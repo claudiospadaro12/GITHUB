@@ -300,7 +300,7 @@
 //        DUE spread per UNA convergenza): qui resta UNILATERALE.
 //+------------------------------------------------------------------+
 #property copyright "ABTG - EA operativo del candidato RELATIVO (PASSO 1, merito a tick reali)"
-#property version   "1.01"
+#property version   "1.02"
 #property description "Convergenza dello z-score del rapporto fra DUE simboli. QUESTO EA APRE ORDINI VERI."
 #property strict
 
@@ -1112,6 +1112,15 @@ bool LeggiChiusura(const ulong ticket, double &prezzoUscita, double &profittoNet
 void RegistraChiusura(const int motivo)
   {
    if(gTicket == 0) return;
+
+   //--- LA BARRA SU CUI LA POSIZIONE E' NATA L'HA VISSUTA: una tenuta di
+   //    ZERO barre non esiste, e a valle diventerebbe "0 secondi", cioe'
+   //    dentro la quota "sotto 60 secondi" che il collaudo A7 pretende a
+   //    0,00. I rami di uscita anticipata incrementano gia' gPosBarre;
+   //    questo pavimento copre l'ULTIMO percorso rimasto (trovato in
+   //    review): la chiusura di FINE CORSA in OnTester (motivo 5), che
+   //    di incremento non ne ha nessuno.
+   if(gPosBarre <= 0) gPosBarre = 1;
 
    double prezzoUscita = 0.0, profitto = 0.0;
    bool letta = LeggiChiusura(gTicket, prezzoUscita, profitto);
@@ -1963,9 +1972,20 @@ void OnTick()
       if(oggi.year*10000 + oggi.mon*100 + oggi.day !=
          ingr.year*10000 + ingr.mon*100 + ingr.day)
         {
-         gPosBarre++;                                   // ha vissuto almeno la barra su cui era viva
-         if(TrovaPosizioneNostra() != gTicket) RegistraChiusura(2);   // sparita nella notte = STOP
-         else                                  ChiudiPosizione(3);    // ancora viva = FLAT di sessione
+         if(TrovaPosizioneNostra() != gTicket)
+           { gPosBarre++; RegistraChiusura(2); }          // sparita nella notte = STOP
+         else
+           {
+            //--- se ChiudiPosizione viene RIFIUTATA (broker/connessione),
+            //    gTicket resta vivo e si riprova al tick successivo: senza
+            //    questo ripristino, gPosBarre++ ripeterebbe a ogni tick
+            //    finche' il fill non riesce, gonfiando la tenuta di una
+            //    barra per ogni tentativo fallito.
+            int prima = gPosBarre;
+            gPosBarre++;                                  // ha vissuto almeno la barra su cui era viva
+            ChiudiPosizione(3);                            // ancora viva = FLAT di sessione
+            if(gTicket != 0) gPosBarre = prima;            // chiusura RIFIUTATA: non contarla
+           }
         }
      }
 

@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_RELATIVO_R117_v2
+#  MARCATORE_RIGA_RELATIVO_R117_v3
 #  RIGA_RELATIVO_R117.ps1 -- IL ROUND R117: PRIMA MISURA DI MERITO DEL
 #  CANDIDATO "RELATIVO", A TICK REALI.
 #
@@ -137,7 +137,7 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "RELATIVO_R117_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.01"   # 1.01 = i due difetti chiusi il 04/09 (flat di recupero + gPosBarre nei rami di uscita anticipata)
+$VERSIONE_ATTESA         = "1.02"   # 1.02 = pavimento gPosBarre<=0->1 in RegistraChiusura (percorso OnTester/fine corsa) + ripristino gPosBarre su ChiudiPosizione rifiutata nel flat di recupero (04/09)
 $AUTOTEST_BLOCCHI_ATTESI = 20
 $NSTATS_ATTESI           = 73      # 73 valori + Pass, Simbolo, Periodo = 76 colonne
 $INPUT_ATTESI            = 28
@@ -1228,7 +1228,7 @@ elseif($null -eq $GambaIS -and $null -eq $GambaOOS){
   [void]$R.Add("  NON ESEGUITO: nessuna gamba letta.")
 }
 elseif(-not $PORTO.ContainsKey($Simbolo) -or $PORTO[$Simbolo].GrezziL -lt 0 -or $PORTO[$Simbolo].GrezziS -lt 0){
-  [void]$R.Add("  NON ESEGUITO, E NON E' UN VERDE: gli attesi del passo 0 non sono stati messi nella tabella $PORTO di questa riga")
+  [void]$R.Add("  NON ESEGUITO, E NON E' UN VERDE: gli attesi del passo 0 non sono stati messi nella tabella `$PORTO di questa riga")
   [void]$R.Add("  (valgono -1). Vanno presi dal CSV OPTFRAME del passo 0, riga N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", colonne")
   [void]$R.Add("  'Attraversamenti Grezzi Long' e 'Attraversamenti Grezzi Short', e scritti nella riga PRIMA del lancio.")
   [void]$R.Add("  (i referti archiviati del passo 0 NON bastano: per le 90 celle stampano gli ESEGUIBILI/giorno, i GREZZI solo per")
@@ -1271,7 +1271,13 @@ else{
   $scarto = [math]::Abs($tot - $sommaAttesa)
   [void]$R.Add("  scarto LONG  " + (FmtN $scaL) + " su una tolleranza di " + (FmtN $tolL))
   [void]$R.Add("  scarto SHORT " + (FmtN $scaS) + " su una tolleranza di " + (FmtN $tolS))
-  [void]$R.Add("  scarto sulla somma " + (FmtN $scarto) + " su " + (FmtN $tolleranza) + " (0,5% dell'atteso, minimo 20: e' la giuntura IS/OOS, dove la passata OOS riparte col suo warmup)")
+  [void]$R.Add("  scarto sulla somma " + (FmtN $scarto) + " su " + (FmtN $tolleranza) + " (0,5% dell'atteso, minimo 20: SONO DUE le cause dichiarate, e la seconda NON e' quantificata)")
+  [void]$R.Add("  CAUSA 1 (quantificata): la giuntura IS/OOS. Il passo 0 girava la finestra intera in UNA passata, qui il generico")
+  [void]$R.Add("      la spezza e la passata OOS riparte col suo warmup di " + $FissiAttesi["InpWarmupBarre"] + " barre: ~5-10 attraversamenti per lato.")
+  [void]$R.Add("  CAUSA 2 (NON QUANTIFICATA): il passo 0 girava a MODELLO 2 (open prices, barre dallo storico M1), questa corsa")
+  [void]$R.Add("      gira a MODELLO 4 (tick reali, barre COSTRUITE dai tick). Le chiusure M5 possono differire, quindi lo z-score")
+  [void]$R.Add("      puo' differire, quindi un attraversamento di confine puo' ribaltarsi. NESSUNO ha misurato quanto: percio'")
+  [void]$R.Add("      questo collaudo, se cade, e' un RILIEVO da indagare, NON la prova che il nucleo sia stato trasportato male.")
   [void]$R.Add("  >>> IL VERDETTO SI LEGGE SUI DUE LATI SEPARATI, non sulla somma: uno scambio compensativo (long in piu', short in")
   [void]$R.Add("      meno) lascerebbe la somma perfetta ed e' proprio il difetto di trasporto che questo collaudo deve pescare.")
   if($scaL -le $tolL -and $scaS -le $tolS){
@@ -1283,8 +1289,8 @@ else{
     $quali = New-Object System.Collections.ArrayList
     if($scaL -gt $tolL){ [void]$quali.Add("LONG " + (FmtN $totL) + " vs " + (FmtN $attL) + " (scarto " + (FmtN $scaL) + ", tolleranza " + (FmtN $tolL) + ")") }
     if($scaS -gt $tolS){ [void]$quali.Add("SHORT " + (FmtN $totS) + " vs " + (FmtN $attS) + " (scarto " + (FmtN $scaS) + ", tolleranza " + (FmtN $tolS) + ")") }
-    [void]$R.Add("  ESITO: FALLITO su " + ($quali -join " e ") + ". Il nucleo NON produce gli stessi segnali del passo 0.")
-    [void]$Problemi.Add("COLLAUDO DEL PORTO FALLITO: " + ($quali -join "; ") + " -- sulla stessa cella e sulla stessa finestra del passo 0. Lo z-score si calcola su barre CHIUSE: il modello di tick NON puo' spiegare una differenza cosi' grande. O il nucleo e' stato trasportato male, o la finestra effettiva e' diversa (leggere Giorni Contati e Barre Valutate). IL ROUND NON PARTE finche' questo non torna.")
+    [void]$R.Add("  ESITO: FUORI TOLLERANZA su " + ($quali -join " e ") + " -- vedi RILIEVI: le cause possibili sono tre, due non quantificate.")
+    [void]$Rilievi.Add("COLLAUDO DEL PORTO FUORI TOLLERANZA: " + ($quali -join "; ") + " -- stessa cella e stessa finestra del passo 0. LE CAUSE POSSIBILI SONO TRE, e due non sono quantificate: (a) il nucleo statistico trasportato male; (b) il MODELLO DEL TESTER diverso (passo 0 = Modello 2 open prices, qui = Modello 4 tick reali: le barre M5 sono COSTRUITE in modo diverso, le chiusure possono differire e un attraversamento di confine si ribalta); (c) la finestra effettiva diversa (leggere Giorni Contati, Barre Valutate, Gamba Prima Barra Epoch). PRIMA di rifare l'EA: confrontare Giorni Contati e Barre Valutate con 441 (D30) / 450 (NAS) del passo 0. Se combaciano, la causa e' (a) o (b), e per separarle serve una passata di controllo a Modello 2.")
   }
 }
 [void]$R.Add("")

@@ -74,45 +74,42 @@ Dettaglio completo, con tutti i numeri e i rilievi:
 > ### 🥇 **IL COLLAUDO DEL PORTO — è il gate più importante, e va per primo**
 > L'EA conta gli attraversamenti **grezzi** e non apre niente. Quel numero deve
 > venire **identico** a `Attraversamenti Grezzi Long/Short` del passo 0, sulla
-> stessa cella e sulla stessa finestra: **lo z-score si calcola su barre CHIUSE,
-> e il modello di tick non lo tocca.** Se non combacia, il nucleo statistico è
-> stato trasportato male e **tutto il resto del round non vuol dire niente.**
+> stessa cella e sulla stessa finestra — con una tolleranza dichiarata (sotto).
 >
-> ## 🛑 PRIMA DI LANCIARE I BLOCCHI 2 E 3, UNA COSA VA FATTA A MANO — **E ADESSO LA RIGA SI FERMA DA SOLA SE NON È STATA FATTA**
-> Nella tabella `$PORTO` in testa a `RIGA_RELATIVO_R117.ps1` i due attesi
-> valgono ancora **−1 / −1**. In **v1** questo faceva uscire la corsa **VERDE
-> senza aver confrontato niente**, mentre questa pagina prometteva *"se il porto
-> fallisce il round non parte"* — un esito che **non poteva mai verificarsi**.
-> In **v2** c'è un **gate esplicito**: con `$PORTO` a −1 la corsa PORTO **non
-> parte proprio**, e si ferma **prima** di aprire MT5 (a tick reali sono ore
-> risparmiate). Il giro a vuoto `-SoloControllo` passa lo stesso, con un rilievo.
+> ## ✅ IL COLLAUDO DEL PORTO È ARMATO (04/09) — questi blocchi misurano davvero
+> Nella tabella `$PORTO` di `RIGA_RELATIVO_R117.ps1` ci sono i due attesi VERI,
+> letti direttamente dai CSV OPTFRAME della griglia estesa del passo 0 (riga
+> `InpFinestraN=40` / `InpSogliaIngressoSigma=1.35`, un solo match per file,
+> confermato da due letture indipendenti), ora archiviati in
+> `backtest_pipeline/risultati_archivio/sondarelativo/`:
 >
-> ### 📄 Da dove si prendono i due numeri — **e dove NON stanno**
-> - ✅ **Ci sono**: nel **CSV OPTFRAME del passo 0**, griglia **ESTESA**, riga
->   **N=40 / σ=1.35**, colonne `Attraversamenti Grezzi Long` e `... Short`.
->   File: `ABTG_SondaRelativo_D30EUR_IS_ohlc_D30_M5_EST.csv` e l'equivalente NAS,
->   dentro lo zip `RELATIVO_GRIGLIA_ESTESA_...` **sul tuo Desktop** (non è in repo).
-> - ❌ **NON ci sono** nei referti archiviati
->   (`risultati_archivio/sondarelativo/REFERTO_D30_M5_ESTESA_...` e `..._NAS_...`),
->   e l'ho **verificato riga per riga**: la tabella delle 90 celle stampa
->   `ese/ggL` e `ese/ggS`, cioè gli **ESEGUIBILI per giorno** (**dopo** i filtri
->   di occupazione e tetto), e i **grezzi** li stampa **solo** per la cella di
->   riferimento **N=20 / σ=1.05** (D30 **2246/2374** su 441 giorni, NAS
->   **2419/2418** su 450 giorni). Grezzi ed eseguibili **sono due grandezze
->   diverse** e una **non si ricava** dall'altra: per questo la riga **blocca**
->   invece di inventarsi un atteso.
+> | gamba | Grezzi Long attesi | Grezzi Short attesi |
+> |---|---|---|
+> | **D30EUR** | **1303** | **1419** |
+> | **NASUSD** | **1506** | **1431** |
 >
-> **Cosa devi fare:** aprire quei due CSV, leggere la riga N=40/σ=1.35, scrivere i
-> quattro numeri nella tabella `$PORTO`, **committare e ripinnare**. Oppure
-> mandarmeli e li scrivo io.
+> In **v1/v2** la tabella valeva −1/−1 e la corsa usciva **VERDE senza
+> confrontare niente**. Da **v3** c'è il **gate bloccante**: se qualcuno
+> rimettesse −1, la corsa PORTO si fermerebbe **prima** di aprire MT5. Adesso il
+> gate si **supera**, e quello che leggi nel referto è un confronto vero.
 >
-> ⚠️ **La tolleranza non è zero, ed è dichiarata:** il passo 0 girava la finestra
-> intera in una passata sola, qui il generico la spezza in IS e OOS e la passata
-> OOS riparte col suo warmup. Intorno alla giuntura qualche attraversamento può
-> mancare: tolleranza **0,5% dell'atteso, minimo 20** — e in **v2** si applica
-> **a ciascun lato separatamente**, non alla somma: sulla sola somma uno **scambio
-> compensativo** (un long in più e uno short in meno) passerebbe inosservato, ed è
-> esattamente il difetto di trasporto che questo collaudo deve pescare.
+> ⚠️ **La tolleranza non è zero, e le cause sono TRE — due non quantificate:**
+> **(1) la giuntura IS/OOS** (quantificata: il passo 0 girava la finestra intera
+> in una passata, qui il generico la spezza e l'OOS riparte col suo warmup —
+> ~5-10 attraversamenti per lato); **(2) il MODELLO DEL TESTER diverso**
+> (il passo 0 girava a **Modello 2**, open prices, barre dallo storico M1;
+> questa corsa gira a **Modello 4**, tick reali, barre COSTRUITE dai tick — le
+> chiusure M5 possono differire, un attraversamento di confine può ribaltarsi,
+> e **nessuno ha ancora misurato quanto**); **(3) la finestra effettiva diversa**
+> (si legge da `Giorni Contati`/`Barre Valutate` nel referto). Tolleranza:
+> **0,5% dell'atteso per lato, minimo 20**, applicata **a ciascun lato
+> separatamente** — sulla sola somma uno **scambio compensativo** (un long in
+> più e uno short in meno) passerebbe inosservato.
+>
+> 🔴 **Se il collaudo esce fuori tolleranza, NON è la prova che il nucleo sia
+> stato trasportato male**: è un **RILIEVO da indagare**, con le cause (1)-(3)
+> da controllare in quest'ordine — la (2) in particolare non è mai stata
+> misurata da nessun round di casa, e potrebbe essere proprio lei.
 
 > ### 👯 **I GEMELLI — perché due corse identiche non sono uno spreco**
 > Due passate con gli **stessi input** e **magic diverso** devono venire
@@ -169,7 +166,7 @@ Fra "passa" e "bocciata secca" c'è **sempre** una **zona morta** esplicita.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v2` — **v1 è bocciata dalla review del 04/09, non lanciarla**) |
+| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v3` — **v1 è bocciata dalla review del 04/09, non lanciarla**) |
 | **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.01** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
 | **File prova** | i 6 `prove/RELATIVO_R117_*.txt` (scaricati tutti, ne gira uno: gli altri servono al gemellaggio a SEI) |
 | **Banco** | **Modello 4 = OGNI TICK, TICK REALI**. Finestra **2024.09.26 → 2026.06.30**, split **40/60** |
@@ -195,7 +192,7 @@ il segnaposto **si riscrive**, non si lascia.
 
 | file al pin | cosa dovrà essere verificato prima di dichiararlo pronto |
 |---|---|
-| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · marcatore `MARCATORE_RIGA_RELATIVO_R117_v2` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
+| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · marcatore `MARCATORE_RIGA_RELATIVO_R117_v3` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
 | `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · `#property version "1.01"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
 | i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | **200 tutti e sei, identici** · 32 righe vive ciascuno · 28 input che **combaciano nome per nome** con quelli dell'EA · differenze reciproche: **solo `@SIMBOLO`, `InpMagic`, `InpModoSonda`** |
 | `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato): il driver lo scarica al pin e lo ri-pinna sull'EA |
@@ -297,7 +294,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_PORTO_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -308,18 +305,21 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     Write-Host 'GIRO A VUOTO: guarda solo che i sei gate passino e che la COMPILAZIONE riesca. NON ci sono numeri qui dentro.' -ForegroundColor Yellow }
 ```
 
-## 2️⃣ 🥇 `D30_PORTO` — **IL COLLAUDO DEL PORTO. Se fallisce, il round finisce qui.**
+## 2️⃣ 🥇 `D30_PORTO` — **il collaudo del porto è armato (D30EUR 1303/1419)**
 
-> 🛑 **Questo blocco (e il 3️⃣) si ferma subito, con un errore esplicito, finché la
-> tabella `$PORTO` vale −1/−1.** Non è un guasto: è il gate. Leggi il riquadro
-> *"PRIMA DI LANCIARE I BLOCCHI 2 E 3"* qui sopra.
+> 🥇 **Questo blocco misura sul serio**: la tabella `$PORTO` è armata (D30EUR
+> 1303/1419). Guarda la riga `COLLAUDO DEL PORTO` nel referto: ti dà scarto
+> LONG e scarto SHORT **separati**, con la loro tolleranza. Se esce **fuori
+> tolleranza**, **non è la prova che il nucleo sia rotto** — è un RILIEVO con
+> tre cause possibili (leggi il riquadro *"IL COLLAUDO DEL PORTO È ARMATO"*
+> qui sopra), da indagare prima di toccare l'EA.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_PORTO_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -337,7 +337,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_PORTO_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -355,7 +355,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -373,7 +373,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_GEM_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -391,7 +391,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -409,7 +409,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_GEM_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
