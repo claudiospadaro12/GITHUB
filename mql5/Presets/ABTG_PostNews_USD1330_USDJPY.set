@@ -1,0 +1,210 @@
+; =====================================================================
+; Preset POST-NEWS -- BLOCCO DELLE 13:30 SERVER OLTRE L'NFP
+; (CPI m/m . Retail Sales . Core Retail Sales . PPI m/m . Advance GDP)
+; -- USD/JPY -- M5
+; Candidato B della caccia del 04/09/2026
+;   backtest_pipeline/caccia_strategie/CACCIA_POSTNEWS_ALTRE_FAMIGLIE_2026-09-04.md
+; EA: ABTG_PostNews.mq5 v1.10 o superiore.  Magic 774801 (VERGINE).
+; =====================================================================
+;
+; !!! NON E' UNA SEDIA: E' UN CANDIDATO DA MISURARE. !!!
+;   La domanda a cui deve rispondere e' UNA SOLA (dossier par. 8, versione
+;   per questo blocco): "il motore range-M5 + due pendenti funziona sugli
+;   ALTRI dati delle 8:30 New York come funziona sull'NFP?"
+;   Se si', la famiglia news triplica le occasioni senza una riga di
+;   codice nuova. Se no, abbiamo imparato che l'edge sta nell'NFP e non
+;   nel motore -- che e' comunque un'informazione che oggi non abbiamo.
+;
+; ---------------------------------------------------------------------
+; !!! PERCHE' QUESTO PRESET E' SEPARATO DALLA SEDIA NFP VIVA !!!
+;   Il dossier (par. 4.B) suggerisce di riusare la STESSA istanza della
+;   sedia NFP (magic 771203) allargandole il filtro del titolo. Qui NON
+;   si fa, e la ragione e' la regola di casa: NON SI TOCCA UNA SEDIA CHE
+;   GIRA IN FORWARD PRIMA DI AVER MISURATO A PARTE LA MODIFICA.
+;   Quindi: istanza nuova, magic nuovo (774801), calendario nuovo, e la
+;   sedia NFP resta esattamente com'e'.
+;   Il MERGE nella sedia viva -- se mai -- e' una decisione FUTURA di
+;   Claudio, dopo che questo preset ha dei numeri.
+;
+;   E c'e' un fatto MISURATO che rende la convivenza sicura:
+;   IL CALENDARIO DI QUESTO PRESET NON CONTIENE L'NFP, e le sue giornate
+;   e quelle dell'NFP NON SI TOCCANO MAI: 0 giornate in comune su 14 anni
+;   (misurato da costruisci_news_blocchi_usa.py, caso 7 dell'autotest --
+;   e' ovvio a posteriori, BLS non pubblica CPI e NFP lo stesso giorno,
+;   ma qui e' contato, non supposto).
+;   ==> Le due istanze non possono aprire lo stesso giorno.
+;       Nessun raddoppio di rischio, cap C1 non sfiorato.
+;
+; ---------------------------------------------------------------------
+; IL MECCANISMO: IDENTICO alla sedia NFP viva, cambia SOLO L'EVENTO
+;   ora d'azione   13:45 server = news+15 -> barre [1] e [2] = 13:35 e
+;                  13:40, le DUE candele DOPO quella della notizia.
+;                  IDENTICO al preset NFP.
+;   offset         BUY STOP max +3 pip . SELL STOP min -2 pip  IDENTICI
+;   SL / TP        25 / 30 pip dall'ingresso                   IDENTICI
+;   scadenza       14:45 server (news+75) -- DIVERSA, vedi sotto
+;   rischio        0,65% per evento     -- DIVERSO (meta'), vedi sotto
+;
+; LA SCADENZA: 14:45, E LA POSIZIONE MUORE LI'
+;   Il preset NFP dice 16:59 con InpCloseAtExpiry=false: finestra viva di
+;   3h14 che CONTIENE le 15:00, cioe' UoM, ISM Services e ISM
+;   Manufacturing. E' il rilievo del par. 6 del dossier: con quella
+;   scadenza il test misura due cose insieme.
+;   Qui: 14:45 (news+75) e InpCloseAtExpiry=TRUE.
+;   Il true e' obbligatorio, non estetico: l'NFP esce SEMPRE di venerdi'
+;   e la chiusura di fine settimana gli fa da rete; CPI, Retail Sales,
+;   PPI e GDP escono in QUALUNQUE giorno, quindi con false una posizione
+;   aperta di martedi' resterebbe viva fino al venerdi'. Stessa scelta
+;   dei preset ECB e FOMC.
+;
+; IL RISCHIO: 0,65% PER EVENTO (meta' della sedia NFP)
+;   InpRiskPercent=0.65 con InpRiskRefSLpips=50 significa:
+;       0,325% per GAMBA (SL 25 pip = meta' del riferimento)
+;       0,65%  per EVENTO nel caso peggiore (25+25 = 50 pip)
+;   La sedia NFP viva sta a 1,30 (= 0,65% per gamba). Un candidato mai
+;   misurato entra a meta' rischio: e' il metro del 18/08 (cap C1 3,25%
+;   aperto = 5 SL da 0,65%). Non e' il 3,0% di default del corso.
+;
+; IL SIMBOLO: USD/JPY
+;   Per continuita' con la sedia NFP viva (magic 771203, USDJPY): e'
+;   l'unico modo di ottenere un confronto A SIMBOLO COSTANTE fra "NFP" e
+;   "resto del blocco 13:30". Se cambiassimo anche il simbolo, un
+;   risultato diverso non saprebbe dire se e' l'evento o il cambio.
+;   Il GEMELLO e' EUR/USD: stesso preset su grafico EURUSD, ma
+;   InpMagic=774802 e SL/TP DA RIMISURARE -- 25 pip su USDJPY e 25 pip su
+;   EURUSD non sono la stessa distanza (vincolo 5 del par. 2 del dossier:
+;   un preset in PIP non e' trasportabile fra simboli).
+;
+; FTMO
+;   Azione 13:45 = news+15, fuori dalla finestra vietata (+/-2 minuti).
+;   [VERIFICATO da Claudio il 04/09/2026, tabella letterale da ftmo.com]:
+;   per USD la lista "Restricted event" contiene GDP q/q e CPI y/y;
+;   CPI m/m, Retail Sales e PPI NON ci sono.
+;   ==> CPI y/y e Core CPI m/m non entrano proprio in questo blocco.
+;   ==> "Advance GDP q/q" e' trattato come RESTRICTED (lettura
+;       conservativa: contiene "GDP q/q") ed e' ISOLATO in un'etichetta
+;       sua nel calendario. Col default qui sotto (USD1330OKF) le
+;       giornate di GDP NON vengono tradate: il preset e' utilizzabile
+;       anche su conto Standard funded.
+;       Per includerle -- solo in Challenge, o per capire quanto pesano --
+;       si cambia UNA stringa: InpNewsTitleMatch=USD1330OK.
+;
+; ---------------------------------------------------------------------
+; IL CALENDARIO -- LEGGERE PRIMA DI LANCIARE UNA PASSATA
+;   File: abtg_news_usd1330_2010_2023_UTC.csv, prodotto da
+;         backtest_pipeline/costruisci_news_blocchi_usa.py
+;   Va messo in Common\Files (nel tester ogni agente ha la sua sandbox:
+;   e' li' che il round del 07/08 e' morto con Trades=0).
+;
+;   !!! COPRE 2010-2023 E BASTA. !!! La sorgente Forex Factory di casa
+;   finisce nel 2023. Una passata FUORI da quella finestra fa ZERO trade
+;   e SI BUTTA: non e' "niente edge", e' "non e' girata".
+;   All'avvio l'EA stampa:
+;       [PostNews][NEWS] letto da ... | UTILI per questo preset N | dal .. al ..
+;   Con questo preset N deve valere 541, dal 2010.01.14 al 2023.12.14.
+;   Se N=0 -> CANARINO ROSSO, la passata si butta.
+;
+;   LE ETICHETTE DEL TITOLO (scatole cinesi: si cambia UNA stringa)
+;     InpNewsTitleMatch=USD1330OKF  541 righe / 347 giornate   <- QUESTO
+;                                   ora canonica 13:30 + eventi NON
+;                                   restricted FTMO (niente GDP)
+;     InpNewsTitleMatch=USD1330OKR   51 righe /  51 giornate
+;                                   solo Advance GDP q/q (restricted)
+;     InpNewsTitleMatch=USD1330OK   592 righe / 398 giornate
+;                                   canoniche, GDP compreso
+;     InpNewsTitleMatch=USD1330DST   52 righe /  34 giornate
+;                                   le giornate col DST USA/UK sfasato:
+;                                   il dato e' uscito alle 12:30 server e
+;                                   con l'ora d'azione fissa l'EA
+;                                   leggerebbe il range di 75 minuti DOPO
+;                                   la notizia. E' il difetto che la sedia
+;                                   NFP ha gia' oggi (dossier par. 3.2):
+;                                   qui e' ISOLATO, non nascosto.
+;     InpNewsTitleMatch=USD1330     644 righe / 431 giornate = tutto
+;     InpNewsTitleMatch=PPI m/m     (o "CPI m/m", o "Advance GDP q/q")
+;                                   isola UNA famiglia. ATTENZIONE:
+;                                   "Retail Sales m/m" prende ANCHE
+;                                   "Core Retail Sales m/m" (e'
+;                                   sottostringa): per il Core usare
+;                                   "Core Retail".
+;
+;   I BUCHI DEL CALENDARIO, DICHIARATI (righe canoniche per anno)
+;     Retail Sales m/m       154 . completo, 10-12 all'anno per 14 anni
+;     Core Retail Sales m/m  154 . completo (esce nello STESSO minuto del
+;                                  precedente: due righe, UN solo prezzo.
+;                                  gPlacedDay garantisce 1 trade/giorno)
+;     PPI m/m                132 . BUCO 2019-2021 (2019:6  2020:0  2021:7)
+;     CPI m/m                101 . BUCO GROSSO 2010-2013 (2010:1, poi
+;                                  2011/2012/2013 a ZERO; da 2015 completo)
+;                                  -- questo il dossier non lo diceva:
+;                                  misurato oggi, va dichiarato nel round
+;     Advance GDP q/q         51 . 3-4 per anno (restricted FTMO, escluso
+;                                  dal default)
+;   ==> CONSEGUENZA DI METODO: la composizione del blocco NON e' costante
+;       nel tempo. Il 2010-2013 e' fatto quasi solo di Retail Sales e PPI,
+;       il 2015-2023 ha anche il CPI. Un confronto fra finestre
+;       (IS/OOS) sta confrontando anche MISCELE DIVERSE, non solo
+;       periodi diversi. Va scritto nel round, non scoperto dopo.
+;
+; MAGIC 774801 -- verificato VERGINE il 04/09/2026 con una ricerca su
+;   tutto il repository (nessun 7748xx in uso: il piu' vicino occupato e'
+;   7746xx). Riservati per questa famiglia: 774801 = 13:30/USDJPY
+;   (questo), 774802 = gemello 13:30/EURUSD.
+;   E' un BLOCCO DIVERSO da quello del candidato A (7747xx) apposta: le
+;   due famiglie devono restare separabili in classifica e sul VPS.
+;
+; USO: grafico USD/JPY M5, carica questo preset. DEMO. Nessuna garanzia.
+; =====================================================================
+
+; --- orari (ORA SERVER = ora italiana - 1) ---
+; azione 13:45 = news+15: IDENTICA alla sedia NFP viva
+InpActionHour=13
+InpActionMin=45
+; scadenza 14:45 = news+75 (NON 16:59: vedi intestazione)
+InpExpiryHour=14
+InpExpiryMin=45
+
+; --- l'evento ---
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news_usd1330_2010_2023_UTC.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=USD1330OKF
+InpNewsShiftMinutes=0
+
+; --- i due pendenti: IDENTICI al preset NFP (+3 / -2, SL 25, TP 30
+;     dall'ingresso). Sono il punto di partenza, non una taratura. ---
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=2.0
+InpTPpips=30.0
+InpSLpips=25.0
+; niente OCO: il corso lo nega esplicitamente e le sedie vive non lo usano
+InpUseOCO=false
+; TRUE, al contrario del preset NFP: questi eventi non escono di venerdi'
+; e senza questo la posizione resterebbe viva per giorni (vedi sopra)
+InpCloseAtExpiry=true
+
+; --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+
+; --- rete di sicurezza del venerdi' (con CloseAtExpiry=true non scatta
+;     mai: resta accesa perche' non costa niente) ---
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+
+; --- rischio: 0,325% per gamba, 0,65% per evento nel caso peggiore ---
+InpRiskPercent=0.65
+InpRiskRefSLpips=50.0
+
+; --- generali ---
+InpComment=USD1330 PostNews
+InpMagic=774801
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpUsaGuardian=true
