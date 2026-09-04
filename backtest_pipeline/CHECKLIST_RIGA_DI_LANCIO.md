@@ -7554,3 +7554,92 @@ grep -n 'Rilievi.Add' backtest_pipeline/righe/*.ps1 | grep -v 'Corsa\|if('
 punti va **ri-verificata come se fosse una riga nuova**, almeno sui rami che la
 patch attraversa. Qui i sei difetti erano chiusi bene e il settimo e' nato dal
 sesto: **la ri-verifica non e' una formalita', e' il posto dove si paga meno.**
+
+---
+
+## 🆕 AGGIUNTA DEL 04/09/2026 (sera) — trovata dal **verificatore** sul pacchetto SONDA RELATIVO / GRIGLIA ESTESA (`RIGA_SONDARELATIVO_ESTESA.ps1` + pagina, pin `d1fb9e7`), **rifacendo a mano lo scan della 79-bis che la pagina dichiarava già fatto**
+
+## 118. 🔎 LO SCAN DELLA CLASSE 79 FATTO CON UN CONTENITORE **CASE-INSENSITIVE** TROVA **SEMPRE ZERO**: il rilevatore è vittima esattamente del difetto che deve cercare
+
+_Misurato due volte sullo stesso file, non immaginato._ La pagina del pacchetto
+dichiarava, in tabella, fra le prove eseguite:
+
+```
+0 omonimie case-insensitive (scansione AST: classe 79/79-bis)
+```
+
+Lo scan rifatto sullo **stesso** `.ps1`, con la regola scritta nella 79-bis, ne
+trova **tre**: `$hA`/`$ha`, `$Mappa`/`$mappa`, `$r`/`$R`. Nessuna delle tre è
+attiva (due stanno in funzioni diverse, la terza è temporalmente disgiunta: `$r`
+muore alla riga 982, `$R` nasce alla 1085) — **ma la frase «0 omonimie» è falsa**,
+e il motivo è meccanico, non di distrazione.
+
+In PowerShell **quasi tutti i contenitori sono case-insensitive di default**, e
+quindi collassano proprio le due grafie che si stanno cercando:
+
+```powershell
+@("R","r","Mappa","mappa") | Sort-Object -Unique                 # -> R, Mappa        (2)
+@("R","r","Mappa","mappa") | Sort-Object -Unique -CaseSensitive  # -> r, R, mappa, Mappa (4)
+$h=@{}; $h["R"]=1; $h["r"]=1; $h.Keys.Count                      # -> 1
+```
+
+Chi scrive lo scan con `$h=@{}` (o con `Sort-Object -Unique` senza
+`-CaseSensitive`, o con `Group-Object` e poi un `ContainsKey`) raggruppa
+correttamente per `ToLower()`, poi **conta le grafie distinte con uno strumento
+che non distingue le grafie**: il conteggio è sempre 1, e l'esito è sempre
+`0 omonimie`. È un verde che non ha guardato niente — la **50** applicata a un
+attrezzo di verifica invece che a un giro a vuoto.
+
+> ✅ **REGOLA (tre pezzi).**
+> 1. **Il contenitore dello scan deve distinguere le maiuscole**: `Sort-Object
+>    -Unique -CaseSensitive`, oppure
+>    `New-Object 'System.Collections.Generic.Dictionary[string,object]'` (che usa
+>    il comparatore ordinale). **Mai `@{}` e mai `Sort-Object -Unique` liscio.**
+> 2. **Lo scan si collauda con un positivo noto PRIMA di crederci.** Un
+>    `0 omonimie` su un driver da 1200 righe con `$R` di referto e cicli `$r`
+>    dentro non è una buona notizia: è la spia che l'attrezzo è rotto. Il
+>    controllo costa una riga: `@("R","r") | Sort-Object -Unique` deve dare **due**
+>    elementi, non uno.
+> 3. **Ogni coppia trovata si giudica su DUE assi, e si scrivono tutti e due**:
+>    **SCOPE** (funzioni diverse = locali, va bene; stesso scope = da guardare) e
+>    **ORDINE** (stesso scope ma l'ultima lettura della prima grafia viene PRIMA
+>    della prima scrittura della seconda = latente, non attiva). «Zero omonimie»
+>    e «tre omonimie, tutte inerti, ecco perché» sono due frasi diversissime: la
+>    seconda è verificabile, la prima no.
+
+```powershell
+# lo scan giusto, con lo scope e le righe (classe 79/79-bis/118)
+function Scope($n){ $p=$n.Parent; while($null -ne $p){ if($p -is [System.Management.Automation.Language.FunctionDefinitionAst]){ return $p.Name }; $p=$p.Parent }; return '<script>' }
+$ast=[System.Management.Automation.Language.Parser]::ParseFile($f,[ref]$null,[ref]$null)
+$d=New-Object 'System.Collections.Generic.Dictionary[string,object]'
+foreach($v in $ast.FindAll({param($n) $n -is [System.Management.Automation.Language.VariableExpressionAst]},$true)){
+  $u=$v.VariablePath.UserPath; $k=$u.ToLower()
+  if(-not $d.ContainsKey($k)){ $d[$k]=(New-Object 'System.Collections.Generic.Dictionary[string,object]') }
+  if(-not $d[$k].ContainsKey($u)){ $d[$k][$u]=(New-Object System.Collections.ArrayList) }
+  [void]$d[$k][$u].Add((Scope $v) + ':' + $v.Extent.StartLineNumber)
+}
+foreach($k in $d.Keys){ if($d[$k].Count -gt 1){ $k; $d[$k] } }   # 0 stampe = ATTREZZO DA COLLAUDARE
+```
+
+### 118 / censimento dei fratelli (classe 111) — 04/09/2026
+
+Scan rifatto **col contenitore giusto** su tutte le `backtest_pipeline/righe/*.ps1`:
+**56 coppie** in tutto. Quasi tutte sono `$r`/`$R` a livello di script, **inerti
+per ordine** (il ciclo `$r` finisce prima che nasca il `$R` del referto: stesso
+stampo di R104, R95-R99, R101-R103, R107, R108, R116, SONDARELATIVO e
+SONDARELATIVO_ESTESA). **Una sola è ATTIVA, ed è nuova:**
+
+- ⚠️ **`RIGA_STORICO_INDICI.ps1` riga 662: `$logS = Join-Path $Logs "sonda_dow.txt"`.**
+  `$logS` **è** `$Logs`, cioè la **cartella dei log** (`$Work\log`, riga 116). Dopo
+  quella riga `$Logs` non è più una cartella ma un **file**, e i quattro
+  `Join-Path $Logs ...` successivi (righe **774**, **824**, **993**, **1128**)
+  costruiscono percorsi **dentro un file**. Il ramo si arma solo con
+  `-RifaiSondaDow`, quindi il difetto è vivo ma **dormiente**: nessuno l'ha ancora
+  pagato. Correzione: rinominare la variabile locale (`$logSonda`), **non**
+  `$Logs`.
+
+> 📌 **Lezione di metodo.** La 79-bis (03/09) prescriveva lo scan col parser, ed è
+> giusta. Quello che mancava è **il collaudo dell'attrezzo**: una regola di
+> verifica che nessuno falsifica diventa, in due giorni, un timbro. Qui il timbro
+> ha certificato «0» su un file che ne aveva tre, e un fratello con un difetto
+> **attivo** è rimasto in repo per giorni con lo scan «passato».
