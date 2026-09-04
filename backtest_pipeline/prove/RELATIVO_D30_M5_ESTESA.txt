@@ -1,0 +1,195 @@
+# =====================================================================
+#  RELATIVO -- PASSO 0 / ESTENSIONE DELLA GRIGLIA  --  PROVA VERA
+#  GAMBA D30EUR (si scambia)  x  METRO U30USD (si legge)  --  M5
+# ---------------------------------------------------------------------
+#  QUESTO FILE NON SOSTITUISCE prove\RELATIVO_D30_M5.txt.
+#  Quello resta com'e', al suo pin, coi suoi numeri del 04/09/2026 e col
+#  suo gemellaggio a 4 gia' verificato: si e' scelta la strada (b) --
+#  PROVA NUOVI DEDICATI -- proprio per non invalidare quella verifica.
+#  I due file di questa estensione sono DUE (M5 soltanto): i due M15
+#  hanno dato SOSPESO su entrambi i lati e sono chiusi.
+#
+#  PERCHE' ESISTE, ED E' UNA DECISIONE DI CLAUDIO (04/09/2026)
+#  ---------------------------------------------------------------------
+#  La corsa del 04/09 ha dato VIVO su entrambi i lati su D30_M5 e
+#  NAS_M5, ma L'ALTOPIANO VIVO SI APPOGGIA AL BORDO DELLA GRIGLIA SU
+#  TUTTI E DUE GLI ASSI:
+#     D30_M5: blocchi 2x2 vivi in N {35,40} x sigma {1.20 .. 1.65}
+#     NAS_M5: blocchi 2x2 vivi in N {35,40} x sigma {1.35 .. 1.65}
+#  N=40 e' il MASSIMO N misurato, sigma=1.65 e' il MASSIMO sigma
+#  misurato. Nessuna cella oltre quel bordo e' MAI stata guardata.
+#  Quindi il "centro dell'altopiano" (regola di casa: MAI il picco) NON
+#  E' DETERMINABILE: potrebbe essere il centro vero, oppure il FIANCO
+#  BASSO di un altopiano piu' grande che continua fuori dalla griglia.
+#  Le due letture sono ENTRAMBE compatibili coi dati del 04/09, e la
+#  cella per il round a tick reali non si congela finche' non si sa
+#  quale delle due e' vera.
+#  Riferimenti: report\PROPOSTA_RELATIVO_TICK_REALI_2026-09-04.md
+#  (sezione 3.4, RILIEVO del bordo, e la decisione D4).
+#
+#  COSA CAMBIA RISPETTO AI QUATTRO PROVA ORIGINALI: SOLO I DUE ASSI.
+#  ---------------------------------------------------------------------
+#  Le venti righe di parametri FISSI, le quattro direttive @, la
+#  finestra, la sessione, il metro, il modello, le soglie: TUTTO
+#  IDENTICO. Se cambiasse anche una sola altra cosa, le celle nuove non
+#  sarebbero confrontabili con le vecchie e l'estensione non servirebbe
+#  a niente.
+#
+#  E LA GRIGLIA E' L'INTERA GRIGLIA ESTESA, NON SOLO LE CELLE NUOVE.
+#  ---------------------------------------------------------------------
+#  N     10 -> 55 passo 5     (10 valori: i 7 vecchi + 45, 50, 55)
+#  sigma 0,75 -> 1,95 passo 0,15 (9 valori: i 7 vecchi + 1,80 e 1,95)
+#  = 90 celle, di cui 49 sono LE STESSE gia' misurate il 04/09.
+#  Rigirare le 49 vecchie costa ~30 secondi di macchina in piu'
+#  [le 49 del 04/09 sono state misurate in ~30 s di tester, referti
+#  alla mano] e in cambio da' DUE cose che le sole 41 celle nuove non
+#  darebbero:
+#    1) UN COLLAUDO DI RIPRODUZIONE. La cella di riferimento N=20
+#       sigma=1,05 DEVE tornare identica al 04/09. Se non torna, non e'
+#       l'estensione a essere sbagliata: sono i numeri del 04/09 a non
+#       essere riproducibili, e va saputo PRIMA di scegliere una cella.
+#       La riga di lancio lo gatta a macchina.
+#    2) UNA MAPPA SOLA, LETTA IN UN PEZZO. La regola dell'altopiano
+#       guarda blocchi 2x2 di celle CONTIGUE: cucire a mano due mappe
+#       misurate in due corse diverse e' esattamente il punto in cui si
+#       sbaglia. Qui la mappa 10x9 esce gia' intera dal referto.
+#
+#  PREVISIONE DICHIARATA PRIMA DELLA MISURA (falsificabile)
+#  ---------------------------------------------------------------------
+#  N e sigma piu' grandi RIDUCONO le occasioni: sulla griglia vecchia si
+#  passa da 13,07 eseguibili/giorno (N=10, sigma=0,75) a 2,89 (N=40,
+#  sigma=1,65). L'estrapolazione dice che le celle nuove scenderanno
+#  ancora, e che una parte di loro sbattera' contro il PAVIMENTO C1
+#  (2,00/giorno) morendo di portata, non di geometria.
+#  >>> QUESTA E' GIA' UNA RISPOSTA: se l'altopiano vivo finisce perche'
+#      C1 cade, allora il bordo della griglia vecchia NON stava
+#      tagliando niente di utile e la scelta N=35/sigma=1,50 regge.
+#  >>> SE INVECE le celle nuove restano VIVE, il centro va rifatto sulla
+#      mappa nuova e la proposta del 04/09 va corretta. Nessuna delle
+#      due uscite e' un fallimento: e' la domanda che aveva senso porre.
+#
+#  ATTENZIONE AL CONTEGGIO DELLE CELLE (rischio dichiarato, non temuto)
+#  ---------------------------------------------------------------------
+#  L'asse sigma va per multipli di 0,15 su numeri in virgola mobile:
+#  0,75 + 8 x 0,15 = 1,95 puo' uscire 1,9500000000000002 nel motore di
+#  ottimizzazione e fare 8 valori invece di 9 (72 celle invece di 90).
+#  NON si corregge in silenzio: la riga di lancio conta le righe del CSV
+#  e le confronta con 90. Se sono 72 o 81, e' un PROBLEMA scritto nel
+#  referto, non una griglia "quasi giusta" letta come se fosse giusta.
+#
+#  QUELLO CHE QUESTO FILE **NON** CAMBIA
+#  ---------------------------------------------------------------------
+#  - I CANCELLI. C1, C2, C3, C5, C6, C7, C8 stanno nei #define del
+#    sorgente, non qui: si leggono dal .mq5 al pin, come sempre. Le
+#    soglie di D30EUR restano 8,40 punti indice per C3 (3 x 2,80 di
+#    spread MISURATO, mediana oraria PEGGIORE 14-21 server).
+#  - LA REGOLA DI LETTURA: ALTOPIANO, MAI IL PICCO. Su una griglia piu'
+#    grande la tentazione del picco cresce, non cala: la regola resta
+#    scritta qui, PRIMA dei numeri.
+#  - IL SORGENTE. ABTG_SondaRelativo.mq5 v1.03 NON si tocca: e' un
+#    contatore puro, nessun ordine, nessun magic, e resta tale.
+#  - InpSogliaUscitaSigma PINNATO a 0,05: e' la DEFINIZIONE di C6, non
+#    un parametro. InpModoSpread e InpModoZScore PINNATI a 0: sono
+#    l'ablazione, e l'ablazione si fa dopo, una variabile alla volta.
+#
+#  SORGENTE : mql5\Experts\ABTG_SondaRelativo.mq5  (v1.03, NON toccata)
+#  ORIGINALE: prove\RELATIVO_D30_M5.txt  (resta valido e intatto)
+#  REFERTO DA CUI NASCE:
+#    risultati_archivio\sondarelativo\REFERTO_D30_M5_2026-09-04_1419_v103_VIVO.txt
+#  PROPOSTA : report\PROPOSTA_RELATIVO_TICK_REALI_2026-09-04.md
+#  SPREAD   : risultati_archivio\SPREAD_FLOTTA_MISURA_2026-09-03.md
+#             + spread_flotta\spread_orario_D30EUR.csv   [MISURATO]
+#  FIRMA    : report\FIRME_2026-08-31.md, FIRMA 2 (cancello H8)
+#  DUE LATI + STORICO LUNGO SUGLI INDICI: CLAUDE.md, 25/08.
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    MOTORE (rapporto fra due simboli -> scarto dalla media mobile ->
+#    z-score -> due soglie simmetriche -> uscita per convergenza)
+#    derivato dalla LETTURA di:
+#      1) "Pair Trade" (c) vladimirkovalchuk / @wa1one
+#         https://www.tradingview.com/script/ru23VN0C/
+#      2) "Unilateral Pairs Trading" (c) @pietro3334
+#         https://www.tradingview.com/script/MD5vkc0n/
+#      3) "Statistical Arbitrage Pairs Trading - Long-Side Only"
+#         (c) @piirsalu  https://www.tradingview.com/script/Kt6XkQIM/
+#         (da qui SOLO la normalizzazione robusta mediana/MAD)
+#      4) conferma indipendente del meccanismo su MT5 e su INDICI:
+#         m4rk-lewis/price_action_analytics (GitHub) -- indicatore, non
+#         EA: NON e' la fonte del codice.
+#    LICENZA: (1), (2) e (3) NON DICHIARANO NESSUNA LICENZA nel
+#    sorgente [VERIFICATO il 02/09/2026]. Su TradingView access=1 rende
+#    il sorgente LEGGIBILE, non automaticamente RIUSABILE.
+#    >>> REGOLA APPLICATA: NON E' STATA COPIATA NEMMENO UNA RIGA DI
+#    PINE. E' stata riscritta in MQL5 la FORMULA STATISTICA (matematica
+#    pubblica, non proteggibile) E SI CITA COMUNQUE autore, URL e data.
+#
+# =====================================================================
+#  IL BANCO -- IDENTICO ALLA CORSA DEL 04/09, E DEVE ESSERLO
+# ---------------------------------------------------------------------
+#  SIMBOLO SCAMBIATO (gamba)   D30EUR     <- @SIMBOLO
+#  SIMBOLO METRO               U30USD     <- InpSimboloMetro, SI LEGGE
+#                                            E NON SI SCAMBIA
+#  FINESTRA 2024.09.26 -> 2026.06.30 (pavimento MISURATO dei dati BCM
+#  sugli indici). FINESTRA ORARIA 14:30 -> 22:00 ORA SERVER BCM
+#  (= 15:30 -> 23:00 italiane). Inizio INCLUSO, fine ESCLUSA.
+#  MODELLO DI CORSA: 2 = "Solo prezzi di apertura". Il segnale nasce su
+#  BARRA CHIUSA e non si apre niente: il tick non aggiunge informazione.
+#  PRIMA DELLA CORSA lo storico del METRO (U30USD) DEVE essere gia'
+#  scaricato nel terminale, o ogni barra risulta "spaiata" e il referto
+#  misura la configurazione invece del mercato.
+#  TETTO ~100.000 BARRE: 21 mesi di M5 lo eccedono. NON si spezza in
+#  tranche (stessa scelta del 04/09): la sonda dichiara da sola la
+#  finestra effettiva con "Giorni Contati" e "Barre Valutate", e quei
+#  due numeri devono tornare uguali a quelli del 04/09.
+#
+# =====================================================================
+#  GLI ASSI -- DUE, ESTESI, E L'UNICA COSA CHE CAMBIA
+# ---------------------------------------------------------------------
+#  InpFinestraN            10 -> 55 passo 5   (10 valori)
+#     era 10 -> 40 (7 valori). Le tre nuove: 45, 50, 55.
+#     E' LA MANOPOLA DELLA FREQUENZA (dossier par.5.4).
+#  InpSogliaIngressoSigma  0,75 -> 1,95 passo 0,15  (9 valori)
+#     era 0,75 -> 1,65 (7 valori). Le due nuove: 1,80 e 1,95.
+#  = 90 passate (erano 49).
+#
+#  E LA REGOLA DI SELEZIONE, dichiarata insieme al numero e PRIMA di
+#  vederlo: CENTRO DELL'ALTOPIANO, MAI IL PICCO. Il verdetto per lato
+#  non e' "esiste una cella che passa": e' "esiste un blocco 2x2 di
+#  celle CONTIGUE in cui C1, C3, C5, C6 e C8 stanno in piedi INSIEME".
+#  Una cella isolata e' RUMORE, e la risposta e' NO.
+#
+# =====================================================================
+#  DOVE GIRA
+# ---------------------------------------------------------------------
+#  @FINOA e' documentazione: il driver generico prende la fine da
+#  -Fino, che vale 2026.06.30 di default. Le direttive lette dal
+#  generico sono @SIMBOLO, @PERIODO, @DAQUANDO.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+InpFinestraN=20||10||5||55||Y
+InpSogliaIngressoSigma=1.05||0.75||0.15||1.95||Y
+InpSogliaUscitaSigma=0.05
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+InpBarreMaxTenuta=120
+InpBarreOrizzonte=24
+InpLato=0
+InpPuntiPerIndice=100.0
+InpAtrPeriod=14
+InpAtrModoRma=false
+InpWarmupBarre=300
+InpConfrontaMT5=true
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVO_SONDA
