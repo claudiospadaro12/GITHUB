@@ -60,10 +60,16 @@ backtest, prima** che tu ridistribuisca il fix sul VPS.
 | **Dove** | **PC di backtest**, mai il VPS. **MT5 e MetaEditor CHIUSI** (la riga li ricontrolla anche fra una corsa e l'altra) |
 | **Quanto ci mette** | compilazione + 2 passate singole OHLC M1 su ~2,5 settimane + 2 avvii del terminale. **Totale onesto: 3-15 minuti** [STIMA]. Se il PC di backtest **non ha gennaio 2026** di EURJPY/EURUSD sul disco, il tempo lo fa lo scarico dello storico — e **questa riga NON misura lo storico**, per scelta: se non escono canarini il referto lo dice **con due nomi possibili, non uno** |
 
-## 📌 IL PIN — **`1a656cecaa2323f8243ae7a0bc10af6a0d95373a`**
+## 📌 IL PIN — **`68250ce319180dca8e54ac52f8c140f058eb2e75`**
 
-✅ **Verificato uno per uno via `raw` il 04/09/2026** (HTTP 200 + `sha256`
-identico al repo al pin, tutti e sei i file):
+✅ **RI-PINNATO il 04/09/2026** dopo la prima corsa vera su MT5: il canarino
+diceva correttamente `letto da Common\Files` su entrambe le sedie (il fix
+funziona), ma il driver segnalava `PROBLEMI: 2` falsi (`righe 18` letto,
+`righe 17` atteso) per un errore SUO, non dell'EA — confondeva le righe
+TOTALI del file (header incluso, quello che l'EA conta davvero) con le
+righe evento (che escludono l'header). Corretto (classe 119 della
+checklist), **verificato uno per uno via `raw` su questo nuovo pin** (HTTP
+200 + `sha256` identico al repo, tutti e sei i file):
 
 | file al pin | cosa si verifica |
 |---|---|
@@ -83,7 +89,7 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1a656cecaa2323f8243ae7a0bc10af6a0d95373a'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='68250ce319180dca8e54ac52f8c140f058eb2e75'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -101,7 +107,7 @@ Tutti e **sei** scaricati **allo stesso pin**, mai dalla punta del branch.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1a656cecaa2323f8243ae7a0bc10af6a0d95373a'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='68250ce319180dca8e54ac52f8c140f058eb2e75'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -124,7 +130,7 @@ rilancia **tutto il blocco**, non solo un pezzo. Esempio sul blocco 1️⃣:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='1a656cecaa2323f8243ae7a0bc10af6a0d95373a'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='68250ce319180dca8e54ac52f8c140f058eb2e75'; $t0=Get-Date; $iv=[Globalization.CultureInfo]::InvariantCulture; $p="$env:USERPROFILE\RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ECBFOMC_VERIFICA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo -Terminale 'C:\Program Files\BCM Markets MT5 Terminal'; $rc=$LASTEXITCODE;
