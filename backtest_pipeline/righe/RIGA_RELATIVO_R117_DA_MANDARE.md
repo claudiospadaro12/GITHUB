@@ -78,19 +78,41 @@ Dettaglio completo, con tutti i numeri e i rilievi:
 > e il modello di tick non lo tocca.** Se non combacia, il nucleo statistico è
 > stato trasportato male e **tutto il resto del round non vuol dire niente.**
 >
-> 🔴 **PRIMA DI LANCIARE, UNA COSA VA FATTA A MANO** (e la riga lo dichiara da
-> sola se non è stata fatta): i due numeri attesi vanno presi dal **CSV OPTFRAME
-> del passo 0** (dentro lo zip `RELATIVO_GRIGLIA_ESTESA_...`, riga
-> **N=40 / σ=1.35**, colonne `Attraversamenti Grezzi Long` e `... Short`) e
-> scritti nella tabella `$PORTO` in testa a `RIGA_RELATIVO_R117.ps1`. Finché
-> valgono **−1**, il collaudo **non si esegue** e il referto scrive
-> **"NON ESEGUITO, E NON È UN VERDE"** — che è meglio di un verde che non ha
-> misurato niente.
+> ## 🛑 PRIMA DI LANCIARE I BLOCCHI 2 E 3, UNA COSA VA FATTA A MANO — **E ADESSO LA RIGA SI FERMA DA SOLA SE NON È STATA FATTA**
+> Nella tabella `$PORTO` in testa a `RIGA_RELATIVO_R117.ps1` i due attesi
+> valgono ancora **−1 / −1**. In **v1** questo faceva uscire la corsa **VERDE
+> senza aver confrontato niente**, mentre questa pagina prometteva *"se il porto
+> fallisce il round non parte"* — un esito che **non poteva mai verificarsi**.
+> In **v2** c'è un **gate esplicito**: con `$PORTO` a −1 la corsa PORTO **non
+> parte proprio**, e si ferma **prima** di aprire MT5 (a tick reali sono ore
+> risparmiate). Il giro a vuoto `-SoloControllo` passa lo stesso, con un rilievo.
+>
+> ### 📄 Da dove si prendono i due numeri — **e dove NON stanno**
+> - ✅ **Ci sono**: nel **CSV OPTFRAME del passo 0**, griglia **ESTESA**, riga
+>   **N=40 / σ=1.35**, colonne `Attraversamenti Grezzi Long` e `... Short`.
+>   File: `ABTG_SondaRelativo_D30EUR_IS_ohlc_D30_M5_EST.csv` e l'equivalente NAS,
+>   dentro lo zip `RELATIVO_GRIGLIA_ESTESA_...` **sul tuo Desktop** (non è in repo).
+> - ❌ **NON ci sono** nei referti archiviati
+>   (`risultati_archivio/sondarelativo/REFERTO_D30_M5_ESTESA_...` e `..._NAS_...`),
+>   e l'ho **verificato riga per riga**: la tabella delle 90 celle stampa
+>   `ese/ggL` e `ese/ggS`, cioè gli **ESEGUIBILI per giorno** (**dopo** i filtri
+>   di occupazione e tetto), e i **grezzi** li stampa **solo** per la cella di
+>   riferimento **N=20 / σ=1.05** (D30 **2246/2374** su 441 giorni, NAS
+>   **2419/2418** su 450 giorni). Grezzi ed eseguibili **sono due grandezze
+>   diverse** e una **non si ricava** dall'altra: per questo la riga **blocca**
+>   invece di inventarsi un atteso.
+>
+> **Cosa devi fare:** aprire quei due CSV, leggere la riga N=40/σ=1.35, scrivere i
+> quattro numeri nella tabella `$PORTO`, **committare e ripinnare**. Oppure
+> mandarmeli e li scrivo io.
 >
 > ⚠️ **La tolleranza non è zero, ed è dichiarata:** il passo 0 girava la finestra
 > intera in una passata sola, qui il generico la spezza in IS e OOS e la passata
 > OOS riparte col suo warmup. Intorno alla giuntura qualche attraversamento può
-> mancare: tolleranza **0,5% della somma attesa, minimo 20**.
+> mancare: tolleranza **0,5% dell'atteso, minimo 20** — e in **v2** si applica
+> **a ciascun lato separatamente**, non alla somma: sulla sola somma uno **scambio
+> compensativo** (un long in più e uno short in meno) passerebbe inosservato, ed è
+> esattamente il difetto di trasporto che questo collaudo deve pescare.
 
 > ### 👯 **I GEMELLI — perché due corse identiche non sono uno spreco**
 > Due passate con gli **stessi input** e **magic diverso** devono venire
@@ -147,8 +169,8 @@ Fra "passa" e "bocciata secca" c'è **sempre** una **zona morta** esplicita.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v1`) |
-| **EA** | `mql5/Experts/ABTG_Relativo.mq5` — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
+| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v2` — **v1 è bocciata dalla review del 04/09, non lanciarla**) |
+| **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.01** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
 | **File prova** | i 6 `prove/RELATIVO_R117_*.txt` (scaricati tutti, ne gira uno: gli altri servono al gemellaggio a SEI) |
 | **Banco** | **Modello 4 = OGNI TICK, TICK REALI**. Finestra **2024.09.26 → 2026.06.30**, split **40/60** |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** |
@@ -163,17 +185,18 @@ questo EA: **mettici il tempo che ci mette, e se sembra bloccato guarda che il
 tester stia macinando invece di fermare tutto.** Il referto porta l'**ora di
 avvio**, non quella di fine, apposta.
 
-## 📌 IL PIN — **`983a0f2d68ab75f7519c69a615d2b7ce89543f85`**
+## 📌 IL PIN — **`@@PIN@@`** ⛔ SEGNAPOSTO, NON ANCORA SCELTO
 
-✅ **INSERITO il 04/09/2026** (prima di questo commit qui c'era il cartello del
-segnaposto: si **riscrive**, non si lascia — classe 101). I **nove** file che il
-driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** +
-**sha256 identico** al repo) **prima** che questa riga fosse dichiarata pronta.
+⛔ **IL PIN VECCHIO (`983a0f2…`) NON VALE PIÙ**: puntava alla versione **v1**
+della riga, quella bocciata dalla review del 04/09 (4 difetti bloccanti nel
+driver + 2 nell'EA). **Non lanciarla.** Il pin nuovo si sceglie **dopo** il
+commit dei fix e si verifica via `raw` prima di essere scritto qui — classe 101:
+il segnaposto **si riscrive**, non si lascia.
 
-| file al pin | esito |
+| file al pin | cosa dovrà essere verificato prima di dichiararlo pronto |
 |---|---|
-| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | **200, identico** (`9b1d15a4…`) · marcatore `MARCATORE_RIGA_RELATIVO_R117_v1` · **ASCII puro** · **parse 0 errori** (pwsh 7.4.6) · **0 usi di `$r` dopo la nascita di `$R`** (classe 79, vedi sotto) |
-| `mql5/Experts/ABTG_Relativo.mq5` | **200, identico** (`e28d6778…`) · `#property version "1.00"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
+| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · marcatore `MARCATORE_RIGA_RELATIVO_R117_v2` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
+| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · `#property version "1.01"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
 | i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | **200 tutti e sei, identici** · 32 righe vive ciascuno · 28 input che **combaciano nome per nome** con quelli dell'EA · differenze reciproche: **solo `@SIMBOLO`, `InpMagic`, `InpModoSonda`** |
 | `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato): il driver lo scarica al pin e lo ri-pinna sull'EA |
 
@@ -206,14 +229,75 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 > (qui il parse è su pwsh 7), il comportamento del generico con `-Modello 4`, e
 > la sezione **scelta del terminale**.
 
+## 🩹 LA REVIEW DEL 04/09 — **v1 BOCCIATA, ECCO COSA È CAMBIATO IN v2**
+
+Il verificatore di stringhe ha dato **FAIL** alla v1. Sette difetti reali, tutti
+chiusi. Li scrivo tutti, anche quelli che fanno brutta figura: **un difetto
+taciuto torna**.
+
+### 🔴 Nel driver (4 bloccanti)
+
+| # | il difetto | perché era grave |
+|---|---|---|
+| 1 | leggeva il `#define` **`REL_NSTATS`**, che è della **sonda**: nell'EA nuovo si chiama **`ABR_NSTATS`** | la riga **moriva sempre**, giro a vuoto compreso. Nascosto da un **secondo gate** che rigrepava lo stesso valore col nome giusto: ora si legge **una volta sola** |
+| 2 | `$corsa.Periodo` **non esisteva**: la tabella `$CORSE` non dichiarava il campo | `$Periodo` era `$null` → il gate del tetto barre diceva **"OLTRE IL TETTO" sempre**. Ora il campo c'è su tutte e sei le corse, con una **guardia** che rifiuta un record monco (classe 121) |
+| 3 | il CSV del **gemello** veniva rifiutato come "STANTIO" **sempre** | la guardia di freschezza era puntata su un file che **deve** essere della corsa precedente: i blocchi 5 e 7 davano **"PROBLEMI" falsi al 100%**. Ora la data si **dichiara nel referto** invece di far fallire il confronto |
+| 4 | il **collaudo del porto** era spento (`-1/-1`) ma la corsa usciva **verde** | vedi il riquadro sopra: ora **gate bloccante prima di aprire MT5**, e i due lati si confrontano **separati** |
+
+Più due rilievi minori chiusi: la **sentinella** ora si cancella **solo se è di
+questo giro** (prima un giro fermato da un gate cancellava quella di un giro
+precedente davvero interrotto), e il **titolo a schermo** non dice più
+*"SONDA RELATIVO — PASSO 0, CONTATORE"* (era falso: qui l'EA apre ordini), come
+non lo dice più la riga `pulizia:`, che adesso avverte che l'`.ex5` lasciato nel
+terminale **sa aprire posizioni**.
+
+### 🟠 Nell'EA — **due difetti che toccavano gli ordini veri** (`v1.00` → `v1.01`)
+
+1. **Il flat di fine sessione dormiva.** Scattava solo dentro
+   `ValutaBarraChiusa()`, che gira **a barra nuova**: fra l'ultima barra della
+   sessione e la prima del giorno dopo **non arriva nessuna barra nuova**, quindi
+   una posizione aperta restava viva **tutta la notte**, protetta dal solo stop.
+   Aggiunto un **flat di recupero in testa a `OnTick()`**, con chiave di
+   **calendario** (`anno*10000+mese*100+giorno`, mai `day_of_year`). ⚠️ Con una
+   variante rispetto a quanto chiesto, e la dichiaro: se nella notte lo **stop**
+   ha già chiuso la posizione, si **registra la chiusura per stop** invece di
+   mandare una `PositionClose` su un ticket morto — che sarebbe un **rifiuto
+   finto** e, peggio, lascerebbe `gTicket` vivo per sempre bloccando ogni
+   ingresso successivo.
+2. **Il collaudo A7 si autoinvalidava.** `gPosBarre` cresceva **solo** nel ramo
+   "barra tenuta intera", non nei due rami che chiudono prima (stop scoperto fra
+   due barre, e flat). Una posizione stoppata sulla **barra d'ingresso** finiva a
+   registro con **tenuta 0 barre = 0 secondi**, cioè dentro la quota "sotto 60
+   secondi" che A7 pretende a **0,00%**: **una sola** operazione così su ~400
+   rendeva **l'intera gamba NON LEGGIBILE**. Ora `gPosBarre` si incrementa anche
+   lì: la barra appena chiusa la posizione **l'ha vissuta**.
+
+### 📎 DIFFERENZE NOTE fra il nucleo dell'EA e quello della sonda (dichiarate)
+
+Il collaudo del porto verifica che i due producano gli **stessi grezzi**. Due
+funzioni però **non sono identiche riga per riga**, ed è giusto scriverlo:
+
+- **`AggiornaEscursione_Calc`** — nella sonda ha due rami espliciti
+  (`lato>0` / `lato<0`), qui è rifattorizzata su un **ternario**. Numericamente
+  identica per `lato = ±1` (autotest blocco 11 li collauda entrambi); l'unico
+  caso divergente era `lato = 0`, che nella sonda è un no-op — ed è stato
+  riportato a no-op anche qui, quindi **la differenza non esiste più**.
+- **`GiorniMetroAttivi_Calc`** — la sonda ha in firma il flag `soloFinestra`,
+  qui **cablato a `true`** perché l'unico chiamante lo passava già così. Il corpo,
+  per `soloFinestra=true`, è **identico riga per riga**.
+
+🟢 **Nessuna delle due tocca i grezzi né il segnale**: la prima misura MFE/MAE a
+posizione già aperta, la seconda conta i giorni in cui il metro ha quotato (il
+denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
+
 ## 1️⃣ Giro a vuoto (`-SoloControllo`, con `-AccettoTettoBarre`: **serve anche qui**)
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_PORTO_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -226,12 +310,16 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 
 ## 2️⃣ 🥇 `D30_PORTO` — **IL COLLAUDO DEL PORTO. Se fallisce, il round finisce qui.**
 
+> 🛑 **Questo blocco (e il 3️⃣) si ferma subito, con un errore esplicito, finché la
+> tabella `$PORTO` vale −1/−1.** Non è un guasto: è il gate. Leggi il riquadro
+> *"PRIMA DI LANCIARE I BLOCCHI 2 E 3"* qui sopra.
+
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_PORTO_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -247,9 +335,9 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_PORTO_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -265,9 +353,9 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30 -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -283,9 +371,9 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_D30_GEM_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -301,9 +389,9 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
@@ -319,9 +407,9 @@ driver scarica sono stati verificati uno per uno via `raw` al pin (**HTTP 200** 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='983a0f2d68ab75f7519c69a615d2b7ce89543f85'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v1' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v2' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'RELATIVO_R117_NAS_GEM_2*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });

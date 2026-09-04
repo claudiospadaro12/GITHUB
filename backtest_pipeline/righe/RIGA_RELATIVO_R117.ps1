@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_RELATIVO_R117_v1
+#  MARCATORE_RIGA_RELATIVO_R117_v2
 #  RIGA_RELATIVO_R117.ps1 -- IL ROUND R117: PRIMA MISURA DI MERITO DEL
 #  CANDIDATO "RELATIVO", A TICK REALI.
 #
@@ -36,8 +36,13 @@
 #         stessa cella e sulla stessa finestra. Lo z-score si calcola su
 #         BARRE CHIUSE: il modello di tick non lo tocca. Se non
 #         combaciano, il nucleo statistico e' stato trasportato male e
-#         tutto il resto del round non vuol dire niente. Gli attesi sono
-#         nella tabella $PORTO qui sotto, ricopiati dai referti.
+#         tutto il resto del round non vuol dire niente. Gli attesi
+#         vanno nella tabella $PORTO qui sotto, e finche' valgono -1 le
+#         due corse PORTO NON PARTONO (gate esplicito): un collaudo che
+#         non confronta niente uscirebbe verde senza aver misurato
+#         niente. I due numeri stanno nel CSV OPTFRAME del passo 0
+#         (griglia ESTESA), riga N=40/sigma=1.35 -- NON nei referti
+#         archiviati, che per le 90 celle stampano gli eseguibili.
 # ---------------------------------------------------------------------
 #  IL BANCO
 #    MODELLO 4 = OGNI TICK BASATO SU TICK REALI. E' il punto del round:
@@ -132,7 +137,7 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "RELATIVO_R117_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.00"
+$VERSIONE_ATTESA         = "1.01"   # 1.01 = i due difetti chiusi il 04/09 (flat di recupero + gPosBarre nei rami di uscita anticipata)
 $AUTOTEST_BLOCCHI_ATTESI = 20
 $NSTATS_ATTESI           = 73      # 73 valori + Pass, Simbolo, Periodo = 76 colonne
 $INPUT_ATTESI            = 28
@@ -170,9 +175,24 @@ $ECO_RISCHIO = 0.65
 #     (cella N=40 sigma=1,35, colonne "Attraversamenti Grezzi
 #     Long/Short"). Lo z-score si calcola su barre CHIUSE: il modello di
 #     tick NON lo tocca, quindi devono tornare ALLA CIFRA.
-#     >>> A -1 il collaudo NON si esegue e la riga lo dichiara come
-#     RILIEVO, invece di dare un verde che non ha misurato niente. I due
-#     numeri stanno nel CSV OPTFRAME del passo 0, riga N=40/sigma=1.35.
+#     >>> A -1 LA CORSA VERA NON PARTE (gate piu' sotto, subito dopo la
+#     scelta del prova): un PORTO che non confronta niente uscirebbe
+#     VERDE senza aver misurato niente, ed e' peggio di un rosso.
+#     >>> DA DOVE SI PRENDONO. I due numeri stanno nel CSV OPTFRAME del
+#     passo 0 (griglia ESTESA), riga N=40 / sigma=1.35, colonne
+#     "Attraversamenti Grezzi Long" e "Attraversamenti Grezzi Short":
+#       ABTG_SondaRelativo_D30EUR_IS_ohlc_D30_M5_EST.csv
+#       ABTG_SondaRelativo_NASUSD_IS_ohlc_NAS_M5_EST.csv
+#     CERCATI NEI REFERTI ARCHIVIATI, E NON CI SONO (verificato il
+#     04/09 su REFERTO_D30_M5_ESTESA_2026-09-04_1630_v103_VIVO.txt e
+#     REFERTO_NAS_M5_ESTESA_2026-09-04_1632_v103_VIVO.txt): la tabella
+#     delle 90 celle stampa ese/ggL e ese/ggS, cioe' gli ESEGUIBILI per
+#     giorno (DOPO i filtri di occupazione e tetto), e i GREZZI li
+#     stampa SOLO per la cella di riferimento N=20/sigma=1.05
+#     (D30 2246/2374 su 441 giorni, NAS 2419/2418 su 450 giorni).
+#     Grezzi ed eseguibili NON sono la stessa grandezza e non si
+#     ricavano gli uni dagli altri: percio' qui restano -1 e il gate
+#     BLOCCA, invece di inventare un atteso.
 $PORTO = @{
   "D30EUR" = @{ GrezziL = -1; GrezziS = -1 }
   "NASUSD" = @{ GrezziL = -1; GrezziS = -1 }
@@ -185,14 +205,24 @@ $TETTO_GIORNI = @{ "M5" = 475; "M15" = 1461 }
 # --- LE SEI CORSE AMMESSE. Il campo Gemello serve al confronto di
 #     determinismo; Sonda dice, senza indovinare, se quella corsa deve
 #     produrre ordini oppure no.
+#     >>> IL CAMPO Periodo C'E' E SERVE (difetto trovato in review il
+#     04/09): senza, $Periodo restava $null, $TETTO_GIORNI[$null] non
+#     tornava niente e il gate del tetto barre diceva "OLTRE IL TETTO"
+#     SEMPRE, con un doppio spazio nel referto. Il TF si DICHIARA qui,
+#     una volta, e da qui lo leggono sia il gate del tetto sia il gate
+#     sui prova: nessuna stringa "M5" cablata due volte.
 $CORSE = [ordered]@{
-  "D30"       = @{ Simbolo="D30EUR"; File="RELATIVO_R117_D30.txt";         Magic="774601"; Sonda="false"; Gemello="D30_GEM"; Ruolo="MISURA" }
-  "NAS"       = @{ Simbolo="NASUSD"; File="RELATIVO_R117_NAS.txt";         Magic="774602"; Sonda="false"; Gemello="NAS_GEM"; Ruolo="MISURA" }
-  "D30_GEM"   = @{ Simbolo="D30EUR"; File="RELATIVO_R117_D30_GEMELLO.txt"; Magic="774611"; Sonda="false"; Gemello="D30";     Ruolo="GEMELLO" }
-  "NAS_GEM"   = @{ Simbolo="NASUSD"; File="RELATIVO_R117_NAS_GEMELLO.txt"; Magic="774612"; Sonda="false"; Gemello="NAS";     Ruolo="GEMELLO" }
-  "D30_PORTO" = @{ Simbolo="D30EUR"; File="RELATIVO_R117_D30_PORTO.txt";   Magic="774603"; Sonda="true";  Gemello="";        Ruolo="PORTO" }
-  "NAS_PORTO" = @{ Simbolo="NASUSD"; File="RELATIVO_R117_NAS_PORTO.txt";   Magic="774604"; Sonda="true";  Gemello="";        Ruolo="PORTO" }
+  "D30"       = @{ Simbolo="D30EUR"; Periodo="M5"; File="RELATIVO_R117_D30.txt";         Magic="774601"; Sonda="false"; Gemello="D30_GEM"; Ruolo="MISURA" }
+  "NAS"       = @{ Simbolo="NASUSD"; Periodo="M5"; File="RELATIVO_R117_NAS.txt";         Magic="774602"; Sonda="false"; Gemello="NAS_GEM"; Ruolo="MISURA" }
+  "D30_GEM"   = @{ Simbolo="D30EUR"; Periodo="M5"; File="RELATIVO_R117_D30_GEMELLO.txt"; Magic="774611"; Sonda="false"; Gemello="D30";     Ruolo="GEMELLO" }
+  "NAS_GEM"   = @{ Simbolo="NASUSD"; Periodo="M5"; File="RELATIVO_R117_NAS_GEMELLO.txt"; Magic="774612"; Sonda="false"; Gemello="NAS";     Ruolo="GEMELLO" }
+  "D30_PORTO" = @{ Simbolo="D30EUR"; Periodo="M5"; File="RELATIVO_R117_D30_PORTO.txt";   Magic="774603"; Sonda="true";  Gemello="";        Ruolo="PORTO" }
+  "NAS_PORTO" = @{ Simbolo="NASUSD"; Periodo="M5"; File="RELATIVO_R117_NAS_PORTO.txt";   Magic="774604"; Sonda="true";  Gemello="";        Ruolo="PORTO" }
 }
+#--- i campi che OGNI record di $CORSE deve dichiarare. Un record monco
+#    non da' errore in PowerShell: da' $null, e $null si propaga in
+#    silenzio fino a un verdetto sbagliato (classe 121).
+$CAMPI_CORSA = @("Simbolo","Periodo","File","Magic","Sonda","Gemello","Ruolo")
 #--- le righe che possono legittimamente differire fra i sei prova.
 #    Qualunque ALTRA differenza FERMA TUTTO.
 $DifferenzeAmmesse = @("InpMagic","InpModoSonda")
@@ -258,6 +288,8 @@ $SondaTxt   = "n/d"
 $FotoPrima  = @()
 $FotoDopo   = @()
 $SentTrovata = ""
+$SentScritta = $false   # true SOLO se QUESTO giro ha davvero scritto la sentinella (cioe' ha toccato il terminale)
+$EtaGemello  = ""
 $tCorsa     = $Avvio
 $Simbolo    = "n/d"
 $Periodo    = "n/d"
@@ -634,12 +666,28 @@ function CancelliMerito($gIS,$gOOS,[ref]$righe){
 #  INIZIO ESECUZIONE
 # =====================================================================
 try{
-  Titolo ("SONDA RELATIVO -- PASSO 0, CONTATORE (" + $EA + ") -- modo " + $Modo)
+  #--- LA PRIMA RIGA CHE SI LEGGE A SCHERMO DEVE DIRE COS'E' QUESTO
+  #    ROUND. Diceva ancora "PASSO 0, CONTATORE": era il titolo della
+  #    riga della sonda, ed era FALSO qui (difetto trovato in review il
+  #    04/09). Qui l'EA APRE POSIZIONI in backtest.
+  Titolo ("RELATIVO -- R117, PASSO 1: MERITO A TICK REALI -- QUESTO EA APRE ORDINI VERI IN BACKTEST (" + $EA + ") -- modo " + $Modo)
   if($Pin -eq ""){ throw "-Pin obbligatorio: senza, girerebbe la punta del branch spacciandola per un commit congelato." }
   if($Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin deve essere un commit di 40 caratteri esadecimali, ricevuto: " + $Pin) }
   if($Prova -eq ""){ throw ("-Prova obbligatorio: uno fra " + (@($CORSE.Keys) -join ", ") + ".") }
   if(Get-Process terminal64,metaeditor64 -ErrorAction SilentlyContinue){
     throw "MT5 O METAEDITOR APERTO: col terminale aperto il tester non gira (zero CSV), con MetaEditor aperto la compilazione torna subito senza compilare."
+  }
+  #--- GUARDIA CLASSE 121: la tabella $CORSE si controlla PRIMA di
+  #    usarla, e su TUTTE E SEI le righe (non solo su quella scelta):
+  #    il gate sui prova al passo 3 legge il Periodo di tutte e sei.
+  #    Un campo mancante in PowerShell non e' un errore, e' un $null che
+  #    viaggia zitto fino al verdetto.
+  foreach($kc in @($CORSE.Keys)){
+    foreach($campo in $CAMPI_CORSA){
+      if(-not $CORSE[$kc].ContainsKey($campo)){ throw ("BUG INTERNO (classe 121): la tabella CORSE non dichiara il campo '" + $campo + "' per la corsa " + $kc + ".") }
+      if(("" + $CORSE[$kc][$campo]) -eq "" -and $campo -ne "Gemello"){ throw ("BUG INTERNO (classe 121): il campo '" + $campo + "' della corsa " + $kc + " e' vuoto.") }
+    }
+    if(-not $TETTO_GIORNI.ContainsKey($CORSE[$kc].Periodo)){ throw ("BUG INTERNO (classe 121): il TF '" + $CORSE[$kc].Periodo + "' della corsa " + $kc + " non e' nella tabella TETTO_GIORNI: il gate del tetto barre non saprebbe contro cosa misurare.") }
   }
   $corsa    = $CORSE[$Prova]
   $Simbolo  = $corsa.Simbolo
@@ -653,6 +701,24 @@ try{
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
   Dico ("banco ....... MODELLO 4 (OGNI TICK, TICK REALI), UNA passata (cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + "), split IS/OOS " + $FrazioneIS + ". Deposito " + $Deposito + ". RUOLO DI QUESTA CORSA: " + $corsa.Ruolo)
   Dico ("regola ...... NESSUNA GRIGLIA, NESSUNA SELEZIONE: la cella e' congelata. IS e OOS sono DUE CAMPIONI della STESSA configurazione, non una scelta e una validazione. UN SOLO REGIME: da questo round NON esce una sedia.") "Yellow"
+
+  #--- IL GATE CHE MANCAVA (difetto trovato in review il 04/09). Una
+  #    corsa di ruolo PORTO esiste PER misurare una cosa sola: che i
+  #    "Segnali Grezzi" dell'EA combacino con gli "Attraversamenti
+  #    Grezzi" del passo 0. Con la tabella $PORTO a -1 quel confronto
+  #    NON SI FA, e la corsa usciva VERDE senza aver misurato niente --
+  #    mentre la pagina prometteva "se il porto fallisce il round non
+  #    parte", un esito che cosi' non poteva MAI verificarsi.
+  #    Adesso ci si ferma PRIMA della corsa (che a tick reali costa ore).
+  if($corsa.Ruolo -eq "PORTO" -and (-not $SoloControllo) -and
+     ((-not $PORTO.ContainsKey($Simbolo)) -or $PORTO[$Simbolo].GrezziL -lt 0 -or $PORTO[$Simbolo].GrezziS -lt 0)){
+    throw ("COLLAUDO DEL PORTO NON ARMATO: nella tabella `$PORTO di questa riga " + $Simbolo + " vale ancora -1/-1. Questa corsa a TICK REALI non misurerebbe niente. Prendi 'Attraversamenti Grezzi Long' e 'Attraversamenti Grezzi Short' dal CSV OPTFRAME del passo 0 (riga N=" + $ECO_N + "/sigma=" + (Fmt2 $ECO_SIGMA) + "), scrivili nella tabella `$PORTO, committa e ripinna. NOTA: i referti archiviati del passo 0 NON bastano -- stampano i grezzi solo per la cella di riferimento N=20/sigma=1.05, mentre per le altre 89 celle danno gli ESEGUIBILI/giorno, che sono un'ALTRA grandezza (dopo i filtri). Serve il CSV.")
+  }
+  if($corsa.Ruolo -eq "PORTO" -and $SoloControllo -and
+     ((-not $PORTO.ContainsKey($Simbolo)) -or $PORTO[$Simbolo].GrezziL -lt 0 -or $PORTO[$Simbolo].GrezziS -lt 0)){
+    [void]$Rilievi.Add("giro a vuoto su una corsa PORTO con la tabella `$PORTO ancora a -1/-1: il CONTROLLO passa lo stesso (non misura niente per definizione), ma la CORSA VERA si fermera' qui finche' i due attesi del passo 0 non sono scritti nella riga.")
+    Dico ("ATTENZIONE: tabella PORTO a -1/-1 per " + $Simbolo + ": in CONTROLLO si prosegue, in CORSA ci si ferma.") "Yellow"
+  }
 
   # -------------------------------------------------------------------
   #  1. SCARICO AL PIN + SENTINELLA DI UN GIRO PRECEDENTE
@@ -694,9 +760,13 @@ try{
   if($nBlocchi -ne $AUTOTEST_BLOCCHI_ATTESI){ throw ("autotest: " + $AutoSrcTxt + ", attesi " + $AUTOTEST_BLOCCHI_ATTESI + ".") }
   if($src -notmatch '\[AUTOTEST\]\s+12\s'){ throw "autotest: manca il blocco 12 nel sorgente (etichetta [AUTOTEST] 12): e' quello che collauda LottoDaRischio_Calc, cioe' il calcolo che protegge il conto." }
   $defs = LeggiDefine $src
-  $nst = [int](DefNum $defs "REL_NSTATS")
-  $NStatsTxt = "REL_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
-  if($nst -ne $NSTATS_ATTESI){ throw ("REL_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (100 colonne).") }
+  #--- IL NOME DEL #define E' ABR_NSTATS, NON REL_NSTATS: REL_ era della
+  #    SONDA del passo 0 (ABTG_SondaRelativo), e con quel nome questa riga
+  #    moriva SEMPRE, giro a vuoto compreso. Difetto trovato in review il
+  #    04/09: il gate DOPPIO (qui e al blocco 2-bis) lo nascondeva.
+  $nst = [int](DefNum $defs "ABR_NSTATS")
+  $NStatsTxt = "ABR_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
+  if($nst -ne $NSTATS_ATTESI){ throw ("ABR_NSTATS = " + $nst + ", atteso " + $NSTATS_ATTESI + " (" + ($NSTATS_ATTESI + 3) + " colonne).") }
   $inputEA = LeggiInputEA $src
   $InputTxt = "" + @($inputEA).Count + " input letti dal sorgente"
   if(@($inputEA).Count -ne $INPUT_ATTESI){ throw ("input: " + $InputTxt + ", attesi " + $INPUT_ATTESI + ".") }
@@ -735,14 +805,18 @@ try{
   # scritto dentro il codice misurato e' un cancello che si sposta con
   # lui). Ci sono pero' tre numeri che DEVONO combaciare, o la corsa
   # misura qualcosa di diverso da quello che la pagina promette.
-  $ns = (DefNum $defs "ABR_NSTATS")
+  #--- ABR_NSTATS E' GIA' STATO LETTO E GATTATO QUI SOPRA: si RIUSA il
+  #    valore, non si rigrepa. Il secondo grep (con un NOME DIVERSO)
+  #    faceva da rete a un gate che era gia' morto, e cosi' il difetto
+  #    del nome sbagliato e' rimasto invisibile. UN nome, UN gate.
+  $ns = [double]$nst
   $pi = (DefNum $defs "ABR_PUNTI_PER_INDICE_ATTESO")
   $sd = (DefNum $defs "ABR_SPREAD_D30EUR")
   $sn = (DefNum $defs "ABR_SPREAD_NASUSD")
   $SpreadAtteso = $sd
   if($Simbolo -eq "NASUSD"){ $SpreadAtteso = $sn }
   $diverg = New-Object System.Collections.ArrayList
-  if($ns -ne $NSTATS_ATTESI){ [void]$diverg.Add("ABR_NSTATS " + (FmtN $ns) + " vs " + $NSTATS_ATTESI) }
+  # (ABR_NSTATS non si ricontrolla qui: e' gia' un gate DURO piu' sopra.)
   if([math]::Abs($pi - 100.0) -gt 0.001){ [void]$diverg.Add("ABR_PUNTI_PER_INDICE_ATTESO " + (Fmt2 $pi) + " vs 100,00 (conversione MISURATA sui tre indici)") }
   if([math]::Abs($sd - 2.80) -gt 0.001 -or [math]::Abs($sn - 1.80) -gt 0.001){ [void]$diverg.Add("spread attesi " + (Fmt2 $sd) + "/" + (Fmt2 $sn) + " vs 2,80/1,80 (SPREAD_FLOTTA del 03/09, mediana oraria PEGGIORE)") }
   $DefineTxt = "cancelli di MERITO (in questa riga, NON nell'EA): E >= " + (Fmt3 $A1_E_R) + " R | PF >= " + (Fmt2 $A2_PF) + " | DD <= " + (Fmt2 $A4_DD) + "% | peggior giornata >= " + (Fmt2 $A5_PEGGIOR) + "% | n >= " + $A6_N + " | sotto 60 s < " + (Fmt2 $A7_SOTTO60) + "%. Bocciatura secca: E < " + (Fmt3 $B_E_R) + " | PF < " + (Fmt2 $B_PF) + " | DD > " + (Fmt2 $B_DD) + "% | peggior giornata < " + (Fmt2 $B_PEGGIOR) + "%. Attesi dal sorgente: ABR_NSTATS " + (FmtN $ns) + ", punto indice " + (Fmt2 $pi) + ", spread " + (Fmt2 $SpreadAtteso) + " punti indice"
@@ -756,7 +830,10 @@ try{
   Titolo "3. GATE SUI SEI PROVA (direttive nude + input nei due versi + ZERO assi + fissi + magic e modo sonda + gemellaggio a SEI)"
   $letture = [ordered]@{}
   foreach($k in @($CORSE.Keys)){
-    $esito = GateProva (Join-Path $Prove $CORSE[$k].File) $CORSE[$k].File $CORSE[$k].Simbolo "M5" $inputEA $CORSE[$k].Magic $CORSE[$k].Sonda
+    #--- il TF atteso si legge dalla TABELLA (campo Periodo), non da una
+    #    stringa cablata qui: due posti da cui leggere lo stesso fatto
+    #    sono due posti che possono divergere.
+    $esito = GateProva (Join-Path $Prove $CORSE[$k].File) $CORSE[$k].File $CORSE[$k].Simbolo $CORSE[$k].Periodo $inputEA $CORSE[$k].Magic $CORSE[$k].Sonda
     $letture[$k] = $esito.Lettura.Mappa
     if($k -eq $Prova){ $CelleTxt = "" + $esito.Celle + " passata (NESSUNA GRIGLIA: cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", zero assi Y nei prova)" }
   }
@@ -853,6 +930,7 @@ try{
   Titolo "6. COMPILAZIONE (metaeditor64, invocazione diretta, .ex5 vecchio cancellato prima)"
   New-Item -ItemType Directory -Force -Path $dstExp | Out-Null
   Set-Content -LiteralPath $Sentinella -Value @(("scritto il " + (Get-Date).ToString("yyyy-MM-dd HH:mm:ss",$INV) + " da RIGA_RELATIVO_R117.ps1 (" + $Prova + ")"), $dstMq5, $dstEx5, $dstCsv) -Encoding ASCII
+  $SentScritta = $true   # da qui in poi QUESTO giro ha toccato il terminale: la sentinella e' SUA e la cancella lui
   Copy-Item -LiteralPath $mq5 -Destination $dstMq5 -Force
   Remove-Item -LiteralPath $dstEx5 -Force -ErrorAction SilentlyContinue
   $logC = Join-Path $Work "COMPILAZIONE.log"
@@ -994,8 +1072,16 @@ try{
         [void]$Rilievi.Add("gemello di determinismo NON verificato a macchina in questa corsa (manca il CSV di " + $corsa.Gemello + "): il confronto va fatto a mano fra i due referti, ed e' un gate, non una formalita'.")
       }
       else{
-        $gg = LeggiGamba $csvG $tCorsa ("OOS gemello " + $corsa.Gemello)
-        if($null -eq $gg){ $GemelloTxt = "NON CONFRONTABILE: il CSV del gemello esiste ma non e' leggibile (vedi PROBLEMI)." }
+        # CLASSE 122 (difetto trovato in review il 04/09): il CSV del
+        # gemello e' della corsa PRECEDENTE per costruzione, quindi DEVE
+        # essere piu' vecchio dell'avvio di QUESTA corsa. Passargli
+        # $tCorsa lo faceva scartare SEMPRE come "STANTIO", e i confronti
+        # gemelli davano "PROBLEMI" falsi al 100%. Qui la guardia di
+        # freschezza NON si applica: la data si DICHIARA nel referto.
+        $itmG = Get-Item -LiteralPath $csvG
+        $gg = LeggiGamba $csvG ([DateTime]::MinValue) ("OOS gemello " + $corsa.Gemello)
+        $EtaGemello = " (CSV del gemello scritto il " + $itmG.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ": DEVE essere della corsa precedente)"
+        if($null -eq $gg){ $GemelloTxt = "NON CONFRONTABILE: il CSV del gemello esiste ma non e' leggibile (vedi PROBLEMI)." + $EtaGemello }
         else{
           $sc = New-Object System.Collections.ArrayList
           foreach($k in @("Operazioni Totali","Segnali Grezzi Long","Segnali Grezzi Short","Uscite Convergenza","Uscite Stop")){
@@ -1005,10 +1091,10 @@ try{
             if([math]::Abs($GambaOOS[$k] - $gg[$k]) -gt 0.011){ [void]$sc.Add($k + " " + (Fmt3 $GambaOOS[$k]) + " vs " + (Fmt3 $gg[$k])) }
           }
           if($sc.Count -eq 0){
-            $GemelloTxt = "IDENTICI: " + $Prova + " e " + $corsa.Gemello + " coincidono su 9 grandezze su 9 (5 conteggi esatti + 4 numeri economici a 0,01). Il banco e' deterministico."
+            $GemelloTxt = "IDENTICI: " + $Prova + " e " + $corsa.Gemello + " coincidono su 9 grandezze su 9 (5 conteggi esatti + 4 numeri economici a 0,01). Il banco e' deterministico." + $EtaGemello
           }
           else{
-            $GemelloTxt = "DIVERGONO: " + ($sc -join "; ") + "."
+            $GemelloTxt = "DIVERGONO: " + ($sc -join "; ") + "." + $EtaGemello
             [void]$Problemi.Add("GEMELLI DIVERGENTI fra " + $Prova + " e " + $corsa.Gemello + ": " + ($sc -join "; ") + ". Due passate con gli stessi input e magic diverso DEVONO venire identiche al centesimo. Il banco e' sporco: NESSUN numero di questo round si legge, per bello che sia.")
           }
         }
@@ -1035,14 +1121,29 @@ if($DataFolder -ne ""){
   $dstCsv = Join-Path $DataFolder ("MQL5\Files\OptResults_" + $EA + "_" + $Simbolo + ".csv")
   # l'unico residuo che si toglie e' il CSV grezzo NOSTRO rimasto in
   # MQL5\Files (il generico lo sposta; se e' morto prima, resta li' e il
-  # prossimo giro lo leggerebbe come fresco). I .mq5/.ex5 della sonda
-  # RESTANO e si DICHIARANO (contatore senza ordini, riscritti a ogni corsa).
+  # prossimo giro lo leggerebbe come fresco). I .mq5/.ex5 RESTANO e si
+  # DICHIARANO -- e QUI la dichiarazione e' cambiata (difetto trovato in
+  # review il 04/09): diceva "contatore senza ordini", che era vero per
+  # la SONDA del passo 0 e NON lo e' per questo EA.
   $tolto = "nessun CSV grezzo residuo"
   if(Test-Path -LiteralPath $dstCsv){ Remove-Item -LiteralPath $dstCsv -Force -ErrorAction SilentlyContinue; $tolto = "rimosso il CSV grezzo residuo " + $dstCsv }
   $FotoDopo = @(("Experts\" + $EA + ".mq5: " + (Foto $dstMq5)), ("Experts\" + $EA + ".ex5: " + (Foto $dstEx5)), ("Files\OptResults_" + $EA + "_" + $Simbolo + ".csv: " + (Foto $dstCsv)))
-  $Pulizia = $tolto + "; nel terminale RESTANO (dichiarati, non cancellati): " + $dstMq5 + " e " + $dstEx5
+  $Pulizia = $tolto + "; nel terminale RESTANO (dichiarati, non cancellati, riscritti a ogni corsa): " + $dstMq5 + " e " + $dstEx5 + " -- ATTENZIONE: questo .ex5 SA APRIRE POSIZIONI (non e' il contatore puro del passo 0). Se qualcuno lo attacca a un grafico vivo, manda ordini: sul banco di backtest resta li' apposta, sul VPS non ci deve arrivare."
 }
-Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
+#--- LA SENTINELLA SI CANCELLA SOLO SE E' DI QUESTO GIRO (rilievo del
+#    04/09). Prima si cancellava incondizionatamente: un giro fermato da
+#    un gate PRIMA di toccare il terminale cancellava cosi' la sentinella
+#    di un giro PRECEDENTE davvero interrotto, e i suoi residui restavano
+#    nel terminale senza piu' nessuno che li dichiarasse.
+if($SentScritta){
+  Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
+  $SentNota = "rimossa (era di QUESTO giro: il terminale e' stato toccato e i file sono nella foto DOPO)"
+}
+elseif(Test-Path -LiteralPath $Sentinella){
+  $SentNota = "LASCIATA DOV'ERA: questo giro si e' fermato PRIMA di toccare il terminale, quindi la sentinella NON e' sua. Contenuto: " + $SentTrovata
+  [void]$Rilievi.Add("sentinella NON rimossa perche' NON di questo giro: si e' fermato prima di scrivere nel terminale. Resta a dichiarare i residui del giro precedente, ed e' giusto cosi'.")
+}
+else{ $SentNota = "nessuna sentinella da rimuovere (questo giro non ha toccato il terminale)" }
 
 $suff = ""
 if($Modo -eq "CONTROLLO"){ $suff = "CONTROLLO_" }
@@ -1088,6 +1189,7 @@ foreach($f in $FotoPrima){ [void]$R.Add("   " + $f) }
 [void]$R.Add("foto DOPO:")
 foreach($f in $FotoDopo){ [void]$R.Add("   " + $f) }
 [void]$R.Add("pulizia: " + $Pulizia)
+[void]$R.Add("sentinella: " + $SentNota)
 [void]$R.Add("")
 [void]$R.Add("--- I CANCELLI, SCRITTI PRIMA DEI NUMERI (stanno nella riga e nella pagina, NON nell'EA) ---")
 [void]$R.Add("  " + $DefineTxt)
@@ -1124,16 +1226,28 @@ elseif(-not $PORTO.ContainsKey($Simbolo) -or $PORTO[$Simbolo].GrezziL -lt 0 -or 
   [void]$R.Add("  NON ESEGUITO, E NON E' UN VERDE: gli attesi del passo 0 non sono stati messi nella tabella $PORTO di questa riga")
   [void]$R.Add("  (valgono -1). Vanno presi dal CSV OPTFRAME del passo 0, riga N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", colonne")
   [void]$R.Add("  'Attraversamenti Grezzi Long' e 'Attraversamenti Grezzi Short', e scritti nella riga PRIMA del lancio.")
-  [void]$Rilievi.Add("COLLAUDO DEL PORTO NON ESEGUITO: gli attesi del passo 0 nella tabella PORTO valgono -1. La corsa produce i suoi 'Segnali Grezzi' ma nessuno li confronta: il porto del nucleo statistico resta NON VERIFICATO.")
+  [void]$R.Add("  (i referti archiviati del passo 0 NON bastano: per le 90 celle stampano gli ESEGUIBILI/giorno, i GREZZI solo per")
+  [void]$R.Add("   la cella di riferimento N=20/sigma=1.05. Sono due grandezze diverse e una non si ricava dall'altra.)")
+  if($Modo -eq "CORSA"){
+    [void]$Problemi.Add("COLLAUDO DEL PORTO NON ESEGUITO IN UNA CORSA VERA: gli attesi del passo 0 nella tabella PORTO valgono -1. Il gate a monte avrebbe dovuto fermare questa corsa PRIMA di aprire MT5: se sei arrivato qui, il gate e' stato aggirato o rotto. La corsa produce i suoi 'Segnali Grezzi' ma nessuno li confronta: il porto del nucleo statistico resta NON VERIFICATO, e questo round NON PARTE.")
+  }
+  else{
+    [void]$Rilievi.Add("COLLAUDO DEL PORTO NON ESEGUITO (giro a vuoto): gli attesi del passo 0 nella tabella PORTO valgono -1. In CONTROLLO e' atteso e non blocca; nella CORSA VERA il gate a monte si ferma.")
+  }
 }
 else{
-  $tot = 0.0
-  foreach($g in @($GambaIS, $GambaOOS)){ if($null -ne $g){ $tot += $g["Segnali Grezzi Long"] + $g["Segnali Grezzi Short"] } }
+  #--- I DUE LATI SI CONFRONTANO SEPARATI (rilievo del 04/09): sulla
+  #    SOLA somma L+S uno scambio compensativo (long in piu', short in
+  #    meno) passerebbe inosservato, ed e' esattamente il difetto di
+  #    trasporto che questo collaudo dovrebbe pescare.
+  $totL = 0.0; $totS = 0.0
+  foreach($g in @($GambaIS, $GambaOOS)){ if($null -ne $g){ $totL += $g["Segnali Grezzi Long"]; $totS += $g["Segnali Grezzi Short"] } }
+  $tot  = $totL + $totS
   $attL = [double]$PORTO[$Simbolo].GrezziL
   $attS = [double]$PORTO[$Simbolo].GrezziS
   $sommaAttesa = $attL + $attS
-  [void]$R.Add("  grezzi misurati (IS + OOS, somma dei due lati): " + (FmtN $tot))
-  [void]$R.Add("  grezzi attesi dal passo 0 (cella N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", L " + (FmtN $attL) + " + S " + (FmtN $attS) + "): " + (FmtN $sommaAttesa))
+  [void]$R.Add("  grezzi misurati (IS + OOS): LONG " + (FmtN $totL) + " | SHORT " + (FmtN $totS) + " | somma " + (FmtN $tot))
+  [void]$R.Add("  grezzi attesi dal passo 0 (cella N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + "): LONG " + (FmtN $attL) + " | SHORT " + (FmtN $attS) + " | somma " + (FmtN $sommaAttesa))
   #--- LA TOLLERANZA NON E' ZERO, E IL PERCHE' VA SCRITTO PRIMA DI
   #    LEGGERE IL NUMERO. Il passo 0 girava la finestra INTERA in una
   #    passata sola; qui il generico la spezza in IS e OOS, e la passata
@@ -1141,17 +1255,31 @@ else{
   #    attraversamento puo' quindi mancare o comparire: e' un effetto
   #    del BANCO, non del nucleo. Tolleranza: 0,5% della somma attesa,
   #    e comunque non piu' di 20 attraversamenti.
+  #    La tolleranza si applica A CIASCUN LATO, calcolata sull'atteso di
+  #    quel lato: cosi' un long in piu' e uno short in meno NON si
+  #    cancellano a vicenda dentro una somma.
+  $tolL = [math]::Max(20.0, 0.005*$attL)
+  $tolS = [math]::Max(20.0, 0.005*$attS)
+  $scaL = [math]::Abs($totL - $attL)
+  $scaS = [math]::Abs($totS - $attS)
   $tolleranza = [math]::Max(20.0, 0.005*$sommaAttesa)
   $scarto = [math]::Abs($tot - $sommaAttesa)
-  [void]$R.Add("  scarto " + (FmtN $scarto) + " su una tolleranza di " + (FmtN $tolleranza) + " (0,5% della somma attesa, minimo 20: e' la giuntura IS/OOS, dove la passata OOS riparte col suo warmup)")
-  if($scarto -le $tolleranza){
-    [void]$R.Add("  ESITO: PASSATO. Il nucleo statistico e' stato trasportato bene: lo z-score si calcola su barre CHIUSE e il")
-    [void]$R.Add("  modello di tick non lo tocca, quindi questa uguaglianza e' la prova che l'EA vede gli STESSI segnali della sonda.")
-    if($scarto -gt 0.5){ [void]$Rilievi.Add("collaudo del porto passato ma NON esatto: scarto di " + (FmtN $scarto) + " attraversamenti sulla giuntura IS/OOS, dentro la tolleranza dichiarata. Se lo scarto crescesse su altre corse, la spiegazione della giuntura andrebbe verificata invece che ripetuta.") }
+  [void]$R.Add("  scarto LONG  " + (FmtN $scaL) + " su una tolleranza di " + (FmtN $tolL))
+  [void]$R.Add("  scarto SHORT " + (FmtN $scaS) + " su una tolleranza di " + (FmtN $tolS))
+  [void]$R.Add("  scarto sulla somma " + (FmtN $scarto) + " su " + (FmtN $tolleranza) + " (0,5% dell'atteso, minimo 20: e' la giuntura IS/OOS, dove la passata OOS riparte col suo warmup)")
+  [void]$R.Add("  >>> IL VERDETTO SI LEGGE SUI DUE LATI SEPARATI, non sulla somma: uno scambio compensativo (long in piu', short in")
+  [void]$R.Add("      meno) lascerebbe la somma perfetta ed e' proprio il difetto di trasporto che questo collaudo deve pescare.")
+  if($scaL -le $tolL -and $scaS -le $tolS){
+    [void]$R.Add("  ESITO: PASSATO SU ENTRAMBI I LATI. Il nucleo statistico e' stato trasportato bene: lo z-score si calcola su barre")
+    [void]$R.Add("  CHIUSE e il modello di tick non lo tocca, quindi questa uguaglianza e' la prova che l'EA vede gli STESSI segnali della sonda.")
+    if($scaL -gt 0.5 -or $scaS -gt 0.5){ [void]$Rilievi.Add("collaudo del porto passato ma NON esatto: scarto L " + (FmtN $scaL) + " / S " + (FmtN $scaS) + " attraversamenti sulla giuntura IS/OOS, dentro la tolleranza dichiarata. Se lo scarto crescesse su altre corse, la spiegazione della giuntura andrebbe verificata invece che ripetuta.") }
   }
   else{
-    [void]$R.Add("  ESITO: FALLITO. Il nucleo NON produce gli stessi segnali del passo 0.")
-    [void]$Problemi.Add("COLLAUDO DEL PORTO FALLITO: grezzi " + (FmtN $tot) + " contro " + (FmtN $sommaAttesa) + " attesi dal passo 0 sulla stessa cella e sulla stessa finestra (scarto " + (FmtN $scarto) + ", tolleranza " + (FmtN $tolleranza) + "). Lo z-score si calcola su barre CHIUSE: il modello di tick NON puo' spiegare una differenza cosi' grande. O il nucleo e' stato trasportato male, o la finestra effettiva e' diversa (leggere Giorni Contati e Barre Valutate). IL ROUND NON PARTE finche' questo non torna.")
+    $quali = New-Object System.Collections.ArrayList
+    if($scaL -gt $tolL){ [void]$quali.Add("LONG " + (FmtN $totL) + " vs " + (FmtN $attL) + " (scarto " + (FmtN $scaL) + ", tolleranza " + (FmtN $tolL) + ")") }
+    if($scaS -gt $tolS){ [void]$quali.Add("SHORT " + (FmtN $totS) + " vs " + (FmtN $attS) + " (scarto " + (FmtN $scaS) + ", tolleranza " + (FmtN $tolS) + ")") }
+    [void]$R.Add("  ESITO: FALLITO su " + ($quali -join " e ") + ". Il nucleo NON produce gli stessi segnali del passo 0.")
+    [void]$Problemi.Add("COLLAUDO DEL PORTO FALLITO: " + ($quali -join "; ") + " -- sulla stessa cella e sulla stessa finestra del passo 0. Lo z-score si calcola su barre CHIUSE: il modello di tick NON puo' spiegare una differenza cosi' grande. O il nucleo e' stato trasportato male, o la finestra effettiva e' diversa (leggere Giorni Contati e Barre Valutate). IL ROUND NON PARTE finche' questo non torna.")
   }
 }
 [void]$R.Add("")

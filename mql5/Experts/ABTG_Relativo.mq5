@@ -300,7 +300,7 @@
 //        DUE spread per UNA convergenza): qui resta UNILATERALE.
 //+------------------------------------------------------------------+
 #property copyright "ABTG - EA operativo del candidato RELATIVO (PASSO 1, merito a tick reali)"
-#property version   "1.00"
+#property version   "1.01"
 #property description "Convergenza dello z-score del rapporto fra DUE simboli. QUESTO EA APRE ORDINI VERI."
 #property strict
 
@@ -902,6 +902,12 @@ bool AllineaSerie_Calc(const datetime &ty[], const int n,
 //| giorno" (festivita' propria, FISIOLOGICO) da "il metro era attivo |
 //| ma manca proprio quella barra" (buco vero del feed).              |
 //+------------------------------------------------------------------+
+//--- DIFFERENZA DICHIARATA rispetto alla sonda del passo 0: li' la
+//    firma ha in piu' il flag 'soloFinestra', che qui e' CABLATO A TRUE
+//    perche' l'unico chiamante lo passava gia' true. Il corpo, per
+//    soloFinestra=true, e' identico riga per riga. Nessuno dei due tocca
+//    i grezzi ne' il segnale: contano i GIORNI in cui il metro ha
+//    quotato, cioe' il denominatore di C2.
 void GiorniMetroAttivi_Calc(const datetime &tx[], const int nx,
                             const int oraIni, const int minIni,
                             const int oraFin, const int minFin,
@@ -952,6 +958,14 @@ void AggiornaEscursione_Calc(const int lato, const double prezzoIngresso,
                              const double puntoIndice,
                              double &mfe, double &mae)
   {
+   //--- DIFFERENZA DICHIARATA rispetto alla sonda del passo 0: li' la
+   //    funzione e' scritta con due rami espliciti (lato>0 / lato<0),
+   //    qui e' rifattorizzata su un ternario. Numericamente IDENTICA
+   //    per lato = +1 e -1 (autotest blocco 11 li collauda entrambi).
+   //    L'unico caso che il ternario tratterebbe diversamente e'
+   //    lato = 0, che nella sonda e' un no-op: lo si riporta a no-op
+   //    QUI SOPRA, cosi' la differenza non esiste piu' nemmeno li'.
+   if(lato == 0) return;
    double su  = PuntiIndice_Calc(high - prezzoIngresso, puntoIndice);
    double giu = PuntiIndice_Calc(prezzoIngresso - low,  puntoIndice);
    double favore = (lato > 0) ? su  : giu;
@@ -1341,10 +1355,16 @@ void ValutaBarraChiusa()
    //    noi non guardavamo. Si verifica SEMPRE, prima di ogni altra
    //    cosa: uno stato di posizione che non esiste piu' farebbe
    //    contare barre di tenuta a una posizione morta.
+   //    >>> gPosBarre SI INCREMENTA ANCHE QUI (difetto trovato in review,
+   //    04/09): la barra appena chiusa la posizione l'ha VISSUTA, e senza
+   //    questo incremento uno stop preso sulla barra d'ingresso finirebbe
+   //    a registro con tenuta 0 barre = 0 secondi, cioe' dentro la quota
+   //    "sotto 60 secondi" che il collaudo A7 pretende a 0,00%. UNA sola
+   //    operazione cosi' su ~400 renderebbe l'intera gamba NON LEGGIBILE.
    if(gTicket != 0 && !InpModoSonda)
      {
       if(TrovaPosizioneNostra() != gTicket)
-         RegistraChiusura(2);          // sparita fra due barre = STOP
+        { gPosBarre++; RegistraChiusura(2); }   // sparita fra due barre = STOP
      }
 
    //--- 2) FUORI SESSIONE non si valuta niente, e NESSUNO STATO
@@ -1353,7 +1373,11 @@ void ValutaBarraChiusa()
    if(!inSeg)
      {
       gBarreFuoriFinestra++;
-      if(gTicket != 0) ChiudiPosizione(3);
+      //--- stesso motivo del blocco 1-bis: la barra appena chiusa la
+      //    posizione l'ha vissuta, e senza l'incremento una posizione
+      //    aperta sull'ultima barra utile uscirebbe col flat a tenuta 0
+      //    barre, cioe' "sotto 60 secondi", falsando il collaudo A7.
+      if(gTicket != 0){ gPosBarre++; ChiudiPosizione(3); }
       return;
      }
 
@@ -1920,6 +1944,31 @@ void OnDeinit(const int reason)
 
 void OnTick()
   {
+   //--- FLAT DI RECUPERO (difetto trovato in review, 04/09).
+   //    Il flat di fine sessione vive dentro ValutaBarraChiusa, che gira
+   //    SOLO a barra nuova. Fra l'ultima barra della sessione (22:00) e
+   //    la prima barra del giorno dopo NON arriva nessuna barra nuova:
+   //    il flat non scatta e la posizione DORME tutta la notte, protetta
+   //    dal solo stop. Qui si recupera PRIMA del filtro di barra nuova.
+   //    La chiave del giorno e' di CALENDARIO (anno*10000+mese*100+giorno)
+   //    e MAI day_of_year: e' un difetto gia' pagato altrove.
+   //    >>> la posizione potrebbe essere gia' MORTA di stop nella notte:
+   //    in quel caso si REGISTRA la chiusura per stop invece di mandare
+   //    una PositionClose su un ticket che non esiste piu' (che sarebbe
+   //    un rifiuto finto E lascerebbe gTicket vivo per sempre).
+   if(gTicket != 0 && !InpModoSonda)
+     {
+      MqlDateTime oggi; TimeToStruct(TimeCurrent(), oggi);
+      MqlDateTime ingr; TimeToStruct(gPosTIngr,     ingr);
+      if(oggi.year*10000 + oggi.mon*100 + oggi.day !=
+         ingr.year*10000 + ingr.mon*100 + ingr.day)
+        {
+         gPosBarre++;                                   // ha vissuto almeno la barra su cui era viva
+         if(TrovaPosizioneNostra() != gTicket) RegistraChiusura(2);   // sparita nella notte = STOP
+         else                                  ChiudiPosizione(3);    // ancora viva = FLAT di sessione
+        }
+     }
+
    //--- si lavora SOLO a barra nuova: lo z-score si calcola su barre
    //    chiuse, e valutare a ogni tick vorrebbe dire leggere una barra
    //    IN FORMAZIONE, cioe' un look-ahead mascherato.
