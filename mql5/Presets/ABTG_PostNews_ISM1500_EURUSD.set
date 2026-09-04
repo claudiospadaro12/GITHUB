@@ -1,0 +1,195 @@
+; =====================================================================
+; Preset POST-NEWS -- BLOCCO DELLE 15:00 SERVER (ISM + CB Consumer
+; Confidence) -- EUR/USD -- M5
+; Candidato A della caccia del 04/09/2026
+;   backtest_pipeline/caccia_strategie/CACCIA_POSTNEWS_ALTRE_FAMIGLIE_2026-09-04.md
+; EA: ABTG_PostNews.mq5 v1.10 o superiore.  Magic 774701 (VERGINE).
+; =====================================================================
+;
+; !!! NON E' UNA SEDIA: E' UN CANDIDATO DA MISURARE. !!!
+;   Nessun numero di questo preset e' stato ancora provato nel tester.
+;   Gli offset e SL/TP sono COPIATI dalla sedia NFP (l'unico set di
+;   valori di casa per un evento macro USA a 8:30/10:00 ET) come PUNTO
+;   DI PARTENZA dichiarato, non come taratura. Vanno RIMISURATI: il
+;   dossier lo scrive esplicitamente (par. 4.A, riga "SL/TP DA MISURARE"),
+;   e il vincolo 5 del par. 2 dice che un preset in PIP non e'
+;   trasportabile fra simboli a volatilita' diversa.
+;
+; ---------------------------------------------------------------------
+; IL MECCANISMO, IN QUATTRO RIGHE (identico a quello delle sedie vive)
+;   1. l'evento esce alle 15:00 server (10:00 New York);
+;   2. all'ora d'azione l'EA prende max/min delle DUE candele M5 gia'
+;      chiuse (ombre incluse) e ci mette sopra due STOP simmetrici;
+;   3. BUY STOP = max +3 pip, SELL STOP = min -2 pip, SL 25 / TP 30 pip
+;      misurati DALL'INGRESSO;
+;   4. i pendenti scadono alle 16:25 server e la posizione si chiude li'.
+;
+; GLI EVENTI (tutti USD, tutti alle 15:00 server, stabilita' 93,4%)
+;   ISM Manufacturing PMI . ISM Services PMI . CB Consumer Confidence
+;   441 giornate distinte 2010-2023 nel calendario di casa; 431 dopo
+;   l'igiene di costruisci_news_blocchi_usa.py (4 righe di domenica e 6
+;   doppioni di gennaio buttati, elencati uno per uno dallo script).
+;   E' il blocco piu' PULITO del calendario: solo il 7,0% delle giornate
+;   ha un altro evento ad alto impatto dentro la finestra viva.
+;
+; ---------------------------------------------------------------------
+; L'ORA D'AZIONE: 15:15 DI DEFAULT, E PERCHE'
+;   La scelta news+10 / news+15 e' un'ABLAZIONE APERTA (dossier par. 4.A:
+;   "e' l'ablazione A/B, nessuna delle due sedie vive ha mai avuto un
+;   numero"). Qui il default e' 15:15 -- news+15 -- per una ragione di
+;   metodo, non di merito:
+;       azione 15:15 -> barre [1] e [2] = 15:05 e 15:10, cioe' le DUE
+;                       candele DOPO quella della notizia. E' ESATTAMENTE
+;                       la geometria del preset NFP da cui prendiamo
+;                       offset e SL/TP.
+;       azione 15:10 -> barre [1] e [2] = 15:00 e 15:05, cioe' la candela
+;                       della notizia PIU' la successiva. E' la geometria
+;                       ECB/FOMC.
+;   Col default 15:15 cambia UNA COSA SOLA rispetto alla sedia NFP:
+;   L'EVENTO. Con 15:10 ne cambierebbero DUE (evento + geometria del
+;   range) e il round non saprebbe piu' a chi attribuire la differenza.
+;   ==> Il gemello dell'ablazione si ottiene cambiando UN SOLO numero:
+;       InpActionMin=10. Nient'altro.
+;
+; LA SCADENZA: 16:25 SERVER (news+85), E LA POSIZIONE MUORE LI'
+;   InpExpiryHour/Min=16:25 come chiede il dossier (par. 4.A), NON 16:59
+;   come il preset NFP: quella finestra lunga 3h14 contiene le 15:00 e
+;   contamina la misura (rilievo del par. 6).
+;   InpCloseAtExpiry=TRUE, e qui mi discosto dal preset NFP: quello puo'
+;   permettersi InpCloseAtExpiry=false perche' l'NFP esce SEMPRE di
+;   venerdi' e la chiusura di fine settimana (21:50 server) fa da rete.
+;   Gli eventi di QUESTO blocco escono in QUALUNQUE giorno della
+;   settimana: con false, una posizione aperta di martedi' resterebbe
+;   viva per GIORNI. Con true la finestra viva e' [news+15 .. news+85],
+;   che e' anche la finestra su cui il dossier ha MISURATO il 7,0% di
+;   contaminazione. Stessa scelta dei preset ECB e FOMC.
+;
+; IL RISCHIO: 0,65% PER EVENTO
+;   InpRiskPercent=0.65 con InpRiskRefSLpips=50 significa:
+;       0,325% per GAMBA (SL 25 pip = meta' del riferimento)
+;       0,65%  per EVENTO nel caso peggiore (tutte e due le gambe
+;              stoppate: 25+25 = 50 pip)
+;   E' l'unita' del cap C1 firmato il 18/08 (3,25% aperto = 5 SL da
+;   0,65%), ed e' META' della sedia NFP viva (che sta a 1,30 = 0,65%
+;   per gamba). Voluto: un candidato MAI misurato non entra con lo
+;   stesso rischio di uno che ha gia' un backtest sotto.
+;   Non e' il 3,0% di default del corso.
+;
+; IL SIMBOLO: EUR/USD
+;   Motivo misurato, non estetico (dossier par. 4.A): e' l'unico maggiore
+;   di cui abbiamo lo spread reale BCM archiviato -- mediana 0,100-0,200
+;   pip in sessione Londra (REGISTRO_TEST.md R115) -- cioe' lo 0,4-0,8%
+;   di uno SL da 25 pip.
+;   Il GEMELLO e' USD/JPY (stesso simbolo della sedia NFP: confronto
+;   "stesso motore, stesso simbolo, evento diverso"). Per il gemello:
+;   stesso preset su grafico USDJPY, ma cambiare InpMagic=774702 (i due
+;   banchi devono restare distinguibili) e RIMISURARE SL/TP: 25 pip su
+;   EURUSD e 25 pip su USDJPY non sono la stessa distanza.
+;   NIENTE INDICI su questo blocco: le 15:00 server cadono dentro la
+;   finestra di ABTG_Dow_Apertura_US (violazione della regola 1 di
+;   report/ROTTA_PROP.md).
+;
+; FTMO
+;   Azione 15:15 = 15 minuti DOPO la notizia, ben fuori dalla finestra
+;   vietata (+/-2 minuti). E [VERIFICATO da Claudio il 04/09/2026,
+;   tabella letterale da ftmo.com]: ISM Manufacturing PMI, ISM Services
+;   PMI e CB Consumer Confidence NON sono nella lista "Restricted event"
+;   per USD. Questo blocco e' utilizzabile ANCHE su conto Standard
+;   funded, non solo in Challenge.
+;
+; ---------------------------------------------------------------------
+; IL CALENDARIO -- LEGGERE PRIMA DI LANCIARE UNA PASSATA
+;   File: abtg_news_ism1500_2010_2023_UTC.csv, prodotto da
+;         backtest_pipeline/costruisci_news_blocchi_usa.py
+;   Va messo in Common\Files (nel tester ogni agente ha la sua sandbox:
+;   e' li' che il round del 07/08 e' morto con Trades=0).
+;
+;   !!! COPRE 2010-2023 E BASTA. !!! La sorgente Forex Factory di casa
+;   finisce nel 2023 e l'altra sorgente disponibile ha l'ora dimostrata
+;   incoerente. Una passata FUORI da quella finestra fa ZERO trade e
+;   SI BUTTA: non e' "niente edge", e' "non e' girata".
+;   All'avvio l'EA stampa:
+;       [PostNews][NEWS] letto da ... | UTILI per questo preset N | dal .. al ..
+;   Con questo preset N deve valere 431, dal 2010.01.04 al 2023.12.20.
+;   Se N=0 -> CANARINO ROSSO, la passata si butta.
+;
+;   LE ETICHETTE DEL TITOLO (scatole cinesi: si cambia UNA stringa)
+;     InpNewsTitleMatch=ISM1500OK   431 righe / 431 giornate  <- QUESTO
+;                                   solo le giornate in cui l'evento e'
+;                                   uscito DAVVERO alle 15:00 server
+;     InpNewsTitleMatch=ISM1500DST   32 righe /  31 giornate
+;                                   le giornate col DST USA/UK sfasato:
+;                                   l'evento e' uscito alle 14:00 server
+;                                   e con l'ora d'azione fissa l'EA
+;                                   leggerebbe il range di 75 minuti DOPO
+;                                   la notizia. E' il difetto che la sedia
+;                                   NFP ha gia' oggi (dossier par. 3.2):
+;                                   qui e' ISOLATO, non nascosto.
+;     InpNewsTitleMatch=ISM1500     463 righe / 462 giornate = tutte
+;                                   (ablazione "quanto costa il DST")
+;     InpNewsTitleMatch=ISM Services PMI   (o "ISM Manufacturing PMI",
+;                                   o "CB Consumer Confidence") isola UNA
+;                                   famiglia: il titolo vero e' rimasto
+;                                   nel campo apposta.
+;
+; MAGIC 774701 -- verificato VERGINE il 04/09/2026 con una ricerca su
+;   tutto il repository (nessun 7747xx in uso da nessuna parte: il blocco
+;   piu' vicino occupato e' 7746xx). Riservati per questa famiglia:
+;   774701 = ISM/EURUSD (questo), 774702 = gemello ISM/USDJPY.
+;
+; USO: grafico EUR/USD M5, carica questo preset. DEMO. Nessuna garanzia.
+; =====================================================================
+
+; --- orari (ORA SERVER = ora italiana - 1) ---
+; azione 15:15 = news+15 (le due candele DOPO la notizia). Gemello
+; dell'ablazione: InpActionMin=10.
+InpActionHour=15
+InpActionMin=15
+; scadenza 16:25 = news+85 (NON 16:59: vedi intestazione)
+InpExpiryHour=16
+InpExpiryMin=25
+
+; --- l'evento ---
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news_ism1500_2010_2023_UTC.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=ISM1500OK
+InpNewsShiftMinutes=0
+
+; --- i due pendenti (punto di partenza dal preset NFP: +3 / -2, SL 25,
+;     TP 30 dall'ingresso). DA RIMISURARE su EURUSD. ---
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=2.0
+InpTPpips=30.0
+InpSLpips=25.0
+; niente OCO: il corso lo nega esplicitamente e le sedie vive non lo usano
+InpUseOCO=false
+; TRUE, al contrario del preset NFP: questi eventi non escono di venerdi'
+; e senza questo la posizione resterebbe viva per giorni (vedi sopra)
+InpCloseAtExpiry=true
+
+; --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+
+; --- rete di sicurezza del venerdi' (con CloseAtExpiry=true non scatta
+;     mai: resta accesa perche' non costa niente) ---
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+
+; --- rischio: 0,325% per gamba, 0,65% per evento nel caso peggiore ---
+InpRiskPercent=0.65
+InpRiskRefSLpips=50.0
+
+; --- generali ---
+InpComment=ISM1500 PostNews
+InpMagic=774701
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpUsaGuardian=true
