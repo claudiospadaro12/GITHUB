@@ -308,11 +308,14 @@ foreach($s in $SEDIE){
     AutoFalliti = @()
     Ordini      = 0
     NienteNews  = 0
+    LogVisti    = -1
     LogNuovi    = 0
     Verdetto    = "NON VERIFICATO (la riga non e' arrivata a misurarlo)"
   }
 }
 
+# non misurato -> 'n/d', mai -1 (regola di casa sulle sentinelle).
+function FmtN($v){ if($null -eq $v -or [int]$v -lt 0){ return "n/d" }; return ([int]$v).ToString($INV) }
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico([string]$t,[string]$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
 function Titolo([string]$t){ Write-Host ""; Write-Host ("=== " + $t + " ===") -ForegroundColor Cyan }
@@ -497,11 +500,20 @@ function Compila([string]$exe,[string]$mq5,[string]$ex5,[string]$log,[int]$tetto
 }
 
 # ---------------------------------------------------------------------
-#  I LOG DEL TESTER: cinque radici (gli agent NON stanno sotto la
-#  cartella dati). Si fotografano LUNGHEZZA e CONTEGGIO PER PATTERN, e
-#  dopo la corsa si prendono SOLO le occorrenze oltre il conteggio
-#  precedente: i log del tester si APPENDONO, e leggere il file intero
+#  I LOG DEL TESTER: TRE radici, e SOLO quelle del TESTER (gli agent non
+#  stanno sotto la cartella dati). Si fotografano LUNGHEZZA e CONTEGGIO
+#  PER PATTERN, e dopo la corsa si prendono SOLO le occorrenze oltre il
+#  conteggio precedente: i log si APPENDONO, e leggere il file intero
 #  attribuirebbe alla sedia 2 le righe della sedia 1.
+#
+#  >>> PERCHE' NON SI GUARDANO <CartellaDati>\Logs e MQL5\Logs (che
+#      altre righe di casa guardano): lanciare il tester con /config
+#      AVVIA IL TERMINALE, che carica l'ultimo profilo coi suoi grafici
+#      e gli EA attaccati sopra. Se su quel PC c'e' un ABTG_PostNews su
+#      grafico, in MQL5\Logs stampa IL SUO canarino, con il SUO preset:
+#      finirebbe mescolato a quello della sedia in prova e il verdetto
+#      direbbe "il campo cambia fra le righe" su una corsa sana. Il
+#      canarino si legge SOLO dove scrive il TESTER.
 # ---------------------------------------------------------------------
 $PATTERN = [ordered]@{
   NEWS    = '\[PostNews\]\[NEWS\] letto da'
@@ -515,12 +527,8 @@ $PATTERN = [ordered]@{
 function RadiciLog(){
   $rad = New-Object System.Collections.ArrayList
   if($env:APPDATA){ [void]$rad.Add((Join-Path $env:APPDATA "MetaQuotes\Tester")) }
-  if($DataFolder){
-    [void]$rad.Add((Join-Path $DataFolder "Tester"))
-    [void]$rad.Add((Join-Path $DataFolder "Logs"))
-    [void]$rad.Add((Join-Path $DataFolder "MQL5\Logs"))
-  }
-  if($InstDir){ [void]$rad.Add((Join-Path $InstDir "Tester")) }
+  if($DataFolder){ [void]$rad.Add((Join-Path $DataFolder "Tester")) }
+  if($InstDir){    [void]$rad.Add((Join-Path $InstDir "Tester")) }
   return @($rad)
 }
 function ElencoLog(){
@@ -531,43 +539,62 @@ function ElencoLog(){
   }
   return @($fuori)
 }
+# CACHE (percorso+lunghezza): un log gia' letto e NON cresciuto non si
+# rilegge. Senza, ogni fotografia rileggerebbe tutte le radici del tester
+# (su un PC di backtest sono decine di file di agent) per ogni pattern.
+$script:CacheLog = @{}
+function RigheLog([string]$percorso,[long]$lunghezza){
+  $c = $script:CacheLog[$percorso]
+  if($null -ne $c -and [long]$c.Len -eq $lunghezza){ return $c.Righe }
+  $righe = LeggiTesto $percorso
+  $script:CacheLog[$percorso] = @{ Len=$lunghezza; Righe=$righe }
+  return $righe
+}
 function FotoLog(){
   $foto = @{}
   foreach($f in (ElencoLog)){
-    $righe = LeggiTesto $f.FullName
+    $righe = RigheLog $f.FullName $f.Length
     $conte = @{}
     foreach($k in @($PATTERN.Keys)){ $conte[$k] = @($righe | Where-Object { $_ -match $PATTERN[$k] }).Count }
     $foto[$f.FullName] = @{ Len=[long]$f.Length; Conte=$conte }
   }
   return $foto
 }
-# righe NUOVE di un pattern: quelle oltre il conteggio della fotografia.
-function RigheNuove($fotoPrima,[string]$chiave){
-  $fuori = New-Object System.Collections.ArrayList
+# LE RIGHE NUOVE DI QUESTA CORSA, tutte in un giro solo: per ogni pattern
+# si prendono le occorrenze OLTRE il conteggio della fotografia (i log del
+# tester si APPENDONO: leggere il file intero attribuirebbe alla sedia 2
+# le righe della sedia 1). Torna anche quanti file sono CRESCIUTI, e li
+# copia agli atti.
+function RaccogliNuove($fotoPrima,[string]$tag){
+  $fuori = @{}
+  foreach($k in @($PATTERN.Keys)){ $fuori[$k] = (New-Object System.Collections.ArrayList) }
+  $cresciuti = 0
   foreach($f in (ElencoLog)){
-    $prima = 0
-    if($null -ne $fotoPrima -and $fotoPrima.ContainsKey($f.FullName)){ $prima = [int]$fotoPrima[$f.FullName].Conte[$chiave] }
-    $viste = 0
-    foreach($riga in (LeggiTesto $f.FullName)){
-      if($riga -match $PATTERN[$chiave]){
-        $viste++
-        if($viste -gt $prima){ [void]$fuori.Add($riga.Trim()) }
+    $lenPrima = -1
+    $contePrima = @{}
+    if($null -ne $fotoPrima -and $fotoPrima.ContainsKey($f.FullName)){
+      $lenPrima   = [long]$fotoPrima[$f.FullName].Len
+      $contePrima = $fotoPrima[$f.FullName].Conte
+    }
+    if($f.Length -gt $lenPrima){
+      $cresciuti++
+      try{ Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Work ("log_" + $tag + "_" + $f.Name)) -Force -ErrorAction SilentlyContinue }catch{}
+    }
+    $righe = RigheLog $f.FullName $f.Length
+    foreach($k in @($PATTERN.Keys)){
+      $prima = 0
+      if($null -ne $contePrima -and $contePrima.ContainsKey($k)){ $prima = [int]$contePrima[$k] }
+      $viste = 0
+      foreach($riga in @($righe)){
+        if($riga -match $PATTERN[$k]){
+          $viste++
+          if($viste -gt $prima){ [void]$fuori[$k].Add($riga.Trim()) }
+        }
       }
     }
   }
-  return @($fuori)
-}
-# i file di log CRESCIUTI durante la corsa, copiati agli atti.
-function CopiaLogCresciuti($fotoPrima,[string]$tag){
-  $n = 0
-  foreach($f in (ElencoLog)){
-    $prima = -1
-    if($null -ne $fotoPrima -and $fotoPrima.ContainsKey($f.FullName)){ $prima = [long]$fotoPrima[$f.FullName].Len }
-    if($f.Length -le $prima){ continue }
-    $n++
-    try{ Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Work ("log_" + $tag + "_" + $f.Name)) -Force -ErrorAction SilentlyContinue }catch{}
-  }
-  return $n
+  $fuori["CRESCIUTI"] = $cresciuti
+  return $fuori
 }
 
 # ---------------------------------------------------------------------
@@ -707,7 +734,9 @@ try{
   $srcRaw = ($srcRighe -join "`n")
   $nAT = @([regex]::Matches($srcRaw,'falliti\s*\+=\s*AT_Caso\(')).Count
   $nPP = @([regex]::Matches($srcRaw,'if\s*\(\s*!\w+\s*\)\s*falliti\+\+;')).Count
-  $AutotestTxt = $nAT + " AT_Caso() + " + $nPP + " controlli 'if(!X) falliti++;' = " + ($nAT+$nPP) + " casi totali (nessun #define nel sorgente: RICALCOLATO ora dal file al pin)"
+  # NB: "" davanti, sempre: $nAT e' un [int] e '$nAT + " testo"' proverebbe a
+  # convertire la STRINGA in numero (fermata vera, vista al primo giro a vuoto).
+  $AutotestTxt = "" + $nAT + " AT_Caso() + " + $nPP + " controlli 'if(!X) falliti++;' = " + ($nAT+$nPP) + " casi totali (nessun #define nel sorgente: RICALCOLATO ora dal file al pin)"
   if($nAT -ne $AT_CASO_ATTESI -or $nPP -ne $FALLITIPP_ATTESI){ throw ("autotest: " + $AutotestTxt + " -- atteso " + $AT_CASO_ATTESI + " AT_Caso() + " + $FALLITIPP_ATTESI + " controlli. Il sorgente e' cambiato: il gate NON si aggiorna da solo.") }
 
   if($srcRaw -notmatch 'double\s+OnTester\s*\('){ throw ("" + $EA + ".mq5 non ha OnTester: non e' l'EA atteso.") }
@@ -729,7 +758,12 @@ try{
   if(-not $InputsSorgente.Contains("InpNewsCommon")){ throw "il sorgente al pin non ha l'input InpNewsCommon: non e' l'EA col fix v1.10." }
   $NewsCommonTxt = "default compilato = '" + $InputsSorgente["InpNewsCommon"].Val + "' (i due .set NON lo nominano: e' questo il valore che va nell'.ini, ed e' la stessa condizione della sedia in forward)"
   if($InputsSorgente["InpNewsCommon"].Val -ne "true"){ throw ("InpNewsCommon ha default '" + $InputsSorgente["InpNewsCommon"].Val + "' invece di 'true': i due preset non lo nominano, quindi la corsa NON proverebbe il ramo Common\Files. Prima di misurare, o si cambia il default o si aggiunge la riga ai .set.") }
-  if($InputsSorgente["InpAutoTest"].Val -ne "true"){ [void]$Rilievi.Add("InpAutoTest ha default '" + $InputsSorgente["InpAutoTest"].Val + "': il secondo canarino (riga AUTOTEST) potrebbe non comparire.") }
+  # InpAutoTest e' il SECONDO canarino (il caso n.5 dell'autotest E' il
+  # calendario) ed e' un gate del verdetto: se non fosse acceso, il gate
+  # cadrebbe piu' avanti con un messaggio oscuro ("manca la riga
+  # InpAutoTest=true"). Meglio fermarsi qui, dicendo perche'.
+  if(-not $InputsSorgente.Contains("InpAutoTest")){ throw "il sorgente al pin non ha l'input InpAutoTest: il secondo canarino (autotest) non esisterebbe e il verdetto perderebbe un gate." }
+  if($InputsSorgente["InpAutoTest"].Val -ne "true"){ throw ("InpAutoTest ha default '" + $InputsSorgente["InpAutoTest"].Val + "' invece di 'true' e i due .set non lo nominano: la riga '[PostNews][AUTOTEST] ---- fine: N casi falliti ----' non comparirebbe, e con lei il secondo canarino sul calendario.") }
   Dico ("versione " + $VersTxt + " | autotest " + $AutotestTxt + " | " + $HedgeTxt + " | include " + $IncTxt) "Green"
   Dico ("input: " + $InputTxt) "Green"
   Dico ("InpNewsCommon: " + $NewsCommonTxt) "Green"
@@ -812,7 +846,7 @@ try{
     Dico ($s.Id + ": utili nel file " + $Stato[$s.Id].UtiliAttesi + ", nella finestra " + $Stato[$s.Id].InFinestra + " (" + $Stato[$s.Id].DateFinestra + ")") "Green"
   }
   $FinestraTxt = "VERIFICATA PRIMA DI APRIRE MT5: ogni sedia ha almeno un evento dentro " + $DaQuando + " -> " + $Fino
-  foreach($l in $righeFinestra){ [void]$Rilievi.Add(("eventi in finestra --" + $l.Trim())) }
+  foreach($l in $righeFinestra){ [void]$Rilievi.Add(("eventi in finestra -- " + $l.Trim())) }
 
   # -------------------------------------------------------------------
   #  5. IL TERMINALE DI BACKTEST
@@ -971,9 +1005,11 @@ try{
         throw ("MT5 O METAEDITOR APERTO (ricontrollato subito prima della corsa " + $s.Id + "): chiudili e rilancia LA STESSA riga.")
       }
       $fotoPrima = FotoLog
+      $Stato[$s.Id].LogVisti = @($fotoPrima.Keys).Count
+      Dico ("radici del tester guardate: " + ((RadiciLog) -join " ; ") + " -- file .log gia' presenti: " + $Stato[$s.Id].LogVisti) "DarkGray"
       $t0 = Get-Date
       Dico ("avvio il tester (tetto " + $TimeoutMin + " min)...") "Cyan"
-      $proc = Start-Process -FilePath $Terminal64 -ArgumentList ("/config:`"" + $s.IniPath + "`"") -PassThru
+      $proc = Start-Process -FilePath $Terminal64 -ArgumentList ("/config:`"" + $Stato[$s.Id].IniPath + "`"") -PassThru
       $uscito = $proc.WaitForExit($TimeoutMin * 60 * 1000)
       if(-not $uscito){
         try{ Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue }catch{}
@@ -984,14 +1020,15 @@ try{
         $Stato[$s.Id].Corsa = "COMPLETATA in " + [int]((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds) + " s"
       }
       Start-Sleep -Seconds 2
-      $Stato[$s.Id].LogNuovi   = CopiaLogCresciuti $fotoPrima $s.Id
-      $Stato[$s.Id].RigheNews  = RigheNuove $fotoPrima "NEWS"
-      $Stato[$s.Id].Autotest   = RigheNuove $fotoPrima "AUTOFIN"
-      $Stato[$s.Id].Cieco      = @(RigheNuove $fotoPrima "CIECO").Count
-      $Stato[$s.Id].Rosso      = @(RigheNuove $fotoPrima "ROSSO").Count
-      $Stato[$s.Id].Ordini     = @(RigheNuove $fotoPrima "ORDINE").Count
-      $Stato[$s.Id].NienteNews = @(RigheNuove $fotoPrima "NIENTE").Count
-      $guai = @(RigheNuove $fotoPrima "GUAI")
+      $nuove = RaccogliNuove $fotoPrima $s.Id
+      $Stato[$s.Id].LogNuovi   = [int]$nuove["CRESCIUTI"]
+      $Stato[$s.Id].RigheNews  = @($nuove["NEWS"])
+      $Stato[$s.Id].Autotest   = @($nuove["AUTOFIN"])
+      $Stato[$s.Id].Cieco      = @($nuove["CIECO"]).Count
+      $Stato[$s.Id].Rosso      = @($nuove["ROSSO"]).Count
+      $Stato[$s.Id].Ordini     = @($nuove["ORDINE"]).Count
+      $Stato[$s.Id].NienteNews = @($nuove["NIENTE"]).Count
+      $guai = @($nuove["GUAI"])
       # dal canarino: 'letto da X', 'righe N', 'UTILI ... M'
       $dove = New-Object System.Collections.ArrayList
       $rig  = New-Object System.Collections.ArrayList
@@ -1030,7 +1067,7 @@ try{
       $st = $Stato[$s.Id]
       $motivi = New-Object System.Collections.ArrayList
       if(@($st.RigheNews).Count -eq 0){
-        [void]$motivi.Add("NESSUNA riga '[PostNews][NEWS] letto da ...' nei log cresciuti. Due nomi possibili, non uno: (1) la passata NON e' girata (storico M1 di " + $s.Sym + " assente nella finestra, terminale fermo su una finestra modale, .ex5 non caricato); (2) i log del tester non stanno in nessuna delle radici che questa riga guarda. Guarda evidenza_" + $s.Id + ".txt e i log_" + $s.Id + "_*.log nello zip.")
+        [void]$motivi.Add("NESSUNA riga '[PostNews][NEWS] letto da ...' nei log del tester cresciuti (file .log visti nelle radici del tester: " + $st.LogVisti + ", cresciuti in questa corsa: " + $st.LogNuovi + "). Due nomi possibili, non uno: (1) la passata NON e' girata (storico M1/M5 di " + $s.Sym + " assente nella finestra, terminale fermo su una finestra modale, .ex5 non caricato); (2) i log del tester non stanno in nessuna delle tre radici che questa riga guarda. QUESTA RIGA NON MISURA LO STORICO, per scelta dichiarata: se il sospetto e' quello, si misura con scarica_storico.ps1 -Simboli " + $s.Sym + " -SoloReferto. Guarda evidenza_" + $s.Id + ".txt e i log_" + $s.Id + "_*.log nello zip.")
       }
       if($st.Cieco -gt 0){ [void]$motivi.Add("CALENDARIO CIECO trovato " + $st.Cieco + " volte: l'EA non ha trovato " + $NEWSFILE + " ne' in Common\Files ne' nella sandbox.") }
       if($st.Rosso -gt 0){ [void]$motivi.Add("CANARINO ROSSO trovato " + $st.Rosso + " volte: il file si legge ma per questo preset NON contiene nemmeno un evento.") }
@@ -1042,13 +1079,20 @@ try{
       $rigDist = @(@($st.RigheFile) | Select-Object -Unique)
       if(@($rigDist).Count -gt 1){ [void]$motivi.Add("'righe' cambia fra le righe di log (" + ($rigDist -join ", ") + ").") }
       elseif(@($rigDist).Count -eq 1 -and [int]$rigDist[0] -ne $NRigheEventoPin){
-        [void]$motivi.Add("l'EA dice 'righe " + $rigDist[0] + "' ma il " + $NEWSFILE + " AL PIN ha " + $NRigheEventoPin + " righe evento: ha letto UN ALTRO file.")
+        [void]$motivi.Add("l'EA dice 'righe " + $rigDist[0] + "' ma il file " + $NEWSFILE + " AL PIN ha " + $NRigheEventoPin + " righe evento: ha letto UN ALTRO calendario.")
       }
       $utiDist = @(@($st.Utili) | Select-Object -Unique)
       if(@($utiDist).Count -gt 1){ [void]$motivi.Add("'UTILI per questo preset' cambia fra le righe di log (" + ($utiDist -join ", ") + ").") }
       elseif(@($utiDist).Count -eq 1){
         if([int]$utiDist[0] -le 0){ [void]$motivi.Add("UTILI per questo preset = 0: calendario cieco PER QUESTA SEDIA.") }
         elseif([int]$utiDist[0] -ne $st.UtiliAttesi){ [void]$motivi.Add("UTILI letti = " + $utiDist[0] + ", ma ricontando il file AL PIN con i filtri di questo preset ne escono " + $st.UtiliAttesi + ": i filtri del preset e il file non stanno dicendo la stessa cosa.") }
+      }
+      # >>> la riga c'e' ma un campo non si estrae = il FORMATO e' cambiato.
+      #     Senza questo ramo il verdetto uscirebbe verde con i campi vuoti.
+      if(@($st.RigheNews).Count -gt 0){
+        foreach($c in @(@{N="letto da"; V=$doveDist}, @{N="righe"; V=$rigDist}, @{N="UTILI per questo preset"; V=$utiDist})){
+          if(@($c.V).Count -eq 0){ [void]$motivi.Add("la riga del canarino c'e' ma NON sono riuscito a leggerne il campo '" + $c.N + "': il formato della riga stampata dall'EA e' cambiato e questa riga va aggiornata a mano (non si legge un verdetto da un campo vuoto).") }
+        }
       }
       if(@($st.AutoFalliti).Count -eq 0){ [void]$motivi.Add("nessuna riga '[PostNews][AUTOTEST] ---- fine: N casi falliti ----' trovata: il secondo canarino non si e' potuto leggere.") }
       elseif(@(@($st.AutoFalliti) | Where-Object { $_ -ne 0 }).Count -gt 0){ [void]$motivi.Add("l'autotest dell'EA riporta casi falliti diversi da 0 (" + ((@($st.AutoFalliti)) -join ", ") + "): il caso n.5 dell'autotest E' il calendario.") }
@@ -1147,7 +1191,7 @@ foreach($s in $SEDIE){
 [void]$REF.Add("")
 [void]$REF.Add("--- IL BANCO ---")
 [void]$REF.Add("terminale: " + $TermTxt)
-[void]$REF.Add("cartella dati: " + $DataFolder)
+[void]$REF.Add("cartella dati: " + $(if($DataFolder -ne ""){ $DataFolder } else { "NON RISOLTA (il giro si e' fermato prima)" }))
 [void]$REF.Add("compilazione: " + $Compilato)
 [void]$REF.Add("riga Result del log: " + $ResultTxt)
 [void]$REF.Add("versione letta dal #property: " + $VersTxt + "   (attesa " + $VERSIONE_ATTESA + ", quella del fix FILE_COMMON)")
@@ -1171,16 +1215,16 @@ foreach($s in $SEDIE){
   $st = $Stato[$s.Id]
   [void]$REF.Add("  [" + $s.Id + "] " + $s.Sym + " magic " + $s.Magic)
   [void]$REF.Add("    preset: " + $st.Preset)
-  [void]$REF.Add("    eventi utili nel calendario al pin (ricontati QUI con i filtri del preset): " + $st.UtiliAttesi)
-  [void]$REF.Add("    di cui DENTRO la finestra: " + $st.InFinestra + "   " + $st.DateFinestra)
+  [void]$REF.Add("    eventi utili nel calendario al pin (ricontati QUI con i filtri del preset): " + (FmtN $st.UtiliAttesi))
+  [void]$REF.Add("    di cui DENTRO la finestra: " + (FmtN $st.InFinestra) + "   " + $st.DateFinestra)
   [void]$REF.Add("    ini: " + $st.Ini)
-  [void]$REF.Add("    corsa: " + $st.Corsa + " | file di log cresciuti: " + $st.LogNuovi)
+  [void]$REF.Add("    corsa: " + $st.Corsa + " | file .log nelle radici del TESTER prima: " + (FmtN $st.LogVisti) + " | cresciuti in questa corsa: " + (FmtN $st.LogNuovi))
   [void]$REF.Add("    canarino NEWS: " + @($st.RigheNews).Count + " righe (una in OnInit + una per ogni giorno di test: l'EA ricarica il file quando cambia il giorno)")
   foreach($riga in @($st.RigheNews | Select-Object -First 4)){ [void]$REF.Add("      " + $riga) }
   if(@($st.RigheNews).Count -gt 4){ [void]$REF.Add("      ... (le altre in evidenza_" + $s.Id + ".txt)") }
   [void]$REF.Add("    letto da (valori distinti): " + $(if(@($st.Dove).Count -gt 0){ (@(@($st.Dove) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso Common\Files: e' QUESTA la prova del fix")
-  [void]$REF.Add("    righe del file (distinti): " + $(if(@($st.RigheFile).Count -gt 0){ (@(@($st.RigheFile) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + $NRigheEventoPin + " (le righe evento del file al pin)")
-  [void]$REF.Add("    UTILI per questo preset (distinti): " + $(if(@($st.Utili).Count -gt 0){ (@(@($st.Utili) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + $st.UtiliAttesi + " (conto rifatto qui sul file al pin; NB: conta TUTTO il file, non la finestra)")
+  [void]$REF.Add("    righe del file (distinti): " + $(if(@($st.RigheFile).Count -gt 0){ (@(@($st.RigheFile) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $NRigheEventoPin) + " (le righe evento del file al pin)")
+  [void]$REF.Add("    UTILI per questo preset (distinti): " + $(if(@($st.Utili).Count -gt 0){ (@(@($st.Utili) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso " + (FmtN $st.UtiliAttesi) + " (conto rifatto qui sul file al pin; NB: conta TUTTO il file, non la finestra)")
   [void]$REF.Add("    CALENDARIO CIECO: " + $st.Cieco + " | CANARINO ROSSO: " + $st.Rosso + "   (attesi 0 e 0)")
   [void]$REF.Add("    autotest 'casi falliti' (atteso 0 su ogni riga): " + $(if(@($st.AutoFalliti).Count -gt 0){ (@($st.AutoFalliti) -join ", ") } else { "nessuna riga trovata" }))
   [void]$REF.Add("    ordini pendenti piazzati [RILIEVO, mai un gate]: " + $st.Ordini + " | righe 'nessuna notizia nel CSV oggi': " + $st.NienteNews)
