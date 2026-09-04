@@ -367,7 +367,7 @@ function DefNum($d,[string]$nome){
 # IL GATE DI UN PROVA, in una funzione: direttive nude, parametri che
 # ESISTONO nell'EA (nei due versi), 2 assi esatti, celle contate, fissi
 # nome per nome, nessuna riga estranea. Torna @{ Lettura; Celle }.
-function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfAtteso,$inputEA){
+function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfAtteso,$inputEA,[string]$magicAtteso,[string]$sondaAttesa){
   $lettura = LeggiProva $percorso $pf
   $h    = $lettura.Mappa
   $assi = $lettura.Assi
@@ -380,15 +380,11 @@ function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfA
   $paramProva = @($h.Keys | Where-Object { $_ -notmatch '^@' })
   foreach($k in $paramProva){ if(-not ($inputEA -contains $k)){ throw ($pf + ": il parametro '" + $k + "' NON e' un input di " + $EA + " (classe 112 / errore n.3: MT5 lo ignorerebbe in silenzio).") } }
   foreach($k in @($inputEA)){ if(-not $h.Contains($k)){ throw ($pf + ": l'input '" + $k + "' dell'EA NON e' pinnato nel prova: MT5 userebbe lo stato che si ricorda dall'ultima griglia.") } }
-  # DUE assi Y esatti.
-  if(@($assi).Count -ne 2){ throw ($pf + ": deve avere ESATTAMENTE 2 assi Y (" + (@($AssiAttesi.Keys) -join ", ") + "). Trovati: " + @($assi).Count + " {" + (@($assi) -join ", ") + "}.") }
-  $nc = 1
-  foreach($k in @($AssiAttesi.Keys)){
-    if(-not ($assi -contains $k)){ throw ($pf + ": manca l'asse Y " + $k + ".") }
-    if($h[$k] -ne $AssiAttesi[$k]){ throw ($pf + ": " + $k + " e' '" + $h[$k] + "', atteso '" + $AssiAttesi[$k] + "' (la griglia e' quella CONGELATA nella bozza: non si ritocca).") }
-    $nc = $nc * (CelleAsse $h[$k] $k)
-  }
-  if($nc -ne $NCelleAttese){ throw ($pf + ": i pin ||Y danno " + $nc + " celle, attese " + $NCelleAttese + ".") }
+  # NESSUN ASSE Y: la cella e' congelata (vedi $AssiAttesi vuoto). Un
+  # asse acceso qui vorrebbe dire che qualcuno ha rimesso una griglia
+  # dove il documento dice che non ce n'e' nessuna.
+  if(@($assi).Count -ne 0){ throw ($pf + ": ha " + @($assi).Count + " assi Y {" + (@($assi) -join ", ") + "} ma questo round NON HA UNA GRIGLIA.") }
+  if($RigheAttese -ne 1){ throw ("configurazione interna incoerente: RigheAttese = " + $RigheAttese + ", atteso 1 (una passata per corsa).") }
   # I FISSI, nome per nome, col valore.
   foreach($k in @($FissiAttesi.Keys)){
     if(-not $h.Contains($k)){ throw ($pf + ": manca la riga '" + $k + "'.") }
@@ -396,325 +392,235 @@ function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfA
     if($v -ne $FissiAttesi[$k]){ throw ($pf + ": " + $k + " e' '" + $v + "', atteso '" + $FissiAttesi[$k] + "'.") }
     if($h[$k] -match '\|\|Y\s*$'){ throw ($pf + ": " + $k + " NON va sweepato.") }
   }
-  # niente righe estranee: 4 direttive + 20 fissi + 2 assi = 26.
-  $attese = 4 + @($FissiAttesi.Keys).Count + @($AssiAttesi.Keys).Count
+  # LE RIGHE CHE POSSONO DIFFERIRE si gattano lo stesso, contro
+  # l'atteso DI QUELLA CORSA: "puo' differire fra i sei" non vuol dire
+  # "puo' valere qualunque cosa".
+  foreach($k in @($DifferenzeAmmesse)){
+    if(-not $h.Contains($k)){ throw ($pf + ": manca la riga '" + $k + "'.") }
+    if($h[$k] -match '\|\|Y\s*$'){ throw ($pf + ": " + $k + " NON va sweepato.") }
+  }
+  if($magicAtteso -ne "" -and $h["InpMagic"] -ne $magicAtteso){ throw ($pf + ": InpMagic e' '" + $h["InpMagic"] + "', atteso '" + $magicAtteso + "'.") }
+  if($sondaAttesa -ne "" -and $h["InpModoSonda"] -ne $sondaAttesa){ throw ($pf + ": InpModoSonda e' '" + $h["InpModoSonda"] + "', atteso '" + $sondaAttesa + "'.") }
+  # niente righe estranee: 4 direttive + 26 fissi + 2 variabili = 32.
+  $attese = 4 + @($FissiAttesi.Keys).Count + @($DifferenzeAmmesse).Count
   if(@($h.Keys).Count -ne $attese){ throw ($pf + ": " + @($h.Keys).Count + " righe vive invece di " + $attese + ": c'e' una riga estranea o ne manca una.") }
-  return @{ Lettura=$lettura; Celle=$nc }
+  return @{ Lettura=$lettura; Celle=$RigheAttese }
 }
 # IL GEMELLAGGIO A QUATTRO: le righe vive dei parametri (tutto tranne le
 # direttive) devono essere IDENTICHE nei quattro prova; le direttive
 # @SIMBOLO/@PERIODO devono valere quello che l'etichetta dichiara.
-# NOTA: qui il gemellaggio e' A DUE (i due prova ESTESA: stesso TF,
-# stessa finestra, differiscono SOLO per @SIMBOLO). Il gemellaggio A
-# QUATTRO dei prova originali NON viene toccato ne' invalidato: quei
-# quattro file restano com'erano e questa riga non li legge nemmeno.
-function GateGemelli($letture){
+# IL GEMELLAGGIO A SEI. Le righe dei parametri devono essere IDENTICHE
+# nei sei prova, TRANNE quelle dichiarate in $DifferenzeAmmesse
+# (InpMagic e InpModoSonda) -- e quelle sono gia' state gattate una per
+# una contro l'atteso della loro corsa dentro GateProva. Qui si
+# verifica che NON ce ne siano ALTRE: una terza differenza non
+# dichiarata vorrebbe dire che due corse misurano due motori diversi.
+function GateGemelli($letture, $ammesse){
   $chiavi = @($letture.Keys)
   $base = $chiavi[0]
   $hA = $letture[$base]
+  $diverse = New-Object System.Collections.ArrayList
   foreach($altro in $chiavi){
     if($altro -eq $base){ continue }
     $hB = $letture[$altro]
     foreach($k in @($hA.Keys)){
       if($k -match '^@'){ continue }
       if(-not $hB.Contains($k)){ throw ("GEMELLAGGIO NON VALIDO: " + $base + " ha la riga '" + $k + "' che " + $altro + " non ha.") }
-      if($hA[$k] -ne $hB[$k]){ throw ("GEMELLAGGIO NON VALIDO: '" + $k + "' vale '" + $hA[$k] + "' in " + $base + " e '" + $hB[$k] + "' in " + $altro + ". I quattro prova devono differire SOLO per @SIMBOLO e @PERIODO.") }
+      if($hA[$k] -ne $hB[$k]){
+        if($ammesse -contains $k){ if(-not ($diverse -contains $k)){ [void]$diverse.Add($k) }; continue }
+        throw ("GEMELLAGGIO NON VALIDO: '" + $k + "' vale '" + $hA[$k] + "' in " + $base + " e '" + $hB[$k] + "' in " + $altro + ". I sei prova possono differire SOLO per @SIMBOLO e per " + ($ammesse -join ", ") + ".")
+      }
     }
     foreach($k in @($hB.Keys)){
       if($k -match '^@'){ continue }
       if(-not $hA.Contains($k)){ throw ("GEMELLAGGIO NON VALIDO: " + $altro + " ha la riga '" + $k + "' che " + $base + " non ha.") }
     }
-    if($hA["@DAQUANDO"] -ne $hB["@DAQUANDO"] -or $hA["@FINOA"] -ne $hB["@FINOA"]){ throw ("GEMELLAGGIO NON VALIDO: finestra diversa fra " + $base + " e " + $altro + ".") }
+    if($hA["@DAQUANDO"] -ne $hB["@DAQUANDO"] -or $hA["@FINOA"] -ne $hB["@FINOA"] -or $hA["@PERIODO"] -ne $hB["@PERIODO"]){ throw ("GEMELLAGGIO NON VALIDO: finestra o TF diversi fra " + $base + " e " + $altro + ".") }
   }
-  return ("VALIDO: i " + @($chiavi).Count + " prova hanno il blocco dei parametri IDENTICO riga per riga e differiscono SOLO per @SIMBOLO e @PERIODO")
+  $d = "nessuna"
+  if($diverse.Count -gt 0){ $d = ($diverse -join ", ") }
+  return ("VALIDO: i " + @($chiavi).Count + " prova hanno il blocco dei parametri IDENTICO riga per riga; differenze DICHIARATE trovate: " + $d + " (piu' @SIMBOLO)")
 }
 
-# L'ESITO DI UN LATO PER UNA CELLA, ricalcolato dai numeri grezzi con le
-# disuguaglianze del sorgente (OnTester): serve a incrociare le colonne
-# "Cx Esito" della sonda. Torna "V" (viva), "S" (sospesa), "." (no).
-function StatoCella($r,[string]$lato,$sg){
-  $mfe = $r.MfeL; $rr = $r.RrL
-  if($lato -eq "S"){ $mfe = $r.MfeS; $rr = $r.RrS }
-  $c1 = ($r.EseGT -ge $sg.C1)
-  $c3 = ($mfe -ge $sg.SogliaC3)
-  $c5 = ($rr -ge $sg.C5)
-  $c6 = 2; if($r.NonConvT -gt $sg.C6KO){ $c6 = 0 } elseif($r.NonConvT -gt $sg.C6SOSP){ $c6 = 1 }
-  $c8 = 2; if($r.Sotto60 -ge $sg.C8SOTTO60){ $c8 = 0 } elseif($r.TenMedT -lt $sg.C8TEN){ $c8 = 1 }
-  if(-not ($c1 -and $c3 -and $c5) -or $c6 -eq 0 -or $c8 -eq 0){ return "." }
-  if($c6 -eq 2 -and $c8 -eq 2){ return "V" }
-  return "S"
-}
-# L'ALTOPIANO: esiste un blocco 2x2 di celle CONTIGUE (N adiacenti x
-# sigma adiacenti) tutte in piedi? Torna @{ Verdetto; VVV; SSS; Mappa }.
-function Altopiano($stati,$listaN,$listaSig,[string]$lato){
-  $blocchiV = 0; $blocchiVS = 0
-  for($i=0; $i -lt ($listaN.Count-1); $i++){
-    for($j=0; $j -lt ($listaSig.Count-1); $j++){
-      $q = @($stati[("" + $listaN[$i] + "|" + $listaSig[$j])], $stati[("" + $listaN[$i+1] + "|" + $listaSig[$j])],
-             $stati[("" + $listaN[$i] + "|" + $listaSig[$j+1])], $stati[("" + $listaN[$i+1] + "|" + $listaSig[$j+1])])
-      $tuttiV  = (@($q | Where-Object { $_ -eq "V" }).Count -eq 4)
-      $tuttiVS = (@($q | Where-Object { $_ -eq "V" -or $_ -eq "S" }).Count -eq 4)
-      if($tuttiV){ $blocchiV++ }
-      if($tuttiVS){ $blocchiVS++ }
-    }
+# LEGGE UNA GAMBA (IS oppure OOS) DAL CSV OPTFRAME. Una riga sola, per
+# costruzione: la cella e' congelata e non c'e' nessuna griglia. Torna
+# $null se il file non c'e' o e' STANTIO (piu' vecchio dell'avvio della
+# corsa): un CSV vecchio letto come fresco e' il modo piu' rapido di
+# pubblicare i numeri di un'altra corsa.
+function LeggiGamba([string]$csv,[datetime]$tC,[string]$eti){
+  if(-not (Test-Path -LiteralPath $csv)){
+    [void]$Problemi.Add("CSV " + $eti + " NON prodotto: " + $csv + " (storico mancante sulla gamba o sul metro " + $METRO + "? MT5 gia' aperto? compilazione? RAM esaurita a tick reali?)")
+    return($null)
   }
-  $nV = @($stati.Values | Where-Object { $_ -eq "V" }).Count
-  $nS = @($stati.Values | Where-Object { $_ -eq "S" }).Count
-  $v = "NO (nessun blocco 2x2 in piedi: celle vive isolate = rumore)"
-  if($blocchiV -gt 0){ $v = "VIVO (" + $blocchiV + " blocchi 2x2 tutti VIVI)" }
-  elseif($blocchiVS -gt 0){ $v = "SOSPESO (" + $blocchiVS + " blocchi 2x2 in piedi ma con celle SOSPESE per C6 25-40% o C8 < 12 barre)" }
-  if($nV -eq 0 -and $nS -eq 0){ $v = "NO (nessuna cella passa C1+C3+C5+C6+C8 insieme)" }
-  $righe = New-Object System.Collections.ArrayList
-  [void]$righe.Add(("    lato " + $lato + "   sigma -> " + (($listaSig | ForEach-Object { Fmt2 $_ }) -join "  ")))
-  foreach($n in $listaN){
-    $riga = "    N=" + ("" + $n).PadLeft(2) + "        "
-    foreach($s in $listaSig){ $k = "" + $n + "|" + $s; $st = "?"; if($stati.ContainsKey($k)){ $st = $stati[$k] }; $riga += "  " + $st + "   " }
-    [void]$righe.Add($riga)
+  $itm = Get-Item -LiteralPath $csv
+  if($itm.LastWriteTime -lt $tC){
+    [void]$Problemi.Add("CSV " + $eti + " STANTIO, NON LETTO: scritto alle " + $itm.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ", cioe' PRIMA dell'avvio di questa corsa. E' il CSV di una corsa PRECEDENTE rimasto in workdir: questa corsa NON ha numeri.")
+    return($null)
   }
-  return @{ Verdetto=$v; NV=$nV; NS=$nS; Mappa=($righe -join "`r`n") }
-}
-
-# L'ANALISI DEL CSV, in una funzione: datazione, righe CONTATE, colonne
-# per NOME, collaudi PRIMA dei numeri, cella di riferimento, mappa e
-# verdetto per lato. Muta $Problemi/$Rilievi e le variabili di script.
-function AnalizzaCsv([string]$csvIS,[datetime]$tC,$sg){
-  if(-not (Test-Path -LiteralPath $csvIS)){
-    [void]$Problemi.Add("CSV OPTFRAME NON prodotto: " + $csvIS + " (storico mancante su " + $Simbolo + " o sul metro " + $METRO + "? MT5 gia' aperto? compilazione?)")
-    return
+  $lin = @(Get-Content -LiteralPath $csv | Where-Object { $_.Trim() -ne "" })
+  $nR = $lin.Count - 1
+  if($nR -ne $RigheAttese){
+    [void]$Problemi.Add("" + $nR + " righe nel CSV " + $eti + ", " + $RigheAttese + " attesa (cache del tester? un asse rimasto acceso? passata morta a OnInit?).")
+    if($nR -le 0){ return($null) }
   }
-  $csvItem = Get-Item -LiteralPath $csvIS
-  $script:CsvOraTxt = $csvItem.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV)
-  if($csvItem.LastWriteTime -lt $tC){
-    [void]$Problemi.Add("CSV STANTIO, NON LETTO. E' scritto alle " + $script:CsvOraTxt + ", cioe' PRIMA dell'avvio di questa corsa (" + $tC.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "): e' il CSV di una corsa PRECEDENTE rimasto nella workdir (-Rifai copre il generico che SALTA, non quello che MUORE). Questa corsa NON ha numeri.")
-    return
-  }
-  $lin = @(Get-Content -LiteralPath $csvIS | Where-Object { $_.Trim() -ne "" })
-  $nRighe = $lin.Count - 1
-  if($nRighe -lt 0){ $nRighe = 0 }
-  $script:CsvRighe = $nRighe
-  if($nRighe -ne $NCelleAttese){ [void]$Problemi.Add("" + $nRighe + " righe nel CSV, " + $NCelleAttese + " passate chieste (cache del tester? storico? passate morte a OnInit?).") }
-  if($nRighe -le 0){ return }
   $head = $lin[0] -split ','
   $ix = @{}
   for($i=0; $i -lt $head.Count; $i++){ $ix[$head[$i].Trim()] = $i }
-  $servono = @("Attraversamenti Grezzi Long","Attraversamenti Grezzi Short",
-    "Attraversamenti Eseguibili Long","Attraversamenti Eseguibili Short","Giorni Contati",
-    "Eseguibili Al Giorno Long","Eseguibili Al Giorno Short","Eseguibili Al Giorno Totale","C1 Esito",
-    "Mfe Mediana Long Punti Indice","Mfe Mediana Short Punti Indice",
-    "Mae Mediana Long Punti Indice","Mae Mediana Short Punti Indice",
-    "Rr Da Mediane Long","Rr Da Mediane Short","Win Rate Necessario Long Pct","Win Rate Necessario Short Pct",
-    "Mfe Su Spread Long","Mfe Su Spread Short","Spread Misurato Punti Indice","Soglia C3 Punti Indice",
-    "C3 Esito Long","C3 Esito Short","C5 Esito Long","C5 Esito Short",
-    "Chiuse Long","Chiuse Short","Convergute Long","Convergute Short",
-    "Non Convergute Long Pct","Non Convergute Short Pct","Non Convergute Totale Pct","Uscite Fine Corsa Escluse","C6 Esito",
-    "Max Eseguibili Giorno Long","Max Eseguibili Giorno Short","Max Eseguibili Giorno Totale","Rischio Aperto Max Pct","C7 Cap Necessario",
-    "Giorni Almeno 2 Eseguibili","Giorni Zero Eseguibili",
-    "Tenuta Mediana Long Barre","Tenuta Mediana Short Barre","Tenuta Mediana Totale Barre","Sotto 60 Secondi Pct","C8 Esito",
+  $servono = @("Segnali Grezzi Long","Segnali Grezzi Short",
+    "Segnali Soppressi Posizione Aperta","Segnali Soppressi Tetto Giorno",
+    "Segnali Soppressi Ingresso Fuori Finestra","Segnali Soppressi Filtro Spread",
+    "Segnali Soppressi Giorno Spaiato",
+    "Operazioni Long","Operazioni Short","Operazioni Totali",
+    "Uscite Convergenza","Uscite Stop","Uscite Flat Sessione","Uscite Tetto Barre","Uscite Fine Corsa","Uscite Ignote",
+    "Ordini Rifiutati","Ultimo Retcode",
+    "Giorni Contati","Giorni Col Tetto Colpito","Giorni Col Tetto Colpito Pct",
+    "Giorni Spaiati","Giorni Spaiati Pct",
+    "Operazioni In Giorni Spaiati","Profitto In Giorni Spaiati","Profitto Fuori Giorni Spaiati",
+    "Guadagno Mediano Vincente Punti Indice","Mfe Mediana Punti Indice","Mae Mediana Punti Indice",
+    "Rapporto Realizzato Su Mfe",
+    "Spread Ingresso Mediano Punti Indice","Spread Ingresso P95 Punti Indice",
+    "Scarto Ingresso Vs Apertura Mediano","Scarto Ingresso Vs Apertura P95",
+    "Tenuta Mediana Barre","Tenuta Mediana Minuti","Sotto 60 Secondi Pct",
+    "Operazioni A Lotto Minimo","Operazioni A Lotto Minimo Pct","Sl Allargato Da Stops Level",
+    "Rischio Medio Realizzato Pct","Aspettativa In R",
+    "Profitto Netto","Profit Factor","Operazioni Chiuse Tester","Vinte Pct",
+    "Equity Dd Pct","Peggior Giornata Pct",
     "Barre Valutate","Barre Fuori Finestra","Barre Saltate Dati",
-    "Valutazioni Metro Mancante Segnale","Valutazioni Perse Buco Finestra","Valutazioni Con Solo Metro","Z Non Calcolabile",
-    "Giorni Spaiati","Giorni Spaiati Pct","C2 Esito",
-    "Scartati Occupato Altro Lato Collaudo","Atr Mediano Punti Indice","Atr Divergenza Rel Media Pct","Punto Indice Prezzo",
-    "Metro Prima Barra Epoch","Gamba Prima Barra Epoch","Campioni Troncati","Autotest Falliti","Autotest Blocchi",
-    "Finestra N","Soglia Ingresso Sigma","Soglia Uscita Sigma","Modo Spread","Modo Z Score","Barre Max Tenuta","Barre Orizzonte","Lato Attivo",
-    "Giorni Festa Metro","Giorni Metro Zero Calendario",
-    "Ingressi Barra Reale Fuori","Chiuse Zero Barre")
+    "Valutazioni Metro Mancante Segnale","Valutazioni Perse Buco Finestra",
+    "Valutazioni Con Solo Metro","Z Non Calcolabile",
+    "Atr Mediano Punti Indice","Punto Indice Prezzo",
+    "Metro Prima Barra Epoch","Gamba Prima Barra Epoch",
+    "Autotest Falliti","Autotest Blocchi",
+    "Finestra N","Soglia Ingresso Sigma","Soglia Uscita Sigma","Atr Sl Multiplo",
+    "Max Trades Day","Risk Percent","Lato Attivo",
+    "Modo Sonda","Salta Giorni Spaiati","Slippage Punti","Magic")
   $manca = New-Object System.Collections.ArrayList
   foreach($cn in $servono){ if(-not $ix.ContainsKey($cn)){ [void]$manca.Add($cn) } }
-  if($manca.Count -gt 0){ [void]$Problemi.Add("nel CSV mancano le colonne: " + ($manca -join ", ") + " (header OPTFRAME cambiato nella sonda?)."); return }
-  if($head.Count -lt ($NSTATS_ATTESI + 3)){ [void]$Problemi.Add("header con " + $head.Count + " colonne, attese almeno " + ($NSTATS_ATTESI + 3) + ".") }
-  $maxIx = 0
-  foreach($cn in $servono){ if($ix[$cn] -gt $maxIx){ $maxIx = $ix[$cn] } }
+  if($manca.Count -gt 0){
+    [void]$Problemi.Add("nel CSV " + $eti + " mancano le colonne: " + ($manca -join ", ") + " (header OPTFRAME dell'EA diverso da quello atteso?).")
+    return($null)
+  }
+  if($head.Count -lt ($NSTATS_ATTESI + 3)){ [void]$Problemi.Add("CSV " + $eti + ": header con " + $head.Count + " colonne, attese almeno " + ($NSTATS_ATTESI + 3) + ".") }
+  $c = $lin[1] -split ','
+  $g = @{}
+  foreach($cn in $servono){
+    if($ix[$cn] -ge $c.Count){ [void]$Problemi.Add("CSV " + $eti + ": la riga dei dati ha meno colonne dell'header."); return($null) }
+    $g[$cn] = Num $c[$ix[$cn]]
+  }
+  $g["_etichetta"] = $eti
+  return($g)
+}
 
-  $righe = New-Object System.Collections.ArrayList
-  for($i=1; $i -lt $lin.Count; $i++){
-    $c = $lin[$i] -split ','
-    if($c.Count -le $maxIx){ [void]$Problemi.Add("riga " + $i + " del CSV ha meno colonne dell'header: non la leggo."); continue }
-    $r = [pscustomobject]@{
-      N        = [int](Num $c[$ix["Finestra N"]]);  Sigma = [math]::Round((Num $c[$ix["Soglia Ingresso Sigma"]]),2)
-      SigUsc   = Num $c[$ix["Soglia Uscita Sigma"]]; ModoSp = [int](Num $c[$ix["Modo Spread"]]); ModoZ = [int](Num $c[$ix["Modo Z Score"]])
-      BarreMax = [int](Num $c[$ix["Barre Max Tenuta"]]); BarreOr = [int](Num $c[$ix["Barre Orizzonte"]]); Lato = [int](Num $c[$ix["Lato Attivo"]])
-      GrezL = Num $c[$ix["Attraversamenti Grezzi Long"]]; GrezS = Num $c[$ix["Attraversamenti Grezzi Short"]]
-      EseL  = Num $c[$ix["Attraversamenti Eseguibili Long"]]; EseS = Num $c[$ix["Attraversamenti Eseguibili Short"]]
-      Giorni= Num $c[$ix["Giorni Contati"]]
-      EseGL = Num $c[$ix["Eseguibili Al Giorno Long"]]; EseGS = Num $c[$ix["Eseguibili Al Giorno Short"]]; EseGT = Num $c[$ix["Eseguibili Al Giorno Totale"]]
-      C1    = [int](Num $c[$ix["C1 Esito"]])
-      MfeL  = Num $c[$ix["Mfe Mediana Long Punti Indice"]]; MfeS = Num $c[$ix["Mfe Mediana Short Punti Indice"]]
-      MaeL  = Num $c[$ix["Mae Mediana Long Punti Indice"]]; MaeS = Num $c[$ix["Mae Mediana Short Punti Indice"]]
-      RrL   = Num $c[$ix["Rr Da Mediane Long"]]; RrS = Num $c[$ix["Rr Da Mediane Short"]]
-      WrL   = Num $c[$ix["Win Rate Necessario Long Pct"]]; WrS = Num $c[$ix["Win Rate Necessario Short Pct"]]
-      MfeSpL= Num $c[$ix["Mfe Su Spread Long"]]; MfeSpS = Num $c[$ix["Mfe Su Spread Short"]]
-      Spread= Num $c[$ix["Spread Misurato Punti Indice"]]; SogliaC3 = Num $c[$ix["Soglia C3 Punti Indice"]]
-      C3L   = [int](Num $c[$ix["C3 Esito Long"]]); C3S = [int](Num $c[$ix["C3 Esito Short"]])
-      C5L   = [int](Num $c[$ix["C5 Esito Long"]]); C5S = [int](Num $c[$ix["C5 Esito Short"]])
-      ChL   = Num $c[$ix["Chiuse Long"]]; ChS = Num $c[$ix["Chiuse Short"]]; CvL = Num $c[$ix["Convergute Long"]]; CvS = Num $c[$ix["Convergute Short"]]
-      NonConvL = Num $c[$ix["Non Convergute Long Pct"]]; NonConvS = Num $c[$ix["Non Convergute Short Pct"]]; NonConvT = Num $c[$ix["Non Convergute Totale Pct"]]
-      FineCorsa= Num $c[$ix["Uscite Fine Corsa Escluse"]]; C6 = [int](Num $c[$ix["C6 Esito"]])
-      MaxGL = Num $c[$ix["Max Eseguibili Giorno Long"]]; MaxGS = Num $c[$ix["Max Eseguibili Giorno Short"]]; MaxGT = Num $c[$ix["Max Eseguibili Giorno Totale"]]
-      Rischio = Num $c[$ix["Rischio Aperto Max Pct"]]; C7 = [int](Num $c[$ix["C7 Cap Necessario"]])
-      G2    = Num $c[$ix["Giorni Almeno 2 Eseguibili"]]; G0 = Num $c[$ix["Giorni Zero Eseguibili"]]
-      TenL  = Num $c[$ix["Tenuta Mediana Long Barre"]]; TenS = Num $c[$ix["Tenuta Mediana Short Barre"]]; TenMedT = Num $c[$ix["Tenuta Mediana Totale Barre"]]
-      Sotto60 = Num $c[$ix["Sotto 60 Secondi Pct"]]; C8 = [int](Num $c[$ix["C8 Esito"]])
-      BarreVal = Num $c[$ix["Barre Valutate"]]; BarreFuori = Num $c[$ix["Barre Fuori Finestra"]]; BarreSal = Num $c[$ix["Barre Saltate Dati"]]
-      MetroManc = Num $c[$ix["Valutazioni Metro Mancante Segnale"]]; PerseBuco = Num $c[$ix["Valutazioni Perse Buco Finestra"]]
-      SoloMetro = Num $c[$ix["Valutazioni Con Solo Metro"]]; ZNon = Num $c[$ix["Z Non Calcolabile"]]
-      Spaiati = Num $c[$ix["Giorni Spaiati"]]; SpaiPct = Num $c[$ix["Giorni Spaiati Pct"]]; C2 = [int](Num $c[$ix["C2 Esito"]])
-      GFesta = Num $c[$ix["Giorni Festa Metro"]]; GZeroCal = Num $c[$ix["Giorni Metro Zero Calendario"]]
-      IngrFuori = Num $c[$ix["Ingressi Barra Reale Fuori"]]; ChiuseZero = Num $c[$ix["Chiuse Zero Barre"]]
-      AltroLato = Num $c[$ix["Scartati Occupato Altro Lato Collaudo"]]
-      AtrMed = Num $c[$ix["Atr Mediano Punti Indice"]]; AtrDiv = Num $c[$ix["Atr Divergenza Rel Media Pct"]]
-      PuntoIdx = Num $c[$ix["Punto Indice Prezzo"]]
-      MetroEpoch = Num $c[$ix["Metro Prima Barra Epoch"]]; GambaEpoch = Num $c[$ix["Gamba Prima Barra Epoch"]]
-      Troncati = [int](Num $c[$ix["Campioni Troncati"]])
-      AutoKo = [int](Num $c[$ix["Autotest Falliti"]]); AutoBl = [int](Num $c[$ix["Autotest Blocchi"]]) }
-    [void]$righe.Add($r)
+# I COLLAUDI DI SANITA', su UNA gamba. Se cade uno solo, il round non
+# si legge: e' la clausola severa di casa, e vale PRIMA di qualunque
+# numero economico.
+function CollaudiGamba($g,[string]$eti,[string]$ruolo){
+  $ko = 0
+  if($null -eq $g){ return(1) }
+  if($g["Autotest Falliti"] -eq -1){ [void]$Problemi.Add($eti + ": Autotest Falliti = -1 (autotest NON girato): non e' 'passato', e' 'non eseguito'."); $ko++ }
+  elseif($g["Autotest Falliti"] -gt 0){ [void]$Problemi.Add($eti + ": Autotest Falliti = " + (FmtN $g["Autotest Falliti"]) + ": il nucleo DIVERGE dalla spec, i numeri NON si leggono."); $ko++ }
+  if($g["Autotest Blocchi"] -ne $AUTOTEST_BLOCCHI_ATTESI){ [void]$Problemi.Add($eti + ": Autotest Blocchi = " + (FmtN $g["Autotest Blocchi"]) + " invece di " + $AUTOTEST_BLOCCHI_ATTESI + " (EA diverso da quello atteso?)."); $ko++ }
+  if([math]::Abs($g["Punto Indice Prezzo"] - 1.0) -gt 0.001){ [void]$Problemi.Add($eti + ": Punto Indice Prezzo = " + (Fmt3 $g["Punto Indice Prezzo"]) + " invece di 1,000: MFE, MAE e la SCALA DELLO STOP escono sbagliati di un fattore."); $ko++ }
+  #--- ECO DEI PIN: un pin che MT5 ignora in silenzio fa misurare
+  #    un'altra cella, e senza queste righe nessuno se ne accorge.
+  if([math]::Abs($g["Finestra N"] - $ECO_N) -gt 0.001 -or
+     [math]::Abs($g["Soglia Ingresso Sigma"] - $ECO_SIGMA) -gt 0.001 -or
+     [math]::Abs($g["Soglia Uscita Sigma"] - $ECO_USCITA) -gt 0.0001 -or
+     [math]::Abs($g["Atr Sl Multiplo"] - $ECO_ATRSL) -gt 0.001 -or
+     [math]::Abs($g["Max Trades Day"] - $ECO_TETTO) -gt 0.001 -or
+     [math]::Abs($g["Risk Percent"] - $ECO_RISCHIO) -gt 0.001){
+    [void]$Problemi.Add($eti + ": ECO DEI PIN DIVERSO dall'atteso (N " + (FmtN $g["Finestra N"]) + " vs " + $ECO_N + ", sigma " + (Fmt2 $g["Soglia Ingresso Sigma"]) + " vs " + (Fmt2 $ECO_SIGMA) + ", uscita " + (Fmt2 $g["Soglia Uscita Sigma"]) + ", SL " + (Fmt2 $g["Atr Sl Multiplo"]) + " ATR, tetto " + (FmtN $g["Max Trades Day"]) + ", rischio " + (Fmt2 $g["Risk Percent"]) + "%): IL PIN NON E' PASSATO e la corsa ha misurato un'altra configurazione.")
+    $ko++
   }
-  if($righe.Count -eq 0){ return }
-  $script:RigheGriglia = $righe
+  #--- il ruolo dichiarato deve combaciare con quello che l'EA ha fatto
+  $sondaAttesa = 0.0
+  if($ruolo -eq "PORTO"){ $sondaAttesa = 1.0 }
+  if([math]::Abs($g["Modo Sonda"] - $sondaAttesa) -gt 0.001){
+    [void]$Problemi.Add($eti + ": Modo Sonda = " + (FmtN $g["Modo Sonda"]) + " ma il ruolo di questa corsa e' " + $ruolo + ": o l'EA ha aperto ordini in una corsa di collaudo, o non li ha aperti nella corsa di misura.")
+    $ko++
+  }
+  #--- vincolo prop P5: a M5 la tenuta minima e' UNA barra = 300 s.
+  #    Questa quota DEVE venire 0,00: e' un COLLAUDO, non una scoperta.
+  if($g["Sotto 60 Secondi Pct"] -gt 0.0001){
+    [void]$Problemi.Add($eti + ": Sotto 60 Secondi Pct = " + (Fmt2 $g["Sotto 60 Secondi Pct"]) + " (atteso 0,00 a M5, dove la tenuta minima e' una barra = 300 s): la contabilita' delle barre e' rotta.")
+    $ko++
+  }
+  if($g["Uscite Ignote"] -gt 0){ [void]$Problemi.Add($eti + ": Uscite Ignote = " + (FmtN $g["Uscite Ignote"]) + " (atteso 0): ci sono chiusure che l'EA non sa spiegare, e i conteggi per motivo non tornano."); $ko++ }
+  if($g["Ordini Rifiutati"] -gt 0){ [void]$Rilievi.Add($eti + ": Ordini Rifiutati = " + (FmtN $g["Ordini Rifiutati"]) + " (ultimo retcode " + (FmtN $g["Ultimo Retcode"]) + "): NON sono segnali mancati, sono FILL mancati. Se sono molti rispetto alle operazioni, la tolleranza di riempimento (InpSlippagePts) e' troppo stretta e va detto PRIMA di leggere il conto economico.") }
+  if($g["Barre Saltate Dati"] -gt 10){ [void]$Rilievi.Add($eti + ": Barre Saltate Dati = " + (FmtN $g["Barre Saltate Dati"]) + " (atteso ~0): buchi nello storico.") }
+  if($g["Operazioni A Lotto Minimo Pct"] -gt 20.0){ [void]$Rilievi.Add($eti + ": il " + (Fmt2 $g["Operazioni A Lotto Minimo Pct"]) + "% delle operazioni e' andato a LOTTO MINIMO: su quelle il rischio REALE non e' 0,65% ma quello che il minimo impone (lezione del 31/08: 'le riduzioni sotto ~0,5% erano FINZIONE'). Il rischio medio realizzato e' " + (Fmt2 $g["Rischio Medio Realizzato Pct"]) + "%: leggere il DRAWDOWN con quel numero in mano, non col dichiarato.") }
+  if($g["Giorni Col Tetto Colpito Pct"] -gt 20.0){ [void]$Rilievi.Add($eti + ": il tetto giornaliero ha morso nel " + (Fmt2 $g["Giorni Col Tetto Colpito Pct"]) + "% dei giorni (oltre il 20%): questa corsa sta misurando IL TETTO almeno quanto il motore, e va scritto in quei termini.") }
+  if($g["Metro Prima Barra Epoch"] -le 0 -or $g["Gamba Prima Barra Epoch"] -le 0){ [void]$Problemi.Add($eti + ": Metro/Gamba Prima Barra Epoch = " + (FmtN $g["Metro Prima Barra Epoch"]) + "/" + (FmtN $g["Gamba Prima Barra Epoch"]) + ": una delle due serie non e' sincronizzata."); $ko++ }
+  elseif($g["Metro Prima Barra Epoch"] -gt ($g["Gamba Prima Barra Epoch"] + 7*86400)){ [void]$Problemi.Add($eti + ": il METRO " + $METRO + " parte DOPO la gamba: la finestra effettiva e' piu' corta e va dichiarata."); $ko++ }
+  return($ko)
+}
 
-  # COLLAUDI, su OGNI riga, PRIMA di leggere qualunque numero. Se uno
-  # solo non torna, il file NON VALE (clausola severa dei prova).
-  $collaudoKo = 0
-  foreach($r in $righe){
-    $et = "cella N=" + $r.N + " sigma=" + (Fmt2 $r.Sigma)
-    if($r.AutoKo -eq -1){ [void]$Problemi.Add($et + ": Autotest Falliti = -1 (autotest NON girato): file invalido."); $collaudoKo++ }
-    elseif($r.AutoKo -gt 0){ [void]$Problemi.Add($et + ": Autotest Falliti = " + $r.AutoKo + ": la sonda DIVERGE dalla spec, i numeri NON si leggono."); $collaudoKo++ }
-    if($r.AutoBl -ne $AUTOTEST_BLOCCHI_ATTESI){ [void]$Problemi.Add($et + ": Autotest Blocchi = " + $r.AutoBl + " invece di " + $AUTOTEST_BLOCCHI_ATTESI + " (sonda diversa da quella attesa?)."); $collaudoKo++ }
-    if($r.AltroLato -ne 0){ [void]$Problemi.Add($et + ": Scartati Occupato Altro Lato Collaudo = " + (FmtN $r.AltroLato) + " (atteso 0 per costruzione, T6): la macchina a stati e' rotta, i numeri non valgono."); $collaudoKo++ }
-    if([math]::Abs($r.Sotto60) -gt 0.0001){ [void]$Problemi.Add($et + ": Sotto 60 Secondi Pct = " + (Fmt2 $r.Sotto60) + " (atteso 0,00: a M5/M15 la tenuta minima e' una barra, T12): contabilita' dei tempi rotta."); $collaudoKo++ }
-    if($r.ChiuseZero -ne 0){ [void]$Problemi.Add($et + ": Chiuse Zero Barre = " + (FmtN $r.ChiuseZero) + " (atteso 0, fix T12 v1.03: dalla v1.03 e' LO STESSO EVENTO di 'Sotto 60 Secondi Pct', qui in conteggio secco): contabilita' dei tempi rotta."); $collaudoKo++ }
-    if([math]::Abs($r.PuntoIdx - 1.0) -gt 0.001){ [void]$Problemi.Add($et + ": Punto Indice Prezzo = " + (Fmt3 $r.PuntoIdx) + " invece di 1,000 (T14): MFE/MAE sbagliati di un fattore, la TAGLIA non si legge."); $collaudoKo++ }
-    if([math]::Abs($r.Spread - $SpreadAtteso) -gt 0.001){ [void]$Problemi.Add($et + ": Spread Misurato Punti Indice = " + (Fmt2 $r.Spread) + " invece di " + (Fmt2 $SpreadAtteso) + ": la sonda ha preso un altro simbolo."); $collaudoKo++ }
-    if([math]::Abs($r.SogliaC3 - $SogliaC3Attesa) -gt 0.001){ [void]$Problemi.Add($et + ": Soglia C3 Punti Indice = " + (Fmt2 $r.SogliaC3) + " invece di " + (Fmt2 $SogliaC3Attesa) + "."); $collaudoKo++ }
-    if($r.Troncati -ne 0){ [void]$Problemi.Add($et + ": Campioni Troncati = 1: le mediane sono TRONCATE, non si leggono."); $collaudoKo++ }
-    if([math]::Abs($r.AtrDiv) -gt 0.5){ [void]$Rilievi.Add($et + ": Atr Divergenza Rel Media Pct = " + ([double]$r.AtrDiv).ToString("0.0000",$INV) + " (atteso ~0 con InpAtrModoRma=false): la convenzione di iATR NON e' la SMA del TR e VA SCRITTO. Non blocca: l'ATR e' eco, non motore.") }
-    if($r.MetroEpoch -le 0 -or $r.GambaEpoch -le 0){ [void]$Problemi.Add($et + ": Metro/Gamba Prima Barra Epoch = " + (FmtN $r.MetroEpoch) + "/" + (FmtN $r.GambaEpoch) + ": la serie del metro o della gamba non e' sincronizzata."); $collaudoKo++ }
-    elseif($r.MetroEpoch -gt ($r.GambaEpoch + 7*86400)){ [void]$Problemi.Add($et + ": il METRO " + $METRO + " parte DOPO la gamba (" + ([DateTime]'1970-01-01').AddSeconds($r.MetroEpoch).ToString("yyyy-MM-dd",$INV) + " contro " + ([DateTime]'1970-01-01').AddSeconds($r.GambaEpoch).ToString("yyyy-MM-dd",$INV) + "): la finestra effettiva e' piu' corta per tutte le coppie, e va dichiarata."); $collaudoKo++ }
-    if($r.SigUsc -ne 0.05 -or $r.ModoSp -ne 0 -or $r.ModoZ -ne 0 -or $r.BarreMax -ne 120 -or $r.BarreOr -ne 24 -or $r.Lato -ne 0){ [void]$Problemi.Add($et + ": eco dei pin diverso dall'atteso (uscita " + (Fmt2 $r.SigUsc) + ", spread " + $r.ModoSp + ", z " + $r.ModoZ + ", tenuta " + $r.BarreMax + ", orizzonte " + $r.BarreOr + ", lato " + $r.Lato + "): il pin non e' passato."); $collaudoKo++ }
-    if($r.BarreSal -gt 10){ [void]$Rilievi.Add($et + ": Barre Saltate Dati = " + (FmtN $r.BarreSal) + " (atteso ~0): buchi nello storico, da guardare.") }
-    if($r.SpaiPct -gt $sg.C2){ [void]$Rilievi.Add($et + ": Giorni Spaiati Pct = " + (Fmt2 $r.SpaiPct) + " > " + (Fmt2 $sg.C2) + " (C2): la sonda va rifatta filtrando i giorni spaiati, E SI DICHIARA.") }
-    if($r.GZeroCal -ne 0){ [void]$Rilievi.Add($et + ": Giorni Metro Zero Calendario = " + (FmtN $r.GZeroCal) + " (atteso 0: e' il vecchio criterio v1.01 -- zero barre in TUTTO il giorno calendario sul metro 24h -- tenuto SOLO come controllo. Se non e' 0 su un metro quasi-24h, guardare da vicino: e' la spia della domanda VUOTA che la v1.02 ha corretto).") }
-    # incrocio fra gli esiti scritti dalla sonda e la ricalcolo con i #define del sorgente
-    $c1r = 0; if($r.EseGT -ge $sg.C1){ $c1r = 1 }
-    $c6r = 2; if($r.NonConvT -gt $sg.C6KO){ $c6r = 0 } elseif($r.NonConvT -gt $sg.C6SOSP){ $c6r = 1 }
-    $c8r = 2; if($r.Sotto60 -ge $sg.C8SOTTO60){ $c8r = 0 } elseif($r.TenMedT -lt $sg.C8TEN){ $c8r = 1 }
-    $c3Lr = 0; if($r.MfeL -gt $sg.Largo){ $c3Lr = 2 } elseif($r.MfeL -ge $sg.SogliaC3){ $c3Lr = 1 }
-    $c3Sr = 0; if($r.MfeS -gt $sg.Largo){ $c3Sr = 2 } elseif($r.MfeS -ge $sg.SogliaC3){ $c3Sr = 1 }
-    if($r.C1 -ne $c1r -or $r.C6 -ne $c6r -or $r.C8 -ne $c8r -or $r.C3L -ne $c3Lr -or $r.C3S -ne $c3Sr){
-      [void]$Problemi.Add($et + ": gli esiti scritti dalla sonda (C1 " + $r.C1 + ", C3 " + $r.C3L + "/" + $r.C3S + ", C6 " + $r.C6 + ", C8 " + $r.C8 + ") NON coincidono con la ricalcolo dai #define (" + $c1r + ", " + $c3Lr + "/" + $c3Sr + ", " + $c6r + ", " + $c8r + "): sonda e driver non applicano le stesse disuguaglianze. NON si legge.")
-      $collaudoKo++
-    }
+# I CANCELLI DI MERITO SU UNA GAMBA. Restituisce il verdetto e riempie
+# la lista dei motivi. Le fasce sono DISGIUNTE per costruzione: fra
+# "passa" e "bocciata secca" c'e' SEMPRE la ZONA MORTA (non passa, ma
+# non e' una bocciatura del meccanismo).
+function Fascia($val,$soglia,$muro,[bool]$piuEmeglio){
+  if($piuEmeglio){
+    if($val -ge $soglia){ return("PASSA") }
+    if($val -lt $muro){ return("BOCCIATA") }
+    return("ZONA MORTA")
   }
-  # FIX T12 v1.03, MISURATO (non solo dichiarato): quante volte il gate
-  # sulla barra REALE ha morso dove il gate vecchio (barra teorica) lasciava
-  # passare. E' la somma su tutte le celle, non un collaudo per riga: puo'
-  # essere 0 per costruzione (nessun buco di storico incontrato in QUESTA
-  # finestra/simbolo), e in quel caso il fix non e' stato messo alla prova
-  # qui, non e' "sbagliato" -- si dichiara e basta (ordine di lettura
-  # consigliato: 1. autotest 0/25, 2. Chiuse Zero Barre=0 e Sotto60=0,00 su
-  # tutte le celle, 3. questo numero: se e' 0 mentre il 2 passa comunque,
-  # il fix non ha mai morso qui).
-  $sommaIngrFuori = (@($righe | Measure-Object -Property IngrFuori -Sum)).Sum
-  if($null -eq $sommaIngrFuori){ $sommaIngrFuori = 0 }
-  if($sommaIngrFuori -eq 0){ [void]$Rilievi.Add("FIX T12 (v1.03) NON MISURATO IN QUESTA CORSA: Ingressi Barra Reale Fuori = 0 sulla somma delle " + $righe.Count + " celle. Il collaudo T12 (Chiuse Zero Barre / Sotto 60 Secondi Pct) puo' passare comunque: se qui non c'e' nessun buco di storico, il fix semplicemente non e' mai stato chiamato a intervenire su questa finestra/simbolo, e non e' un problema. Se invece T12 fallisce ancora ALTROVE con questo a 0, la diagnosi v1.03 va riverificata (vedi commento del sorgente).") }
-  else{ [void]$Rilievi.Add("FIX T12 (v1.03) MISURATO: Ingressi Barra Reale Fuori = " + (FmtN $sommaIngrFuori) + " (somma sulle " + $righe.Count + " celle): il gate nuovo sulla barra REALE ha morso almeno una volta dove il gate vecchio (barra teorica) avrebbe lasciato passare l'ingresso. E' la prova che il fix e' falsificabile e regge.") }
-  # la finestra EFFETTIVA (tetto o broker, classe 36): dalla prima riga.
-  $r0 = $righe[0]
-  $dGamba = ([DateTime]'1970-01-01').AddSeconds($r0.GambaEpoch)
-  $dMetro = ([DateTime]'1970-01-01').AddSeconds($r0.MetroEpoch)
-  $dChiesta = [DateTime]::ParseExact($DaQuando,"yyyy.MM.dd",$INV)
-  $dFine    = [DateTime]::ParseExact($Fino,"yyyy.MM.dd",$INV)
-  $feriali = 0; $d = $dChiesta
-  while($d -le $dFine){ if($d.DayOfWeek -ne "Saturday" -and $d.DayOfWeek -ne "Sunday"){ $feriali++ }; $d = $d.AddDays(1) }
-  $script:TettoTxt = $script:TettoTxt + " | EFFETTIVA: prima barra GAMBA " + $dGamba.ToString("yyyy-MM-dd",$INV) + ", METRO " + $dMetro.ToString("yyyy-MM-dd",$INV) + ", Giorni Contati " + (FmtN $r0.Giorni) + " su ~" + $feriali + " feriali chiesti, Barre Valutate " + (FmtN $r0.BarreVal)
-  if($dGamba -gt $dChiesta.AddDays(7)){ [void]$Rilievi.Add("FINESTRA EFFETTIVA PIU' CORTA di quella chiesta: la gamba parte dal " + $dGamba.ToString("yyyy-MM-dd",$INV) + " invece che dal " + $DaQuando + ". TETTO del tester (classe 36) o storico del broker: C1 resta per-giorno sul denominatore CONTATO (leggibile), campione e regime coperto si DICHIARANO nella lettura.") }
-  if($r0.Giorni -lt 0.75*$feriali){ [void]$Rilievi.Add("Giorni Contati " + (FmtN $r0.Giorni) + " contro ~" + $feriali + " feriali nella finestra chiesta: la corsa copre MENO del 75% dei giorni. Finestra effettiva piu' corta (tetto/storico) o molti giorni senza barre in finestra: si dichiara.") }
-  # firma del tetto sul gemello dello stesso TF, se il suo CSV esiste
-  # il gemello si legge dalla tabella $CORSE (campo Gemello), non si
-  # ricostruisce concatenando "NAS_" + $Periodo: con le etichette _EST
-  # quella concatenazione cercherebbe un CSV che non esiste, e la firma
-  # del tetto risulterebbe "non verificabile" per un motivo finto.
-  $altroSim = $CORSE[$Prova].GemelloSim; $altraEt = $CORSE[$Prova].Gemello
-  $csvAltro = Join-Path $Results ($EA + "_" + $altroSim + "_IS_ohlc_" + $altraEt + ".csv")
-  if(Test-Path -LiteralPath $csvAltro){
-    try{
-      $la = @(Get-Content -LiteralPath $csvAltro | Where-Object { $_.Trim() -ne "" })
-      if($la.Count -ge 2){
-        $ha = $la[0] -split ','; $ixa = @{}; for($i=0; $i -lt $ha.Count; $i++){ $ixa[$ha[$i].Trim()] = $i }
-        $ca = $la[1] -split ','
-        if($ixa.ContainsKey("Barre Valutate")){
-          $bvA = Num $ca[$ixa["Barre Valutate"]]
-          $dataA = (Get-Item -LiteralPath $csvAltro).LastWriteTime.ToString("yyyy-MM-dd HH:mm",$INV)
-          if([math]::Abs($bvA - $r0.BarreVal) -lt 0.5){ [void]$Rilievi.Add("FIRMA DEL TETTO (classe 36): Barre Valutate IDENTICHE (" + (FmtN $r0.BarreVal) + ") a quelle di " + $altraEt + " (CSV del " + $dataA + "). Il broker non da' mai lo stesso numero a due simboli diversi; il tetto si'. La finestra effettiva e' quella del tetto, non quella chiesta.") }
-          else{ [void]$Rilievi.Add("confronto col gemello " + $altraEt + " (CSV del " + $dataA + "): Barre Valutate " + (FmtN $r0.BarreVal) + " contro " + (FmtN $bvA) + " -> NON identiche, nessuna firma del tetto su questo confronto.") }
-        }
-      }
-    } catch { [void]$Rilievi.Add("confronto col gemello " + $altraEt + " non riuscito: " + $_.Exception.Message) }
-  }
-  else{ [void]$Rilievi.Add("firma del tetto NON verificabile a macchina in questa corsa: il CSV del gemello " + $altraEt + " non e' in workdir. Si confronta a mano 'Barre Valutate' fra i due referti dello stesso TF: IDENTICHE = tetto.") }
+  if($val -le $soglia){ return("PASSA") }
+  if($val -gt $muro){ return("BOCCIATA") }
+  return("ZONA MORTA")
+}
 
-  if($collaudoKo -gt 0){
-    $script:VerdettoL = "NON LEGGIBILE (" + $collaudoKo + " collaudi falliti: vedi PROBLEMI)"
-    $script:VerdettoS = $script:VerdettoL
-    return
+function CancelliMerito($gIS,$gOOS,[ref]$righe){
+  $out = New-Object System.Collections.ArrayList
+  if($null -eq $gIS -or $null -eq $gOOS){
+    [void]$out.Add("NON MISURABILE: manca una delle due gambe (IS o OOS).")
+    $righe.Value = $out
+    return("NON MISURABILE")
   }
-  # la cella di riferimento (la domanda-sonda del GIACIMENTO)
-  $script:Cella = @($righe | Where-Object { $_.N -eq $RIF_N -and [math]::Abs($_.Sigma - $RIF_SIGMA) -lt 0.001 }) | Select-Object -First 1
-  if($null -eq $script:Cella){ [void]$Rilievi.Add("la cella di riferimento N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " NON e' nel CSV (griglia diversa?): la domanda-sonda si legge sulla cella piu' vicina, a mano.") }
+  $nIS  = $gIS["Operazioni Totali"]
+  $nOOS = $gOOS["Operazioni Totali"]
+  $eR   = $gOOS["Aspettativa In R"]
+  $pf   = $gOOS["Profit Factor"]
+  $pfIS = $gIS["Profit Factor"]
+  $dd   = $gOOS["Equity Dd Pct"]
+  $pg   = $gOOS["Peggior Giornata Pct"]
+  $s60  = $gOOS["Sotto 60 Secondi Pct"]
 
-  # --- COLLAUDO DI RIPRODUZIONE (esiste SOLO in questa riga ESTESA).
-  #     La stessa cella, con gli stessi input, deve dare gli stessi
-  #     numeri del 04/09: una passata non sa nemmeno che la griglia
-  #     intorno a lei e' cresciuta. Se non torna, il referto del 04/09
-  #     non e' riproducibile su questo banco, e la scelta della cella
-  #     per il round a tick non si puo' appoggiare su di lui.
-  if($null -eq $script:Cella){
-    [void]$Problemi.Add("COLLAUDO DI RIPRODUZIONE NON ESEGUIBILE: la cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " non e' nel CSV, quindi non si puo' verificare che questa corsa riproduca i numeri del 04/09. La mappa estesa NON si cuce su quella vecchia.")
-  }
-  elseif(-not $RIPRO.ContainsKey($Simbolo)){
-    [void]$Rilievi.Add("COLLAUDO DI RIPRODUZIONE saltato: nessun atteso in tabella per " + $Simbolo + ". Si dichiara, non si inventa un atteso.")
-  }
-  else{
-    $rip = $RIPRO[$Simbolo]
-    $cr  = $script:Cella
-    $sc  = New-Object System.Collections.ArrayList
-    $oss = [ordered]@{ "Giorni Contati"=$cr.Giorni; "Barre Valutate"=$cr.BarreVal;
-                       "Grezzi L"=$cr.GrezL; "Grezzi S"=$cr.GrezS;
-                       "Eseguibili L"=$cr.EseL; "Eseguibili S"=$cr.EseS }
-    $chi = [ordered]@{ "Giorni Contati"="Giorni"; "Barre Valutate"="BarreVal";
-                       "Grezzi L"="GrezL"; "Grezzi S"="GrezS";
-                       "Eseguibili L"="EseL"; "Eseguibili S"="EseS" }
-    foreach($vk in @($oss.Keys)){
-      $val = [double]$oss[$vk]; $atteso = [double]$rip[$chi[$vk]]
-      if([math]::Abs($val - $atteso) -gt 0.5){ [void]$sc.Add($vk + " " + (FmtN $val) + " invece di " + (FmtN $atteso)) }
-    }
-    $oss2 = [ordered]@{ "MFE mediana L"=$cr.MfeL; "MFE mediana S"=$cr.MfeS;
-                        "MAE mediana L"=$cr.MaeL; "MAE mediana S"=$cr.MaeS;
-                        "Non convergute tot pct"=$cr.NonConvT; "Tenuta mediana tot"=$cr.TenMedT }
-    $chi2 = [ordered]@{ "MFE mediana L"="MfeL"; "MFE mediana S"="MfeS";
-                        "MAE mediana L"="MaeL"; "MAE mediana S"="MaeS";
-                        "Non convergute tot pct"="NonConvT"; "Tenuta mediana tot"="TenMedT" }
-    foreach($vk in @($oss2.Keys)){
-      $val = [double]$oss2[$vk]; $atteso = [double]$rip[$chi2[$vk]]
-      if([math]::Abs($val - $atteso) -gt 0.011){ [void]$sc.Add($vk + " " + (Fmt2 $val) + " invece di " + (Fmt2 $atteso)) }
-    }
-    if($sc.Count -gt 0){
-      [void]$Problemi.Add("COLLAUDO DI RIPRODUZIONE FALLITO sulla cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " (" + $Simbolo + "): " + ($sc -join "; ") + ". Estendere la griglia NON puo' cambiare una passata con gli stessi identici input: se questi numeri divergono e' cambiato il BANCO (storico scaricato dopo il 04/09, cache del tester, sorgente diverso). I numeri del referto del 04/09 NON sono riproducibili qui: la mappa estesa resta leggibile DA SOLA, ma i verdetti del 04/09 vanno considerati SUPERATI, non confermati.")
-    }
-    else{
-      [void]$Rilievi.Add("COLLAUDO DI RIPRODUZIONE PASSATO sulla cella N=" + $RIF_N + " sigma=" + (Fmt2 $RIF_SIGMA) + " (" + $Simbolo + "): 12 grandezze su 12 identiche ai referti del 04/09 (6 conteggi esatti + 6 mediane/quote a 0,01). Le celle nuove si leggono sulla STESSA scala delle vecchie.")
-    }
-  }
-  # la mappa 7x7 e l'ALTOPIANO, per lato
-  $listaN   = @($righe | ForEach-Object { $_.N } | Sort-Object -Unique)
-  $listaSig = @($righe | ForEach-Object { $_.Sigma } | Sort-Object -Unique)
-  $mappe = @{ "L"=$null; "S"=$null }
-  foreach($lato in @("L","S")){
-    $stati = @{}
-    foreach($r in $righe){ $stati[("" + $r.N + "|" + $r.Sigma)] = (StatoCella $r $lato $sg) }
-    $a = Altopiano $stati $listaN $listaSig $lato
-    $script:Mappa[$lato] = $a.Mappa + "`r`n    celle VIVE " + $a.NV + " / SOSPESE " + $a.NS + " su " + $righe.Count
-    if($lato -eq "L"){ $script:VerdettoL = $a.Verdetto } else { $script:VerdettoS = $a.Verdetto }
-  }
+  $fE  = Fascia $eR $A1_E_R $B_E_R $true
+  $fPF = Fascia $pf $A2_PF  $B_PF  $true
+  $fDD = Fascia $dd $A4_DD  $B_DD  $false
+  #--- la peggior giornata e' NEGATIVA: "meglio" vuol dire piu' vicino a
+  #    zero. La fascia si scrive a mano per non far dire a Fascia una
+  #    cosa che non intende.
+  $fPG = "PASSA"
+  if($pg -lt $A5_PEGGIOR){ $fPG = "ZONA MORTA" }
+  if($pg -lt $B_PEGGIOR){ $fPG = "BOCCIATA" }
+  $fN  = "PASSA"
+  if($nOOS -lt $A6_N -or $nIS -lt $A6_N){ $fN = "MERITO SOSPESO" }
+  if($nOOS -lt $N_NON_MISURABILE -or $nIS -lt $N_NON_MISURABILE){ $fN = "NON MISURABILE" }
+  $fA3 = "PASSA"
+  if($gIS["Profitto Netto"] -le 0.0 -or $pfIS -le 1.0){ $fA3 = "BOCCIATA" }
+  elseif(($gIS["Profitto Netto"] -gt 0.0) -ne ($gOOS["Profitto Netto"] -gt 0.0)){ $fA3 = "BOCCIATA" }
+  $fA7 = "PASSA"
+  if($s60 -ge $A7_SOTTO60){ $fA7 = "BOCCIATA" }
+
+  [void]$out.Add("  A1 aspettativa OOS " + (Fmt3 $eR) + " R   (>= " + (Fmt3 $A1_E_R) + " passa, < " + (Fmt3 $B_E_R) + " bocciata secca)   -> " + $fE)
+  [void]$out.Add("  A2 profit factor OOS " + (Fmt3 $pf) + "   (>= " + (Fmt2 $A2_PF) + " passa, < " + (Fmt2 $B_PF) + " bocciata secca)   -> " + $fPF)
+  [void]$out.Add("  A3 IS coerente: profitto IS " + (Fmt2 $gIS["Profitto Netto"]) + ", PF IS " + (Fmt3 $pfIS) + ", profitto OOS " + (Fmt2 $gOOS["Profitto Netto"]) + "   -> " + $fA3)
+  [void]$out.Add("  A4 drawdown equity OOS " + (Fmt2 $dd) + "%   (<= " + (Fmt2 $A4_DD) + " passa, > " + (Fmt2 $B_DD) + " bocciata PER RISCHIO)   -> " + $fDD)
+  [void]$out.Add("  A5 peggior giornata OOS " + (Fmt2 $pg) + "%   (>= " + (Fmt2 $A5_PEGGIOR) + " passa, < " + (Fmt2 $B_PEGGIOR) + " bocciata PER RISCHIO)   -> " + $fPG)
+  [void]$out.Add("  A6 operazioni IS " + (FmtN $nIS) + " / OOS " + (FmtN $nOOS) + "   (>= " + $A6_N + " per giudicare il MERITO)   -> " + $fN)
+  [void]$out.Add("  A7 sotto 60 secondi OOS " + (Fmt2 $s60) + "%   (< " + (Fmt2 $A7_SOTTO60) + " passa; a M5 deve essere 0,00)   -> " + $fA7)
+
+  #--- IL VERDETTO. Il RISCHIO non si sospende MAI, nemmeno con n
+  #    piccolo (Emendamento, regola B): A4 e A5 bocciano da soli.
+  if($fDD -eq "BOCCIATA" -or $fPG -eq "BOCCIATA"){ $righe.Value = $out; return("BOCCIATA PER RISCHIO") }
+  if($fN -eq "NON MISURABILE"){ $righe.Value = $out; return("NON MISURABILE") }
+  if($fN -eq "MERITO SOSPESO"){ $righe.Value = $out; return("MERITO SOSPESO (si legge SOLO il rischio, e il rischio non e' rosso)") }
+  if($fE -eq "BOCCIATA" -or $fPF -eq "BOCCIATA" -or $fA3 -eq "BOCCIATA" -or $fA7 -eq "BOCCIATA"){ $righe.Value = $out; return("BOCCIATA") }
+  if($fE -eq "PASSA" -and $fPF -eq "PASSA" -and $fA3 -eq "PASSA" -and $fDD -eq "PASSA" -and $fPG -eq "PASSA" -and $fA7 -eq "PASSA"){ $righe.Value = $out; return("PASSA TUTTI I CANCELLI A") }
+  $righe.Value = $out
+  return("NON PASSA (zona morta: nessuna proposta, nessuna bocciatura del meccanismo)")
 }
 
 # =====================================================================
@@ -735,8 +641,8 @@ try{
   Dico ("pin ......... " + $Pin)
   Dico ("prova ....... " + $Prova + " = " + $FileProva + " | gamba " + $Simbolo + " " + $Periodo + " | metro " + $METRO + " (si legge, non si scambia)")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
-  Dico ("banco ....... MODELLO 2 (SOLO PREZZI DI APERTURA), " + $NCelleAttese + " passate (GRIGLIA ESTESA: N 10..55 passo 5 = 10 valori x sigma 0,75..1,95 passo 0,15 = 9 valori; le " + $NCelleVecchie + " celle del 04/09 sono CONTENUTE qui dentro). Deposito " + $Deposito + " (inerte: zero ordini)")
-  Dico ("regola ...... ALTOPIANO, NON PICCO: verdetto per lato = esiste un blocco 2x2 di celle contigue con C1+C3+C5+C6+C8 in piedi INSIEME. Cella isolata = rumore = NO.") "Yellow"
+  Dico ("banco ....... MODELLO 4 (OGNI TICK, TICK REALI), UNA passata (cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + "), split IS/OOS " + $FrazioneIS + ". Deposito " + $Deposito + ". RUOLO DI QUESTA CORSA: " + $corsa.Ruolo)
+  Dico ("regola ...... NESSUNA GRIGLIA, NESSUNA SELEZIONE: la cella e' congelata. IS e OOS sono DUE CAMPIONI della STESSA configurazione, non una scelta e una validazione. UN SOLO REGIME: da questo round NON esce una sedia.") "Yellow"
 
   # -------------------------------------------------------------------
   #  1. SCARICO AL PIN + SENTINELLA DI UN GIRO PRECEDENTE
@@ -757,7 +663,7 @@ try{
   Dico "driver generico scaricato e PINNATO (riscarica la sonda al pin, non dalla punta del branch)" "Green"
   Remove-Item -Path (Join-Path $Prove "RELATIVO_*.txt") -Force -ErrorAction SilentlyContinue
   foreach($k in @($CORSE.Keys)){ Scarica ($RawPin + "/backtest_pipeline/prove/" + $CORSE[$k].File) (Join-Path $Prove $CORSE[$k].File) }
-  Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter "RELATIVO_*_ESTESA.txt").Count + " su 2 (ne gira UNO, l'altro serve al gemellaggio a DUE)") "Green"
+  Dico ("file prova scaricati: " + @(Get-ChildItem $Prove -Filter "RELATIVO_R117_*.txt").Count + " su " + @($CORSE.Keys).Count + " (ne gira UNO, gli altri servono al gemellaggio a SEI)") "Green"
   $mq5 = Join-Path $Work ($EA + ".mq5")
   Scarica ($RawPin + "/mql5/Experts/" + $EA + ".mq5") $mq5
 
@@ -776,7 +682,7 @@ try{
   foreach($rg in $srcRighe){ $viva = ($rg -replace '//.*$',''); if($viva -match '^\s*blocchi\+\+\s*;'){ $nBlocchi++ } }
   $AutoSrcTxt = "" + $nBlocchi + " blocchi (righe 'blocchi++;' fuori dai commenti)"
   if($nBlocchi -ne $AUTOTEST_BLOCCHI_ATTESI){ throw ("autotest: " + $AutoSrcTxt + ", attesi " + $AUTOTEST_BLOCCHI_ATTESI + ".") }
-  if($src -notmatch '\[AUTOTEST\]\s+21\s'){ throw "autotest: manca il blocco 21 nel sorgente (etichetta [AUTOTEST] 21)." }
+  if($src -notmatch '\[AUTOTEST\]\s+12\s'){ throw "autotest: manca il blocco 12 nel sorgente (etichetta [AUTOTEST] 12): e' quello che collauda LottoDaRischio_Calc, cioe' il calcolo che protegge il conto." }
   $defs = LeggiDefine $src
   $nst = [int](DefNum $defs "REL_NSTATS")
   $NStatsTxt = "REL_NSTATS = " + $nst + " -> " + ($nst + 3) + " colonne"
@@ -784,54 +690,68 @@ try{
   $inputEA = LeggiInputEA $src
   $InputTxt = "" + @($inputEA).Count + " input letti dal sorgente"
   if(@($inputEA).Count -ne $INPUT_ATTESI){ throw ("input: " + $InputTxt + ", attesi " + $INPUT_ATTESI + ".") }
-  $chiamate = 0
-  foreach($rg in $srcRighe){ $viva = ($rg -replace '//.*$',''); if($viva -match 'OrderSend|CTrade|PositionClose|PositionOpen|OrderClose|Trade\.mqh|\.Buy\(|\.Sell\('){ $chiamate++ } }
-  $GrepTxt = "" + $chiamate + " chiamate di trading fuori dai commenti (attese 0)"
-  if($chiamate -gt 0){ throw ("IL CONTATORE NON E' PURO: " + $GrepTxt + ".") }
+  #--- IL GATE E' CAMBIATO, E IL CAMBIO E' IL PUNTO: le due righe della
+  #    sonda pretendevano ZERO chiamate di trading (era un contatore).
+  #    Qui l'EA APRE ORDINI, quindi quel gate sarebbe sbagliato. Al suo
+  #    posto c'e' il GATE HEDGE-SAFE, che e' il difetto vero di questa
+  #    casa: su conto HEDGING PositionSelect(_Symbol) seleziona la
+  #    posizione PIU' VECCHIA del simbolo, qualunque sia il magic, e
+  #    PositionClose(_Symbol) CHIUDE QUELLA DEL VICINO.
+  #    Fonte: report\AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md.
+  $pericolosi = 0
+  $trovati = New-Object System.Collections.ArrayList
+  foreach($rg in $srcRighe){
+    $viva = ($rg -replace '//.*$','')
+    foreach($p in @('PositionSelect(_Symbol','PositionClose(_Symbol','PositionModify(_Symbol','PositionClosePartial(_Symbol')){
+      if($viva.Contains($p)){ $pericolosi++; [void]$trovati.Add($p) }
+    }
+  }
+  $GrepTxt = "" + $pericolosi + " pattern per SIMBOLO fuori dai commenti (attesi 0: su conto HEDGING leggerebbero o chiuderebbero la posizione del VICINO)"
+  if($pericolosi -gt 0){ throw ("EA NON HEDGE-SAFE: " + $GrepTxt + " -> " + ((@($trovati) | Sort-Object -Unique) -join ", ") + ". L'audit del 03/09 lo dice testualmente: il MEZZO fix (lettura corretta + scrittura per simbolo) e' PIU' PERICOLOSO del bug originale.") }
+  #--- e la controprova positiva: l'EA DEVE avere il ciclo hedge-safe e
+  #    la chiusura PER TICKET. Un gate che cerca solo assenze passa
+  #    anche su un file che non fa niente.
+  if($src -notmatch 'PositionGetTicket\s*\(' -or $src -notmatch 'PositionSelectByTicket\s*\('){ throw "l'EA non usa PositionGetTicket/PositionSelectByTicket: senza il ciclo hedge-safe la lettura della PROPRIA posizione non e' garantita." }
+  if($src -notmatch 'PositionClose\s*\(\s*gTicket'){ throw "l'EA non chiude PER TICKET (PositionClose(gTicket)): su conto hedging la chiusura per simbolo colpisce la posizione piu' vecchia, che puo' essere di un altro EA." }
+  $GrepTxt = $GrepTxt + "; ciclo hedge-safe e chiusura per TICKET presenti"
+
   $nInc = 0
   foreach($rg in $srcRighe){ $viva = ($rg -replace '//.*$',''); if($viva -match '^\s*#include\b'){ $nInc++ } }
-  $IncludeTxt = "" + $nInc + " righe #include (attese 0: sonda autosufficiente)"
-  if($nInc -gt 0){ throw ("il sorgente ha " + $nInc + " #include: la pagina dice che e' autosufficiente, e nessuno li installa. Ci si ferma prima di compilare.") }
-  # LE SOGLIE, dal sorgente, confrontate con la pagina.
-  $SoglieSrc = @{
-    C1 = (DefNum $defs "REL_C1_ESEGUIBILI_GIORNO"); C5 = (DefNum $defs "REL_C5_RR_MINIMO")
-    C6KO = (DefNum $defs "REL_C6_NON_CONVERGUTE_KO"); C6SOSP = (DefNum $defs "REL_C6_NON_CONVERGUTE_SOSP")
-    C8TEN = (DefNum $defs "REL_C8_TENUTA_BARRE_MIN"); C8SOTTO60 = (DefNum $defs "REL_C8_QUOTA_SOTTO60_KO")
-    C2 = (DefNum $defs "REL_C2_GIORNI_SPAIATI_PCT"); C7R = (DefNum $defs "REL_C7_RISCHIO_PER_TRADE"); C7CAP = (DefNum $defs "REL_C7_CAP_RISCHIO_APERTO")
-    MultScarto = (DefNum $defs "REL_C3_MULTIPLO_SCARTO"); MultLargo = (DefNum $defs "REL_C3_MULTIPLO_LARGO")
-    SpreadD30 = (DefNum $defs "REL_SPREAD_D30EUR"); SpreadNAS = (DefNum $defs "REL_SPREAD_NASUSD") }
-  $spreadSrc = $SoglieSrc.SpreadD30
-  if($Simbolo -eq "NASUSD"){ $spreadSrc = $SoglieSrc.SpreadNAS }
-  $SoglieSrc["SogliaC3"] = $SoglieSrc.MultScarto * $spreadSrc
-  $SoglieSrc["Largo"]    = $SoglieSrc.MultLargo  * $spreadSrc
-  $SpreadAtteso   = $spreadSrc
-  $SogliaC3Attesa = $SoglieSrc.SogliaC3
+  $IncludeTxt = "" + $nInc + " righe #include (atteso " + $INCLUDE_ATTESI + ": Trade/Trade.mqh -- qui l'EA APRE ORDINI, e 0 sarebbe l'errore)"
+  if($nInc -ne $INCLUDE_ATTESI){ throw ("il sorgente ha " + $nInc + " #include invece di " + $INCLUDE_ATTESI + ".") }
+  if($src -notmatch '#include\s*<Trade/Trade\.mqh>'){ throw "il sorgente non include <Trade/Trade.mqh>: l'unico include ammesso e' quello, ed e' quello che serve." }
+  # GLI ATTESI DEL SORGENTE. Nell'EA NON ci sono i cancelli di merito
+  # (quelli stanno in questa riga e nella pagina, apposta: un cancello
+  # scritto dentro il codice misurato e' un cancello che si sposta con
+  # lui). Ci sono pero' tre numeri che DEVONO combaciare, o la corsa
+  # misura qualcosa di diverso da quello che la pagina promette.
+  $ns = (DefNum $defs "ABR_NSTATS")
+  $pi = (DefNum $defs "ABR_PUNTI_PER_INDICE_ATTESO")
+  $sd = (DefNum $defs "ABR_SPREAD_D30EUR")
+  $sn = (DefNum $defs "ABR_SPREAD_NASUSD")
+  $SpreadAtteso = $sd
+  if($Simbolo -eq "NASUSD"){ $SpreadAtteso = $sn }
   $diverg = New-Object System.Collections.ArrayList
-  if($SoglieSrc.C1 -ne $PAGINA_C1_TOT_GG){ [void]$diverg.Add("C1 " + (Fmt2 $SoglieSrc.C1) + " vs pagina " + (Fmt2 $PAGINA_C1_TOT_GG)) }
-  if($SoglieSrc.C5 -ne $PAGINA_C5_RR){ [void]$diverg.Add("C5 " + (Fmt2 $SoglieSrc.C5) + " vs " + (Fmt2 $PAGINA_C5_RR)) }
-  if($SoglieSrc.C6KO -ne $PAGINA_C6_KO -or $SoglieSrc.C6SOSP -ne $PAGINA_C6_SOSP){ [void]$diverg.Add("C6 " + (Fmt2 $SoglieSrc.C6SOSP) + "/" + (Fmt2 $SoglieSrc.C6KO) + " vs " + (Fmt2 $PAGINA_C6_SOSP) + "/" + (Fmt2 $PAGINA_C6_KO)) }
-  if($SoglieSrc.C8TEN -ne $PAGINA_C8_TENUTA -or $SoglieSrc.C8SOTTO60 -ne $PAGINA_C8_SOTTO60){ [void]$diverg.Add("C8 " + (Fmt2 $SoglieSrc.C8TEN) + "/" + (Fmt2 $SoglieSrc.C8SOTTO60) + " vs " + (Fmt2 $PAGINA_C8_TENUTA) + "/" + (Fmt2 $PAGINA_C8_SOTTO60)) }
-  if($SoglieSrc.C2 -ne $PAGINA_C2_SPAIATI){ [void]$diverg.Add("C2 " + (Fmt2 $SoglieSrc.C2) + " vs " + (Fmt2 $PAGINA_C2_SPAIATI)) }
-  if($SoglieSrc.C7R -ne $PAGINA_C7_RISCHIO -or $SoglieSrc.C7CAP -ne $PAGINA_C7_CAP){ [void]$diverg.Add("C7 " + (Fmt2 $SoglieSrc.C7R) + "/" + (Fmt2 $SoglieSrc.C7CAP) + " vs " + (Fmt2 $PAGINA_C7_RISCHIO) + "/" + (Fmt2 $PAGINA_C7_CAP)) }
-  if($SoglieSrc.MultScarto -ne $PAGINA_C3_MULT -or $SoglieSrc.MultLargo -ne $PAGINA_C3_LARGO){ [void]$diverg.Add("C3 multipli " + (Fmt2 $SoglieSrc.MultScarto) + "/" + (Fmt2 $SoglieSrc.MultLargo) + " vs " + (Fmt2 $PAGINA_C3_MULT) + "/" + (Fmt2 $PAGINA_C3_LARGO)) }
-  if($spreadSrc -ne $corsa.SpreadPagina){ [void]$diverg.Add("spread " + $Simbolo + " " + (Fmt2 $spreadSrc) + " vs pagina " + (Fmt2 $corsa.SpreadPagina)) }
-  $DefineTxt = "C1 >= " + (Fmt2 $SoglieSrc.C1) + "/gg | C3 MFE >= " + (Fmt2 $SoglieSrc.SogliaC3) + " pti (" + (Fmt2 $SoglieSrc.MultScarto) + " x spread " + (Fmt2 $spreadSrc) + "; largo > " + (Fmt2 $SoglieSrc.Largo) + ") | C5 RR >= " + (Fmt2 $SoglieSrc.C5) + " | C6 non conv. > " + (Fmt2 $SoglieSrc.C6KO) + "% scarto, " + (Fmt2 $SoglieSrc.C6SOSP) + "-" + (Fmt2 $SoglieSrc.C6KO) + "% sospeso | C8 tenuta < " + (Fmt2 $SoglieSrc.C8TEN) + " barre sospeso, >= " + (Fmt2 $SoglieSrc.C8SOTTO60) + "% sotto 60 s scarto | C2 > " + (Fmt2 $SoglieSrc.C2) + "% spaiati | C7 " + (Fmt2 $SoglieSrc.C7R) + "% x max/gg vs cap " + (Fmt2 $SoglieSrc.C7CAP) + "%"
-  if($diverg.Count -gt 0){ throw ("LE SOGLIE DEL SORGENTE NON SONO QUELLE DELLA PAGINA: " + ($diverg -join "; ") + ". Il criterio si cambia PRIMA dei numeri, non dopo: ci si ferma.") }
+  if($ns -ne $NSTATS_ATTESI){ [void]$diverg.Add("ABR_NSTATS " + (FmtN $ns) + " vs " + $NSTATS_ATTESI) }
+  if([math]::Abs($pi - 100.0) -gt 0.001){ [void]$diverg.Add("ABR_PUNTI_PER_INDICE_ATTESO " + (Fmt2 $pi) + " vs 100,00 (conversione MISURATA sui tre indici)") }
+  if([math]::Abs($sd - 2.80) -gt 0.001 -or [math]::Abs($sn - 1.80) -gt 0.001){ [void]$diverg.Add("spread attesi " + (Fmt2 $sd) + "/" + (Fmt2 $sn) + " vs 2,80/1,80 (SPREAD_FLOTTA del 03/09, mediana oraria PEGGIORE)") }
+  $DefineTxt = "cancelli di MERITO (in questa riga, NON nell'EA): E >= " + (Fmt3 $A1_E_R) + " R | PF >= " + (Fmt2 $A2_PF) + " | DD <= " + (Fmt2 $A4_DD) + "% | peggior giornata >= " + (Fmt2 $A5_PEGGIOR) + "% | n >= " + $A6_N + " | sotto 60 s < " + (Fmt2 $A7_SOTTO60) + "%. Bocciatura secca: E < " + (Fmt3 $B_E_R) + " | PF < " + (Fmt2 $B_PF) + " | DD > " + (Fmt2 $B_DD) + "% | peggior giornata < " + (Fmt2 $B_PEGGIOR) + "%. Attesi dal sorgente: ABR_NSTATS " + (FmtN $ns) + ", punto indice " + (Fmt2 $pi) + ", spread " + (Fmt2 $SpreadAtteso) + " punti indice"
+  if($diverg.Count -gt 0){ throw ("IL SORGENTE NON DICE QUELLO CHE DICE LA PAGINA: " + ($diverg -join "; ") + ". Ci si ferma PRIMA della corsa.") }
   Dico ("versione " + $VersioneTxt + " | autotest " + $AutoSrcTxt + " | " + $NStatsTxt + " | " + $InputTxt + " | " + $GrepTxt + " | " + $IncludeTxt) "Green"
-  Dico ("soglie dal sorgente (= pagina): " + $DefineTxt) "Green"
+  Dico ("cancelli e attesi: " + $DefineTxt) "Green"
 
   # -------------------------------------------------------------------
   #  3. I GATE SUI PROVA -- girano PRIMA di aprire MT5
   # -------------------------------------------------------------------
-  Titolo "3. GATE SUI DUE PROVA (direttive nude + input nei due versi + 2 assi + 90 celle + fissi + gemellaggio a DUE)"
+  Titolo "3. GATE SUI SEI PROVA (direttive nude + input nei due versi + ZERO assi + fissi + magic e modo sonda + gemellaggio a SEI)"
   $letture = [ordered]@{}
   foreach($k in @($CORSE.Keys)){
-    $esito = GateProva (Join-Path $Prove $CORSE[$k].File) $CORSE[$k].File $CORSE[$k].Simbolo $CORSE[$k].Periodo $inputEA
+    $esito = GateProva (Join-Path $Prove $CORSE[$k].File) $CORSE[$k].File $CORSE[$k].Simbolo "M5" $inputEA $CORSE[$k].Magic $CORSE[$k].Sonda
     $letture[$k] = $esito.Lettura.Mappa
-    if($k -eq $Prova){ $CelleTxt = "" + $esito.Celle + " (2 assi ESTESI: InpFinestraN 10..55 passo 5 x InpSogliaIngressoSigma 0,75..1,95 passo 0,15; il 04/09 erano 10..40 x 0,75..1,65 = 49), ricontate dai pin ||Y al pin" }
+    if($k -eq $Prova){ $CelleTxt = "" + $esito.Celle + " passata (NESSUNA GRIGLIA: cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", zero assi Y nei prova)" }
   }
-  Dico ("gate per prova: 4 direttive nude, " + $INPUT_ATTESI + " input pinnati nome per nome nei DUE versi, 2 assi esatti, celle " + $CelleTxt + ", nessuna riga estranea: PASSATI su 4/4") "Green"
-  $GemelliTxt = GateGemelli $letture
+  Dico ("gate per prova: 4 direttive nude, " + $INPUT_ATTESI + " input pinnati nome per nome nei DUE versi, ZERO assi, magic e modo sonda gattati uno per uno, " + $CelleTxt + ", nessuna riga estranea: PASSATI su " + @($CORSE.Keys).Count + "/" + @($CORSE.Keys).Count) "Green"
+  $GemelliTxt = GateGemelli $letture $DifferenzeAmmesse
   Dico ("gemellaggio: " + $GemelliTxt) "Green"
 
   # -------------------------------------------------------------------
@@ -984,7 +904,7 @@ try{
   # -------------------------------------------------------------------
   #  7. LA CORSA -- il generico, UNA volta, con lo STESSO terminale
   # -------------------------------------------------------------------
-  Titolo ("7. LA CORSA " + $Prova + " (generico, Modello 2 OPEN PRICES, FrazioneIS " + $FrazioneIS + ", -Rifai)")
+  Titolo ("7. LA CORSA " + $Prova + " (generico, Modello 4 TICK REALI, FrazioneIS " + $FrazioneIS + ", -Rifai)")
   $tCorsa = Get-Date
   $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
             "-Expert",$EA,
@@ -993,7 +913,7 @@ try{
             "-DaQuando",$DaQuando,
             "-Fino",$Fino,
             "-FrazioneIS",("" + $FrazioneIS),
-            "-Modello","2",
+            "-Modello","4",
             "-Rifai",
             "-Deposito",("" + $Deposito),
             "-Terminal",$TermExe,
@@ -1015,7 +935,7 @@ try{
     # (SOLO esistenza e data: sul Model mente, punto 96 della checklist).
     $ante = Join-Path $Work ("anteprima_" + $EA + "_" + $Simbolo + ".ini")
     if((Test-Path -LiteralPath $ante) -and ((Get-Item -LiteralPath $ante).LastWriteTime -ge $tCorsa)){
-      $AnteprimaTxt = "FRESCA (" + (Get-Item -LiteralPath $ante).LastWriteTime.ToString("HH:mm:ss",$INV) + "): il generico ha passato i suoi controlli. NON aprirla: scrive Model=4 hardcoded, la corsa vera usa Model=2."
+      $AnteprimaTxt = "FRESCA (" + (Get-Item -LiteralPath $ante).LastWriteTime.ToString("HH:mm:ss",$INV) + "): il generico ha passato i suoi controlli. ATTENZIONE: l'anteprima scrive Model=4 HARDCODED, quindi NON PUO' fare da prova che la corsa gira a tick reali -- quella prova sta nel REPORT DEL TESTER, e va letta li'."
       $nIni = @(Get-Content -LiteralPath $ante | Where-Object { $_ -match '^Inp\w+=' }).Count
       $AnteprimaTxt = $AnteprimaTxt + " Righe Inp* in [TesterInputs]: " + $nIni + " (attese " + $INPUT_ATTESI + ")"
       if($nIni -ne $INPUT_ATTESI){ [void]$Problemi.Add("anteprima .ini con " + $nIni + " righe Inp* invece di " + $INPUT_ATTESI + ".") }
@@ -1024,8 +944,16 @@ try{
     Dico ("anteprima: " + $AnteprimaTxt)
   }
   else{
-    $csvIS = Join-Path $Results ($EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv")
-    AnalizzaCsv $csvIS $tCorsa $SoglieSrc
+    #--- a Modello 4 il generico NON mette il suffisso "_ohlc": quel
+    #    suffisso e' proprio la marca dei modelli non-tick. Cercarlo qui
+    #    vorrebbe dire non trovare mai il CSV giusto.
+    $csvIS  = Join-Path $Results ($EA + "_" + $Simbolo + "_IS_"  + $Prova + ".csv")
+    $csvOOS = Join-Path $Results ($EA + "_" + $Simbolo + "_OOS_" + $Prova + ".csv")
+    $GambaIS  = LeggiGamba $csvIS  $tCorsa "IS"
+    $GambaOOS = LeggiGamba $csvOOS $tCorsa "OOS"
+    $CollaudiKo = 0
+    $CollaudiKo += CollaudiGamba $GambaIS  "IS"  $corsa.Ruolo
+    $CollaudiKo += CollaudiGamba $GambaOOS "OOS" $corsa.Ruolo
   }
 }
 catch{
@@ -1066,19 +994,18 @@ $nOos = 0
 if($Prova -ne "" -and (Test-Path -LiteralPath (Join-Path $Results ($EA + "_" + $Simbolo + "_OOS_ohlc_" + $Prova + ".csv")))){ $nOos = 1 }
 if($nOos -gt 0){ [void]$Rilievi.Add("un CSV *_OOS esiste NONOSTANTE la gamba degenere (FrazioneIS " + $FrazioneIS + "): numeri su finestra NON dichiarata, NON leggerli. Nello zip solo come reperto.") }
 
-$sg = $SoglieSrc
 $R = New-Object System.Collections.ArrayList
 [void]$R.Add("=====================================================================")
-[void]$R.Add(" SONDA RELATIVO -- PASSO 0 / ESTENSIONE DELLA GRIGLIA (" + $EA + ")")
-[void]$R.Add(" gamba " + $Simbolo + " (si scambia) x metro " + $METRO + " (si legge), " + $Periodo + " -- NESSUN ORDINE -- " + $NCelleAttese + " passate (griglia ESTESA; le " + $NCelleVecchie + " del 04/09 sono dentro)")
+[void]$R.Add(" RELATIVO -- R117, PASSO 1: MERITO A TICK REALI (" + $EA + ")")
+[void]$R.Add(" gamba " + $Simbolo + " (si scambia) x metro " + $METRO + " (si legge), " + $Periodo + " -- QUESTO EA APRE ORDINI -- ruolo: " + $RuoloTxt)
 [void]$R.Add("=====================================================================")
 [void]$R.Add("modo: " + $Modo + "   <- CONTROLLO = giro a vuoto, NON e' il risultato")
-[void]$R.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- ORA DI AVVIO, non di fine. MISURATO il 04/09: 49 passate M5 = ~30 s di tester, quindi 90 ~= 1 minuto piu' gli avvii del terminale")
+[void]$R.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   <- ORA DI AVVIO, non di fine. A TICK REALI la corsa e' lunga: non e' un blocco.")
 [void]$R.Add("pin:  " + $Pin)
-[void]$R.Add("prova: " + $Prova + " = " + $FileProva)
-[void]$R.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
-[void]$R.Add("banco: MODELLO 2 (SOLO PREZZI DI APERTURA): il segnale nasce su barra chiusa e non si apre niente. I CSV portano il suffisso _ohlc (marca del generico per ogni modello non-tick). Deposito " + $Deposito + " (inerte).")
-[void]$R.Add("terminale: " + $TermScelto + "   [" + $TermCrit + "]   dati: " + $DataFolder)
+[void]$R.Add("prova: " + $Prova + " = " + $FileProva + " | magic atteso " + $MagicTxt + " | modo sonda atteso " + $SondaTxt)
+[void]$R.Add("finestra: " + $DaQuando + " -> " + $Fino + "  (split IS/OOS " + $FrazioneIS + ")")
+[void]$R.Add("banco: MODELLO 4 (OGNI TICK, TICK REALI). E' il punto del round: sul tick reale lo spread NON si assume, SI PAGA. Il Model si verifica sul REPORT DEL TESTER, non sull'anteprima .ini (che scrive 4 hardcoded). Deposito " + $Deposito + ".")
+[void]$R.Add("terminale: "[void]$R.Add("terminale: " + $TermScelto + "   [" + $TermCrit + "]   dati: " + $DataFolder)
 [void]$R.Add("compilazione: " + $Compilato + "   <- EA NUOVO: se e' FALLITA, QUESTO e' il risultato del passo")
 [void]$R.Add("riga Result del log: " + $ResultTxt)
 [void]$R.Add("codice di uscita di metaeditor64: " + $RcMeTxt + "   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)")
