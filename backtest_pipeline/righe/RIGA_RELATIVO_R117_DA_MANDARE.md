@@ -182,15 +182,16 @@ questo EA: **mettici il tempo che ci mette, e se sembra bloccato guarda che il
 tester stia macinando invece di fermare tutto.** Il referto porta l'**ora di
 avvio**, non quella di fine, apposta.
 
-## 📌 IL PIN — **`@@PIN@@`** ⛔ SEGNAPOSTO, NON ANCORA SCELTO
+## 📌 IL PIN — **`b4e69ed3e1a4866ec332b28360b2aabc96638e43`**
 
-⛔ **IL PIN VECCHIO (`983a0f2…`) NON VALE PIÙ**: puntava alla versione **v1**
-della riga, quella bocciata dalla review del 04/09 (4 difetti bloccanti nel
-driver + 2 nell'EA). **Non lanciarla.** Il pin nuovo si sceglie **dopo** il
-commit dei fix e si verifica via `raw` prima di essere scritto qui — classe 101:
-il segnaposto **si riscrive**, non si lascia.
+✅ **PRONTA — pinnata il 04/09/2026, dopo TRE giri di `verificatore-stringhe`**
+(FAIL con 4 bloccanti nel driver + 2 nell'EA · FAIL con 1 gate armato a mano +
+2 residui di propagazione · terzo giro in corso sul delta finale). I pin
+precedenti (`983a0f2…` v1, `8fce113…` v3-parziale) **non valgono più**: puntavano
+a versioni con difetti già chiusi qui. **Verificato uno per uno via `raw`**
+(HTTP 200 + sha256 identico al repo, tutti e nove i file):
 
-| file al pin | cosa dovrà essere verificato prima di dichiararlo pronto |
+| file al pin | cosa è stato verificato |
 |---|---|
 | `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · marcatore `MARCATORE_RIGA_RELATIVO_R117_v3` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
 | `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · `#property version "1.02"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
@@ -321,7 +322,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -346,7 +347,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -364,7 +365,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -382,7 +383,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30 -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -400,7 +401,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -418,7 +419,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -436,7 +437,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='b4e69ed3e1a4866ec332b28360b2aabc96638e43'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v3' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
