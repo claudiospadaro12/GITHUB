@@ -1,0 +1,216 @@
+# =====================================================================
+#  PASSO 0 -- POST NEWS / BLOCCO ISM DELLE 15:00 SERVER su EUR/USD M5
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_ISM1500_EURUSD.set
+#  Scritto il 04/09/2026. NON LANCIATO (chi scrive non ha MT5).
+# =====================================================================
+#
+#  DA DOVE VIENE QUESTA CELLA
+#  Dossier di caccia del 04/09/2026, candidato "A":
+#    backtest_pipeline\caccia_strategie\CACCIA_POSTNEWS_ALTRE_FAMIGLIE_2026-09-04.md
+#  Il MECCANISMO non e' nuovo: e' lo stesso della sedia NFP viva (due
+#  pendenti sul range delle due candele M5 dopo la notizia). Cambia UNA
+#  COSA SOLA: l'EVENTO. Le regole tradotte una per una stanno nel preset
+#  gemello, con la mappa regola->parametro scritta li' dentro.
+#
+#  >>> COSA DEVE RISPONDERE, e NIENT'ALTRO
+#      1. quante volte l'evento c'e' davvero nel periodo (l'EA lo stampa
+#         da solo in avvio: "[PostNews][NEWS] ... UTILI per questo preset N")
+#      2. quanti ORDINI e quante OPERAZIONI ne escono (colonna Trades)
+#      3. se il campione basta al metro di casa (Emendamento A: >=150
+#         OPERAZIONI per finestra).
+#         >>> QUI L'ATTESA E' DIVERSA DALLA CELLA NFP, E VA LETTA BENE. <<<
+#         Sul calendario di casa, con l'etichetta di questo preset
+#         (ISM1500OK), ci sono 431 GIORNATE distinte dal 2010.01.04 al
+#         2023.12.20 = 13,96 anni = 30,9 giornate l'anno.
+#         [MISURATO ORA sul file, contando le righe. NON e' il "31,5/anno"
+#          del dossier: quel numero contava le 441 giornate PRIMA
+#          dell'igiene di costruisci_news_blocchi_usa.py.]
+#         Con -DaQuando 2010.01.01, -Fino 2023.12.31 e lo split 0,40 di
+#         casa (meta' al 2015.08.07) le giornate cadono cosi':
+#              IS  2010.01.01 -> 2015.08.07 : 189 OCCASIONI
+#              OOS 2015.08.08 -> 2023.12.31 : 242 OCCASIONI
+#         >>> ATTENZIONE, E' LA COSA PIU' IMPORTANTE DI QUESTA PAGINA:
+#             UN'OCCASIONE NON E' UN'OPERAZIONE. Ogni giornata utile
+#             piazza DUE pendenti; quante gambe scattino davvero non lo
+#             sa nessuno prima della passata (puo' valere 0, 1 o 2).
+#             Quindi n(IS) sta fra 0 e 378 e il numero VERO lo dice
+#             SOLO la colonna Trades del CSV.
+#             Se n(IS) >= 150 il MERITO diventa misurabile in un round
+#             successivo. NON in questo: qui il banco e' Modello 1 (OHLC)
+#             = SCREENING, e da uno screening non esce nessuna promozione.
+#         >>> DA QUESTA CELLA NON PUO' USCIRE NESSUNA PROMOZIONE. <<<
+#         Il giudizio che resta valido a qualunque n e' quello sul
+#         RISCHIO (Emendamento B): se il DD sfonda si boccia.
+#
+#  >>> PERCHE' IL ROUND DEL 07/08 DI QUESTO EA E' DA BUTTARE
+#      Il verdetto "PostNews: nessun edge" e' NULLO: i quattro CSV hanno
+#      Trades=0. Due cause sommate, tutte e due corrette il 03/09:
+#        (a) il DATO: abtg_news.csv aveva 17 righe datate 2026-2027 e il
+#            periodo testato non le conteneva -> zero eventi.
+#        (b) il CANALE: l'EA leggeva il CSV senza FILE_COMMON e nel
+#            tester ogni agente ha la SUA sandbox MQL5\Files, dove il
+#            file non arriva mai -> FileOpen falliva e il filtro si
+#            spegneva in silenzio.
+#      >>> CONTROLLO OBBLIGATORIO PRIMA DI LEGGERE QUALSIASI NUMERO:
+#          nel log della passata deve comparire
+#            [PostNews][NEWS] letto da Common\Files | righe 463 |
+#            UTILI per questo preset 431 | dal 2010.01.04 al 2023.12.20
+#          (righe 463 e non 464: l'intestazione la salta da sola,
+#           StringToTime("Data Ora") torna 0).
+#          Se N=0, o se compare CALENDARIO CIECO / CANARINO ROSSO, LA
+#          PASSATA SI BUTTA: non e' "niente edge", e' "non e' girata".
+#
+#  >>> IL CALENDARIO, E DOVE VA MESSO (passo che fa fallire il round)
+#      File: mql5\Files\abtg_news_ism1500_2010_2023_UTC.csv
+#      (464 righe = 1 intestazione + 463 eventi; prodotto da
+#       backtest_pipeline\costruisci_news_blocchi_usa.py; UTC dichiarato).
+#      Delle 463 righe, 431 portano l'etichetta ISM1500OK (quella di
+#      questo preset) e 32 portano ISM1500DST.
+#      VA COPIATO IN TUTTE E DUE:
+#         %APPDATA%\MetaQuotes\Terminal\Common\Files\
+#         <DataFolder del terminale>\MQL5\Files\
+#      Common e' quella che conta nel tester (gli agenti la condividono);
+#      l'altra serve al test singolo e al grafico.
+#      NB: NON si tocca abtg_news.csv, che e' il file del FORWARD.
+#
+#      !!! IL CALENDARIO FINISCE NEL 2023. !!! La sorgente Forex Factory
+#      di casa si ferma li'. Una finestra che sconfina oltre il
+#      2023.12.20 non e' un errore, ma quei mesi valgono ZERO occasioni:
+#      per questo la riga gira con -Fino 2023.12.31 e non col
+#      2026.06.30 di altri round. Dichiarato, non nascosto.
+#
+#  >>> IL BANCO, DICHIARATO PRIMA DEI NUMERI
+#      Servono barre M5 di EURUSD dal 2010: questa cella e' OHLC/M1 =
+#      -Modello 1 = SCREENING, e un numero OHLC non e' mai un verdetto
+#      (in questa casa l'illusione OHLC ha gia' revocato una promozione:
+#      SupRev DOW H4, PF 2,77 OHLC contro 0,79 a tick reali). Se lo
+#      screening e' interessante, la finestra recente si RIFA' a tick
+#      reali (-Modello 4) e SOLO quella si legge come misura.
+#      Sullo SPREAD: EURUSD e' il maggiore di cui abbiamo lo spread reale
+#      BCM archiviato (mediana 0,100-0,200 pip in sessione Londra,
+#      REGISTRO_TEST.md R115) = lo 0,4-0,8% di uno SL da 25 pip. E'
+#      la ragione MISURATA per cui il candidato A nasce su questo
+#      simbolo. Ma a Modello 1 lo spread non e' quello vero: e' un'altra
+#      ragione per cui da qui non esce un verdetto.
+#
+#  >>> LA DATA DI INIZIO NON E' SCRITTA QUI APPOSTA.
+#      @DAQUANDO e' OMESSO: il driver si ferma e obbliga a misurarla.
+#         powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "EURUSD" -SoloReferto
+#      e poi si passa con -DaQuando <la data VERA delle barre M1>.
+#      Mettere 2010.01.01 a occhio significa far girare meta' finestra
+#      su dati che non esistono.
+#      >>> E QUI C'E' UN FATTO GIA' MISURATO CHE MORDE AL CONTRARIO:
+#          in R102 (24/08) lo scarico M1 di EURUSD da BCM ha dichiarato
+#          10.014.728 barre "dal 1971.01.03", ma la prima operazione vera
+#          e' del 1999.01.18. Se il driver prendesse alla lettera il
+#          1971, con lo split 0,40 l'IS finirebbe fra il 1971 e i primi
+#          anni '90: ZERO occasioni, round illeggibile.
+#          Per questo la riga usa il PIU' TARDI fra la data misurata e un
+#          PAVIMENTO dichiarato (2010.01.01, il mese in cui comincia
+#          QUESTO calendario), e scrive nel referto tutti e due i numeri.
+#
+#  >>> IL LIMITE DST, QUI E' ISOLATO (a differenza della cella NFP)
+#      L'ora d'azione e' FISSA (15:15 server). Le 32 giornate in cui il
+#      DST USA/UK e' sfasato -- l'evento esce alle 14:00 server -- NON
+#      entrano in questo preset: portano l'etichetta ISM1500DST e il
+#      filtro del titolo (ISM1500OK) le lascia fuori.
+#      Nella cella NFP quelle giornate erano DENTRO e diluivano la
+#      misura; qui sono un'ablazione a parte, da fare dopo se serve
+#      (InpNewsTitleMatch=ISM1500 le include tutte e 463).
+#
+#  >>> LO SWEEP: due passate sul MAGIC che DEVONO uscire identiche al
+#      centesimo. Non e' spreco: l'export dell'OptFrame scrive il CSV
+#      solo in ottimizzazione, e due celle gemelle sono un controllo di
+#      coerenza gratis. Se differiscono, qualcosa e' rotto.
+#      Magic 774701 (= quello del preset, il LEAD) e 774706.
+#      >>> 774702 NON SI USA QUI: e' RISERVATO nel preset al gemello
+#          CROSS-SIMBOLO (ISM su USDJPY), che e' un altro round.
+#          774706 e' stato verificato VERGINE sul repo il 04/09/2026.
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_ISM_00_conta.txt `
+#       -Simbolo EURUSD -Periodo M5 -DaQuando <data MISURATA> `
+#       -Fino 2023.12.31 -Modello 1 -Etichetta ISM00 -SoloControllo
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  M5
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+# notizia 15:00 server (10:00 New York); candele di riferimento 15:05 e
+# 15:10; la barra d'azione e' quella che si APRE alle 15:15, quando la
+# 15:10 e' chiusa (l'EA legge le barre [1] e [2] = proprio quelle due).
+# E' la GEOMETRIA della sedia NFP: news+15, le DUE candele DOPO quella
+# della notizia. Il gemello dell'ablazione (news+10, geometria ECB/FOMC)
+# si ottiene cambiando UN SOLO numero: InpActionMin=10. Non qui.
+InpActionHour=15||15||0||15||N
+InpActionMin=15||15||0||15||N
+# scadenza dei pendenti 17:25 IT = 16:25 server (news+85). NON 16:59
+# come la cella NFP: quella finestra lunga conterrebbe altri eventi.
+InpExpiryHour=16||16||0||16||N
+InpExpiryMin=25||25||0||25||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_ism1500_2010_2023_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+# ISM1500OK = SOLO le giornate in cui l'evento e' uscito DAVVERO alle
+# 15:00 server (431 righe / 431 giornate). NewsToday fa match sulla
+# DATA, quindi un titolo troppo largo aprirebbe in giorni sbagliati.
+InpNewsTitleMatch=ISM1500OK
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti ---
+# BUY STOP a max+3 (SL -25, TP +30 DALL'INGRESSO) e SELL STOP a min-2
+# (SL +25, TP -30 dall'ingresso). Sono i valori della sedia NFP, presi
+# come PUNTO DI PARTENZA dichiarato e NON come taratura: 25 pip su
+# USDJPY e 25 pip su EURUSD non sono la stessa distanza (vincolo 5 del
+# par. 2 del dossier). La rimisura e' un round successivo, non questo.
+InpBuyOffsetPips=3.0||3.0||0||3.0||N
+InpSellOffsetPips=2.0||2.0||0||2.0||N
+InpTPpips=30.0||30.0||0||30.0||N
+InpSLpips=25.0||25.0||0||25.0||N
+# niente OCO: il corso lo nega esplicitamente e le sedie vive non lo usano
+InpUseOCO=false||false||0||false||N
+# TRUE, al contrario della cella NFP: questi eventi escono in QUALUNQUE
+# giorno della settimana e senza questo una posizione aperta di martedi'
+# resterebbe viva per giorni.
+InpCloseAtExpiry=true||true||0||true||N
+
+# --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false||false||0||false||N
+InpTrailTriggerPips=25.0||25.0||0||25.0||N
+InpTrailNewSLpips=15.0||15.0||0||15.0||N
+
+# --- rete di sicurezza del venerdi' (con CloseAtExpiry=true non scatta
+# mai: resta accesa perche' non costa niente) ---
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio: metro di casa, NON il 3% del corso.
+# 0,65% su un riferimento di 50 pip = 0,325% per ORDINE e 0,65% per
+# EVENTO nel caso peggiore (tutte e due le gambe stoppate: 25+25 pip).
+# E' META' della sedia NFP viva (1,30): un candidato mai misurato non
+# entra con lo stesso rischio di uno che ha gia' un backtest sotto.
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpRiskRefSLpips=50.0||50.0||0||50.0||N
+
+# --- generali ---
+InpComment=ISM1500 PostNews
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- l'unico sweep: due gemelle che DEVONO uscire identiche ---
+# 774701 = il magic del preset (LEAD), 774706 = il gemello di
+# DETERMINISMO. 774702 e' riservato al gemello CROSS-SIMBOLO: non qui.
+InpMagic=774701||774701||5||774706||Y
