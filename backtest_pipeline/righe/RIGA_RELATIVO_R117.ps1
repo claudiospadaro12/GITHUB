@@ -34,9 +34,13 @@
 #         round: i "Segnali Grezzi Long/Short" devono venire IDENTICI,
 #         ALLA CIFRA, agli "Attraversamenti Grezzi" del passo 0 sulla
 #         stessa cella e sulla stessa finestra. Lo z-score si calcola su
-#         BARRE CHIUSE: il modello di tick non lo tocca. Se non
-#         combaciano, il nucleo statistico e' stato trasportato male e
-#         tutto il resto del round non vuol dire niente. Gli attesi
+#         BARRE CHIUSE, ma a Modello 4 le barre sono COSTRUITE dai tick e
+#         il passo 0 girava a Modello 2: la differenza non e' mai stata
+#         misurata (classe 123). Se non combaciano (fuori tolleranza), e'
+#         un RILIEVO a tre cause (nucleo trasportato male / modello del
+#         tester diverso / finestra effettiva diversa) da sciogliere
+#         PRIMA di leggere il conto economico, non una bocciatura secca
+#         del nucleo. Gli attesi
 #         vanno nella tabella $PORTO qui sotto, e finche' valgono -1 le
 #         due corse PORTO NON PARTONO (gate esplicito): un collaudo che
 #         non confronta niente uscirebbe verde senza aver misurato
@@ -253,6 +257,7 @@ $AssiAttesi = [ordered]@{}
 #     raccolta gira SEMPRE, anche nella corsa fermata da un gate.
 $Problemi   = New-Object System.Collections.ArrayList
 $Rilievi    = New-Object System.Collections.ArrayList
+$PortoFuoriTolleranza = $false   # classe 124: il declassamento a Rilievo toglie il segnale (exit resta 0); questo flag lo restituisce a console, non solo nel referto
 $Fatale     = ""
 $Modo       = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
@@ -758,7 +763,7 @@ try{
   $mv = [regex]::Match($src, '(?m)^\s*#property\s+version\s+"([^"]+)"')
   if(-not $mv.Success){ throw "il sorgente non ha #property version." }
   $VersioneTxt = $mv.Groups[1].Value
-  if($VersioneTxt -ne $VERSIONE_ATTESA){ throw ("#property version e' '" + $VersioneTxt + "', attesa '" + $VERSIONE_ATTESA + "': non e' la sonda che la pagina descrive.") }
+  if($VersioneTxt -ne $VERSIONE_ATTESA){ throw ("#property version e' '" + $VersioneTxt + "', attesa '" + $VERSIONE_ATTESA + "': non e' l'EA che la pagina descrive.") }
   $nBlocchi = 0
   foreach($rg in $srcRighe){ $viva = ($rg -replace '//.*$',''); if($viva -match '^\s*blocchi\+\+\s*;'){ $nBlocchi++ } }
   $AutoSrcTxt = "" + $nBlocchi + " blocchi (righe 'blocchi++;' fuori dai commenti)"
@@ -1282,7 +1287,8 @@ else{
   [void]$R.Add("      meno) lascerebbe la somma perfetta ed e' proprio il difetto di trasporto che questo collaudo deve pescare.")
   if($scaL -le $tolL -and $scaS -le $tolS){
     [void]$R.Add("  ESITO: PASSATO SU ENTRAMBI I LATI. Il nucleo statistico e' stato trasportato bene: lo z-score si calcola su barre")
-    [void]$R.Add("  CHIUSE e il modello di tick non lo tocca, quindi questa uguaglianza e' la prova che l'EA vede gli STESSI segnali della sonda.")
+    [void]$R.Add("  CHIUSE, e i due lati combaciano dentro la tolleranza dichiarata: il trasporto del nucleo NON ha lasciato traccia qui.")
+    [void]$R.Add("  Resta detto che la CAUSA 2 (Modello 2 vs Modello 4) non e' mai stata misurata: questo esito la LIMITA, non la esclude.")
     if($scaL -gt 0.5 -or $scaS -gt 0.5){ [void]$Rilievi.Add("collaudo del porto passato ma NON esatto: scarto L " + (FmtN $scaL) + " / S " + (FmtN $scaS) + " attraversamenti sulla giuntura IS/OOS, dentro la tolleranza dichiarata. Se lo scarto crescesse su altre corse, la spiegazione della giuntura andrebbe verificata invece che ripetuta.") }
   }
   else{
@@ -1290,6 +1296,7 @@ else{
     if($scaL -gt $tolL){ [void]$quali.Add("LONG " + (FmtN $totL) + " vs " + (FmtN $attL) + " (scarto " + (FmtN $scaL) + ", tolleranza " + (FmtN $tolL) + ")") }
     if($scaS -gt $tolS){ [void]$quali.Add("SHORT " + (FmtN $totS) + " vs " + (FmtN $attS) + " (scarto " + (FmtN $scaS) + ", tolleranza " + (FmtN $tolS) + ")") }
     [void]$R.Add("  ESITO: FUORI TOLLERANZA su " + ($quali -join " e ") + " -- vedi RILIEVI: le cause possibili sono tre, due non quantificate.")
+    $PortoFuoriTolleranza = $true
     [void]$Rilievi.Add("COLLAUDO DEL PORTO FUORI TOLLERANZA: " + ($quali -join "; ") + " -- stessa cella e stessa finestra del passo 0. LE CAUSE POSSIBILI SONO TRE, e due non sono quantificate: (a) il nucleo statistico trasportato male; (b) il MODELLO DEL TESTER diverso (passo 0 = Modello 2 open prices, qui = Modello 4 tick reali: le barre M5 sono COSTRUITE in modo diverso, le chiusure possono differire e un attraversamento di confine si ribalta); (c) la finestra effettiva diversa (leggere Giorni Contati, Barre Valutate, Gamba Prima Barra Epoch). PRIMA di rifare l'EA: confrontare Giorni Contati e Barre Valutate con 441 (D30) / 450 (NAS) del passo 0. Se combaciano, la causa e' (a) o (b), e per separarle serve una passata di controllo a Modello 2.")
   }
 }
@@ -1385,6 +1392,8 @@ Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
 if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_RELATIVO_R117_" + $Prova + ".txt + COMPILAZIONE.log + il prova + DUE CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_" + $Prova + ".csv e _OOS_, " + $RigheAttese + " riga ciascuno, " + ($NSTATS_ATTESI + 3) + " colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
 else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_RELATIVO_R117.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (atteso 1: e' la gamba su cui si leggono i cancelli di merito).") -ForegroundColor Gray
+
+if($PortoFuoriTolleranza){ Write-Host ""; Write-Host "ATTENZIONE: COLLAUDO DEL PORTO FUORI TOLLERANZA (rilievo, NON bocciatura): non lanciare le corse 4-7 prima di aver mandato questo zip." -ForegroundColor Yellow }
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
 if($Problemi.Count -gt 0){ Write-Host "ESITO: COMPLETATO CON PROBLEMI" -ForegroundColor Yellow; exit 1 }

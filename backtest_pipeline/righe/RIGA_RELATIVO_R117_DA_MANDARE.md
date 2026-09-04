@@ -167,7 +167,7 @@ Fra "passa" e "bocciata secca" c'è **sempre** una **zona morta** esplicita.
 | | |
 |---|---|
 | **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v3` — **v1 è bocciata dalla review del 04/09, non lanciarla**) |
-| **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.01** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
+| **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.02** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
 | **File prova** | i 6 `prove/RELATIVO_R117_*.txt` (scaricati tutti, ne gira uno: gli altri servono al gemellaggio a SEI) |
 | **Banco** | **Modello 4 = OGNI TICK, TICK REALI**. Finestra **2024.09.26 → 2026.06.30**, split **40/60** |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** |
@@ -193,7 +193,7 @@ il segnaposto **si riscrive**, non si lascia.
 | file al pin | cosa dovrà essere verificato prima di dichiararlo pronto |
 |---|---|
 | `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · marcatore `MARCATORE_RIGA_RELATIVO_R117_v3` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
-| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · `#property version "1.01"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
+| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · `#property version "1.02"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
 | i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | **200 tutti e sei, identici** · 32 righe vive ciascuno · 28 input che **combaciano nome per nome** con quelli dell'EA · differenze reciproche: **solo `@SIMBOLO`, `InpMagic`, `InpModoSonda`** |
 | `backtest_pipeline/walkforward_generico.ps1` | **200, identico** (`5d98af3d…`, invariato): il driver lo scarica al pin e lo ri-pinna sull'EA |
 
@@ -287,6 +287,35 @@ funzioni però **non sono identiche riga per riga**, ed è giusto scriverlo:
 posizione già aperta, la seconda conta i giorni in cui il metro ha quotato (il
 denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
 
+### 🩹 IL SECONDO GIRO DI REVIEW — **v2 BOCCIATA, ECCO COSA È CAMBIATO IN v3**
+
+Il collaudo del porto è stato **armato** (04/09, commit `5bd2f43`: i due attesi
+veri letti dai CSV OPTFRAME, vedi il riquadro sopra), e il secondo giro di
+review ha trovato **tre residui**, tutti chiusi in `v3`:
+
+1. **La tolleranza del porto accusava una sola causa** (la giuntura IS/OOS),
+   ma la corsa gira a **Modello 4** (tick reali) mentre il passo 0 girava a
+   **Modello 2** (open prices): le barre M5 sono **costruite** in modo diverso
+   nei due modelli, e nessuno ha mai misurato quanto questo sposti gli
+   attraversamenti. Un fallimento del collaudo veniva scritto come *"il nucleo
+   è stato trasportato male"* — una diagnosi che escludeva per iscritto la
+   causa più probabile e non quantificata. **v3**: il ramo di fallimento è
+   diventato un **RILIEVO a tre cause dichiarate** (nucleo · modello del
+   tester · finestra effettiva), non una bocciatura del round.
+2. **`ABTG_Relativo.mq5` v1.01 → v1.02**: `RegistraChiusura` ora ha un
+   pavimento (`gPosBarre<=0 -> 1`) che copre l'**ultimo** percorso di chiusura
+   rimasto scoperto (fine corsa via `OnTester`, motivo 5) — lo stesso difetto
+   di A7 della v1.01, ma su un percorso diverso. E il flat di recupero
+   notturno ora **ripristina** `gPosBarre` se `ChiudiPosizione` viene
+   **rifiutata**, per non gonfiare la tenuta di una barra a ogni tick di
+   ritentativo.
+3. **Propagazione**: la pagina (questa) e l'intestazione del driver
+   dichiaravano ancora `-1/-1` e la parola `FALLITO` per il porto, mentre il
+   codice ora dice `ARMATO`/`FUORI TOLLERANZA`. Corretto ovunque — è la
+   **classe 124**, appena scritta in checklist: *un declassamento nel codice
+   che non si propaga alla pagina lascia Claudio a cercare una parola che il
+   referto non stampa più*.
+
 ## 1️⃣ Giro a vuoto (`-SoloControllo`, con `-AccettoTettoBarre`: **serve anche qui**)
 
 ```powershell
@@ -327,7 +356,7 @@ denominatore di C2). Il collaudo del porto resta quindi **pertinente**.
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO. Se e'' FALLITO, il round NON parte e le altre corse non si lanciano.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO. Se e'' FUORI TOLLERANZA NON e'' una bocciatura del nucleo: e'' un RILIEVO a tre cause, e prima di lanciare le corse 4-7 me lo mandi.' -ForegroundColor Yellow }
 ```
 
 ## 3️⃣ 🥇 `NAS_PORTO` — collaudo del porto sulla seconda gamba
@@ -446,7 +475,7 @@ ciascuno**, 76 colonne + gli input accodati dal tester).
 **Le righe da guardare per prime, in questo ordine:**
 
 1. **`compilazione:`** — è un EA nuovo. Se è FALLITA, quello è il risultato.
-2. **`COLLAUDO DEL PORTO`** (blocchi 2-3) — se FALLITO, il round finisce lì.
+2. **`COLLAUDO DEL PORTO`** (blocchi 2-3) — l'esito è `PASSATO SU ENTRAMBI I LATI` oppure `FUORI TOLLERANZA`. **Fuori tolleranza NON è una bocciatura del nucleo**: è un RILIEVO a tre cause (giuntura IS/OOS, Modello 2 vs Modello 4, finestra effettiva) e la corsa esce **verde lo stesso**. Mandalo in chat prima di lanciare 4-7.
 3. **`IL GEMELLO DI DETERMINISMO`** (blocchi 5 e 7) — se DIVERGONO, banco sporco.
 4. **`PROBLEMI: 0`** — un solo collaudo di sanità fallito = **non leggibile**.
 5. **`ECO DEI PIN`** — se N non è 40 o σ non è 1,35, **il pin non è passato** e la
