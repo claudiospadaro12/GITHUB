@@ -1,10 +1,9 @@
 # 🎯 POSTNEWS ISM1500/EURUSD — PASSO 0 (conta-occasioni): **LA RIGA DA MANDARE**
 
-> ⛔ **QUESTA PAGINA NON È ANCORA LANCIABILE.** Il pin è ancora il segnaposto
-> `@@PIN@@`: i file citati qui sotto **non sono ancora su GitHub a un commit
-> congelato**. Va prima fatto il commit, poi applicata la **RICETTA DEL PIN** in
-> fondo (che sostituisce il segnaposto e **riscrive questo cartello**). Se stai
-> leggendo questo riquadro, **non incollare niente in PowerShell**.
+> ✅ **PRONTA — pinnata il 04/09/2026** al commit `c1782ffbba2d207480691c7c13b84e50cbbb52a8`
+> (ricetta del pin applicata, nessun segnaposto residuo). **Passo 2 della
+> ricetta (riscarico via `raw` + confronto sha256) fatto qui sotto**, vedi la
+> tabella del pin.
 
 **Che cos'è:** il **PASSO 0** del preset ISM1500/EURUSD di `ABTG_PostNews.mq5`
 v1.10 — il **candidato A** della caccia del 04/09/2026
@@ -81,15 +80,13 @@ finestra più corta di ~12 anni l'IS scende sotto le 150 occasioni. E soprattutt
 
 ---
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`c1782ffbba2d207480691c7c13b84e50cbbb52a8`**
 
-Commit di `lavoro` (04/09/2026). ⚠️ **Il pin qui sopra è un segnaposto**: va
-sostituito col commit vero e **poi** riverificato file per file via `raw`
-(HTTP 200 + `sha256` identico al repo al pin).
-
-Gli `sha256` in tabella sono calcolati **sul working tree del repo** al momento
-in cui questa pagina è stata scritta: dopo la pinnatura vanno **riconfrontati**
-con quelli scaricati da `raw` al pin (è il passo 2 della ricetta in fondo).
+Commit di `lavoro` (04/09/2026), **verificato file per file via `raw` prima di
+consegnare questa pagina**: gli `sha256` in tabella (calcolati sul working tree
+al momento della scrittura) sono stati riconfrontati con quelli scaricati da
+`raw` a questo pin — tutti e otto identici, HTTP 200 su ognuno (passo 2 della
+ricetta in fondo, già eseguito).
 
 | file al pin | sha256 (working tree) | esito atteso |
 |---|---|---|
@@ -111,7 +108,7 @@ Tutti e **otto** vanno scaricati **allo stesso pin**, mai dalla punta del branch
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c1782ffbba2d207480691c7c13b84e50cbbb52a8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ISM_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -134,7 +131,7 @@ sono ancora lì, la misura è veloce.)*
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c1782ffbba2d207480691c7c13b84e50cbbb52a8'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ISM_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
