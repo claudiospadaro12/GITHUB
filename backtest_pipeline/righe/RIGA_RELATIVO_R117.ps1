@@ -585,7 +585,7 @@ function CancelliMerito($gIS,$gOOS,[ref]$righe){
     return("NON MISURABILE")
   }
   $nIS  = $gIS["Operazioni Totali"]
-  $nOOS = $gOOS["Operazioni Totali"]
+  $nOosG = $gOOS["Operazioni Totali"]
   $eR   = $gOOS["Aspettativa In R"]
   $pf   = $gOOS["Profit Factor"]
   $pfIS = $gIS["Profit Factor"]
@@ -603,8 +603,8 @@ function CancelliMerito($gIS,$gOOS,[ref]$righe){
   if($pg -lt $A5_PEGGIOR){ $fPG = "ZONA MORTA" }
   if($pg -lt $B_PEGGIOR){ $fPG = "BOCCIATA" }
   $fN  = "PASSA"
-  if($nOOS -lt $A6_N -or $nIS -lt $A6_N){ $fN = "MERITO SOSPESO" }
-  if($nOOS -lt $N_NON_MISURABILE -or $nIS -lt $N_NON_MISURABILE){ $fN = "NON MISURABILE" }
+  if($nOosG -lt $A6_N -or $nIS -lt $A6_N){ $fN = "MERITO SOSPESO" }
+  if($nOosG -lt $N_NON_MISURABILE -or $nIS -lt $N_NON_MISURABILE){ $fN = "NON MISURABILE" }
   $fA3 = "PASSA"
   if($gIS["Profitto Netto"] -le 0.0 -or $pfIS -le 1.0){ $fA3 = "BOCCIATA" }
   elseif(($gIS["Profitto Netto"] -gt 0.0) -ne ($gOOS["Profitto Netto"] -gt 0.0)){ $fA3 = "BOCCIATA" }
@@ -616,7 +616,7 @@ function CancelliMerito($gIS,$gOOS,[ref]$righe){
   [void]$out.Add("  A3 IS coerente: profitto IS " + (Fmt2 $gIS["Profitto Netto"]) + ", PF IS " + (Fmt3 $pfIS) + ", profitto OOS " + (Fmt2 $gOOS["Profitto Netto"]) + "   -> " + $fA3)
   [void]$out.Add("  A4 drawdown equity OOS " + (Fmt2 $dd) + "%   (<= " + (Fmt2 $A4_DD) + " passa, > " + (Fmt2 $B_DD) + " bocciata PER RISCHIO)   -> " + $fDD)
   [void]$out.Add("  A5 peggior giornata OOS " + (Fmt2 $pg) + "%   (>= " + (Fmt2 $A5_PEGGIOR) + " passa, < " + (Fmt2 $B_PEGGIOR) + " bocciata PER RISCHIO)   -> " + $fPG)
-  [void]$out.Add("  A6 operazioni IS " + (FmtN $nIS) + " / OOS " + (FmtN $nOOS) + "   (>= " + $A6_N + " per giudicare il MERITO)   -> " + $fN)
+  [void]$out.Add("  A6 operazioni IS " + (FmtN $nIS) + " / OOS " + (FmtN $nOosG) + "   (>= " + $A6_N + " per giudicare il MERITO)   -> " + $fN)
   [void]$out.Add("  A7 sotto 60 secondi OOS " + (Fmt2 $s60) + "%   (< " + (Fmt2 $A7_SOTTO60) + " passa; a M5 deve essere 0,00)   -> " + $fA7)
 
   #--- IL VERDETTO. Il RISCHIO non si sospende MAI, nemmeno con n
@@ -1134,13 +1134,24 @@ else{
   $sommaAttesa = $attL + $attS
   [void]$R.Add("  grezzi misurati (IS + OOS, somma dei due lati): " + (FmtN $tot))
   [void]$R.Add("  grezzi attesi dal passo 0 (cella N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", L " + (FmtN $attL) + " + S " + (FmtN $attS) + "): " + (FmtN $sommaAttesa))
-  if([math]::Abs($tot - $sommaAttesa) -lt 0.5){
+  #--- LA TOLLERANZA NON E' ZERO, E IL PERCHE' VA SCRITTO PRIMA DI
+  #    LEGGERE IL NUMERO. Il passo 0 girava la finestra INTERA in una
+  #    passata sola; qui il generico la spezza in IS e OOS, e la passata
+  #    OOS riparte con un warmup suo. Intorno alla giuntura qualche
+  #    attraversamento puo' quindi mancare o comparire: e' un effetto
+  #    del BANCO, non del nucleo. Tolleranza: 0,5% della somma attesa,
+  #    e comunque non piu' di 20 attraversamenti.
+  $tolleranza = [math]::Max(20.0, 0.005*$sommaAttesa)
+  $scarto = [math]::Abs($tot - $sommaAttesa)
+  [void]$R.Add("  scarto " + (FmtN $scarto) + " su una tolleranza di " + (FmtN $tolleranza) + " (0,5% della somma attesa, minimo 20: e' la giuntura IS/OOS, dove la passata OOS riparte col suo warmup)")
+  if($scarto -le $tolleranza){
     [void]$R.Add("  ESITO: PASSATO. Il nucleo statistico e' stato trasportato bene: lo z-score si calcola su barre CHIUSE e il")
     [void]$R.Add("  modello di tick non lo tocca, quindi questa uguaglianza e' la prova che l'EA vede gli STESSI segnali della sonda.")
+    if($scarto -gt 0.5){ [void]$Rilievi.Add("collaudo del porto passato ma NON esatto: scarto di " + (FmtN $scarto) + " attraversamenti sulla giuntura IS/OOS, dentro la tolleranza dichiarata. Se lo scarto crescesse su altre corse, la spiegazione della giuntura andrebbe verificata invece che ripetuta.") }
   }
   else{
     [void]$R.Add("  ESITO: FALLITO. Il nucleo NON produce gli stessi segnali del passo 0.")
-    [void]$Problemi.Add("COLLAUDO DEL PORTO FALLITO: grezzi " + (FmtN $tot) + " contro " + (FmtN $sommaAttesa) + " attesi dal passo 0 sulla stessa cella e sulla stessa finestra. Lo z-score si calcola su barre CHIUSE: il modello di tick NON puo' spiegare la differenza. Il nucleo e' stato trasportato male, oppure la finestra effettiva e' diversa (leggere Giorni Contati e Barre Valutate). IL ROUND NON PARTE finche' questo non torna.")
+    [void]$Problemi.Add("COLLAUDO DEL PORTO FALLITO: grezzi " + (FmtN $tot) + " contro " + (FmtN $sommaAttesa) + " attesi dal passo 0 sulla stessa cella e sulla stessa finestra (scarto " + (FmtN $scarto) + ", tolleranza " + (FmtN $tolleranza) + "). Lo z-score si calcola su barre CHIUSE: il modello di tick NON puo' spiegare una differenza cosi' grande. O il nucleo e' stato trasportato male, o la finestra effettiva e' diversa (leggere Giorni Contati e Barre Valutate). IL ROUND NON PARTE finche' questo non torna.")
   }
 }
 [void]$R.Add("")
@@ -1170,7 +1181,11 @@ if($RuoloTxt -eq "PORTO"){
   [void]$R.Add("  NON SI LEGGONO: questa corsa non apre ordini (ruolo PORTO). Serve a verificare il nucleo, non il conto.")
 }
 else{
-  foreach($r in $RigheCancelli){ [void]$R.Add($r) }
+  #--- CLASSE 79: la variabile di ciclo NON puo' chiamarsi $r, perche'
+  #    PowerShell e' case-insensitive e $r E' $R, cioe' il referto.
+  #    E' il difetto che il verificatore di stringhe ha trovato il 03/09
+  #    sulla riga della sonda: qui non si ripete.
+  foreach($rc in $RigheCancelli){ [void]$R.Add($rc) }
   [void]$R.Add("")
   [void]$R.Add("  VERDETTO DELLA GAMBA " + $Simbolo + ": " + $VerdettoGamba)
 }
@@ -1228,8 +1243,8 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_SONDARELATIVO_EST_" + $Prova + ".txt + COMPILAZIONE.log + il prova + 1 CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_ohlc_" + $Prova + ".csv, " + $NCelleAttese + " righe = le " + $NCelleAttese + " passate, 100 colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
-else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_SONDARELATIVO_EST.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_RELATIVO_R117_" + $Prova + ".txt + COMPILAZIONE.log + il prova + DUE CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_" + $Prova + ".csv e _OOS_, " + $RigheAttese + " riga ciascuno, " + ($NSTATS_ATTESI + 3) + " colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_RELATIVO_R117.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (atteso 1: e' la gamba su cui si leggono i cancelli di merito).") -ForegroundColor Gray
 
 if($Fatale -ne ""){ Write-Host "ESITO: FERMATO" -ForegroundColor Red; exit 1 }
