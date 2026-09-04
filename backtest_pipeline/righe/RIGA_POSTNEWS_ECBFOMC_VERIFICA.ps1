@@ -1173,7 +1173,13 @@ if($FotoPrese){
   # sta nei log, non nel report ottimizzazione), ma resta LI' dopo il
   # giro: non viene ripulito. Dichiarato qui invece di lasciarlo un buco
   # silenzioso nella lista "cosa resta nel terminale".
-  foreach($s in $SEDIE){ [void]$Rilievi.Add("il terminale conserva 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' (report nativo del tester): non fotografato ne' ripulito da questa riga, dichiarato per completezza.") }
+  foreach($s in $SEDIE){
+    if($Stato[$s.Id].Corsa -like "NON TENTATA*"){
+      [void]$Rilievi.Add("sedia " + $s.Id + ": NESSUN 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' prodotto da questo giro (corsa " + $Stato[$s.Id].Corsa + "): l'.ini lo nomina (Report=), ma il tester non e' stato avviato. Se un file con quel nome c'e' nel terminale, e' di un giro PRECEDENTE -- NON MISURATO da questa riga.")
+    } else {
+      [void]$Rilievi.Add("sedia " + $s.Id + ": dopo questa corsa il terminale conserva 'OptReport_POSTNEWSVER_" + $s.Id + ".htm' (report nativo del tester, ReplaceReport=1): non fotografato ne' ripulito da questa riga, dichiarato per completezza.")
+    }
+  }
 }
 
 # =====================================================================
@@ -1232,7 +1238,7 @@ foreach($s in $SEDIE){
   [void]$REF.Add("    di cui DENTRO la finestra: " + (FmtN $st.InFinestra) + "   " + $st.DateFinestra)
   [void]$REF.Add("    ini: " + $st.Ini)
   [void]$REF.Add("    corsa: " + $st.Corsa + " | file .log nelle radici del TESTER prima: " + (FmtN $st.LogVisti) + " | cresciuti in questa corsa: " + (FmtN $st.LogNuovi))
-  [void]$REF.Add("    canarino NEWS: " + $(if($st.Corsa -like "NON TENTATA*"){ "n/d (nessuna corsa)" } else { "" + @($st.RigheNews).Count + " righe" }) + " (una in OnInit + una per ogni giorno di test: l'EA ricarica il file quando cambia il giorno)")
+  [void]$REF.Add("    canarino NEWS: " + $(if($st.Corsa -like "NON TENTATA*"){ "n/d (nessuna corsa)" } else { "" + @($st.RigheNews).Count + " righe (una in OnInit + una per ogni giorno di test: l'EA ricarica il file quando cambia il giorno)" }))
   foreach($riga in @($st.RigheNews | Select-Object -First 4)){ [void]$REF.Add("      " + $riga) }
   if(@($st.RigheNews).Count -gt 4){ [void]$REF.Add("      ... (le altre in evidenza_" + $s.Id + ".txt)") }
   [void]$REF.Add("    letto da (valori distinti): " + $(if(@($st.Dove).Count -gt 0){ (@(@($st.Dove) | Select-Object -Unique) -join " / ") } else { "n/d" }) + "   <- atteso Common\Files: e' QUESTA la prova del fix")
