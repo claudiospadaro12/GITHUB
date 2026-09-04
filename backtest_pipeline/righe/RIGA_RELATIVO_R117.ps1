@@ -191,11 +191,16 @@ $ECO_RISCHIO = 0.65
 #     stampa SOLO per la cella di riferimento N=20/sigma=1.05
 #     (D30 2246/2374 su 441 giorni, NAS 2419/2418 su 450 giorni).
 #     Grezzi ed eseguibili NON sono la stessa grandezza e non si
-#     ricavano gli uni dagli altri: percio' qui restano -1 e il gate
-#     BLOCCA, invece di inventare un atteso.
+#     ricavano gli uni dagli altri.
+#     ARMATI il 04/09/2026 leggendo DIRETTAMENTE i due CSV OPTFRAME
+#     (colonna "Attraversamenti Grezzi Long/Short", riga InpFinestraN=40
+#     / InpSogliaIngressoSigma=1.35), archiviati in
+#     backtest_pipeline/risultati_archivio/sondarelativo/:
+#       ABTG_SondaRelativo_D30EUR_IS_ohlc_D30_M5_EST.csv  -> L=1303 S=1419
+#       ABTG_SondaRelativo_NASUSD_IS_ohlc_NAS_M5_EST.csv  -> L=1506 S=1431
 $PORTO = @{
-  "D30EUR" = @{ GrezziL = -1; GrezziS = -1 }
-  "NASUSD" = @{ GrezziL = -1; GrezziS = -1 }
+  "D30EUR" = @{ GrezziL = 1303; GrezziS = 1419 }
+  "NASUSD" = @{ GrezziL = 1506; GrezziS = 1431 }
 }
 
 # --- IL TETTO DEL TESTER, in giorni di calendario per TF (CLAUDE.md
