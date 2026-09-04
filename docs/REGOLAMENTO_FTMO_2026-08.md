@@ -43,9 +43,33 @@ URL: https://ftmo.com/en/faq/which-instruments-can-i-trade-and-what-strategies-a
 **FATTO ACCERTATO — punto DURISSIMO per noi (niente filtro news negli EA).**
 - Conto **Standard, solo su FTMO Account (funded)**: "On the targeted instruments, it is not permitted to open or close any trades, **including pending orders (such as Stop Loss or Take Profit)**, within a time window starting **2 minutes before and ending 2 minutes after** the release of selected news announcements." E soprattutto: "**if a Stop Loss or Take Profit is triggered within the restricted time window, this will also be considered a breach** of the FTMO Account Agreement."
 - La restrizione NON vale in Challenge/Verification: "Restrictions… apply only once you start trading on an FTMO Account. They do not apply during the Evaluation Process."
-- Vale solo sugli strumenti "targeted" dall'evento: "during the US NFP release, you may trade EURGBP or AUDNZD; however, you must not open or close trades on USDJPY or GBPUSD". Eventi marcati "Restricted event" nel calendario FTMO (dati Forex Factory): NFP, CPI, GDP, tassi/banche centrali ecc.
+- Vale solo sugli strumenti "targeted" dall'evento: "during the US NFP release, you may trade EURGBP or AUDNZD; however, you must not open or close trades on USDJPY or GBPUSD".
 - Posizioni aperte >2 min prima si possono TENERE: "You are allowed to hold open positions on the targeted instruments if they were opened more than 2 minutes before the restricted event."
 - **Conto SWING: nessuna restrizione news**: "The FTMO Swing account type does not have any restrictions on trading during news releases."
+
+### ✅ [VERIFICATO 04/09/2026, fonte Claudio — testo copiato direttamente da ftmo.com]
+**LA TABELLA LETTERALE dei "Restricted event", per valuta/strumento colpito.**
+Sostituisce il generico "NFP, CPI, GDP, tassi/banche centrali ecc." di prima:
+questa è la lista COMPLETA, non un campione.
+
+| valuta/strumento colpito | annunci ristretti |
+|---|---|
+| **USD** (coppie FX con USD, **XAUUSD**, indici USA US2000/US500/US100/US30, **DXY**) | Federal Funds Rate & Statement · Non-Farm Employment Change · Unemployment Rate & Wages · GDP q/q (advance) · FOMC meeting minutes · **CPI y/y** (NON CPI m/m) |
+| **EUR** (coppie FX con EUR) | ECB Main Refinancing Rate |
+| **GBP** (coppie FX con GBP) | Official Bank Rate & voti MPC · CPI y/y |
+| **CAD** (coppie FX con CAD) | Overnight Rate/BOC Rate · CPI m/m · Employment Change/Unemployment Rate |
+| **AUD** (coppie FX con AUD) | RBA Cash Rate & Statement · Employment Change/Unemployment Rate · CPI m/m · CPI y/y · GDP q/q |
+| **NZD** (coppie FX con NZD) | RBNZ Official Cash Rate & Statement · Employment Change/Unemployment Rate · CPI q/q · GDP q/q |
+| **CHF** (coppie FX con CHF) | SNB Interest Rate |
+| **USOIL/UKOIL** | Crude Oil Inventories |
+
+⚠️ **Non sono nella lista, quindi NON restricted su nessun conto**: ISM
+Manufacturing PMI, ISM Services PMI, CB Consumer Confidence, Retail Sales
+(USD), PPI (USD), CPI **m/m** (USD — solo la y/y è ristretta). Rilevante per
+`CACCIA_POSTNEWS_ALTRE_FAMIGLIE_2026-09-04.md`: il candidato A (blocco
+ISM/CB Consumer Confidence, 15:00 server) e buona parte del candidato B
+(CPI m/m, Retail Sales, PPI) sono **fuori dalla lista ristretta anche su
+conto Standard funded** — non solo in Challenge/Verification o su Swing.
 
 URL: https://ftmo.com/en/faq/can-i-trade-news/ · https://ftmo.com/en/faq/ftmo-swing-account-type/ · https://ftmo.com/en/calendar/
 

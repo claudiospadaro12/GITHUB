@@ -227,10 +227,13 @@ sfruttabile"*). **La tesi e' plausibile e falsificabile, non dimostrata.**
 
 **FTMO** — azione a **news+10 = 15:10 server**, cioe' **8 minuti dopo la fine**
 della finestra vietata (±2 min). ✅ **Compatibile su qualunque tipo di conto.**
-🟡 **[INCERTO]** se ISM e CB Consumer Confidence siano marcati *"Restricted
-event"*: non sono ne' lavoro, ne' inflazione, ne' PIL, ne' banca centrale —
-cioe' **le quattro categorie che le fonti nominano** (`REGOLAMENTO_FTMO_2026-08.md`
-§4) — ma **la lista letterale resta non letta** (ftmo.com bloccato, 3ª volta).
+✅ **[VERIFICATO 04/09/2026, Claudio ha copiato la tabella letterale da
+ftmo.com]**: ISM Manufacturing PMI, ISM Services PMI e CB Consumer Confidence
+**NON compaiono nella lista dei "Restricted event"** (che per USD copre solo
+Federal Funds Rate/Statement, Non-Farm Employment Change, Unemployment
+Rate/Wages, GDP q/q, FOMC minutes, CPI y/y). **Questo blocco è fuori dalla
+restrizione ANCHE su conto Standard funded, non solo in Challenge o su
+Swing.** Buco chiuso: vedi `docs/REGOLAMENTO_FTMO_2026-08.md` §4.
 
 **PUNTEGGIO**
 ```
@@ -299,9 +302,12 @@ NFP, Unemployment Rate e Average Hourly Earnings **escono nello stesso minuto**
 dove il prezzo ne vede **uno**.
 
 **FTMO** — azione **13:45 = news+15**. ✅ Compatibile.
-🔴 **CPI e GDP sono nominate esplicitamente** fra le categorie restricted
-(`REGOLAMENTO_FTMO_2026-08.md` §4): la compatibilita' qui **dipende
-interamente dal minuto**, non dalla famiglia. Con la scadenza accorciata a
+✅ **[VERIFICATO 04/09/2026, tabella letterale ftmo.com]** — CORREZIONE rispetto
+alla stima iniziale: **solo GDP q/q e CPI y/y sono nella lista restricted per
+USD. CPI m/m, Retail Sales e PPI NON ci sono.** Quindi buona parte di questo
+blocco (CPI m/m, Retail Sales, PPI) è **fuori dalla restrizione anche su
+Standard funded** — solo GDP q/q e (se mai si aggiungesse) CPI y/y andrebbero
+trattati con l'accorgimento del minuto. Con la scadenza accorciata a
 14:45 la finestra viva **non tocca nessun altro evento delle 15:00**.
 
 **PUNTEGGIO**: `[2] semplicita' · [2] filtro=motore · [2] tesi · [1] buco
