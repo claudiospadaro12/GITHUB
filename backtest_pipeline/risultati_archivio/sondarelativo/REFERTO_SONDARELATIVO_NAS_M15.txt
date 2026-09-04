@@ -1,0 +1,215 @@
+=====================================================================
+ SONDA RELATIVO -- PASSO 0, CONTATORE DI CONVERGENZA (ABTG_SondaRelativo)
+ gamba NASUSD (si scambia) x metro U30USD (si legge), M15 -- NESSUN ORDINE -- 49 passate
+=====================================================================
+modo: CORSA   <- CONTROLLO = giro a vuoto, NON e' il risultato
+data: 2026-09-04 14:09:58   <- ORA DI AVVIO, non di fine: la corsa dura decine di minuti
+pin:  b3acff11221e2cb9fed0a48899b23e6c94cbf5a0
+prova: NAS_M15 = RELATIVO_NAS_M15.txt
+finestra: 2024.09.26 -> 2026.06.30  (UNA TRANCHE, FrazioneIS 1)
+banco: MODELLO 2 (SOLO PREZZI DI APERTURA): il segnale nasce su barra chiusa e non si apre niente. I CSV portano il suffisso _ohlc (marca del generico per ogni modello non-tick). Deposito 100000 (inerte).
+terminale: C:\Program Files\BCM Markets MT5 Terminal   [FATTO: cartella dati con bases\BCMMarkets-Server (scartate le installazioni -V3)]   dati: C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+compilazione: OK (89 KB, 14:10:04), 0 errors, 0 warning   <- EA NUOVO: se e' FALLITA, QUESTO e' il risultato del passo
+riga Result del log: Result: 0 errors, 0 warnings, 1339 ms elapsed, cpu='X64 Regular'
+codice di uscita di metaeditor64: 1   (NON LETTO non e' un fallimento: fa fede l'.ex5 e il log)
+versione letta dal #property: 1.03 (attesa 1.03)
+autotest nel sorgente: 25 blocchi (righe 'blocchi++;' fuori dai commenti) (attesi 25)
+colonne: REL_NSTATS = 97 -> 100 colonne (attese 100)
+input: 22 input letti dal sorgente (attesi 22, tutti pinnati nel prova)
+grep contatore puro: 0 chiamate di trading fuori dai commenti (attese 0)
+include: 0 righe #include (attese 0: sonda autosufficiente)
+celle: 49 (2 assi: InpFinestraN 10..40 passo 5 x InpSogliaIngressoSigma 0,75..1,65 passo 0,15), ricontate dai pin ||Y al pin
+gemellaggio 4 prova: VALIDO: i 4 prova hanno il blocco dei parametri IDENTICO riga per riga e differiscono SOLO per @SIMBOLO e @PERIODO
+tetto barre: DENTRO IL TETTO: M15 chiede 642 giorni (1.76 anni) contro ~1461 di tetto | EFFETTIVA: prima barra GAMBA 2024-09-26, METRO 2024-09-26, Giorni Contati 447 su ~459 feriali chiesti, Barre Valutate 12970
+cache tester: prima 1 file, dopo 0
+codice di uscita del generico: 0
+anteprima .ini (solo CONTROLLO): n/a (solo in CONTROLLO)
+csv *_OOS trovati: 1 (attesi 0: gamba OOS degenere; il rosso del generico su quel file e' ATTESO e NON si rilancia)
+foto PRIMA dei file del terminale:
+   Experts\ABTG_SondaRelativo.mq5: presente, 175264 byte, 2026-09-03 22:50:25
+   Experts\ABTG_SondaRelativo.ex5: presente, 91716 byte, 2026-09-03 22:50:29
+   Files\OptResults_ABTG_SondaRelativo_NASUSD.csv: assente
+foto DOPO:
+   Experts\ABTG_SondaRelativo.mq5: presente, 175264 byte, 2026-09-04 14:10:05
+   Experts\ABTG_SondaRelativo.ex5: presente, 90968 byte, 2026-09-04 14:10:07
+   Files\OptResults_ABTG_SondaRelativo_NASUSD.csv: assente
+pulizia: nessun CSV grezzo residuo; nel terminale RESTANO (dichiarati, non cancellati): C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.mq5 e C:\Users\Master\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Experts\ABTG_SondaRelativo.ex5
+
+--- I CRITERI DI LETTURA (dai #define del sorgente al pin, uguali alla pagina; scritti PRIMA dei numeri) ---
+  C1 >= 2.00/gg | C3 MFE >= 5.40 pti (3.00 x spread 1.80; largo > 10.80) | C5 RR >= 0.70 | C6 non conv. > 40.00% scarto, 25.00-40.00% sospeso | C8 tenuta < 12.00 barre sospeso, >= 25.00% sotto 60 s scarto | C2 > 10.00% spaiati | C7 0.65% x max/gg vs cap 3.25%
+  VERDETTO PER LATO = ALTOPIANO, NON PICCO: esiste un blocco 2x2 di celle CONTIGUE (N adiacenti x sigma adiacenti)
+  in cui C1 (somma dei lati) + C3 (lato) + C5 (lato) + C6 (totale) + C8 (totale) stanno in piedi INSIEME?
+    VIVO    = almeno un blocco 2x2 tutto di celle VIVE (C6 <= 25.00% e tenuta >= 12.00 barre dentro)
+    SOSPESO = blocchi 2x2 in piedi solo con celle SOSPESE dentro (C6 25.00-40.00% o tenuta < 12.00)
+    NO      = nessun blocco 2x2: le celle vive, se ci sono, sono ISOLATE = rumore. Una cella sola non e' una risposta.
+  CLAUSOLA SEVERA: un solo collaudo fallito su una sola delle 49 righe = NON LEGGIBILE, nessun verdetto.
+  NESSUNA CELLA VIENE PROMOSSA: la cella di riferimento (N=20, sigma=1.05) si stampa perche' e' la domanda-sonda, non perche' e' la migliore.
+
+--- I COLLAUDI (si leggono PRIMA dei numeri; su TUTTE le righe) ---
+  righe nel CSV: 49 (attese 49) | CSV scritto alle 2026-09-04 14:10:23 (FRESCO: piu' recente dell'avvio della corsa)
+  autotest: 0 falliti su 25 blocchi (attesi 0/25) | occupato ALTRO lato (T6): 0 (atteso 0) | sotto 60 s: 0.00% (atteso 0,00)
+  punto indice: 1.000 (atteso 1,000) | spread misurato: 1.80 (atteso 1.80) | soglia C3: 5.40 (attesa 5.40) | campioni troncati: 0 (atteso 0)
+  ATR divergenza vs iATR: 0.0000% (atteso ~0 con SMA del TR) | ATR mediano 45.47 punti idx
+  storico: prima barra GAMBA 2024-09-26 16:30 | METRO 2024-09-26 16:00 (il metro NON deve partire dopo la gamba)
+  barre valutate 12970 | fuori finestra 26943 | saltate per dati 190 | giorni contati 447
+  DUE FEED: metro mancante sul segnale 1 | valutazioni perse per buco 18 (il COSTO della regola stretta) | solo metro 0 | z non calcolabile 0
+  C2 giorni spaiati: 1 = 0.22% (oltre 10.00% = rifare filtrando, e dichiarare)
+  diagnostica C2 (v1.02): Giorni Festa Metro 1 (festivita' del metro DENTRO la finestra della sonda, ora esclusa dal numeratore C2) | Giorni Metro Zero Calendario 0 (vecchio criterio v1.01, tenuto come controllo, atteso 0 su un metro quasi-24h)
+  FIX T12 (v1.03): Chiuse Zero Barre 0 (atteso 0, prima riga; collaudato su TUTTE le righe, un fallimento sta nei PROBLEMI) | Ingressi Barra Reale Fuori 12 (prima riga; la SOMMA sulle 49 celle sta nei RILIEVI qui sotto: se e' 0 mentre il collaudo T12 passa comunque, il fix non e' mai stato messo alla prova in questa corsa)
+  (i valori qui sopra sono della prima riga; i collaudi sono stati verificati su TUTTE le 49 righe: un fallimento sta nei PROBLEMI)
+
+--- LA CELLA DI RIFERIMENTO (N=20, sigma=1.05): la domanda-sonda del GIACIMENTO sez. 8 ---
+  eseguibili/giorno: LONG 1.268 | SHORT 1.340 | SOMMA 2.609 (C1 >= 2.00: esito 1) | grezzi L/S 762/847, eseguibili 567/599 su 447 giorni
+  MFE mediana: LONG 46.20 pti = 25.67 x spread | SHORT 47.50 pti = 26.39 x spread   (C3 soglia 5.40 = 3x 1.80; esiti L/S 2/2: 0 scarto, 1 passa, 2 largo)
+  MAE mediana: LONG 42.60 | SHORT 46.80 pti (pavimento SL) | RR: L 1.085 / S 1.015 (C5 >= 0.70: esiti 1/1) | win rate necessario L 51.57% / S 53.35%
+  C6 non convergute: L 29.63% / S 26.04% / TOTALE 27.79% (chiuse 567/599, convergute 399/443, fine corsa escluse 0; esito 1: 0 scarto, 1 sospeso, 2 passa)
+  C8 tenuta mediana: L 6.00 / S 6.00 / due lati 6.00 barre (esito 1) | C7 max eseguibili in un giorno L/S/tot 4/4/7 -> rischio aperto 4.55% vs cap 3.25% (cap necessario: 1)
+  giorni con >= 2 eseguibili 401 | giorni a zero 2
+  stato della cella: LONG S | SHORT S   (V viva, S sospesa, . no)
+
+--- LA MAPPA 7x7 PER LATO (V = C1+C3+C5+C6+C8 in piedi; S = in piedi con C6 25-40% o tenuta < 12; . = no) ---
+    lato L   sigma -> 0.75  0.90  1.05  1.20  1.35  1.50  1.65
+    N=10          S     S     S     S     S     S     S   
+    N=15          S     S     S     S     S     S     S   
+    N=20          S     S     S     S     S     S     .   
+    N=25          S     S     S     S     S     .     .   
+    N=30          S     S     S     .     .     .     .   
+    N=35          S     .     .     .     .     .     .   
+    N=40          S     .     .     .     .     .     .   
+    celle VIVE 0 / SOSPESE 30 su 49
+
+    lato S   sigma -> 0.75  0.90  1.05  1.20  1.35  1.50  1.65
+    N=10          S     S     S     S     S     S     S   
+    N=15          S     S     S     S     S     S     S   
+    N=20          S     S     S     S     S     S     .   
+    N=25          S     S     S     S     S     .     .   
+    N=30          S     S     S     .     .     .     .   
+    N=35          S     .     .     .     .     .     .   
+    N=40          S     .     .     .     .     .     .   
+    celle VIVE 0 / SOSPESE 30 su 49
+
+VERDETTO LONG : SOSPESO (17 blocchi 2x2 in piedi ma con celle SOSPESE per C6 25-40% o C8 < 12 barre)
+VERDETTO SHORT: SOSPESO (17 blocchi 2x2 in piedi ma con celle SOSPESE per C6 25-40% o C8 < 12 barre)
+
+--- LE 49 CELLE (ordinate per N, poi sigma; mai aggregate) ---
+  N sigma ese/ggL ese/ggS ese/ggT   MFE L   MFE S   RR L   RR S nonCnv% ten.med mx/g  C1 C3L C3S  C6  C8 L/S
+ 10  0.75   2.204   2.213   4.416   35.00   34.60   0.90   0.97   15.50    4.00   11   1   2   2   2   1 S/S
+ 10  0.90   2.141   2.103   4.244   36.80   35.00   0.95   0.95   15.60    4.00   10   1   2   2   2   1 S/S
+ 10  1.05   2.031   1.989   4.020   36.50   35.80   0.91   0.96   15.92    4.00    8   1   2   2   2   1 S/S
+ 10  1.20   1.888   1.843   3.732   36.85   38.55   0.89   1.03   15.89    4.00    8   1   2   2   2   1 S/S
+ 10  1.35   1.732   1.696   3.427   37.00   38.10   0.87   0.96   15.73    5.00    6   1   2   2   2   1 S/S
+ 10  1.50   1.600   1.515   3.114   38.40   39.70   0.90   0.99   15.09    5.00    6   1   2   2   2   1 S/S
+ 10  1.65   1.450   1.324   2.774   39.45   39.60   0.93   0.94   15.32    4.00    6   1   2   2   2   1 S/S
+ 15  0.75   1.624   1.669   3.293   42.25   43.15   1.04   1.00   21.47    5.00    8   1   2   2   2   1 S/S
+ 15  0.90   1.557   1.582   3.139   43.15   43.40   1.01   0.95   21.45    5.00    8   1   2   2   2   1 S/S
+ 15  1.05   1.468   1.501   2.969   43.50   46.80   0.94   1.06   21.70    6.00    7   1   2   2   2   1 S/S
+ 15  1.20   1.365   1.434   2.799   44.45   44.20   0.94   0.97   21.82    6.00    6   1   2   2   2   1 S/S
+ 15  1.35   1.304   1.324   2.629   45.20   45.30   0.94   1.02   22.13    6.00    5   1   2   2   2   1 S/S
+ 15  1.50   1.217   1.224   2.441   44.80   46.40   0.92   0.98   22.00    6.00    5   1   2   2   2   1 S/S
+ 15  1.65   1.114   1.101   2.215   45.95   46.80   0.89   0.98   22.22    6.00    5   1   2   2   2   1 S/S
+ 20  0.75   1.387   1.418   2.805   43.55   47.35   1.02   1.08   27.03    6.00    7   1   2   2   1   1 S/S
+ 20  0.90   1.327   1.398   2.725   44.90   46.40   1.05   1.02   27.34    6.00    7   1   2   2   1   1 S/S
+ 20  1.05   1.268   1.340   2.609   46.20   47.50   1.08   1.02   27.79    6.00    7   1   2   2   1   1 S/S
+ 20  1.20   1.163   1.273   2.436   46.40   48.00   0.99   1.03   28.01    7.00    6   1   2   2   1   1 S/S
+ 20  1.35   1.114   1.188   2.302   46.50   49.30   0.92   1.04   28.09    7.00    5   1   2   2   1   1 S/S
+ 20  1.50   1.051   1.089   2.141   49.65   48.20   1.02   0.98   28.11    6.00    5   1   2   2   1   1 S/S
+ 20  1.65   0.998   0.982   1.980   50.05   49.30   0.99   1.05   27.12    6.00    5   0   2   2   1   1 ./.
+ 25  0.75   1.262   1.306   2.568   46.00   47.10   1.01   1.02   30.84    5.00    7   1   2   2   1   1 S/S
+ 25  0.90   1.210   1.255   2.465   46.60   48.10   1.02   1.14   31.49    6.00    7   1   2   2   1   1 S/S
+ 25  1.05   1.136   1.190   2.327   48.40   48.75   1.02   1.03   31.83    6.00    6   1   2   2   1   1 S/S
+ 25  1.20   1.067   1.128   2.195   51.40   48.00   1.04   1.03   31.09    6.00    6   1   2   2   1   1 S/S
+ 25  1.35   1.002   1.045   2.047   53.80   48.60   1.14   1.02   30.27    6.00    6   1   2   2   1   1 S/S
+ 25  1.50   0.949   0.984   1.933   53.80   48.35   1.14   1.00   30.32    6.00    5   0   2   2   1   1 ./.
+ 25  1.65   0.888   0.902   1.790   51.40   49.60   1.03   0.98   28.38    6.00    5   0   2   2   1   1 ./.
+ 30  0.75   1.186   1.210   2.396   45.55   44.50   1.04   0.96   30.72    5.00    8   1   2   2   1   1 S/S
+ 30  0.90   1.096   1.139   2.235   46.35   44.10   1.00   0.92   31.03    6.00    7   1   2   2   1   1 S/S
+ 30  1.05   1.040   1.060   2.101   46.40   47.20   0.92   0.97   29.71    6.00    7   1   2   2   1   1 S/S
+ 30  1.20   0.984   0.973   1.957   53.40   49.30   1.04   0.95   27.77    6.00    7   0   2   2   1   1 ./.
+ 30  1.35   0.913   0.917   1.830   54.40   50.75   1.02   0.96   26.53    7.00    6   0   2   2   1   1 ./.
+ 30  1.50   0.832   0.832   1.664   56.25   50.85   1.01   0.93   24.60    7.50    5   0   2   2   2   1 ./.
+ 30  1.65   0.796   0.792   1.588   59.00   54.30   1.02   0.98   22.82    8.00    5   0   2   2   2   1 ./.
+ 35  0.75   1.056   1.081   2.136   46.30   45.80   0.96   0.94   30.05    6.00    7   1   2   2   1   1 S/S
+ 35  0.90   0.980   0.996   1.975   51.10   46.50   1.00   0.89   28.77    6.00    6   0   2   2   1   1 ./.
+ 35  1.05   0.935   0.940   1.875   51.60   49.40   0.95   0.95   27.92    7.00    6   0   2   2   1   1 ./.
+ 35  1.20   0.888   0.884   1.772   59.00   50.80   1.06   0.96   27.27    7.00    6   0   2   2   1   1 ./.
+ 35  1.35   0.857   0.828   1.685   61.70   53.25   1.12   0.98   26.16    8.00    6   0   2   2   1   1 ./.
+ 35  1.50   0.785   0.776   1.562   63.20   57.10   1.13   0.95   25.07    8.00    5   0   2   2   1   1 ./.
+ 35  1.65   0.740   0.747   1.488   63.30   62.05   1.04   1.04   24.51    9.00    4   0   2   2   2   1 ./.
+ 40  0.75   1.013   1.029   2.043   49.00   46.30   1.13   0.94   31.65    6.00    7   1   2   2   1   1 S/S
+ 40  0.90   0.940   0.949   1.888   55.15   50.85   1.17   1.04   31.40    6.50    6   0   2   2   1   1 ./.
+ 40  1.05   0.908   0.902   1.810   57.35   53.00   1.08   1.01   31.64    7.00    6   0   2   2   1   1 ./.
+ 40  1.20   0.848   0.843   1.691   59.50   54.10   1.06   1.00   30.42    7.50    6   0   2   2   1   1 ./.
+ 40  1.35   0.790   0.792   1.582   63.90   56.90   1.09   0.98   29.28    9.00    6   0   2   2   1   1 ./.
+ 40  1.50   0.754   0.754   1.508   65.50   59.60   1.10   1.01   29.82   10.00    6   0   2   2   1   1 ./.
+ 40  1.65   0.700   0.720   1.421   69.40   59.20   1.09   0.92   28.50   10.00    5   0   2   2   1   1 ./.
+
+--- LE NOTE CHE VANNO LETTE INSIEME AI NUMERI ---
+  - QUESTA SONDA NON DICE SE IL MOTORE GUADAGNA: conta OCCASIONI e misura TAGLIA, GEOMETRIA, CONVERGENZA, TENUTA.
+    Il merito e' a tick, dopo, con >= 150 operazioni IS (Emendamento della Finestra, punto A).
+  - NON MISURA LA CO-INTEGRAZIONE: C6 e' la sua approssimazione operativa. Se C6 e' alto, e' MOMENTUM TRAVESTITO.
+  - IL DAX DALLE 17 SERVER IN POI E' FUORI DAL SUO CASH e lo spread quasi raddoppia (2,80 = ora peggiore): C3 usa la
+    CLAUSOLA SEVERA (mediana oraria PEGGIORE), non la mediana di sessione 1,6-1,7 citata nel GIACIMENTO.
+  - C9 GRADIENTE M5/M15: si legge confrontando i referti D30_M5/D30_M15 (e NAS) a parita' di tutto il resto.
+    Derivato PRIMA della misura: a M15 il candidato NON dovrebbe arrivare al pavimento; il bersaglio e' M5.
+  - TETTO BARRE (M5): la finestra EFFETTIVA la dice la riga 'tetto barre' qui sopra; C1 resta per-giorno sul denominatore CONTATO.
+  - UN SOLO BROKER, UN SOLO REGIME (toro). FORMA UNILATERALE: a due gambe i numeri di C3 andrebbero RADDOPPIATI.
+  - Nessun per-trade e nessun CSV riga-per-segnale: corsa in ottimizzazione, zero ordini. I numeri stanno SOLO nelle 100 colonne OPTFRAME.
+
+AVVISO: FrazioneIS 1.0 -> la gamba 'OOS' del generico e' DEGENERE (0 giorni). Il rosso del generico sul CSV *_OOS e' ATTESO: NON rilanciare.
+
+PROBLEMI: 0
+RILIEVI: 52
+  - cella N=10 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=0.75: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.05: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=25 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=15 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.35: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=30 sigma=0.90: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=20 sigma=1.20: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=35 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=10 sigma=1.50: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - cella N=40 sigma=1.65: Barre Saltate Dati = 190 (atteso ~0): buchi nello storico, da guardare.
+  - FIX T12 (v1.03) MISURATO: Ingressi Barra Reale Fuori = 283 (somma sulle 49 celle): il gate nuovo sulla barra REALE ha morso almeno una volta dove il gate vecchio (barra teorica) avrebbe lasciato passare l'ingresso. E' la prova che il fix e' falsificabile e regge.
+  - confronto col gemello D30_M15 (CSV del 2026-09-03 22:51): Barre Valutate 12970 contro 12981 -> NON identiche, nessuna firma del tetto su questo confronto.
+  - un CSV *_OOS esiste NONOSTANTE la gamba degenere (FrazioneIS 1): numeri su finestra NON dichiarata, NON leggerli. Nello zip solo come reperto.
+
+COME SI RIPRENDE: dalla pagina righe/RIGA_SONDARELATIVO_DA_MANDARE.md, NON da questa riga: $Pin nasce dentro il blocco e non sopravvive.
