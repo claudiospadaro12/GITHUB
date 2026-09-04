@@ -7674,3 +7674,146 @@ differenza (`$NRigheFilePin` = righe totali header incluso, `$NRigheEventoPin`
 > (non da un `#define` o da una costante nel sorgente) va verificato con una
 > corsa vera, non solo con la lettura del codice: la review statica può solo
 > DICHIARARE il rischio, non chiuderlo.
+
+---
+
+## 🆕 AGGIUNTE DEL 04/09/2026 (sera) — trovate dal **verificatore** su R117 RELATIVO (`RIGA_RELATIVO_R117.ps1` + `ABTG_Relativo.mq5` v1.00 + pagina, pin `983a0f2`, **pacchetto già dichiarato pronto e già "eseguito a banco"**). Quattro classi, tutte **RIPRODOTTE ESEGUENDO**, tutte su una riga che nasceva copiando la riga sorella della sonda.
+
+## 120. 🧬 IL **GATE EREDITATO DALLA RIGA SORELLA** CHE CERCA UN IDENTIFICATORE **RINOMINATO NEL NUOVO SORGENTE** — la corsa muore al primo giro, e la pagina lo dichiara verde perché quel numero era stato letto **a mano, con un altro attrezzo**
+
+`RIGA_RELATIVO_R117.ps1` nasce copiando `RIGA_SONDARELATIVO_ESTESA.ps1`. La
+sonda esportava `#define REL_NSTATS 97`; l'EA nuovo esporta
+`#define ABR_NSTATS 73`. Nella riga nuova sono rimasti **DUE** controlli sulla
+stessa grandezza:
+
+```powershell
+$nst = [int](DefNum $defs "REL_NSTATS")     # riga 697  <- eredità della sorella
+...
+$ns  = (DefNum $defs "ABR_NSTATS")          # riga 738  <- il controllo NUOVO, giusto
+```
+
+`DefNum` **lancia** quando il `#define` non c'è. Risultato eseguito su banco:
+
+```
+*** LA RIGA SI FERMA QUI: il sorgente non ha il #define REL_NSTATS
+```
+
+Muore alla **sezione 2**, cioè *prima* della compilazione, *prima* del tester,
+su **tutte e sette** le righe della pagina, giro a vuoto compreso.
+
+**La firma diagnostica è il GATE DOPPIO**: quando una riga controlla **due
+volte la stessa grandezza con due nomi diversi**, uno dei due è quasi sempre
+un residuo del parente. Il gate doppio non è ridondanza: è un fossile.
+
+> ✅ **REGOLA**: quando una riga di lancio nasce **copiando una riga sorella**,
+> si fa il **censimento di TUTTI gli identificatori del vecchio EA** citati
+> nella riga nuova (`#define`, nomi di colonna, nomi di funzione, prefissi) e
+> si verifica **uno per uno** che esistano nel sorgente NUOVO. Non basta
+> cambiare quelli a cui si è pensato.
+>
+> ⚠️ **E la seconda metà, che è quella che brucia**: la pagina dichiarava
+> «`ABR_NSTATS` 73 (76 colonne)» come **verificato**. Era vero — ma verificato
+> **a mano, con un grep**, non facendo girare il gate della riga. **Un numero
+> letto con un attrezzo diverso da quello che poi decide NON è il gate
+> collaudato.** Il collaudo di un gate è farlo girare **sul file vero**, non
+> ottenere lo stesso numero per un'altra strada. (Parente stretto della 118: lì
+> lo scanner era cieco, qui il gate non è mai stato acceso sul bersaglio vero.)
+
+## 121. 🕳️ `$record.Campo` CHE **NON ESISTE** TORNA `$null` IN SILENZIO — e `$tabella[$null]` sotto `$ErrorActionPreference='Stop'` è una **FERMATA**, senza `Stop` è un **GATE INERTE**
+
+Stessa riga, stesso giro. La tabella delle corse non ha il campo `Periodo`:
+
+```powershell
+$CORSE = [ordered]@{ "D30_PORTO" = @{ Simbolo=...; File=...; Magic=...; Sonda=...; Gemello=...; Ruolo=... } }
+...
+$Periodo = $corsa.Periodo          # riga 646  ->  $null, SENZA UN FIATO
+...
+$tetto   = $TETTO_GIORNI[$Periodo] # riga 774
+```
+
+Eseguito, i due volti dello stesso difetto:
+
+- con `$ErrorActionPreference='Stop'` (che è il caso vero della riga):
+  **`Index operation failed; the array index evaluated to null`** → il `catch`
+  la scrive come `!!! FERMATO:` con un messaggio che **non nomina né il campo
+  né la tabella**: chi legge il referto non ha modo di risalire a `Periodo`;
+- senza `Stop`: `$tetto` resta `$null`, e allora `642 -gt $null` è **VERO**
+  (`$null` → 0), quindi **il gate del tetto delle barre dice sempre "OLTRE IL
+  TETTO"**, qualunque sia il TF, e stampa in referto
+  `OLTRE IL TETTO:  chiede 642 giorni (1.76 anni) contro ~ giorni (0.0 anni)`
+  — un gate inerte con due buchi al posto dei numeri.
+
+> ✅ **REGOLA**: ogni campo letto da un record di configurazione (`$corsa.X`,
+> `$w.Tag`, `$cella.Y`) va **preso da una tabella che lo dichiara**, e la riga
+> deve **rifiutare** il record incompleto:
+> `if(-not $corsa.ContainsKey("Periodo")){ throw "..." }`.
+> **Un `$null` silenzioso non è un valore mancante: è un gate che ha smesso di
+> esistere.** E la spia che si vede a occhio, in referto, è **il campo vuoto in
+> mezzo a una frase** (`«OLTRE IL TETTO:  chiede…»`, due spazi): quando in un
+> referto compare uno spazio doppio dove doveva esserci un valore, quello è un
+> `$null`, non un refuso.
+
+## 122. 🧊 LA **GUARDIA DI FRESCHEZZA PUNTATA SULL'ARTEFATTO CHE DEVE ESSERE VECCHIO**: il confronto col GEMELLO non può passare per un gate che pretende un file più nuovo dell'avvio
+
+La classe "CSV stantio" (31/08) è giusta e va tenuta: un CSV più vecchio
+dell'avvio della corsa **non è di questa corsa**. Ma in R117 la stessa funzione
+`LeggiGamba $csv $tCorsa` viene usata **anche** per leggere il CSV della corsa
+**GEMELLA**, che per costruzione è stato scritto **nella corsa precedente**:
+
+```powershell
+$gg = LeggiGamba $csvG $tCorsa ("OOS gemello " + $corsa.Gemello)   # riga 997
+# dentro LeggiGamba:
+if($itm.LastWriteTime -lt $tC){ ...Problemi.Add("CSV ... STANTIO, NON LETTO ... questa corsa NON ha numeri"); return $null }
+```
+
+Risultato: **il gemello di determinismo non può passare MAI.** I blocchi 5 e 7
+della pagina — che la pagina stessa chiama *«se DIVERGONO, il banco è sporco e
+NESSUN numero di questo round vale»* — finiscono **sempre** con
+`PROBLEMI: ≥ 1`, `ESITO: COMPLETATO CON PROBLEMI`, `exit 1`, e in referto la
+frase **falsa** «questa corsa NON ha numeri» riferita al file del *gemello*.
+Due corse a tick reali (ore di macchina) per un rosso che non è un rosso.
+
+> ✅ **REGOLA**: la freschezza è una proprietà **dell'artefatto DI QUESTA
+> corsa**, non di tutti gli artefatti che la corsa legge. Un artefatto di
+> **confronto** (gemello, baseline, foto di prima, referto precedente) si legge
+> **senza gate di freschezza** e con la sua **data DICHIARATA in referto**
+> (`«gemello D30 letto da un CSV del 04/09 18:12»`), così chi legge decide se è
+> il file giusto. **Prima di riusare una funzione di lettura "sicura" su un
+> secondo file, si chiede: questo file DEVE essere nuovo, o DEVE essere
+> vecchio?** Se la risposta è "vecchio", la guardia va **esclusa e dichiarata**,
+> non ereditata.
+
+## 123. 📏 LA **TOLLERANZA CHE DICHIARA UNA CAUSA** MENTRE LA CORSA NE INTRODUCE **DUE** — e il messaggio di fallimento **esclude proprio la causa non dichiarata**, quindi il gate MISDIAGNOSTICA
+
+Il collaudo del porto di R117 confronta gli attraversamenti grezzi dell'EA con
+quelli misurati al passo 0. La riga dichiara **una** sola causa di scarto e
+tara la tolleranza su quella:
+
+> *«il passo 0 girava la finestra intera in una passata sola, qui il generico la
+> spezza in IS e OOS e la passata OOS riparte col suo warmup. Tolleranza 0,5%
+> della somma attesa, minimo 20.»*
+
+Ma il passo 0 girava a **`-Modello 2` (OPEN PRICES)** (`RIGA_SONDARELATIVO_ESTESA.ps1`,
+riga 1011) e R117 gira a **`-Modello 4` (TICK REALI)** (`RIGA_RELATIVO_R117.ps1`,
+riga 926). **Il tester costruisce le barre in modo diverso nei due modelli**
+(da M1 nel primo, dai tick reali nel secondo): le chiusure M5 possono
+differire, quindi lo z-score può differire, quindi gli attraversamenti possono
+differire — per un motivo che **non è "il nucleo è stato trasportato male"**.
+
+E il messaggio di fallimento del gate **nega esplicitamente** quella causa:
+
+> *«Lo z-score si calcola su barre CHIUSE: il modello di tick NON può spiegare
+> una differenza così grande. O il nucleo è stato trasportato male, o la
+> finestra effettiva è diversa.»*
+
+Un gate che, quando cade, **esclude per iscritto la spiegazione più probabile**
+non è un gate: è una diagnosi sbagliata già scritta.
+
+> ✅ **REGOLA**: prima di confrontare due misure fatte su **due corse diverse**,
+> si fa l'**elenco di TUTTO ciò che è cambiato fra le due** (modello del tester,
+> split, warmup, versione dell'EA, finestra, TF, simbolo) e **ogni voce
+> dell'elenco finisce nel testo della tolleranza**. Se una causa non è
+> quantificabile, si dichiara come **non quantificata** e il gate **declassa**
+> da bloccante a rilievo — non si tace e si tiene la soglia stretta.
+> Corollario: **il messaggio di fallimento non deve mai escludere una causa che
+> nessuno ha misurato.** Elenca, non assolve.
