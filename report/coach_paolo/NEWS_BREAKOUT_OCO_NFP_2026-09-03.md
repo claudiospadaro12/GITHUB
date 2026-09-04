@@ -480,6 +480,37 @@ casa — che **non e' un round e non promuove niente**:
 
 ---
 
+## 9-bis. 🔁 AGGIORNAMENTO 04/09/2026 — **PAOLO SMENTISCE IL BREAKOUT IMMEDIATO SUGLI NFP, CON PAROLE SUE**
+
+📄 Referto: **`backtest_pipeline/caccia_strategie/ANALISI_LIVE_PAOLO_2026-09-03.md`** §2.
+**Non duplico: si legge li'.** Le tre righe che toccano QUESTO dossier:
+
+1. 🎯 **Nella live della sera del 03/09** (cioe' **lo stesso giorno** in cui e'
+   stato scritto questo dossier), alla domanda di un allievo sugli NFP del
+   giorno dopo, Paolo risponde `[TRASCRITTO chiaro]`:
+   > _"**Io li faccio, ma NON con la strategia quella del breakout immediato**,
+   > ne faccio con **un'altra strategia che stiamo testando**, gia' due volte
+   > che va bene […] **l'NFP non si puo' fare con lo slippage, perche' li' lo
+   > slippage e' troppo forte**"_
+2. 🟢 **Questo conferma l'insidia n.1 del §5.2** (_"slippage all'attivazione"_)
+   **dalla bocca del proprietario del conto**. ⚠️ **Non e' convergenza fra fonti
+   indipendenti** — e' la fonte stessa che parla del proprio conto. Ma chiude
+   il §5.4: i trade `News Breakout M15 OCO | NFP` del 07/08 sono **il metodo
+   VECCHIO**, dichiarato abbandonato su NFP.
+3. 🔴 **La "altra strategia" resta ignota**: zero dettagli su evento, simbolo,
+   orario, stop, se sia un EA o manuale. Solo _"gia' **due volte** che va bene"_
+   = **[dichiarato, n=2]**. ➡️ **Domanda Q2** per Claudio, ed e' l'unica cosa
+   che muove questo dossier.
+
+📌 **Nota collegata sul nostro `ABTG_PostNews`:** l'AutoTest v1.10 ha un caso
+dedicato — _"slide **NFP/USDJPY** del corso"_ (righe 176-181). **Quel caso
+verifica l'ARITMETICA, non la bonta' della strategia, e resta dov'e'.** Ma
+quando PostNews si rimisurera' (il verdetto 07/08 e' **NULLO** per calendario
+cieco), il **ramo NFP parte con una smentita esplicita della fonte**: da
+scrivere nel round **prima** di lanciarlo, non dopo.
+
+---
+
 ## 10. 🔗 FONTI EFFETTIVAMENTE APERTE
 
 - https://www.mql5.com/en/code/55064 — sorgente `FetchNews.mq5` scaricato e letto (169 righe)

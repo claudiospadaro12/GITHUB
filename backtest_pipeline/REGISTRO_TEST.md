@@ -134,6 +134,12 @@ misurare, **mai** un risultato da citare.
 | O3 | DAX_M3 | D30EUR | — | OHLC 33% pos, short 0% | 🔴 morto |
 | O4 | Londra_ORB | GBPUSD | — | OHLC 11% pos, DD 23% | 🔴 morto |
 
+> ⚠️ **04/09/2026 — la FINESTRA del range ORB e' contesa** (voce dei docenti
+> 14:30-14:45 server vs indicatore e nostre sedie 14:25-14:30). Tutta la
+> ricostruzione, con le tre letture possibili e il prerequisito Q1, sta nella
+> sezione **«ORB — LA FINESTRA DEL RANGE E' CONTESA»** piu' sotto e nel referto
+> `caccia_strategie/ANALISI_LIVE_PAOLO_2026-09-03.md` §1. **Non misurato.**
+
 ---
 
 ## 4) SUPERTREND REVERSAL portato su indici (screen OHLC 1-min)
@@ -521,6 +527,67 @@ dichiarato, nessuna proposta**.
   pagina della riga.
 - ⚠️ **Nessuna sedia viva toccata.** Nessun numero: **il round non e' ancora
   girato.**
+
+---
+
+## ORB — LA FINESTRA DEL RANGE E' CONTESA (letto il 04/09/2026, NON misurato)
+
+_Referto completo: **`caccia_strategie/ANALISI_LIVE_PAOLO_2026-09-03.md`** §1.
+Non duplico: qui solo la riga che serve a chi apre il registro._
+
+Claudio ha mandato insieme **la trascrizione della live di Paolo del 03/09** e
+**i parametri del suo `ORB_Indicator_V17`**. Le due fonti **non dicono la stessa
+cosa** sulla finestra su cui si disegna il box:
+
+| fonte | finestra USA | finestra DAX |
+|---|---|---|
+| **La VOCE dei docenti** (Paolo 03/09 + Emiliano r.213, RICORRENTE su 18 live) | **15:30-15:45 IT** = **14:30-14:45 server** | **09:00-09:15 IT** = **08:00-08:15 server** |
+| **Lo STRUMENTO** (`ORB_Indicator_V17`, `InpTime1 14:25:00` / `InpTime2 14:29:59`; **stessi numeri della V15**) | **14:25-14:30 server** = i **5 minuti PRIMA** dell'apertura | ⚪ **non lo sappiamo**: il preset DAX non ce l'abbiamo |
+| 🪑 **LE NOSTRE DUE SEDIE VIVE** (`ABTG_ORB` 770601 NASUSD · `ABTG_ORB_Ottimizzato` 770611 U30USD) | **14:25-14:30 server** (`InpRangeStartHour/Min`, `InpRangeEndHour/Min`) | — |
+
+**Le due finestre non si sovrappongono nemmeno per un secondo**, e hanno durata
+diversa (5 minuti contro 15).
+
+- 🟢 **Quello che regge oggi**: la finestra che usiamo **ha una misura dietro**
+  (`report/CONTRATTI_SEDIE.md` r.83 — 770611: DD **9,92%** R15, **119 trade**,
+  OOS 12,6 mesi). La finestra dettata a voce **non e' mai stata misurata da noi
+  su Nasdaq/Dow**. **Il valore misurato batte il valore dettato.**
+- 🟢 **Controllo passato, mai fatto prima**: su **4 parametri** (finestra,
+  `EntryPoints 10.0`, tabella **K a 6 gruppi**, fine giornata **22:59**) la
+  **V17** dell'indicatore da' **gli stessi numeri della V15** su cui e' scritto
+  il nostro `ABTG_ORB` (header righe 7-13). **La replica non e' andata alla
+  deriva.**
+- 🔴 **Prerequisito prima di qualunque griglia**: i **due preset `.set` di Paolo**
+  (_"ORB DAX"_ e _"ORB Wall Street"_, r.91) — sono l'unica cosa che scioglie il
+  nodo. **Domanda Q1 del referto.**
+- ⚠️ **Secondo dubbio, da non nascondere**: lo screenshot dei parametri e' su
+  **`NASUSD_EXT`**, che e' **un simbolo custom NOSTRO** (import HistData, in
+  frigo per il cancello zero). **[INFERITO] quel terminale e' probabilmente il
+  nostro, non quello di Paolo** → quei valori potrebbero essere il default di
+  fabbrica, non il preset del docente. **Q1-bis.**
+
+➡️ **SPUNTO S1 (non un candidato, non una coda):** la finestra e' fatta di
+**4 input**, `14:25-14:30` vs `14:30-14:45`. **Gradino G1 pulito, zero righe di
+codice, nessuna ricompilazione — DOPO Q1**, non prima: se il preset di Paolo
+dice una terza cosa, la griglia cambia.
+
+### Le altre due righe che questo referto lascia al registro
+
+- 🔴 **Divergenza fra i due docenti sull'ampiezza del range ORB.** La r.230 di
+  questo registro (**RICORRENTE, Emiliano, 18 live**) dice _"niente trade se
+  range troppo ampio"_; **Paolo il 03/09 lo nega esplicitamente** (_"mi
+  condiziona la size e basta"_). **La riga 230 resta com'e'**: si annota la
+  contraddizione, non si riscrive una regola misurata su una live sola.
+  ⚠️ Nota: **noi oggi quel filtro non ce l'abbiamo** — siamo per caso allineati
+  a Paolo.
+- 📌 **ADR: QUARTO passaggio in nove giorni, e le righe 284/299 sono ancora due
+  IDEE.** Stavolta con un uso **nuovo**: non solo "distanza <= ADR", ma
+  **consumo giornaliero > ~2x ADR -> il mercato si riposa** (e la dashboard
+  Python che Paolo annuncia ha **due colonne su dieci** dedicate all'ADR).
+  Prerequisito invariato e ancora aperto dal 27/08: **come lo calcola**
+  (High-Low o True Range, weekend, confine di giornata).
+
+⛔ **Nessuna azione sulla flotta da questa lettura. Nessun parametro toccato.**
 
 ---
 

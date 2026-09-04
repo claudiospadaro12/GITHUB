@@ -76,6 +76,18 @@ sono le due aperture in ora italiana, e la regola di casa (`CLAUDE.md`) dice
 server = IT − 1. **Se il fuso fosse un altro, tutta questa riga cade.** Lo
 segnalo, non lo firmo.
 
+🔴 **E il lato DAX non è solo suo: è già a registro, dettato dall'ALTRO docente.**
+`backtest_pipeline/REGISTRO_TEST.md` riga 213, nella sezione **«REGOLE EMILIANO
+MONZA — sintesi da 18 live»**, testuale:
+> _"**RICORRENTE** **ORB = prima candela M15, 09:00-09:15 IT** (08:00-08:15
+> server). Si opera **dalle 09:15**."_
+
+➡️ **Quindi la finestra "primi 15 minuti DOPO l'apertura" è dichiarata da
+ENTRAMBI i docenti dell'accademia** (Emiliano su 18 live, Paolo stasera).
+⚠️ **Ma restano UNA fonte, non due** (stesso corso, regola di casa sul
+conteggio). **Il punto che conta è un altro: due voci concordi contro uno
+strumento che, in due versioni, misura un'altra finestra.**
+
 ### 1.2 🔧 Quello che l'INDICATORE misura — dal file dei parametri
 
 ```
@@ -263,7 +275,7 @@ money management non è il nostro**.
 | **ADR come filtro di ESAURIMENTO (>2× ADR → si riposa)** | 🆕 ✅ _"ha fatto **più del doppio** della media […] questa è una situazione che ha fatto questa **corsa: si deve riposare**"_ (r.71-75) | 🟡 (distanza ≤ ADR) | ⚪ | 🔴 assente | **1, NUOVO** |
 | **Cascata dei TF con moltiplicatore 4-5** | 🆕 ✅ _"se stai su **15** andrai a cercare meglio in **H4** che non in H1 […] **normalmente il moltiplicatore è 4-5**: da D1 a Weekly è **5**, da H4 a D1 sono **6** candele, da H1 a H4 sono **4**"_ (r.91) | ✅ D1→H4→H1 | ✅ teorema 3 TF | 🔴 **assente come filtro esplicito** | **1 + 🔴 buco nostro, 4ª volta** |
 | **SuperTrend: pavimento di timeframe** | ✅ _"**in super trend si fa bene dall'H1 in su**, perché l'H1 fa il segnale più solido […] **va bene anche in M5, non in M1 o M3**"_ (r.91) | 🟡 "Invert meglio in **H1**, poi M15" | ❌ "da H4 a Weekly" | 🟡 flotta M15/H1/H2/H4 | **§7, X3** |
-| **ORB: si aspetta la CHIUSURA di una candela fuori dal range** | ✅ _"la **prima candela che si forma INTERAMENTE fuori** dall'ORB"_ (r.91) | ⚪ | ⚪ | 🟡 `InpUseCloseConfirm` **esiste ma default FALSE**: i nostri ORB entrano con **pendenti STOP** a `EntryPoints×K` | **§7, X2 — delta reale** |
+| **ORB: si aspetta la CHIUSURA di una candela fuori dal range** | ✅ _"la **prima candela che si forma INTERAMENTE fuori** dall'ORB"_ (r.91) | ⚪ | ⚪ | 🟡 `InpUseCloseConfirm` **esiste ma default FALSE**: i nostri ORB entrano con **pendenti STOP** a `EntryPoints×K`. ⚠️ **E c'è la voce di Emiliano a registro** (r.224, RICORRENTE, 18 live): _"la candela **chiude col corpo fuori dal range** (non solo spike)"_ | **§7, X2 — delta reale.** ⚠️ **"interamente" (Paolo) è più stretto di "col corpo" (Emiliano): due soglie diverse, stessa accademia** |
 | **ORB: stop sull'estremo OPPOSTO del range** | ✅ _"**l'ORB si mette lo stop sul livello opposto**, quindi era bello ampio"_ (r.91) | ⚪ | ⚪ | ✅ `InpSLMode = ORB_SL_OPPRANGE` (**default**) | **2** 🟢🟢 |
 | **ORB: chiusura a fine giornata** | 🟡 _"l'ORB è un'operazione che **si chiude in giornata**"_ — **ma poi la contraddice** (§6, Y2) | ⚪ | ⚪ | ✅ `InpCloseAtEnd=true`, `InpEndHour=22 / Min=59` | **2** 🟢 (sulla versione "in giornata") |
 | **ORB: 1 solo strumento per sessione** | ✅ _"Dow Jones, Nasdaq o S&P: **uno solo che ne prendete, se no impazzite**"_ (r.91) | ⚪ | ⚪ | 🟡 `InpOneTradePerDay=true` (per **simbolo**, non per famiglia) | **1** |
@@ -295,7 +307,7 @@ scritto dall'accademia" NON è convergenza fra fonti indipendenti.** È
 
 | # | Contraddizione | Le due voci | Gravità |
 |---|---|---|---|
-| **Y1** | 🔴 **ORB: nessun filtro di ampiezza (03/09) vs "skip se range troppo ampio" (materiale del corso già agli atti)** | 03/09, r.91: _"**mi condiziona la size e basta**"_ e anzi _"è **più difficile che ti prenda lo stop** con range ampio molto molto ampio"_. `REGISTRO_TEST.md` r.230: _"**Niente trade se range troppo ampio** / stop troppo largo"_ | 🔴 **ALTA** — sono due politiche **opposte** sullo stesso parametro. Il registro attribuisce quella nota al corso; oggi il docente la nega |
+| **Y1** | 🔴 **ORB, ampiezza del range: PAOLO dice "nessun filtro", EMILIANO dice "skip"** ⚠️ **è una divergenza fra i DUE DOCENTI, non fra Paolo e se stesso** | **Paolo 03/09**, r.91: _"hai un limite sulla dimensione del range? **No** […] **mi condiziona la size e basta**"_, e anzi _"è **più difficile che ti prenda lo stop** con range ampio, molto molto ampio"_. **Emiliano**, `REGISTRO_TEST.md` r.230 (sezione «REGOLE EMILIANO MONZA — sintesi da **18 live**», etichetta **RICORRENTE**): _"**Niente trade se range troppo ampio / stop troppo largo** (ORB tardivo con canale ~140 pt → **skip**)"_ | 🔴 **ALTA** — due politiche **opposte** sullo stesso parametro, dai due docenti dello stesso corso. ⚠️ **E l'asimmetria di peso va detta: Emiliano lo dice su 18 live come regola RICORRENTE, Paolo lo nega in una risposta sola.** Non decido io chi ha ragione: **il registro resta com'è** |
 | **Y2** | 🔴 **ORB: intraday o multiday?** | _"l'ORB è un'operazione che **si chiude in giornata**"_ **e**, tre righe dopo, _"perché non la porti avanti? **Se io mi [entro] con la size bassa questa me la porto avanti**"_ + _"si lascia in macchina **tutto il giorno**, si lascia **finché non ti prende lo stop**"_ (r.91) | 🔴 **ALTA** — e tocca il prop: §8.3 |
 | **Y3** | 🔴 **ORB: voce 15 min DOPO l'apertura vs indicatore 5 min PRIMA** | §1 | 🔴 **ALTA — il titolo del referto** |
 | **Y4** | 🟡 **NFP: "domani può scombinare tutto" ma nessuna regola di astensione** | Avverte (r.17, r.43: _"peccato, domani c'è gli NF[P], perché […] possono scombinare un po' tutto"_) e continua a pianificare ingressi per domani | 🟡 **MEDIA** — stesso schema del 27/08 su Jackson Hole (Y2 di quel referto): **avverte e opera** |
@@ -379,10 +391,10 @@ NESSUNA PROP, NESSUN EA NOMINATO, NESSUNA CHALLENGE, NESSUN TRUCCO ANTI-PROP.
 | **Range DAX** | **09:00 → 09:15** | _"la mattina si fa **dalle 9 alle 9 e un quarto** col DAX"_ | `[T]` sui numeri · `[I]` sul fuso (italiano) → **08:00-08:15 server** |
 | **Range USA** | **15:30 → 15:45** | _"pomeriggio si fa **dalle 15 e 30 alle 15 e 45** con Dow Jones, Nasdaq o Standard [& Poor's]"_ | `[T]` sui numeri · `[I]` sul fuso → **14:30-14:45 server** |
 | **Durata del range** | **15 minuti** | _"questa casella che è composta dai **primi 15 minuti** della contrattazione"_ | `[T]` |
-| **Trigger d'ingresso** | **prima candela chiusa INTERAMENTE fuori dal range** | _"bisogna aspettare la **prima candela che si forma interamente fuori** dall'ORB"_ | `[T]` — ⚠️ "interamente" (ombre comprese) è **più stretto** del "corpo fuori" già a registro (r.224) |
+| **Trigger d'ingresso** | **prima candela chiusa INTERAMENTE fuori dal range** | _"bisogna aspettare la **prima candela che si forma interamente fuori** dall'ORB"_ | `[T]` — ⚠️ "interamente" (ombre comprese) è **più stretto** del **"corpo fuori"** che a registro è attribuito a **Emiliano** (r.224, RICORRENTE su 18 live) |
 | **Deroga discrezionale** | ⚠️ **non entra se c'è un imbalance aperto** | _"perché non sono entrat[o] in modo meccanico? **Perché qui c'è ancora un imbalance aperto**, ho detto: ve lo vengo ad aspettare qua"_ | `[T]` — 🚩 **la regola meccanica ha una deroga a occhio: non automatizzabile 1:1** |
 | **Stop** | **estremo OPPOSTO del range** | _"l'ORB si mette **lo stop sul livello opposto**, quindi era bello ampio, lo stop era **un stop ampio**"_ | `[T]` |
-| **Filtro di ampiezza** | 🔴 **NESSUNO** | _"hai un limite sulla dimensione del range? **No**, l'ampiezza mi condiziona **lo stop loss, la size** […] **mi condiziona la size e basta**"_ | `[T]` — vedi Y1 |
+| **Filtro di ampiezza** | 🔴 **NESSUNO** | _"hai un limite sulla dimensione del range? **No**, l'ampiezza mi condiziona **lo stop loss, la size** […] **mi condiziona la size e basta**"_ | `[T]` — 🔴 **contraddice la regola RICORRENTE di Emiliano già a registro** (r.230), vedi Y1 |
 | **Ampiezza grande = ?** | 🟡 **meno rischio di stop** | _"è **più difficile che ti prenda lo stop** con range ampio, molto molto ampio"_ | `[T]` — `[D]` come tesi, **nessun numero a sostegno** |
 | **Breakeven** | 🏆 **a 30-40 punti** | _"**quando il prezzo mi fa 30-40 punti io porto lo stop in profit**"_ · confermato dalla domanda dell'allievo: _"tu metti lo stop in profit **dopo 30-40 punti a prescindere dai livelli tecnici**? — **Quando faccio l'ORB sull'indice io mi trovo bene a fare così**"_ | 🟢 `[T]` — **due passaggi indipendenti nella stessa risposta** |
 | **Regola size ↔ gestione** | 🆕 **size robusta → parzializzo · size leggera → lascio correre** | _"fa 30-40 punti: **[se sono] entrato con una size più robusta parzializzo** […] invece **[se sono] entrato con una size più leggera lo lascio correre**"_ | `[T?]` sul verbo biascicato ("scinto"), `[T]` sul meccanismo |
@@ -653,7 +665,7 @@ precedenti (il finale privato pesa da solo il 20% delle righe).
 | # | Spunto | Costo | Perché ha senso | Priorità |
 |---|---|---|---|---|
 | **S1** | 🥇🥇 **ORB: finestra del range `14:25-14:30` (attuale) vs `14:30-14:45` (quella che il docente detta a voce)** | ⚡ **ZERO: sono 4 input** (`InpRangeStartHour/Min`, `InpRangeEndHour/Min`), **nessuna ricompilazione** | **Il gradino G1 più pulito uscito da queste tre live.** Un fattore per volta, on/off numerico, su **due sedie vive con una promessa già misurata** (770601, 770611). ⚠️ **Da fare DOPO Q1**: se il preset di Paolo dice un'altra cosa ancora, la griglia cambia | 🔴 **ALTA (dopo Q1)** |
-| **S2** | 🥈 **ORB: `InpUseCloseConfirm` false → true** (entra alla chiusura di una candela oltre il livello, invece che col pendente STOP) | ⚡ **ZERO: è già un `bool`** | Il docente lo dice due volte e **in una delle due lo usa per NON entrare**. Ed è già a registro (r.224) come regola ricorrente del corso. ⚠️ **Attenzione seria: è un filtro IN PIÙ.** Va misurato **il costo in numero di operazioni**, non solo il PF — e la sedia 770601 è già sotto osservazione per frequenza (v1.01) | 🔴 **ALTA** |
+| **S2** | 🥈 **ORB: `InpUseCloseConfirm` false → true** (entra alla chiusura di una candela oltre il livello, invece che col pendente STOP) | ⚡ **ZERO: è già un `bool`** | Il docente lo dice due volte e **in una delle due lo usa per NON entrare**. Ed è **l'unico punto ORB in cui i due docenti CONCORDANO**: a registro come regola **RICORRENTE di Emiliano su 18 live** (r.224, "col corpo fuori") + Paolo stasera ("interamente fuori"). ⚠️ **Restano una fonte sola, e le due soglie non coincidono.** ⚠️ **E attenzione seria: è un filtro IN PIÙ.** Va misurato **il costo in numero di operazioni**, non solo il PF — e la sedia 770601 è già sotto osservazione per frequenza (v1.01) | 🔴 **ALTA** |
 | **S3** | 🥉 **Bollinger: "movimento esaurito = rientro dentro le bande"** come gate anti-inseguimento | 🔧 ~15 righe | 🏆 **La regola più pulita e meccanizzabile della serata** (M9), con un **verso definito** e **zero discrezionalità**. E attacca lo stesso problema di `InpMaxExtAtr` (anti-inseguimento) con un metro diverso. ⚠️ **Due parametri liberi in più** (periodo, deviazioni) = rischio curve fitting da dichiarare | 🟡 **MEDIA** |
 | **S4** | **ORB: breakeven a 30-40 punti fissi** invece che dopo la parziale | 🔧 poche righe (esiste già `InpBreakeven`, cambia il **trigger**) | Delta reale e ben documentato (due passaggi indipendenti). ⚠️ **E il docente stesso, nella stessa live, dubita che sia stato giusto** (E1) — poi conclude che sarebbe stato stoppato lo stesso. **Da misurare proprio perché la fonte è incerta** | 🟡 **MEDIA** |
 | **S5** | **Golden Cross: finestra dell'incrocio ±3 candele invece di `InpCrossLookback=8`** | ⚡ **ZERO: è un input** (per la parte "dopo") | ⚠️ **Nota di realismo obbligatoria: le "tre candele PRIMA dell'incrocio" NON sono implementabili** su barra chiusa senza guardare il futuro. **Misurabile solo la metà "dopo": 3 invece di 8.** Va scritto nel round, o il round misura un'altra cosa | 🟢 **BASSA** |
@@ -672,7 +684,7 @@ precedenti (il finale privato pesa da solo il 20% delle righe).
 | 🔴 **Wyckoff / sweep di liquidità / "il prezzo va a prendere gli stop"** | Già «**Da NON automatizzare (Paolo)**», `REGISTRO_TEST.md` r.245. **Terzo riconferma** |
 | 🔴 **Qualsiasi numero di controvalore della serata** | Si autocorregge in diretta e il conto non torna (§8.1) |
 | 🔴 **"Sugli indici non c'è swap"** | **Ritrattato dal relatore stesso nella stessa risposta** (§8.6). ⛔ **I costi si leggono nella specifica del simbolo, non in una live** |
-| ⚠️ **Il filtro di ampiezza del range ORB** | 🔴 **NON si tocca in nessuna direzione**: la voce di stasera e il materiale del corso già a registro (r.230) **si contraddicono** (Y1). **Prima si chiede quale delle due vale (Q1), poi eventualmente si misura** |
+| ⚠️ **Il filtro di ampiezza del range ORB** | 🔴 **NON si tocca in nessuna direzione**: Paolo stasera lo nega, Emiliano lo prescrive come **RICORRENTE su 18 live** (r.230). **I due docenti si contraddicono** (Y1). ⚠️ **E noi oggi NON ce l'abbiamo**: siamo per caso allineati a Paolo. **Prima si chiede quale delle due vale (Q1), poi eventualmente si misura** |
 | ⚠️ **La deroga "non entro se c'è un imbalance aperto"** | **Discrezionale per costruzione.** Meccanizzarla richiederebbe una definizione di imbalance che **la fonte non dà** |
 
 ---
