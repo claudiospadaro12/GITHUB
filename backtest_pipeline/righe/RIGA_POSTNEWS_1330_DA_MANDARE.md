@@ -312,6 +312,7 @@ grep -c "\$pin='$SHA'" "$F"        # DEVE dare 2 (blocchi 1-2)
 grep -c "\$pin='$TOK'" "$F"        # DEVE dare 0
 CART='segnap'"osto"'\|non e'"'"' ancora lanciabile'\|la riga non par'"te"   # composto
 grep -ci "$CART" "$F"              # DEVE dare 0 dopo aver RISCRITTO il cartello
+grep -o "$TOK" "$F" | wc -l        # DEVE dare 0: nessun segnaposto sopravvissuto
 ```
 
 **Poi (passo 2, quello che questa pagina non poteva fare):** riscaricare gli
