@@ -1,6 +1,6 @@
 # 🎯 POSTNEWS ISM1500/EURUSD — PASSO 0 (conta-occasioni): **LA RIGA DA MANDARE**
 
-> ✅ **PRONTA — pinnata il 04/09/2026** al commit `d00fa5683ccfd9981fe43db934661defdc1d225e`
+> ✅ **PRONTA — pinnata il 04/09/2026** al commit `1dbae10394488181c65cfbfa5c9f91d4852fb18e`
 > (ricetta del pin applicata, nessun testo di attesa residuo). **Passo 2 della
 > ricetta (riscarico via `raw` + confronto sha256) fatto qui sotto**, vedi la
 > tabella del pin.
@@ -80,7 +80,7 @@ finestra più corta di ~11,2 anni l'IS scende sotto le 150 occasioni. E soprattu
 
 ---
 
-## 📌 IL PIN — **`d00fa5683ccfd9981fe43db934661defdc1d225e`**
+## 📌 IL PIN — **`1dbae10394488181c65cfbfa5c9f91d4852fb18e`**
 
 Commit di `lavoro` (04/09/2026), **verificato file per file via `raw` prima di
 consegnare questa pagina**: gli `sha256` in tabella (calcolati sul working tree
@@ -90,7 +90,7 @@ ricetta in fondo, già eseguito).
 
 | file al pin | sha256 (working tree) | esito atteso |
 |---|---|---|
-| `backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1` | `b2e4bb1e8a07b65fa8bf01a726cc66c69a285b0994b69cdb4e537e911d493b95` | marcatore `MARCATORE_RIGA_POSTNEWS_ISM_v1` presente, **ASCII puro**, parse `pwsh` OK |
+| `backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1` | `a4a1ee49b0a265bc8e4e49812da81f5542013e355fcafca787575383f9a53222` | marcatore `MARCATORE_RIGA_POSTNEWS_ISM_v1` presente, **ASCII puro**, parse `pwsh` OK |
 | `backtest_pipeline/prove/POSTNEWS_ISM_00_conta.txt` | `93fb35d3f5ba0d935edc8056b2bd9ac735031d5a1e9f8147196f5952f71fa9a2` | `@DAQUANDO`/`@FINOA` assenti, **34 righe vive** (2 direttive + 31 fissi + 1 asse) |
 | `backtest_pipeline/walkforward_generico.ps1` | `5d98af3d80e34a4ceb6c85719e9c3513b673fed6be6c517563042f3434a8bc85` | **non si edita**: il driver lo scarica, lo pinna col replace di `$EABranch` **e gli alza `[Charts] MaxBars`**, poi rilegge **dal disco** lo stato finale di entrambi (2 occorrenze attese) |
 | `mql5/Experts/ABTG_PostNews.mq5` | `b3e5468034563b02af8280dcb7b5ad59412b5fc9712d3b73914be9a3eaf28f61` | `#property version "1.10"`, 3 `AT_Caso(` + 2 `falliti++` (5 casi). **NON modificato da questo round** |
@@ -108,7 +108,7 @@ Tutti e **otto** vanno scaricati **allo stesso pin**, mai dalla punta del branch
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d00fa5683ccfd9981fe43db934661defdc1d225e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='1dbae10394488181c65cfbfa5c9f91d4852fb18e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ISM_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -131,7 +131,7 @@ sono ancora lì, la misura è veloce.)*
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d00fa5683ccfd9981fe43db934661defdc1d225e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='1dbae10394488181c65cfbfa5c9f91d4852fb18e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_ISM.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_ISM.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_ISM_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;

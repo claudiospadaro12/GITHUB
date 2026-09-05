@@ -1,6 +1,6 @@
 # 🎯 POSTNEWS USD1330/USDJPY — PASSO 0 (conta-occasioni): **LA RIGA DA MANDARE**
 
-> ✅ **PRONTA — pinnata il 04/09/2026** al commit `d00fa5683ccfd9981fe43db934661defdc1d225e`
+> ✅ **PRONTA — pinnata il 04/09/2026** al commit `1dbae10394488181c65cfbfa5c9f91d4852fb18e`
 > (ricetta del pin applicata, nessun testo di attesa residuo). **Passo 2 della
 > ricetta (riscarico via `raw` + confronto sha256) fatto qui sotto**, vedi la
 > tabella del pin.
@@ -95,7 +95,7 @@ possono contare **prima** della corsa. Numeri **contati sul file**, non stimati:
 
 ---
 
-## 📌 IL PIN — **`d00fa5683ccfd9981fe43db934661defdc1d225e`**
+## 📌 IL PIN — **`1dbae10394488181c65cfbfa5c9f91d4852fb18e`**
 
 Commit di `lavoro` (04/09/2026), **verificato file per file via `raw` prima di
 consegnare questa pagina**: gli `sha256` in tabella (calcolati sul working tree
@@ -105,7 +105,7 @@ ricetta in fondo, già eseguito).
 
 | file al pin | sha256 (working tree) | esito atteso |
 |---|---|---|
-| `backtest_pipeline/righe/RIGA_POSTNEWS_1330.ps1` | `76e4a7801d2d34446b78c73a3e461df55df0e9cce15a8dea2722bd38dee53350` | marcatore `MARCATORE_RIGA_POSTNEWS_1330_v1` presente, **ASCII puro**, parse `pwsh` OK |
+| `backtest_pipeline/righe/RIGA_POSTNEWS_1330.ps1` | `af54439695c87a0236a698542d2da9ee64f49d4080c7ecd42a66083271cd1709` | marcatore `MARCATORE_RIGA_POSTNEWS_1330_v1` presente, **ASCII puro**, parse `pwsh` OK |
 | `backtest_pipeline/prove/POSTNEWS_1330_00_conta.txt` | `cd3bde46537ac6561d688fd5da70cf0c89285e76f3df76828d7b3c463f9a6d06` | `@DAQUANDO`/`@FINOA` assenti, **34 righe vive** (2 direttive + 31 fissi + 1 asse) |
 | `backtest_pipeline/walkforward_generico.ps1` | `5d98af3d80e34a4ceb6c85719e9c3513b673fed6be6c517563042f3434a8bc85` | **non si edita**: il driver lo scarica, lo pinna col replace di `$EABranch` **e gli alza `[Charts] MaxBars`**, poi rilegge **dal disco** lo stato finale (2 occorrenze attese) |
 | `mql5/Experts/ABTG_PostNews.mq5` | `b3e5468034563b02af8280dcb7b5ad59412b5fc9712d3b73914be9a3eaf28f61` | `#property version "1.10"`, 3 `AT_Caso(` + 2 `falliti++` (5 casi). **NON modificato da questo round** |
@@ -123,7 +123,7 @@ Tutti e **otto** vanno scaricati **allo stesso pin**, mai dalla punta del branch
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d00fa5683ccfd9981fe43db934661defdc1d225e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_1330.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='1dbae10394488181c65cfbfa5c9f91d4852fb18e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_1330.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_1330.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_1330_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -144,7 +144,7 @@ da solo se lo storico M1 di USDJPY non è ancora sul disco del PC di backtest.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='d00fa5683ccfd9981fe43db934661defdc1d225e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_1330.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='1dbae10394488181c65cfbfa5c9f91d4852fb18e'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_POSTNEWS_1330.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_POSTNEWS_1330.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_POSTNEWS_1330_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
