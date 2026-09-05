@@ -435,7 +435,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO. Se e'' FUORI TOLLERANZA NON e'' una bocciatura del nucleo: e'' un RILIEVO a tre cause, e prima di lanciare le corse 4-7 me lo mandi.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO. Se e'' FUORI TOLLERANZA NON e'' una bocciatura del nucleo: e'' un RILIEVO a tre cause, e prima di lanciare le corse 4-7 me lo mandi.' -ForegroundColor Yellow;
+    Write-Host 'CANARINO CLASSE 134, PRIMA CORSA VERA CON ZERO ASSI Y: nel referto la riga "passate:" e i DUE CSV devono avere 1 RIGA CIASCUNO. Se PROBLEMI dice "0 righe nel CSV", MT5 non ha accettato Optimization=1 senza parametri da ottimizzare: FERMATI, non lanciare le altre corse, mandami lo zip.' -ForegroundColor Cyan }
 ```
 
 ## 3️⃣ 🥇 `NAS_PORTO` — collaudo del porto sulla seconda gamba
