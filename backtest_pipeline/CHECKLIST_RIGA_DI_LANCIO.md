@@ -8377,3 +8377,122 @@ referto si compone da round + simbolo, il modo entra solo nel nome dello zip).
 >    altri** e quali due righe lo distinguono (`modo:` e `data:`). Costa un
 >    `Write-Host`; l'alternativa e' rileggere il referto sbagliato credendolo
 >    quello giusto, che e' la classe 110 con un'altra faccia.
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (sera) — trovata **sul campo**, non a tavolino: il giro a vuoto di **R117 RELATIVO** (`RIGA_RELATIVO_R117.ps1` v3, pin `b4e69ed3`) ha **compilato l'EA senza un errore** e poi **non è mai partito**. Classe **RIPRODOTTA ESEGUENDO** su `pwsh` 7.4.6 con la prova vera, l'EA vero e il generico vero.
+
+## 133. 🧊 LO SCRIPT **CONDIVISO** NON CONOSCE LA FAMIGLIA DI ROUND A **CELLA CONGELATA**: pretende una griglia, e ferma per sempre chi una griglia non ce l'ha — dopo che la compilazione è già riuscita
+
+`backtest_pipeline/walkforward_generico.ps1` è nato (07/08) per le **GRIGLIE**, e
+fra i suoi controlli ne ha uno che pretende **almeno un parametro spazzolato**:
+
+```powershell
+if($Sweep.Count -eq 0 -and $Errori.Count -eq 0){
+  [void]$Errori.Add("nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward")
+}
+```
+
+Per una griglia è giusto. Ma esiste una famiglia di round **legittima e sempre
+più frequente** in cui di griglia non ce n'è **nessuna, per costruzione**: la
+**CELLA CONGELATA**, scelta in un round precedente e qui soltanto **MISURATA** su
+due finestre indipendenti. R117 è esattamente questo (N=40, σ=1,35, e il driver
+stesso **vieta** gli assi Y in `GateProva`). `$Sweep` resta vuoto **sempre**,
+quindi il controllo scattava su **tutte e sei** le corse del round, **ogni
+volta**, e il round era **ineseguibile** dal primo minuto.
+
+### Perché è insidiosa più di un errore qualunque
+
+1. **Arriva DOPO il successo.** La riga scarica, gatta sei prova, compila l'EA in
+   MetaEditor con **0 errori e 0 warning** — e poi muore. Chi guarda la console
+   ha appena letto una fila di verdi: il rosso sembra un incidente del banco, non
+   un difetto strutturale.
+2. **Il messaggio d'errore descrive il difetto come se fosse colpa tua**
+   (*"sarebbe un backtest singolo, non un walk-forward"*): suona come una
+   diagnosi del tuo file prova, mentre il file prova è **giusto**.
+3. **Muore PRIMA dell'anteprima `.ini`**, cioè prima dell'unico artefatto datato
+   che il giro a vuoto produce: il referto dice "anteprima ASSENTE" e non dice
+   perché.
+4. **È in uno script CONDIVISO da decine di round pinnati.** Il riflesso di
+   togliere il controllo è il modo più veloce di rompere tutti gli altri.
+
+### E la trappola vera: **il precedente che sembra un precedente e non lo è**
+
+R116 LondonFx è un round dichiaratamente **senza griglia** (*"QUESTO FILE NON HA
+UNA GRIGLIA E NON HA UN PICCO"*, firma F11) e **ha girato benissimo** il 03/09.
+Da lì la conclusione ovvia — *"allora esiste già uno stampo di casa, copialo"* —
+è **SBAGLIATA**. Aperti i suoi prova, gli assi Y ci sono eccome:
+
+```
+InpMotore=2||1||1||3||Y      <- 3 celle, l'ABLAZIONE
+InpMagic=774001||774001||1||774002||Y   <- 2 celle, i GEMELLI
+```
+
+R116 è senza griglia **nel MERITO** (nessun parametro di motore in gara), non
+**nel CONTEGGIO**: per il generico vale `$Sweep = 2`. R117 tiene i gemelli in
+**prova SEPARATI**, quindi ogni corsa è **una cella secca** e `$Sweep = 0`.
+👉 **"Senza griglia" detto dai criteri e "senza assi Y" contato dallo script sono
+due cose diverse, e solo la seconda è quella che il controllo guarda.**
+
+### E il "trucco" NON si poteva copiare comunque
+
+Mettere un asse finto a 2 celle nei prova di R117 avrebbe: violato il gate del
+driver stesso (che **pretende zero assi Y**), rotto `$RigheAttese = 1`,
+**raddoppiato le passate a tick reali** (che costano ore), e **toccato sei file
+prova firmati**. 🚫 **La cella firmata non si modifica per far contento un
+controllo dello strumento.**
+
+> ✅ **REGOLA (tre pezzi).**
+> 1. **Un controllo di uno script CONDIVISO che non può essere soddisfatto da una
+>    famiglia legittima di round non si toglie e non si aggira: si apre con un
+>    interruttore OPT-IN, default spento.** Così i round già pinnati non cambiano
+>    di una virgola (**va DIMOSTRATO eseguendo**, non affermato: qui la prova a
+>    griglia `LONDONFX_R116_TICK.txt` dà gli stessi 2 assi / 6 celle **con e
+>    senza** il flag) e chi ha bisogno dell'eccezione **la chiede per nome**.
+>    L'interruttore salta **quel** controllo e **nessun altro** — anche questo si
+>    dimostra: con il flag acceso, asse degenere e parametro inesistente devono
+>    ancora fermare tutto.
+> 2. **Chi consuma uno script condiviso AL PIN deve GATTARE che quel pin abbia la
+>    versione che gli serve.** `walkforward_generico.ps1` viene scaricato dal PIN
+>    del round come tutto il resto: un pin vecchio non ha l'interruttore e
+>    PowerShell muore su *"parametro sconosciuto"*, che non dice niente. Il gate
+>    (`if($t -notmatch '\[switch\]\$PermettiCellaSingola'){ throw ... }`) trasforma
+>    un messaggio muto in una causa scritta. **E il round che tocca lo script
+>    condiviso ha bisogno di un PIN NUOVO**: il fix non arriva ai round pinnati
+>    prima, ed è giusto così.
+> 3. **Quando un controllo salta perché "non c'era niente da contare", il ramo
+>    che tace va riempito.** A zero assi il generico non stampava **nessun**
+>    conteggio di celle: chi legge il log resta senza il numero che poi deve
+>    ritrovare come righe nel CSV. E la riga aggiunta **non deve affermare quello
+>    che non ha verificato**: `"zero assi Y"` è vero solo se non ci sono errori —
+>    con un asse Y **degenere** lo sweep è vuoto uguale, e quella riga
+>    giurerebbe il falso proprio nel caso in cui un asse c'era.
+
+### 🔍 Come si cerca negli altri round (censimento, classe 111)
+
+Il difetto colpisce **ogni** riga che passa al generico un file prova **senza
+nemmeno una riga `||Y`**. Si trova a macchina:
+
+```powershell
+# i prova SENZA nessun asse Y: sono i candidati alla classe 133
+Get-ChildItem .\backtest_pipeline\prove\*.txt | ForEach-Object {
+  $vive = @(Get-Content $_.FullName | Where-Object { $_.Trim() -match '=' -and -not $_.Trim().StartsWith('#') -and -not $_.Trim().StartsWith('@') })
+  $assi = @($vive | Where-Object { $_ -match '\|\|Y\s*$' }).Count
+  if($assi -eq 0){ "{0,-46} assi Y = 0  <- ineseguibile senza -PermettiCellaSingola" -f $_.Name }
+}
+```
+
+**ESEGUITO il 05/09/2026** (`pwsh` 7.4.6, sui 544 prova del repo): **18 prova
+senza nessun asse Y**. Sei sono quelli di R117 (chiusi qui). Gli altri dodici:
+`ABTG_PTE_R58`, `CELLE_PTE`, `CELLE_REGIME`, `CELLE_REGIME_R80`,
+`OROLOGIO_PREREGISTRAZIONE_BREEDON_2026-09-01`, `R104_MaxMinDAX_MFE`,
+`R90a_toro_U30USD`, `R90b_orso_U30USD`, `R90c_laterale_U30USD`,
+`R90d_crollo_U30USD`, `RELATIVO_FREQUENZA_BOZZA`, `V21_CONFIG_AMICO`.
+
+> ⚠️ **E qui il censimento va letto con la testa, non copiato in un verdetto:
+> quelli sono CANDIDATI, non vittime.** Un prova senza assi Y è colpito dalla
+> classe 133 **solo se lo consuma `walkforward_generico.ps1`**. Verificato: i
+> `CELLE_REGIME*` e gli `R90*` li consuma **`prova_regime.ps1`**, che quel
+> controllo **non ce l'ha** (misurato: il controllo è **solo** nel generico —
+> `walkforward.ps1`, `walkforward_pte.ps1` e `walkforward_aperture.ps1` non lo
+> hanno). 👉 **Il censimento dice "guarda qui", il verdetto lo dà il grep di CHI
+> SCARICA quel prova.** È la classe 111 applicata bene: si censisce il fratello,
+> non si condanna l'omonimo.
