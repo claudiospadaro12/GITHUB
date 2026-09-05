@@ -45,6 +45,11 @@
   `LONDONFX_TICK_CRITERI.md`, firma in `report/FIRME_2026-09-03.md`. **EA
   contenitore `ABTG_LondonFx.mq5` COSTRUITO** (commit `42eb67b`, repo-only,
   3 motori a interruttore, nato hedge-safe, 112 casi autotest).
+  ➡️ **ESITO, la sera stessa**: EA **compilato** (`0 errors, 0 warnings`),
+  R116 **girato a tick reali** su entrambe le gambe, **entrambe BOCCIATE PER
+  RISCHIO** (previsione "NO probabile" dei criteri: confermata due volte).
+  Referti in `risultati_archivio/r116_londonfx/`. Unica coda: **GBPUSD a banco
+  sporco** (classe 129) → `RIGA_R116BIS_LONDONFX_DA_MANDARE.md`.
 - **RELATIVO** (scarto DAX/Dow come motore) e **VGRSI** (paper arXiv): promossi
   della 4a battuta di caccia, in coda. Sonda RELATIVO in costruzione.
 
@@ -132,11 +137,16 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
    dopo le 22:15 con la riga PASSO 2: **pagina pronta**
    (`RIGA_DEPLOY_ORB104_PICCOLO_DA_MANDARE.md`, pin `8167c77…`): CONTROLLO
    prima (va bene anche di giorno), CORSA con MT5 chiuso, poi PASSO 3.
-5. Righe in costruzione da agenti (03/09 ~14:50): **R116 LondonFx** (tick,
-   EURUSD+GBPUSD) -> **PRONTA** (03/09 pom.): `backtest_pipeline/righe/RIGA_R116_LONDONFX_DA_MANDARE.md`,
-   driver `RIGA_R116_LONDONFX.ps1` v1 + 2 prova `LONDONFX_R116_*.txt`, 5 blocchi
-   (EUR vuoto/corsa, GBP vuoto/corsa, -SoloFase2), pin nella pagina. NOTA: l'EA
-   v1.00 NON esporta il per-trade (5.0.5 e S4 dei criteri non eseguibili: segnalato).
+5. ~~R116 LondonFx da lanciare~~ **GIRATO E CHIUSO il 03/09 sera** (vedi il
+   riquadro "R116 LONDONFX" qui sotto): EA **compilato pulito** (0 errors, 0
+   warnings), **entrambe le gambe BOCCIATE PER RISCHIO**. **RESTA UNA COSA**:
+   la gamba **GBPUSD e' uscita a BANCO SPORCO** (gemelli divergenti sul motore
+   3) e per la sanita' 5.0.1 quei numeri **non si leggono**. Causa confermata
+   il 04/09 = **classe 129** (piu' agenti locali). Riga pronta per rifarla a
+   **un agente solo**: `righe/RIGA_R116BIS_LONDONFX_DA_MANDARE.md` + driver
+   `RIGA_R116BIS_LONDONFX.ps1` (pin `c3a21c6…`), 4 blocchi (GBP vuoto/corsa,
+   EUR facoltativo, -SoloFase2). **Passo manuale obbligatorio prima**: Strategy
+   Tester -> Agenti -> solo Core 1.
    E **sonda RELATIVO** (4 prove) — da lanciare quando il PC di
    backtest si libera dopo il DUKA. Poi il giacimento di classe 3:
    AllineaLondra e VwapRevert (righe gia' scritte, costano UNA corsa).

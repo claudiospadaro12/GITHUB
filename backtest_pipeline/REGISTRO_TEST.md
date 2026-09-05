@@ -982,6 +982,29 @@ dentro i cancelli), ma segnala un problema di determinismo/non-riproducibilita' 
 banco che va capito prima di fidarsi ciecamente dei prossimi round su GBPUSD. Motori 1 e 2 non
 segnalati come rotti dal gate.
 
+✅ **04/09 -- LA CAUSA E' CONFERMATA, e non e' l'EA: CLASSE 129** (checklist, riquadro suo).
+Piu' **agenti locali MT5 vivi insieme** fanno divergere davvero le celle che dovrebbero uscire
+identiche: su `RIGA_POSTNEWS_ISM`, 5 corse consecutive con 4 core attivi hanno dato **5 divergenze
+DIVERSE** (39, 13, 20, 2, 7 operazioni di scarto, mai lo stesso numero), e con **Core 1 solo** i
+gemelli sono usciti **identici alla prima corsa**. La corsa GBPUSD del 03/09 girava con piu' agenti.
+
+📄 **05/09 -- RIGA PRONTA PER RIFARLA A BANCO PULITO: R116-BIS.**
+`righe/RIGA_R116BIS_LONDONFX_DA_MANDARE.md` + driver `righe/RIGA_R116BIS_LONDONFX.ps1`
+(pin `c3a21c6...`, marcatore `MARCATORE_RIGA_R116BIS_LONDONFX_v1`). **Non tocca un solo parametro
+del motore**: stessi criteri firmati, stesso EA v1.01 (blob identico a quello che ha girato),
+stessi due prova (blob identici), stessi cancelli. Cambia **solo il banco** -- un agente solo -- e
+l'etichetta dei CSV (`R116B_`, cosi' i CSV del giro sporco non si possono rileggere al posto di
+questi. Il driver **conta i processi `metatester64` vivi** ogni 400 ms e mette il massimo nel
+referto: **> 1 = PROBLEMA, round fermo**, qualunque numero sia uscito (un gate che non legge niente
+non e' un gate verde). Le tre letture del confronto col 03/09 sono **congelate nella pagina prima
+dei numeri**: (a) numeri uguali -> la bocciatura GBPUSD diventa leggibile e R116 chiude pulito;
+(b) numeri diversi -> il referto GBPUSD del 03/09 e' carta straccia **e diventa obbligatorio
+rifare anche EURUSD**; (c) gemelli che divergono ANCORA a un agente -> la classe 129 non spiega
+tutto, e il sospettato diventa il motore 3.
+⚠️ **La gamba EURUSD del 03/09 NON si rifa' per obbligo**: aveva PROBLEMI 0 e gemelli identici su
+3 coppie, cioe' il gate di identita' -- la prova di casa che il banco era pulito -- e' PASSATO.
+⚠️ **E il verdetto non e' in gioco comunque**: F12 resta firmata, da R116 **non esce una sedia**.
+
 ### SECONDA CACCIA DOPO R116 (03/09 sera) — le righe che toccano questo registro
 
 Dossier completo: `caccia_strategie/CACCIA_LONDRA_ALTERNATIVA_2026-09-03.md`.

@@ -81,7 +81,7 @@ viceversa.
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI**, e **un solo agente** (sopra) |
 | **Quanto ci mette** | il 03/09, **con più agenti**: EURUSD ~**70 secondi** (avvio 17:51:17 → CSV OOS 17:52:26), GBPUSD ~**2,5 minuti**. [INFERITO] a un agente solo sale più o meno quanti agenti si spengono: **minuti, non ore**. Il numero vero lo dice questo giro |
 
-## 📌 IL PIN — **`@@PIN@@`**
+## 📌 IL PIN — **`c3a21c67b459e2cddf9944e97d1f4339e5ab4809`**
 
 Commit di `lavoro`. I sei file che il driver scarica **al pin** (mai dalla punta
 del branch): il driver **nuovo**, i **due prova** (invariati), il **generico**,
@@ -97,7 +97,7 @@ che hanno girato il 03/09 (verificato con `git ls-tree`: hash identici).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c3a21c67b459e2cddf9944e97d1f4339e5ab4809'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116BIS_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116BIS_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloControllo; $rc=$LASTEXITCODE;
@@ -114,7 +114,7 @@ che hanno girato il 03/09 (verificato con `git ls-tree`: hash identici).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c3a21c67b459e2cddf9944e97d1f4339e5ab4809'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116BIS_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116BIS_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD; $rc=$LASTEXITCODE;
@@ -146,7 +146,7 @@ scrupolo va bene, **ma va dichiarato come conferma**, non come "il vero numero".
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c3a21c67b459e2cddf9944e97d1f4339e5ab4809'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116BIS_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116BIS_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo EURUSD; $rc=$LASTEXITCODE;
@@ -174,7 +174,7 @@ ribalta il segno di `E`, **questo blocco non servirà.**
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='@@PIN@@'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c3a21c67b459e2cddf9944e97d1f4339e5ab4809'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_R116BIS_LONDONFX.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_R116BIS_LONDONFX.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_R116BIS_LONDONFX_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simbolo GBPUSD -SoloFase2; $rc=$LASTEXITCODE;
