@@ -176,7 +176,7 @@ $RawPin  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Sentinella = Join-Path $Work "RELATIVO_R117_IN_CORSO.txt"
 
 # --- IDENTITA' ATTESA DEL SORGENTE (gate, non decorazione)
-$VERSIONE_ATTESA         = "1.02"   # 1.02 = pavimento gPosBarre<=0->1 in RegistraChiusura (percorso OnTester/fine corsa) + ripristino gPosBarre su ChiudiPosizione rifiutata nel flat di recupero (04/09)
+$VERSIONE_ATTESA         = "1.03"   # 1.03 = blocco 5 dell'autotest con UNA variabile d'uscita PER CHIAMATA (classe 137): prima le due chiamate a Rapporto_Calc condividevano 'out' e la respinta azzerava il valore atteso della prima -> 'Autotest Falliti' usciva 1 su 20 IN OGNI CORSA, accusando un nucleo sano. NESSUN numero economico cambia. (1.02 = pavimento gPosBarre<=0->1 in RegistraChiusura + ripristino gPosBarre su ChiudiPosizione rifiutata, 04/09)
 $AUTOTEST_BLOCCHI_ATTESI = 20
 $NSTATS_ATTESI           = 73      # 73 valori + Pass, Simbolo, Periodo = 76 colonne
 $INPUT_ATTESI            = 28

@@ -8925,3 +8925,81 @@ modi, e' rossa senza discutere. Corretto qui con
 > nello stesso profilo. Un giro solo, su un banco pulito, e' verde in tutti e
 > due i casi. **Il secondo giro e' un attrezzo di verifica**: lo stato che un
 > driver lascia dietro di se' e' parte del driver.
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (notte) — trovata **sul campo, dai numeri della corsa vera**: `D30_PORTO` (R117 RELATIVO, pin `434e2714`, magic 774603 + ombra 774653) e' arrivata in fondo, il **collaudo del porto e' PASSATO** (scarto Long 3/20, Short 2/20) e il **gemello interno e' IDENTICO su 9/9 grandezze** — ma il referto ha scritto `PROBLEMI: 2`, cioe' `Autotest Falliti = 1` **sia in IS sia in OOS**. La classe e' stata **RIPRODOTTA ESEGUENDO**: il nucleo puro dell'EA (20 blocchi) e' stato **portato in C++ riga per riga** e fatto girare fuori da MT5 — `1 fallito su 20` prima del fix, `0 su 20` dopo, esattamente i numeri del referto.
+
+## 137. 🪞 L'AUTOTEST CHE **RIUSA LA VARIABILE D'USCITA** FRA DUE CHIAMATE: la chiamata **RESPINTA** azzera il valore atteso di quella **RIUSCITA**, e il blocco accusa un nucleo **SANO** — per sempre, in ogni corsa
+
+Il difetto non e' nel motore: e' **nel collaudo del motore**. Ed e' la forma
+peggiore, perche' un autotest rotto **verso il rosso** non fa perdere soldi ma
+fa perdere *fiducia nei numeri buoni*: la colonna `Autotest Falliti` e' un
+**gate duro** (`> 0` -> `PROBLEMI`, "i numeri NON si leggono"), quindi una corsa
+economicamente **valida** viene messa in quarantena, e il round si ferma davanti
+a un guasto che non esiste.
+
+Il codice colpevole, in `ABTG_Relativo.mq5` v1.02 (blocco 5):
+
+```mql5
+double a5_o=0.0;
+bool   a5_k1 = Rapporto_Calc(10.0, 4.0, a5_o);   // out = 2,5   <-- ok
+bool   a5_k2 = Rapporto_Calc(10.0, 0.0, a5_o);   // RESPINTA... e out torna 0
+if(!a5_k1 || a5_k2 || MathAbs(a5_o-2.5)>0.0001)  // 0 != 2,5 -> FALLISCE SEMPRE
+```
+
+La causa e' una **convenzione del nucleo puro di casa**, che e' giusta e va
+tenuta: **ogni `_Calc` azzera il parametro d'uscita PRIMA di guardare il
+dominio**, cosi' un chiamante distratto che ignora il `bool` non si porta a casa
+un valore vecchio spacciato per nuovo. Fatto: `Rapporto_Calc` scrive `out=0.0`
+alla riga 1, e solo alla riga 2 controlla `x<=0`. Conseguenza: **una chiamata
+che deve fallire e' una chiamata che CANCELLA**, e riusare lo stesso `out`
+significa distruggere il risultato appena verificato.
+
+La riga sorella lo faceva **giusto**: la sonda `ABTG_SondaRelativo.mq5` (blocco
+6, 25 blocchi, `Autotest Falliti = 0` in archivio) usa **tre** variabili,
+`a6_o1/a6_o2/a6_o3`, e **verifica anche che le respinte escano a zero** partendo
+da `1.0`. Il nucleo e' stato trasportato bene; **e' il test che e' stato
+trasportato male**, comprimendo tre variabili in una. Da qui la regola:
+
+> 🔎 **Quando si trasporta un autotest da una riga sorella, il "rifattorizzo
+> mentre copio" NON e' un miglioramento: e' un cambio di misura.** Il diff che
+> conta e' fra i due autotest, non fra i due nuclei.
+
+### Come si riconosce, senza aspettare la corsa
+
+- **Il sintomo che identifica la classe**: il numero di falliti e' **lo stesso,
+  identico, in IS e in OOS** (e sara' lo stesso su ogni simbolo e ogni periodo).
+  L'autotest gira in `OnInit`, **prima di qualunque barra**: se e' deterministico
+  e fallisce, fallisce **ovunque**. Un fallimento che **cambia** fra IS e OOS
+  sarebbe un'altra bestia (dipendenza da dati) e andrebbe cercato altrove.
+- ⚠️ **E per questo la modalita' NON e' mai la spiegazione comoda.** La tentazione
+  qui era diagnosticare *"e' `InpModoSonda=true`, il PORTO non apre ordini quindi
+  qualche metrica economica sta a zero per disegno"* e **spegnere il blocco in
+  modalita' sonda**. Sarebbe stato **sbagliato due volte**: il blocco 12
+  (`LottoDaRischio_Calc`, quello che protegge il conto) sarebbe finito
+  silenziosamente fuori dal collaudo, e il difetto vero sarebbe sopravvissuto
+  nelle corse 4-7 che il P/L lo maturano davvero. **L'autotest del nucleo puro
+  non legge il terminale e non conosce la modalita': se dipendesse da
+  `InpModoSonda`, quello sarebbe gia' il difetto.**
+- **Il rilevatore a tavolino** (vale su ogni `.mq5` di casa): dentro un blocco
+  `blocchi++`, cercare una variabile passata come **ultimo argomento** (l'uscita
+  per riferimento) a **piu' di una** chiamata `_Calc`, quando fra le due c'e'
+  almeno una chiamata che **deve tornare `false`**. Scan fatto il 05/09 su tutti
+  gli EA del repo: l'unico caso che **mordeva** era questo. Resta **latente** (e
+  non morde) `a12_ppl3` nel blocco 12 dello stesso file, riusato da due chiamate
+  ma **mai messo in una `if` di verifica**: se un domani qualcuno ci aggiunge
+  un'asserzione, quella riga diventa la 137.
+
+### Il fix
+
+Una variabile d'uscita **per chiamata**, e le respinte **partono da un valore
+non nullo** cosi' che l'azzeramento sia una cosa **verificata** invece che
+subita. `ABTG_Relativo.mq5` v1.02 → **v1.03**; nel driver `$VERSIONE_ATTESA`
+sale a `1.03` insieme (o il gate d'identita' del sorgente uccide la corsa al
+primo giro — **classe 120**).
+
+> 💶 **E la cosa che conta per il round**: il fix tocca **solo** la routine di
+> autotest, che gira in `OnInit` e non scrive nient'altro che le proprie due
+> colonne. **I numeri economici di `D30_PORTO` NON cambiano di un centesimo**: la
+> corsa gia' fatta resta valida e leggibile, e va riletta *senza* quei due
+> `PROBLEMI`. Al pin nuovo il referto deve dire `Autotest Falliti = 0` su
+> **20** blocchi.

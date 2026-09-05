@@ -174,7 +174,7 @@ Fra "passa" e "bocciata secca" c'è **sempre** una **zona morta** esplicita.
 |---|---|
 | **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` — 🔴 **v1 bocciata in review, v3 non poteva PARTIRE (classe 133), v4 partiva ma NON MISURAVA NIENTE (classe 134, due CSV da 0 byte): non lanciare nessuna delle tre**) |
 | **Script comune** | `backtest_pipeline/walkforward_generico.ps1` — **anche questo scaricato AL PIN dal driver**, non dalla punta del branch. Al pin nuovo **avverte della classe 134** chi prova a girare senza assi |
-| **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.02** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
+| **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.03** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo**. 🔧 **v1.02 → v1.03**: corretto il **blocco 5 dell'autotest** (classe **137**), che faceva uscire `Autotest Falliti = 1` in **ogni** corsa accusando un nucleo **sano**. **Nessun numero economico cambia** |
 | **File prova** | i 6 `prove/RELATIVO_R117_*.txt` (scaricati tutti, ne gira uno: gli altri servono al gemellaggio a SEI) |
 | **Banco** | **Modello 4 = OGNI TICK, TICK REALI**. Finestra **2024.09.26 → 2026.06.30**, split **40/60** |
 | **Dove** | **PC di backtest**, non VPS. **MT5 e MetaEditor CHIUSI** |
@@ -206,7 +206,7 @@ misurava niente.**
 |---|---|
 | `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · **CAMBIATO** (`b0d347e5…` → `ed4a6782…`) · marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) · **0 occorrenze di `-PermettiCellaSingola` fra gli argomenti passati al generico** |
 | `backtest_pipeline/walkforward_generico.ps1` | 200 + sha256 identico · **CAMBIATO** (`dbebb003…` → `b99b7459…`): il flag **resta** (opt-in, default spento) ma ora **urla la classe 134** a chi lo accende. Il driver lo scarica **al pin** e lo ri-pinna sull'EA |
-| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · 🔒 **INVARIATO, stesso blob `a3941eba…` del pin precedente** · `#property version "1.02"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` · **0** pattern per simbolo (hedge-safe) |
+| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · **CAMBIATO** (blocco 5 dell'autotest, classe **137**) · `#property version "1.03"` · **20** blocchi autotest (invariati di numero) · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` · **0** pattern per simbolo (hedge-safe) · **ASCII puro (0 byte > 126)** |
 | i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | 200 tutti e sei · **CAMBIATI**, e cambia **UNA SOLA RIGA di parametri**: `InpMagic` da valore secco a **asse tecnico a 2 celle** (più un blocco di commento che spiega il perché) |
 | `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` | 200 + sha256 identico · classe 134 da `[INFERITO]` a **MISURATA**, col consiglio sbagliato **corretto e non cancellato** |
 

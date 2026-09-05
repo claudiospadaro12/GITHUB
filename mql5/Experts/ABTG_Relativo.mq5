@@ -300,7 +300,15 @@
 //        DUE spread per UNA convergenza): qui resta UNILATERALE.
 //+------------------------------------------------------------------+
 #property copyright "ABTG - EA operativo del candidato RELATIVO (PASSO 1, merito a tick reali)"
-#property version   "1.02"
+#property version   "1.03"
+//  v1.03 (05/09, R117): il BLOCCO 5 dell'autotest riusava UNA sola
+//  variabile d'uscita per due chiamate a Rapporto_Calc. La seconda
+//  chiamata (respinta sul dominio x<=0) AZZERA 'out' prima del
+//  guardiano, cancellando il 2,5 della prima: il blocco falliva SEMPRE
+//  e la colonna 'Autotest Falliti' usciva 1 su 20 in OGNI corsa (IS e
+//  OOS di D30_PORTO, 05/09). IL NUCLEO ERA SANO: il difetto stava nel
+//  TEST. Nessun numero economico e' toccato -- l'autotest gira in
+//  OnInit e non scrive nient'altro che le sue due colonne.
 #property description "Convergenza dello z-score del rapporto fra DUE simboli. QUESTO EA APRE ORDINI VERI."
 #property strict
 
@@ -1601,11 +1609,21 @@ void AutoTestRelativo()
      { falliti++; Log("[AUTOTEST] 4 MadFin_Calc DIVERGE"); }
 
    //--- BLOCCO 5: Rapporto_Calc e il guardiano su x <= 0.
+   //    >>> UNA VARIABILE PER CHIAMATA, E NON E' PIGNOLERIA (difetto
+   //    trovato il 05/09 in R117, classe 137): Rapporto_Calc AZZERA
+   //    'out' PRIMA di guardare il dominio, come tutto il nucleo puro.
+   //    Riusare lo stesso 'out' per la seconda chiamata cancella il 2,5
+   //    appena calcolato dalla prima, e il blocco fallisce PER SEMPRE
+   //    accusando un nucleo che e' sano. Le uscite si tengono separate,
+   //    e il fatto che le respinte escano a ZERO si VERIFICA invece di
+   //    subirlo (a5_o2 e a5_o3 partono da 1,0 apposta).
    blocchi++;
-   double a5_o=0.0;
-   bool   a5_k1 = Rapporto_Calc(10.0, 4.0, a5_o);
-   bool   a5_k2 = Rapporto_Calc(10.0, 0.0, a5_o);
-   if(!a5_k1 || a5_k2 || MathAbs(a5_o-2.5)>0.0001)
+   double a5_o1=0.0, a5_o2=1.0, a5_o3=1.0;
+   bool   a5_k1 = Rapporto_Calc(10.0,  4.0, a5_o1);   // 2,5
+   bool   a5_k2 = Rapporto_Calc(10.0,  0.0, a5_o2);   // false, e out -> 0
+   bool   a5_k3 = Rapporto_Calc(10.0, -1.0, a5_o3);   // false, e out -> 0
+   if(!a5_k1 || a5_k2 || a5_k3 ||
+      MathAbs(a5_o1-2.5)>0.0001 || MathAbs(a5_o2)>0.0001 || MathAbs(a5_o3)>0.0001)
      { falliti++; Log("[AUTOTEST] 5 Rapporto_Calc DIVERGE"); }
 
    //--- BLOCCO 6: Attraversamento_Calc, ed e' il cuore del segnale.
