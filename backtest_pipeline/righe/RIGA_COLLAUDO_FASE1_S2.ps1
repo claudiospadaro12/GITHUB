@@ -1,6 +1,6 @@
 # =====================================================================
 #  RIGA_COLLAUDO_FASE1_S2.ps1
-#  MARCATORE-VERSIONE-SCRIPT: MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1
+#  MARCATORE-VERSIONE-SCRIPT: MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2
 # ---------------------------------------------------------------------
 #  A COSA SERVE (05/09/2026):
 #  e' lo strumento di LETTURA della SESSIONE 2 del collaudo enforcement
@@ -899,6 +899,15 @@ if (-not $DataFolder) {
   if ($oraRitorno) {
     $accensioniDopoRitorno = @($accensioni | Where-Object { $o = Ora-Riga $_; $o -and ($o -ge $oraRitorno) })
   }
+  # IL RILEVATORE VERO DELL'ORDINE INVERTITO (classe 131, 05/09/2026): SetPausa
+  # stampa la riga di accensione SOLO quando la GV e' a zero, e dentro lo stesso
+  # giorno prop la GV non torna a zero da sola. DUE accensioni dentro la sessione
+  # = le GV sono state cancellate con la soglia ANCORA BASSA e il timer le ha
+  # RISCRITTE entro un secondo -- e quella riscrittura cade PRIMA del ritorno a
+  # 4,00, non dopo: il controllo sopra da solo non la vedrebbe MAI.
+  $accensioniSessione = @($accensioni | Where-Object { $o = Ora-Riga $_; (-not $inizioSessione) -or ($o -and ($o -ge $inizioSessione)) })
+  $riscritture = 0
+  if ($accensioniSessione.Count -gt 1) { $riscritture = $accensioniSessione.Count - 1 }
   Riga ""
   Riga "=== IL LATCH DELLA PAUSA: i due passi del ripristino, letti dai log ===" "Cyan"
   Riga ("  soglia ABBASSATA (ultima riga con pausa < 4,00) : " + $(if ($oraAbbassata) { $oraAbbassata } else { "MAI in questo log" }))
@@ -915,9 +924,19 @@ if (-not $DataFolder) {
     Riga "  invertito, rilievo R2): il Guardian le ha riscritte al giro di timer successivo e IL 100k E'" "Red"
     Riga "  ANCORA IN PAUSA. Rifare l'uscita nell'ordine giusto: 1) soglia a 4.0, 2) F3." "Red"
     foreach ($x in $accensioniDopoRitorno) { Riga ("    " + (Ora-Riga $x) + "  " + $x.Trim()) "Red" }
-  } elseif ($oraRitorno) {
-    Riga "  nessuna accensione della pausa dopo il ritorno a 4,00: coerente con un'uscita nell'ordine giusto." "Green"
+  } elseif ($oraRitorno -and $riscritture -eq 0) {
+    Riga "  una sola accensione, e nessuna dopo il ritorno a 4,00: coerente con un'uscita nell'ordine giusto." "Green"
     Riga "  (La PROVA che le due GV sono sparite resta la corsa del canarino con PAUSA B1 grezzo=NO.)" "Gray"
+  }
+
+  if ($riscritture -gt 0) {
+    Riga ("  *** ROSSO: " + $accensioniSessione.Count + " accensioni della pausa dentro la sessione (" + $riscritture + " RISCRITTURE della GV). ***") "Red"
+    Riga "  Il Guardian stampa l'accensione SOLO quando la GV e' a zero (SetPausa): piu' di una accensione vuol dire" "Red"
+    Riga "  che le due GlobalVariable sono state CANCELLATE con la soglia ancora bassa e il timer le ha RISCRITTE" "Red"
+    Riga "  entro un secondo: ordine invertito, rilievo R2. Uscita giusta: 1) InpDailyPausePct=4.0, 2) F3." "Red"
+    Riga "  Se l'ultima corsa del canarino dice grezzo=NO, il 100k E' tornato a casa: questo rosso riguarda" "Red"
+    Riga "  l'ORDINE del gesto, ed e' esattamente cio' che va scritto nel verbale del rilievo R2." "Red"
+    foreach ($x in $accensioniSessione) { Riga ("    " + (Ora-Riga $x) + "  " + $x.Trim()) "Red" }
   }
 
   # ---------------------------------------------------------------
@@ -1452,11 +1471,13 @@ if (-not $DataFolder) {
   } elseif ($P_conto -like "ROSSO*") {
     $Esito = "ROSSO: conto sbagliato"
     $CodiceUscita = 1
-  } elseif ($accensioniDopoRitorno.Count -gt 0) {
-    $Esito = "ROSSO: la pausa si e' RIACCESA dopo il ritorno a 4,00 (GV cancellate prima di rialzare la soglia): IL 100k E' ANCORA IN PAUSA"
-    $CodiceUscita = 1
   } elseif ($P_modo -eq "RACCOLTA FINALE" -and $null -ne $ultimaCorsa -and $ultimaCorsa.PausaG -eq "SI") {
     $Esito = "ROSSO: l'ultima corsa del canarino vede ancora la PAUSA scritta: il 100k NON e' tornato a casa"
+    if ($riscritture -gt 0) { $Esito = $Esito + " -- E IN PIU' le GV erano gia' state cancellate e RISCRITTE (ordine invertito, R2)" }
+    $CodiceUscita = 1
+  } elseif ($accensioniDopoRitorno.Count -gt 0 -or $riscritture -gt 0) {
+    $Esito = "ROSSO: la pausa e' stata CANCELLATA E RISCRITTA durante la sessione (GV cancellate prima di rialzare la soglia: ordine invertito, rilievo R2)"
+    if ($accensioniDopoRitorno.Count -gt 0) { $Esito = "ROSSO: la pausa si e' RIACCESA dopo il ritorno a 4,00 (GV cancellate prima di rialzare la soglia): IL 100k E' ANCORA IN PAUSA" }
     $CodiceUscita = 1
   } elseif ($P_modo -eq "RACCOLTA FINALE" -and ($null -eq $ultimaCorsa -or $ultimaCorsa.PausaG -eq "")) {
     $Esito = "PARZIALE: nessuna corsa del canarino leggibile a fine sessione -- lo stato della pausa NON e' misurato"

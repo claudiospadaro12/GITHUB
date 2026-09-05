@@ -319,6 +319,15 @@ configurazione firmata (condizione **C-5** del cancello).
 **✅ Atteso:** `CAP C1 grezzo=NO ricalcolato=NO` · `GUARDIAN VIVO grezzo=SI ricalcolato=SI`
 · `MOTIVO ... 0` · `ESITO ... PERMESSO` · **`nessun rilievo`**.
 
+> 🧟 **PRIMA DI LANCIARE — classe 130 (trovata il 05/09 costruendo la sessione
+> gemella S2):** questo driver ha un valore che può sopravvivere fra due
+> lanci nella STESSA finestra PowerShell. Se hai già lanciato la riga 1 o la
+> riga 2 in questa console, **chiudila e apri PowerShell da capo** prima di
+> lanciare la riga 3 qui sotto — altrimenti il referto può mostrare i numeri
+> di una corsa del canarino precedente invece di dire correttamente "nessun
+> referto". Non è ancora corretto nel driver (è pinnato: si tocca in un giro
+> dedicato), quindi per ora la contromisura è questa, ed è sufficiente.
+
 ## 1️⃣4️⃣ RIGA 3 — **RACCOLTA FINALE** (referto + zip da mandarmi)
 
 ```powershell

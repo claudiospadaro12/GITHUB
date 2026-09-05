@@ -17,6 +17,24 @@ scaricano **dal pin** e le cercano nel log — il cancello non dipende dall'occh
 > rendono impossibile dire **quale** ha spostato cosa. Una variabile alla volta,
 > anche in campo.
 
+📌 **Nota (classe 130):** il driver di **questa** sessione azzera da solo i suoi
+valori interni a ogni corsa: le tre righe si possono lanciare nella stessa
+finestra PowerShell senza problemi. **Non vale per la SESSIONE 1**: il suo
+driver (già pinnato, non toccato per non invalidare la prova) ha un valore che
+può sopravvivere fra due lanci nella stessa console — finché non viene
+ripinnato, **la riga 3 della sessione 1 va sempre lanciata da una console
+appena aperta**.
+
+---
+
+> 🔴 **SESSIONE WINDOWS: `Administrator`, NON Master.** Misurato il 03/09 alle
+> 16:08: entrambi i `terminal64` (piccolo e `-V3`/100k) girano come
+> `VMI3047753\Administrator`, e le cartelle dati vive stanno sotto
+> `C:\Users\Administrator\...`. Da **Master** la riga 1 dice «NESSUNA cartella
+> con evidenza» (è già successo il 05/09 con la sessione 1) e in più non potresti
+> nemmeno aprire Proprietà/F3 sul terminale giusto. Le tre righe di questa
+> pagina si rifiutano di partire se `$env:USERNAME` non è `Administrator`.
+
 ---
 
 ## 🛑 DOVE GIRA, E CHI FA COSA — leggilo prima di tutto
@@ -121,7 +139,7 @@ pannello e il log non concordano, **vale il pannello**, che è di adesso.
 
 ---
 
-## 📌 IL PIN — **`e487932f0a861b45a14ea1af92d3dd3c523d615a`**  ✅ **INSERITO** — driver **v1**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1` (verificato con `git ls-tree` a questo commit: ci sono sia il driver sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano). ⚠️ Il pin `2e37a67...` e il marcatore `..._S1_v2` sono quelli della **SESSIONE 1**: sono un'altra riga e un'altra prova, non incollarli qui.
+## 📌 IL PIN — **`PLACEHOLDER_PIN_S2_V2`**  ✅ **INSERITO** — driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2` (verificato con `git ls-tree` a questo commit: ci sono sia il driver sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano). Il pin `v1` (`e487932f...`) è **bruciato**: il verificatore ha trovato il rilevatore del rilievo R2 cieco proprio al caso che deve incastrare (classe 131, corretta in v2) — non incollarlo più. ⚠️ Il pin `2e37a67...` e il marcatore `..._S1_v2` sono quelli della **SESSIONE 1**: sono un'altra riga e un'altra prova, non incollarli qui.
 
 ---
 
@@ -160,9 +178,10 @@ alla riga 3️⃣ per non confondere le righe di stamattina con quelle della pro
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='e487932f0a861b45a14ea1af92d3dd3c523d615a'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
+    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -238,6 +257,15 @@ stampa e finisce: **non manda ordini, non scrive GlobalVariable**.
 · `MOTIVO ... 0 = nessuno` · `ESITO PER UN EA ADESSO: un ingresso sarebbe PERMESSO`
 · `AUTOTEST: 8 blocchi su 8 passati` · `nessun rilievo`.
 
+> 🔎 **`grezzo=X ricalcolato=Y` è la scorciatoia di QUESTA pagina**, non il testo
+> letterale del Giornale. La riga vera è (una per firma, su due colonne):
+> `[CANARINO] PAUSA B1       grezzo(ts>0)=NO   ABTG_PausaAttiva_Calc     =NO   -> coerenti`
+> `[CANARINO] GUARDIAN VIVO  grezzo(ts>0)=SI   ABTG_GuardianVivo_Calc    =SI   -> coerenti`
+> — `grezzo(ts>0)=` è il primo valore, il nome della funzione (`ABTG_PausaAttiva_Calc`
+> per la pausa) è il secondo. Le due lettere `NO`/`SI` sono ciò che conta; se cerchi
+> `grezzo=NO` parola per parola nel Giornale **non lo trovi**, cerca `PAUSA B1` o
+> `GUARDIAN VIVO` e leggi i due valori accanto.
+
 📌 **E la riga che serve al criterio 6:** `posizioni aperte sul conto: N` seguita
 da una riga `pos #<ticket> ... sl=<valore>` per ognuna. **Quello è il "prima"
 degli SL**: il confronto con le corse successive è la prova a macchina del
@@ -312,9 +340,10 @@ prossimo reset del giorno prop: è la prova che la pausa **durerebbe fino a lì*
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='e487932f0a861b45a14ea1af92d3dd3c523d615a'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
+    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Presidio -Minuti 20; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -373,8 +402,10 @@ Sul grafico del Guardian → **Proprietà → Parametri → `InpDailyPausePct` =
 > 🛑 **E l'ORDINE NON È INVERTIBILE:** se cancelli le GlobalVariable **prima** di
 > rialzare la soglia, il giro di timer successivo (1 secondo) **le riscrive** —
 > e ti ritrovi la pausa accesa credendo di averla tolta. Il referto finale
-> **se ne accorge** (cerca una riga di accensione **dopo** il ritorno a 4,00) e
-> in quel caso esce **ROSSO**.
+> **se ne accorge** (`SetPausa` stampa la riga di accensione SOLO quando la GV
+> è a zero: **due accensioni dentro la sessione** = le GV sono state cancellate
+> e il timer le ha riscritte **entro un secondo**, cioè PRIMA che tu rialzassi
+> la soglia, non dopo) e in quel caso esce **ROSSO**.
 
 ## 1️⃣2️⃣ CANARINO — **corsa 4: la MISURA del latch** (30 secondi, e non è una formalità)
 
@@ -430,9 +461,10 @@ del cancello di fase).
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='e487932f0a861b45a14ea1af92d3dd3c523d615a'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
+    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Chiusura; $rc=$LASTEXITCODE;
     $r=@(Get-ChildItem -Path (Join-Path $env:USERPROFILE 'Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop\COLLAUDO_FASE1_S2_*\RIGA_REFERTO_COLLAUDO_FASE1_S2.txt') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
     if($r.Count -eq 0){ throw 'NESSUN REFERTO DI ADESSO sul Desktop: copiami il rosso qui sopra.' };
@@ -481,8 +513,11 @@ Guardian, che è più precisa di un appunto a mano.
    `4.00 → 0.03 → 4.00`. L'ultima riga deve dire **4,00 = configurazione
    firmata**, e il **cap deve essere rimasto 3,25 per tutto il tempo**.
 5. **Il LATCH DELLA PAUSA**: quando è stata abbassata, quando è tornata a 4,00, e
-   soprattutto **se è ricomparsa un'accensione DOPO** — che sarebbe l'ordine
-   invertito del ripristino.
+   soprattutto **quante accensioni ci sono state dentro la sessione** — il
+   Guardian ne stampa una sola per giorno prop, quindi **due o più vogliono
+   dire che le GV sono state cancellate e riscritte** (ordine invertito del
+   ripristino), a prescindere da quando cade la seconda rispetto al ritorno a
+   4,00.
 6. **Il GATE**: `dayLoss` letto dai log, con l'avviso se ≤ 0.
 7. **I referti del canarino**, classificati da soli: *in pausa* / *pausa spenta*
    / *pausa scritta ma scaduta*, con **le posizioni e i loro SL**.
@@ -521,7 +556,7 @@ Guardian, che è più precisa di un appunto a mano.
 | **0** | lettura completa | lo zip |
 | **2** | parziale: artefatto non scaricato, log del giorno mancante, **oppure nessuna corsa del canarino leggibile a fine sessione** (lo stato della pausa non è misurato) | lo zip **lo stesso** (dice cosa manca) |
 | **1** | **ROSSO**: conto sbagliato, riga VIETATA nel log, pin assente/malformato | lo zip **lo stesso** + fermarsi |
-| **1** | 🔴 **ROSSO NUOVO DI QUESTA SESSIONE: la pausa è rimasta accesa** — o perché l'ultima corsa del canarino la vede ancora scritta, o perché è **ricomparsa un'accensione dopo il ritorno a 4,00** (GV cancellate prima di rialzare la soglia) | **prima rimetti a posto** (1️⃣1️⃣ → 1️⃣3️⃣ → 1️⃣4️⃣), poi rilancia la riga 3 e mandami lo zip |
+| **1** | 🔴 **ROSSO NUOVO DI QUESTA SESSIONE: la pausa è rimasta accesa** — o perché l'ultima corsa del canarino la vede ancora scritta, o perché il log mostra **più di un'accensione dentro la sessione** (le GV sono state cancellate e il timer le ha riscritte, ordine invertito) | **prima rimetti a posto** (1️⃣1️⃣ → 1️⃣3️⃣ → 1️⃣4️⃣), poi rilancia la riga 3 e mandami lo zip |
 | **1** | **cartella dati del 100k non identificata** (zero candidate, oppure 2+) | lo zip **lo stesso**: dentro c'è l'elenco completo → rilancia con `-CartellaDati` |
 | _(nessuno)_ | il blocco non arriva a lanciare: `irm` fallito o marcatore assente | copiami il **rosso in console** |
 
@@ -534,9 +569,9 @@ referti del canarino finti, artefatto locale), 5 casi, tutti e tre i modi:
 
 | caso | atteso | ottenuto |
 |---|---|---|
-| sessione riuscita (pausa accesa, EA bloccato, SL mosso in pausa, ripristino a due passi) | PASS a macchina su criterio 5 e 6, uscita 0 | ✅ |
+| sessione riuscita (pausa accesa, EA bloccato, SL mosso in pausa, ripristino a due passi, **una sola** accensione) | PASS a macchina su criterio 5 e 6, uscita 0 | ✅ |
 | giornata **in utile** (`dayLoss=-0,11%`) | `GATE CHIUSO`, "si rimanda" | ✅ |
-| **GV cancellate prima** di rialzare la soglia (accensione dopo il ritorno a 4,00) | ROSSO, uscita 1 | ✅ |
+| **GV cancellate PRIMA** di rialzare la soglia → il timer le riscrive entro 1 s (**due accensioni dentro la sessione**, la seconda cade PRIMA del ritorno a 4,00) | ROSSO, uscita 1, col conteggio delle riscritture | ✅ (classe 131: la prima versione del rilevatore guardava la finestra sbagliata — dopo il ritorno, non dentro la sessione — ed era stata cieca esattamente a questo caso; corretto e rieseguito) |
 | **pausa rimasta accesa** (ultima corsa del canarino con `grezzo=SI`) | ROSSO, uscita 1 | ✅ |
 | **nessun referto del canarino** in chiusura | PARZIALE, uscita 2, e **niente numeri della corsa precedente** | ✅ |
 
