@@ -8496,3 +8496,82 @@ senza nessun asse Y**. Sei sono quelli di R117 (chiusi qui). Gli altri dodici:
 > hanno). 👉 **Il censimento dice "guarda qui", il verdetto lo dà il grep di CHI
 > SCARICA quel prova.** È la classe 111 applicata bene: si censisce il fratello,
 > non si condanna l'omonimo.
+
+---
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (notte) — trovata dal **verificatore** RI-VERIFICANDO il fix della classe 133 (pin `371083bf`), **eseguendo** il generico vecchio e nuovo su banco `pwsh` 7.4.6 con i sei prova veri di R117. Il fix e' **corretto, minimo e non-regressivo** (dimostrato: l'`.ini` di una prova a griglia esce **identico byte per byte**, sha256 `78CB1D6D1D7B2D1E`, con generico vecchio / nuovo-senza-flag / nuovo-col-flag). La classe qui sotto **non e' un difetto del fix**: e' il pezzo che il fix **non poteva coprire** e che nessuno aveva ancora nominato.
+
+## 134. 🚪 IL CONTROLLO CHE SI TOGLIE PROTEGGEVA ANCHE DA UN RISCHIO **DIVERSO DA QUELLO CHE IL SUO MESSAGGIO DICHIARA** — e quel secondo rischio resta scoperto, in silenzio
+
+Il controllo aperto dalla classe 133 dice, con parole sue:
+
+```
+nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward
+```
+
+Letto cosi', e' un controllo **METODOLOGICO**: "questa non e' una selezione".
+E' la ragione per cui aprirlo con `-PermettiCellaSingola` su un round a cella
+congelata e' **giusto**: li' la selezione non c'e' e non deve esserci.
+
+**Ma quel controllo garantiva anche un fatto TECNICO che nessuno gli aveva
+chiesto**, e che sparisce insieme a lui:
+
+> finche' il controllo mordeva, **`walkforward_generico.ps1` non poteva mai
+> arrivare al tester con ZERO input ottimizzabili.**
+
+E il generico scrive `Optimization=1` **incondizionatamente**, anche nella corsa
+vera (`walkforward_generico.ps1` riga 674). Con il flag acceso, MT5 riceve per
+la prima volta nella storia del repo un `.ini` con `Optimization=1` e **nessuna
+riga `||Y`** in `[TesterInputs]`.
+
+### I fatti MISURATI (non l'ipotesi)
+
+| fatto | dove l'ho letto |
+|---|---|
+| il generico scrive `Optimization=1` sempre, anche a sweep vuoto | `walkforward_generico.ps1` riga 674 |
+| `ABTG_Relativo.mq5` produce il CSV **solo** via `OnTesterInit`/`OnTesterDeinit` + `FrameNext`, che MT5 chiama **solo in ottimizzazione** | `mql5/Experts/ABTG_Relativo.mq5` righe 2167-2221; il commento dell'EA stesso: *"In backtest singolo FrameAdd e' inerte"* (riga 2003) |
+| i due round di casa che volevano **UNA cella in ottimizzazione** NON ci sono arrivati a zero assi: ci mettono un **ASSE FINTO a 2 celle** su `InpMagic` (`InpMagic=m\|\|m\|\|1\|\|m+1\|\|Y`) | `RIGA_R102_CLASSIFICA_LUNGA.ps1`, `RIGA_R103_CLASSIFICA_FLOTTA.ps1` (~riga 1292) |
+| l'unico prova senza assi Y consumato da un driver vero, `R104_MaxMinDAX_MFE`, gira con **`Optimization=0`** e passata singola | `RIGA_R104_MFE_MAXMIN_DAX.ps1` righe 508 e 528 |
+
+👉 **Nel repo NON esiste un solo precedente di MT5 girato con `Optimization=1` e
+zero assi Y.** Il comportamento del tester in quella configurazione e'
+**[INFERITO], mai misurato**: puo' fare una passata (prodotto vuoto = 1) oppure
+zero passate. Se fa zero passate, **niente frame, niente `OnTesterDeinit` utile,
+niente CSV** — e il round muore un secondo giro, stavolta **dopo** ore di tick
+reali invece che in dieci secondi.
+
+### Perche' e' una classe, e non "una svista dell'agente"
+
+Il banco che ha dimostrato il fix della 133 e' stato eseguito **tutto in
+`-SoloControllo`** — la modalita' che **non apre MT5 mai**. E' il banco giusto
+per provare che i controlli passano e che l'anteprima esce; e' **strutturalmente
+cieco** su cio' che il tester fa dopo. La pagina lo dichiarava in generale
+(*"il banco non copre la corsa vera di MT5"*), ma **non nominava questo rischio**,
+cioe' quello che il fix stesso aveva appena creato.
+
+> ✅ **REGOLA.** Quando si apre (o si toglie) un controllo di uno script
+> condiviso, **non basta chiedersi se la sua RAGIONE DICHIARATA vale ancora**.
+> Si cerca anche cosa quel controllo **garantiva di fatto** a valle:
+> 1. si grep-pa la **catena a valle** per gli invarianti che ora possono
+>    rompersi (qui: `Optimization=1` scritto sempre, e un EA che esporta solo
+>    per frame);
+> 2. si cerca nel repo un **precedente ESEGUITO** nella nuova configurazione. Se
+>    non c'e', si scrive **[INFERITO]** e si NOMINA il rischio nella pagina;
+> 3. la **prima corsa vera diventa il CANARINO dichiarato**: la riga di lancio
+>    dice a Claudio *quale riga del referto* prova che il motore a valle ha
+>    accettato la configurazione nuova (qui: le righe del CSV, attese 1, non 0),
+>    e **cosa NON lanciare** se quella riga e' rossa.
+>
+> 🚫 Cio' che NON si fa: rimettere l'asse finto per "stare tranquilli". Su R117
+> raddoppierebbe le passate a tick reali e toccherebbe sei prova firmati — la
+> classe 133 ha gia' misurato che quella strada e' peggiore. Il rischio si
+> **dichiara e si osserva**, non si compra con una misura falsata.
+
+### La riga che chiude il buco (costo: zero, nessun pin nuovo)
+
+La pagina non e' pinnata: basta nominare il canarino nel blocco della **prima
+corsa vera**, accanto al promemoria che gia' c'e'.
+
+```powershell
+Write-Host 'CANARINO CLASSE 134, PRIMA CORSA VERA CON ZERO ASSI Y: nel referto la riga "passate:" e i DUE CSV devono avere 1 RIGA CIASCUNO. Se PROBLEMI dice "0 righe nel CSV", MT5 non ha accettato Optimization=1 senza parametri da ottimizzare: FERMATI, non lanciare le altre corse, mandami lo zip.' -ForegroundColor Cyan
+```
