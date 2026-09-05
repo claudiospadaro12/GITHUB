@@ -139,7 +139,7 @@ pannello e il log non concordano, **vale il pannello**, che è di adesso.
 
 ---
 
-## 📌 IL PIN — **`PLACEHOLDER_PIN_S2_V2`**  ✅ **INSERITO** — driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2` (verificato con `git ls-tree` a questo commit: ci sono sia il driver sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano). Il pin `v1` (`e487932f...`) è **bruciato**: il verificatore ha trovato il rilevatore del rilievo R2 cieco proprio al caso che deve incastrare (classe 131, corretta in v2) — non incollarlo più. ⚠️ Il pin `2e37a67...` e il marcatore `..._S1_v2` sono quelli della **SESSIONE 1**: sono un'altra riga e un'altra prova, non incollarli qui.
+## 📌 IL PIN — **`89c9003976f75cc6719aff3e9a4d2764962a95ab`**  ✅ **INSERITO** — driver **v2**, marcatore `MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2` (verificato con `git ls-tree` a questo commit: ci sono sia il driver sia l'artefatto `backtest_pipeline/attese_enforcement_fase1.txt` che le tre righe scaricano). Il pin `v1` (`e487932f...`) è **bruciato**: il verificatore ha trovato il rilevatore del rilievo R2 cieco proprio al caso che deve incastrare (classe 131, corretta in v2) — non incollarlo più. ⚠️ Il pin `2e37a67...` e il marcatore `..._S1_v2` sono quelli della **SESSIONE 1**: sono un'altra riga e un'altra prova, non incollarli qui.
 
 ---
 
@@ -179,7 +179,7 @@ alla riga 3️⃣ per non confondere le righe di stamattina con quelle della pro
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
-    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='89c9003976f75cc6719aff3e9a4d2764962a95ab'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
@@ -341,7 +341,7 @@ prossimo reset del giorno prop: è la prova che la pausa **durerebbe fino a lì*
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
-    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='89c9003976f75cc6719aff3e9a4d2764962a95ab'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Presidio -Minuti 20; $rc=$LASTEXITCODE;
@@ -462,7 +462,7 @@ del cancello di fase).
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if($env:USERNAME -ne 'Administrator'){ throw ('SESSIONE WINDOWS SBAGLIATA: qui sei ' + $env:USERNAME + '. Il terminale -V3 del 100k gira sotto Administrator (misurato il 03/09): chiudi, entra nella sessione Administrator e rilancia.') };
-    $pin='PLACEHOLDER_PIN_S2_V2'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='89c9003976f75cc6719aff3e9a4d2764962a95ab'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_FASE1_S2.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_FASE1_S2.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_FASE1_S2_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Chiusura; $rc=$LASTEXITCODE;
