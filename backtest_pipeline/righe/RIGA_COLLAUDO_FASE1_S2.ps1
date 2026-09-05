@@ -147,6 +147,19 @@ $P_zip        = "NON TENTATO"
 $Esito        = "NON ARRIVATO IN FONDO"
 $CodiceUscita = 1
 
+# --- LE VARIABILI $global: SI AZZERANO QUI, A OGNI CORSA.
+# Non e' pedanteria: le tre righe della pagina si lanciano NELLA STESSA
+# finestra di PowerShell, e una variabile $global: SOPRAVVIVE da
+# un'invocazione all'altra. Senza questo azzeramento, una RACCOLTA FINALE
+# che non trova nessun referto del canarino (cartella sbagliata, MQL5\Files
+# vuota) leggerebbe quelli trovati dalla LETTURA PRIMA di mezz'ora prima e
+# darebbe un verdetto su misure VECCHIE, spacciandole per di adesso.
+# E' la classe 128 (rileggere roba della corsa precedente) trasportata
+# dalle righe di log alle variabili di sessione.
+$global:CAN_RIASS  = $null
+$global:C6_INPAUSA = $null
+$global:C6_TOTALE  = $null
+
 # =====================================================================
 #  UTILITA'
 # =====================================================================
@@ -1056,31 +1069,110 @@ if (-not $DataFolder) {
         if (Contiene $l "*** ROSSO CANARINO ***") { $rosso++ }
         if (Contiene $l "*** FAIL ***") { $fail++ }
       }
+      # CLASSIFICAZIONE PER LA PAUSA (nella sessione 1 era per il cap).
+      # I tre casi non sono simmetrici e vanno detti per esteso:
+      #  SI/SI = la pausa e' scritta E l'include la considera viva -> gli EA
+      #          sono fermi: e' la corsa che serve al criterio 5;
+      #  SI/NO = la GV c'e' ma per l'include e' SCADUTA (ts_fino passato, o
+      #          ripiego delle 24 h): il pannello direbbe ATTIVA e gli EA
+      #          aprirebbero LO STESSO. Nella sessione 2 NON e' il fail-open
+      #          in prova (quello si collauda col CAP, divieto NO.2): e' un
+      #          RILIEVO da spiegare;
+      #  NO    = nessuna pausa scritta: e' la fotografia "prima" o quella
+      #          "dopo il ripristino a due passi".
       $tipo = "NON CLASSIFICATO"
-      if ($capG -eq "SI" -and $capC -eq "SI") { $tipo = "CORSA CON CAP ATTIVO (criterio 7)" }
-      elseif ($capG -eq "SI" -and $capC -eq "NO") { $tipo = "CORSA DI FAIL-OPEN: timbro vecchio, cap SCADUTO (criterio 8)" }
-      elseif ($capG -eq "NO") { $tipo = "corsa con cap SPENTO (fotografia)" }
+      if ($pausaG -eq "SI" -and $pausaC -eq "SI")      { $tipo = "CORSA IN PAUSA (criterio 5): gli EA sono fermi" }
+      elseif ($pausaG -eq "SI" -and $pausaC -eq "NO")  { $tipo = "PAUSA SCRITTA MA SCADUTA per l'include -- RILIEVO, non e' il fail-open in prova" }
+      elseif ($pausaG -eq "NO")                       { $tipo = "corsa con pausa SPENTA (fotografia prima / dopo il ripristino)" }
       Riga ("  --- " + $f.Name + "   (scritto alle " + $f.LastWriteTime.ToString("HH:mm:ss", $INV) + " locali)") "White"
       Riga ("      classificazione : " + $tipo) "White"
       Riga ("      login           : " + $login + "   canale esiste: " + $canale) (@{$true="Green";$false="Red"}[($login -eq $CONTO_COLLAUDO -and $canale -eq "SI")])
       Riga ("      PAUSA B1        : grezzo=" + $pausaG + "  ricalcolato=" + $pausaC)
-      Riga ("      CAP C1          : grezzo=" + $capG + "  ricalcolato=" + $capC)
+      if ($accensPausa) { Riga ("      pausa: accensione=" + $accensPausa + "  scadenza=" + $scadenzaPausa + " (ora SERVER)") "White" }
+      Riga ("      CAP C1          : grezzo=" + $capG + "  ricalcolato=" + $capC + "   [in questa sessione il cap NON si tocca]")
       Riga ("      GUARDIAN VIVO   : grezzo=" + $vivoG + "  ricalcolato=" + $vivoC)
+      if ($vivoG -eq "NO" -or $vivoC -eq "NO") {
+        Riga "      IL GUARDIAN NON BATTE: nella sessione 2 il Guardian non si toglie MAI dal grafico." "Yellow"
+        Riga "      Se il battito manca, o e' stato tolto (gesto della sessione 1), oppure e' fermo davvero." "Yellow"
+      }
       if ($timbroCap) { Riga ("      ultimo timbro cap: " + $timbroCap + " (ora SERVER), cioe' " + $secFa + " secondi prima della corsa  [tolleranza 120 s]") "White" }
       Riga ("      MOTIVO (come i 5 mirror): " + $motivo)
       Riga ("      ESITO per un EA adesso  : " + $esito) (@{$true="Green";$false="Yellow"}[($esito -ne "")])
       Riga ("      rischio aperto GV.4     : " + $gvRisk + "%")
+      Riga ("      posizioni aperte lette  : " + $POS.Keys.Count + "   (sono il materiale del criterio 6)")
+      foreach ($k in ($POS.Keys | Sort-Object)) {
+        $p = $POS[$k]
+        Riga ("        pos #" + $p.Ticket + " magic=" + $p.Magic + " " + $p.Simbolo + " " + $p.Lato + " vol=" + $p.Vol + " sl=" + $p.SL)
+      }
       Riga ("      rilievi: " + $rilievi + "   autotest: " + $autotest + "   ROSSO CANARINO: " + $rosso + "   '*** FAIL ***': " + $fail + "   righe fuori invariante: " + $fuori)
       if ($rosso -gt 0) { Riga "      AUTOTEST DEL CANARINO ROSSO: lo strumento di misura si e' dichiarato rotto. Non si legge niente." "Red" }
       if ($fail -gt 0)  { Riga "      ATTENZIONE: il referto del canarino contiene '*** FAIL ***', che e' la riga VIETATA STOP.AUTOTEST." "Red" }
       if ($fuori -gt 0) { Riga ("      " + $fuori + " righe NON iniziano con [CANARINO]: invariante del canarino violata, da dichiarare.") "Yellow" }
       [void]$riass.Add([pscustomobject]@{
         File=$f.Name; Ora=$f.LastWriteTime.ToString("HH:mm:ss",$INV); Tipo=$tipo; Login=$login;
-        CapG=$capG; CapC=$capC; VivoG=$vivoG; VivoC=$vivoC; Motivo=$motivo; Esito=$esito;
-        Rosso=$rosso; SecFa=$secFa; Timbro=$timbroCap })
+        PausaG=$pausaG; PausaC=$pausaC; CapG=$capG; CapC=$capC; VivoG=$vivoG; VivoC=$vivoC;
+        Motivo=$motivo; Esito=$esito; Rosso=$rosso; SecFa=$secFa; Timbro=$timbroCap;
+        Accensione=$accensPausa; Scadenza=$scadenzaPausa; Pos=$POS })
       try { Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $cart $f.Name) -Force } catch { }
     }
     $global:CAN_RIASS = $riass
+
+    # -------------------------------------------------------------
+    #  10-bis) IL CRITERIO 6 A MACCHINA: GLI SL, CORSA PER CORSA.
+    #
+    #  La prova di forza 1 del paragrafo 2.4 e' "un evento di gestione
+    #  con timestamp DENTRO la pausa": SL modificato (breakeven o
+    #  trailing) oppure parziale eseguito. Il canarino fotografa lo SL
+    #  di ogni posizione a ogni corsa: due corse ENTRAMBE in pausa, con
+    #  lo stesso ticket e uno SL DIVERSO, sono quell'evento -- misurato,
+    #  non dedotto.
+    #
+    #  TRE LIMITI, dichiarati qui perche' chi legge non li deduca:
+    #  1) il confronto vede solo cio' che accade FRA due corse: se il
+    #     trailing muove lo SL e nessuno lancia il canarino, non si vede;
+    #  2) un ticket SPARITO fra due corse NON e' automaticamente un FAIL:
+    #     puo' essere TP, SL, chiusura oraria (DAX/Dow vanno flat alle
+    #     17:30 server) o un parziale che chiude tutto. Va SPIEGATO con
+    #     lo Storico, non contato;
+    #  3) il volume che cala sullo stesso ticket e' la firma di un
+    #     PARZIALE eseguito: e' anch'esso un evento di gestione.
+    # -------------------------------------------------------------
+    if ($riass.Count -ge 2) {
+      Riga ""
+      Riga "=== CRITERIO 6 A MACCHINA: confronto delle posizioni fra corse consecutive ===" "Cyan"
+      $gestioneInPausa = 0
+      $gestioneTotale  = 0
+      for ($i = 1; $i -lt $riass.Count; $i++) {
+        $a = $riass[$i - 1]
+        $b = $riass[$i]
+        $dentro = ($a.PausaG -eq "SI" -and $a.PausaC -eq "SI" -and $b.PausaG -eq "SI" -and $b.PausaC -eq "SI")
+        $eti = "  " + $a.Ora + " -> " + $b.Ora + "  " + $(if ($dentro) { "[ENTRAMBE IN PAUSA]" } else { "[non entrambe in pausa: vale come contorno, non come prova]" })
+        Riga $eti "White"
+        $tuttiTicket = @()
+        foreach ($k in $a.Pos.Keys) { $tuttiTicket += $k }
+        foreach ($k in $b.Pos.Keys) { if ($tuttiTicket -notcontains $k) { $tuttiTicket += $k } }
+        if ($tuttiTicket.Count -eq 0) { Riga "      nessuna posizione aperta in nessuna delle due corse." "Yellow" }
+        foreach ($k in ($tuttiTicket | Sort-Object)) {
+          $pa = $a.Pos[$k]; $pb = $b.Pos[$k]
+          if ($null -eq $pa) { Riga ("      pos #" + $k + "  COMPARSA fra le due corse (aperta dopo la prima): sl=" + $pb.SL) "Yellow"; continue }
+          if ($null -eq $pb) { Riga ("      pos #" + $k + "  SPARITA fra le due corse (chiusa): NON e' automaticamente un FAIL, va spiegata con lo Storico") "Yellow"; continue }
+          $noteP = @()
+          if ($pa.SL -ne $pb.SL)   { $noteP += ("SL MODIFICATO " + $pa.SL + " -> " + $pb.SL) }
+          if ($pa.Vol -ne $pb.Vol) { $noteP += ("VOLUME CALATO/CAMBIATO " + $pa.Vol + " -> " + $pb.Vol + " (firma di un PARZIALE)") }
+          if ($noteP.Count -eq 0) {
+            Riga ("      pos #" + $k + "  invariata (sl=" + $pb.SL + ", vol=" + $pb.Vol + "): la posizione e' ANCORA APERTA (prova di forza 2)")
+          } else {
+            $gestioneTotale++
+            if ($dentro) { $gestioneInPausa++ }
+            Riga ("      pos #" + $k + "  " + ($noteP -join " + ")) (@{$true="Green";$false="White"}[$dentro])
+          }
+        }
+      }
+      Riga ("  eventi di gestione osservati fra corse ENTRAMBE IN PAUSA : " + $gestioneInPausa) (@{$true="Green";$false="Yellow"}[($gestioneInPausa -gt 0)])
+      Riga ("  eventi di gestione osservati in totale (anche fuori)     : " + $gestioneTotale)
+      $global:C6_INPAUSA = $gestioneInPausa
+      $global:C6_TOTALE  = $gestioneTotale
+    }
   }
 
   # ---------------------------------------------------------------
@@ -1122,8 +1214,85 @@ if (-not $DataFolder) {
   Riga ("  spia A1 (tetto per simbolo, InpMaxPosSimbolo>0) nella giornata: " + $spieA1.Count) (@{$true="Yellow";$false="Green"}[($spieA1.Count -gt 0)])
   foreach ($s in $spieA1) { Riga ("    " + $s.Trim()) "Yellow" }
   if ($spieA1.Count -gt 0) {
-    Riga "  Se un EA non ha tentato l'ingresso PER IL TETTO A1, il suo silenzio NON e' un fail del cap:" "Yellow"
+    Riga "  Se un EA non ha tentato l'ingresso PER IL TETTO A1, il suo silenzio NON e' un fail della pausa:" "Yellow"
     Riga "  e' NON MISURATO, e va scritto nel verbale (nota ROUND.PRECEDENZA dell'artefatto)." "Yellow"
+  }
+
+  # ---------------------------------------------------------------
+  # 11-bis) LA FINESTRA DI PAUSA E COSA E' SUCCESSO DENTRO
+  #         (materiale del criterio 6: SPIE, non prove)
+  #
+  #  Inizio = la prima riga "* PAUSA NUOVI INGRESSI attiva:" dentro la
+  #  sessione. Fine = il ritorno della soglia a 4,00 (passo 1 del
+  #  ripristino), oppure "adesso" se non e' ancora avvenuto.
+  #
+  #  Dentro quella finestra si contano DUE cose, e nessuna delle due e'
+  #  la prova del criterio 6 (la prova sono lo Storico e la scheda Trade,
+  #  cioe' i tuoi screenshot, piu' il confronto degli SL fra le corse del
+  #  canarino qui sopra):
+  #   - le righe di giornale dei 5 mirror (nomi presi DALL'ARTEFATTO),
+  #     divise fra righe di BLOCCO e tutto il resto. "Tutto il resto"
+  #     durante una pausa e' esattamente cio' che il criterio 6 vuole
+  #     vedere: un EA che continua a fare il suo mestiere sulle posizioni;
+  #   - le righe del GIORNALE (logs\, non MQL5\Logs\) che contengono
+  #     "modif": nelle build MT5 sono le modifiche di SL/TP. IL TESTO
+  #     ESATTO DIPENDE DALLA BUILD E DALLA LINGUA: se il conteggio e'
+  #     zero NON si conclude niente, e va detto invece di essere dedotto.
+  # ---------------------------------------------------------------
+  Riga ""
+  Riga "=== FINESTRA DI PAUSA E ATTIVITA' DEGLI EA DENTRO (criterio 6, SPIE) ===" "Cyan"
+  $accSessione = @($accensioni | Where-Object { $o = Ora-Riga $_; (-not $inizioSessione) -or ($o -and ($o -ge $inizioSessione)) })
+  $pausaDa = ""
+  $pausaA  = ""
+  if ($accSessione.Count -gt 0) { $pausaDa = Ora-Riga $accSessione[0] }
+  if ($pausaDa -and $oraRitorno -and ($oraRitorno -ge $pausaDa)) { $pausaA = $oraRitorno }
+  if ($pausaDa -and -not $pausaA) { $pausaA = $Avvio.ToString("HH:mm:ss", $INV) }
+  if (-not $pausaDa) {
+    Riga "  NESSUNA accensione della pausa dentro la sessione: la finestra non esiste e il criterio 6" "Yellow"
+    Riga "  non e' osservabile (per definizione si osserva DURANTE la pausa). Se il gesto e' stato fatto," "Yellow"
+    Riga "  guarda il GATE qui sopra: probabilmente la giornata non era in perdita e la pausa non e' partita." "Yellow"
+  } else {
+    Riga ("  finestra di pausa (ora LOCALE VPS): da " + $pausaDa + " a " + $pausaA +
+          $(if ($oraRitorno -and ($oraRitorno -ge $pausaDa)) { "  (fine = ritorno della soglia a 4,00)" } else { "  (fine = ADESSO: la soglia NON e' ancora tornata a 4,00)" })) "White"
+    $dentroFin = @($RIGHE | Where-Object { $o = Ora-Riga $_; $o -and ($o -ge $pausaDa) -and ($o -le $pausaA) })
+    Riga ("  righe di log dentro la finestra: " + $dentroFin.Count)
+    if ($EANOMI.Count -eq 0) {
+      Riga "  nomi EA non disponibili (artefatto non letto): salto il conteggio per EA." "Yellow"
+    } else {
+      foreach ($nome in $EANOMI) {
+        $sue = @($dentroFin | Where-Object { Contiene $_ $nome })
+        $sueBlocchi = @($sue | Where-Object { Contiene $_ "INGRESSO BLOCCATO --" })
+        $sueAltro   = @($sue | Where-Object { -not (Contiene $_ "INGRESSO BLOCCATO --") })
+        Riga ("    " + $nome.PadRight(34) + " righe dentro la pausa: " + $sue.Count +
+              "   di cui BLOCCHI: " + $sueBlocchi.Count + "   ALTRO (candidate di gestione): " + $sueAltro.Count)
+        $q = 0
+        foreach ($x in $sueAltro) {
+          if ($q -ge 8) { RigaSoloFile ("        ... (" + ($sueAltro.Count - 8) + " righe non stampate a video, tutte nello zip)"); break }
+          Riga ("        " + (Ora-Riga $x) + "  " + $x.Trim())
+          $q++
+        }
+      }
+    }
+    # le righe del GIORNALE dentro la finestra: SPIA dipendente dalla build
+    $modif = @()
+    if ($logGiornale -and (Test-Path $logGiornale)) {
+      $tg = Leggi-Testo $logGiornale
+      $rg = @($tg -split "`r?`n" | Where-Object { $_.Trim().Length -gt 0 })
+      $modif = @($rg | Where-Object {
+                  $o = Ora-Riga $_
+                  $o -and ($o -ge $pausaDa) -and ($o -le $pausaA) -and (Contiene $_ "modif") })
+    }
+    Riga ("  righe del GIORNALE con 'modif' dentro la finestra: " + $modif.Count) (@{$true="Green";$false="Yellow"}[($modif.Count -gt 0)])
+    $q = 0
+    foreach ($x in $modif) {
+      if ($q -ge 12) { RigaSoloFile ("      ... (" + ($modif.Count - 12) + " righe non stampate a video, tutte nello zip)"); break }
+      Riga ("      " + $x.Trim())
+      $q++
+    }
+    Riga "  LIMITE DICHIARATO: 'modif' e' una SPIA dipendente dalla build e dalla lingua del terminale." "Gray"
+    Riga "  Zero righe NON vuol dire 'nessuna gestione': vuol dire che questa spia non ha visto niente." "Gray"
+    Riga "  La prova del criterio 6 resta il confronto degli SL fra le corse del canarino, piu' la scheda" "Gray"
+    Riga "  Trade e lo Storico (i tuoi screenshot)." "Gray"
   }
 
   # ---------------------------------------------------------------
@@ -1133,18 +1302,22 @@ if (-not $DataFolder) {
     Riga ""
     Riga "=== VERDETTO (parte a macchina). PASS / NON MISURATO / ROSSO ===" "Cyan"
 
-    $canCap  = 0; $canFail = 0; $secFailOpen = ""
+    $canPausa = 0; $canDiverge = 0; $canSpenta = 0
+    $ultimaCorsa = $null
     if ($null -ne $global:CAN_RIASS) {
       foreach ($c in $global:CAN_RIASS) {
-        if ($c.CapG -eq "SI" -and $c.CapC -eq "SI") { $canCap++ }
-        if ($c.CapG -eq "SI" -and $c.CapC -eq "NO") { $canFail++; $secFailOpen = $c.SecFa }
+        if ($c.PausaG -eq "SI" -and $c.PausaC -eq "SI") { $canPausa++ }
+        if ($c.PausaG -eq "SI" -and $c.PausaC -eq "NO") { $canDiverge++ }
+        if ($c.PausaG -eq "NO")                         { $canSpenta++ }
+        $ultimaCorsa = $c
       }
     }
-    $c7Guardian = 0; $c7Ea = 0; $c8Rientro = 0
+    $c5Guardian = 0; $c5Ea = 0; $c5Rientro = 0; $c6Promessa = 0
     foreach ($a in $ATTESE) {
-      if ($a.Chiave -eq "C7.GUARDIAN") { $c7Guardian = Conta-Dopo $a $inizioSessione }
-      if ($a.Chiave -eq "C7.EA")       { $c7Ea       = Conta-Dopo $a $inizioSessione }
-      if ($a.Chiave -eq "C8.RIENTRO")  { $c8Rientro  = Conta-Dopo $a $inizioSessione }
+      if ($a.Chiave -eq "C5.GUARDIAN")  { $c5Guardian = Conta-Dopo $a $inizioSessione }
+      if ($a.Chiave -eq "C5.EA")        { $c5Ea       = Conta-Dopo $a $inizioSessione }
+      if ($a.Chiave -eq "C5.RIENTRO")   { $c5Rientro  = Conta-Dopo $a $inizioSessione }
+      if ($a.Chiave -eq "C6.PROMESSA")  { $c6Promessa = Conta-Dopo $a $inizioSessione }
     }
     if ($inizioSessione) {
       Riga ("  perimetro del verdetto: SOLO le righe dopo il segnaposto delle " + $inizioSessione + " (ora locale VPS)") "Gray"
