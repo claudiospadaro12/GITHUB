@@ -8220,3 +8220,90 @@ quello che chiude tutto il conto).
 > `StringFormat` del sorgente e si conta **quante cifre** stampa, invece di
 > immaginare cosa apparira' a schermo. Vale per ogni numero che una pagina
 > chiede di "verificare a occhio" su un pannello.
+
+---
+
+## 🆕 AGGIUNTE DEL 05/09/2026 (sera) — trovate dal **verificatore** sulla SESSIONE 2 del collaudo enforcement (`RIGA_COLLAUDO_FASE1_S2.ps1` + pagina, pin `e487932`, pacchetto gia' dichiarato "provato eseguendo su banco"), **rifacendo il banco col caso FISICO invece che col caso comodo**. Due voci: una classe nuova (131, **RIPRODOTTA ESEGUENDO**) e una **recidiva della 115-bis** a due giorni dalla sua stesura.
+
+## 131. 🕰️ IL RILEVATORE DELL'**ORDINE INVERTITO** PUNTATO SULLA FINESTRA SBAGLIATA: cerca l'evento **DOPO** il gesto di ripristino, mentre il fatto che lo prova cade **PRIMA** — e il referto scrive «coerente con un'uscita nell'ordine giusto» proprio quando l'ordine era invertito
+
+La sessione 2 esiste anche per **dimostrare il rilievo R2**: la pausa del Guardian
+e' un **latch**, e l'uscita e' a **due passi in quest'ordine** — 1) rimettere
+`InpDailyPausePct=4.0`, 2) cancellare da F3 `ABTG_PAUSA_GIORNO_<login>` e
+`ABTG_PAUSA_FINO_<login>`. Il driver prometteva di accorgersi dell'ordine
+invertito cosi' (righe 897-921 del pin `e487932`):
+
+```powershell
+$accensioni = @($RIGHE | Where-Object { Contiene $_ "* PAUSA NUOVI INGRESSI attiva:" })
+if ($oraRitorno) { $accensioniDopoRitorno = @($accensioni | Where-Object { (Ora-Riga $_) -ge $oraRitorno }) }
+```
+
+**Ma la fisica del codice dice il contrario.** Se Claudio cancella le GV **prima**
+di rialzare la soglia, il timer del Guardian (1 s) le **riscrive subito**, cioe'
+**MENTRE la soglia e' ancora bassa**: la seconda riga di accensione cade
+**PRIMA** del ritorno a 4,00, non dopo. `$accensioniDopoRitorno` resta **vuoto** e
+il referto stampa **`nessuna accensione della pausa dopo il ritorno a 4,00:
+coerente con un'uscita nell'ordine giusto`** — la frase esattamente opposta al
+fatto.
+
+**Riprodotto eseguendo** (`pwsh`, banco stubbato con log MT5 in UTF-16, scenario
+«F3 alle 15:50 con soglia 0,03 -> riaccensione 15:50:01 -> soglia a 4,00 alle
+15:52»):
+
+```
+  soglia ABBASSATA (ultima riga con pausa < 4,00) : 15:31:00
+  soglia RIMESSA a 4,00 dopo l'abbassamento       : 15:52:00
+  accensioni della pausa nel log della giornata   : 2
+    15:31:01  [GUARDIAN] * PAUSA NUOVI INGRESSI attiva: ...
+    15:50:01  [GUARDIAN] * PAUSA NUOVI INGRESSI attiva: ...
+  nessuna accensione della pausa dopo il ritorno a 4,00: coerente con un'uscita nell'ordine giusto.
+```
+
+Due accensioni **stampate a video** e la riga sotto che le assolve. La sessione
+si e' salvata solo per la **rete di sicurezza indipendente** (l'ultima corsa del
+canarino vedeva ancora `PAUSA B1 grezzo=SI` -> uscita 1): ma se Claudio rifa' F3
+e rilancia la riga 3, l'esito diventa **verde** e nel verbale del rilievo R2
+finisce scritto che l'uscita era nell'ordine giusto.
+
+> ✅ **REGOLA: il rilevatore si punta sul FATTO CHE IL CODICE SCRIVE, non sulla
+> sequenza che il procedimento immagina.** Qui il fatto e' nel sorgente
+> (`ABTG_Guardian.mq5`, `SetPausa`): la riga di accensione esce **solo quando la
+> GV e' a zero** — e dentro lo stesso giorno prop la GV non torna a zero da sola
+> (`OnInit` la azzera **solo** al cambio della chiave del giorno). Quindi
+> **DUE righe di accensione nella stessa sessione = qualcuno ha azzerato le GV e
+> il timer le ha riscritte**: e' quello il rilevatore, e non dipende
+> dall'ordine degli orologi.
+> ⚠️ **E il modo di trovarla prima di pagarla e' il banco:** il caso «comodo»
+> (accensione **dopo** il ritorno) e' quello che si costruisce copiando la
+> promessa della pagina; il caso **fisico** si costruisce chiedendosi *«cosa
+> stampa davvero il binario, e in che ordine, se il gesto e' sbagliato?»*. Un
+> banco che riproduce solo lo scenario descritto nella pagina prova la pagina,
+> non il codice.
+
+### 115-ter. 👥 RECIDIVA DELLA 115-bis (05/09/2026): la pagina sorella eredita **tutto tranne il cartello della SESSIONE WINDOWS**, e il driver del collaudo non ha il filtro «profilo di questa sessione» che il driver del deploy ha gia'
+
+Il 03/09 alle 16:08 e' stato **misurato** (`Get-CimInstance Win32_Process`) che
+**tutta la flotta gira sotto `VMI3047753\Administrator`, non Master**, e
+l'HANDOFF ha scritto la regola: _«da oggi ogni riga per il VPS si lancia dalla
+sessione Administrator (collaudo, deploy, pagelle)»_. La pagina del **deploy** e'
+stata corretta con un banner in testa; il driver del deploy ha anche il filtro a
+macchina (`RIGA_DEPLOY_ORB104_PICCOLO.ps1`: _«eleggibile per i fatti, ma sotto un
+ALTRO profilo utente (questa sessione e' ...)»_).
+
+Le pagine del **collaudo enforcement** (sessione 1 **e** sessione 2, la seconda
+scritta il 05/09 copiando la prima) **non hanno nessuna riga che nomini la
+sessione Windows**, e il loro driver accetta come candidata una cartella dati
+sotto **qualunque** profilo senza dire sotto quale profilo gira **lui**. Dalla
+sessione sbagliata il finale e' gia' noto: `Get-ChildItem` sul profilo altrui
+torna vuoto sotto `-ErrorAction SilentlyContinue`, la scoperta dice **«NESSUNA
+cartella con evidenza»** e il giro finisce a vuoto — con l'aggravante che tutti
+i **gesti a mano** (F3, Proprieta' dell'EA, screenshot) sono comunque
+**impossibili** da quella sessione.
+
+> ✅ **REGOLA: un fatto d'ambiente misurato in campo si scrive in TUTTE le pagine
+> che toccano quell'ambiente, il giorno stesso, non solo in quella che l'ha
+> pagato.** Prima di pinnare una pagina nuova per il VPS: `grep -i administrator`
+> sulla pagina — se non c'e' il cartello della sessione, non e' pronta. E il
+> driver che sceglie una cartella dati **dichiara sempre il profilo che lo
+> lancia** (`$env:USERNAME`, `$env:APPDATA`), perche' e' il fatto che distingue
+> l'istanza viva dalla copia morta (classe 115-bis).
