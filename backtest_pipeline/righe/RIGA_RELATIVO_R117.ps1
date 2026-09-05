@@ -289,6 +289,10 @@ $InputTxt   = "NON CONTATI"
 $GrepTxt    = "NON ESEGUITO"
 $IncludeTxt = "NON CONTATI"
 $CelleTxt   = "NON CONTATE"
+# CLASSE 133: nasce QUI, prima del try, come tutto cio' che la raccolta
+# usa. Se la corsa muore prima del gate, il referto lo dice invece di
+# lasciare il campo vuoto (o, peggio, di dereferenziare un $null).
+$CellaSingolaTxt = "NON VERIFICATO (la corsa non e' arrivata al gate)"
 $GemelliTxt = "NON VERIFICATA"
 $TettoTxt   = "NON VALUTATO"
 $DefineTxt  = "NON LETTI"
@@ -766,6 +770,8 @@ try{
   # sconosciuto e il messaggio non dice niente di utile. Meglio qui,
   # con il nome della causa.
   if($t -notmatch '\[switch\]\$PermettiCellaSingola'){ throw 'il walkforward_generico.ps1 di questo pin NON ha -PermettiCellaSingola: e'' un generico ANTERIORE al 05/09/2026, e su un round a cella congelata si ferma su "nessun parametro da spazzolare" (classe 133). Serve un pin che contenga il fix.' }
+  $CellaSingolaTxt = "generico DEL PIN con -PermettiCellaSingola (gate passato), e la riga glielo passa: e' cio' che rende ESEGUIBILE un round a cella congelata. Senza, il generico esce con codice 1 PRIMA dell'anteprima .ini (classe 133)."
+  Dico "gate classe 133: il generico del pin ha -PermettiCellaSingola" "Green"
   $t = $t -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
   Set-Content -LiteralPath $drv -Value $t -Encoding ASCII
   Dico "driver generico scaricato e PINNATO (riscarica la sonda al pin, non dalla punta del branch)" "Green"
@@ -1217,6 +1223,7 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("gate HEDGE-SAFE: " + $GrepTxt)
 [void]$R.Add("include: " + $IncludeTxt)
 [void]$R.Add("passate: " + $CelleTxt)
+[void]$R.Add("cella singola (classe 133): " + $CellaSingolaTxt)
 [void]$R.Add("gemellaggio 6 prova: " + $GemelliTxt)
 [void]$R.Add("tetto barre: " + $TettoTxt)
 [void]$R.Add("cache tester: " + $CacheTxt)
