@@ -1,0 +1,286 @@
+# =====================================================================
+#  RELATIVO -- PASSO 1b (MERITO, TICK REALI)  --  PROVA VERA  --  R117BIS
+#  gamba NASUSD (si scambia) x metro U30USD (si legge), M5 -- LA MISURA
+# ---------------------------------------------------------------------
+#  IL MOTORE NON E' CAMBIATO DI UNA RIGA rispetto a R117. La cella e'
+#  la stessa, CONGELATA: InpFinestraN=40, InpSogliaIngressoSigma=1.35,
+#  InpAtrSL=2.75, InpRiskPercent=0.65, InpMaxTradesPerDay=5.
+#  In questo round si muove SOLTANTO LA FINESTRA DI MISURA, e i cambi
+#  sono DUE, dichiarati qui e nella pagina:
+#     @FINOA   2026.06.30 -> 2026.08.31   (+62 giorni = +44 feriali)
+#     split    FrazioneIS 0.40 -> 0.50    (due meta' bilanciate)
+#  (piu' il MAGIC, che e' un'etichetta: 774602 -> 774621.)
+#
+#  DUE PROVA, E OGNUNO HA UN COMPITO DIVERSO:
+#    RELATIVO_R117BIS_NAS.txt          magic 774621  <- LA MISURA
+#    RELATIVO_R117BIS_NAS_GEMELLO.txt  magic 774631  <- il GEMELLO
+#         >>> il GEMELLO serve a UNA cosa sola: due passate con gli
+#         stessi input e magic diverso devono venire IDENTICHE AL
+#         CENTESIMO. Se divergono il banco e' sporco e il round non si
+#         legge -- prima ancora di guardare un profitto.
+#  I due differiscono SOLO per InpMagic. Il resto del blocco dei
+#  parametri e' identico carattere per carattere, e la riga di lancio
+#  lo verifica meccanicamente.
+#
+#  >>> QUI NON C'E' NESSUN PROVA DI RUOLO PORTO, ED E' UNA SCELTA.
+#  Il collaudo del porto confronta i "Segnali Grezzi" dell'EA con gli
+#  "Attraversamenti Grezzi" MISURATI dal passo 0, e quel riferimento
+#  (NASUSD: LONG 1506, SHORT 1431) esiste SOLO per la finestra
+#  2024.09.26 -> 2026.06.30. Sulla finestra NUOVA quel numero non
+#  esiste: un PORTO li' sarebbe un collaudo che non confronta niente,
+#  cioe' proprio il difetto che la v3 di R117 ha chiuso. Il porto si
+#  EREDITA da R117 -- stesso EA (stesso blob, versione 1.03), stessa
+#  cella -- ed e' un PREREQUISITO: se la corsa NAS_PORTO di R117 non e'
+#  mai arrivata in fondo, questo round non si legge.
+#
+#  >>> E NON C'E' D30EUR. E' stata BOCCIATA PER RISCHIO in R117
+#  (DD 25,01% contro un muro prop del 10%, peggior giornata -5,20%
+#  contro -5,0%). L'Emendamento della Finestra, regola B: il giudizio
+#  di RISCHIO non si sospende mai e non dipende da n. Allargare la
+#  finestra non puo' riabilitare una gamba bocciata li'.
+#
+# =====================================================================
+#  DA DOVE NASCE QUESTO ROUND: R117 SU NASUSD E' RIMASTO SOSPESO
+# ---------------------------------------------------------------------
+#  R117, gamba NASUSD, finestra 2024.09.26 -> 2026.06.30, split 40/60:
+#     A1  E OOS 0,063 R          ZONA MORTA (soglia 0,075, muro 0,050)
+#     A2  PF OOS 1,189           PASSA (soglia 1,15)
+#     A3  IS in perdita (PF 0,754) e OOS in utile (PF 1,189)  INCOERENTE
+#     A4  DD OOS 8,40%           ZONA MORTA (soglia 8,0, muro 10,0)
+#     A5  peggior giornata -2,12%  PASSA
+#     A6  n IS 87 / n OOS 154    NON SODDISFATTO (servono 150 in ENTRAMBE)
+#  Il RISCHIO non e' mai stato rosso: il verdetto e' MERITO SOSPESO,
+#  non bocciatura.
+#
+#  PERCHE' L'IS AVEVA 87 OPERAZIONI E L'OOS 154.
+#  Il generico spezza la finestra per GIORNI DI CALENDARIO:
+#  Meta = Inizio + Floor(giorni x FrazioneIS). Con 642 giorni e
+#  FrazioneIS 0,40 l'IS prendeva 256 giorni (183 feriali) e l'OOS 386
+#  (276 feriali). Le due cause si sommano, e vanno separate:
+#     (a) LO SPLIT ERA SBILANCIATO: 40% dei giorni all'IS.
+#     (b) LA FREQUENZA NON E' UNIFORME: 87/183 = 0,475 operazioni per
+#         giorno feriale nell'IS contro 154/276 = 0,558 nell'OOS.
+#         La parte VECCHIA della finestra e' piu' povera del 15%.
+#  Il peso lo dice l'aritmetica: a parita' di giorni l'IS avrebbe avuto
+#  ~131 operazioni invece di 87. Quindi (a) spiega la gran parte, (b)
+#  il resto -- e nessuna delle due e' un difetto del motore.
+#
+#  E IL FATTO SCOMODO, SCRITTO PRIMA DEI NUMERI:
+#  A6 (150 in ENTRAMBE) NON E' RAGGIUNGIBILE SU QUESTA GAMBA, e non lo
+#  diventa spostando lo split. Servono 300 operazioni; alla frequenza
+#  media MISURATA (0,525 op / giorno feriale) sono 567 giorni feriali.
+#  Dal pavimento 2024.09.26 a oggi ce ne sono 503. NE MANCANO 64,
+#  cioe' circa tre mesi di calendario. Lo split e' a somma zero: quello
+#  che si toglie all'OOS si da' all'IS. Il massimo ottenibile e'
+#  min(n_IS, n_OOS) ~ 133.
+#  E il pavimento non si abbassa: BCM sugli indici parte dal 26/09/2024
+#  ed e' DICHIARATO COMPLETO dal broker; lo storico esterno _EXT e' in
+#  frigo perche' il CANCELLO ZERO e' chiuso (diff media H1 0,061-0,101%
+#  contro <= 0,05% richiesto).
+#  >>> Quindi 50/50 non e' un trucco per far passare A6: A6 non passa
+#  comunque. E' lo split che massimizza la taglia della META' PIU'
+#  PICCOLA, che e' esattamente cio' che A6 misura, e che rende
+#  finalmente leggibile A3 (in R117 il confronto era fra 87 e 154).
+#
+# =====================================================================
+#  PERCHE' LO SPLIT PUO' CAMBIARE QUI, E ALTROVE NO
+# ---------------------------------------------------------------------
+#  Lo split 40/60 e' il default di casa e serve dove l'IS SCEGLIE
+#  qualcosa (una cella su una griglia) e l'OOS verifica quella scelta.
+#  QUI NON SI SCEGLIE NIENTE: la cella e' congelata PRIMA del round,
+#  non c'e' nessuna griglia, e IS e OOS sono DUE CAMPIONI INDIPENDENTI
+#  DELLA STESSA CONFIGURAZIONE. In quel caso lo split giusto e' quello
+#  che massimizza la taglia della meta' piu' piccola: 50/50. Che e'
+#  anche il valore DA MANUALE -- non e' stato pescato provando.
+#  >>> IL CAMBIO E' DICHIARATO PRIMA DEI NUMERI. Se qualcuno, dopo
+#  averli visti, volesse spostarlo ancora, quella sarebbe un'altra
+#  cosa e si chiamerebbe col suo nome.
+#
+# =====================================================================
+#  LA CELLA, E DA DOVE VIENE  (identica a R117: non si ridiscute qui)
+# ---------------------------------------------------------------------
+#  InpFinestraN = 40, InpSogliaIngressoSigma = 1.35. NON e' il picco di
+#  niente: e' un vertice di un blocco 2x2 che sta in piedi su TUTTE E
+#  QUATTRO le mappe della griglia ESTESA a 90 celle, ed e' INTERNO su
+#  entrambi gli assi (i bordi sono N=10/N=55 e sigma=0,75/1,95), con
+#  SEDICI vicini ortogonali VIVI su sedici.
+#  >>> RILIEVO CHE RESTA E NON SI NASCONDE: su NASUSD la regione viva
+#  tocca ANCORA il bordo (N=55, sigma=1,95), quindi la cella e' INTERNA
+#  ma non e' dimostrato che sia CENTRALE su questa gamba.
+#  >>> E i due criteri di pareggio (piu' occasioni/giorno, C6 piu'
+#  basso) spingono SISTEMATICAMENTE verso il bordo basso della regione
+#  viva: non sono una regola di centratura, sono una regola di
+#  frequenza. E' l'anello completo di vicini vivi a reggere, non il
+#  criterio.
+#
+# =====================================================================
+#  LA GEOMETRIA, E DA DOVE ESCE OGNI NUMERO  (identica a R117)
+# ---------------------------------------------------------------------
+#  InpAtrSL = 2.75 -> stop REALE, sul broker, obbligatorio.
+#    MAE mediana MISURATA sulla cella: NAS 40,00/41,88 punti indice.
+#    ATR mediano MISURATO: NAS 26,98. MAE in ATR 1,48-1,55. x2 ->
+#    2,96-3,10. 2,75 era gia' scritto PRIMA che arrivassero i numeri di
+#    questa cella: spostarlo adesso sarebbe tararlo sui dati.
+#    ASIMMETRIA DICHIARATA: a 2,75 ATR lo stop vale 1,77-1,86 volte la
+#    MAE mediana su NASUSD. Lo dice la colonna "Uscite Stop".
+#  InpMaxTradesPerDay = 5 -> NON e' una preferenza, e' aritmetica:
+#    5 x 0,65% = 3,25% = esattamente il cap C1 firmato il 18/08.
+#  InpRiskPercent = 0.65 -> la taglia di CAMPO, cosi' il drawdown si
+#    legge contro il muro prop SENZA nessuna scalatura inferita.
+#  InpBarreMaxTenuta = 120 -> INERTE per costruzione: la sessione
+#    14:30-22:00 dura 450 minuti = 90 barre M5. Il contenitore VERO e'
+#    il flat di fine sessione, che nel codice non e' nemmeno un input.
+#  InpMaxSpreadPts = 0 -> filtro SPENTO: lo spread si MISURA, non si
+#    filtra (lezione R55). Esce in colonna, mediana e P95.
+#  InpSaltaGiorniSpaiati = false -> i giorni spaiati si MISURANO. Su un
+#    EA vero un giorno spaiato e' un'operazione vera con una perdita
+#    vera, cioe' un RISCHIO da misurare. Tre colonne dedicate.
+#
+# =====================================================================
+#  CRITERI DI MERITO -- CONGELATI PRIMA DEI NUMERI, E IDENTICI A R117
+#  (non si spostano perche' il round precedente non li ha passati:
+#   i criteri si cambiano PRIMA dei numeri, mai dopo)
+# ---------------------------------------------------------------------
+#  A1  aspettativa OOS >= 0,075 R, a tick e AL NETTO dei costi (H8)
+#  A2  profit factor OOS >= 1,15
+#  A3  segno del profitto COERENTE fra IS e OOS, e PF IS > 1,00
+#  A4  drawdown di equity OOS <= 8,0%
+#  A5  peggior giornata non peggiore di -4,0% (pausa Guardian)
+#  A6  n >= 150 operazioni in IS E in OOS, per gamba
+#  A7  quota di trade sotto 60 secondi < 25% (a M5 DEVE venire 0,00:
+#      e' un COLLAUDO, non una scoperta)
+#  BOCCIATURA SECCA: E < 0,050R | PF < 1,10 | IS negativo |
+#      DD > 10,0% | peggior giornata < -5,0%. Le ultime due bocciano
+#      PER RISCHIO qualunque sia il PF e qualunque sia n.
+#  n < 30 NON e' una bocciatura: e' "non misurabile".
+#
+#  A6b -- IL CAMPIONE UNITO: E' UNA PROPOSTA, NON UN CANCELLO FIRMATO.
+#  IS e OOS sono due finestre CONTIGUE e NON SOVRAPPOSTE della stessa
+#  configurazione congelata: le operazioni si sommano legittimamente, e
+#  su quella somma (~266 attese) la taglia del campione e' sopra 150.
+#  Il referto la calcola e la stampa in un blocco separato, con E
+#  mediata pesando per n e PF ricostruito dai lordi. NON entra nel
+#  verdetto e NON puo' trasformare un SOSPESO in un PASSA: la firma, se
+#  arrivera', e' di Claudio.
+#  >>> E IL DRAWDOWN UNITO NON SI CALCOLA E NON SI STIMA: sono due
+#  curve di equity separate, e un drawdown a cavallo della giuntura non
+#  lo vedrebbe nessuna delle due. Il rischio si giudica sulla SINGOLA
+#  gamba, dove il numero e' vero.
+#
+# =====================================================================
+#  IL BANCO, E I SUOI LIMITI DICHIARATI PRIMA
+# ---------------------------------------------------------------------
+#  MODELLO 4 = OGNI TICK BASATO SU TICK REALI. E' il punto del round:
+#  sul tick reale lo spread NON si assume, SI PAGA.
+#  FINESTRA 2024.09.26 -> 2026.08.31. Il pavimento e' MISURATO; il
+#  tetto e' l'ultimo mese CHIUSO prima del 05/09/2026, con quattro
+#  giorni di margine. CHE I DUE MESI IN PIU' CI SIANO DAVVERO NON SI
+#  ASSUME: lo dice il referto con "giorni contati" e "prima barra
+#  GAMBA". Se i giorni contati sono ~450 invece di ~490, la coda nuova
+#  non c'era e il round va riletto su cio' che ha misurato.
+#  >>> PRIMA DELLA CORSA lo storico della GAMBA (NASUSD) e del METRO
+#  (U30USD) deve essere gia' scaricato FINO IN FONDO, o le barre nuove
+#  mancano e ogni barra senza metro risulta "spaiata": il referto
+#  misurerebbe la configurazione invece del mercato.
+#  SPLIT 50/50: due tranche CONTIGUE. IS e OOS NON selezionano niente.
+#  >>> L'OOS NON E' UN VERO OUT-OF-SAMPLE, e va scritto: la cella e'
+#  stata scelta guardando una misura che copre l'INTERA finestra vecchia
+#  (che qui sta quasi tutta dentro). L'unico pezzo mai guardato dal
+#  passo 0 sono luglio-agosto 2026: 44 giorni feriali su ~503. L'unico
+#  vero out-of-sample sara' il FORWARD DEMO.
+#  >>> UN SOLO REGIME (toro). Regola C NON soddisfatta. DA QUESTO ROUND
+#  NON ESCE UNA SEDIA.
+#  >>> UN SOLO BROKER. FORMA UNILATERALE (una gamba si scambia, il
+#  metro si legge): a due gambe si pagherebbero DUE spread per UNA
+#  convergenza, e quella forma non e' mai stata misurata.
+#  >>> TETTO ~100.000 BARRE: si misura sulla GAMBA, non sulla finestra
+#  intera -- il generico lancia IS e OOS come DUE passate separate. A
+#  50/50 la gamba piu' lunga e' di 352 giorni contro ~475 di tetto:
+#  DENTRO. (R117 confrontava col tetto i 642 giorni della finestra
+#  intera e per questo chiedeva -AccettoTettoBarre: era una misura sul
+#  numero sbagliato, ed e' corretta nella riga di lancio di R117BIS.)
+#  A tick reali il vincolo vero e' la RAM: MASSIMO 4 AGENTI (lezione
+#  del 01/09, "no memory for ticks generating").
+#  >>> QUESTO ROUND NON E' INDIPENDENTE DA R117: le due finestre si
+#  sovrappongono per circa il 91% dei giorni. Un numero che si muove si
+#  muove per la GIUNTURA spostata e per i due mesi in coda, non perche'
+#  il motore sia cambiato.
+#
+# =====================================================================
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Motore derivato dalla LETTURA di tre script Pine:
+#      1) "Pair Trade" (c) vladimirkovalchuk / @wa1one
+#         https://www.tradingview.com/script/ru23VN0C/
+#      2) "Unilateral Pairs Trading" (c) @pietro3334
+#         https://www.tradingview.com/script/MD5vkc0n/
+#      3) "Statistical Arbitrage Pairs Trading - Long-Side Only"
+#         (c) @piirsalu  https://www.tradingview.com/script/Kt6XkQIM/
+#    Nessuno dei tre dichiara una licenza [VERIFICATO 02/09/2026].
+#    NON E' STATA COPIATA NEMMENO UNA RIGA DI PINE: e' stata riscritta
+#    la formula statistica (matematica pubblica) e si cita comunque
+#    autore, URL e data.
+# =====================================================================
+
+# =====================================================================
+#  L'ASSE TECNICO SU InpMagic -- CLASSE 134, MISURATA IL 05/09/2026
+# ---------------------------------------------------------------------
+#  InpMagic NON e' scritto secco: e' un ASSE a DUE CELLE
+#  (m || m || 50 || m+50 || Y). NON e' una griglia e non seleziona
+#  niente -- il magic e' un'ETICHETTA, non tocca l'economia della
+#  cella. Serve a una cosa sola, e il motivo e' un fatto misurato:
+#
+#  ABTG_Relativo scrive il CSV dei risultati SOLO da OnTesterDeinit,
+#  leggendo i frame che OnTester manda con FrameAdd. Quel canale
+#  esiste SOLTANTO in OTTIMIZZAZIONE. Il 05/09/2026 una corsa e'
+#  girata con Optimization=1 e ZERO parametri ottimizzabili: MT5 non
+#  ha dato nessun errore, il generico e' uscito con codice 0, e i DUE
+#  CSV sono usciti da ZERO BYTE. Zero passate eseguite, zero misura.
+#
+#  Un asse a DUE celle rimette il tester in ottimizzazione VERA. La
+#  seconda cella (magic m+50) e' un GEMELLO INTERNO: stessi input,
+#  magic diverso, DEVE venire identica alla prima.
+#
+#  NON si torna al valore secco "InpMagic=m": e' proprio quello che
+#  ha prodotto i due file da 0 byte.
+#
+#  >>> IL MAGIC DI QUESTO ROUND E' NUOVO E NON E' QUELLO DI R117.
+#  In R117 la misura su NASUSD aveva 774602 (ombra 774652); qui e'
+#  774621 (ombra 774671). Non e' estetica: e' la rete che impedisce di
+#  leggere un CSV di R117 come se fosse di R117BIS, perche' il gate
+#  "IL PIN DEL MAGIC NON E' PASSATO" lo pesca. Blocco 7746xx verificato
+#  vergine, nessuna collisione con le dodici etichette di R117.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.08.31
+
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+InpFinestraN=40
+InpSogliaIngressoSigma=1.35
+InpSogliaUscitaSigma=0.05
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+InpAtrSL=2.75
+InpBarreMaxTenuta=120
+InpRiskPercent=0.65
+InpMaxTradesPerDay=5
+InpLato=0
+InpAtrPeriod=14
+InpAtrModoRma=false
+InpMagic=774621||774621||50||774671||Y
+InpSlippagePts=10
+InpMaxSpreadPts=0
+InpModoSonda=false
+InpSaltaGiorniSpaiati=false
+InpWarmupBarre=300
+InpPuntiPerIndice=100.0
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVO

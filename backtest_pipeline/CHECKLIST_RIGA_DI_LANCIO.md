@@ -9046,3 +9046,61 @@ davvero pericoloso sul Desktop era quello del pin **`434e271…`**: una corsa
 **esattamente il tipo di referto che si rimanda in chat in buona fede**
 (17/08). **Dopo un ri-pin, l'esempio di referto stantio da nominare e' quello
 BUONO del pin vecchio, non quello rotto**: il rotto si riconosce da solo.
+
+## 🆕 AGGIUNTA DEL 05/09/2026 — trovata **costruendo R117BIS**, rileggendo il gate del tetto barre di R117 con in mano l'aritmetica del generico. Non e' un incidente: e' un gate che **misurava il numero sbagliato** e chiedeva un'eccezione di cui non c'era bisogno.
+
+## 138. 📏 IL TETTO DELLE BARRE MISURATO SULLA **FINESTRA INTERA** INVECE CHE SULLA **GAMBA**: la riga chiede `-AccettoTettoBarre` per una corsa che sta **dentro** il tetto, e l'eccezione diventa un'abitudine
+
+### Il fatto
+
+`RIGA_RELATIVO_R117.ps1` confrontava col tetto (~475 giorni a M5) i **642
+giorni della finestra intera**, e da li' nasceva l'obbligo di passare
+`-AccettoTettoBarre` in **tutte e sei** le corse, con un `RILIEVO` in ogni
+referto.
+
+Ma `walkforward_generico.ps1` **non lancia mai la finestra intera**: al punto 5
+la spezza in due e lancia **due passate separate**, ognuna con le sue date —
+
+```
+$Meta = $Inizio.AddDays([math]::Floor(($FineDt-$Inizio).TotalDays*$FrazioneIS))
+IS  = $Inizio -> $Meta      OOS = $Meta+1 -> $FineDt
+```
+
+A 40/60 le due gambe erano **256** e **386** giorni: **tutte e due sotto il
+tetto**. Il tetto non ha mai morso, e nessuno lo sapeva perche' il gate
+guardava la somma.
+
+### Perche' e' una classe e non un dettaglio
+
+1. **Un'eccezione chiesta sempre smette di essere un'eccezione.** Se una riga
+   pretende `-AccettoTettoBarre` in ogni blocco, chi incolla lo mette senza
+   leggerlo — e il giorno in cui il tetto morde **davvero** quel flag non
+   avvisa piu' nessuno.
+2. **Il `RILIEVO` finiva in ogni referto**, e un rilievo che c'e' sempre e' un
+   rilievo che non si legge.
+3. **La diagnosi restava agganciata al numero sbagliato**: chi avesse letto
+   *"642 giorni contro 475"* avrebbe cercato la finestra effettiva corta in un
+   posto dove non c'era niente da trovare.
+
+### La regola
+
+> **Il tetto del tester si misura sulla GAMBA che il tester riceve davvero, non
+> sulla finestra che la pagina dichiara.** Se il driver spezza la finestra, il
+> numero da confrontare col tetto e' `max(giorni IS, giorni OOS)`.
+> E la finestra intera si stampa lo stesso, accanto, perche' **un numero che si
+> e' sempre letto non deve sparire dal referto senza una riga che spieghi
+> perche'**.
+
+In `RIGA_RELATIVO_R117BIS.ps1` il gate stampa entrambi:
+
+```
+DENTRO IL TETTO -- M5: finestra intera 704 giorni (1.93 anni), spezzata in
+IS 352 + OOS 352 -> GAMBA PIU' LUNGA 352 giorni (0.96 anni) contro ~475 di tetto
+```
+
+e se `-AccettoTettoBarre` viene passato **quando non serve**, il referto lo
+dichiara **INERTE** invece di lasciarlo credere decisivo.
+
+> ⚠️ **Quello che questa classe NON dice:** che il tetto non esista. A M5 su una
+> gamba sola oltre ~475 giorni morde eccome, e li' il flag serve. Dice solo che
+> **va misurato dove il tester guarda.**
