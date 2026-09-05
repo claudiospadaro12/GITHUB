@@ -281,8 +281,10 @@ cui la regola del controllo casuale e' stata scritta il 03/09.
 
 **Non e' un candidato, ed e' la cosa piu' urgente del dossier.**
 
-Le due celle bocciate — e, per loro stessa dichiarazione, **le sedie NFP/ECB
-che girano in forward** — hanno `InpUseOCO=false`:
+Le due celle bocciate — e, verificato riga per riga nei preset, **solo la
+sedia NFP** fra quelle vive (ECB e FOMC hanno `InpUseOCO=true`, scelta
+esplicita di Claudio del 04/09: "preferisco si cancelli l'ordine, è meglio
+si rischia 1 sola volta") — hanno `InpUseOCO=false`:
 
 > `prove/POSTNEWS_1330_00_conta.txt` r.207: *"niente OCO: il corso lo nega
 > esplicitamente e **le sedie vive non lo usano**"*
@@ -421,11 +423,18 @@ restano vere e vanno dette:**
    sedie sono guidate da un **orario** o da un **livello**. Il buco di
    portafoglio **e' reale e resta aperto** — quello che manca non e' il buco,
    e' un motore che lo riempia.
-2. 🔴 **Il rilievo OCO (§6) e' un rilievo di rischio, non di merito**, e sul
-   muro **giornaliero** FTMO (−5.000 su 100k) pesa: senza OCO una giornata
-   whipsaw vale **2R invece di 1R**. A 0,65% per evento sono **1,30% in una
-   giornata** invece di 0,65%. Non sfonda niente da solo — ma e' il doppio di
-   quello che il contratto della sedia promette.
+2. 🔴 **Il rilievo OCO (§6) e' un rilievo di rischio, non di merito** —
+   **CORRETTO dopo verifica del sorgente** (`LotByRisk` alla riga 325 di
+   `ABTG_PostNews.mq5`): il lotto e' UNO SOLO, tarato su `InpRiskRefSLpips`
+   (50 pip = worst case doppio stop, per progetto). Quindi il whipsaw
+   (entrambe le gambe stoppano) costa **ESATTAMENTE** l'`InpRiskPercent`
+   dichiarato dalla sedia (1,30% per NFP) — **non il doppio**: e' gia' il
+   tetto che la size promette. **Il punto vero, piu' preciso**: con OCO
+   ACCESO, sul whipsaw la seconda gamba si cancella PRIMA di stoppare anche
+   lei, e la giornata costa solo META' di quel tetto (una gamba sola). Con
+   OCO SPENTO (la sedia NFP, oggi), il whipsaw realizza SEMPRE il tetto
+   intero. Non e' un rischio nascosto o sforato: e' il tetto dichiarato che
+   si materializza piu' spesso di quanto servirebbe, se OCO lo dimezzerebbe.
 
 ---
 
