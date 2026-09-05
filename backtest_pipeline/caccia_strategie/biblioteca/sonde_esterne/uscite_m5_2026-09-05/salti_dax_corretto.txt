@@ -1,0 +1,14 @@
+DAX GRXEUR (08:00-16:00 SERVER): 145,174 barre M5, 1514 giorni (2011-01-03 -> 2018-12-28)
+range M5 mediano: 10.50 punti indice
+
+##### SALTI Lee-Mykland  TP=20 SL=20 (RR 1.00) #####
+  T=3.0 n= 3036  2.01/gg | LORDO  +0.430 = +0.0215R | monetina -0.171 | info direzionale +0.0301R | NETTA -0.0610R  sotto 0,075R
+  T=4.0 n= 1616  1.07/gg | LORDO  +0.203 = +0.0101R | monetina -0.161 | info direzionale +0.0182R | NETTA -0.0724R  sotto 0,075R
+  T=5.0 n= 1049  0.69/gg | LORDO  +0.428 = +0.0214R | monetina -0.191 | info direzionale +0.0309R | NETTA -0.0611R  sotto 0,075R
+  T=6.0 n=  766  0.51/gg | LORDO  +0.273 = +0.0137R | monetina -0.209 | info direzionale +0.0241R | NETTA -0.0688R  sotto 0,075R
+
+##### SALTI Lee-Mykland  TP=40 SL=20 (RR 2.00) #####
+  T=3.0 n= 3036  2.01/gg | LORDO  +0.948 = +0.0474R | monetina +0.506 | info direzionale +0.0221R | NETTA -0.0351R  sotto 0,075R
+  T=4.0 n= 1616  1.07/gg | LORDO  +0.441 = +0.0220R | monetina +0.479 | info direzionale -0.0019R | NETTA -0.0605R  sotto 0,075R
+  T=5.0 n= 1049  0.69/gg | LORDO  +0.586 = +0.0293R | monetina +0.333 | info direzionale +0.0126R | NETTA -0.0532R  sotto 0,075R
+  T=6.0 n=  766  0.51/gg | LORDO  +0.930 = +0.0465R | monetina +0.503 | info direzionale +0.0214R | NETTA -0.0360R  sotto 0,075R

@@ -1,0 +1,13 @@
+allineate: 119,420 barre M5, 1260 giorni (2011-01-03 -> 2018-12-28)
+
+##### LEAD S&P k=1 barre M5 (5 min) -> DAX, TP=40 SL=20 #####
+  T=1.5 n= 7505  5.96/gg | LORDO  +1.132 = +0.0566R | monetina +1.011 | info direzionale +0.0061R | NETTA -0.0259R  sotto 0,075R
+  T=2.0 n= 4077  3.24/gg | LORDO  +1.189 = +0.0594R | monetina +0.941 | info direzionale +0.0124R | NETTA -0.0231R  sotto 0,075R
+  T=2.5 n= 2533  2.01/gg | LORDO  +0.892 = +0.0446R | monetina +0.956 | info direzionale -0.0032R | NETTA -0.0379R  sotto 0,075R
+  T=3.0 n= 1724  1.37/gg | LORDO  +0.582 = +0.0291R | monetina +0.809 | info direzionale -0.0114R | NETTA -0.0534R  sotto 0,075R
+
+##### LEAD S&P k=3 barre M5 (15 min) -> DAX, TP=40 SL=20 #####
+  T=1.5 n= 9348  7.42/gg | LORDO  +1.182 = +0.0591R | monetina +0.916 | info direzionale +0.0133R | NETTA -0.0234R  sotto 0,075R
+  T=2.0 n= 5592  4.44/gg | LORDO  +0.940 = +0.0470R | monetina +0.865 | info direzionale +0.0037R | NETTA -0.0355R  sotto 0,075R
+  T=2.5 n= 3670  2.91/gg | LORDO  +0.614 = +0.0307R | monetina +0.561 | info direzionale +0.0027R | NETTA -0.0518R  sotto 0,075R
+  T=3.0 n= 2606  2.07/gg | LORDO  +0.424 = +0.0212R | monetina +0.240 | info direzionale +0.0092R | NETTA -0.0613R  sotto 0,075R

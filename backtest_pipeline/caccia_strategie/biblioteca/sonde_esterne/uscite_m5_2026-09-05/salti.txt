@@ -1,0 +1,21 @@
+
+============================================================================
+EUR_USD — 658,436 barre M5 feriali, 2343 giorni | K=270 (bipower), orizzonte 12 barre
+TP=SL=8.0 pip. CONTROLLO APPAIATO = stessa barra, lato opposto.
+============================================================================
+
+--- soglia T=3.0   n=13242   frequenza  5.65 salti/giorno (due lati sommati)
+    CONTINUAZIONE TP-prima-di-SL 44.08%  |  INVERSIONE 44.65%  |  monetina 44.36%  ->  DELTA -0.28 pt
+    MFE med (verso del salto) 10.20 pip | MAE med 10.00 pip | RR 1.020
+
+--- soglia T=4.0   n=5512   frequenza  2.35 salti/giorno (due lati sommati)
+    CONTINUAZIONE TP-prima-di-SL 46.10%  |  INVERSIONE 42.98%  |  monetina 44.54%  ->  DELTA +1.56 pt
+    MFE med (verso del salto) 11.80 pip | MAE med 10.60 pip | RR 1.113
+
+--- soglia T=5.0   n=2791   frequenza  1.19 salti/giorno (due lati sommati)
+    CONTINUAZIONE TP-prima-di-SL 45.54%  |  INVERSIONE 43.21%  |  monetina 44.37%  ->  DELTA +1.16 pt
+    MFE med (verso del salto) 13.20 pip | MAE med 11.80 pip | RR 1.119
+
+--- soglia T=6.0   n=1645   frequenza  0.70 salti/giorno (due lati sommati)
+    CONTINUAZIONE TP-prima-di-SL 46.57%  |  INVERSIONE 40.85%  |  monetina 43.71%  ->  DELTA +2.86 pt
+    MFE med (verso del salto) 15.10 pip | MAE med 12.10 pip | RR 1.248

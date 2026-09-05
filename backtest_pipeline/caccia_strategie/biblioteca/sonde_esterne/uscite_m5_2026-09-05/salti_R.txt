@@ -1,0 +1,29 @@
+EUR_USD: 658,436 barre M5 feriali, 2343 giorni (2011-01-03 -> 2019-12-31)
+
+########## GEOMETRIA TP=8.0 SL=8.0 pip  (RR 1.00) ##########
+  T=3.0  n= 13242   5.65/gg | LORDO salto -0.310 pip = -0.0388R | lato OPPOSTO -0.125 | monetina -0.217
+          costo 1.0 pip -> E netta -0.1638R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.2263R   SOTTO il cancello 0,075R
+  T=4.0  n=  5512   2.35/gg | LORDO salto -0.141 pip = -0.0177R | lato OPPOSTO -0.558 | monetina -0.350
+          costo 1.0 pip -> E netta -0.1427R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.2052R   SOTTO il cancello 0,075R
+  T=5.0  n=  2791   1.19/gg | LORDO salto -0.371 pip = -0.0464R | lato OPPOSTO -0.638 | monetina -0.504
+          costo 1.0 pip -> E netta -0.1714R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.2339R   SOTTO il cancello 0,075R
+  T=6.0  n=  1645   0.70/gg | LORDO salto -0.292 pip = -0.0365R | lato OPPOSTO -1.108 | monetina -0.700
+          costo 1.0 pip -> E netta -0.1615R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.2240R   SOTTO il cancello 0,075R
+
+########## GEOMETRIA TP=16.0 SL=8.0 pip  (RR 2.00) ##########
+  T=3.0  n= 13242   5.65/gg | LORDO salto -0.089 pip = -0.0112R | lato OPPOSTO +0.075 | monetina -0.007
+          costo 1.0 pip -> E netta -0.1362R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.1987R   SOTTO il cancello 0,075R
+  T=4.0  n=  5512   2.35/gg | LORDO salto +0.309 pip = +0.0386R | lato OPPOSTO -0.301 | monetina +0.004
+          costo 1.0 pip -> E netta -0.0864R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.1489R   SOTTO il cancello 0,075R
+  T=5.0  n=  2791   1.19/gg | LORDO salto +0.389 pip = +0.0486R | lato OPPOSTO -0.196 | monetina +0.097
+          costo 1.0 pip -> E netta -0.0764R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.1389R   SOTTO il cancello 0,075R
+  T=6.0  n=  1645   0.70/gg | LORDO salto +0.738 pip = +0.0922R | lato OPPOSTO -0.531 | monetina +0.103
+          costo 1.0 pip -> E netta -0.0328R   SOTTO il cancello 0,075R
+          costo 1.5 pip -> E netta -0.0953R   SOTTO il cancello 0,075R

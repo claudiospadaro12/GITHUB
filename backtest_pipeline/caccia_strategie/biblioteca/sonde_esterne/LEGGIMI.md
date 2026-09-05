@@ -65,6 +65,12 @@ Prefisso: `https://raw.githubusercontent.com/FutureSharks/financial-data/master/
 
 | file | cosa misura |
 |---|---|
+| 🆕 `sonda_fix_profilo.py` | **M5, 05/09** — collaudo F6 dei **FIX VALUTARI**: profilo del range M1 per minuto in ora di Londra, estate contro inverno. **Trova i tre fix nei dati** (WMR 15:59 = 1,34-1,45× il fondo; ECB 13:15 = 1,49×; Tokyo 01:55 = 1,93×) |
+| 🆕 `sonda_fix.py` | **M5** — M11: run-up, **quota di rientro**, MFE/MAE/RR del fade a fix+1, controllo casuale |
+| 🆕 `sonda_fix_cond.py` | **M5** — M11 condizionato al **quintile di run-up** (il meccanismo dichiarato dagli autori: rischio d'inventario dei dealer) |
+| 🆕 `sonda_tondi.py` | **M5** — M23 **numeri tondi** (Osler): tocchi/giorno, rimbalzi contro rotture, MFE/MAE/RR su griglie 100/50/10 pip |
+| 🆕 `sonda_tondi_wr.py` | **M5** — M23: **TP-prima-di-SL** contro controllo casuale **e contro controllo APPAIATO** (vedi il riquadro qui sotto) |
+| 🆕 `uscite_m5_2026-09-05/` | le uscite grezze della battuta M5: salti EURUSD/DAX in **R**, lead-lag S&P→DAX, tondi appaiati |
 | `sonda_volexp.py` | compressione ATR → espansione: segnali/giorno per lato, take/stop, MFE/MAE |
 | `sonda_volexp_wr.py` | stesso motore: tasso **TP-prima-di-SL** contro **controllo a ingressi casuali** |
 | `sonda_vwapband.py` | banda ATR su ancora di sessione + rientro (fade): segnali/giorno, RR, MFE/MAE |
@@ -92,3 +98,33 @@ distingue il proprio ingresso dal caso.**
 
 ➡️ **Regola d'uso: ogni sonda di conteggio futura porta il suo controllo
 casuale.** Costa dieci righe e trasforma un numero in un confronto.
+
+---
+
+## 🔬 IL CONTROLLO CASUALE VA **APPAIATO** — correzione misurata il 05/09/2026
+
+_(battuta M5, `caccia_strategie/CACCIA_TF_M5_2026-09-05.md` §5)_
+
+Il controllo casuale **non appaiato** (l'ingresso di controllo cade a un'ora
+qualsiasi) e' **artificialmente facile da battere**: i segnali si concentrano
+nelle ore vive, dove un TP fisso e' raggiungibile; l'ora morta non ci arriva mai.
+
+Misurato sugli **stessi identici segnali** (numeri tondi, EURUSD M5, 93.000+):
+
+| controllo | delta apparente del meccanismo |
+|---|---:|
+| **casuale NON appaiato** | **da +6,72 a +12,67 punti** 🟢 sembra un edge |
+| **APPAIATO** (stessa barra, stessa geometria, **lato opposto**) | **da −1,50 a +0,90 punti** 🔴 non c'e' niente |
+
+➡️ **7-12 punti percentuali di artefatto.**
+
+🖊️ **Regola d'uso, da qui in avanti:** il controllo di una sonda **direzionale**
+e' **lo stesso ingresso, sulla stessa barra, dal lato opposto**. La media dei
+due lati e' il valore atteso **esatto** di una monetina su quella barra:
+**zero varianza, zero contaminazione da ora del giorno e volatilita'.**
+Il controllo casuale non appaiato resta valido solo per domande **non
+direzionali** (es. "questa geometria e' raggiungibile?").
+
+✅ **Le lapidi del 03/09 non cambiano — si rafforzano:** L2 (sweep) e L3
+(compressione) erano gia' a **−0,2 e −1,2 punti** contro un controllo
+**generoso**; contro quello appaiato starebbero **piu' in basso**, non piu' in alto.

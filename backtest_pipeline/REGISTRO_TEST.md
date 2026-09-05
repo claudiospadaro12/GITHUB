@@ -1432,3 +1432,107 @@ CONTROLLO A INGRESSI CASUALI.
   2607.09426 il riassunto di `WebFetch` dava _"August 24, 2026"_ mentre **l'API
   dice `2026-07-16`**. **Una risposta di WebFetch non e' una citazione: i
   metadati si verificano con l'API.**
+
+---
+
+### CACCIA TF **M5** (05/09/2026, battuta dedicata) — 4 meccanismi MISURATI, 4 sepolti, 0 promossi
+
+Dossier completo: `caccia_strategie/CACCIA_TF_M5_2026-09-05.md`. Il resto sta
+li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi, nessun EA/
+preset/sedia toccati.** Battute gemelle su M15 e M30 lo stesso giorno.
+
+- 🔴 **LA RIGA CHE GOVERNA OGNI CACCIA M5 FUTURA — LA TASSA DEL COSTO.**
+  Su **EURUSD M5** uno stop sensato e' **8 pip**, quindi **1 pip di spread vale
+  0,1250R**; su **D30EUR M5** uno stop di **20 punti** con lo spread MISURATO in
+  casa (**1,65 pti**, `SPREAD_FLOTTA_MISURA_2026-09-03.md`) vale **0,0825R**.
+  👉 **Il pedaggio di UNA operazione M5 vale 1,1-1,7 volte l'intero cancello H8
+  (0,075R)**, quindi **un candidato M5 deve promettere 0,16-0,20R LORDI o non e'
+  un candidato.** 🔴 **Il massimo LORDO misurato oggi su quattro meccanismi con
+  evidenza da Journal of Finance e' +0,0922R.** **Su M5 non manca il segnale: il
+  segnale e' piu' piccolo del pedaggio.** E' la spiegazione quantitativa del
+  perche' il capitolo M5 e' morto 210 celle fa (r.40).
+- 🪦 **LAPIDE — M11 FIX VALUTARI (Krohn-Mueller-Whelan *JF* 79(1) 2024; Evans
+  *JBF* 2018): meccanismo VERO, candidato MORTO.** Collaudo F6 **PASSATO**: i tre
+  fix si vedono nei dati al minuto giusto in entrambe le stagioni (**WMR 15:59
+  Londra = 1,34-1,45× il fondo**, ECB 13:15 = 1,49×, Tokyo 01:55 = **1,93×**,
+  volume raddoppiato). 🎯 **E il segno era PRE-REGISTRATO e l'ha azzeccato:**
+  EURUSD dopo il fix WMR fa **+1,90 pip mediani** nel quintile in cui il dollaro
+  e' salito di piu' (**58,1% positive**) e **−0,60** nel quintile opposto,
+  **monotono su 5 quintili**, su 2 fix su 3 (l'ECB no). 🔴 **SCARTO lo stesso,
+  per lettera del criterio congelato:** **F3 quota di rientro = 0,038-0,082**
+  (rientra il 4-8% del run-up, moneta al 51-53%) → **il FADE non esiste**; e la
+  cella buona vale **1,90 pip contro il cancello di 3,0** e **0,2 eventi/giorno
+  contro il pavimento di 2,00**. **Nessuna altra taratura.**
+- 🪦 **LAPIDE — M23 NUMERI TONDI (Osler *JF* 2003 / *JIMF* 2005): nessuna
+  informazione direzionale.** R1 passa largo (3,04 / 6,07 / 31,05 tocchi al
+  giorno su griglie 100/50/10 pip), R3 e R5 passano — ma su **93.000+ segnali**
+  il delta contro il controllo **APPAIATO** e' **da −1,50 a +0,90 punti, 5 letture
+  su 6 negative**. Il 55-57% di "rimbalzi" e' un artefatto della definizione.
+  L'ipotesi dichiarata (_"il clustering del 2003 su una banca vale nel 2026 su un
+  broker retail?"_) e' **misurata: no**.
+- 🔴 **M31 SALTO STATISTICO (Lee-Mykland *RFS* 2008) su M5: 16 celle su 16 sotto
+  il cancello, due mercati.** EURUSD: da T=3 a T=6 la frequenza va da **5,65 a
+  0,70/gg** (÷8) e il lordo da −0,011R a **+0,0922R** — netto a 1 pip, **sempre
+  negativo** (−0,033R il migliore). DAX (08:00-16:00 server): informazione
+  direzionale **sempre positiva** (+0,018R/+0,031R) ma **un terzo del pedaggio**
+  → netta −0,035R/−0,072R. ⚠️ **La gamba M15 e' dell'agente gemello**
+  (`sonda_salti_m15*.py`): su M15 lo stop raddoppia e la tassa si dimezza —
+  **i due numeri vanno letti insieme.**
+- 🔴 **M25 LEAD-LAG DIREZIONALE S&P → DAX su M5: frequenza SI', edge NO.**
+  2-7 segnali/giorno (**l'unico dei quattro a passare il pavimento F1**), e
+  **8 celle su 8 negative al netto**. La colonna che lo smonta e' la **monetina**
+  (+0,24/+0,96 pti): quasi tutto il "lordo" e' la **deriva del DAX 2011-2018**
+  raccolta da una geometria TP40/SL20, non il segnale. Depurata, l'informazione
+  direzionale e' **−0,003R/+0,013R = zero**. ➡️ **Conferma diretta di H8: _"la
+  frequenza da sola non e' un merito"_.** ⚠️ Non e' RELATIVO/M7 (z-score del
+  RAPPORTO): quello e' un'altra coda, non toccato.
+- 🔬 **CORREZIONE DI METODO, e tocca i dossier del 03/09: IL CONTROLLO CASUALE VA
+  APPAIATO.** Sugli **stessi** segnali, il controllo **non appaiato** (metodo
+  03/09) da' **+6,72/+12,67 punti** di delta apparente; il controllo **appaiato**
+  (stessa barra, stessa geometria, **lato opposto**) da' **−1,50/+0,90**.
+  **7-12 punti di artefatto**, perche' i segnali stanno nelle ore vive e l'ora
+  morta non arriva mai al TP. 🖊️ **Da oggi una sonda DIREZIONALE si controlla
+  col lato opposto sulla stessa barra** (media dei due lati = monetina esatta,
+  zero varianza). ✅ **Le lapidi L2/L3 del 03/09 non cambiano: si rafforzano**
+  (erano gia' negative contro un controllo generoso).
+- ⏱️ **IL COLLAUDO DELL'OROLOGIO HA CAMBIATO UN VERDETTO, non un arrotondamento.**
+  Recepita la correzione di fuso dell'agente M15 (histdata = ora di New York
+  **con** ora legale, **file+5 = server**), **le due corse DAX sono state
+  RIFATTE**: sulla finestra sbagliata (07:00-15:00) il lead-lag era il candidato
+  piu' vicino di tutti (**+0,0332R netti a 2,04 segnali/gg**); sulla finestra
+  giusta (08:00-16:00) scende a **−0,0613R**. La differenza era **l'ora di
+  pre-apertura**. **Un orologio sbagliato produce un numero pulito e falso.**
+- 🔧 **DUE ATTREZZI dal Code Base, e centrano il collo di bottiglia misurato**
+  (**sorgente NON letto: solo la pagina** — vale la lezione del 55630):
+  **76117 `Round Trip Cost Reconciler MT5`** (`usamah41`, 2026.08.13) misura il
+  costo di andata e ritorno **reale** → e' la riga **H12** aperta, e oggi si e'
+  visto che **il costo non e' un dettaglio del verdetto: e' il verdetto**;
+  **76934 `Position Peak Logger — how far your trades actually travelled, in R`**
+  (`petrkostal`, 2026.09.04) registra **MFE/MAE in R** → e' il dato che manca al
+  censimento dei contratti. ✅ **Riconfermato il 31/08:** degli **11 id nuovi**
+  (76669 → 76972) sono **tutti** pannelli/calcolatori/logger/demo Renko.
+  **Zero motori M5.**
+- ⛔ **TradingView (controllo positivo 🟢, 23 script visti): zero sorgenti
+  aperti, e il motivo e' quantitativo.** Ogni titolo cade in una famiglia gia'
+  sepolta con un numero di casa: scalping a pila di indicatori, `Intraday
+  Pullback Sniper` (banda+oscillatore = **M14, 6 finestre su 6 rosse**),
+  `Liquidity Pools`/`Key Liquidity` (**M24, cimitero tre volte**), tre
+  `Opening Drive` (**ORB, ~210 celle**), `Session-Based Momentum Scalper with
+  ATR Filter` (**L3, 0/8 sopra il pavimento**).
+- 🚧 **Buchi dichiarati:** **GitHub 429** (`Retry-After: 3600`, UI e WebFetch;
+  `api.github.com` 403) → **fronte GitHub NON battuto — e un 429 non e' un 404**;
+  **lo spread FOREX di BCM resta NON MISURATO** (H12), quindi la colonna "netta"
+  su EURUSD e' una stima su **1,0 pip di convenzione** (⚠️ a 0,5 pip il salto
+  T=6 tornerebbe a ~+0,03R, **ancora sotto il cancello**: nessuna conclusione si
+  ribalta); sorgenti dei due attrezzi non letti; finestre **2011-2019/2018**, il
+  regime delle sedie **non e' coperto**; **niente tick, zero costi dentro le
+  sonde, non e' BCM**.
+- 🎯 **LA DOMANDA CHE LASCIA, ed e' una strada, non un motore:** _"esiste UN
+  meccanismo che produca 0,16-0,20R LORDI su M5? E se no, perche' cerchiamo la
+  portata SCENDENDO di timeframe invece che AGGIUNGENDO SIMBOLI a M15-H1?"_
+  Il progetto ha gia' risposto due volte: la caccia M1 del 29/08 (_"la frequenza
+  NON la compreremo scendendo"_) e il gradiente **H1 > M30 > M15** di R108/R111.
+  ⚠️ **E cio' che NON dice:** M5 non e' morto **come TEMPO DI INGRESSO** di una
+  tesi piu' lenta — `ABTG_DAX_Apertura_EU` opera su M5 ma su un **livello H1** e
+  con stop largo, e **quella forma la tassa non la paga**. E' l'unica M5 viva in
+  casa, e adesso si sa perche'.
