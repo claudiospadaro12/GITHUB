@@ -33,7 +33,7 @@ guarda il conto**.
 | **stop reale** | `InpAtrSL = 2.75` × ATR ≈ **47,1 pti su D30EUR**, **74,2 su NASUSD**. Deriva da **2 × MAE mediana misurata** (1,32-1,55 ATR) |
 | **tetto giornaliero** | `InpMaxTradesPerDay = 5`. **Non è una preferenza, è aritmetica:** il passo 0 ha misurato **10 occasioni/giorno** su D30EUR, e 10 × 0,65% = **−6,50%**, che sfonda il muro prop giornaliero del 5% |
 | rischio | **0,65%**, la taglia di campo: così il drawdown si legge contro il muro prop **senza scalature inferite** |
-| magic | **774601** (D30) · **774602** (NAS) · 774611/774612 (gemelli) · 774603/774604 (porto). Blocco **7746xx verificato VERGINE** |
+| magic | **774601** (D30) · **774602** (NAS) · 774611/774612 (gemelli) · 774603/774604 (porto). Blocco **7746xx verificato VERGINE**. 🆕 Ognuno ha un **magic OMBRA** = +50 (774651, 774652, …): è la seconda cella dell'**asse tecnico** della classe 134, e serve a far eseguire le passate — vedi il riquadro sotto |
 
 Dettaglio completo, con tutti i numeri e i rilievi:
 `report/PROPOSTA_RELATIVO_TICK_REALI_2026-09-04.md`.
@@ -62,14 +62,20 @@ Dettaglio completo, con tutti i numeri e i rilievi:
 
 ## 🚦 SEI CORSE, E OGNUNA HA UN COMPITO DIVERSO (non sono sei tentativi)
 
-| # | `-Prova` | gamba | magic | ruolo |
-|---|---|---|---|---|
-| 2 | `D30_PORTO` | D30EUR | 774603 | 🥇 **collaudo del porto** — `InpModoSonda=true`: **nessun ordine** |
-| 3 | `NAS_PORTO` | NASUSD | 774604 | 🥇 **collaudo del porto** |
-| 4 | `D30` | D30EUR | 774601 | **la misura** |
-| 5 | `D30_GEM` | D30EUR | 774611 | **gemello di determinismo** |
-| 6 | `NAS` | NASUSD | 774602 | **la misura** |
-| 7 | `NAS_GEM` | NASUSD | 774612 | **gemello di determinismo** |
+| # | `-Prova` | gamba | magic | magic OMBRA | ruolo |
+|---|---|---|---:|---:|---|
+| 2 | `D30_PORTO` | D30EUR | 774603 | 774653 | 🥇 **collaudo del porto** — `InpModoSonda=true`: **nessun ordine** |
+| 3 | `NAS_PORTO` | NASUSD | 774604 | 774654 | 🥇 **collaudo del porto** |
+| 4 | `D30` | D30EUR | 774601 | 774651 | **la misura** |
+| 5 | `D30_GEM` | D30EUR | 774611 | 774661 | **gemello di determinismo** |
+| 6 | `NAS` | NASUSD | 774602 | 774652 | **la misura** |
+| 7 | `NAS_GEM` | NASUSD | 774612 | 774662 | **gemello di determinismo** |
+
+> 🆕 **La colonna "magic OMBRA" è nuova, ed è la classe 134.** Ogni corsa fa
+> **due** passate identiche, una per magic: è ciò che rimette MT5 in
+> ottimizzazione vera. Senza, il tester esegue **zero** passate e i CSV escono
+> **vuoti** — è successo davvero il 05/09. Il magic ombra **non è una seconda
+> configurazione**: è la stessa, con un'etichetta diversa.
 
 > ### 🥇 **IL COLLAUDO DEL PORTO — è il gate più importante, e va per primo**
 > L'EA conta gli attraversamenti **grezzi** e non apre niente. Quel numero deve
@@ -166,8 +172,8 @@ Fra "passa" e "bocciata secca" c'è **sempre** una **zona morta** esplicita.
 
 | | |
 |---|---|
-| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` — **v1 è bocciata dalla review del 04/09 e v3 NON POTEVA GIRARE, vedi classe 133 qui sotto: non lanciarle**) |
-| **Script comune** | `backtest_pipeline/walkforward_generico.ps1` — **anche questo scaricato AL PIN dal driver**, non dalla punta del branch. Al pin nuovo ha il fix della **classe 133** |
+| **Driver** | `righe/RIGA_RELATIVO_R117.ps1` (marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` — 🔴 **v1 bocciata in review, v3 non poteva PARTIRE (classe 133), v4 partiva ma NON MISURAVA NIENTE (classe 134, due CSV da 0 byte): non lanciare nessuna delle tre**) |
+| **Script comune** | `backtest_pipeline/walkforward_generico.ps1` — **anche questo scaricato AL PIN dal driver**, non dalla punta del branch. Al pin nuovo **avverte della classe 134** chi prova a girare senza assi |
 | **EA** | `mql5/Experts/ABTG_Relativo.mq5` **v1.02** — **NUOVO, MAI COMPILATO**. Si compila qui: **se fallisce, QUELLO è il risultato del passo** |
 | **File prova** | i 6 `prove/RELATIVO_R117_*.txt` (scaricati tutti, ne gira uno: gli altri servono al gemellaggio a SEI) |
 | **Banco** | **Modello 4 = OGNI TICK, TICK REALI**. Finestra **2024.09.26 → 2026.06.30**, split **40/60** |
@@ -185,94 +191,167 @@ avvio**, non quella di fine, apposta.
 
 ## 📌 IL PIN — **`434e271426ead410b3ec6a868a1ffa6d25bf31c4`**
 
-🔁 **RIPINNATA il 05/09/2026** dopo il **fallimento del giro a vuoto** del pin
-`b4e69ed3…`: la compilazione era andata **perfettamente (0 errori, 0 warning)** e
-la corsa **non è mai partita lo stesso**. La causa non era nel round: era nello
-**script comune** `walkforward_generico.ps1` — vedi il riquadro **classe 133**
-qui sotto. Il pin `b4e69ed3…` e tutti i precedenti (`983a0f2…` v1,
-`8fce113…` v3-parziale) **non valgono più**: su quel pin **tutte e sei le corse
-morivano sempre**, per costruzione.
+🔁 **RIPINNATA il 05/09/2026 sera**, e stavolta **dopo una corsa VERA fallita**,
+non dopo un giro a vuoto. Il pin `371083bf…` (v4) **girava**: il generico non si
+fermava più, MetaEditor compilava, MT5 partiva… e ha prodotto **DUE CSV DA ZERO
+BYTE**, con `codice di uscita del generico: 0` e **nessun errore da nessuna
+parte**. La causa è nel riquadro **classe 134** qui sotto. 🔴 **Il pin
+`371083bf…` e tutti i precedenti non valgono più: su quelli il round non
+misurava niente.**
 
 **Verificato uno per uno con `git ls-tree` sul pin e `curl` sui `raw`** (HTTP 200
-+ sha256 del raw **identico al blob del repo**, tutti e nove i file, 9 su 9):
++ sha256 del raw **identico al blob del repo**, **10 su 10**):
 
 | file al pin | cosa è stato verificato |
 |---|---|
-| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · **CAMBIATO** (`ea7962f6…` → `b0d347e5…`) · marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) |
-| `backtest_pipeline/walkforward_generico.ps1` | 200 + sha256 identico · **CAMBIATO** (`30dab1a3…` → `dbebb003…`, **+29 −2 righe**): è **qui** che sta il fix della classe 133. Il driver lo scarica **al pin** e lo ri-pinna sull'EA |
-| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · **INVARIATO rispetto a `b4e69ed3…`** (stesso blob) · `#property version "1.02"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` (Trade.mqh) · **0** pattern per simbolo (hedge-safe) · ASCII puro |
-| i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | 200 tutti e sei · **INVARIATI rispetto a `b4e69ed3…`, blob per blob, tutti e sei**: 👉 **la cella firmata (N=40, σ=1,35) NON È STATA TOCCATA** per far contento un controllo · 28 input che **combaciano nome per nome** con quelli dell'EA · differenze reciproche: **solo `@SIMBOLO`, `InpMagic`, `InpModoSonda`** |
+| `backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1` | 200 + sha256 identico · **CAMBIATO** (`b0d347e5…` → `ed4a6782…`) · marcatore `MARCATORE_RIGA_RELATIVO_R117_v5` · **ASCII puro** · **parse 0 errori** · **0 usi di `$r` dopo la nascita di `$R`** (classe 79) · **0 occorrenze di `-PermettiCellaSingola` fra gli argomenti passati al generico** |
+| `backtest_pipeline/walkforward_generico.ps1` | 200 + sha256 identico · **CAMBIATO** (`dbebb003…` → `b99b7459…`): il flag **resta** (opt-in, default spento) ma ora **urla la classe 134** a chi lo accende. Il driver lo scarica **al pin** e lo ri-pinna sull'EA |
+| `mql5/Experts/ABTG_Relativo.mq5` | 200 + sha256 identico · 🔒 **INVARIATO, stesso blob `a3941eba…` del pin precedente** · `#property version "1.02"` · **20** blocchi autotest · `ABR_NSTATS` 73 (**76 colonne**) · **28** input · **1** `#include` · **0** pattern per simbolo (hedge-safe) |
+| i **6** `backtest_pipeline/prove/RELATIVO_R117_*.txt` | 200 tutti e sei · **CAMBIATI**, e cambia **UNA SOLA RIGA di parametri**: `InpMagic` da valore secco a **asse tecnico a 2 celle** (più un blocco di commento che spiega il perché) |
+| `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` | 200 + sha256 identico · classe 134 da `[INFERITO]` a **MISURATA**, col consiglio sbagliato **corretto e non cancellato** |
 
-> ✅ **Quello che è cambiato sono DUE SCRIPT, non la misura.** L'EA e i sei
-> prova sono lo **stesso identico blob** del pin precedente: il round che
-> lancerai è quello firmato, non un altro.
+> 🔒 **LA CELLA FIRMATA NON È STATA TOCCATA.** `InpFinestraN=40`,
+> `InpSogliaIngressoSigma=1.35`, `InpAtrSL=2.75`, `InpMaxTradesPerDay=5`,
+> `InpRiskPercent=0.65`: **identici**, in tutti e sei i prova. L'unica riga
+> cambiata è il **magic**, che è un'**etichetta** e non entra in nessun calcolo.
+> Il gemellaggio a sei continua a dare `VALIDO`.
 
-### 🔴 CLASSE 133 — perché il giro a vuoto è morto, e cos'è cambiato
+### 🔴🔴 CLASSE 134 — perché la corsa vera ha prodotto DUE FILE VUOTI
 
-Il generico `walkforward_generico.ps1` è nato per le **GRIGLIE**, e ha un
-controllo che pretende **almeno un parametro spazzolato**:
+Il pin precedente aveva chiuso la **classe 133** (il generico si fermava su
+*"nessun parametro da spazzolare"*) con un interruttore `-PermettiCellaSingola`.
+Il verificatore l'aveva approvato **ma aveva scritto un rilievo**: *nel repo non
+esiste NESSUN precedente di MT5 lanciato con `Optimization=1` e zero assi Y*.
+
+**Quel rilievo si è avverato.** Ecco cosa è tornato dalla corsa vera:
 
 ```text
-=== NON LANCIO. Prima si sistemano questi ===
-    - nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward
+codice di uscita del generico: 0
+PROBLEMI: 2
+  - -1 righe nel CSV IS, 1 attesa
+  - -1 righe nel CSV OOS, 1 attesa
 ```
 
-Esce con **codice 1 prima ancora di scrivere l'anteprima `.ini`** — che è
-esattamente quello che hai visto. Ma **R117 è a CELLA CONGELATA**: N=40, σ=1,35,
-**zero assi Y**, e il driver stesso li **vieta** (`GateProva`). Lo sweep è vuoto
-**per costruzione**, quindi il controllo scattava **sempre**, su **tutte e sei**
-le corse.
+`ABTG_Relativo_D30EUR_IS_D30_PORTO.csv` e `..._OOS_D30_PORTO.csv`: **0 byte
+tutti e due**.
 
-**RIPRODOTTO ESEGUENDO** (pwsh 7.4.6, prova vero `RELATIVO_R117_D30_PORTO.txt`,
-EA e generico veri del repo): `exit 1`, nessuna anteprima `.ini`. Non è
-un'ipotesi.
+#### 🔬 Il fatto che chiude la diagnosi (non è un'ipotesi plausibile: è una prova)
 
-**Perché R116 LondonFx non l'aveva incontrato** (l'ho controllato prima di
-inventare qualcosa): quel round è senza griglia **nel merito**, ma i suoi prova
-hanno **due assi Y veri** — `InpMotore` (3 celle, l'ablazione) e `InpMagic`
-(2 celle, i gemelli). Lì `$Sweep` vale **2**, non 0. R117 tiene i gemelli in
-**prova separati**, quindi ogni corsa è **una cella secca**. 👉 **Non c'era
-nessun trucco di casa da copiare.**
+Il file **da 0 byte** — non mancante, **vuoto** — dice esattamente cosa è
+successo, perché nell'EA:
 
-**E il trucco non si poteva applicare comunque:** mettere un asse finto a 2 celle
-nei prova avrebbe (a) violato il gate del driver che pretende zero assi Y,
-(b) rotto `$RigheAttese = 1`, (c) **raddoppiato le passate a tick reali**,
-(d) toccato i sei prova firmati.
+- `OnTesterDeinit` fa `FileOpen(…FILE_WRITE…)` **PRIMA** del ciclo
+  `while(FrameNext(…))`;
+- ma l'**intestazione si scrive DENTRO il ciclo**, al primo frame
+  (`if(!header_scritto)`).
 
-**Il fix, in due pezzi:**
+Quindi: **file creato ⇒ `OnTesterDeinit` è stato chiamato**. **File vuoto ⇒
+`FrameNext` non ha restituito nemmeno un frame** ⇒ **`OnTester` non è mai
+girato** ⇒ **MT5 non ha eseguito NESSUNA passata.** Non "una passata muta":
+**zero**.
+
+👉 **`Optimization=1` + zero input marcati `||Y` = ZERO PASSATE, in silenzio.**
+È lo **stesso muro** dello *"sweep degenere"* del **07/08** (*"quattro CSV vuoti
+dopo una notte di macchina"*), che il generico infatti ferma ancora — solo che a
+**zero** assi il controllo l'avevamo appena aperto.
+`-PermettiCellaSingola` toglieva **il cartello, non il muro**.
+
+#### ✅ IL FIX — un ASSE TECNICO a due celle su `InpMagic` (ed è il modo di casa)
+
+```
+InpMagic=774601||774601||50||774651||Y
+```
+
+| | |
+|---|---|
+| **non è una griglia** | il magic è un'**etichetta**: non tocca lo spread, non tocca il lotto, non tocca il segnale, non seleziona niente. La cella misurata resta N=40 / σ=1,35 |
+| **cosa fa** | rimette il tester in **OTTIMIZZAZIONE VERA**, che è l'unico modo perché `FrameAdd` esista e `OnTesterDeinit` abbia qualcosa da scrivere |
+| **cosa regala** | la seconda cella è un **GEMELLO DI DETERMINISMO INTERNO**: stessi input, magic diverso, **deve** venire identica. La riga legge la riga col **magic DICHIARATO** e confronta le due su 9 grandezze |
+| **perché passo 50 e non 1** | `m+50` tiene tutte e **dodici** le etichette dentro il blocco **7746xx** (verificato vergine) **senza collisioni**. Con passo 1, il magic ombra di `D30` sarebbe stato **774602**, cioè il magic dichiarato di `NAS` |
+| **quanto costa** | 2 celle × 2 finestre = **4 pass** per corsa invece di 2. In **CPU** è il doppio; in **tempo di parete** quasi niente, perché MT5 distribuisce le passate sugli **agenti** (e qui sono 4). E comunque **il costo di zero passate è infinito** |
+
+**I magic, dichiarato → ombra:**
+
+| corsa | magic DICHIARATO (la misura) | magic OMBRA (gemello interno) |
+|---|---:|---:|
+| `D30` | 774601 | 774651 |
+| `NAS` | 774602 | 774652 |
+| `D30_GEM` | 774611 | 774661 |
+| `NAS_GEM` | 774612 | 774662 |
+| `D30_PORTO` | 774603 | 774653 |
+| `NAS_PORTO` | 774604 | 774654 |
+
+#### 🧾 IL CONFRONTO CHE CHIUDE IL CASO (`.ini` contro `.ini`, generati a banco)
+
+| riga dell'`.ini` | **R116B** (ha prodotto CSV, Modello 4) | **R117 v4** (0 byte) | **R117 v5** (il fix) |
+|---|---|---|---|
+| `Optimization=1` | ✅ | ✅ | ✅ |
+| `OptimizationCriterion=6` | ✅ | ✅ | ✅ |
+| `Model=4` | ✅ | ✅ | ✅ |
+| **righe con `\|\|Y`** | **2** (`InpMotore`, `InpMagic`) | **0** | **1** (`InpMagic`) |
+
+👉 **L'unica differenza fra l'`.ini` che misura e quello che non misura è il flag
+`Y`.** Tutto il resto è identico riga per riga. E il `InpMagic` di R116B è
+`774001||774001||1||774002||Y`: **esattamente la stessa tecnica**, che in casa
+gira da agosto (R102, R103, R116) con gli OPTFRAME pieni.
+
+#### ❌ E UNA COSA SCRITTA NEL PIN PRECEDENTE ERA SBAGLIATA — la scrivo, non la cancello
+
+La pagina v4 diceva: *"il trucco dell'asse finto non si poteva applicare
+comunque"*, per quattro motivi. **Nessuno dei quattro regge:**
+
+| obiezione di allora | cosa dice il fatto |
+|---|---|
+| *"violerebbe il gate del driver che pretende zero assi Y"* | quel gate **era del driver stesso**, cioè di noi: si cambia, e infatti ora pretende **esattamente un asse e che sia `InpMagic`** |
+| *"romperebbe `$RigheAttese = 1`"* | è una **costante della riga**, ora vale **2** |
+| *"raddoppierebbe le passate a tick reali"* | vero in CPU, quasi irrilevante in tempo di parete (agenti paralleli). E raddoppiare **una misura** è meglio che azzerarne una |
+| *"toccherebbe i sei prova firmati"* | tocca **una riga** che **non è la firma**: la cella è N=40/σ=1,35 e **non si è mossa** |
+
+#### 🛠️ Cosa è cambiato negli script
 
 | dove | cosa |
 |---|---|
-| `walkforward_generico.ps1` | nuovo interruttore **`-PermettiCellaSingola`**, **OPT-IN, default spento**: salta **SOLO** quel controllo, **nessun altro**. Ogni round già pinnato si comporta **esattamente come prima** |
-| `RIGA_RELATIVO_R117.ps1` (v4) | lo **passa** al generico, e ha un **gate nuovo**: se il generico del pin non ha `-PermettiCellaSingola` è **anteriore al fix** e la riga si ferma **con la causa scritta**, invece di morire su un parametro sconosciuto |
+| i **6** prova | `InpMagic` → asse tecnico a 2 celle + un blocco di commento che **vieta esplicitamente** il ritorno al valore secco |
+| `RIGA_RELATIVO_R117.ps1` **v5** | `$RigheAttese` 1 → **2** · `GateProva` pretende **UN asse e che sia `InpMagic` a 2 celle** nella forma esatta della **sua** corsa · `LeggiGamba` **sceglie la riga col magic dichiarato** e **confronta le due** · **non passa più `-PermettiCellaSingola`** · riga di referto nuova **`gemello INTERNO`** |
+| `walkforward_generico.ps1` | il flag **resta** (nessun round cambia) ma ora **urla la classe 134** quando lo accendi, e il messaggio *"CSV con zero passate"* nomina **causa e rimedio** |
 
-**Verificato ESEGUENDO, non leggendo:**
-
-| prova a banco (pwsh 7.4.6) | esito |
-|---|---|
-| prova vero `D30_PORTO`, **senza** il flag | **`exit 1`, nessuna `.ini`** — il difetto originale, riprodotto |
-| prova vero `D30_PORTO`, **con** il flag | **`exit 0`, anteprima `.ini` SCRITTA** |
-| **tutti e sei** i prova veri, col flag | **6 su 6** arrivano all'`.ini`: **28** righe `Inp*` (quante ne pretende `$INPUT_ATTESI`), **0** assi Y residui, `InpMagic` e `InpModoSonda` giusti per ruolo |
-| 🛡️ **non-regressione**: prova a griglia vero `LONDONFX_R116_TICK.txt`, **con e senza** il flag | **identici**: 2 assi, `InpMotore` 3 celle, `InpMagic` 2 celle, **6 celle per finestra**. Nessun round esistente cambia |
-| 🛡️ asse Y **degenere** + parametro **inesistente**, col flag **acceso** | **`exit 1` lo stesso**: *"parametri inesistenti"* + *"sweep degenere"*. Gli altri controlli **mordono ancora** |
-| gate nuovo del driver, sui **due generici veri** | **FERMA** quello vecchio (`git HEAD` precedente), **PASSA** quello fixato |
-| riga di referto `cella singola (classe 133)` nei **tre rami** | gate passato → la dichiara · gate fallito → `NON VERIFICATO` · **morta prima del gate** → `NON VERIFICATO` (nasce **prima del `try`**, non dereferenzia `$null`) |
-
-> ⚠️ **Quello che il banco NON copre, e va detto:** la **compilazione** in
-> MetaEditor, la **corsa vera** di MT5 a tick reali, **Windows PowerShell 5.1**
-> (qui il parse e l'esecuzione sono su **pwsh 7.4.6**), e la sezione **scelta del
-> terminale**. Il giro a vuoto serve proprio a questo: **rifallo per primo.**
-
-### 🧪 E LA RIGA È STATA **ESEGUITA**, NON SOLO LETTA (banco pwsh 7.4.6)
-
-*Questo è il banco del **04/09**, sulla logica del driver. Resta valido: il fix
-della classe 133 non ha toccato nessuna di queste funzioni (il diff del driver è
-il marcatore, il passaggio del flag, il gate nuovo e una riga di referto). Il
-banco della classe 133 è quello del riquadro **qui sopra**.*
+#### 🧪 VERIFICATO ESEGUENDO (pwsh 7.4.6) — quello che il banco copre davvero
 
 | prova a banco | esito |
 |---|---|
-| `GateProva` sui **sei** prova | **PASSATI**, 1 passata ciascuno |
+| i **6 gate** sui prova veri, al pin nuovo | **PASSATI 6/6**, `celle=2` ciascuno, asse `{InpMagic}` |
+| `GateGemelli` a sei | `VALIDO: … differenze DICHIARATE trovate: InpMagic, InpModoSonda (più @SIMBOLO)` |
+| **controprova** `InpMagic` tornato a valore **secco** | **RIFIUTATO**: *"assi Y = {}, atteso ESATTAMENTE uno…"* |
+| **controprova** un **secondo asse** (`InpAtrSL` sweepato) | **RIFIUTATO**: *"assi Y = {InpAtrSL, InpMagic}…"* |
+| **controprova** magic ombra **sbagliato** (`+1` invece di `+50`) | **RIFIUTATO**, con la forma attesa stampata |
+| **controprova** asse a **3 celle** | **RIFIUTATO**: *"ha 3 celle invece di 2"* |
+| CSV **sano** con la riga **OMBRA per prima** | sceglie la riga col magic **774603** (non la prima) e dichiara `gemello INTERNO: IDENTICHE` |
+| CSV col **gemello interno divergente** | `PROBLEMA: GEMELLO INTERNO DIVERGENTE … il banco è sporco` |
+| CSV **senza** la riga del magic dichiarato | `PROBLEMA: … IL PIN DEL MAGIC NON È PASSATO` |
+| CSV **da 0 byte** (il caso del 05/09) | `PROBLEMA: CSV DA ZERO BYTE (classe 134)`, con la diagnosi scritta |
+| **`.ini` generato** dal generico vero, senza il flag | **`exit 0`**, `spazzolati: 1 · InpMagic 2 celle · celle per finestra: 2 → 4 pass`, **1** riga `\|\|Y`, **28** righe `Inp*` |
+| 🛡️ **non-regressione**: prova a griglia vero `LONDONFX_R116_TICK.txt` | **identico** con e senza il flag, **e identico al generico precedente**: 2 assi, 6 celle |
+| 🛡️ prova a **zero assi** + flag acceso | il generico ora **stampa l'allarme classe 134** invece di partire zitto |
+| **giro completo al pin**, `-SoloControllo` | scarica al pin, **6/6 gate**, gemellaggio `VALIDO`, tetto barre dichiarato → si ferma solo sulla **scelta del terminale** (non c'è MT5 qui) |
+
+> ⚠️ **QUELLO CHE IL BANCO NON PUÒ COPRIRE, e va detto senza attenuanti:** che
+> MT5 produca davvero **due righe per CSV** lo si vede **solo su MT5**, e qui MT5
+> non c'è. Il banco prova che l'`.ini` esce col flag `Y` e che il generico conta
+> 2 celle; **la prova definitiva è la riga `gemello INTERNO` del referto della
+> prossima corsa vera.** Non coperti nemmeno: la **compilazione** in MetaEditor,
+> **Windows PowerShell 5.1** (qui è pwsh 7.4.6) e la **scelta del terminale**.
+
+### 🧪 E LA RIGA È STATA **ESEGUITA**, NON SOLO LETTA (banco pwsh 7.4.6)
+
+*Questo è il banco del **04/09**, sulla logica del driver. Resta valido, con
+**una riga corretta**: la classe 134 ha cambiato `GateProva` e `LeggiGamba`,
+quindi la prima riga qui sotto oggi dice **2 passate** e non 1, e il banco
+aggiornato è quello del riquadro **qui sopra**. Le altre righe (cancelli, eco
+dei pin, raccolta) non sono state toccate.*
+
+| prova a banco | esito |
+|---|---|
+| `GateProva` sui **sei** prova | **PASSATI** — ⚠️ *rimisurato il 05/09: oggi sono* **2 passate ciascuno** *(asse tecnico), non 1* |
 | `GateGemelli` a sei | `VALIDO: differenze DICHIARATE trovate: InpMagic, InpModoSonda (più @SIMBOLO)` |
 | **controprova**: magic sbagliato | **RIFIUTATO** — *"InpMagic è '774601', atteso '999999'"* |
 | **controprova**: un prova del **passo 0** dato in pasto alla riga nuova | **RIFIUTATO** — *"il parametro 'InpBarreOrizzonte' NON è un input di ABTG_Relativo"* |
@@ -297,11 +376,11 @@ banco della classe 133 è quello del riquadro **qui sopra**.*
 > (qui il parse è su pwsh 7), il comportamento del generico con `-Modello 4`, e
 > la sezione **scelta del terminale**.
 >
-> 📌 Di questi, la **compilazione** l'hai già passata sul pin `b4e69ed3…`:
-> **0 errori, 0 warning**. È un fatto acquisito, non una promessa. Quello che il
-> giro a vuoto deve dimostrare **adesso** è il pezzo nuovo: che il generico
-> **superi i controlli e scriva l'anteprima `.ini`** invece di uscire con
-> codice 1.
+> 📌 Di questi, la **compilazione** l'hai già passata **due volte** (pin
+> `b4e69ed3…` e pin `371083bf…`): **0 errori, 0 warning**, e **l'EA è lo stesso
+> blob**. È un fatto acquisito, non una promessa. Quello che la corsa deve
+> dimostrare **adesso** è il pezzo nuovo: che MT5 **esegua le passate** e che i
+> due CSV escano con **2 righe ciascuno** invece che da 0 byte.
 
 ## 🩹 LA REVIEW DEL 04/09 — **v1 BOCCIATA, ECCO COSA È CAMBIATO IN v2**
 
@@ -409,8 +488,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
     Write-Host 'GIRO A VUOTO: guarda solo che i sei gate passino e che la COMPILAZIONE riesca. NON ci sono numeri qui dentro.' -ForegroundColor Yellow;
-    Write-Host 'CLASSE 133, LA RIGA DECISIVA DI QUESTO GIRO: nel referto "anteprima .ini (solo CONTROLLO):" deve dire FRESCA con 28 righe Inp*. Se dice ASSENTE o VECCHIA, il generico si e'' fermato di nuovo e il pin e'' sbagliato.' -ForegroundColor Cyan;
-    Write-Host 'E la riga "cella singola (classe 133):" deve dire che il generico del pin ha -PermettiCellaSingola. Se dice NON VERIFICATO, la corsa non e'' arrivata al gate.' -ForegroundColor Cyan }
+    Write-Host 'CLASSE 134, LA RIGA DECISIVA DI QUESTO GIRO: nel referto "anteprima .ini (solo CONTROLLO):" deve dire FRESCA con 28 righe Inp*, e "passate:" deve dire 2 PASSATE PER FINESTRA. Se dice 1, l''asse tecnico su InpMagic non c''e'' e i CSV usciranno di nuovo da 0 byte.' -ForegroundColor Cyan;
+    Write-Host 'E la riga "asse tecnico (classe 134):" deve nominare InpMagic a 2 celle. Se dice NON VERIFICATO, la corsa non e'' arrivata al gate.' -ForegroundColor Cyan }
 ```
 
 ## 2️⃣ 🥇 `D30_PORTO` — **il collaudo del porto è armato (D30EUR 1303/1419)**
@@ -454,7 +533,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: la riga COLLAUDO DEL PORTO.' -ForegroundColor Yellow
+    Write-Host 'CLASSE 134: i due CSV devono avere 2 RIGHE e la riga "gemello INTERNO" del referto deve dire IDENTICHE. Se sono 0 righe / 0 byte, la corsa non ha misurato niente.' -ForegroundColor Cyan }
 ```
 
 ## 4️⃣ `D30` — la misura su D30EUR (magic 774601)
@@ -472,7 +552,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: PROBLEMI = 0, poi i cancelli A. Il gemello si confrontera'' nel blocco dopo.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: PROBLEMI = 0, poi i cancelli A. Il gemello si confrontera'' nel blocco dopo.' -ForegroundColor Yellow
+    Write-Host 'CLASSE 134: i due CSV devono avere 2 RIGHE e la riga "gemello INTERNO" del referto deve dire IDENTICHE. Se sono 0 righe / 0 byte, la corsa non ha misurato niente.' -ForegroundColor Cyan }
 ```
 
 ## 5️⃣ `D30_GEM` — il gemello di determinismo di D30 (magic 774611)
@@ -490,7 +571,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: la riga IL GEMELLO DI DETERMINISMO. Se DIVERGONO, il banco e'' sporco e NESSUN numero vale.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: la riga IL GEMELLO DI DETERMINISMO. Se DIVERGONO, il banco e'' sporco e NESSUN numero vale.' -ForegroundColor Yellow
+    Write-Host 'CLASSE 134: i due CSV devono avere 2 RIGHE e la riga "gemello INTERNO" del referto deve dire IDENTICHE. Se sono 0 righe / 0 byte, la corsa non ha misurato niente.' -ForegroundColor Cyan }
 ```
 
 ## 6️⃣ `NAS` — la misura su NASUSD (magic 774602)
@@ -508,7 +590,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: PROBLEMI = 0, poi i cancelli A. Il gemello si confrontera'' nel blocco dopo.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: PROBLEMI = 0, poi i cancelli A. Il gemello si confrontera'' nel blocco dopo.' -ForegroundColor Yellow
+    Write-Host 'CLASSE 134: i due CSV devono avere 2 RIGHE e la riga "gemello INTERNO" del referto deve dire IDENTICHE. Se sono 0 righe / 0 byte, la corsa non ha misurato niente.' -ForegroundColor Cyan }
 ```
 
 ## 7️⃣ `NAS_GEM` — il gemello di determinismo di NAS (magic 774612)
@@ -526,7 +609,8 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI o FERMATA: lo zip ESISTE lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'GUARDA SUBITO: la riga IL GEMELLO DI DETERMINISMO.' -ForegroundColor Yellow }
+    Write-Host 'GUARDA SUBITO: la riga IL GEMELLO DI DETERMINISMO.' -ForegroundColor Yellow
+    Write-Host 'CLASSE 134: i due CSV devono avere 2 RIGHE e la riga "gemello INTERNO" del referto deve dire IDENTICHE. Se sono 0 righe / 0 byte, la corsa non ha misurato niente.' -ForegroundColor Cyan }
 ```
 
 ## 8️⃣ 📦 RACCOLTA FINALE — **un solo zip da mandare** (regola di casa delle righe di lancio)
@@ -549,18 +633,25 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 
 Zip sul Desktop **`RELATIVO_R117_<PROVA>_<timestamp>.zip`** →
 `REFERTO_RELATIVO_R117_<PROVA>.txt` + `COMPILAZIONE.log` + il file prova +
-**due CSV OPTFRAME** (`..._IS_<PROVA>.csv` e `..._OOS_<PROVA>.csv`, **una riga
-ciascuno**, 76 colonne + gli input accodati dal tester).
+**due CSV OPTFRAME** (`..._IS_<PROVA>.csv` e `..._OOS_<PROVA>.csv`, **DUE righe
+ciascuno** — magic **dichiarato** + magic **OMBRA**, classe 134 — 76 colonne + gli
+input accodati dal tester).
 
 **Le righe da guardare per prime, in questo ordine:**
 
 1. **`compilazione:`** — è un EA nuovo. Se è FALLITA, quello è il risultato.
-2. **`COLLAUDO DEL PORTO`** (blocchi 2-3) — l'esito è `PASSATO SU ENTRAMBI I LATI` oppure `FUORI TOLLERANZA`. **Fuori tolleranza NON è una bocciatura del nucleo**: è un RILIEVO a tre cause (giuntura IS/OOS, Modello 2 vs Modello 4, finestra effettiva) e la corsa esce **verde lo stesso**. Mandalo in chat prima di lanciare 4-7.
-3. **`IL GEMELLO DI DETERMINISMO`** (blocchi 5 e 7) — se DIVERGONO, banco sporco.
-4. **`PROBLEMI: 0`** — un solo collaudo di sanità fallito = **non leggibile**.
-5. **`ECO DEI PIN`** — se N non è 40 o σ non è 1,35, **il pin non è passato** e la
+2. 🔴 **`gemello INTERNO`** (classe 134) — deve dire **`IDENTICHE`** per **IS** e
+   per **OOS**. È la riga che prova che MT5 ha davvero **eseguito le passate**:
+   sul pin v4 i CSV uscivano **da 0 byte** e nessuno se ne accorgeva se non
+   guardando il conteggio righe. Se dice `NON VERIFICATO` o se fra i PROBLEMI
+   compare *"CSV DA ZERO BYTE"*, **fermati e mandami lo zip**: non c'è nessuna
+   misura da leggere sotto.
+3. **`COLLAUDO DEL PORTO`** (blocchi 2-3) — l'esito è `PASSATO SU ENTRAMBI I LATI` oppure `FUORI TOLLERANZA`. **Fuori tolleranza NON è una bocciatura del nucleo**: è un RILIEVO a tre cause (giuntura IS/OOS, Modello 2 vs Modello 4, finestra effettiva) e la corsa esce **verde lo stesso**. Mandalo in chat prima di lanciare 4-7.
+4. **`IL GEMELLO DI DETERMINISMO`** fra CORSE (blocchi 5 e 7) — se DIVERGONO, banco sporco.
+5. **`PROBLEMI: 0`** — un solo collaudo di sanità fallito = **non leggibile**.
+6. **`ECO DEI PIN`** — se N non è 40 o σ non è 1,35, **il pin non è passato** e la
    corsa ha misurato un'altra configurazione.
-6. E **solo dopo**: `I CANCELLI DI MERITO` e il verdetto della gamba.
+7. E **solo dopo**: `I CANCELLI DI MERITO` e il verdetto della gamba.
 
 ## 🔜 COSA SUCCEDE DOPO
 
