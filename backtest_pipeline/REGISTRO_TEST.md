@@ -1151,3 +1151,47 @@ e `caccia_strategie/CACCIA_CANDELA_NEWS_2026-09-03.md` (3 meccanismi cercati,
   **forexfactory.com 403** (calendario e thread), **SSRN 403** (14ª di fila),
   e 13 domini accademici/istituzionali bloccati (NBER, Fed, ECB, Cambridge,
   ScienceDirect, ResearchGate, Semantic Scholar, Skidmore...).
+
+## 🪦 POSTNEWS — candidati A (ISM 15:00/EURUSD) e B (blocco 13:30/USDJPY): PASSO 0 CHIUSO, SENZA EDGE, 05/09/2026
+
+Passo 0 (conta-occasioni + screening Modello 1 OHLC) dei due candidati usciti
+dalla caccia notizie del 04/09 (`CACCIA_POSTNEWS_ALTRE_FAMIGLIE_2026-09-04.md`),
+stesso motore `ABTG_PostNews.mq5` v1.10 della sedia NFP viva (due pendenti sul
+range post-notizia), SL/TP/offset **copiati di netto dalla sedia NFP, mai
+ritarati** su questi simboli/eventi. Righe: `RIGA_POSTNEWS_ISM.ps1` e
+`RIGA_POSTNEWS_1330.ps1`, pin `1dbae10394488181c65cfbfa5c9f91d4852fb18e`.
+
+- 🔴 **A (ISM Manufacturing/Services PMI + CB Consumer Confidence, 15:15
+  server, EURUSD, magic 774701/774706):** IS (2010-2015, n=234) **PF 0,76**,
+  Profit -4.651,72, DD% 6,92. OOS (2015-2023, n=312) **PF 0,79**, Profit
+  -5.633,01, DD% 6,94. **PF sotto 1 su ENTRAMBE le finestre.**
+- 🔴 **B (CPI m/m + Retail Sales + Core Retail Sales + PPI, 13:45 server,
+  USDJPY, magic 774801/774806 — stessa ora della sedia NFP, calendario
+  diverso):** IS (2010-2015, n=151, appena sopra soglia) **PF 0,66**, Profit
+  -4.084,87, DD% 4,75. OOS (2015-2023, n=253) **PF 0,90**, Profit -1.979,08,
+  DD% 4,56. **PF sotto 1 su ENTRAMBE le finestre.**
+- ✅ **Campione pieno su tutte e 4 le letture** (Emendamento A: A supera 150
+  comodo, B lo tocca appena — coerente col conto dei 150 gia' scritto nella
+  pagina, che avvertiva B non ci sarebbe arrivato facile). Nessuna sospensione
+  per campione sottile: il verdetto e' leggibile, ed e' negativo.
+- 🐛 **CLASSE 129 (nuova, in `CHECKLIST_RIGA_DI_LANCIO.md`): le righe "gemello
+  di coerenza" (2 celle che DEVONO uscire identiche, cambia solo il magic)
+  vanno lanciate con UN SOLO agente locale MT5.** Con gli 8 core della
+  macchina di backtest (4 attivi), 5 corse di fila su ISM hanno dato gemelli
+  **mai identici** (scarti da 2 a 39 operazioni, verso variabile) e
+  `CALENDARIO CIECO` occasionale. **Causa confermata con un monitor in tempo
+  reale** (`Get-Process metatester64` in loop): 4 processi tester vivi
+  contemporaneamente nell'istante esatto della lettura del calendario —
+  uno per cella/finestra, in corsa sullo stesso file condiviso. Disabilitando
+  Core 2/3/4 (pannello Strategy Tester -> Agenti), la corsa successiva ha
+  dato gemelli **identici al centesimo**. Il verdetto di merito (PF<1 su
+  tutte le letture) non e' MAI cambiato durante la caccia al bug: nessuna
+  delle sei letture (pulite o sporche) ha mai mostrato PF>=1.
+- 🔬 **Non e' un cancello chiuso per sempre: e' un motore, non un mandato.**
+  Il PF<1 boccia QUESTO meccanismo (breakout a due pendenti) su QUESTI due
+  eventi con QUESTI parametri (ereditati dall'NFP, mai ritarati). Per la
+  Regola della Seconda Caccia (19/08), **non si ritocca SL/TP sugli stessi
+  dati per farli tornare verdi** (sarebbe il curve-fitting gia' pagato in
+  casa): si cerca un MECCANISMO diverso sulla stessa inefficienza (fade,
+  liquidity sweep, gestione a tempo). Caccia aperta il 05/09/2026, dossier
+  in arrivo in `caccia_strategie/`.
