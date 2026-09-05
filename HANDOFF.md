@@ -3,7 +3,41 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-09-03 mezzogiorno**. **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-05 sera** (R117 classe 134). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🗓️ AGGIORNAMENTO 05/09 SERA — 🔴 R117 RELATIVO: **LA CORSA VERA E' USCITA VUOTA** (classe 134), FIX APPLICATO
+
+**Cos'e' successo:** la prima corsa vera di R117 (`-Prova D30_PORTO`, tick reali)
+e' finita con `codice di uscita del generico: 0`, **nessun errore**, e **DUE CSV
+DA ZERO BYTE**. Nessuna misura.
+
+**Perche' (diagnosi chiusa dal FATTO, non da un'ipotesi):** il file **c'era ed era
+vuoto**. `OnTesterDeinit` apre il file **prima** del ciclo `FrameNext` ma scrive
+l'intestazione **dentro** il ciclo ⇒ `OnTesterDeinit` chiamato + zero frame ⇒
+**MT5 non ha eseguito nessuna passata**. Causa: `Optimization=1` (che il generico
+scrive sempre) con **zero input marcati `||Y`**. E' lo stesso muro dello *"sweep
+degenere"* del 07/08. Il flag `-PermettiCellaSingola` del pin precedente toglieva
+**il cartello, non il muro**.
+
+**Fix (v5, pin `434e271426ead410b3ec6a868a1ffa6d25bf31c4`, verificato 10 file su
+10 con `git ls-tree` + `curl`):** **asse tecnico a 2 celle su `InpMagic`**
+(`m||m||50||m+50||Y`) nei sei prova — la tecnica che R102/R103/R116 usano da
+agosto. Il magic e' un'**etichetta**: 🔒 **la cella firmata (N=40, σ=1,35) NON e'
+stata toccata**, e l'**EA e' lo stesso blob** del pin precedente. La seconda
+passata e' un **gemello di determinismo interno gratis**.
+
+- Pagina: `backtest_pipeline/righe/RIGA_RELATIVO_R117_DA_MANDARE.md`
+  (marcatore `MARCATORE_RIGA_RELATIVO_R117_v5`).
+- 👉 **La riga da guardare per prima nel referto e' `gemello INTERNO`**: deve dire
+  `IDENTICHE` per IS e per OOS. Se dice `NON VERIFICATO`, o fra i PROBLEMI
+  compare *"CSV DA ZERO BYTE"*, **la corsa non ha misurato niente**.
+- Checklist **classe 134**: da `[INFERITO]` a **MISURATA**, e con il consiglio
+  sbagliato che dava (*"non rimettere l'asse finto"*) **corretto e non
+  cancellato**.
+- ⚠️ **Non provato qui:** che MT5 produca davvero due righe per CSV. Lo dira'
+  **solo la prossima corsa vera**.
 
 ---
 
