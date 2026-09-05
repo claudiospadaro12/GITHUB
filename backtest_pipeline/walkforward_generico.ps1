@@ -66,6 +66,28 @@
 #  comportamento e' identico a sempre per ogni round gia' pinnato.
 #  NON e' una scorciatoia per le griglie: se un asse Y c'e' ma e'
 #  degenere, l'errore "sweep degenere" resta e ferma lo stesso.
+#
+#  >>> LEGGI QUESTO PRIMA DI USARLO -- CLASSE 134, MISURATA IL 05/09/2026
+#  L'interruttore qui sopra toglie IL CARTELLO, NON IL MURO. La prima
+#  corsa vera che l'ha usato (R117 RELATIVO, prova D30_PORTO, Modello 4)
+#  e' uscita con codice 0, senza un errore da nessuna parte, e con i DUE
+#  CSV DA ZERO BYTE. Motivo: questo driver scrive SEMPRE Optimization=1,
+#  ma con tutti i parametri in forma v||v||0||v||N nessun input e'
+#  marcato come ottimizzabile, quindi MT5 non ha nessuna combinazione da
+#  eseguire e NON ESEGUE NESSUNA PASSATA. Su un EA che esporta i
+#  risultati con FrameAdd/OnTesterDeinit (cioe' su TUTTI i nostri:
+#  quel canale esiste solo in ottimizzazione) il file viene creato e
+#  resta vuoto -- e' lo stesso muro del "sweep degenere" del 07/08.
+#  QUINDI: se il tuo round non ha nessuna griglia nel merito, NON usare
+#  questo flag. Metti un ASSE TECNICO A DUE CELLE su un parametro che
+#  non tocca l'economia, tipicamente il magic:
+#        InpMagic=774601||774601||50||774651||Y
+#  E' quello che fanno R102, R103 e R116 da agosto, e i loro OPTFRAME
+#  sono pieni. Le due passate sono identiche per costruzione, quindi la
+#  seconda e' anche un gemello di determinismo gratis.
+#  Il flag resta qui SOLO per il caso (finora mai visto in casa) di un
+#  EA che scriva il suo CSV direttamente da OnTester/OnDeinit, senza
+#  passare dai frame.
 # =====================================================================
 param(
   [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
@@ -473,6 +495,19 @@ elseif($PermettiCellaSingola -and $Errori.Count -eq 0){
   Write-Host "    CELLA CONGELATA (-PermettiCellaSingola): zero assi Y." -ForegroundColor Yellow
   Write-Host ("    celle per finestra          : $NCelle   ->  " + ($NCelle*2) + " pass a tick reali in tutto") -ForegroundColor White
   Write-Host "    IS e OOS qui NON selezionano niente: sono due campioni della STESSA configurazione." -ForegroundColor Yellow
+  #--- CLASSE 134 (MISURATA il 05/09/2026): il flag toglie il cartello,
+  #    non il muro. Con Optimization=1 e ZERO parametri ottimizzabili
+  #    MT5 non esegue nessuna passata, e un EA che esporta via
+  #    FrameAdd/OnTesterDeinit lascia un CSV DA 0 BYTE. Chi accende
+  #    questo flag deve vederlo scritto PRIMA di aspettare una notte.
+  Write-Host "" -ForegroundColor Red
+  Write-Host "    !!! ATTENZIONE, CLASSE 134 (MISURATA IL 05/09/2026) !!!" -ForegroundColor Red
+  Write-Host "    Con Optimization=1 e ZERO parametri ottimizzabili MT5 non esegue NESSUNA" -ForegroundColor Red
+  Write-Host "    passata: non da' errore, esce con codice 0, e un EA che esporta con" -ForegroundColor Red
+  Write-Host "    FrameAdd/OnTesterDeinit (tutti i nostri) lascia il CSV DA 0 BYTE." -ForegroundColor Red
+  Write-Host "    Se questo EA e' di quelli, METTI UN ASSE TECNICO A DUE CELLE sul magic:" -ForegroundColor Yellow
+  Write-Host "        InpMagic=<m>||<m>||50||<m+50>||Y" -ForegroundColor Yellow
+  Write-Host "    e togli -PermettiCellaSingola. E' quello che fanno R102, R103, R116, R117." -ForegroundColor Yellow
 }
 
 if($Errori.Count -gt 0){
@@ -705,7 +740,15 @@ $InputsTxt
   if(Test-Path $csv){
     $n=@(Get-Content $csv).Count
     Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force
-    if($n -le 1){ Write-Host "    ATTENZIONE: $tag.csv ha solo l'intestazione, ZERO passate." -ForegroundColor Red }
+    if($n -le 1){
+      Write-Host "    ATTENZIONE: $tag.csv ha solo l'intestazione (o e' VUOTO), ZERO passate." -ForegroundColor Red
+      if($Sweep.Count -eq 0){
+        Write-Host "    CAUSA N.1, CLASSE 134: questa corsa non ha NESSUN parametro ottimizzabile." -ForegroundColor Red
+        Write-Host "    Con Optimization=1 e zero assi Y, MT5 non esegue nessuna passata: OnTester non" -ForegroundColor Red
+        Write-Host "    gira, FrameAdd non manda niente, e OnTesterDeinit crea il file e lo lascia vuoto." -ForegroundColor Red
+        Write-Host "    RIMEDIO: asse tecnico a 2 celle sul magic, InpMagic=<m>||<m>||50||<m+50>||Y." -ForegroundColor Yellow
+      }
+    }
     else        { Write-Host ("    OK -> $tag.csv   ({0} righe)" -f ($n-1)) -ForegroundColor Green }
     if(($n-1) -eq $NAttese -and $NMute -gt 0){
       Write-Host ("    (regolare: {0} celle chieste meno {1} con ENTRAMBI i lati spenti = {2} righe)" -f $NCelle, $NMute, $NAttese) -ForegroundColor DarkGray

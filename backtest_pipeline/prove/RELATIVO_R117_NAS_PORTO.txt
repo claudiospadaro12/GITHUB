@@ -154,6 +154,35 @@
 #    autore, URL e data.
 # =====================================================================
 
+# =====================================================================
+#  L'ASSE TECNICO SU InpMagic -- CLASSE 134, MISURATA IL 05/09/2026
+# ---------------------------------------------------------------------
+#  InpMagic NON e' scritto secco: e' un ASSE a DUE CELLE
+#  (m || m || 50 || m+50 || Y). NON e' una griglia e non seleziona
+#  niente -- il magic e' un'ETICHETTA, non tocca l'economia della
+#  cella. Serve a una cosa sola, e il motivo e' un fatto misurato:
+#
+#  ABTG_Relativo scrive il CSV dei risultati SOLO da OnTesterDeinit,
+#  leggendo i frame che OnTester manda con FrameAdd. Quel canale
+#  esiste SOLTANTO in OTTIMIZZAZIONE. Il 05/09/2026 la corsa
+#  D30_PORTO e' girata con Optimization=1 e ZERO parametri marcati
+#  come ottimizzabili: MT5 non ha dato nessun errore, il generico e'
+#  uscito con codice 0, e i DUE CSV sono usciti da ZERO BYTE --
+#  OnTesterDeinit ha creato il file, FrameNext non ha trovato NESSUN
+#  frame, e l'intestazione (che si scrive solo al primo frame) non e'
+#  mai stata scritta. Zero passate eseguite, zero misura.
+#
+#  Un asse a DUE celle rimette il tester in ottimizzazione VERA. La
+#  seconda cella (magic m+50, blocco 7746xx vergine) e' un GEMELLO
+#  INTERNO: stessi input, magic diverso, DEVE venire identica alla
+#  prima. La riga di lancio legge la riga col magic DICHIARATO e
+#  confronta le due -- il costo in piu' e' una passata, che il tester
+#  distribuisce su un agente parallelo.
+#
+#  NON si torna al valore secco "InpMagic=m": e' proprio quello che
+#  ha prodotto i due file da 0 byte.
+# =====================================================================
+
 @SIMBOLO  NASUSD
 @PERIODO  M5
 @DAQUANDO 2024.09.26
@@ -176,7 +205,7 @@ InpMaxTradesPerDay=5
 InpLato=0
 InpAtrPeriod=14
 InpAtrModoRma=false
-InpMagic=774604
+InpMagic=774604||774604||50||774654||Y
 InpSlippagePts=10
 InpMaxSpreadPts=0
 InpModoSonda=true

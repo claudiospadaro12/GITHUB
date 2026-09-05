@@ -1,21 +1,42 @@
 # =====================================================================
-#  MARCATORE_RIGA_RELATIVO_R117_v4
+#  MARCATORE_RIGA_RELATIVO_R117_v5
 #  RIGA_RELATIVO_R117.ps1 -- IL ROUND R117: PRIMA MISURA DI MERITO DEL
 #  CANDIDATO "RELATIVO", A TICK REALI.
 #
-#  v4 (05/09/2026, CLASSE 133). La v3 era CORRETTA ma NON POTEVA GIRARE:
-#  il giro a vuoto compilava l'EA senza un errore e poi il generico
-#  usciva con codice 1 PRIMA di scrivere l'anteprima .ini, su un
-#  controllo suo che pretende almeno un parametro spazzolato ("nessun
-#  parametro da spazzolare: sarebbe un backtest singolo, non un
-#  walk-forward"). Quel controllo e' giusto per le GRIGLIE ed e' quello
-#  che questo round, a CELLA CONGELATA, non ha e non deve avere: la v3
-#  sarebbe morta su TUTTE E SEI le corse, sempre, per costruzione.
-#  Chiuso in due pezzi: walkforward_generico.ps1 ha un interruttore
-#  OPT-IN -PermettiCellaSingola (default spento: nessun round gia'
-#  pinnato cambia comportamento) che salta QUEL controllo e SOLO
-#  quello; questa riga lo passa e PRETENDE che il generico del pin ce
-#  l'abbia, con un gate suo, prima di lanciare.
+#  v5 (05/09/2026, CLASSE 134 -- CONFERMATA IN CAMPO, NON PIU' TEORICA).
+#  La v4 girava: il generico non si fermava piu' e MT5 partiva. Ma la
+#  corsa vera D30_PORTO e' uscita con "codice di uscita del generico: 0"
+#  e DUE CSV DA ZERO BYTE. Nessun errore da nessuna parte, e nessuna
+#  misura. La causa, ricostruita dal FATTO (il file c'era ed era vuoto,
+#  non mancava):
+#    ABTG_Relativo scrive il CSV SOLO da OnTesterDeinit, leggendo con
+#    FrameNext i frame che OnTester manda con FrameAdd. Il file da 0
+#    byte dice che OnTesterDeinit E' STATO CHIAMATO (ha aperto il file)
+#    e che FrameNext non ha trovato NESSUN frame -- l'intestazione si
+#    scrive solo dentro il ciclo, al primo frame. Zero frame = ZERO
+#    PASSATE eseguite. Il generico scrive Optimization=1 sempre, ma con
+#    TUTTI i parametri in forma v||v||0||v||N nessun input e' marcato
+#    come ottimizzabile: MT5 non ha niente da combinare e non esegue
+#    nessuna passata (e' lo stesso muro del "sweep degenere" del 07/08,
+#    che in casa aveva gia' prodotto "quattro CSV vuoti dopo una notte
+#    di macchina").
+#  La v4 quindi NON POTEVA MISURARE NIENTE su nessuna delle sei corse,
+#  esattamente come la v3 non poteva partire. -PermettiCellaSingola
+#  toglieva il cartello, non il muro.
+#
+#  IL FIX, ed e' quello che questa casa usa gia' da R102/R103: un ASSE
+#  TECNICO A DUE CELLE SU InpMagic (m||m||50||m+50||Y). Il magic e'
+#  un'ETICHETTA e non tocca l'economia della cella, quindi la misura
+#  resta la stessa; il tester pero' torna in OTTIMIZZAZIONE VERA e i
+#  frame arrivano. La seconda cella e' un GEMELLO INTERNO gratis
+#  (stessi input, magic diverso: DEVE venire identica). Questa riga
+#  legge la riga col magic DICHIARATO e confronta le due.
+#  R102 lo fa da agosto sugli stessi binari e i suoi OPTFRAME sono
+#  pieni: non e' un'idea nuova, e' il modo di casa.
+#  -PermettiCellaSingola NON SERVE PIU' e questa riga NON LO PASSA: con
+#  un asse vero lo sweep non e' vuoto e il controllo del generico passa
+#  da solo. L'interruttore resta nel generico (opt-in, default spento)
+#  con scritto sopra cosa e' successo qui.
 #
 #  ATTENZIONE, ED E' LA PRIMA COSA DA SAPERE: QUI L'EA APRE ORDINI.
 #  Le due righe che l'hanno preceduto (RIGA_SONDARELATIVO _v5 e
@@ -160,10 +181,20 @@ $AUTOTEST_BLOCCHI_ATTESI = 20
 $NSTATS_ATTESI           = 73      # 73 valori + Pass, Simbolo, Periodo = 76 colonne
 $INPUT_ATTESI            = 28
 $INCLUDE_ATTESI          = 1       # Trade/Trade.mqh: qui l'EA APRE ORDINI, e 0 sarebbe l'errore
-#--- QUI NON C'E' NESSUNA GRIGLIA: la cella e' CONGELATA, quindi ogni
-#    corsa fa UNA passata sola e il CSV deve avere UNA riga. Un numero
-#    diverso vuol dire cache del tester o un asse rimasto acceso.
-$RigheAttese             = 1
+#--- QUI NON C'E' NESSUNA GRIGLIA NEL MERITO: la cella e' CONGELATA.
+#    C'e' pero' UN ASSE TECNICO su InpMagic a DUE celle (classe 134):
+#    senza almeno un parametro davvero ottimizzabile MT5 esegue ZERO
+#    passate e il CSV esce da 0 byte. Quindi ogni corsa fa DUE passate
+#    ECONOMICAMENTE IDENTICHE e il CSV deve avere DUE righe: quella col
+#    magic DICHIARATO (la misura) e quella col magic OMBRA (il gemello
+#    interno). Un numero diverso vuol dire cache del tester, un asse in
+#    piu' rimasto acceso, o una passata morta a OnInit.
+$RigheAttese             = 2
+#--- l'asse tecnico, dichiarato QUI una volta sola: passo fra il magic
+#    dichiarato e il suo OMBRA. 50 tiene tutte e dodici le etichette
+#    dentro il blocco 7746xx (VERIFICATO VERGINE) senza collisioni.
+$MAGIC_PASSO_OMBRA       = 50
+$ASSE_TECNICO            = "InpMagic"
 
 # --- I CANCELLI DI MERITO, SCRITTI QUI PRIMA DEI NUMERI. La riga li
 #     RICALCOLA dai numeri grezzi del CSV invece di fidarsi di una
@@ -262,10 +293,12 @@ $FissiAttesi = [ordered]@{
   "InpSlippagePts"="10"; "InpMaxSpreadPts"="0"; "InpSaltaGiorniSpaiati"="false";
   "InpWarmupBarre"="300"; "InpPuntiPerIndice"="100.0";
   "InpScriviCsv"="true"; "InpVerbose"="true"; "InpAutoTest"="true"; "InpTag"="RELATIVO" }
-#--- NESSUN ASSE: la cella e' CONGELATA. Un asse Y in un prova di questo
-#    round vorrebbe dire che qualcuno ha rimesso una griglia dove il
-#    documento dice che non ce n'e' nessuna.
-$AssiAttesi = [ordered]@{}
+#--- UN SOLO ASSE, ED E' TECNICO: InpMagic a DUE celle (classe 134).
+#    NESSUN ALTRO. Un secondo asse Y in un prova di questo round
+#    vorrebbe dire che qualcuno ha rimesso una GRIGLIA dove il
+#    documento dice che non ce n'e' nessuna -- e nessun asse vorrebbe
+#    dire tornare ai due CSV da 0 byte del 05/09.
+$AssiAttesi = [ordered]@{ "InpMagic" = 2 }
 
 # --- tutto cio' che la raccolta usa nasce QUI, prima del try: la
 #     raccolta gira SEMPRE, anche nella corsa fermata da un gate.
@@ -289,7 +322,7 @@ $InputTxt   = "NON CONTATI"
 $GrepTxt    = "NON ESEGUITO"
 $IncludeTxt = "NON CONTATI"
 $CelleTxt   = "NON CONTATE"
-# CLASSE 133: nasce QUI, prima del try, come tutto cio' che la raccolta
+# CLASSE 134: nasce QUI, prima del try, come tutto cio' che la raccolta
 # usa. Se la corsa muore prima del gate, il referto lo dice invece di
 # lasciare il campo vuoto (o, peggio, di dereferenziare un $null).
 $CellaSingolaTxt = "NON VERIFICATO (la corsa non e' arrivata al gate)"
@@ -306,6 +339,10 @@ $SoglieSrc  = $null      # i #define letti dal sorgente
 #    variabile che nasce dentro il try non esisterebbe li'.
 $GambaIS    = $null      # la riga del CSV IS
 $GambaOOS   = $null      # la riga del CSV OOS
+#--- l'esito del GEMELLO INTERNO (le due passate dell'asse tecnico),
+#    una voce per gamba. Nasce QUI, prima del try, come tutto cio' che
+#    la raccolta usa: LeggiGamba ci scrive dentro con $script:.
+$GemelloInterno = @{}
 $CollaudiKo = 0
 $RigheCancelli = @("  (non calcolati: la corsa non e' arrivata ai numeri)")
 $VerdettoGamba = "n/d"
@@ -447,11 +484,16 @@ function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfA
   $paramProva = @($h.Keys | Where-Object { $_ -notmatch '^@' })
   foreach($k in $paramProva){ if(-not ($inputEA -contains $k)){ throw ($pf + ": il parametro '" + $k + "' NON e' un input di " + $EA + " (classe 112 / errore n.3: MT5 lo ignorerebbe in silenzio).") } }
   foreach($k in @($inputEA)){ if(-not $h.Contains($k)){ throw ($pf + ": l'input '" + $k + "' dell'EA NON e' pinnato nel prova: MT5 userebbe lo stato che si ricorda dall'ultima griglia.") } }
-  # NESSUN ASSE Y: la cella e' congelata (vedi $AssiAttesi vuoto). Un
-  # asse acceso qui vorrebbe dire che qualcuno ha rimesso una griglia
-  # dove il documento dice che non ce n'e' nessuna.
-  if(@($assi).Count -ne 0){ throw ($pf + ": ha " + @($assi).Count + " assi Y {" + (@($assi) -join ", ") + "} ma questo round NON HA UNA GRIGLIA.") }
-  if($RigheAttese -ne 1){ throw ("configurazione interna incoerente: RigheAttese = " + $RigheAttese + ", atteso 1 (una passata per corsa).") }
+  # UN SOLO ASSE Y, E DEVE ESSERE QUELLO TECNICO SU InpMagic (classe
+  # 134). Zero assi = MT5 esegue ZERO passate e il CSV esce da 0 byte
+  # (MISURATO il 05/09). Due o piu' assi = qualcuno ha rimesso una
+  # GRIGLIA dove il documento dice che non ce n'e' nessuna.
+  if(@($assi).Count -ne 1 -or $assi[0] -ne $ASSE_TECNICO){
+    throw ($pf + ": assi Y = {" + (@($assi) -join ", ") + "}, atteso ESATTAMENTE uno e deve essere " + $ASSE_TECNICO + " (classe 134: con zero assi MT5 non esegue nessuna passata e i CSV escono da 0 byte; con due assi questo round avrebbe una griglia, che non deve avere).")
+  }
+  $celleAsse = CelleAsse $h[$ASSE_TECNICO] $pf
+  if($celleAsse -ne 2){ throw ($pf + ": l'asse tecnico " + $ASSE_TECNICO + " ha " + $celleAsse + " celle invece di 2. Due celle sono il MINIMO che rimette MT5 in ottimizzazione vera, e piu' di due raddoppierebbero il costo a tick reali senza misurare niente di nuovo.") }
+  if($RigheAttese -ne $celleAsse){ throw ("configurazione interna incoerente: RigheAttese = " + $RigheAttese + ", asse tecnico a " + $celleAsse + " celle (devono coincidere: una riga di CSV per passata).") }
   # I FISSI, nome per nome, col valore.
   foreach($k in @($FissiAttesi.Keys)){
     if(-not $h.Contains($k)){ throw ($pf + ": manca la riga '" + $k + "'.") }
@@ -464,14 +506,25 @@ function GateProva([string]$percorso,[string]$pf,[string]$simAtteso,[string]$tfA
   # "puo' valere qualunque cosa".
   foreach($k in @($DifferenzeAmmesse)){
     if(-not $h.Contains($k)){ throw ($pf + ": manca la riga '" + $k + "'.") }
+    #--- InpMagic E' l'asse tecnico e DEVE avere il flag Y: qui si
+    #    esclude, altrove si controlla nella sua forma completa.
+    if($k -eq $ASSE_TECNICO){ continue }
     if($h[$k] -match '\|\|Y\s*$'){ throw ($pf + ": " + $k + " NON va sweepato.") }
   }
-  if($magicAtteso -ne "" -and $h["InpMagic"] -ne $magicAtteso){ throw ($pf + ": InpMagic e' '" + $h["InpMagic"] + "', atteso '" + $magicAtteso + "'.") }
+  #--- L'ASSE TECNICO NELLA SUA FORMA ESATTA: m||m||50||m+50||Y, dove m
+  #    e' il magic DICHIARATO per QUESTA corsa. "Puo' differire fra i
+  #    sei" non vuol dire "puo' valere qualunque cosa": il magic e'
+  #    l'unica cosa che dice quale corsa ha prodotto quel CSV.
+  if($magicAtteso -ne ""){
+    $ombra = [long]$magicAtteso + $MAGIC_PASSO_OMBRA
+    $formaAttesa = "" + $magicAtteso + "||" + $magicAtteso + "||" + $MAGIC_PASSO_OMBRA + "||" + $ombra + "||Y"
+    if($h[$ASSE_TECNICO] -ne $formaAttesa){ throw ($pf + ": " + $ASSE_TECNICO + " e' '" + $h[$ASSE_TECNICO] + "', atteso '" + $formaAttesa + "' (magic dichiarato " + $magicAtteso + ", magic OMBRA " + $ombra + " del gemello interno).") }
+  }
   if($sondaAttesa -ne "" -and $h["InpModoSonda"] -ne $sondaAttesa){ throw ($pf + ": InpModoSonda e' '" + $h["InpModoSonda"] + "', atteso '" + $sondaAttesa + "'.") }
   # niente righe estranee: 4 direttive + 26 fissi + 2 variabili = 32.
   $attese = 4 + @($FissiAttesi.Keys).Count + @($DifferenzeAmmesse).Count
   if(@($h.Keys).Count -ne $attese){ throw ($pf + ": " + @($h.Keys).Count + " righe vive invece di " + $attese + ": c'e' una riga estranea o ne manca una.") }
-  return @{ Lettura=$lettura; Celle=$RigheAttese }
+  return @{ Lettura=$lettura; Celle=$celleAsse }
 }
 # IL GEMELLAGGIO A QUATTRO: le righe vive dei parametri (tutto tranne le
 # direttive) devono essere IDENTICHE nei quattro prova; le direttive
@@ -509,14 +562,23 @@ function GateGemelli($letture, $ammesse){
   return ("VALIDO: i " + @($chiavi).Count + " prova hanno il blocco dei parametri IDENTICO riga per riga; differenze DICHIARATE trovate: " + $d + " (piu' @SIMBOLO)")
 }
 
-# LEGGE UNA GAMBA (IS oppure OOS) DAL CSV OPTFRAME. Una riga sola, per
-# costruzione: la cella e' congelata e non c'e' nessuna griglia. Torna
-# $null se il file non c'e' o e' STANTIO (piu' vecchio dell'avvio della
-# corsa): un CSV vecchio letto come fresco e' il modo piu' rapido di
-# pubblicare i numeri di un'altra corsa.
-function LeggiGamba([string]$csv,[datetime]$tC,[string]$eti){
+# LEGGE UNA GAMBA (IS oppure OOS) DAL CSV OPTFRAME. DUE righe, per
+# costruzione (classe 134: l'asse tecnico su InpMagic a due celle e'
+# cio' che rimette MT5 in ottimizzazione vera e fa arrivare i frame).
+# Si RESTITUISCE la riga col magic DICHIARATO -- che e' anche la prova
+# che il pin del magic e' passato -- e si CONFRONTA con quella del
+# magic OMBRA: stessi input, magic diverso, devono coincidere.
+# Torna $null se il file non c'e', se e' vuoto, se e' STANTIO (piu'
+# vecchio dell'avvio della corsa: un CSV vecchio letto come fresco e'
+# il modo piu' rapido di pubblicare i numeri di un'altra corsa) o se la
+# riga col magic dichiarato non c'e'.
+function LeggiGamba([string]$csv,[datetime]$tC,[string]$eti,[string]$magicAtteso){
   if(-not (Test-Path -LiteralPath $csv)){
     [void]$Problemi.Add("CSV " + $eti + " NON prodotto: " + $csv + " (storico mancante sulla gamba o sul metro " + $METRO + "? MT5 gia' aperto? compilazione? RAM esaurita a tick reali?)")
+    return($null)
+  }
+  if((Get-Item -LiteralPath $csv).Length -eq 0){
+    [void]$Problemi.Add("CSV " + $eti + " DA ZERO BYTE (classe 134): il file c'e' ma non ha nemmeno l'intestazione. E' la firma esatta del 05/09: OnTesterDeinit ha aperto il file, FrameNext non ha trovato NESSUN frame, quindi MT5 non ha eseguito NESSUNA passata. Causa n.1: l'asse tecnico " + $ASSE_TECNICO + " non e' arrivato all'.ini (Optimization=1 senza nessun parametro ottimizzabile). Causa n.2: la cache del tester ha ripescato le passate senza rieseguire OnTester.")
     return($null)
   }
   $itm = Get-Item -LiteralPath $csv
@@ -527,7 +589,7 @@ function LeggiGamba([string]$csv,[datetime]$tC,[string]$eti){
   $lin = @(Get-Content -LiteralPath $csv | Where-Object { $_.Trim() -ne "" })
   $nR = $lin.Count - 1
   if($nR -ne $RigheAttese){
-    [void]$Problemi.Add("" + $nR + " righe nel CSV " + $eti + ", " + $RigheAttese + " attesa (cache del tester? un asse rimasto acceso? passata morta a OnInit?).")
+    [void]$Problemi.Add("" + $nR + " righe nel CSV " + $eti + ", " + $RigheAttese + " attese (l'asse tecnico " + $ASSE_TECNICO + " ha 2 celle: magic dichiarato + magic ombra). Se sono ZERO o meno: nessuna passata eseguita, e' la classe 134. Se sono di piu': cache del tester, o un secondo asse rimasto acceso. Se e' UNA: una delle due passate e' morta a OnInit.")
     if($nR -le 0){ return($null) }
   }
   $head = $lin[0] -split ','
@@ -568,14 +630,62 @@ function LeggiGamba([string]$csv,[datetime]$tC,[string]$eti){
     return($null)
   }
   if($head.Count -lt ($NSTATS_ATTESI + 3)){ [void]$Problemi.Add("CSV " + $eti + ": header con " + $head.Count + " colonne, attese almeno " + ($NSTATS_ATTESI + 3) + ".") }
-  $c = $lin[1] -split ','
-  $g = @{}
-  foreach($cn in $servono){
-    if($ix[$cn] -ge $c.Count){ [void]$Problemi.Add("CSV " + $eti + ": la riga dei dati ha meno colonne dell'header."); return($null) }
-    $g[$cn] = Num $c[$ix[$cn]]
+  #--- SI LEGGONO TUTTE le righe dei dati, poi si SCEGLIE quella col
+  #    magic DICHIARATO. Prendere ciecamente la prima (com'era prima
+  #    dell'asse tecnico) vorrebbe dire pubblicare, mezze volte su due,
+  #    i numeri della passata OMBRA spacciandoli per quelli della corsa.
+  $tutte = New-Object System.Collections.ArrayList
+  for($ir=1; $ir -lt $lin.Count; $ir++){
+    $c = $lin[$ir] -split ','
+    $g = @{}
+    $monca = $false
+    foreach($cn in $servono){
+      if($ix[$cn] -ge $c.Count){ $monca = $true; break }
+      $g[$cn] = Num $c[$ix[$cn]]
+    }
+    if($monca){ [void]$Problemi.Add("CSV " + $eti + ": la riga dei dati n." + $ir + " ha meno colonne dell'header."); return($null) }
+    $g["_etichetta"] = $eti
+    [void]$tutte.Add($g)
   }
-  $g["_etichetta"] = $eti
-  return($g)
+  if($tutte.Count -eq 0){ return($null) }
+  #--- LA RIGA DELLA MISURA: quella col magic dichiarato. Se non c'e',
+  #    il pin del magic NON e' passato e i numeri sono di un'altra
+  #    configurazione (errore n.3 della checklist: MT5 ignora in
+  #    silenzio un input che non riconosce).
+  $mia = $null
+  if($magicAtteso -ne ""){
+    foreach($g in $tutte){ if([math]::Abs($g["Magic"] - [double]$magicAtteso) -lt 0.5){ $mia = $g; break } }
+    if($null -eq $mia){
+      $visti = (@($tutte | ForEach-Object { FmtN $_["Magic"] }) -join ", ")
+      [void]$Problemi.Add("CSV " + $eti + ": NESSUNA riga col magic dichiarato " + $magicAtteso + " (nel CSV ci sono: " + $visti + "). IL PIN DEL MAGIC NON E' PASSATO: questi numeri non sono di questa corsa.")
+      return($null)
+    }
+  }
+  else{ $mia = $tutte[0] }
+  #--- IL GEMELLO INTERNO, gratis: la seconda passata ha gli STESSI
+  #    input e solo il magic diverso, quindi DEVE venire identica. Se
+  #    diverge, il banco non e' deterministico e nessun numero di
+  #    questa corsa vale -- e si scopre QUI, dentro la corsa, senza
+  #    aspettare il prova gemello.
+  if($tutte.Count -ge 2){
+    $altra = $null
+    foreach($g in $tutte){ if(-not [Object]::ReferenceEquals($g,$mia)){ $altra = $g; break } }
+    if($null -ne $altra){
+      $sc = New-Object System.Collections.ArrayList
+      foreach($k in @("Segnali Grezzi Long","Segnali Grezzi Short","Operazioni Totali","Uscite Convergenza","Uscite Stop")){
+        if([math]::Abs($mia[$k] - $altra[$k]) -gt 0.5){ [void]$sc.Add($k + " " + (FmtN $mia[$k]) + " vs " + (FmtN $altra[$k])) }
+      }
+      foreach($k in @("Profitto Netto","Profit Factor","Equity Dd Pct","Aspettativa In R")){
+        if([math]::Abs($mia[$k] - $altra[$k]) -gt 0.011){ [void]$sc.Add($k + " " + (Fmt3 $mia[$k]) + " vs " + (Fmt3 $altra[$k])) }
+      }
+      if($sc.Count -eq 0){ $script:GemelloInterno[$eti] = "IDENTICHE: magic " + (FmtN $mia["Magic"]) + " e magic OMBRA " + (FmtN $altra["Magic"]) + " coincidono su 9 grandezze su 9 (5 conteggi esatti + 4 numeri economici a 0,01)." }
+      else{
+        $script:GemelloInterno[$eti] = "DIVERGONO: " + ($sc -join "; ") + " (magic " + (FmtN $mia["Magic"]) + " vs OMBRA " + (FmtN $altra["Magic"]) + ")."
+        [void]$Problemi.Add("GEMELLO INTERNO DIVERGENTE su " + $eti + ": " + ($sc -join "; ") + ". Sono DUE PASSATE DELLA STESSA CORSA con gli stessi input e solo il magic diverso: devono venire identiche al centesimo. Il banco e' sporco e NESSUN numero di questa corsa si legge.")
+      }
+    }
+  }
+  return($mia)
 }
 
 # I COLLAUDI DI SANITA', su UNA gamba. Se cade uno solo, il round non
@@ -727,7 +837,7 @@ try{
   Dico ("pin ......... " + $Pin)
   Dico ("prova ....... " + $Prova + " = " + $FileProva + " | gamba " + $Simbolo + " " + $Periodo + " | metro " + $METRO + " (si legge, non si scambia)")
   Dico ("finestra .... " + $DaQuando + " -> " + $Fino + " (UNA TRANCHE, FrazioneIS " + $FrazioneIS + ")")
-  Dico ("banco ....... MODELLO 4 (OGNI TICK, TICK REALI), UNA passata (cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + "), split IS/OOS " + $FrazioneIS + ". Deposito " + $Deposito + ". RUOLO DI QUESTA CORSA: " + $corsa.Ruolo)
+  Dico ("banco ....... MODELLO 4 (OGNI TICK, TICK REALI), " + $RigheAttese + " passate per finestra, ECONOMICAMENTE IDENTICHE (asse tecnico su " + $ASSE_TECNICO + ", classe 134; cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + "), split IS/OOS " + $FrazioneIS + ". Deposito " + $Deposito + ". RUOLO DI QUESTA CORSA: " + $corsa.Ruolo)
   Dico ("regola ...... NESSUNA GRIGLIA, NESSUNA SELEZIONE: la cella e' congelata. IS e OOS sono DUE CAMPIONI della STESSA configurazione, non una scelta e una validazione. UN SOLO REGIME: da questo round NON esce una sedia.") "Yellow"
 
   #--- IL GATE CHE MANCAVA (difetto trovato in review il 04/09). Una
@@ -762,16 +872,20 @@ try{
   Scarica ($RawPin + "/backtest_pipeline/walkforward_generico.ps1") $drv
   $t = Get-Content -LiteralPath $drv -Raw
   if($t -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw 'walkforward_generico.ps1 non ha la riga $EABranch = "lavoro" attesa: non lo posso pinnare (il pin varrebbe per il driver e NON per la sonda misurata).' }
-  # CLASSE 133: questo round e' a CELLA CONGELATA (zero assi Y) e il
-  # generico, nato per le GRIGLIE, lo BLOCCA con "nessun parametro da
-  # spazzolare" prima ancora di scrivere l'anteprima .ini. Serve
-  # -PermettiCellaSingola, che esiste solo dal 05/09/2026: se il pin
-  # punta a un generico PIU' VECCHIO, PowerShell muore su un parametro
-  # sconosciuto e il messaggio non dice niente di utile. Meglio qui,
-  # con il nome della causa.
-  if($t -notmatch '\[switch\]\$PermettiCellaSingola'){ throw 'il walkforward_generico.ps1 di questo pin NON ha -PermettiCellaSingola: e'' un generico ANTERIORE al 05/09/2026, e su un round a cella congelata si ferma su "nessun parametro da spazzolare" (classe 133). Serve un pin che contenga il fix.' }
-  $CellaSingolaTxt = "generico DEL PIN con -PermettiCellaSingola (gate passato), e la riga glielo passa: e' cio' che rende ESEGUIBILE un round a cella congelata. Senza, il generico esce con codice 1 PRIMA dell'anteprima .ini (classe 133)."
-  Dico "gate classe 133: il generico del pin ha -PermettiCellaSingola" "Green"
+  # CLASSE 134 (v5). La v4 passava al generico -PermettiCellaSingola per
+  # far girare un round a ZERO assi Y. Il generico non si fermava piu' e
+  # MT5 partiva, ma con Optimization=1 e NESSUN parametro ottimizzabile
+  # il tester esegue ZERO passate: OnTester non gira mai, FrameAdd non
+  # manda niente, e OnTesterDeinit scrive un file da 0 BYTE. MISURATO il
+  # 05/09 su D30_PORTO. Da qui in avanti il round ha un ASSE TECNICO
+  # VERO (InpMagic, 2 celle), quindi il controllo del generico passa da
+  # solo e -PermettiCellaSingola NON SI PASSA PIU'.
+  # Il gate che resta e' sul GENERICO GIUSTO, non su quel flag: si
+  # pretende che scriva Optimization=1 (e' quello che fa arrivare i
+  # frame) e che abbia il conteggio delle celle.
+  if($t -notmatch '(?m)^Optimization=1\s*$'){ throw 'il walkforward_generico.ps1 di questo pin non scrive Optimization=1 nell''.ini: senza ottimizzazione ABTG_Relativo non emette NESSUN frame e i CSV escono vuoti (classe 134).' }
+  $CellaSingolaTxt = "ASSE TECNICO su " + $ASSE_TECNICO + " a " + $RigheAttese + " celle (classe 134). NON e' una griglia e non seleziona niente: il magic e' un'etichetta. Serve a rimettere MT5 in OTTIMIZZAZIONE VERA, perche' a zero assi Y il tester esegue ZERO passate e i CSV escono da 0 BYTE (MISURATO il 05/09 su D30_PORTO: generico uscito con codice 0 e due file vuoti). -PermettiCellaSingola NON viene piu' passato: con un asse vero non serve."
+  Dico ("classe 134: asse tecnico " + $ASSE_TECNICO + " a " + $RigheAttese + " celle, -PermettiCellaSingola NON passato") "Green"
   $t = $t -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
   Set-Content -LiteralPath $drv -Value $t -Encoding ASCII
   Dico "driver generico scaricato e PINNATO (riscarica la sonda al pin, non dalla punta del branch)" "Green"
@@ -865,7 +979,7 @@ try{
   # -------------------------------------------------------------------
   #  3. I GATE SUI PROVA -- girano PRIMA di aprire MT5
   # -------------------------------------------------------------------
-  Titolo "3. GATE SUI SEI PROVA (direttive nude + input nei due versi + ZERO assi + fissi + magic e modo sonda + gemellaggio a SEI)"
+  Titolo "3. GATE SUI SEI PROVA (direttive nude + input nei due versi + UN SOLO asse TECNICO + fissi + magic e modo sonda + gemellaggio a SEI)"
   $letture = [ordered]@{}
   foreach($k in @($CORSE.Keys)){
     #--- il TF atteso si legge dalla TABELLA (campo Periodo), non da una
@@ -873,9 +987,9 @@ try{
     #    sono due posti che possono divergere.
     $esito = GateProva (Join-Path $Prove $CORSE[$k].File) $CORSE[$k].File $CORSE[$k].Simbolo $CORSE[$k].Periodo $inputEA $CORSE[$k].Magic $CORSE[$k].Sonda
     $letture[$k] = $esito.Lettura.Mappa
-    if($k -eq $Prova){ $CelleTxt = "" + $esito.Celle + " passata (NESSUNA GRIGLIA: cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ", zero assi Y nei prova)" }
+    if($k -eq $Prova){ $CelleTxt = "" + $esito.Celle + " passate per finestra (cella CONGELATA N=" + $ECO_N + " sigma=" + (Fmt2 $ECO_SIGMA) + ": NESSUNA GRIGLIA nel merito. Le due passate differiscono SOLO per il magic -- asse tecnico della classe 134 -- e devono venire IDENTICHE: e' il gemello interno)" }
   }
-  Dico ("gate per prova: 4 direttive nude, " + $INPUT_ATTESI + " input pinnati nome per nome nei DUE versi, ZERO assi, magic e modo sonda gattati uno per uno, " + $CelleTxt + ", nessuna riga estranea: PASSATI su " + @($CORSE.Keys).Count + "/" + @($CORSE.Keys).Count) "Green"
+  Dico ("gate per prova: 4 direttive nude, " + $INPUT_ATTESI + " input pinnati nome per nome nei DUE versi, UN SOLO asse (" + $ASSE_TECNICO + ", tecnico), magic e modo sonda gattati uno per uno, " + $CelleTxt + ", nessuna riga estranea: PASSATI su " + @($CORSE.Keys).Count + "/" + @($CORSE.Keys).Count) "Green"
   $GemelliTxt = GateGemelli $letture $DifferenzeAmmesse
   Dico ("gemellaggio: " + $GemelliTxt) "Green"
 
@@ -1041,12 +1155,12 @@ try{
             "-FrazioneIS",("" + $FrazioneIS),
             "-Modello","4",
             "-Rifai",
-            # CLASSE 133: senza questo, il generico (nato per le griglie)
-            # si ferma su "nessun parametro da spazzolare" e NON scrive
-            # nemmeno l'anteprima .ini. Qui la cella e' CONGELATA per
-            # costruzione e gli assi Y sono ZERO per gate del driver
-            # (GateProva): 1 cella x 2 finestre = 2 passate a corsa.
-            "-PermettiCellaSingola",
+            # CLASSE 134: NIENTE -PermettiCellaSingola. Il prova porta un
+            # ASSE TECNICO VERO (InpMagic a 2 celle), quindi lo sweep del
+            # generico non e' vuoto e il suo controllo passa da solo.
+            # 2 celle x 2 finestre = 4 passate a corsa, ECONOMICAMENTE
+            # IDENTICHE a due a due: la seconda e' il gemello interno, e
+            # il tester la distribuisce su un agente parallelo.
             "-Deposito",("" + $Deposito),
             "-Terminal",$TermExe,
             "-MetaEditor",$MeExe,
@@ -1081,8 +1195,8 @@ try{
     #    vorrebbe dire non trovare mai il CSV giusto.
     $csvIS  = Join-Path $Results ($EA + "_" + $Simbolo + "_IS_"  + $Prova + ".csv")
     $csvOOS = Join-Path $Results ($EA + "_" + $Simbolo + "_OOS_" + $Prova + ".csv")
-    $GambaIS  = LeggiGamba $csvIS  $tCorsa "IS"
-    $GambaOOS = LeggiGamba $csvOOS $tCorsa "OOS"
+    $GambaIS  = LeggiGamba $csvIS  $tCorsa "IS"  $corsa.Magic
+    $GambaOOS = LeggiGamba $csvOOS $tCorsa "OOS" $corsa.Magic
     $CollaudiKo = 0
     $CollaudiKo += CollaudiGamba $GambaIS  "IS"  $corsa.Ruolo
     $CollaudiKo += CollaudiGamba $GambaOOS "OOS" $corsa.Ruolo
@@ -1123,7 +1237,7 @@ try{
         # gemelli davano "PROBLEMI" falsi al 100%. Qui la guardia di
         # freschezza NON si applica: la data si DICHIARA nel referto.
         $itmG = Get-Item -LiteralPath $csvG
-        $gg = LeggiGamba $csvG ([DateTime]::MinValue) ("OOS gemello " + $corsa.Gemello)
+        $gg = LeggiGamba $csvG ([DateTime]::MinValue) ("OOS gemello " + $corsa.Gemello) $CORSE[$corsa.Gemello].Magic
         $EtaGemello = " (CSV del gemello scritto il " + $itmG.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ": DEVE essere della corsa precedente)"
         if($null -eq $gg){ $GemelloTxt = "NON CONFRONTABILE: il CSV del gemello esiste ma non e' leggibile (vedi PROBLEMI)." + $EtaGemello }
         else{
@@ -1223,7 +1337,9 @@ $R = New-Object System.Collections.ArrayList
 [void]$R.Add("gate HEDGE-SAFE: " + $GrepTxt)
 [void]$R.Add("include: " + $IncludeTxt)
 [void]$R.Add("passate: " + $CelleTxt)
-[void]$R.Add("cella singola (classe 133): " + $CellaSingolaTxt)
+[void]$R.Add("asse tecnico (classe 134): " + $CellaSingolaTxt)
+if(@($GemelloInterno.Keys).Count -eq 0){ [void]$R.Add("gemello INTERNO (le 2 passate della stessa corsa): NON VERIFICATO (nessun CSV letto)") }
+else{ foreach($kg in @($GemelloInterno.Keys)){ [void]$R.Add("gemello INTERNO [" + $kg + "]: " + $GemelloInterno[$kg]) } }
 [void]$R.Add("gemellaggio 6 prova: " + $GemelliTxt)
 [void]$R.Add("tetto barre: " + $TettoTxt)
 [void]$R.Add("cache tester: " + $CacheTxt)
@@ -1424,7 +1540,7 @@ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_RELATIVO_R117_" + $Prova + ".txt + COMPILAZIONE.log + il prova + DUE CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_" + $Prova + ".csv e _OOS_, " + $RigheAttese + " riga ciascuno, " + ($NSTATS_ATTESI + 3) + " colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
+if($Prova -ne ""){ Write-Host ("FILE ATTESI NELLO ZIP: REFERTO_RELATIVO_R117_" + $Prova + ".txt + COMPILAZIONE.log + il prova + DUE CSV OPTFRAME (" + $EA + "_" + $Simbolo + "_IS_" + $Prova + ".csv e _OOS_, " + $RigheAttese + " righe ciascuno -- magic dichiarato + magic OMBRA, classe 134 -- " + ($NSTATS_ATTESI + 3) + " colonne + gli input accodati dal tester). In CONTROLLO: solo referto + COMPILAZIONE.log + prova.") -ForegroundColor Gray }
 else{ Write-Host "FILE ATTESI NELLO ZIP: il solo REFERTO_RELATIVO_R117.txt (fermato prima di scegliere il prova)" -ForegroundColor Gray }
 Write-Host ("CSV *_OOS trovati: " + $nOos + " (atteso 1: e' la gamba su cui si leggono i cancelli di merito).") -ForegroundColor Gray
 
