@@ -7,6 +7,36 @@
 
 ---
 
+## 🗓️ AGGIORNAMENTO 05/09 — 💸 SPREADLOGGER PRONTO DA LANCIARE (il debito del 23/08, pagato)
+
+**Il *RealCost Spread P95 Logger* (Code Base 74148), promosso il 23/08 e citato da
+SETTE cacce senza mai essere usato, adesso e' codice nostro e ha le sue righe.**
+
+| artefatto | dove |
+|---|---|
+| **EA di SOLA LETTURA** (multi-simbolo, mediana+P95 per ORA SERVER, stato ripreso fra i riavvii) | `mql5/Experts/ABTG_SpreadLogger.mq5` v1.00 |
+| **driver installa+compila** (solo piccolo 50503392, CONTROLLO/CORSA, backup+ripristino) | `backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1` |
+| **driver raccolta** (non tocca il terminale, ricalcola e si CONTRADDICE con l'EA) | `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` |
+| **pagina di lancio** (3 blocchi + i passi a mano in MT5) | `backtest_pipeline/righe/RIGA_SPREADLOGGER_DA_MANDARE.md` |
+
+- **Pin verificato** `b314ec4ee2912d057e3be789d0a351bee3a8a0f6` (raw 200 + sha256
+  identico + `git ls-tree`), `Parser::ParseFile` 0 errori su tutti e due i driver
+  e sui 3 blocchi della pagina, `.ps1` **ASCII puro**.
+- 🔒 **Sola lettura per costruzione**: zero ordini, zero GlobalVariable, tre soli
+  file in `MQL5\Files`. La riga di lancio **conta 24 token vietati sul sorgente e
+  pretende 0** prima di installare.
+- ✅ **MT5 resta aperto** (come `RIGA_CHIUDISEDIE`): la flotta non si ferma.
+  **MetaEditor va chiuso.** Il **100k / -V3 non si tocca** (Fase 1).
+- 🛑 **L'unico gesto che puo' fare danno lo fa la mano, non il codice**:
+  l'EA va attaccato su un **GRAFICO NUOVO** — su un grafico che ha gia' un EA
+  lo **sostituirebbe**.
+- ⏳ **Finestra proposta**: collaudo il giorno dopo, prima lettura a **5 sedute**,
+  referto buono a **10** (due lunedi', due venerdi', due rollover).
+- ⚠️ **Non misura lo slippage**: quello e' T2 (*Round Trip Cost Reconciler*,
+  codice 76117), ancora da fare.
+
+---
+
 ## 🗓️ AGGIORNAMENTO 03/09 — LA GIORNATA PIU' DENSA: gemelli ORB risolti, LondonFx promosso+firmato (R116), spread misurato, migrazione Fase 1 avviata
 
 ### 🔫 MISTERO GEMELLI ORB — RISOLTO (dossier `report/ORB_GEMELLI_DIVERGENZA_2026-08-22.md`)
