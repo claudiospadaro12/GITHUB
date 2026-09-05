@@ -60,7 +60,7 @@ SETTE cacce senza mai essere usato, adesso e' codice nostro e ha le sue righe.**
   **eseguendo** i due driver su un banco che imita i file veri dell'EA, ha trovato
   che la RACCOLTA **non svuotava la cartella di lavoro** — un giro che non trovava
   il file di stato **rileggeva la copia del giro precedente** e stampava un referto
-  verde con i numeri di ieri intestati alla cartella di oggi (**classe 135**, nuova
+  verde con i numeri di ieri intestati alla cartella di oggi (**classe 136**, nuova
   in checklist). Corretto insieme a una **recidiva della classe 132** (stesso nome
   di referto nei due modi), all'`ESITO DEL GIRO` che diceva COMPLETATO con problemi
   in elenco e alla sentinella lasciata accesa dopo un ripristino già fatto.

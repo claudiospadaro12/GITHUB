@@ -8818,7 +8818,7 @@ impacchetta?* Se la risposta e' "il piu' recente che trova", la risposta e'
 
 ## 🆕 AGGIUNTA DEL 05/09/2026 (sera) — trovata dal **verificatore** sul pacchetto **SPREADLOGGER** (`RIGA_SPREADLOGGER.ps1` + `RIGA_SPREADLOGGER_RACCOLTA.ps1` + `ABTG_SpreadLogger.mq5` v1.00, pin `b314ec4e`), **ESEGUENDO la raccolta due volte di fila** su un banco che imita i file veri dell'EA. Il pacchetto era per il resto pulito (parse reale 0 errori, ASCII puro, cultura invariante ovunque, 36 casi di autotest contati nel sorgente uno per uno, 24 token vietati a zero, ripristino provato eseguendo). Una classe **nuova** (RIPRODOTTA) e una **recidiva della 132 a un giorno dalla sua stesura**.
 
-## 135. 🥫 LA **CARTELLA DI LAVORO CHE NON SI SVUOTA**: il giro di oggi rilegge la **copia di ieri** e la intesta alla fonte di **oggi** — referto completo, `PROBLEMI: 0`, uscita 0
+## 136. 🥫 LA **CARTELLA DI LAVORO CHE NON SI SVUOTA**: il giro di oggi rilegge la **copia di ieri** e la intesta alla fonte di **oggi** — referto completo, `PROBLEMI: 0`, uscita 0
 
 E' il rovescio esatto della **classe 106** (l'artefatto che **si svuota** a ogni
 corsa letto come registro cumulativo). Qui l'artefatto **non si svuota mai**, e
