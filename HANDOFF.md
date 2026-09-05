@@ -7,6 +7,59 @@
 
 ---
 
+## 🗓️ AGGIORNAMENTO 05/09 SERA — 🎯 **LO SLIPPAGE VERO SI MISURA: `ABTG_SlippageLogger` PRONTO** (conto REALE)
+
+**Perche':** BCM ha confermato che **il conto DEMO non simula lo slippage**.
+Il numero esiste **solo su un conto reale** ⇒ Claudio mette sul suo conto reale
+da **7.500 EUR** le due sedie piu' frequenti — **DAX Apertura EU (770101)** e
+**ORB Ottimizzato (770611)** — a rischio di casa **0,65%/trade** (~49 EUR a
+trade, rischio aperto massimo simultaneo ~1,3%), e ci affianca il logger.
+
+E' l'attrezzo **T2** promosso il 23/08 (`report/SWEEP_MECCANISMI_2026-08-23.md`,
+Code Base 76117) e mai costruito: la misura che `ABTG_SpreadLogger` dichiara
+esplicitamente di **non** fare.
+
+- **EA:** `mql5/Experts/ABTG_SlippageLogger.mq5` — **SOLA LETTURA**, piu' stretto
+  del gemello dello spread: nel sorgente **non esistono le strutture con cui in
+  MQL5 si compone un ordine** (quindi nemmeno `OnTradeTransaction`, la cui firma
+  le pretenderebbe), niente GlobalVariable, **non cancella e non sposta nessun
+  file**, non tocca il Market Watch. Autotest **9 blocchi / 101 casi**.
+- **Tre fonti** per il prezzo richiesto, tutte registrate: **C** commento del
+  server (`sl 24178.20`), **B** prezzo dell'ordine, **A** foto nostra di SL/TP
+  presa ogni secondo. Priorita' **C > B > A**, dichiarata. 🔥 **La spia che vale
+  da sola il referto:** se B coincide con l'eseguito su TUTTE le righe, quel
+  server non riporta il livello richiesto e una misura su B direbbe *"slippage
+  zero" su qualunque conto* — il referto lo scrive invece di stampare uno zero.
+- **Il numero di conto sta nel NOME dei file e in OGNI riga del registro**: un
+  registro del demo (dove lo slippage e' zero per costruzione) **non si puo'
+  mescolare** con uno del reale.
+- **Pagina:** `backtest_pipeline/righe/RIGA_SLIPPAGELOGGER_DA_MANDARE.md`
+  (marcatori `MARCATORE_RIGA_SLIPPAGELOGGER_v1` / `..._RACCOLTA_v1`).
+- 🔑 **SERVE UNA COSA DA CLAUDIO: il numero di login del conto REALE.** Non e'
+  scritto da nessuna parte nel repo e non si indovina. Va messo nelle righe al
+  posto di `SCRIVI_QUI_IL_NUMERO`, e in `InpLoginAtteso` quando si attacca l'EA.
+- 🛡️ **Guardia sul conto piu' severa del solito** (qui il capitale e' vero):
+  `-LoginAtteso` obbligatorio; **`50503392` e `50504263` vietati per sempre senza
+  manopola di sblocco**; una cartella che ha visto uno dei due e' **scartata anche
+  se contiene pure il conto atteso**; il login deve comparire nei log (180 gg);
+  e **seconda serratura dentro l'EA**, che si rifiuta di partire sul conto
+  sbagliato.
+- ✅ **Provato ESEGUENDO, non leggendo:** 101 casi dell'autotest portati su banco
+  a terra (0 rossi, compreso il caso vero di R109: stop a 21660,10 riempito a
+  21681,60 = **+21,5 punti indice avversi**); guardia provata su **4 finti
+  terminali in 9 casi**; raccolta provata su registro sintetico con **sintesi
+  sabotata** (beccata) e **registro inquinato da riga demo** (2 problemi alzati).
+  Trovata cosi' una cantonata mia: `$numero + " testo"` in PowerShell **non
+  concatena**, esplode — corretta.
+- ⚠️ **NON provato:** la **compilazione** (qui non c'e' MetaEditor). Il primo
+  `Result: 0 errors` arriva col referto della CORSA.
+- 🎯 **A cosa serve:** i criteri di costo dei round (C1/C2/S0) oggi **danno lo
+  slippage per zero**; e il **DD promesso** delle sedie nel censimento dei
+  contratti viene da backtest **senza slippage**. Con questa tabella diventa un
+  addendo **misurato**, per sedia e per motivo d'uscita.
+
+---
+
 ## 🗓️ AGGIORNAMENTO 05/09 SERA — 🔴 R117 RELATIVO: **LA CORSA VERA E' USCITA VUOTA** (classe 134), FIX APPLICATO
 
 **Cos'e' successo:** la prima corsa vera di R117 (`-Prova D30_PORTO`, tick reali)
