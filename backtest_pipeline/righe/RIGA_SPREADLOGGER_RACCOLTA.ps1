@@ -151,6 +151,22 @@ try{
   Write-Host "Questa riga NON scrive niente dentro il terminale: MT5 puo' restare aperto." -ForegroundColor Yellow
   if($Pin -ne "" -and $Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin, se lo passi, deve essere un commit di 40 caratteri esadecimali; ricevuto: " + $Pin) }
   New-Item -ItemType Directory -Force -Path $Work | Out-Null
+  # LA CARTELLA DI LAVORO SI SVUOTA A OGNI GIRO, PRIMA DI GUARDARE QUALUNQUE
+  # COSA. Senza questo, le copie lasciate da una raccolta PRECEDENTE restano
+  # li' e il giro dopo le rilegge come se fossero la misura di ADESSO: il
+  # referto scriverebbe "fonte: <cartella di oggi>" con i numeri di ieri,
+  # PROBLEMI 0 e uscita 0, mentre la riga FILE COPIATI dice "ASSENTE nel
+  # terminale" sessanta righe piu' sotto. RIPRODOTTO ESEGUENDO il 05/09.
+  $puliti = New-Object System.Collections.ArrayList
+  foreach($v in @("_stato.csv","_orario.csv","_REFERTO.txt","_stato.tmp")){
+    $vecchio = Join-Path $Work ($Prefisso + $v)
+    if(Test-Path -LiteralPath $vecchio){
+      Remove-Item -LiteralPath $vecchio -Force -ErrorAction SilentlyContinue
+      if(Test-Path -LiteralPath $vecchio){ throw ("non riesco a cancellare la copia vecchia " + $vecchio + ": mi fermo, perche' leggerla sarebbe una misura di un altro giro spacciata per questa.") }
+      [void]$puliti.Add($Prefisso + $v)
+    }
+  }
+  if($puliti.Count -gt 0){ [void]$Rilievi.Add("cartella di lavoro svuotata prima di cominciare: " + (@($puliti) -join ", ") + " venivano da una raccolta precedente e sono stati BUTTATI (i numeri di questo referto vengono solo dalla copia fatta adesso).") }
 
   # -------------------------------------------------------------------
   #  1. LA CARTELLA DATI -- stessa scelta per FATTI della riga gemella
@@ -263,14 +279,23 @@ try{
     $s = Join-Path $srcDir $n
     if(Test-Path -LiteralPath $s){
       $d = Join-Path $Work $n
-      Copy-Item -LiteralPath $s -Destination $d -Force
-      [void]$Copiati.Add($n + ": " + (Descrivi $s))
+      # un file che l'EA tiene aperto mentre salva (tipicamente il .tmp, che
+      # viene scritto senza condivisione) NON deve uccidere la raccolta: si
+      # dichiara e si va avanti.
+      try{
+        Copy-Item -LiteralPath $s -Destination $d -Force
+        [void]$Copiati.Add($n + ": " + (Descrivi $s))
+      }
+      catch{
+        [void]$Copiati.Add($n + ": PRESENTE nel terminale ma NON COPIABILE adesso (" + $_.Exception.Message + ")")
+        [void]$Rilievi.Add("non sono riuscito a copiare " + $n + ": probabilmente l'EA lo stava scrivendo proprio adesso. " + $_.Exception.Message)
+      }
     }
     else{ [void]$Copiati.Add($n + ": ASSENTE nel terminale") }
   }
   $statoLoc = Join-Path $Work ($Prefisso + "_stato.csv")
   if(-not (Test-Path -LiteralPath $statoLoc)){
-    throw ("NESSUN FILE DI STATO (" + (Join-Path $srcDir ($Prefisso + "_stato.csv")) + " non esiste). Le tre spiegazioni possibili, in ordine di probabilita': 1) l'EA non e' mai stato attaccato a un grafico, o e' stato attaccato su un ALTRO terminale; 2) e' attaccato da meno di InpSalvaSec secondi e non ha ancora salvato; 3) hai cambiato InpPrefissoFile e allora va passato -Prefisso.")
+    throw ("NESSUN FILE DI STATO USABILE (" + (Join-Path $srcDir ($Prefisso + "_stato.csv")) + "). Le tre spiegazioni possibili, in ordine di probabilita': 1) l'EA non e' mai stato attaccato a un grafico, o e' stato attaccato su un ALTRO terminale; 2) e' attaccato da meno di InpSalvaSec secondi e non ha ancora salvato; 3) hai cambiato InpPrefissoFile e allora va passato -Prefisso. Guarda anche la riga FILE COPIATI qui sotto: se dice NON COPIABILE, il file c'era ma era in scrittura -- rilancia fra qualche secondo.")
   }
 
   # -------------------------------------------------------------------
@@ -445,7 +470,14 @@ try{
       if($n -le 0){ [void]$r.Add("   >> " + $nome + ": nessun campione"); continue }
       $med = Percentile $bins $n 0.50
       $p95 = Percentile $bins $n 0.95
-      [void]$r.Add("   >> " + $nome + ": n=" + $n + " GG=" + $gg + "  mediana " + (Mostra $med $ppu 3) + " [" + $med.Bin + " punti MT5]  P95 " + (Mostra $p95 $ppu 3) + " [" + $p95.Bin + " punti MT5]  (" + $unita + ")")
+      # il numero grezzo fra parentesi quadre e' una MISURA: quando il
+      # percentile cade oltre il tetto non esiste nessun numero, e stamparne
+      # uno (il sentinella 10001) lo farebbe leggere come se fosse misurato.
+      $grezMed = "" + $med.Bin + " punti MT5"
+      $grezP95 = "" + $p95.Bin + " punti MT5"
+      if($med.Over){ $grezMed = "oltre il tetto, nessun numero" }
+      if($p95.Over){ $grezP95 = "oltre il tetto, nessun numero" }
+      [void]$r.Add("   >> " + $nome + ": n=" + $n + " GG=" + $gg + "  mediana " + (Mostra $med $ppu 3) + " [" + $grezMed + "]  P95 " + (Mostra $p95 $ppu 3) + " [" + $grezP95 + "]  (" + $unita + ")")
     }
     [void]$r.Add("")
   }

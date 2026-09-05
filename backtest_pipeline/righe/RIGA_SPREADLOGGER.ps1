@@ -627,7 +627,13 @@ try{
     [void]$Rilievi.Add("il login " + $CONTO_PICCOLO + " NON compare nei log degli ultimi 45 giorni della cartella scelta (" + $Piccolo.Percorso + "): la scelta si regge su bases\" + $BASE_BCM + " + assenza di tracce del 100k. Dichiarato.")
   }
   $Scelta = $Piccolo.Percorso
-  if($Piccolo.Origin -ne "" -and (Test-Path -LiteralPath (Join-Path $Piccolo.Origin "metaeditor64.exe"))){ $Inst = $Piccolo.Origin }
+  # origin.txt lo scrive il terminale, non noi: se dentro c'e' un disco che
+  # questa sessione non ha (installazione spostata, lettera diversa),
+  # Join-Path NON torna un percorso brutto, LANCIA -- ed e' la stessa
+  # guardia gia' messa sopra sul disco di sistema.
+  $MeOrigin = ""
+  if($Piccolo.Origin -ne ""){ try{ $MeOrigin = (Join-Path $Piccolo.Origin "metaeditor64.exe") }catch{ $MeOrigin = ""; [void]$Rilievi.Add("l'origin.txt della cartella scelta ('" + $Piccolo.Origin + "') non e' un percorso usabile da questa sessione: cerco metaeditor64.exe nella cartella dati.") } }
+  if($MeOrigin -ne "" -and (Test-Path -LiteralPath $MeOrigin)){ $Inst = $Piccolo.Origin }
   elseif($Piccolo.HaMe){ $Inst = $Piccolo.Percorso }
   else{ throw ("metaeditor64.exe dell'installazione del piccolo NON trovato (origin.txt: '" + $Piccolo.Origin + "'): senza il SUO compilatore non installo niente.") }
   if($Inst -like "*-V3*"){ throw ("l'installazione che l'origin.txt indica per il piccolo contiene -V3 (" + $Inst + "): contraddice il perimetro, mi fermo.") }
@@ -722,6 +728,10 @@ try{
         $Ripristino = (RipristinaDaBackup $BackupDir $Due) -join "; "
         [void]$Problemi.Add("compilazione con errori: " + $ResultTxt)
         $InstallTxt = "TENTATA E RIPRISTINATA"
+      # la SENTINELLA dice "un giro e' rimasto a meta'": appena il ripristino
+      # e' fatto non e' piu' vero, e lasciarla accesa farebbe aprire il giro
+      # DOPO con un PROBLEMA che non esiste (e un CONTROLLO non piu' pulito).
+      Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
       }
       else{
         $Compilato = "OK (" + $kb + " KB, " + (Get-Item -LiteralPath $DestEx5).Length + " byte, " + (Get-Item -LiteralPath $DestEx5).LastWriteTime.ToString("HH:mm:ss",$INV) + "), " + $ResultTxt
@@ -735,12 +745,20 @@ try{
       $Ripristino = (RipristinaDaBackup $BackupDir $Due) -join "; "
       [void]$Problemi.Add("MetaEditor muto: nessun log e nessun .ex5.")
       $InstallTxt = "TENTATA E RIPRISTINATA"
+      # la SENTINELLA dice "un giro e' rimasto a meta'": appena il ripristino
+      # e' fatto non e' piu' vero, e lasciarla accesa farebbe aprire il giro
+      # DOPO con un PROBLEMA che non esiste (e un CONTROLLO non piu' pulito).
+      Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
     }
     else{
       $Compilato = "FALLITA (" + $ResultTxt + ")"
       $Ripristino = (RipristinaDaBackup $BackupDir $Due) -join "; "
       [void]$Problemi.Add("compilazione fallita: nessun .ex5 fresco. " + $ResultTxt)
       $InstallTxt = "TENTATA E RIPRISTINATA"
+      # la SENTINELLA dice "un giro e' rimasto a meta'": appena il ripristino
+      # e' fatto non e' piu' vero, e lasciarla accesa farebbe aprire il giro
+      # DOPO con un PROBLEMA che non esiste (e un CONTROLLO non piu' pulito).
+      Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
     }
     Dico ("compilazione: " + $Compilato) "Yellow"
   }
@@ -799,7 +817,11 @@ try{
   elseif($vere -gt 0){ $V3Txt = "INVARIATO su " + $vere + " foto di file REALMENTE PRESENTI" }
   else{ $V3Txt = "NON MISURATO (nessun file vero da fotografare sotto le cartelle col 100k: la sua cartella dati sta sotto un profilo che questa sessione non legge). Il perimetro qui regge PER COSTRUZIONE -- questa riga scrive solo sotto la cartella scelta -- ma sul 100k non e' misurato, e non si regala un verde." }
 
-  $ReferTxt = Join-Path $Work "REFERTO_SPREADLOGGER_INSTALLA.txt"
+  # IL MODO STA NEL NOME DEL REFERTO, non solo in quello dello zip (classe
+  # 132): CONTROLLO e CORSA producono due referti che si somigliano riga per
+  # riga, e con lo stesso nome uno sovrascrive l'altro appena si scompattano
+  # i due zip nella stessa cartella.
+  $ReferTxt = Join-Path $Work ("REFERTO_SPREADLOGGER_INSTALLA_" + $Modo + ".txt")
   $r = New-Object System.Collections.ArrayList
   [void]$r.Add("=====================================================================")
   [void]$r.Add("  INSTALLAZIONE DI " + $EA + " v" + $VersioneAttesa + " -- logger dello spread vivo (SOLA LETTURA)")
@@ -808,7 +830,11 @@ try{
   # come un verde anche quando il giro si e' fermato al primo gate
   # (i due conteggi contano cose diverse -- classe 119/124).
   $esitoGiro = "COMPLETATO (nessun gate ha fermato il giro)"
+  # "arrivato in fondo" e "andato bene" sono due cose diverse: una
+  # compilazione fallita e ripristinata arriva in fondo. La riga in testa non
+  # deve leggersi verde quando sotto ci sono PROBLEMI.
   if($Fatale -ne ""){ $esitoGiro = "FERMATO da un gate: " + $Fatale }
+  if($Fatale -eq "" -and $Problemi.Count -gt 0){ $esitoGiro = "ARRIVATO IN FONDO MA CON " + $Problemi.Count + " PROBLEMI: leggi la riga INSTALLAZIONE e l'elenco PROBLEMI qui sotto PRIMA di attaccare l'EA" }
   [void]$r.Add("ESITO DEL GIRO: " + $esitoGiro)
   [void]$r.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (E' L'ORA DI AVVIO DI QUESTO GIRO, non l'ora attuale)")
   [void]$r.Add("modo: " + $Modo + "     macchina: " + $env:COMPUTERNAME + "     sessione: " + $env:USERNAME)
