@@ -835,22 +835,90 @@ if (-not $DataFolder) {
   } elseif ($contesti.Keys.Count -eq 1) {
     Riga ("  contesto unico che scrive [GUARDIAN]: " + ($contesti.Keys -join "") + " (spia coerente con UN SOLO Guardian; la prova resta P-2)") "Green"
   }
+  if (-not [double]::IsNaN($ultimaPausa)) {
+    if ($ultimaPausa -eq 4.00) { Riga ("  ULTIMA soglia di PAUSA dichiarata nel log: " + $ultimaPausa.ToString("0.00", $INV) + "% = configurazione firmata") "Green" }
+    else { Riga ("  ULTIMA soglia di PAUSA dichiarata nel log: " + $ultimaPausa.ToString("0.00", $INV) + "% -- NON e' il 4,0 firmato: il passo 1 del ripristino MANCA.") "Red" }
+  }
   if (-not [double]::IsNaN($ultimoCap)) {
-    if ($ultimoCap -eq 3.25) { Riga ("  ULTIMO cap dichiarato nel log: " + $ultimoCap.ToString("0.00", $INV) + "% = configurazione firmata") "Green" }
+    if ($ultimoCap -eq 3.25) { Riga ("  ULTIMO cap dichiarato nel log: " + $ultimoCap.ToString("0.00", $INV) + "% = configurazione firmata (in questa sessione non doveva cambiare, e infatti non e' cambiato)") "Green" }
     else { Riga ("  ULTIMO cap dichiarato nel log: " + $ultimoCap.ToString("0.00", $INV) + "% -- NON e' il 3,25 firmato: il 100k NON e' tornato a casa.") "Red" }
+  }
+  if ($capMosso) {
+    Riga "  ATTENZIONE: nella giornata il cap ha assunto un valore diverso da 3,25. La sessione 2 tocca SOLO" "Yellow"
+    Riga "  InpDailyPausePct: se il cap si e' mosso oggi, o e' rimasto un residuo della sessione 1, oppure e'" "Yellow"
+    Riga "  stato toccato il campo sbagliato. Va spiegato nel verbale prima di dare qualunque verdetto." "Yellow"
+  }
+
+  # ---------------------------------------------------------------
+  #  8-bis) IL LATCH DELLA PAUSA (rilievo R2 / rischio X7).
+  #
+  #  QUESTO E' IL CONTROLLO PIU' IMPORTANTE DELL'INTERA SESSIONE 2, e
+  #  non riguarda il criterio: riguarda il fatto che il 100k torni a
+  #  operare. La pausa NON si spegne rialzando la soglia. L'uscita e' a
+  #  due passi: 1) InpDailyPausePct=4.0, 2) cancellare le due GV da F3.
+  #  Se si fa il 2 PRIMA dell'1, il giro di timer successivo (1 s) le
+  #  riscrive e RISTAMPA la riga di accensione (SetPausa, Guardian riga
+  #  189: la riga esce solo alla PRIMA accensione, cioe' quando la GV
+  #  e' tornata a zero). Percio': UNA RIGA DI ACCENSIONE DELLA PAUSA
+  #  DOPO IL RITORNO A 4.00 = LE GV SONO STATE CANCELLATE TROPPO PRESTO
+  #  E LA PAUSA E' ANCORA ACCESA.
+  #
+  #  LIMITE DICHIARATO: questa riga NON puo' leggere le GlobalVariable
+  #  (stanno dentro il terminale). La PROVA che il latch e' spento e'
+  #  la corsa del canarino DOPO il passo 2, che stampa
+  #  "PAUSA B1 grezzo(ts>0)=NO". Qui c'e' l'indizio dai log; la misura
+  #  e' piu' sotto, nella sezione dei referti del canarino.
+  # ---------------------------------------------------------------
+  $oraAbbassata   = ""      # ultima riga soglie con pausa < 4.00
+  $oraRitorno     = ""      # prima riga soglie con pausa = 4.00 DOPO l'abbassamento
+  foreach ($s in $SOGLIE) { if ($s.Pausa -lt 4.00) { $oraAbbassata = $s.Ora } }
+  if ($oraAbbassata) {
+    foreach ($s in $SOGLIE) {
+      if ($s.Pausa -eq 4.00 -and $s.Ora -and ($s.Ora -gt $oraAbbassata) -and (-not $oraRitorno)) { $oraRitorno = $s.Ora }
+    }
+  }
+  $accensioni = @($RIGHE | Where-Object { Contiene $_ "* PAUSA NUOVI INGRESSI attiva:" })
+  $accensioniDopoRitorno = @()
+  if ($oraRitorno) {
+    $accensioniDopoRitorno = @($accensioni | Where-Object { $o = Ora-Riga $_; $o -and ($o -ge $oraRitorno) })
+  }
+  Riga ""
+  Riga "=== IL LATCH DELLA PAUSA: i due passi del ripristino, letti dai log ===" "Cyan"
+  Riga ("  soglia ABBASSATA (ultima riga con pausa < 4,00) : " + $(if ($oraAbbassata) { $oraAbbassata } else { "MAI in questo log" }))
+  Riga ("  soglia RIMESSA a 4,00 dopo l'abbassamento       : " + $(if ($oraRitorno) { $oraRitorno } else { "NON ANCORA" })) (@{$true="Green";$false="Yellow"}[[bool]$oraRitorno])
+  Riga ("  accensioni della pausa nel log della giornata   : " + $accensioni.Count)
+  foreach ($x in $accensioni) { Riga ("    " + (Ora-Riga $x) + "  " + $x.Trim()) "White" }
+  if ($oraAbbassata -and -not $oraRitorno) {
+    Riga "  PASSO 1 DEL RIPRISTINO NON ANCORA FATTO: la soglia e' ancora bassa. Se la sessione e' finita," "Red"
+    Riga "  il 100k resta in pausa fino al reset del giorno prop. Rimettere InpDailyPausePct=4.0, POI F3." "Red"
+  }
+  if ($accensioniDopoRitorno.Count -gt 0) {
+    Riga ("  *** ROSSO: " + $accensioniDopoRitorno.Count + " accensione/i della pausa DOPO il ritorno a 4,00. ***") "Red"
+    Riga "  Vuol dire che le due GlobalVariable sono state cancellate PRIMA di rialzare la soglia (ordine" "Red"
+    Riga "  invertito, rilievo R2): il Guardian le ha riscritte al giro di timer successivo e IL 100k E'" "Red"
+    Riga "  ANCORA IN PAUSA. Rifare l'uscita nell'ordine giusto: 1) soglia a 4.0, 2) F3." "Red"
+    foreach ($x in $accensioniDopoRitorno) { Riga ("    " + (Ora-Riga $x) + "  " + $x.Trim()) "Red" }
+  } elseif ($oraRitorno) {
+    Riga "  nessuna accensione della pausa dopo il ritorno a 4,00: coerente con un'uscita nell'ordine giusto." "Green"
+    Riga "  (La PROVA che le due GV sono sparite resta la corsa del canarino con PAUSA B1 grezzo=NO.)" "Gray"
   }
 
   # ---------------------------------------------------------------
   #  9) L'ULTIMA FOTO PERIODICA DEL GUARDIAN (eq=, ogni 300 s se
-  #     InpVerbose=true) e il MASSIMO di rischioAperto della giornata
+  #     InpVerbose=true): il MASSIMO di rischioAperto della giornata
+  #     E -- per questa sessione -- IL GATE DELLA GIORNATA IN PERDITA
   # ---------------------------------------------------------------
   Riga ""
-  Riga "=== RISCHIO APERTO letto dal Guardian (righe periodiche, ogni 300 s) ===" "Cyan"
+  Riga "=== FOTO PERIODICHE DEL GUARDIAN: perdita del giorno e rischio aperto ===" "Cyan"
   $maxRischio = [double]::NaN
+  $ultimoDayLoss = [double]::NaN
+  $maxDayLoss = [double]::NaN
   $ultimaEq = ""
   $ultimaEqOra = ""
+  $nPeriodiche = 0
   foreach ($r in $RIGHE) {
     if (-not (Contiene $r "rischioAperto=")) { continue }
+    $nPeriodiche++
     $ultimaEq = $r.Trim(); $ultimaEqOra = Ora-Riga $r
     $m = [regex]::Match($r, "rischioAperto=(-?[0-9.]+)%")
     if ($m.Success) {
@@ -859,24 +927,67 @@ if (-not $DataFolder) {
         if ([double]::IsNaN($maxRischio) -or $v -gt $maxRischio) { $maxRischio = $v }
       }
     }
+    # dayLoss e' POSITIVO quando la giornata e' IN PERDITA:
+    # dailyPct = 100*(saldo a inizio giornata - equity)/saldo iniziale
+    # (ABTG_Guardian.mq5 righe 366-369). Un numero NEGATIVO = giornata in UTILE.
+    $md = [regex]::Match($r, "dayLoss=(-?[0-9.]+)%")
+    if ($md.Success) {
+      $d = Num-Inv $md.Groups[1].Value
+      if (-not [double]::IsNaN($d)) {
+        $ultimoDayLoss = $d
+        if ([double]::IsNaN($maxDayLoss) -or $d -gt $maxDayLoss) { $maxDayLoss = $d }
+      }
+    }
   }
   if ($ultimaEq) {
-    Riga ("  ULTIMA riga periodica (" + $ultimaEqOra + "): " + $ultimaEq) "White"
+    Riga ("  righe periodiche lette: " + $nPeriodiche + "   ULTIMA (" + $ultimaEqOra + "): " + $ultimaEq) "White"
     if ([double]::IsNaN($maxRischio)) {
       Riga "  rischioAperto non estratto: formato inatteso." "Yellow"
     } else {
       Riga ("  MASSIMO rischioAperto della giornata: " + $maxRischio.ToString("0.00", $INV) + "%   (cancello di fase: <= 3,25%)") "White"
-      if ($maxRischio -le 0.0) {
-        Riga "  P-5: rischio aperto ZERO nell'ultima lettura -> IL CRITERIO 7 NON E' INNESCABILE ADESSO." "Yellow"
-        Riga "       Con riskPct=0 nessuna soglia positiva morde (Guardian riga 413), e 0 vuol dire 'cap spento'." "Yellow"
-        Riga "       Serve almeno UNA POSIZIONE APERTA CON SL: si sposta la sessione in una finestra buona." "Yellow"
-      }
     }
     Riga "  CAVEAT DA RIPETERE SEMPRE INSIEME AL NUMERO (R7): (a) campionamento ogni 300 s, i picchi" "Gray"
     Riga "  fra due campioni non si vedono; (b) il cap e' CIECO SUI PENDENTI (buco B6): e' un LIMITE INFERIORE." "Gray"
   } else {
     Riga "  nessuna riga periodica trovata: InpVerbose potrebbe essere false, oppure il Guardian non gira." "Yellow"
-    Riga "  Il rischio aperto lo dicono comunque il PANNELLO (screenshot P-5) e il referto del CANARINO." "Yellow"
+    Riga "  Perdita del giorno e rischio aperto li dicono comunque il PANNELLO (P-4/P-5) e il CANARINO." "Yellow"
+  }
+
+  # ---------------------------------------------------------------
+  #  9-bis) IL GATE DELLA SESSIONE 2: LA GIORNATA DEV'ESSERE IN PERDITA
+  #
+  #  Precondizione FISICA, non preferenza (ABTG_Guardian.mq5 riga 400):
+  #      if(InpDailyPausePct>0 && dailyPct>=InpDailyPausePct)
+  #  e InpDailyPausePct=0 significa "pausa spenta". Quindi non esiste
+  #  nessun valore della soglia che accenda la pausa se dailyPct<=0.
+  #  Se la giornata non e' in perdita, la prova SI RIMANDA: non e' un
+  #  difetto dell'enforcement, e' il criterio che non e' innescabile.
+  #
+  #  QUESTA E' UNA SPIA, NON IL NUMERO CHE DECIDE: dayLoss= e' campionato
+  #  ogni 300 s, quindi puo' essere vecchio di 5 minuti. Il numero che
+  #  decide e' il campo "Perdita oggi" del PANNELLO, che Claudio legge
+  #  ADESSO (prerequisito P-4).
+  # ---------------------------------------------------------------
+  Riga ""
+  Riga "=== GATE DELLA SESSIONE 2: la giornata e' in perdita? (criterio 5) ===" "Cyan"
+  if ([double]::IsNaN($ultimoDayLoss)) {
+    Riga "  dayLoss NON LETTO dai log (nessuna riga periodica, o formato inatteso)." "Yellow"
+    Riga "  GATE NON MISURATO A MACCHINA: decide il campo 'Perdita oggi' del pannello (P-4)." "Yellow"
+    Riga "  Se il pannello dice 'Perdita oggi' <= 0, LA SESSIONE SI RIMANDA: la pausa non e' innescabile." "Yellow"
+  } else {
+    Riga ("  ULTIMO dayLoss letto (" + $ultimaEqOra + "): " + $ultimoDayLoss.ToString("0.00", $INV) + "%   [positivo = giornata IN PERDITA]") "White"
+    Riga ("  MASSIMO dayLoss della giornata           : " + $maxDayLoss.ToString("0.00", $INV) + "%") "White"
+    if ($ultimoDayLoss -gt 0.0) {
+      Riga ("  GATE APERTO (spia): la giornata e' in perdita. Soglia suggerita per la prova: un valore") "Green"
+      Riga ("  POSITIVO e chiaramente SOTTO la perdita letta dal PANNELLO adesso (esempio: pannello -0,06% -> 0,03).") "Green"
+      Riga  "  Il perche' del 'chiaramente sotto': dailyPct si muove a ogni tick con l'equity; una soglia" "Gray"
+      Riga  "  incollata al valore letto puo' non mordere piu' un secondo dopo, e la prova sembrerebbe fallita." "Gray"
+    } else {
+      Riga ("  GATE CHIUSO (spia): dayLoss = " + $ultimoDayLoss.ToString("0.00", $INV) + "% <= 0 -> LA PAUSA NON E' INNESCABILE.") "Yellow"
+      Riga  "  NON E' UN FALLIMENTO DELL'ENFORCEMENT: e' la precondizione fisica del criterio 5 (Guardian riga 400)." "Yellow"
+      Riga  "  Si RIMANDA la sessione a una giornata in perdita, anche di una frazione (il 03/09 bastava -0,06%)." "Yellow"
+      Riga  "  Prima di rimandare, guarda il PANNELLO: il log e' vecchio fino a 5 minuti, il pannello e' di adesso." "Yellow"
+    }
   }
 
   # ---------------------------------------------------------------
@@ -898,7 +1009,8 @@ if (-not $DataFolder) {
     $P_canarino = "NESSUN REFERTO dopo le " + $daQuando.ToString("HH:mm:ss", $INV)
     Riga ("  nessun referto del canarino scritto dopo le " + $daQuando.ToString("HH:mm:ss", $INV) + " (ora locale VPS).") "Yellow"
     Riga "  Nel modo LETTURA PRIMA e' NORMALE (il canarino lo lanci tu dopo). Nella RACCOLTA FINALE" "Yellow"
-    Riga "  vuol dire che le corse del canarino non ci sono: la parte deterministica dei criteri 7/8 manca." "Yellow"
+    Riga "  vuol dire che le corse del canarino non ci sono: manca la parte deterministica del criterio 5" "Yellow"
+    Riga "  E manca la sola misura a macchina del criterio 6 (il confronto degli SL fra due corse)." "Yellow"
   } else {
     $P_canarino = $canFiles.Count.ToString() + " referti letti"
     $riass = New-Object System.Collections.ArrayList
@@ -910,6 +1022,11 @@ if (-not $DataFolder) {
       $capG = ""; $capC = ""; $vivoG = ""; $vivoC = ""; $pausaG = ""; $pausaC = ""
       $rilievi = "?"; $autotest = "?"; $rosso = 0; $fail = 0; $fuori = 0
       $timbroCap = ""; $secFa = ""
+      $accensPausa = ""; $scadenzaPausa = ""
+      # LE POSIZIONI DI QUESTA CORSA: e' il materiale del criterio 6.
+      # Il canarino stampa, per ogni posizione aperta:
+      #   [CANARINO]   pos #<ticket> magic=<n> <SIMBOLO> BUY|SELL vol=.. apert=.. corr=.. sl=<valore|NESSUNO> ...
+      $POS = @{}
       foreach ($l in $rr) {
         if ($l.Trim().Length -eq 0) { continue }
         if (-not $l.StartsWith("[CANARINO]")) { $fuori++ }
@@ -925,6 +1042,14 @@ if (-not $DataFolder) {
         if ($l -match "ESITO PER UN EA ADESSO: un ingresso sarebbe (PERMESSO|FERMATO)") { $esito = $Matches[1] }
         if ($l -match "scritto dal Guardian \(GV\.4\)\s*:\s*(-?[0-9.]+)%") { $gvRisk = $Matches[1] }
         if ($l -match "ultimo timbro (\d{4}\.\d{2}\.\d{2} \d{2}:\d{2}:\d{2}), cioe' (-?\d+) secondi fa") { $timbroCap = $Matches[1]; $secFa = $Matches[2] }
+        if ($l -match "dettaglio: accensione=(.+?)\s+scadenza=(.+?)\s+adesso=") { $accensPausa = $Matches[1]; $scadenzaPausa = $Matches[2] }
+        $mp = [regex]::Match($l, "pos #(\d+) magic=(-?\d+)\s+(\S+)\s+(BUY|SELL)\s+vol=([0-9.]+)\s+apert=([0-9.]+)\s+corr=([0-9.]+)\s+sl=(\S+)")
+        if ($mp.Success) {
+          $POS[$mp.Groups[1].Value] = [pscustomobject]@{
+            Ticket = $mp.Groups[1].Value; Magic = $mp.Groups[2].Value; Simbolo = $mp.Groups[3].Value
+            Lato = $mp.Groups[4].Value;   Vol = $mp.Groups[5].Value;   Apert = $mp.Groups[6].Value
+            Corr = $mp.Groups[7].Value;   SL = $mp.Groups[8].Value }
+        }
         if ($l -match "RILIEVI:\s*(\d+)") { $rilievi = $Matches[1] }
         if (Contiene $l "nessun rilievo") { $rilievi = "0" }
         if ($l -match "AUTOTEST:\s*(\d+) blocchi su (\d+) passati \(falliti (\d+), attesi (\d+)\)") { $autotest = $Matches[1] + "/" + $Matches[2] + " passati, falliti " + $Matches[3] + ", attesi " + $Matches[4] }
