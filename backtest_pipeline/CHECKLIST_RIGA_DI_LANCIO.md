@@ -9003,3 +9003,46 @@ primo giro — **classe 120**).
 > corsa gia' fatta resta valida e leggibile, e va riletta *senza* quei due
 > `PROBLEMI`. Al pin nuovo il referto deve dire `Autotest Falliti = 0` su
 > **20** blocchi.
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (notte, poco dopo) — trovata dal **verificatore di stringhe** RI-VERIFICANDO il fix della classe 137 (pin `c78a519`). Il fix e' **corretto, isolato e riprodotto** (diff limitato al `#property version` e al blocco 5 dell'autotest; bug e fix **rifatti girare in C++ fuori da MT5**: `a5_o` finale = **0**, non 2,5, con la forma vecchia; 0 falliti con la nuova; forma **identica** a quella della riga sorella `ABTG_SondaRelativo` blocco 6). La voce qui sotto **non e' un difetto del fix**: e' un difetto della **PAGINA** che il ri-pin si e' portato dietro.
+
+## 136-bis. 🧹 L'ISTRUZIONE DI PULIZIA CHE **CANCELLA UNA DIPENDENZA FRA CORSE** DICHIARATA DUE SCHERMATE PIU' SOPRA: la 136 al contrario
+
+La classe **136** dice *"la cartella di lavoro non si svuota e il giro di oggi
+rilegge la copia di ieri"*. Dopo un ri-pin la reazione naturale e' scrivere in
+pagina **"svuota la cartella di lavoro prima di ripartire"**, ed e' quello che
+la pagina R117 diceva — **senza dire QUANDO, e quindi una volta per corsa**.
+
+Ma in quel round la **workdir e' anche un canale fra corse**: i blocchi **5** e
+**7** (i *gemelli di determinismo*) confrontano a macchina il proprio CSV con
+quello della corsa **precedente**, che sta li' **per costruzione** — la pagina
+lo scrive lei stessa, testualmente: *"il confronto lo fa a macchina la seconda
+corsa della coppia (il CSV della prima e' gia' in workdir)"*.
+
+Svuotare fra il 4 e il 5 (o fra il 6 e il 7) **non fa fallire niente in rosso**:
+il driver declassa e scrive `NON CONFRONTABILE ORA … si confronta A MANO fra i
+due referti`. Cioe' **un gate firmato si spegne in giallo**, e per riaverlo a
+macchina bisogna **rifare la corsa precedente** — a tick reali, ore.
+
+> 🔎 **La regola.** Prima di scrivere in pagina *"svuota / cancella / riparti da
+> zero"*, chiedersi **chi altro legge quella cartella**. Se un blocco successivo
+> ci trova dentro il proprio termine di paragone, l'istruzione va **datata**
+> ("una volta sola, prima della prima corsa del pin nuovo") e va detto
+> **esplicitamente fra quali blocchi NON si fa**.
+>
+> ⚖️ **E il corollario che vale sempre:** una pulizia manuale non e' mai la
+> difesa primaria. Qui la difesa vera **esisteva gia' ed e' meccanica** — il
+> driver rifiuta come `STANTIO` ogni CSV scritto **prima dell'avvio** della
+> corsa e lo mette fra i `PROBLEMI`. **Quando la guardia automatica c'e', la
+> pulizia a mano e' cintura in piu': se la scrivi come se fosse l'unica difesa,
+> chi legge la esegue anche dove fa danno.**
+
+### Il secondo rilievo dello stesso giro (stessa pagina, stessa causa)
+
+La riga *"quale `pin:` deve dire il referto"* nominava come referto-trappola
+solo `371083bf…` (la corsa uscita a **0 byte**). Ma dopo il ri-pin il referto
+davvero pericoloso sul Desktop era quello del pin **`434e271…`**: una corsa
+**arrivata in fondo, verde, col porto passato e il gemello identico** — cioe'
+**esattamente il tipo di referto che si rimanda in chat in buona fede**
+(17/08). **Dopo un ri-pin, l'esempio di referto stantio da nominare e' quello
+BUONO del pin vecchio, non quello rotto**: il rotto si riconosce da solo.

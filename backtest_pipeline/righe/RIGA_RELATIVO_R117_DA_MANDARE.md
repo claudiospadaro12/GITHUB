@@ -201,6 +201,19 @@ avvio**, non quella di fine, apposta.
 > ⚠️ **Ma la cartella di lavoro va SVUOTATA prima di ripartire** (classi
 > **135** e **136**): gli artefatti del pin morto hanno **lo stesso nome** di
 > quelli buoni, e la raccolta "prende il più recente".
+>
+> 🔴 **E SI SVUOTA UNA VOLTA SOLA, PRIMA DEL BLOCCO 2 — MAI FRA IL 4 E IL 5,
+> MAI FRA IL 6 E IL 7** (rilievo del verificatore, 05/09 notte). Il confronto
+> **gemello di determinismo** dei blocchi 5 e 7 legge, **per costruzione**, il
+> CSV della corsa **precedente** rimasto in `%USERPROFILE%\abtg_relativo_r117`
+> (è scritto due schermate più sopra: *"il CSV della prima è già in workdir"*).
+> Se svuoti lì in mezzo, quel gate **non muore**, ma si **declassa**: il
+> referto scrive `NON CONFRONTABILE ORA … si confronta A MANO fra i due
+> referti`, e a tick reali rifare il blocco 4 costa ore. La rete di sicurezza
+> contro un CSV vecchio **c'è già ed è meccanica**: il driver rifiuta come
+> `STANTIO` qualunque CSV scritto **prima dell'avvio** di questa corsa, e lo
+> mette fra i `PROBLEMI`. Lo svuotamento è cintura in più, non bretelle al
+> posto della cintura.
 
 🔁 **RIPINNATA il 05/09/2026 sera**, e stavolta **dopo una corsa VERA fallita**,
 non dopo un giro a vuoto. Il pin `371083bf…` (v4) **girava**: il generico non si
@@ -627,8 +640,11 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ## 8️⃣ 📦 RACCOLTA FINALE — **un solo zip da mandare** (regola di casa delle righe di lancio)
 
 > 🔴 **INDURITO IN REVIEW (05/09, classe 135).** Sul Desktop **ci sono già** gli
-> zip della **corsa v4 fallita** di oggi: stesso nome, stesso schema, referto che
-> dice `PROBLEMI: 2 / -1 righe nel CSV`. La versione precedente di questo blocco
+> zip di **due** generazioni morte: la **v4** (`371083bf…`, referto
+> `PROBLEMI: 2 / -1 righe nel CSV`) e — più insidiosa — quella del pin
+> **`434e271…`**, una corsa `D30_PORTO` **arrivata in fondo e verde**, che però
+> porta il falso `Autotest Falliti = 1`. Stesso nome, stesso schema.
+> La versione precedente di questo blocco
 > prendeva **il più recente e basta**: se una delle sei corse non fosse arrivata
 > alla raccolta, avrebbe **impacchettato lo zip del pin vecchio** e l'avrebbe
 > stampato in verde come `TROVATO`. Adesso ogni zip candidato viene **aperto sul
@@ -667,12 +683,17 @@ input accodati dal tester).
 **Le righe da guardare per prime, in questo ordine:**
 
 0. 🕐 **`pin:` e `data:`, in cima al referto — PRIMA DI TUTTO IL RESTO.** `pin:`
-   deve dire **`c78a519257e3c5355c69029dfeb4d6fcfec017e1`**: se dice `371083bf…`
-   stai leggendo il referto della **corsa di stamattina, quella che è uscita a 0
-   byte**, e sotto non c'è nessuna misura. `data:` è l'**ora di AVVIO** (non di
-   fine) e dev'essere quella della corsa che hai appena lanciato. *(Il 17/08 due
-   referti stantii sono stati rimandati in chat in buona fede: qui il rischio è
-   concreto, perché gli zip della v4 sono ancora sul Desktop con lo stesso nome.)*
+   deve dire **`c78a519257e3c5355c69029dfeb4d6fcfec017e1`**, e **nient'altro**.
+   Sul Desktop ci sono **due** generazioni di referti che possono ingannare:
+   `371083bf…` (la corsa uscita a **0 byte**: sotto non c'è nessuna misura) e
+   🔴 **`434e271…` — quella è la più insidiosa**, perché è una corsa **arrivata
+   in fondo**, con collaudo del porto **passato** e gemello interno
+   **identico**: sembra buona, e infatti i suoi numeri economici lo sono — ma è
+   il referto che porta il falso `Autotest Falliti = 1` e **non è la corsa che
+   hai appena lanciato**. `data:` è l'**ora di AVVIO** (non di fine) e dev'essere
+   quella di adesso. *(Il 17/08 due referti stantii sono stati rimandati in chat
+   in buona fede: qui il rischio è concreto, perché gli zip vecchi sono ancora
+   sul Desktop con lo stesso nome.)*
 1. **`compilazione:`** — è un EA nuovo. Se è FALLITA, quello è il risultato.
 2. 🔴 **`gemello INTERNO`** (classe 134) — deve dire **`IDENTICHE`** per **IS** e
    per **OOS**. È la riga che prova che MT5 ha davvero **eseguito le passate**:
