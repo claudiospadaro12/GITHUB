@@ -165,11 +165,18 @@ try{
   if($env:APPDATA){ [void]$radici.Add((Join-Path $env:APPDATA "MetaQuotes\Terminal")) }
   $drive = $env:SystemDrive
   if(-not $drive){ $drive = "C:" }
-  try{
-    foreach($u in @(Get-ChildItem -LiteralPath (Join-Path $drive "Users") -Directory -ErrorAction SilentlyContinue)){
-      [void]$radici.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
-    }
-  }catch{}
+  # stessa guardia della riga gemella: Join-Path su un disco inesistente
+  # LANCIA, e una scansione facoltativa non puo' fermare la raccolta.
+  $driveOk = $false
+  try{ $driveOk = (Test-Path -LiteralPath ($drive + "\")) }catch{ $driveOk = $false }
+  if($driveOk){
+    try{
+      foreach($u in @(Get-ChildItem -LiteralPath (Join-Path $drive "Users") -Directory -ErrorAction SilentlyContinue)){
+        [void]$radici.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
+      }
+    }catch{}
+  }
+  else{ [void]$Rilievi.Add("il disco di sistema '" + $drive + "' non e' leggibile da questa sessione: scansione limitata a %APPDATA% e ai processi vivi. Dichiarato.") }
   foreach($rt in $radici){
     if(-not (Test-Path -LiteralPath $rt)){ continue }
     foreach($d in @(Get-ChildItem -LiteralPath $rt -Directory -ErrorAction SilentlyContinue)){
@@ -368,6 +375,7 @@ try{
   [void]$r.Add("  SPREAD VIVO -- RACCOLTA DEL " + $Avvio.ToString("yyyy-MM-dd HH:mm",$INV) + " (ora locale del PC)")
   [void]$r.Add("  fonte: " + $Prefisso + " sul terminale " + $Scelta)
   [void]$r.Add("=====================================================================")
+  [void]$r.Add("ESITO DELLA RACCOLTA    : letta e ricalcolata (se qui sotto compare '!!! FERMATO' il giro si e' interrotto e i numeri non ci sono)")
   [void]$r.Add("conto nel file di stato : " + $Meta["conto"] + " @ " + $Meta["server"])
   [void]$r.Add("primo campione (server) : " + $Meta["primo_campione"])
   [void]$r.Add($frescoTxt)

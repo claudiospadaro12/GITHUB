@@ -234,6 +234,10 @@ function FotoTxt($f){
 }
 function Confronta($a,$b){
   if($null -eq $a -or $null -eq $b){ return "NON CONFRONTABILE" }
+  # DUE ASSENZE NON SONO UNA PROVA (classe 117): un file che non c'era e
+  # non c'e' non si timbra INVARIATO, perche' quella parola in un referto
+  # vuol dire "l'ho guardato ed era uguale".
+  if(-not $a.Esiste -and -not $b.Esiste){ return "ASSENTE prima e dopo (niente da confrontare)" }
   if($a.Esiste -ne $b.Esiste -or $a.Len -ne $b.Len -or $a.Hash -ne $b.Hash){ return "CAMBIATO" }
   if($a.Ora -ne $b.Ora){ return "stessi byte, data diversa" }
   return "INVARIATO"
@@ -489,11 +493,19 @@ try{
   if($env:APPDATA){ [void]$radici.Add((Join-Path $env:APPDATA "MetaQuotes\Terminal")) }
   $drive = $env:SystemDrive
   if(-not $drive){ $drive = "C:" }
-  try{
-    foreach($u in @(Get-ChildItem -LiteralPath (Join-Path $drive "Users") -Directory -ErrorAction SilentlyContinue)){
-      [void]$radici.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
-    }
-  }catch{}
+  # IL DISCO SI VERIFICA PRIMA DI USARLO: Join-Path su un disco che non
+  # esiste NON torna un percorso brutto, LANCIA -- e una scansione che
+  # esplode qui fermerebbe tutta la riga per una cartella facoltativa.
+  $driveOk = $false
+  try{ $driveOk = (Test-Path -LiteralPath ($drive + "\")) }catch{ $driveOk = $false }
+  if(-not $driveOk){ [void]$Rilievi.Add("il disco di sistema '" + $drive + "' non e' leggibile da questa sessione: la scansione ha guardato solo %APPDATA% e i processi vivi. Dichiarato.") }
+  if($driveOk){
+    try{
+      foreach($u in @(Get-ChildItem -LiteralPath (Join-Path $drive "Users") -Directory -ErrorAction SilentlyContinue)){
+        [void]$radici.Add((Join-Path $u.FullName "AppData\Roaming\MetaQuotes\Terminal"))
+      }
+    }catch{}
+  }
   foreach($rt in $radici){
     if(-not (Test-Path -LiteralPath $rt)){ continue }
     foreach($d in @(Get-ChildItem -LiteralPath $rt -Directory -ErrorAction SilentlyContinue)){
@@ -503,7 +515,9 @@ try{
   }
   $paroleChiave = @("MT5","BCM","MetaTrader","MetaQuotes","Terminal")
   $radiciInst = New-Object System.Collections.ArrayList
-  foreach($ri in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, (Join-Path $drive "Program Files"), (Join-Path $drive "Program Files (x86)"))){
+  $radiciPF = @($env:ProgramFiles, ${env:ProgramFiles(x86)})
+  if($driveOk){ $radiciPF = $radiciPF + @((Join-Path $drive "Program Files"), (Join-Path $drive "Program Files (x86)")) }
+  foreach($ri in $radiciPF){
     if(-not $ri){ continue }
     if(-not (Test-Path -LiteralPath $ri)){ continue }
     $giaVisto = $false
@@ -790,6 +804,12 @@ try{
   [void]$r.Add("=====================================================================")
   [void]$r.Add("  INSTALLAZIONE DI " + $EA + " v" + $VersioneAttesa + " -- logger dello spread vivo (SOLA LETTURA)")
   [void]$r.Add("=====================================================================")
+  # L'ESITO STA IN TESTA, in una riga sola: "PROBLEMI: 0" da solo si legge
+  # come un verde anche quando il giro si e' fermato al primo gate
+  # (i due conteggi contano cose diverse -- classe 119/124).
+  $esitoGiro = "COMPLETATO (nessun gate ha fermato il giro)"
+  if($Fatale -ne ""){ $esitoGiro = "FERMATO da un gate: " + $Fatale }
+  [void]$r.Add("ESITO DEL GIRO: " + $esitoGiro)
   [void]$r.Add("data: " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + "   (E' L'ORA DI AVVIO DI QUESTO GIRO, non l'ora attuale)")
   [void]$r.Add("modo: " + $Modo + "     macchina: " + $env:COMPUTERNAME + "     sessione: " + $env:USERNAME)
   [void]$r.Add("pin : " + $Pin)
