@@ -53,9 +53,18 @@ SETTE cacce senza mai essere usato, adesso e' codice nostro e ha le sue righe.**
 | **driver raccolta** (non tocca il terminale, ricalcola e si CONTRADDICE con l'EA) | `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` |
 | **pagina di lancio** (3 blocchi + i passi a mano in MT5) | `backtest_pipeline/righe/RIGA_SPREADLOGGER_DA_MANDARE.md` |
 
-- **Pin verificato** `b314ec4ee2912d057e3be789d0a351bee3a8a0f6` (raw 200 + sha256
+- **Pin verificato** `41728ee14525c468d05c980780c3ad20976b997c` (raw 200 + sha256
   identico + `git ls-tree`), `Parser::ParseFile` 0 errori su tutti e due i driver
   e sui 3 blocchi della pagina, `.ps1` **ASCII puro**.
+- 🔁 **Ri-pinnato dopo la verifica del 05/09** (era `b314ec4e…`): il verificatore,
+  **eseguendo** i due driver su un banco che imita i file veri dell'EA, ha trovato
+  che la RACCOLTA **non svuotava la cartella di lavoro** — un giro che non trovava
+  il file di stato **rileggeva la copia del giro precedente** e stampava un referto
+  verde con i numeri di ieri intestati alla cartella di oggi (**classe 135**, nuova
+  in checklist). Corretto insieme a una **recidiva della classe 132** (stesso nome
+  di referto nei due modi), all'`ESITO DEL GIRO` che diceva COMPLETATO con problemi
+  in elenco e alla sentinella lasciata accesa dopo un ripristino già fatto.
+  **L'EA `.mq5` non è stato toccato** (stesso sha `b59c8bec…`).
 - 🔒 **Sola lettura per costruzione**: zero ordini, zero GlobalVariable, tre soli
   file in `MQL5\Files`. La riga di lancio **conta 24 token vietati sul sorgente e
   pretende 0** prima di installare.

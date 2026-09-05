@@ -27,7 +27,16 @@ tiene **mediana e P95 ora per ora (ora SERVER)**, accumulando per giorni.
 |---|---|
 | **Non apre, non modifica, non chiude nessuna posizione** | non c'è nessuna funzione di trading nel sorgente, e **la riga di lancio lo verifica** prima di installare: censimento di **24 token vietati** sulle righe di codice, deve dare **0** |
 | **Non tocca nessuna GlobalVariable** | il Guardian e gli EA vivi si parlano con quelle: qui non se ne legge e non se ne scrive nemmeno una, quindi **non c'è modo di interferire** |
-| **Non scrive fuori dai propri 3 file** | `ABTG_SpreadLogger_stato.csv`, `_orario.csv`, `_REFERTO.txt` in `MQL5\Files`. Nessun `.set`, nessun `.chr`, nessun `.ini` — e le righe lo **fotografano** prima e dopo |
+| **Non scrive nessun FILE fuori dai propri 3** | `ABTG_SpreadLogger_stato.csv`, `_orario.csv`, `_REFERTO.txt` in `MQL5\Files`. Nessun `.set`, nessun `.chr`, nessun `.ini` — e le righe lo **fotografano** prima e dopo |
+
+> ⚠️ **L'unica cosa che tocca fuori dai suoi file, detta perché è vera:** con
+> `InpAggiungiMarketWatch = true` (default) l'EA chiama `SymbolSelect` sui sette
+> simboli, cioè **li aggiunge alla finestra Market Watch se non ci sono**. Qui non
+> ne aggiunge nessuno (ci sono già tutti e sette: la flotta ci opera), ma il
+> permesso nel codice **c'è**, e va detto invece di promettere «non tocca niente».
+> Se vuoi **zero** tocchi al terminale: al momento di attaccarlo metti quell'input
+> su **false** — misura solo i simboli già selezionati, e quelli non selezionati
+> li marca `NON SELEZIONABILE` nel referto.
 
 E non serve nemmeno il **trading algoritmico attivo**: il campionamento è a
 timer, la spunta non c'entra.
@@ -58,7 +67,7 @@ misurato il 03/09: entrambi i `terminal64` girano sotto quell'utente).
 
 ---
 
-## 2. 📌 IL PIN — **`b314ec4ee2912d057e3be789d0a351bee3a8a0f6`** ✅ **INSERITO E VERIFICATO**
+## 2. 📌 IL PIN — **`41728ee14525c468d05c980780c3ad20976b997c`** ✅ **INSERITO E VERIFICATO**
 
 Commit di `lavoro`. **Verificato uno per uno via `raw` prima di scrivere questa
 pagina** (HTTP 200 + sha256 identico al repo + presente in `git ls-tree`):
@@ -66,11 +75,22 @@ pagina** (HTTP 200 + sha256 identico al repo + presente in `git ls-tree`):
 | file al pin | esito |
 |---|---|
 | `mql5/Experts/ABTG_SpreadLogger.mq5` | 200, identico (`b59c8bec…`, 51.703 byte), `#property version "1.00"`, **0 caratteri non-ASCII**, **0 token vietati** |
-| `backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1` | 200, identico (`8c95cbbf…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
-| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | 200, identico (`424780aa…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
+| `backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1` | 200, identico (`e2d5836a…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
+| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | 200, identico (`a38e8cd4…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
 
 Il pin è scritto **quattro volte** in questa pagina (qui e nei **tre** blocchi) ed
 è sempre **la stessa identica stringa da 40 hex**.
+
+> 🔁 **Perché il pin è cambiato** (era `b314ec4e…`): la verifica prima dell'invio
+> ha trovato — **eseguendo**, su un banco che imita i file veri dell'EA — che la
+> RACCOLTA **non svuotava la propria cartella di lavoro**. Un secondo giro che
+> **non trovava** il file di stato nel terminale rileggeva la copia del giro
+> precedente e stampava un referto **completo e verde**, `PROBLEMI: 0`, uscita 0,
+> intestato alla cartella dati di **oggi** con i numeri di **ieri**. Corretto
+> insieme ad altri cinque punti (referti con lo stesso nome nei due modi,
+> `ESITO DEL GIRO` verde con problemi in elenco, sentinella lasciata accesa dopo
+> un ripristino già fatto). L'EA **non è stato toccato**: è lo stesso file di
+> prima (`b59c8bec…`).
 
 ---
 
@@ -81,7 +101,7 @@ guardate, la cartella scelta col suo **criterio**, i gate sul sorgente e le foto
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='b314ec4ee2912d057e3be789d0a351bee3a8a0f6'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='41728ee14525c468d05c980780c3ad20976b997c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CONTROLLO; $rc=$LASTEXITCODE;
@@ -105,7 +125,7 @@ con **MetaEditor CHIUSO**. **MT5 resta aperto**: la flotta continua a lavorare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process metaeditor64 -EA SilentlyContinue){ throw 'METAEDITOR APERTO: chiudilo (MT5 puo'' restare aperto) e rilancia. Non ho scaricato e non ho toccato niente.' };
-    $pin='b314ec4ee2912d057e3be789d0a351bee3a8a0f6'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='41728ee14525c468d05c980780c3ad20976b997c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Modo CORSA; $rc=$LASTEXITCODE;
@@ -114,8 +134,15 @@ con **MetaEditor CHIUSO**. **MT5 resta aperto**: la flotta continua a lavorare.
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SPREADLOGGER_INSTALLA_CORSA_ DI ADESSO SUL DESKTOP: la riga non e'' arrivata alla raccolta. Mandami quello che vedi qui sopra, va bene uguale.' };
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): NON e'' un fallimento, fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'GIRO CON PROBLEMI: lo zip ESISTE lo stesso, mandalo. NON attaccare l''EA prima di aver letto la riga INSTALLAZIONE del referto.' -ForegroundColor Yellow };
-    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan }
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    $iv=[Globalization.CultureInfo]::InvariantCulture;
+    Write-Host ('NEL REFERTO la riga data: e'' l''ORA DI AVVIO di questo giro (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + ').') -ForegroundColor Gray }
 ```
+
+> 📄 **I due referti hanno nomi DIVERSI, apposta**: `REFERTO_SPREADLOGGER_INSTALLA_CONTROLLO.txt`
+> e `REFERTO_SPREADLOGGER_INSTALLA_CORSA.txt`. Si somigliano riga per riga: se
+> avessero lo stesso nome, scompattando i due zip nella stessa cartella uno
+> cancellerebbe l'altro in silenzio (checklist classe 132).
 
 ---
 
@@ -188,7 +215,7 @@ accumulare. Si può rilanciare tutte le volte che si vuole.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='b314ec4ee2912d057e3be789d0a351bee3a8a0f6'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='41728ee14525c468d05c980780c3ad20976b997c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
