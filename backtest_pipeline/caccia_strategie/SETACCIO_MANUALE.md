@@ -870,3 +870,43 @@ di un fattore ~27.
 > `fx-bizday` 01/09, _"even 1 basis point will destroy the profitability"_ ·
 > questa). **Direzione "oscillatore geometrico continuo ad altissima frequenza"
 > chiusa con un numero, prima di spenderci un round.**
+
+---
+
+## 📅 05/09/2026 — CACCIA DEDICATA **TF M30**: 5 meccanismi MISURATI, 5 sepolti, 2 sorgenti letti, 0 promossi
+
+Dossier completo: `caccia_strategie/CACCIA_TF_M30_2026-09-05.md`.
+Qui resta l'indice, perche' e' questo il file che il prossimo cacciatore grep-a.
+
+### I MECCANISMI (scartati su MISURA, non su lettura)
+
+| meccanismo | esito | il numero che lo uccide |
+|---|---|---|
+| **M27 · deriva a mezz'ora** (Knuteson arXiv:2010.01727) | 🔴 **SEPOLTO — ed esce dalla coda del 23/08** | `GRXEUR` **1.518 sedute** su 4 regimi, 28 mezz'ore: la **migliore** rende **1,63 punti indice** contro un cancello 3× spread di **4,95** = **0,33×**. `SPXUSD` 1.545 sedute: massimo `t = 2,65` sull'ultima mezz'ora, che e' **M13/Gao, gia' ⬛ con R98**. **Nessuna mezz'ora paga nemmeno UNO spread** |
+| **cross-asset INDICE × VALUTA della stessa area** (chiesto dal mandato) | 🔴 **SEPOLTO** | `FR40_EUR × EUR_USD`, stesso provider, **8.112 barre M30**: correlazione ritardata **−0,015** a 1 barra. Condizionamento: la cella migliore vale **+0,92 bp ≈ 0,05 punti indice** contro spread 1,65 (**fattore ~30**), e il win rate **peggiora** man mano che il segnale si rafforza (52,9 → 47,1 → 44,2 a 1/1,5/2 σ) = **monotonia rotta**. La letteratura lo diceva prima (Wagner, IREF 2020: a frequenza intraday la causalita' va **indice → valuta**) |
+| **reversione overnight→intraday, UNIVARIATA** (*Overnight-Intraday Reversal Everywhere*) | 🔴 **SEPOLTO** | DAX **1.513** coppie: monotonia **FALLITA**, long Q1+short Q5 = **−1,98 punti indice medi, −0,75 mediani** (in perdita **prima** dei costi). S&P **1.262** coppie: monotonia **FALLITA** e **segno rovesciato**. 👉 Il paper e' **CROSS-SEZIONALE su migliaia di titoli**; noi abbiamo 4 indici. Stessa obiezione con cui il 03/09 e' stato scartato **M12** |
+| **la stessa cosa in forma CROSS-SEZIONALE** | 🚨 **ARTEFATTO — LOOK-AHEAD, §4 rossa** | sembrava **+29,64 bp/giorno, t +8,49**. La "notte" dell'S&P finisce alle **15:30 CET di oggi** e **contiene la seduta europea di oggi**. Prove: la **sola coppia a stesso orario** (DAX vs ESTX50) e' **negativa in entrambe le direzioni**; l'ingresso ritardato **non** uccide l'effetto (quindi non e' prezzo stantio); l'univariata e' piatta. ✅ **`RELATIVO` NON e' esposto** (lavora solo nella sovrapposizione 14:30-22:00) |
+| **M25 · seduta USA di ieri → seduta EU di oggi, come MOTORE** | 🔴 **SEPOLTO sull'orizzonte GIORNALIERO** | tolto il gap (ingresso a +30 e +60 min dall'apertura): **monotonia FALLITA in entrambe le direzioni su 4 corse**, spread da **−2,49 a +2,43 bp**, `\|t\| ≤ 0,55`, su **2.532 giornate**. ⚠️ **NON** chiude il lead-lag intraday a 20-45 minuti, che resta ⬜ |
+
+### I SORGENTI LETTI RIGA PER RIGA — 2 su 2 scartati
+
+| id / slug | titolo | esito | la riga che lo prova |
+|---|---|---|---|
+| **tv `pjZmjlZB`** | `Prod_1st_NQ15HMADY` — *NQ HMA Midday Strategy* (QuantByBoji, **MPL 2.0**) | 🔴 **SCARTO** | riga 149 calcola `shortCondition`, riga 154 lo tiene **commentato**: **long-only nei fatti**, e la riga 180 `strategy.exit('long', from_entry='short')` punta a un ID **mai creato**. Piu': `strategy.entry('long', strategy.long, 1, …)` = **lotto fisso**; TP/SL `ta.atr(...)*mult/**0.25**` = **cablati sul tick del future NQ**; motore = **EMA200 + flip di canale** = doppione di `ABTG_EMA200` **e** della famiglia `SupertrendReversal`; righe 16-17 l'autore dichiara la **ri-ottimizzazione periodica**; e il nome interno dice **NQ15** = M15 |
+| **tv `fmPC9fWd`** | `OBS Volume Spike Reaction Fade [NQ]` (TurkishTraderUsa_, **MPL 2.0**) | 🔴 **SCARTO** | intestazione: _"Designed and tested on NQ futures, **1-minute chart**"_ (M1, gia' chiuso); `default_qty_type=strategy.fixed` = **lotto fisso**; tooltip `grpFib`: livelli statici _"**calibrated for NQ over Oct 2025 - Apr 2026**"_ = **sovradattamento dichiarato dall'autore**; motore = **fade dell'anomalo (M17, ⬛ due volte)** + gate di **compressione→espansione**, falsificata il 03/09 su 9.723 segnali. 🟢 **Ma una frase da tenere:** _"without Bar Magnifier the Strategy Tester **overstates** close-target results"_ — e' la nostra R57 scritta da un estraneo |
+
+### 🏷️ TAG TRADINGVIEW A RESA **ZERO** misurati oggi (da non riprovare)
+**`intermarket`** · **`timeofday`** — entrambi _"Nothing here, yet"_ col filtro `script_type=strategies`.
+
+### 🔬 IL RILIEVO DI METODO
+**`WebSearch` puo' restituire repository che NON esistono:** `algorembrant/QRAT2025`
+arriva con tanto di descrizione dettagliata e **`WebFetch` da' 404**.
+👉 **Uno snippet di ricerca non e' una verifica.** Prima volta misurata in questo progetto.
+
+### 🎯 LA CONSEGUENZA CHE ORIENTA LE PROSSIME CACCE M30
+**A M30 il costo non e' piu' il vincolo:** ATR M30 del DAX **25-40 punti** contro
+uno spread misurato di **1,65** → un take a 1,5R vale **23-36 volte lo spread**.
+Le morti di casa a M5/M15 sono in buona parte morti da **attrito**; a M30 quel muro
+non c'e'. 👉 **Il vincolo che resta e' l'EDGE**, e nei cinque meccanismi misurati
+non c'e' — non hanno fallito il cancello dello spread, hanno fallito **la
+monotonia**, tre volte su tre.
