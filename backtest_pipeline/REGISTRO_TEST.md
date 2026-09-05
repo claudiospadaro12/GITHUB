@@ -1322,3 +1322,113 @@ caccia dopo il PF<1 su 4 letture (ISM 15:00 EURUSD 0,76/0,79 · 13:30 USDJPY
   orizzonte — **Almeida-Goodhart-Payne, JFQA 1998, dati a 5 minuti, effetti nei
   15 minuti dopo il rilascio** — e' su `researchonline.lse.ac.uk`, **bloccato**:
   se un giorno si riapre la famiglia, **si parte da li'**.
+
+---
+
+### CACCIA DEDICATA AL TIMEFRAME M15 (05/09/2026) — 0 EA promossi, 4 lapidi, 1 LEGGE NUOVA
+
+Dossier completo: `caccia_strategie/CACCIA_TF_M15_2026-09-05.md`. Il resto sta
+li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi, nessun EA /
+preset / sedia / parametro di forward toccato.** Battuta parallela a quelle su
+M5 e M30 (agenti gemelli). Misurate 436.869 barre M15 su 3 strumenti
+(GRXEUR 2012-2018, SPXUSD 2012-2018, EURUSD Oanda 2013-2019), sempre col
+CONTROLLO A INGRESSI CASUALI.
+
+- 📏 **LEGGE NUOVA, E VALE PER TUTTE E TRE LE BATTUTE: SU M15 IL COSTO E' PIU'
+  GRANDE DEL CANCELLO H8.** Con SL = 1,2 ATR(14) su M15, **1R = 20,85 punti
+  DAX / 25,8 punti Dow [INFERITO] / 10,8 pip EURUSD**, e lo spread di casa vale
+  **0,082 / 0,078 / 0,095 R per operazione** — cioe' **piu' dell'intero cancello
+  H8 (0,075R)**. ➡️ **Un motore M15 deve misurare E LORDA >= 0,157R per
+  consegnare 0,075R netti.** Proposta di metodo (decide Claudio): **ogni passo 0
+  su M5/M15/M30 dichiara 1R IN PUNTI e IL COSTO IN R nella prima riga del
+  referto**, prima di qualunque win rate. Avrebbe risparmiato LondonFx (1R = 8
+  pip, costo 1,7-3,3x l'edge richiesto: numero scritto DOPO la promozione).
+- 🪦 **LAPIDE — M31 SALTO STATISTICO (Lee-Mykland, RFS 21(6) 2535-2563, 2008) su
+  M15: CHIUSO.** Era il meccanismo M31 della tassonomia del 03/09, **mai
+  toccato**, coi criteri J1-J5 congelati e mai misurati. Oggi misurato per
+  intero. **L'edge C'E'** (batte il controllo casuale in modo **monotono** su 3
+  strumenti e 6 soglie), ma **muore di aritmetica: la cella con l'edge non ha
+  campione, la cella col campione non ha edge.** DAX senza notizia:
+  2,0σ = **1,34 segn./gg/lato** ma E netta **−0,036R**; 4,5σ = E netta
+  **+0,104R** ma **0,10 segn./gg/lato = ~88 operazioni su tutto il banco tick
+  disponibile (pavimento indici 2024.09.26)**, cioe' **sotto n>=150: un round a
+  tick non sarebbe nemmeno LEGGIBILE**. E **nessuna cella passa S0** (take/spread
+  **1,93-2,28** contro il 2,5 che ha falsificato `ABTG_VwapRevert`).
+  **NON ritestare con altre soglie o altre geometrie** (regola della seconda
+  caccia): la contro-prova e' gia' fatta, vedi riga sotto.
+- 🔧 **CONTRO-PROVA CHE CHIUDE LA PORTA — "muore di edge o di costo?".**
+  Rigirando tutto con SL=TP=2,5 ATR e orizzonte 24 barre: DAX 4,0σ passa da
+  E=+0,1406R a **+0,0639R**, cioe' **0,169 ATR contro 0,160 ATR** di edge
+  assoluto. 🎯 **L'edge per segnale e' una QUANTITA' FISSA DI ATR (~0,16), non
+  un multiplo fisso di R**: allargando lo stop l'edge in R si diluisce
+  esattamente quanto il costo. **Nessuna geometria salva l'aritmetica.**
+- 🪦 **LAPIDE — IL FADE DEL SALTO: chiuso.** Perde contro il controllo casuale
+  in **9 celle su 9** (da −2,6 a −8,6 punti), RR da mediane 0,76-0,92 contro
+  1,09-1,32 della continuazione. ⚠️ Questo **contraddice l'ipotesi scritta il
+  03/09** nella tassonomia ("il salto senza notizia e' quello dove il rientro e'
+  piu' probabile"): sui nostri strumenti il salto **CONTINUA**. Letto, non scelto.
+- 🥇 **FATTO NUOVO E UTILE ANCHE FUORI DA QUESTO MOTORE: sugli INDICI l'edge sta
+  nei salti SENZA notizia, sul FOREX in quelli CON notizia.** SPXUSD 4,0σ:
+  senza notizia **55,7% contro 46,9% del caso (+8,8 punti, n=1.032)**, con
+  notizia **46,7% contro 47,6%**. EURUSD: l'opposto. ➡️ Sugli indici il salto da
+  calendario e' rumore gia' prezzato, il salto da flusso e' informazione.
+  Cancello J5 (>70% su notizia = e' `ABTG_PostNews` travestito) **PASSATO
+  larghissimo: 13,3%-41,3%**.
+- 🔬 **LA LEGGE DEL GATE (÷4-6, 31/08) CONFERMATA LA QUINTA VOLTA — e stavolta
+  come CURVA CONTINUA dentro UN SOLO motore, con UNA sola manopola.** DAX senza
+  notizia, da 2,0σ a 4,5σ: **frequenza ÷13,4** (1,34 → 0,10 segn./gg/lato) e
+  **edge ×4,0** (+0,047R → +0,186R), **monotono in entrambe le direzioni, zero
+  inversioni**. Non e' piu' un aneddoto su 4 EA diversi: e' una proprieta' del
+  mercato a 15 minuti.
+- 🕐 **CORREZIONE MISURATA AL `LEGGIMI` DELLE SONDE ESTERNE, e conta per ogni
+  sonda futura: gli indici histdata NON sono in EST fisso.** Il minuto a piu'
+  alta |variazione| media M1 **non si sposta fra inverno ed estate** (SPXUSD
+  09:30 e 15:59 in entrambe; GRXEUR 03:00 in entrambe) → sono in **ora di NEW
+  YORK CON ORA LEGALE**. ➡️ **ora file + 5 = ora server BCM tutto l'anno**, e il
+  collaudo passa contro due verita' di casa (DAX 08:00 server, USA 14:30 server).
+  I file **Oanda sono invece in UTC** (EURUSD picca 13:30 d'inverno e 12:30
+  d'estate = NFP). ⚠️ Per incrociare gli indici col calendario FF serve la
+  regola DST **americana**. Attrezzo nuovo: `sonda_orologio_fonte_esterna.py`.
+- 🪦 **DUE LAPIDI DA PAPER, metadati VERIFICATI con l'API arXiv** (non con la
+  pagina): (a) **arXiv 2608.21888**, Kitron & Wengrowicz, 22/08/2026,
+  _"Short-horizon mean reversion in cryptocurrency markets"_ — e' su **candele
+  da 15 minuti**, e chiude **M16 (Nagel) su M15**: sulle **187 azioni/ETF USA
+  liquidi AUC media 0,499 e solo il 2,7% significativo** = la reversione a 15'
+  **non esiste su strumenti liquidi**; dove esiste, _"the gross edge peaks near
+  1.3 bp per trade against a 5 bp round-trip cost"_ e _"not one of the 183
+  crypto pairs clears even the 5 bp maker band at any threshold"_.
+  (b) **arXiv 2607.09426**, Kim & Hansen, 16/07/2026, _"The Quarter-Hour
+  Effect"_ — predicibilita' ai confini del quarto d'ora (R2 OOS 3,37%) ma
+  **0,5 bp lordi = _"one tenth of a single standard-tier taker fee"_**, e
+  orizzonte **10 secondi** (sotto il nostro TF, e contro il paletto E9).
+- 🎯 **TRE CONFERME ESTERNE INDIPENDENTI, STESSA CONCLUSIONE DELLA MIA MISURA**:
+  2608.21888 (15 min, crypto+azioni), 2607.09426 (quarto d'ora, crypto futures)
+  e **2605.04004** (Mesfin, MNQ 5 min: _"a two-point round-trip transaction cost
+  eliminates this gross edge entirely in every case"_). **Sull'intraday breve
+  l'edge lordo esiste e il costo se lo mangia tutto: non e' un difetto della
+  nostra macchina, e' la struttura del timeframe.**
+- ❓ **LA DOMANDA DEL PROSSIMO PASSO NON E' "quale altro motore M15": e' "COME
+  SI ENTRA SENZA PAGARE LO SPREAD"** — la stessa rimasta aperta il 03/09
+  sull'orologio di Breedon, e adesso posta da **due meccanismi indipendenti**.
+  🥇 **La mossa piu' economica resta la stessa da sette cacce: misurare lo
+  spread VERO su D30EUR/U30USD/NASUSD nella fascia di lavoro** col *RealCost
+  Spread P95 Logger* (Code Base **74148**, promosso il 23/08 e **mai usato**).
+  Tutta la tabella dei costi poggia ancora su **spread di CONVENZIONE**: se il
+  DAX fosse a 1,0 invece di 1,7, la cella 4,0σ passerebbe da +0,059R a +0,088R
+  **e il verdetto cambierebbe**.
+- 🚧 **Buchi dichiarati:** **GitHub ricerca 429 con `Retry-After: 3600`** (⚠️ non
+  e' un 404: il pool GitHub di oggi NON e' stato guardato, vale la misura del
+  02/09); **`public.econ.duke.edu` EGRESS_BLOCKED** → il PDF di *"Intraday
+  Market Return Predictability Culled from the Factor Zoo"* (Bollerslev e
+  coautori) **non aperto**, ed e' il paper piu' vicino al nostro problema: se si
+  riapre il tema, si parte da li' e **serve che lo scarichi Claudio**;
+  **MQL5 Code Base** raggiungibile ma con **autori e date non leggibili** (lista
+  JS); **PDF di Lee-Mykland non aperto** (la soglia e' stata comunque spazzolata
+  a mano da 2,0σ a 4,5σ, quindi la costante degli autori e' irrilevante qui);
+  **nessun dato dopo il 2019-2020** (il regime 2024-2026 delle sedie NON e'
+  coperto); **`SPXUSD → U30USD` e' un riscalamento `[INFERITO]`**, la gamba DAX
+  invece e' diretta (GRXEUR = stessa scala di D30EUR).
+- 🔧 **CORREZIONE DI METODO agli atti (recidiva del 05/09):** per arXiv
+  2607.09426 il riassunto di `WebFetch` dava _"August 24, 2026"_ mentre **l'API
+  dice `2026-07-16`**. **Una risposta di WebFetch non e' una citazione: i
+  metadati si verificano con l'API.**
