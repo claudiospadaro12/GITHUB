@@ -611,7 +611,23 @@ function RaccogliLog(){
       if($script:LenPrima.ContainsKey($f.FullName)){ $da = [int64]$script:LenPrima[$f.FullName] }
       if($f.Length -le $da){ continue }
       $n++
-      foreach($l in (LeggiTesto $f.FullName)){
+      # SOLO la coda nuova (da $da in poi), MAI il file intero: senza il seek,
+      # un log gia' scritto da una corsa PRECEDENTE nello stesso giorno (stesso
+      # file 20260905.log) verrebbe riletto da capo, e le righe VECCHIE (con i
+      # loro eventuali problemi gia' superati) rientrerebbero come se fossero
+      # di QUESTA corsa. I log del tester sono UTF-16LE (LeggiTesto lo rileva
+      # dal BOM iniziale; qui il BOM non c'e' piu' perche' si legge da meta'
+      # file, quindi si forza Unicode, stessa codifica di CodaLogStorico sopra).
+      $nuovo = ""
+      try{
+        $daAllineato = $da
+        if($daAllineato % 2 -ne 0){ $daAllineato = $daAllineato - 1 }
+        $fs = New-Object System.IO.FileStream($f.FullName,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
+        if($daAllineato -gt 0){ [void]$fs.Seek($daAllineato,[System.IO.SeekOrigin]::Begin) }
+        $sr = New-Object System.IO.StreamReader($fs,[System.Text.Encoding]::Unicode,$false)
+        $nuovo = $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+      } catch { $nuovo = "" }
+      foreach($l in @($nuovo -split "`r`n|`n|`r")){
         if($l -match $pattern){ [void]$RigheLog.Add(($f.Name + ": " + $l.Trim())) }
       }
       try{ Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $Work ("log_" + $f.Name)) -Force -ErrorAction SilentlyContinue }catch{}

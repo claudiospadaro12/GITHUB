@@ -8029,3 +8029,72 @@ della concatenazione e' davvero una stringa.
 > (anche fuori dal contesto del driver intero), non solo farlo passare dal
 > parser: il parser non vede i tipi a runtime.
 
+## 128. 🕸️ `RaccogliLog` rilegge il file INTERO invece che solo la coda nuova:
+un rilancio nello stesso giorno RIPESCA le righe (e i problemi) della corsa
+PRECEDENTE, spacciandoli per problemi di quella di ADESSO
+
+Trovato confrontando due referti consecutivi di `RIGA_POSTNEWS_ISM.ps1`, stesso
+giorno: la seconda corsa (08:29-08:31, con 4 passate tutte pulite: calendario
+letto correttamente da tutti e 4 gli agenti, 0 casi falliti in autotest su
+tutte e 4) ha comunque stampato `PROBLEMI: 4`, con `CALENDARIO CIECO trovato 1
+volte` e `1 casi falliti` — **identici, orario compreso (08:16:xx), a quelli
+della corsa FALLITA di 13 minuti prima.** Le righe vecchie sono rientrate nel
+referto nuovo.
+
+**Causa**: `RaccogliLog` fotografa la LUNGHEZZA del file PRIMA della corsa
+(`$da`) per capire se e' cresciuto — questa parte funziona. Ma per leggerne il
+contenuto usa `LeggiTesto $f.FullName`, che **riapre il file da byte zero**,
+non da `$da`. Il file di log del giorno (`20260905.log`) e' lo STESSO per
+corse diverse lanciate nella stessa giornata (MT5 non lo ruota per invocazione
+del driver): la seconda corsa vede il file cresciuto (giusto: sono cresciute
+le SUE righe), ma legge anche tutto cio' che c'era GIA' scritto dalla corsa
+precedente, e lo filtra col pattern come se fosse tutto fresco.
+
+**Verificato scrivendo un file finto in due `run` successivi** (stessa
+tecnica di `CodaLogStorico`, la funzione GEMELLA poche righe sopra nello
+stesso file, che il seek ce l'ha gia' e non ha questo difetto):
+```
+--- Contenuto letto con SEEK (fix) ---
+[PostNews][NEWS] letto RUN2 riga C
+[PostNews][NEWS] letto RUN2 riga D
+--- Contenuto letto SENZA seek (bug attuale, rilegge tutto) ---
+[PostNews][NEWS] letto RUN1 riga A
+[PostNews][NEWS] letto RUN1 riga B
+[PostNews][NEWS] letto RUN2 riga C
+[PostNews][NEWS] letto RUN2 riga D
+```
+
+**Fix** (identico a `CodaLogStorico`: `FileStream`+`Seek($da)`+`StreamReader`
+con `Encoding.Unicode` forzato, perche' il BOM che dice a `LeggiTesto` quale
+codifica usare sta SOLO all'inizio del file e si perde leggendo da meta'):
+```powershell
+$daAllineato = $da
+if($daAllineato % 2 -ne 0){ $daAllineato = $daAllineato - 1 }   # UTF-16: offset sempre pari
+$fs = New-Object System.IO.FileStream($f.FullName,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::ReadWrite)
+if($daAllineato -gt 0){ [void]$fs.Seek($daAllineato,[System.IO.SeekOrigin]::Begin) }
+$sr = New-Object System.IO.StreamReader($fs,[System.Text.Encoding]::Unicode,$false)
+$nuovo = $sr.ReadToEnd(); $sr.Close(); $fs.Close()
+```
+
+**Censimento (bug PRE-ESISTENTE, non introdotto oggi — copiato da uno stampo
+comune)**: la funzione identica, difettosa, vive in `RIGA_R116_LONDONFX.ps1`
+(la sorgente originale) e in ogni driver che l'ha ereditata:
+`RIGA_DIAG_GBPUSD.ps1`, `RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1`,
+`RIGA_POSTNEWS_NFP.ps1`. **Sistemata oggi solo in**
+`RIGA_POSTNEWS_ISM.ps1`, `RIGA_POSTNEWS_1330.ps1`, `RIGA_POSTNEWS_NFP.ps1`
+(le tre attive in questo round) — **`RIGA_R116_LONDONFX.ps1`,
+`RIGA_DIAG_GBPUSD.ps1` e `RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1` restano
+DIFETTOSE**: chiunque le rilanci PIU' VOLTE nello stesso giorno rischia di
+vedersi ripresentare problemi gia' chiusi (o, peggio nel verso opposto, un
+conteggio "distinti" che sembra tornare perche' la stessa riga buona di un
+giro precedente si somma a quelle del giro nuovo). Va portato al prossimo
+tocco di ciascuno di questi file.
+
+> ✅ **REGOLA**: qualunque funzione che "fotografa la lunghezza PRIMA e legge
+> SOLO cio' che e' cresciuto DOPO" deve leggere DAL PUNTO fotografato
+> (seek/offset), MAI il file intero — anche se il controllo "e' cresciuto?"
+> e' corretto, un rilancio nello STESSO giorno sullo STESSO file di log rende
+> il difetto invisibile alla prima esecuzione e ATTIVO dalla seconda in poi.
+> Si scopre solo confrontando DUE referti consecutivi della STESSA riga, mai
+> guardandone uno solo.
+
