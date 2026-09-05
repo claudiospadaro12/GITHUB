@@ -615,18 +615,34 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 
 ## 8️⃣ 📦 RACCOLTA FINALE — **un solo zip da mandare** (regola di casa delle righe di lancio)
 
+> 🔴 **INDURITO IN REVIEW (05/09, classe 135).** Sul Desktop **ci sono già** gli
+> zip della **corsa v4 fallita** di oggi: stesso nome, stesso schema, referto che
+> dice `PROBLEMI: 2 / -1 righe nel CSV`. La versione precedente di questo blocco
+> prendeva **il più recente e basta**: se una delle sei corse non fosse arrivata
+> alla raccolta, avrebbe **impacchettato lo zip del pin vecchio** e l'avrebbe
+> stampato in verde come `TROVATO`. Adesso ogni zip candidato viene **aperto sul
+> referto della sua cartella** e accettato **solo se dentro c'è il pin `434e271`**:
+> uno zip del pin vecchio viene **scartato in rosso**, non spedito.
+
 ```powershell
 & { $ErrorActionPreference='Stop';
+    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4';
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $stamp=(Get-Date).ToString('yyyyMMdd_HHmm'); $out=Join-Path $d ('RELATIVO_R117_TUTTO_'+$stamp); New-Item -ItemType Directory -Force -Path $out | Out-Null;
-    $att=@('RELATIVO_R117_D30_PORTO_2*','RELATIVO_R117_NAS_PORTO_2*','RELATIVO_R117_D30_2*','RELATIVO_R117_D30_GEM_2*','RELATIVO_R117_NAS_2*','RELATIVO_R117_NAS_GEM_2*'); $trovati=0;
-    foreach($m in $att){ $c=@(Get-ChildItem (Join-Path $d ($m+'.zip')) -EA SilentlyContinue | Sort-Object LastWriteTime -Descending);
-      if($c.Count -gt 0){ Copy-Item $c[0].FullName -Destination $out -Force; $trovati++; Write-Host ('  TROVATO: '+$c[0].Name+'   ('+$c[0].LastWriteTime+')') -ForegroundColor Green }
-      else { Write-Host ('  MANCA:   '+$m+'.zip -- quella corsa non e'' arrivata alla raccolta') -ForegroundColor Red } }
-    $zip=$out+'.zip'; Remove-Item $zip -Force -EA SilentlyContinue; Compress-Archive -Path (Join-Path $out '*') -DestinationPath $zip -Force;
-    Write-Host ''; Write-Host ('ZIP DA MANDARE IN CHAT: '+$zip) -ForegroundColor Cyan;
-    Write-Host ('FILE ATTESI DENTRO: 6 zip di corsa. Trovati: '+$trovati+' su 6.') -ForegroundColor Gray;
-    if($trovati -lt 6){ Write-Host 'ATTENZIONE: mandalo lo stesso, ma dimmi quale corsa e'' mancata e cosa ha stampato.' -ForegroundColor Yellow } }
+    $att=@('RELATIVO_R117_D30_PORTO_2*','RELATIVO_R117_NAS_PORTO_2*','RELATIVO_R117_D30_2*','RELATIVO_R117_D30_GEM_2*','RELATIVO_R117_NAS_2*','RELATIVO_R117_NAS_GEM_2*'); $trovati=0; $scartati=0;
+    foreach($m in $att){ $c=@(Get-ChildItem (Join-Path $d ($m+'.zip')) -EA SilentlyContinue | Sort-Object LastWriteTime -Descending); $preso=$null;
+      foreach($z in $c){ $cart=Join-Path $d $z.BaseName; $ref=@(Get-ChildItem (Join-Path $cart 'REFERTO_RELATIVO_R117_*.txt') -EA SilentlyContinue);
+        if($ref.Count -eq 0){ Write-Host ('  SALTO:   '+$z.Name+'  -- niente cartella/referto accanto: il pin NON e'' verificabile') -ForegroundColor Yellow; $scartati++; continue };
+        if(Select-String -LiteralPath $ref[0].FullName -SimpleMatch -Pattern $pin -Quiet){ $preso=$z; break };
+        Write-Host ('  SCARTO:  '+$z.Name+'  -- e'' di un PIN VECCHIO (v4 o prima): quella corsa NON ha misurato niente') -ForegroundColor Red; $scartati++ };
+      if($preso){ Copy-Item $preso.FullName -Destination $out -Force; $trovati++; Write-Host ('  TROVATO: '+$preso.Name+'   ('+$preso.LastWriteTime+')   pin v5 VERIFICATO nel referto') -ForegroundColor Green }
+      else { Write-Host ('  MANCA:   '+$m+'.zip AL PIN NUOVO -- quella corsa non e'' arrivata alla raccolta, oppure c''e'' solo la sua versione vecchia') -ForegroundColor Red } };
+    Write-Host '';
+    if($trovati -eq 0){ Write-Host 'NESSUNO ZIP AL PIN NUOVO: non creo nessun archivio. Rilancia le corse dai blocchi 2-7.' -ForegroundColor Red }
+    else { $zip=$out+'.zip'; Remove-Item $zip -Force -EA SilentlyContinue; Compress-Archive -Path (Join-Path $out '*') -DestinationPath $zip -Force;
+      Write-Host ('ZIP DA MANDARE IN CHAT: '+$zip) -ForegroundColor Cyan };
+    Write-Host ('FILE ATTESI DENTRO: 6 zip di corsa, TUTTI col pin '+$pin.Substring(0,7)+'. Trovati: '+$trovati+' su 6. Zip di pin vecchi scartati: '+$scartati) -ForegroundColor Gray;
+    if($trovati -gt 0 -and $trovati -lt 6){ Write-Host 'ATTENZIONE: mandalo lo stesso, ma dimmi quale corsa e'' mancata e cosa ha stampato.' -ForegroundColor Yellow } }
 ```
 
 ## 📦 COSA TORNA (per corsa)
@@ -639,6 +655,13 @@ input accodati dal tester).
 
 **Le righe da guardare per prime, in questo ordine:**
 
+0. 🕐 **`pin:` e `data:`, in cima al referto — PRIMA DI TUTTO IL RESTO.** `pin:`
+   deve dire **`434e271426ead410b3ec6a868a1ffa6d25bf31c4`**: se dice `371083bf…`
+   stai leggendo il referto della **corsa di stamattina, quella che è uscita a 0
+   byte**, e sotto non c'è nessuna misura. `data:` è l'**ora di AVVIO** (non di
+   fine) e dev'essere quella della corsa che hai appena lanciato. *(Il 17/08 due
+   referti stantii sono stati rimandati in chat in buona fede: qui il rischio è
+   concreto, perché gli zip della v4 sono ancora sul Desktop con lo stesso nome.)*
 1. **`compilazione:`** — è un EA nuovo. Se è FALLITA, quello è il risultato.
 2. 🔴 **`gemello INTERNO`** (classe 134) — deve dire **`IDENTICHE`** per **IS** e
    per **OOS**. È la riga che prova che MT5 ha davvero **eseguito le passate**:

@@ -8698,3 +8698,230 @@ passare dai frame. **In casa non ne esiste nessuno.**
 > griglia vero (identico con e senza il flag, e identico al generico precedente).
 > **La prova definitiva e' la riga `gemello INTERNO` del referto della prossima
 > corsa vera.**
+
+#### ⚖️ LA CONTROFIRMA DEL VERIFICATORE (05/09 sera) — **il consiglio sbagliato era MIO, e lo confermo sbagliato**
+
+Il riquadro 🚫 di questa stessa classe (*"cio' che NON si fa: rimettere l'asse
+finto"*) **l'ho scritto io**, e l'agente ha ragione su **tutti e tre** i punti.
+Lo metto agli atti perche' un verificatore che non si smentisce quando i numeri
+lo smentiscono e' un gate che non puo' fallire — e **un gate che non puo'
+fallire non e' un gate**:
+
+- *"raddoppia le passate"*: era un costo **vero ma piccolo**, presentato come se
+  fosse **decisivo**. A 4 agenti, 2 passate stanno nello stesso tempo di parete.
+- *"tocca sei prova firmati"*: **verificato a mano col `git diff` fra i due pin**
+  — nei sei file cambia **una riga** (`InpMagic`) piu' un blocco di commento. La
+  cella firmata non si e' mossa di un carattere. L'obiezione era **falsa**.
+- *"la 133 aveva gia' misurato che quella strada e' peggiore"*: **questo e' il
+  peggiore dei tre.** La 133 aveva misurato che il generico **si ferma** a zero
+  assi. Non aveva misurato **niente** sull'asse tecnico. Ho messo due cose
+  diverse nella stessa frase e le ho spacciate per una misura. E' esattamente
+  il difetto che questa checklist esiste per intercettare, commesso **dentro
+  questa checklist**.
+
+**Quello che va TENUTO del rilievo originale** (e che l'agente ha giustamente
+conservato): la parte **diagnostica**. *"Nel repo non esiste nessun precedente
+di `Optimization=1` a zero assi Y, quindi il comportamento e' `[INFERITO]`"* era
+**esatto**, ed e' il canarino nato da li' che ha fatto leggere la corsa fallita
+in dieci secondi invece di scriverla come *"RELATIVO non ha edge"*. Il rilievo
+ha funzionato; **la raccomandazione che gli stava sotto no**.
+
+> ✅ **LA REGOLA CHE MANCAVA AL PUNTO 2 DELLA «REGOLA» QUI SOPRA.** Il punto 2
+> dice: *"si cerca nel repo un precedente ESEGUITO nella nuova configurazione;
+> se non c'e', si scrive [INFERITO] e si NOMINA il rischio"*. **Manca la meta'
+> che e' costata la corsa:** se nel repo esiste un precedente **ESEGUITO della
+> strada ALTERNATIVA** (qui: R102, R103, R116 con l'asse tecnico e gli OPTFRAME
+> pieni), **non si sceglie la strada senza precedenti e la si "dichiara e
+> osserva": si prende quella misurata.** "Dichiarare il rischio" e' cio' che si
+> fa quando **non c'e'** un'alternativa collaudata. Quando c'e', dichiarare il
+> rischio invece di evitarlo **non e' prudenza: e' scommettere una corsa vera**
+> — e qui la scommessa e' stata persa il giorno stesso.
+
+---
+
+## 135. 📦 DOPO UN **RI-PIN**, GLI ARTEFATTI DEL PIN MORTO HANNO **LO STESSO NOME** DI QUELLI BUONI: la raccolta finale "prende il piu' recente" e impacchetta in **verde** lo zip della corsa che non ha misurato niente
+
+**Trovata il 05/09/2026 in review, sul blocco 8 di `RIGA_RELATIVO_R117_DA_MANDARE.md`.
+Non e' ipotetica: gli zip da scartare erano gia' sul Desktop di Claudio mentre
+scrivevo questa riga.**
+
+### Il fatto
+
+R117 e' stato **ri-pinnato lo stesso giorno**: la v4 (`371083bf…`) era girata
+davvero, per ore, e aveva prodotto **due CSV da 0 byte** (classe 134). Sul
+Desktop c'erano quindi gia':
+
+```
+RELATIVO_R117_D30_PORTO_20260905_1730.zip     <- v4, corsa MUTA, 0 byte dentro
+RELATIVO_R117_D30_PORTO_20260905_1930.zip     <- v5, la misura vera (dopo)
+```
+
+**Stesso prefisso, stesso schema di nome, stesso giorno, stessa cartella.** Il
+timestamp nel nome non li distingue: distingue solo *quale e' venuto prima*.
+
+La raccolta finale faceva, per ognuno dei sei pattern:
+
+```powershell
+$c=@(Get-ChildItem (Join-Path $d ($m+'.zip')) | Sort-Object LastWriteTime -Descending)
+if($c.Count -gt 0){ Copy-Item $c[0].FullName ... ; Write-Host ('  TROVATO: '+$c[0].Name) -ForegroundColor Green }
+```
+
+Finche' **tutte e sei** le corse nuove arrivano in fondo, funziona. **Ma se una
+sola non ci arriva** (tester interrotto, RAM finita a tick reali, MT5 aperto,
+gate rosso) — cioe' **proprio il caso in cui la raccolta serve** — quel pattern
+ricade sullo zip **del pin morto**, lo copia, e lo stampa **in verde** con la
+parola `TROVATO`. In chat arriva un archivio da 6 file di cui uno e' la corsa
+che **non ha misurato niente**, e nessuno dei due lati lo sa.
+
+### Perche' e' una classe e non "una distrazione del blocco 8"
+
+I gate contro il referto stantio che questa casa ha gia' (punto 13, la riga
+`data:`; i filtri `LastWriteTime -ge $t0` dei blocchi di corsa) **guardano
+l'ETA'**. Qui l'eta' **non separa niente**: i due artefatti sono dello **stesso
+round**, dello **stesso giorno**, a ore di distanza. L'unica cosa che li separa
+e' **il pin scritto dentro il referto**.
+
+> 🔴 **Il ri-pin dello stesso round e' l'unico caso in cui il nome dell'artefatto
+> mente pur essendo giusto.** Ogni altra volta il nome basta.
+
+### La regola
+
+> ✅ **Quando un round viene RI-PINNATO, la raccolta finale non seleziona per
+> NOME ne' per DATA: apre il referto di ogni candidato e accetta solo quello che
+> dichiara il PIN NUOVO.** Uno zip del pin vecchio si **scarta in rosso**, non si
+> spedisce. E se non resta niente, **non si crea nessun archivio** (un archivio
+> vuoto e' un altro modo di dire "TROVATO" a un file che non c'e').
+>
+> Corollario che rende la regola applicabile: **il referto deve stampare il pin**
+> (R117 lo fa, riga `pin:`) e **il driver deve lasciare la cartella accanto allo
+> zip**, cosi' il pin si legge **senza scompattare**.
+
+Il blocco 8 corretto (**riprodotto eseguendo** su pwsh 7.4.6, con un Desktop
+finto che conteneva sia lo zip v4 sia quello v5: sceglie il v5, scarta il v4 in
+rosso, e su un pattern che ha **solo** il v4 stampa `SCARTO` + `MANCA` invece di
+spedirlo):
+
+```powershell
+foreach($z in $c){ $cart=Join-Path $d $z.BaseName; $ref=@(Get-ChildItem (Join-Path $cart 'REFERTO_*.txt') -EA SilentlyContinue);
+  if($ref.Count -eq 0){ Write-Host ('  SALTO: '+$z.Name+' -- pin NON verificabile') -ForegroundColor Yellow; continue };
+  if(Select-String -LiteralPath $ref[0].FullName -SimpleMatch -Pattern $pin -Quiet){ $preso=$z; break };
+  Write-Host ('  SCARTO: '+$z.Name+' -- PIN VECCHIO: quella corsa NON ha misurato niente') -ForegroundColor Red }
+```
+
+### Il controllo da fare, sempre
+
+Quando una pagina di lancio viene **ri-pinnata dopo una corsa gia' eseguita**
+(non dopo un giro a vuoto), si rilegge **la sezione di raccolta finale** e ci si
+chiede: *se una delle corse nuove non arriva in fondo, questo blocco cosa
+impacchetta?* Se la risposta e' "il piu' recente che trova", la risposta e'
+**sbagliata**.
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (sera) — trovata dal **verificatore** sul pacchetto **SPREADLOGGER** (`RIGA_SPREADLOGGER.ps1` + `RIGA_SPREADLOGGER_RACCOLTA.ps1` + `ABTG_SpreadLogger.mq5` v1.00, pin `b314ec4e`), **ESEGUENDO la raccolta due volte di fila** su un banco che imita i file veri dell'EA. Il pacchetto era per il resto pulito (parse reale 0 errori, ASCII puro, cultura invariante ovunque, 36 casi di autotest contati nel sorgente uno per uno, 24 token vietati a zero, ripristino provato eseguendo). Una classe **nuova** (RIPRODOTTA) e una **recidiva della 132 a un giorno dalla sua stesura**.
+
+## 135. 🥫 LA **CARTELLA DI LAVORO CHE NON SI SVUOTA**: il giro di oggi rilegge la **copia di ieri** e la intesta alla fonte di **oggi** — referto completo, `PROBLEMI: 0`, uscita 0
+
+E' il rovescio esatto della **classe 106** (l'artefatto che **si svuota** a ogni
+corsa letto come registro cumulativo). Qui l'artefatto **non si svuota mai**, e
+il difetto e' peggiore: la 106 fa leggere un verde su una domanda sbagliata,
+questa fa leggere **numeri veri di un altro giro** come se fossero la misura di
+adesso.
+
+Lo stampo e' quello di casa e sembra prudente: **si COPIA** il file dal terminale
+nella propria cartella di lavoro (uno *snapshot*: giusto), e poi **si lavora
+sulla copia** (giusto anche questo). Il buco sta nella riga che non c'e':
+
+```powershell
+$Work = Join-Path $env:USERPROFILE "abtg_spreadlogger_raccolta"
+...
+foreach($n in $nomi){
+  $s = Join-Path $srcDir $n
+  if(Test-Path -LiteralPath $s){ Copy-Item -LiteralPath $s -Destination (Join-Path $Work $n) -Force ; ... }
+  else{ [void]$Copiati.Add($n + ": ASSENTE nel terminale") }   # <-- la copia VECCHIA resta li'
+}
+$statoLoc = Join-Path $Work ($Prefisso + "_stato.csv")
+if(-not (Test-Path -LiteralPath $statoLoc)){ throw "NESSUN FILE DI STATO ..." }   # <-- guarda la COPIA, non la FONTE
+```
+
+Il gate che dovrebbe fermare tutto (`throw "NESSUN FILE DI STATO"`) e' puntato
+sulla **copia** invece che sulla **fonte**: se la copia di un giro precedente e'
+ancora nella cartella di lavoro, **il gate passa**.
+
+**RIPRODOTTO ESEGUENDO** (`pwsh` 7.4.6, due giri di fila nello stesso profilo):
+
+| giro | cartella dati passata | cosa c'era dentro | cosa ha scritto il referto |
+|---|---|---|---|
+| 1 | banco con i file dell'EA | stato.csv + orario.csv veri | corretto: 3140 campioni, tabella per ora, confronto `OK ZERO differenze` |
+| 2 | **un'altra cartella, VUOTA** | **niente** | `fonte: <la cartella VUOTA>`, **3140 campioni**, la stessa tabella, `confronto OK ZERO differenze`, `PROBLEMI: 0`, **uscita 0**, e nello zip **gli stessi tre file di prima** (10.157 / 641 / 23 byte, identici) |
+
+L'unica traccia della bugia stava **sessanta righe piu' sotto**, nella sezione
+`FILE COPIATI DAL TERMINALE`: `ASSENTE nel terminale` — sotto una testata che
+diceva conto, server, primo e ultimo campione, e una tabella piena di numeri.
+E il **confronto incrociato EA/PowerShell**, che e' il vanto del pacchetto,
+diceva `ZERO differenze` **perche' confrontava due file vecchi fra loro**: due
+attrezzi indipendenti che si danno ragione su un dato che non e' di oggi.
+
+Perche' non e' un caso di laboratorio: e' **proprio la strada che la pagina
+insegna**. La riga si ferma quando non sa quale cartella dati sia il piccolo
+(classe 115) e dice a Claudio *"rilancia aggiungendo `-CartellaDati <percorso>`"*:
+basta incollare il percorso **sbagliato** (l'altro terminale, il 100k, una
+cartella qualunque) e il referto esce **verde, completo e con i numeri di
+un'altra raccolta**. Vale uguale per l'EA staccato, per il `-Prefisso` cambiato,
+per il terminale reinstallato.
+
+> ✅ **REGOLA (tre pezzi).**
+> 1. **La cartella di lavoro si SVUOTA all'inizio di ogni giro**, prima di
+>    guardare qualunque cosa, e se un file vecchio non si riesce a cancellare
+>    **ci si ferma** (leggerlo sarebbe la misura di un altro giro spacciata per
+>    questa). Se qualcosa e' stato buttato, il referto lo **dichiara**.
+> 2. **Il gate dell'esistenza si punta sulla FONTE, non sulla COPIA** — o, se si
+>    vuole tenerlo sulla copia (comodo, perche' cattura anche la copia fallita),
+>    solo **dopo** aver svuotato al punto 1.
+> 3. **L'intestazione di un referto e' una CATENA DI CUSTODIA**: accanto alla
+>    fonte ci va **quando quel file e' stato scritto** (data, byte, sha256 dei
+>    file copiati **in questo giro**), e la riga dell'assenza sta **in testa**,
+>    non in fondo. `PROBLEMI: 0` con `ASSENTE nel terminale` in fondo e' la
+>    classe 124 con un'altra faccia.
+
+### 132-bis. 🧾 RECIDIVA A UN GIORNO: due modi, due referti, **lo stesso nome di file**
+
+La classe **132** e' stata scritta la sera del 04/09 (`R116BIS LONDONFX`), e il
+pacchetto SPREADLOGGER — costruito il giorno dopo — la ripete identica:
+`CONTROLLO` e `CORSA` scrivevano tutti e due
+`REFERTO_SPREADLOGGER_INSTALLA.txt`, distinti solo dal nome dello **zip**.
+Scompattati i due zip nella stessa cartella, uno cancella l'altro in silenzio, e
+i due referti si somigliano riga per riga (stessa testata, stessi campi):
+la differenza vera sta in `modo:` e nelle tre righe della compilazione.
+
+**La 132 non e' un difetto di un file: e' lo STAMPO.** Finche' lo stampo non
+cambia, ogni driver nuovo che nasce copiando un fratello se la porta dentro —
+esattamente come dice la **classe 111**. Chi verifica un pacchetto con piu' modi
+**conta i nomi dei referti prima ancora di leggerli**: se sono uno solo per due
+modi, e' rossa senza discutere. Corretto qui con
+`REFERTO_SPREADLOGGER_INSTALLA_<MODO>.txt`.
+
+### Le altre tre, minori ma pagate lo stesso (tutte ESEGUITE)
+
+1. **`ESITO DEL GIRO: COMPLETATO` con `PROBLEMI: 1` in elenco.** La riga in testa
+   era nata (bene) per non far leggere verde un giro **fermato**; ma una
+   compilazione **fallita e ripristinata** *arriva* in fondo, e la testata
+   diceva `COMPLETATO` sopra un'installazione che non c'e' stata. Ora dice
+   `ARRIVATO IN FONDO MA CON N PROBLEMI`. **"Arrivato in fondo" e "andato bene"
+   sono due cose diverse, e la testata deve dire la seconda.**
+2. **La SENTINELLA del giro interrotto restava accesa dopo un ripristino gia'
+   fatto**: il giro dopo apriva con un `PROBLEMA` inesistente e il `CONTROLLO`
+   non era piu' "pulito" — cioe' il gate che la pagina impone prima della CORSA
+   si bloccava da solo. Una bandiera che dice *"c'e' roba a meta'"* si **spegne
+   nel momento in cui la roba e' stata rimessa a posto**, in tutti i rami, non
+   solo in quello felice (e' la 116 vista dall'altra parte).
+3. **Il sentinella dell'overflow stampato come se fosse una misura**: il
+   percentile che cade oltre il tetto usciva `>10000` nella colonna comoda ma
+   `[10001 punti MT5]` nella parentesi del numero **grezzo** — e la parentesi
+   quadra, in quel referto, e' per definizione "il dato vero". Un numero che non
+   e' stato misurato non si stampa: ora c'e' scritto `oltre il tetto, nessun
+   numero`.
+
+> 🧪 **E una nota sul metodo, che vale per il prossimo verificatore.** Le due
+> classi grosse sono uscite **solo** eseguendo il driver **due volte di fila**
+> nello stesso profilo. Un giro solo, su un banco pulito, e' verde in tutti e
+> due i casi. **Il secondo giro e' un attrezzo di verifica**: lo stato che un
+> driver lascia dietro di se' e' parte del driver.
