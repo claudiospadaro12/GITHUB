@@ -824,7 +824,7 @@ try{
   $nAT   = @([regex]::Matches($srcRaw,'falliti\s*\+=\s*AT_Caso\(')).Count
   $nPP   = @([regex]::Matches($srcRaw,'if\s*\(\s*!\w+\s*\)\s*falliti\+\+;')).Count
   $nCasiTotali = $nAT + $nPP
-  $AutotestTxt = $nAT + " AT_Caso() + " + $nPP + " controlli 'if(!X) falliti++;' = " + $nCasiTotali + " casi totali (nessun #define nel sorgente: RICALCOLATO ora dal file al pin, non un numero scritto a mano)"
+  $AutotestTxt = "" + $nAT + " AT_Caso() + " + $nPP + " controlli 'if(!X) falliti++;' = " + $nCasiTotali + " casi totali (nessun #define nel sorgente: RICALCOLATO ora dal file al pin, non un numero scritto a mano)"
   if($nAT -ne $AT_CASO_ATTESI -or $nPP -ne $FALLITIPP_ATTESI){ throw ("autotest: " + $AutotestTxt + " -- atteso " + $AT_CASO_ATTESI + " AT_Caso() + " + $FALLITIPP_ATTESI + " controlli = " + $CASI_TOTALI_ATTESI + ". Il sorgente e' cambiato: il gate NON si aggiorna da solo, va rivisto a mano.") }
 
   if($srcRaw -notmatch 'double\s+OnTester\s*\('){ throw ("" + $EA + ".mq5 NON esporta i risultati (manca OnTester): il generico si fermerebbe da solo, ma e' meglio saperlo qui.") }

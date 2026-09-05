@@ -7971,3 +7971,45 @@ difetto che deve trovare), qui sull'ACCENTO invece che sul case.
 > repo (accentata e non): `non . ancora lanciabile` con il punto al posto della
 > lettera, o due alternative nel pattern.
 
+## 127. 💥 `[int] + [stringa]` non e' concatenazione: PowerShell prova a CONVERTIRE
+la stringa in intero (crash 100% riproducibile, non un edge case)
+
+Trovato da Claudio lanciando **davvero** il primo blocco (giro di controllo) di
+`RIGA_POSTNEWS_ISM.ps1`: fermato subito, primissima fase, con
+`Cannot convert value "AT_Caso() +" to type "System.Int32"`. La riga:
+```powershell
+$AutotestTxt = $nAT + " AT_Caso() + " + $nPP + " controlli ..."
+```
+($nAT e $nPP sono `[int]`, contati da `regex.Matches(...).Count`). In
+PowerShell `+` fra un `[int]` a sinistra e una `[string]` a destra **non**
+converte l'intero in stringa: converte la STRINGA nel tipo di SINISTRA. Con
+`" AT_Caso() + "` che non e' un numero, l'operazione esplode. **Non e' raro**:
+succede a OGNI esecuzione che arriva a quella riga, senza eccezioni.
+```powershell
+PS> $n = 3; $n + " AT_Caso() + "
+Cannot convert value "AT_Caso() +" to type "System.Int32". ...
+PS> "" + $n + " AT_Caso() + "     # fix: parte da una stringa, non da un intero
+3 AT_Caso() +
+```
+**Perche' l'ha presa la revisione statica precedente**: `Parser::ParseFile` fa
+SOLO l'analisi sintattica — questa e' una riga sintatticamente valida che
+esplode **a runtime**, in base al TIPO delle variabili. Nessuna checklist di
+"parse pulito" la becca: serve **eseguire** quella riga (anche isolata, con
+valori finti) prima di dichiararla verificata.
+
+**Censimento dei fratelli (stessa riga, letterale, copiata per stampo)**:
+`RIGA_POSTNEWS_NFP.ps1`, `RIGA_POSTNEWS_ISM.ps1`, `RIGA_POSTNEWS_1330.ps1` —
+tutti e tre **rotti allo stesso identico modo prima del fix**. **Non** rotto:
+`RIGA_POSTNEWS_ECBFOMC_VERIFICA.ps1`, che aveva GIA' il fix (`""` davanti) da
+una revisione precedente — la correzione esisteva gia' in casa, semplicemente
+non era stata riportata indietro nel driver-stampo da cui NFP/ISM/1330 sono
+stati copiati.
+
+> ✅ **REGOLA**: quando una stringa di log/referto INIZIA con una variabile
+> numerica concatenata (`$qualcheConteggio + "..."`), il primo operando **deve**
+> essere una stringa (`"" + $numero + "..."`, oppure `[string]$numero + "..."`,
+> mai il numero nudo). E prima di dichiarare "pulito" un blocco di codice che
+> costruisce testo da variabili, **eseguirlo davvero** con valori rappresentativi
+> (anche fuori dal contesto del driver intero), non solo farlo passare dal
+> parser: il parser non vede i tipi a runtime.
+
