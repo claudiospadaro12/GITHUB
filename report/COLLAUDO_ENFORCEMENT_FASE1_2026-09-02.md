@@ -176,6 +176,14 @@ giorno**, altrimenti M27 e H5 misurano un buco senza sapere che e' nostro.
 
 ### 2.3 🅱️1 CRITERIO 5 — «la pausa che morde»
 
+> 📄 **AGGIORNAMENTO 05/09: questa procedura e la §2.4 sono state trasformate in
+> una PAGINA DI LANCIO pronta** —
+> `backtest_pipeline/righe/COLLAUDO_FASE1_SESSIONE2_DA_MANDARE.md` (16 passi,
+> driver `RIGA_COLLAUDO_FASE1_S2.ps1` pinnato, 5 corse del canarino, GATE a
+> macchina sulla giornata in perdita, controllo del LATCH e ROSSO se la pausa
+> resta accesa). Quello che segue resta la **fonte** della pagina: se i due
+> divergono, vince questo documento e la pagina si corregge.
+
 **Cosa si vuole dimostrare:** che quando il Guardian alza la bandiera di pausa,
 un EA del 100k **la nomina nel giornale e non manda l'ordine**.
 
@@ -435,7 +443,7 @@ tocca il conto piccolo 50503392 ne' il forward._
 | **D2** | **Decidere sul canarino P-C1** (§6, R4): lo si scrive in un giro dedicato, oppure si accetta un collaudo opportunistico che puo' restare 🟡 NON MISURATO | prima di fissare le finestre | 5 min |
 | **G1** | **Prerequisiti P-1…P-5**: `conto_attivo.ps1`, conteggio Guardian, screenshot pannello "prima", annotare perdita del giorno / posizioni aperte / rischio aperto | una volta, all'inizio | **15 min** |
 | **G2** | **Criterio 7 (cap) + criterio 8 (fail-open) — stessa sessione**, in una finestra con **posizione aperta con SL**: abbassare `InpMaxOpenRiskPct`, presidiare, rimuovere il Guardian, attendere 3 min, rimetterlo e riverificare campo per campo | 1 sessione | **45 min** (di cui ~20 di presidio) |
-| **G3** | **Criterio 5 (pausa) + criterio 6 (gestione) — sessione SEPARATA**, in una giornata **in perdita**, meglio a ridosso delle **07:59 server**; poi ripristino a due passi (soglia → F3) | 1 sessione, altro giorno | **40 min** |
+| **G3** | **Criterio 5 (pausa) + criterio 6 (gestione) — sessione SEPARATA**, in una giornata **in perdita**; poi ripristino a due passi (soglia → F3). 📄 **Pagina pronta dal 05/09: `backtest_pipeline/righe/COLLAUDO_FASE1_SESSIONE2_DA_MANDARE.md`** (pin `e487932`). ⏰ Finestra consigliata rivista: **14:30-16:00 server**, perche' serve anche una **posizione aperta** (criterio 6) e a quell'ora la perdita del giorno, se c'e', si e' gia' formata; le 07:59 restano l'alternativa col tentativo d'ingresso piu' regolare ma con `Perdita oggi` quasi sempre a zero | 1 sessione, altro giorno | **40 min** |
 | **G4** | **Screenshot dopo ogni gesto** (legge dello screenshot): pannello prima / bandiera attiva / riga `[GUARDIA]` / pannello ripristinato | dentro G2 e G3 | incluso |
 | **G5** | **Criterio 9**: raccolta giornaliera dei log `-V3` per **5 giornate di borsa** | 5 giorni | **5 min/giorno = 25 min** |
 | **G6** | **Verbale finale**: per ogni criterio 5-9, esito PASS/FAIL/NON MISURATO + la riga di log copiata + l'ora | alla fine | **20 min** |

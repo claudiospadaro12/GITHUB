@@ -70,6 +70,24 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
   Administrator. Idraulica confermata (conto trovato, filo ok), ma
   **rischioAperto=0,00%** alle 11:19 → collaudo VERO rimandato alle ~15:30
   (ore USA, mirror con posizioni aperte). Le 3 stringhe sono in chat.
+  ⚠️ **Difetto noto sulla S1 (classe 130, misurato il 05/09 e NON corretto per
+  non far divergere il file dal pin): `$global:CAN_RIASS` sopravvive fra due
+  invocazioni nella STESSA console → una `-Chiusura` che non trova referti del
+  canarino conta quelli della corsa precedente. Contromisura di procedura:
+  lanciare la riga 3 della S1 da una console APPENA APERTA.**
+- **Collaudo enforcement Fase 1 sessione 2** (criteri 5 = pausa B1 che morde,
+  6 = posizioni gestite durante la pausa): pacchetto **costruito e pinnato il
+  05/09** — `backtest_pipeline/righe/COLLAUDO_FASE1_SESSIONE2_DA_MANDARE.md`,
+  driver `RIGA_COLLAUDO_FASE1_S2.ps1` v1, pin **`e487932`**, marcatore
+  `MARCATORE_RIGA_COLLAUDO_FASE1_S2_v1`. 16 passi, 3 righe PowerShell di sola
+  lettura, **5 corse del canarino** (la 4ª misura il LATCH, la 5ª certifica che
+  il 100k e' tornato a casa). 🔴 **Precondizione fisica: si lancia SOLO in una
+  giornata in PERDITA** (`Perdita oggi` > 0 nel pannello: Guardian riga 400 —
+  con dailyPct<=0 nessuna soglia positiva morde). Il driver ha il GATE a
+  macchina sul campo `dayLoss=`. **Mai lo stesso giorno della sessione 1.**
+  Provato ESEGUENDO su banco stubbato: 5 casi (felice / giornata in utile /
+  GV cancellate prima di rialzare la soglia / pausa rimasta accesa / zero
+  referti del canarino), tutti con l'esito atteso. Manca solo il verificatore.
 
 ### 🎫 DUKA + esperimento manuale
 - DUKA tranche-sonda Dow (2024-10 → 2025-06) in completamento (~14:45 oggi).

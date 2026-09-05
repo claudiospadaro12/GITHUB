@@ -8138,3 +8138,85 @@ qui si vede.
 > `_DA_MANDARE.md` di ogni riga che usa questo pattern (non solo nel driver),
 > perche' e' un passo MANUALE che nessuno script puo' forzare da fuori MT5.
 
+
+---
+
+## 🆕 AGGIUNTE DEL 05/09/2026 — trovate **costruendo la SESSIONE 2** del collaudo enforcement (`RIGA_COLLAUDO_FASE1_S2.ps1` + pagina, pin `e487932`), copiando lo stampo della sessione 1. Due classi: la prima **RIPRODOTTA ESEGUENDO sul driver della S1**, la seconda trovata leggendo le stringhe di formato del sorgente MQL5 accanto alla pagina.
+
+## 130. 🧟 LA VARIABILE `$global:` CHE **SOPRAVVIVE FRA DUE INVOCAZIONI** DEL DRIVER NELLA STESSA CONSOLE: il referto dice «NESSUN REFERTO» e due righe sotto conta **5 corse**
+
+Le pagine `_DA_MANDARE.md` fanno lanciare **tre righe nella stessa finestra di
+PowerShell** (`& { ... & $p -Pin $pin ... }`, poi `-Presidio`, poi `-Chiusura`).
+Ogni `& $p` e' una nuova esecuzione dello **script**, ma **NON** una nuova
+sessione: lo scope `$global:` e' quello della **console**, e sopravvive.
+
+`RIGA_COLLAUDO_FASE1_S1.ps1` (v2, in campo) scrive `$global:CAN_RIASS = $riass`
+**solo dentro il ramo** «ho trovato dei referti del canarino», e nel verdetto
+legge `if ($null -ne $global:CAN_RIASS) { ... }`. Se la corsa successiva **non**
+trova referti (cartella dati diversa, `-CartellaDati` corretto a meta' giro,
+`MQL5\Files` ripulita, canarino non ancora lanciato), la variabile **resta
+quella di prima** e il verdetto conta le corse della corsa PRECEDENTE.
+
+**Riprodotto eseguendo** (`pwsh`, banco stubbato, due invocazioni consecutive
+del driver S1 nella stessa console, referti cancellati fra l'una e l'altra):
+
+```
+--- REFERTO DELLA CORSA B (nessun referto del canarino sul disco) ---
+canarino:   NESSUN REFERTO dopo le 00:00:00          <- il PASSO dice la verita'
+    corse del canarino col cap ATTIVO         : 5    <- il VERDETTO conta quelle di PRIMA
+```
+
+Le due righe **si contraddicono dentro lo stesso file** e la seconda e' quella
+che entra nel verbale del collaudo. E' la **classe 128** (rileggere roba della
+corsa precedente) trasportata dai file di log alle **variabili di sessione**: la
+128 si difende col seek, questa non ha nessuna difesa perche' nessuno ha pensato
+che lo script venisse eseguito **due volte nello stesso processo**.
+
+> ✅ **REGOLA: ogni `$global:` si AZZERA in cima al file**, insieme ai campi dei
+> PASSI (classe 94-ter / 125), e non "quando serve":
+> ```powershell
+> $global:CAN_RIASS  = $null
+> $global:C6_INPAUSA = $null
+> ```
+> **Corollario di verifica**: un driver che si lancia piu' volte dalla stessa
+> pagina si prova **due volte di fila nella stessa console**, la seconda con lo
+> stato di mondo **piu' povero** della prima. Se il secondo referto e' piu'
+> ricco del mondo che ha davanti, c'e' uno zombie.
+> **Meglio ancora: non usare `$global:` per passare dati fra due sezioni dello
+> stesso script** — e' una variabile di script travestita.
+
+**Fratelli in repo al 05/09/2026 (classe 111)**: `RIGA_COLLAUDO_FASE1_S1.ps1`
+(`$global:CAN_RIASS`, righe ~1069 e ~1229) — **NON corretto oggi di proposito**:
+quel file e' **pinnato** (`2e37a67`) su una pagina gia' passata dal verificatore
+e in attesa di essere lanciata in campo; cambiarlo adesso farebbe divergere il
+file di HEAD da quello che il VPS scarica dal pin. **Va corretto al primo giro
+che tocca la S1**, e fino ad allora vale la contromisura di procedura:
+**la riga 3 (`-Chiusura`) della S1 si lancia in una console APPENA APERTA**.
+`RIGA_COLLAUDO_FASE1_S2.ps1` nasce gia' con l'azzeramento in cima (e la prova a
+banco: seconda corsa senza referti -> contatori a 0, uscita 2 «PARZIALE»).
+
+## 130-bis. 🔬 LA VERIFICA DEL GESTO PUNTATA SULLA FONTE **CHE ARROTONDA**: il valore giusto sembra sbagliato, e chi lo legge lo "corregge"
+
+Trovata **leggendo le stringhe di formato del sorgente** mentre si scriveva il
+passo «controlla che il pannello dica...». Nel Guardian la **stessa** soglia
+esce in due posti con **due precisioni diverse**:
+
+| dove | formato | con `InpDailyPausePct = 0.03` si legge |
+|---|---|---|
+| pannello (`Comment`) | `Pausa morbida (%.1f%%): %s` | **`Pausa morbida (0.0%): ATTIVA`** |
+| giornale (`OnInit`) | `pausa morbida=%.2f%%` | `pausa morbida=0.03%` |
+
+La pagina stava per dire *«dopo il gesto il pannello deve mostrare la soglia che
+hai messo»*: sul VPS Claudio avrebbe letto **`0.0%`**, avrebbe pensato «0 = pausa
+spenta, ho sbagliato campo» e avrebbe rifatto il gesto — o peggio, avrebbe
+cercato il campo giusto **accanto**, che e' `InpDailyLossPct` (il divieto `NO.1`,
+quello che chiude tutto il conto).
+
+> ✅ **REGOLA: quando due fonti mostrano lo stesso numero con precisioni diverse,
+> la pagina DICE QUALE FA FEDE e mostra la stringa attesa LETTERALE.** Non «deve
+> mostrare 0,03»: «leggerai `(0.0%)`, e' l'arrotondamento a una cifra, la parola
+> che conta e' **ATTIVA**; la soglia vera con due decimali sta nel log».
+> **Come si trova prima di pagarla:** si va a leggere la `PrintFormat` /
+> `StringFormat` del sorgente e si conta **quante cifre** stampa, invece di
+> immaginare cosa apparira' a schermo. Vale per ogni numero che una pagina
+> chiede di "verificare a occhio" su un pannello.
