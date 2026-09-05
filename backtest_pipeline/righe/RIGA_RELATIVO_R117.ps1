@@ -1,7 +1,21 @@
 # =====================================================================
-#  MARCATORE_RIGA_RELATIVO_R117_v3
+#  MARCATORE_RIGA_RELATIVO_R117_v4
 #  RIGA_RELATIVO_R117.ps1 -- IL ROUND R117: PRIMA MISURA DI MERITO DEL
 #  CANDIDATO "RELATIVO", A TICK REALI.
+#
+#  v4 (05/09/2026, CLASSE 133). La v3 era CORRETTA ma NON POTEVA GIRARE:
+#  il giro a vuoto compilava l'EA senza un errore e poi il generico
+#  usciva con codice 1 PRIMA di scrivere l'anteprima .ini, su un
+#  controllo suo che pretende almeno un parametro spazzolato ("nessun
+#  parametro da spazzolare: sarebbe un backtest singolo, non un
+#  walk-forward"). Quel controllo e' giusto per le GRIGLIE ed e' quello
+#  che questo round, a CELLA CONGELATA, non ha e non deve avere: la v3
+#  sarebbe morta su TUTTE E SEI le corse, sempre, per costruzione.
+#  Chiuso in due pezzi: walkforward_generico.ps1 ha un interruttore
+#  OPT-IN -PermettiCellaSingola (default spento: nessun round gia'
+#  pinnato cambia comportamento) che salta QUEL controllo e SOLO
+#  quello; questa riga lo passa e PRETENDE che il generico del pin ce
+#  l'abbia, con un gate suo, prima di lanciare.
 #
 #  ATTENZIONE, ED E' LA PRIMA COSA DA SAPERE: QUI L'EA APRE ORDINI.
 #  Le due righe che l'hanno preceduto (RIGA_SONDARELATIVO _v5 e
@@ -744,6 +758,14 @@ try{
   Scarica ($RawPin + "/backtest_pipeline/walkforward_generico.ps1") $drv
   $t = Get-Content -LiteralPath $drv -Raw
   if($t -notmatch '\$EABranch\s*=\s*"lavoro"'){ throw 'walkforward_generico.ps1 non ha la riga $EABranch = "lavoro" attesa: non lo posso pinnare (il pin varrebbe per il driver e NON per la sonda misurata).' }
+  # CLASSE 133: questo round e' a CELLA CONGELATA (zero assi Y) e il
+  # generico, nato per le GRIGLIE, lo BLOCCA con "nessun parametro da
+  # spazzolare" prima ancora di scrivere l'anteprima .ini. Serve
+  # -PermettiCellaSingola, che esiste solo dal 05/09/2026: se il pin
+  # punta a un generico PIU' VECCHIO, PowerShell muore su un parametro
+  # sconosciuto e il messaggio non dice niente di utile. Meglio qui,
+  # con il nome della causa.
+  if($t -notmatch '\[switch\]\$PermettiCellaSingola'){ throw 'il walkforward_generico.ps1 di questo pin NON ha -PermettiCellaSingola: e'' un generico ANTERIORE al 05/09/2026, e su un round a cella congelata si ferma su "nessun parametro da spazzolare" (classe 133). Serve un pin che contenga il fix.' }
   $t = $t -replace '\$EABranch\s*=\s*"lavoro"', ('$EABranch="' + $Pin + '"')
   Set-Content -LiteralPath $drv -Value $t -Encoding ASCII
   Dico "driver generico scaricato e PINNATO (riscarica la sonda al pin, non dalla punta del branch)" "Green"
@@ -1013,6 +1035,12 @@ try{
             "-FrazioneIS",("" + $FrazioneIS),
             "-Modello","4",
             "-Rifai",
+            # CLASSE 133: senza questo, il generico (nato per le griglie)
+            # si ferma su "nessun parametro da spazzolare" e NON scrive
+            # nemmeno l'anteprima .ini. Qui la cella e' CONGELATA per
+            # costruzione e gli assi Y sono ZERO per gate del driver
+            # (GateProva): 1 cella x 2 finestre = 2 passate a corsa.
+            "-PermettiCellaSingola",
             "-Deposito",("" + $Deposito),
             "-Terminal",$TermExe,
             "-MetaEditor",$MeExe,

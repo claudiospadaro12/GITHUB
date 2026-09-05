@@ -54,6 +54,18 @@
 #  -SoloControllo NON apre MT5: scarica, legge, controlla tutto e ti
 #  fa vedere l'.ini che lancerebbe. Lancialo SEMPRE prima: costa dieci
 #  secondi e ti dice quante celle sono, cioe' quante ore di macchina.
+#
+#  -PermettiCellaSingola (05/09/2026, classe 133): questo driver e' nato
+#  per le GRIGLIE, e uno dei suoi controlli pretende almeno un parametro
+#  spazzolato ("sarebbe un backtest singolo, non un walk-forward").
+#  Esiste pero' una famiglia di round LEGITTIMA che di griglia non ne ha
+#  nessuna: la CELLA CONGELATA, scelta in un round precedente e qui solo
+#  MISURATA su due finestre indipendenti (R117 RELATIVO). Per quei round
+#  il controllo non protegge niente e blocca tutto. Questo interruttore
+#  salta QUEL controllo e SOLO quello, ed e' OPT-IN: senza, il
+#  comportamento e' identico a sempre per ogni round gia' pinnato.
+#  NON e' una scorciatoia per le griglie: se un asse Y c'e' ma e'
+#  degenere, l'errore "sweep degenere" resta e ferma lo stesso.
 # =====================================================================
 param(
   [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
@@ -83,6 +95,9 @@ param(
                                      #   Altro valore (es. "Pepperstone") = secondo
                                      #   broker: vedi l'avviso rosso qui sotto.
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
+  [switch]$PermettiCellaSingola,     # round a CELLA CONGELATA (zero assi Y): salta SOLO
+                                     #   il controllo "nessun parametro da spazzolare".
+                                     #   Default spento = comportamento di sempre.
   [switch]$Rifai,
   [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
 )
@@ -382,8 +397,9 @@ if($Degeneri.Count -gt 0){
   Write-Host "    E' l'errore del 07/08: quattro CSV vuoti dopo una notte di macchina." -ForegroundColor Yellow
   [void]$Errori.Add("sweep degenere")
 }
-if($Sweep.Count -eq 0 -and $Errori.Count -eq 0){
-  [void]$Errori.Add("nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward")
+if($Sweep.Count -eq 0 -and $Errori.Count -eq 0 -and -not $PermettiCellaSingola){
+  [void]$Errori.Add("nessun parametro da spazzolare: sarebbe un backtest singolo, non un walk-forward" +
+                    " (se il round e' a CELLA CONGELATA per costruzione, e' -PermettiCellaSingola)")
 }
 
 # --- il blocco finale: prima le blindature automatiche, poi il file
@@ -446,6 +462,17 @@ foreach($s in $Sweep){
 }
 if($Sweep.Count -gt 0){
   Write-Host ("    celle per finestra          : $NCelle   ->  " + ($NCelle*2) + " pass a tick reali in tutto") -ForegroundColor White
+}
+elseif($PermettiCellaSingola -and $Errori.Count -eq 0){
+  # senza questa riga un round a cella congelata NON stampa NESSUN
+  # conteggio di celle (il ramo sopra non scatta), e chi legge il log
+  # resta senza il numero che poi deve ritrovare come righe nel CSV.
+  # Il "-and $Errori.Count -eq 0" NON e' cosmetico: con un asse Y
+  # DEGENERE lo sweep e' vuoto lo stesso, e senza quel pezzo questa
+  # riga giurerebbe "zero assi Y" proprio quando un asse c'era.
+  Write-Host "    CELLA CONGELATA (-PermettiCellaSingola): zero assi Y." -ForegroundColor Yellow
+  Write-Host ("    celle per finestra          : $NCelle   ->  " + ($NCelle*2) + " pass a tick reali in tutto") -ForegroundColor White
+  Write-Host "    IS e OOS qui NON selezionano niente: sono due campioni della STESSA configurazione." -ForegroundColor Yellow
 }
 
 if($Errori.Count -gt 0){
