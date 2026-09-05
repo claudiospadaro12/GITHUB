@@ -7,6 +7,16 @@
 
 ---
 
+## ⏰ DA FARE DOMANI MATTINA — conto REALE (10105439) non ancora sistemato
+
+**Stato lasciato a notte fonda del 05/09:**
+- Login sul conto reale **10105439** fatto, su una **terza istanza MT5** dedicata (`C:\BCM_Reale`, icona "MT5 REALE" sul Desktop del VPS).
+- `ABTG_SlippageLogger` — **CONTROLLO passato** (`PROBLEMI: 0`), ma con `-CartellaDati`/`-ConfermoConto` a mano perche' il login non compariva ancora nei log: **la CORSA (installazione vera) NON e' stata fatta**, quindi l'EA non e' ancora sul terminale reale ne' attaccato a un grafico.
+- 🔴 **Incidente scoperto e risolto stanotte**: l'icona **"MT5 CONTO DEMO PICCOLO"** puntava per errore alla Destinazione sbagliata (`C:\BCM_Reale\terminal64.exe`, la stessa di MT5 REALE) — clic su entrambe apriva solo il reale. Il **terminale vero del piccolo** (`C:\Program Files\BCM Markets MT5 Terminal`, **senza** `-V3`, quello con tutta la flotta viva: DAX Apertura, Dow Apertura, ORB, NFP, ecc.) e' stato trovato **CHIUSO** (flotta ferma) e **riaperto da Claudio** la stessa notte. Claudio ha confermato "SI TUTTO OK" dopo il riavvio — **ma da verificare domani mattina con calma**: (1) l'icona "MT5 CONTO DEMO PICCOLO" e' stata corretta per bene (Destinazione = `C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe`)? (2) tutti i grafici/EA della flotta erano ancora attaccati dopo il riavvio, o vanno riattaccati a mano? (3) AutoTrading e' acceso?
+- **Prossimo passo sul reale**: rilanciare il **blocco 2 (CORSA)** di `RIGA_SLIPPAGELOGGER_DA_MANDARE.md` (pin `7b2c6d248f95306b5c8899fc802268a205edf30d`, con lo stesso `-CartellaDati`/`-ConfermoConto` del controllo) per installare davvero l'EA, poi attaccarlo a un grafico nuovo del terminale REALE con `InpLoginAtteso = 10105439` (seconda serratura). Solo dopo si puo' pensare a mettere le due sedie (DAX Apertura EU 770101, ORB Ottimizzato 770611) sul conto reale.
+
+---
+
 ## 🗓️ AGGIORNAMENTO 05/09 NOTTE — 🎯 **R117 CHIUSO, R117BIS PRONTO** (NASUSD): la stessa cella, la finestra piu' lunga che esiste
 
 **Come e' finito R117 (tick reali, cella congelata N=40 / sigma=1,35):**
