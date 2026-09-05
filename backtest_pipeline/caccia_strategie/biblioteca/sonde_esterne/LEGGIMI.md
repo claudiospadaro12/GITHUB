@@ -65,6 +65,10 @@ Prefisso: `https://raw.githubusercontent.com/FutureSharks/financial-data/master/
 
 | file | cosa misura |
 |---|---|
+| 🆕 `sonda_m30_drift.py` | **M30, 05/09** — deriva per **mezz'ora del giorno** in punti indice (media, mediana, t, %>0) + sessione cash contro notte. **Ha chiuso M27**: la mezz'ora migliore del DAX su 1.518 sedute vale **0,33× il cancello 3× spread** |
+| 🆕 `sonda_m30_crossasset.py` | **M30** — **correlazione ritardata** indice × valuta della stessa area (lag 0-3) + condizionamento a 1/1,5/2 σ con base di confronto. Un solo provider per le due gambe |
+| 🆕 `sonda_m30_onid.py` | **M30** — reversione **overnight → intraday** univariata a quintili. I cancelli **K1-K4 sono scritti nell'intestazione del file**, non nel referto |
+| 🆕 `sonda_m30_panel.py` | **M30** — pannello **cross-sezionale** overnight→intraday **+ la diagnosi dell'artefatto**: scomposizione per coppia, ingresso ritardato, controllo casuale. 🚨 **Da leggere prima di costruire qualunque pannello cross-fuso** (vedi il riquadro sotto) |
 | 🆕 `sonda_fix_profilo.py` | **M5, 05/09** — collaudo F6 dei **FIX VALUTARI**: profilo del range M1 per minuto in ora di Londra, estate contro inverno. **Trova i tre fix nei dati** (WMR 15:59 = 1,34-1,45× il fondo; ECB 13:15 = 1,49×; Tokyo 01:55 = 1,93×) |
 | 🆕 `sonda_fix.py` | **M5** — M11: run-up, **quota di rientro**, MFE/MAE/RR del fade a fix+1, controllo casuale |
 | 🆕 `sonda_fix_cond.py` | **M5** — M11 condizionato al **quintile di run-up** (il meccanismo dichiarato dagli autori: rischio d'inventario dei dealer) |
@@ -128,3 +132,45 @@ direzionali** (es. "questa geometria e' raggiungibile?").
 ✅ **Le lapidi del 03/09 non cambiano — si rafforzano:** L2 (sweep) e L3
 (compressione) erano gia' a **−0,2 e −1,2 punti** contro un controllo
 **generoso**; contro quello appaiato starebbero **piu' in basso**, non piu' in alto.
+
+---
+
+## 🚨 LA TRAPPOLA DEI PANNELLI CROSS-FUSO — trovata il 05/09 (battuta M30)
+
+_(`caccia_strategie/CACCIA_TF_M30_2026-09-05.md` §4.4 — la sonda che la dimostra
+e' `sonda_m30_panel.py`)_
+
+Un pannello cross-sezionale overnight→intraday su **3 indici** (DAX, EuroStoxx,
+S&P) rendeva **+29,64 bp al giorno, t = +8,49, 61,3% di giorni positivi**, contro
+un controllo casuale a **−1,43 bp**. **E' tutto artefatto.**
+
+> **La "notte" del mercato che apre DOPO contiene la "giornata" del mercato che
+> apre PRIMA.**
+>
+> | | finestra di orologio |
+> |---|---|
+> | notte del **DAX** per il giorno t | 18:00 CET (t−1) → **09:00 CET (t)** |
+> | notte dell'**S&P** per il giorno t | 22:00 CET (t−1) → **15:30 CET (t)** |
+> | seduta del **DAX** del giorno t | **09:00 → 17:30 CET (t)** |
+>
+> Ordinare i tre indici sul rendimento notturno per decidere un trade sul DAX che
+> **parte alle 09:00** usa un prezzo delle **15:30**: e' **look-ahead**, bandiera
+> rossa §4.
+
+**Le tre prove che lo inchiodano, e sono il modo giusto di smontare un numero
+troppo bello:**
+1. **scomposizione per coppia** → tutto il P/L sta nelle coppie Europa-vs-USA; la
+   **sola coppia a stesso orario** (DAX vs ESTX50) e' **negativa in entrambe le
+   direzioni** (−4,90 e −5,35 bp). E' la cella di controllo, ed e' rossa;
+2. **ingresso ritardato** di 30 e 60 minuti → l'effetto **non muore** (+23,15 e
+   +19,33 bp): quindi **non** e' prezzo stantio all'apertura;
+3. **la versione univariata**, che non ha nessuno sfasamento di fuso, e' **piatta**
+   (monotonia fallita su DAX e S&P, 2.775 coppie notte/giorno).
+
+🖊️ **Regola d'uso:** prima di costruire qualunque sonda che confronti **due
+mercati con sessioni sfasate**, si disegnano **le finestre di orologio delle due
+gambe una sotto l'altra**. Se la finestra del predittore **si sovrappone** a
+quella della risposta, il numero e' rotto — per quanto bello sia.
+✅ Contro-esempio in casa: **`RELATIVO` NON e' esposto**, perche' lavora **solo
+nella sovrapposizione** 14:30-22:00 server, dove i due mercati sono aperti
+**insieme**, e non calcola nemmeno lo z-score fuori finestra.
