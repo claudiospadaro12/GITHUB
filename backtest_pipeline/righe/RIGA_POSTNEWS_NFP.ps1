@@ -871,7 +871,7 @@ try{
   $calAttese = 600
   if(@($calRighe).Count -ne $calAttese){ throw ("calendario " + $NEWSFILE + ": " + @($calRighe).Count + " righe, attese " + $calAttese + " (1 header + 599 eventi). Il file al pin non e' quello atteso.") }
   if($calRighe[0].Trim() -ne "Data Ora;Impatto;Valuta;Titolo"){ throw ("calendario " + $NEWSFILE + ": header '" + $calRighe[0] + "', atteso 'Data Ora;Impatto;Valuta;Titolo'.") }
-  $CalCsvTxt = @($calRighe).Count + " righe (1 header + 599 eventi), header verificato. NB: verificato ORA, sul repo, che nessun'altra occorrenza dei magic " + $MAGIC1 + "/" + $MAGIC2 + " esiste fuori da preset+prova (blocco vergine) -- la riga NON puo' riverificarlo a runtime (niente repo sul PC di backtest)."
+  $CalCsvTxt = "" + @($calRighe).Count + " righe (1 header + 599 eventi), header verificato. NB: verificato ORA, sul repo, che nessun'altra occorrenza dei magic " + $MAGIC1 + "/" + $MAGIC2 + " esiste fuori da preset+prova (blocco vergine) -- la riga NON puo' riverificarlo a runtime (niente repo sul PC di backtest)."
   Dico ("calendario: " + $CalCsvTxt) "Green"
 
   # -------------------------------------------------------------------

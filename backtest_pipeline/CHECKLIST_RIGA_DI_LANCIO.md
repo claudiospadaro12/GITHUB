@@ -8005,6 +8005,22 @@ una revisione precedente — la correzione esisteva gia' in casa, semplicemente
 non era stata riportata indietro nel driver-stampo da cui NFP/ISM/1330 sono
 stati copiati.
 
+**127-bis. NON e' un difetto isolato: e' una FAMIGLIA di righe, e la seconda
+istanza e' stata scoperta SOLO rilanciando davvero, un gate piu' avanti.**
+Fixata la riga dell'autotest, Claudio ha rilanciato lo stesso blocco ISM e si
+e' fermato **al gate successivo** (verifica del calendario), con lo STESSO
+errore: `$CalCsvTxt = @($calRighe).Count + " righe (1 intestazione + " ...`
+— identica gotcha, stavolta con `@(...).Count` invece di una variabile nuda.
+Corretta nei tre driver allo stesso modo (`""` davanti). **Una prima ondata di
+fix trovata da una revisione statica NON prova che la famiglia sia esaurita**:
+qui ne bastavano DUE, in gate diversi, per far cadere il primo giro reale due
+volte di fila. Prima di ridichiarare "pulito" un driver dopo un fix di questa
+classe, va fatto un secondo giro di grep su TUTTO il file (non solo sulla
+riga appena corretta) cercando ogni `= <espressione-che-potrebbe-essere-un-numero>
++ "` — variabili che iniziano per `n`, `.Count`, `.Length`, differenze fra
+due interi in parentesi — e va controllato per ciascuna se il PRIMO operando
+della concatenazione e' davvero una stringa.
+
 > ✅ **REGOLA**: quando una stringa di log/referto INIZIA con una variabile
 > numerica concatenata (`$qualcheConteggio + "..."`), il primo operando **deve**
 > essere una stringa (`"" + $numero + "..."`, oppure `[string]$numero + "..."`,
