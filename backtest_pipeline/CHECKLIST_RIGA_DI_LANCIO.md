@@ -8098,3 +8098,43 @@ tocco di ciascuno di questi file.
 > Si scopre solo confrontando DUE referti consecutivi della STESSA riga, mai
 > guardandone uno solo.
 
+## 129. 🏁 Il "gemello di coerenza" (2 celle, stesso motore, cambia solo il
+magic) va lanciato con **UN SOLO agente locale MT5**, altrimenti diverge
+davvero — CAUSA CONFERMATA, non solo sospettata
+
+Su `RIGA_POSTNEWS_ISM.ps1`, 5 corse consecutive con gli 8 core della macchina
+di backtest tutti abilitati (Local: 8 cores, 4 attivi = Core 1-4) hanno dato
+**5 divergenze diverse fra i due magic gemelli (774701/774706)**, mai
+identiche, con lo scarto che oscillava senza uno schema fisso (39, 13, 20, 2,
+7 operazioni di differenza) e occasionali `CALENDARIO CIECO` (un agente su
+quattro che non legge il calendario in tempo). **Confermato con un monitor in
+tempo reale** (`Get-Process metatester64` in loop ogni 300ms): nell'istante
+esatto in cui il canarino NEWS veniva scritto nel log, **4 processi
+`metatester64.exe` erano vivi contemporaneamente** — uno per cella/finestra
+(2 magic x 2 finestre IS/OOS) — tutti a leggere lo STESSO
+`Common\Files\<calendario>.csv` nello stesso istante.
+
+**Disabilitando Core 2/3/4** nel pannello Strategy Tester -> scheda **Agenti**
+(non Strumenti->Opzioni: e' un sotto-pannello del Tester stesso), lasciando
+**Core 1 solo**, la corsa successiva ha dato gemelli **IDENTICI AL CENTESIMO**
+su IS e OOS, prima corsa pulita su sei tentativi. Causa chiusa, non solo
+indiziata.
+
+**Perche' capita solo su QUESTE righe e non sulle altre**: le righe normali
+(1 asse vero, N celle diverse per parametro) non hanno un obbligo di identita'
+fra celle — se due celle "vicine" leggono il calendario con un microscarto di
+timing, il numero cambia ma nessun gate se ne accorge. Il "gemello di
+coerenza" (introdotto per verificare che il banco non sia sporco) e' l'UNICA
+classe di riga che confronta DUE celle pretendendo identita' bit-per-bit — ed
+e' proprio per questo che il difetto, probabilmente presente anche altrove,
+qui si vede.
+
+> ✅ **REGOLA**: prima di lanciare una riga con un asse "gemello di
+> coerenza" (celle che DEVONO uscire identiche, non solo confrontabili),
+> **disabilitare tutti gli agenti locali tranne uno** nel pannello Strategy
+> Tester -> Agenti, per TUTTA la durata di quella riga (blocco 1 e blocco 2).
+> Si rimettono gli agenti attivi dopo, per le righe normali dove la velocita'
+> conta e l'identita' bit-per-bit non e' richiesta. Va scritto nella pagina
+> `_DA_MANDARE.md` di ogni riga che usa questo pattern (non solo nel driver),
+> perche' e' un passo MANUALE che nessuno script puo' forzare da fuori MT5.
+

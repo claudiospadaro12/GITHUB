@@ -126,6 +126,17 @@ da solo se lo storico M1 di EURUSD non è ancora sul disco del PC di backtest.
 *(R102 dichiarava ~10 milioni di barre M1 EURUSD già scaricate su quel PC: se
 sono ancora lì, la misura è veloce.)*
 
+> 🏁 **PRIMA DI LANCIARE QUESTO BLOCCO: disabilita tutti gli agenti locali
+> tranne uno.** Pannello **Strategy Tester → scheda Agenti** (non
+> Strumenti→Opzioni): click destro su Core 2/3/4/... → **Disabilita**, lascia
+> solo **Core 1**. **Causa confermata, non sospettata** (checklist classe 129):
+> con più agenti attivi le 2 celle gemelle (774701/774706) girano in
+> **parallelo** e si accavallano leggendo lo stesso calendario condiviso —
+> risultato: `CALENDARIO CIECO` occasionale e i due gemelli che **NON**
+> escono identici, con lo scarto diverso a ogni rilancio. Con un solo agente
+> i gemelli tornano **identici al centesimo**. Si rimettono gli agenti dopo,
+> per le righe normali dove l'identità bit-per-bit non serve.
+
 ## 2️⃣ CORSA VERA (2 celle × 2 finestre, Modello 1 OHLC M1)
 
 ```powershell
