@@ -3,7 +3,65 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-09-05 sera** (R117 classe 134). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-05 notte** (R117 chiuso, **R117BIS pronto**). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🗓️ AGGIORNAMENTO 05/09 NOTTE — 🎯 **R117 CHIUSO, R117BIS PRONTO** (NASUSD): la stessa cella, la finestra piu' lunga che esiste
+
+**Come e' finito R117 (tick reali, cella congelata N=40 / sigma=1,35):**
+
+| gamba | verdetto |
+|---|---|
+| **D30EUR** | 🔴 **BOCCIATA PER RISCHIO** — E OOS **-0,267R**, PF **0,452**, DD **25,01%**, peggior giornata **-5,20%**. **CHIUSA: non si ritocca.** |
+| **NASUSD** | 🟠 **MERITO SOSPESO** — E OOS 0,063R (zona morta), PF OOS **1,189** (passa), DD OOS 8,40% (zona morta), peggior giornata -2,12% (passa). **A6 non soddisfatto: n IS 87 / n OOS 154.** E A3 segnala un'incoerenza: **IS in perdita (PF 0,754), OOS in utile**. Il rischio non e' mai stato rosso. |
+
+### 🔴 Il fatto che serve sapere PRIMA di chiedere un altro round
+
+**A6 (n >= 150 in IS *e* in OOS) NON e' raggiungibile su NASUSD**, e non lo
+diventa spostando lo split. Aritmetica da numeri **misurati** in R117: la
+frequenza media e' **0,525 operazioni per giorno feriale** (IS 0,475 / OOS
+0,558), quindi 300 operazioni chiedono **567 giorni feriali**; dal pavimento
+`2024.09.26` a oggi ce ne sono **503**. **Ne mancano 64, cioe' ~3 mesi.**
+E il pavimento **non si abbassa**: BCM sugli indici e' **dichiarato completo**,
+lo storico `_EXT` e' in frigo per il **cancello zero**.
+📅 **A6 si soddisfa da sola aspettando: i 567 feriali cadono intorno al
+27/11/2026.** La prossima tappa scritta e' rifare la stessa corsa a dicembre con
+`@FINOA 2026.11.30`.
+
+### Cosa fa allora R117BIS (e cosa NON fa)
+
+- **Non tocca il motore di una riga**: cella congelata identica, **stesso blob**
+  dell'EA (`f24ff688…`, v1.03, gia' compilato due volte con 0 errori).
+- Muove **solo la finestra di misura**: `@FINOA` **2026.06.30 -> 2026.08.31**
+  (+44 feriali) e **FrazioneIS 0,40 -> 0,50**. Lo split cambia perche' **qui IS e
+  OOS non selezionano niente** (nessuna griglia): lo split giusto e' quello che
+  **massimizza la meta' piu' piccola**, ed e' anche il valore da manuale.
+- **Due corse sole** (`NAS`, `NAS_GEM`), magic **nuovi** 774621/774631 cosi' un
+  CSV di R117 non puo' essere riletto al posto di uno di R117BIS.
+- **D30EUR non c'e'**: bocciata per rischio, e la regola B dice che il rischio
+  non si sospende e non dipende da n.
+- **Il collaudo del porto non si riesegue**: il riferimento del passo 0
+  (L=1506 / S=1431) esiste **solo** per la finestra vecchia. Si **eredita** da
+  R117 ed e' un **prerequisito dichiarato**. Al suo posto un **controllo di
+  coerenza** sulla densita' giornaliera, che il referto non chiama collaudo.
+- 🆕 **A6b, IL CAMPIONE UNITO — PROPOSTA, non firmata**: IS+OOS sono contigui e
+  non sovrapposti, le operazioni si sommano (~266 >= 150). `E` mediata pesando
+  per n (esatta), PF ricostruito dai lordi, peggior giornata = minimo dei due.
+  🔴 **Il drawdown unito NON si calcola e non si stima**, e il referto lo scrive.
+  **A6b non entra nel verdetto: la firma, se arrivera', e' di Claudio.**
+- 🆕 **Checklist classe 138**: il tetto barre si misura sulla **GAMBA**, non sulla
+  finestra intera. R117 chiedeva `-AccettoTettoBarre` per corse che ci stavano
+  **dentro** (256 e 386 giorni contro ~475), e un'eccezione chiesta sempre smette
+  di essere un'eccezione.
+
+- **Pagina:** `backtest_pipeline/righe/RIGA_RELATIVO_R117BIS_DA_MANDARE.md`
+  (marcatore `MARCATORE_RIGA_RELATIVO_R117BIS_v1`, pin
+  `48b035cf677913990b26bb125c974924d2d58e08`, **6 file su 6 verificati** con
+  `git ls-tree` + `curl`).
+- ⚠️ **Non provato qui:** compilazione, corsa vera, PS 5.1. Il banco pwsh copre
+  parse, ASCII, classe 79, i due gate sui prova, il gemellaggio, **10
+  controprove rifiutate** e i blocchi nuovi eseguiti su numeri finti.
 
 ---
 

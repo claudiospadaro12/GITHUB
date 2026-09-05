@@ -1536,3 +1536,55 @@ preset/sedia toccati.** Battute gemelle su M15 e M30 lo stesso giorno.
   tesi piu' lenta — `ABTG_DAX_Apertura_EU` opera su M5 ma su un **livello H1** e
   con stop largo, e **quella forma la tassa non la paga**. E' l'unica M5 viva in
   casa, e adesso si sa perche'.
+
+## 🪦 R117 RELATIVO D30EUR (M5, tick reali, cella N=40 / sigma=1,35) — BOCCIATA PER RISCHIO
+
+Finestra `2024.09.26 -> 2026.06.30`, split 40/60, rischio 0,65%, SL 2,75xATR,
+tetto 5 trade/giorno. **E OOS -0,267R · PF OOS 0,452 · DD OOS 25,01% · peggior
+giornata -5,20%.** Due muri prop sfondati insieme (DD > 10%, giornata < -5%):
+**bocciatura PER RISCHIO**, che l'Emendamento della Finestra (regola B) non
+sospende mai e che **non dipende da n**.
+
+> ⚠️ **NON si ritocca e NON si riprova con una finestra piu' lunga.** Allargare
+> la finestra non puo' riabilitare una gamba bocciata sul rischio. Era anche la
+> gamba con la previsione peggiore scritta PRIMA dei numeri: lo spread del DAX
+> nella nostra sessione (2,80 punti indice) mangiava da solo il **79%** del
+> cancello H8, e dalle 17 server in poi il DAX e' fuori dal suo cash.
+
+## ⏸️ R117 RELATIVO NASUSD (M5, tick reali, stessa cella) — MERITO SOSPESO (il rischio non e' mai stato rosso)
+
+**E OOS 0,063R** (zona morta: soglia 0,075, muro 0,050) · **PF OOS 1,189**
+(passa) · **DD OOS 8,40%** (zona morta: soglia 8,0, muro 10,0) · **peggior
+giornata -2,12%** (passa) · **A7 0,00%** (collaudo passato).
+🔴 **A6 NON soddisfatto: n IS 87 / n OOS 154** contro i 150 richiesti in
+ENTRAMBE. E **A3 incoerente**: IS in perdita (PF 0,754), OOS in utile — ma su
+campioni di taglia molto diversa, quindi l'incoerenza **puo' essere rumore**.
+
+### 📏 E A6 NON E' RAGGIUNGIBILE SU QUESTA GAMBA — misurato, non temuto
+
+| | |
+|---|---:|
+| IS: 87 operazioni su 183 feriali | 0,475 op/gg |
+| OOS: 154 operazioni su 276 feriali | 0,558 op/gg |
+| media pesata | **0,525 op/gg** |
+| 300 operazioni (150+150) chiedono | **567 feriali** |
+| disponibili dal pavimento 2024.09.26 a oggi | **503** |
+| **mancano** | **64 feriali ~ 3 mesi** |
+
+Lo split e' un **gioco a somma zero**: il massimo ottenibile e'
+**min(n_IS, n_OOS) ~ 133**. Il pavimento non si abbassa (BCM sugli indici e'
+**dichiarato completo**; lo storico `_EXT` e' in frigo per il **cancello zero**).
+📅 **A6 si soddisfa da sola aspettando:** i 567 feriali cadono intorno al
+**27/11/2026**.
+
+📄 **RIGA PRONTA: R117BIS**, `righe/RIGA_RELATIVO_R117BIS_DA_MANDARE.md` +
+driver `righe/RIGA_RELATIVO_R117BIS.ps1` (pin `48b035cf…`, marcatore
+`MARCATORE_RIGA_RELATIVO_R117BIS_v1`). **Non tocca un solo parametro del
+motore** (stesso blob dell'EA): muove solo `@FINOA` a **2026.08.31** e
+`FrazioneIS` a **0,50**, cambia i magic (774621/774631) perche' un CSV di R117
+non possa essere riletto al posto di uno del round nuovo, e aggiunge tre blocchi
+di referto (**campione unito A6b — proposta, non firmata**; **quanto storico
+servirebbe per A6**; **controllo di coerenza col passo 0**).
+⚠️ **Il verdetto atteso resta `MERITO SOSPESO`**, e va detto prima: il round
+serve a leggere **A3 su campioni bilanciati** e a mettere agli atti il campione
+unito, non a far passare A6.
