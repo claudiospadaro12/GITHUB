@@ -8575,3 +8575,126 @@ corsa vera**, accanto al promemoria che gia' c'e'.
 ```powershell
 Write-Host 'CANARINO CLASSE 134, PRIMA CORSA VERA CON ZERO ASSI Y: nel referto la riga "passate:" e i DUE CSV devono avere 1 RIGA CIASCUNO. Se PROBLEMI dice "0 righe nel CSV", MT5 non ha accettato Optimization=1 senza parametri da ottimizzare: FERMATI, non lanciare le altre corse, mandami lo zip.' -ForegroundColor Cyan
 ```
+
+---
+
+### 🔴🔴 AGGIORNAMENTO DEL 05/09/2026 SERA — **LA CLASSE 134 SI E' AVVERATA IN CAMPO.** Non e' piu' `[INFERITO]`: e' **MISURATA**
+
+Claudio ha lanciato la corsa vera (`-Prova D30_PORTO -AccettoTettoBarre`, senza
+`-SoloControllo`). Il canarino scritto qui sopra ha **cantato**:
+
+```
+codice di uscita del generico: 0
+PROBLEMI: 2
+  - -1 righe nel CSV IS, 1 attesa (cache del tester? un asse rimasto acceso? passata morta a OnInit?).
+  - -1 righe nel CSV OOS, 1 attesa (cache del tester? un asse rimasto acceso? passata morta a OnInit?).
+```
+
+`ABTG_Relativo_D30EUR_IS_D30_PORTO.csv` e `..._OOS_D30_PORTO.csv`: **0 byte
+tutti e due**. MT5 non ha dato **nessun** errore, il generico e' uscito con
+**codice 0**, e la misura **non esiste**.
+
+#### Il fatto che scioglie l'ambiguita' fra "una passata" e "zero passate"
+
+Il rilievo lasciava aperte due possibilita'. **Il file da 0 byte le separa**, e
+la prova sta nel codice dell'EA:
+
+- `OnTesterDeinit` fa `FileOpen(...FILE_WRITE...)` **prima** del ciclo
+  `while(FrameNext(...))`, e **l'intestazione si scrive DENTRO il ciclo**, al
+  primo frame (`if(!header_scritto)`, `ABTG_Relativo.mq5`).
+- Quindi: **file creato** = `OnTesterDeinit` **e' stato chiamato**;
+  **file vuoto** = `FrameNext` **non ha restituito nemmeno un frame**.
+- Nessun frame ⇒ **`OnTester` non e' mai girato** ⇒ **MT5 non ha eseguito
+  NESSUNA passata**. Non "una passata muta": **zero**.
+
+E le `-1` righe del referto sono la stessa cosa vista dall'altra parte:
+`Get-Content` su un file da 0 byte torna 0 righe, meno l'intestazione = **-1**.
+
+👉 **Verdetto: `Optimization=1` + zero input marcati `||Y` = ZERO PASSATE.**
+E' lo **stesso muro** del *"sweep degenere"* del 07/08 (*"quattro CSV vuoti dopo
+una notte di macchina"*), che in casa era gia' stato pagato una volta e che il
+generico infatti ferma ancora — solo che a **zero** assi il controllo l'avevamo
+appena aperto.
+
+#### ❌ E QUI VA CORRETTO UN CONSIGLIO SCRITTO IN QUESTA STESSA CLASSE
+
+Il riquadro qui sopra diceva:
+
+> 🚫 *Cio' che NON si fa: rimettere l'asse finto per "stare tranquilli". Su R117
+> raddoppierebbe le passate a tick reali e toccherebbe sei prova firmati.*
+
+**Quel consiglio era SBAGLIATO, e lo si scrive invece di cancellarlo.** Le due
+obiezioni non reggono alla misura:
+
+| obiezione di allora | cosa dice il fatto |
+|---|---|
+| "raddoppia le passate a tick reali" | Vero in CPU, **falso in tempo di parete**: le passate di un'ottimizzazione MT5 le distribuisce sugli agenti, e il round gira **a 4 agenti**. Due passate = due agenti. E comunque **il costo di zero passate e' infinito**: non misuri niente. |
+| "tocca sei prova firmati" | I sei prova erano gia' stati toccati due volte (v2, v3). E la **cella firmata (N=40, σ=1,35) NON si tocca**: il magic **non e' un parametro economico**, e' un'etichetta. |
+| "la 133 ha gia' misurato che quella strada e' peggiore" | La 133 **non aveva misurato niente** di quella strada: aveva misurato che il generico si fermava. Erano due cose diverse messe nella stessa frase. |
+
+**LA REGOLA VERA, e vale in generale:** quando la scelta e' fra *"una misura
+che costa il doppio"* e *"nessuna misura che costa zero"*, **non e' una scelta**.
+Il costo di una passata in piu' si paga; il costo di un round che esce verde
+senza aver misurato niente **non si vede nemmeno**.
+
+#### ✅ LA SOLUZIONE APPLICATA (05/09, ed e' quella di casa da agosto)
+
+**ASSE TECNICO A DUE CELLE SU `InpMagic`**, nei sei prova di R117:
+
+```
+InpMagic=774601||774601||50||774651||Y
+```
+
+- **Non e' una griglia.** Il magic e' un'**etichetta**: non entra in nessun
+  calcolo, non tocca lo spread, non tocca il lotto, non tocca il segnale. La
+  cella misurata resta N=40 / σ=1,35 / SL 2,75 ATR / rischio 0,65%.
+- **Rimette MT5 in ottimizzazione VERA**, che e' l'unico modo perche'
+  `FrameAdd` esista e `OnTesterDeinit` scriva qualcosa.
+- **La seconda cella e' un GEMELLO DI DETERMINISMO GRATIS**: stessi input,
+  magic diverso, **deve** venire identica. La riga legge la riga col **magic
+  DICHIARATO** e confronta le due (9 grandezze: 5 conteggi esatti + 4 numeri
+  economici a 0,01).
+- **Il passo e' 50, non 1**, apposta: `m+50` tiene tutte e dodici le etichette
+  dentro il blocco **7746xx** (verificato vergine) **senza collisioni** fra le
+  sei corse. Con passo 1, il magic ombra di `D30` (774602) sarebbe stato il
+  magic dichiarato di `NAS`.
+
+**Precedenti ESEGUITI, che al momento del rilievo erano gia' li' e andavano
+seguiti invece che scartati:** R102 (`RIGA_R102_CLASSIFICA_LUNGA.ps1`, riga
+~1003: *"InpMagic non e' nella forma gemella m||m||1||m+1||Y"* e `$CelleAttese
+= 2`), R103, e **R116** (`LONDONFX_R116_TICK.txt`, che a Modello 4 ha prodotto
+CSV pieni con `InpMotore` 3 celle **+ `InpMagic` 2 celle**).
+
+#### 🔬 IL CONFRONTO CHE CHIUDE IL CASO (fatto a banco, `.ini` contro `.ini`)
+
+| riga dell'`.ini` | R116B (**ha prodotto CSV**) | R117 v4 (**0 byte**) | R117 v5 (**il fix**) |
+|---|---|---|---|
+| `Optimization=1` | ✅ | ✅ | ✅ |
+| `OptimizationCriterion=6` | ✅ | ✅ | ✅ |
+| `Model=4` | ✅ | ✅ | ✅ |
+| **righe con `\|\|Y`** | **2** (`InpMotore`, `InpMagic`) | **0** | **1** (`InpMagic`) |
+
+👉 **L'unica differenza fra l'`.ini` che misura e quello che non misura e' il
+flag `Y`.** Tutto il resto e' identico riga per riga.
+
+#### 🛠️ E COSA E' CAMBIATO NEGLI SCRIPT (perche' non succeda a un altro round)
+
+| dove | cosa |
+|---|---|
+| i **6** `prove/RELATIVO_R117_*.txt` | `InpMagic` diventa l'asse tecnico `m\|\|m\|\|50\|\|m+50\|\|Y`, con un blocco di commento che spiega **perche'** e vieta il ritorno al valore secco |
+| `RIGA_RELATIVO_R117.ps1` (**v5**) | `$RigheAttese` 1 → **2**; `GateProva` pretende **esattamente UN asse** e che sia `InpMagic` **a 2 celle** nella forma esatta col magic della **sua** corsa; `LeggiGamba` **sceglie la riga col magic dichiarato** (prendere ciecamente la prima pubblicherebbe, una volta su due, i numeri della passata ombra) e **confronta le due**; **NON passa piu' `-PermettiCellaSingola`** |
+| `walkforward_generico.ps1` | il flag **resta** (opt-in, default spento: nessun round cambia), ma ora **urla la classe 134 a schermo** quando viene usato, e il messaggio *"CSV con zero passate"* nomina la causa e il rimedio |
+
+**Quando `-PermettiCellaSingola` e' ancora legittimo:** solo per un EA che scriva
+il suo CSV **direttamente** da `OnTester`/`OnDeinit` con `FileWrite`, senza
+passare dai frame. **In casa non ne esiste nessuno.**
+
+> ⚠️ **CIO' CHE ANCORA NON E' PROVATO, e va detto:** che la corsa v5 produca
+> davvero due righe per CSV lo si vede **solo su MT5**, e MT5 qui non c'e'. Il
+> banco ha provato: i sei gate, il gemellaggio a sei, le quattro controprove che
+> devono fallire, i cinque casi di lettura del CSV (compreso il file da 0 byte e
+> la riga ombra messa per prima), l'`.ini` generato col flag `Y` e il conteggio
+> **2 celle → 4 pass**, e la **non-regressione** del generico su un prova a
+> griglia vero (identico con e senza il flag, e identico al generico precedente).
+> **La prova definitiva e' la riga `gemello INTERNO` del referto della prossima
+> corsa vera.**
