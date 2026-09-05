@@ -9104,3 +9104,53 @@ dichiara **INERTE** invece di lasciarlo credere decisivo.
 > ⚠️ **Quello che questa classe NON dice:** che il tetto non esista. A M5 su una
 > gamba sola oltre ~475 giorni morde eccome, e li' il flag serve. Dice solo che
 > **va misurato dove il tester guarda.**
+
+---
+
+## 🆕 AGGIUNTA DEL 05/09/2026 (sera) — trovata dal **verificatore di stringhe** sulla pagina **SLIPPAGE LOGGER** (`RIGA_SLIPPAGELOGGER_DA_MANDARE.md` + `RIGA_SLIPPAGELOGGER.ps1` + `RIGA_SLIPPAGELOGGER_RACCOLTA.ps1` + `ABTG_SlippageLogger.mq5` v1.00, pin `7b2c6d24`), **la prima pagina del progetto che tocca un conto BCM REALE** (7.500 EUR veri).
+
+Il pacchetto e' per il resto **il piu' pulito verificato finora**: pin confermato con `git ls-tree` **e** `curl` (sha256 dei tre blob identico al locale), parse reale `Parser::ParseFile` 0 errori su entrambi i driver **e** sui tre blocchi incollabili estratti dalla pagina, ASCII puro ovunque, cultura invariante su ogni `ToString`/`Parse`, zero costrutti PS7-only, **48 token vietati censiti a ZERO sulle 1823 righe di codice dell'EA** (nessun `OrderSend`, nessuna `MqlTradeRequest`, nessun `#include`, zero commenti a blocco), 101 casi / 9 blocchi di autotest **contati uno per uno nel sorgente** e coincidenti coi `#define`, perimetro di scrittura limitato a due file in `MQL5\Experts\`, e la guardia sul conto **provata eseguendo in 6 scenari su 4 finti terminali** (compreso il terminale MISTO, respinto **anche se conteneva il login atteso**). Una voce sola, ed e' una classe **nuova** e di **pagina**.
+
+## 139. 🔓 LA SERRATURA ELENCATA FRA LE AUTOMATICHE MA IL CUI **DEFAULT LA LASCIA APERTA**: il cartello dice «ce ne sono cinque», ne funzionano quattro, e la quinta dipende da un gesto a mano che il cartello non nomina
+
+**Dove.** La pagina dello Slippage Logger, riquadro «🛡️ LA GUARDIA È PIÙ SEVERA DEL SOLITO», punto 5 su 5:
+
+> «E c'è una SECONDA serratura dentro l'EA stesso: l'input `InpLoginAtteso`. Se il terminale su cui lo trascini non è quel conto, **l'EA non parte**. Anche se la riga sbagliasse cartella, **il logger non misurerebbe il conto sbagliato**.»
+
+**Il fatto.** Nel sorgente, `ABTG_SlippageLogger.mq5` riga 188:
+
+```
+input long   InpLoginAtteso     = 0;      // 0 = qualunque
+```
+
+e riga 1685:
+
+```
+if(InpLoginAtteso != 0 && g_contoMio != InpLoginAtteso) return(INIT_PARAMETERS_INCORRECT);
+```
+
+**Col default, `InpLoginAtteso` vale 0 e il confronto non si fa MAI.** La serratura c'e' ed e' scritta bene — ma **nasce aperta**, e la chiude solo Claudio scrivendo il numero nella finestra degli input. La riga di lancio, per scelta dichiarata e giusta, **non installa nessun `.set`**: quindi non c'e' nessun automatismo che la chiuda al posto suo.
+
+**Perche' e' una classe e non un dettaglio.** Le altre quattro serrature del riquadro (`-LoginAtteso` obbligatorio, i due conti demo vietati per sempre, la cartella che ha visto un conto vietato scartata, il login preteso nei log) sono **automatiche**: girano da sole, e il verificatore le ha viste fermare la riga eseguendo. Elencare accanto a quelle una serratura **opt-in con default disattivato**, con la stessa grafia e nella stessa lista numerata, fa credere che il perimetro sia chiuso da cinque lati quando ne e' chiuso da quattro. **Il lettore conta le serrature, non i default.**
+
+E qui non e' un caso qualunque: e' la pagina che porta un artefatto **su un conto con soldi veri**, dove tutto il resto del pacchetto e' costruito apposta per non lasciare niente all'interpretazione.
+
+> ⚠️ **Quello che questa classe NON dice.** Non dice che il default sia sbagliato: `InpLoginAtteso = 0` e' **coerente col progetto dell'EA**, che deve poter partire anche su un demo per collaudare la macchina (e infatti lo dichiara in testa al referto e in ogni riga del registro). E non dice che ci fosse un rischio per il capitale: questo EA **non puo' mandare ordini** — verificato per costruzione, non per promessa. Il danno possibile era il piu' insidioso del progetto, non il piu' grave: **un file di zeri che somiglia a una misura**. Che poi la raccolta becca due volte (`login trovati nel registro`, `tipi di conto nel registro`), come e' stato provato eseguendo.
+
+### La regola
+
+> **Una protezione si puo' elencare fra le automatiche solo se e' automatica.**
+> Se il suo default la disattiva e a chiuderla e' un gesto a mano, il cartello
+> deve dirlo **nel punto in cui la elenca**, non venti schermate piu' sotto:
+> «questa la chiudi TU, e nasce aperta». Altrimenti chi legge conta cinque
+> serrature e ne ha quattro.
+>
+> Regola pratica per chi scrive la pagina: **accanto a ogni serratura, la
+> parola AUTOMATICA o A MANO.** Se non sai quale scrivere, apri il sorgente e
+> guarda il default — e' esattamente il gesto che questa classe pretende.
+
+**Fix applicato il 05/09/2026** (solo alla pagina, **nessun ri-pin**: il `.md` non viene scaricato da nessuna riga, quindi il pin `7b2c6d24` resta valido e i tre blocchi restano quelli verificati). Al punto 5 del riquadro e' stato aggiunto:
+
+> ⚠️ **Ma questa quinta serratura è l'unica delle cinque che devi CHIUDERE TU**: nel sorgente `InpLoginAtteso` nasce a **`0`**, e `0` vuol dire *«qualunque conto»* — cioè **serratura aperta**. Si chiude scrivendo il numero nella finestra degli input quando trascini l'EA sul grafico (**PASSO 3, punto 2**).
+
+Il PASSO 3 gia' lo diceva («Lasciarlo a `0` non è un guasto ... ma **butta via una protezione gratis**»): la pagina si contraddiceva da sola a 130 righe di distanza, e **la versione ottimista era quella che si legge per prima**.

@@ -85,6 +85,12 @@ si **rifiutano di partire** se lo lasci lì com'è.
 >    **`InpLoginAtteso`**. Se il terminale su cui lo trascini non è quel conto,
 >    **l'EA non parte** e lo scrive in Esperti. Anche se la riga sbagliasse
 >    cartella, **il logger non misurerebbe il conto sbagliato**.
+>    ⚠️ **Ma questa quinta serratura è l'unica delle cinque che devi CHIUDERE
+>    TU**: nel sorgente `InpLoginAtteso` nasce a **`0`**, e `0` vuol dire
+>    *«qualunque conto»* — cioè **serratura aperta**. Si chiude scrivendo il
+>    numero nella finestra degli input quando trascini l'EA sul grafico
+>    (**PASSO 3, punto 2**). Le prime quattro sono automatiche e non dipendono
+>    da te; questa sì, ed è il motivo per cui il PASSO 3 la ripete in grande.
 
 ---
 
