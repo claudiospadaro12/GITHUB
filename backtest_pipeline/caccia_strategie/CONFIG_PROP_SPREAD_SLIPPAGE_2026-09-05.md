@@ -442,6 +442,19 @@ la mediana.
 > 50504263 sta misurando un mondo senza slippage** — e il nostro unico
 > slippage misurato (21,5 punti, R109) viene da un **backtest a tick reali**,
 > non dalla demo. **La domanda D6 dice se il forward e' ottimista.**
+>
+> ✅ **RISPOSTA — [VERIFICATO, 05/09/2026, contatto diretto con BCM via Claudio]:**
+> confermato dal broker stesso: **sul conto demo NON c'e' slippage, solo sul
+> conto reale.** Chiude la domanda nel senso peggiore dei due possibili.
+> **Conseguenza diretta e permanente per il metodo di casa: OGNI numero di
+> P/L, drawdown o edge misurato sul forward demo (piccolo 50503392, 100k
+> 50504263) e' STRUTTURALMENTE OTTIMISTA sul fronte esecuzione** — manca
+> per costruzione il costo che la R109 aveva stimato a 21,5 punti su un solo
+> stop. Il forward demo resta valido per tutto il resto (frequenza, segno
+> del segnale, gestione, guardian, calendario) ma **NON puo' essere l'ultima
+> parola sul rischio di drawdown**: quello lo dice solo il backtest a tick
+> con slippage simulato (gia' fatto per R109/R116/R117) o il conto reale.
+> Va scritto in ogni referto che cita un numero di rischio dal forward demo.
 
 **D7 — volume e condizioni migliori**
 > _"Do you operate an active-trader / volume-tier programme (rebates, tighter
@@ -668,6 +681,8 @@ RISCHIO    Nessuno. ⚠️ D6 (demo = reale?) puo' dare una risposta
            SCOMODA: se la demo non simula lo slippage, tutto il forward
            su 50504263 e' ottimista su questa dimensione. E' meglio
            saperlo prima di comprare una challenge.
+           ✅ RISPOSTA ARRIVATA (05/09/2026): CONFERMATO da BCM.
+           Nessuno slippage su demo, solo su reale. Vedi D6 sopra.
 ```
 
 ---
@@ -684,8 +699,8 @@ RISCHIO    Nessuno. ⚠️ D6 (demo = reale?) puo' dare una risposta
    → P1 (misura) e D8 (domanda).
 5. **Il ping del NOSTRO VPS.** Non misurabile da qui, per costruzione. Ho
    dato il metodo (§2.3), non il risultato.
-6. **Se la demo BCM replichi il reale.** Nessuna fonte specifica su BCM; solo
-   il consenso generale (demo senza slippage). → D6.
+6. ~~Se la demo BCM replichi il reale.~~ **RISPOSTA ARRIVATA (05/09/2026):**
+   NO, confermato dal broker — niente slippage su demo, solo su reale. → D6.
 7. **Se BCM abbia scaglioni di volume.** Nessuna traccia. → D7.
 8. **La modalita' di esecuzione dei nostri simboli.** Decide se meta' del
    §3 e' rilevante o decorativa. → P2, ed e' misurabile in casa.
