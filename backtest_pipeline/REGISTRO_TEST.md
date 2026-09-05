@@ -1195,3 +1195,107 @@ ritarati** su questi simboli/eventi. Righe: `RIGA_POSTNEWS_ISM.ps1` e
   casa): si cerca un MECCANISMO diverso sulla stessa inefficienza (fade,
   liquidity sweep, gestione a tempo). Caccia aperta il 05/09/2026, dossier
   in arrivo in `caccia_strategie/`.
+
+---
+
+### SECONDA CACCIA POST-NEWS (05/09/2026) — 3 meccanismi MISURATI, 3 bocciati, 0 promossi
+
+Dossier completo: `caccia_strategie/CACCIA_POSTNEWS_MECCANISMI_2026-09-05.md`.
+Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi,
+nessun EA/preset/sedia toccati.** Applicazione della Regola della seconda
+caccia dopo il PF<1 su 4 letture (ISM 15:00 EURUSD 0,76/0,79 · 13:30 USDJPY
+0,66/0,90).
+
+- 🧪 **PER LA PRIMA VOLTA LA FAMIGLIA NEWS E' STATA MISURATA, NON OPINATA.**
+  Sonde Python su barre M1 esterne (FutureSharks, GPL-3.0, Oanda, **UTC come
+  il nostro calendario FF: zero conversioni di fuso**): **EUR_USD 3.719.294
+  barre** e **XAU_USD 3.594.016**, 2010-01-03 -> 2020-05-14. **686
+  giornate-evento su EURUSD, 683 su oro, 7 varianti di meccanismo**, ognuna col
+  **controllo a ingressi casuali** (che esce PF 1,00 / 1,06 = sonda non
+  sbilanciata). Sonde in `caccia_strategie/biblioteca/sonde_esterne/sonda_postnews*.py`.
+  ⚠️ Limiti dichiarati: non e' BCM, OHLC non tick, **ZERO costi**, finestra che
+  NON copre il regime 2021-2026. **Misure di occasioni, mai verdetti (F6).**
+- 🪦 **LAPIDE — IL FADE POST-NOTIZIA E' CHIUSO, MISURATO.** ISM: **PF 0,85
+  (t -1,26)** EURUSD e **PF 0,73 (t -2,41)** oro; 13:30: PF 1,10 contro un
+  controllo casuale a 1,06 (EURUSD) e 1,08 contro **1,11** (oro, cioe' PEGGIO
+  del caso). **Il segno si ribalta fra blocchi e fra simboli.** Ragione
+  strutturale: il fade e' lo specchio del breakout **sugli stessi prezzi di
+  scatto** -> a somma quasi nulla, e paga lo spread due volte.
+  **Invertire una strategia perdente non e' un meccanismo nuovo.**
+- 🪦 **LAPIDE — LIQUIDITY SWEEP sul range della notizia: chiuso.** ISM **PF
+  0,86** (4/11 anni), 13:30 PF 1,18 ma contro casuale 1,06 e tutto fatto nel
+  2010-2012. **E' il TERZO giro sulla stessa geometria**: BreakinBox chiuso a
+  tick il 31/08 (PF 1,007, DD 24,1%) e R95 0/30. Cambiare il LIVELLO (range
+  news invece del box notturno) non cambia la geometria.
+- ⏱️ **USCITA A TEMPO 30': l'unica variante con t>2, UCCISA DALLA PROVA
+  DELL'EPOCA.** ISM EURUSD tutto 2010-2020: media +1,84 pip, t 2,73, PF 1,57,
+  9/11 anni. Ma **2010-2011 (n=73): +7,87 pip, PF 3,14, +574,7 pip** contro
+  **2012-2020 (n=298): +0,36 pip, t 0,61, PF 1,12**. **L'84% del profitto dal
+  20% del campione, e sono i due anni piu' vecchi.** +0,36 pip su stop 25 =
+  **0,014R contro il cancello 0,075R NETTI** (FIRMA 2). Sul blocco 13:30 la
+  stessa gestione e' NEGATIVA su entrambi i simboli (PF 0,93 e 0,79).
+  🟡 Lascito utile: **se il motore si riaccende, la finestra viva giusta e'
+  ~30 minuti, non 70-85.**
+- 🔴 **RILIEVO SULLE SEDIE VIVE, non un candidato: `InpUseOCO=false` e il
+  DOPPIO RIEMPIMENTO al 24%.** Misurato: **92/371 = 24,8%** (ISM) e
+  **74/315 = 23,5%** (13:30) delle giornate riempiono ENTRAMBE le gambe.
+  Senza OCO la giornata di whipsaw vale **-2,0R** mentre il trend pulito paga
+  **+1,2R**: asimmetria STRUTTURALE contro la strategia. A 0,65%/evento fa
+  **1,30% in una giornata** invece di 0,65% = il doppio del contratto della
+  sedia. ⚠️ `InpUseOCO` **e' un input**: la tensione con la Regola della
+  seconda caccia e' DICHIARATA, non aggirata. **Decisione di Claudio.**
+- 🆕 **SCOPERTA NEI DATI DI CASA (mai vista in 3 dossier notizie): i CSV
+  `biblioteca/dati/CALENDARIO_news-*.csv` contengono FORECAST e ACTUAL.**
+  **1.667 eventi USA ad alto impatto** con entrambi i valori, **2021.01.05 ->
+  2024.10.29** (⚠️ **NON** fino al 2025 malgrado il nome del file; colonna
+  "precedente" vuota ovunque). Mappatura verificata su 3 verita' note (NFP dic-2020
+  -140K, NFP mar-2023 236K, ISM dic-2020 60,7).
+  📐 Giornate distinte: 13:30 **220** · 15:00 **138** · Claims **199** ·
+  15:00+Claims **319** (si sovrappongono solo 18 volte) · tutti e tre **452**
+  in 3,8 anni. 🎯 **Poolati, i 452 darebbero 226 IS + 226 OOS = la PRIMA volta
+  che la famiglia news vede il pavimento dei 150** — ma **solo poolando**, e
+  `InpActionHour` e' una costante dell'istanza (r.74-75): servirebbe leggere
+  l'ora dell'evento dal CSV.
+- 🟡 **UNICO MECCANISMO ANCORA IN PIEDI, e NON misurabile da qui: la SORPRESA
+  (actual vs forecast), un solo lato.** I prezzi esterni finiscono 2020-05, il
+  calendario con sorpresa comincia 2021-01: **zero giorni in comune. Nessun
+  numero, e non lo invento.** Due obiezioni gia' agli atti prima di spendere un
+  round: (a) **tre misure indipendenti** dicono che la sorpresa e' gia' prezzata
+  molto prima del minuto 15 — Ederington-Lee ("40 seconds", da snippet),
+  **Takahashi arXiv 2508.06788 letto oggi nel PDF: _"shocks dissipate almost
+  entirely within a second"_**, Mesfin ("just the news spike itself");
+  (b) **Ben Omrane & Savaser 2016 (JIFMIM 45): "sign switch effect"** — in
+  regimi di forte avversione al rischio il segno della reazione FX si INVERTE,
+  e le famiglie che lo fanno sono consumi/casa/lavoro/credito [da snippet].
+- 🔧 **ATTREZZO (non un candidato da imbuto): `Economic Calendar CSV`,
+  Code Base 52977, Stanislav Korotky (`marketeer`), 22/10/2024 agg. 22/11/2024.**
+  Esporta il calendario nativo MT5 in CSV **e fa correzione di ora legale** sui
+  timestamp storici = **proprio il difetto DST misurato il 04/09** (10 NFP su
+  174 a 12:30 invece che 13:30). E' la sola strada per avere actual/forecast
+  oltre il 2024 e all'indietro. ⚠️ **Sorgente NON letto** (solo la pagina):
+  **va letto prima di girarlo.**
+- 📐 **Geometria, rilievo misurato:** il range post-notizia mediano (2 candele
+  M5, ISM) su EURUSD e' **13,2 pip** -> **lo SL di 25 pip vale 1,89 volte il
+  range che definisce il setup.**
+- 🥇 **Risposta PARZIALE alla domanda lasciata aperta il 04/09 ("quale asset
+  reagisce di piu'"): depurato del controllo casuale, oro ed EURUSD si
+  EQUIVALGONO** (+0,046R contro +0,041R per evento) e **sono entrambi sotto il
+  cancello**. Sull'oro **il controllo casuale guadagna da solo** (+0,055R): e'
+  deriva 2010-2012, non edge. **Cambiare simbolo non salva la famiglia.**
+- 🔧 **CORREZIONI DI METODO agli atti:** (a) **l'API arXiv risponde solo in
+  HTTPS** — in http torna **301 con 0 byte** (si legge come "fonte nulla" ed e'
+  falso); (b) **`api.github.com` e' inutilizzabile** da qui (**403**, "sessions
+  are bound to their configured repositories"): la ricerca GitHub si fa dalla
+  **UI**; (c) **la ricerca interna di mql5.com (`/en/search#!keyword=`) e' guidata
+  da JS e torna solo l'interfaccia**: inutile; (d) ⚠️ **una risposta di WebFetch
+  non e' una citazione**: sul PDF Takahashi il riassunto conteneva una frase
+  sul "reversal in the first few minutes" **che nel testo NON C'E'** — estratto
+  il PDF a mano, l'abstract dice l'opposto ("within a second").
+  **Sui paper: estrarre il testo, non fidarsi del riassunto.**
+- 🚧 **Buchi dichiarati:** **USD_JPY non esiste sulla fonte esterna (404 vero)**
+  -> il blocco 13:30 e' stato misurato su EURUSD e oro, **non sul simbolo della
+  cella bocciata**. Nessuna misura dopo il 2020-05 (il regime delle sedie non e'
+  coperto). Otto domini accademici bloccati; il paper piu' vicino al nostro
+  orizzonte — **Almeida-Goodhart-Payne, JFQA 1998, dati a 5 minuti, effetti nei
+  15 minuti dopo il rilascio** — e' su `researchonline.lse.ac.uk`, **bloccato**:
+  se un giorno si riapre la famiglia, **si parte da li'**.
