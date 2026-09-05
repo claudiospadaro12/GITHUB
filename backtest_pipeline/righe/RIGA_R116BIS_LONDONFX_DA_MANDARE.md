@@ -111,6 +111,12 @@ che hanno girato il 03/09 (verificato con `git ls-tree`: hash identici).
 
 ## 2️⃣ GBPUSD — **la corsa vera su banco pulito** (12 passate a tick reali)
 
+> ⚖️ **PRIMA di premere invio**: in fondo a questa pagina c'è
+> **«IL CONFRONTO COL 03/09 — le tre letture»**. I tre esiti possibili
+> (numeri ~uguali / numeri diversi / gemelli ancora divergenti) e cosa si fa in
+> ciascuno sono **congelati lì dentro ADESSO, che i numeri non esistono ancora**
+> (commit `f5d728e`, prima del lancio). **Si leggono prima, non dopo.**
+
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
@@ -156,7 +162,10 @@ scrupolo va bene, **ma va dichiarato come conferma**, non come "il vero numero".
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'CORSA CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
     Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
-    Write-Host 'E'' UNA CONFERMA, NON IL NUMERO NUOVO: l''EURUSD del 03/09 aveva gia'' i gemelli identici.' -ForegroundColor Gray }
+    Write-Host 'E'' UNA CONFERMA, NON IL NUMERO NUOVO: l''EURUSD del 03/09 aveva gia'' i gemelli identici.' -ForegroundColor Gray;
+    Write-Host 'GUARDA SUBITO LA RIGA "agenti locali durante la corsa": deve dire 1. Se dice piu'' di 1, i gemelli non vogliono dire niente.' -ForegroundColor Yellow;
+    $iv=[Globalization.CultureInfo]::InvariantCulture;
+    Write-Host ('POI nel REFERTO_R116BIS_LONDONFX_EURUSD.txt: riga modo: = CORSA, e riga data: = ORA DI AVVIO di QUESTA corsa (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + '): di referti EURUSD sul disco ce ne sono DUE (quello del 03/09 e questo), e la riga data: e'' quello che li distingue.') -ForegroundColor Gray }
 ```
 
 ---
@@ -183,7 +192,9 @@ ribalta il segno di `E`, **questo blocco non servirà.**
     if($z.Count -eq 0){ throw 'NESSUNO ZIP R116BIS_LONDONFX_FASE2_GBPUSD_ DI ADESSO SUL DESKTOP: la fase 2 non e'' arrivata alla raccolta. Mandami quello che vedi qui sopra.' };
     if($rc -isnot [int]){ Write-Host 'CODICE DI USCITA NON LETTO (capita su PS 5.1): fa fede il REFERTO nello zip.' -ForegroundColor Yellow };
     if(($rc -is [int]) -and ($rc -ne 0)){ Write-Host 'FASE 2 CON PROBLEMI: lo zip esiste lo stesso, mandalo.' -ForegroundColor Yellow };
-    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan }
+    Write-Host ('MANDA IN CHAT QUESTO FILE: ' + $z[0].FullName) -ForegroundColor Cyan;
+    $iv=[Globalization.CultureInfo]::InvariantCulture;
+    Write-Host ('ATTENZIONE AL NOME: il referto della fase 2 si chiama REFERTO_R116BIS_LONDONFX_GBPUSD.txt, LO STESSO NOME di quello della corsa vera. Si distinguono da DUE righe: modo: = FASE2 (non CORSA) e data: = ORA DI AVVIO di questa fase 2 (circa ' + $t0.ToString('yyyy-MM-dd HH:mm',$iv) + '), NON l''ora attuale (' + (Get-Date).ToString('HH:mm',$iv) + ').') -ForegroundColor Gray }
 ```
 
 ---

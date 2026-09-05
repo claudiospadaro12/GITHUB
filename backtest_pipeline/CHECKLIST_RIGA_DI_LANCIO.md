@@ -8307,3 +8307,73 @@ i **gesti a mano** (F3, Proprieta' dell'EA, screenshot) sono comunque
 > driver che sceglie una cartella dati **dichiara sempre il profilo che lo
 > lancia** (`$env:USERNAME`, `$env:APPDATA`), perche' e' il fatto che distingue
 > l'istanza viva dalla copia morta (classe 115-bis).
+
+---
+
+## 🆕 AGGIUNTE DEL 05/09/2026 (sera) — trovate dal **verificatore** su **R116-BIS LONDONFX** (`RIGA_R116BIS_LONDONFX.ps1` + pagina, pin `c3a21c67`), driver nato **copiando** la riga R116 gia' verificata e gia' girata il 03/09. Il pacchetto e' per il resto pulito (parse reale OK, ASCII puro, cultura invariante, monitor agenti verificato ESEGUENDO, 5 rami del giudizio classe 129 eseguiti uno per uno, guardia `-Pin` arriva allo zip). Due voci: una **recidiva della 110 nella forma della 115-ter**, e una **classe nuova**.
+
+### 110-bis. 🗓️ RECIDIVA DELLA 110 (05/09/2026): il promemoria della riga `data:` **muore nella riscrittura del blocco**, non nella dimenticanza
+
+Nella pagina madre `RIGA_R116_LONDONFX_DA_MANDARE.md` (03/09) **tutti e due** i
+blocchi di corsa vera chiudevano con la riga della classe 110:
+
+```
+POI nel REFERTO_..._<SIMBOLO>.txt: riga modo: = CORSA, ... e riga data: = ORA DI
+AVVIO di questa corsa (circa <t0>), NON l'ora attuale (<adesso>)
+```
+
+Nella pagina figlia `RIGA_R116BIS_LONDONFX_DA_MANDARE.md` (05/09) il blocco
+GBPUSD **la conserva**, il blocco EURUSD **no**: quel blocco era stato
+**riscritto** per dire un'altra cosa (_"e' una CONFERMA, non il numero nuovo"_),
+e la frase nuova ha **sostituito** l'ultimo `Write-Host` invece di aggiungersi.
+Nessuno ha cancellato una protezione: e' sparita perche' occupava il posto in
+cui e' stata scritta la frase nuova.
+
+E' il caso peggiore per la 110, non uno qualunque: dopo il bis **sul disco ci
+sono DUE referti EURUSD** (03/09 e oggi), il 03/09 e' **quello buono** (PROBLEMI
+0, gemelli identici) e viene citato in pagina — cioe' esattamente la situazione
+in cui un referto stantio si rimanda in buona fede.
+
+> ✅ **REGOLA (due pezzi).**
+> 1. **Quando si RISCRIVE un blocco copiato, si fa il diff dei `Write-Host` con
+>    quello della pagina madre, non solo la rilettura del blocco nuovo**: quello
+>    che manca non si vede leggendo, si vede confrontando. Un `Write-Host` che
+>    sparisce e' una protezione che sparisce.
+> 2. **Ogni blocco che produce un referto con una riga `data:` la nomina**, senza
+>    eccezioni per i blocchi "facoltativi" o "di conferma" — sono proprio quelli
+>    lanciati in coda a una giornata lunga, con gli zip vecchi ancora sul Desktop.
+
+## 132. 🧾 DUE MODI DELLO STESSO DRIVER SCRIVONO **REFERTI DIVERSI CON LO STESSO NOME DI FILE**: si distinguono solo dalla cartella che li contiene — e la cartella sparisce quando si scompatta
+
+Il nome dello **zip** porta il modo (`R116BIS_LONDONFX_GBPUSD_...` per la corsa
+vera, `R116BIS_LONDONFX_FASE2_GBPUSD_...` per la fase 2 da sola), ma il nome del
+**referto dentro** no:
+
+```powershell
+$ZipNome = "R116BIS_LONDONFX_" + $Simbolo + "_" + $Stamp
+if($Modo -ne "CORSA"){ $ZipNome = "R116BIS_LONDONFX_" + $Modo + "_" + $Simbolo + "_" + $Stamp }
+...
+$refPath = Join-Path $Cart ("REFERTO_R116BIS_LONDONFX_" + $Simbolo + ".txt")   # <- il MODO non c'e'
+```
+
+Corsa vera e fase 2 (e, in un giro `-SoloControllo`, anche il giro a vuoto)
+producono tutti e tre `REFERTO_R116BIS_LONDONFX_GBPUSD.txt`. Finche' restano
+negli zip sono distinti; **appena si scompattano due zip nella stessa cartella,
+uno sovrascrive l'altro in silenzio** — e i due referti si somigliano riga per
+riga (stessa intestazione, stessi cancelli, stesse etichette), quindi la
+sostituzione non si vede leggendo. La differenza sta in **una riga sola**,
+`modo:`, all'inizio.
+
+Non e' un difetto di questo round soltanto: e' lo stampo di casa (il nome del
+referto si compone da round + simbolo, il modo entra solo nel nome dello zip).
+
+> ✅ **REGOLA (due pezzi).**
+> 1. **Il MODO entra nel nome del REFERTO, non solo in quello dello zip**:
+>    `REFERTO_<ROUND>_<SIMBOLO>.txt` per la corsa vera, e `_CONTROLLO` / `_FASE2`
+>    per gli altri modi. Un artefatto si identifica dal suo nome, non dal
+>    contenitore da cui e' stato tirato fuori.
+> 2. **Finche' lo stampo non e' cambiato**, ogni blocco della pagina che non e'
+>    la corsa vera **dice a schermo che il referto ha lo stesso nome degli
+>    altri** e quali due righe lo distinguono (`modo:` e `data:`). Costa un
+>    `Write-Host`; l'alternativa e' rileggere il referto sbagliato credendolo
+>    quello giusto, che e' la classe 110 con un'altra faccia.
