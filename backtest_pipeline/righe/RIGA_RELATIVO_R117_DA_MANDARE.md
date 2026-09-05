@@ -189,7 +189,18 @@ questo EA: **mettici il tempo che ci mette, e se sembra bloccato guarda che il
 tester stia macinando invece di fermare tutto.** Il referto porta l'**ora di
 avvio**, non quella di fine, apposta.
 
-## 📌 IL PIN — **`434e271426ead410b3ec6a868a1ffa6d25bf31c4`**
+## 📌 IL PIN — **`c78a519257e3c5355c69029dfeb4d6fcfec017e1`**
+
+> 🔧 **RI-PINNATO IL 05/09 (notte), classe 137.** Il pin precedente
+> (`434e271…`, quello con cui è girata `D30_PORTO`) faceva uscire
+> **`Autotest Falliti = 1` su 20** in **ogni** corsa — e non era il nucleo:
+> era il **blocco 5 dell'autotest** che si cancellava da solo il valore
+> atteso. **I numeri economici di `D30_PORTO` restano validi** (l'autotest
+> gira in `OnInit` e non scrive nient'altro che le sue due colonne): quella
+> corsa va **riletta senza quei due `PROBLEMI`**, non rifatta.
+> ⚠️ **Ma la cartella di lavoro va SVUOTATA prima di ripartire** (classi
+> **135** e **136**): gli artefatti del pin morto hanno **lo stesso nome** di
+> quelli buoni, e la raccolta "prende il più recente".
 
 🔁 **RIPINNATA il 05/09/2026 sera**, e stavolta **dopo una corsa VERA fallita**,
 non dopo un giro a vuoto. Il pin `371083bf…` (v4) **girava**: il generico non si
@@ -477,7 +488,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -SoloControllo -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -504,7 +515,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -523,7 +534,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_PORTO -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -542,7 +553,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30 -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -561,7 +572,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova D30_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -580,7 +591,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -599,7 +610,7 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_RELATIVO_R117.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_RELATIVO_R117.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_RELATIVO_R117_v5' -Quiet)){ throw 'SCRIPT VECCHIO O SBAGLIATO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Prova NAS_GEM -AccettoTettoBarre; $rc=$LASTEXITCODE;
@@ -621,12 +632,12 @@ review ha trovato **tre residui**, tutti chiusi in `v3`:
 > prendeva **il più recente e basta**: se una delle sei corse non fosse arrivata
 > alla raccolta, avrebbe **impacchettato lo zip del pin vecchio** e l'avrebbe
 > stampato in verde come `TROVATO`. Adesso ogni zip candidato viene **aperto sul
-> referto della sua cartella** e accettato **solo se dentro c'è il pin `434e271`**:
+> referto della sua cartella** e accettato **solo se dentro c'è il pin `c78a519`**:
 > uno zip del pin vecchio viene **scartato in rosso**, non spedito.
 
 ```powershell
 & { $ErrorActionPreference='Stop';
-    $pin='434e271426ead410b3ec6a868a1ffa6d25bf31c4';
+    $pin='c78a519257e3c5355c69029dfeb4d6fcfec017e1';
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if($c -and (Test-Path -LiteralPath $c)){ $d=$c; break } }; if(-not $d){ $d=$env:USERPROFILE };
     $stamp=(Get-Date).ToString('yyyyMMdd_HHmm'); $out=Join-Path $d ('RELATIVO_R117_TUTTO_'+$stamp); New-Item -ItemType Directory -Force -Path $out | Out-Null;
     $att=@('RELATIVO_R117_D30_PORTO_2*','RELATIVO_R117_NAS_PORTO_2*','RELATIVO_R117_D30_2*','RELATIVO_R117_D30_GEM_2*','RELATIVO_R117_NAS_2*','RELATIVO_R117_NAS_GEM_2*'); $trovati=0; $scartati=0;
@@ -656,7 +667,7 @@ input accodati dal tester).
 **Le righe da guardare per prime, in questo ordine:**
 
 0. 🕐 **`pin:` e `data:`, in cima al referto — PRIMA DI TUTTO IL RESTO.** `pin:`
-   deve dire **`434e271426ead410b3ec6a868a1ffa6d25bf31c4`**: se dice `371083bf…`
+   deve dire **`c78a519257e3c5355c69029dfeb4d6fcfec017e1`**: se dice `371083bf…`
    stai leggendo il referto della **corsa di stamattina, quella che è uscita a 0
    byte**, e sotto non c'è nessuna misura. `data:` è l'**ora di AVVIO** (non di
    fine) e dev'essere quella della corsa che hai appena lanciato. *(Il 17/08 due
