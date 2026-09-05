@@ -715,8 +715,10 @@ if (-not $DataFolder) {
     if ($Minuti -gt 60) { $Minuti = 60 }
     Riga ""
     Riga ("=== PRESIDIO: " + $Minuti + " minuti di coda dal vivo sul log Esperti ===") "Cyan"
-    Riga "Stampo SOLO le righe nuove che contengono [GUARDIAN], [GUARDIA] o [CANARINO]," "Gray"
-    Riga "piu' la spia A1 (tetto di esposizione per simbolo)." "Gray"
+    Riga "Stampo le righe nuove che contengono [GUARDIAN], [GUARDIA] o [CANARINO], la spia A1" "Gray"
+    Riga "(tetto di esposizione per simbolo) e -- questa e' la differenza dalla sessione 1 -- TUTTE le" "Gray"
+    Riga "righe dei 5 mirror, anche quelle che non parlano di blocchi: durante la pausa sono proprio" "Gray"
+    Riga "quelle a interessare, perche' sono la gestione delle posizioni gia' aperte (criterio 6)." "Gray"
     Riga "Ctrl+C interrompe: non si perde niente, il log resta dov'e'." "Gray"
     Riga ""
     $lung = 0
@@ -736,6 +738,8 @@ if (-not $DataFolder) {
         foreach ($tk in @("[GUARDIAN]", "[GUARDIA]", "[CANARINO]", "fra posizioni e pendenti (tetto")) {
           if (Contiene $r $tk) { $interessa = $true }
         }
+        # i 5 mirror per nome (dall'artefatto): serve al criterio 6, non al 5
+        foreach ($nome in $EANOMI) { if (Contiene $r $nome) { $interessa = $true } }
         if (-not $interessa) { continue }
         $nNuove++
         $col = "White"
@@ -751,7 +755,7 @@ if (-not $DataFolder) {
     if ($nNuove -eq 0) {
       Riga "ZERO RIGHE NUOVE NON E' UN PASS: e' NON MISURATO." "Yellow"
       Riga "Il silenzio e' compatibile sia con 'l'enforcement funziona' sia con 'nessun EA voleva entrare'." "Yellow"
-      Riga "La prova del criterio 7 lato EA si ripete in un'altra finestra d'ingresso (vedi la pagina)." "Yellow"
+      Riga "La prova del criterio 5 lato EA si ripete in un'altra finestra d'ingresso (vedi la pagina)." "Yellow"
     }
     # rileggo tutto il file per il censimento finale di questo referto
     if (Test-Path $logEsperti) {
@@ -1004,7 +1008,7 @@ if (-not $DataFolder) {
   }
 
   # ---------------------------------------------------------------
-  # 10) I REFERTI DEL CANARINO (la parte DETERMINISTICA dei criteri 7/8)
+  # 10) I REFERTI DEL CANARINO (la parte DETERMINISTICA del criterio 5)
   # ---------------------------------------------------------------
   Riga ""
   Riga "=== REFERTI DEL CANARINO (MQL5\Files\ABTG_Canarino_*.txt) ===" "Cyan"
@@ -1344,66 +1348,119 @@ if (-not $DataFolder) {
     }
 
     Riga ""
-    Riga "  CRITERIO 7 -- il cap che rifiuta l'ingresso" "White"
-    Riga ("    [GUARDIAN] * CAP RISCHIO APERTO attivo   : " + $c7Guardian) (@{$true="Green";$false="Yellow"}[($c7Guardian -gt 0)])
-    Riga ("    [GUARDIA] INGRESSO BLOCCATO ... (firma C1): " + $c7Ea) (@{$true="Green";$false="Yellow"}[($c7Ea -gt 0)])
-    Riga ("    corse del canarino col cap ATTIVO         : " + $canCap) (@{$true="Green";$false="Yellow"}[($canCap -gt 0)])
+    Riga "  CRITERIO 5 -- la pausa B1 che morde" "White"
+    Riga ("    [GUARDIAN] * PAUSA NUOVI INGRESSI attiva  : " + $c5Guardian) (@{$true="Green";$false="Yellow"}[($c5Guardian -gt 0)])
+    Riga ("    [GUARDIA] INGRESSO BLOCCATO ... (firma B1): " + $c5Ea) (@{$true="Green";$false="Yellow"}[($c5Ea -gt 0)])
+    Riga ("    corse del canarino CON LA PAUSA ATTIVA    : " + $canPausa) (@{$true="Green";$false="Yellow"}[($canPausa -gt 0)])
     if (-not $censimentoFatto) {
-      Riga "    -> le due righe di log qui sopra NON sono state cercate: verdetto sul criterio 7 NON DATO." "Red"
-    } elseif ($c7Guardian -gt 0 -and $c7Ea -gt 0) {
-      Riga "    -> la catena e' COMPLETA a macchina: il Guardian ha alzato la bandiera e un EA VERO l'ha letta." "Green"
+      Riga "    -> le due righe di log qui sopra NON sono state cercate: verdetto sul criterio 5 NON DATO." "Red"
+    } elseif ($c5Guardian -gt 0 -and $c5Ea -gt 0) {
+      Riga "    -> la catena e' COMPLETA a macchina: il Guardian ha alzato la bandiera e un EA VERO l'ha letta" "Green"
+      Riga "       e ha rinunciato all'ingresso." "Green"
       Riga "       Manca solo l'occhio: NESSUN ORDINE NUOVO nella scheda Trade/Storico dentro la finestra (screenshot)." "Green"
-    } elseif ($c7Guardian -gt 0 -and $canCap -gt 0) {
-      Riga "    -> NON MISURATO sul lato EA: la bandiera c'era e il CANALE risponde (canarino), ma nessun EA" "Yellow"
-      Riga "       ha tentato di entrare in quella finestra. NON e' un PASS e NON e' un FAIL: si ripete." "Yellow"
-    } elseif ($c7Guardian -eq 0) {
-      Riga "    -> NON MISURATO: il cap non e' mai stato ATTIVO nel log di oggi (soglia non abbassata," "Yellow"
-      Riga "       oppure rischio aperto 0,00% = criterio non innescabile, R1)." "Yellow"
+    } elseif ($c5Guardian -gt 0 -and $canPausa -gt 0) {
+      Riga "    -> NON MISURATO sul lato EA: la bandiera c'era e il CANALE risponde (il canarino dice che un" "Yellow"
+      Riga "       ingresso sarebbe FERMATO), ma nessun EA ha tentato di entrare in quella finestra." "Yellow"
+      Riga "       NON e' un PASS e NON e' un FAIL: si ripete in una finestra d'ingresso (WIN.1-WIN.5)." "Yellow"
+    } elseif ($c5Guardian -eq 0) {
+      Riga "    -> NON MISURATO: la pausa non e' mai stata ACCESA nel log di oggi. O la soglia non e' stata" "Yellow"
+      Riga "       abbassata, oppure la giornata non era in perdita: con dailyPct<=0 nessuna soglia positiva" "Yellow"
+      Riga "       morde (Guardian riga 400) -- e' il GATE piu' sopra, non un difetto dell'enforcement." "Yellow"
     }
-
-    Riga ""
-    Riga "  CRITERIO 8 -- fail-open (si prova col CAP, MAI con la PAUSA)" "White"
-    Riga ("    corse del canarino con cap SCADUTO per anzianita': " + $canFail) (@{$true="Green";$false="Yellow"}[($canFail -gt 0)])
-    if ($canFail -gt 0 -and $secFailOpen) {
-      Riga ("    attesa misurata fra l'ultimo timbro del cap e la corsa: " + $secFailOpen + " secondi (tolleranza 120 s)") "Green"
-      Riga "    -> il cap e' scaduto DA SOLO col Guardian rimosso: il fail-open del CANALE e' MISURATO." "Green"
-    }
-    Riga ("    [GUARDIA] via libera ... (CAP RISCHIO APERTO)     : " + $c8Rientro) (@{$true="Green";$false="Yellow"}[($c8Rientro -gt 0)])
-    if (-not $censimentoFatto) {
-      Riga "    -> la riga di rientro dell'EA NON e' stata cercata: la parte EA del criterio 8 e' NON DATA." "Red"
-    } elseif ($c8Rientro -gt 0) {
-      Riga "    -> PASS PIENO: un EA vero, che era bloccato, ha scritto il rientro dopo la rimozione." "Green"
-      if ($OraRimozione) { Riga ("       Confronta l'ora della riga con l'ora di rimozione che hai annotato: " + $OraRimozione) "Green" }
-    } elseif ($canFail -gt 0) {
-      Riga "    -> NON MISURATO sul lato EA (nessun EA ha richiamato la guardia nei minuti della rimozione)." "Yellow"
-      Riga "       La parte deterministica (canale + include) e' verde: il canarino l'ha misurata." "Yellow"
+    Riga ("    [GUARDIA] via libera ... (PAUSA GIORNALIERA): " + $c5Rientro) (@{$true="Green";$false="Gray"}[($c5Rientro -gt 0)])
+    if ($c5Rientro -gt 0) {
+      Riga "    -> in piu': un EA ha scritto il RIENTRO dopo il ripristino a due passi. E' la prova, sul lato" "Green"
+      Riga "       EA, che la pausa e' davvero finita (e non solo che la soglia e' tornata a 4,0)." "Green"
     } else {
-      Riga "    -> NON MISURATO: manca la corsa del canarino oltre i 120 s dalla rimozione del Guardian." "Yellow"
+      Riga "    -> la riga di rientro NON e' obbligatoria per il PASS: l'include la stampa solo se QUELL'EA" "Gray"
+      Riga "       richiama la guardia dopo il ripristino (ABTG_GuardiaIngresso, ramo motivo==0). Se nessuno" "Gray"
+      Riga "       aveva piu' motivo di valutare un ingresso, non esce. La sua assenza non e' un FAIL." "Gray"
     }
 
     Riga ""
-    Riga "  C7.RIENTRO -- ATTESA NON OTTENIBILE IN QUESTA SESSIONE, e non e' un difetto del collaudo:" "Yellow"
-    Riga "  la riga '[GUARDIAN] cap rischio aperto rientrato:' la stampa il ramo else del timer SOLO se" "Yellow"
-    Riga "  GV_CAP e' ancora > 0 (ABTG_Guardian.mq5 righe 425-428). Ma OGNI cambio di parametri e OGNI" "Yellow"
-    Riga "  riattacco passano da OnInit, che azzera GV_CAP IN SILENZIO (riga 283): quando il cap torna a" "Yellow"
-    Riga "  3,25 la bandiera e' gia' a zero e la riga non esce. Comparirebbe solo se il rischio scendesse" "Yellow"
-    Riga "  sotto la soglia col Guardian ancora vivo e la soglia ancora bassa (una posizione che si chiude)." "Yellow"
-    Riga "  -> la sua assenza NON si conta come FAIL del criterio 7." "Yellow"
+    Riga "  CRITERIO 6 -- le posizioni aperte restano gestite durante la pausa" "White"
+    Riga ("    righe con la PROMESSA dell'include (C6.PROMESSA): " + $c6Promessa)
+    Riga "    ATTENZIONE: C6.PROMESSA e' la frase che l'include stampa a OGNI blocco ('La posizione" "Gray"
+    Riga "    eventualmente gia' aperta NON viene toccata.'). E' il RICHIAMO del criterio, NON la sua prova:" "Gray"
+    Riga "    lo dice l'artefatto stesso. Contarla come prova sarebbe leggere una promessa come un fatto." "Gray"
+    if ($null -eq $global:C6_INPAUSA) {
+      Riga "    eventi di gestione misurati fra le corse del canarino: NON CALCOLATI (servono almeno DUE corse)." "Yellow"
+      Riga "    -> criterio 6 NON MISURATO a macchina. Restano i tuoi screenshot della scheda Trade e lo Storico." "Yellow"
+    } else {
+      Riga ("    eventi di gestione fra corse ENTRAMBE IN PAUSA (SL mosso / volume calato): " + $global:C6_INPAUSA) (@{$true="Green";$false="Yellow"}[($global:C6_INPAUSA -gt 0)])
+      if ($global:C6_INPAUSA -gt 0) {
+        Riga "    -> PROVA DI FORZA 1 MISURATA: un evento di gestione con orario DENTRO la pausa. La guardia" "Green"
+        Riga "       non ha toccato le uscite: il criterio 6 ha la sua prova a macchina." "Green"
+      } else {
+        Riga "    -> NON MISURATO a macchina: fra due corse in pausa nessuno SL si e' mosso e nessun volume e'" "Yellow"
+        Riga "       calato. Puo' voler dire che non c'era niente da gestire (nessun trailing da fare), non che" "Yellow"
+        Riga "       la gestione sia ferma. Vale la prova di forza 2+3: posizione ANCORA APERTA a fine pausa" "Yellow"
+        Riga "       (elenco per ticket qui sopra) piu' le righe dei 5 EA dentro la finestra." "Yellow"
+      }
+    }
+    Riga "    E IL FAIL, per essere chiari: una posizione CHIUSA dalla guardia, o uno SL congelato mentre il" "White"
+    Riga "    prezzo corre e il trailing avrebbe dovuto muoverlo. Nessuna delle due cose la puo' dire questa" "White"
+    Riga "    riga da sola: si guardano lo Storico e il grafico." "White"
+
+    Riga ""
+    Riga "  IL 100k E' TORNATO A CASA? (condizione C-5 del cancello, e la cosa piu' urgente di tutte)" "White"
+    if ($null -eq $ultimaCorsa) {
+      Riga "    NESSUNA corsa del canarino letta: NON si puo' dire se la pausa e' spenta. LANCIA IL CANARINO" "Red"
+      Riga "    ADESSO e rilancia questa riga: finche' non lo fai, non sai se il 100k sta ancora fermo." "Red"
+    } elseif ($ultimaCorsa.PausaG -eq "NO") {
+      Riga ("    ULTIMA corsa del canarino (" + $ultimaCorsa.Ora + "): PAUSA B1 grezzo=NO -> le due GlobalVariable") "Green"
+      Riga  "    non ci sono piu': il latch e' SPENTO e i 5 mirror possono tornare a entrare." "Green"
+    } elseif ($ultimaCorsa.PausaG -ne "SI") {
+      Riga ("    ULTIMA corsa del canarino (" + $ultimaCorsa.Ora + "): la riga 'PAUSA B1 grezzo=...' NON e' stata letta") "Yellow"
+      Riga  "    dal referto (formato inatteso, o referto troncato). NON si puo' dire se la pausa e' spenta:" "Yellow"
+      Riga  "    apri il referto del canarino e leggilo con gli occhi, oppure rilancia il canarino." "Yellow"
+    } else {
+      Riga ("    *** ROSSO: ULTIMA corsa del canarino (" + $ultimaCorsa.Ora + "): PAUSA B1 grezzo=" + $ultimaCorsa.PausaG + " ***") "Red"
+      Riga  "    LA PAUSA E' ANCORA ACCESA: il 100k NON apre fino al reset del giorno prop (rischio X7)." "Red"
+      Riga  "    Uscita, in QUEST'ORDINE: 1) InpDailyPausePct = 4.0 sul Guardian; 2) F3 e cancellare" "Red"
+      Riga  "    ABTG_PAUSA_GIORNO_50504263 e ABTG_PAUSA_FINO_50504263; 3) rilanciare il canarino e" "Red"
+      Riga  "    ricontrollare che dica grezzo=NO. Non chiudere la sessione prima di aver letto quel NO." "Red"
+    }
+    if ($canDiverge -gt 0) {
+      Riga ("    RILIEVO: " + $canDiverge + " corsa/e con PAUSA scritta ma SCADUTA per l'include (grezzo=SI, ricalcolato=NO).") "Yellow"
+      Riga  "    In quella finestra il pannello del Guardian direbbe ATTIVA e gli EA aprirebbero LO STESSO." "Yellow"
+      Riga  "    Nella sessione 2 non e' il fail-open in prova (quello si fa col CAP): va spiegato nel verbale." "Yellow"
+    }
 
     Riga ""
     Riga "  E LA PARTE CHE NESSUNA MACCHINA PUO' DIRE (la fa Claudio, con gli screenshot):" "White"
-    Riga "   - nessun ORDINE NUOVO nella scheda Trade/Storico dentro la finestra di blocco;" "White"
+    Riga "   - nessun ORDINE NUOVO nella scheda Trade/Storico dentro la finestra di pausa (criterio 5);" "White"
+    Riga "   - la posizione aperta e' ANCORA LI' a fine pausa, e il suo S/L si e' mosso quando doveva (criterio 6);" "White"
     Riga "   - un solo Guardian nel menu Finestra (P-2);" "White"
-    Riga "   - il pannello e' tornato a 4,9 / 9,9 / pausa 4,0 / cap 3,25 con Azione CHIUDI+BLOCCA (C-5)." "White"
+    Riga "   - il pannello e' tornato a 4,9 / 9,9 / pausa 4,0 / cap 3,25 con Azione CHIUDI+BLOCCA, e la riga" "White"
+    Riga "     'Pausa morbida (4.0%): libera' -- non 'ATTIVA' (C-5);" "White"
+    Riga "   - F3 non contiene piu' ABTG_PAUSA_GIORNO_50504263 ne' ABTG_PAUSA_FINO_50504263." "White"
+    if ($OraGesto) {
+      Riga ("   (ora del gesto annotata da te: " + $OraGesto + " -- confrontala con l'accensione della pausa letta dal log)") "Gray"
+    }
   }
 
   # --- esito e codice d'uscita, a tre stati ---
+  #  Nella sessione 2 c'e' un ROSSO in piu' rispetto alla sessione 1, e non
+  #  riguarda il collaudo: riguarda il fatto che il 100k sia tornato a
+  #  operare. Una pausa lasciata accesa e' una giornata di forward persa
+  #  (rischio X7), e il posto giusto per urlarlo e' il codice d'uscita,
+  #  non una riga in mezzo al referto.
   if ($vietateTrovate -gt 0) {
     $Esito = "ROSSO: righe VIETATE trovate (" + $vietateTrovate + ")"
     $CodiceUscita = 1
   } elseif ($P_conto -like "ROSSO*") {
     $Esito = "ROSSO: conto sbagliato"
     $CodiceUscita = 1
+  } elseif ($accensioniDopoRitorno.Count -gt 0) {
+    $Esito = "ROSSO: la pausa si e' RIACCESA dopo il ritorno a 4,00 (GV cancellate prima di rialzare la soglia): IL 100k E' ANCORA IN PAUSA"
+    $CodiceUscita = 1
+  } elseif ($P_modo -eq "RACCOLTA FINALE" -and $null -ne $ultimaCorsa -and $ultimaCorsa.PausaG -eq "SI") {
+    $Esito = "ROSSO: l'ultima corsa del canarino vede ancora la PAUSA scritta: il 100k NON e' tornato a casa"
+    $CodiceUscita = 1
+  } elseif ($P_modo -eq "RACCOLTA FINALE" -and ($null -eq $ultimaCorsa -or $ultimaCorsa.PausaG -eq "")) {
+    $Esito = "PARZIALE: nessuna corsa del canarino leggibile a fine sessione -- lo stato della pausa NON e' misurato"
+    $CodiceUscita = 2
   } elseif ($P_log -like "FALLITO*" -or $P_artefatto -like "FALLITO*" -or $P_artefatto -like "SOSPETTO*") {
     $Esito = "PARZIALE: lettura incompleta (vedi i PASSI)"
     $CodiceUscita = 2
