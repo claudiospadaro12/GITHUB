@@ -43,7 +43,7 @@ uso: dichiararlo sempre per evitare confusione futura.
 **Stato deploy conto reale a fine giornata 06/09:**
 - `ABTG_SlippageLogger` — installato, live, **0 deal registrati** (nessun trade ancora eseguito su questo conto).
 - `ABTG_DAX_Apertura_EU` (770101) e `ABTG_ORB_Ottimizzato` (770611) — installati, CORSA pulita. Passi manuali (attaccare ai grafici, caricare i preset, AutoTrading) da confermare con Claudio la prossima sessione utile.
-- `ABTG_Guardian` (779002) — installato, CORSA pulita (0 problemi), preset caricato e verificato via screenshot (16/16 valori corretti: magic 779002, saldo 0, 4.9/9.9/4.0/3.25, azione enforce). **Da confermare**: Claudio ha premuto OK, acceso AutoTrading sul grafico del Guardian, e verificato la scheda Esperti con i 4 numeri firmati?
+- `ABTG_Guardian` (779002) — installato, CORSA pulita (0 problemi), preset caricato e verificato via screenshot (16/16 valori corretti: magic 779002, saldo 0, 4.9/9.9/4.0/3.25, azione enforce). **CONFERMATO da Claudio (06/09 sera): OK premuto, AutoTrading acceso, faccina verde.** Il conto reale ha ora la rete di protezione attiva su tutte e due le sedie.
 - ⚠️ **Promemoria permanente**: il blocco Guardian a -9,9% è definitivo (richiude tutto ogni secondo, comprese posizioni a mano) finché non si cancella a mano la GlobalVariable `ABTG_GUARD_10105439_FAILED` con F3 su MT5.
 
 ---
