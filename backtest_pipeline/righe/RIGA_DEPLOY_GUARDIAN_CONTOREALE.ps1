@@ -19,8 +19,36 @@
 #        installa: oggi sul reale non c'e' NESSUNA rete a livello di
 #        conto, solo il rischio per-trade dentro i due preset.
 #
+#  >>> 06/09 -- DA QUESTO GIRO NON E' PIU' UN'INSTALLAZIONE NUOVA: E' UN
+#      AGGIORNAMENTO DI SICUREZZA, v1.11 -> v1.12. E cambia due cose
+#      pratiche, tutte e due da sapere PRIMA di lanciare.
+#      IL PERCHE', in breve: sul conto reale c'e' un CREDITO del broker di
+#      2.500 EUR (stabile, non prelevabile) che si somma all'EQUITA' ma non
+#      al BILANCIO. La v1.11 catturava il saldo di riferimento e la
+#      baseline del giorno dal BILANCIO, e li confrontava con l'EQUITA':
+#      il credito faceva da cuscinetto finto e costante: con bilancio 5.000
+#      e credito 2.500, la pausa al 4,9% e il blocco al 9,9% non sarebbero
+#      scattati fino a una perdita VERA di oltre 2.700/3.000 EUR, cioe'
+#      oltre meta' del capitale. La rete c'era ma quasi non mordeva.
+#      LE DUE CONSEGUENZE PRATICHE:
+#       1. IL GUARDIANO E' GIA' SU UN GRAFICO VIVO di quel terminale.
+#          Va STACCATO A MANO PRIMA della CORSA (tasto destro sul suo
+#          grafico > Expert Advisors > Rimuovi), se no Windows tiene il
+#          suo .ex5 aperto e la CORSA si ferma da sola al momento di
+#          sostituirlo. Fermarsi li' e' il comportamento GIUSTO, non un
+#          guasto: si rimette tutto com'era e si rilancia dopo aver
+#          staccato. C'e' anche una SONDA che lo dice gia' in CONTROLLO.
+#       2. IL GATE DI VERSIONE ORA PRETENDE LA 1.12 E RIFIUTA LA 1.11 PER
+#          NOME -- perche' la 1.11 e' esattamente il file col bug che
+#          stiamo togliendo, e un pin vecchio lo rimetterebbe dentro.
+#          E siccome '#property version' e' solo una stringa, si
+#          verificano anche le TRACCE VERE del fix nel codice: baseline
+#          presa dall'EQUITA' e le cinque GlobalVariable della baseline
+#          rinominate _V2 (senza il rinomino il guardiano rileggerebbe il
+#          numero vecchio contaminato e il fix non prenderebbe).
+#
 #  >>> COSA INSTALLA, E DOVE (solo in modo CORSA, e SOLO li'): TRE FILE.
-#        <dati>\MQL5\Experts\ABTG_Guardian.mq5           (v1.11)
+#        <dati>\MQL5\Experts\ABTG_Guardian.mq5           (v1.12)
 #        <dati>\MQL5\Experts\ABTG_Guardian.ex5           (compilato qui)
 #        <dati>\MQL5\Presets\ABTG_Guardian_REALE.set
 #      TRE, NIENT'ALTRO. Nessun .chr, nessun .ini, nessun profilo,
@@ -186,7 +214,16 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 
 # --- IL GUARDIANO ----------------------------------------------------
 $EA      = "ABTG_Guardian"
-$VER     = "1.11"
+# VERSIONE PRETESA: 1.12, e il numero NON e' decorativo.
+# La 1.11 e' quella che sta GIA' sul conto reale, ed e' quella COL BUG
+# del credito: se il pin puntasse ancora a lei, questa riga rimetterebbe
+# nel terminale esattamente il file che stiamo sostituendo. Il gate piu'
+# sotto la rifiuta per nome, e insieme a lei si pretendono le due tracce
+# VERE del fix (baseline dall'equita' + GlobalVariable rinominate _V2):
+# la versione da sola e' una stringa, e una stringa si puo' alzare senza
+# aver corretto niente.
+$VER     = "1.12"
+$VER_KO  = "1.11"        # la versione col bug: si nomina, per poterla RIFIUTARE per nome
 $MAGIC   = "779002"
 $SET     = "ABTG_Guardian_REALE.set"
 $AVVIO   = "[GUARDIAN] avviato. Saldo iniziale="
@@ -284,6 +321,7 @@ $GiaLi      = "NON VERIFICATO"
 $ContoTxt   = "NON MISURATO"
 $BasiTxt    = "bases\ della cartella scelta: NON LETTE (il giro si e' fermato prima di sceglierla)"
 $CoinquiTxt = "NON VERIFICATO"
+$Ex5Aperto  = "NON MISURATO (il giro si e' fermato prima di guardare l'.ex5 del guardiano)"
 $SetCopiato = $false
 $BackupDir  = ""
 $Reale      = $null
@@ -600,8 +638,16 @@ try{
   }
   $term = @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)
   if($term.Count -gt 0){
-    [void]$Rilievi.Add("MT5 APERTO (" + (@($term | ForEach-Object { "pid " + $_.Id }) -join ", ") + "): e' ATTESO e va bene. " + $EA + " e' un file NUOVO per questo terminale, non sta su nessun grafico, quindi la compilazione non scarica niente; e questa riga non scrive dentro config\ ne' nei .chr, che sono i file che MT5 riscrive all'uscita (checklist punto 7). Le due sedie e il logger continuano a lavorare.")
-    Dico "MT5 aperto: atteso, le sedie e il logger continuano" "Green"
+    # ATTENZIONE -- QUESTA FRASE E' CAMBIATA IL 06/09, ED E' UNA CORREZIONE
+    # DI SOSTANZA. Fino al primo deploy diceva: "ABTG_Guardian e' un file
+    # NUOVO per questo terminale, non sta su nessun grafico". Da quel giro
+    # NON E' PIU' VERO: il guardiano e' stato installato E attaccato a un
+    # grafico vivo. Lasciare in piedi la vecchia frase vorrebbe dire
+    # scrivere nel referto una cosa falsa proprio nel punto in cui il
+    # referto serve -- e un referto che rassicura su un fatto che non ha
+    # guardato e' peggio di un referto che tace.
+    [void]$Rilievi.Add("MT5 APERTO (" + (@($term | ForEach-Object { "pid " + $_.Id }) -join ", ") + "): e' ATTESO e va bene per le due sedie e il logger, che continuano a lavorare. MA QUESTO GIRO NON E' PIU' UN'INSTALLAZIONE NUOVA: dal 06/09 " + $EA + " sta gia' su un grafico di questo terminale, quindi Windows puo' tenere il suo .ex5 APERTO. Se e' cosi', questa riga NON COMPILA e rimette tutto com'era (non e' un guasto: e' il comportamento voluto). Va STACCATO DAL GRAFICO PRIMA: tasto destro sul grafico del guardiano > Expert Advisors > Rimuovi. Questa riga non scrive dentro config\\ ne' nei .chr, che sono i file che MT5 riscrive all'uscita (checklist punto 7).")
+    Dico "MT5 aperto: atteso. RICORDA: il guardiano va STACCATO dal suo grafico prima della CORSA" "Yellow"
   }
   else{
     [void]$Rilievi.Add("MT5 CHIUSO in questo giro: l'installazione riesce lo stesso, ma il guardiano comincera' a sorvegliare solo quando riaprirai il terminale, lo attaccherai a un grafico e l'AutoTrading sara' acceso.")
@@ -663,21 +709,81 @@ try{
   $mv = [regex]::Match($testo, '#property\s+version\s+"([^"]+)"')
   if(-not $mv.Success){ throw ("in " + $EA + ".mq5 non c'e' nessun #property version: non e' il file che credo.") }
   $v = $mv.Groups[1].Value
+  if($v -eq $VER_KO){
+    throw ("AL PIN C'E' ANCORA LA v" + $VER_KO + " DEL GUARDIANO, cioe' PROPRIO LA VERSIONE COL BUG che questo giro deve sostituire. La v" + $VER_KO + " cattura il saldo di riferimento dal BILANCIO ma lo confronta con l'EQUITA': su un conto con un CREDITO del broker (questo ne ha 2.500 EUR, stabile e non prelevabile) il credito si comporta come un guadagno permanente e le soglie del 4,9% e del 9,9% non mordono piu' dove dicono. Installarla vorrebbe dire rimettere nel terminale esattamente il file che stiamo togliendo. Serve la v" + $VER + ": ricontrolla il pin. NON installo.")
+  }
   if($v -ne $VER){ throw ("VERSIONE SBAGLIATA per " + $EA + ": al pin c'e' la v" + $v + ", attesa la v" + $VER + ". NON installo.") }
-  [void]$GateTxt.Add("versione: " + $EA + " v" + $v + " (attesa " + $VER + ")")
+  [void]$GateTxt.Add("versione: " + $EA + " v" + $v + " (attesa " + $VER + "; la v" + $VER_KO + ", quella col bug del credito, e' rifiutata PER NOME)")
 
   # --- che sia DAVVERO il guardiano, non un omonimo: le tre funzioni
   #     che fanno il mestiere. Ancorate sulla parentesi (classe 116-ter):
   #     un nome rinominato non passa.
   foreach($f in @("FlattenAll","OpenRiskPct","VerificaFilo","SetPausa")){
     if($testo -notmatch ($f + '\s*\(')){
-      throw ("in " + $EA + ".mq5 non trovo la funzione " + $f + "(...): non e' il guardiano che credo (o non e' la v1.11). NON installo.")
+      throw ("in " + $EA + ".mq5 non trovo la funzione " + $f + "(...): non e' il guardiano che credo (o non e' la v" + $VER + "). NON installo.")
     }
   }
   if($testo -notmatch 'EventSetTimer\s*\(\s*1\s*\)'){
     throw ("in " + $EA + ".mq5 non trovo EventSetTimer(1): il guardiano sorveglia via OnTimer, senza timer non sorveglia niente. NON installo.")
   }
   [void]$GateTxt.Add("nucleo del guardiano: FlattenAll / OpenRiskPct / VerificaFilo / SetPausa presenti, EventSetTimer(1) presente")
+
+  # --- v1.12: LE TRACCE VERE DEL FIX DEL CREDITO, non la sua targhetta.
+  #     '#property version' e' una STRINGA: si alza scrivendo tre caratteri,
+  #     anche senza aver corretto una riga di codice. Un gate che si fida
+  #     solo di quella verifica l'ETICHETTA, non il contenuto. Qui si
+  #     pretendono i DUE FATTI che il fix ha lasciato nel sorgente, e si
+  #     leggono sul testo VIVO (commenti tolti): un commento che PARLA del
+  #     fix non e' il fix.
+  $vivo = (($righe | ForEach-Object { $_ -replace '//.*$','' }) -join "`n")
+
+  #  FATTO 1 -- la baseline si cattura dall'EQUITA', non dal BILANCIO.
+  #  E' tutto il bug: la v1.11 prendeva 'bal' e lo confrontava piu' sotto
+  #  con 'eq'. Su questo conto c'e' un credito del broker di 2.500 EUR che
+  #  sta nell'equita' e non nel bilancio, quindi il confronto partiva con
+  #  2.500 EUR di cuscinetto finto e le soglie non mordevano piu' dove
+  #  dicono di mordere.
+  if($vivo -notmatch 'gStart\s*=\s*\(\s*GlobalVariableCheck\s*\(\s*GV_START\s*\)\s*\?\s*GlobalVariableGet\s*\(\s*GV_START\s*\)\s*:\s*eq\s*\)'){
+    throw ("IL FIX DEL CREDITO NON C'E' NEL SORGENTE AL PIN: il saldo di riferimento (gStart) non risulta catturato dall'EQUITA'. E' il cuore della v" + $VER + " -- senza, il guardiano tornerebbe a misurare il cuscinetto dal BILANCIO e a confrontarlo con l'EQUITA', cioe' a regalare al conto tutto il credito del broker prima di frenare. Il numero di versione da solo non basta a dire che il fix c'e'. NON installo.")
+  }
+  if($vivo -match 'GlobalVariableSet\s*\(\s*GV_DAYSTART\s*,\s*bal\s*\)'){
+    throw ("NEL SORGENTE AL PIN LA BASELINE GIORNALIERA E' ANCORA PRESA DAL BILANCIO (GlobalVariableSet(GV_DAYSTART,bal)): e' meta' del bug del credito, quella che decide la soglia del 4,9% (chiusura di tutto e blocco fino alle 23). NON installo.")
+  }
+  $nDayEq = @([regex]::Matches($vivo,'GlobalVariableSet\s*\(\s*GV_DAYSTART\s*,\s*eq\s*\)')).Count
+  if($nDayEq -lt 2){
+    throw ("LA BASELINE GIORNALIERA E' PRESA DALL'EQUITA' SOLO IN " + $nDayEq + " PUNTI SU 2 nel sorgente al pin. I punti sono due e servono tutti e due: uno in OnInit (primo avvio) e uno in OnTimer (il cambio di giorno prop delle 23). Se ne corregge uno solo, il guardiano parte giusto e poi si guasta da solo al primo scoccare della mezzanotte. NON installo.")
+  }
+
+  #  FATTO 2 -- le CINQUE GlobalVariable della baseline sono rinominate _V2.
+  #  Senza il nome nuovo il fix di codice non servirebbe a NIENTE su questo
+  #  conto: quelle variabili "sopravvivono a riavvii e ricompilazioni" per
+  #  scelta, quindi il guardiano rileggerebbe il numero VECCHIO (catturato
+  #  col criterio sbagliato) invece di ricatturarlo pulito.
+  $gvKo = New-Object System.Collections.ArrayList
+  foreach($g in @("START","PEAK","DAYKEY","DAYSTART","BLOCKDAY")){
+    $atteso = '"ABTG_GUARD_%I64d_' + $g + '_V2"'
+    if($vivo.IndexOf($atteso, [System.StringComparison]::Ordinal) -lt 0){ [void]$gvKo.Add($g) }
+  }
+  if(@($gvKo).Count -gt 0){
+    throw ("NEL SORGENTE AL PIN MANCA IL RINOMINO _V2 su " + @($gvKo).Count + " GlobalVariable della baseline (" + (@($gvKo) -join ", ") + "). Quelle variabili PERSISTONO nel terminale per scelta: sul conto reale ci sono GIA', scritte dalla v" + $VER_KO + " col criterio sbagliato. Senza il nome nuovo il guardiano le RILEGGE alla prima ricompilazione e il fix non prende -- si aggiornerebbe il codice lasciando in campo il numero contaminato. NON installo.")
+  }
+  #  ...e GV_FAILED NON si rinomina: quella non era contaminata dal bug, e
+  #  rinominarla azzererebbe un eventuale blocco definitivo gia' in essere.
+  #  Sarebbe la faccia peggiore di questo aggiornamento: un conto fermato
+  #  per DD sfondato che si ritrova operativo senza che nessuno l'abbia deciso.
+  if($vivo.IndexOf('"ABTG_GUARD_%I64d_FAILED"', [System.StringComparison]::Ordinal) -lt 0){
+    throw ("NEL SORGENTE AL PIN LA GlobalVariable DEL BLOCCO DEFINITIVO NON E' PIU' 'ABTG_GUARD_<login>_FAILED'. Quella NON andava toccata: non era contaminata dal bug del credito, e cambiarle nome vorrebbe dire che un conto gia' FERMATO per DD totale sfondato si ritroverebbe di colpo operativo, senza che nessuno l'abbia deciso. NON installo.")
+  }
+  [void]$GateTxt.Add("IL FIX DEL CREDITO, verificato NEL CODICE e non sulla targhetta di versione: baseline catturata dall'EQUITA' (gStart + 2 punti su 2 per il giorno prop), le 5 GlobalVariable della baseline rinominate _V2 (cattura fresca forzata), e GV_FAILED lasciata col nome di prima (un blocco definitivo in essere non si azzera per sbaglio)")
+
+  # le due righe che il referto dice a Claudio di cercare nella scheda
+  # Esperti. Se non ci sono, le istruzioni sarebbero sbagliate: non e' un
+  # pericolo, quindi e' un rilievo e non un blocco.
+  foreach($sp in @($AVVIO, "[GUARDIAN] baseline presa dall")){
+    if($testo.IndexOf($sp, [System.StringComparison]::Ordinal) -lt 0){
+      [void]$Rilievi.Add("nel sorgente al pin non trovo la riga di log '" + $sp + "...', che il referto dice di cercare nella scheda Esperti. Non e' un pericolo (il guardiano funziona lo stesso), ma quel passo di verifica non si potra' fare come scritto.")
+    }
+  }
 
   # --- IL FILO. Il guardiano SCRIVE su nomi costruiti nel .mq5, gli EA
   #     LEGGONO da nomi costruiti nell'include. Due posti diversi: se
@@ -1171,8 +1277,38 @@ try{
   foreach($a in $Art){ $FotoP[$a.N] = Foto $a.P; Dico ("REALE prima -- " + $a.N + ": " + (FotoTxt $FotoP[$a.N])) }
   $gia = New-Object System.Collections.ArrayList
   foreach($a in $Art){ if($FotoP[$a.N].Esiste){ [void]$gia.Add($a.N) } }
-  if($gia.Count -gt 0){ $GiaLi = "SI, " + $gia.Count + " dei 3 file erano gia' in questo terminale (" + (@($gia) -join ", ") + "). Verranno sostituiti, col backup." }
+  if($gia.Count -gt 0){ $GiaLi = "SI, " + $gia.Count + " dei 3 file erano gia' in questo terminale (" + (@($gia) -join ", ") + "). Verranno sostituiti, col backup.  --> QUESTO E' UN AGGIORNAMENTO (v" + $VER_KO + " -> v" + $VER + "), NON un'installazione nuova." }
   else{ $GiaLi = "NO: nessuno dei 3 file era in questo terminale (installazione NUOVA del guardiano)" }
+
+  # --- SONDA: QUALCUNO TIENE APERTO L'.EX5 DEL GUARDIANO?
+  #  Dal 06/09 questo EA non e' piu' un file nuovo: sta gia' su un grafico
+  #  VIVO di questo terminale. Se e' attaccato, Windows tiene il suo .ex5
+  #  aperto e la CORSA si ferma da sola quando prova a cancellarlo (il gate
+  #  "EX5 VECCHIO NON CANCELLABILE" piu' sotto). Meglio dirlo ADESSO, gia'
+  #  in CONTROLLO -- che e' il giro che non scrive niente -- piuttosto che
+  #  farglielo scoprire a meta' di una CORSA sul conto reale.
+  #
+  #  ONESTA' SULLA MISURA, perche' qui e' facile spacciare una sonda per
+  #  una prova: questa chiede il file in lettura ESCLUSIVA, ed e' quindi
+  #  PIU' SEVERA della cancellazione vera (che riesce lo stesso se chi
+  #  tiene il file aperto ha concesso la condivisione in cancellazione).
+  #  Quindi: "RISULTA APERTO" NON dimostra che la CORSA si fermera';
+  #  "non risulta aperto" e' un buon segno e nient'altro. La prova vera la
+  #  da' la CORSA. Per questo e' un RILIEVO e non un blocco.
+  if($FotoP[("Experts\" + $EA + ".ex5")].Esiste){
+    try{
+      $fs = [System.IO.File]::Open($DestEx5,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::None)
+      $fs.Close()
+      $fs.Dispose()
+      $Ex5Aperto = "l'.ex5 del guardiano c'e' gia' e NON risulta tenuto aperto da nessun processo (sonda in lettura esclusiva riuscita). E' un buon segno, NON una prova: la prova la da' la CORSA quando prova a cancellarlo davvero."
+    }
+    catch{
+      $Ex5Aperto = "ATTENZIONE -- l'.ex5 del guardiano c'e' gia' ed e' TENUTO APERTO DA UN PROCESSO (" + $_.Exception.GetType().Name + "). Su questo terminale il guardiano sta su un grafico vivo dal 06/09: STACCALO PRIMA di lanciare la CORSA (tasto destro sul SUO grafico > Expert Advisors > Rimuovi). Se non lo fai, la CORSA non compila e rimette tutto com'era: e' il comportamento VOLUTO, non un guasto."
+      [void]$Rilievi.Add($Ex5Aperto)
+    }
+  }
+  else{ $Ex5Aperto = "l'.ex5 del guardiano NON e' in questo terminale: niente da staccare e niente da sbloccare." }
+  Dico ("sonda sull'.ex5 del guardiano: " + $Ex5Aperto) "Yellow"
 
   # I COINQUILINI + L'INCLUDE: non si toccano e devono restare identici.
   foreach($f in $FotoVic){ $f.Prima = Foto $f.Percorso }
@@ -1247,7 +1383,18 @@ try{
     # si spaccia per nuovo (checklist 54).
     if(Test-Path -LiteralPath $DestEx5){
       Remove-Item -LiteralPath $DestEx5 -Force -ErrorAction SilentlyContinue
-      if(Test-Path -LiteralPath $DestEx5){ throw ("EX5 VECCHIO NON CANCELLABILE (" + $DestEx5 + "): qualcuno lo tiene aperto -- il guardiano e' gia' su un grafico di questo terminale? NON compilo: un ex5 vecchio che sopravvive si spaccia per nuovo.") }
+      if(Test-Path -LiteralPath $DestEx5){
+        # DAL 06/09 QUESTO NON E' PIU' UN CASO DI SCUOLA: il guardiano e'
+        # gia' su un grafico vivo di questo terminale, quindi e' LA causa
+        # attesa numero uno. Il messaggio deve dire cosa fare, non solo
+        # che qualcosa e' andato storto -- e deve dire chiaro che fermarsi
+        # QUI e' il comportamento giusto, se no si prova a forzare.
+        throw ("EX5 VECCHIO NON CANCELLABILE (" + $DestEx5 + "): qualcuno tiene quel file APERTO." +
+               "  ||  CAUSA ATTESA NUMERO UNO, e non e' un guasto: " + $EA + " E' GIA' ATTACCATO A UN GRAFICO di questo terminale (ce l'hai messo il 06/09). Finche' e' su un grafico, MT5 tiene il binario aperto e non si puo' sostituire." +
+               "  ||  COSA FARE, in quest'ordine: (1) in MT5 vai sul grafico dove gira il guardiano -- riconoscibile dal pannello '=== ABTG GUARDIAN ==='; (2) tasto destro sul grafico > Expert Advisors > Rimuovi (in alternativa chiudi proprio quel grafico); (3) controlla che la faccina in alto a destra di quel grafico sia sparita; (4) rilancia LA STESSA riga di CORSA, senza cambiare niente." +
+               "  ||  MT5 puo' restare aperto: le due sedie e il logger non c'entrano e continuano a lavorare." +
+               "  ||  NON COMPILO, e nel terminale non resta niente a meta': i file toccati fin qui tornano com'erano dal backup " + $BackupDir + ". Un .ex5 vecchio che sopravvive a una ricompilazione si spaccia per nuovo, e su un conto reale un guardiano che si spaccia per aggiornato mentre ha ancora il bug del credito e' il peggiore dei due mondi.")
+      }
     }
 
     # -----------------------------------------------------------------
@@ -1451,6 +1598,7 @@ try{
   foreach($x in $SetTxt){ [void]$r.Add("   " + $x) }
   [void]$r.Add("valori pretesi (firma Claudio 18/08/2026, CLAUDE.md): giorno " + $A_DAILYLOSS.ToString("0.0#",$INV) + "% . totale " + $A_TOTALDD.ToString("0.0#",$INV) + "% . pausa " + $A_PAUSA.ToString("0.0#",$INV) + "% . cap " + $A_CAP.ToString("0.0#",$INV) + "% . reset " + $A_RESETHOUR + ":00 server . azione " + $A_ACTION + " (enforce) . saldo 0 (cattura automatica)")
   [void]$r.Add("erano gia' installati ....: " + $GiaLi)
+  [void]$r.Add("l'.ex5 e' tenuto aperto? .: " + $Ex5Aperto)
   [void]$r.Add("")
   [void]$r.Add("backup ...................: " + $BackupTxt)
   [void]$r.Add("compilazione " + $EA + ": " + $Comp)
@@ -1472,13 +1620,21 @@ try{
   [void]$r.Add("  QUESTA RIGA NON HA ATTACCATO IL GUARDIANO A NESSUN GRAFICO E NON HA")
   [void]$r.Add("  TOCCATO L'AUTOTRADING. Finche' non lo fai tu, il guardiano non")
   [void]$r.Add("  sorveglia niente e non puo' chiudere niente.")
+  [void]$r.Add("  0. QUESTO E' UN AGGIORNAMENTO (v" + $VER_KO + " -> v" + $VER + "), NON un'installazione")
+  [void]$r.Add("     nuova: il guardiano stava GIA' su un grafico. Prima della CORSA")
+  [void]$r.Add("     andava STACCATO (tasto destro sul suo grafico > Expert Advisors >")
+  [void]$r.Add("     Rimuovi); adesso va RIATTACCATO. Se la CORSA si e' fermata su")
+  [void]$r.Add("     'EX5 VECCHIO NON CANCELLABILE', vuol dire che era ancora")
+  [void]$r.Add("     attaccato: staccalo e rilancia la stessa riga. Non e' un guasto.")
   [void]$r.Add("  1. Navigatore > Expert Advisors > tasto destro > Aggiorna: deve")
   [void]$r.Add("     comparire " + $EA + ".")
-  [void]$r.Add("  2. File > Nuovo grafico -- UN TERZO grafico, NUOVO. Il simbolo e il")
-  [void]$r.Add("     timeframe NON contano (il guardiano guarda il CONTO, non il")
-  [void]$r.Add("     grafico), ma DEVE essere un grafico SENZA EA: un grafico MT5")
-  [void]$r.Add("     tiene UN SOLO Expert Advisor, e trascinarlo su quello del DAX o")
-  [void]$r.Add("     dell'ORB SOSTITUIREBBE la sedia, spegnendola in silenzio.")
+  [void]$r.Add("  2. IL GRAFICO. Va bene lo STESSO grafico su cui girava prima (quello")
+  [void]$r.Add("     da cui l'hai staccato): ormai e' un grafico SENZA EA, ed e' l'unica")
+  [void]$r.Add("     cosa che conta. Se preferisci uno nuovo, File > Nuovo grafico.")
+  [void]$r.Add("     Il simbolo e il timeframe NON contano (il guardiano guarda il")
+  [void]$r.Add("     CONTO, non il grafico), ma DEVE essere un grafico SENZA EA: un")
+  [void]$r.Add("     grafico MT5 tiene UN SOLO Expert Advisor, e trascinarlo su quello")
+  [void]$r.Add("     del DAX o dell'ORB SOSTITUIREBBE la sedia, spegnendola in silenzio.")
   [void]$r.Add("  3. Trascina " + $EA + ", scheda Dati in Ingresso > Carica... >")
   [void]$r.Add("     " + $SET)
   [void]$r.Add("     e PRIMA DI PREMERE OK guarda a schermo e fotografa:")
@@ -1492,8 +1648,14 @@ try{
   [void]$r.Add("     GlobalVariable (pausa, cap, battito), ma NON PUO' CHIUDERE:")
   [void]$r.Add("     il braccio armato della rete resta spento.")
   [void]$r.Add("  5. IL PANNELLO SUL GRAFICO -- e' QUI che si verifica tutto:")
-  [void]$r.Add("       'Saldo iniziale:' deve essere il SALDO VERO (atteso ~7500.00).")
-  [void]$r.Add("          Se leggi 100000 o un numero che non c'entra: STACCA L'EA.")
+  [void]$r.Add("       'Saldo iniziale:' e' LA PROVA CHE IL FIX HA PRESO.")
+  [void]$r.Add("          deve dire ~7500.00, cioe' l'EQUITA' (bilancio + credito).")
+  [void]$r.Add("          Se dice ~5000.00 hai davanti il solo BILANCIO: il fix NON")
+  [void]$r.Add("          ha preso, STACCA L'EA e mandami lo screenshot.")
+  [void]$r.Add("          Se dice 100000 e' il preset del demo FTMO: STACCA L'EA.")
+  [void]$r.Add("          NON serve cancellare niente da F3: la v" + $VER + " usa nomi nuovi")
+  [void]$r.Add("          (ABTG_GUARD_<login>_START_V2 e compagni) proprio per")
+  [void]$r.Add("          ricatturare il saldo da sola, senza toccare niente a mano.")
   [void]$r.Add("       'Perdita oggi: ... / limite " + $A_DAILYLOSS.ToString("0.0#",$INV) + "%'")
   [void]$r.Add("       'Drawdown: ... / limite " + $A_TOTALDD.ToString("0.0#",$INV) + "%'  con '(statico)'")
   [void]$r.Add("       'Azione: CHIUDI+BLOCCA'")
@@ -1505,6 +1667,11 @@ try{
   [void]$r.Add("       '[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.'")
   [void]$r.Add("       '[GUARDIAN] filo verificato: 5 GlobalVariable su 5 ...'")
   [void]$r.Add("       '" + $AVVIO + "<saldo vero>  DailyLoss=" + $A_DAILYLOSS.ToString("0.0#",$INV) + "%  DD=" + $A_TOTALDD.ToString("0.0#",$INV) + "% (statico)  Azione=CHIUDI+BLOCCA'")
+  [void]$r.Add("          <-- QUI il saldo dev'essere ~7500.00, NON ~5000.00")
+  [void]$r.Add("       '[GUARDIAN] baseline presa dall'EQUITA' (v" + $VER + "): equity=...")
+  [void]$r.Add("        bilancio=...  differenza=...'  <-- riga NUOVA della v" + $VER + ":")
+  [void]$r.Add("          la 'differenza' e' il CREDITO del broker (atteso ~2500).")
+  [void]$r.Add("          E' il numero che era invisibile e che ha nascosto il bug.")
   [void]$r.Add("       '[GUARDIAN] pausa morbida=" + $A_PAUSA.ToString("0.00",$INV) + "%  cap rischio aperto=" + $A_CAP.ToString("0.00",$INV) + "% ...'")
   [void]$r.Add("     Se compare 'FILO ROTTO' o 'CASI FALLITI': STACCA L'EA e mandami")
   [void]$r.Add("     lo screenshot. Sono le due righe che dicono che la rete non e'")

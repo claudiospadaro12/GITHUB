@@ -295,6 +295,20 @@ int OnInit()
    else                  gStart=(GlobalVariableCheck(GV_START)? GlobalVariableGet(GV_START) : eq);
    GlobalVariableSet(GV_START,gStart);
 
+   // v1.12: la RIGA DELLA PROVA. Stampa le due grandezze fianco a fianco,
+   // cosi' il credito del broker (equita' MENO bilancio) si legge con gli
+   // occhi nella scheda Esperti invece di doverlo dedurre. Era esattamente
+   // il numero invisibile che ha nascosto il bug fino al 06/09: su quel
+   // conto il bilancio diceva 5000 e l'equita' 7500, e il guardiano
+   // prendeva il primo per confrontarlo col secondo. Serve anche a un
+   // secondo scopo, meno ovvio: tiene VIVA la variabile bal, che dopo il
+   // fix non avrebbe piu' nessun lettore in OnInit -- e una variabile non
+   // usata e' un WARNING di compilazione, che la riga di deploy tratta
+   // come un PROBLEMA che ferma tutto il collaudo.
+   PrintFormat("[GUARDIAN] baseline presa dall'EQUITA' (v1.12): equity=%.2f  bilancio=%.2f  differenza=%.2f "
+               "(se la differenza non e' zero e' il CREDITO del broker: non e' tuo, e infatti NON allarga le soglie)",
+               eq,bal,eq-bal);
+
    gPeak=(GlobalVariableCheck(GV_PEAK)? GlobalVariableGet(GV_PEAK) : MathMax(eq,gStart));
    if(eq>gPeak) gPeak=eq;
    GlobalVariableSet(GV_PEAK,gPeak);

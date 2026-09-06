@@ -1,5 +1,5 @@
 ; ================================================================
-;  PRESET CONTO REALE -- ABTG_Guardian v1.11  (magic 779002)
+;  PRESET CONTO REALE -- ABTG_Guardian v1.12  (magic 779002)
 ;  Conto REALE BCM 10105439 -- server BCMMarkets-Server -- ~7.500 EUR
 ;  Terminale C:\BCM_Reale (cartella dati E23E1504A8D02A22179395F0652B86B6)
 ; ----------------------------------------------------------------
@@ -28,19 +28,44 @@
 ;   1. InpStartBalance 100000 -> 0. Il 100000 serviva a SIMULARE una
 ;      challenge FTMO da 100k su un demo. Qui il conto e' vero: 0 =
 ;      cattura in automatico il saldo reale al primo avvio e lo
-;      persiste nella GlobalVariable ABTG_GUARD_10105439_START.
+;      persiste nella GlobalVariable ABTG_GUARD_10105439_START_V2
+;      (il suffisso _V2 e' della v1.12: vedi la nota qui sopra).
 ;   2. InpMagic 779001 -> 779002 (vedi la nota sul magic piu' sotto).
 ;   3. InpAutotest: nel preset FTMO NON C'ERA (prendeva il default
 ;      compilato false, in silenzio). Qui c'e', ed e' true.
 ;  Tutto il resto -- 4.9 / 9.9 / statico / reset 23 / pausa 4.0 /
 ;  cap 3.25 / azione 0 / tutti i magic -- e' IDENTICO.
+; ----------------------------------------------------------------
+;  AGGIORNAMENTO 06/09/2026 -- v1.11 -> v1.12. NESSUN VALORE E'
+;  CAMBIATO in questo file: stessi 16 input, stessi numeri firmati il
+;  18/08. Sono cambiati SOLO questi commenti, perche' due cose che ci
+;  stavano scritte non sono piu' vere:
+;   1. la versione dell'EA (v1.11 -> v1.12);
+;   2. il NOME della GlobalVariable del saldo di riferimento, che ora
+;      finisce per _V2 (ABTG_GUARD_10105439_START_V2). Il nome nuovo e'
+;      voluto: serve a costringere il guardiano a RICATTURARE il saldo
+;      col criterio corretto invece di rileggere quello vecchio, che era
+;      contaminato dal credito del broker.
+;  PERCHE' la v1.12 esiste: fino alla v1.11 il saldo di riferimento e la
+;  baseline del giorno venivano presi dal BILANCIO, ma confrontati con
+;  l'EQUITA'. Su questo conto c'e' un CREDITO del broker di 2.500 EUR
+;  (stabile, NON prelevabile) che sta nell'equita' e non nel bilancio:
+;  il guardiano lo vedeva come un guadagno permanente di 2.500 EUR, e le
+;  soglie del 4,9% e del 9,9% non sarebbero scattate fino a una perdita
+;  VERA di oltre 2.700/3.000 EUR -- cioe' oltre meta' del capitale.
+;  Dalla v1.12 le due grandezze sono la stessa (equita' da tutte e due
+;  le parti del confronto) e il credito si cancella da solo.
+;  ATTENZIONE al numero da leggere sul pannello: "Saldo iniziale" ora
+;  deve dire ~7500 (l'EQUITA'), NON ~5000 (il bilancio). Se leggi ~5000,
+;  il fix NON ha preso.
 ; ================================================================
 
 ; ---------------------------------------------------------------
 ;  SALDO DI RIFERIMENTO
 ; ---------------------------------------------------------------
-; 0 = CATTURA IN AUTOMATICO il saldo al primo avvio (atteso ~7500.00)
-; e lo scrive in ABTG_GUARD_10105439_START, che PERSISTE nel terminale.
+; 0 = CATTURA IN AUTOMATICO il saldo al primo avvio (atteso ~7500.00,
+; cioe' l'EQUITA' -- v1.12; NON ~5000, che sarebbe il solo bilancio)
+; e lo scrive in ABTG_GUARD_10105439_START_V2, che PERSISTE nel terminale.
 ; NON mettere 100000: quello era il finto saldo della challenge FTMO
 ; simulata sul demo. Qui i soldi sono veri.
 ; Se un giorno il riferimento va rifatto (versamento/prelievo), si
@@ -160,7 +185,7 @@ InpVerbose=true
 ; scrive nel canale, stampa e basta. Gira PRIMA che il guardiano legga
 ; il saldo. Precedente sullo stesso terminale: ABTG_ORB_Ottimizzato gira
 ; sul reale da oggi con InpAutoTest=true.
-; Serve a due cose: e' la prova in Esperti che gira davvero la v1.11 con
+; Serve a due cose: e' la prova in Esperti che gira davvero la v1.12 con
 ; l'include v1.51, e la sua riga "TUTTI I CASI PASSATI" e' il cancello
 ; prima di fidarsi del guardiano.
 InpAutotest=true
