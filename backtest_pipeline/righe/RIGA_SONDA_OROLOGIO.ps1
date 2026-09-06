@@ -1199,7 +1199,12 @@ if($TickTxt -ne ""){ [void]$RefTxt.Add("tick: " + $TickTxt) }
 [void]$RefTxt.Add("produce la TABELLA qui sotto. Ipotesi e criteri " + $NCriteri + " stanno in")
 [void]$RefTxt.Add("prove/" + $Spec + " e si leggono PRIMA della tabella.")
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add("LE TRE COSE DA SAPERE PRIMA DI LEGGERE UN NUMERO:")
+# Il titolo CONTA le righe che seguono: sul giro INDICI sono sette (le
+# tre di sempre piu' quattro criteri suoi), e un titolo che dice "tre"
+# sopra sette righe insegna a smettere di leggere alla terza.
+$TestaTitolo = "LE TRE COSE DA SAPERE PRIMA DI LEGGERE UN NUMERO:"
+if($GiroU -eq "INDICI"){ $TestaTitolo = "LE SETTE COSE DA SAPERE PRIMA DI LEGGERE UN NUMERO:" }
+[void]$RefTxt.Add($TestaTitolo)
 [void]$RefTxt.Add(" 1. ORA SERVER FISSA (criterio " + $CritFuso + ", scelta FIRMATA). Gli uffici di")
 [void]$RefTxt.Add("    Londra e New York si spostano rispetto all'ora server per ~4")
 [void]$RefTxt.Add("    settimane l'anno (ora legale USA e UE non coincidenti; il")
@@ -1284,7 +1289,12 @@ foreach($c in $CELLE){
     [void]$RefTxt.Add("  fasce con " + $CritZero + " >= 3 in questa finestra: " + @($sopra).Count + " su " + @($dati).Count)
     if(@($sopra).Count -gt 0){
       foreach($x in @($sopra | Sort-Object -Property @{Expression={[double]$_.C1}} -Descending | Select-Object -First 6)){
-        [void]$RefTxt.Add(("    ora {0,2}  durata {1,2}h  n={2,5}  lordo={3,8}  spread mediano={4,6}  " + $CritZero + "={5,5}  giornate positive={6,6}%  ore medie tenuta={7,5}" -f `
+        # LE PARENTESI INTORNO ALLA CONCATENAZIONE NON SONO ESTETICA: in
+        # PowerShell '-f' LEGA PIU' STRETTO di '+', quindi senza di esse
+        # il formato si applicherebbe SOLO all'ultimo pezzo di stringa e
+        # i primi segnaposti uscirebbero stampati com'e' ({0,2}, {1,2}...).
+        # Trovato ESEGUENDO sul banco, non leggendo.
+        [void]$RefTxt.Add((("    ora {0,2}  durata {1,2}h  n={2,5}  lordo={3,8}  spread mediano={4,6}  " + $CritZero + "={5,5}  giornate positive={6,6}%  ore medie tenuta={7,5}") -f `
           [int]$x.Ora, [int]$x.Durata, (FmtN $x.N), (Fmt2 $x.LordoPt), (Fmt2 $x.SprMed), (Fmt2 $x.C1), (Fmt2 $x.PctPos), (Fmt2 $x.OreTen)))
       }
     }
@@ -1292,22 +1302,133 @@ foreach($c in $CELLE){
   [void]$RefTxt.Add("")
 }
 
-# --- IL CANCELLO C1, CONTATO E NON GIUDICATO.
+# --- UNA FASCIA SOLA, PRESA PER NOME. Se le righe non sono ESATTAMENTE
+#     una, torna $null: due righe per la stessa fascia sono una griglia
+#     sbagliata, e zero righe sono una cella muta. In tutti e due i casi
+#     il numero non esiste, e non si inventa.
+function CercaFascia($dati,[int]$ora,[int]$dur){
+  if($null -eq $dati){ return $null }
+  $r = @($dati | Where-Object { $null -ne $_.Ora -and [int]$_.Ora -eq $ora -and $null -ne $_.Durata -and [int]$_.Durata -eq $dur })
+  if(@($r).Count -ne 1){ return $null }
+  return $r[0]
+}
+
+# =====================================================================
+#  LA LETTURA APPAIATA DEI DUE LATI -- criterio I7, e si stampa solo
+#  sui giri che la pretendono (oggi: INDICI).
+#  E' un CONTO, non un verdetto: il driver mette LONG e SHORT sulla
+#  STESSA riga e calcola due grandezze. La lettura la fa chi firma.
+# =====================================================================
+if($LetturaAppaiata){
+  [void]$RefTxt.Add("=====================================================================")
+  [void]$RefTxt.Add(" LETTURA APPAIATA DEI DUE LATI -- criterio I7, CONTATA non adjudicata")
+  [void]$RefTxt.Add("=====================================================================")
+  [void]$RefTxt.Add("PERCHE' ESISTE QUESTA SEZIONE, detto prima dei numeri: la finestra")
+  [void]$RefTxt.Add("e' un REGIME SOLO (toro pieno). Su un motore direzionale a orario")
+  [void]$RefTxt.Add("fisso una fascia LONG puo' uscire verde SOLO perche' l'indice e'")
+  [void]$RefTxt.Add("salito. Il criterio I7, congelato PRIMA dei numeri, dice: i due lati")
+  [void]$RefTxt.Add("si leggono INSIEME, cella per cella; se LONG(ora X) e SHORT(ora X)")
+  [void]$RefTxt.Add("sono simmetrici e opposti entro il rumore, quella cella e' DERIVA")
+  [void]$RefTxt.Add("DELL'INDICE e non un orologio.")
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("I DUE NUMERI, in chiaro (lordo medio per giornata, in punti):")
+  [void]$RefTxt.Add("   deriva = (lordo LONG - lordo SHORT) / 2   <- quanto e' salito o")
+  [void]$RefTxt.Add("            sceso l'indice in quel blocco di ore: e' il TORO.")
+  [void]$RefTxt.Add("   asimm  = (lordo LONG + lordo SHORT) / 2   <- quanto RESTA quando")
+  [void]$RefTxt.Add("            i due lati si annullano: e' l'unico posto dove puo'")
+  [void]$RefTxt.Add("            stare un fatto che non sia la deriva.")
+  [void]$RefTxt.Add("   Se |asimm| <= |deriva| la riga esce DERIVA. Se |asimm| > |deriva|")
+  [void]$RefTxt.Add("   esce ASIMM: NON vuol dire 'edge', vuol dire 'qui c'e' qualcosa da")
+  [void]$RefTxt.Add("   guardare, e va guardato con I2 (mai il picco) e I3 (altopiano).")
+  [void]$RefTxt.Add("   ATTENZIONE: due lati con lo stesso numero di giornate NON sono")
+  [void]$RefTxt.Add("   garantiti -- la colonna n sta accanto apposta. Se n L e n S")
+  [void]$RefTxt.Add("   differiscono di molto, i due lati non hanno operato gli stessi")
+  [void]$RefTxt.Add("   giorni e la sottrazione vale meno.")
+  foreach($s in $Sim){
+    $cellaL = @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Lato -eq "LONG"  -and $_.Id -ne $GemelliId })
+    $cellaS = @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Lato -eq "SHORT" -and $_.Id -ne $GemelliId })
+    [void]$RefTxt.Add("")
+    [void]$RefTxt.Add("---------------------------------------------------------------------")
+    [void]$RefTxt.Add("APPAIATA " + $s)
+    if(@($cellaL).Count -ne 1 -or @($cellaS).Count -ne 1){
+      [void]$RefTxt.Add("  (non leggibile: su " + $s + " non ci sono esattamente un lato LONG e un lato SHORT in questo giro)")
+      continue
+    }
+    $cl = $cellaL[0]; $cs = $cellaS[0]
+    foreach($tag in @("IS","OOS")){
+      $datiL = $cl.DatiIS; $datiS = $cs.DatiIS
+      if($tag -eq "OOS"){ $datiL = $cl.DatiOOS; $datiS = $cs.DatiOOS }
+      [void]$RefTxt.Add("")
+      if($null -eq $datiL -or $null -eq $datiS){
+        $mancaTxt = "  finestra " + $tag + ": NON LEGGIBILE -- manca il CSV di "
+        if($null -eq $datiL){ $mancaTxt += ($cl.Id + " (LONG)") }
+        if($null -eq $datiL -and $null -eq $datiS){ $mancaTxt += " e di " }
+        if($null -eq $datiS){ $mancaTxt += ($cs.Id + " (SHORT)") }
+        [void]$RefTxt.Add($mancaTxt + ". I due lati si leggono INSIEME o non si leggono (I7): gira anche l'altro lato e poi -Ricomponi.")
+        continue
+      }
+      [void]$RefTxt.Add("  finestra " + $tag + "  (lordo = punti MT5 sul bid, media per giornata operata)")
+      [void]$RefTxt.Add("  ora dur |   n L   n S |  lordo L  lordo S |   deriva    asimm | lettura")
+      $quantiAsimm = 0
+      $quantiLetti = 0
+      $classifica = New-Object System.Collections.ArrayList
+      for($h4 = 0; $h4 -le 23; $h4++){
+        foreach($d4 in @(4,8,12)){
+          $xl = CercaFascia $datiL $h4 $d4
+          $xs2 = CercaFascia $datiS $h4 $d4
+          $nl = $null; $ns = $null; $ll = $null; $ls = $null
+          if($null -ne $xl){ $nl = $xl.N; $ll = $xl.LordoPt }
+          if($null -ne $xs2){ $ns = $xs2.N; $ls = $xs2.LordoPt }
+          $der = $null; $asi = $null; $lett = "n/d (manca un lato)"
+          if($null -ne $ll -and $null -ne $ls){
+            $der = ([double]$ll - [double]$ls)/2.0
+            $asi = ([double]$ll + [double]$ls)/2.0
+            $quantiLetti++
+            if([math]::Abs($asi) -gt [math]::Abs($der)){
+              $lett = "ASIMM"
+              $quantiAsimm++
+              [void]$classifica.Add([pscustomobject]@{ Ora=$h4; Dur=$d4; Der=$der; Asi=$asi; NL=$nl; NS=$ns })
+            }else{
+              $lett = "DERIVA"
+            }
+          }
+          [void]$RefTxt.Add(("  {0,3} {1,3}h |{2,6}{3,6} |{4,9}{5,9} |{6,9}{7,9} | {8}" -f `
+            $h4, $d4, (FmtN $nl), (FmtN $ns), (Fmt2 $ll), (Fmt2 $ls), (Fmt2 $der), (Fmt2 $asi), $lett))
+        }
+      }
+      [void]$RefTxt.Add("  fasce in cui |asimm| > |deriva|: " + $quantiAsimm + " su " + $quantiLetti + " leggibili (su 72 dell'asse)")
+      if($quantiAsimm -gt 0){
+        [void]$RefTxt.Add("  le piu' grandi per |asimm| (e NON sono una promozione: I2 dice centro dell'altopiano, mai il picco):")
+        foreach($x in @($classifica | Sort-Object -Property @{Expression={[math]::Abs([double]$_.Asi)}} -Descending | Select-Object -First 6)){
+          [void]$RefTxt.Add(("    ora {0,2}  durata {1,2}h  n L={2,5}  n S={3,5}  deriva={4,9}  asimm={5,9}" -f `
+            [int]$x.Ora, [int]$x.Dur, (FmtN $x.NL), (FmtN $x.NS), (Fmt2 $x.Der), (Fmt2 $x.Asi)))
+        }
+      }
+    }
+  }
+  [void]$RefTxt.Add("")
+  [void]$RefTxt.Add("E SE TUTTE LE RIGHE ESCONO 'DERIVA', L'ESITO E' VALIDO E VA SCRITTO")
+  [void]$RefTxt.Add("COSI': su questi due indici, in questa finestra, l'orologio non")
+  [void]$RefTxt.Add("aggiunge niente al fatto che il mercato e' salito.")
+  [void]$RefTxt.Add("")
+}
+
+# --- IL CANCELLO ZERO, CONTATO E NON GIUDICATO.
 [void]$RefTxt.Add("=====================================================================")
-[void]$RefTxt.Add(" IL CANCELLO C1 -- contato dal driver, NON adjudicato")
+[void]$RefTxt.Add(" IL CANCELLO " + $CritZero + " -- contato dal driver, NON adjudicato")
 [void]$RefTxt.Add("=====================================================================")
-[void]$RefTxt.Add("C1 (congelato): per almeno UNA fascia oraria, su almeno DUE dei tre")
+[void]$RefTxt.Add($CritZero + " (congelato): per almeno UNA fascia oraria, " + $FrasePerimetro)
 [void]$RefTxt.Add("simboli, |lordo medio per giornata| >= 3 x spread mediano DELLA")
 [void]$RefTxt.Add("STESSA ORA. Il rapporto lo calcola l'EA e lo scrive in colonna, cosi'")
 [void]$RefTxt.Add("nessuno lo puo' rifare storto in un foglio.")
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add(">>> IL CRITERIO CONGELATO NON DICE SU QUALE FINESTRA SI LEGGE C1.")
+[void]$RefTxt.Add(">>> IL CRITERIO CONGELATO NON DICE SU QUALE FINESTRA SI LEGGE " + $CritZero + ".")
 [void]$RefTxt.Add("    Il conto e' riportato per tutte e tre le letture, e la scelta di")
 [void]$RefTxt.Add("    quale vale e' di chi firma, non di questo script.")
 [void]$RefTxt.Add("")
 [void]$RefTxt.Add(">>> E IL CRITERIO E' AMBIGUO SU UN'ALTRA COSA, dichiarata qui invece")
-[void]$RefTxt.Add("    che sciolta di nascosto: 'per almeno UNA fascia oraria, su almeno")
-[void]$RefTxt.Add("    DUE dei tre simboli' si puo' leggere in due modi.")
+[void]$RefTxt.Add("    che sciolta di nascosto: 'per almeno UNA fascia oraria, " + $FrasePerimetro)
+[void]$RefTxt.Add("    simboli' si puo' leggere in due modi.")
 [void]$RefTxt.Add("      SEVERA: la STESSA fascia (stessa ora E stessa durata) sopra")
 [void]$RefTxt.Add("              soglia su >= 2 simboli. E' un fatto d'insieme.")
 [void]$RefTxt.Add("      LARGA : due simboli qualsiasi, ciascuno con una fascia SUA.")
@@ -1319,20 +1440,19 @@ foreach($c in $CELLE){
 [void]$RefTxt.Add("    il progetto ha vietato a se stesso (CHECKLIST 31/08).")
 [void]$RefTxt.Add("    La lettura LARGA e' stampata accanto, etichettata, perche' e' un")
 [void]$RefTxt.Add("    dato utile -- ma NON e' il verdetto.")
-$sim = @("EURUSD","GBPUSD","XAUUSD")
 # --- QUANTE CELLE DI MISURA HANNO DAVVERO PRODOTTO DATI.
 #     Serve al TERZO STATO del cancello, e non e' un dettaglio: senza,
 #     una corsa che non ha misurato NIENTE stampava "C1 NON PASSATO",
 #     cioe' l'affermazione piu' forte possibile ricavata da zero dati
 #     (CHECKLIST punti 68 e 94). "Non ho misurato" e "ho misurato e non
 #     passa" sono due cose diverse, e la seconda chiude una pista.
-$celleMisurate = @($CELLE | Where-Object { $_.Id -ne "00_gemelli" -and $null -ne $_.DatiIS -and $null -ne $_.DatiOOS }).Count
+$celleMisurate = @($CELLE | Where-Object { $_.Id -ne $GemelliId -and $null -ne $_.DatiIS -and $null -ne $_.DatiOOS }).Count
 $simMancanti = New-Object System.Collections.ArrayList
-foreach($s in $sim){
-  $q = @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" -and $null -ne $_.DatiOOS }).Count
+foreach($s in $Sim){
+  $q = @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne $GemelliId -and $null -ne $_.DatiOOS }).Count
   if($q -eq 0){ [void]$simMancanti.Add($s) }
 }
-[void]$RefTxt.Add("  celle di misura con dati in questa corsa: " + $celleMisurate + " su 6")
+[void]$RefTxt.Add("  celle di misura con dati in questa corsa: " + $celleMisurate + " su " + $nMisura)
 if(@($simMancanti).Count -gt 0){
   [void]$RefTxt.Add("  simboli senza NESSUNA cella misurata: " + ($simMancanti -join ", "))
 }
@@ -1359,8 +1479,8 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
   for($h3 = 0; $h3 -le 23; $h3++){
     foreach($d3 in @(4,8,12)){
       $qui = New-Object System.Collections.ArrayList
-      foreach($s in $sim){
-        foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" })){
+      foreach($s in $Sim){
+        foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne $GemelliId })){
           if($null -eq $c.DatiIS -or $null -eq $c.DatiOOS){ continue }
           if(FasciaSopra $c $h3 $d3 $lettura){ if(-not $qui.Contains($s)){ [void]$qui.Add($s) } }
         }
@@ -1373,9 +1493,9 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
   }
   # --- LETTURA LARGA: quella della v2. Si stampa, NON decide.
   $simLarga = New-Object System.Collections.ArrayList
-  foreach($s in $sim){
+  foreach($s in $Sim){
     $trovato = $false
-    foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne "00_gemelli" })){
+    foreach($c in @($CELLE | Where-Object { $_.Sym -eq $s -and $_.Id -ne $GemelliId })){
       if($null -eq $c.DatiIS -or $null -eq $c.DatiOOS){ continue }
       foreach($x in @($c.DatiOOS)){
         if($null -eq $x.Ora -or $null -eq $x.Durata){ continue }
@@ -1388,28 +1508,37 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
   # differenza fra "la pista si chiude" e "la corsa non e' finita".
   # Con due simboli gia' sopra soglia il PASSATO e' un fatto anche se
   # manca il terzo -- il criterio ne chiede DUE. Il NON PASSATO invece
-  # pretende che tutte e sei le celle abbiano dati.
+  # pretende che TUTTE le celle di misura abbiano dati.
   $esito = "NON PASSATO"
   if(@($simSevera).Count -ge 2){ $esito = "PASSATO" }
-  elseif($celleMisurate -lt 6){ $esito = "NON MISURATO PER INTERO (celle con dati " + $celleMisurate + " su 6: qui NON si legge un 'no')" }
+  elseif($celleMisurate -lt $nMisura){ $esito = "NON MISURATO PER INTERO (celle con dati " + $celleMisurate + " su " + $nMisura + ": qui NON si legge un 'no')" }
   $elenco = "nessuno"
   if(@($simSevera).Count -gt 0){ $elenco = ($simSevera -join ", ") + " sulla fascia migliore (" + $fasciaSevera + ")" }
-  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " SEVERA (stessa fascia): simboli = " + @($simSevera).Count + " (" + $elenco + ")  ->  C1 " + $esito)
+  [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " SEVERA (stessa fascia): simboli = " + @($simSevera).Count + " (" + $elenco + ")  ->  " + $CritZero + " " + $esito)
   $elencoL = "nessuno"
   if(@($simLarga).Count -gt 0){ $elencoL = ($simLarga -join ", ") }
   [void]$RefTxt.Add("  lettura " + $lettura.PadRight(8) + " larga  (fasce diverse ammesse, NON e' il verdetto): simboli = " + @($simLarga).Count + " (" + $elencoL + ")")
 }
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add("ATTENZIONE, e vale piu' del conto qui sopra: C1 e' il CANCELLO ZERO,")
+[void]$RefTxt.Add("ATTENZIONE, e vale piu' del conto qui sopra: " + $CritZero + " e' il CANCELLO ZERO,")
 [void]$RefTxt.Add("non il verdetto. Restano DUE criteri che questo script NON adjudica")
 [void]$RefTxt.Add("e non puo' adjudicare, perche' sono giudizi e non conti:")
-[void]$RefTxt.Add("  C2 - LA CELLA NON VALE PERCHE' E' LA PIU' VERDE. Vale solo se e'")
-[void]$RefTxt.Add("       quella che la TESI aveva indicato PRIMA: ore europee per EUR,")
-[void]$RefTxt.Add("       ore londinesi per GBP, ore americane per USD. Se l'ora verde")
-[void]$RefTxt.Add("       NON e' quella prevista, il round e' NEGATIVO anche col numero")
-[void]$RefTxt.Add("       positivo. 24 ore x 3 simboli x 2 lati = 144 celle: a caso")
-[void]$RefTxt.Add("       qualcuna e' verde.")
-[void]$RefTxt.Add("  C3 - ALTOPIANO, NON PICCO: la fascia buona deve avere accanto ORE")
+if($GiroU -eq "FX"){
+  [void]$RefTxt.Add("  C2 - LA CELLA NON VALE PERCHE' E' LA PIU' VERDE. Vale solo se e'")
+  [void]$RefTxt.Add("       quella che la TESI aveva indicato PRIMA: ore europee per EUR,")
+  [void]$RefTxt.Add("       ore londinesi per GBP, ore americane per USD. Se l'ora verde")
+  [void]$RefTxt.Add("       NON e' quella prevista, il round e' NEGATIVO anche col numero")
+  [void]$RefTxt.Add("       positivo. 24 ore x 3 simboli x 2 lati = 144 celle: a caso")
+  [void]$RefTxt.Add("       qualcuna e' verde.")
+}else{
+  [void]$RefTxt.Add("  I2 - LA CELLA NON SI SCEGLIE PERCHE' E' LA PIU' VERDE. 24 ore x 3")
+  [void]$RefTxt.Add("       durate x 2 simboli x 2 lati = 288 celle: a caso qualcuna e'")
+  [void]$RefTxt.Add("       verde. Vale la regola di casa: CENTRO DELL'ALTOPIANO, MAI IL")
+  [void]$RefTxt.Add("       PICCO (12 Spearman IS->OOS negative su 13). E le ancore")
+  [void]$RefTxt.Add("       dichiarate PRIMA sono due, in ora SERVER: 08:00 apertura DAX,")
+  [void]$RefTxt.Add("       14:30 apertura indici USA.")
+}
+[void]$RefTxt.Add("  " + $CritAlto + " - ALTOPIANO, NON PICCO: la fascia buona deve avere accanto ORE")
 [void]$RefTxt.Add("       ADIACENTI dello stesso segno. Un'ora verde isolata fra due")
 [void]$RefTxt.Add("       rosse e' rumore. Si legge scorrendo la colonna 'lordo' delle")
 [void]$RefTxt.Add("       tabelle qui sopra, riga per riga.")
@@ -1417,16 +1546,17 @@ foreach($lettura in @("IS","OOS","ENTRAMBE")){
 [void]$RefTxt.Add("caduto D7 (l'ora del fix, chiuso il 22/08) esce CONFERMATO ED ESTESO")
 [void]$RefTxt.Add("e la pista dell'orologio si chiude con un numero NOSTRO.")
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add('IL VERDETTO C1 SI LEGGE SOLO A CELLE COMPLETE. Il criterio congelato')
-[void]$RefTxt.Add('chiede DUE DEI TRE SIMBOLI: e'' un criterio DI INSIEME, e questo referto')
-[void]$RefTxt.Add('riporta solo le celle di QUESTO giro. Quando le sei celle di misura sono')
-[void]$RefTxt.Add('girate, si lancia il blocco 4 della pagina: -Ricomponi (LO STESSO PIN).')
-[void]$RefTxt.Add('Quel modo NON apre il tester e NON compila: rilegge i CSV gia'' prodotti,')
-[void]$RefTxt.Add('lo dichiara cella per cella con la data del file, e ricalcola C1 sui tre')
-[void]$RefTxt.Add('simboli. NON si usa -TutteLeCelle per ricomporre: da oggi -TutteLeCelle')
-[void]$RefTxt.Add('RIFA'' DAVVERO tutte le passate (-Rifai sta sempre nell''argv), e sono ore.')
-[void]$RefTxt.Add('ATTENZIONE: con un PIN DIVERSO la riga cancella risultati_prove\ e le celle')
-[void]$RefTxt.Add('gia'' girate SONO PERSE. Un ri-pin a meta'' round = si ricomincia da capo.')
+[void]$RefTxt.Add("IL VERDETTO " + $CritZero + " SI LEGGE SOLO A CELLE COMPLETE. Il criterio congelato")
+[void]$RefTxt.Add("chiede " + $FrasePerimetro + " simboli: e' un criterio DI INSIEME, e questo")
+[void]$RefTxt.Add("referto riporta solo le celle di QUESTO giro. Quando le " + $nMisura + " celle di")
+[void]$RefTxt.Add("misura sono girate, si lancia il blocco di RICOMPOSIZIONE della pagina:")
+[void]$RefTxt.Add("-Ricomponi (LO STESSO PIN, LO STESSO -Giro).")
+[void]$RefTxt.Add("Quel modo NON apre il tester e NON compila: rilegge i CSV gia' prodotti,")
+[void]$RefTxt.Add("lo dichiara cella per cella con la data del file, e ricalcola " + $CritZero + " sui")
+[void]$RefTxt.Add("simboli del giro. NON si usa -TutteLeCelle per ricomporre: -TutteLeCelle")
+[void]$RefTxt.Add("RIFA' DAVVERO tutte le passate (-Rifai sta sempre nell'argv), e sono ore.")
+[void]$RefTxt.Add("ATTENZIONE: con un PIN DIVERSO la riga cancella risultati_prove\ e le celle")
+[void]$RefTxt.Add("gia' girate SONO PERSE. Un ri-pin a meta' round = si ricomincia da capo.")
 [void]$RefTxt.Add("")
 if($Fatale -ne ""){
   [void]$RefTxt.Add("!!! FERMATO: " + $Fatale)
@@ -1437,15 +1567,20 @@ foreach($p in $Problemi){ [void]$RefTxt.Add("  - " + $p) }
 [void]$RefTxt.Add("RILIEVI: " + $Rilievi.Count)
 foreach($p in $Rilievi){ [void]$RefTxt.Add("  - " + $p) }
 [void]$RefTxt.Add("")
-[void]$RefTxt.Add('COME SI RIPRENDE: si riparte dalla pagina righe/RIGA_SONDA_OROLOGIO_DA_MANDARE.md,')
-[void]$RefTxt.Add('che e'' l''UNICO posto in cui la riga di lancio esiste (CHECKLIST punto 100).')
+$PaginaGiro = "righe/RIGA_SONDA_OROLOGIO_DA_MANDARE.md"
+if($GiroU -eq "INDICI"){ $PaginaGiro = "righe/RIGA_SONDA_OROLOGIO_INDICI_DA_MANDARE.md" }
+[void]$RefTxt.Add("COME SI RIPRENDE: si riparte dalla pagina " + $PaginaGiro + ",")
+[void]$RefTxt.Add("che e' l'UNICO posto in cui la riga di lancio di questo giro esiste")
+[void]$RefTxt.Add("(CHECKLIST punto 100). Ogni giro ha la SUA pagina e il SUO pin.")
 
-$refPath = Join-Path $Cart "REFERTO_SONDA_OROLOGIO.txt"
+$refPath = Join-Path $Cart $NomeReferto
 Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
 Write-Host ($RefTxt -join "`r`n")
 
 # --- gli artefatti: solo cio' che ha girato, copiato PER NOME.
-foreach($f in @("COMPILAZIONE_FALLITA.log")){
+#     La SPECIFICA del giro entra sempre, se si e' scaricata: i criteri
+#     si leggono PRIMA della tabella, e nello zip ci devono stare.
+foreach($f in @("COMPILAZIONE_FALLITA.log",$Spec)){
   $src = Join-Path $Work $f
   if(Test-Path -LiteralPath $src){ Copy-Item $src -Destination $Cart -Force }
 }
