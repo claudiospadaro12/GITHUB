@@ -1,4 +1,4 @@
-# MARCATORE_RIGA_ORGANIZZA_DESKTOP_v3
+# MARCATORE_RIGA_ORGANIZZA_DESKTOP_v4
 # organizza_desktop.ps1 -- ANTEPRIMA di default (non muove niente).
 #   -Esegui   -> sposta davvero, scrive il log CSV (serve per -Annulla)
 #   -Annulla  -> rilegge l'ultimo log DI QUESTO SCRIPT e rimette tutto com'era
@@ -149,7 +149,7 @@ foreach ($d in @(Get-ChildItem -LiteralPath $Desktop -Directory -Force -ErrorAct
 }
 
 Write-Host ''
-if ($Esegui) { Write-Host '=== SPOSTATE (raggruppate per categoria) ===' -ForegroundColor Cyan }
+if ($Esegui) { Write-Host '=== DA SPOSTARE ORA (esito reale in fondo) ===' -ForegroundColor Cyan }
 else         { Write-Host '=== PIANO (cosa verrebbe spostato, raggruppato per categoria) ===' -ForegroundColor Cyan }
 $Piano | Group-Object Categoria | Sort-Object Name | ForEach-Object {
   Write-Host ''
@@ -172,6 +172,7 @@ $SenzaCategoria | Sort-Object | ForEach-Object { Write-Host ('    - ' + $_) }
 # --- ESEGUI: sposta davvero e scrive il log CSV --------------------------
 $Log = New-Object System.Collections.ArrayList
 $KoMossi = 0
+$Falliti = New-Object System.Collections.ArrayList
 $logFile = ''
 if ($Esegui) {
   New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -186,7 +187,9 @@ if ($Esegui) {
       Move-Item -LiteralPath $voce.Percorso -Destination $dest -ErrorAction Stop
       [void]$Log.Add([PSCustomObject]@{ Origine = $voce.Percorso; Destinazione = $dest })
     } catch {
-      Write-Host ('  NON spostata: ' + $voce.Cartella + '  --  ' + $_.Exception.Message) -ForegroundColor Yellow
+      $msgKo = '  NON spostata: ' + $voce.Cartella + ' (verso ' + $voce.Categoria + ')  --  ' + $_.Exception.Message
+      Write-Host $msgKo -ForegroundColor Yellow
+      [void]$Falliti.Add($msgKo)
       $KoMossi++
     }
   }
@@ -207,7 +210,7 @@ if ($Esegui) {
 $prefisso = if ($Esegui) { 'esito_desktop_' } else { 'piano_desktop_' }
 $fileOut = Join-Path $Desktop ($prefisso + (Get-Date).ToString('yyyy-MM-dd_HHmmss', $INV) + '.txt')
 $righe = New-Object System.Collections.ArrayList
-if ($Esegui) { [void]$righe.Add('ESITO ESECUZIONE - le cartelle sotto sono state spostate davvero') }
+if ($Esegui) { [void]$righe.Add('ESITO ESECUZIONE - elenco PIANIFICATO qui sotto; esito REALE e fallite per nome in fondo') }
 else         { [void]$righe.Add('PIANO SIMULATO - nessuna cartella spostata') }
 [void]$righe.Add('data: ' + $stamp)
 [void]$righe.Add('Desktop: ' + $Desktop)
@@ -223,7 +226,9 @@ $Piano | Group-Object Categoria | Sort-Object Name | ForEach-Object {
 [void]$righe.Add('SENZA CATEGORIA (' + $SenzaCategoria.Count + '): ' + (($SenzaCategoria | Sort-Object) -join ', '))
 if ($Esegui) {
   [void]$righe.Add('')
-  [void]$righe.Add('spostate con successo: ' + $Log.Count + '   NON spostate: ' + $KoMossi)
+  [void]$righe.Add('ESITO REALE -- spostate con successo: ' + $Log.Count + '   NON spostate: ' + $KoMossi)
+  foreach ($m in $Falliti) { [void]$righe.Add($m) }
+  [void]$righe.Add('(le NON spostate sono rimaste dove erano e NON sono nel log di annullamento)')
   [void]$righe.Add('Log per annullare: ' + $logFile)
 }
 Set-Content -LiteralPath $fileOut -Value $righe -Encoding UTF8
