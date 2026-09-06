@@ -9608,3 +9608,60 @@ coincidono, **non e' un numero**.
 > fino a ~2.995 EUR di perdita**, cioe' **il bug del credito, tale e quale**.
 > Il preset lo blocca (pretende `0` esatto), **la finestra dei parametri di MT5
 > no.** Va scritto nella pagina accanto a `InpStartBalance = 0`.
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 (notte, subito dopo) — trovata dal **verificatore di stringhe** RI-VERIFICANDO il fix della classe 145 su `RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1` (pin `69ff7751`), **ESEGUENDO** di nuovo tutto il banco: 23 sabotaggi sul gate v1.12 (0 sfuggiti), parse reale, one-liner verbatim, e **tre corse end-to-end** del driver vero contro un finto terminale. **Il fix della 145 e' corretto e verificato** (`.ex5` reso non cancellabile con `chattr +i`: i tre file tornano bit per bit come prima, sentinella tolta, `PROBLEMI: 0`, nessun «RIPRISTINO FALLITO»). Ma il `try/catch` che lo rende possibile ha aperto **una porta nuova, della stessa famiglia** — quarta recidiva della meta-classe del 04/09 (_"la correzione di un difetto ne porta dentro uno nuovo, della stessa famiglia"_). **Riprodotta.**
+
+## 147. 🤫 IL `try/catch` CHE **INGOIA IL FALLIMENTO CHE DOVEVA GRIDARE**: l'esito finisce fra i RILIEVI, il chiamante **non conta i non riusciti**, e la **sentinella** — cioe' il registro delle scritture — **viene cancellata lo stesso**
+
+**Dove.** `RipristinaDaBackup()` (righe 586-619 dopo il fix della 145) torna
+**solo un elenco di STRINGHE**: nessun contatore dei "non riusciti". Nessuno
+dei tre chiamanti (righe 701, 1478, 1497) cerca `RIPRISTINO NON RIUSCITO`
+dentro quelle stringhe. Nel ramo della **sentinella** (righe 700-705) l'esito
+va in `$Rilievi` — **mai in `$Problemi`** — e la riga 702 toglie la sentinella
+**incondizionatamente**.
+
+**Riprodotto sul banco** (driver vero, finto terminale, `chattr +i` sul `.mq5`
+gia' sovrascritto da un giro interrotto). Il referto ha detto:
+
+```
+PROBLEMI: 0
+RILIEVI:
+  - UN GIRO PRECEDENTE ERA STATO INTERROTTO fra backup e fine: i file sono
+    stati RIMESSI dal backup ... (ABTG_Guardian.mq5: RIPRISTINO NON RIUSCITO
+    (Access to the path ... is denied.) -- controllare a mano ...)
+```
+
+**La frase-titolo dice «i file sono stati RIMESSI»** — e non e' vero: uno non
+lo era. Il dettaglio c'e', ma sta **dentro la parentesi della frase che lo
+smentisce**, in un RILIEVO, con `PROBLEMI: 0`. E la sentinella, unico registro
+di cosa era stato scritto, **era gia' stata cancellata**: il giro dopo non ha
+piu' modo di sapere che nel terminale e' rimasto un file non suo.
+
+**Perche' e' una classe.** E' esattamente il difetto che questo stesso file
+condanna a riga 671 (_"un referto che rassicura su un fatto che non ha
+guardato e' peggio di un referto che tace"_), ricreato **dal rimedio**: prima
+della 145 il fallimento era **rumoroso e sbagliato** (eccezione, exit 1 con la
+causa sbagliata); dopo, e' **silenzioso e sbagliato**. Il `try/catch`
+per-elemento e' giusto — serve perche' un file non fermi gli altri — ma
+**"non far saltare il ciclo" non vuol dire "non dirlo al referto"**.
+
+**La regola.** Ogni funzione di ripristino/rollback torna **due cose**: gli
+esiti **e il numero dei non riusciti**. Il chiamante, se quel numero e' > 0:
+1. mette una voce in **`$Problemi`** (non fra i rilievi) -> `exit 1`;
+2. **NON cancella la sentinella / il registro delle scritture** — quella e'
+   l'unica traccia che dice al giro dopo cosa c'e' ancora da rimettere;
+3. **non scrive una frase-titolo che afferma il successo**: il titolo si
+   costruisce dal conteggio, non dall'intenzione.
+
+**Il controllo secco, da fare sempre.** Dopo ogni `catch` aggiunto per
+"robustezza": _chi legge questo errore?_ Se la risposta e' "una stringa in un
+elenco che nessuno conta", il `catch` non ha reso robusto il giro — **ha reso
+muto il referto**.
+
+> 📐 **E il corollario sui numeri:** un `-eq` fra due valori che possono essere
+> **entrambi vuoti per fallimento** (qui `(HashPieno $b) -eq (HashPieno $d)`,
+> che torna `""` quando l'hash non si calcola) **dichiara "identici" due file
+> che non ha saputo leggere**. Il confronto va sempre preceduto da
+> `$hash -ne ""`: "non misurato" non e' "uguale".
