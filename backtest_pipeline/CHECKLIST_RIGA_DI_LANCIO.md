@@ -9381,3 +9381,62 @@ referto che non esiste proprio) piu' il punto 10 (nessun `try/catch` nel ciclo:
 riprodotto -> **corsa monca e ZERO log, spostamento irreversibile**).
 **"Claudio l'ha gia' lanciato" non e' una verifica: e' solo la prova che quel
 giorno nessuna cartella era aperta in Esplora risorse.**
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 (sera, poco dopo) — trovata dal **verificatore di stringhe** RI-VERIFICANDO il fix delle classi 140/140-bis/141/142/142-bis su `riordina_desktop.ps1` (v2, pin `ed2004ac`), **ESEGUENDO due `-Esegui` di fila** su Desktop finto. I sette fix sono applicati bene (142-bis **verificata eseguendo**: 7 slot `_1` pre-occupati, versione A e versione C tutte e nove superstiti; `ESITO REALE` costruito su `$log`/`$falliti`, non su `$piano`). Ma **la correzione del referto ha riarmato la classe 140** che la stessa patch stava chiudendo — terza recidiva della meta-classe del 04/09 (_"la correzione di un difetto ne porta dentro uno nuovo, della stessa famiglia"_).
+
+## 143. 🐍 IL REFERTO SCRITTO SUL DESKTOP DIVENTA **MATERIALE DA SPOSTARE AL GIRO DOPO**: nessuna corsa e' mai piu' "vuota", e il log fatto **solo di referti** SCAVALCA il log vero per `-Annulla`
+
+_Difetto vero, **riprodotto** il 06/09 sul pin `ed2004ac` (righe 173-179, 208,
+226, 261-263, 59-62). Banco: tre cartelle round, due `-Esegui` di fila,
+`-Annulla`._
+
+Le tre guardie della classe 140 sono tutte e tre al loro posto e tutte e tre
+**non servono a niente**:
+
+1. timbro al SECONDO -> i due log hanno nomi diversi, **si'**;
+2. il log vuoto non si scrive -> ma **il secondo log NON e' vuoto**;
+3. `-Annulla` prende l'ultimo NON VUOTO -> e l'ultimo non vuoto e' **quello
+   sbagliato**.
+
+Perche' il fix della classe 141 fa scrivere `esito_riordino_*.txt` e
+`esito_riordino_*.zip` **sul Desktop**, cioe' **dentro il perimetro che lo
+script stesso rastrella**: `.txt` -> `ABTG_DOCUMENTI`, `.zip` -> `ABTG_ZIP`. Il
+secondo giro non trova "niente da fare": trova **i due referti del primo giro**,
+li sposta, e scrive un log nuovo di **2 righe**. Misurato:
+
+```
+log dopo giro 2:
+   riordino_..._082908.csv  (3 righe)  <- bb_r10, gap_r11, oro_r12     [quello VERO]
+   riordino_..._082909.csv  (2 righe)  <- esito_riordino_....txt/.zip  [SPAZZATURA]
+-Annulla  ->  "ANNULLO usando riordino_..._082909.csv"
+              "Rimessi a posto: 2   NON rimessi: 0"   ESITO: OK   exit 0
+Desktop dopo: le tre cartelle sono ANCORA in ABTG_RISULTATI.
+```
+
+Verde, `exit 0`, e il riordino e' **irreversibile**. E' la classe 140
+riprodotta **per interposto referto**: il vecchio bug la innescava con un log
+vuoto, questo la innesca con un log **pieno di roba nostra**.
+
+Il gemello `RIGA_ORGANIZZA_DESKTOP.ps1` e' **immune per caso**, non per merito:
+rastrella con `Get-ChildItem -Directory` (riga 109), quindi i suoi referti-FILE
+non li vede. **Ecco perche' copiare il fix dal gemello non basta**: la guardia
+del gemello non ha mai dovuto proteggere niente. (Punto 9 al contrario: il
+gemello non aveva la meta' buona, aveva solo un perimetro piu' stretto.)
+
+> ✅ **Regola: uno script che rastrella una cartella non puo' scrivere i propri
+> artefatti DENTRO quella cartella senza metterli nella blacklist.** Prima di
+> aggiungere un referto/zip/log a un perimetro che lo script stesso spazza:
+> chiedersi *"al giro dopo, questo file lo sposto io?"*. Se si', due gesti:
+> 1. lista a **prefisso** dei propri artefatti (e di quelli degli script
+>    gemelli che scrivono sullo stesso Desktop), saltata **sempre**, anche con
+>    `-Tutto`;
+> 2. **anti-collisione anche sul nome del LOG** (due corse nello stesso secondo
+>    esistono: il timbro al secondo riduce la finestra, non la chiude), e log
+>    consumato da un `-Annulla` riuscito **rinominato** (`usato_riordino_*.csv`)
+>    cosi' il secondo `-Annulla` non accusa un Desktop sano.
+>
+> Controllo secco, da fare su OGNI script distruttivo con rollback:
+> **eseguirlo DUE VOLTE di fila e poi annullare.** Se il secondo giro trova
+> qualcosa da fare che il primo ha creato, il rollback e' gia' morto.
