@@ -10,6 +10,43 @@ Ma e' la cosa che moltiplica la resa per dieci.
 
 ---
 
+## 🔓 AGGIORNAMENTO 06/09/2026 (sera) — **MQL5 NON È PIÙ MURATO, E IL SORGENTE SI SCARICA**
+
+⚠️ **Quanto segue MISURA il canale oggi e NON cancella il §1: il 403 al
+CONNECT del 16/08 è agli atti così com'è. Oggi il canale risponde.**
+
+Verificato passo per passo (dossier `CACCIA_SHORT_FREQUENZA_2026-09-06.md` §0 e §2):
+
+| passo | URL | esito misurato |
+|---|---|---|
+| elenco | `mql5.com/en/code/mt5/experts/page<N>` | **200** · 40 titoli+id per pagina |
+| scheda | `mql5.com/en/code/<ID>` | **200** · `<meta name="description">` contiene **descrizione + AUTORE + DATA** |
+| 🥇 **sorgente** | `mql5.com/en/code/download/<ID>/<Nome>.mq5` | **200** · `76153` → **18.183 byte, 466 righe di `.mq5` vero** |
+
+👉 **Il setaccio §4 è applicabile al Code Base senza intermediari.** Non serve
+più il mirror GitHub offline per leggere un sorgente.
+
+🔴 **MA RESTANO DUE LIMITI, ed è il motivo per cui questa NON è una vittoria piena:**
+1. **La ricerca interna è in JS.** `?s=…`, `?sort=rating`, `?sort=downloads`
+   sono **IGNORATI** (verificato: i primi 6 titoli restano identici), e
+   `mql5.com/en/search?keyword=…` torna 200 con **0 risultati nell'HTML**.
+   ➡️ **Si può SOLO scorrere l'elenco in ordine di data.** Non si può cercare
+   "short", "mean reversion" o "fade": è il limite che condiziona di più una caccia.
+2. ⚠️ **Molti `.mq5` del Code Base sono in UTF-16.** Un `grep '^input'` ci trova
+   **ZERO input** e fa sembrare pulito un sorgente sporco: su `29362` il primo
+   passaggio dava "0 input, nessuna bandiera rossa", la verità dopo la decodifica
+   è **42 input e una MARTINGALA ATTIVA PER DEFAULT**. 👉 **Si decodifica PRIMA
+   di setacciare**, altrimenti passa un martingala.
+
+**Altre fonti, stessa sera:** TradingView **200 ma il Pine NON è nell'HTML**
+(0 occorrenze di `strategy(` su 1,54 MB) → **non setacciabile**; GitHub
+**403 sulla UI e 403 sull'API di ricerca** (_"sessions are bound to their
+configured repositories"_ — ⚠️ **è uno SCOPING, non una quota**: `rate_limit`
+dà 200 con 15.000 crediti, quindi **non è il 429 "riprova fra un'ora"** dei
+giorni scorsi); SSRN e Forex Factory **403**; Quantpedia **308**.
+
+---
+
 ## 1. 🧱 IL PROBLEMA, misurato
 
 L'ambiente in cui giro ha una **allowlist di domini**. Le fonti utili
