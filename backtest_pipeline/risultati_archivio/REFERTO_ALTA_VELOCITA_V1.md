@@ -81,3 +81,32 @@ prova piu' pulita finora del metodo: DUE versioni testate e bocciate in
 UN giorno, zero euro di forward, zero mesi persi. La strategia resta
 quello che il suo stesso manuale dichiara: un metodo dove l'ultimo
 strato — quello che guadagna — e' umano.
+
+---
+
+## RIMANDO (06/09/2026) — rilettura integrale della fonte
+
+Il manuale di 38 pagine e' stato **riletto pagina per pagina** e confrontato
+riga per riga con questo EA:
+
+👉 **`report/ANALISI_MANUALE_ALTAVELOCITA_2026-09-06.md`**
+
+In sintesi (i contenuti stanno li', non si duplicano qui):
+- **Il capitolo NON si riapre**: il PDF non porta un solo parametro che non
+  avessimo gia' l'11/08. Nessuna tesi nuova -> patto di chiusura intatto.
+- **Fedelta' della traduzione verificata**: 13 voci esatte su 17, 3
+  approssimazioni gia' dichiarate nel codice, **1 buco vero** — l'EA non ha
+  **nessun filtro di sessione/fascia oraria**, che il manuale prescrive su 3
+  pagine. Il verdetto rosso vale per cio' che e' stato testato: **la sessione
+  non e' stata provata** (e non si prova: fuso non dichiarato dalla fonte +
+  REGOLA DELLA SECONDA CACCIA).
+- **Appendice D**: nessun codice, nessuna formula. L'indicatore ufficiale del
+  corso **ammette di non avere la formula del ciclo**; noi ce l'abbiamo da 3
+  fonti indipendenti -> su quel pezzo siamo piu' fedeli del corso.
+- **Bandiere**: 1 rossa (hedging su posizione multiday, p.23 — gia' esclusa
+  da questo EA), 1 arancione (rientro ripetuto dopo l'uscita in perdita,
+  che contraddice la misura in euro del dossier PS5), 2 sui claim di
+  rendimento. **Zero martingala, zero griglia, zero no-SL.**
+- **Aperta una richiesta**: i file `AltaVelocita.mq5/.mq4` allegati al corso
+  conterrebbero i parametri del Supertrend e dell'ATR, che il manuale non
+  dichiara in nessuna delle 38 pagine.
