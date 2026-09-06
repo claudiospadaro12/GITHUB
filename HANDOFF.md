@@ -7,6 +7,53 @@
 
 ---
 
+## 🛡️ 06/09 sera — GUARDIAN v1.12: il credito rendeva la rete quasi INERTE (bug trovato e chiuso)
+
+**Il fatto.** Il credito di 2.500€ sta nell'**equità** e non nel **bilancio**. Il
+Guardian v1.11 catturava il saldo di riferimento e la baseline giornaliera dal
+**BILANCIO**, ma li confrontava con l'**EQUITÀ**: due grandezze diverse ai due
+lati dello stesso confronto. Il credito, essendo **costante**, si comportava da
+cuscinetto permanente di 2.500€.
+
+**Quanto pesava.** Con bilancio 5.000 e credito 2.500, la pausa al 4,9% e il
+blocco al 9,9% **non sarebbero scattati** fino a una perdita **reale** di oltre
+**2.700-3.000€** — cioè oltre metà del capitale vero — invece dei **~245-495€**
+previsti. 👉 **La rete c'era ed era quasi disattivata.**
+
+**Cosa è stato fatto** (`d884f7e` e seguiti, branch `lavoro`):
+- `ABTG_Guardian.mq5` **v1.11 → v1.12**: baseline presa dall'**EQUITÀ** in
+  entrambi i punti (OnInit e il cambio di giorno prop in OnTimer).
+- Le **5 GlobalVariable della baseline** rinominate con suffisso **`_V2`**
+  (`ABTG_GUARD_<login>_START_V2` ecc.). Serve: quelle variabili **persistono per
+  scelta**, quindi senza il nome nuovo il guardiano rileggerebbe il numero
+  vecchio contaminato e **il fix non prenderebbe**. Nessun reset a mano da F3.
+- **`ABTG_GUARD_<login>_FAILED` NON è stata rinominata**, ed è deliberato:
+  rinominarla rimetterebbe operativo un conto già fermato per DD sfondato.
+- Aggiunta una riga di log che stampa **equity, bilancio e la differenza** (=
+  il credito): è il numero invisibile che aveva nascosto il bug.
+- Driver `RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1`: gate su **v1.12** con **rifiuto
+  esplicito della v1.11**, più gate sulle **tracce vere del fix nel codice**
+  (perché `#property version` è una stringa e si alza senza correggere niente).
+- ⚠️ **Il deploy è un AGGIORNAMENTO, non un'installazione**: il Guardian è già
+  attaccato a un grafico vivo, quindi **va staccato prima della CORSA** (tasto
+  destro sul grafico → Expert Advisors → Rimuovi) e riattaccato dopo con **lo
+  stesso preset** (nessun valore è cambiato).
+
+**Pin da usare: `480aed8191a5a3ebe80f45a4256caac529fec945`** (il precedente
+`a01e157…` **non va più usato**: lì c'è ancora la v1.11 col bug, e il driver
+nuovo lo rifiuta da solo). Pagina:
+`backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE_DA_MANDARE.md`.
+
+**Prova che il fix ha preso**, in scheda Esperti dopo il riavvio:
+`[GUARDIAN] avviato. Saldo iniziale=` deve dire **~7500.00** (l'equità), **non
+~5000.00** (il bilancio).
+
+🔎 **DA FARE ALLA PROSSIMA SESSIONE:** far girare CONTROLLO + CORSA col pin
+sopra, e **verificare quel numero**. Finché non è fatto, **sul conto reale gira
+ancora la v1.11, cioè la versione col bug**.
+
+---
+
 ## 💶 06/09 — CONTO REALE: bilancio vero 5.000€, non 7.500€ (regola di conteggio decisa da Claudio)
 
 **Scoperto dallo screenshot del dialogo Guardian**: la barra Trade del conto reale (10105439) mostra
@@ -30,15 +77,21 @@ opera sempre con 7.500€ di potenza) ma **NON sono prelevabili**: un prelievo
 può portare via solo il bilancio (5.000€ + profitti realizzati), mai il
 credito. Tipico bonus broker non cash-out.
 
-⚠️ **Nota tecnica che resta valida indipendentemente dalla convenzione di
+~~⚠️ **Nota tecnica che resta valida indipendentemente dalla convenzione di
 reporting**: `ABTG_Guardian.mq5` usa `AccountInfoDouble(ACCOUNT_BALANCE)` (il
 bilancio, 5.000€) come riferimento per i SUOI calcoli di drawdown (righe
 259/335) — questo NON cambia, è un fatto del codice, non una scelta di
 reporting. Le soglie 4,9%/9,9% del Guardian sono quindi calcolate su 5.000€
-(più severe in euro assoluti di quanto lo sarebbero su 7.500€), mentre quando
-Claudio chiede "quanto abbiamo guadagnato in %" la risposta va data sul
-7.500€. Due basi diverse per due scopi diversi, entrambe corrette per il loro
-uso: dichiararlo sempre per evitare confusione futura.
+(più severe in euro assoluti di quanto lo sarebbero su 7.500€)...~~
+
+🛑 **QUESTA NOTA ERA SBAGLIATA, ed è stata corretta poche ore dopo (vedi la
+sezione qui sotto).** Diceva che il Guardian calcolava le soglie su 5.000€,
+cioè "più severe": **falso, ed era il contrario.** Il Guardian prendeva la
+baseline dal BILANCIO (5.000) ma la confrontava con l'EQUITÀ (7.500): non
+misurava un drawdown su 5.000, misurava un drawdown **partito con 2.500€ di
+vantaggio finto**. Le soglie erano quindi **molto più LARGHE**, non più strette.
+Lasciata qui barrata apposta: è la forma dell'errore da non rifare — *due
+grandezze diverse ai due lati dello stesso confronto*.
 
 **Stato deploy conto reale a fine giornata 06/09:**
 - `ABTG_SlippageLogger` — installato, live, **0 deal registrati** (nessun trade ancora eseguito su questo conto).
