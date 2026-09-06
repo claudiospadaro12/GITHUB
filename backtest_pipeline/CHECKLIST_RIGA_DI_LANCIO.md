@@ -9154,3 +9154,36 @@ E qui non e' un caso qualunque: e' la pagina che porta un artefatto **su un cont
 > ⚠️ **Ma questa quinta serratura è l'unica delle cinque che devi CHIUDERE TU**: nel sorgente `InpLoginAtteso` nasce a **`0`**, e `0` vuol dire *«qualunque conto»* — cioè **serratura aperta**. Si chiude scrivendo il numero nella finestra degli input quando trascini l'EA sul grafico (**PASSO 3, punto 2**).
 
 Il PASSO 3 gia' lo diceva («Lasciarlo a `0` non è un guasto ... ma **butta via una protezione gratis**»): la pagina si contraddiceva da sola a 130 righe di distanza, e **la versione ottimista era quella che si legge per prima**.
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 — trovata verificando `organizza_desktop.ps1` (anteprima del riordino Desktop VPS), **ESEGUENDO**
+
+## 101. 🪤 LA LISTA ORDINATA IN CUI LA VOCE GENERICA STA SOPRA LA SPECIFICA: la specifica e' CODICE MORTO, e la cartella-DESTINAZIONE combacia con la propria parola chiave
+
+Due sintomi della stessa malattia: **una tabella `[ordered]` di regole dove la
+prima che combacia vince**, riletta senza simulare l'ordine.
+
+1. **Voce specifica irraggiungibile.** In `organizza_desktop.ps1`:
+   `'Backup' = @('backup_')` era dichiarata **prima** di
+   `'Pulizia_VPS' = @('pulizia_vps','backup_pul')`. Ogni cartella
+   `backup_pulizia_vps_*` cade in `Backup`: la chiave `backup_pul` non puo'
+   vincere **mai**. Non e' un errore di sintassi, e' una riga che non gira —
+   e in fase di anteprima sembra tutto a posto perche' un posto lo trova.
+2. **La destinazione mangia se stessa.** I nomi delle categorie
+   (`Slippage_Spread`, `Backtest`, `Fantasmi`, `Indicatori`, ...) contengono
+   la loro stessa parola chiave: al **secondo** lancio la cartella di arrivo
+   viene classificata come cartella da spostare **dentro se stessa**. Un
+   riordino che si annida da solo a ogni giro.
+
+> ✅ **Regola: ogni tabella di regole a priorita' si verifica ESEGUENDOLA su
+> un Desktop finto che contiene i casi ambigui** (un nome che combacia con due
+> categorie, e **un nome uguale a quello di una destinazione**). E le
+> destinazioni entrano sempre nella lista delle PROTETTE, insieme alle
+> tematiche del punto 11.
+
+_Sullo stesso file, terzo difetto e gia' noto (punto 11): la categoria
+`Indicatori` avrebbe portato via `INDICATORI`, dichiarata "non si sposta" da
+`riordina_desktop.ps1` (righe 15-16) e messa fra le tematiche da
+`sistema_cartelle.ps1` (righe 45-48). La blacklist del gemello va copiata,
+non ricordata._
