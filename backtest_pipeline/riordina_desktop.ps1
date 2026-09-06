@@ -160,6 +160,11 @@ $NonToccareFilePrefisso = @(
   "anteprima_riordino_","esito_riordino_","annulla_riordino_","usato_riordino_",
   "piano_desktop_","esito_desktop_","annulla_desktop_"
 )
+# file personali/clienti di Claudio (nulla a che fare col trading ABTG):
+# richiesto il 06/09 di escluderli dal sacco ABTG_DOCUMENTI. Sottostringa,
+# confronto SENZA cultura (i nomi hanno spazi e maiuscole miste).
+$NonToccareFileContiene = @("cliente","clienti","claudio")
+$NonToccareFileEsatto = @("DUPLICATI_SCARTATI.xlsx","lista-emilia-romagna--20260717-090319.xlsx")
 
 function Famiglia($nome){
   foreach($f in $Famiglie.Keys){
@@ -182,6 +187,10 @@ foreach($v in $voci){
     $mio = $false
     foreach($pp in $NonToccareFilePrefisso){ if($v.Name.StartsWith($pp,[System.StringComparison]::OrdinalIgnoreCase)){ $mio = $true; break } }
     if($mio){ continue }
+    $personale = $false
+    if($NonToccareFileEsatto -contains $v.Name){ $personale = $true }
+    if(-not $personale){ foreach($k in $NonToccareFileContiene){ if($v.Name.ToLowerInvariant().Contains($k)){ $personale = $true; break } } }
+    if($personale){ continue }
   }
 
   if($v.PSIsContainer){
