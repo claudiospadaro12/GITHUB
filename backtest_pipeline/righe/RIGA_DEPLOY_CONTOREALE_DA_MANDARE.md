@@ -75,7 +75,7 @@ contenuto al pin identico al file nel repo**.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1` | 200, identico (`292bc7f2…`, **80.656 byte**), marcatore `MARCATORE_RIGA_DEPLOY_CONTOREALE_v1` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
+| `backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1` | 200, identico (`292bc7f2…`, **80.656 byte**), marcatore `MARCATORE_RIGA_DEPLOY_CONTOREALE_v2` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
 | `mql5/Experts/ABTG_DAX_Apertura_EU.mq5` | 200, identico (`105f0f81…`, **118.483 byte**), `#property version "1.01"`, `ABTG_DEF_MAGIC 770101`, `ABTG_DEF_RISK 1.0` |
 | `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` | 200, identico (`c14d85dd…`, **74.103 byte**) — **lo stesso sha256 e gli stessi byte del deploy della v1.04 sul piccolo del 03/09**, `#property version "1.04"`, autotest **10 blocchi / 33 casi**, `PositionSelect(_Symbol)` fuori dai commenti: **0** |
 | `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (`b7462cd5…`, **112.481 byte**, **v1.51** — la stessa del deploy sul piccolo) |
@@ -140,7 +140,7 @@ cartelle guardate, la cartella scelta col suo **criterio**, i gate sui sorgenti,
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: li'' queste due sedie GIA'' girano. Serve il numero del conto REALE.' };
     $pin='ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CONTROLLO; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'DEPLOY_CONTOREALE_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);
@@ -169,7 +169,7 @@ la riga `guardia sul conto` che dice **TROVATO**, e la riga
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: serve il numero del conto REALE.' };
     $pin='ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CORSA; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'DEPLOY_CONTOREALE_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);

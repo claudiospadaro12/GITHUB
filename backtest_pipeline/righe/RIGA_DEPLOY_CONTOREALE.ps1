@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_DEPLOY_CONTOREALE_v1
+#  MARCATORE_RIGA_DEPLOY_CONTOREALE_v2
 #  RIGA_DEPLOY_CONTOREALE.ps1 -- INSTALLA E COMPILA LE DUE SEDIE VERE
 #  sul SOLO terminale del conto REALE, il cui numero lo deve dire
 #  CLAUDIO con -LoginAtteso.
@@ -1080,6 +1080,9 @@ try{
     $err1 = -1; $war1 = -1; $err2 = -1; $war2 = -1
     $ok1 = $false; $ok2 = $false
 
+    # 94-ter: il campo si timbra PRIMA del lancio. Se l'invocazione stessa
+    # esplode, il referto non deve dire "non ci siamo arrivati".
+    $Comp1 = "FALLITA -- METAEDITOR NON PARTITO (eccezione al lancio di " + $Me + ": vedi la riga FERMATO)"
     $e1 = Compila $Me @(("/compile:" + $Dest1Mq5), ("/inc:" + $MqlDir), ("/log:" + $Log1Path)) $Dest1Ex5 $Log1Path $TimeoutSec $EA1
     $Log1Righe = @($e1.Log)
     if($null -ne $e1.Rc){ $Rc1 = "" + $e1.Rc + "   (1 e' NORMALE su questo VPS: e' il numero di file compilati, misurato il 03/09)" }
@@ -1097,6 +1100,8 @@ try{
     Dico ($EA1 + ": " + $Comp1) "Yellow"
 
     if($ok1){
+      # 94-ter: il campo si timbra PRIMA del lancio, come per Comp1.
+      $Comp2 = "FALLITA -- METAEDITOR NON PARTITO (eccezione al lancio di " + $Me + ": vedi la riga FERMATO)"
       $e2 = Compila $Me @(("/compile:" + $Dest2Mq5), ("/inc:" + $MqlDir), ("/log:" + $Log2Path)) $Dest2Ex5 $Log2Path $TimeoutSec $EA2
       $Log2Righe = @($e2.Log)
       if($null -ne $e2.Rc){ $Rc2 = "" + $e2.Rc + "   (1 e' NORMALE su questo VPS)" }
@@ -1133,6 +1138,10 @@ try{
       }
     }
     else{
+      # 116-quater: i due campi si timbrano PRIMA del ripristino. Se il
+      # ripristino STESSO esplode, il referto non deve dire "mai scritto".
+      $InstallTxt = "TENTATA -- RIPRISTINO IN CORSO. Se questa riga e' rimasta cosi', il ripristino STESSO e' esploso: nel terminale potrebbero essere rimasti file nuovi. Guarda le sette righe REALE e il backup " + $BackupDir + "."
+      $Ripristino = "IN CORSO dal backup " + $BackupDir + " -- se questa riga e' rimasta cosi', rimetti a mano dal backup."
       $Ripristino = (RipristinaDaBackup $BackupDir $TuttiDest) -join "; "
       $InstallTxt = "TENTATA E RIPRISTINATA (tutto o niente: una delle due compilazioni non e' andata, quindi TUTTI E SETTE i file sono tornati com'erano)"
       [void]$Problemi.Add("compilazione non riuscita -- " + $EA1 + ": " + $Comp1 + " || " + $EA2 + ": " + $Comp2)
@@ -1143,10 +1152,15 @@ try{
 catch{
   $Fatale = $_.Exception.Message
   Write-Host ("!!! FERMATO: " + $Fatale) -ForegroundColor Red
-  if($ScrittoNelTerminale -and $BackupDir -ne "" -and (Test-Path -LiteralPath $BackupDir)){
+  # 116-quater: il ripristino si comanda dal REGISTRO DELLE SCRITTURE (backup +
+  # sentinella, scritti PRIMA della prima copia), MAI da una bandiera alzata
+  # DOPO la Copy-Item. Ripristinare quando non si era scritto e' un no-op.
+  if($BackupDir -ne "" -and (Test-Path -LiteralPath $BackupDir)){
     try{
       $dest = @()
       foreach($a in $Art){ $dest = $dest + @($a.P) }
+      $InstallTxt = "TENTATA -- RIPRISTINO IN CORSO dopo un'eccezione. Se questa riga e' rimasta cosi', il ripristino STESSO e' esploso."
+      $Ripristino = "IN CORSO dal backup " + $BackupDir + " (dopo un'eccezione) -- se questa riga e' rimasta cosi', rimetti a mano dal backup."
       $Ripristino = ((RipristinaDaBackup $BackupDir $dest) -join "; ") + "  (dopo un'eccezione)"
       $InstallTxt = "TENTATA E RIPRISTINATA (eccezione)"
       Remove-Item -LiteralPath $Sentinella -Force -ErrorAction SilentlyContinue
@@ -1207,11 +1221,14 @@ try{
     if((Confronta $f.Prima $f.Dopo) -eq "CAMBIATO"){ $cambiateL++ }
   }
   $regTxt = ""
-  if($MqlDir -ne ""){
+  if($MqlDir -ne "" -and $FotoPrese){
     $invFileD = Inventario (Join-Path $MqlDir "Files") ($LOGGER + "*")
     $cambiReg = 0
     foreach($k in $invFileD.Keys){ if((-not $InvFileP.ContainsKey($k)) -or $InvFileP[$k] -ne $invFileD[$k]){ $cambiReg++ } }
     $regTxt = "  ||  il suo REGISTRO in MQL5\Files: " + $InvFileP.Keys.Count + " file prima, " + $invFileD.Keys.Count + " dopo, " + $cambiReg + " nuovi o cresciuti -- e SE E' CRESCIUTO E' NORMALE E GIUSTO: il logger scrive ogni 10 secondi finche' MT5 e' aperto. Questa riga non ci ha scritto niente (non ha nessun percorso verso quella cartella)."
+  }
+  elseif($MqlDir -ne ""){
+    $regTxt = "  ||  il suo REGISTRO in MQL5\Files: NON MISURATO (il giro si e' fermato prima della foto PRIMA: un confronto contro il vuoto non e' una misura)."
   }
   if($cambiateL -gt 0){
     $LoggerTxt = "ATTENZIONE: " + $cambiateL + " file di " + $LOGGER + " RISULTANO CAMBIATI. Questa riga non doveva toccarlo." + $regTxt
