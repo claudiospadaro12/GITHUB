@@ -54,13 +54,31 @@ $LogDir = Join-Path $Desktop "ABTG_ORDINE_LOG"
 # non devono sovrascrivere il log/referto l'uno dell'altro (classe 140).
 $stamp  = (Get-Date).ToString("yyyy-MM-dd_HHmmss", $INV)
 
-# --- ANNULLA: rilegge l'ultimo log NON VUOTO e riporta tutto indietro -----
+function NomeSenzaCollisione($cartella, $base, $coda) {
+  # classe 143-bis: se due giri cadono nello stesso SECONDO, non si vuole
+  # che il secondo scavalchi il file/log del primo. Tentativi numerati.
+  $cand = Join-Path $cartella ($base + $coda)
+  $k = 0
+  while(Test-Path -LiteralPath $cand){
+    $k++
+    $cand = Join-Path $cartella ($base + "_" + $k + $coda)
+  }
+  return $cand
+}
+
+# --- ANNULLA: rilegge l'ultimo log NON VUOTO, NON GIA' USATO, e riporta tutto indietro ---
 if($Annulla){
   $ultimo = Get-ChildItem -LiteralPath $LogDir -Filter "riordino_*.csv" -ErrorAction SilentlyContinue |
             Sort-Object LastWriteTime -Descending |
             Where-Object { @(Import-Csv -LiteralPath $_.FullName -ErrorAction SilentlyContinue).Count -gt 0 } |
             Select-Object -First 1
-  if(-not $ultimo){ Write-Host "Nessun log di riordino da annullare (o sono tutti vuoti)." -ForegroundColor Yellow; exit 0 }
+  if(-not $ultimo){
+    Write-Host "Nessun log di riordino da annullare (o sono tutti vuoti/gia' usati)." -ForegroundColor Yellow
+    $fileA0 = NomeSenzaCollisione $Desktop "annulla_riordino" ("_" + $stamp + ".txt")
+    Set-Content -LiteralPath $fileA0 -Value @("ESITO ANNULLAMENTO riordina_desktop","data: " + (Get-Date).ToString("yyyy.MM.dd HH:mm:ss", $INV),"Nessun log da annullare (o tutti gia' usati/vuoti).") -Encoding UTF8
+    Write-Host ("Referto: " + $fileA0) -ForegroundColor Gray
+    exit 0
+  }
   Write-Host ("ANNULLO usando " + $ultimo.Name) -ForegroundColor Cyan
   $n = 0; $ko = 0
   $rilievi = New-Object System.Collections.ArrayList
@@ -80,7 +98,11 @@ if($Annulla){
     }
   }
   Write-Host ("Rimessi a posto: " + $n + "   NON rimessi: " + $ko) -ForegroundColor White
-  $fileA = Join-Path $Desktop ("annulla_riordino_" + $stamp + ".txt")
+  # log CONSUMATO: rinominato cosi' un -Annulla successivo non lo ripesca
+  # (il -Filter "riordino_*.csv" non prende piu' "usato_riordino_...").
+  $logUsato = NomeSenzaCollisione $ultimo.DirectoryName ("usato_" + [IO.Path]::GetFileNameWithoutExtension($ultimo.Name)) ".csv"
+  Move-Item -LiteralPath $ultimo.FullName -Destination $logUsato -ErrorAction SilentlyContinue
+  $fileA = NomeSenzaCollisione $Desktop "annulla_riordino" ("_" + $stamp + ".txt")
   $righeA = New-Object System.Collections.ArrayList
   [void]$righeA.Add("ESITO ANNULLAMENTO riordina_desktop")
   [void]$righeA.Add("data: " + (Get-Date).ToString("yyyy.MM.dd HH:mm:ss", $INV))
@@ -130,6 +152,14 @@ $NonToccarePrefisso = @(
   "EASYTREND","INDICATORI","BREAKOUT","NOTTE","PROCE","ALTA VELOCIT",
   "NASDAQ APERTU","DAX E NASD","PIANO DI TRADI","FILE WORD","FILE CHE SCARICO"
 )
+# classe 143: i referti che questo script (e il suo gemello) scrivono sul
+# Desktop non sono materiale da spostare -- altrimenti un secondo giro non
+# vuoto sposta i PROPRI referti, scrive un log-spazzatura da 1-2 righe che
+# SCAVALCA quello vero, e -Annulla rimette a posto la cosa sbagliata.
+$NonToccareFilePrefisso = @(
+  "anteprima_riordino_","esito_riordino_","annulla_riordino_","usato_riordino_",
+  "piano_desktop_","esito_desktop_","annulla_desktop_"
+)
 
 function Famiglia($nome){
   foreach($f in $Famiglie.Keys){
@@ -148,6 +178,11 @@ foreach($v in $voci){
   $prot = $false
   foreach($pp in $NonToccarePrefisso){ if($v.Name.ToUpperInvariant().StartsWith($pp,[System.StringComparison]::Ordinal)){ $prot = $true; break } }
   if($prot){ continue }
+  if(-not $v.PSIsContainer){
+    $mio = $false
+    foreach($pp in $NonToccareFilePrefisso){ if($v.Name.StartsWith($pp,[System.StringComparison]::OrdinalIgnoreCase)){ $mio = $true; break } }
+    if($mio){ continue }
+  }
 
   if($v.PSIsContainer){
     # corsa/round ANCORA IN CORSO: si guarda l'ultima scrittura, cartella E contenuto.
@@ -190,22 +225,23 @@ if($inCorso.Count -gt 0){
 if($piano.Count -eq 0){
   Write-Host ""
   Write-Host "Niente da spostare: il Desktop e' gia' in ordine (o tutto e' IN CORSO / protetto)." -ForegroundColor Green
-  exit 0
-}
-
-$piano | Group-Object Dove | Sort-Object Name | ForEach-Object {
+} else {
+  $piano | Group-Object Dove | Sort-Object Name | ForEach-Object {
+    Write-Host ""
+    Write-Host ("  -> " + $_.Name + "   (" + $_.Count + " elementi)") -ForegroundColor White
+    $_.Group | Select-Object -First 12 | ForEach-Object { Write-Host ("       " + $_.Nome) -ForegroundColor DarkGray }
+    if($_.Count -gt 12){ Write-Host ("       ... e altri " + ($_.Count-12)) -ForegroundColor DarkGray }
+  }
   Write-Host ""
-  Write-Host ("  -> " + $_.Name + "   (" + $_.Count + " elementi)") -ForegroundColor White
-  $_.Group | Select-Object -First 12 | ForEach-Object { Write-Host ("       " + $_.Nome) -ForegroundColor DarkGray }
-  if($_.Count -gt 12){ Write-Host ("       ... e altri " + ($_.Count-12)) -ForegroundColor DarkGray }
+  Write-Host ("TOTALE: " + $piano.Count + " elementi da sistemare.") -ForegroundColor Yellow
+  Write-Host "NON verranno toccati: collegamenti, programmi, le tue cartelle tematiche e le cartelle-destinazione (nemmeno con -Tutto)." -ForegroundColor Gray
 }
-Write-Host ""
-Write-Host ("TOTALE: " + $piano.Count + " elementi da sistemare.") -ForegroundColor Yellow
-Write-Host "NON verranno toccati: collegamenti, programmi, le tue cartelle tematiche e le cartelle-destinazione (nemmeno con -Tutto)." -ForegroundColor Gray
 
-# --- raccolta: referto su Desktop, SEMPRE (anteprima ed esecuzione) -------
-$prefissoRef = if($Esegui){ "esito_riordino_" } else { "anteprima_riordino_" }
-$fileOut = Join-Path $Desktop ($prefissoRef + $stamp + ".txt")
+# --- raccolta: referto su Desktop, SEMPRE (anteprima ed esecuzione, anche
+# a piano vuoto: la riga di lancio cerca un file fresco e non deve trovare
+# il nulla su un giro pulito, classe 143-ter) -------------------------------
+$prefissoRef = if($Esegui){ "esito_riordino" } else { "anteprima_riordino" }
+$fileOut = NomeSenzaCollisione $Desktop $prefissoRef ("_" + $stamp + ".txt")
 $righe = New-Object System.Collections.ArrayList
 if($Esegui){ [void]$righe.Add("ESITO ESECUZIONE riordina_desktop - elenco PIANIFICATO; esito REALE in fondo") }
 else       { [void]$righe.Add("ANTEPRIMA riordina_desktop - nessun elemento spostato") }
@@ -223,7 +259,7 @@ if($inCorso.Count -gt 0){
 
 if(-not $Esegui){
   Set-Content -LiteralPath $fileOut -Value $righe -Encoding UTF8
-  $zipOut = Join-Path $Desktop ($prefissoRef + $stamp + ".zip")
+  $zipOut = NomeSenzaCollisione $Desktop $prefissoRef ("_" + $stamp + ".zip")
   Compress-Archive -LiteralPath $fileOut -DestinationPath $zipOut -Force
   Write-Host ""
   Write-Host "Questa era solo l'ANTEPRIMA: non ho spostato niente." -ForegroundColor Yellow
@@ -235,6 +271,7 @@ if(-not $Esegui){
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
 $log = New-Object System.Collections.ArrayList
 $falliti = New-Object System.Collections.ArrayList
+$rinominati = New-Object System.Collections.ArrayList
 foreach($p in $piano){
   try{
     $destDir = Join-Path $Desktop $p.Dove
@@ -252,6 +289,7 @@ foreach($p in $piano){
     }
     Move-Item -LiteralPath $p.Origine -Destination $dest -ErrorAction Stop
     [void]$log.Add([pscustomobject]@{ Origine=$p.Origine; Destinazione=$dest })
+    if($i -gt 0){ [void]$rinominati.Add("  rinominato per collisione: " + $p.Nome + "  ->  " + (Split-Path -Leaf $dest)) }
   } catch {
     $m = "  NON spostato: " + $p.Nome + " (verso " + $p.Dove + ")  --  " + $_.Exception.Message
     Write-Host $m -ForegroundColor Yellow
@@ -259,7 +297,7 @@ foreach($p in $piano){
   }
 }
 if($log.Count -gt 0){
-  $logFile = Join-Path $LogDir ("riordino_" + $stamp + ".csv")
+  $logFile = NomeSenzaCollisione $LogDir "riordino" ("_" + $stamp + ".csv")
   $log | Export-Csv -LiteralPath $logFile -NoTypeInformation -Encoding UTF8
 } else {
   $logFile = "(niente spostato in questo giro: nessun log nuovo, quello del giro precedente resta valido per -Annulla)"
@@ -268,10 +306,11 @@ if($log.Count -gt 0){
 [void]$righe.Add("")
 [void]$righe.Add("ESITO REALE -- spostati con successo: " + $log.Count + "   NON spostati: " + $falliti.Count)
 foreach($m in $falliti){ [void]$righe.Add($m) }
+foreach($m in $rinominati){ [void]$righe.Add($m) }
 [void]$righe.Add("(i NON spostati sono rimasti dove erano e NON sono nel log di annullamento)")
 [void]$righe.Add("Log per annullare: " + $logFile)
 Set-Content -LiteralPath $fileOut -Value $righe -Encoding UTF8
-$zipOut = Join-Path $Desktop ($prefissoRef + $stamp + ".zip")
+$zipOut = NomeSenzaCollisione $Desktop $prefissoRef ("_" + $stamp + ".zip")
 Compress-Archive -LiteralPath $fileOut -DestinationPath $zipOut -Force
 
 Write-Host ""
