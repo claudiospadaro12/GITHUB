@@ -9187,3 +9187,73 @@ _Sullo stesso file, terzo difetto e gia' noto (punto 11): la categoria
 `riordina_desktop.ps1` (righe 15-16) e messa fra le tematiche da
 `sistema_cartelle.ps1` (righe 45-48). La blacklist del gemello va copiata,
 non ricordata._
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 — trovata verificando `RIGA_ORGANIZZA_DESKTOP.ps1` **modalita' -Esegui**, ESEGUENDOLA
+
+## 140. 🧨 IL LANCIO CHE NON MUOVE NIENTE DISTRUGGE IL LOG PER ANNULLARE QUELLO CHE HA MOSSO IL LANCIO PRIMA
+
+_Difetto vero, gia' committato (`5fac1c1`, righe 112-127 di
+`backtest_pipeline/righe/RIGA_ORGANIZZA_DESKTOP.ps1`), **riprodotto** su un
+Desktop finto: sette cartelle spostate, secondo `-Esegui` nello stesso minuto,
+`-Annulla` -> "FATTO: 0 cartelle rimesse al loro posto", verde, uscita 0, e il
+Desktop riorganizzato **per sempre**._
+
+Il punto 12 dice che un BACKUP senza guardia si auto-distrugge al secondo
+lancio. Il punto 26 dice che due chiamate nello stesso minuto si sovrascrivono
+il referto. Questo e' i due punti **moltiplicati fra loro e applicati al LOG DI
+ROLLBACK**, cioe' all'unico artefatto che rende reversibile uno spostamento di
+massa:
+
+```powershell
+$logFile = Join-Path $LogDir ('organizza_desktop_' + (Get-Date).ToString('yyyy-MM-dd_HHmm', $INV) + '.csv')
+$Log | Export-Csv -LiteralPath $logFile -NoTypeInformation -Encoding UTF8
+```
+
+Tre pezzi che si sommano, e nessuno dei tre da solo sarebbe letale:
+1. **il nome e' al MINUTO**: due lanci ravvicinati -> stesso file;
+2. **lo script e' IDEMPOTENTE** (giusto!): al secondo giro non c'e' piu' niente
+   da spostare, quindi `$Log` e' **vuoto**;
+3. **`Export-Csv` con lista vuota scrive comunque il file, a 0 byte**
+   (misurato) — non lo salta.
+
+Risultato: il secondo giro **sovrascrive con 0 byte** il log del primo. E
+siccome `-Annulla` prende semplicemente il piu' recente, l'annullamento
+risponde "0 rimesse a posto" con la faccia di chi ha lavorato. E Claudio
+rilancia spesso ("non ero sicuro, rifaccio"): non e' un caso di laboratorio,
+e' il caso NORMALE.
+
+> ✅ **Regola: il log di rollback e' l'artefatto piu' prezioso di uno script
+> distruttivo, e si tratta come tale.** Tre guardie, tutte e tre:
+> ```powershell
+> # 1) nome al SECONDO, non al minuto
+> $logFile = Join-Path $LogDir ('organizza_desktop_' + (Get-Date).ToString('yyyy-MM-dd_HHmmss', $INV) + '.csv')
+> # 2) il log VUOTO non si scrive proprio
+> if ($Log.Count -gt 0) { $Log | Export-Csv -LiteralPath $logFile -NoTypeInformation -Encoding UTF8 }
+> # 3) -Annulla prende l'ultimo NON VUOTO (gia' fatto dal gemello archivia_test_desktop.ps1, righe 94-100)
+> Get-ChildItem ... | Sort-Object LastWriteTime -Descending |
+>   Where-Object { @(Import-Csv -LiteralPath $_.FullName).Count -gt 0 } | Select-Object -First 1
+> ```
+
+### 140-bis. 🤫 E L'ANNULLAMENTO PARZIALE CHE ESCE VERDE
+
+Stessa verifica, stesso file (righe 22-31). `-Annulla` fa
+`if (Test-Path $r.Destinazione) { ...muovi... }` e **basta**: se Claudio nel
+frattempo ha spostato o buttato una destinazione, quella riga viene **saltata
+in silenzio**, il conto finale e' semplicemente piu' basso e l'uscita e' `0`.
+Riprodotto: 3 spostate, 2 rimesse, "FATTO: 2 cartelle rimesse al loro posto"
+in verde e nessuna parola sulla terza.
+
+Peggio: se l'origine **esiste di nuovo** (Claudio ha ricreato la cartella e ci
+ha lavorato dentro), `Move-Item -Force` su una cartella **non sovrascrive: ANNIDA**
+(misurato: `Desktop\collaudo_a\collaudo_a\f.txt`). L'annullamento "riesce",
+conta +1, e lascia una matrioska che nessuno cerchera' mai.
+
+> ✅ Il gemello **aveva gia' risolto entrambi** (`archivia_test_desktop.ps1`,
+> righe 104-119): `try/catch` per riga, `if (Test-Path $r.Origine) { throw
+> "l'originale esiste gia': non sovrascrivo" }`, contatore `$ko`, riga gialla
+> per ogni fallita e **`exit 1` se `$ko -gt 0`**. E' il punto 9 (la riscrittura
+> non puo' perdere la sicurezza del gemello) colto sul fatto: **prima di
+> scrivere un `-Annulla` nuovo si apre quello vecchio e si copiano le guardie,
+> una per una.**
