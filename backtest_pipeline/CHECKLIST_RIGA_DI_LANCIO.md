@@ -9440,3 +9440,81 @@ gemello non aveva la meta' buona, aveva solo un perimetro piu' stretto.)
 > Controllo secco, da fare su OGNI script distruttivo con rollback:
 > **eseguirlo DUE VOLTE di fila e poi annullare.** Se il secondo giro trova
 > qualcosa da fare che il primo ha creato, il rollback e' gia' morto.
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 (sera) — trovata dal **verificatore di stringhe** sul pacchetto **DEPLOY GUARDIAN SUL CONTO REALE** (`RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1` + pagina + `ABTG_Guardian.mq5` v1.11 + `ABTG_Guardian_REALE.set`, pin `a01e157`), **facendo il `diff` invece di leggere la tabella che lo riassume**. Il pacchetto e' per il resto pulito e verificato ESEGUENDO (parse reale 0 errori, ASCII puro, 22 sabotaggi sul preset + 6 sul sorgente + 4 sul filo tutti beccati, ripristino totale provato su 4 rami, include mai toccato). Una classe **nuova**, **riprodotta col diff**.
+
+## 144. 🧮 IL **DIFF DICHIARATO «UNA PER UNA»** CHE NE CONTA **TRE** MENTRE IL `diff` NE HA **QUATTRO**: la voce in piu' e' benigna, ma la frase *«tutto il resto e' IDENTICO»* e' **la garanzia su cui si e' deciso di non rileggere il resto**
+
+### Il fatto
+
+Il preset nuovo `ABTG_Guardian_REALE.set` nasce **copiando** quello del
+dry-run FTMO (`ABTG_Guardian_FTMO_2Step.set`). Sia la pagina sia
+l'intestazione del `.set` dichiarano, con enfasi, **TRE differenze
+obbligate, dichiarate una per una** — `InpStartBalance` 100000 -> 0,
+`InpMagic` 779001 -> 779002, `InpAutotest` assente -> `true` — e poi
+scrivono: **«Tutto il resto e' IDENTICO»**.
+
+Il `diff` vero, fatto sulle sole chiavi (commenti esclusi), ne trova
+**QUATTRO**:
+
+```
+> InpAutotest=true                    (aggiunta)
+< InpComment=GUARDIAN FTMO 2STEP
+> InpComment=GUARDIAN REALE           <-- LA QUARTA, NON DICHIARATA
+< InpMagic=779001        > InpMagic=779002
+< InpStartBalance=100000 > InpStartBalance=0
+```
+
+`InpComment` e' **benigna** (e' il commento che finisce sugli ordini di
+chiusura d'emergenza) ed e' pure **giusta**: chiamare "GUARDIAN FTMO
+2STEP" gli ordini su un conto vero sarebbe peggio. Il difetto **non e' il
+valore**: e' il **numero**.
+
+### Perche' e' una classe, e non una pignoleria
+
+Perche' quella frase e' **un permesso di non guardare**. In un pacchetto
+dove tutto il resto e' contato a macchina — *«16 chiavi = 16 input,
+copertura TOTALE»*, *«5 fili su 5»*, *«0 byte > 126»* — l'unica frase
+messa **a occhio** e' proprio quella che dice a chi legge *«del resto non
+ti preoccupare»*. Chi rilegge il preset si ferma alle tre righe della
+tabella e **non rifa' il diff**. Oggi la quarta voce era il commento
+degli ordini; la prossima volta puo' essere `InpDDMode` o
+`InpDailyResetHour`, che invece **spostano dei soldi**, e nessuno le
+guarderebbe — perche' la tabella dice tre e la tabella "e' gia' stata
+verificata".
+
+E' la stessa forma della **126** (il cartello che si avvelena da solo) e
+della **139** (la serratura elencata che non chiude), applicata al
+**conteggio di un diff**: il numero dichiarato e' l'unica cosa che il
+lettore controlla, e il numero e' sbagliato.
+
+### La regola
+
+**Un preset/EA/`.ini` nato COPIANDO un altro non si descrive: si
+`diff`a, e nel referto ci va l'USCITA DEL DIFF, non un riassunto.**
+
+- il conto delle differenze si **stampa da una macchina** (`diff` sulle
+  sole righe `chiave=valore`, commenti esclusi), mai contato a mano;
+- ogni voce del diff va **nominata**, anche quella benigna — soprattutto
+  quella benigna, perche' e' la voce che insegna a fidarsi del conto;
+- la frase **«tutto il resto e' identico»** e' ammessa **solo** se la
+  riga sopra e' l'uscita letterale del diff. Senza quella, si scrive
+  *«differenze: le seguenti N, elencate dal diff»* e basta.
+
+### Il controllo secco, da fare sempre
+
+```bash
+diff <(grep -v '^;' VECCHIO.set | grep -v '^$' | sort) \
+     <(grep -v '^;' NUOVO.set   | grep -v '^$' | sort)
+```
+Le righe `<`/`>` che escono devono essere **tante quante** ne dichiara la
+pagina. Se sono di piu', la pagina va corretta **prima** di mandarla —
+anche quando la voce in piu' e' innocua.
+
+> 📌 Nota sul caso del 06/09: la correzione e' **gratis sulla pagina**
+> (il `.md` non viene scaricato da nessuna riga, quindi non serve
+> ri-pinnare) e va rimandata al prossimo ri-pin naturale per
+> l'intestazione dentro il `.set`, che invece e' pinnata. **Il pin non si
+> brucia per un commento**: si brucia per un numero.
