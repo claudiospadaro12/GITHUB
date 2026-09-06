@@ -1699,3 +1699,129 @@ della Regola della Seconda Caccia su DAX e Dow.
   non lo rende) — e' la debolezza principale del dossier e non e' nascosta;
   **autori e date del Code Base non leggibili dalla lista** (JS), presi dalle
   schede.
+
+---
+
+### CACCIA ORO/ARGENTO — MECCANISMI (06/09/2026) — 0 promossi, 3 LAPIDI MISURATE, 1 CANCELLO, 1 BUG DA 0,6 R
+
+Dossier completo: `caccia_strategie/CACCIA_ORO_ARGENTO_MECCANISMI_2026-09-06.md`.
+Il resto sta li', non si duplica. **ZERO EA promossi, ZERO file prova nuovi,
+nessun EA/preset/sedia toccati, nessun backtest lanciato.** Al sorgente su
+**12 oggetti** (4 `.mq5` nuovi del Code Base + 8 Pine sui metalli), archiviati
+in `caccia_strategie/biblioteca/sorgenti/`. Applicazione della
+Regola della seconda caccia dopo la chiusura di `ABTG_AltaVelocita` (rosso 8/8
+a tick) e il rifiuto dell'argento nello studio PS5 esterno.
+
+- 🔬 **PRIMA VOLTA CHE MECCANISMI SPECIFICI DELL'ORO VENGONO MISURATI, NON
+  OPINATI.** Sonde Python su barre M5 esterne (FutureSharks, GPL-3.0, Oanda,
+  **UTC**): **XAU_USD 594.311 barre**, **USB10Y_USD 484.218** (future Treasury
+  10 anni), **EUR_USD 623.889**, 2012-01-01 -> 2020-05-14. **~430
+  configurazioni**, cancello congelato PRIMA (R netto >= +0,075 · n >= 150 ·
+  anni positivi >= 7/9 · costo A/R **dichiarato** 0,25 $). Sonde in
+  `caccia_strategie/biblioteca/sonde_esterne/sonda_oro_*.py`.
+  ⚠️ Limiti dichiarati: non e' BCM, OHLC non tick, **costo dichiarato NON
+  misurato**, finestra che **non copre il regime 2021-2026**.
+- 🟢 **IL LEAD-LAG BOND -> ORO ESISTE, ED E' L'UNICA COSA VIVA DEL DOSSIER.**
+  Disegno C (bond forte, oro ancora fermo): **n=2.210, +0,3219 $/evento,
+  t=+4,12, PF 1,303, 8 anni su 9**. E **passa la sua falsificazione**: il
+  momentum dell'oro DA SOLO, sugli stessi dati, fa **t=+0,46, PF 1,020** ->
+  l'informazione viene davvero dal BOND. La controprova (l'oro guida il bond?)
+  da' un effetto **venti volte piu' piccolo**.
+- 🪦 **LAPIDE 1 — E MUORE DENTRO LO SPREAD.** Con SL/TP veri (SL = a x ATR60',
+  TP = b x SL, ambiguita' intrabarra **a sfavore**) e costo 0,25 $:
+  **54 celle, 0 promosse**; la migliore **+0,0201 R** contro il cancello di
+  +0,075 R, e sta positiva **3 anni su 9**. Su scala **giornaliera**: **90
+  celle, 0 a t>=2,0**, con un anno che vale fino al **111%** del totale.
+  **Un edge che non copre il costo non e' un edge piu' piccolo: e' zero.**
+- 🪦 **LAPIDE 2 — ORO <- DOLLARO: negativo in ENTRAMBI i versi.** Disegno C con
+  driver EUR_USD: verso della tesi **−0,3447 $/evento, t=−6,31, PF 0,718,
+  0 anni positivi su 9**; verso contrario **−0,1553 $, t=−2,85**. La
+  confluenza bond+dollaro **non aggiunge niente** (miglior t=+1,30).
+  ➡️ *"L'oro segue il dollaro"* e' vero come **correlazione** e falso come
+  **segnale operabile**.
+- 🪦 **LAPIDE 3 — L'ASTA LBMA (fixing 10:30 e 15:00 Londra): 72 celle su 72
+  NEGATIVE**, fade E continuazione, su entrambe le aste; in 68 su 72 gli anni
+  positivi sono 0 o 1 su 9. Meccanismo **specifico dell'oro** e **mai
+  registrato prima** (verificato: zero occorrenze di LBMA/fixing/Treasury nel
+  registro). **La finestra d'asta a M5 e' zona di costo puro.**
+- 🔴 **XAG_USD NON ESISTE SULLA FONTE ESTERNA — 404 VERO** (XAU_USD 200,
+  1.649.390 byte, stessa richiesta). ➡️ **spread oro/argento, ratio trading,
+  SMT fra metalli: NON MISURABILI da questo ambiente.** Non misurati, non
+  inventati. Si aggiunge alle tre bocciature indipendenti gia' agli atti
+  sull'argento (CostToCost XAGUSD PF 0,70 6/7 anni negativi e spenta il 24/08;
+  argento "non giudicabile" in fase 0; PS5 esterno *"perde a prescindere"*).
+- 🚪 **IL CANCELLO CHE BLOCCA TUTTO, ED E' APERTO DA 12 GIORNI: LO SPREAD BCM
+  SULL'ORO NON E' MAI STATO MISURATO.** Il verdetto del lead-lag si ribalta
+  su quel numero: a **0,00 $** fa PF 1,303 e 8/9 anni; a **0,25 $** fa
+  +0,02 R; a **0,35 $** fa **PF 0,906 e 2/9 anni**. Lo strumento e' gratuito
+  ed e' **promosso dal 23/08 e mai usato**: `RealCost Spread P95 Logger MT5`,
+  [Code Base 74148](https://www.mql5.com/en/code/74148). **E' lo stesso
+  cancello che blocca `KA-Gold Bot` (promosso 9/10 il 25/08, mai costruito).**
+  Sotto 0,10 $ lo scaffale oro intraday esiste; sopra 0,30 $ si chiude e lo si
+  scrive una volta per tutte.
+- 🧨 **RILIEVO DI PROCESSO — UN LOOK-AHEAD DA 0,60 R, PRESO PERCHE' IL NUMERO
+  ERA TROPPO BELLO.** La sonda LBMA alla prima esecuzione dava **PF 2,721 ·
+  WR 76,4% · 9 anni su 9**. Trattato come **sospetto di bug**, non come
+  scoperta: il segnale usava la **chiusura** della barra `j` e l'ingresso
+  avveniva all'**apertura della STESSA barra `j`**. Corretto a `j+1`, la stessa
+  cella va da **+0,3930 R a −0,2043 R**. 📌 Segno di riconoscimento da
+  ricordare: **la simmetria innaturale fra i due lati** (CONTINUA +0,39 /
+  FADE −0,73 sugli stessi eventi) vuol dire che si sta misurando la **barra
+  d'ingresso**, non il mercato.
+- 📚 **CODE BASE SULL'ORO: ESAURITO, e stavolta col catalogo completo.**
+  **1.609 titoli** ricrawlati (42 pagine, HTTP 200), **18 in tema metalli**, di
+  cui **12 con "recovery"/"grid"/"quantum"** nel nome o negli input e **5 della
+  famiglia `SilverTrend`** (falso amico: e' un indicatore di tendenza, **non
+  l'argento**). **4 sorgenti nuovi letti riga per riga, tutti scartati**:
+  `Sniper Gold Hybrid Recovery EA` (76605, 26/08/2026, 65 input,
+  `RecoveryLotMultiplier=1.20` + cap interno al **12%** contro un muro prop del
+  10%), `XANDER Grid XAUUSD` (71776, griglia bidirezionale `GridStep=390` +
+  `AVERAGE_TP`), `Quantum XAUUSD Silver Trader` (73622, **79 input**, doppia
+  taratura Gold_/Silver_ = fratello del 63193 gia' scartato il 16/08),
+  `GoldWarrior02b` (20577, `InpMultiplier=3 // Multiplier of hedge positions`
+  + `iCustom` non allegati + lotto fisso).
+- 🌲 **TRADINGVIEW: 8 STRATEGIE SUI METALLI LETTE RIGA PER RIGA, 0 PROMOSSE.**
+  169 script censiti su 8 query, **113 col sorgente leggibile**. **Due sono
+  ROTTE**: `XAG strategy 1h` (@SoftKill21, MPL-2.0) ha
+  `strategy.entry("long",1,when=short1)` — **il 2o argomento in Pine v4 e' il
+  bool `long`, quindi i nomi sono invertiti**, ed e' **lo stesso difetto gia'
+  verbalizzato il 28/08**; `Gold/Silver 30m Only` (@MtxTrader) ha l'uscita
+  short identica a quella long e l'ingresso short su `vrsi > 35`. **Quattro
+  senza stop loss.** L'unica davvero in tema — `Silver Long/Short` (@tyler747),
+  che E' il gold/silver ratio — dimensiona al **100% dell'equity**, non ha
+  stop, e ha le soglie GSR **60/45 cablate sull'epoca 2000-2020** (il GSR ha
+  toccato **125 nel marzo 2020**). `Aurum DCX` (@exlux) e' il meglio scritto
+  (tutti i `request.security` con `lookahead_off`, SL/TP + trailing) ma ha
+  **28 input e cinque filtri impilati** = l'architettura che da noi e' **0
+  successi su 5**. ➡️ **La tesi del RAPPORTO oro/argento esiste come idea, ma
+  NON esiste una implementazione sana: andrebbe scritta da zero** — e prima
+  serve l'argento, che da qui non si misura.
+- ⚠️ **TRAPPOLA DA ANNOTARE (`Gold/Silver Spread`, @MarcoValente):**
+  `spr = (au - ag)` con oro ~2.000 e argento ~25 e' **oro al 98,7%**. Quel
+  grafico chiama "spread" **il prezzo dell'oro**. L'oggetto giusto e' il
+  **RAPPORTO** `au/ag`, non la differenza.
+- 🧨 **UN MIO ERRORE DI CANALE, CORRETTO IN GIORNATA E A VERBALE.** A meta'
+  caccia avevo concluso che *"TradingView non da' il codice"* perche' il campo
+  `scriptSource` era vuoto in **164 script su 169**. **Falso**, e la procedura
+  giusta era gia' in `PROMEMORIA_SBLOCCO_FONTI.md` §2-A **dal 28/08**: si legge
+  **`access`** e si scarica da **`pine-facade`**. Rimisurato: **113 leggibili
+  su 169 (67%), non 5 (3%)**. 📌 **`scriptSource` vuoto non vuol dire
+  "protetto": vuol dire "usa l'altro endpoint". Il campo che dice la verita' e'
+  `access`.** Otto sorgenti scaricati subito dopo, 8 volte HTTP 200.
+- 🌐 **Altre fonti, resa zero:** arXiv **7 query, 2 paper in
+  tema e 0 operabili** (il turn-of-the-year sull'oro e' calendario annuale =
+  famiglia R63 chiusa, e 1 occasione l'anno); Quantpedia **82 slug, 5 su
+  materie prime**, tutti panieri di futures con roll = non traducibili su CFD.
+- ✅ **CANALE NUOVO DA SCRIVERE IN `PROMEMORIA_SBLOCCO_FONTI.md`:**
+  **`tradingview.com` risponde 200 oggi** (`/scripts/gold/` e
+  `/pubscripts-suggest-json/?search=`), e **`quantpedia.com/strategies/` pure**
+  — erano dichiarate bloccate. ⚠️ Ma su TradingView **il sorgente non arriva**
+  per gli script moderni: canale buono per i **titoli**, non per il **codice**.
+- 🚧 **Buchi dichiarati:** **argento non misurabile** (404 vero); **regime
+  2021-2026 non coperto** (i dati esterni finiscono il 2020-05-14: nessuna
+  misura sull'oro sopra i 2.000 $); **spread vero non misurato** (ogni numero
+  e' al netto di un costo **dichiarato**); **GitHub UI 403 oggi** — era viva il
+  05/09, riprovata due volte con attesa, **dichiarata non raggiunta, non
+  cancellata**; **164 script TradingView su 169 col titolo verificato e il
+  codice no** — e un titolo non e' un candidato; **Forex Factory 403** e
+  **api.github.com 403**, coerenti coi dossier precedenti.

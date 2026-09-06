@@ -1,0 +1,13 @@
+//@version=2
+study("Gold/Silver Spread")
+sym = input(title="Symbol", type=symbol, defval="FX:XAUUSD")
+sym2 = input(title="Symbol2", type=symbol, defval="FX:XAGUSD")
+res = input(title="Resolution", type=resolution, defval="D")
+cures=input(true,"use current resolution?")
+rres=cures?period:res
+au=security(sym,rres,close)
+ag=security(sym2,rres,close)
+spr=(au-ag)
+masp=sma(spr,100)
+plot(spr,color=red,style=histogram,linewidth=3,histbase=1000)
+plot(masp,color=aqua,linewidth=2)

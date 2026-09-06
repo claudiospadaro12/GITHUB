@@ -796,3 +796,52 @@ Query **produttive** oggi (mecanismo, non formato — regola del 03/09 confermat
 | 🆕 `newyorkfed.org` · `technicalanalysis.org.uk` | 🔴 **murati** — §1 |
 | `ideas.repec.org` | 🔴 **`EGRESS_BLOCKED` anche via `WebFetch`** (secondo trasporto) — §1 |
 | Forex Factory · Quantpedia premium · EarnForex | ⬜ **non riprovate**: murate e gia' misurate su due trasporti (02/09) |
+
+---
+
+## 🆕 06/09/2026 — DUE CANALI CHE ERANO DATI PER BLOCCATI RISPONDONO
+
+Misurato durante `CACCIA_ORO_ARGENTO_MECCANISMI_2026-09-06.md`, non ipotizzato.
+
+| host | com'era scritto qui | com'e' OGGI |
+|---|---|---|
+| **`tradingview.com`** | 🔴 bloccato (403 al CONNECT) | 🟢 **200** su `/scripts/gold/` (626.727 byte) e su `/pubscripts-suggest-json/?search=gold` (29.720 byte) |
+| **`quantpedia.com`** | 🔴 bloccato | 🟢 **200** su `/strategies/` (641.789 byte, 82 slug veri) |
+
+### ⚠️ AUTOCORREZIONE NELLA STESSA GIORNATA — il campo `scriptSource` NON e' la strada
+
+**Prima stesura di questo blocco (sbagliata, e la lascio a verbale):** avevo
+scritto che *"TradingView e' buono per i titoli, non per il codice"*, perche'
+nel JSON di `pubscripts-suggest-json` il campo **`scriptSource` e' vuoto in 164
+casi su 169** (pieno solo per gli script legacy Pine v1-v2).
+
+🔴 **La conclusione era falsa, e il §2-A di questo stesso file lo diceva gia'
+dal 28/08.** La strada per il sorgente **non e' `scriptSource`**: e'
+
+```
+1) pubscripts-suggest-json  ->  campi  scriptIdPart  e  access
+2) se access == 1  ->  https://pine-facade.tradingview.com/pine-facade/get/<scriptIdPart>/last  ->  campo "source"
+```
+
+**Rimisurato sugli stessi 169 script: `access == 1` (sorgente leggibile) su
+113.** Non 5. **Il 67%, non il 3%.** Otto sorgenti scaricati dal pine-facade
+nella stessa sessione: **8 richieste, 8 volte HTTP 200, Pine completo**.
+
+📌 **La lezione non e' su TradingView: e' che avevo dedotto un blocco da UN
+campo invece di leggere la procedura gia' scritta in questo file.**
+`scriptSource` vuoto **non** vuol dire "sorgente protetto": vuol dire
+"usa l'altro endpoint". **Il campo che dice la verita' e' `access`.**
+
+➡️ **Regola pratica confermata:** `pubscripts-suggest-json` per **censire** un
+tema (velocissimo, da' autore e like), poi **`access`** per sapere chi si puo'
+leggere, poi **pine-facade** per il codice. Un titolo non e' mai un candidato:
+il setaccio del §4 si applica solo al sorgente.
+
+### Le altre, invariate al 06/09
+🟢 `raw.githubusercontent.com` · `export.arxiv.org` (**solo https**) ·
+`mql5.com` (lista, schede **e download del sorgente**:
+`/en/code/download/<id>/<nome>.mq5`).
+🔴 `forexfactory.com` (403) · `api.github.com` (403) ·
+`quantpedia.com/?s=` (466) · `mql5.com/en/search` (JS).
+🟡 `github.com/search` (UI): **403 il 06/09**, viva il 05/09 — **non e' un 404,
+e' un "non adesso"**: si riprova con attesa crescente, non si cancella.
