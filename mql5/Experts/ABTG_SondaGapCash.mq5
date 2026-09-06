@@ -80,9 +80,12 @@
 //|  TUTTE le righe di log cominciano con "[GAPCASH]" e NESSUNA       |
 //|  contiene stringhe che fanno fede per altri collaudi: il          |
 //|  fallimento dell'autotest si chiama "*** ROSSO SONDAGAPCASH ***"  |
-//|  e NON "*** FAIL ***", che e' una riga VIETATA del collaudo       |
-//|  enforcement Fase 1 (backtest_pipeline\attese_enforcement_        |
-//|  fase1.txt, STOP.AUTOTEST). Un rosso di QUESTA sonda non deve     |
+//|  e NON la riga VIETATA del collaudo enforcement Fase 1 (la voce   |
+//|  STOP.AUTOTEST di backtest_pipeline\attese_enforcement_fase1.txt: |
+//|  qui non la si trascrive nemmeno come esempio, perche' un         |
+//|  controllo che cerca quella stringa la troverebbe in questo file  |
+//|  e diventerebbe rosso per sempre senza che il codice faccia       |
+//|  niente di male -- classe 126). Un rosso di QUESTA sonda non deve |
 //|  poter fermare il collaudo di un ALTRO artefatto.                 |
 //|                                                                   |
 //|  ---------------------------------------------------------------- |
@@ -200,7 +203,7 @@
 
 //--- numero di colonne dell'OPTFRAME. Non si tocca senza toccare
 //    ColonneStats(): l'autotest confronta le due cose (blocco 8).
-#define GC_NSTATS                 62
+#define GC_NSTATS                 63
 
 //==================================================================
 //  INPUT
@@ -472,9 +475,12 @@ double Media_Calc(const double &v[], const int n)
 //| PERCENTILE da un ISTOGRAMMA di secchi interi (lo spread in punti  |
 //| MT5 E' un intero, quindi qui il percentile e' ESATTO e non serve  |
 //| tenere in memoria mezzo milione di campioni).                     |
-//| Il totale comprende ANCHE i campioni finiti oltre il tetto: se il |
-//| percentile ci cade dentro esce 'oltreTetto' invece di un numero   |
-//| comodo e falso. Torna -1 se non c'e' niente da misurare.          |
+//| 'totale' DEVE gia' comprendere i campioni finiti oltre il tetto   |
+//| (chi conta i campioni ne tiene UN solo contatore, e l'overflow e' |
+//| un di cui, non un in piu': sommarli due volte sposterebbe tutti i |
+//| percentili verso il basso). Se il percentile cade nella coda      |
+//| oltre il tetto esce 'oltreTetto' invece di un numero comodo e     |
+//| falso. Torna -1 se non c'e' niente da misurare.                   |
 //+------------------------------------------------------------------+
 long PercentileIstogramma_Calc(const long &isto[], const long totale, const double frac, bool &oltreTetto)
   {
@@ -711,6 +717,7 @@ void ColonneStats(string &nomi[], int &dec[])
    nomi[i]="Giornate Troncate";                 dec[i]=0; i++;   // 59
    nomi[i]="Autotest Falliti";                  dec[i]=0; i++;   // 60
    nomi[i]="Autotest Blocchi";                  dec[i]=0; i++;   // 61
+   nomi[i]="P03 Tick Campana Scartati";         dec[i]=0; i++;   // 62
   }
 
 //==================================================================
@@ -831,7 +838,10 @@ bool AutoTestGapCash()
       Caso("P0-2: 0,0988 contro 0,0112 (8,8x) passa", EsitoP02_Calc(0.0988, 0.0112) == GC_PASSA);
       Caso("P0-2: 0,02 contro 0,0112 (1,8x) e' SCARTO", EsitoP02_Calc(0.02, 0.0112) == GC_SCARTO);
       Caso("P0-2: media evento NEGATIVA e' SCARTO anche col controllo peggiore", EsitoP02_Calc(-0.05, -0.10) == GC_SCARTO);
-      Caso("P0-2: esattamente 3x passa",         EsitoP02_Calc(0.03, 0.01) == GC_PASSA);
+      //  il "3x esatto" si COSTRUISCE (3,0 x 0,01) invece di scriverlo
+      //  come 0,03: cosi' il caso sta sul confine per costruzione e non
+      //  dipende da come l'ultimo bit del letterale viene arrotondato.
+      Caso("P0-2: esattamente 3x passa (confine incluso)", EsitoP02_Calc(3.0*0.01, 0.01) == GC_PASSA);
       Caso("rapporto take/spread 30 su 5 = 6",   MathAbs(RapportoTakeSpread_Calc(30.0,5.0) - 6.0) < 0.000001);
       Caso("spread non misurato -> rapporto 0",  MathAbs(RapportoTakeSpread_Calc(30.0,0.0)) < 0.000001);
       Caso("P0-3: 6x passa",                     EsitoP03_Calc(6.0,5.0) == GC_PASSA);
@@ -926,11 +936,13 @@ double ChiusuraCashPrecedente(const datetime mezzanotte, datetime &tTrovata)
       MqlRates r[];
       ArraySetAsSeries(r, false);
       int n = CopyRates(_Symbol, PERIOD_M1, da, a, r);
-      if(n <= 0)
-        {
-         if(s == 2) gLettureM1Fallite++;
-         continue;
-        }
+      //--- n < 0 e' un ERRORE di lettura (storico non caricato); n == 0
+      //    e' semplicemente "li' non c'erano barre", che su un fine
+      //    settimana e' la risposta giusta e non un guasto. Contare i
+      //    due casi insieme renderebbe il canarino inutile: si
+      //    accenderebbe ogni sabato.
+      if(n < 0){ gLettureM1Fallite++; continue; }
+      if(n == 0) continue;
       for(int i=n-1; i>=0; i--)
         {
          int mdg = MinutiDelGiorno_Calc(r[i].time);
@@ -1032,8 +1044,8 @@ void ChiudiGiornata()
    if(gNGiorno > 0)
      {
       bool ov1=false, ov2=false;
-      long med = PercentileIstogramma_Calc(gIstoGiorno, gNGiorno + gOverGiorno, 0.50, ov1);
-      long p95 = PercentileIstogramma_Calc(gIstoGiorno, gNGiorno + gOverGiorno, 0.95, ov2);
+      long med = PercentileIstogramma_Calc(gIstoGiorno, gNGiorno, 0.50, ov1);
+      long p95 = PercentileIstogramma_Calc(gIstoGiorno, gNGiorno, 0.95, ov2);
       g.spreadMed = (med >= 0) ? (double)med : 0.0;
       g.spreadP95 = (p95 >= 0) ? (double)p95 : 0.0;
      }
@@ -1044,9 +1056,12 @@ void ChiudiGiornata()
    datetime da = g.tCampana;
    datetime a  = (datetime)((long)g.tCampana + (long)(GC_MIN_PRIMA_ORA - 1)*60);
    int n = CopyRates(_Symbol, PERIOD_M1, da, a, r);
+   //--- vedi ChiusuraCashPrecedente: n < 0 e' un guasto di lettura,
+   //    n == 0 e' un giorno senza sessione (sabato, domenica, festa) e
+   //    NON e' un guasto. Sono due cose diverse e si contano diverse.
+   if(n < 0) gLettureM1Fallite++;
    if(n <= 0)
      {
-      gLettureM1Fallite++;
       g.motivo = GC_KO_POCHE_BARRE;
       Registra(g);
       return;
@@ -1384,6 +1399,9 @@ void CampionaSpread(const MqlTick &t)
      }
    else
       gOverGiorno++;
+   //--- gNGiorno conta TUTTI i campioni validi, compresi quelli finiti
+   //    oltre il tetto: gOverGiorno e' un DI CUI, non un in piu'. E'
+   //    la convenzione che PercentileIstogramma_Calc si aspetta.
    gNGiorno++;
   }
 
@@ -1391,9 +1409,12 @@ void CampionaSpread(const MqlTick &t)
 //  I NOMI DEI FILE -- due corse non si sovrascrivono MAI
 //  Nel nome entrano: simbolo, periodo, GATE o CONTROLLO, la soglia,
 //  l'etichetta libera e le date della PRIMA e dell'ULTIMA giornata
-//  vista. Cosi' la corsa IS e la corsa OOS dello stesso sweep, che
-//  hanno gli stessi input e cambiano solo il periodo, finiscono in
-//  due file diversi. E' una classe di difetto gia' pagata in casa.
+//  vista. Cosi' la corsa dentro campione e quella fuori campione
+//  dello stesso sweep -- che hanno gli STESSI input e cambiano solo
+//  la finestra di date -- finiscono in due file diversi invece di
+//  sovrascriversi. E' una classe di difetto gia' pagata in casa, e
+//  lo stesso vale per la corsa col gate acceso contro quella di
+//  CONTROLLO, che il contratto vuole in due CSV distinti.
 //==================================================================
 string EtichettaNumero(const double v, const int dec)
   {
@@ -1524,8 +1545,10 @@ void ScriviReferto(const double &s[])
                                gMinCampana/60, gMinCampana%60, gMinChiusura/60, gMinChiusura%60));
    if(gNG > 0)
       RigaReferto(h, StringFormat("giornate viste ......: dalla %d alla %d (%d righe di tabella)", gG[0].data, gG[gNG-1].data, gNG));
+   if(InpLato != 0)
+      RigaReferto(h, StringFormat("*** InpLato = %d: i verdetti del lato spento escono NON MISURATI (e un NON MISURATO non diventa mai verde). Le MISURE dell'altro lato restano stampate: sono numeri, non promozioni. ***", InpLato));
    RigaReferto(h, StringFormat("prima barra M1 nello storico del simbolo: %s",
-                               TimeToString((datetime)SeriesInfoInteger(_Symbol, PERIOD_M1, SERIES_FIRSTDATE), TIME_DATE|TIME_MINUTES)));
+                               TimeToString((datetime)(long)SeriesInfoInteger(_Symbol, PERIOD_M1, SERIES_FIRSTDATE), TIME_DATE|TIME_MINUTES)));
    RigaReferto(h, StringFormat("autotest ............: %d casi falliti su %d blocchi (-1 = NON eseguito, che non e' 'passato')",
                                gAutotestFalliti, gAutotestBlocchi));
    RigaReferto(h, "");
@@ -1603,7 +1626,7 @@ void ScriviReferto(const double &s[])
                                gMinCampana/60, gMinCampana%60, (gMinCampana+1)/60, (gMinCampana+1)%60));
    RigaReferto(h, StringFormat("spread nelle giornate-EVENTO: mediana %.4f %s   P95 %.4f %s   (su %.0f tick)",
                                s[16], gUnita, s[17], gUnita, s[22]));
-   RigaReferto(h, StringFormat("spread su TUTTE le giornate: mediana %.4f %s   P95 %.4f %s   (su %.0f tick)",
+   RigaReferto(h, StringFormat("spread su tutte le giornate VALIDE: mediana %.4f %s   P95 %.4f %s   (su %.0f tick)",
                                s[18], gUnita, s[19], gUnita, s[23]));
    RigaReferto(h, StringFormat("take MEDIANO delle giornate-evento ...: %.4f %s", s[15], gUnita));
    RigaReferto(h, StringFormat("rapporto take / spread mediano .......: %.2fx   (cancello: >= %.0fx passa, %.0f-%.0fx sospeso, sotto %.0fx scarto)",
@@ -1612,6 +1635,7 @@ void ScriviReferto(const double &s[])
    RigaReferto(h, "il rapporto usa lo spread delle giornate in cui si entrerebbe, non la media");
    RigaReferto(h, "di tutte: e' il prezzo che si pagherebbe davvero. La riga su TUTTE le");
    RigaReferto(h, "giornate e' li' come controllo, e le due si leggono insieme.");
+   RigaReferto(h, StringFormat("tick scartati nel minuto della campana (ask sotto il bid, tick sporchi): %.0f", s[62]));
    if(s[24] > 0.0)
       RigaReferto(h, StringFormat("*** %.0f campioni di spread sono finiti OLTRE IL TETTO dell'istogramma: i percentili in quella coda sono dichiarati, non stimati. ***", s[24]));
    if(!InpMisuraSpreadCampana)
@@ -1639,6 +1663,17 @@ void ScriviReferto(const double &s[])
                                InpMinutiUscita, s[34], s[35], s[36], s[37]));
    RigaReferto(h, StringFormat("|MAE| p75 %.4f%%   MFE p50 %.4f%%", s[40], s[41]));
    RigaReferto(h, StringFormat("letture: frequenza %s | separazione %s", NomeEsito((int)s[38]), NomeEsito((int)s[39])));
+   //--- il controllo dello short e' meno il controllo del long: se il
+   //    controllo long e' positivo, quello short e' negativo e il
+   //    "3x" diventa vero per aritmetica. Va detto QUI, dove il numero
+   //    si legge, non in fondo.
+   if(s[7] >= 0.0)
+     {
+      RigaReferto(h, "*** ATTENZIONE: il controllo del lato SHORT e' meno quello del lato LONG,");
+      RigaReferto(h, "    quindi qui e' <= 0 e la separazione short e' vera per ARITMETICA. Sul lato");
+      RigaReferto(h, "    short guarda il SEGNO della media e la quota di positive contro il 50%,");
+      RigaReferto(h, "    non il rapporto. ***");
+     }
    RigaReferto(h, "la soglia short e' FISSA e NON specchia quella long: nelle otto celle dello");
    RigaReferto(h, "sweep il numero short e' LO STESSO in tutte e otto, non otto misure diverse.");
    RigaReferto(h, "SE IL LATO SHORT USCISSE VIVO non e' una cosa da festeggiare: vorrebbe dire");
@@ -1746,10 +1781,10 @@ void CalcolaStats(double &s[])
    if(nTake > 0){ ArraySort(takePt); takeMediano = MedianaOrdinata_Calc(takePt, nTake); }
 
    bool ovA=false, ovB=false, ovC=false, ovD=false;
-   long medEvBin = PercentileIstogramma_Calc(gIstoEventoL, gNEventoL + gOverEventoL, 0.50, ovA);
-   long p95EvBin = PercentileIstogramma_Calc(gIstoEventoL, gNEventoL + gOverEventoL, 0.95, ovB);
-   long medTuBin = PercentileIstogramma_Calc(gIstoTutti,   gNTutti  + gOverTutti,   0.50, ovC);
-   long p95TuBin = PercentileIstogramma_Calc(gIstoTutti,   gNTutti  + gOverTutti,   0.95, ovD);
+   long medEvBin = PercentileIstogramma_Calc(gIstoEventoL, gNEventoL, 0.50, ovA);
+   long p95EvBin = PercentileIstogramma_Calc(gIstoEventoL, gNEventoL, 0.95, ovB);
+   long medTuBin = PercentileIstogramma_Calc(gIstoTutti,   gNTutti,   0.50, ovC);
+   long p95TuBin = PercentileIstogramma_Calc(gIstoTutti,   gNTutti,   0.95, ovD);
    double spreadMedEv = (medEvBin >= 0) ? SpreadInUnita_Calc((double)medEvBin, gPPU) : 0.0;
    double spreadP95Ev = (p95EvBin >= 0) ? SpreadInUnita_Calc((double)p95EvBin, gPPU) : 0.0;
    double spreadMedTu = (medTuBin >= 0) ? SpreadInUnita_Calc((double)medTuBin, gPPU) : 0.0;
@@ -1823,9 +1858,9 @@ void CalcolaStats(double &s[])
    s[19] = spreadP95Tu;
    s[20] = rapporto;
    s[21] = (double)e03;
-   s[22] = (double)(gNEventoL + gOverEventoL);
-   s[23] = (double)(gNTutti + gOverTutti);
-   s[24] = (double)(gOverEventoL + gOverTutti);
+   s[22] = (double)gNEventoL;
+   s[23] = (double)gNTutti;
+   s[24] = (double)gOverTutti;
    s[25] = PercentileOrdinato_Calc(maeP, nMae, 0.50);
    s[26] = PercentileOrdinato_Calc(maeP, nMae, 0.75);
    s[27] = PercentileOrdinato_Calc(maeP, nMae, 0.90);
@@ -1863,6 +1898,7 @@ void CalcolaStats(double &s[])
    s[59] = (gTroncato ? 1.0 : 0.0);
    s[60] = (double)gAutotestFalliti;
    s[61] = (double)gAutotestBlocchi;
+   s[62] = (double)gTickScartati;
   }
 
 //==================================================================//
