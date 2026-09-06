@@ -226,7 +226,7 @@ basta.** E gira **prima** che il guardiano legga il saldo.
 > gira sul reale **da stamattina** con `InpAutoTest=true`. Un autotest all'avvio
 > su quel conto **non è una novità di oggi**.
 
-Serve a due cose: è **la prova in Esperti** che gira davvero la v1.11 con
+Serve a due cose: è **la prova in Esperti** che gira davvero la v1.12 con
 l'include v1.51, e la riga **«TUTTI I CASI PASSATI»** è il cancello prima di
 fidarsi del guardiano.
 
@@ -336,25 +336,39 @@ la riga `guardia sul conto` che dice **TROVATO**, la
 # 🖱️ **I PASSI MANUALI — LI FA CLAUDIO, NON LA RIGA**
 
 > # 🛑🛑 **LA RIGA NON HA ATTACCATO NIENTE E NON HA ACCESO NIENTE.**
-> # **IL GUARDIANO NON È SU NESSUN GRAFICO.**
+> # **DOPO LA CORSA IL GUARDIANO NON È SU NESSUN GRAFICO** (l'hai staccato tu prima, e la riga non lo rimette).
 > # **FINCHÉ NON FAI TU I PASSI QUI SOTTO, NON SORVEGLIA E NON CHIUDE NIENTE.**
+>
+> ⚠️ **Ed è la finestra scoperta di questo aggiornamento, quindi te la dico
+> chiara:** fra il momento in cui stacchi l'EA e il momento in cui lo riattacchi,
+> **il conto è senza rete di portafoglio**. Sono i minuti della CORSA. Le due
+> sedie continuano a operare col **loro** rischio per-trade, ma **pausa, cap ed
+> emergenze non ci sono**. 👉 **Fallo a mercati fermi**, o comunque **non lasciare
+> il buco aperto**: riattacca appena la CORSA è finita.
 
-### PASSO 1 — far comparire l'EA
+### PASSO 1 — far comparire l'EA aggiornato
 **Navigatore → Expert Advisors → tasto destro → Aggiorna.** Deve comparire
 **`ABTG_Guardian`**. Se non c'è, la CORSA non è andata su **questo** terminale:
 rileggi `cartella dati scelta` nel referto e **fermati**.
 
-### PASSO 2 — un **TERZO** grafico, **NUOVO**
-> 🛑 **GRAFICO NUOVO, MAI UNO CHE HA GIÀ UN EA.** Un grafico MT5 tiene **UN SOLO
+### PASSO 2 — il grafico: va bene **quello di prima**
+Ormai è **un grafico senza EA** (l'hai staccato tu), quindi è perfetto. Se
+preferisci, `File > Nuovo grafico` va bene uguale.
+
+> 🛑 **MAI un grafico che ha GIÀ un EA.** Un grafico MT5 tiene **UN SOLO
 > Expert Advisor**: trascinare il guardiano sul grafico del **DAX** o dell'**ORB**
-> **SOSTITUIREBBE la sedia**, spegnendola in silenzio. `File > Nuovo grafico`.
+> **SOSTITUIREBBE la sedia**, spegnendola in silenzio.
 
 **Simbolo e timeframe NON contano** — il guardiano guarda il **CONTO**, non il
 grafico. Deve solo essere un grafico **senza EA**.
 
-### PASSO 3 — carica il preset e **fotografa PRIMA di premere OK**
+### PASSO 3 — ricarica **lo STESSO preset** e **fotografa PRIMA di premere OK**
 Trascina **`ABTG_Guardian`** → scheda **«Dati in Ingresso» → `Carica...`** →
 **`ABTG_Guardian_REALE.set`** (te lo apre già nella cartella giusta).
+
+> 🧾 **È lo stesso preset di stamattina: nessun valore è cambiato.** I 16 numeri
+> qui sotto devono uscire **identici a quelli che hai già fotografato**. Se uno
+> non torna, **non premere OK**.
 
 📸 **PRIMA DI OK, guarda a schermo e fai lo screenshot:**
 
@@ -377,8 +391,11 @@ guardiano scrive le sue GlobalVariable ma NON PUÒ CHIUDERE.** 📸 Screenshot.
 ```
 === ABTG GUARDIAN ===
 Stato: OK - operativo
-Saldo iniziale: 7500.00        <-- IL SALDO VERO. Se leggi 100000: STACCA L'EA.
-Equity: 7500.00   Balance: 7500.00
+Saldo iniziale: 7500.00        <-- L'EQUITA'. Se leggi ~5000 (il BILANCIO) il fix
+                                   NON ha preso: STACCA L'EA. Se leggi 100000 e'
+                                   il preset del demo: STACCA L'EA.
+Equity: 7500.00   Balance: 5000.00   <-- i due numeri ora sono DIVERSI, ed e'
+                                   NORMALE: la differenza e' il credito di 2.500
 --- GIORNO ---
 Inizio giorno: 7500.00
 Perdita oggi: 0.00  (0.00% / limite 4.9%)
@@ -393,17 +410,24 @@ Rischio aperto: 0.00% / cap 3.25% -> ok
 *(riprodotto dalla stringa di formato del pannello in `ABTG_Guardian.mq5`, non a
 memoria: le cifre dipendono dal tuo saldo, le etichette e l'ordine no.)*
 📸 **Screenshot del pannello: è la prova fotografica del deploy.**
-🛑 Se `Saldo iniziale` **non** è il saldo vero: **stacca l'EA**, cancella da **F3**
-la variabile `ABTG_GUARD_<login>_START` e riattaccalo.
+🛑 Se `Saldo iniziale` **non** è ~7500: **stacca l'EA** e mandami lo screenshot.
+🚫 **Non cancellare niente da F3**: la v1.12 usa nomi nuovi (`…_START_V2`) apposta
+per ricatturare il saldo da sola. Se ti trovi a dover pulire a mano, **prima
+sentimi**: la variabile che NON va toccata a caso è
+`ABTG_GUARD_<login>_FAILED` (quella tiene il blocco definitivo).
 
 ### PASSO 6 — la scheda **ESPERTI** (⚠️ **non** «Giornale»)
 ```
 [AUTOTEST] ABTG_PausaGuardian v1.51 -- nucleo puro, ora finta=1000000 tolleranza=120 s
 [AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.
 [GUARDIAN] filo verificato: 5 GlobalVariable su 5 con lo stesso nome fra guardiano e include (conto ...)
+[GUARDIAN] baseline presa dall'EQUITA' (v1.12): equity=7500.00  bilancio=5000.00  differenza=2500.00 (...)
 [GUARDIAN] avviato. Saldo iniziale=7500.00  DailyLoss=4.9%  DD=9.9% (statico)  Azione=CHIUDI+BLOCCA
 [GUARDIAN] pausa morbida=4.00%  cap rischio aperto=3.25% (modo ingresso)  reset giorno=23:00 server
 ```
+> 🆕 **La quarta riga è NUOVA della v1.12** ed è quella che vale: `differenza` è il
+> **credito del broker** (atteso **~2500**). Ed è il numero che, restando
+> invisibile, ha tenuto nascosto il bug fino a oggi.
 🛑 **Se compare `*** FILO ROTTO ***` o `CASI FALLITI`: STACCA L'EA** e mandami lo
 screenshot. Sono **le due righe che dicono che la rete non è collegata a niente.**
 📸 Screenshot della scheda Esperti.
@@ -431,10 +455,22 @@ mordere **senza ricompilare niente**. 👉 **Non serve toccare le due sedie.**
 5. 🔥 **`L'INCLUDE (si verifica, NON si riscrive)`** — deve dire **`IDENTICO al pin
    e NON TOCCATO`**.
 6. 🔥 **`IL FILO guardiano -> EA`** — deve dire **`5 GlobalVariable su 5`**.
-7. **`GATE SUPERATI`** — versione 1.11, il nucleo (`FlattenAll`/`OpenRiskPct`/
+7. **`GATE SUPERATI`** — versione **1.12** (e la riga dice esplicitamente che la
+   **1.11 è rifiutata per nome**), il nucleo (`FlattenAll`/`OpenRiskPct`/
    `VerificaFilo`/`SetPausa` + `EventSetTimer(1)`), i **default COMPILATI**
    (`InpAction=0`, `InpCloseAllMagics=true`: **anche un RIPRISTINA sulla finestra
    dei parametri non spegne la rete**).
+   🆕 **E la riga `IL FIX DEL CREDITO, verificato NEL CODICE`** — è **il gate
+   nuovo, e quello che conta di più oggi**: `#property version` è **una stringa**,
+   si alza scrivendo tre caratteri **senza aver corretto niente**. Quindi il
+   driver verifica **i fatti**: baseline presa dall'**equità** (in **2 punti su 2**,
+   perché correggerne uno solo farebbe partire il guardiano giusto e guastarsi da
+   solo alle 23), le **5 GlobalVariable rinominate `_V2`**, e **`GV_FAILED`
+   lasciata col nome di prima** — rinominare *quella* rimetterebbe operativo un
+   conto già fermato per DD sfondato.
+7-bis. 🆕 **`l'.ex5 e' tenuto aperto?`** — il preavviso sul guardiano ancora
+   attaccato al grafico. ⚠️ **Un «non risulta tenuto aperto» NON è un via
+   libera**: staccalo comunque (vedi il riquadro in cima).
 8. 🔥 **`IL PRESET, APERTO E CONTATO`** — **la riga che vale di più**: **16 chiavi =
    16 input** (copertura **TOTALE**), il saldo di riferimento, le due soglie che
    **chiudono**, i due freni che **non chiudono**, l'azione, il magic, e
@@ -467,7 +503,10 @@ mordere **senza ricompilare niente**. 👉 **Non serve toccare le due sedie.**
 | **Numero di un conto DEMO** | ❌ NO | **intatto** | il messaggio rosso — e **non si forza** |
 | **MetaEditor aperto**, blocco CORSA (si ferma **prima** di scaricare) | ❌ NO | **intatto** | il messaggio rosso; chiudi MetaEditor e rilancia |
 | **`SCRIPT VECCHIO`** o download fallito | ❌ NO | **intatto** | il messaggio (404 su un pin appena creato: aspetta 5 minuti e **rilancia la stessa riga**) |
-| **Gate sul sorgente** (versione ≠ 1.11, funzioni del nucleo, `EventSetTimer(1)`, **default compilati non sicuri**, include) | ✅ SÌ | **intatto** | lo zip: `ESITO DEL GIRO: FERMATO ...` col motivo |
+| **Gate sul sorgente** (versione ≠ **1.12**, funzioni del nucleo, `EventSetTimer(1)`, **default compilati non sicuri**, include) | ✅ SÌ | **intatto** | lo zip: `ESITO DEL GIRO: FERMATO ...` col motivo |
+| 🆕 **PIN VECCHIO** (al pin c'è ancora la **v1.11**, quella col bug del credito) | ✅ SÌ | **intatto** | lo zip — il messaggio dice che rimetterebbe dentro **proprio il file che stiamo togliendo**. Rilancia col pin di questa pagina |
+| 🆕 **IL FIX DEL CREDITO NON C'È NEL CODICE** (versione alzata ma baseline ancora dal bilancio, `_V2` mancante, `GV_FAILED` rinominata) | ✅ SÌ | **intatto** | lo zip — **è il gate che non si fida dell'etichetta** |
+| 🆕 **`EX5 VECCHIO NON CANCELLABILE`** = **hai dimenticato di staccare l'EA dal grafico** | ✅ SÌ (+ backup) | **RIPRISTINATO, tutti e tre** | **non è un guasto**: stacca l'EA (§ in cima) e **rilancia la stessa riga** |
 | 🧵 **IL FILO ROTTO** (un nome di GlobalVariable diverso fra `.mq5` e `.mqh`) | ✅ SÌ | **intatto** | lo zip — **è il caso peggiore che si potesse evitare**: senza questo gate il guardiano girerebbe scrivendo su nomi che nessuno legge |
 | **Gate sul PRESET** (non-ASCII, riga malformata, chiave doppia/estranea, copertura non totale, magic sbagliato o collidente, **`InpAction=1`**, **`InpStartBalance=100000`**, un numero ≠ dalla firma, soglie incoerenti) | ✅ SÌ | **intatto** | lo zip — **non si forza** |
 | 🧷 **INCLUDE assente o diverso dal pin** | ✅ SÌ | **intatto** (l'include **non** viene toccato) | lo zip: prima di installare un guardiano si capisce su quale terminale siamo |
@@ -532,7 +571,9 @@ scarto. Tre casi:
   lo stesso** (sta scritto nell'include, e lo riporto come letto).
 - 🧮 **`InpStartBalance=0` cattura il saldo UNA VOLTA e lo persiste.** Se domani
   versi o prelevi, le soglie restano calcolate sul **vecchio** saldo finché non
-  cancelli `ABTG_GUARD_<login>_START` da F3 e riavvii l'EA.
+  cancelli `ABTG_GUARD_<login>_START_V2` da F3 e riavvii l'EA. ⚠️ **Nome cambiato
+  con la v1.12** (`_V2` in fondo): la vecchia `…_START`, senza suffisso, è ancora
+  lì ma **non la legge più nessuno**, e cancellare quella non farebbe niente.
 - 🔌 **Guardiano spento = niente rete, e anche niente freni.** Se MT5 è chiuso o
   l'EA non è sul grafico, il **battito** si ferma: pausa e cap **scadono da soli**
   entro 120 s (fail-open voluto) e i due EA tornano a operare **senza** B1 e C1.
@@ -541,7 +582,46 @@ scarto. Tre casi:
 
 ---
 
-## 🧪 COSA È STATO PROVATO **ESEGUENDO**, NON LEGGENDO — **136 casi, 0 rossi**
+## 🧪 COSA È STATO PROVATO **ESEGUENDO** PER QUESTO AGGIORNAMENTO — **40 casi, 0 rossi**
+
+> 📌 I **136 casi** del deploy di stamattina restano validi (stesso driver, stessa
+> struttura) e **non sono stati rifatti da zero**: sarebbe stato un numero grosso
+> e poco onesto. Qui ci sono i **40 casi nuovi**, mirati su **quello che è
+> cambiato**. Girati con lo script **vero del repo**, non con una copia.
+
+| cosa | esito |
+|---|---|
+| **CONTROLLO sano** (arriva in fondo, dichiara v1.12, il preset fa ancora **16 = 16**, riconosce che è un **AGGIORNAMENTO**) | ✅ 7 casi |
+| 🔥 **il vecchio pin (v1.11) → SI FERMA**, col messaggio che dice *«è proprio la versione col bug»* | ✅ 2 casi |
+| una versione qualunque diversa (1.13) → si ferma | ✅ 1 caso |
+| 🔥 **i 5 sabotaggi sul FIX** con la versione **alzata a 1.12 ma il codice ancora sbagliato**: baseline dal bilancio in `OnTimer`; **corretto 1 punto su 2**; `gStart` di nuovo dal bilancio; `_V2` tolto; **`GV_FAILED` rinominata** → **beccati tutti e 5** | ✅ 5 casi |
+| **conti vietati** `50503392` / `50504263`, in CONTROLLO **e** in CORSA | ✅ 4 casi |
+| **tutto-o-niente**: compilazione fallita → i **3 file tornano con sha256 identico**, il `.set` **non entra**, la **sedia viva e l'include intatti**, sentinella pulita | ✅ 6 casi |
+| 🔥 **`.ex5` reso NON CANCELLABILE DAVVERO** (flag immutabile, non una finta): **si ferma**, dice *«è già attaccato a un grafico»*, dice **come staccarlo**, dice **che non è un guasto**, **non compila**, e **rimette tutto com'era** | ✅ 8 casi |
+| **CORSA riuscita**: 3 file su 3 identici al pin, **include non toccato**, grafici e config `INVARIATI`, e il referto spiega **stacca/riattacca** e **7500 ≠ 5000** | ✅ 7 casi |
+
+### 🐛 E il banco ha trovato **due difetti veri**, che leggendo non erano usciti
+1. 🔴 **`$AVVIO` e `$Avvio` erano LA STESSA VARIABILE.** PowerShell **non
+   distingue le maiuscole** nei nomi: la costante con la riga di log
+   (`[GUARDIAN] avviato. Saldo iniziale=`) veniva **sovrascritta dalla data** di
+   `$Avvio = Get-Date`. 👉 Il referto ti diceva di cercare in Esperti **una data**
+   invece della riga. Non era un pericolo per il conto, ma era **un'istruzione
+   sbagliata proprio nel passo di verifica**. Rinominata `$RIGA_AVVIO`.
+2. 🟡 **La sonda sull'`.ex5` può sbagliare in TUTTE E DUE le direzioni** —
+   misurato, non supposto: un file **non cancellabile** ma **apribile** faceva
+   dire alla sonda «libero». 👉 Per questo è un **rilievo e non un via libera**, e
+   per questo la pagina ti dice di **staccare l'EA comunque**.
+
+### 🛡️ E un autogol evitato
+La correzione lasciava la variabile `bal` **senza più nessun lettore** in
+`OnInit`. Una variabile non usata è un **warning** di compilazione — e **questo
+stesso driver tratta ogni warning come un PROBLEMA con scritto «NON ATTACCARE
+NIENTE»**. 👉 Il fix di sicurezza si sarebbe **bloccato da solo**. Risolto usando
+`bal` per la cosa più utile possibile: **stampare il credito**.
+
+---
+
+## 🧪 IL COLLAUDO DI STAMATTINA (resta valido) — **136 casi, 0 rossi**
 
 Qui sotto c'è capitale vero e un EA che può chiudere posizioni, quindi il conto lo
 do per esteso:
@@ -585,6 +665,18 @@ do per esteso:
 > lo stesso** (`b7462cd5…`) contro cui stamattina hanno compilato **0 errors,
 > 0 warnings** i due EA delle sedie, e nel banco il compilatore è **finto**. Il
 > primo `Result:` **vero** lo vedremo **nel referto della CORSA**.
+> 👉 Vale in particolare per la **riga di log nuova** della v1.12: è scritta con
+> lo stesso `PrintFormat` delle altre due già in campo, ma **finché non compila
+> davvero, "compila" resta una previsione mia, non un fatto.**
+>
+> ⚠️ **E NON È PROVATO IL BLOCCO DI WINDOWS.** Sul banco l'`.ex5` è stato reso
+> non cancellabile col **flag immutabile di Linux**, che esercita **esattamente
+> lo stesso ramo di codice** (cancellazione fallita → non compilo → ripristino).
+> Ma **non è un lock di MT5**: se su Windows MT5 tenesse il file in un modo che
+> lascia comunque cancellarlo, la CORSA proseguirebbe e **MT5 ricaricherebbe l'EA
+> al volo**. Non sarebbe un danno — ricatturerebbe la baseline giusta lo stesso —
+> ma **non è la strada collaudata**, ed è il motivo per cui la pagina ti chiede di
+> **staccarlo a mano** invece di fidarsi.
 >
 > ⚠️ **E un secondo limite, dichiarato:** il banco end-to-end gira su Linux, dove
 > `MQL5\Experts\x.mq5` è **un nome di file**, non un percorso annidato. I finti
