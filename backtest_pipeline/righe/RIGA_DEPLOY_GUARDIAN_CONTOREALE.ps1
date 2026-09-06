@@ -226,7 +226,14 @@ $VER     = "1.12"
 $VER_KO  = "1.11"        # la versione col bug: si nomina, per poterla RIFIUTARE per nome
 $MAGIC   = "779002"
 $SET     = "ABTG_Guardian_REALE.set"
-$AVVIO   = "[GUARDIAN] avviato. Saldo iniziale="
+# ATTENZIONE AL NOME DI QUESTA VARIABILE -- 06/09, difetto TROVATO SUL BANCO.
+# Si chiamava $AVVIO, e PowerShell NON distingue le maiuscole nei nomi delle
+# variabili: era quindi LA STESSA VARIABILE di $Avvio = Get-Date, qualche riga
+# piu' sotto, che la sovrascriveva con la data. Risultato: nel referto, il
+# punto che dice a Claudio QUALE RIGA cercare nella scheda Esperti stampava
+# una data al posto della riga. Nessun pericolo per il conto -- ma era
+# un'istruzione sbagliata proprio nel passo di verifica. Ora il nome e' unico.
+$RIGA_AVVIO = "[GUARDIAN] avviato. Saldo iniziale="
 
 # --- L'INCLUDE: si VERIFICA, non si riscrive -------------------------
 $INC     = "ABTG_PausaGuardian.mqh"
@@ -779,7 +786,7 @@ try{
   # le due righe che il referto dice a Claudio di cercare nella scheda
   # Esperti. Se non ci sono, le istruzioni sarebbero sbagliate: non e' un
   # pericolo, quindi e' un rilievo e non un blocco.
-  foreach($sp in @($AVVIO, "[GUARDIAN] baseline presa dall")){
+  foreach($sp in @($RIGA_AVVIO, "[GUARDIAN] baseline presa dall")){
     if($testo.IndexOf($sp, [System.StringComparison]::Ordinal) -lt 0){
       [void]$Rilievi.Add("nel sorgente al pin non trovo la riga di log '" + $sp + "...', che il referto dice di cercare nella scheda Esperti. Non e' un pericolo (il guardiano funziona lo stesso), ma quel passo di verifica non si potra' fare come scritto.")
     }
@@ -1666,7 +1673,7 @@ try{
   [void]$r.Add("       '[AUTOTEST] ABTG_PausaGuardian v1.51 ...'")
   [void]$r.Add("       '[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.'")
   [void]$r.Add("       '[GUARDIAN] filo verificato: 5 GlobalVariable su 5 ...'")
-  [void]$r.Add("       '" + $AVVIO + "<saldo vero>  DailyLoss=" + $A_DAILYLOSS.ToString("0.0#",$INV) + "%  DD=" + $A_TOTALDD.ToString("0.0#",$INV) + "% (statico)  Azione=CHIUDI+BLOCCA'")
+  [void]$r.Add("       '" + $RIGA_AVVIO + "<saldo vero>  DailyLoss=" + $A_DAILYLOSS.ToString("0.0#",$INV) + "%  DD=" + $A_TOTALDD.ToString("0.0#",$INV) + "% (statico)  Azione=CHIUDI+BLOCCA'")
   [void]$r.Add("          <-- QUI il saldo dev'essere ~7500.00, NON ~5000.00")
   [void]$r.Add("       '[GUARDIAN] baseline presa dall'EQUITA' (v" + $VER + "): equity=...")
   [void]$r.Add("        bilancio=...  differenza=...'  <-- riga NUOVA della v" + $VER + ":")
