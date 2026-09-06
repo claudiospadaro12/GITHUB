@@ -1,4 +1,12 @@
-=== Range ORB (ORARI SERVER, come l'indicatore) ====
+; ==============================================================
+; PRESET CONTO REALE -- ABTG_ORB_Ottimizzato v1.04 (magic 770611)
+; Simbolo: U30USD   Timeframe del grafico: M5
+; Unica differenza dalla cella viva sul conto piccolo/100k:
+;   InpRiskPercent 1,0 -> 0,65 (taglia di casa per il conto reale).
+; Orari in ORA SERVER BCM (= ora italiana - 1): Dow apre 14:30 server.
+; Si carica dalla finestra input dell EA -> Carica...
+; ==============================================================
+; === Range ORB (ORARI SERVER, come l'indicatore) ====
 InpRangeStartHour=14
 InpRangeStartMin=30
 InpRangeEndHour=14
@@ -8,12 +16,12 @@ InpEndMin=0
 InpCloseAtEnd=true
 InpOneTradePerDay=true
 InpPendingExpiryMin=600
-=== Ingresso (EntryPoints x K, come l'indicatore) ====
+; === Ingresso (EntryPoints x K, come l'indicatore) ====
 InpEntryPoints=10.0
 InpK=1.0
 InpAllowLong=true
 InpAllowShort=false
-=== Stop, target, gestione ====
+; === Stop, target, gestione ====
 InpSLMode=3
 InpExecTF=5
 InpAtrPeriod=14
@@ -28,7 +36,7 @@ InpUseTrailEMA=true
 InpEmaFast=9
 InpEmaSlow=21
 InpExitOnEmaClose=false
-=== Ricetta ToolKit ABTG / live (tutto OPT-IN) ====
+; === Ricetta ToolKit ABTG / live (tutto OPT-IN) ====
 InpUseCloseConfirm=false
 InpMinBodyPct=50.0
 InpUseEmaFilter=false
@@ -39,9 +47,9 @@ InpMaxRangePct=0.8
 InpUseVolumeFilter=false
 InpVolMult=1.5
 InpVolAvgBars=20
-=== Rischio ====
+; === Rischio ====
 InpRiskPercent=0.65
-=== Filtro notizie (CSV in MQL5/Files) ====
+; === Filtro notizie (CSV in MQL5/Files) ====
 InpUseNewsFilter=false
 InpNewsFile=abtg_news.csv
 InpNewsMinImpact=3
@@ -50,8 +58,25 @@ InpNewsAfterMin=30
 InpNewsShiftMinutes=0
 InpNewsCurrencies=USD
 InpNewsFlatten=true
-=== Generali ====
+; === Generali ====
 InpComment=ORB OTT
 InpMagic=770611
 InpMaxSpread=0
 InpVerbose=true
+
+; --------------------------------------------------------------
+; 06/09: input dell EA che il preset NON copriva. Il valore qui
+;        scritto e IDENTICO al default compilato, quindi il
+;        comportamento non cambia di una virgola: cambia che ora
+;        il file li DICHIARA, invece di lasciarli al default
+;        (e il default silenzioso e esattamente la trappola del
+;        2% chiusa il 02/09, verbale VERBALE_CHIUSURA_770101).
+; --------------------------------------------------------------
+; Buffer extra sullo stop in punti: default compilato 0 = come v1.01
+InpSLBufferPts=0
+; R55 slippage stimato in punti: default compilato 0 = off
+InpSlippagePts=0
+; Autotest del nucleo di selezione hedge-safe: default compilato true. NON spegnerlo: e la riga che prova in Esperti che gira la v1.04.
+InpAutoTest=true
+; Guardian: default compilato true. Sul conto REALE il Guardian NON gira: fail-open, no-op dichiarato.
+InpUsaGuardian=true

@@ -1,4 +1,12 @@
-=== Sessione (ORARIO DEL SERVER/BROKER!) ====
+; ==============================================================
+; PRESET CONTO REALE -- ABTG_DAX_Apertura_EU  (magic 770101)
+; Simbolo: D30EUR   Timeframe del grafico: M5
+; Unica differenza dalla cella viva sul conto piccolo/100k:
+;   InpRiskPercent 1,0 -> 0,65 (taglia di casa per il conto reale).
+; Orari in ORA SERVER BCM (= ora italiana - 1): DAX apre 08:00 server.
+; Si carica dalla finestra input dell EA -> Carica...
+; ==============================================================
+; === Sessione (ORARIO DEL SERVER/BROKER!) ====
 InpSessionHour=8
 InpSessionMin=0
 InpRangeMinutes=35
@@ -7,7 +15,7 @@ InpCloseMin=30
 InpCloseAtEnd=true
 InpOneTradePerDay=true
 InpMaxPosSimbolo=0
-=== Ingresso ====
+; === Ingresso ====
 InpEntryMode=2
 InpRangeMode=0
 InpLevelTF=16385
@@ -19,17 +27,17 @@ InpAllowLong=true
 InpAllowShort=false
 InpMinRangePts=0.0
 InpMaxRangePts=0.0
-=== Retest (InpEntryMode=RETEST, leva Emiliano) ====
+; === Retest (InpEntryMode=RETEST, leva Emiliano) ====
 InpRetestOffsetPts=200.0
 InpFadeOffsetPts=0.0
-=== Entrata ritardata/confermata (InpEntryMode=DELAYED) ====
+; === Entrata ritardata/confermata (InpEntryMode=DELAYED) ====
 InpDelayMinutes=30
 InpDelayDirMode=0
-=== Gap Fill (opzionale, tipico USA) ====
+; === Gap Fill (opzionale, tipico USA) ====
 InpUseGapFill=false
 InpGapMinPoints=150.0
 InpGapMinRR=1.5
-=== Filtro di trend (opzionale) ====
+; === Filtro di trend (opzionale) ====
 InpUseEmaFilter=false
 InpEmaFast=14
 InpEmaSlow=200
@@ -39,16 +47,16 @@ InpStAtrPeriod=10
 InpStMultiplier=2.5
 InpStTF=16385
 InpUseSupertrend3=false
-=== Filtro di correlazione (opzionale) ====
+; === Filtro di correlazione (opzionale) ====
 InpUseCorrelation=false
 InpCorrSymbol=SPXUSD
 InpCorrTF=16385
 InpCorrEmaFast=14
 InpCorrEmaSlow=100
-=== Filtro VWAP (live Emiliano, opt-in) ====
+; === Filtro VWAP (live Emiliano, opt-in) ====
 InpUseVwapFilter=false
 InpVwapTF=15
-=== Rischio e gestione ====
+; === Rischio e gestione ====
 InpRiskPercent=0.65
 InpSLMode=0
 InpAtrSlMult=1.5
@@ -63,11 +71,11 @@ InpTrailMode=1
 InpTrailTF=5
 InpTrailAtrMult=2.0
 InpTrailFixedPts=410.0
-=== Obiettivi a numeri tondi (approx. Multipivot/%Custom) ====
+; === Obiettivi a numeri tondi (approx. Multipivot/%Custom) ====
 InpUseRoundLevels=false
 InpRoundStep=100.0
 InpRoundMinDistPts=50.0
-=== Filtro notizie (file CSV in MQL5/Files) ====
+; === Filtro notizie (file CSV in MQL5/Files) ====
 InpUseNewsFilter=false
 InpNewsFile=abtg_news.csv
 InpNewsMinImpact=3
@@ -76,11 +84,11 @@ InpNewsAfterMin=30
 InpNewsShiftMinutes=0
 InpNewsCurrencies=
 InpNewsFlatten=true
-=== Slippage & floor SL (consiglio amico) ====
+; === Slippage & floor SL (consiglio amico) ====
 InpSlippagePts=0.0
 InpMinStopPts=0.0
 InpSkipIfTight=true
-=== Filtro VOLUMI (regola Emiliano: rottura valida solo con vol=
+; === Filtro VOLUMI (regola Emiliano: rottura valida solo con volumi) ===
 InpUseVolumeFilter=false
 InpVolMult=1.5
 InpVolAvgBars=20
@@ -88,7 +96,20 @@ InpUseAtrFilter=false
 InpAtrFilterBars=20
 InpAtrFilterMult=1.0
 InpConfirmMode=0
-=== Generali ====
+; === Generali ====
 InpMagic=770101
 InpMaxSpread=0
 InpVerbose=true
+
+; --------------------------------------------------------------
+; 06/09: input dell EA che il preset NON copriva. Il valore qui
+;        scritto e IDENTICO al default compilato, quindi il
+;        comportamento non cambia di una virgola: cambia che ora
+;        il file li DICHIARA, invece di lasciarli al default
+;        (e il default silenzioso e esattamente la trappola del
+;        2% chiusa il 02/09, verbale VERBALE_CHIUSURA_770101).
+; --------------------------------------------------------------
+; R51 secondo ciclo sul lato opposto: default compilato false
+InpAllowReverse=false
+; Guardian: default compilato true. Sul conto REALE il Guardian NON gira: la guardia e fail-open (canale inesistente = passa), quindi qui vale come no-op dichiarato.
+InpUsaGuardian=true
