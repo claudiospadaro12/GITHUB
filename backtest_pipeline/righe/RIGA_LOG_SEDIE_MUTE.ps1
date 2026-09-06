@@ -1,7 +1,14 @@
-# MARCATORE_RIGA_LOG_SEDIE_MUTE_v3
+# MARCATORE_RIGA_LOG_SEDIE_MUTE_v4
 # Sola lettura: legge i log Esperti (MQL5\Logs) del conto PICCOLO (50503392)
 # e stampa le righe di ABTG_SupRev_DAX_H4 (970912) e ABTG_GapFill 225JPY (772235).
 # NON scrive, NON modifica, NON tocca EA/preset/grafici. Solo un referto su Desktop.
+# v4 (06/09 notte): classe 150 - l'ESITO guardava i file SELEZIONATI, non
+#             quelli LETTI: due file illeggibili davano 'PARZIALE' con ZERO
+#             righe lette e le due sedie dichiarate mute. Ora conta i letti.
+#             + 150-bis: se la cartella non si vede, il messaggio NOMINA la
+#               sessione Windows (lo stesso GUID esiste sotto due profili).
+#             + 150-ter: nei VIETATI anche il conto REALE 10105439.
+#             + 119: 'trovati in finestra' e 'LETTI' non si chiamano piu' uguale.
 # v3 (06/09 notte): classe 149 - la manopola -CartellaDati passava DAVANTI
 #             ai gate (accettava una cartella inesistente o quella del 100k).
 #             Ora valida sempre e sceglie dopo: esistenza, MQL5\Logs, conti
@@ -22,7 +29,10 @@ param(
 $ErrorActionPreference = 'Continue'
 $INV = [System.Globalization.CultureInfo]::InvariantCulture
 $LOGIN_ATTESO = '50503392'
-$VIETATI = @('50504263')   # il 100k non c'entra con queste due sedie: se lo trovi, scartalo
+# 150-ter: la lista era la foto di ieri. Sotto la STESSA sessione Administrator
+# e' eleggibile anche la cartella del conto REALE (10105439, soldi veri),
+# scoperta il 06/09. Un gate incompleto e' un gate che rassicura e basta.
+$VIETATI = @('50504263', '10105439')
 $nonLetti = New-Object System.Collections.ArrayList
 
 Write-Host ''
@@ -108,7 +118,9 @@ if ($CartellaDati -ne '') {
   # non meno. L'origine del valore non e' una prova della sua bonta':
   # si VALIDA sempre, si sceglie dopo.
   if (-not (Test-Path -LiteralPath $CartellaDati)) {
-    Write-Host ('CARTELLA -CartellaDati INESISTENTE: ' + $CartellaDati) -ForegroundColor Red
+    Write-Host ('NON VEDO LA CARTELLA: ' + $CartellaDati) -ForegroundColor Red
+    Write-Host ('150-bis: prima di pensare che il percorso sia sbagliato, guarda la SESSIONE WINDOWS: questa finestra gira come ''' + $env:USERNAME + '''.') -ForegroundColor Yellow
+    Write-Host 'La flotta gira sotto Administrator (misurato il 03/09): da un altro utente la cartella C''E'' ma NON si legge, e Test-Path torna falso senza dire perche''.' -ForegroundColor Yellow
     Write-Host 'Mi fermo qui. Senza log non misuro niente, e un referto vuoto sembrerebbe una sedia muta.' -ForegroundColor Red
     exit 1
   }
@@ -172,7 +184,7 @@ $nonLetti.Clear()
 $file = @(Get-ChildItem -LiteralPath $logsDir -Filter '*.log' -File -EA SilentlyContinue |
           Where-Object { $_.LastWriteTime -ge $soglia } | Sort-Object Name)
 
-Write-Host ("file di log letti (ultimi $Giorni giorni): " + $file.Count) -ForegroundColor Gray
+Write-Host ("file di log TROVATI in finestra (ultimi $Giorni giorni): " + $file.Count) -ForegroundColor Gray
 
 $righeSupRev  = New-Object System.Collections.ArrayList
 $righeVicini  = New-Object System.Collections.ArrayList
@@ -195,9 +207,15 @@ foreach ($f in $file) {
 # classe 149-bis: "non ho trovato niente" e "non ho guardato niente" devono
 # avere due nomi diversi, e il secondo deve essere PIU' RUMOROSO del primo.
 # Un denominatore zero non e' un risultato: e' l'assenza della misura.
+# 150: il denominatore zero rientrava dalla porta di servizio. Il gate
+# guardava i file SELEZIONATI dalla finestra, non quelli LETTI DAVVERO:
+# due file illeggibili davano 'PARZIALE' (che in italiano vuol dire "quasi
+# tutto") mentre le righe lette erano ZERO e le due sedie venivano
+# dichiarate mute. Adesso il conto e' sui file letti.
+$letti = $file.Count - $nonLetti.Count
 $esito = 'COMPLETO'
-if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti' }
-if ($file.Count -eq 0) { $esito = 'NON MISURATO -- ZERO file di log in finestra: questo referto NON dice NIENTE sulle due sedie' }
+if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti su ' + $file.Count }
+if ($letti -le 0) { $esito = 'NON MISURATO -- ZERO file di log LETTI (' + $file.Count + ' in finestra, ' + $nonLetti.Count + ' illeggibili): questo referto NON dice NIENTE sulle due sedie' }
 
 Write-Host ''
 Write-Host '=== 970912 SupRev DAX H4 -- righe di ABTG_SupRev_DAX_H4_Ottimizzato ===' -ForegroundColor Cyan
@@ -231,10 +249,10 @@ while (Test-Path -LiteralPath $fileOut) {
   if ($n -gt 50) { break }
 }
 $righeOut = New-Object System.Collections.ArrayList
-[void]$righeOut.Add('LOG SEDIE MUTE v3 - sola lettura, nessun file toccato')
+[void]$righeOut.Add('LOG SEDIE MUTE v4 - sola lettura, nessun file toccato')
 [void]$righeOut.Add('data: ' + (Get-Date).ToString('yyyy.MM.dd HH:mm:ss', $INV))
 [void]$righeOut.Add('cartella dati: ' + $scelta + '  [' + $comeScelta + ']')
-[void]$righeOut.Add('file di log letti: ' + $file.Count + ' (ultimi ' + $Giorni + ' giorni)')
+[void]$righeOut.Add('file di log LETTI: ' + $letti + ' su ' + $file.Count + ' trovati in finestra (ultimi ' + $Giorni + ' giorni)')
 [void]$righeOut.Add('ESITO LETTURA: ' + $esito)
 foreach ($x in $nonLetti) { [void]$righeOut.Add('  NON LETTO (in lettura): ' + $x) }
 foreach ($x in $nonLettiRicerca) { [void]$righeOut.Add('  NON LETTO (durante il riconoscimento delle cartelle, NON incide sulla misura): ' + $x) }
