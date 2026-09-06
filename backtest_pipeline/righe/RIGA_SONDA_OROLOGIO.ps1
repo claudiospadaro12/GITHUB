@@ -207,6 +207,26 @@
 #      Sul giro FX questa sezione NON si stampa: i criteri C1-C7 sono
 #      firmati e non prevedono la lettura appaiata: aggiungerla la'
 #      cambierebbe un referto gia' congelato.
+#
+#  CHE COSA E' STATO VERIFICATO ESEGUENDO, prima dell'invio (banco
+#  stubbato: Scarica -> copia locale, CSV OPTFRAME sintetici con
+#  l'intestazione VERA dell'EA):
+#   - parse pwsh 0 errori, ASCII puro, 0 collisioni case-insensitive,
+#     nessun uso della variabile automatica args;
+#   - IL RAMO FX NON SI E' MOSSO: il driver v3 (pin f81eb70) e questo
+#     girati sullo STESSO banco danno lo stesso referto riga per riga
+#     -- 546 righe di tabelle e di conti -- tranne DUE righe nuove
+#     ("giro:" e "tick:") e quattro blocchi di prosa resi generici.
+#     Nessun numero cambia;
+#   - il giro INDICI tira fuori esattamente le 4 celle, i 4 magic e i 4
+#     file prova giusti; I1 severo e I7 appaiato calcolati sui dati
+#     seminati apposta (una fascia sopra soglia su tutti e due i
+#     simboli, una riga asimmetrica in mezzo a righe simmetriche);
+#   - 8 guardie + 15 mutazioni dei file prova del ramo INDICI -> 15
+#     fermate, col controllo positivo prima e dopo.
+#  NON verificato qui, e va detto: tutto cio' che richiede MT5 -- la
+#  COMPILAZIONE dell'EA (che non e' mai stata fatta da nessuno), i
+#  tempi, e ogni singolo numero.
 # =====================================================================
 [CmdletBinding()]
 param(
