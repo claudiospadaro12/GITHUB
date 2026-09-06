@@ -1295,19 +1295,27 @@ try{
   #  in CONTROLLO -- che e' il giro che non scrive niente -- piuttosto che
   #  farglielo scoprire a meta' di una CORSA sul conto reale.
   #
-  #  ONESTA' SULLA MISURA, perche' qui e' facile spacciare una sonda per
-  #  una prova: questa chiede il file in lettura ESCLUSIVA, ed e' quindi
-  #  PIU' SEVERA della cancellazione vera (che riesce lo stesso se chi
-  #  tiene il file aperto ha concesso la condivisione in cancellazione).
-  #  Quindi: "RISULTA APERTO" NON dimostra che la CORSA si fermera';
-  #  "non risulta aperto" e' un buon segno e nient'altro. La prova vera la
-  #  da' la CORSA. Per questo e' un RILIEVO e non un blocco.
+  #  ONESTA' SULLA MISURA, perche' qui e' facilissimo spacciare una sonda
+  #  per una prova. Questa chiede il file in lettura ESCLUSIVA, che NON e'
+  #  la stessa domanda di "riesco a cancellarlo?". Puo' sbagliare in TUTTE
+  #  E DUE le direzioni, e sul banco si sono viste tutte e due:
+  #    - puo' ALLARMARE SENZA MOTIVO: chi tiene aperto il file puo' aver
+  #      concesso la condivisione in cancellazione, e allora la CORSA
+  #      passerebbe lo stesso;
+  #    - puo' TACERE A TORTO: un file puo' essere non cancellabile pur
+  #      restando apribile in lettura (misurato sul banco del 06/09 con un
+  #      file marcato immutabile: la sonda diceva "libero", la
+  #      cancellazione falliva lo stesso).
+  #  Quindi nessuno dei due esiti e' una prova, e la prova vera la da' solo
+  #  la CORSA quando prova a cancellarlo davvero. Per questo e' un RILIEVO
+  #  e non un blocco: serve a dare a Claudio un preavviso quando c'e', non
+  #  a promettergli che andra' bene quando tace.
   if($FotoP[("Experts\" + $EA + ".ex5")].Esiste){
     try{
       $fs = [System.IO.File]::Open($DestEx5,[System.IO.FileMode]::Open,[System.IO.FileAccess]::Read,[System.IO.FileShare]::None)
       $fs.Close()
       $fs.Dispose()
-      $Ex5Aperto = "l'.ex5 del guardiano c'e' gia' e NON risulta tenuto aperto da nessun processo (sonda in lettura esclusiva riuscita). E' un buon segno, NON una prova: la prova la da' la CORSA quando prova a cancellarlo davvero."
+      $Ex5Aperto = "l'.ex5 del guardiano c'e' gia' e NON risulta tenuto aperto da nessun processo (sonda in lettura esclusiva riuscita). ATTENZIONE: questo NON e' un via libera. La sonda chiede 'posso aprirlo in esclusiva?', che non e' la stessa domanda di 'posso cancellarlo?', e sul banco si e' visto un file NON cancellabile che la sonda dichiarava libero. Se il guardiano e' su un grafico, STACCALO LO STESSO prima della CORSA."
     }
     catch{
       $Ex5Aperto = "ATTENZIONE -- l'.ex5 del guardiano c'e' gia' ed e' TENUTO APERTO DA UN PROCESSO (" + $_.Exception.GetType().Name + "). Su questo terminale il guardiano sta su un grafico vivo dal 06/09: STACCALO PRIMA di lanciare la CORSA (tasto destro sul SUO grafico > Expert Advisors > Rimuovi). Se non lo fai, la CORSA non compila e rimette tutto com'era: e' il comportamento VOLUTO, non un guasto."
