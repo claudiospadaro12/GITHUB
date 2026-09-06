@@ -9834,6 +9834,21 @@ dopo, uno script nuovo lo rifa'.
 > cartelle — giusta, 100k, GUID storto, cartella senza `MQL5\Logs` — e solo la
 > prima passa.)
 
+> 🟢 **CHIUSA ALLA RADICE poche ore dopo** — `RIGA_LOG_SEDIE_MUTE.ps1` **v3**,
+> pin `14f610b4`, commit _"Sedie mute v2->v3"_. La sessione principale ha scelto
+> la strada opposta a quella suggerita qui sopra (patch allo SCRIPT invece dei
+> tre `if` nella riga) **perche' Claudio era andato a dormire**: il vincolo che
+> faceva preferire la riga — evitare un ri-pin a notte fonda — non c'era piu'.
+> **Ed e' la scelta giusta, e va scritta come regola**: il rimedio dentro la riga
+> vale per UNA invocazione, il rimedio dentro lo script vale per OGNI uso futuro
+> della manopola. La forma "nella riga" resta valida **solo** come toppa a
+> orologio, quando il ri-pin costa piu' del difetto.
+> Verificato dal verificatore ESEGUENDO al pin: giusta -> 0 · 100k -> 1 ·
+> GUID storto -> 1 · senza `MQL5\Logs` -> 1 · `MQL5\Logs` vuota -> 0 con
+> `NON MISURATO` · ramo automatico NON regredito (`$conLogin.Count -eq 1`
+> sceglie ancora e la separazione della 148 regge). **Ma la patch ha lasciato
+> aperta la meta' non nominata del denominatore zero: vedi 150.**
+
 ### 149-bis. 🫙 `ESITO LETTURA: COMPLETO` con **ZERO file letti**: l'universo vuoto spacciato per misura completa
 
 Nello stesso script l'esito si calcola cosi':
@@ -9886,3 +9901,170 @@ recente); **(b)** `$nonLetti` e' condiviso fra la fase di **riconoscimento** e
 quella di **lettura**, quindi **lo stesso file illeggibile viene contato due
 volte** (`PARZIALE -- 2 file NON letti` per un solo file rotto: verificato
 eseguendo con un log irraggiungibile).
+
+---
+
+## 🆕 AGGIUNTE DEL 06/09/2026 (notte fonda) — trovate dal **verificatore di stringhe** RI-VERIFICANDO la **v3** di `RIGA_LOG_SEDIE_MUTE.ps1` (pin `14f610b4`), cioe' la patch che chiudeva 149 e 149-bis. **La patch e' corretta**: sette casi rifatti eseguendo su `pwsh` 7.4.6 (cartella giusta / 100k / GUID storto / senza `MQL5\Logs` / `MQL5\Logs` vuota / due lanci nello stesso secondo / ramo automatico) danno tutti l'esito promesso, parse reale 0 errori, ASCII puro 0 byte, raw al pin **HTTP 200** con sha256 `c4ef9a24…a502` identico a `git show`, una sola `Set-Content` in tutto il file (sola lettura confermata col grep, non con la promessa). Le tre voci qui sotto sono **quello che la patch non copriva**: due **RIPRODOTTE ESEGUENDO**, una **misurata sui referti degli altri round**.
+
+## 150. 🫗 IL DENOMINATORE ZERO CHE RIENTRA DALLA PORTA DI SERVIZIO: chiuso `COMPLETO con 0 file`, resta aperto **`PARZIALE` con 0 file letti DAVVERO** — e l'intestazione conta i file **scelti**, non quelli letti
+
+### Il fatto
+
+La 149-bis aveva imposto: *"non ho trovato niente" e "non ho guardato niente"
+devono avere due nomi diversi*. La v3 la applica cosi':
+
+```powershell
+$esito = 'COMPLETO'
+if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti' }
+if ($file.Count -eq 0)     { $esito = 'NON MISURATO -- ZERO file di log in finestra: ...' }
+```
+
+Il gate guarda **`$file.Count`**, cioe' i file **selezionati** dalla finestra —
+non quelli **letti**. Banco riprodotto (due `.log` in finestra, tutti e due resi
+illeggibili, corsa da utente senza permessi):
+
+```
+file di log letti (ultimi 45 giorni): 2
+=== 970912 SupRev DAX H4 ===  NESSUNA RIGA TROVATA in questa finestra.
+=== 772235 GapFill 225JPY ===  NESSUNA RIGA TROVATA in questa finestra.
+ESITO LETTURA: PARZIALE -- 2 file NON letti          <-- uscita 0
+```
+
+👉 Zero righe lette, due sedie dichiarate silenziose, e l'esito dice
+**PARZIALE**, che in italiano vuol dire *"quasi tutto, manca un pezzo"*, non
+*"non ho letto niente"*. Sopra, l'intestazione **`file di log letti: 2`** e' la
+bugia che regge tutto: quel numero conta i file **scelti dalla finestra**, e
+sotto lo stesso referto ne dichiara 2 **non letti**. Due grandezze diverse con
+lo stesso nome (classe **119**), e la piu' rassicurante sta in cima.
+
+E la riga sopra rincara: `cartella dati: ... [IMPOSTA A MANO, e VALIDATA: ...
+login 50503392 TROVATO nei log]`. Il lettore ha un cartello verde
+sull'identita', un'intestazione che dice "2 file letti" e due `NESSUNA RIGA
+TROVATA`: **la conclusione sbagliata e' gia' scritta.**
+
+### Perche' e' una classe e non un residuo
+
+E' la **quinta recidiva** della meta-classe del 04/09 (_"la correzione di un
+difetto ne porta dentro uno nuovo, della stessa famiglia"_) — e stavolta e'
+letteralmente la **stessa** famiglia: il denominatore zero. Il fix ha nominato
+UNA delle due strade che portano a zero (nessun file da guardare) e ha lasciato
+l'altra (file guardati, nessuno letto). Motivo strutturale: chi corregge scrive
+il gate sulla variabile che ha **appena messo a fuoco** (`$file.Count`), non
+sulla grandezza che il referto **promette** (le righe effettivamente lette).
+
+> ✅ **REGOLA: il gate del denominatore zero si punta su quello che si e'
+> DAVVERO letto, non su quello che si e' scelto di leggere.** Il conto utile e'
+> `letti = selezionati - illeggibili`: se `letti == 0` l'esito e' **NON
+> MISURATO**, qualunque sia il motivo (finestra vuota, permessi, file
+> spariti). E ogni intestazione che dice «letti: N» deve dire **N letti su M
+> scelti**, altrimenti e' la 119.
+>
+> 🔎 **Prova che va rifatta ogni volta**: non basta il caso «zero file». Il caso
+> fisico e' «i file ci sono e non si leggono» — si riproduce in tre secondi
+> (permessi a 000, corsa da utente non privilegiato) ed e' quello che il banco
+> comodo non ha mai.
+
+**Patch minima** (2 righe, `RIGA_LOG_SEDIE_MUTE.ps1`):
+
+```diff
++$letti = $file.Count - $nonLetti.Count
+ $esito = 'COMPLETO'
+ if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti su ' + $file.Count }
+-if ($file.Count -eq 0) { $esito = 'NON MISURATO -- ZERO file di log in finestra: ...' }
++if ($letti -le 0) { $esito = 'NON MISURATO -- ZERO file di log LETTI (' + $file.Count + ' in finestra, ' + $nonLetti.Count + ' illeggibili): questo referto NON dice NIENTE sulle due sedie' }
+```
+
+e l'intestazione `'file di log letti: '` diventa
+`'file di log LETTI: ' + $letti + ' su ' + $file.Count + ' in finestra'`.
+
+_(Nota sull'ordine dei due `if`, domanda posta dalla sessione principale: nella
+v3 **non possono mai essere veri insieme** — `$nonLetti` viene azzerato prima
+del ciclo e riempito solo dentro, quindi `$file.Count -eq 0` implica
+`$nonLetti.Count -eq 0`. Dimostrato eseguendo: caso `MQL5\Logs` vuota ->
+`NON MISURATO` senza nessuna riga `NON LETTO`. L'ordine scelto e' comunque
+quello giusto — vince il piu' rumoroso — ma la domanda vera non era l'ordine:
+era **il terzo ramo che mancava**.)_
+
+## 150-bis. 🚪 «CARTELLA INESISTENTE» DETTO A CHI STA SOLO **NELLA SESSIONE WINDOWS SBAGLIATA** — e sotto l'altro profilo c'e' un GEMELLO MORTO con lo **STESSO GUID**
+
+### Il fatto
+
+La riga di lancio della v3 passa il percorso **scritto a mano**:
+
+```
+-CartellaDati "C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5"
+```
+
+e non dice **da quale sessione Windows** va lanciata. Ma su questo VPS:
+
+- MT5 deriva il nome della cartella dati dal **percorso di installazione**,
+  uguale per tutti gli utenti: lo **stesso GUID `215D85D7...` esiste sotto
+  `C:\Users\Master\` e sotto `C:\Users\Administrator\`** (misurato il 03/09,
+  classe **115-bis**);
+- la copia sotto `Master` e' **MORTA** dal 22/08 (HANDOFF 03/09: _"ogni deploy
+  fatto da Master dopo il 22/08 non e' mai arrivato in forward"_);
+- `C:\Users\Administrator\` **non si legge da una finestra non elevata di un
+  altro utente**: `Test-Path` torna `$false` senza dire perche'.
+
+Quindi, se Claudio apre PowerShell sotto `Master` (e la pagina del deploy ORB104
+gli dice **proprio quello**: _"VPS, sessione Master"_), la v3 stampa:
+
+```
+CARTELLA -CartellaDati INESISTENTE: C:\Users\Administrator\...\215D85D7...
+Mi fermo qui. Senza log non misuro niente...
+```
+
+👉 **La frase e' falsa e manda a caccia della cosa sbagliata.** La cartella
+esiste, e' viva, e' piena di log: semplicemente **da li' non si vede**. Chi
+legge quel rosso conclude «il GUID e' cambiato / il terminale e' stato
+reinstallato» e apre un'indagine su un problema che non esiste — costo: un giro
+a vuoto, di notte, esattamente quello che il gate della 149 doveva impedire.
+E' la classe **123** (il messaggio esclude la causa vera) nata **dentro il fix
+della 149**.
+
+### La regola
+
+> ✅ **Un gate su un percorso ASSOLUTO di un ALTRO profilo utente deve nominare
+> la sessione fra le cause, prima del percorso.** `Test-Path = $false` su
+> `C:\Users\<altro>\...` significa *«non esiste OPPURE non lo vedo da qui»*, e
+> le due cose si distinguono con un fatto gratis: `$env:USERNAME`.
+>
+> 📌 **E la riga di lancio STAMPA SEMPRE la sessione come prima cosa** — la
+> 115-bis lo aveva gia' scritto per le PAGINE (_"la pagina dice in testa DA
+> QUALE SESSIONE si lancia, perche' la sessione e' diventata un input"_): vale
+> **anche per le one-liner**, che una pagina in testa non ce l'hanno.
+> Costo: due righe, zero ri-pin.
+>
+> 🚫 **E NON si sostituisce il percorso assoluto con `$env:APPDATA`** «per
+> renderlo portabile»: qui sarebbe il difetto PEGGIORE, perche' sotto la
+> sessione sbagliata `$env:APPDATA` punta al **gemello morto con lo stesso
+> GUID**, che ha pure il login `50503392` nei suoi log vecchi — cioe' passa il
+> gate d'identita' e produce un referto silenzioso e verde. Il percorso
+> assoluto e' la scelta giusta; quello che mancava era **dichiarare la sessione**.
+
+## 150-ter. 📸 LA LISTA DEI **VIETATI** E' LA FOTO DI IERI: il terminale arrivato **oggi** non c'e' dentro
+
+Nello stesso script:
+
+```powershell
+$VIETATI = @('50504263')   # il 100k
+```
+
+Ma HANDOFF del **06/09 notte** — cioe' poche ore prima — dichiara che sotto la
+**stessa** sessione `Administrator` ci sono **due** candidate eleggibili, e la
+seconda e' `E23E1504A8D02A22179395F0652B86B6` con `origin.txt=C:\BCM_Reale`:
+il **conto REALE `10105439`**, soldi veri. Nella lista dei vietati **non c'e'**.
+
+Qui non fa danno (script di sola lettura, e col GUID giusto il gate non scatta
+mai), ma la forma e' quella che conta: **la blacklist e' stata scritta guardando
+il censimento di ieri**, e il perimetro e' cambiato lo stesso giorno.
+
+> ✅ **REGOLA: una lista di ESCLUSIONE si riconcilia col censimento vivo ogni
+> volta che la si usa, non si scrive una volta.** Il minimo: la lista dei
+> vietati contiene **tutti i conti noti diversi dal bersaglio** (qui:
+> `50504263` 100k **e** `10105439` reale), e il referto **stampa la lista che
+> ha usato**, cosi' chi legge vede subito se e' vecchia.
+>
+> _(Parente della 139 — la serratura elencata fra le automatiche che il default
+> lascia aperta — e della 134: il controllo copre meno di quello che il suo
+> nome promette.)_
