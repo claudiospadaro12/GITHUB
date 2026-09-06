@@ -1,4 +1,18 @@
-# 📬 **LA SONDA DELL'OROLOGIO** — LA RIGA DA MANDARE
+# 📬 **LA SONDA DELL'OROLOGIO — RAMO FOREX/ORO** — LA RIGA DA MANDARE
+
+> 🔀 **DAL 06/09 I GIRI SONO DUE, E OGNUNO HA LA SUA PAGINA.**
+> **Questa è il ramo FOREX/ORO** (EURUSD / GBPUSD / XAUUSD, criteri **C1-C7**,
+> pin **`f81eb70`**, driver **v3**). Il ramo **INDICI** (D30EUR / U30USD, criteri
+> **I1-I8**) sta in **`righe/RIGA_SONDA_OROLOGIO_INDICI_DA_MANDARE.md`**, con
+> **un altro pin** e le sue righe già pronte. **Le due pagine non si mescolano.**
+>
+> ⚠️ **Le righe di QUESTA pagina restano com'erano e vanno bene così:** pinnate a
+> `f81eb70`, scaricano il driver **v3**, che il parametro `-Giro` non ce l'ha
+> nemmeno — quindi **niente cambia per il ramo forex**.
+> 🔴 **MA se un giorno si ri-pinna questa pagina a un commit dal 06/09 in poi,
+> allora la riga DEVE aggiungere `-Giro FX` e il marcatore da cercare diventa
+> `MARCATORE_RIGA_SONDA_OROLOGIO_v4`**: dalla v4 il giro è **obbligatorio**
+> (senza, la riga si ferma con `exit 2` e non parte niente, apposta).
 
 **Che cos'è:** il **PASSO 0** del candidato **P1** della caccia intraday
 forex/oro del 28/08 (`caccia_strategie/CACCIA_INTRADAY_FOREX_ORO_2026-08-28.md`,
