@@ -69,6 +69,17 @@ precisione — scoperto per caso controllando gli screenshot, non da un allarme)
   durante altro lavoro sullo stesso terminale, va evitato che ricapiti (magari
   tenendo il grafico di Guardian su un simbolo/tab meno "di passaggio").
 
+**3) DECISIONE (Claudio, 06/09 notte): NIENTE Guardian sul piccolo (50503392).**
+Il Guardian sta solo su **reale (10105439)** e **100K (50504263)**; sul piccolo
+non c'è mai stato e **resta fuori per scelta**. Motivo, dichiarato: *"dobbiamo
+vedere appieno come si comportano gli EA"* — cioè il piccolo è il conto dove il
+drawdown della flotta si deve vedere **NON FRENATO**. Con la rete attiva il DD
+osservato sarebbe quello tagliato dal Guardian, non quello vero, e il criterio
+RISCHIO del 18/08 (*DD forward > DD promesso dal backtest → revisione
+immediata*) diventerebbe inapplicabile: confronteresti un numero potato con un
+numero intero. **Il piccolo è lo strumento di misura, non il conto da
+proteggere.**
+
 ---
 
 ## 🛡️ 06/09 sera — GUARDIAN v1.12: il credito rendeva la rete quasi INERTE (bug trovato e chiuso)
