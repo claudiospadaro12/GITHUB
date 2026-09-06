@@ -10,15 +10,13 @@ Ho letto il tuo sul PS5 ORB Bot e mi è venuta voglia di ricambiare con lo stess
 livello di onestà: cosa misuriamo, con quale strumento, e soprattutto cosa
 abbiamo buttato via e perché.
 
-Il progetto è una **flotta di Expert Advisor MQL5** pensata per superare una
-prop challenge (target 10%, muro giornaliero 5%, muro totale 10%). L'impostazione
-è diversa dalla tua — non un motore ottimizzato a fondo, ma molti motori
-scorrelati con un modulo di rischio unico sopra — ma i problemi che troviamo
-sono gli stessi, e sull'ultimo (costi reali di esecuzione) credo che tu sia
-esattamente sul mio stesso muro. Se ha senso, su quello mi piacerebbe unire le
-forze.
-
-Qui dentro non ci sono dettagli di conto: solo metodo e risultati.
+Il progetto è una **flotta di Expert Advisor MQL5** per superare una prop
+challenge (target 10%, muro giornaliero 5%, muro totale 10%). L'impostazione è
+diversa dalla tua — non un motore ottimizzato a fondo, ma molti motori
+scorrelati con un modulo di rischio unico sopra — ma i problemi che troviamo sono
+gli stessi, e sull'ultimo (i costi reali di esecuzione) credo che tu sia
+esattamente sul mio stesso muro. Qui dentro solo metodo e risultati, niente
+dettagli di conto.
 
 ---
 
@@ -41,13 +39,12 @@ numero non vuol dire niente.
 | livello | cosa vale | come lo usiamo |
 |---|---|---|
 | **Backtest OHLC** | indicativo, mai promotivo | serve per esplorare griglie lunghe (20 anni) dove i tick non esistono. Da solo **non promuove niente** |
-| **Backtest a tick reali** | promotivo, ma limitato nel tempo | il tetto barre del tester ci dà ~4 anni su M15 e ~1,3 su M5 per corsa: finestre più lunghe si spezzano in tranche, dichiarandolo |
-| **Walk-forward IS/OOS** | è il metro standard | split dell'universo dei parametri, promozione solo su OOS |
+| **Backtest a tick reali** | promotivo, ma corto | il tetto barre del tester dà ~4 anni su M15 e ~1,3 su M5 per corsa: finestre più lunghe si spezzano in tranche, dichiarandolo |
+| **Walk-forward IS/OOS** | il metro standard | promozione solo su out-of-sample |
 | **Prova di regime** | il più severo | quattro finestre separate — toro, orso, laterale, crollo — misurate una per una invece che diluite in una media |
-| **Forward reale** | l'unico giudice finale | contratto di ogni sedia confrontato col comportamento vero |
+| **Forward reale** | l'unico giudice finale | il contratto di ogni sedia confrontato col comportamento vero |
 
-Il salto fra il primo e il secondo livello ha già ucciso un EA promosso: ne parlo
-nella tabella della sezione 5.
+Il salto fra il primo e il secondo livello ha già ucciso un EA promosso (sezione 5).
 
 Aggiungo una regola di caccia che ci ha risparmiato tempo: **quando un motore
 risulta senza edge, si cerca un meccanismo diverso sulla stessa inefficienza,
@@ -66,32 +63,31 @@ di notte sull'oro, chi su cambi in sessione di Londra. Le correlazioni misurate
 fra le sedie storiche del portafoglio sono vicine a zero, ed è quello il motivo
 per cui esistono tante.
 
-**Ogni sedia ha un contratto scritto**, con due sole voci ma vincolanti:
-il **drawdown promesso** dal backtest della cella che l'ha promossa, e la
-**frequenza promessa** (operazioni/mese di quella stessa finestra OOS). Il
-censimento di questi contratti è un documento a parte, e la sua funzione è
-rendere falsificabile il forward: senza DD promesso, qualunque drawdown reale non
-viola niente.
+**Ogni sedia ha un contratto scritto**, due sole voci ma vincolanti: il
+**drawdown promesso** dal backtest della cella che l'ha promossa e la
+**frequenza promessa** (operazioni/mese della stessa finestra OOS). Serve a
+rendere falsificabile il forward: senza DD promesso, qualunque drawdown reale
+non viola niente.
 
-Sopra le sedie c'è un **modulo di rischio unico sul conto**, con:
+Sopra le sedie c'è un **modulo di rischio unico sul conto**:
 
 - **rischio per trade 0,65%.** Non è un gusto: Monte Carlo sulle serie reali dà
-  p99 **8,51%** contro un muro statico del 10% — passa. Ma su un muro **trailing**
-  lo stesso rischio dà p99 **12,05%**, cioè non passa. La taglia dipende dal
-  **tipo di muro**, e va rifirmata se cambiamo prop;
-- **pausa morbida al 4,0% giornaliero** e **chiusura d'emergenza al 4,9%** e al
-  **9,9% totale** — mai sul muro esatto, sempre con un margine tecnico per spread
-  e slippage in chiusura;
+  p99 **8,51%** contro un muro statico del 10% — passa. Su un muro **trailing**
+  lo stesso rischio dà p99 **12,05%**, cioè non passa: la taglia dipende dal
+  **tipo di muro**;
+- **pausa al 4,0% giornaliero** e **chiusura d'emergenza al 4,9%** e al **9,9%
+  totale** — mai sul muro esatto, sempre con un margine per spread e slippage in
+  chiusura;
 - **cap sul rischio aperto simultaneo al 3,25%** = 5 stop vivi da 0,65%.
 
-Quest'ultimo numero è quello che mi ha insegnato di più. Non nasce da una teoria
-ma da una misura sul forward vero: una mattina d'agosto avevamo **9 posizioni di
-8 sedie aperte contemporaneamente = 5,85% di rischio aperto**, con p99
-giornaliero al 5,67%. Su una prop col muro giornaliero al 5% quel giorno era già
-oltre il limite, e nessuno se n'era accorto. Con più motori scorrelati il rischio
-non è la singola sedia: è la **sovrapposizione**. E il vincolo giusto non è
-"quante sedie sono accese" ma "quanti stop sono vivi adesso" — una griglia da
-sola può fare 10 posizioni essendo una sedia sola.
+Quest'ultimo è il numero che mi ha insegnato di più, e non nasce da una teoria ma
+da una misura sul forward vero: una mattina d'agosto avevamo **9 posizioni di 8
+sedie aperte contemporaneamente = 5,85% di rischio aperto**, p99 giornaliero
+5,67%. Su una prop col muro giornaliero al 5% quel giorno era già oltre il
+limite, e nessuno se n'era accorto. Con molti motori scorrelati il rischio non è
+la singola sedia: è la **sovrapposizione**. E il vincolo giusto non è "quante
+sedie sono accese" ma "quanti stop sono vivi adesso" — una griglia da sola può
+fare 10 posizioni essendo una sedia sola.
 
 ### Il criterio di uscita, tre corsie
 
@@ -117,11 +113,10 @@ una ragione.
 
 **A. L'unità di misura è l'operazione, non l'anno.**
 L'in-sample si dimensiona su **≥150 operazioni**, non su "cinque anni". La soglia
-morde davvero: con n=75-159 la superficie dei parametri era frastagliata (una
-cella che sporge, il resto su e giù = selezione che insegue il rumore); con
-n=190-256 sullo stesso motore l'altopiano si legge a occhio. Quanti anni servano
-lo detta la frequenza del motore, non il calendario: un motore che fa 25-53
-trade/anno su H1 forex ha bisogno di ~5 anni di IS, e lo si calcola.
+morde: con n=75-159 la superficie dei parametri era frastagliata (una cella che
+sporge, il resto su e giù = selezione che insegue il rumore); con n=190-256 sullo
+stesso motore l'altopiano si legge a occhio. Quanti anni servano lo detta la
+frequenza del motore, non il calendario.
 
 Corollario che ci ha fatto cambiare idea su un intero round: **non si boccia un
 motore perché non guadagnava nel 2012.** Su un cambio, l'IS 2010-2016 dava
@@ -209,12 +204,12 @@ numero grosso che non avevamo. L'abbiamo estratto dai report a tick reali
 confrontando, sulla stessa riga, il **livello richiesto** e il **prezzo
 eseguito**: 638 stop loss e 283 take profit.
 
-Il controllo positivo è la parte che mi ha convinto che la misura fosse buona:
-la stessa formula applicata ai take profit deve dare risultati opposti, se il
-segno è giusto. E infatti — **l'81% degli stop viene riempito peggio del livello
-richiesto, e lo 0% dei 283 take profit.** Se la formula fosse sbagliata i TP
-uscirebbero a caso. L'asimmetria è reale: gli stop scivolano contro di noi, i
-take non scivolano mai a favore.
+Il controllo positivo è la parte che mi ha convinto: la stessa formula applicata
+ai take profit deve dare risultati opposti, se il segno è giusto. E infatti —
+**l'81% degli stop viene riempito peggio del livello richiesto, e lo 0% dei 283
+take profit.** Se la formula fosse sbagliata i TP uscirebbero a caso.
+L'asimmetria è reale: gli stop scivolano contro di noi, i take non scivolano mai
+a favore.
 
 Il risultato non è un numero, sono **due mondi**:
 
@@ -229,9 +224,8 @@ coda statistica: è un **orario**. Le scivolate peggiori cadono tutte su pochi
 secondi esatti e ricorrenti — stesso secondo, anni diversi — cioè gap di
 riapertura, non esecuzione lenta. E l'evento da 21,5 punti su cui avevamo
 costruito una priorità di lavoro è in realtà il **percentile 98,6**: l'evento
-raro, non il costo che paghiamo di solito. Non è inutile saperlo — l'evento raro
-è quello che brucia una challenge — ma cambia quale numero si usa per tarare
-cosa.
+raro è proprio quello che brucia una challenge, ma non è il costo che paghiamo di
+solito — e cambia quale numero si usa per tarare cosa.
 
 **Il limite, dichiarato senza sconti:** questo è slippage **del tester**, cioè il
 gap fra un tick e il successivo, non latenza né coda d'esecuzione. È un
@@ -250,10 +244,10 @@ affiancate da uno strumento in **sola lettura** costruito apposta, che per ogni
 trade registra il livello richiesto e il prezzo eseguito da **tre fonti
 indipendenti** (commento del server, prezzo dell'ordine, e una nostra fotografia
 periodica dello stop), con priorità dichiarata. Non è un esperimento per
-guadagnare: è per avere finalmente il numero vero. E ha già la sua spia di
-onestà scritta: se una delle fonti coincidesse sempre con l'eseguito, quella
-fonte direbbe "slippage zero" su qualunque conto — e il referto lo dovrà
-scrivere, invece di stampare uno zero.
+guadagnare: è per avere finalmente il numero. E ha già la sua spia di onestà
+scritta: se una delle tre fonti coincidesse sempre con l'eseguito, quella fonte
+direbbe "slippage zero" su qualunque conto — e va scritto, invece di stampare
+uno zero.
 
 ---
 
