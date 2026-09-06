@@ -1,12 +1,74 @@
-# 🛡️ IL GUARDIANO SUL CONTO REALE — **le due righe da mandare** (controllo · corsa)
+# 🛡️ IL GUARDIANO SUL CONTO REALE — **AGGIORNAMENTO v1.11 → v1.12** (controllo · corsa)
 
-**Che cos'è:** l'installazione di **`ABTG_Guardian` v1.11** (magic **779002**) sul
-terminale del **conto REALE**, con il preset **`ABTG_Guardian_REALE.set`** che
-porta **i numeri già firmati da te il 18/08**: **pausa 4,0 · emergenza 4,9 e 9,9 ·
-reset 23 · cap rischio aperto 3,25%**.
+**Che cos'è:** l'**aggiornamento** di **`ABTG_Guardian` da v1.11 a v1.12** (magic
+**779002**) sul terminale del **conto REALE**. Il preset
+**`ABTG_Guardian_REALE.set`** è **lo stesso di prima**: **stessi 16 input, stessi
+numeri firmati da te il 18/08** — **pausa 4,0 · emergenza 4,9 e 9,9 · reset 23 ·
+cap rischio aperto 3,25%**. **Nessun numero è cambiato.**
 
-È il pezzo che **mancava** dopo stamattina: sul reale ci sono due EA che aprono
-ordini veri, ma **a livello di conto non c'è nessuna rete**. Questa la mette.
+> ⚠️ **Questa NON è più l'installazione di stamattina.** Stamattina il Guardian
+> non c'era; adesso c'è **ed è acceso su un grafico**. Cambia una cosa pratica —
+> **va staccato prima** — ed è tutta la sezione qui sotto.
+
+---
+
+# 🔴 PRIMA DI LANCIARE LA CORSA — **STACCA IL GUARDIAN DAL GRAFICO**
+
+### 1️⃣ Perché si aggiorna (tre righe, il resto sta in fondo)
+Il conto ha un **credito del broker di 2.500 €** (stabile, **non prelevabile**)
+che si somma all'**equità** ma **non al bilancio**. Il Guardian v1.11 prendeva il
+suo **saldo di riferimento dal BILANCIO** e poi lo confrontava con l'**EQUITÀ**:
+quel credito faceva da **cuscinetto finto**, e **la pausa al 4,9% e il blocco al
+9,9% non sarebbero scattati** fino a una perdita **vera** di oltre **2.700-3.000 €**
+— invece dei **~245-495 €** previsti. 👉 **La rete c'era, ma quasi non mordeva.**
+La v1.12 prende **l'equità da tutte e due le parti** del confronto, e il credito
+si cancella da solo.
+
+### 2️⃣ **STACCA L'EA** (è l'unico gesto in più rispetto a stamattina)
+> 🛑 **In MT5, sul terminale del reale:** trova il grafico dove gira il guardiano
+> — è quello col pannello **`=== ABTG GUARDIAN ===`** —, poi
+> **tasto destro sul grafico → Expert Advisors → Rimuovi**.
+> *(In alternativa va bene anche chiudere proprio quel grafico.)*
+> ✅ **Controllo:** la **faccina** in alto a destra di quel grafico deve **sparire**.
+
+**Perché serve:** finché l'EA è sul grafico, **Windows tiene aperto il suo file
+`.ex5`** e non si può sostituire. **Le altre due sedie e il logger NON si toccano**:
+continuano a lavorare, e **MT5 resta aperto**.
+
+> 🟢 **Se te lo dimentichi non rompi niente.** La CORSA se ne accorge da sola,
+> **si ferma**, **rimette tutto com'era** e ti scrive
+> *«EX5 VECCHIO NON CANCELLABILE … è già attaccato a un grafico»* con i passi da
+> fare. 👉 **Quello NON è un guasto: è il comportamento voluto.** Stacchi e
+> rilanci **la stessa identica riga**.
+> ⚠️ E il contrario **non vale**: se il CONTROLLO dice che l'`.ex5` sembra libero,
+> **staccalo lo stesso**. Quella sonda può **tacere a torto** (misurato sul banco),
+> quindi **non è un via libera**.
+
+### 3️⃣ Dopo la CORSA — **riattacca e ricarica lo STESSO preset**
+- Va benissimo **lo stesso grafico** da cui l'hai staccato (ormai è senza EA).
+- **Ricarica `ABTG_Guardian_REALE.set`**: 👉 **non è cambiato niente** — stessi 16
+  input, stessi numeri firmati. Non devi ritoccare nessun valore.
+- 🚫 **NON devi cancellare niente da F3.** La v1.12 usa **nomi nuovi** per le sue
+  variabili interne (`ABTG_GUARD_<login>_START_V2` ecc.) **proprio per
+  ricatturare il saldo da sola**, senza che tu tocchi niente a mano.
+
+### 4️⃣ ✅ **LA PROVA CHE IL FIX HA PRESO** — un numero solo
+Nella scheda **Esperti** (e sul pannello) la riga:
+```
+[GUARDIAN] avviato. Saldo iniziale=7500.00  DailyLoss=4.9%  DD=9.9% (statico)  Azione=CHIUDI+BLOCCA
+```
+| se leggi | vuol dire |
+|---|---|
+| **~7500.00** | ✅ **è l'EQUITÀ: il fix ha preso.** È questo che deve uscire |
+| **~5000.00** | 🛑 è il solo **BILANCIO**: **il fix NON ha preso** → **stacca l'EA** e mandami lo screenshot |
+| **100000** | 🛑 è il preset del **demo FTMO** → **stacca l'EA** |
+
+E subito sotto c'è una **riga nuova della v1.12**, che mostra il numero che era
+invisibile e che aveva nascosto il bug:
+```
+[GUARDIAN] baseline presa dall'EQUITA' (v1.12): equity=7500.00  bilancio=5000.00  differenza=2500.00 (...)
+```
+👉 quella **`differenza`** è **il credito del broker**.
 
 ---
 
@@ -51,11 +113,11 @@ ordini veri, ma **a livello di conto non c'è nessuna rete**. Questa la mette.
 | **NON TOCCA I TRE EA GIÀ IN CAMPO** | `SlippageLogger`, `DAX_Apertura_EU`, `ORB_Ottimizzato`: i loro 6 file sono fotografati prima e dopo e devono uscire **INVARIATI**. ⚠️ Il **registro** del logger in `MQL5\Files` invece **può crescere** durante il giro: è **ATTESO**, non un problema |
 | **NON SI INSTALLA SUI DEMO** | **50503392 e 50504263 VIETATI PER SEMPRE**, senza manopola. E il motivo qui è **peggiore** che stamattina: sul **100k gira già un Guardian** (magic `779001`) per il dry-run FTMO, e **due guardiani sullo stesso conto** vorrebbero dire **due `FlattenAll` che si accavallano** |
 
-**Scrive TRE file, nient'altro:**
+**Scrive TRE file, nient'altro** — e stavolta li **sostituisce**, non li crea:
 ```
-<dati>\MQL5\Experts\ABTG_Guardian.mq5        (v1.11)
-<dati>\MQL5\Experts\ABTG_Guardian.ex5        (compilato sul posto)
-<dati>\MQL5\Presets\ABTG_Guardian_REALE.set
+<dati>\MQL5\Experts\ABTG_Guardian.mq5        (v1.12, al posto della v1.11)
+<dati>\MQL5\Experts\ABTG_Guardian.ex5        (ricompilato sul posto)
+<dati>\MQL5\Presets\ABTG_Guardian_REALE.set  (stessi valori, solo commenti aggiornati)
 ```
 **Backup di tutti e tre** in `Desktop\backup_guardian_<data>\<ora>\` **prima** di
 scrivere, **sentinella** per il giro interrotto a mano, **ripristino TOTALE** su
@@ -87,7 +149,12 @@ se lo lasci lì com'è.
 
 ---
 
-## 2. 📌 IL PIN — **`a01e1573015685157a2faa6cce7bd6b0261d7392`** ✅ **INSERITO E VERIFICATO**
+## 2. 📌 IL PIN — **`480aed8191a5a3ebe80f45a4256caac529fec945`** ✅ **NUOVO, INSERITO E VERIFICATO**
+
+> ⚠️ **Il pin di stamattina (`a01e157…`) NON va più usato**, e non è una
+> raccomandazione: **il driver nuovo lo rifiuterebbe da solo**, perché a quel pin
+> c'è ancora la **v1.11**, cioè **proprio il file col bug del credito** che stiamo
+> togliendo. *(Provato sul banco: si ferma e lo dice.)*
 
 Commit di `lavoro`. **Verificato file per file prima di scrivere questa pagina**,
 non dichiarato: presente in `git ls-tree`, **HTTP 200** via `raw`, e **sha256 del
@@ -95,13 +162,18 @@ contenuto scaricato identico al file nel repo**.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1` | 200, identico (`00fbf8d9…`, **97.545 byte**), marcatore `MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
-| `mql5/Experts/ABTG_Guardian.mq5` | 200, identico (`5675d222…`, **23.320 byte**), `#property version "1.11"` — 👉 **gli stessi 23.320 byte censiti come «v1.11, vivo»** in `report/CONFIG_PROP_2026-08-31.md` |
-| `mql5/Presets/conto_reale/ABTG_Guardian_REALE.set` | 200, identico (`393b723a…`, **8.593 byte**), **16 chiavi = 16 input dell'EA** |
-| `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (`b7462cd5…`, **112.481 byte**, **v1.51**) — 👉 **lo stesso `b7462cd5…` scritto nella pagina di deploy di stamattina**: è il file che sta **già** nel terminale del reale |
+| `backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1` | 200, identico (`79174321…`, **113.337 byte**), marcatore `MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
+| `mql5/Experts/ABTG_Guardian.mq5` | 200, identico (`d10831cd…`, **26.634 byte**), `#property version "1.12"`, **ASCII puro** |
+| `mql5/Presets/conto_reale/ABTG_Guardian_REALE.set` | 200, identico (`49af941d…`, **10.213 byte**), **16 chiavi = 16 input dell'EA**, **ASCII puro** |
+| `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (`b7462cd5…`, **112.481 byte**, **v1.51**) — 👉 **lo stesso `b7462cd5…` di stamattina, NON toccato**: è il file contro cui sono già compilati i due `.ex5` in campo |
 
 Il pin è scritto **quattro volte** in questa pagina (qui, nei **due** blocchi e in
 fondo) ed è sempre **la stessa identica stringa da 40 hex**.
+
+> 🧾 **Il `.set` è cresciuto di byte ma NON di valori.** `8.593 → 10.213` byte sono
+> **solo commenti**: la versione (v1.11 → v1.12) e il nome della variabile del
+> saldo (ora `…_START_V2`), che dicevano due cose non più vere. **I 16 valori sono
+> identici**, ricontati a macchina.
 
 ---
 
@@ -209,7 +281,7 @@ cartelle guardate, la cartella scelta col suo **criterio**, i gate sul sorgente,
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: sul 100k gira gia'' un Guardian. Serve il numero del conto REALE.' };
-    $pin='a01e1573015685157a2faa6cce7bd6b0261d7392'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='480aed8191a5a3ebe80f45a4256caac529fec945'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CONTROLLO; $rc=$LASTEXITCODE;
@@ -239,7 +311,7 @@ la riga `guardia sul conto` che dice **TROVATO**, la
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: serve il numero del conto REALE.' };
-    $pin='a01e1573015685157a2faa6cce7bd6b0261d7392'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='480aed8191a5a3ebe80f45a4256caac529fec945'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CORSA; $rc=$LASTEXITCODE;
@@ -522,7 +594,7 @@ do per esteso:
 
 ---
 
-_Artefatti al pin `a01e1573015685157a2faa6cce7bd6b0261d7392`:
+_Artefatti al pin `480aed8191a5a3ebe80f45a4256caac529fec945`:
 `backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1`,
 `mql5/Experts/ABTG_Guardian.mq5`,
 `mql5/Presets/conto_reale/ABTG_Guardian_REALE.set`,
