@@ -1,0 +1,260 @@
+# =====================================================================
+#  GAPCASH_NAS -- PASSO 0: SONDA DI CONTEGGIO, SEGNO, COSTO E GEOMETRIA
+#  Il rimbalzo dei primi 15 minuti dopo un GAP DELLA SESSIONE CASH
+#  in giu' sul Nasdaq (NASUSD M5)
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA (fa fede, qui non si duplica):
+#    backtest_pipeline\caccia_strategie\CACCIA_NASDAQ_MECCANISMI_2026-09-06.md
+#  STRUMENTO CHE RIPRODUCE I NUMERI DELLA CACCIA:
+#    backtest_pipeline\caccia_strategie\misura_gapcash_nasdaq_2026-09-06.py
+#
+#  ORIGINE (regola di casa: si cita sempre)
+#    MECCANISMO  : Yu, Rentzler & Wolf, "Nasdaq-100 Index Futures:
+#                  Intraday Momentum or Reversal?", Journal of Investment
+#                  Management. [LETTO-VIA-SEARCH -- SSRN 403 e joim.com
+#                  egress-blocked: L'ABSTRACT NON E' STATO APERTO]
+#    SPIEGAZIONE : Nagel, "Evaporating Liquidity", Review of Financial
+#                  Studies 25(7), 2005-2039 (2012). [LETTO-VIA-SEARCH]
+#                  E' il meccanismo M16 della tassonomia del 03/09.
+#    MISURA      : NOSTRA, su dato NOSTRO -- vedi il blocco qui sotto.
+#
+# =====================================================================
+#  0. LA SOLA COSA DA SAPERE PRIMA DI LANCIARE
+# ---------------------------------------------------------------------
+#  L'EA/SONDA NON ESISTE ANCORA nel repo. Questo file e' l'ipotesi
+#  congelata PRIMA che il codice sia scritto, ed e' l'ordine giusto
+#  (stesso precedente di ABTG_TurnaroundTuesday.txt, 16/08). Il driver
+#  fallira' finche' la sonda non c'e' -- ed e' giusto che fallisca.
+#
+#  NOME PREVISTO DELLA SONDA: mql5\Experts\ABTG_SondaGapCash.mq5
+#  E' un CONTATORE: nessun ordine, nessun lotto, nessun magic, nessuna
+#  sedia. Conta giornate-evento e misura segno, costo e geometria.
+#  Precedenti di casa: ABTG_SondaRelativo, ABTG_SondaM0PB,
+#  ABTG_SondaLondonFx, ABTG_SondaOrologio, ABTG_SondaMediazione.
+#
+#  I NOMI DEGLI INPUT PIU' SOTTO SONO VINCOLANTI per chi scrive il
+#  codice. Se il .mq5 ne usa altri, MT5 li ignora IN SILENZIO e la
+#  fase risponde a un'altra domanda (LEGGIMI.md, trappola "nome
+#  inesistente"). Non e' stile: e' un round buttato.
+#
+# =====================================================================
+#  1. IPOTESI, in italiano
+# ---------------------------------------------------------------------
+#  Quando il Nasdaq apre la sessione cash SOTTO la chiusura cash del
+#  giorno di borsa precedente di almeno lo 0,50%, i primi 15 minuti
+#  rimbalzano.
+#
+#  PERCHE' DOVREBBE FUNZIONARE, in una riga:
+#    un gap in giu' e' una richiesta di liquidita' concentrata su un
+#    solo lato; chi la fornisce alla campana viene pagato per il
+#    rischio d'inventario, e il pagamento si incassa nei primi minuti.
+#
+#  E PERCHE' NON E' UN MOTORE CHE ABBIAMO GIA' -- tre differenze, tutte
+#  verificabili nel sorgente:
+#    (a) NON e' l'ORB (ABTG_ORB 770601): quello e' uno straddle sugli
+#        estremi del range 14:25-14:30, ed e' morto in R97 (0/4 celle,
+#        PF OOS 0,84-0,91, n=135). Qui non c'e' nessun range e nessuna
+#        rottura: si entra AL PREZZO D'APERTURA, in una direzione
+#        decisa PRIMA dalla dimensione del gap.
+#    (b) NON e' il GAPFILL di ABTG_Nasdaq_Apertura_US: quello calcola
+#        gap = iOpen(D1,0) - iClose(D1,1) (righe 1425-1429), cioe' il
+#        salto attraverso la MEZZANOTTE DEL SERVER, dove il CFD e'
+#        aperto. Il referto R62 par.5 lo dice: "trada i giorni con un
+#        gap grande", n=19-43, in pratica i lunedi'. QUI il gap e'
+#        quello della SESSIONE CASH (open 09:30 New York meno l'ultima
+#        chiusura <= 16:00 del giorno di borsa prima): una grandezza
+#        DIVERSA, che nessun nostro EA ha mai calcolato.
+#    (c) NON e' il RANGE_FADE ucciso da R42 (0/24 IS e 0/24 OOS):
+#        quello faceva il fade degli ESTREMI DEL RANGE d'apertura. Qui
+#        il grilletto e' un evento della NOTTE, non un livello.
+#
+# =====================================================================
+#  2. LA MISURA CHE GIUSTIFICA QUESTO PASSO 0
+#     (storico ESTERNO, solo finestra IS, cassaforte NON aperta)
+# ---------------------------------------------------------------------
+#  Fonte: risultati_archivio\ANATOMIA_APERTURE_20260826\
+#         ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv
+#         (prodotta il 26/08/2026 da anatomia_aperture.py su
+#          C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv,
+#          5.233.590 barre M1, 2010.11.14 -> 2026.07.31, ora New York)
+#  Finestra usata: SOLO fase == IS (2010-2020), 2.568 giornate buone.
+#  La CASSAFORTE 2021-2026 NON E' STATA APERTA: la regola delle due
+#  fasi del referto della fonte e' stata rispettata alla lettera, e per
+#  questo la cassaforte resta una validazione VERA per questo motore.
+#
+#    filtro              n     media cl15   mediana    win%
+#    CONTROLLO (tutti) 2568     +0,0112%    +0,0058%   50,8%
+#    gap <= -0,30%      566     +0,0601%    +0,0653%   57,8%
+#    gap <= -0,40%      436     +0,0794%    +0,0851%   58,3%
+#    gap <= -0,50%      348     +0,0988%    +0,1064%   60,1%
+#    gap <= -0,75%      213     +0,1179%    +0,1182%   58,2%
+#    gap <= -1,00%      130     +0,1895%    +0,1643%   63,1%
+#    -> MONOTONO nella soglia.
+#
+#    Simulazione stop-only + uscita a tempo, costo 0,0060% dedotto
+#    (= 1,7 punti indice su 28.270, spread mediano MISURATO 14-20
+#     server, SPREAD_FLOTTA_MISURA_2026-09-03.md):
+#      col gate (gap <= -0,50%): E da +0,114R a +0,356R, PF 1,52-1,82
+#                                su 8 stop diversi su 8
+#      SENZA il gate           : E da +0,010R a +0,017R, PF 1,05-1,07
+#    -> IL GATE E' IL MOTORE, non un cerotto (rapporto 12:1 in R).
+#
+#    Lato opposto (short sui gap >= +0,50%): media +0,0076%, win 51,0%
+#    -> NULLO, e non monotono. L'asimmetria e' MISURATA, non scelta.
+#
+#    Tenuta: 9 anni su 11 positivi; togliendo 2018 E 2020 la cella
+#    stop 0,40% fa ancora +0,173R con PF 1,657 su n=251.
+#
+#  !!! TUTTO QUESTO E' SU FEED ESTERNO, NON SUI TICK DI BCM, e il
+#      referto del 26/08 dichiara il cancello qualita' del feed IN
+#      VERIFICA (2023: 22,9% di giorni sospetti). E' esattamente il
+#      motivo per cui esiste questo PASSO 0.
+#
+# =====================================================================
+#  3. CRITERI DI ACCETTAZIONE -- CONGELATI IL 06/09/2026,
+#     PRIMA DI QUALUNQUE NUMERO DI BCM
+# ---------------------------------------------------------------------
+#  P0-1  FREQUENZA (conteggio, non merito)
+#        giornate-evento (gap cash <= soglia) nella finestra.
+#        Attese ~68 alla soglia -0,50% (503 feriali x 13,6% misurato
+#        sull'esterno). CANCELLO: >= 25 -> PASSA. < 25 -> SCARTO:
+#        il fenomeno non esiste sul nostro feed e non c'e' round.
+#        NOTA SCRITTA PRIMA, e non e' una scusa: 0,14 eventi/giorno
+#        e' UN OTTAVO del pavimento di frequenza di casa (1,00/giorno).
+#        Questo motore NON PUO' essere portata. Se passa, entra come
+#        CECCHINO -- e il verdetto di merito a tick su n=150+150 su
+#        questo simbolo NON e' raggiungibile prima di anni.
+#
+#  P0-2  SEGNO E SEPARAZIONE (il criterio che decide)
+#        media del rendimento dei 15 minuti sulle giornate-evento,
+#        contro la media sulle giornate NORMALI della stessa finestra.
+#        PASSA se: media_evento > 0  E  media_evento >= 3 x media_tutti.
+#        Atteso dall'esterno: +0,0988% contro +0,0112% = 8,8x.
+#        < 3x -> SCARTO. E' il criterio "il gate e' il motore": se il
+#        gate non separa, non c'e' niente da rifinire.
+#
+#  P0-3  COSTO (il numero che non abbiamo mai misurato)
+#        spread MEDIANO e P95 dentro il minuto 14:30:00-14:31:00
+#        server, misurato tick per tick, DA SOLO -- non la mediana
+#        della sessione. Poi:
+#        take mediano (mediana del rendimento a +15 min sulle
+#        giornate-evento, in punti indice) contro 3 x spread mediano
+#        di QUEL minuto.
+#          >= 3x        -> PASSA
+#          fra 2x e 3x  -> SOSPESO (si rilegge col round di merito)
+#          <  2x        -> SCARTO
+#        Atteso: take ~30 punti a prezzi 2026, cancello ~5 punti se lo
+#        spread della campana somigliasse alla mediana di sessione.
+#        !!! Se lo spread della campana fosse 5 punti invece di 1,7,
+#            il cancello sale a 15 e la cella passa comunque: e' il
+#            motivo per cui questo criterio e' un cancello e non un
+#            veto. Ma il NUMERO va misurato, non stimato.
+#
+#  P0-4  GEOMETRIA (nessun cancello: si LEGGE, e fissa lo stop dopo)
+#        percentili di |MAE| e MFE nei 15 minuti sulle giornate-evento.
+#        Atteso dall'esterno: |MAE15| p50 0,196% p75 0,356% p90 0,534%;
+#        MFE15 p50 0,277% p75 0,454%.
+#        !!! LO STOP DEL ROUND SUCCESSIVO LO FISSA QUESTO NUMERO, NON
+#            L'OTTIMIZZATORE. Regola scritta adesso per non doverla
+#            difendere dopo: si prende il p75 di |MAE|, arrotondato,
+#            e NON si spazzola lo stop cercando il picco.
+#
+#  P0-5  DUE LATI (regola del 25/08: si misurano sempre entrambi)
+#        stessa misura sul lato SHORT per gap >= +0,50%.
+#        PREVISIONE SCRITTA PRIMA: NULLA -- sull'esterno la media e'
+#        +0,0076% con win 51,0% contro un controllo di 50,8%.
+#        Se qui uscisse VIVA sarebbe una sorpresa da scrivere, non da
+#        festeggiare: vorrebbe dire che il feed esterno e quello BCM
+#        non raccontano la stessa storia, e allora il problema e'
+#        il DATO, non il motore.
+#
+#  P0-6  IGIENE
+#        - nessun giorno festivo o a mezza seduta nel conteggio: si
+#          contano solo le sedute con almeno 55 barre M1 nei primi 60
+#          minuti (stessa definizione di GIORNO SOSPETTO del 26/08).
+#        - si dichiara quante giornate-evento cadono di LUNEDI'. Se
+#          fossero > 40% il motore e' il gap del weekend travestito, ed
+#          e' gia' misurato da R61/R62: verdetto SOSPESO e si riparla.
+#
+#  P0-7  COLLISIONE (non e' un cancello, e' un obbligo di referto)
+#        Il referto DEVE elencare cosa gira gia' su NASUSD alle
+#        14:30:00 server: ABTG_ORB (770601, M5), Nasdaq_Apertura_US
+#        Ottimizzato (M5) e la sedia GATED SHORT 770250 (M15, SHORT
+#        sulla rottura al ribasso dell'apertura).
+#        !!! Su una mattina di gap in giu' il GATED SHORT vende e
+#            questo comprerebbe: OPPOSTI, stesso simbolo, stesso
+#            minuto. Va sciolto PRIMA di qualunque deploy.
+#
+# =====================================================================
+#  4. COSA QUESTA CORSA NON DICE -- scritto prima, non dopo
+# ---------------------------------------------------------------------
+#    - NON dice se il motore guadagna: non apre ordini, non c'e' un
+#      profit factor, non c'e' un'equity, non c'e' un drawdown.
+#    - NON e' un round di merito e non promuove niente.
+#    - NON tocca nessuna sedia viva, nessun preset, nessun magic.
+#    - Una frequenza alta NON e' un edge: e' una frequenza.
+#
+# =====================================================================
+#  5. LE DIRETTIVE
+# ---------------------------------------------------------------------
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#         ^ NON e' un'ipotesi: e' il pavimento MISURATO dei tick BCM
+#           sugli indici (REFERTO_SONDA_STORICO_17-08.md, stato
+#           COMPLETO; e' la stessa data usata da R97 e da R117).
+#           Dal 26/09/2024 a oggi sono ~503 giorni feriali.
+#
+#  MODELLO DI CORSA: 4 (real tick). Serve il tick per due cose che
+#  l'OHLC non puo' dare: lo spread VERO del minuto della campana
+#  (P0-3) e la MAE dentro i 15 minuti (P0-4). E' anche il modello con
+#  cui sono girati R97 e R117 sullo stesso simbolo e sulla stessa
+#  finestra: i numeri restano confrontabili.
+#
+# =====================================================================
+#  6. LO SWEEP -- una manopola sola, e conta le celle
+# ---------------------------------------------------------------------
+#  8 celle. La soglia e' l'UNICO asse libero: e' la manopola della
+#  frequenza, ed e' la stessa grandezza su cui la misura esterna e'
+#  risultata MONOTONA. Tutto il resto e' pinnato.
+#
+InpSogliaGapPct=-0.50||-1.00||0.10||-0.30||Y
+#
+#  ora della campana, in ORA SERVER BCM (= ora italiana - 1).
+#  14:30 server = 15:30 italiane = 09:30 New York. NON si converte.
+InpOraAperturaServer=14||14||0||14||N
+InpMinAperturaServer=30||30||0||30||N
+#
+#  l'uscita e' a TEMPO. 15 minuti = l'orizzonte in cui la correlazione
+#  misurata e' massima (-0,173 a +15 contro -0,080 a +60).
+InpMinutiUscita=15||15||0||15||N
+#
+#  0 = misura ENTRAMBI i lati (P0-5). Non si sceglie il lato qui.
+InpLato=0||0||0||0||N
+#
+#  false = il gate e' ACCESO. La corsa di CONTROLLO (gate spento, che
+#  serve a P0-2) si lancia a parte con -ConControllo, cosi' le due
+#  misure stanno in due CSV distinti e non si sovrascrivono.
+InpGateSpento=false||false||0||false||N
+#
+#  minuto della campana da misurare a parte per lo spread (P0-3)
+InpMisuraSpreadCampana=true||true||0||true||N
+#
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+#
+# =====================================================================
+#  7. SE PASSA -- cosa succede dopo, per non improvvisarlo
+# ---------------------------------------------------------------------
+#  1. Si scrive ABTG_GapCash.mq5 (EA vero) con: rischio in % (0,65%),
+#     UN solo trade al giorno, stop REALE al broker dimensionato sul
+#     p75 di |MAE| letto in P0-4, uscita a tempo, flat sempre, mai
+#     overnight, tetto giornaliero, e il blocco Guardian standard.
+#  2. Round di merito a tick sulla finestra BCM, con lo split e i
+#     cancelli congelati PRIMA -- e con il verdetto di MERITO
+#     dichiarato SOSPESO in partenza per n insufficiente (P0-1).
+#  3. Solo dopo, e separatamente: la CASSAFORTE 2021-2026 dello
+#     storico esterno come prova di regime a parametri CONGELATI.
+#     E' la validazione piu' pulita disponibile a questo candidato,
+#     e vale solo se nessuno la apre prima.
+# =====================================================================
