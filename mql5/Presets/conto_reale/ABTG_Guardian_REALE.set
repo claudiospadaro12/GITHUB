@@ -1,0 +1,166 @@
+; ================================================================
+;  PRESET CONTO REALE -- ABTG_Guardian v1.11  (magic 779002)
+;  Conto REALE BCM 10105439 -- server BCMMarkets-Server -- ~7.500 EUR
+;  Terminale C:\BCM_Reale (cartella dati E23E1504A8D02A22179395F0652B86B6)
+; ----------------------------------------------------------------
+;  COS'E' QUESTO FILE: i parametri del GUARDIANO DI PORTAFOGLIO, cioe'
+;  l'unico artefatto del conto reale che guarda IL CONTO INTERO e non
+;  la singola sedia. Si carica dalla finestra input dell'EA -> Carica...
+;
+;  >>> ATTENZIONE, DA LEGGERE PRIMA DI CARICARLO <<<
+;  Con InpAction=0 e InpCloseAllMagics=true questo EA, quando una soglia
+;  viene sfondata, CHIUDE TUTTE LE POSIZIONI E CANCELLA TUTTI I PENDENTI
+;  DEL CONTO -- di QUALSIASI magic, quindi ANCHE le posizioni aperte A
+;  MANO da Claudio (magic 0). E' un potere che nessun altro EA installato
+;  sul conto reale ha. E' voluto: e' esattamente la "rete di protezione"
+;  che oggi manca.
+; ----------------------------------------------------------------
+;  I NUMERI SONO QUELLI GIA' FIRMATI DA CLAUDIO IL 18/08/2026
+;  (CLAUDE.md, "CRITERIO DI USCITA DELLE SEDIE" + report/FIRME_2026-08-18.md:
+;   "cap rischio aperto 3,25% (C1) e pacchetto Guardian
+;    (pausa 4,0 / emergenza 4,9 e 9,9 / reset 23)").
+;  NON sono stati scelti oggi ne' tarati su un backtest: sono la
+;  politica di rischio di casa, valida in generale e non solo per la
+;  challenge FTMO.
+; ----------------------------------------------------------------
+;  DIFFERENZE DAL PRESET FTMO (mql5/Presets/ABTG_Guardian_FTMO_2Step.set),
+;  che restano le UNICHE tre, dichiarate una per una:
+;   1. InpStartBalance 100000 -> 0. Il 100000 serviva a SIMULARE una
+;      challenge FTMO da 100k su un demo. Qui il conto e' vero: 0 =
+;      cattura in automatico il saldo reale al primo avvio e lo
+;      persiste nella GlobalVariable ABTG_GUARD_10105439_START.
+;   2. InpMagic 779001 -> 779002 (vedi la nota sul magic piu' sotto).
+;   3. InpAutotest: nel preset FTMO NON C'ERA (prendeva il default
+;      compilato false, in silenzio). Qui c'e', ed e' true.
+;  Tutto il resto -- 4.9 / 9.9 / statico / reset 23 / pausa 4.0 /
+;  cap 3.25 / azione 0 / tutti i magic -- e' IDENTICO.
+; ================================================================
+
+; ---------------------------------------------------------------
+;  SALDO DI RIFERIMENTO
+; ---------------------------------------------------------------
+; 0 = CATTURA IN AUTOMATICO il saldo al primo avvio (atteso ~7500.00)
+; e lo scrive in ABTG_GUARD_10105439_START, che PERSISTE nel terminale.
+; NON mettere 100000: quello era il finto saldo della challenge FTMO
+; simulata sul demo. Qui i soldi sono veri.
+; Se un giorno il riferimento va rifatto (versamento/prelievo), si
+; cancella A MANO quella GlobalVariable (F3 nel terminale) e si
+; riavvia l'EA: al riavvio ricattura il saldo di quel momento.
+InpStartBalance=0
+
+; ---------------------------------------------------------------
+;  EMERGENZA -- QUESTE DUE CHIUDONO DAVVERO
+; ---------------------------------------------------------------
+; PERDITA GIORNALIERA: 4.9% del saldo iniziale. Su 7.500 EUR = 367,50 EUR.
+; Sfondata -> chiude tutto e BLOCCA fino al reset del giorno (ore 23 server).
+; Il 4.9 invece di 5.0 e' voluto: un decimo PRIMA del muro (firma 18/08).
+InpDailyLossPct=4.9
+
+; DRAWDOWN TOTALE: 9.9% del saldo iniziale. Su 7.500 EUR = 742,50 EUR,
+; cioe' pavimento di equity a ~6.757,50 EUR.
+; Sfondato -> chiude tutto e BLOCCA PER SEMPRE (GlobalVariable
+; ABTG_GUARD_10105439_FAILED = 1, che NON si azzera da sola: si sblocca
+; SOLO cancellandola a mano da F3). E' un fermo definitivo, non un
+; fermo giornaliero: va saputo prima, non dopo.
+InpTotalDDPct=9.9
+
+; 0 = STATICO (misurato dal saldo iniziale) . 1 = TRAILING (dal picco equity)
+; STATICO e' la firma del 18/08. Conseguenza dichiarata: il pavimento
+; resta a 6.757,50 anche se il conto sale -- questo Guardian difende il
+; capitale di partenza, NON i profitti gia' fatti. Il trailing sarebbe
+; una regola DIVERSA e andrebbe firmata a parte.
+InpDDMode=0
+
+; Ora SERVER in cui gira il contatore giornaliero.
+; 23 server BCM = 00:00 ora italiana (il server BCM e' 1 ora indietro:
+; regola fissa del CLAUDE.md). Firma del 18/08.
+; Merito tecnico su QUESTO conto: la giornata operativa delle due sedie
+; vive va dalle 08:00 (DAX) alle 21:00 (ORB) ora server, quindi sta
+; TUTTA dentro un solo "giorno prop" -- il reset non taglia mai una
+; sessione a meta'.
+InpDailyResetHour=23
+
+; ---------------------------------------------------------------
+;  FRENI MORBIDI -- QUESTI NON CHIUDONO NIENTE
+;  Scrivono solo le GlobalVariable che i due EA leggono con
+;  ABTG_PausaGuardian.mqh (ABTG_GuardiaIngresso) PRIMA di aprire.
+;  Da oggi quella funzione smette di essere fail-open a vuoto: il
+;  canale esiste davvero perche' c'e' chi lo scrive.
+; ---------------------------------------------------------------
+; PAUSA MORBIDA (firma B1): a -4,0% sulla giornata (su 7.500 = 300 EUR)
+; nessun EA apre piu' niente fino al reset delle 23. Le posizioni gia'
+; aperte restano vive e continuano a essere gestite dal loro EA.
+; DEVE restare SOTTO InpDailyLossPct, se no non frenerebbe mai prima
+; dell'emergenza: 4.0 < 4.9, verificato.
+InpDailyPausePct=4.0
+
+; CAP C1 sul rischio aperto simultaneo, % dell'equity.
+; 3.25 = 5 stop pieni vivi da 0,65% (misura M2). Firma del 18/08.
+; ONESTA': con SOLE DUE sedie vive a 0,65% il rischio aperto massimo
+; possibile e' ~1,3%, quindi oggi questo cap NON morde mai. Non e' un
+; errore: e' margine gia' firmato, pronto per quando le sedie saranno
+; di piu'. Va dichiarato che oggi e' inerte, non spacciato per rete.
+InpMaxOpenRiskPct=3.25
+
+; 0 = rischio misurato dall'INGRESSO (convenzione della misura M2 su cui
+; il 3,25% e' tarato) . 1 = dal prezzo corrente. Firma: 0.
+InpRiskMode=0
+
+; Logga un avviso ogni 5 minuti per le posizioni SENZA stop loss.
+; Su questo conto serve davvero: una posizione aperta A MANO senza SL
+; e' rischio NON calcolabile, quindi ESCLUSA dal cap. Meglio saperlo.
+InpWarnNoSL=true
+
+; ---------------------------------------------------------------
+;  COMPORTAMENTO
+; ---------------------------------------------------------------
+; 0 = CHIUDI+BLOCCA (enforce) . 1 = SOLO ALLARME (non chiude niente)
+; QUI 0, ed e' LA decisione di questo deploy: un guardiano in "solo
+; allarme" su un conto vero non e' una rete, e' un post-it.
+InpAction=0
+
+; true = chiude posizioni e pendenti di QUALSIASI magic, cioe' TUTTO IL
+; CONTO. Comprese le posizioni aperte A MANO (magic 0). La regola di
+; rischio e' sul CONTO, non sulla singola sedia.
+InpCloseAllMagics=true
+
+; Pannello di stato sul grafico: e' il modo in cui si verifica con gli
+; occhi che il saldo iniziale catturato e le quattro soglie sono giuste.
+InpShowPanel=true
+
+; MAGIC DEL GUARDIANO -- 779002.
+; Non trada mai di sua iniziativa: lo usa per i propri log e lo mette
+; sugli ordini di CHIUSURA d'emergenza (CTrade.SetExpertMagicNumber).
+; PERCHE' 779002 e non 779001:
+;   - 779001 e' il Guardian del dry-run FTMO sul DEMO. Tenerli distinti
+;     vuol dire che, guardando la cronologia, si sa SEMPRE quale
+;     guardiano ha chiuso cosa;
+;   - la famiglia 779xxx e' il blocco dei "guardiani" per convenzione
+;     di casa (779001 Guardian, 7797xx/7799xx blocchi di griglia dei
+;     round R97/R99);
+;   - 779002 e' VERGINE: zero occorrenze in tutto il repository
+;     (verificato prima di sceglierlo);
+;   - non collide con nessuno dei due magic vivi su questo terminale,
+;     770101 (DAX Apertura EU) e 770611 (ORB Ottimizzato).
+InpMagic=779002
+
+; Commento degli ordini del guardiano.
+InpComment=GUARDIAN REALE
+
+; Log dettagliato nel giornale: una riga di stato ogni 5 minuti.
+; Su un conto vero il registro vale piu' del rumore che fa.
+InpVerbose=true
+
+; AUTOTEST all'avvio. VERIFICATO LEGGENDO IL CODICE, non assunto:
+; ABTG_AutotestGuardia() (ABTG_PausaGuardian.mqh v1.51) esegue 114 casi
+; sul NUCLEO PURO -- funzioni che ricevono numeri finti come argomenti e
+; rispondono. Nell'intero blocco dell'autotest non c'e' NESSUNA
+; GlobalVariableSet, NESSUNA GlobalVariableDel, NESSUN OrderSend,
+; NESSUN PositionClose e NESSUN HistorySelect: non tocca il conto, non
+; scrive nel canale, stampa e basta. Gira PRIMA che il guardiano legga
+; il saldo. Precedente sullo stesso terminale: ABTG_ORB_Ottimizzato gira
+; sul reale da oggi con InpAutoTest=true.
+; Serve a due cose: e' la prova in Esperti che gira davvero la v1.11 con
+; l'include v1.51, e la sua riga "TUTTI I CASI PASSATI" e' il cancello
+; prima di fidarsi del guardiano.
+InpAutotest=true
