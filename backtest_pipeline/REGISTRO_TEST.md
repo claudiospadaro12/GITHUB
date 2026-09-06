@@ -1588,3 +1588,114 @@ servirebbe per A6**; **controllo di coerenza col passo 0**).
 ⚠️ **Il verdetto atteso resta `MERITO SOSPESO`**, e va detto prima: il round
 serve a leggere **A3 su campioni bilanciati** e a mettere agli atti il campione
 unito, non a far passare A6.
+
+---
+
+### CACCIA MECCANISMI DAX/DOW (06/09/2026) — 0 EA esterni promossi, 1 verifica che chiude un capitolo
+
+Dossier completo: `caccia_strategie/CACCIA_INDICI_DAX_DOW_MECCANISMI_2026-09-06.md`.
+Il resto sta li', non si duplica. **ZERO EA esterni promossi, nessun EA/preset/
+sedia/parametro di forward toccato, nessun backtest lanciato.** Applicazione
+della Regola della Seconda Caccia su DAX e Dow.
+
+- 🚨 **L'ORB-STRADDLE (doppio ordine stop opposto + cancellazione immediata
+  della gamba opposta) E' GIA' IN CASA, IN QUATTRO EA, E DUE GIRANO SUL CONTO
+  REALE.** Verificato nel sorgente, non nella descrizione:
+  `ABTG_DAX_Apertura_EU.mq5` (770101, **LIVE**) piazza BuyStop r.**1073** e
+  SellStop r.**1096** e cancella con `HandleOCO()` r.**1850-1854** ->
+  `CancelMyPendings()` r.**1833-1845**, chiamato a ogni tick da r.**590**;
+  `ABTG_ORB_Ottimizzato.mq5` (770611, **LIVE**) r.**456/471/1029**;
+  `ABTG_Londra_ORB.mq5` r.**220/235/304**; `ABTG_MaxMinNotte.mq5`
+  r.**355/367/473**. (Piu' `ABTG_PostNews.mq5` con `OcoCheck`.)
+  🔴 **E i quattro "tratti distintivi" della fonte esterna sono INPUT che
+  abbiamo gia'**: geometria ATR-adattiva = `InpSLMode=ABTG_SL_ATR` +
+  `InpAtrSlMult` (r.**314-315**); pavimento di stop a ZERO = `InpMinStopPts`,
+  **il cui default e' gia' 0** (r.**345**); parziale+BE+runner = `InpTP1_R` /
+  `InpBEatR` (r.**317/320**). ➡️ Proporlo sarebbe **una griglia di parametri su
+  una sedia viva**: esattamente cio' che la regola del 19/08 vieta.
+  ⚠️ **Resta UNA decisione di Claudio, non un candidato**: la sedia gira con
+  floor 200 e SL al bordo opposto; floor 0 + SL ATR sono due valori di due input
+  esistenti, misurabili solo come **ablazione su banco separato con magic nuovi**.
+  Numero da mettere davanti prima di deciderlo: spread D30EUR misurato **1,65
+  punti indice** -> con SL 20 punti il costo vale **0,0825R = 1,1 volte l'intero
+  cancello H8**. "Stop strettissimo" e "prop" sono in tensione.
+  📌 I numeri della fonte (DAX PF 2,40 DD 2,07% · Dow PF 3,01 DD 2,67%) sono
+  **[DICHIARATI, BACKTEST IDEALE, NON VERIFICATI DA NOI]** e non pesano.
+- 🪦 **CONFERMA, quinta volta di fila: il Code Base non produce piu' MOTORI.**
+  I due soli EA nuovi dal 05/09 sono doppioni per ammissione della loro stessa
+  pagina: **76927 `Session Range Desk MT5`** (Erdem Mumin Kaynak, 03/09/2026) =
+  range di sessione + ingresso ai bordi + stop al bordo opposto = **il nostro
+  `ABTG_ORB`**, e l'autore lo definisce _"a programming example"_;
+  **77009 `SuperTrend TV EA`** (Mykyta Samoiliuk, 06/09/2026) = flip SuperTrend
+  = **famiglia SupRev gia' viva**, e l'autore scrive _"backtests showed modest
+  results due to spread costs from frequent reversals"_. Gli altri 38 titoli
+  della prima pagina sono **tutti** attrezzi.
+- 🪦 **TradingView, terza conferma indipendente (28/08, 30/08, 06/09): il DAX
+  gratuito col sorgente e' fatto di INDICATORI.** Tag `dax`: **20 su 22 sono
+  indicatori**, e le 2 `strategy` non sono DAX-specifiche. Tag `us30`: **11 su
+  13 indicatori**. Le famiglie ricorrenti sono tutte gia' sepolte con un numero
+  di casa (ORB, sweep di liquidita' M24, incroci di medie, range asiatico).
+  🔴 Due morti per DATI e non per idea: `DAX Breadth`, `DAX Universe Relative
+  Strength`, `McClellan for GER30` richiedono i **costituenti dell'indice**, che
+  su MT5/BCM non esistono.
+- 🪦 **TRE LAPIDI DA PAPER, metadati VERIFICATI con l'API arXiv** (non con la
+  pagina): (a) **2511.06177** (Vlasiuk-Smirnov, 09/11/2025) — l'abstract dice
+  _"for short lags (1-5,000 ticks), expected responses cluster near zero ...
+  suggesting high short-term efficiency"_, e serve NBBO tick di SPY: non
+  traducibile; (b) **2512.15720** (Singha, 02/12/2025) — l'entropia di
+  order-flow predice la **TAGLIA** del movimento, **non la direzione**
+  (_"directional accuracy remains at chance levels (45%)"_): al massimo un gate
+  appiccicato, che in casa e' **0 su 5**; (c) **2604.26063** (Lin et al.,
+  28/04/2026, VP-MACD su S&P/Nasdaq/**Dow**) — e' un **incrocio di medie**,
+  famiglia morta due volte in casa, senza codice pubblicato.
+  📌 La letteratura sulle **aste** (4 paper scorsi) e' tutta microstruttura da
+  **libro ordini su azioni singole**: su un CFD di indice non esiste asta e non
+  esiste libro. Nessuna traduzione possibile.
+- 🕳️ **FATTO NUOVO TENUTO, e non e' un candidato: l'ASTA INTRADAY DI XETRA.**
+  Lo script `Xetra Auctions Breakout [Box Strategy]` (ovvo_113, agg. 11/02/2026,
+  1.742 like) dichiara un'asta intraday DAX alle **13:00-13:02 CET = 12:00-12:02
+  ORA SERVER** — un evento di liquidita' **programmato a minuto fisso in mezzo
+  alla seduta**, che la flotta non usa: le aperture DAX smettono alle 12:00 e
+  `DaxReEntry` comincia alle 12:05. ⚠️ **[INCERTO]: l'orario NON e' verificato
+  alla fonte primaria** (`cashmarket.deutsche-boerse.com` e `xetra.com` sono
+  entrambi **EGRESS_BLOCKED**) — servono due minuti del browser di Claudio.
+  🔴 **E come MECCANISMO resta scarto**: box su finestra oraria + rottura = ORB
+  (~210 celle), box + fade = R42 (0/24 IS e 0/24 OOS). _"Cambiare il LIVELLO non
+  cambia la geometria"_ (03/09). Si misura, semmai, con una sonda Python sui
+  dati M1 esterni gia' in casa (GRXEUR 2012-2018, ora file +5 = ora server).
+- 🥇 **L'UNICA PROPOSTA, ed e' DI CASA e MAI ACCESA: la SONDA DELL'OROLOGIO
+  sugli INDICI.** `ABTG_SondaOrologio.mq5` (971 righe, scritto il 28/08, **mai
+  compilato, mai girato** — zero referti in `risultati_archivio/`) ha sette
+  celle FOREX e **zero celle indice**. Meccanismo: si entra all'ora, si esce
+  all'ora, **nessuna condizione di prezzo mai** -> nessun parente nel cimitero
+  (ORB, fade, sweep, box, incroci, VWAP, gap, relativo, salto: tutti sepolti).
+  🎯 **Il numero che lo promuove e' il CAMPIONE, ed e' aritmetica:** entra
+  **1 volta al giorno per costruzione** -> **459 feriali** dal pavimento
+  2024.09.26 al 2026.06.30 = **~229 operazioni per meta' IS/OOS**, contro il
+  pavimento di 150. E' **l'unica famiglia su DAX/Dow che il muro del campione
+  non uccide**: R117 RELATIVO NASUSD n 87/154, NY Retest n 114-115, DaxReEntry
+  n<=92, salto DAX M15 n~88 — **tutti "merito sospeso"**.
+  Cancello zero congelato: **lordo medio/giornata >= 3x lo spread MISURATO in
+  quell'ora** (sul DAX, con spread 1,65 pti, fa **>= 4,95 punti indice**),
+  lettura SEVERA su ENTRAMBI i simboli.
+  ⚠️ Rischio principale dichiarato PRIMA: **un solo regime (toro)** -> criterio
+  **I7**, i due lati si leggono INSIEME e una cella simmetrica-opposta e'
+  **DERIVA, non edge**.
+  ⚠️ Porta d'uscita firmata prima: **se la tabella esce PIATTA, la lapide D7
+  ("l'ora del fix": volatilita' si', direzione no) esce CONFERMATA ED ESTESA
+  agli indici e la pista si chiude per sempre.**
+  📄 Artefatti: `prove/SONDA_OROLOGIO_INDICI.txt` (specifica, criteri **I1-I8**
+  congelati, NON si lancia) + 4 celle eseguibili
+  `prove/SONDA_OROLOGIO_11_D30EUR_LONG.txt`, `12_D30EUR_SHORT`,
+  `13_U30USD_LONG`, `14_U30USD_SHORT`. **Magic 777211-777214 vergini**
+  (cercati uno per uno nel repo il 06/09: zero occorrenze; i 777200-777206 sono
+  del ramo forex).
+- 🚧 **Buchi dichiarati:** **GitHub NON BATTUTO** — UI **429 `Retry-After:
+  3600`**, `api.github.com` **403**, **`gh` CLI non installato** in ambiente:
+  **terza caccia di fila** (02/09, 05/09, 06/09), ed e' la fonte che di solito
+  da' il SORGENTE; **Forex Factory 403**; **SSRN 403**; **Deutsche Boerse e
+  Xetra EGRESS_BLOCKED**; **ZERO sorgenti esterni letti oggi** (i due del Code
+  Base si scartano sulla loro stessa pagina, il Pine dello script Xetra la fetch
+  non lo rende) — e' la debolezza principale del dossier e non e' nascosta;
+  **autori e date del Code Base non leggibili dalla lista** (JS), presi dalle
+  schede.

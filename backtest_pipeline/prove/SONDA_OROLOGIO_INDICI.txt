@@ -1,0 +1,259 @@
+# =====================================================================
+#  SONDA_OROLOGIO_INDICI -- PASSO 0 di MISURA sugli INDICI (DAX, DOW)
+#  Dossier: caccia_strategie/CACCIA_INDICI_DAX_DOW_MECCANISMI_2026-09-06.md
+# =====================================================================
+#
+# #####################################################################
+# #  QUESTO FILE E' LA SPECIFICA. NON SI LANCIA.                      #
+# #  Gli artefatti che GIRANO sono QUATTRO e discendono da qui:       #
+# #     SONDA_OROLOGIO_11_D30EUR_LONG.txt    (magic 777211)           #
+# #     SONDA_OROLOGIO_12_D30EUR_SHORT.txt   (magic 777212)           #
+# #     SONDA_OROLOGIO_13_U30USD_LONG.txt    (magic 777213)           #
+# #     SONDA_OROLOGIO_14_U30USD_SHORT.txt   (magic 777214)           #
+# #  Servono perche' la misura vuole DUE SIMBOLI x DUE LATI in corse  #
+# #  SEPARATE (regola dei due lati sugli indici, 25/08: "ogni analisi #
+# #  misura SEMPRE tutti e due i lati... si RITESTA"), e un file      #
+# #  prova porta un solo @SIMBOLO e un solo lato.                     #
+# #                                                                   #
+# #  QUESTO FILE NON SOSTITUISCE E NON MODIFICA                       #
+# #     prove/SONDA_OROLOGIO_FX.txt                                   #
+# #  ne' le sue sette celle 00-06, che restano CONGELATE parola per   #
+# #  parola. Quello e' il ramo FOREX/ORO (28/08). Questo e' il ramo   #
+# #  INDICI (06/09), e i criteri qui sotto sono NUOVI e propri: si    #
+# #  chiamano I1-I8 apposta, per non confonderli con i C1-C7 del      #
+# #  ramo forex. Dove un criterio e' identico, lo dico; dove cambia,  #
+# #  dico PERCHE'.                                                    #
+# #####################################################################
+#
+# ATTENZIONE, LEGGERE PRIMA DI LANCIARE: QUESTO NON E' UN FILE PROVA DI
+# STRATEGIA. E' UN FILE PROVA DI MISURA.
+#
+# Non chiede "quanto guadagna". Chiede: "esiste una fascia oraria in cui il
+# LORDO medio per giornata vale almeno TRE VOLTE lo spread mediano misurato
+# IN QUELLA STESSA ORA?". La risposta e' una TABELLA, non un P/L.
+#
+# L'EA ESISTE GIA' ED E' QUELLO DEL RAMO FOREX, NON MODIFICATO:
+#   mql5/Experts/ABTG_SondaOrologio.mq5  (971 righe, scritto il 28/08/2026)
+# NON va toccato per questa corsa. Se qualcuno sente il bisogno di
+# aggiungergli anche un solo input per gli indici, quella e' la prova che
+# ha smesso di misurare l'orologio e ha cominciato a misurare un motore --
+# che e' un altro round.
+#
+# ⚠️ FATTO DA DICHIARARE PRIMA, NON DOPO: quell'EA NON E' MAI STATO
+# COMPILATO DA NESSUNO e NON E' MAI GIRATO. Verificato il 06/09/2026:
+# ZERO referti in risultati_archivio/ che lo nominino. Se MetaEditor si
+# lamenta, il risultato del PASSO 0 e' quello, e va riportato com'e'.
+#
+# ---------------------------------------------------------------------
+# IPOTESI (scritta PRIMA di qualunque numero)
+# ---------------------------------------------------------------------
+# I flussi che muovono un indice hanno un ORARIO D'UFFICIO, non una forma
+# grafica: l'apertura del mercato cash sottostante, il fixing, l'arrivo
+# della sessione americana, l'asta di chiusura. Se questi flussi lasciano
+# una traccia, allora esiste un BLOCCO DI ORE in cui il rendimento medio
+# per giornata e' diverso da zero in modo sistematico, E abbastanza grande
+# da pagare lo spread di quell'ora -- senza che nessun livello, nessuna
+# media e nessun oscillatore entrino nella decisione.
+#
+# NON e' un pattern di prezzo. E' un calendario.
+#
+# PRECEDENTE DI CASA CHE RENDE RAGIONEVOLE LA SPESA (e il suo limite):
+#   OROLOGIO_VS_BREEDON_2026-09-03.md ha misurato sul FOREX la stessa
+#   forma: EURUSD SHORT 08:00-16:00 server, C1 = 4,59 su IS 2011-2017
+#   (n=1.607) e 5,31 su OOS 2017-2026 (n=2.411), con la cella INDICATA
+#   PRIMA dei numeri.
+#   ⚠️ QUEL PRECEDENTE E' FOREX. Che la stessa forma valga su un INDICE
+#   e' esattamente cio' che questa corsa deve SCOPRIRE, non cio' che
+#   assume. Chi legge il referto non spacci il precedente per attesa.
+#
+# PRECEDENTI CONTRARI IN CASA, da tenere davanti agli occhi:
+#   (a) D7 -- "l'ora del fix" (Michelberger & Witte 2015), chiuso in
+#       SWEEP_MECCANISMI_LIBERI_2026-08-22.md: volatilita' si',
+#       DIREZIONE no. Questa sonda misura un'altra cosa (la deriva media
+#       di un BLOCCO DI ORE, non la volatilita' di un minuto) -- MA se la
+#       tabella esce PIATTA, D7 esce CONFERMATO ED ESTESO AGLI INDICI e
+#       la pista dell'orologio si chiude per sempre. E' un esito valido,
+#       e' firmato qui, e va scritto cosi'.
+#   (b) R98 -- Market Intraday Momentum (Gao), ABTG_IntradayMomentum:
+#       morto. Ma Gao entra CONDIZIONATO al rendimento della prima
+#       mezz'ora, cioe' su una regola di PREZZO. L'orologio non guarda
+#       nessun prezzo: sono due meccanismi diversi, e la distinzione va
+#       ripetuta nel referto perche' e' facile confonderli.
+#   (c) M25 -- lead-lag S&P->DAX su M5: 8 celle su 8 negative al netto.
+#       Ma quello legge un ALTRO SIMBOLO. L'orologio non legge niente.
+#
+# ---------------------------------------------------------------------
+# CRITERI DI ACCETTAZIONE (CONGELATI PRIMA DI VEDERE I NUMERI)
+# ---------------------------------------------------------------------
+# I1 - CANCELLO ZERO (si legge PRIMA di ogni P/L):
+#      per almeno UNA fascia oraria, su ENTRAMBI i simboli,
+#      |lordo medio per giornata| >= 3 x spread mediano DELLA STESSA ORA.
+#      Se no -> ROUND CHIUSO, pista dell'orologio chiusa sugli indici con
+#      un numero nostro, e lapide D7 estesa. E' un esito valido.
+#      >>> LETTURA SEVERA, come firmato il 31/08 sul ramo forex: "la
+#          STESSA fascia (stessa ora E stessa durata) sopra soglia su
+#          ENTRAMBI i simboli". Il driver puo' stampare anche la lettura
+#          larga (ogni simbolo con una fascia sua), ma quella esce
+#          ETICHETTATA e NON DECIDE.
+#      >>> Il numero, per non doverlo calcolare in un foglio: con lo
+#          spread D30EUR MISURATO in casa (1,65 punti indice,
+#          SPREAD_FLOTTA_MISURA_2026-09-03.md), il cancello sul DAX vale
+#          >= 4,95 punti indice di lordo medio per giornata. Lo spread di
+#          U30USD nella fascia NON e' misurato: la colonna dello spread
+#          della sonda E' la misura, e il cancello si legge da li'.
+#
+# I2 - LA CELLA NON SI SCEGLIE PERCHE' E' LA PIU' VERDE.
+#      24 ore x 3 durate x 2 simboli x 2 lati = 288 celle: a caso
+#      qualcuna e' verde. Vale la regola di casa: CENTRO DELL'ALTOPIANO,
+#      MAI IL PICCO (12 Spearman IS->OOS negative su 13, la 13a a tick
+#      reali sul nostro broker).
+#
+# I3 - ALTOPIANO, NON PICCO, IN SENSO LETTERALE: la fascia buona deve
+#      avere accanto ORE ADIACENTI DELLO STESSO SEGNO. Un'ora verde
+#      isolata fra due rosse e' rumore, non un motore.
+#
+# I4 - RISCHIO PRIMA DEL MERITO (Emendamento della Finestra, punto B):
+#      si riporta SEMPRE la PEGGIOR GIORNATA in % per ogni fascia, anche
+#      se il merito non passa. Un drawdown e' un fatto accaduto, non una
+#      stima, e non si sospende mai. Muro FTMO: -5.000 su 100k in una
+#      sola giornata; muro totale 10%.
+#      >>> AVVERTENZA sulla TAGLIA: il lotto esce da un rischio dell'1%
+#          su uno stop di 10 ATR, quindi e' piccolo. La peggior giornata
+#          della sonda NON e' la peggior giornata di una versione
+#          operabile. Il referto lo deve scrivere.
+#
+# I5 - CAMPIONE -- ED E' LA RAGIONE PER CUI QUESTO ROUND ESISTE.
+#      >= 150 giornate per fascia in CIASCUNA meta' IS/OOS.
+#      MISURATO, non sperato: dal pavimento 2024.09.26 al 2026.06.30 ci
+#      sono 459 giorni feriali; la sonda entra UNA VOLTA AL GIORNO PER
+#      COSTRUZIONE, quindi ~459 operazioni per cella = ~229 per meta',
+#      con margine anche togliendo ~20 festivi di borsa.
+#      Confronto che spiega perche' vale la spesa (tutti su questi
+#      simboli, tutti negli ultimi due mesi):
+#         R117 RELATIVO NASUSD   n IS 87 / OOS 154 -> merito SOSPESO
+#         NY Session Retest      n 114-115         -> merito SOSPESO
+#         DaxReEntry             n <= 92           -> merito SOSPESO
+#         M31 salto DAX M15      n ~88 sul banco   -> "non leggibile"
+#      L'orologio e' l'unico che compra campione, e lo compra perche'
+#      entra ogni giorno senza chiedere il permesso al prezzo.
+#
+# I6 - L'ORA E' IN ORA SERVER BCM (ora italiana - 1), e il referto DEVE
+#      dichiarare l'errore noto: le ore d'ufficio di Londra e New York si
+#      spostano rispetto all'ora server per ~4 settimane l'anno (ora
+#      legale USA e UE non coincidenti). Questa sonda misura in ORA
+#      SERVER FISSA, con l'errore NOTO e DICHIARATO, non corretto.
+#      E' la stessa scelta firmata sul ramo forex (C6).
+#      >>> ANCORE DI CASA per il collaudo dell'orologio, gia' misurate:
+#          DAX apre 08:00 server; indici USA aprono 14:30 server.
+#
+# I7 - UN SOLO REGIME, E VA LETTO COME TALE.
+#      2024.09.26 -> 2026.06.30 e' TORO PIENO. Su un motore direzionale
+#      a orario fisso questo e' il rischio piu' serio del round: una
+#      fascia LONG puo' uscire verde solo perche' l'indice e' salito.
+#      >>> LA LETTURA DELLA DERIVA E' CONGELATA QUI, PRIMA DEI NUMERI:
+#          i due lati vanno letti INSIEME, cella per cella.
+#          Se LONG(ora X) e SHORT(ora X) sono simmetrici e opposti entro
+#          il rumore, quella cella e' DERIVA e non conta.
+#          Un fatto esiste SOLO dove l'asimmetria fra i due lati e' piu'
+#          grande della deriva media della finestra sullo stesso blocco
+#          di ore. Il referto deve stampare le due colonne AFFIANCATE.
+#      >>> E' il "controllo a ingressi casuali" del 03-05/09 applicato
+#          all'orologio: qui il controllo appaiato e' il LATO OPPOSTO
+#          sulla stessa ora, che e' esattamente la forma raccomandata
+#          (media dei due lati = monetina esatta, zero varianza).
+#
+# I8 - NESSUNA PROMOZIONE DA QUESTA CORSA.
+#      Questa sonda non promuove niente, non boccia nessuna sedia, non
+#      tocca nessun parametro di forward e non manda niente in campo:
+#      produce una TABELLA. Un'eventuale promozione richiede un round di
+#      MERITO separato, a tick reali, con criteri firmati a parte.
+#      (Identico a C7 del ramo forex.)
+#
+# ---------------------------------------------------------------------
+# LE DATE: MISURATE, NON IPOTIZZATE
+# ---------------------------------------------------------------------
+#   D30EUR  inizio storico 2024.09.26, stato COMPLETO
+#   U30USD  inizio storico 2024.09.26, stato COMPLETO
+#   Fonte VERIFICATA: risultati_archivio/REFERTO_SONDA_STORICO_17-08.md
+#   riga 46 -- la riga che elenca insieme 100GBP 200AUD 225JPY D30EUR
+#   E35EUR E50EUR F40EUR NASUSD SPXUSD U30USD UKOIL USOIL con data
+#   2024.09.26 e stato COMPLETO.
+#
+#   >>> IL PAVIMENTO NON SI ABBASSA. Lo storico _EXT (HistData) e'
+#       IN FRIGO per il cancello zero, e U30USD_DK (Dukascopy) e' in
+#       frigo dal 03/09 per il giorno 2024.11.20 fuori soglia. Nessuna
+#       delle due strade e' utilizzabile per questo round.
+#
+#   FINESTRA: 2024.09.26 -> 2026.06.30.
+#   Tetto del tester ~100.000 barre; indici su H1 ~120 barre/settimana;
+#   21 mesi = ~91 settimane = ~11.000 barre. Sta dentro con enorme
+#   margine: il collo di bottiglia NON e' il tester, e' il pavimento.
+#
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# ---------------------------------------------------------------------
+# LO SWEEP: si spazzola L'ORA, e SOLO l'ora.
+# Una passata per ogni ora d'ingresso (24); la durata del blocco e' il
+# secondo asse, tenuto CORTO apposta (3 valori: 4/8/12) per non
+# moltiplicare le celle e non trasformare la misura in una pesca.
+# 24 x 3 = 72 celle per finestra, 144 passate per file (IS + OOS).
+# ---------------------------------------------------------------------
+InpOraIngresso=8||0||1||23||Y
+InpOreDurata=4||4||4||12||Y
+
+# --- TUTTO IL RESTO PINNATO, e i motivi sono scritti ---
+# IL LATO: due corse separate, mai insieme (l'EA si rifiuta di partire
+# con tutti e due accesi, perche' con tutti e due la colonna "Lato" non
+# vorrebbe dire niente).
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+# rischio: la taglia di CONFRONTO di casa. NON e' la taglia prop (0,65%).
+InpRiskPercent=1.0||1.0||0||1.0||N
+# stop di SOLA PROTEZIONE: la sonda non deve essere gestita, deve
+# MISURARE. 10 ATR = praticamente mai toccato: serve solo a non lasciare
+# una posizione nuda se il broker salta un'uscita.
+InpSLatrMult=10.0||10.0||0||10.0||N
+InpATRPeriod=14||14||0||14||N
+# nessun take: si esce SOLO all'ora, mai al prezzo. E' il punto della sonda.
+InpTPatrMult=0.0||0.0||0||0.0||N
+# una posizione alla volta, una al giorno.
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=1||1||0||1||N
+# nessun filtro di spread NELLA MISURA: lo spread va MISURATO, non
+# filtrato. Se lo filtriamo, misuriamo le ore buone di uno spread che ci
+# siamo scelti noi. La colonna "Giorni Saltati Spread" DEVE uscire 0.
+InpMaxSpreadPts=0||0||0||0||N
+# chiusura forzata di fine giornata: 30 minuti prima di fine giornata
+# server. NON e' un interruttore, e' l'ANTICIPO: il flat non si puo'
+# spegnere con nessun valore di questo parametro.
+InpFlatAnticipoMin=30||30||0||30||N
+InpMagic=777211||777211||0||777211||N
+
+# =====================================================================
+#  QUELLO CHE QUESTA MISURA NON PUO' DIRE -- detto PRIMA
+# =====================================================================
+#  1. NON dice se un motore d'orologio guadagnerebbe. Dice se c'e'
+#     abbastanza lordo da coprire tre volte il costo. Sono due domande.
+#  2. NON copre nessun regime diverso dal toro 2024-2026 (I7).
+#  3. La durata 8 e 12 ore fa TENERE la posizione oltre la chiusura del
+#     cash: un ingresso alle 08:00 con durata 12 esce alle 20:00, quando
+#     il DAX cash e' chiuso da due ore e mezza e il CFD e' sottile. La
+#     sonda NON lo impedisce e NON lo deve impedire: la colonna dello
+#     spread nell'ora d'ingresso pero' NON descrive il costo dell'USCITA.
+#     >>> Il referto deve dichiarare questo limite cella per cella sulle
+#         durate lunghe. E' il difetto piu' insidioso di questa misura,
+#         ed e' scritto qui perche' non venga scoperto dopo i numeri.
+#  4. NON misura la correlazione con le sedie vive. La leggera pero' si
+#     legge dalla colonna dell'ORA: 08:00-12:00 su D30EUR e' l'orario
+#     della sedia 770101; 14:30-19:30 su U30USD e' l'orario delle sedie
+#     770202 e 770611. Una fascia verde DENTRO quelle finestre vale
+#     molto meno per la prop, e va detto nel referto anche se il numero
+#     e' bello (ROTTA_PROP: "mai due EA sullo stesso segnale/simbolo/
+#     lato allo stesso rischio pieno").
+#  5. L'EA non e' mai stato compilato (vedi sopra).
+# =====================================================================

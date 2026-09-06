@@ -1,0 +1,101 @@
+# =====================================================================
+#  SONDA DELL'OROLOGIO -- CELLA 13_u30usd_long  --  U30USD (DOW) LONG
+#  ABTG_SondaOrologio  su  U30USD  H1, TICK REALI
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  E' il PASSO 0 -- di MISURA -- del ramo INDICI dell'orologio, nato
+#  dalla caccia meccanismi DAX/Dow del 06/09/2026. Produce una TABELLA,
+#  non un P/L.
+#
+#  L'IPOTESI, i CRITERI I1-I8 e i limiti dichiarati stanno TUTTI, per
+#  intero, nel file congelato
+#        backtest_pipeline/prove/SONDA_OROLOGIO_INDICI.txt
+#  e NON si riscrivono qui: un criterio ricopiato in quattro file e' un
+#  criterio che prima o poi diverge. Quello e' la SPECIFICA; questo e'
+#  l'ARTEFATTO ESEGUIBILE che ne discende.
+#
+#  DOSSIER:
+#    caccia_strategie/CACCIA_INDICI_DAX_DOW_MECCANISMI_2026-09-06.md
+#
+#  CHE COSA CAMBIA QUESTO FILE RISPETTO AGLI ALTRI TRE:
+#    SOLO il SIMBOLO, il LATO e il MAGIC. Tutto il resto e' identico,
+#    riga per riga. Il driver lo verifichi PRIMA di aprire MT5 contro
+#    valori DICHIARATI NEL DRIVER, non contro un file gemello: una
+#    corruzione SIMMETRICA su tutti e quattro passerebbe un diff
+#    (lezione R108/R110).
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.06.30, MISURATA E NON SCELTA.
+#    U30USD ha inizio storico 2024.09.26 con stato COMPLETO
+#    (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md riga 46).
+#    Il pavimento NON si abbassa: lo storico _EXT e' in frigo per il
+#    cancello zero, e U30USD_DK (Dukascopy) e' in frigo dal 03/09 per
+#    il giorno 2024.11.20 fuori soglia. 459 giorni feriali nella
+#    finestra -> ~229 operazioni per meta' IS/OOS, sopra il pavimento
+#    dei 150 (criterio I5).
+#    ⚠️ UN SOLO REGIME (toro pieno): vale il criterio I7, i due lati si
+#    leggono INSIEME e una cella simmetrica-opposta e' DERIVA, non edge.
+#
+#  MAGIC VERGINE 777213: cercato in tutto il repo il 06/09/2026 ->
+#  ZERO occorrenze. I magic 777200-777206 sono del ramo FOREX (celle
+#  00-06, 28/08) e non vanno riusati. Nessun magic di nessuna sedia viva
+#  compare qui.
+#
+#  L'ORA E' SEMPRE ORA SERVER BCM (ora italiana - 1).
+#  Ancore di casa per il collaudo: gli indici USA aprono 14:30 server.
+#
+#  >>> QUELLO CHE QUESTO FILE NON PUO' DIRE, detto prima:
+#      - non promuove e non boccia niente (criterio I8);
+#      - misura in ORA SERVER FISSA, con l'errore di ~4 settimane l'anno
+#        NOTO e DICHIARATO, non corretto (criterio I6). ⚠️ Sul Dow
+#        l'errore morde di piu' che sul DAX: nelle ~4 settimane in cui
+#        l'ora legale USA e UE non coincidono, l'apertura di New York si
+#        sposta di un'ora RISPETTO ALL'OROLOGIO DEL SERVER, e questa
+#        sonda non lo corregge;
+#      - sulle durate 8 e 12 ore la posizione resta aperta a lungo dopo
+#        l'ingresso: la colonna dello spread e' misurata NELL'ORA
+#        D'INGRESSO e NON descrive il costo dell'uscita. Limite n.3 del
+#        file di specifica;
+#      - la peggior giornata in % e' condizionata alla TAGLIA (rischio
+#        1% su stop 10 ATR = lotto piccolo): non e' il rischio di una
+#        versione operabile;
+#      - l'EA ABTG_SondaOrologio.mq5 NON E' MAI STATO COMPILATO NE'
+#        GIRATO DA NESSUNO (verificato: zero referti in
+#        risultati_archivio/). Se MetaEditor si lamenta, il risultato
+#        del PASSO 0 e' quello e va riportato com'e';
+#      - la riga di lancio va passata da CHECKLIST_RIGA_DI_LANCIO.md,
+#        CLASSE 129 compresa: UN SOLO agente MT5 vivo, altrimenti le
+#        celle che devono uscire identiche divergono.
+#
+#  >>> E LA LETTURA CHE VA FATTA SUBITO DOPO, sul Dow piu' che altrove:
+#      su U30USD la fascia 14:30-19:30 server e' gia' occupata da DUE
+#      sedie vive (ABTG_Dow_Apertura_US magic 770202 e
+#      ABTG_ORB_Ottimizzato magic 770611, quest'ultima sul conto reale).
+#      Una fascia verde DENTRO quella finestra vale molto meno per la
+#      prop anche con dei bei numeri: ROTTA_PROP.md, "mai due EA sullo
+#      stesso segnale/simbolo/lato allo stesso rischio pieno".
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# ---------------------------------------------------------------------
+# LO SWEEP: si spazzola L'ORA, e SOLO l'ora.
+# 24 ore d'ingresso x 3 durate (4/8/12) = 72 celle per finestra.
+# ---------------------------------------------------------------------
+InpOraIngresso=14||0||1||23||Y
+InpOreDurata=4||4||4||12||Y
+
+# --- TUTTO IL RESTO PINNATO ---
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLatrMult=10.0||10.0||0||10.0||N
+InpATRPeriod=14||14||0||14||N
+InpTPatrMult=0.0||0.0||0||0.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=1||1||0||1||N
+InpMaxSpreadPts=0||0||0||0||N
+InpFlatAnticipoMin=30||30||0||30||N
+InpMagic=777213||777213||0||777213||N
