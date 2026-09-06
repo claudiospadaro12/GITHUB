@@ -30,7 +30,7 @@
 //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.11"
+#property version   "1.12"
 #property strict
 #include <Trade/Trade.mqh>
 //  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
@@ -44,6 +44,24 @@
 //      e, se non coincidono, urla nel giornale.
 //   2) l'AUTOTEST del nucleo di decisione (input InpAutotest, default
 //      spento), cosi' il collaudo non dipende da un altro programma.
+//  v1.12 -- 06/09/2026. BUG TROVATO SUL CONTO REALE (credito broker
+//  stabile e non prelevabile, scoperto quel giorno): il saldo iniziale
+//  e la baseline giornaliera venivano catturati dal BILANCIO (senza
+//  credito), ma confrontati con l'EQUITA' corrente (con credito dentro).
+//  Il credito, essendo costante, appariva come un "guadagno" permanente
+//  che si sommava al cuscinetto reale -- coi numeri di quel giorno
+//  (bilancio 5.000, credito 2.500) la pausa al 4,9% e il blocco al 9,9%
+//  non sarebbero scattati fino a una perdita REALE di oltre 2.700/3.000
+//  euro, cioe' oltre meta' del capitale vero. Fix: gStart e la baseline
+//  giornaliera ora si catturano dall'EQUITA', non dal bilancio -- stessa
+//  base su entrambi i lati del confronto, il credito si cancella da solo
+//  e le soglie tornano a mordere ai punti percentuali dichiarati.
+//  Le GlobalVariable di saldo/picco/giorno cambiano nome (suffisso _V2):
+//  un conto gia' in campo con la v1.11 ha quei valori scritti col vecchio
+//  criterio, e "sopravvivono a riavvii/ricompilazioni" e' voluto (persist-
+//  enza) -- senza il nome nuovo la ricompilazione riletterebbe il vecchio
+//  numero contaminato invece di ricatturarlo pulito. Nessun reset a mano
+//  da F3 necessario: la cattura fresca e' automatica al primo avvio.
 #include <ABTG_PausaGuardian.mqh>
 
 //--- SALDO / REGOLE PROP -------------------------------------------
@@ -239,11 +257,21 @@ int VerificaFilo()
 int OnInit()
   {
    long acc=AccountInfoInteger(ACCOUNT_LOGIN);
-   GV_START   =StringFormat("ABTG_GUARD_%I64d_START",acc);
-   GV_PEAK    =StringFormat("ABTG_GUARD_%I64d_PEAK",acc);
-   GV_DAYKEY  =StringFormat("ABTG_GUARD_%I64d_DAYKEY",acc);
-   GV_DAYSTART=StringFormat("ABTG_GUARD_%I64d_DAYSTART",acc);
-   GV_BLOCKDAY=StringFormat("ABTG_GUARD_%I64d_BLOCKDAY",acc);
+   // v1.12: le cinque GlobalVariable della baseline (saldo/picco/giorno)
+   // cambiano nome con un suffisso _V2 -- APPOSTA. Un conto che aveva gia'
+   // il guardiano v1.11 in campo ha questi valori GIA' SCRITTI col vecchio
+   // criterio (baseline dal bilancio, contaminata da un eventuale credito);
+   // "sopravvivono a riavvii/ricompilazioni" e' una caratteristica voluta
+   // (persistenza), quindi senza cambiare nome il fix di codice non
+   // servirebbe a niente: alla prima ricompilazione riletterebbe il
+   // vecchio numero sbagliato invece di ricatturarlo. Il nome nuovo forza
+   // una cattura fresca col criterio corretto (v1.12: dall'equita'),
+   // senza bisogno di cancellare nulla a mano da F3.
+   GV_START   =StringFormat("ABTG_GUARD_%I64d_START_V2",acc);
+   GV_PEAK    =StringFormat("ABTG_GUARD_%I64d_PEAK_V2",acc);
+   GV_DAYKEY  =StringFormat("ABTG_GUARD_%I64d_DAYKEY_V2",acc);
+   GV_DAYSTART=StringFormat("ABTG_GUARD_%I64d_DAYSTART_V2",acc);
+   GV_BLOCKDAY=StringFormat("ABTG_GUARD_%I64d_BLOCKDAY_V2",acc);
    GV_FAILED  =StringFormat("ABTG_GUARD_%I64d_FAILED",acc);
    // canale verso gli EA -- gli STESSI nomi stanno in ABTG_PausaGuardian.mqh
    GV_PAUSA    =StringFormat("ABTG_PAUSA_GIORNO_%I64d",acc);
@@ -259,9 +287,12 @@ int OnInit()
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
    double eq =AccountInfoDouble(ACCOUNT_EQUITY);
 
-   // saldo iniziale: input se >0, altrimenti cattura una volta e persisti
+   // saldo iniziale: input se >0, altrimenti cattura una volta e persisti.
+   // v1.12: cattura dall'EQUITA' (non dal bilancio) -- stessa base con cui
+   // verra' confrontato piu' sotto, cosi' un eventuale credito del broker
+   // (costante) si cancella da solo invece di restare come cuscinetto.
    if(InpStartBalance>0) gStart=InpStartBalance;
-   else                  gStart=(GlobalVariableCheck(GV_START)? GlobalVariableGet(GV_START) : bal);
+   else                  gStart=(GlobalVariableCheck(GV_START)? GlobalVariableGet(GV_START) : eq);
    GlobalVariableSet(GV_START,gStart);
 
    gPeak=(GlobalVariableCheck(GV_PEAK)? GlobalVariableGet(GV_PEAK) : MathMax(eq,gStart));
@@ -273,7 +304,7 @@ int OnInit()
    if(!GlobalVariableCheck(GV_DAYKEY) || (int)GlobalVariableGet(GV_DAYKEY)!=pk)
      {
       GlobalVariableSet(GV_DAYKEY,pk);
-      GlobalVariableSet(GV_DAYSTART,bal);      // baseline giornaliera = saldo a inizio giornata
+      GlobalVariableSet(GV_DAYSTART,eq);      // v1.12: baseline giornaliera = EQUITA' a inizio giornata (non bilancio)
       GlobalVariableSet(GV_BLOCKDAY,0);
       GlobalVariableSet(GV_PAUSA,0);           // giorno nuovo = pausa morbida azzerata
       GlobalVariableSet(GV_PAUSAFINO,0);
@@ -344,11 +375,11 @@ void OnTimer()
    if((int)GlobalVariableGet(GV_DAYKEY)!=pk)
      {
       GlobalVariableSet(GV_DAYKEY,pk);
-      GlobalVariableSet(GV_DAYSTART,bal);
+      GlobalVariableSet(GV_DAYSTART,eq);    // v1.12: EQUITA', non bilancio (vedi nota in testa al file)
       GlobalVariableSet(GV_BLOCKDAY,0);
       GlobalVariableSet(GV_PAUSA,0);        // la pausa morbida dura un giorno prop
       GlobalVariableSet(GV_PAUSAFINO,0);
-      if(InpVerbose) PrintFormat("[GUARDIAN] nuovo giorno prop: baseline=%.2f (pausa morbida azzerata)",bal);
+      if(InpVerbose) PrintFormat("[GUARDIAN] nuovo giorno prop: baseline=%.2f (pausa morbida azzerata)",eq);
      }
 
    // aggiorno picco equity (per trailing)
