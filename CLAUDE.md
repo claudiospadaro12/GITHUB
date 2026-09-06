@@ -7,6 +7,23 @@
 - Ciò che non è pushato = perso. Nel dubbio, committa.
 - Per ripartire in una chat nuova: leggere `HANDOFF.md` + `PROMEMORIA_APERTURE.md` + `CLASSIFICHE.md` sul branch sopra.
 
+## 🖥️ REGOLA DEI TERMINALI MULTIPLI (richiesta esplicita di Claudio, 06/09)
+**Sul VPS ci sono TRE terminali MT5 aperti contemporaneamente** (piccolo 50503392,
+100k 50504263, reale 10105439): confondersi di finestra è facile e costa caro
+(si rischia di attaccare/toccare l'EA sbagliato sul conto sbagliato). Da qui in
+avanti, OGNI VOLTA che chiedo a Claudio di aprire/toccare un terminale specifico:
+1. **dichiaro SEMPRE il numero di conto** (non "il piccolo", anche il numero:
+   50503392 / 50504263 / 10105439) E la cartella programma che lo identifica
+   (`BCM Markets MT5 Terminal` = piccolo, `... -V3` = 100k, `C:\BCM_Reale` = reale);
+2. **non chiedo MAI a Claudio di riconoscere la finestra "a occhio"** dal solo
+   titolo: se serve, fornisco la stringa di sola lettura che stampa PID + titolo
+   + cartella (`Get-Process terminal64 | select Id, MainWindowTitle, Path`),
+   così il riconoscimento è un fatto stampato, non un'inferenza sua;
+3. vale per QUALSIASI istruzione manuale in MT5 (trascinare un EA, aprire un
+   grafico, leggere Esperti), non solo per le righe di lancio PowerShell.
+Nato da un incidente reale (06/09): senza il numero di conto in chiaro, un
+attacco EA destinato al piccolo è stato quasi fatto sul terminale del REALE.
+
 ## REGOLA DELLE RIGHE DI LANCIO (richiesta esplicita di Claudio, 10/08)
 Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
 1. **l'`irm` davanti** che riscarica script e prova dal branch `lavoro` (il 10/08
