@@ -24,6 +24,12 @@ accettata, poi Claudio ha corretto: preferisce 7.500€. A 0,65% di rischio, il
 costo per trade resta quello già detto in mattinata: **~49€** (0,65% di
 7.500€).
 
+**Natura del credito, chiarita da Claudio**: i 2.500€ di credito restano
+SEMPRE dentro il conto come equità utilizzabile per margine/trading (il conto
+opera sempre con 7.500€ di potenza) ma **NON sono prelevabili**: un prelievo
+può portare via solo il bilancio (5.000€ + profitti realizzati), mai il
+credito. Tipico bonus broker non cash-out.
+
 ⚠️ **Nota tecnica che resta valida indipendentemente dalla convenzione di
 reporting**: `ABTG_Guardian.mq5` usa `AccountInfoDouble(ACCOUNT_BALANCE)` (il
 bilancio, 5.000€) come riferimento per i SUOI calcoli di drawdown (righe
