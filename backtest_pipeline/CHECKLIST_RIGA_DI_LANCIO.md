@@ -9665,3 +9665,89 @@ muto il referto**.
 > che torna `""` quando l'hash non si calcola) **dichiara "identici" due file
 > che non ha saputo leggere**. Il confronto va sempre preceduto da
 > `$hash -ne ""`: "non misurato" non e' "uguale".
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 (notte) — trovata dal **verificatore di stringhe** su `RIGA_LOG_SEDIE_MUTE.ps1` (pin `85beb05f`, riga di SOLA LETTURA dei log Esperti per le due sedie mute residue `970912` e `772235`), leggendo i **sorgenti veri** degli EA invece della tabella del referto che li riassume. Lo script e' per il resto pulito (parse reale `pwsh` 0 errori, ASCII puro, cultura invariante su tutti e tre i `ToString`, nessuna scrittura fuori dal referto sul Desktop). La voce qui sotto e' il difetto che **avrebbe fatto leggere a Claudio le righe della sedia SBAGLIATA e chiudere il caso al contrario**.
+
+## 148. 🏷️ IL MARCATORE DI LOG **NON IDENTIFICA LA SEDIA**: lo stesso prefisso di `Log()` e' condiviso da cinque EA della stessa famiglia, e due di loro girano sullo **STESSO simbolo E STESSO timeframe**
+
+### Il fatto
+
+La riga doveva rispondere a una domanda secca del referto
+`DIAGNOSI_SEDIE_MUTE_2026-09-05.md` §6: la sedia `970912`
+(`ABTG_SupRev_DAX_H4_Ottimizzato`, D30EUR H4) **parla o e' morta?** Il filtro
+scritto era quello suggerito dal referto stesso:
+
+```powershell
+if ($r -match 'STReversal' -and $r -match 'D30EUR') { ... }   # SBAGLIATO
+```
+
+Ma `[STReversal]` **non e' la firma di quella sedia**: e' il prefisso di
+`Log()` di **cinque** EA in repo —
+
+| file | riga |
+|---|---:|
+| `ABTG_SupertrendReversal.mq5` | 120 |
+| `ABTG_SupertrendReversal_Ottimizzato.mq5` | 118 |
+| `ABTG_SupertrendReversal_Multi.mq5` | 122 |
+| `ABTG_SupertrendReversal_Multi_Ottimizzato.mq5` | 122 |
+| `ABTG_SupRev_DAX_H4_Ottimizzato.mq5` | 119 |
+
+— tutti con la stessa identica istruzione
+`void Log(string m){ if(InpVerbose) Print("[STReversal] ", m); }`.
+
+E il vicino non e' ipotetico: **`770923` = `ABTG_SupertrendReversal` gira su
+D30EUR H4**, cioe' **stesso simbolo e stesso timeframe della sedia indagata**
+(`FLOTTA_ATTIVA.md` riga 30; `AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md` riga
+319 lo elenca sullo stesso terminale insieme alla `970912`;
+`CENSIMENTO_FREQUENZA_FLOTTA_2026-08-22.md` riga 187 lo chiama
+_"probabile predecessore"_ proprio della `970912`).
+
+👉 Il filtro `STReversal + D30EUR` fa entrare nel referto **le righe di 770923**.
+E siccome il referto mappa l'esito su verdetti **opposti** (_"righe di skip -> il
+pattern arriva, apri il round"_ / _"nessuna riga di nessun tipo -> (d) non gira,
+riparazione"_), bastava **una riga del vicino** perche' una sedia muta venisse
+dichiarata viva e il round R-A venisse aperto sul motore sbagliato. Il costo non
+e' un giro a vuoto: e' una **conclusione invertita messa agli atti**.
+
+### Perche' e' una classe e non una svista
+
+Il prefisso di `Log()` e' una **convenzione di FAMIGLIA**: nasce copiando un EA
+per farne una variante, e sopravvive alla copia. Il simbolo e il timeframe
+**non bastano** a disambiguare, perche' e' esattamente cosi' che nasce una
+variante ottimizzata: **stesso strumento, stesso TF, motore ritarato**. Ed e' la
+stessa struttura gia' vista al §8 del referto del 05/09 (il magic `250604`
+default di DUE EA diversi) e alla collisione `770901` del 22/08: **l'etichetta
+identifica il CODICE, non la SEDIA.**
+
+### La regola
+
+> ✅ **La sedia si identifica dalla colonna CONTESTO del log Esperti — cioe' dal
+> NOME DEL FILE EA — non dal prefisso che l'EA si stampa da solo.** MT5 scrive
+> ogni riga come `<NomeEA> (<SIMBOLO>,<TF>)  <messaggio>`: il nome del file `.ex5`
+> e' l'unica cosa unica per sedia. Qui il filtro giusto e' `SupRev_DAX_H4`, non
+> `STReversal`.
+>
+> 🔎 **E il controllo si fa PRIMA, con un `grep`, non a mente**: preso il
+> marcatore che la riga sta per usare, si conta **in quanti sorgenti compare**
+> (`grep -rn '"\[MARCATORE\]' mql5/Experts/`) e **quante sedie di quella lista
+> girano sullo stesso simbolo** (`FLOTTA_ATTIVA.md`). Se il conto e' > 1, il
+> marcatore **non e' un filtro**: e' un imbuto che raccoglie i fratelli.
+>
+> 🧾 **E i fratelli non si buttano: si stampano a parte, etichettati.** Una
+> sezione `VICINI DI CASA (NON sono la sedia indagata)` col loro nome EA rende
+> visibile la contaminazione invece di nasconderla — e serve da controprova: se
+> il vicino parla e l'indagata no **sullo stesso simbolo, stesso TF e stesso
+> giorno**, quella e' la misura piu' forte che il referto potesse portare a casa.
+
+### 148-bis. 🔇 E l'asimmetria che la rende velenosa
+
+Il gemello dello stesso script (`GapFill` + `225JPY`) **funziona per caso**, e
+per un motivo diverso: li' la parola cercata (`GapFill`) **non e' il prefisso**
+(che e' `[GAP]`, `ABTG_GapFill.mq5` riga 203) ma **il nome del file EA**, che e'
+unico. Due filtri scritti nella stessa riga di codice, con la stessa forma
+`-match X -and -match SIMBOLO`, **uno corretto e uno rotto** — e la differenza
+non si vede leggendo lo script: si vede **solo** aprendo i due sorgenti.
+E' la Regola Zero, punto 1, applicata agli **EA** e non solo agli script:
+_apri il file a cui la riga punta e leggilo davvero._
