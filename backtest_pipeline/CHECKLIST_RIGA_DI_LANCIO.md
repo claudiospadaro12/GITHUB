@@ -10068,3 +10068,46 @@ il censimento di ieri**, e il perimetro e' cambiato lo stesso giorno.
 > _(Parente della 139 — la serratura elencata fra le automatiche che il default
 > lascia aperta — e della 134: il controllo copre meno di quello che il suo
 > nome promette.)_
+
+---
+
+## 119-bis. 🖥️ LA RINOMINA DEL CONTATORE CHIUDE IL **REFERTO** E DIMENTICA LA **CONSOLE** — e la console e' quella che Claudio guarda per prima
+
+**Trovato il 06/09/2026** dal verificatore, al **terzo** giro sulla stessa riga
+(`RIGA_LOG_SEDIE_MUTE.ps1` v4, pin `75e603e`), **riproducendo eseguendo** con
+un log illeggibile (symlink rotto — i permessi a 000 non bastano se si gira
+come root, e la prima prova era passata per questo).
+
+Il fix della **150** era corretto e completo *sul file*: il referto diceva
+`file di log LETTI: 1 su 2 trovati in finestra` e `ESITO LETTURA: PARZIALE`.
+Ma nello stesso script era rimasta **un'altra** stampa con il vecchio nome, nel
+blocco `CARTELLE GUARDATE` a monte, che conta una **terza** grandezza ancora
+(i file aperti per RICONOSCERE la cartella, tetto di 15 per sottocartella):
+
+```
+  C:\...\215D85...   file di log letti=2   login visti: 50503392     <-- console
+  file di log TROVATI in finestra (ultimi 45 giorni): 2
+  ESITO LETTURA: PARZIALE -- 1 file NON letti su 2                   <-- stesso schermo
+```
+
+👉 `letti=2` e `1 file NON letti su 2` **sullo stesso schermo**, con la stessa
+parola. Sul VPS vero (45 giorni di log, due sottocartelle) i numeri divergono
+anche in valore: `letti=30`, poi `TROVATI: 45`, poi `LETTI: 45 su 45`. Tre
+numeri, due nomi, e il piu' rassicurante in cima — la 150 daccapo, un canale
+piu' in la'.
+
+> ✅ **REGOLA: rinominare una grandezza e' un'operazione di GREP, non di
+> memoria.** Dopo aver cambiato il nome di un contatore, si cerca il nome
+> VECCHIO in tutto il file — `grep -in 'letti' script.ps1` — e ogni superstite
+> o si rinomina o si dichiara diverso. **Il conto deve dare zero occorrenze
+> ambigue, sul file E sullo schermo.** La 150 lo diceva gia' per le
+> intestazioni del referto: vale identico per ogni `Write-Host`, perche' il
+> canale che decide non e' quello piu' formale, e' quello che si legge per
+> primo.
+
+_(Recidiva n. 6 della meta-classe del 04/09 — "la correzione di un difetto ne
+porta dentro uno nuovo della stessa famiglia" — e terza consecutiva sulla
+stessa riga. Corollario di metodo, pagato lo stesso giorno: **una prova di
+illeggibilita' fatta con `chmod 000` mentre si gira come root non prova
+niente**, root scavalca i permessi e il caso non si riproduce affatto. Si usa
+un **symlink rotto**, che fallisce l'apertura davvero.)_
