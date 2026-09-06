@@ -67,7 +67,7 @@ partire** se lo lasci lì com'è.
 
 ---
 
-## 2. 📌 IL PIN — **`ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23`** ✅ **INSERITO E VERIFICATO**
+## 2. 📌 IL PIN — **`69af6d8e81ec5ab4197b3e8b7e73f3770d09c78c`** ✅ **INSERITO E VERIFICATO**
 
 Commit di `lavoro`. **Verificato file per file prima di scrivere questa pagina**,
 non dichiarato: presente in `git ls-tree`, **HTTP 200** via `raw`, e **sha256 del
@@ -75,7 +75,7 @@ contenuto al pin identico al file nel repo**.
 
 | file al pin | esito |
 |---|---|
-| `backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1` | 200, identico (`292bc7f2…`, **80.656 byte**), marcatore `MARCATORE_RIGA_DEPLOY_CONTOREALE_v2` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
+| `backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1` | 200, identico (`52cde838…`, **82.282 byte**), marcatore `MARCATORE_RIGA_DEPLOY_CONTOREALE_v2` presente **nel file scaricato**, **ASCII puro** (0 byte > 126), `Parser::ParseFile` **0 errori** |
 | `mql5/Experts/ABTG_DAX_Apertura_EU.mq5` | 200, identico (`105f0f81…`, **118.483 byte**), `#property version "1.01"`, `ABTG_DEF_MAGIC 770101`, `ABTG_DEF_RISK 1.0` |
 | `mql5/Experts/ABTG_ORB_Ottimizzato.mq5` | 200, identico (`c14d85dd…`, **74.103 byte**) — **lo stesso sha256 e gli stessi byte del deploy della v1.04 sul piccolo del 03/09**, `#property version "1.04"`, autotest **10 blocchi / 33 casi**, `PositionSelect(_Symbol)` fuori dai commenti: **0** |
 | `mql5/Include/ABTG_PausaGuardian.mqh` | 200, identico (`b7462cd5…`, **112.481 byte**, **v1.51** — la stessa del deploy sul piccolo) |
@@ -125,6 +125,25 @@ dichiara** invece di lasciarli al caso.
 
 ---
 
+## 3-bis. 🩹 IL CONTROLLO A MASSIMA SEVERITÀ HA TROVATO 3 DIFETTI, CORRETTI
+
+Prima di questa pagina, il driver è passato per un controllo aggiuntivo,
+adversariale, perché è la prima volta che una riga installa EA capaci di
+mandare ordini veri. **Il nucleo che tocca i soldi** (guardia sui due conti
+demo, rischio 0,65% come unica differenza, copertura totale dei preset,
+tutto-o-niente sul ramo normale, nessun attacco a grafico/AutoTrading) **è
+stato eseguito e verificato pulito**. Il verdetto è stato FAIL solo su tre
+punti di onestà del referto nei rami d'eccezione (recidive delle classi
+**94-ter** e **116-quater**, già chiuse nei due antenati diretti — logger e
+deploy ORB104): in scenari rari (MetaEditor che esplode al lancio, il
+ripristino stesso che fallisce) il referto avrebbe potuto dire "non ci
+siamo arrivati" mentre nel terminale erano già finiti dei file. **Corretti**
+prima di mandare questa pagina: adesso quei rami si timbrano correttamente
+e il ripristino si comanda dal registro di backup, non da una bandiera.
+Il pin sotto è già quello **dopo** la correzione — marcatore `_v2`.
+
+---
+
 ## ▶️ BLOCCO 1 — **CONTROLLO** (giro a vuoto: non scrive niente nel terminale)
 
 Si lancia **prima**, anche di giorno, con MT5 aperto. Torna l'elenco delle
@@ -138,7 +157,7 @@ cartelle guardate, la cartella scelta col suo **criterio**, i gate sui sorgenti,
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: li'' queste due sedie GIA'' girano. Serve il numero del conto REALE.' };
-    $pin='ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='69af6d8e81ec5ab4197b3e8b7e73f3770d09c78c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CONTROLLO; $rc=$LASTEXITCODE;
@@ -167,7 +186,7 @@ la riga `guardia sul conto` che dice **TROVATO**, e la riga
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: serve il numero del conto REALE.' };
-    $pin='ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='69af6d8e81ec5ab4197b3e8b7e73f3770d09c78c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_CONTOREALE_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CORSA; $rc=$LASTEXITCODE;
@@ -445,7 +464,7 @@ Qui sotto c'è capitale vero, quindi il conto lo do per esteso:
 
 ---
 
-_Artefatti al pin `ddbb7e6d48d6ee99f4e892fd4b700d3cd4719b23`:
+_Artefatti al pin `69af6d8e81ec5ab4197b3e8b7e73f3770d09c78c`:
 `backtest_pipeline/righe/RIGA_DEPLOY_CONTOREALE.ps1`,
 `mql5/Experts/ABTG_DAX_Apertura_EU.mq5`, `mql5/Experts/ABTG_ORB_Ottimizzato.mq5`,
 `mql5/Include/ABTG_PausaGuardian.mqh`,
