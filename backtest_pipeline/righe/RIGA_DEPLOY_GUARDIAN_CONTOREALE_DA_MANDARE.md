@@ -151,7 +151,7 @@ se lo lasci lì com'è.
 
 ---
 
-## 2. 📌 IL PIN — **`480aed8191a5a3ebe80f45a4256caac529fec945`** ✅ **NUOVO, INSERITO E VERIFICATO**
+## 2. 📌 IL PIN — **`69ff7751ef086e5aeb2e77b534e66c05655ccb27`** ✅ **NUOVO, INSERITO E VERIFICATO**
 
 > ⚠️ **Il pin di stamattina (`a01e157…`) NON va più usato**, e non è una
 > raccomandazione: **il driver nuovo lo rifiuterebbe da solo**, perché a quel pin
@@ -283,7 +283,7 @@ cartelle guardate, la cartella scelta col suo **criterio**, i gate sul sorgente,
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: sul 100k gira gia'' un Guardian. Serve il numero del conto REALE.' };
-    $pin='480aed8191a5a3ebe80f45a4256caac529fec945'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='69ff7751ef086e5aeb2e77b534e66c05655ccb27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CONTROLLO; $rc=$LASTEXITCODE;
@@ -313,7 +313,7 @@ la riga `guardia sul conto` che dice **TROVATO**, la
     $conto='SCRIVI_QUI_IL_NUMERO';
     if($conto -notmatch '^\d{5,12}$'){ throw 'DEVI SCRIVERE IL NUMERO DEL CONTO REALE al posto di SCRIVI_QUI_IL_NUMERO. Non ho toccato niente.' };
     if($conto -eq '50503392' -or $conto -eq '50504263'){ throw 'QUELLO E'' UN CONTO DEMO: serve il numero del conto REALE.' };
-    $pin='480aed8191a5a3ebe80f45a4256caac529fec945'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='69ff7751ef086e5aeb2e77b534e66c05655ccb27'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_DEPLOY_GUARDIAN_CONTOREALE_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -LoginAtteso $conto -Modo CORSA; $rc=$LASTEXITCODE;
@@ -699,7 +699,7 @@ do per esteso:
 
 ---
 
-_Artefatti al pin `480aed8191a5a3ebe80f45a4256caac529fec945`:
+_Artefatti al pin `69ff7751ef086e5aeb2e77b534e66c05655ccb27`:
 `backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1`,
 `mql5/Experts/ABTG_Guardian.mq5`,
 `mql5/Presets/conto_reale/ABTG_Guardian_REALE.set`,
