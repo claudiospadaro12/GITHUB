@@ -9518,3 +9518,93 @@ anche quando la voce in piu' e' innocua.
 > ri-pinnare) e va rimandata al prossimo ri-pin naturale per
 > l'intestazione dentro il `.set`, che invece e' pinnata. **Il pin non si
 > brucia per un commento**: si brucia per un numero.
+
+---
+
+## 🆕 AGGIUNTE DEL 06/09/2026 (notte) — trovate dal **verificatore di stringhe** sul deploy `ABTG_Guardian` v1.11 -> v1.12 sul **conto REALE** (pin `480aed81`), **ESEGUENDO**: 15 sabotaggi sul gate del fix (0 sfuggiti), 7 guardie sul conto, le 2 one-liner verbatim dalla pagina, e **tre corse end-to-end** del driver vero contro un finto terminale (CONTROLLO, CORSA con `.ex5` reso non cancellabile con `chattr +i`, CORSA di recupero). Il fix del credito e il suo gate sono **corretti e robusti**. Le due voci qui sotto sono difetti **del contorno**, tutti e due **riprodotti**.
+
+## 145. 🧯 IL RIPRISTINO CHE **RISCRIVE ANCHE IL FILE CHE NON HA MAI TOCCATO**, e sul file bloccato muore: il tutto-o-niente FUNZIONA, ma il referto dice **«RIPRISTINO FALLITO — rimetti a mano»**
+
+**Dove.** `RIGA_DEPLOY_GUARDIAN_CONTOREALE.ps1`, `RipristinaDaBackup()`
+(righe 586-603): per **ogni** file del registro fa `Copy-Item ... -Force`
+dal backup, **senza chiedersi se quel file e' gia' identico al backup**.
+
+**Il caso, che e' quello PIU' PROBABILE del giro.** L'aggiornamento di un EA
+**gia' attaccato a un grafico vivo** si ferma — giustamente — sul gate
+`EX5 VECCHIO NON CANCELLABILE`. A quel punto:
+- il `.mq5` era stato copiato -> **va** rimesso, e viene rimesso;
+- l'`.ex5` **non e' mai stato toccato** (la `Remove-Item` era fallita) ->
+  **non ha niente da rimettere**, ma il ripristino ci prova lo stesso;
+- il file e' bloccato, quindi la `Copy-Item` esplode con *accesso negato*,
+  **l'eccezione abortisce l'intero ciclo**, il `.set` non viene nemmeno
+  guardato e i due campi del referto restano ai loro segnaposto.
+
+**Cosa legge Claudio** (riprodotto, non dedotto):
+```
+INSTALLAZIONE ....: TENTATA -- RIPRISTINO IN CORSO dopo un'eccezione.
+                    Se questa riga e' rimasta cosi', il ripristino STESSO e' esploso.
+ripristino .......: IN CORSO dal backup ... -- se questa riga e' rimasta
+                    cosi', rimetti a mano dal backup.
+PROBLEMI: 1
+  - RIPRISTINO FALLITO dopo l'eccezione: guarda a mano <backup>
+```
+**Mentre i tre file sono byte per byte com'erano.** Verificato con sha256
+prima/dopo: `mq5=5675d222 ex5=14c28ef1 set=393b723a` -> identici.
+
+**Perche' e' grave anche se non rompe niente.**
+1. La pagina promette l'opposto (*«si ferma, rimette tutto com'era»*,
+   *«RIPRISTINATO, tutti e tre»*, *«non e' un guasto»*). Il referto dice
+   *guasto*. Su un conto **vero**, la reazione naturale a «rimetti a mano dal
+   backup» e' **copiare a mano un `.ex5` vecchio sopra un terminale vivo**.
+2. La `Remove-Item` della **sentinella** sta **dopo** la chiamata al
+   ripristino: saltata l'una, resta l'altra. Da li' in poi **ogni** CONTROLLO
+   esce con `PROBLEMI: 1` (sentinella di un giro interrotto) — e la pagina
+   pretende `PROBLEMI: 0` per passare alla CORSA. **Il cancello documentato
+   diventa irraggiungibile.**
+
+**La regola.** Un ripristino comandato dal registro deve **misurare prima di
+scrivere**: se la destinazione e' **gia' identica al backup non si tocca**, e
+si dichiara *«gia' identico al backup, non toccato»*. E **il fallimento su un
+file non deve mai far saltare gli altri**: `try/catch` **per file**, esito per
+file. Riscrivere alla cieca un file sano e' l'unico modo di trasformare un
+ripristino **riuscito** in un ripristino **dichiarato rotto**.
+
+**Il controllo secco:** ogni `RipristinaDa*` va provata **con la destinazione
+non scrivibile** (`chattr +i` su Linux basta e avanza) e si legge **il
+referto**, non solo gli sha256 dei file. Il banco che asserisce solo sugli
+hash da' **verde a questo difetto**: e' esattamente com'e' passato.
+
+## 146. 💶 IL NUMERO DELLA PROMESSA IN CIMA ALLA PAGINA CALCOLATO SU **UN'ALTRA BASE** DI QUELLO DELLA TABELLA IN FONDO: la stessa pagina promette `~245-495 EUR` e consegna `~367-742 EUR`
+
+**Dove.** `RIGA_DEPLOY_GUARDIAN_CONTOREALE_DA_MANDARE.md` righe 22-23 (*«invece
+dei ~245-495 EUR previsti»*) contro le righe 91-93 (*«pausa ~300 EUR . giorno
+~367 EUR . totale ~742 EUR»*). Stessa frase ripetuta in `HANDOFF.md`.
+
+**Il fatto.** Conto con **bilancio 5.000** e **credito stabile 2.500** =
+**equita' 7.500**. `245`/`495` sono `4,9%`/`9,9%` di **5.000**; `367,50`/`742,50`
+sono gli stessi due punti percentuali di **7.500**. La v1.12 cattura la
+baseline dall'**equita'**, quindi consegna i secondi. **Il codice e' giusto** e
+segue la convenzione che Claudio aveva gia' scelto lo stesso giorno (*«la % del
+conto reale si calcola sull'EQUITA' 7.500»*, `HANDOFF.md`). **E' il numero
+della pagina a essere vecchio**, rimasto dell'altra convenzione.
+
+**Perche' non e' un dettaglio.** E' il numero **del paragrafo che spiega perche'
+si aggiorna**, cioe' quello su cui si decide di fidarsi del resto — la famiglia
+della **classe 144**. E ha un secondo lato che va **dichiarato**, non nascosto:
+`742,50 EUR` sono il **9,9% dell'equita'** ma il **14,85% dei 5.000 EUR
+davvero prelevabili**. La firma del 18/08 dice `9,9%`: su quale base, **si
+scrive**.
+
+**La regola.** Su un conto con **credito**, ogni soglia si scrive **due volte**:
+in **percentuale con la base nominata** (*«9,9% dell'equita' 7.500»*) **e in
+euro**. Un `9,9%` senza base, su un conto dove bilancio ed equita' non
+coincidono, **non e' un numero**.
+
+> ⚠️ **E la trappola che ne discende, da lasciare scritta:** `InpStartBalance`
+> **non e' la base percentuale, e' il livello di riferimento**. `gStart` fa i
+> due mestieri insieme (`dailyLimit = pct*gStart` **e** `totalDD = gStart-eq`).
+> Metterci il bilancio vero (`5000`) — il gesto piu' istintivo del mondo —
+> renderebbe `totalDD = 5000-7500 = -2500`: il DD totale **non scatterebbe piu'
+> fino a ~2.995 EUR di perdita**, cioe' **il bug del credito, tale e quale**.
+> Il preset lo blocca (pretende `0` esatto), **la finestra dei parametri di MT5
+> no.** Va scritto nella pagina accanto a `InpStartBalance = 0`.
