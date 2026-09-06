@@ -7,6 +7,41 @@
 
 ---
 
+## 💶 06/09 — CONTO REALE: bilancio vero 5.000€, non 7.500€ (regola di conteggio decisa da Claudio)
+
+**Scoperto dallo screenshot del dialogo Guardian**: la barra Trade del conto reale (10105439) mostra
+`Bilancio: 5.000,00 EUR   Equità: 7.500,00 EUR   Credito: 2.500,00 EUR`.
+Tutte le stime di oggi ("saldo ~7.500€", "0,65% = ~49€ a trade") erano calcolate
+sull'**Equità** (Bilancio + Credito), non sul Bilancio vero. Chiesto a Claudio:
+**il credito di 2.500€ è STABILE** (confermato da lui, non revocabile) — quindi
+nessun rischio che il Guardian legga una sua rimozione come un drawdown del 50%
+e blocchi tutto per errore.
+
+**Decisione presa (06/09, poi corretta lo stesso giorno): la % di profitto del
+conto reale si calcola sull'EQUITÀ (7.500€ = bilancio 5.000€ + credito stabile
+2.500€), non sul solo bilancio.** Prima decisione (bilancio 5.000€) proposta e
+accettata, poi Claudio ha corretto: preferisce 7.500€. A 0,65% di rischio, il
+costo per trade resta quello già detto in mattinata: **~49€** (0,65% di
+7.500€).
+
+⚠️ **Nota tecnica che resta valida indipendentemente dalla convenzione di
+reporting**: `ABTG_Guardian.mq5` usa `AccountInfoDouble(ACCOUNT_BALANCE)` (il
+bilancio, 5.000€) come riferimento per i SUOI calcoli di drawdown (righe
+259/335) — questo NON cambia, è un fatto del codice, non una scelta di
+reporting. Le soglie 4,9%/9,9% del Guardian sono quindi calcolate su 5.000€
+(più severe in euro assoluti di quanto lo sarebbero su 7.500€), mentre quando
+Claudio chiede "quanto abbiamo guadagnato in %" la risposta va data sul
+7.500€. Due basi diverse per due scopi diversi, entrambe corrette per il loro
+uso: dichiararlo sempre per evitare confusione futura.
+
+**Stato deploy conto reale a fine giornata 06/09:**
+- `ABTG_SlippageLogger` — installato, live, **0 deal registrati** (nessun trade ancora eseguito su questo conto).
+- `ABTG_DAX_Apertura_EU` (770101) e `ABTG_ORB_Ottimizzato` (770611) — installati, CORSA pulita. Passi manuali (attaccare ai grafici, caricare i preset, AutoTrading) da confermare con Claudio la prossima sessione utile.
+- `ABTG_Guardian` (779002) — installato, CORSA pulita (0 problemi), preset caricato e verificato via screenshot (16/16 valori corretti: magic 779002, saldo 0, 4.9/9.9/4.0/3.25, azione enforce). **Da confermare**: Claudio ha premuto OK, acceso AutoTrading sul grafico del Guardian, e verificato la scheda Esperti con i 4 numeri firmati?
+- ⚠️ **Promemoria permanente**: il blocco Guardian a -9,9% è definitivo (richiude tutto ogni secondo, comprese posizioni a mano) finché non si cancella a mano la GlobalVariable `ABTG_GUARD_10105439_FAILED` con F3 su MT5.
+
+---
+
 ## ⏰ DA FARE DOMANI MATTINA — conto REALE (10105439) non ancora sistemato
 
 **Stato lasciato a notte fonda del 05/09:**
