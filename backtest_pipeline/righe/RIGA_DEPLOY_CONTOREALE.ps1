@@ -216,7 +216,7 @@ $PresetsTxt = "NON VERIFICATO (non ci siamo arrivati)"
 $LoggerTxt  = "NON VERIFICATO (non ci siamo arrivati)"
 $GiaLi      = "NON VERIFICATO"
 $ContoTxt   = "NON MISURATO"
-$BasiTxt    = "NON LETTE"
+$BasiTxt    = "bases\ della cartella scelta: NON LETTE (il giro si e' fermato prima di sceglierla)"
 $LoggerQui  = "NON VERIFICATO"
 $ScrittoNelTerminale = $false
 $SetCopiati = $false
@@ -516,7 +516,7 @@ try{
   }
   Dico ("pin ............ " + $Pin)
   Dico ("conto atteso ... " + $LoginAtteso + "   (vietati per sempre: " + ($VIETATI_CONTI -join ", ") + ")") "Yellow"
-  Dico ("rischio preteso  " + $RISCHIO_ATTESO.ToString($INV) + "%   (tetto invalicabile " + $RISCHIO_TETTO.ToString($INV) + "%)") "Yellow"
+  Dico ("rischio preteso  " + $RISCHIO_ATTESO.ToString("0.00",$INV) + "%   (tetto invalicabile " + $RISCHIO_TETTO.ToString("0.00",$INV) + "%)") "Yellow"
   Dico ("cartella di lavoro: " + $Work)
 
   # -------------------------------------------------------------------
@@ -596,12 +596,12 @@ try{
   $mr1 = [regex]::Match($testo1, 'ABTG_DEF_RISK\s+([0-9]+(?:\.[0-9]+)?)')
   if(-not $mr1.Success){ throw ("in " + $EA1 + ".mq5 non trovo #define ABTG_DEF_RISK: non posso verificare il default compilato del rischio, e su un conto reale questo non si salta.") }
   $r1def = [double]::Parse($mr1.Groups[1].Value, $INV)
-  if($r1def -gt $RISCHIO_TETTO){ throw ("IL DEFAULT COMPILATO DEL RISCHIO di " + $EA1 + " e' " + $r1def.ToString($INV) + "%, sopra il tetto " + $RISCHIO_TETTO.ToString($INV) + "% (riga rossa A4). E' la trappola chiusa il 02/09: NON installo.") }
+  if($r1def -gt $RISCHIO_TETTO){ throw ("IL DEFAULT COMPILATO DEL RISCHIO di " + $EA1 + " e' " + $r1def.ToString("0.00",$INV) + "%, sopra il tetto " + $RISCHIO_TETTO.ToString("0.00",$INV) + "% (riga rossa A4). E' la trappola chiusa il 02/09: NON installo.") }
   $mr2 = [regex]::Match($testo2, 'input\s+double\s+InpRiskPercent\s*=\s*([0-9]+(?:\.[0-9]+)?)')
   if(-not $mr2.Success){ throw ("in " + $EA2 + ".mq5 non trovo il default di InpRiskPercent: non posso verificare il default compilato, e su un conto reale questo non si salta.") }
   $r2def = [double]::Parse($mr2.Groups[1].Value, $INV)
-  if($r2def -gt $RISCHIO_TETTO){ throw ("IL DEFAULT COMPILATO DEL RISCHIO di " + $EA2 + " e' " + $r2def.ToString($INV) + "%, sopra il tetto " + $RISCHIO_TETTO.ToString($INV) + "%. NON installo.") }
-  [void]$GateTxt.Add("default COMPILATI del rischio (quelli che tornerebbero con un RIPRISTINA sul grafico): " + $EA1 + " " + $r1def.ToString($INV) + "% | " + $EA2 + " " + $r2def.ToString($INV) + "%   -- tetto " + $RISCHIO_TETTO.ToString($INV) + "%: rispettato")
+  if($r2def -gt $RISCHIO_TETTO){ throw ("IL DEFAULT COMPILATO DEL RISCHIO di " + $EA2 + " e' " + $r2def.ToString("0.00",$INV) + "%, sopra il tetto " + $RISCHIO_TETTO.ToString("0.00",$INV) + "%. NON installo.") }
+  [void]$GateTxt.Add("default COMPILATI del rischio (quelli che tornerebbero con un RIPRISTINA sul grafico): " + $EA1 + " " + $r1def.ToString("0.00",$INV) + "% | " + $EA2 + " " + $r2def.ToString("0.00",$INV) + "%   -- tetto " + $RISCHIO_TETTO.ToString("0.00",$INV) + "%: rispettato")
 
   # --- l'autotest della v1.04 dell'ORB: e' l'unica prova che in Esperti
   #     distinguera' la v1.04 dalla v1.02 (la v1.02 non lo stampa affatto)
@@ -703,7 +703,7 @@ try{
       throw ("InpRiskPercent del preset " + $c.Nome + " non e' un numero leggibile ('" + $s.KV["InpRiskPercent"] + "'). NON installo.")
     }
     if([math]::Abs($rv - $RISCHIO_ATTESO) -gt 0.0000001){
-      throw ("RISCHIO SBAGLIATO nel preset " + $c.Nome + ": InpRiskPercent = " + $rv.ToString($INV) + ", atteso ESATTAMENTE " + $RISCHIO_ATTESO.ToString($INV) + " (taglia firmata per il conto reale). NON installo.")
+      throw ("RISCHIO SBAGLIATO nel preset " + $c.Nome + ": InpRiskPercent = " + $rv.ToString("0.00",$INV) + ", atteso ESATTAMENTE " + $RISCHIO_ATTESO.ToString("0.00",$INV) + " (taglia firmata per il conto reale). NON installo.")
     }
     $sopra = New-Object System.Collections.ArrayList
     foreach($k in $s.Ordine){
@@ -715,7 +715,7 @@ try{
       }
     }
     if($sopra.Count -gt 0){
-      throw ("NEL PRESET " + $c.Nome + " C'E' UNA CHIAVE DI RISCHIO SOPRA IL TETTO " + $RISCHIO_TETTO.ToString($INV) + " (" + (@($sopra) -join ", ") + "): riga rossa A4. NON installo.")
+      throw ("NEL PRESET " + $c.Nome + " C'E' UNA CHIAVE DI RISCHIO SOPRA IL TETTO " + $RISCHIO_TETTO.ToString("0.00",$INV) + " (" + (@($sopra) -join ", ") + "): riga rossa A4. NON installo.")
     }
     $lato = "long+short"
     if($s.KV.ContainsKey("InpAllowLong") -and $s.KV.ContainsKey("InpAllowShort")){
@@ -728,8 +728,8 @@ try{
     if($s.KV.ContainsKey("InpMaxSpread")){ $mx = "" + $s.KV["InpMaxSpread"] }
     $gu = "n/d"
     if($s.KV.ContainsKey("InpUsaGuardian")){ $gu = "" + $s.KV["InpUsaGuardian"] }
-    [void]$SetTxt.Add($c.Nome + "  ->  simbolo atteso " + $c.Simbolo + " | " + @($s.Ordine).Count + " chiavi = " + @($ins).Count + " input dell'EA (copertura TOTALE) | InpMagic=" + $s.KV["InpMagic"] + " | InpRiskPercent=" + $rv.ToString($INV) + " | lati: " + $lato + " | InpMaxSpread=" + $mx + " | InpUsaGuardian=" + $gu)
-    Dico ("preset OK: " + $c.Nome + "  (magic " + $s.KV["InpMagic"] + ", rischio " + $rv.ToString($INV) + "%, " + @($s.Ordine).Count + " chiavi, copertura totale)") "Green"
+    [void]$SetTxt.Add($c.Nome + "  ->  simbolo atteso " + $c.Simbolo + " | " + @($s.Ordine).Count + " chiavi = " + @($ins).Count + " input dell'EA (copertura TOTALE) | InpMagic=" + $s.KV["InpMagic"] + " | InpRiskPercent=" + $rv.ToString("0.00",$INV) + " | lati: " + $lato + " | InpMaxSpread=" + $mx + " | InpUsaGuardian=" + $gu)
+    Dico ("preset OK: " + $c.Nome + "  (magic " + $s.KV["InpMagic"] + ", rischio " + $rv.ToString("0.00",$INV) + "%, " + @($s.Ordine).Count + " chiavi, copertura totale)") "Green"
   }
   [void]$GateTxt.Add("preset: TUTTI E DUE passano i sei cancelli (ASCII, righe ben formate, nessuna chiave estranea, copertura TOTALE degli input, magic esatto, rischio esatto e sotto il tetto)")
 
@@ -1268,7 +1268,7 @@ try{
   [void]$r.Add("I DUE PRESET, APERTI E CONTATI:")
   if($SetTxt.Count -eq 0){ [void]$r.Add("   NON LETTI (il giro si e' fermato prima)") }
   foreach($x in $SetTxt){ [void]$r.Add("   " + $x) }
-  [void]$r.Add("rischio preteso: InpRiskPercent = " + $RISCHIO_ATTESO.ToString($INV) + " ESATTO, e nessuna chiave *Risk* sopra il tetto " + $RISCHIO_TETTO.ToString($INV))
+  [void]$r.Add("rischio preteso: InpRiskPercent = " + $RISCHIO_ATTESO.ToString("0.00",$INV) + " ESATTO, e nessuna chiave *Risk* sopra il tetto " + $RISCHIO_TETTO.ToString("0.00",$INV))
   [void]$r.Add("erano gia' installati ....: " + $GiaLi)
   [void]$r.Add("")
   [void]$r.Add("backup ...................: " + $BackupTxt)
@@ -1302,15 +1302,15 @@ try{
   [void]$r.Add("  3. Trascina " + $EA1 + ", scheda Dati in Ingresso > Carica... >")
   [void]$r.Add("     " + $SET1)
   [void]$r.Add("     e PRIMA DI PREMERE OK guarda a schermo: InpMagic = " + $MAGIC1)
-  [void]$r.Add("     e InpRiskPercent = " + $RISCHIO_ATTESO.ToString($INV) + ". Screenshot.")
+  [void]$r.Add("     e InpRiskPercent = " + $RISCHIO_ATTESO.ToString("0.00",$INV) + ". Screenshot.")
   [void]$r.Add("  4. Stessa cosa su un secondo grafico NUOVO " + $SIMB2 + " M5 con")
   [void]$r.Add("     " + $EA2 + " e " + $SET2)
-  [void]$r.Add("     (InpMagic = " + $MAGIC2 + ", InpRiskPercent = " + $RISCHIO_ATTESO.ToString($INV) + ").")
+  [void]$r.Add("     (InpMagic = " + $MAGIC2 + ", InpRiskPercent = " + $RISCHIO_ATTESO.ToString("0.00",$INV) + ").")
   [void]$r.Add("  5. AutoTrading ACCESO e faccina SORRIDENTE su tutti e due i grafici.")
   [void]$r.Add("  6. Scheda ESPERTI (non Giornale): '" + $AVVIO1 + "...' e")
   [void]$r.Add("     '" + $AVVIO2 + "...', piu' la riga")
   [void]$r.Add("     'ORB AUTOTEST: " + $ORB_BLOCCHI + " blocchi su " + $ORB_BLOCCHI + " passati, " + $ORB_CASI + " casi dichiarati, 0 falliti'.")
-  [void]$r.Add("     Nella riga CONFIG IN USO del DAX deve comparire rischio=" + $RISCHIO_ATTESO.ToString($INV) + "%.")
+  [void]$r.Add("     Nella riga CONFIG IN USO del DAX deve comparire rischio=" + $RISCHIO_ATTESO.ToString("0.00",$INV) + "%.")
   [void]$r.Add("  7. PROMEMORIA DEI SOLDI: con 7.500 EUR e 0,65% il rischio per trade")
   [void]$r.Add("     e' circa 49 EUR. Due sedie insieme = circa 1,3% (circa 98 EUR).")
   [void]$r.Add("")
