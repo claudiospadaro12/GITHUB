@@ -9257,3 +9257,46 @@ conta +1, e lascia una matrioska che nessuno cerchera' mai.
 > non puo' perdere la sicurezza del gemello) colto sul fatto: **prima di
 > scrivere un `-Annulla` nuovo si apre quello vecchio e si copiano le guardie,
 > una per una.**
+
+## 141. 📰 IL REFERTO CHE ELENCA IL **PIANO** SOTTO IL TITOLO DELL'**ESITO**: la cartella che NON si e' mossa risulta spostata nello zip, e il conto "NON spostate: 1" non dice MAI quale
+
+_Difetto vero, riprodotto il 06/09 sul pin `d250911` di
+`backtest_pipeline/righe/RIGA_ORGANIZZA_DESKTOP.ps1` (righe 152, 210, 214-218,
+226) mentre si verificavano i fix del punto 140. Banco: una destinazione di
+categoria occupata da un FILE omonimo -> `Move-Item` esplode davvero._
+
+Il fix del 06/09 aveva gia' sistemato mezza bugia del referto (le
+cartelle-categoria dichiarate "PROTETTE" quando sono DESTINAZIONI). L'altra
+meta' era rimasta, ed e' peggiore, perche' sta nell'**unico artefatto che
+Claudio manda indietro**, lo zip:
+
+1. l'elenco per categoria e' costruito su **`$Piano`** (cosa si VOLEVA
+   spostare) ma stampato sotto il titolo **"le cartelle sotto sono state
+   spostate davvero"**;
+2. la cartella fallita compare li' dentro come spostata;
+3. l'unica traccia del fallimento nel referto e' il numero secco
+   `NON spostate: 1` — **senza il nome**. Il nome esiste solo nella riga gialla
+   a schermo, che si perde alla chiusura della finestra.
+
+Esito misurato: `esito_desktop_*.txt` con `Fantasmi (1) - fantasmi_R80` sotto
+"spostate davvero", mentre `fantasmi_R80` era ancora sul Desktop. E su Windows
+non serve un banco artificiale: **basta la cartella aperta in Esplora risorse o
+un file dentro tenuto da un editor** e `Move-Item` fallisce. Uscita `1` e riga
+gialla ci sono (il punto 140-bis ha fatto il suo), ma chi legge lo zip legge il
+contrario del vero -> mezzo giro a vuoto garantito ("dov'e' finita?").
+
+> ✅ **Regola: un referto di ESECUZIONE si costruisce su cio' che e'
+> RIUSCITO, mai sulla lista delle intenzioni; e ogni fallimento entra nel
+> referto CON IL NOME, non come contatore.** Tre gesti:
+> ```powershell
+> # 1) il titolo non promette piu' di quel che l'elenco dimostra
+> [void]$righe.Add('ESITO ESECUZIONE - elenco PIANIFICATO qui sotto; esito REALE e fallite per nome in fondo')
+> # 2) i fallimenti si accumulano per NOME, non solo come $Ko++
+> [void]$Falliti.Add('  NON spostata: ' + $voce.Cartella + '  --  ' + $_.Exception.Message)
+> # 3) e finiscono nel file che parte nello zip
+> foreach ($m in $Falliti) { [void]$righe.Add($m) }
+> ```
+> Il gemello `-Annulla` dello stesso script lo faceva **gia' giusto** (lista
+> `$rilievi` riversata nel referto): e' di nuovo il punto 9 — **la meta' buona
+> era in casa, a otto righe di distanza, e non e' stata copiata nell'altra
+> meta'.**
