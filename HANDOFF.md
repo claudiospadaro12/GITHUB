@@ -17,8 +17,9 @@ cuscinetto permanente di 2.500€.
 
 **Quanto pesava.** Con bilancio 5.000 e credito 2.500, la pausa al 4,9% e il
 blocco al 9,9% **non sarebbero scattati** fino a una perdita **reale** di oltre
-**2.700-3.000€** — cioè oltre metà del capitale vero — invece dei **~245-495€**
-previsti. 👉 **La rete c'era ed era quasi disattivata.**
+**2.700-3.000€** — cioè oltre metà del capitale vero — invece dei **~367-742€**
+che la v1.12 consegna davvero (4,9%/9,9% dell'**equità 7.500€**, la base scelta
+il 06/09 per la % di profitto). 👉 **La rete c'era ed era quasi disattivata.**
 
 **Cosa è stato fatto** (`d884f7e` e seguiti, branch `lavoro`):
 - `ABTG_Guardian.mq5` **v1.11 → v1.12**: baseline presa dall'**EQUITÀ** in

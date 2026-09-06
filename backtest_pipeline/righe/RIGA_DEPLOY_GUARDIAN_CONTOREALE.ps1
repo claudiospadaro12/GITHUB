@@ -589,14 +589,30 @@ function RipristinaDaBackup([string]$dir,[string[]]$dest){
     if([string]::IsNullOrEmpty($d)){ continue }
     $nome = Split-Path -Leaf $d
     $b = Join-Path $dir $nome
-    if(Test-Path -LiteralPath $b){
-      Copy-Item -LiteralPath $b -Destination $d -Force
-      if((HashPieno $b) -eq (HashPieno $d)){ [void]$esiti.Add($nome + ": rimesso dal backup (sha256 identico)") }
-      else{ [void]$esiti.Add($nome + ": COPIATO MA SHA256 DIVERSO -- controllare a mano") }
+    try{
+      if(Test-Path -LiteralPath $b){
+        # GIA' IDENTICO AL BACKUP = NON E' STATO TOCCATO: non si riscrive.
+        # E' il caso dell'.ex5 tenuto aperto da MT5 (la Remove-Item era
+        # fallita, quindi il file non e' mai stato cancellato): riscriverlo
+        # fallisce per 'accesso negato' e fa passare per ROTTO un
+        # ripristino perfettamente riuscito (classe 145).
+        if((HashPieno $b) -eq (HashPieno $d)){
+          [void]$esiti.Add($nome + ": gia' identico al backup, non toccato")
+          continue
+        }
+        Copy-Item -LiteralPath $b -Destination $d -Force
+        if((HashPieno $b) -eq (HashPieno $d)){ [void]$esiti.Add($nome + ": rimesso dal backup (sha256 identico)") }
+        else{ [void]$esiti.Add($nome + ": COPIATO MA SHA256 DIVERSO -- controllare a mano") }
+      }
+      else{
+        Remove-Item -LiteralPath $d -Force -ErrorAction SilentlyContinue
+        if(Test-Path -LiteralPath $d){ [void]$esiti.Add($nome + ": NON RIMOSSO (prima non c'era) -- controllare a mano") }
+        else{ [void]$esiti.Add($nome + ": rimosso (prima del giro non c'era)") }
+      }
     }
-    else{
-      Remove-Item -LiteralPath $d -Force -ErrorAction SilentlyContinue
-      [void]$esiti.Add($nome + ": rimosso (prima del giro non c'era)")
+    catch{
+      # un file che non si lascia rimettere NON deve far saltare gli altri
+      [void]$esiti.Add($nome + ": RIPRISTINO NON RIUSCITO (" + $_.Exception.Message + ") -- controllare a mano " + $b)
     }
   }
   return @($esiti)

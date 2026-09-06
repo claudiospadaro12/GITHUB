@@ -20,7 +20,9 @@ che si somma all'**equità** ma **non al bilancio**. Il Guardian v1.11 prendeva 
 suo **saldo di riferimento dal BILANCIO** e poi lo confrontava con l'**EQUITÀ**:
 quel credito faceva da **cuscinetto finto**, e **la pausa al 4,9% e il blocco al
 9,9% non sarebbero scattati** fino a una perdita **vera** di oltre **2.700-3.000 €**
-— invece dei **~245-495 €** previsti. 👉 **La rete c'era, ma quasi non mordeva.**
+— invece dei **~367-742 €** che la v1.12 consegna davvero (4,9% e 9,9%
+dell'**equità 7.500 €**, la base che hai scelto il 06/09 per la % di profitto).
+👉 **La rete c'era, ma quasi non mordeva.**
 La v1.12 prende **l'equità da tutte e due le parti** del confronto, e il credito
 si cancella da solo.
 
@@ -345,6 +347,9 @@ la riga `guardia sul conto` che dice **TROVATO**, la
 > sedie continuano a operare col **loro** rischio per-trade, ma **pausa, cap ed
 > emergenze non ci sono**. 👉 **Fallo a mercati fermi**, o comunque **non lasciare
 > il buco aperto**: riattacca appena la CORSA è finita.
+> 📅 **Oggi (06/09/2026) è domenica: i mercati sono chiusi.** È il momento
+> giusto — la finestra scoperta non costa niente adesso, ma non aspettare
+> l'apertura di lunedì per farla.
 
 ### PASSO 1 — far comparire l'EA aggiornato
 **Navigatore → Expert Advisors → tasto destro → Aggiorna.** Deve comparire
@@ -574,6 +579,14 @@ scarto. Tre casi:
   cancelli `ABTG_GUARD_<login>_START_V2` da F3 e riavvii l'EA. ⚠️ **Nome cambiato
   con la v1.12** (`_V2` in fondo): la vecchia `…_START`, senza suffisso, è ancora
   lì ma **non la legge più nessuno**, e cancellare quella non farebbe niente.
+- 🪤 **NON metterci `5000` pensando "è il saldo vero".** `InpStartBalance` non è
+  solo l'etichetta del saldo: è il **livello di riferimento** con cui l'equità
+  viene confrontata (`totalDD = riferimento − equità`). Scrivere `5000` a mano
+  ricrea **lo stesso bug del credito** da un'altra porta: `totalDD = 5000−7500 =
+  −2500`, e il DD totale non scatterebbe più fino a **~2.995 €** di perdita vera
+  — esattamente il difetto che questo aggiornamento chiude. **`InpStartBalance`
+  resta `0`, sempre**: il preset lo pretende esatto, ma la finestra dei
+  parametri di MT5 non lo impedisce se lo tocchi a mano.
 - 🔌 **Guardiano spento = niente rete, e anche niente freni.** Se MT5 è chiuso o
   l'EA non è sul grafico, il **battito** si ferma: pausa e cap **scadono da soli**
   entro 120 s (fail-open voluto) e i due EA tornano a operare **senza** B1 e C1.
