@@ -9751,3 +9751,138 @@ unico. Due filtri scritti nella stessa riga di codice, con la stessa forma
 non si vede leggendo lo script: si vede **solo** aprendo i due sorgenti.
 E' la Regola Zero, punto 1, applicata agli **EA** e non solo agli script:
 _apri il file a cui la riga punta e leggilo davvero._
+
+---
+
+## 🆕 AGGIUNTA DEL 06/09/2026 (notte) — trovata dal **verificatore di stringhe**
+RI-VERIFICANDO la **v2** di `RIGA_LOG_SEDIE_MUTE.ps1` (pin `fa009ca8`), quella
+nata ieri per chiudere la classe **148**. Il fix della 148 e' **corretto e
+verificato ESEGUENDO** su banco `pwsh` 7.4.6 con tre finti terminali MT5
+(log UTF-16 con BOM + UTF-8, righe del vicino `770923` su **D30EUR H4**): le
+righe della sedia indagata `970912` e quelle del vicino finiscono in **due
+sezioni diverse**, e il file vecchio fuori finestra resta fuori. Parse reale 0
+errori, ASCII puro (0 byte non-ASCII), cultura invariante ovunque
+(`$INV` su tutti i `ToString`), zero euristiche del silenzio, sola lettura.
+Ma **la manopola aggiunta per chiudere la classe 115 ha aperto la porta di
+servizio**: due voci, tutte e due **RIPRODOTTE ESEGUENDO**.
+
+## 149. 🔑 LA MANOPOLA A MANO CHE **SCAVALCA IL GATE CHE LO SCRIPT HA GIA'**: `-CartellaDati` salta sia il controllo di esistenza sia la lista dei conti VIETATI, e diventa **l'unico ramo con meno controlli di quello automatico**
+
+### Il fatto
+
+Lo script sceglie la cartella dati del conto piccolo con un ramo automatico
+onesto: legge i log, cerca il login `50503392`, **scarta** le cartelle in cui
+compare un login della lista `$VIETATI` (il 100k `50504263`, fuori perimetro
+Fase 1) e, se resta ambiguo, **si ferma** (classe 115: l'ambiente non si
+indovina). Poi c'e' la manopola:
+
+```powershell
+if ($CartellaDati -ne '') { $scelta = $CartellaDati; $comeScelta = 'IMPOSTA A MANO con -CartellaDati' }
+```
+
+**Prima riga del blocco `if/elseif`**: appena il percorso e' scritto, tutto il
+resto del giudizio non viene nemmeno valutato. Ne segue che la manopola **non
+controlla nulla** — ne' che la cartella esista, ne' che non sia quella vietata.
+Due corse sul banco, tutte e due verdi, `exit 0`, referto scritto sul Desktop:
+
+| passo `-CartellaDati` | cosa fa lo script | cosa scrive il referto |
+|---|---|---|
+| cartella del **100k** (in `$VIETATI`) | stampa in console `login visti: 50504263` **e la usa lo stesso** | le righe del 100k intestate alle due sedie del **piccolo** |
+| GUID **sbagliato di un carattere** | nessun avviso, `file di log letti (ultimi 21 giorni): 0` | `NESSUNA RIGA TROVATA` per **tutte e due** le sedie, `ESITO LETTURA: COMPLETO` |
+
+👉 Il secondo caso e' quello che uccide: il referto di questa riga serve a
+distinguere **"la sedia e' filtrata"** da **"la sedia non gira"**, e un percorso
+sbagliato di **un carattere** produce, in verde e senza una parola di allarme,
+esattamente il verdetto _"non gira -> apri la riparazione"_. La classe 148 al
+contrario: li' la sedia muta sembrava parlare, qui **la sedia che parla sembra
+muta** — e i due GUID (piccolo `215D85D7...`, 100k `BCA8AD18...`) girano
+appaiati nella stessa chat.
+
+### Perche' e' una classe e non una svista
+
+La manopola nasce **come rimedio a un difetto** (classe 115: il gate che si
+ferma davanti a due cartelle eleggibili — costo misurato, due lanci a vuoto la
+sera del 06/09 su `RIGA_SPREADLOGGER.ps1`). Il rimedio si scrive di fretta,
+come **scorciatoia fidata**: _"se il percorso me lo do io, e' giusto per
+definizione"_. Ma da quel momento la scorciatoia diventa **la strada normale**:
+da stasera il `-CartellaDati` e' scritto **dentro ogni riga**, quindi il ramo
+automatico — l'unico che controlla qualcosa — non viene mai piu' eseguito.
+Ed era **gia' stato previsto per iscritto** il 05/09, dentro la narrazione
+della classe 136: _"basta incollare il percorso sbagliato (l'altro terminale,
+il 100k, una cartella qualunque) e il referto esce verde, completo e con i
+numeri di un'altra raccolta"_. Previsto e non trasformato in regola: il giorno
+dopo, uno script nuovo lo rifa'.
+
+### La regola
+
+> ✅ **Una manopola a mano deve passare gli STESSI gate del ramo automatico, non
+> meno.** Se il codice sa scartare una cartella perche' ci trova un login
+> vietato, **deve scartarla anche quando gliela passa l'utente**: l'origine del
+> valore non e' una prova della sua bonta'. La forma giusta e' *validare
+> sempre, scegliere dopo* — mai `if (manopola) { usa }` come primo ramo.
+>
+> 🔎 **Il minimo sindacale, in tre righe, e vale per QUALUNQUE percorso passato
+> a mano**: (1) esiste? (2) contiene la sottocartella che il lavoro pretende
+> (`MQL5\Logs`)? (3) **contiene la prova d'identita' del bersaglio** — qui il
+> numero di conto dentro i log, che e' un FATTO, mentre il GUID e' solo
+> un'etichetta copiata.
+>
+> 🧯 **E finche' lo script non e' patchato, i tre controlli si mettono NELLA
+> RIGA**, prima dell'`irm`: costano tre `if`, non richiedono un ri-pin, e
+> trasformano un referto falso in un messaggio rosso che dice a Claudio cosa
+> mandare. (Fatto stanotte: i tre gate sono stati provati eseguendo su quattro
+> cartelle — giusta, 100k, GUID storto, cartella senza `MQL5\Logs` — e solo la
+> prima passa.)
+
+### 149-bis. 🫙 `ESITO LETTURA: COMPLETO` con **ZERO file letti**: l'universo vuoto spacciato per misura completa
+
+Nello stesso script l'esito si calcola cosi':
+
+```powershell
+$esito = 'COMPLETO'
+if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti' }
+```
+
+Conta i file **che non si sono potuti leggere**, e non contempla mai il caso
+_"non c'era niente da leggere"_. Con zero file in finestra il referto esce
+`ESITO LETTURA: COMPLETO` + `NESSUNA RIGA TROVATA` su tutte e due le sedie:
+due frasi che, lette insieme a notte fonda, **sono una conclusione**. L'unico
+campanello (`file di log letti: 0`) e' una riga di intestazione che l'esito
+subito sotto **contraddice**.
+
+> ✅ **REGOLA: "non ho trovato niente" e "non ho guardato niente" devono avere
+> due nomi diversi nel referto, e il secondo deve essere PIU' RUMOROSO del
+> primo.** `denominatore = 0` non e' un risultato: e' l'assenza della misura.
+> Un `ESITO LETTURA: NON MISURATO -- zero file di log in finestra` in testa
+> costa una riga, e nella riga di lancio il controllo costa un `Select-String`
+> sul referto appena scritto.
+>
+> _(Parente stretta della **136** — l'artefatto che non si svuota — e della
+> **124**: `PROBLEMI: 0` calcolato su un insieme vuoto e' sempre 0.)_
+
+### Le due patch da applicare allo script (fuori dalla notte, con calma)
+
+```diff
+-if ($CartellaDati -ne '') { $scelta = $CartellaDati; $comeScelta = 'IMPOSTA A MANO con -CartellaDati' }
++if ($CartellaDati -ne '') {
++  if (-not (Test-Path -LiteralPath $CartellaDati)) { Write-Host ('CARTELLA -CartellaDati INESISTENTE: ' + $CartellaDati) -ForegroundColor Red; exit 1 }
++  $vv = $info[$CartellaDati].Visti
++  foreach ($x in $VIETATI) { if ($vv -and $vv.Contains($x)) { Write-Host ('CARTELLA VIETATA: qui c''e'' il conto ' + $x) -ForegroundColor Red; exit 1 } }
++  $scelta = $CartellaDati; $comeScelta = 'IMPOSTA A MANO con -CartellaDati (esistenza e conto verificati)'
++}
+```
+
+```diff
+ $esito = 'COMPLETO'
++if ($file.Count -eq 0) { $esito = 'NON MISURATO -- ZERO file di log in finestra: questo referto NON dice niente sulle due sedie' }
+ if ($nonLetti.Count -gt 0) { $esito = 'PARZIALE -- ' + $nonLetti.Count + ' file NON letti' }
+```
+
+E due rilievi minori, misurati sullo stesso banco, da chiudere insieme:
+**(a)** il nome del referto e' al secondo (`log_sedie_mute_AAAA-MM-GG_HHMMSS.txt`):
+due lanci **nello stesso secondo** si sovrascrivono in silenzio (classe 142-bis,
+qui innocua perche' il contenuto e' identico e la raccolta prende il piu'
+recente); **(b)** `$nonLetti` e' condiviso fra la fase di **riconoscimento** e
+quella di **lettura**, quindi **lo stesso file illeggibile viene contato due
+volte** (`PARZIALE -- 2 file NON letti` per un solo file rotto: verificato
+eseguendo con un log irraggiungibile).
