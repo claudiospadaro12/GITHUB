@@ -9300,3 +9300,84 @@ contrario del vero -> mezzo giro a vuoto garantito ("dov'e' finita?").
 > `$rilievi` riversata nel referto): e' di nuovo il punto 9 — **la meta' buona
 > era in casa, a otto righe di distanza, e non e' stata copiata nell'altra
 > meta'.**
+
+
+---
+
+## 🆕 AGGIUNTE DEL 06/09/2026 (sera) — trovate dal **verificatore di stringhe** su `riordina_desktop.ps1` (pin `8127e82`, scritto il **14/08**, mai modificato, **gia' usato in passato**), ESEGUENDO otto banchi su `pwsh` 7.4.6. Lo script e' il gemello ANZIANO di `RIGA_ORGANIZZA_DESKTOP.ps1`: le classi 140 / 140-bis / 141, chiuse stamattina sul gemello GIOVANE, sono **tutte e tre ancora armate qui**. Due voci nuove, tutte e due **riprodotte**.
+
+## 142. 🎚️ LO SWITCH «PRENDI TUTTO» CHE RIBALTA IL **DEFAULT PROTETTIVO**: la blacklist che vive solo come *"nome non riconosciuto = resta fermo"* smette di esistere, e la console continua a promettere la protezione
+
+_Difetto vero, gia' committato (`8127e82`, `backtest_pipeline/riordina_desktop.ps1`
+righe 13-17, 84, 104-106, 133), **riprodotto**: Desktop finto con `EASYTREND`,
+`INDICATORI`, `PIANO DI TRADING`, `BREAKOUT`, `ALTA VELOCITA`, `ARCHIVIO_TEST`,
+`Slippage_Spread`, `Collaudo`, `Fantasmi`, `Backup` -> `-Tutto` in anteprima
+elenca **tutte e dieci** sotto `-> ABTG_VARIE`, e due righe piu' sotto stampa
+`NON verranno toccati: collegamenti, programmi e le tue cartelle tematiche.`_
+
+I punti 11 e 101 parlano di **liste esplicite** che si contraddicono fra script
+gemelli. Questo e' il caso in cui **la lista protettiva NON ESISTE COME LISTA**:
+la protezione e' un *effetto collaterale* della logica ("se nessun pattern
+combacia, non faccio niente"), e' dichiarata solo nel **commento di testa**
+(righe 15-16: _"le cartelle gia' tematiche di Claudio ... non si spostano"_) e
+ripetuta a schermo come se fosse una regola. Un **unico switch** (`-Tutto`)
+cambia il default da "non riconosciuto = FERMO" a "non riconosciuto = SPOSTA", e
+in quell'istante:
+
+1. la protezione dichiarata sparisce **senza che nessuna riga di codice cambi**;
+2. il messaggio a schermo che la promette resta li', **identico**, in tutti e
+   due i rami — quindi il referto MENTE proprio nel ramo pericoloso;
+3. finiscono nel sacco anche **gli archivi degli altri script** (`ARCHIVIO_TEST`
+   di `archivia_test_desktop.ps1`) e **le 17 cartelle-destinazione del gemello
+   giovane** create lo stesso giorno: il riordino di stamattina viene sepolto
+   dentro `ABTG_VARIE` dal riordino di stasera.
+
+> ✅ **Regola: una protezione che esiste solo come "default che non fa niente"
+> non e' una protezione.** Se un file dichiara delle intoccabili (anche solo in
+> un commento), quelle intoccabili devono stare in una **lista ESPLICITA**
+> controllata **prima** della classificazione, cosi' resta valida anche quando
+> uno switch ribalta il default. E la lista comprende sempre **le destinazioni
+> di tutti gli script gemelli che archiviano lo stesso Desktop** (punto 9 e
+> punto 101). Controllo secco su ogni switch tipo `-Tutto` / `-Anche` /
+> `-Forza`: **elencare cosa NON e' piu' protetto quando lo si accende, e
+> verificare che il messaggio a schermo cambi di conseguenza.**
+
+### 142-bis. 🔁 L'ANTI-COLLISIONE DATATA AL MINUTO CHE, ALLA SECONDA COLLISIONE, DEGRADA IN SOVRASCRITTURA SILENZIOSA
+
+Stesso file, righe 44 e 147-151. E' il punto 140 applicato non al log ma
+all'**anti-collisione**, e finisce peggio perche' distrugge un file di Claudio:
+
+```powershell
+$stamp = Get-Date -Format "yyyy-MM-dd_HHmm"        # al MINUTO
+if(Test-Path -LiteralPath $dest){ $dest = "..._$stamp..." }   # UNICO tentativo
+Move-Item -LiteralPath $p.Origine -Destination $dest -Force   # e se anche QUELLO esiste: -Force
+```
+
+**Riprodotto**: `appunti.md` versione A -> archiviato; ricreato versione B ->
+archiviato come `appunti_2026-09-06_0817.md`; ricreato versione C, **stesso
+minuto** -> il nome ripiegato e' di nuovo `appunti_2026-09-06_0817.md`, esiste
+gia', e `-Force` **ci scrive sopra**. In `ABTG_DOCUMENTI` restano A e C: **la
+VERSIONE B non esiste piu', e nessuna riga a schermo lo dice.** Sulle CARTELLE
+lo stesso `-Force` non sovrascrive ma **ANNIDA** (classe 140-bis).
+
+> ✅ **Regola: un ripiego anti-collisione non si tenta UNA volta sola, e non si
+> chiude mai con `-Force`.** Timbro al SECONDO, e poi contatore finche' il nome
+> e' libero; l'ultima `Move-Item` va **senza `-Force`** e con `-ErrorAction
+> Stop`, dentro il `try/catch` per elemento: se il posto e' occupato la voce
+> deve **FALLIRE CON IL NOME NEL REFERTO** (classe 141), non vincere in
+> silenzio.
+> ```powershell
+> $i = 1
+> while (Test-Path -LiteralPath $dest) { $dest = $base + '_' + $stampSec + '_' + $i; $i++ }
+> Move-Item -LiteralPath $p.Origine -Destination $dest -ErrorAction Stop   # niente -Force
+> ```
+
+### E il promemoria che vale piu' delle due voci
+
+`riordina_desktop.ps1` era **gia' stato usato**, e questo lo aveva fatto passare
+per collaudato. Non lo era: aveva **tutte e tre** le classi chiuse stamattina sul
+gemello (140 log al minuto, 140-bis annullamento che annida ed esce verde, 141
+referto che non esiste proprio) piu' il punto 10 (nessun `try/catch` nel ciclo:
+riprodotto -> **corsa monca e ZERO log, spostamento irreversibile**).
+**"Claudio l'ha gia' lanciato" non e' una verifica: e' solo la prova che quel
+giorno nessuna cartella era aperta in Esplora risorse.**
