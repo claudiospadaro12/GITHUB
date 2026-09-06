@@ -3,7 +3,71 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-09-05 notte** (R117 chiuso, **R117BIS pronto**). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-06 notte** (SpreadLogger con oro acceso sul piccolo, incidente Guardian sul reale risolto). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🥇 06/09 notte — SPREADLOGGER ACCESO SUL PICCOLO (con l'ORO) + INCIDENTE GUARDIAN SUL REALE (risolto)
+
+**1) `ABTG_SpreadLogger` è finalmente live sul piccolo (50503392)**, cartella dati
+`...\215D85D767A1C39E22D242C8114BF9F5` (identificata col gate classe 115, due
+candidate eleggibili sotto la sessione Administrator: questa = piccolo per il
+login `50503392` nei log; l'altra, `E23E1504A8D02A22179395F0652B86B6` con
+`origin.txt=C:\BCM_Reale`, è il **reale** e non va usata qui). Pin
+`41728ee14525c468d05c980780c3ad20976b997c` (invariato dal 05/09, verificato
+identico via `git show`+sha256 prima di rilanciare).
+- CORSA pulita (0 problemi, compilazione 0 errori/0 warning), backup fatto,
+  `.set`/`.chr`/`.ini` invariati, 100k non toccato.
+- Attaccato su grafico `CADCHF,H1` con **`InpSimboli` esteso a 8 simboli**
+  (aggiunto `,XAUUSD` in coda ai 7 di default): **autotest 8/8 blocchi, 36/36
+  casi, 0 falliti**, tutti e 8 selezionabili.
+- 🔴 **Incidente minore, autorisolto**: per un momento sono girate **DUE
+  istanze** dello stesso EA (`EURCHF,H1` + `CADCHF,H1`), che scrivono sugli
+  stessi 3 file di stato — rischio di un salvataggio che sovrascrive l'altro.
+  Chiusa l'istanza su `EURCHF,H1` (rimossa pulita, motivo 1): resta la sola su
+  `CADCHF,H1`, che si autocorregge da sola al prossimo salvataggio periodico
+  (300s) senza perdita di dati (l'istanza sopravvissuta è sempre stata quella
+  con lo stato più aggiornato).
+- **Obiettivo**: misurare lo spread vero dell'oro per sbloccare il candidato
+  "oro←tassi" del 06/09 (statisticamente reale, t=+4,12, ma 0/54 celle passano
+  a costo $0,25 — non sappiamo se lo spread vero BCM è vicino a 0 o a 0,35+).
+- **Prossimo passo**: lanciare `RIGA_SPREADLOGGER_RACCOLTA.ps1` dopo 5 giornate
+  di borsa per la prima lettura, 10 per il referto buono (due rollover visti).
+
+**2) Incidente reale (10105439): Guardian trovato STACCATO, poi rimesso e confermato**
+Durante l'attacco del logger sul piccolo, Claudio ha lavorato in parallelo sul
+terminale del **reale** e a un certo punto il grafico `EURCAD,M15` (dove stava
+`ABTG_Guardian`) **non c'era più** fra i tab: il conto reale è rimasto **senza
+rete di protezione per un tratto della serata** (durata non misurata con
+precisione — scoperto per caso controllando gli screenshot, non da un allarme).
+- **Verificato uno per uno**, coi soli 3 grafici rimasti sul reale: `D30EUR,M5`
+  = `ABTG_DAX_Apertura_EU` ✅, `U30USD,M5` = `ABTG_ORB_Ottimizzato` ✅ (mai
+  toccato), `EURJPY,H1` = `ABTG_SlippageLogger` ✅ (spostato lì da `EURCHF,H1`
+  in un momento imprecisato, ma è di sola lettura quindi innocuo). Solo
+  Guardian mancava.
+- **Rimesso da Claudio**: nuovo grafico (`EURGBP,H1`), EA trascinato, preset
+  `ABTG_Guardian_REALE.set` ricaricato. **Confermato via screenshot**: baseline
+  corretta `equity=7500.00 bilancio=5000.00 differenza=2500.00`, `avviato.
+  Saldo iniziale=7500.00`, tutti gli autotest PASS. **Il reale è di nuovo
+  protetto.**
+- **Falsa pista chiarita**: Claudio pensava di aver visto un secondo Guardian
+  sul conto **100K** (50504263) con dati sospetti — **verificato via
+  screenshot: è un'istanza separata e legittima**, mai stata toccata,
+  baseline `100000.00` (non 7.500, niente credito broker lì), GlobalVariable
+  scoped correttamente al login `50504263` (nessuna possibilità di
+  collisione fra terminali). **Nessuna azione necessaria lì.**
+- ⚠️ **Lezione da portare avanti**: sul VPS girano **tre terminali MT5
+  contemporaneamente** (piccolo 50503392 / 100k 50504263 / reale 10105439) e
+  confondersi di finestra è facile — vedi la nuova regola in `CLAUDE.md`
+  ("REGOLA DEI TERMINALI MULTIPLI", commit `90b2513`): ogni istruzione ora
+  dichiara sempre il numero di conto + la cartella che lo identifica, e se
+  serve si dà la stringa di sola lettura `Get-Process terminal64 | select
+  Id, MainWindowTitle, Path` per far riconoscere la finestra da un fatto
+  stampato, non a occhio.
+- **DA FARE PROSSIMA SESSIONE**: capire (con Claudio) COME e QUANDO il
+  grafico di Guardian sul reale si è chiuso — se è stato un click accidentale
+  durante altro lavoro sullo stesso terminale, va evitato che ricapiti (magari
+  tenendo il grafico di Guardian su un simbolo/tab meno "di passaggio").
 
 ---
 
@@ -40,18 +104,21 @@ il 06/09 per la % di profitto). 👉 **La rete c'era ed era quasi disattivata.**
   destro sul grafico → Expert Advisors → Rimuovi) e riattaccato dopo con **lo
   stesso preset** (nessun valore è cambiato).
 
-**Pin da usare: `480aed8191a5a3ebe80f45a4256caac529fec945`** (il precedente
-`a01e157…` **non va più usato**: lì c'è ancora la v1.11 col bug, e il driver
-nuovo lo rifiuta da solo). Pagina:
+**Pin FINALE usato: `69ff7751ef086e5aeb2e77b534e66c05655ccb27`** (dopo `480aed81…`
+è arrivata un'ulteriore correzione, classe 145 su `RipristinaDaBackup` — i pin
+precedenti `a01e157…` e `480aed81…` **non vanno più usati**). Pagina:
 `backtest_pipeline/righe/RIGA_DEPLOY_GUARDIAN_CONTOREALE_DA_MANDARE.md`.
 
 **Prova che il fix ha preso**, in scheda Esperti dopo il riavvio:
 `[GUARDIAN] avviato. Saldo iniziale=` deve dire **~7500.00** (l'equità), **non
 ~5000.00** (il bilancio).
 
-🔎 **DA FARE ALLA PROSSIMA SESSIONE:** far girare CONTROLLO + CORSA col pin
-sopra, e **verificare quel numero**. Finché non è fatto, **sul conto reale gira
-ancora la v1.11, cioè la versione col bug**.
+✅ **FATTO (06/09 sera-notte)**: CONTROLLO+CORSA eseguiti (dopo un'ulteriore
+correzione, classe 145, `RipristinaDaBackup` — pin finale
+`69ff7751ef086e5aeb2e77b534e66c05655ccb27`), v1.12 attaccata e **verificata via
+screenshot**: `Saldo iniziale=7500.00` (l'equità), non più 5000. Poi staccata
+di nuovo per un incidente indipendente (vedi la sezione in cima, "INCIDENTE
+GUARDIAN SUL REALE") e **rimessa e riconfermata** nella stessa nottata.
 
 ---
 
