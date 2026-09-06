@@ -1,7 +1,14 @@
-# MARCATORE_RIGA_LOG_SEDIE_MUTE_v4
+# MARCATORE_RIGA_LOG_SEDIE_MUTE_v5
 # Sola lettura: legge i log Esperti (MQL5\Logs) del conto PICCOLO (50503392)
 # e stampa le righe di ABTG_SupRev_DAX_H4 (970912) e ABTG_GapFill 225JPY (772235).
 # NON scrive, NON modifica, NON tocca EA/preset/grafici. Solo un referto su Desktop.
+# v5 (06/09): classe 119 residua - l'intestazione 'CARTELLE GUARDATE' diceva
+#             ancora 'file di log letti=N' per i file guardati durante il
+#             RICONOSCIMENTO (max 15 per sottocartella): sullo stesso schermo
+#             si leggeva 'letti=2' e 'PARZIALE -- 1 file NON letti su 2'.
+#             Tre grandezze, due nomi, la piu' rassicurante in cima.
+#             + 150-ter residuo: il messaggio della scelta per ESCLUSIONE
+#               nominava solo il 100k; ora nomina la lista VIETATI vera.
 # v4 (06/09 notte): classe 150 - l'ESITO guardava i file SELEZIONATI, non
 #             quelli LETTI: due file illeggibili davano 'PARZIALE' con ZERO
 #             righe lette e le due sedie dichiarate mute. Ora conta i letti.
@@ -105,7 +112,7 @@ foreach ($c in $candidate) {
 Write-Host ''
 Write-Host 'CARTELLE GUARDATE:' -ForegroundColor Yellow
 foreach ($c in $candidate) {
-  Write-Host ('  ' + $c + '   file di log letti=' + $info[$c].NFile + '   login visti: ' + ((@($info[$c].Visti) | Sort-Object) -join ',')) -ForegroundColor Gray
+  Write-Host ('  ' + $c + '   file guardati SOLO per il RICONOSCIMENTO (max 15 per sottocartella, NON e'' la misura)=' + $info[$c].NFile + '   login visti: ' + ((@($info[$c].Visti) | Sort-Object) -join ',')) -ForegroundColor Gray
 }
 
 # attenzione: $_ dentro un Where-Object annidato ombreggia quello esterno -> si fissa in $cc
@@ -161,7 +168,7 @@ elseif ($conLogin.Count -gt 1) {
   Write-Host ('DUE O PIU'' CARTELLE col login ' + $LOGIN_ATTESO + ': non indovino. Rilancia con -CartellaDati ''<percorso>''.') -ForegroundColor Red
   exit 1
 }
-elseif ($senzaVietati.Count -eq 1) { $scelta = $senzaVietati[0]; $comeScelta = 'RILIEVO: login NON trovato nei log; scelta per ESCLUSIONE (unica candidata senza traccia del 100k)' }
+elseif ($senzaVietati.Count -eq 1) { $scelta = $senzaVietati[0]; $comeScelta = 'RILIEVO: login NON trovato nei log; scelta per ESCLUSIONE (unica candidata senza traccia dei conti vietati ' + ($VIETATI -join ', ') + ')' }
 else {
   Write-Host 'NON SO QUALE CARTELLA E'' IL CONTO PICCOLO (zero o piu'' candidate).' -ForegroundColor Red
   Write-Host 'Rilancia indicando la cartella: ... -CartellaDati "C:\percorso\della\cartella"' -ForegroundColor Yellow
@@ -249,7 +256,7 @@ while (Test-Path -LiteralPath $fileOut) {
   if ($n -gt 50) { break }
 }
 $righeOut = New-Object System.Collections.ArrayList
-[void]$righeOut.Add('LOG SEDIE MUTE v4 - sola lettura, nessun file toccato')
+[void]$righeOut.Add('LOG SEDIE MUTE v5 - sola lettura, nessun file toccato')
 [void]$righeOut.Add('data: ' + (Get-Date).ToString('yyyy.MM.dd HH:mm:ss', $INV))
 [void]$righeOut.Add('cartella dati: ' + $scelta + '  [' + $comeScelta + ']')
 [void]$righeOut.Add('file di log LETTI: ' + $letti + ' su ' + $file.Count + ' trovati in finestra (ultimi ' + $Giorni + ' giorni)')
