@@ -108,6 +108,27 @@ Tre corsie — verbale completo in `report/FIRME_2026-08-18.md`:
 Firmati lo stesso giorno: **cap rischio aperto 3,25%** (C1, = 5 SL vivi da
 0,65%) e **pacchetto Guardian** (pausa 4,0 / emergenza 4,9 e 9,9 / reset 23).
 
+## 📊 PAVIMENTO DI FREQUENZA: SI MISURA PER FAMIGLIA (firmato da Claudio, 07/09)
+Il pavimento di **1,00 operazione/giorno** NON si applica piu' alla singola
+sedia ma alla **FAMIGLIA** (motore x simboli schierabili) — stessa unita' del
+criterio di uscita firmato il 18/08. Misurato: un conto vero con statistiche
+calcolate da MQL5 gira 3-5 EA su **26 simboli** e fa **0,29-0,47 op/giorno PER
+SIMBOLO**: nel campo ogni istanza e' un cecchino, e la portata la fa il numero
+di simboli, non la velocita' del motore. Il nostro 1,00 era tarato all'estremo
+ALTO di quella forbice.
+- 🔓 Conseguenza: una sedia sotto 1,00 non e' piu' scartabile **per sola
+  frequenza** se la famiglia raggiunge il pavimento. Le esclusioni passate
+  motivate SOLO dalla frequenza vanno rilette — tornano in coda all'imbuto,
+  **mai in campo in automatico**.
+- ❌ Non tocca nessun criterio di RISCHIO. La soglia resta 1,00: cambia l'unita'
+  a cui si applica.
+- ⚠️ Firmato lo stesso giorno il **tetto per cluster/valuta al 3,0%** (la
+  larghezza senza controllo della correlazione e' la trappola: i portafogli
+  larghi letti hanno DD misurati del 32,6% e 45,6%). 🔴 **E' FIRMATO MA NON
+  ATTIVO**: nel Guardian il tetto per cluster non esiste ancora. Finche' non e'
+  implementato e collaudato e' un'intenzione, non una protezione — e va detto
+  ogni volta che si cita. Verbale: `report/FIRME_2026-09-07.md`.
+
 ## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
 **Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
 a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
