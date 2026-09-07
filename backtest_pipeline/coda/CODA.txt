@@ -1,0 +1,7 @@
+# CODA DEL RUNNER -- formato:  <pin 40 hex> | <percorso nel repo> | <argomenti>
+# Le righe che cominciano con # sono commenti.
+# Ogni script deve contenere "# RUNNER_SOLA_LETTURA" o viene RIFIUTATO (cancello G1).
+#
+# VUOTA: nessuno script di casa porta ancora il marcatore di sola lettura.
+# La prima coda si riempie dopo che il perimetro e'  firmato e i cancelli
+# sono stati collaudati sul VPS.
