@@ -10323,3 +10323,31 @@ cui contava.
 _(Le due correzioni sono in `RIGA_SONDA_OROLOGIO.ps1` **v5**, commit `fa7f33da`,
 pagina INDICI ri-pinnata in `c4ce74a`. Ramo FX **v4 -> v5: referto identico riga
 per riga**, `diff` vuoto su 581 righe di banco.)_
+
+### 153-ter. 🧷 PRECISAZIONE **MISURATA** ALLA 152 (stessa sera, altro banco): dentro `& { ... }` la riga **MUORE DAVVERO**
+
+La **152**, scritta poche ore prima sulla riga di R118, dice che
+`-ErrorAction Stop` non uccide la one-liner perche' il `;` tira dritto. **Sulle
+righe della sonda dell'orologio NON succede**, ed e' stato misurato con una URL
+rotta di proposito (`.../NON_ESISTE.ps1`, 404 vero da GitHub):
+
+```
+Invoke-RestMethod: ... 404: Not Found
+exit=1
+```
+
+**e nient'altro**: nessuna riga dopo l'`irm` e' stata eseguita, Desktop vuoto.
+
+La differenza non e' `-EA Stop`: e' il **guscio**. Queste righe stanno tutte
+dentro un `& { ...; ...; ... }`, che per il chiamante e' **UNA sola statement**:
+l'errore terminante esce dallo scriptblock e ammazza la statement intera. La
+riga di R118 della 152 e' invece una **catena di statement nude**, dove il `;`
+successivo e' una statement a se' e viene eseguita.
+
+> ✅ **REGOLA (unisce 152 e 153-ter): o la one-liner sta dentro `& { ... }`,
+> oppure ha il `if(-not (Test-Path $p)){ throw ... }`.** Le due protezioni sono
+> alternative, non sinonimi — e **quale delle due sta funzionando si stabilisce
+> ESEGUENDO con una URL rotta**, non guardando la riga. Controprova fatta lo
+> stesso giorno sulle righe dell'orologio: puntandole al **driver v3**
+> (`f81eb70`, marcatore vecchio) il `throw 'SCRIPT VECCHIO'` **parte davvero**,
+> exit 1, Desktop vuoto, nessuna corsa.
