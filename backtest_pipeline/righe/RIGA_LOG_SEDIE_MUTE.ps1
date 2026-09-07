@@ -1,7 +1,13 @@
-# MARCATORE_RIGA_LOG_SEDIE_MUTE_v5
+# MARCATORE_RIGA_LOG_SEDIE_MUTE_v6
 # Sola lettura: legge i log Esperti (MQL5\Logs) del conto PICCOLO (50503392)
 # e stampa le righe di ABTG_SupRev_DAX_H4 (970912) e ABTG_GapFill 225JPY (772235).
 # NON scrive, NON modifica, NON tocca EA/preset/grafici. Solo un referto su Desktop.
+# v6 (07/09): classe 150-quater - il gate dei conti vietati rifiutava la
+#             cartella GIUSTA. MISURATO sul VPS: i log del piccolo contengono
+#             sia 50503392 sia 10105439 (dalla stessa installazione e' stato
+#             aperto in passato il conto reale). La presenza di un conto
+#             vietato non e' una prova di appartenenza: si scarta solo se il
+#             conto ATTESO manca e c'e' un vietato.
 # v5 (06/09): classe 119 residua - l'intestazione 'CARTELLE GUARDATE' diceva
 #             ancora 'file di log letti=N' per i file guardati durante il
 #             RICONOSCIMENTO (max 15 per sottocartella): sullo stesso schermo
@@ -116,7 +122,10 @@ foreach ($c in $candidate) {
 }
 
 # attenzione: $_ dentro un Where-Object annidato ombreggia quello esterno -> si fissa in $cc
-$conLogin = @($candidate | Where-Object { $cc = $_; $v = $info[$cc].Visti; $vietata = $false; foreach ($x in $VIETATI) { if ($v.Contains($x)) { $vietata = $true } }; ($v.Contains($LOGIN_ATTESO)) -and (-not $vietata) })
+# 150-quater anche qui: la cartella APPARTIENE al conto atteso se il suo login
+# c'e', anche se nei log compaiono altri conti aperti in passato dalla stessa
+# installazione (misurato: il piccolo mostra 10105439,50503392).
+$conLogin = @($candidate | Where-Object { $cc = $_; $info[$cc].Visti.Contains($LOGIN_ATTESO) })
 $senzaVietati = @($candidate | Where-Object { $cc = $_; $v = $info[$cc].Visti; $vietata = $false; foreach ($x in $VIETATI) { if ($v.Contains($x)) { $vietata = $true } }; -not $vietata })
 $scelta = ''
 $comeScelta = ''
@@ -143,11 +152,19 @@ if ($CartellaDati -ne '') {
     Write-Host 'Mi fermo invece di fidarmi del percorso sulla parola.' -ForegroundColor Red
     exit 1
   }
-  foreach ($x in $VIETATI) {
-    if ($vv.Contains($x)) {
-      Write-Host ('CARTELLA VIETATA: nei log di questa cartella c''e'' il conto ' + $x + ', fuori perimetro.') -ForegroundColor Red
-      Write-Host 'Mi fermo: misurerei la sedia sbagliata sul conto sbagliato.' -ForegroundColor Red
-      exit 1
+  # 150-quater (misurato il 07/09 sul VPS): la cartella del PICCOLO contiene
+  # nei log ANCHE il login 10105439, perche' da quella stessa installazione in
+  # passato e' stato aperto il conto reale. "C'e' un conto vietato nei log" NON
+  # vuol dire "questa cartella E' di un conto vietato": la cartella APPARTIENE
+  # al conto atteso se il suo login c'e'. Si scarta solo quando il conto atteso
+  # NON c'e' e c'e' invece un vietato.
+  if (-not $vv.Contains($LOGIN_ATTESO)) {
+    foreach ($x in $VIETATI) {
+      if ($vv.Contains($x)) {
+        Write-Host ('CARTELLA DI UN ALTRO CONTO: nei log c''e'' il conto ' + $x + ' e NON c''e'' il ' + $LOGIN_ATTESO + '.') -ForegroundColor Red
+        Write-Host 'Mi fermo: misurerei la sedia sbagliata sul conto sbagliato.' -ForegroundColor Red
+        exit 1
+      }
     }
   }
   $scelta = $CartellaDati
@@ -256,7 +273,7 @@ while (Test-Path -LiteralPath $fileOut) {
   if ($n -gt 50) { break }
 }
 $righeOut = New-Object System.Collections.ArrayList
-[void]$righeOut.Add('LOG SEDIE MUTE v5 - sola lettura, nessun file toccato')
+[void]$righeOut.Add('LOG SEDIE MUTE v6 - sola lettura, nessun file toccato')
 [void]$righeOut.Add('data: ' + (Get-Date).ToString('yyyy.MM.dd HH:mm:ss', $INV))
 [void]$righeOut.Add('cartella dati: ' + $scelta + '  [' + $comeScelta + ']')
 [void]$righeOut.Add('file di log LETTI: ' + $letti + ' su ' + $file.Count + ' trovati in finestra (ultimi ' + $Giorni + ' giorni)')
