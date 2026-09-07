@@ -1,5 +1,31 @@
 # 🧯 POSTNEWS NEUTRALIZZATE — 07/09/2026, ore 20:46
 
+> # 🔴 CORREZIONE DEL NUMERO — 07/09, ore 21:20
+> **Ho detto "3,00% per evento" tutta la sera. È SBAGLIATO, di un fattore 2.**
+>
+> `ABTG_PostNews.mq5` riga **325**: `double lot=LotByRisk(InpRiskRefSLpips*pip);`
+> Il lotto è dimensionato come se lo stop fosse **`InpRiskRefSLpips` = 50 pip**,
+> mentre lo stop vero (`InpSLpips`) è **25**. Quindi una gamba stoppata costa
+> **METÀ** di `InpRiskPercent`. E `InpUseOCO` è **true** di default (riga 99;
+> i preset ECB/FOMC non lo scrivono, quindi vale il default): appena una gamba
+> si riempie **l'altra viene cancellata** (riga 382), quindi non si sommano.
+>
+> | sedia | `InpRiskPercent` | OCO | **rischio VERO per evento** |
+> |---|---:|---|---:|
+> | 771201 ECB | 3,0 | ✅ on | **1,50%** |
+> | 771202 FOMC | 3,0 | ✅ on | **1,50%** |
+> | 771203 NFP | 1,30 | ❌ off | **1,30%** (0,65% × 2 gambe) |
+>
+> 👉 Contro il cap C1 di 3,25% fa **il 46%**, non il 92% che ho scritto.
+> Resta **2,3× il metro di casa** (0,65%) su sedie senza contratto — un difetto
+> di metodo vero — ma **non era l'emergenza che ho descritto.**
+>
+> ✅ E il preset NFP era **già a posto**: il suo commento
+> (*"qui si usa il metro di casa, NON il 3% del modulo ECB/FOMC"*, firma del
+> 18/08) descrive un meccanismo **reale**, non una convenzione. Chi l'ha scritto
+> aveva ragione; i moduli ECB/FOMC non sono mai stati riscalati allo stesso modo.
+
+
 Decisione di Claudio: **"FERMIAMO"**, dopo che il censimento dei contratti ha
 trovato tre sedie in forward al **3,00%** / **1,30%** con **DD promesso NESSUNO**.
 
