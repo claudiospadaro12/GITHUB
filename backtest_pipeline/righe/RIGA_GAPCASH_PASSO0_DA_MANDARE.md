@@ -98,9 +98,17 @@ un guasto: **è macchina risparmiata**.
 (anche inventato):
 
 ```powershell
-& { $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; & $p -CollaudoCancello 'C:\percorso\del\csv_da_provare.csv' }
+& { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
+    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -CollaudoCancello 'C:\percorso\del\csv_da_provare.csv';
+    Write-Host ("codice di uscita del collaudo: " + $LASTEXITCODE) -ForegroundColor Cyan }
 ```
-Esce **0** se avrebbe fatto passare, **2** se avrebbe fermato — con il motivo scritto.
+Esce **0** se avrebbe fatto passare, **2** se avrebbe fermato — con il motivo
+scritto. **Non apre MT5, non compila, non tocca niente**: legge solo il CSV che
+gli dai. (Anche questo blocco ha il suo `irm`: `$p` e `$pin` nascono **dentro**
+il `& { }` e non sopravvivono.)
 
 ---
 
@@ -129,7 +137,7 @@ NUOVO=<il commit nuovo, 40 caratteri>
 VECCHIO=$(grep -oE "\\\$pin='[0-9a-f]{40}'" "$F" | head -1 | grep -oE '[0-9a-f]{40}')
 echo "vecchio: $VECCHIO"
 sed -i "s|\$pin='$VECCHIO'|\$pin='$NUOVO'|g; s|^$VECCHIO\$|$NUOVO|; s|\*\*\`$VECCHIO\`\*\*|\*\*\`$NUOVO\`\*\*|g" "$F"
-grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 3
+grep -c "\$pin='$NUOVO'" "$F"    # DEVE dare 4
 grep -c "\$pin='$VECCHIO'" "$F"  # DEVE dare 0
 ```
 
