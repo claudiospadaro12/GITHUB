@@ -61,10 +61,10 @@ correggere a mano.
 
 ---
 
-## 📌 IL PIN — **`73069faaa50b225561aa655338e3095dc4c61c46`**
+## 📌 IL PIN — **`fa7f33da9db7713b99dfce26b37dcaed8871fdc1`**
 
 ```
-73069faaa50b225561aa655338e3095dc4c61c46
+fa7f33da9db7713b99dfce26b37dcaed8871fdc1
 ```
 
 **Verificato dopo il push** (HTTP 200 + sha256 identico al repo) per **tutti e
@@ -179,7 +179,7 @@ nel referto**, non nascoste:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
@@ -220,7 +220,7 @@ nel referto**, non nascoste:
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '11_d30eur_long'; $rc=$LASTEXITCODE;
@@ -248,7 +248,7 @@ altre tre di fila o una per volta.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '12_d30eur_short'; $rc=$LASTEXITCODE;
@@ -263,7 +263,7 @@ altre tre di fila o una per volta.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '13_u30usd_long'; $rc=$LASTEXITCODE;
@@ -278,7 +278,7 @@ altre tre di fila o una per volta.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '14_u30usd_short'; $rc=$LASTEXITCODE;
@@ -307,7 +307,7 @@ davvero** (`-Rifai` è sempre nell'argv). **Per rileggere c'è il blocco 4️⃣
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='fa7f33da9db7713b99dfce26b37dcaed8871fdc1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -Ricomponi; $rc=$LASTEXITCODE;
