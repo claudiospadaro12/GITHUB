@@ -1,5 +1,14 @@
 # 📜 IL CENSIMENTO DEI CONTRATTI — cosa il backtest ha PROMESSO, sedia per sedia
 
+> ➡️ **07/09/2026 — questo file ha un SUCCESSORE: `report/CENSIMENTO_CONTRATTI.md`.**
+> Il censimento nuovo e' organizzato **per CONTO** (reale 10105439 / 100k 50504263 /
+> piccolo 50503392) e aggiunge le colonne che mancavano alla corsia RISCHIO:
+> **`n`**, **MERITO sospeso si/no**, **deposito e rischio % del backtest**, **STATO
+> (MISURATO / DA RIPRODURRE / NON MISURATO)** e la **frequenza in op/giorno**.
+> Include anche le sedie nate dopo il 25/08 (GatedShort 770250, PostNews
+> 771201/771202/771203) e toglie la sedia fantasma 250604.
+> Questo file resta agli atti come **fonte storica** delle promesse del 18-24/08.
+
 _Missione M11, 18/08/2026 — prerequisito dichiarato alla firma della C3
 (`report/FIRME_2026-08-18.md`): la regola "DD forward oltre il DD promesso" e
 "frequenza molto sotto quella promessa" morde solo se esiste questa tabella._
