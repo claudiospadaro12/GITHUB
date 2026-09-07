@@ -73,6 +73,40 @@ apertura c'è una scelta (Standard / Raw / ECN / Cent…), va presa **quella**.
 
 ---
 
+## ✅ MISURATO IL 07/09 ORE 23:37 — IL VPS CE LA FA
+
+`CODA_04` sul VPS (`VMI3047753`), sola lettura:
+
+| | |
+|---|---|
+| CPU | **AMD EPYC — 6 core fisici, 6 processori logici** |
+| verdetto | 🟢 **SUFFICIENTE**, tetto consigliato agli agenti **3 su 6** |
+| RAM | 11,99 GB totali, **7 GB liberi** |
+| disco C: | 199,7 GB, **98 GB liberi (49,1%)** |
+| cartelle dati MT5 | **41,57 GB** in totale |
+
+**Il conto del disco torna**: la cartella più grossa è il piccolo con **20,58 GB**.
+Il terminale nuovo riscarica uno storico paragonabile → restano **~77 GB liberi**.
+
+Due letture laterali, non cercate ma utili:
+- il **conto reale occupa 0,17 GB**: praticamente nessuno storico scaricato.
+  Coerente — quel terminale **opera**, non misura. Buon segno.
+- il **piccolo occupa 20,58 GB**, tanto per un terminale di solo forward. Non è
+  un problema con 98 GB liberi, ma è il primo posto dove guardare se un giorno
+  il disco stringe.
+
+### ✅ Impostazioni applicate
+- **conto demo dedicato: 50504400** (Server BCMMarkets, valuta euro, leva 1:500
+  — irrilevante: il driver scrive `Leverage=100` nell'`.ini`), creato il 07/09;
+- **agenti del tester portati a 3** (Claudio, 07/09 sera).
+
+⚠️ **Da confermare**: che i 3 agenti siano impostati **sul terminale che farà i
+backtest**, non su uno dei tre vivi. Disabilitare agenti non tocca il trading —
+quindi nessun danno in ogni caso — ma se il tetto sta sul terminale sbagliato
+**non protegge niente**.
+
+---
+
 ## ⚠️ IL RISCHIO VERO, ED È QUELLO CHE MI PREOCCUPA: LA **CPU**
 
 Un walk-forward a tick reali **satura la macchina**. E sul VPS quella macchina
