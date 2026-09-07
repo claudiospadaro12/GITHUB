@@ -13,20 +13,39 @@ cancelli troppo severi ed ogni tanto si potrebbe chiudere un occhio."_
 
 ## 1. 🧨 LE DUE PROVE
 
-### A) `LONDONFX` — HA PASSATO, ed è fermo a "criteri da firmare"
-Referto `risultati_archivio/REFERTO_SONDALONDONFX_2026-09-03.md`, testuale:
+### A) ~~`LONDONFX` — HA PASSATO, ed è fermo a "criteri da firmare"~~
+### 🔴 A) **QUESTA VOCE ERA SBAGLIATA. CORRETTA IL 07/09, ORE 16:50.**
 
-> _"**PRIMO CANDIDATO DELLA MISSIONE FREQUENZA A PASSARE IL PASSO 0.**
-> Su EURUSD M15 col filtro RSI il motore fa **2,0-2,3 segnali/giorno PER LATO**"_
+**Cosa avevo scritto:** che `LONDONFX` aveva passato il passo 0 il 03/09 e che
+era **fermo** su *"criteri da firmare"* con l'EA *"da scrivere"* — cioè un
+candidato buono parcheggiato per una firma mancante.
 
-- riga regina: EUR_M15, RSI, ora 8 → **2,26 sig/gg**, MFE 13,4 pip, RR 1,136
-- **12/12 righe VIVE** su tutte e tre le ore
-- l'ablazione dice che il filtro **è** il lavoro (taglia il 73-77%)
+**Cosa dicono davvero i file.** Avevo letto `LONDONFX_TICK_CRITERI.md`, che è
+una **bozza delle 09:25**, e mi ero fermato lì. I file in
+`risultati_archivio/r116_londonfx/` sono **dello stesso pomeriggio**:
+`CORSA_EURUSD_2026-09-03_1751_BOCCIATA.txt`. 👉 **L'EA è stato scritto e la
+corsa è stata fatta, otto ore dopo la bozza.** E il verdetto è:
 
-**Dove si è fermato:** `risultati_archivio/LONDONFX_TICK_CRITERI.md` è marcato
-**"BOZZA, DA FIRMARE"**, e dentro dice che l'EA `ABTG_LondonFx.mq5` è
-**"DA SCRIVERE"**. Dal **03/09**. 👉 Nessun cancello l'ha bocciato: manca
-**una firma e un file di codice**.
+| motore | E in R | PF OOS | **DD OOS** | n IS / OOS | esito |
+|---|---:|---:|---:|---:|---|
+| canale nudo | −0,0690 | 0,898 | **45,29%** | 928 / 1325 | 🔴 BOCCIATA PER RISCHIO |
+| **canale + RSI** (il promuovibile) | −0,1078 | **0,843** | **37,14%** | 470 / 662 | 🔴 BOCCIATA PER RISCHIO |
+| allineamento 5 medie | −0,0517 | 0,923 | **31,26%** | 539 / 804 | 🔴 BOCCIATA PER RISCHIO |
+
+**Non è parcheggiato: è morto, ed è morto bene.** Con **n OOS 662** il merito
+non era nemmeno sospeso, e perde in **tutte e due** le finestre (IS profit
+−36.353,98, PF IS 0,795).
+
+### ⚖️ E QUESTO ROVESCIA UNA PARTE DELLA TESI — nel senso che la rafforza
+
+Il vincitore della missione frequenza, quello con **2,0-2,3 segnali/giorno**,
+è arrivato in fondo all'imbuto **con campione pieno** e ha fatto un
+**drawdown del 37%**.
+
+👉 **Nessun allentamento di cancello lo avrebbe salvato**, perché non è stato
+fermato da una soglia di merito: è stato fermato dal **RISCHIO**, e il rischio
+si legge a qualunque n. Allentare avrebbe messo davanti a una challenge un
+motore da 37% di DD, cioè **quasi quattro volte il muro del 10%**.
 
 ### B) `SONDA OROLOGIO — RAMO FX` — pronta dal 28/08, **mai girata**
 Sette file prova in `prove/` (gemelli, EURUSD L/S, GBPUSD L/S, XAUUSD L/S) e
@@ -78,9 +97,9 @@ sedie in campo stanno una per simbolo.
 
 ## 4. 🛤️ COSA FARE — in ordine, e nessuno di questi chiede un cancello più largo
 
-1. **Firmare i criteri di `LONDONFX` R116 e scrivere `ABTG_LondonFx.mq5`.**
-   È il candidato che ha passato, con 2,0-2,3 seg/giorno. Fermo da 4 giorni.
-2. **Girare il ramo FX dell'orologio** — 7 celle pronte dal 28/08.
+1. ~~Firmare i criteri di `LONDONFX`~~ — **CADUTA**: la corsa c'è già ed è
+   BOCCIATA PER RISCHIO su tutti e tre i motori (vedi §1A corretto).
+2. **Girare il ramo FX dell'orologio** — 7 celle pronte dal 28/08, zero referti.
 3. **Aprire la corsia DEMO a merito sospeso** sul piccolo 50503392: le celle
    che passano il RISCHIO ma non hanno n vanno lì ad accumulare operazioni,
    con un budget di tempo dichiarato e un criterio di uscita scritto prima.
