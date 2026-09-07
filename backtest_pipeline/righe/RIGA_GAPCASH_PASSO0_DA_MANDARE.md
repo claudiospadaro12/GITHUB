@@ -99,7 +99,7 @@ un guasto: **è macchina risparmiata**.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4bf50bbf88f74a22a0c06648969c204f941ee2cf'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -CollaudoCancello 'C:\percorso\del\csv_da_provare.csv';
@@ -112,10 +112,10 @@ il `& { }` e non sopravvivono.)
 
 ---
 
-## 📌 IL PIN — **`77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d`**
+## 📌 IL PIN — **`4bf50bbf88f74a22a0c06648969c204f941ee2cf`**
 
 ```
-77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d
+4bf50bbf88f74a22a0c06648969c204f941ee2cf
 ```
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
@@ -155,7 +155,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4bf50bbf88f74a22a0c06648969c204f941ee2cf'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -GiroAVuoto;
@@ -173,8 +173,10 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 - `i 9 nomi vincolanti del contratto esistono tutti nel sorgente`;
 - **`celle ....... GATE 8  |  CTRL 2`** ← è **questo** il numero che deve tornare;
 - `stella ...... i due file prova differiscono SOLO su InpGateSpento e InpSogliaGapPct`;
-- `terminale ... ...BCM Markets MT5 Terminal...` — **deve** contenere
-  `BCM Markets MT5 Terminal` e **non** contenere `-V3`;
+- `terminale ... ...BCM Markets MT5 Terminal...` — **non devi controllarlo tu**:
+  dal pin `4bf50bb` è un **cancello**. Se il ripiego del selettore pescasse la
+  `-V3` (100k **50504263**) o `C:\BCM_Reale` (reale **10105439**), la riga si
+  ferma con `TERMINALE SBAGLIATO` **prima** di copiarci dentro la sonda;
 - 🎯 **`compilata la sonda: OK (<n> KB, <ora>, log: 0 errori, 0 avvisi)`** — è
   il **primo risultato vero** di questo PASSO 0. Se invece esce
   `COMPILAZIONE FALLITA`, le righe rosse sopra **sono il risultato**: si copia
@@ -193,7 +195,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4bf50bbf88f74a22a0c06648969c204f941ee2cf'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -208,7 +210,7 @@ comandi indipendenti, e un `throw` alla prima non fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='4bf50bbf88f74a22a0c06648969c204f941ee2cf'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCorsa 'CTRL' -Rifai;
@@ -252,6 +254,17 @@ Cartella e zip sul **Desktop**: `GAPCASH_PASSO0_<MODO>_<data>_<ora>` — dentro:
 - `ABTG_SondaGapCash_NASUSD_IS_CTRL.csv` (**2 righe**, gate spento);
 - i due file prova e `misura_tick_NASUSD.csv`;
 - `COMPILAZIONE_ABTG_SondaGapCash.log`, se il compilatore ne ha lasciato uno.
+
+> 🧊 **Nello zip entra SOLO ciò che ha prodotto QUESTA corsa** (classe **155**,
+> riprodotta il 07/09 eseguendo, e corretta nel pin `4bf50bb`). La cartella di
+> lavoro è riusabile: prima della correzione una corsa morta alla
+> **compilazione** (uscita 3, l'esito più probabile della prima corsa)
+> spediva nello zip i **due CSV della corsa buona del giro prima**, sotto un
+> referto che diceva `corsa GATE ..: NON ESEGUITA`. Adesso i file vecchi
+> restano fuori, il referto conta quelli allegati
+> (`CSV di misura allegati allo zip: n`) e la console stampa l'elenco
+> **letto dalla cartella**, non la lista fissa di quello che ci sarebbe
+> dovuto essere.
 
 ### 📅 Le due righe da guardare per prime nel referto
 1. **`modo:`** — `CORSA` (il risultato) o `GIRO A VUOTO` (**non si manda come

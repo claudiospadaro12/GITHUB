@@ -10445,3 +10445,158 @@ Il difetto **non si vede su Linux con uno stub che esce 0**: lo stub va fatto
 uscire **diverso da zero**, se no il banco conferma esattamente l'illusione che
 si sta cercando di rompere. Vale per tutti i banchi di questa famiglia:
 **il finto eseguibile interno non esce mai 0 per comodita'.**
+
+---
+
+## 🆕 AGGIUNTE DEL 07/09/2026 — trovate dal **verificatore di stringhe** sul **PASSO 0 del GAP DELLA SESSIONE CASH DEL NASDAQ** (`RIGA_GAPCASH_PASSO0.ps1` + pagina, pin `77fd4f8e`), **ESEGUENDO** su `pwsh` 7.4.6: banco completo con generico finto, tre finti `metaeditor64` (uno che riesce, uno che fallisce, uno che **esce 1 con soli avvisi**), terminali finti e cartella dati finta con `.chr`/`config`/`.set` preesistenti.
+
+**Il driver e' per il resto SOLIDO, e lo e' MISURATO, non dichiarato:** parse reale **0 errori / 8.670 token**, **ASCII puro** (0 byte), nessun costrutto di `pwsh` 7, cultura invariante ovunque (tutti i `[double]`/`[int]` cadono su valori gia' passati da `TryParse` con `InvariantCulture`); **11 cancelli di pre-volo fatti fallire uno per uno -> 11 fermate** col messaggio giusto; **9 casi sul cancello di mezzo** (compresi i bordi **24 -> ferma / 25 -> passa**); **classe 151 CHIUSA eseguendo** (nello scenario "pochi eventi" il generico e' invocato **1 volta sola**, esiste **solo** il CSV `_GATE`, uscita 2); **classe 154 chiusa nei due versi** (metaeditor esce 1 per avvisi + generico esce 1 + CSV buoni -> la riga legge **0**; generico esce 0 + nessun CSV -> uscita **2**); **classe 153 rispettata** (cita la misura dei **TICK**, `misura_tick_NASUSD.csv`: 166.509.474 tick dal 2024.09.26, non il referto delle BARRE); perimetro pulito (**nessun** `.chr`, `config` o `.set` toccato, byte per byte).
+
+Le due voci qui sotto sono **RIPRODOTTE ESEGUENDO** e sono state **corrette e riverificate** nel pin `4bf50bb`.
+
+## 155. 🧊 LO ZIP DELLA CORSA CHE **NON E' MAI GIRATA** ARRIVA PIENO DEI FILE DELLA CORSA DI IERI: la cartella di lavoro e' riusabile e la raccolta copia **PER NOME**, non per **DATA**
+
+### Il fatto
+
+`RIGA_GAPCASH_PASSO0.ps1` lavora in `$env:USERPROFILE\abtg_gapcash_passo0`, che
+**si riusa apposta** fra una corsa e l'altra. La raccolta finale copiava nello
+zip tutto quello che trovava li' dentro **per nome**:
+
+```powershell
+foreach($f in @(("COMPILAZIONE_" + $EA + ".log"), ("misura_tick_" + $Simbolo + ".csv"))){
+  $s1 = Join-Path $Work $f
+  if(Test-Path -LiteralPath $s1){ Copy-Item -LiteralPath $s1 -Destination $Cart -Force }
+}
+...
+$Ris2 = Join-Path $Work ("risultati_prove\" + $EA)
+if((Test-Path -LiteralPath $Ris2) -and (-not $GiroAVuoto)){
+  foreach($f in @(Get-ChildItem -LiteralPath $Ris2 -Filter "*.csv" ...)){
+    Copy-Item -LiteralPath $f.FullName -Destination $Cart -Force
+  }
+}
+```
+
+**Riprodotto, due volte, con due corse di fila nella stessa cartella:**
+
+| corsa 1 | corsa 2 | il referto della corsa 2 diceva | ma nello zip c'era |
+|---|---|---|---|
+| CORSA buona (2 CSV) | **compilazione FALLITA**, uscita **3** | `corsa GATE ..: NON ESEGUITA` | `..._IS_GATE.csv` **e** `..._IS_CTRL.csv` **di ieri** |
+| compilazione fallita (lascia il log) | muore a un **cancello di pre-volo**, uscita **1** | `compilazione : NON TENTATA` | `COMPILAZIONE_<EA>.log` **di ieri**, con dentro `1 errors` |
+
+E il secondo e' il piu' cattivo: **i quattro stati della compilazione**
+(classe 94-ter) esistevano e funzionavano nel referto — ed erano **smentiti
+dall'imballaggio**. Chi apre lo zip trova un log del compilatore accanto a un
+referto che giura che il compilatore non e' mai stato lanciato.
+
+### Perche' e' una classe e non una svista
+
+Perche' il driver **la regola ce l'aveva gia' scritta**, e con la motivazione
+giusta — ma **solo per il giro a vuoto**:
+
+> *"NEL GIRO A VUOTO NON SI COPIA NESSUN CSV. La cartella di lavoro e'
+> riusabile: i CSV di una corsa VERA precedente restano li' dentro, e infilarli
+> in uno zip intestato GIRO A VUOTO vorrebbe dire mandare numeri veri dentro un
+> pacchetto che dichiara di non averne."*
+
+La stessa frase vale **identica** per la corsa morta alla compilazione e per
+quella morta al pre-volo: anche loro sono pacchetti che dichiarano di non avere
+numeri. La protezione era stata pensata per **il modo** (`GIRO A VUOTO`) invece
+che per **il fatto** (quel file l'ha scritto questa corsa, si' o no?), e ha
+coperto un ramo su tre. **Il modo e' una dichiarazione, la data e' una misura.**
+
+Ed e' velenosa proprio dove morde: qui `COMPILAZIONE FALLITA` non e' un caso
+di scuola, e' **l'esito piu' probabile della prima corsa** (la sonda non era
+mai stata compilata da nessuno), e la pagina dice a Claudio *"si copia lo zip
+in chat e ci si ferma li'"*.
+
+### 155-bis. 📋 E l'elenco `FILE ATTESI NELLO ZIP` che e' il **PIANO**, non l'**ESITO** (recidiva della 141)
+
+Sotto lo zip la console stampava **sempre le stesse cinque righe**, su tutti i
+rami:
+
+```
+FILE ATTESI NELLO ZIP:
+   - REFERTO_GAPCASH_PASSO0.txt          <- e' questo che conta
+   - ABTG_SondaGapCash_NASUSD_IS_GATE.csv    (8 righe, gate acceso)
+   ...
+```
+
+Su una corsa uscita **3** (compilazione fallita, zero passate) quella riga
+prometteva un CSV *"a 8 righe, gate acceso"* che **non poteva esistere**. E'
+esattamente la **classe 141** — *l'elenco del piano stampato sotto il titolo
+dell'esito* — nata il 06/09 su un altro script e ancora armata qui.
+
+### La regola
+
+1. **Nello zip entra cio' che porta la data di QUESTA corsa.** Il filtro e'
+   `LastWriteTime -ge $Avvio` (con qualche secondo di margine), non il nome.
+2. **Cio' che resta fuori si DICHIARA**, non si nasconde: un rilievo nel
+   referto con nome e ora di scrittura di ogni file scartato.
+3. **L'elenco a schermo si legge dalla cartella**
+   (`Get-ChildItem $Cart`), mai da una lista scritta a mano.
+4. **Eccezione motivata:** i file **riscaricati al pin a ogni corsa** con un
+   `Remove-Item` davanti (qui i due file prova e `misura_tick_*.csv`) **non si
+   vagliano per data** — o sono di adesso o non esistono, e filtrarli li
+   farebbe sparire dallo zip solo perche' il server ha mandato un timestamp
+   suo. **Questa eccezione va scritta accanto al filtro**, altrimenti la
+   correzione della 155 ne porta dentro una nuova della stessa famiglia
+   (successo davvero, alla prima stesura della patch: i due file prova erano
+   spariti dallo zip).
+
+### Il controllo secco, da fare sempre
+
+> **Due corse di fila nella stessa cartella di lavoro, la seconda fatta
+> fallire.** Se nello zip della seconda c'e' anche solo un file della prima, e'
+> questa classe. Un banco che parte sempre da una cartella pulita **non la vede
+> mai**.
+
+## 37-quater. 🖥️ IL RIPIEGO DEL SELETTORE DEL TERMINALE PERDE L'ESCLUSIONE DEL `-V3`, E LA RIGA CHE STAMPA LA REGOLA **NON LA FA RISPETTARE**
+
+_Terza recidiva della 37 in due giorni (06/09 su `RIGA_LOG_SEDIE_MUTE.ps1`,
+07/09 mattina su `scarica_storico.ps1`, 07/09 qui). **Riprodotta eseguendo**:
+banco con **la sola** installazione `BCM Markets MT5 Terminal -V3`._
+
+Il selettore, copiato riga per riga da `walkforward_generico.ps1` (che ha lo
+stesso difetto), e' fatto di due righe:
+
+```powershell
+$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+```
+
+**La prima esclude la `-V3`. La seconda no.** E subito sotto il driver stampava:
+
+```
+terminale ... C:\...\BCM Markets MT5 Terminal -V3   (DEVE contenere 'BCM Markets MT5 Terminal' e NON contenere '-V3')
+```
+
+cioe' **la regola e la sua violazione sulla stessa riga**, lasciate all'occhio
+di chi legge. A banco la corsa e' andata **fino in fondo**: `PROBLEMI: 0`,
+`ESITO: CORSA COMPLETATO`, **uscita 0**, e `ABTG_SondaGapCash.mq5`, `.ex5` e
+`.log` scritti dentro `MQL5\Experts` del terminale del **100k 50504263**.
+
+### Perche' e' grave anche se il ramo "non dovrebbe mai scattare"
+
+Perche' e' esattamente cio' che la **regola dei terminali multipli** di
+`CLAUDE.md` (06/09, nata da un attacco EA quasi finito sul conto REALE) vieta:
+_"non chiedo MAI a Claudio di riconoscere la finestra a occhio"_. Un ripiego
+che non dovrebbe mai scattare **scatta il giorno in cui qualcuno rinomina o
+disinstalla l'altra cartella** — cioe' il giorno in cui nessuno se lo aspetta.
+
+### La regola
+
+**Una condizione stampata fra parentesi non e' un controllo.** Se una riga
+sa scrivere *"DEVE contenere X e NON contenere Y"*, allora sa anche fare
+`if(...){ throw }`: e deve farlo, sul valore **effettivamente scelto**, dopo il
+ripiego e non dentro di lui.
+
+```powershell
+if(($instDir -notlike "*BCM Markets MT5 Terminal*") -or ($instDir -like "*-V3*") -or ($instDir -like "*BCM_Reale*")){
+  throw ("TERMINALE SBAGLIATO: " + $instDir + " ...")
+}
+```
+
+⚠️ **E il difetto e' ancora vivo in `walkforward_generico.ps1`** (riga del
+ripiego, par. 7), che e' **condiviso da tutti i round**: li' non si tocca di
+corsa dentro un round, ma **va messo in coda ai lavori**, perche' ogni driver
+che copia quel selettore eredita il buco.
