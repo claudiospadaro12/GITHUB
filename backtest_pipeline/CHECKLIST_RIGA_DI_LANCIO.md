@@ -10351,3 +10351,97 @@ successivo e' una statement a se' e viene eseguita.
 > stesso giorno sulle righe dell'orologio: puntandole al **driver v3**
 > (`f81eb70`, marcatore vecchio) il `throw 'SCRIPT VECCHIO'` **parte davvero**,
 > exit 1, Desktop vuoto, nessuna corsa.
+
+---
+
+## 🆕 AGGIUNTA DEL 07/09/2026 — trovata dal **verificatore di stringhe** sulla riga della **SONDA DEI TICK D30EUR** (`scarica_storico.ps1`, pin `5fa4445e`), **ESEGUENDO** su `pwsh` 7.4.6. La riga proposta era per il resto onesta (guscio `& { }`, pin, marcatore, zip fresco filtrato con `-ge $t0`), ed e' stata bocciata su quattro punti: due gia' in checklist (**65** elenco senza apici, **37** il passo che non stampa il terminale scelto), uno gia' in tabella (**150** esito completo su insieme troncato) e **quello qui sotto, nuovo e riprodotto**.
+
+## 154. 🎭 IL CODICE D'USCITA CHE LA RIGA LEGGE **NON E' QUELLO DELLO SCRIPT**: e' quello dell'ULTIMO `.exe` CHE LO SCRIPT HA LANCIATO DENTRO — e `$global:LASTEXITCODE=0` **non protegge**, perche' sporca DOPO
+
+### Il fatto
+
+La ricetta di casa (punto 13) e' questa, e sembra blindata:
+
+```powershell
+$global:LASTEXITCODE=0; & $p -Simboli D30EUR ...; $rc=$LASTEXITCODE
+if($rc -ne 0){ ...rosso... }
+```
+
+L'azzeramento davanti serve contro lo sporco che viene **da prima**. Ma
+`scarica_storico.ps1`, sul ramo che va **bene**, **non chiama mai `exit`**: fa
+`exit 2` solo quando il timeout ha troncato la corsa (riga 456). E dentro, alla
+riga 164, lancia un eseguibile esterno:
+
+```powershell
+& $MetaEditor "/compile:$mq5" "/log" | Out-Null
+```
+
+`$LASTEXITCODE` e' **globale e condiviso**: quel `metaeditor64.exe` lo riscrive,
+e siccome dopo non c'e' nessun `exit`, **quello e' il valore che la riga legge**.
+
+**Riprodotto** (`pwsh` 7.4.6, banco: uno script che chiama un `.sh` che esce 3 e
+poi finisce bene senza `exit`):
+
+```
+  compilato: ok (lo script prosegue e finisce bene)
+  ... corsa completata, nessun exit
+### rc letto dalla riga = 3   (lo script e andato BENE, non ha mai fatto exit)
+```
+
+### Perche' e' una classe e non un dettaglio
+
+Sbaglia **in tutti e due i versi**, e il verso cattivo e' il secondo:
+
+1. ❌ **falso allarme**: `metaeditor64 /compile` e' noto per uscire diverso da 0
+   anche sui soli *warning*. Una corsa perfetta verrebbe annunciata come
+   fallita, e Claudio la rifarebbe per niente — il giro a vuoto che questo
+   ruolo esiste per uccidere.
+2. 🟢 **falso verde, ed e' il peggiore**: se il compilatore esce **0** (caso
+   normale), `$rc` vale **0 comunque**, qualunque cosa sia successa dopo. Il
+   gate `if($rc -eq 0){ 'COMPLETO' }` non sta misurando la corsa: sta misurando
+   **la compilazione di quaranta minuti prima**. E' la **150** che rientra da
+   una porta che nessuno aveva guardato: l'esito COMPLETO su un insieme
+   troncato, firmato da un codice d'uscita che parla di un'altra cosa.
+
+La differenza con le voci gia' scritte (punto 13, riga 6582) e' netta: quelle
+avvertono che `$LASTEXITCODE` puo' essere **`$null`** o **sporco da prima**.
+Qui e' **pulito, non nullo, e sbagliato**: e' il codice di un altro programma,
+scritto **dopo** l'azzeramento, dentro la stessa chiamata che stiamo misurando.
+
+### La regola
+
+> ⚖️ **`$LASTEXITCODE` dopo `& script.ps1` vale SOLO se quello script termina
+> con `exit <n>` su OGNI ramo.** Si stabilisce con un grep, prima di scriverci
+> sopra un gate:
+> ```
+> grep -n '^\s*exit ' script.ps1        # ci sono tutti i rami? anche quello buono?
+> grep -nE '^\s*&\s*\$|Start-Process|\.exe' script.ps1   # chi altro tocca $LASTEXITCODE?
+> ```
+> Se il ramo buono esce **senza `exit`**, il codice d'uscita **non e' una
+> misura**: si stampa come informazione (`rc=...`) e **il gate si mette
+> sull'ARTEFATTO** — che e' gia' quello che dice il **26-bis**, ma qui per un
+> motivo diverso: non perche' il codice significhi un'altra cosa, ma perche'
+> **non e' il suo**.
+
+### Come e' stato chiuso sulla riga della sonda D30EUR
+
+Il gate non guarda `$rc`: guarda le **righe attese nel CSV raccolto**, che per
+costruzione esistono solo se la corsa e' arrivata in fondo (la riga `TICK` la
+scrive `ABTG_HistoryDownloader.mq5:260-265` **dopo** il ciclo dei timeframe, e
+subito prima del `=== FINITO`):
+
+```powershell
+if($rt.Count -ne 1 -or $r1.Count -ne 1 -or $r5.Count -ne 1 -or $rc -eq 2){ ...INCOMPLETA... }
+```
+
+`$rc` resta dentro, ma **solo nella forma in cui e' affidabile**: `-eq 2` e' un
+valore che *nessun* compilatore produce li' ed e' scritto a mano dallo script
+sul ramo del timeout. Il resto della scala e' rumore, e viene **stampato**
+(`rc=...`) invece che interpretato.
+
+### 154-bis. 🧪 E il corollario sul banco
+
+Il difetto **non si vede su Linux con uno stub che esce 0**: lo stub va fatto
+uscire **diverso da zero**, se no il banco conferma esattamente l'illusione che
+si sta cercando di rompere. Vale per tutti i banchi di questa famiglia:
+**il finto eseguibile interno non esce mai 0 per comodita'.**
