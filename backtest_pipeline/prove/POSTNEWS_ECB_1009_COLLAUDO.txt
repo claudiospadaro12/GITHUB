@@ -1,0 +1,108 @@
+# =====================================================================
+#  COLLAUDO DELLA SEDIA PostNews ECB 771201 -- EVENTO BCE 10/09/2026
+#  CONTRATTO CONGELATO IL 07/09/2026 SERA, PRIMA DI QUALUNQUE NUMERO.
+# =====================================================================
+#
+#  DECISIONE DI CLAUDIO, testuale (07/09, ore ~21):
+#    "Ma perche' dovremmo chiuderli? Il 10 settembre c'e' la BCE e
+#     potremmo testare l'EA se va bene."
+#  Ha ragione, ed e' coerente con report/CORSIA_DEMO_REGOLE.md scritto
+#  poche ore prima: il forward su DEMO e' lo strumento giusto quando il
+#  backtest non puo' rispondere. Qui il backtest non ha MAI risposto --
+#  il calendario non veniva letto.
+#
+#  DOVE: conto DEMO PICCOLO 50503392 (C:\Program Files\BCM Markets MT5
+#  Terminal), grafico EURJPY M5, magic 771201. NON il reale 10105439,
+#  NON il 100k 50504263: su quei due la sedia non c'e' (misurato il
+#  07/09, report/POSTNEWS_NEUTRALIZZATE_2026-09-07.md).
+#
+# ---------------------------------------------------------------------
+#  LA DOMANDA -- ed e' UNA SOLA
+# ---------------------------------------------------------------------
+#  >>> IL MECCANISMO FUNZIONA?
+#
+#  NON e' "questa strategia guadagna". Un evento e' n=1: se guadagna non
+#  vuol dire che funziona, se perde non vuol dire che non funziona.
+#  >>> SUL MERITO QUESTO ROUND NON CONCLUDE NIENTE, E LO SCRIVO ADESSO
+#      PERCHE' NON CI SIA MODO DI RACCONTARLA DIVERSAMENTE DOPO.
+#  Il merito resta SOSPESO (regola di casa: sotto 150 operazioni). Serve
+#  il pavimento del rischio, che si legge sempre -- ma con n=1 nemmeno
+#  quello e' una distribuzione: e' un aneddoto. Vale come COLLAUDO.
+#
+#  Cio' che invece un evento risponde, e che non abbiamo MAI verificato:
+#  l'EA legge il calendario, si arma all'ora giusta, piazza gli ordini
+#  ai livelli giusti, dimensiona il lotto come promesso, e l'OCO fa il
+#  suo lavoro. Nessuna di queste cinque cose e' agli atti.
+#
+# ---------------------------------------------------------------------
+#  I CANCELLI DI FUNZIONAMENTO -- si leggono nella scheda ESPERTI
+# ---------------------------------------------------------------------
+#  F1. IL CALENDARIO SI LEGGE.
+#      Riga attesa: [PostNews][NEWS] letto da <dove> | righe N | UTILI
+#      per questo preset M ...
+#      >>> M (UTILI) deve essere >= 1.
+#      Se M = 0 compare il CANARINO ROSSO del sorgente e la sedia NON
+#      si arma: il collaudo e' FALLITO PRIMA DI COMINCIARE, e non e' un
+#      giudizio sulla strategia.
+#      E "letto da" dice DOVE: Common\Files oppure la sandbox.
+#
+#  F2. SI ARMA ALL'ORA GIUSTA.
+#      InpActionHour=14 / InpActionMin=0 = ORA SERVER = 15:00 italiane.
+#      ATTENZIONE ALLE ORE (regola di casa del 06/08): la scheda ESPERTI
+#      e' in ORA LOCALE del PC, il grafico in ORA SERVER. Una riga di
+#      log delle 15:00 corrisponde alle 14:00 server. Prima di dire
+#      "e' in ritardo", stabilire in quale ora e' scritto il numero.
+#
+#  F3. PIAZZA DUE PENDENTI, uno per lato.
+#      Attesi due ordini (BUY STOP e SELL STOP) sopra e sotto il range.
+#
+#  F4. L'OCO FUNZIONA.
+#      InpUseOCO e' true (default del sorgente, r.99: i preset ECB/FOMC
+#      non lo scrivono). Appena una gamba diventa POSIZIONE, l'altra
+#      dev'essere CANCELLATA -- riga attesa nel log:
+#         "OCO: cancellata la gamba opposta (ticket ...)"
+#      >>> Se restano DUE posizioni aperte insieme, il rischio dichiarato
+#          RADDOPPIA e il collaudo e' FALLITO su un punto di RISCHIO.
+#
+#  F5. IL LOTTO E' QUELLO PROMESSO.
+#      Il sorgente (r.325) dimensiona su InpRiskRefSLpips=50 pip, non
+#      sullo stop vero (InpSLpips=25): una gamba stoppata costa META' di
+#      InpRiskPercent. Con InpRiskPercent=1.30 -> 0,65% per gamba.
+#      >>> Verifica: se la gamba va in stop, la perdita dev'essere
+#          ~0,65% del saldo. Se e' ~1,30%, la formula non e' quella che
+#          credevamo e va rimisurata PRIMA di qualunque altra cosa.
+#
+# ---------------------------------------------------------------------
+#  IL RISCHIO -- RISCALATO PRIMA DELLA CORSA, NON DOPO
+# ---------------------------------------------------------------------
+#  InpRiskPercent passa da 3.0 a 1.30, cioe' 0,65% per gamba: IL METRO
+#  DI CASA firmato il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%).
+#
+#  Non e' una mia idea: e' scritto nel preset dell'NFP di questa stessa
+#  famiglia (ABTG_PostNews_NFP_USDJPY_LIVE_2026-09-04.set), testuale:
+#     "RISCHIO. La slide non dice niente sul rischio. Qui si usa il metro
+#      di casa, NON il 3% del modulo ECB/FOMC: InpRiskPercent=1.30 su
+#      InpRiskRefSLpips=50 = 0,65% per ORDINE ... E' la riscalatura
+#      firmata il 18/08"
+#  Il 3,0% dei moduli ECB/FOMC viene dal corso e non e' mai stato
+#  riscalato. Qui si riscala, e si dichiara.
+#
+#  ⚠ CORREZIONE AGLI ATTI: il 07/09 sera avevo detto a Claudio che queste
+#  sedie rischiavano "3,00% per evento". SBAGLIATO di un fattore 2: con
+#  il riferimento a 50 pip e lo stop a 25, il rischio vero era 1,50%.
+#  Verbale: report/POSTNEWS_NEUTRALIZZATE_2026-09-07.md.
+#
+# ---------------------------------------------------------------------
+#  COSA SI FA DOPO -- deciso PRIMA
+# ---------------------------------------------------------------------
+#  - F1..F5 tutti verdi -> il meccanismo funziona. La sedia entra nella
+#    CORSIA DEMO con le sue quattro righe (domanda, traguardo n=150 con
+#    data stimata, DD promesso, tagliando a 6 mesi). NON entra in campo.
+#  - Un cancello rosso -> si ripara quello, e si rifa'. Un cancello rosso
+#    NON e' un verdetto sulla strategia.
+#  - Comunque vada, il DD promesso resta NON MISURATO: un evento non lo
+#    produce. La riga del censimento resta rossa finche' non c'e' un
+#    backtest vero con un calendario vero.
+#
+#  ⛔ QUESTO COLLAUDO NON AUTORIZZA NIENTE SUL CONTO REALE 10105439.
+# =====================================================================

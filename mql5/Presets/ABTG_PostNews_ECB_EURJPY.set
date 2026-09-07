@@ -25,7 +25,14 @@ InpTrailNewSLpips=15.0
 InpFridayClose=true
 InpFridayCloseHour=21
 InpFridayCloseMin=50
-InpRiskPercent=3.0
+; --- 07/09/2026: riscalato al METRO DI CASA ---
+;   Era 3.0 (il numero del corso). Con InpRiskRefSLpips=50 e InpSLpips=25
+;   il sorgente (r.325) dimensiona su 50 pip: 3.0 significava 1,50% per
+;   gamba stoppata. 1.30 significa 0,65% per gamba -- la taglia firmata
+;   il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%), la stessa gia' usata
+;   dal preset NFP di questa famiglia.
+;   Contratto del collaudo: prove/POSTNEWS_ECB_1009_COLLAUDO.txt
+InpRiskPercent=1.30
 InpRiskRefSLpips=50.0
 InpComment=ECB PostNews
 InpMagic=771201
