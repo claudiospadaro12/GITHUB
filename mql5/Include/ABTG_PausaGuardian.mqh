@@ -226,6 +226,54 @@
 //           COLLAUDO_ENFORCEMENT_FASE1 congela "19/19" sui binari IN CAMPO
 //           (v1.20): resta valido per quelli, e va aggiornato a 114/v1.51
 //           SOLO nel round di ricompilazione, dichiarandolo PRIMA dei numeri.
+//  v1.60 -- 07/09/2026. TETTO PER CLUSTER CORRELATO (C2), firmato da Claudio
+//           il 07/09 (verbale report/FIRME_2026-09-07.md, paragrafo "TETTO PER
+//           CLUSTER / VALUTA AL 3,0%"). OPT-IN: mappa vuota = spento, e a mappa
+//           vuota NON viene letta e NON viene scritta NESSUNA GlobalVariable --
+//           comportamento identico a oggi, riga per riga.
+//           PERCHE': il verbale lo dichiara "FIRMATO MA NON ATTIVO -- il tetto
+//           per cluster non esiste nel codice". La misura che lo motiva sta nel
+//           dossier caccia_strategie/CONFIG_PROP_FREQUENZA_2026-09-06.md: i due
+//           portafogli "prop firm ready" a larga base letti hanno drawdown
+//           MISURATI del 32,59% e del 45,64%. La larghezza SENZA controllo
+//           della correlazione e' la trappola -- ed e' esattamente il rischio
+//           che la firma gemella dello stesso giorno (pavimento di frequenza
+//           per FAMIGLIA = piu' simboli) rende piu' probabile.
+//           DIFFERENZA DA P0 (tetto simbolo+lato, v1.50): P0 conta le TESTE su
+//           UN simbolo; C2 conta il RISCHIO (somma degli SL vivi in % equity)
+//           su un GRUPPO di simboli. Sono due tetti diversi e convivono.
+//           CHI DECIDE COSA -- la divisione del lavoro e' voluta:
+//            - il GUARDIAN somma il rischio per cluster e, per ogni cluster
+//              saturo, RI-TIMBRA ogni secondo una GlobalVariable dedicata
+//              (stesso identico meccanismo di C1, quindi stesso fail-open:
+//              se il guardiano muore, entro ABTG_BATTITO_TOLLERANZA il tetto
+//              scade da solo e la flotta non resta ferma per sempre);
+//            - questo include mappa il SIMBOLO che si sta per tradare sui suoi
+//              cluster e legge quelle bandiere. Un simbolo puo' stare in PIU'
+//              cluster (EURUSD e' in USD e in EUR): basta che UNO sia saturo
+//              per rifiutare l'ingresso.
+//           COSA HO SCRITTO QUI:
+//            - ABTG_ClusterParse_Calc() / ABTG_SimboloNelCluster_Calc():
+//              NUCLEO PURO, non leggono niente, ricevono la mappa come stringa
+//              -> l'autotest li interroga a tavolino, senza conto e senza
+//              tester. La mappa e' la STESSA riga di testo che legge il
+//              Guardian: una sola grammatica, un solo parser, un solo bug
+//              possibile invece di due (lezione del FIX 3 di GoldenCross,
+//              scritta in testa a questo file);
+//            - ABTG_ClusterGVRadice(): il NOME della bandiera per cluster, in
+//              un posto solo. Guardian e include lo chiamano tutti e due, cosi'
+//              il "filo" non puo' divergere per un refuso (era il difetto che
+//              nel Guardian v1.11 ha reso necessaria VerificaFilo);
+//            - ABTG_ClusterSaturo() / ABTG_ClusterFiloOk(): il filo che legge;
+//            - ABTG_GuardiaIngresso() prende DUE argomenti nuovi IN CODA
+//              (cluster_mappa="", simbolo_cluster=""): tutte le chiamate gia'
+//              scritte nella flotta restano valide riga per riga;
+//            - motivo 7 nel giornale, con frase ANCORA DIVERSA da B1/C1 e da
+//              P0: vedi il commento dentro la guardia (collaudo C9).
+//           LA MAPPA NON E' FIRMATA: la proposta sta in report/CLUSTER_PROPOSTA.md
+//           e va firmata a parte, come dice il verbale. Qui c'e' il meccanismo,
+//           non la scelta. NESSUN EA e' stato modificato e nessun preset in
+//           campo e' stato toccato.
 //  ASCII puro: niente accenti e niente emoji nelle stringhe.
 #ifndef ABTG_PAUSAGUARDIAN_MQH
 #define ABTG_PAUSAGUARDIAN_MQH
@@ -328,6 +376,7 @@ string ABTG_MotivoTesto(const int motivo)
    if(motivo==5) return("OBIETTIVO DELLA CHALLENGE GIA' RAGGIUNTO (stop S1) -- "
                         "si riapre SOLO A MANO");
    if(motivo==6) return("TETTO SIMBOLO+LATO raggiunto (P0)");
+   if(motivo==7) return("TETTO RISCHIO PER CLUSTER CORRELATO raggiunto (C2)");
    return("nessuno");
   }
 
@@ -1231,6 +1280,229 @@ bool ABTG_TettoSimboloLato_Calc(const string simbolo,const int lato,
 
 //+------------------------------------------------------------------+
 //|                                                                   |
+//|   TETTO PER CLUSTER CORRELATO (C2, v1.60) -- NUCLEO PURO.          |
+//|                                                                   |
+//|   LA MAPPA e' UNA SOLA STRINGA, la stessa che legge il Guardian:   |
+//|                                                                   |
+//|      "USD=EURUSD,GBPUSD,USDJPY;METALLI=XAUUSD,XAGUSD;AZ_US=U30USD" |
+//|                                                                   |
+//|   - i cluster si separano con ';', i membri con ',';               |
+//|   - il nome puo' dichiarare un TETTO PROPRIO con ':'               |
+//|       "AZIONARIO:3.5=D30EUR,U30USD"                                |
+//|     (assente o 0 -> si usa il tetto generale del Guardian, cioe'   |
+//|      il 3,0% firmato il 07/09);                                    |
+//|   - un membro che finisce con '*' e' un PREFISSO: "XAUUSD*" prende |
+//|     anche "XAUUSD.r" dei broker con suffisso. Un '*' da solo NON   |
+//|     vale "tutti i simboli": sarebbe un tetto su tutto il conto per |
+//|     distrazione, e quel tetto esiste gia' e si chiama C1;          |
+//|   - il confronto e' insensibile alle maiuscole e agli spazi;       |
+//|   - un simbolo puo' stare in PIU' cluster (EURUSD e' in USD e in   |
+//|     EUR): l'ingresso si rifiuta se anche UNO solo e' saturo.       |
+//|                                                                   |
+//|   Perche' una STRINGA e non una tabella nel codice: la mappa e'    |
+//|   una SCELTA di Claudio, non un fatto tecnico (il verbale del      |
+//|   07/09 dice "e' una scelta, va firmata a parte"). Come stringa    |
+//|   sta in un input/preset e si cambia senza ricompilare niente.     |
+//|                                                                   |
+//+------------------------------------------------------------------+
+
+//--- quanti cluster al massimo. 24 e' abbondante: la proposta del
+//    07/09 (report/CLUSTER_PROPOSTA.md) ne conta 10.
+#ifndef ABTG_CLUSTER_MAX
+#define ABTG_CLUSTER_MAX 24
+#endif
+
+//--- lunghezza massima del NOME di un cluster. Non e' estetica: il nome
+//    finisce dentro il nome di una GlobalVariable
+//    ("ABTG_CAP_CLUSTER_<NOME>_<login>"), e MT5 taglia i nomi oltre i 63
+//    caratteri -- due cluster con nome lungo e prefisso uguale
+//    diventerebbero LA STESSA bandiera. Meglio ignorarli e dirlo.
+#ifndef ABTG_CLUSTER_NOME_MAX
+#define ABTG_CLUSTER_NOME_MAX 24
+#endif
+
+//+------------------------------------------------------------------+
+//| Legge la mappa -- NUCLEO PURO (nessuna lettura del terminale).    |
+//| Riempie nomi[] (MAIUSCOLO), membri[] (la lista grezza, separata da |
+//| virgole) e tetti[] (0 = usa il tetto generale). Ritorna quanti     |
+//| cluster ha letto: 0 = mappa vuota o senza righe valide, ed e' il   |
+//| DEFAULT NEUTRO -- a 0 cluster nessuno legge e nessuno blocca.      |
+//| Le righe malformate si SALTANO, non fanno fallire tutta la mappa:  |
+//| un tetto di rischio non deve sparire per una virgola di troppo.    |
+//+------------------------------------------------------------------+
+int ABTG_ClusterParse_Calc(const string mappa,string &nomi[],
+                           string &membri[],double &tetti[])
+  {
+   ArrayResize(nomi,0);
+   ArrayResize(membri,0);
+   ArrayResize(tetti,0);
+
+   string m=mappa;
+   StringTrimLeft(m); StringTrimRight(m);
+   if(StringLen(m)<=0) return(0);                 // spento: mappa vuota
+
+   string pezzi[];
+   int np=StringSplit(m,StringGetCharacter(";",0),pezzi);
+   if(np<=0) return(0);
+
+   int n=0;
+   for(int i=0;i<np;i++)
+     {
+      if(n>=ABTG_CLUSTER_MAX) break;              // oltre il tetto: si ferma
+
+      string p=pezzi[i];
+      StringTrimLeft(p); StringTrimRight(p);
+      if(StringLen(p)<=0) continue;               // ';;' o ';' finale
+
+      int pos=StringFind(p,"=");
+      if(pos<=0) continue;                        // niente '=' o nome vuoto
+
+      string testa=StringSubstr(p,0,pos);
+      string coda =StringSubstr(p,pos+1);
+      StringTrimLeft(testa); StringTrimRight(testa);
+      StringTrimLeft(coda);  StringTrimRight(coda);
+      if(StringLen(coda)<=0) continue;            // cluster senza membri
+
+      //--- tetto proprio del cluster, opzionale: "NOME:3.5"
+      double tetto=0.0;
+      int pc=StringFind(testa,":");
+      if(pc>=0)
+        {
+         string spct=StringSubstr(testa,pc+1);
+         testa=StringSubstr(testa,0,pc);
+         StringTrimLeft(testa);  StringTrimRight(testa);
+         StringTrimLeft(spct);   StringTrimRight(spct);
+         tetto=StringToDouble(spct);
+         if(tetto<0.0) tetto=0.0;                 // dito storto: si ignora
+        }
+      if(StringLen(testa)<=0) continue;
+      if(StringLen(testa)>ABTG_CLUSTER_NOME_MAX) continue;   // vedi nota sopra
+
+      StringToUpper(testa);
+      ArrayResize(nomi,n+1);
+      ArrayResize(membri,n+1);
+      ArrayResize(tetti,n+1);
+      nomi[n]  =testa;
+      membri[n]=coda;
+      tetti[n] =tetto;
+      n++;
+     }
+   return(n);
+  }
+
+//+------------------------------------------------------------------+
+//| Il simbolo appartiene a questo cluster? -- NUCLEO PURO.           |
+//| membri = la lista grezza separata da virgole gia' letta.           |
+//| Confronto in MAIUSCOLO, spazi ignorati, jolly finale '*' = prefisso|
+//+------------------------------------------------------------------+
+bool ABTG_SimboloNelCluster_Calc(const string simbolo,const string membri)
+  {
+   if(StringLen(simbolo)<=0 || StringLen(membri)<=0) return(false);
+
+   string s=simbolo;
+   StringTrimLeft(s); StringTrimRight(s);
+   StringToUpper(s);
+   if(StringLen(s)<=0) return(false);
+
+   string el[];
+   int ne=StringSplit(membri,StringGetCharacter(",",0),el);
+   if(ne<=0) return(false);
+
+   for(int i=0;i<ne;i++)
+     {
+      string e=el[i];
+      StringTrimLeft(e); StringTrimRight(e);
+      if(StringLen(e)<=0) continue;
+      StringToUpper(e);
+
+      int L=StringLen(e);
+      if(StringGetCharacter(e,L-1)==StringGetCharacter("*",0))
+        {
+         string pref=StringSubstr(e,0,L-1);
+         if(StringLen(pref)<=0) continue;         // '*' da solo: NON vale tutto
+         if(StringSubstr(s,0,StringLen(pref))==pref) return(true);
+         continue;
+        }
+      if(s==e) return(true);
+     }
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| IL NOME DELLA BANDIERA DI UN CLUSTER -- in UN POSTO SOLO.         |
+//| Lo chiamano SIA il Guardian (che scrive) SIA questo include (che   |
+//| legge): e' il motivo per cui non serve una VerificaFilo per i      |
+//| cluster, il nome nasce dalla stessa funzione.                      |
+//| La radice va poi passata a ABTG_GVNome(), che ci appende il conto. |
+//+------------------------------------------------------------------+
+string ABTG_ClusterGVRadice(const string nome_cluster)
+  {
+   string n=nome_cluster;
+   StringTrimLeft(n); StringTrimRight(n);
+   StringToUpper(n);
+   return("ABTG_CAP_CLUSTER_"+n);
+  }
+
+//+------------------------------------------------------------------+
+//| IL FILO -- legge le bandiere scritte dal Guardian.                |
+//| Ritorna il NOME del PRIMO cluster saturo a cui il simbolo          |
+//| appartiene, "" se nessuno (cioe' se si puo' aprire).               |
+//|                                                                    |
+//| Fail-open a tre livelli, gli stessi di C1:                          |
+//|  1. mappa vuota          -> "" e non si legge NIENTE;               |
+//|  2. bandiera mai scritta -> ABTG_GVLeggi ritorna 0 -> "";           |
+//|  3. Guardian morto       -> il timbro invecchia e ABTG_CapAttivo_   |
+//|     Calc lo scarta da solo dopo ABTG_BATTITO_TOLLERANZA.            |
+//+------------------------------------------------------------------+
+string ABTG_ClusterSaturo(const string mappa,const string simbolo)
+  {
+   if(StringLen(mappa)<=0 || StringLen(simbolo)<=0) return("");
+
+   string nomi[],membri[]; double tetti[];
+   int nc=ABTG_ClusterParse_Calc(mappa,nomi,membri,tetti);
+   if(nc<=0) return("");
+
+   datetime ora=TimeCurrent();
+   for(int i=0;i<nc;i++)
+     {
+      if(!ABTG_SimboloNelCluster_Calc(simbolo,membri[i])) continue;
+      double ts=ABTG_GVLeggi(ABTG_ClusterGVRadice(nomi[i]));
+      if(ABTG_CapAttivo_Calc(ts,ora,ABTG_BATTITO_TOLLERANZA)) return(nomi[i]);
+     }
+   return("");
+  }
+
+//+------------------------------------------------------------------+
+//| VERIFICA DEL FILO, versione cluster (diagnostica, non blocca).     |
+//| Il Guardian CREA la bandiera di OGNI cluster che conosce (a 0      |
+//| quando il cluster e' libero). Se un cluster della mappa di questo  |
+//| EA non ha nessuna bandiera, vuol dire che il Guardian NON conosce  |
+//| quel cluster: la mappa dell'EA e quella del Guardian divergono, e  |
+//| su quel cluster il tetto NON protegge (fail-open silenzioso).      |
+//| Qui il silenzio si rompe. Ritorna true se tutti i cluster hanno    |
+//| riscontro; mancanti = elenco di quelli che non ce l'hanno.         |
+//+------------------------------------------------------------------+
+bool ABTG_ClusterFiloOk(const string mappa,string &mancanti)
+  {
+   mancanti="";
+   if(StringLen(mappa)<=0) return(true);          // spento: niente da verificare
+
+   string nomi[],membri[]; double tetti[];
+   int nc=ABTG_ClusterParse_Calc(mappa,nomi,membri,tetti);
+   if(nc<=0) return(true);
+
+   int fuori=0;
+   for(int i=0;i<nc;i++)
+     {
+      if(GlobalVariableCheck(ABTG_GVNome(ABTG_ClusterGVRadice(nomi[i])))) continue;
+      fuori++;
+      if(StringLen(mancanti)<200) mancanti+=nomi[i]+" ";
+     }
+   return(fuori==0);
+  }
+
+//+------------------------------------------------------------------+
+//|                                                                   |
 //|   LA GUARDIA -- la riga unica da mettere negli EA.                 |
 //|                                                                   |
 //+------------------------------------------------------------------+
@@ -1297,6 +1569,21 @@ bool ABTG_TettoSimboloLato_Calc(const string simbolo,const int lato,
 //| motivo di P1: non dipende dal Guardian, e' una regola del CONTO e    |
 //| deve valere anche a guardiano spento e dentro il tester.             |
 //+------------------------------------------------------------------+
+//| ARGOMENTI NUOVI v1.60 (tetto per CLUSTER, C2), tutti e due IN CODA   |
+//| e a default neutro -- stesso identico schema di P1, S1 e P0, quindi  |
+//| nessuna chiamata gia' scritta nella flotta va toccata per compilare: |
+//|   cluster_mappa   = "" (default) -> SPENTO, e non viene letta        |
+//|                     NESSUNA GlobalVariable (no-op puro, e' un caso   |
+//|                     di autotest, non una promessa);                  |
+//|   simbolo_cluster = "" (default) -> _Symbol. Si passa esplicito solo |
+//|                     dagli EA multi-simbolo.                          |
+//|                                                                      |
+//| C2 sta DOPO P0 e PRIMA del fail-open sul canale. Attenzione: a       |
+//| differenza di P1 e P0, C2 DIPENDE dal Guardian (e' lui che somma il  |
+//| rischio e timbra le bandiere): a guardiano spento, e dentro lo       |
+//| Strategy Tester, non morde mai. E' voluto e va dichiarato: nel       |
+//| tester i backtest restano confrontabili con quelli di ieri.          |
+//+------------------------------------------------------------------+
 bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
                           const bool pretendi_guardian=false,
                           const int soglia_perdite_consecutive=0,
@@ -1306,7 +1593,9 @@ bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
                           const bool obiettivo_su_equity=false,
                           const int tetto_simbolo_lato=0,
                           const int lato_ingresso=ABTG_LATO_NULLO,
-                          const string simbolo_tetto="")
+                          const string simbolo_tetto="",
+                          const string cluster_mappa="",
+                          const string simbolo_cluster="")
   {
    if(!attiva) return(true);                    // 1. l'utente l'ha spenta
 
@@ -1371,6 +1660,60 @@ bool ABTG_GuardiaIngresso(const bool attiva,const string chi="EA",
         }
       ultimoStatoTetto=morde;
       if(morde) return(false);
+     }
+
+   // 1-quater. TETTO PER CLUSTER CORRELATO (C2, firma 07/09/2026): a mappa
+   //        vuota non si legge niente e non si decide niente.
+   //        LA FRASE DEL GIORNALE E' DIVERSA DA QUELLE DI B1/C1 *E* DA QUELLA
+   //        DI P0, di proposito e per lo stesso motivo spiegato qui sopra:
+   //        il collaudo enforcement (backtest_pipeline/attese_enforcement_fase1.txt)
+   //        estrae il CAMPO C9.BLOCCO cercando "INGRESSO BLOCCATO --" e pretende
+   //        che ogni riga cosi' trovata abbia nello STESSO MINUTO una riga
+   //        [GUARDIAN] che la spieghi. Un rifiuto per cluster una riga [GUARDIAN]
+   //        ce l'ha (il cap cluster acceso), ma NON nello stesso minuto: il
+   //        Guardian la scrive una volta sola, al cambio di stato, e il rifiuto
+   //        puo' arrivare ore dopo. Con la stessa frase il criterio 9 conterebbe
+   //        un "blocco orfano" e segnalerebbe un difetto che non esiste. Qui si
+   //        scrive INGRESSO SOSPESO: non collide con nessuna ATTESA (C5.EA,
+   //        C7.EA, C5/C8.RIENTRO, C6.PROMESSA), con nessuna VIETATA e con nessun
+   //        CAMPO (C9.BLOCCO, C9.RISCHIO) del file delle attese.
+   // stessa igiene di log di P1 e P0: si scrive al CAMBIO di stato e poi al
+   // massimo una volta ogni ABTG_LOG_OGNI_SEC.
+   static datetime ultimoLogCluster  =0;
+   static bool     ultimoStatoCluster=false;
+   static bool     filoClusterVisto  =false;
+
+   if(StringLen(cluster_mappa)>0)
+     {
+      string simCL=(StringLen(simbolo_cluster)>0 ? simbolo_cluster : _Symbol);
+
+      // diagnostica UNA volta sola per vita dell'EA, e solo se il canale
+      // esiste davvero (nel tester non si stampa niente): se il Guardian non
+      // conosce un cluster di questa mappa, il tetto su quel cluster NON
+      // protegge -- ed e' meglio leggerlo nel giornale che scoprirlo dopo.
+      if(!filoClusterVisto && ABTG_CanaleEsiste())
+        {
+         filoClusterVisto=true;
+         string mancanti="";
+         if(!ABTG_ClusterFiloOk(cluster_mappa,mancanti))
+            PrintFormat("[GUARDIA] %s: ATTENZIONE, cluster senza riscontro nel Guardian: %s"
+                        "-- la mappa di questo EA e quella del Guardian NON coincidono, "
+                        "su quei cluster il tetto C2 non protegge.",chi,mancanti);
+        }
+
+      string   saturo =ABTG_ClusterSaturo(cluster_mappa,simCL);
+      bool     mordeCL=(StringLen(saturo)>0);
+      datetime oraCL  =TimeCurrent();
+
+      if(mordeCL && (mordeCL!=ultimoStatoCluster || (oraCL-ultimoLogCluster)>=ABTG_LOG_OGNI_SEC))
+        {
+         PrintFormat("[GUARDIA] %s: INGRESSO SOSPESO -- %s. Il cluster %s e' saturo "
+                     "e %s ne fa parte (le posizioni gia' aperte restano gestite dal loro EA).",
+                     chi,ABTG_MotivoTesto(7),saturo,simCL);
+         ultimoLogCluster=oraCL;
+        }
+      ultimoStatoCluster=mordeCL;
+      if(mordeCL) return(false);
      }
 
    if(!ABTG_CanaleEsiste()) return(true);       // 2. nessun guardiano su questo conto
