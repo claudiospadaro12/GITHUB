@@ -10209,3 +10209,117 @@ _(Meta-lezione: questa checklist ha tenuto per settimane una spiegazione
 SBAGLIATA di un rimedio GIUSTO. Il rimedio funzionava per il motivo n.1, non
 per il n.2 che era scritto. Un rimedio si collauda falsificandolo, anche quando
 "si sa" perche' funziona.)_
+
+---
+
+## 🆕 AGGIUNTE DEL 07/09/2026 — trovate dal **verificatore di stringhe** sulla **SONDA DELL'OROLOGIO, giro INDICI** (`RIGA_SONDA_OROLOGIO.ps1` v4, pin `73069faa`, + `RIGA_SONDA_OROLOGIO_INDICI_DA_MANDARE.md`), **ESEGUENDO** su `pwsh` 7.4.6 e banco stubbato (`Scarica` -> copia locale, CSV OPTFRAME con l'intestazione VERA dell'EA a 28 colonne). Il driver e' per il resto **solido e verificato eseguendo**: parse 0 errori, ASCII puro 0 byte, nessun costrutto di `pwsh` 7, cultura invariante su **tutti** i `ToString`/`TryParse`, **17 mutazioni dei 4 file prova -> 17 fermate** col controllo positivo, `-Giro INDICI` tira fuori **esattamente** le 4 celle / 4 magic / 4 prova giusti, `-Giro FX` le 7 di prima, senza `-Giro` **exit 2 e Desktop vuoto**, zombie-run e `rc != 0` del generico finiscono nei **PROBLEMI**, insieme vuoto -> **`NON MISURATO PER INTERO`** (non "NON PASSATO"), nessuna scrittura di `.chr`/`.ini`/preset. Le due voci qui sotto sono **RIPRODOTTE ESEGUENDO** e sono tutte e due **RECIDIVE** di classi gia' scritte qui dentro — ed e' quello che le rende utili.
+
+## 153. 🔄 IL GATE A SOGLIA CHE, SUPERATA LA SOGLIA, NON **ATTENUA** L'AVVERTIMENTO MA LO **CAPOVOLGE IN UNA GARANZIA** — e la garanzia e' su una grandezza che su quel simbolo **nessuno ha mai misurato**
+
+### Il fatto
+
+Il driver ha un avvertimento automatico, giusto e scritto bene, sul ramo FOREX:
+
+```
+finestra dal 2011.01.01, tick NATIVO BCM dal 2024.09.26: nel tratto
+precedente lo SPREAD non e' quello del tick (vedi RILIEVI)
+```
+
+Sul ramo INDICI la finestra parte **esattamente** dal `2024.09.26`, quindi la
+disuguaglianza `@DAQUANDO >= pavimento` e' vera. E a quel punto il codice non si
+limitava a **togliere** l'avvertimento: al suo posto scriveva
+
+```
+finestra dal 2024.09.26 = dal pavimento MISURATO dei tick BCM (2024.09.26,
+stato COMPLETO su D30EUR e U30USD, REFERTO_SONDA_STORICO_17-08.md riga 46):
+tick NATIVI su TUTTA la finestra, spread del feed vero
+```
+
+**Ogni pezzo di quella frase e' verificabile, e uno e' falso.**
+`REFERTO_SONDA_STORICO_17-08.md` e' la sonda `ABTG_InfoBroker` **su TF H1**:
+misura le **BARRE**. Lo scrive gia' `R109_CRITERI.md` par. 4.2, in lettere:
+_"La sonda del 17/08 ha misurato **le BARRE**, non i tick"_. In tutto il repo
+esistono **due sole** misure di profondita' a TICK — `misura_tick_U30USD.csv` e
+`misura_tick_NASUSD.csv` — e **su D30EUR non ce n'e' nessuna**.
+
+E non e' una pignoleria di vocabolario: la sonda dell'orologio ha come cancello
+zero `|lordo| >= 3 x spread mediano`. **Lo spread e' META' della misura.** A
+`Model=4` senza tick reali **MT5 non si ferma**: ripiega e genera i tick dalle
+barre M1, e la colonna `Spread Mediano Ingresso` smette di essere lo spread del
+feed. Cioe' il giro dove l'evidenza a tick e' **piu' debole** (D30EUR: zero
+misure) era l'unico dove l'avvertimento **spariva**, sostituito da un `🟢`.
+
+### Perche' e' una classe e non un refuso
+
+E' la **18** (_"la profondita' dello storico misurata su un TF, la corsa girata
+su un altro"_) — ma la 18, come e' scritta, si difende dal **silenzio**: dice
+"misura sul TF che il tester usa davvero". Qui il silenzio non c'era: c'era una
+**frase affermativa**, con una **citazione puntuale** (`riga 46`) e un numero
+giusto (`2024.09.26` **e'** la prima data di quei simboli — delle BARRE). Una
+frase cosi' **chiude la domanda** invece di aprirla: chi legge il referto vede
+`spread del feed vero` e smette di guardare. **Il pericolo non e' il dato
+mancante: e' il dato VICINO** — misurato sul serio, ma su un'altra grandezza,
+e promosso a garanzia da una disuguaglianza fra date.
+
+> ✅ **REGOLA: un gate a soglia puo' TOGLIERE un avvertimento, mai METTERE una
+> garanzia al suo posto.** Quando la soglia e' superata, il campo si scrive con
+> l'elenco di **CHI** ha la misura e **CHI NO**, simbolo per simbolo, citando il
+> file che la prova; e per chi non ce l'ha **si alza un RILIEVO**, perche'
+> _"non ho misurato" non e' "va bene"_ (punto **40**). Il controllo che lo
+> trova, ed e' di due minuti: **si prende la citazione della frase verde e si
+> apre il file citato**, chiedendosi *"questo referto misura la grandezza di cui
+> sto parlando?"*.
+
+### 153-bis. 🚪 E LA FRASE COSTRUITA **PRIMA** DEL GATE ARRIVA SUL DESKTOP ANCHE NELLA CORSA CHE IL GATE HA **FERMATO**
+
+Difesa dell'autore, in buona fede: _"quel ramo e' irraggiungibile, un altro gate
+ferma prima"_. **Falso, e riprodotto eseguendo.** In questo driver — come in
+tutti i driver di casa — la variabile del referto nasce **prima** del `try` dei
+gate, e la **raccolta gira SEMPRE** (regola di casa, giustamente). Quindi:
+
+```
+& $p -Giro FX -Pin <40 hex> -SoloControllo -DaQuando 2024.09.26
+-> !!! FERMATO: SONDA_OROLOGIO_00_GEMELLI.txt: @DAQUANDO e' 2011.01.01, atteso 2024.09.26
+-> ESITO: FERMATO   (exit 1)
+```
+
+e **dentro lo zip sul Desktop**, in cima al referto:
+
+```
+tick: ... stato COMPLETO su EURUSD e GBPUSD e XAUUSD ... tick NATIVI su
+      TUTTA la finestra, spread del feed vero
+```
+
+Una frase **falsa su tre simboli forex**, con la sua citazione d'archivio,
+consegnata a Claudio. **Il gate ferma la CORSA, non ferma il REFERTO.**
+
+> ✅ **REGOLA: "questo ramo e' irraggiungibile" si dimostra ESEGUENDOLO, non
+> ragionandoci.** E la domanda giusta non e' _"il gate scatta?"_ ma
+> _"cosa c'e' scritto nel referto DOPO che il gate e' scattato?"_. Corollario di
+> mestiere: **ogni campo del referto costruito PRIMA dei gate va scritto in modo
+> che resti vero anche in una corsa fermata** — oppure va costruito **dopo** i
+> gate che lo riguardano. Il controllo: **si fa fallire un gate a turno e si
+> rilegge il referto riga per riga chiedendosi "questa frase e' vera adesso?"**
+> (e' il metodo della **94-ter**, applicato ai campi di TESTA invece che a
+> quelli di esito).
+
+### 🔁 E la recidiva che vale piu' delle due voci: la **94-ter** era ancora armata qui
+
+Stesso giro, stessa sera: il campo `compilazione:` era timbrato **solo sul ramo
+di successo**, quindi una compilazione **tentata e fallita** usciva nel referto
+scritta **`NON TENTATA`**. E' la **94-ter parola per parola** — stessa variabile
+`$Compilato`, stesso caso ("un EA mai compilato"), pagata il **02/09** su
+`RIGA_SONDARSIEMAV8.ps1`. Qui mordeva **piu' forte**, perche' `ABTG_SondaOrologio`
+non e' mai stato compilato da nessuno e **"FALLITA" era l'esito piu' probabile
+della prima corsa** — cioe' la classe stava aspettando esattamente il round in
+cui contava.
+
+> ✅ **La 94-ter aveva gia' lasciato il grep pronto** (_"`grep -rl 'Compilato =
+> "NON TENTATA"' *.ps1` -> 27 driver su 29"_), e nessuno l'ha eseguito su questo.
+> **Un grep scritto nella checklist e non girato e' una classe che non e'
+> chiusa.** Il punto **2** ("cerco i difetti gemelli") non e' una buona
+> intenzione: e' quel comando, incollato, prima di mandare la riga.
+
+_(Le due correzioni sono in `RIGA_SONDA_OROLOGIO.ps1` **v5**, commit `fa7f33da`,
+pagina INDICI ri-pinnata in `c4ce74a`. Ramo FX **v4 -> v5: referto identico riga
+per riga**, `diff` vuoto su 581 righe di banco.)_
