@@ -10663,3 +10663,44 @@ oggi vale scritto anche per il ritardo di esecuzione.
 `ExecutionMode=0` **fin dal 07/08/2026**. Quindi tutti i round di questa casa
 sono girati a **zero ritardo DICHIARATO nell'`.ini`** — non era uno stato
 nascosto, come avevo scritto: era un numero che nessun referto ha mai letto.
+
+---
+
+# CLASSE 157 — `git add -A` MENTRE GLI AGENTI LAVORANO
+### Misurata il 07/09/2026 notte, sbagliando io
+
+## Cosa e' successo
+Mentre un agente stava scrivendo il pacchetto di deploy di `RELATIVO NASUSD`,
+la sessione principale ha fatto un `git add -A` per committare tutt'altro
+(l'avviso sulla sonda tick dell'oro). Il `-A` ha **rastrellato anche i file
+dell'agente**, ancora a meta' lavoro, e li ha infilati nel commit `afa289f`
+con un messaggio che parlava d'altro.
+
+**Contenuto giusto, attribuzione sbagliata.** Non si e' perso niente — ma la
+storia del repo adesso dice che l'avviso sulla sonda tick ha introdotto un
+preset e una scheda che non c'entrano niente. Chi rileggera' fra un mese
+cerchera' nel commit sbagliato.
+
+## Perche' e' una classe NUOVA
+Fino al 07/09 in questo repo lavorava **una cosa alla volta**. Da quando la
+sessione principale e gli agenti scrivono **in parallelo sulla stessa copia
+di lavoro**, `git add -A` non e' piu' "aggiungi le mie modifiche": e'
+**"aggiungi tutto quello che chiunque sta scrivendo adesso"**.
+
+## La regola
+🔴 **Con agenti in corso, `git add -A` e' vietato.**
+Si aggiungono **i percorsi che si sono toccati**, per nome:
+
+```bash
+git add report/SONDA_TICK_ORO_ATTENZIONE.md      # SI: solo il mio
+git add -A                                        # NO: rastrella anche gli altri
+```
+
+E se un commit e' gia' partito sbagliato, **non si riscrive la storia per
+rimediare**: si scrive nel commit dopo cosa e' finito dove — che e'
+esattamente quello che ha fatto l'agente, e per cui va dato atto.
+
+## Il corollario che vale di piu'
+Un agente che, invece di ignorare l'anomalia, **la nota e la scrive nel suo
+referto** vale piu' di uno che consegna e basta. Quella riga e' il motivo per
+cui questa classe esiste.
