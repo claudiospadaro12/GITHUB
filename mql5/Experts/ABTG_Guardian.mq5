@@ -30,7 +30,7 @@
 //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.12"
+#property version   "1.13"
 #property strict
 #include <Trade/Trade.mqh>
 //  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
@@ -62,6 +62,35 @@
 //  enza) -- senza il nome nuovo la ricompilazione riletterebbe il vecchio
 //  numero contaminato invece di ricatturarlo pulito. Nessun reset a mano
 //  da F3 necessario: la cattura fresca e' automatica al primo avvio.
+//  v1.13 -- 07/09/2026. TETTO DI RISCHIO APERTO PER CLUSTER CORRELATO
+//  (C2), firmato da Claudio il 07/09 -- verbale report/FIRME_2026-09-07.md,
+//  che lo dichiara testualmente "FIRMATO MA NON ATTIVO: nel Guardian il
+//  tetto per cluster non esiste ancora". Adesso esiste.
+//  PERCHE', misurato (dossier caccia_strategie/CONFIG_PROP_FREQUENZA_2026-09-06):
+//  i due portafogli "prop firm ready" a larga base letti hanno drawdown
+//  MISURATI del 32,59% e del 45,64%. La larghezza SENZA controllo della
+//  correlazione e' la trappola, ed e' esattamente il rischio che la firma
+//  gemella dello stesso giorno (pavimento di frequenza per FAMIGLIA = piu'
+//  simboli) rende piu' probabile.
+//  COME FUNZIONA: il guardiano somma il rischio degli SL vivi separatamente
+//  per ogni CLUSTER dichiarato e, per ogni cluster oltre il tetto, timbra
+//  una GlobalVariable dedicata -- lo STESSO meccanismo di C1, quindi lo
+//  stesso fail-open (se il guardiano muore, il timbro invecchia e il tetto
+//  scade da solo). Come C1, NON chiude niente: blocca i nuovi ingressi
+//  degli EA che leggono il canale con ABTG_PausaGuardian.mqh.
+//  STA ACCANTO A C1, NON AL SUO POSTO: C1 guarda il conto intero (3,25%),
+//  C2 guarda un gruppo correlato (3,0%). Vince il piu' stringente dei due,
+//  senza che nessuno dei due debba saperlo dell'altro.
+//  DEFAULT = NO-OP ASSOLUTO: InpMaxClusterRiskPct=0 e InpClusterMappa=""
+//  -> la mappa non viene nemmeno letta, nessuna GlobalVariable nuova viene
+//  creata, nessuna riga nuova compare nel giornale, il pannello resta
+//  identico. Su un conto in campo non cambia nulla finche' Claudio non
+//  firma la mappa (proposta: report/CLUSTER_PROPOSTA.md) e non la scrive
+//  nell'input.
+//  IL CONFINE DEL CONTROLLO, dichiarato: come C1, C2 somma solo le
+//  POSIZIONI con SL (buco B6: i pendenti non si contano, le posizioni
+//  senza SL sono rischio ignoto ed escluse). E' un LIMITE INFERIORE del
+//  rischio impegnato, non una misura esatta.
 #include <ABTG_PausaGuardian.mqh>
 
 //--- SALDO / REGOLE PROP -------------------------------------------
@@ -78,6 +107,17 @@ input double InpDailyPausePct  = 4.0;    // PAUSA MORBIDA: perdita giornaliera %
 input double InpMaxOpenRiskPct = 3.25;   // CAP C1: rischio aperto simultaneo massimo, % equity (0=spento). 3.25 = 5 SL vivi da 0,65%
 input int    InpRiskMode       = 0;      // Rischio aperto: 0=dall'INGRESSO (come la misura M2) . 1=dal PREZZO CORRENTE (perdita residua)
 input bool   InpWarnNoSL       = true;   // logga un warning per le posizioni SENZA stop loss (rischio ignoto, non bloccante)
+//--- CAP C2 PER CLUSTER CORRELATO (firma 07/09/2026) -----------------
+//  OPT-IN e NO-OP di default: a tetto 0 O mappa vuota il guardiano si
+//  comporta ESATTAMENTE come la v1.12, senza leggere e senza scrivere
+//  niente in piu'. La MAPPA e' una SCELTA di Claudio e va firmata a parte
+//  (il verbale del 07/09 lo dice testualmente): la proposta sta in
+//  report/CLUSTER_PROPOSTA.md e NON e' in nessun preset.
+//  Formato: "NOME=SYM,SYM;NOME2=SYM3"  -- tetto proprio opzionale con ':'
+//  ("AZIONARIO:3.5=D30EUR,U30USD"), jolly finale per i suffissi broker
+//  ("XAUUSD*"). Un simbolo puo' stare in piu' cluster.
+input double InpMaxClusterRiskPct = 0;   // CAP C2: rischio aperto massimo per CLUSTER, % equity (0=spento). Firma 07/09: 3.0
+input string InpClusterMappa      = "";  // CAP C2: mappa dei cluster ("" = spento). Es. USD=EURUSD,GBPUSD;METALLI=XAUUSD,XAGUSD
 //--- COMPORTAMENTO -------------------------------------------------
 input int    InpAction         = 0;      // 0=CHIUDI+BLOCCA (enforce) . 1=SOLO ALLARME (monitor, non chiude)
 input bool   InpCloseAllMagics = true;   // true=chiude posizioni/pendenti di QUALSIASI magic (tutto il conto)
@@ -96,6 +136,13 @@ string GV_PAUSA, GV_PAUSAFINO, GV_CAP, GV_RISKPCT, GV_BATTITO;
 CTrade gTrade;
 double gStart=0, gPeak=0;
 datetime gLastLog=0, gLastWarnNoSL=0;
+//--- C2: la mappa dei cluster, letta UNA volta in OnInit.
+//    gClN=0 vuol dire SPENTO, ed e' il default: con 0 cluster nessuna
+//    funzione nuova viene chiamata e nessuna GlobalVariable viene creata.
+string   gClNomi[], gClMembri[];
+double   gClTetti[];
+bool     gClAttivo[];        // stato precedente, per scrivere solo al CAMBIO
+int      gClN=0;
 
 //+------------------------------------------------------------------+
 int DayKey(datetime t){ MqlDateTime s; TimeToStruct(t,s); return s.year*1000+s.day_of_year; }
@@ -196,6 +243,66 @@ double OpenRiskPct(const double equity,int &senzaSL,string &listaNoSL)
       tot+=LossIfStopHit(sym,ptp,vol,from,sl);
      }
    return(100.0*tot/equity);
+  }
+
+//+------------------------------------------------------------------+
+//| C2 -- RISCHIO APERTO PER CLUSTER, in % dell'equity.               |
+//| Riempie perc[] con una voce per cluster (stesso ordine di gClNomi).|
+//|                                                                    |
+//| PERCHE' UN SECONDO GIRO invece di allargare OpenRiskPct(): perche' |
+//| OpenRiskPct() e' codice IN CAMPO, e il collaudo enforcement legge  |
+//| il suo numero (campo C9.RISCHIO). Lasciandolo intatto, a cluster   |
+//| spenti questa funzione non viene MAI chiamata e il comportamento   |
+//| del guardiano e' identico byte per byte a prima. Il costo del giro |
+//| in piu' e' una volta al secondo, solo a tetto acceso.              |
+//|                                                                    |
+//| Stesse convenzioni di C1, di proposito (un numero che si legge     |
+//| accanto all'altro deve essere misurato allo stesso modo):          |
+//|  - stessa distanza (InpRiskMode: ingresso o prezzo corrente);      |
+//|  - posizioni SENZA SL escluse (rischio ignoto, gia' segnalato);    |
+//|  - pendenti NON contati (buco B6, dichiarato in testa al file);    |
+//|  - un simbolo che sta in PIU' cluster pesa su TUTTI: e' voluto,    |
+//|    EURUSD e' rischio dollaro E rischio euro nello stesso istante.  |
+//+------------------------------------------------------------------+
+int ClusterRiskPct(const double equity,double &perc[])
+  {
+   ArrayResize(perc,gClN);
+   for(int c=0;c<gClN;c++) perc[c]=0.0;
+   if(gClN<=0 || equity<=0) return(gClN);
+
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+
+      double sl=PositionGetDouble(POSITION_SL);
+      if(sl<=0) continue;                       // rischio ignoto: escluso, come in C1
+
+      string sym =PositionGetString(POSITION_SYMBOL);
+      long   ptp =PositionGetInteger(POSITION_TYPE);
+      double vol =PositionGetDouble(POSITION_VOLUME);
+      double from=(InpRiskMode==1)? PositionGetDouble(POSITION_PRICE_CURRENT)
+                                  : PositionGetDouble(POSITION_PRICE_OPEN);
+      double perdita=LossIfStopHit(sym,ptp,vol,from,sl);
+      if(perdita<=0) continue;                  // SL gia' in profitto: rischio nullo
+
+      for(int c=0;c<gClN;c++)
+         if(ABTG_SimboloNelCluster_Calc(sym,gClMembri[c]))
+            perc[c]+=perdita;
+     }
+
+   for(int c=0;c<gClN;c++) perc[c]=100.0*perc[c]/equity;
+   return(gClN);
+  }
+
+//+------------------------------------------------------------------+
+//| Il tetto che vale per il cluster c: quello proprio se dichiarato,  |
+//| altrimenti quello generale dell'input.                             |
+//+------------------------------------------------------------------+
+double ClusterTetto(const int c)
+  {
+   if(c<0 || c>=gClN) return(InpMaxClusterRiskPct);
+   return(gClTetti[c]>0.0 ? gClTetti[c] : InpMaxClusterRiskPct);
   }
 
 //+------------------------------------------------------------------+
@@ -326,6 +433,36 @@ int OnInit()
    if(!GlobalVariableCheck(GV_PAUSA))    GlobalVariableSet(GV_PAUSA,0);
    if(!GlobalVariableCheck(GV_PAUSAFINO))GlobalVariableSet(GV_PAUSAFINO,0);
    GlobalVariableSet(GV_CAP,0);          // il cap si ricalcola da zero a ogni avvio
+
+   //--- C2 (07/09/2026): la mappa dei cluster si legge UNA volta, qui.
+   //    NO-OP di default: se il tetto e' 0 O la mappa e' vuota non si
+   //    parsifica niente, non si crea nessuna GlobalVariable e non si
+   //    stampa nessuna riga in piu' -- il giornale resta quello della v1.12.
+   gClN=0;
+   if(InpMaxClusterRiskPct>0 && StringLen(InpClusterMappa)>0)
+     {
+      gClN=ABTG_ClusterParse_Calc(InpClusterMappa,gClNomi,gClMembri,gClTetti);
+      if(gClN<=0)
+         Print("[GUARDIAN] ATTENZIONE: InpClusterMappa non contiene nessun cluster valido -> "
+               "tetto per cluster SPENTO. Formato atteso: NOME=SYM,SYM;NOME2:3.5=SYM3");
+      else
+        {
+         ArrayResize(gClAttivo,gClN);
+         for(int c=0;c<gClN;c++)
+           {
+            gClAttivo[c]=false;
+            // la bandiera si CREA subito a 0, anche se il cluster e' libero:
+            // e' cosi' che un EA puo' accorgersi che la sua mappa e quella del
+            // guardiano divergono (ABTG_ClusterFiloOk nell'include).
+            GlobalVariableSet(ABTG_GVNome(ABTG_ClusterGVRadice(gClNomi[c])),0);
+            PrintFormat("[GUARDIAN] cluster %d/%d: %s tetto %.2f%% membri [%s]",
+                        c+1,gClN,gClNomi[c],ClusterTetto(c),gClMembri[c]);
+           }
+         PrintFormat("[GUARDIAN] cap per CLUSTER correlato ATTIVO: %d cluster, tetto generale %.2f%% "
+                     "(firma 07/09/2026). Il cap complessivo resta %.2f%%: vince il piu' stringente.",
+                     gClN,InpMaxClusterRiskPct,InpMaxOpenRiskPct);
+        }
+     }
 
    gTrade.SetExpertMagicNumber(InpMagic);
    EventSetTimer(1);
@@ -472,6 +609,50 @@ void OnTimer()
       GlobalVariableSet(GV_CAP,0);
      }
 
+   //=== C2 -- CAP SUL RISCHIO APERTO PER CLUSTER CORRELATO ===============
+   //  A cluster spenti (gClN=0) questo blocco non fa NIENTE: nessun giro
+   //  sulle posizioni, nessuna GlobalVariable, nessuna riga di giornale.
+   //  Le frasi sono VOLUTAMENTE diverse da quelle di C1: il collaudo
+   //  enforcement (backtest_pipeline/attese_enforcement_fase1.txt) cerca
+   //  "[GUARDIAN] * CAP RISCHIO APERTO attivo:" e "[GUARDIAN] cap rischio
+   //  aperto rientrato:" come attese di C7, e "rischioAperto=" come campo
+   //  di C9. Nessuna riga qui sotto contiene una di quelle sottostringhe.
+   string clPanel="";
+   double clMax=0.0; string clMaxNome="";
+   if(gClN>0)
+     {
+      double clPct[];
+      ClusterRiskPct(eq,clPct);
+      for(int c=0;c<gClN;c++)
+        {
+         double tetto=ClusterTetto(c);
+         bool   morde=(clPct[c]>=tetto);
+         string gv   =ABTG_GVNome(ABTG_ClusterGVRadice(gClNomi[c]));
+
+         if(morde)
+           {
+            if(!gClAttivo[c])
+               PrintFormat("[GUARDIAN] # CAP CLUSTER attivo: %s a %.2f%% >= %.2f%% "
+                           "(nuovi ingressi sospesi sui simboli di questo cluster)",
+                           gClNomi[c],clPct[c],tetto);
+            // il valore e' il timestamp e si rinfresca a ogni giro: se il
+            // guardiano muore, il tetto scade da solo (fail-open, come C1)
+            GlobalVariableSet(gv,(double)TimeCurrent());
+           }
+         else
+           {
+            if(gClAttivo[c])
+               PrintFormat("[GUARDIAN] cap cluster rientrato: %s a %.2f%% < %.2f%%",
+                           gClNomi[c],clPct[c],tetto);
+            GlobalVariableSet(gv,0);
+           }
+         gClAttivo[c]=morde;
+
+         if(clPct[c]>clMax){ clMax=clPct[c]; clMaxNome=gClNomi[c]; }
+         if(morde) clPanel+=StringFormat("\n  %s %.2f%%/%.2f%% CAP ATTIVO",gClNomi[c],clPct[c],tetto);
+        }
+     }
+
    // posizioni senza SL = rischio IGNOTO: si segnala, non si blocca
    if(InpWarnNoSL && senzaSL>0 && TimeCurrent()-gLastWarnNoSL>=300)
      {
@@ -496,6 +677,12 @@ void OnTimer()
         InpDailyPausePct,(InpDailyPausePct<=0?"spenta":(pausaOn?"ATTIVA (stop nuovi ingressi)":"libera")),
         riskPct,InpMaxOpenRiskPct,(InpMaxOpenRiskPct<=0?"spento":(capOn?"CAP ATTIVO":"ok")),
         (senzaSL>0?StringFormat("\n!! %d posizioni SENZA SL (rischio ignoto)",senzaSL):""));
+      // C2: il pannello cresce SOLO se il tetto per cluster e' acceso
+      if(gClN>0)
+         panel+=StringFormat("\nCluster (%d, tetto %.2f%%): peggiore %s %.2f%%%s",
+                             gClN,InpMaxClusterRiskPct,
+                             (StringLen(clMaxNome)>0?clMaxNome:"-"),clMax,
+                             (StringLen(clPanel)>0?clPanel:""));
       Comment(panel);
      }
 
@@ -507,6 +694,12 @@ void OnTimer()
                   eq,dailyPct,totalPct,riskPct,
                   (failed?"FAILED":(nowBlocked?"BLOCKED":"OK")),
                   (pausaOn?"ON":"off"),(capOn?"ON":"off"));
+      // riga SEPARATA per C2, e solo a tetto acceso: non contiene
+      // "rischioAperto=" apposta, cosi' il campo C9.RISCHIO del collaudo
+      // enforcement continua a estrarre SOLO il numero di C1.
+      if(gClN>0)
+         PrintFormat("[GUARDIAN] cluster: %d dichiarati, peggiore %s clusterMax=%.2f%% (tetto generale %.2f%%)",
+                     gClN,(StringLen(clMaxNome)>0?clMaxNome:"-"),clMax,InpMaxClusterRiskPct);
      }
   }
 //+------------------------------------------------------------------+

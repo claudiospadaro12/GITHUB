@@ -2217,13 +2217,163 @@ int ABTG_AutotestTettoSimboloLato()
    return(falliti);
   }
 
+//+------------------------------------------------------------------+
+//| AUTOTEST DEL TETTO PER CLUSTER (C2, v1.60) -- 45 casi.            |
+//| Tutto sul nucleo puro: nessuna GlobalVariable, nessuna posizione,  |
+//| nessun terminale. E' il motivo per cui il nucleo esiste.           |
+//| I casi C) girano sullo STESSO nucleo di C1 (ABTG_CapAttivo_Calc):   |
+//| e' voluto -- il fail-open del cluster non e' una copia, e' la       |
+//| stessa funzione gia' collaudata.                                   |
+//+------------------------------------------------------------------+
+int ABTG_AutotestCluster()
+  {
+   int falliti=0;
+   Print("[AUTOTEST] --- TETTO PER CLUSTER CORRELATO (C2, v1.60) ---");
+
+   string nomi[],membri[];
+   double tetti[];
+   int    nc=0;
+   datetime ORA=(datetime)1000000;
+   int      TOL=120;
+
+   //--- A) LETTURA DELLA MAPPA -------------------------------------
+   nc=ABTG_ClusterParse_Calc("",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("mappa VUOTA -> 0 cluster (default neutro)",nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("     ",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("mappa di soli spazi -> 0 cluster",nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("usd=EURUSD,GBPUSD",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("un cluster con due membri -> 1 cluster",nc,1,falliti);
+   ABTG_AutotestCaso("il nome del cluster e' normalizzato in MAIUSCOLO",
+                     (nc==1 ? (nomi[0]=="USD") : false),true,falliti);
+   ABTG_AutotestCaso("senza ':' il tetto proprio e' 0 (usa il generale)",
+                     (nc==1 ? (tetti[0]==0.0) : false),true,falliti);
+
+   nc=ABTG_ClusterParse_Calc("USD=EURUSD;METALLI=XAUUSD,XAGUSD;AZ_US=U30USD,SPXUSD",
+                             nomi,membri,tetti);
+   ABTG_AutotestCasoInt("tre cluster separati da ';' -> 3 cluster",nc,3,falliti);
+   ABTG_AutotestCaso("i membri del terzo cluster sono conservati",
+                     (nc==3 ? ABTG_SimboloNelCluster_Calc("SPXUSD",membri[2]) : false),
+                     true,falliti);
+
+   nc=ABTG_ClusterParse_Calc("AZIONARIO:3.5=D30EUR,U30USD",nomi,membri,tetti);
+   ABTG_AutotestCaso("con ':3.5' il cluster dichiara un tetto proprio",
+                     (nc==1 ? (MathAbs(tetti[0]-3.5)<0.0001) : false),true,falliti);
+   ABTG_AutotestCaso("col tetto proprio il NOME resta pulito (senza ':3.5')",
+                     (nc==1 ? (nomi[0]=="AZIONARIO") : false),true,falliti);
+
+   nc=ABTG_ClusterParse_Calc("AZIONARIO:-2=D30EUR",nomi,membri,tetti);
+   ABTG_AutotestCaso("tetto proprio NEGATIVO (dito storto) -> 0, usa il generale",
+                     (nc==1 ? (tetti[0]==0.0) : false),true,falliti);
+
+   nc=ABTG_ClusterParse_Calc("USD EURUSD,GBPUSD",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("riga SENZA '=' -> saltata (non e' un cluster)",nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("USD=",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("cluster senza membri -> saltato",nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("=EURUSD",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("cluster senza nome -> saltato",nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("USD=EURUSD;",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("';' finale non crea un cluster vuoto",nc,1,falliti);
+
+   nc=ABTG_ClusterParse_Calc("USD=EURUSD;;METALLI=XAUUSD",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("';;' in mezzo non crea un cluster vuoto",nc,2,falliti);
+
+   nc=ABTG_ClusterParse_Calc("NOME_LUNGHISSIMO_CHE_SFONDA_IL_LIMITE=EURUSD",
+                             nomi,membri,tetti);
+   ABTG_AutotestCasoInt("nome oltre 24 caratteri -> saltato (nomi GV troncabili)",
+                        nc,0,falliti);
+
+   nc=ABTG_ClusterParse_Calc("  METALLI  =  XAUUSD , XAGUSD  ",nomi,membri,tetti);
+   ABTG_AutotestCasoInt("spazi attorno a nome e membri -> tollerati",nc,1,falliti);
+   ABTG_AutotestCaso("con gli spazi il membro si riconosce lo stesso",
+                     (nc==1 ? ABTG_SimboloNelCluster_Calc("XAGUSD",membri[0]) : false),
+                     true,falliti);
+
+   //--- B) APPARTENENZA DI UN SIMBOLO ------------------------------
+   string CL_USD ="EURUSD,GBPUSD,USDJPY,USDCHF,USDCAD,NZDUSD,AUDUSD";
+   string CL_EUR ="EURUSD,EURJPY";
+   string CL_MET ="XAUUSD*,XAGUSD*";
+   string CL_AZUS="U30USD,SPXUSD,NASUSD";
+   string CL_AZ  ="D30EUR,U30USD,SPXUSD,NASUSD,225JPY,200AUD";
+
+   ABTG_AutotestCaso("simbolo esatto nella lista -> DENTRO",
+                     ABTG_SimboloNelCluster_Calc("USDJPY",CL_USD),true,falliti);
+   ABTG_AutotestCaso("simbolo assente dalla lista -> fuori",
+                     ABTG_SimboloNelCluster_Calc("D30EUR",CL_USD),false,falliti);
+   ABTG_AutotestCaso("maiuscole/minuscole mescolate -> DENTRO",
+                     ABTG_SimboloNelCluster_Calc("eurUsd",CL_EUR),true,falliti);
+   ABTG_AutotestCaso("spazi attorno ai membri -> DENTRO",
+                     ABTG_SimboloNelCluster_Calc("GBPUSD"," EURUSD , GBPUSD "),true,falliti);
+   ABTG_AutotestCaso("jolly 'XAUUSD*' prende 'XAUUSD.r' (suffisso broker)",
+                     ABTG_SimboloNelCluster_Calc("XAUUSD.r",CL_MET),true,falliti);
+   ABTG_AutotestCaso("jolly 'XAUUSD*' NON prende 'EURUSD'",
+                     ABTG_SimboloNelCluster_Calc("EURUSD",CL_MET),false,falliti);
+   ABTG_AutotestCaso("'*' DA SOLO non vale 'tutti i simboli' (quello e' C1)",
+                     ABTG_SimboloNelCluster_Calc("EURUSD","*"),false,falliti);
+   ABTG_AutotestCaso("membro piu' corto SENZA jolly non fa da prefisso",
+                     ABTG_SimboloNelCluster_Calc("XAUUSD","XAU"),false,falliti);
+   ABTG_AutotestCaso("lista dei membri vuota -> fuori",
+                     ABTG_SimboloNelCluster_Calc("EURUSD",""),false,falliti);
+   ABTG_AutotestCaso("simbolo vuoto -> fuori",
+                     ABTG_SimboloNelCluster_Calc("",CL_USD),false,falliti);
+   ABTG_AutotestCaso("EURUSD sta in DUE cluster: e' nel cluster USD",
+                     ABTG_SimboloNelCluster_Calc("EURUSD",CL_USD),true,falliti);
+   ABTG_AutotestCaso("EURUSD sta in DUE cluster: ed e' anche nel cluster EUR",
+                     ABTG_SimboloNelCluster_Calc("EURUSD",CL_EUR),true,falliti);
+   //    la scelta del 07/09 messa a macchina: DAX e Dow NON nello stesso 3,0%,
+   //    ma insieme nel super-cluster AZIONARIO al 3,5%
+   ABTG_AutotestCaso("D30EUR NON e' nel cluster AZ_US (scelta del 07/09)",
+                     ABTG_SimboloNelCluster_Calc("D30EUR",CL_AZUS),false,falliti);
+   ABTG_AutotestCaso("D30EUR e' nel super-cluster AZIONARIO",
+                     ABTG_SimboloNelCluster_Calc("D30EUR",CL_AZ),true,falliti);
+   ABTG_AutotestCaso("U30USD e' nello stesso super-cluster AZIONARIO",
+                     ABTG_SimboloNelCluster_Calc("U30USD",CL_AZ),true,falliti);
+
+   //--- C) FAIL-OPEN: stesso nucleo del cap C1 ---------------------
+   ABTG_AutotestCaso("bandiera del cluster mai scritta (0) -> libero",
+                     ABTG_CapAttivo_Calc(0,ORA,TOL),false,falliti);
+   ABTG_AutotestCaso("bandiera timbrata 1 s fa -> cluster SATURO",
+                     ABTG_CapAttivo_Calc((double)(ORA-1),ORA,TOL),true,falliti);
+   ABTG_AutotestCaso("bandiera timbrata 300 s fa (Guardian morto) -> FAIL-OPEN",
+                     ABTG_CapAttivo_Calc((double)(ORA-300),ORA,TOL),false,falliti);
+
+   //--- D) IL NOME DELLA BANDIERA ----------------------------------
+   string radice=ABTG_ClusterGVRadice("metalli");
+   ABTG_AutotestCaso("la radice della bandiera contiene ABTG_CAP_CLUSTER_",
+                     (StringFind(radice,"ABTG_CAP_CLUSTER_")>=0),true,falliti);
+   ABTG_AutotestCaso("la radice normalizza il nome in MAIUSCOLO",
+                     (radice=="ABTG_CAP_CLUSTER_METALLI"),true,falliti);
+   ABTG_AutotestCaso("la radice NON collide con quella del cap C1",
+                     (StringFind(radice,"ABTG_CAP_RISCHIO")>=0),false,falliti);
+
+   //--- E) IL MOTIVO NEL GIORNALE, E CHE NON COLLIDA ----------------
+   ABTG_AutotestCaso("motivo 7 = tetto per cluster (testo dedicato)",
+                     (StringFind(ABTG_MotivoTesto(7),"CLUSTER")>=0),true,falliti);
+   ABTG_AutotestCaso("motivo 7 si dichiara C2",
+                     (StringFind(ABTG_MotivoTesto(7),"(C2)")>=0),true,falliti);
+   ABTG_AutotestCaso("motivo 7 NON contiene la frase del collaudo C9",
+                     (StringFind(ABTG_MotivoTesto(7),"INGRESSO BLOCCATO")>=0),false,falliti);
+   ABTG_AutotestCaso("motivo 7 e' DISTINTO dal motivo 2 (cap C1)",
+                     (ABTG_MotivoTesto(7)==ABTG_MotivoTesto(2)),false,falliti);
+   ABTG_AutotestCaso("motivo 7 e' DISTINTO dal motivo 6 (tetto P0)",
+                     (ABTG_MotivoTesto(7)==ABTG_MotivoTesto(6)),false,falliti);
+   ABTG_AutotestCaso("i motivi 1-6 non sono stati spostati (6 e' ancora P0)",
+                     (StringFind(ABTG_MotivoTesto(6),"TETTO SIMBOLO+LATO")>=0),true,falliti);
+
+   return(falliti);
+  }
+
 int ABTG_AutotestGuardia()
   {
    int falliti=0;
    datetime ORA=(datetime)1000000;        // "adesso" finto, comodo per i conti
    int TOL=120;                           // tolleranza battito dei test
 
-   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.51 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
+   PrintFormat("[AUTOTEST] ABTG_PausaGuardian v1.60 -- nucleo puro, ora finta=%I64d tolleranza=%d s",
                (long)ORA,TOL);
 
    //--- PAUSA (B1) -------------------------------------------------
@@ -2290,6 +2440,17 @@ int ABTG_AutotestGuardia()
    //    dentro quello vecchio, cosi' ogni EA che gia' chiama
    //    ABTG_AutotestGuardia() eredita i casi nuovi senza essere toccato.
    falliti+=ABTG_AutotestTettoSimboloLato();
+
+   //--- TETTO PER CLUSTER C2 (v1.60): stessa scelta di P1, S1 e P0 --
+   //    l'autotest nuovo gira dentro quello vecchio, cosi' ogni EA che gia'
+   //    chiama ABTG_AutotestGuardia() eredita i casi nuovi senza essere
+   //    toccato. CONTEGGIO AGGIORNATO: 19 (B1/C1/battito/decisione) + 26 (P1)
+   //    + 30 (S1) + 39 (P0) + 45 (C2) = 159 casi, marcatore "v1.60".
+   //    Il cancello del criterio 2 del pacchetto COLLAUDO_ENFORCEMENT_FASE1
+   //    congela "19/19" sui binari IN CAMPO (v1.20) e resta valido per quelli:
+   //    va aggiornato a 159/v1.60 SOLO nel round di ricompilazione, e
+   //    DICHIARANDOLO PRIMA dei numeri (regola di casa).
+   falliti+=ABTG_AutotestCluster();
 
    if(falliti==0) Print("[AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.");
    else           PrintFormat("[AUTOTEST] ABTG_PausaGuardian: %d CASI FALLITI -- NON mettere in campo.",falliti);
