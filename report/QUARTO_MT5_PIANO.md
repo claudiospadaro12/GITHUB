@@ -30,6 +30,49 @@ Sarebbe un progetto nuovo, non lo stesso con una macchina in più.
 
 ---
 
+## 💰 QUANTO CARICARE SUL CONTO NUOVO: **NON IMPORTA.** Ed è verificato nel codice.
+
+Il saldo del conto **non entra mai** in un backtest. Il tester usa **il proprio
+deposito**, che glielo scriviamo noi nell'`.ini`:
+
+```ini
+Deposit=10000        <- $Deposito del driver (righe 627 e 781)
+Currency=EUR
+Leverage=100         <- anche la LEVA la decidiamo noi
+```
+
+E gli EA calcolano il lotto con `AccountInfoDouble(ACCOUNT_BALANCE)`
+(`ABTG_ORB_Ottimizzato.mq5` r.1070, `ABTG_DAX_Apertura_EU.mq5` r.1794) — ma
+**dentro il tester quella funzione torna il saldo del TESTER**, cioè il
+`Deposit=` qui sopra. Il saldo vero del conto non la tocca.
+
+👉 **Carica quello che ti propone BCM di default.** Mille o un milione, il
+backtest esce identico.
+
+---
+
+## 🔴 QUELLO CHE INVECE CONTA DAVVERO, E NON È IL SALDO
+
+### 1. Il conto dev'essere **HEDGING**
+`CLAUDE.md` riga 174: *"Conto DEMO BCM 50503392, tipo HEDGING"*. **Tutte** le
+nostre misure sono state fatte lì.
+
+Su un conto **NETTING** le posizioni si fondono invece di convivere: un EA che
+tiene due gambe (le PostNews coi due pendenti, il DAX con `InpMaxPosSimbolo`,
+qualunque cosa con l'OCO) **si comporterebbe in modo diverso**. Non
+"leggermente": diverso.
+
+### 2. Le **specifiche dei simboli** devono essere le stesse
+Contratto, tick value, lotto minimo, spread di D30EUR / U30USD / NASUSD. Se il
+tipo di conto nuovo ha specifiche diverse, i numeri cambiano e l'ancora del
+passo 7 **non riprodurrà** — e non sapremmo se è colpa della macchina o del
+conto.
+
+👉 **Chiedi a BCM lo STESSO tipo di conto del 50503392.** Se in fase di
+apertura c'è una scelta (Standard / Raw / ECN / Cent…), va presa **quella**.
+
+---
+
 ## ⚠️ IL RISCHIO VERO, ED È QUELLO CHE MI PREOCCUPA: LA **CPU**
 
 Un walk-forward a tick reali **satura la macchina**. E sul VPS quella macchina
@@ -79,7 +122,7 @@ Quindi:
 
 | # | cosa | chi |
 |---|---|---|
-| 1 | **Aprire un conto DEMO BCM nuovo** (qualunque saldo) e segnarsi il numero | 👤 **Claudio** |
+| 1 | **Aprire un conto DEMO BCM nuovo**: saldo **qualunque**, ma **HEDGING** e **stesso tipo di conto del 50503392**. Segnarsi il numero | 👤 **Claudio** |
 | 2 | Installare MT5 BCM in `C:\MT5_Backtest`, loggare quel conto | 👤 **Claudio** |
 | 3 | **NON attaccare NESSUN EA.** Nessun grafico con esperti, mai | 👤 **Claudio** |
 | 4 | Limitare gli agenti del tester a metà dei core | 👤 **Claudio** |
