@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SONDA_OROLOGIO_v4
+#  MARCATORE_RIGA_SONDA_OROLOGIO_v5
 #  RIGA_SONDA_OROLOGIO.ps1  --  LA SONDA DELL'OROLOGIO
 #  ABTG_SondaOrologio, H1, TICK REALI. DUE GIRI, e si DICHIARA quale:
 #
@@ -227,6 +227,34 @@
 #  NON verificato qui, e va detto: tutto cio' che richiede MT5 -- la
 #  COMPILAZIONE dell'EA (che non e' mai stata fatta da nessuno), i
 #  tempi, e ogni singolo numero.
+#
+#  ------------------------------------------------------------------
+#  CHE COSA CAMBIA NELLA v5 (07/09/2026, verificatore di stringhe,
+#  trovate ESEGUENDO prima dell'invio del ramo INDICI). Sono DUE, e
+#  tutte e due sono RECIDIVE di classi gia' scritte nella checklist:
+#
+#   N. LA RIGA "tick:" NON CAPOVOLGE PIU' L'AVVERTIMENTO IN UNA
+#      GARANZIA (CLASSE 18). La v4, appena @DAQUANDO >= 2024.09.26,
+#      spegneva il rilievo sulla profondita' dei tick e al suo posto
+#      scriveva "tick NATIVI su TUTTA la finestra, spread del feed
+#      vero", citando REFERTO_SONDA_STORICO_17-08.md riga 46. Quel
+#      referto e' la sonda ABTG_InfoBroker su TF H1: misura le BARRE.
+#      R109_CRITERI.md par. 4.2 lo scrive in lettere, e in tutto il
+#      repo esistono SOLO misura_tick_U30USD.csv e misura_tick_NASUSD.csv
+#      -- su D30EUR la profondita' a TICK non e' MAI stata misurata.
+#      A Modello 4 senza tick reali MT5 non si ferma: ripiega sulle
+#      barre M1 e la colonna dello spread -- META' del cancello zero --
+#      smette di essere lo spread del feed. Adesso il driver DICE quali
+#      simboli hanno la misura e quali no, e alza un RILIEVO.
+#
+#   O. IL CAMPO "compilazione:" SI TIMBRA ANCHE SUL RAMO CHE FALLISCE
+#      (CLASSE 94-ter, pagata il 02/09 su RIGA_SONDARSIEMAV8.ps1, la
+#      STESSA variabile $Compilato e lo STESSO caso: un EA mai
+#      compilato). La v4 lasciava "NON TENTATA" nel referto di una
+#      compilazione TENTATA E FALLITA -- cioe' proprio l'esito piu'
+#      probabile della prima corsa di questo EA, e proprio la riga che
+#      la pagina dice di leggere. Adesso gli stati sono tre:
+#      NON TENTATA / TENTATA-esito ignoto / FALLITA / OK.
 # =====================================================================
 [CmdletBinding()]
 param(
@@ -675,9 +703,33 @@ try{
   # LA FINESTRA CHE PARTE ESATTAMENTE DAL PAVIMENTO NON E' UN CASO: si
   # dichiara, altrimenti l'assenza del rilievo qui sopra si legge come
   # "nessuno ha guardato".
+  # --- MA IL PAVIMENTO E' MISURATO SULLE BARRE, NON SUI TICK, ed e' la
+  #     CLASSE 18 della checklist ("la profondita' misurata su un TF, la
+  #     corsa girata su un altro"). REFERTO_SONDA_STORICO_17-08.md e' la
+  #     sonda ABTG_InfoBroker su TF H1: misura le BARRE. Lo scrive in
+  #     lettere R109_CRITERI.md par. 4.2 -- "La sonda del 17/08 ha misurato
+  #     le BARRE, non i tick" -- e a Modello 4 la riga che conta e' la riga
+  #     'TICK' di risultati_archivio/misura_tick/misura_tick_<SIM>.csv,
+  #     colonna PrimaDataLocale (precisazione del 18/08 al punto 18).
+  #     Qui sotto la superficie NON si capovolge in una garanzia: se manca
+  #     la misura dei tick di un simbolo si DICE, e diventa un RILIEVO.
+  #     Elenco aggiornato il 07/09/2026 guardando la cartella, non a memoria.
+  $TickMisurati    = @("U30USD","NASUSD")
+  $ConMisuraTick   = @($Sim | Where-Object { $TickMisurati -contains $_ })
+  $SenzaMisuraTick = @($Sim | Where-Object { $TickMisurati -notcontains $_ })
   $TickTxt = "finestra dal " + $DaQuando + ", tick NATIVO BCM dal " + $TickNativoBCM + ": nel tratto precedente lo SPREAD non e' quello del tick (vedi RILIEVI)"
   if([datetime]::ParseExact($DaQuando,"yyyy.MM.dd",$INV) -ge [datetime]::ParseExact($TickNativoBCM,"yyyy.MM.dd",$INV)){
-    $TickTxt = "finestra dal " + $DaQuando + " = dal pavimento MISURATO dei tick BCM (" + $TickNativoBCM + ", stato COMPLETO su " + ($Sim -join " e ") + ", REFERTO_SONDA_STORICO_17-08.md riga 46): tick NATIVI su TUTTA la finestra, spread del feed vero"
+    $pezzoTick = "PROFONDITA' A TICK misurata su [" + (@($ConMisuraTick) -join ", ") + "], MAI MISURATA su [" + (@($SenzaMisuraTick) -join ", ") + "] (vedi RILIEVI)"
+    if(@($SenzaMisuraTick).Count -eq 0){
+      $pezzoTick = "PROFONDITA' A TICK misurata su TUTTI i simboli del giro (misura_tick_<SIM>.csv, riga TICK, colonna PrimaDataLocale " + $TickNativoBCM + ")"
+    }
+    if(@($ConMisuraTick).Count -eq 0){
+      $pezzoTick = "PROFONDITA' A TICK MAI MISURATA su NESSUNO dei simboli del giro [" + ($Sim -join ", ") + "] (vedi RILIEVI)"
+    }
+    $TickTxt = "finestra dal " + $DaQuando + " = dalla prima data che il broker HA -- ma quella e' la misura delle BARRE H1 (stato COMPLETO su " + ($Sim -join " e ") + ", REFERTO_SONDA_STORICO_17-08.md riga 46), NON dei tick. " + $pezzoTick
+    if($Modello -eq 4 -and @($SenzaMisuraTick).Count -gt 0){
+      [void]$Rilievi.Add("PROFONDITA' A TICK MAI MISURATA su " + ($SenzaMisuraTick -join ", ") + ", e la finestra gira a Modello 4. La data " + $TickNativoBCM + " viene da REFERTO_SONDA_STORICO_17-08.md, che e' la sonda ABTG_InfoBroker su TF H1: misura le BARRE, non i tick (R109_CRITERI.md par. 4.2 lo scrive in lettere, e in tutto il repo esistono solo misura_tick_U30USD.csv e misura_tick_NASUSD.csv). A Modello 4, se i tick reali non coprono la finestra MT5 NON si ferma: ripiega e genera i tick dalle barre M1, e la colonna 'Spread Mediano Ingresso' -- che e' META' del cancello " + $CritZero + " -- smette di essere lo spread del feed. E' la CLASSE 18 della checklist. Si chiude misurando i tick di quel simbolo (misura_tick_<SIMBOLO>.csv), non con questa corsa: finche' manca, il rapporto " + $CritZero + " su quel simbolo si legge con l'etichetta 'spread NON verificato' attaccata.")
+    }
   }
 
   $passate = 0
@@ -947,9 +999,21 @@ try{
     $ex5 = Join-Path $dstExp ($EA + ".ex5")
     Remove-Item -LiteralPath $ex5 -Force -ErrorAction SilentlyContinue
     $t0 = Get-Date
+    # IL CAMPO DEL REFERTO SI TIMBRA SUL RAMO CHE LO DECIDE, NON SOLO SU
+    # QUELLO CHE LO FA CONTENTO (CHECKLIST 94-ter, pagata il 02/09 su
+    # RIGA_SONDARSIEMAV8.ps1, STESSA variabile $Compilato e STESSO caso:
+    # un EA mai compilato). Gli stati sono TRE, quanti sono i rami:
+    #   NON TENTATA  = non ci siamo arrivati (valore di partenza)
+    #   TENTATA...   = MetaEditor lanciato, esito non ancora deciso
+    #   FALLITA / OK = i due esiti veri
+    # Qui morde davvero: ABTG_SondaOrologio NON e' mai stato compilato da
+    # nessuno, quindi "FALLITA" e' l'esito PIU' PROBABILE di questa corsa,
+    # e la pagina dice a Claudio di leggere proprio questa riga.
+    $Compilato = "TENTATA, esito ignoto (MetaEditor lanciato, corsa interrotta prima del controllo dell'.ex5)"
     & $MetaEditor ("/compile:" + $dstMq5) "/log" | Out-Null
     while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
     if(-not (Test-Path -LiteralPath $ex5)){
+      $Compilato = "FALLITA (MetaEditor lanciato, nessun .ex5 dopo " + [int]((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds) + " s: gli errori sono in COMPILAZIONE_FALLITA.log dentro lo zip). E' UN RISULTATO DEL PASSO 0, non un guasto della riga."
       $logC = Join-Path $dstExp ($EA + ".log")
       if(Test-Path -LiteralPath $logC){
         Copy-Item $logC -Destination (Join-Path $Work "COMPILAZIONE_FALLITA.log") -Force

@@ -17,7 +17,7 @@ STESSA ORA**?"*
 | | |
 |---|---|
 | **EA (mai compilato, mai girato)** | `mql5/Experts/ABTG_SondaOrologio.mq5` — **è lo stesso del ramo FX, NON modificato** |
-| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v4`) |
+| **Driver** | `righe/RIGA_SONDA_OROLOGIO.ps1` (marcatore `MARCATORE_RIGA_SONDA_OROLOGIO_v5`) |
 | **Specifica CONGELATA** | `prove/SONDA_OROLOGIO_INDICI.txt` — ipotesi, criteri **I1-I8**, date. **Si legge PRIMA della tabella** (il driver la mette dentro lo zip) |
 | **File prova (4)** | `prove/SONDA_OROLOGIO_11_D30EUR_LONG.txt` `_12_D30EUR_SHORT` `_13_U30USD_LONG` `_14_U30USD_SHORT` |
 
@@ -140,11 +140,22 @@ nel referto**, non nascoste:
 - 📐 **Finestra `2024.09.26 → 2026.06.30`, H1, `Model=4` (tick reali), split
   40/60, deposito `100.000`, `InpRiskPercent = 1.0`** — e quel numero è **letto
   dal file prova**, dove morde davvero.
-- 🟢 **La data di partenza NON è una scelta, è un PAVIMENTO MISURATO**: il tick
-  BCM su D30EUR e U30USD parte dal **2024.09.26** con stato **COMPLETO**
-  (`risultati_archivio/REFERTO_SONDA_STORICO_17-08.md`, riga 46). Quindi qui —
-  a differenza del ramo forex — **i tick sono NATIVI su tutta la finestra**, e
-  il referto lo scrive nella riga `tick:`.
+- 🟢 **La data di partenza NON è una scelta, è un PAVIMENTO MISURATO** — ma
+  **misurato sulle BARRE**: `risultati_archivio/REFERTO_SONDA_STORICO_17-08.md`
+  riga 46 dà D30EUR e U30USD con prima data **2024.09.26** e stato **COMPLETO**,
+  e quella sonda è `ABTG_InfoBroker` **su TF H1**.
+- 🔴 **E LA PROFONDITÀ A TICK È UN'ALTRA MISURA, che su D30EUR NON ESISTE.**
+  In tutto il repo ci sono solo `misura_tick_U30USD.csv` (riga `TICK`,
+  `PrimaDataLocale 2024.09.26`) e `misura_tick_NASUSD.csv`: **su D30EUR i tick
+  non sono mai stati misurati** — lo scrive già `R109_CRITERI.md` par. 4.2. È la
+  **classe 18** della checklist, e morde perché a `Model=4` senza tick reali MT5
+  **non si ferma**: ripiega sulle barre M1 e la colonna
+  **`Spread Mediano Ingresso` — che è METÀ del cancello I1** — smette di essere
+  lo spread del feed. 🟢 **Il driver (v5) lo DICE da solo**: la riga `tick:`
+  distingue i simboli misurati da quelli no, e su D30EUR esce un **RILIEVO**.
+  **Non blocca la corsa** (il LORDO in punti regge lo stesso): significa che
+  **il rapporto I1 su D30EUR si legge con l'etichetta "spread NON verificato"**,
+  finché non si misurano i tick di quel simbolo.
 - 🕐 **Le ore sono in ORA SERVER BCM = ora italiana − 1.** Ancore: **DAX apre
   08:00 server**, **indici USA 14:30 server**. Nel referto `8` vuol dire le 9
   italiane. **Il referto lo dichiara in testa**, perché senza quella riga una
@@ -170,7 +181,7 @@ nel referto**, non nascoste:
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloControllo; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_CONTROLLO_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_CONTROLLO_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -189,7 +200,17 @@ nel referto**, non nascoste:
 - `terminale scelto: ...` ← **è il nome da confrontare** con quello che stampa poi il driver generico;
 - 🔴 **`compilato ABTG_SondaOrologio: OK (...)`** ← **è questa la riga che conta.**
   Se invece esce `COMPILAZIONE FALLITA`, sopra ci sono in **rosso** le ultime 40
-  righe del log di MetaEditor: **mandami lo zip, quello è il risultato**;
+  righe del log di MetaEditor: **mandami lo zip, quello è il risultato**.
+  🟢 **E nel referto la riga `compilazione:` dice il vero anche quando fallisce**
+  (v5): i valori possibili sono `NON TENTATA` (non ci siamo arrivati) /
+  `TENTATA, esito ignoto` / **`FALLITA (...)`** / `OK (...)`. Fino alla v4 una
+  compilazione **tentata e fallita** usciva scritta `NON TENTATA` — classe
+  **94-ter**, e sarebbe capitato **proprio a questa corsa**, che è la prima
+  compilazione dell'EA;
+- in fondo `PROBLEMI: 0` e **`RILIEVI: 2`** — e i due RILIEVI attesi sono
+  **noti e voluti**: *determinismo del banco non misurato* (qui non c'è la cella
+  gemelli) e *profondità a TICK mai misurata su D30EUR*. Se ne compare un terzo,
+  leggilo;
 - in fondo `ESITO: CONTROLLO COMPLETATO`.
 
 ---
@@ -201,7 +222,7 @@ nel referto**, non nascoste:
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '11_d30eur_long'; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_CORSA_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -229,7 +250,7 @@ altre tre di fila o una per volta.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '12_d30eur_short'; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_CORSA_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -244,7 +265,7 @@ altre tre di fila o una per volta.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '13_u30usd_long'; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_CORSA_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -259,7 +280,7 @@ altre tre di fila o una per volta.
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -SoloCella '14_u30usd_short'; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_CORSA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_CORSA_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -288,7 +309,7 @@ davvero** (`-Rifai` è sempre nell'argv). **Per rileggere c'è il blocco 4️⃣
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
     $pin='73069faaa50b225561aa655338e3095dc4c61c46'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SONDA_OROLOGIO.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SONDA_OROLOGIO.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v4' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SONDA_OROLOGIO_v5' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=0; & $p -Giro INDICI -Pin $pin -Ricomponi; $rc=$LASTEXITCODE;
     $z=@(Get-ChildItem (Join-Path $env:USERPROFILE 'Desktop\SONDA_OROLOGIO_INDICI_RICOMPOSIZIONE_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
     if($z.Count -eq 0){ throw 'NESSUNO ZIP SONDA_OROLOGIO_INDICI_RICOMPOSIZIONE_ DI ADESSO: la riga non e'' arrivata alla raccolta' };
@@ -327,8 +348,14 @@ dentro:
 2. **`modo:`** — `CORSA` (il risultato) / `CONTROLLO` (giro a vuoto: **non è un
    risultato**) / `RICOMPOSIZIONE` (rilettura dichiarata: **nessun numero nuovo**);
 3. **`data:`** — **deve essere di ADESSO**;
-4. **`cache tester:`** — `prima N file, dopo 0`;
-5. **`il tester ha girato in questo giro:`** (una per cella) — in `CORSA` deve
+4. **`compilazione:`** — `OK (...)` oppure **`FALLITA (...)`**. Se dice
+   `NON TENTATA` la corsa si è fermata **prima** di MetaEditor (gate sui file
+   prova, MT5 aperto, pin storto): la causa è nella riga `!!! FERMATO:`;
+5. **`tick:`** — deve nominare **quali** simboli hanno la profondità a TICK
+   misurata e quali no. Su questo giro la frase attesa è
+   *«misurata su [U30USD], MAI MISURATA su [D30EUR]»*, e sotto c'è il RILIEVO;
+6. **`cache tester:`** — `prima N file, dopo 0`;
+7. **`il tester ha girato in questo giro:`** (una per cella) — in `CORSA` deve
    dire **SI**. Un **NO** lì è un **PROBLEMA**: quei numeri vengono da un altro giro.
 
 ---
@@ -390,15 +417,25 @@ dei **gate**:
 
 ## ✅ COSA È GIÀ STATO VERIFICATO — **eseguendo**, prima dell'invio
 
-Driver portato alla **v4** ed **ESEGUITO** su banco stubbato (`Scarica` → copia
+Driver portato alla **v5** (v3 → v4 = i due giri; v4 → v5 = le due correzioni del
+verificatore del 07/09) ed **ESEGUITO** su banco stubbato (`Scarica` → copia
 locale, CSV OPTFRAME sintetici con l'**intestazione vera** dell'EA):
 
 - ✅ **`Parser::ParseFile` → 0 errori**; **ASCII puro** (0 byte > 127, regola del
   17/08); **0 collisioni case-insensitive**; non usa `$args`;
-- ✅ 🔴 **IL RAMO FX NON SI È MOSSO, ed è misurato**: driver v3 e driver v4 girati
-  sullo **stesso banco** danno lo **stesso referto riga per riga** (546 righe di
-  tabelle e di conti) tranne **due righe nuove** (`giro:`, `tick:`) e quattro
-  blocchi di prosa resi generici. **Nessun numero cambia**;
+- ✅ 🔴 **IL RAMO FX NON SI È MOSSO, ed è misurato — col conto esatto, non
+  "circa"** (ri-misurato dal verificatore il 07/09 su `-Ricomponi` FX, 7 celle
+  seminate): **nel REFERTO** v3 → v5 cambiano **20 righe su 510**, e sono
+  **2 righe NUOVE** (`giro:`, `tick:`) più **18 righe di sola prosa riflusso**.
+  **Nessun numero del referto cambia.** ⚠️ **Fuori dal referto invece qualcosa
+  cambia, e va detto** (la v4 non lo dichiarava): **2 righe nuove in CONSOLE**
+  (`giro ........ FX`, `specifica scaricata: ...`) e **un file in più nello
+  zip** — `SONDA_OROLOGIO_FX.txt`, con `FILE NELLO ZIP` che passa da **22 a 23**.
+  🟢 Irraggiungibile oggi: la pagina FX resta pinnata a `f81eb70`, cioè al
+  driver **v3**;
+- ✅ **v4 → v5 sul ramo FX: referto IDENTICO riga per riga** (581 righe di
+  console, `diff` vuoto): le due correzioni del 07/09 toccano solo il ramo in
+  cui la finestra parte **dal** pavimento, cioè INDICI;
 - ✅ **selezione delle celle provata a secco**: `-Giro INDICI` → **esattamente**
   `11_d30eur_long, 12_d30eur_short, 13_u30usd_long, 14_u30usd_short` coi magic
   `777211-777214` e i 4 file prova giusti; `-Giro FX` → le 7 di prima;
