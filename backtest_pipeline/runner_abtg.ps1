@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RUNNER_ABTG_v1
+#  MARCATORE_RUNNER_ABTG_v2
 #  runner_abtg.ps1 -- ESEGUE DA SOLO LA CODA, e pubblica i referti sul
 #  repo. Nato il 07/09/2026 dalla domanda di Claudio: "puoi lanciarle tu
 #  le stringhe per me?".
@@ -65,7 +65,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-$MARC = "MARCATORE_RUNNER_ABTG_v1"
+$MARC = "MARCATORE_RUNNER_ABTG_v2"
 $MARC_RICHIESTO = "RUNNER_SOLA_LETTURA"
 
 # =====================================================================
@@ -172,14 +172,46 @@ if($Installa){
   Write-Host ("  copiato in: " + $dest)
   $task   = "ABTG_Runner"
   $azione = "powershell -NoProfile -ExecutionPolicy Bypass -File $dest"
-  cmd /c "schtasks /Delete /TN $task /F" 2>&1 | Out-Null
-  $out = cmd /c "schtasks /Create /TN $task /TR ""$azione"" /SC DAILY /ST $Ora /F" 2>&1
-  if($LASTEXITCODE -ne 0){
-    Write-Host "ERRORE schtasks:" -ForegroundColor Red
+
+  # 07/09/2026, DIFETTO PAGATO AL PRIMO INSTALL. schtasks scrive su stderr
+  # anche quando va tutto bene -- il /Delete di un'attivita' che NON ESISTE
+  # ANCORA (cioe' sempre, al primo giro) stampa "Impossibile trovare il file
+  # specificato". Con $ErrorActionPreference='Stop' quello diventa un errore
+  # TERMINANTE e la corsa muore PRIMA del /Create. Il commento di
+  # pubblica_trades.ps1 lo diceva gia' ("schtasks scrive su stderr anche
+  # quando va tutto bene") e io avevo copiato lo schema senza la protezione.
+  # Qui: stderr viene inghiottito DENTRO cmd (>nul 2>nul), cosi' PowerShell
+  # non lo vede proprio, e l'EAP viene abbassato solo per queste due righe.
+  #
+  # >>> ONESTA': IL DIFETTO NON E' STATO RIPRODOTTO AL BANCO. Chi scrive gira
+  #     PowerShell 7 su Linux e li' il caso A (stderr visibile, EAP=Stop) NON
+  #     muore. Sul VPS gira Windows PowerShell 5.1, che si comporta
+  #     diversamente. Cio' che E' un fatto e' DOVE e' morto: il messaggio
+  #     diceva "runner_abtg.ps1:175 car:3" e la 175 era esattamente la riga
+  #     del /Delete. Quindi questa correzione e' una IPOTESI ben motivata,
+  #     non una riparazione dimostrata -- ed e' il motivo per cui subito
+  #     sotto c'e' la VERIFICA sull'artefatto: se l'ipotesi fosse sbagliata,
+  #     la riga lo DICE invece di lasciare mezza installazione.
+  $eapPrima = $ErrorActionPreference
+  $ErrorActionPreference = "Continue"
+  cmd /c "schtasks /Delete /TN $task /F >nul 2>nul" | Out-Null
+  $out = cmd /c "schtasks /Create /TN $task /TR ""$azione"" /SC DAILY /ST $Ora /F 2>&1"
+  $ErrorActionPreference = $eapPrima
+
+  # E IL VERDETTO STA SULL'ARTEFATTO, NON SUL CODICE DI USCITA (classe 154):
+  # si interroga l'attivita' e si pretende di ritrovarla.
+  $ErrorActionPreference = "Continue"
+  $q = cmd /c "schtasks /Query /TN $task 2>&1"
+  $ErrorActionPreference = $eapPrima
+  $registrata = @($q | Where-Object { $_ -match [regex]::Escape($task) }).Count -gt 0
+  if(-not $registrata){
+    Write-Host "ERRORE: l'attivita' NON risulta registrata. Uscita di schtasks:" -ForegroundColor Red
     $out | ForEach-Object { Write-Host ("  " + $_) -ForegroundColor Red }
+    Write-Host "  (se dice 'Accesso negato': lancia PowerShell come AMMINISTRATORE)" -ForegroundColor Yellow
     exit 1
   }
-  Write-Host ("  attivita' '" + $task + "' registrata, ogni giorno alle " + $Ora) -ForegroundColor Green
+  Write-Host ("  attivita' '" + $task + "' REGISTRATA E RITROVATA, ogni giorno alle " + $Ora) -ForegroundColor Green
+  $q | Where-Object { $_ -match [regex]::Escape($task) } | ForEach-Object { Write-Host ("    " + $_) -ForegroundColor Gray }
   Write-Host "  Da adesso il VPS esegue la coda da solo e pubblica i referti." -ForegroundColor Green
   Write-Host "  Per toglierla:  schtasks /Delete /TN ABTG_Runner /F" -ForegroundColor Gray
   exit 0
