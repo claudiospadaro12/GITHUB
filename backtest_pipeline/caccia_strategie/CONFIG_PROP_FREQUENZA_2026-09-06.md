@@ -515,3 +515,25 @@ _Compilato nella notte del 06/09/2026. Fonti aperte davvero: **mql5.com**
 eseguiti stanotte (aritmetica della frequenza, Poisson dell'inattivita',
 tempo al target) sui numeri gia' agli atti di `PIANO_PROP.md` area H.
 **Nessun EA, preset, grafico o parametro toccato. Nessun acquisto proposto.**_
+
+---
+
+## 🔗 RIMANDO — ANALISI LIVE EMILIANO 07/09/2026
+
+➡️ **`backtest_pipeline/risultati_archivio/ANALISI_LIVE_EMILIANO_2026-09-07.md`**
+
+Non duplico i contenuti; le **due voci che toccano la corsia prop-hardening**:
+
+- 🇺🇸 **Festivi USA e filtro correlazione.** La sedia viva `770411` gira con
+  `InpUseCorrelation=true` su `SPXUSD` e `InpUseNewsFilter=false`. Nei giorni di
+  festivo americano `CorrBias()` (`ABTG_MaxMinNotte.mq5` r.698-711) legge un
+  SPXUSD fermo e **non se ne accorge**: restituisce il bias del giorno prima.
+  **Quanto costi non è mai stato contato** → spunto S2 del referto.
+- 🌙 **Il box notturno `23:00–04:59` non è mai stato ottimizzato** (verificato:
+  324 righe di CSV di corsa, un solo valore distinto per `InpBoxStartHour` e
+  `InpBoxEndHour`). Non cambia nessun cancello prop, ma è una **convenzione
+  spacciata per misura** in più di un documento: va saputo prima di costruirci
+  sopra un ragionamento di rischio.
+
+⚪ **Zero regole prop citate nella live** (grep: 0 occorrenze di
+`prop`/`FTMO`/`challenge`/`funded`/`drawdown`) — quarta live consecutiva.

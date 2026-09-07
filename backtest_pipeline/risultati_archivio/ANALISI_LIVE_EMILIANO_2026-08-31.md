@@ -439,3 +439,25 @@ _Referto compilato leggendo il file **integralmente, 51/51 righe**, compreso il
 blocco unico della r.51 (**47.621 caratteri = l'86% del file**). Ogni valore ha
 la sua citazione. Ogni incrocio col repo è verificato **nel sorgente o nel
 referto citato**, mai a memoria. **Nessun file eseguibile è stato modificato.**_
+
+---
+
+## 🔁 AGGIORNAMENTO 07/09 — È ARRIVATA LA LIVE DI LUNEDÌ 07/09 (EMILIANO, 08:30)
+
+➡️ **Referto completo: `risultati_archivio/ANALISI_LIVE_EMILIANO_2026-09-07.md`.**
+Non duplico: qui solo le **quattro righe che toccano QUESTO referto**.
+
+1. ⚔️ **La contraddizione X1 di questo referto ("io non metto gli ordini pendenti")
+   si aggrava**: il 07/09 ne piazza almeno tre e detta l'offset (10 punti indice /
+   3 pip). **Tre live, tre posizioni sul trigger d'ingresso** → da questa fonte
+   **non si ricava una regola sul modo di entrare**, solo sui livelli.
+2. 🔁 **Lo spunto S-D (flag bank holiday) sale di priorità**: il 07/09 è la
+   **seconda occorrenza in 5 giorni** (Labor Day USA+Canada) e stavolta si aggancia
+   a una **sedia viva** — `InpUseCorrelation=true` su `SPXUSD` nella `770411`, con
+   `CorrBias()` che a mercato USA chiuso restituisce **il bias del giorno prima**
+   senza accorgersene (verificato in `ABTG_MaxMinNotte.mq5` r.698-711).
+3. 🆕 **La soglia di R:R, dichiarata mancante nel referto del 28/08 §6.3, il 07/09
+   esce esplicita: `1 a 1` minimo**, pronunciata due volte.
+4. 🌙 **Novità di misura, non di opinione:** la finestra del box notturno
+   (`23:00–04:59`) risulta **MAI ottimizzata** — 324 righe di CSV di corsa, un solo
+   valore distinto. Diventa una **domanda aperta**, non un'opinione battuta.
