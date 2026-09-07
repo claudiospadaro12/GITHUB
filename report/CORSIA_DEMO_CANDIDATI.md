@@ -336,7 +336,13 @@ qualcuno le rimette in lista domani._
    esiste in `mql5/Presets/`), un magic nuovo, una compilazione.**
 3. ⏳ **Il tempo è il vero costo**: a 0,12–0,53 op/giorno, n=150 arriva in
    **11 mesi (RELATIVO) / 28 mesi (NY RETEST) / 40 mesi (DAX REENTRY) / anni
-   (SUPERWAVE)**. È esattamente il motivo per cui la demo è lo strumento
+   (SUPERWAVE)**.
+   🔧 **CORREZIONE 07/09/2026 (sera):** gli **"11 mesi" di RELATIVO sono
+   SBAGLIATI** e sono incoerenti con la riga "~11 op/mese" della sua stessa
+   scheda G1. Il conto giusto: 0,525 op/feriale × 21,75 feriali/mese = **11,42
+   op/mese** → 150 / 11,42 = **13,1 mesi**, data stimata **13/10/2027**.
+   Vale quello scritto in `report/CORSIA_DEMO_RELATIVO_NASUSD.md` §2.
+   Le stime degli altri tre non sono state ricontrollate. È esattamente il motivo per cui la demo è lo strumento
    giusto: **il backtest quei mesi non li può fabbricare, il forward sì.**
 4. 🔴 **E gli scarti "morti" sono davvero morti**: 35 righe, ognuna con un
    numero — DD dal 11,7% al 67,8%, PF da 0,43 a 0,99, o zero segnali al
