@@ -1,3 +1,8 @@
+# MARCATORE_SCARICA_STORICO_v2
+# v2 (07/09): aggiunto il marcatore, che mancava. Senza, la riga di lancio
+#             non puo' verificare di aver scaricato lo script GIUSTO prima
+#             di eseguirlo (regola di casa sulle righe di lancio, punto 1).
+#             Nessun'altra modifica: il comportamento e' identico.
 # =====================================================================
 #  scarica_storico.ps1  --  scarica lo STORICO dal broker e dice
 #                           SE il broker ce l'ha davvero
