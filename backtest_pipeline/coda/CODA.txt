@@ -1,7 +1,21 @@
-# CODA DEL RUNNER -- formato:  <pin 40 hex> | <percorso nel repo> | <argomenti>
-# Le righe che cominciano con # sono commenti.
-# Ogni script deve contenere "# RUNNER_SOLA_LETTURA" o viene RIFIUTATO (cancello G1).
+# =====================================================================
+#  CODA DEL RUNNER -- la eseguono il VPS, da solo, alle 03:30
+# ---------------------------------------------------------------------
+#  FORMATO:   <pin 40 hex> | <percorso nel repo> | <argomenti opzionali>
+#  Le righe che cominciano con # sono commenti e vengono saltate.
 #
-# VUOTA: nessuno script di casa porta ancora il marcatore di sola lettura.
-# La prima coda si riempie dopo che il perimetro e'  firmato e i cancelli
-# sono stati collaudati sul VPS.
+#  OGNI SCRIPT DEVE:
+#    - contenere la riga "# RUNNER_SOLA_LETTURA"  (cancello G1)
+#    - non contenere nessuno dei 24 divieti        (cancello G2)
+#    - stare in backtest_pipeline/righe/ e finire in .ps1
+#    - STAMPARE, non scrivere file: il runner cattura lo standard
+#      output, lo salva come log e lo pubblica lui sul repo.
+#
+#  Il perimetro firmato: report/PERIMETRO_RUNNER.md (07/09/2026)
+# =====================================================================
+
+# --- 1. che cosa e' attaccato, e dove. La foto di stanotte.
+5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+
+# --- 2. chi ha scritto nei log e chi e' muto.
+5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
