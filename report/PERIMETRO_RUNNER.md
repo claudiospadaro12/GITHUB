@@ -100,6 +100,38 @@ Si toglie in qualunque momento con `schtasks /Delete /TN ABTG_Runner /F`.
 ## ✍️ FIRMA
 
 - [ ] **Claudio**, data: ________
-- [ ] `-CollaudoCancelli` lanciato sul VPS: **11 su 11 giusti** — data: ________
+- [x] `-CollaudoCancelli` lanciato sul VPS: **11 su 11 giusti** — **07/09/2026, ore 22:46** ✅
 
 _Senza tutte e due le caselle, il runner non si installa._
+
+### Esito del collaudo, per esteso (07/09/2026 22:46, VPS)
+```
+[OK ] BUONO: legge e stampa                    -> G1 e G2 passati
+[OK ] CATTIVO: manca il marcatore              -> G1: manca 'RUNNER_SOLA_LETTURA'
+[OK ] CATTIVO: tocca il REALE                  -> G2: 'BCM_Reale'
+[OK ] CATTIVO: nomina il conto reale           -> G2: '10105439'
+[OK ] CATTIVO: scrive un file                  -> G2: 'Set-Content'
+[OK ] CATTIVO: cancella                        -> G2: 'Remove-Item'
+[OK ] CATTIVO: esegue testo                    -> G2: 'Invoke-Expression'
+[OK ] CATTIVO: avvia un processo               -> G2: 'terminal64.exe'
+[OK ] CATTIVO: -EseguiDavvero                  -> G2: 'EseguiDavvero'
+[OK ] BUONO: il divieto e' in un COMMENTO      -> G1 e G2 passati
+[OK ] CATTIVO: sorgente vuoto                  -> G0: sorgente vuoto
+COLLAUDO: 11 giusti, 0 sbagliati su 11
+```
+
+---
+
+## 🔎 UNA CONSEGUENZA DI PROGETTO, SCOPERTA COL COLLAUDO
+
+Il divieto `Set-Content` / `Out-File` / `Copy-Item` **rifiuta quasi tutte le
+righe di casa esistenti**, perché quasi tutte scrivono il proprio referto su
+file. Non e' un difetto del cancello: e' il progetto giusto, e la soluzione
+non e' allargare il perimetro.
+
+👉 **Nella coda gli script STAMPANO, non scrivono.** Il runner cattura lo
+standard output di ognuno, lo salva come log e **lo pubblica lui** sul repo.
+Quindi per la coda servono **varianti snelle** delle righe esistenti — che
+stampano e basta. È lavoro onesto, non un allentamento.
+
+**Nessuna riga entra in coda finché non ha una variante che stampa.**
