@@ -19,3 +19,6 @@ d2922bf6f26c3af35dbe5863d50d15d2ac42a584 | backtest_pipeline/righe/CODA_01_sedie
 
 # --- 2. chi ha scritto nei log e chi e' muto.
 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
+
+# --- 3. quale conto sta in quale cartella dati (dal giornale del terminale).
+d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1
