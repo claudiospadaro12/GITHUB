@@ -1,0 +1,111 @@
+; ==========================================================================
+; ABTG_NySessionRetest -- PRESET CORSIA DEMO -- U30USD M15
+; Conto: DEMO PICCOLO 50503392 (cartella "C:\Program Files\BCM Markets MT5
+; Terminal", SENZA -V3). NON il reale 10105439. NON il 100k 50504263.
+; Scritto il 07/09/2026. Scheda: report/CORSIA_DEMO_NYRETEST.md
+; ASCII PURO: niente emoji (regola CLAUDE.md del 17/08 sui file letti da
+; Windows in ANSI).
+; ==========================================================================
+;
+; DA DOVE VIENE OGNI NUMERO (nessun valore a memoria):
+;   - i FISSI e la finestra: backtest_pipeline/prove/ABTG_NySessionRetest_Tar2.txt
+;     (spec dell'ESTENSIONE FINALE della taratura, criteri congelati PRIMA
+;      dei numeri)
+;   - la CELLA (slope 75 / sl 5): backtest_pipeline/risultati_archivio/
+;     REFERTO_NYRETEST_2026-08-31.md, sezione "ESTENSIONE FINALE (corsa VERA
+;     11:42, pin 77435cb, 8/8)" -- riga slope 75: n 115/114,
+;     PF 1.374 (sl5) / 1.427 (sl7), DD(sl7) 3.7%, peggior giornata -0.69%
+;   - i valori NON pinnati nel prova: sono i DEFAULT COMPILATI dell'EA
+;     (mql5/Experts/ABTG_NySessionRetest.mq5), che sono quelli che il tester
+;     ha effettivamente usato. Ogni riga di questo tipo e' marcata [DEFAULT].
+;
+; BANCO CHE HA PRODOTTO I NUMERI: U30USD M15, MODELLO 4 (TICK REALI BCM),
+; finestra 2024.09.26 -> 2026.06.30 (459 giorni feriali), deposito 100.000,
+; rischio 0.65%.  (backtest_pipeline/righe/RIGA_NYRETEST_TAR2.ps1 riga 55)
+;
+; RISCHIO: 0.65% -- NESSUNA RISCALATURA. La cella e' stata misurata
+; DIRETTAMENTE a InpRiskPercent=0.65, che e' gia' il metro di casa firmato il
+; 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%). Quindi DD 4,7% e peggior
+; giornata -0,69% valgono TALI E QUALI, senza scalature inferite.
+;
+; PERCHE' sl=5 E NON sl=7: alla cella slope 75 l'asse SL ha due valori
+; misurati, tutti e due sopra la barra (PF 1.374 con DD 4,7% / PF 1.427 con
+; DD 3,7%). sl=5 e' il MENO favorevole dei due: si prende quello, per la
+; regola di casa "il centro della banda, MAI il picco". Il DD promesso e' di
+; conseguenza il PEGGIORE dei due.
+;
+; ATTENZIONE, DA RIPETERE: alla cella slope 75 i DUE LATI NON sono mai stati
+; smontati. InpAllowLong e InpAllowShort restano ENTRAMBI accesi, com'erano
+; nella misura. Un long-only qui sarebbe una cella MAI MISURATA.
+; ==========================================================================
+
+; --- TREND (gate direzione: EMA200 su H1) ---
+InpEmaTrend=200
+
+; --- VWAP DI SESSIONE ANCORATA ---
+InpRetestBufferPts=0
+
+; --- FILTRO REGIME COSTITUTIVO --- QUESTA E' LA CELLA ---
+; InpVwapSlopeMin = 75 punti indice su 5 barre M15: e' il gate che dimezza
+; il DD (n 625->115, DD 12.9%->4.7%). E' anche il PICCO del PF: vedi scheda.
+InpVwapSlopeMin=75.0
+InpVwapSlopePeriod=5
+; Espansione SPENTA PER MISURA, non per ipotesi: la griglia 48 l'ha trovata
+; decorativa (n 625->621->604 al crescere della soglia, PF piatto).
+InpExpansionMin=0.0
+InpExpansionLookback=10
+
+; --- SESSIONE USA -- ORA SERVER BCM (= ora italiana - 1) ---
+; RTH NY 09:30-16:00 ET -> 14:30-21:00 SERVER. Il 9 e il 16 sono ore ET:
+; se compaiono qui, il preset e' sbagliato.
+InpSessionHour=14
+InpSessionMin=30
+InpCloseHour=20
+InpCloseMin=55
+; VINCOLO DURO del mandato: flat di fine seduta acceso (v5 = flat di recupero).
+InpCloseAtEnd=true
+
+; --- PREMARKET (livelli per il parziale) --- [DEFAULT] non pinnato nel prova
+InpPmStartHour=9
+InpPmStartMin=0
+
+; --- STOP LOSS (ordine vero al broker) --- InpSlLookback E' L'ASSE DELLA CELLA
+InpSlLookback=5
+InpSlBufferPts=300
+; PAVIMENTO SL OBBLIGATORIO (R109): mai 0.
+InpMinStopPts=500
+
+; --- GESTIONE (parziale su livello + breakeven) --- [DEFAULT] non pinnati
+; nel prova: il tester ha usato questi, quindi la cella misurata LI CONTIENE.
+InpUsePmLevel=true
+InpUseDayLevel=true
+InpTP1_ClosePct=50.0
+InpMoveBE=true
+
+; --- RISCHIO E CAP ---
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+; DUE LATI, come nella misura. NON toccare senza una misura nuova.
+InpAllowLong=true
+InpAllowShort=true
+
+; --- CONVERSIONE PUNTI INDICE --- [DEFAULT] U30USD: 100 punti MT5 = 1 punto
+; indice (la stessa conversione MISURATA su D30EUR, referto Breakin 31/08).
+InpMT5PerPuntoIndice=100
+
+; --- GENERALI ---
+InpComment=NYRT DEMO
+; MAGIC NUOVO E VERGINE: 769510.
+; Verificato il 07/09/2026 con:  grep -rn "769510" . --exclude-dir=.git
+; -> 0 OCCORRENZE in tutto il repository. NON e' 769500/769501/769502/769503
+; (quelli sono i magic dei ROUND, non vanno mai riusati in campo).
+InpMagic=769510
+; Filtro spread SPENTO come nella cella misurata (scelta dichiarata: si copia
+; la cella promossa, non se ne inventa un'altra).
+InpMaxSpread=0
+; Verbose ON: serve per leggere nel Giornale/Esperti che si e' armata davvero.
+InpVerbose=true
+; AutoTest ON: stampa in OnInit le righe [NYRT][AUTOTEST] con slope e magic
+; VERI. E' la prova stampata che il preset e' entrato, non un'inferenza.
+InpAutoTest=true
+; ==========================================================================
