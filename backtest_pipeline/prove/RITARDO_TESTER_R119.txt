@@ -156,11 +156,23 @@
 #      fitti, cioe' NELL'APERTURA -- che e' esattamente quando queste
 #      due sedie lavorano. E' un motivo per aspettarsi che morda, ma va
 #      verificato dal canarino G0, non dato per buono.
-#   4. LE STRINGHE NON SONO FISSATE. InpNewsFile, InpNewsCurrencies,
-#      InpCorrSymbol, InpComment restano al default del sorgente: il
-#      formato ||..|| del driver non e' per le stringhe. Sono tutti
-#      economicamente inerti qui (filtro notizie spento su entrambe le
-#      sedie, correlazione spenta sulla 770101, il commento e' cosmetico).
+#   4. LE STRINGHE. I due file prova non le fissano (il formato ||..||
+#      del driver non e' per le stringhe), ma il driver le BLINDA da solo
+#      al default del sorgente -- e per queste sedie quel default e'
+#      IDENTICO al preset del conto reale, verificato riga per riga:
+#         InpCorrSymbol "SPXUSD"      sorgente = preset vivo
+#         InpNewsFile   "abtg_news.csv"  sorgente = preset vivo
+#         InpComment    "ORB OTT"     sorgente = preset vivo
+#      L'UNICA che NON finisce nell'.ini e' InpNewsCurrencies, perche' il
+#      driver salta le stringhe VUOTE di proposito (riga 449: "stringa
+#      vuota: la lascio al default compilato"). Il default compilato e'
+#      "" e il preset vivo e' "": identici, niente di nascosto.
+#      >>> E' QUESTO il motivo per cui il giro a vuoto del 07/09 stampa
+#          "input trovati: 82" ma "parametri in [TesterInputs]: 81".
+#          Il numero che manca e' quello, ed e' spiegato.
+#      Tutte comunque economicamente inerti qui: filtro notizie SPENTO su
+#      entrambe le sedie, correlazione SPENTA sulla 770101, il commento
+#      e' cosmetico.
 #   5. NESSUNA ANCORA STORICA. Non esiste in archivio un round girato su
 #      QUESTE celle esatte (preset del conto reale, deposito 10.000):
 #      quindi la corsa a Delay=0 E' la base, e il suo unico controllo
