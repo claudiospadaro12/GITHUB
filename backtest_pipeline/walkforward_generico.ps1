@@ -619,6 +619,18 @@ if(-not $Terminal -and $BrokerBCM){
     Write-Host "Senza -UseSpare NON si scrive nel 100k (-V3) ne' nel conto REALE. Mi fermo." -ForegroundColor Red
     exit 1
   }
+  # 123: se non si trova niente MA esistono solo terminali VIETATI, dirlo.
+  # "terminale non trovato" nasconderebbe la causa vera e manderebbe a caccia
+  # di un'installazione mancante che invece c'e', ed e' solo quella sbagliata.
+  if(-not $c -and -not $UseSpare){
+    $vietati=@($allTerm|Where-Object{$_.DirectoryName -like "*-V3*" -or $_.DirectoryName -like "*BCM_Reale*"})
+    if($vietati.Count -gt 0){
+      Write-Host "NESSUN TERMINALE UTILIZZABILE, ma ce ne sono di VIETATI:" -ForegroundColor Red
+      foreach($v in $vietati){ Write-Host ("   " + $v.DirectoryName) -ForegroundColor Red }
+      Write-Host "Il 100k (-V3) e il conto REALE non si toccano senza -UseSpare. Mi fermo." -ForegroundColor Red
+      exit 1
+    }
+  }
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
 if(-not $Terminal -and -not $BrokerBCM){
