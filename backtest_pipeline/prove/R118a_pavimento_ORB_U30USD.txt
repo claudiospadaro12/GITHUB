@@ -1,0 +1,224 @@
+# =====================================================================
+#  R118a / IL PAVIMENTO DELLO STOP SOTTO SLIPPAGE - ORB      U30USD M5
+#  EA: ABTG_ORB_Ottimizzato   (sedia VIVA sul conto REALE: magic 770611)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R118a_pavimento_ORB_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r118a -Modello 4
+#  (SEMPRE prima con -SoloControllo: deve stampare 25 CELLE PER FINESTRA.
+#   Se ne stampa un altro numero, il file e' stato letto male: FERMARSI.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI, e sono CONGELATI:
+#      backtest_pipeline\prove\R118_PAVIMENTO_STOP_CRITERI.md
+#      Da qui NON esce nessun cambio in forward: esce una raccomandazione.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DI QUESTA CORSA, UNA SOLA
+#    "Sulla cella piu' fragile del portafoglio, allargare lo stop
+#     RESTITUISCE il drawdown che lo slippage porta via - e a che
+#     prezzo in profit factor?"
+#
+#  DA DOVE NASCE: il conflitto fra PS5 ORB BOT par.5 (il pavimento
+#  dello stop DEVE restare a zero, perche' "dimezza l'edge": DAX PF
+#  2,40 -> 1,26) e R55 (l'ORB "non muore di PF, muore di DRAWDOWN":
+#  sfonda il 10% con 1,5 punti indice di slippage). Dossier che ha
+#  isolato il conflitto: report\ANALISI_STUDIO_PS5_ORB_2026-09-06.md
+#  par.4 e 4.3.
+#
+#  E QUESTO ROUND ERA GIA' STATO CHIESTO DA NOI, PRIMA DI CONOSCERE IL
+#  DOCUMENTO DEL COLLEGA. R88a, riga sullo slippage, 19/08/2026:
+#    "SLIPPAGE: 0, come tutti i round tranne R55. Se una cella passa i
+#     cancelli, il suo R55-bis e' un round a parte (i criteri 6.4 lo
+#     chiedono esplicitamente: la pendenza cambia col lotto)."
+#  >>> QUESTO E' QUEL R55-BIS. <<<
+# ---------------------------------------------------------------------
+#  IL LIMITE PIU' IMPORTANTE DI QUESTA CORSA, DICHIARATO PRIMA
+#    ABTG_ORB_Ottimizzato.mq5 NON HA ne' InpMinStopPts ne'
+#    InpSkipIfTight (verificato con grep sul sorgente il 07/09/2026:
+#    zero occorrenze). Quindi:
+#      - il RAMO C (saltare il trade quando lo stop e' troppo stretto)
+#        NON E' IMPLEMENTABILE su questo EA, e IL CODICE NON SI TOCCA
+#        in questo round. La misura ESCE dal round;
+#      - il RAMO B si misura con l'EQUIVALENTE InpSLBufferPts (riga
+#        192), che agisce SOLO nei modi OPPRANGE(0) e HALFRANGE(3).
+#        La cella viva e' HALFRANGE, quindi agisce.
+#    >>> E InpSLBufferPts NON E' UN PAVIMENTO: e' un allargamento
+#        SEMPRE. Il pavimento agisce solo quando lo stop e' piu'
+#        stretto della soglia; il buffer si somma a OGNI trade. Sono
+#        parenti, non gemelli, e ogni riga del referto che li accosta
+#        lo deve scrivere accanto al numero.
+# ---------------------------------------------------------------------
+#  LE UNITA' - LA TRAPPOLA CHE DA SOLA AVREBBE RESO IL ROUND INUTILE
+#    >>> 100 PUNTI MT5 = 1 PUNTO INDICE su U30USD a BCM. <<<
+#    [MISURATO, non assunto]: REFERTO_ROUND55_SLIPPAGE.md ("200 punti
+#    = 2 punti indice sul Dow"), prove\R55b_slippage_ORB.txt riga 25,
+#    prove\R88a_stoplargo_U30USD.txt (dove la missione R88 aveva
+#    sbagliato di un fattore DIECI e l'errore e' agli atti).
+#    I "20 punti" del collega sono 20 punti INDICE = 2000 punti MT5.
+#    OGNI VALORE, QUI E NEL REFERTO, SI SCRIVE IN TUTTE E DUE LE UNITA'.
+# ---------------------------------------------------------------------
+#  GLI ASSI - 5 x 5 = 25 CELLE PER FINESTRA = 50 PASSATE
+#
+#  (1) InpSLBufferPts = 0 / 500 / 1000 / 1500 / 2000 punti MT5
+#                     =  0 /   5 /   10 /   15 /   20 punti indice
+#      0    = RAMO A: la cella VIVA, il controllo. Deve riprodurre
+#             numeri gia' noti (ancora A1 dei criteri).
+#      500  e 1000 = i due valori di R88 (5-10 punti indice, la regola
+#             dello stop del ToolKit ABTG par.5.1). Hanno un'ancora.
+#      1500 = ponte. Nessuna ancora: senza di lui fra 10 e 20 non c'e'
+#             niente e l'altopiano non si legge.
+#      2000 = 20 PUNTI INDICE: IL NUMERO ESATTO DEL COLLEGA, misurato
+#             per la prima volta su dato nostro.
+#
+#  (2) InpSlippagePts = 0 / 50 / 100 / 150 / 200 punti MT5
+#                     = 0 / 0,5 / 1,0 / 1,5 / 2,0 punti indice
+#      E' LA SCALA IDENTICA A QUELLA DI R55, e non e' pigrizia: su
+#      questo EA il modello di slippage e' LO STESSO di R55 (SL e TP
+#      spostati contro il trade DOPO il calcolo del lotto, righe
+#      454-455 e 469-470), quindi la tabella di questo round e la
+#      tabella par.2 di R55 si leggono UNA ACCANTO ALL'ALTRA.
+#      150 = 1,5 punti indice e' il numero che in R55 ha fatto sfondare
+#      il 10% a questa cella (9,7623 -> 10,2086).
+#
+#      !!! I VALORI DELLO SLIPPAGE SONO SCENARI ASSUNTI, NON MISURE.
+#          ABTG_SlippageLogger sul conto reale ha ZERO DEAL registrati
+#          (deployato il 05-06/09). BCM ha confermato che il conto DEMO
+#          NON simula lo slippage. MISURA_SLIPPAGE_2026-09-05.md misura
+#          921 uscite del TESTER (mediana in sessione 0,40 - P95 3,25
+#          punti indice), che e' un PAVIMENTO del vero, non il vero.
+#          Il referto lo deve ripetere sotto ogni tabella.
+# ---------------------------------------------------------------------
+#  LE ANCORE - CANCELLO BLOCCANTE, SI LEGGE PRIMA DI TUTTO IL RESTO
+#    La colonna a slippage 0 deve riprodurre R88 (r88_csv, celle
+#    InpSLMode=3 + InpTPMode=1), che a sua volta riprodusse R54b e R55
+#    al centesimo su buffer 0:
+#
+#      buffer    IS Profit / PF / DD% / n      OOS Profit / PF / DD% / n
+#      0    (0)  9509,39 / 1,24979 / 7,8885 / 71   41057,00 / 1,67419 / 9,7623 / 119
+#      500  (5)  3193,77 / 1,09174 / 7,8098 / 71   29295,20 / 1,51284 / 9,5573 / 119
+#      1000(10)  1095,82 / 1,03507 / 7,0616 / 71   28466,13 / 1,55394 / 8,0454 / 119
+#
+#    Se NON le riproduce, i numeri di questa corsa NON SI LEGGONO: si
+#    cerca cosa e' cambiato (l'EA lo riscarica il driver dalla PUNTA di
+#    'lavoro', cache del tester, dati) e ci si ferma li'.
+#
+#  IL CANARINO DEL CONTEGGIO (gratis, e obbligatorio)
+#    Ne' il buffer ne' lo slippage toccano gli INGRESSI di questo EA.
+#    >>> QUINDI n DEVE RESTARE 71 (IS) e 119 (OOS) IN TUTTE E 25 LE
+#        CELLE. Se si muove, c'e' un effetto che non abbiamo capito e
+#        il round si ferma PRIMA di leggere il resto.
+# ---------------------------------------------------------------------
+#  IL CAMPIONE, E COSA SOSPENDE
+#    n IS = 71, n OOS = 119. SONO ENTRAMBE SOTTO 150 e non e'
+#    rimediabile: la finestra non si allarga indietro (muro dei tick
+#    2024.09.26) e spostare lo split lascerebbe un OOS di ~40.
+#    >>> IL GIUDIZIO DI MERITO E' SOSPESO. Questa corsa si legge per il
+#        RISCHIO (regola B dell'Emendamento: un drawdown e' un fatto
+#        accaduto, e vale a qualunque n) e come diagnosi.
+#    REGIME CONTENUTO: UNO SOLO (Dow 2024-2026, prevalentemente
+#    rialzista). Va scritto accanto a ogni tabella.
+# ---------------------------------------------------------------------
+#  LA CELLA E' QUELLA VIVA SUL CONTO REALE 10105439 (magic 770611),
+#  copiata dal preset mql5\Presets\conto_reale\
+#  ABTG_ORB_Ottimizzato_770611_REALE.set, con DUE sole differenze
+#  DICHIARATE:
+#    - InpRiskPercent 0,65 -> 1,00 (valore comune di R15/R54b/R55/R88:
+#      senza, i numeri non si confrontano con NIENTE);
+#    - InpMagic 770611 -> 778220 (magic VERGINE: il driver cancella i
+#      per-trade per magic, e i magic vivi non si sfiorano nemmeno in
+#      backtest).
+#  Tutto il resto e' copiato ESATTO. Il progetto ha gia' pagato DUE
+#  VOLTE l'errore InpTP1_ATRmult=0 contro 0,5.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#         ^ muro MISURATO dei tick BCM sugli indici
+#           (REFERTO_SONDA_STORICO_17-08.md, stato COMPLETO). Con
+#           -FrazioneIS 0.40 e -Fino 2026.06.30:
+#             IS  2024.09.26 -> 2025.06.09
+#             OOS 2025.06.10 -> 2026.06.30
+#           Le stesse finestre di R15/R54b/R55/R88.
+
+# --- RANGE ORB: OR 15' 14:30->14:45 SERVER (= 15:30->15:45 IT).
+#     ORA SERVER BCM = ora italiana - 1. NON si converte qui.
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+
+# --- FINE GIORNATA: 21:00 server, come la sedia viva.
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- INGRESSO: pendenti STOP a 10 x K oltre il livello, come in campo.
+InpUseCloseConfirm=0
+InpMinBodyPct=50.0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- STOP E TARGET: la cella viva. HALFRANGE (50% del range) e' lo
+#     stop STRETTISSIMO che R55 ha nominato come causa della fragilita'
+#     (lotto = rischio / distanza_stop). E' l'oggetto del round: PINNATO.
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTPMode=1
+InpTPRangeMult=1.5
+#     InpTP_R con InpTPMode=1 e' INERTE (lo legge solo ManageTP1, che
+#     esce subito perche' InpTP1Pct=0): MISURATO in R88, dove le coppie
+#     TP_R 1,5 / 2,0 sono uscite identiche a ogni decimale. Qui si pinna
+#     al valore di campo (1,0) e l'ancora si riproduce lo stesso.
+InpTP_R=1.0
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- FILTRI: EMA200 acceso (e' il cuore della cella R15), tetto range
+#     0,8%, volumi e EMA 9/21 spenti. Come in campo.
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+# --- RISCHIO: 1,00% pinnato. NON e' la taglia di campo (0,65% sul
+#     conto reale): e' il valore comune che rende le celle
+#     confrontabili fra loro e coi round precedenti.
+InpRiskPercent=1.0
+
+# --- NOTIZIE: spente (servono un CSV in MQL5\Files e non c'entrano).
+InpUseNewsFilter=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le sue GlobalVariable
+#     non esistono, quindi la guardia e' INERTE (fail-open totale) e i
+#     numeri restano confrontabili coi round precedenti.
+InpUsaGuardian=1
+InpAutoTest=1
+
+# --- IGIENE: log spento nelle corse lunghe, spread non filtrato.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- MAGIC VERGINE: NON tocca il 770611, che e' questo stesso EA vivo
+#     sul conto REALE 10105439.
+InpMagic=778220
+
+# =====================================================================
+#  LA GRIGLIA: 5 x 5 = 25 celle per finestra = 50 passate.
+#  Formato: default||start||step||stop||Y
+# =====================================================================
+InpSLBufferPts=0||0||500||2000||Y
+InpSlippagePts=0||0||50||200||Y

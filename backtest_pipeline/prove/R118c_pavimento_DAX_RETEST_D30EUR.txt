@@ -1,0 +1,243 @@
+# =====================================================================
+#  R118c / IL PAVIMENTO SULLA CELLA VIVA DEL DAX        D30EUR M15
+#  EA: ABTG_DAX_Apertura_EU  (sedia VIVA sul conto REALE: magic 770101)
+#
+#  Si lancia con:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R118c_pavimento_DAX_RETEST_D30EUR.txt
+#    -Simbolo D30EUR -Deposito 10000 -Etichetta r118c -Modello 4
+#  (SEMPRE prima con -SoloControllo: deve stampare 10 CELLE PER
+#   FINESTRA. Altro numero = file letto male: FERMARSI.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI, e sono CONGELATI:
+#      backtest_pipeline\prove\R118_PAVIMENTO_STOP_CRITERI.md
+#
+#  >>> QUESTA CORSA SI LANCIA PER PRIMA. E' la piu' corta (20 passate)
+#      ed e' il CANCELLO: se non riproduce R83, il round si ferma
+#      PRIMA di spendere macchina sulle altre due.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DI QUESTA CORSA
+#    "Sulla cella ESATTA che gira oggi sul conto reale, quanto costa e
+#     quanto rende un pavimento allo stop - e quanto costa in TRADE la
+#     terza via (saltare invece di allargare), che nessuno ha mai
+#     misurato?"
+# ---------------------------------------------------------------------
+#  IL LIMITE PIU' PESANTE DI QUESTA CORSA, DICHIARATO PRIMA
+#    >>> QUI LO SLIPPAGE NON E' SIMULABILE, E RESTA PINNATO A ZERO. <<<
+#    La 770101 gira in RETEST (InpEntryMode=2), cioe' un ordine LIMIT.
+#    Nel sorgente lo slippage e' applicato SOLO agli ingressi a
+#    pendente STOP (righe 1059 e 1083) e ai rami DELAYED/OPENCONFIRM.
+#    Sul retest, riga 1487, il commento e' esplicito:
+#        "limit sul livello (niente buffer/slippage)"
+#    Scrivere InpSlippagePts>0 qui NON cambierebbe un centesimo: uscirebbero
+#    cinque colonne identiche e un referto che sembra aver misurato
+#    qualcosa. Percio' l'asse NON C'E', ed e' scritto perche' non c'e'.
+#
+#    CONSEGUENZA, col verso del bias dichiarato:
+#      questa corsa misura del pavimento SOLO il canale
+#        stop piu' largo -> meno lotti -> meno drawdown
+#      e MAI il canale
+#        stop piu' largo -> lo slippage se ne mangia meno
+#      >>> QUINDI SOTTOSTIMA IL VALORE DEL PAVIMENTO. Un bias di cui si
+#          conosce il verso si dichiara e si tiene: non si aggira, e
+#          NON si tocca il codice per aggirarlo.
+#      Il canale mancante si misura sulla corsa b (stessa EA, ingresso
+#      a STOP) e sulla corsa a (ORB): e li' lo si dichiara di nuovo.
+# ---------------------------------------------------------------------
+#  LE UNITA' - LA TRAPPOLA CHE DA SOLA AVREBBE RESO IL ROUND INUTILE
+#    Nel codice il pavimento e' InpMinStopPts * _Point: PUNTI MT5.
+#    >>> Su D30EUR (2 decimali) 100 PUNTI MT5 = 1 PUNTO INDICE. <<<
+#    I "20 punti" del collega sono 20 punti INDICE = 2000 punti MT5.
+#    Chi scrivesse 20 imposterebbe 0,2 punti indice: un no-op, tre rami
+#    identici, e un referto che conclude il FALSO con numeri VERI.
+#    OGNI VALORE, QUI E NEL REFERTO, IN TUTTE E DUE LE UNITA'. SEMPRE.
+# ---------------------------------------------------------------------
+#  GLI ASSI - 5 x 2 = 10 CELLE PER FINESTRA = 20 PASSATE
+#
+#  (1) InpMinStopPts = 0 / 2000 / 4000 / 6000 / 8000 punti MT5
+#                    = 0 /   20 /   40 /   60 /   80 punti indice
+#      0    = RAMO A: pavimento spento. E' la configurazione VIVA, ed
+#             e' il ramo che il collega dichiara intoccabile. Ancora A2.
+#      2000 = 20 punti indice: IL NUMERO ESATTO DEL COLLEGA. E per pura
+#             convergenza e' anche il nostro pavimento DURO (13,3 x
+#             spread = 21-23 punti indice su D30EUR,
+#             CACCIA_TFBASSO_FREQUENZA_2026-09-06.md par.6.2).
+#      4000 = ponte, nessuna ancora: senza, fra 20 e 60 non c'e' niente
+#             e l'altopiano non si legge.
+#      6000 e 8000 = INCASTRANO la frontiera MISURATA di casa:
+#             stop >= 40 x spread -> su D30EUR 64-68 punti indice
+#             (spread mediano in sessione 1,6-1,7 punti indice,
+#             SPREAD_FLOTTA_MISURA_2026-09-03.md, 252 M tick).
+#             La frontiera resta DENTRO la griglia, non ai bordi.
+#
+#  (2) InpSkipIfTight = 0 / 1  (0 = false, 1 = true)  -> E' IL RAMO
+#      0 = RAMO B: ALLARGA lo stop al pavimento (la via di R55).
+#      1 = RAMO C: SALTA il trade (mai misurato da nessuno dei due
+#              corpus). Scioglie l'obiezione del collega alla radice -
+#              non allarga niente, quindi non "scardina le proporzioni"
+#              - e il suo costo e' la FREQUENZA.
+#      NOTA: con InpMinStopPts=0 il blocco non si attiva mai, quindi le
+#      due celle a pavimento 0 sono GEMELLE e devono uscire IDENTICHE
+#      al centesimo. E' un canarino gratis: se non lo sono, c'e' di
+#      mezzo la cache del tester o una griglia ricordata da MT5, e il
+#      numero non si legge.
+#
+#  PREVISIONE SCRITTA PRIMA, falsificabile: lo stop di questa cella e'
+#  l'INTERO range d'apertura (InpSLMode=0 = RANGE, bordo opposto),
+#  quindi stimo che 2000 (20 punti indice) NON MORDA quasi mai, 4000 a
+#  volte, 6000 spesso, 8000 quasi sempre. Se 20 non morde, il numero
+#  del collega SU QUESTA GEOMETRIA non e' nemmeno confutabile: e' un
+#  no-op (esito 3 dei criteri), e il conflitto si sposta sull'ORB, dove
+#  lo stop e' META' range.
+# ---------------------------------------------------------------------
+#  L'ANCORA - CANCELLO BLOCCANTE
+#    Le due celle InpMinStopPts=0 devono riprodurre la cella VIVA gia'
+#    misurata in R83 (r83_csv\ABTG_DAX_Apertura_EU_D30EUR_*_r83v.csv,
+#    18/08/2026), che e' la cella INCORONATA dal duello degli ingressi
+#    e il DD scritto nel contratto della sedia 770101:
+#
+#      IS   282,12 | PF 1,07810 | DD 7,0257%  | n=197 | pegg.giorn -1,0502
+#      OOS  999,42 | PF 1,18776 | DD 10,5984% | n=311 | pegg.giorn -1,0671
+#
+#    Se non li riproduce, IL ROUND SI FERMA QUI e si cerca cosa e'
+#    cambiato: il driver riscarica l'EA dalla PUNTA del branch
+#    'lavoro', quindi una modifica al sorgente fra il pin e il lancio
+#    si vedrebbe esattamente cosi'.
+# ---------------------------------------------------------------------
+#  LE TRE DIFFERENZE DAL PRESET DI CAMPO, DICHIARATE
+#    Il corpo qui sotto e' COPIATO da prove\R83v_vivo_D30EUR.txt, che
+#    e' la cella verificata trade per trade contro la sedia viva.
+#    Rispetto a mql5\Presets\conto_reale\
+#    ABTG_DAX_Apertura_EU_770101_REALE.set differisce in TRE punti:
+#      1. InpRiskPercent 1,00 (campo: 0,65) - valore comune di R83, e
+#         il DD del CONTRATTO e' scritto a 1,00;
+#      2. InpAllowShort 1 (campo: false, solo long dal 07/08) - R83 ha
+#         misurato i due lati insieme, e l'ancora e' quella;
+#      3. chart M15 (campo: M5) - R83 e' girato su M15.
+#    >>> QUINDI I NUMERI ASSOLUTI DI QUESTA CORSA DESCRIVONO LA CELLA
+#        DEL CONTRATTO, NON IL PRESET DI CAMPO. Il round e'
+#        COMPARATIVO: i confronti si leggono DENTRO la stessa corsa,
+#        mai fra corse e mai contro il campo.
+#    Il magic e' VERGINE (778240): non si sfiora il 770101.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+#         ^ muro MISURATO dei tick BCM sugli indici. Con -FrazioneIS
+#           0.40 e -Fino 2026.06.30: IS 2024.09.26 -> 2025.06.09,
+#           OOS 2025.06.10 -> 2026.06.30. Le finestre di R83.
+#           REGIME CONTENUTO: uno e mezzo, tutto rialzista. Niente
+#           2020, niente 2022. Va scritto accanto a ogni tabella.
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana: IT - 1) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: RETEST (2). E' la cella viva, ed e' PINNATA: lo stile
+#     d'ingresso e' la domanda di R83, non di questo round.
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+# --- FILTRI: TUTTI SPENTI, come in R83 e come in campo.
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+
+# --- RISCHIO E GESTIONE: identici a R83 e al preset di campo (salvo il
+#     rischio, dichiarato sopra). Se cambiasse anche solo il trailing,
+#     questa corsa non isolerebbe piu' il pavimento.
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+# --- SLIPPAGE: PINNATO A ZERO, e il motivo sta in testa a questo file:
+#     su un ingresso LIMIT il codice non lo applica. Non e' una scelta
+#     di comodo: e' l'unica scrittura onesta possibile senza toccare
+#     l'EA, e il codice in questo round NON SI TOCCA.
+InpSlippagePts=0
+
+# --- REVERSE di R51: SPENTO com'e' in campo.
+InpAllowReverse=0
+
+# --- GUARDIAN: acceso come in campo. Nel tester le GlobalVariable non
+#     esistono: guardia INERTE (fail-open), numeri confrontabili.
+InpUsaGuardian=1
+
+# --- IGIENE: log spento nelle corse lunghe, spread non filtrato.
+InpMaxSpread=0
+InpVerbose=0
+
+# --- MAGIC VERGINE: NON tocca il 770101, vivo sul conto REALE.
+InpMagic=778240
+
+# =====================================================================
+#  LA GRIGLIA: 5 x 2 = 10 celle per finestra = 20 passate.
+#  Formato: default||start||step||stop||Y
+#  InpSkipIfTight e' un BOOL e si scrive 0/1, NON false/true.
+#  Motivo, misurato nel driver: walkforward_generico.ps1 quando blinda
+#  da solo un bool scrive gia' la forma NUMERICA (Risolvi() converte
+#  true->1 e false->0 e poi stampa il numero), ed e' la forma con cui
+#  sono girati TUTTI i round di questa casa. La forma false||...||true
+#  compare in due file prova mai lanciati: NON e' provata, e un round
+#  non e' il posto dove provarla.
+#  start 0 / step 1 / stop 1 = DUE celle. Verificarlo nella stampa di
+#  -SoloControllo, non darlo per buono.
+# =====================================================================
+InpMinStopPts=0||0||2000||8000||Y
+InpSkipIfTight=0||0||1||1||Y
