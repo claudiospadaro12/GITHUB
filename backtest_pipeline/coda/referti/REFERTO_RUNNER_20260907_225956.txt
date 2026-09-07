@@ -1,0 +1,22 @@
+﻿REFERTO RUNNER ABTG -- 2026-09-07 22:59:56 (ora locale VPS)
+marcatore : MARCATORE_RUNNER_ABTG_v2
+branch    : lavoro
+perimetro : SOLA LETTURA -- report/PERIMETRO_RUNNER.md
+
+righe di coda: 2
+
+--- 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 270s, uscita 0
+    log: CODA_01_sedie_attaccate_20260907_225956.log
+
+--- 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_02_chi_ha_operato_20260907_225956.log
+
+--- RIEPILOGO ---
+eseguiti  : 2
+rifiutati : 0
+falliti   : 0
+ESITO: COMPLETO
