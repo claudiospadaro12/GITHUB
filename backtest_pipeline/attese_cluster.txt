@@ -1,0 +1,148 @@
+# ATTESE DEL COLLAUDO -- TETTO DI RISCHIO APERTO PER CLUSTER CORRELATO (C2)
+# Firma del 07/09/2026 (report/FIRME_2026-09-07.md). Codice: ABTG_Guardian
+# v1.13 + ABTG_PausaGuardian.mqh v1.60. Proposta dei cluster (NON firmata):
+# report/CLUSTER_PROPOSTA.md
+#
+# STATO DICHIARATO: IMPLEMENTATO MA NON COLLAUDATO. Finche' i casi qui sotto
+# non sono girati sul PC/VPS di Claudio, il tetto NON e' una protezione
+# attiva -- e va detto ogni volta che si cita, come per la firma stessa.
+#
+# A COSA SERVE: e' l'elenco MACCHINA-LEGGIBILE delle righe di log che fanno
+# fede. Stesso formato di attese_enforcement_fase1.txt, cosi' il cancello non
+# dipende dall'occhio.
+#
+# FORMATO: CHIAVE | TIPO | TESTO
+#   TIPO = ATTESA   -> deve comparire perche' il caso sia PASS
+#          VIETATA  -> se compare, ci si ferma
+#          CAMPO    -> riga da cui si estrae un NUMERO
+#          AZIONE   -> passo che esegue Claudio (non e' una riga di log)
+#          PROVA    -> la prova di ENFORCEMENT: non e' una riga di log, e'
+#                      un fatto da verificare in Trade/Storico
+#   Nei TESTO, <...> sono segnaposto: si cerca per SOTTOSTRINGA.
+#
+# ASCII PURO, nessuna emoji e nessuna lettera accentata (regola di casa 17/08:
+# i .ps1 su Windows PowerShell 5.1 leggono in ANSI).
+#
+# ATTENZIONE ORE: schede Esperti/Giornale in ORA LOCALE del VPS (= italiana);
+# grafico e TimeCurrent() in ORA SERVER (= italiana meno 1).
+
+#--- DOVE SI COLLAUDA (regola dei terminali multipli, 06/09) ---------------
+# SI COLLAUDA SUL DEMO PICCOLO: conto 50503392, cartella programma
+#   "BCM Markets MT5 Terminal".
+# NON sul conto REALE 10105439 (cartella C:\BCM_Reale).
+# NON sul 100k 50504263 (cartella "... -V3"): li' e' in corso il collaudo
+#   enforcement di FASE 1 e un tetto nuovo ne falserebbe i criteri 7-9.
+# Riconoscimento della finestra come FATTO STAMPATO, non a occhio:
+#   Get-Process terminal64 | select Id, MainWindowTitle, Path
+
+#--- PREREQUISITI ---------------------------------------------------------
+PRE.BINARIO   | ATTESA  | [AUTOTEST] ABTG_PausaGuardian v1.60
+PRE.AUTOTEST  | ATTESA  | [AUTOTEST] ABTG_PausaGuardian: TUTTI I CASI PASSATI.
+PRE.CASI      | CAMPO   | [AUTOTEST]
+# Dal CAMPO PRE.CASI si conta il numero di righe [AUTOTEST] con PASS/FAIL:
+# devono essere 159 (19 B1/C1/battito/decisione + 26 P1 + 30 S1 + 39 P0 +
+# 45 C2). Il cancello congelato del pacchetto COLLAUDO_ENFORCEMENT_FASE1 dice
+# "19/19" e resta giusto per i BINARI IN CAMPO (v1.20): non si confrontano i
+# due numeri senza dichiarare quale binario si sta guardando.
+PRE.FILO      | ATTESA  | [GUARDIAN] filo verificato: 5 GlobalVariable su 5
+PRE.UNGUARD   | AZIONE  | UN SOLO Guardian per conto (regola B9): controllare il menu Finestra.
+STOP.AUTOTEST | VIETATA | *** FAIL ***
+STOP.FILO     | VIETATA | *** FILO ROTTO ***
+
+#--- COME SI FA MORDERE IL TETTO SENZA RISCHIARE SOLDI --------------------
+# NON si aprono posizioni grosse per arrivare al 3,0%: si ABBASSA IL TETTO.
+# InpMaxClusterRiskPct non chiude MAI niente (come C1: scrive una bandiera e
+# basta), quindi abbassarlo e' sicuro -- al contrario di InpDailyLossPct, che
+# con InpAction=0 esegue FlattenAll() su TUTTO il conto (divieto NO.1 del
+# file di fase 1: NON si tocca).
+SETUP.TETTO   | AZIONE  | InpMaxClusterRiskPct=0.10 (invece di 3.0) durante i casi B e C.
+SETUP.MAPPA   | AZIONE  | InpClusterMappa=METALLI=XAUUSD,XAGUSD;AZ_EU=D30EUR
+SETUP.LOTTI   | AZIONE  | 2 posizioni di lotto minimo con SL, rischio ~0.05-0.08% ciascuna.
+SETUP.EA      | AZIONE  | L'EA di prova chiama ABTG_GuardiaIngresso(...) passando la STESSA mappa in cluster_mappa e il proprio simbolo in simbolo_cluster.
+SETUP.P0      | AZIONE  | Tetto P0 (tetto_simbolo_lato) a 0 sulla sedia di prova: P0 decide PRIMA di C2 e maschererebbe il caso.
+
+#==========================================================================
+# CASO A -- A TETTO 0 IL COMPORTAMENTO E' IDENTICO A PRIMA (no-op)
+#==========================================================================
+# Guardian avviato con i DEFAULT (InpMaxClusterRiskPct=0, InpClusterMappa="").
+A.SOGLIE      | ATTESA  | [GUARDIAN] pausa morbida=
+A.NOCLUSTER   | VIETATA | [GUARDIAN] cluster
+A.NOCAP       | VIETATA | [GUARDIAN] # CAP CLUSTER attivo:
+A.NOEA        | VIETATA | INGRESSO SOSPESO --
+A.NOGV        | PROVA   | F3 (Variabili globali): NESSUNA variabile che inizia per ABTG_CAP_CLUSTER_ deve esistere. Se ne esiste una, il no-op non e' un no-op.
+A.PANNELLO    | PROVA   | Il pannello sul grafico NON ha la riga "Cluster (": e' identico alla v1.12.
+A.EA          | PROVA   | Un EA che passa cluster_mappa="" apre esattamente come prima (nessuna riga [GUARDIA] nuova).
+
+#==========================================================================
+# CASO B -- DUE POSIZIONI DELLO STESSO CLUSTER OLTRE IL TETTO: LA SECONDA
+#           E' RIFIUTATA (questo e' il caso che giustifica tutta la firma)
+#==========================================================================
+# Con SETUP.TETTO/SETUP.MAPPA: XAUUSD ~0.06% + XAGUSD ~0.06% = ~0.12% sul
+# cluster METALLI, sopra 0.10%.
+B.AVVIO       | ATTESA  | [GUARDIAN] cap per CLUSTER correlato ATTIVO:
+B.ELENCO      | ATTESA  | [GUARDIAN] cluster 1/2: METALLI tetto
+B.GUARDIAN    | ATTESA  | [GUARDIAN] # CAP CLUSTER attivo: METALLI
+B.GV          | PROVA   | F3: ABTG_CAP_CLUSTER_METALLI_50503392 contiene un TIMESTAMP che si aggiorna ogni secondo (non 0).
+B.EA          | ATTESA  | INGRESSO SOSPESO -- TETTO RISCHIO PER CLUSTER CORRELATO raggiunto (C2)
+B.ENFORCE     | PROVA   | ENFORCEMENT, non "sembra funzionare": nella scheda Trade/Storico NON deve comparire NESSUN ordine del magic di prova nella finestra in cui la riga B.EA e' stata scritta. Riga di rifiuto SENZA ordine = PASS. Ordine presente = FAIL, anche se la riga c'e'.
+B.RIENTRO     | ATTESA  | [GUARDIAN] cap cluster rientrato: METALLI
+B.RIAPERTURA  | PROVA   | Chiusa una delle due posizioni, il cluster rientra e l'EA torna ad aprire: il blocco e' REVERSIBILE, non un latch.
+
+#==========================================================================
+# CASO C -- DUE CLUSTER DIVERSI SOPRA IL 3,0% SOMMATO MA SOTTO IL 3,25%:
+#           PASSANO TUTTE E DUE
+#==========================================================================
+# XAUUSD (cluster METALLI) ~0.06% + D30EUR (cluster AZ_EU) ~0.06%: la SOMMA
+# (0.12%) sfonderebbe il tetto per cluster, ma nessun SINGOLO cluster lo
+# tocca. E' la prova che C2 non e' un secondo cap globale mascherato.
+C.NOCAP       | VIETATA | [GUARDIAN] # CAP CLUSTER attivo:
+C.NOEA        | VIETATA | INGRESSO SOSPESO --
+C.GV          | PROVA   | F3: ABTG_CAP_CLUSTER_METALLI_50503392 e ABTG_CAP_CLUSTER_AZ_EU_50503392 esistono ENTRAMBE e valgono 0.
+C.ENFORCE     | PROVA   | Tutte e due le posizioni vengono aperte davvero (ticket in Trade). Se una viene rifiutata, il tetto sta sommando cluster diversi = DIFETTO.
+C.MISURA      | CAMPO   | clusterMax=
+# Dal CAMPO C.MISURA si legge il peggiore dei cluster: deve restare sotto il
+# tetto per tutta la finestra del caso C.
+
+#==========================================================================
+# CASO D -- C1 MORDE PRIMA DEL CLUSTER (vince il piu' stringente)
+#==========================================================================
+# Si INVERTE la taratura: InpMaxClusterRiskPct=3.0 (largo) e InpMaxOpenRiskPct
+# =0.10 (stretto). Le stesse due posizioni di prima.
+D.GUARDIAN    | ATTESA  | [GUARDIAN] * CAP RISCHIO APERTO attivo:
+D.EA          | ATTESA  | INGRESSO BLOCCATO -- CAP RISCHIO APERTO raggiunto (firma C1)
+D.NOCLUSTER   | VIETATA | [GUARDIAN] # CAP CLUSTER attivo:
+D.GV          | PROVA   | F3: le ABTG_CAP_CLUSTER_* restano a 0 mentre ABTG_CAP_RISCHIO_50503392 e' timbrata.
+D.ENFORCE     | PROVA   | Nessun ordine del magic di prova nella finestra: blocca C1, e il tetto per cluster non c'entra.
+D.RIPRISTINO  | AZIONE  | A fine caso D rimettere InpMaxOpenRiskPct=3.25 (valore firmato il 18/08).
+
+#==========================================================================
+# CASO E -- FAIL-OPEN: SE IL GUARDIAN MUORE, IL TETTO SCADE DA SOLO
+#==========================================================================
+# Si prova SOLO col cluster (mai con la pausa: divieto NO.2 di fase 1).
+# Con il cluster saturo si RIMUOVE il Guardian dal grafico e si annota l'ora.
+E.ATTESA      | PROVA   | Entro ~120 s (ABTG_BATTITO_TOLLERANZA) l'EA torna ad aprire, senza toccare niente: la bandiera invecchia e il nucleo la scarta.
+E.NOETERNO    | PROVA   | Se dopo 5 minuti l'EA e' ancora fermo, il fail-open NON funziona: FAIL. Un cane da guardia morto non deve fermare la flotta per sempre.
+
+#==========================================================================
+# CASO F -- MAPPE DIVERGENTI FRA EA E GUARDIAN (il filo)
+#==========================================================================
+# Si mette nell'EA un cluster che il Guardian NON ha (es. "CRYPTO=BTCUSD").
+F.AVVISO      | ATTESA  | ATTENZIONE, cluster senza riscontro nel Guardian:
+F.FAILOPEN    | PROVA   | L'EA apre lo stesso su quel cluster (fail-open dichiarato): il tetto NON protegge dove le mappe divergono. La riga di avviso e' l'unica difesa, e si scrive UNA volta per vita dell'EA.
+
+#--- RIGHE VIETATE IN TUTTI I CASI ----------------------------------------
+STOP.DAILY    | VIETATA | [GUARDIAN] !! PERDITA GIORNALIERA SFONDATA
+STOP.TOTALE   | VIETATA | [GUARDIAN] !!! DD TOTALE SFONDATO
+
+#--- NOMI DELLE GLOBALVARIABLE NUOVE (F3: Strumenti > Variabili globali) ---
+GV.C1 | ABTG_CAP_RISCHIO_50503392            | cap complessivo C1 (gia' esistente, NON cambia)
+GV.C2 | ABTG_CAP_CLUSTER_<NOME>_50503392     | una per cluster dichiarato. 0 = libero; timestamp ri-timbrato ogni secondo = saturo. Il Guardian la CREA a 0 in OnInit anche per i cluster liberi: e' il riscontro che cerca ABTG_ClusterFiloOk.
+
+#--- COSA RESTA APERTO, DA DICHIARARE INSIEME AI NUMERI -------------------
+OPEN.1 | La MAPPA dei cluster NON e' firmata: report/CLUSTER_PROPOSTA.md e' una proposta. Il collaudo prova il MECCANISMO, non la scelta dei gruppi.
+OPEN.2 | C2 conta solo le POSIZIONI con SL: pendenti esclusi (buco B6) e posizioni senza SL escluse (rischio ignoto). E' un LIMITE INFERIORE del rischio, come C1.
+OPEN.3 | PRECEDENZA: C2 decide PRIMA di B1/C1 e ritorna subito. Finche' C2 morde, le righe di rientro di C1/C8 ("via libera, il blocco e' rientrato") sono RIMANDATE, non perse. Chi collauda C1 tiene la mappa vuota sulla sedia di prova.
+OPEN.4 | Il campionamento del Guardian e' 1 s per la decisione e 300 s per il log: fra due righe di log i picchi non si vedono.
+OPEN.5 | Nel TESTER C2 non morde mai (le GV del Guardian non esistono): i backtest restano confrontabili con quelli di ieri. Non e' un bug, e' il fail-open del canale.
+OPEN.6 | I commenti del preset mql5/Presets/conto_reale/ABTG_Guardian_REALE.set citano "v1.51" e "114 casi": dopo una ricompilazione diventano v1.60 e 159. NESSUN VALORE del preset e' stato toccato -- va aggiornato il commento nel round di ricompilazione, dichiarandolo PRIMA dei numeri.
+OPEN.7 | Prima di accendere C2 in campo: una settimana in SOLA MISURA (tetto acceso sul Guardian, mappa NON passata agli EA) per contare quante volte avrebbe morso. Il dossier avvisa che un tetto troppo stretto spegne il grappolo DAX delle 08:15, che e' fatto APPOSTA di 3 sedie.
