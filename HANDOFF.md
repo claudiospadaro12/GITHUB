@@ -3,7 +3,64 @@
 > **Da incollare in una chat nuova:**
 > *"Leggi `HANDOFF.md`, `PIANO_PROP.md`, `CACCIA_MOTORE_APERTURE.md`, `FLOTTA_ATTIVA.md`, `PROMEMORIA_APERTURE.md` e `backtest_pipeline/risultati_archivio/CLASSIFICHE.md` nel branch `lavoro` del repo `claudiospadaro12/GITHUB` e riprendi da li'."*
 >
-> Ultimo aggiornamento: **2026-09-06 notte** (SpreadLogger con oro acceso sul piccolo, incidente Guardian sul reale risolto). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+> Ultimo aggiornamento: **2026-09-07 pomeriggio** (SpreadLogger con oro acceso sul piccolo, incidente Guardian sul reale risolto). **Branch unico di lavoro: `lavoro`** (qui e' consolidato TUTTO).
+
+---
+
+## 🗓️ 07/09 — GIORNATA DI VERDETTI: due piste CHIUSE con numeri nostri
+
+**Tre round eseguiti, tre risposte, zero promozioni — ed e' il risultato giusto.**
+
+### 🔴 GAP CASH NASDAQ — SCARTO (`REFERTO_GAPCASH_PASSO0_2026-09-07.md`)
+Il candidato piu' solido della caccia del 06/09. Sul dato ESTERNO: evento
+**+0,0988%** contro controllo +0,0112%, monotono nella soglia, rapporto 12:1.
+Sui **tick BCM**: evento **-0,0487%** contro controllo -0,0134%. **Segno
+rovesciato**, e la monotonia si rompe **4 volte su 7**. Le giornate-evento pero'
+esistono e sono piu' dell'atteso (**77** contro ~62): il fenomeno c'e', il
+rimbalzo no. Misura auto-verificata (la media di controllo, misurata due volte,
+coincide alla cifra). 🔒 Cassaforte 2021-2026 **mai aperta e non piu' necessaria**.
+
+### 🔴 OROLOGIO SUGLI INDICI, meta' DAX — NESSUN ORLOGIO (`REFERTO_OROLOGIO_INDICI_DAX_2026-09-07.md`)
+Lettura appaiata dei due lati (criterio I7): **0 fasce asimmetriche su 72 in
+OOS**, 1 su 72 in IS (e perde da entrambe le parti). In quasi tutte le celle
+**LONG = -SHORT esatto**: ogni ora "verde" era **deriva del toro**. L'ora 15,
+che col solo lato long era la sopravvissuta, ha `asimm = 0` in entrambe le
+finestre. Il caduto **D7 esce CONFERMATO ED ESTESO**. ⚠️ Il **DOW non e' girato**
+(2 celle, ~12 min): su U30USD non si conclude niente.
+
+### 🟠 R118 PAVIMENTO DELLO STOP — nessuna cella promossa (`REFERTO_R118_PAVIMENTO_STOP.md`)
+Il conflitto col collega **non si chiude perche' la domanda era mal posta**: a
+20 punti indice, sulla nostra geometria, il pavimento tocca **fra lo 0% e il 2%**
+dei trade. *Non dissentivamo: misuravamo due operazioni diverse chiamandole con
+lo stesso nome.* Il risultato solido e' l'**asimmetria**: allargare lo stop
+riduce il DD in modo **riproducibile** (85% delle celle) e costa edge in modo
+**non riproducibile** (OOS 29/56 = monetina). 🔴 Sull'ORB la **configurazione
+VIVA** e' l'unica che sfonda il muro sotto slippage (DD 9,76 -> 10,34), e la
+correzione che la proteggerebbe **non e' promuovibile** (n=119 < 150).
+
+### 📏 MISURE DI COSTO — il collo di bottiglia vero del progetto
+- 🟢 **Tick D30EUR misurati** (`misura_tick_D30EUR.csv`): **35,4M dal 2024.09.26**,
+  muro barre M1 concorde. Era l'ultimo dei tre indici senza. Densita': DAX ~55
+  tick/minuto contro ~104 del Dow e ~252 del Nasdaq.
+- 🟡 **Spread**: il logger raccoglie dal 06/09 sera su 8 simboli (**oro compreso**).
+  Prima lettura utile a 5 sedute, referto buono a 10.
+- 🔴 **Slippage**: il logger sul reale ha ancora **0 deal**. Finche' non produce
+  numeri, **ogni gradino di slippage di ogni round resta uno scenario assunto**.
+
+### 🛡️ SICUREZZA — chiuso un buco nel driver CONDIVISO
+`walkforward_generico.ps1`: il ripiego della scelta del terminale **perdeva
+l'esclusione del -V3**. Se l'installazione giusta mancava, si prendeva **il 100k**
+e ci scriveva dentro l'EA, con `PROBLEMI: 0` e uscita 0. Riprodotto eseguendo, e
+lo stesso schema era emerso lo stesso giorno in `scarica_storico.ps1`: difetto
+**di famiglia**. Corretto in tutti e due + messaggio che ELENCA i terminali
+vietati invece di dire "non trovato" (classe 123).
+
+### 🧾 Classi nuove in checklist, tutte nate ESEGUENDO
+**151** (il cancello che vive solo nei criteri e in una Write-Host finale) ·
+**152** (`-ErrorAction Stop` non uccide la one-liner: e' il guscio `& { }`) ·
+**153** (non promettere una profondita' dati non misurata) · **154** (il codice
+d'uscita letto e' dell'ultimo .exe lanciato dentro, non dello script) ·
+**155** (lo zip di una corsa mai girata pieno dei file di ieri) · **37-quater**.
 
 ---
 

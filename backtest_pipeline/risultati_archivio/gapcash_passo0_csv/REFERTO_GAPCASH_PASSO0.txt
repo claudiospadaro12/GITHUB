@@ -1,0 +1,194 @@
+=====================================================================
+ PASSO 0 -- GAP DELLA SESSIONE CASH DEL NASDAQ (NASUSD M5)
+=====================================================================
+modo ........: CORSA   <- GIRO A VUOTO non e' un risultato
+data ........: 2026-09-07 15:17:48  (referto chiuso alle 15:22:55)
+pin .........: 4bf50bbf88f74a22a0c06648969c204f941ee2cf
+sonda .......: ABTG_SondaGapCash v1.00  -- CONTATORE: nessun ordine, nessun magic, nessuna sedia
+contratto ...: prove\GAPCASH_NAS_PASSO0.txt   (criteri congelati il 06/09/2026)
+controllo ...: prove\GAPCASH_NAS_PASSO0_CONTROLLO.txt   (variante: cambia SOLO InpGateSpento e l'asse tecnico)
+finestra ....: 2024.09.26 -> 2026.06.30   UNA TRANCHE (-FrazioneIS 1)
+giorni feriali di CALENDARIO nella finestra: 459
+banco .......: Modello 4 (TICK REALI), deposito 10000 -- irrilevante, la sonda non apre ordini
+terminale ...: C:\Program Files\BCM Markets MT5 Terminal
+compilazione : OK (76 KB, scritto alle 15:17:53, log: 0 errori, 0 avvisi)
+profondita' tick (misura riletta al pin, misura_tick_NASUSD.csv):
+   NASUSD TICK  prima data 2024.09.26  conteggio 166509474  verdetto 'TICK REALI PARZIALI'
+   COSA DICE : i tick reali di questo simbolo partono dalla data qui sopra.
+   COSA NON DICE: 'PARZIALI' e' riferito alla richiesta della misura (2022.01.01),
+   NON alla finestra di questo round. E NON e' stato misurato se dentro la
+   finestra ci siano buchi. P0-3 misura lo spread TICK PER TICK: se i tick non
+   fossero nativi, quel criterio misurerebbe un'altra cosa.
+corsa GATE ..: MISURATA (8 righe)
+corsa CTRL ..: MISURATA (2 righe)
+cancello ....: PASSATO
+CSV di misura allegati allo zip: 2   (SOLO quelli scritti da questa corsa; i file di una corsa precedente sono elencati nei RILIEVI, non allegati)
+CSV *_OOS trovati: 2   (attesi 0: con -FrazioneIS 1 la gamba OOS del driver generico e' DEGENERE e si ignora)
+
+QUESTA CORSA NON DICE SE IL MOTORE GUADAGNA.
+Non apre ordini, non c'e' profit factor, non c'e' equity, non c'e' drawdown,
+e non promuove nessuna cella. Una frequenza alta NON e' un edge: e' una
+frequenza. (contratto, par. 4)
+
+---------------------------------------------------------------------
+  P0-1  FREQUENZA  --  cancello: >= 25 giornate-evento PASSA, < 25 SCARTO
+  P0-2  SEGNO E SEPARAZIONE  --  PASSA se media evento > 0 E >= 3x media di TUTTE
+---------------------------------------------------------------------
+atteso dal contratto alla soglia -0,50%: ~68 giornate-evento su 503 feriali.
+questa finestra ha 459 feriali di calendario: riscalato, l'atteso e' ~62.
+IL CANCELLO RESTA 25, che e' quello congelato: il riscalo serve a leggere, non a giudicare.
+
+soglia%   valide  eventi  P0-1     mediaEv%   mediaTutti%  sep.x   P0-2     medianaEv%  winEv%  winTutti%
+  -0.30     446     114  PASSA      -0.0372      -0.0134    2.78  SCARTO      -0.0329   42.11      49.78
+  -0.40     446      98  PASSA      -0.0421      -0.0134    3.15  SCARTO      -0.0335   42.86      49.78
+  -0.50     446      77  PASSA      -0.0487      -0.0134    3.64  SCARTO      -0.0326   44.16      49.78
+  -0.60     446      66  PASSA      -0.0414      -0.0134    3.09  SCARTO      -0.0033   48.48      49.78
+  -0.70     446      60  PASSA      -0.0279      -0.0134    2.08  SCARTO       0.0000   50.00      49.78
+  -0.80     446      52  PASSA      -0.0197      -0.0134    1.47  SCARTO       0.0000   50.00      49.78
+  -0.90     446      47  PASSA      -0.0437      -0.0134    3.26  SCARTO      -0.0004   48.94      49.78
+  -1.00     446      40  PASSA      -0.0571      -0.0134    4.27  SCARTO      -0.0379   45.00      49.78
+
+*** 8 celle hanno la media di CONTROLLO <= 0. In quel caso il '3x' e' vero per
+    ARITMETICA e non vuol dire piu' niente: la separazione va letta come NON
+    DIMOSTRATA, e il numero che conta e' il SEGNO della media evento.
+
+---------------------------------------------------------------------
+  P0-3  COSTO -- spread del minuto 14:30:00-14:31:00 SERVER, DA SOLO,
+        misurato TICK PER TICK. Cancello: take mediano >= 3x spread
+        mediano PASSA, 2-3x SOSPESO, < 2x SCARTO.
+---------------------------------------------------------------------
+soglia%   take med.   spread med.  spread P95   take/spread  P0-3      tick nel minuto  scartati  oltre tetto
+  -0.30     -7.6500       1.8000       2.7000        -4.25  SCARTO              74516         0            0
+  -0.40     -8.4000       1.8000       2.7000        -4.67  SCARTO              63183         0            0
+  -0.50     -8.0000       1.8000       2.7000        -4.44  SCARTO              49630         0            0
+  -0.60     -0.8500       1.8000       2.7000        -0.47  SCARTO              45197         0            0
+  -0.70      0.0000       1.8000       2.7000         0.00  SCARTO              41756         0            0
+  -0.80      0.0000       1.8000       2.7000         0.00  SCARTO              35874         0            0
+  -0.90     -0.1000       1.8000       2.7000        -0.06  SCARTO              33184         0            0
+  -1.00    -10.9000       1.7000       2.7000        -6.41  SCARTO              28436         0            0
+le unita' sono UNITA' DI PREZZO del simbolo (punti indice), non punti MT5.
+
+---------------------------------------------------------------------
+  P0-4  GEOMETRIA -- NESSUN CANCELLO: SI LEGGE.
+        Lo stop del round successivo lo fissa il p75 di |MAE|,
+        arrotondato, e NON si spazzola cercando il picco.
+---------------------------------------------------------------------
+soglia%   MAE p50%  MAE p75%  MAE p90%  MFE p50%  MFE p75%  MAE p75 (unita' di prezzo)
+  -0.30    0.1489    0.3330    0.5453    0.1275    0.3108       74.4000
+  -0.40    0.1577    0.3506    0.6094    0.1289    0.3119       83.0000
+  -0.50    0.1841    0.3635    0.6992    0.1269    0.3349       90.3000
+  -0.60    0.1841    0.3771    0.7171    0.1792    0.3777       91.3000
+  -0.70    0.1841    0.3519    0.7171    0.2154    0.4004       90.3000
+  -0.80    0.1878    0.3519    0.7171    0.2154    0.4004       90.3000
+  -0.90    0.1959    0.3934    0.7914    0.2154    0.3777       99.6000
+  -1.00    0.1959    0.3934    0.7914    0.2395    0.4004       99.6000
+atteso dallo storico ESTERNO (non da BCM): |MAE15| p50 0,196% p75 0,356% p90 0,534%;
+MFE15 p50 0,277% p75 0,454%. Se i numeri di BCM fossero molto diversi, e' il DATO
+che va guardato prima del motore.
+
+---------------------------------------------------------------------
+  P0-5  DUE LATI -- lo SHORT sui gap >= +0,50%.
+        PREVISIONE SCRITTA PRIMA, nel contratto: NULLA.
+        Se uscisse VIVO sarebbe una sorpresa da scrivere, non da
+        festeggiare: vorrebbe dire che feed esterno e BCM non
+        raccontano la stessa storia, e il problema e' il DATO.
+---------------------------------------------------------------------
+il lato short NON dipende dalla soglia long (soglia fissa +0,50%): si legge una volta.
+eventi short ...............: 98
+media short ................: +0.0398 %   (mediana +0.0006 %)
+win short ..................: 50.00 %   contro un controllo di 49.78 %
+separazione short ..........: 2.97 x
+esito frequenza / separaz. .: PASSA / SCARTO
+MAE short p75 / MFE short p50: 0.2540 % / 0.1667 %
+atteso sull'esterno: media +0,0076%, win 51,0% contro un controllo di 50,8% -> NULLO.
+
+---------------------------------------------------------------------
+  P0-6  IGIENE -- festivi e mezze sedute fuori, e la QUOTA DEI LUNEDI'.
+        Oltre il 40% di lunedi' questo e' il gap del WEEKEND
+        travestito (gia' misurato da R61/R62): verdetto SOSPESO.
+---------------------------------------------------------------------
+soglia%   eventi  lunedi  quota%   P0-6      barre M1 1a ora (mediana)  aperture non esatte
+  -0.30     114      21   18.42  PASSA                        60.00                    0
+  -0.40      98      19   19.39  PASSA                        60.00                    0
+  -0.50      77      18   23.38  PASSA                        60.00                    0
+  -0.60      66      16   24.24  PASSA                        60.00                    0
+  -0.70      60      16   26.67  PASSA                        60.00                    0
+  -0.80      52      14   26.92  PASSA                        60.00                    0
+  -0.90      47      13   27.66  PASSA                        60.00                    0
+  -1.00      40      11   27.50  PASSA                        60.00                    0
+giornate scartate per IGIENE (poche barre M1): 53   per DATI: 0
+letture M1 fallite: 98   giornate troncate: 0
+
+---------------------------------------------------------------------
+  IL VERDETTO -- si legge SULLA CELLA -0,50%, dichiarata prima.
+---------------------------------------------------------------------
+P0-1 frequenza .....: PASSA   (77 giornate-evento, cancello 25)
+P0-2 separazione ...: SCARTO   (-0.0487% contro -0.0134% = 3.64x, cancello 3x)
+P0-3 costo .........: SCARTO   (take -8.0000 contro spread 1.8000 = -4.44x)
+P0-4 geometria .....: NESSUN CANCELLO -- si legge. Lo stop del round dopo e' il p75 di |MAE| = 0.3635% (90.3000 in unita' di prezzo).
+P0-5 due lati ......: frequenza PASSA, separazione SCARTO sul lato SHORT
+P0-6 lunedi' .......: PASSA   (18 su 77 = 23.38%, cancello 40%)
+
+VERDETTO COMPLESSIVO (catena calcolata dalla sonda: uno SCARTO domina tutto,
+un SOSPESO o un NON MISURATO domina un PASSA): SCARTO
+
+--- LA MONOTONIA DELLA SOGLIA (si LEGGE, non e' un cancello) ---
+sull'esterno la media cresceva al crescere della soglia, in modo MONOTONO.
+rotture della monotonia (soglia da -0,30 verso -1,00): 4 su 7
+una monotonia rotta NON boccia niente da sola: dice che il gate non e' una
+manopola pulita su questo feed, e va scritto accanto al verdetto.
+
+---------------------------------------------------------------------
+  LA CORSA DI CONTROLLO (gate SPENTO) -- tre verifiche, non un verdetto
+---------------------------------------------------------------------
+1. il gate e' davvero SPENTO in questa corsa: Eco Gate Spento = 1  -> SI
+2. a gate spento ogni giornata valida e' evento: eventi 446 contro valide 446  -> SI
+3. la media di CONTROLLO misurata due volte: gate -0.0134% contro controllo -0.0134%  -> COINCIDONO
+4. gemelli di determinismo (le due celle a gate spento sono identiche per
+   costruzione, la soglia li' e' inerte): IDENTICI.
+
+---------------------------------------------------------------------
+  P0-7  COLLISIONE -- cosa gira gia' su NASUSD alle 14:30:00 SERVER
+        (obbligo di referto del contratto, non un cancello)
+---------------------------------------------------------------------
+  1. ABTG_ORB                       magic 770601   NASUSD M5
+  2. Nasdaq_Apertura_US_Ottimizzato (vedi FLOTTA_ATTIVA.md)  NASUSD M5
+  3. GATED SHORT                    magic 770250   NASUSD M15
+     -> SHORT sulla rottura al ribasso dell'apertura, forward dal 30/08,
+        conto PICCOLO 50503392, rischio 0,35%.
+
+  *** IL CONFLITTO, SCRITTO PRIMA DI AVERE I NUMERI ***
+  Su una mattina di GAP IN GIU' la sedia GATED SHORT 770250 VENDE e questo
+  motore COMPREREBBE: opposti, stesso simbolo, stesso minuto. Non e' una
+  sovrapposizione di orario: e' una posizione contro l'altra dentro lo
+  stesso conto. VA SCIOLTO PRIMA DI QUALUNQUE DEPLOY, e questo PASSO 0
+  non lo scioglie: lo mette agli atti.
+
+  QUESTA CORSA NON MISURA LO STATO acceso/spento di quelle tre sedie.
+  Lo stato si legge in FLOTTA_ATTIVA.md e sul VPS, non qui. [DA VERIFICARE
+  al momento del deploy: report/M27_SEGNO_ASPETTATIVA_2026-08-31.md dice che
+  l'ORB nativo 770601 e' stato spento a inizio agosto -- se e' cosi', il
+  conflitto vivo resta quello con la 770250.]
+
+---------------------------------------------------------------------
+  IL NUMERO DA GUARDARE PER PRIMO NON E' IL VERDETTO
+---------------------------------------------------------------------
+  a) P0-1: le giornate-evento alla soglia -0,50%, contro le ~68 attese
+     dallo storico esterno. Molto meno = il fenomeno su BCM e' un'altra cosa.
+  b) la QUOTA DEI LUNEDI' di P0-6. Oltre il 40% non stiamo misurando quello
+     che crediamo di misurare.
+
+SE PASSA, cosa succede dopo (contratto par. 7): si scrive l'EA vero con lo
+stop dimensionato sul p75 di |MAE| letto qui, si fa un round di merito a tick
+con il MERITO gia' dichiarato SOSPESO per n insufficiente (0,14 eventi/giorno
+e' UN OTTAVO del pavimento di frequenza di casa: questo motore NON PUO'
+essere portata, al massimo un CECCHINO), e SOLO dopo si apre la cassaforte
+2021-2026 dello storico esterno. Vale solo se nessuno la apre prima.
+
+PROBLEMI: 0
+RILIEVI: 1
+  - NON allegati allo zip 2 file di una corsa PRECEDENTE (la cartella di lavoro e' riusabile): ABTG_SondaGapCash_NASUSD_OOS_CTRL.csv (scritto 2026-09-07 15:15:50), ABTG_SondaGapCash_NASUSD_OOS_GATE.csv (scritto 2026-09-07 15:14:12). Questa corsa e' partita alle 2026-09-07 15:17:48: nello zip ci va solo cio' che ha prodotto LEI.
+
+COME SI RIPRENDE: si riparte dalla pagina righe\RIGA_GAPCASH_PASSO0_DA_MANDARE.md,
+NON da questa riga: $p e $pin nascono dentro il blocco di lancio e non
+sopravvivono alla fine del blocco.
