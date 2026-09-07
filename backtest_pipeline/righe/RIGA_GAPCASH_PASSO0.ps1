@@ -91,7 +91,18 @@
 #          e' successo solo a Modello 2 (secondi). Se il terminale si
 #          riapre una seconda volta per pochi istanti, e' quello.
 #
-#   5. I VERDETTI LI CALCOLA IL CODICE, NON IL LETTORE.
+#   5. IL VERDETTO SULLE CORSE STA SULL'ARTEFATTO, NON SUL CODICE DI
+#      USCITA (classe 154, aggiunta alla checklist il 07/09/2026).
+#      walkforward_generico.ps1 sul ramo buono non chiama mai 'exit':
+#      quello che torna e' il codice dell'ultimo .exe lanciato dentro
+#      (metaeditor64 /compile, che esce non-zero anche solo per degli
+#      avvisi). Qui quel numero finisce nei RILIEVI e basta: se il CSV
+#      c'e', e' fresco, ha le colonne giuste e il numero di righe giusto,
+#      la corsa E' avvenuta. Il codice d'uscita di QUESTA riga invece e'
+#      sempre esplicito (exit 0/1/2/3 su ogni ramo), quindi chi la lancia
+#      legge il nostro, non quello di metaeditor.
+#
+#   6. I VERDETTI LI CALCOLA IL CODICE, NON IL LETTORE.
 #      P0-1 ... P0-7 escono gia' calcolati dalla sonda (colonne
 #      "P01 Esito", "P02 Esito", ...). Questo driver li LEGGE, li
 #      impagina, e ci aggiunge i confronti che una corsa sola non puo'
@@ -202,6 +213,7 @@ $OosTrovati   = 0
 $Modo = "CORSA"
 if($GiroAVuoto){ $Modo = "GIRO A VUOTO" }
 $EsitoNum = 0
+$Feriali  = 0
 
 function Ora(){ return (Get-Date).ToString("HH:mm:ss", $INV) }
 function Dico([string]$t,[string]$c="Gray"){ Write-Host ("[" + (Ora) + "] " + $t) -ForegroundColor $c }
@@ -539,10 +551,12 @@ try{
     if($m.H["@PERIODO"]  -ne $Periodo){  throw ($m.File + ": @PERIODO e' '"  + $m.H["@PERIODO"]  + "', atteso " + $Periodo) }
     if($m.H["@DAQUANDO"] -ne $DaQuando){ throw ($m.File + ": @DAQUANDO e' '" + $m.H["@DAQUANDO"] + "', atteso " + $DaQuando) }
   }
-  $nG = CelleAsse $mG.H["InpSogliaGapPct"]
-  $nC = CelleAsse $mC.H["InpSogliaGapPct"]
-  if($nG -ne $CelleGate){ throw ($FileGate + ": lo sweep del contratto deve fare " + $CelleGate + " celle, ne conto " + $nG + " (riga: " + $mG.H["InpSogliaGapPct"] + ").") }
-  if($nC -ne $CelleCtrl){ throw ($FileCtrl + ": l'asse tecnico deve fare " + $CelleCtrl + " celle, ne conto " + $nC + " (riga: " + $mC.H["InpSogliaGapPct"] + "). Con UNA sola cella MT5 non esegue nessuna passata e il CSV esce da zero byte -- classe 134.") }
+  $rigaAsseG = "" + $mG.H["InpSogliaGapPct"]
+  $rigaAsseC = "" + $mC.H["InpSogliaGapPct"]
+  $nG = CelleAsse $rigaAsseG
+  $nC = CelleAsse $rigaAsseC
+  if($nG -ne $CelleGate){ throw ($FileGate + ": lo sweep del contratto deve fare " + $CelleGate + " celle, ne conto " + $nG + " (riga: " + $rigaAsseG + ").") }
+  if($nC -ne $CelleCtrl){ throw ($FileCtrl + ": l'asse tecnico deve fare " + $CelleCtrl + " celle, ne conto " + $nC + " (riga: " + $rigaAsseC + "). Con UNA sola cella MT5 non esegue nessuna passata e il CSV esce da zero byte -- classe 134.") }
   Dico ("celle ....... GATE " + $nG + "  |  CTRL " + $nC + "   (contate con la formula del driver generico)") "Green"
 
   # il GATE dei VALORI: prende il caso che il diff non puo' vedere, cioe'
@@ -623,7 +637,18 @@ try{
     throw $Compilazione
   }
   # metaeditor torna prima di aver finito di scrivere: si aspetta l'.ex5.
-  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){ Start-Sleep -Seconds 2 }
+  #  MA NON SI ASPETTANO 180 SECONDI PER NIENTE: se il log del
+  #  compilatore dichiara gia' degli errori, l'.ex5 non arrivera' mai e
+  #  l'attesa e' solo tempo rubato a chi guarda lo schermo. Misurato a
+  #  banco il 07/09: senza questa uscita anticipata il ramo "compilazione
+  #  fallita" -- che qui e' l'esito PIU' PROBABILE -- restava fermo tre
+  #  minuti buoni con il messaggio d'errore gia' scritto su disco.
+  while((-not (Test-Path -LiteralPath $ex5)) -and ((New-TimeSpan -Start $t0 -End (Get-Date)).TotalSeconds -lt 180)){
+    $parziale = LeggiLogTesto $logMe
+    $mp = [regex]::Match($parziale,'(\d+)\s+error')
+    if($mp.Success -and [int]$mp.Groups[1].Value -gt 0){ break }
+    Start-Sleep -Seconds 2
+  }
 
   $testoLog = LeggiLogTesto $logMe
   if($testoLog -ne ""){ Set-Content -LiteralPath $logMio -Value $testoLog -Encoding ASCII }
@@ -647,7 +672,7 @@ try{
   }
   if(-not $ex5Ok){
     if($Compilazione -notlike "FALLITA*"){
-      $Compilazione = "FALLITA (nessun .ex5 prodotto entro 180 s; log del compilatore: " + $sintesi + ")"
+      $Compilazione = "FALLITA (nessun .ex5 prodotto; log del compilatore: " + $sintesi + ")"
     }
     if($testoLog -ne ""){
       Write-Host ""
@@ -669,38 +694,58 @@ try{
   $csvGate = Join-Path $Risultati ($EA + "_" + $Simbolo + "_IS_GATE.csv")
   $csvCtrl = Join-Path $Risultati ($EA + "_" + $Simbolo + "_IS_CTRL.csv")
 
-  function LanciaGenerico([string]$provaPath,[string]$etichetta,[string]$bersaglio){
-    # il CSV bersaglio si CANCELLA prima: cosi' "esiste" vuol dire
-    # "prodotto adesso", e il generico non puo' saltare la corsa
-    # dicendo "gia' fatto" (difetto pagato il 31/08 sulla LondonFX).
-    Remove-Item -LiteralPath $bersaglio -Force -ErrorAction SilentlyContinue
-    $argv = @("-ExecutionPolicy","Bypass","-File",$drv,
-              "-Expert",$EA,
-              "-Prova",$provaPath,
-              "-Etichetta",$etichetta,
-              "-Simbolo",$Simbolo,
-              "-Periodo",$Periodo,
-              "-DaQuando",$DaQuando,
-              "-Fino",$Fino,
-              "-Modello","4",
-              "-FrazioneIS","1",
-              "-Deposito",("" + $Deposito))
-    if($GiroAVuoto){ $argv += "-SoloControllo" }
-    if($Rifai){ $argv += "-Rifai" }
-    $global:LASTEXITCODE = 0
-    & powershell $argv
-    return $LASTEXITCODE
+  # >>> DIFETTO TROVATO ESEGUENDO, A BANCO, IL 07/09/2026 <<<
+  #  La prima stesura faceva partire il figlio DENTRO una funzione e ne
+  #  tornava il codice con "return $LASTEXITCODE". In PowerShell l'output
+  #  di un processo figlio finisce nel FLUSSO DI USCITA della funzione:
+  #  il valore tornato era @(tutte le righe stampate dal generico, 0), e
+  #  il confronto "$rc -ne 0" era vero SEMPRE. A banco il referto diceva
+  #  "corsa GATE FERMATA (codice ... 0)" su una corsa andata bene.
+  #  Qui la funzione costruisce SOLO gli argomenti; il figlio parte a
+  #  livello di istruzione, come fanno tutte le righe di casa, cosi' il
+  #  suo output va a schermo (con i colori) e $LASTEXITCODE e' il suo.
+  function ArgomentiGenerico([string]$provaPath,[string]$etichetta){
+    $a = @("-ExecutionPolicy","Bypass","-File",$drv,
+           "-Expert",$EA,
+           "-Prova",$provaPath,
+           "-Etichetta",$etichetta,
+           "-Simbolo",$Simbolo,
+           "-Periodo",$Periodo,
+           "-DaQuando",$DaQuando,
+           "-Fino",$Fino,
+           "-Modello","4",
+           "-FrazioneIS","1",
+           "-Deposito",("" + $Deposito))
+    if($GiroAVuoto){ $a += "-SoloControllo" }
+    if($Rifai){ $a += "-Rifai" }
+    return ,$a
   }
 
   $tGate = Get-Date
   if($CorseVolute -contains "GATE"){
     Titolo ("4. CORSA GATE ACCESO -- " + $CelleGate + " celle, tick reali")
-    $rc = LanciaGenerico (Join-Path $Prove $FileGate) "GATE" $csvGate
+    # il CSV bersaglio si CANCELLA prima: cosi' "esiste" vuol dire
+    # "prodotto adesso", e il generico non puo' saltare la corsa dicendo
+    # "gia' fatto" (difetto pagato il 31/08 sulla LondonFX).
+    if(-not $GiroAVuoto){ Remove-Item -LiteralPath $csvGate -Force -ErrorAction SilentlyContinue }
+    $argvGate = ArgomentiGenerico (Join-Path $Prove $FileGate) "GATE"
+    $global:LASTEXITCODE = 0
+    & powershell $argvGate
+    $rc = $LASTEXITCODE
+    if($null -eq $rc){ $rc = 0 }
+    # >>> CLASSE 154 (07/09/2026): IL GIUDIZIO SI DA' SULL'ARTEFATTO. <<<
+    #  walkforward_generico.ps1, sul ramo che va BENE, non chiama mai
+    #  'exit': il codice che torna al chiamante e' allora quello
+    #  dell'ULTIMO .exe che ha lanciato dentro -- metaeditor64 /compile,
+    #  che torna non-zero anche solo per degli AVVISI. Trattare quel
+    #  numero come un guasto vorrebbe dire dichiarare FERMATA una corsa
+    #  perfettamente riuscita. Quindi: il codice si DICHIARA nei rilievi,
+    #  e poi si guarda comunque il CSV, che e' l'unica cosa che dice se
+    #  la corsa e' avvenuta.
     if($rc -ne 0){
-      $StatoGate = "FERMATA (il driver generico e' uscito con codice " + $rc + ")"
-      [void]$Problemi.Add("corsa GATE: il driver generico e' uscito con codice " + $rc + ". Il rosso sul CSV *_OOS invece e' ATTESO (gamba degenere con -FrazioneIS 1): non e' quello.")
+      [void]$Rilievi.Add("corsa GATE: il driver generico e' uscito con codice " + $rc + ". NON e' stato usato come verdetto (classe 154: quel numero puo' essere quello di metaeditor64 lanciato dentro, non un guasto). Il giudizio e' sul CSV. E il rosso del generico sui CSV *_OOS e' comunque ATTESO: gamba degenere con -FrazioneIS 1.")
     }
-    elseif($GiroAVuoto){ $StatoGate = "GIRO A VUOTO OK (nessuna passata, nessun CSV)" }
+    if($GiroAVuoto){ $StatoGate = "GIRO A VUOTO OK (nessuna passata, nessun CSV)" }
     else{
       if(Test-Path -LiteralPath $csvGate){
         $lw = (Get-Item -LiteralPath $csvGate).LastWriteTime
@@ -760,12 +805,17 @@ try{
   if($FaiCtrl){
     Titolo ("6. CORSA DI CONTROLLO -- GATE SPENTO, " + $CelleCtrl + " celle, tick reali")
     $tCtrl = Get-Date
-    $rc2 = LanciaGenerico (Join-Path $Prove $FileCtrl) "CTRL" $csvCtrl
+    if(-not $GiroAVuoto){ Remove-Item -LiteralPath $csvCtrl -Force -ErrorAction SilentlyContinue }
+    $argvCtrl = ArgomentiGenerico (Join-Path $Prove $FileCtrl) "CTRL"
+    $global:LASTEXITCODE = 0
+    & powershell $argvCtrl
+    $rc2 = $LASTEXITCODE
+    if($null -eq $rc2){ $rc2 = 0 }
+    # stessa regola di sopra: classe 154, il verdetto e' sull'ARTEFATTO.
     if($rc2 -ne 0){
-      $StatoCtrl = "FERMATA (il driver generico e' uscito con codice " + $rc2 + ")"
-      [void]$Problemi.Add("corsa di CONTROLLO: il driver generico e' uscito con codice " + $rc2 + ".")
+      [void]$Rilievi.Add("corsa di CONTROLLO: il driver generico e' uscito con codice " + $rc2 + ". NON usato come verdetto (classe 154): il giudizio e' sul CSV.")
     }
-    elseif($GiroAVuoto){ $StatoCtrl = "GIRO A VUOTO OK (nessuna passata, nessun CSV)" }
+    if($GiroAVuoto){ $StatoCtrl = "GIRO A VUOTO OK (nessuna passata, nessun CSV)" }
     else{
       if(Test-Path -LiteralPath $csvCtrl){
         $lw2 = (Get-Item -LiteralPath $csvCtrl).LastWriteTime
@@ -807,8 +857,8 @@ Titolo "REFERTO E RACCOLTA"
 $Cart = Join-Path $Dsk ("GAPCASH_PASSO0_" + ($Modo -replace '\s','') + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
-$R = New-Object System.Collections.ArrayList
-function L([string]$t){ [void]$R.Add($t) }
+$RefTxt = New-Object System.Collections.ArrayList
+function L([string]$t){ [void]$RefTxt.Add($t) }
 
 L "====================================================================="
 L (" PASSO 0 -- GAP DELLA SESSIONE CASH DEL NASDAQ (" + $Simbolo + " " + $Periodo + ")")
@@ -991,7 +1041,7 @@ L "---------------------------------------------------------------------"
 L "  LA CORSA DI CONTROLLO (gate SPENTO) -- tre verifiche, non un verdetto"
 L "---------------------------------------------------------------------"
 if($null -eq $RigheCtrl){
-  L "NON LETTA. " + $StatoCtrl
+  L ("NON LETTA. " + $StatoCtrl)
   L "Senza questa corsa, la media di controllo di P0-2 resta quella calcolata"
   L "DENTRO la corsa a gate acceso: e' lo stesso numero, ma non e' stato"
   L "verificato da una seconda misura indipendente. Va detto, non nascosto."
@@ -999,21 +1049,21 @@ if($null -eq $RigheCtrl){
 else{
   $c0 = $RigheCtrl[0]
   $egc = V $c0 "Eco Gate Spento"
-  L ("1. il gate e' davvero SPENTO in questa corsa: Eco Gate Spento = " + (F0 $egc) + (if($null -ne $egc -and [int]$egc -eq 1){ "  -> SI" }else{ "  -> NO, e allora la riga InpGateSpento NON e' arrivata all'EA" }))
+  L ("1. il gate e' davvero SPENTO in questa corsa: Eco Gate Spento = " + (F0 $egc) + $(if($null -ne $egc -and [int]$egc -eq 1){ "  -> SI" }else{ "  -> NO, e allora la riga InpGateSpento NON e' arrivata all'EA" }))
   $ev = V $c0 "P01 Eventi Long"; $va = V $c0 "Giornate Valide"
   $ug = "n/d"
   if($null -ne $ev -and $null -ne $va){ if([int]$ev -eq [int]$va){ $ug = "SI" } else { $ug = "NO" } }
   L ("2. a gate spento ogni giornata valida e' evento: eventi " + (F0 $ev) + " contro valide " + (F0 $va) + "  -> " + $ug)
   if($ug -eq "NO"){ [void]$Problemi.Add("corsa di CONTROLLO: eventi (" + (F0 $ev) + ") diversi dalle giornate valide (" + (F0 $va) + ") a gate spento. La riga InpGateSpento non ha fatto quello che doveva.") }
   if($null -ne $RigheGate){
-    $mg = V $RigheGate[0] "P02 Media Tutti Pct"
-    $mc = V $c0 "P02 Media Tutti Pct"
+    $mediaGate = V $RigheGate[0] "P02 Media Tutti Pct"
+    $mediaCtrl = V $c0 "P02 Media Tutti Pct"
     $dd = "n/d"
-    if($null -ne $mg -and $null -ne $mc){
-      if([math]::Abs([double]$mg - [double]$mc) -lt 0.0000005){ $dd = "COINCIDONO" }
-      else { $dd = "DIVERSE (differenza " + ([double]$mg - [double]$mc).ToString("0.000000",$INV) + ")" }
+    if($null -ne $mediaGate -and $null -ne $mediaCtrl){
+      if([math]::Abs([double]$mediaGate - [double]$mediaCtrl) -lt 0.0000005){ $dd = "COINCIDONO" }
+      else { $dd = "DIVERSE (differenza " + ([double]$mediaGate - [double]$mediaCtrl).ToString("0.000000",$INV) + ")" }
     }
-    L ("3. la media di CONTROLLO misurata due volte: gate " + (FS $mg) + "% contro controllo " + (FS $mc) + "%  -> " + $dd)
+    L ("3. la media di CONTROLLO misurata due volte: gate " + (FS $mediaGate) + "% contro controllo " + (FS $mediaCtrl) + "%  -> " + $dd)
     if($dd -like "DIVERSE*"){
       [void]$Problemi.Add("la media su TUTTE le giornate e' diversa fra la corsa GATE e la corsa di CONTROLLO: e' la STESSA popolazione misurata due volte. Il problema e' il BANCO, non il motore, e nessun numero del PASSO 0 si legge.")
     }
@@ -1046,7 +1096,7 @@ L ""
 # --- P0-7: OBBLIGO DI REFERTO. Non e' un cancello: e' un elenco che
 #     DEVE comparire, e che va sciolto PRIMA di qualunque deploy.
 L "---------------------------------------------------------------------"
-L "  P0-7  COLLISIONE -- cosa gira gia' su " + $Simbolo + " alle 14:30:00 SERVER"
+L ("  P0-7  COLLISIONE -- cosa gira gia' su " + $Simbolo + " alle 14:30:00 SERVER")
 L "        (obbligo di referto del contratto, non un cancello)"
 L "---------------------------------------------------------------------"
 L "  1. ABTG_ORB                       magic 770601   NASUSD M5"
@@ -1094,16 +1144,16 @@ foreach($p in $Problemi){ L ("  - " + $p) }
 L ("RILIEVI: " + $Rilievi.Count)
 foreach($p in $Rilievi){ L ("  - " + $p) }
 L ""
-L "COME SI RIPRENDE: si riparte dalla pagina righe\RIGA_GAPCASH_PASSO0_DA_MANDARE.md,"
-L "NON da questa riga: $p e $pin nascono dentro il blocco di lancio e non"
-L "sopravvivono alla fine del blocco."
+L 'COME SI RIPRENDE: si riparte dalla pagina righe\RIGA_GAPCASH_PASSO0_DA_MANDARE.md,'
+L 'NON da questa riga: $p e $pin nascono dentro il blocco di lancio e non'
+L 'sopravvivono alla fine del blocco.'
 
 $refPath = Join-Path $Cart "REFERTO_GAPCASH_PASSO0.txt"
-Set-Content -LiteralPath $refPath -Value ($R -join "`r`n") -Encoding ASCII
-Write-Host ($R -join "`r`n")
+Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
+Write-Host ($RefTxt -join "`r`n")
 
 # --- gli artefatti, copiati PER NOME: solo cio' che esiste davvero.
-foreach($f in @(("COMPILAZIONE_" + $EA + ".log"), "misura_tick_NASUSD.csv")){
+foreach($f in @(("COMPILAZIONE_" + $EA + ".log"), ("misura_tick_" + $Simbolo + ".csv"))){
   $s1 = Join-Path $Work $f
   if(Test-Path -LiteralPath $s1){ Copy-Item -LiteralPath $s1 -Destination $Cart -Force }
 }
@@ -1111,8 +1161,13 @@ foreach($f in @($FileGate,$FileCtrl)){
   $s2 = Join-Path $Prove $f
   if(Test-Path -LiteralPath $s2){ Copy-Item -LiteralPath $s2 -Destination $Cart -Force }
 }
+# NEL GIRO A VUOTO NON SI COPIA NESSUN CSV. La cartella di lavoro e'
+# riusabile: i CSV di una corsa VERA precedente restano li' dentro, e
+# infilarli in uno zip intestato "GIRO A VUOTO" vorrebbe dire mandare
+# numeri veri dentro un pacchetto che dichiara di non averne (e' il
+# difetto gemello del "referto di una corsa mai avvenuta", 31/08).
 $Ris2 = Join-Path $Work ("risultati_prove\" + $EA)
-if(Test-Path -LiteralPath $Ris2){
+if((Test-Path -LiteralPath $Ris2) -and (-not $GiroAVuoto)){
   foreach($f in @(Get-ChildItem -LiteralPath $Ris2 -Filter "*.csv" -ErrorAction SilentlyContinue)){
     Copy-Item -LiteralPath $f.FullName -Destination $Cart -Force
   }
