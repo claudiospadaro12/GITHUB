@@ -104,10 +104,10 @@ Esce **0** se avrebbe fatto passare, **2** se avrebbe fermato — con il motivo 
 
 ---
 
-## 📌 IL PIN — **`PIN_DA_INSERIRE_DOPO_IL_PUSH`**
+## 📌 IL PIN — **`77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d`**
 
 ```
-PIN_DA_INSERIRE_DOPO_IL_PUSH
+77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d
 ```
 
 La riga passa il pin a `-Pin` e **si rifiuta di partire senza**: un default
@@ -147,7 +147,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE_DOPO_IL_PUSH'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -GiroAVuoto;
@@ -185,7 +185,7 @@ supera a mani basse anche un `sed` che **non ha matchato niente**.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE_DOPO_IL_PUSH'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin;
@@ -200,7 +200,7 @@ comandi indipendenti, e un `throw` alla prima non fermerebbe le altre.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia.' };
-    $pin='PIN_DA_INSERIRE_DOPO_IL_PUSH'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='77fd4f8eb5c63276cdb0b91e23505b02f18f8b3d'; $p="$env:USERPROFILE\RIGA_GAPCASH_PASSO0.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_GAPCASH_PASSO0.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_GAPCASH_PASSO0_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloCorsa 'CTRL' -Rifai;
