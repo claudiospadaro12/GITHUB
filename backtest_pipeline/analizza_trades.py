@@ -33,6 +33,47 @@ FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
 FRAZIONE_BASSA = 0.30   # sotto il 30% del movimento catturato = la gestione taglia troppo presto
 DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo stretti
 
+# --- FUORI DAL TOTALE: le operazioni SENZA COMMENTO del conto piccolo -------
+#
+# Claudio, 07/09/2026: "sul conto piccolo demo avevo iniziato a farlo manuale.
+# Da quando vedi costanza nei commenti, vuol dire che siamo partiti solo con
+# EA. I trade senza commenti non li calcolare nel conto piccolo."
+#
+# MISURATO su trades_auto.csv (30/03 -> 07/09/2026), non assunto:
+#   - 661 operazioni hanno  strategy=""  e  magic=0 ;
+#   - la corrispondenza e' ESATTA nei due sensi: zero righe con strategy vuota
+#     e magic != 0, zero righe con strategy piena e magic 0. Quindi "senza
+#     commento" e "magic 0" sono lo STESSO insieme, e il filtro non deve
+#     scegliere fra i due criteri: li pretende entrambi e segnala se un giorno
+#     dovessero divergere.
+#   - valgono -18.706,94 EUR contro i -1.235,41 EUR di TUTTA la flotta: se
+#     entrano nel totale, il netto del piccolo non e' il netto della flotta.
+#   - l'ULTIMA e' del 27/07/2026. Dal 28/07 in poi il conto e' solo EA
+#     (264 operazioni, tutte con commento). Il confine e' una misura, non
+#     una data scelta a mano.
+#
+# Non si cancellano: si mostrano FUORI dal totale, come i "RESIDUI SU DISCO"
+# del censimento. Un numero che mescola due cose non e' un numero.
+CAMBIO_SOLO_EA = "2026-07-28"   # primo giorno senza piu' operazioni manuali
+
+
+def senza_commento(r):
+    """True se la riga non appartiene a nessun EA nostro (manuale di Claudio)."""
+    vuoto = not (r.get("strategy") or "").strip()
+    magic0 = (str(r.get("magic", "0")) or "0").strip() in ("", "0")
+    return vuoto and magic0
+
+
+def discordi(righe):
+    """Righe in cui i due criteri NON coincidono: vanno dette, non indovinate."""
+    fuori = []
+    for r in righe:
+        vuoto = not (r.get("strategy") or "").strip()
+        magic0 = (str(r.get("magic", "0")) or "0").strip() in ("", "0")
+        if vuoto != magic0:
+            fuori.append(r)
+    return fuori
+
 
 def leggi(path):
     if not os.path.exists(path):
@@ -100,6 +141,16 @@ def main():
         r["_ct"] = tempo(r.get("close_time", ""))
     righe = [r for r in righe if r["_ot"] and r["_ct"]]
 
+    # --- FUORI DAL TOTALE: le manuali di Claudio (vedi in cima al file).
+    #     Si tolgono PRIMA di scegliere la giornata: altrimenti un giorno di
+    #     sole manuali diventerebbe "la giornata" e la pagella parlerebbe di
+    #     un lavoro che nessun EA ha fatto.
+    manuali_tutte = [r for r in righe if senza_commento(r)]
+    ambigue = discordi(righe)
+    righe = [r for r in righe if not senza_commento(r)]
+    if not righe:
+        sys.exit("Nel CSV non c'e' nessuna operazione con commento: solo manuali.")
+
     # La giornata si sceglie sulla CHIUSURA, non sull'apertura.
     # Il 05/08 questo filtro girava su open_time e ha buttato fuori due
     # posizioni aperte il 31/07 e chiuse quel giorno: -61,59 euro spariti
@@ -109,6 +160,14 @@ def main():
         giorno = max(r["_ct"] for r in righe).strftime("%Y-%m-%d")
     oggi = [r for r in righe if r["_ct"].strftime("%Y-%m-%d") == giorno]
     if not oggi:
+        # Distinguere i due casi: "giornata vuota" e "giornata di sole
+        # manuali" sono cose diverse, e dirle uguali nasconde un fatto.
+        soloman = [r for r in manuali_tutte
+                   if r["_ct"].strftime("%Y-%m-%d") == giorno]
+        if soloman:
+            sys.exit("Il %s ha SOLO %d operazioni senza commento (manuali, "
+                     "fuori dal conto della flotta): nessun EA ha operato."
+                     % (giorno, len(soloman)))
         sys.exit("Nessun trade chiuso il %s." % giorno)
 
     # Le posizioni aperte nei giorni precedenti si segnalano: la durata media
@@ -157,6 +216,42 @@ def main():
         out.append("| %s | **%+.2f** |" % (sym, v))
     out.append("")
     out.append("**Totale giornata: %+.2f**" % sum(perSym.values()))
+    out.append("")
+    out.append("_Totale della **sola flotta**: le operazioni senza commento "
+               "(manuali, magic 0) stanno fuori — vedi sotto._")
+
+    # ---------- FUORI DAL TOTALE: le manuali ----------
+    manuali_oggi = [r for r in manuali_tutte
+                    if r["_ct"].strftime("%Y-%m-%d") == giorno]
+    if manuali_oggi or ambigue:
+        out += ["", "## 🚫 Fuori dal totale — operazioni SENZA COMMENTO", ""]
+    if manuali_oggi:
+        netto_man = sum(num(r, "profit") + num(r, "swap") + num(r, "commission")
+                        for r in manuali_oggi)
+        perSymMan = defaultdict(lambda: [0, 0.0])
+        for r in manuali_oggi:
+            v = perSymMan[r.get("symbol", "?")]
+            v[0] += 1
+            v[1] += num(r, "profit") + num(r, "swap") + num(r, "commission")
+        out += ["Trading **manuale** di Claudio sul piccolo (`strategy` vuota, "
+                "`magic` 0). **Non entrano nel totale della flotta** qui sopra "
+                "— Claudio, 07/09/2026.", "",
+                "| Simbolo | Trade | Netto |", "|---|---|---|"]
+        for sym, (nn, v) in sorted(perSymMan.items(), key=lambda x: x[1][1]):
+            out.append("| %s | %d | **%+.2f** |" % (sym, nn, v))
+        out += ["", "**Totale manuale (fuori dal conto): %+.2f** su %d operazioni."
+                % (netto_man, len(manuali_oggi)), "",
+                "> ⚠️ Attese **zero** manuali dal **%s** in poi: se questo blocco "
+                "compare per una data successiva, o il confine e' cambiato o "
+                "qualcuno ha operato a mano. **Va guardato, non ignorato.**"
+                % CAMBIO_SOLO_EA]
+    if ambigue:
+        out += ["", "> 🔴 **%d operazion%s con commento e magic DISCORDI** "
+                "(una delle due cose dice EA e l'altra no). Il filtro pretende "
+                "entrambi i criteri e queste **restano nel totale**: vanno "
+                "capite prima di decidere da che parte stanno. pid: %s"
+                % (len(ambigue), "i" if len(ambigue) > 1 else "e",
+                   ", ".join(str(r.get("pid", "?")) for r in ambigue[:10]))]
 
     # ---------- segnalazioni ----------
     avvisi = []

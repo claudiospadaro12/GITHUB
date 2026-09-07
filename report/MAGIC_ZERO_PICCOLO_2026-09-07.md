@@ -50,21 +50,58 @@ volte** la flotta.
 
 ---
 
-## ❓ DA DOVE VENGONO — **NON MISURATO**, e non lo invento
+## ✅ DA DOVE VENGONO — **RISPOSTA DI CLAUDIO, 07/09/2026 notte**
 
-Il campo `strategy` è **vuoto** e il magic è **0**. In MT5 il magic 0 vuol dire
-"non piazzato da un EA con magic proprio". Le ipotesi possibili, **nessuna
-verificata**:
+> _"Sul conto piccolo demo avevo iniziato a farlo manuale. Da quando vedi
+> costanza nei commenti, vuol dire che siamo partiti solo con EA. **I trade
+> senza commenti non li calcolare nel conto piccolo.**"_
 
-1. **trading manuale** di Claudio sul demo;
-2. **copy trading / segnale**: nell'area clienti BCM ci sono le voci *Social
-   Trading* e *PAMM* (viste nello screenshot del 07/09). Un segnale copiato
-   produce esattamente questo: nessun magic, nessun commento, molti simboli,
-   concentrazione sull'oro;
-3. un **EA senza magic** attaccato in passato.
+Erano il **suo trading manuale**. Le tre ipotesi (manuale / copy trading /
+EA senza magic) sono chiuse dalla prima. ❌ Il segnale copiato e il PAMM
+**non c'entrano**.
 
-🔴 **Non scelgo fra le tre.** Serve una domanda a Claudio o una lettura del
-giornale del terminale, ed è la prima cosa da chiarire.
+### 📐 E il confine è MISURATO, non scelto
+
+| controllo | risultato |
+|---|---|
+| `strategy` vuota **e** `magic` 0 | **661** operazioni |
+| `strategy` vuota ma `magic` ≠ 0 | **0** |
+| `strategy` piena ma `magic` 0 | **0** |
+| **ultima** operazione senza commento | **27/07/2026** |
+| dal **28/07/2026** in poi | **264 operazioni, TUTTE con commento** |
+
+👉 "Senza commento" e "magic 0" sono lo **stesso identico insieme**: il
+filtro non deve scegliere fra i due criteri, li pretende **entrambi** e
+segnala se un giorno dovessero divergere. E la data del passaggio a solo-EA
+non l'ho decisa io: **è dove i numeri smettono**.
+
+### 📊 Il conto piccolo, letto come va letto
+
+| periodo | flotta (con commento) | manuale (fuori dal conto) |
+|---|---:|---:|
+| 30/03 → 27/07 | 359 op · **−290,71 €** | 661 op · **−18.706,94 €** |
+| **28/07 → 07/09** (solo EA) | 264 op · **−944,70 €** | **0 op · 0,00 €** |
+| **totale flotta** | **623 op · −1.235,41 €** | — |
+
+---
+
+## 🔧 FATTO: il filtro è nel codice
+
+`backtest_pipeline/analizza_trades.py`, patch del 07/09/2026:
+- le operazioni senza commento **escono dal totale** della flotta;
+- **non vengono cancellate**: compaiono in un blocco dichiarato
+  *"🚫 Fuori dal totale — operazioni SENZA COMMENTO"*, con netto e simboli
+  — stesso schema dei `RESIDUI SU DISCO` del censimento;
+- si tolgono **prima** di scegliere la giornata, altrimenti un giorno di sole
+  manuali (il 16/06: 55 operazioni, zero EA) diventerebbe "la giornata";
+- ⚠️ **canarino**: se il blocco compare per una data **dal 28/07 in poi**, la
+  pagella lo dice in chiaro — o il confine è cambiato, o qualcuno ha operato
+  a mano;
+- 🔴 se i due criteri dovessero **divergere** su una riga, quella riga
+  **resta nel totale** e viene segnalata col suo `pid`: non la classifico da solo.
+
+Il **100k è pulito** e verificato: 27 operazioni, cinque magic, **zero**
+`strategy` vuote. La patch non lo tocca.
 
 ---
 
@@ -95,11 +132,13 @@ sulla sedia `NY RETEST` prima di accenderla in demo. Lì resta aperta.
 
 ## 📋 COSA FARE, in ordine
 
-1. ❓ **Chiedere a Claudio da dove vengono le 661 operazioni.** È una domanda,
-   non un lavoro.
-2. 🔧 **Separare il magic 0 in `analizza_trades.py`**: non cancellarlo — va
-   mostrato, ma **fuori dal totale della flotta**, come i `RESIDUI SU DISCO` del
-   censimento. Un numero che mescola due cose non è un numero.
+1. ✅ **FATTO** — chiesto a Claudio: erano il suo trading manuale (07/09 notte).
+2. ✅ **FATTO** — magic 0 separato in `analizza_trades.py`, fuori dal totale
+   ma mostrato. Un numero che mescola due cose non è un numero.
 3. 🔁 **Rileggere le pagelle passate** sapendo questo: i netti giornalieri del
-   piccolo che citano un totale di conto vanno riletti.
+   piccolo che citano un totale di conto vanno riletti. ⚠️ **Non si
+   rigenerano in blocco**: il blocco 100k di ogni pagella calcola il saldo
+   **cumulato a oggi**, quindi rigenerare una giornata di giugno le
+   scriverebbe dentro il saldo di settembre. Riguardano comunque solo le
+   pagelle **fino al 27/07**; da lì in poi erano già pulite.
 4. 🟢 **Il 100k non è toccato**: lì i tre magic sono tutti nostri.
