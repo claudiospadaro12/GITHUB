@@ -1,0 +1,43 @@
+REFERTO R119 -- RITARDO DEL TESTER SULLE DUE SEDIE VIVE DEL CONTO REALE
+marcatore riga : MARCATORE_RIGA_RITARDO_TESTER_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE
+branch          : lavoro
+avvio           : 2026-09-07 16:23:55
+contratto       : prove\RITARDO_TESTER_R119.txt (criteri G0-G2, S1-S4 congelati il 07/09/2026)
+
+CANCELLO G0 (il ritardo morde?): MORDE
+
+--- LE CORSE ---
+  R119_DAX_D0000
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_DAX_D0100
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_DAX_D0050
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_DAX_D0500
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_ORB_D0000
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_ORB_D0100
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_ORB_D0050
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_ORB_D0500
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+
+file CSV attesi: 16   file CSV LETTI: 16
+
+RILIEVI: 0
+
+ESITO: MISURATO
+
+COSA NON DICE QUESTO REFERTO: non giudica. I criteri S1-S4 si applicano
+ai numeri dei CSV e il verdetto lo scrive la chat, contro il contratto.

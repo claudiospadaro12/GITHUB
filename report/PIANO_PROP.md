@@ -278,8 +278,19 @@ due sedie stanno su un conto con **soldi veri**:
   FAMIGLIA**, non per sedia (motore × simboli schierabili) — misurato su un conto
   vero con statistiche calcolate da MQL5: **3-5 EA su 26 simboli**, **0,29-0,47
   op/giorno per simbolo** → riga **H13**; **(b)** il **tetto per CLUSTER al 3,0%**,
-  🔴 **FIRMATO MA NON ATTIVO** (nel Guardian il tetto per cluster **non
-  esiste**) → riga **C10**
+  🔴 **FIRMATO MA NON ATTIVO** → riga **C10**. 📌 **Appendice dello stesso
+  verbale, aggiunta in giornata**: il tetto e' stato **IMPLEMENTATO** (Guardian
+  **v1.13** + include **v1.60**, input **spenti di default**) — lo stato passa da
+  _"firmato ma non attivo"_ a _"implementato ma **non compilato e non
+  collaudato**"_, che vuol ancora dire **NON ATTIVO**
+- ✅🥇 **`report/CENSIMENTO_CONTRATTI.md`** (07/09, da un altro agente) — **il
+  prerequisito della C3, aperto da tre settimane, e' CHIUSO**: **47 righe-sedia /
+  41 sedie uniche**, per CONTO, con DD promesso + **fonte** + deposito/rischio del
+  backtest + `n` + merito + frequenza. **40 MISURATE · 3 da riprodurre · 4 NON
+  MISURATE**; merito **PIENO su 15**, **SOSPESO su 28**. 🔴 Quattro buchi
+  dichiarati (le tre PostNews **senza DD promesso** e gia' operative · il
+  `BREAKOUT_EA_JPY_v3` col **magic illeggibile** · la **771322** con **tre DD
+  incompatibili** · l'ultima foto `.chr` ferma al **25/08**)
 - 🥇 `backtest_pipeline/risultati_archivio/REFERTO_R118_PAVIMENTO_STOP.md`
   (170 passate, 6 CSV): **nessuna cella promossa**; il conflitto col collega si
   spiega (**a 20 punti indice il pavimento tocca fra lo 0% e il 2% dei trade**);
@@ -369,7 +380,9 @@ piccolo e 100k — e' **ottimista per costruzione** sul fronte esecuzione.
 | orario (**ora server BCM** = italiana − 1) | apertura **08:00 srv** = 09:00 IT · range 35 min · flat **17:30 srv** = 18:30 IT | range **14:30-14:45 srv** = 15:30-15:45 IT · flat **21:00 srv** = 22:00 IT |
 | lato | **solo LONG** (`InpAllowShort=false`) | **solo LONG** (`InpAllowShort=false`) |
 | rischio | **0,65%** (unica differenza dalla cella viva sul demo, che gira a 1,0%) | **0,65%** (idem) |
-| **DD promesso** | **10,60% a 1,0%** — cella R83 RETEST, la sola realmente promossa (M31: il 6,25% di R16 descrive una cella **che non gira piu'**) | 🆕 **5,65% IS / 6,54% OOS** a dep. 10.000 e 0,65% — 🥇 `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5 |
+| **DD promesso** 🆕 | **10,60% a 1,0% → ≈6,89% alla taglia viva 0,65%** — cella **R83 RETEST**, che e' **la cella viva** (dep. 10.000 · tick · **n=311, merito PIENO**). 📌 Il **6,25% di R16** che stava in `CONTRATTI_SEDIE.md` descrive una cella **che non gira piu'** (M31): il numero da usare e' questo | **6,5389% OOS · 5,6530% IS — gia' ALLA TAGLIA VIVA** (dep. 10.000 · **0,65%** · tick). 🟠 **Merito SOSPESO** (119 e 71 < 150). 🔴 Due avvertenze che vanno **sempre** con questo numero: il contratto **storico** e' **9,92% a rischio 1% (R15)**, che passava il muro del 10% **per otto centesimi**; e R118 misura che **la configurazione VIVA e' l'unica che sfonda il muro sotto slippage** (9,76 → **10,34%** a 1%). *Il margine viene dalla taglia, non dal motore.* |
+| fonte del DD | 🥇 `report/CENSIMENTO_CONTRATTI.md` §2 (07/09) → `r83_csv/..._OOS_r83d1.csv` riga `entry=1` | 🥇 `report/CENSIMENTO_CONTRATTI.md` §2 (07/09) → `ritardo_r119_csv/...` + `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5 |
+| frequenza promessa | ~21 op/mese ⇒ **~0,97 op/giorno** | ~9,4 op/mese ⇒ **~0,43 op/giorno** |
 | **merito** | 🔵 **SOSPESO** — 0 operazioni sul reale | 🔵 **SOSPESO** — 0 operazioni sul reale; e in banco **71 IS / 119 OOS < 150** (regola 16/08) |
 
 ⚠️ **`InpUsaGuardian=true` sui due preset e' un no-op DICHIARATO**: la guardia
@@ -551,42 +564,71 @@ limite non verificato.
 **Fonti:** 🥇 `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §2, §4, §6 · classe **156** in
 `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
 
-### 🥉 BLOCCO 3 — IL CENSIMENTO DEI CONTRATTI (DD e frequenza promessi, sedia per sedia)
-**Stato:** prerequisito **dichiarato alla FIRMA 2 del 18/08** (_"senza tabella,
-la regola e' inchiostro"_). `report/CONTRATTI_SEDIE.md` esiste (44 sedie: 40
-pieni, 2 parziali, 2 senza), **ma manca la colonna PEGGIOR GIORNATA**, che
-nessun contratto ha mai avuto — ed e' proprio il vincolo che morde
-(`ANALISI_DD_TOTALE_2026-08-26.md`: margine **5%** sul giorno contro **36%** sul
-totale).
-⚙️ **UN ALTRO AGENTE CI STA LAVORANDO IN PARALLELO IN QUESTO MOMENTO: non va
-rifatto.** Qui si registra solo cio' che questo giro **aggiunge** al censimento:
-- 🆕 **770611 ORB** — DD promesso **5,65% IS / 6,54% OOS** (dep. 10.000, rischio
-  0,65%, `ExecutionMode=0`), 🥇 `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5. **Merito
-  sospeso** (71/119 < 150): sono numeri **descrittivi**, e il PF 1,675 dell'OOS
-  **non va citato come merito**.
-- 🆕 **770611 ORB** — DD sotto slippage assunto: **9,76% → 10,34%** a 2 punti
-  indice, 🥇 `REFERTO_R118_PAVIMENTO_STOP.md` §3.1.
-**Quanto costa:** senza la peggior giornata promessa, la corsia **RISCHIO** della
-C3 (_"DD forward > DD promesso → revisione immediata"_) e' **inapplicabile** su
-quasi tutte le sedie — e nella tabella del **cancello 1** la colonna "DD reale
-forward" e' **`n/d` su 17 famiglie su 17**.
+### 🥉 BLOCCO 3 — IL CENSIMENTO DEI CONTRATTI: ✅ **CONSEGNATO OGGI** (e quello che resta scoperto)
+**Era** il prerequisito **dichiarato alla FIRMA 2 del 18/08** (_"senza tabella,
+la regola e' inchiostro"_), **aperto da tre settimane**. ✅ **Chiuso oggi da un
+altro agente** con `report/CENSIMENTO_CONTRATTI.md` (07/09): **47 righe-sedia =
+41 sedie uniche**, organizzate **per CONTO** (reale / 100k / piccolo), con DD
+promesso, **fonte** (CSV o referto + round), **deposito e rischio del backtest
+da cui viene il numero**, `n`, se il merito e' sospeso, frequenza promessa.
+**40 righe MISURATE · 3 da riprodurre · 4 NON MISURATE · merito PIENO su 15,
+SOSPESO su 28.**
+👉 **La corsia RISCHIO della C3 diventa applicabile su 40 sedie su 47.** E'
+il singolo passo avanti piu' grosso del giro.
 
-### 4️⃣ BLOCCO 4 — IL TETTO PER CLUSTER 3,0%: **FIRMATO IL 07/09, NON ESISTE NEL CODICE**
+🔴 **Cio' che NON e' coperto, e resta un blocco — dichiarato dal censimento
+stesso, non da noi:**
+- **tre sedie PostNews** (771201 ECB · 771202 FOMC · **771203 NFP**) girano in
+  forward **senza nessun DD promesso**; la 771203 rischia **1,30% per evento** e
+  **ha gia' operato** (+37,36 € il 04/09);
+- **`BREAKOUT_EA_JPY_v3`** su USDJPY: **nemmeno il magic e' leggibile**, e la
+  famiglia ha DD **30-48%** agli atti;
+- **771322 PTE GBPUSD** ha **TRE DD promessi incompatibili** (R23 **2,64%** ·
+  R78 **17,68%** · R103 **13,1%**): su quella sedia la corsia RISCHIO **non puo'
+  scattare in modo prevedibile**;
+- ⚠️ **l'ultima foto `.chr` e' del 25/08**: da allora il **conto reale**, tre
+  sedie nuove e un riavvio del terminale piccolo **non sono mai stati censiti**
+  — il perimetro e' ricostruito da quattro fonti, non da una lettura fresca.
+
+📌 E cio' che **questo** giro ha aggiunto alla tabella: il **DD promesso della
+`770611`** — **5,65% IS / 6,54% OOS**, dep. 10.000, **gia' alla taglia viva
+0,65%**, tick (🥇 `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5) — che il censimento
+definisce _"il piu' recente e il piu' pulito del parco"_. **Merito SOSPESO**
+(71/119 < 150): il PF 1,675 dell'OOS **non va citato come merito**.
+
+⚠️ **Resta scoperta la PEGGIOR GIORNATA promessa**, che nessun contratto ha mai
+avuto — ed e' proprio il vincolo che morde (`ANALISI_DD_TOTALE_2026-08-26.md`:
+margine **5%** sul giorno contro **36%** sul totale). E nella tabella del
+**cancello 1** la colonna "DD reale **forward** per famiglia" resta **`n/d`**:
+il censimento da' la **promessa**, non il **realizzato** (→ M20).
+
+### 4️⃣ BLOCCO 4 — IL TETTO PER CLUSTER 3,0%: **FIRMATO E IMPLEMENTATO OGGI, NON COMPILATO E NON COLLAUDATO**
 **Il fatto, e va ripetuto ogni volta che si cita:** ✍️ firmato oggi
-(`report/FIRME_2026-09-07.md`), e **NON ATTIVO**. Il `ABTG_Guardian` conosce il
-cap complessivo `InpMaxOpenRiskPct=3.25` e il blocco simbolo+lato, **non i
-cluster**. 🔴 **Finche' non e' implementato e collaudato e' un'intenzione
-scritta, non una protezione.**
+(`report/FIRME_2026-09-07.md`) e, **nella stessa giornata, gia' implementato**
+da un altro agente — `ABTG_Guardian.mq5` **v1.13** + `ABTG_PausaGuardian.mqh`
+**v1.60** (commit `cdb2037`). 🔴 **Ma lo stato e' cambiato di UNA parola sola,
+e non di piu': da _"FIRMATO MA NON ATTIVO"_ a _"IMPLEMENTATO MA NON COMPILATO NE'
+COLLAUDATO"_ — che vuol ancora dire NON ATTIVO.**
+🟢 **Cio' che rende l'implementazione sicura, ed e' verificato nel commit, non
+promesso**: i due input nuovi **nascono SPENTI** (`InpMaxClusterRiskPct=0`,
+`InpClusterMappa=""`), i due parametri nuovi di `ABTG_GuardiaIngresso()` sono
+**in coda alla firma** (nessuna chiamata esistente si sposta) e **tutto** il
+codice nuovo sta dentro `if(StringLen(cluster_mappa)>0)` → col default **viene
+saltato in blocco**. **Nessun EA in campo lo passa: no-op verificato.**
 **Perche' e' stato firmato, con la misura:** i due portafogli "prop firm ready" a
 larga base letti dalla caccia hanno DD **MISURATI del 32,59% e del 45,64%**. _"La
 larghezza senza controllo della correlazione e' la trappola"_ — ed e' esattamente
 il rischio che l'**altra** firma dello stesso giorno (pavimento di frequenza per
 FAMIGLIA = piu' simboli) rende **piu' probabile**.
-**I tre passi mancanti, in ordine:** (1) **definire i cluster** — e' una scelta,
-va firmata a parte; (2) implementarlo nel Guardian; (3) collaudarlo come i cap
-gia' esistenti (il collaudo enforcement, non _"sembra funzionare"_).
-⚙️ **Anche questo e' in corso su un altro agente**: qui e' registrato come
-**riga C10**, non duplicato.
+**I tre passi, e dove sono adesso:** (1) 🟠 **definire i cluster —
+PROPOSTO, NON FIRMATO** (`report/CLUSTER_PROPOSTA.md`): resta **una scelta di
+Claudio**; (2) ✅ **implementarlo nel Guardian — FATTO** (v1.13 / mqh v1.60,
+**non compilato**: in questo ambiente non c'e' MetaEditor); (3) ❌
+**collaudarlo — DA FARE, sul PC/VPS di Claudio** (`backtest_pipeline/attese_cluster.txt`),
+col metro dell'enforcement e non con _"sembra funzionare"_.
+⚙️ **Lavoro di un altro agente**: qui e' registrato come **riga C10**, non
+duplicato. 🔴 **Fino al collaudo, ogni volta che si cita il tetto per cluster
+si dice che NON e' una protezione attiva.**
 
 ### 5️⃣ BLOCCO 5 — LA COLLISIONE P0-7: due motori nostri, stesso simbolo, stesso minuto, lati opposti
 **Il fatto:** su una mattina di **gap in giu'** su NASUSD alle **14:30 server**
@@ -664,7 +706,7 @@ sola operazione sul conto vero**.
 | C3 | Criterio di uscita delle sedie | **3 corsie** (rischio / merito a 20 op per famiglia / tagliando 6 mesi) | ✍️ FIRME 18/08 §2 | 🧊 FIRMATO — **morde solo col censimento dei contratti** (BLOCCO 3) |
 | C8 | Tetto max posizioni per **simbolo + lato** | opt-in, default spento | ✍️ P0, 02/09 | 🧊 FIRMATO |
 | C9 | Difetto `PositionSelect` su conto HEDGING | **34 EA su 126** | 🥇 audit 03/09 | 📋 PROPOSTO — **manca la firma sul PERIMETRO** |
-| **C10** 🆕 | **Tetto per CLUSTER / valuta** | **3,0%** | ✍️ `FIRME_2026-09-07.md` | 🔴 **FIRMATO ma NON ATTIVO — non esiste nel Guardian** |
+| **C10** 🆕 | **Tetto per CLUSTER / valuta** | **3,0%** | ✍️ `FIRME_2026-09-07.md` + appendice | 🔴 **FIRMATO · IMPLEMENTATO (v1.13, spento di default) · NON COMPILATO · NON COLLAUDATO = NON ATTIVO** |
 | **C11** 🆕 | **Collisione fra sedie di lato OPPOSTO sullo stesso simbolo/minuto** | **nessuna regola oggi** | 🥇 `REFERTO_GAPCASH_PASSO0_2026-09-07.md` §6 | 🔓 APERTO |
 | E9 | Paletto anti-HFT (tenuta) | **max 25% dei trade sotto 60 s** | ✍️ P5, 02/09 · 🥇 noi al **4,6%** | 🧊 FIRMATO |
 | F1 | Prop di riferimento | **FTMO 2-Step 100k**, muri **5/10 STATICI** | 🥈 `REGOLAMENTO_FTMO_2026-08.md` | 📋 PROPOSTO — nessuna riga autorizza un acquisto |
@@ -1091,7 +1133,7 @@ falla aritmetica piu' grossa del piano.
 
 | # | parametro | valore PROPOSTO | fonti (rango) | conflitti | stato |
 |---|---|---|---|---|---|
-| C10 🆕 | 🧱 **TETTO DI RISCHIO APERTO PER CLUSTER CORRELATO** (nuova, v20) | **3,0%** per cluster (valuta comune, o classe: indici / metalli / JPY-crosses...), **accanto** al cap complessivo C1 = 3,25% gia' firmato il 18/08. 🔴 **Il valore e' firmato; i CLUSTER no**: quali simboli stanno insieme e' **una scelta che va firmata a parte**, ed e' il primo dei tre passi mancanti | ✒️🥇 `report/FIRME_2026-09-07.md` §"tetto per cluster" (firmato con la stessa riga del pavimento di frequenza) · 🥇 la misura che lo motiva: i due portafogli "prop firm ready" a larga base letti dalla caccia hanno DD **MISURATI del 32,59% e del 45,64%** per saldo — _"la larghezza senza controllo della correlazione e' la trappola"_ · 🥇 sorgente `mql5/Experts/ABTG_Guardian.mq5`: `OpenRiskPct()` somma gli SL vivi **senza nessuna nozione di cluster** | 🔴🔴 **IL CONFLITTO E' CON SE STESSO, E VA DETTO OGNI VOLTA CHE SI CITA QUESTA RIGA: e' FIRMATO ma NON ATTIVO.** Il Guardian conosce il cap complessivo (`InpMaxOpenRiskPct=3.25`) e il tetto simbolo+lato (C8), **non i cluster**. Finche' non e' implementato e collaudato **e' un'intenzione scritta, non una protezione**. ⚠️ E c'e' una tensione **interna alle due firme dello stesso giorno**: il pavimento per FAMIGLIA (H13) spinge verso **piu' simboli**, che e' esattamente la condizione in cui il tetto di cluster serve — **la firma che allarga e' attiva, quella che protegge no** | 🔴 **FIRMATO (07/09/2026) MA NON ATTIVO** — i tre passi, in ordine: **(1)** definire i cluster (firma a parte) · **(2)** implementarlo nel Guardian · **(3)** collaudarlo col metro dell'enforcement, non con _"sembra funzionare"_. ⚙️ **Lavoro in corso su un altro agente**: qui e' registrato, non duplicato |
+| C10 🆕 | 🧱 **TETTO DI RISCHIO APERTO PER CLUSTER CORRELATO** (nuova, v20) | **3,0%** per cluster (valuta comune, o classe: indici / metalli / JPY-crosses...), **accanto** al cap complessivo C1 = 3,25% gia' firmato il 18/08 — **i due non si parlano: vince il piu' stringente**. 🔴 **Il valore e' firmato; i CLUSTER no**: quali simboli stanno insieme e' **una scelta che va firmata a parte**, ed e' il primo dei tre passi mancanti | ✒️🥇 `report/FIRME_2026-09-07.md` §"tetto per cluster" (firmato con la stessa riga del pavimento di frequenza) · 🥇 la misura che lo motiva: i due portafogli "prop firm ready" a larga base letti dalla caccia hanno DD **MISURATI del 32,59% e del 45,64%** per saldo — _"la larghezza senza controllo della correlazione e' la trappola"_ · 🥇 sorgente `mql5/Experts/ABTG_Guardian.mq5`: `OpenRiskPct()` somma gli SL vivi **senza nessuna nozione di cluster** | 🔴🔴 **IL CONFLITTO E' CON SE STESSO, E VA DETTO OGNI VOLTA CHE SI CITA QUESTA RIGA: e' FIRMATO e IMPLEMENTATO, ma NON COMPILATO e NON COLLAUDATO — quindi NON ATTIVO.** In campo il Guardian che gira e' ancora la **v1.12**, che conosce il cap complessivo (`InpMaxOpenRiskPct=3.25`) e il tetto simbolo+lato (C8), **non i cluster**. Finche' non e' compilato e collaudato **e' codice spento, non una protezione**. ⚠️ E c'e' una tensione **interna alle due firme dello stesso giorno**: il pavimento per FAMIGLIA (H13) spinge verso **piu' simboli**, che e' esattamente la condizione in cui il tetto di cluster serve — **la firma che allarga e' attiva, quella che protegge no** | 🔴 **FIRMATO (07/09/2026) · IMPLEMENTATO (stessa giornata) · NON COMPILATO · NON COLLAUDATO = NON ATTIVO** — i tre passi: **(1)** 🟠 definire i cluster = **PROPOSTO, NON FIRMATO** (`report/CLUSTER_PROPOSTA.md`) · **(2)** ✅ implementarlo = **FATTO** (`ABTG_Guardian.mq5` **v1.13** + `ABTG_PausaGuardian.mqh` **v1.60**, commit `cdb2037`; input nuovi **spenti di default**, `InpMaxClusterRiskPct=0` e `InpClusterMappa=""`, tutto il codice nuovo dentro `if(StringLen(cluster_mappa)>0)` → **no-op verificato**) · **(3)** ❌ collaudarlo = **DA FARE sul PC/VPS di Claudio** (`backtest_pipeline/attese_cluster.txt`), col metro dell'enforcement e non con _"sembra funzionare"_. ⚙️ **Lavoro di un altro agente**: qui e' registrato, non duplicato |
 | C11 🆕 | 🔀 **COLLISIONE FRA SEDIE DI LATO OPPOSTO SULLO STESSO SIMBOLO E MINUTO** — il caso P0-7 (nuova, v20) | **oggi non esiste nessuna regola**. Proposta minima, **da misurare prima di decidere**: ogni candidato che entra su un simbolo **gia' presidiato** dichiara nel suo passo 0 **chi altro spara in quella finestra e con che lato**, com'e' stato fatto qui (obbligo di referto, non cancello). Un eventuale blocco automatico **non si propone senza una misura di quanto spesso accadrebbe** | 🥇 `backtest_pipeline/risultati_archivio/REFERTO_GAPCASH_PASSO0_2026-09-07.md` §6 (_"la collisione P0-7 resta agli atti e **NON e' sciolta**... il precedente vale per il prossimo che entrera' su NASUSD alle 14:30"_) · contratto congelato `backtest_pipeline/prove/GAPCASH_NAS_PASSO0.txt` §P0-7 · 🥈 `report/CONTRATTO_GATEDSHORT_770250.md` (la sedia viva che **vende** su NASUSD sul gap in giu') | ⚠️ **Nessun controllo di casa la vede**: il **cap C1** conta gli SL vivi (li conterebbe **tutti e due**, quindi vede il rischio ma non il **doppione**), il **tetto C8** conta **simbolo + LATO** — e due lati **opposti** passano entrambi. 🔴 Su conto hedging le due posizioni **non si compensano nel costo**: pagano **due spread, due slippaggi, due stop**, e su una prop sono **due posizioni**, non zero. 🟢 **Oggi la collisione NON e' armata** (il candidato gap-cash e' morto al passo 0): questa riga registra il **precedente**, non un pericolo in corso | 🔓 **APERTO (v20)** — si chiude con una **misura**: su quante mattine, nella finestra a tick, i due lati sarebbero stati vivi insieme sullo stesso minuto. Senza quel numero, qualunque blocco automatico rischia di **spegnere piu' di quanto protegge** |
 
 # AREA D — 📰 NEWS E ORARI
@@ -1756,7 +1798,7 @@ sintassi, runtime e frequenza del terzo motore sono **tutti da verificare**.
 | M26 | 🐻 **IMPORT TICK DUKASCOPY per il verdetto ORSO** — il gated short 770250 (e ogni motore short/crollo) **non potra' MAI** avere un verdetto tick in un orso su BCM (tick BCM dal 26/09/2024 = nessun orso). Il verdetto ORSO oggi e' solo **OHLC** (PF 1.84): la conferma vera dei costi in un crollo richiede storico tick esterno (Dukascopy 2020/2022) | PC di backtest (import gia' progettato in M12, strada Dukascopy) | "importare i tick Dukascopy del crollo 2020 e dell'orso 2022 per NASUSD, cosi' il verdetto short-orso non resta OHLC-fantasia — e' la sola via al merito pieno del mattone TEMPESTA". ⏳🆕 **v18: la macchina si sta muovendo, e su un altro simbolo** — la **TRANCHE-SONDA del Dow** (`USA30IDXUSD`, finestra 2024-10-01 → 2025-06-16, motore `curl` dopo il blocco anti-python misurato il 31/08) e' **in completamento oggi verso le ~15:30**: **non porta l'orso** (e' la tranche che si SOVRAPPONE al nativo BCM, cioe' il **cancello di validazione** del feed), ma **e' il passo che dice se questa strada esiste**. Se il cancello passa, la storica 2019→2024 e poi l'orso diventano una corsa lunga, non una speranza |
 | M37 🆕 | ⏳ **I DEAL DEL `SlippageLogger` SUL CONTO REALE** — oggi **ZERO**. E' il buco che rende **SCENARIO ASSUNTO** ogni gradino di slippage di **ogni** round del progetto (R118 lo dichiara tre volte), e che rende **ottimista per costruzione** ogni riga di forward su conto demo (BCM: *il demo non simula lo slippage*). 👉 **Non richiede ne' macchina ne' codice: richiede che le due sedie del conto reale ESEGUANO** | **Claudio** (lasciar lavorare il conto **REALE 10105439**, `C:\BCM_Reale`, senza staccare il Guardian; poi `backtest_pipeline/righe/RIGA_SLIPPAGELOGGER_RACCOLTA.ps1`) | "quanti punti indice di slippage paghiamo davvero sugli **stop** delle due sedie vive, in sessione e fuori? 🔴 **Senza questo numero, R118 e ogni round successivo sul pavimento dello stop ripetono lo stesso limite** — e non sappiamo se il **10,34% di DD** della configurazione ORB viva sotto slippage e' uno spauracchio o il numero vero" |
 | M38 🆕 | 🐞 **R119 v3 — IL RITARDO DI ESECUZIONE, CON LA CHIAVE GIUSTA.** Il primo giro e' **NON MISURATO**: la chiave `Delay` **non esiste in MT5** e le chiavi `[Tester]` sconosciute vengono **ignorate in silenzio** (uscita 0, CSV prodotti, referto verde). Il round va rifatto con **`ExecutionMode`**, driver corretto e ri-collaudato, marcatore `..._v3_EXECMODE`. ✅ Il default (parametro non passato) resta **`ExecutionMode=0` byte per byte**: tutti i round gia' pinnati **riproducono identici** | **Claudio sul PC di backtest** (8 corse; il canarino G0 ha gia' risparmiato 6 corse a tick una volta) | "con un ritardo di esecuzione **vero**, `770101` (che entra a **BuyLimit**) degrada poco e `770611` (che entra a **BuyStop**) degrada molto, come dice l'ipotesi congelata? 🔴 **E' la differenza fra le due sedie che stanno sul conto REALE**: se la fragile e' quella che gira sui soldi veri, va saputo prima, non dopo" |
-| M39 🆕 | 🧱 **LA DEFINIZIONE DEI CLUSTER** — prerequisito del tetto 3,0% firmato il 07/09 (**riga C10**), che oggi e' **firmato e NON attivo**. Il valore e' deciso, **l'insieme no**: quali simboli stanno nello stesso cluster (per valuta comune? per classe: indici / metalli / JPY-crosses? per correlazione **misurata** sui nostri tick?) **e' una scelta, e va firmata a parte** prima di scrivere una riga di codice | **Claudio** (la firma sull'insieme) + **architetto-prop** (la proposta di partizione, con la correlazione **misurata** e non assunta) + **mql5-ea-developer** (l'implementazione nel Guardian) — ⚙️ **lavoro gia' in corso su un altro agente: non va duplicato** | "su quale base si raggruppano i simboli, e la partizione si **misura** (correlazione dei rendimenti sui nostri tick) o si **dichiara** (classe di asset)? 🔴 Finche' la risposta non c'e', il tetto per cluster **e' un'intenzione scritta, non una protezione** — e va detto **ogni volta** che lo si cita" |
+| M39 🆕 | 🧱 **LA DEFINIZIONE DEI CLUSTER + IL COLLAUDO** — i due passi che mancano al tetto 3,0% (**riga C10**), che oggi e' **firmato, implementato (v1.13, spento di default), NON compilato e NON collaudato**. Il valore e' deciso, il **codice c'e'**, ma **l'insieme dei cluster no** (`report/CLUSTER_PROPOSTA.md` e' **PROPOSTO, NON FIRMATO**) e il **collaudo non e' girato** (`backtest_pipeline/attese_cluster.txt`): quali simboli stanno nello stesso cluster (per valuta comune? per classe: indici / metalli / JPY-crosses? per correlazione **misurata** sui nostri tick?) **e' una scelta, e va firmata a parte** prima di scrivere una riga di codice | **Claudio** (la firma sull'insieme) + **architetto-prop** (la proposta di partizione, con la correlazione **misurata** e non assunta) + **mql5-ea-developer** (l'implementazione nel Guardian) — ⚙️ **lavoro gia' in corso su un altro agente: non va duplicato** | "su quale base si raggruppano i simboli, e la partizione si **misura** (correlazione dei rendimenti sui nostri tick) o si **dichiara** (classe di asset)? E **quando gira il collaudo**? 🔴 Finche' non ci sono tutte e due le risposte, il tetto per cluster **e' codice spento, non una protezione** — e va detto **ogni volta** che lo si cita" |
 
 ## ✍️ LE FIRME CHE SERVONO A CLAUDIO (in ordine di urgenza)
 
@@ -2041,7 +2083,63 @@ _(A2/A4: FIRMA 4 · D-spegnimenti: FIRMA 5.)_
 
 ## 📊 IL CONTO DEL GIRO
 
-🆕 **v18 (03/09): 54 parametri — 16 congelati · 21 proposti · 16 aperti · 1
+🆕 **v20 (07/09): 60 parametri — 18 congelati · 21 proposti · 17 aperti · 1
+chiuso per misura · 3 NON MISURATI.** E' il giro in cui il piano ha smesso di
+chiedersi *quanto rischiamo* e ha cominciato a chiedersi **quanto sono veri i
+numeri con cui misuriamo il rischio**.
+
+- 🧊 **DUE FIRME NUOVE** (`report/FIRME_2026-09-07.md`): **H13** (pavimento di
+  frequenza **per FAMIGLIA**, 1,00 op/giorno — l'unita' cambia, la soglia no) e
+  **C10** (tetto per **CLUSTER 3,0%**) — 🔴 e le due **vanno lette insieme**:
+  quella che **allarga** e' a costo zero e vale da subito, quella che
+  **protegge** e' **codice ancora da scrivere**;
+- 🆕 **AREA I nuova — FEDELTA' DEL BANCO**: **I1** slippaggio vero (**0 deal**),
+  **I2** `ExecutionMode=0` in tutti i round, **I3** determinismo, **I4** spread
+  (indici misurati, forex no);
+- 🆕 **C11 nuova** (collisione P0-7: due sedie di lato **opposto** sullo stesso
+  simbolo e minuto — **nessun controllo di casa la vede**);
+- 🆕 **sezione v20 in testa**: dove siamo · la distanza dalla prop
+  quantificata · i blocchi in ordine di costo · **la coda di lavoro per Claudio**;
+- 🥇 **forward ricontato oggi**: piccolo **25/08→04/09** = 66 chiusure / 65
+  ingressi / 27 magic / **−125,28 €** e **7,22 ingressi per giornata operativa**
+  (contro 4,85 della finestra 03-28/08: **resa dal 63% all'89%** del promesso);
+  100k **10/08→04/09** = 27 chiusure / 16 giornate / **+2.854,99 = +2,85%**;
+- 📏 **la consistency, misurata con la FORMULA DICHIARATA** (e la vecchia riga
+  "43,6%" di H9 **e' superata**): best day / **giorni positivi** = **37,27%**
+  grezzo e **29,97%** normalizzato; best day / **totale** = 58,86% e 59,48%.
+  ✅ Sul **2-Step non esistono consistency rule dure** (accertato): sulla prop di
+  riferimento **non ci tocca**;
+- 🆕 **M37 · M38 · M39** in COSA MANCA (deal del logger · R119 v3 · definizione
+  dei cluster);
+- 📄 **DD promesso agli atti per `770611`**: **5,65% IS / 6,54% OOS** (R119
+  §5) — merito **SOSPESO** (71/119 < 150), sono numeri **descrittivi**.
+
+**Cosa NON e' cambiato**: nessun valore firmato toccato, **nessun candidato
+promosso** (tre round, **tre verdetti negativi**), **zero modifiche al forward da
+questo documento**, nessuna sedia accesa o spenta, nessun acquisto autorizzato.
+
+🔴 **I conflitti e i limiti nuovi, dichiarati:**
+**(1)** 🔴 **firmato ≠ attivo**: il tetto per cluster e' **firmato oggi e non
+esiste nel Guardian** — va detto **ogni volta** che si cita, e la firma gemella
+(famiglia = piu' simboli) rende il buco **piu' probabile**, non meno;
+**(2)** ❔ **`ExecutionMode=0`**: tutti i round sono a **ritardo zero**, ed era
+**dichiarato nell'`.ini` dal 07/08** — *non era nascosto, era non letto*. La
+formulazione precedente (_"stato nascosto"_) attribuiva al driver un difetto che
+non ha, ed e' **corretta qui**;
+**(3)** 🔴 **0 deal**: ogni gradino di slippage di ogni round e' uno **scenario
+assunto**, e la configurazione **VIVA** dell'ORB e' **l'unica che sfonda il muro
+del 10%** sotto quello scenario (9,76% → 10,34%);
+**(4)** ⚠️ **il determinismo non e' della macchina, e' del ROUND**: due round dello
+stesso giorno, stessa macchina — uno l'ha verificato (R119), l'altro ha dovuto
+dichiararlo **non verificato** (orologio indici);
+**(5)** ⚠️ **campione sottile ovunque**: 16 giornate sul 100k, 9 sul piccolo,
+**0 operazioni sul reale**. Le proiezioni di tempo sono **lineari e dichiarate
+tali**: descrivono il passato, non promettono il futuro;
+**(6)** 🟡 **meta' round sull'orologio indici**: le due celle del **Dow** non
+sono girate e il criterio I1 e' **d'insieme** → su U30USD **non si conclude
+niente**, ne' in un verso ne' nell'altro.
+
+_(conteggio precedente, v18)_ **v18 (03/09): 54 parametri — 16 congelati · 21 proposti · 16 aperti · 1
 chiuso per misura.** **Una riga nuova sola**, perche' questo giro non ha
 prodotto parametri: ha prodotto **misure su parametri che c'erano gia'**.
 - 📋 **C9 nuova** (il difetto `PositionSelect` su conto hedging: **34 EA su
@@ -2210,6 +2308,7 @@ B9 — e le due consegne di M15 (screenshot fuso + `super trend.ex4`).
 
 | data | versione | cosa e' cambiato | perche' |
 |---|---|---|---|
+| 07/09/2026 sera | **v20** | 🧭 **IL GIRO IN CUI IL PIANO HA MESSO IN CIMA LA RISPOSTA ALLA DOMANDA DI CLAUDIO — *"come siete messi per le prop?"* — E HA SCOPERTO CHE IL PROBLEMA PIU' GRANDE NON E' UNA TAGLIA: E' LA FEDELTA' DEL BANCO.** 💶 **(1) Il fatto che pesa piu' di tutti**: sul conto **REALE 10105439** le due sedie (**770101** DAX Apertura, che entra a **BuyLimit**, e **770611** ORB, che entra a **BuyStop**) sono **attaccate, armate e a 0,65%**, con Guardian **779002 v1.12** vivo — ma **non hanno eseguito UNA SOLA OPERAZIONE**: `ABTG_SlippageLogger` ha **0 deal**. 👉 **Non esiste ancora nessuna misura di esecuzione su un conto BCM vero**, e siccome BCM ha confermato che **il demo non simula lo slippage**, tutto il forward che abbiamo e' **ottimista per costruzione**. ⚔️ **(2) TRE ROUND, TRE VERDETTI, ZERO PROMOZIONI — ed e' il risultato giusto**: 🔴 **GAPCASH Nasdaq SCARTO** (il fenomeno c'e', **77 giornate-evento** contro ~62 attese, ma **il segno si rovescia sui tick BCM**: esterno +0,0988% → BCM **−0,0487%**, monotonia rotta **4 volte su 7**; costo del verdetto **8 minuti di macchina** invece di un EA e settimane di forward) · 🔴 **OROLOGIO sugli INDICI, meta' DAX: l'orologio NON esiste** (**0 fasce asimmetriche su 72 in OOS**, 1 su 72 in IS che **perde da entrambe le parti**; in quasi tutte le celle **LONG = −SHORT esatto** → ogni ora "verde" era **deriva del toro**. L'ora 15, sopravvissuta col **solo lato long**, ha `asimm = 0`: **la regola dei due lati del 25/08 ha fatto esattamente il lavoro per cui era stata scritta**. ⚠️ Il **Dow non e' girato**) · 🟠 **R118 pavimento dello stop: nessuna cella promossa** — il conflitto col collega si spiega (**a 20 punti indice il pavimento tocca fra lo 0% e il 2% dei trade**: *non dissentivamo, misuravamo due operazioni diverse chiamandole allo stesso modo*), e il risultato solido e' l'**asimmetria RISCHIO/MERITO**: allargare lo stop **riduce il DD in modo riproducibile** (85% delle celle, le due finestre concordano) e **costa edge in modo NON riproducibile** (OOS 29/56 = monetina). 🔴 **E morde la sedia viva**: la configurazione **in campo** dell'ORB e' **l'unica che sfonda il muro del 10% sotto slippage** (DD OOS **9,76% → 10,34%**), e **la correzione che la proteggerebbe non e' promuovibile** (n=119 < 150). 🐞 **(3) R119: IL CANARINO HA SPARATO AL PRIMO GIRO VERO.** La chiave inventata si chiamava **`Delay`** — **in MT5 non esiste**, e **MT5 ignora in silenzio le chiavi `[Tester]` sconosciute** (uscita 0, CSV prodotti, gemelli a posto, **referto verde**). Round fermato a **2 corse su 8**, **6 corse a tick risparmiate**. *Senza il canarino il referto avrebbe detto "le due sedie vive reggono fino a 500 ms di ritardo": **una bugia con i numeri sotto**.* 📌 **La correzione di metodo che resta e vale per tutti i round futuri**: `walkforward_generico.ps1` scrive **`ExecutionMode=0`** dal **07/08/2026** — **non era nascosto, era dichiarato nell'`.ini` e nessun referto l'ha mai letto** → **AREA I nuova** (**I1** slippaggio, **I2** `ExecutionMode`, **I3** determinismo, **I4** spread). 🟢 Gratis dal round fallito: **gemelli di determinismo PASSATO** su U30USD e il **DD promesso della 770611 agli atti** (**5,65% IS / 6,54% OOS**, merito **sospeso**). ✍️ **(4) DUE FIRME** (`report/FIRME_2026-09-07.md`, _"firmo il punto 1, lancia l'orologio"_): **H13** — il **pavimento di frequenza si misura per FAMIGLIA** (motore × simboli), soglia invariata a **1,00 op/giorno**, motivata da un conto vero con statistiche MQL5 (**3-5 EA su 26 simboli → 0,29-0,47 op/giorno per simbolo**: *nel campo ogni istanza e' un cecchino*) — e **C10** — **tetto per CLUSTER al 3,0%**, motivato da due portafogli larghi con DD **misurati 32,59% e 45,64%**. 🔴 **C10 E' FIRMATO MA NON ATTIVO: nel Guardian il tetto per cluster NON ESISTE**, e va detto ogni volta che lo si cita — con l'aggravante che la firma gemella (famiglia = **piu' simboli**) rende quel buco **piu' probabile**. 🆕 **(5) C11 nuova — la collisione P0-7**: su un gap in giu' su NASUSD alle **14:30 server** la sedia viva **GATED SHORT 770250 vende** e il motore gap-cash **avrebbe comprato**; **nessun controllo di casa la vede** (il cap C1 conta gli SL vivi, il tetto C8 conta **simbolo+LATO**, e due lati opposti passano entrambi). Oggi **non e' armata** (il candidato e' morto), ma **il precedente resta**. 🥇 **(6) IL FORWARD RICONTATO OGGI**: piccolo **25/08→04/09** — 66 chiusure, **65 ingressi**, 27 magic, **−125,28 €**, **15 magic su 27 in perdita**, e **7,22 ingressi per giornata operativa** contro i **4,85** della finestra 03-28/08 → **la resa sale dal 63% all'89%** del promesso (⚠️ 9 giornate: segnale, non verdetto); 100k **10/08→04/09** — 27 chiusure in **16 giornate**, **+2.854,99 = +2,85%**, peggior giornata realizzata **−647,82 = −0,648%**. ✅ **La correzione della sovrataglia A2 e' verificata DAI DATI**: il lotto ORB passa da **19,70** (02/09) a **4,80/4,60** (03/09) = **÷4,1**. 📏 **(7) LA CONSISTENCY, MISURATA CON LA FORMULA DICHIARATA** (e la riga "43,6%" del v16 **e' superata, perche' li' la formula non c'era**): best day / **profitto dei giorni POSITIVI** — la formula **letterale** FTMO 1-Step — = **37,27%** grezzo, **29,97%** normalizzando la giornata fuori contratto; best day / **profitto totale** = **58,86%** e **59,48%**. ✅ **Sul 2-Step (la nostra prop di riferimento) NON esistono consistency rule dure**: non ci tocca. 🟠 Sul **35% di FundingPips** (solo sui reward) il grezzo **sfora** e il normalizzato **rientra**: la differenza la fa **una singola giornata fuori contratto**, non la strategia. 📏 **(8) LA DISTANZA DALLA PROP, quantificata**: mancano **7.145,01 € = 7,15 punti** al target di fase 1; al ritmo **grezzo** ≈**1,8 mesi**, al ritmo **normalizzato** ≈**3,1 mesi** — dentro la forchetta dell'AREA H (1,8-3,0 mesi a flotta migrata), dalla parte buona; margine **7,7×** sul muro giornaliero **ma sul solo REALIZZATO** (il flottante non e' nel CSV → **la peggior giornata vera e' NON MISURATA**); **16 giornate operative** contro un minimo di 4. 🆕 **(9) M37 · M38 · M39** in COSA MANCA (i deal del logger · **R119 v3** con la chiave giusta · **la definizione dei cluster**, che e' una firma e viene **prima** del codice). 🛑 **Zero modifiche al forward da questo documento, zero preset toccati, zero acquisti autorizzati, nessun candidato promosso, nessuna sedia accesa o spenta.** → **60 parametri (18C · 21P · 17A · 1 chiuso · 3 NON MISURATI)** | il mandato permanente di Claudio del 07/09 (*"a fine settimana dimmi come siete messi"*) + i tre referti del giorno + le due firme + il forward ricontato sui CSV del 04-05/09 + i tre preset del conto reale letti per intero |
 | 05/09/2026 sera | **v19** | 🔴 **BCM CONFERMA: LA DEMO NON SIMULA LO SLIPPAGE, SOLO IL REALE.** Risposta diretta di Claudio col broker (`CONFIG_PROP_SPREAD_SLIPPAGE_2026-09-05.md`, domanda D6): chiude nel senso peggiore la domanda che pesava su tutto il forward. **Conseguenza permanente per il metodo**: ogni riga FORWARD di **H1** (100k e piccolo) e' OTTIMISTA sul fronte esecuzione — manca per costruzione il costo che R109 aveva misurato a **21,5 punti su un solo stop**. Non risolve il conflitto di segno banco/forward (mancare slippage renderebbe il forward piu' ottimista, non lo spiega), ma il rischio di drawdown vero **non lo dice piu' il forward demo da solo**: lo dice il backtest a tick con slippage simulato (gia' la prassi R109/R116/R117) o il conto reale. 🛡️ **Audit di flotta sul filtro spread**: presente in **86 EA su 104**, **spento in 75** — incluse **tutte** le sedie indici vive (DAX/Dow/Nasdaq Apertura, MaxMinNotte). Nessuna deviazione esplicita sulle chiusure d'emergenza del Guardian (proprio quando lo spread e' piu' largo). 📡 **VPS: la domanda e' chiusa con un numero**, non un'ipotesi — ping VPS→BCM misurato **mediana 21,3 ms** (16,5-38,3), zona "accettabile": **non e' li' il collo di bottiglia** (confermato anche dalla documentazione MetaQuotes: lo slippage sullo stop lo decide il tempo di elaborazione del broker, centinaia di ms, non la rete). 🏹 **Tre cacce di frequenza chiuse in un giorno (M5/M15/M30), 0 promossi su 111 candidati esaminati**: M5 e M15 muoiono di COSTO (il pedaggio spread vale 1,1-1,7× il cancello H8 — misurato come curva monotona, non aneddoto); M30 muore di EDGE, non di costo (spread = 1/30 del take, il vincolo e' la monotonia, fallita 3 volte su 3) — e un falso positivo pericoloso (look-ahead bias, t=+8,49 apparente) catturato e smontato con 3 controprove indipendenti prima di essere promosso per errore. 🪦 **R116 LondonFx CHIUSO**: bocciato su entrambe le gambe anche a banco pulito (agenti locali forzati a 1, gemelli riconfermati identici) — EURUSD E −0,1078R/DD 37%, GBPUSD E −0,2357R/DD 53% — morto per geometria, non per costi (spread di Londra e' il piu' stretto misurato in casa). 🎯 **RELATIVO R117 in corso**: 2 difetti di infrastruttura trovati e chiusi in giornata (generico condiviso che rifiutava le celle congelate; autotest dell'EA con una variabile riusata fra due casi) — nessuno dei due tocca la cella firmata N=40/σ=1,35; collaudo del porto PASSATO (scarto 3/20 e 2/20) e gemello interno IDENTICO 9/9 su D30_PORTO. 🛡️ **Spread Logger schierato**: EA di sola lettura installato e vivo sul conto piccolo (autotest 36/36), raccoglierà la prima mappa oraria vera dello spread P95 per simbolo. 🛑 **Zero modifiche al forward da queste scoperte, zero preset toccati, zero candidato promosso.** |
 | 03/09/2026 mattina | **v18** | 🔬 **LA MATTINATA IN CUI IL PIANO HA MISURATO SE STESSO — una violazione di contratto scoperta e riparata in 8 ore, un difetto di codice inchiodato e censito, un debito di misura pagato, e il primo candidato della caccia frequenza che arriva a un round firmato.** 🚨 **(1) SOVRATAGLIA ORB 3,3× — TROVATA E CHIUSA**: la pagella automatica del 02/09 scopre che il **+1.680,35 del dry-run 100k e' un DIFETTO** — l'ORB `770611` girava a **1,0% invece dello 0,3% di contratto**, provato dalle **sei coppie appaiate** piccolo/100k (rapporto lotti da **5,86-6,44** a **20,29 e 19,70** fra il 21 e il 24/08 = il rapporto dei saldi) e da una verifica indipendente sullo stop (59,00 pt × 19,70 lotti = **0,996% del conto**). Riportata a contratto, la sedia sul 100k vale **circa −383 €** invece di +496,44. ✅ **Corretta da Claudio il 03/09 alle 08:10** (foto 07:34 a 1.0 → foto 08:10 a **0.3**, nessun altro campo toccato; piccolo verificato a 1,0% e chiuso con Annulla) → riga **A2**. La verifica sul campo e' la **prima coppia gemella futura** (rapporto atteso ~6). 🕶️ **(2) IL MISTERO DEL TRAILING E' RISOLTO, E NON ERA IL TRAILING**: la **FOTO A delle 08:19** inchioda `LARRY DOW S` (772341) **aperta dal 01/09 08:45** su U30USD, viva per tutta la vita del trade ORB → **ipotesi A (`SelPos`/hedging) confermata 3 giorni su 3** (19/08, 21/08, 02/09). I due pannelli sono **identici in ogni riga**: _"il colpevole e' il codice, identico sui due conti: cambia solo il VICINATO"_. 🔎 **(3) AUDIT DI FLOTTA — 126 file**: **26 🔴 vulnerabili · 8 🟠 "mezzo fix" (leggono per ticket, CHIUDONO per simbolo) · 85 🟢 sani · 7 ⚪**; e la scoperta che allarga il caso: la stessa `SelPos()` governa **`HandleOCO()`** e **`InpOneTradePerDay`** → **e' un difetto di RISCHIO**, non di gestione. 📊 **(4) VERIFICA STORICA — il verdetto che l'audit aspettava**: **ZERO chiusure incrociate** su 21 chiusure `expert` esaminate una per una e **zero occasioni** armate → **i 🟠 NON passano davanti ai 🔴**; ma il **danno passivo dei 🔴 e' agli atti**: `ABTG_ORB` nativo ha aperto **il secondo lato vietato dal pannello in 4 giornate su 16**, correlate **4 su 4** con un vicino a ticket piu' basso (**1 probabilita' su 1820**), = **20 operazioni dove il contratto ne prevede 16, +25% di frequenza**. ⚖️ Scritto anche il fatto scomodo: **quelle 4 operazioni hanno guadagnato +201,15 €** — fortuna su quattro, non un argomento. ⚠️ **Correzione di premessa misurata**: non "la posizione piu' vecchia" ma **quella col `position_id` piu' basso** — diverso nel **16,5% dei casi**, perche' i pendenti ereditano il ticket di quando sono stati *piazzati*. → **riga C9 nuova (PROPOSTO)** + **M34/M35 nuove**. 🔴 **E IL CONFLITTO DEL GIORNO, con una firma di IERI**: il fix dell'ORB **richiede una ricompilazione** e **D1** dice _"fase 1 senza ricompilazioni"_ (l'ORB e' **uno dei 5 mirror del 100k in collaudo**: ricompilare **brucia il criterio 4**, rischio X13) → raccomandazione dichiarata: **fixare solo sul terminale del PICCOLO**, dove il difetto morde. 🪑 **(5) FASE 4 VERDE**: **6 sedie mute su 6 VIVE e attaccate** (foto 08:47-08:54) — nessuna morta in silenzio → **H10**. 💸 **(6) SPREAD MISURATO, DEBITO DEL 23/08 PAGATO**: **252 milioni di tick**, **% solo-bid 0,000% su 3 simboli su 3** (→ **le corse a Model 4 usavano lo spread VERO: niente da rifare**), mediane in sessione **1,6-2,0 punti indice**, **DAX di NOTTE 3,5-3,9**, Dow ora 23 con P95 7,0 e max 101. **La convenzione "2.0 NON MISURATO" era giusta in sessione e OTTIMISTA fuori** — e **C2 si applica ORA PER ORA** (take ≥ 3× lo spread **dell'ora**). I round **gia' giudicati non si riscrivono**; dai futuri si cita questa misura. **H12 resta APERTA** perche' il **forex** non e' misurato (→ **M36**). 🏹 **(7) IL VIVAIO SI ORDINA**: 🪦 **V8 NON PROMOSSO confermato DA UNA MISURA** (ablazione: il filtro RSI toglie **9-13%** → e' un incrocio EMA(5/20), famiglia gia' morta due volte) · 🥇 **LondonFx PRIMO SUPERSTITE del passo 0** (EURUSD **19/24**, GBPUSD **24/24**, filtro che **taglia il 73-77%**) → ✍️ **R116 FIRMATO** (_"FIRMO TUTTO, ANCHE LA A SU F5"_: F5=A, ora 8, rischio **0,65%**, cap 2%/giorno acceso, prova di rischio come round separato) e **EA contenitore costruito** (`ABTG_LondonFx.mq5` v1.00, **repo-only, MAI compilato**, **hedge-safe dalla nascita**) · 🟢 **RELATIVO 8/10** (divergenza relativa fra due indici: la frequenza e' **una manopola**) e 🟠 **VGRSI 6/10** in coda (ma i suoi numeri nascono da **ri-ottimizzazione settimanale** = la regola misurata **anti-predittiva**, e i **DD dichiarati sono al muro o sopra**) · ⏸️ DayFlow scavalcato. ⚖️ **(8) M31 INCORPORATA** (eseguita il 02/09, arrivata dopo la chiusura del v17.1): il DD della famiglia Aperture DAX passa da **16,39% realizzato** a **7,36% normalizzato** = **1,18×** il promesso — **l'emergenza cade, lo sforo resta**, e viene **tutto** dalle modalita' BUY/SELL **che non sono piu' in campo** (RETEST-only: DD **0,28%**); la corsia **MERITO resta scattata anche normalizzata** (−277,64 €). 🛑 **Zero modifiche al forward da questo documento, zero preset toccati, zero acquisti autorizzati, nessun candidato promosso, nessuna sedia accesa o spenta.** → **54 parametri (16C · 21P · 16A · 1 chiuso)** | la pagella del 02/09 + le tre foto e la correzione della taglia + audit e verifica del difetto hedging + il censimento delle sedie mute + la misura dello spread + i due referti di sonda (V8, LondonFx) + la firma R116 + la 4ª battuta della caccia + M31 |
 | 02/09/2026 sera | **v17.1** | 🎯 **IL CENSIMENTO CHIESTO DALLA FIRMA P0 E' STATO FATTO PRIMA DEL CODICE, E HA CAMBIATO IL DISEGNO** (commit `36b4ba6`, cantiere della stessa giornata). Il tetto **"A1" (`InpMaxPosSimbolo`) esisteva GIA'**, **copiato a mano e identico byte per byte in 5 EA** della famiglia Aperture (DAX_Apertura_EU · Dow_Apertura_US · Nasdaq_Apertura_US · Apertura_3Ingressi · Apertura_Marco): conta posizioni **+ pendenti** su **tutti i magic**, ma **NON per lato** — conta il **totale sul simbolo**. 🔴 **E su conto HEDGING e' proprio quella la distinzione che conta**: un long e uno short sullo stesso simbolo sono una **COPERTURA**, non un pile-up, e con `A1=1` si bloccherebbero **entrambi**. 👉 Il tetto nuovo vive **nell'include di guardia**, ragiona **per simbolo+LATO** e separa il **nucleo puro** dal **filo che legge il terminale** (con autotest dedicato): **non duplica A1, lo corregge**. Aggiornata la sola riga **C8**; conteggi invariati (**53 parametri**), **binari in campo non toccati** (vincolo D1) | la nota di cantiere della firma P0: _"il cantiere CENSISCE l'esistente prima di scrivere codice nuovo"_ — e l'esistente non faceva la cosa che serviva |
