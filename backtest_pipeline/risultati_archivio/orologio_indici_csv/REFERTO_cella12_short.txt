@@ -1,0 +1,277 @@
+=====================================================================
+ SONDA DELL'OROLOGIO -- ABTG_SondaOrologio -- D30EUR / U30USD H1
+=====================================================================
+giro: INDICI   (criteri I1-I8, specifica prove/SONDA_OROLOGIO_INDICI.txt, 4 celle)
+modo: CORSA   <- CONTROLLO = giro a vuoto (NON e' il risultato)
+                      RICOGNIZIONE = solo determinismo e cronometro
+                      CORSA = la misura
+                      RICOMPOSIZIONE = NESSUNA corsa: rilettura dei CSV gia' fatti
+data: 2026-09-07 15:01:14
+pin:  fa7f33da9db7713b99dfce26b37dcaed8871fdc1
+finestra: 2024.09.26 -> 2026.06.30  (split 40/60)
+banco: Modello 4, deposito 100000, rischio 1,0% (pinnato nei file prova)
+terminale: C:\Program Files\BCM Markets MT5 Terminal
+compilazione: OK (49 KB, 15:01:19)
+cache tester: prima 2 file, dopo 0
+rifai: il driver generico e' chiamato SEMPRE con -Rifai (mai una passata saltata e spacciata per fresca)
+cronometro: 384 s per 144 passate (cella 12_d30eur_short) = 3 s per passata -> le 4 celle di questo giro (576 passate) costerebbero circa 0.4 ore. NON e' una misura di determinismo: qui i gemelli non ci sono.
+tick: finestra dal 2024.09.26 = dalla prima data che il broker HA -- ma quella e' la misura delle BARRE H1 (stato COMPLETO su D30EUR e U30USD, REFERTO_SONDA_STORICO_17-08.md riga 46), NON dei tick. PROFONDITA' A TICK misurata su [U30USD], MAI MISURATA su [D30EUR] (vedi RILIEVI)
+
+QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO (criterio I8).
+La sonda non promuove niente e non tocca nessuna sedia viva:
+produce la TABELLA qui sotto. Ipotesi e criteri I1-I8 stanno in
+prove/SONDA_OROLOGIO_INDICI.txt e si leggono PRIMA della tabella.
+
+LE SETTE COSE DA SAPERE PRIMA DI LEGGERE UN NUMERO:
+ 1. ORA SERVER FISSA (criterio I6, scelta FIRMATA). Gli uffici di
+    Londra e New York si spostano rispetto all'ora server per ~4
+    settimane l'anno (ora legale USA e UE non coincidenti; il
+    Giappone non cambia). L'errore c'e', e' noto, NON e' corretto.
+ 2. IL LORDO E' LA DERIVA SUL BID, non il risultato eseguito: bid
+    all'ingresso contro bid all'uscita, nei due versi. Lo spread
+    resta FUORI dalla misura, apposta, perche' il cancello I1 lo
+    confronta a parte. La media e' sulle GIORNATE OPERATE, non
+    sulle giornate di calendario.
+ 3. LA PEGGIOR GIORNATA IN % E' CONDIZIONATA ALLA TAGLIA: il lotto
+    esce da un rischio dell'1% su uno stop di 10 ATR, quindi e'
+    piccolo e la percentuale e' piccola con lui. NON e' il rischio
+    di una versione operabile: quella avrebbe uno stop diverso.
+ 4. L'ORA E' ORA SERVER BCM = ORA ITALIANA MENO UNA (criterio I6).
+    Le ancore misurate in casa: il DAX apre alle 08:00 SERVER, gli
+    indici USA alle 14:30 SERVER. Nella tabella qui sotto '8' vuol
+    dire le 9 italiane, '14' le 15 italiane. Chi legge una fascia
+    verde senza questa riga la attribuisce all'ora sbagliata.
+ 5. UN SOLO REGIME, TORO PIENO (criterio I7). La finestra
+    2024.09.26 -> 2026.06.30 e' un mercato solo: una fascia LONG
+    puo' uscire verde SOLO perche' l'indice e' salito. Per questo
+    il referto ha la sezione LETTURA APPAIATA DEI DUE LATI, e i due
+    lati NON si leggono separati.
+ 6. SEDIE VIVE NELLE STESSE ORE (ROTTA_PROP). 08:00-12:00 su
+    D30EUR e' l'orario della sedia 770101; 14:30-19:30 su U30USD
+    e' l'orario delle sedie 770202 e 770611 (quest'ultima sul conto
+    reale). Una fascia verde DENTRO quelle finestre vale molto meno
+    per la prop, anche coi numeri belli.
+ 7. DURATE 8 e 12 ORE: la posizione resta aperta molto dopo
+    l'ingresso (sul DAX oltre la chiusura del cash delle 17:30
+    server). La colonna dello spread e' misurata NELL'ORA
+    D'INGRESSO e NON descrive il costo dell'USCITA. E' il limite
+    n.3 del file di specifica, e vale su tutte le righe 8h e 12h.
+
+---------------------------------------------------------------------
+CELLA 11_d30eur_long  --  D30EUR LONG  --  magic 777211
+  D30EUR (DAX) lato LONG  -- la tabella 24 ore x 3 durate
+  esito: NON ESEGUITA   righe CSV: n/d (IS) / n/d (OOS), attese 72
+  il tester ha girato in questo giro: NON PERTINENTE (cella non eseguita in questo giro)
+  (nessuna tabella: la cella non ha prodotto CSV in questo giro)
+
+---------------------------------------------------------------------
+CELLA 12_d30eur_short  --  D30EUR SHORT  --  magic 777212
+  D30EUR (DAX) lato SHORT -- regola dei due lati (25/08) e lettura appaiata (I7)
+  esito: MISURATA   righe CSV: 72 (IS) / 72 (OOS), attese 72
+  il tester ha girato in questo giro: SI (il tester ha girato in questo giro)
+
+  finestra IS   (n = giornate operate | lordo = punti MT5 sul bid | I1 = |lordo|/spread mediano | pegg = peggior giornata %)
+  ora |     4 ORE                |     8 ORE                |    12 ORE
+      |    n   lordo    I1   pegg|    n   lordo    I1   pegg|    n   lordo    I1   pegg
+    0 |   16 -928.75  2.44  -0.18|   16  193.12  0.51  -0.18|   16-2092.50  5.51  -0.35|
+    1 |    6-2208.33  5.89  -0.09|    6-5836.67 15.56  -0.19|    6-5798.33 15.46  -0.19|
+    2 |   24 -383.33  1.02  -0.19|   24 2345.00  6.25  -0.28|   24   31.25  0.08  -0.37|
+    3 |   24 1245.83  3.28  -0.15|   24 3174.17  8.35  -0.35|   24  500.42  1.32  -0.41|
+    4 |   26  251.92  0.72  -0.33|   26 -155.38  0.44  -0.63|   26-3392.69  9.69  -0.82|
+    5 |   14 -342.86  0.95  -0.41|   14 4263.57 11.84  -0.58|   14 1720.00  4.78  -0.79|
+    6 |   24-5387.08 13.81  -0.45|   24-9570.83 24.54  -0.61|   24-8203.33 21.03  -0.74|
+    7 |   27   55.56  0.14  -0.63|   27 -492.22  1.23  -0.73|   27  979.26  2.45  -0.84|
+    8 |   22 -506.36  1.47  -0.49|   22   92.73  0.27  -0.75|   22  571.36  1.66  -0.92|
+    9 |   21  603.33  2.51  -0.59|   21 1747.14  7.28  -0.74|   21 2432.86 10.14  -0.75|
+   10 |   16-3224.37 18.97  -0.50|   16-6806.25 40.04  -0.71|   16-5684.37 33.44  -0.92|
+   11 |   19 1414.21  8.32  -0.97|   19-1100.00  6.47  -0.98|   19-2575.79 15.15  -0.91|
+   12 |   18-1995.56 11.74  -0.68|   18-3840.56 22.59  -0.82|   18 -903.33  5.31  -0.83|
+   13 |   16-2073.13 12.96  -0.44|   16-2486.88 15.54  -0.80|   16-5158.12 32.24  -0.82|
+   14 |   30-2041.67 12.76  -0.57|   30-1409.00  8.81  -0.57|   30 -136.33  0.85  -0.57|
+   15 |   30-2443.67 14.38  -0.57|   30-2195.67 12.92  -0.69|   30-1326.67  7.80  -0.74|
+   16 |   16  -60.63  0.36  -0.42|   16-3125.62 18.39  -0.42|   16-2723.75 16.02  -0.42|
+   17 |   26-9316.15 35.83  -0.76|   26-9137.31 35.14  -0.76|   26-9432.69 36.28  -0.76|
+   18 |   19-6230.00 23.07  -0.53|   19-4297.89 15.92  -0.49|   19-3134.74 11.61  -0.50|
+   19 |   29 -532.07  2.05  -0.21|   29  128.28  0.49  -0.21|   29 -200.00  0.77  -0.23|
+   20 |   24 -679.58  2.72  -0.18|   24 -389.17  1.56  -0.17|   24-1639.17  6.56  -0.21|
+   21 |   19 -790.53  2.82  -0.08|   19  -32.63  0.12  -0.08|   19-3276.32 11.70  -0.25|
+   22 |    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|
+   23 |    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|
+  fasce con I1 >= 3 in questa finestra: 42 su 72
+    ora 10  durata  8h  n=   16  lordo=-6806.25  spread mediano=170.00  I1=40.04  giornate positive= 37.50%  ore medie tenuta= 8.00
+    ora 17  durata 12h  n=   26  lordo=-9432.69  spread mediano=260.00  I1=36.28  giornate positive= 26.92%  ore medie tenuta=20.49
+    ora 17  durata  4h  n=   26  lordo=-9316.15  spread mediano=260.00  I1=35.83  giornate positive= 38.46%  ore medie tenuta= 9.86
+    ora 17  durata  8h  n=   26  lordo=-9137.31  spread mediano=260.00  I1=35.14  giornate positive= 42.31%  ore medie tenuta=18.02
+    ora 10  durata 12h  n=   16  lordo=-5684.37  spread mediano=170.00  I1=33.44  giornate positive= 31.25%  ore medie tenuta=23.00
+    ora 13  durata 12h  n=   16  lordo=-5158.12  spread mediano=160.00  I1=32.24  giornate positive= 50.00%  ore medie tenuta=23.83
+
+  finestra OOS   (n = giornate operate | lordo = punti MT5 sul bid | I1 = |lordo|/spread mediano | pegg = peggior giornata %)
+  ora |     4 ORE                |     8 ORE                |    12 ORE
+      |    n   lordo    I1   pegg|    n   lordo    I1   pegg|    n   lordo    I1   pegg
+    0 |   55  392.00  1.06  -0.28|   55  273.45  0.74  -0.37|   55 1785.64  4.83  -0.38|
+    1 |   10-3896.00 13.91  -0.18|   10-4462.00 15.94  -0.26|   10-6033.00 21.55  -0.42|
+    2 |   46 -153.26  0.43  -0.14|   46 1030.65  2.86  -0.64|   46 1204.13  3.35  -0.85|
+    3 |   29 -129.66  0.36  -0.22|   29   94.83  0.26  -0.36|   29-2671.03  7.42  -0.43|
+    4 |   40  -38.00  0.12  -0.31|   40 4035.25 12.23  -0.48|   40 4688.25 14.21  -0.61|
+    5 |   37 -427.30  1.26  -0.43|   37 2246.49  6.61  -0.60|   37 4008.65 11.79  -0.62|
+    6 |   31 1595.16  4.83  -0.42|   31-1622.58  4.92  -0.59|   31-1887.42  5.72  -0.59|
+    7 |   33 3980.91 10.48  -0.75|   33 5962.73 15.69  -1.00|   33 3811.52 10.03  -1.00|
+    8 |   37  785.95  2.91  -0.60|   37 2198.65  8.14  -0.68|   37 3221.08 11.93  -0.68|
+    9 |   36 -660.00  3.88  -0.42|   36  654.72  3.85  -0.70|   36 -301.67  1.78  -0.70|
+   10 |   35 1604.57 10.03  -0.37|   35 2762.57 17.27  -0.50|   35 3076.29 19.23  -0.52|
+   11 |   33  910.00  5.69  -0.31|   33-1320.30  8.25  -0.48|   33-6079.39 38.00  -0.65|
+   12 |   45  953.33  6.36  -0.33|   45 1205.33  8.04  -0.42|   45-2252.00 15.01  -0.47|
+   13 |   41 1777.56 11.85  -0.41|   41  812.68  5.42  -0.53|   41  751.46  5.01  -0.56|
+   14 |   36 1303.89  8.69  -0.49|   36  908.06  6.05  -0.59|   36  472.22  3.15  -0.61|
+   15 |   34-2167.65 13.55  -0.38|   34-5070.88 31.69  -0.77|   34-2996.76 18.73  -0.79|
+   16 |   31  703.55  4.40  -0.22|   31-1011.29  6.32  -0.39|   31 -894.52  5.59  -0.39|
+   17 |   34 1480.88  8.71  -0.23|   34  954.41  5.61  -0.24|   34  864.71  5.09  -0.26|
+   18 |   42 1408.81  5.22  -0.24|   42 1485.00  5.50  -0.24|   42 1371.67  5.08  -0.24|
+   19 |   42-2113.33  9.83  -0.21|   42-1087.38  5.06  -0.22|   42 -182.14  0.85  -0.23|
+   20 |   42-1492.62  7.46  -0.35|   42-1228.10  6.14  -0.35|   42-3047.62 15.24  -0.36|
+   21 |   34  306.47  1.14  -0.15|   34  120.00  0.44  -0.18|   34  682.65  2.53  -0.28|
+   22 |    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|    0    0.00  0.00   0.00|
+   23 |   14   -5.71  0.02  -0.05|   14   -5.71  0.02  -0.05|   14   -5.71  0.02  -0.05|
+  fasce con I1 >= 3 in questa finestra: 52 su 72
+    ora 11  durata 12h  n=   33  lordo=-6079.39  spread mediano=160.00  I1=38.00  giornate positive= 42.42%  ore medie tenuta=17.18
+    ora 15  durata  8h  n=   34  lordo=-5070.88  spread mediano=160.00  I1=31.69  giornate positive= 41.18%  ore medie tenuta=19.93
+    ora  1  durata 12h  n=   10  lordo=-6033.00  spread mediano=280.00  I1=21.55  giornate positive= 40.00%  ore medie tenuta=12.00
+    ora 10  durata 12h  n=   35  lordo= 3076.29  spread mediano=160.00  I1=19.23  giornate positive= 57.14%  ore medie tenuta=23.33
+    ora 15  durata 12h  n=   34  lordo=-2996.76  spread mediano=160.00  I1=18.73  giornate positive= 35.29%  ore medie tenuta=21.53
+    ora 10  durata  8h  n=   35  lordo= 2762.57  spread mediano=160.00  I1=17.27  giornate positive= 57.14%  ore medie tenuta= 8.00
+
+---------------------------------------------------------------------
+CELLA 13_u30usd_long  --  U30USD LONG  --  magic 777213
+  U30USD (DOW) lato LONG
+  esito: NON ESEGUITA   righe CSV: n/d (IS) / n/d (OOS), attese 72
+  il tester ha girato in questo giro: NON PERTINENTE (cella non eseguita in questo giro)
+  (nessuna tabella: la cella non ha prodotto CSV in questo giro)
+
+---------------------------------------------------------------------
+CELLA 14_u30usd_short  --  U30USD SHORT  --  magic 777214
+  U30USD (DOW) lato SHORT
+  esito: NON ESEGUITA   righe CSV: n/d (IS) / n/d (OOS), attese 72
+  il tester ha girato in questo giro: NON PERTINENTE (cella non eseguita in questo giro)
+  (nessuna tabella: la cella non ha prodotto CSV in questo giro)
+
+=====================================================================
+ LETTURA APPAIATA DEI DUE LATI -- criterio I7, CONTATA non adjudicata
+=====================================================================
+PERCHE' ESISTE QUESTA SEZIONE, detto prima dei numeri: la finestra
+e' un REGIME SOLO (toro pieno). Su un motore direzionale a orario
+fisso una fascia LONG puo' uscire verde SOLO perche' l'indice e'
+salito. Il criterio I7, congelato PRIMA dei numeri, dice: i due lati
+si leggono INSIEME, cella per cella; se LONG(ora X) e SHORT(ora X)
+sono simmetrici e opposti entro il rumore, quella cella e' DERIVA
+DELL'INDICE e non un orologio.
+
+I DUE NUMERI, in chiaro (lordo medio per giornata, in punti):
+   deriva = (lordo LONG - lordo SHORT) / 2   <- quanto e' salito o
+            sceso l'indice in quel blocco di ore: e' il TORO.
+   asimm  = (lordo LONG + lordo SHORT) / 2   <- quanto RESTA quando
+            i due lati si annullano: e' l'unico posto dove puo'
+            stare un fatto che non sia la deriva.
+   Se |asimm| <= |deriva| la riga esce DERIVA. Se |asimm| > |deriva|
+   esce ASIMM: NON vuol dire 'edge', vuol dire 'qui c'e' qualcosa da
+   guardare, e va guardato con I2 (mai il picco) e I3 (altopiano).
+   ATTENZIONE: due lati con lo stesso numero di giornate NON sono
+   garantiti -- la colonna n sta accanto apposta. Se n L e n S
+   differiscono di molto, i due lati non hanno operato gli stessi
+   giorni e la sottrazione vale meno.
+
+---------------------------------------------------------------------
+APPAIATA D30EUR
+
+  finestra IS: NON LEGGIBILE -- manca il CSV di 11_d30eur_long (LONG). I due lati si leggono INSIEME o non si leggono (I7): gira anche l'altro lato e poi -Ricomponi.
+
+  finestra OOS: NON LEGGIBILE -- manca il CSV di 11_d30eur_long (LONG). I due lati si leggono INSIEME o non si leggono (I7): gira anche l'altro lato e poi -Ricomponi.
+
+---------------------------------------------------------------------
+APPAIATA U30USD
+
+  finestra IS: NON LEGGIBILE -- manca il CSV di 13_u30usd_long (LONG) e di 14_u30usd_short (SHORT). I due lati si leggono INSIEME o non si leggono (I7): gira anche l'altro lato e poi -Ricomponi.
+
+  finestra OOS: NON LEGGIBILE -- manca il CSV di 13_u30usd_long (LONG) e di 14_u30usd_short (SHORT). I due lati si leggono INSIEME o non si leggono (I7): gira anche l'altro lato e poi -Ricomponi.
+
+E SE TUTTE LE RIGHE ESCONO 'DERIVA', L'ESITO E' VALIDO E VA SCRITTO
+COSI': su questi due indici, in questa finestra, l'orologio non
+aggiunge niente al fatto che il mercato e' salito.
+
+=====================================================================
+ IL CANCELLO I1 -- contato dal driver, NON adjudicato
+=====================================================================
+I1 (congelato): per almeno UNA fascia oraria, su ENTRAMBI i due
+simboli, |lordo medio per giornata| >= 3 x spread mediano DELLA
+STESSA ORA. Il rapporto lo calcola l'EA e lo scrive in colonna, cosi'
+nessuno lo puo' rifare storto in un foglio.
+
+>>> IL CRITERIO CONGELATO NON DICE SU QUALE FINESTRA SI LEGGE I1.
+    Il conto e' riportato per tutte e tre le letture, e la scelta di
+    quale vale e' di chi firma, non di questo script.
+
+>>> E IL CRITERIO E' AMBIGUO SU UN'ALTRA COSA, dichiarata qui invece
+    che sciolta di nascosto: 'per almeno UNA fascia oraria, su ENTRAMBI i due
+    simboli' si puo' leggere in due modi.
+      SEVERA: la STESSA fascia (stessa ora E stessa durata) sopra
+              soglia su >= 2 simboli. E' un fatto d'insieme.
+      LARGA : due simboli qualsiasi, ciascuno con una fascia SUA.
+              Due ore diverse su due simboli diversi passerebbero.
+    IL VERDETTO QUI SOTTO E' LA LETTURA SEVERA, ed e' una scelta
+    DICHIARATA: quando un criterio congelato copre lo stesso caso con
+    due clausole, in questa casa vince la piu' severa -- muovere un
+    criterio verso il permissivo dopo averlo scritto e' la mossa che
+    il progetto ha vietato a se stesso (CHECKLIST 31/08).
+    La lettura LARGA e' stampata accanto, etichettata, perche' e' un
+    dato utile -- ma NON e' il verdetto.
+  celle di misura con dati in questa corsa: 1 su 4
+  simboli senza NESSUNA cella misurata: U30USD
+  lettura IS       SEVERA (stessa fascia): simboli = 1 (D30EUR sulla fascia migliore (ora 0, durata 12h))  ->  I1 NON MISURATO PER INTERO (celle con dati 1 su 4: qui NON si legge un 'no')
+  lettura IS       larga  (fasce diverse ammesse, NON e' il verdetto): simboli = 1 (D30EUR)
+  lettura OOS      SEVERA (stessa fascia): simboli = 1 (D30EUR sulla fascia migliore (ora 0, durata 12h))  ->  I1 NON MISURATO PER INTERO (celle con dati 1 su 4: qui NON si legge un 'no')
+  lettura OOS      larga  (fasce diverse ammesse, NON e' il verdetto): simboli = 1 (D30EUR)
+  lettura ENTRAMBE SEVERA (stessa fascia): simboli = 1 (D30EUR sulla fascia migliore (ora 0, durata 12h))  ->  I1 NON MISURATO PER INTERO (celle con dati 1 su 4: qui NON si legge un 'no')
+  lettura ENTRAMBE larga  (fasce diverse ammesse, NON e' il verdetto): simboli = 1 (D30EUR)
+
+ATTENZIONE, e vale piu' del conto qui sopra: I1 e' il CANCELLO ZERO,
+non il verdetto. Restano DUE criteri che questo script NON adjudica
+e non puo' adjudicare, perche' sono giudizi e non conti:
+  I2 - LA CELLA NON SI SCEGLIE PERCHE' E' LA PIU' VERDE. 24 ore x 3
+       durate x 2 simboli x 2 lati = 288 celle: a caso qualcuna e'
+       verde. Vale la regola di casa: CENTRO DELL'ALTOPIANO, MAI IL
+       PICCO (12 Spearman IS->OOS negative su 13). E le ancore
+       dichiarate PRIMA sono due, in ora SERVER: 08:00 apertura DAX,
+       14:30 apertura indici USA.
+  I3 - ALTOPIANO, NON PICCO: la fascia buona deve avere accanto ORE
+       ADIACENTI dello stesso segno. Un'ora verde isolata fra due
+       rosse e' rumore. Si legge scorrendo la colonna 'lordo' delle
+       tabelle qui sopra, riga per riga.
+E se la tabella e' PIATTA, l'esito e' VALIDO e va scritto cosi': il
+caduto D7 (l'ora del fix, chiuso il 22/08) esce CONFERMATO ED ESTESO
+e la pista dell'orologio si chiude con un numero NOSTRO.
+
+IL VERDETTO I1 SI LEGGE SOLO A CELLE COMPLETE. Il criterio congelato
+chiede su ENTRAMBI i due simboli: e' un criterio DI INSIEME, e questo
+referto riporta solo le celle di QUESTO giro. Quando le 4 celle di
+misura sono girate, si lancia il blocco di RICOMPOSIZIONE della pagina:
+-Ricomponi (LO STESSO PIN, LO STESSO -Giro).
+Quel modo NON apre il tester e NON compila: rilegge i CSV gia' prodotti,
+lo dichiara cella per cella con la data del file, e ricalcola I1 sui
+simboli del giro. NON si usa -TutteLeCelle per ricomporre: -TutteLeCelle
+RIFA' DAVVERO tutte le passate (-Rifai sta sempre nell'argv), e sono ore.
+ATTENZIONE: con un PIN DIVERSO la riga cancella risultati_prove\ e le celle
+gia' girate SONO PERSE. Un ri-pin a meta' round = si ricomincia da capo.
+
+PROBLEMI: 2
+  - cella 12_d30eur_short (IS): 'Notti Attraversate' > 0 su 26 passate. La chiusura forzata di fine giornata NON e' stata ermetica su questo simbolo: il mandato 'mai overnight' non e' rispettato e va detto.
+  - cella 12_d30eur_short (OOS): 'Notti Attraversate' > 0 su 26 passate. La chiusura forzata di fine giornata NON e' stata ermetica su questo simbolo: il mandato 'mai overnight' non e' rispettato e va detto.
+RILIEVI: 6
+  - DETERMINISMO DEL BANCO NON MISURATO IN QUESTO GIRO: il ramo INDICI non ha una cella gemelli (i file prova congelati sono 4 e questo driver non se ne inventa un quinto). Che due passate identiche diano due righe identiche su questa macchina lo dice solo la cella 00_gemelli del ramo FX, e vale se e' stata girata QUI, con lo stesso terminale e lo stesso EA.
+  - PROFONDITA' A TICK MAI MISURATA su D30EUR, e la finestra gira a Modello 4. La data 2024.09.26 viene da REFERTO_SONDA_STORICO_17-08.md, che e' la sonda ABTG_InfoBroker su TF H1: misura le BARRE, non i tick (R109_CRITERI.md par. 4.2 lo scrive in lettere, e in tutto il repo esistono solo misura_tick_U30USD.csv e misura_tick_NASUSD.csv). A Modello 4, se i tick reali non coprono la finestra MT5 NON si ferma: ripiega e genera i tick dalle barre M1, e la colonna 'Spread Mediano Ingresso' -- che e' META' del cancello I1 -- smette di essere lo spread del feed. E' la CLASSE 18 della checklist. Si chiude misurando i tick di quel simbolo (misura_tick_<SIMBOLO>.csv), non con questa corsa: finche' manca, il rapporto I1 su quel simbolo si legge con l'etichetta 'spread NON verificato' attaccata.
+  - cella 12_d30eur_short (IS): 72 fasce su 72 hanno MENO di 150 giornate operate. Criterio I5: su quelle fasce il MERITO resta sospeso (il RISCHIO no).
+  - cella 12_d30eur_short (IS): su 2 fasce lo stop di protezione (10 ATR) o una posizione orfana ha chiuso piu' dell'1% delle operazioni. Lo stop doveva essere un paracadute mai aperto: se morde, la sonda sta misurando anche lo stop.
+  - cella 12_d30eur_short (OOS): 72 fasce su 72 hanno MENO di 150 giornate operate. Criterio I5: su quelle fasce il MERITO resta sospeso (il RISCHIO no).
+  - cella 12_d30eur_short (OOS): su 2 fasce lo stop di protezione (10 ATR) o una posizione orfana ha chiuso piu' dell'1% delle operazioni. Lo stop doveva essere un paracadute mai aperto: se morde, la sonda sta misurando anche lo stop.
+
+COME SI RIPRENDE: si riparte dalla pagina righe/RIGA_SONDA_OROLOGIO_INDICI_DA_MANDARE.md,
+che e' l'UNICO posto in cui la riga di lancio di questo giro esiste
+(CHECKLIST punto 100). Ogni giro ha la SUA pagina e il SUO pin.
