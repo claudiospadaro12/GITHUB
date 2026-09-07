@@ -10111,3 +10111,101 @@ stessa riga. Corollario di metodo, pagato lo stesso giorno: **una prova di
 illeggibilita' fatta con `chmod 000` mentre si gira come root non prova
 niente**, root scavalca i permessi e il caso non si riproduce affatto. Si usa
 un **symlink rotto**, che fallisce l'apertura davvero.)_
+
+---
+
+## 151. 🚦 IL **CANCELLO** CHE ESISTE SOLO NEI CRITERI E NELLA `Write-Host` FINALE: la corsa "che si ferma prima di spendere macchina" **spende tutto**, e poi stampa in verde
+
+**Trovato il 07/09/2026** dal verificatore delle stringhe, **riproducendo
+eseguendo** la riga di R118 (`lancia_r118.ps1`, pin `f81ad55`) su un banco con
+un finto `walkforward_generico.ps1` che scriveva CSV con numeri **assurdi di
+proposito** (`profit 12345,00 · PF 9,99999 · DD 99,9999 · n 7`) al posto
+dell'ancora dichiarata (`999,42 / 1,18776 / 10,5984 / 311`).
+
+I criteri congelati del round dicevano, testuale:
+
+> *"Corsa **c** per prima (20 passate, la piu' corta): e' il **cancello A2**.
+> Se non riproduce R83 V, **il round si ferma prima di spendere macchina**."*
+
+Il driver invece:
+
+1. lancia `c`, `a` e `b` **di fila**, senza mai guardare il CSV di `c`;
+2. stampa `=== TUTTI E 6 I CSV CI SONO. ===` **in verde**;
+3. e solo **dopo** le 170 passate stampa l'ancora — come **promemoria per
+   l'occhio umano**:
+
+```powershell
+# lancia_r118.ps1, ramo finale della raccolta
+Write-Host ("=== TUTTI E " + $attesi.Count + " I CSV CI SONO. ===") -ForegroundColor Green
+Write-Host "    CONTROLLO D'IGIENE NUMERO UNO, prima di qualunque lettura:" -ForegroundColor Gray
+Write-Host "      corsa c, riga InpMinStopPts=0  -> deve dare OOS 999,42 / PF 1,18776" -ForegroundColor Gray
+```
+
+Nessun `Import-Csv`, nessun confronto, nessun `exit 1`: il "cancello" e' una
+**frase**. Il risparmio promesso (fermarsi a **20** passate invece di **170**)
+non puo' avvenire per costruzione, e il verde in fondo **contraddice** la frase
+grigia due righe sotto.
+
+> ✅ **REGOLA: un cancello dichiarato BLOCCANTE nei criteri deve essere una
+> RIGA DI CODICE che legge l'artefatto e fa `exit 1` — o non e' un cancello, e'
+> un consiglio.** Il collaudo e' la **falsificazione**: si danno al driver
+> numeri sbagliati e si guarda se se ne accorge. Se il verdetto e' identico con
+> i numeri veri e con quelli falsi, il controllo **non esiste**.
+> Corollario: il gate va messo **fra le corse**, non nella raccolta finale —
+> un controllo che gira dopo aver pagato il conto non e' un cancello, e'
+> un'autopsia.
+
+_(Parente della 34 — "il canarino che vive solo in una `Print`" — ma peggiore:
+li' il canarino non veniva letto perche' MT5 in ottimizzazione non mostra i
+log; qui il canarino **si legge benissimo**, arriva solo **dopo che i soldi di
+macchina sono stati spesi**, e sopra ha una riga verde che dice che e' andato
+tutto bene.)_
+
+---
+
+## 152. 🕳️ `-ErrorAction Stop` NELLA ONE-LINER **NON UCCIDE LA RIGA**: il `;` tira dritto lo stesso, e anche il controllo del MARCATORE viene saltato — l'unico pezzo che salva davvero e' il `Remove-Item`
+
+**Trovato il 07/09/2026** dal verificatore delle stringhe, **eseguendo** la
+riga di R118 con una URL rotta di proposito. Questo punto **CORREGGE il punto
+8 di questa stessa checklist**, che da settimane dichiara:
+
+```powershell
+irm $u -OutFile $p -ErrorAction Stop      # 2: errore TERMINANTE = la riga muore qui
+```
+
+**Non e' vero.** `-ErrorAction Stop` rende terminante l'errore **per quel
+cmdlet**: interrompe la *statement* in corso, **non la sequenza di statement
+separate da `;`**. Misurato:
+
+```
+$p="$env:USERPROFILE\lancia_r118.ps1"; Remove-Item $p -EA SilentlyContinue;
+irm "<url che da' 404>" -OutFile $p -ErrorAction Stop;
+if(-not (Select-String -Path $p -SimpleMatch -Pattern 'ROUND 118' -Quiet)){ throw 'SCRIPT VECCHIO' };
+Write-Host "!!! LA CODA HA TIRATO DRITTO !!!"
+-->  Invoke-RestMethod: 404: Not Found
+     Select-String: Cannot find path '...' because it does not exist.
+     !!! LA CODA HA TIRATO DRITTO !!!
+```
+
+E il **secondo** pezzo di sicurezza cade per lo stesso motivo: con il file non
+scaricato, `Select-String` **va in errore** invece di tornare `$false`, l'errore
+abortisce la *statement* `if(...)` — quindi il `throw` **non viene mai
+eseguito** — e l'esecuzione riprende dalla statement dopo. Dei tre pezzi del
+punto 8, **l'unico che ha funzionato davvero e' il primo**: senza `Remove-Item`
+la copia vecchia nel profilo sarebbe partita.
+
+> ✅ **REGOLA: nella one-liner il `throw` e' l'unica cosa che ferma la coda.**
+> Quindi il controllo va scritto in modo che il `throw` sia **RAGGIUNGIBILE**,
+> cioe' preceduto da un test che non puo' andare in errore:
+> ```powershell
+> ...; irm $u -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern '<marcatore>' -Quiet)){ throw 'SCRIPT VECCHIO' }; & powershell ...
+> ```
+> `Test-Path` non lancia mai: se il file non c'e' torna `$false`, il `throw`
+> parte e **la riga muore davvero**. Verificato eseguendo: con `throw` la
+> statement successiva NON gira; con il solo `-ErrorAction Stop` gira.
+> E il `Remove-Item` resta obbligatorio comunque: e' la rete sotto tutte e due.
+
+_(Meta-lezione: questa checklist ha tenuto per settimane una spiegazione
+SBAGLIATA di un rimedio GIUSTO. Il rimedio funzionava per il motivo n.1, non
+per il n.2 che era scritto. Un rimedio si collauda falsificandolo, anche quando
+"si sa" perche' funziona.)_
