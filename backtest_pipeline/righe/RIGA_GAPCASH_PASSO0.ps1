@@ -598,6 +598,19 @@ try{
   if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1." }
   $instDir = $cand.DirectoryName
   $Terminale = $instDir
+  # >>> IL RIPIEGO QUI SOPRA PERDE L'ESCLUSIONE DEL "-V3": E' CODICE, NON
+  #     UN CARTELLO (classe 37, riprodotta ESEGUENDO il 07/09/2026).
+  #     Se la cartella "BCM Markets MT5 Terminal" senza -V3 non c'e', la
+  #     seconda riga del selettore ripesca QUALUNQUE "*BCM Markets*",
+  #     cioe' anche la -V3 del conto 100k 50504263: la corsa finiva bene,
+  #     PROBLEMI 0, uscita 0, e il .mq5/.ex5 della sonda scritti dentro il
+  #     terminale sbagliato. La riga stampata sotto DICEVA la regola e non
+  #     la faceva rispettare a nessuno tranne all'occhio di chi legge --
+  #     ed e' esattamente quello che la regola dei terminali multipli
+  #     (CLAUDE.md, 06/09) vieta. Adesso e' un cancello.
+  if(($instDir -notlike "*BCM Markets MT5 Terminal*") -or ($instDir -like "*-V3*") -or ($instDir -like "*BCM_Reale*")){
+    throw ("TERMINALE SBAGLIATO: " + $instDir + ". Questo PASSO 0 gira SOLO sul terminale del conto DEMO PICCOLO 50503392 (cartella che contiene 'BCM Markets MT5 Terminal' e NON contiene '-V3'). Il ripiego del selettore ha scelto un'altra installazione (la -V3 e' il 100k 50504263, C:\BCM_Reale e' il conto REALE 10105439): mi fermo PRIMA di copiarci dentro la sonda e di aprirci il tester.")
+  }
   $MetaEditor = Join-Path $instDir "metaeditor64.exe"
   if($MetaEditorPercorso -ne ""){
     $MetaEditor = $MetaEditorPercorso
@@ -854,6 +867,54 @@ catch{
 #  fermata a meta'.
 # =====================================================================
 Titolo "REFERTO E RACCOLTA"
+
+# =====================================================================
+#  QUALI ARTEFATTI SI ALLEGANO: SOLO QUELLI SCRITTI DA *QUESTA* CORSA.
+#  Difetto RIPRODOTTO il 07/09/2026 a banco, in due versi, e la
+#  cartella di lavoro ($env:USERPROFILE\abtg_gapcash_passo0) e'
+#  RIUSABILE apposta:
+#    (a) corsa che muore alla COMPILAZIONE (uscita 3, l'esito PIU'
+#        PROBABILE della prima corsa): lo zip usciva con dentro i due
+#        CSV della corsa BUONA del giro prima, sotto un referto che
+#        diceva "corsa GATE ..: NON ESEGUITA";
+#    (b) corsa che muore a un cancello di PRE-VOLO (uscita 1): lo zip
+#        usciva con dentro COMPILAZIONE_<EA>.log del giro prima, sotto
+#        un referto che diceva "compilazione : NON TENTATA".
+#  Il driver la regola ce l'aveva gia', ma SOLO per il giro a vuoto.
+#  Qui vale per tutti i rami: si allega cio' che porta la data di
+#  QUESTA corsa, il resto si DICHIARA scartato (non si nasconde).
+# =====================================================================
+$Allegati  = New-Object System.Collections.ArrayList
+$Scartati  = New-Object System.Collections.ArrayList
+function Vaglia([string]$percorso){
+  if(-not (Test-Path -LiteralPath $percorso)){ return }
+  $fi = Get-Item -LiteralPath $percorso
+  if($fi.LastWriteTime -ge $Avvio.AddSeconds(-5)){ [void]$Allegati.Add($fi.FullName) }
+  else{ [void]$Scartati.Add($fi.Name + " (scritto " + $fi.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ")") }
+}
+# il log del compilatore SI VAGLIA: viene cancellato solo dentro il
+# blocco della compilazione, quindi chi muore PRIMA se lo ritrova li'.
+Vaglia (Join-Path $Work ("COMPILAZIONE_" + $EA + ".log"))
+# i tre file scaricati AL PIN non si vagliano per data: Scarica() li
+# cancella e li riscarica a ogni corsa, quindi o sono di adesso o non
+# ci sono proprio. Vagliarli per data li farebbe sparire dallo zip solo
+# perche' il server ha mandato indietro un timestamp suo.
+foreach($f in @( (Join-Path $Work ("misura_tick_" + $Simbolo + ".csv")),
+                 (Join-Path $Prove $FileGate), (Join-Path $Prove $FileCtrl) )){
+  if(Test-Path -LiteralPath $f){ [void]$Allegati.Add((Get-Item -LiteralPath $f).FullName) }
+}
+# NEL GIRO A VUOTO NON SI ALLEGA NESSUN CSV: nessuna passata e' girata,
+# e infilare numeri veri in un pacchetto intestato "GIRO A VUOTO"
+# vorrebbe dire mandare risultati che quella corsa non ha prodotto.
+$Ris2 = Join-Path $Work ("risultati_prove\" + $EA)
+if((Test-Path -LiteralPath $Ris2) -and (-not $GiroAVuoto)){
+  foreach($f in @(Get-ChildItem -LiteralPath $Ris2 -Filter "*.csv" -ErrorAction SilentlyContinue)){ Vaglia $f.FullName }
+}
+$CsvAllegati = @($Allegati | Where-Object { $_ -like "*.csv" -and (Split-Path -Leaf $_) -like ($EA + "_*") }).Count
+if($Scartati.Count -gt 0){
+  [void]$Rilievi.Add("NON allegati allo zip " + $Scartati.Count + " file di una corsa PRECEDENTE (la cartella di lavoro e' riusabile): " + ($Scartati -join ", ") + ". Questa corsa e' partita alle " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss",$INV) + ": nello zip ci va solo cio' che ha prodotto LEI.")
+}
+
 $Cart = Join-Path $Dsk ("GAPCASH_PASSO0_" + ($Modo -replace '\s','') + "_" + $Stamp)
 New-Item -ItemType Directory -Force -Path $Cart | Out-Null
 
@@ -884,6 +945,7 @@ L ("   fossero nativi, quel criterio misurerebbe un'altra cosa.")
 L ("corsa GATE ..: " + $StatoGate)
 L ("corsa CTRL ..: " + $StatoCtrl)
 L ("cancello ....: " + $CancelloStato + $(if($CancelloPerche -ne ""){ " -- " + $CancelloPerche }else{ "" }))
+L ("CSV di misura allegati allo zip: " + $CsvAllegati + "   (SOLO quelli scritti da questa corsa; i file di una corsa precedente sono elencati nei RILIEVI, non allegati)")
 L ("CSV *_OOS trovati: " + $OosTrovati + "   (attesi 0: con -FrazioneIS 1 la gamba OOS del driver generico e' DEGENERE e si ignora)")
 L ""
 L "QUESTA CORSA NON DICE SE IL MOTORE GUADAGNA."
@@ -1152,26 +1214,8 @@ $refPath = Join-Path $Cart "REFERTO_GAPCASH_PASSO0.txt"
 Set-Content -LiteralPath $refPath -Value ($RefTxt -join "`r`n") -Encoding ASCII
 Write-Host ($RefTxt -join "`r`n")
 
-# --- gli artefatti, copiati PER NOME: solo cio' che esiste davvero.
-foreach($f in @(("COMPILAZIONE_" + $EA + ".log"), ("misura_tick_" + $Simbolo + ".csv"))){
-  $s1 = Join-Path $Work $f
-  if(Test-Path -LiteralPath $s1){ Copy-Item -LiteralPath $s1 -Destination $Cart -Force }
-}
-foreach($f in @($FileGate,$FileCtrl)){
-  $s2 = Join-Path $Prove $f
-  if(Test-Path -LiteralPath $s2){ Copy-Item -LiteralPath $s2 -Destination $Cart -Force }
-}
-# NEL GIRO A VUOTO NON SI COPIA NESSUN CSV. La cartella di lavoro e'
-# riusabile: i CSV di una corsa VERA precedente restano li' dentro, e
-# infilarli in uno zip intestato "GIRO A VUOTO" vorrebbe dire mandare
-# numeri veri dentro un pacchetto che dichiara di non averne (e' il
-# difetto gemello del "referto di una corsa mai avvenuta", 31/08).
-$Ris2 = Join-Path $Work ("risultati_prove\" + $EA)
-if((Test-Path -LiteralPath $Ris2) -and (-not $GiroAVuoto)){
-  foreach($f in @(Get-ChildItem -LiteralPath $Ris2 -Filter "*.csv" -ErrorAction SilentlyContinue)){
-    Copy-Item -LiteralPath $f.FullName -Destination $Cart -Force
-  }
-}
+# --- gli artefatti: la lista e' gia' stata VAGLIATA per data qui sopra.
+foreach($f in $Allegati){ Copy-Item -LiteralPath $f -Destination $Cart -Force }
 
 $zip = $Cart + ".zip"
 Remove-Item -LiteralPath $zip -Force -ErrorAction SilentlyContinue
@@ -1179,12 +1223,20 @@ try{ Compress-Archive -Path (Join-Path $Cart "*") -DestinationPath $zip -Force }
 Write-Host ""
 Write-Host ("CARTELLA: " + $Cart) -ForegroundColor Green
 Write-Host ("ZIP DA MANDARE: " + $zip) -ForegroundColor Green
-Write-Host "FILE ATTESI NELLO ZIP:" -ForegroundColor Gray
-Write-Host "   - REFERTO_GAPCASH_PASSO0.txt          <- e' questo che conta" -ForegroundColor Gray
-Write-Host ("   - " + $EA + "_" + $Simbolo + "_IS_GATE.csv    (8 righe, gate acceso)") -ForegroundColor Gray
-Write-Host ("   - " + $EA + "_" + $Simbolo + "_IS_CTRL.csv    (2 righe, gate SPENTO)") -ForegroundColor Gray
-Write-Host ("   - " + $FileGate + " + " + $FileCtrl) -ForegroundColor Gray
-Write-Host ("   - COMPILAZIONE_" + $EA + ".log        (se il compilatore ha lasciato un log)") -ForegroundColor Gray
+# >>> L'ELENCO E' L'ESITO, NON IL PIANO (classe 141). Si stampa cio' che
+#     e' finito dentro DAVVERO, letto dalla cartella, non la lista fissa
+#     di quello che ci sarebbe dovuto essere.
+Write-Host "FILE DENTRO LO ZIP (letti dalla cartella, non promessi):" -ForegroundColor Gray
+foreach($f in @(Get-ChildItem -LiteralPath $Cart -File -ErrorAction SilentlyContinue | Sort-Object Name)){
+  $nota = ""
+  if($f.Name -eq "REFERTO_GAPCASH_PASSO0.txt"){ $nota = "   <- e' questo che conta" }
+  if($f.Name -like ("*_IS_GATE.csv")){ $nota = "   (attese " + $CelleGate + " righe, gate acceso)" }
+  if($f.Name -like ("*_IS_CTRL.csv")){ $nota = "   (attese " + $CelleCtrl + " righe, gate SPENTO)" }
+  Write-Host ("   - " + $f.Name + $nota) -ForegroundColor Gray
+}
+if($Scartati.Count -gt 0){
+  Write-Host ("   (" + $Scartati.Count + " file di una corsa PRECEDENTE NON allegati: " + ($Scartati -join ", ") + ")") -ForegroundColor DarkYellow
+}
 
 # =====================================================================
 #  CODICI DI USCITA -- e nessuno di questi vuol dire "il motore va bene"
