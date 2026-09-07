@@ -1,0 +1,36 @@
+MISURA DELLA PROFONDITA' DEI TICK REALI -- D30EUR @ BCM
+data: 2026-09-07   (corsa eseguita da Claudio sul PC di backtest)
+script: scarica_storico.ps1 pinnato a 5fa4445e95fff57e224c187974f2ab4a543dd329
+        (v2: aggiunto il MARCATORE che mancava)
+riga:   -Simboli 'D30EUR' -Da '2022.01.01' -Timeframes 'M1,M5' -TimeoutMin 240 -Auto
+        !!! GLI APICI SONO OBBLIGATORI: senza, PowerShell lega M1,M5 come ARRAY e
+            arriva "M1 M5" (spazio). Il .mq5 splitta solo sulla virgola -> nessun
+            timeframe riconosciuto -> ZERO righe di barre nel CSV, mentre la riga
+            TICK (che sta fuori dal ciclo) viene scritta lo stesso e il referto
+            esce VERDE. Riprodotto il 07/09, classe 65.
+
+I TICK REALI DI D30EUR PARTONO DAL 2024.09.26   (35408137 tick, verdetto: TICK REALI PARZIALI)
+MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26
+
+D30EUR M1 barre=642270 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+D30EUR M5 barre=129666 locale=2024.09.26 server=2024.09.26 -> IL BROKER NON HA PIU' STORICO
+D30EUR TICK barre=35408137 locale=2024.09.26 server=- -> TICK REALI PARZIALI
+
+COME SI LEGGE:
+ - 'TICK REALI PARZIALI' NON vuol dire tick finti: vuol dire parziali rispetto
+   al 2022.01.01 richiesto. Cio' che conta e' che la data d'inizio dei tick
+   (2024.09.26) COINCIDA col muro delle barre M1 (2024.09.26):
+   coincide, quindi la finestra di casa (@DAQUANDO 2024.09.26) e' coperta da
+   TICK VERI e i numeri a Modello 4 su questo simbolo reggono.
+ - PERCHE' E' STATA FATTA: il giro di CONTROLLO della sonda dell'orologio
+   (07/09) ha alzato il rilievo "profondita' a tick MAI MISURATA su D30EUR".
+   A Modello 4 MT5 non si ferma se i tick mancano: se li fabbrica dalle barre
+   M1, e la colonna 'Spread Mediano Ingresso' -- META' del cancello I1 --
+   smette di essere lo spread del feed. Adesso il rilievo e' CHIUSO.
+
+DENSITA' A CONFRONTO (tick per barra M1, calcolata qui):
+ - NASUSD  166.509.474 / 660.018 = ~252 tick per minuto
+ - U30USD   67.618.571 / 650.255 = ~104
+ - D30EUR   35408137 / 642270 = ~55
+   Il DAX e' il piu' RADO dei tre. Non e' un difetto (e' il mercato), ma va
+   ricordato quando si cita una misura di spread costruita sui suoi tick.
