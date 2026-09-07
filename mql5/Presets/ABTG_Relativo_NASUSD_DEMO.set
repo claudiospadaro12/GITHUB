@@ -1,0 +1,157 @@
+; =====================================================================
+; ABTG_Relativo -- NASUSD M5 -- CORSIA DEMO (conto DEMO PICCOLO 50503392)
+; Preset di FORWARD OSSERVATIVO. Creato il 07/09/2026.
+; EA: mql5/Experts/ABTG_Relativo.mq5
+; Magic: 774690 -- VERIFICATO VERGINE repo-wide il 07/09/2026
+;        (grep -rn "774690" . --exclude-dir=.git  ->  0 occorrenze)
+; Scheda della sedia: report/CORSIA_DEMO_RELATIVO_NASUSD.md
+; Istruzioni di carico:  report/CORSIA_DEMO_RELATIVO_ISTRUZIONI.md
+; =====================================================================
+;
+; !!! GAMBA UNICA: NASUSD. LA GAMBA D30EUR E' BOCCIATA. !!!
+;   R117 su D30EUR ha misurato DD OOS 25,01% e peggior giornata -5,20%
+;   = DUE muri prop sfondati insieme (10% totale / 5% giornaliero).
+;   Bocciatura PER RISCHIO, che non dipende da n e non si sospende mai.
+;   Questo preset NON va caricato su D30EUR, per nessun motivo.
+;   Fonte: backtest_pipeline/REGISTRO_TEST.md, sezione
+;          "R117 RELATIVO D30EUR ... BOCCIATA PER RISCHIO"
+;
+; ---------------------------------------------------------------------
+; DA DOVE VIENE OGNI VALORE (regola di casa: nessun numero a memoria)
+;   Il blocco parametri qui sotto e' COPIATO CARATTERE PER CARATTERE dal
+;   file prova della cella promossa:
+;       backtest_pipeline/prove/RELATIVO_R117_NAS.txt
+;   ed e' identico anche al file prova del round successivo
+;       backtest_pipeline/prove/RELATIVO_R117BIS_NAS.txt
+;   (i due differiscono SOLO per @FINOA e per InpMagic: verificato riga
+;   per riga il 07/09/2026). Nessun input e' stato ritoccato.
+;
+;   DUE SOLE DIFFERENZE CONSAPEVOLI rispetto al file prova, dichiarate:
+;
+;   (a) InpTag: "RELATIVO" nel prova, "RELATIVO_DEMO" qui. VERIFICATO NEL
+;   CODICE che sia puramente cosmetico: InpTag compare in TRE punti soli
+;   (riga 484 = prefisso del Log; righe 1267-1268 = commento dell'ordine
+;   passato a gTrade.Buy/Sell). Non entra in nessun calcolo, non tocca
+;   lotto, stop, segnale o filtro. Serve a distinguere a colpo d'occhio
+;   le operazioni della corsia demo nella cronologia del conto.
+;
+;   (b) InpMagic.
+;   Nel prova e' un ASSE a due celle (774602||774602||50||774652||Y),
+;   che serve SOLO a rimettere il tester in ottimizzazione vera perche'
+;   l'EA scrive il CSV da OnTesterDeinit. In forward l'asse non esiste:
+;   il magic e' un valore secco, e per costruzione DEVE essere nuovo,
+;   perche' 774602/774652 sono magic di ROUND, non di campo.
+;
+; ---------------------------------------------------------------------
+; RISCHIO: 0,65% -- NESSUNA RISCALATURA, E QUESTO E' UN FATTO
+;   La cella R117 e' stata misurata gia' a InpRiskPercent = 0.65, che e'
+;   esattamente il metro di casa firmato il 18/08 (cap C1 3,25% = 5 SL
+;   vivi da 0,65%). Quindi i numeri promessi -- DD 8,40%, peggior
+;   giornata -2,12% -- valgono TALI E QUALI, senza scalatura inferita.
+;
+; RISCHIO APERTO: 0,65% MASSIMO, LETTO NEL CODICE
+;   L'EA tiene UNA SOLA posizione per volta (gTicket e' una variabile
+;   singola, non un vettore). InpMaxTradesPerDay=5 e' il tetto delle
+;   operazioni AL GIORNO, non delle posizioni CONTEMPORANEE.
+;   Quindi questa sedia aggiunge al massimo 0,65% di rischio aperto,
+;   contro un cap C1 di 3,25%. Il peggior giorno teorico e' 5 x 0,65%
+;   = 3,25%, che sta dentro il muro giornaliero prop del 5%.
+;
+; ---------------------------------------------------------------------
+; I NUMERI PROMESSI (backtest OOS, tick reali BCM, rischio 0,65%)
+;   Fonte: backtest_pipeline/REGISTRO_TEST.md sezione
+;          "R117 RELATIVO NASUSD ... MERITO SOSPESO"
+;   confermata da backtest_pipeline/righe/RIGA_RELATIVO_R117BIS.ps1 righe 9-14
+;     aspettativa OOS  +0,063 R   (soglia A1 0,075 -- ZONA MORTA)
+;     profit factor    1,189      (soglia A2 1,15 -- passa)
+;     drawdown OOS     8,40%      (soglia A4 8,0 / muro 10,0 -- ZONA MORTA)
+;     peggior giornata -2,12%     (soglia A5 -4,0 -- passa)
+;     trade < 60 s     0,00%      (collaudo A7 -- passa)
+;     n                IS 87 / OOS 154  (A6 chiede 150 in ENTRAMBE: NON passa)
+;   Il DD 8,40% e' il CANCELLO DI RISCHIO VIVO: se il forward lo supera,
+;   revisione IMMEDIATA (corsia RISCHIO firmata il 18/08).
+;
+; LIMITE DI TRACCIABILITA', DICHIARATO
+;   I CSV grezzi di R117 NON sono in backtest_pipeline/risultati_archivio/
+;   (verificato il 07/09/2026: la cartella sondarelativo/ contiene solo i
+;   referti del PASSO 0). I numeri sopra hanno DUE citazioni indipendenti
+;   nel repo (REGISTRO_TEST.md e RIGA_RELATIVO_R117BIS.ps1) ma NON un
+;   file di misura primario. E' un limite, e va detto.
+;
+; ---------------------------------------------------------------------
+; DUE COSE CHE IN FORWARD SI COMPORTANO DIVERSAMENTE DAL TESTER
+;   1. InpMaxSpreadPts = 0 significa filtro SPENTO. Nel tester era una
+;      scelta di MISURA (lezione R55: lo spread si misura, non si
+;      filtra). In forward vuol dire che l'EA entra a QUALUNQUE spread.
+;      Lo spread NASUSD misurato il 03/09 in sessione 14-20 e' 1,6-1,8
+;      punti indice (P95 2,7) -- fonte
+;      backtest_pipeline/risultati_archivio/SPREAD_FLOTTA_MISURA_2026-09-03.md
+;      Resta 0 perche' cambiarlo vorrebbe dire non collaudare piu' la
+;      cella promossa ma un'altra. E' una scelta dichiarata, non una
+;      dimenticanza.
+;   2. Questo EA NON ha input Guardian, e il conto 50503392 il 07/09 e'
+;      stato lasciato SENZA Guardian da Claudio, apposta, per "vedere
+;      appieno come si comportano gli EA". Conseguenza da sapere prima:
+;      la pausa Guardian al -4,0% giornaliero NON scattera'. Una
+;      giornata che nel backtest "sul campo non sarebbe esistita", qui
+;      esistera' per intero.
+;
+; =====================================================================
+;  IL BLOCCO DEI PARAMETRI -- copiato da RELATIVO_R117_NAS.txt
+; =====================================================================
+
+; --- il metro: si LEGGE, non si scambia. U30USD DEVE essere in Market
+;     Watch e con lo storico scaricato, altrimenti OnInit FALLISCE ---
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+
+; --- il motore: cella CONGELATA, vertice interno del blocco 2x2 ---
+InpFinestraN=40
+InpSogliaIngressoSigma=1.35
+InpSogliaUscitaSigma=0.05
+
+; --- la finestra, in ORA SERVER BCM (= ora italiana - 1).
+;     14:30 server = 15:30 italiane = apertura cash USA.
+;     22:00 server = 23:00 italiane. FINE ESCLUSA. ---
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+
+; --- uscite e rischio ---
+InpAtrSL=2.75
+InpBarreMaxTenuta=120
+InpRiskPercent=0.65
+InpMaxTradesPerDay=5
+InpLato=0
+
+; --- ATR (qui DECIDE: e' la scala dello stop) ---
+InpAtrPeriod=14
+InpAtrModoRma=false
+
+; --- ordini. MAGIC NUOVO, verificato vergine il 07/09/2026 ---
+InpMagic=774690
+InpSlippagePts=10
+InpMaxSpreadPts=0
+
+; --- ablazioni di fase 2: NASCONO SPENTE, e restano spente ---
+InpModoSonda=false
+InpSaltaGiorniSpaiati=false
+
+; --- tecnici ---
+InpWarmupBarre=300
+InpPuntiPerIndice=100.0
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVO_DEMO
+
+; =====================================================================
+;  LA RIGA DEL LOG CHE DICE CHE SI E' ARMATO (da cercare in Esperti)
+;  [RELATIVO_DEMO] avviato su NASUSD PERIOD_M5 | metro U30USD |
+;  cella N=40 sigma=1.35 | SL 2.75 x ATR | rischio 0.65% |
+;  tetto 5/giorno | magic 774690
+;  Se manca questa riga, l'EA NON e' armato. Se il magic stampato non
+;  e' 774690, il preset NON e' stato caricato.
+; =====================================================================
