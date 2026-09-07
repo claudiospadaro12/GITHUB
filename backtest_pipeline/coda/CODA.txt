@@ -22,3 +22,6 @@ d2922bf6f26c3af35dbe5863d50d15d2ac42a584 | backtest_pipeline/righe/CODA_01_sedie
 
 # --- 3. quale conto sta in quale cartella dati (dal giornale del terminale).
 d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1
+
+# --- 4. quanto e' grossa questa macchina (per il quarto MT5).
+269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
