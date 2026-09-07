@@ -1,0 +1,25 @@
+REFERTO R119 -- RITARDO DEL TESTER SULLE DUE SEDIE VIVE DEL CONTO REALE
+marcatore riga : MARCATORE_RIGA_RITARDO_TESTER_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v2_RITARDO
+branch          : lavoro
+avvio           : 2026-09-07 16:13:11
+contratto       : prove\RITARDO_TESTER_R119.txt (criteri G0-G2, S1-S4 congelati il 07/09/2026)
+
+CANCELLO G0 (il ritardo morde?): IGNORATA
+
+--- LE CORSE ---
+  R119_ORB_D0000
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+  R119_ORB_D0500
+     IS  : LETTO   gemelli G1: IDENTICI (ok)
+     OOS : LETTO   gemelli G1: IDENTICI (ok)
+
+file CSV attesi: 4   file CSV LETTI: 4
+
+RILIEVI: 0
+
+ESITO: NON MISURATO -- cancello G0: IGNORATA
+
+COSA NON DICE QUESTO REFERTO: non giudica. I criteri S1-S4 si applicano
+ai numeri dei CSV e il verdetto lo scrive la chat, contro il contratto.

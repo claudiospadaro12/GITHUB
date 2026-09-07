@@ -1,5 +1,12 @@
 # =====================================================================
-#  MARCATORE_RIGA_RITARDO_TESTER_v1
+#  MARCATORE_RIGA_RITARDO_TESTER_v2
+#  v2 (07/09/2026, dopo il primo giro): la v1 chiedeva al driver di scrivere
+#  una riga "Delay=" nell'.ini. QUELLA CHIAVE NON ESISTE. Il canarino G0 ha
+#  trovato i CSV a 0 ms e a 500 ms IDENTICI byte per byte e ha fermato il
+#  round dopo due corse su otto. La chiave vera e' ExecutionMode
+#  (0 normale / -1 casuale / N millisecondi, max 600000) e il driver la
+#  scriveva GIA', a 0. Classe 156: MT5 ignora in silenzio le chiavi .ini che
+#  non conosce -- un nome plausibile ma inventato non da' nessun errore.
 #  RIGA_RITARDO_TESTER.ps1 -- R119: le DUE sedie vive del conto reale
 #  rifatte con il RITARDO DEL TESTER acceso, su una scala di 4 livelli.
 # ---------------------------------------------------------------------
@@ -32,11 +39,14 @@
 #      Classe 151, imparata il 07/09/2026 sbagliando: in R118 i criteri
 #      promettevano un cancello e nel driver c'era solo una Write-Host
 #      DOPO le 170 passate.
-#      Qui le prime DUE corse sono ORB a Delay=0 e ORB a Delay=500, e
-#      SUBITO DOPO gira CancelloCanarino(), che confronta i due CSV e
-#      FERMA TUTTO (exit 2, esito NON MISURATO) se sono identici cifra
-#      per cifra: vorrebbe dire che MT5 ignora la chiave Delay scritta
-#      da .ini, e le altre sei corse sarebbero macchina buttata.
+#      Qui le prime DUE corse sono ORB a ExecutionMode=0 e ORB a
+#      ExecutionMode=500, e SUBITO DOPO gira CancelloCanarino(), che
+#      confronta i due CSV e FERMA TUTTO (exit 2, esito NON MISURATO) se
+#      sono identici cifra per cifra: vorrebbe dire che MT5 non ONORA il
+#      ritardo chiesto, e le altre sei corse sarebbero macchina buttata.
+#      >>> IL 07/09 E' SCATTATO DAVVERO, AL PRIMO GIRO: 2 corse su 8, la
+#          chiave era sbagliata (classe 156). Ha fatto esattamente il
+#          lavoro per cui e' stato scritto.
 #      IL CANCELLO E' COLLAUDABILE SENZA MT5:
 #         -CollaudoCancello -CsvA <file> -CsvB <file>
 #      esegue SOLO quella logica e dice cosa avrebbe fatto. Un cancello
@@ -85,8 +95,8 @@ $Work    = Join-Path $env:USERPROFILE "abtg_ritardo_r119"
 $Prove   = Join-Path $Work "prove"
 $Avvio   = Get-Date
 
-$MARC_MIO = "MARCATORE_RIGA_RITARDO_TESTER_v1"
-$MARC_DRV = "MARCATORE_WALKFORWARD_GENERICO_v2_RITARDO"
+$MARC_MIO = "MARCATORE_RIGA_RITARDO_TESTER_v2"
+$MARC_DRV = "MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE"
 
 # le due sedie e la scala. UNA SOLA VOLTA, qui.
 $SEDIE = @(
@@ -103,8 +113,8 @@ function Muori($t,$code){ Write-Host ""; Write-Host ("!!! " + $t) -ForegroundCol
 # ---------------------------------------------------------------------
 #  LA FIRMA DI UNA CORSA: solo le colonne che dicono l'esito economico,
 #  ordinate per magic. Le colonne di eco degli input NON entrano (sono
-#  identiche per costruzione fra le corse: cio' che cambia e' il Delay,
-#  che non e' un input dell'EA e quindi non compare nel CSV).
+#  identiche per costruzione fra le corse: cio' che cambia e' il ritardo
+#  di esecuzione, che non e' un input dell'EA e non compare nel CSV).
 # ---------------------------------------------------------------------
 function FirmaCorsa($csv){
   if(-not (Test-Path -LiteralPath $csv)){ return $null }
@@ -138,8 +148,8 @@ function GemelliOk($csv){
 # =====================================================================
 function CancelloCanarino($csvBase,$csvStress){
   Titolo "CANCELLO G0 -- IL RITARDO MORDE?"
-  Write-Host ("    BASE   (Delay=0)   : " + $csvBase)
-  Write-Host ("    STRESS (Delay=500) : " + $csvStress)
+  Write-Host ("    BASE   (ExecutionMode=0)   : " + $csvBase)
+  Write-Host ("    STRESS (ExecutionMode=500) : " + $csvStress)
   $a = FirmaCorsa $csvBase
   $b = FirmaCorsa $csvStress
   if($null -eq $a -or $null -eq $b){
@@ -152,7 +162,7 @@ function CancelloCanarino($csvBase,$csvStress){
   Write-Host ""
   if($a -eq $b){
     Write-Host "    ESITO G0: IDENTICI CIFRA PER CIFRA." -ForegroundColor Red
-    Write-Host "    -> MT5 IGNORA la chiave Delay scritta nell'.ini." -ForegroundColor Red
+    Write-Host "    -> MT5 NON ONORA il ritardo chiesto con ExecutionMode da .ini." -ForegroundColor Red
     Write-Host "    -> L'esito del round e' NON MISURATO." -ForegroundColor Red
     Write-Host "    -> NON vuol dire 'immune al ritardo': vuol dire che la leva" -ForegroundColor Red
     Write-Host "       non e' utilizzabile da riga di comando, e va cercata un'altra strada." -ForegroundColor Red
@@ -228,7 +238,7 @@ function Corri($sedia,$ritardo){
            "-Etichetta",$et,"-Modello","4","-Rifai")
   if($SoloControllo){ $arg += "-SoloControllo" }
   Write-Host ""
-  Write-Host ("--- " + $sedia.Chi + " (" + $sedia.EA + " " + $sedia.Sim + ", ingresso " + $sedia.Ordine + ")  Delay=" + $ritardo + " ms ---") -ForegroundColor Cyan
+  Write-Host ("--- " + $sedia.Chi + " (" + $sedia.EA + " " + $sedia.Sim + ", ingresso " + $sedia.Ordine + ")  ExecutionMode=" + $ritardo + " ---") -ForegroundColor Cyan
   $t0 = Get-Date
   $p  = Start-Process -FilePath "powershell.exe" -ArgumentList $arg -NoNewWindow -PassThru -Wait
   $csvIS  = Join-Path $Work ("risultati_prove\" + $sedia.EA + "\" + $sedia.EA + "_" + $sedia.Sim + "_IS_"  + $et + ".csv")
@@ -253,9 +263,11 @@ if($SoloControllo){
   Write-Host  "    ogni corsa = 2 finestre (IS/OOS) x 2 celle magic = 4 passate a tick reali." -ForegroundColor White
   Write-Host  "    CONTROLLA DUE COSE QUI SOPRA, PER TUTTE E DUE LE SEDIE:" -ForegroundColor Yellow
   Write-Host  "      a) il conto delle celle deve dire 2. Se dice altro, FERMATI e dillo." -ForegroundColor Yellow
-  Write-Host  "      b) nell'anteprima dell'.ini ci deve essere la riga  Delay=100" -ForegroundColor Yellow
-  Write-Host  "         Se quella riga NON c'e', il driver e' una copia vecchia e il round" -ForegroundColor Yellow
-  Write-Host  "         girerebbe SENZA ritardo dicendo di averlo messo." -ForegroundColor Yellow
+  Write-Host  "      b) nell'anteprima dell'.ini ci deve essere la riga  ExecutionMode=100" -ForegroundColor Yellow
+  Write-Host  "         (NON 'Delay=100': quella chiave non esiste in MT5. Il primo giro del" -ForegroundColor Yellow
+  Write-Host  "          07/09 e' morto proprio li' -- classe 156.)" -ForegroundColor Yellow
+  Write-Host  "         Se la riga dice ExecutionMode=0, il driver e' una copia vecchia e il" -ForegroundColor Yellow
+  Write-Host  "         round girerebbe SENZA ritardo dicendo di averlo messo." -ForegroundColor Yellow
   exit 0
 }
 

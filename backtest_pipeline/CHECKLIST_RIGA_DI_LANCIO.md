@@ -10596,7 +10596,70 @@ if(($instDir -notlike "*BCM Markets MT5 Terminal*") -or ($instDir -like "*-V3*")
 }
 ```
 
-⚠️ **E il difetto e' ancora vivo in `walkforward_generico.ps1`** (riga del
-ripiego, par. 7), che e' **condiviso da tutti i round**: li' non si tocca di
-corsa dentro un round, ma **va messo in coda ai lavori**, perche' ogni driver
-che copia quel selettore eredita il buco.
+~~⚠️ E il difetto e' ancora vivo in `walkforward_generico.ps1`~~ — **CHIUSO
+il 07/09/2026** (commit `6a83744` + `5ddd017`): il ripiego del driver condiviso
+adesso porta l'esclusione del `-V3` e di `BCM_Reale`, e se restano solo
+terminali VIETATI lo dice ed esce 1 invece di ripiegarci sopra.
+
+
+---
+
+# CLASSE 156 — UNA CHIAVE DI `.ini` COL NOME PLAUSIBILE, MA INVENTATA
+### Misurata il 07/09/2026, sbagliando io, nel round R119
+
+## Cosa e' successo
+Per stressare l'esecuzione delle due sedie vive ho aggiunto al driver
+condiviso un parametro `-Ritardo` che scriveva nella sezione `[Tester]`
+dell'`.ini` una riga:
+
+```ini
+Delay=500
+```
+
+**Quella chiave non esiste in MT5.** Il nome era plausibile — nella
+finestra del tester la tendina si chiama *"Delays"* — ma la chiave vera
+dell'`.ini` e' `ExecutionMode`.
+
+## Perche' e' insidiosa: MT5 non protesta
+Una chiave sconosciuta dentro `[Tester]` **viene ignorata in silenzio**.
+Nessun errore, nessun avviso, codice d'uscita 0, CSV regolarmente prodotti,
+gemelli di determinismo a posto, referto verde. Un round che **sembra
+girato** e non lo e'. E' la stessa famiglia del difetto del *parametro col
+nome sbagliato in `[TesterInputs]`* che il driver intercetta da agosto
+(li' pero' il driver **conosce** l'elenco degli input dell'EA e puo'
+controllare; sulle chiavi di `[Tester]` non ha nessun elenco).
+
+## Cosa l'ha presa
+Il **canarino** del contratto R119: due corse della stessa cella, una a
+ritardo 0 e una a ritardo 500, e il confronto dei CSV **come codice fra le
+due corse**. Sono usciti **identici byte per byte**, IS e OOS. Il round si
+e' fermato a **2 corse su 8** con esito `NON MISURATO`.
+
+👉 **Senza il canarino** sarebbero girate tutte e otto le corse, e il
+referto avrebbe detto *"le due sedie vive reggono fino a 500 ms di
+ritardo"*. Sarebbe stata una **bugia con i numeri sotto** — la specie
+peggiore.
+
+## La regola
+**Una chiave di configurazione che non hai mai visto onorata da una misura
+non e' una leva: e' un'ipotesi.** Prima di leggere qualunque scala costruita
+su una chiave nuova, serve il **canarino**: stesso identico caso, valore
+assurdo, i numeri DEVONO cambiare. Se non cambiano, l'esito e'
+**NON MISURATO**, mai *"robusto"* / *"immune"*.
+
+Vale gia' per lo `Spread` (il commento del driver lo diceva da agosto), e da
+oggi vale scritto anche per il ritardo di esecuzione.
+
+## I valori giusti, per non ripetere l'errore
+`[Tester]` -> `ExecutionMode`:
+
+| valore | significato |
+|---|---|
+| `0` | esecuzione normale, nessun ritardo |
+| `-1` | ritardo **casuale** |
+| `1` .. `600000` | ritardo in **millisecondi** (tetto 600.000) |
+
+⚠️ **E la cosa da sapere:** `walkforward_generico.ps1` scriveva gia'
+`ExecutionMode=0` **fin dal 07/08/2026**. Quindi tutti i round di questa casa
+sono girati a **zero ritardo DICHIARATO nell'`.ini`** — non era uno stato
+nascosto, come avevo scritto: era un numero che nessun referto ha mai letto.
