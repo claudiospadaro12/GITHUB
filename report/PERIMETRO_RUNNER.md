@@ -99,10 +99,28 @@ Si toglie in qualunque momento con `schtasks /Delete /TN ABTG_Runner /F`.
 
 ## ✍️ FIRMA
 
-- [ ] **Claudio**, data: ________
+- [x] **Claudio** — **07/09/2026, ore ~23:00**, in chat, testuale: **"firmo il perimetro"** ✅
 - [x] `-CollaudoCancelli` lanciato sul VPS: **11 su 11 giusti** — **07/09/2026, ore 22:46** ✅
 
-_Senza tutte e due le caselle, il runner non si installa._
+_Le due caselle ci sono. Il runner puo' essere installato._
+
+---
+
+## 🔍 UNA PRECISAZIONE CHE FACCIO SUBITO, NON DOPO
+
+Il perimetro vieta di **toccare** il conto reale. Le prime due righe della coda
+**enumerano tutte le cartelle dati**, quindi passano anche su quella del conto
+reale e ne **leggono** i `.chr` e i log.
+
+👉 **Lo interpreto così: leggere in modo generico è permesso, e serve.** Il
+divieto è su *agire* e su *puntare* quel conto — infatti la scansione G2
+rifiuta chi ne nomina il numero, la cartella o il percorso. Una riga che
+enumera tutto senza casi speciali è esattamente ciò che serve per **accorgersi
+se una sedia compare dove non dovrebbe**: vietarle la lettura ci renderebbe
+ciechi proprio dove conta di più.
+
+⚠️ **Se Claudio la legge diversamente, lo dica e le due righe si limitano alle
+cartelle dei due conti demo.** Lo scrivo prima del primo giro, non dopo.
 
 ### Esito del collaudo, per esteso (07/09/2026 22:46, VPS)
 ```
