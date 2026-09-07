@@ -1,8 +1,14 @@
-# R119 — IL RITARDO DEL TESTER SULLE DUE SEDIE VIVE
+# R119 — IL RITARDO DEL TESTER SULLE DUE SEDIE VIVE (v2)
 
-- **Pin della riga:** `7357f4631cdb8b789a58a0a9b8177c65702438af`
-- **Marcatore riga:** `MARCATORE_RIGA_RITARDO_TESTER_v1`
-- **Marcatore driver:** `MARCATORE_WALKFORWARD_GENERICO_v2_RITARDO`
+> ⚠️ **La v1 era difettosa e il canarino l'ha presa.** Scriveva nell'`.ini` una
+> riga `Delay=`, che in MT5 **non esiste**: la chiave vera è `ExecutionMode`.
+> Il primo giro (07/09, 16:13) si è fermato a 2 corse su 8 con esito
+> `NON MISURATO`. Verbale: `risultati_archivio/REFERTO_RITARDO_R119_PRIMO_GIRO.md`.
+> **Questa è la v2, con la chiave giusta.**
+
+- **Pin della riga:** `e6041bce7948e479973bfd82547201461aa723db`
+- **Marcatore riga:** `MARCATORE_RIGA_RITARDO_TESTER_v2`
+- **Marcatore driver:** `MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE`
 - **Contratto:** `backtest_pipeline/prove/RITARDO_TESTER_R119.txt`
 - **Celle congelate:** `prove/ABTG_DAX_Apertura_EU_RITARDO.txt`, `prove/ABTG_ORB_Ottimizzato_RITARDO.txt`
 
@@ -26,19 +32,19 @@ cambia nessun parametro. Gli `.ini` hanno `AllowLiveTrading=false`.
 ## BLOCCO 1 — GIRO A VUOTO (30 secondi, MT5 non si apre)
 
 ```powershell
-$ProgressPreference='SilentlyContinue'; $u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/7357f4631cdb8b789a58a0a9b8177c65702438af/backtest_pipeline/righe/RIGA_RITARDO_TESTER.ps1'; $f="$env:TEMP\RIGA_RITARDO_TESTER.ps1"; irm ($u+'?cb='+[guid]::NewGuid().ToString('N')) -OutFile $f; & { powershell -NoProfile -ExecutionPolicy Bypass -File $f -SoloControllo }
+$ProgressPreference='SilentlyContinue'; $u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/e6041bce7948e479973bfd82547201461aa723db/backtest_pipeline/righe/RIGA_RITARDO_TESTER.ps1'; $f="$env:TEMP\RIGA_RITARDO_TESTER.ps1"; irm ($u+'?cb='+[guid]::NewGuid().ToString('N')) -OutFile $f; & { powershell -NoProfile -ExecutionPolicy Bypass -File $f -SoloControllo }
 ```
 
 **Da guardare in console, due cose:**
 1. per **tutte e due** le sedie il conto delle celle deve dire **2**;
-2. nell'anteprima dell'`.ini` ci dev'essere la riga **`Delay=100`**.
+2. nell'anteprima dell'`.ini` ci dev'essere la riga **`ExecutionMode=100`** (NON `Delay=100`: quella chiave non esiste — è l'errore del primo giro, classe 156).
    Se quella riga non c'è, il driver è una copia vecchia e il round girerebbe
    **senza ritardo dicendo di averlo messo**.
 
 ## BLOCCO 2 — LA CORSA VERA (8 corse a tick reali)
 
 ```powershell
-$ProgressPreference='SilentlyContinue'; $u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/7357f4631cdb8b789a58a0a9b8177c65702438af/backtest_pipeline/righe/RIGA_RITARDO_TESTER.ps1'; $f="$env:TEMP\RIGA_RITARDO_TESTER.ps1"; irm ($u+'?cb='+[guid]::NewGuid().ToString('N')) -OutFile $f; & { powershell -NoProfile -ExecutionPolicy Bypass -File $f -Rifai }
+$ProgressPreference='SilentlyContinue'; $u='https://raw.githubusercontent.com/claudiospadaro12/GITHUB/e6041bce7948e479973bfd82547201461aa723db/backtest_pipeline/righe/RIGA_RITARDO_TESTER.ps1'; $f="$env:TEMP\RIGA_RITARDO_TESTER.ps1"; irm ($u+'?cb='+[guid]::NewGuid().ToString('N')) -OutFile $f; & { powershell -NoProfile -ExecutionPolicy Bypass -File $f -Rifai }
 ```
 
 Alla fine, sul **Desktop**: cartella `RITARDO_R119` e **`RITARDO_R119.zip`** —
