@@ -607,7 +607,18 @@ if(-not $Terminal -and $BrokerBCM){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
   else{$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select-Object -First 1}
-  if(-not $c){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*"}|Select-Object -First 1}
+  # 37-quater (07/09): il RIPIEGO perdeva l'esclusione del -V3, quindi quando
+  # l'installazione giusta mancava si pigliava IL 100k (50504263, in Fase 1) e
+  # ci scriveva dentro l'EA -- con PROBLEMI: 0 e uscita 0. Riprodotto eseguendo.
+  # Adesso il ripiego mantiene le stesse esclusioni del ramo principale, e se
+  # non trova niente NON si arrangia: si ferma rumorosamente.
+  if(-not $c -and -not $UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -notlike "*-V3*" -and $_.DirectoryName -notlike "*BCM_Reale*"}|Select-Object -First 1}
+  if(-not $c -and $UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
+  if($c -and -not $UseSpare -and ($c.DirectoryName -like "*-V3*" -or $c.DirectoryName -like "*BCM_Reale*")){
+    Write-Host ("TERMINALE SBAGLIATO: " + $c.DirectoryName) -ForegroundColor Red
+    Write-Host "Senza -UseSpare NON si scrive nel 100k (-V3) ne' nel conto REALE. Mi fermo." -ForegroundColor Red
+    exit 1
+  }
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
 if(-not $Terminal -and -not $BrokerBCM){
