@@ -45,15 +45,48 @@ trovato nessuno.
 
 ---
 
-## ❓ COSA RESTA APERTO — ed è l'unica cosa che conta
+## ✅ DOVE SONO — MISURATO alle 20:51, e la risposta cambia la gravità
 
-**Non sappiamo ancora DOVE sono attaccati i tre EA.** L'output di
-`RIGA_TROVA_POSTNEWS.ps1` è scorso via prima di essere letto.
+`RIGA_TROVA_POSTNEWS.ps1` ha girato su **tutte e cinque** le cartelle dati:
 
-🔴 **Perché conta**: il calendario vuoto è un **tampone**, non uno spegnimento.
-Gli EA sono ancora attaccati. Se qualcuno rimette un calendario — o se un EA
-ne scarica uno — **ripartono al 3,00%**. Lo spegnimento vero resta:
-**staccare l'EA + `ABTG_ChiudiSedie`**.
+| terminale | esito |
+|---|---|
+| **50503392 PICCOLO demo** | 🟡 **771201 → `chart43.chr` · 771202 → `chart44.chr` · 771203 → `chart42.chr`** |
+| SCONOSCIUTA `73B7A242…` | ✅ CONTROLLATA, nessuno |
+| SCONOSCIUTA `857385E4…` | ✅ CONTROLLATA, nessuno |
+| **50504263 100k demo** | ✅ CONTROLLATA, nessuno |
+| **10105439 REALE** | ✅ **CONTROLLATA, nessuno** |
+
+> ### 🟢 **TUTTE E TRE STANNO SUL DEMO PICCOLO. SUL CONTO REALE NON CE N'È NESSUNA.**
+
+### 🔧 CORREZIONE DOVUTA
+Nel riferire il censimento avevo scritto che le PostNews erano _"l'unica voce
+che tocca soldi adesso"_. **Non era vero, e non potevo saperlo**: la posizione
+non era agli atti (ultima foto `.chr` del 25/08) e l'ho scritto anche allora —
+ma la frase dava per scontato il caso peggiore. **Il rischio al 3,00% era su un
+conto DEMO.** Resta un difetto di METODO grave (sedie in forward senza
+contratto), **non un'esposizione di denaro vero.**
+
+### ⚠️ Un dettaglio da leggere bene
+Per tutti e tre: **`log recenti che lo nominano: 0`**. Non prova che non abbiano
+operato — l'EA scrive `[PostNews] …` **senza il numero di magic** nel testo del
+log. Il +37,36 della `771203` viene dal CSV delle operazioni, non dal log.
+👉 **"0 nei log" qui vuol dire "il numero non compare nel testo", non "non ha
+operato".**
+
+## ❓ COSA RESTA DA FARE
+**Staccare i tre EA dai grafici 42, 43 e 44 del piccolo 50503392** — e basta.
+Niente da fare sul reale né sul 100k.
+
+🔴 **Perché serve comunque**: il calendario vuoto è un **tampone**. Gli EA sono
+ancora attaccati e con un calendario nuovo **ripartono al 3,00%** — su demo, ma
+ripartono. E prima di staccarli vale un censimento con `ABTG_ChiudiSedie`
+(magic vuoti = non tocca niente) per vedere se hanno posizioni o pendenti
+aperti: **`InpContoAtteso = 50503392`**, non altri.
+
+📌 **Da mappare, non urgente**: due cartelle dati (`73B7A242…`, `857385E4…`)
+non sono nella tabella dei conti di casa. Sono risultate pulite, ma **cinque
+cartelle dati per tre terminali** è un numero che va spiegato.
 
 ## 📌 Conseguenza per il CENSIMENTO
 Le tre righe 🔴 **NON MISURATO** di `report/CENSIMENTO_CONTRATTI.md` restano
