@@ -1,0 +1,117 @@
+# =====================================================================
+#  GAPCASH_NAS -- PASSO 0, LA CORSA DI CONTROLLO (GATE SPENTO)
+#  VARIANTE del contratto congelato  prove\GAPCASH_NAS_PASSO0.txt
+# ---------------------------------------------------------------------
+#  QUESTO FILE NON E' UNA SECONDA IPOTESI E NON AGGIUNGE NESSUN
+#  CRITERIO. I criteri stanno TUTTI nel contratto congelato il
+#  06/09/2026 e non si ricopiano qui: un criterio scritto in due posti
+#  e' un criterio che prima o poi diverge.
+#
+# =====================================================================
+#  1. PERCHE' ESISTE
+# ---------------------------------------------------------------------
+#  Il contratto, par. 6, riga InpGateSpento, dice testualmente:
+#     "false = il gate e' ACCESO. La corsa di CONTROLLO (gate spento,
+#      che serve a P0-2) si lancia a parte con -ConControllo, cosi' le
+#      due misure stanno in due CSV distinti e non si sovrascrivono."
+#
+#  -ConControllo NON ESISTE in walkforward_generico.ps1.
+#  VERIFICATO IL 07/09/2026: zero occorrenze della stringa in tutto il
+#  repo. Il contratto ha nominato un interruttore immaginario.
+#
+#  Il modo che il driver generico ha DAVVERO per far girare la STESSA
+#  sonda con un input diverso e' -Prova su un file variante (piu'
+#  -Etichetta per il nome del CSV). Questo e' quel file variante.
+#  L'INTENZIONE del contratto e' rispettata alla lettera: due misure,
+#  due CSV distinti, che non si sovrascrivono mai.
+#
+#  IL CONTRATTO NON E' STATO TOCCATO: prove\GAPCASH_NAS_PASSO0.txt
+#  resta byte per byte com'era il 06/09, PRIMA di qualunque numero BCM.
+#
+# =====================================================================
+#  2. COSA CAMBIA RISPETTO AL CONTRATTO -- due righe, e solo due
+# ---------------------------------------------------------------------
+#  (a) InpGateSpento  false -> true
+#      E' la corsa di controllo: ogni giornata valida diventa
+#      "evento". La sonda lo sa e lo dichiara da sola nel referto
+#      ("qui evento e controllo sono la STESSA popolazione, la
+#      separazione vale 1,00x per costruzione e il verdetto P0-2 NON
+#      si applica").
+#
+#  (b) InpSogliaGapPct  da 8 celle a 2 celle
+#      A gate spento la soglia NON HA NESSUN EFFETTO sulla misura:
+#      nel sorgente EventoLong_Calc() e EventoShort_Calc() fanno
+#      "if(gateSpento) return(true)" PRIMA di guardare il gap. Le 8
+#      celle del contratto qui produrrebbero 8 righe IDENTICHE, cioe'
+#      6 passate a tick reali buttate.
+#      MA NON SI PUO' SCENDERE A UNA SOLA:
+#      CLASSE 134, misurata il 05/09/2026 -- con Optimization=1 e ZERO
+#      parametri marcati ottimizzabili MT5 non esegue NESSUNA passata,
+#      esce con codice 0 e lascia il CSV DA ZERO BYTE. Il rimedio di
+#      casa (R102, R103, R116, R117) e' un ASSE TECNICO A DUE CELLE su
+#      un parametro che non tocca l'economia della misura.
+#      Qui quel parametro e' la soglia stessa, che a gate spento e'
+#      inerte PER COSTRUZIONE: le due passate sono identiche, quindi
+#      la seconda e' anche un GEMELLO DI DETERMINISMO gratis.
+#      (Negli EA veri l'asse tecnico e' InpMagic; questa sonda non ha
+#       nessun magic perche' non manda ordini.)
+#
+#  Nient'altro cambia. Il driver RIGA_GAPCASH_PASSO0.ps1 lo VERIFICA
+#  riga per riga contro il contratto PRIMA di aprire MT5, e si ferma
+#  se trova una terza differenza.
+#
+# =====================================================================
+#  3. LE DIRETTIVE -- identiche al contratto
+# ---------------------------------------------------------------------
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#
+#  MODELLO DI CORSA: 4 (real tick), come il contratto. Serve anche qui:
+#  la media di controllo si confronta con quella della corsa a gate
+#  acceso, e due medie calcolate su due modelli diversi non si
+#  confrontano.
+#
+# =====================================================================
+#  4. I PARAMETRI
+# ---------------------------------------------------------------------
+#  L'ASSE TECNICO A DUE CELLE (vedi 2b). A gate spento e' inerte.
+InpSogliaGapPct=-0.50||-0.60||0.10||-0.50||Y
+#
+#  ora della campana, in ORA SERVER BCM (= ora italiana - 1).
+#  14:30 server = 15:30 italiane = 09:30 New York. NON si converte.
+InpOraAperturaServer=14||14||0||14||N
+InpMinAperturaServer=30||30||0||30||N
+#
+InpMinutiUscita=15||15||0||15||N
+#
+InpLato=0||0||0||0||N
+#
+#  >>> LA RIGA CHE FA DI QUESTO FILE LA CORSA DI CONTROLLO <<<
+InpGateSpento=true||true||0||true||N
+#
+InpMisuraSpreadCampana=true||true||0||true||N
+#
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+#
+# =====================================================================
+#  5. COSA SI LEGGE IN QUESTA CORSA -- e cosa NON si legge
+# ---------------------------------------------------------------------
+#  SI LEGGE:
+#    - "P02 Media Tutti Pct": la media di CONTROLLO, il denominatore
+#      di P0-2. Deve coincidere, cifra per cifra, con la stessa colonna
+#      della corsa a gate acceso: e' la stessa popolazione misurata due
+#      volte. Se le due non coincidono, il problema e' il BANCO, non il
+#      motore, e nessun numero del PASSO 0 si legge.
+#    - "P01 Eventi Long" qui DEVE valere "Giornate Valide": a gate
+#      spento ogni giornata valida e' evento. Se non coincidono, la
+#      riga InpGateSpento NON e' arrivata all'EA (trappola del nome
+#      inesistente, LEGGIMI.md) e la corsa risponde a un'altra domanda.
+#    - le due righe fra loro: devono essere IDENTICHE (determinismo).
+#
+#  NON SI LEGGE:
+#    - il verdetto P0-2 di questa corsa: vale 1,00x per costruzione.
+#    - nessun verdetto di merito. Qui non c'e' PF, non c'e' equity,
+#      non c'e' drawdown: la sonda non manda ordini.
+# =====================================================================
