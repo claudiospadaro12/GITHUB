@@ -1,0 +1,113 @@
+# =====================================================================
+#  R119 -- CELLA CONGELATA: la sedia VIVA del DAX sul conto REALE
+#  ABTG_DAX_Apertura_EU  magic 770101  D30EUR M5  conto 10105439
+# ---------------------------------------------------------------------
+#  IL CONTRATTO FA FEDE E NON SI RISCRIVE QUI:
+#     backtest_pipeline\prove\RITARDO_TESTER_R119.txt
+#
+#  DA DOVE VENGONO QUESTI VALORI: NON sono scelti, sono COPIATI dal
+#  preset che gira sul conto reale,
+#     mql5\Presets\conto_reale\ABTG_DAX_Apertura_EU_770101_REALE.set
+#  e trascritti da uno script, non a mano. Sono fissati TUTTI (anche
+#  quelli uguali al default del sorgente) apposta: cosi' la cella
+#  misurata resta il CONTO REALE anche se domani qualcuno cambia un
+#  default nel .mq5.
+#
+#  QUELLO CHE QUI NON SI CERCA: niente. Non c'e' nessun asse di merito.
+#  L'unico asse e' TECNICO -- il magic, due celle identiche per
+#  costruzione (schema di casa, R102/R103/R116). Serve a dare a MT5
+#  qualcosa da ottimizzare, altrimenti zero passate (classe 134), e
+#  regala il GEMELLO DI DETERMINISMO del cancello G1.
+#
+#  LA COSA CHE QUESTA SEDIA MISURA, dichiarata: InpEntryMode=2 e'
+#  ABTG_RETEST, che entra con un BuyLimit (linea 1504 del .mq5). Un
+#  LIMIT si riempie al livello O MEGLIO: l'ingresso e' immune allo
+#  slippage per costruzione. Quindi qui il ritardo puo' toccare SOLO le
+#  uscite. Ipotesi H1 del contratto: degrado PICCOLO.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+InpMagic=770101||770101||50||770151||Y
+
+# --- la cella viva, copiata dal preset del conto reale
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=0||0||0||0||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=0||0||0||0||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=0||0||0||0||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=0||0||0||0||N
+InpUseCorrelation=0||0||0||0||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=0||0||0||0||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=0||0||0||0||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=1||1||0||1||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=0||0||0||0||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAllowReverse=0||0||0||0||N
+InpUsaGuardian=1||1||0||1||N

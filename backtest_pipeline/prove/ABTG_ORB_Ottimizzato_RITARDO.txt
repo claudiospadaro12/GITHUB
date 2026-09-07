@@ -1,0 +1,87 @@
+# =====================================================================
+#  R119 -- CELLA CONGELATA: la sedia VIVA dell'ORB sul conto REALE
+#  ABTG_ORB_Ottimizzato  magic 770611  U30USD M5  conto 10105439
+# ---------------------------------------------------------------------
+#  IL CONTRATTO FA FEDE E NON SI RISCRIVE QUI:
+#     backtest_pipeline\prove\RITARDO_TESTER_R119.txt
+#
+#  DA DOVE VENGONO QUESTI VALORI: NON sono scelti, sono COPIATI dal
+#  preset che gira sul conto reale,
+#     mql5\Presets\conto_reale\ABTG_ORB_Ottimizzato_770611_REALE.set
+#  e trascritti da uno script, non a mano. Sono fissati TUTTI (anche
+#  quelli uguali al default del sorgente) apposta: cosi' la cella
+#  misurata resta il CONTO REALE anche se domani qualcuno cambia un
+#  default nel .mq5.
+#
+#  QUELLO CHE QUI NON SI CERCA: niente. Nessun asse di merito. L'unico
+#  asse e' TECNICO -- il magic, due celle identiche per costruzione
+#  (schema di casa, R102/R103/R116): serve a dare a MT5 qualcosa da
+#  ottimizzare (classe 134) e regala il gemello di determinismo G1.
+#
+#  LA COSA CHE QUESTA SEDIA MISURA, dichiarata: entra con BuyStop
+#  (linea 456 del .mq5). Un ordine STOP e' un ordine A MERCATO
+#  DIFFERITO: si riempie al livello O PEGGIO. Lo slippage se lo prende
+#  tutto. Ipotesi H2 del contratto: degrado GRANDE e crescente.
+#  >>> E' QUESTA la sedia del CANARINO G0, apposta: se il ritardo morde
+#      da qualche parte, deve mordere qui.
+#  InpSLMode=3 e' ORB_SL_HALFRANGE -- la cella che R55 aveva marcato
+#  "vive solo a taglia piccola".
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+InpMagic=770611||770611||50||770661||Y
+
+# --- la cella viva, copiata dal preset del conto reale
+InpRangeStartHour=14||14||0||14||N
+InpRangeStartMin=30||30||0||30||N
+InpRangeEndHour=14||14||0||14||N
+InpRangeEndMin=45||45||0||45||N
+InpEndHour=21||21||0||21||N
+InpEndMin=0||0||0||0||N
+InpCloseAtEnd=1||1||0||1||N
+InpOneTradePerDay=1||1||0||1||N
+InpPendingExpiryMin=600||600||0||600||N
+InpEntryPoints=10.0||10.0||0||10.0||N
+InpK=1.0||1.0||0||1.0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=0||0||0||0||N
+InpSLMode=3||3||0||3||N
+InpExecTF=5||5||0||5||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=1000.0||1000.0||0||1000.0||N
+InpTP_R=1.0||1.0||0||1.0||N
+InpTPMode=1||1||0||1||N
+InpTPRangeMult=1.5||1.5||0||1.5||N
+InpTP1Pct=0.0||0.0||0||0.0||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailEMA=1||1||0||1||N
+InpEmaFast=9||9||0||9||N
+InpEmaSlow=21||21||0||21||N
+InpExitOnEmaClose=0||0||0||0||N
+InpUseCloseConfirm=0||0||0||0||N
+InpMinBodyPct=50.0||50.0||0||50.0||N
+InpUseEmaFilter=0||0||0||0||N
+InpUseEma200Filter=1||1||0||1||N
+InpEma200Period=200||200||0||200||N
+InpMinRangePct=0.0||0.0||0||0.0||N
+InpMaxRangePct=0.8||0.8||0||0.8||N
+InpUseVolumeFilter=0||0||0||0||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=1||1||0||1||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpSLBufferPts=0||0||0||0||N
+InpSlippagePts=0||0||0||0||N
+InpAutoTest=1||1||0||1||N
+InpUsaGuardian=1||1||0||1||N

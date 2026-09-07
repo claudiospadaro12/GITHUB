@@ -1,0 +1,172 @@
+# =====================================================================
+#  R119 -- IL RITARDO DEL TESTER SULLE DUE SEDIE VIVE DEL CONTO REALE
+#  CONTRATTO CONGELATO IL 07/09/2026, PRIMA DI QUALUNQUE NUMERO.
+# =====================================================================
+#
+#  PERCHE' ORA
+#  Claudio (07/09): "lo slippage mi ammazza tutti gli expert che creo".
+#  Il consiglio generico che gira sul web dice: fai il backtest con un
+#  ritardo di rete simulato, e se l'EA smette di guadagnare scarta la
+#  strategia. E' l'unico dei cinque consigli letti che in casa NON
+#  abbiamo mai fatto, e costa zero perche' non richiede nessun EA nuovo.
+#
+#  IL BUCO CHE CHIUDE, MISURATO E NON SUPPOSTO
+#   1. Il driver condiviso walkforward_generico.ps1 non ha MAI scritto
+#      la riga Delay nell'.ini. Verificato leggendo le due sezioni
+#      [Tester] del sorgente il 07/09/2026: la chiave non c'e'.
+#      Quindi TUTTI i round di questa casa sono girati a esecuzione
+#      OTTIMALE, zero ritardo -- e nessun referto lo diceva.
+#   2. R118 (06-07/09) ha simulato lo slippage con l'input InpSlippagePts
+#      dell'EA. Sulla sedia viva del DAX quell'input e' INERTE: linea
+#      1487 di ABTG_DAX_Apertura_EU.mq5, "limit sul livello (niente
+#      buffer/slippage)". Il ritardo del tester non passa dagli input:
+#      vale anche li'.
+#   3. Il SlippageLogger sul conto reale ha ZERO deal. Ogni numero di
+#      slippage scritto in ogni round finora e' uno SCENARIO ASSUNTO,
+#      non una misura. Questo round non lo chiude, ma non fa finta.
+#
+#  LE DUE SEDIE, E PERCHE' PROPRIO QUESTE
+#  Sono le UNICHE due che oggi girano con SOLDI VERI (conto 10105439).
+#      A) ABTG_DAX_Apertura_EU  magic 770101  D30EUR M5
+#         InpEntryMode=2 = ABTG_RETEST -> entra con BuyLimit (linea 1504).
+#      B) ABTG_ORB_Ottimizzato  magic 770611  U30USD M5
+#         entra con BuyStop (linea 456).
+#  I valori misurati vengono dai preset del conto reale:
+#      mql5\Presets\conto_reale\ABTG_DAX_Apertura_EU_770101_REALE.set
+#      mql5\Presets\conto_reale\ABTG_ORB_Ottimizzato_770611_REALE.set
+#
+# ---------------------------------------------------------------------
+#  IPOTESI -- SCRITTA ADESSO, PRIMA DI VEDERE UN SOLO NUMERO
+# ---------------------------------------------------------------------
+#  Il consiglio che gira ("usa ordini pendenti invece che a mercato,
+#  cosi' eviti lo slippage") e' MEZZO SBAGLIATO, e questo round lo
+#  misura. La protezione non e' "pendente contro mercato": e'
+#  LIMIT contro STOP.
+#     - un BUY LIMIT si riempie al prezzo chiesto O MIGLIORE.
+#       Lo slippage in ingresso e' zero PER COSTRUZIONE.
+#     - un BUY STOP si riempie al prezzo chiesto O PEGGIORE: quando il
+#       prezzo tocca il livello parte una richiesta a mercato. E' un
+#       ordine a mercato differito, e lo slippage se lo prende TUTTO.
+#  Quindi:
+#     H1. la sedia 770101 (LIMIT) degrada POCO. Il ritardo la puo'
+#         toccare solo sulle USCITE (breakeven, trailing, chiusura
+#         forzata delle 17:30 server), non sull'ingresso.
+#     H2. la sedia 770611 (STOP) degrada MOLTO, e in modo crescente col
+#         ritardo.
+#     H3. il degrado di 770611 e' PIU' GRANDE di quello di 770101 a
+#         ogni livello di ritardo.
+#  SE ESCE IL CONTRARIO -- se il DAX degrada quanto o piu' dell'ORB --
+#  L'IPOTESI E' SBAGLIATA, e lo scrivo qui adesso perche' non ci sia
+#  modo di raccontarla diversamente dopo.
+#
+# ---------------------------------------------------------------------
+#  LA SCALA
+# ---------------------------------------------------------------------
+#  Quattro livelli, gli stessi per tutte e due le sedie:
+#      Delay = 0 ms   (BASE: zero ritardo, ma SCRITTO ESPLICITO)
+#      Delay = 50 ms  (VPS co-locato o quasi: il caso buono)
+#      Delay = 100 ms (il numero che il consiglio letto propone)
+#      Delay = 500 ms (il caso cattivo: rete lenta / momento di stress)
+#  Finestra 2024.09.26 -> 2026.06.30, Modello 4 (tick reali), split
+#  40/60. La data d'inizio NON e' scelta: e' il muro dei tick misurato
+#  (misura_tick_D30EUR.csv 35.408.137 tick; NASUSD/U30USD stessa data).
+#
+#  LA CELLA E' CONGELATA, NON CERCATA. Nessun asse di merito viene
+#  spazzolato: i due file prova fissano OGNI input al valore del preset
+#  vivo. L'unico asse e' TECNICO (il magic, 2 celle identiche per
+#  costruzione) e serve a due cose: dare a MT5 qualcosa da ottimizzare
+#  (senza, zero passate -- classe 134), e regalare un GEMELLO DI
+#  DETERMINISMO gratis.
+#
+# =====================================================================
+#  I CANCELLI. IN QUEST'ORDINE. TUTTI PRIMA DI LEGGERE IL MERITO.
+# =====================================================================
+#
+#  G0 -- CANARINO: IL RITARDO MORDE?   [FERMA TUTTO SE FALLISCE]
+#     Non e' misurato in questa casa che MT5 onori la chiave Delay
+#     scritta da .ini. Quindi PRIMA di spendere il resto della macchina:
+#     si girano la sedia 770611 a Delay=0 e a Delay=500 e si confrontano
+#     i due CSV.
+#        - se sono DIVERSI  -> il ritardo morde, si prosegue.
+#        - se sono IDENTICI cifra per cifra -> la riga e' IGNORATA da
+#          MT5, e l'esito del round e' *NON MISURATO*.
+#     >>> "NON MISURATO" NON VUOL DIRE "IMMUNE AL RITARDO". E' lo stesso
+#         errore che il commento di -Spread nel driver mette in guardia
+#         dal fare da agosto. Se scatta G0, il round si ferma qui e si
+#         scrive che la leva non e' utilizzabile da .ini.
+#     La sedia scelta per il canarino e' la 770611 APPOSTA: e' quella
+#     con l'ordine STOP, cioe' l'unica dove il ritardo DEVE mordere se
+#     morde da qualche parte. Fare il canarino sulla 770101 (LIMIT)
+#     confonderebbe "riga ignorata" con "sedia immune".
+#
+#  G1 -- GEMELLI DI DETERMINISMO
+#     Le 2 celle dell'asse magic devono dare la STESSA riga di risultati
+#     (profitto, PF, DD, numero trade) dentro ogni corsa.
+#     Se no: il banco non e' deterministico e NIENTE di questo round si
+#     legge. Non e' un dettaglio: sul ramo INDICI dell'orologio (07/09)
+#     il determinismo non era verificato e il referto ha dovuto
+#     dichiararlo come limite.
+#
+#  G2 -- IL CAMPIONE
+#     Regola di casa (16/08): il MERITO si sospende sotto 150 operazioni;
+#     il RISCHIO si legge sempre, a qualunque n.
+#     Qui si dichiara n per sedia e per finestra, e se n < 150 si legge
+#     SOLO il rischio.
+#
+# =====================================================================
+#  I CRITERI DI SOPRAVVIVENZA. CONGELATI ORA.
+# =====================================================================
+#
+#  S1 -- RISCHIO (vale sempre, a qualunque n).
+#     A 100 ms l'Equity DD % non deve superare di piu' del 20% RELATIVO
+#     il DD misurato a 0 ms, nella STESSA finestra.
+#     Esempio: DD 10,00% a 0 ms -> il tetto a 100 ms e' 12,00%.
+#     Chi lo supera va in REVISIONE. Non "si spegne": va in revisione,
+#     che e' la corsia firmata il 18/08.
+#
+#  S2 -- MERITO (solo se n >= 150).
+#     A 100 ms il Profit Factor deve restare > 1,00 nella finestra OOS.
+#     Sotto 1,00 la sedia, a quel ritardo, perde soldi.
+#
+#  S3 -- SCALA MONOTONA.
+#     Il degrado deve crescere col ritardo: 0 -> 50 -> 100 -> 500.
+#     Se la scala NON e' monotona, il ritardo non e' la variabile
+#     dominante su quella sedia: si DICHIARA e non si promuove niente.
+#     Non si sceglie il livello che fa comodo.
+#
+#  S4 -- COSA NON SI FA CON QUESTO ROUND.
+#     Questo round NON promuove, NON spegne e NON cambia nessun
+#     parametro di nessuna sedia viva. Produce numeri. Le decisioni
+#     passano dalle corsie firmate il 18/08 (RISCHIO / MERITO /
+#     TAGLIANDO) e le firma Claudio.
+#
+# =====================================================================
+#  I LIMITI, DICHIARATI PRIMA E NON DOPO
+# =====================================================================
+#   1. UN SOLO REGIME. 2024.09.26 -> 2026.06.30 e' un mercato solo
+#      (toro). Vale la regola C dell'emendamento della finestra: cio'
+#      che esce descrive QUESTO regime.
+#   2. IL RITARDO NON E' LO SLIPPAGE. Il ritardo sposta il momento
+#      dell'esecuzione lungo il flusso dei tick; lo slippage vero
+#      comprende anche la profondita' del book, che il tester non ha.
+#      Il ritardo e' un LIMITE INFERIORE del danno, non una stima.
+#   3. DENSITA' DEI TICK. Su D30EUR sono ~55 tick/minuto misurati, su
+#      U30USD ~104. A 50 ms molto spesso NON arriva nessun tick nuovo e
+#      il ritardo non sposta niente. Il ritardo morde dove i tick sono
+#      fitti, cioe' NELL'APERTURA -- che e' esattamente quando queste
+#      due sedie lavorano. E' un motivo per aspettarsi che morda, ma va
+#      verificato dal canarino G0, non dato per buono.
+#   4. LE STRINGHE NON SONO FISSATE. InpNewsFile, InpNewsCurrencies,
+#      InpCorrSymbol, InpComment restano al default del sorgente: il
+#      formato ||..|| del driver non e' per le stringhe. Sono tutti
+#      economicamente inerti qui (filtro notizie spento su entrambe le
+#      sedie, correlazione spenta sulla 770101, il commento e' cosmetico).
+#   5. NESSUNA ANCORA STORICA. Non esiste in archivio un round girato su
+#      QUESTE celle esatte (preset del conto reale, deposito 10.000):
+#      quindi la corsa a Delay=0 E' la base, e il suo unico controllo
+#      interno e' il gemello di determinismo G1. Detto qui perche'
+#      nessuno lo scambi per una riproduzione.
+#   6. InpUsaGuardian resta al valore vivo (true) su tutte e due. Nel
+#      tester il Guardian non gira, quindi la guardia e' un no-op: la
+#      corsa misura l'EA, non il pacchetto EA+Guardian.
+# =====================================================================

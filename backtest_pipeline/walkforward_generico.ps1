@@ -1,4 +1,5 @@
 # =====================================================================
+#  MARCATORE_WALKFORWARD_GENERICO_v2_RITARDO
 #  walkforward_generico.ps1  --  UN walk-forward per QUALSIASI EA
 # ---------------------------------------------------------------------
 #  PERCHE' ESISTE (07/08/2026)
@@ -112,6 +113,22 @@ param(
                                      #   numeri DIVERSI. Se sono identici, la riga e' ignorata e
                                      #   la scala a tick reali NON E' ESEGUIBILE (va dichiarato,
                                      #   non interpretato come "robusto allo spread").
+  [int]$Ritardo      = -1,           # 07/09/2026 (R119, ritardo del tester). -1 = NON scrive la
+                                     #   riga Delay nell'.ini = comportamento identico a sempre
+                                     #   (esecuzione OTTIMALE, zero ritardo: e' cio' che tutti i
+                                     #   round di questa casa hanno fatto finora, senza dirlo).
+                                     #    0 = ritardo ZERO scritto ESPLICITO (toglie lo stato
+                                     #        nascosto: serve come BASE della scala).
+                                     #    N = ritardo di N millisecondi fra la richiesta dell'EA
+                                     #        e l'esecuzione. E' l'unica leva che degrada
+                                     #        l'esecuzione SENZA passare da un input dell'EA,
+                                     #        quindi vale anche dove InpSlippagePts e' inerte.
+                                     #   ATTENZIONE, NON MISURATO IN CASA: come per lo Spread, non
+                                     #   e' verificato che MT5 onori questa riga da .ini. Prima di
+                                     #   leggere una scala serve il CANARINO: stesso EA, ritardo
+                                     #   assurdo, numeri DIVERSI. Se sono identici la riga e'
+                                     #   IGNORATA e la scala NON E' MISURATA -- che non vuol dire
+                                     #   "immune al ritardo".
   [string]$Prova     = "",           # file prova alternativo (default: prove\<EA>.txt)
   [string]$BrokerPattern = "BCM",    # SU QUALE TERMINALE girare. "BCM" = come sempre.
                                      #   Altro valore (es. "Pepperstone") = secondo
@@ -133,6 +150,7 @@ function Titolo($t){ Write-Host ""; Write-Host $t -ForegroundColor Cyan }
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
 
 Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
+Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v2_RITARDO" -ForegroundColor DarkGray
 
 # =====================================================================
 #  0. SU QUALE BROKER SI STA GIRANDO
@@ -559,6 +577,26 @@ if($Spread -ge 0){
   Write-Host "     atti passa -Spread 0.)" -ForegroundColor DarkYellow
 }
 
+# --- la riga Delay dell'.ini (R119). Con -1 la riga NON esiste: e' esattamente
+#     quello che hanno fatto TUTTI i round di questa casa fino al 07/09/2026.
+$RigaRitardo = ""
+if($Ritardo -ge 0){
+  $RigaRitardo = "Delay=$Ritardo"
+  $comeRitardo = if($Ritardo -eq 0){ "esecuzione OTTIMALE (zero ritardo), dichiarata" } else { "ritardo di $Ritardo ms (STRESS)" }
+  Write-Host ""
+  Write-Host "    Delay=$Ritardo  ->  $comeRitardo" -ForegroundColor Yellow
+  if($Ritardo -gt 0){
+    Write-Host "    NON E' MISURATO che MT5 onori questa riga da .ini. Senza il CANARINO" -ForegroundColor Yellow
+    Write-Host "    (stessa cella, ritardo assurdo, numeri DIVERSI) la scala non si legge:" -ForegroundColor Yellow
+    Write-Host "    identico alla base vuol dire riga IGNORATA, non 'immune al ritardo'." -ForegroundColor Yellow
+  }
+} else {
+  Write-Host ""
+  Write-Host "    (nessuna riga Delay nell'.ini: esecuzione OTTIMALE, zero ritardo." -ForegroundColor DarkYellow
+  Write-Host "     E' il comportamento di sempre, ma e' STATO NASCOSTO: per metterlo agli" -ForegroundColor DarkYellow
+  Write-Host "     atti passa -Ritardo 0.)" -ForegroundColor DarkYellow
+}
+
 # =====================================================================
 #  6. -SoloControllo: si ferma qui e fa vedere cosa lancerebbe
 # =====================================================================
@@ -575,6 +613,7 @@ Symbol=$Simbolo
 Period=$Periodo
 Model=4
 $RigaSpread
+$RigaRitardo
 Optimization=1
 OptimizationCriterion=6
 FromDate=$($WF[0].Da)
@@ -729,6 +768,7 @@ Symbol=$Simbolo
 Period=$Periodo
 Model=$Modello
 $RigaSpread
+$RigaRitardo
 Optimization=1
 OptimizationCriterion=6
 FromDate=$($w.Da)
