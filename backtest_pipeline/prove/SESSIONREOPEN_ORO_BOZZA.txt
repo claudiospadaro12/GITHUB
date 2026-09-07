@@ -1,0 +1,215 @@
+# =====================================================================
+#  SESSIONREOPEN ORO -- BOZZA, NON LANCIABILE COM'E'
+#  L'ora della riapertura CME dell'oro: esiste sul NOSTRO broker, e
+#  paga DOPO il costo di QUELLE ore?
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA (fa fede, qui non si duplica):
+#    backtest_pipeline\caccia_strategie\CACCIA_APERTURE_ORO_2026-09-08.md
+#
+#  ORIGINE (regola di casa: si cita sempre)
+#    EA        : SessionReopenEA -- GianlucaGangemi
+#                https://www.mql5.com/en/code/77060
+#                pubblicato 07/09/2026 07:11 [VERIFICATO, pagina aperta]
+#                Nessuna licenza OSI dichiarata; download libero dal
+#                Code Base. Attribuzione OBBLIGATORIA in testa a
+#                qualunque .mq5 derivato.
+#    SORGENTE ARCHIVIATO (409 righe, 13 input, letto riga per riga):
+#      caccia_strategie\biblioteca\sorgenti\
+#      SessionReopenEA_GianlucaGangemi-CodeBase-NOLICENSE_mql5code77060_2026-09-08.mq5
+#
+# =====================================================================
+#  0. PERCHE' QUESTO FILE NON SI PUO' LANCIARE OGGI
+# ---------------------------------------------------------------------
+#  Mancano DUE numeri che NON si inventano, e senza i quali il round
+#  misura un'altra strategia:
+#
+#   (1) @DAQUANDO -- la profondita' a TICK di XAUUSD sul nostro broker
+#       NON E' MAI STATA MISURATA. In risultati_archivio\misura_tick\
+#       ci sono SOLO D30EUR, NASUSD, U30USD [VERIFICATO].
+#       Si misura con scarica_storico.ps1 / la sonda di casa. Finche'
+#       non c'e', la riga resta VUOTA. Precedente che costa: sugli
+#       indici il driver diceva 2024.01.01 e i dati partivano dal
+#       26/09/2024 -- meta' finestra IS non esisteva.
+#
+#   (2) InpEntryHour -- l'ora della riapertura IN ORA SERVER BCM.
+#       L'autore usa 1 sul SUO server (allineato all'ora legale
+#       AMERICANA, GMT+3). Il nostro server e' ora italiana - 1 e segue
+#       l'ora legale EUROPEA.
+#       [INFERITO, NON MISURATO]: sul BCM dovrebbe cadere verso le
+#       23:00 server, e restare li' tutto l'anno TRANNE le ~3 settimane
+#       di marzo e ottobre/novembre in cui i due cambi d'ora non
+#       coincidono.
+#       [INCERTO]: non so nemmeno se BCM abbia una pausa su XAUUSD.
+#       Un'ora sbagliata qui NON DA' ERRORE: da' un altro esperimento.
+#
+#  >>> Quindi: PASSO 0 (sonda) PRIMA. PASSO 1 (griglia) solo dopo.
+#
+# =====================================================================
+#  1. IPOTESI, in italiano
+# ---------------------------------------------------------------------
+#  L'oro ha una pausa di manutenzione giornaliera al CME. Nell'ORA
+#  successiva alla riapertura il prezzo sale piu' di quanto il caso
+#  spieghi, mentre OGNI ALTRA ora della giornata misura piatta.
+#
+#  PERCHE' DOVREBBE FUNZIONARE, in una riga:
+#    la pausa accumula domanda che non ha dove scaricarsi; alla
+#    riapertura quella domanda arriva tutta insieme su un book sottile,
+#    e chi e' presente viene pagato per il rischio d'inventario.
+#
+#  E PERCHE' NON E' UN MOTORE CHE ABBIAMO GIA' -- tre differenze:
+#    (a) NON e' ABTG_MaxMinNotte XAUUSD (magic 770402): quello rompe il
+#        MAX/MIN della notte -- e' un LIVELLO. Qui non c'e' nessun
+#        livello: il grilletto e' SOLO l'orologio.
+#        >>> MA ATTENZIONE: stesso simbolo, fascia oraria che si
+#        sovrappone. La sovrapposizione delle operazioni VA MISURATA
+#        prima di qualunque schieramento (regola di rotta prop: mai due
+#        EA sullo stesso simbolo/fascia al rischio pieno).
+#    (b) NON e' l'ORB / il breakout d'apertura (famiglia CHIUSA il
+#        26.07.26, ~210 celle a tick): non c'e' range e non c'e'
+#        rottura. Si compra a mercato all'ora, e basta.
+#    (c) NON e' il post-news sui metalli (CACCIA_POSTNEWS 05/09, dove
+#        sull'oro il controllo casuale guadagnava di piu'): qui non c'e'
+#        nessun evento di calendario, c'e' un orario di BORSA.
+#
+#  E' invece la PRIMA istanza concreta della famiglia OROLOGIO:
+#  ABTG_SondaOrologio ha una cella XAUUSD H1 congelata e MAI GIRATA.
+#  Questo candidato le da' un'ORA PRECISA da testare invece di una
+#  griglia cieca su 24 -- cioe' trasforma una spazzolata in un'ipotesi.
+#
+# =====================================================================
+#  2. CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  PASSO 0 -- SONDA (nessun ordine, nessun lotto, nessun magic).
+#  Serve solo a rendere scrivibili i due numeri del blocco 0.
+#
+#   G0.1  PROFONDITA': prima barra M1 e primo tick reali disponibili su
+#         XAUUSD. Si scrive in @DAQUANDO. Se lo storico a tick copre
+#         meno di 3 anni -> il MERITO resta sospeso (regola B: il
+#         campione sottile sospende il MERITO, mai il RISCHIO).
+#
+#   G0.2  LA PAUSA ESISTE: esiste un'ora del giorno in cui il conteggio
+#         dei tick crolla e poi riparte? SI/NO, e a che ora server.
+#         Se NO -> 🔴 IL CANDIDATO E' MORTO QUI, e si scrive cosi'.
+#         Non e' una delusione: e' la falsificazione piu' economica
+#         possibile, e costa un pomeriggio invece di un round.
+#
+#   G0.3  SPREAD ORA PER ORA: spread mediano di XAUUSD per ciascuna
+#         delle 24 ore server. Serve il numero dell'ora della
+#         riapertura, non la media della giornata.
+#         Riferimento di casa: spread DIURNO misurato 0,24 $
+#         (SpreadLogger 07/09). L'autore misura ~60 punti (0,60 $) di
+#         costo di giro completo ALLA RIAPERTURA sul suo broker.
+#
+#   G0.4  CANCELLO DI COSTO (frontiera di casa, CACCIA_TFBASSO §6.1):
+#         pavimento DURO   stop >= 13,3 x spread_dell_ora
+#         pavimento LAVORO stop >= 40   x spread_dell_ora
+#         Lo stop dell'EA e' 2,0 x media(high-low) di 480 barre H1.
+#         >>> SE lo stop non arriva al pavimento DURO -> NON SI PROVA.
+#         >>> SE arriva al DURO ma non al LAVORO -> si prova, ma il
+#             pedaggio va DICHIARATO in R e sottratto nel giudizio.
+#
+#  ---------------------------------------------------------------------
+#  PASSO 1 -- SCREENING (solo se G0.2 e G0.4 passano).
+#
+#   G1.1  CONTROLLO NEGATIVO OBBLIGATORIO: la stessa misura girata su
+#         TUTTE le altre 23 ore server. L'autore dichiara che ogni
+#         altra ora e' piatta (|t| < 2). Se da noi vincono anche altre
+#         5 ore, non abbiamo trovato la riapertura: abbiamo trovato una
+#         deriva generale dell'oro, e il candidato NON e' quello che
+#         dice di essere.
+#
+#   G1.2  SEGNO E FORZA: E >= +0,075 R per operazione NETTA del costo
+#         misurato in G0.3 (cancello H8 di casa). Sotto -> scarto.
+#
+#   G1.3  CAMPIONE: >= 150 operazioni nella finestra IS (emendamento
+#         della finestra, regola A). ~200 op/anno dichiarate dall'autore
+#         -> bastano ~9-10 mesi. Sotto 150 la superficie e' rumore.
+#
+#   G1.4  RISCHIO (vale a QUALUNQUE n, regola B): peggior giornata
+#         < 2,06% (la nostra peggiore misurata, R51) e DD < 10%.
+#         Un drawdown e' un fatto accaduto, non una stima.
+#
+#   G1.5  SELEZIONE: CENTRO DELL'ALTOPIANO, MAI il picco. 12 Spearman
+#         IS->OOS negative su 13.
+#
+#   G1.6  MODELLO: questa e' una griglia di SCREENING. Nessun verdetto
+#         senza tick reali -- e sull'oro i tick reali oggi non li
+#         sappiamo nemmeno misurare (blocco 0). Dichiarato.
+#
+# =====================================================================
+#  3. COSA SI TIENE E COSA SI RIFA' (la separazione che chiede il §5F)
+# ---------------------------------------------------------------------
+#  SI TIENE (il MOTORE, sano):
+#    - il grilletto a orologio, una volta per sessione
+#    - InpSkipMonday (la riapertura settimanale e' rumore: l'autore la
+#      misura a t=0,88 contro t=8,32 delle giornaliere)
+#    - lo SL VERO mandato al broker dentro l'ordine
+#    - l'unita' di volatilita' mean(high-low), NON iATR: il true range
+#      includerebbe il salto della pausa e allargherebbe lo stop
+#    - un solo tentativo per sessione anche dopo un rifiuto
+#
+#  SI RIFA' (la GESTIONE, ed e' quello che sappiamo fare):
+#    - lotto FISSO -> rischio in PERCENTUALE dell'equity (0,65%)
+#    - nessun TP -> parziale a 1R + pari + runner a 2R
+#    - gate di spread in PUNTI -> spread come FRAZIONE dello stop (R55)
+#    - pavimento allo SL (R109)
+#    - solo LONG -> il lato short va MISURATO, non assunto (regola dei
+#      due lati, 25/08). Sull'oro non e' firmata, ma il principio vale.
+#
+# =====================================================================
+#  4. LE RIGHE @  -- INCOMPLETE DI PROPOSITO
+# ---------------------------------------------------------------------
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO
+#         ^^^ VUOTA. Non si inventa: si misura (blocco 0, G0.1).
+
+# ---------------------------------------------------------------------
+#  5. GRIGLIA DI SCREENING -- sweep STRETTO, non un verdetto
+#     Nome=default||start||step||stop||Y/N
+#     I nomi degli input sono quelli VERI del sorgente 77060: se il
+#     .mq5 usasse altri nomi, MT5 li ignora IN SILENZIO.
+# ---------------------------------------------------------------------
+# 🔴 InpEntryHour: il default 1 e' l'ora del server DELL'AUTORE, non la
+#    nostra. Il valore va SCRITTO DOPO G0.2, in ORA SERVER BCM.
+#    Lo sweep 21..24 e' li' per catturare l'ora vera intorno alla stima
+#    di 23:00 -- NON e' un'ottimizzazione dell'ora: e' l'ammissione che
+#    l'ora non la so ancora.
+InpEntryHour=1||21||1||24||Y
+InpEntryWindowMin=10||10||0||10||N
+InpHoldHours=2||1||1||3||Y
+InpSkipMonday=true||true||0||true||N
+InpStopAtrMult=2.0||1.5||0.5||3.0||Y
+InpRangeBars=480||480||0||480||N
+InpMaxSpreadPts=60||60||0||60||N
+InpLots=0.01||0.01||0||0.01||N
+InpMagic=77701||77701||0||77701||N
+#
+#  Celle: 4 ore x 3 hold x 4 moltiplicatori = 48. Screening, non
+#  verdetto. E si sceglie il CENTRO dell'altopiano, mai la cella
+#  migliore (G1.5).
+#
+# =====================================================================
+#  6. IL CONTROLLO NEGATIVO, come file gemello
+# ---------------------------------------------------------------------
+#  G1.1 non e' un'opzione: e' la corsa che decide se abbiamo trovato la
+#  riapertura o la deriva dell'oro. Stessa identica griglia, stessa
+#  finestra, InpEntryHour=0..23 con passo 1, tutto il resto pinnato
+#  sulla cella centrale dell'altopiano trovato al passo 1.
+#  ATTESO se il candidato e' vero: l'ora della riapertura sopra tutte
+#  le altre, e le altre indistinguibili da zero.
+#  ATTESO se e' falso: cinque o sei ore verdi sparse -> rumore.
+#
+# =====================================================================
+#  7. RIGA PROP (regola 7-bis)
+# ---------------------------------------------------------------------
+#  Una operazione per sessione, una posizione alla volta, uscita a tempo
+#  dopo 2 ore: il muro giornaliero (-5.000 su 100k) non lo puo' toccare
+#  con un trade solo. ~200 op/anno = ~0,8 op/giorno: sotto il pavimento
+#  di 1,00 come SEDIA, dentro come FAMIGLIA (regola firmata 07/09).
+#  🔴 L'autore dichiara "circa un anno su nove e' negativo" e
+#  return/drawdown 6,5: e' una curva a scalini con lunghi ritorni dal
+#  picco -- ESATTAMENTE la forma che il DD TRAILING di certe prop
+#  punisce, e che le nostre Monte Carlo (tutte su DD statico dal
+#  deposito) non descrivono. Segnalato, come impone la regola.
+# =====================================================================
