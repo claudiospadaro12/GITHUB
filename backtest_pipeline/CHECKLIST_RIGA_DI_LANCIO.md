@@ -10704,3 +10704,102 @@ esattamente quello che ha fatto l'agente, e per cui va dato atto.
 Un agente che, invece di ignorare l'anomalia, **la nota e la scrive nel suo
 referto** vale piu' di uno che consegna e basta. Quella riga e' il motivo per
 cui questa classe esiste.
+
+---
+
+## 🆕 AGGIUNTE DELL'08/09/2026 — trovate dal **verificatore di stringhe** su `RIGA_ANCORA_R119.ps1` v1 (pin `a4536be6`), la riga del **PASSO 7 del quarto MT5** (l'ancora che deve riprodurre alla cifra due corse di R119 sul terminale `C:\MT5_Backtest`, conto demo 50504400, mentre sul VPS girano altri **tre** terminali fra cui il **conto REALE 10105439 con posizioni aperte**). Lo script era per il resto pulito: parse reale `pwsh` 7.4.6 **0 errori**, **ASCII puro 0 byte**, `TryParse` con `InvariantCulture` coerente col punto decimale che il tester scrive davvero nei CSV, tolleranze (`0.005` / `0.000005` / `0.00005`) **corrette** rispetto ai decimali stampati (2 / 5 / 4), percorso dei CSV **giusto** (`$PSScriptRoot` del driver = cartella di lavoro della riga), nomi delle colonne **esistenti** nell'intestazione vera, e i quattro numeri attesi **confermati sui CSV agli atti** (`risultati_archivio\ritardo_r119b_csv\*_D0000.csv`). Le due voci qui sotto sono **RIPRODOTTE ESEGUENDO** e avrebbero fatto fallire il passo 7 **al 100%**, tutte e due in modo silenzioso.
+
+## 158. 👯 IL CSV DELLA **CELLA CONGELATA** HA **DUE** RIGHE, NON UNA: il lettore che ne pretende una sola stampa **NON RIPRODUCE** su una corsa perfettamente riuscita
+
+**Trovato l'08/09/2026** leggendo i CSV veri di R119 invece del referto che li riassume.
+
+I round a **cella congelata** (nessun asse di merito) portano per forza un
+**asse TECNICO sul magic** — `InpMagic=770611||770611||50||770661||Y` — perche'
+senza nessun input marcato `Y` MT5 **non esegue nessuna passata** e il CSV esce
+vuoto (**classe 134**). Quell'asse produce **2 celle identiche per costruzione**:
+sono i **gemelli di determinismo G1**, e sono un regalo, non un rumore.
+
+Quindi il CSV di una cella congelata ha **DUE righe di dati**. La v1 dell'ancora
+faceva:
+
+```powershell
+if($righe.Count -ne 1){ $ok=$false; $note += "il CSV OOS ha $($righe.Count) righe: la cella congelata ne vuole 1" }
+```
+
+Misurato eseguendo su `ABTG_ORB_Ottimizzato_U30USD_OOS_R119_ORB_D0000.csv`:
+`righe = 2` -> **NON RIPRODUCE**. Con i numeri **esatti** dentro
+(`diff profit = 0`, `diff PF = 0`, `diff DD = 0`, `Trades 119`).
+
+> 🔴 **E' il peggiore dei falsi negativi**: dichiara "la macchina nuova non e'
+> la stessa macchina" dopo **ore di tick reali** (104 milioni di tick), e manda
+> a cercare un difetto che non esiste — tetto barre, storico, tipo di conto —
+> mentre il difetto e' nel **lettore**.
+
+> ✅ **REGOLA. Chi legge un CSV di round deve sapere quante righe la GRIGLIA
+> produce**, e il conto si fa **sul file prova**, non a memoria:
+> `start`, `stop`, `step` dell'unico asse `Y`. Se l'asse tecnico e' a 2 celle,
+> le righe sono 2.
+> E il controllo giusto non e' "quante righe", e':
+> 1. **tutte le righe identiche** sulle colonne economiche (= cancello G1,
+>    gratis: se divergono, il banco non e' deterministico e l'ancora non vuol
+>    dire niente);
+> 2. il confronto coi numeri attesi si fa sulla **prima** riga;
+> 3. un numero di righe diverso da quello atteso e' un **RILIEVO dichiarato**,
+>    non un verdetto economico.
+
+_(Corollario: `RIGA_RITARDO_TESTER.ps1`, scritta il giorno prima per le STESSE
+due sedie, aveva gia' `GemelliOk()` che pretende `$r.Count -ge 2`. La v1
+dell'ancora e' nata dallo stesso repo e ha invertito il numero. **Un difetto
+gemello si cerca nello script fratello prima di mandare la riga** — punto 2 di
+questa checklist.)_
+
+---
+
+## 159. 🚪 LA GUARDIA «MT5 APERTO» E' **GLOBALE**, MA I TERMINALI SONO **QUATTRO**: la corsa non parte, e il motivo non e' nel round
+
+**Trovato l'08/09/2026**, leggendo la guardia del driver condiviso invece di
+fidarsi del fatto che "ha sempre funzionato".
+
+`walkforward_generico.ps1`, riga 843:
+
+```powershell
+# MT5 aperto = il tester non parte e escono ZERO CSV. E' successo.
+if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $Force){
+  Muori "chiudi MetaTrader prima di lanciare, altrimenti escono 0 CSV."
+}
+```
+
+Quella guardia e' nata sul **PC di backtest**, dove di MT5 ce n'era **uno**. Sul
+**VPS** ce ne sono **quattro** (piccolo 50503392, 100k 50504263, **REALE
+10105439 con posizioni aperte**, backtest 50504400) e almeno tre sono **sempre
+vivi per mestiere**. Risultato: la riga dell'ancora sarebbe morta alla prima
+corsa con `chiudi MetaTrader prima di lanciare`, **zero CSV**, e il lettore a
+valle avrebbe detto *"CSV assente: la corsa non ha prodotto risultati"* — cioe'
+avrebbe accusato **la macchina** di un difetto della **guardia**.
+
+Il vincolo vero era gia' scritto, nero su bianco, in `scarica_storico.ps1`
+(punto 4b): _"il vincolo vero e' quindi **quella installazione dev'essere
+chiusa**, NON la macchina dev'essere senza MT5"_. Un secondo avvio sulla
+**stessa cartella dati** non esegue niente; un'altra installazione non c'entra.
+
+> ✅ **REGOLA. Su una macchina con PIU' terminali, la guardia globale non si
+> eredita: si sostituisce con quella CHIRURGICA, e la chirurgica la fa la
+> riga**, non il driver condiviso:
+> 1. **censimento PRIMA**: `Get-Process terminal64` con `Id` e `Path`, diviso in
+>    **BERSAGLIO** (`$_.Path -like "$cartellaBT\*"`) e **LASCIATI VIVI**;
+>    un processo senza `Path` leggibile **non e' mai un bersaglio**;
+> 2. si chiude **solo** il bersaglio (`-ChiudiBacktest`), e se non lo si vuole
+>    chiudere si **muore chiedendolo**, mai si tira dritto;
+> 3. al driver si passa `-Force`, **dichiarando perche'**: la guardia
+>    l'abbiamo gia' fatta, meglio;
+> 4. **censimento DOPO**, e il confronto dei PID lo fa **il codice**: "stessi
+>    PID prima e dopo" e' la prova che il conto reale non e' stato toccato.
+>    Chiedere a Claudio di confrontare due liste di PID a occhio e' la stessa
+>    classe del riconoscere una finestra dal titolo (regola dei terminali
+>    multipli, CLAUDE.md 06/09).
+
+> ⚠️ **E il corollario che costa di piu':** `-Force` **spegne** un controllo.
+> Si passa **solo** dopo aver messo al suo posto un controllo **piu' stretto**,
+> nello stesso script e **prima** della chiamata. Un `-Force` senza il
+> sostituto e' esattamente il difetto della **classe 149** (la manopola a mano
+> che scavalca il gate che lo script ha gia').
