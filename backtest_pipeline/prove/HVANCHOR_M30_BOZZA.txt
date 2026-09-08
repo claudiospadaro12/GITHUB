@@ -1,0 +1,252 @@
+# =====================================================================
+#  HVANCHOR (bozza)  --  IL SALTO DI VOLATILITA' CREA IL LIVELLO:
+#                        estensione -> continuazione, estensione
+#                        FALLITA -> esaurimento.  DUE LATI.
+#  ABTG_HvAnchor  su  D30EUR / U30USD / NASUSD  M30, TICK REALI
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:
+#    report\CACCIA_M30_INDICI_2026-09-08.md   (promosso P3, 8/10)
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "HV Spike Strategy (HVP + OR Breakout +
+#    Reversal + TP/SL Modes)" di kostastrovas, TradingView, creato
+#    26/10/2025, Pine v6, 134 righe, sorgente pubblico (scriptAccess
+#    "open_no_auth"), LETTO RIGA PER RIGA l'08/09/2026.
+#      https://www.tradingview.com/script/1oZNa7Oq-HV-Spike-Strategy-HVP-OR-Breakout-Reversal-TP-SL-Modes/
+#    Copia archiviata in casa:
+#      caccia_strategie\biblioteca\sorgenti\
+#      HvSpikeOrBreakoutReversal_kostastrovas-NOLICENSE_tv1oZNa7Oq_2026-09-08.pine
+#    LICENZA: [INCERTO] -- nessuna intestazione nel sorgente.
+#    L'attribuzione va RIPETUTA in testa a ABTG_HvAnchor.mq5.
+#
+# =====================================================================
+#  !!!  QUESTO FILE NON PUO' GIRARE OGGI  !!!
+# ---------------------------------------------------------------------
+#  L'EA  mql5\Experts\ABTG_HvAnchor.mq5  NON ESISTE.
+#  Specifica congelata.  Nomi di input PROPOSTI: da ricopiare dal .mq5
+#  quando esistera' (MT5 ignora in silenzio un pin che non trova --
+#  errore n.3 della CHECKLIST_RIGA_DI_LANCIO).
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  La barra in cui la volatilita' SALTA DI PERCENTILE e' la barra in cui
+#  e' arrivata l'informazione.  Il suo range diventa il metro della
+#  giornata: da li' in poi il mercato o lo ESTENDE (l'informazione era
+#  vera e c'e' seguito) o non ce la fa e RIENTRA (era una scossa e
+#  basta).
+#
+#  IL PUNTO CHE LO RENDE DIVERSO DA TUTTO IL RESTO:
+#    il livello NON LO SCEGLIAMO NOI e non e' un orario.  Lo sceglie
+#    l'evento.  Non c'e' nessun box d'apertura, nessuna campanella,
+#    nessuna sessione: il motore non sa che ora e'.
+#
+#  LA DOMANDA VERA:
+#    M2 (ORB condizionato allo stato di volatilita', Crabel) e' 🟨 in
+#    canna in casa: li' la volatilita' AUTORIZZA un box orario.
+#    >>> Qui la volatilita' NON autorizza: GENERA il livello.
+#        E' la stessa cosa con un nome diverso, o e' un altro motore?
+#    L'unico modo di scioglierla e' misurarla.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' NON E' UN CADUTO
+# ---------------------------------------------------------------------
+#    - NON e' M1/ORB (~210 celle) NE' M2, PURCHE' si rispetti la
+#      condizione C0 qui sotto (che e' la ragione stessa del file).
+#    - NON e' M17 (fade dell'anomalo, cimitero interno ED esterno):
+#      M17 fade UNA BARRA ANOMALA subito.  Qui l'evento di volatilita'
+#      non e' un ingresso: e' solo l'ANCORA.  Dopo l'ancora servono
+#      un'estensione del 100% E un rientro E un attraversamento del
+#      50% opposto.  Tre condizioni che M17 non ha.
+#    - NON e' M24 / CRT (0/30 celle): il livello non e' un estremo di
+#      struttura, e il ramo continuazione va NELLA direzione.
+#
+# ---------------------------------------------------------------------
+#  🔴 C0 -- LA CONDIZIONE CHE METTO IO, PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  Il sorgente ha DUE modalita' di attivazione:
+#     (a) "HV Spike"        -> il percentile della volatilita' storica
+#                              ATTRAVERSA verso l'alto una soglia
+#     (b) "Market Sessions" -> apertura di Tokyo / Londra / New York
+#
+#  >>> SI MISURA SOLO LA (a).  LA (b) NON SI TOCCA.
+#      Motivo, e non e' un'opinione: la (b) e' un ORB con un altro
+#      nome, e l'ORB e' ⬛ con ~210 celle a tick (R45 0/48, R12 48/48
+#      negative).  Provarla sarebbe la Regola della Seconda Caccia
+#      (19/08) violata alla lettera: "MAI parametri diversi dello
+#      stesso motore morto".
+#
+#  🔴 E LA CONSEGUENZA SCOMODA SI DICHIARA SUBITO, non dopo:
+#      senza il ramo sessioni la FREQUENZA CROLLA.  Un attraversamento
+#      di percentile e' un EVENTO, non un orario: puo' capitare poche
+#      volte al mese.
+#      >>> Se la famiglia non arriva al pavimento, HVANCHOR MUORE PER
+#          FREQUENZA, e va bene cosi'.  Meglio saperlo alla prima
+#          passata che al terzo round.
+#      >>> PER QUESTO LA FREQUENZA SI MISURA PER PRIMA, PRIMA DI
+#          GUARDARE UN SOLO NUMERO DI P/L.  Se C1 fallisce, il file
+#          si chiude e non si guarda altro: guardare il P/L di un
+#          motore gia' bocciato e' il modo migliore per convincersi
+#          di riaprirlo.
+#
+# ---------------------------------------------------------------------
+#  MECCANICA DA IMPLEMENTARE (dal sorgente, righe 60-125)
+# ---------------------------------------------------------------------
+#  VOLATILITA' STORICA:
+#     hv = stdev(log(close/close[1]), InpHvLen) * sqrt(252)   [annualiz.]
+#     hvp = percentile di hv nelle ultime InpHvLookback barre
+#  ATTIVAZIONE (l'ancora):
+#     hvp > InpHvSoglia  E  hvp[1] <= InpHvSoglia    <- ATTRAVERSAMENTO,
+#                                                       non "stare sopra"
+#     Alla barra di attivazione si congelano:
+#       ancHigh, ancLow, range = ancHigh - ancLow
+#       liv100Up = ancHigh + range ;  liv100Dn = ancLow - range
+#       liv50Up  = ancHigh + range/2 ; liv50Dn  = ancLow - range/2
+#  RAMO CONTINUAZIONE:
+#     chiusura > liv100Up -> LONG   |   chiusura < liv100Dn -> SHORT
+#  RAMO ESAURIMENTO:
+#     c'e' gia' stata l'estensione 100% da un lato, POI la chiusura e'
+#     RIENTRATA dentro [ancLow, ancHigh], POI attraversa il 50% opposto
+#       (estensione giu' fallita -> LONG ;  su fallita -> SHORT)
+#  UNA sola operazione per attivazione.
+#  Scadenza: l'ancora si spegne dopo InpAncoraBarre barre senza
+#  ingresso (nel sorgente l'ancora vive finche' non arriva la
+#  successiva -- va messo un tetto, altrimenti un'ancora vecchia di
+#  tre settimane puo' ancora sparare).
+#
+#  >>> Tutto su BARRA CHIUSA.
+#
+# ---------------------------------------------------------------------
+#  COSA TENGO E COSA RIFACCIO -- separati
+# ---------------------------------------------------------------------
+#  TENGO (il motore):
+#    - l'ancoraggio all'ATTRAVERSAMENTO del percentile di volatilita'
+#    - la geometria 50% / 100% del range della barra-ancora
+#    - i due rami continuazione / esaurimento, simmetrici sui due lati
+#    - una sola operazione per ancora
+#
+#  RIFACCIO DA ZERO (la gestione, perche' NELLA FONTE NON C'E'):
+#    🔴 Nel Pine, `entryPrice = strategy.position_avg_price` e' letto
+#       PRIMA dell'ingresso (riga 108), quindi sulla barra d'ingresso
+#       vale `na`, quindi `strategy.exit(stop = na, limit = na)` NON
+#       PIAZZA NIENTE -- e `strategy.exit` non viene richiamato nelle
+#       barre successive.
+#       >>> IN QUEL SORGENTE LO STOP E IL TAKE NON ESISTONO AFFATTO.
+#           Qualunque numero l'autore mostri e' il risultato di una
+#           strategia SENZA USCITE.  Non pesa comunque (regola di casa:
+#           i numeri degli autori non sono un criterio), ma va scritto
+#           perche' e' la ragione per cui questo motore vale solo con
+#           una gestione NOSTRA.
+#    - stop DENTRO l'OrderSend, sempre, dal primo tick
+#    - rischio in PERCENTUALE dell'equity (0,65%), mai lotto fisso
+#    - parziale a 1R + breakeven + runner a 2R
+#    - spread come PERCENTUALE dello stop (lezione R55)
+#    - tetto di vita dell'ancora (InpAncoraBarre), che la fonte non ha
+#
+# ---------------------------------------------------------------------
+#  CRITERI DI ACCETTAZIONE  -- CONGELATI PRIMA DI QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  C1  FREQUENZA DI FAMIGLIA >= 1,00 op/giorno su
+#      {D30EUR, U30USD, NASUSD} messi insieme, CON LA SOLA MODALITA'
+#      HV (vedi C0).
+#      🔴 SI MISURA PER PRIMA.  E' il criterio che con ogni probabilita'
+#         decide questo candidato, ed e' scritto qui prima di sapere.
+#
+#  C2  CAMPIONE >= 150 operazioni per PARTE (IS e OOS), sui tre simboli
+#      IN COMUNE.
+#      Storico BCM indici dal 2024.09.26 (MISURATO, 252 milioni di
+#      tick, SPREAD_FLOTTA_MISURA_2026-09-03.md) = ~21 mesi.
+#      Sotto 150+150 -> MERITO SOSPESO (valvola R59), RISCHIO no.
+#
+#  C3  COSTO -- FRONTIERA `stop >= 40 x spread`, spread MISURATI:
+#         D30EUR 1,6-1,7  ->  >= 64-68 punti indice
+#         U30USD 1,9-2,0  ->  >= 76-80 punti indice
+#         NASUSD 1,6-1,8  ->  >= 64-72 punti indice
+#      🟢 A favore: l'ancora e' per costruzione una barra di
+#         volatilita' ALTA, quindi il suo range e lo stop ad ATR
+#         dovrebbero essere ampi.  🔴 MA E' UN'IPOTESI, NON UNA MISURA:
+#         il passo 0 stampa la MEDIANA dello stop in punti indice.
+#
+#  C4  DUE LATI misurati SEPARATAMENTE (regola 25/08).
+#
+#  C5  DUE RAMI (continuazione / esaurimento) contati e giudicati
+#      SEPARATAMENTE.  Se paga solo il ramo continuazione, e' un
+#      breakout condizionato e va confrontato con M2 prima di
+#      promuoverlo.  Se paga solo l'esaurimento, e' un fade
+#      condizionato e va confrontato con M14/M17.
+#
+#  C6  RISCHIO, mai sospeso: DD < 10% E peggior giornata < 5%.
+#      🔴 CONTRO, strutturalmente: gli attraversamenti di percentile si
+#         RAGGRUPPANO (la volatilita' e' persistente), quindi il motore
+#         lavora A RAFFICHE.  E' proprio la forma che un DD TRAILING
+#         punisce -- e tutte le nostre Monte Carlo sono su DD STATICO
+#         dal deposito.  Se Claudio sceglie una prop con drawdown che
+#         insegue l'equity, questo candidato va rivalutato da zero.
+#      >>> Il passo 0 deve stampare il MASSIMO NUMERO DI OPERAZIONI IN
+#          UNA GIORNATA e in una settimana, non solo la media.
+#
+#  C7  SELEZIONE: centro dell'altopiano, MAI il picco (12 Spearman
+#      IS->OOS negative su 13).
+#
+#  C8  MODELLO: griglia = SCREENING, verdetto SOLO a tick reali (R57).
+#
+#  CRITERI DI BOCCIATURA:
+#    B0  qualcuno accende la modalita' "Market Sessions"  -> il round
+#        e' NULLO, non "misto".  (C0)
+#    B1  frequenza di famiglia < 1,00 op/giorno           -> BOCCIATO
+#    B2  stop mediano sotto la frontiera su tutti e tre    -> BOCCIATO
+#    B3  entrambi i rami negativi in IS su tutti i simboli -> BOCCIATO
+#    B4  DD > 10% o peggior giornata > 5% in QUALUNQUE cella
+#        dell'altopiano                                    -> BOCCIATO
+#    B5  nessun altopiano = rumore                         -> BOCCIATO
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26   <- MISURATO, non assunto.
+#  IS  2024.09.26 -> 2025.09.30
+#  OOS 2025.10.01 -> 2026.06.30
+#  REGIME CONTENUTO: 🔴 UNO SOLO -- e per QUESTO motore e' il limite
+#    piu' grave dei tre, perche' un motore ancorato alla VOLATILITA'
+#    misurato in un'epoca di volatilita' omogenea non ha visto il caso
+#    che gli interessa.  Va scritto accanto a qualunque risultato.
+#
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+# ---------------------------------------------------------------------
+#  Perche' NASUSD come primo: e' il piu' volatile dei tre, quindi e'
+#  quello su cui gli attraversamenti di percentile sono piu' frequenti.
+#  Se la frequenza non regge NEMMENO li', il candidato e' chiuso in una
+#  corsa sola invece che in tre.
+#
+#  GEMELLI (@SIMBOLO diverso, tutto il resto IDENTICO carattere per
+#  carattere -- qui non ci sono orari, quindi il diff e' pulito):
+#    HVANCHOR_M30_D30.txt   (@SIMBOLO D30EUR)
+#    HVANCHOR_M30_U30.txt   (@SIMBOLO U30USD)
+# ---------------------------------------------------------------------
+#
+#  SWEEP -- SCREENING STRETTO.  27 celle.
+#  Nomi PROPOSTI: da ricopiare dal .mq5 quando esistera'.
+#
+InpHvLen=30||20||10||40||Y
+InpHvLookback=252||252||1||252||N
+InpHvSoglia=50.0||50.0||10.0||70.0||Y
+InpAncoraBarre=20||10||10||30||Y
+InpStopAtr=1.0||1.0||1||1.0||N
+InpAtrLen=14||14||1||14||N
+InpRiskPercent=0.65||0.65||1||0.65||N
+InpUsaRamoContinuazione=true||true||1||true||N
+InpUsaRamoEsaurimento=true||true||1||true||N
+InpAllowLong=true||true||1||true||N
+InpAllowShort=true||true||1||true||N
+InpModoAttivazione=0||0||1||0||N
+#
+#  >>> InpModoAttivazione = 0 e' "SOLO HV".  IL VALORE 1 (sessioni)
+#      NON SI USA IN QUESTO ROUND -- vedi C0 e B0.  Il flag e' N
+#      apposta: se qualcuno lo mettesse a Y, il round sarebbe nullo.
+#  >>> 3 x 3 x 3 = 27 celle.  Cella al CENTRO dell'altopiano, mai al
+#      picco.  Se l'altopiano non c'e', il round finisce li' (B5).
+# =====================================================================

@@ -1,0 +1,271 @@
+# =====================================================================
+#  LVNARBITRO (bozza)  --  L'ARBITRO DEL LIVELLO: rifiuto -> FADE,
+#                          accettazione -> BREAKOUT.  Un solo motore,
+#                          due rami, DUE LATI.
+#  ABTG_LvnArbitro  su  D30EUR / U30USD / NASUSD  M30, TICK REALI
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:
+#    report\CACCIA_M30_INDICI_2026-09-08.md   (promosso P2, 9/10)
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "LVN Rejection / Acceptance Strategy" di
+#    AIScripts, TradingView, creato 06/05/2026, Pine v6, sorgente
+#    pubblico (scriptAccess "open_no_auth"), LETTO RIGA PER RIGA
+#    l'08/09/2026.
+#      https://www.tradingview.com/script/j35ygZIm-LVN-Rejection-Acceptance-Strategy/
+#    Copia archiviata in casa:
+#      caccia_strategie\biblioteca\sorgenti\
+#      LvnRejectionAcceptance_AIScripts-MPL2_tvj35ygZIm_2026-09-08.pine
+#    LICENZA: MPL 2.0, DICHIARATA in testa al sorgente [VERIFICATO].
+#    L'attribuzione va RIPETUTA in testa a ABTG_LvnArbitro.mq5.
+#
+#    !!! IL NOME DELLA FONTE MENTE, ED E' SCRITTO SUBITO !!!
+#    Nel sorgente NON c'e' nessun Volume Profile e nessun Low Volume
+#    Node: la "zona LVN" e' una banda SMA(40) +/- 0,8*ATR(14).
+#    Chi promuovesse questo motore PER IL NOME comprerebbe una cosa
+#    che non esiste.  E' promosso per le SEI RIGHE che lo definiscono.
+#
+# =====================================================================
+#  !!!  QUESTO FILE NON PUO' GIRARE OGGI  !!!
+# ---------------------------------------------------------------------
+#  L'EA  mql5\Experts\ABTG_LvnArbitro.mq5  NON ESISTE.
+#  Questo file e' la SPECIFICA CONGELATA di cosa dovra' misurare:
+#  ipotesi e criteri sono scritti PRIMA di aver visto un solo numero.
+#  I nomi di input qui sotto sono PROPOSTI, non letti da un sorgente:
+#  quando l'EA esistera' vanno RICOPIATI DAL .mq5, perche' MT5 IGNORA
+#  IN SILENZIO un pin che non trova (errore n.3 della
+#  CHECKLIST_RIGA_DI_LANCIO -- e' cosi' che e' nato il falso "0/8" del
+#  FiboH4, REGISTRO_TEST.md par. 2-bis).
+# =====================================================================
+#
+# ---------------------------------------------------------------------
+#  IPOTESI
+# ---------------------------------------------------------------------
+#  Lo stesso bordo di banda vuol dire DUE COSE OPPOSTE, e cio' che le
+#  distingue non e' il prezzo: e' il modo in cui il prezzo ci passa.
+#
+#    RIFIUTO      il prezzo perfora il bordo e RIENTRA nella stessa
+#                 barra, con volume SOTTO la media -> nessuno lo voleva
+#                 davvero, chi ha inseguito la perforazione e' gia' in
+#                 perdita  -> si opera IL RITORNO (fade)
+#
+#    ACCETTAZIONE il prezzo chiude oltre il bordo DUE volte di fila ->
+#                 il livello e' stato accettato, ci sono ordini nuovi
+#                 dall'altra parte  -> si opera LA CONTINUAZIONE
+#
+#  LA DOMANDA VERA, ed e' UNA SOLA:
+#    il fade della banda in casa e' MORTO -- M14, R108/R111, SEI
+#    finestre su SEI rosse, con gradiente H1 > M30 > M15 (cioe' peggiora
+#    proprio dove sto guardando).  Ma quelle sei finestre misuravano il
+#    fade INCONDIZIONATO: si vendeva il bordo alto e basta.
+#    >>> Il fade CONDIZIONATO al rientro-nella-barra E al volume basso,
+#        dentro un motore che sullo STESSO livello produce anche il
+#        segnale OPPOSTO, e' un'altra domanda?
+#
+#  PERCHE' LA DOMANDA HA SENSO (e non e' "riproviamo M14"):
+#    ROBUSTEZZA.md misura la differenza fra le due forme.
+#      filtro AGGIUNTO DOPO a un motore gia' tarato ..... 0 successi su 5
+#        (R20 ADX, R12, R26, R45, R54)
+#      filtro che E' la strategia dall'inizio ........... 30 celle su 30
+#        (ABTG_EMA200 Dow, R29, PASS pieno)
+#    Qui l'arbitro NON e' un filtro sopra M14: senza l'arbitro non c'e'
+#    nemmeno la DIREZIONE dell'operazione.  E' la seconda forma.
+#
+#  E LA CACCIA M30 DEL 05/09 CHIEDE ESATTAMENTE QUESTO, testuale:
+#    "non serve cercare meccanismi PIU' GRANDI (la taglia c'e' gia').
+#     Serve cercare meccanismi con una CONDIZIONE, e la condizione
+#     dev'essere il motore, non un cerotto."
+#
+# ---------------------------------------------------------------------
+#  PERCHE' NON E' UN CADUTO  (lista completa nel dossier par. 4/P2)
+# ---------------------------------------------------------------------
+#    - NON e' M14 nudo: il fade richiede DUE condizioni congiunte
+#      (rientro nella stessa barra + volume sotto media) e convive col
+#      ramo opposto sullo stesso livello.  M14 non ha ne' l'una ne'
+#      l'altro.  Se il ramo fade risultera' rosso e il ramo breakout
+#      no, avremo imparato una cosa che sei finestre di M14 NON
+#      potevano dire.
+#    - NON e' M24 / CRT / Turtle Soup (0/30 celle a tick): li' il
+#      livello e' un ESTREMO DI STRUTTURA (massimo/minimo precedente) e
+#      si entra SEMPRE contro.  Qui il livello e' una banda statistica
+#      ricalcolata a ogni barra, e la direzione NON e' decisa in
+#      partenza.
+#    - NON e' M1 / ORB (~210 celle): nessun box, nessun orario,
+#      nessuna finestra d'apertura.  Il motore non sa che ora e'.
+#    - NON e' M17 (fade dell'anomalo, cimitero doppio): li' l'evento e'
+#      una CODA (3x volume, 3x range).  Qui la perforazione-e-rientro
+#      e' un evento ORDINARIO, che capita quasi ogni giorno.
+#    - E' PARENTE di M19 (arbitro di regime, promosso 01/09, IN CANNA),
+#      e lo dichiaro: M19 arbitra sulla VOLATILITA' (contrazione-
+#      espansione), questo arbitra sul COMPORTAMENTO DEL PREZZO SUL
+#      LIVELLO.  Arbitri diversi, stessa idea madre.
+#
+# ---------------------------------------------------------------------
+#  MECCANICA DA IMPLEMENTARE  (dal sorgente, righe 15-33)
+# ---------------------------------------------------------------------
+#    banda:      base = SMA(close, InpBandaLen)
+#                alto = base + InpBandaAtr * ATR(InpAtrLen)
+#                basso= base - InpBandaAtr * ATR(InpAtrLen)
+#
+#    volume basso:  tickvolume < InpVolFrazione * SMA(tickvolume, InpBandaLen)
+#
+#    RIFIUTO RIALZISTA (LONG, fade)
+#      minimo[1] < basso[1]  E  chiusura[1] > basso[1]  E  volume basso
+#    RIFIUTO RIBASSISTA (SHORT, fade)
+#      massimo[1] > alto[1]  E  chiusura[1] < alto[1]   E  volume basso
+#    ACCETTAZIONE RIALZISTA (LONG, breakout)
+#      chiusura[1] > alto[1]  E  chiusura[2] > alto[2]
+#    ACCETTAZIONE RIBASSISTA (SHORT, breakout)
+#      chiusura[1] < basso[1] E  chiusura[2] < basso[2]
+#
+#    >>> TUTTO SU BARRA CHIUSA.  Nessuna decisione sulla candela in
+#        corso: e' la differenza fra un backtest e una favola.
+#    >>> UNA posizione alla volta per simbolo (come nel sorgente).
+#
+# ---------------------------------------------------------------------
+#  COSA TENGO DELLA FONTE E COSA RIFACCIO -- separati, come da regola
+# ---------------------------------------------------------------------
+#  TENGO (il motore):
+#    - la banda SMA +/- ATR come livello mobile
+#    - i due rami rifiuto/accettazione e il loro discriminante
+#    - la condizione di volume basso sul solo ramo rifiuto
+#    - la simmetria esatta fra long e short
+#
+#  RIFACCIO (la gestione -- e' la parte che sappiamo fare):
+#    - 🔴 LO STOP.  Nel Pine `strategy.exit` e' chiamato FUORI dal
+#      blocco d'ingresso e usa `strategy.position_avg_price`, che sulla
+#      barra d'ingresso vale ancora `na`: LA PRIMA BARRA E' SCOPERTA.
+#      Su M30 sono 30 minuti senza stop.  In MQL5 lo stop va DENTRO
+#      l'OrderSend, punto.
+#    - rischio in PERCENTUALE dell'equity (0,65%), mai lotto fisso, mai
+#      percent_of_equity: il lotto si calcola da (equity * risk) /
+#      (distanza di stop * valore punto)
+#    - parziale a 1R + breakeven + runner a 2R (gestione DAX/Dow di casa)
+#    - spread come PERCENTUALE dello stop, non in punti (lezione R55)
+#    - orari in ORA SERVER BCM (italiana - 1)
+#
+# ---------------------------------------------------------------------
+#  IL RISCHIO NUMERO 1 DEL PORTING, dichiarato PRIMA
+# ---------------------------------------------------------------------
+#  🔴 IL VOLUME.  Il sorgente usa `volume`, che su TradingView per i
+#     futures e' VOLUME SCAMBIATO.  Su BCM, sugli indici CFD, MT5
+#     espone TICK VOLUME: conta i cambi di prezzo, non i contratti.
+#     >>> Non e' la stessa variabile.  Il ramo "rifiuto" potrebbe
+#         cambiare segno per questo motivo e per nessun altro.
+#  >>> CONSEGUENZA OPERATIVA, congelata qui: il PASSO 0 deve misurare
+#      il ramo RIFIUTO e il ramo ACCETTAZIONE **separatamente**, con
+#      due contatori distinti.  Un risultato aggregato non saprebbe
+#      dire se ha fallito il meccanismo o la variabile.
+#
+# ---------------------------------------------------------------------
+#  CRITERI DI ACCETTAZIONE  -- CONGELATI PRIMA DI QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  C1  FREQUENZA DI FAMIGLIA >= 1,00 operazione/giorno su
+#      {D30EUR, U30USD, NASUSD} messi insieme.
+#      (pavimento firmato da Claudio il 07/09: l'unita' e' la FAMIGLIA,
+#       non la singola sedia)
+#      Sotto 1,00 -> BOCCIATO per frequenza, e si dice.
+#
+#  C2  CAMPIONE.  >= 150 operazioni per PARTE (IS e OOS), contate sui
+#      TRE SIMBOLI IN COMUNE.
+#      🔴 IL VINCOLO DURO, misurato: lo storico BCM sugli indici parte
+#         dal 2024.09.26 (252 milioni di tick,
+#         SPREAD_FLOTTA_MISURA_2026-09-03.md) = ~21 mesi = ~440 sedute.
+#         Su UN simbolo solo, un motore da ~0,5 op/giorno fa ~220
+#         operazioni TOTALI: spezzate fanno 110 e 110, cioe' SOTTO IL
+#         PAVIMENTO.  Il campione esiste SOLO in comune fra i tre.
+#      Se anche in comune non si arriva a 150+150 -> il MERITO resta
+#      SOSPESO (valvola R59), il RISCHIO si giudica lo stesso.
+#
+#  C3  COSTO -- FRONTIERA `stop >= 40 x spread`, con gli spread MISURATI
+#      in sessione, ora per ora:
+#         D30EUR 1,6-1,7  ->  stop mediano >= 64-68 punti indice
+#         U30USD 1,9-2,0  ->  stop mediano >= 76-80 punti indice
+#         NASUSD 1,6-1,8  ->  stop mediano >= 64-72 punti indice
+#      Lo stop qui e' 1,5*ATR(14) su M30: VA MISURATO, non assunto.
+#      Sotto la frontiera su un simbolo -> quel simbolo esce, non tutti.
+#
+#  C4  DUE LATI.  Long e short si misurano SEMPRE E SEPARATAMENTE
+#      (regola 25/08).  Un lato positivo e uno negativo NON e' un
+#      motore promosso: e' un motore da un lato solo, e si scrive cosi'.
+#
+#  C5  DUE RAMI.  Ramo RIFIUTO e ramo ACCETTAZIONE si contano e si
+#      giudicano SEPARATAMENTE (vedi "rischio n.1").
+#
+#  C6  RISCHIO, e non si sospende mai:
+#      DD del backtest sulla cella promossa < 10% (muro prop totale) E
+#      peggior giornata < 5% (muro prop giornaliero).
+#      Riferimento di casa: peggior giornata misurata -2,06% (R51).
+#      Un DD e' un fatto accaduto: vale a qualunque n.
+#
+#  C7  SELEZIONE DELLA CELLA: centro dell'altopiano, MAI il picco.
+#      In casa 12 Spearman IS->OOS negative su 13 (la 13a, R58, a tick
+#      reali sul nostro broker).  La regola di selezione si dichiara
+#      INSIEME al numero, altrimenti il numero non vuol dire niente.
+#
+#  C8  MODELLO: la griglia e' SCREENING (OHLC ammesso), il VERDETTO e'
+#      SOLO a tick reali.  R57: cambiando SOLO il modello, il segno
+#      dell'orso si e' ribaltato.
+#
+#  CRITERI DI BOCCIATURA, dichiarati con la stessa forza:
+#    B1  frequenza di famiglia < 1,00 op/giorno            -> BOCCIATO
+#    B2  stop mediano sotto la frontiera su TUTTI E TRE     -> BOCCIATO
+#    B3  entrambi i rami negativi in IS su tutti i simboli  -> BOCCIATO
+#    B4  DD > 10% o peggior giornata > 5% in QUALUNQUE cella
+#        dell'altopiano                                     -> BOCCIATO
+#    B5  l'altopiano non esiste (una cella che sporge, il resto su e
+#        giu') -> e' rumore, non un motore                  -> BOCCIATO
+#        (e' il cancello K3 che il 05/09 ha ucciso 3 meccanismi su 3)
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26   <- MISURATO, non assunto: e' l'inizio dello
+#                            storico tick BCM sugli indici, verificato
+#                            su 252 milioni di tick
+#                            (SPREAD_FLOTTA_MISURA_2026-09-03.md;
+#                             misura_tick\misura_tick_D30EUR.csv =
+#                             35.408.137 tick dal 2024.09.26).
+#  IS  2024.09.26 -> 2025.09.30   (~12 mesi)
+#  OOS 2025.10.01 -> 2026.06.30   (~9 mesi)
+#  REGIME CONTENUTO, dichiarato come vuole l'emendamento della finestra:
+#    🔴 UNO SOLO.  21 mesi di indici 2024-2026 NON contengono un orso,
+#       non contengono un crollo, non contengono un laterale lungo.
+#       >>> Questo round NON puo' dare un verdetto di regime, e non
+#           deve pretenderlo.  La prova di regime, se servira', si fa
+#           con i dati esterni e a PARAMETRI CONGELATI (regola D-C del
+#           REFERTO_STORICO_INDICI: sui simboli _EXT non si tara
+#           niente e non si promuove nessuna cella -- e il cancello
+#           zero degli _EXT e' tuttora CHIUSO, diff H1 0,061-0,101%
+#           contro <=0,05% richiesto).
+#
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+# ---------------------------------------------------------------------
+#  GEMELLI: stesso identico blocco parametri, SOLO @SIMBOLO diverso.
+#    LVNARBITRO_M30_U30.txt   (@SIMBOLO U30USD)
+#    LVNARBITRO_M30_NAS.txt   (@SIMBOLO NASUSD)
+#  Da scrivere QUANDO l'EA esiste, e il diff si verifica meccanicamente.
+# ---------------------------------------------------------------------
+#
+#  SWEEP -- SCREENING STRETTO, non un verdetto.  27 celle.
+#  Nomi PROPOSTI: da ricopiare dal .mq5 quando esistera'.
+#
+InpBandaLen=40||30||10||50||Y
+InpBandaAtr=0.8||0.6||0.2||1.0||Y
+InpAtrLen=14||14||1||14||N
+InpVolFrazione=0.8||0.7||0.1||0.9||Y
+InpStopAtr=1.5||1.5||1||1.5||N
+InpRR=2.0||2.0||1||2.0||N
+InpRiskPercent=0.65||0.65||1||0.65||N
+InpUsaRamoRifiuto=true||true||1||true||N
+InpUsaRamoAccettazione=true||true||1||true||N
+InpAllowLong=true||true||1||true||N
+InpAllowShort=true||true||1||true||N
+#
+#  >>> 3 x 3 x 3 = 27 celle.  Poche apposta: e' uno SCREENING.
+#      La cella si sceglie AL CENTRO DELL'ALTOPIANO, mai al picco.
+#      Se l'altopiano non c'e', il round finisce li' (B5).
+# =====================================================================
