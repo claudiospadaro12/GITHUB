@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_ANCORA_R119_v2
+#  MARCATORE_RIGA_ANCORA_R119_v3
 # ---------------------------------------------------------------------
 #  IL PASSO 7 DEL QUARTO MT5: la macchina nuova RIPRODUCE un numero gia'
 #  misurato, oppure non e' la stessa macchina.
@@ -51,6 +51,23 @@
 #     I PID degli altri terminali si contano PRIMA e DOPO, e il
 #     confronto lo fa il codice.
 #
+#  COSA E' CAMBIATO DALLA v2 (08/09/2026, dopo il fallimento delle 17:43).
+#
+#  3. CLASSE 161 -- IL DRIVER NON PORTAVA GLI #include NOSTRI. Il passo 7
+#     e' morto SUBITO con "CSV OOS assente o non fresco" su tutte e due
+#     le sedie ed ESITO "NON MISURATO -- ZERO CSV letti". Causa:
+#     walkforward_generico.ps1 scaricava e copiava solo il .mq5, ma
+#     ABTG_ORB_Ottimizzato (r.106) e ABTG_DAX_Apertura_EU (r.132) hanno
+#     #include <ABTG_PausaGuardian.mqh>, e C:\MT5_Backtest e'
+#     un'installazione NUOVA E VUOTA: niente include, niente .ex5,
+#     driver morto a codice 1 prima ancora di aprire MT5.
+#     Rimedio nel driver, non qui: la v5 porta gli include nostri in
+#     MQL5\Include (sottocartelle comprese) e li dichiara a schermo.
+#     Qui cambia UNA COSA SOLA: il marcatore preteso passa da
+#     MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST a
+#     MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE. Senza questa riga
+#     l'ancora rifiuterebbe il driver CORRETTO dicendo "e' vecchio".
+#
 #  NIENTE EMOJI: Windows PowerShell 5.1 legge i .ps1 come ANSI.
 # =====================================================================
 
@@ -65,8 +82,8 @@ param(
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$MARC_MIO = "MARCATORE_RIGA_ANCORA_R119_v2"
-$MARC_DRV = "MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST"
+$MARC_MIO = "MARCATORE_RIGA_ANCORA_R119_v3"
+$MARC_DRV = "MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE"
 $RawBase  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Avvio    = Get-Date
 
@@ -211,7 +228,7 @@ if(-not (Select-String -LiteralPath $drv -SimpleMatch -Pattern $MARC_DRV -Quiet)
   Muori ("il driver scaricato NON ha il marcatore " + $MARC_DRV + ": e' una copia vecchia, senza -TerminaleBacktest. Non si prosegue.")
 }
 Write-Host ""
-Write-Host "    driver: scaricato e marcatore v4 verificato." -ForegroundColor Green
+Write-Host "    driver: scaricato e marcatore v5 verificato." -ForegroundColor Green
 
 foreach($s in $SEDIE){ Scarica ($RawBase + "/backtest_pipeline/prove/" + $s.Prova) (Join-Path $Prove $s.Prova) }
 Write-Host ("    file prova: " + $SEDIE.Count + " scaricati.") -ForegroundColor Green

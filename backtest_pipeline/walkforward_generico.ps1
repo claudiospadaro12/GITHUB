@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST
+#  MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
 #  walkforward_generico.ps1  --  UN walk-forward per QUALSIASI EA
 # ---------------------------------------------------------------------
 #  PERCHE' ESISTE (07/08/2026)
@@ -115,16 +115,43 @@
 #  riga: le righe di lancio gia' scritte non cambiano di una virgola.
 #    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_ORB -TerminaleBacktest "C:\MT5_Backtest"
 #
-#  COMPATIBILITA' DEI MARCATORI -- QUESTA RIGA E' VOLUTA, NON UN AVANZO.
-#  Questo file contiene ANCORA, di proposito, la stringa
-#  MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE. Le righe di lancio gia'
+#  PERCHE' ESISTE LA v5 -- GLI #include NOSTRI (08/09/2026)
+#  Il passo 7 (ancora R119 sul quarto MT5, C:\MT5_Backtest) e' fallito
+#  alle 17:43 dell'08/09 cosi': "CSV OOS assente o non fresco" su TUTTE E
+#  DUE le sedie, driver uscito con codice 1, ESITO "NON MISURATO -- ZERO
+#  CSV letti". Fallimento IMMEDIATO, non dopo ore: quindi non era il
+#  tester, era prima del tester.
+#  La causa: questo driver scaricava e copiava SOLO mql5\Experts\<EA>.mq5.
+#  Ma 69 EA su 153 hanno #include <ABTG_PausaGuardian.mqh> -- fra questi
+#  ABTG_ORB_Ottimizzato (r.106) e ABTG_DAX_Apertura_EU (r.132), cioe'
+#  ESATTAMENTE le due sedie dell'ancora. Sul PC di backtest quel file
+#  stava nella cartella dati da mesi e nessuno se n'era accorto;
+#  C:\MT5_Backtest e' un'installazione NUOVA E VUOTA, quindi metaeditor
+#  non trovava l'include, non produceva l'.ex5, e il driver moriva su
+#  "compilazione fallita" prima ancora di aprire MT5.
+#  Da questa versione il driver porta anche gli #include NOSTRI in
+#  <cartella dati>\MQL5\Include\, rispettando le sottocartelle del repo
+#  (ABTG\ resta ABTG\), li DICHIARA a schermo uno per uno (un file
+#  copiato in silenzio e' un'assunzione, non un fatto), e se la
+#  compilazione fallisce lo stesso STAMPA LE ULTIME RIGHE DEL LOG DI
+#  METAEDITOR invece del solo "compilazione fallita".
+#  Gli #include di SISTEMA (<Trade/Trade.mqh>, <Trade\PositionInfo.mqh>,
+#  <Trade\SymbolInfo.mqh>, <Trade\AccountInfo.mqh>) NON si copiano: li
+#  ha gia' MT5 in ogni installazione. I NOSTRI sono tre, censiti col
+#  grep sull'intero repo, e stanno nella lista $NostriInclude qui sotto.
+#
+#  COMPATIBILITA' DEI MARCATORI -- QUESTE RIGHE SONO VOLUTE, NON AVANZI.
+#  Questo file contiene ANCORA, di proposito, le stringhe
+#  MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE e
+#  MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST. Le righe di lancio gia'
 #  scritte la cercano con Select-String -SimpleMatch per rifiutare le copie
 #  vecchie del driver -- fra queste righe\RIGA_RITARDO_TESTER.ps1 (r.99 e
 #  r.225), che e' esattamente la riga dell'ancora R119 del passo 7.
-#  Togliendo quella stringa, quelle righe morirebbero dicendo "driver
+#  Togliendo quelle stringhe, quelle righe morirebbero dicendo "driver
 #  vecchio" davanti a un driver PIU' NUOVO. Cio' che il marcatore v3
-#  promette (il parametro -Ritardo, cioe' ExecutionMode nell'.ini) qui e'
-#  invariato: la promessa e' ancora vera, quindi la stringa resta.
+#  promette (il parametro -Ritardo, cioe' ExecutionMode nell'.ini) e cio'
+#  che promette il v4 (il parametro -TerminaleBacktest) qui sono
+#  invariati: le promesse sono ancora vere, quindi le stringhe restano.
 # =====================================================================
 param(
   [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
@@ -198,7 +225,7 @@ function Titolo($t){ Write-Host ""; Write-Host $t -ForegroundColor Cyan }
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
 
 Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
-Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST" -ForegroundColor DarkGray
+Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE" -ForegroundColor DarkGray
 
 # =====================================================================
 #  0. SU QUALE BROKER SI STA GIRANDO
@@ -252,6 +279,47 @@ catch{
 }
 $src=Get-Content $srcFile -Raw
 Write-Host ("    sorgente: {0} righe" -f (($src -split "`n").Count)) -ForegroundColor DarkGray
+
+# --- 1-bis. GLI #include NOSTRI (v5, 08/09/2026)
+#  Censiti col grep su TUTTO il repo (mql5\Experts\*.mq5 + mql5\Include):
+#    110 + 12  #include <Trade/Trade.mqh> e <Trade\Trade.mqh>   -> DI SISTEMA
+#      3       <Trade\PositionInfo|SymbolInfo|AccountInfo.mqh>  -> DI SISTEMA
+#     69       #include <ABTG_PausaGuardian.mqh>                 -> NOSTRO
+#  Nessun altro. ABTG\ABTG_ApertureCore.mqh e OptFrame.mqh stanno nel
+#  repo ma OGGI nessun .mq5 li include (dentro gli EA quel codice e'
+#  copiato in linea): si portano lo stesso, costano un download e
+#  coprono il giorno in cui un EA tornera' a includerli. Il campo Serve
+#  dice chi e' indispensabile: se manca QUELLO, si muore qui invece di
+#  morire piu' avanti su un "compilazione fallita" che non spiega niente.
+$NostriInclude=@(
+  @{ Rel="ABTG_PausaGuardian.mqh";     Serve=$true;  Nota="69 EA lo includono (ORB e DAX dell'ancora compresi)" },
+  @{ Rel="ABTG/ABTG_ApertureCore.mqh"; Serve=$false; Nota="nel repo, oggi nessun #include" },
+  @{ Rel="OptFrame.mqh";               Serve=$false; Nota="nel repo, oggi nessun #include" }
+)
+$IncDir=Join-Path $Work "src_include"
+New-Item -ItemType Directory -Force -Path $IncDir | Out-Null
+$IncPronti=@()
+foreach($inc in $NostriInclude){
+  $rel=$inc.Rel
+  $relWin=$rel.Replace("/","\")
+  $dst=Join-Path $IncDir $relWin
+  $dstDir=Split-Path -Parent $dst
+  New-Item -ItemType Directory -Force -Path $dstDir | Out-Null
+  # stesso schema di ripiego del sorgente (r.245): si prova a scaricare,
+  # e se la rete non c'e' si usa la copia gia' scaricata prima.
+  try{ Invoke-WebRequest -Uri "$RawBase/mql5/Include/$rel" -OutFile $dst -UseBasicParsing }
+  catch{
+    if(Test-Path $dst){ Write-Host "    (download fallito per $rel : uso la copia locale gia' scaricata)" -ForegroundColor Yellow }
+    elseif($inc.Serve){
+      Muori ("non riesco a scaricare l'include NOSTRO '$rel' e non ne ho una copia locale.`n" +
+             "    Senza quel file l'EA non compila: 69 EA su 153 hanno #include <ABTG_PausaGuardian.mqh>.`n" +
+             "    URL provata: $RawBase/mql5/Include/$rel")
+    }
+    else{ Write-Host "    (download fallito per $rel : non e' incluso da nessun EA, tiro dritto)" -ForegroundColor DarkYellow; continue }
+  }
+  if(Test-Path $dst){ $IncPronti += @{ Rel=$relWin; File=$dst; Nota=$inc.Nota } }
+}
+Write-Host ("    include nostri pronti: {0} su {1}" -f $IncPronti.Count,$NostriInclude.Count) -ForegroundColor DarkGray
 
 # --- l'EA esporta i risultati? senza OnTester non c'e' niente da leggere.
 #  Il 07/08 scheda_ea.py ha contato 39 EA su 61 che esportano: gli altri
@@ -845,13 +913,76 @@ if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $For
 }
 
 $MqlExperts=Join-Path $DataFolder "MQL5\Experts"
+$MqlInclude=Join-Path $DataFolder "MQL5\Include"
 $MqlFiles  =Join-Path $DataFolder "MQL5\Files"
 $Results   =Join-Path $Work "risultati_prove\$Expert"
-New-Item -ItemType Directory -Force -Path $MqlExperts,$Results | Out-Null
+New-Item -ItemType Directory -Force -Path $MqlExperts,$MqlInclude,$Results | Out-Null
+
+# --- GLI #include NOSTRI, PORTATI E DICHIARATI (v5)
+#  Un file copiato in silenzio e' un'assunzione: qui si stampa cosa e'
+#  arrivato e DOVE, come si fa gia' per il terminale scelto. Ricopiarli
+#  su un terminale che li ha gia' e' innocuo: la fonte e' sempre il repo,
+#  esattamente come per il .mq5 dell'EA copiato due righe piu' sotto.
+Write-Host ""
+Write-Host "--- INCLUDE NOSTRI PORTATI SUL TERMINALE -----------------------------" -ForegroundColor Cyan
+Write-Host ("    destinazione : " + $MqlInclude) -ForegroundColor White
+if($IncPronti.Count -eq 0){
+  Write-Host "    (nessuno: la lista e' vuota o i download sono tutti falliti)" -ForegroundColor DarkYellow
+}
+foreach($ip in $IncPronti){
+  $dstInc=Join-Path $MqlInclude $ip.Rel
+  New-Item -ItemType Directory -Force -Path (Split-Path -Parent $dstInc) | Out-Null
+  Copy-Item $ip.File -Destination $dstInc -Force
+  $len=0; if(Test-Path $dstInc){ $len=(Get-Item $dstInc).Length }
+  Write-Host ("    " + $ip.Rel.PadRight(30) + " " + $len + " byte   (" + $ip.Nota + ")") -ForegroundColor White
+}
+Write-Host "    (di SISTEMA, NON copiati perche' MT5 li ha gia': Trade\Trade.mqh," -ForegroundColor DarkGray
+Write-Host "     Trade\PositionInfo.mqh, Trade\SymbolInfo.mqh, Trade\AccountInfo.mqh)" -ForegroundColor DarkGray
+Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
 
 Copy-Item $srcFile -Destination $MqlExperts -Force
 & $MetaEditor "/compile:$(Join-Path $MqlExperts "$Expert.mq5")" "/log" | Out-Null
-if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ Muori "compilazione fallita per $Expert. Apri MetaEditor e guarda gli errori." }
+if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){
+  # --- v5: il messaggio di morte deve dire PERCHE'.
+  #  Fino a ieri qui usciva solo "compilazione fallita": chi legge non ha
+  #  modo di sapere se manca un include, se c'e' un errore di sintassi o
+  #  se metaeditor non e' nemmeno partito. Il log lo scrive metaeditor
+  #  con /log accanto al sorgente (<EA>.log), in UTF-16: va letto a byte
+  #  e decodificato, altrimenti escono caratteri a caso.
+  $logAtteso=Join-Path $MqlExperts "$Expert.log"
+  $logFile=$null
+  if(Test-Path $logAtteso){ $logFile=$logAtteso }
+  else{
+    $alt=@(Get-ChildItem $MqlExperts -Filter "*.log" -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 1)
+    if($alt.Count -gt 0){ $logFile=$alt[0].FullName }
+  }
+  $coda=@()
+  if($logFile){
+    $by=$null
+    try{ $by=[System.IO.File]::ReadAllBytes($logFile) }catch{ $by=$null }
+    if($by -and $by.Length -gt 1){
+      $txt=""
+      if($by[0] -eq 0xFF -and $by[1] -eq 0xFE){ $txt=[System.Text.Encoding]::Unicode.GetString($by,2,$by.Length-2) }
+      elseif($by[0] -eq 0xFE -and $by[1] -eq 0xFF){ $txt=[System.Text.Encoding]::BigEndianUnicode.GetString($by,2,$by.Length-2) }
+      elseif($by.Length -gt 3 -and $by[1] -eq 0 -and $by[3] -eq 0){ $txt=[System.Text.Encoding]::Unicode.GetString($by) }
+      else{ $txt=[System.Text.Encoding]::UTF8.GetString($by) }
+      $righeLog=@(($txt -split "`r?`n") | Where-Object { $_.Trim() -ne "" })
+      if($righeLog.Count -gt 25){ $coda=@($righeLog[($righeLog.Count-25)..($righeLog.Count-1)]) }
+      else{ $coda=$righeLog }
+    }
+  }
+  Write-Host ""
+  Write-Host "--- ULTIME RIGHE DEL LOG DI METAEDITOR -------------------------------" -ForegroundColor Red
+  if($logFile){ Write-Host ("    log: " + $logFile) -ForegroundColor DarkGray }
+  else{ Write-Host "    NESSUN LOG TROVATO in $MqlExperts (metaeditor potrebbe non essere nemmeno partito)" -ForegroundColor Red }
+  if($coda.Count -eq 0 -and $logFile){ Write-Host "    (log presente ma vuoto o illeggibile)" -ForegroundColor Red }
+  foreach($r in $coda){ Write-Host ("    " + $r) -ForegroundColor Yellow }
+  Write-Host "---------------------------------------------------------------------" -ForegroundColor Red
+  Muori ("compilazione fallita per $Expert (nessun .ex5 prodotto).`n" +
+         "    Le ultime righe del log di MetaEditor sono stampate qui sopra: si leggono QUELLE.`n" +
+         "    Se dicono 'can't open ... .mqh', manca un #include: gli include nostri portati`n" +
+         "    da questo driver sono elencati nel riquadro INCLUDE NOSTRI, poco piu' su.")
+}
 Write-Host "    compilato $Expert" -ForegroundColor Green
 
 $Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }   # un OHLC non deve MAI sovrascrivere un tick reale
