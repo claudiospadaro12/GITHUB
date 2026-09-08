@@ -8,6 +8,20 @@ Tre tipi di riga, e sono diversi:
 
 ---
 
+# ⏸️ IN STANDBY PER DECISIONE DI CLAUDIO (08/09 sera)
+**`ABTG_ImpulsoApertura` (magic 769800)** — l'EA scritto oggi che tira fuori
+DAX SHORT e NASDAQ LONG nativamente. Avevo proposto il suo **passo 0 di
+conteggio** (il round runner lo compilerebbe da solo): Claudio ha detto
+_"teniamolo in standby"_. 👉 **Non lo lancio.** Il file prova non e' ancora
+scritto: quando arriva il via, sono dieci minuti.
+
+**`ABTG_OpeningReversalB`** e' invece **ARCHIVIATO** con verdetto scritto
+(12 celle, mai piu' di 3 operazioni, frequenza 128 volte sotto il pavimento):
+`report/P0_OPENINGREVERSALB_2026-09-08.md`. Ha la sua porta di rientro se una
+misura nuova gli ridara' una ragione.
+
+---
+
 # 🔴 URGENTI — bloccano la strada verso il 1° ottobre
 
 ## 1. 🖱️ RICOMPILARE E RICARICARE LE 7 SEDIE COL FIX DEL LOTTO
