@@ -628,3 +628,55 @@ Futures* `[VERIFICATO via API oggi — titolo e data letti]`, **gia' noto in cas
 
 **Nessun EA scritto, nessun EA compilato, nessun parametro in forward toccato,
 nessuna sedia accesa o spenta, nessun backtest lanciato.**
+
+---
+
+# 🔎 VERIFICA DI CLAUDE — 08/09/2026
+
+## ✅ Consegnato tutto, e i file ci sono
+`IBRETEST_M30_BOZZA.txt`, `LVNARBITRO_M30_BOZZA.txt`, `HVANCHOR_M30_BOZZA.txt`
+in `backtest_pipeline/prove/`; gli 8 sorgenti archiviati in
+`backtest_pipeline/caccia_strategie/biblioteca/sorgenti/` (il riassunto citava
+un percorso accorciato: i file **ci sono**).
+
+## 🩺 IL REPERTO CHE VALE OLTRE QUESTA CACCIA
+5 sorgenti su 13 **non hanno stop**, e in **3 casi è lo stesso identico baco
+Pine**: `strategy.position_avg_price` letto **prima** dell'ingresso → `stop = na`
+→ **backtest senza stop, che sembra bellissimo**.
+
+> ### 👉 Da qui in avanti, chi legge Pine in questo progetto controlla PRIMA quella riga.
+> È un cancello nuovo che costa dieci secondi e smaschera una curva perfetta.
+
+## ⚠️ UNA CORREZIONE CHE CAMBIA COSA È POSSIBILE
+Il referto dice: *"lo storico BCM indici parte dal 2024.09.26 (misurato) = ~21
+mesi, quindi il campione esiste solo mettendo in comune i tre indici"*.
+
+**Vero, ma incompleto.** Quel muro riguarda i **tick** dei simboli standard.
+Agli atti del progetto esiste **`NASUSD_EXT` con OHLC 2020-2024**, già in casa e
+già usato (screening di regime, dossier Lyapunov 769200).
+
+| | |
+|---|---|
+| `NASUSD_EXT` | ✅ **OHLC 2020-2024 disponibile** |
+| `D30EUR_EXT` | ❓ **non trovato** — va verificato **prima** di prometterlo |
+| U30USD | ❓ da verificare |
+
+👉 Conseguenza pratica per questi tre candidati: sul **Nasdaq** si può fare uno
+**screening di regime su 4 anni in OHLC** — regola F6 di casa: lo screening a
+OHLC non dà verdetti di merito, ma **taglia i morti in fretta**, che a tre
+settimane dalla challenge è esattamente ciò che serve. Il verdetto a tick resta
+sulla finestra dei 21 mesi, **e va dichiarato ogni volta**.
+
+## 🧭 ORDINE CONSIGLIATO (decide Claudio)
+1. 🥈 **P2 `LVN Rejection/Acceptance`** per primo — **non** perché sia il
+   migliore (P1 ha un punto in più), ma perché costa **3-4 ore** contro le
+   6-8 di P1: **57 righe, 5 input**. A 23 giorni dalla scadenza, il candidato
+   che entra **prima** nell'imbuto vale più di quello che entrerebbe meglio.
+2. 🥇 **P1 `IB Completed`** subito dopo: stop strutturale su pivot confermato,
+   sizing a rischio **già nel codice**, `lookahead_off` esplicito su tutte e 9
+   le `request.security`. È il più solido dei tre.
+3. 🥉 **P3 `HV Spike`** per ultimo.
+
+🔴 E per tutti e tre vale la stessa cosa detta per ogni candidato di oggi:
+**nessuno va in campo senza passare l'imbuto.** Un motore letto nel sorgente e
+promosso da una caccia è un **candidato**, non una sedia.
