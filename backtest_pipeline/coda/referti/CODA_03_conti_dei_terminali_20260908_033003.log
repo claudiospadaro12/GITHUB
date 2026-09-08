@@ -1,0 +1,54 @@
+=== QUALE CONTO STA IN QUALE CARTELLA DATI ===
+data lettura: 2026-09-08 03:30:16  (ora locale)
+letto dal GIORNALE del terminale (<dati>\logs), non da una tabella scritta a mano.
+cartelle dati: 6
+
+=== CARTELLA 04C7A32B575E40027B4FF8724D14D702
+    programma : C:\MT5_Backtest
+    giornali letti: 2
+    CONTO 50504400
+        '50504400': previous successful authorization performed from 188.216.67.79 on 2026.09.07 22:34:13
+    modo di margine: HEDGING
+    azienda: BCMMarkets-Server: no demo/preliminary groups on server side
+
+=== CARTELLA 215D85D767A1C39E22D242C8114BF9F5
+    programma : C:\Program Files\BCM Markets MT5 Terminal
+    giornali letti: 5
+    CONTO 10105439
+        '10105439': previous successful authorization performed from 161.97.172.19 on 2026.08.07 20:30:27
+    CONTO 50503392
+        '50503392': previous successful authorization performed from 188.216.67.79 on 2026.09.05 21:43:52
+    ATTENZIONE: piu' di un conto in questa cartella -- il terminale ha cambiato login.
+    modo di margine: HEDGING
+
+=== CARTELLA 73B7A2420D6397DFF9014A20F1201F97
+    programma : C:\Program Files\Pepperstone MetaTrader 5
+    giornali letti: 2
+    CONTO: NON TROVATO nei giornali recenti (non vuol dire che non ci sia).
+    modo di margine: NON TROVATO nel testo (NON vuol dire netting)
+    azienda: PepperstoneUK-Live: no demo/preliminary groups on server side
+
+=== CARTELLA 857385E4B0F2356AD99AA95CDF40FAE9
+    programma : C:\Program Files\Tickmill Europe MT5 Terminal
+    giornali letti: 5
+    CONTO: NON TROVATO nei giornali recenti (non vuol dire che non ci sia).
+    modo di margine: NON TROVATO nel testo (NON vuol dire netting)
+
+=== CARTELLA BCA8AD18563BF5B64A433C2662D0A104
+    programma : C:\Program Files\BCM Markets MT5 Terminal -V3
+    giornali letti: 5
+    CONTO 50504263
+        '50504263': previous successful authorization performed from 84.247.218.137 on 2026.09.03 12:24:23
+    modo di margine: HEDGING
+
+=== CARTELLA E23E1504A8D02A22179395F0652B86B6
+    programma : C:\BCM_Reale
+    giornali letti: 4
+    CONTO 10105439
+        '10105439': previous successful authorization performed from 161.97.172.19 on 2026.09.05 22:05:06
+    modo di margine: HEDGING
+    azienda: BCMMarkets-Server: no demo/preliminary groups on server side
+
+PROMEMORIA: tutte le misure di casa vengono da un conto HEDGING (CLAUDE.md r.174).
+Un terminale da backtest su conto NETTING non riprodurrebbe le ancore.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
