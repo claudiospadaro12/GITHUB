@@ -82,16 +82,55 @@ Su 100k con −0,8% flottante al reset: pavimento FTMO 95.000, **il nostro 94.20
 👉 Si firma **quando si sceglie la prop** (punto 4). Non prima.
 📄 `report/GUARDIAN_BASELINE_GIORNALIERA_2026-09-08.md`
 
-## 6. 🖊️ IL RIPESCAGGIO: quali dei 7 entrano in coda, e con che priorità
-**Il candidato di testa**: `SuperWave DAX H4` (magic **770512**) — PF 1,28,
-**DD 3,3% a tick**, n 56. EA già compilato, magic già assegnato, e la **gemella
-770511 (Dow H1) è già viva** sul piccolo con PF 1,52 su n 227.
-**Domanda secca**: va in **corsia demo** sul piccolo 50503392, o resta fermo?
-⚠️ n=56 → **merito sospeso**. Il suo valore è che **costa pochissimo provarlo**.
-Soglia di rischio da dichiarare se si accende: **DD forward > 3,3% → revisione immediata**.
-📄 `report/RIPESCAGGIO_FREQUENZA_2026-09-08.md`
+## 6. 🖊️ IL RIPESCAGGIO — **⚠️ RITIRO LA MIA RACCOMANDAZIONE DI STAMATTINA**
 
----
+Stamattina avevo scritto *"`SuperWave DAX H4` (770512) in corsia demo"*.
+**Il pacchetto preparato stasera ha tirato fuori tre fatti che non avevo**, e
+tutti e tre spingono dall'altra parte. Li metto in chiaro perche' la
+raccomandazione era mia.
+
+### 🔴 1. Il DD di 3,3% e' misurato all'**1,00%** di rischio, non allo 0,65%
+Verificato nel CSV primario
+(`risultati_archivio/SuperWave/valid_SuperWaveRT_D30EUR_H4_realtick.csv`,
+`Pass 1`): `InpRiskPercent = 1`, `Trades 56`, `PF 1.28456`, `DD 3.3245`.
+👉 Il "DD 3,3%" che avevo citato **non e' il DD alla taglia di casa.**
+
+### 🔴 2. Sul piccolo, a 0,65%, il **pavimento del lotto** morde
+D30EUR ha `VOLUME_MIN = 0,10` e `CONTRACT_SIZE = 10` (misurati, `REFERTO_R114.txt`
+r.77-78). Su un conto da ~5.100 €, a 0,65%, il lotto **non** finisce al minimo
+solo se lo stop sta sotto **~33 punti indice** — e uno stop Supertrend su DAX H4
+quasi certamente non ci sta.
+👉 In quel regime **`InpRiskPercent` non controlla piu' niente**, e il DD sul
+piccolo diventa **~6,5%**, non 3,32%.
+**E non e' teoria**: e' gia' successo il **20/08** sullo stesso motore e sullo
+stesso conto (`DIARIO.md`: −72,32 su 5.076,62 = **1,42% contro un contratto da
+1,0%**).
+
+### 🔴 3. C'era gia' un NO agli atti, di ieri, e il suo argomento **regge**
+`report/CORSIA_DEMO_SUPERWAVE_DAX_H4.md` (07/09) si intitola **"NON ACCENDERE"**:
+il traguardo delle 150 operazioni cade nel **2029-2031**, contro il tetto di 18
+mesi della corsia demo. **Non l'ho smontato: non l'avevo letto.**
+
+### 📉 E il numero che chiude il discorso per ottobre
+Frequenza misurata: **2,65 operazioni al MESE**.
+👉 **Al 1° ottobre avra' fatto ~2 operazioni.** Per la challenge **non serve a
+niente**: non e' una sedia in piu', e' una sedia che non fa in tempo a dire nulla.
+
+> ### ✍️ RACCOMANDAZIONE CORRETTA: **non accendere adesso.**
+> Non perche' il motore sia brutto — il merito resta **sospeso**, n=56 < 150 — ma
+> perche' a 23 giorni dalla challenge **non puo' cambiare niente**, e alla taglia
+> del piccolo **il rischio dichiarato non e' quello vero**.
+
+### ✅ E la cosa che invece VALE, e costa zero
+La domanda *"il pavimento del lotto morde davvero sulle sedie del piccolo?"* si
+chiude **leggendo una riga del Giornale** — nessuna sedia da accendere. E'
+esattamente il **passo 8** (il canarino) gia' in programma. Se il pavimento
+morde, riguarda **tutte** le sedie del piccolo, non solo questa: e' una misura
+che vale molto piu' di un'accensione.
+
+📄 `report/CORSIA_DEMO_SUPERWAVE_DAX_2026-09-08.md` · preset pronto (44 input
+copiati dal banco, 2 deviazioni e 4 buchi **dichiarati**) se un giorno la
+decisione cambia.
 
 # 🟡 DA DECIDERE CON CALMA — nessuna scadenza stretta
 
