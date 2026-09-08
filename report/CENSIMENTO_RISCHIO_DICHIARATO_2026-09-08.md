@@ -274,6 +274,13 @@ essendo sedie a tutti gli effetti:
 
 **Somma rischio (38 sedie leggibili): 🔥 35,90%** — limite inferiore, manca GapContinuation.
 
+🔴 **18 delle 40 sedie di questo terminale non hanno NESSUN preset col loro
+magic** (BreakingBand x3, GapFill x4, PunteLarry x6, CostToCost x2, EasyTrend x2,
+PTE 771332). Di queste, **11 girano esattamente sul default del sorgente (1,0)**
+e **7 girano su un valore che non sta ne' in un preset ne' nel sorgente**
+(0,5 · 0,3 · 0,65 · 0,25 · 0,3 · 0,5 · 0,5): quei sette numeri **esistono solo
+dentro il `.chr`**. Se il profilo `ORO` si perde, non sono ricostruibili.
+
 ---
 
 ## 🖥️ `C:\Program Files\BCM Markets MT5 Terminal -V3` — DRY-RUN 100K **50504263** — profilo attivo `SQUADRA 100K` — 7 sedie
