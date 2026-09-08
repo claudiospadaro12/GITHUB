@@ -29,6 +29,22 @@ DEP_100K  = 100000.0
 FTMO_PAV_TOTALE = 90000.0   # pavimento statico -10%
 FTMO_LIM_GIORNO = 5000.0    # perdita massima giornaliera -5%
 
+# --- pagella TRIPLA (08/09/2026): il terzo CSV e' il CONTO REALE 10105439,
+#     l'unico con soldi veri e - fino a oggi - l'unico SENZA pagella.
+#     Lo scrivera' il TradeExporter sul terminale C:\BCM_Reale con
+#     InpFile=ABTG_Trades_Reale.csv (nome DIVERSO dagli altri due: la
+#     Common\Files e' condivisa fra i terminali dello stesso VPS, stesso
+#     nome = tre conti che si sovrascrivono a vicenda).
+#     Al 08/09/2026 il file NON esiste ancora: la sezione lo dichiara.
+CSV_REALE     = "data/statements/trades_reale.csv"
+CSV_REALE_MT5 = "ABTG_Trades_Reale.csv"   # nome in Common\Files (input InpFile)
+
+# Colonne senza le quali la sezione del REALE non stampa NIENTE.
+# Non e' pignoleria: su un conto vero un totale che salta una colonna e'
+# un numero sbagliato, e un numero sbagliato costa soldi.
+COLONNE_MINIME = ("open_time", "close_time", "profit", "swap", "commission",
+                  "symbol", "strategy", "magic")
+
 # soglie di lettura, dalle regole del progetto
 FRAZIONE_BASSA = 0.30   # sotto il 30% del movimento catturato = la gestione taglia troppo presto
 DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo stretti
@@ -91,6 +107,27 @@ def num(r, k, default=0.0):
         return float(str(r.get(k, "")).replace(",", "."))
     except (TypeError, ValueError):
         return default
+
+
+def leggibile(r, k):
+    """True se il campo k c'e' ed e' un numero VERO.
+
+    `num()` in caso di guaio ripiega su 0.0, e va benissimo per i due conti
+    demo: una riga storta li' sposta una lettura. Sul conto REALE no — uno
+    zero silenzioso al posto di una perdita e' esattamente il modo in cui un
+    totale sbagliato sembra giusto. Qui il guaio si vede.
+    """
+    v = r.get(k, None)
+    if v is None:
+        return False
+    v = str(v).strip()
+    if v == "":
+        return False
+    try:
+        float(v.replace(",", "."))
+        return True
+    except ValueError:
+        return False
 
 
 def tempo(s):
@@ -385,6 +422,148 @@ def main():
                 "Peggior giornata dal via: **%+.2f**. _Numeri dal solo REALIZZATO " % peggior_g +
                 "(il CSV non vede il floating): l'arbitro vero dei pavimenti resta "
                 "il Guardian, che legge l'equity._"]
+
+    # ---------- CONTO REALE (10105439) ----------
+    # Terza sezione, 08/09/2026, su richiesta di Claudio: "voglio che monitori
+    # automaticamente il conto reale come fai con gli altri".
+    #
+    # 🔴 QUI SI E' PIU' PRUDENTI CHE ALTROVE, e non e' un vezzo: sugli altri due
+    #    conti un numero sbagliato costa una lettura, qui costa dei soldi. Per
+    #    questo la sezione, prima di stampare QUALSIASI totale:
+    #      1) controlla che ci siano tutte le colonne che le servono;
+    #      2) pretende che OGNI riga sia leggibile (date e importi);
+    #      3) se anche una sola non lo e', DICHIARA e NON stampa il totale.
+    #    Un totale a meta' su un conto vero e' peggio di nessun totale: sembra
+    #    un numero, e invece e' un'opinione.
+    out += ["", "## 💶 Conto REALE 10105439 — soldi veri", ""]
+    if not os.path.exists(CSV_REALE):
+        out += ["_CSV del conto reale **non ancora sul repo**: la sezione si accende "
+                "da sola quando il file arriva._", "",
+                "**Perche' non c'e' (misurato l'08/09/2026):** sul terminale del "
+                "reale (`C:\\BCM_Reale`) **non gira nessun `ABTG_TradeExporter`**. "
+                "Il censimento dei `.chr` di quel terminale trova tre EA "
+                "(`ABTG_DAX_Apertura_EU` 770101, `ABTG_ORB_Ottimizzato` 770611, "
+                "`ABTG_SlippageLogger`) e nessun esportatore. Senza esportatore "
+                "non esiste `%s` in `Common\\Files`, e `pubblica_trades.ps1` non "
+                "ha niente da caricare." % CSV_REALE_MT5, "",
+                "> ⚠️ Il censimento legge i `.chr`, cioe' una **foto al salvataggio "
+                "del profilo**: e' un indizio forte, non un fatto certo. "
+                "Istruzioni per accendere l'esportatore (gesto di Claudio sul "
+                "terminale reale): `report/PAGELLA_CONTO_REALE_2026-09-08.md`."]
+    else:
+        with open(CSV_REALE, encoding="utf-8-sig", newline="") as f:
+            lettore = csv.DictReader(f, delimiter=";")
+            intestazione = lettore.fieldnames or []
+            rreale = list(lettore)
+        mancanti = [c for c in COLONNE_MINIME if c not in intestazione]
+        if mancanti:
+            # 🔴 colonna mancante = niente totale. Dichiarato, non aggirato.
+            out += ["> 🔴 **Il CSV del reale non ha le colonne che servono: "
+                    "manca%s `%s`.** Su un conto vero non stampo un totale a "
+                    "meta': la sezione si ferma qui. Colonne trovate: `%s`."
+                    % ("no" if len(mancanti) > 1 else "",
+                       "`, `".join(mancanti),
+                       "`, `".join(intestazione) if intestazione else "(nessuna)")]
+        elif not rreale:
+            out += ["_Il CSV del reale c'e' ma e' **vuoto** (solo intestazione): "
+                    "nessuna posizione chiusa esportata. Nessun totale da dare._"]
+        else:
+            # 1) leggibilita' RIGA PER RIGA: date e importi.
+            illeggibili = []
+            for r in rreale:
+                r["_ot"] = tempo(r.get("open_time", ""))
+                r["_ct"] = tempo(r.get("close_time", ""))
+                r["_num_ok"] = all(leggibile(r, k)
+                                   for k in ("profit", "swap", "commission"))
+                if not (r["_ot"] and r["_ct"] and r["_num_ok"]):
+                    illeggibili.append(r)
+
+            if illeggibili:
+                # 🔴 nessun totale finche' non si capiscono: sono soldi veri.
+                out += ["> 🔴 **%d rig%s del CSV del reale non %s leggibil%s** "
+                        "(data o importo non interpretabile). Su un conto vero "
+                        "**non stampo un totale che le salta**: vanno capite "
+                        "prima. pid: %s"
+                        % (len(illeggibili),
+                           "he" if len(illeggibili) > 1 else "a",
+                           "sono" if len(illeggibili) > 1 else "e'",
+                           "i" if len(illeggibili) > 1 else "e",
+                           ", ".join(str(r.get("pid", "?")) for r in illeggibili[:10])),
+                        "",
+                        "_Il resto della sezione resta spento fino ad allora: "
+                        "una sezione muta e' un'informazione, un totale "
+                        "sbagliato no._"]
+            else:
+                # 2) stesso filtro del piccolo: le operazioni SENZA COMMENTO
+                #    (strategy vuota E magic 0) stanno FUORI dal totale, ma si
+                #    mostrano. Firma di Claudio del 07/09: non e' una regola
+                #    "del piccolo", e' come si legge un conto.
+                man_reale = [r for r in rreale if senza_commento(r)]
+                amb_reale = discordi(rreale)
+                flotta_reale = [r for r in rreale if not senza_commento(r)]
+
+                def _netto_r(r):
+                    return num(r, "profit") + num(r, "swap") + num(r, "commission")
+
+                netto_storico_re = sum(_netto_r(r) for r in flotta_reale)
+                oggi_re = [r for r in flotta_reale
+                           if r["_ct"].strftime("%Y-%m-%d") == giorno]
+                netto_oggi_re = sum(_netto_r(r) for r in oggi_re)
+
+                perGiorno_re = defaultdict(float)
+                for r in flotta_reale:
+                    perGiorno_re[r["_ct"].strftime("%Y-%m-%d")] += _netto_r(r)
+                peggior_re = min(perGiorno_re.values()) if perGiorno_re else 0.0
+
+                if oggi_re:
+                    perEA_re = defaultdict(list)
+                    for r in oggi_re:
+                        perEA_re[r.get("strategy") or ("magic " + str(r.get("magic", "?")))].append(r)
+                    out += ["| EA | Trade | P&L | Come sono usciti |", "|---|---|---|---|"]
+                    for ea, tr in sorted(perEA_re.items(),
+                                         key=lambda x: -sum(_netto_r(r) for r in x[1])):
+                        motivi = defaultdict(int)
+                        for r in tr:
+                            motivi[r.get("close_reason") or "?"] += 1
+                        out.append("| %s | %d | **%+.2f** | %s |" % (
+                            ea, len(tr), sum(_netto_r(r) for r in tr),
+                            " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items()))))
+                    out.append("")
+                else:
+                    out += ["_Nessuna posizione chiusa oggi sul reale._", ""]
+
+                out += ["**Netto REALIZZATO della flotta sul reale: "
+                        "%+.2f** (oggi: %+.2f · su %d operazioni dal via)"
+                        % (netto_storico_re, netto_oggi_re, len(flotta_reale)),
+                        "",
+                        "Peggior giornata dal via: **%+.2f**." % peggior_re]
+
+                # 🔴 Il SALDO non si stampa: il deposito iniziale del reale non
+                #    e' un dato di questo CSV. Inventarlo (come DEP_100K, che
+                #    li' e' un fatto del dry-run) sarebbe un numero finto su un
+                #    conto vero. Si dice, non si indovina.
+                out += ["", "> ⚠️ Qui c'e' il **netto realizzato**, non il saldo: "
+                        "il deposito iniziale del reale non sta in questo CSV e "
+                        "**non lo invento**. E come per il 100k, il CSV **non "
+                        "vede il floating**: l'arbitro dei pavimenti resta chi "
+                        "legge l'equity."]
+
+                if man_reale:
+                    netto_man_re = sum(_netto_r(r) for r in man_reale)
+                    ultima = max(r["_ct"] for r in man_reale).strftime("%Y-%m-%d")
+                    out += ["", "### 🚫 Fuori dal totale — operazioni SENZA COMMENTO (reale)", "",
+                            "`strategy` vuota **e** `magic` 0: non appartengono a "
+                            "nessuna nostra sedia. **%d operazion%s, %+.2f** "
+                            "(ultima il %s). **Non entrano** nel netto qui sopra "
+                            "— stessa regola del piccolo, Claudio 07/09/2026."
+                            % (len(man_reale), "i" if len(man_reale) > 1 else "e",
+                               netto_man_re, ultima)]
+                if amb_reale:
+                    out += ["", "> 🔴 **%d operazion%s con commento e magic DISCORDI "
+                            "sul CONTO REALE.** Restano nel totale e vanno capite: "
+                            "pid %s"
+                            % (len(amb_reale), "i" if len(amb_reale) > 1 else "e",
+                               ", ".join(str(r.get("pid", "?")) for r in amb_reale[:10]))]
 
     os.makedirs(OUT_DIR, exist_ok=True)
     dest = os.path.join(OUT_DIR, "giornata_%s.md" % giorno)

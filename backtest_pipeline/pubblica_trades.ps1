@@ -5,6 +5,12 @@
 #  Common\Files e lo carica nel repo (data/statements/trades_auto.csv) via
 #  API GitHub, usando il tuo token. Il report del sabato lo leggera' da li'.
 #
+#  Dal 08/09/2026 i CSV pubblicati sono TRE, uno per conto:
+#    ABTG_Trades.csv       -> data/statements/trades_auto.csv    piccolo 50503392  (OBBLIGATORIO)
+#    ABTG_Trades_100k.csv  -> data/statements/trades_100k.csv    100k    50504263  (facoltativo)
+#    ABTG_Trades_Reale.csv -> data/statements/trades_reale.csv   REALE   10105439  (facoltativo)
+#  Se un file facoltativo non c'e', lo script LO DICE e PROSEGUE: non fallisce.
+#
 #  Da lanciare sul VPS (dove gira l'EA e c'e' il token).
 #
 #  USO:
@@ -30,6 +36,16 @@ param(
     #     Lo scrive il TradeExporter del -V3 nella STESSA Common condivisa.
     [string]$RepoPath100k = "data/statements/trades_100k.csv",
     [string]$CsvName100k  = "ABTG_Trades_100k.csv",
+    # --- pagella TRIPLA (08/09/2026): anche il CSV del CONTO REALE 10105439.
+    #     Lo scrivera' il TradeExporter attaccato sul terminale C:\BCM_Reale
+    #     con InpFile=ABTG_Trades_Reale.csv. Il NOME DEVE ESSERE DIVERSO dagli
+    #     altri due: Common\Files e' UNA SOLA cartella condivisa da tutti i
+    #     terminali dello stesso utente Windows, quindi stesso nome = i tre
+    #     conti si sovrascrivono a vicenda.
+    #     Al 08/09/2026 quel file NON esiste ancora (nessun TradeExporter sul
+    #     terminale del reale): qui e' FACOLTATIVO, lo dice e prosegue.
+    [string]$RepoPathReale = "data/statements/trades_reale.csv",
+    [string]$CsvNameReale  = "ABTG_Trades_Reale.csv",
     [string]$TokenFile  = "",
     [switch]$TriggerReport,
     [switch]$Installa,                 # registra l'attivita' pianificata e esce
@@ -105,12 +121,12 @@ foreach ($p in $tokenCandidates) {
 }
 if (-not $tok) { Write-Host "Token non trovato. Passa -TokenFile col percorso del .gh_report_token.txt" -ForegroundColor Red; exit 1 }
 
-# --- pubblicazione di UN file (usata due volte: piccolo + 100k) ---
+# --- pubblicazione di UN file (usata TRE volte: piccolo + 100k + reale) ---
 $common  = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
 $headers = @{ Authorization = "token $tok"; "User-Agent" = "ABTG-Publisher"; Accept = "application/vnd.github+json" }
 $apiBase = "https://api.github.com/repos/$Owner/$Repo"
 
-function Pubblica-Csv([string]$nomeCsv, [string]$repoPath, [bool]$obbligatorio) {
+function Pubblica-Csv([string]$nomeCsv, [string]$repoPath, [bool]$obbligatorio, [string]$nota) {
     $csv = Join-Path $common $nomeCsv
     if (-not (Test-Path $csv)) {
         if ($obbligatorio) {
@@ -118,8 +134,10 @@ function Pubblica-Csv([string]$nomeCsv, [string]$repoPath, [bool]$obbligatorio) 
             Write-Host "Assicurati che l'EA ABTG_TradeExporter sia attaccato a un grafico sul VPS." -ForegroundColor Yellow
             exit 1
         }
+        # FACOLTATIVO: non e' un errore, e' un fatto. Si dice e si prosegue,
+        # altrimenti un conto che non c'e' ancora blocca gli altri due.
         Write-Host "CSV facoltativo non trovato (salto): $csv" -ForegroundColor Yellow
-        Write-Host "  (e' quello del 100k: compare col primo export del TradeExporter sul -V3)" -ForegroundColor DarkGray
+        if ($nota) { Write-Host ("  " + $nota) -ForegroundColor DarkGray }
         return
     }
     $bytes = [IO.File]::ReadAllBytes($csv)
@@ -159,8 +177,13 @@ function Pubblica-Csv([string]$nomeCsv, [string]$repoPath, [bool]$obbligatorio) 
     }
 }
 
-Pubblica-Csv $CsvName     $RepoPath     $true    # conto piccolo (come sempre)
-Pubblica-Csv $CsvName100k $RepoPath100k $false   # conto 100k (pagella doppia)
+# conto piccolo 50503392: e' l'unico OBBLIGATORIO (c'e' da sempre).
+Pubblica-Csv $CsvName      $RepoPath      $true  ""
+# conto 100k 50504263 (dry-run FTMO): facoltativo.
+Pubblica-Csv $CsvName100k  $RepoPath100k  $false "(e' quello del 100k 50504263: compare col primo export del TradeExporter sul -V3)"
+# conto REALE 10105439: facoltativo finche' nessuno attacca il TradeExporter
+# sul terminale C:\BCM_Reale. Il gesto sul reale lo fa Claudio, non lo script.
+Pubblica-Csv $CsvNameReale $RepoPathReale $false "(e' quello del conto REALE 10105439: compare quando ABTG_TradeExporter gira su C:\BCM_Reale con InpFile=ABTG_Trades_Reale.csv - vedi report\PAGELLA_CONTO_REALE_2026-09-08.md)"
 
 # --- opzionale: lancia subito il report settimanale ---
 if ($TriggerReport) {

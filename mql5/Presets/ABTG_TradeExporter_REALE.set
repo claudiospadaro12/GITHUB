@@ -1,0 +1,30 @@
+; =====================================================================
+;  ABTG_TradeExporter_REALE.set
+;  Preset dell'ESPORTATORE CSV per il CONTO REALE 10105439
+;  Terminale: C:\BCM_Reale        (NON gli altri: vedi sotto)
+;  Scritto il 08/09/2026.
+; ---------------------------------------------------------------------
+;  A COSA SERVE: ABTG_TradeExporter LEGGE lo storico dei trade CHIUSI e
+;  lo scrive in un CSV dentro Common\Files. NON invia ordini, non
+;  modifica ordini, non chiude posizioni: nel sorgente
+;  mql5\Experts\ABTG_TradeExporter.mq5 non esiste nessuna chiamata di
+;  trading (ne' OrderSend, ne' CTrade, ne' PositionClose/Modify).
+;  L'unica scrittura che fa e' FileWrite su file (riga 188).
+;
+;  IL NOME DEL FILE E' L'UNICA COSA CHE CAMBIA rispetto agli altri due
+;  conti, e non e' un dettaglio: Common\Files e' UNA SOLA cartella
+;  condivisa da tutti i terminali MT5 dello stesso utente Windows.
+;  Tre terminali con lo stesso InpFile = i tre conti si sovrascrivono
+;  a vicenda e la pagella legge un miscuglio.
+;      piccolo 50503392  ->  ABTG_Trades.csv
+;      100k    50504263  ->  ABTG_Trades_100k.csv
+;      REALE   10105439  ->  ABTG_Trades_Reale.csv   <-- questo preset
+;
+;  COME SI CARICA: finestra dell'EA -> scheda "Dati in ingresso" ->
+;  pulsante "Carica" -> scegli questo file. Poi OK.
+;  Istruzioni complete e avvertenze: report\PAGELLA_CONTO_REALE_2026-09-08.md
+; =====================================================================
+InpFile=ABTG_Trades_Reale.csv
+InpFromYear=2024
+InpExportMinutes=30
+InpUseCommon=true
