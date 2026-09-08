@@ -1,0 +1,54 @@
+; =====================================================================
+;  NATO L'08/09/2026 PER EVITARE UNA COLLISIONE DI MAGIC.
+;  Claudio ha firmato: EURJPY e EURUSD del PostNews vanno a 1.30.
+;  La strada corta sarebbe caricare ABTG_PostNews_ECB_EURJPY.set anche
+;  sul grafico EURUSD: un .set non contiene il simbolo, quindi
+;  "funzionerebbe". MA quel file porta dentro InpMagic=771201, che e'
+;  il magic della sedia EURJPY: due sedie con lo STESSO magic non si
+;  distinguono piu' -- ne' nei referti, ne' dentro l'EA quando controlla
+;  se ha gia' una posizione viva. Questo preset e' identico a quello
+;  ECB tranne magic e commento.
+;  L'altra strada -- caricare ABTG_PostNews_FOMC_EURUSD.set -- e'
+;  sbagliata per un altro motivo: filtra USD e "FOMC" e agisce alle
+;  19:40 server. Sulla BCE non sparerebbe mai.
+; =====================================================================
+; Preset POST-NEWS -- ECB Press Conference -- EUR/USD -- M5
+; Notizia 14:45 IT (giovedi, 8 volte/anno). Azione 15:00 IT = 14:00 server. Scadenza 18:15 IT = 17:15 server.
+; Range = le DUE candele dopo quella della notizia. BUY STOP max+3, SELL STOP min-2, TP50/SL25. Trailing +25->SL15 ON.
+; Attacca su grafico EUR/USD M5 e carica questo preset. Magic 771202.
+; NB: per operare servono le DATE ECB nel file abtg_news.csv (valuta EUR). Vedi abtg_news_postnews_esempio.csv.
+InpActionHour=14
+InpActionMin=0
+InpExpiryHour=17
+InpExpiryMin=15
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsCurrencies=EUR
+InpNewsTitleMatch=ECB
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseTrail25=true
+InpCloseAtExpiry=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+; --- 07/09/2026: riscalato al METRO DI CASA ---
+;   Era 3.0 (il numero del corso). Con InpRiskRefSLpips=50 e InpSLpips=25
+;   il sorgente (r.325) dimensiona su 50 pip: 3.0 significava 1,50% per
+;   gamba stoppata. 1.30 significa 0,65% per gamba -- la taglia firmata
+;   il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%), la stessa gia' usata
+;   dal preset NFP di questa famiglia.
+;   Contratto del collaudo: prove/POSTNEWS_ECB_1009_COLLAUDO.txt
+InpRiskPercent=1.30
+InpRiskRefSLpips=50.0
+InpComment=ECB PostNews EURUSD
+InpMagic=771202
+InpMaxSpread=0
+InpVerbose=true
