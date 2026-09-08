@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE
+#  MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST
 #  walkforward_generico.ps1  --  UN walk-forward per QUALSIASI EA
 # ---------------------------------------------------------------------
 #  PERCHE' ESISTE (07/08/2026)
@@ -89,6 +89,42 @@
 #  Il flag resta qui SOLO per il caso (finora mai visto in casa) di un
 #  EA che scriva il suo CSV direttamente da OnTester/OnDeinit, senza
 #  passare dai frame.
+#
+#  -TerminaleBacktest (08/09/2026, v4) -- PASSO 6 di report\QUARTO_MT5_PIANO.md
+#  PERCHE' ESISTE, ED E' UN DIFETTO GIA' PAGATO, NON UNA PRECAUZIONE.
+#  Fino a ieri il terminale lo sceglieva SOLO il ripiego del punto 7:
+#  "prendi il primo terminal64.exe sotto Program Files la cui cartella
+#  contiene 'BCM Markets', escludendo -V3 (il 100k) e BCM_Reale". Con TRE
+#  installazioni quel filtro ne lasciava passare UNA, e il primo che
+#  capitava era per forza quella giusta.
+#  Il 07/09 sul VPS e' stato installato il QUARTO terminale, dedicato ai
+#  backtest: C:\MT5_Backtest, conto demo 50504400 (HEDGING, zero EA
+#  attaccati). Da quel momento il filtro ne lascia passare DUE -- il
+#  terminale da backtest E IL PICCOLO 50503392, che ha 40 sedie vive e
+#  posizioni aperte -- e "il primo che capita" diventa un'inferenza su
+#  come Get-ChildItem ordina le cartelle. E' esattamente la CLASSE
+#  37-QUATER, pagata il 07/09: un ripiego che sceglie il terminale
+#  sbagliato e non lo dice.
+#  Con questo parametro la cartella si NOMINA, e il driver muore se non
+#  la trova o se non contiene terminal64.exe. Le guardie NON si
+#  allentano: -V3 e BCM_Reale restano vietati anche quando li nomini a
+#  mano. E da questa versione il terminale scelto viene sempre DICHIARATO
+#  a schermo (percorso + da quale via), perche' il difetto che stiamo
+#  chiudendo non e' scegliere male: e' scegliere in silenzio.
+#  SENZA il parametro il comportamento resta identico a prima, riga per
+#  riga: le righe di lancio gia' scritte non cambiano di una virgola.
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_ORB -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  COMPATIBILITA' DEI MARCATORI -- QUESTA RIGA E' VOLUTA, NON UN AVANZO.
+#  Questo file contiene ANCORA, di proposito, la stringa
+#  MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE. Le righe di lancio gia'
+#  scritte la cercano con Select-String -SimpleMatch per rifiutare le copie
+#  vecchie del driver -- fra queste righe\RIGA_RITARDO_TESTER.ps1 (r.99 e
+#  r.225), che e' esattamente la riga dell'ancora R119 del passo 7.
+#  Togliendo quella stringa, quelle righe morirebbero dicendo "driver
+#  vecchio" davanti a un driver PIU' NUOVO. Cio' che il marcatore v3
+#  promette (il parametro -Ritardo, cioe' ExecutionMode nell'.ini) qui e'
+#  invariato: la promessa e' ancora vera, quindi la stringa resta.
 # =====================================================================
 param(
   [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
@@ -136,6 +172,15 @@ param(
   [string]$BrokerPattern = "BCM",    # SU QUALE TERMINALE girare. "BCM" = come sempre.
                                      #   Altro valore (es. "Pepperstone") = secondo
                                      #   broker: vedi l'avviso rosso qui sotto.
+  [string]$TerminaleBacktest = "",   # 08/09/2026 (v4): CARTELLA PROGRAMMA del terminale
+                                     #   da usare, nominata a mano. Es. "C:\MT5_Backtest"
+                                     #   (VPS, conto demo 50504400, zero EA attaccati).
+                                     #   Se passato si usa QUELLO E SOLO QUELLO: niente
+                                     #   ripiego, niente inferenza sull'ordine delle
+                                     #   cartelle. Muore se la cartella non esiste, se non
+                                     #   contiene terminal64.exe, o se e' un terminale
+                                     #   VIETATO (-V3 = 100k, BCM_Reale = conto reale).
+                                     #   Vuoto (default) = ripiego di sempre, immutato.
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$PermettiCellaSingola,     # round a CELLA CONGELATA (zero assi Y): salta SOLO
                                      #   il controllo "nessun parametro da spazzolare".
@@ -153,7 +198,7 @@ function Titolo($t){ Write-Host ""; Write-Host $t -ForegroundColor Cyan }
 function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
 
 Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
-Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v3_EXECMODE" -ForegroundColor DarkGray
+Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST" -ForegroundColor DarkGray
 
 # =====================================================================
 #  0. SU QUALE BROKER SI STA GIRANDO
@@ -647,6 +692,61 @@ $InputsTxt
 # =====================================================================
 #  7. MT5: trova, compila, gira
 # =====================================================================
+# ---------------------------------------------------------------------
+#  7-bis. IL TERMINALE NOMINATO A MANO (-TerminaleBacktest)
+#  Sta PRIMA di tutto il resto e, se valorizzato, riempie $Terminal: i
+#  due blocchi di ripiego qui sotto sono entrambi guardati da
+#  "if(-not $Terminal ...)" e quindi non partono nemmeno. Se invece il
+#  parametro e' vuoto, questo blocco non fa NIENTE e la scelta resta
+#  quella di sempre, identica riga per riga.
+# ---------------------------------------------------------------------
+$ViaTerminale=""
+if($Terminal){ $ViaTerminale="parametro esplicito -Terminal" }
+if($TerminaleBacktest){
+  if($Terminal){
+    Muori ("-TerminaleBacktest e -Terminal dicono due cose diverse: passane UNO solo.`n" +
+           "    -TerminaleBacktest = '$TerminaleBacktest'`n" +
+           "    -Terminal          = '$Terminal'")
+  }
+  # La guardia di casa NON si allenta perche' il percorso e' scritto a
+  # mano: anzi, e' proprio quando si scrive a mano che si sbaglia riga.
+  if($TerminaleBacktest -like "*-V3*" -or $TerminaleBacktest -like "*BCM_Reale*"){
+    Muori ("TERMINALE VIETATO in -TerminaleBacktest: '$TerminaleBacktest'`n" +
+           "    Il 100k (-V3, conto 50504263) e il conto REALE (BCM_Reale, 10105439)`n" +
+           "    non si toccano da questo driver, nemmeno nominandoli a mano.`n" +
+           "    Il terminale da backtest e' C:\MT5_Backtest (conto demo 50504400).")
+  }
+  $cartellaBT=$TerminaleBacktest.TrimEnd('\','/')
+  if(-not (Test-Path -LiteralPath $cartellaBT -PathType Container)){
+    Muori ("-TerminaleBacktest: la cartella NON esiste.`n" +
+           "    cercata  : '$cartellaBT'`n" +
+           "    Va passata la CARTELLA PROGRAMMA del terminale, cioe' quella che`n" +
+           "    contiene terminal64.exe (non l'exe, non la cartella dati):`n" +
+           "      -TerminaleBacktest `"C:\MT5_Backtest`"")
+  }
+  $exeBT=Join-Path $cartellaBT "terminal64.exe"
+  if(-not (Test-Path -LiteralPath $exeBT -PathType Leaf)){
+    Muori ("-TerminaleBacktest: la cartella c'e', ma NON contiene terminal64.exe.`n" +
+           "    cartella : '$cartellaBT'`n" +
+           "    cercato  : '$exeBT'`n" +
+           "    Se il terminale e' installato altrove, passa QUELLA cartella.`n" +
+           "    Per vedere le installazioni vive, in sola lettura:`n" +
+           "      Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path")
+  }
+  # il compilatore sta nella stessa cartella: se manca, il round morirebbe
+  # piu' avanti con un errore che non nomina il terminale. Meglio adesso.
+  $medBT=Join-Path $cartellaBT "metaeditor64.exe"
+  if(-not (Test-Path -LiteralPath $medBT -PathType Leaf)){
+    Muori ("-TerminaleBacktest: manca metaeditor64.exe, e senza compilatore l'EA`n" +
+           "    non si compila.`n" +
+           "    cartella : '$cartellaBT'`n" +
+           "    cercato  : '$medBT'")
+  }
+  $Terminal=$exeBT
+  $MetaEditor=$medBT
+  $ViaTerminale="parametro esplicito -TerminaleBacktest"
+}
+
 if(-not $Terminal -and $BrokerBCM){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
@@ -675,7 +775,8 @@ if(-not $Terminal -and $BrokerBCM){
       exit 1
     }
   }
-  if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+  if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"
+         $ViaTerminale="RIPIEGO automatico su BrokerPattern 'BCM'" + $(if($UseSpare){" con -UseSpare"}else{""})}
 }
 if(-not $Terminal -and -not $BrokerBCM){
   # TERMINALE DI UN ALTRO BROKER. Si parte da origin.txt (ogni cartella
@@ -694,13 +795,15 @@ if(-not $Terminal -and -not $BrokerBCM){
     if(-not (Test-Path $t)){ continue }
     $Terminal=$t
     $MetaEditor=Join-Path $inst "metaeditor64.exe"
+    $ViaTerminale="RIPIEGO da origin.txt per BrokerPattern '$BrokerPattern'"
     if(-not $DataFolder){ $DataFolder=$d.FullName }
     break
   }
   if(-not $Terminal){
     $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
     $c=$allTerm|Where-Object{$_.DirectoryName -like "*$BrokerPattern*"}|Select-Object -First 1
-    if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+    if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"
+           $ViaTerminale="RIPIEGO su Program Files per BrokerPattern '$BrokerPattern'"}
   }
   if(-not $Terminal){
     Muori ("non trovo nessun terminale che contenga '$BrokerPattern'.`n" +
@@ -712,6 +815,24 @@ if(-not $Terminal -and -not $BrokerBCM){
   Write-Host "    terminale: $Terminal" -ForegroundColor Yellow
 }
 if(-not $Terminal){ Muori "non trovo terminal64.exe. Passalo con -Terminal `"C:\...\terminal64.exe`"." }
+
+# --- SI DICHIARA SEMPRE QUALE TERMINALE E' STATO SCELTO, E DA QUALE VIA.
+#  Il difetto della classe 37-quater non e' scegliere male: e' scegliere
+#  in silenzio. Con quattro terminali BCM sul VPS (piccolo 50503392,
+#  100k 50504263 -V3, reale 10105439 BCM_Reale, backtest 50504400 in
+#  C:\MT5_Backtest) questa riga va LETTA prima di lasciar girare il round.
+if(-not $ViaTerminale){ $ViaTerminale="RIPIEGO automatico" }
+Write-Host ""
+Write-Host "--- TERMINALE SCELTO ------------------------------------------------" -ForegroundColor Cyan
+Write-Host ("    terminal64 : " + $Terminal) -ForegroundColor White
+Write-Host ("    cartella   : " + (Split-Path -Parent $Terminal)) -ForegroundColor White
+Write-Host ("    via        : " + $ViaTerminale) -ForegroundColor Yellow
+if($ViaTerminale -like "RIPIEGO*"){
+  Write-Host "    (ripiego: nessuna cartella nominata. Se non e' quello che volevi," -ForegroundColor DarkYellow
+  Write-Host "     rilancia con -TerminaleBacktest `"C:\MT5_Backtest`" e non tirare a indovinare.)" -ForegroundColor DarkYellow
+}
+Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
+
 if($Terminal -and -not $DataFolder){
   $instDir=Split-Path -Parent $Terminal; $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"
   if(Test-Path $termRoot){$DataFolder=Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue|Where-Object{$o=Join-Path $_.FullName "origin.txt";(Test-Path $o)-and((Get-Content $o -Raw).Trim() -ieq $instDir)}|Select-Object -First 1 -ExpandProperty FullName}
