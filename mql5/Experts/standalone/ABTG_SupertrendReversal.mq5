@@ -25,7 +25,7 @@
 //|  DEMO. Nessun EA garantisce profitti.                          |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 
 #include <Trade/Trade.mqh>
@@ -244,8 +244,17 @@ void Enter(bool isLong,double stLine)
    if(totLot<=0){ Log("lotto nullo."); return; }
 
    double lotMkt=NormVol(totLot*InpFirstFraction);
-   double lotPend=NormVol(totLot-lotMkt);
+   //--- CORREZIONE 08/09/2026: il pavimento del lotto minimo ora e' applicato
+   //    PRIMA del calcolo di lotPend. Con l'ordine precedente, se NormVol()
+   //    azzerava lotMkt (tranche sotto il minimo), lotPend si prendeva TUTTO
+   //    totLot e subito dopo lotMkt risorgeva al minimo: volume totale
+   //    totLot+volMin, cioe' fino al doppio del rischio dichiarato.
+   //    Misurato in campo il 20/08/2026: 1,42% su un contratto da 1,0%.
+   //    Ora lotPend si calcola su cio' che resta DAVVERO; se resta sotto il
+   //    minimo NormVol torna 0 e la guardia (InpUsePending && lotPend>0)
+   //    salta il pendente: volume totale = lotMkt. Coerente.
    if(lotMkt<=0) lotMkt=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   double lotPend=NormVol(totLot-lotMkt);
 
    bool ok=isLong?gTrade.Buy(lotMkt,_Symbol,ask,sl,tp,"STRev L 1/3")
                  :gTrade.Sell(lotMkt,_Symbol,bid,sl,tp,"STRev S 1/3");
