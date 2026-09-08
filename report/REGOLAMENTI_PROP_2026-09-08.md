@@ -395,3 +395,56 @@ PRIORITA'  MASSIMA - e' l'unica voce con un tempo di risposta che non controllia
 **Nessun EA, preset, parametro, grafico o sedia viva e' stato toccato per
 scrivere questo file.** L'unico file prodotto e' questo. Tutte le proposte
 del §5 sono **proposte**: nessuna e' stata applicata.
+
+---
+
+# 🔎 VERIFICA DI CLAUDE — 08/09/2026
+
+## ✅ IL BUCO DELLA BASELINE È VERO. L'ho letto nel codice
+`mql5/Experts/ABTG_Guardian.mq5`, righe **428** e **529**:
+```mql5
+GlobalVariableSet(GV_DAYSTART,eq);   // v1.12: baseline giornaliera = EQUITA' a inizio giornata (non bilancio)
+```
+Confermato: la nostra giornata parte dall'**equità**, quella di FTMO dal
+**saldo** alle 00:00 CE(S)T. Con flottante negativo al reset **il nostro
+pavimento sta più in basso del loro**: crediamo di avere margine e non ce
+l'abbiamo.
+
+## ⚠️ MA NON È UNA SVISTA — ed è importante, perché cambia la correzione
+Quella riga è un **fix deliberato del 06/09**, e risolveva un bug **misurato
+sul conto reale**: il broker tiene lì un **credito stabile e non prelevabile**
+(bilancio 5.000, credito 2.500). Prendere la baseline dal **bilancio** e
+confrontarla con l'**equità** faceva apparire il credito come un guadagno
+permanente: la pausa al 4,9% e il blocco al 9,9% **non sarebbero scattati fino
+a oltre 2.700-3.000 € di perdita vera**, cioè più di metà del capitale.
+
+> ### 🎯 Quindi la correzione **NON è "tornare al bilancio"**
+> Tornare indietro **riaprirebbe** un buco già pagato sul conto con i soldi
+> veri. Le due esigenze sono entrambe legittime **su conti diversi**:
+>
+> | conto | chi fa da arbitro | baseline giusta |
+> |---|---|---|
+> | **REALE** (con credito) | il nostro Guardian | **equità** ✅ come oggi |
+> | **prop FTMO** (senza credito) | **FTMO** | **saldo** alle 00:00 |
+>
+> 👉 La forma giusta è un **modo dichiarato** (`InpDailyBaseline`:
+> `equita` / `saldo` / `max(saldo,equita)`), scelto **per conto**, con il
+> default che **non cambia niente** dove gira oggi. Un input in più, nessun
+> comportamento nuovo finché non lo si accende: la stessa forma già usata per
+> il cap C2 per cluster (opt-in, no-op di default).
+
+🔴 **Non lo implemento di mia iniziativa**: tocca il pezzo che protegge il
+conto reale. **Serve la firma di Claudio**, ed è la più urgente delle cinque
+proposte, insieme all'email a FTMO.
+
+## 📋 E LA CLASSE DI PROVA VA DETTA OGNI VOLTA CHE SI CITA QUESTO DOSSIER
+Il proxy blocca **tutti** i domini delle prop (403 al CONNECT) e anche
+`web.archive.org`. **Nessuna pagina è stata aperta**: le citazioni sono
+`[LETTO-VIA-SEARCH]` su ricerche ristrette ai domini ufficiali.
+
+👉 Sono **verificabili in 30 secondi da un browser normale**, ma **non sono
+una lettura diretta**. Prima di pagare una fee, i due numeri che decidono —
+**muro statico o trailing** e **come si calcola il confine della giornata** —
+vanno confermati **da Claudio sul sito** o **per iscritto dal supporto**.
+Su questo non si parte "perché tanto l'abbiamo letto": è esattamente il tipo
+di assunzione che questo dossier è nato per chiudere.
