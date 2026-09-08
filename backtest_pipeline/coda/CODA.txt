@@ -45,3 +45,10 @@ e2e0bb408beec0763e7e4755e3e71265f234d37b | backtest_pipeline/righe/CODA_06_quale
 #     canale e' questa coda. Di TUTTI i file stampa nome/taglia/data, il
 #     CONTENUTO solo di quelli col nome dei nostri referti.
 cdb9373da752b373457b6e8782ab48086f9e206b | backtest_pipeline/righe/CODA_07_desktop.ps1
+
+# --- 8. i parametri di OGNI sedia, in forma di .set pronto.
+#     Il censimento dell'08/09 ha trovato che sul 100k (50504263) NON esiste
+#     nessun preset nel repo: le taglie 0,65 e 0,30 vivono SOLO nei .chr. Se
+#     quel terminale si azzera, la configurazione del dry-run FTMO non e'
+#     ricostruibile da nessuna fonte scritta.
+6ba50102f134c9e4b3c114ae73ceb19fa63cd100 | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
