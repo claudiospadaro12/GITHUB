@@ -31,3 +31,10 @@ d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti
 #     reale CODA_01 non vede il Guardian nei .chr, CODA_02 lo vede scrivere
 #     464 righe fino alle 23:56. Un EA che scrive STA GIRANDO.
 f5f5b9f9e36e6007607d6901ecdac2fe5d769394 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
+
+# --- 6. quale dei due alberi di sorgenti e' stato copiato sui terminali.
+#     Nel repo ABTG_PostNews esiste in due versioni diverse (666 righe /
+#     versione 1.10 con Guardian, e 307 righe / versione 1.00 senza).
+#     Se non si sa quale gira, si legge la riga sbagliata per spiegare
+#     un comportamento.
+e2e0bb408beec0763e7e4755e3e71265f234d37b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
