@@ -1,0 +1,258 @@
+# =====================================================================
+#  ABTG_ImpulsoApertura -- SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
+#  "La candela d'apertura E' il segnale, ma solo se e' IMPULSIVA"
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA (fa fede, qui non si duplica):
+#    report\CACCIA_APERTURE_ORO_2026-09-08.md
+#
+#  ORIGINE (regola di casa: si cita sempre, e si dice cosa e' stato letto)
+#    MOTORE      : "Market Open Impulse [LuciTech]" -- TradingView,
+#                  autore @TradesLuci, creato 2025-08-12, 205 righe Pine v5,
+#                  scriptAccess = open_no_auth.
+#                  https://www.tradingview.com/script/fd3aaa16c57f4a75b712fa311c62594a/
+#                  [VERIFICATO: sorgente scaricato e letto riga per riga
+#                   via pine-facade il 08/09/2026]
+#    LICENZA     : 🔴 NESSUNA licenza dichiarata nel sorgente (nessuna
+#                  intestazione MPL/MIT, solo //@version=5). Il codice e'
+#                  pubblico e leggibile. CONSEGUENZA OPERATIVA: il .mq5 si
+#                  scrive DA SPECIFICA, non si traduce riga per riga, e
+#                  l'attribuzione all'autore va in testa al file.
+#                  Il sorgente Pine NON e' stato archiviato in biblioteca.
+#    NON E' LO STESSO OGGETTO di "Breakouts With Timefilter Strategy
+#    [LuciTech]", gia' scartato il 28/08 (CACCIA_INTRADAY_INDICI, riga 442).
+#
+# =====================================================================
+#  0. LA SOLA COSA DA SAPERE PRIMA DI LANCIARE
+# ---------------------------------------------------------------------
+#  L'EA NON ESISTE ANCORA nel repo. Questo file e' l'ipotesi congelata
+#  PRIMA che il codice sia scritto (stesso precedente di
+#  ABTG_TurnaroundTuesday.txt e GAPCASH_NAS_PASSO0.txt). Il driver
+#  fallira' finche' il .mq5 non c'e' -- ed e' giusto che fallisca.
+#
+#  NOME PREVISTO: mql5\Experts\ABTG_ImpulsoApertura.mq5
+#  I NOMI DEGLI INPUT QUI SOTTO SONO VINCOLANTI per chi scrive il codice.
+#  Se il .mq5 ne usa altri, MT5 li ignora IN SILENZIO e la fase risponde a
+#  un'altra domanda (LEGGIMI.md, trappola "nome inesistente").
+#  L'EA deve avere OnTester (22 EA su 61 non ce l'avevano: il driver
+#  rifiuta di partire).
+#
+# =====================================================================
+#  1. IPOTESI, in italiano
+# ---------------------------------------------------------------------
+#  Alla campanella, la PRIMA barra completa della seduta cash e' l'unica
+#  del giorno in cui arriva insieme tutto l'ordine accumulato fuori
+#  sessione. Quando quella barra e' ANOMALA (range >= K x ATR) e chiude
+#  nella meta' del suo range dalla parte del movimento, l'ordine non e'
+#  stato assorbito: la seduta continua nella stessa direzione.
+#  Quando invece e' una barra qualunque, non c'e' niente da seguire e
+#  NON SI OPERA.
+#
+#  PERCHE' DOVREBBE FUNZIONARE, in una riga:
+#    un'apertura impulsiva e' un eccesso di domanda che il book non ha
+#    saputo assorbire in mezz'ora; chi si mette dalla parte dell'ordine
+#    residuo viene pagato dalla coda dell'esecuzione.
+#
+#  🎯 PERCHE' RIEMPIE IL BUCO CHE IL MANDATO DICHIARA
+#    La direzione NON e' un input: la decide la barra d'apertura stessa.
+#    Quindi il motore produce NATIVAMENTE il DAX SHORT e il NASDAQ LONG,
+#    i due lati che quattro cacce di fila (29/08, 06/09 x2, 08/09) hanno
+#    cercato fuori senza trovarli. Il filtro (l'impulso >= K x ATR) NON
+#    e' un cerotto: SENZA di esso non c'e' nessun segnale. E' la
+#    condizione B di ROBUSTEZZA.md ("il filtro E' il motore": 0 successi
+#    su 5 quando e' aggiunto dopo, 30 celle su 30 quando e' costitutivo).
+#
+#  E PERCHE' NON E' UN MOTORE CHE ABBIAMO GIA' -- differenze verificabili:
+#    (a) NON e' l'ORB (famiglia chiusa il 26.07.26, ~210 celle a tick,
+#        R45 0/48, R12 48/48 negative, R97 0/4): li' il grilletto e' la
+#        ROTTURA DI UN LIVELLO (estremi del range d'apertura). Qui non
+#        c'e' nessun livello e nessuna rottura: si valuta la CHIUSURA di
+#        una barra e si entra all'apertura della successiva.
+#    (b) NON e' A4 "Nasdaq apertura solo long" (0% combo positive, best
+#        PF 0,91): quello e' un breakout a lato fissato. Qui il lato e'
+#        deciso dal dato e i due rami sono simmetrici per costruzione.
+#    (c) NON e' ABTG_Live5m (rottura della candela PRE-apertura): li' il
+#        riferimento e' la barra PRIMA della campanella, qui e' la prima
+#        barra DOPO, ed e' richiesta una condizione di ampiezza.
+#    (d) NON e' ABTG_OpeningReversalB (fade del drive fallito a 3 stadi,
+#        stesso settore orario ma segno OPPOSTO). ⚠️ E' il suo
+#        CONTRARIO logico: quello entra CONTRO il drive, questo A FAVORE.
+#        Sono complementari, non alternativi -- ma vedi il cancello C4.
+#
+# =====================================================================
+#  2. MECCANICA (cosa deve fare il .mq5, in tre righe)
+# ---------------------------------------------------------------------
+#  INGRESSO : alla CHIUSURA della barra che comincia a InpOpenHour:
+#             InpOpenMinute (ORA SERVER BCM = ora italiana - 1), se
+#               range(barra) >= InpImpulseATRMult * ATR(InpATRPeriod)
+#               e chiusura sopra il punto medio e sopra l'apertura -> BUY
+#               e chiusura sotto il punto medio e sotto l'apertura -> SELL
+#             Ordine a mercato all'APERTURA della barra successiva.
+#             MAI decidere sulla barra in formazione (§4 repaint).
+#  STOP     : InpSLMode=CANDELA -> minimo (buy) / massimo (sell) della
+#             barra d'impulso, cioe' STRUTTURALE.
+#             InpSLMode=ATR     -> +/- InpSLAtrMult * ATR.
+#             In entrambi i casi SL VERO mandato al broker dentro
+#             l'ordine, mai virtuale, mai solo nel codice.
+#             Pavimento InpMinStopPts (lezione R109) e rispetto di
+#             SYMBOL_TRADE_STOPS_LEVEL.
+#  USCITA   : TP a InpRR volte il rischio. Breakeven a InpBEatR (mettere
+#             il BE come MODIFICA dell'ordine, non come chiusura).
+#             Chiusura forzata a InpFlatHour (ora server): ZERO overnight.
+#  GESTIONE : rischio in PERCENTUALE dell'equity (InpRiskPercent), MAI
+#             lotto fisso; UNA posizione per volta per magic; UN solo
+#             tentativo per seduta anche in caso di rifiuto del broker.
+#
+#  🔧 COSA TENGO DEL MOTORE ESTERNO / COSA RIFACCIO (regola F, 16/08)
+#    TENGO   : il grilletto (barra d'apertura impulsiva), il gate di
+#              ampiezza costitutivo, lo stop strutturale sulla barra
+#              stessa, il sizing risk_amount/stop_distance (l'autore
+#              lo scrive gia' bene), il breakeven a R.
+#    RIFACCIO: orari in ORA SERVER (l'originale usa Europe/London);
+#              parziale 1R + runner (la nostra gestione DAX/Dow);
+#              gate di spread in % dello stop (R55); pavimento di stop
+#              (R109); flat di fine seduta; magic; OnTester; sfrondatura
+#              degli input entro il tetto di ~15.
+#
+# =====================================================================
+#  3. CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri)
+# ---------------------------------------------------------------------
+#  C0 -- PASSO 0, CONTEGGIO. Prima di qualunque griglia si CONTANO i
+#        segnali (una passata, InpImpulseATRMult al valore centrale).
+#        Pavimento firmato il 07/09: 1,00 op/giorno PER FAMIGLIA.
+#        La famiglia qui e' {D30EUR, U30USD, NASUSD} x {long, short}.
+#        -> se la somma dei tre simboli e' < 1,00 op/giorno, il motore
+#           NON entra in campo. Si dichiara il numero, non si tratta.
+#        -> se un singolo simbolo e' sotto ma la famiglia arriva, la
+#           sedia resta candidata (la frequenza per sedia non e' piu'
+#           un criterio di scarto dal 07/09).
+#
+#  C1 -- CANCELLO DI COSTO, e si calcola PRIMA. Frontiera di casa:
+#        pavimento DURO stop >= 13,3 x spread, DI LAVORO stop >= 40 x
+#        spread. Su D30EUR/NASUSD/U30USD lo stop naturale misurato e' 20
+#        punti a M5 e 17,4 a M15: SOTTO la soglia. M30 e' il primo TF la
+#        cui volatilita' entra nella banda utile -- ed e' per questo che
+#        @PERIODO qui e' M30 e non M5.
+#        -> se lo stop mediano misurato al PASSO 0 non arriva a 40 x
+#           spread, si sale a H1 PRIMA di girare la griglia, non dopo.
+#
+#  C2 -- DUE LATI, SEMPRE (regola di casa 25/08). Long e short si
+#        misurano SEPARATAMENTE e si riportano SEPARATAMENTE. Un lato
+#        verde non promuove l'altro. Un lato rosso non boccia l'altro
+#        (lezione PTE: GBPUSD ok, USDJPY no).
+#
+#  C3 -- CAMPIONE (emendamento della finestra, 16/08). L'unita' e'
+#        l'OPERAZIONE: IS >= 150 e OOS >= 150.
+#        🔴 Se il conteggio del PASSO 0 non permette 150+150 sulla
+#        finestra a tick (2024.09.26 -> oggi, ~490 sedute), NON si
+#        spezza: si gira la finestra INTERA e si applica la valvola R59
+#        -- il MERITO resta sospeso, il RISCHIO si giudica lo stesso
+#        (un drawdown e' un fatto accaduto, a qualunque n).
+#        Il REGIME contenuto va DICHIARATO: 2024.09-2026.09 e' un solo
+#        regime (toro sugli indici USA). Screening di regime SOLO su
+#        NASUSD_EXT OHLC (2020/2022), e SOLO come screening.
+#
+#  C4 -- SCORRELAZIONE, CANCELLO DURO, da misurare PRIMA del verdetto.
+#        Questo motore entra alla campanella, dove gia' operano:
+#          770101 ABTG_DAX_Apertura_EU  (D30EUR, SOLO LONG)
+#          770202 ABTG_Dow_Apertura_US  (U30USD, SOLO LONG)
+#          770611 ABTG_ORB_Ottimizzato  (U30USD, SOLO LONG)
+#        -> si confrontano i GIORNI-SEGNALE del ramo LONG con quelli
+#           delle sedie vive. Se coincidono, il ramo long NON diversifica
+#           e va SCARTATO (raddoppia il rischio sullo stesso evento:
+#           malattia del doppione Apertura_Marco, ritirato il 06/08).
+#        -> il ramo SHORT non ha nessuna sedia viva con cui collidere
+#           sulle aperture: e' li' che sta il valore atteso di questo
+#           round, e va detto prima per non farsi ingannare dopo.
+#
+#  C5 -- IL GATE DEVE MORDERE. Alzando InpImpulseATRMult i trade devono
+#        calare e la qualita' salire IN MODO ORDINATO (monotonia).
+#        Se il PF e' PIATTO rispetto alla soglia, il gate e' decorativo
+#        -> SCARTO, e non si cerca la cella verde.
+#
+#  C6 -- CONTROLLO A INGRESSI CASUALI (lezione di metodo del 03/09,
+#        16 celle e 32.339 segnali, delta medio -0,70 punti). Il tasso
+#        di vittoria da solo non dice niente. Serve il tasso di un
+#        ingresso A CASO alla stessa ora, con la stessa geometria di
+#        stop/target, sugli stessi giorni. Se il delta e' <= 0 -> SCARTO.
+#
+#  C7 -- SELEZIONE DELLA CELLA: CENTRO DELL'ALTOPIANO, MAI IL PICCO.
+#        12 Spearman IS->OOS negative su 13. La regola di selezione va
+#        scritta accanto al numero, altrimenti il numero non vuol dire
+#        niente.
+#
+#  C8 -- VERDETTO SOLO A TICK REALI. R57: cambiando SOLO il modello, il
+#        segno si e' ribaltato. OHLC = screening, mai verdetto.
+#
+#  C9 -- CANCELLO PROP. Oltre al DD totale si misura LA PEGGIOR
+#        GIORNATA (muro giornaliero -5% su 100k; la nostra peggiore
+#        misurata, R51, e' -2,06%). Un trade al giorno per simbolo
+#        rende il rischio giornaliero strutturalmente basso, MA tre
+#        simboli che aprono lo stesso giorno nella stessa direzione
+#        sono UN rischio, non tre: si misura la sovrapposizione, non si
+#        assume. (Il tetto per cluster e' FIRMATO il 07/09 ma NON ANCORA
+#        ATTIVO nel Guardian: e' un'intenzione, non una protezione.)
+#
+# =====================================================================
+#  4. FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 e' MISURATO, non ipotizzato:
+#    risultati_archivio\misura_tick\REFERTO_MISURA_TICK_D30EUR.txt
+#      "I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)"
+#      "MURO DELLE BARRE M1, colonna PrimaDataServer: 2024.09.26"
+#    idem NASUSD (166509474 tick, referto 30/08) e U30USD.
+#  🔴 Per XAUUSD la profondita' a tick NON e' mai stata misurata
+#     (in misura_tick\ ci sono SOLO i tre indici): il ramo ORO di questo
+#     motore NON ha una @DAQUANDO e NON si lancia finche' la sonda
+#     (scarica_storico.ps1) non ha girato. Non si inventa una data.
+#
+# =====================================================================
+#  5. LA GRIGLIA -- E' UNO SCREENING, NON UN VERDETTO
+# ---------------------------------------------------------------------
+#  Due manopole libere, tutto il resto pinnato. 5 x 4 = 20 celle per
+#  lato per simbolo. Sweep stretto di proposito: la prima griglia serve
+#  a vedere se esiste un ALTOPIANO, non a trovare il massimo.
+#
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+#
+# --- il grilletto e l'uscita: le uniche due manopole libere ---
+InpImpulseATRMult=1.5||1.2||0.2||2.0||Y
+InpRR=3.0||1.5||0.5||3.0||Y
+#
+# --- il lato: si gira DUE VOLTE, una per ramo (regola 25/08) ---
+#     corsa A (long) : InpAllowLong=1 / InpAllowShort=0
+#     corsa B (short): InpAllowLong=0 / InpAllowShort=1
+InpAllowLong=1||1||1||1||N
+InpAllowShort=0||0||1||1||N
+#
+# --- l'orologio: ORA SERVER BCM (italiana - 1). NON e' una manopola. ---
+#     D30EUR 08:00 server = 09:00 IT   |   NASUSD/U30USD 14:30 server
+InpOpenHour=8||8||1||8||N
+InpOpenMinute=0||0||1||0||N
+InpFlatHour=21||21||1||21||N
+#
+# --- rischio e cancelli: pinnati, mai spazzolati ---
+InpRiskPercent=0.65||0.65||0.1||0.65||N
+InpATRPeriod=14||14||1||14||N
+InpSLMode=0||0||1||0||N
+InpSLAtrMult=0.5||0.5||0.1||0.5||N
+InpBEatR=2.0||2.0||0.5||2.0||N
+InpMinStopPts=25||25||1||25||N
+InpMaxSpreadPctOfStop=2.5||2.5||0.5||2.5||N
+#
+# =====================================================================
+#  6. LA DOMANDA A CUI QUESTO ROUND DEVE RISPONDERE
+# ---------------------------------------------------------------------
+#  "Sul NOSTRO DAX e sul NOSTRO Nasdaq, una candela d'apertura anomala
+#   (range >= K x ATR) porta informazione sulla DIREZIONE del resto
+#   della seduta -- e la porta ANCHE DAL LATO SHORT, dove non abbiamo
+#   nessuna sedia -- oppure il suo vantaggio vive dentro lo spread come
+#   e' gia' successo al lead-lag BOND->ORO il 06/09?"
+#
+#  E' una domanda in due tempi, e il primo puo' cancellare il secondo:
+#    PASSO 0 : quanti segnali, quanto e' grande lo stop mediano,
+#              quanto spread paga -> C0 e C1.
+#    PASSO 1 : la griglia sopra, DUE corse (una per lato), con il
+#              controllo a ingressi casuali di C6 accanto.
+# =====================================================================

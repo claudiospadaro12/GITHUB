@@ -1,0 +1,234 @@
+# =====================================================================
+#  GAPCASH_RICONQUISTA -- PASSO 0: SONDA DI CONTEGGIO, SEGNO E COSTO
+#  Il RAMO CHE MANCA al gap della sessione cash: non il rimbalzo,
+#  non il riempimento -- la RICONQUISTA FALLITA.
+#  D30EUR (DAX) e U30USD (Dow), DUE LATI, M30.
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA (fa fede, qui non si duplica):
+#    report\CACCIA_APERTURE_ORO_2026-09-08.md
+#
+#  ORIGINE (regola di casa: si cita sempre, e si dice cosa e' stato letto)
+#    MOTORE      : "IU Gap Fill Strategy" -- TradingView, @Shivam_Mandrai,
+#                  creato 2025-03-10, 77 righe Pine v6, 3 input.
+#                  https://www.tradingview.com/script/9c46763fe5aa4cd9a048b3a1910944a6/
+#                  [VERIFICATO: sorgente letto riga per riga, 08/09/2026;
+#                   copia gia' in biblioteca dal 03/09:
+#                   sorgenti\IuGapFillStrategy_ShivamMandrai-MPL2_tvT2ByrMw0_2026-09-03.pine]
+#    LICENZA     : 🟢 MPL 2.0 (dichiarata in testa al sorgente, (c)
+#                  Shivam_Mandrai). Permissiva: il derivato si puo'
+#                  scrivere, con l'avviso di licenza e l'attribuzione
+#                  in testa al .mq5.
+#
+#  📕 PERCHE' QUESTO NON E' UN RIPESCAGGIO MASCHERATO -- la lista dei caduti
+#    Il MECCANISMO e' gia' passato dal setaccio UNA volta, il 03/09
+#    (CACCIA_FREQUENZA5_IMPLEMENTAZIONI, riga S18), e fu scartato con
+#    QUESTA motivazione, testuale:
+#      "Stesso tetto strutturale: 1 gap al giorno, e in piu' filtrato a
+#       pec_gap = 0.2% -> sui nostri indici restano poche sedute l'anno."
+#    Cioe' fu scartato SOLO PER FREQUENZA, contro il pavimento di allora
+#    (2 segnali/giorno PER LATO, criterio C2 della caccia frequenza).
+#    🔓 Il 07/09/2026 Claudio ha FIRMATO che il pavimento e' 1,00
+#    op/giorno PER FAMIGLIA, non per sedia, e ha scritto nero su bianco:
+#      "le esclusioni passate motivate SOLO dalla frequenza vanno rilette
+#       -- tornano in coda all'imbuto, mai in campo in automatico."
+#    Questo file E' quella rilettura. Non e' una griglia nuova su un
+#    motore morto (regola della seconda caccia, 19/08): il motore non e'
+#    mai stato dichiarato senza edge -- non e' mai stato MISURATO.
+#    E la stessa riga S18 chiudeva con: "un pezzo da rubare, e lo scrivo
+#    perche' e' gratis: l'ingresso NON e' all'apertura ma alla
+#    riconquista confermata".
+#
+# =====================================================================
+#  0. LA SOLA COSA DA SAPERE PRIMA DI LANCIARE
+# ---------------------------------------------------------------------
+#  LA SONDA NON ESISTE ANCORA. E' un CONTATORE: nessun ordine, nessun
+#  lotto, nessun magic, nessuna sedia. Precedenti di casa:
+#  ABTG_SondaGapCash (spec in GAPCASH_NAS_PASSO0.txt), ABTG_SondaRelativo,
+#  ABTG_SondaOrologio, ABTG_SondaLondonFx.
+#  NOME PREVISTO: mql5\Experts\ABTG_SondaGapRiconquista.mq5
+#  I nomi degli input qui sotto sono VINCOLANTI.
+#
+# =====================================================================
+#  1. IPOTESI, in italiano
+# ---------------------------------------------------------------------
+#  Quando la seduta cash apre con un GAP e il prezzo, nel corso della
+#  mattina, torna indietro fino a RIATTRAVERSARE la chiusura cash del
+#  giorno prima ma NON riesce a restarci -- chiude di nuovo dalla parte
+#  del gap -- allora il tentativo di riempimento e' FALLITO e la seduta
+#  riparte nella direzione del gap.
+#
+#  PERCHE' DOVREBBE FUNZIONARE, in una riga:
+#    chi ha venduto il riempimento del gap si ritrova in perdita nel
+#    momento esatto in cui il livello viene riconquistato, e la sua
+#    uscita forzata e' il carburante della seconda gamba.
+#
+#  🎯 PERCHE' RIEMPIE IL BUCO DEL MANDATO
+#    Il ramo GAP-GIU' -> riconquista fallita -> SELL genera il
+#    DAX SHORT e il DOW SHORT all'apertura, che nessuna sedia viva ha
+#    (R52_CENSIMENTO_LATI: 770101 SOLO LONG, 770202 SOLO LONG, 770611
+#    SOLO LONG). Il lato NON e' un input: lo decide il segno del gap.
+#
+#  E PERCHE' NON E' UNA MISURA CHE ABBIAMO GIA' -- tre differenze:
+#    (a) NON e' P0-2 di GAPCASH_NAS_PASSO0 (rimbalzo dei primi 15
+#        minuti dopo un gap in giu'): li' si entra ALL'APERTURA, in
+#        direzione CONTRARIA al gap, e si esce a tempo. Qui si entra
+#        DOPO, alla riconquista fallita, IN DIREZIONE del gap.
+#    (b) NON e' P0-5 dello stesso file (lo stesso rimbalzo sul lato
+#        opposto, gap >= +0,50%): quella misura e' un FADE, questa e'
+#        una CONTINUAZIONE. Le due previsioni sono opposte: se P0-5
+#        esce viva, questa deve uscire morta, e viceversa. Sono un
+#        controllo l'una dell'altra ed e' un bene, non un doppione.
+#    (c) NON e' ABTG_GapFill (772231-772235): quello entra CONTRO il
+#        gap puntando al riempimento COMPLETO, con InpFillPct, sul gap
+#        del WEEKEND su H1. Qui il gap e' quello della sessione CASH
+#        infrasettimanale e la condizione e' che il riempimento
+#        FALLISCA.
+#    (d) NON e' il pattern OOPS (articolo MQL5 21741, messo in coda
+#        oggi dal dossier gemello): li' il riferimento e' l'ESTREMO
+#        del periodo precedente e si entra CONTRO l'apertura. Qui il
+#        riferimento e' la CHIUSURA cash e si entra A FAVORE del gap.
+#        E soprattutto: quella pagina VIETA la copia, questa e' MPL 2.0.
+#
+# =====================================================================
+#  2. COSA DEVE CONTARE LA SONDA (definizioni operative, ORA SERVER)
+# ---------------------------------------------------------------------
+#  chiusura_cash_ieri = close della barra M30 che finisce a InpCashEnd
+#                       dell'ultima seduta buona precedente
+#  apertura_cash_oggi = open della barra M30 che comincia a InpCashStart
+#  gap%               = (apertura_cash_oggi / chiusura_cash_ieri - 1) x 100
+#
+#  GIORNATA-EVENTO se |gap%| >= InpMinGapPct.
+#  Su una giornata-evento, dentro la finestra InpCashStart ->
+#  InpCashStart + InpWindowBars barre, si cerca la RICONQUISTA FALLITA:
+#    gap SU  : una barra con low  <  chiusura_cash_ieri
+#              e close > chiusura_cash_ieri            -> segnale LONG
+#    gap GIU': una barra con high >  chiusura_cash_ieri
+#              e close < chiusura_cash_ieri            -> segnale SHORT
+#  Il segnale si valuta SOLO su barra CHIUSA (mai la barra in
+#  formazione: §4 repaint / look-ahead).
+#  Un solo segnale per giornata, il primo.
+#
+#  E per ogni segnale la sonda registra:
+#    - rendimento a +1, +2, +4 barre M30 dalla chiusura del segnale
+#    - MAE e MFE nella stessa finestra
+#    - lo SPREAD misurato tick per tick nel minuto del segnale
+#    - se la giornata e' un lunedi' (per separare il gap del weekend)
+#
+# =====================================================================
+#  3. CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  P0-1  FREQUENZA (conteggio, non merito)
+#        segnali/giorno per simbolo e per lato, sulla finestra a tick.
+#        Pavimento firmato 07/09: 1,00 op/giorno PER FAMIGLIA
+#        {D30EUR, U30USD, NASUSD} x {long, short}.
+#        CANCELLO: se la somma dei tre simboli sui due lati e' < 1,00
+#        op/giorno -> il motore non e' portata e NON entra in campo.
+#        Si scrive il numero e si chiude, senza trattare.
+#        ⚠️ PREVISIONE SCRITTA PRIMA, e non e' incoraggiante: alla
+#        soglia 0,2% dell'autore restano poche sedute l'anno (S18,
+#        03/09). Il conteggio va fatto ANCHE a soglia 0,10% e 0,05%,
+#        perche' e' la soglia -- non il meccanismo -- che decide la
+#        portata, e su un CFD che quota 23 ore il "gap cash" e' un
+#        movimento di sessione chiusa, non un salto di prezzo.
+#
+#  P0-2  SEGNO E SEPARAZIONE (il criterio che decide il merito)
+#        media del rendimento a +2 barre sulle giornate con segnale,
+#        contro la media sulle giornate-evento SENZA segnale (stesso
+#        gap, nessuna riconquista fallita) della stessa finestra.
+#        PASSA se: il segno e' quello atteso E la separazione e' >= 3x.
+#        < 3x -> SCARTO. Se il gate non separa, non c'e' motore.
+#
+#  P0-3  CONTROLLO A INGRESSI CASUALI (obbligatorio dal 03/09)
+#        stesso numero di ingressi, stesse ore, stessa geometria, presi
+#        a CASO nelle stesse giornate. Se il delta e' <= 0 -> SCARTO.
+#        Su 16 celle e 32.339 segnali il delta medio di casa e' -0,70
+#        punti: un win rate senza il suo caso non dice niente.
+#
+#  P0-4  COSTO
+#        take mediano (in punti indice) contro 3 x spread mediano DEL
+#        MINUTO DEL SEGNALE (non della sessione).
+#          >= 3x -> PASSA | 2x-3x -> SOSPESO | < 2x -> SCARTO
+#        E si dichiara anche il rapporto stop/spread contro la
+#        frontiera di casa (duro 13,3x, di lavoro 40x).
+#
+#  P0-5  GEOMETRIA (nessun cancello: si LEGGE, e fissa lo stop dopo)
+#        percentili di |MAE| e MFE. Lo stop del round successivo lo
+#        fissa il p75 di |MAE|, NON l'ottimizzatore.
+#
+#  P0-6  DUE LATI (regola 25/08): long e short si contano e si
+#        riportano separatamente, su tutti e tre i simboli. Un lato
+#        non promuove ne' boccia l'altro.
+#
+#  P0-7  IGIENE
+#        - solo sedute piene (>= 55 barre M1 nella prima ora), stessa
+#          definizione di GIORNO SOSPETTO del 26/08
+#        - si dichiara la quota di segnali che cade di LUNEDI': se
+#          > 40% e' il gap del weekend travestito, gia' misurato in
+#          R61/R62 -> verdetto SOSPESO
+#        - si dichiara che il regime della finestra e' UNO SOLO
+#          (2024.09-2026.09, toro sugli indici USA)
+#
+#  P0-8  COLLISIONE (obbligo di referto, non cancello)
+#        Il referto deve elencare cosa gira gia' su quei simboli in
+#        quella fascia: 770101 (DAX Apertura long M5), 770202 (Dow
+#        Apertura long M5), 770611 (ORB-EMA200 long M5), 772234
+#        (GapFill Dow H1), 770250 (GATED SHORT Nasdaq M15).
+#        ⚠️ Su un gap in giu' il ramo SHORT di questa sonda e il
+#        rimbalzo long di GAPCASH_NAS sarebbero OPPOSTI sullo stesso
+#        simbolo nello stesso minuto: va sciolto PRIMA di qualunque
+#        deploy, non dopo.
+#
+# =====================================================================
+#  4. COSA QUESTA CORSA NON DICE -- scritto prima, non dopo
+# ---------------------------------------------------------------------
+#    - NON dice se il motore guadagna: non apre ordini, non c'e' PF,
+#      non c'e' equity, non c'e' drawdown.
+#    - NON promuove niente e non tocca nessuna sedia, nessun preset,
+#      nessun magic.
+#    - Una frequenza alta NON e' un edge: e' una frequenza.
+#
+# =====================================================================
+#  5. LE DIRETTIVE
+# ---------------------------------------------------------------------
+#  @DAQUANDO e' MISURATO, non ipotizzato:
+#    risultati_archivio\misura_tick\REFERTO_MISURA_TICK_D30EUR.txt
+#    "I TICK REALI DI D30EUR PARTONO DAL 2024.09.26 (35408137 tick)"
+#  Stessa data misurata per NASUSD (166509474 tick) e U30USD.
+#
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+#
+#  la soglia del gap: e' la manopola che decide la PORTATA, quindi qui
+#  si spazzola -- ma e' un CONTEGGIO, non una scelta di cella
+InpMinGapPct=0.20||0.05||0.05||0.30||Y
+#
+#  orari della sessione cash, ORA SERVER BCM (italiana - 1)
+#    D30EUR : 08:00 -> 21:00 server   (09:00 -> 22:00 IT)
+#    U30USD / NASUSD : 14:30 -> 21:00 server
+InpCashStart=8||8||1||8||N
+InpCashEnd=21||21||1||21||N
+#
+#  quante barre M30 dopo l'apertura si accetta il segnale
+InpWindowBars=8||8||1||8||N
+#
+#  0 = misura ENTRAMBI i lati (P0-6). Il lato non si sceglie qui.
+InpLato=0||0||0||0||N
+#
+InpMisuraSpreadSegnale=true||true||0||true||N
+InpControlloCasuale=true||true||0||true||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+#
+# =====================================================================
+#  6. SE PASSA -- cosa succede dopo, per non improvvisarlo
+# ---------------------------------------------------------------------
+#  1. Si scrive ABTG_GapRiconquista.mq5 con: rischio in % (0,65%), UN
+#     solo trade al giorno per simbolo, stop REALE al broker
+#     dimensionato sul p75 di |MAE| letto in P0-5, flat di fine
+#     seduta, mai overnight, OnTester, magic dedicato.
+#  2. Round di merito a tick, split e cancelli congelati PRIMA, con
+#     il MERITO dichiarato SOSPESO in partenza se n < 150+150 (R59:
+#     il campione sottile sospende il MERITO, mai il RISCHIO).
+#  3. Cella promossa: CENTRO dell'altopiano, MAI il picco.
+# =====================================================================
