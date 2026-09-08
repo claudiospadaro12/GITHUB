@@ -386,3 +386,47 @@ Stessa forma, cambiano tre argomenti (e **ora puo' girare sul VPS**, cosa che
 Lo script non ammazza piu' quello che capita: **o gli dici quale terminale
 chiudere, o ti stampa in faccia che sta per chiuderli tutti** — e quando glielo
 dici, **stampa PID e percorso di chi ha lasciato vivo**, conto reale compreso.
+
+
+---
+
+# 🛡️ ESITO DEL VERIFICATORE — **FAIL sulla riga, PASS sulla sicurezza**
+
+La riga qui sopra **non va usata**: sostituita da quella approvata in
+`backtest_pipeline/righe/RIGA_STORICO_MT5BACKTEST_APPROVATA.txt`.
+
+## ✅ La parte che conta è PROVATA, non creduta
+- **Chiusura chirurgica dimostrata sull'AST**: i due `Stop-Process` che
+  ammazzano tutto (righe **447** e **659**) stanno **entrambi** nel ramo `else`
+  di `if ($TerminaleBacktest)`; i chirurgici (429, 649) nel ramo vero.
+  `$TerminaleBacktest` non è mai riassegnato, `$Terminal` è assegnato una volta
+  sola. 👉 **Passando il parametro, nessun percorso di esecuzione arriva alla
+  strage.**
+- **Confronto percorsi non ingannabile**, 8 casi su 8 eseguiti sulle funzioni
+  vere estratte con l'AST: `C:\MT5_Backtest_OLD`, `C:\MT5_Backtest2` e
+  `C:\MT5_Backtest\sub\` **non** sono bersaglio. `C:\BCM_Reale` **mai**.
+
+## 🔧 I cinque difetti corretti nella riga (nessuno tocca la sicurezza)
+| # | difetto | correzione |
+|---|---|---|
+| 1 | **pin mancante** (`?cb=` non basta: il commit era di 30 minuti prima, dentro la finestra di cache raw) | URL all'hash `ec4f6c4…`, verificato: **HTTP 200, contenuto identico a `git show`** |
+| 2 | **raccolta per NOME, non per data** — recidiva classe 155: su 7 uscite anticipate lo zip parte **pieno del giro precedente** | pulizia prima + filtro `LastWriteTime -ge $t0` + riga rossa se zero file nuovi |
+| 3 | elenco finale senza data | aggiunto `LastWriteTime` |
+| 4 | **"devono essere ancora tre" affidato all'occhio** — vietato da CLAUDE.md 06/09 | confronto **PID prima/dopo**, con allarme rosso se sparisce un terminale non-backtest |
+| 5 | due definizioni della cartella Desktop → raccolta vuota **in silenzio** | una sola variabile `$dsk` |
+
+## ✅ E il difetto 6 (fuori dalla riga) l'ho chiuso io
+`scarica_storico.ps1:246` — il **ripiego automatico** cercava solo
+`*BCM Markets*` e poteva scegliere il **-V3 (100k)**, senza controllo sul
+valore scelto: la **37-quater ancora aperta**. Ora **muore** dicendo quale ha
+scelto e quale usare.
+
+⚠️ Quel commit è **successivo** al pin `ec4f6c4`: la riga approvata scarica la
+versione appuntata, che non ha la guardia — **e non le serve**, perché passa
+`-TerminaleBacktest` e al ripiego non arriva mai. **È esattamente a cosa serve
+un pin.**
+
+## 📋 NON COPERTO, e va detto
+Qui non c'è Windows, né PowerShell 5.1, né MT5: parser e banchi girati su
+**pwsh 7.4.6 su Linux**. Che MT5 scarichi davvero lo storico **lo dirà la
+corsa**.

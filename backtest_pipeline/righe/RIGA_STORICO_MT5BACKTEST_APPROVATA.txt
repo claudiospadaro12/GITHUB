@@ -1,0 +1,20 @@
+$sha='ec4f6c4c1f5dda1d0c591ddddab3ec28a7a45d4b'; $w="$env:USERPROFILE\abtg_storico"; $p="$w\scarica_storico.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $rac="$dsk\storico_bcm"; $d="$dsk\STORICO_MT5BACKTEST";
+New-Item -ItemType Directory -Force -Path $w | Out-Null;
+Remove-Item $p -ErrorAction SilentlyContinue; Remove-Item $rac -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item $d -Recurse -Force -ErrorAction SilentlyContinue; Remove-Item "$w\storico_console.txt" -ErrorAction SilentlyContinue;
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$sha/backtest_pipeline/scarica_storico.ps1" -OutFile $p -ErrorAction Stop;
+if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' };
+if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCARICA_STORICO_v3_TERMINALE_BACKTEST' -Quiet)){ throw 'SCRIPT VECCHIO: manca la v3, quella riga chiuderebbe TUTTI i terminali' };
+if(Test-Path "$env:USERPROFILE\mql5\Scripts\ABTG_HistoryDownloader.mq5"){ Write-Host "ATTENZIONE: c e una copia LOCALE del .mq5 nel profilo: lo script usera QUELLA e non GitHub" -ForegroundColor Red };
+$prima=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,Path); Write-Host '--- TERMINALI PRIMA (attesi QUATTRO) ---'; $prima | Format-Table -AutoSize;
+$t0=Get-Date;
+& powershell -NoProfile -ExecutionPolicy Bypass -File $p -TerminaleBacktest "C:\MT5_Backtest" -Simboli 'D30EUR,U30USD' -Da '2024.09.26' -Timeframes 'M1,M5' -TimeoutMin 240 -Auto -ChiudiMT5 2>&1 | Tee-Object -FilePath "$w\storico_console.txt";
+$rc=$LASTEXITCODE; $dopo=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,Path); Write-Host '--- TERMINALI DOPO (attesi TRE) ---'; $dopo | Format-Table -AutoSize;
+$persi=@($prima | Where-Object { ($dopo.Id -notcontains $_.Id) -and ($_.Path -notlike 'C:\MT5_Backtest\*') });
+if($persi.Count -gt 0){ Write-Host '!!! ALLARME: sono spariti terminali NON di backtest (forward / CONTO REALE) !!!' -ForegroundColor Red; $persi | Format-Table -AutoSize } else { Write-Host 'OK: tutti i terminali NON di backtest sono ancora vivi, stessi PID di prima' -ForegroundColor Green };
+New-Item -ItemType Directory -Force -Path $d | Out-Null;
+$nuovi=@(Get-ChildItem $rac -File -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 });
+if($nuovi.Count -gt 0){ $nuovi | Copy-Item -Destination $d -Force } else { Write-Host '!!! NESSUN FILE NUOVO: la corsa NON ha prodotto referto, lo zip NON e una misura !!!' -ForegroundColor Red };
+Copy-Item "$w\storico_console.txt" -Destination $d -Force -ErrorAction SilentlyContinue;
+Compress-Archive -Path "$d\*" -DestinationPath "$dsk\STORICO_MT5BACKTEST.zip" -Force;
+Write-Host ("codice di uscita, INFORMATIVO (classe 154, non decide): " + $rc);
+Get-ChildItem $d | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
