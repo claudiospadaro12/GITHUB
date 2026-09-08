@@ -371,3 +371,36 @@ Terminale vuoto nel profilo attivo. **Somma rischio: 0,00%.**
 *Referto prodotto in sola lettura da fonti gia' nel repo. Cap C1 3,25% = firma
 18/08 (`report/FIRME_2026-08-18.md`). Tetto per cluster 3,0% = firma 07/09
 (`report/FIRME_2026-09-07.md`), 🔴 firmato ma NON attivo.*
+
+---
+
+# 🔎 VERIFICA DI CLAUDE SUL REFERTO DELL'AGENTE — 08/09/2026
+
+Ho ricontrollato **a campione** le affermazioni più pesanti, perché un referto
+che nessuno verifica è un'opinione con le tabelle.
+
+## ✅ CONFERMATE, con la prova
+| affermazione | verifica |
+|---|---|
+| tre preset con lo **stesso magic 770101** a taglie diverse | ✅ `ABTG_DAX_Apertura_EU_LEGACY_2pct.set` = **2.0** · `conto_reale/…_770101_REALE.set` = **0,65** · `sedie_piccolo/recupero2/sedia_…_770101.set` = **1** |
+| `standalone/ABTG_DAX_Apertura_EU.mq5` ancora a `ABTG_DEF_RISK 2.0` | ✅ riga **33**. La copia principale è a **1.0** dal 02/09 (riga 90). **Il fix C4 ha toccato una copia sola.** |
+
+> ### 🙋 E un errore mio, agli atti
+> La mia prima verifica sui preset 770101 ne trovava **uno solo**: avevo
+> cercato in `mql5/Presets/` senza le **sottocartelle** (`conto_reale/`,
+> `sedie_piccolo/`, `sedie_piccolo/recupero2/`). L'agente aveva ragione, io
+> avevo guardato male. Verificare prima di correggere, sempre.
+
+## ⚠️ DA CORREGGERE nel referto dell'agente
+**"REALE ✅ sotto il cap — ma senza Guardian nel profilo attivo"** è vero come
+lettura dei `.chr`, ma **quasi certamente falso come stato reale**:
+- esiste `mql5/Presets/conto_reale/ABTG_Guardian_REALE.set` — il Guardian per
+  quel conto è previsto e configurato;
+- `CODA_02` dell'08/09 lo vede scrivere **464 righe**, ultima alle **23:56**,
+  con `eq=7500.00 dayLoss=0.00% totDD=0.00%`.
+
+👉 Un EA che scrive **sta girando**. La spiegazione economica è che il `.chr`
+del terminale reale sia una **foto vecchia** — la stessa domanda che `CODA_05`
+misura stanotte. **Fino ad allora: non si dice che il conto reale è senza
+Guardian.** Sarebbe un allarme costruito su una fonte che sappiamo di non
+saper ancora leggere.
