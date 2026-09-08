@@ -2,6 +2,10 @@
 #  ABTG_ImpulsoApertura -- SPEC/GRIGLIA (criteri congelati PRIMA dei numeri)
 #  "La candela d'apertura E' il segnale, ma solo se e' IMPULSIVA"
 # ---------------------------------------------------------------------
+#  EA: ABTG_ImpulsoApertura
+#     (riga letta da controlla_prova.py per trovare il sorgente da solo:
+#      aggiunta 08/09/2026 insieme al .mq5. NESSUN criterio toccato.)
+# ---------------------------------------------------------------------
 #  DOSSIER DI CACCIA (fa fede, qui non si duplica):
 #    report\CACCIA_APERTURE_ORO_2026-09-08.md
 #
@@ -35,6 +39,33 @@
 #  un'altra domanda (LEGGIMI.md, trappola "nome inesistente").
 #  L'EA deve avere OnTester (22 EA su 61 non ce l'avevano: il driver
 #  rifiuta di partire).
+#
+#  --- SCRITTO IL 08/09/2026, DOPO CHE IL .mq5 E' STATO SCRITTO ---
+#  (note MECCANICHE per far funzionare la riga di lancio: nessun
+#   criterio di promozione/bocciatura toccato, restano congelati)
+#   * IL .mq5 ORA ESISTE: mql5\Experts\ABTG_ImpulsoApertura.mq5, magic
+#     769800 (blocco 7698xx verificato LIBERO nel repo). Ha OnTester.
+#   * TUTTI E 14 i pin qui sotto esistono nell'EA con lo stesso nome
+#     (verificato con controlla_prova.py: zero "input SCONOSCIUTO").
+#   * UNITA' DI InpMinStopPts: e' in PUNTI INDICE (25 = 25 punti
+#     indice = 2500 punti MT5 su D30EUR/NASUSD/U30USD). La conversione
+#     e' l'input InpMT5PerPuntoIndice (default 100), pinnato al default
+#     dal driver. In PUNTI MT5 un pavimento di 25 sarebbe stato 0,25
+#     punti indice, cioe' inerte: non e' quello che R109 chiede.
+#   * INPUT IN PIU' RISPETTO A QUESTO ELENCO (restano al default, il
+#     driver li blinda): InpATRSuAperture=true (riferimento del gate:
+#     media dei range delle ultime InpATRPeriod BARRE D'APERTURA, non
+#     l'ATR di TF -- vedi report\EA_IMPULSO_APERTURA_2026-09-08.md,
+#     e' una DECISIONE DICHIARATA, non del sorgente esterno),
+#     InpFlatMinute=0, InpMT5PerPuntoIndice=100, InpMagic=769800,
+#     InpComment, InpVerbose, InpUsaGuardian=true.
+#   * ATTENZIONE, DUE ASSI Y: la griglia del par.5 spazzola
+#     InpImpulseATRMult E InpRR (5 x 4 = 20 celle, com'e' congelato).
+#     controlla_prova.py pretende UN SOLO asse Y e quindi segnala
+#     "2 assi Y": e' un attrito noto fra il pre-controllo e questa
+#     griglia, NON un errore dell'EA. Chi lancia decide: o
+#     walkforward_generico (che i due assi li regge) o due round da un
+#     asse ciascuno. La GRIGLIA NON E' STATA CAMBIATA.
 #
 # =====================================================================
 #  1. IPOTESI, in italiano
