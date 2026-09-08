@@ -243,6 +243,21 @@ if (-not $instDir) {
   $ViaTerminale = "RIPIEGO automatico su 'BCM Markets' sotto Program Files"
 }
 
+# --- 08/09/2026: la 37-quater era ancora aperta QUI.
+#  Il secondo ripiego qui sopra cerca solo "*BCM Markets*", quindi puo'
+#  scegliere il "-V3" (100k 50504263) -- e nessuno controllava il valore
+#  scelto. Un ripiego che punta il terminale sbagliato e non lo dice e'
+#  il difetto gia' pagato il 07/09. Adesso muore.
+#  Segnalato dal verificatore delle stringhe, difetto 6 del giro sulla
+#  riga dello storico.
+if (($instDir -like "*-V3*") -or ($instDir -like "*BCM_Reale*")) {
+  Write-Host ""
+  Write-Host "TERMINALE SCELTO VIETATO: '$instDir'" -ForegroundColor Red
+  Write-Host "    -V3 = 100k 50504263 . BCM_Reale = REALE 10105439." -ForegroundColor Red
+  Write-Host "    Usa -TerminaleBacktest ""C:\MT5_Backtest"" (demo 50504400)." -ForegroundColor Red
+  exit 1
+}
+
 $Terminal   = Join-Path $instDir "terminal64.exe"
 $MetaEditor = Join-Path $instDir "metaeditor64.exe"
 $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
