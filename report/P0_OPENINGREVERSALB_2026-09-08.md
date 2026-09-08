@@ -81,3 +81,39 @@ compilazione, quattro passate a tick reali, CSV, referto leggibile, zip sul
 Desktop. **Zero rilievi. Il conto reale mai sfiorato.**
 
 Stamattina questa macchina non esisteva.
+
+---
+
+# 🔬 PASSO 0-BIS **A** — `InpFailScoreMin` 3 → 2 → 1: **NON CAMBIA NIENTE**
+
+Girato sul VPS, 08/09 ore **18:47**. `rc=0`, zero rilievi, PID intatti.
+
+| Pass | `InpFailScoreMin` | Trades IS | Profit | PF | DD % |
+|---|---:|---:|---:|---:|---:|
+| 0 | **1** | **2** | 57,28 | 1,82619 | 0,9588 |
+| 1 | **2** | **2** | 57,28 | 1,82619 | 0,9588 |
+| 2 | **3** | **2** | 57,28 | 1,82619 | 0,9588 |
+| — | *(OOS, tutte)* | **0** | 0 | 0 | 0 |
+
+## ✅ E il primo controllo era: **il parametro è arrivato davvero all'EA?**
+Sì, verificato **nel CSV**, colonna per colonna: `InpFailScoreMin` vale **1, 2, 3**
+sulle tre righe. Le altre due soglie restano a 4 e 60, come previsto.
+
+> ### 🎯 Quindi non è "l'asse non è passato". **Il parametro è stato applicato e non ha spostato NIENTE** — nemmeno di un'operazione, nemmeno alla quinta cifra.
+
+## 📖 IL VERDETTO, contro il criterio congelato PRIMA
+> *"1. Il conteggio NON si muove (resta sotto 5 in IS) → questo cancello NON è
+> il collo di bottiglia. Si passa al file successivo."*
+
+**Criterio 1, applicato alla lettera:** `InpFailScoreMin` è **INERTE** in questo
+intervallo. In ogni situazione candidata la failure-evidence era già ≥3, oppure
+**uno degli altri due cancelli aveva già ucciso il candidato prima**.
+
+👉 Il collo di bottiglia è **altrove**: `InpSignalScoreMin` (file B) o
+`InpFollowThroughPct` (file C).
+
+## 💡 E c'è un pezzo di risposta gratis alla domanda della SPEC madre
+La SPEC chiedeva: *"se il PF è piatto rispetto alle soglie, lo scoring è
+decorativo → scarto"*. **Su questo asse il PF è piatto come un tavolo.** Non
+basta per il verdetto — gli altri due assi non sono ancora stati misurati — ma è
+**un terzo della risposta, già in cassa**, e va agli atti così.
