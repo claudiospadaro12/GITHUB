@@ -1,0 +1,98 @@
+=== SEDIE ATTACCATE (v2) -- profilo ATTIVO separato dai RESIDUI ===
+data lettura: 2026-09-08 03:30:06  (ora locale)
+cartelle dati: 6
+
+=== CARTELLA 04C7A32B575E40027B4FF8724D14D702
+    programma: C:\MT5_Backtest
+    profili: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    --- PROFILO ATTIVO: 0 sedie ---
+        (nessuna)
+
+=== CARTELLA 215D85D767A1C39E22D242C8114BF9F5
+    programma: C:\Program Files\BCM Markets MT5 Terminal
+    profili: 5   ATTIVO: 'ORO'   [CONFIG] config\common.ini -> ProfileLast=ORO
+    --- PROFILO ATTIVO: 40 sedie ---
+        ABTG_TradeExporter                     NZDCAD   H1    magic -         rischio -       [ORO\chart01.chr]
+        ABTG_PTE                               U30USD   H1    magic 771321    rischio 1.0     [ORO\chart02.chr]
+        ABTG_BreakingBand                      GBPUSD   H1    magic 772161    rischio 1.0     [ORO\chart03.chr]
+        ABTG_BreakingBand                      EURUSD   H1    magic 772162    rischio 1.0     [ORO\chart04.chr]
+        ABTG_BreakingBand                      AUDUSD   H1    magic 772163    rischio 1.0     [ORO\chart05.chr]
+        ABTG_GapFill                           GBPUSD   H1    magic 772231    rischio 1.0     [ORO\chart06.chr]
+        ABTG_GapFill                           EURUSD   H1    magic 772232    rischio 1.0     [ORO\chart07.chr]
+        ABTG_GapFill                           AUDUSD   H1    magic 772233    rischio 1.0     [ORO\chart08.chr]
+        ABTG_GapFill                           U30USD   H1    magic 772234    rischio 1.0     [ORO\chart09.chr]
+        ABTG_GapFill                           225JPY   H1    magic 772235    rischio 1.0     [ORO\chart10.chr]
+        ABTG_PunteLarry                        U30USD   H1    magic 772341    rischio 1.0     [ORO\chart11.chr]
+        ABTG_PunteLarry                        EURAUD   H1    magic 772342    rischio 0.5     [ORO\chart12.chr]
+        ABTG_PunteLarry                        XAUUSD   H1    magic 772343    rischio 0.3     [ORO\chart13.chr]
+        ABTG_PunteLarry                        GBPJPY   H1    magic 772344    rischio 1.0     [ORO\chart14.chr]
+        ABTG_PunteLarry                        GBPUSD   H1    magic 772345    rischio 1.0     [ORO\chart15.chr]
+        ABTG_PunteLarry                        EURCAD   H1    magic 772346    rischio 1.0     [ORO\chart16.chr]
+        ABTG_CostToCost                        EURJPY   H4    magic 772361    rischio 0.65    [ORO\chart17.chr]
+        ABTG_CostToCost                        GBPCAD   H4    magic 772362    rischio 0.25    [ORO\chart18.chr]
+        ABTG_EasyTrend                         CHFJPY   H1    magic 772421    rischio 0.3     [ORO\chart20.chr]
+        ABTG_EasyTrend                         GBPUSD   H1    magic 772422    rischio 0.5     [ORO\chart21.chr]
+        ABTG_GapContinuation                   225JPY   M1    magic -         rischio -       [ORO\chart23.chr]
+        ABTG_PTE                               GBPUSD   H1    magic 771332    rischio 0.5     [ORO\chart24.chr]
+        ABTG_PTE                               GBPUSD   H1    magic 771322    rischio 0.5     [ORO\chart26.chr]
+        ABTG_SuperWave                         U30USD   H4    magic 770531    rischio 1.0     [ORO\chart27.chr]
+        ABTG_MaxMinNotte                       XAUUSD   M15   magic 770402    rischio 0.5     [ORO\chart29.chr]
+        ABTG_DAX_Apertura_EU                   D30EUR   M5    magic 770101    rischio 1.0     [ORO\chart30.chr]
+        ABTG_Dow_Apertura_US                   U30USD   M5    magic 770202    rischio 1.0     [ORO\chart31.chr]
+        ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   M15   magic 770411    rischio 1.0     [ORO\chart32.chr]
+        ABTG_EMA200                            U30USD   H1    magic 771531    rischio 1.0     [ORO\chart33.chr]
+        ABTG_EMA200_Ottimizzato                XAUUSD   H4    magic 971501    rischio 0.25    [ORO\chart34.chr]
+        ABTG_SupertrendReversal                225JPY   H2    magic 770924    rischio 1.0     [ORO\chart35.chr]
+        ABTG_SupertrendReversal_Ottimizzato    XAUUSD   H4    magic 970901    rischio 1       [ORO\chart36.chr]
+        ABTG_SuperWave_DOW_H1_Ottimizzato      U30USD   H1    magic 770511    rischio 1.0     [ORO\chart37.chr]
+        ABTG_SupRev_DAX_H4_Ottimizzato         D30EUR   H4    magic 970912    rischio 1.0     [ORO\chart38.chr]
+        ABTG_SupRev_NAS_H1_Ottimizzato         NASUSD   H1    magic 970913    rischio 1.0     [ORO\chart39.chr]
+        ABTG_ORB_Ottimizzato                   U30USD   M5    magic 770611    rischio 1.0     [ORO\chart40.chr]
+        ABTG_Nasdaq_Apertura_US                NASUSD   M15   magic 770250    rischio 0.35    [ORO\chart41.chr]
+        ABTG_PostNews                          USDJPY   M5    magic 771203    rischio 1.30    [ORO\chart42.chr]
+        ABTG_PostNews                          EURJPY   M5    magic 771201    rischio 3.0     [ORO\chart43.chr]
+        ABTG_PostNews                          EURUSD   M5    magic 771202    rischio 3.0     [ORO\chart44.chr]
+
+=== CARTELLA 73B7A2420D6397DFF9014A20F1201F97
+    programma: C:\Program Files\Pepperstone MetaTrader 5
+    profili: 4   ATTIVO: 'Euro'   [CONFIG] config\common.ini -> ProfileLast=Euro
+    --- PROFILO ATTIVO: 0 sedie ---
+        (nessuna)
+
+=== CARTELLA 857385E4B0F2356AD99AA95CDF40FAE9
+    programma: C:\Program Files\Tickmill Europe MT5 Terminal
+    profili: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    --- PROFILO ATTIVO: 2 sedie ---
+        Gold_Ichimoku_TK_ATR_EA                XAUUSD   M5    magic 250604    rischio 0.5     [Default\chart01.chr]
+        BREAKOUT_EA_JPY_v3                     USDJPY   M15   magic -         rischio -       [Default\chart02.chr]
+
+=== CARTELLA BCA8AD18563BF5B64A433C2662D0A104
+    programma: C:\Program Files\BCM Markets MT5 Terminal -V3
+    profili: 5   ATTIVO: 'SQUADRA 100K'   [CONFIG] config\common.ini -> ProfileLast=SQUADRA 100K
+    --- PROFILO ATTIVO: 7 sedie ---
+        ABTG_DAX_Apertura_EU                   D30EUR   M5    magic 770101    rischio 0.65    [SQUADRA 100K\chart01.chr]
+        ABTG_Dow_Apertura_US                   U30USD   M5    magic 770202    rischio 0.65    [SQUADRA 100K\chart02.chr]
+        ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   M15   magic 770411    rischio 0.65    [SQUADRA 100K\chart03.chr]
+        ABTG_SupertrendReversal                225JPY   H2    magic 770901    rischio 0.65    [SQUADRA 100K\chart04.chr]
+        ABTG_TradeExporter                     EURUSD   H1    magic -         rischio -       [SQUADRA 100K\chart05.chr]
+        ABTG_ORB_Ottimizzato                   U30USD   M5    magic 770611    rischio 0.3     [SQUADRA 100K\chart06.chr]
+        ABTG_Guardian                          AUDNZD   H1    magic 779001    rischio -       [SQUADRA 100K\chart07.chr]
+    --- RESIDUI SU DISCO (altri profili, NON contati): 6 ---
+        ABTG_Guardian                          AUDCAD   H1    magic 779001    rischio -       [Default\chart01.chr]
+        ABTG_DAX_Apertura_EU                   D30EUR   M5    magic 770101    rischio 0.65    [Default\chart02.chr]
+        ABTG_Dow_Apertura_US                   U30USD   M5    magic 770202    rischio 0.65    [Default\chart03.chr]
+        ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR   M15   magic 770411    rischio 0.65    [Default\chart04.chr]
+        ABTG_SupertrendReversal                225JPY   H2    magic 770901    rischio 0.65    [Default\chart05.chr]
+        ABTG_ORB_Ottimizzato                   U30USD   M5    magic 770611    rischio 0.3     [Default\chart06.chr]
+
+=== CARTELLA E23E1504A8D02A22179395F0652B86B6
+    programma: C:\BCM_Reale
+    profili: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    --- PROFILO ATTIVO: 3 sedie ---
+        ABTG_DAX_Apertura_EU                   D30EUR   M5    magic 770101    rischio 0.65    [Default\chart01.chr]
+        ABTG_ORB_Ottimizzato                   U30USD   M5    magic 770611    rischio 0.65    [Default\chart02.chr]
+        ABTG_SlippageLogger                    EURJPY   H1    magic -         rischio -       [Default\chart03.chr]
+
+TOTALE SEDIE NEL PROFILO ATTIVO : 52
+residui su disco (NON nel totale): 6
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
