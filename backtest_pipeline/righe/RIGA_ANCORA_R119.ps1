@@ -420,7 +420,9 @@ foreach($s in $SEDIE){
   Write-Host ("   " + $s.EA + "_" + $s.Sim + "_OOS_ANCORA.csv") -ForegroundColor Gray
   Write-Host ("   " + $s.Prova) -ForegroundColor Gray
 }
-Get-ChildItem -LiteralPath $d | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
+# Out-Host: senza, Format-Table esce DOPO le Write-Host che seguono e l'ESITO
+# finirebbe stampato sopra la tabella. Cosmetico, ma si legge al contrario.
+Get-ChildItem -LiteralPath $d | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize | Out-Host
 Write-Host ""
 Write-Host ("ESITO: " + $esitoFinale) -ForegroundColor $(if($esitoFinale -eq "ANCORA SUPERATA"){"Green"}else{"Yellow"})
 Write-Host ("Nel referto la riga 'data:' dice " + $Avvio.ToString("yyyy-MM-dd HH:mm:ss") + ": e' quella da leggere per sapere se il file e' di oggi.") -ForegroundColor Gray
