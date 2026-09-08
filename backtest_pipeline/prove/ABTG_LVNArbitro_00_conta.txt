@@ -1,0 +1,225 @@
+# =====================================================================
+#  PASSO 0 -- ABTG_LVNArbitro su U30USD (Dow) M30
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_LVNArbitro   (mql5\Experts\, scritto l'08/09/2026,
+#      MAI COMPILATO e MAI GIRATO al momento in cui questo file nasce)
+#  SPEC e criteri di round: prove\LVNARBITRO_M30_BOZZA.txt
+#  DOSSIER DI CACCIA:      report\CACCIA_M30_INDICI_2026-09-08.md (P2, 9/10)
+#  REFERTO DI PORTING:     report\EA_LVN_ARBITRO_2026-09-08.md
+# =====================================================================
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "LVN Rejection / Acceptance Strategy" di
+#    AIScripts (TradingView, slug j35ygZIm, 06/05/2026, Pine v6,
+#    57 righe, 5 input), LICENZA MPL 2.0 dichiarata in testa al
+#    sorgente [VERIFICATO]. Sorgente LETTO, nessuna riga copiata.
+#    Copia archiviata:
+#      caccia_strategie\biblioteca\sorgenti\
+#      LvnRejectionAcceptance_AIScripts-MPL2_tvj35ygZIm_2026-09-08.pine
+#    L'attribuzione e' RIPETUTA in testa a ABTG_LVNArbitro.mq5.
+#
+#    !!! IL NOME DELLA FONTE MENTE, ED E' SCRITTO SUBITO !!!
+#    Nel sorgente NON c'e' nessun Volume Profile e nessun Low Volume
+#    Node: la "zona LVN" e' una banda SMA(40) +/- 0,8*ATR(14).
+#
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA CELLA ESISTE
+# ---------------------------------------------------------------------
+#  L'EA e' nato oggi da specifica. Prima di qualunque griglia si CONTA:
+#  una griglia su un motore di cui non si sa nemmeno se opera e' tempo
+#  di macchina buttato (e, peggio, produce celle "verdi per caso" su un
+#  campione che non esiste). Il PASSO 0 e' la forma di casa: stessa
+#  cella appena usata per ABTG_OpeningReversalB, che l'08/09 ha fatto
+#  2 OPERAZIONI IN 21 MESI ed e' stato archiviato per FREQUENZA.
+#  >>> E' esattamente il rischio che questa cella deve intercettare
+#      PRIMA di spendere un round.
+#
+#  >>> COSA DEVE RISPONDERE, E NIENT'ALTRO
+#      1. l'EA COMPILA e PARTE? (riga [LVN] avviato... con la CONFIG)
+#      2. quante OPERAZIONI fa nel periodo (colonna Trades)?
+#      3. le fa da TUTTI E DUE I LATI (colonne Long / Short)?
+#      4. e da TUTTI E DUE I RAMI? (colonne Rifiuto Long/Short e
+#         Accett Long/Short: sono i segnali GREZZI, contati anche
+#         quando il ramo non ha poi operato E ANCHE quando una
+#         posizione era gia' aperta -- servono a dire quante OCCASIONI
+#         c'erano, non quante ne abbiamo prese. Se segnali >> Trades,
+#         il collo di bottiglia e' l'OCCUPAZIONE, non il motore)
+#      5. il campione basta al metro di casa (Emendamento A: >=150
+#         operazioni per finestra)?
+#      6. quanto vale la PEGGIOR GIORNATA? (colonna dedicata: e' la
+#         misura numero 1 di QUESTO candidato, vedi sotto)
+#
+#  >>> COSA NON PUO' USCIRE DA QUI: NESSUNA PROMOZIONE.
+#      Non c'e' nessun asse di merito. L'unico asse e' TECNICO -- il
+#      magic, due celle identiche per costruzione: serve a dare a MT5
+#      qualcosa da ottimizzare (senza, zero passate: classe 134) e
+#      regala il gemello di determinismo del cancello G1.
+#      Se il profitto fosse bello NON si promuove: si scrive il numero
+#      e si passa alla griglia, coi criteri gia' congelati nella SPEC.
+#      Se il DD sfonda, invece, si BOCCIA subito: il rischio si legge a
+#      qualunque n (Emendamento B).
+#
+#  >>> IL CANCELLO CHE PUO' FERMARE TUTTO SUBITO
+#      Trades = 0 NON vuol dire "nessun edge": vuol dire "non e'
+#      girata". E' l'errore da cui nasce questa forma di cella (il
+#      verdetto PostNews del 07/08, nullo perche' i CSV avevano
+#      Trades=0). Se esce 0, si guarda il LOG prima di scrivere
+#      qualunque verdetto -- e in particolare le colonne dei segnali
+#      GREZZI: se anche quelle sono 0, non e' il motore, e' la banda
+#      (o i dati) che non si formano.
+#
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e' la parte che vale di piu'
+# ---------------------------------------------------------------------
+#  Il metro (firmato 07/09): il pavimento e' 1,00 op/giorno per
+#  FAMIGLIA = {D30EUR, U30USD, NASUSD}. Su UN simbolo la quota che
+#  serve e' quindi ~0,33 op/giorno.
+#
+#  Il conto, con le ipotesi in chiaro:
+#    - finestra 08:00-20:30 SERVER su M30 = 25 barre di decisione per
+#      seduta; ~440 sedute nei 21 mesi di storico BCM sugli indici;
+#    - il segnale NON e' raro: il ramo ACCETTAZIONE chiede due chiusure
+#      di fila oltre una banda larga solo 0,8*ATR(14) attorno alla
+#      SMA(40) -- su M30 il prezzo ci sta fuori spesso;
+#    - il vincolo VERO non e' il segnale ma l'OCCUPAZIONE: UNA
+#      posizione alla volta, e la posizione vive finche' non prende lo
+#      stop (1,5*ATR) o il target (2R = 3*ATR) o il flat delle 21:00.
+#      Su M30 un movimento di 3*ATR chiede ore, non minuti.
+#
+#  >>> ATTESA CENTRALE: 1,0 - 2,5 operazioni al giorno di seduta su
+#      U30USD, cioe' ~450-1100 operazioni nei 21 mesi.
+#      Diviso IS/OOS fa ~225-550 per parte: SOPRA il pavimento dei 150
+#      dell'Emendamento A, su UN SOLO SIMBOLO.
+#      >>> Se e' cosi', questo e' il primo candidato della coda M30 che
+#          NON ha bisogno di mettere in comune i tre indici per avere
+#          un campione. Sarebbe la notizia migliore del round.
+#
+#  >>> LE TRE SOGLIE, dichiarate adesso:
+#      < 100 operazioni totali (= 0,23 op/g)  -> il motore e' MOLTO piu'
+#          raro del previsto: la mia stima e' sbagliata e va detto.
+#          Non e' ancora bocciatura (il pavimento e' di FAMIGLIA), ma
+#          diventa un candidato che sta in piedi solo a tre simboli.
+#      < 30 operazioni totali                 -> BOCCIATO per frequenza,
+#          come ABTG_OpeningReversalB stamattina. Senza appello.
+#      > 2000 operazioni totali (= 4,5 op/g)  -> il motore MITRAGLIA.
+#          Non e' una bocciatura di per se', ma allora la colonna
+#          "Peggior Giornata %" diventa il cancello principale: e' il
+#          rischio n.1 dichiarato dal dossier per questo candidato
+#          ("niente gli impedisce 3-4 operazioni nello stesso
+#          pomeriggio"), e il tetto InpMaxTradesPerDay esiste apposta
+#          -- ma si accende DOPO aver misurato, non prima.
+#
+#  >>> ATTESA SUI DUE RAMI (contatori separati, cancello C5):
+#      mi aspetto MOLTI piu' segnali di ACCETTAZIONE che di RIFIUTO,
+#      perche' il rifiuto chiede tre condizioni congiunte (perforazione
+#      + rientro nella stessa barra + volume sotto media) mentre
+#      l'accettazione ne chiede due, entrambe frequenti.
+#      Stima grezza: rifiuto = 10-25% dei segnali totali.
+#      Se il ramo rifiuto uscisse a ZERO o quasi, il sospetto n.1 non e'
+#      il motore ma IL VOLUME (vedi sotto), e la prova successiva e'
+#      una passata con InpUsaFiltroVolume=false.
+#
+#  >>> ATTESA SUI DUE LATI (regola 25/08): long e short devono essere
+#      dello stesso ordine di grandezza. Il motore e' simmetrico per
+#      costruzione: uno sbilanciamento oltre 70/30 e' un indizio di
+#      deriva del sottostante (il Dow 2024-2026 sale), non del codice,
+#      e va scritto come tale.
+#
+# ---------------------------------------------------------------------
+#  IL RISCHIO NUMERO 1, DICHIARATO PRIMA: IL VOLUME
+# ---------------------------------------------------------------------
+#  La fonte usa `volume`, che su TradingView per i futures e' VOLUME
+#  SCAMBIATO. Su BCM, sugli indici CFD, MT5 espone TICK VOLUME: conta i
+#  cambi di prezzo, non i contratti. NON E' LA STESSA VARIABILE.
+#  Il ramo RIFIUTO poggia interamente su di essa.
+#  >>> Per questo: (a) i due rami hanno CONTATORI SEPARATI nel CSV;
+#      (b) la soglia e' un input (InpVolFrazione); (c) il filtro si
+#      puo' SPEGNERE (InpUsaFiltroVolume) -- ma NON in questa cella:
+#      qui si misura la configurazione della fonte, tale e quale.
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26  <- MISURATO, non assunto: inizio dello storico
+#    tick BCM sugli indici (SPREAD_FLOTTA_MISURA_2026-09-03.md;
+#    misura_tick\misura_tick_D30EUR.csv = 35.408.137 tick dal
+#    2024.09.26). Il PASSO 0 gira sulla finestra INTERA: non si spezza
+#    IS/OOS finche' non si sa se il motore opera.
+#  REGIME CONTENUTO, come vuole l'Emendamento della finestra: UNO SOLO.
+#    21 mesi di indici 2024-2026 non contengono un orso, non contengono
+#    un crollo, non contengono un laterale lungo. Questo round NON puo'
+#    dare un verdetto di regime e non deve pretenderlo.
+#
+#  ORARI IN ORA SERVER BCM (= ora italiana - 1). Qui NON c'e' un orario
+#  d'apertura da azzeccare (il motore non sa che ora e'): la finestra
+#  08:00-20:30 e il flat alle 21:00 servono al COSTO e al divieto di
+#  overnight, non al segnale. Restano comunque in ORA SERVER.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+#     769900: blocco VERIFICATO LIBERO nel repo l'08/09/2026
+#     (grep 76xxxx/77xxxx + CODA_01_sedie_attaccate_20260908_033003.log).
+#     769800 e' di ABTG_ImpulsoApertura, scritto stamattina.
+InpMagic=769900||769900||50||769950||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno.
+#     Fissarli e' voluto: cosi' la cella misurata resta questa anche se
+#     domani qualcuno cambia un default nel .mq5.
+InpUsaGuardian=true||true||0||true||N
+
+# --- MOTORE: i 5 valori della fonte, tali e quali (40 / 14 / 0,8 / 1,5 / 2,0)
+InpBandaLen=40||40||0||40||N
+InpBandaAtr=0.8||0.8||0||0.8||N
+InpAtrLen=14||14||0||14||N
+InpVolFrazione=0.8||0.8||0||0.8||N
+InpUsaFiltroVolume=true||true||0||true||N
+
+# --- i due RAMI: entrambi accesi, come nella fonte (si separano coi contatori)
+InpUsaRamoRifiuto=true||true||0||true||N
+InpUsaRamoAccettazione=true||true||0||true||N
+
+# --- i due LATI: entrambi accesi (regola 25/08, si separano coi contatori)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- SESSIONE, ORA SERVER BCM (italiana - 1). NON viene dalla fonte:
+#     e' di casa, e serve al costo (fuori sessione lo spread raddoppia)
+#     e al divieto di overnight.
+InpOraInizio=8||8||0||8||N
+InpMinInizio=0||0||0||0||N
+InpOraFine=20||20||0||20||N
+InpMinFine=30||30||0||30||N
+InpUsaFlatSeduta=true||true||0||true||N
+InpOraFlat=21||21||0||21||N
+InpMinFlat=0||0||0||0||N
+
+# --- STOP e USCITA: stop 1,5*ATR e TP 2R sono della fonte.
+#     Il pavimento in punti indice (R109) e' di casa: MAI zero.
+InpStopAtr=1.5||1.5||0||1.5||N
+InpMinStopPts=25||25||0||25||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+InpRR=2.0||2.0||0||2.0||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- RISCHIO: 0,65% di contratto di casa; gate spread in % dello stop (R55);
+#     tetto giornaliero SPENTO = come la fonte (si misura prima di tappare).
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpreadPctOfStop=2.5||2.5||0||2.5||N
+InpMaxTradesPerDay=0||0||0||0||N
+
+# InpComment="LVN"   (stringa: lasciata al default compilato -- un pin di
+#                     stringa vuoto MT5 lo ignora in silenzio, classe FiboH4)
+InpVerbose=true||true||0||true||N
+# =====================================================================
+#  DOPO QUESTA CELLA, e solo dopo:
+#    - se il conteggio regge -> i gemelli U30USD / D30EUR / NASUSD e poi
+#      la griglia da 27 celle gia' congelata in LVNARBITRO_M30_BOZZA.txt
+#      (cella scelta AL CENTRO DELL'ALTOPIANO, mai al picco);
+#    - se il conteggio non regge -> si scrive il numero e si archivia,
+#      come stamattina con ABTG_OpeningReversalB. Costa un pomeriggio,
+#      non un round.
+# =====================================================================
