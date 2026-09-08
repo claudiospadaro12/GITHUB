@@ -1,0 +1,32 @@
+﻿REFERTO RUNNER ABTG -- 2026-09-08 03:30:03 (ora locale VPS)
+marcatore : MARCATORE_RUNNER_ABTG_v2
+branch    : lavoro
+perimetro : SOLA LETTURA -- report/PERIMETRO_RUNNER.md
+
+righe di coda: 4
+
+--- d2922bf6f26c3af35dbe5863d50d15d2ac42a584 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 6s, uscita 0
+    log: CODA_01_sedie_attaccate_20260908_033003.log
+
+--- 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_02_chi_ha_operato_20260908_033003.log
+
+--- d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_03_conti_dei_terminali_20260908_033003.log
+
+--- 269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 6s, uscita 0
+    log: CODA_04_capacita_macchina_20260908_033003.log
+
+--- RIEPILOGO ---
+eseguiti  : 4
+rifiutati : 0
+falliti   : 0
+ESITO: COMPLETO
