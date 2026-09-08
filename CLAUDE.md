@@ -1,5 +1,19 @@
 # Note di progetto — DA RICORDARE SEMPRE
 
+## 🎯 OBIETTIVO CON UNA DATA (Claudio, 08/09/2026)
+**La challenge prop parte ai PRIMI DI OTTOBRE 2026.** Da fine settembre
+Claudio vuole avere gli expert pronti. Dall'08/09 restano ~3 settimane.
+- Ogni lavoro vale in proporzione a quanto avvicina una **sedia schierabile
+  il 1° ottobre**. Il resto scala.
+- Conseguenza gia' misurata: la **frequenza** diventa il requisito principale
+  (una sedia da 1 op/giorno accesa oggi arriva a 150 operazioni a marzo, non
+  a ottobre) e la banda buona sugli indici e' **M30/H1**, non M5/M15
+  (frontiera del costo `stop >= 40 x spread`).
+- Carta bianca a Claude sulle decisioni operative, MA restano di Claudio:
+  **conto reale 10105439**, **parametri di rischio e taglie**, **spendere
+  soldi**. E il perimetro del runner resta **sola lettura**: si allarga solo
+  con una firma nuova. Verbale: `report/MANDATO_2026-09-08.md`.
+
 ## ⛑️ REGOLA #1 — SALVA SEMPRE SU GITHUB (richiesta esplicita di Claudio)
 **Ad OGNI passo significativo → commit + push su GitHub, SUBITO.** Claudio non deve MAI rischiare di perdere lavoro se la chat si blocca/riempie (è già successo spesso).
 - Branch di lavoro attuale: **`lavoro`** (qui è consolidato TUTTO).
