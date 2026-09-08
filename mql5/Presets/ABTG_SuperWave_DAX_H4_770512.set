@@ -1,0 +1,230 @@
+; ==========================================================================
+; ABTG_SuperWave_DAX_H4_Ottimizzato -- PRESET CORSIA DEMO -- D30EUR H4
+; Conto: DEMO PICCOLO 50503392 (cartella "C:\Program Files\BCM Markets MT5
+; Terminal", SENZA -V3). NON il reale 10105439. NON il 100k 50504263.
+; Scritto il 08/09/2026. Scheda: report/CORSIA_DEMO_SUPERWAVE_DAX_2026-09-08.md
+; ASCII PURO: niente emoji (regola CLAUDE.md del 17/08, file letti in ANSI).
+; ==========================================================================
+;
+; DA DOVE VIENE OGNI NUMERO -- nessun valore a memoria, nessuno a intuito.
+;
+;   FONTE PRIMARIA [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/risultati_archivio/SuperWave/
+;       valid_SuperWaveRT_D30EUR_H4_realtick.csv  --  riga "Pass 1"
+;     Quel CSV ha UNA COLONNA PER OGNI INPUT dell'EA al momento della corsa:
+;     i valori qui sotto marcati [CSV Pass 1] sono COPIATI da li', non dedotti.
+;     Pass 1 = Profit 277.69 / PF 1.28456 / Equity DD 3.3245% / Trades 56 /
+;              Expected Payoff 4.95875 / Sharpe 1.06358 / Recovery 0.80462.
+;
+;   BANCO CHE HA PRODOTTO QUEI NUMERI [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/ini/valid_SuperWaveRT_D30EUR_H4.ini
+;       Symbol=D30EUR  Period=H4  Model=4 (TICK REALI)  Deposit=10000
+;       Currency=EUR   Leverage=100   FromDate=2024.01.01  ToDate=2026.06.30
+;
+;   RIGA DI REGISTRO CHE PROMUOVE LA CELLA [rango 1]:
+;     backtest_pipeline/REGISTRO_TEST.md riga 477
+;       "D30EUR (DAX) | H4 | StMult 3.0 / TP 2.0 | 278 | 1.28 | 3.3% | 56 |
+;        ABTG_SuperWave_DAX_H4_Ottimizzato | 770512"
+;     e riga 459 (intestazione della griglia): "entrambe le direzioni,
+;     rischio 1%".
+;
+;   DEFAULT DEL SORGENTE [rango 1, ma e' codice non misura]:
+;     mql5/Experts/ABTG_SuperWave_DAX_H4_Ottimizzato.mq5
+;     Usati SOLO per i tre input che NON esistevano quando la cella e' stata
+;     misurata (non hanno colonna nel CSV). Marcati [NON RICAVATO DAL BANCO].
+;
+; --------------------------------------------------------------------------
+; 1) IL RISCHIO -- TROVATO, ED E' MISURATO
+; --------------------------------------------------------------------------
+; La cella e' stata misurata a InpRiskPercent = 1.0. Non e' un'inferenza:
+;   - colonna InpRiskPercent del CSV, riga Pass 1  -> 1
+;   - riga del .ini: InpRiskPercent=1.0||1.0||0||1.0||N (asse FISSO)
+;   - riga 459 del REGISTRO_TEST.md: "rischio 1%"
+; Quindi DD 3.3245% e' il DD MISURATO A RISCHIO 1,00% su deposito 10.000 EUR.
+;
+; QUI SOTTO IL PRESET SCRIVE 0.65, E NON E' LA TAGLIA MISURATA.
+; E' il metro di casa FIRMATO da Claudio il 18/08/2026 (cap C1 3,25% = 5 SL
+; vivi da 0,65% -- CLAUDE.md, report/FIRME_2026-08-18.md). Mettere 1.00
+; significherebbe schierare una taglia SOPRA quella firmata, e la taglia e'
+; una firma di Claudio, non una mia scelta.
+;   -> A 0,65% il DD atteso e' 3,3245 x (0,65/1,00) = 2,16%
+;      *** [APPROSSIMATO, NON MISURATO] *** -- convenzione di casa
+;      (report/CENSIMENTO_CONTRATTI.md par. 1.2, DD ~lineare col rischio).
+;   -> Il CANCELLO DI RISCHIO resta il MISURATO 3,32%: un DD stimato non puo'
+;      essere una promessa. Il 2,16% vale come SPIA ANTICIPATA. Dettaglio
+;      nella scheda, sezione "IL DD PROMESSO".
+;   -> ALTERNATIVA A UNA RIGA, se Claudio la preferisce: InpRiskPercent=1.00
+;      riproduce ESATTAMENTE la taglia misurata e rende il cancello 3,32%
+;      esatto invece che conservativo. E' l'unica riga da cambiare.
+;
+; --------------------------------------------------------------------------
+; 2) TRE COSE CHE QUESTO PRESET NON PUO' RIPRODURRE -- dichiarate qui
+; --------------------------------------------------------------------------
+; A) L'EA CHE HA MISURATO NON E' L'EA CHE SI SCHIERA.
+;    Il .ini dice Expert=ABTG_SuperWave.ex5 e il CSV porta InpMagic=770501:
+;    ha girato l'EA BASE, non il derivato _DAX_H4_Ottimizzato. I due sorgenti
+;    sono file separati. NESSUNO HA MAI VERIFICATO che il derivato riproduca
+;    il numero del padre (rilievo gia' agli atti in
+;    report/CORSIA_DEMO_SUPERWAVE_DAX_H4.md par. 3, punto 1).
+;    Questo preset porta il derivato SULLA STESSA CELLA del padre: e' il
+;    massimo che si puo' fare senza una corsa nuova.
+;
+; B) IL FIX DEL LOTTO DELL'08/09 CAMBIA IL COMPORTAMENTO.
+;    La cella e' stata misurata il 26/07 con il codice v1.00, che nel regime
+;    "tranche sotto il lotto minimo" piazzava totLot+volMin (fino al DOPPIO
+;    del rischio dichiarato). Il sorgente in repo oggi e' v1.01, CORRETTO
+;    (report/FIX_LOTTO_PENDENTE_2026-09-08.md, file n.2, riga 264).
+;    Il FIX_LOTTO lo dice testualmente: "Le curve di backtest delle celle
+;    promosse su questi motori CAMBIERANNO -- chi le riproduce deve saperlo."
+;    -> Il forward NON e' bit-identico alla cella misurata. Va detto ogni
+;       volta che si cita il 3,32%.
+;
+; C) TRE INPUT NON ESISTEVANO AL MOMENTO DELLA MISURA.
+;    InpUsaGuardian, InpPendingAtr, InpSLBufferAtr non hanno colonna nel CSV.
+;    Sono lasciati ai default del sorgente, che sono i valori NEUTRI
+;    (comportamento identico a prima), ma e' un'INFERENZA DAL CODICE, non un
+;    dato del banco. Marcati [NON RICAVATO DAL BANCO].
+;
+; --------------------------------------------------------------------------
+; 3) MAGIC 770512 -- e il conflitto agli atti, dichiarato
+; --------------------------------------------------------------------------
+; 770512 e' il default compilato del sorgente (riga 108) ed e' il magic
+; scritto nel REGISTRO_TEST.md riga 477. E' quello che uso.
+; CONFLITTO: report/CORSIA_DEMO_SUPERWAVE_DAX_H4.md (07/09) RISERVAVA il
+; 770513 (verificato vergine repo-wide) per non confondere una sedia demo
+; nuova con il residuo "assegnato ma non in campo" del 25/08.
+; -> Le due ragioni sono tutte e due buone. Tengo 770512 perche' e' il magic
+;    che il registro promuove e perche' 770512 risulta ASSENTE da ogni
+;    censimento (FLOTTA_ATTIVA.md riga 46: "NON IN CAMPO"), quindi non c'e'
+;    niente con cui confonderlo in campo OGGI.
+; -> Passare a 770513 e' UNA RIGA. Se Claudio preferisce, si cambia qui e
+;    nella riga di verifica. E' scritto perche' la scelta sia sua.
+; ==========================================================================
+
+; ---------- SUPERTREND E TIMEFRAME -- QUESTA E' LA CELLA ----------
+; InpTF: 16388 = PERIOD_H4. Lo stesso numero sta nel CSV e nel .ini.
+; Il GRAFICO su cui si trascina l'EA deve comunque essere D30EUR H4.
+InpTF=16388
+; InpStMult 3.0 = l'asse ottimizzato della cella promossa. [CSV Pass 1]
+; Non e' un picco isolato: 7 celle su 9 della griglia sono positive
+; (REGISTRO_TEST.md riga 480: "DAX H4: 7/9 positive, DD basso").
+InpStMult=3.0
+InpStAtrPeriod=10
+
+; ---------- PATTERN RIMBALZO ---------- [CSV Pass 1]
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+; DUE LATI, come nella misura (InpAllowLong=1 e InpAllowShort=1 nel CSV, e
+; il .ini li fissa a 1||1). Regola dei DUE LATI sugli indici, 25/08.
+; ATTENZIONE: alla cella StMult 3.0 / TP 2.0 i due lati NON sono mai stati
+; smontati, e la famiglia ha uno SHORT MORTO misurato sul Dow (R110: PF OOS
+; 0,429). Long-only qui sarebbe una cella MAI MISURATA: non si tocca.
+InpAllowLong=true
+InpAllowShort=true
+
+; ---------- CONFLUENZA ---------- [CSV Pass 1]
+; Spenta nella misura (InpUseConfluence=0, fissato anche dal .ini): in
+; SuperWave l'ingresso e' il cross EMA14x200, non la confluenza.
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+; ---------- INGRESSO FRAZIONATO ---------- [CSV Pass 1]
+; 1/3 a mercato + 2/3 su pendente stop a 20 pip, scadenza 3 barre H4.
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20
+; [NON RICAVATO DAL BANCO] input aggiunto dopo la misura del 26/07: nessuna
+; colonna nel CSV. 0 = "usa InpPendingPips", cioe' il comportamento misurato.
+InpPendingAtr=0
+InpPendingExpiryBars=3
+
+; ---------- STOP / TARGET ---------- [CSV Pass 1]
+InpSLLookback=5
+InpSLBufferPips=3
+; [NON RICAVATO DAL BANCO] come sopra. 0 = "usa InpSLBufferPips".
+InpSLBufferAtr=0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+; InpTP_RR 2.0 = il secondo asse della cella promossa. [CSV Pass 1]
+InpTP_RR=2.0
+InpTrailOnST=true
+InpExitOnFlip=true
+
+; ---------- RISCHIO ----------
+; *** PROPOSTA, NON MISURATA A QUESTA TAGLIA. *** La cella e' misurata a
+; 1.00 (vedi blocco 1 in testa). 0.65 e' il metro firmato il 18/08.
+; La taglia e' una firma di Claudio: se dice 1.00, si cambia SOLO questa riga.
+;
+; *** E L'AVVISO CHE VALE PIU' DEL NUMERO QUI SOPRA ***
+; Su D30EUR il lotto MINIMO e' 0,10 e il CONTRACT_SIZE e' 10 (misurati:
+; R114_CORSA_20260827/REFERTO_R114.txt righe 77-80), quindi 0,10 lotti = 1 EUR
+; per punto indice. Il codice ALZA AL MINIMO il lotto calcolato dal rischio
+; (sorgente riga 421: MathMax(mn, ...)). Con un saldo di ~5.100 EUR:
+;     0,65% = 33,15 EUR  ->  serve uno stop <= 33 punti indice per NON
+;                            finire al lotto minimo.
+; Uno stop Supertrend StMult 3,0 x ATR(10) su DAX H4 e' quasi certamente
+; molto piu' largo di 33 punti indice (valore mediano: NON MISURATO).
+; -> IN QUEL REGIME QUESTA RIGA NON CONTROLLA PIU' NIENTE: 0.65 e 1.00 danno
+;    lo STESSO lotto (0,10), e il rischio VERO per trade e' lo stop in punti
+;    indice moltiplicato per 1 EUR.
+; -> GIA' SUCCESSO, MISURATO: report/DIARIO.md 20/08/2026, SW DOW H2 (770531,
+;    stesso motore, stesso conto piccolo): due gambe da 0,10 lotti, -72,32 EUR
+;    su 5.076,62 = 1,42% contro un contratto da 1,0%.
+; -> Si legge nella riga di Giornale [SuperWave] ... mercato X.XX lot ... SL ...
+;    ed e' il PASSO 8 della scheda. Finche' non e' letta, il DD promesso del
+;    3,32% va citato col cartello appeso.
+InpRiskPercent=0.65
+; 0 = illimitato, come nella misura. [CSV Pass 1]
+; NOTA DI RISCHIO APERTO: senza tetto giornaliero e con due lati accesi, il
+; numero di posizioni contemporanee NON e' limitato dall'EA. Su H4 il cross
+; EMA14x200 e' raro (2 op/mese misurate), ma il tetto vero lo dovrebbe dare
+; il cap C1 3,25% del Guardian -- che sul piccolo 50503392 NON GIRA
+; (decisione di Claudio del 06-07/09). Dichiarato, non risolto.
+InpMaxTradesPerDay=0
+
+; ---------- FILTRO ORARI (ORA SERVER BCM) ---------- [CSV Pass 1]
+; SPENTO nella misura. Su H4 la barra e' gia' la finestra: non si accende
+; niente che la cella non avesse.
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+
+; ---------- FILTRO NOTIZIE ---------- [CSV Pass 1]
+; SPENTO nella misura. Resta spento: accenderlo sarebbe un'altra cella.
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+
+; ---------- GUARDIAN ----------
+; [NON RICAVATO DAL BANCO] input aggiunto con la migrazione Guardian
+; (firme B1/C1 del 18/08): nessuna colonna nel CSV del 26/07.
+; Lasciato al default del sorgente (true). SUL PICCOLO 50503392 IL GUARDIAN
+; NON GIRA: la guardia e' fail-open e non cambia niente. Lo tengo true
+; perche' e' il default compilato e perche' il giorno in cui il Guardian
+; arrivasse sul piccolo questa sedia sarebbe gia' dentro il cap.
+InpUsaGuardian=true
+
+; ---------- GENERALI ----------
+; Default del sorgente, riga 107. Serve per riconoscere le posizioni nel
+; Terminale (colonna Commento).
+InpComment=SUPERWAVE DAX H4
+; Magic: vedi blocco 3 in testa (conflitto 770512 / 770513 dichiarato).
+InpMagic=770512
+; Filtro spread SPENTO come nella cella misurata. [CSV Pass 1]
+; Non e' una svista: si copia la cella promossa, non se ne inventa un'altra.
+InpMaxSpread=0
+; Verbose ON. [CSV Pass 1] E qui serve a una cosa precisa: l'EA stampa
+; "[SuperWave] LONG/SHORT mercato %.2f lot @ ... SL ... TP ..." (riga 269 del
+; sorgente). QUELLA RIGA E' L'UNICO MODO DI SAPERE SE IL LOTTO E' FINITO AL
+; MINIMO -- ed e' la pre-condizione bloccante della scheda.
+InpVerbose=true
+; ==========================================================================
