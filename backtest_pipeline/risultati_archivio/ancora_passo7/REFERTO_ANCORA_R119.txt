@@ -1,0 +1,19 @@
+REFERTO ANCORA R119 -- PASSO 7 DEL QUARTO MT5
+marcatore riga  : MARCATORE_RIGA_ANCORA_R119_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST
+pin             : 8473062c9ceaea8492641b56d310494afdb4e187
+data            : 2026-09-08 17:52:02   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+terminale       : C:\MT5_Backtest\terminal64.exe
+tetto barre     : MaxBars=10000000
+
+--- LE DUE SEDIE ---
+  ORB : RIPRODUCE
+  DAX : RIPRODUCE
+
+CSV OOS attesi: 2   LETTI: 2
+PID non bersaglio PRIMA: 7824, 8664, 9780
+PID non bersaglio DOPO : 7824, 8664, 9780
+
+RILIEVI: 0
+
+ESITO: ANCORA SUPERATA
