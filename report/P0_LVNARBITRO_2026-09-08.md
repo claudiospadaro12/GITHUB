@@ -94,3 +94,70 @@ Con n=392 e n=618 siamo **sopra il pavimento dei 150**: il merito è
 🔴 **Due finestre che si comportano in modo opposto**, ed entrambi i PF sono
 **a ridosso di 1**. Anche se il DD si sistemasse alla taglia prop, **questo non è
 un edge**: è una moneta con i costi sopra. Va detto adesso, non dopo.
+
+---
+
+# 🏁 LA CORSA A **DEPOSITO 100.000** — e il verdetto si scrive da solo
+
+| finestra | Trades | Profit | PF | **DD %** | peggior giornata |
+|---|---:|---:|---:|---:|---:|
+| **IS** a 10k | 392 | −264,58 | 0,97856 | **18,0147** | −2,4661% |
+| **IS** a **100k** | 392 | −3.374,90 | 0,97485 | 🔴 **19,3534** | −2,8046% |
+| **OOS** a 10k | 618 | +1.022,05 | 1,05108 | **11,3303** | — |
+| **OOS** a **100k** | 618 | **+11.310,73** | 1,05227 | 🔴 **11,7644** | −2,4542% |
+
+## 🔴 IL DD NON È CROLLATO. È SALITO DI POCO.
+
+Il criterio era **dichiarato prima della corsa**:
+> *"se il DD **crolla** verso il 2-4% → era il pavimento del lotto, e il motore va
+> in griglia; se **resta sopra il 10%** → è il **motore**, e si boccia per
+> rischio senza altre discussioni."*
+
+**18,01 → 19,35** e **11,33 → 11,76**. 👉 **BOCCIATO PER RISCHIO.**
+
+## 🙋 E la mia ipotesi era SBAGLIATA — il che è la notizia più utile del round
+Avevo scritto che il DD del 18% *"non è attribuibile"* perché il **pavimento del
+lotto** poteva gonfiarlo. **Non era vero.** Il profitto scala **12,8×** (IS) e
+**11,1×** (OOS) per un deposito **10×**: i lotti si sono scalati quasi
+proporzionalmente, quindi a 10.000 il pavimento **non stava mordendo** su questo
+simbolo con questo stop.
+
+> ### 🎯 E questa risposta vale MOLTO oltre questo motore.
+> La domanda aperta di stasera era: *"il pavimento del lotto sta falsando tutte
+> le nostre misure a 10k?"* **Su U30USD M30, con stop 1,5×ATR: NO.**
+> È una misura riusabile, ottenuta gratis da un round che serviva ad altro.
+> ⚠️ **Non si estende** a D30EUR H4 (stop molto più larghi, il caso
+> `SuperWave DAX H4`): lì la domanda resta aperta.
+
+## 💀 IL MODO IN CUI MUORE, che è istruttivo
+Sull'OOS il motore fa **+11.310,73 su 100k = +11,31%**: **supererebbe il target
+del +10%**. Ma con **DD 11,76%** avrebbe **sfondato il muro totale del −10%
+prima di arrivarci**.
+
+> ### Guadagna, e muore per strada. È esattamente il profilo che una challenge
+> non perdona — e che un backtest guardato solo dal profitto ti nasconde.
+
+E il muro **giornaliero** non c'entra: **−2,80%** nel peggior giorno, contro un
+limite del −5%. **Non è una giornata catastrofica: è un'erosione lunga.**
+
+## ⚖️ E il merito confermava già tutto
+PF **0,975 in IS** (in perdita) e **1,053 in OOS** (in guadagno), con n=392 e 618
+— **sopra il pavimento dei 150, quindi giudicabile**. Due finestre opposte, ed
+entrambi i PF a ridosso di 1. **Non era un edge nemmeno prima di guardare il DD.**
+
+---
+
+## 🏁 VERDETTO: **BOCCIATO PER RISCHIO** (e senza edge)
+- ✅ **frequenza**: eccellente, 1.010 operazioni, campione su un simbolo solo;
+- 🔴 **rischio**: DD **19,35% / 11,76%** contro un muro del 10%, a **due taglie
+  di conto diverse**;
+- 🔴 **merito**: PF a ridosso di 1 e **incoerente fra le finestre**.
+
+📌 **Porta di rientro** (regola 18/08): rientra solo se un **meccanismo di
+gestione** nuovo abbatte il DD — non un parametro diverso dello stesso motore
+(regola della seconda caccia, 19/08). Il candidato naturale sarebbe un **tetto
+di perdita giornaliera/settimanale interno**, ma è **codice nuovo**, non una
+soglia da ritoccare.
+
+💰 **Costo totale del verdetto: due round, ~15 minuti.** Restano in coda
+`ABTG_ImpulsoApertura` (in standby) e i due candidati M30 non ancora portati.
