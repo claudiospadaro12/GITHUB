@@ -25,3 +25,9 @@ d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti
 
 # --- 4. quanto e' grossa questa macchina (per il quarto MT5).
 269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
+
+# --- 5. la foto delle sedie e' fresca o vecchia? + il calendario news letto davvero.
+#     Nasce dalla contraddizione dell'08/09 03:30: sul terminale del conto
+#     reale CODA_01 non vede il Guardian nei .chr, CODA_02 lo vede scrivere
+#     464 righe fino alle 23:56. Un EA che scrive STA GIRANDO.
+f5f5b9f9e36e6007607d6901ecdac2fe5d769394 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
