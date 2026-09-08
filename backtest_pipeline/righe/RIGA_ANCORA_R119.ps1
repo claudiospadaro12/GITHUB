@@ -225,7 +225,7 @@ function Scarica($url,$dst){
 $drv = Join-Path $Work "walkforward_generico.ps1"
 Scarica ($RawBase + "/backtest_pipeline/walkforward_generico.ps1") $drv
 if(-not (Select-String -LiteralPath $drv -SimpleMatch -Pattern $MARC_DRV -Quiet)){
-  Muori ("il driver scaricato NON ha il marcatore " + $MARC_DRV + ": e' una copia vecchia, senza -TerminaleBacktest. Non si prosegue.")
+  Muori ("il driver scaricato NON ha il marcatore " + $MARC_DRV + ": e' una copia vecchia. Senza la v5 non porta gli #include nostri sul terminale, l'EA non compila e il round muore con ZERO CSV. Non si prosegue.")
 }
 Write-Host ""
 Write-Host "    driver: scaricato e marcatore v5 verificato." -ForegroundColor Green
