@@ -30,7 +30,7 @@
 //|  Tutto-in-uno: compila con F7. Usa solo Trade.mqh (standard MT5). |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
-#property version   "1.13"
+#property version   "1.14"
 #property strict
 #include <Trade/Trade.mqh>
 //  v1.11 -- 19/08/2026. Il calcolo del cap e la scrittura delle bandiere
@@ -91,6 +91,38 @@
 //  POSIZIONI con SL (buco B6: i pendenti non si contano, le posizioni
 //  senza SL sono rischio ignoto ed escluse). E' un LIMITE INFERIORE del
 //  rischio impegnato, non una misura esatta.
+//  v1.14 -- 08/09/2026. MODO DICHIARATO PER LA BASELINE GIORNALIERA
+//  (input InpDailyBaseline), nato dal dossier report/REGOLAMENTI_PROP_
+//  2026-09-08.md par. 3.1 + "VERIFICA DI CLAUDE".
+//  PERCHE' ESISTE: le prop NON misurano la giornata come noi. FTMO parte
+//  dal SALDO registrato alle 00:00 CE(S)T; FundingPips dal PIU' ALTO fra
+//  saldo ed equita' di apertura. Noi partiamo dall'EQUITA'. Se al reset
+//  c'e' una posizione aperta in perdita flottante, l'equita' e' PIU'
+//  BASSA del saldo e il nostro pavimento scende con lei mentre il loro
+//  resta fermo: numeri del dossier, 100k con -0,8% flottante al reset ->
+//  pavimento FTMO 95.000, nostro 94.200. Nel verso sbagliato: siamo PIU'
+//  PERMISSIVI della prop, cioe' la challenge puo' essere gia' violata
+//  mentre il guardiano e' ancora "in pausa morbida". Riguarda solo le
+//  sedie che tengono posizioni attraverso l'ora del reset -- e la flotta
+//  ne ha (le swing multi-day di report/ROTTA_PROP.md).
+//  PERCHE' IL DEFAULT RESTA L'EQUITA': perche' tornare al bilancio
+//  riaprirebbe il bug PAGATO sul conto REALE il 06/09 (vedi v1.12 qui
+//  sopra): li' il broker tiene un CREDITO stabile e non prelevabile
+//  (bilancio 5.000, credito 2.500) e una baseline presa dal bilancio,
+//  confrontata con l'equita', trasformerebbe quel credito in un
+//  cuscinetto falso da 2.500 euro. Le due esigenze sono entrambe vere,
+//  ma su CONTI DIVERSI: per questo e' un MODO, non una correzione.
+//  DEFAULT = NO-OP: InpDailyBaseline=0 e' esattamente la v1.13 (baseline
+//  = equita'). Nessuna soglia, nessun cap, nessuna logica di chiusura e'
+//  stata toccata. L'unica differenza visibile a default e' la riga di
+//  giornale del nuovo giorno prop, che ora DICHIARA il modo: una
+//  protezione che non dice come sta misurando non e' verificabile.
+//  E' UNA FIRMA DI CLAUDIO: quale modo va su quale conto NON lo decide
+//  l'EA e non lo decide chi scrive il codice. Il modo non e' in nessun
+//  preset. Bussola: REALE (col credito) = 0 EQUITA' . prop FTMO = 1
+//  SALDO . FundingPips/The5ers = 2 MAX. E i regolamenti citati sono
+//  [LETTO-VIA-SEARCH], non letture dirette: prima di pagare una fee
+//  vanno confermati da Claudio sul sito o per iscritto dal supporto.
 #include <ABTG_PausaGuardian.mqh>
 
 //--- SALDO / REGOLE PROP -------------------------------------------
@@ -99,6 +131,20 @@ input double InpDailyLossPct   = 5.0;    // Limite PERDITA GIORNALIERA (% del sa
 input double InpTotalDDPct     = 10.0;   // Limite DRAWDOWN TOTALE (% del saldo iniziale)
 input int    InpDDMode         = 0;      // DD totale: 0=STATICO (dal saldo iniziale) . 1=TRAILING (dal picco equity)
 input int    InpDailyResetHour = 0;      // Ora SERVER in cui azzera il contatore giornaliero (0=mezzanotte broker)
+//--- MODO DELLA BASELINE GIORNALIERA (v1.14, 08/09/2026) ------------
+//  Da quale grandezza parte il conteggio della perdita del giorno.
+//  OPT-IN e NO-OP di default, stessa forma del cap C2 qui sotto: a 0 il
+//  guardiano si comporta ESATTAMENTE come la v1.13.
+//    0 = EQUITA' (default, come oggi)  -- l'unico sicuro sul conto REALE,
+//        dove il credito del broker contamina il bilancio (fix v1.12).
+//    1 = SALDO                         -- il criterio di FTMO (saldo alle
+//        00:00 CE(S)T). Su un conto CON CREDITO riaprirebbe il bug del
+//        06/09: NON usarlo li'.
+//    2 = MAX(saldo,equita)             -- il criterio di FundingPips, il
+//        piu' prudente dei tre: non sta mai sotto nessuno dei due.
+//  Valori fuori scala ripiegano sul default (0). La scelta del modo per
+//  un conto e' una FIRMA DI CLAUDIO, non una decisione dell'EA.
+input int    InpDailyBaseline  = 0;      // Baseline giornaliera: 0=EQUITA' (come oggi) . 1=SALDO (FTMO) . 2=MAX(saldo,equita)
 //--- PAUSA MORBIDA E CAP RISCHIO (firme 18/08/2026) -----------------
 //  Questi due NON chiudono e NON bloccano niente da soli: scrivono
 //  GlobalVariable che gli EA leggono prima di aprire. Finche' nessun
@@ -172,6 +218,127 @@ datetime NextResetTime()
    datetime r=StructToTime(s);
    if(r<=t) r+=86400;                 // gia' passata oggi -> domani
    return(r);
+  }
+
+//+------------------------------------------------------------------+
+//| v1.14 -- BASELINE DELLA GIORNATA.                                 |
+//| La grandezza da cui parte il conteggio della perdita giornaliera. |
+//| Funzione PURA: non legge il conto, non tocca GlobalVariable --    |
+//| prende i due numeri e il modo e restituisce la baseline. E' pura  |
+//| APPOSTA, cosi' l'autotest la collauda senza toccare niente.       |
+//|   0 = EQUITA'  -> come v1.12/v1.13: comportamento invariato       |
+//|   1 = SALDO    -> criterio FTMO (saldo alle 00:00 CE(S)T)         |
+//|   2 = MAX      -> criterio FundingPips (il piu' alto dei due)     |
+//| Qualsiasi altro valore ripiega sul DEFAULT: un input sbagliato    |
+//| non deve MAI cambiare da solo il comportamento in campo.          |
+//+------------------------------------------------------------------+
+double BaselineGiorno_Calc(const double bal,const double eq,const int modo)
+  {
+   if(modo==1) return(bal);
+   if(modo==2) return(MathMax(bal,eq));
+   return(eq);                       // 0 e qualunque valore fuori scala
+  }
+
+//+------------------------------------------------------------------+
+//| Il nome del modo, per il giornale e per il pannello. Una          |
+//| protezione che non dichiara COME sta misurando non e'             |
+//| verificabile da un censimento.                                    |
+//+------------------------------------------------------------------+
+string BaselineModoTesto(const int modo)
+  {
+   if(modo==1) return("SALDO");
+   if(modo==2) return("MAX(saldo,equita)");
+   if(modo==0) return("EQUITA'");
+   return("EQUITA' (ripiego: input fuori scala)");
+  }
+
+//+------------------------------------------------------------------+
+//| v1.14 -- AUTOTEST del modo della baseline (gira solo con          |
+//| InpAutotest=true, all'avvio, e NON tocca il conto).               |
+//| Sta QUI e non nell'include apposta: l'include e' condiviso con    |
+//| tutti gli altri EA e il conteggio dei suoi casi (159, marcatore   |
+//| v1.60) e' un cancello di collaudo -- il modo della baseline e'    |
+//| roba del solo guardiano e non deve spostare quel numero.          |
+//+------------------------------------------------------------------+
+bool BaselineUguale(const double a,const double b){ return(MathAbs(a-b)<0.005); }
+
+int AutotestBaselineGiorno()
+  {
+   int falliti=0;
+   Print("[AUTOTEST] ABTG_Guardian v1.14 -- MODO BASELINE GIORNALIERA (funzione pura, conto non toccato)");
+
+   //--- A) IL CASO DEL DOSSIER: 100k con una posizione a -0,8% flottante
+   //    al momento del reset (report/REGOLAMENTI_PROP_2026-09-08.md 3.1)
+   double balA=100000.0, eqA=99200.0;
+   ABTG_AutotestCaso("modo 0 su flottante NEGATIVO -> equita' 99200 (come v1.13)",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,0),99200.0),true,falliti);
+   ABTG_AutotestCaso("modo 1 su flottante NEGATIVO -> saldo 100000 (criterio FTMO)",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,1),100000.0),true,falliti);
+   ABTG_AutotestCaso("modo 2 su flottante NEGATIVO -> 100000 (il piu' alto)",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,2),100000.0),true,falliti);
+   //    e i due PAVIMENTI del dossier, col limite del 5% su 100k = 5000
+   ABTG_AutotestCaso("pavimento modo 1 = 95000 (identico a quello di FTMO)",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,1)-5000.0,95000.0),true,falliti);
+   ABTG_AutotestCaso("pavimento modo 0 = 94200 (800 SOTTO quello di FTMO)",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,0)-5000.0,94200.0),true,falliti);
+
+   //--- B) FLOTTANTE POSITIVO al reset: qui il verso si inverte
+   double balB=100000.0, eqB=100500.0;
+   ABTG_AutotestCaso("modo 0 su flottante POSITIVO -> equita' 100500 (piu' prudente)",
+                     BaselineUguale(BaselineGiorno_Calc(balB,eqB,0),100500.0),true,falliti);
+   ABTG_AutotestCaso("modo 1 su flottante POSITIVO -> saldo 100000",
+                     BaselineUguale(BaselineGiorno_Calc(balB,eqB,1),100000.0),true,falliti);
+   ABTG_AutotestCaso("modo 2 su flottante POSITIVO -> 100500 (il piu' alto)",
+                     BaselineUguale(BaselineGiorno_Calc(balB,eqB,2),100500.0),true,falliti);
+
+   //--- C) CONTO REALE COL CREDITO (i numeri del bug del 06/09):
+   //    bilancio 5.000, credito 2.500 -> equita' 7.500 a flottante zero
+   double balC=5000.0, eqC=7500.0;
+   ABTG_AutotestCaso("credito: modo 0 -> 7500, il fix v1.12 resta intatto",
+                     BaselineUguale(BaselineGiorno_Calc(balC,eqC,0),7500.0),true,falliti);
+   ABTG_AutotestCaso("credito: modo 1 -> 5000, RIAPRE il bug (2500 di cuscinetto falso)",
+                     BaselineUguale(BaselineGiorno_Calc(balC,eqC,1),5000.0),true,falliti);
+   ABTG_AutotestCaso("credito: modo 2 -> 7500, coincide col modo 0 finche' eq>bal",
+                     BaselineUguale(BaselineGiorno_Calc(balC,eqC,2),7500.0),true,falliti);
+   //    credito MA flottante peggiore del credito: eq scende sotto il bilancio
+   //    e il MAX torna a pescare il saldo contaminato. Limite DICHIARATO del
+   //    modo 2 su un conto con credito.
+   ABTG_AutotestCaso("credito + flottante oltre il credito: modo 2 -> 5000 (contaminato)",
+                     BaselineUguale(BaselineGiorno_Calc(5000.0,4000.0,2),5000.0),true,falliti);
+
+   //--- D) INPUT FUORI SCALA: si ripiega sul default, mai su un modo nuovo
+   ABTG_AutotestCaso("modo 7 (fuori scala) -> ripiega su EQUITA'",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,7),99200.0),true,falliti);
+   ABTG_AutotestCaso("modo -1 (fuori scala) -> ripiega su EQUITA'",
+                     BaselineUguale(BaselineGiorno_Calc(balA,eqA,-1),99200.0),true,falliti);
+
+   //--- E) INVARIANTI: il modo 2 non sta MAI sotto agli altri due
+   ABTG_AutotestCaso("invariante: modo 2 >= modo 0 (flottante negativo)",
+                     (BaselineGiorno_Calc(balA,eqA,2)>=BaselineGiorno_Calc(balA,eqA,0)),true,falliti);
+   ABTG_AutotestCaso("invariante: modo 2 >= modo 1 (flottante positivo)",
+                     (BaselineGiorno_Calc(balB,eqB,2)>=BaselineGiorno_Calc(balB,eqB,1)),true,falliti);
+   ABTG_AutotestCaso("conto fermo (saldo=equita'): i tre modi coincidono",
+                     (BaselineUguale(BaselineGiorno_Calc(100000.0,100000.0,0),100000.0) &&
+                      BaselineUguale(BaselineGiorno_Calc(100000.0,100000.0,1),100000.0) &&
+                      BaselineUguale(BaselineGiorno_Calc(100000.0,100000.0,2),100000.0)),true,falliti);
+
+   //--- F) IL NOME DEL MODO, che e' quello che finisce nel giornale
+   ABTG_AutotestCaso("il testo del modo 0 dice EQUITA'",
+                     (StringFind(BaselineModoTesto(0),"EQUITA'")>=0),true,falliti);
+   ABTG_AutotestCaso("il testo del modo 1 dice SALDO",
+                     (BaselineModoTesto(1)=="SALDO"),true,falliti);
+   ABTG_AutotestCaso("il testo del modo 2 dice MAX",
+                     (StringFind(BaselineModoTesto(2),"MAX")>=0),true,falliti);
+   ABTG_AutotestCaso("i tre testi sono DISTINTI fra loro",
+                     (BaselineModoTesto(0)!=BaselineModoTesto(1) &&
+                      BaselineModoTesto(1)!=BaselineModoTesto(2) &&
+                      BaselineModoTesto(0)!=BaselineModoTesto(2)),true,falliti);
+   ABTG_AutotestCaso("un modo fuori scala si DICHIARA come ripiego nel giornale",
+                     (StringFind(BaselineModoTesto(7),"ripiego")>=0),true,falliti);
+
+   if(falliti==0) Print("[AUTOTEST] baseline giornaliera: TUTTI I 22 CASI PASSATI.");
+   else           PrintFormat("[AUTOTEST] baseline giornaliera: %d CASI FALLITI -- NON mettere in campo.",falliti);
+   return(falliti);
   }
 
 //+------------------------------------------------------------------+
@@ -389,7 +556,11 @@ int OnInit()
 
    //--- v1.11: il filo verso gli EA e' integro? (solo lettura e log)
    VerificaFilo();
-   if(InpAutotest) ABTG_AutotestGuardia();
+   if(InpAutotest)
+     {
+      ABTG_AutotestGuardia();       // casi del canale (nell'include, INVARIATI)
+      AutotestBaselineGiorno();     // v1.14: casi del modo della baseline
+     }
 
    double bal=AccountInfoDouble(ACCOUNT_BALANCE);
    double eq =AccountInfoDouble(ACCOUNT_EQUITY);
@@ -420,15 +591,33 @@ int OnInit()
    if(eq>gPeak) gPeak=eq;
    GlobalVariableSet(GV_PEAK,gPeak);
 
+   // v1.14: il MODO della baseline si dichiara all'avvio, e a voce alta se
+   // NON e' quello di default. A default (0) questa riga non compare: il
+   // giornale resta quello della v1.13.
+   if(InpDailyBaseline!=0)
+      PrintFormat("[GUARDIAN] MODO BASELINE GIORNALIERA = %s (InpDailyBaseline=%d). NON e' il default: "
+                  "e' una scelta di conto FIRMATA. Su un conto CON CREDITO del broker il modo 1 (SALDO) "
+                  "riaprirebbe il bug del 06/09 -- li' vale solo il modo 0.",
+                  BaselineModoTesto(InpDailyBaseline),InpDailyBaseline);
+   if(InpDailyBaseline<0 || InpDailyBaseline>2)
+      PrintFormat("[GUARDIAN] *** InpDailyBaseline=%d FUORI SCALA (attesi 0/1/2): uso il DEFAULT, baseline = EQUITA'.",
+                  InpDailyBaseline);
+
    // baseline del giorno
    int pk=PropDayKey();
    if(!GlobalVariableCheck(GV_DAYKEY) || (int)GlobalVariableGet(GV_DAYKEY)!=pk)
      {
+      // v1.12: la baseline giornaliera NON viene dal bilancio (credito del
+      // broker). v1.14: da quale grandezza viene lo dice il MODO -- default
+      // 0 = EQUITA', cioe' identico alla v1.13.
+      double base=BaselineGiorno_Calc(bal,eq,InpDailyBaseline);
       GlobalVariableSet(GV_DAYKEY,pk);
-      GlobalVariableSet(GV_DAYSTART,eq);      // v1.12: baseline giornaliera = EQUITA' a inizio giornata (non bilancio)
+      GlobalVariableSet(GV_DAYSTART,base);
       GlobalVariableSet(GV_BLOCKDAY,0);
       GlobalVariableSet(GV_PAUSA,0);           // giorno nuovo = pausa morbida azzerata
       GlobalVariableSet(GV_PAUSAFINO,0);
+      PrintFormat("[GUARDIAN] nuovo giorno prop: baseline=%.2f (modo=%s)  [equity=%.2f bilancio=%.2f]",
+                  base,BaselineModoTesto(InpDailyBaseline),eq,bal);
      }
    if(!GlobalVariableCheck(GV_PAUSA))    GlobalVariableSet(GV_PAUSA,0);
    if(!GlobalVariableCheck(GV_PAUSAFINO))GlobalVariableSet(GV_PAUSAFINO,0);
@@ -525,12 +714,17 @@ void OnTimer()
    int pk=PropDayKey();
    if((int)GlobalVariableGet(GV_DAYKEY)!=pk)
      {
+      // v1.12: non dal bilancio (credito del broker). v1.14: la scelta la
+      // fa il MODO -- default 0 = EQUITA', identico alla v1.13.
+      double base=BaselineGiorno_Calc(bal,eq,InpDailyBaseline);
       GlobalVariableSet(GV_DAYKEY,pk);
-      GlobalVariableSet(GV_DAYSTART,eq);    // v1.12: EQUITA', non bilancio (vedi nota in testa al file)
+      GlobalVariableSet(GV_DAYSTART,base);
       GlobalVariableSet(GV_BLOCKDAY,0);
       GlobalVariableSet(GV_PAUSA,0);        // la pausa morbida dura un giorno prop
       GlobalVariableSet(GV_PAUSAFINO,0);
-      if(InpVerbose) PrintFormat("[GUARDIAN] nuovo giorno prop: baseline=%.2f (pausa morbida azzerata)",eq);
+      if(InpVerbose)
+         PrintFormat("[GUARDIAN] nuovo giorno prop: baseline=%.2f (modo=%s)  [equity=%.2f bilancio=%.2f] (pausa morbida azzerata)",
+                     base,BaselineModoTesto(InpDailyBaseline),eq,bal);
      }
 
    // aggiorno picco equity (per trailing)
