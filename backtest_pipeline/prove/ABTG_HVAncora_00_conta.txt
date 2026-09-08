@@ -1,0 +1,339 @@
+# =====================================================================
+#  PASSO 0 -- ABTG_HVAncora su U30USD (Dow) M30
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_HVAncora   (mql5\Experts\, scritto il 09/09/2026,
+#      MAI COMPILATO e MAI GIRATO al momento in cui questo file nasce)
+#  SPEC e criteri di round: prove\HVANCHOR_M30_BOZZA.txt
+#  DOSSIER DI CACCIA:      report\CACCIA_M30_INDICI_2026-09-08.md (P3, 8/10)
+#  REFERTO DI PORTING:     report\EA_HV_ANCORA_2026-09-09.md
+# =====================================================================
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "HV Spike Strategy (HVP + OR Breakout +
+#    Reversal + TP/SL Modes)" di kostastrovas (TradingView, slug
+#    1oZNa7Oq, 26/10/2025, Pine v6, 134 righe, 15 input).
+#    LICENZA: [INCERTO] -- NESSUNA intestazione nel sorgente. E'
+#    VERIFICATO solo che scriptAccess = "open_no_auth", cioe' che il
+#    sorgente e' LEGGIBILE. Leggibile non vuol dire riutilizzabile:
+#    per questo il .mq5 non contiene UNA RIGA del suo codice.
+#    Copia archiviata (come letta, per tracciabilita'):
+#      caccia_strategie\biblioteca\sorgenti\
+#      HvSpikeOrBreakoutReversal_kostastrovas-NOLICENSE_tv1oZNa7Oq_2026-09-08.pine
+#    L'attribuzione e' RIPETUTA in testa a ABTG_HVAncora.mq5.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA CELLA ESISTE
+# ---------------------------------------------------------------------
+#  L'EA e' nato da specifica e non e' mai stato compilato. Prima di
+#  qualunque griglia si CONTA: una griglia su un motore di cui non si
+#  sa nemmeno se opera e' tempo di macchina buttato e, peggio, produce
+#  celle "verdi per caso" su un campione che non esiste.
+#  E' la stessa cella che l'08/09 ha chiuso ABTG_OpeningReversalB in un
+#  pomeriggio (2 operazioni in 21 mesi -> archiviato per FREQUENZA)
+#  invece che in un round.
+#
+#  >>> COSA DEVE RISPONDERE, E NIENT'ALTRO
+#      1. l'EA COMPILA e PARTE? (riga [HVA] avviato... con la CONFIG)
+#      2. quante ANCORE nascono (colonna Ancore)? E' la domanda che
+#         viene PRIMA di tutte: senza ancore non c'e' nemmeno un
+#         prezzo di riferimento, e il motore non esiste.
+#      3. quante OPERAZIONI (colonna Trades)? Da tutti e due i LATI
+#         (colonne Long / Short)?
+#      4. quante OCCASIONI per RAMO (colonne Cont Long/Short ed
+#         Esaur Long/Short)? Sono i segnali GREZZI, contati per tutta
+#         la vita dell'ancora ANCHE dopo che l'operazione e' stata
+#         presa: dicono quante occasioni c'erano, non quante ne
+#         abbiamo prese.
+#      5. quante ancore muoiono a vuoto (colonna Ancore Scadute)? Se
+#         Ancore e' alto e Trades e' basso, il collo di bottiglia e'
+#         la CONVERSIONE (l'estensione del 100% non arriva), non
+#         l'attivazione -- e si legge dal CSV invece di indovinarlo.
+#      6. quanto vale la PEGGIOR GIORNATA, e quanto vale la RAFFICA
+#         (colonne Max Trade Giorno / Max Trade Settimana)?
+#
+#  >>> COSA NON PUO' USCIRE DA QUI: NESSUNA PROMOZIONE.
+#      Non c'e' nessun asse di merito. L'unico asse e' TECNICO -- il
+#      magic, due celle identiche per costruzione: serve a dare a MT5
+#      qualcosa da ottimizzare (senza, zero passate: classe 134) e
+#      regala il gemello di determinismo del cancello G1.
+#      Se il profitto fosse bello NON si promuove: si scrive il numero
+#      e si passa alla griglia. Se il DD sfonda, o se il PF e'
+#      leggibile e sotto il pavimento, si BOCCIA subito (vedi sotto).
+#
+#  >>> IL CANCELLO CHE PUO' FERMARE TUTTO SUBITO
+#      Trades = 0 NON vuol dire "nessun edge": vuol dire "non e'
+#      girata". Se esce 0 si guarda il LOG e la colonna Ancore PRIMA
+#      di scrivere qualunque verdetto: se anche le Ancore sono 0, non
+#      e' il motore, e' il percentile (o lo storico) che non si forma.
+#
+# ---------------------------------------------------------------------
+#  TRE COSE LETTE NEL SORGENTE CHE CAMBIANO L'ATTESA -- prima dei numeri
+# ---------------------------------------------------------------------
+#  (1) NELLA FONTE LO STOP E IL TAKE NON ESISTONO AFFATTO
+#      (`strategy.position_avg_price` letto PRIMA dell'ingresso ->
+#      `strategy.exit(stop=na, limit=na)` non piazza niente, e non
+#      viene richiamato dopo). Qui lo stop viaggia DENTRO l'OrderSend:
+#      il difetto non puo' esistere. Va detto perche' e' la ragione
+#      per cui questo motore vale SOLO con una gestione nostra.
+#
+#  (2) NELLA FONTE IL RAMO "REVERSAL" E' CODICE MORTO.
+#      La prima barra che chiude oltre il 100% accende il breakout,
+#      prende il trade e mette `tradeTaken := true`; il ramo reversal
+#      pretende `not tradeTaken` e non puo' piu' scattare. Non c'e'
+#      nessun input per spegnere il breakout.
+#      >>> CONSEGUENZA DIRETTA SU QUESTA CELLA, dichiarata adesso:
+#          con ENTRAMBI i rami accesi (come qui, che e' la config
+#          della fonte) gli INGRESSI di esaurimento saranno ~0 PER
+#          COSTRUZIONE. NON e' un bug e NON e' un verdetto sul ramo:
+#          e' la gerarchia della fonte. Le colonne Esaur Long/Short
+#          contano le OCCASIONI, e servono a dire QUANTO varrebbe
+#          misurare il ramo -- che si fa in una cella dedicata con
+#          InpUsaRamoContinuazione=false, NON qui.
+#
+#  (3) IL "PERCENTILE A 252 BARRE" SU M30 NON E' UN ANNO: E' UNA
+#      SETTIMANA. 252 e' il numero di sedute di un anno su un grafico
+#      GIORNALIERO; su M30, con ~46 barre al giorno sugli indici, 252
+#      barre valgono ~5-6 sedute.
+#      >>> Il motore NON misura la volatilita' rara dell'anno: misura
+#          la volatilita' rispetto all'ULTIMA SETTIMANA.
+#      >>> Questo RIBALTA in parte la paura del dossier ("senza il
+#          ramo sessioni la frequenza crolla"): l'attivazione e' molto
+#          meno rara di quanto il nome "HV Spike" faccia pensare.
+#          Ma resta una PREVISIONE, e il numero lo dice questa cella.
+#
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e' la parte che vale di piu'
+# ---------------------------------------------------------------------
+#  Il metro (firmato 07/09): il pavimento e' 1,00 op/giorno per
+#  FAMIGLIA = {D30EUR, U30USD, NASUSD}. Su UN simbolo la quota che
+#  serve e' quindi ~0,33 op/giorno.
+#
+#  Il conto, con le ipotesi in chiaro (si smontano una per una se
+#  sbaglio, ed e' il motivo per cui le scrivo):
+#    - finestra 08:00-20:30 SERVER su M30 = ~26 barre di decisione per
+#      seduta (LVNArbitro, stesso simbolo e stessa finestra, ne ha
+#      misurate 4.485 su 256 giorni = 17,5/giorno: e' il numero vero
+#      da cui parto);
+#    - ~440 sedute nei 21 mesi di storico BCM sugli indici;
+#    - la HV e' una stdev a 30 barre: e' una serie LISCIA e molto
+#      autocorrelata. Attraversa verso l'alto la propria mediana a
+#      5-6 giorni (la soglia 50) forse una volta ogni 1-2 giorni di
+#      barre; ma si vedono solo gli attraversamenti che capitano
+#      DENTRO la finestra (26 barre su ~46) -> stima 0,3-0,8 ANCORE
+#      per seduta = 130-350 ancore nei 21 mesi;
+#    - conversione ancora -> operazione: serve una chiusura oltre il
+#      100% del range della barra-ancora entro 20 barre valutate. E'
+#      un movimento di un intero range in piu': stima 25-40%.
+#
+#  >>> ATTESA CENTRALE: 130-350 ANCORE e 50-200 OPERAZIONI nei 21
+#      mesi su U30USD, cioe' 0,11-0,45 op/giorno di seduta.
+#      >>> Lo dico chiaro: la META' BASSA di questa forbice sta SOTTO
+#          la quota per simbolo (0,33) e il campione per parte sta
+#          SOTTO il pavimento dei 150 dell'Emendamento A. Questo e' il
+#          candidato piu' fragile dei tre della coda M30, il dossier
+#          lo diceva, e non sto scommettendo il contrario.
+#
+#  >>> LE QUATTRO SOGLIE DI FREQUENZA, dichiarate adesso:
+#      < 30 operazioni totali   -> BOCCIATO per frequenza, senza
+#          appello, come ABTG_OpeningReversalB l'08/09. Non si spende
+#          nemmeno la corsa sui gemelli.
+#      30-100 operazioni        -> sta in piedi SOLO come FAMIGLIA a
+#          tre simboli, e il campione per parte NON c'e': MERITO
+#          SOSPESO (valvola R59), RISCHIO no. Si decide se spendere le
+#          due corse gemelle, non si promuove.
+#      >= 150 per PARTE (IS e OOS) -> campione leggibile su un simbolo
+#          solo: si passa alla griglia da 27 celle della bozza.
+#      > 1.500 operazioni       -> il motore MITRAGLIA: allora la
+#          lettura (3) qui sopra e' persino timida, e le colonne
+#          "Peggior Giornata %" e "Max Trade Giorno/Settimana"
+#          diventano il cancello principale.
+#
+#  >>> ATTESA SUI RAMI: le occasioni di CONTINUAZIONE devono essere
+#      molte piu' di quelle di ESAURIMENTO (l'esaurimento pretende
+#      un'estensione PRIMA e un rientro POI: e' un sottoinsieme).
+#      Stima grezza: esaurimento = 20-40% delle occasioni totali.
+#      Gli INGRESSI di esaurimento, invece, ~0 -- vedi punto (2).
+#
+#  >>> ATTESA SUI DUE LATI (regola 25/08): long e short dello stesso
+#      ordine di grandezza. Il motore e' simmetrico per costruzione:
+#      uno sbilanciamento oltre 70/30 e' un indizio di deriva del
+#      sottostante (il Dow 2024-2026 sale), non del codice, e va
+#      scritto come tale.
+#
+# ---------------------------------------------------------------------
+#  ###  LA SOGLIA DI PF -- IL CANCELLO CHE VIENE PRIMA DELLA GRIGLIA  ###
+# ---------------------------------------------------------------------
+#  DA DOVE VIENE, dichiarato: e' il cancello C0 proposto in
+#  report\PERCHE_MUOIONO_2026-09-08.md (censimento di ~71 righe-
+#  verdetto d'archivio, 08/09/2026). LO ADOTTO COME CRITERIO DI QUESTO
+#  ROUND, congelato prima dei numeri. NON e' firmato da Claudio: nel
+#  referto e' scritto "PROPOSTO, non congelato", e resta cosi'.
+#
+#      SE  in una finestra (IS o OOS) n >= 150
+#      E   il PF misurato A TICK REALI in QUELLA finestra e' < 1,10
+#      ALLORA il candidato si SCARTA: niente griglia, niente
+#      ottimizzazione, niente "proviamo un'altra cella".
+#      Si applica al PEGGIORE dei PF leggibili, non al migliore.
+#      Se n < 150 in TUTTE le finestre il cancello NON si applica: il
+#      PF non e' una misura, e si torna al conteggio delle occasioni.
+#
+#  PERCHE' 1,10, COL MECCANISMO E NON COL FATTO CHE SEPARA I DATI:
+#    un muro prop e' un vincolo sul MASSIMO della curva di equity, non
+#    sulla sua media. Per un percorso con media per operazione mu e
+#    rumore sigma il drawdown massimo atteso converge a sigma^2/(2*mu)
+#    (Magdon-Ismail & Atiya 2004): cresce col QUADRATO del rumore e
+#    cala con la PRIMA POTENZA dell'edge -- e mu e' proporzionale a
+#    (PF - 1). Quindi a PF vicino a 1 la deriva sparisce, resta solo
+#    il rumore, e il DD esplode INDIPENDENTEMENTE da quanto sei bravo
+#    per trade. E' il ritratto esatto di ABTG_LVNArbitro l'08/09:
+#    OOS +11,31% su 100k -- sopra il target -- con DD 11,76%, cioe'
+#    "guadagna e muore per strada".
+#    Il numero 1,10 e' il punto di mezzo fra il massimo dei bocciati
+#    per rischio dell'archivio (1,12) e il minimo delle sedie vive
+#    leggibili (1,154). >>> IL MARGINE E' SOTTILE (0,034 punti di PF)
+#    e va detto: C0 non ha ancora sbagliato sui dati che abbiamo, ma
+#    non e' una legge di natura.
+#
+#  E LA POSTILLA CHE RIGUARDA PROPRIO QUESTO MOTORE:
+#    HVAncora lavora A RAFFICHE (gli attraversamenti di percentile si
+#    raggruppano, perche' la volatilita' e' persistente). Piu' il
+#    percorso e' a grumi, piu' sigma per unita' di tempo e' grande, e
+#    piu' la formula sopra punisce un PF vicino a 1. >>> Quindi 1,10
+#    qui e' un PAVIMENTO, non un obiettivo: un PF fra 1,10 e 1,20 su
+#    questo motore NON e' una buona notizia, e' un rinvio.
+#
+#  >>> Perche' e' il cancello giusto e non ne bastano altri:
+#      13 motori su 13 bocciati per RISCHIO in tutto l'archivio hanno
+#      PF <= 1,19. Zero eccezioni. E il numero di operazioni NON
+#      predice la morte (EMA200 U30USD: 712 operazioni, DD 6,48%).
+#      Il collo di bottiglia del progetto non e' trovare i trade: e'
+#      il PF. Questo file lo scrive PRIMA di vedere il numero.
+#
+# ---------------------------------------------------------------------
+#  IL RISCHIO, che non si sospende mai (Emendamento B)
+# ---------------------------------------------------------------------
+#  DD > 10% o peggior giornata > 5% in una qualunque delle due celle
+#  -> BOCCIATO, a qualunque n. E la lezione LVNArbitro dell'08/09:
+#  il DD va riletto ANCHE all'altra taglia di conto prima di scrivere
+#  il verdetto (li' 19,35% a una taglia e 11,76% a un'altra: due
+#  numeri diversi dello stesso motore).
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26  <- MISURATO, non assunto: inizio dello storico
+#    tick BCM sugli indici (SPREAD_FLOTTA_MISURA_2026-09-03.md;
+#    misura_tick\misura_tick_D30EUR.csv = 35.408.137 tick dal
+#    2024.09.26).
+#  REGIME CONTENUTO: UNO SOLO -- e per QUESTO motore e' il limite piu'
+#    grave dei tre, perche' un motore ancorato alla VOLATILITA'
+#    misurato in un'epoca di volatilita' omogenea non ha visto il caso
+#    che gli interessa. Va scritto accanto a qualunque risultato.
+#
+#  @SIMBOLO U30USD -- e qui MI DISCOSTO dalla bozza, che proponeva
+#    NASUSD per primo (il piu' volatile). Motivo dichiarato: il gemello
+#    ABTG_LVNArbitro e' appena girato su U30USD con la STESSA finestra,
+#    la STESSA sessione e gli STESSI costi. Sullo stesso simbolo i due
+#    conteggi si confrontano direttamente (barre valutate, peggior
+#    giornata, frequenza) invece di essere due misure incomparabili.
+#    Se la frequenza regge, i gemelli NASUSD e D30EUR vengono subito
+#    dopo, con tutto il resto identico carattere per carattere.
+#
+#  ORARI IN ORA SERVER BCM (= ora italiana - 1). Qui NON c'e' un orario
+#  d'apertura da azzeccare (il motore non sa che ora e'): la finestra
+#  08:00-20:30 e il flat alle 21:00 servono al COSTO e al divieto di
+#  overnight, non al segnale. Restano comunque in ORA SERVER.
+#  >>> EFFETTO DICHIARATO: fuori finestra non si valuta niente, quindi
+#      NON nascono ancore. Un attraversamento notturno non viene visto.
+#      La finestra COSTA FREQUENZA, ed e' un prezzo scelto.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+#     776900: blocco 7769xx VERIFICATO LIBERO nel repo il 09/09/2026
+#     (grep repo-wide su 776900/776950: zero occorrenze; incrociato col
+#     censimento CODA_01_sedie_attaccate_20260908_033003.log).
+#     Occupati e NON toccati: 769800 (ABTG_ImpulsoApertura),
+#     769900+769950 (ABTG_LVNArbitro), 772900 (ABTG_IBRetest).
+InpMagic=776900||776900||50||776950||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno.
+#     Fissarli e' voluto: cosi' la cella misurata resta questa anche se
+#     domani qualcuno cambia un default nel .mq5.
+InpUsaGuardian=true||true||0||true||N
+
+# --- ATTIVAZIONE: i valori della fonte, tali e quali (30 / 252 / 50).
+#     InpModoAttivazione=0 e' l'UNICO valore che l'EA accetta: con
+#     qualunque altro OnInit RIFIUTA di partire. Il divieto B0 della
+#     bozza (mai la modalita' "Market Sessions", che e' un ORB) qui
+#     non e' una promessa: e' impossibile da violare.
+InpModoAttivazione=0||0||0||0||N
+InpHvLen=30||30||0||30||N
+InpHvLookback=252||252||0||252||N
+InpHvSoglia=50.0||50.0||0||50.0||N
+# --- tetto di vita dell'ancora: DI CASA, la fonte non ce l'ha
+#     (li' un'ancora vecchia di tre settimane puo' ancora sparare)
+InpAncoraBarre=20||20||0||20||N
+InpAncoraSoloOggi=true||true||0||true||N
+
+# --- i due RAMI: entrambi accesi, come nella fonte. Ricorda il punto
+#     (2): cosi' gli INGRESSI di esaurimento sono ~0 per costruzione,
+#     e si leggono solo le OCCASIONI nelle colonne dedicate.
+InpUsaRamoContinuazione=true||true||0||true||N
+InpUsaRamoEsaurimento=true||true||0||true||N
+
+# --- i due LATI: entrambi accesi (regola 25/08, si separano coi contatori)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- SESSIONE, ORA SERVER BCM (italiana - 1). NON viene dalla fonte
+#     (il Pine opera 24 ore): e' di casa, e serve al costo e al
+#     divieto di overnight.
+InpOraInizio=8||8||0||8||N
+InpMinInizio=0||0||0||0||N
+InpOraFine=20||20||0||20||N
+InpMinFine=30||30||0||30||N
+InpUsaFlatSeduta=true||true||0||true||N
+InpOraFlat=21||21||0||21||N
+InpMinFlat=0||0||0||0||N
+
+# --- STOP e USCITA: stop 1,0*ATR(14) e TP 2R sono della fonte.
+#     Il pavimento in punti indice (R109) e' di casa: MAI zero.
+InpStopAtr=1.0||1.0||0||1.0||N
+InpAtrLen=14||14||0||14||N
+InpMinStopPts=25||25||0||25||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+InpRR=2.0||2.0||0||2.0||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- RISCHIO: 0,65% di contratto di casa (la fonte usa il 10%
+#     dell'equity a trade, che non e' un rischio: e' una taglia);
+#     gate spread in % dello stop (R55); tetto giornaliero SPENTO =
+#     come la fonte (la raffica si MISURA prima di tapparla).
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpreadPctOfStop=2.5||2.5||0||2.5||N
+InpMaxTradesPerDay=0||0||0||0||N
+
+# InpComment="HVA"   (stringa: lasciata al default compilato -- un pin di
+#                     stringa vuoto MT5 lo ignora in silenzio, classe FiboH4)
+InpVerbose=true||true||0||true||N
+# =====================================================================
+#  DOPO QUESTA CELLA, e solo dopo:
+#    - se il conteggio regge E il PF non e' sotto il pavimento -> i
+#      gemelli NASUSD / D30EUR e poi la griglia da 27 celle gia'
+#      congelata in HVANCHOR_M30_BOZZA.txt (cella scelta AL CENTRO
+#      DELL'ALTOPIANO, mai al picco);
+#      >>> nota per chi prepara quella griglia: il file bozza NON pinna
+#          InpAncoraSoloOggi (l'input non esisteva quando e' stato
+#          scritto). Va aggiunto, altrimenti controlla_prova.py non se
+#          ne accorge e la cella misura un default invece di una scelta.
+#    - se il conteggio non regge -> si scrive il numero e si archivia,
+#      come ABTG_OpeningReversalB. Costa un pomeriggio, non un round.
+#    - il ramo ESAURIMENTO, se le sue OCCASIONI sono tante, merita una
+#      cella dedicata con InpUsaRamoContinuazione=false: e' l'unico
+#      modo di misurarlo, e nella fonte non e' mai stato misurato da
+#      nessuno perche' li' non gira.
+# =====================================================================
