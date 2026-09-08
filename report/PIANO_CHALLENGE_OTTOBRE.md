@@ -468,3 +468,40 @@ Guardian) · `report/FIRME_2026-09-02.md` · `report/FIRME_2026-09-03.md` ·
 | data | versione | cosa cambia | perche' |
 |---|---|---|---|
 | **08/09/2026** | **v1** | prima stesura. Nasce dalla frase di Claudio dell'08/09 (_"dai primi d'ottobre vorrei iniziare la challenge"_): il piano viene costruito **all'indietro dal 1 ottobre** invece che in avanti dai cancelli. Novita' incorporate lo stesso giorno: il **requisito R4** (rischio vero = dichiarato) dal censimento del codice di sizing su 91 EA, la **firma PostNews 1,30** e il **rilievo DST del 25/10-01/11** che nessun documento aveva ancora scritto | c'e' una data, e una data cambia l'ordine delle cose — **non i criteri** |
+
+---
+
+# 🔄 AGGIORNAMENTO DI CLAUDE — 08/09/2026, poche ore dopo la stesura
+
+## ✅ IL FIX DI DUE RIGHE **E' STATO APPLICATO** (commit `872dba8`)
+Il piano dice *"difetto di due righe, individuato e **non applicato**"*. Vero
+quando è stato scritto, **superato adesso**: la correzione è nei sorgenti, in
+**tutti e 15** i file (13 in `mql5/Experts/`, 2 in `standalone/`), con le
+versioni alzate **1.00 → 1.01** e le tre verifiche testuali passate
+(`report/FIX_LOTTO_PENDENTE_2026-09-08.md`).
+
+### 🔴 Ma il requisito R4 **NON è ancora soddisfatto**, e la differenza è tutta qui
+Sui terminali **gira l'`.ex5`, non il sorgente**. Finché quelle 7 sedie vive
+non vengono **ricompilate (F7) e ricaricate**, il codice che rischia è ancora
+quello vecchio.
+
+| stato | R4 |
+|---|---|
+| sorgenti nel repo | ✅ corretti |
+| `.ex5` sui terminali | 🔴 **ancora il vecchio** |
+| **firma che serve** | ricompilare **cambia il volume** delle sedie vive → **è una decisione di Claudio** |
+
+👉 Quindi il conto del piano — *"5 sedie se R4 è verificata, 2 altrimenti"* —
+**resta valido**: oggi siamo ancora a 2. Ma la distanza da 5 non è più "un
+lavoro da fare": è **una compilazione e un ricarico**.
+
+## 🔍 E il numero che regge la raccomandazione è andato in verifica
+La proposta del piano (*"slittare di due settimane costa zero perché su FTMO
+non c'è limite di tempo"*) poggia su una regola **assunta, non letta alla
+fonte**. È partito un agente a verificarla per iscritto, insieme a tutto il
+resto del regolamento delle prop candidate → `report/REGOLAMENTI_PROP_2026-09-08.md`.
+
+🔴 **La domanda più pericolosa di quel giro non è il limite di tempo: è se il
+muro totale sia STATICO o TRAILING.** Tutte le misure di DD del progetto
+assumono **statico**. Se la prop scelta usa il trailing, **vanno rilette
+tutte**, e va detto prima di comprare — non dopo.
