@@ -10845,3 +10845,43 @@ $r=Join-Path $env:APPDATA 'MetaQuotes\Terminal'; Get-ChildItem $r -Directory -EA
 ✅ **Nota di merito al cancello**: il pre-volo della riga dell'ancora ha beccato
 il tetto **in due secondi**, prima di otto passate a tick reali su 104 milioni
 di tick. Senza, avremmo letto un numero diverso e accusato **la macchina nuova**.
+
+---
+
+## 🔧 CLASSE 162 — il referto del runner e' delle **03:30**: parlare di "oggi" leggendolo e' leggere IERI
+_(08/09/2026 sera, sbagliando: ho scritto che il conto REALE non aveva operato)_
+
+**Il fatto.** Il runner gira alle **03:30**. Quando legge i log del giorno
+corrente, quel file e' appena nato: nel referto dell'08/09 si vede scritto
+proprio cosi'
+```
+log letti: 3
+  20260908.log   (0 KB, ultimo 09/08/2026 00:00:28)   <-- ZERO KB
+  20260907.log   (83 KB, ultimo 09/07/2026 23:55:23)  <-- e' da qui che viene TUTTO
+```
+👉 **Tutte le righe di quel referto descrivono il 6 e il 7 settembre.**
+
+**Come l'ho sbagliata.** Ho scritto, la sera dell'08/09, che *"il conto reale non
+ha ancora fatto nessuna operazione"*, basandomi su tre indizi (`totDD=0.00%`,
+`SlippageLogger` a 0 campioni, nessuna riga di ordine) **presi tutti e tre da
+quel referto**. Claudio ha risposto: _"non e' vero, il conto reale ha operato
+oggi"_. **Aveva ragione lui**: i miei tre indizi si riferivano al **07/09**, e la
+dimensione `0 KB` del file di oggi era **stampata sotto i miei occhi**.
+
+> ### 🔴 LA REGOLA
+> Ogni volta che si cita un referto del runner, si dichiara **A CHE ORA E'
+> STATO SCATTATO** e **QUALI GIORNI CONTIENE**. Una frase al presente
+> ("il conto non ha operato") ricavata da una foto delle 03:30 e' **falsa per
+> costruzione** su tutto quello che succede dopo le 03:30.
+> **Se la domanda riguarda oggi, la foto di stanotte non risponde: serve una
+> misura di adesso.**
+
+⚠️ **E vale anche per l'altra meta' di quel referto**: "sul conto reale non c'e'
+il TradeExporter" viene da `CODA_01`, che legge i `.chr` -- cioe' una **foto al
+salvataggio del profilo**, non lo stato vivo. E' **la stessa domanda** che
+`CODA_05` misura, ed e' stata scritta **la mattina dello stesso giorno**.
+Sapevo del limite e l'ho usato lo stesso come se fosse un fatto presente.
+
+**Antidoto pratico**: per sapere cosa sta facendo un conto **adesso** servono
+(a) il log del terminale **letto adesso**, oppure (b) un `TradeExporter` che
+scriva il CSV. Il resto e' archeologia, per quanto fresca sembri.
