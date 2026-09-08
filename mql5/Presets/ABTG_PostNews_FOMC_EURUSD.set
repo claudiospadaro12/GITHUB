@@ -2,7 +2,11 @@
 ; Notizia 20:30 IT (ora legale) / 19:30 IT (ora solare). Azione = news+10 min. Scadenza = news+75 min.
 ; ESTATE (ora legale IT): azione 20:40 IT = 19:40 server; scadenza 21:45 IT = 20:45 server (valori sotto).
 ; INVERNO (ora solare IT): azione 19:40 IT = 18:40 server; scadenza 20:45 IT = 19:45 server -> metti Action 18:40, Expiry 19:45.
-; Range = candela della notizia + la successiva. BUY STOP max+3, SELL STOP min-2, TP50/SL25. NIENTE trailing.
+; Range = candela della notizia + la successiva. BUY STOP max+3, SELL STOP min-3, TP50/SL25. NIENTE trailing.
+; [08/09/2026] corretto il commento, NON il valore: diceva "SELL STOP min-2"
+;   ma InpSellOffsetPips vale 3.0 in tutti e tre i preset di questa
+;   famiglia, e l'etichetta dell'input nel sorgente dice "strategia: 3 pip".
+;   Era il commento a essere vecchio. Visto nella schermata F7 di Claudio.
 ; Attacca su grafico EUR/USD M5 e carica questo preset. Magic 771202.
 ; NB: per operare servono le DATE FOMC nel file abtg_news.csv (valuta USD).
 InpActionHour=19

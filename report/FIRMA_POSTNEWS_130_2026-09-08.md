@@ -127,3 +127,55 @@ caricato su niente.** Caricarlo (o no) è una decisione a parte.
    allargamento.
 2. **Con quale coppia?** Solo EURJPY (preset esistente, già collaudato) oppure
    **anche** EURUSD (preset nuovo, mai girato).
+
+---
+
+## ✅ CONTROLLO DELLA SCHERMATA F7 — 08/09/2026, 05:24
+
+Claudio ha aperto i **Dati in Ingresso** di `ABTG_PostNews 1.10 (EURJPY,M5)` e
+chiesto: _"mi sembra sia tutto a posto, se vuoi cambio solo il rischio"_.
+
+**Ha ragione.** Confronto riga per riga con il preset congelato
+`ABTG_PostNews_ECB_EURJPY.set`:
+
+| input | schermata | preset | |
+|---|---|---|---|
+| ora d'azione (server) | 14 : 00 | 14 : 00 | ✅ |
+| scadenza pendenti (server) | 17 : 15 | 17 : 15 | ✅ |
+| opera SOLO con la notizia nel CSV | true | true | ✅ |
+| file news | `abtg_news.csv` (Common) | idem | ✅ |
+| impatto minimo | 3 | 3 | ✅ |
+| valuta / titolo | **EUR** / **ECB** | EUR / ECB | ✅ |
+| offset BUY / SELL | 3.0 / 3.0 | 3.0 / 3.0 | ✅ |
+| TP / SL | 50.0 / 25.0 | 50.0 / 25.0 | ✅ |
+| trailing +25 -> SL 15 | true / 25 / 15 | idem | ✅ |
+| chiusura venerdi | 21:50 server | 21:50 | ✅ |
+| riferimento SL per la size | 50.0 | 50.0 | ✅ |
+| commento / magic | `ECB PostNews` / **771201** | idem | ✅ |
+| **rischio %** | 🔴 **3.0** | **1.30** | ❌ **l'unica differenza** |
+
+> ### 🎯 UNA SOLA RIGA FUORI POSTO SU QUINDICI.
+> Il grafico ha gia' addosso il preset ECB: e' arrivato tutto tranne il
+> rischio, che era stato riscalato **dopo**. Quindi si cambia **solo quel
+> numero**, ed e' esattamente quello firmato.
+
+### 🔒 E l'identita' del terminale e' MISURATA, non riconosciuta a occhio
+La finestra non mostra il numero di conto, quindi non chiedo a Claudio di
+fidarsi dell'aspetto. Lo dice il censimento: **le sedie PostNews esistono solo
+sul piccolo**. `CODA_01` dell'08/09 sul conto reale trova **tre** sedie
+(`DAX_Apertura_EU` 770101, `ORB_Ottimizzato` 770611, `SlippageLogger`) e
+**nessun PostNews**. 👉 Un grafico `ABTG_PostNews (EURJPY,M5)` **puo' essere
+solo** il terminale del **50503392**.
+
+### 📎 Una conferma laterale, non cercata
+La schermata dice **3.0**, e `CODA_01` aveva letto **3.0** dal `.chr`. Per
+questo grafico la foto **coincideva con la realta'**: un punto a favore della
+freschezza dei `.chr`, che `CODA_05` misurera' stanotte su tutti i terminali.
+Un caso non fa una regola, ma va messo agli atti.
+
+### 🧹 E un difettuccio trovato leggendo la schermata
+L'intestazione dei preset diceva *"SELL STOP min-2"* mentre
+`InpSellOffsetPips` vale **3.0** in tutti e tre i preset della famiglia (e
+l'etichetta nel sorgente dice *"strategia: 3 pip"*). Era il **commento** a
+essere vecchio, non il valore. Corretto in tutti e tre, con la data.
+
