@@ -104,8 +104,39 @@
 //              [CANARINO]". Ora l'invariante e' vera alla lettera e
 //              diventa collaudabile: contare le righe del referto che
 //              iniziano con [CANARINO] deve dare TUTTE le righe.
+//  v1.02 -- 08/09/2026. IL CANARINO ERA CIECO: correzione dei NOMI, piu'
+//           una spia perche' non ricapiti. Nessun cambio di logica, di
+//           soglia o delle frasi cercate nei log.
+//           IL DIFETTO: ABTG_Guardian.mq5 dalla v1.12 (06/09/2026)
+//           scrive CINQUE delle sue sei GlobalVariable interne con il
+//           suffisso _V2 (START/PEAK/DAYKEY/DAYSTART/BLOCKDAY); solo
+//           FAILED e' rimasta col nome di prima. Il canarino cercava
+//           ancora i nomi SENZA _V2: leggeva cinque caselle inesistenti
+//           (o i residui vecchi del guardiano v1.11) e stampava
+//           "esiste=NO / grezzo=0" senza capire che era CIECO lui, non
+//           spento il Guardian. Cieco dal 06/09 al 08/09.
+//           1) i sei nomi ora si costruiscono in UN SOLO punto
+//              (NomeGuardInterna) e combaciano con quelli che il
+//              Guardian scrive OGGI. Toccate le righe 381, 582, 607,
+//              609, 611, 636; la 613 (FAILED) era gia' giusta.
+//           2) ART_GV6 conteneva il nome VECCHIO del BLOCKDAY: e'
+//              aggiornato QUI e nell'artefatto
+//              backtest_pipeline/attese_enforcement_fase1.txt (riga
+//              GV.6), che dichiara data e motivo al suo interno. Se si
+//              fosse aggiornato solo uno dei due, il BLOCCO 2
+//              dell'autotest avrebbe segnalato una differenza vera ma
+//              per il motivo sbagliato.
+//           3) NUOVO: sezione "4b" -- per ognuna delle sei si guarda
+//              ANCHE il nome VECCHIO e, se e' popolato, esce un
+//              RILIEVO ("su questo terminale gira una versione del
+//              Guardian precedente alla v1.12"). Cosi' un rename
+//              futuro SI VEDE, invece di rendere muto lo strumento.
+//              Per FAILED il controllo si dichiara NON APPLICABILE
+//              (nome mai cambiato: vecchio e nuovo sono lo stesso).
+//           NON COMPILATA in sessione: qui non c'e' MetaEditor.
 #property script_show_inputs
 #property strict
+#property version   "1.02"
 #property description "CANARINO DEL GUARDIAN (P-C1, firma D2 del 02/09/2026): SOLA LETTURA."
 #property description "Legge le bandiere del Guardian e ricalcola il verdetto con le funzioni dell'include."
 #property description "NON manda ordini, NON scrive GlobalVariable. Scrive un solo referto in MQL5\\Files."
@@ -117,7 +148,7 @@
 //====================================================================
 //  COSTANTI
 //====================================================================
-#define CANARINO_VERSIONE           "v1.01"
+#define CANARINO_VERSIONE           "v1.02"
 #define CANARINO_BLOCCHI_ATTESI     8          // autotest: blocchi eseguiti = attesi
 #define CANARINO_LOGIN_COLLAUDO     50504263   // il 100k della fase 1
 
@@ -133,7 +164,26 @@
 #define ART_GV3 "ABTG_CAP_RISCHIO_50504263"
 #define ART_GV4 "ABTG_RISCHIO_APERTO_50504263"
 #define ART_GV5 "ABTG_GUARDIAN_BATTITO_50504263"
-#define ART_GV6 "ABTG_GUARD_50504263_BLOCKDAY"
+//    v1.02 (08/09/2026): ART_GV6 diceva "ABTG_GUARD_50504263_BLOCKDAY",
+//    cioe' il nome PRIMA del rename della v1.12 del Guardian. Aggiornato
+//    a "..._BLOCKDAY_V2" INSIEME alla riga GV.6 dell'artefatto: i due
+//    devono restare copie l'uno dell'altro, altrimenti questo blocco
+//    urlerebbe "rename silenzioso" quando invece il rename e' noto,
+//    voluto e gia' recepito.
+#define ART_GV6 "ABTG_GUARD_50504263_BLOCKDAY_V2"
+
+//--- IL SUFFISSO DELLA v1.12 DEL GUARDIAN (06/09/2026).
+//    ABTG_Guardian.mq5 (OnInit, righe 544-549) scrive le sue SEI
+//    GlobalVariable interne cosi':
+//       ABTG_GUARD_<login>_START_V2     ABTG_GUARD_<login>_DAYSTART_V2
+//       ABTG_GUARD_<login>_PEAK_V2      ABTG_GUARD_<login>_BLOCKDAY_V2
+//       ABTG_GUARD_<login>_DAYKEY_V2    ABTG_GUARD_<login>_FAILED  <- SENZA
+//    Il suffisso e' voluto: il nome nuovo forza il Guardian a ricatturare
+//    la baseline col criterio corretto invece di rileggere il numero
+//    vecchio persistito dalla v1.11. FAILED non e' stata rinominata
+//    perche' non e' una baseline: e' una bandiera 0/1.
+#define CANARINO_SUFFISSO_V2        "_V2"
+#define CANARINO_GV_INTERNE         6          // START PEAK DAYKEY DAYSTART BLOCKDAY FAILED
 
 //--- LE DUE FRASI che l'artefatto cerca nel giornale degli EA
 //    (righe C5.EA e C7.EA). Le produce ABTG_MotivoTesto() dell'include:
@@ -193,6 +243,22 @@ void Rilievo(const string testo)
   }
 
 string SN(const bool b){ return(b ? "SI" : "NO"); }
+
+//====================================================================
+//  I NOMI DELLE SEI GlobalVariable INTERNE DEL GUARDIAN (v1.02)
+//  Si costruiscono QUI e in nessun altro posto. Prima erano scritti a
+//  mano in sei punti diversi del file: quando il Guardian v1.12 ne ha
+//  rinominate cinque, quei sei punti sono rimasti indietro uno per uno
+//  e il canarino ha smesso di vedere senza dirlo a nessuno.
+//  radice   = "START" / "PEAK" / "DAYKEY" / "DAYSTART" / "BLOCKDAY" /
+//             "FAILED"
+//  suffisso = CANARINO_SUFFISSO_V2 per il nome di OGGI, "" per il nome
+//             VECCHIO (pre-v1.12) che la sezione 4b va a cercare.
+//====================================================================
+string NomeGuardInterna(const long login,const string radice,const string suffisso)
+  {
+   return(StringFormat("ABTG_GUARD_%I64d_%s%s",login,radice,suffisso));
+  }
 
 //====================================================================
 //  NUCLEO PURO DEL CANARINO -- niente terminale, cosi' l'autotest
@@ -378,7 +444,7 @@ int AutotestCanarino()
    //    legittimamente diversi, e allora il confronto si DICHIARA sospeso
    //    invece di essere silenziosamente saltato.
    blocchi++;
-   string b2_blockday=StringFormat("ABTG_GUARD_%I64d_BLOCKDAY",login);
+   string b2_blockday=NomeGuardInterna(login,"BLOCKDAY",CANARINO_SUFFISSO_V2);
    if(login==CANARINO_LOGIN_COLLAUDO)
      {
       int b2_diff=0;
@@ -579,7 +645,7 @@ void SezioneGiornoProp(const datetime oraS,const long login)
                      TimeToString(ini23,TIME_DATE|TIME_MINUTES),
                      TimeToString(ini23+86400,TIME_DATE|TIME_MINUTES)));
 
-   string nDayKey=StringFormat("ABTG_GUARD_%I64d_DAYKEY",login);
+   string nDayKey=NomeGuardInterna(login,"DAYKEY",CANARINO_SUFFISSO_V2);
    bool   cDayKey=GlobalVariableCheck(nDayKey);
    int    letta  =(cDayKey ? (int)GlobalVariableGet(nDayKey) : 0);
    int    k0 =ChiaveGiornoProp_Calc(oraS,0);
@@ -604,13 +670,13 @@ void SezioneGiornoProp(const datetime oraS,const long login)
 
    //--- gli altri numeri interni del Guardian, in sola lettura
    RigaGV("D-KEY",nDayKey,2,"chiave del giorno prop in corso, scritta dal Guardian");
-   RigaGV("D-STA",StringFormat("ABTG_GUARD_%I64d_DAYSTART",login),3,
+   RigaGV("D-STA",NomeGuardInterna(login,"DAYSTART",CANARINO_SUFFISSO_V2),3,
           "saldo a inizio giornata prop: e' la BASELINE su cui si misura la perdita del giorno (pausa B1)");
-   RigaGV("START",StringFormat("ABTG_GUARD_%I64d_START",login),3,
+   RigaGV("START",NomeGuardInterna(login,"START",CANARINO_SUFFISSO_V2),3,
           "saldo iniziale della challenge (base dei limiti 4,9 / 9,9)");
-   RigaGV("PEAK", StringFormat("ABTG_GUARD_%I64d_PEAK",login),3,
+   RigaGV("PEAK", NomeGuardInterna(login,"PEAK",CANARINO_SUFFISSO_V2),3,
           "picco di equity, serve al DD trailing se InpDDMode=1");
-   RigaGV("FAIL", StringFormat("ABTG_GUARD_%I64d_FAILED",login),4,
+   RigaGV("FAIL", NomeGuardInterna(login,"FAILED",""),4,
           "challenge dichiarata FALLITA dal Guardian (DD totale sfondato). 0 = no");
   }
 
@@ -633,7 +699,7 @@ void SezioneGlobalVariable(const long login)
           "rischio aperto in % misurato dal Guardian (informativo, CIECO SUI PENDENTI: buco B6)");
    RigaGV("GV.5",ABTG_GVNome("ABTG_GUARDIAN_BATTITO"),0,
           "battito del guardiano, tolleranza 120 s (ABTG_BATTITO_TOLLERANZA)");
-   RigaGV("GV.6",StringFormat("ABTG_GUARD_%I64d_BLOCKDAY",login),2,
+   RigaGV("GV.6",NomeGuardInterna(login,"BLOCKDAY",CANARINO_SUFFISSO_V2),2,
           "NON e' del canale: e' il BLOCCO DURO. Se resta timbrato e InpAction=0 il Guardian chiude tutto al primo timer");
 
    //--- il canale esiste? E' la spia X1/X3: se non esiste, tutti gli EA
@@ -645,6 +711,83 @@ void SezioneGlobalVariable(const long login)
       Rilievo("IL CANALE NON ESISTE SU QUESTO CONTO: ABTG_CanaleEsiste() = NO. Gli EA vanno in "
               "fail-open totale, cioe' aprono SENZA chiedere niente, e non lo scrivono da nessuna "
               "parte. Se il Guardian dovrebbe essere acceso, questo e' un difetto grave.");
+  }
+
+//====================================================================
+//  SEZIONE 4b: LA SPIA DEL RENAME (v1.02, 08/09/2026)
+//  PERCHE' ESISTE, in una riga: dal 06/09 all'08/09 questo canarino ha
+//  cercato cinque nomi che nessuno scriveva piu' (il Guardian v1.12 li
+//  aveva rinominati con _V2) e ha stampato "esiste=NO" senza che quel
+//  NO significasse "il Guardian e' spento". Uno strumento che diventa
+//  muto per un rename non e' uno strumento: e' un placebo.
+//  COSA FA: per ognuna delle sei GlobalVariable interne guarda ANCHE il
+//  nome VECCHIO (senza _V2). Se lo trova POPOLATO, e' un fatto, non
+//  un'ipotesi: su quel terminale gira -- o ha girato -- un Guardian
+//  precedente alla v1.12.
+//  NON decide niente e non tocca niente: legge e stampa, come tutto il
+//  resto dell'artefatto.
+//====================================================================
+void SezioneNomiVecchi(const long login)
+  {
+   Titolo("4b) SPIA DEL RENAME -- esistono ancora GlobalVariable col nome VECCHIO (senza _V2)?");
+
+   string radici[6]  ={"START","PEAK","DAYKEY","DAYSTART","BLOCKDAY","FAILED"};
+   //--- il suffisso che il Guardian usa OGGI, variabile per variabile:
+   //    FAILED e' l'unica delle sei che NON e' stata rinominata.
+   string suffissi[6]={CANARINO_SUFFISSO_V2,CANARINO_SUFFISSO_V2,CANARINO_SUFFISSO_V2,
+                       CANARINO_SUFFISSO_V2,CANARINO_SUFFISSO_V2,""};
+   int trovate=0;
+
+   for(int i=0;i<CANARINO_GV_INTERNE;i++)
+     {
+      string nuovo=NomeGuardInterna(login,radici[i],suffissi[i]);
+
+      //--- caso FAILED: vecchio e nuovo sono LO STESSO nome. Cercare qui
+      //    il "nome vecchio" darebbe un allarme ogni volta che la
+      //    bandiera e' scritta -- cioe' un falso positivo garantito.
+      //    Si dichiara NON APPLICABILE invece di saltarlo in silenzio.
+      if(suffissi[i]=="")
+        {
+         Riga(StringFormat("[CANARINO] %-9s nome di oggi %-36s -> controllo del nome VECCHIO NON APPLICABILE: "
+                           "questa GV non e' mai stata rinominata (vecchio e nuovo coincidono).",
+                           radici[i],nuovo));
+         continue;
+        }
+
+      string   vecchio=NomeGuardInterna(login,radici[i],"");
+      bool     cV=GlobalVariableCheck(vecchio);
+      double   vV=(cV ? GlobalVariableGet(vecchio)  : 0.0);
+      datetime mV=(cV ? GlobalVariableTime(vecchio) : (datetime)0);
+
+      if(cV && vV!=0.0)
+        {
+         trovate++;
+         Rilievo(StringFormat("TROVATA LA GV COL NOME VECCHIO '%s' (valore %.4f, modificata %s): su questo terminale "
+                              "gira -- o ha girato -- una versione del Guardian PRECEDENTE alla v1.12. "
+                              "Il nome di oggi e' '%s': verificare quale delle due il Guardian stia scrivendo ADESSO.",
+                              vecchio,vV,
+                              (mV>0 ? TimeToString(mV,TIME_DATE|TIME_SECONDS) : "-"),
+                              nuovo));
+        }
+      else if(cV)
+        {
+         Riga(StringFormat("[CANARINO] %-9s nome VECCHIO %-36s esiste ma vale 0 (residuo spento del guardiano pre-v1.12): "
+                           "non e' un rilievo, ma si puo' cancellare da F3.",
+                           radici[i],vecchio));
+        }
+      else
+        {
+         Riga(StringFormat("[CANARINO] %-9s nome VECCHIO %-36s assente: coerente con un Guardian v1.12 o successivo.",
+                           radici[i],vecchio));
+        }
+     }
+
+   if(trovate==0)
+      Riga("[CANARINO] nessun nome vecchio popolato: i sei nomi cercati qui sopra sono quelli che il Guardian scrive dalla v1.12 (06/09/2026).");
+   else
+      Riga(StringFormat("[CANARINO] nomi VECCHI popolati: %d su %d. Finche' non si chiarisce quale versione del Guardian gira, "
+                        "le letture della sezione 3 vanno considerate SOSPESE, non negative.",
+                        trovate,CANARINO_GV_INTERNE));
   }
 
 //====================================================================
@@ -946,6 +1089,7 @@ void OnStart()
    SezioneConto(login);
    SezioneGiornoProp(oraS,login);
    SezioneGlobalVariable(login);
+   SezioneNomiVecchi(login);        // v1.02: la spia del rename (non c'era)
    SezioneVerdetto(oraS);
 
    double equity=SezioneSoldi();

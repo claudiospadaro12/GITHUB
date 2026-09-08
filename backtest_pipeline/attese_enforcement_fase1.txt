@@ -86,7 +86,33 @@ GV.2 | ABTG_PAUSA_FINO_50504263        | scadenza dichiarata della pausa
 GV.3 | ABTG_CAP_RISCHIO_50504263       | timestamp ri-timbrato ogni secondo finche' il cap C1 morde; 0 = rientrato
 GV.4 | ABTG_RISCHIO_APERTO_50504263    | rischio aperto in % (informativo)
 GV.5 | ABTG_GUARDIAN_BATTITO_50504263  | battito del guardiano (tolleranza 120 s)
-GV.6 | ABTG_GUARD_50504263_BLOCKDAY    | NON e' del canale: e' il blocco DURO. Se resta timbrato e InpAction=0, il Guardian chiude tutto al primo timer. Si azzera a mano da F3.
+GV.6 | ABTG_GUARD_50504263_BLOCKDAY_V2 | NON e' del canale: e' il blocco DURO. Se resta timbrato e InpAction=0, il Guardian chiude tutto al primo timer. Si azzera a mano da F3.
+#
+# AGGIORNAMENTO DICHIARATO -- 08/09/2026, agente MQL5 (branch 'lavoro').
+# COSA E' CAMBIATO: la riga GV.6 diceva 'ABTG_GUARD_50504263_BLOCKDAY'.
+#   Ora dice 'ABTG_GUARD_50504263_BLOCKDAY_V2'.
+# PERCHE': ABTG_Guardian.mq5 v1.12 del 06/09/2026 (OnInit, righe 544-549)
+#   ha rinominato CINQUE GlobalVariable interne aggiungendo il suffisso _V2
+#   (START, PEAK, DAYKEY, DAYSTART, BLOCKDAY). Era una scelta VOLUTA: il
+#   nome nuovo forza la ricattura della baseline col criterio corretto
+#   (dall'equita') invece di rileggere il valore vecchio persistito dalla
+#   v1.11. La sesta, ABTG_GUARD_<login>_FAILED, NON e' stata rinominata.
+#   Delle sei, solo BLOCKDAY compare in questo artefatto (riga GV.6): le
+#   altre cinque righe GV.1-GV.5 sono le GV del CANALE verso gli EA, che
+#   il rename NON ha toccato -- restano esattamente come sono.
+# COSA NON E' CAMBIATO: nessuna riga ATTESA / VIETATA / CAMPO, nessun
+#   criterio, nessuna soglia, nessun testo cercato nei log. Solo il NOME
+#   di GV.6, che qui e' documentazione operativa per la lettura da F3.
+# DOVE E' COPIATO: ABTG_CanarinoGuardian.mq5 v1.02 tiene questi sei nomi
+#   hardcoded (#define ART_GV1..ART_GV6) e li confronta con quelli che
+#   genera (autotest BLOCCO 2). I due file DEVONO restare copie l'uno
+#   dell'altro: aggiornarne uno solo fa gridare 'rename silenzioso' a un
+#   rename che invece e' noto e gia' recepito. Sono stati aggiornati
+#   ENTRAMBI, nello stesso commit.
+# ATTENZIONE ALLA LETTURA STORICA: i referti del canarino precedenti a
+#   questa data, per BLOCKDAY e per le altre quattro GV rinominate,
+#   riportano 'esiste=NO / grezzo=0' perche' guardavano il nome vecchio.
+#   Quel NO non vuol dire 'bandiera spenta': vuol dire 'casella sbagliata'.
 
 #--- DIVIETI DI PROCEDURA (imparati leggendo il codice, non sbagliando) ----
 NO.1 | NON abbassare MAI InpDailyLossPct: con InpAction=0 esegue FlattenAll() su TUTTO il conto.
