@@ -10885,3 +10885,31 @@ Sapevo del limite e l'ho usato lo stesso come se fosse un fatto presente.
 **Antidoto pratico**: per sapere cosa sta facendo un conto **adesso** servono
 (a) il log del terminale **letto adesso**, oppure (b) un `TradeExporter` che
 scriva il CSV. Il resto e' archeologia, per quanto fresca sembri.
+
+---
+
+## 🔧 CLASSE 163 — leggere un log di MT5 **mentre il terminale gira**: serve la lettura CONDIVISA
+_(08/09/2026 sera, sbagliando due volte nella stessa ora)_
+
+```
+Eccezione durante la chiamata di "ReadAllBytes": "Il processo non puo' accedere
+al file ...\MQL5\Logs\20260908.log perche' e' in uso da un altro processo."
+```
+`[IO.File]::ReadAllBytes` e `Get-Content` aprono il file **in esclusiva**: su un
+log del giorno corrente, con il terminale **vivo che ci sta scrivendo dentro**,
+falliscono sempre.
+
+> ### 🔴 LA REGOLA: si apre in **FileShare::ReadWrite**, sempre.
+> ```powershell
+> $fs=[IO.File]::Open($p,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite)
+> ```
+> **E il rimedio era gia' in casa**: la funzione `Leggi-Condiviso` sta in
+> `CODA_01`, `CODA_02`, `CODA_03`, `CODA_05`, `CODA_06`, `CODA_07`, `CODA_08` --
+> e' scritta **apposta per questo**, dal primo giorno del runner.
+> L'ho dimenticata scrivendo una riga al volo. **Una riga "veloce" che salta una
+> funzione gia' collaudata non e' veloce: e' da rifare.**
+
+⚠️ Nota che il difetto **si vede solo sul log di OGGI**: quelli dei giorni
+passati MT5 li ha chiusi, e `ReadAllBytes` funziona. Cioe' il difetto compare
+**esattamente quando la domanda e' "cosa e' successo adesso"** -- e quella e' la
+domanda che conta.
