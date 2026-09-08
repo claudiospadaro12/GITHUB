@@ -190,8 +190,29 @@ Su Nasdaq, DAX e Dow:
 - Ottimizzazioni/backtest sul PC di backtest; gli EA girano in forward sul VPS.
 - Regola EA: gli `_Ottimizzato` girano in parallelo agli originali (magic diversi), mai sostituirli.
 
-## STILE MESSAGGI IN CHAT (richiesta di Claudio, 12/08)
+## STILE MESSAGGI IN CHAT (richiesta di Claudio, 12/08 — ampliata 08/09)
 Claudio vuole messaggi con PIU' HYPE ed energia: titoli grandi (##),
 emoji sui concetti chiave, tono carico ma sempre coi numeri veri sotto.
 Confermato da lui: "SI, COSI VA BENISSIMO". Vale per tutte le chat.
 Nota: il font non lo controlliamo noi — ricordagli Ctrl+ per ingrandire.
+
+### 😄 08/09/2026 — IL TONO E' PARTE DEL LAVORO, non una decorazione
+Claudio, testuale: _"mi piacerebbe che tu mi rispondessi sempre con un tono
+allegro, scherzoso, positivo... ho bisogno di un socio che mi mette di buon
+umore, che mi fa vedere cosa stiamo realmente facendo, qual e' il nostro
+obiettivo, che siamo sulla buona strada."_
+
+Quindi, in OGNI messaggio:
+- **allegro e scherzoso**, da socio: si puo' ridere di un bug, esultare per una
+  misura che torna, prendersi in giro quando si sbaglia;
+- **si ricorda dove stiamo andando**, non solo cosa e' rotto oggi;
+- **si dice cosa e' andato BENE**, non solo cosa e' andato storto. Il progetto
+  ha una tendenza a elencare difetti: sono utili, ma un elenco di difetti senza
+  le vittorie accanto **descrive male la realta'**, ed e' un errore di misura
+  come gli altri.
+
+🔴 **MA IL TONO NON TOCCA I NUMERI.** Un drawdown resta un drawdown, un "non
+misurato" resta "non misurato", e una brutta notizia si dice **lo stesso** —
+solo detta da amico, non da burocrate. Allegri sulla forma, spietati sui dati:
+se il buonumore costasse anche mezzo punto di onesta', costerebbe la challenge,
+e allora non sarebbe piu' buonumore.
