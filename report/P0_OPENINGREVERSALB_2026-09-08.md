@@ -158,3 +158,65 @@ Con due operazioni in totale, **una entrata diversa cambia tutto il seguito**.
 - ⛔ oppure **non c'è nessun collo di bottiglia da allargare**: il motore, su
   questo mercato e su questa finestra, **non trova occasioni**, e i tre score
   non c'entrano.
+
+---
+
+# 🔬 PASSO 0-BIS **C** — `InpFollowThroughPct` 60 → 50 → 40
+
+| `FT %` | Trades IS | Profit | PF | DD % |
+|---:|---:|---:|---:|---:|
+| **60** (default) | 2 | 57,28 | 1,82619 | 0,9588 |
+| **50** | **3** | 180,98 | 3,56200 | 0,9648 |
+| **40** (più largo) | 2 | 53,68 | 1,75256 | 0,9272 |
+| *(OOS, tutte e tre)* | **0** | 0 | 0 | 0 |
+
+Non monotono, e sempre **fra 2 e 3 operazioni**. 🎲 **La mia scommessa era su
+questo asse: sbagliata.** Terza previsione mancata su tre, e stanno tutte agli atti.
+
+---
+
+# 🏁 VERDETTO FINALE: **ARCHIVIATO**, e lo dice il criterio congelato
+
+> *"Se dopo tutti e tre nessuno muove nulla, il motore è **ARCHIVIATO**: non è
+> una questione di soglie."*
+
+## 📊 Il quadro completo — 12 celle misurate a tick reali
+
+| asse | valori provati | Trades IS | Trades OOS |
+|---|---|---|---|
+| *(passo 0, default)* | — | 2 | **0** |
+| **A** `fail` | 1 · 2 · 3 | 2 · 2 · 2 | **0 · 0 · 0** |
+| **B** `signal` | 2 · 3 · 4 | 1 · 2 · 2 | **0 · 0 · 0** |
+| **C** `FT` | 40 · 50 · 60 | 2 · 3 · 2 | **0 · 0 · 0** |
+
+**Dodici celle. Il conteggio IS non esce mai dall'intervallo 1-3. L'OOS è zero
+ovunque, dalla soglia più stretta alla più larga.**
+
+## 🧮 E lo zero dell'OOS non è un mistero: è aritmetica
+Frequenza misurata in IS: **0,0078 operazioni/giorno**. Su 386 giorni di OOS ne
+sono attese **~3**. La probabilità di vederne **zero** con quel tasso è del
+**~5%**. 👉 Raro ma normale. **Non serve inventare un baco: il motore è
+semplicemente troppo lento.**
+
+## ⚖️ Cosa NON abbiamo giudicato, e va detto
+**Il merito.** Non sappiamo se l'idea funziona, e non lo sapremo: con 1-3
+operazioni per cella il PF non è un'informazione. `PF 3,56` sulla cella FT=50
+è **tre trade**, non una scoperta.
+👉 **Il motore non è bocciato per demerito. È archiviato per FREQUENZA** —
+0,0078 op/giorno contro un pavimento di 1,00: **128 volte sotto**. Anche
+schierandolo su Dow + Nasdaq + DAX insieme resterebbe **40 volte sotto**.
+
+## 💰 QUANTO È COSTATO SAPERLO
+**Quattro round, ~25 minuti di macchina, zero decisioni sbagliate.**
+L'alternativa era una griglia di ottimizzazione su un motore che opera due
+volte in 21 mesi: ore di CPU e — molto peggio — una **cella "vincente" scelta
+fra tre trade**, che è esattamente la cella che brucia una challenge.
+
+> ### 🎯 Il passo 0 ha fatto il suo mestiere: **ha detto di no in fretta.**
+
+## 📌 PORTA DI RIENTRO (regola del 18/08)
+Rientra se una misura nuova gli ridà una ragione. Le due che avrebbero senso:
+1. la **fascia pomeridiana** prevista dalla SPEC (gli orari sono input, costa una corsa);
+2. un **mercato diverso** (Nasdaq, DAX) dove i livelli di seduta sono più densi.
+🔴 Ma **non adesso**: a 23 giorni dalla challenge ci sono **14 candidati** in
+coda che non hanno ancora avuto la loro prima corsa. Questo ha avuto quattro.
