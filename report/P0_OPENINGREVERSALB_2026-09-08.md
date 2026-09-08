@@ -117,3 +117,44 @@ La SPEC chiedeva: *"se il PF è piatto rispetto alle soglie, lo scoring è
 decorativo → scarto"*. **Su questo asse il PF è piatto come un tavolo.** Non
 basta per il verdetto — gli altri due assi non sono ancora stati misurati — ma è
 **un terzo della risposta, già in cassa**, e va agli atti così.
+
+---
+
+# 🔬 PASSO 0-BIS **B** — `InpSignalScoreMin` 4 → 3 → 2: **si muove, ma AL CONTRARIO**
+
+Girato sul VPS, 08/09. `rc=0`, zero rilievi, PID intatti. Asse verificato nel CSV.
+
+| Pass | `signal` | Trades IS | Profit | PF | DD % |
+|---|---:|---:|---:|---:|---:|
+| 2 | **4** (default) | 2 | 57,28 | 1,82619 | 0,9588 |
+| 1 | **3** | 2 | 57,28 | 1,82619 | 0,9588 |
+| 0 | **2** (più largo) | 🔴 **1** | 126,61 | 0 | 0,0371 |
+| — | *(OOS, tutte e tre)* | **0** | 0 | 0 | 0 |
+
+## 🤨 ALLENTANDO IL CANCELLO, I TRADE SONO **CALATI**
+Un cancello più largo può solo **ammettere più candidati**, mai di meno. Quindi
+il conteggio che scende da 2 a 1 **non è un effetto del filtro**: è
+**dipendenza dal percorso**.
+
+La spiegazione più semplice, e non è una scusa: con la soglia a 2 il motore
+prende un segnale **PRIMA**, e quell'ingresso anticipato **consuma il posto**
+(cap `InpMaxTradesPerDay=2`, oppure resta aperto e blocca il successivo).
+Con due operazioni in totale, **una entrata diversa cambia tutto il seguito**.
+
+> ### 🎯 È la definizione operativa di "campione sottile".
+> A n=1-2, il passaggio del profitto da 57,28 a 126,61 **non vuol dire niente**:
+> è un trade diverso, non un trade migliore. `PF 0` sulla cella da 1 trade
+> conferma: un solo vincente, nessun perdente, il PF non è calcolabile.
+
+## 📖 VERDETTO, contro il criterio congelato PRIMA
+> *"1. Il conteggio NON si muove (resta sotto 5 in IS) → questo cancello NON è
+> il collo di bottiglia."*
+
+**Conteggio fra 1 e 2: sotto 5.** Criterio 1 di nuovo. 👉 Nemmeno
+`InpSignalScoreMin` è il collo di bottiglia.
+
+**Restano in piedi due sole ipotesi**, e la prossima corsa le separa:
+- 🅲 il collo di bottiglia è **`InpFollowThroughPct`** (file C);
+- ⛔ oppure **non c'è nessun collo di bottiglia da allargare**: il motore, su
+  questo mercato e su questa finestra, **non trova occasioni**, e i tre score
+  non c'entrano.
