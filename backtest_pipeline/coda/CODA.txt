@@ -38,3 +38,10 @@ f5f5b9f9e36e6007607d6901ecdac2fe5d769394 | backtest_pipeline/righe/CODA_05_foto_
 #     Se non si sa quale gira, si legge la riga sbagliata per spiegare
 #     un comportamento.
 e2e0bb408beec0763e7e4755e3e71265f234d37b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
+
+# --- 7. il Desktop del VPS, portato a Claude senza che Claudio mandi niente.
+#     Claudio (08/09, mentre guida): "anche i file che ci sono sul desktop
+#     analizzali tu, io non ho tempo". Claude non vede quel Desktop: l'unico
+#     canale e' questa coda. Di TUTTI i file stampa nome/taglia/data, il
+#     CONTENUTO solo di quelli col nome dei nostri referti.
+cdb9373da752b373457b6e8782ab48086f9e206b | backtest_pipeline/righe/CODA_07_desktop.ps1
