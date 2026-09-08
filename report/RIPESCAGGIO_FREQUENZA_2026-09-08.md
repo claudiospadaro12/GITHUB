@@ -552,3 +552,54 @@ _Compilato in sola lettura d'archivio. **Nessun EA, preset, sedia, magic o
 parametro di forward e' stato toccato. Nessun backtest lanciato. Nessuna
 promozione. Nessun candidato va in campo per effetto di questo referto.**
 Se un referto e questo documento divergono, **comanda il referto**._
+
+---
+
+# 🔎 VERIFICA DI CLAUDE — 08/09/2026
+
+## ✅ Il candidato di testa regge il controllo, alla cifra
+`backtest_pipeline/REGISTRO_TEST.md` **riga 477** (l'agente citava `report/`,
+il file sta in `backtest_pipeline/`: percorso sbagliato, **numeri giusti**):
+
+| | |
+|---|---|
+| `D30EUR (DAX)` **H4** · StMult 3.0 / TP 2.0 | netto **278** · PF **1.28** · **DD 3,3%** · **n 56** |
+| EA | `ABTG_SuperWave_DAX_H4_Ottimizzato` |
+| magic | **770512**, già scritto nel sorgente (riga 108) |
+| è già in campo? | **NO** — zero occorrenze nel censimento dell'08/09 |
+
+🎁 E c'è un regalo che nessuno aveva notato: **la sua gemella `770511` (Dow H1)
+è già viva sul piccolo**, stesso EA, stessa famiglia, e nel registro fa
+**PF 1.52 · DD 4,0% · n 227, tutte e 9 le celle positive**. Non è un motore
+sconosciuto: è **un secondo simbolo di un motore che già gira**.
+
+## ⚖️ MA n = 56, e la regola di casa non si piega per la fretta
+- **MERITO: sospeso.** Sotto le 150 operazioni non si giudica se guadagna. PF
+  1,28 su 56 trade **non è una promessa**, è un indizio.
+- **RISCHIO: leggibile a qualunque n** (valvola R59). **DD 3,3% a tick reali è
+  un fatto accaduto**, ed è un buon numero: sta sotto il DD della gemella già
+  in campo.
+
+👉 Quindi il suo valore vero **non è "è forte"**: è **"costa pochissimo
+provarlo"**. EA già compilato, magic già assegnato, gemella già viva. In corsia
+demo è **mezz'ora di lavoro**, non un round.
+
+## 🔴 E il numero che manca resta mancante
+Con lui dentro, la famiglia SuperWave fa **0,80 op/giorno**: **sotto il
+pavimento di 1,00**. Ci arriverebbe con `SuperWave NASUSD H1`, la cui frequenza
+è **NON MISURATA**. Finché quel numero non c'è, la famiglia **non raggiunge il
+pavimento** — e il ripescaggio, che nasce proprio dalla regola della frequenza
+per famiglia, **non si chiude su questo candidato**.
+
+## 🧭 LA MIA RACCOMANDAZIONE (la decisione resta di Claudio)
+1. 🥇 **`SuperWave DAX H4` (770512) in corsia demo** sul piccolo **50503392**
+   (`C:\Program Files\BCM Markets MT5 Terminal`), taglia della corsia demo, con
+   la soglia di RISCHIO dichiarata: **DD forward > 3,3% → revisione immediata**
+   (criterio del 18/08, la sedia si giudica sul rischio anche a n piccolo).
+2. 🔬 **`M0PB` in fondo alla coda dell'imbuto, non in cima.** 5 celle su 12
+   passano un cancello congelato ed è una notizia vera — ma **DD, PF e peggior
+   giornata sono zero misure**. Prima si misura, poi si parla.
+3. ✂️ **I tre "lenti" che lenti non erano restano fuori**, e con loro le 35
+   righe bocciate per rischio o per assenza di edge. Il cambio di unità del
+   07/09 **non tocca nessun criterio di rischio**: chi legge questo referto come
+   un condono ha capito male la firma.
