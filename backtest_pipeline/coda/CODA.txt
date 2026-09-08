@@ -59,3 +59,10 @@ cdb9373da752b373457b6e8782ab48086f9e206b | backtest_pipeline/righe/CODA_07_deskt
 #     Legge gli ULTIMI DUE giorni e stampa la DATA di ciascuno: alle 03:30
 #     il giorno completo e' quello PRECEDENTE (classe 162).
 b995879c843116c8bc54c19b35397fbd828555a6 | backtest_pipeline/righe/CODA_09_giornale_operativo.ps1
+
+# --- 10. lo slippage misurato sul campo. Claudio (08/09 sera): "cosi' puoi
+#     iniziare a valutare lo slippage". ABTG_SlippageLogger scrive il ledger
+#     dei deal e la sintesi in MQL5\Files (righe 961-962 del sorgente): questa
+#     riga li porta fuori dal terminale. Distingue "ledger vuoto" da "ledger
+#     pieno di zeri": sono due cose diverse.
+f8a7afa75fcf15ed73135123513e11ace62103f0 | backtest_pipeline/righe/CODA_10_slippage.ps1
