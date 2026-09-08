@@ -10803,3 +10803,45 @@ chiusa**, NON la macchina dev'essere senza MT5"_. Un secondo avvio sulla
 > nello stesso script e **prima** della chiamata. Un `-Force` senza il
 > sostituto e' esattamente il difetto della **classe 149** (la manopola a mano
 > che scavalca il gate che lo script ha gia').
+
+---
+
+## 🔧 CLASSE 160 — un'impostazione MT5 cambiata e poi il terminale **ucciso a forza** = impostazione **PERSA**
+_(08/09/2026, sul VPS, cercando perche' "Illimitato" non era rimasto)_
+
+**Il fatto.** MT5 tiene le opzioni in `<cartella dati>\config\common.ini` e lo
+**riscrive solo all'USCITA PULITA** (`File > Esci`). Un `Stop-Process -Force`
+— che e' esattamente quello che fanno le nostre righe con `-ChiudiMT5` e
+`-ChiudiBacktest` — **ammazza il processo senza lasciargli salvare niente**.
+
+**Il sintomo, misurato l'08/09**: Claudio mette `Max barre nel grafico =
+Illimitato`, poi la riga dell'ancora legge `MaxBars=100000` e **muore
+correttamente**. Il censimento di tutti i terminali conferma: **100000
+ovunque**. L'impostazione non era mai arrivata su disco.
+
+> ### 🔴 LA REGOLA
+> Quando una riga di lancio chiede a Claudio di **cambiare un'impostazione nel
+> terminale**, deve dire, nello stesso respiro:
+> 1. **su QUALE terminale** — numero di conto **e** cartella programma
+>    (regola dei terminali multipli, 06/09);
+> 2. che va chiuso con **`File > Esci`**, non con la X e non lasciandolo aperto;
+> 3. **come si VERIFICA che sia entrata**, con una riga di sola lettura che
+>    stampa il valore da `config\common.ini`. **Il "fatto!" di chi clicca non
+>    e' una misura** — e non perche' non ci si fidi, ma perche' MT5 puo'
+>    avercelo silenziosamente buttato via.
+
+**La riga di verifica (sola lettura, stampa TUTTI i terminali):**
+```powershell
+$r=Join-Path $env:APPDATA 'MetaQuotes\Terminal'; Get-ChildItem $r -Directory -EA SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName 'config\common.ini') } | ForEach-Object { $o=Join-Path $_.FullName 'origin.txt'; $prog=if(Test-Path $o){ (Get-Content $o -Raw) -replace '[^\x20-\x7E]','' } else { '(sconosciuto)' }; $mb='(chiave MaxBars ASSENTE = illimitato)'; foreach($l in (Get-Content (Join-Path $_.FullName 'config\common.ini') -EA SilentlyContinue)){ if($l -match '^\s*MaxBars(InChart)?\s*=\s*([0-9]+)\s*$'){ $mb=$matches[2] } }; [pscustomobject]@{ Programma=$prog.Trim(); MaxBars=$mb } } | Format-Table -AutoSize -Wrap
+```
+
+**E l'ORDINE giusto, che e' la parte che si sbaglia:**
+1. si **chiude** il terminale che le righe potrebbero ammazzare;
+2. lo si **riapre**, si cambia l'impostazione;
+3. **`File > Esci`** (uscita pulita: e' qui che `common.ini` viene scritto);
+4. si **rilancia la riga di verifica** e si legge il valore nuovo;
+5. **solo allora** si lancia il round.
+
+✅ **Nota di merito al cancello**: il pre-volo della riga dell'ancora ha beccato
+il tetto **in due secondi**, prima di otto passate a tick reali su 104 milioni
+di tick. Senza, avremmo letto un numero diverso e accusato **la macchina nuova**.
