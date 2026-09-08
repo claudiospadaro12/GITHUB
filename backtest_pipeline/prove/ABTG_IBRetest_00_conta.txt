@@ -1,0 +1,321 @@
+# =====================================================================
+#  PASSO 0 -- ABTG_IBRetest su U30USD (Dow) M30
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_IBRetest   (mql5\Experts\, scritto l'08/09/2026,
+#      MAI COMPILATO e MAI GIRATO al momento in cui questo file nasce)
+#  SPEC e criteri di round: prove\IBRETEST_M30_BOZZA.txt
+#  DOSSIER DI CACCIA:      report\CACCIA_M30_INDICI_2026-09-08.md (P1, 9/10)
+#  REFERTO DI PORTING:     report\EA_IB_RETEST_2026-09-08.md
+# =====================================================================
+#
+#  ORIGINE E ATTRIBUZIONE (regola di casa: si cita sempre)
+#    Meccanica derivata da "IB Completed" di Genxtraders (TradingView,
+#    slug Z1CwMI6V, 25/08/2026, Pine v6, 1.092 righe, 124 input),
+#    scriptAccess "open_no_auth" VERIFICATO l'08/09/2026.
+#    LICENZA: [INCERTO] -- il sorgente NON ha intestazione di licenza.
+#    "Sorgente leggibile" non vuol dire "licenza permissiva": percio'
+#    NON e' stata copiata NESSUNA riga. Il sorgente e' stato LETTO
+#    riga per riga e l'EA e' scritto DA SPECIFICA, in codice nostro.
+#    Copia archiviata:
+#      caccia_strategie\biblioteca\sorgenti\
+#      IbCompleted_Genxtraders-NOLICENSE_tvZ1CwMI6V_2026-09-08.pine
+#    L'attribuzione e' RIPETUTA in testa a ABTG_IBRetest.mq5.
+#
+#    NON CONFONDERE con "InitialBalanceBO" (slug 4732849691c1, in
+#    biblioteca dal 28/08): quello e' un IB BREAKOUT nudo di 306 righe
+#    che entra SULLA ROTTURA. Qui la rottura non e' un ingresso.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA CELLA ESISTE
+# ---------------------------------------------------------------------
+#  L'EA e' nato oggi da specifica. Prima di qualunque griglia si CONTA:
+#  una griglia su un motore di cui non si sa nemmeno se opera e' tempo
+#  di macchina buttato (e, peggio, produce celle "verdi per caso" su un
+#  campione che non esiste).
+#  L'08/09 questa stessa forma di cella ha gia' pagato DUE volte:
+#    - ABTG_OpeningReversalB: 2 operazioni in 21 mesi -> archiviato per
+#      FREQUENZA senza spendere un round di griglia;
+#    - ABTG_LVNArbitro: 1.010 operazioni (frequenza ottima) ma DD
+#      19,35% / 11,76% -> BOCCIATO per RISCHIO, in due corse.
+#  >>> Questo candidato sta in mezzo ai due rischi: ha un tetto
+#      STRUTTURALE di 1 operazione per seduta (quindi puo' morire come
+#      il primo) e uno stop STRUTTURALE che puo' essere largo (quindi
+#      puo' morire come il secondo). La cella deve dire QUALE dei due.
+#
+#  >>> COSA DEVE RISPONDERE, E NIENT'ALTRO
+#      1. l'EA COMPILA e PARTE? (riga [IBRT] avviato... con la CONFIG)
+#      2. l'IB SI FORMA? (colonna "Sedute con IB": se e' ~0 e' l'ORARIO
+#         sbagliato, non il motore -- vedi il blocco FUSO qui sotto)
+#      3. quante OPERAZIONI fa nel periodo (colonna Trades)?
+#      4. le fa da TUTTI E DUE I LATI (colonne Long / Short)?
+#      5. DOVE si perde il segnale? Le colonne sono i TRE STATI, contati
+#         separatamente: Rottura Long/Short (passo 1), Ritorno
+#         Long/Short (passo 2), Segnale Long/Short (passo 3 grezzo).
+#         Se Rottura >> Ritorno, il collo di bottiglia e' il passo 2.
+#         Se Ritorno >> Segnale, e' il passo 3. Se Segnale >> Trades,
+#         sono i CANCELLI (orario, lato, HTF, spread) -- e si legge nel
+#         log, non si indovina al round dopo.
+#      6. lo stop sta SOPRA la frontiera del costo? (colonna
+#         "Stop Mediano Punti", cancello C3 della SPEC)
+#      7. lo stop e' davvero STRUTTURALE? (colonna "Stop Da Pivot":
+#         quante volte e' venuto dal pivot confermato invece che dal
+#         ripiego sull'estremo del ritorno)
+#      8. il PAVIMENTO DEL LOTTO morde? (colonna "Lotto Al Minimo")
+#      9. quanto vale la PEGGIOR GIORNATA e il DD?
+#
+#  >>> COSA NON PUO' USCIRE DA QUI: NESSUNA PROMOZIONE.
+#      Non c'e' nessun asse di merito. L'unico asse e' TECNICO -- il
+#      magic, due celle identiche per costruzione: serve a dare a MT5
+#      qualcosa da ottimizzare (senza, zero passate: classe 134) e
+#      regala il gemello di determinismo del cancello G1.
+#      Se il profitto fosse bello NON si promuove: si scrive il numero
+#      e si passa alla griglia, coi criteri gia' congelati nella SPEC.
+#      Se il DD sfonda, invece, si BOCCIA subito: il rischio si legge a
+#      qualunque n (Emendamento B del 16/08).
+#
+#  >>> IL CANCELLO CHE PUO' FERMARE TUTTO SUBITO
+#      Trades = 0 NON vuol dire "nessun edge": vuol dire "non e'
+#      girata" (errore da cui nasce questa forma di cella: i CSV
+#      PostNews del 07/08, nulli perche' Trades=0). Se esce 0 si guarda
+#      PRIMA la colonna "Sedute con IB" e poi le colonne dei tre stati:
+#      se anche "Sedute con IB" e' 0, non e' il motore -- e' l'ORARIO
+#      dell'Initial Balance, cioe' il fuso.
+#
+# ---------------------------------------------------------------------
+#  FUSO ORARIO -- IL MODO PIU' FACILE DI BUTTARE QUESTA CORSA
+# ---------------------------------------------------------------------
+#  Server BCM = ORA ITALIANA - 1 (regola fissa di CLAUDE.md).
+#  Apertura indici USA: 15:30 IT = 14:30 SERVER.
+#  >>> Quindi qui sotto InpIbInizioOra = 14 e InpIbInizioMin = 30.
+#      UN CSV CON InpIbInizioOra = 15 E' DA CESTINARE: non da' errore,
+#      misura semplicemente un'altra strategia (l'IB delle 16:30-17:30
+#      italiane, che non e' l'apertura di niente).
+#  Il gemello DAX vorra' 8 / 0 / 9 / 0 (09:00-10:00 italiane): i tre
+#  file gemelli NON possono essere identici carattere per carattere su
+#  InpIbInizio*/InpIbFine*, ed e' l'unica eccezione ammessa.
+#
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e' la parte che vale di piu'
+# ---------------------------------------------------------------------
+#  Il metro (firmato 07/09): il pavimento e' 1,00 op/giorno per
+#  FAMIGLIA = {D30EUR, U30USD, NASUSD}. Su UN simbolo la quota che
+#  serve e' quindi ~0,33 op/giorno.
+#
+#  Il conto, con le ipotesi in chiaro (sono ipotesi, non misure):
+#    - ~440 sedute nei 21 mesi di storico BCM sugli indici;
+#    - TETTO STRUTTURALE: 1 operazione per seduta (InpMaxTradesPerDay=1
+#      = il `sessionTradeDone` della fonte). Il MASSIMO TEORICO e'
+#      quindi 440 operazioni, e nemmeno un'unita' di piu';
+#    - passo 1 (rottura dell'IB da un lato): frequentissimo, lo stimo
+#      in 80-95% delle sedute;
+#    - passo 2 (ritorno sul livello CON chiusura dalla parte sbagliata
+#      della SMA9): lo stimo in 40-55% delle sedute che hanno rotto;
+#    - passo 3 (il ritorno FALLISCE, riclusura oltre livello e oltre
+#      SMA, prima del cutoff delle 20:00 server): 45-60% dei ritorni.
+#    Composti: 0,80x0,45x0,50 ~ 0,18 fino a 0,95x0,55x0,60 ~ 0,31.
+#
+#  >>> ATTESA CENTRALE: 0,20 - 0,32 operazioni per seduta su U30USD,
+#      cioe' ~90-140 operazioni nei 21 mesi.
+#      🔴 E LA CONSEGUENZA VA DETTA PRIMA, non dopo:
+#      questo e' SOTTO il pavimento dei 150 per finestra
+#      dell'Emendamento A **su un simbolo solo**, ed e' anche sotto la
+#      quota di 0,33 op/giorno per simbolo. E' esattamente il caso
+#      previsto dalla SPEC: il campione e la frequenza si raggiungono
+#      solo mettendo in comune i TRE indici (unita' FAMIGLIA, firmata
+#      il 07/09). Se questa cella esce a ~120 operazioni NON e' una
+#      brutta notizia: e' la notizia attesa.
+#      >>> Il PASSO 0 gira sulla finestra INTERA e NON si spezza in
+#          IS/OOS: con questi numeri spezzare adesso darebbe due
+#          campioni sotto soglia e nessuna informazione in piu'.
+#
+#  >>> LE SOGLIE, dichiarate adesso (frequenza):
+#      > 440 operazioni  -> IMPOSSIBILE: il tetto strutturale e' 1 per
+#          seduta. Se succede NON e' un bel risultato, e' un BACO nel
+#          tetto o nel reset di seduta -> corsa NULLA, si legge il
+#          codice, non il P/L.
+#      >= 110 operazioni (>= 0,25 op/g) -> in linea con l'attesa. Si
+#          passa ai due gemelli D30EUR e NASUSD e si somma la famiglia.
+#      60-109 operazioni -> il motore e' piu' raro del previsto. Non e'
+#          ancora bocciatura (il pavimento e' di FAMIGLIA), ma i tre
+#          simboli insieme farebbero ~0,45-0,75 op/g: SOTTO 1,00.
+#          Si dice, e il candidato sta in piedi solo allargando i
+#          simboli, non ritoccando i parametri.
+#      < 30 operazioni (< 0,07 op/g) -> BOCCIATO PER FREQUENZA, senza
+#          appello, come ABTG_OpeningReversalB stamattina. Nemmeno
+#          tre simboli ci arrivano.
+#
+#  >>> LA SOGLIA DI DD, che stasera e' diventata LA soglia:
+#      🔴 DD (Equity DD %) > 10,0% -> BOCCIATO PER RISCHIO, subito.
+#         Il numero non e' scelto da me: e' il muro totale tipico di
+#         una challenge prop, ed e' lo stesso metro con cui stasera
+#         e' caduto ABTG_LVNArbitro (19,35% IS / 11,76% OOS a DUE
+#         taglie di conto). Li' il motore sull'OOS faceva +11,31% su
+#         100k -- cioe' SUPERAVA il target -- ma avrebbe sfondato il
+#         muro PRIMA di arrivarci. Un profitto raggiunto dopo aver
+#         perso il conto non e' un profitto.
+#      🟠 DD fra 6,0% e 10,0% -> ALLARME, non bocciatura. Con ~120
+#         operazioni a 0,65% di rischio, un cammino casuale produce
+#         gia' 6-7% di DD: in quella fascia il numero non distingue
+#         il motore dal rumore. Si prosegue, ma la griglia dovra'
+#         portare il DD giu', non il profitto su.
+#      🔴 Peggior Giornata % < -5,0% -> BOCCIATO (muro giornaliero).
+#         ⚠️ E si legge INSIEME al DD, mai da sola: su LVNArbitro la
+#         peggior giornata era -2,80% (comodissima) mentre il DD
+#         totale sfondava. Non si muore di singola giornata: si muore
+#         di EROSIONE LUNGA.
+#
+#  >>> LA SOGLIA DI COSTO (cancello C3 della SPEC), su U30USD:
+#      spread MISURATO 1,9-2,0 punti indice -> frontiera
+#      stop >= 40 x spread = 76-80 PUNTI INDICE.
+#      Attesa: lo stop qui e' STRUTTURALE (fino al pivot confermato +
+#      buffer), quindi piu' largo di uno stop ad ATR: stimo una mediana
+#      di 80-180 punti indice. MA UN'IPOTESI NON E' UNA MISURA, ed e'
+#      per questo che la colonna "Stop Mediano Punti" esiste.
+#      🔴 Se la mediana esce SOTTO 76 punti -> il motore vive DENTRO
+#         il costo su U30USD: si dichiara e si va a vedere D30EUR e
+#         NASUSD (frontiera 64-72), non si "aggiusta" il buffer.
+#      ⚠️ E si guarda "Stop Da Pivot" contro il totale dei trade: se il
+#         pivot confermato manca quasi sempre e lo stop viene dal
+#         ripiego (estremo del ritorno), allora "stop strutturale" e'
+#         un'etichetta e non un fatto -- ed era uno dei 9 punti su 10
+#         per cui questo candidato e' stato promosso.
+#
+#  >>> IL PAVIMENTO DEL LOTTO, e stasera abbiamo imparato a misurarlo:
+#      la colonna "Lotto Al Minimo" conta quante volte il lotto teorico
+#      stava SOTTO il minimo del broker e il minimo lo ha rialzato (in
+#      quel caso il rischio VERO e' piu' alto dello 0,65% dichiarato).
+#      Su U30USD VOLUME_MIN = 0,10 e CONTRACT_SIZE = 10 = 1 EUR per
+#      punto indice al lotto minimo; con 0,65% su 10.000 = 65 EUR e
+#      uno stop STRUTTURALE che stimo 80-180 punti, il pavimento
+#      POTREBBE mordere -- piu' che con lo stop 1,5xATR di LVNArbitro.
+#      >>> Se quella colonna esce alta, il DD di questa corsa mescola
+#          motore e taglia di conto, e "un numero che mescola due cose
+#          non e' un numero": si rifa' a -Deposito 100000.
+#          Se esce a ZERO, la seconda corsa NON serve -- ed e' una
+#          corsa risparmiata rispetto a stasera.
+#
+#  >>> ATTESA SUI DUE LATI (regola 25/08): long e short devono essere
+#      dello stesso ordine di grandezza. Il motore e' simmetrico per
+#      costruzione (nella fonte i due blocchi sono scritti due volte in
+#      modo speculare). Uno sbilanciamento oltre 70/30 e' un indizio di
+#      DERIVA DEL SOTTOSTANTE (il Dow 2024-2026 sale), non del codice,
+#      e va scritto come tale invece di essere "corretto".
+#
+# ---------------------------------------------------------------------
+#  I RISCHI DEL PORTING, DICHIARATI PRIMA (dettaglio nel referto)
+# ---------------------------------------------------------------------
+#  1. IL PIVOT. La fonte usa ta.pivothigh/ta.pivotlow con 2 barre per
+#     lato; qui il pivot e' ricalcolato a mano, con confronto STRETTO
+#     su entrambi i lati (in caso di pareggio esatto il pivot NON si
+#     forma). Su un indice a due decimali il pareggio e' raro, ma la
+#     conseguenza di una differenza qui non e' un segnale in piu':
+#     e' uno STOP diverso, cioe' un RISCHIO diverso.
+#  2. LA SCALA DI USCITE. La fonte esce a scaglioni 1R/2R/3R/4R/5R con
+#     breakeven a 2R. QUI NO: un TP unico a 2R, niente parziali (una
+#     posizione, una tranche) e breakeven SPENTO. Non e' la stessa
+#     curva di equity della fonte, e non si pretende che lo sia.
+#  3. IL FILTRO HTF. Nella fonte e' ACCESO di default (SMA 9 su H4).
+#     Qui e' SPENTO: il passo 0 misura il MOTORE NUDO. In casa un
+#     filtro appiccicato a un motore gia' tarato fa 0 successi su 5.
+#  4. L'ORA DI INGRESSO. La fonte calcola R dalla CHIUSURA della barra
+#     di segnale; qui R si calcola dal prezzo REALE di riempimento
+#     (apertura della barra dopo). E' piu' onesto e leggermente meno
+#     generoso: lo scarto e' un mezzo spread, e va messo in conto.
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26  <- MISURATO, non assunto: inizio dello storico
+#    tick BCM sugli indici (SPREAD_FLOTTA_MISURA_2026-09-03.md).
+#  REGIME CONTENUTO, come vuole l'Emendamento della finestra: UNO SOLO.
+#    21 mesi di indici 2024-2026 non contengono un orso, non contengono
+#    un crollo, non contengono un laterale lungo. Questo round NON puo'
+#    dare un verdetto di regime e non deve pretenderlo.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+#     772900: blocco 7729xx VERIFICATO VERGINE nel repo l'08/09/2026
+#     (grep repo-wide su tutti i 7xxxxx + censimento
+#      coda\referti\CODA_01_sedie_attaccate_20260908_033003.log).
+#     769800 e' di ABTG_ImpulsoApertura, 769900 di ABTG_LVNArbitro
+#     (che ha gia' prenotato fino a 769950 col suo asse gemello).
+InpMagic=772900||772900||50||772950||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno.
+#     Fissarli e' voluto: cosi' la cella misurata resta questa anche se
+#     domani qualcuno cambia un default nel .mq5.
+InpUsaGuardian=true||true||0||true||N
+
+# --- INITIAL BALANCE in ORA SERVER BCM (= italiana - 1).
+#     14:30-15:30 SERVER = 15:30-16:30 italiane = la PRIMA ORA di
+#     contrattazione USA. Un 15 al posto del 14 e' da cestinare.
+InpIbInizioOra=14||14||0||14||N
+InpIbInizioMin=30||30||0||30||N
+InpIbFineOra=15||15||0||15||N
+InpIbFineMin=30||30||0||30||N
+
+# --- MOTORE: i valori della fonte, tali e quali (SMA 9, pivot 2/2,
+#     buffer 2,0 punti, invalidazione spenta, filtro d'ampiezza spento)
+InpSmaLen=9||9||0||9||N
+InpPivot=2||2||0||2||N
+InpStopBufferPunti=2.0||2.0||0||2.0||N
+InpInvalidaSuIbOpposto=false||false||0||false||N
+InpMaxIbPunti=0||0||0||0||N
+
+# --- FILTRO HTF: SPENTO, anche se nella fonte e' acceso. Il passo 0
+#     misura il motore NUDO; il filtro e' un asse da misurare DOPO,
+#     mai una toppa per salvarlo (0 successi su 5, ROBUSTEZZA.md).
+InpUsaFiltroHTF=false||false||0||false||N
+InpHtfMinuti=240||240||0||240||N
+InpHtfMaLen=9||9||0||9||N
+
+# --- i due LATI: entrambi accesi (regola 25/08, si separano coi contatori)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- SESSIONE, ORA SERVER BCM. Il cutoff e il flat non vengono dalla
+#     fonte (li' erano 15:45 e 15:55 ora di New York, cioe' una
+#     sessione a futures): sono di casa e servono al COSTO e al
+#     divieto di overnight. 20:00 / 21:00 server = 21:00 / 22:00 IT.
+InpCutoffOra=20||20||0||20||N
+InpCutoffMin=0||0||0||0||N
+InpUsaFlatSeduta=true||true||0||true||N
+InpGoFlatOra=21||21||0||21||N
+InpGoFlatMin=0||0||0||0||N
+
+# --- STOP: il pavimento in punti indice (R109) e' di casa, MAI zero.
+InpMinStopPts=25||25||0||25||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- USCITA: TP unico a 2R (centro della scala 1R/2R/3R della fonte),
+#     breakeven SPENTO (con TP a 2R il BE a 2R della fonte sarebbe inerte).
+InpRR=2.0||2.0||0||2.0||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- RISCHIO: 0,65% di contratto di casa; gate spread in % dello stop (R55).
+#     TETTO GIORNALIERO = 1: NON e' un meccanismo nuovo, e' la regola
+#     `sessionTradeDone` della fonte (una operazione per seduta, che
+#     blocca ENTRAMBI i lati) resa esplicita e misurabile.
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpreadPctOfStop=2.5||2.5||0||2.5||N
+InpMaxTradesPerDay=1||1||0||1||N
+
+# InpComment="IBRT"  (stringa: lasciata al default compilato -- un pin di
+#                     stringa vuoto MT5 lo ignora in silenzio, classe FiboH4)
+InpVerbose=true||true||0||true||N
+# =====================================================================
+#  DOPO QUESTA CELLA, e solo dopo:
+#    - se il conteggio regge -> i gemelli D30EUR (IB 08:00-09:00
+#      SERVER) e NASUSD (IB 14:30-15:30 SERVER), si somma la FAMIGLIA,
+#      e poi la griglia gia' congelata in IBRETEST_M30_BOZZA.txt
+#      (InpSmaLen x InpPivot, cella scelta AL CENTRO DELL'ALTOPIANO,
+#      mai al picco);
+#    - se il DD sfonda il 10% -> si BOCCIA qui, come stasera con
+#      ABTG_LVNArbitro. Costa una corsa, non un round;
+#    - se il conteggio non regge -> si scrive il numero e si archivia,
+#      come stamattina con ABTG_OpeningReversalB.
+# =====================================================================
