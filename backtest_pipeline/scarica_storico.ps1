@@ -1,4 +1,40 @@
-# MARCATORE_SCARICA_STORICO_v2
+# MARCATORE_SCARICA_STORICO_v3_TERMINALE_BACKTEST
+# v3 (08/09): parametro -TerminaleBacktest + CHIUSURA CHIRURGICA dei processi.
+#
+#   PERCHE' ESISTE, ED E' UN PERICOLO VERO, NON UNA PRECAUZIONE.
+#   Fino alla v2 questo script, in modalita' -Auto, chiudeva MT5 cosi':
+#       Get-Process -Name "terminal64" | Stop-Process -Force
+#   cioe' TUTTI i terminali della macchina, senza guardare quale.
+#   Sul VPS i terminali sono QUATTRO, e uno e' il CONTO REALE 10105439
+#   (C:\BCM_Reale) CON POSIZIONI APERTE; gli altri due vivi sono il
+#   piccolo 50503392 e il 100k 50504263 (-V3). Lanciare li' un download
+#   dello storico voleva dire spegnere il terminale dei soldi veri
+#   mentre opera: per questo report\SONDA_TICK_ORO_ATTENZIONE.md
+#   vietava il VPS a questo script, e il quarto MT5 restava inutile.
+#
+#   ADESSO: con -TerminaleBacktest "C:\MT5_Backtest" (conto demo
+#   50504400, zero EA attaccati) la cartella si NOMINA. Lo script usa
+#   quel terminale e chiude SOLO il processo terminal64 il cui Path e'
+#   ESATTAMENTE l'eseguibile di quella cartella; gli altri non si
+#   toccano e vengono STAMPATI con PID e percorso, prima e dopo. La
+#   prova che il forward non e' stato toccato sta nel referto, non
+#   nella fiducia.
+#
+#   SENZA il parametro il comportamento resta IDENTICO alla v2 (chiude
+#   tutti), ma prima stampa un avviso rosso con l'elenco di cosa sta
+#   per ammazzare, e CHIEDE CONFERMA se non c'e' -Auto.
+#
+#   Le guardie del parametro sono le STESSE gia' scritte e gia' provate
+#   in walkforward_generico.ps1 v4 (punto 7-bis), non ne sono state
+#   inventate di nuove: muore se la cartella non esiste, se non contiene
+#   terminal64.exe, se manca metaeditor64.exe, se il percorso contiene
+#   -V3 (100k 50504263) o BCM_Reale (reale 10105439).
+#
+#   COMPATIBILITA' DEI MARCATORI: la stringa MARCATORE_SCARICA_STORICO_v2
+#   resta qui sotto DI PROPOSITO, cosi' una riga di lancio gia' scritta
+#   che la cercasse continua a riconoscere questo file. Cio' che quel
+#   marcatore prometteva e' invariato.
+#   MARCATORE_SCARICA_STORICO_v2
 # v2 (07/09): aggiunto il marcatore, che mancava. Senza, la riga di lancio
 #             non puo' verificare di aver scaricato lo script GIUSTO prima
 #             di eseguirlo (regola di casa sulle righe di lancio, punto 1).
@@ -37,9 +73,17 @@
 #   -Simboli "XAUUSD"         altri simboli
 #   -SenzaTick                solo barre, niente tick reali (molto piu' veloce)
 #   -SoloReferto              rilegge l'ultimo risultato senza rifare nulla
+#   -TerminaleBacktest "C:\MT5_Backtest"
+#                             usa QUEL terminale (conto demo 50504400) e
+#                             chiude SOLO quel processo. E' l'unico modo
+#                             ammesso sul VPS.
 #
-#  !! SUL VPS NON USARE -Auto: chiuderebbe il terminale che tiene su
-#     gli EA in forward. Sul VPS: installa e trascina lo script a mano.
+#  !! SUL VPS: -Auto SENZA -TerminaleBacktest CHIUDE TUTTI I TERMINALI,
+#     compreso il conto REALE 10105439 che ha posizioni aperte, e i due
+#     demo che tengono su gli EA in forward. Sul VPS si passa SEMPRE
+#     -TerminaleBacktest "C:\MT5_Backtest": cosi' si chiude solo quel
+#     terminale e gli altri tre restano vivi, con la prova stampata
+#     (PID + percorso) prima e dopo la chiusura.
 # =====================================================================
 param(
   [string] $Simboli    = "D30EUR,NASUSD,U30USD",
@@ -49,7 +93,20 @@ param(
   [switch] $Auto,
   [switch] $ChiudiMT5,
   [switch] $SoloReferto,
-  [int]    $TimeoutMin = 90
+  [int]    $TimeoutMin = 90,
+  [string] $TerminaleBacktest = ""   # 08/09/2026 (v3): CARTELLA PROGRAMMA del
+                                     #   terminale da usare, nominata a mano.
+                                     #   Es. "C:\MT5_Backtest" (VPS, conto demo
+                                     #   50504400, zero EA attaccati). Se passato:
+                                     #   niente ricerca, niente inferenza, e la
+                                     #   chiusura diventa CHIRURGICA (solo quel
+                                     #   processo). Muore se la cartella non
+                                     #   esiste, se non contiene terminal64.exe /
+                                     #   metaeditor64.exe, o se e' un terminale
+                                     #   VIETATO (-V3 = 100k 50504263,
+                                     #   BCM_Reale = reale 10105439).
+                                     #   Vuoto (default) = comportamento di
+                                     #   sempre, immutato.
 )
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -64,14 +121,128 @@ $Work     = Join-Path $env:USERPROFILE "abtg_storico"
 New-Item -ItemType Directory -Force -Path $Work | Out-Null
 
 # ---------------------------------------------------------------------
+# 0. FUNZIONI DI SERVIZIO: morte parlante e SCELTA CHIRURGICA dei processi
+# ---------------------------------------------------------------------
+function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exit 1 }
+
+function Normalizza-Percorso([string]$p){
+  # Confronto fra percorsi: si toglie lo spazio ai bordi, si uniformano
+  # gli slash e si ignorano maiuscole/minuscole. NIENTE "-like", niente
+  # "assomiglia": o e' lo STESSO eseguibile, o non lo e'. Un match per
+  # prefisso farebbe scambiare C:\MT5_Backtest con C:\MT5_Backtest_OLD.
+  if([string]::IsNullOrWhiteSpace($p)){ return "" }
+  return ($p.Trim() -replace '/','\').TrimEnd('\').ToLowerInvariant()
+}
+
+function Scegli-Terminali {
+  # Divide i processi terminal64 in DUE liste:
+  #   Bersagli    = quelli il cui Path e' ESATTAMENTE $EsePath
+  #   Risparmiati = TUTTI gli altri, che non si toccano
+  # E' scritta cosi', su una lista passata da fuori invece di chiamare
+  # Get-Process dentro, apposta per poterla COLLAUDARE OFFLINE con
+  # oggetti finti (Id + Path) senza MT5 e senza Windows. Un cancello che
+  # nessuno ha visto scattare non e' un cancello dimostrato.
+  param($Processi, [string]$EsePath)
+  $bersagli = @(); $risparmiati = @()
+  $mira = Normalizza-Percorso $EsePath
+  foreach($p in @($Processi)){
+    if($null -eq $p){ continue }
+    $path = ""
+    try { $path = [string]$p.Path } catch { $path = "" }   # Path illeggibile = si risparmia
+    if($mira -ne "" -and (Normalizza-Percorso $path) -eq $mira){ $bersagli += $p }
+    else { $risparmiati += $p }
+  }
+  return [pscustomobject]@{ Bersagli = @($bersagli); Risparmiati = @($risparmiati) }
+}
+
+function Stampa-Terminali($titolo, $lista, $colore){
+  Write-Host $titolo -ForegroundColor $colore
+  if(@($lista).Count -eq 0){ Write-Host "      (nessuno)" -ForegroundColor DarkGray; return }
+  foreach($p in @($lista)){
+    $path = "(percorso non leggibile)"
+    try { if($p.Path){ $path = [string]$p.Path } } catch { }
+    Write-Host ("      PID {0,-8} {1}" -f $p.Id, $path) -ForegroundColor $colore
+  }
+}
+
+function Avviso-ChiusuraTotale($processi){
+  # NESSUN -TerminaleBacktest: qui si chiude TUTTO, come nella v2. Il
+  # comportamento non cambia, ma smette di essere silenzioso.
+  Write-Host ""
+  Write-Host "#####################################################################" -ForegroundColor Red
+  Write-Host "  ATTENZIONE: -TerminaleBacktest NON e' stato passato." -ForegroundColor Red
+  Write-Host "  In questa modalita' lo script chiude TUTTI i terminali MT5 della" -ForegroundColor Red
+  Write-Host "  macchina, senza distinguere: forward, 100k e CONTO REALE compresi." -ForegroundColor Red
+  Write-Host "#####################################################################" -ForegroundColor Red
+  Stampa-Terminali "  Terminali che verrebbero chiusi TUTTI:" $processi "Red"
+  Write-Host "  Sul VPS la riga giusta e':" -ForegroundColor Yellow
+  Write-Host "    -TerminaleBacktest `"C:\MT5_Backtest`"   (conto demo 50504400)" -ForegroundColor Yellow
+  if($Auto){
+    Write-Host "  -Auto passato: nessuna domanda, vado avanti (ma l'avviso resta stampato)." -ForegroundColor DarkYellow
+    return
+  }
+  $r = Read-Host "  Scrivi CHIUDITUTTO per continuare, qualsiasi altra cosa per fermarti"
+  if($r -ne "CHIUDITUTTO"){ Muori "fermato da te: NESSUN terminale e' stato toccato." }
+}
+
+# ---------------------------------------------------------------------
 # 1. trova terminale BCM + cartella dati
 # ---------------------------------------------------------------------
-$allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
+# 1-bis. IL TERMINALE NOMINATO A MANO (-TerminaleBacktest)
+#  Le guardie sono quelle GIA' scritte in walkforward_generico.ps1 v4,
+#  punto 7-bis: stesse condizioni, stessi messaggi. Se il parametro e'
+#  vuoto questo blocco non fa NIENTE e la scelta resta quella di sempre,
+#  riga per riga.
+$instDir = ""
+$ViaTerminale = ""
+if ($TerminaleBacktest) {
+  # La guardia di casa NON si allenta perche' il percorso e' scritto a
+  # mano: anzi, e' proprio quando si scrive a mano che si sbaglia riga.
+  if ($TerminaleBacktest -like "*-V3*" -or $TerminaleBacktest -like "*BCM_Reale*") {
+    Muori ("TERMINALE VIETATO in -TerminaleBacktest: '$TerminaleBacktest'`n" +
+           "    Il 100k (-V3, conto 50504263) e il conto REALE (BCM_Reale, 10105439)`n" +
+           "    non si toccano da questo script, nemmeno nominandoli a mano.`n" +
+           "    Il terminale da backtest e' C:\MT5_Backtest (conto demo 50504400).")
+  }
+  $cartellaBT = $TerminaleBacktest.TrimEnd('\','/')
+  if (-not (Test-Path -LiteralPath $cartellaBT -PathType Container)) {
+    Muori ("-TerminaleBacktest: la cartella NON esiste.`n" +
+           "    cercata  : '$cartellaBT'`n" +
+           "    Va passata la CARTELLA PROGRAMMA del terminale, cioe' quella che`n" +
+           "    contiene terminal64.exe (non l'exe, non la cartella dati):`n" +
+           "      -TerminaleBacktest `"C:\MT5_Backtest`"")
+  }
+  $exeBT = Join-Path $cartellaBT "terminal64.exe"
+  if (-not (Test-Path -LiteralPath $exeBT -PathType Leaf)) {
+    Muori ("-TerminaleBacktest: la cartella c'e', ma NON contiene terminal64.exe.`n" +
+           "    cartella : '$cartellaBT'`n" +
+           "    cercato  : '$exeBT'`n" +
+           "    Se il terminale e' installato altrove, passa QUELLA cartella.`n" +
+           "    Per vedere le installazioni vive, in sola lettura:`n" +
+           "      Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path")
+  }
+  # il compilatore sta nella stessa cartella: se manca, la corsa morirebbe
+  # piu' avanti con un errore che non nomina il terminale. Meglio adesso.
+  $medBT = Join-Path $cartellaBT "metaeditor64.exe"
+  if (-not (Test-Path -LiteralPath $medBT -PathType Leaf)) {
+    Muori ("-TerminaleBacktest: manca metaeditor64.exe, e senza compilatore lo`n" +
+           "    script MQL5 non si compila.`n" +
+           "    cartella : '$cartellaBT'`n" +
+           "    cercato  : '$medBT'")
+  }
+  $instDir = $cartellaBT
+  $ViaTerminale = "parametro esplicito -TerminaleBacktest"
+}
 
-$instDir    = $cand.DirectoryName
+if (-not $instDir) {
+  $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
+  if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
+  $instDir = $cand.DirectoryName
+  $ViaTerminale = "RIPIEGO automatico su 'BCM Markets' sotto Program Files"
+}
+
 $Terminal   = Join-Path $instDir "terminal64.exe"
 $MetaEditor = Join-Path $instDir "metaeditor64.exe"
 $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
@@ -80,6 +251,23 @@ $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue |
     (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $instDir)
 } | Select-Object -First 1 -ExpandProperty FullName
 if (-not $DataFolder) { Write-Host "Cartella dati MT5 non trovata." -ForegroundColor Red; exit 1 }
+
+# --- SI DICHIARA SEMPRE QUALE TERMINALE E' STATO SCELTO, E DA QUALE VIA.
+#  Con QUATTRO terminali BCM sul VPS (piccolo 50503392, 100k 50504263
+#  -V3, reale 10105439 in C:\BCM_Reale, backtest 50504400 in
+#  C:\MT5_Backtest) questa riga va LETTA prima di lasciar girare.
+Write-Host ""
+Write-Host "--- TERMINALE SCELTO ------------------------------------------------" -ForegroundColor Cyan
+Write-Host ("    terminal64 : " + $Terminal) -ForegroundColor White
+Write-Host ("    cartella   : " + $instDir) -ForegroundColor White
+Write-Host ("    dati       : " + $DataFolder) -ForegroundColor White
+Write-Host ("    via        : " + $ViaTerminale) -ForegroundColor Yellow
+if ($ViaTerminale -like "RIPIEGO*") {
+  Write-Host "    (ripiego: nessuna cartella nominata, e la ricerca guarda SOLO sotto" -ForegroundColor DarkYellow
+  Write-Host "     Program Files: C:\MT5_Backtest non verrebbe mai trovato da qui." -ForegroundColor DarkYellow
+  Write-Host "     Sul VPS rilancia con -TerminaleBacktest `"C:\MT5_Backtest`".)" -ForegroundColor DarkYellow
+}
+Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
 
 $CsvOut = Join-Path $DataFolder "MQL5\Files\ABTG_StoricoScaricato.csv"
 
@@ -216,20 +404,59 @@ if (-not $Auto) {
 # ---------------------------------------------------------------------
 # 4b. modalita' AUTOMATICA (solo PC di backtest, MT5 chiuso)
 # ---------------------------------------------------------------------
-$running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
-if ($running -and $ChiudiMT5) {
-  Write-Host "`nMT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
-  $running | Stop-Process -Force -ErrorAction SilentlyContinue
-  Start-Sleep -Seconds 5
+# --- PERCHE' QUESTO SCRIPT CHIUDE MT5 (il motivo, prima del rimedio)
+#  Il punto 4b non apre un tester: lancia IL TERMINALE con /config e un
+#  [StartUp] Script=. MT5 esegue lo script di avvio SOLO quando quella
+#  istanza parte davvero; se un terminale sulla STESSA cartella dati e'
+#  gia' aperto, il secondo avvio si limita a portarlo in primo piano e
+#  lo Script NON parte (referto assente, CSV a zero byte). Il vincolo
+#  vero e' quindi "quella installazione dev'essere chiusa", NON "la
+#  macchina dev'essere senza MT5": e' esattamente per questo che la
+#  chiusura puo' diventare CHIRURGICA senza cambiare nulla del metodo.
+$tuttiTerm = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+
+if ($TerminaleBacktest) {
+  # --- CHIUSURA CHIRURGICA: guardo SOLO il terminale nominato.
+  $sel = Scegli-Terminali -Processi $tuttiTerm -EsePath $Terminal
+  Write-Host ""
+  Write-Host "--- TERMINALI MT5 VISTI ADESSO --------------------------------------" -ForegroundColor Cyan
+  Stampa-Terminali "  BERSAGLIO (terminale da backtest, l'unico che posso chiudere):" $sel.Bersagli "Yellow"
+  Stampa-Terminali "  LASCIATI VIVI (forward e conto reale: NON li tocco):" $sel.Risparmiati "Green"
+  Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
+  $running = @($sel.Bersagli)
+  if ($running.Count -gt 0 -and $ChiudiMT5) {
+    Write-Host "`nIl terminale da backtest e' aperto: chiudo SOLO quello (-ChiudiMT5)." -ForegroundColor Yellow
+    $running | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 5
+    $running = @((Scegli-Terminali -Processi @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -EsePath $Terminal).Bersagli)
+  }
+  if ($running.Count -gt 0) {
+    Write-Host "`nIL TERMINALE DA BACKTEST E' APERTO. In automatico non si puo': un" -ForegroundColor Red
+    Write-Host "secondo avvio sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
+    Write-Host ("   " + $Terminal) -ForegroundColor Red
+    Write-Host "Aggiungi -ChiudiMT5: verra' chiuso SOLO quel processo, gli altri" -ForegroundColor Red
+    Write-Host "terminali (forward e conto reale) restano vivi." -ForegroundColor Red
+    exit 1
+  }
+} else {
+  # --- NESSUN PARAMETRO: comportamento IDENTICO alla v2, ma dichiarato.
+  Avviso-ChiusuraTotale $tuttiTerm
   $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
-}
-if ($running) {
-  Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
-  Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
-  Write-Host "Aggiungi -ChiudiMT5 per farlo chiudere da solo, oppure usa la" -ForegroundColor Red
-  Write-Host "modalita' manuale (senza -Auto)." -ForegroundColor Red
-  Write-Host "SUL VPS: NON usare -ChiudiMT5, spegneresti gli EA in forward." -ForegroundColor Red
-  exit 1
+  if ($running -and $ChiudiMT5) {
+    Write-Host "`nMT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
+    $running | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 5
+    $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
+  }
+  if ($running) {
+    Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
+    Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
+    Write-Host "Aggiungi -ChiudiMT5 per farlo chiudere da solo, oppure usa la" -ForegroundColor Red
+    Write-Host "modalita' manuale (senza -Auto)." -ForegroundColor Red
+    Write-Host "SUL VPS: NON usare -ChiudiMT5, spegneresti gli EA in forward." -ForegroundColor Red
+    Write-Host "SUL VPS la strada e' -TerminaleBacktest `"C:\MT5_Backtest`"." -ForegroundColor Red
+    exit 1
+  }
 }
 
 if (Test-Path $CsvOut) { Remove-Item $CsvOut -Force }   # cosi' so che il referto e' nuovo
@@ -410,8 +637,28 @@ if (-not $visto) {
 }
 
 Write-Host "`nChiudo MT5..." -ForegroundColor DarkGray
-Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 3
+if ($TerminaleBacktest) {
+  # --- CHIUSURA CHIRURGICA. Era qui la riga piu' pericolosa dello script:
+  #  Get-Process -Name "terminal64" | Stop-Process -Force  ->  TUTTI.
+  #  Adesso si chiude SOLO il processo il cui Path e' esattamente
+  #  $Terminal, e si STAMPA chi resta vivo: la prova che il forward e il
+  #  conto reale non sono stati toccati finisce nel referto.
+  $selF = Scegli-Terminali -Processi @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -EsePath $Terminal
+  Stampa-Terminali "  CHIUDO SOLO questo (terminale da backtest):" $selF.Bersagli "Yellow"
+  Stampa-Terminali "  NON TOCCO questi (forward e conto reale):" $selF.Risparmiati "Green"
+  if (@($selF.Bersagli).Count -gt 0) { @($selF.Bersagli) | Stop-Process -Force -ErrorAction SilentlyContinue }
+  Start-Sleep -Seconds 3
+  $dopo = Scegli-Terminali -Processi @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -EsePath $Terminal
+  Write-Host "  --- PROVA, DOPO LA CHIUSURA ---" -ForegroundColor Cyan
+  Stampa-Terminali "  ancora vivi (attesi: gli altri terminali, intatti):" $dopo.Risparmiati "Green"
+  if (@($dopo.Bersagli).Count -gt 0) {
+    Stampa-Terminali "  ATTENZIONE: il terminale da backtest e' ANCORA vivo:" $dopo.Bersagli "Yellow"
+  }
+} else {
+  Stampa-Terminali "  CHIUDO TUTTI questi (nessun -TerminaleBacktest):" @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) "Red"
+  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  Start-Sleep -Seconds 3
+}
 Mostra-Referto
 
 # =====================================================================
