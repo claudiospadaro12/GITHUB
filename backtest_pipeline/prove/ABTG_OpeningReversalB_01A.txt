@@ -1,0 +1,104 @@
+# =====================================================================
+#  PASSO 0-BIS A -- ABTG_OpeningReversalB su U30USD (Dow) M5
+#  UN SOLO CANCELLO ALLENTATO: Failure Evidence Count
+#  EA: ABTG_OpeningReversalB   (mql5\Experts\)
+#  SPEC madre: prove\ABTG_OpeningReversalB.txt
+#  Cella precedente: prove\ABTG_OpeningReversalB_00_conta.txt
+# =====================================================================
+#  ASSE DI QUESTO FILE: InpFailScoreMin   (default del sorgente: 3)
+#  valori provati: 1, 2, 3
+#
+#  DA DOVE NASCE, e il numero e' gia' agli atti
+#  Il PASSO 0 dell'08/09/2026 (etichetta P0CONTA, girato sul VPS) ha dato:
+#     IS  256 giorni -> 2 operazioni (PF 1,82619 . DD 0,9588%)
+#     OOS 386 giorni -> 0 operazioni
+#  Lo zero dell'OOS NON e' "non e' girata": la parte IS lo esclude, perche'
+#  l'EA ha compilato, e' partito e ha operato. E' uno ZERO VERO.
+#  Frequenza misurata: 0,0078 op/giorno contro il pavimento di 1,00: 128
+#  volte sotto.
+#
+#  >>> LA DOMANDA, UNA SOLA: QUESTO cancello quanto MORDE?
+#      I tre cancelli sono in AND. Allentandone UNO SOLO i trade possono
+#      solo salire: di quanto salgono misura quanto quel cancello stava
+#      bloccando. E' la prova che la SPEC madre chiede ("i tre score
+#      devono mordere"), fatta dal basso invece che dall'alto.
+#
+#  >>> PERCHE' TRE FILE E NON UNA GRIGLIA SOLA
+#      La regola di casa e' "un file prova misura UNA variabile alla
+#      volta", e il controllore l'ha fatta rispettare. Tre assi insieme
+#      avrebbero dato 8 celle e nessuna risposta pulita su CHI blocca.
+#      I tre file sono una SEQUENZA: A (fail), B (signal), C (FT).
+#
+# =====================================================================
+#  CRITERI CONGELATI, PRIMA DEI NUMERI -- si legge la cella PIU' LARGA,
+#  finestra IS. Valgono IDENTICI per tutti e tre i file.
+# =====================================================================
+#
+#  ATTESA DICHIARATA: allentando UN cancello i trade salgono, ma restano
+#  nell'ordine delle DECINE. (Nel PASSO 0 avevo previsto "poche decine"
+#  e ne sono uscite 2: quella previsione era sbagliata di un ordine di
+#  grandezza ed e' agli atti. Questa e' la seconda, e vale come la prima.)
+#
+#  1. Il conteggio NON si muove (resta sotto 5 in IS)
+#     -> questo cancello NON e' il collo di bottiglia. Si passa al file
+#        successivo. Se dopo tutti e tre nessuno muove nulla, il motore
+#        e' ARCHIVIATO: non e' una questione di soglie.
+#
+#  2. IS > 500 operazioni nella cella piu' larga
+#     -> SCARTO. Se allentando di uno-due scatti i trade esplodono di due
+#        ordini di grandezza, quel cancello non era un filtro: era LA
+#        strategia. Una curva tenuta in piedi da una soglia e' la cella
+#        "verde per caso" che brucia la challenge (regola 19/08).
+#
+#  3. IS fra 30 e 500, e il conteggio cresce in modo ORDINATO scendendo
+#     di soglia (nessun salto di un ordine di grandezza su un solo
+#     scatto)
+#     -> questo cancello e' il collo di bottiglia. SI PROSEGUE con la
+#        griglia vera della SPEC madre, dichiarando la soglia trovata.
+#
+#  4. MERITO SOSPESO sempre: sotto 150 operazioni per finestra non si
+#     giudica se guadagna (Emendamento A). Il RISCHIO si legge invece a
+#     qualunque n: DD > 10% su qualunque cella -> BOCCIATO subito,
+#     qualunque sia il conteggio (Emendamento B).
+#
+#  5. Se l'OOS resta a ZERO mentre l'IS si popola, va DETTO e non
+#     interpretato: due finestre che si comportano in modo opposto sono
+#     un fatto da spiegare, non un dettaglio da mediare.
+#
+#  DOVE GIRA: terminale da backtest C:\MT5_Backtest (conto 50504400).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- L'UNICO ASSE: il cancello allentato
+InpFailScoreMin=1||1||1||3||Y
+
+# --- tutto il resto FISSO, come nel PASSO 0
+InpMagic=769400||769400||0||769400||N
+InpSignalScoreMin=4||4||0||4||N
+InpFollowThroughPct=60.0||60.0||0||60.0||N
+InpFTBarsWindow=2||2||0||2||N
+InpPBMaxBars=3||3||0||3||N
+InpPBMaxDepthPct=50.0||50.0||0||50.0||N
+InpSignalMaxBar=15||15||0||15||N
+InpLevelZonePts=200||200||0||200||N
+InpFirst6Min=6||6||0||6||N
+InpEntryOffsetPts=0||0||0||0||N
+InpTP_R=2.0||2.0||0||2.0||N
+InpMaxRiskIdxPts=20||20||0||20||N
+InpMinStopPts=500||500||0||500||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=21||21||0||21||N
+InpCloseMin=0||0||0||0||N
+InpOvernightStartHour=23||23||0||23||N
+InpOvernightStartMin=0||0||0||0||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpSide=2||2||0||2||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
