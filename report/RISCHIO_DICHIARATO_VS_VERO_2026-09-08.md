@@ -436,3 +436,73 @@ In ordine di quanto rischio spostano. **Nessuno di questi è stato toccato.**
 - **DA MISURARE, e non l'abbiamo:** `VOLUME_MIN` + valore del punto di **U30USD**
   · se il Guardian conta le gambe vere o gli input · quale albero
   (`mql5/Experts/` o `standalone/`) viene compilato sul VPS.
+
+---
+
+# 🔎 VERIFICA DI CLAUDE — 08/09/2026
+
+## ✅ IL BUG È VERO. L'ho letto, ed è di due righe
+`mql5/Experts/ABTG_SuperWave.mq5`, righe **253-256**:
+```mql5
+double lotMkt=NormVol(totLot*InpFirstFraction);
+double lotPend=NormVol(totLot-lotMkt);                              // <- calcolato PRIMA
+if(lotMkt<=0) lotMkt=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);   // <- il pavimento DOPO
+```
+Se `totLot*InpFirstFraction` normalizza a **zero** (rischio piccolo o conto
+piccolo), allora `lotPend` prende **tutto** `totLot`, e **subito dopo** `lotMkt`
+viene rialzato al lotto minimo. Volume totale = **`totLot + volMin`** invece di
+`totLot`. 👉 Non è una teoria: il **DIARIO del 20/08** registra **1,42% su un
+contratto da 1,0%**.
+
+**Conta i file:** il pattern esatto compare in **15** sorgenti — **13** in
+`mql5/Experts/` e **2** in `mql5/Experts/standalone/`.
+
+## ✅ E il conto reale è onesto **per il motivo che dice l'agente**
+`mql5/Presets/conto_reale/*.set` hanno entrambi `InpAllowShort=false`
+(righe 27 e 23) e `InpRiskPercent=0.65`. **Una sola gamba armata** → 0,65%
+dichiarato = 0,65% vero. Con due lati sarebbero **1,30%**.
+🟢 **E nessuno dei 15 file col bug gira sul conto reale.**
+
+## ⚠️ UNA CORREZIONE: "le due _Ottimizzato dell'oro girano a 2,0%" — **NO**
+Quel 2,0 è il **default del sorgente**
+(`ABTG_SupertrendReversal_Ottimizzato.mq5:86`), **non** ciò che gira.
+`CODA_01` dell'08/09 misura sul piccolo:
+
+| sedia | magic | rischio che GIRA | default del sorgente |
+|---|---|---:|---:|
+| `SupertrendReversal_Ottimizzato` XAUUSD H4 | 970901 | **1** | 2.0 |
+| `EMA200_Ottimizzato` XAUUSD H4 | 971501 | **0,25** | — |
+
+👉 Caso peggiore col bug: **2,00%**, non 4,00%. La conclusione resta ("da sola
+mangia più di mezzo cap"), il numero no.
+
+> ### 📏 La lezione, e vale per ogni referto futuro
+> **Il default del sorgente NON è quello che gira.** Un numero letto nel
+> `.mq5` descrive cosa succederebbe riattaccando l'EA nudo; quello che gira lo
+> dice il censimento. Vanno sempre incrociati, e va sempre detto quale dei due
+> si sta citando.
+
+## 🎯 DOVE IL BUG MORDE DAVVERO, oggi
+Incrocio dei 15 file col censimento delle sedie vive:
+
+| terminale | sedie colpite | rischio che gira | caso peggiore col bug |
+|---|---|---:|---:|
+| 🟡 piccolo 50503392 | 6 (`SuperWave` U30USD, `SupRev` ×3, `SupertrendReversal` 225JPY, `_Ottimizzato` oro) | 1,0 · 1,0 · 1,0 · 1,0 · 1,0 · 1 | fino a **2×** ciascuna |
+| 🟠 100k 50504263 | 1 (`SupertrendReversal` 225JPY, 770901) | 0,65 | **1,30%** |
+| 🟢 REALE | **nessuna** | — | — |
+
+## ✍️ LA DECISIONE, che non prendo da solo
+La correzione è di **due righe** (spostare il pavimento **prima** del calcolo
+di `lotPend`, o ricalcolare `lotPend` dopo). Ma:
+- tocca **15 file**, di cui **7 con sedie vive**;
+- **non ha effetto finché gli EA non vengono ricompilati e ricaricati** — e
+  quello lo fa Claudio;
+- ricompilare **cambia il volume** delle sedie vive: è un intervento sulla
+  taglia, e le taglie sono la sua firma.
+
+👉 **Scritto, misurato, non applicato.** Aspetta una riga di Claudio.
+
+## ❓ E la domanda dell'agente resta aperta e importante
+`mql5/Experts/standalone/` **non è un doppione** (PostNews: 307 righe contro
+666). 🔴 **Quale dei due alberi viene compilato sul VPS?** Finché non si sa,
+non si sa nemmeno quale codice sta girando.
