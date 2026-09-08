@@ -1,0 +1,88 @@
+# =====================================================================
+#  PASSO 0 -- ABTG_OpeningReversalB su U30USD (Dow) M5
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_OpeningReversalB   (mql5\Experts\, scritto il 30/08/2026,
+#      MAI COMPILATO E MAI GIRATO fino all'08/09/2026)
+#  SPEC e criteri congelati: prove\ABTG_OpeningReversalB.txt
+# =====================================================================
+#
+#  PERCHE' QUESTA CELLA ESISTE
+#  L'EA sta nel repo dal 30/08 con i criteri gia' congelati, e
+#  risultati_prove\ e' VUOTO: non e' mai stato girato. E' il candidato
+#  piu' economico che abbiamo -- il lavoro di scrittura e' gia' pagato.
+#  Ma la sua SPEC dice, testualmente, che il primo passo e' il PASSO 0.
+#  Una griglia su un motore che non si sa nemmeno se opera e' tempo di
+#  macchina buttato: prima si CONTA, poi si giudica.
+#
+#  >>> COSA DEVE RISPONDERE, e NIENT'ALTRO
+#      1. l'EA COMPILA e PARTE? (le righe [ORB][AUTOTEST] in avvio)
+#      2. quante OPERAZIONI fa nel periodo (colonna Trades)?
+#      3. le fa da TUTTI E DUE I LATI (InpSide=2, regola 25/08)?
+#      4. il campione basta al metro di casa (Emendamento A: >=150
+#         operazioni per finestra)?
+#
+#  >>> COSA NON PUO' USCIRE DA QUI: NESSUNA PROMOZIONE.
+#      Non c'e' nessun asse di merito. L'unico asse e' TECNICO -- il
+#      magic, due celle identiche per costruzione: serve a dare a MT5
+#      qualcosa da ottimizzare (senza, zero passate: classe 134) e
+#      regala il gemello di determinismo del cancello G1.
+#      Se il profitto fosse bello NON si promuove: si scrive il numero
+#      e si passa alla griglia, con i criteri gia' congelati nella SPEC.
+#      Se il DD sfonda, invece, si BOCCIA subito: il rischio si legge a
+#      qualunque n (Emendamento B).
+#
+#  >>> IL CANCELLO CHE PUO' FERMARE TUTTO SUBITO
+#      Trades = 0 NON vuol dire "nessun edge": vuol dire "non e'
+#      girata". E' l'errore da cui nasce questa forma di cella (il
+#      verdetto PostNews del 07/08, nullo perche' i CSV avevano
+#      Trades=0). Se esce 0, si guarda il LOG prima di scrivere
+#      qualunque verdetto.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI (perche' valga come previsione):
+#      cap 2 ingressi/giorno, ~250 sedute in ~21 mesi di storico
+#      -> il massimo teorico e' ~1000 operazioni, ma il motore ha TRE
+#      cancelli di conferma in serie (fail>=3, signal>=4, FT>=60%).
+#      Mi aspetto POCHE decine di operazioni, non centinaia. Se ne
+#      escono centinaia, i cancelli non stanno mordendo e va guardato.
+#
+#  DOVE GIRA: terminale da backtest C:\MT5_Backtest (conto 50504400),
+#      passo 7 superato l'08/09/2026 (ancora R119 riprodotta alla cifra).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+InpMagic=769400||769400||50||769450||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno.
+#     Fissarli e' voluto: cosi' la cella misurata resta questa anche se
+#     domani qualcuno cambia un default nel .mq5.
+InpFailScoreMin=3||3||0||3||N
+InpSignalScoreMin=4||4||0||4||N
+InpFollowThroughPct=60.0||60.0||0||60.0||N
+InpFTBarsWindow=2||2||0||2||N
+InpPBMaxBars=3||3||0||3||N
+InpPBMaxDepthPct=50.0||50.0||0||50.0||N
+InpSignalMaxBar=15||15||0||15||N
+InpLevelZonePts=200||200||0||200||N
+InpFirst6Min=6||6||0||6||N
+InpEntryOffsetPts=0||0||0||0||N
+InpTP_R=2.0||2.0||0||2.0||N
+InpMaxRiskIdxPts=20||20||0||20||N
+InpMinStopPts=500||500||0||500||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=21||21||0||21||N
+InpCloseMin=0||0||0||0||N
+InpOvernightStartHour=23||23||0||23||N
+InpOvernightStartMin=0||0||0||0||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+InpSide=2||2||0||2||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+# InpComment="ORB"   (stringa: lasciata al default compilato)
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpAutoTest=1||1||0||1||N
