@@ -10,7 +10,32 @@
 #    - BE indipendente:   OFF | a 1R (InpBEatR)
 #    - Trailing:          OFF | ATR | PREVBAR | FIXED
 #
+#  MARCATORE_SCAN_GESTIONE_v2_VPS
+#
 #  PC FISSO, MetaTrader CHIUSO.
+#
+#  ---------------------------------------------------------------------
+#  PERCHE' ESISTE LA v2 (09/09/2026) -- ERA UN PERICOLO, NON UN DIFETTO
+#  Questo script e' del tempo in cui c'era UN SOLO MT5. Sul VPS ce ne
+#  sono QUATTRO (piccolo 50503392, 100k 50504263, REALE 10105439,
+#  backtest 50504400) e la v1 faceva due cose che oggi costano care:
+#    1. senza -Terminal cercava in "C:\Program Files*" il primo
+#       "*BCM Markets MT5 Terminal*" -> che sul VPS e' IL PICCOLO, cioe'
+#       il terminale con le sedie VIVE. Avrebbe copiato e RICOMPILATO
+#       l'EA dentro la cartella di un terminale in FORWARD;
+#    2. la guardia "MetaTrader aperto" era GLOBALE: con quattro terminali
+#       vivi o si ferma sempre, o con -Force parte mentre il bersaglio e'
+#       ancora aperto (classe 159).
+#  La v2 chiude tutte e due:
+#    - MUORE se il terminale risolto e' -V3 (100k) o BCM_Reale (REALE);
+#    - si RIFIUTA di indovinare il terminale se non e' stato passato
+#      -Terminal e c'e' piu' di un terminal64 vivo;
+#    - la guardia diventa CHIRURGICA: guarda solo i processi che girano
+#      DENTRO la cartella del terminale bersaglio;
+#    - l'EA si scarica da un PIN (commit), non da HEAD del branch.
+#  E ha tolto i caratteri non-ASCII che erano nel file dal giorno uno:
+#  Windows PowerShell 5.1 legge i .ps1 come ANSI (regola di CLAUDE.md).
+#  ---------------------------------------------------------------------
 #
 #  Uso:
 #    # DAX apertura (server hour 8):
@@ -24,14 +49,15 @@ param(
   [int]$SessionHour=8,                    # ORA SERVER BCM (DAX=8, Nasdaq=14). NON l'ora italiana!
   [string]$Tf="M5",
   [ValidateSet("struttura","distanze")]
-  [string]$Fase="struttura",              # struttura = QUALI toggle · distanze = QUANTO larghi
-  [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force
+  [string]$Fase="struttura",              # struttura = QUALI toggle - distanze = QUANTO larghi
+  [switch]$UseSpare,[string]$Terminal="",[string]$MetaEditor="",[string]$DataFolder="",[switch]$Force,
+  [string]$Pin="lavoro"
 )
 $ErrorActionPreference="Stop"
 [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12
 $EA=$Robot
 # gli EA con InpBEatR vivono sul branch di lavoro (non ancora sul default)
-$EABranch="lavoro"
+$EABranch=$Pin   # v2: un PIN di commit, non HEAD del branch (classe 164)
 $RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
 
 # --- GRIGLIA STRUTTURA DI GESTIONE (48 combo; ingresso fissato ai default) ---
@@ -84,6 +110,19 @@ try{Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$EA.mq5" -OutFile (Join-Path $
 catch{Write-Host "   ERRORE download $EA da $EABranch" -ForegroundColor Red; exit 1}
 
 if(-not $Terminal){
+  # v2 -- IL RIFIUTO DI INDOVINARE. Con piu' di un MT5 vivo, "il primo che
+  # trovo in Program Files" e' una lotteria che puo' uscire sul terminale
+  # delle sedie in forward. Meglio fermarsi e farsi dare il percorso.
+  $vivi=@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+  if($vivi.Count -gt 1){
+    Write-Host ""
+    Write-Host ("STOP: ci sono " + $vivi.Count + " terminali MT5 vivi e -Terminal non e' stato passato.") -ForegroundColor Red
+    Write-Host "      Non indovino: qui indovinare vuol dire poter ricompilare un EA" -ForegroundColor Red
+    Write-Host "      dentro il terminale di un conto in FORWARD." -ForegroundColor Red
+    $vivi | ForEach-Object { Write-Host ("      PID " + $_.Id + "   " + $(if($_.Path){$_.Path}else{"<percorso non leggibile>"})) -ForegroundColor Yellow }
+    Write-Host "      Rilancia con:  -Terminal 'C:\MT5_Backtest\terminal64.exe'" -ForegroundColor Cyan
+    exit 1
+  }
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
   else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
@@ -97,7 +136,22 @@ if($Terminal -and -not $DataFolder){
 if(-not $DataFolder -or -not (Test-Path $DataFolder)){Write-Host "Cartella dati non trovata." -ForegroundColor Red; exit 1}
 $MqlExperts=Join-Path $DataFolder "MQL5\Experts"; $MqlFiles=Join-Path $DataFolder "MQL5\Files"
 $Results=Join-Path $Work "risultati_gestione"; New-Item -ItemType Directory -Force -Path $MqlExperts,$Results|Out-Null
-if((Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) -and -not $Force){Write-Host "!!! Chiudi MetaTrader prima (0 CSV altrimenti)." -ForegroundColor Red; exit 1}
+# --- v2: LE DUE PORTE CHIUSE A CHIAVE. Valgono anche se -Terminal e' stato
+#     passato a mano: un dito storto non deve poter arrivare al conto reale.
+$instDirBT = Split-Path -Parent $Terminal
+if($instDirBT -like "*-V3*" -or $instDirBT -like "*BCM_Reale*"){
+  Write-Host ("TERMINALE VIETATO: '" + $instDirBT + "'. Il 100k (-V3, 50504263) e il conto REALE (BCM_Reale, 10105439) non si toccano.") -ForegroundColor Red
+  exit 1
+}
+# --- v2: GUARDIA CHIRURGICA (classe 159): solo i processi che girano DENTRO
+#     la cartella del bersaglio. Gli altri terminali restano vivi e non
+#     bloccano la corsa.
+$vivoBersaglio=@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like ($instDirBT + "\*")) })
+if($vivoBersaglio.Count -gt 0 -and -not $Force){
+  Write-Host "!!! Il terminale BERSAGLIO e' aperto: chiudilo (0 CSV altrimenti)." -ForegroundColor Red
+  $vivoBersaglio | ForEach-Object { Write-Host ("    PID " + $_.Id + "   " + $_.Path) -ForegroundColor Yellow }
+  exit 1
+}
 Copy-Item (Join-Path $Work "src_gest\$EA.mq5") -Destination $MqlExperts -Force
 & $MetaEditor "/compile:$(Join-Path $MqlExperts "$EA.mq5")" "/log" | Out-Null
 if(-not (Test-Path (Join-Path $MqlExperts "$EA.ex5"))){Write-Host "ERRORE compilazione $EA" -ForegroundColor Red; exit 1}

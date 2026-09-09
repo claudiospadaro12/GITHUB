@@ -143,6 +143,48 @@ ALTO di quella forbice.
   implementato e collaudato e' un'intenzione, non una protezione — e va detto
   ogni volta che si cita. Verbale: `report/FIRME_2026-09-07.md`.
 
+## 🔥 IL MOTTO (Claudio, 09/09/2026) — VALE ANCHE PER GLI AGENTI
+Testuale: _"NON ACCONTENTIAMOCI MAI. QUESTO DEVE ESSERE IL NOSTRO MOTTO. SE IO
+NON INSISTEVO COI CONTROLLI, MAGARI AVREMMO PERSO TANTISSIME OCCASIONI. UNA
+VOLTA CHE TROVIAMO UN BUON MOTORE, SONO SICURO CHE CI SARANNO I PARAMETRI
+GIUSTI... SE SIAMO VICINI ALLA CONVALIDA MA MANCA QUALCOSA, IO MI METTO A
+DISPOSIZIONE PER ULTERIORI RICERCHE, MA DAVVERO NON MOLLIAMO PER NULLA AL
+MONDO. DEVI DIRLO ANCHE AGLI AGENTI."_
+
+E ha ragione con una prova in mano: **il 09/09 la sua insistenza ha aperto un
+censimento che ha trovato `EMA200` sul Dow** — l'unica delle 41 sedie vive che
+passa i cancelli di oggi alla lettera — **ferma sul demo**. Senza quella
+spinta, quel motore restava in archivio.
+
+### Come si applica, in concreto
+- 🔓 **Un candidato non si archivia finche' non e' stato misurato in almeno
+  DUE modi diversi.** "Non ha edge" detto da una corsa sola e' un'ipotesi.
+- 🔎 **Prima di scrivere MORTO si guarda: la GESTIONE dell'uscita e' stata
+  messa ad asse? I SIMBOLI gemelli sono stati provati? Il TF e' stato
+  cambiato?** Se una di queste e' NO, il verdetto e' *"non ancora misurato"*,
+  non *"morto"*.
+- 📉 **TF: si preferiscono i piu' BASSI** (piu' operazioni = campione prima),
+  **ma la frontiera del costo `stop >= 40 x spread` non si sposta**: su M5 gli
+  indici la sfondano, e allora quel TF si dichiara escluso PER COSTO, con il
+  numero accanto. Non e' pigrizia: e' un conto.
+- 💰 **Non si scarta niente che generi profitto senza scriverne il NUMERO e
+  il MOTIVO.** Se si scarta, la riga va in `REGISTRO_TEST.md` con il PF, il
+  DD, l'n e il cancello. Un morto senza certificato non e' un morto.
+- 🙋 **Se manca poco alla convalida, si CHIEDE a Claudio**: si e' messo a
+  disposizione per fare ricerche in prima persona. Un buco che lui puo'
+  chiudere e' un buco da segnalargli, non da subire.
+
+### 🛑 E IL LIMITE, che e' parte dello stesso motto
+**"Provare tutte le combinazioni" NON vuol dire griglia larga su un motore
+morto.** E' misurato in casa: su un motore senza edge una griglia piu' fitta
+trova solo **picchi di rumore**, e la cella "verde per caso" e' quella che
+brucia la challenge (regola del 19/08). Quindi:
+- ✅ si allarga su **MOTORI, MECCANISMI, SIMBOLI, TF, GESTIONE DELL'USCITA**;
+- ❌ non si allarga sui **parametri di un motore gia' dichiarato senza edge**;
+- 📐 e ogni allargamento si paga con una **prova fuori campione o di regime**.
+**Non mollare e non illudersi sono la stessa disciplina**: chi si accontenta
+di un numero bello su 58 operazioni ha mollato prima, non dopo.
+
 ## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
 **Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
 a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
