@@ -14,7 +14,7 @@ Uso:
     python3 backtest_pipeline/analizza_trades.py            # ultimo giorno con trade
     python3 backtest_pipeline/analizza_trades.py 2026-08-03 # un giorno preciso
 """
-import csv, sys, os
+import csv, sys, os, subprocess
 from collections import defaultdict
 from datetime import datetime
 
@@ -71,6 +71,55 @@ DURATA_SOSPETTA = 120   # secondi: sotto = quasi certamente trailing/BE troppo s
 # Non si cancellano: si mostrano FUORI dal totale, come i "RESIDUI SU DISCO"
 # del censimento. Un numero che mescola due cose non e' un numero.
 CAMBIO_SOLO_EA = "2026-07-28"   # primo giorno senza piu' operazioni manuali
+
+
+def freschezza(path):
+    """Quando il CONTENUTO di questo CSV e' cambiato l'ultima volta nel repo.
+
+    NATO DA UN ERRORE PAGATO (04/09/2026): la pagella ha pubblicato
+    "100k: netto di oggi +0,00" mentre il CSV del 100k era fermo al giorno
+    prima. Il conto quel giorno aveva fatto **+30,78** (riga gemella della
+    `DAX Apertura EU RETEST`, arrivata solo il 05/09 alle 17:32). Fino al
+    07/09 la sezione controllava soltanto che il file ESISTESSE: un dato che
+    non arriva e uno zero vero venivano stampati **identici**.
+    Ricorrenze: 04/09, 07/09, 09/09.
+
+    PERCHE' NON BASTA LA DATA DEL FILE: in un clone fresco tutti i file
+    prendono l'ora del checkout, quindi l'mtime direbbe "arrivato adesso"
+    anche per un CSV fermo da giorni. La data del commit che l'ha toccato
+    per ultimo e' invece un fatto scritto una volta sola. L'mtime resta
+    come rete di sicurezza se git non c'e' (e allora la fonte lo dichiara).
+
+    ⚠️ IL LIMITE, dichiarato perche' conta: un CSV che arriva IDENTICO —
+    il conto non ha chiuso niente di nuovo — **non lascia traccia in git**.
+    Quindi "fermo al giorno X" vuol dire *"da X non arriva CONTENUTO
+    NUOVO"*, NON *"la consegna e' rotta"*. Sono due cose diverse e da qui
+    non si distinguono: per distinguerle serve un timbro scritto DENTRO il
+    file dall'esportatore, che oggi non esiste.
+    Ed e' esattamente per questo che il verdetto non e' "zero" ne' "guasto",
+    ma **DATO NON ARRIVATO**: dice quello che sappiamo e si ferma li'.
+
+    Torna (data 'AAAA-MM-GG' o None, fonte).
+    """
+    if not os.path.exists(path):
+        return None, "assente"
+    try:
+        p = subprocess.run(["git", "log", "-1", "--format=%cs", "--", path],
+                           capture_output=True, text=True, timeout=15)
+        d = (p.stdout or "").strip()
+        if p.returncode == 0 and len(d) == 10:
+            return d, "git"
+    except Exception:
+        pass    # git assente o repo strano: si ripiega, dichiarandolo
+    return datetime.fromtimestamp(os.path.getmtime(path)).strftime("%Y-%m-%d"), "data del file"
+
+
+def giorni_fra(da, a):
+    """Giorni di calendario fra due 'AAAA-MM-GG'. None se una non si legge."""
+    try:
+        return (datetime.strptime(a, "%Y-%m-%d") - datetime.strptime(da, "%Y-%m-%d")).days
+    except Exception:
+        return None
 
 
 def senza_commento(r):
@@ -214,6 +263,46 @@ def main():
     out = ["# 📅 Giornata %s — pagella automatica" % giorno, "",
            "_Generato da `analizza_trades.py` sul CSV del TradeExporter. "
            "Posizioni **chiuse** in giornata._", ""]
+    # ---------- TIMBRO DI FRESCHEZZA (09/09/2026) ----------
+    #
+    # Sta IN TESTA apposta: e' la prima cosa da sapere prima di credere a un
+    # qualunque numero sotto. Un dato che non arriva non e' uno zero.
+    CONTI = (("piccolo 50503392", CSV_IN),
+             ("100k 50504263",    CSV_100K),
+             ("reale 10105439",   CSV_REALE))
+    fresco = {}
+    righe_timbro, fermi = [], []
+    for etichetta, percorso in CONTI:
+        d, fonte = freschezza(percorso)
+        fresco[percorso] = bool(d) and d >= giorno
+        if d is None:
+            righe_timbro.append("| %s | `%s` | — | ⚪ **CSV ASSENTE** |"
+                                % (etichetta, os.path.basename(percorso)))
+        elif fresco[percorso]:
+            righe_timbro.append("| %s | `%s` | %s _(%s)_ | ✅ aggiornato |"
+                                % (etichetta, os.path.basename(percorso), d, fonte))
+        else:
+            n = giorni_fra(d, giorno)
+            righe_timbro.append("| %s | `%s` | %s _(%s)_ | 🔴 **FERMO%s** |"
+                                % (etichetta, os.path.basename(percorso), d, fonte,
+                                   "" if n is None else " da %d giorn%s" % (n, "o" if n == 1 else "i")))
+            fermi.append(etichetta)
+    out += ["## 🕐 Freschezza dei dati", "",
+            "| Conto | File | Contenuto aggiornato al | Stato |",
+            "|---|---|---|---|"] + righe_timbro + [""]
+    if fermi:
+        out += ["> 🔴 **%s: DATO NON ARRIVATO.** Per quest%s conto la pagella "
+                "**non stampa un netto di giornata** — un CSV fermo e uno zero "
+                "vero sono indistinguibili da qui, e il 04/09/2026 questa "
+                "confusione ha fatto pubblicare `+0,00` su un giorno da "
+                "**+30,78**." % (" · ".join(fermi), "i" if len(fermi) > 1 else "o"), ""]
+    out += ["> ℹ️ La data e' quella dell'**ultimo cambiamento di contenuto nel "
+            "repo**. Un CSV che arriva **identico** (nessuna posizione chiusa "
+            "nuova) non lascia traccia: `FERMO` vuol dire *\"da li' non arriva "
+            "contenuto nuovo\"*, **non** *\"la consegna e' rotta\"*. Per "
+            "separare i due casi serve un timbro scritto **dentro** il file "
+            "dall'esportatore — oggi non c'e'.", ""]
+
     if ereditate:
         out += ["> ⚠️ %d posizion%s aperta in giorni precedenti e chiusa oggi "
                 "(%s). Per quelle la durata media e la frazione catturata non "
@@ -404,6 +493,20 @@ def main():
                     ea, len(tr), sum(_netto(r) for r in tr),
                     " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items()))))
             out.append("")
+        elif not fresco[CSV_100K]:
+            # Il caso che il 04/09 e' costato un numero pubblicato sbagliato:
+            # qui NON si scrive "nessuna posizione chiusa" e NON si scrive
+            # "+0,00". Non lo sappiamo, e si dice.
+            d100, _f100 = freschezza(CSV_100K)
+            out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del 100k ha contenuto "
+                    "fermo al **%s**: non posso dire ne' che il conto abbia "
+                    "operato, ne' che non l'abbia fatto. **Nessun netto di "
+                    "giornata per questo conto.**" % d100, "",
+                    "_Cosa guardare sul VPS: terminale **100k, conto `50504263`, "
+                    "cartella `... -V3`** (NON il piccolo `50503392` in "
+                    "`BCM Markets MT5 Terminal`, NON il reale `10105439` in "
+                    "`C:\\BCM_Reale`) — l'`ABTG_TradeExporter` gira? e "
+                    "`pubblica_trades.ps1` prende `ABTG_Trades_100k.csv`?_", ""]
         else:
             out += ["_Nessuna posizione chiusa oggi sul 100k._", ""]
 
@@ -411,13 +514,23 @@ def main():
         usato_oggi = max(0.0, -netto_oggi)
         margine_giorno = FTMO_LIM_GIORNO - usato_oggi
         peggior_g = min(perGiorno100.values()) if perGiorno100 else 0.0
-        out += ["**Saldo realizzato: %.2f**  (netto di oggi: %+.2f · dal via: %+.2f)" % (
-                    saldo, netto_oggi, netto_storico), "",
-                "| Regola FTMO | Pavimento | Margine attuale |", "|---|---|---|",
-                "| Perdita totale (statico -10%%) | 90.000 | **%+.2f** (%.2f%% del conto) |" % (
-                    margine_tot, 100.0 * margine_tot / DEP_100K),
-                "| Perdita giornaliera (-5%%) | -5.000/giorno | oggi usati %.2f -> restano **%.2f** |" % (
-                    usato_oggi, margine_giorno),
+        if fresco[CSV_100K]:
+            out += ["**Saldo realizzato: %.2f**  (netto di oggi: %+.2f · dal via: %+.2f)" % (
+                        saldo, netto_oggi, netto_storico), ""]
+        else:
+            # Il saldo cumulato resta un fatto vero, ma va DATATO: e' fermo
+            # all'ultima consegna, non a stasera. Il "netto di oggi" sparisce.
+            d100, _f100 = freschezza(CSV_100K)
+            out += ["**Saldo realizzato AL %s: %.2f**  (dal via: %+.2f) — "
+                    "⚠️ **fermo all'ultima consegna, non a stasera; il netto di "
+                    "oggi NON e' noto.**" % (d100, saldo, netto_storico), ""]
+        out += ["| Regola FTMO | Pavimento | Margine attuale |", "|---|---|---|",
+                "| Perdita totale (statico -10%%) | 90.000 | **%+.2f** (%.2f%% del conto)%s |" % (
+                    margine_tot, 100.0 * margine_tot / DEP_100K,
+                    "" if fresco[CSV_100K] else " _(all'ultima consegna)_"),
+                ("| Perdita giornaliera (-5%%) | -5.000/giorno | oggi usati %.2f -> restano **%.2f** |" % (
+                    usato_oggi, margine_giorno)) if fresco[CSV_100K] else
+                "| Perdita giornaliera (-5%) | -5.000/giorno | 🔴 **NON CALCOLABILE**: dato non arrivato |",
                 "",
                 "Peggior giornata dal via: **%+.2f**. _Numeri dal solo REALIZZATO " % peggior_g +
                 "(il CSV non vede il floating): l'arbitro vero dei pavimenti resta "
