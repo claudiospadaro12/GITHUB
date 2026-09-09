@@ -1,0 +1,245 @@
+# =====================================================================
+#  R120d  --  USCITE SUPERTREND  /  cella 00_nuda
+#  EA: ABTG_SupRev_DAX_H4_Ottimizzato
+#  D30EUR H4  --  2024.09.26 in avanti
+# ---------------------------------------------------------------------
+#  IL PRIMO ROUND DEL PROGETTO CHE METTE AD ASSE LA GESTIONE
+#  DELL'USCITA DELLA FAMIGLIA SUPERTREND.
+#
+#  ORIGINE, e non e' un'opinione: report\AUDIT_USCITE_2026-09-09.md,
+#  Tabella B righe 1-2 e paragrafo 8 (voce ORO, la numero 1 per rapporto
+#  valore/lavoro di tutto l'audit).
+#    InpTrailOnST   e' in 15 EA, default true  -> ZERO volte ad asse
+#    InpExitOnFlip  e' in 14 EA, default true  -> ZERO volte ad asse
+#    InpFirstFraction e' in 14 EA, 0,3333      -> ZERO volte ad asse
+#  Rifatta la verifica il 09/09/2026 su tutto il repo, .git escluso:
+#    grep -rn "InpTrailOnST=.*||Y"    ->  0 righe
+#    grep -rn "InpExitOnFlip=.*||Y"   ->  0 righe
+#    grep -rn "InpFirstFraction=.*||Y"->  0 righe
+#  Gli unici posti dove compaiono sono PIN a true
+#  (righe\RIGA_R110_LATI_VIVI.ps1 r.388/395/402, RIGA_R99_ORO_RISCHIO.ps1
+#  r.215, RIGA_R113_REGIME_NASUSD.ps1 r.345). Girano al default da luglio
+#  e NESSUNO HA MAI MISURATO QUANTO VALGONO.
+#
+#  PERCHE' VALE LA PENA, col numero di casa (R46, 14/08, tick reali,
+#  fuori campione, INGRESSO IDENTICO E PINNATO PER NOME):
+#    DAX, TP 3R secco senza gestione ....  PF 0,88   DD 22,50%
+#    DAX, trailing PREVBAR senza parziale  PF 1,49   DD  6,27%
+#  La SOLA struttura d'uscita muove il PF di 0,61 punti e il drawdown di
+#  16 punti. Sul Dow l'escursione e' PF 1,01 -> 1,27.
+#  Fonte: risultati_archivio\REFERTO_ROUND46_GESTIONE.md.
+#
+#  >>> QUESTA E' LA CELLA: 00  ->  InpTrailOnST=false , InpExitOnFlip=false
+#      USCITA NUDA: restano SOLO stop iniziale, parziale 50% a 1R,
+#      stop in pari e TP finale a InpTP_RR. E' il gemello esatto della
+#      riga 'parziale + BE, poi corre a 3R' di R46, che sul DAX fece
+#      PF 1,03 e DD 8,74% (REFERTO_ROUND46_GESTIONE.md).
+#
+#  LA GRIGLIA DEL ROUND -- 2x2, UN FILE PER CELLA (regola di casa: un
+#  file prova misura UNA variabile, controlla_prova.py lo impone):
+#      11_vivo     trail ON   flip ON    <- la configurazione in campo
+#      01_notrail  trail OFF  flip ON
+#      10_noflip   trail ON   flip OFF
+#      00_nuda     trail OFF  flip OFF   <- solo SL + parziale + BE + TP
+#
+#  PERCHE' SERVONO TUTTE E QUATTRO, E NON DUE. I due meccanismi
+#  INTERAGISCONO nel sorgente, e si legge riga per riga:
+#    ABTG_SupertrendReversal.mq5:187-192
+#        if(HasPosition()) { ... if(InpExitOnFlip && flip) { CloseAll
+#        Positions(); CancelPendings(); return; } return; }
+#        // con posizione aperta non cerco nuovi ingressi
+#    ABTG_SupertrendReversal.mq5:319 e 357-360
+#        if(InpTrailOnST && SupertrendSeries(3,dir,line)) ... PositionModify
+#  Il trailing e il flip chiudono le posizioni, e finche' una posizione e'
+#  aperta L'INGRESSO E' BLOCCATO. Spegnerne uno LIBERA LO SLOT prima o
+#  dopo, quindi cambia QUALI trade il motore prende.
+#
+#  >>> CONSEGUENZA CHE VA LETTA PRIMA DEI NUMERI, ALTRIMENTI IL ROUND
+#      VIENE INTERPRETATO AL CONTRARIO:
+#      IL NUMERO DI OPERAZIONI CAMBIERA' DA CELLA A CELLA. Questo NON e'
+#      lo studio del Dow del 05/08, dove il trailing lasciava 329 trade
+#      identici in ogni passata e cambiava solo l'uscita. QUI NO.
+#      Quindi un PF piu' alto in una cella puo' venire da una gestione
+#      migliore OPPURE da un campione diverso, e le due cose vanno
+#      separate guardando n, payoff e vincita media -- non il solo PF.
+#      Se n si muove di piu' del 20% fra due celle, il confronto diretto
+#      del PF fra quelle due celle E' SOSPESO e va detto nel referto.
+#
+#  LA SEDIA VIVA: magic 970912, IN CAMPO (FLOTTA_ATTIVA.md r.45, confermata dagli Esperti
+#      VPS del 25/08 22:15). E' anche l'unica sedia con TENSIONE
+#      STATISTICA VERA sul silenzio (DIAGNOSI_SEDIE_MUTE_2026-09-05.md
+#      par. 6).
+#  >>> Nessuna sedia in forward viene toccata da questo file. I magic qui
+#      sotto sono VERGINI (verifica sotto) e non hanno mai operato nulla.
+#
+#  I NUMERI D'ARCHIVIO DI QUESTA SEDIA -- sono il METRO, non il verdetto:
+#      R103 a tick reali, finestra unica 21 mesi:
+#        +7.856 EUR  PF 2,05  DD 4,22%  n 99
+#        (R103_REFERTO_BLOCCO1_INDICI.md riga 8, citato in
+#         prove\R110_SUPDAX_01_long.txt)
+#      validazione 26/07 (REGISTRO_TEST.md r.169, S4v):
+#        PF 1,96  DD 5,7%  n 86  profit 781
+#      revalidation 30/07: PFmed reale 1,05, MARGINALE
+#        (report\CENSIMENTO_CONTRATTI.md r.133)
+#
+#  >>> ATTESA DICHIARATA PRIMA DEI NUMERI (regola di casa):
+#      n OOS  50 - 70  [DERIVATA da n 86-99 sull'INTERA finestra,
+#             con lo split 40/60 la parte OOS ne prende ~60%]
+#      PF     1,00 - 2,10 sulla cella VIVA
+#      DD     4,2% - 5,7% a rischio 1,00%
+#      SOGLIA DEI 150: NO: 86-99 operazioni sull'INTERA finestra, meno di 70 in OOS.
+#      >>> IL MERITO E' SOSPESO SU QUESTO SIMBOLO. Da questa cella
+#          NON PUO' USCIRE NESSUNA PROMOZIONE, e sta scritto PRIMA.
+#          Quello che si legge e' il RISCHIO (Emendamento B del
+#          16/08: 'il campione sottile sospende il giudizio sul
+#          MERITO, mai sul RISCHIO') e il SEGNO dell'effetto.
+#
+#      E QUESTA E' L'ATTESA SULL'EFFETTO, cioe' la parte falsificabile:
+#      MI ASPETTO UNO SPREAD LARGO FRA LE QUATTRO CELLE, non un pareggio.
+#      Motivo misurato: R46 muove il PF di 0,61 punti e il DD di 16 punti
+#      cambiando solo l'uscita; lo studio del Dow del 05/08 muove il PF
+#      dell'11% e il DD del 23% col solo tipo di trailing.
+#      SE INVECE LE QUATTRO CELLE ESCONO DENTRO 0,10 DI PF E 1 PUNTO DI
+#      DD, LA RISPOSTA ONESTA E' "IL DEFAULT VA BENE" -- ed e' un
+#      risultato, non un fallimento. Scritto adesso.
+#
+#      >>> LA DIREZIONE DELL'EFFETTO NON E' PREVEDIBILE, e chi scrivera'
+#          "me lo aspettavo" dopo aver visto il segno si sta raccontando
+#          una storia. L'unico indizio che abbiamo e' UNA giornata
+#          (17/08, una sola operazione) e non e' un campione.
+#
+#  >>> SOGLIE CONGELATE PRIMA -- cosa fa SCARTARE, col numero:
+#      G0 DETERMINISMO: le due passate gemelle (magic 783430 e 783431) devono
+#         dare profit, PF, DD e n IDENTICI AL CENTESIMO. Se differiscono,
+#         il banco non e' deterministico e IL ROUND E' NULLO. Si ferma.
+#      G1 METRO: la cella 11_vivo deve stare dentro la forbice d'attesa
+#         qui sopra. Se ne esce, il file non riproduce la sedia e le
+#         altre tre celle NON SI LEGGONO.
+#      G2 CAMPIONE: sotto 30 operazioni OOS la cella non ha nemmeno un
+#         indizio (criterio congelato l'08/08, report\DIARIO.md r.40:
+#         "celle con 11 trade e PF 335 passavano tutto").
+#      G3 MERITO (vale solo dove n OOS >= 150): per proporre un cambio
+#         alla sedia viva servono TUTTE E TRE:
+#           - PF OOS >= 1,10
+#           - PF OOS della cella nuova > PF OOS della 11_vivo di almeno
+#             0,15 (sotto e' rumore: lo scarto fra celle gemelle di
+#             archivio della stessa sedia arriva a 0,1 punti di PF)
+#           - DD OOS <= DD OOS della 11_vivo
+#      G4 RISCHIO (vale a QUALUNQUE n, Emendamento B del 16/08): se una
+#         cella ha DD OOS > 10,0% a rischio 1,00%, e' SCARTATA anche se
+#         guadagna. Il muro prop non si negozia.
+#      G5 ALTOPIANO: si sceglie il CENTRO, MAI IL PICCO. Con 4 celle
+#         l'altopiano e' debole per costruzione; se UNA cella sporge e le
+#         altre tre stanno insieme, la risposta e'
+#         "NON C'E' UNA CONFIGURAZIONE ROBUSTA", e si scrive cosi'.
+#      >>> DA QUESTO ROUND NON ESCE NESSUNA PROMOZIONE AUTOMATICA. Esce
+#          al massimo un CANDIDATO per la corsia demo. Le sedie in campo
+#          non si toccano: quello lo decide Claudio.
+#
+#  >>> BUCHI DICHIARATI DI QUESTA CELLA:
+#      1. IL PARZIALE DEL 50% SUGLI INDICI NON E' IL 50%, ed e' MISURATO,
+#         non temuto. Il 17/08 su U30USD lo step del volume e' 0,10 e una
+#         gamba da 0,10 lotti non puo' chiudere il 50%: il parziale ha
+#         incassato 9,64 EUR invece di 14,70, cioe' il 33%, e sull'altra
+#         gamba 0,00 EUR esatti (report\DIARIO.md r.155). Su D30EUR con
+#         1,00 lotto invece ha funzionato (r.156).
+#         >>> EFFETTO SU QUESTO ROUND: il parziale e' PINNATO IDENTICO in
+#             tutte e quattro le celle, quindi la distorsione e' la STESSA
+#             ovunque e il CONFRONTO FRA CELLE REGGE. Sono i NUMERI
+#             ASSOLUTI a portarsela dietro. Va scritto nel referto.
+#             La cella di controllo R120e misura quanto pesa.
+#      2. IL CAMPIONE E' SOTTO I 150. Vedi la riga SOGLIA DEI 150 qui
+#         sopra: da questa cella esce un SEGNO e un DD, non un merito.
+#      3. FRONTIERA DEL COSTO su questo simbolo: 280 punti MT5 = 2,80 punti indice (sonda 17/08). Frontiera del
+#      costo: stop >= 40 x 2,80 = 112 PUNTI INDICE. Su H4 con
+#      StMult 3,0 x ATR(9) la distanza vera e' [NON MISURATO];
+#      il DAX H4 e' il piu' largo dei tre indici, quindi e' il
+#      meno esposto -- ma il numero va letto nel CSV.
+#
+#  >>> RISCHIO 1,00% qui dentro. In campo il 100k gira a 0,65%: OGNI DD
+#      di questo file va MOLTIPLICATO PER 0,65 per confrontarlo col
+#      forward.
+#
+#  >>> ORARI: InpUseTimeWindow=false, InpUseNewsFilter=false. In questo
+#      round NON c'e' nessun parametro d'orario, quindi la regola dell'ora
+#      SERVER BCM (italiana meno 1) non morde qui. Se un giorno si
+#      aggiunge una finestra oraria a questa famiglia, va scritta in ora
+#      SERVER, non italiana.
+#
+#  >>> MAGIC VERGINI 783430/783431: blocco 783xxx, cercato numero per numero
+#      su tutto il repo il 09/09/2026 (.git escluso) -> ZERO occorrenze
+#      per tutti e 36 i magic del round. I magic delle sedie vive
+#      (970901 970911 970912 970913 970914 970915 970916 971001 770501
+#      770511 770512 770901 770922 770923 770924 770925) sono VIETATI
+#      qui dentro e non compaiono.
+#      Le due celle sono IDENTICHE PER COSTRUZIONE: la seconda e' il
+#      gemello di determinismo (cancello G0) e costa una passata.
+#
+#  >>> COME SI LANCIA (dal PC di backtest, MT5 CHIUSO, SEMPRE prima con
+#      -SoloControllo: deve stampare 2 CELLE PER FINESTRA; altro numero
+#      = file letto male, FERMARSI):
+#        walkforward_generico.ps1 -Expert ABTG_SupRev_DAX_H4_Ottimizzato
+#          -Prova prove\R120d_D30EUR_00_nuda.txt
+#          -Simbolo D30EUR -DaQuando 2024.09.26 -Deposito 10000
+#          -Etichetta r120d00 -Modello 4
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+
+# --- IDENTITA' DEL MOTORE: la cella viva, pinnata per nome ---
+InpUsaGuardian=true||true||0||true||N
+InpTF=16388||16388||0||16388||N
+InpStMult=3.0||3.0||0||3.0||N
+InpStAtrPeriod=9||9||0||9||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+
+# --- I DUE LATI, TUTTI E DUE VIVI (regola di casa del 25/08) ---
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- Confluenza / medie ---
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+
+# --- Ingresso frazionato: PINNATO al default. InpFirstFraction e' il
+#     TERZO parametro mai messo ad asse della famiglia, ma NON e' l'asse
+#     di questo round: e' proposto come R121 nel dossier, con il suo
+#     costo. Qui resta fermo apposta, altrimenti il round misura due
+#     cose insieme e non ne misura nessuna.
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+
+# --- LA GESTIONE DELL'USCITA: la parte che questo round misura ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=3.0||3.0||0||3.0||N
+
+# >>> IL DELTA DI QUESTA CELLA, e sono le uniche due righe che cambiano
+#     fra i quattro file del simbolo:
+InpTrailOnST=false||false||0||false||N
+InpExitOnFlip=false||false||0||false||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE SPAZZOLATO: i due magic gemelli di controllo (G0) ---
+InpMagic=783430||783430||1||783431||Y

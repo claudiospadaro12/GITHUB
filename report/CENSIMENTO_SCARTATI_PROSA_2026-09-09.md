@@ -17,6 +17,18 @@
 _Compilato il **09/09/2026**. Se un referto e questo documento divergono,
 **comanda il referto** — e la divergenza va nella §CONTRADDIZIONI, non nascosta._
 
+> ## ✅ AGGIORNAMENTO DEL 09/09/2026 (sera) — **LE 10 CONTRADDIZIONI SONO STATE LAVORATE**
+> Ognuna e' stata portata davanti all'**indizio materiale** (file che esistono
+> davvero: CSV, commit, orari). Verbale completo e verdetti:
+> **`report/CONTRADDIZIONI_CHIUSE_2026-09-09.md`**.
+> 🔴 **Due esiti toccano questo file:** **C1** — il `DD 42,9%` di `ABTG_FvgRetest`
+> e' **RITIRATO** (nessuna traccia materiale in tutta la storia del repo): la
+> riga **A119** va letta come **`NON ANCORA MISURATO`**, non come contraddizione
+> aperta. **C8** — l'accusa *"criterio aggiunto dopo i numeri"* su `M0PB` **e'
+> risultata FALSA** ai commit (i criteri erano congelati ~4 ore prima della
+> corsa); il verdetto scende comunque a **`NON ANCORA MISURATO`**, ma per due
+> motivi diversi e migliori.
+
 ---
 
 ## 🧊 LE REGOLE DI SCRITTURA, CONGELATE PRIMA DELLA TABELLA

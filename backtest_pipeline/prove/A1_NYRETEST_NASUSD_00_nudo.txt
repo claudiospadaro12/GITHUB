@@ -1,0 +1,139 @@
+# ==========================================================================
+#  EA: ABTG_NySessionRetest
+#  A1-01 -- NY SESSION RETEST sul GEMELLO NASUSD, PASSO 0 (motore NUDO).
+#  Scritto il 09/09/2026 per la RIAPERTURA DEI QUATTRO CANDIDATI DI CLASSE A1
+#  (report/RIAPERTURA_A1_2026-09-09.md). Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  PERCHE' ESISTE QUESTO FILE -- la casella NO del certificato
+#    Certificato di morte (CLAUDE.md, 09/09), casella 4 "SIMBOLI GEMELLI":
+#    per il NY Session Retest la risposta e' NO. Tutto cio' che e' stato
+#    misurato -- passo 0 H1 (0 trade), passo 0 M15 (n=625), griglia 48,
+#    estensione 8 -- sta su UN SOLO SIMBOLO, U30USD.
+#    Fonte: risultati_archivio/REFERTO_NYRETEST_2026-08-31.md, tutte le
+#    sezioni; prove/ABTG_NySessionRetest.txt, _Tar.txt, _Tar2.txt
+#    (@SIMBOLO U30USD in tutti e tre).
+#    NASUSD ha la STESSA SEDUTA (14:30-20:55 server), lo STESSO orologio,
+#    la stessa struttura VWAP-di-seduta + EMA200 su H1, e i tick BCM dal
+#    2024.09.26 con verdetto COMPLETO
+#    (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md r.46).
+#    E' il gemello vero: cambia UNA cosa sola, il simbolo.
+#
+#  PERCHE' NUDO E NON GIA' A slope 75 -- ed e' il punto tecnico del round
+#    Il gate InpVwapSlopeMin e' in PUNTI INDICE ASSOLUTI (sorgente r.96:
+#    "Pendenza minima |VWAP| sul periodo, in PUNTI INDICE"). Su U30USD la
+#    scala era ancorata al take mediano MISURATO: 45 = meta' del take
+#    mediano WIN (+87.8 punti indice), 90 = ~1x (REFERTO_NYRETEST par. TARATURA
+#    e par. ESTENSIONE FINALE). NASUSD quota su un livello d'indice diverso:
+#    >>> IL NUMERO 75 NON SI TRASFERISCE. Trasferirlo sarebbe inventare
+#        una soglia. Prima si MISURA la scala del simbolo (take mediano in
+#        punti indice), poi si costruisce l'asse slope su quella scala.
+#    Questo file produce esattamente quella scala. E' il passo 0, non il
+#    verdetto.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (e prima di guardare qualunque CSV)
+#    Riferimento MISURATO sul gemello U30USD, stesso motore nudo, stessa
+#    finestra, stesso rischio, tick reali, deposito 100k
+#    (REFERTO_NYRETEST_2026-08-31.md, "PASSO 0 VALIDO corsa v5, pin 50551fa"):
+#      n = 625 deal (462 posizioni) | PF = 1.002 | DD = 12.87%
+#      take mediano WIN +87.8 punti indice / LOSS -57.1 | pegg.gio -2.89%
+#      lati: LONG n=351 +2450 (win 51.9%) | SHORT n=272 -2650 (win 47.1%)
+#    Mi aspetto su NASUSD, e lo scrivo PRIMA:
+#      n fra 450 e 800 deal   (stessa seduta, stessa meccanica di retest)
+#      PF fra 0.90 e 1.15     (il motore NUDO e' in pareggio per costruzione:
+#                              il valore, su U30USD, lo aggiunge il GATE)
+#      DD fra 8% e 18% a rischio 0.65%
+#    >>> Se il PF nudo uscisse molto SOPRA 1.15 sarebbe un risultato
+#        SOSPETTO, non bello: vorrebbe dire che su NASUSD il motore e'
+#        un'altra cosa rispetto al gemello, e andrebbe capito prima di
+#        essere festeggiato.
+#
+#  SOGLIE CONGELATE (scarto/prosecuzione decisi ORA, col numero accanto)
+#    S1  n < 300 deal            -> il motore non parla abbastanza su NASUSD.
+#                                   Capitolo gemelli CHIUSO, niente griglia.
+#    S2  PF nudo < 0.85          -> peggio del pareggio del gemello (1.002).
+#                                   Capitolo CHIUSO: non si cerca un gate che
+#                                   salvi un motore che parte sotto.
+#    S3  DD > 20.0% a 0.65%      -> rischio fuori scala prima ancora del gate.
+#                                   CHIUSO (il rischio si giudica a qualunque n,
+#                                   Emendamento B del 16/08).
+#    S4  chiusure OLTRE il flat > 5% delle posizioni -> FILE INVALIDO.
+#                                   E' il vincolo duro del mandato (zero
+#                                   overnight) e la classe pagata il 31/08 su
+#                                   questo stesso EA (30 chiusure oltre il flat,
+#                                   v4 -> flat di recupero v5).
+#    S5  CANCELLO G1 (determinismo): le due passate gemelle 769520 e 769521
+#                                   devono essere IDENTICHE AL CENTESIMO.
+#                                   Se non lo sono, il banco non e' deterministico
+#                                   e NESSUN numero di questa corsa si legge.
+#
+#  COSA QUESTO FILE NON DECIDE, dichiarato
+#    - Non promuove niente. Nemmeno se il PF fosse bello: n>=150 per finestra
+#      qui non c'e' (corsa a UNA tranche) e il merito resta sospeso.
+#    - Non misura il gate. Produce la SCALA (take mediano in punti indice)
+#      su cui il gate si costruira', in un file separato, con UN asse solo.
+#    - Non tocca la sedia demo 769510 su U30USD, che resta com'e'.
+#
+#  FRONTIERA DEL COSTO C3, dichiarata PRIMA (06/09)
+#    Su U30USD la perdita mediana e' -57.1 punti indice contro spread
+#    1.9-2.0 = 29.3x: SOPRA il pavimento duro (13.3x), SOTTO quello di
+#    lavoro (40x = 76-80 punti indice per U30USD).
+#    Su NASUSD il pavimento di lavoro e' 64-72 punti indice
+#    (spread MISURATO 1.6-1.8, SPREAD_FLOTTA_MISURA_2026-09-03.md r.17).
+#    >>> Lo stop di questo motore in punti indice su NASUSD e' [NON MISURATO]:
+#        lo produce QUESTA corsa. Se la perdita mediana esce sotto 24 punti
+#        indice (= 13.3x lo spread 1.8), il capitolo si chiude PER COSTO,
+#        col numero accanto, quale che sia il PF.
+#
+#  BANCO
+#    Modello 4 (TICK REALI). Deposito 100000 (come il passo 0 del gemello:
+#    "PF 1.002, +214 su 100k"). UNA TRANCHE: FrazioneIS 1.0 va passata dalla
+#    riga di lancio, come il 31/08 -- la gamba OOS esce degenere ed e' ATTESA
+#    rossa/vuota: NON si rilancia.
+#
+#  Direttive @ NUDE (senza # davanti, senza commenti in coda): commentate o
+#  sporche = gate vuoto (classe pagata il 30/08 su questo stesso EA).
+#  2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+@SIMBOLO NASUSD
+@PERIODO M15
+@DAQUANDO 2024.09.26
+@FINOA 2026.06.30
+#
+# --- I FISSI: identici al passo 0 del gemello (prove/ABTG_NySessionRetest.txt).
+#     Cambia UNA cosa in tutto il file: il simbolo.
+InpEmaTrend=200
+# GATE COSTITUTIVI SPENTI: e' la baseline voluta, non una dimenticanza.
+InpVwapSlopeMin=0.00
+InpExpansionMin=0.00
+InpVwapSlopePeriod=5
+InpExpansionLookback=10
+InpSlLookback=5
+InpSlBufferPts=300
+InpMinStopPts=500
+InpRetestBufferPts=0
+# FUSO SERVER BCM (IT-1): seduta 14:30 -> flat 20:55. MAI 9:30 / 16:00 (ET).
+InpSessionHour=14
+InpSessionMin=30
+InpCloseHour=20
+InpCloseMin=55
+# VINCOLO DURO del mandato: flat di fine seduta acceso (v5, flat di recupero).
+InpCloseAtEnd=true
+# DUE LATI insieme, come al passo 0 del gemello (regola dei due lati, 25/08:
+# i lati si rileggono SEPARATI nel per-trade, non si sceglie il migliore qui).
+InpAllowLong=true
+InpAllowShort=true
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# Conversione punti indice: 100 e' MISURATO sui tre indici BCM (D30EUR,
+# U30USD, NASUSD) -- ABTG_Relativo.mq5 r.392. Pinnato esplicito, non ereditato.
+InpMT5PerPuntoIndice=100
+InpComment=NYRTNAS
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+#
+# --- L'UNICO ASSE: TECNICO, gemelli sul magic = cancello G1 di determinismo
+#     (2 passate che DEVONO uscire identiche). 769520/769521 verificati
+#     VERGINI repo-wide il 09/09/2026: grep -rn --exclude-dir=.git -> 0.
+InpMagic=769520||769520||1||769521||Y
+# ==========================================================================
