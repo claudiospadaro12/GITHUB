@@ -10955,3 +10955,90 @@ usato e' il VPS, alle 03:30.**
 **promessa**, non un collaudo. Vale per la coda come per le righe di lancio --
 dove infatti il controllo del codice HTTP c'era gia', ed e' proprio da li' che
 andava copiato.
+
+---
+
+## 🆕 AGGIUNTE DEL 09/09/2026 — trovate dal **verificatore di stringhe** sulla riga dei **GEMELLI IBRetest** (`RIGA_ROUND_VPS.ps1`, pin `bfaab024`, due corse in sequenza sullo stesso terminale). Il driver e' per il resto **solido**: parse 0 errori su `pwsh` 7.4.6, ASCII puro (0 byte non-ASCII su riga, driver e file prova), nessun formato .NET invalido, `InvariantCulture` su **tutti** i `TryParse`/`ToString` numerici, guardia terminale chirurgica + censimento PID prima/dopo, pin = **commit vero** (classe 164 rispettata), e la **classe 26 e' gia' disinnescata** perche' cartella di sosta, referto e zip portano tutti l'`-Etichetta` nel nome. Le due voci qui sotto sono nuove.
+
+## 165. 🪤 IL GUSCIO `& { ... }` CHE PROTEGGE IL DOWNLOAD **UCCIDE LA SECONDA CORSA**: `$ErrorActionPreference='Stop'` + **due** chiamate native in fila = basta UNA riga su `stderr` della prima perche' la seconda non parta mai
+
+**Il fatto.** La riga dei gemelli chiamava lo stesso script **due volte** dentro
+un solo `& { $ErrorActionPreference='Stop'; ...; & powershell ...; & powershell ... }`.
+
+Il guscio e' li' per un motivo giusto e **misurato** (punto **153-ter**: dentro
+`& { }` un errore terminante ammazza la riga davvero, e cosi' l'`irm` fallito
+non fa girare una copia vecchia). Ma quel motivo ha un rovescio che nessuno
+aveva scritto:
+
+> in **Windows PowerShell 5.1**, con `$ErrorActionPreference='Stop'`, l'output su
+> **`stderr`** di un comando **nativo** viene convertito in `NativeCommandError`
+> ed e' **TERMINANTE**. Dentro `& { }` esce dallo scriptblock e ammazza
+> **l'intera** statement: la seconda `& powershell` **non viene mai eseguita**.
+
+**E lo `stderr` arriva davvero.** `RIGA_ROUND_VPS.ps1` lancia il driver con
+`Start-Process -NoNewWindow`, quindi il nipote **eredita gli handle**: un
+errore non catturato di `walkforward_generico.ps1` (che gira anche lui a
+`Stop`) risale fino alla console del padre. E il driver ha operazioni
+**scoperte**, non ipotetiche — righe **935, 943, 1043, 1046, 1061**:
+`Copy-Item $srcFile -Destination $MqlExperts -Force` (fallisce se il `.mq5` e'
+aperto in MetaEditor), `Set-Content` dell'`.ini`, e soprattutto
+`Remove-Item $csv -Force` — **che fallisce se il CSV e' aperto in Excel**, cioe'
+il gesto piu' normale del mondo fra due corse.
+
+**Il danno**: la prima corsa e' l'unica che gira, la seconda non parte, la riga
+`--- ESITO` non si stampa, e sul Desktop c'e' **un solo zip** — con l'aria di
+una raccolta riuscita, perche' quella prima corsa e' andata benissimo.
+E' il difetto **specularmente opposto** al punto **13** (li' la coda tirava
+dritto quando doveva fermarsi; qui la coda si ferma quando doveva tirare
+dritto), e non e' coperto dal punto **26** (che parla della raccolta che si
+sovrascrive, non della chiamata che non avviene).
+
+> ### 🔴 LA REGOLA
+> **`Stop` copre il DOWNLOAD, non le CORSE.** In una riga con **piu' di una**
+> chiamata nativa, appena passato il cancello del marcatore si riabbassa a
+> `Continue`, e gli esiti si **catturano in variabili**, subito:
+> ```powershell
+> ...; if(-not (Select-String -Path $p -SimpleMatch -Pattern '<marcatore>' -Quiet)){ throw 'SCRIPT VECCHIO' };
+> $ErrorActionPreference='Continue';
+> & powershell ... -Etichetta "A"; $rcA=$LASTEXITCODE;
+> & powershell ... -Etichetta "B"; $rcB=$LASTEXITCODE;
+> Write-Host ("RIEPILOGO  A=" + $rcA + "  B=" + $rcB)
+> ```
+> Le variabili non sono un vezzo: se la **seconda** chiamata non parte proprio
+> (eseguibile non trovato), `$LASTEXITCODE` **resta quello della prima** e la
+> riga stampa in faccia l'esito sbagliato attribuito alla corsa sbagliata.
+
+⚠️ **E il riepilogo in fondo diventa obbligatorio quando le corse sono due.**
+Ogni corsa stampa gia' il suo `ZIP PRONTO DA MANDARE`, ma dopo ore di tick
+reali della seconda corsa **quello della prima e' fuori dal buffer della
+console**. La riga finisce elencando **tutti** gli zip attesi, con `Length` e
+`LastWriteTime`, e la riga `data:` di **ogni** referto (punto 110): altrimenti
+la regola del 11/08 e' rispettata solo per l'ultima corsa.
+
+### 56-ter. 🧹 E IL GIRO A VUOTO CHE **CANCELLA L'ARTEFATTO DELLA CORSA VERA** (rovescio del punto 56)
+
+Stessa verifica. Il punto **56** dice che il giro a vuoto **sporca** la raccolta
+della corsa vera. Qui il verso e' l'altro. In `RIGA_ROUND_VPS.ps1` la pulizia
+chirurgica dei CSV omonimi (righe **434-439**, classe 155, giustissima) sta
+**PRIMA** del ramo `-SoloControllo` (riga **469**):
+
+```powershell
+foreach($f in @($csvIS,$csvOOS)){ if(Test-Path -LiteralPath $f){ Remove-Item -LiteralPath $f -Force ... } }
+...
+if($SoloControllo){ ... exit 0 }
+```
+
+Quindi un `-SoloControllo` lanciato **con la stessa `-Etichetta`** dopo un round
+riuscito **cancella i due CSV buoni** e non li rifa': il giro "che non tocca
+niente" e' l'unico gesto che distrugge il risultato. Non morde finche' l'ordine
+e' `vuoto -> vera` (l'ordine che la checklist prescrive), morde nel gesto
+naturale *"rifaccio il giro a vuoto per capire perche' il numero e' strano"*.
+
+> ### 🔴 LA REGOLA
+> **Ogni cancellazione preventiva va DOPO il ramo che non produce niente.**
+> Diff proposto: spostare il `foreach` di pulizia sotto il blocco
+> `if($SoloControllo){...exit 0}`, oppure racchiuderlo in
+> `if(-not $SoloControllo){ ... }`. E la regola generale per il verificatore:
+> **per ogni `Remove-Item` chiedersi quale MODO della riga lo esegue e quale
+> MODO avrebbe dovuto rimetterlo a posto.** Se nessun modo lo rimette, quella
+> cancellazione non e' una pulizia: e' una perdita.
