@@ -126,7 +126,62 @@ Il testo intorno e' per chi firma; il driver guarda solo quelle righe.
 @DECISIONE D-D CHIAVE=FINESTRA VALORE=2010-2026 STATO=FIRMATO
 @DECISIONE D-E CHIAVE=SOGLIA_CANARINO_ORE VALORE=20 STATO=FIRMATO
 @DECISIONE D-F CHIAVE=STRADA_DAX VALORE=diagnosi_prima STATO=FIRMATO
+@DECISIONE D-G CHIAVE=DAX_SOTTOINSIEME VALORE=2010_2018 STATO=FIRMATO
 ```
+
+---
+
+### 🅖 D-G — **il sottoinsieme del DAX che si puo' usare** (FIRMATA da Claudio, 10/09/2026)
+
+**Claudio, testuale: _"FIRMO D-G"_.** Firmata alle 00:45 del 10/09/2026, subito dopo
+aver letto il referto della seconda diagnosi.
+
+#### Cosa autorizza, ESATTAMENTE
+| voce | valore |
+|---|---|
+| **anni ammessi** | **2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018** (nove) |
+| **ore** | la finestra del feed, **02:00-15:00 ora di NEW YORK** (= **07:00-20:00 ora server BCM**, = 08:00-21:00 italiane) |
+| **esclusi** | **2019** (convenzione oraria diversa + 207 buchi > 60 min) e **2020-2026** |
+| **USO** | **SOLO_PROVA_REGIME**, come la D-C gia' firmata |
+
+#### 🔴 COSA QUESTA FIRMA **NON** AUTORIZZA
+- ❌ **NON** produce contratti: nessun DD promesso, nessuna frequenza promessa, nessun
+  numero che entri in `CENSIMENTO_CONTRATTI.md`.
+- ❌ **NON** promuove nessuna sedia, e **non** riapre nessun candidato da sola.
+- ❌ **NON** autorizza a incollare i nove anni ai dati recenti: **2010-2018 usa
+  `02:00-15:00`, il 2019 e il 2024-2026 usano `00:00-23:00`. Sono due convenzioni
+  diverse.** I nove anni sono coerenti **fra loro**, ed e' su quelli che si misura.
+- ❌ **NON** e' BCM: niente spread vero, niente orari del broker, niente basis.
+  **Serve a rispondere a una domanda sola: "questo motore SOPRAVVIVE fuori dal toro?"**
+
+#### 📐 SU COSA POGGIA (misurato il 09-10/09/2026, non assunto)
+- **Nove anni su nove SANI**: 0 barre fuori banda, `ALLARME banda: no`, finestra modale
+  identica, densita' **58,1-59,6**, DST seguito correttamente.
+  Referto: `risultati_archivio/DIAGNOSI_DAX_20260910_SOGLIA41/REFERTO_DIAGNOSI_DAX.txt`.
+- **Soglia di densita' usata: 41,0**, **dichiarata**, tarata **appena sotto il 42,0** che
+  e' la densita' minima del **controllo positivo `nsxusd`** — la serie gia' promossa.
+  🔎 Non e' una soglia di merito abbassata dopo i numeri: e' la **taratura di uno
+  strumento contro un campione noto-buono**. Uno strumento che boccia il proprio
+  controllo positivo e' tarato male, e lo ha scritto lo strumento stesso nel referto.
+- **Prova incrociata indipendente**: i prezzi 2026 del feed (21.859,78-25.903,90)
+  contengono il **25.656,8** letto sul grafico BCM il 09/09. Due fonti diverse, stesso
+  numero.
+- **Perche' il 2020-2023 e' escluso**: contiene **un altro strumento**. Prezzi 2021
+  3.461-4.414 e 2022 3.247-4.395 contro 2024 16.343-20.526. Stesso file, due ordini di
+  grandezza.
+
+#### 🐻 A COSA SERVE, in una riga
+Dentro i nove anni ci sono **2011** (range 4.965-7.623), **2015** (9.300-12.428) e
+**2018** (10.276-13.594): **tre ribassi veri**. Fino a stanotte ogni sedia sugli indici
+era misurata su **21 mesi di un solo toro**.
+
+#### ⚠️ BUCHI CHE RESTANO APERTI, e la firma non li chiude
+- **Q1 SOSPESA**: l'elenco dei giorni sporchi e' troncato ai primi 40 su ~390, quindi la
+  divisione fra "giornate intere" e "spazzatura" **non e' misurata**. I totali si'.
+- **Il cancello ZERO non e' misurato** su questi anni: si misura solo importando, e
+  l'import e' un passo separato con le sue guardie.
+
+
 
 ---
 
