@@ -304,3 +304,30 @@ Ordinato per **rapporto valore/lavoro**, con la regola di casa
 > **La risposta non e' "non abbiamo mai guardato". E' "abbiamo guardato bene,
 > ma solo in una stanza della casa".** E le altre stanze sono a poche ore di
 > tester di distanza. 🚀
+
+---
+
+## 🎙️ 9. CONFERMA ESTERNA ARRIVATA LO STESSO GIORNO (rimando, non duplicato)
+
+La live di Emiliano del **09/09/2026** contiene, raccontata in diretta e con
+l'esito commentato a caldo dal relatore, **la sequenza esatta che il §2.1 misura
+come la peggiore**: parziale a meta' posizione preso presto (~20-24 punti su un
+target ATR di 28), poi **stop ALLARGATO invece che portato a pari**, poi stop
+preso, poi — testuale — _"profitto ridicolo"_ e _"questi erano altri 50 punti"_.
+
+> 🟢 **Due strade indipendenti, stessa conclusione.** La nostra e' una misura su
+> tick reali fuori campione (**1,49 senza parziale · 1,40 col parziale · 0,88
+> senza gestione**); la sua e' un aneddoto in diretta. **Non hanno lo stesso
+> peso — la misura vale, l'aneddoto conferma — e la conferma NON riapre nulla:**
+> i cancelli R35 bocciano il cambio sul Dow, quindi **nessun cambio live**.
+
+📌 Ne esce **un solo asse nuovo**, ed e' uno spunto: lui ancora il parziale al
+**target di volatilita' (frazione dell'ATR, ~0,71-0,86x)**, noi lo ancoriamo
+sempre al **rischio** (`TP1_R` / `TP1_ClosePct`). **Ancoraggio diverso, unita'
+diversa: non si copia il numero.**
+
+➡️ **Referto completo: `report/ANALISI_LIVE_EMILIANO_2026-09-09.md`**
+(§1.1.1 la sequenza riga per riga · §4 i tre cantieri · §5 lo spunto S1).
+🚩 Nello stesso referto la **prima bandiera ROSSA** delle cinque live di Emiliano
+(mediazione reattiva insegnata in scalping) — **VIETATA PER NOI**, documentata
+come intelligence.
