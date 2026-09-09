@@ -121,13 +121,61 @@ Il testo intorno e' per chi firma; il driver guarda solo quelle righe.
 
 ```
 @DECISIONE D-A CHIAVE=FONTE VALORE=histdata STATO=FIRMATO
-@DECISIONE D-B CHIAVE=SIMBOLI VALORE=NASUSD,SPXUSD STATO=FIRMATO
+@DECISIONE D-B CHIAVE=SIMBOLI VALORE=NASUSD,SPXUSD,D30EUR STATO=FIRMATO
 @DECISIONE D-C CHIAVE=USO VALORE=SOLO_PROVA_REGIME STATO=FIRMATO
 @DECISIONE D-D CHIAVE=FINESTRA VALORE=2010-2026 STATO=FIRMATO
 @DECISIONE D-E CHIAVE=SOGLIA_CANARINO_ORE VALORE=20 STATO=FIRMATO
 @DECISIONE D-F CHIAVE=STRADA_DAX VALORE=diagnosi_prima STATO=FIRMATO
 @DECISIONE D-G CHIAVE=DAX_SOTTOINSIEME VALORE=2010_2018 STATO=FIRMATO
 ```
+
+---
+
+### 🅑-bis D-B ESTESA — **entra il D30EUR** (FIRMATA da Claudio, 10/09/2026, 01:05)
+
+**Claudio, testuale: _"FIRMO D-B con D30EUR"_.**
+`D-B` passa da `NASUSD,SPXUSD` a **`NASUSD,SPXUSD,D30EUR`**.
+
+**Perche' adesso e non prima**: la riga 615 di `RIGA_STORICO_INDICI.ps1` teneva il DAX
+FUORI GIRO con questa motivazione cablata: _"grxeur BOCCIATO (min 2.906 impossibile +
+sessione ballerina 2020-2023): **prima la diagnosi, D-F**"_.
+👉 **La diagnosi c'e', ed e' del 10/09**: nove anni SANI su nove, e il minimo 2.906 e'
+spiegato (era **un altro strumento**, non un errore di scala). La condizione che teneva
+chiuso il cancello **e' soddisfatta**.
+
+⚠️ **E questa firma da sola NON basta a importare.** Vedi il nodo qui sotto.
+
+---
+
+### 🔴 IL NODO ANCORA APERTO — **la finestra e' GLOBALE, e va sciolto prima dell'import**
+
+`RIGA_STORICO_INDICI.ps1` legge la finestra da **`D-D`** (righe 598-601) e la usa **per
+TUTTI i simboli insieme**: guida lo scarico (r.940), la chiamata a python (r.840
+`--da/--a`) e la conversione. **Non esiste un override per simbolo.**
+
+| | oggi |
+|---|---|
+| `D-D` | **2010-2026** |
+| `D-G` (DAX) | **solo 2010-2018** |
+
+👉 Importando adesso, dentro `D30EUR_EXT` **finirebbero anche il 2020-2023, cioe' l'altro
+strumento** — e sarebbe **contro la D-G appena firmata**.
+
+#### Le tre strade, con il loro prezzo
+1. 🟡 **Corsa dedicata**: si porta `D-D` a `2010-2018` e `D-B` al solo `D30EUR` per quella
+   corsa, poi si rimette tutto. **Funziona senza toccare codice, ma muovere due decisioni
+   avanti e indietro e' proprio il modo in cui si perde il filo.**
+2. 🟠 **Importare tutto e limitare nei file prova** (`@DAQUANDO 2010.01.01`,
+   `@FINOA 2018.12.31`). **Sconsigliata**: lascia in MT5 un simbolo che CONTIENE dati
+   sbagliati, e basta un round distratto per prenderli dentro. E' esattamente la classe di
+   trappola che il 09/09 abbiamo passato la giornata a disinnescare.
+3. 🟢 **CONSIGLIATA — una decisione nuova `D-H` con la finestra PER SIMBOLO**
+   (es. `D30EUR:2010-2018`), letta dallo script con un fallback a `D-D` per chi non e'
+   nominato. **Modifica piccola e localizzata**, e soprattutto **rende impossibile
+   l'errore invece di chiedere a qualcuno di ricordarselo.**
+
+🔴 **Nessuna delle tre e' stata scelta: e' una decisione di Claudio, e va presa a mente
+fresca. Finche' non c'e', NON si importa.**
 
 ---
 
