@@ -1,0 +1,34 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2010
+data: 2026-09-10 00:20 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2010
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2010
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  nessuna barra fuori banda su 26866 barre.
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2010-11  apertura modale 02:00  (su 9 giorni)
+  2010-12  apertura modale 02:00  (su 16 giorni)
+  VERDETTO FUSO: non misurabile (servono mesi invernali E estivi).
+  apertura di SETTIMANA modale 02:00 (su 4 settimane)
+
+D30EUR (grxeur): 26866 barre M1, dal 2010.11.15 02:00 al 2010.12.30 07:59
+  prezzo minimo 6654.50000  massimo 7104.50000
+  ordine di grandezza dentro la banda attesa 4000.0-45000.0: OK
+  2010: 26866 barre
+  buchi intragiornalieri > 60 min: 0
+  giorni feriali SENZA nessuna barra: 1  (primi: 2010-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)

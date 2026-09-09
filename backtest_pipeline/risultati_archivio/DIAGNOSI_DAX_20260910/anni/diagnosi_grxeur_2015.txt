@@ -1,0 +1,46 @@
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --diagnosi --simboli grxeur --cartella C:\Users\Master\abtg_diagnosi_dax\anno_2015
+data: 2026-09-10 00:21 (ora del PC)
+cartella ZIP: C:\Users\Master\abtg_diagnosi_dax\anno_2015
+
+
+================ D30EUR (grxeur) ================
+fonte: ZIP in C:\Users\Master\abtg_diagnosi_dax\anno_2015
+DIAGNOSI FUORI BANDA -- D30EUR (grxeur), banda attesa 4000.0-45000.0
+  nessuna barra fuori banda su 211996 barre.
+
+MAPPA MESE-PER-MESE DELL'ORA DI APERTURA (riuso di misura_fuso):
+MISURA DEL FUSO -- ora di apertura di seduta, mese per mese
+  (se GENNAIO e LUGLIO danno la STESSA ora -> il feed segue il
+   DST americano = ORA LOCALE DI NEW YORK -> shift unico OK.
+   Se LUGLIO e' un'ora PRIMA -> feed EST FISSO -> lo shift unico
+   dell'importatore sbaglia meta' anno: FERMARSI.)
+  2015-01  apertura modale 02:00  (su 21 giorni)
+  2015-02  apertura modale 02:00  (su 19 giorni)
+  2015-03  apertura modale 03:00  (su 14 giorni)
+  2015-04  apertura modale 02:00  (su 18 giorni)
+  2015-05  apertura modale 02:00  (su 19 giorni)
+  2015-06  apertura modale 02:00  (su 21 giorni)
+  2015-07  apertura modale 02:00  (su 14 giorni)
+  2015-08  apertura modale 02:00  (su 20 giorni)
+  2015-09  apertura modale 02:00  (su 20 giorni)
+  2015-10  apertura modale 02:00  (su 16 giorni)
+  2015-11  apertura modale 02:00  (su 19 giorni)
+  2015-12  apertura modale 02:00  (su 20 giorni)
+  INVERNO 02:00   ESTATE 02:00   differenza +0 min
+  VERDETTO FUSO: il feed SEGUE il DST -> ora locale di New York.
+  Atteso all'import: shift unico +5 (come gli 8 forex del 15/08).
+  apertura di SETTIMANA modale 02:00 (su 41 settimane)
+
+D30EUR (grxeur): 211996 barre M1, dal 2015.01.02 02:00 al 2015.12.30 15:58
+  prezzo minimo 9300.50000  massimo 12428.50000
+  ordine di grandezza dentro la banda attesa 4000.0-45000.0: OK
+  2015: 211996 barre
+  buchi intragiornalieri > 60 min: 1  (peggiore: 79 min dopo 2015.02.17 02:01)
+  giorni feriali SENZA nessuna barra: 6  (primi: 2015-04-03, 2015-04-06, 2015-05-01, 2015-05-25, 2015-12-24)
+  NOTA: i giorni di festa di borsa stanno legittimamente in quel conto.
+
+ESITO: OK
+(le barre fuori banda TROVATE sono il risultato della
+ diagnosi, non un guasto di questa corsa)
