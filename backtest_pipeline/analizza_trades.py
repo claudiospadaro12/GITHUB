@@ -104,11 +104,18 @@ def freschezza(path):
     if not os.path.exists(path):
         return None, "assente"
     try:
-        p = subprocess.run(["git", "log", "-1", "--format=%cs", "--", path],
+        # %as = data dell'AUTORE, %cs = data del COMMITTER. Si prende la PIU'
+        # VECCHIA delle due, ed e' un difetto pagato: la prima stesura usava
+        # solo %cs, e un rebase o un cherry-pick RISCRIVONO quella data a oggi.
+        # Su un timbro di freschezza vuol dire falso VERDE — il fallimento
+        # peggiore possibile, quello silenzioso e nella direzione che
+        # rassicura. Questo progetto sposta lavoro fra branch di continuo.
+        p = subprocess.run(["git", "log", "-1", "--format=%as %cs", "--", path],
                            capture_output=True, text=True, timeout=15)
-        d = (p.stdout or "").strip()
-        if p.returncode == 0 and len(d) == 10:
-            return d, "git"
+        if p.returncode == 0:
+            date = [x for x in (p.stdout or "").split() if len(x) == 10 and x[4] == x[7] == "-"]
+            if date:
+                return min(date), "git"
     except Exception:
         pass    # git assente o repo strano: si ripiega, dichiarandolo
     return datetime.fromtimestamp(os.path.getmtime(path)).strftime("%Y-%m-%d"), "data del file"
@@ -220,7 +227,23 @@ def frazione_catturata(r):
 
 def main():
     righe = leggi(CSV_IN)
-    giorno = sys.argv[1] if len(sys.argv) > 1 else None
+    # Le opzioni (--forza) non sono una data: senza questo filtro
+    # `analizza_trades.py --forza` cercherebbe i trade del giorno "--forza".
+    argomenti = [a for a in sys.argv[1:] if not a.startswith("-")]
+    giorno = argomenti[0] if argomenti else None
+    if giorno:
+        # Il formato conta davvero: il confronto di freschezza e' fra STRINGHE
+        # ISO, e '2026-09-09' >= '2026-9-8' e' **False** ('0' < '9'). Una data
+        # senza lo zero davanti farebbe diventare rosso tutto, in silenzio.
+        # Il giro di andata e ritorno serve: `strptime` ACCETTA '2026-9-8'
+        # (Python non pretende gli zeri), quindi il solo parse non basta a
+        # garantire la forma che il confronto fra stringhe richiede.
+        try:
+            if datetime.strptime(giorno, "%Y-%m-%d").strftime("%Y-%m-%d") != giorno:
+                raise ValueError(giorno)
+        except ValueError:
+            sys.exit("Data '%s' non valida: serve AAAA-MM-GG con lo zero "
+                     "davanti (es. 2026-09-08)." % giorno)
 
     for r in righe:
         r["_ot"] = tempo(r.get("open_time", ""))
@@ -267,14 +290,28 @@ def main():
     #
     # Sta IN TESTA apposta: e' la prima cosa da sapere prima di credere a un
     # qualunque numero sotto. Un dato che non arriva non e' uno zero.
+    # LA DATA DI RIFERIMENTO E' L'OROLOGIO, NON I DATI (difetto trovato dal
+    # controllo-preventivo, 09/09): `giorno` viene da max(close_time) del CSV
+    # del PICCOLO. Se l'esportatore del piccolo muore, `giorno` scivola
+    # indietro da solo e **tutte le righe tornano verdi**, proprio nel caso in
+    # cui il timbro servirebbe. Un timbro di freschezza non puo' misurarsi sui
+    # dati che deve giudicare.
+    #   - pagella SERALE automatica (nessuna data a mano) -> riferimento = OGGI;
+    #   - pagella RETROATTIVA chiesta a mano  -> riferimento = quel giorno,
+    #     perche' li' la domanda e' "il CSV copriva quella data?".
+    oggi_data = datetime.now().strftime("%Y-%m-%d")
+    su_richiesta = bool(argomenti)
+    rif = giorno if su_richiesta else oggi_data
+
     CONTI = (("piccolo 50503392", CSV_IN),
              ("100k 50504263",    CSV_100K),
              ("reale 10105439",   CSV_REALE))
-    fresco = {}
+    fresco, quando = {}, {}
     righe_timbro, fermi = [], []
     for etichetta, percorso in CONTI:
-        d, fonte = freschezza(percorso)
-        fresco[percorso] = bool(d) and d >= giorno
+        d, fonte = freschezza(percorso)      # una sola chiamata a git per file
+        quando[percorso] = d
+        fresco[percorso] = bool(d) and d >= rif
         if d is None:
             righe_timbro.append("| %s | `%s` | — | ⚪ **CSV ASSENTE** |"
                                 % (etichetta, os.path.basename(percorso)))
@@ -282,25 +319,71 @@ def main():
             righe_timbro.append("| %s | `%s` | %s _(%s)_ | ✅ aggiornato |"
                                 % (etichetta, os.path.basename(percorso), d, fonte))
         else:
-            n = giorni_fra(d, giorno)
-            righe_timbro.append("| %s | `%s` | %s _(%s)_ | 🔴 **FERMO%s** |"
+            n = giorni_fra(d, rif)
+            righe_timbro.append("| %s | `%s` | %s _(%s)_ | ⚠️ **fermo%s** |"
                                 % (etichetta, os.path.basename(percorso), d, fonte,
-                                   "" if n is None else " da %d giorn%s" % (n, "o" if n == 1 else "i")))
+                                   "" if n is None else " da %d giorn%s%s" % (
+                                       n, "o" if n == 1 else "i",
+                                       " (weekend compreso)" if n and n >= 3 else "")))
             fermi.append(etichetta)
+
+    # --- SOSPETTO VERO contro RUMORE (misurato, non stimato) --------------
+    # Il controllo-preventivo ha contato: sui CSV veri di agosto-settembre il
+    # 100k risulterebbe "fermo" **13 sere su 30**, ma i guasti di consegna
+    # noti sono **1** (04/09). Segnale/rumore 1:13 = un allarme che si impara
+    # a ignorare, e la sera che conta si salta.
+    # Il discriminante che REGGE alla misura sono le GEMELLE: le strategie che
+    # nella storia hanno operato su TUTTI E DUE i conti. Se una gemella chiude
+    # sul piccolo e sul 100k non compare, il dato manca DAVVERO. Sul 04/09 si
+    # accende (DAX Apertura EU RETEST BUY chiusa sul piccolo, assente sul
+    # 100k); in 40 giorni sbaglia 3 volte invece di 13.
+    gemelle_mancanti = set()
+    if not fresco.get(CSV_100K, True) and os.path.exists(CSV_100K):
+        try:
+            with open(CSV_100K, encoding="utf-8-sig", newline="") as f:
+                r100_t = list(csv.DictReader(f, delimiter=";"))
+            gemelle = ({r.get("strategy") for r in righe if r.get("strategy")} &
+                       {r.get("strategy") for r in r100_t if r.get("strategy")})
+            chiuse_100k = {r.get("strategy") for r in r100_t
+                           if (r.get("close_time") or "")[:10].replace(".", "-") == giorno}
+            gemelle_mancanti = ({r.get("strategy") for r in oggi} & gemelle) - chiuse_100k
+        except Exception:
+            pass    # se non si riesce a leggere, si resta sul verdetto prudente
+
     out += ["## 🕐 Freschezza dei dati", "",
             "| Conto | File | Contenuto aggiornato al | Stato |",
             "|---|---|---|---|"] + righe_timbro + [""]
+    if not su_richiesta and giorno != oggi_data:
+        n = giorni_fra(giorno, oggi_data) or 0
+        out += ["> 🔴 **PAGELLA VECCHIA DI %d GIORN%s.** Generata il %s, ma "
+                "l'ultima operazione con commento sul piccolo `50503392` e' del "
+                "**%s**: da li' non arriva piu' niente." % (
+                    n, "I" if n != 1 else "O", oggi_data, giorno), ""]
+    if gemelle_mancanti:
+        out += ["> 🔴 **DATO NON ARRIVATO DAL 100k — e stavolta e' un sospetto "
+                "VERO, non rumore.** %s ha chiuso sul piccolo `50503392` ed e' "
+                "una **gemella** (opera su tutti e due i conti), ma sul 100k "
+                "`50504263` non compare. E' la firma esatta del 04/09/2026, "
+                "quando la pagella pubblico' `+0,00` su un giorno da **+30,78**."
+                % " · ".join("`%s`" % s for s in sorted(gemelle_mancanti)), ""]
+    elif fermi:
+        out += ["> ⚠️ **%s: nessun contenuto nuovo.** Puo' voler dire due cose "
+                "diverse — **o il conto non ha operato, o il dato non e' "
+                "arrivato** — e da qui non si distinguono. Nessuna gemella "
+                "risulta mancante, quindi **con ogni probabilita' e' la prima**."
+                % " · ".join(fermi), ""]
     if fermi:
-        out += ["> 🔴 **%s: DATO NON ARRIVATO.** Per quest%s conto la pagella "
-                "**non stampa un netto di giornata** — un CSV fermo e uno zero "
-                "vero sono indistinguibili da qui, e il 04/09/2026 questa "
-                "confusione ha fatto pubblicare `+0,00` su un giorno da "
-                "**+30,78**." % (" · ".join(fermi), "i" if len(fermi) > 1 else "o"), ""]
-    out += ["> ℹ️ La data e' quella dell'**ultimo cambiamento di contenuto nel "
-            "repo**. Un CSV che arriva **identico** (nessuna posizione chiusa "
-            "nuova) non lascia traccia: `FERMO` vuol dire *\"da li' non arriva "
-            "contenuto nuovo\"*, **non** *\"la consegna e' rotta\"*. Per "
-            "separare i due casi serve un timbro scritto **dentro** il file "
+        out += ["> 🚧 **Attenzione a cosa e' gia' implementato:** la soppressione "
+                "del netto di giornata oggi vale **solo per il 100k `50504263`**. "
+                "Per il piccolo `50503392` e per il **REALE `10105439`** non c'e' "
+                "ancora: se uno dei due risulta fermo qui sopra, il numero nella "
+                "sua sezione e' **l'ultimo noto, non quello di oggi**.", ""]
+    out += ["> ℹ️ La data e' la piu' vecchia fra data d'autore e data di commit "
+            "dell'**ultimo cambiamento di contenuto nel repo**. Un CSV che "
+            "arriva **identico** (nessuna posizione chiusa nuova) non lascia "
+            "traccia: `fermo` vuol dire *\"da li' non arriva contenuto "
+            "nuovo\"*, **non** *\"la consegna e' rotta\"*. Per separare i due "
+            "casi al 100% serve un timbro scritto **dentro** il file "
             "dall'esportatore — oggi non c'e'.", ""]
 
     if ereditate:
@@ -497,7 +580,7 @@ def main():
             # Il caso che il 04/09 e' costato un numero pubblicato sbagliato:
             # qui NON si scrive "nessuna posizione chiusa" e NON si scrive
             # "+0,00". Non lo sappiamo, e si dice.
-            d100, _f100 = freschezza(CSV_100K)
+            d100 = quando[CSV_100K]
             out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del 100k ha contenuto "
                     "fermo al **%s**: non posso dire ne' che il conto abbia "
                     "operato, ne' che non l'abbia fatto. **Nessun netto di "
@@ -506,7 +589,11 @@ def main():
                     "cartella `... -V3`** (NON il piccolo `50503392` in "
                     "`BCM Markets MT5 Terminal`, NON il reale `10105439` in "
                     "`C:\\BCM_Reale`) — l'`ABTG_TradeExporter` gira? e "
-                    "`pubblica_trades.ps1` prende `ABTG_Trades_100k.csv`?_", ""]
+                    "`pubblica_trades.ps1` prende `ABTG_Trades_100k.csv`?_", "",
+                    "_Per riconoscere la finestra senza andare a occhio "
+                    "(regola dei terminali multipli, 06/09), riga di SOLA "
+                    "LETTURA:_ `Get-Process terminal64 | select Id, "
+                    "MainWindowTitle, Path`", ""]
         else:
             out += ["_Nessuna posizione chiusa oggi sul 100k._", ""]
 
@@ -520,7 +607,7 @@ def main():
         else:
             # Il saldo cumulato resta un fatto vero, ma va DATATO: e' fermo
             # all'ultima consegna, non a stasera. Il "netto di oggi" sparisce.
-            d100, _f100 = freschezza(CSV_100K)
+            d100 = quando[CSV_100K]
             out += ["**Saldo realizzato AL %s: %.2f**  (dal via: %+.2f) — "
                     "⚠️ **fermo all'ultima consegna, non a stasera; il netto di "
                     "oggi NON e' noto.**" % (d100, saldo, netto_storico), ""]
@@ -680,8 +767,40 @@ def main():
 
     os.makedirs(OUT_DIR, exist_ok=True)
     dest = os.path.join(OUT_DIR, "giornata_%s.md" % giorno)
+
+    # --- LA PARTE SCRITTA A MANO NON SI TOCCA (09/09/2026, imparata male) ---
+    #
+    # Questo file lo scrive uno script, ma sotto ci vive anche la "## 🧠 Lettura",
+    # che e' scritta a mano ed e' la parte che vale. Il 09/09 due rigenerazioni
+    # di PROVA hanno cancellato **282 righe** di analisi da
+    # giornata_2026-09-08.md e giornata_2026-09-09.md -- fra cui il calcolo al
+    # centesimo della perdita certa da -26,57 sull'oro e la lettura della
+    # giornata record -- e il commit se le e' portate via su GitHub.
+    # Un `open(..., "w")` su un file dove vive anche testo umano e' una mina.
+    #
+    # Regola: si ricuce la coda dal marcatore in poi. Se il file esiste ma il
+    # marcatore non c'e', NON si sovrascrive alla cieca: si esce e lo si dice.
+    MARCATORE = "\n## \U0001f9e0 Lettura"
+    coda = ""
+    if os.path.exists(dest):
+        with open(dest, encoding="utf-8") as f:
+            vecchio = f.read()
+        i = vecchio.find(MARCATORE)
+        if i >= 0:
+            coda = vecchio[i:].strip("\n")
+        elif "--forza" not in sys.argv:
+            sys.exit("%s esiste gia' e NON ha il marcatore '## Lettura': non lo "
+                     "sovrascrivo alla cieca (il 09/09/2026 una rigenerazione ha "
+                     "cancellato 282 righe scritte a mano). Se e' voluto, "
+                     "rilancia con --forza." % dest)
+
     with open(dest, "w", encoding="utf-8") as f:
         f.write("\n".join(out) + "\n")
+        if coda:
+            f.write("\n" + coda + "\n")
+    if coda:
+        print("\n[i] Coda scritta a mano PRESERVATA: %d righe dal marcatore "
+              "'## Lettura' in poi." % (coda.count("\n") + 1))
     print("\n".join(out))
     print("\n-> scritto %s" % dest)
 
