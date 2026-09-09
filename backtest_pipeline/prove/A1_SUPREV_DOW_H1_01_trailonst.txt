@@ -63,8 +63,27 @@
 #    T1  SENTINELLA. La cella InpTrailOnST=1 deve riprodurre l'archivio con
 #        tolleranza: n entro +-2%, PF entro +-0.05, su ENTRAMBE le finestre.
 #        (Stessa tolleranza delle sentinelle NyRetest del 31/08.)
-#        Se non riproduce -> FILE INVALIDO, non si legge nient'altro:
-#        significa che il banco o l'EA non sono piu' quelli del 08/08.
+#        RETTIFICA 09/09/2026 -- QUESTA SOGLIA ERA UNA TRAPPOLA, ed e'
+#        stata corretta PRIMA di girare il round, non dopo i numeri.
+#        Diceva "se non riproduce -> FILE INVALIDO". Ma i CSV di FASE 0
+#        sono delle 08/08 06:54 e da allora il binario e' CAMBIATO PER
+#        SCELTA NOSTRA, tre volte: fix LotByRisk (08/08 11:48), Guardian
+#        (19/08), pavimento del lotto minimo (08/09). L'ultimo puo'
+#        muovere ANCHE n, non solo i lotti: quando totLot*FirstFraction
+#        normalizzava a zero, il codice vecchio piazzava il pendente e il
+#        nuovo lo salta.
+#        >>> Cosi' com'era, T1 avrebbe buttato un round BUONO per un
+#            cambio di codice VOLUTO e migliorativo.
+#        SOGLIA CORRETTA, e la distinzione e' quella che conta:
+#          - SENTINELLA DI CONTINUITA' (n entro +-2%, PF entro +-0.05):
+#            NON E' BLOCCANTE. Se scarta, si SCRIVE di quanto e si dice
+#            quale dei tre cambi lo spiega. Il round si legge lo stesso.
+#          - SENTINELLA DI DETERMINISMO (le due celle gemelle sul magic
+#            devono dare numeri IDENTICI alla cifra): QUESTA SI' e'
+#            bloccante. Se due celle identiche danno numeri diversi, non
+#            e' il codice che e' cambiato: e' il banco che non e'
+#            deterministico, e allora NIENTE di questo round vale.
+#        (E' la stessa scelta gia' congelata in R123a_U30USD_00_gate.txt.)
 #    T2  Si giudica la FINESTRA PEGGIORE (l'IS). L'ipotesi "l'uscita
 #        spiegava l'IS rosso" si tiene in piedi SOLO se, con InpTrailOnST=0:
 #          PF IS  >= 1.00   E   PF OOS >= 1.20   E   DD IS <= 8.0%
