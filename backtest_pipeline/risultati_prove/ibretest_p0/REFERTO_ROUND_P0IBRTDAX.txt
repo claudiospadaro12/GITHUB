@@ -1,0 +1,41 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : bfaab0248443d08c896b0c3adcd7c5fe6e900667
+data            : 2026-09-09 08:42:38   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+terminale       : C:\MT5_Backtest\terminal64.exe
+tetto barre     : MaxBars=10000000
+
+EA              : ABTG_IBRetest
+file prova      : ABTG_IBRetest_00_conta_D30EUR.txt   (10360 byte, dal pin)
+etichetta       : P0IBRTDAX
+simbolo         : D30EUR
+periodo         : M30
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_IBRetest\ABTG_IBRetest_D30EUR_IS_P0IBRTDAX.csv
+  righe : 2
+    Pass 1    Profit 260.68       PF 1.21062    Equity DD % 2.7988     Trades 58
+    Pass 0    Profit 260.68       PF 1.21062    Equity DD % 2.7988     Trades 58
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_IBRetest\ABTG_IBRetest_D30EUR_OOS_P0IBRTDAX.csv
+  righe : 2
+    Pass 1    Profit -83.97       PF 0.96493    Equity DD % 5.2515     Trades 107
+    Pass 0    Profit -83.97       PF 0.96493    Equity DD % 5.2515     Trades 107
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 7824, 8664, 9780
+PID non bersaglio DOPO : 7824, 8664, 9780
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

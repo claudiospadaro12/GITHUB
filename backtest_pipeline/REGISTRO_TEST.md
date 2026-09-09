@@ -1825,3 +1825,63 @@ a tick) e il rifiuto dell'argento nello studio PS5 esterno.
   cancellata**; **164 script TradingView su 169 col titolo verificato e il
   codice no** — e un titolo non e' un candidato; **Forex Factory 403** e
   **api.github.com 403**, coerenti coi dossier precedenti.
+
+---
+
+## 🪦 09/09/2026 — `ABTG_IBRetest` (magic 772900): SCARTATO dal cancello C0
+
+**Origine**: meccanica derivata da *"IB Completed"* di Genxtraders (TradingView,
+slug `Z1CwMI6V`), scritta da specifica in codice nostro. Dossier di caccia
+`report/CACCIA_M30_INDICI_2026-09-08.md`, dove era il candidato **P1, 9/10** —
+il piu' solido dei tre. Referti: `report/P0_IBRETEST_2026-09-09.md` (madre
+U30USD) e `report/P0_IBRETEST_NASUSD_2026-09-09.md` (gemelli + verdetto).
+
+**Famiglia misurata su TRE simboli, M30, tick reali, 2024.09.26 -> 2026.06.30,
+deposito 10.000, rischio 0,65%:**
+
+| simbolo | n | PF IS | PF OOS | DD IS | DD OOS |
+|---|---|---|---|---|---|
+| U30USD | 95 | 0,38242 | 0,69663 | 7,38% | 7,61% |
+| NASUSD | 84 | 0,56297 | 0,59292 | 5,80% | 5,31% |
+| D30EUR | 165 | **1,21062** | 0,96493 | 2,80% | 5,25% |
+| **FAMIGLIA** | **344** | **0,7356** (n=135) | **0,8124** (n=209) | non sommabile | non sommabile |
+
+**PF di famiglia 0,7798.** Cancello **C0** (`n >= 150` + `PF < 1,10` nella
+finestra peggiore -> scarto senza griglia), congelato nei file prova PRIMA
+delle corse: **scatta**, e scatta sulla **sola finestra OOS a campione pieno**
+(n=209). Secondo motivo indipendente: **0,78 op/giorno di famiglia** contro il
+pavimento firmato di **1,00** (07/09).
+
+**PERCHE' STA QUI, cioe' cosa NON rifare:**
+1. 🚫 **Non ritestare "solo il DAX".** D30EUR ha una finestra a **PF 1,21 con DD
+   2,80%** ed e' il simbolo migliore dei tre. Tenerlo e buttare gli altri due
+   e' la scelta a posteriori vietata dalla regola del 19/08: su **58
+   operazioni** PF 1,21 non e' distinguibile da PF 1,00, e infatti l'OOS dello
+   **stesso simbolo**, senza che nulla fosse stato ottimizzato, fa **0,96493**.
+2. 🚫 **Non rigrigliare `InpSmaLen` / `InpPivot` / `InpRR` / l'orario di flat.**
+   Su un motore a PF 0,78 di famiglia una griglia trova solo picchi di rumore.
+3. ✅ **Quello che si PUO' riprendere** (clausola buona del 19/08, meccanismo
+   diverso sulla stessa inefficienza): **la GESTIONE DELL'USCITA**. Misurato:
+   **il 62% dei trade non muore di stop ne' di TP, ma del flat di fine seduta**
+   (52/84 su NASUSD, 103/165 su D30EUR). Il porting ha un **TP unico a 2R**
+   mentre la fonte esce a scaglioni **1R/2R/3R/4R/5R con breakeven a 2R**: era
+   il **rischio di porting n.2, dichiarato per iscritto prima delle corse**, e
+   si e' misurato da solo. Sarebbe un MOTORE NUOVO, non una cella nuova.
+
+**COSA LASCIA DI BUONO (l'EA e' sano, non e' il codice il problema):**
+- 4 cancelli su 5 passati su **tutti e tre** i simboli: frequenza, rischio
+  (DD max 7,61%), muro giornaliero (peggior giornata −1,08%), costo C3
+  (stop mediano 110-240 punti indice = **67x-123x lo spread**, frontiera 40x);
+- **G1 determinismo**: celle gemelle 772900/772950 identiche alla cifra in
+  tutte e sei le corse;
+- **due lati veri**: Long/Short 60/40 su NASUSD, **29/29 in IS su D30EUR**;
+- **pavimento del lotto non morde** (4 casi su 344) -> nessuna corsa a 100k.
+
+**BUCO DICHIARATO, da chiudere sui prossimi EA:** su D30EUR la colonna
+`Reject` conta **94 ordini rifiutati su ~259 tentativi (36%)** contro 16 su
+NASUSD e 2 su U30USD-IS. E' la firma del cancello sullo spread che respinge i
+segnali serali (finestra DAX ~11 ore contro 5,5 degli USA, asimmetria
+**dichiarata prima** nel file prova). **Ma l'ORA dei trade riempiti non e'
+misurabile da queste colonne**: serve una colonna `Ora Ingresso` nell'OnTester.
+Finche' non c'e', il numero del DAX e' **non verificabile su quel punto** —
+il che non e' la stessa cosa che "sporco".
