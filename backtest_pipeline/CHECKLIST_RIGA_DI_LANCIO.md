@@ -10913,3 +10913,45 @@ falliscono sempre.
 passati MT5 li ha chiusi, e `ReadAllBytes` funziona. Cioe' il difetto compare
 **esattamente quando la domanda e' "cosa e' successo adesso"** -- e quella e' la
 domanda che conta.
+
+---
+
+## 🔧 CLASSE 164 — il pin della coda e' un **COMMIT**, non il `sha1sum` del file
+_(09/09/2026: sei righe su dieci non sono girate, e la colpa e' mia)_
+
+**Il fatto.** `runner_abtg.ps1` riga **267** costruisce l'URL cosi':
+```powershell
+$url = $RawBase + "/" + $pin + "/" + $perc + "?cb=..."
+```
+cioe' usa il pin come **riferimento git** dentro
+`raw.githubusercontent.com/<owner>/<repo>/<PIN>/<percorso>`.
+Un **commit** funziona; il **`sha1sum` del file NON e' un oggetto git** e GitHub
+risponde **404** -> la riga viene **RIFIUTATA** (giustamente: il cancello fa il
+suo lavoro, e' il pin a essere sbagliato).
+
+**Come si e' visto**: referto del **09/09 03:30** -> `eseguiti 4, rifiutati 6`,
+sei volte `RIFIUTATO: scarico fallito -- (404) Non trovato`. Le quattro righe
+vecchie, appuntate il 07/09 con veri commit, sono passate; **le sei mie, tutte
+appuntate con `sha1sum`, no.**
+
+**Perche' non me ne sono accorto**: il formato in testa a `CODA.txt` diceva solo
+`<pin 40 hex>`. **Quaranta cifre esadecimali le hanno tutti e due**, e
+`sha1sum` e' il comando che veniva naturale dopo aver scritto il file.
+Nessun controllo mi ha contraddetto, perche' **l'unico posto dove il pin viene
+usato e' il VPS, alle 03:30.**
+
+> ### 🔴 LA REGOLA
+> ```
+> git log -1 --format=%H -- <percorso del file>      # <- il pin giusto
+> ```
+> E **si verifica PRIMA di appuntarlo**, senza aspettare la notte:
+> ```
+> curl -s -o /dev/null -w "%{http_code}" \
+>   "https://raw.githubusercontent.com/<owner>/<repo>/<PIN>/<percorso>"
+> ```
+> **Deve rispondere 200.** Tre secondi contro una notte persa.
+
+⚠️ **E la lezione piu' generale**: un pin appuntato e mai provato e' una
+**promessa**, non un collaudo. Vale per la coda come per le righe di lancio --
+dove infatti il controllo del codice HTTP c'era gia', ed e' proprio da li' che
+andava copiato.

@@ -2,6 +2,19 @@
 #  CODA DEL RUNNER -- la eseguono il VPS, da solo, alle 03:30
 # ---------------------------------------------------------------------
 #  FORMATO:   <pin 40 hex> | <percorso nel repo> | <argomenti opzionali>
+#
+#  >>> IL PIN E' UN **COMMIT** DI GIT, NON IL CHECKSUM DEL FILE. <<<
+#      Il runner costruisce l'URL cosi':
+#        raw.githubusercontent.com/<owner>/<repo>/<PIN>/<percorso>
+#      cioe' usa il pin come RIFERIMENTO GIT. Il `sha1sum` di un file NON
+#      e' un oggetto git: GitHub risponde 404 e la riga viene RIFIUTATA.
+#      Costato il 09/09/2026: sei righe su dieci non sono girate per
+#      questo (classe 164).
+#      Si ricava cosi':   git log -1 --format=%H -- <percorso del file>
+#      E si VERIFICA prima di appuntarlo:
+#        curl -s -o /dev/null -w "%{http_code}" \
+#          "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/<PIN>/<percorso>"
+#      Deve rispondere 200.
 #  Le righe che cominciano con # sono commenti e vengono saltate.
 #
 #  OGNI SCRIPT DEVE:
@@ -30,39 +43,39 @@ d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti
 #     Nasce dalla contraddizione dell'08/09 03:30: sul terminale del conto
 #     reale CODA_01 non vede il Guardian nei .chr, CODA_02 lo vede scrivere
 #     464 righe fino alle 23:56. Un EA che scrive STA GIRANDO.
-f5f5b9f9e36e6007607d6901ecdac2fe5d769394 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
+e1ca7f17d796d8b262e8cc6e72cb69921386d5a3 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
 
 # --- 6. quale dei due alberi di sorgenti e' stato copiato sui terminali.
 #     Nel repo ABTG_PostNews esiste in due versioni diverse (666 righe /
 #     versione 1.10 con Guardian, e 307 righe / versione 1.00 senza).
 #     Se non si sa quale gira, si legge la riga sbagliata per spiegare
 #     un comportamento.
-e2e0bb408beec0763e7e4755e3e71265f234d37b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
+32718b9f6eb99728fe532a5c512ae39f83c0db6b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
 
 # --- 7. il Desktop del VPS, portato a Claude senza che Claudio mandi niente.
 #     Claudio (08/09, mentre guida): "anche i file che ci sono sul desktop
 #     analizzali tu, io non ho tempo". Claude non vede quel Desktop: l'unico
 #     canale e' questa coda. Di TUTTI i file stampa nome/taglia/data, il
 #     CONTENUTO solo di quelli col nome dei nostri referti.
-cdb9373da752b373457b6e8782ab48086f9e206b | backtest_pipeline/righe/CODA_07_desktop.ps1
+3a648eb6299ee287995358b87bee0a93e7a063be | backtest_pipeline/righe/CODA_07_desktop.ps1
 
 # --- 8. i parametri di OGNI sedia, in forma di .set pronto.
 #     Il censimento dell'08/09 ha trovato che sul 100k (50504263) NON esiste
 #     nessun preset nel repo: le taglie 0,65 e 0,30 vivono SOLO nei .chr. Se
 #     quel terminale si azzera, la configurazione del dry-run FTMO non e'
 #     ricostruibile da nessuna fonte scritta.
-6ba50102f134c9e4b3c114ae73ceb19fa63cd100 | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
+47b61d06c699590717f53aa9e2035593abd5ae5e | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
 
 # --- 9. il giornale operativo di OGNI conto, compreso quello che non ha
 #     il TradeExporter. Claudio (08/09 sera): "voglio che monitori
 #     automaticamente il conto reale come fai con gli altri".
 #     Legge gli ULTIMI DUE giorni e stampa la DATA di ciascuno: alle 03:30
 #     il giorno completo e' quello PRECEDENTE (classe 162).
-b995879c843116c8bc54c19b35397fbd828555a6 | backtest_pipeline/righe/CODA_09_giornale_operativo.ps1
+4833b9dc218d1767f33faa5d613ce3d1d00779b7 | backtest_pipeline/righe/CODA_09_giornale_operativo.ps1
 
 # --- 10. lo slippage misurato sul campo. Claudio (08/09 sera): "cosi' puoi
 #     iniziare a valutare lo slippage". ABTG_SlippageLogger scrive il ledger
 #     dei deal e la sintesi in MQL5\Files (righe 961-962 del sorgente): questa
 #     riga li porta fuori dal terminale. Distingue "ledger vuoto" da "ledger
 #     pieno di zeri": sono due cose diverse.
-f8a7afa75fcf15ed73135123513e11ace62103f0 | backtest_pipeline/righe/CODA_10_slippage.ps1
+a864bc78ddd6d9af315ad32e2682179d6249f7ae | backtest_pipeline/righe/CODA_10_slippage.ps1
