@@ -1,0 +1,47 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v1
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 7cd7b27eacdc94c4622c27b96bbd2aa18d241272
+data            : 2026-09-09 18:50:25   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+terminale       : C:\MT5_Backtest\terminal64.exe
+tetto barre     : MaxBars=10000000
+
+EA              : ABTG_SupRev_DOW_H1_Ottimizzato
+file prova      : R123b_U30USD_01_stmult.txt   (22271 byte, dal pin)
+etichetta       : R123BSTMULT
+simbolo         : U30USD
+periodo         : H1
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 10000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_SupRev_DOW_H1_Ottimizzato\ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123BSTMULT.csv
+  righe : 5
+    Pass 2    Profit -15.58       PF 0.98837    Equity DD % 6.1656     Trades 117
+    Pass 0    Profit -250.84      PF 0.87674    Equity DD % 8.8808     Trades 180
+    Pass 1    Profit 108.26       PF 1.08369    Equity DD % 2.9434     Trades 144
+    Pass 3    Profit -352.95      PF 0.72133    Equity DD % 8.4102     Trades 100
+    Pass 4    Profit 1036.97      PF 2.01707    Equity DD % 3.7461     Trades 97
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_SupRev_DOW_H1_Ottimizzato\ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123BSTMULT.csv
+  righe : 5
+    Pass 2    Profit 622.79       PF 1.38944    Equity DD % 5.9091     Trades 152
+    Pass 0    Profit -227.96      PF 0.91405    Equity DD % 10.2319    Trades 261
+    Pass 3    Profit 101.4        PF 1.09271    Equity DD % 3.6071     Trades 112
+    Pass 1    Profit -123.22      PF 0.9532     Equity DD % 12.3642    Trades 200
+    Pass 4    Profit 668.49       PF 1.4182     Equity DD % 5.6971     Trades 117
+  ESITO : LETTO -- 5 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 7824, 8664, 9780
+PID non bersaglio DOPO : 7824, 8664, 9780
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
