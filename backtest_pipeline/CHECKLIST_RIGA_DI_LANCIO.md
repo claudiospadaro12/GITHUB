@@ -11042,3 +11042,165 @@ naturale *"rifaccio il giro a vuoto per capire perche' il numero e' strano"*.
 > **per ogni `Remove-Item` chiedersi quale MODO della riga lo esegue e quale
 > MODO avrebbe dovuto rimetterlo a posto.** Se nessun modo lo rimette, quella
 > cancellazione non e' una pulizia: e' una perdita.
+
+---
+
+## 🆕 AGGIUNTE DEL 09/09/2026 — trovate dal **controllo preventivo** sulla riga di **R123** (`RIGA_ROUND_VPS.ps1`, pin `7cd7b27e`, **quattro** corse in sequenza sul terminale da backtest `C:\MT5_Backtest`, demo 50504400, EA `ABTG_SupRev_DOW_H1_Ottimizzato`). La riga era per il resto **buona**: parse reale 0 errori, ASCII puro su riga e su tutti e 4 i file prova, pin = commit vero, marcatore controllato prima di eseguire, **classe 165 gia' disinnescata** (`Continue` prima delle chiamate native + esiti catturati + riepilogo finale degli zip), etichette e nomi prova validi per `EtichettaValida`/`NomeValido`, **nessuna collisione** di CSV/zip (le 4 etichette sono vergini in tutto il repo), i 4 file prova passano `controlla_prova.py` (2/5/7/5 celle, **una sola variabile per file**), i magic `784100/784110/784120/784130/784150` **vergini** (grep repo-wide), e la finestra `2024.09.26 -> 2026.06.30` con `FrazioneIS 0.40` **ricalcolata a mano** da' `IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30`, cioe' **esattamente** quella dichiarata in `risultati_archivio/REFERTO_WEEKEND_FASE0.md` r.7. Le tre voci qui sotto sono nuove.
+
+## 166. 📌 IL PIN DELLA RIGA **NON COPRE IL SORGENTE DELL'EA**: il driver lo scarica dal **RAMO**, non dal commit — `$EABranch` e' **cablato**, e non e' nemmeno un parametro
+
+**Il fatto.** La riga si pinna col commit e lo passa in giro con cura:
+`RIGA_ROUND_VPS.ps1` scarica **se stesso**, il **driver** e il **file prova**
+da `.../GITHUB/$Pin/...`. Sembra tutto pinnato. Non lo e'.
+
+Dentro `backtest_pipeline/walkforward_generico.ps1`, r.**220-221**:
+
+```powershell
+$EABranch="lavoro"
+$RawBase="https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$EABranch"
+```
+
+`$EABranch` **non e' un `param()`**: e' una costante. E da quel `$RawBase`
+scendono le due cose che decidono il numero:
+
+| r. | scaricato | da dove |
+|---|---|---|
+| 272 | `mql5/Experts/<EA>.mq5` | **ramo `lavoro`** |
+| 310 | `mql5/Include/ABTG_PausaGuardian.mqh` | **ramo `lavoro`** |
+
+E `RIGA_ROUND_VPS.ps1` **non passa `-Pin` al driver** (r.451-454: l'elenco
+`$arg` ha `-Expert -Prova -Etichetta -Modello -Deposito -Rifai -Force
+-TerminaleBacktest`, e basta) — quindi non potrebbe rimediare nemmeno se
+`$EABranch` fosse un parametro.
+
+**Perche' e' una classe e non una pignoleria.** Il pin serve a una cosa sola:
+*"il numero che esce l'ha prodotto QUESTO codice"*. Qui il pin garantisce la
+**procedura** e lascia libero il **motore**. Se fra il momento in cui la riga
+viene approvata e il momento in cui Claudio la incolla qualcuno spinge un
+commit su `lavoro` che tocca l'EA o l'include, il round gira su un binario
+**diverso da quello dichiarato** e nessun artefatto lo dice: il referto stampa
+`pin : <commit>` e la frase e' **vera per tutto tranne che per l'EA**.
+E il rischio non e' teorico: la **Regola #1** di casa impone di committare e
+pushare su `lavoro` a ogni passo, quindi il ramo si muove *mentre* la riga
+aspetta. Su R123 la cosa mordeva doppio, perche' l'intero file `R123a` e'
+costruito sulla domanda *"il numero del 08/08 e' riproducibile col binario di
+OGGI?"*: se il binario cambia a meta' round, la domanda non ha piu' risposta.
+
+> ### 🔴 LA REGOLA
+> **Un round "pinnato" non lo e' finche' non e' pinnato anche il `.mq5`.**
+> Fino a quando `$EABranch` non diventa un parametro alimentato dal pin, la
+> riga **misura** quello che ha compilato e lo **stampa**:
+> ```powershell
+> Get-FileHash -LiteralPath "$env:USERPROFILE\abtg_round\src_prove\<EA>.mq5" -Algorithm SHA256
+> Get-FileHash -LiteralPath "$env:USERPROFILE\abtg_round\src_include\ABTG_PausaGuardian.mqh" -Algorithm SHA256
+> ```
+> (`src_prove`/`src_include` sono le copie **davvero scaricate e compilate**,
+> non il repo locale.) L'atteso si calcola prima, offline, con
+> `git show <PIN>:mql5/Experts/<EA>.mq5 | sha256sum`: se i due numeri non
+> coincidono, **il round e' girato su un altro motore** e va rifatto o
+> ridichiarato. Costa una riga, non ha rete in piu' e non introduce nessun
+> modo nuovo di fallire.
+> 📌 **E il rimedio vero, da fare con calma**: `-Pin` propagato al driver e
+> `$EABranch` alimentato da li'. Finche' non c'e', l'hash e' l'unica prova.
+
+## 167. 🐺 IL CANCELLO DETERMINISTICO **GRIDA AL LUPO** SUI `||` DEL NOSTRO FORMATO `.ini` QUANDO NON STANNO IN UNA HERE-STRING — 5 «bloccanti» su `walkforward_generico.ps1`, **tutti falsi**
+
+**Il fatto.** `controlla_riga.py` sa gia' che i nostri `Inp...=v||v||0||v||N`
+non sono l'operatore di `pwsh` 7 — c'e' scritto nella docstring di
+`righe_utili()`, con la frase giusta: *"un cancello che grida al lupo si impara
+a ignorare"*. Ma il salto implementato copre **solo le here-string**
+(`@" ... "@`). I `||` dentro una **stringa normale** passano dritti nel test.
+
+Lanciando il cancello con `--ps1 backtest_pipeline/walkforward_generico.ps1`
+escono **5 BLOCCANTI** e un `ESITO: FAIL`:
+
+```
+X [PWSH7] r.454: operatore '||' (pwsh 7)   ->  "  3. le righe da spazzolare:  Nome=default||start||step||stop||Y`n"
+X [PWSH7] r.570: operatore '||' (pwsh 7)   ->  [void]$Righe.Add("$($i.nome)=$($i.val)||$($i.val)||0||$($i.val)||N")
+X [PWSH7] r.583: operatore '||' (pwsh 7)   ->  [void]$Righe.Add("$n=$v||$v||0||$v||N")
+X [PWSH7] r.643: operatore '||' (pwsh 7)   ->  "        InpMagic=<m>||<m>||50||<m+50>||Y"
+X [PWSH7] r.1068: operatore '||' (pwsh 7)  ->  "    RIMEDIO: asse tecnico a 2 celle sul magic, InpMagic=..."
+```
+
+Tutti e cinque sono **dentro stringhe fra virgolette**: sono il generatore
+dell'`.ini` e i suoi messaggi d'aiuto. `walkforward_generico.ps1` gira sul VPS
+in Windows PowerShell 5.1 **da mesi**, e r.570 e' la riga che scrive ogni
+singola cella di ogni round: se fosse davvero un `||` di `pwsh` 7, non avremmo
+un CSV.
+
+**Perche' e' una classe.** Il difetto non e' nello script controllato: e' nel
+**controllore**, ed e' della famiglia peggiore. Un cancello che dice `FAIL` su
+un file sano insegna a **discutere col cancello**, e il giorno che il `FAIL` e'
+vero lo si scavalca per abitudine. E' il motivo per cui il verificatore non e'
+mai stato messo su `walkforward_generico.ps1` prima d'ora — cioe' il pezzo di
+codice piu' importante della pipeline **non era mai passato dal cancello**.
+
+> ### 🔴 LA REGOLA
+> 1. **Il rilievo `PWSH7 ||` si conferma SEMPRE guardando la riga citata.**
+>    Se il `||` sta dentro una stringa, e' il **nostro separatore `.ini`**:
+>    e' un falso positivo, e si scrive che lo e' — non si ignora in silenzio.
+> 2. **Da correggere in `controlla_riga.py`**: in `righe_utili()`, oltre alla
+>    here-string, togliere dal codice nudo anche il contenuto delle stringhe
+>    (`'...'` e `"..."`) prima di applicare `PWSH7_ONLY`. Il pattern `&&` e
+>    `??` hanno lo stesso problema.
+> 3. **E fino ad allora `walkforward_generico.ps1` va passato al cancello lo
+>    stesso**, sapendo cosa aspettarsi: gli altri tre controlli su quel file
+>    (ASCII puro, formati .NET, cultura invariante) **passano**, e sono quelli
+>    che non si vedono a occhio.
+
+## 168. 🕳️ LA DIRETTIVA DEL FILE PROVA CHE **NESSUNO LEGGE**: `@FINOA` non esiste ne' nel driver ne' nella riga — la fine finestra e' un **default che oggi coincide per fortuna**
+
+**Il fatto.** Tutti e quattro i file prova di R123 dichiarano in testa:
+
+```
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+```
+
+Tre su quattro vengono lette davvero. La quarta no:
+
+| direttiva | letta da | dove |
+|---|---|---|
+| `@SIMBOLO` | driver + riga | `walkforward_generico.ps1` r.474 · `RIGA_ROUND_VPS.ps1` r.413 |
+| `@PERIODO` | driver + riga | r.475 · r.414 |
+| `@DAQUANDO` | driver + riga | r.476 · r.415 |
+| **`@FINOA`** | **NESSUNO** | `grep -n FINOA walkforward_generico.ps1` -> **zero righe** |
+
+La fine finestra la decide `[string]$Fino = "2026.06.30"` (r.160), un
+**default del driver**. E `RIGA_ROUND_VPS.ps1` non ha nemmeno un `-Fino` da
+passare. Su R123 non fa danno **per coincidenza**: `@FINOA` dice 2026.06.30 e
+il default dice 2026.06.30. Ma e' fortuna, non metodo — e il file `R123a`
+costruisce la sentinella di continuita' proprio su quella data.
+
+**Il rovescio, che e' il vero pericolo**: chi domani scrivera' `@FINOA
+2025.12.31` in un file prova otterra' **2026.06.30** lo stesso, senza un
+avviso, e confrontera' numeri di due finestre diverse credendole uguali. E' la
+stessa famiglia della classe 160 (*il tetto che fa girare su meno storico e
+nessuno lo dice*), applicata all'altro estremo della finestra.
+
+**Aggravante di lettura**: nel referto del round (`RIGA_ROUND_VPS.ps1` sez. 9)
+si stampano `simbolo`, `periodo`, `da quando` — ma **non** la data di fine e
+**non** le due finestre IS/OOS calcolate. Quindi l'artefatto che torna a
+Claudio **non contiene** l'informazione che serve a dire se i numeri sono
+confrontabili con l'archivio: quella verifica sta solo sulla carta di chi ha
+preparato il round.
+
+> ### 🔴 LA REGOLA
+> 1. **Ogni direttiva `@` scritta in un file prova va cercata nel codice che
+>    la deve leggere, con un `grep`, prima di fidarsene.** Una direttiva che
+>    nessuno legge non e' documentazione: e' una **falsa garanzia**.
+> 2. **Da correggere nel driver**: leggere `@FINOA` come si legge `@DAQUANDO`
+>    (`if(-not $PSBoundParameters.ContainsKey('Fino') -and
+>    $Direttive.ContainsKey("FINOA")){ $Fino=$Direttive["FINOA"] }`), e
+>    **morire** se `@FINOA` c'e' e non e' una data valida.
+> 3. **Da aggiungere al referto**: `fino a` e le **due finestre IS/OOS
+>    calcolate**, che il driver gia' stampa a schermo (r.667-668) e poi butta.
+>    Finche' non c'e', **il giro a vuoto `-SoloControllo` e' l'unico posto
+>    dove quelle due date si vedono** — ed e' un motivo in piu' per non
+>    saltarlo mai (header dello script, r.68: *"PRIMA LA PROVA A VUOTO,
+>    SEMPRE"*).
+> 4. E `controlla_prova.py` oggi pretende `@DAQUANDO` (r.112) ma **non**
+>    `@FINOA`: coerente col fatto che nessuno la legge, incoerente col fatto
+>    che i file la scrivono.
