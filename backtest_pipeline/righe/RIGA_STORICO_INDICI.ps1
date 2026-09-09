@@ -450,6 +450,48 @@ function Firmata($id){ return ($Dec.ContainsKey($id) -and $Dec[$id].Stato -eq "F
 function Valore($id,$difetto){ if($Dec.ContainsKey($id)){ return $Dec[$id].Valore }; return $difetto }
 
 # =====================================================================
+#  D-H -- LA FINESTRA PER SIMBOLO (10/09/2026)
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE. Fino a ieri la finestra era UNA SOLA (D-D) per tutti i
+#  simboli. Il 10/09 la diagnosi del DAX ha misurato che grxeur e' SANO
+#  dal 2010 al 2018 e che dal 2020 al 2023 contiene UN ALTRO STRUMENTO
+#  (prezzi 3.247-4.414 contro 16.343-20.526 del 2024). La D-G firmata
+#  ammette quindi il DAX SOLO sul 2010-2018, mentre il NASUSD resta buono
+#  su tutta la D-D. Con una finestra sola le due cose non stanno insieme.
+#
+#  LA SCELTA DI DISEGNO, ed e' quella che conta: si poteva importare
+#  tutto e limitare gli anni nei file prova. NO. Quella strada lascia in
+#  MT5 un simbolo che CONTIENE dati sbagliati, e affida a chi scrive il
+#  prossimo round il compito di ricordarsene. Qui invece l'anno sbagliato
+#  NON ENTRA proprio: l'errore diventa IMPOSSIBILE, non "sconsigliato".
+#
+#  FORMATO:  D30EUR:2010-2018;NASUSD:2010-2026
+#  Un simbolo non nominato eredita D-D. Una D-H assente o vuota lascia
+#  TUTTO com'era: e' un no-op, e i round gia' fatti non cambiano.
+# =====================================================================
+function FinestraSimbolo([string]$bcm, [int]$daGlob, [int]$aGlob){
+  $spec = (Valore "D-H" "")
+  if([string]::IsNullOrWhiteSpace($spec)){ return @($daGlob, $aGlob, "D-D (nessuna D-H)") }
+  foreach($pezzo in ($spec -split ";")){
+    $p = $pezzo.Trim()
+    if($p -eq ""){ continue }
+    $kv = $p -split ":"
+    if($kv.Count -ne 2){ continue }
+    if($kv[0].Trim().ToUpper() -ne $bcm.ToUpper()){ continue }
+    $m = [regex]::Match($kv[1].Trim(),'^(\d{4})-(\d{4})$')
+    if(-not $m.Success){ continue }
+    $d = [int]$m.Groups[1].Value; $a = [int]$m.Groups[2].Value
+    if($a -lt $d){ continue }
+    # LA D-H PUO' SOLO STRINGERE, MAI ALLARGARE: un simbolo non puo'
+    # ottenere da qui anni che la D-D non ha gia' autorizzato.
+    if($d -lt $daGlob){ $d = $daGlob }
+    if($a -gt $aGlob){ $a = $aGlob }
+    return @($d, $a, ("D-H " + $bcm))
+  }
+  return @($daGlob, $aGlob, "D-D (non nominato in D-H)")
+}
+
+# =====================================================================
 #  UNA CHIAMATA A MT5 IN /config, fatta come si deve
 #   - AllowLiveTrading=false SEMPRE (checklist 51: aprire MT5 per
 #     misurare non deve poter riarmare niente)
@@ -934,10 +976,17 @@ if($PuoScaricare -and -not $SoloControllo){
     $CartAnni = Join-Path $Work ("anni\" + $simbolo)
     New-Item -ItemType Directory -Force -Path $CartAnni | Out-Null
     $fattiAnni = @()
+    # --- D-H: la finestra di QUESTO simbolo, e la si DICHIARA a schermo.
+    $fs = FinestraSimbolo $simbolo $AnnoDa $AnnoA
+    $sDa = [int]$fs[0]; $sA = [int]$fs[1]
+    Write-Host ("   " + $simbolo + ": finestra " + $sDa + "-" + $sA + "   [" + $fs[2] + "]") -ForegroundColor Cyan
+    if($sDa -ne $AnnoDa -or $sA -ne $AnnoA){
+      [void]$Note.Add("F5: " + $simbolo + " gira su " + $sDa + "-" + $sA + " invece di " + $AnnoDa + "-" + $AnnoA + " (" + $fs[2] + ").")
+    }
     $csvStrum  = Join-Path $LavFonte ($(if($Fonte -eq "histdata"){ "" } else { "m1\" }) + $simbolo + "_M1.csv")
 
     # ---------- il giro degli anni ----------
-    for($anno = $AnnoDa; $anno -le $AnnoA; $anno++){
+    for($anno = $sDa; $anno -le $sA; $anno++){
       if((Trascorse) -ge $OreMax){
         [void]$Problemi.Add("F5: " + $simbolo + " " + $anno + " NON INIZIATO (tetto -OreMax). Rilancia la STESSA riga: la cache riprende da dove era.")
         break
@@ -1211,7 +1260,7 @@ if($PuoScaricare -and -not $SoloControllo){
 
     $sd.Barre = $tot
     $sd.Anni  = (($fattiAnni | Sort-Object) -join " ")
-    $sd.Fase  = "SCARICATO (" + $fattiAnni.Count + " anni su " + ($AnnoA - $AnnoDa + 1) + ")"
+    $sd.Fase  = "SCARICATO (" + $fattiAnni.Count + " anni su " + ($sA - $sDa + 1) + ")"
     $CsvFinali += $finale
     Write-Host ("   " + $simbolo + ": " + $tot + " barre M1 -> " + $finale) -ForegroundColor Green
 
@@ -1232,9 +1281,9 @@ if($PuoScaricare -and -not $SoloControllo){
         -Value ($capo + $testa + @("", "--- ultime righe ---") + $coda)
     }catch{ [void]$Note.Add("F5: anteprima di " + $simbolo + " non scritta (" + $_.Exception.Message + ")") }
 
-    $mancanti = @($AnnoDa..$AnnoA | Where-Object { $fattiAnni -notcontains $_ })
+    $mancanti = @($sDa..$sA | Where-Object { $fattiAnni -notcontains $_ })
     if($mancanti.Count -gt 0){
-      [void]$Problemi.Add("F5: " + $simbolo + ": " + $fattiAnni.Count + " anni su " + ($AnnoA - $AnnoDa + 1) +
+      [void]$Problemi.Add("F5: " + $simbolo + ": " + $fattiAnni.Count + " anni su " + ($sA - $sDa + 1) +
                           ". GLI ANNI MANCANTI SONO QUESTI, dichiarati: " + ($mancanti -join " "))
     }
   }

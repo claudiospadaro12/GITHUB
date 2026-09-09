@@ -127,7 +127,58 @@ Il testo intorno e' per chi firma; il driver guarda solo quelle righe.
 @DECISIONE D-E CHIAVE=SOGLIA_CANARINO_ORE VALORE=20 STATO=FIRMATO
 @DECISIONE D-F CHIAVE=STRADA_DAX VALORE=diagnosi_prima STATO=FIRMATO
 @DECISIONE D-G CHIAVE=DAX_SOTTOINSIEME VALORE=2010_2018 STATO=FIRMATO
+@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=DA_FIRMARE
 ```
+
+---
+
+### 🅗 D-H — **la finestra PER SIMBOLO** (PREPARATA, **DA FIRMARE**)
+
+```
+@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=DA_FIRMARE
+```
+
+#### Il problema che scioglie
+`RIGA_STORICO_INDICI.ps1` leggeva la finestra da **`D-D`** e la usava **per tutti i simboli
+insieme** (righe 598-601 → 940, 1214, 1235). Ma dal 10/09 le due cose non stanno piu'
+insieme:
+| simbolo | finestra buona | perche' |
+|---|---|---|
+| **NASUSD** | 2010-2026 | 16 anni, gia' usato in R113 |
+| **D30EUR** | **2010-2018** | dal 2020 al 2023 il file contiene **un altro strumento** |
+
+#### 🎯 La scelta di disegno, ed e' quella che conta
+Si poteva **importare tutto e limitare gli anni nei file prova**. **NO.**
+Quella strada lascia dentro MT5 un simbolo che **CONTIENE dati sbagliati**, e affida a chi
+scrive il prossimo round il compito di ricordarsene.
+👉 **Qui l'anno sbagliato NON ENTRA PROPRIO: l'errore diventa IMPOSSIBILE, non
+"sconsigliato".** E' la stessa scelta fatta oggi col pavimento del lotto e col certificato
+di morte: **la protezione sta nel meccanismo, non nella memoria di chi lo usa.**
+
+#### 🔒 Le tre proprieta' di sicurezza, MISURATE su banco
+1. **La D-H puo' solo STRINGERE, mai allargare.** Un simbolo non puo' ottenere da qui anni
+   che la `D-D` non abbia gia' autorizzato. Provato: `D30EUR:2005-2030` → esce **2010-2026**.
+2. **E' un NO-OP se assente o vuota.** Chi non e' nominato eredita `D-D`, e i round gia'
+   fatti non cambiano di una virgola.
+3. **Un formato rotto non fa danni**: `D30EUR:duemiladieci` e `2018-2010` (rovesciata)
+   → si eredita la globale, non si inventa niente.
+
+**Banco**: `backtest_pipeline/banco_finestra_per_simbolo.ps1` — **10 casi su 10 PASSATI**,
+eseguiti davvero, non ragionati. Piu' `PARSE OK` sullo script intero e cancello
+deterministico pulito.
+
+#### 📋 Cosa succede quando la firmi
+Nel giro F5 lo script stampa, **per ogni simbolo**, la finestra che sta usando e **da dove
+viene**:
+```
+   NASUSD: finestra 2010-2026   [D-D (non nominato in D-H)]
+   D30EUR: finestra 2010-2018   [D-H D30EUR]
+```
+e se una finestra e' diversa dalla globale lo scrive anche fra le NOTE del referto.
+**Nessun numero cambia per il NASUSD.**
+
+🔴 **Firma di Claudio. Finche' `STATO=DA_FIRMARE`, la D-H non ha effetto** (il codice legge
+il valore solo se la decisione c'e', e la lettura e' gia' tollerante all'assenza).
 
 ---
 
