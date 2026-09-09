@@ -1,0 +1,200 @@
+# =====================================================================
+#  PASSO 0 GEMELLO -- ABTG_IBRetest su D30EUR M30
+#  cella 00_conta_D30EUR : COMPLETARE IL CAMPIONE DELLA FAMIGLIA
+#  EA: ABTG_IBRetest   magic 772900 (gia' compilato e girato il 09/09
+#      su U30USD, label P0_IBRETEST, pin d4116ab9)
+#  SPEC e criteri di round: prove\IBRETEST_M30_BOZZA.txt
+#  GEMELLO MADRE:          prove\ABTG_IBRetest_00_conta.txt (U30USD)
+#  REFERTO DELLA MADRE:    report\P0_IBRETEST_2026-09-09.md
+# =====================================================================
+#
+#  PERCHE' QUESTA CELLA ESISTE -- E NON E' UNA SECONDA CHANCE
+#  Il gemello U30USD del 09/09 ha dato: 95 operazioni (0,214 per
+#  seduta), DD 7,38% IS / 7,61% OOS, peggior giornata -1,07%, stop
+#  mediano 239,75 punti indice (123x lo spread, frontiera 40x),
+#  Lotto Al Minimo 3 su 95. Quattro cancelli su cinque PASSATI.
+#  Il quinto NO: PF 0,38242 (IS) e 0,69663 (OOS). Perde in entrambe.
+#  MA n = 42 e 53, SOTTO il pavimento dei 150 dell'Emendamento A:
+#  il MERITO e' formalmente SOSPESO, non bocciato. Era previsto e
+#  scritto PRIMA nella cella madre ("se esce a ~120 operazioni NON e'
+#  una brutta notizia: e' la notizia attesa").
+#
+#  >>> QUESTE DUE CORSE SERVONO A UNA COSA SOLA: portare la FAMIGLIA
+#      (unita' firmata il 07/09 = motore x simboli schierabili) sopra
+#      il pavimento dei 150 PER FINESTRA, in modo che il verdetto sia
+#      una REGOLA e non un'impressione.
+#
+#  >>> QUELLO CHE QUESTE CORSE NON SONO
+#      NON sono una griglia, NON toccano una soglia, NON cercano il
+#      simbolo su cui il motore per caso guadagna. Ogni singolo input
+#      e' IDENTICO alla cella madre tranne le eccezioni dichiarate qui
+#      sotto. Cercare "il simbolo buono" dopo un PF 0,38 e' esattamente
+#      la caccia al picco di rumore vietata dalla regola del 19/08.
+#
+# ---------------------------------------------------------------------
+#  LE ECCEZIONI, DICHIARATE PRIMA
+# ---------------------------------------------------------------------
+#  1. LE ORE DELL'INITIAL BALANCE. Eccezione gia' prevista dalla cella
+#     madre ("i tre file gemelli NON possono essere identici carattere
+#     per carattere su InpIbInizio*/InpIbFine*").
+#     Qui: 08:00-09:00 SERVER = 09:00-10:00 italiane = la PRIMA ORA
+#     del DAX cash. UN CSV CON InpIbInizioOra = 9 E' DA CESTINARE.
+#     Regola fissa CLAUDE.md: server BCM = ora italiana - 1.
+#  2. IL MAGIC RESTA 772900/772950. Non apro un blocco nuovo: e' lo
+#     STESSO EA nella STESSA famiglia, e i CSV sono separati per
+#     simbolo. L'asse magic qui e' solo il gemello di determinismo del
+#     cancello G1 (due celle identiche -> due righe identiche), non un
+#     identificativo di sedia: NESSUNA di queste corse va in forward.
+#  3. E UNA TERZA COSA CHE NON E' UN'ECCEZIONE MA VA DETTA LO STESSO:
+#     il CUTOFF resta 20:00 SERVER come sulla madre, NON lo abbasso
+#     alla chiusura del DAX cash (16:30 server = 17:30 italiane).
+#     Motivo: cambiarlo renderebbe la corsa NON sommabile con le altre
+#     due, e queste corse esistono per SOMMARE. Conseguenza da mettere
+#     in conto: su D30EUR la finestra utile e' ~11 ore contro ~5,5 dei
+#     due indici USA, quindi un ingresso serale in liquidita' sottile
+#     e' POSSIBILE. Se i contatori mostrano segnali concentrati dopo le
+#     16:30 server, quello e' un difetto DA MISURARE nella griglia, non
+#     da correggere adesso di nascosto.
+#
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  FREQUENZA. Sulla madre: 0,214 operazioni per seduta. Il motore ha un
+#  tetto strutturale di 1 per seduta e la meccanica non dipende dal
+#  simbolo, solo dalla sua rumorosita' intorno all'IB.
+#  >>> ATTESA: 0,18 - 0,28 op/seduta, cioe' ~80-125 operazioni per
+#      simbolo sui 21 mesi.
+#  Nota specifica D30EUR: il DAX ha un'apertura piu' violenta
+#  dell'apertura USA (gap notturni sul future), quindi mi aspetto PIU'
+#  rotture dell'IB e potenzialmente PIU' ritorni falliti: se la
+#  frequenza esce nella meta' ALTA della forbice (0,25-0,28) e' atteso,
+#  non e' una sorpresa.
+#  >>> ATTESA DI FAMIGLIA: ~255-345 operazioni sui tre indici, cioe'
+#      SOPRA il pavimento dei 150 per finestra -> il merito si sblocca.
+#      Se la somma resta SOTTO 300 totali (150 per finestra), il merito
+#      resta sospeso anche dopo queste corse e si dice, senza giudicare.
+#
+#  RISCHIO (si legge a qualunque n, Emendamento B). Sulla madre 7,38% /
+#  7,61%: dentro la fascia di ALLARME 6-10% gia' congelata.
+#  >>> DD > 10,0% -> BOCCIATO PER RISCHIO, subito, come LVNArbitro.
+#  >>> Peggior Giornata < -5,0% -> BOCCIATO (muro giornaliero).
+#
+#  COSTO (cancello C3). Spread MISURATO 1,6-1,7 punti indice ->
+#  frontiera stop >= 40 x spread = 64-68 PUNTI INDICE.
+#  Sulla madre la mediana e' uscita 239,75 punti indice su U30USD
+#  (frontiera 76-80): passata con 3x di margine.
+#  >>> Se qui la mediana esce SOTTO 64-68, il motore vive DENTRO il
+#      costo su questo simbolo: si dichiara, non si "aggiusta" il
+#      buffer.
+#
+#  >>> IL CANCELLO CHE CHIUDE LA PARTITA -- C0, dichiarato adesso
+#      Se la FAMIGLIA arriva a n >= 150 per finestra e il PF resta
+#      SOTTO 1,10 nella finestra PEGGIORE -> SCARTO, senza griglia.
+#      Meccanismo: E[maxDD] cresce come sigma^2/(2*mu) e mu cresce come
+#      (PF-1); a PF ~1 il drawdown atteso diverge. Misurato in casa:
+#      13 motori su 13 bocciati per rischio avevano PF <= 1,19.
+#
+#  >>> E DICHIARO LA MIA ATTESA, come sempre PRIMA:
+#      MI ASPETTO CHE CONFERMINO. Un PF di 0,38 su 42 operazioni non e'
+#      rumore, e il motore e' simmetrico per costruzione: non c'e'
+#      ragione meccanica perche' su DAX e Nasdaq faccia l'opposto.
+#      Se INVECE uno dei due uscisse con PF > 1,10 su n >= 150, NON e'
+#      una promozione: e' un'ANOMALIA DA SPIEGARE prima di qualunque
+#      passo successivo (stesso motore, stessa meccanica, esito
+#      opposto = o il simbolo ha una struttura diversa e si dimostra,
+#      o e' rumore e si dice).
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26  <- MISURATO (SPREAD_FLOTTA_MISURA_2026-09-03).
+#  UN SOLO REGIME in 21 mesi di indici: nessun verdetto di regime puo'
+#  uscire da qui, e non lo si pretende.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+#     772900: blocco 7729xx VERIFICATO VERGINE nel repo l'08/09/2026
+#     (grep repo-wide su tutti i 7xxxxx + censimento
+#      coda\referti\CODA_01_sedie_attaccate_20260908_033003.log).
+#     769800 e' di ABTG_ImpulsoApertura, 769900 di ABTG_LVNArbitro
+#     (che ha gia' prenotato fino a 769950 col suo asse gemello).
+InpMagic=772900||772900||50||772950||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno.
+#     Fissarli e' voluto: cosi' la cella misurata resta questa anche se
+#     domani qualcuno cambia un default nel .mq5.
+InpUsaGuardian=true||true||0||true||N
+
+# --- INITIAL BALANCE in ORA SERVER BCM (= italiana - 1).
+#     14:30-15:30 SERVER = 15:30-16:30 italiane = la PRIMA ORA di
+#     contrattazione USA. Un 15 al posto del 14 e' da cestinare.
+InpIbInizioOra=8||8||0||8||N
+InpIbInizioMin=0||0||0||0||N
+InpIbFineOra=9||9||0||9||N
+InpIbFineMin=0||0||0||0||N
+
+# --- MOTORE: i valori della fonte, tali e quali (SMA 9, pivot 2/2,
+#     buffer 2,0 punti, invalidazione spenta, filtro d'ampiezza spento)
+InpSmaLen=9||9||0||9||N
+InpPivot=2||2||0||2||N
+InpStopBufferPunti=2.0||2.0||0||2.0||N
+InpInvalidaSuIbOpposto=false||false||0||false||N
+InpMaxIbPunti=0||0||0||0||N
+
+# --- FILTRO HTF: SPENTO, anche se nella fonte e' acceso. Il passo 0
+#     misura il motore NUDO; il filtro e' un asse da misurare DOPO,
+#     mai una toppa per salvarlo (0 successi su 5, ROBUSTEZZA.md).
+InpUsaFiltroHTF=false||false||0||false||N
+InpHtfMinuti=240||240||0||240||N
+InpHtfMaLen=9||9||0||9||N
+
+# --- i due LATI: entrambi accesi (regola 25/08, si separano coi contatori)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- SESSIONE, ORA SERVER BCM. Il cutoff e il flat non vengono dalla
+#     fonte (li' erano 15:45 e 15:55 ora di New York, cioe' una
+#     sessione a futures): sono di casa e servono al COSTO e al
+#     divieto di overnight. 20:00 / 21:00 server = 21:00 / 22:00 IT.
+InpCutoffOra=20||20||0||20||N
+InpCutoffMin=0||0||0||0||N
+InpUsaFlatSeduta=true||true||0||true||N
+InpGoFlatOra=21||21||0||21||N
+InpGoFlatMin=0||0||0||0||N
+
+# --- STOP: il pavimento in punti indice (R109) e' di casa, MAI zero.
+InpMinStopPts=25||25||0||25||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- USCITA: TP unico a 2R (centro della scala 1R/2R/3R della fonte),
+#     breakeven SPENTO (con TP a 2R il BE a 2R della fonte sarebbe inerte).
+InpRR=2.0||2.0||0||2.0||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- RISCHIO: 0,65% di contratto di casa; gate spread in % dello stop (R55).
+#     TETTO GIORNALIERO = 1: NON e' un meccanismo nuovo, e' la regola
+#     `sessionTradeDone` della fonte (una operazione per seduta, che
+#     blocca ENTRAMBI i lati) resa esplicita e misurabile.
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpreadPctOfStop=2.5||2.5||0||2.5||N
+InpMaxTradesPerDay=1||1||0||1||N
+
+# InpComment="IBRT"  (stringa: lasciata al default compilato -- un pin di
+#                     stringa vuoto MT5 lo ignora in silenzio, classe FiboH4)
+InpVerbose=true||true||0||true||N
+# =====================================================================
+#  DOPO QUESTA CELLA, e solo dopo:
+#    - se il conteggio regge -> i gemelli D30EUR (IB 08:00-09:00
+#      SERVER) e NASUSD (IB 14:30-15:30 SERVER), si somma la FAMIGLIA,
+#      e poi la griglia gia' congelata in IBRETEST_M30_BOZZA.txt
+#      (InpSmaLen x InpPivot, cella scelta AL CENTRO DELL'ALTOPIANO,
+#      mai al picco);
+#    - se il DD sfonda il 10% -> si BOCCIA qui, come stasera con
+#      ABTG_LVNArbitro. Costa una corsa, non un round;
+#    - se il conteggio non regge -> si scrive il numero e si archivia,
+#      come stamattina con ABTG_OpeningReversalB.
+# =====================================================================
