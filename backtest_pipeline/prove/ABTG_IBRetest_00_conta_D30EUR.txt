@@ -130,8 +130,8 @@ InpMagic=772900||772900||50||772950||Y
 InpUsaGuardian=true||true||0||true||N
 
 # --- INITIAL BALANCE in ORA SERVER BCM (= italiana - 1).
-#     14:30-15:30 SERVER = 15:30-16:30 italiane = la PRIMA ORA di
-#     contrattazione USA. Un 15 al posto del 14 e' da cestinare.
+#     08:00-09:00 SERVER = 09:00-10:00 italiane = la PRIMA ORA del
+#     DAX cash. Un 9 al posto dell'8 e' da cestinare.
 InpIbInizioOra=8||8||0||8||N
 InpIbInizioMin=0||0||0||0||N
 InpIbFineOra=9||9||0||9||N
@@ -188,8 +188,8 @@ InpMaxTradesPerDay=1||1||0||1||N
 InpVerbose=true||true||0||true||N
 # =====================================================================
 #  DOPO QUESTA CELLA, e solo dopo:
-#    - se il conteggio regge -> i gemelli D30EUR (IB 08:00-09:00
-#      SERVER) e NASUSD (IB 14:30-15:30 SERVER), si somma la FAMIGLIA,
+#    - QUESTO E' GIA' UN GEMELLO: la madre e' U30USD. Dopo questa
+#      cella si somma la FAMIGLIA (U30USD + D30EUR + NASUSD),
 #      e poi la griglia gia' congelata in IBRETEST_M30_BOZZA.txt
 #      (InpSmaLen x InpPivot, cella scelta AL CENTRO DELL'ALTOPIANO,
 #      mai al picco);
