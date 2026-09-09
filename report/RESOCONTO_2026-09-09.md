@@ -11,10 +11,24 @@
 ## 🤖 COSA HA FATTO LA MACCHINA DA SOLA
 
 ### Il runner notturno (03:30, sola lettura)
-**4 righe eseguite su 10** (`CODA_01`-`04`, uscita 0, 3-14 secondi). 🔴 **Le altre 6
-RIFIUTATE per 404**: `CODA_05`-`10` puntano a pin di commit che non esistono piu' al
-percorso indicato. **Difetto vecchio di ieri, non chiuso oggi** — e va detto, perche'
-il runner sta girando a **meno della meta' della sua coda da due notti.**
+**4 righe eseguite su 10** (`CODA_01`-`04`, uscita 0, 3-14 secondi), **6 RIFIUTATE
+per 404**.
+
+### ✅ RETTIFICA (21:20, verificata dopo aver scritto questo resoconto)
+Un'ora fa avevo scritto *"difetto non chiuso oggi... il runner gira a meta' coda **da
+due notti**"*. **Sbagliato due volte, e la verita' e' migliore:**
+- 🔎 il referto del **08/09** ha **`RIFIUTATO` = 0**: e' stata **UNA notte sola**, non due;
+- 🔎 `git log` su `CODA.txt`: i pin sono stati corretti il **09/09 alle 05:20** — cioe'
+  **un'ora e cinquanta DOPO** la corsa delle 03:30. La corsa ha usato l'ultima versione
+  che esisteva quando e' partita: **si e' comportata bene su un input rotto**, e l'input
+  era gia' stato riparato.
+- ✅ **Verificato adesso, uno per uno**: i 6 pin oggi in `CODA.txt` rispondono **200** tutti
+  e sei (`e1ca7f17` · `32718b9f` · `3a648eb6` · `47b61d06` · `4833b9dc` · `a864bc78`), e i
+  4 che gia' funzionavano sono **invariati**.
+👉 **La corsa delle 03:30 di domani gira la coda INTERA.** Niente da riparare.
+📌 Il pin `f5f5b9f9` del referto **non esiste** come oggetto git (`git cat-file` lo
+conferma): era un `sha1sum` di file, cioe' **la classe 164** — quella per cui la coda
+porta scritto in testa *"IL PIN E' UN COMMIT DI GIT, NON IL CHECKSUM DEL FILE"*.
 
 ### 🥇 I ROUND — e per la prima volta i risultati sono arrivati **DA SOLI** sul repo
 `pubblica_risultati.ps1`, scritto stamattina, ha fatto il suo primo lavoro vero:
@@ -121,7 +135,7 @@ di 3,25% ✅. **4 posizioni su 6 gia' a rischio ZERO** (due col trailing che ha 
 | 🥈 | **Sonda indici Pepperstone**: `GER40` risulta "0 barre — da scaricare", **domanda mai fatta** | 5 min |
 | 🥉 | **Dove vive `NASUSD_EXT`** (16 anni di Nasdaq gia' importati, ma sul PC fisso, non sul VPS) | 2 min |
 | 4 | **Round LATI × REGIME** su forex e metalli: 10 file prova gia' pronti | — |
-| 5 | 🔴 **Riparare i 6 pin 404 del runner**: gira a meta' coda da due notti | — |
+| 5 | ✅ ~~Riparare i 6 pin del runner~~ — **gia' fatto il 09/09 alle 05:20, verificato 6/6 a 200**: domani la coda gira intera | fatto |
 
 ---
 
