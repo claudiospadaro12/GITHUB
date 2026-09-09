@@ -355,10 +355,23 @@ def main():
             "|---|---|---|---|"] + righe_timbro + [""]
     if not su_richiesta and giorno != oggi_data:
         n = giorni_fra(giorno, oggi_data) or 0
-        out += ["> 🔴 **PAGELLA VECCHIA DI %d GIORN%s.** Generata il %s, ma "
-                "l'ultima operazione con commento sul piccolo `50503392` e' del "
-                "**%s**: da li' non arriva piu' niente." % (
-                    n, "I" if n != 1 else "O", oggi_data, giorno), ""]
+        if not fresco[CSV_IN]:
+            # Il FILE del piccolo non e' arrivato: qui il rosso e' meritato.
+            out += ["> 🔴 **IL PICCOLO `50503392` NON CONSEGNA PIU'.** Pagella "
+                    "generata il %s ma datata **%s** (%d giorn%s indietro), e "
+                    "`trades_auto.csv` risulta fermo **anche come file**: non e' "
+                    "che il conto non ha operato, e' che **il dato non arriva**."
+                    % (oggi_data, giorno, n, "o" if n == 1 else "i"), ""]
+        else:
+            # Il file E' arrivato oggi, solo senza chiusure nuove: weekend,
+            # festivo, o giornata senza trade. Gridare al lupo qui insegna a
+            # ignorare i rossi veri — lo stesso errore corretto sul 100k, e
+            # misurato: capiterebbe 10 sere su 40, quasi tutte di sabato.
+            out += ["> ⚠️ **Pagella del %s, generata il %s.** Il CSV del piccolo "
+                    "`50503392` **e' arrivato oggi** (vedi tabella qui sopra) ma "
+                    "non ha chiusure dopo il %s: con ogni probabilita' il conto "
+                    "non ha chiuso nulla — weekend o festivo. **Nessun dato "
+                    "mancante accertato.**" % (giorno, oggi_data, giorno), ""]
     if gemelle_mancanti:
         out += ["> 🔴 **DATO NON ARRIVATO DAL 100k — e stavolta e' un sospetto "
                 "VERO, non rumore.** %s ha chiuso sul piccolo `50503392` ed e' "
@@ -374,10 +387,11 @@ def main():
                 % " · ".join(fermi), ""]
     if fermi:
         out += ["> 🚧 **Attenzione a cosa e' gia' implementato:** la soppressione "
-                "del netto di giornata oggi vale **solo per il 100k `50504263`**. "
-                "Per il piccolo `50503392` e per il **REALE `10105439`** non c'e' "
-                "ancora: se uno dei due risulta fermo qui sopra, il numero nella "
-                "sua sezione e' **l'ultimo noto, non quello di oggi**.", ""]
+                "del netto di giornata vale per il **100k `50504263`** e per il "
+                "**REALE `10105439`**. Per il **piccolo `50503392`** non c'e' "
+                "ancora: se risulta fermo qui sopra, i numeri delle sezioni "
+                "sopra sono **gli ultimi noti, non quelli di oggi** — ma il "
+                "banner qui sopra lo dice.", ""]
     out += ["> ℹ️ La data e' la piu' vecchia fra data d'autore e data di commit "
             "dell'**ultimo cambiamento di contenuto nel repo**. Un CSV che "
             "arriva **identico** (nessuna posizione chiusa nuova) non lascia "
@@ -387,10 +401,12 @@ def main():
             "dall'esportatore — oggi non c'e'.", ""]
 
     if ereditate:
-        out += ["> ⚠️ %d posizion%s aperta in giorni precedenti e chiusa oggi "
+        out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
                 "(%s). Per quelle la durata media e la frazione catturata non "
                 "sono indicative." %
-                (len(ereditate), "e" if len(ereditate) > 1 else "e",
+                (len(ereditate), "i" if len(ereditate) > 1 else "e",
+                 "e" if len(ereditate) > 1 else "a",
+                 "e" if len(ereditate) > 1 else "a",
                  ", ".join(sorted({r.get("strategy", "?") for r in ereditate}))), ""]
 
     # ---------- riepilogo per EA ----------
@@ -729,14 +745,44 @@ def main():
                             ea, len(tr), sum(_netto_r(r) for r in tr),
                             " · ".join("%s×%d" % (k, v) for k, v in sorted(motivi.items()))))
                     out.append("")
+                elif not fresco[CSV_REALE]:
+                    # Stessa protezione del 100k, e qui vale di piu': su un
+                    # conto con SOLDI VERI uno zero finto non e' una lettura
+                    # sbagliata, e' un numero sbagliato. Messa PRIMA che il
+                    # CSV arrivi apposta: il file compare nel momento in cui
+                    # Claudio accende l'esportatore su C:\BCM_Reale, senza
+                    # preavviso, e la finestra fra "arriva" e "c'e' la
+                    # protezione" e' l'unica in cui si puo' pubblicare uno
+                    # zero falso sul conto vero.
+                    out += ["> 🔴 **DATO NON ARRIVATO.** Il CSV del reale ha "
+                            "contenuto fermo al **%s**: non posso dire ne' che "
+                            "il conto abbia operato, ne' che non l'abbia fatto. "
+                            "**Nessun netto di giornata per questo conto.**"
+                            % quando[CSV_REALE], "",
+                            "_Terminale da guardare: **reale `10105439`, cartella "
+                            "`C:\\BCM_Reale`** (NON il piccolo `50503392` in "
+                            "`BCM Markets MT5 Terminal`, NON il 100k `50504263` "
+                            "in `... -V3`). Riga di SOLA LETTURA per riconoscere "
+                            "la finestra:_ `Get-Process terminal64 | select Id, "
+                            "MainWindowTitle, Path`", ""]
                 else:
                     out += ["_Nessuna posizione chiusa oggi sul reale._", ""]
 
-                out += ["**Netto REALIZZATO della flotta sul reale: "
-                        "%+.2f** (oggi: %+.2f · su %d operazioni dal via)"
-                        % (netto_storico_re, netto_oggi_re, len(flotta_reale)),
-                        "",
-                        "Peggior giornata dal via: **%+.2f**." % peggior_re]
+                if fresco[CSV_REALE]:
+                    out += ["**Netto REALIZZATO della flotta sul reale: "
+                            "%+.2f** (oggi: %+.2f · su %d operazioni dal via)"
+                            % (netto_storico_re, netto_oggi_re, len(flotta_reale)),
+                            "",
+                            "Peggior giornata dal via: **%+.2f**." % peggior_re]
+                else:
+                    out += ["**Netto REALIZZATO della flotta sul reale AL %s: "
+                            "%+.2f** (su %d operazioni dal via) — ⚠️ **fermo "
+                            "all'ultima consegna, non a stasera; il netto di "
+                            "oggi NON e' noto.**"
+                            % (quando[CSV_REALE], netto_storico_re, len(flotta_reale)),
+                            "",
+                            "Peggior giornata dal via: **%+.2f** _(all'ultima "
+                            "consegna)_." % peggior_re]
 
                 # 🔴 Il SALDO non si stampa: il deposito iniziale del reale non
                 #    e' un dato di questo CSV. Inventarlo (come DEP_100K, che
@@ -781,18 +827,52 @@ def main():
     # Regola: si ricuce la coda dal marcatore in poi. Se il file esiste ma il
     # marcatore non c'e', NON si sovrascrive alla cieca: si esce e lo si dice.
     MARCATORE = "\n## \U0001f9e0 Lettura"
+    # Le intestazioni di secondo livello che questo script genera da solo.
+    # Tutto il resto, in un giornata_*.md, l'ha scritto un umano.
+    GENERATE = ("## Chi ha operato", "## Netto per simbolo",
+                "## ⚠️ Da guardare",
+                "## \U0001f4b6 Conto REALE", "## \U0001f550 Freschezza dei dati",
+                "## \U0001f6ab Fuori dal totale", "## \U0001f6e1️ Conto 100k",
+                "## \U0001f9e0 Lettura")
     coda = ""
     if os.path.exists(dest):
         with open(dest, encoding="utf-8") as f:
             vecchio = f.read()
+
+        # Cintura: una copia di quello che c'era, prima di toccarlo. Costa
+        # niente e vale per i casi che non abbiamo previsto.
+        if vecchio.strip():
+            bdir = os.path.join(OUT_DIR, ".backup")
+            os.makedirs(bdir, exist_ok=True)
+            with open(os.path.join(bdir, "giornata_%s_%s.md" % (
+                          giorno, datetime.now().strftime("%H%M%S"))),
+                      "w", encoding="utf-8") as b:
+                b.write(vecchio)
+
         i = vecchio.find(MARCATORE)
         if i >= 0:
             coda = vecchio[i:].strip("\n")
-        elif "--forza" not in sys.argv:
-            sys.exit("%s esiste gia' e NON ha il marcatore '## Lettura': non lo "
-                     "sovrascrivo alla cieca (il 09/09/2026 una rigenerazione ha "
-                     "cancellato 282 righe scritte a mano). Se e' voluto, "
-                     "rilancia con --forza." % dest)
+
+        # La domanda giusta NON e' "c'e' il marcatore?" ma "c'e' qualcosa che
+        # questo script non ha scritto?". La prima stesura guardava solo il
+        # marcatore e aveva due buchi, tutti e due riprodotti dal
+        # controllo-preventivo: (a) cancellava IN SILENZIO le sezioni a mano
+        # messe SOPRA il marcatore — e non e' un caso di scuola, oggi
+        # giornata_2026-08-21.md ne ha SEI ("I gemelli ORB hanno divergito di
+        # nuovo", "Quali EA spegnere oggi", ...); (b) chiedeva --forza per
+        # rigenerare due volte lo stesso giorno un file tutto generato, cioe'
+        # addestrava a scrivere --forza per abitudine, che e' il modo in cui
+        # una guardia smette di guardare.
+        orfane = [l for l in (vecchio[:i] if i >= 0 else vecchio).splitlines()
+                  if l.startswith("## ") and not any(l.startswith(g) for g in GENERATE)]
+        if orfane and "--forza" not in sys.argv:
+            sys.exit("%s contiene %d sezion%s scritte a mano FUORI dalla coda "
+                     "'## Lettura': rigenerare le perderebbe.\n  %s\n"
+                     "Spostale sotto '## Lettura', oppure rilancia con --forza "
+                     "se sai quello che fai. (Una copia e' gia' in "
+                     "report/.backup/.)" % (
+                         dest, len(orfane), "i" if len(orfane) > 1 else "e",
+                         "\n  ".join(orfane[:6])))
 
     with open(dest, "w", encoding="utf-8") as f:
         f.write("\n".join(out) + "\n")

@@ -29,3 +29,8 @@ backtest_pipeline/src_prove/
 backtest_pipeline/src_pte/
 backtest_pipeline/anteprima_*.ini
 backtest_pipeline/gen_*.ini
+
+# Copie di sicurezza delle pagelle prima di ogni rigenerazione (09/09/2026):
+# servono a recuperare una Lettura cancellata per sbaglio, non a essere
+# versionate -- sarebbero un duplicato di ogni giornata_*.md a ogni corsa.
+report/.backup/
