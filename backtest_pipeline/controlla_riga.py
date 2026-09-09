@@ -114,15 +114,38 @@ def controlla_formati_net(path, testo):
         passa("formati .NET: " + os.path.basename(path))
 
 def controlla_cultura(path, testo):
-    nudi = []
+    """CORRETTO il 09/09/2026, dopo un FALSO POSITIVO su RIGA_DIAGNOSI_DAX.ps1.
+
+    La prima stesura segnalava OGNI `[double]$var`. Sbagliato due volte:
+      1. prendeva le DICHIARAZIONI DI TIPO dentro param(), che non sono
+         conversioni di stringhe (`[double]$SogliaDensita = 55.0`);
+      2. in PowerShell il CAST `[double]"2.5"` usa gia' la cultura
+         invariante -- non e' li' il pericolo.
+    Il pericolo VERO, e quello che ci ha morso davvero, e'
+    `::Parse` / `::TryParse` SENZA cultura: quelli seguono la cultura del
+    thread, e su un VPS it-IT "2.0" diventa 20.
+    Regola di casa applicata a me stesso: un cancello che grida al lupo
+    si impara a ignorare, ed e' peggio di nessun cancello.
+    """
+    sospetti = []
+    in_param = False
     for i, riga in enumerate(testo.splitlines(), 1):
         nudo = riga.split("#", 1)[0]
-        if re.search(r"\[double\]\s*\$", nudo) and "InvariantCulture" not in nudo:
-            nudi.append(i)
-    if nudi:
-        rileva("CULTURA", "cast [double] nudo alle righe " + ", ".join(str(x) for x in nudi[:8]) + ": su VPS it-IT '2.0' diventa 20. Serve InvariantCulture", path)
+        if re.match(r"\s*param\s*\(", nudo, re.I): in_param = True
+        if in_param:
+            if ")" in nudo and not re.search(r"\w\s*\(", nudo.split(")")[0]):
+                in_param = False
+            continue
+        # SOLO i tipi CON LA VIRGOLA: su un intero il separatore decimale non
+        # esiste, quindi la cultura non lo puo' mordere. Segnalare [int]::TryParse
+        # sarebbe il terzo falso positivo di fila su questo stesso controllo.
+        if re.search(r"\[(double|single|float|decimal)\]::(Try)?Parse\s*\(", nudo, re.I) \
+           and "InvariantCulture" not in nudo and "NumberStyles" not in nudo:
+            sospetti.append((i, nudo.strip()[:60]))
+    if sospetti:
+        rileva("CULTURA", "Parse/TryParse senza cultura invariante: " + " | ".join("r." + str(i) + " " + t for i, t in sospetti[:5]) + "  -> su VPS it-IT '2.0' diventa 20", path)
     else:
-        passa("nessun cast [double] nudo: " + os.path.basename(path))
+        passa("nessun Parse decimale senza cultura invariante: " + os.path.basename(path))
 
 GUARDIA = r"(Muori|throw|exit\s+1|VIETATO|notlike|-ne\b|Write-Host|Red)"
 
