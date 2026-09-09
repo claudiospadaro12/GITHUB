@@ -1,0 +1,121 @@
+# =====================================================================
+#  PASSO 0 -- ABTG_Nightly su EURCHF (fade del box notturno)
+#  cella 00_conta : CONTARE LE OCCASIONI, non giudicare la strategia
+#  EA: ABTG_Nightly  -- sorgente mql5\Experts\, gia' scritto e gia' compilato)
+# =====================================================================
+#
+#  PERCHE' ESISTE, ed e' un BUCO NOSTRO, non un motore nuovo
+#  La live di Paolo dell'08/09/2026 (trascrizione analizzata in
+#  caccia_strategie\ANALISI_LIVE_PAOLO_2026-09-08.md) dice, testuale:
+#     "Tutti gli AUD non si fanno, tutti gli NZD non si fanno, GBPJPY no.
+#      Si prendono solo strumenti che la notte sono a bassa volatilita' e
+#      costante. EURCHF va bene, EURCAD va bene."
+#  Incrociando con i nostri risultati: ABTG_Nightly e' stato girato su
+#  AUDUSD, USDJPY (ESCLUSI dalla strategia), su indici e oro (dove faceva
+#  ZERO trade per il baco del filtro QB, REGISTRO_TEST.md r.444), e su
+#  EURUSD/GBPUSD/USDCHF, dove il verdetto negativo REGGE.
+#  >>> Ma EURCHF -- la prima coppia che il corso nomina -- NON E' MAI
+#      STATA GIRATA. E' la piu' "lenta" di notte, cioe' quella su cui la
+#      strategia dovrebbe funzionare MEGLIO.
+#
+#  >>> NON E' "RIFARE LA GRIGLIA SU UN MOTORE MORTO" (vietato dalla
+#      regola della seconda caccia, 19/08). E' girare il motore sulla
+#      POPOLAZIONE DI STRUMENTI per cui e' stato scritto. Popolazione
+#      diversa, non griglia diversa: nessun parametro viene ottimizzato,
+#      tutti restano al default del sorgente.
+#
+#  >>> COSA DEVE RISPONDERE, e NIENT'ALTRO
+#      1. l'EA opera su EURCHF, o il filtro QB lo spegne come sugli indici?
+#      2. quante OPERAZIONI in 21 mesi?
+#      3. il campione basta al metro di casa (>=150 per finestra)?
+#      4. il DRAWDOWN sta dentro? (il rischio si legge a qualunque n)
+#
+#  >>> NESSUNA PROMOZIONE PUO' USCIRE DA QUI.
+#      Nessun asse di merito: l'unico asse e' TECNICO -- il magic, due
+#      celle identiche per costruzione (classe 134 + gemello G1).
+#
+# ---------------------------------------------------------------------
+#  ATTESE DICHIARATE PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  Il motore piazza DUE limit ai bordi del box, UNA volta per notte
+#  (InpOneShotPerNight=true). Su ~450 notti feriali nella finestra:
+#  >>> ATTESA CENTRALE: 135-315 operazioni totali (fill del 30-70% delle
+#      notti), cioe' ~55-125 per finestra.
+#      E LO DICO SUBITO: quella forbice sta SOTTO le 150 per finestra.
+#      Se esce cosi', il MERITO resta SOSPESO (Emendamento A) anche con
+#      numeri belli, e la strada e' allungare la finestra -- non
+#      dichiarare una vittoria su un campione sottile.
+#
+#  LE SOGLIE:
+#    ZERO operazioni          -> NON E' GIRATA. Prima di qualunque
+#        verdetto si guarda il log: se compare "QB alto (...): escluso",
+#        e' il filtro, non il mercato -- lo stesso baco degli indici, e
+#        allora la prova da rifare e' con InpMaxNightVolPips alzato.
+#    < 30 operazioni          -> BOCCIATO per frequenza, come
+#        ABTG_OpeningReversalB il 08/09. Senza appello.
+#    DD > 10% su una cella    -> BOCCIATO per RISCHIO, subito, qualunque
+#        sia il conteggio (Emendamento B).
+#    PF < 1,10 con n>=150     -> scarto senza griglia (cancello C0
+#        proposto in report/PERCHE_MUOIONO_2026-09-08.md; lo ADOTTO qui,
+#        dichiarandolo: non e' firmato).
+#
+#  IL LIMITE PIU' IMPORTANTE, DICHIARATO PRIMA: IL COSTO.
+#      EURCHF e' una coppia a bassissima volatilita': lo spread pesa in
+#      proporzione MOLTO piu' che su EURUSD. La frontiera di casa e'
+#      stop >= 40 x spread, e lo spread di EURCHF su BCM **NON E'
+#      MISURATO**. Percio': qualunque PF che esca da qui va riletto
+#      quando lo spread sara' misurato, e se lo stop mediano non copre
+#      40 volte lo spread la cella non e' promuovibile, per bello che sia
+#      il numero. Questo NON e' un dettaglio: e' il motivo per cui i
+#      motori su strumenti lenti sembrano funzionare in backtest.
+#
+#  LA FINESTRA: @DAQUANDO 2024.09.26 e' il pavimento che SAPPIAMO
+#      esistere su questo broker (misurato sugli indici il 08/09). La
+#      profondita' tick VERA di EURCHF **NON E' MISURATA**: se il
+#      campione uscisse sottile, la prima cosa da fare e' misurarla, non
+#      cambiare i parametri.
+#
+#  DOVE GIRA: terminale da backtest C:\MT5_Backtest (conto 50504400).
+# =====================================================================
+
+@SIMBOLO  EURCHF
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- asse TECNICO: 2 celle identiche (gemelli di determinismo, G1)
+InpMagic=771701||771701||1||771702||Y
+
+# --- tutti gli altri input FISSATI al default del sorgente, uno per uno
+InpUsaGuardian=1||1||0||1||N
+InpBoxStartHour=22||22||0||22||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpPlaceHour=5||5||0||5||N
+InpPlaceMin=0||0||0||0||N
+InpCutoffHour=7||7||0||7||N
+InpCutoffMin=0||0||0||0||N
+InpCloseAtCutoff=0||0||0||0||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpEdgeOffsetPips=0||0||0||0||N
+InpOneShotPerNight=1||1||0||1||N
+InpSLpips=0||0||0||0||N
+InpAtrPeriod=14||14||0||14||N
+InpSLatrMult=1.0||1.0||0||1.0||N
+InpTPfrac=0.5||0.5||0||0.5||N
+InpMaxNightVolPips=45||45||0||45||N
+InpMinRangePips=0||0||0||0||N
+InpMaxRangePips=0||0||0||0||N
+InpBlockNightActive=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=0||0||0||0||N
+# InpNewsFile="abtg_news.csv"   (stringa: lasciata al default compilato)
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=60||60||0||60||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies=""   (stringa: lasciata al default compilato)
+# InpComment="NIGHTLY"   (stringa: lasciata al default compilato)
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
