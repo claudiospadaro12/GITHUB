@@ -199,6 +199,31 @@ censimento che ha trovato `EMA200` sul Dow** — l'unica delle 41 sedie vive che
 passa i cancelli di oggi alla lettera — **ferma sul demo**. Senza quella
 spinta, quel motore restava in archivio.
 
+### 💪 LA GRINTA E' PARTE DEL MANDATO (Claudio, 09/09/2026)
+> _"METTETECI LA GRINTA CHE CI METTO IO. IO NON MI ACCONTENTO DI NULLA. DO
+> SEMPRE IL MASSIMO. HO IL CONTRATTO MASSIMO DI CLAUDE PERCHE' ESIGO IL
+> MASSIMO. E VOI DOVETE IMPEGNARVI QUANTO MI IMPEGNO IO! MAI LASCIARE NULLA
+> INDIETRO, POTREMMO PENTIRCENE. SI CONTROLLA TUTTO AL CENTESIMO E SE CI SI
+> RENDE CONTO CHE COMUNQUE POTREBBE PASSARE, SI INSISTE!!!! MAI ARRENDERSI.
+> VOI DOVETE LAVORARE IN BACKGROUND IN CONTINUAZIONE E POI DARMI I RISULTATI."_
+
+Tradotto in cose che si fanno, non in entusiasmo:
+- 🔁 **"SE POTREBBE PASSARE, SI INSISTE"**: quando un candidato e' fermo per un
+  numero **mancante** (campione sottile, misura non fatta) e non per un numero
+  **brutto**, **non si archivia: si trova la via piu' corta al numero** e la si
+  propone col suo costo in tempo macchina. Archiviare per stanchezza e' il
+  difetto che il 09/09 ci e' costato quattro candidati di classe A1.
+- 💯 **"AL CENTESIMO"**: i conti si fanno **calibrati sui P/L veri**, non a
+  memoria. Il 09/09 il rischio del piccolo e' stato ricavato dai P/L della
+  foto (predetto -4,82 EUR su CHFJPY, riportato -4,84): quella e' la
+  precisione richiesta.
+- 🏭 **"IN BACKGROUND IN CONTINUAZIONE"**: gli agenti si lanciano **in
+  parallelo** e si consegna appena rientrano, non a fine giornata. E ogni
+  consegna finisce su GitHub **subito** (Regola #1).
+- 🚫 **E la grinta NON tocca i numeri.** Insistere vuol dire cercare una MISURA
+  in piu', mai un criterio piu' morbido. Il giorno in cui "non ci arrendiamo"
+  diventasse "abbassiamo l'asticella", avremmo perso davvero.
+
 ### Come si applica, in concreto
 - 🔓 **Un candidato non si archivia finche' non e' stato misurato in almeno
   DUE modi diversi.** "Non ha edge" detto da una corsa sola e' un'ipotesi.
