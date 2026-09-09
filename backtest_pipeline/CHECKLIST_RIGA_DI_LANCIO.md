@@ -11204,3 +11204,142 @@ preparato il round.
 > 4. E `controlla_prova.py` oggi pretende `@DAQUANDO` (r.112) ma **non**
 >    `@FINOA`: coerente col fatto che nessuno la legge, incoerente col fatto
 >    che i file la scrivono.
+
+## 169. 🗑️ LO SCRIPT CHE RIGENERA UN `.md` DOVE VIVE ANCHE TESTO SCRITTO A MANO — **487 righe di analisi cancellate in 3 episodi, da DUE sessioni diverse, e nessuno se n'era accorto**
+
+**Il fatto, misurato il 09/09/2026.** `analizza_trades.py` scrive
+`report/giornata_AAAA-MM-GG.md` con un `open(dest, "w")`. Ma in quel file, sotto
+la parte generata, vive anche la **`## 🧠 Lettura`**, che e' scritta a mano ed e'
+la parte che vale. Ogni rigenerazione la cancellava **in silenzio**, `rc=0`.
+
+Il censimento di tutte e 28 le pagelle ha trovato **tre** episodi, non uno:
+
+| Commit | Quando | Cosa ha bruciato |
+|---|---|---|
+| `ae0c26eb` | 04/08 | **60 righe** da `giornata_2026-08-04.md` |
+| `fc98c53c` | 07/09 22:49 | **145 righe** da `giornata_2026-09-07.md` — **da un'ALTRA sessione** |
+| `eea8b0e3` | 09/09 | **282 righe** da `giornata_2026-09-08.md` e `-09-09.md` |
+
+Fra le perse: *"RISOLTA LA DOMANDA DEL 04/09"*, il calcolo al centesimo della
+perdita **certa** da −26,57 sull'oro, e la lettura della giornata record
+(+360,70, 8 sedie su 8). Tutte recuperate dai commit in cui c'erano ancora.
+
+⚠️ **Le due cose che rendono questa classe cattiva:**
+1. **Non fa rumore.** Nessun errore, nessun avviso: il file si accorcia e basta.
+2. **Il collaudo E' il danno.** Non e' lo script in produzione ad averlo fatto:
+   sono state le **prove** di chi lo stava modificando. Si rompe proprio mentre
+   si sta lavorando bene.
+
+**E la PRIMA guardia scritta per chiuderla aveva due buchi**, tutti e due
+riprodotti dal `controllo-preventivo` prima che uscisse — vale la pena
+scriverli, perche' sono la parte non ovvia:
+- **(a)** guardava solo il marcatore `## 🧠 Lettura` e ricuciva la coda: quindi
+  cancellava **in silenzio** le sezioni a mano messe **SOPRA** il marcatore. E
+  non e' un caso di scuola: `giornata_2026-08-21.md` ne ha **SEI**
+  (`## 3. 🔬 IL FATTO DELLA GIORNATA: I GEMELLI ORB HANNO DIVERGITO DI NUOVO`,
+  `## 5. ⚫ QUALI EA SPEGNERE OGGI`, ...).
+- **(b)** pretendeva `--forza` per rigenerare **due volte lo stesso giorno** un
+  file tutto generato — cosa che si fa di continuo quando arriva un CSV
+  aggiornato. Tre volte che lo scrivi, `--forza` diventa un riflesso: e' la
+  **classe 149** (*la manopola a mano che scavalca il gate*) che rientra dalla
+  finestra.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di eseguire uno script che scrive in `report/`, si guarda
+>    `git status`.** Il collaudo di uno scrittore di file e' un'operazione
+>    distruttiva finche' non e' dimostrato il contrario.
+> 2. **La domanda della guardia NON e' _"c'e' il marcatore?"_ ma _"c'e'
+>    qualcosa che questo script non ha scritto?"_.** Si confrontano le
+>    intestazioni presenti con l'elenco di quelle **generate**, e ci si ferma
+>    solo sulle **orfane**, nominandole. Cosi' la rigenerazione legittima
+>    funziona senza `--forza` e il gate non si logora.
+> 3. **L'elenco delle intestazioni generate si ESTRAE DAL SORGENTE**
+>    (`grep -oP '"## [^"]*'`), non si scrive a memoria: a memoria si sfasa al
+>    primo titolo nuovo, e si sfasa **in silenzio**.
+> 4. **Copia di sicurezza prima di ogni scrittura** (`report/.backup/`,
+>    gitignorata): tre righe, e copre i casi che non abbiamo previsto.
+
+## 170. 🕰️ `%cs` NON E' LA DATA DEL DATO, E' LA DATA DEL **COMMITTER** — un rebase la riscrive a oggi e il timbro di freschezza da' **FALSO VERDE**
+
+Un timbro che dice *"questo dato e' arrivato il giorno X"* letto con
+`git log -1 --format=%cs -- <file>` **mente dopo un rebase, un cherry-pick o un
+`--amend`**: quelle operazioni riscrivono la data del committer a **oggi**,
+lasciando il contenuto identico. Riprodotto in un repo di prova:
+
+```
+PRIMA:            data/csv.csv -> ('2026-09-01', 'git')
+DOPO cherry-pick: data/csv.csv -> ('2026-09-09', 'git')
+git log -1: committer=2026-09-09   author=2026-09-01
+```
+
+Contenuto **fermo dall'01/09**, timbrato **✅ aggiornato al 09/09**. E questo
+progetto sposta lavoro fra branch in continuazione: non e' teoria.
+
+⚠️ **E' il fallimento peggiore possibile per un controllo**: silenzioso, e
+nella direzione che **rassicura**. Un timbro che sbaglia verso il rosso lo
+scopri subito perche' rompe le scatole; uno che sbaglia verso il verde non lo
+scopri mai.
+
+> ### 🔴 LA REGOLA
+> **`%as` (data dell'autore), o meglio il MINIMO fra `%as` e `%cs`.**
+> `--format=%as %cs` e `min()` delle due: la cintura e le bretelle costano una
+> parola. E si filtra sulla **forma** (10 caratteri, trattini in posizione 4 e
+> 7), perche' un git vecchio che non conosce il segnaposto ne stampa il
+> **letterale** e quello passerebbe come data.
+
+## 171. 🪞 IL CONTROLLO ANCORATO A UNA DATA **RICAVATA DAI DATI CHE DEVE GIUDICARE** — se la fonte muore, il controllo diventa verde da solo
+
+La prima stesura del timbro di freschezza confrontava la data dei CSV con
+`giorno`, che pero' **viene da `max(close_time)` del CSV del conto piccolo**.
+Conseguenza: **se l'esportatore del piccolo si ferma, `giorno` scivola indietro
+da solo** e tutte le righe tornano verdi — proprio nel caso in cui il timbro
+servirebbe. Riprodotto: con un CSV troncato al 04/09 uscivano **tre righe
+verdi** su una pagella vecchia di cinque giorni.
+
+E la riga del conto che detta la data era **verde per costruzione**: non
+portava informazione, e mentiva esattamente quando contava.
+
+> ### 🔴 LA REGOLA
+> **La freschezza si giudica sull'OROLOGIO, mai sui dati che deve giudicare.**
+> `datetime.now()`. E si distingue il modo d'uso: la corsa **automatica** chiede
+> *"i dati sono di stasera?"* (riferimento = oggi), quella **retroattiva chiesta
+> a mano** chiede *"il CSV copriva quel giorno?"* (riferimento = il giorno
+> chiesto). Sono due domande diverse e vogliono due riferimenti diversi.
+
+## 172. 🐺 L'ALLARME CHE SUONA 13 VOLTE PER UN INCENDIO — **la frequenza attesa di un 🔴 automatico si CONTA sui dati veri, prima di metterlo**
+
+Un avviso rosso che si accende quattro sere su dieci non e' una protezione: e'
+un addestramento a ignorarlo, e la sera che conta Claudio lo salta. Misurato
+sui CSV veri (01/08 → 09/09/2026):
+
+| | |
+|---|---|
+| sere in cui il 100k risulterebbe "fermo" | **13 su 30** (43%) |
+| guasti di consegna veri nel periodo | **1** (04/09) |
+| **segnale / rumore** | **1 : 13** |
+| banner "pagella vecchia" sul piccolo | **10 sere su 40**, quasi tutte di **sabato** |
+
+**Il discriminante si sceglie MISURANDOLO, e il primo che viene in mente puo'
+essere quello sbagliato.** L'ipotesi ovvia — *"la pipeline ha girato stasera?"*
+(un commit su `data/statements/` in giornata) — e' stata **scartata perche'
+misurata**: il 04/09 la pipeline **aveva** girato (`8bceb17`, 22:45, toccando
+solo `trades_auto.csv`), quindi avrebbe taciuto proprio sul caso vero.
+
+Quello che regge sono le **GEMELLE**: le strategie che nella storia hanno
+operato su **entrambi** i conti (`DAX Apertura EU RETEST BUY`, `Dow Apertura US
+RETEST BUY`, `MAXMIN DAX SHORT SELL`, `ORB OTT BUY`, `STREV L 1/3`). Se una
+gemella chiude sul piccolo e sul 100k **non compare**, il dato manca davvero.
+Sul 04/09 **si accende**; in 40 giorni sbaglia **3 volte invece di 13**.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di mettere un 🔴 automatico, se ne conta la frequenza attesa sui
+>    dati veri.** Se suona piu' spesso di quanto il fatto accada, non e' pronto.
+> 2. **Due livelli, non uno**: 🔴 per il sospetto con un discriminante che
+>    regge, ⚠️ per l'ambiguita' — e il giallo **dice le due letture possibili**
+>    invece di scegliere.
+> 3. **Il discriminante si valida contro il caso storico noto**: deve
+>    accendersi sul caso vero. Se non si accende li', non serve a niente.
+> 4. E quando la misura **non puo'** distinguere i due casi, lo si scrive
+>    **dove il numero si legge**, non nei commenti: qui *"un CSV che arriva
+>    identico non lascia traccia"*, e la cura definitiva e' un timbro scritto
+>    **dentro** il file dall'esportatore.
