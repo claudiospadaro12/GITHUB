@@ -143,6 +143,49 @@ ALTO di quella forbice.
   implementato e collaudato e' un'intenzione, non una protezione — e va detto
   ogni volta che si cita. Verbale: `report/FIRME_2026-09-07.md`.
 
+## 🚦 IL CANCELLO PRIMA DI OGNI PASSAGGIO (firmato da Claudio, 09/09/2026)
+Nato da due sue frasi dello stesso giorno, e da un fatto:
+> _"VOGLIO CHE CREI UN AGENTE CHE VERIFICHI LE STRINGHE E CONTROLLI SE CI SONO
+> ERRORI, COSI PRIMA DI OGNI PASSAGGIO."_ · _"ED ALLORA SOCIO, DEVI ASPETTARE."_
+
+**Il fatto**: il 09/09 una riga e' partita verso Claudio **prima** che il
+verificatore rispondesse. Il verificatore poi ha trovato **3 difetti
+bloccanti**. E' andata bene **per fortuna, non per metodo** — e la fortuna non
+e' un metodo.
+
+### 🔴 LA REGOLA, ed e' BLOCCANTE
+**NIENTE esce dalla sessione verso Claudio o verso il VPS senza un PASS.**
+Vale per: righe di lancio, script `.ps1` nuovi o modificati, file prova,
+modifiche a un EA, e **verdetti che archiviano un candidato**.
+- ⏳ **Se il controllo non e' ancora tornato, SI ASPETTA.** Non si manda "tanto
+  probabilmente va bene". Se Claudio ha fretta, si dice *"sto aspettando il
+  controllo"* — che e' una risposta, non un ritardo.
+- 🤖 **Due strati, e servono tutti e due**: `python3
+  backtest_pipeline/controlla_riga.py` (deterministico: non ragiona, quindi non
+  dimentica) e l'agente **`controllo-preventivo`** (giudizio: legge gli script,
+  capisce se la cosa fa quello che promette). Il primo che fallisce blocca.
+- 📌 Ogni difetto di **classe nuova** entra in `CHECKLIST_RIGA_DI_LANCIO.md`
+  con la data e il caso reale. La checklist e' la memoria: se una classe non
+  ci finisce, la si ripaga.
+
+### 🪦 IL CERTIFICATO DI MORTE — nasce da _"NON E' ACCETTABILE"_
+Claudio, stesso giorno: _"NON POSSIAMO DOPO MESI SCOPRIRE CHE AVREMMO DOVUTO
+FARE DIVERSAMENTE... AVEVAMO UN SACCO DI EA BLOCCATI PER NON ESSERE STATI
+VERIFICATI A FONDO. NON E' ACCETTABILE."_ **Ed e' misurato che ha ragione**:
+il censimento del 09/09 ha trovato `EMA200` Dow (PF OOS 1,52 su n=517, 30/30
+PASS a walk-forward tick) ferma sul demo; **6 candidati su 7 "bocciati per
+frequenza" senza NESSUN PF misurato**; e un **DD del 42,9% fantasma** in
+`HANDOFF.md` per un motore mai girato.
+
+**Un candidato NON si archivia come MORTO se manca anche una sola di queste:**
+1. un **PF** misurato · 2. un **n** e un **DD** · 3. la **gestione
+dell'uscita** messa ad asse almeno una volta · 4. i **simboli gemelli**
+provati · 5. il **TF** cambiato almeno una volta.
+
+🔴 Se ne manca una, il verdetto e' **"NON ANCORA MISURATO"**, non "morto" — e
+in `REGISTRO_TEST.md` va scritto **cosa manca**. **Un morto senza certificato
+non e' un morto: e' un'occasione persa che nessuno ritrovera' piu'.**
+
 ## 🔥 IL MOTTO (Claudio, 09/09/2026) — VALE ANCHE PER GLI AGENTI
 Testuale: _"NON ACCONTENTIAMOCI MAI. QUESTO DEVE ESSERE IL NOSTRO MOTTO. SE IO
 NON INSISTEVO COI CONTROLLI, MAGARI AVREMMO PERSO TANTISSIME OCCASIONI. UNA
