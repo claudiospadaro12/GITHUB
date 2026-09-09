@@ -127,15 +127,17 @@ Il testo intorno e' per chi firma; il driver guarda solo quelle righe.
 @DECISIONE D-E CHIAVE=SOGLIA_CANARINO_ORE VALORE=20 STATO=FIRMATO
 @DECISIONE D-F CHIAVE=STRADA_DAX VALORE=diagnosi_prima STATO=FIRMATO
 @DECISIONE D-G CHIAVE=DAX_SOTTOINSIEME VALORE=2010_2018 STATO=FIRMATO
-@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=DA_FIRMARE
+@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=FIRMATO
 ```
 
 ---
 
-### 🅗 D-H — **la finestra PER SIMBOLO** (PREPARATA, **DA FIRMARE**)
+### 🅗 D-H — **la finestra PER SIMBOLO** (FIRMATA da Claudio, 10/09/2026, 01:35)
+
+**Claudio, testuale: _"FIRMO D-H"_.**
 
 ```
-@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=DA_FIRMARE
+@DECISIONE D-H CHIAVE=FINESTRA_PER_SIMBOLO VALORE=D30EUR:2010-2018 STATO=FIRMATO
 ```
 
 #### Il problema che scioglie
@@ -177,8 +179,15 @@ viene**:
 e se una finestra e' diversa dalla globale lo scrive anche fra le NOTE del referto.
 **Nessun numero cambia per il NASUSD.**
 
-🔴 **Firma di Claudio. Finche' `STATO=DA_FIRMARE`, la D-H non ha effetto** (il codice legge
-il valore solo se la decisione c'e', e la lettura e' gia' tollerante all'assenza).
+✅ **FIRMATA. Da adesso e' in vigore**: il `D30EUR_EXT` che nascera' conterra' **solo i
+nove anni sani**, e il 2020-2023 — quello che contiene un altro strumento — **non puo'
+entrarci nemmeno per sbaglio**.
+
+🔴 **E l'import NON e' ancora autorizzato da questa firma.** Manca il censimento del
+terminale sul PC `DESKTOP-H4D7CAJ`: quel terminale e' loggato sul conto **piccolo
+50503392**, l'import **chiude e riapre MT5**, e c'e' un precedente reale
+(`HANDOFF.md`: quel PC **ha piazzato** #3160534/#3160535 → **−104,60** sul piccolo).
+**Prima si guarda cosa c'e' attaccato, poi si importa.**
 
 ---
 
