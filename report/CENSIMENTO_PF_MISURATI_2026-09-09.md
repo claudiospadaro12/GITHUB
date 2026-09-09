@@ -5,7 +5,7 @@ numero e' stimato o arrotondato "a occhio". Dove il dato non esiste nei CSV c'e'
 `[NON MISURATO]` e basta.
 
 - Sorgente: `backtest_pipeline/risultati_archivio/`, `backtest_pipeline/risultati_prove/`, `backtest_pipeline/prove/`
-- Script rifacibile: `backtest_pipeline/censimento_pf.py` (rilanciarlo rigenera CSV e conteggi)
+- Script rifacibile: `backtest_pipeline/censimento_pf.py` (rimacina i CSV) + `backtest_pipeline/censimento_pf_referto.py` (riscrive questo referto)
 - CSV grezzo aggregato: `backtest_pipeline/risultati_archivio/CENSIMENTO_PF_TUTTI_2026-09-09.csv`
 
 ## 📐 COME SONO STATI CALCOLATI I NUMERI (regole dichiarate)

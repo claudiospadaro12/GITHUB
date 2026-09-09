@@ -219,6 +219,9 @@ def main():
             file_notes.append((rel, stato, ''))
             BUCHI.append((rel, stato))
             continue
+        _k = [(r['profit'], r['pf'], r['trades'], r['dd']) for r in rows if r['trades'] > 0]
+        if _k and len(set(_k)) < len(_k):
+            stat['csv_con_esiti_duplicati'] += 1
         nz = [r for r in rows if r['trades'] == 0]
         ok = [r for r in rows if r['trades'] > 0]
         if len(nz) == len(rows):
