@@ -80,11 +80,11 @@ corsa **solo-short**, e la fotografia del **campo** sedia per sedia.
 |---|---:|---|
 | sorgenti `.mq5` totali | **111** | `mql5/Experts/*.mq5` |
 | **con un input di lato** (`InpAllowLong/Short`, `InpLato`, `InpSide`, `InpTradeDirection`, `InpDirectionMode`) | **80** | 72% |
-| senza input di lato | **31** | di cui **6 utility che non tradano** e **25 motori** |
-| **motori senza input che aprono comunque ENTRAMBI i versi** | **25 su 25** | ✅ verificato riga per riga |
+| senza input di lato | **31** | di cui **7 che non tradano affatto** (`Apertura_Study_EA`, `SlippageLogger`, `SpreadLogger`, `TradeExporter`, `SondaLondonFx`, `SondaM0PB`, `SondaRsiEmaV8`: zero `Buy`/`Sell` nel sorgente) e **24 motori** |
+| **motori senza input che aprono comunque ENTRAMBI i versi** | **24 su 24** | ✅ verificato riga per riga |
 
 > ✅ **Conferma della conclusione di R52, ri-misurata su 111 file invece che 70:**
-> **NON esiste nel parco un EA che apra un solo verso per costruzione.** I 25
+> **NON esiste nel parco un EA che apra un solo verso per costruzione.** I 24
 > senza input piazzano entrambi i versi (ternario o coppia stop/limit): per loro
 > il lato lo decide **il mercato**, non un interruttore. Il lato short **non
 > manca mai come idea**: quando manca, e' stato **spento**.
@@ -182,18 +182,19 @@ vs SELL: `entry`, `sl`, `dist`, `skip`, `lot`, `tp` tutti simmetrici),
 
 ### 🟢 I 61 RESIDUI, spiegati uno per classe (nessuno e' un difetto)
 
-**Classe 1 — la guardia `sl>0`, e qui il parco e' DISCIPLINATO 15 su 15.**
+**Classe 1 — la guardia `sl>0`, e qui il parco e' DISCIPLINATO 28 su 28.**
 `PositionGetDouble(POSITION_SL)` vale **0.0** quando lo stop non c'e'. Su un
 prezzo positivo `0.0 >= openP` e' **falso** (il long e' immune) ma
 `0.0 <= openP` e' **vero**: senza protezione, uno short **senza stop** verrebbe
 giudicato "gia' in pari" e **il breakeven verrebbe saltato solo agli short**.
-E' esattamente il difetto che stavo cercando. **Non c'e'**: tutti e 15 gli EA
-che fanno quel test sono coperti, con due tecniche diverse —
+E' esattamente il difetto che stavo cercando. **Non c'e': 28 EA fanno quel
+test, 28 sono coperti, ZERO scoperti** — con tre tecniche diverse.
 
-| copertura | EA (file : riga della riga `beDone`) |
-|---|---|
-| ✅ guardia **inline** sul ramo short `&& sl>0` | `ABTG_EMA200.mq5:270` · `ABTG_EMA200_Ottimizzato.mq5:270` · `ABTG_PTE.mq5:399` · `ABTG_PTE_Ottimizzato.mq5:455` · `ABTG_SuperWave.mq5:315` · `ABTG_SupertrendReversal.mq5:335` · `ABTG_WOL.mq5:304` · `ABTG_SupRev_NAS_H1_Ottimizzato.mq5:322` (e i 5 gemelli SupRev :322) · `ABTG_FiboH4_Multi.mq5:479` · `ABTG_FiboH4_Corso.mq5:798` · `ABTG_BreakingBand.mq5:1447` · `ABTG_AltaVelocita.mq5:1192` |
-| ✅ filtro **a monte** `if(sl<=0) continue;` | `ABTG_AtrExhaustVol.mq5:713` · `ABTG_VwapRevert.mq5:1112` · `ABTG_CrossEma.mq5:486` · `ABTG_CrossEmaApertura.mq5:709` · `ABTG_FvgRetest.mq5:1017` · `ABTG_LiquiditySweep.mq5:774` |
+| copertura | quanti | EA (file : riga del test `beDone`/`beFatto`) |
+|---|---:|---|
+| ✅ guardia **inline** sul ramo short (`&& sl>0`) | **20** | `ABTG_EMA200.mq5:270` · `ABTG_EMA200_Ottimizzato.mq5:270` · `ABTG_PTE.mq5:399` · `ABTG_PTE_Ottimizzato.mq5:455` · `ABTG_SuperWave.mq5:315` · `ABTG_SuperWave_DAX_H4_Ottimizzato.mq5:315` · `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5:315` · `ABTG_SupertrendReversal.mq5:335` · `ABTG_SupertrendReversal_Ottimizzato.mq5:321` · `ABTG_SupertrendReversal_Multi.mq5:325` · `ABTG_SupertrendReversal_Multi_Ottimizzato.mq5:325` · `ABTG_SupRev_{CAC_H4,DAX_H1,DAX_H4,DOW_H1,DOW_H4,NAS_H1}_Ottimizzato.mq5:322` (6) · `ABTG_WOL.mq5:304` · `ABTG_FiboH4_Multi.mq5:479` · `ABTG_FiboH4_Corso.mq5:798` |
+| ✅ filtro **a monte** `if(sl<=0) continue;` | **6** | `ABTG_AtrExhaustVol.mq5:713` · `ABTG_VwapRevert.mq5:1112` · `ABTG_CrossEma.mq5:486` · `ABTG_CrossEmaApertura.mq5:709` · `ABTG_FvgRetest.mq5:1017` · `ABTG_LiquiditySweep.mq5:774` |
+| ✅ guardia `sl>0.0` su **entrambi** i rami | **2** | `ABTG_AltaVelocita.mq5:1192` · `ABTG_BreakingBand.mq5:1447` |
 
 📌 Idem per il trailing: `ABTG_ORB_Ottimizzato.mq5:837` (long, `newSL>sl`)
 contro `:857` (short, `(newSL<sl||sl==0)`). **Testo diverso, comportamento
@@ -515,7 +516,8 @@ Il magic 770101 sul DAX, **spaccato per geometria** (colonna `strategy`):
 | | |
 |---|---:|
 | sorgenti `.mq5` | **111** |
-| ✅ **possono shortare** (input di lato + 25 senza input che aprono comunque entrambi i versi + utility escluse) | **105 su 105 motori** |
+| di cui **non tradano** (nessun `Buy`/`Sell` nel sorgente) | **7** |
+| ✅ **possono shortare**: 80 con input di lato + 24 che aprono entrambi i versi senza input | **104 su 104 motori** |
 | 🔴 short **spento nel DEFAULT del sorgente** | **4** (2 sono `_Ottimizzato` di aperture, 1 e' una sonda per disegno, 1 e' una sedia fantasma) |
 | 🔴 **short spento nel PRESET** (e' questo che gira) | **14 preset** |
 | 🐻 long spento (short-only) | 2 sorgenti + 3 preset |
@@ -578,8 +580,9 @@ un dato che nessuno ha spiegato.**
 **571 decisioni a due rami esaminate in 111 sorgenti · 510 specchiate al
 centesimo · 61 residui letti a mano · 0 asimmetrie che falsino i numeri short.**
 Il punto piu' esposto — la guardia `sl>0` sul breakeven degli short, dove uno
-zero non e' un valore neutro — e' **coperto 15 volte su 15**, con due tecniche
-diverse (§A.3, Classe 1).
+zero non e' un valore neutro e senza protezione **il breakeven verrebbe saltato
+ai soli short** — e' **coperto 28 volte su 28**, con tre tecniche diverse
+(§A.3, Classe 1).
 
 👉 **Conseguenza operativa, ed e' buona:** quando misuriamo un lato short,
 **quel numero vale**. Il motore non lo sta zoppicando. Se lo short perde, perde
