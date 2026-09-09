@@ -1,0 +1,206 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  LATI-A1 / DISCESA / gemello LONG -- EMA200 su U30USD H1, TICK REALI.
+#  Round "REGGE FUORI DAL TORO?" -- scritto il 09/09/2026.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  A CHE DOMANDA RISPONDE, e non e' "lo short funziona?"
+#    Claudio, 09/09/2026: "ricontrollate anche i long ... expert che
+#    reggano". La domanda vera e': COSA FA IL LATO LONG QUANDO L'INDICE
+#    SCENDE. Un motore long-only si scopre fragile li', non nel toro.
+#    Le quattro celle che servono sono LATO x REGIME, e questo file
+#    produce la colonna LONG della riga DISCESA.
+#    Il gemello LATI_A1_EMA200_U30USD_DISCESA_short.txt produce la
+#    colonna SHORT sulla STESSA finestra: i due file differiscono
+#    ESCLUSIVAMENTE per quale flag di lato e' l'asse. E' l'eccezione
+#    dichiarata alla regola "una variabile per file" -- la variabile e'
+#    UNA (il lato), ma serve in due file perche' l'asse Y e' uno solo.
+#
+#  PERCHE' QUESTA FINESTRA E NON UN'ALTRA -- e va detto senza sconti
+#    Sonda dello storico del 17/08/2026
+#    (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md, riga 46):
+#    tutti gli indici BCM, U30USD compreso, hanno PrimaData 2024.09.26
+#    con stato COMPLETO. COMPLETO vuol dire che il dato non manca sul
+#    disco: IL BROKER NON CE L'HA. Quindi 2008, 2020 e 2022 sugli indici
+#    NON ESISTONO e nessun round li potra' misurare finche' lo storico
+#    resta questo.
+#    >>> Dentro i 21 mesi disponibili c'e' pero' UNA discesa vera, ed e'
+#        gia' stata nominata in casa: R107_CRITERI.md riga 246 usa la
+#        finestra dedicata 2025.02.01 -> 2025.04.30 ("~60 giorni di
+#        borsa"). Fuori casa il fatto e' datato: massimo dell'S&P 500 il
+#        19/02/2025, minimo di chiusura l'08/04/2025, -18,9% dal massimo;
+#        il Nasdaq segna -26,5% dal massimo del 24/01 al minimo intraday
+#        del 07/04 [FONTE ESTERNA: rassegna stampa, non misurato da noi].
+#    >>> Uso la finestra DI CASA (2025.02.01-2025.04.30) e non una mia:
+#        cosi' i numeri restano confrontabili con R107 e con chi verra'.
+#
+#  MODELLO: TICK REALI (Modello 4). DICHIARATO, e cambia cosa si puo'
+#  concludere.
+#    I tick BCM sugli indici partono dal 2024.09.26 (stessa sonda), quindi
+#    QUESTA finestra sta INTERAMENTE dentro i tick veri: riempimenti veri,
+#    colonna spread vera. E' l'unica discesa del progetto su cui si possa
+#    dire "il DD e' un fatto accaduto" senza asterischi sul dato.
+#    >>> Cosa permette di concludere: il RISCHIO (DD, peggior giornata),
+#        che si legge a QUALUNQUE n (Emendamento B del 16/08).
+#    >>> Cosa NON permette: il MERITO. L'attesa qui sotto dice n 32-62 sul
+#        lato long, MOLTO sotto il muro dei 150. Nessuna promozione, nessuno
+#        spegnimento, nessuna cella scelta da questo file.
+#
+#  L'ANTENATO, riga per riga
+#    Il corpo e' la copia di prove/R110_EMADOW_02_short.txt (che a sua volta
+#    copia prove/R103_ABTG_EMA200_U30USD_771531.txt). Delta ammessi e
+#    dichiarati, nient'altro:
+#      - InpMagic      (764100, blocco vergine -- vedi sotto)
+#      - InpComment    (per non confondere i CSV)
+#      - InpAllowShort (da pin a ASSE: e' la domanda del file)
+#      - la sintassi dei pin (forma nuda "Nome=valore", come i file A1 del
+#        09/09) e InpNewsCurrencies NON pinnato: il pin di una stringa a
+#        valore VUOTO viene IGNORATO da MT5 e controlla_prova.py lo blocca
+#        (classe FiboH4). Il default compilato e' gia' la stringa vuota.
+#      - InpUsaGuardian pinnato true: NON esisteva come colonna nei CSV di
+#        R110? esisteva (prove/R110_EMADOW_02_short.txt riga 1 del corpo).
+#        Confermato identico.
+#
+#  IL NUMERO GIA' MISURATO SU QUESTA SEDIA -- serve a costruire l'attesa
+#    R110 (TICK REALI, split 40/60 su 2024.09.26-2026.06.30), CSV grezzi in
+#    prove/R110_CSV_EMADOW/, letti riga per riga il 09/09/2026:
+#      IS  2024.09.26 -> 2025.06.09  (la finestra CHE CONTIENE questa discesa)
+#        metro L+S : +4585.40 | PF 1.20110 | DD 5.7325% | n 237
+#        LONG puro : +1843.66 | PF 1.16183 | DD 2.6377% | n 112
+#        SHORT puro: +2607.38 | PF 1.23153 | DD 4.5113% | n 125
+#      OOS 2025.06.10 -> 2026.06.30  (toro puro)
+#        metro L+S : +23321.47 | PF 1.52365 | DD 7.8323% | n 517
+#        LONG puro : +5670.52  | PF 1.24103 | DD 8.8973% | n 241
+#        SHORT puro: +16948.35 | PF 1.89147 | DD 2.6628% | n 302
+#    >>> Due cose vanno dette adesso, perche' sono misurate e sono strane.
+#        (1) Nell'IS i due lati sono ADDITIVI AL TRADE: 112 + 125 = 237
+#            esatto. Nell'OOS NO: 241 + 302 = 543 contro 517. Lo slot
+#            unico del motore morde solo nella seconda finestra.
+#        (2) Nel TORO PURO lo SHORT fa PF 1.89 e il LONG 1.24. Il lato
+#            short guadagna PIU' del long in un mercato che sale.
+#            [INCERTO] dichiarato: non lo so spiegare senza il per-trade,
+#            e non lo invento. E' una ragione in piu' per misurare i lati
+#            nella discesa invece di dedurli.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Frequenza MISURATA (non stimata) dai due CSV R110 sopra:
+#      IS  = 256 giorni solari -> metro 0.926 op/g, long 0.4375, short 0.488
+#      OOS = 385 giorni solari -> metro 1.343 op/g, long 0.626,  short 0.784
+#    Questa finestra: 2025.02.01 -> 2025.04.30 = 89 giorni solari.
+#      -> a ritmo IS : metro 82, LONG 39, SHORT 43
+#      -> a ritmo OOS: metro 120, LONG 56, SHORT 70
+#    ATTESA SCRITTA: cella LONG puro n fra 32 e 62; cella L+S n fra 70 e 135.
+#    PF: ignoto per segno, e lo dico. Attesa larga: LONG puro PF 0.60-1.30.
+#    DD: mi aspetto il LONG puro PEGGIO che nel toro (nell'OOS fa 8.90%),
+#      perche' qui l'indice perde il 19% in nove settimane. Attesa 3-14%.
+#    >>> Se esce un PF LONG di 2.0 con DD dell'1% in una discesa del 19%,
+#        il primo sospetto e' un baco, non una scoperta.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  CANCELLO CROCIATO. La cella L+S di QUESTO file deve uscire
+#        IDENTICA AL CENTESIMO alla cella L+S del file gemello
+#        LATI_A1_EMA200_U30USD_DISCESA_short.txt (stessa finestra, stesso
+#        modello, stessi pin, solo l'asse cambia). Se non lo e', il banco
+#        non e' deterministico e NESSUN numero dei due file si legge.
+#        Sostituisce l'asse tecnico sui magic gemelli: costa zero passate
+#        in piu' e controlla la stessa cosa.
+#    T2  RISCHIO, e vale a QUALUNQUE n (Emendamento B). DD della cella
+#        LONG puro <= 10.00% a rischio 1.0%. Sopra: la sedia EMA200 Dow
+#        non si schiera alla taglia prevista senza rifare i conti, e si
+#        scrive nel dossier di schieramento
+#        (report/DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md).
+#        Il numero 10.00 e' il muro prop TOTALE; a 0.65% diventa 6.5%.
+#    T3  PEGGIOR GIORNATA (colonna del CSV, misurata): allarme a -3.00%
+#        a rischio 1.0% contro un muro prop giornaliero del 5%.
+#        Sopra: revisione della taglia prima di accendere.
+#    T4  FRAGILITA' DIREZIONALE. Se PF(LONG, DISCESA) < 0.80 mentre
+#        PF(LONG, TORO) = 1.24 (misurato), il motore e' DIREZIONALE e va
+#        scritto cosi' nel contratto della sedia. NON e' una bocciatura:
+#        e' un'etichetta onesta, e cambia la taglia, non l'accensione.
+#    T5  NIENTE PROMOZIONI E NIENTE SPEGNIMENTI DA QUESTO FILE. n atteso
+#        32-62 sul lato, sotto il muro dei 150: il MERITO e' SOSPESO.
+#        Scritto prima, contro la tentazione di leggere un PF bello su 40
+#        operazioni.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - UNA SOLA DISCESA. 2025.02-04 e' UN episodio, non un regime provato.
+#      Emendamento C (prova di regime) NON soddisfatto e non soddisfabile
+#      sugli indici con questo storico. Il gemello di regime che manca
+#      (2008, 2020, 2022) esiste solo su forex e metalli.
+#    - LA FINESTRA DI CONTROLLO NON E' INDIPENDENTE. Il file A2 (toro)
+#      gira sulla finestra OOS di R110: e' un TERMINE DI PARAGONE sulla
+#      stessa scala e una SENTINELLA, non una conferma nuova.
+#    - PEGGIOR GIORNATA: la colonna esiste nei CSV di questa famiglia
+#      (vista in csv_R79); se in questa corsa non uscisse, resta
+#      [NON MISURATO] e va detto, non stimato.
+#    - Guardian: InpUsaGuardian=true e' il default, ma nel tester le
+#      GlobalVariable del Guardian non esistono e la guardia lascia
+#      passare tutto (fail-open). I numeri restano confrontabili con R110.
+#    - RISCHIO 1.0% qui, 0.65% in campo: ogni DD di questo file va
+#      moltiplicato per 0.65 per confrontarlo col forward.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 10000 (come R110).
+#  UNA TRANCHE: FrazioneIS 1.0 va passata dalla riga di lancio. La gamba
+#  OOS esce degenere ed e' ATTESA vuota: NON si rilancia.
+#  @DAQUANDO/@FINOA: dentro il pavimento MISURATO 2024.09.26 (sonda 17/08).
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2025.02.01
+@FINOA    2025.04.30
+#
+# --- I FISSI: copia dell'antenato R110_EMADOW_02_short.txt.
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+# InpAllowLong PINNATO true: in questo file il long c'e' SEMPRE.
+InpAllowLong=true
+# InpAllowShort -> E' L'ASSE, in fondo al file.
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota =
+# ignorato da MT5 (controlla_prova.py controllo 3). Default = "".
+InpComment=LATIA1 EMADOW DISC L
+# MAGIC FISSO E VERGINE 764100 -- verificato repo-wide il 09/09/2026:
+# grep -rn "764100" . --exclude-dir=.git -> 0 occorrenze.
+# VIETATO il 771531 della sedia viva e i 7633xx di R110.
+InpMagic=764100
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- L'UNICO ASSE (2 celle x 1 tranche = 2 passate)
+#     0 = SHORT spento -> cella LONG PURO (la misura nuova del file)
+#     1 = SHORT acceso -> cella L+S, la sedia intera (cancello T1)
+InpAllowShort=1||0||1||1||Y
+# ==========================================================================

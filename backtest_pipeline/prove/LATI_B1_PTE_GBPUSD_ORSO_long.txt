@@ -1,0 +1,196 @@
+# ==========================================================================
+#  EA: ABTG_PTE
+#  LATI-B1 / ORSO DEL CAVO 2021-2022 / gemello LONG -- PTE su GBPUSD H1, OHLC.
+#  Round "REGGE FUORI DAL TORO?" -- scritto il 09/09/2026.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  PERCHE' QUESTO MOTORE E QUESTO SIMBOLO, e non un altro
+#    Regola di casa (Emendamento C, 16/08): la prova di regime batte la
+#    storia contigua. Ma sugli INDICI non e' eseguibile: la sonda del
+#    17/08 (REFERTO_SONDA_STORICO_17-08.md r.46) ha misurato tutti gli
+#    indici BCM a 2024.09.26 con stato COMPLETO -- il broker non ha
+#    niente prima. Il 2008, il 2020 e il 2022 esistono SOLO su forex e
+#    metalli. Su GBPUSD il broker dichiara 1993.05.11 (stessa sonda,
+#    colonna PrimaDataTF su H1) e R76 ha MISURATO che lo Strategy Tester
+#    legge davvero indietro (con -DaQuando 2000.01.01 l'n e' cresciuto da
+#    190-256 a 440-631): la finestra lunga non e' un'ipotesi, e' provata.
+#    >>> E la PTE su GBPUSD e' l'unico posto del parco dove un LATO SOLO
+#        ha gia' un PF sopra la soglia di casa su campione pieno.
+#        Fonte: risultati_archivio/csv_R79/ABTG_PTE_GBPUSD_OOS_ohlc_pte79gbp.csv,
+#        finestra 2013.04.01-2026.06.30, OHLC, rischio 1%, letta il 09/09:
+#          SOLO SHORT buf 25 : +2945.16 | PF 1.13959 | DD 7.8729% | n 221 | pegg.gio -1.2998%
+#          SOLO LONG  buf 25 : +1583.93 | PF 1.06595 | DD 6.5474% | n 255 | pegg.gio -1.3528%
+#          L+S        buf 25 : +4575.77 | PF 1.09997 | DD 10.5109%| n 476 | pegg.gio -1.3529%
+#          SOLO SHORT buf  5 : -1514.25 | PF 0.95719 | DD 14.1795%| n 207
+#          SOLO LONG  buf  5 :  -620.12 | PF 0.98445 | DD  9.7122%| n 240
+#          L+S        buf  5 : -2124.62 | PF 0.97164 | DD 17.6756%| n 447
+#        R79 ha anche misurato che i due lati sono ADDITIVI all'1%: la
+#        scomposizione e' legittima, non un artefatto di InpMaxPositions.
+#
+#  E QUAL E' IL BUCO CHE QUESTO ROUND CHIUDE
+#    Quei numeri sono la MEDIA di tredici anni. Dentro ci sono un orso e
+#    un toro che si annullano. Nessuno ha mai letto quella cella DENTRO
+#    un regime. Questo file lo fa, su una finestra datata.
+#
+#  LA FINESTRA, DATATA -- ORSO
+#    2021.06.01 -> 2022.09.30. Sedici mesi in cui GBPUSD scende da circa
+#    1.4250 (fine maggio 2021) al minimo storico intraday di 1.0350 del
+#    26/09/2022, il lunedi' dopo il mini-budget Truss. Dentro ci sono
+#    ANCHE il rialzo dei tassi Fed del 2022 e l'energia europea: e' un
+#    orso di sterlina E un toro di dollaro insieme.
+#    [FONTE ESTERNA: storia di mercato, non misurata sui dati BCM.]
+#    >>> PASSO 0 OBBLIGATORIO: la data della PRIMA operazione va letta e
+#        scritta. La PTE su H1 ha bisogno di ~156 barre di riscaldamento
+#        (TmaSlow 56 + AtrSlow 100), cioe' circa un mese: se la prima
+#        operazione cade dopo il 2021.07.15 il riscaldamento ha morso di
+#        piu' del previsto e la finestra utile si DICHIARA accorciata.
+#    >>> E' l'orso PIU' RECENTE disponibile, quindi il piu' vicino al
+#        mercato su cui la sedia girera'. Gli altri due (2007.11-2009.01
+#        e 2014.07-2016.10) sono cloni di questo file con sole date
+#        diverse, e stanno nel dossier.
+#
+#  MODELLO: OHLC su M1. DICHIARATO, e limita cosa si puo' concludere.
+#    I tick reali BCM sul forex partono dal 2024.07.05 (misurato dal
+#    Diario del tester, NOTA_PAVIMENTO_TICK_FOREX_2026-09-01). Su una
+#    finestra del 2021-2022 i tick VERI NON ESISTONO e la colonna spread
+#    NON e' vera: il tester li genera dalle M1.
+#    >>> "O la finestra lunga o il riempimento vero, mai tutti e due"
+#        (R76). E' la tensione vera del progetto, e qui si paga.
+#    >>> Cosa permette di concludere: SCREENING, e il RISCHIO come LIMITE
+#        INFERIORE (un DD OHLC e' quasi sempre piu' gentile del vero).
+#    >>> Cosa NON permette: un verdetto. R57 ha misurato che il solo
+#        cambio di modello ribalta il SEGNO di questo motore
+#        sull'intraday. Nessuna promozione esce da qui, per nessun lato.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Frequenza MISURATA, non stimata, dal CSV R79 sopra: finestra
+#    2013.04.01-2026.06.30 = 4838 giorni solari = 13.246 anni.
+#      L+S 476 op -> 35.94 op/anno
+#      LONG  255  -> 19.25 op/anno
+#      SHORT 221  -> 16.68 op/anno
+#    Questa finestra: 2021.06.01 -> 2022.09.30 = 486 giorni solari = 1.331 anni.
+#      -> attesa centrale: L+S 48, LONG 26, SHORT 22
+#      -> ATTESA SCRITTA (banda +-40%, perche' la frequenza dentro un
+#         regime NON e' la frequenza media e non ho motivo di fingere
+#         che lo sia): L+S fra 29 e 67, LONG puro fra 15 e 36.
+#    PF: ignoto per segno. Attesa larga e dichiarata: LONG puro PF 0.50-1.20 (un motore
+#      di mean-reversion che compra dentro un orso di sedici mesi
+#      parte svantaggiato, e lo scrivo prima).
+#    >>> Il numero che conta di piu' non e' il PF: e' n. Se esce n < 10
+#        sul lato, questa finestra su questo motore NON PARLA, e va
+#        scritto cosi' invece di commentare un PF su otto operazioni.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  CANCELLO CROCIATO. La cella L+S di questo file deve uscire
+#        IDENTICA AL CENTESIMO alla cella L+S del gemello
+#        LATI_B1_PTE_GBPUSD_ORSO_short.txt. Se non lo e', il
+#        banco non e' deterministico e nessun numero dei due si legge.
+#    T2  n < 10 sul lato -> finestra MUTA. Si scrive "non parla", non si
+#        commenta il PF. (Congelato adesso proprio perche' con poche
+#        decine di operazioni attese la tentazione ci sara'.)
+#    T3  RISCHIO, e vale a QUALUNQUE n (Emendamento B del 16/08).
+#        DD della cella LONG puro <= 15.00% a rischio 1.0%. E' il DOPPIO
+#        del DD misurato su tredici anni sullo stesso lato (6.55% long /
+#        7.87% short) ed e' la soglia della corsia RISCHIO firmata il
+#        18/08. Sopra -> revisione, quale che sia il PF.
+#    T4  PEGGIOR GIORNATA: allarme a -3.00% a rischio 1.0% contro il muro
+#        prop giornaliero del 5%. Su tredici anni il peggio misurato e'
+#        -1.35%: un -3% dentro un regime sarebbe un fatto nuovo.
+#    T5  MERITO SOSPESO, dichiarato adesso. n atteso per lato ben sotto
+#        150. Questo file NON promuove e NON spegne niente.
+#    T6  E LA DOMANDA VERA, con la sua soglia: il motore REGGE FUORI DAL
+#        TORO se PF(LONG, ORSO) >= 0.90 E PF(SHORT, TORO) >= 0.90.
+#        Se uno dei due esce sotto 0.70, il motore e' DIREZIONALE: non e'
+#        una bocciatura, e' un'etichetta che cambia il contratto della
+#        sedia. Si giudica sulla COPPIA di round (orso + toro), mai su
+#        una finestra sola -- "un solo periodo avverso e' un aneddoto"
+#        (PROVA_REGIME_CRITERI.md).
+#
+#  BUCHI DICHIARATI
+#    - OHLC, non tick. Detto sopra, e non e' aggirabile su questa finestra.
+#    - UNA finestra per regime. La regola di casa ne vuole due concordi;
+#      le altre finestre datate sono elencate nel dossier del round e sono
+#      cloni di questo file con sole date diverse.
+#    - LO SPREAD DEL 2021-2022 NON E' MISURATO e non lo sara' mai: il
+#      tester usa lo spread corrente. Su una coppia liquida come il cavo
+#      e' un'approssimazione tollerabile, ma va detta.
+#    - Guardian fail-open nel tester (le GlobalVariable non esistono):
+#      i numeri restano confrontabili con R79.
+#    - RISCHIO 1.0% qui, 0.5% sulla sedia viva: DD x 0.5 per il confronto
+#      col forward.
+#
+#  BANCO: Modello 1 (OHLC su M1). Deposito 10000.
+#  UNA TRANCHE: FrazioneIS 1.0 dalla riga di lancio.
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2021.06.01
+@FINOA    2022.09.30
+#
+# --- I FISSI: copia campo per campo della riga MISURATA del CSV
+#     risultati_archivio/csv_R79/ABTG_PTE_GBPUSD_OOS_ohlc_pte79gbp.csv
+#     (Pass 6, letta il 09/09/2026). Nessun valore scritto a memoria.
+InpUsaGuardian=true
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+# InpAllowLong PINNATO true: in questo file il long c'e' SEMPRE.
+InpAllowLong=true
+# InpAllowShort -> E' L'ASSE, in fondo al file.
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+# BUFFER 25: e' la cella CANDIDATA di R78/R79, non quella viva a buffer 5.
+# La viva (buffer 5) e' misurata NEGATIVA su tredici anni su entrambi i lati
+# (R79: long -620, short -1514). Si porta nell'orso la cella che ha un
+# numero positivo, non quella che ne ha uno rosso.
+InpSLbufferPips=25.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+# RISCHIO 1.0% = quello di R79. NON 0.5% (la taglia viva del .chr del
+# 23/08): a 0.5% la sentinella non sarebbe piu' confrontabile con
+# l'archivio, e si perderebbe l'unico cancello gratis del round.
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: il pin di una stringa a
+# valore VUOTO viene IGNORATO da MT5 (controlla_prova.py controllo 3).
+# Il default compilato e' gia' la stringa vuota che serve.
+InpComment=LATIB1 PTEGBP ORSO L
+# MAGIC FISSO E VERGINE 764110 -- verificato repo-wide il 09/09/2026:
+# grep -rn "764110" . --exclude-dir=.git -> 0 occorrenze.
+# VIETATI: 771301 (default sorgente e magic di R79), 771322/771332
+# (sedie vive GBPUSD), 790510/790511 (R102).
+InpMagic=764110
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0
+#
+# --- L'UNICO ASSE (2 celle x 1 tranche = 2 passate)
+#     0 = SHORT spento -> cella LONG PURO
+#     1 = SHORT acceso -> cella L+S, la sedia intera (cancello crociato)
+InpAllowShort=1||0||1||1||Y
+# ==========================================================================

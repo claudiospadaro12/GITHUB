@@ -1,0 +1,123 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  LATI-A2 / TORO DI CONTROLLO / gemello SHORT -- EMA200 su U30USD H1,
+#  TICK REALI. Round "REGGE FUORI DAL TORO?" -- scritto il 09/09/2026.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  A COSA SERVE, e non e' una misura nuova
+#    Emendamento della Finestra, regola C: un DD misurato dentro un orso
+#    non dice se il motore e' fragile o se era semplicemente un brutto
+#    trimestre per tutti. SENZA IL TERMINE DI PARAGONE quel numero non si
+#    legge. Questo file produce la riga TORO della matrice LATO x REGIME,
+#    sulla stessa scala e sullo stesso banco del file LATI-A1.
+#
+#  E FA UNA SECONDA COSA, che vale quanto la prima: E' LA SENTINELLA.
+#    La finestra 2025.06.10 -> 2026.06.30 e' ESATTAMENTE la gamba OOS di
+#    R110 (split 40/60 su 2024.09.26-2026.06.30, FrazioneIS 0.40).
+#    Quindi le due celle di questo file hanno un bersaglio MISURATO da
+#    colpire, letto riga per riga dai CSV grezzi in prove/R110_CSV_EMADOW/
+#    il 09/09/2026:
+#      cella SHORT puro : +16948.35 | PF 1.89147 | DD 2.6628% | n 302
+#      cella L+S         : +23321.47 | PF 1.52365 | DD 7.8323% | n 517
+#    >>> Se non li riproduce, non e' "un risultato diverso": e' il banco
+#        che non e' piu' quello del 26/08, e allora NESSUN numero del
+#        round LATI-A1 si legge. Si scopre PRIMA di leggere la discesa,
+#        non dopo. [DA VERIFICARE: che la gamba OOS di R110 sia
+#        letteralmente 2025.06.10-2026.06.30 e' DEDOTTO dalla stessa
+#        aritmetica dichiarata in prove/A1_SUPREV_DOW_H1_01_trailonst.txt
+#        (FrazioneIS 0.40 su 2024.09.26-2026.06.30); va confermato nelle
+#        gen_*.ini di R110, che nella cartella dei CSV non ci sono.
+#        Se le date vere fossero altre, la sentinella decade e questo
+#        file va riscritto con quelle.]
+#
+#  MODELLO: TICK REALI (Modello 4), finestra interamente dentro il
+#  pavimento MISURATO dei tick sugli indici (2024.09.26, sonda 17/08).
+#    >>> Cosa permette di concludere: qui, e SOLO qui, n e' sopra il muro
+#        dei 150 su entrambe le celle (bersaglio 302 e 517), quindi il
+#        MERITO e' leggibile. Nella finestra di discesa NO, ed e' scritto li'.
+#    >>> Cosa NON permette: dire qualcosa di NUOVO. Questa finestra e' gia'
+#        stata misurata in R110: non e' una conferma indipendente, e' un
+#        metro. Chi la contasse come seconda prova sbaglierebbe.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Non e' un'attesa larga: e' un bersaglio. Tolleranza congelata sotto (T1).
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  SENTINELLA. Entrambe le celle devono riprodurre i bersagli R110
+#        con n entro +-2% e PF entro +-0.05. E' la stessa tolleranza delle
+#        sentinelle NyRetest del 31/08 e del file A1 SupRev del 09/09.
+#        Fuori tolleranza -> ROUND LATI-A1 INVALIDO, non si legge niente.
+#    T2  CANCELLO CROCIATO. La cella L+S di questo file deve uscire
+#        IDENTICA AL CENTESIMO a quella del gemello LATI_A2_EMA200_U30USD_TORO_long.txt.
+#    T3  Questo file NON promuove e NON boccia. E' un metro.
+#
+#  BUCHI DICHIARATI
+#    - NON INDIPENDENTE da R110, dichiarato sopra.
+#    - Il TORO qui e' UN toro (13 mesi del 2025-2026). Non e' la prova di
+#      regime dell'Emendamento C: quella, sugli indici, con lo storico
+#      BCM a 2024.09.26 COMPLETO, NON E' ESEGUIBILE. Punto.
+#    - RISCHIO 1.0% qui, 0.65% in campo: DD x 0.65 per il confronto.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 10000 (come R110).
+#  UNA TRANCHE: FrazioneIS 1.0 dalla riga di lancio.
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2025.06.10
+@FINOA    2026.06.30
+#
+# --- I FISSI: copia dell'antenato R110_EMADOW_02_short.txt.
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+# InpAllowLong -> E' L'ASSE, in fondo al file.
+# InpAllowShort PINNATO true: in questo file lo short c'e' SEMPRE.
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota =
+# ignorato da MT5 (controlla_prova.py controllo 3). Default = "".
+InpComment=LATIA2 EMADOW TORO S
+# MAGIC FISSO E VERGINE 764103 -- verificato repo-wide il 09/09/2026:
+# grep -rn "764103" . --exclude-dir=.git -> 0 occorrenze.
+# VIETATO il 771531 della sedia viva e i 7633xx di R110.
+InpMagic=764103
+InpMaxSpread=0
+InpVerbose=true
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- L'UNICO ASSE (2 celle x 1 tranche = 2 passate)
+#     0 = LONG spento -> cella SHORT PURO (bersaglio della sentinella)
+#     1 = LONG acceso -> cella L+S, la sedia intera (cancello T2)
+InpAllowLong=1||0||1||1||Y
+# ==========================================================================

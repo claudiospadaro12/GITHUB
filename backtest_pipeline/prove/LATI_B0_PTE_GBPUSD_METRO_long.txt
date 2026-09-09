@@ -1,0 +1,125 @@
+# ==========================================================================
+#  EA: ABTG_PTE
+#  LATI-B0 / METRO E SENTINELLA / gemello LONG -- PTE su GBPUSD H1, OHLC.
+#  Round "REGGE FUORI DAL TORO?" -- scritto il 09/09/2026.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  QUESTO FILE NON MISURA NIENTE DI NUOVO, ED E' IL SUO SCOPO
+#    Gira sulla finestra 2013.04.01 -> 2026.06.30, che e' ESATTAMENTE la
+#    gamba OOS di R79 (17/08/2026). Le sue due celle hanno un bersaglio
+#    MISURATO da colpire, letto riga per riga il 09/09/2026 dal CSV
+#    risultati_archivio/csv_R79/ABTG_PTE_GBPUSD_OOS_ohlc_pte79gbp.csv:
+#      cella LONG puro (buf 25) : +1583.93 | PF 1.06595 | DD 6.5474% | n 255 | pegg.gio -1.3528%
+#      cella L+S        (buf 25) : +4575.77 | PF 1.09997 | DD 10.5109% | n 476 | pegg.gio -1.3529%
+#    Se non li riproduce, i quattro file di regime (LATI-B1 e LATI-B2)
+#    NON SI LEGGONO: vorrebbe dire che fra agosto e oggi e' cambiato il
+#    sorgente dell'EA, il banco o il feed, e i numeri d'archivio non sono
+#    piu' un metro.
+#    >>> E' un'informazione utile ANCHE se fallisce: sapere che l'EA di
+#        oggi non riproduce l'EA del 17/08 vale piu' di quattro finestre
+#        di regime misurate su un motore diverso da quello che credevamo.
+#
+#  UNA DIFFERENZA NOTA E DICHIARATA CON L'ARCHIVIO
+#    Il CSV di R79 NON ha la colonna InpUsaGuardian: a quel pin l'input
+#    non veniva pinnato. Qui e' pinnato a true (default del sorgente
+#    ABTG_PTE.mq5 riga 44). Nel tester il Guardian e' fail-open (le
+#    GlobalVariable non esistono), quindi l'atteso e' ZERO differenza --
+#    ma se la sentinella fallisce, QUESTA e' la prima cosa da guardare,
+#    ed e' scritta prima, non dopo.
+#
+#  MODELLO: OHLC su M1, come R79. I tick reali BCM sul forex partono dal
+#  2024.07.05: su tredici anni non esistono. Dichiarato, e non aggirabile.
+#
+#  ATTESA DICHIARATA: e' il bersaglio qui sopra. Niente banda larga.
+#
+#  SOGLIE CONGELATE
+#    T1  SENTINELLA. Entrambe le celle devono riprodurre R79 con n entro
+#        +-2% e PF entro +-0.05 (stessa tolleranza delle sentinelle
+#        NyRetest del 31/08 e del file A1 SupRev del 09/09).
+#        Fuori tolleranza -> ROUND LATI-B INVALIDO, si ferma tutto e si
+#        indaga il perche' PRIMA di lanciare le finestre di regime.
+#    T2  CANCELLO CROCIATO. La cella L+S di questo file deve uscire
+#        IDENTICA AL CENTESIMO a quella del gemello LATI_B0_PTE_GBPUSD_METRO_short.txt.
+#    T3  Questo file NON promuove e NON boccia. E' un metro.
+#
+#  BUCHI DICHIARATI
+#    - Non e' una misura indipendente: e' una ripetizione voluta di R79.
+#    - Tredici anni contigui DILUISCONO (Emendamento C): questo numero
+#      NON dice se il motore regge in un orso. Quello lo dicono B1 e B2.
+#    - RISCHIO 1.0% qui, 0.5% sulla sedia viva: DD x 0.5 per il forward.
+#
+#  BANCO: Modello 1 (OHLC su M1). Deposito 10000.
+#  UNA TRANCHE: FrazioneIS 1.0 dalla riga di lancio.
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 2013.04.01
+@FINOA    2026.06.30
+#
+# --- I FISSI: copia campo per campo della riga MISURATA del CSV
+#     risultati_archivio/csv_R79/ABTG_PTE_GBPUSD_OOS_ohlc_pte79gbp.csv
+#     (Pass 6, letta il 09/09/2026). Nessun valore scritto a memoria.
+InpUsaGuardian=true
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+# InpAllowLong PINNATO true: in questo file il long c'e' SEMPRE.
+InpAllowLong=true
+# InpAllowShort -> E' L'ASSE, in fondo al file.
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+# BUFFER 25: e' la cella CANDIDATA di R78/R79, non quella viva a buffer 5.
+# La viva (buffer 5) e' misurata NEGATIVA su tredici anni su entrambi i lati
+# (R79: long -620, short -1514). Si porta nell'orso la cella che ha un
+# numero positivo, non quella che ne ha uno rosso.
+InpSLbufferPips=25.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+# RISCHIO 1.0% = quello di R79. NON 0.5% (la taglia viva del .chr del
+# 23/08): a 0.5% la sentinella non sarebbe piu' confrontabile con
+# l'archivio, e si perderebbe l'unico cancello gratis del round.
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: il pin di una stringa a
+# valore VUOTO viene IGNORATO da MT5 (controlla_prova.py controllo 3).
+# Il default compilato e' gia' la stringa vuota che serve.
+InpComment=LATIB0 PTEGBP METRO L
+# MAGIC FISSO E VERGINE 764114 -- verificato repo-wide il 09/09/2026:
+# grep -rn "764114" . --exclude-dir=.git -> 0 occorrenze.
+# VIETATI: 771301 (default sorgente e magic di R79), 771322/771332
+# (sedie vive GBPUSD), 790510/790511 (R102).
+InpMagic=764114
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0
+#
+# --- L'UNICO ASSE (2 celle x 1 tranche = 2 passate)
+#     0 = SHORT spento -> cella LONG PURO
+#     1 = SHORT acceso -> cella L+S, la sedia intera (cancello crociato)
+InpAllowShort=1||0||1||1||Y
+# ==========================================================================
