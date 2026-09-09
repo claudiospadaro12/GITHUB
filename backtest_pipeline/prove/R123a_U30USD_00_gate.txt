@@ -1,0 +1,179 @@
+# ======================================================================
+#  EA: ABTG_SupRev_DOW_H1_Ottimizzato
+#  R123a -- ALTOPIANO SupRev DOW H1 / cella 00_gate
+#  U30USD H1 -- LA CELLA VIVA, DUE VOLTE. Asse tecnico: InpMagic.
+#  Scritto il 09/09/2026. Criteri congelati PRIMA dei numeri.
+# ======================================================================
+#
+#  QUESTO FILE NON MISURA UN PARAMETRO. Misura DUE cose e basta:
+#    S1  il DETERMINISMO del banco (cancello G1): due celle identiche in
+#        tutto tranne il magic devono dare numeri identici a 1 centesimo.
+#    S2  la CONTINUITA' col CSV del 08/08: n IS 118, PF IS 0.92343,
+#        n OOS 155, PF OOS 1.43648, DD IS 6.2975%, DD OOS 4.8184%.
+#  Va letto PER PRIMO. Se S1 fallisce, gli altri tre file non si leggono.
+#  Se fallisce solo S2, gli altri tre si leggono lo stesso -- ma il
+#  riferimento cambia (vedi il blocco sul binario, qui sotto).
+#
+#
+#  ORIGINE, e non e' un'opinione: report/SUPREV_DOW_H1_ALTOPIANO_2026-09-09.md
+#    "l'altopiano NON e' stato misurato, perche' quel round ha UN SOLO ASSE"
+#    Verificato di nuovo il 09/09/2026 sui CSV grezzi del 08/08:
+#      cut -d, -f10,11,12 risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/
+#                         ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS.csv | sort -u
+#        InpStMult,InpStAtrPeriod,InpNearAtr
+#        3.5,9,1
+#    Undici passate, un solo asse (InpTF). Attorno alla cella viva non c'e'
+#    NESSUN vicino in spazio di parametri: solo lo stesso motore su altri TF.
+#
+#  LA CELLA CHE E' IN DISCUSSIONE (tick reali, la fonte primaria)
+#    risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_IS.csv  riga 5
+#    risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_OOS.csv riga 2
+#    InpTF=16385 (H1), StMult 3.5 / AtrP 9 / NearAtr 1.0 / TP_RR 3.0:
+#      IS  : profit  -102.96 | PF 0.92343 | DD 6.2975% | n 118
+#      OOS : profit  +622.65 | PF 1.43648 | DD 4.8184% | n 155
+#    La sedia 970916 e' stata SPENTA l'11/08/2026 sull'IS rosso
+#    (risultati_archivio/REFERTO_FUORILISTA.md r.15). n=118 e' SOTTO il
+#    pavimento dei 150: su quella finestra il merito era SOSPESO, non
+#    bocciato. L'OOS invece ha n=155, cioe' sopra il muro.
+#
+#  IL PUNTO DI QUESTO ROUND, in una riga
+#    Il 1.43648 e' UNA cella. La regola di casa e' CENTRO DELL'ALTOPIANO,
+#    MAI IL PICCO. Se i vicini reggono, il numero e' vero e la sedia
+#    rientra CON UNA RAGIONE. Se la cella sporge da sola, era rumore e
+#    si scrive. Questo file misura UNA SEZIONE di quell'altopiano.
+#
+#  ATTENZIONE, IL PUNTO PIU' IMPORTANTE DI TUTTO IL ROUND
+#  >>> IL NUMERO 1.43648 E' STATO PRODOTTO DA UN BINARIO CHE NON ESISTE PIU'.
+#    git log su mql5/Experts/ABTG_SupRev_DOW_H1_Ottimizzato.mq5:
+#      400a462  08/08/2026 06:54  <- i CSV di FASE 0 sono committati QUI
+#      3af47ed  08/08/2026 11:48  fix sizing: OrderCalcProfit al posto del
+#                                 tick value nudo, dentro LotByRisk()
+#      f8ebc32  19/08/2026 07:47  migrazione Guardian (fail-open nel tester)
+#      872dba8  08/09/2026 07:13  fix: pavimento del lotto minimo PRIMA di
+#                                 lotPend (versione 1.00 -> 1.01)
+#    I CSV del 08/08 sono usciti alle 06:54, cioe' QUASI CINQUE ORE PRIMA
+#    del primo dei tre cambi. Il binario di oggi ne ha tre di differenza.
+#    >>> Il fix del 08/09 puo' muovere ANCHE IL NUMERO DI OPERAZIONI, non
+#        solo i lotti: quando totLot*InpFirstFraction normalizza a zero, il
+#        vecchio codice piazzava comunque il pendente (secondo trade), il
+#        nuovo lo salta (mq5 righe 260-271, commento della correzione).
+#        Quindi n=118 / n=155 NON sono garantiti dal codice di oggi.
+#    >>> Il fix del 08/08 tocca LotByRisk: il messaggio di commit dice
+#        "sui simboli sani i due calcoli coincidono", ma su U30USD questo
+#        e' [NON MISURATO]. Se non coincidono, Profit e DD% si riscalano
+#        (il PF quasi no: e' invariante a un fattore di lotto uniforme).
+#    >>> CONSEGUENZA OPERATIVA, scritta prima: la sentinella S2 qui sotto
+#        NON e' un cancello di validita' del round. Se fallisce, il round
+#        resta leggibile (tutte le celle girano sullo STESSO binario) ma
+#        muore il confronto con l'archivio, e il referto deve dirlo forte.
+#        Questo corregge la formulazione della soglia T1 dei file gemelli
+#        A1_SUPREV_DOW_H1_01_trailonst.txt e 02_exitonflip.txt, che dice
+#        "se non riproduce -> FILE INVALIDO": scritta cosi' butterebbe un
+#        round per un cambio di codice DOCUMENTATO e voluto.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    S1: le due celle 784100 e 784150 devono differire di 0.00, o al
+#        massimo di 0.01 sul Profit con PF, Trades e DD IDENTICI (i 4
+#        gruppi su 949 dell'archivio che fanno cosi' sono PASS, non
+#        anomalie: MANOPOLE_INERTI_2026-09-09.md r.40).
+#        Se differiscono di piu' -> la macchina non e' deterministica e
+#        NESSUN numero di questo round vale. Stop.
+#    S2: mi aspetto, in ordine di fiducia decrescente
+#        - n IS e n OOS: 118 e 155, oppure LEGGERMENTE PIU' BASSI. Il fix
+#          del 08/09 puo' solo TOGLIERE pendenti, non aggiungerli. Attesa:
+#          n IS 100-118, n OOS 132-155. Un n PIU' ALTO di 118/155 e' un
+#          segnale che qualcos'altro e' cambiato, e va indagato.
+#        - PF IS e PF OOS: entro +-0.08 da 0.923 e 1.436. Il PF e'
+#          invariante a un riscalamento uniforme del lotto; si muove solo
+#          per i trade in cui il pavimento del lotto minimo morde.
+#        - Profit e DD%: NON HO UN'ATTESA STRETTA e non la invento. Sono
+#          le grandezze che un cambio di sizing riscala. Se il DD OOS
+#          esce fra 3.5% e 6.5% lo considero coerente; fuori da li' e'
+#          [DA SPIEGARE], non [BOCCIATO].
+#    Serve a una cosa sola: se esce un PF di 2.5 con DD 1%, il primo
+#    sospetto e' un baco, non una scoperta.
+#
+#  BANCO -- e la finestra e' quella del 08/08, per costruzione
+#    Modello 4 (TICK REALI). Deposito 10000. FrazioneIS 0.40.
+#    walkforward_generico.ps1 r.661:
+#      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#    Con 2024.09.26 -> 2026.06.30 sono 642 giorni, floor(642*0.40)=256,
+#    Meta = 2025.06.09. Quindi:
+#      IS  2024.09.26 - 2025.06.09   (8,5 mesi)
+#      OOS 2025.06.10 - 2026.06.30  (12,7 mesi)
+#    Sono ESATTAMENTE le finestre dichiarate in
+#    risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7. Verificate col conto,
+#    non ricordate. Se la riga di lancio cambia FrazioneIS o @FINOA, la
+#    sentinella S2 decade e questo file va riscritto.
+#    REGIME: 21 mesi di tick BCM sugli indici = UN SOLO REGIME (toro).
+#    Emendamento della Finestra regola C: NON soddisfatta, e non lo sara'
+#    alla fine di questo round. Dichiarato come buco, non come dettaglio.
+#
+#  COSA SI SCRIVE, in ogni caso
+#    S1 PASS + S2 PASS -> il 1.43648 e' il numero di OGGI. Si leggono b/c/d.
+#    S1 PASS + S2 FAIL -> si leggono b/c/d lo stesso, ma il referto apre
+#      dicendo: "il numero che ha riaperto questo candidato NON e' piu'
+#      riproducibile col binario di oggi, ecco quello nuovo". E la stessa
+#      riga va in REGISTRO_TEST.md.
+#    S1 FAIL -> non si legge niente e si indaga la macchina.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: copiata campo per campo dalla riga 2 del CSV d'archivio
+#     risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_OOS.csv
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=9
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=SRDOW123A
+# --- L'ASSE TECNICO, in fondo al file (vedi sotto)
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE, ed e' TECNICO (2 celle x 2 finestre = 4 passate).
+#     Due magic gemelli e VERGINI, verificati repo-wide il 09/09/2026:
+#       grep -rl "784100" . --exclude-dir=.git  -> 0 file
+#       grep -rl "784150" . --exclude-dir=.git  -> 0 file
+#     NON si riusa il 970916 della sedia spenta: un CSV di questo round
+#     non deve poter essere riletto al posto di uno del 08/08.
+#     Passo 50, come nel precedente di casa 772900/772950
+#     (report/P0_IBRETEST_NASUSD_2026-09-09.md r.29).
+InpMagic=784100||784100||50||784150||Y
+# ======================================================================

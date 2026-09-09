@@ -1,0 +1,381 @@
+# ======================================================================
+#  EA: ABTG_SupRev_DOW_H1_Ottimizzato
+#  R123b -- ALTOPIANO SupRev DOW H1 / cella 01_stmult
+#  U30USD H1 FISSO. Asse: InpStMult. AtrP 9 e NearAtr 1.0 PINNATI.
+#  Scritto il 09/09/2026. Criteri congelati PRIMA dei numeri.
+# ======================================================================
+#
+#  ORIGINE, e non e' un'opinione: report/SUPREV_DOW_H1_ALTOPIANO_2026-09-09.md
+#    "l'altopiano NON e' stato misurato, perche' quel round ha UN SOLO ASSE"
+#    Verificato di nuovo il 09/09/2026 sui CSV grezzi del 08/08:
+#      cut -d, -f10,11,12 risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/
+#                         ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS.csv | sort -u
+#        InpStMult,InpStAtrPeriod,InpNearAtr
+#        3.5,9,1
+#    Undici passate, un solo asse (InpTF). Attorno alla cella viva non c'e'
+#    NESSUN vicino in spazio di parametri: solo lo stesso motore su altri TF.
+#
+#  LA CELLA CHE E' IN DISCUSSIONE (tick reali, la fonte primaria)
+#    risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_IS.csv  riga 5
+#    risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_OOS.csv riga 2
+#    InpTF=16385 (H1), StMult 3.5 / AtrP 9 / NearAtr 1.0 / TP_RR 3.0:
+#      IS  : profit  -102.96 | PF 0.92343 | DD 6.2975% | n 118
+#      OOS : profit  +622.65 | PF 1.43648 | DD 4.8184% | n 155
+#    La sedia 970916 e' stata SPENTA l'11/08/2026 sull'IS rosso
+#    (risultati_archivio/REFERTO_FUORILISTA.md r.15). n=118 e' SOTTO il
+#    pavimento dei 150: su quella finestra il merito era SOSPESO, non
+#    bocciato. L'OOS invece ha n=155, cioe' sopra il muro.
+#
+#  IL PUNTO DI QUESTO ROUND, in una riga
+#    Il 1.43648 e' UNA cella. La regola di casa e' CENTRO DELL'ALTOPIANO,
+#    MAI IL PICCO. Se i vicini reggono, il numero e' vero e la sedia
+#    rientra CON UNA RAGIONE. Se la cella sporge da sola, era rumore e
+#    si scrive. Questo file misura UNA SEZIONE di quell'altopiano.
+#
+#  COSA QUESTO ROUND PERMETTE E NON PERMETTE DI CONCLUDERE
+#    Il round R123 e' fatto di TRE file, uno per asse, con gli altri due
+#    parametri PINNATI al valore della cella viva (regola di casa: una
+#    variabile per file prova, imposta da controlla_prova.py controllo 4).
+#      R123b -> InpStMult        (AtrP 9  e NearAtr 1.0 pinnati)
+#      R123c -> InpStAtrPeriod   (StMult 3.5 e NearAtr 1.0 pinnati)
+#      R123d -> InpNearAtr       (StMult 3.5 e AtrP 9 pinnati)
+#    >>> PERMETTE: di dire se la cella viva sta al centro di un tratto
+#        piatto LUNGO OGNI ASSE preso da solo (tre sezioni ortogonali
+#        passanti per il punto vivo).
+#    >>> NON PERMETTE: di dire niente sulla SUPERFICIE COMPLETA. Le celle
+#        diagonali (es. StMult 3.0 con AtrP 8) NON sono misurate qui, e
+#        l'archivio dice che le diagonali contano: nel censimento OHLC del
+#        26/07 la coppia StMult 3.5 / AtrP 10 fa PF 0.779 mentre 3.0 / 10
+#        fa 1.238 -- il comportamento sull'asse AtrP CAMBIA SEGNO a seconda
+#        dello StMult. Tre sezioni non sono una mappa: sono tre tagli.
+#    >>> E NON PROMUOVE NIENTE. Anche un altopiano perfetto qui dentro non
+#        rimette in campo la sedia 970916: la riaccensione e' una decisione
+#        di Claudio e, per la regola del 09/09, ogni allargamento si paga
+#        con una prova FUORI CAMPIONE o DI REGIME che questo round non ha.
+#
+#  QUELLO CHE C'ERA GIA' IN CASA -- scavato il 09/09/2026, ed e' molto
+#    L'archivio NON era vuoto su questi parametri. C'e' un censimento del
+#    26/07/2026 sullo STESSO simbolo, STESSO TF, STESSA finestra:
+#      backtest_pipeline/ini/valid_SupRevScr_U30USD_H1.ini
+#        Model=1 (OHLC M1, SCREENING) - FromDate 2024.01.01 - ToDate 2026.06.30
+#        InpStMult=2.5||2.5||0.5||3.5||Y   InpStAtrPeriod=8||8||1||10||Y
+#        InpTP_RR=2.0||2.0||0.5||3.0||Y
+#        -> risultati_archivio/SupRev_nuovi_indici/
+#           642b6b88-valid_SupRevScr_U30USD_H1.csv  (27 passate)
+#      backtest_pipeline/ini/valid_SupRevRT_U30USD_H1.ini
+#        Model=4 (TICK REALI) - stesse date - griglia ridotta ai vincitori
+#        -> .../valid_SupRevRT_U30USD_H1_realtick.csv  (8 passate)
+#    NOTA sulla finestra: le due .ini dichiarano FromDate 2024.01.01 ma lo
+#    storico BCM di U30USD parte dal 2024.09.26 (REFERTO_WEEKEND_FASE0.md,
+#    "sugli indici diceva 2024.01.01 e partiva dal 26/09/2024"). Che sia la
+#    stessa finestra e' CONTROLLATO, non assunto: la cella 3.5/9/3.0 a tick
+#    fa n=273 sul periodo intero, e 118 (IS) + 155 (OOS) = 273 ESATTO.
+#    NOTA sull'EA: quelle corse girarono ABTG_SupertrendReversal.mq5 (la
+#    base), non l'_Ottimizzato. Il diff degli input fra i due sorgenti e'
+#    stato fatto: differiscono SOLO nei default di InpTF/InpStMult/
+#    InpStAtrPeriod/InpTP_RR/InpComment/InpMagic (tutti PINNATI nelle .ini)
+#    piu' due input in piu' nella base, InpFridayClose/InpFridayCloseHour,
+#    default false = inerti. Tutti gli altri default COINCIDONO.
+#
+#    >>> COSA DICE QUEL CENSIMENTO, ed e' il motivo per cui l'attesa qui
+#        sotto e' scritta in numeri e non in aggettivi.
+#        OHLC, periodo intero, TP_RR 3.0, NearAtr 1, H1:
+#           StMult\AtrP        8         9        10
+#              2.5           0.868     1.084     1.221   (n 475/444/454)
+#              3.0           1.048     1.095     1.238   (n 367/349/306)
+#              3.5           1.015    *1.334*    0.779   (n 318/273/248)
+#        A tick reali (le 8 celle rifatte):
+#              3.0/9  1.040   3.0/10  1.081
+#              3.5/9 *1.195*  3.5/10  0.706
+#        >>> Sull'asse StAtrPeriod, a StMult 3.5, la cella viva ha gia'
+#            due vicini misurati e sono 1.015 (a 8) e 0.779 (a 10) in OHLC,
+#            0.706 (a 10) a tick reali. UN PASSO di periodo ATR fa cadere
+#            il PF di 0.49 punti a tick reali.
+#        >>> E il verso si INVERTE con lo StMult: a 2.5 e a 3.0 il PF SALE
+#            passando da AtrP 8 a 10; a 3.5 CROLLA. Questo e' rumore o e'
+#            struttura, non lo sappiamo -- ma e' il fatto da cui parte
+#            l'attesa dichiarata di questo file.
+#
+#  E QUELLO CHE NON C'ERA -- le caselle davvero LIBERE
+#    InpStAtrPeriod come ASSE in un file prova: ZERO occorrenze in tutto
+#      il repo (grep -rn "InpStAtrPeriod=.*||Y" backtest_pipeline/prove/).
+#      Esiste solo come sweep dentro una .ini del 26/07, mai con split.
+#    InpNearAtr come ASSE: ZERO occorrenze, e c'e' di piu' -- il valore 1
+#      e' l'UNICO mai girato. Verificato su tutti i CSV SupRev/
+#      SupertrendReversal dell'archivio (40+ file, ogni simbolo, ogni TF):
+#      la colonna InpNearAtr vale 1 dappertutto, senza eccezioni. E' una
+#      manopola VERGINE su TUTTA la famiglia, non solo su questo motore.
+#    InpStMult come asse: 8 file prova nel repo (R18, R21, R22, R3_*,
+#      ABTG_PivotSupertrendReversal), 7 su 8 con PASSO 0.5 -- ma MAI su
+#      ABTG_SupRev_DOW_H1_Ottimizzato, e mai con split IS/OOS su U30USD.
+#
+#  L'ASSE E IL PASSO -- perche' 2.5 / 3.0 / 3.5 / 4.0 / 4.5
+#    COSA FA IL PARAMETRO, letto nel sorgente (mq5 riga 373):
+#      double bUp = hl2 + InpStMult*atr[i];  bLo = hl2 - InpStMult*atr[i];
+#    E' la SEMILARGHEZZA della banda del Supertrend, in ATR. Tocca tre
+#    cose insieme: quanto spesso la linea gira (dir), quanto spesso una
+#    candela la tocca (il pattern d'ingresso, mq5 r.201-213), e dove
+#    finisce lo stop (mq5 r.245-248, sl = min(stLine, estremo) - buffer).
+#    PASSO 0.5 -> mezzo ATR di spostamento della linea. E' il passo di
+#      casa su questo parametro: 7 file prova su 8 nel repo usano 0.5
+#      (R18, R21, R22, R3_STREV_XAUUSD_H3, R3_SupRev_NAS_H1, ...), e
+#      R3_STREV_XAUUSD_H3.txt usa ESATTAMENTE 2.5||0.5||4.5.
+#      Un passo di 0.25 sarebbe il 7% della banda: sotto il rumore da
+#      barra a barra, rischio manopola inerte. Un passo di 1.0 salterebbe
+#      i vicini immediati, che sono proprio quello che si vuole leggere.
+#    CHE IL PASSO MORDA E' MISURATO, non sperato: nel censimento OHLC del
+#      26/07, ad AtrP 9, il numero di operazioni sul periodo intero passa
+#      da 444 (2.5) a 349 (3.0) a 273 (3.5). Un passo = -22% di campione.
+#    RANGE 2.5-4.5, centrato ESATTAMENTE sulla cella viva 3.5.
+#      In basso copre TUTTO il ventaglio che la famiglia SupRev usa
+#      davvero in campo: CAC H4 2.5, DAX H4 3.0, NAS H1 3.0, DAX H1 3.5,
+#      DOW H4 3.5 (REGISTRO_TEST.md r.168-170 e 402-404). La cella viva
+#      3.5 sta al BORDO ALTO di quel ventaglio -- ed e' un motivo in piu'
+#      per guardare cosa c'e' SOPRA, dove nessuno ha mai misurato niente.
+#      In alto 4.0 e 4.5 sono territorio [NON MISURATO] su questo simbolo.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- e derivata, non inventata
+#    La derivazione, in due passi, con le fonti:
+#    PASSO 1, correzione OHLC -> TICK. L'archivio ha OTTO celle misurate
+#      in tutti e due i modi sullo stesso simbolo, TF e finestra
+#      (642b6b88-valid_SupRevScr_U30USD_H1.csv contro
+#       valid_SupRevRT_U30USD_H1_realtick.csv). L'OHLC sovrastima il PF di:
+#         3.0/9/3.0  +0.055    3.0/10/3.0 +0.157
+#         3.5/9/3.0  +0.139    3.5/10/3.0 +0.073
+#         3.0/9/2.5  +0.054    3.0/10/2.5 +0.145
+#         3.5/9/2.5  +0.137    3.5/10/2.5 +0.080
+#      Banda misurata: da +0.054 a +0.157, mediana +0.106, su 8 coppie.
+#    PASSO 2, rapporto OOS/PERIODO-INTERO. Sulla cella viva a tick:
+#      PF OOS 1.43648 / PF periodo intero 1.19515 = 1.202.
+#      >>> Questo rapporto e' misurato su UNA cella sola. E' l'anello
+#          debole della catena e va detto: se le altre celle hanno
+#          un'asimmetria IS/OOS diversa, la stima sbaglia.
+#    RISULTATO, cella per cella (STIMA DERIVATA, non misura):
+#      StMult 2.5 -> OHLC 1.084, tick stimato 0.98 [0.93-1.03],
+#                    PF OOS atteso ~1.18  [1.11-1.24]   n OOS atteso ~252
+#      StMult 3.0 -> tick MISURATO 1.040,
+#                    PF OOS atteso ~1.25                n OOS atteso ~198
+#      StMult 3.5 -> MISURATO: PF OOS 1.43648, n OOS 155  (la cella viva)
+#      StMult 4.0 -> [NON MISURATO]                     n OOS atteso ~121
+#      StMult 4.5 -> [NON MISURATO]                     n OOS atteso ~94
+#      (gli n attesi vengono dalla proporzione del campione fra le due
+#       finestre, misurata sulla cella viva: 118/273 = 0.432 in IS e
+#       155/273 = 0.568 in OOS, e dal decadimento del campione col
+#       moltiplicatore misurato in archivio, ~x0.78 ogni +0.5)
+#    >>> SE IL 1.436 E' VERO mi aspetto 2.5, 3.0 e 3.5 tutte e tre sopra
+#        1.20 con n OOS sopra 150: A1 PASSA su questo asse.
+#    >>> SE ERA RUMORE mi aspetto 3.0 sotto 1.05 -- il che contraddirebbe
+#        il suo numero a tick di periodo intero (1.040 con l'IS rosso
+#        dentro) e sarebbe gia' di per se' una scoperta.
+#    >>> E UNA COSA LA DICO ADESSO PERCHE' NON POSSA SEMBRARE FURBA DOPO:
+#        4.0 e 4.5 sono attesi SOTTO le 150 operazioni in OOS. Per la
+#        soglia A2 non potranno mai contare A FAVORE dell'altopiano. Se
+#        tornano belli, sono [MERITO SOSPESO], punto. Se tornano sotto
+#        1.00, contano contro come pendenza. E' asimmetrico apposta.
+#    DD atteso: la cella viva fa 4.82% OOS e 6.30% IS. Sulle celle con PF
+#      sopra 1.10 mi aspetto DD OOS 3-8%; su quelle che crollano 6-14%
+#      (a periodo intero il DD a tick va da 9.09% a 13.30% sulle 8 celle
+#      misurate). Qualunque cella sopra 10.0% e' fuori dall'altopiano
+#      per la soglia A7, anche col PF bello.
+#
+#  LA REGOLA DI SELEZIONE, dichiarata INSIEME al numero (Emendamento A)
+#    Se un altopiano c'e', la cella che si porta avanti e' il CENTRO del
+#    tratto contiguo, MAI IL PICCO. Se il centro coincide con la cella
+#    viva 3.5 / 9 / 1.0 -> la cella viva e' confermata e non si tocca
+#    niente. Se il centro e' un'ALTRA cella -> si scrive, si dichiara, e
+#    quella cella va a una prova NUOVA fuori campione: non entra in campo
+#    da qui, perche' sarebbe scelta guardando l'OOS.
+#    Il PICCO non si sceglie MAI, nemmeno se e' bellissimo. In R70 i
+#    confronti fatti col picco si sono RIBALTATI quando sono stati rifatti
+#    con questa regola.
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI (valgono per tutti e tre gli assi)
+#    A1  ALTOPIANO (merito). Servono >= 3 CELLE CONTIGUE sullo stesso asse
+#        con, CIASCUNA: PF OOS >= 1.20  E  n OOS >= 150  E  DD OOS <= 10.0%
+#        E la cella viva (StMult 3.5 / AtrP 9 / NearAtr 1.0) DENTRO la terna.
+#        Tre e non due: due celle adiacenti sono un segmento, non un piano,
+#        ed e' la trappola scritta nella soglia T4 dei file A1 gemelli.
+#        1.20 e non 1.10: 1.10 e' il cancello di ammissione di un candidato
+#        (FASE 0 criterio 2); qui la domanda e' se il 1.436 REGGE, e una
+#        cella che scivola a 1.12 mentre la vicina fa 1.44 descrive una
+#        superficie in discesa, non un altopiano.
+#    A2  IL PAVIMENTO DEI 150 E' ASIMMETRICO, ed e' voluto. Una cella con
+#        n OOS < 150 NON PUO' MAI contare A FAVORE di A1 (Emendamento A: il
+#        merito sotto 150 e' sospeso). Puo' pero' contare CONTRO, e solo
+#        come fatto di FORMA della superficie: se una cella adiacente alla
+#        viva torna con PF OOS < 1.00, quella e' una pendenza misurata, e
+#        una pendenza non ha bisogno di 150 operazioni per essere una
+#        pendenza. L'asimmetria e' nella direzione prudente: puo' negare un
+#        altopiano, non puo' fabbricarne uno.
+#    A3  ANTI-ALTOPIANO-FINTO. Due celle contigue con n IDENTICO e PF
+#        identico alla QUARTA cifra NON sono due celle: sono una cella
+#        misurata due volte, cioe' un tratto di asse INERTE. Non contano
+#        per A1. (Il censimento del 09/09 ha trovato 874 CSV su 1960 con
+#        passate a esito identico: e' il modo piu' comune di credere di
+#        aver misurato un altopiano.)
+#    A4  PICCO. Se la cella viva fa PF OOS >= 1.20 e ENTRAMBE le vicine
+#        immediate dello stesso asse fanno PF OOS < 1.05, quell'asse
+#        dichiara PICCO. Un asse che dichiara PICCO annulla il verdetto di
+#        altopiano dell'INTERO round, anche se gli altri assi passano.
+#    A5  UN ASSE INERTE NON E' NE' UN SI' NE' UN NO. Se tutte le celle di
+#        un asse cadono sotto A3, quell'asse esce dal denominatore e va
+#        scritto come "manopola inerte, MISURATA" -- che e' un risultato,
+#        non un fallimento.
+#    A6  VERDETTO DI ROUND. "Altopiano" si scrive solo se A1 passa sulla
+#        MAGGIORANZA degli assi che si sono MOSSI e nessun asse ha
+#        dichiarato PICCO sotto A4. In ogni altro caso il verdetto e'
+#        "non c'e' una configurazione robusta", e si scrive cosi'.
+#    A7  RISCHIO, che vale a qualunque n (Emendamento B). Ogni cella con
+#        DD OOS > 10.0% o DD IS > 10.0% va segnalata come cella di rischio
+#        anche se il suo PF e' bello, e NON puo' entrare in un altopiano.
+#        Riferimento: la cella viva fa DD IS 6.30% e DD OOS 4.82%.
+#    A8  LA SCOPERTA CHE VARREBBE PIU' DEL ROUND, e la si dichiara ORA per
+#        non poterla spacciare dopo. Se una cella DIVERSA dalla viva torna
+#        con PF IS >= 1.10 E PF OOS >= 1.20 E n >= 150 in ENTRAMBE le
+#        finestre, allora l'11/08 la sedia e' stata spenta su una CELLA
+#        sbagliata, non su un MOTORE sbagliato. Va riportato in grassetto.
+#        MA NON PROMUOVE NIENTE: sarebbe una cella scelta guardando anche
+#        l'OOS, e va a una finestra nuova.
+#
+#  LE DUE SENTINELLE, e non sono la stessa cosa
+#    S1  DETERMINISMO (cancello G1). Vive nel file R123a_U30USD_00_gate:
+#        due celle gemelle sul magic (784100 e 784150) devono dare numeri
+#        IDENTICI a 1 centesimo di Profit. Precedente di casa: G1 passato
+#        949/949 (report/MANOPOLE_INERTI_2026-09-09.md r.40).
+#        S1 e' BLOCCANTE: se fallisce non si legge nient'altro, perche' il
+#        problema e' la macchina e non i parametri.
+#    S2  CONTINUITA' COL 08/08. La cella 3.5/9/1.0 dovrebbe ridare
+#        n IS 118 / PF IS 0.92343 / n OOS 155 / PF OOS 1.43648.
+#        S2 NON E' BLOCCANTE, per il motivo scritto sopra: fra i CSV del
+#        08/08 e oggi ci sono TRE commit sull'EA. Se S2 fallisce, il round
+#        si legge lo stesso e il nuovo numero della cella viva DIVENTA il
+#        riferimento -- ma allora il referto deve dire, prima di ogni altra
+#        cosa, che il 1.43648 agli atti non e' piu' il numero di questo
+#        motore. Profit e DD% possono muoversi anche con S2 "passata":
+#        sono le grandezze che un cambio di sizing riscala. n e PF sono le
+#        due da guardare.
+#
+#  ATTENZIONE, IL PUNTO PIU' IMPORTANTE DI TUTTO IL ROUND
+#  >>> IL NUMERO 1.43648 E' STATO PRODOTTO DA UN BINARIO CHE NON ESISTE PIU'.
+#    git log su mql5/Experts/ABTG_SupRev_DOW_H1_Ottimizzato.mq5:
+#      400a462  08/08/2026 06:54  <- i CSV di FASE 0 sono committati QUI
+#      3af47ed  08/08/2026 11:48  fix sizing: OrderCalcProfit al posto del
+#                                 tick value nudo, dentro LotByRisk()
+#      f8ebc32  19/08/2026 07:47  migrazione Guardian (fail-open nel tester)
+#      872dba8  08/09/2026 07:13  fix: pavimento del lotto minimo PRIMA di
+#                                 lotPend (versione 1.00 -> 1.01)
+#    I CSV del 08/08 sono usciti alle 06:54, cioe' QUASI CINQUE ORE PRIMA
+#    del primo dei tre cambi. Il binario di oggi ne ha tre di differenza.
+#    >>> Il fix del 08/09 puo' muovere ANCHE IL NUMERO DI OPERAZIONI, non
+#        solo i lotti: quando totLot*InpFirstFraction normalizza a zero, il
+#        vecchio codice piazzava comunque il pendente (secondo trade), il
+#        nuovo lo salta (mq5 righe 260-271, commento della correzione).
+#        Quindi n=118 / n=155 NON sono garantiti dal codice di oggi.
+#    >>> Il fix del 08/08 tocca LotByRisk: il messaggio di commit dice
+#        "sui simboli sani i due calcoli coincidono", ma su U30USD questo
+#        e' [NON MISURATO]. Se non coincidono, Profit e DD% si riscalano
+#        (il PF quasi no: e' invariante a un fattore di lotto uniforme).
+#    >>> CONSEGUENZA OPERATIVA, scritta prima: la sentinella S2 qui sotto
+#        NON e' un cancello di validita' del round. Se fallisce, il round
+#        resta leggibile (tutte le celle girano sullo STESSO binario) ma
+#        muore il confronto con l'archivio, e il referto deve dirlo forte.
+#        Questo corregge la formulazione della soglia T1 dei file gemelli
+#        A1_SUPREV_DOW_H1_01_trailonst.txt e 02_exitonflip.txt, che dice
+#        "se non riproduce -> FILE INVALIDO": scritta cosi' butterebbe un
+#        round per un cambio di codice DOCUMENTATO e voluto.
+#
+#  BANCO -- e la finestra e' quella del 08/08, per costruzione
+#    Modello 4 (TICK REALI). Deposito 10000. FrazioneIS 0.40.
+#    walkforward_generico.ps1 r.661:
+#      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#    Con 2024.09.26 -> 2026.06.30 sono 642 giorni, floor(642*0.40)=256,
+#    Meta = 2025.06.09. Quindi:
+#      IS  2024.09.26 - 2025.06.09   (8,5 mesi)
+#      OOS 2025.06.10 - 2026.06.30  (12,7 mesi)
+#    Sono ESATTAMENTE le finestre dichiarate in
+#    risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7. Verificate col conto,
+#    non ricordate. Se la riga di lancio cambia FrazioneIS o @FINOA, la
+#    sentinella S2 decade e questo file va riscritto.
+#    REGIME: 21 mesi di tick BCM sugli indici = UN SOLO REGIME (toro).
+#    Emendamento della Finestra regola C: NON soddisfatta, e non lo sara'
+#    alla fine di questo round. Dichiarato come buco, non come dettaglio.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - SUPERFICIE COMPLETA: [NON MISURATA] e non lo sara'. Tre sezioni
+#      ortogonali, zero celle diagonali. Vedi "cosa non permette".
+#    - PEGGIOR GIORNATA: [NON MISURATO] e NON PRODUCIBILE qui. Questo EA
+#      non scrive un CSV riga-per-operazione: la colonna non esiste nel CSV
+#      di ottimizzazione MT5. Restera' [NON MISURATO] anche dopo la corsa.
+#    - PROVA DI REGIME: assente. Un solo toro, 21 mesi. Regola C non
+#      soddisfatta: niente di quello che esce di qui e' promuovibile.
+#    - TAGLIA: si gira a rischio 1.0%, NON a 0.65%. E' una scelta: a 0.65%
+#      la sentinella S2 non sarebbe piu' confrontabile con l'archivio. La
+#      rimisura a 0.65% e' una domanda SEPARATA, in un file separato.
+#    - LATO SHORT DA SOLO: [NON MISURATO]. Qui gira L+S come la sedia
+#      viva. La regola dei due lati del 25/08 chiede il lato separato: e'
+#      un round suo, non questo.
+#    - GUARDIAN: InpUsaGuardian=true e' il default, ma nel Strategy Tester
+#      le sue GlobalVariable non esistono e la guardia lascia passare tutto
+#      (fail-open dichiarato nel sorgente, righe 34-42). I numeri restano
+#      confrontabili con quelli del 08/08.
+#    - InpNewsCurrencies NON e' pinnato di proposito: il pin di una stringa
+#      a valore VUOTO viene IGNORATO da MT5 (classe FiboH4,
+#      controlla_prova.py controllo 3). Il default compilato e' gia' la
+#      stringa vuota che serve.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: copiata campo per campo dalla riga 2 del CSV d'archivio
+#     risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_OOS.csv
+InpUsaGuardian=true
+InpTF=16385
+# InpStMult -> E' L'ASSE, in fondo al file.
+InpStAtrPeriod=9
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=SRDOW123B
+# MAGIC FISSO E VERGINE 784110 (verificato repo-wide il 09/09/2026:
+# grep -rl "784110" . --exclude-dir=.git -> 0 file).
+InpMagic=784110
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (5 celle x 2 finestre = 10 passate)
+#     2.5 / 3.0 / 3.5 / 4.0 / 4.5  -- centrato sulla cella viva 3.5.
+InpStMult=3.5||2.5||0.5||4.5||Y
+# ======================================================================
