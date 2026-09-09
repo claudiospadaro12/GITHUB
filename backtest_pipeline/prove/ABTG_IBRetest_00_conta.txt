@@ -116,7 +116,7 @@
 #
 #  >>> ATTESA CENTRALE: 0,20 - 0,32 operazioni per seduta su U30USD,
 #      cioe' ~90-140 operazioni nei 21 mesi.
-#      🔴 E LA CONSEGUENZA VA DETTA PRIMA, non dopo:
+#       E LA CONSEGUENZA VA DETTA PRIMA, non dopo:
 #      questo e' SOTTO il pavimento dei 150 per finestra
 #      dell'Emendamento A **su un simbolo solo**, ed e' anche sotto la
 #      quota di 0,33 op/giorno per simbolo. E' esattamente il caso
@@ -145,7 +145,7 @@
 #          tre simboli ci arrivano.
 #
 #  >>> LA SOGLIA DI DD, che stasera e' diventata LA soglia:
-#      🔴 DD (Equity DD %) > 10,0% -> BOCCIATO PER RISCHIO, subito.
+#       DD (Equity DD %) > 10,0% -> BOCCIATO PER RISCHIO, subito.
 #         Il numero non e' scelto da me: e' il muro totale tipico di
 #         una challenge prop, ed e' lo stesso metro con cui stasera
 #         e' caduto ABTG_LVNArbitro (19,35% IS / 11,76% OOS a DUE
@@ -153,13 +153,13 @@
 #         100k -- cioe' SUPERAVA il target -- ma avrebbe sfondato il
 #         muro PRIMA di arrivarci. Un profitto raggiunto dopo aver
 #         perso il conto non e' un profitto.
-#      🟠 DD fra 6,0% e 10,0% -> ALLARME, non bocciatura. Con ~120
+#       DD fra 6,0% e 10,0% -> ALLARME, non bocciatura. Con ~120
 #         operazioni a 0,65% di rischio, un cammino casuale produce
 #         gia' 6-7% di DD: in quella fascia il numero non distingue
 #         il motore dal rumore. Si prosegue, ma la griglia dovra'
 #         portare il DD giu', non il profitto su.
-#      🔴 Peggior Giornata % < -5,0% -> BOCCIATO (muro giornaliero).
-#         ⚠️ E si legge INSIEME al DD, mai da sola: su LVNArbitro la
+#       Peggior Giornata % < -5,0% -> BOCCIATO (muro giornaliero).
+#          E si legge INSIEME al DD, mai da sola: su LVNArbitro la
 #         peggior giornata era -2,80% (comodissima) mentre il DD
 #         totale sfondava. Non si muore di singola giornata: si muore
 #         di EROSIONE LUNGA.
@@ -171,10 +171,10 @@
 #      buffer), quindi piu' largo di uno stop ad ATR: stimo una mediana
 #      di 80-180 punti indice. MA UN'IPOTESI NON E' UNA MISURA, ed e'
 #      per questo che la colonna "Stop Mediano Punti" esiste.
-#      🔴 Se la mediana esce SOTTO 76 punti -> il motore vive DENTRO
+#       Se la mediana esce SOTTO 76 punti -> il motore vive DENTRO
 #         il costo su U30USD: si dichiara e si va a vedere D30EUR e
 #         NASUSD (frontiera 64-72), non si "aggiusta" il buffer.
-#      ⚠️ E si guarda "Stop Da Pivot" contro il totale dei trade: se il
+#       E si guarda "Stop Da Pivot" contro il totale dei trade: se il
 #         pivot confermato manca quasi sempre e lo stop viene dal
 #         ripiego (estremo del ritorno), allora "stop strutturale" e'
 #         un'etichetta e non un fatto -- ed era uno dei 9 punti su 10
