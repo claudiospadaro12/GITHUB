@@ -60,17 +60,37 @@ def leggi(path):
         return f.read()
 
 def controlla_ascii(path, dati):
-    fuori = [(i + 1, b) for i, b in enumerate(dati) if b > 127]
-    if fuori:
-        righe = set()
-        n = 1
-        for b in dati:
-            if b == 10:
-                n += 1
-            elif b > 127:
-                righe.add(n)
-        blocca("ASCII", "byte non-ASCII in un .ps1: Windows PowerShell 5.1 lo legge come ANSI e il parser esplode. Righe: " + ", ".join(str(x) for x in sorted(righe)[:10]), path)
-    else:
+    """CLAUDE.md distingue, e il cancello deve distinguere uguale:
+
+      "Le lettere accentate nei COMMENTI passano (vengono solo storpiate
+       a schermo), l'emoji dentro una STRINGA no."
+
+    Quindi: non-ASCII nel CODICE o dentro una stringa = BLOCCANTE (e' li'
+    che il parser di PowerShell 5.1 esplode con "Token imprevisto").
+    Non-ASCII in un COMMENTO = RILIEVO: viola la regola di casa dei .ps1
+    in ASCII puro e va ripulito, ma non rompe niente.
+    Correzione del 09/09/2026: prima erano tutti bloccanti, e la prima
+    passata su tutta la pipeline ha prodotto 27 "bloccanti" quasi tutti
+    su emoji dentro commenti d'intestazione. Un cancello che grida al
+    lupo si impara a ignorare.
+    """
+    testo = dati.decode("utf-8", errors="replace")
+    in_codice, in_commento = [], []
+    for i, riga in enumerate(testo.splitlines(), 1):
+        if not any(ord(c) > 127 for c in riga):
+            continue
+        # il '#' vale come inizio commento solo FUORI da una stringa
+        nudo = senza_stringhe(riga)
+        taglio = nudo.find("#")
+        if taglio >= 0 and not any(ord(c) > 127 for c in riga[:taglio]):
+            in_commento.append(i)
+        else:
+            in_codice.append(i)
+    if in_codice:
+        blocca("ASCII", "byte non-ASCII nel CODICE o dentro una stringa: PowerShell 5.1 legge i .ps1 come ANSI e il parser esplode. Righe: " + ", ".join(str(x) for x in in_codice[:10]), path)
+    if in_commento:
+        rileva("ASCII", "byte non-ASCII in COMMENTI (righe " + ", ".join(str(x) for x in in_commento[:8]) + "): non rompe il parser, ma viola la regola dei .ps1 in ASCII puro", path)
+    if not in_codice and not in_commento:
         passa("ASCII puro: " + os.path.basename(path))
 
 def righe_utili(testo):
@@ -92,8 +112,29 @@ def righe_utili(testo):
             if re.match(r"^[\"\']@", riga.strip()):
                 dentro_here = False
             continue
-        fuori.append((i, riga.split("#", 1)[0]))
+        fuori.append((i, senza_stringhe(riga.split("#", 1)[0])))
     return fuori
+
+
+def senza_stringhe(nudo):
+    """Toglie i LETTERALI DI STRINGA prima di cercare i costrutti pwsh-7.
+
+    CLASSE 167, trovata il 09/09/2026 dal controllo-preventivo su R123.
+    Il cancello dava 5 BLOCCANTI [PWSH7] '||' su walkforward_generico.ps1
+    -- il pezzo PIU' IMPORTANTE della pipeline -- e erano TUTTI FALSI:
+    sono i "||" del NOSTRO formato .ini dentro stringhe fra virgolette
+    (`"$($i.nome)=$($i.val)||$($i.val)||0||$($i.val)||N"`, r.570: la riga
+    che scrive ogni cella di ogni round -- se fosse davvero pwsh-7 non
+    avremmo un solo CSV in archivio).
+    Conseguenza vera e sgradevole: proprio per quei falsi positivi
+    walkforward_generico NON ERA MAI PASSATO DAL CANCELLO.
+
+    Nota dichiarata: e' una spogliatura APPROSSIMATA (non gestisce il
+    backtick di escape ne' le here-string, che sono gia' saltate a monte).
+    Sbaglia nel verso SICURO -- puo' nascondere codice dentro una stringa
+    mal chiusa, non puo' inventare un difetto che non c'e'.
+    """
+    return re.sub(r"'[^']*'", "''", re.sub(r'"[^"]*"', '""', nudo))
 
 def controlla_pwsh7(path, testo):
     trovati = []
@@ -112,6 +153,32 @@ def controlla_formati_net(path, testo):
         blocca("FORMATO", "formato .NET non valido (allineamento tipo Python): " + ", ".join(sorted(set(brutti))[:5]), path)
     else:
         passa("formati .NET: " + os.path.basename(path))
+
+def conta_argomenti(riga, pos_aperta):
+    """Quanti argomenti ha la chiamata che apre a `pos_aperta`?
+
+    Serve perche' `[double]::Parse($s, $INV)` E' CORRETTO: $INV e' la
+    nostra InvariantCulture, e cercare la parola "InvariantCulture" nella
+    riga produceva 22 falsi positivi su 22 (misurato il 09/09 sulla prima
+    passata su tutta la pipeline). Quello che conta non e' COME si chiama
+    la cultura: e' SE e' stata passata.
+    Ritorna None se la parentesi non si chiude sulla riga: una chiamata
+    spezzata non si giudica, si salta.
+    """
+    liv, argomenti, visto = 0, 1, False
+    for c in riga[pos_aperta:]:
+        if c == "(":
+            liv += 1
+        elif c == ")":
+            liv -= 1
+            if liv == 0:
+                return argomenti if visto else 0
+        elif c == "," and liv == 1:
+            argomenti += 1
+        elif liv == 1 and not c.isspace():
+            visto = True
+    return None
+
 
 def controlla_cultura(path, testo):
     """CORRETTO il 09/09/2026, dopo un FALSO POSITIVO su RIGA_DIAGNOSI_DAX.ps1.
@@ -139,9 +206,16 @@ def controlla_cultura(path, testo):
         # SOLO i tipi CON LA VIRGOLA: su un intero il separatore decimale non
         # esiste, quindi la cultura non lo puo' mordere. Segnalare [int]::TryParse
         # sarebbe il terzo falso positivo di fila su questo stesso controllo.
-        if re.search(r"\[(double|single|float|decimal)\]::(Try)?Parse\s*\(", nudo, re.I) \
-           and "InvariantCulture" not in nudo and "NumberStyles" not in nudo:
-            sospetti.append((i, nudo.strip()[:60]))
+        for m in re.finditer(r"\[(?:double|single|float|decimal)\]::(Try)?Parse\s*\(", nudo, re.I):
+            n_arg = conta_argomenti(nudo, m.end() - 1)
+            if n_arg is None:
+                continue                      # chiamata spezzata su piu' righe: non giudico
+            # Parse(x) = 1 argomento -> nessuna cultura passata.
+            # TryParse(x,[ref]y) = 2 argomenti -> nessuna cultura passata.
+            # Con un argomento in piu' la cultura c'e' (spesso e' $INV).
+            limite = 2 if m.group(1) else 1
+            if n_arg <= limite:
+                sospetti.append((i, nudo.strip()[:60]))
     if sospetti:
         rileva("CULTURA", "Parse/TryParse senza cultura invariante: " + " | ".join("r." + str(i) + " " + t for i, t in sospetti[:5]) + "  -> su VPS it-IT '2.0' diventa 20", path)
     else:

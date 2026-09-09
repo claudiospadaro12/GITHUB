@@ -68,7 +68,7 @@ if (-not (Test-Path $termRoot)) { Write-Host "Cartella MetaQuotes non trovata." 
 $out = New-Object System.Collections.ArrayList
 $trovate = 0
 
-Write-Host "=== LOG MT5 · filtro '$Filtro' · data $Data ===" -ForegroundColor Cyan
+Write-Host "=== LOG MT5 - filtro '$Filtro' - data $Data ===" -ForegroundColor Cyan
 if (-not $Tutto) { Write-Host "    finestra $Da - $A (ORA LOCALE del PC: sul VPS = ora italiana = server + 1h)" -ForegroundColor Gray }
 
 foreach ($dir in (Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue)) {

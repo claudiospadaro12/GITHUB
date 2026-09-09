@@ -271,4 +271,4 @@ $Inputs
 Write-Host ""
 Write-Host "=== FINITO === Zippa 'risultati_retest_fade' e caricamela." -ForegroundColor White
 Write-Host "    Riferimento gia' noto, stessa gestione: DAX breakout -78,78 (PF 0,994)" -ForegroundColor Gray
-Write-Host "    Nasdaq breakout -769,01 (PF 0,894) · Dow +3.882 (PF 1,371)." -ForegroundColor Gray
+Write-Host "    Nasdaq breakout -769,01 (PF 0,894) - Dow +3.882 (PF 1,371)." -ForegroundColor Gray

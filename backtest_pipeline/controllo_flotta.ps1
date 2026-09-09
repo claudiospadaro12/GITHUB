@@ -188,7 +188,7 @@ foreach ($s in ($perSym.Keys | Sort-Object)) {
 }
 if ($senzaRischio.Count -gt 0) {
   Write-Host ""
-  Write-Host ("    ⚠️ questa somma NON conta {0} EA accesi che non stampano CONFIG IN USO:" -f $senzaRischio.Count) -ForegroundColor Yellow
+  Write-Host ("    ATTENZIONE: questa somma NON conta {0} EA accesi che non stampano CONFIG IN USO:" -f $senzaRischio.Count) -ForegroundColor Yellow
   foreach ($x in $senzaRischio) { Write-Host ("       {0} ({1})" -f $x.ea, $x.simbolo) -ForegroundColor DarkYellow }
   Giallo "L'esposizione reale e' PIU' ALTA di quella stampata: $($senzaRischio.Count) EA non dichiarano il loro rischio nel log."
 }

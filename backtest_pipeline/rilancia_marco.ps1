@@ -43,4 +43,4 @@ Write-Host "Ottimizzo (real tick)..." -ForegroundColor Cyan
 (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$(Join-Path $Work "ini\$Ini.ini")`"" -PassThru).WaitForExit()
 if(Test-Path $old){Copy-Item $old -Destination (Join-Path $Results "$Ini`_$Sym.csv") -Force; Write-Host ("OK -> risultati_marco\{0}_{1}.csv" -f $Ini,$Sym) -ForegroundColor Green}
 else{Write-Host "(manca il CSV: MT5 aperto? o compilazione fallita)" -ForegroundColor Yellow}
-Write-Host "Mandami il CSV: se il baseline ridà ~PF 1.49 l'EA e' sano, poi accendiamo i filtri uno alla volta." -ForegroundColor White
+Write-Host "Mandami il CSV: se il baseline rida' ~PF 1.49 l'EA e' sano, poi accendiamo i filtri uno alla volta." -ForegroundColor White
