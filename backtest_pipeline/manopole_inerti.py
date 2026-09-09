@@ -168,6 +168,7 @@ def analizza_csv(path):
             k = tuple(r['inp'].get(o, '') for o in var if o != c)
             ctx[k].append(i)
         gr_conf = 0; gr_morso = 0; dpfs = []; dtr = []
+        gr_vivi = 0; gr_vivi_morso = 0     # gruppi con almeno una passata a >=30 trade
         for k, idxs in ctx.items():
             vv = {rows[i]['inp'].get(c, '') for i in idxs}
             if len(vv) < 2: continue
@@ -176,6 +177,9 @@ def analizza_csv(path):
             if len(ee) > 1: gr_morso += 1
             pfs = [rows[i]['pf'] for i in idxs]
             trs = [rows[i]['trades'] for i in idxs]
+            if max(trs) >= 30:
+                gr_vivi += 1
+                if len(ee) > 1: gr_vivi_morso += 1
             dpfs.append(max(pfs) - min(pfs)); dtr.append(max(trs) - min(trs))
         valori = sorted({r['inp'].get(c, '') for r in rows},
                         key=lambda x: (num(x) is None, num(x) if num(x) is not None else x))
@@ -184,6 +188,7 @@ def analizza_csv(path):
         if gr_conf > 0:
             dpfs.sort(); dtr.sort()
             rec.update(metrica='ceteris_paribus', gr_conf=gr_conf, gr_morso=gr_morso,
+                       gr_vivi=gr_vivi, gr_vivi_morso=gr_vivi_morso,
                        morso_pct=round(100.0 * gr_morso / gr_conf, 1),
                        dpf_med=round(dpfs[(len(dpfs)-1)//2], 4),
                        dpf_max=round(max(dpfs), 4),
@@ -198,7 +203,7 @@ def analizza_csv(path):
             ssb = sum(len(v)*((sum(v)/len(v))-mu)**2 for v in byv.values())
             eta = (ssb/sst) if sst > 0 else None
             # esiti distinti per valore della manopola (grezzo)
-            rec.update(metrica='eta2', gr_conf=0, gr_morso=None,
+            rec.update(metrica='eta2', gr_conf=0, gr_morso=None, gr_vivi=0, gr_vivi_morso=None,
                        morso_pct=None,
                        eta2=(None if eta is None else round(eta, 4)),
                        dpf_max=round(max(allpf)-min(allpf), 4))

@@ -76,6 +76,62 @@ Guardian 779002 e SlippageLogger sono utility: non tradano, non hanno contratto.
 > 6,54% qui sopra è lo stesso motore alla taglia ridotta: il margine viene
 > dalla taglia, non dal motore.
 
+### 🛑 CHIUSURA DELLA CONTRADDIZIONE C3 (09/09/2026) — **9,92% e 10,00% NON SONO IN CONFLITTO: SONO DUE MISURE DIVERSE**
+
+_Aperta da `report/CENSIMENTO_SCARTATI_PROSA_2026-09-09.md` §C3 e da
+`report/PERCHE_MUOIONO_2026-09-08.md` r.66-67 e r.77-80. **Chiusa senza
+lanciare niente**, confrontando i due referti campo per campo._
+
+| | **9,92%** | **10,00%** |
+|---|---|---|
+| fonte | `risultati_archivio/REFERTO_ROUND15_ORB_GESTIONE.md` r.14-17 | `risultati_archivio/R103_REFERTO_BLOCCO1_INDICI.md` r.12 |
+| data | **09/08/2026** (R15) | **24/08/2026** (R103, corsa 13:48→14:02) |
+| finestra | **solo OOS** (~12,6 mesi) | **21 mesi INTERI** (IS+OOS, 2024.09.26 → 2026.06.30) |
+| modello di barre | **tick reali** | **OHLC M1** |
+| deposito | **10.000 €** | **100.000 €** |
+| rischio simulato | **1,0%** — misurato direttamente | **0,3%** → DD misurato **3,00%**, poi **NORMALIZZATO ×3,33** |
+| `n` | **119** | **190** |
+| PF | 1,657 | 1,67 |
+
+🔎 **La prova che e' la STESSA cella e non due celle rivali: `71 + 119 = 190`.**
+L'IS di R15 fa **71** trade e l'OOS **119**; R103 gira la **stessa
+configurazione** sulla finestra intera e conta **esattamente 190**. **Non e' un
+conflitto: e' la stessa sedia guardata su una finestra piu' lunga, con un
+modello di barre piu' grezzo e con una taglia diversa riportata a 1% con una
+moltiplicazione.**
+
+**➡️ QUALE E' IL NUMERO DEL CONTRATTO — la risposta in tre righe, in ordine:**
+1. 🥇 **Il numero OPERATIVO, quello che si usa oggi sulla `770611` del conto
+   REALE 10105439, e' `6,5389%` OOS / `5,6530%` IS** — **R119 del 07/09/2026**,
+   perche' e' **l'unico misurato ALLA TAGLIA VIVA (0,65%)**, a tick, col
+   **preset del conto reale**. E' gia' la riga della tabella §2 qui sopra.
+2. 🥈 **Il contratto STORICO e' `9,92% a 1%` (R15)** — tick reali, misura
+   diretta, **col doppio asterisco** (passava il muro per 8 centesimi).
+3. 🥉 **Il `10,00%` di R103 e' un numero DERIVATO, non una misura a 1%**: viene
+   da 3,00% moltiplicato per 3,33, su barre OHLC. **Va citato come stima di
+   confronto fra motori** (e' la colonna normalizzata di una classifica), **mai
+   come il DD promesso della sedia**.
+
+**🔴 E la risposta a "dentro il muro o AL muro" e' che la domanda cambia con la
+taglia, ed e' l'unica cosa che conta:**
+- **a 1,0% — taglia che NON e' in campo** — la sedia sta **al muro da tutte e
+  tre le parti**: 9,92% (R15, tick) · 10,00% (R103, derivato) · e **10,34%
+  SOPRA il muro** sotto slippage assunto (`REFERTO_R118_PAVIMENTO_STOP.md`).
+  **Tre misure indipendenti nella stessa fascia: non e' rumore, e' il posto
+  dove sta il motore.**
+- **a 0,65% — la taglia VERA sul conto reale** — sta a **6,54%**, cioe' **3,46
+  punti sotto il muro**. ✅ **Dentro.**
+- 👉 Quindi: **la sedia e' DENTRO il muro, e ci sta per la TAGLIA, non per il
+  motore.** Alzarla a 1% la porta **al** muro o **oltre**. Questa frase era
+  gia' in questo file e nel `PIANO_PROP`: la chiusura di C3 non la cambia, **la
+  rende una misura invece che un'avvertenza**.
+- ⚠️ **Resta il limite dichiarato e non chiuso da nessuno dei tre numeri**: il
+  **merito e' SOSPESO** (n 119 e 71, sotto 150) e **21 mesi sono UN SOLO
+  REGIME (toro)**. E lo slippaggio vero sul conto che paga e' **`[NON
+  MISURATO]`** (`SlippageLogger`: **0 deal**, `PIANO_PROP.md` I1/M37).
+
+📄 Verbale: `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C3.
+
 ---
 
 ## 3. 🛡️ CONTO 100K DEMO — 50504263 (istanza `-V3`, dry-run FTMO 2-Step) — 5 SEDIE

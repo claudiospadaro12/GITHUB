@@ -610,6 +610,38 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
 - **Corse** (G1PAOLO, VWAPREV, FVGRET): nessuna da' una proposta. VWAPREV/FVGRET
   sono D30EUR M15 (bassi TF indici): VWAPREV campione sottile+OOS perde, FVGRET
   DD 42,9% (bocciato rischio).
+
+> ### 🛑 RETTIFICA DEL 09/09/2026 — IL "DD 42,9%" DI `FVGRET` E' **RITIRATO**
+> _Il numero qui sopra **resta scritto** (non si cancella un numero storico:
+> si dichiara ritirato, con la data e il motivo). **Ma NON si puo' piu'
+> citare in nessuna direzione.**_
+>
+> **Motivo — ricerca esaustiva, e non ha trovato niente.** Scandite **tutte
+> le revisioni di tutti i commit** del repo (`git ls-tree -r` su ogni commit
+> di `--all`): **nessun percorso contenente `fvg`/`FVG` e' mai stato un
+> risultato.** Le uniche 12 tracce che esistono, oggi e nella storia, sono:
+> EA (`mql5/Experts/ABTG_FvgRetest.mq5`), tesi (`FVG_TESI.md`), dossier di
+> caccia + 3 sorgenti Pine, **file prova** (`prove/PASSO0_FVGRET_01_long.txt`,
+> `_02_short.txt`, `ABTG_FvgRetest.txt`), **riga di lancio**
+> (`righe/RIGA_PASSO0_FVGRET.ps1` + pagina) e referto di **preparazione**
+> (`prove/REFERTO_PREPARAZIONE_KSQFVG.md`). 🔴 **Zero CSV, zero log, zero
+> referto di risultato, nessuna cartella in `risultati_archivio/`.** Il
+> referto che la riga di lancio avrebbe prodotto — `REFERTO_PASSO0_FVGRET` —
+> **non e' mai esistito in nessun commit.**
+> - 🔎 **Controprova nello stesso periodo**: delle tre corse citate nella
+>   stessa frase, **VWAPREV ha i suoi risultati agli atti**
+>   (`risultati_archivio/vwaprevert/`) e G1PAOLO ha i suoi file prova.
+>   **FVGRET no.** Non e' un archivio incompleto: e' un archivio che per gli
+>   altri due ha funzionato.
+> - 🔎 **Il commit che ha scritto questa riga** (`dab6f0b`, 29/08/2026
+>   12:14 UTC) tocca **un solo file: `HANDOFF.md`**, `74 insertions`. Nessun
+>   risultato e' entrato nel repo con lui.
+>
+> **Verdetto: `ABTG_FvgRetest` (magic 775501) NON E' MORTO — e' `NON ANCORA
+> MISURATO`**, e torna **in coda all'imbuto**. Coerente con i tre documenti
+> recenti che gia' lo dicevano: `report/GIACIMENTO_DI_CASA_2026-09-03.md`
+> r.71 · `report/CORSIA_DEMO_CANDIDATI.md` r.290 · `report/CORSIA_DEMO_CANDIDATI_v2.md`
+> r.240. 📄 Verbale: `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C1.
 - **32 Pine esterni valutati → 0 candidati nuovi.** Tutti dominati (EMA-cross→HAM,
   BB-MR→Bulge, struttura→HH&LL) o chiusi (ORB/breakout) o red-flag (3 recovery/
   griglia: 2 pyramiding + 1 rebuy; 2 licenza CC-NC). **2 mattoncini archiviati**:
@@ -634,6 +666,12 @@ fonte. Killer noto: il costo (~1bp slippage uccide la versione ingenua).
   UN solo toro). L'edge indici vero vive nell'**APERTURA/RETEST** (DAX Apertura
   vince in forward), non nei fade. Prossimo candidato fade gia' in porting citato
   da R109: **VWAP Mean Reversion** con SL strutturale (= il pezzo che mancava).
+  > 🛑 **RETTIFICA 09/09/2026**: **`FVGRET` va tolto da questa lettura
+  > d'insieme.** La lane fade M15 indici resta giudicata da **R109 +
+  > VWAPREV**, che hanno numeri agli atti; `FVGRET` **non e' mai girato**
+  > (vedi la rettifica in §"3 corse lette", sopra). Chi cita "anche il FVG
+  > ha fallito nel fade" cita **una terza gamba che non esiste**: il
+  > campione della lettura e' **due**, non tre.
 
 ### 🧵 FILI APERTI (decisioni/lavori)
 - **HH&LL** (struttura pivot, LonesomeTheBlue+ABTG): l'unico motore NUOVO del
@@ -1808,6 +1846,49 @@ _NB: sul demo gira TUTTA la flotta (~50 EA, anche i "morti") per osservazione fi
 1. 🔄 **EMA200**: scan OHLC H4 (in corso) + H1 → poi tick reali sui vincitori.
 2. ⏳ **Tick reali mancanti**: SupRev IBEX (E35EUR) H1; GoldenCross H1 sui top OHLC (Oro/USDJPY/GBPUSD); SupRev non-indici H4 (XAU/CHFJPY/GBPJPY/AUDUSD).
 3. ✅ **CODA FASCIA B ESEGUITA (notte 10-11/08, 48/48 lavori)** — referto completo in `risultati_archivio/REFERTO_CODA_FASCIA_B.md`. Capitoli CHIUSI: Nightly 0/8 (il posto non se l'è guadagnato), FiboH4_Multi 0/8, SupertrendInvert (non opera: 0-2 trade), WOL (profitti da spread). **Sorpresa: PTE** — bocciata a casa sua (oro), passa i criteri congelati su **Dow H1 (altopiano BE 0-1, 43 trade OOS, PF 1,32), GBPUSD H1 (51 trade, PF 1,45), USDJPY (12 celle su 16)** + DAX H1 con riserve. SuperWave: Dow H2 (61 trade, PF 1,73) e GBPUSD H2 (63 trade, PF 2,09). ⚠️ Righe H3 PTE = pattern regime (IS rosso/OOS verde), non contarle. **Prossimo: R23 per-trade dei 5 candidati** (magic vergini) → dd_portafoglio → eventuale vivaio, decisione di Claudio.
+
+   > ### 🛑 RETTIFICA DEL 09/09/2026 — DUE DEI QUATTRO "CAPITOLI CHIUSI" NON SONO CHIUSI
+   > _Le righe qui sopra restano com'erano. Ma **due dei quattro "0/8" non
+   > sono otto misure**, e i CSV in archivio lo dimostrano riga per riga._
+   >
+   > 🌙 **`Nightly 0/8` → il verdetto vale su TRE simboli, non otto.** Contati
+   > oggi sui file `risultati_prove/ABTG_Nightly/*.csv` (FASE 0, commit
+   > `400a462` del 08/08), colonna `Trades`:
+   > | simbolo | IS (n) | OOS (n) | stato |
+   > |---|---:|---:|---|
+   > | EURUSD | 106 | 164 | ✅ misurato (PF 1,049 / 0,861) |
+   > | GBPUSD | 96 | 163 | ✅ misurato (PF 0,586 / 1,040) |
+   > | USDCHF | 81 | 131 | ✅ misurato (PF 0,863 / 0,970) |
+   > | **AUDUSD** | **0** | **0** | 🔴 **MAI MISURATO** |
+   > | **USDJPY** | **0** | **0** | 🔴 **MAI MISURATO** |
+   > | **XAUUSD** | **0** | **0** | 🔴 **MAI MISURATO** |
+   > | **XAGUSD** | **0** | **4** | 🔴 **MAI MISURATO** |
+   > | **D30EUR** | **0** | **0** | 🔴 **MAI MISURATO** |
+   > | **U30USD** | **0** | **0** | 🔴 **MAI MISURATO** |
+   >
+   > 🔴 **Sei simboli su nove non hanno un solo trade**, e il 09/09 e' la
+   > prima volta che vengono contati tutti. ⚠️ **La rettifica del 23/08 in
+   > `REGISTRO_TEST.md` r.444-447 ne aveva nominati SOLO TRE** (U30USD,
+   > D30EUR, XAUUSD) con la causa `InpMaxNightVolPips` contro
+   > `ATR(H1)/PipSize()` su indici/oro — che spiega indici e metalli, **ma
+   > NON spiega AUDUSD e USDJPY**, che sono forex e sono a zero lo stesso.
+   > 👉 **Causa di AUDUSD/USDJPY = `[NON MISURATO]`.**
+   > ➡️ **`ABTG_Nightly` torna in coda all'imbuto su AUDUSD, USDJPY, XAUUSD,
+   > XAGUSD, D30EUR, U30USD come `NON ANCORA MISURATO`.** Il verdetto
+   > negativo **regge** su EURUSD/GBPUSD/USDCHF.
+   >
+   > 📐 **`FiboH4_Multi 0/8` → e' UNA configurazione contata otto volte** (gia'
+   > scritto in `REGISTRO_TEST.md` §2-bis del 21/08, **qui mancava**), e i CSV
+   > lo confermano al centesimo: **7 file IS su 8** danno `n=72` con profit da
+   > **−384,56 a −394,13**, e **7 file OOS su 8** danno `n=82` con profit da
+   > **+116,17 a +118,68** — cioe' lo **stesso** paniere di default, perche'
+   > `InpSymbols` era pinnato **vuoto** e MT5 ignora un pin di stringa vuoto.
+   > L'unico simbolo davvero distinto e' **XAUUSD** (IS −536,71 `n=67` /
+   > −677,70 `n=77`; OOS **+299,89 PF 1,281** `n=70`). ➡️ Capitolo **NON
+   > chiuso**: `ABTG_FiboH4_Multi` torna in coda come `NON ANCORA MISURATO`
+   > sulle 8 coppie; **R93 non e' mai girato**.
+   >
+   > 📄 Verbale: `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C5 e §C9.
 4. ❓ **SupertrendInvert tick reali** — da ritrovare sul PC (non in archivio).
 5. 🟢 **VPS — PULIZIA IN CORSO (via libera di Claudio 10/08 sera)**: checklist completa in `report/PULIZIA_VPS_10-08.md` — 15 voci Tier 1 (bocciati con referto: ORB corso, ORB_Fibo, Nightly, MaxMin EURUSD, GoldenCross ×5, PTE, WOL, SupertrendInvert, PostNews ×2, SupRev CAC, doppioni STREV, EMA200 base ×6, HARSI), Tier 2 da verificare, whitelist squadra+vivaio. Prima di staccare: chiudere le posizioni aperte dei morti (incluso il gruppo di controllo oro del 04/08 → annotare esito). La ricompilazione coi log del filtro (5-bis) resta per un momento calmo, NON stasera.
 6. ✅ **ALTA VELOCITA' — CAPITOLO CHIUSO IN GIORNATA (11/08, referto:

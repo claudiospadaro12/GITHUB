@@ -408,6 +408,45 @@ _SupertrendReversal (il motore che generalizza) su Dow/Stoxx50/CAC/FTSE/Nikkei, 
 - **Dow H1:** positivo (PF 1.20, 273tr) ma DD ~10% → secondario/opzionale.
 - Il SupRev ora ha edge REAL-TICK confermato su: Oro, DAX (H1/H4), Nasdaq (H1), Dow (H4/H1), CAC (H4). **Motore che generalizza, dimostrato.**
 
+> ### 🛑 REVOCA DEL 30/07/2026, SCRITTA QUI IL 09/09/2026 (arrivava con 41 giorni di ritardo)
+> _I numeri qui sopra **restano**: sono veri e riproducibili. Cambia il
+> **verdetto**. Fino a oggi questo registro diceva **"CONFERMATA"** e **non
+> portava la revoca**: chi apriva solo `REGISTRO_TEST.md` credeva che Dow H4
+> fosse un keeper. **Non lo e' piu' dal 30/07.**_
+>
+> 🔴 **`ABTG_SupRev_DOW_H4_Ottimizzato` (970914) e `ABTG_SupRev_CAC_H4_Ottimizzato`
+> (970915): PROMOZIONI REVOCATE — "illusione OHLC".**
+> Revoca gia' agli atti in `risultati_archivio/CLASSIFICHE.md` §2
+> (Dow H4 **PFmed 0,79**, DD 3,3, 56 tr, *"❌ CROLLA (illusione OHLC)"*) e in
+> `FLOTTA_ATTIVA.md` §"SCARTATI (backtest) ma tenuti in osservazione"
+> (Dow H4 *"illusione OHLC (RT 0.79)"* · CAC H4 *"overfit (RT 0.96)"*).
+>
+> ✅ **Perche' 2,77 e 0,79 non si contraddicono — verificato sui CSV grezzi
+> il 09/09, non ripreso dalla prosa:**
+> - Il **2,77** e' la **CELLA MIGLIORE** di uno sweep **a finestra unica,
+>   senza split**: `risultati_archivio/SupRev_nuovi_indici/valid_SupRevRT_U30USD_H4_realtick.csv`,
+>   **8 celle**, PF da **0,487 a 2,768**; la cella 2,76794 ha **DD 4,0022 ·
+>   n 79** — **coincide al centesimo con la riga della tabella qui sopra**.
+>   La **mediana** di quello stesso sweep e' **1,772**.
+> - Lo **0,79** e' un **PF MEDIANO**, cioe' un altro oggetto. Il ricalcolo
+>   indipendente del 09/09 (`risultati_archivio/CENSIMENTO_PF_TUTTI_2026-09-09.csv`,
+>   riga `SupRev,DOW,H4,Ottimizzato_U30USD`) legge sullo sweep **con split**
+>   `risultati_prove/ABTG_SupRev_DOW_H4_Ottimizzato/`: **PFmed IS 0,741 ·
+>   PFmed OOS 0,921** (10 celle per finestra) contro **PFmax 4,928 / 2,324**.
+>   ⚠️ **Il valore esatto "0,79 · 56 trade" di `CLASSIFICHE.md` NON e'
+>   riproducibile da nessun CSV oggi in repo** (il piu' vicino e' OOS n=57
+>   PF 0,930): lo marco **[NON RIPRODOTTO]**. **La sostanza pero' regge da
+>   tre misure indipendenti: la mediana sta sotto 1, la cella migliore sta a
+>   2,77. Un keeper si giudica sulla mediana.**
+>
+> 📌 **Regola che questa riga lascia in eredita': un PF va sempre scritto con
+> l'aggettivo davanti — "PF della cella migliore" o "PF mediano". Senza
+> l'aggettivo il numero non vuol dire niente**, ed e' esattamente cosi' che
+> una promozione revocata e' sopravvissuta 41 giorni in questo registro.
+> ➡️ Il Dow H1 (970916, PF 1.20 · DD 9,8% · 273 tr) **non e' toccato da questa
+> revoca**: era gia' *"secondario/opzionale"*.
+> 📄 Verbale: `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C2.
+
 ---
 
 ## MaxMinNotte — rottura range notturno all'apertura europea (26.07.26, real-tick)
@@ -446,6 +485,16 @@ toccano questo registro — il resto sta nel referto, non si duplica:
   con `ATR(H1)/PipSize()`, e su indici/oro `PipSize()=_Point` → sempre ≥45.
   **Su quei mercati il fade non e' stato bocciato: non e' stato misurato.**
   Il verdetto negativo regge su EURUSD/GBPUSD/USDCHF (~160 trade a testa).
+  > 🛑 **ESTENSIONE DELLA RETTIFICA — 09/09/2026: i simboli non misurati sono
+  > SEI, non tre.** Contati oggi sui CSV (`risultati_prove/ABTG_Nightly/*.csv`,
+  > commit `400a462`), colonna `Trades`: **AUDUSD 0/0 · USDJPY 0/0 · XAUUSD
+  > 0/0 · XAGUSD 0/4 · D30EUR 0/0 · U30USD 0/0**. Hanno un campione vero
+  > **solo** EURUSD (106/164), GBPUSD (96/163) e USDCHF (81/131).
+  > 🔴 **E la causa del 23/08 non basta**: `PipSize()=_Point` spiega indici e
+  > metalli, **non spiega AUDUSD e USDJPY**, che sono forex e sono a zero lo
+  > stesso → causa `[NON MISURATO]`. ➡️ Il "0/8" e' un verdetto su **TRE**
+  > mercati; gli altri sei tornano in coda all'imbuto come **NON ANCORA
+  > MISURATI**. 📄 `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C5.
 - ✅ Il **BREAKOUT** del box (questa famiglia) e' confermato dal PDF e dalla
   misura di casa (91,1% delle notti rompe un lato, `NOTTE_ORO.md`).
 - 🆕 Unica proposta uscita: **BREAKIN del box notturno** (falsa rottura →
@@ -805,6 +854,67 @@ sta li', non si duplica.
 - **NON ritestare con altre griglie** (seconda caccia 19/08). Alternative gia'
   in vivaio, stessa missione frequenza: LondonFx (RR 1,875, bozza congelata)
   e Sonda dell'Orologio (pronta dal 28/08, mai girata).
+
+> ### 🛑 RETTIFICA DEL 09/09/2026 — IL VERDETTO SCENDE DA **"MORTO"** A **"NON ANCORA MISURATO"**
+> _I dodici numeri qui sopra **restano**: sono buoni, sono riproducibili e
+> costano minuti. Cambia il **verdetto**, e cambia per due motivi che con
+> l'accusa originale **non c'entrano**._
+>
+> #### ✅ Prima, la buona notizia: l'accusa di metodo e' FALSA, e va detto
+> `report/RIPESCAGGIO_FREQUENZA_2026-09-08.md` §R5 sostiene che il win rate
+> **62-70%** sia *"aggiunto DOPO aver visto i numeri"*, violando la regola di
+> casa. 🔎 **Controllato sui file e sugli orari: non e' andata cosi'.** Il
+> file prova `prove/M0PB_FREQUENZA_M5.txt` §F4-bis **congela prima della
+> corsa** sia la soglia **RR ≥ 0,70** sia la **tabella del win rate**
+> (*"RR 0,36 → 79,0% | 0,50 → 71,7% | 0,73 → 62,2% | 1,00 → 53,8%"*), sotto
+> l'intestazione **"CRITERI DI ACCETTAZIONE (CONGELATI IL 31/08 PRIMA DI OGNI
+> NUMERO)"**. Cronologia dai commit: prova+riga `2c4b466` **15:08 UTC** e
+> `4e1cdf8` **15:31 UTC**; corsa **19:35**; referto `8ee2392` **18:27 UTC**.
+> 👉 **I criteri erano congelati ore prima. La casa ha fatto il suo lavoro.**
+> L'unico pezzo davvero non congelato e' l'inciso editoriale *"la zona che in
+> casa non ha mai pagato"* — che e' un **commento**, non un cancello, e non
+> compare in nessuna delle 12 celle di verdetto.
+>
+> #### 🔴 Ma il verdetto scende lo stesso, per DUE motivi migliori
+> 1. **`F1` e' stato applicato PER LATO, e quell'unita' non e' piu' quella di
+>    casa.** La firma del **07/09** (`report/FIRME_2026-09-07.md`, H13;
+>    `CLAUDE.md` §PAVIMENTO DI FREQUENZA) sposta il pavimento di **1,00
+>    op/giorno** dalla **singola sedia** alla **FAMIGLIA**. Con l'unita' nuova,
+>    e usando **i numeri del referto stesso** (r.35-40): M5 sui **3 indici, due
+>    lati** = **2,957 op/giorno**; le 5 celle che passano H8 = **1,516**;
+>    NASUSD M5 due lati da solo = **0,992**. 👉 **`F1: 0/12` era il cancello
+>    che uccideva 12 celle su 12, ed e' l'unico decaduto per firma.** E
+>    `CLAUDE.md` e' esplicito: le esclusioni motivate **solo** dalla frequenza
+>    *"tornano in coda all'imbuto, **mai in campo in automatico**"*.
+> 2. **`H8` come FIRMATO non e' mai stato misurato.** La FIRMA 2 del 31/08 dice
+>    testualmente *"**E ≥ 0.075R misurata A TICK**"*. Il passo 0 ha usato una
+>    **delega dichiarata** — `RR = mediana(take)/mediana(stop)` su passata
+>    open-prices — che il file prova ammette apertamente. E' onesto ed e'
+>    congelato prima, **ma un rapporto di mediane non e' un'attesa**, e la
+>    corsa a tick che la firma richiede **non e' mai stata lanciata**
+>    (*"Nessuna corsa a tick va lanciata"*). 👉 **`E` = `[NON MISURATO]`.** E
+>    perfino sulla delega **5 celle su 12 PASSANO** (0,712-0,743).
+>
+> #### 🪦 E il CERTIFICATO DI MORTE (regola del 09/09) non e' compilabile
+> Servono cinque voci; M0PB ne ha **due**: ✅ TF cambiato (M5 **e** M15) · ✅
+> simboli gemelli (3 indici × 2 lati). Mancano: 🔴 **PF** (la sonda e' un
+> contatore puro, **zero ordini**) · 🔴 **n e DD** (nessun trade simulato) ·
+> 🔴 **gestione dell'uscita mai messa ad asse** (lo stop e' rimasto **fisso a
+> 2,75×ATR** in tutte e 12 le celle — ed e' *proprio quello* che fa cadere
+> l'RR, perche' lo stop e' strutturalmente piu' largo del take).
+> ➡️ **Verdetto: `NON ANCORA MISURATO`. Torna in coda all'imbuto.**
+>
+> #### 🎯 Cosa servirebbe per giudicarlo con criteri congelati prima
+> **Congelare PRIMA di lanciare**, in un file prova nuovo: **(a)** il pavimento
+> di frequenza dichiarato **per FAMIGLIA** (H13), non per lato; **(b)** `E ≥
+> 0,075R` **misurata a tick** — cioe' un EA con ordini veri, non una sonda —
+> perche' e' il cancello **come firmato**; **(c)** almeno **un asse sulla
+> gestione dell'uscita** (il moltiplicatore dello stop e/o un take
+> strutturale), **dichiarato come asse e non come recupero**, cosi' che non
+> violi la seconda caccia del 19/08; **(d)** le due finestre con **n ≥ 150**
+> per lato o la rinuncia esplicita al giudizio di MERITO (valvola R59).
+> ⚠️ **Nulla di questo dice che M0PB funzioni. Dice che non lo sappiamo.**
+> 📄 Verbale: `report/CONTRADDIZIONI_CHIUSE_2026-09-09.md` §C8.
 
 ## RSI+EMA V8 (Pine anonimo, incollato in chat 01-02/09) — NON PROMOSSO, CONFERMATO DA MISURA, 03/09/2026
 - **Verdetto: il filtro RSI toglie solo il 9-13% degli incroci EMA(5/20)**
