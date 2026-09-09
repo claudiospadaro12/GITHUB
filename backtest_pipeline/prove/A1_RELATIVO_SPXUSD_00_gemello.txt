@@ -1,0 +1,147 @@
+# ==========================================================================
+#  EA: ABTG_Relativo
+#  A1-04 -- RELATIVO sul TERZO SIMBOLO: SPXUSD con metro U30USD.
+#  E' la gamba GEMELLA mai provata, ed e' l'unica delle tre vie che cambia
+#  l'aritmetica del muro dei 150 su questo motore.
+#  Scritto il 09/09/2026 -- report/RIAPERTURA_A1_2026-09-09.md.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  PERCHE' ESISTE QUESTO FILE -- l'aritmetica, non l'ottimismo
+#    RELATIVO NASUSD e' fermo su A6 (n IS 87 / n OOS 154 contro 150 in
+#    ENTRAMBE) e il progetto ha GIA' misurato che A6 su quella gamba NON E'
+#    RAGGIUNGIBILE: 0.525 op/giorno feriale, 567 feriali necessari, 503
+#    disponibili dal pavimento tick, mancano 64 (~3 mesi), data di
+#    autosoddisfazione 27/11/2026.
+#    Fonte: backtest_pipeline/REGISTRO_TEST.md par. "A6 NON E' RAGGIUNGIBILE
+#    SU QUESTA GAMBA" (righe 1554-1578).
+#    Le tre vie possibili, e perche' due sono chiuse:
+#      - FINESTRA PIU' LUNGA: il pavimento dei tick BCM sugli indici e'
+#        MISURATO al 2024.09.26 e il broker NON HA il resto
+#        (REFERTO_SONDA_STORICO_17-08.md). R117BIS sposta @FINOA al
+#        2026.08.31 e compra ~2 mesi = ~23 operazioni: utile, ma non
+#        risolve nulla, e il suo stesso registro lo dichiara.
+#      - TF PIU' BASSO: si e' gia' a M5. Sotto c'e' M1, e lo stop di questo
+#        motore e' 2.75 x ATR(TF): scendere di TF ACCORCIA lo stop.
+#        Il pavimento di lavoro C3 su NASUSD e' 64-72 punti indice
+#        (40 x spread 1.6-1.8). Lo stop attuale in punti indice e'
+#        [NON MISURATO]; a M1 sarebbe di sicuro PIU' PICCOLO.
+#        >>> Via dichiarata ESCLUSA PER COSTO, con il numero accanto, in
+#            attesa che qualcuno misuri lo stop in punti indice a M5.
+#      - SIMBOLI GEMELLI: e' l'unica strada che aggiunge operazioni SUBITO
+#        e che, per la firma del 07/09, conta sul pavimento di FAMIGLIA.
+#
+#  PERCHE' SPXUSD E NON UN ALTRO, e perche' NON e' una riapertura del D30EUR
+#    La gamba D30EUR e' BOCCIATA PER RISCHIO (DD OOS 25.01%, peggior
+#    giornata -5.20%: due muri prop insieme) e NON si riapre, mai, per
+#    nessun motivo (REGISTRO_TEST.md par. "R117 RELATIVO D30EUR").
+#    Ma il suo stesso certificato dichiara PERCHE' era la gamba peggiore
+#    gia' PRIMA dei numeri: la finestra operativa 14:30-22:00 SERVER e'
+#    la seduta cash USA, e "dalle 17 server in poi il DAX e' fuori dal suo
+#    cash". Cioe': quel test faceva operare un simbolo EUROPEO negli orari
+#    AMERICANI. Non e' un argomento per riaprirlo. E' un argomento per dire
+#    che un gemello con la SEDUTA GIUSTA non e' lo stesso test.
+#    SPXUSD ha: la stessa seduta cash del metro U30USD, lo stesso orologio,
+#    tick BCM dal 2024.09.26 con verdetto COMPLETO
+#    (REFERTO_SONDA_STORICO_17-08.md r.46), ed e' gia' un simbolo di casa
+#    (ci gira ABTG_EMA200). Cambia UNA cosa sola: il simbolo della gamba.
+#
+#  >>> DUE PRE-CONDIZIONI BLOCCANTI, DA MISURARE PRIMA DELLA CORSA <<<
+#    P1  InpPuntiPerIndice su SPXUSD. Il 100.0 e' MISURATO sui TRE indici
+#        D30EUR/U30USD/NASUSD (ABTG_Relativo.mq5 r.392 "MISURATO = 100 sui
+#        tre indici"); su SPXUSD e' [NON MISURATO]. Va letto dal simbolo
+#        (digits e point) PRIMA di lanciare, come e' stato fatto per D30EUR
+#        il 31/08 (REFERTO_BREAKIN_2026-08-31.md). Se non e' 100, il valore
+#        pinnato qui sotto va corretto e il file rimandato al controllo.
+#        >>> Con la conversione sbagliata i lotti sono sbagliati e ogni
+#            numero di rischio di questa corsa e' spazzatura.
+#    P2  SPREAD SPXUSD: [NON MISURATO]. SPREAD_FLOTTA_MISURA_2026-09-03.md
+#        ha SOLO NASUSD (1.6-1.8), U30USD (1.9-2.0) e D30EUR (1.6-1.7).
+#        Finche' manca, il cancello C3 su questa gamba NON E' COMPILABILE
+#        e va dichiarato come buco nel referto, non aggirato.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Riferimento MISURATO sulla gamba NASUSD, stessa identica cella, stessa
+#    finestra, stesso rischio, tick reali (REGISTRO_TEST.md par. R117):
+#      IS  n=87  PF 0.754
+#      OOS n=154 PF 1.189 | E +0.063R | DD 8.40% | pegg.gio -2.12%
+#      frequenza 0.525 op/giorno feriale
+#    Mi aspetto su SPXUSD, e lo scrivo PRIMA:
+#      n totale (IS+OOS) fra 180 e 320
+#      PF OOS fra 0.85 e 1.30
+#      DD OOS <= 12%
+#    >>> Il segno NON e' assunto. La famiglia ha gia' una gamba morta su
+#        due: che la terza sia verde e' una possibilita', non una previsione.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    R1  DD > 10.0% in una QUALUNQUE delle due finestre -> BOCCIATA PER
+#        RISCHIO, esattamente come la gamba D30EUR. Non si ritocca, non si
+#        riprova con un'altra finestra: un DD e' un fatto accaduto e vale a
+#        qualunque n (Emendamento B, 16/08).
+#    R2  peggior giornata < -5.0% -> idem, spegnimento del capitolo.
+#    R3  PF OOS < 0.90 -> il motore non generalizza al terzo simbolo. Il
+#        capitolo "gemelli del RELATIVO" si CHIUDE, e si scrive col numero.
+#    R4  n totale < 150 -> la gamba non aiuta la famiglia a raggiungere il
+#        pavimento di 1.00 op/giorno: si dichiara e NON si accende niente.
+#    R5  CANCELLO G1 (determinismo): le passate 774640 e 774641 devono
+#        essere IDENTICHE AL CENTESIMO. Se no, nessun numero si legge.
+#    R6  A7 (collaudo del porto): trade sotto 60 secondi < 25%. Sopra,
+#        il file e' invalido (il motore starebbe leggendo il metro male).
+#
+#  COSA RISPONDE QUESTO ROUND, E COSA NO
+#    RISPONDE a: "il RELATIVO e' un motore o e' una coincidenza su un
+#    simbolo?". Due gambe su tre erano gia' misurate e discordi (NASUSD
+#    positiva OOS, D30EUR morta): la terza rompe il pareggio.
+#    E RISPONDE all'aritmetica: se SPXUSD tiene, la FAMIGLIA RELATIVO
+#    (NASUSD + SPXUSD) fa ~1.05 op/giorno [DERIVATA: 0.525 x 2, cioe'
+#    assumendo la STESSA frequenza sul gemello -- assunzione DICHIARATA e
+#    non misurata] e centra il pavimento firmato il 07/09.
+#    NON RISPONDE a: il merito. Anche con n=300 di famiglia, il muro dei
+#    150 e' PER FINESTRA e PER GAMBA. Il verdetto atteso resta
+#    MERITO SOSPESO, ed e' scritto PRIMA.
+#    NON tocca: la sedia demo 774690 su NASUSD, nessun preset, nessun EA.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40
+#  (le stesse condizioni di R117: e' l'unico modo di confrontare le gambe).
+@SIMBOLO  SPXUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a prove/RELATIVO_R117_NAS.txt, campo per campo.
+#     Cambia UNA cosa in tutto il file: @SIMBOLO. Il metro resta U30USD.
+InpSimboloMetro=U30USD
+InpModoSpread=0
+InpModoZScore=0
+InpFinestraN=40
+InpSogliaIngressoSigma=1.35
+InpSogliaUscitaSigma=0.05
+InpOraInizioServer=14
+InpMinInizioServer=30
+InpOraFineServer=22
+InpMinFineServer=0
+InpAtrSL=2.75
+InpBarreMaxTenuta=120
+InpRiskPercent=0.65
+InpMaxTradesPerDay=5
+InpLato=0
+InpAtrPeriod=14
+InpAtrModoRma=false
+InpSlippagePts=10
+InpMaxSpreadPts=0
+InpModoSonda=false
+InpSaltaGiorniSpaiati=false
+InpWarmupBarre=300
+# >>> PRE-CONDIZIONE P1: da CONFERMARE sul simbolo prima della corsa.
+InpPuntiPerIndice=100.0
+InpScriviCsv=true
+InpVerbose=true
+InpAutoTest=true
+InpTag=RELATIVOSPX
+#
+# --- L'UNICO ASSE: TECNICO, gemelli sul magic = cancello G1 di determinismo.
+#     774640/774641 verificati VERGINI repo-wide il 09/09/2026
+#     (grep -rn --exclude-dir=.git -> 0 occorrenze). Blocco 7746xx, coerente
+#     con 774601 D30EUR / 774602 NASUSD.
+InpMagic=774640||774640||1||774641||Y
+# ==========================================================================

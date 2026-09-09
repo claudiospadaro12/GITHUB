@@ -1,0 +1,154 @@
+# ==========================================================================
+#  EA: ABTG_DaxReEntry
+#  A1-05 -- DAX REENTRY, LATO LONG: LA DISCESA DI TF A M1.
+#  E' l'unico dei quattro candidati A1 in cui scendere di TF NON peggiora la
+#  frontiera del costo -- e nessuno l'aveva ancora guardato.
+#  Scritto il 09/09/2026 -- report/RIAPERTURA_A1_2026-09-09.md.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  PERCHE' ESISTE QUESTO FILE -- il fatto tecnico che sblocca la casella TF
+#    Certificato di morte, casella 5 "TF cambiato": per DaxReEntry e' NO.
+#    Tutto cio' che esiste sta su D30EUR M5, una corsa sola
+#    (prove/ABTG_DaxReEntry.txt @PERIODO M5; risultati_archivio/
+#    REFERTO_DAXREENTRY_2026-08-31.md).
+#    La regola di casa dice: si preferiscono i TF PIU' BASSI (piu'
+#    operazioni), ma la frontiera del costo C3 (stop >= 40 x spread) non si
+#    sposta -- e su M5 gli indici la sfondano quasi sempre, perche' lo stop
+#    di un motore intraday e' di solito una funzione della BARRA (ATR, minimi
+#    a N barre) e scendere di TF lo accorcia.
+#    >>> SU QUESTO MOTORE NON E' COSI', ed e' leggibile nel sorgente:
+#        ABTG_DaxReEntry.mq5 r.81
+#          input double InpSlFracRange = 0.454;
+#          // SL = estremo del range +/- (range * questa frazione)
+#        Lo stop e' una frazione del RANGE MATTUTINO 08:35-11:05 SERVER.
+#        Il range e' lo stesso identico intervallo di orologio a M1 e a M5.
+#        SCENDERE DI TF NON ACCORCIA LO STOP.
+#    >>> Quindi la via "TF piu' basso" qui e' aperta, mentre sugli altri tre
+#        candidati A1 va dichiarata esclusa PER COSTO. Questo e' il motivo
+#        per cui il file esiste.
+#
+#  COSA CAMBIA DAVVERO SCENDENDO A M1
+#    Cambia UNA cosa: la granularita' della CONFERMA del reclaim ("reclaim
+#    confermato a barra chiusa"). A M1 la riconquista si conferma prima e in
+#    giornate in cui la barra M5 non la stampava affatto.
+#    Il tetto giornaliero resta 2 (1 per lato): la frequenza non puo'
+#    esplodere, puo' solo riempire giorni oggi vuoti. Con n=92 LONG su ~459
+#    giorni feriali (0.20 op/giorno) contro un tetto di 1 LONG al giorno,
+#    lo spazio c'e': il cap NON e' cio' che ferma questo motore.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Riferimento MISURATO su M5, STESSA cella, stessa finestra, stesso
+#    rischio, tick reali (REFERTO_DAXREENTRY_2026-08-31.md, riga break=20 LONG):
+#      n = 92 | PF = 1.159 | DD = 4.6% | peggior giornata -0.68% | profit +4368
+#      (lato SHORT misurato e MORTO: PF 0.38-0.54, DD 8.8-23% -> qui long-only)
+#    Mi aspetto su M1, e lo scrivo PRIMA:
+#      n fra 92 e 180
+#      PF fra 0.95 e 1.25  -- IN CALO, non in salita: piu' segnali vuol dire
+#        segnali mediamente peggiori, ed e' l'esito NORMALE di una discesa di
+#        TF. Un PF che SALE oltre 1.30 con n che raddoppia sarebbe un
+#        risultato SOSPETTO, non bello, e andrebbe capito prima che festeggiato.
+#      DD fra 4% e 8% a rischio 0.65%
+#    >>> Il round riesce anche se il PF scende, purche' resti sopra 1.00 e il
+#        campione cresca: e' campione quello che ci manca, non decimali di PF.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    D1  n(M1) <= 92 (cioe' <= n di M5) -> la discesa di TF NON produce
+#        campione su questo motore. Capitolo TF CHIUSO, con il numero, e si
+#        passa ai gemelli (F40EUR / E50EUR, stessa seduta europea).
+#    D2  PF(M1) < 1.00 -> il campione in piu' e' campione peggiore. Si torna
+#        a M5 e il capitolo TF si chiude.
+#    D3  DD > 8.0% -> RISCHIO. Si chiude. (Su M5 era 4.6%: il margine e' ampio
+#        e questa soglia e' generosa di proposito, ma e' un tetto vero.)
+#    D4  peggior giornata < -4.0% -> si chiude (su M5 era -0.68%).
+#    D5  CANCELLO G1 (determinismo): le passate 769320 e 769321 devono essere
+#        IDENTICHE AL CENTESIMO. Se no, nessun numero si legge.
+#    D6  OVERNIGHT: chiusure oltre il flat delle 16:30 server sopra il 5%
+#        delle posizioni -> FILE INVALIDO (vincolo duro del mandato, riscritto
+#        il 31/08 proprio su questo EA).
+#
+#  >>> RISCHIO DI BANCO DICHIARATO PRIMA, non scoperto dopo <<<
+#    D7  IL TETTO DELLE BARRE DEL TESTER. CLAUDE.md (regola 25/08) dichiara
+#        un tetto di ~100.000 barre per corsa, che "limita M15 a ~4 anni e M5
+#        a ~1,3 anni". Questa corsa e' M1 su 21 mesi: se il tetto morde, il
+#        tester TRONCA la finestra e i numeri NON sono confrontabili con
+#        quelli di M5.
+#        >>> CONTROLLO OBBLIGATORIO PRIMA DI LEGGERE QUALUNQUE NUMERO: la data
+#            della prima operazione nel per-trade CSV deve stare a ridosso del
+#            2024.09.26. Se parte molto dopo, il FILE E' INVALIDO e la corsa
+#            va spezzata in tranche (e dichiarata cosi').
+#            E' un controllo, non una speranza.
+#
+#  FRONTIERA DEL COSTO C3, dichiarata PRIMA e col suo buco in chiaro
+#    Spread D30EUR MISURATO: 1.6-1.7 punti indice in seduta cash EU, P95 2.7
+#    all'ora 8 (SPREAD_FLOTTA_MISURA_2026-09-03.md r.19).
+#    Pavimento di lavoro C3 per D30EUR: 64-68 punti indice; pavimento duro
+#    (13.3x): ~22 punti indice.
+#    Take mediano LONG MISURATO: +76.8 punti indice su n=71 (referto 31/08)
+#    = 46.5x lo spread 1.65 -> SOPRA il pavimento di lavoro.
+#    >>> MA la frontiera e' definita sullo STOP, e lo STOP in punti indice di
+#        questo motore e' [NON MISURATO]. Stima DERIVATA dal take mediano e
+#        dall'RR di progetto 2.2:1 dichiarato nel file prova del 31/08:
+#        76.8 / 2.2 = ~35 punti indice = ~21x lo spread -> SOPRA il pavimento
+#        DURO, SOTTO quello DI LAVORO.
+#        E' una STIMA, non una misura, e va scritta cosi' nel referto.
+#        Questa corsa scrive il per-trade: lo stop vero si legge da li'.
+#    >>> E il punto che conta: qualunque sia quel numero, a M1 e' LO STESSO
+#        di M5, perche' lo stop e' figlio del range e non della barra.
+#
+#  LONG-ONLY, E SCRITTO NEL FILE
+#    InpSide=0. Lo short e' MISURATO e MORTO (PF 0.38-0.54, DD 8.8-23% su
+#    break 20-40, referto 31/08). La regola dei due lati (25/08) e' gia'
+#    soddisfatta da quella misura: i due lati SONO stati misurati, e uno e'
+#    stato scartato con il numero accanto. Non si rimisura un morto.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 100000. UNA TRANCHE:
+#  FrazioneIS 1.0 dalla riga di lancio, come il 31/08 -- la gamba OOS esce
+#  degenere ed e' ATTESA vuota: NON si rilancia. Serve perche' i numeri
+#  siano confrontabili con quelli di M5, che sono a una tranche.
+@SIMBOLO  D30EUR
+@PERIODO  M1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica alla riga break=20 LONG del referto 31/08, tranne
+#     il lato (fissato a LONG) e il TF (che e' la domanda di questo file).
+#     Nota: nel file prova del 31/08 l'asse InpSlFracRange era DICHIARATO
+#     degenere ("di FATTO a UN valore, 0.454: con step 0.300 il secondo
+#     passo 0.754 supera lo stop 0.700"). Qui e' pinnato al suo unico
+#     valore vero. E' una manopola che NON e' mai stata girata davvero, e
+#     va detto: non e' "provata", e' ferma.
+InpBreakPts=20.0
+InpSlFracRange=0.454
+InpSide=0
+# FUSO SERVER BCM (IT-1): range 08:35-11:05, trading 11:05-14:15, flat 16:30.
+# Il 9 e il 17 sono le ore ITALIANE: se compaiono, il file e' sbagliato.
+InpRangeStartHour=8
+InpRangeStartMin=35
+InpRangeEndHour=11
+InpRangeEndMin=5
+InpTradeStartHour=11
+InpTradeStartMin=5
+InpTradeEndHour=14
+InpTradeEndMin=15
+InpCloseHour=16
+InpCloseMin=30
+# Pavimento SL obbligatorio (R109): 500 punti MT5 = 5 punti indice, MAI 0.
+InpMinStopPts=500
+InpRiskPercent=0.65
+InpMaxTradesPerDay=2
+# Conversione D30EUR: MISURATA il 31/08 (digits 2, mediane in scala)
+# -- risultati_archivio/REFERTO_BREAKIN_2026-08-31.md.
+InpMT5PerPuntoIndice=100
+InpComment=REENTM1
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+#
+# --- L'UNICO ASSE: TECNICO, gemelli sul magic = cancello G1 di determinismo.
+#     769320/769321 verificati VERGINI repo-wide il 09/09/2026
+#     (grep -rn --exclude-dir=.git -> 0 occorrenze). Blocco 7693xx, lo stesso
+#     del round del 31/08 (769300), ma numeri NUOVI: un CSV di questa corsa
+#     non deve poter essere riletto al posto di uno vecchio.
+InpMagic=769320||769320||1||769321||Y
+# ==========================================================================

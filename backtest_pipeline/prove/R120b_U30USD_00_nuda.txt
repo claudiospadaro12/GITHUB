@@ -44,12 +44,12 @@
 #
 #  PERCHE' SERVONO TUTTE E QUATTRO, E NON DUE. I due meccanismi
 #  INTERAGISCONO nel sorgente, e si legge riga per riga:
-#    ABTG_SupertrendReversal.mq5:187-192
+#    ABTG_SuperWave_DOW_H1_Ottimizzato.mq5:176-181
 #        if(HasPosition()) { ... if(InpExitOnFlip && flip) { CloseAll
 #        Positions(); CancelPendings(); return; } return; }
-#        // con posizione aperta non cerco nuovi ingressi
-#    ABTG_SupertrendReversal.mq5:319 e 357-360
-#        if(InpTrailOnST && SupertrendSeries(3,dir,line)) ... PositionModify
+#        // r.181: con posizione aperta non cerco nuovi ingressi
+#    ABTG_SuperWave_DOW_H1_Ottimizzato.mq5:299  (armamento del trailing) e r.341 (PositionModify)
+#        if(InpTrailOnST && SupertrendSeries(3,dir,line)) ...
 #  Il trailing e il flip chiudono le posizioni, e finche' una posizione e'
 #  aperta L'INGRESSO E' BLOCCATO. Spegnerne uno LIBERA LO SLOT prima o
 #  dopo, quindi cambia QUALI trade il motore prende.

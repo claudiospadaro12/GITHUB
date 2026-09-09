@@ -1,0 +1,170 @@
+# ==========================================================================
+#  EA: ABTG_SupRev_DOW_H1_Ottimizzato
+#  A1-02 -- SupRev DOW H1 (magic vivo 970916, sedia SPENTA l'11/08/2026):
+#  LA GESTIONE DELL'USCITA MESSA AD ASSE PER LA PRIMA VOLTA. Asse: InpTrailOnST.
+#  Scritto il 09/09/2026 -- report/RIAPERTURA_A1_2026-09-09.md.
+#  Criteri congelati PRIMA dei numeri.
+# ==========================================================================
+#
+#  PERCHE' ESISTE QUESTO FILE -- la casella NO piu' rumorosa dell'archivio
+#    report/AUDIT_USCITE_2026-09-09.md par. 1, riga 3, testuale:
+#      "Sulle sedie che oggi stanno in campo su oro, argento, Nikkei,
+#       Nasdaq H1, DAX H4 -- la famiglia Supertrend -- la gestione
+#       dell'uscita NON E' MAI STATA MESSA AD ASSE NEMMENO UNA VOLTA.
+#       InpTrailOnST (15 EA), InpExitOnFlip (14 EA) e InpFirstFraction
+#       (14 EA) hanno ZERO occorrenze come asse in tutto il repo."
+#    Riverificato il 09/09 su tutte le 628 prove:
+#      grep -rn -E "^(InpTrailOnST|InpExitOnFlip|InpFirstFraction)=.*\|\|Y"
+#      backtest_pipeline/prove/  ->  ZERO RIGHE.
+#    Questa non e' una casella provata: e' una casella LIBERA.
+#
+#  E PERCHE' PROPRIO SU QUESTO MOTORE
+#    E' l'unico dei quattro candidati A1 con il MERITO MISURABILE a pieno
+#    titolo (n=273 sull'intera finestra) e con i CSV GREZZI in archivio.
+#    E l'unica cosa che lo ha mai spento e' UN NUMERO SOLO: l'IS rosso.
+#    Fonte primaria (tick reali, IS 26/09/2024-09/06/2025,
+#    OOS 10/06/2025-30/06/2026, rischio 1%, deposito 10000):
+#      risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_IS.csv  r.5
+#      risultati_prove/ABTG_SupRev_DOW_H1_Ottimizzato/..._U30USD_OOS.csv r.2
+#      (finestre dichiarate in risultati_archivio/REFERTO_WEEKEND_FASE0.md)
+#      cella InpTF=16385 (H1), StMult 3.5 / AtrP 9 / TP_RR 3.0:
+#        IS  : profit -102.96 | PF 0.92343 | DD 6.2975% | n 118
+#        OOS : profit +622.65 | PF 1.43648 | DD 4.8184% | n 155
+#    >>> L'OOS ha n=155, cioe' SOPRA il muro dei 150: su quella finestra il
+#        merito NON e' sospeso, ed e' PF 1.44 con DD 4.8%.
+#    >>> Verdetto dell'11/08 (REFERTO_FUORILISTA.md r.15): "IS -103 / OOS
+#        +623 -- IS ROSSO -> SPEGNERE". La sedia e' stata spenta da flat.
+#    >>> Quel verdetto e' stato dato su un motore la cui USCITA nessuno
+#        aveva mai toccato. E' esattamente il caso che il certificato di
+#        morte del 09/09 chiama "NON ANCORA MISURATO", non "morto".
+#
+#  QUANTO PUO' VALERE -- ordine di grandezza MISURATO, su un'ALTRA famiglia
+#    report/AUDIT_USCITE_2026-09-09.md par. 2.1 (R46, 14/08, tick, OOS,
+#    stesso identico ingresso, sei uscite diverse, DAX D30EUR):
+#      PF da 0.88 a 1.49 e DD da 22.50% a 6.27% cambiando SOLO l'uscita.
+#    >>> E' un ordine di grandezza, NON una previsione su questo motore.
+#        Su SupRev il numero e' [NON MISURATO] e questo file non assume
+#        nessun segno: puo' benissimo peggiorare. Serve a saperlo.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Cella InpTrailOnST=1 (il default, quello gia' misurato): DEVE
+#    riprodurre i numeri qui sopra. E' la SENTINELLA di continuita'.
+#    Cella InpTrailOnST=0 (mai misurata da nessuno): mi aspetto
+#      - MENO uscite anticipate -> n uguale o quasi uguale (l'ingresso non
+#        cambia: il trailing agisce dopo). Attesa: n IS 110-125, n OOS 148-165.
+#      - DD IN SALITA, non in discesa: senza trailing la posizione respira
+#        di piu'. Attesa: DD IS 6-10%, DD OOS 4.5-8%.
+#      - PF: ignoto per segno. Attesa larga e dichiarata: PF IS 0.75-1.15,
+#        PF OOS 1.10-1.75.
+#    Scriverlo prima serve a una cosa sola: se esce un PF IS di 1.6 e un DD
+#    dell'1%, il primo sospetto e' un baco, non una scoperta.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    T1  SENTINELLA. La cella InpTrailOnST=1 deve riprodurre l'archivio con
+#        tolleranza: n entro +-2%, PF entro +-0.05, su ENTRAMBE le finestre.
+#        (Stessa tolleranza delle sentinelle NyRetest del 31/08.)
+#        Se non riproduce -> FILE INVALIDO, non si legge nient'altro:
+#        significa che il banco o l'EA non sono piu' quelli del 08/08.
+#    T2  Si giudica la FINESTRA PEGGIORE (l'IS). L'ipotesi "l'uscita
+#        spiegava l'IS rosso" si tiene in piedi SOLO se, con InpTrailOnST=0:
+#          PF IS  >= 1.00   E   PF OOS >= 1.20   E   DD IS <= 8.0%
+#        Tutte e tre. Due su tre = non tenuta.
+#    T3  RISCHIO, che vale a qualunque n: il DD non deve salire, in nessuna
+#        delle due finestre, oltre il valore attuale + 1.0 punto
+#        (soglia IS 7.30%, soglia OOS 5.82%). Sopra: l'uscita nuova compra
+#        PF vendendo rischio, e non e' il commercio che ci serve.
+#    T4  DUE CELLE NON SONO UN ALTOPIANO. Anche se T2 passa, questo file
+#        NON PROMUOVE NIENTE: apre il file 03 (InpExitOnFlip) e, se anche
+#        quello si muove, la terna InpTP_RR. Scritto PRIMA, contro la
+#        tentazione di incoronare la cella vincente di un asse a due valori.
+#    T5  Se entrambe le celle danno n e PF identici al centesimo, l'asse
+#        e' INERTE su questo motore (il trailing non morde) e va scritto
+#        cosi': "manopola inerte, misurata", non "provato e non funziona".
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PEGGIOR GIORNATA: [NON MISURATO] e NON PRODUCIBILE qui. Questo EA non
+#      scrive un CSV riga-per-operazione (nessun input tipo InpScriviCsv nel
+#      sorgente): la colonna non esiste nel CSV di ottimizzazione MT5.
+#      Restera' [NON MISURATO] anche dopo questa corsa, e va detto nel referto.
+#      >>> Con DD 6.30% / 4.82% la peggior giornata NON e' implicata: il muro
+#          prop giornaliero del 5% resta dentro il cono del possibile.
+#    - TAGLIA: questa corsa gira a rischio 1.0% e NON a 0.65%. E' una SCELTA:
+#      a 0.65% la sentinella T1 non sarebbe piu' confrontabile con l'archivio,
+#      e si perderebbe l'unico cancello di determinismo gratis che abbiamo.
+#      La rimisura a 0.65% (che secondo l'aritmetica di casa porta il DD
+#      full-period da 9.8% a ~6.4%) e' una domanda SEPARATA e va in un file
+#      separato: una variabile per file.
+#    - UN SOLO REGIME: 21 mesi di tick BCM sugli indici = un solo toro.
+#      Emendamento della Finestra regola C (prova di regime): NON soddisfatta.
+#      Qualunque cosa esca da qui non e' promuovibile senza quella prova.
+#    - Guardian: InpUsaGuardian=true e' il default del sorgente, ma nel
+#      Strategy Tester le GlobalVariable del Guardian non esistono e la
+#      guardia lascia passare tutto (fail-open dichiarato nel sorgente,
+#      righe 34-42). I numeri restano confrontabili con quelli del 08/08.
+#
+#  BANCO: Modello 4 (TICK REALI). Deposito 10000. FrazioneIS 0.40.
+#  Le finestre che ne escono sono ESATTAMENTE quelle del 08/08
+#  (IS 2024.09.26-2025.06.09, OOS 2025.06.10-2026.06.30): e' la condizione
+#  perche' la sentinella T1 abbia senso. Se la riga di lancio cambia
+#  FrazioneIS o @FINOA, T1 decade e il file va riscritto.
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica al CSV d'archivio, campo per campo, letta dalle
+#     colonne del file risultati_prove/.../..._U30USD_OOS.csv (riga 2).
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=9
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+# InpTrailOnST -> E' L'ASSE, in fondo al file.
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON e' pinnato di proposito: il pin di una stringa a
+# valore VUOTO viene IGNORATO da MT5 (classe FiboH4, controlla_prova.py
+# controllo 3). Il default compilato e' gia' la stringa vuota che serve.
+InpComment=STREVDOWH1A1
+# MAGIC FISSO E VERGINE 970960 (verificato repo-wide il 09/09/2026:
+# grep -rn "970960" . --exclude-dir=.git -> 0 occorrenze). NON si riusa il
+# 970916 della sedia spenta: un CSV di questo round non deve poter essere
+# riletto al posto di uno del 08/08.
+InpMagic=970960
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = trailing sul Supertrend SPENTO (MAI misurato, in nessun EA, mai)
+#     1 = acceso (il default, e la sentinella T1)
+InpTrailOnST=1||0||1||1||Y
+# ==========================================================================
