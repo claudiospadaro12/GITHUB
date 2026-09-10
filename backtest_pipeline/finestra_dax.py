@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 """
-MARCATORE_FINESTRA_DAX_v2
+MARCATORE_FINESTRA_DAX_v3
 
 LA CONVENZIONE ORARIA DEL DAX 2019/2024-2026: SI RIPARA COL TAGLIO?
 Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
@@ -67,13 +67,16 @@ Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
 import argparse, os, re, sys, zipfile
 from collections import defaultdict
 
-MARCATORE       = "MARCATORE_FINESTRA_DAX_v2"
+MARCATORE       = "MARCATORE_FINESTRA_DAX_v3"
 FINESTRA_SANI   = (2, 15)                       # ore incluse
 ANNI_SANI       = list(range(2010, 2019))
 ANNI_IPOTESI    = [2019, 2024, 2025, 2026]      # CLASSE 180: elencati, non per differenza
 ANNI_MARCI      = [2020, 2021, 2022, 2023]      # fuori ipotesi: misurati, non giudicati
 BANDA           = (57.5, 60.5)
-NUCLEO_MIN      = 40.0                          # barre/giorno per dire "ora del nucleo"
+NUCLEO_FRAZ     = 0.60      # il nucleo e' >= 60% dell'ora di PICCO dell'anno
+NUCLEO_PAV      = 10.0      # pavimento anti-rumore, NON un criterio
+NUCLEO_SEPARAZ  = 1.6       # sotto questo rapporto picco/fondo il nucleo NON esiste
+LAG_MARGINE_MIN = 0.02      # sotto questo margine l'argmax NON discrimina
 INIZIO_ATTESO   = 2                             # ora di New York
 OROLOGI         = [("New York", 2), ("UTC", 6), ("CET/Berlino", 8)]
 
@@ -162,14 +165,29 @@ def densita_referto(d, aa, solo=None):
     return float(barre) / (float(gg) * float(len(cop))), cop
 
 def nucleo(d, aa):
-    """Prima e ultima ora con almeno NUCLEO_MIN barre/giorno."""
+    """Torna (prima, ultima, perche'). CLASSE 181: la soglia si DERIVA dal
+    picco dell'anno. Una soglia fissa a 40 faceva due danni misurati:
+    spegneva una seduta sottile a 35 barre/ora con l'orologio GIUSTO
+    (separazione 2,33x, struttura evidente) e leggeva "inizio 00" su un
+    profilo PIATTO a 46 barre/ora, dove il nucleo non esiste."""
     gg = len(d["giorni"][aa])
     if gg == 0:
-        return None, None
-    dense = sorted([h for h, c in d["ore"][aa].items() if float(c) / gg >= NUCLEO_MIN])
-    if not dense:
-        return None, None
-    return dense[0], dense[-1]
+        return None, None, "nessun giorno con barre"
+    p = profilo(d, aa)
+    picco = max(p)
+    if picco <= 0:
+        return None, None, "nessuna barra"
+    soglia = max(NUCLEO_PAV, NUCLEO_FRAZ * picco)
+    dense = [h for h in range(24) if p[h] >= soglia]
+    fondo = [p[h] for h in range(24) if p[h] < soglia]
+    if not dense or not fondo:
+        return None, None, "profilo PIATTO: nessun nucleo distinguibile (picco %.0f)" % picco
+    sep = picco / max(fondo) if max(fondo) > 0 else 999.0
+    if sep < NUCLEO_SEPARAZ:
+        return None, None, ("separazione %.2fx < %.1f: nucleo NON DISTINGUIBILE"
+                            % (sep, NUCLEO_SEPARAZ))
+    return dense[0], dense[-1], ("picco %.0f, fondo %.0f, separazione %.2fx"
+                                 % (picco, max(fondo), sep))
 
 def profilo(d, aa):
     gg = len(d["giorni"][aa])
@@ -178,15 +196,20 @@ def profilo(d, aa):
     return [float(d["ore"][aa].get(h, 0)) / gg for h in range(24)]
 
 def lag_migliore(p_anno, p_rif):
-    """Di quante ore va spostato p_anno per assomigliare a p_rif?
-    0 = stesso orologio. Serve a NOMINARE lo spostamento invece di
-    leggerlo come 'buchi'."""
-    best, best_s = 0, -1.0
-    for k in range(-6, 7):
-        s = sum(p_anno[(h + k) % 24] * p_rif[h] for h in range(24))
-        if s > best_s:
-            best_s, best = s, k
-    return best
+    """Torna (lag, margine). CLASSE 182: un argmax esce SEMPRE, anche
+    quando la funzione e' piatta. Misurato: su profilo uniforme il
+    margine fra primo e secondo massimo e' 0,000% e vinceva -6, cioe'
+    l'estremo del ciclo di ricerca, che il verdetto stampava come
+    "si spostano del lag misurato". Sui profili veri il margine e' ~3,8%."""
+    s = dict((k, sum(p_anno[(h + k) % 24] * p_rif[h] for h in range(24)))
+             for k in range(-6, 7))
+    ordinati = sorted(s.values(), reverse=True)
+    if ordinati[0] <= 0:
+        return None, 0.0
+    marg = (ordinati[0] - ordinati[1]) / ordinati[0]
+    if marg < LAG_MARGINE_MIN:
+        return None, marg
+    return max(s, key=lambda k: s[k]), marg
 
 # ---------------------------------------------------------------- stampa
 def stampa_profilo(d, aa):
@@ -214,19 +237,22 @@ def rapporto(d, anni_visti, mostra_profilo):
         tot = sum(d["ore"][aa].values())
         dt, cop = densita_referto(d, aa)
         dr, copr = densita_referto(d, aa, solo=FINESTRA_SANI)
-        n0, n1 = nucleo(d, aa)
-        lg = lag_migliore(profilo(d, aa), p_sani) if p_sani else None
+        n0, n1, perche = nucleo(d, aa)
+        lg, marg = lag_migliore(profilo(d, aa), p_sani) if p_sani else (None, 0.0)
         grp = ("SANO" if aa in ANNI_SANI else
                "IPOTESI" if aa in ANNI_IPOTESI else
                "marcio" if aa in ANNI_MARCI else "altro")
-        ris[aa] = {"dens_r": dr, "nucleo": (n0, n1), "lag": lg, "gruppo": grp,
-                   "giorni": gg, "barre": tot, "coperte": len(cop)}
+        ris[aa] = {"dens_r": dr, "nucleo": (n0, n1), "perche": perche, "lag": lg,
+                   "margine": marg, "gruppo": grp, "giorni": gg, "barre": tot,
+                   "coperte": len(cop)}
         log("%-5d %-10s %-8d %-7d %-8d %-8s %-8s %-11s %s" % (
             aa, grp, tot, gg, len(cop),
             ("%.1f" % dt) if dt else "n/d",
             ("%02d-%02d" % (n0, n1)) if n0 is not None else "n/d",
             ("%.1f" % dr) if dr else "NON MIS.",
-            ("%+d" % lg) if lg is not None else "-"))
+            ("%+d (%.1f%%)" % (lg, marg * 100.0)) if lg is not None else ("n.d. (%.1f%%)" % (marg * 100.0))))
+        if n0 is None:
+            log("        nucleo NON MISURATO: " + perche)
         if mostra_profilo and (aa in ANNI_IPOTESI or aa in ANNI_SANI[-1:]):
             stampa_profilo(d, aa)
     return ris
@@ -253,6 +279,12 @@ def verdetto(ris, mancanti, rotti, saltati):
         log("  ATTENZIONE: %d CSV saltati perche' il simbolo non e' riconoscibile:" % len(saltati))
         for s in saltati[:5]:
             log("           " + s)
+    # gli esclusi si NOMINANO (classe 180): mai "tutto cio' che non e' X"
+    for etichetta in ("marcio", "altro"):
+        fuori_ip = sorted([a for a, v in ris.items() if v["gruppo"] == etichetta])
+        if fuori_ip:
+            log("  fuori ipotesi (%s), MISURATI ma NON giudicati: %s"
+                % (etichetta, ", ".join(str(a) for a in fuori_ip)))
     # A) il test PRINCIPALE: l'ora di inizio del nucleo
     ip = {a: v for a, v in ris.items() if v["gruppo"] == "IPOTESI"}
     sa = {a: v for a, v in ris.items() if v["gruppo"] == "SANO"}
@@ -268,10 +300,16 @@ def verdetto(ris, mancanti, rotti, saltati):
         n0 = ip[a]["nucleo"][0]
         inizi[a] = n0
         log("     %d -> inizio nucleo %s   lag contro i sani %s" % (
-            a, ("%02d" % n0) if n0 is not None else "NON MISURATO",
-            ("%+d" % ip[a]["lag"]) if ip[a]["lag"] is not None else "-"))
+            a, ("%02d" % n0) if n0 is not None else ("NON MISURATO (" + ip[a]["perche"] + ")"),
+            ("%+d (margine %.1f%%)" % (ip[a]["lag"], ip[a]["margine"] * 100.0))
+            if ip[a]["lag"] is not None
+            else ("NON DISCRIMINANTE (margine %.1f%%)" % (ip[a]["margine"] * 100.0))))
     if sa:
         s0 = [v["nucleo"][0] for v in sa.values() if v["nucleo"][0] is not None]
+        if not s0:
+            log("     !! NESSUN anno SANO ha un nucleo misurabile: il difetto e' in")
+            log("        questo script o nella regola del nucleo, NON nei dati.")
+            return 2
         if s0:
             log("     controllo positivo (SANI): inizio nucleo %02d-%02d" % (min(s0), max(s0)))
             if min(s0) != INIZIO_ATTESO or max(s0) != INIZIO_ATTESO:
@@ -290,6 +328,10 @@ def verdetto(ris, mancanti, rotti, saltati):
                 % (a, h, INIZIO_ATTESO, ris[a]["lag"] or 0))
         log("     Quegli anni NON si riparano col taglio: si SPOSTANO del lag")
         log("     misurato, e poi si rimisura. Non archiviare come 'bucati'.")
+        if fermo:
+            log("     ...MA LA CACHE E' INCOMPLETA: questa e' una smentita PARZIALE,")
+            log("        non un verdetto. Rifare con la cache completa.")
+            return 2
         return 1
     log("     ESITO A: PASSATO -- tutti gli anni dell'ipotesi cominciano alle %02d." % INIZIO_ATTESO)
     # B) conferma sulla densita' ristretta
@@ -428,6 +470,55 @@ def autotest():
     esito("CSV dal nome non riconosciuto: SALTATO e nominato (v1 lo contava)",
           len(dd["saltati"]) == 1 and len(dd["giorni"].get(2018, [])) == 20)
 
+    # 9. CLASSE 181: profilo PIATTO -> nucleo NON DISTINGUIBILE, non "inizio 00"
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2019, dict((h, 46) for h in range(0, 24)))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("profilo PIATTO: il nucleo e' NON DISTINGUIBILE (la v2 diceva 'inizio 00')",
+          r[2019]["nucleo"][0] is None)
+    esito("  -> e il lag NON si stampa come numero (classe 182)", r[2019]["lag"] is None)
+    esito("  -> verdetto: non conclude (rc 2), non 'spostali di -6 ore'",
+          verdetto(r, [], [], []) == 2)
+
+    # 10. CLASSE 181 al contrario: seduta SOTTILE con l'orologio GIUSTO
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2024, dict(list(dict((h, 35) for h in range(2, 16)).items()) +
+                      list(dict((h, 15) for h in list(range(0, 2)) + list(range(16, 24))).items())))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("seduta SOTTILE (35/15) con orologio giusto: nucleo 02, NON si spegne",
+          r[2024]["nucleo"][0] == 2)
+
+    # 11. CLASSE 183: zip presente per NOME ma vuoto di contenuto
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2024, dict((h, 59) for h in range(0, 24)), simbolo="XXXXXX", nomecsv="altro.csv")
+    os.rename(os.path.join(cart, "XXXXXX_M1_2024.zip"),
+              os.path.join(cart, "GRXEUR_M1_2024.zip"))
+    _, anni_i = inventario(cart, "grxeur")
+    dd = misura(cart, "grxeur")
+    misurati = sorted([y for y in dd["giorni"] if len(dd["giorni"][y]) > 0])
+    vuoti = [y for y in anni_i if y not in misurati]
+    manc2 = sorted(set(x for x in ANNI_IPOTESI if x not in anni_i) |
+                   set(x for x in vuoti if x in ANNI_IPOTESI))
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("zip presente per NOME ma vuoto: finisce nei MANCANTI (classe 183)",
+          2024 in anni_i and 2024 in vuoti and 2024 in manc2)
+    esito("  -> e il verdetto NON esce verde (rc 2)", verdetto(r, manc2, [], []) == 2)
+
+    # 12. CLASSE 177/N3: cache incompleta + orologio spostato -> rc 2, non rc 1
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2024, dict(list(dict((h, 59) for h in range(3, 17)).items()) +
+                      list(dict((h, 25) for h in list(range(0, 3)) + list(range(17, 24))).items())))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("cache incompleta + orologio spostato: smentita PARZIALE, rc 2 non 1",
+          verdetto(r, [2019, 2025, 2026], [], []) == 2)
+
     for f in os.listdir(cart):
         os.remove(os.path.join(cart, f))
     os.rmdir(cart)
@@ -473,6 +564,15 @@ def main():
         log("         NON e' 'niente da riparare': e' la macchina sbagliata.")
         return 2
     d = misura(cart, a.simbolo)
+    # CLASSE 183: l'inventario legge i NOMI, la misura legge i CONTENUTI.
+    # Se i due non concordano un anno sparisce e il verdetto esce verde.
+    misurati = sorted([y for y in d["giorni"] if len(d["giorni"][y]) > 0])
+    vuoti = [y for y in anni if y not in misurati]
+    if vuoti:
+        log("")
+        log("  ATTENZIONE: zip presenti per NOME ma SENZA barre di %s: %s"
+            % (a.simbolo, ", ".join(str(x) for x in vuoti)))
+    mancanti = sorted(set(mancanti) | set(x for x in vuoti if x in ANNI_IPOTESI))
     ris = rapporto(d, sorted(d["giorni"].keys()), True)
     # controllo indipendente dell'orologio su un altro strumento
     if a.controllo:
@@ -481,10 +581,13 @@ def main():
             dc = misura(cart, a.controllo)
             log("")
             log("--- CONTROLLO OROLOGIO su %s (24h da sempre nel referto) ---" % a.controllo)
-            for aa in sorted(dc["giorni"].keys())[:6]:
-                n0, n1 = nucleo(dc, aa)
+            log("  (questo blocco NON entra nel verdetto: e' un riscontro, non un cancello)")
+            da_mostrare = [y for y in sorted(dc["giorni"].keys())
+                           if y in ANNI_IPOTESI or y in ANNI_SANI[-2:]]
+            for aa in (da_mostrare or sorted(dc["giorni"].keys())[-6:]):
+                n0, n1, perche = nucleo(dc, aa)
                 log("  %d: nucleo %s   (cash USA 09:30 NY -> atteso ~09 se il file e' NY)"
-                    % (aa, ("%02d-%02d" % (n0, n1)) if n0 is not None else "n/d"))
+                    % (aa, ("%02d-%02d" % (n0, n1)) if n0 is not None else ("n/d -- " + perche)))
         else:
             log("")
             log("--- CONTROLLO OROLOGIO: nessuno zip di %s, saltato (dichiarato) ---" % a.controllo)
