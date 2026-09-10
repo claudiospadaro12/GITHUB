@@ -11487,3 +11487,95 @@ Due difetti gemelli sulla stessa riga:
 >    processi dice **chi e' vivo adesso**; CODA_03 dice **quale conto sta in
 >    quale cartella**. Da sola, nessuna delle due chiude la REGOLA DEI TERMINALI
 >    MULTIPLI.
+
+---
+
+## 175. 🎭 L'ESEGUIBILE INVOCATO **PER PERCORSO**, senza `&` — e il cancello che ci scriveva sopra "riga di SOLA LETTURA"
+
+**Pagata il 10/09/2026, poche ore dopo la 173 e per colpa della 173.**
+La lista bianca della 173 vietava l'**operatore di chiamata `&`**, e con quello
+credevo chiusa la porta dell'esecuzione. Ma in PowerShell **un eseguibile
+nominato per percorso parte da solo**:
+
+```powershell
+C:\python313\python.exe -c "..."     # nessun '&', e parte lo stesso
+```
+
+Il cancello vedeva zero cmdlet fuori dalla lista bianca, zero `&`, e stampava:
+`riga di SOLA LETTURA locale`. 🔴 **Su una riga che esegue codice arbitrario.**
+
+**E il difetto non e' l'esecuzione: e' la FRASE.** Una riga che lancia
+`python.exe -c` puo' essere perfettamente innocua — quella lo era. Ma un
+cancello che **certifica il falso** e' peggio di un cancello che tace: la volta
+che quella frase compare sopra `C:\BCM_Reale\terminal64.exe`, viene creduta.
+
+**Come si e' chiusa** (`controlla_riga.py`, ramo senza pin):
+- si cerca **ogni percorso di eseguibile** (`.exe .bat .cmd .com .msi .msix .vbs
+  .js .py .ps1`), **spazi compresi** — la prima stesura si fermava al primo
+  spazio e quindi **non vedeva** `C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe`,
+  cioe' proprio il caso che conta;
+- se e' `terminal64`/`metaeditor64` o sta in un percorso vietato → **BLOCCANTE**;
+- altrimenti → **RILIEVO che NOMINA l'eseguibile**, e la frase "SOLA LETTURA"
+  **non si stampa piu'**: diventa *"esegue X, vedi il rilievo 175"*.
+
+> ### 🔴 LA REGOLA
+> 1. **In PowerShell l'esecuzione non ha una parola chiave sola.** `&`, il
+>    percorso nudo, il dot-source `.`, `Start-Process`, un metodo .NET: chi
+>    cerca un solo modo ne trova uno e ne perde quattro.
+> 2. **Un cancello non certifica mai piu' di quello che ha guardato.** La frase
+>    che stampa e' parte del controllo: se dice "sola lettura", deve averlo
+>    dimostrato. Nel dubbio si dichiara cosa si e' visto, non cosa si spera.
+> 3. **Ogni pezza a un cancello si prova sui casi che DEVONO restare rossi**,
+>    non solo su quello che deve passare. Qui i due casi nuovi (il REALE e il
+>    piccolo invocati per percorso) sono entrati nel banco: 14 casi + 2.
+
+---
+
+## 176. 🐍 `\"` DENTRO UN `-c "..."` — l'escape di PowerShell e' il **BACKTICK**, non il backslash: la stringa si spezza in DUE argomenti
+
+**Pagata il 10/09/2026**, sulla riga che doveva verificare il python
+embeddable del VPS. Questa:
+
+```powershell
+python.exe -c "import sys, ssl; print(sys.version); print(\"OK\")"
+```
+
+e' morta con `SyntaxError: unterminated string literal`. **Non e' un errore di
+python: e' un errore di PowerShell.** In una stringa fra doppi apici PowerShell
+**ignora il `\`** e chiude sul `"`. Verificato **eseguendo**, stampando gli
+argomenti veri che arrivano al processo:
+
+```
+ARG1=[-c]
+ARG2=[import sys, ssl; print(sys.version); print(\]      <-- ecco il SyntaxError
+ARG3=[OK\)]
+```
+
+☠️ **E il difetto e' MUTO in prova**: su una stringa **senza** virgolette
+interne la stessa riga funziona benissimo. Si scopre solo il giorno in cui
+serve stampare qualcosa fra virgolette — cioe' sempre il giorno sbagliato.
+Il cancello deterministico **non lo vede**: la riga e' ASCII pura e fa parse
+pulito. Lo vede solo chi la **esegue**.
+
+> ### 🔴 LA REGOLA
+> 1. **Dentro un `-c "..."` (o `-Command`, o qualunque argomento passato a un
+>    eseguibile nativo) le virgolette interne sono APICI SINGOLI.** Mai `\"`,
+>    mai `` `" ``: gli apici singoli attraversano PowerShell intatti e per
+>    python sono virgolette a tutti gli effetti.
+> 2. **Zero `$` dentro la stringa**, o PowerShell interpola prima di consegnare.
+> 3. **Una riga con virgolette annidate si PROVA prima di dettarla**, girandola
+>    davvero. Qui e' stata girata sotto un PowerShell vero prima della seconda
+>    consegna, e infatti la seconda ha funzionato.
+> 4. Gemella della **73** (multiriga nei preset) e della **21**: la trappola non
+>    e' il contenuto, e' **chi lo taglia prima di consegnarlo**.
+
+### 🥈 E il corollario che ha salvato la misura: **una prova che riesce non e' una prova che dimostra**
+La riga corretta importava `zipfile` e stampava "OK". Ma `zipfile` **si importa
+anche senza `zlib`** (`try: import zlib / except ImportError: zlib = None`):
+avremmo dichiarato "python a posto" e scoperto a meta' scarico che il deflate
+non c'era. Stessa cosa per `ssl`: importarlo **non prova** che le CA di Windows
+si carichino, e per `winreg`: importarlo non prova che il **Desktop** si legga.
+👉 La verifica buona **usa** ogni modulo per la cosa per cui ci serve:
+`zlib.compress` che davvero comprime, `ssl.create_default_context()` che davvero
+carica le CA, `winreg.QueryValueEx(...'Desktop')` che davvero stampa il
+percorso. **Un import non e' un collaudo.**
