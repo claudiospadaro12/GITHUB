@@ -507,3 +507,31 @@ _Cacciatore di strategie · 08/09/2026 · branch `lavoro`._
 _Attribuzioni: `SessionReopenEA` — GianlucaGangemi, MQL5 Code Base 77060._
 _`lwOopsPatternExpert` — Chacha Ian Maroa / MetaQuotes Ltd, articolo 21741:
 **letto, non copiato**, per divieto esplicito sulla pagina._
+
+---
+
+# 🔴 ERRATA — 10/09/2026: **lo "spread oro MISURATO in casa 0,24 $" di r.208/390 NON ESISTE**
+
+Cercato in tutto il repo il 10/09: **quel numero non ha nessuna fonte.** Non e'
+stato misurato da nessuna sonda, non sta in nessun CSV, non e' in nessun referto.
+Da qui e' passato in altri dossier, portandosi dietro **due pavimenti di costo
+sbagliati** (DI LAVORO 9,6 $ e DURO 3,2 $).
+
+**I numeri veri, ognuno con la sua riga:**
+- **spread 0,16 $** — `risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`,
+  riga `XAUUSD`, colonna `SpreadPt` = **16 punti**. Verificata: nello stesso
+  istante NASUSD **1,80** e U30USD **2,00**, contro le mediane a tick di
+  1,6-1,8 e 1,9-2,0. Due su due.
+- seconda lettura **0,22 $** — `R114_CORSA_20260827/REFERTO_R114.txt`.
+- **commissione 0,0403 $** (3,4858 EUR/lotto, giro completo) —
+  `data/statements/trades_auto.csv`, 520 righe XAUUSD. 🚨 **Sull'oro esiste e
+  sugli indici e' ZERO**: nessun conto di casa la teneva.
+- **COSTO PIENO: 0,2003 $ = 20,03 USD/lotto.**
+
+**Pavimenti corretti: DI LAVORO 8,01 $ · DURO 2,67 $.**
+
+🔴 E lo spread **nella finestra 14:30-14:41 server resta [NON MISURATO]**: le due
+letture stanno una 3 ore dopo e una 6 ore prima.
+
+> **Un numero senza riga di provenienza non e' un numero misurato: e' una voce.**
+> Gemella del "DD 42,9% fantasma" di `HANDOFF.md`, ritirato il 09/09.

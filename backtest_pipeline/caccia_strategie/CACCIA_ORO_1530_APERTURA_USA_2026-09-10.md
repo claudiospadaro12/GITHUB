@@ -38,11 +38,11 @@ sfiorato. Nessun backtest nostro: il costo e i dati li misura un altro agente.**
 >
 > 🟢 **La cosa piu' utile che porto NON e' un EA: e' un cancello aritmetico
 > gia' in casa nostra.** Lo stop del collega e' il lato opposto di un range di
-> **5 minuti**. Con lo spread oro **misurato in casa a 0,24 $**
+> **5 minuti**. Con lo spread oro **misurato in casa a 0,16 $ (+ commissione 0,0403 $)**
 > (`CACCIA_APERTURE_ORO_2026-09-08.md` §, riga 208), il pavimento **DURO** e'
-> **3,2 $** e quello **DI LAVORO** e' **9,6 $**. 👉 **La domanda che decide
+> **2,67 $** e quello **DI LAVORO** e' **8,01 $**. 👉 **La domanda che decide
 > tutto e' una sola e si misura in mezz'ora: quanto e' larga, in dollari, la
-> candela M5 delle 14:30 server sull'oro?** Se la mediana sta sotto 9,6 $,
+> candela M5 delle 14:30 server sull'oro?** Se la mediana sta sotto 8,01 $,
 > l'idea e' fuori per COSTO prima ancora che per edge — e non serve nessun
 > backtest per saperlo.
 >
@@ -330,7 +330,7 @@ MIT · **14 stelle**, 10 fork · **5 file `.mq5` presenti** · **XAUUSD, M1**
   trailing da 700 punti.
 - 🔴 Nessun risultato numerico nel README (solo screenshot citati).
 - 📐 Nota di costo, ed e' interessante: **SL 400 punti oro ≈ 4,00 $**. Contro il
-  nostro spread misurato di 0,24 $ fa **16,7 × spread**: sopra il pavimento
+  nostro spread misurato di 0,16 $ (+ commissione 0,0403 $) fa **25,0 x spread**: sopra il pavimento
   **duro** (13,3×), **ben sotto** quello **di lavoro** (40×). 👉 Anche il
   progetto GitHub con piu' stelle su questo tema **vive nella fascia in cui il
   pedaggio conta**.
@@ -471,7 +471,7 @@ per quanto costa misurarle:
 
 | # | meccanismo alternativo | perche' proprio questo | supporto esterno |
 |---|---|---|---|
-| **A1** | 🎯 **misurare l'AMPIEZZA prima della direzione**: quanto vale, in dollari, la candela M5 delle 14:30 srv | **decide se l'idea esiste**: se la mediana < 9,6 $ e' fuori per costo | il "cost gate" di §4.4 e i due studi di §3.1-3.2 |
+| **A1** | 🎯 **misurare l'AMPIEZZA prima della direzione**: quanto vale, in dollari, la candela M5 delle 14:30 srv | **decide se l'idea esiste**: se la mediana < 8,01 $ e' fuori per costo | il "cost gate" di §4.4 e i due studi di §3.1-3.2 |
 | **A2** | **FADE della prima spinta** invece del breakout | e' il rovescio esatto; e la casa e' **quasi tutta long/trend**: riempirebbe un buco vero | ⚪ trovato solo materiale non apribile (optionalpha, 403) |
 | **A3** | **filtro di STATO 9/21 gia' allineate** alle 15:30 (non l'incrocio) | toglie il ritardo strutturale di §5.2 ed e' **gia' scritto in casa** (r.230 _"inclinate"_) | 🟢 la voce dei docenti nel nostro `REGISTRO_TEST.md` |
 | **A4** | **range piu' lungo** (15:30-15:45 = 14:30-14:45 srv) con **stessa uscita a tempo** | uno stop 3× piu' largo **entra nel pavimento di lavoro**; e la fonte migliore (Zarattini) usa 5 min, non 1 | §3.1, §3.3 |
@@ -506,12 +506,12 @@ non le porto all'imbuto finche' A1 non ha risposto.
 Non e' *"il metodo del collega guadagna?"*. E' **una domanda di aritmetica che
 viene prima**, costa mezz'ora di macchina e **puo' chiudere il caso da sola**:
 
-> ## 🥇 **"Sull'oro, la candela M5 delle 14:30 SERVER (= 15:30 italiane = 09:30 ET), quanto e' larga in DOLLARI — mediana e primo quartile — e quella larghezza sta sopra il pavimento DI LAVORO di 9,6 $ (= 40 × lo spread misurato di 0,24 $) oppure no? E i 4 minuti successivi, quanto percorrono LORDI nella direzione della rottura?"**
+> ## 🥇 **"Sull'oro, la candela M5 delle 14:30 SERVER (= 15:30 italiane = 09:30 ET), quanto e' larga in DOLLARI — mediana e primo quartile — e quella larghezza sta sopra il pavimento DI LAVORO di 8,01 $ (= 40 x il COSTO PIENO misurato di 0,2003 $ = spread 0,16 + commissione 0,0403) oppure no? E i 4 minuti successivi, quanto percorrono LORDI nella direzione della rottura?"**
 
 **Perche' proprio questa, e in questo ordine:**
 1. 🧱 **Lo stop del collega E' quel range.** Se la mediana della larghezza sta
-   sotto **9,6 $**, il metodo nasce dentro la zona in cui il pedaggio comanda —
-   e sotto **3,2 $** (pavimento **duro**) e' fuori **matematicamente**, senza
+   sotto **8,01 $**, il metodo nasce dentro la zona in cui il pedaggio comanda —
+   e sotto **2,67 $** (pavimento **duro**) e' fuori **matematicamente**, senza
    che serva discutere di direzione.
 2. 📏 **Il secondo pezzo (quanto percorrono 4 minuti) e' il numeratore.** Il
    confronto che decide e' **quello di §3.2**: *movimento lordo* contro
@@ -529,8 +529,8 @@ Lo lascio qui pronto, con la riga che **non ho il diritto di riempire**:
 #   il costo di andata e ritorno, e la rottura del range di 5 minuti ne
 #   indica la direzione.
 # CRITERI DI ACCETTAZIONE (congelati PRIMA dei numeri):
-#   C1 [COSTO]   mediana della larghezza del range M5 14:30-14:35 srv >= 9,6 $
-#                (= 40 x spread misurato 0,24 $).  Sotto 3,2 $ = SCARTO SECCO.
+#   C1 [COSTO]   mediana della larghezza del range M5 14:30-14:35 srv >= 8,01 $
+#                (= 40 x costo pieno 0,2003 $).  Sotto 2,67 $ = SCARTO SECCO.
 #   C2 [SEGNALE] percorso lordo mediano nei 4 minuti dopo la rottura
 #                >= 3 x costo andata/ritorno misurato NELLA STESSA ORA.
 #   C3 [LATI]    misurati SEMPRE tutti e due (regola di casa, 25/08).
@@ -580,7 +580,7 @@ Lo lascio qui pronto, con la riga che **non ho il diritto di riempire**:
    ha **finestra 09:30 ET + uscita a tempo**; uno ha perfino la **descrizione
    che non corrisponde al codice**.
 4. 🟢 **E la mossa giusta non e' un backtest: e' un righello.** Misurare la
-   larghezza della candela M5 delle 14:30 srv contro il pavimento di 9,6 $.
+   larghezza della candela M5 delle 14:30 srv contro il pavimento di 8,01 $.
    **Costa mezz'ora e puo' rispondere a Claudio prima di cena.**
 
 > 🔥 **Non ci accontentiamo — e infatti non archivio niente.** Qui non c'e' un
@@ -588,3 +588,48 @@ Lo lascio qui pronto, con la riga che **non ho il diritto di riempire**:
 > quello vuol dire *"non ancora misurato"*, non *"morto"*. La via piu' corta al
 > numero e' scritta in §8. 💪
 
+
+---
+
+# 🔴 ERRATA DELLA SESSIONE PRINCIPALE — 10/09/2026, stesso giorno
+
+**I pavimenti di questo dossier erano costruiti su un numero fantasma.**
+Il dossier partiva da *"spread oro **misurato in casa** 0,24 $"*, ereditato da
+`CACCIA_APERTURE_ORO_2026-09-08.md` r.208/390. 🔎 Cercato in tutto il repo:
+**quel 0,24 non ha nessuna fonte.** E' un numero che si citava da se'.
+
+## ✅ I NUMERI VERI, con la riga da cui vengono
+| | valore | fonte |
+|---|---:|---|
+| spread XAUUSD | **0,16 $** (16 punti) | `risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`, riga `XAUUSD`, colonna `SpreadPt` |
+| seconda lettura | 0,22 $ | `R114_CORSA_20260827/REFERTO_R114.txt` (ask 4535,52 / bid 4535,30) |
+| **commissione** | **0,0403 $** (3,4858 EUR/lotto giro completo) | `data/statements/trades_auto.csv`, 520 righe XAUUSD, **ricontata** |
+| **COSTO PIENO** | **0,2003 $ = 20,03 USD/lotto** | somma delle due |
+
+🔬 La lettura 0,16 e' **credibile perche' verificata**: nello stesso istante la
+stessa sonda leggeva NASUSD **1,80** e U30USD **2,00**, contro le mediane a tick
+su 252 M di tick di **1,6-1,8** e **1,9-2,0**. Due su due centrate.
+
+## 📏 I PAVIMENTI CORRETTI
+| | prima (fantasma) | **adesso** |
+|---|---:|---:|
+| pavimento **DI LAVORO** (40x) | 9,6 $ | **8,01 $** |
+| pavimento **DURO** (13,3x) | 3,2 $ | **2,67 $** |
+
+⚠️ **Sembrano piu' bassi, ma non e' una buona notizia**: il movimento vero
+misurato in quella finestra e' **1,41 $** (33 operazioni manuali di Claudio,
+14:35-14:40 server, 19 giornate). **Resta sotto anche il pavimento DURO.** Il
+verdetto di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md` non cambia: **sfonda**.
+
+## 🔴 E IL BUCO CHE RESTA APERTO E' LO STESSO
+Le due letture stanno **una 3 ore dopo e una 6 ore prima** della finestra
+14:30-14:41 server. **Lo spread NELLA finestra e' [NON MISURATO]**, e nei primi
+minuti dopo l'apertura si allarga. Tutti i conti qui sopra usano la lettura
+**piu' favorevole**: il costo vero non puo' che essere peggiore.
+
+> ### 📌 LA LEZIONE, che e' gemella del "DD 42,9% fantasma"
+> **Un numero senza riga di provenienza non e' un numero misurato: e' una voce.**
+> E le voci si propagano — questo 0,24 aveva gia' fatto due dossier e stava per
+> farne un terzo, portandosi dietro due pavimenti sbagliati. Da qui in avanti,
+> **ogni soglia di costo si scrive con accanto il FILE e la RIGA** da cui viene
+> il numero.
