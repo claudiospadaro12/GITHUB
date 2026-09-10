@@ -1,0 +1,143 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R120b -- IL PARZIALE: la manopola dell'uscita spazzolata UNA VOLTA
+#           SOLA in tutta la storia del progetto.   U30USD  M5
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120b_parziale_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r120b -Modello 4
+#  (-SoloControllo deve stampare 5 celle per finestra.)
+#  CRITERI: prove\R120_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  IL BUCO, MISURATO NELL'ARCHIVIO (10/09/2026)
+#    InpTP1Pct compare come ASSE in UN SOLO file prova su 153:
+#    R15_ORB_gestione_DD.txt, valori {0, 50}. Mai 25, mai 75, mai 100.
+#    E la sedia VIVA sul conto reale (770611) gira con InpTP1Pct=0.0
+#    (mql5\Presets\conto_reale\ABTG_ORB_Ottimizzato_770611_REALE.set).
+#    >>> Il certificato di morte del 09/09 chiede "la gestione
+#        dell'uscita messa ad asse almeno una volta". Qui e' stata
+#        messa ad asse su DUE valori, sette settimane fa, e mai piu'.
+#
+#  IL FATTO DI CODICE CHE RENDE QUESTO FILE NECESSARIO, E CHE VALE PIU'
+#  DEL ROUND (letto in ABTG_ORB_Ottimizzato.mq5 r.451/588 e r.677):
+#    - con InpTPMode = ORB_TP_R (0) il TP dell'ordine sta a
+#        entry + dist * InpTP_R
+#      e il bersaglio del parziale sta a
+#        openP + (openP - SL_corrente) * InpTP_R
+#      A stop fermo sono LO STESSO PREZZO: il parziale non ha niente da
+#      anticipare e InpTP1Pct e' STRUTTURALMENTE QUASI INERTE.
+#    - col trailing acceso il bersaglio del parziale SI MUOVE, perche'
+#      e' ricalcolato su SL_corrente: piu' il trailing sale, piu' il
+#      parziale si avvicina. NON e' "1,5R dall'ingresso".
+#    >>> CONSEGUENZA DICHIARATA: il "parziale 80% a 1,5R + coda a 3R"
+#        del collega NON e' esprimibile in modo TP_R. L'unico modo di
+#        avere parziale e coda su DUE prezzi diversi e' InpTPMode=1
+#        (coda a un multiplo del RANGE), ed e' quello che questo file
+#        usa. Non e' la sua ricetta: e' la sua IDEA nella nostra
+#        macchina, e la differenza va detta.
+#    - e c'e' un secondo effetto, gia' a verbale (r.651-663 del .mq5):
+#      con InpTP1Pct <= 0 il BREAKEVEN NON SCATTA MAI, anche con
+#      InpBreakeven=true. La sedia viva ha il breakeven SPENTO senza
+#      saperlo. Questo file lo misura invece di ipotizzarlo.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO SU QUESTA CELLA
+#    Qui InpSLMode=3 (HALFRANGE, la cella VIVA): stop ~47 punti indice
+#    [DERIVATO, vedi R120a] contro spread mediano ora 14 di 2,00
+#    = 23,5x. SOPRA il pavimento DURO 13,3x, SOTTO quello DI LAVORO 40x.
+#    >>> LO DICHIARO PRIMA: questo file NON puo' produrre una sedia.
+#        Misura un MECCANISMO sulla cella che gia' gira sul conto reale,
+#        per sapere se quella sedia sta lasciando soldi per terra col
+#        parziale spento. La sedia schierabile la cerca R120a, che il
+#        cancello del costo lo passa. Due domande diverse, due file.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    - n: INVARIANTE (IS 71, OOS 119) su tutte e 5 le celle. Il parziale
+#      cambia COME si esce, non SE si entra. Se n si muove, ci si ferma.
+#    - InpTP1Pct=0 deve riprodurre AL CENTESIMO la cella viva a 100k:
+#      +41.057,00 - PF 1,6742 - DD 9,7623% - n 119. E' l'ANCORA.
+#    - DD OOS: in CALO al crescere del parziale (si porta a casa prima,
+#      e con InpTP1Pct>0 il breakeven finalmente si accende).
+#      Attesa 6,5% - 9,8%.
+#    - PF OOS: attesa in CALO, non in salita. Motivo: R44 ha misurato che
+#      su questo motore i target ambiziosi PAGANO (OOS monotono
+#      +4.003 -> +6.585 da 1,5x a 3,0x l'ampiezza); tagliare l'80%
+#      presto va nella direzione opposta. Attesa 1,40 - 1,70.
+#    - InpTP1Pct=100 chiude tutto al primo bersaglio: e' il caso
+#      degenere, serve come estremo dell'altopiano, non come candidato.
+#  FALSIFICAZIONE / cosa mi farebbe cambiare idea: se il PF OOS SALE col
+#  parziale, la tesi "questo motore vuole target lunghi" (R44) e' falsa
+#  su questa geometria e va riscritta. Sarebbe il risultato piu' utile
+#  del file, e per questo l'attesa e' scritta al contrario.
+#  ESITO POSSIBILE E ONESTO: "il default va bene". Se il guadagno sta
+#  dentro +/- 0,15 di PF, la risposta e' che la sedia viva sta gia' al
+#  posto giusto -- ed e' un risultato, non un fallimento.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779810.  Finestra: muro dei tick BCM, 2024.09.26.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- LA CELLA VIVA DEL CONTO REALE, copiata dal preset 770611_REALE.set
+#     (tranne il rischio, portato a 1,00% per confrontabilita').
+#     InpTPMode=1 e' obbligatorio perche' il parziale abbia un prezzo
+#     DIVERSO dalla coda: vedi il blocco di codice in testa al file.
+InpSLMode=3
+InpSLBufferPts=0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP_R=1.0
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+InpExecTF=5
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+InpRiskPercent=1.0
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779810
+
+# --- L'ASSE, UNO SOLO: 0 / 25 / 50 / 75 / 100 = 5 celle.
+#     0 e 50 sono le uniche due mai misurate (R15). 25/75/100 sono nuove.
+InpTP1Pct=0||0||25||100||Y

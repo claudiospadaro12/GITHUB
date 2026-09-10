@@ -1,0 +1,194 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R120a -- LA FRONTIERA DEL COSTO, SULL'ASSE CHE NESSUNO HA MAI FINITO
+#           U30USD  M5  -- OPPRANGE + buffer 0..30 punti indice
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120a_costo_buffer_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r120a -Modello 4
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      backtest_pipeline\prove\R120_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND ESISTE (tre fatti misurati, nessuna opinione)
+#
+#  1. R88 (19-20/08, TICK REALI, r88_csv/): le sei celle migliori per
+#     PF OOS sono TUTTE InpSLMode=0 (OPPRANGE). La migliore fa
+#        PF OOS 1,8385 - DD OOS 3,840% - n 119
+#     contro la cella VIVA (HALFRANGE)
+#        PF OOS 1,6742 - DD OOS 9,7623% - n 119.
+#     Bocciata da un cancello sul PF IS (1,063 contro 1,10) applicato a
+#     n IS = 71.
+#  2. Emendamento della finestra, regola A (16/08): sotto 150 operazioni
+#     il MERITO E' SOSPESO. n IS = 71 e' sotto. Lo scrive R88 stesso.
+#     >>> QUESTO E' UN CANDIDATO FERMO SU UN NUMERO MANCANTE, NON SU UN
+#         NUMERO BRUTTO. Il motto del 09/09 dice cosa si fa in quel
+#         caso: si cerca la via piu' corta al numero.
+#  3. R118 (07/09, par.3.3): il buffer abbassa il DD OOS in modo
+#     MONOTONO su tutti e cinque i gradini di slippage
+#     (10,2086 -> 8,8315 -> 8,1606 -> 7,6415 -> 6,9528).
+#     "Non e' un picco: e' un piano inclinato."
+#     E NESSUNO E' MAI ANDATO OLTRE 20 PUNTI INDICE.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO, APPLICATO PRIMA DI SCEGLIERE I VALORI
+#
+#  Spread U30USD ora 14 server (l'ora del trade), MISURATO su
+#  4.931.660 tick: MEDIANA 2,00 - P95 3,00 - MAX 47,0 punti indice.
+#  Fonte: risultati_archivio/spread_flotta/spread_orario_U30USD.csv r.15.
+#  Pavimento DI LAVORO 40x -> lo stop deve valere >= 80,0 punti indice.
+#  Pavimento DURO 13,3x    -> >= 26,6 punti indice.
+#
+#  QUANTO VALE LO STOP OGGI (attenzione: DERIVATO, non misurato)
+#    Invertendo il DD di R118 corsa a (DD proporzionale al lotto, e il
+#    lotto va come 1/distanza) su 14 coppie buffer-contro-baseline:
+#    13 stime su 14 cadono fra 32 e 51 punti indice, mediana ~45; una
+#    sola (buffer 5, slippage 0) esce a 233 ed e' scartata come
+#    outlier -- la dichiaro invece di nasconderla.
+#    -> HALFRANGE (la cella VIVA) ~47 punti indice = 23,5x lo spread:
+#       SOTTO il pavimento di lavoro (59% del richiesto).
+#    -> ampiezza del range 14:30-14:45 ~94 punti indice (banda 85-103).
+#    CONTROPROVA INDIPENDENTE: range di giornata U30USD MISURATO su 24
+#    giornate vere (data/statements/trades_auto.csv, session_high/low)
+#    = 314,5 punti indice mediana; regola di scala x sqrt(15/1440) =
+#    32,1; fattore di amplificazione dell'apertura 3,05 MISURATO SUL
+#    DAX (giornata_2026-08-06.md: "R medio ~58,7 punti indice" contro
+#    186,5 x sqrt(15/1440) = 19,0) -> 97,9. Le due strade danno 94 e 98.
+#    >>> IL FATTORE 3,05 E' MISURATO SU UN SIMBOLO SOLO (il DAX):
+#        trasportarlo sul Dow e' [INFERITO]. Che le due strade
+#        combacino e' la ragione per cui lo uso, non una prova.
+#
+#  QUINDI, con OPPRANGE (stop = ampiezza range + 10 di ingresso + buffer):
+#    buffer  0 -> ~104 pti idx = 52,0x mediana  PASSA (+30%)
+#    buffer 10 -> ~114          = 57,0x         PASSA (+43%)
+#    buffer 20 -> ~124          = 62,0x         PASSA (+55%), e 41,3x
+#                                               anche allo spread P95
+#    buffer 30 -> ~134          = 67,0x         PASSA (+68%)
+#  Al bordo BASSO della banda (range 85) e allo spread P95 (3,00) la
+#  cella a buffer 0 fa 31,7x e NON passa: serve buffer >= ~15.
+#  >>> ECCO PERCHE' L'ASSE ARRIVA A 30 E NON SI FERMA A 20: il punto in
+#      cui il cancello si chiude anche nel caso sfavorevole sta DENTRO
+#      la griglia, con celle da tutte e due le parti. E' il disegno che
+#      rende leggibile la risposta, non un allargamento a caso.
+#
+#  E LA NOTA CHE EVITA UN FALSO SCARTO: "gli indici su M5 sono esclusi
+#  per costo" NON si applica qui. Quella regola parla di motori con lo
+#  stop scalato sulla BARRA M5 (~10-15 punti indice = 5-7x). Qui il TF
+#  di esecuzione e' M5 ma la GEOMETRIA e' da 15 minuti: lo stop e' 104
+#  punti indice. Il TF non decide il costo: lo decide lo stop.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (falsificabile)
+#    - n: INVARIANTE lungo tutto l'asse. IS 71, OOS 119, in tutte e 7
+#      le celle. Il buffer sposta lo STOP, non decide se si entra.
+#      Se n cambia, c'e' un effetto che non ho capito: ci si ferma.
+#    - DD OOS: MONOTONO DECRESCENTE, prosecuzione del piano inclinato di
+#      R118. Attesa 3,5% - 5,5% nella zona buffer 15-30.
+#    - PF OOS: fra 1,55 e 1,90, NON monotono (R88 e R118 concordano che
+#      il PF sul buffer non e' riproducibile mentre il DD lo e').
+#    - PF IS: fra 0,90 e 1,10, in calo col buffer. Lo scrivo prima
+#      perche' e' la parte che NON mi piace e va detta lo stesso.
+#    - Cella attesa al centro dell'altopiano: buffer 1500-2000.
+#  FALSIFICAZIONE: se il DD OOS smette di scendere, o risale, oltre 20
+#  punti indice, il piano inclinato di R118 finisce li' e va scritto:
+#  vorrebbe dire che il beneficio dello stop largo si esaurisce PRIMA
+#  del punto in cui il cancello del costo si chiude, e allora questa
+#  geometria non e' schierabile e lo si dice.
+# ---------------------------------------------------------------------
+#  LE ANCORE GRATIS (si controllano PRIMA di leggere il resto)
+#    La cella buffer 500 con questo corpo deve riprodurre R88 riga
+#    "OPPRANGE / 500 / TP in R 1,5": +23.003,35 - PF 1,8385 - DD 3,840%.
+#    La cella buffer 1000 deve riprodurre "OPPRANGE / 1000 / R 2,0"?
+#    NO: quella riga aveva TP_R 2,0, qui e' 1,5. Non e' un'ancora.
+#    L'unica ancora vera e' buffer 500. Se non riproduce, ci si ferma.
+# ---------------------------------------------------------------------
+#  UNITA', DICHIARATA: 100 PUNTI MT5 = 1 PUNTO INDICE su U30USD a BCM.
+#  MISURATO (REFERTO_ROUND55_SLIPPAGE.md, R55b_slippage_ORB.txt r.25).
+#  Quindi 0..3000 punti MT5 = 0..30 punti indice, passo 5.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE
+#    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM
+#    su U30USD, MISURATO (REFERTO_SONDA_STORICO_17-08.md: U30USD
+#    2024.09.26, stato COMPLETO = il broker NON HA piu' storico;
+#    confermato da misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#    NON si puo' allargare indietro. Un regime solo (Dow al rialzo).
+#  MAGIC VERGINE 779800 (779800-779899 liberi al 10/09/2026).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- geometria del range: OR 15' 14:30->14:45 SERVER (= 15:30->15:45 IT)
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+# --- ingresso: pendenti STOP a 10 x K oltre il livello, come in campo
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+# --- LA GEOMETRIA CHE IL CANCELLO DEL COSTO SELEZIONA: stop all'estremo
+#     opposto del range (OPPRANGE = 0), TP in R sullo stop, 1,5R.
+#     E' la riga migliore di R88 per PF OOS. Pinnata: NON e' l'asse.
+InpSLMode=0
+InpTPMode=0
+InpTP_R=1.5
+InpTPRangeMult=1.5
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+# --- gestione R15 pinnata: trailing EMA9 acceso, NIENTE parziale.
+#     Se cambiasse anche solo il trailing questo file misurerebbe due
+#     cose insieme e non isolerebbe piu' lo stop.
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+# --- filtri: EMA200 acceso (cuore della cella R15), tetto range 0,8%.
+#     NOTA: il tetto 0,8% su U30USD a ~53.400 vale 428 punti indice
+#     contro un range tipico di ~94: qui morde di rado. Lo lascio come
+#     in campo apposta, per non cambiare due cose insieme.
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+# --- rischio pinnato all'1,00%: NON e' la taglia di campo (in campo la
+#     sedia gira a 0,65%). E' il valore comune che rende queste celle
+#     confrontabili con R88 e R118. LE TAGLIE RESTANO DI CLAUDIO.
+InpRiskPercent=1.0
+
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779800
+
+# --- L'ASSE, UNO SOLO: 0..3000 punti MT5 = 0..30 punti indice = 7 celle
+InpSLBufferPts=0||0||500||3000||Y
