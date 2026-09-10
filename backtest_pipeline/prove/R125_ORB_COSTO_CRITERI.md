@@ -1,3 +1,26 @@
+# ✅ FIRMATO DA CLAUDIO — 10/09/2026, sera
+
+> 🗊️ **Claudio, testuale: _"firma i criteri R125"_.**
+>
+> **I criteri di questo file sono CONGELATI da questo momento, a numeri non
+> visti.** Nessuna cella di R125 e' mai girata: `git status` pulito, nessun CSV
+> `r125*` nel repo, verificato prima della firma.
+>
+> 🔒 **Da qui in avanti valgono le regole di casa:** i criteri si cambiano
+> **prima** dei numeri, non dopo. Se un risultato non piace, **non si tocca il
+> criterio** — si dichiara l'esito e, se serve, si progetta un round nuovo con
+> criteri nuovi, firmati anch'essi prima.
+>
+> 📜 **Cosa la firma autorizza:** 6 file prova, 33 celle, **66 passate**,
+> **~7 minuti** di macchina sul **terminale di BACKTEST** (mai su quelli con le
+> sedie vive). 🚫 **Non autorizza** nessuna modifica a EA, preset, parametri o
+> sedie in forward, e **non tocca il conto reale**.
+>
+> 🚦 **Sei giri di cancello prima della firma**, sei FAIL, tutti corretti.
+> Verbale: `report/FIRMA_R125_2026-09-10.md`.
+
+---
+
 # R125 -- ORB DENTRO LA FRONTIERA DEL COSTO -- CRITERI CONGELATI
 
 > **Questi criteri si leggono PRIMA dei numeri. Data: 10/09/2026.**
