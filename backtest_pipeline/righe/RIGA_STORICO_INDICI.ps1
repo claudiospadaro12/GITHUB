@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_STORICO_INDICI_v1
+#  MARCATORE_RIGA_STORICO_INDICI_v2_TERMINALE_CHIRURGICO
 #  RIGA_STORICO_INDICI.ps1  --  PIU' ANNI DI STORICO SUGLI INDICI
 #                               (richiesta di Claudio, 25/08/2026)
 # ---------------------------------------------------------------------
@@ -84,7 +84,16 @@ param(
   [int]   $AnniPerTranche = 8,      # RAM: la conversione HistData tiene TUTTE le barre in memoria
                                     #   (~690 byte a barra, MISURATO). 8 anni = ~2,6 M barre = ~1,8 GB,
                                     #   che e' la taglia gia' girata il 18/08. Se esce MemoryError: 4.
-  [string]$Cartella      = ""       # dove lavorare (default: ~\abtg_storico_indici)
+  [string]$Cartella      = "",      # dove lavorare (default: ~\abtg_storico_indici)
+  [string]$TerminaleBacktest = ""   # v2 (10/09/2026): la CARTELLA PROGRAMMA del terminale da
+                                    #   usare, es. "C:\MT5_Backtest" (demo 50504400).
+                                    #   Sul VPS e' OBBLIGATORIO passarlo: la ricerca automatica
+                                    #   guarda solo sotto Program Files, dove C:\MT5_Backtest
+                                    #   NON c'e' -- e sceglierebbe il PICCOLO 50503392, che e'
+                                    #   un terminale in FORWARD. Censimento del 10/09 alle 07:21:
+                                    #   vivi 7824 C:\BCM_Reale (REALE 10105439), 8664 ...-V3
+                                    #   (100k 50504263), 9780 ...MT5 Terminal (piccolo 50503392);
+                                    #   C:\MT5_Backtest NON era nemmeno acceso.
 )
 
 $ErrorActionPreference = "Stop"
@@ -358,6 +367,88 @@ New-Item -ItemType Directory -Force -Path $Work,$Logs,$Strum,$Cart,$CartDat,$Car
 # =====================================================================
 #  F0. MT5 CHIUSO -- solo se serve davvero
 # =====================================================================
+#  v2 (10/09/2026) -- LA SCELTA CHIRURGICA DEL TERMINALE.
+#  Prima la ricerca era: Get-ChildItem "C:\Program Files*" -Recurse
+#  -Filter terminal64.exe, poi il primo "*BCM Markets MT5 Terminal*" non
+#  "-V3". Sul VPS quel filtro trova ESATTAMENTE UN candidato -- il
+#  PICCOLO 50503392, che e' un terminale in FORWARD -- quindi non
+#  scattava nemmeno il "non tiro a indovinare", e C:\MT5_Backtest (demo
+#  50504400, il terminale da backtest) non veniva MAI trovato perche'
+#  non sta sotto Program Files. F6 avrebbe copiato il CSV e i preset
+#  dentro la cartella dati del piccolo, e F7 avrebbe compilato e fatto
+#  girare uno script LI' DENTRO.
+#  Le guardie sono le stesse gia' scritte in scarica_storico.ps1 v3:
+#  stesse condizioni, stessi messaggi, confronto per percorso
+#  NORMALIZZATO (mai "-like": un match per prefisso scambierebbe
+#  C:\MT5_Backtest con C:\MT5_Backtest_OLD).
+# =====================================================================
+function NormalizzaPercorso([string]$x){
+  if([string]::IsNullOrWhiteSpace($x)){ return "" }
+  return ($x.Trim() -replace '/','\').TrimEnd('\').ToLowerInvariant()
+}
+
+function RisolviTerminale {
+  # Torna @{ InstDir; Terminal; MetaEditor; DataFolder; Via }.
+  # Muore parlando se il terminale scelto e' uno di quelli vietati.
+  $instDir = ""
+  $via     = ""
+  if($TerminaleBacktest){
+    if(($TerminaleBacktest -like "*-V3*") -or ($TerminaleBacktest -like "*BCM_Reale*")){
+      throw ("TERMINALE VIETATO in -TerminaleBacktest: '" + $TerminaleBacktest + "'. " +
+             "Il 100k (-V3, 50504263) e il REALE (BCM_Reale, 10105439) non si toccano da " +
+             "questo script, nemmeno nominandoli a mano. Il terminale da backtest e' " +
+             "C:\MT5_Backtest (demo 50504400).")
+    }
+    $cart = $TerminaleBacktest.TrimEnd('\','/')
+    if(-not (Test-Path -LiteralPath $cart -PathType Container)){
+      throw ("-TerminaleBacktest: la cartella NON esiste: '" + $cart + "'. Va passata la " +
+             "CARTELLA PROGRAMMA (quella che contiene terminal64.exe), non l'exe e non la cartella dati.")
+    }
+    if(-not (Test-Path -LiteralPath (Join-Path $cart "terminal64.exe") -PathType Leaf)){
+      throw ("-TerminaleBacktest: '" + $cart + "' non contiene terminal64.exe.")
+    }
+    if(-not (Test-Path -LiteralPath (Join-Path $cart "metaeditor64.exe") -PathType Leaf)){
+      throw ("-TerminaleBacktest: '" + $cart + "' non contiene metaeditor64.exe, e senza " +
+             "compilatore lo script MQL5 non si compila.")
+    }
+    $instDir = $cart
+    $via     = "parametro esplicito -TerminaleBacktest"
+  } else {
+    $tutti = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+    $cand  = @($tutti | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" })
+    if($cand.Count -ne 1){ throw ("terminale BCM: trovati " + $cand.Count + " candidati invece di 1. Non tiro a indovinare: passa -TerminaleBacktest.") }
+    $instDir = $cand[0].DirectoryName
+    $via     = "RIPIEGO automatico sotto Program Files"
+  }
+  if(($instDir -like "*-V3*") -or ($instDir -like "*BCM_Reale*")){
+    throw ("TERMINALE SCELTO VIETATO: '" + $instDir + "'. -V3 = 100k 50504263, BCM_Reale = REALE 10105439.")
+  }
+  $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  $dataF = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
+      $o = Join-Path $_.FullName "origin.txt"
+      (Test-Path $o) -and ((NormalizzaPercorso (Get-Content $o -Raw)) -eq (NormalizzaPercorso $instDir))
+    } | Select-Object -First 1 -ExpandProperty FullName
+  if(-not $dataF){
+    # portable: la cartella dati sta dentro la cartella programma
+    if(Test-Path -LiteralPath (Join-Path $instDir "MQL5")){ $dataF = $instDir }
+  }
+  if(-not $dataF){ throw ("cartella dati MT5 non trovata per '" + $instDir + "' (nessun origin.txt che ci punta, e non e' portable).") }
+  Write-Host ""
+  Write-Host "--- TERMINALE SCELTO ------------------------------------------------" -ForegroundColor Cyan
+  Write-Host ("    cartella   : " + $instDir) -ForegroundColor White
+  Write-Host ("    dati       : " + $dataF) -ForegroundColor White
+  Write-Host ("    via        : " + $via) -ForegroundColor Yellow
+  if($via -like "RIPIEGO*"){
+    Write-Host "    (ripiego: la ricerca guarda SOLO sotto Program Files, dove" -ForegroundColor DarkYellow
+    Write-Host "     C:\MT5_Backtest non c'e'. Sul VPS rilancia con" -ForegroundColor DarkYellow
+    Write-Host "     -TerminaleBacktest `"C:\MT5_Backtest`".)" -ForegroundColor DarkYellow
+  }
+  Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
+  return @{ InstDir=$instDir; Terminal=(Join-Path $instDir "terminal64.exe");
+            MetaEditor=(Join-Path $instDir "metaeditor64.exe"); DataFolder=$dataF; Via=$via }
+}
+
+# =====================================================================
 #  MT5 aperto: riscrive i suoi file all'uscita, e la registrazione del
 #  simbolo custom fatta adesso verrebbe cancellata.
 #  METAEDITOR aperto: e' SINGLE-INSTANCE. Con una copia gia' viva il
@@ -366,11 +457,36 @@ New-Item -ItemType Directory -Force -Path $Work,$Logs,$Strum,$Cart,$CartDat,$Car
 #  sorgente sano. I driver gemelli (R97, R103) guardano tutti e due:
 #  qui ne guardavo uno solo.
 #  Lo scarico (F5) NON apre MT5 e NON ha bisogno di questa guardia.
-if(($Importa -or $Verifica) -and -not $SoloControllo){
-  $vivi = @(Get-Process -Name "terminal64","metaeditor64" -ErrorAction SilentlyContinue)
+#  v2: la guardia copre anche -Prepara (F6 SCRIVE nella cartella dati del
+#  terminale: CSV in MQL5\Files e preset in MQL5\Presets -- se il terminale
+#  scelto e' sbagliato, scrive dentro un terminale in FORWARD), ed e'
+#  CHIRURGICA: guarda solo i processi del terminale SCELTO. Gli altri
+#  terminali vivi vengono ELENCATI come risparmiati, non fermano la corsa
+#  e non si toccano. Sul VPS la flotta in forward e' sempre accesa: una
+#  guardia globale renderebbe l'import impossibile, e una guardia che
+#  ammazza tutto renderebbe l'import un incidente.
+$TermScelto = $null
+if(($Prepara -or $Importa -or $Verifica) -and -not $SoloControllo){
+  $TermScelto = RisolviTerminale
+  $eseMio = NormalizzaPercorso $TermScelto.Terminal
+  $medMio = NormalizzaPercorso $TermScelto.MetaEditor
+  $tuttiP = @(Get-Process -Name "terminal64","metaeditor64" -ErrorAction SilentlyContinue)
+  $vivi   = @($tuttiP | Where-Object {
+              $pp = ""
+              try{ $pp = NormalizzaPercorso $_.Path }catch{ $pp = "" }
+              ($pp -eq $eseMio) -or ($pp -eq $medMio) })
+  $risparmiati = @($tuttiP | Where-Object { $vivi -notcontains $_ })
+  if($risparmiati.Count -gt 0){
+    Write-Host ""
+    Write-Host ("--- RISPARMIATI: " + $risparmiati.Count + " processi MT5 di ALTRI terminali, e NON si toccano:") -ForegroundColor Cyan
+    foreach($r in $risparmiati){
+      $rp = ""; try{ $rp = $r.Path }catch{ $rp = "(path non leggibile)" }
+      Write-Host ("    pid " + $r.Id + "  " + $r.ProcessName + "  " + $rp) -ForegroundColor Cyan
+    }
+  }
   if($vivi.Count -gt 0){
     Write-Host ""
-    Write-Host ("!!! APERTO: " + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ", ")) -ForegroundColor Red
+    Write-Host ("!!! APERTO IL TERMINALE BERSAGLIO: " + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ", ") + " -- " + $TermScelto.InstDir) -ForegroundColor Red
     Write-Host "    MT5 riscrive i suoi file all'uscita: quello che facciamo adesso" -ForegroundColor Yellow
     Write-Host "    verrebbe cancellato. E con MetaEditor aperto la compilazione torna" -ForegroundColor Yellow
     Write-Host "    subito SENZA compilare, e il referto direbbe 'non compila' di uno" -ForegroundColor Yellow
@@ -499,21 +615,35 @@ function FinestraSimbolo([string]$bcm, [int]$daGlob, [int]$aGlob){
 #   - chiusura PULITA: col kill le BARRE restano e la REGISTRAZIONE del
 #     simbolo no (i 32 lanci a vuoto del 14/08)
 # =====================================================================
+#  v2: CHIRURGICA. Prima chiudeva -- e poi AMMAZZAVA con Stop-Process
+#  -Force -- OGNI terminal64 vivo sulla macchina. Sul VPS quella riga
+#  spegneva la flotta in forward, REALE 10105439 compreso. Adesso tocca
+#  solo i processi il cui Path e' ESATTAMENTE l'eseguibile del terminale
+#  scelto; un processo di cui non si riesce a leggere il Path NON e' un
+#  bersaglio (nel dubbio non si ammazza niente).
 function ChiudiMT5Pulito([int]$secondi = 90){
-  $procs = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+  if(-not $TermScelto){ throw "ChiudiMT5Pulito chiamata senza terminale scelto: non chiudo MT5 alla cieca." }
+  $eseMio = NormalizzaPercorso $TermScelto.Terminal
+  $Miei = {
+    @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object {
+        $pp = ""; try{ $pp = NormalizzaPercorso $_.Path }catch{ $pp = "" }
+        $pp -eq $eseMio })
+  }
+  $procs = @(& $Miei)
   if($procs.Count -eq 0){ return $true }
   foreach($p in $procs){ try{ [void]$p.CloseMainWindow() }catch{ } }
   $scade = (Get-Date).AddSeconds($secondi)
   while((Get-Date) -lt $scade){
     Start-Sleep -Seconds 2
-    if(@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue).Count -eq 0){
+    if(@(& $Miei).Count -eq 0){
       Write-Host "    MT5 chiuso in modo pulito (simboli personalizzati salvati)." -ForegroundColor Green
       return $true
     }
   }
   Write-Host "    !! MT5 non si e' chiuso da solo: lo forzo. I simboli creati adesso" -ForegroundColor Yellow
   Write-Host "       potrebbero NON essere registrati (le barre restano, il simbolo no)." -ForegroundColor Yellow
-  foreach($p in @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)){
+  foreach($p in @(& $Miei)){
+    Write-Host ("       forzo SOLO il pid " + $p.Id + " (" + $TermScelto.InstDir + ")") -ForegroundColor Yellow
     try{ Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue }catch{ }
   }
   Start-Sleep -Seconds 3
@@ -1301,19 +1431,14 @@ if($Prepara -and $CsvFinali.Count -gt 0 -and -not $SoloControllo){
   $pp6 = NuovoPasso "F6" "prepara import"
   $pp6.Inizio = (Ora)
 
-  # --- il terminale PER NOME, mai Select-Object -First 1 alla cieca
-  $tutti = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-  $cand  = @($tutti | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" })
-  if($cand.Count -ne 1){ throw ("terminale BCM: trovati " + $cand.Count + " candidati invece di 1. Non tiro a indovinare.") }
-  $InstDir    = $cand[0].DirectoryName
-  $Terminal   = Join-Path $InstDir "terminal64.exe"
-  $MetaEditor = Join-Path $InstDir "metaeditor64.exe"
-  $termRoot   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-  $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
-      $o = Join-Path $_.FullName "origin.txt"
-      (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $InstDir)
-    } | Select-Object -First 1 -ExpandProperty FullName
-  if(-not $DataFolder){ throw "cartella dati MT5 non trovata (origin.txt non punta a nessuna cartella)." }
+  # --- v2: il terminale e' quello gia' RISOLTO e DICHIARATO dalla guardia
+  #     chirurgica. Niente seconda ricerca: due ricerche indipendenti sono
+  #     due occasioni di scegliere terminali diversi nella stessa corsa.
+  if(-not $TermScelto){ $TermScelto = RisolviTerminale }
+  $InstDir    = $TermScelto.InstDir
+  $Terminal   = $TermScelto.Terminal
+  $MetaEditor = $TermScelto.MetaEditor
+  $DataFolder = $TermScelto.DataFolder
   $MqlFiles = Join-Path $DataFolder "MQL5\Files"
   $MqlScr   = Join-Path $DataFolder "MQL5\Scripts"
   $MqlPre   = Join-Path $DataFolder "MQL5\Presets"
@@ -1448,18 +1573,12 @@ if($Verifica -and -not $SoloControllo){
   $pv.Inizio = (Ora)
   try{
     if(-not $DataFolder){
-      $tutti = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-      $cand  = @($tutti | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" })
-      if($cand.Count -ne 1){ throw ("terminale BCM: " + $cand.Count + " candidati invece di 1.") }
-      $InstDir  = $cand[0].DirectoryName
-      $Terminal = Join-Path $InstDir "terminal64.exe"
-      $MetaEditor = Join-Path $InstDir "metaeditor64.exe"
-      $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-      $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
-          $o = Join-Path $_.FullName "origin.txt"
-          (Test-Path $o) -and ((Get-Content $o -Raw).Trim() -ieq $InstDir)
-        } | Select-Object -First 1 -ExpandProperty FullName
-      if(-not $DataFolder){ throw "cartella dati MT5 non trovata." }
+      # v2: stesso terminale della guardia, mai una ricerca nuova
+      if(-not $TermScelto){ $TermScelto = RisolviTerminale }
+      $InstDir    = $TermScelto.InstDir
+      $Terminal   = $TermScelto.Terminal
+      $MetaEditor = $TermScelto.MetaEditor
+      $DataFolder = $TermScelto.DataFolder
     }
     $MqlScr = Join-Path $DataFolder "MQL5\Scripts"
     $MqlPre = Join-Path $DataFolder "MQL5\Presets"
