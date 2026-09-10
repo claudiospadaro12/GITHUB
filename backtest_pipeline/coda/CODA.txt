@@ -28,7 +28,7 @@
 # =====================================================================
 
 # --- 1. che cosa e' attaccato, e dove. La foto di stanotte.
-d2922bf6f26c3af35dbe5863d50d15d2ac42a584 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
 
 # --- 2. chi ha scritto nei log e chi e' muto.
 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
@@ -39,11 +39,24 @@ d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti
 # --- 4. quanto e' grossa questa macchina (per il quarto MT5).
 269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
 
+# >>> 10/09/2026 -- PIN RIFATTI su 01, 05, 08 e 10 (classe 222).
+#     CODA_08 cercava i .chr in <dati>\profiles\charts (che e' MT4) invece
+#     che in <dati>\MQL5\Profiles\Charts (MT5): stampava "TOTALE SEDIE
+#     STAMPATE: 0" senza un errore, e CODA_05 "la cartella del profilo
+#     attivo non esiste" su 6 terminali su 6. CODA_01, stessa notte, ne
+#     leggeva 49: il percorso giusto era gia' in casa ed e' stato copiato
+#     da li'. Adesso ogni zero dice di CHE TIPO e' (cartella non trovata /
+#     trovata e vuota / zero sedie davvero), altrimenti il silenzio si
+#     sposta e basta.
+#     Da controllare nel referto di stanotte: CODA_08 deve stampare la
+#     riga "=== I PARAMETRI DI OGNI SEDIA, IN FORMA DI .set (v2) ===" e un
+#     TOTALE > 0; se restasse 0, la riga di ESITO dice dove ho guardato.
+
 # --- 5. la foto delle sedie e' fresca o vecchia? + il calendario news letto davvero.
 #     Nasce dalla contraddizione dell'08/09 03:30: sul terminale del conto
 #     reale CODA_01 non vede il Guardian nei .chr, CODA_02 lo vede scrivere
 #     464 righe fino alle 23:56. Un EA che scrive STA GIRANDO.
-e1ca7f17d796d8b262e8cc6e72cb69921386d5a3 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
+d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
 
 # --- 6. quale dei due alberi di sorgenti e' stato copiato sui terminali.
 #     Nel repo ABTG_PostNews esiste in due versioni diverse (666 righe /
@@ -64,7 +77,7 @@ e1ca7f17d796d8b262e8cc6e72cb69921386d5a3 | backtest_pipeline/righe/CODA_05_foto_
 #     nessun preset nel repo: le taglie 0,65 e 0,30 vivono SOLO nei .chr. Se
 #     quel terminale si azzera, la configurazione del dry-run FTMO non e'
 #     ricostruibile da nessuna fonte scritta.
-47b61d06c699590717f53aa9e2035593abd5ae5e | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
+d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
 
 # --- 9. il giornale operativo di OGNI conto, compreso quello che non ha
 #     il TradeExporter. Claudio (08/09 sera): "voglio che monitori
@@ -78,4 +91,4 @@ e1ca7f17d796d8b262e8cc6e72cb69921386d5a3 | backtest_pipeline/righe/CODA_05_foto_
 #     dei deal e la sintesi in MQL5\Files (righe 961-962 del sorgente): questa
 #     riga li porta fuori dal terminale. Distingue "ledger vuoto" da "ledger
 #     pieno di zeri": sono due cose diverse.
-a864bc78ddd6d9af315ad32e2682179d6249f7ae | backtest_pipeline/righe/CODA_10_slippage.ps1
+d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
