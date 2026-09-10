@@ -9,8 +9,8 @@
 > e 21 le misure di stop, tutte le ore modali, tutti gli spread orari, i due
 > ancoraggi (114,40 e 47,70), il fattore di conversione e la correlazione di
 > rango. **Il motore di misura riproduce al centesimo.** Sono stati corretti
-> **sei difetti** (elencati in §0-bis) e aperte **cinque classi nuove**
-> (197-201) in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
+> **sette difetti** (elencati in §0-bis) e aperte **sei classi nuove**
+> (197-202) in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
 > 🟢 Nota di perimetro: questo referto **non archivia nessun
 > candidato come morto** — dove manca un dato scrive *NON ANCORA MISURATO* —
 > quindi non attiva il cancello del 09/09 sui verdetti di archiviazione (le 5
