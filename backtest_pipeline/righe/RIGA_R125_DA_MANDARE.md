@@ -1,9 +1,10 @@
 # 📬 R125 — LA RIGA DA MANDARE (bozza, IN ATTESA DEL CANCELLO)
 
-> ⏳ **STATO: BOZZA.** Scritta il 10/09 sera dopo la firma di Claudio sui
-> criteri. **NON e' ancora passata da `controlla_riga.py` ne' dall'agente
-> `controllo-preventivo`.** Finche' non c'e' il PASS, questa riga **non si
-> incolla**. Regola del 09/09.
+> ✅ **STATO: PASSATA DAL CANCELLO** il 10/09/2026.
+> `controlla_riga.py` verde sui tre blocchi (17 PASSATI, 0 bloccanti) **e**
+> agente `controllo-preventivo`: **PASS con 3 difetti corretti** (classi
+> **217, 218, 219**) e 1 rilievo sul driver (classe **220**). I tre blocchi
+> sono stati **ESEGUITI** in pwsh contro un driver-banco, non solo letti.
 
 **Criteri**: `backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md` — ✅ **FIRMATI**
 da Claudio il **10/09/2026 sera**, a numeri non visti. Verbale:
@@ -35,6 +36,12 @@ scegliere il terminale al **ripiego**, e sulla macchina ce ne sono tre.
 ⚠️ **`-Deposito 100000` va passato SEMPRE**: il default del driver e' **10.000**,
 i file prova chiedono **100.000**. Senza, il round gira alla taglia sbagliata e
 i numeri non sono confrontabili con R88.
+✅ **Verificato per ESECUZIONE** (non per lettura): il parametro arriva intatto
+fino a `walkforward_generico.ps1`, che lo scrive come `Deposit=100000` nell'.ini.
+
+🔴 **`-Prova` vuole il NOME NUDO del file, senza `prove\`** (classe **217**): il
+driver lo valida con `^[A-Za-z0-9_.-]+$` — il backslash lo fa **morire subito**,
+e poi comporrebbe comunque una URL `.../prove/prove\...` da 404.
 
 ---
 
@@ -106,8 +113,12 @@ i numeri non sono confrontabili con R88.
 ```
 
 📨 **Poi manda**: `Desktop\R125_<data>_<ora>.zip`.
-📖 **Cosa guardare per primo nella stampa**: **12 CSV** (6 etichette × IS/OOS).
-Se ne mancano, dillo — **non si legge un round monco come se fosse intero**.
+📖 **Cosa guardare per primo nella stampa**: le **due righe di conteggio** —
+**`CSV raccolti: 12 su 12`** e **`REFERTI raccolti: 6 su 6`**.
+Se un numero e' piu' basso, dillo — **non si legge un round monco come se fosse
+intero**. (Classe **218**: i CSV stanno in `abtg_round\risultati_prove`, i
+referti su `Desktop\ROUND_<etichetta>\`: sono **due posti diversi**, e la prima
+stesura raccoglieva solo il primo.)
 
 ---
 

@@ -237,11 +237,58 @@ def in_una_guardia(righe, idx):
             return True
     return False
 
-def controlla_terminali(path, testo, dove):
-    righe = righe_utili(testo)
-    for k, (i, nudo) in enumerate(righe):
+# CLASSE 221 (10/09/2026). Il commento a GUARDIA_RIGA gia' diceva che sulla
+# riga la GUARDIA generica e' "troppo larga (basterebbe un Write-Host per
+# zittire il divieto)" -- ma la correzione era stata applicata SOLO al ramo
+# della riga su UNA sola riga fisica. Una riga di lancio MULTIRIGA passa da
+# controlla_terminali(), che usa la GUARDIA larga, e li' il buco e' rimasto.
+# Contro-esempio misurato su R125: cambiando il bersaglio in 'C:\BCM_Reale'
+# la riga usciva "nessun difetto meccanico", perche' la riga SUCCESSIVA era
+# "if($LASTEXITCODE -ne 0){ Write-Host (...) -ForegroundColor Red }" e conteneva
+# Write-Host, Red e -ne, cioe' TRE dei token della GUARDIA larga.
+# Due rimedi, indipendenti:
+#   a) sul testo di una RIGA DI LANCIO si usa la guardia STRETTA;
+#   b) un percorso vietato passato come VALORE di -Terminal*/-Percorso* non e'
+#      mai una guardia: quello e' un bersaglio, e blocca sempre.
+GUARDIA_STRETTA = r"(Muori|throw|exit\s+1|VIETATO)"
+# Attenzione: i percorsi veri CONTENGONO SPAZI ("C:\Program Files\BCM Markets
+# MT5 Terminal -V3"). Un [^\s]* si ferma al primo spazio e lascia passare
+# proprio i due terminali di Program Files: si cattura il VALORE per intero
+# (fra apici, fra virgolette, o fino a spazio se nudo) e lo si confronta dopo.
+BERSAGLIO_VALORE = re.compile(
+    r"-(?:Terminal(?:e)?(?:Backtest)?|Percorso|Cartella|Path)\s+"
+    r"(?:'([^']*)'|\"([^\"]*)\"|(\S+))", re.I)
+
+def bersagli_vietati(riga_cruda):
+    """I valori di -Terminal*/-Percorso* che nominano un terminale vietato."""
+    fuori = []
+    for m in BERSAGLIO_VALORE.finditer(riga_cruda):
+        val = m.group(1) or m.group(2) or m.group(3) or ""
         for v in VIETATI_PERCORSO:
-            if v in nudo and not in_una_guardia(righe, k):
+            if v.lower() in val.lower():
+                fuori.append((v, val))
+    return fuori
+
+def controlla_terminali(path, testo, dove, stretta=False):
+    righe = righe_utili(testo)
+    # Il percorso di un terminale sta SEMPRE fra virgolette, e righe_utili()
+    # le toglie: questo controllo va fatto sul testo GREZZO (stessa scelta,
+    # e stessa motivazione, del ramo a riga singola).
+    grezze = {n: l for n, l in enumerate(testo.splitlines(), 1)}
+    for k, (i, nudo) in enumerate(righe):
+        cruda = grezze.get(i, "")
+        if not re.search(GUARDIA_STRETTA, cruda, re.I):
+            for v, val in bersagli_vietati(cruda):
+                blocca("221", "r." + str(i) + ": il terminale VIETATO '" + v + "' e' passato come"
+                              " BERSAGLIO (-Terminal.../-Percorso... = '" + val + "'). Nessuna"
+                              " guardia lo rende innocuo: il 100k 50504263, il REALE 10105439 e"
+                              " il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
+        for v in VIETATI_PERCORSO:
+            if stretta:
+                coperto = bool(re.search(GUARDIA_STRETTA, nudo, re.I))
+            else:
+                coperto = in_una_guardia(righe, k)
+            if v in nudo and not coperto:
                 blocca("TERMINALE", "r." + str(i) + ": nomina '" + v + "' senza una guardia che lo rifiuta nelle righe vicine. Il 100k 50504263, il REALE 10105439 e il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
         for c in CONTI_VIETATI:
             if c in nudo and not in_una_guardia(righe, k):
@@ -432,7 +479,7 @@ def controlla_riga_lancio(riga):
         passa("bersaglio dichiarato: " + TERMINALE_BUONO)
     elif "-Terminal" in riga or "-TerminaleBacktest" in riga:
         rileva("TERMINALE", "la riga passa un terminale che non e' " + TERMINALE_BUONO + ": verificare a mano che non sia un conto in forward")
-    controlla_terminali("<riga>", riga, "<riga di lancio>")
+    controlla_terminali("<riga>", riga, "<riga di lancio>", stretta=True)
 
     # --- 6. la raccolta
     if "Compress-Archive" in riga or "zip" in riga.lower() or "-File" in riga:

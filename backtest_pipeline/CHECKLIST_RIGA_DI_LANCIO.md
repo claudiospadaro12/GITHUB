@@ -12839,3 +12839,146 @@ della classe 210 in un'altra veste:** la misura che manca resta invisibile.
 > annullato**. Agganciare l'avviso a un ramo vuol dire spegnerlo in tutti gli
 > altri — e il ramo dove si tace e', per costruzione, quello dove nessuno sta
 > guardando.
+
+---
+
+## 217. 📄 IL PARAMETRO `-Prova` VUOLE IL **NOME NUDO**: `prove\` davanti lo uccide
+
+**10/09/2026, cancello su `RIGA_R125_DA_MANDARE.md`.** La riga passava
+`-Prova ('prove\' + $prove[$e])`, ragionevole a leggerlo: il file **sta**
+in `prove\`. Ma `RIGA_ROUND_VPS.ps1` valida quel parametro con
+`NomeValido` = `^[A-Za-z0-9_.-]+$`, che **non ammette il backslash**, e
+subito dopo compone la URL come `.../backtest_pipeline/prove/ + $Prova`.
+Quindi il prefisso fa due danni in fila: 🛑 `Muori` immediato al pre-volo,
+e — se anche passasse — una URL `.../prove/prove\...` da **404**.
+
+Misurato **eseguendo**, non leggendo: con un driver-banco che ricopia il
+`param()` e `NomeValido` veri, il passo 1 muore su `r125a` ed esce `1`,
+e il `break` ferma tutto. **Zero CSV, giro bruciato.**
+
+> ### 🔴 LA REGOLA
+> **Un parametro che finisce sia in un `Join-Path` sia in una URL non e' un
+> percorso: e' un NOME.** Prima di comporlo, si apre il `param()` del
+> destinatario e si legge la **validazione**, non il nome del parametro.
+> E il collaudo si fa **lanciando** la riga contro un finto destinatario che
+> stampa cosa ha ricevuto: `-Prova [prove\R125a...]` si vede a colpo d'occhio,
+> rileggendo la riga no.
+
+---
+
+## 218. 📦 LA RACCOLTA CHE PESCA IN **UN SOLO** POSTO, quando i pezzi stanno in **DUE**
+
+**10/09/2026, stessa riga.** Il passo 3 raccoglieva da
+`$env:USERPROFILE\abtg_round` con `-Include '*r125*.csv','*REFERTO*.txt'`.
+I CSV stanno davvero li' (`abtg_round\risultati_prove\<EA>\`, perche' il
+driver interno usa `$PSScriptRoot`). 🔴 **I REFERTI no**: `RIGA_ROUND_VPS.ps1`
+li scrive in `Desktop\ROUND_<etichetta>\REFERTO_ROUND_<etichetta>.txt`.
+Quel `-Include '*REFERTO*.txt'` **non poteva matchare niente**: sarebbe uscito
+uno zip con 12 CSV e **zero referti**, cioe' i numeri **senza** il deposito,
+la `@DAQUANDO`, il tetto barre, i **PID prima/dopo** (la prova stampata che il
+conto reale non e' stato toccato) e i RILIEVI.
+
+⚠️ Aggravante di misura: il conteggio stampato era
+`file raccolti: N (attesi 12 CSV)` — un **totale misto** di CSV, referti, log
+e file prova. Con quel numero **non si puo' accorgersi** che mancano i referti:
+`N` sarebbe stato "grande abbastanza" comunque.
+
+> ### 🔴 LA REGOLA
+> **Un pattern di raccolta che non puo' MAI matchare e' peggio di uno
+> mancante**: promette una verifica e la restituisce sempre soddisfatta.
+> Prima di scrivere `-Include`, si apre lo script che PRODUCE i file e si
+> legge **dove li scrive** (`$d = Join-Path $dsk ...`). E si conta **ogni
+> famiglia di file separatamente** (`CSV: 12 su 12` · `REFERTI: 6 su 6`):
+> un totale unico nasconde esattamente la cosa che manca.
+
+---
+
+## 219. 🟡 `exit 3` NON E' UN FALLIMENTO: "diverso da zero" e' una lettura troppo grossa
+
+**10/09/2026, stessa riga.** Il passo 2 faceva
+`if($LASTEXITCODE -ne 0){ 'PARZIALE ... i CSV gia' fatti restano' }`. Ma
+`RIGA_ROUND_VPS.ps1` ha **quattro** esiti dichiarati: `0` girato · `3` girato
+**CON RILIEVI** · `2` **NON MISURATO** · `1` non e' nemmeno partito. Con
+`-ne 0` un round **completo e valido** con un rilievo innocuo (p.es. *"tetto
+barre non verificabile dal codice"*) si presentava a Claudio in giallo come
+**"PARZIALE"** — e un round **davvero non girato** (`2`) usava **le stesse
+parole**. Due fatti opposti, un messaggio solo.
+
+> ### 🔴 LA REGOLA
+> **Se lo script chiamato dichiara N codici di uscita, la riga ne legge N, non
+> due.** `-ne 0` e' ammesso solo dove l'unica alternativa e' "fallito".
+> E i tre rami si **esercitano**, con un driver-banco che esce apposta `0/3/2/1`:
+> e' l'unico modo di vedere il testo che Claudio leggera' davvero.
+
+---
+
+## 220. 🛑 LA GUARDIA CHE VIETA DUE TERMINALI SU TRE — il **piccolo 50503392** non e' protetto
+
+**10/09/2026, rilievo aperto su `RIGA_ROUND_VPS.ps1` (non sulla riga).**
+La guardia e':
+`if($cartellaBT -like "*-V3*" -or $cartellaBT -like "*BCM_Reale*"){ Muori }`.
+✅ Verificata **eseguendola**: muore davvero su `C:\BCM_Reale` (**10105439**)
+e su `...BCM Markets MT5 Terminal -V3` (**50504263**).
+🔴 **Ma `C:\Program Files\BCM Markets MT5 Terminal` — il piccolo 50503392, che
+ha le sedie VIVE in forward — NON e' nella lista.** Con
+`-TerminaleBacktest 'C:\Program Files\BCM Markets MT5 Terminal' -ChiudiBacktest`
+il driver lo tratterebbe come bersaglio legittimo e **lo chiuderebbe**.
+Sul VPS quella cartella **esiste**, quindi il `Test-Path` non salva.
+
+⚠️ Non tocca R125 (la riga nomina `C:\MT5_Backtest`, e il cancello lo
+verifica), ma e' un **buco di classe 175** che aspetta il primo refuso.
+
+> ### 🔴 LA REGOLA
+> **La lista dei terminali vietati si scrive per ELENCO dei protetti, non per
+> elenco dei sospetti** (e' la classe 180 applicata ai processi): *un solo*
+> percorso e' bersaglio, **tutto il resto e' vietato**. Finche' la guardia e'
+> scritta al contrario, i conti nuovi nascono senza protezione.
+> 🔧 Correzione da fare al driver (richiede **pin nuovo**, quindi non e' stata
+> fatta dentro il cancello di R125): sostituire la lista nera con
+> `if($cartellaBT -ne "C:\MT5_Backtest"){ Muori }` oppure aggiungere
+> `"BCM Markets MT5 Terminal"` ai vietati con l'eccezione esplicita per
+> `-V3` gia' coperta.
+
+---
+
+## 221. 🚨 IL CANCELLO LASCIAVA PASSARE UNA RIGA PUNTATA SUL **CONTO REALE** — due buchi in fila
+
+**10/09/2026, contro-esempio costruito durante il cancello di R125.** La riga
+approvata era giusta; ma per provare a **romperla** (regola del 10/09) le ho
+cambiato il bersaglio in `-TerminaleBacktest 'C:\BCM_Reale'`. 🔴 **Il cancello
+deterministico ha risposto `ESITO: nessun difetto meccanico`.** Idem con
+`'...BCM Markets MT5 Terminal -V3'` (100k **50504263**) e col piccolo
+**50503392**. Tre bersagli vietati su tre, **tutti approvati**.
+
+I due buchi, indipendenti, tutti e due dentro `controlla_terminali()`:
+
+1. 🧵 **`righe_utili()` TOGLIE le stringhe** (`senza_stringhe`), e il percorso di
+   un terminale sta **sempre** fra apici. Il divieto cercava `BCM_Reale` in un
+   testo da cui `'C:\BCM_Reale'` era gia' stato cancellato: **non poteva
+   trovarlo mai.** Il ramo a riga singola lo sapeva gia' (*"i percorsi vietati
+   vanno cercati anche DENTRO le stringhe"*) e usava il testo grezzo; il ramo
+   multiriga no.
+2. 🐺 **La `GUARDIA` larga** vale `(Muori|throw|exit 1|VIETATO|notlike|-ne|Write-Host|Red)`
+   su una **finestra di 5 righe**. La riga sotto al bersaglio era
+   `if($LASTEXITCODE -ne 0){ Write-Host (...) -ForegroundColor Red; break }`:
+   **tre token di guardia** in una riga che non e' una guardia di niente.
+   Anche qui il commento di `GUARDIA_RIGA` lo diceva — *"basterebbe un
+   Write-Host per zittire il divieto"* — ma la stretta era stata applicata
+   **solo** al ramo a riga singola.
+
+> ### 🔴 LA REGOLA
+> **Un valore passato a `-Terminal*` / `-Percorso*` e' un BERSAGLIO, non una
+> menzione: nessuna guardia vicina lo puo' rendere innocuo.** Si cattura il
+> **valore intero** (fra apici, fra virgolette o fino a spazio) e lo si
+> confronta con l'elenco dei vietati — 🚫 **mai** con un `[^\s]*`, perche' i
+> percorsi veri contengono spazi (`C:\Program Files\BCM Markets MT5 Terminal -V3`)
+> e un troncamento allo spazio lascia passare **proprio** i due terminali di
+> Program Files.
+>
+> ### 🧯 E LA LEZIONE PIU' GRANDE
+> **Una correzione applicata a UN ramo non e' una correzione: e' una toppa.**
+> Tutti e due i buchi erano gia' **descritti a parole nei commenti del file**,
+> accanto al ramo dove erano stati chiusi. Quando si scrive *"attenzione, qui
+> X"*, si cerca **ogni** posto dove X vale, e lo si prova. Verifica fatta:
+> i tre contro-esempi ora **bloccano**, la riga vera resta verde, e su
+> **237 `.ps1`** del progetto la classe 221 produce **0 falsi positivi**.
