@@ -24,6 +24,43 @@ misura nuova gli ridara' una ragione.
 
 # 🔴 URGENTI — bloccano la strada verso il 1° ottobre
 
+## 0. 🖊️ R125 — FIRMA SUI CRITERI, A NUMERI NON VISTI
+📄 `backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md` · dossier `report/ROUND_ORB_ATR_PS5_2026-09-10.md`
+💰 **Costo: ~7 minuti di macchina** (66 passate x 0,101 min/passata, ritmo MISURATO su R88).
+🚦 **Sei giri di cancello, sei FAIL, tutti corretti.** Il sesto chiude:
+*"SI', R125 e' lanciabile oggi con i buchi dichiarati"* — e i criteri ammettono
+**una sola lettura**, dimostrato su **200.000 griglie**, non promesso.
+
+### 🟢 COSA COMPRI CON LA FIRMA — sei MISURE
+1. Se sull'asse del buffer esiste un **altopiano** e **a che costo**.
+2. La **prima misura in assoluto** della geometria OPPRANGE su **DAX** e su **NASDAQ**
+   (finora esiste solo sul Dow).
+3. Il lato **short** del DAX, che nel censimento dei lati **non esiste**.
+4. L'**ampiezza minima di range** (`InpMinRangePct`), manopola mai messa ad asse.
+5. Il **parziale** (`InpTP1Pct`), idem.
+6. La finestra **15 minuti** sul Nasdaq contro i 5 che gira oggi.
+
+### 🔴 COSA **NON** COMPRI — e va letto, non saltato
+- 🚫 **Nessuna sedia schierabile.** Sul **Dow e' impossibile per costruzione**:
+  `n` e' **invariante 71/119 in tutte e 48 le celle** di R88a (verificato sul CSV
+  primario: `Trades` ha **un solo valore distinto**). L'asse muove lo **stop**, non
+  gli **ingressi**.
+- 🟠 Su **DAX e Nasdaq** l'`n` atteso e' **90-190** e **100-220**, cioe' **a
+  cavallo dei 150**: il merito **puo' restare sospeso anche li'**.
+- 🚫 **Il round puo' chiudere senza scegliere NESSUNA cella** — la procedura ha
+  tre uscite legittime a mani vuote. Rimedio dichiarato: asse esteso, +2 celle
+  = 4 passate = **~0,4 minuti**.
+- 🚫 **Niente tocca il conto reale 10105439.** La `770611` resta **sotto il
+  pavimento di costo** (23,5x derivato / **29,5x misurato** contro 40x) e quella
+  domanda resta **tua**, aperta anche dopo R125.
+
+### 🔁 E il fatto che ha riaperto tutto
+A parita' di rischio (1%) e sugli **stessi 119 trade**, il ramo **OPPRANGE** fa
+**DD 3,84%** dove la geometria della sedia viva ne fa **9,76%** — 12/12 celle sotto
+il cancello contro 12/12 sopra. 👉 **Il DD e' un fatto accaduto, quindi vale a
+qualunque n** (Emendamento B). E' il **rischio** a essere leggibile, non il merito.
+
+
 ## 1. 🖱️ RICOMPILARE E RICARICARE LE 7 SEDIE COL FIX DEL LOTTO
 **Cosa**: il bug del lotto è corretto in **15 sorgenti**, ma sui terminali gira
 l'`.ex5`, non il sorgente. Finché non ricompili, quelle sedie **rischiano fino
