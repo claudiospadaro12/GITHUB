@@ -1,0 +1,348 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8">
+<title>PS5 ORB Bot - Domande e richiesta dati</title><style>
+@page { size: A4; margin: 16mm 14mm 15mm 14mm; }
+*{box-sizing:border-box}
+body{font-family:"DejaVu Sans",Arial,Helvetica,sans-serif;font-size:9.4pt;line-height:1.45;color:#16202b;margin:0}
+h1{font-size:15.5pt;color:#0b3a5d;border-bottom:2.5px solid #0b3a5d;padding-bottom:5px;margin:20px 0 10px;page-break-after:avoid}
+h2{font-size:12pt;color:#0b3a5d;margin:16px 0 7px;border-bottom:1px solid #c8d6e2;padding-bottom:3px;page-break-after:avoid}
+h3{font-size:10.4pt;color:#12496f;margin:12px 0 5px;page-break-after:avoid}
+p{margin:6px 0}
+ul,ol{margin:6px 0 6px 17px;padding:0}
+li{margin:3px 0}
+table{border-collapse:collapse;width:100%;margin:9px 0;font-size:8.4pt;page-break-inside:avoid}
+th{background:#0b3a5d;color:#fff;text-align:left;padding:5px 7px;font-weight:600}
+td{border-bottom:1px solid #dde5ec;padding:5px 7px;vertical-align:top}
+tr:nth-child(even) td{background:#f5f8fa}
+code{background:#eef2f6;padding:1px 4px;border-radius:3px;font-family:"DejaVu Sans Mono",monospace;font-size:8.3pt}
+blockquote{margin:9px 0;padding:8px 12px;background:#f5f8fa;border-left:4px solid #0b3a5d;page-break-inside:avoid}
+blockquote p{margin:4px 0}
+hr{border:0;border-top:2px solid #0b3a5d;margin:16px 0}
+strong{color:#0b2c47}
+.cover{text-align:center;padding:60mm 0 0}
+.cover h1{border:0;font-size:24pt;margin-bottom:4px;letter-spacing:.5px}
+.cover .sub{font-size:11.5pt;color:#4a5b6b;margin-bottom:26px}
+.cover .box{display:inline-block;text-align:left;background:#f5f8fa;border:1px solid #c8d6e2;border-radius:6px;padding:15px 22px;font-size:9.4pt;line-height:1.6}
+.brk{page-break-before:always}
+.foot{margin-top:20px;padding-top:8px;border-top:1px solid #c8d6e2;font-size:8pt;color:#6b7b8b;text-align:center}
+</style></head><body>
+<div class="cover">
+  <h1>PS5 ORB BOT</h1>
+  <div class="sub">Domande e richiesta dati &middot; 10 settembre 2026</div>
+  <div class="box">
+    <b>Da:</b> Claudio Spadaro (progetto ABTG)<br>
+    <b>A:</b> Marco Garbuglia<br>
+    <b>Riferimento:</b> <i>PS5 ORB Bot &mdash; Documento Master</i>, EA v2.60, 10/08/2026<br><br>
+    <b>Il documento e' in due parti:</b><br>
+    &nbsp;&nbsp;<b>PARTE A</b> &mdash; domande per te, cose che sai<br>
+    &nbsp;&nbsp;<b>PARTE B</b> &mdash; richiesta dati per il tuo Claude, cose da estrarre dai file<br><br>
+    Se hai poco tempo: <b>le prime tre domande della Parte A</b><br>sono quelle che cambiano davvero cosa facciamo noi.
+  </div>
+</div>
+<div class="brk"></div><h1>PARTE A &mdash; Domande per Marco</h1><h1>DOMANDE SUL PS5 ORB BOT — da mandare al collega</h1>
+<hr />
+<h2>Ciao Marco,</h2>
+<p>grazie di aver condiviso il documento master del PS5. L'abbiamo letto tutto, e
+prima delle domande ti diciamo cosa ci ha colpito, perche' non e' una cortesia:</p>
+<ul>
+<li>
+<p><strong>La gerarchia di fiducia scritta sopra ogni numero</strong> (forward live &gt; tick
+  100% &gt; coarse 1 minuto) con il costo dell'errore <strong>misurato</strong> invece che
+  stimato: <em>US100 in coarse PF 2,18, lo stesso asset al tick reale </em><em>1,15</em>**.
+  Non l'avevamo mai vista dichiarata cosi' bene, e ce la portiamo in casa.</p>
+</li>
+<li>
+<p><strong>La tabella degli scartati con i numeri accanto.</strong> Da noi vale una regola
+  identica: <em>"un candidato archiviato senza un numero non e' un candidato morto,
+  e' un'occasione persa che nessuno ritrovera' piu'"</em>. La tua tabella e' proprio
+  quello, fatto bene.</p>
+</li>
+<li>
+<p><strong>L'autopsia della settimana in perdita, in euro, con la colpa attribuita
+  alla configurazione e non alla strategia.</strong> In particolare questa riga:
+  <em>"la configurazione in produzione deve corrispondere all'ultima versione
+  validata, e va verificata </em><em>sul terminale — non sui file <code>.set</code></em><em>"</em>.
+   <strong>Lo stesso identico difetto lo abbiamo trovato in casa nostra oggi</strong>: un
+  preset corretto nel repo e un grafico vivo con un valore diverso sopra. Averlo
+  letto da te con il conto in mano ci ha fatto controllare subito.</p>
+</li>
+</ul>
+<p>Le domande sotto nascono dal volerlo capire bene, non dal metterlo in dubbio.</p>
+<hr />
+<h1>PARTE 1 — LE TRE CHE CONTANO DAVVERO</h1>
+<h3>1. Il pavimento di stop-loss: <strong>0 o fisso?</strong></h3>
+<p>Nel documento (sez. 5, <em>"I due valori che non si toccano"</em>) c'e' scritto
+<strong><code>InpMinSLPts = 0</code></strong>, e che portarlo a 20 punti <em>"fa crollare il DAX da PF 2,40
+a 1,26 e US2000 da 2,97 a 1,05-1,40"</em>, perche' <em>"lo stop stretto e' l'unita' di
+misura di tutta la geometria"</em>.
+A noi e' arrivato pero' un riassunto che dice <strong>"range su ATR con un pavimento di
+stop-loss fisso"</strong>.
+ <strong>E' cambiato qualcosa dopo la v2.60 del 10/08?</strong> Se hai trovato un pavimento
+che NON distrugge l'edge, e' la cosa piu' interessante di tutte — e ci
+piacerebbe capire <strong>come l'hai riscalato</strong> (hai toccato anche buffer/target/size
+per tenere le proporzioni, o solo il pavimento?).</p>
+<h3>2. <strong>UK100 e US2000</strong>: sono rientrati in portafoglio dopo il 10/08?</h3>
+<p>Nel documento il portafoglio validato ha <strong>quattro</strong> asset e <strong>UK100 non c'e'</strong>
+(<em>"~20 trade l'anno, spread al 19% del range, assente da entrambi i portafogli
+validati"</em>), mentre <strong>US2000 vive solo su Pepperstone</strong> perche' su FTMO
+<em>"lo spread e' pari al 90% dello stop"</em>. E nell'autopsia UK100 pesa <strong>-2.842 EUR</strong>
+e US2000 su FTMO <strong>-717 EUR</strong>.
+ A noi e' arrivata una lista di <strong>cinque</strong> asset che li comprende tutti e due:
+<strong>e' un aggiornamento (li hai recuperati con qualche modifica) o un refuso?</strong></p>
+<h3>3.  <strong>Hai finito le 2-4 settimane di raccolta slippage?</strong></h3>
+<p>E' la domanda a cui teniamo di piu'. Nel documento l'haircut e' dichiarato
+<strong>non ancora tarato</strong>, con due soli campioni: <em>"US30 </em><em>4,67 punti, pari al 27%
+dello stop</em><em>; NAS 2,38 punti, 13%"</em>. E fra il +130% e il +93% annuo c'e' solo
+quel numero.
+ Se la raccolta e' finita, per noi <strong>quello e' il dato piu' prezioso del
+documento intero</strong>: slippage misurato su una straddle a stop stretto, su conto
+vero. Ci interessano soprattutto:</p>
+<ul>
+<li><strong>mediana e coda alta</strong> (P80/P90), non la media;</li>
+<li>
+<p><strong>la differenza fra ingresso e uscita</strong>: da noi il primo dato misurato su
+  conto reale dice <strong>slippage all'ingresso, ma ZERO sull'uscita in stop</strong> (un
+  solo campione, quindi un indizio, non una statistica) — e se anche da te
+  l'uscita costa meno dell'ingresso, cambia dove conviene mettere la protezione;</p>
+</li>
+<li>
+<p>se hai visto lo slippage <strong>peggiorare nei primi 60 secondi</strong> dopo l'apertura.</p>
+</li>
+</ul>
+<hr />
+<h1>PARTE 2 — LE UTILI, se hai tempo</h1>
+<h3>4. La soglia <strong>spread ÷ SL al 20%</strong>: da dove viene il 20?</h3>
+<p>Scrivi <em>"sotto il 20% vive, oltre il 50% muore"</em>, misurato <strong>all'orario del
+trade</strong>. E' una soglia <strong>osservata sui tuoi asset</strong> (cioe' sotto il 20% i tuoi
+sopravvivono e sopra il 50% no) oppure <strong>derivata da un conto</strong> (per esempio dal
+rapporto rischio/rendimento e dal win rate)?
+ Te lo chiediamo perche' <strong>noi usiamo una soglia molto piu' stretta</strong> — nel tuo
+formato sarebbe circa <strong>il 2,5%</strong> — e le due non possono essere tutte e due
+giuste. La nostra e' tarata su edge sottili; la tua su un edge grasso.
+<strong>Sapere come hai ricavato il 20% ci dice quale delle due stiamo sbagliando.</strong></p>
+<h3>5. Le <strong>frequenze di inversione</strong> (35% UK100, <strong>57% DAX</strong>, 68% Russell)</h3>
+<p>Sono il numero che ci ha impressionato di piu', perche' spiega in una riga
+perche' cancellare la gamba opposta e' <em>"una protezione, non una preferenza"</em>.
+ Come sono definite esattamente? <em>"Il prezzo tocca il livello opposto entro la
+stessa giornata"</em>, oppure <em>"entro N minuti"</em>, oppure <em>"dopo che la prima gamba e'
+stata stoppata"</em>? La definizione cambia molto il numero, e a noi serve per
+misurarla sui nostri dati con la tua stessa regola.</p>
+<h3>6. <strong>US30 al tick nella finestra vera</strong></h3>
+<p>Lo elenchi fra i loop aperti: <em>"US30 e' il motore principale del portafoglio ed
+e' ancora l'unico grande asset senza verdetto tick sulla sua vera finestra
+(15:25-15:40)"</em>.
+ L'hai poi chiuso? Se si', <strong>il PF 3,01 quanto e' sceso?</strong> (Chiediamo perche'
+sugli altri il passaggio coarse &rarr; tick e' costato circa la meta'.)</p>
+<h3>7. L'<strong>armo anomalo delle 11:50 del 4 agosto</strong> sul DAX</h3>
+<p>Anche questo e' fra i loop aperti, con la candela segnale alle 08:55.
+ L'hai spiegato? Da noi un armo fuori orario e' quasi sempre <strong>un problema di
+fuso</strong> (l'ora dei log del terminale e' l'ora locale del PC, l'ora del grafico e'
+quella del server: <strong>sono diverse</strong>, e ci siamo gia' cascati). Se e' quello, e'
+una trappola che vale la pena scriversi.</p>
+<h3>8. Il <strong>portafoglio decorrelato</strong> oltre il PS5</h3>
+<p>Ultimo loop aperto della tua lista.  Ci stai lavorando? E' il punto su cui
+siamo piu' d'accordo con te: <strong>DAX, US30, NAS100 e Russell nella stessa mezz'ora
+sono quattro versioni della stessa scommessa</strong>, e la diversificazione toglie il
+rumore del singolo indice ma <strong>non il fattore comune</strong>. Se hai gia' provato ad
+aggiungere qualcosa di davvero scorrelato (un'altra sessione, un'altra classe,
+un altro meccanismo), sapere <strong>cosa NON ha funzionato</strong> ci farebbe risparmiare
+settimane.</p>
+<hr />
+<h1>E COSA POSSIAMO DARTI NOI IN CAMBIO</h1>
+<p>Non vogliamo solo chiedere. Se ti servono, questi numeri li abbiamo <strong>misurati</strong>
+e te li giriamo volentieri:</p>
+<ul>
+<li>
+<p><strong>Spread mediani misurati a tick</strong> (campione: ~252 milioni di tick) sui
+  nostri indici, sul nostro broker — utili se vuoi un secondo termine di
+  paragone per la tua regola <code>spread ÷ SL</code>.</p>
+</li>
+<li>
+<p><strong>Il primo slippage mai misurato sul nostro conto reale</strong> su un ORB
+  d'apertura su DAX: <strong>+0,70 punti indice in ingresso, 0,00 sull'uscita in
+  stop</strong>.  <strong>Un solo campione per gruppo: e' un indizio, non una statistica</strong> —
+  te lo diciamo com'e'.</p>
+</li>
+<li>
+<p><strong>Una trappola di misura che potrebbe riguardare anche te</strong>: sul nostro
+  broker il livello <em>richiesto</em> non viene riportato nel prezzo dell'ordine, quindi
+  <strong>il modo piu' ovvio di misurare lo slippage darebbe ZERO su qualunque conto</strong>.
+  Ce ne siamo accorti per caso confrontando due fonti diverse. Se la tua raccolta
+  slippage legge quel campo, <strong>vale la pena verificarlo prima di fidarsi del
+  numero</strong>.</p>
+</li>
+<li>
+<p><strong>Un fatto pratico</strong>: sul nostro broker <strong>US2000 non esiste proprio</strong>
+  (nessun Russell 2000 a listino) e <strong>UK100 c'e'</strong> con spread intorno a <strong>1,6
+  punti indice</strong>. Se ti serviva un confronto broker su quei due, eccolo.</p>
+</li>
+</ul>
+<p>Grazie ancora — il documento e' scritto meglio del 90% di quello che si trova in
+giro, e la frase che ci portiamo via e' quella finale:</p>
+<blockquote>
+<p><em>"Un vantaggio misurato con lo strumento sbagliato e' un vantaggio inesistente."</em></p>
+</blockquote>
+<div class="brk"></div><h1>PARTE B &mdash; Richiesta dati, per il tuo Claude</h1><h1>RICHIESTA DATI PS5 — scritta per essere data DIRETTAMENTE al Claude del collega</h1>
+<hr />
+<h1>LE QUATTRO CHE SCIOLGONO I DUBBI VERI</h1>
+<h2>1.  I PARAMETRI VIVI, LETTI DAL TERMINALE (non dai <code>.set</code>)</h2>
+<p>E' la sua stessa lezione della sezione 8 (<em>"il file diceva una cosa, il terminale
+ne faceva un'altra"</em>), e per noi e' la domanda n.1 perche' il riassunto che ci e'
+arrivato dice <strong>"pavimento di stop fisso"</strong> mentre il documento dice <strong>0</strong>.</p>
+<p><strong>Cosa vorremmo, come tabella, una riga per asset:</strong>
+| asset | InpMinSLPts | InpATR_SLMult | InpATR_TPMult | InpATR_BufMult | InpATR_MinMult | InpMaxLevels | InpPartialRR | InpPartialPct | InpChaseOnInvalid | InpMaxChasePts | MaxMult | rischio % |</p>
+<ul>
+<li>
+<p>letti <strong>dal terminale in esecuzione</strong> (pannello F7 o <code>.chr</code> del grafico), <strong>non</strong>
+  dal <code>.set</code>, e con la <strong>data della lettura</strong>;</p>
+</li>
+<li>
+<p>accanto, la <strong>versione dell'EA</strong> che sta girando (il timbro <code>===== PS5 ORB vX.XX =====</code>
+  che stampa nel log Esperti);</p>
+</li>
+<li>
+<p>e se un valore sul terminale <strong>differisce</strong> dal <code>.set</code>, per noi quella riga vale
+  piu' di tutte le altre: e' esattamente il difetto che ci e' costato una
+  discussione ieri.</p>
+</li>
+</ul>
+<h2>2.  LA DISTRIBUZIONE DELLO SLIPPAGE — non la media, la <strong>distribuzione</strong></h2>
+<p>E' il dato piu' prezioso di tutto il documento, e oggi ha <strong>n=2</strong>.</p>
+<p><strong>Cosa vorremmo, se la raccolta e' andata avanti:</strong>
+| asset | n | mediana | P80 | P90 | max | in <strong>punti</strong> e in <strong>% dello stop</strong> |</p>
+<p>più tre spaccature che cambiano dove si mette la protezione:</p>
+<ul>
+<li>
+<p><strong>INGRESSO contro USCITA</strong> tenuti separati (da noi il primo dato su conto
+  reale dice <strong>slippage in ingresso e ZERO sull'uscita in stop</strong> — n=1, quindi un
+  indizio, non una statistica: se anche da lui l'uscita costa meno, e' una
+  regolarita' e non un caso);</p>
+</li>
+<li>
+<p>⏱ <strong>per minuto dall'apertura</strong> (0-1', 1-5', 5-15'): lo slippage peggiora nel
+  primo minuto? Di quanto?</p>
+</li>
+<li>
+<p><strong>giorni con notizia macro contro giorni normali</strong>.</p>
+</li>
+</ul>
+<p>E una domanda tecnica che vale il dato intero: <strong>da quale campo e' preso il
+prezzo "richiesto"?</strong> Sul nostro broker il livello richiesto <strong>non viene
+riportato</strong> nel prezzo dell'ordine: chi misura lo slippage da li' ottiene <strong>zero
+su qualunque conto</strong>. Se la sua raccolta legge quel campo, il <strong>4,67 punti di
+US30 potrebbe essere sottostimato</strong> — e siccome tutto l'haircut (+130% contro
++93%) dipende da quel numero, vale la pena verificarlo prima di tararlo.</p>
+<h2>3.  LE FREQUENZE DI INVERSIONE — la <strong>definizione</strong>, poi il numero</h2>
+<p>35% UK100, <strong>57% DAX</strong>, 68% Russell: e' il numero che ci ha colpito di piu',
+perche' trasforma "cancellare la gamba opposta" da preferenza a protezione.</p>
+<p><strong>Cosa vorremmo:</strong></p>
+<ul>
+<li>
+<p>la <strong>definizione operativa esatta</strong>, meglio se copiata dal codice o dalla query
+  che l'ha prodotta. Le tre plausibili danno numeri molto diversi:
+  (a) il prezzo tocca il livello opposto <strong>entro la giornata</strong>;
+  (b) lo tocca <strong>entro N minuti</strong> dall'ingresso (quale N?);
+  (c) lo tocca <strong>dopo</strong> che la prima gamba e' stata stoppata;</p>
+</li>
+<li>
+<p>la <strong>n</strong> e la <strong>finestra temporale</strong> su cui e' calcolata;</p>
+</li>
+<li>se ce l'ha: la <strong>distribuzione dei minuti</strong> fra il primo riempimento e il tocco
+  del livello opposto.  Questo secondo numero per noi <strong>vale piu' della
+  percentuale</strong>: dice quanto tempo ha davvero una cancellazione per arrivare in
+  tempo.</li>
+</ul>
+<h2>4.  COME SI TRADUCONO I SUOI MOLTIPLICATORI SUL NOSTRO BROKER</h2>
+<p>I suoi numeri sono moltiplicatori di ATR: da soli non sono trasportabili. Per
+convertirli ci servono <strong>due misure sue</strong>, e sono entrambe banali da estrarre:</p>
+<ul>
+<li>
+<p><strong>ATR(14) su D1 chiusa, mediana e quartili</strong>, per ciascun asset, sul periodo
+  del backtest  cosi' <code>0,03208</code> diventa <strong>punti indice</strong>, e possiamo confrontarlo
+  con il nostro spread misurato;</p>
+</li>
+<li>
+<p><strong>le specifiche di contratto</strong> dei suoi simboli (<code>GER40.cash</code>, <code>US30.cash</code>,
+  <code>US100.cash</code>, <code>US2000.cash</code>): <strong>contract size, tick size, tick value, digits</strong>.
+  Senza queste, <code>MaxMult</code> e il rischio % non sono confrontabili con i nostri.</p>
+</li>
+</ul>
+<p><strong>E una domanda diretta: cos'e' esattamente <code>MaxMult</code>?</strong> Il documento dice che
+e' <em>"strutturale e dipende dallo strumento"</em>, ma non spiega <strong>di cosa</strong> e' il
+moltiplicatore (lotti massimi? ampiezza massima di range accettata? tetto sulla
+size?). E' l'unico parametro della tabella che non riusciamo a interpretare.</p>
+<hr />
+<h1>LE ALTRE, se ha tempo di farle estrarre</h1>
+<h2>5.  DA DOVE VIENE LA SOGLIA <code>spread ÷ SL ≤ 20%</code></h2>
+<p>Non la soglia: <strong>i dati sotto</strong>. Cioe' la tabella (asset, periodo) con
+<strong>spread/SL misurato</strong> e <strong>risultato</strong> accanto, quella da cui si vede che sotto il
+20% sopravvivono e sopra il 50% muoiono.
+ Perche' ci serve: <strong>noi usiamo circa il 2,5%</strong>, otto volte piu' stretto. Se la
+sua soglia e' <strong>osservata</strong> (regressione su asset veri) batte la nostra, che e'
+<strong>scelta a tavolino</strong>. Se e' derivata da un conto, vogliamo il conto. In ogni caso
+<strong>una delle due e' sbagliata</strong>, e questa e' la strada per sapere quale.</p>
+<h2>6.  GLI INGRESSI DEL MONTE CARLO</h2>
+<p>Il MC su 10.000 percorsi con ricampionamento per giornata e' ben fatto, ma il
+risultato dipende <strong>tutto</strong> dalla distribuzione in ingresso.
+<strong>Cosa vorremmo:</strong> la distribuzione degli <strong>R per trade</strong> (o per giornata) usata
+come urna — istogramma o quartili + n.  In particolare: e' costruita su risultati
+<strong>tick</strong> o <strong>coarse</strong>? Il documento dice che il coarse <em>"mente sul drawdown"</em>
+(12 mesi verdi che diventano −11%): se l'urna e' coarse, il DD del MC eredita
+quella bugia.</p>
+<h2>7.  LA CRONOLOGIA OPERAZIONE PER OPERAZIONE DELLA SETTIMANA NERA</h2>
+<p>29 luglio  5 agosto, da 162.672 a 154.075 EUR. L'ha gia' analizzata operazione
+per operazione: se puo' girarci <strong>l'export delle operazioni</strong> (anche anonimizzato:
+bastano <strong>asset, ora, direzione, R, causa di chiusura</strong>), per noi e' <strong>il pezzo
+piu' istruttivo del documento</strong>.
+ Motivo: e' l'unico campione <strong>forward live</strong> che esiste, ed e' la fonte con il
+massimo livello di fiducia della sua stessa gerarchia.</p>
+<h2>8.  US30 AL TICK NELLA FINESTRA VERA (15:25-15:40)</h2>
+<p>Era fra i loop aperti. Se l'ha chiuso: <strong>il PF 3,01 dov'e' andato a finire?</strong>
+Sugli altri asset il passaggio coarse &rarr; tick e' costato <strong>circa la meta'</strong>.
+E' il motore principale del portafoglio: se anche li' si dimezza, l'intero
++130% annuo va riletto.</p>
+<h2>9.  IL PORTAFOGLIO DECORRELATO — soprattutto <strong>cosa NON ha funzionato</strong></h2>
+<p>Ultimo loop aperto. Se ha gia' provato ad aggiungere qualcosa di davvero
+scorrelato (altra sessione, altra classe, altro meccanismo) e <strong>non</strong> ha
+funzionato, quella lista di fallimenti per noi vale piu' dei successi: ci
+risparmia settimane. E' lo stesso principio della sua tabella degli scartati.</p>
+<hr />
+<h1>E COSA GLI DIAMO NOI — <strong>in cambio, e subito</strong></h1>
+<p>Perche' funzioni deve essere uno scambio, non un questionario. Questi li abbiamo
+misurati e li giriamo volentieri, nello stesso formato che chiediamo a lui:</p>
+<table>
+<thead>
+<tr>
+<th>dato</th>
+<th>valore</th>
+<th>livello di fiducia</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>spread mediani a tick sui nostri indici</td>
+<td>campione <strong>~252 milioni di tick</strong></td>
+<td>misurato</td>
+</tr>
+<tr>
+<td>slippage su conto <strong>REALE</strong>, ORB d'apertura DAX</td>
+<td><strong>+0,70 punti indice in ingresso, 0,00 sull'uscita in stop</strong></td>
+<td><strong>n=1 per gruppo: indizio, non statistica</strong></td>
+</tr>
+<tr>
+<td>la trappola del livello richiesto non riportato dal server</td>
+<td>il modo ovvio di misurare lo slippage darebbe <strong>ZERO su qualunque conto</strong></td>
+<td>misurato, trovato per confronto fra due fonti</td>
+</tr>
+<tr>
+<td>disponibilita' simboli sul nostro broker</td>
+<td><strong>US2000 non esiste</strong>; UK100 c'e', spread ~<strong>1,6 punti indice</strong></td>
+<td>letto dal listino</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>E la frase che gli rubiamo, perche' e' la migliore del documento:
+<strong>"Un vantaggio misurato con lo strumento sbagliato e' un vantaggio inesistente."</strong></p>
+</blockquote>
+<div class="foot">PS5 ORB Bot &mdash; Domande e richiesta dati &middot; progetto ABTG &middot; 10/09/2026</div>
+</body></html>
