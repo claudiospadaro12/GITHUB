@@ -13116,3 +13116,52 @@ legittima. Regressione: **237 `.ps1`, 0 falliti.**
 **50503392** (quello con le sedie vive) ora e' protetto come gli altri due.
 
 ---
+
+## 224. "MERITO PIENO" letto sulla finestra PIENA, che un fuori campione non ce l'ha (11/09/2026)
+
+**Il caso.** `PIANO_CHALLENGE_OTTOBRE.md` §1.2 dava a **due** delle otto candidate
+l'etichetta **`n = MERITO PIENO`**: `770511` con **227** e `970913` con **155**.
+Il 227 e' della corsa a **finestra piena**. Una finestra piena **non ha un fuori
+campione**: e' tutto dentro campione. Spezzata IS/OOS, la stessa corsa fa
+**84 e 143** — verificato nei CSV, e **84 + 143 = 227** — cioe' **tutte e due le
+finestre sotto la soglia dei 150**.
+
+🔴 **L'etichetta diceva l'opposto del vero, e su una colonna che decide.** Il
+merito su quella sedia e' **SOSPESO**, esattamente come sull'ORB — e la sedia era
+in lista proprio perche' sembrava l'unica a non averlo sospeso.
+
+**La regola.** Un `n` non e' un numero: e' **un numero PIU' la finestra da cui
+viene**. Prima di scrivere `n = MERITO PIENO` si verifica **tre cose**:
+1. che il numero venga da una **partizione IS/OOS vera**, non dalla finestra piena;
+2. che sia la finestra **fuori campione** a superare la soglia, non la somma;
+3. che la corsa sia **a tick**, non `_ohlc` (che e' screening e non da' mai verdetti).
+
+📌 **E la forma generale:** sommare due finestre e confrontare il totale con
+una soglia pensata per UNA finestra e' lo stesso errore del campione gonfiato.
+La soglia dei 150 **non si raggiunge sommando**: si raggiunge **dentro** la
+finestra su cui si pronuncia il verdetto.
+
+⚠️ `970913` e' rimasta **DA RIVERIFICARE** e non corretta: l'unico file OOS
+trovato in archivio per quella sedia e' `..._OOS_ohlc.csv`. Finche' non e'
+chiarito, l'etichetta **non regge** — ed e' scritto cosi' nel piano, che e' il
+verdetto onesto quando manca la misura, non quando si sospetta.
+
+---
+
+## 225. Il cancello non ha un modo per l'oggetto che gli si da' piu' spesso (11/09/2026)
+
+**Il caso.** `python3 controlla_riga.py --ps1 <file prova .txt>` esce **FAIL** con
+`[PWSH7] operatore doppia pipe`. 🔴 **Falso positivo al 100%**: il `||` nei file
+prova e' il **separatore dell'asse** della griglia, non l'operatore PowerShell 7.
+E per i `.md` non esiste nessun modo: un percorso posizionale muore con
+`unrecognized arguments`.
+
+👉 E' la **classe 202** in forma concreta — *"lo strumento non sa che oggetto
+sta guardando"* — e il costo non e' teorico: un FAIL plausibile su un oggetto
+sano insegna a **ignorare l'esito del cancello**, che e' il modo piu' rapido per
+disattivare una rete di sicurezza senza toccarla.
+
+**Il rimedio proposto (non applicato):** `--oggetto {riga,ps1,prova,md}`, con i
+controlli PowerShell **spenti** su `prova` e `md`. Per i file prova il cancello
+giusto esiste gia' e si chiama `controlla_prova.py`: finche' il modo non c'e',
+**e' quello che va usato**, e usare `--ps1` su un `.txt` e' un errore d'uso.
