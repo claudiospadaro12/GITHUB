@@ -44,8 +44,8 @@ cancello del costo di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
    **girata**, che e' un'altra cosa; (b) **lo spread nell'ora del trade E'
    MISURATO**, ora per ora, da **252 milioni di tick** — quello che manca e' la
    granularita' al **minuto** dentro 14:30-14:45.
-5. 💰 **Il round costa 66 passate ≈ 67 minuti di macchina** (modello di costo
-   MISURATO: R88, 136 passate in 2,3 ore = **1,01 min/passata** su questo
+5. 💰 **Il round costa 66 passate ≈ 7 minuti di macchina** (modello di costo
+   MISURATO: R88, 136 passate in **13,7 min** = **0,101 min/passata** su questo
    identico EA/simbolo/TF). Sei file, **un asse ciascuno**, tutti e sei
    **PASS** a `controlla_prova.py`.
 
@@ -283,8 +283,16 @@ scarto, ed e' il genere di errore che costa un candidato.
 | | | | **33** | **66** | |
 
 ## 3.1 💰 IL COSTO IN TEMPO MACCHINA — **modello MISURATO, non stimato**
-**R88: 136 passate in 2,3 ore = 1,01 min/passata** (stesso EA, stesso simbolo,
-stesso TF, tick reali, stessa finestra). 👉 **66 × 1,01 = 67 minuti.**
+**R88: 136 passate in 13,7 min = 0,101 min/passata** (stesso EA, stesso simbolo,
+stesso TF, tick reali, stessa finestra). 👉 **66 × 0,101 = ~7 minuti.**
+
+> 🔴 **CORREZIONE del 10/09 sera — la v1 di questo dossier diceva "2,3 ore" e
+> quindi "67 minuti": sbagliato di un FATTORE 10 ESATTO** (classe 192 della
+> checklist). Le **2,3 ore** stampate in `REFERTO_R88.txt` r.4 sono la durata di
+> **TUTTA LA NOTTE** — la prima riga del referto dice *"R88 (firmato) + **R87 +
+> R89 + R86** (SIGILLATI)"*. Le **cinque righe di R88** sommano
+> `8,0+2,1+1,3+1,2+1,1 = **13,7 min**`. 👉 **Un modello di costo si costruisce
+> col numeratore del SUO lavoro, non con quello del turno intero.**
 Con il margine per compilazione e avvio: **~1h20m su una macchina.**
 📌 Il mandato dice *"meglio due round da 48 fatti bene"*: **66 sta in quella
 misura.** Una griglia che moltiplicasse le tre manopole del collega

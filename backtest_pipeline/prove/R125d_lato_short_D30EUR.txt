@@ -128,4 +128,4 @@ InpMaxSpread=0
 InpVerbose=0
 
 # --- ASSE TECNICO: 2 celle gemelle (cancello G1 di determinismo)
-InpMagic=779830||779830||50||779880||Y
+InpMagic=779860||779860||10||779870||Y

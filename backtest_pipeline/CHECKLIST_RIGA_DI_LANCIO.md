@@ -11880,3 +11880,142 @@ diverse, e il pavimento separa la seconda, non la prima.
 > 3. **E se davvero si rimanda**, la premessa va scritta **nel codice**, accanto
 >    al ramo, con la data e il numero che la sostiene — non in un referto che
 >    nessuno riaprira'.
+
+---
+
+## 🆕 AGGIUNTE DEL 10/09/2026 — trovate dal **controllo preventivo** su `report/ORB_OPPRANGE_RIAPERTURA_2026-09-10.md`, il referto che **RIAPRE** il ramo `OPPRANGE` dell'`ABTG_ORB` (U30USD) e che chiede a Claudio una firma sui criteri di R125. Il referto era per il resto **solido e verificato riga per riga**: le 12 cifre della tabella del punto 1 combaciano **al centesimo** con `r88_csv/*_OOS_r88a.csv` (PF 1,67419 / 1,83850 / 1,76162, DD 9,7623 / 3,8395 / 4,2025, RF, Sharpe, n=119); le bande dell'altopiano (**OPPRANGE 3,70-5,87% e PF 1,642-1,844**, **HALFRANGE 7,96-12,02% e PF 1,247-1,674**) sono esatte; il **12/12 sotto / 12/12 sopra** e' **vero contato cella per cella**; `InpRiskPercent=1`, `Trades=119`/`71` e `InpAllowShort=0` sono **costanti su tutte e 48 le righe** di tutte e due le finestre; il **5.991 contro 4.206 = +42%** e' aritmetica giusta; il **PF IS 1,061 / 1,063 contro il cancello A3 (`PF IS >= 1,10`)** e' la bocciatura vera di `R88_CRITERI.md`; l'enum `ENUM_ORB_SL` (`OPPRANGE=0 ... HALFRANGE=3`, `.mq5` r.121) e' letto giusto; il regime **"UNO SOLO"** e' davvero a r.153 di `R88a_stoplargo_U30USD.txt`; il pin `c7714a8` e' un **commit vero**; i **6 file prova R125 passano `controlla_prova.py` 0 problemi** (33 celle, 66 passate, **un asse ciascuno**), sono **ASCII puro (0 byte non-ASCII)**, hanno gli **orari SERVER giusti** (U30USD/NASUSD 14:30, D30EUR 8:00) e i **magic vergini** in tutto il repo. Le quattro voci qui sotto sono nuove.
+
+## 189. 🏔️ «CENTRO DELL'ALTOPIANO» DETTO DEL **CENTRO DELL'ASSE** — e la cella e' il **PICCO** su tutte e tre le metriche
+
+**10/09/2026, `ORB_OPPRANGE_RIAPERTURA_2026-09-10.md` r.41-42.** Il referto
+promuove la cella `OPPRANGE + buffer 500` scrivendo: *"la cella scelta e' **al
+centro dell'altopiano** (buffer 500 = il valore di mezzo dell'asse 0/500/1000),
+**non il picco** — regola di casa, dichiarata prima."*
+
+🔴 **Sul suo asse quella cella E' il picco. Su tutte e tre le metriche.**
+Asse `InpSLMode=0 / InpTPMode=0 / InpTP_R=1.5`, `r88_csv/..._OOS_r88a.csv`:
+
+| `InpSLBufferPts` | 0 | **500** | 1000 |
+|---|---:|---:|---:|
+| PF OOS | 1,76162 | **1,83850** ⬅ max | 1,64542 |
+| Profit | 21.942,40 | **23.003,35** ⬅ max | 16.850,58 |
+| DD OOS | 4,2025 | **3,8395** ⬅ min | 4,4027 |
+
+**Centro dell'ASSE e centro dell'ALTOPIANO sono due cose diverse.** Il primo e'
+una proprieta' della griglia (dove ho messo i tre valori), il secondo e' una
+proprieta' della **curva** (come si comportano i vicini). Confonderli fa passare
+per "robusto" esattamente il picco che la regola del 19/08 vieta.
+
+E la prova che sono diverse ce l'avevamo **nello stesso round**: la forma
+operativa della regola e' congelata in `R125_ORB_COSTO_CRITERI.md` par.3 —
+*"si accetta una cella SOLO se le due celle adiacenti stanno dalla stessa parte
+del cancello e col PF entro +/- 0,15 dalla cella scelta"*. Applicata:
+`|1,83850 - 1,64542| = **0,193 > 0,15**` ⇒ **la cella NON passa**, e il verdetto
+scritto dalla regola stessa e' *"non c'e' una configurazione robusta"*.
+
+> ### 🔴 LA REGOLA
+> 1. **"Centro dell'altopiano" si DIMOSTRA con i due vicini, non con la
+>    posizione nella griglia.** Si stampano i tre numeri, sempre.
+> 2. **Prima di scrivere "non il picco", si ordina l'asse.** Se la cella e' il
+>    massimo di una qualunque delle metriche che si sta citando, o non si scrive
+>    "non il picco", o si scrive **anche** su quale metrica lo e'.
+> 3. **Se la regola ha una forma operativa gia' congelata in casa, si applica
+>    quella**, non la parafrasi. Qui bastava leggere il par.3 del round che il
+>    referto stesso chiede di firmare.
+
+## 190. 🏷️ IL NOME DI UN CANCELLO CHE **COLLIDE CON UNA COSTANTE FIRMATA** — `C1` che vale 3,25% e `C1` che vale 7,00%
+
+**10/09/2026.** Il referto scrive *"vs **C1 = 7,00%**"* e *"tutte e 12 le celle
+OPPRANGE stanno **sotto il cap C1**"*.
+
+🔴 **`C1` e' una costante FIRMATA e vale un'altra cosa**: `FIRME_2026-08-18.md`
+§*"FIRMA 3 — C1: il cap sul rischio aperto simultaneo"* = **3,25%**, ed e'
+scritta cosi' in `CLAUDE.md`, in `PIANO_CHALLENGE_OTTOBRE.md` e nel Guardian
+(`InpMaxOpenRiskPct = 3.25`). Il 7,00% e' il cancello **A1** di
+`R88_CRITERI.md` (firmato il 19/08), che `R125_ORB_COSTO_CRITERI.md` par.4 ha
+**ribattezzato `C1`** dentro la propria numerazione locale `C0..C5`.
+
+Il referto usa perfino **la stessa parola** della firma (*"il cap C1"*) e non
+definisce il numero da nessuna parte. Chi legge — e chi legge e' **Claudio, che
+quella firma l'ha messa** — trova una costante che conosce accanto a un valore
+che non e' il suo. E' un difetto di **vocabolario condiviso**, e i vocabolari
+condivisi si rompono in silenzio.
+
+> ### 🔴 LA REGOLA
+> 1. **Le sigle firmate sono riservate**: `A1`/`B`/`C1`/`C3`, cap 3,25%, muro
+>    5%, pavimento 1,00 op/g. Un round **non le riusa** per i propri cancelli.
+> 2. **Un round numera i suoi cancelli con un prefisso proprio** (`R125-G0..G5`),
+>    mai con lettere gia' spese in una firma.
+> 3. **Ogni soglia citata fuori dal suo file porta la fonte accanto**:
+>    *"A1 di `R88_CRITERI.md` = DD OOS <= 7,00%"*, non *"C1"*.
+> 🔧 Riparazione fatta: in `R125_ORB_COSTO_CRITERI.md` i cancelli vanno
+> rinominati `G0..G5` **prima** della firma.
+
+## 191. 🧪 IL CONTRO-ESEMPIO CHE PORTA UNA PROVA **IRRILEVANTE ALL'IPOTESI** — e la dichiara "smentita"
+
+**10/09/2026, punto 5 del referto, prima riga della tabella.**
+Ipotesi alternativa: *"il DD e' piu' basso solo perche' OPPRANGE **espone meno
+capitale**"*. Verifica addotta: *"`InpRiskPercent` = 1 in **tutte** le 48 righe;
+stesso n (119); stessa finestra"*. Esito dichiarato: **"❌ smentita: stesso
+denaro a rischio per trade"**.
+
+✅ Il **fatto** e' vero (verificato: `InpRiskPercent` e' `1` in tutte e 48 le
+righe di tutte e due le finestre, `Trades` e' `119`/`71`, `InpAllowShort` e' `0`).
+🔴 **Ma non tocca l'ipotesi.** Con il lotto calcolato a rischio,
+**lotto = R / distanza stop** — ed e' la formula che il referto **cita da solo**
+al punto 3, da R55. Stop HALFRANGE **~47** punti indice contro OPPRANGE **~104**
+⇒ a parita' di 1% di rischio HALFRANGE porta **~2,2x il NOZIONALE**. E
+`Equity DD %` del tester si misura sull'**equity**, cioe' **include l'escursione
+flottante**: 2,2x i lotti fanno 2,2x l'oscillazione a parita' di movimento
+avverso in punti.
+
+👉 Quindi *"stesso denaro a rischio per trade"* e' vero **e compatibile con
+l'ipotesi**: l'esposizione in nozionale e' proprio **diversa**. L'ipotesi non e'
+smentita — e' il **meccanismo piu' probabile**, ed e' lo stesso che R55 aveva
+gia' nominato. Il DD resta **un fatto accaduto** (Emendamento B, e questo non
+cambia), ma la **causa** non e' "OPPRANGE e' piu' bravo": e' "OPPRANGE porta meno
+nozionale e viene toccato meno dal rumore", e le due parti **non sono state
+separate** — `[NON MISURATO]`.
+
+> ### 🔴 LA REGOLA
+> 1. **Un contro-esempio si scrive in due tempi**: (a) *cosa predirebbe
+>    l'ipotesi alternativa, con un numero*; (b) *cosa si e' misurato*. Se (a)
+>    non e' scritto, non e' un contro-esempio: e' una nota.
+> 2. **Una costante uguale nei due rami non e' una smentita.** Va mostrato che
+>    la **grandezza nominata dall'ipotesi** (qui: il nozionale) e' uguale — e
+>    qui e' 2,2x.
+> 3. **Se la formula che smonta il proprio contro-esempio e' citata due
+>    paragrafi sopra, il contro-esempio non e' stato provato a rompere: e' stato
+>    provato a confermare.** E' la regola del 10/09, applicata a se stessa.
+
+## 192. ⏱️ IL MODELLO DI COSTO CON IL **NUMERATORE DI TUTTA LA NOTTE** E IL DENOMINATORE DI **UN ROUND SOLO** — 67 minuti dove ne bastano 7
+
+**10/09/2026**, `ROUND_ORB_ATR_PS5_2026-09-10.md` §3.1, ripreso dal referto:
+*"**modello di costo MISURATO, non stimato**: R88, 136 passate in **2,3 ore** =
+**1,01 min/passata** ... 66 x 1,01 = **67 minuti**"*.
+
+🔴 **Le 2,3 ore non sono di R88: sono di TUTTA LA NOTTE.**
+`r88_csv/REFERTO_R88.txt` r.1-4 lo scrive nel titolo — *"R88 (firmato) + **R87 +
+R89 + R86** (SIGILLATI)"*, `avvio 23:42:37`, `data 01:58:38`. La somma delle
+durate stampate riga per riga fa **135,3 min** su **tutti** i round; le **cinque
+righe di R88** fanno **13,7 min** (8,0 + 2,1 + 1,3 + 1,2 + 1,1) per 68 celle =
+**136 passate**.
+
+👉 **13,7 / 136 = 0,101 min/passata**, non 1,01. E **66 x 0,101 = 6,7 minuti**,
+non 67. Il modello sbaglia di **un fattore 10 esatto**, ed e' etichettato
+**MISURATO**.
+
+Qui l'errore e' benigno (sovrastima: nessuno rinuncia a un round da 7 minuti
+credendolo da 67) — **ma la classe non e' benigna**, perche' e' lo stesso gesto
+che altrove decide se un round si lancia o si taglia, e perche' un numero
+marchiato *MISURATO* nessuno lo ricontrolla.
+
+> ### 🔴 LA REGOLA
+> 1. **Numeratore e denominatore devono venire dalla STESSA riga.** Se il
+>    denominatore e' "le passate di R88", il numeratore e' "la somma delle
+>    durate delle righe R88", non `durata:` del referto della notte.
+> 2. **Il referto del runner ha una `durata:` che copre TUTTI i lavori.** Per il
+>    costo di un round si sommano le colonne `[x.x min]` di quel round.
+> 3. **Un ordine di grandezza si controlla sempre a mano**: 66 passate a tick
+>    reali su M5 in **piu' di un'ora** contro le 48 celle di R88a in **8,0
+>    minuti** doveva stridere prima della moltiplicazione.

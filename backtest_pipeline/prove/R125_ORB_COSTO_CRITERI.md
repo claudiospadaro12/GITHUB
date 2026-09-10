@@ -66,19 +66,25 @@ Operativamente, e senza margini di interpretazione:
 
 | # | cancello | soglia | perche' |
 |---|---|---|---|
-| **C0** | **COSTO** | stop stimato >= **40 x spread mediano dell'ora** | e' il cancello di casa. Chi non lo passa **non si legge nemmeno**, qualunque PF abbia |
-| **C1** | **RISCHIO** | **DD OOS <= 7,00%** | e' il numero gia' firmato in `R88_CRITERI.md` cancello A1. Non si ammorbidisce |
-| **C2** | **RISCHIO, seconda finestra** | **DD IS <= 9,00%** | il rischio si legge a qualunque n (Emendamento B). La cella viva fa 7,8885% IS |
-| **C3** | **MERITO** | **PF OOS >= 1,40** | idem R88. E si legge **SOLO** sull'OOS: n OOS = 119, n IS = 71 |
-| **C4** | **CAMPIONE** | n OOS >= 95 e n IS >= 57 | idem R88 |
-| **C5** | **ALTOPIANO** | par.3 soddisfatto | senza questo, nessuna cella e' leggibile |
+> 📛 **I cancelli si chiamano `G0..G5`, non `C0..C5`.** Rinominati il 10/09
+> **prima della firma** perche' `C1` e' gia' preso: e' il **cap sul rischio aperto
+> simultaneo, 3,25%**, firmato da Claudio il 18/08 (`report/FIRME_2026-08-18.md`).
+> Due cancelli diversi con lo stesso nome sono un incidente che aspetta il suo
+> giorno. Classe 190 della checklist.
+
+| **G0** | **COSTO** | stop stimato >= **40 x spread mediano dell'ora** | e' il cancello di casa. Chi non lo passa **non si legge nemmeno**, qualunque PF abbia |
+| **G1** | **RISCHIO** | **DD OOS <= 7,00%** | e' il numero gia' firmato in `R88_CRITERI.md` cancello A1. Non si ammorbidisce |
+| **G2** | **RISCHIO, seconda finestra** | **DD IS <= 9,00%** | il rischio si legge a qualunque n (Emendamento B). La cella viva fa 7,8885% IS |
+| **G3** | **MERITO** | **PF OOS >= 1,40** | idem R88. E si legge **SOLO** sull'OOS: n OOS = 119, n IS = 71 |
+| **G4** | **CAMPIONE** | n OOS >= 95 e n IS >= 57 | idem R88 |
+| **G5** | **ALTOPIANO** | par.3 soddisfatto | senza questo, nessuna cella e' leggibile |
 
 > ### RIGA CHE NON SI NEGOZIA
 > **Il MERITO si legge sull'OOS (n=119) e NON sull'IS (n=71).**
 > Non e' un ammorbidimento: e' l'Emendamento A del 16/08 applicato alla
 > lettera. E per essere onesti fino in fondo: **il PF IS si scrive lo stesso,
 > accanto a ogni numero**, con l'n a fianco. Chi legge decide se gli basta.
-> Se una cella passa C0-C5 con PF IS sotto 1,00, si dichiara
+> Se una cella passa G0-G5 con PF IS sotto 1,00, si dichiara
 > **"passa i cancelli, ma la finestra vecchia non la conferma"** -- non
 > "promossa".
 
