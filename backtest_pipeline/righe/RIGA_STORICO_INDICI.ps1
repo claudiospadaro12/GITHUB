@@ -85,6 +85,19 @@ param(
                                     #   (~690 byte a barra, MISURATO). 8 anni = ~2,6 M barre = ~1,8 GB,
                                     #   che e' la taglia gia' girata il 18/08. Se esce MemoryError: 4.
   [string]$Cartella      = "",      # dove lavorare (default: ~\abtg_storico_indici)
+  [string]$PathPython    = "",      # v2 (10/09/2026): percorso COMPLETO di python.exe, es.
+                                    #   "C:\python313\python.exe". Serve perche' il 10/09 sul VPS
+                                    #   l'installer di python.org e' stato RIFIUTATO DALLA POLICY
+                                    #   DI SISTEMA (0x80070659, "installazione vietata dai criteri
+                                    #   di sistema"). La via che funziona e' il pacchetto
+                                    #   EMBEDDABLE: uno zip che si scompatta e basta, senza
+                                    #   installer e senza amministratore -- ma resta FUORI dal
+                                    #   PATH, quindi Get-Command non lo troverebbe mai.
+                                    #   Con questo parametro NON si tocca il PATH della macchina:
+                                    #   glielo diciamo noi dov'e'. histdata_m1.py usa SOLO la
+                                    #   libreria standard (argparse, os, re, sys, time, urllib,
+                                    #   zipfile, datetime, ssl, winreg, shutil, tempfile): niente
+                                    #   pip, quindi l'embeddable basta.
   [string]$TerminaleBacktest = ""   # v2 (10/09/2026): la CARTELLA PROGRAMMA del terminale da
                                     #   usare, es. "C:\MT5_Backtest" (demo 50504400).
                                     #   Sul VPS e' OBBLIGATORIO passarlo: la ricerca automatica
@@ -934,14 +947,30 @@ ScriviStato
 if(-not $SoloControllo -and $PuoScaricare){
   $pp = NuovoPasso "F4" "python trovato e >= 3.8"
   $pp.Inizio = (Ora)
-  $Python = (Get-Command python.exe -ErrorAction SilentlyContinue |
-             Where-Object { $_.Source -notlike "*\WindowsApps\*" } |
-             Select-Object -First 1 -ExpandProperty Source)
-  if(-not $Python){ $Python = (Get-Command py.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source) }
+  $ViaPython = ""
+  if($PathPython){
+    # v2: nominato a mano. Si VERIFICA che esista, non si presume -- e se il
+    # percorso e' sbagliato si muore QUI, con scritto cosa si cercava, invece
+    # di ripiegare in silenzio su un altro interprete.
+    if($PathPython -like "*\WindowsApps\*"){
+      throw ("-PathPython punta allo stub del Microsoft Store: '" + $PathPython + "'. Non e' un interprete.")
+    }
+    if(-not (Test-Path -LiteralPath $PathPython -PathType Leaf)){
+      throw ("-PathPython: il file NON esiste: '" + $PathPython + "'. Va passato il percorso COMPLETO di python.exe, per esempio C:\python313\python.exe")
+    }
+    $Python    = $PathPython
+    $ViaPython = "parametro esplicito -PathPython"
+  } else {
+    $Python = (Get-Command python.exe -ErrorAction SilentlyContinue |
+               Where-Object { $_.Source -notlike "*\WindowsApps\*" } |
+               Select-Object -First 1 -ExpandProperty Source)
+    if(-not $Python){ $Python = (Get-Command py.exe -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Source) }
+    if($Python){ $ViaPython = "trovato nel PATH" }
+  }
   if(-not $Python){
     $PuoScaricare = $false
     $pp.Esito = "ASSENTE"
-    [void]$Problemi.Add("PYTHON ASSENTE (o solo lo stub del Microsoft Store): installalo da python.org spuntando 'Add python.exe to PATH'. Senza, lo scarico non e' eseguibile.")
+    [void]$Problemi.Add("PYTHON ASSENTE (o solo lo stub del Microsoft Store). Due strade: installarlo da python.org spuntando 'Add python.exe to PATH', oppure -- se la policy della macchina rifiuta l'installer (errore 0x80070659) -- scompattare il pacchetto EMBEDDABLE e passare -PathPython 'C:\python313\python.exe'. Senza, lo scarico non e' eseguibile.")
   } else {
     $rcv = EseguiNativo $Python @("-c","import sys; print(sys.version); sys.exit(0 if sys.version_info>=(3,8) else 1)") (Join-Path $Logs "python_versione.txt")
     if($rcv -ne 0){
@@ -949,8 +978,8 @@ if(-not $SoloControllo -and $PuoScaricare){
       $pp.Esito = "TROPPO VECCHIO"
       [void]$Problemi.Add("PYTHON TROPPO VECCHIO O NON FUNZIONANTE: " + $Python)
     } else {
-      $pp.Esito = "OK"; $pp.Nota = $Python
-      Dico ("python: " + $Python) "Green"
+      $pp.Esito = "OK"; $pp.Nota = ($Python + "  (" + $ViaPython + ")")
+      Dico ("python: " + $Python + "   via " + $ViaPython) "Green"
     }
   }
   $pp.Fine = (Ora)
