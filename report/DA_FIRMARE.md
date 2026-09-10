@@ -207,6 +207,7 @@ volta che si cita.
 | 11 | **conferma che i 3 agenti del tester** siano sul terminale da backtest | se il tetto sta sul terminale sbagliato **non protegge niente** |
 | 12 | **profondità a tick di XAUUSD** | senza, **nessun verdetto di merito sull'oro** è possibile, per nessun candidato |
 | 13 | **frequenza di `SuperWave NASUSD H1`** | è il numero che porterebbe la famiglia SuperWave sopra il pavimento di 1,00 |
+| 14 | 🔴 **QUALE ALBERO COMPILA IL VPS: `mql5/Experts/` o `mql5/Experts/standalone/`?** | e' la domanda piu' economica e piu' pesante della lista. `standalone/ABTG_DAX_Apertura_EU.mq5` riga **33** e' ancora a `ABTG_DEF_RISK 2.0` mentre la copia principale e' a **1.0** dal 02/09: **il fix C4 ha toccato una copia sola**. Se il VPS compilasse la cartella `standalone/`, l'EA del **CONTO REALE 10105439** girerebbe al **doppio** del rischio firmato — e con lui altri 15 sorgenti. Aperta da **tre censimenti** (08/09 due volte, 10/09) e **mai chiusa**. Si chiude guardando dove punta MetaEditor sul VPS: **e' sola lettura, costa 30 secondi** |
 
 ---
 
