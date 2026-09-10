@@ -253,6 +253,46 @@ brucia la challenge (regola del 19/08). Quindi:
 **Non mollare e non illudersi sono la stessa disciplina**: chi si accontenta
 di un numero bello su 58 operazioni ha mollato prima, non dopo.
 
+## 🛑 IL CONTRO-ESEMPIO PRIMA DELLA CONSEGNA (richiesta di Claudio, 10/09/2026)
+Testuale, dopo che uno strumento appena scritto aveva certificato il falso:
+> _"TU DEVI VERIFICARE SEMPRE TUTTO E NON FARE ERRORI!!! SE FACCIAMO ERRORI IL
+> NOSTRO OBIETTIVO SI ALLONTANA!!!!! IL NOSTRO OBIETTIVO SONO GLI EA X LE PROP!"_
+
+**Il fatto**: il 10/09 `finestra_dax.py` v1 e' stato bocciato dal cancello con
+**sette difetti**, e uno era che lo strumento **certificava "l'orologio e' LO
+STESSO" su un feed spostato di un'ora** (banda 55,0-62,0, l'alternativa atterrava
+a 55,6). Piu': una formula "verificata" su due numeri con **due incognite
+libere**, mentre i numeri veri stavano in un file **nella stessa cartella** che
+non avevo aperto; e un verdetto che bocciava su un insieme definito **per
+differenza**, trascinandosi dentro anni che non c'entravano.
+
+🔴 **La causa e' UNA SOLA, ed e' la stessa nei tre casi: avevo controllato
+che la mia risposta fosse COERENTE con quello che mi aspettavo, invece di
+provare a ROMPERLA.** Quella non e' verifica: e' conferma. E costa giornate.
+
+### 🔴 LA REGOLA
+**Prima di consegnare una misura, uno strumento o un verdetto, devo costruire IO
+il CONTRO-ESEMPIO che lo farebbe sbagliare, e far vedere che non sbaglia.**
+- 🧪 Se l'attesa e' una **banda**, va provata contro l'**ipotesi
+  alternativa**, non contro il nulla: "se non c'e' niente esce un numero basso"
+  non e' un test. **Quale numero produce l'ALTRA spiegazione?** Se cade dentro la
+  banda, la banda non misura niente (classe 178).
+- 🧮 Se c'e' una **formula**, si verifica contro i **numeri veri gia'
+  scritti da qualcun altro**, non contro due valori che tornano: con due
+  incognite libere torna sempre qualcosa. **Prima si cerca il file che ha gia'
+  la risposta.**
+- 🎯 L'insieme su cui si pronuncia un verdetto si **elenca per nome**, mai
+  "tutto cio' che non e' X" (classe 180).
+- 🚫 **Se non riesco a costruire il contro-esempio, non ho capito la misura
+  abbastanza da consegnarla.** Si aspetta, non si manda.
+
+### 🎯 E LA BUSSOLA, che e' la seconda meta' della sua frase
+**L'obiettivo sono gli EA per le PROP.** Ogni ora spesa vale in proporzione a
+quanto avvicina una **sedia schierabile**. Strumenti, cancelli e diagnosi
+servono **solo** perche' senza di loro le sedie nascono sbagliate — non sono il
+lavoro, sono il ponteggio. 🔴 **Una giornata che produce solo ponteggio va
+dichiarata come tale**, non raccontata come progresso.
+
 ## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
 **Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
 a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
