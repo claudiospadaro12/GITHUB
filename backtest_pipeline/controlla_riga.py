@@ -277,7 +277,7 @@ def controlla_terminali(path, testo, dove, stretta=False):
     grezze = {n: l for n, l in enumerate(testo.splitlines(), 1)}
     for k, (i, nudo) in enumerate(righe):
         cruda = grezze.get(i, "")
-        # CLASSE 222 (11/09/2026) -- QUI NON C'E' NESSUNA ESENZIONE, ED E' VOLUTO.
+        # CLASSE 223 (11/09/2026) -- QUI NON C'E' NESSUNA ESENZIONE, ED E' VOLUTO.
         # La 221 aveva subordinato questo blocco a "se non c'e' una guardia
         # stretta sulla riga". Contro-esempio misurato stanotte sulla riga vera
         # di R125: OGNI riga di lancio di casa porta gia' un

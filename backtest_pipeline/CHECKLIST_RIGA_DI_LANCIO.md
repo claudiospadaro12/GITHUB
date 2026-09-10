@@ -13059,7 +13059,18 @@ Trovata la causa in CODA_08, e' stata **cercata in tutti gli altri `CODA_`**:
 uscito il fratello minore in `CODA_10`, che saltava **in silenzio** i terminali
 senza file dello SlippageLogger: adesso ognuno stampa `GUARDATO e NIENTE: <programma>`.
 
-## 222. Il `throw` legittimo che zittisce il divieto sul terminale (11/09/2026)
+## 223. Il `throw` legittimo che zittisce il divieto sul terminale (11/09/2026)
+
+> 🔁 **Era nata come 222, rinumerata a 223 la stessa notte.** Due agenti in
+> parallelo hanno cercato il primo numero libero **nello stesso momento** e hanno
+> trovato tutti e due il 222. 👉 E' la **classe 194 in forma nuova**: li' il
+> difetto era *"il nome nuovo si cerca nel repo prima di adottarlo"*, qui il
+> `grep` **e' stato fatto** ed era **giusto quando e' stato fatto** — ma due
+> lavori concorrenti l'hanno fatto insieme. 📌 **Regola aggiunta: quando piu'
+> agenti lavorano in parallelo, il numero si riserva scrivendo la voce PRIMA di
+> lavorarci, oppure si ricontrolla al momento del commit.** Un `grep` corretto
+> ha comunque una data di scadenza, e la sua scadenza e' il commit di qualcun
+> altro.
 
 **Il caso.** La classe 221 aveva ristretto la guardia sul terminale bersaglio da
 `(Muori|throw|exit 1|VIETATO|notlike|-ne|Write-Host|Red)` a

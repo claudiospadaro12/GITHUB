@@ -1961,3 +1961,17 @@ risolto il fuso · **(4)** misure aperte (DD OOS di `COST_EURJPY`, indici a
 tick reali, Pepperstone, LZMA) · **(5)** filone nuovo: **motori per le
 aperture di DAX e Nasdaq**, con la bussola di R42 (_"agli estremi del range
 di apertura non c'e' edge in nessuna direzione: paga solo il RETEST"_).
+
+## ⚠️ 11/09/2026 — NOTA DI TRACCIABILITA' (turno di notte)
+
+**Quattro `.ps1` della coda** (`CODA_01`, `CODA_05`, `CODA_08`, `CODA_10`, riparati
+per la **classe 222**) sono finiti dentro il commit **`d22c61f`**, il cui messaggio
+parla d'altro (`DA_FIRMARE punto 1`). 🔴 **Causa: un mio `git add -A` mentre un
+agente stava lavorando in parallelo sugli stessi minuti.** Il contenuto e' corretto
+e verificato su `origin/lavoro`, e i pin della coda puntano li' — **funziona** —
+ma **il messaggio di quel commit non descrive quel codice**.
+
+📌 **Regola che ne esce, e vale per tutti i turni con agenti in parallelo:**
+con lavori concorrenti **non si usa `git add -A`**: si aggiungono i propri file per
+nome. Un commit il cui messaggio non descrive il suo diff e' una bugia
+nell'archivio, e l'archivio e' l'unica cosa che ci resta fra una chat e l'altra.
