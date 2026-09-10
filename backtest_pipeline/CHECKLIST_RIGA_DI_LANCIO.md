@@ -12633,12 +12633,18 @@ fermava senza verdetto scritto.
 >    ammissibile"* e' un esito, e va **scritto**, con i cancelli che hanno
 >    escluso ogni cella **elencati per nome** (classe 180: mai per differenza).
 > 3. 🛑 **E la contropartita obbligatoria, perche' una soglia in piu' PUO'
->    distruggere una misura:** quando l'unico cancello che esclude le celle e'
->    quello di qualita', si calcolano **lo stesso** i blocchi ignorandolo
->    (**"blocchi GEOMETRICI"**) e si scrivono come
->    **"ALTOPIANO NON PROFITTEVOLE: si legge come misura, non si sceglie"**,
+>    distruggere una misura:** ~~quando l'unico cancello che esclude le celle e'
+>    quello di qualita'~~ 🆕 **ogni volta che il cancello di qualita' esclude
+>    almeno una cella** (grilletto riscritto al SESTO giro: bastava una cella
+>    fuori per un ALTRO cancello per spegnere l'obbligo e perdere la stessa
+>    misura che voleva salvare), si calcolano **lo stesso** i blocchi
+>    ignorandolo (**"blocchi GEOMETRICI"**) e si scrivono come
+>    **"FORMA GEOMETRICA: si legge come misura, non si sceglie"**,
 >    col PF, il DD e l'`n`. Un altopiano piatto a PF 1,20 **dice qualcosa sul
 >    motore** (la manopola non morde), e i fatti non si buttano.
+>    🔴 **E si legge INSIEME alla classe 212**, che e' il conto da pagare per
+>    questa contropartita: un risultato di seconda categoria dentro un
+>    documento di criteri **deve dire da solo che non sceglie**.
 
 ---
 
@@ -12678,3 +12684,158 @@ e' un morto: e' un'occasione persa che nessuno ritrovera' piu'.*
 >    riga vecchia come *"morta"*: sarebbero due pesi e due misure, e la piu'
 >    morbida sarebbe quella applicata a noi.
 
+
+---
+
+## 🆕 AGGIUNTE DEL 10/09/2026 (SESTO GIRO) — il giro **sulle correzioni del quinto**, chiesto dal quinto stesso: *"le mie modifiche non sono controfirmate"*. 🟢 **La prima cosa da scrivere e' quello che ha RETTO**, misurato e non raccontato: il simulatore della procedura `P1..P8` e' stato **riscritto da zero dal TESTO** (classe 186) e lanciato **in forza bruta su 200.000 griglie casuali**. Risultato: **`P3` non pareggia MAI** (0 casi irrisolti) e **`P7` non pareggia MAI** (0 casi), e il motivo e' strutturale, non fortunato — due blocchi massimali non possono condividere la cella iniziale, quindi lo spareggio *"parametro piu' basso"* chiude sempre; **la nota di `P7` sui due baricentri e' VERA** (0 discordanze, con la dimostrazione accanto al conteggio); il **caso vuoto** e il **ripescaggio** sono deterministici in tutte e due le strade (`P4` e `P5`); i due contro-esempi storici e **cinque righe su dieci** della tabella tornano **identiche**; la correzione del quinto giro sul **DD non monotono** in `R125c`/`R125f` e' **verificata al file** (`R118a` gira `InpSLMode=3` + `InpTPMode=1`, `R125a` gira `InpSLMode=0` + `InpTPMode=0`: rami diversi davvero, il quinto giro ha ragione); `E1` di `R125a` ora coincide con `P1..P8`; i **6 file prova** fanno **33 celle / 66 passate / 0 problemi**, sono **ASCII puro** e hanno le **ore SERVER intatte** (D30EUR **8**, U30USD/NASUSD **14**). Le cinque voci qui sotto sono i difetti **nuovi**.
+
+## 212. 🚪 LA CATEGORIA DI RISULTATO NATA PER **NON BUTTARE UNA MISURA**, CHE DIVENTA UNA **PORTA DI SERVIZIO**
+
+**10/09/2026, SESTO giro di cancello su R125.** Il quinto giro, entrando `G3`
+nell'ammissibilita' (classe 210), si era accorto che quella stretta poteva
+**cancellare una forma misurata** e aveva scritto la contropartita giusta: si
+calcolano lo stesso i blocchi ignorando il PF — i **"blocchi GEOMETRICI"** — e
+si scrivono nel referto. 🟢 **L'intenzione era corretta e va difesa.**
+🔴 **Quello che mancava era la meta' negativa: il testo diceva COSA CALCOLARE
+e non diceva CHE QUEL CALCOLO NON SCEGLIE NIENTE**, e la procedura `P1..P8` i
+blocchi geometrici **non li nominava affatto**.
+
+Eseguita, la doppia lettura **si rompe**:
+- `PF = 1,60 · 1,70 · 1,75 | 1,30 · 1,32 · 1,35 · 1,38`, DD tutti 5,0% ->
+  ramo **ammissibile**: cella **500**. Ramo **geometrico**: cella **2000**,
+  **PF 1,32**, sotto il cancello. **Due letture, due celle.**
+- E il caso davvero velenoso:
+  `PF = 1,48 · 1,45 · 1,42 · 1,38 · 1,35 · 1,33 · 1,30` -> il ramo geometrico
+  sceglie la **1000**, che **PF 1,42 ce l'ha e `G3` lo passa**. In referto e'
+  **indistinguibile** da una cella scelta regolarmente — ma e' stata tirata
+  fuori da un blocco costruito **ignorando il PF**. 🛑 **Questa e' una
+  promozione mascherata**, ed e' esattamente il modo in cui una challenge si
+  brucia con tutti i verbali in ordine.
+
+> ### 🔴 LA REGOLA
+> 1. **Quando si introduce una CATEGORIA NUOVA di risultato in un documento di
+>    criteri, si scrive nello stesso momento cosa quella categoria NON
+>    autorizza.** Una categoria che dice solo cosa e' apre di default tutto
+>    quello che non ha vietato.
+> 2. **Un risultato di seconda categoria deve dirlo DA SOLO, nel proprio nome
+>    e nella propria etichetta**, non nel paragrafo che lo ha istituito: chi
+>    lo rilegge fra sei mesi legge la tabella, non il paragrafo.
+> 3. 📌 **Test operativo**, da fare sempre: *esiste una griglia in cui la
+>    categoria nuova indica una cella DIVERSA da quella regolare?* Se si', o
+>    la si vieta per iscritto o si e' aperta una seconda porta.
+> 4. 🧯 **E i due elenchi non stanno mai nella stessa tabella.** Un numero
+>    giusto nella colonna sbagliata e' un numero sbagliato.
+
+---
+
+## 213. 🔀 DUE REGOLE NATE LO STESSO GIORNO, DALLA STESSA CLASSE, CHE SI CONTRADDICONO **SULL'ESEMPIO DI UNA DELLE DUE**
+
+**10/09/2026, SESTO giro.** La classe 210 aveva prodotto **due** rimedi nella
+stessa passata: (a) il **caso vuoto** di `P2` — *"NESSUNA CELLA AMMISSIBILE ...
+la procedura si ferma qui"* — e (b) l'obbligo dei **blocchi geometrici**.
+🔴 **L'esempio con cui (b) si giustifica — *"per esempio tutto l'asse a PF
+1,20"* — e' esattamente e solo il caso in cui (a) dice di FERMARSI.** Le due
+regole distano **sessanta righe** nello stesso file, sono state scritte nella
+**stessa ora**, e **nessuna delle due cita l'altra**. Chi esegue non sa se
+deve fermarsi o scrivere la fotografia.
+
+👉 Composizione adottata: **`P2` ferma la SCELTA, non la MISURA.** Prima il
+verdetto di `P2` coi cancelli per nome, poi il riquadro della forma
+geometrica; **il round chiude comunque a mani vuote**.
+
+> ### 🔴 LA REGOLA
+> **Due rimedi partoriti dalla stessa diagnosi vanno provati UNO CONTRO
+> L'ALTRO prima di consegnarli**, e il caso su cui provarli e' gia' scritto: e'
+> **l'esempio che uno dei due usa per giustificarsi**. Se l'esempio di A cade
+> dentro il dominio di B, o si compongono per iscritto (con l'ORDINE) o se ne
+> tiene uno solo. 🛑 Il difetto non e' scrivere due regole: e' scriverle
+> **senza farle incontrare**.
+
+---
+
+## 214. 📋 LA TABELLA CHE DIMOSTRA UNA PROCEDURA **SENZA I DATI CHE LA PROCEDURA USA PER DECIDERE**
+
+**10/09/2026, SESTO giro.** Il quinto giro aveva fatto la cosa giusta —
+**eseguire** la procedura su otto griglie avversarie invece di rileggerla — e
+sotto la tabella aveva scritto il criterio corretto: *"due persone con la
+procedura in mano e la stessa griglia devono scegliere la STESSA cella"*.
+🔴 **Ma la colonna "griglia" stampava SOLO i PF**, mentre `P3` spareggia col
+**DD massimo del blocco** e `P7` col **DD della cella**. Rieseguita coi DD
+tutti uguali — l'unica lettura possibile per chi ha in mano solo quella
+colonna — **quattro righe su otto davano un risultato diverso da quello
+scritto**:
+- riga **6**: **500** invece di **1500** — 🔴 **cella diversa**;
+- riga **1**: **1000** invece di **1500** — cioe' era diventata identica
+  alla 1b, che sta li' apposta per mostrare l'ALTRO esito;
+- righe **2** e **5**: il **ripescaggio `P3-bis` non scattava affatto** — e
+  sono **le due righe messe li' a dimostrare la classe 209**. La vetrina della
+  regola nuova **non esercitava la regola nuova**.
+
+> ### 🔴 LA REGOLA
+> 1. **Una tabella di collaudo deve contenere TUTTI gli ingressi che la
+>    procedura legge**, non solo quelli che raccontano la storia. Se un passo
+>    spareggia su una grandezza, quella grandezza sta **nella tabella**.
+> 2. 🧪 **Il test e' meccanico e va fatto sempre: si ri-esegue la propria
+>    tabella LEGGENDO SOLO LA TABELLA.** Se serve un numero che sta nella
+>    testa di chi l'ha scritta, la tabella non dimostra niente — dimostra che
+>    l'autore si ricorda cosa voleva.
+> 3. ⚠️ **E il campanello e' la riga che dimostra la regola NUOVA**: se il
+>    caso costruito apposta per far scattare il rimedio **non lo fa scattare**
+>    con i dati stampati, il rimedio non e' mai stato provato.
+
+---
+
+## 215. 🧾 IL RIQUADRO CHE DESCRIVE UN FILE **SENZA RIAPRIRLO** — e descrive un altro file
+
+**10/09/2026, SESTO giro.** Il quinto giro ha aggiunto ai criteri il riquadro
+che mancava su `R125d` (il sesto file, l'unico senza asse di altopiano) —
+🟢 **giusto aggiungerlo**, la tabella chiede di elencare gli assi *"per
+nome"*. 🔴 **Ma il riquadro descrive un file diverso da quello sul disco:**
+- diceva *"2 celle gemelle **sullo stesso** `InpMagic`"*, mentre il file ha
+  `InpMagic=779860||779860||10||779870||Y`: **due magic DIVERSI**, ed e'
+  proprio quello **l'asse**;
+- diceva *"il confronto e' fra **due rami (long / short)**"*. 🛑 **Dentro
+  `R125d` non c'e' nessun ramo long:** il file lo scrive da solo — *"l'asse e'
+  il MAGIC su due valori: **DUE CELLE IDENTICHE PER COSTRUZIONE**"* — e serve
+  a regalare gratis il **cancello di casa `G1` di determinismo**. Le due celle
+  sono **tutte e due short**; il long del DAX sta in `R125c`/`R125e`;
+- e di conseguenza *"il verdetto si legge **cella per cella**"* e' fuorviante:
+  le due celle vanno lette **INSIEME**, e se non escono identiche al centesimo
+  **il banco e' sporco e il round si ferma prima di ogni altro numero**.
+
+> ### 🔴 LA REGOLA
+> **Un riquadro che descrive un file si scrive col file APERTO, sempre — e la
+> prova che e' stato aperto e' che il riquadro cita una stringa VERBATIM che
+> dentro c'e'.** Descrivere a memoria un file che sta nella stessa cartella e'
+> lo stesso difetto della classe 178 (*"la formula verificata su due numeri
+> mentre i numeri veri stavano nel file accanto"*): non e' pigrizia, e' aver
+> controllato che la propria idea fosse **coerente** invece di provare a
+> **romperla**. ⚠️ E il posto dove costa di piu' e' un documento di **criteri
+> congelati**, perche' li' la descrizione **diventa la regola** e il file vero
+> non ha piu' voce.
+
+---
+
+## 216. 🪟 LA CLAUSOLA CHE SCATTA SOLO SE IL BLOCCO DI BORDO **VINCE**, e resta muta se **PERDE**
+
+**10/09/2026, SESTO giro.** La clausola *"l'asse e' APERTO da quel lato e va
+esteso di almeno due gradini"* (classe 209) e' agganciata a `P5`, cioe' scatta
+quando il blocco appoggiato al bordo ✂️ **e' quello vincente** e viene
+accorciato. 🔴 **Se quel blocco semplicemente PERDE `P3`, non viene mai
+esaminato e nessuno lo nomina.**
+
+Griglia che lo rompe: `PF = 1,60 · 1,62 · 1,65 · 1,68 | 1,90 · 1,92 · 1,95`,
+DD tutti uguali. Blocchi: `{0,500,1000,1500}` (**4 celle**) e
+`{2000,2500,3000}` (**3 celle, il PF piu' alto della griglia, appoggiato al
+3000 tagliato**). Vince il primo per **lunghezza**; il secondo non viene
+annullato **perche' non e' mai stato guardato**; il referto **non dice** che
+l'altopiano potrebbe continuare oltre la griglia. 🛑 **E' il falso NEGATIVO
+della classe 210 in un'altra veste:** la misura che manca resta invisibile.
+
+> ### 🔴 LA REGOLA
+> **Una dichiarazione di BUCO si aggancia al FATTO che il buco esiste, mai al
+> RAMO della procedura che ci passa sopra.** Qui il fatto e' *"un blocco tocca
+> il bordo tagliato"*, e va scritto **che quel blocco vinca, perda o venga
+> annullato**. Agganciare l'avviso a un ramo vuol dire spegnerlo in tutti gli
+> altri — e il ramo dove si tace e', per costruzione, quello dove nessuno sta
+> guardando.

@@ -90,11 +90,22 @@ Operativamente, e senza margini di interpretazione:
 
    > 🆕 ⚙️ **R125d NON HA UN ASSE DI ALTOPIANO, e va detto qui perche' la
    > tabella dice di elencare gli assi "per nome" e lui e' il sesto file**
-   > (classe 209, quinto giro). Il suo asse e' **tecnico**: **2 celle gemelle**
-   > sullo stesso `InpMagic` per il cancello di determinismo `G1`. Con 2 celle
-   > **P4 boccia sempre**, quindi **la procedura 4-bis NON si applica a R125d**:
-   > li' il confronto e' fra **due rami** (long / short), non fra celle di una
-   > curva, e il verdetto si legge coi cancelli `R125-G0..G4` cella per cella.
+   > (classe 209, quinto giro). Il suo asse e' **tecnico**: `InpMagic` su
+   > **due valori** (`779860` e `779870`), cioe' **due celle IDENTICHE PER
+   > COSTRUZIONE**, entrambe **short**. Con 2 celle **P4 boccia sempre**,
+   > quindi **la procedura 4-bis NON si applica a R125d**.
+   > 🆕 🔴 **E QUI IL QUINTO GIRO AVEVA DESCRITTO UN ALTRO FILE -- classe 215,
+   > SESTO giro.** Diceva *"2 celle gemelle **sullo stesso** `InpMagic`"*
+   > (i magic sono **due e diversi**: e' l'asse) e soprattutto *"il confronto
+   > e' fra **due rami (long / short)**"*. 🛑 **Dentro `R125d` non c'e' nessun
+   > ramo long:** il file lo scrive da solo (*"l'asse e' il MAGIC su due
+   > valori: DUE CELLE IDENTICHE PER COSTRUZIONE"*), e serve a regalare gratis
+   > il **cancello di casa `G1` (gemelli / determinismo — da non confondere con
+   > `R125-G1`, che qui e' il RISCHIO)**. Il lato **long** del DAX sta in
+   > `R125c`/`R125e`, non qui. 👉 Verdetto: **le due celle si leggono
+   > INSIEME** — se non escono identiche al centesimo il banco e' sporco e il
+   > round si ferma **prima** di qualunque altro numero — e **solo dopo** il
+   > lato short si giudica coi cancelli `R125-G0..G4`.
    > **Non e' un buco: e' un file che risponde a un'altra domanda.**
 
 3. 🧱 **Bordo che e' un LIMITE FISICO**: dall'altra parte non c'e' una misura
@@ -161,14 +172,54 @@ puo' stare dentro nessun blocco.
 > correzione DISTRUGGE UNA MISURA.** Con `G3` in P1, una griglia piatta ma
 > poco redditizia (per esempio tutto l'asse a **PF 1,20**) non ha piu' nessun
 > blocco, e il round rischierebbe di archiviare *"niente"* dove invece c'e'
-> **una forma misurata**. 👉 **Obbligo:** quando l'unico cancello che esclude
-> le celle e' `R125-G3`, si calcolano **lo stesso** i blocchi ignorando `G3`
-> (**"blocchi GEOMETRICI"**) e si scrivono nel referto con la dicitura
-> **"ALTOPIANO NON PROFITTEVOLE: si legge come misura, non si sceglie"**,
-> col PF, il DD e l'`n`. **Un altopiano piatto a PF 1,20 e' un fatto sul
+> **una forma misurata**. 👉 **Obbligo:** **ogni volta che `R125-G3` esclude
+> almeno una cella** si calcolano **lo stesso** i blocchi ignorando `G3` (e
+> **soltanto** `G3`: gli altri quattro cancelli restano attivi) — sono i
+> **"blocchi GEOMETRICI"** — e si scrivono nel referto con la dicitura
+> **"FORMA GEOMETRICA: si legge come misura, non si sceglie"**, col PF, il DD
+> e l'`n` di ogni cella. **Un altopiano piatto a PF 1,20 e' un fatto sul
 > motore** (dice che la manopola non morde), e i fatti non si buttano:
 > e' la regola del 09/09 (*"non si scarta niente senza scriverne il NUMERO e
 > il MOTIVO"*).
+>
+> 🆕 🔴 **E QUI SI CHIUDE LA PORTA DI SERVIZIO -- classe 212, SESTO giro di
+> cancello, 10/09/2026.** La v3 diceva *cosa calcolare* e non diceva **che
+> quel calcolo non sceglie niente**, e la procedura `P1..P8` i blocchi
+> geometrici non li nomina affatto. Eseguita, la doppia lettura **si rompe**:
+> su `PF = 1,60 · 1,70 · 1,75 | 1,30 · 1,32 · 1,35 · 1,38` (DD tutti 5,0%) il
+> ramo ammissibile sceglie la **500** e il ramo geometrico sceglie la **2000**
+> (PF **1,32**, sotto il cancello). E il caso peggiore non e' nemmeno questo:
+> su `PF = 1,48 · 1,45 · 1,42 · 1,38 · 1,35 · 1,33 · 1,30` il ramo geometrico
+> sceglie la **1000**, che ha **PF 1,42 e passa `R125-G3`** — cioe' una cella
+> **indistinguibile in referto da una cella scelta regolarmente**, tirata pero'
+> fuori da un blocco costruito **ignorando il PF**. Quella e' una **promozione
+> mascherata**, e si chiude con tre frasi, non col buon senso di chi legge:
+> 1. 🚫 **Un blocco GEOMETRICO non entra MAI in `P3`, `P5`, `P6`, `P7`.** La
+>    procedura `P1..P8` gira **una volta sola**, sui blocchi di `P2`, cioe' su
+>    celle **tutte ammissibili**. Il calcolo geometrico e' una **fotografia**:
+>    produce un elenco di celle con i loro numeri, **non produce una cella
+>    scelta**, e la parola *"scelta"* accanto a un blocco geometrico e' un
+>    errore di lettura.
+> 2. 🚫 **Nessuna cella nominata dentro un blocco GEOMETRICO puo' essere
+>    proposta, promossa, messa in forward o citata come candidata** — nemmeno
+>    se quella singola cella passa tutti e cinque i cancelli. Se una cella
+>    merita, esce da `P7` **dal ramo ammissibile**: non c'e' una seconda porta.
+> 3. 📌 **Nel referto i due elenchi stanno in due riquadri SEPARATI e
+>    ETICHETTATI**, mai nella stessa tabella: `BLOCCHI (P2)` e
+>    `FORMA GEOMETRICA (non si sceglie)`. Un numero giusto nella colonna
+>    sbagliata e' un numero sbagliato.
+>
+> 🆕 ⚠️ **E il caso VUOTO tira da tutte e due le parti -- classe 213, sesto
+> giro.** L'esempio scritto qui sopra (*tutto l'asse a PF 1,20*) e' **esattamente
+> e solo** il caso in cui `P2` dice *"NESSUNA CELLA AMMISSIBILE ... la
+> procedura si ferma qui"*. Le due regole sono nate lo stesso giorno, dalla
+> stessa classe 210, e **non si citavano**. 👉 **Si compongono cosi', e
+> l'ordine e' quello scritto:** `P2` ferma **la scelta**, non **la
+> misura**. Quando non c'e' nessuna cella ammissibile si scrive **prima** il
+> verdetto di `P2` (coi cancelli per nome, cella per cella) e **poi**, se
+> `R125-G3` ha escluso almeno una cella, il riquadro
+> **`FORMA GEOMETRICA (non si sceglie)`**. **Il round chiude comunque a mani
+> vuote**: la fotografia non e' un'uscita di riserva.
 
 **P2. BLOCCHI.** Un **BLOCCO** e' una sequenza di celle **contigue sull'asse**,
 tutte ammissibili, in cui **`max(PF OOS) - min(PF OOS) <= 0,15` calcolato sul
@@ -185,6 +236,10 @@ sovrapporsi.
   **"NESSUNA CELLA AMMISSIBILE"**, si scrive **quale cancello** ha escluso
   ognuna delle celle **per nome** (mai "tutte le altre"), e **non si sceglie
   niente**. La v2 non nominava questo caso e su di esso non aveva output.
+  🆕 📌 **"Si ferma qui" vuol dire che si ferma la SCELTA, non la MISURA**
+  (classe 213, sesto giro): se `R125-G3` ha escluso almeno una cella, il
+  riquadro **`FORMA GEOMETRICA (non si sceglie)`** del commento a `P1` si
+  scrive **lo stesso**, **dopo** questo verdetto e **senza** cambiarlo.
 
 **P3. QUALE BLOCCO.** Vince quello con **piu' celle**. Spareggi, in
 quest'ordine: (a) **DD OOS massimo piu' basso** dentro il blocco; (b)
@@ -228,6 +283,19 @@ qualunque cosa esca dopo il ripescaggio -- una cella scelta **oppure** il
 👉 **Il ripescaggio sceglie, non assolve.**
 🧱 **I bordi LIMITE FISICO NON si tolgono**: restano a contare (dall'altra
 parte non manca una misura, manca un valore che non esiste).
+🆕 🔴 **E LA CLAUSOLA VALE ANCHE PER IL BLOCCO DI BORDO CHE *PERDE* -- classe
+216, SESTO giro.** Fin qui *"l'asse e' APERTO da quel lato"* si scriveva solo
+se il blocco appoggiato al bordo ✂️ **vinceva** `P3` (e poi veniva annullato).
+Eseguita, la regola lascia muto il caso piu' banale: su
+`PF = 1,60 · 1,62 · 1,65 · 1,68 | 1,90 · 1,92 · 1,95` (DD tutti uguali) i
+blocchi sono `{0,500,1000,1500}` (4 celle) e `{2000,2500,3000}` (3 celle,
+**il PF piu' alto della griglia**, appoggiato al 3000 tagliato). Vince il
+primo **per lunghezza**, il secondo **non viene mai annullato perche' non e'
+mai stato esaminato**, e il referto **non dice** che l'altopiano potrebbe
+continuare oltre la griglia. E' lo stesso falso NEGATIVO della classe 210 in
+un'altra veste. 👉 **Obbligo:** la frase *"l'asse e' APERTO da quel lato e va
+esteso di almeno due gradini"* si scrive **ogni volta che un blocco di `P2`
+CONTIENE un bordo ✂️**, che quel blocco vinca, perda o venga annullato.
 
 **P6. SCEGLIIBILI.** Dal **blocco residuo** (= il blocco dopo P5) si tolgono la
 **prima** e l'**ultima** cella (non hanno due vicine dentro il blocco, quindi il
@@ -307,23 +375,72 @@ BLOCCO**, mai quello dell'asse.
 > **sei hanno retto**. Qui ci sono tutte e otto, comprese quelle passate:
 > un elenco di soli difetti descrive male la realta', ed e' regola di casa.
 
-| # | griglia (PF OOS sui 7 valori) | cosa mette alla prova | esito v2 | v3 |
-|---|---|---|---|---|
-| 1 | `0,90 \| 1,60 1,66 1,70 1,72 \| 1,10 1,05` | altopiano di lunghezza **PARI** (4 celle) | 🟢 baricentro **2,5**, scegliibili 1000 e 1500 **a pari distanza**, spareggio DD -> **1500** | invariata |
-| 1b | idem, **DD identici al centesimo** | lo spareggio (b) esiste davvero? | 🟢 -> **1000** (parametro piu' basso) | invariata |
-| 2 | `1,50 1,55 1,60 \| 1,20 \| 1,70 1,80 1,84` | **due blocchi massimali della STESSA lunghezza** | 🔴 **DUE VERDETTI**: *"estendi l'asse"* oppure **500** | **classe 209** -> P3-bis: **500**, + *"asse APERTO a destra"* |
-| 3 | `1,60 1,62 1,65 1,68 1,70 1,72 1,74` | altopiano che tocca **tutti e due i bordi** | 🟢 P5 toglie solo la 3000 (🧱 la 0 resta), baricentro 2,5, 1000 e 1500 a pari distanza **e a pari DD (4,3)** -> spareggio (b) **parametro piu' basso** -> **1000**, + frase d'obbligo | invariata |
-| 4a | `0,80 1,10 1,45 1,80 2,20 2,60 3,00` | **nessuno** span sotto 0,15 | 🟢 **sette** blocchi da 1 cella -> **P4: "non c'e' una configurazione robusta"** | stesso verdetto, ma i blocchi sono **cinque**: con `G3` in P1 la 0 (0,80) e la 500 (1,10) non sono piu' ammissibili. E P2 ora **dice** che i blocchi da 1 cella esistono |
-| 4b | tutte le celle con **DD 12%** | **nessuna cella ammissibile** | 🔴 **nessun blocco: la procedura non aveva output** | **classe 210** -> P2: *"NESSUNA CELLA AMMISSIBILE"*, con i cancelli per nome |
-| 5 | `1,60 1,62 1,65 [1,66 DD 8,9%] 1,68 1,70 1,72` | **buco in mezzo**: cella che passa il PF ma **non** il rischio | 🟢 la cella non ammissibile **spezza** (P1), restano `{0,500,1000}` e `{2000,2500,3000}` | 🟢 + P3-bis sceglie la **500** invece di fermarsi |
-| 6 | `1,40 1,50 1,55 1,60 1,70 1,85 2,00` | **ancoraggi diversi** (era il difetto 206) | 🟢 **cinque** blocchi massimali enumerati **senza dipendere da dove si parte** -> `{1000,1500,2000}` -> **1500** | invariata |
-| 7 | `1,70 1,74 1,78 \| 1,20 \| 1,60 1,66 1,72` | il blocco vincente **muore in P5** mentre un altro **sopravvive** | 🔴 **DUE VERDETTI**: *"estendi"* oppure **500** -- e il blocco buttato aveva **il PF piu' alto della griglia** | **classe 209** -> **500** + *"asse APERTO a destra"* |
-| 8 | `1,70 1,75 1,80 \| 1,05 1,00 0,95 0,90` | altopiano **PERDENTE** piu' lungo di quello buono | 🔴 sceglieva la **2000 a PF 1,00** e il round chiudeva a mani vuote | **classe 210** -> `G3` in P1: le perdenti non sono ammissibili -> **500** |
+> 🆕 🔴 **E LA COLONNA `DD OOS` E' STATA AGGIUNTA AL SESTO GIRO -- classe 214.**
+> La v3 stampava **solo i PF**, ma `P3` spareggia col **DD massimo del blocco**
+> e `P7` spareggia col **DD della cella**: senza quei numeri **la tabella non
+> e' ri-eseguibile**, ed e' il criterio che la tabella stessa dichiara due
+> righe piu' sotto. Rieseguita coi DD **tutti uguali** (l'unica lettura
+> possibile per chi ha in mano solo i PF), **quattro righe su otto davano un
+> risultato diverso da quello scritto**: la **6** dava **500** invece di
+> **1500** (cella diversa!), la **1** dava **1000** invece di **1500** (cioe'
+> era identica alla 1b), e nella **2** e nella **5** il **ripescaggio P3-bis
+> non scattava affatto** -- proprio nelle righe messe li' a dimostrare la
+> classe 209. 👉 I DD sono adesso **scritti**, e con questi numeri tutte e
+> dieci le righe tornano.
+
+| # | PF OOS sui 7 valori | DD OOS sui 7 valori | cosa mette alla prova | esito v2 | v3/v4 |
+|---|---|---|---|---|---|
+| 1 | `0,90 \| 1,60 1,66 1,70 1,72 \| 1,10 1,05` | `5,00 5,00 4,60 4,40 5,00 5,00 5,00` | altopiano di lunghezza **PARI** (4 celle) | 🟢 baricentro **2,5**, scegliibili 1000 e 1500 **a pari distanza**, spareggio DD -> **1500** (P7) | invariata |
+| 1b | idem | `4,50` su tutte e sette | lo spareggio (b) esiste davvero? | 🟢 -> **1000** (parametro piu' basso, P7) | invariata |
+| 2 | `1,50 1,55 1,60 \| 1,20 \| 1,70 1,80 1,84` | `5,90 5,80 5,85 6,00 4,10 4,05 3,90` | **due blocchi massimali della STESSA lunghezza** | 🔴 **DUE VERDETTI**: *"estendi l'asse"* oppure **500** | **classe 209** -> P3-bis: **500** (P6), + *"asse APERTO a destra"* |
+| 3 | `1,60 1,62 1,65 1,68 1,70 1,72 1,74` | `4,30` su tutte e sette | altopiano che tocca **tutti e due i bordi** | 🟢 P5 toglie solo la 3000 (🧱 la 0 resta), baricentro 2,5, 1000 e 1500 a pari distanza **e a pari DD** -> spareggio (b) **parametro piu' basso** -> **1000** (P7), + frase d'obbligo | invariata |
+| 4a | `0,80 1,10 1,45 1,80 2,20 2,60 3,00` | `4,00` su tutte e sette | **nessuno** span sotto 0,15 | 🟢 **sette** blocchi da 1 cella -> **P4: "non c'e' una configurazione robusta"** | stesso verdetto, ma i blocchi sono **cinque**: con `G3` in P1 la 0 (0,80) e la 500 (1,10) non sono piu' ammissibili. E P2 ora **dice** che i blocchi da 1 cella esistono. 🆕 **E scatta il riquadro `FORMA GEOMETRICA`** (classe 212): senza `G3` i blocchi tornano **sette** |
+| 4b | `1,60` su tutte e sette | `12,00` su tutte e sette | **nessuna cella ammissibile** | 🔴 **nessun blocco: la procedura non aveva output** | **classe 210** -> P2: *"NESSUNA CELLA AMMISSIBILE"*, con i cancelli per nome (qui: `R125-G1` su tutte e sette). 🆕 **Nessuna forma geometrica**: `G3` non ha escluso niente |
+| 5 | `1,60 1,62 1,65 1,66 1,68 1,70 1,72` | `5,90 5,80 5,85 8,90 4,10 4,05 3,90` | **buco in mezzo**: cella che passa il PF ma **non** il rischio | 🟢 la cella non ammissibile **spezza** (P1), restano `{0,500,1000}` e `{2000,2500,3000}` | 🟢 + P3-bis sceglie la **500** (P6) invece di fermarsi |
+| 6 | `1,40 1,50 1,55 1,60 1,70 1,85 2,00` | `6,00 5,80 4,50 4,40 4,30 5,00 5,00` | **ancoraggi diversi** (era il difetto 206) | 🟢 **cinque** blocchi massimali enumerati **senza dipendere da dove si parte** -> spareggio (a) DD -> `{1000,1500,2000}` -> **1500** (P6) | invariata |
+| 7 | `1,70 1,74 1,78 \| 1,20 \| 1,60 1,66 1,72` | `5,90 5,80 5,85 6,00 4,10 4,05 3,90` | il blocco vincente **muore in P5** mentre un altro **sopravvive** | 🔴 **DUE VERDETTI**: *"estendi"* oppure **500** -- e il blocco buttato aveva **il PF piu' alto della griglia** | **classe 209** -> **500** (P6) + *"asse APERTO a destra"* |
+| 8 | `1,70 1,75 1,80 \| 1,05 1,00 0,95 0,90` | `4,20 4,00 3,80 3,60 3,40 3,30 3,20` | altopiano **PERDENTE** piu' lungo di quello buono | 🔴 sceglieva la **2000 a PF 1,00** e il round chiudeva a mani vuote | **classe 210** -> `G3` in P1: le perdenti non sono ammissibili -> **500** (P6). 🆕 **+ riquadro `FORMA GEOMETRICA`** con **tutti e due** i blocchi per nome — `{0,500,1000}` e `{1500,2000,2500,3000}` — che **non si scelgono** (classe 212) |
 
 🎯 **Il criterio con cui sono state giudicate**, e va scritto: *due persone con
 la procedura in mano e la stessa griglia devono scegliere la STESSA cella, e
 devono poterlo dimostrare **citando il passo**.* Le righe 2, 4b, 7 e 8 non lo
-passavano.
+passavano alla v2; le righe **1, 2, 5 e 6** non lo passavano alla **v3**, per
+mancanza della colonna DD (classe 214).
+
+#### 🆕 🧪 LE SEI GRIGLIE DEL SESTO GIRO -- e le TRE cose che il sesto giro NON e' riuscito a rompere
+
+> 🔬 **Come sono state girate.** Il simulatore della procedura e' stato
+> **riscritto da zero dal TESTO** di questo paragrafo (classe **186**: il banco
+> che esamina non puo' essere lo stesso che ha scritto il compito), e poi
+> lanciato **anche in forza bruta su 200.000 griglie casuali** (PF 0,80-2,20,
+> DD 2,0-9,0%).
+
+| # | cosa attacca | esito |
+|---|---|---|
+| N1 | il **ripescaggio due volte di fila** | 🟢 **NON E' RAGGIUNGIBILE** su nessuno dei tre assi di R125. `P5` annulla solo un blocco che contiene un bordo ✂️, e i bordi ✂️ sono **uno per asse**: due blocchi **massimali** che lo contengono sarebbero **annidati**, quindi non entrambi massimali. Massimo misurato su 200.000 griglie: **1 ripescaggio**. 📌 Se un round futuro usasse un asse con ✂️ **da tutte e due le parti**, la cosa cambierebbe: **allora** il ciclo di P3-bis servirebbe davvero |
+| N2 | blocco **geometrico** e blocco **ammissibile** che indicano **celle diverse** | 🔴 **classe 212** -> **500** contro **2000**. Chiuso col divieto esplicito |
+| N3 | il blocco **geometrico e' l'unico che esiste** | 🔴 **classe 213** (collisione col caso vuoto di P2) -> ordine di scrittura fissato |
+| N4 | il **ripescaggio svuota tutto**: caso vuoto **non** da P4 | 🟢 con ammissibili `{2000,2500,3000}` soltanto: P5 annulla, non resta nessun blocco -> **"L'ALTOPIANO, SE C'E', ESCE DALLA GRIGLIA"**. Con in piu' una cella isolata a sinistra: ripescaggio -> blocco da 1 cella -> **P4** + clausola. Tutti e due deterministici |
+| N5 | il **grilletto** della contropartita | 🔴 con *"l'unico cancello che esclude e' G3"* bastava **una** cella fuori per `R125-G1` per spegnere l'obbligo e perdere la stessa misura. Grilletto riscritto: **ogni volta che `G3` esclude almeno una cella** |
+| N9 | il blocco di bordo che **perde** e non viene mai esaminato | 🔴 **classe 216** -> la frase *"asse APERTO"* ora scatta se un blocco **contiene** un bordo ✂️, non solo se lo perde |
+
+🟢 **E LE TRE COSE CHE HANNO RETTO, misurate su 200.000 griglie** (vanno scritte:
+un elenco di soli difetti descrive male la realta'):
+1. **`P3` non pareggia mai**: **0** casi irrisolti. Il motivo e' strutturale --
+   due blocchi massimali non possono avere la stessa cella iniziale (sarebbero
+   annidati), quindi lo spareggio (b) *"parametro piu' basso"* **chiude sempre**.
+2. **`P7` non pareggia mai**: **0** casi irrisolti, stesso motivo (il parametro
+   e' unico per cella).
+3. **La nota di `P7` sui due baricentri e' VERA**: **0** discordanze fra il
+   baricentro del blocco residuo e quello calcolato dopo `P6`. E c'e' la
+   dimostrazione, non solo il conteggio: togliere la **prima** e l'**ultima**
+   cella di un blocco contiguo **non sposta la media**, e ogni cella di bordo
+   ancora presente dopo `P5` **e' gia'** la prima o l'ultima del residuo.
+   👉 **Corollario dello stesso conto: il ramo *"`P6` annulla il blocco"* e'
+   IRRAGGIUNGIBILE** (0 casi su 200.000): un residuo di 3+ celle contigue lascia
+   sempre almeno una scegliibile. Non e' un difetto -- e' una cintura in piu' --
+   ma va detto, perche' `P3-bis` dice *"annullato da P5 **o da P6**"* e la
+   seconda meta' **non si e' mai vista**.
 
 4-ter. ⚖️ **QUANDO PAR.3, 3-bis E LA PROCEDURA DICONO COSE DIVERSE, VINCE
    SEMPRE LA PROCEDURA `P1..P8`** -- e vale anche per **questo** paragrafo e per
@@ -333,7 +450,9 @@ passavano.
    e' **"non c'e' una configurazione robusta"** (P4, dopo che P3-bis ha
    ripescato `{1500,2000}`) **piu' la clausola "l'asse e' APERTO a destra e va
    esteso"** (P5). 📌 In tutte e due le letture della procedura -- v2 e v3 --
-   **la 2500 NON si sceglie**: cambia il nome del verdetto, non l'esito. 🔴 **La differenza e' che il 2500 potrebbe essere
+   **la 2500 NON si sceglie**: cambia il nome del verdetto, non l'esito.
+   🔴 **E la differenza fra il par.3 nudo e la procedura -- cioe' il motivo per
+   cui vince la procedura -- e' che il 2500 potrebbe essere
    il centro dell'altopiano oppure il fianco di una salita che la griglia ha
    tagliato, e i due casi danno lo stesso quadro di numeri.** Il costo di
    sbagliare (una cella promossa sul fianco) e' una challenge; il costo di
