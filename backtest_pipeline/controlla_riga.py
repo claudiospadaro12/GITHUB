@@ -247,13 +247,47 @@ def controlla_terminali(path, testo, dove):
             if c in nudo and not in_una_guardia(righe, k):
                 blocca("CONTO", "r." + str(i) + ": nomina il conto " + c + " fuori da una guardia", dove)
 
+# CLASSE 173 (10/09/2026) -- il cancello chiedeva un PIN e un MARCATORE anche a una
+# riga che NON scarica e NON esegue nessuno script: un censimento di sola lettura
+# fatto di soli cmdlet locali (Get-Process ...) non ha niente da appuntare a un
+# commit, e bloccarlo era un falso positivo. La restrizione e' vera nell'altro
+# verso e li' NON si tocca: se la riga scarica o esegue uno .ps1, pin e marcatore
+# restano BLOCCANTI. In cambio la riga esente deve dimostrare di essere di sola
+# lettura: se nomina un cmdlet che scrive, l'esenzione decade e torna bloccante.
+SCRITTURA = ["Remove-Item", "Set-Content", "Add-Content", "Out-File", "Copy-Item",
+             "Move-Item", "New-Item", "Start-Process", "Invoke-Expression", "iex ",
+             "DownloadString", "Compress-Archive", "Stop-Process", "> "]
+
+def esegue_uno_script(riga):
+    """True se la riga scarica codice o manda in esecuzione uno .ps1.
+    Solo in quel caso il pin e il marcatore hanno un senso (e sono bloccanti)."""
+    scarica = re.search(r"\b(irm|iwr|curl|wget|Invoke-RestMethod|Invoke-WebRequest)\b", riga, re.I)
+    if scarica or "githubusercontent.com" in riga:
+        return True
+    if ".ps1" in riga.lower():
+        return True
+    if "& powershell" in riga or "powershell.exe" in riga.lower():
+        return True
+    return False
+
 def controlla_riga_lancio(riga):
+    # --- 0. classe 173: la riga esegue davvero uno script, o e' sola lettura locale?
+    con_script = esegue_uno_script(riga)
+    if not con_script:
+        # confine di parola: senza, "Remove-Item" fa scattare anche "Move-Item"
+        sporche = [v for v in SCRITTURA
+                   if re.search(r"(?<![A-Za-z-])" + re.escape(v.strip()) + r"(?![A-Za-z])", riga, re.I)]
+        if sporche:
+            blocca("173", "la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA nomina " + ", ".join(sporche) + ": una riga senza pin e' ammessa solo se e' di SOLA LETTURA. Cosi' com'e' non e' ne' pinnata ne' innocua")
+        else:
+            passa("riga di SOLA LETTURA locale: nessuno script scaricato o eseguito, nessun cmdlet che scrive -> pin e marcatore non si applicano (classe 173)")
+
     # --- 1. il PIN deve essere un COMMIT (classe 164): 40 esadecimali
     pins = re.findall(r"githubusercontent\.com/[^/]+/[^/]+/([A-Za-z0-9_.-]+)/", riga)
     pins += re.findall(r"\$PIN\s*=\s*'([^']+)'", riga)
     pins += re.findall(r"\$PIN\s*=\s*\"([^\"]+)\"", riga)
     visti = set(p for p in pins if not p.startswith("$"))
-    if not visti:
+    if not visti and con_script:
         blocca("PIN", "nessun pin trovato nella riga: la riga deve puntare a un COMMIT, non a un branch")
     for p in visti:
         if re.fullmatch(r"[0-9a-f]{40}", p):
@@ -273,6 +307,8 @@ def controlla_riga_lancio(riga):
     # --- 2. il MARCATORE va controllato prima di eseguire
     if "Select-String" in riga and "SimpleMatch" in riga and "MARCATORE" in riga:
         passa("la riga controlla il MARCATORE dello script scaricato")
+    elif not con_script:
+        pass          # classe 173: niente script scaricato, niente marcatore da controllare
     else:
         blocca("MARCATORE", "la riga non verifica il MARCATORE dello script scaricato: una copia vecchia in cache gira senza dirlo")
 
@@ -307,6 +343,8 @@ def controlla_riga_lancio(riga):
     # --- 6. la raccolta
     if "Compress-Archive" in riga or "zip" in riga.lower() or "-File" in riga:
         passa("la riga prevede una raccolta o punta a uno script che ce l'ha")
+    elif not con_script:
+        pass          # classe 173: una riga che stampa e basta non produce file da raccogliere
     else:
         rileva("RACCOLTA", "non vedo la raccolta: ogni risultato deve arrivare anche sul Desktop del VPS (regola 11/08)")
 

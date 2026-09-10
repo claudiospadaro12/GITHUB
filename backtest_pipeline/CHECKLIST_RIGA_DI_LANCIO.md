@@ -11343,3 +11343,89 @@ Sul 04/09 **si accende**; in 40 giorni sbaglia **3 volte invece di 13**.
 >    **dove il numero si legge**, non nei commenti: qui *"un CSV che arriva
 >    identico non lascia traccia"*, e la cura definitiva e' un timbro scritto
 >    **dentro** il file dall'esportatore.
+
+---
+
+## 173. 🚪 IL CANCELLO CHIEDE UN **PIN** A UNA RIGA CHE NON SCARICA NIENTE — e cosi' boccia proprio il **censimento di sola lettura** che CLAUDE.md pretende prima di ogni lavoro
+
+**Caso reale, 10/09/2026.** Prima di importare i nove anni di storico DAX serviva
+il **censimento dei terminali** imposto dalla REGOLA DEI TERMINALI MULTIPLI (06/09):
+
+```
+Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id, MainWindowTitle, Path | Format-Table -AutoSize
+```
+
+`controlla_riga.py` ha risposto **FAIL** con **due bloccanti**:
+
+```
+X [PIN]       nessun pin trovato nella riga: la riga deve puntare a un COMMIT, non a un branch
+X [MARCATORE] la riga non verifica il MARCATORE dello script scaricato
+```
+
+🔴 **Tutti e due FALSI.** Quella riga non scarica nessuno script e non ne esegue
+nessuno: non c'e' **niente** da appuntare a un commit, e non c'e' nessun
+marcatore da controllare perche' non c'e' nessun file. Il cancello stava
+chiedendo il passaporto a chi non attraversa la frontiera.
+
+### 🤔 PERCHE' E' GRAVE, e non un fastidio
+E' la **terza** classe di falsi positivi del cancello stesso (dopo la 167 sui
+`||` del formato `.ini`). E il falso positivo di un cancello **bloccante** non e'
+neutro: la regola di casa dice *"il primo che fallisce blocca"*, quindi un
+allarme falso costringe a **scavalcare il cancello a mano** — e il giorno in cui
+si prende l'abitudine di scavalcarlo, il cancello ha smesso di proteggere.
+👉 **Un cancello che grida al lupo si ripara con la stessa urgenza di uno che
+lascia passare un lupo.**
+
+### 🛠️ LA RIPARAZIONE — si RESTRINGE l'ambito, non si ammorbidisce il criterio
+In `controlla_riga.py`, `esegue_uno_script(riga)` decide se la riga
+**scarica codice** (`irm`/`iwr`/`curl`/`wget`/`Invoke-RestMethod`/
+`Invoke-WebRequest`/`githubusercontent.com`) **oppure esegue uno script**
+(`.ps1`, `& powershell`, `powershell.exe`):
+
+- ✅ **se SI** → `PIN`, `MARCATORE` e `RACCOLTA` restano **esattamente come
+  prima**, bloccanti. Nessuno sconto.
+- ✅ **se NO** → la riga e' esente, **ma deve pagare il pedaggio**: se nomina
+  anche solo uno fra `Remove-Item`, `Set-Content`, `Add-Content`, `Out-File`,
+  `Copy-Item`, `Move-Item`, `New-Item`, `Start-Process`, `Invoke-Expression`,
+  `iex`, `DownloadString`, `Compress-Archive`, `Stop-Process` o una
+  redirezione, **torna BLOCCANTE con codice 173**. Il ragionamento: una riga
+  senza pin e' ammessa **solo** se e' di **SOLA LETTURA**; una riga che scrive
+  e non e' appuntabile a un commit non e' ne' pinnata ne' innocua, ed e' il
+  peggio dei due mondi.
+
+### 🧪 IL BANCO (3 casi su 3, e vanno tenuti tutti e tre)
+| riga | atteso | esito |
+|---|---|---|
+| censimento `Get-Process ... Select-Object Id, MainWindowTitle, Path` | PASS | ✅ PASS |
+| riga che **scarica** uno `.ps1` **senza pin** (`.../lavoro/...`) | FAIL | ✅ FAIL (PIN + MARCATORE) |
+| riga senza download che chiama **`Remove-Item`** | FAIL | ✅ FAIL (173) |
+
+Piu' il **risweep di non-regressione**: `--ps1` su **243 file `.ps1`** del repo →
+**0 bloccanti**, come prima della modifica.
+
+### 🐛 E UN DIFETTO DENTRO LA RIPARAZIONE, trovato al banco
+La prima stesura cercava i cmdlet che scrivono con un `in` su stringa: e
+`"Remove-Item"` **contiene** `"Move-Item"`, quindi il messaggio accusava la riga
+di due cmdlet quando ne aveva uno. Bloccava giusto per il motivo giusto, ma
+**diceva un numero falso** — e un cancello che esagera l'accusa si fa credere
+meno la volta dopo. Riparato col confine di parola
+`(?<![A-Za-z-]) ... (?![A-Za-z])`.
+
+### 📌 E LA LEZIONE SUL NUMERO DELLA CLASSE
+Questa classe era stata scritta nel codice come **169**: numero **gia' occupato**
+(169 = lo script che rigenera un `.md` scritto a mano). Il numero si sceglie
+**leggendo la coda della checklist**, non contando a memoria dall'ultima classe
+che si ricorda: due classi con lo stesso numero rendono la memoria del progetto
+**inconsultabile**, che e' l'unica cosa che questa checklist deve garantire.
+
+> ### 🔴 LA REGOLA
+> 1. **Un controllo bloccante si applica SOLO alle righe di cui e' vero.**
+>    Il pin protegge dal codice che cambia sotto i piedi: dove non gira codice,
+>    non c'e' niente da proteggere e l'allarme e' rumore.
+> 2. **Restringere l'ambito NON e' ammorbidire il criterio** — ma va dimostrato:
+>    ogni restrizione si accompagna a un caso di banco che **deve ancora
+>    fallire** (qui: la riga che scarica senza pin) e a un **risweep** di tutti
+>    i file gia' approvati.
+> 3. **L'esenzione si paga**: chi non e' pinnato deve essere di sola lettura.
+>    Nessuna riga sta nella terra di mezzo (scrive **e** non e' appuntabile).
+> 4. **Il numero di classe si legge in coda alla checklist prima di scriverlo.**
