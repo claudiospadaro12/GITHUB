@@ -10,6 +10,16 @@ cancello del costo di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
 > Porta **misure**, una **griglia** e **sei file prova gia' passati dal
 > cancello**. Le decisioni sono di Claudio.
 
+> ### 🆕 🔴 E IL TITOLO VA LETTO CON QUESTA RIGA ACCANTO (terzo giro di cancello, classe 205)
+> **"Puo' produrre una sedia" e' vero per il DAX e per il Nasdaq, NON per il
+> Dow.** Su U30USD `R125a` dichiara da solo che **n resta 71 IS / 119 OOS in
+> tutte e 7 le celle** (il buffer sposta lo stop, non decide se si entra), e
+> sotto **150** l'Emendamento A tiene il **MERITO SOSPESO**. 👉 Su U30USD questo
+> round dice **se l'altopiano esiste e a che costo** — non schiera. La sedia
+> puo' uscire da **D30EUR** (`R125c`/`R125e`) o da **NASUSD** (`R125f`), dove
+> l'archivio misura n fino a **233** e **357**. Forma congelata:
+> `R125_ORB_COSTO_CRITERI.md` par. 4, riquadro classe 205.
+
 ---
 
 # 0. 🥇 LE CINQUE RIGHE CHE RESTANO
@@ -20,6 +30,12 @@ cancello del costo di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
    (spread mediano ora 14 **2,00**, MISURATO su 4,93 M tick). La cella viva
    (HALFRANGE) ne ha **~47** = **23,5x** → **non passa**. La cella
    **OPPRANGE** ne ha **~104** = **52,0x** → **passa con +30% di margine** —
+   ⚠️ **e lo stesso giorno la stessa grandezza e' stata MISURATA, piu' alta:**
+   `CANCELLO_COSTO_FLOTTA_2026-09-10.md` legge lo stop vero della `770611` su
+   **7 gambe reali** = **59,0** idx = **29,5x** (range implicito **~118**,
+   sopra la banda inferita 85-103) → OPPRANGE+0 diventa **~64,0x**. 🟢 **I
+   numeri di questo dossier sono quindi PRUDENTI, e nessun verdetto si
+   ribalta** (la sedia viva resta sotto il pavimento con tutti e due). §2.2-bis.
    ed e' lo stesso ramo che R88 aveva gia' misurato migliore fuori campione:
    **le TRE celle esistenti fanno PF OOS 1,762 / 1,839 / 1,645 e DD OOS
    4,20% / 3,84% / 4,40% su n=119 — tutte e tre sopra R125-G3 (1,40) e tutte e tre
@@ -198,6 +214,38 @@ strada 3 da' **314,5 × 0,10206 × 3,05 = 97,9**. **94 e 98.**
 ⚠️ **Il fattore 3,05 e' misurato su UN SIMBOLO SOLO.** Trasportarlo sul Dow e'
 **[INFERITO]**. Che due strade indipendenti diano lo stesso numero e' la
 ragione per cui lo uso — **non e' una prova**.
+🔎 *(nit del cancello: `58,7 / 19,0` fa **3,09**, non 3,05; con 3,09 la strada 3
+darebbe **99,2** invece di 97,9. La differenza e' l'1,3% e va nella direzione
+prudente, ma il numero scritto e' quello sbagliato di suo.)*
+
+### 🆕 2.2-bis 🔴 E LA BANDA E' STATA **SUPERATA DA UNA MISURA**, LO STESSO GIORNO — classe 198
+
+**Trovato dal terzo giro di cancello, e non e' un dettaglio: e' l'ANTENATO del
+numero che il terzo giro stava correggendo.** Mentre questo dossier inferiva il
+range, `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` **misurava lo stop vero**
+della sedia viva `770611` (U30USD, HALFRANGE+0, finestra 14:30-14:45) su **7
+gambe reali** di `data/statements/trades_auto.csv`:
+
+| lettura | stop HALFRANGE+0 | range implicito | OPPRANGE+0 | /2,00 | /3,00 (P95) |
+|---|---:|---:|---:|---:|---:|
+| **DERIVATA** (inversione DD di R118, 21 mesi di tester) — questo dossier | ~47 | **~94** (banda 85-103) | ~104 | 52,0x | 34,7x 🟡 |
+| **MISURATA** (7 gambe vere, 11/08→03/09/2026, mediana 59,0: 33,3·49,1·57,7·59,0·60,0·73,5·94,0) | **59,0** | **~118** | ~128 | **64,0x** | **42,7x** 🟢 |
+
+- 🟢 **Nessun verdetto si ribalta**: la sedia viva **non passa** il pavimento
+  con tutti e due i numeri (**23,5x** derivato, **29,5x** misurato), e OPPRANGE
+  passa con tutti e due. **Le tabelle del §2.3 restano valide come stima
+  PRUDENTE**: sottostimano lo stop, quindi sottostimano il margine.
+- 🔴 **Ma cambia una cosa pratica**: col range misurato **OPPRANGE+0 passa il
+  40x anche allo spread P95 senza nessun buffer**, mentre col range inferito
+  serviva buffer 25 al bordo basso. 👉 **Il buffer non e' piu' obbligatorio per
+  il COSTO**: l'asse di R125a resta perche' misura il **MERITO** lungo il
+  buffer (B1), non perche' serva a passare il cancello.
+- 🛑 **E le due letture NON si mediano.** Il 59,0 e' **misurato**, su n=7 gambe
+  di cinque settimane, ed e' un **limite INFERIORE** (il trailing puo' solo
+  stringere lo stop). Il ~47 e' **derivato**, su 21 mesi di tester. **Due
+  popolazioni diverse.** Si dichiarano tutte e due con la loro provenienza; a
+  chiuderle e' la **corsa diagnostica** sulla distribuzione del range
+  14:30-14:45 (§6, buco 2), che costa ~10 minuti.
 
 ## 2.3 ⚖️ IL VERDETTO DI COSTO, cella per cella
 
@@ -230,6 +278,14 @@ Pavimenti: **DI LAVORO** `40x`, **DURO** `13,3x`. Stop OPPRANGE = `range + 10
 > cioe' rispondeva al **caso peggiore** col numero del **caso centrale** —
 > sottostima del **40%**. La conclusione sopravvive perche' l'asse era gia' largo,
 > **non perche' il conto fosse giusto.**
+> 🆕 **E il terzo giro di cancello ha trovato che quella correzione era stata
+> applicata ai due REFERTI e NON al FILE PROVA** (`R125a` r.69 diceva ancora
+> ">= ~15"): il file prova e' il documento che si **esegue**, quindi e' il primo
+> da correggere, non l'ultimo. **Classe 202.** Ora e' chiuso.
+> 🔴 **E tutta questa tabella gira su un range INFERITO che una MISURA dello
+> stesso giorno supera: vedi §2.2-bis (classe 198).** Con il range misurato
+> (~118) **il buffer non serve piu' al costo nemmeno al P95**. La tabella resta
+> come **stima prudente**, non come il numero migliore che abbiamo.
 
 ### 🇩🇪 D30EUR (08:00-08:15) — stop OPPRANGE **58,7 MISURATO IN CAMPO** · spread **1,70** / P95 **2,70**
 | buffer | stop | **/1,70** | 40x = 68,0 | /2,70 (P95) |
@@ -342,7 +398,19 @@ brucia la challenge.
 > 3. se una cella sporge e le vicine no → **"non c'e' una configurazione
 >    robusta"**, e si scrive cosi';
 > 4. fra due celle sull'altopiano si prende **la piu' interna**, mai quella col
->    PF piu' alto.
+>    PF piu' alto;
+> 5. 🆕 **le celle di BORDO (il primo e l'ultimo valore di ogni asse) NON sono
+>    mai la cella scelta** — hanno una sola adiacente, quindi il punto 2 su di
+>    loro **non e' verificabile**. Un altopiano puo' **poggiare** su un bordo:
+>    se e' un **limite fisico** del parametro (`buffer 0`, `TP1Pct 0` e `100`,
+>    `MinRangePct 0`) l'altopiano e' **chiuso** e si sceglie normalmente; se e'
+>    solo la **fine della griglia** (`buffer 3000`, `MinRangePct 0,20`) l'asse
+>    si dichiara **APERTO** da quel lato, e se l'altopiano e' fatto solo dal
+>    bordo e dalla sua unica vicina il verdetto e' **"l'altopiano, se c'e',
+>    esce dalla griglia"** → si estende l'asse, **non si promuove il bordo**.
+>    👉 **Sull'asse 0..3000 le celle SCEGLIBILI sono CINQUE: 500..2500.**
+>    Forma completa e tabella dei bordi per asse: `R125_ORB_COSTO_CRITERI.md`
+>    **par. 3-bis**, congelato il 10/09 dal cancello **prima** dei numeri.
 
 **Le soglie, congelate ora:** R125-G0 costo `stop ≥ 40 × spread mediano dell'ora` ·
 R125-G1 **DD OOS ≤ 7,00%** · R125-G2 **DD IS ≤ 9,00%** · R125-G3 **PF OOS ≥ 1,40** ·

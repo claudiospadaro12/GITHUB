@@ -160,7 +160,7 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
 | *"e' una cella fortunata"* | 12/12 celle OPPRANGE sotto **A1** (`R88_CRITERI.md`, DD OOS <= 7,00%), 12/12 HALFRANGE sopra | ❌ **smentita**: e' un ramo, non una cella |
 | *"il PF OOS 1,84 promuove la sedia"* | n OOS = **119**, sotto la soglia 150 | ✅ **VERA, e mi smentisce**: 🔴 **il merito e' sospeso anche in OOS.** Il PF 1,84 **non promuove**, esattamente come il PF IS 1,06 non bocciava |
 | *"la finestra copre piu' regimi"* | `R88a_stoplargo_U30USD.txt` r.153 dichiara: **"IL REGIME CONTENUTO: UNO SOLO"** | ✅ **VERA, e mi smentisce**: 🔴 **Emendamento C non soddisfatto** |
-| *"il 52,0x del cancello di costo e' misurato"* | il range ~94 e' **INFERITO** (banda 85-103); al bordo basso con spread P95 fa **31,7x e NON passa** | ⚠️ **parzialmente vera, e la v1 aveva sottostimato il buffer del 40%** (classe 195): il pavimento a P95 chiede `40 x 3,00 = 120` idx, e con `stop = range + 10 + buffer` serve **~16 al centro della banda (range 94)** ma **~25 al BORDO BASSO (range 85)** — cioe' proprio il caso che la frase nomina. 🟢 L'asse arriva a 3000 punti = **30 idx** e contiene **2500**, quindi la conclusione regge — **ma reggeva per fortuna**: fermarsi a 20 avrebbe misurato solo celle che al bordo basso non passano |
+| *"il 52,0x del cancello di costo e' misurato"* | il range ~94 e' **INFERITO** (banda 85-103); al bordo basso con spread P95 fa **31,7x e NON passa** | ⚠️ **parzialmente vera, e la v1 aveva sottostimato il buffer del 40%** (classe 195): il pavimento a P95 chiede `40 x 3,00 = 120` idx, e con `stop = range + 10 + buffer` serve **~16 al centro della banda (range 94)** ma **~25 al BORDO BASSO (range 85)** — cioe' proprio il caso che la frase nomina. 🟢 L'asse arriva a 3000 punti = **30 idx** e contiene **2500**, quindi la conclusione regge — **ma reggeva per fortuna**: fermarsi a 20 avrebbe misurato solo celle che al bordo basso non passano. 🆕 **E il terzo giro di cancello ha trovato l'ANTENATO del numero (classe 198):** lo stesso giorno `CANCELLO_COSTO_FLOTTA_2026-09-10.md` ha **MISURATO** lo stop vero della `770611` su **7 gambe reali** = **59,0 idx** (non ~47) → range implicito **~118**, **sopra** la banda 85-103 → OPPRANGE+0 fa **~64,0x** e **~42,7x anche al P95**, cioe' **passa nudo**. 🟢 **Nessun verdetto si ribalta e la direzione dell'errore era prudente**, ma il "52,0x" di questa riga e' la lettura **DERIVATA**, non la migliore che abbiamo: le due **non si mediano** (`ROUND_ORB_ATR_PS5` §2.2-bis) |
 
 ### 🔑 Quindi cosa e' promuovibile OGGI, e cosa no
 
@@ -170,7 +170,16 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
   parita' di rischio, sugli stessi trade. Questo vale a qualunque n.
 - 🔴 **NON PROMUOVIBILE — il MERITO.** n=71 IS e n=119 OOS sono **entrambi sotto
   150**, e il regime e' **uno solo**. Nessun PF di questa tabella schiera una
-  sedia. Serve il round R125 per fare il numero.
+  sedia.
+  🆕 🔴 **E il terzo giro di cancello corregge la riga che stava qui (classe
+  205): NON e' vero che *"serve il round R125 per fare il numero"* — su
+  U30USD R125 quel numero NON lo fa.** `R125a` dichiara da solo *"n:
+  INVARIANTE lungo tutto l'asse, IS 71 / OOS 119, in tutte e 7 le celle"*: il
+  buffer sposta lo **stop**, non decide **se si entra**, e il muro dei tick BCM
+  (2024.09.26) non si sposta. 👉 **R125 serve a sapere se l'altopiano esiste e
+  a che costo.** Il **merito pieno** sul ramo puo' venire solo da **D30EUR** e
+  **NASUSD** (`R125c`/`R125e`/`R125f`, n fino a **233** e **357**
+  nell'archivio) o da un simbolo in piu' — **non** da un'altra griglia sul Dow.
 
 ## 6. 👉 COSA CHIEDE, in concreto
 

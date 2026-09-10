@@ -12305,3 +12305,98 @@ concreto non e' teorico: qualcuno "ripara" il referto **togliendo le emoji da un
 > 3. 🔧 **Riparazione da fare (aperta)**: un `--oggetto {riga,ps1,md}` che, per i
 >    `.md`, spenga `[ASCII]`, `[PIN]`, `[MARCATORE]`, `[RACCOLTA]` e trasformi
 >    `[CONTO]` in RILIEVO. Finche' non c'e', vale il punto 1.
+
+## 203. 📄 LA CORREZIONE APPLICATA AI **REFERTI** E NON AL **FILE PROVA** — cioe' a tutto tranne al documento che si esegue
+
+**10/09/2026, TERZO giro di cancello sullo stesso round (R125).** La classe
+**195** (contro-esempio che risponde al caso peggiore col numero del caso
+centrale) era stata corretta: *"serve buffer >= ~15"* → **16 al centro / 25 al
+bordo basso**, dichiarata *"corretta in tutti e due i file"*, e il messaggio di
+commit chiudeva con *"grep su tutte e sette le classi: ogni residuo superstite
+e' dentro una nota che ritira il numero vecchio"*.
+
+🔴 **I "due file" erano i due REFERTI. Il numero vecchio era rimasto NUDO in
+`backtest_pipeline/prove/R125a_costo_buffer_U30USD.txt` r.69** — e un secondo
+figlio stava in `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.330, che citava
+*"R125 avvertiva che serve buffer >= ~15"* attribuendo a R125 un numero che R125
+aveva gia' ritirato.
+
+👉 **La gerarchia era rovesciata.** Un `.md` si legge; un **file prova si
+ESEGUE**: e' l'unico dei tre che finisce dentro un `.ini` e produce numeri. E i
+criteri di quel round dicono da soli *"i criteri si leggono PRIMA dei numeri"* —
+cioe' il file prova e' anche il primo documento che qualcuno legge sul posto.
+
+> ### 🔴 LA REGOLA
+> 1. **L'ordine di correzione e': prima i file ESEGUIBILI (`.txt` di prova,
+>    `.ps1`, `.set`, `.ini`), poi i referti.** Se il tempo finisce, deve
+>    finire sui referti, mai sull'eseguibile.
+> 2. **"Corretto in tutti e due i file" non e' una chiusura: e' un conteggio.**
+>    La chiusura e' `grep -rn` **del numero vecchio su TUTTO il repo**, con
+>    l'elenco delle occorrenze superstiti e il motivo di ognuna, incollato.
+> 3. 🔎 **E il grep si fa sulla STRINGA DEL NUMERO, non sul concetto**: qui
+>    bastava `grep -rn '>= ~15'`. Cercare "buffer" avrebbe dato 400 righe e
+>    nascosto le due che contavano.
+
+## 204. 🖥️ L'ISTRUZIONE DI LANCIO DENTRO IL FILE PROVA CHE **NON NOMINA IL TERMINALE**
+
+**10/09/2026.** Tutti e sei i file prova di R125 aprivano con un blocco *"Si
+lancia con: -Expert ... -Prova ... -Simbolo ... -Deposito ... -Modello 4"*.
+**Nessuno dei sei nominava `-TerminaleBacktest`.**
+
+🔴 E il driver lo dice da solo, a r.93-95 di `backtest_pipeline/walkforward_generico.ps1`:
+> *"-TerminaleBacktest (08/09/2026, v4) — **PERCHE' ESISTE, ED E' UN DIFETTO GIA'
+> PAGATO, NON UNA PRECAUZIONE.** Fino a ieri il terminale lo sceglieva SOLO il
+> ripiego del punto 7."*
+
+Se il parametro e' **vuoto**, la scelta del terminale torna al **ripiego**. Sulla
+macchina ci sono **TRE terminali MT5** e uno ha le **SEDIE VIVE**: e' esattamente
+lo scenario del 09/09 (`scan_gestione.ps1` senza `-Terminal`, che avrebbe
+ricompilato un EA dentro il terminale del conto piccolo).
+
+⚠️ **E la trappola e' che non e' una riga di lancio**: e' un **commento** dentro
+un `.txt`. `controlla_riga.py` non lo guarda, `controlla_prova.py` nemmeno —
+controlla assi, celle e pin, non le istruzioni per l'uomo. **Lo trova solo chi
+legge.**
+
+> ### 🔴 LA REGOLA
+> 1. **Ogni istruzione di lancio, anche se e' un commento dentro un file prova,
+>    nomina il terminale** con `-TerminaleBacktest "<cartella programma>"` e col
+>    **numero di conto in chiaro accanto** (regola dei terminali multipli, 06/09).
+> 2. **Un commento che qualcuno copiera' e incollera' e' una riga di lancio**, e
+>    va giudicato con lo stesso metro. La differenza fra codice e commento la
+>    vede il parser, non l'uomo alle 23:00.
+
+## 205. 🎫 IL CANCELLO CHE **FILTRA** RACCONTATO COME CANCELLO CHE **PROMUOVE** — e il round che non puo' fare il numero che promette
+
+**10/09/2026, R125.** I criteri congelavano `R125-G3 = PF OOS >= 1,40` sotto
+l'etichetta **MERITO**, con la riga *"il MERITO si legge sull'OOS (n=119) e NON
+sull'IS (n=71) — Emendamento A applicato alla lettera"*. Ma l'Emendamento A del
+16/08 dice che **sotto 150 operazioni il merito e' SOSPESO**, e **119 e' sotto**.
+👉 Leggerlo sull'OOS sceglie **la finestra meno peggio**; non rende il numero
+sufficiente. Passare G3 vuol dire **"merito non ESCLUSO"**, non *"merito
+dimostrato"*.
+
+🔴 **E il referto gemello lo scriveva gia' giusto al suo punto 5** (*"il PF 1,84
+non promuove, esattamente come il PF IS 1,06 non bocciava"*): i due documenti
+dello stesso round **si contraddicevano**, ed era la stessa famiglia della
+classe **196** chiusa poche ore prima.
+
+🔢 **E la seconda meta', che e' quella che costa tempo macchina:** il file prova
+`R125a` dichiara da solo *"n: INVARIANTE lungo tutto l'asse, IS 71 / OOS 119, in
+tutte e 7 le celle"* — il buffer sposta lo **stop**, non decide **se si entra** —
+e il muro dei tick BCM (2024.09.26) non si sposta. **Quindi quel round, sul suo
+simbolo principale, NON PUO' chiudere il buco del merito**, mentre il titolo del
+dossier prometteva *"il round che puo' produrre una sedia"* e il referto gemello
+scriveva *"serve il round R125 per fare il numero"*.
+
+> ### 🔴 LA REGOLA
+> 1. **Accanto a ogni cancello si scrive se PROMUOVE o se FILTRA.** Un cancello
+>    che si puo' solo **non superare** non e' una prova di merito, ed e' un
+>    errore di misura raccontarlo come tale.
+> 2. 📐 **Prima di scrivere "questo round fa il numero mancante", si calcola l'n
+>    ATTESO del round** e lo si confronta con la soglia che manca. Se l'asse non
+>    cambia il numero di ingressi (e il file prova spesso lo dichiara da solo,
+>    come qui), **il round NON fa quel numero**: dirlo prima costa un minuto,
+>    scoprirlo dopo costa il round.
+> 3. **La via al campione si nomina**: altro simbolo, altra finestra, altro TF —
+>    per nome, mai "si vedra'".

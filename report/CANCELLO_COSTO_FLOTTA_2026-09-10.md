@@ -390,8 +390,12 @@ demo (n a fianco) · **[INF]** = inferito, con la strada dichiarata ·
 > forbice**.)*
 >
 > 🔓 **Cosa cambia rispetto a R125**: R125 dava OPPRANGE+0 a **52,0x** e
-> avvertiva che **al bordo basso della banda e allo spread P95 fa 31,7x, quindi
-> serve buffer ≥ ~15**. Con il range MISURATO, **OPPRANGE+0 passa il 40x anche
+> avvertiva che al bordo basso della banda e allo spread P95 fa **31,7x**,
+> quindi serve **buffer ≥ ~25 al bordo basso** (≥ ~16 al centro della banda).
+> *(la v1 di R125 scriveva "≥ ~15": ritirato la sera del 10/09 — **classe 195**,
+> rispondeva al caso peggiore col numero del caso centrale. Qui ne era rimasto
+> in piedi un figlio, chiuso dal terzo giro di cancello — **classe 203**.)*
+> Con il range MISURATO, **OPPRANGE+0 passa il 40x anche
 > al P95 senza buffer**. 🔴 **Questo NON promuove niente e NON ribalta nessun
 > verdetto** (la cella viva resta a 29,5x e resta sotto il pavimento): sposta
 > solo il ramo OPPRANGE da *"passa se gli metti il buffer"* a *"passa già

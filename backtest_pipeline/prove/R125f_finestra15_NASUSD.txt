@@ -6,6 +6,13 @@
 #  Si lancia con:
 #    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125f_finestra15_NASUSD.txt
 #    -Simbolo NASUSD -Deposito 100000 -Etichetta r125f -Modello 4
+#    -TerminaleBacktest "<CARTELLA PROGRAMMA DEL MT5 DI BACKTEST>"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026): se e'
+#     vuoto, walkforward_generico.ps1 sceglie il terminale col RIPIEGO.
+#     Sulla macchina ci sono TRE terminali MT5 e uno ha le SEDIE VIVE.
+#     La cartella si NOMINA A MANO, col numero di conto in chiaro accanto
+#     (es. "C:\MT5_Backtest" = VPS, demo 50504400, zero EA attaccati).
 #  (-SoloControllo deve stampare 7 celle per finestra.)
 #  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------

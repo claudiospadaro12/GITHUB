@@ -6,8 +6,18 @@
 #  Si lancia con:
 #    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125a_costo_buffer_U30USD.txt
 #    -Simbolo U30USD -Deposito 100000 -Etichetta r125a -Modello 4
+#    -TerminaleBacktest "<CARTELLA PROGRAMMA DEL MT5 DI BACKTEST>"
 #  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
 #   Se ne stampa un numero diverso, ci si ferma.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026).
+#     Se il parametro e' vuoto, walkforward_generico.ps1 sceglie il
+#     terminale col RIPIEGO -- ed e' il difetto che il parametro v4
+#     dell'08/09 e' nato per uccidere ("PERCHE' ESISTE, ED E' UN DIFETTO
+#     GIA' PAGATO, NON UNA PRECAUZIONE", r.93-95 del driver). Sulla
+#     macchina ci sono TRE terminali MT5 e uno ha le SEDIE VIVE: la
+#     cartella si NOMINA A MANO, col numero di conto in chiaro accanto
+#     (es. "C:\MT5_Backtest" = VPS, demo 50504400, zero EA attaccati).
 #
 #  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
 #      backtest_pipeline\prove\R125_ORB_COSTO_CRITERI.md
@@ -66,7 +76,37 @@
 #                                               anche allo spread P95
 #    buffer 30 -> ~134          = 67,0x         PASSA (+68%)
 #  Al bordo BASSO della banda (range 85) e allo spread P95 (3,00) la
-#  cella a buffer 0 fa 31,7x e NON passa: serve buffer >= ~15.
+#  cella a buffer 0 fa 31,7x e NON passa: il pavimento a P95 chiede
+#  40 x 3,00 = 120 punti indice, e con stop = range + 10 + buffer
+#  servono >= 25 AL BORDO BASSO (range 85) e >= 16 AL CENTRO (range 94).
+#  >>> CORREZIONE del 10/09 (classe 195, applicata qui dal TERZO giro di
+#      cancello): questo file aveva scritto "serve buffer >= ~15", che e'
+#      il conto del caso CENTRALE messo in bocca al caso PEGGIORE --
+#      sottostima del 40%. Il numero era gia' stato corretto nei due
+#      referti e NON qui: il file prova e' il documento che si ESEGUE,
+#      ed e' il primo che va corretto, non l'ultimo (classe 203).
+#
+#  >>> E LA BANDA STESSA E' STATA SUPERATA DA UNA MISURA, LO STESSO
+#      GIORNO, E VA DETTO PRIMA DI LEGGERE I NUMERI (classe 198):
+#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md misura lo stop VERO
+#      della sedia viva 770611 (U30USD, HALFRANGE+0, 14:30-14:45) su
+#      SETTE gambe reali di data/statements/trades_auto.csv:
+#      mediana 59,0 punti indice (33,3 / 49,1 / 57,7 / 59,0 / 60,0 /
+#      73,5 / 94,0), non ~47. Da 59,0 esce un range implicito ~118, cioe'
+#      SOPRA il bordo alto della banda inferita 85-103.
+#      CONSEGUENZA, con il range misurato: OPPRANGE+0 = ~128 = ~64,0x
+#      (non 52,0x) e ~42,7x anche allo spread P95, cioe' PASSA NUDO.
+#      >>> QUINDI I CONTI DI COSTO DI QUESTO FILE SONO PRUDENTI, NON
+#          SBAGLIATI: sottostimano lo stop, quindi sottostimano il
+#          margine. NESSUN VERDETTO SI RIBALTA (la cella viva resta
+#          sotto il pavimento: 23,5x col derivato, 29,5x col misurato).
+#      >>> E LE DUE LETTURE NON SI MEDIANO: il 59,0 e' misurato su n=7
+#          gambe reali di 5 settimane (11/08-03/09/2026) ed e' un LIMITE
+#          INFERIORE (il trailing puo' solo stringere lo stop); il ~47 e'
+#          DERIVATO invertendo il DD di R118 su 21 mesi di tester. Sono
+#          due popolazioni diverse. Si dichiarano tutte e due, con la
+#          loro provenienza, e si chiudono con la corsa diagnostica sulla
+#          distribuzione del range 14:30-14:45 (dossier par. 6, buco 2).
 #  >>> ECCO PERCHE' L'ASSE ARRIVA A 30 E NON SI FERMA A 20: il punto in
 #      cui il cancello si chiude anche nel caso sfavorevole sta DENTRO
 #      la griglia, con celle da tutte e due le parti. E' il disegno che
@@ -130,6 +170,15 @@
 #    E1  L'altopiano c'e': PF OOS >= 1,40 su >= 4 celle adiacenti entro
 #        +/- 0,15, DD OOS <= 7,00% su tutte. -> si propone il CENTRO
 #        (non il massimo) e si va alla prova di regime.
+#        >>> E ANCHE IN E1 QUESTO FILE NON SCHIERA NIENTE (classe 205):
+#            n OOS resta 119, sotto i 150 dell'Emendamento A, quindi il
+#            MERITO resta SOSPESO e il cancello R125-G3 dice "merito non
+#            escluso", non "merito dimostrato". E1 autorizza la PROVA DI
+#            REGIME, non il campo. E la prova di regime vera (un orso)
+#            oggi e' [NON MISURABILE] su questi tick: un regime solo.
+#        >>> E LA CELLA SCELTA NON PUO' ESSERE UNA CELLA DI BORDO:
+#            par. 3-bis dei criteri, congelato prima dei numeri. Sulle
+#            sette celle 0..3000 le SCEGLIBILI sono cinque: 500..2500.
 #    E2  Il picco resta un picco: solo buffer 500 tiene, le vicine no.
 #        -> IL VERDETTO E' "NON C'E' UNA CONFIGURAZIONE ROBUSTA", si
 #        scrive cosi', e NON si propone niente. Il PF 1,8385 diventa

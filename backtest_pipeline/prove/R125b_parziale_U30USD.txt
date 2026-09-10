@@ -6,6 +6,13 @@
 #  Si lancia con:
 #    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125b_parziale_U30USD.txt
 #    -Simbolo U30USD -Deposito 100000 -Etichetta r125b -Modello 4
+#    -TerminaleBacktest "<CARTELLA PROGRAMMA DEL MT5 DI BACKTEST>"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026): se e'
+#     vuoto, walkforward_generico.ps1 sceglie il terminale col RIPIEGO.
+#     Sulla macchina ci sono TRE terminali MT5 e uno ha le SEDIE VIVE.
+#     La cartella si NOMINA A MANO, col numero di conto in chiaro accanto
+#     (es. "C:\MT5_Backtest" = VPS, demo 50504400, zero EA attaccati).
 #  (-SoloControllo deve stampare 5 celle per finestra.)
 #  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------
@@ -44,6 +51,13 @@
 #    Qui InpSLMode=3 (HALFRANGE, la cella VIVA): stop ~47 punti indice
 #    [DERIVATO, vedi R125a] contro spread mediano ora 14 di 2,00
 #    = 23,5x. SOPRA il pavimento DURO 13,3x, SOTTO quello DI LAVORO 40x.
+#    >>> LA STESSA GRANDEZZA E' ANCHE MISURATA, E VA SCRITTA ACCANTO
+#        (classe 198): report/CANCELLO_COSTO_FLOTTA_2026-09-10.md legge
+#        59,0 punti indice su SETTE gambe reali della 770611
+#        (trades_auto.csv) = 29,5x. Il verdetto NON cambia -- sotto il
+#        pavimento di lavoro con tutti e due i numeri -- ma il numero
+#        DERIVATO e quello MISURATO non si mediano: si dichiarano
+#        tutti e due, con la loro provenienza.
 #    >>> LO DICHIARO PRIMA: questo file NON puo' produrre una sedia.
 #        Misura un MECCANISMO sulla cella che gia' gira sul conto reale,
 #        per sapere se quella sedia sta lasciando soldi per terra col
