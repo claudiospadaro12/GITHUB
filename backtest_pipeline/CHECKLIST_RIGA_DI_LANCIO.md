@@ -11579,3 +11579,45 @@ si carichino, e per `winreg`: importarlo non prova che il **Desktop** si legga.
 `zlib.compress` che davvero comprime, `ssl.create_default_context()` che davvero
 carica le CA, `winreg.QueryValueEx(...'Desktop')` che davvero stampa il
 percorso. **Un import non e' un collaudo.**
+
+---
+
+## 177. 🫥 IL CONTROLLO CHE, SE GUARDA NEL POSTO SBAGLIATO, STAMPA IL VERDETTO **TRANQUILLIZZANTE** — uno ZERO non e' una prova finche' non e' provato che si e' guardato dove serve
+_(10/09/2026, mattina della BCE, sulla riga di controllo delle sedie `ABTG_PostNews` del piccolo 50503392)_
+
+**Il fatto.** La riga elencava `abtg_news*.csv` sotto `%APPDATA%\MetaQuotes\Terminal`
+e, con l'elenco vuoto, stampava: _"NESSUN file: le PostNews sono CIECHE. Controllo
+RIUSCITO, elenco vuoto."_ **Riprodotto eseguendo** su un albero senza cartelle dati
+e su un `%APPDATA%` **inesistente**: identica frase, identico "RIUSCITO". Cioe' la
+domanda _"la sedia puo' armare oggi?"_ e la domanda _"sto guardando dove gira MT5?"_
+producevano **la stessa risposta rassicurante**.
+
+> ### 🔴 LA REGOLA
+> Un controllo di sicurezza che conta e trova **zero** deve prima **dimostrare di
+> aver guardato nel posto giusto**, e se non ci riesce il verdetto e'
+> **NON CONCLUSIVO**, mai "a posto". In pratica si stampano, accanto allo zero,
+> le **ancore** che quello zero rendono credibile:
+> - la radice davvero guardata;
+> - quante cartelle dati MT5 (`...\<HASH>\MQL5`) ci sono sotto (il 07/09 erano **5**);
+> - un artefatto **noto e datato** che li' dentro DEVE esserci (qui le 3 copie
+>   `*.PRIMA_DI_NEUTRALIZZARE_2026-09-07_204601.bak`): zero calendari **e** zero
+>   `.bak` = albero sbagliato, non calendario vuoto;
+> - i processi `terminal64` vivi con **PID + titolo + cartella** (i terminali
+>   *portable* tengono i dati **dentro** la cartella programma: `%APPDATA%` non li vede).
+
+### 🕳️ I due corollari, misurati lo stesso giorno sulla stessa riga
+1. **La data cercata in UN SOLO formato.** `Get-Date -Format 'yyyy.MM.dd'` non
+   trova `2026-09-10` (trattini): sull'albero di prova una riga BCE **di oggi**
+   e' stata contata **0**. E la data va cercata anche in **ora server** (= locale
+   -1): fra mezzanotte e l'una il giorno del server e' quello prima.
+2. **La conclusione che dipende da un input NON misurato.** "Calendario vuoto =
+   non arma" e' vero **solo se `InpRestrictToNews=true`** sul grafico vivo
+   (`ABTG_PostNews.mq5` r.251). Finche' quel valore non e' stampato, la frase e'
+   un'inferenza: si legge dal `.chr` insieme a `InpRiskPercent` e `InpMagic`.
+
+⚠️ **E vale la pena dirlo:** la stessa riga leggeva i **log di oggi** con
+`Select-String` — cioe' senza la lettura condivisa della **classe 163**, che era
+gia' agli atti dall'08/09. Su un log che il terminale sta scrivendo il risultato
+sarebbe stato "nessuna riga `[PostNews]`": di nuovo **uno zero che sembra una
+buona notizia**. Il rimedio e' sempre lo stesso: `Leggi-Condiviso` (FileShare
+ReadWrite + BOM/euristica UTF-16), gia' in casa dal primo giorno del runner.
