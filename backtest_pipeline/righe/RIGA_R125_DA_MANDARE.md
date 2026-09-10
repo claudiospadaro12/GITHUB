@@ -53,7 +53,7 @@ i numeri non sono confrontabili con R88.
     foreach($e in 'r125a','r125b','r125c','r125d','r125e','r125f'){
       Write-Host ('--- ' + $e + '  (attese ' + $celle[$e] + ' celle per finestra)') -ForegroundColor Cyan;
       $global:LASTEXITCODE=0;
-      & $p -Expert ABTG_ORB_Ottimizzato -Prova ('prove\' + $prove[$e]) -Etichetta $e -Pin $pin -Deposito 100000 -Modello 4 -TerminaleBacktest 'C:\MT5_Backtest' -SoloControllo;
+      & $p -Expert ABTG_ORB_Ottimizzato -Prova ($prove[$e]) -Etichetta $e -Pin $pin -Deposito 100000 -Modello 4 -TerminaleBacktest 'C:\MT5_Backtest' -SoloControllo;
       if($LASTEXITCODE -ne 0){ Write-Host ('FERMATI: ' + $e + ' esce ' + $LASTEXITCODE) -ForegroundColor Red; break } } }
 ```
 
@@ -79,8 +79,9 @@ i numeri non sono confrontabili con R88.
     foreach($e in 'r125a','r125b','r125c','r125d','r125e','r125f'){
       Write-Host ('=== ' + $e) -ForegroundColor Cyan;
       $global:LASTEXITCODE=0;
-      & $p -Expert ABTG_ORB_Ottimizzato -Prova ('prove\' + $prove[$e]) -Etichetta $e -Pin $pin -Deposito 100000 -Modello 4 -TerminaleBacktest 'C:\MT5_Backtest' -ChiudiBacktest;
-      if($LASTEXITCODE -ne 0){ Write-Host ('PARZIALE su ' + $e + ': i CSV gia' + [char]39 + ' fatti restano, mandali lo stesso.') -ForegroundColor Yellow } } }
+      & $p -Expert ABTG_ORB_Ottimizzato -Prova ($prove[$e]) -Etichetta $e -Pin $pin -Deposito 100000 -Modello 4 -TerminaleBacktest 'C:\MT5_Backtest' -ChiudiBacktest;
+      if($LASTEXITCODE -eq 3){ Write-Host ('RILIEVI su ' + $e + ': il round E' + [char]39 + ' GIRATO, i CSV ci sono. Leggi i RILIEVI nel referto.') -ForegroundColor Yellow }
+      elseif($LASTEXITCODE -ne 0){ Write-Host ('NON GIRATO: ' + $e + ' esce ' + $LASTEXITCODE + '. Vado avanti con gli altri, ma il round e' + [char]39 + ' MONCO: mandalo lo stesso.') -ForegroundColor Red } } }
 ```
 
 ---
@@ -91,9 +92,14 @@ i numeri non sono confrontabili con R88.
 & { $ErrorActionPreference='Stop';
     $d = Join-Path ([Environment]::GetFolderPath('Desktop')) ('R125_' + (Get-Date -Format 'yyyyMMdd_HHmm'));
     New-Item -ItemType Directory -Path $d -Force | Out-Null;
-    Get-ChildItem "$env:USERPROFILE\abtg_round" -Recurse -Include '*r125*.csv','*REFERTO*.txt','*.log' -EA SilentlyContinue | Copy-Item -Destination $d -EA SilentlyContinue;
-    $n = (Get-ChildItem $d -File -EA SilentlyContinue | Measure-Object).Count;
-    Write-Host ('file raccolti: ' + $n + '  (attesi 12 CSV: 6 etichette x IS/OOS)') -ForegroundColor Cyan;
+    Get-ChildItem "$env:USERPROFILE\abtg_round\risultati_prove" -Recurse -Include '*r125*.csv' -EA SilentlyContinue | Copy-Item -Destination $d -EA SilentlyContinue;
+    foreach($e in 'r125a','r125b','r125c','r125d','r125e','r125f'){
+      $rd = Join-Path ([Environment]::GetFolderPath('Desktop')) ('ROUND_' + $e);
+      if(Test-Path $rd){ Get-ChildItem $rd -File -EA SilentlyContinue | Copy-Item -Destination $d -Force -EA SilentlyContinue } };
+    $nc = @(Get-ChildItem $d -File -Filter '*.csv' -EA SilentlyContinue).Count;
+    $nr = @(Get-ChildItem $d -File -Filter 'REFERTO_*.txt' -EA SilentlyContinue).Count;
+    Write-Host ('CSV raccolti: ' + $nc + ' su 12 attesi (6 etichette x IS/OOS)') -ForegroundColor Cyan;
+    Write-Host ('REFERTI raccolti: ' + $nr + ' su 6 attesi') -ForegroundColor Cyan;
     Get-ChildItem $d -File | Select-Object Name, Length | Format-List;
     Compress-Archive -Path (Join-Path $d '*') -DestinationPath ($d + '.zip') -Force;
     Write-Host ('ZIP PRONTO: ' + $d + '.zip') -ForegroundColor Green }

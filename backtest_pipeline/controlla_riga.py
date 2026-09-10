@@ -341,9 +341,17 @@ def controlla_riga_lancio(riga):
             passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
 
     # --- 1. il PIN deve essere un COMMIT (classe 164): 40 esadecimali
+    # CLASSE 217 (10/09/2026): questi due regex erano CASE SENSITIVE su $PIN,
+    # ma in PowerShell le variabili NON lo sono e tutte le 388 occorrenze del
+    # progetto scrivono '$pin=' minuscolo. Risultato misurato sulla prima riga
+    # vera passata dal cancello (R125): il pin non veniva MAI trovato, usciva
+    # il bloccante generico "nessun pin trovato" e le classi 164 (il pin e' un
+    # commit?) e 187 (il pin contiene davvero quel marcatore?) NON venivano MAI
+    # eseguite. Un cancello che blocca per il motivo sbagliato nasconde i due
+    # controlli che contano. Ora il confronto e' insensibile al maiuscolo.
     pins = re.findall(r"githubusercontent\.com/[^/]+/[^/]+/([A-Za-z0-9_.-]+)/", riga)
-    pins += re.findall(r"\$PIN\s*=\s*'([^']+)'", riga)
-    pins += re.findall(r"\$PIN\s*=\s*\"([^\"]+)\"", riga)
+    pins += re.findall(r"\$PIN\s*=\s*'([^']+)'", riga, re.I)
+    pins += re.findall(r"\$PIN\s*=\s*\"([^\"]+)\"", riga, re.I)
     visti = set(p for p in pins if not p.startswith("$"))
     if not visti and con_script:
         blocca("PIN", "nessun pin trovato nella riga: la riga deve puntare a un COMMIT, non a un branch")
