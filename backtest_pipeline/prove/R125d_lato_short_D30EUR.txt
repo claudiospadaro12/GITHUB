@@ -44,7 +44,7 @@
 #      Qualunque differenza = STOP.
 #    - n: 60-140 per finestra. Il filtro EMA200 e' simmetrico, quindi
 #      in un DAX che sale lo short vede meno giornate del long.
-#      Se n OOS < 95 -> NON MISURABILE (soglia C4), non "bocciato".
+#      Se n OOS < 95 -> NON MISURABILE (soglia R125-G4), non "bocciato".
 #    - PF OOS: attesa 0,70 - 1,20. La scrivo BASSA e dico perche':
 #      su TUTTI i simboli dove il lato e' stato isolato, lo short
 #      dell'apertura ha perso (U30USD ORB 0,520; U30USD Dow Apertura
@@ -63,7 +63,7 @@
 #  spread mediano dell'ora 8). Il buffer e' pinnato a 2000 apposta: e'
 #  il primo valore che passa il cancello con margine (+16%), non quello
 #  che passa di misura.
-#  MAGIC VERGINI 779830 / 779880.
+#  MAGIC VERGINI 779860 / 779870.
 # =====================================================================
 @SIMBOLO  D30EUR
 @PERIODO  M5

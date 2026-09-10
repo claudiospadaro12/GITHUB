@@ -84,7 +84,7 @@
 #      finestra non e' mai stato contato. Attesa 90-190 per finestra
 #      (frequenza ~1 setup al giorno x ~250 giorni x 40/60 di taglio,
 #      meno i giorni filtrati dalla EMA200). SE n OOS < 95 la cella e'
-#      NON MISURABILE, non bocciata: e' la soglia C4 dei criteri.
+#      NON MISURABILE, non bocciata: e' la soglia R125-G4 dei criteri.
 #    - DD OOS: MONOTONO DECRESCENTE col buffer, come su U30USD.
 #      Attesa 5% - 15% a buffer 0, 4% - 10% a buffer 30.
 #    - PF OOS: attesa 0,95 - 1,45. LO SCRIVO BASSO APPOSTA: R11 ha gia'

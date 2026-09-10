@@ -22,8 +22,8 @@ cancello del costo di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
    **OPPRANGE** ne ha **~104** = **52,0x** → **passa con +30% di margine** —
    ed e' lo stesso ramo che R88 aveva gia' misurato migliore fuori campione:
    **le TRE celle esistenti fanno PF OOS 1,762 / 1,839 / 1,645 e DD OOS
-   4,20% / 3,84% / 4,40% su n=119 — tutte e tre sopra C3 (1,40) e tutte e tre
-   sotto C1 (7,00%).**
+   4,20% / 3,84% / 4,40% su n=119 — tutte e tre sopra R125-G3 (1,40) e tutte e tre
+   sotto R125-G1 (7,00%).**
    🔴 **Ma con la nostra regola quella non e' ancora una cella scelta**: vedi
    §3.4, dove il contro-esempio mi ha corretto.
 2. 🔓 **E non era stata bocciata per un numero brutto: per un numero
@@ -222,7 +222,14 @@ Pavimenti: **DI LAVORO** `40x`, **DURO** `13,3x`. Stop OPPRANGE = `range + 10
 > quella che R88 aveva gia' misurato migliore fuori campione.** Due regole di
 > casa indipendenti puntano sulla stessa casella.
 > ⚠️ **Al bordo BASSO della banda (range 85) e allo spread P95, OPPRANGE+0 fa
-> 31,7x e NON passa.** Serve buffer ≥ ~15. **Per questo l'asse arriva a 30.**
+> 31,7x e NON passa.** Serve buffer **16 al centro della banda (range 94)** e
+> **25 al bordo basso (range 85)** — il pavimento a P95 chiede `40 x 3,00 = 120`
+> punti indice. 🟢 **Per questo l'asse arriva a 30 (3000 punti), e la cella che
+> copre il caso peggiore e' la 2500.**
+> 📌 **CORREZIONE del 10/09 sera (classe 195):** la v1 diceva "buffer >= ~15",
+> cioe' rispondeva al **caso peggiore** col numero del **caso centrale** —
+> sottostima del **40%**. La conclusione sopravvive perche' l'asse era gia' largo,
+> **non perche' il conto fosse giusto.**
 
 ### 🇩🇪 D30EUR (08:00-08:15) — stop OPPRANGE **58,7 MISURATO IN CAMPO** · spread **1,70** / P95 **2,70**
 | buffer | stop | **/1,70** | 40x = 68,0 | /2,70 (P95) |
@@ -293,11 +300,25 @@ stesso TF, tick reali, stessa finestra). 👉 **66 × 0,101 = ~7 minuti.**
 > R89 + R86** (SIGILLATI)"*. Le **cinque righe di R88** sommano
 > `8,0+2,1+1,3+1,2+1,1 = **13,7 min**`. 👉 **Un modello di costo si costruisce
 > col numeratore del SUO lavoro, non con quello del turno intero.**
-Con il margine per compilazione e avvio: **~1h20m su una macchina.**
+Con il margine per compilazione, avvio del terminale e caricamento dei tick, il
+turno sta **sotto i 20 minuti** su una macchina. ⚠️ Il margine e' **STIMATO**, il
+ritmo di 0,101 min/passata e' **MISURATO**.
 📌 Il mandato dice *"meglio due round da 48 fatti bene"*: **66 sta in quella
 misura.** Una griglia che moltiplicasse le tre manopole del collega
 (7 buffer × 5 parziali × 5 ampiezze × 3 simboli × 2 lati) farebbe **1.050
-celle = 2.100 passate = 35 ore**. **Non si lancia, e si dichiara perche'.**
+celle = 2.100 passate = **~3,5 ore**.
+🔴 **E non si lancia lo stesso — ma il motivo NON e' il tempo, ed e' importante
+dirlo:** e' la regola del **19/08**. Moltiplicare manopole su un motore il cui
+**merito e' SOSPESO** (n IS 71 / n OOS 119, **entrambi sotto 150**) non trova
+altopiani: trova **picchi di rumore**, e la cella verde per caso e' quella che
+brucia la challenge.
+> 📌 **CORREZIONE del 10/09 sera (classe 193).** La v1 scriveva **35 ore** e
+> usava quel numero come **la ragione** per non lanciare la griglia grande.
+> Il numero derivava dal modello di costo sbagliato di un fattore 10: le ore
+> vere sono **3,5**, e a 3,5 ore **quell'argomento non reggeva piu' da solo**.
+> La ragione buona esisteva gia' ed e' un'altra — ma andava scritta QUELLA.
+> 👉 **Quando si corregge un numero, si inseguono i suoi DISCENDENTI**, e
+> soprattutto quelli che sorreggono un argomento.
 
 ## 3.2 ✂️ COSA **NON** PROVO, e perche' — la parte che vale piu' della griglia
 
@@ -323,16 +344,16 @@ celle = 2.100 passate = 35 ore**. **Non si lancia, e si dichiara perche'.**
 > 4. fra due celle sull'altopiano si prende **la piu' interna**, mai quella col
 >    PF piu' alto.
 
-**Le soglie, congelate ora:** C0 costo `stop ≥ 40 × spread mediano dell'ora` ·
-C1 **DD OOS ≤ 7,00%** · C2 **DD IS ≤ 9,00%** · C3 **PF OOS ≥ 1,40** ·
-C4 **n OOS ≥ 95 e n IS ≥ 57** · C5 altopiano.
+**Le soglie, congelate ora:** R125-G0 costo `stop ≥ 40 × spread mediano dell'ora` ·
+R125-G1 **DD OOS ≤ 7,00%** · R125-G2 **DD IS ≤ 9,00%** · R125-G3 **PF OOS ≥ 1,40** ·
+R125-G4 **n OOS ≥ 95 e n IS ≥ 57** · R125-G5 altopiano.
 **Bocciatura secca:** DD OOS > **9,7623%** (il DD promesso dalla sedia reale) ·
 stop sotto **13,3×** spread.
 
 > 🔴 **La riga che non si negozia, e che va detta chiara:** il **MERITO si
 > legge sull'OOS (n=119) e NON sull'IS (n=71)** — Emendamento A del 16/08 alla
 > lettera. **Ma il PF IS si scrive lo stesso, accanto a ogni numero, con l'n a
-> fianco.** Se una cella passa C0-C5 con PF IS sotto 1,00 si dichiara
+> fianco.** Se una cella passa R125-G0..R125-G5 con PF IS sotto 1,00 si dichiara
 > **"passa i cancelli, ma la finestra vecchia non la conferma"** — **non
 > "promossa"**. 🛑 **E non e' un ammorbidimento retroattivo: R88 resta
 > giudicato com'era.** I criteri si cambiano prima dei numeri, e questi sono
@@ -351,7 +372,7 @@ sono queste:
 | 1000 | 1,00555 | 4,5695 | 71 | **1,64542** | 4,4027 | 119 |
 
 **Cosa dicono, e la seconda cosa mi contraddice:**
-- 🟢 **Tutte e tre passano C3** (PF OOS ≥ 1,40) **e C1** (DD OOS ≤ 7,00%) con
+- 🟢 **Tutte e tre passano R125-G3** (PF OOS ≥ 1,40) **e R125-G1** (DD OOS ≤ 7,00%) con
   **n=119 ≥ 95**. Tre celle **adiacenti** dalla stessa parte del cancello:
   **non e' una cella sola che sporge.**
 - 🔴 **MA sul PF il buffer 500 e' un MASSIMO, non un piano**: 1,762 → 1,839 →
@@ -507,7 +528,7 @@ cambia di almeno il 5%, la manopola **non ha morso** a quei valori e i loro PF
 
 1. 🔏 **La firma sui criteri** `R125_ORB_COSTO_CRITERI.md` — vanno firmati **a
    numeri non visti**, altrimenti i numeri di R125 non si leggono.
-2. 🖥️ **La macchina.** Il round vuole **un MT5 solo, libero, ~1h20m**. Una
+2. 🖥️ **La macchina.** Il round vuole **un MT5 solo, libero, ~20 minuti**. Una
    macchina, un lavoro.
 3. 🙋 **Le tre domande al collega** (gia' nel dossier del 10/09): pavimento di
    stop **0 o fisso**? UK100/US2000 rientrati? **slippage misurato** dopo le
@@ -525,7 +546,9 @@ cambia di almeno il 5%, la manopola **non ha morso** a quei valori e i loro PF
   costo esiste, e' gia' stata misurata a tick, e non e' quella in campo**.
 - **Non promuove niente.** Nessuna cella scende su nessun conto.
 - **Non tocca il forward**: nessun EA modificato, nessun preset cambiato,
-  nessun magic vivo riusato (i sei file usano **779800-779880**, vergini).
+  nessun magic vivo riusato (i sei file usano **779800-779870**, vergini;
+  la banda di `R125d` e' stata portata a **779860-779870** il 10/09 perche'
+  quella vecchia scavalcava i magic di `R125e` e `R125f`).
 - **Non ha verificato nessun numero del collega.**
 - **Non ha eseguito nessun backtest.** Tutti i numeri qui dentro vengono da
   corse **gia' fatte** e da **statement veri**, con la fonte accanto.

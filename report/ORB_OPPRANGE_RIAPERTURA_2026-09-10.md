@@ -27,11 +27,29 @@ alto, Recovery Factor piu' alto e Sharpe piu' alto.**
 | **OPPRANGE+500 TPmode0 TP 1,5** | 23.003,35 | **1,8385** | **3,8395** | **5,543** | **31,93** | 119 |
 | OPPRANGE+0 TPmode0 TP 1,5 | 21.942,40 | 1,7616 | 4,2025 | 4,812 | 29,51 | 119 |
 
+⚠️ **PF, Recovery Factor e Sharpe sono qui per COMPLETEZZA, non come
+promozione:** a n=119 (**sotto 150**) il **MERITO e' SOSPESO** e **nessuno dei tre
+schiera niente** (vedi punto 5). 👉 **L'unica cosa leggibile a questo n e' il DD,
+che e' un fatto accaduto.**
+
 📌 **Profitto per punto di drawdown: 5.991 contro 4.206 = +42%.**
 
 🔴 **E il rovescio, che va detto subito:** OPPRANGE fa **il 44,0% di profitto
-in meno** (23.003,35 contro 41.057,00). Il +42% e' un **RAPPORTO**: la challenge
-si passa col **target**, non col rapporto.
+in meno** (23.003,35 contro 41.057,00).
+
+📌 **Ma attenzione, ed e' la correzione piu' sottile del secondo giro di
+cancello:** il **44,0% in meno** e il **DD dimezzato** sono **LA STESSA COSA vista
+due volte** — meno nozionale (~2,2x), contato una volta sul lato dei ricavi e una
+volta sul lato del rischio. Non sono uno svantaggio e un vantaggio indipendenti.
+- ⚖️ A **parita' di DD** il confronto si ribalterebbe — ma **DI QUANTO e'
+  `[NON MISURATO]`**, e **non si estrapola**: questo stesso referto misura che il
+  DD **non si riscala linearmente** (6,346 atteso contro 6,5389 misurato).
+- 🛑 **E la taglia e' di Claudio.** Qui si dichiara il fatto, non si propone
+  un numero.
+- 🎯 In una prop il target e' **vincolato al muro di DD**: il rapporto
+  profitto/DD **e' la grandezza che morde**. Ma resta vero che la challenge si
+  passa col **target**, e con 23.003 al posto di 41.057 quel target arriva piu'
+  tardi. **Le due cose vanno tenute insieme, non una sola.**
 
 📌 **DELTA rispetto al preset reale** (`mql5/Presets/conto_reale/ABTG_ORB_Ottimizzato_770611_REALE.set`),
 verificati riga per riga dal cancello: **coincidono** `SLMode=3`, `TPMode=1`,
@@ -106,8 +124,20 @@ non con tre punti.
   = **23,5x** lo spread mediano (2,00) → **sotto il pavimento di lavoro 40x**;
   OPPRANGE ~104 = **52,0x** → **passa**.
 
-👉 **Tre misure indipendenti, fatte in tre round diversi, puntano tutte sulla
-stessa casella: allargare lo stop.** E nessuna delle tre e' stata agita.
+👉 **E allora e' onesto contare bene, perche' la v1 aveva contato male qui
+come al punto 1** (classe 196): **NON sono tre prove indipendenti.**
+- **R55 e R88a leggono la STESSA riga di CSV** (`41.057,00 / 1,6742 / 9,7623 /
+  n=119`): sono **due letture degli stessi dati**, non due misure.
+- 🔴 **R125 non e' un round: e' IL round che questo referto chiede di
+  autorizzare al punto 6.** Zero passate eseguite. Quello che porta e' un
+  **cancello di costo su un range `[INFERITO]`** — e lo dice il punto 5 quattro
+  paragrafi piu' sotto. La v1 lasciava punto 3 e punto 5 a contraddirsi **dentro
+  lo stesso documento**.
+
+📌 **Quello che resta, ed e' comunque il punto:** due letture degli stessi dati
+e un cancello di costo ancora inferito **puntano sulla stessa casella — allargare
+lo stop — e nessuna delle tre e' mai stata agita.** E' un buon motivo per
+**misurare**, non per promuovere.
 
 ## 4. 🪦 PERCHE' ERA STATO ARCHIVIATO — ed e' un numero MANCANTE, non brutto
 
@@ -127,10 +157,10 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
 | ipotesi alternativa che romperebbe la lettura | verifica | esito |
 |---|---|---|
 | *"il DD e' piu' basso solo perche' OPPRANGE espone meno capitale"* | `InpRiskPercent`=1 in **tutte** le 48 righe, n=119, stessa finestra — **ma il lotto va come `R / distanza stop`** (R55, che cito io stesso al punto 3): 47 contro 104 punti indice ⇒ HALFRANGE porta **~2,2x il NOZIONALE** a parita' di 1%, e `Equity DD %` si misura sull'equity, quindi **include il flottante** | ⚠️ 🔴 **NON smentita — anzi, e' il meccanismo PIU' PROBABILE.** La v1 di questo referto la dichiarava "smentita" portando una prova **irrilevante all'ipotesi** (classe 191). Il **fatto** (il DD accaduto) resta e vale per l'Emendamento B; la **causa** e' un misto di *meno stop-out da rumore* e *meno escursione flottante*, e le due parti **non sono separate**: `[NON MISURATO]` — servirebbe il per-trade, che R88 non ha salvato |
-| *"e' una cella fortunata"* | 12/12 celle OPPRANGE sotto C1, 12/12 HALFRANGE sopra | ❌ **smentita**: e' un ramo, non una cella |
+| *"e' una cella fortunata"* | 12/12 celle OPPRANGE sotto **A1** (`R88_CRITERI.md`, DD OOS <= 7,00%), 12/12 HALFRANGE sopra | ❌ **smentita**: e' un ramo, non una cella |
 | *"il PF OOS 1,84 promuove la sedia"* | n OOS = **119**, sotto la soglia 150 | ✅ **VERA, e mi smentisce**: 🔴 **il merito e' sospeso anche in OOS.** Il PF 1,84 **non promuove**, esattamente come il PF IS 1,06 non bocciava |
 | *"la finestra copre piu' regimi"* | `R88a_stoplargo_U30USD.txt` r.153 dichiara: **"IL REGIME CONTENUTO: UNO SOLO"** | ✅ **VERA, e mi smentisce**: 🔴 **Emendamento C non soddisfatto** |
-| *"il 52,0x del cancello di costo e' misurato"* | il range ~94 e' **INFERITO** (banda 85-103); al bordo basso con spread P95 fa **31,7x e NON passa** | ⚠️ **parzialmente vera**: serve buffer >= ~15, ed e' il motivo per cui l'asse del round arriva a 30 |
+| *"il 52,0x del cancello di costo e' misurato"* | il range ~94 e' **INFERITO** (banda 85-103); al bordo basso con spread P95 fa **31,7x e NON passa** | ⚠️ **parzialmente vera, e la v1 aveva sottostimato il buffer del 40%** (classe 195): il pavimento a P95 chiede `40 x 3,00 = 120` idx, e con `stop = range + 10 + buffer` serve **~16 al centro della banda (range 94)** ma **~25 al BORDO BASSO (range 85)** — cioe' proprio il caso che la frase nomina. 🟢 L'asse arriva a 3000 punti = **30 idx** e contiene **2500**, quindi la conclusione regge — **ma reggeva per fortuna**: fermarsi a 20 avrebbe misurato solo celle che al bordo basso non passano |
 
 ### 🔑 Quindi cosa e' promuovibile OGGI, e cosa no
 

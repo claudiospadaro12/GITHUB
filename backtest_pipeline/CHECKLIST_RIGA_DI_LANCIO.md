@@ -12019,3 +12019,134 @@ marchiato *MISURATO* nessuno lo ricontrolla.
 > 3. **Un ordine di grandezza si controlla sempre a mano**: 66 passate a tick
 >    reali su M5 in **piu' di un'ora** contro le 48 celle di R88a in **8,0
 >    minuti** doveva stridere prima della moltiplicazione.
+
+## 🆕 AGGIUNTE DEL 10/09/2026 (SECONDO GIRO) — trovate dal **controllo preventivo** sulla **v2** dello stesso referto (`report/ORB_OPPRANGE_RIAPERTURA_2026-09-10.md`, commit `f1d674b`), cioe' **sui difetti INTRODOTTI mentre si correggevano i dieci precedenti**. Le dieci correzioni annunciate sono state riverificate una per una e **otto su dieci sono state applicate bene e verificate al centesimo**: la tabella dei tre buffer (PF 1,76162 / 1,83850 / 1,64542 · Profit 21.942,40 / 23.003,35 / 16.850,58 · DD 4,2025 / 3,8395 / 4,4027) combacia riga per riga col CSV, la cella **e' davvero il picco su tutte e tre le metriche** e il verdetto *"nessuna configurazione robusta"* e' quello **stretto** che la regola impone (|1,8385 − 1,6454| = 0,1931 > 0,15); il **44,0%** di profitto in meno e il **+42%** sono aritmetica giusta; il **6,346 atteso contro 6,5389 misurato (+3,0%)** e' giusto e la fonte `PIANO_CHALLENGE_OTTOBRE.md` **r.149** esiste ed e' quella; i tre delta col preset reale sono **tutti verificati sul `.set` e sul `.mq5`** (`InpTP_R` e' **inerte per costruzione** — con `InpTPMode=ORB_TP_RANGE` il TP e' calcolato dal range, r.451/466/588, e `InpTP1Pct=0` esce da `ManageTP1()` prima di usarlo — e le passate 11/15, 27/31, 43/47 sono identiche al centesimo); il **13,7 min per 136 passate** e' la somma esatta delle cinque righe R88; i magic **779860/779870 sono vergini in tutto il repo** e la banda non tocca piu' R125e (779850) ne' R125f (779840); i sei file R125 sono **ASCII puro** e ripassano `controlla_prova.py` con **0 problemi** (33 celle, 66 passate). Le quattro voci qui sotto sono i difetti **nuovi**.
+
+## 193. 🧟 LA CORREZIONE CHE NON INSEGUE I **DISCENDENTI** DEL NUMERO CORRETTO — l'orfano nello stesso paragrafo
+
+**10/09/2026, `ROUND_ORB_ATR_PS5_2026-09-10.md` §3.1.** La classe 192 e' stata
+riparata bene alla riga della formula (`0,101 min/passata`, `66 x 0,101 = ~7
+minuti`), **ma tre numeri DERIVATI da quello sbagliato sono rimasti in piedi**,
+uno addirittura **tre righe sotto**, dentro lo stesso paragrafo:
+- r.296 *"Con il margine per compilazione e avvio: **~1h20m su una macchina**"*
+  (era 67 min + margine);
+- r.300 *"1.050 celle = 2.100 passate = **35 ore**"* — con il ritmo corretto fa
+  **2.100 x 0,101 = 212 min = 3,5 ore**, cioe' **un decimo**;
+- r.510 *"Il round vuole un MT5 solo, libero, **~1h20m**"*.
+
+🔴 **E il piu' grave e' il secondo, perche' e' ARGOMENTATIVO**: le "35 ore" sono
+la ragione scritta per cui la griglia completa del collega *"non si lancia, e si
+dichiara perche'"*. A **3,5 ore** quell'argomento non regge piu' da solo — la
+ragione buona resta (una griglia che moltiplica manopole su un motore non
+confermato cerca picchi di rumore, regola del 19/08), ma **e' un'altra ragione**,
+e va scritta quella.
+
+> ### 🔴 LA REGOLA
+> 1. **Quando si corregge un numero, si cerca il numero VECCHIO in tutto il file
+>    e in tutto il repo** (`grep`), non solo nella riga che si sta riscrivendo.
+>    Un fattore 10 si propaga a tutti i suoi prodotti.
+> 2. **I numeri derivati si RICALCOLANO, non si rileggono**: margini, proiezioni,
+>    controfattuali ("e se facessimo la griglia grande?") sono figli del ritmo.
+> 3. **Se un numero corretto smonta un ARGOMENTO**, l'argomento si riscrive nella
+>    stessa passata. Un verdetto tenuto in piedi da un numero ritirato e' peggio
+>    del numero sbagliato, perche' adesso ha un'aria verificata.
+
+## 194. 🏷️ IL RENAME FATTO **SENZA CERCARE IL NUOVO NOME NEL REPO** — e fatto in **un file solo**
+
+**10/09/2026, riparazione della classe 190.** I cancelli del round sono stati
+rinominati `C0..C5` → `G0..G5` in `R125_ORB_COSTO_CRITERI.md`. Due difetti, e il
+primo e' esattamente la classe che si voleva chiudere:
+
+🔴 **(a) `G1` era gia' preso, e piu' di `C1`.** `G1` e' il nome di casa del
+**cancello dei GEMELLI / di determinismo** (due celle identiche per costruzione:
+se divergono, il banco e' sporco): compare in **51 file prova** di
+`backtest_pipeline/prove/`, in questa stessa checklist (*"tutte le righe
+identiche sulle colonne economiche (= cancello G1...)"*) e — la ciliegina —
+**dentro `R125d_lato_short_D30EUR.txt`, tre volte** (r.4, r.38, r.130:
+*"cancello G1 di determinismo"*). Quindi nello **stesso round**, `G1` vuol dire
+**due cose diverse**: *DD OOS <= 7,00%* nei criteri e *gemelli identici* nel file
+prova. La classe 190 non e' stata chiusa: e' stata **spostata di una lettera**, e
+peggiorata (`C1` collideva con una firma lontana, `G1` collide dentro la stessa
+cartella). ⚠️ E la regola scritta in 190 diceva **`R125-G0..G5`, con prefisso di
+round**: non e' stata seguita.
+
+🔴 **(b) rename PARZIALE = riferimenti orfani.** Fuori dal file dei criteri i
+vecchi nomi sono rimasti, e puntano a sigle che **non esistono piu'**:
+`R125a` r.92/93/143 (`C3`, `C1`, `C0`), `R125c` r.87 (`C4`), `R125d` r.47
+(`C4`), `R125f` r.71 (`C4`), `report/ORB_OPPRANGE_RIAPERTURA_2026-09-10.md`
+r.130 (*"12/12 celle OPPRANGE sotto **C1**"* — nella tabella dei contro-esempi,
+**nello stesso documento** che due paragrafi sopra spiega perche' `C1` e'
+sbagliato), e `ROUND_ORB_ATR_PS5_2026-09-10.md` r.25/26/326-328/335/354, che e'
+**il documento con cui la firma viene chiesta** e che elenca le soglie come
+`C0..C5`.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di scegliere un nome nuovo lo si cerca**: `grep -rn "\bG1\b"`. Un
+>    rename che non passa dal grep e' un rename verso un'altra collisione.
+> 2. **Un rename e' finito quando il vecchio nome non esiste piu' in NESSUN
+>    file** (tranne la nota che spiega il rename). Si chiude col grep, non a
+>    memoria.
+> 3. **I nomi si prendono col prefisso del round** (`R125-G0`), come gia'
+>    prescritto in 190: e' l'unico schema che non collide mai.
+
+## 195. 🎯 IL CONTRO-ESEMPIO CHE RISPONDE AL **CASO PEGGIORE** CON IL NUMERO DEL **CASO CENTRALE**
+
+**10/09/2026**, `ORB_OPPRANGE_RIAPERTURA` §5 ultima riga e
+`ROUND_ORB_ATR_PS5` §2.3. Il contro-esempio dice — bene — che il `52,0x` non e'
+misurato: *"il range ~94 e' INFERITO (banda 85-103); **al bordo basso con spread
+P95 fa 31,7x e NON passa**"*. Poi conclude: *"serve buffer >= **~15**"*.
+
+🔴 **Il ~15 non e' il numero del bordo basso: e' quello del centro.** Il
+pavimento a P95 chiede `40 x 3,00 = 120` punti indice di stop. Con
+`stop = range + 10 + buffer`:
+- range **94** (centro) → `104 + 16 = 120` ⇒ buffer **~16**;
+- range **85** (bordo basso, quello NOMINATO nella frase) → `95 + 25 = 120` ⇒
+  buffer **~25**.
+
+Cioe' la frase apre col caso peggiore e chiude col numero del caso medio,
+**sottostimando il buffer necessario del 40%**. Qui la conclusione sopravvive per
+fortuna (l'asse arriva a 3000 punti = 30 idx e contiene 2500), **ma e' fortuna**:
+se l'asse si fosse fermato a 20 il round avrebbe misurato solo celle che al
+bordo basso non passano, con un contro-esempio che dichiarava di averlo coperto.
+
+> ### 🔴 LA REGOLA
+> 1. **Il numero che chiude un contro-esempio si calcola sul CASO NOMINATO nella
+>    premessa.** Se la premessa dice "bordo basso + P95", la risposta si calcola
+>    col bordo basso e col P95, e si scrive quale.
+> 2. **Quando c'e' una BANDA, il requisito si scrive su tutta la banda**
+>    (*"serve buffer 16-25 a seconda del bordo"*), mai su un punto solo.
+> 3. **E si verifica che l'ASSE PROPOSTO contenga il valore del caso peggiore**,
+>    con il conto scritto accanto.
+
+## 196. 🧾 IL ROUND **MAI GIRATO** CITATO COME UNA DELLE *"MISURE INDIPENDENTI"*
+
+**10/09/2026**, `ORB_OPPRANGE_RIAPERTURA` §3: *"**Tre misure indipendenti, fatte
+in tre round diversi**, puntano tutte sulla stessa casella: allargare lo
+stop"* — e le tre sono **R55**, **R88** e **R125**.
+
+🔴 **R125 non e' un round: e' il round che questo stesso referto chiede di
+autorizzare al §6.** Non ha girato nessuna passata. Quello che porta e' un
+**modello di costo** costruito su un range **[INFERITO]** (~94, banda 85-103) —
+e lo dichiara il referto stesso, quattro paragrafi piu' sotto, nella riga 5 dei
+contro-esempi. Quindi il §3 e il §5 **si contraddicono nello stesso documento**.
+⚠️ Aggravante: R55 e R88 non sono nemmeno indipendenti **fra loro** sui numeri
+citati (la cella HALFRANGE di R55 — 41.057,00 / 1,6742 / 9,7623 / n=119 — e'
+**la stessa riga** del CSV di R88a): e' **la stessa configurazione sugli stessi
+dati**, esattamente il difetto che la v2 aveva appena ritirato al §1
+(*"tre fonti indipendenti, stesso numero"* → **falso**).
+
+👉 E' il parente stretto del **DD del 42,9% fantasma** trovato il 09/09 in
+`HANDOFF.md` per un motore **mai girato**: un numero che nasce come proposta e
+in tre paragrafi diventa un precedente.
+
+> ### 🔴 LA REGOLA
+> 1. **"Misura" e' una parola riservata a una corsa ESEGUITA.** Un modello, una
+>    stima o una griglia proposta si chiamano cosi', e portano `[INFERITO]` o
+>    `[NON MISURATO]` **nella riga in cui vengono contati**, non trenta righe
+>    dopo.
+> 2. **"Indipendenti" si dimostra**: due letture della **stessa riga di CSV**
+>    sono UNA misura. Prima di scrivere "tre fonti", si controlla che i dati
+>    sotto siano tre.
+> 3. **Se una correzione ritira "fonti indipendenti" in un paragrafo, la stessa
+>    formula va cercata in TUTTO il documento** (e' la classe 193 applicata alle
+>    parole invece che ai numeri).

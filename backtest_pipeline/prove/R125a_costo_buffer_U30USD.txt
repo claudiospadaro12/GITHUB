@@ -89,8 +89,8 @@
 #
 #  >>> LEGGERE QUESTE TRE RIGHE PRIMA DI TUTTO IL RESTO. Dicono due
 #      cose, e la seconda mi contraddice:
-#      (a) TUTTE E TRE passano il cancello del MERITO (C3, PF OOS >=
-#          1,40) e TUTTE E TRE passano quello del RISCHIO (C1, DD OOS
+#      (a) TUTTE E TRE passano il cancello del MERITO (R125-G3, PF OOS >=
+#          1,40) e TUTTE E TRE passano quello del RISCHIO (R125-G1, DD OOS
 #          <= 7,00%), con n 119 >= 95. Tre celle ADIACENTI dalla stessa
 #          parte del cancello: NON e' una cella sola che sporge.
 #      (b) MA sul PF il buffer 500 e' un MASSIMO, non un piano:
@@ -140,7 +140,7 @@
 #        In quel caso la cella schierabile e' la piu' PICCOLA che passa
 #        il costo, e va detto che il margine e' quello e non di piu'.
 #  FALSIFICAZIONE DELLA TESI DEL ROUND: se nessuna cella tiene insieme
-#  C0 (costo), C1 (DD) e C3 (PF) su un altopiano, allora l'ORB sul Dow
+#  R125-G0 (costo), R125-G1 (DD) e R125-G3 (PF) su un altopiano, allora l'ORB sul Dow
 #  non ha una configurazione che stia dentro la frontiera del costo, e
 #  si scrive in REGISTRO_TEST.md con PF, DD, n e cancello.
 # ---------------------------------------------------------------------

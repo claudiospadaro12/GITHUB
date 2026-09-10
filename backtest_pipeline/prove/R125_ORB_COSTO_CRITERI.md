@@ -66,25 +66,31 @@ Operativamente, e senza margini di interpretazione:
 
 | # | cancello | soglia | perche' |
 |---|---|---|---|
-> 📛 **I cancelli si chiamano `G0..G5`, non `C0..C5`.** Rinominati il 10/09
-> **prima della firma** perche' `C1` e' gia' preso: e' il **cap sul rischio aperto
-> simultaneo, 3,25%**, firmato da Claudio il 18/08 (`report/FIRME_2026-08-18.md`).
-> Due cancelli diversi con lo stesso nome sono un incidente che aspetta il suo
-> giorno. Classe 190 della checklist.
+> 📛 **I cancelli si chiamano `R125-G0..R125-G5`, col prefisso di round.**
+> 🔁 **Rinominati DUE VOLTE il 10/09, prima della firma, e la seconda volta
+> e' la lezione:** prima erano `C0..C5`, ma **`C1` e' gia' preso** — e' il cap sul
+> rischio aperto simultaneo, **3,25%**, firmato da Claudio il 18/08
+> (`report/FIRME_2026-08-18.md`), classe **190**. Li ho spostati a `G0..G5` e
+> **ho collisionato di nuovo**: `G1` e' il nome di casa del **cancello dei
+> gemelli / di determinismo**, presente in **51 file prova** e persino **tre
+> volte dentro `R125d` di questo stesso round**. Classe **194**.
+> 🔴 **La regola che ne esce: un nome di cancello nuovo si cerca nel repo
+> PRIMA di adottarlo, e porta il prefisso del suo round.** Un `grep`, non la
+> memoria.
 
-| **G0** | **COSTO** | stop stimato >= **40 x spread mediano dell'ora** | e' il cancello di casa. Chi non lo passa **non si legge nemmeno**, qualunque PF abbia |
-| **G1** | **RISCHIO** | **DD OOS <= 7,00%** | e' il numero gia' firmato in `R88_CRITERI.md` cancello A1. Non si ammorbidisce |
-| **G2** | **RISCHIO, seconda finestra** | **DD IS <= 9,00%** | il rischio si legge a qualunque n (Emendamento B). La cella viva fa 7,8885% IS |
-| **G3** | **MERITO** | **PF OOS >= 1,40** | idem R88. E si legge **SOLO** sull'OOS: n OOS = 119, n IS = 71 |
-| **G4** | **CAMPIONE** | n OOS >= 95 e n IS >= 57 | idem R88 |
-| **G5** | **ALTOPIANO** | par.3 soddisfatto | senza questo, nessuna cella e' leggibile |
+| **R125-G0** | **COSTO** | stop stimato >= **40 x spread mediano dell'ora** | e' il cancello di casa. Chi non lo passa **non si legge nemmeno**, qualunque PF abbia |
+| **R125-G1** | **RISCHIO** | **DD OOS <= 7,00%** | e' il numero gia' firmato in `R88_CRITERI.md` cancello A1. Non si ammorbidisce |
+| **R125-G2** | **RISCHIO, seconda finestra** | **DD IS <= 9,00%** | il rischio si legge a qualunque n (Emendamento B). La cella viva fa 7,8885% IS |
+| **R125-G3** | **MERITO** | **PF OOS >= 1,40** | idem R88. E si legge **SOLO** sull'OOS: n OOS = 119, n IS = 71 |
+| **R125-G4** | **CAMPIONE** | n OOS >= 95 e n IS >= 57 | idem R88 |
+| **R125-G5** | **ALTOPIANO** | par.3 soddisfatto | senza questo, nessuna cella e' leggibile |
 
 > ### RIGA CHE NON SI NEGOZIA
 > **Il MERITO si legge sull'OOS (n=119) e NON sull'IS (n=71).**
 > Non e' un ammorbidimento: e' l'Emendamento A del 16/08 applicato alla
 > lettera. E per essere onesti fino in fondo: **il PF IS si scrive lo stesso,
 > accanto a ogni numero**, con l'n a fianco. Chi legge decide se gli basta.
-> Se una cella passa G0-G5 con PF IS sotto 1,00, si dichiara
+> Se una cella passa R125-G0..R125-G5 con PF IS sotto 1,00, si dichiara
 > **"passa i cancelli, ma la finestra vecchia non la conferma"** -- non
 > "promossa".
 

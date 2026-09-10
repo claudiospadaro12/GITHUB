@@ -68,7 +68,7 @@
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
 #    - n: 100-220 per finestra (il Nasdaq nell'ORB e' sempre stato il
 #      piu' generoso dei tre: r12 fa 171 IS / 267 OOS).
-#      Se n OOS < 95 -> NON MISURABILE (soglia C4).
+#      Se n OOS < 95 -> NON MISURABILE (soglia R125-G4).
 #    - DD OOS: MONOTONO DECRESCENTE col buffer. Attesa 6% - 16%.
 #      Il Nasdaq e' il piu' volatile dei tre: mi aspetto il DD peggiore
 #      del round, e lo scrivo prima.
