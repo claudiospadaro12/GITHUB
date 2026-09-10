@@ -62,15 +62,44 @@ qualunque n** (Emendamento B). E' il **rischio** a essere leggibile, non il meri
 
 
 ## 1. 🖱️ RICOMPILARE E RICARICARE LE 7 SEDIE COL FIX DEL LOTTO
-**Cosa**: il bug del lotto è corretto in **15 sorgenti**, ma sui terminali gira
-l'`.ex5`, non il sorgente. Finché non ricompili, quelle sedie **rischiano fino
-al doppio del dichiarato**.
+**Cosa**: il bug del lotto è corretto in **15 sorgenti** dall'**08/09**
+(commit `872dba8`, versione `1.01` — **verificato file per file stanotte**),
+ma sui terminali gira l'`.ex5`, non il sorgente. 👉 **Quindi non firmi una
+modifica al codice: firmi una COMPILAZIONE e un RICARICO.** Finché non
+ricompili, quelle sedie **rischiano fino al doppio del dichiarato**.
+
+🔴 **E il pericolo non è il fix: è il GESTO.** Un "Compila tutto"
+ricompilerebbe **anche le due sedie del conto REALE 10105439** (i loro sorgenti
+sono cambiati il 02/09 e il 03/09), e un ricarico che perde il preset le porta a
+**2,00% per sedia = 4,00% sul conto**, cioè **sopra il cap C1**.
+🛑 **Raccomandazione scritta: non aprire MetaEditor su `C:\BCM_Reale`.**
 **Dove**: 6 sul piccolo **50503392** (`C:\Program Files\BCM Markets MT5 Terminal`),
 1 sul 100k **50504263** (`... -V3`). 🟢 **Nessuna sul reale.**
 **Perché è tuo**: ricompilare **cambia il volume** delle sedie vive. È la taglia,
 e la taglia è una tua firma.
-**Quanto vale**: porta il requisito R4 da **2 sedie a 5**. Senza, il piano di
-ottobre resta a **2 sedie schierabili**.
+🔴 **CORRETTO L'11/09 (turno di notte) — il "da 2 a 5" NON regge, e l'ho
+ricontato sulla tabella §1.2 del piano:**
+- **lettura stretta** (R1+R2+R3+R4 tutti pieni): **da 2 a 2, delta ZERO**;
+- **lettura larga** (accettando R1 con etichetta `REGISTRO_TEST` e R2 col
+  deposito non dichiarato): **da 2 a 4**.
+Il **5 non esce in nessuna delle due.** Motivo: la ricompilazione **non tocca
+niente** di ciò che blocca `770101` (conflitto di DD R83 contro R119),
+`770202` (manca il **preset su file**, non il codice), `770411` (due pendenti
+opposti) e `771531` (pavimento del lotto **per gamba**). Guadagna R4 solo su
+`970913` e `770511` — che però **restano fermi su R1 e R2**.
+
+⚠️ **E due cose che nessuno aveva scritto**, entrambe misurate stanotte:
+1. 🔴 **La ricompilazione SPOSTA LA FREQUENZA.** Dove `totLot` è
+   esattamente il lotto minimo (`770511`, `770531`, `970901`) la seconda
+   tranche **sparisce**: i *deal* per segnale passano da 2 a 1, quindi
+   `770511` scende da 0,50 a **~0,25 op/giorno se le operazioni si contano dai
+   DEAL** — mentre i **segnali** non cambiano di uno. 👉 È una
+   **trappola di misura sul requisito n.1**: sembrerebbe che la sedia abbia
+   dimezzato la frequenza, e non è vero.
+2. 🔴 **Riapre R2** su `970913` e `770511`: i loro DD promessi vengono da
+   backtest col binario **vecchio**, e con il **deposito non dichiarato**.
+
+📄 Pacchetto completo: `report/PACCHETTO_R4_DA_FIRMARE_2026-09-11.md`
 📄 `report/FIX_LOTTO_PENDENTE_2026-09-08.md`
 
 ## 2. 🖱️ POSTNEWS EURUSD: `InpRiskPercent` **3.0 → 1.30**

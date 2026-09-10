@@ -65,10 +65,25 @@ $cart = @(Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-O
 $trovati = 0
 
 foreach($d in $cart){
+  # 10/09/2026: il nome del programma si legge PRIMA di qualunque salto.
+  # Un terminale saltato in silenzio non si distingue da un terminale che
+  # non esiste, e il lettore non sa dove ho guardato.
+  $orig0 = Join-Path $d.FullName "origin.txt"
+  $prog0 = "(programma sconosciuto)"
+  if(Test-Path -LiteralPath $orig0){
+    $o0 = Leggi-Condiviso $orig0
+    if($o0){ $prog0 = ($o0 -replace "[^\x20-\x7E]","").Trim() }
+  }
   $dirF = Join-Path $d.FullName "MQL5\Files"
-  if(-not (Test-Path -LiteralPath $dirF)){ continue }
+  if(-not (Test-Path -LiteralPath $dirF)){
+    Write-Host ("    GUARDATO e NIENTE: " + $prog0 + " -- non ha nemmeno la cartella MQL5\Files.")
+    continue
+  }
   $ff = @(Get-ChildItem -LiteralPath $dirF -Filter "ABTG_Slippage*" -Recurse -ErrorAction SilentlyContinue)
-  if($ff.Count -eq 0){ continue }
+  if($ff.Count -eq 0){
+    Write-Host ("    GUARDATO e NIENTE: " + $prog0 + " -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.")
+    continue
+  }
 
   $orig = Join-Path $d.FullName "origin.txt"
   $prog = "(programma sconosciuto)"

@@ -71,7 +71,6 @@ function Trova-ProfiloAttivo($dataFolder,$profili){
       $conChr += (New-Object psobject -Property @{ Nome=$p.Name; Ultimo=$ultimo; Quanti=$c.Count })
     }
   }
-  if($conChr.Count -eq 0){ $ris.Fonte = "nessun profilo con grafici salvati"; return $ris }
   $chiaviIgnote = @()
   $cfg = Join-Path $dataFolder "config"
   if(Test-Path -LiteralPath $cfg){
@@ -89,9 +88,28 @@ function Trova-ProfiloAttivo($dataFolder,$profili){
             return $ris
           }
         }
+        # 10/09/2026: il profilo dichiarato dai config puo' ESISTERE ed
+        # essere SENZA grafici salvati. Prima finiva fra le "chiavi che
+        # nominano un profilo inesistente" e si ripiegava sul .chr piu'
+        # recente -- cioe' si spacciava per attivo un RESIDUO. Adesso il
+        # profilo dichiarato vince lo stesso, e il fatto che sia vuoto lo
+        # dice il chiamante ("cartella trovata ma vuota"), che e' un'altra
+        # notizia.
+        foreach($p in $profili){
+          if($p.Name -ieq $val){
+            $ris.Nome=$p.Name; $ris.Certo=$true
+            $ris.Fonte="[CONFIG] config\" + $f.Name + " -> " + $m.Groups[1].Value + "=" + $val + "   (profilo SENZA grafici salvati)"
+            return $ris
+          }
+        }
         $chiaviIgnote += ("config\" + $f.Name + " -> " + $m.Groups[1].Value + "=" + $val)
       }
     }
+  }
+  if($conChr.Count -eq 0){
+    if($chiaviIgnote.Count -gt 0){ $ris.Fonte = "nessun profilo con grafici salvati, e la chiave dei config nomina un profilo che non c'e' (" + ($chiaviIgnote -join "; ") + ")" }
+    else { $ris.Fonte = "nessun profilo con grafici salvati, e nessuna chiave di profilo nei config" }
+    return $ris
   }
   if($conChr.Count -eq 1){
     $ris.Nome=$conChr[0].Nome; $ris.Certo=$true
@@ -107,8 +125,19 @@ function Trova-ProfiloAttivo($dataFolder,$profili){
 }
 
 function TF($tipo,$size){
-  $s = [int]$size
-  switch([int]$tipo){
+  # 10/09/2026, trovato con un contro-esempio: un .chr senza period_type
+  # o period_size fa arrivare qui la stringa "-" (il "campo mancante" di
+  # Campo). [int]"-" ESPLODE con InvalidArgument, l'errore finisce nello
+  # standard error -- che il runner NON pubblica -- e nel referto resta
+  # una colonna vuota senza spiegazione. Adesso si torna "?" e si va
+  # avanti. La conversione e' a CULTURA INVARIANTE per abitudine: sul
+  # VPS it-IT il separatore non deve mai entrare in una misura.
+  $inv = [Globalization.CultureInfo]::InvariantCulture
+  $st  = [Globalization.NumberStyles]::Integer
+  $t = 0; $s = 0
+  if(-not [int]::TryParse([string]$tipo, $st, $inv, [ref]$t)){ return "?" }
+  if(-not [int]::TryParse([string]$size, $st, $inv, [ref]$s)){ return "?" }
+  switch($t){
     0 { if($s -eq 0){ return "M?" } ; return ("M" + $s) }
     1 { return ("H" + $s) }
     2 { return ("D" + $s) }
