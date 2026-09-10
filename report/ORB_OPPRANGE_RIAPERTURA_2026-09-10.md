@@ -185,10 +185,51 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
   **NASUSD** (`R125c`/`R125e`/`R125f`, n fino a **233** e **357**
   nell'archivio) o da un simbolo in piu' — **non** da un'altra griglia sul Dow.
 
+  ⚠️ 🆕 **MA QUEI DUE NUMERI DICONO IL CAMPIONE, NON IL MERITO** (classe 207,
+  quarto giro di cancello). Il **233** e' di `r11` su D30EUR — **un'altra
+  ricetta** (finestra 65', EMA50, niente trailing/parziale/breakeven), che il
+  dossier archivia **MORTA** con **PF OOS 0,940-1,022** e **DD 17,5-29,7%**.
+  Il **357** e' di `ORB` `ohlc` su NASUSD — **altro EA, modello OHLC e non
+  tick**, **PF IS 0,945**, **PF OOS 1,248** cioe' **sotto `R125-G3` (1,40)**.
+  👉 **Il campione e' RAGGIUNGIBILE li'; il merito NON e' dimostrato.**
+  🔴 E la portata vera di R125 la dichiarano i suoi file prova: **n atteso
+  90-190 e 100-220**, **due bande a cavallo dei 150** — quindi il merito
+  **puo' restare sospeso anche sul DAX e sul Nasdaq**.
+  🛑 **E il colpo finale e' di RISCHIO, che si legge a qualunque n:** quelle
+  due righe del censimento portano **DD OOS 19,59%** (D30EUR `r11`, profitto
+  OOS mediano **negativo**) e **DD IS 22,85% / OOS 11,77%** (NASUSD `ohlc`,
+  profitto IS **negativo**). 🔴 **Sfondano `R125-G1`, `R125-G2` e la
+  bocciatura secca a 9,7623%.** 👉 Si citano **solo** per il campione: per il
+  merito e per il rischio **sono gia' bocciate**.
+
 ## 6. 👉 COSA CHIEDE, in concreto
 
 1. 🖊️ **Firma di Claudio sui criteri R125** (`backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md`)
-   — a numeri non visti, prima del lancio. 6 file prova, 33 celle, 66 passate, **~7 minuti di macchina**. 🔴 **La v1 diceva "~67 minuti": sbagliato di un fattore 10 esatto** (classe 192). Il vero ritmo e' misurato: `REFERTO_R88.txt` da' **13,7 min per 136 passate** = **0,101 min/passata** — le "2,3 ore" del referto R88 sono di **tutta la notte**, R87+R89+R86 compresi.
+   — a numeri non visti, prima del lancio.
+
+   > ### 🆕 🔴 COSA COMPRA ESATTAMENTE CON QUELLA FIRMA (classe 208, quarto giro di cancello)
+   > La riserva del punto 5 stava **solo** nel paragrafo che SPIEGA, non in
+   > quello che **CHIEDE LA FIRMA**: chi legge solo "cosa chiede, in concreto"
+   > non la incontrava. Quindi, in chiaro:
+   > - ✅ **COMPRA:** 6 misure a criteri congelati — **se l'altopiano del ramo
+   >   OPPRANGE esiste, dove sta, e a che costo** (`R125a`); se il parziale
+   >   lascia soldi per terra sulla sedia viva (`R125b`); e **la prima misura
+   >   in assoluto** della geometria del Dow su **DAX** e **Nasdaq**
+   >   (`R125c`-`R125f`, buchi B2/B3/B5 del dossier). Costo: **~7 minuti**.
+   > - 🔴 **NON COMPRA una sedia schierabile.** Su **U30USD** e' **misurato**
+   >   che non puo' esserci: `n` e' **INVARIANTE 71 IS / 119 OOS su tutte e 48
+   >   le celle** di R88a (verificato sul CSV: `Trades` ha **un solo valore
+   >   distinto**), il buffer sposta lo **stop** e non decide **se si entra**,
+   >   e sotto 150 l'Emendamento A tiene il **merito sospeso**.
+   >   Su **D30EUR** e **NASUSD** l'`n` atteso e' **90-190** e **100-220**:
+   >   🔴 **a cavallo dei 150**, quindi **nemmeno li' e' promessa**.
+   > - 🚫 **NON COMPRA niente sul conto reale 10105439.** Nessuna riga di
+   >   questo round tocca la `770611`: la domanda del punto 2 resta **sua**,
+   >   e resta aperta anche dopo R125.
+   > - ⏳ **E cosa servirebbe DAVVERO per una sedia sul Dow:** tick sotto il
+   >   muro del **2024.09.26** (che non abbiamo) **oppure** un secondo regime
+   >   da un altro simbolo. 👉 **Questo e' il buco da segnalare a Claudio, non
+   >   da subire** — e' esattamente il caso in cui si e' messo a disposizione. 6 file prova, 33 celle, 66 passate, **~7 minuti di macchina**. 🔴 **La v1 diceva "~67 minuti": sbagliato di un fattore 10 esatto** (classe 192). Il vero ritmo e' misurato: `REFERTO_R88.txt` da' **13,7 min per 136 passate** = **0,101 min/passata** — le "2,3 ore" del referto R88 sono di **tutta la notte**, R87+R89+R86 compresi.
 2. 🔴 **Una domanda che riguarda il conto REALE 10105439, quindi e' SOLO SUA:**
    la sedia viva `770611` gira con la geometria che **non passa il cancello di
    costo** — **23,5x** con lo stop DERIVATO, **29,5x** con lo stop **MISURATO

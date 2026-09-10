@@ -64,6 +64,17 @@
 #          a quei valori e i loro PF non si citano. E' la lezione dei
 #          874 CSV con esiti identici del censimento 09/09: una
 #          manopola che non morde non e' una manopola provata.
+#      >>> E I 150 DELL'EMENDAMENTO A SONO UN'ALTRA SOGLIA, PIU' ALTA
+#          (classe 207, quarto giro di cancello): R125-G4 (n OOS >= 95)
+#          dice se la cella e' LEGGIBILE; l'Emendamento A del 16/08 dice
+#          che sotto 150 operazioni il MERITO E' SOSPESO. Fra 95 e 149
+#          la cella si legge per il RISCHIO (DD, che e' un fatto a
+#          qualunque n) e passare R125-G3 vale "merito NON ESCLUSO",
+#          NON "merito dimostrato". Solo sopra 150 il PF OOS dimostra.
+#          >>> LO DICHIARO QUI PERCHE' L'ATTESA STA A CAVALLO DEI 150:
+#              questo file PUO' finire sotto, e in quel caso il round
+#              NON schiera nemmeno su questo simbolo. Chi firma i
+#              criteri compra una MISURA, non una sedia promessa.
 #    - PF OOS: attesa in SALITA leggera fino a 0,15 e poi PIATTA o in
 #      calo, perche' oltre quel punto si perde campione piu' in fretta
 #      di quanto si guadagni in qualita'. Attesa 1,00 - 1,45.

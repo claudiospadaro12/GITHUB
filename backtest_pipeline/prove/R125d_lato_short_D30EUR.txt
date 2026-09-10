@@ -52,6 +52,17 @@
 #    - n: 60-140 per finestra. Il filtro EMA200 e' simmetrico, quindi
 #      in un DAX che sale lo short vede meno giornate del long.
 #      Se n OOS < 95 -> NON MISURABILE (soglia R125-G4), non "bocciato".
+#      >>> E I 150 DELL'EMENDAMENTO A SONO UN'ALTRA SOGLIA, PIU' ALTA
+#          (classe 207, quarto giro di cancello): R125-G4 (n OOS >= 95)
+#          dice se la cella e' LEGGIBILE; l'Emendamento A del 16/08 dice
+#          che sotto 150 operazioni il MERITO E' SOSPESO. Fra 95 e 149
+#          la cella si legge per il RISCHIO (DD, che e' un fatto a
+#          qualunque n) e passare R125-G3 vale "merito NON ESCLUSO",
+#          NON "merito dimostrato". Solo sopra 150 il PF OOS dimostra.
+#          >>> LO DICHIARO QUI PERCHE' L'ATTESA STA A CAVALLO DEI 150:
+#              questo file PUO' finire sotto, e in quel caso il round
+#              NON schiera nemmeno su questo simbolo. Chi firma i
+#              criteri compra una MISURA, non una sedia promessa.
 #    - PF OOS: attesa 0,70 - 1,20. La scrivo BASSA e dico perche':
 #      su TUTTI i simboli dove il lato e' stato isolato, lo short
 #      dell'apertura ha perso (U30USD ORB 0,520; U30USD Dow Apertura

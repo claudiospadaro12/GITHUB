@@ -1,4 +1,4 @@
-# 🧪 ROUND ORB / PS5 — **il round che puo' produrre una sedia**
+# 🧪 ROUND ORB / PS5 — **il round che MISURA l'altopiano e il suo costo** (e che su U30USD **non puo'** produrre una sedia)
 
 **Data: 10/09/2026.** Nasce dal documento master del collega (Marco Garbuglia,
 "PS5 ORB Bot", v2.60) letto in
@@ -10,15 +10,41 @@ cancello del costo di `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
 > Porta **misure**, una **griglia** e **sei file prova gia' passati dal
 > cancello**. Le decisioni sono di Claudio.
 
-> ### 🆕 🔴 E IL TITOLO VA LETTO CON QUESTA RIGA ACCANTO (terzo giro di cancello, classe 205)
-> **"Puo' produrre una sedia" e' vero per il DAX e per il Nasdaq, NON per il
-> Dow.** Su U30USD `R125a` dichiara da solo che **n resta 71 IS / 119 OOS in
+> ### 🆕 🔴 IL TITOLO E' STATO CORRETTO DUE VOLTE — classi 205 e 207
+> **v1: "il round che puo' produrre una sedia".** 🔴 Falso sul Dow (classe 205,
+> terzo giro). **v2: "vero per il DAX e per il Nasdaq".** 🔴 Falso anche quella
+> (classe 207, quarto giro): li' il **campione e' raggiungibile**, il **merito
+> non e' dimostrato**, e l'`n` atteso sta **a cavallo dei 150**. 👉 **La forma
+> che regge e' quella del titolo di adesso: questo round MISURA.**
+>
+> Su U30USD `R125a` dichiara da solo che **n resta 71 IS / 119 OOS in
 > tutte e 7 le celle** (il buffer sposta lo stop, non decide se si entra), e
 > sotto **150** l'Emendamento A tiene il **MERITO SOSPESO**. 👉 Su U30USD questo
-> round dice **se l'altopiano esiste e a che costo** — non schiera. La sedia
-> puo' uscire da **D30EUR** (`R125c`/`R125e`) o da **NASUSD** (`R125f`), dove
-> l'archivio misura n fino a **233** e **357**. Forma congelata:
+> round dice **se l'altopiano esiste e a che costo** — non schiera. L'unica
+> via al merito **pieno** passerebbe da **D30EUR** (`R125c`/`R125e`) o da
+> **NASUSD** (`R125f`), dove l'archivio misura n fino a **233** e **357**. Forma congelata:
 > `R125_ORB_COSTO_CRITERI.md` par. 4, riquadro classe 205.
+> ⚠️ 🆕 **E QUEI DUE NUMERI DICONO IL CAMPIONE, NON IL MERITO** (classe 207,
+> quarto giro di cancello). Il **233** e' di `r11` su D30EUR, cioe' **un'altra
+> ricetta** (finestra 65' 07:00-08:05, EMA50, niente trailing / parziale /
+> breakeven) che questo stesso dossier archivia **MORTA** al §1.2, con
+> **PF OOS 0,940-1,022** e **DD OOS 17,5-29,7%**. Il **357** e' di `ORB` `ohlc`
+> su NASUSD: **un altro EA e un altro modello** (OHLC, **non tick**), con
+> **PF IS 0,945** e **PF OOS 1,248**, cioe' **sotto `R125-G3` (1,40)**.
+> 👉 **Nessuno dei due e' "la sedia che aspetta li'"**: dicono che su quei
+> simboli il **CAMPIONE e' RAGGIUNGIBILE**, non che il **MERITO** ci sia --
+> e sono due cose diverse. 🔴 **E quanto ne porta davvero R125 lo dicono i
+> suoi file prova, non l'archivio: `n` atteso 90-190 (`R125c`/`R125e`) e
+> 100-220 (`R125f`) -- due bande a CAVALLO dei 150.** Quindi il merito
+> **puo' restare sospeso anche li'**, e va detto prima, non dopo.
+> 🛑 **E c'e' un dettaglio che li chiude del tutto, ed e' di RISCHIO, che
+> si legge a QUALUNQUE n (Emendamento B):** nel censimento quelle due righe
+> portano **DD OOS 19,59%** (D30EUR `r11`, con **profitto OOS mediano NEGATIVO**,
+> -73,85) e **DD IS 22,85% / DD OOS 11,77%** (NASUSD `ohlc`, con **profitto IS
+> negativo**, -407,21). 🔴 **Tutte e due sfondano `R125-G1` (7,00%),
+> `R125-G2` (9,00%) e perfino la bocciatura secca a 9,7623%.** 👉 Quelle due
+> righe si possono citare **solo** per dire *"su quei simboli il campione
+> esiste"*. Per il merito e per il rischio **sono gia' bocciate**.
 
 ---
 
@@ -414,6 +440,13 @@ brucia la challenge.
 >    👉 **Sull'asse 0..3000 le celle SCEGLIBILI sono CINQUE: 500..2500.**
 >    Forma completa e tabella dei bordi per asse: `R125_ORB_COSTO_CRITERI.md`
 >    **par. 3-bis**, congelato il 10/09 dal cancello **prima** dei numeri.
+>    🆕 🔴 **E il par. 3-bis da solo NON BASTA: e' stato provato col
+>    contro-esempio e NON reggeva** (classe **206**) — *"entro +/- 0,15 dalla
+>    cella scelta"* non e' transitivo, *"la piu' interna"* non dice rispetto a
+>    cosa, e gli altopiani di lunghezza **pari** non avevano spareggio: due
+>    lettori onesti uscivano con **due verdetti opposti**. 👉 **La forma che si
+>    esegue e' la PROCEDURA NUMERATA `P1..P8` del par. 4-bis dei criteri**, col
+>    suo contro-esempio dentro.
 
 **Le soglie, congelate ora:** R125-G0 costo `stop ≥ 40 × spread mediano dell'ora` ·
 R125-G1 **DD OOS ≤ 7,00%** · R125-G2 **DD IS ≤ 9,00%** · R125-G3 **PF OOS ≥ 1,40** ·

@@ -89,35 +89,117 @@ Operativamente, e senza margini di interpretazione:
 
 3. 🧱 **Bordo che e' un LIMITE FISICO**: dall'altra parte non c'e' una misura
    che manca, c'e' **un valore che non esiste**. L'altopiano e' **CHIUSO** da
-   quel lato e si sceglie normalmente (la cella scelta resta la piu' interna
-   dell'altopiano, cioe' **non** il bordo). Nessuna penalita', e va detto:
+   quel lato: la cella di bordo **resta dentro il blocco e conta** (passo P5),
+   ma **non e' scegliibile** (passo P6). La scelta poi la fa la **procedura di
+   4-bis**, non l'aggettivo *"interna"*. Nessuna penalita', e va detto:
    **non e' un buco**.
-4. ✂️ **Bordo che e' la FINE DELLA GRIGLIA**: li' il vuoto e' **una misura che
-   MANCA**, e la differenza morde:
-   - se, **tolto il bordo**, restano almeno **tre** celle di altopiano, si
-     sceglie la piu' interna **fra quelle** e si dichiara accanto al numero:
-     **"asse APERTO verso l'alto: il centro vero puo' stare oltre 3000, e non
-     e' misurato"**;
-   - se invece l'altopiano e' fatto **solo** dal bordo e dalla sua unica
-     adiacente, il verdetto e' **"L'ALTOPIANO, SE C'E', ESCE DALLA GRIGLIA"**:
-     🛑 **non si sceglie niente su quell'asse**, e la risposta e' **estendere
-     l'asse di almeno due gradini** in un round successivo.
+4. ✂️ **Bordo che e' la FINE DELLA GRIGLIA**: li' il vuoto e' **una misura
+   che MANCA**. Una cella di questo tipo **si toglie dal blocco prima di
+   contare** (procedura qui sotto, passo **P5**), e se quel che resta non
+   regge il verdetto e' **"L'ALTOPIANO, SE C'E', ESCE DALLA GRIGLIA"**:
+   🛑 **non si sceglie niente su quell'asse**, e la risposta e'
+   **estendere l'asse di almeno due gradini** in un round successivo.
    - 📌 **Estendere un asse NON viola la regola del 19/08** ("niente parametri
      diversi di un motore morto"): li' si vieta di infittire la griglia di un
      motore **gia' dichiarato senza edge**; qui si **chiude una misura che la
      griglia aveva tagliato**. E si paga con la **stessa** prova fuori campione
      del par. 4 del dossier, non con una piu' morbida.
-4-bis. ⚖️ **E QUANDO 3-bis E PAR.3 DICONO COSE DIVERSE, VINCE 3-bis** (che e'
-   il piu' stretto). Caso concreto: altopiano `{2000, 2500, 3000}`. Per il par.3
-   la cella **2500** sarebbe accettabile (le sue due vicine stanno dentro la
-   banda); per il par. 3-bis punto 4, tolto il bordo restano **due** celle, non
-   tre, quindi il verdetto e' **"esce dalla griglia"** e si estende l'asse.
-   🔴 **La differenza e' che il 2500 potrebbe essere il centro dell'altopiano
-   oppure il fianco di una salita che la griglia ha tagliato, e i due casi
-   danno lo stesso quadro di numeri.** Il costo di sbagliare (una cella
-   promossa sul fianco) e' una challenge; il costo di allungare l'asse e'
-   **7 celle = 14 passate = ~1,4 minuti** al ritmo misurato di 0,101
-   min/passata. **Non e' un dilemma.**
+
+### 🆕 4-bis. 🤖 LA PROCEDURA, PASSO PER PASSO -- perche' *"il centro dell'altopiano"* NON e' un'istruzione
+
+> 🔴 **Perche' questo blocco esiste -- classe 206, QUARTO giro di cancello,
+> 10/09/2026.** Il par. 3-bis era stato scritto prima dei numeri, ed era la
+> cosa giusta da fare. Ma **non era stato provato col contro-esempio**, come
+> impone la regola del 10/09 -- e messo alla prova **non ha retto**: 🔴 **due
+> lettori onesti, con la STESSA griglia in mano, arrivavano a due verdetti
+> OPPOSTI.** Una regola di selezione che ammette due risposte non e' una
+> regola: e' una preferenza. Qui sotto c'e' la versione che ne ammette **una
+> sola**, e il contro-esempio che la prova.
+
+**P1. AMMISSIBILI.** E' ammissibile ogni cella che passa `R125-G0`, `R125-G1`,
+`R125-G2` e `R125-G4`. Una cella non ammissibile **spezza**: non puo' stare
+dentro nessun blocco.
+
+**P2. BLOCCHI.** Un **BLOCCO** e' una sequenza di celle **contigue sull'asse**,
+tutte ammissibili, in cui **`max(PF OOS) - min(PF OOS) <= 0,15` calcolato sul
+BLOCCO INTERO** -- **non** fra vicine. 🔴 **E' qui che la v1 si rompeva:**
+*"entro +/- 0,15 dalla cella scelta"* **non e' transitivo**, quindi l'insieme
+dipendeva da **quale cella si guardava per prima**. Si elencano tutti i blocchi
+**MASSIMALI** (non allungabili di una cella da nessuno dei due lati); possono
+sovrapporsi.
+
+**P3. QUALE BLOCCO.** Vince quello con **piu' celle**. Spareggi, in
+quest'ordine: (a) **DD OOS massimo piu' basso** dentro il blocco; (b)
+**parametro piu' basso**. 🚫 **Il PF non entra nella scelta del blocco** oltre
+alla banda di P2.
+
+**P4. SOGLIA DI ESISTENZA.** Se il blocco vincente ha **meno di 3 celle**,
+**non c'e' altopiano**: verdetto *"non c'e' una configurazione robusta"*
+(par.3), e **non si sceglie niente**.
+
+**P5. BORDI ✂️ FINE GRIGLIA.** Si tolgono dal blocco. Se dopo averli tolti
+restano **meno di 3 celle** -> **"L'ALTOPIANO, SE C'E', ESCE DALLA GRIGLIA"**,
+si estende l'asse. 🧱 **I bordi LIMITE FISICO NON si tolgono**: restano a
+contare (dall'altra parte non manca una misura, manca un valore che non
+esiste).
+
+**P6. SCEGLIIBILI.** Dal blocco residuo si tolgono la **prima** e l'**ultima**
+cella (non hanno due vicine dentro il blocco, quindi il par.3 su di loro non e'
+verificabile) **e ogni cella di bordo, di qualunque tipo**. Quel che resta sono
+le **SCEGLIIBILI**. Se l'insieme e' vuoto, verdetto come P5.
+
+**P7. LA CELLA.** Si prende la scegliibile il cui **indice sull'asse** e' piu'
+vicino al **baricentro del blocco residuo** (media aritmetica degli indici delle
+sue celle). Spareggi, in quest'ordine: (a) **DD OOS piu' basso** -- il rischio
+si legge a qualunque n, Emendamento B; (b) **parametro piu' basso**.
+🚫 **Mai il PF.**
+
+**P8. DICHIARAZIONE OBBLIGATORIA.** Accanto al numero si scrivono: il **blocco
+intero**, la **cella scelta**, **quale passo l'ha decisa** e -- se P5 ha tolto
+un bordo ✂️ -- la frase **"asse APERTO da quel lato: il centro vero puo' stare
+oltre la griglia, e NON e' misurato"**.
+
+#### 🧪 IL CONTRO-ESEMPIO CHE HA BOCCIATO LA v1 (costruito prima di consegnare)
+
+Griglia di prova, PF OOS: **1500 -> 1,42 · 2000 -> 1,55 · 2500 -> 1,68 ·
+3000 -> 1,70**, tutte ammissibili.
+
+| lettore | con la v1 del par. 3-bis | esito |
+|---|---|---|
+| ancora sulla **2500** | vicine 2000 (Δ 0,13) e 3000 (Δ 0,02) -> altopiano `{2000,2500,3000}` -> tolto il bordo restano **2** | 🛑 **"esce dalla griglia": si estende l'asse** |
+| ancora sulla **2000** | vicine 1500 (Δ 0,13) e 2500 (Δ 0,13) -> `{1500,2000,2500}`, e la 3000 si attacca alla 2500 -> **4** celle -> tolto il bordo ne restano **3** | ✅ **"si sceglie la 2000"** |
+
+🔴 **Stessa griglia, verdetti opposti** -- e uno dei due promuove una cella sul
+fianco di una salita, che e' esattamente il caso che il par. 3-bis diceva di
+voler evitare.
+
+🟢 **Con la procedura la risposta e' UNA:** `span{1500,2000,2500}` = **0,26 >
+0,15**, quindi non e' un blocco. I blocchi massimali sono `{2000,2500,3000}`
+(span **0,15**) e `{1500,2000}` (span 0,13). P3 -> vince il primo (3 celle).
+P5 toglie la 3000 -> restano **2** -> **"esce dalla griglia", si estende
+l'asse**. Non c'e' una seconda lettura.
+
+🧪 **E il secondo contro-esempio, il PAREGGIO** (che la v1 non nominava
+affatto): blocco `{0, 500, 1000, 1500}`. Il baricentro cade sull'**indice 1,5**,
+cioe' **esattamente fra 500 e 1000**: la v1 diceva *"la piu' interna"* e non
+c'era **nessuna** cella piu' interna dell'altra. P7 spareggia col **DD OOS piu'
+basso**, e se anche quello pareggia al centesimo, col **parametro piu' basso**
+(la **500**).
+
+⚠️ **E "interna" rispetto a COSA**, che era la terza ambiguita': la v1 non lo
+diceva, e su `{1500,2000,2500}` "interna all'ASSE" da' **1500** mentre "interna
+all'ALTOPIANO" da' **2000**. 👉 **P7 fissa il riferimento: il baricentro del
+BLOCCO**, mai quello dell'asse.
+
+4-ter. ⚖️ **QUANDO PAR.3 E 3-bis DICONO COSE DIVERSE, VINCE LA PROCEDURA** (che
+   e' la piu' stretta). Il caso concreto e' quello della tabella qui sopra: per
+   il par.3 nudo la **2500** sarebbe accettabile; per la procedura il verdetto
+   e' *"esce dalla griglia"*. 🔴 **La differenza e' che il 2500 potrebbe essere
+   il centro dell'altopiano oppure il fianco di una salita che la griglia ha
+   tagliato, e i due casi danno lo stesso quadro di numeri.** Il costo di
+   sbagliare (una cella promossa sul fianco) e' una challenge; il costo di
+   allungare l'asse e' **7 celle = 14 passate = ~1,4 minuti** al ritmo misurato
+   di 0,101 min/passata. **Non e' un dilemma.**
 
 5. **In tutti e due i casi la cella di bordo resta LEGGIBILE come MISURA**:
    conta per il cancello del costo (R125-G0), conta per il DD (R125-G1/G2),
@@ -154,7 +236,7 @@ Operativamente, e senza margini di interpretazione:
 | **R125-G2** | **RISCHIO, seconda finestra** | **DD IS <= 9,00%** | il rischio si legge a qualunque n (Emendamento B). La cella viva fa 7,8885% IS |
 | **R125-G3** | **MERITO** | **PF OOS >= 1,40** | idem R88. E si legge **SOLO** sull'OOS: n OOS = 119, n IS = 71 |
 | **R125-G4** | **CAMPIONE** | n OOS >= 95 e n IS >= 57 | idem R88 |
-| **R125-G5** | **ALTOPIANO** | par.3 soddisfatto | senza questo, nessuna cella e' leggibile |
+| **R125-G5** | **ALTOPIANO** | par.3 **e procedura 4-bis (P1..P8)** soddisfatti | senza questo, nessuna cella e' leggibile |
 
 > ### RIGA CHE NON SI NEGOZIA
 > **Il MERITO si legge sull'OOS (n=119) e NON sull'IS (n=71).**
@@ -182,6 +264,27 @@ Operativamente, e senza margini di interpretazione:
 > merito pieno passa da **D30EUR e NASUSD** (`R125c`/`R125e`/`R125f`, dove
 > l'archivio misura n fino a **233** e **357**), **non** da un'altra griglia su
 > U30USD.
+> ⚠️ 🆕 **E QUEI DUE NUMERI DICONO IL CAMPIONE, NON IL MERITO** (classe 207,
+> quarto giro di cancello). Il **233** e' di `r11` su D30EUR, cioe' **un'altra
+> ricetta** (finestra 65' 07:00-08:05, EMA50, niente trailing / parziale /
+> breakeven) che questo stesso dossier archivia **MORTA** al §1.2, con
+> **PF OOS 0,940-1,022** e **DD OOS 17,5-29,7%**. Il **357** e' di `ORB` `ohlc`
+> su NASUSD: **un altro EA e un altro modello** (OHLC, **non tick**), con
+> **PF IS 0,945** e **PF OOS 1,248**, cioe' **sotto `R125-G3` (1,40)**.
+> 👉 **Nessuno dei due e' "la sedia che aspetta li'"**: dicono che su quei
+> simboli il **CAMPIONE e' RAGGIUNGIBILE**, non che il **MERITO** ci sia --
+> e sono due cose diverse. 🔴 **E quanto ne porta davvero R125 lo dicono i
+> suoi file prova, non l'archivio: `n` atteso 90-190 (`R125c`/`R125e`) e
+> 100-220 (`R125f`) -- due bande a CAVALLO dei 150.** Quindi il merito
+> **puo' restare sospeso anche li'**, e va detto prima, non dopo.
+> 🛑 **E c'e' un dettaglio che li chiude del tutto, ed e' di RISCHIO, che
+> si legge a QUALUNQUE n (Emendamento B):** nel censimento quelle due righe
+> portano **DD OOS 19,59%** (D30EUR `r11`, con **profitto OOS mediano NEGATIVO**,
+> -73,85) e **DD IS 22,85% / DD OOS 11,77%** (NASUSD `ohlc`, con **profitto IS
+> negativo**, -407,21). 🔴 **Tutte e due sfondano `R125-G1` (7,00%),
+> `R125-G2` (9,00%) e perfino la bocciatura secca a 9,7623%.** 👉 Quelle due
+> righe si possono citare **solo** per dire *"su quei simboli il campione
+> esiste"*. Per il merito e per il rischio **sono gia' bocciate**.
 > 🛑 **Questo NON e' un ammorbidimento e NON e' un irrigidimento: e' scrivere
 > cosa vuol dire passare un cancello.** Vale da adesso, a numeri non visti.
 

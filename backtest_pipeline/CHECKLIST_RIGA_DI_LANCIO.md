@@ -12400,3 +12400,137 @@ scriveva *"serve il round R125 per fare il numero"*.
 >    scoprirlo dopo costa il round.
 > 3. **La via al campione si nomina**: altro simbolo, altra finestra, altro TF —
 >    per nome, mai "si vedra'".
+
+
+---
+
+## 206. 📐 LA REGOLA DI SELEZIONE CHE AMMETTE **DUE RISPOSTE** — cioe' una preferenza travestita da criterio
+
+**10/09/2026, QUARTO giro di cancello su R125.** Il terzo giro aveva fatto la
+cosa giusta: aveva congelato **prima dei numeri** il par. 3-bis sulle **celle di
+bordo** (`R125_ORB_COSTO_CRITERI.md`). 🟢 Il tempismo era corretto — una regola
+di selezione scritta dopo aver visto dove cade il massimo non e' una regola.
+
+🔴 **Ma non era stata provata col CONTRO-ESEMPIO**, e messa alla prova non ha
+retto: **due lettori onesti, con la STESSA griglia in mano, arrivavano a due
+verdetti OPPOSTI** — uno estendeva l'asse, l'altro promuoveva una cella.
+
+Le tre ambiguita', tutte e tre load-bearing:
+1. **`+/- 0,15` NON E' TRANSITIVO.** Il par.3 diceva *"le due celle adiacenti
+   col PF entro +/- 0,15 dalla cella scelta"*: applicato per formare un
+   **insieme**, l'insieme dipende da **quale cella si guarda per prima**.
+   Contro-esempio misurabile — PF OOS `1500→1,42 · 2000→1,55 · 2500→1,68 ·
+   3000→1,70`: chi si ancora alla **2500** vede `{2000,2500,3000}` → tolto il
+   bordo restano 2 → *"esce dalla griglia"*; chi si ancora alla **2000** vede
+   `{1500,2000,2500}` + la 3000 attaccata → 4 celle → tolto il bordo ne restano
+   3 → *"si sceglie la 2000"*. **Verdetti opposti sulla stessa griglia.**
+2. **"LA PIU' INTERNA" NON DICE RISPETTO A COSA.** Su `{1500,2000,2500}`,
+   "interna all'ASSE" da' **1500**, "interna all'ALTOPIANO" da' **2000**.
+3. **NESSUNO SPAREGGIO PER GLI ALTOPIANI DI LUNGHEZZA PARI.** Su
+   `{0,500,1000,1500}` il centro cade **fra** 500 e 1000, e la regola vietava
+   di usare il PF per decidere: quindi **non decideva niente**.
+
+> ### 🔴 LA REGOLA
+> **Una regola di selezione si valida come uno strumento: le si costruisce
+> contro il CONTRO-ESEMPIO, e il contro-esempio giusto NON e' "una griglia
+> brutta" — e' *"due lettori diversi, stessa griglia: escono con la stessa
+> cella?"*. Se la risposta e' no, non e' un criterio.**
+> Operativamente, e sono tre domande da fare a ogni regola di selezione:
+> 1. **La relazione che forma l'insieme e' TRANSITIVA?** Se e' del tipo
+>    *"entro X dalla cella scelta"*, **non lo e'**: si scrive come **span sul
+>    blocco intero** (`max - min <= X`), che non dipende dal punto di partenza.
+> 2. **Ogni aggettivo ha un RIFERIMENTO scritto?** *"Interna"*, *"centrale"*,
+>    *"robusta"* senza il "rispetto a cosa" sono **buchi**, non sintesi.
+> 3. **C'e' uno SPAREGGIO, e arriva fino in fondo?** Ogni pareggio possibile
+>    (lunghezza pari, DD identici) deve avere il suo tie-break, e l'ultimo
+>    dev'essere **totale** (es. il valore del parametro), altrimenti la
+>    procedura si ferma senza risposta.
+> 📌 **E il metro finale: la regola si scrive come una PROCEDURA NUMERATA
+> (P1..Pn), non come un principio.** Un principio si interpreta; una procedura
+> si esegue. Applicato qui: `R125_ORB_COSTO_CRITERI.md` par. 4-bis, P1..P8.
+
+---
+
+## 207. 🎣 IL **CAMPIONE RAGGIUNGIBILE** SPACCIATO PER **MERITO RAGGIUNGIBILE** — e l'`n` preso da un'ALTRA configurazione
+
+**10/09/2026, QUARTO giro di cancello su R125.** Il terzo giro aveva chiuso
+bene la classe **205** (su U30USD il round non puo' fare il numero del merito:
+`n` **INVARIANTE** 71/119, verificato sul CSV di R88a — `Trades` ha **un solo
+valore distinto su tutte e 48 le celle**). 🟢 Quella parte e' misurata e regge.
+
+🔴 **Ma la riserva tolta al Dow e' stata rimessa, identica, su DAX e Nasdaq**:
+in **tre** documenti (criteri par.4, titolo del dossier, punto 5 del referto
+gemello) compariva *"la via al merito pieno passa da D30EUR e NASUSD, dove
+l'archivio misura n fino a **233** e **357**"*. Aperto l'archivio riga per riga:
+- il **233** e' di **`r11` su D30EUR**, cioe' **un'altra ricetta** (finestra 65'
+  07:00-08:05, EMA50, niente trailing/parziale/breakeven) — **che il dossier
+  stesso archivia MORTA al suo §1.2**, con **PF OOS 0,940-1,022** e **DD OOS
+  17,5-29,7%**. Il suo PF OOS mediano e' **0,995**: sotto 1;
+- il **357** e' di **`ORB` etichetta `ohlc` su NASUSD**: **altro EA e altro
+  modello di esecuzione** (OHLC, **non tick**), **PF IS 0,945**, **PF OOS
+  1,248** — cioe' **sotto il cancello di merito del round stesso (1,40)**.
+
+🛑 **E aperte fino in fondo, quelle due righe erano gia' MORTE anche per il
+RISCHIO** — che si legge a **qualunque n** (Emendamento B): **DD OOS 19,59%**
+con **profitto OOS mediano NEGATIVO** (`r11` D30EUR) e **DD IS 22,85% / DD OOS
+11,77%** con **profitto IS negativo** (`ohlc` NASUSD). **Sfondano `R125-G1`
+(7,00%), `R125-G2` (9,00%) e la bocciatura secca a 9,7623%** del round che le
+stava citando come via al merito. 👉 **Il numero che era stato letto (l'`n`) era
+l'unica colonna di quelle righe che non le condannava.**
+
+🔴 **E la contraddizione piu' dura era interna al round**: i **file prova** —
+i documenti che si **eseguono** — dichiarano da soli `n` atteso **90-190**
+(`R125c`/`R125e`) e **100-220** (`R125f`), cioe' **due bande a cavallo dei
+150**; e **nessuno dei tre nominava la soglia dei 150**: il loro unico cancello
+sull'`n` era `R125-G4` a **95**. Quindi il round poteva chiudersi con tutte le
+celle "passate" e il **merito ancora sospeso**, su tutti e tre i simboli.
+
+> ### 🔴 LA REGOLA
+> 1. **`n` raggiungibile e MERITO raggiungibile sono due cose diverse, e si
+>    scrivono separate.** *"Li' c'e' il campione"* non e' *"li' c'e' la sedia"*.
+> 2. **Un `n` citato come via al merito porta SEMPRE accanto il PF e il DD
+>    della RIGA da cui viene** — e se quella riga e' di **un'altra
+>    configurazione** (altra finestra, altro EA, altro modello, altro TF), si
+>    dice **quale** e si dice che **il suo `n` non e' il nostro `n`**.
+>    ⚠️ Caso peggiore, e capitato: l'`n` viene da una ricetta che **lo stesso
+>    documento dichiara MORTA** qualche paragrafo sopra.
+> 3. **Se l'attesa dichiarata sta a CAVALLO della soglia, si scrive che sta a
+>    cavallo** — e lo si scrive **nel file prova**, non solo nel referto
+>    (lezione della classe **203**: prima gli eseguibili).
+> 4. 📌 **E la soglia che vale per il merito e' quella dell'Emendamento A
+>    (150), non quella di leggibilita' del round (95).** Confonderle e' un
+>    ammorbidimento silenzioso.
+
+---
+
+## 208. 🖊️ LA RISERVA SCRITTA NEL PARAGRAFO CHE **SPIEGA** E NON IN QUELLO CHE **CHIEDE LA FIRMA**
+
+**10/09/2026, QUARTO giro di cancello su R125.** Il referto
+`ORB_OPPRANGE_RIAPERTURA` diceva la verita' al suo **punto 5**: *"nessun PF di
+questa tabella schiera una sedia"*, e dopo la classe 205 anche *"su U30USD R125
+quel numero NON lo fa"*. 🟢 Corretto.
+
+🔴 **Ma il punto 6 — quello intitolato "COSA CHIEDE, IN CONCRETO", cioe'
+l'unico che Claudio deve per forza leggere per decidere — chiedeva la firma
+sui criteri elencando solo il COSTO** (*"6 file prova, 33 celle, 66 passate,
+~7 minuti di macchina"*). **Chi legge solo quel paragrafo firma senza sapere
+che cosa il round NON puo' dargli.** La riserva c'era, ma un paragrafo prima e
+in un elenco di contro-esempi: cioe' **fuori dal punto in cui si decide**.
+
+> ### 🔴 LA REGOLA
+> **Il paragrafo che CHIEDE una firma deve contenere, per intero, cosa quella
+> firma COMPRA e cosa NON compra. Non si rimanda: si ripete.**
+> Forma minima, quattro righe:
+> - ✅ **cosa compra** (le misure, per nome) e **quanto costa**;
+> - 🔴 **cosa NON compra** — e se una cosa e' **misurata impossibile**, si dice
+>   con il numero che la rende impossibile;
+> - 🚫 **cosa non tocca** (in particolare: il **conto reale 10105439**, le
+>   taglie, i parametri in forward);
+> - ⏳ **cosa servirebbe davvero** per la cosa che non compra — che e' il buco
+>   da **segnalare a Claudio**, non da subire (motto del 09/09: si e' messo a
+>   disposizione per le ricerche che possiamo solo chiedergli).
+> 📌 **Motivo, ed e' di casa: un rimando non e' una dichiarazione.** La stessa
+> famiglia della classe **203** (la correzione arrivata a tutto tranne che al
+> documento che si esegue) e della **193** (il numero corretto e i suoi
+> discendenti lasciati liberi): **la correzione vale dove viene LETTA, non dove
+> e' stata SCRITTA.**

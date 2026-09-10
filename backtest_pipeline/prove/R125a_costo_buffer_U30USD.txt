@@ -183,6 +183,11 @@
 #        >>> E LA CELLA SCELTA NON PUO' ESSERE UNA CELLA DI BORDO:
 #            par. 3-bis dei criteri, congelato prima dei numeri. Sulle
 #            sette celle 0..3000 le SCEGLIBILI sono cinque: 500..2500.
+#        >>> E LA REGOLA CHE SCEGLIE E' LA PROCEDURA NUMERATA P1..P8 DEL
+#            PAR. 4-bis DEI CRITERI, non l'aggettivo "centro" (classe 206,
+#            quarto giro di cancello): il par. 3-bis da solo ammetteva DUE
+#            verdetti opposti sulla stessa griglia. Si esegue P1..P8 e si
+#            scrive accanto al numero QUALE PASSO ha deciso la cella.
 #    E2  Il picco resta un picco: solo buffer 500 tiene, le vicine no.
 #        -> IL VERDETTO E' "NON C'E' UNA CONFIGURAZIONE ROBUSTA", si
 #        scrive cosi', e NON si propone niente. Il PF 1,8385 diventa

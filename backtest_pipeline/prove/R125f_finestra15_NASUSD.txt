@@ -76,6 +76,17 @@
 #    - n: 100-220 per finestra (il Nasdaq nell'ORB e' sempre stato il
 #      piu' generoso dei tre: r12 fa 171 IS / 267 OOS).
 #      Se n OOS < 95 -> NON MISURABILE (soglia R125-G4).
+#      >>> E I 150 DELL'EMENDAMENTO A SONO UN'ALTRA SOGLIA, PIU' ALTA
+#          (classe 207, quarto giro di cancello): R125-G4 (n OOS >= 95)
+#          dice se la cella e' LEGGIBILE; l'Emendamento A del 16/08 dice
+#          che sotto 150 operazioni il MERITO E' SOSPESO. Fra 95 e 149
+#          la cella si legge per il RISCHIO (DD, che e' un fatto a
+#          qualunque n) e passare R125-G3 vale "merito NON ESCLUSO",
+#          NON "merito dimostrato". Solo sopra 150 il PF OOS dimostra.
+#          >>> LO DICHIARO QUI PERCHE' L'ATTESA STA A CAVALLO DEI 150:
+#              questo file PUO' finire sotto, e in quel caso il round
+#              NON schiera nemmeno su questo simbolo. Chi firma i
+#              criteri compra una MISURA, non una sedia promessa.
 #    - DD OOS: MONOTONO DECRESCENTE col buffer. Attesa 6% - 16%.
 #      Il Nasdaq e' il piu' volatile dei tre: mi aspetto il DD peggiore
 #      del round, e lo scrivo prima.
