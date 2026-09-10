@@ -59,6 +59,10 @@
 #    -> HALFRANGE (la cella VIVA) ~47 punti indice = 23,5x lo spread:
 #       SOTTO il pavimento di lavoro (59% del richiesto).
 #    -> ampiezza del range 14:30-14:45 ~94 punti indice (banda 85-103).
+#    !! I DUE NUMERI QUI SOPRA SONO DERIVATI E LA BANDA E' STATA SUPERATA
+#       DA UNA MISURA (59,0 idx, range ~118): il blocco che lo spiega sta
+#       ~35 righe piu' sotto, "E LA BANDA STESSA...". Leggerlo PRIMA di
+#       usare questi numeri. Classe 198.
 #    CONTROPROVA INDIPENDENTE: range di giornata U30USD MISURATO su 24
 #    giornate vere (data/statements/trades_auto.csv, session_high/low)
 #    = 314,5 punti indice mediana; regola di scala x sqrt(15/1440) =

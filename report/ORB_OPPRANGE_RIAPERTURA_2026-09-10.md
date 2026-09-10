@@ -123,6 +123,10 @@ non con tre punti.
 - **R125 (10/09)** aggiunge il **cancello del costo**: HALFRANGE ~47 punti indice
   = **23,5x** lo spread mediano (2,00) → **sotto il pavimento di lavoro 40x**;
   OPPRANGE ~104 = **52,0x** → **passa**.
+  ⚠️ **Numeri DERIVATI.** La stessa grandezza e' anche **misurata** su 7 gambe
+  vere della `770611`: **59,0 idx = 29,5x** (OPPRANGE **~64,0x**) — vedi il
+  punto 5 e `ROUND_ORB_ATR_PS5` §2.2-bis, **classe 198**. 🟢 **Verdetto
+  identico con tutti e due**, ma i due numeri **non si mediano**.
 
 👉 **E allora e' onesto contare bene, perche' la v1 aveva contato male qui
 come al punto 1** (classe 196): **NON sono tre prove indipendenti.**
@@ -187,8 +191,10 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
    — a numeri non visti, prima del lancio. 6 file prova, 33 celle, 66 passate, **~7 minuti di macchina**. 🔴 **La v1 diceva "~67 minuti": sbagliato di un fattore 10 esatto** (classe 192). Il vero ritmo e' misurato: `REFERTO_R88.txt` da' **13,7 min per 136 passate** = **0,101 min/passata** — le "2,3 ore" del referto R88 sono di **tutta la notte**, R87+R89+R86 compresi.
 2. 🔴 **Una domanda che riguarda il conto REALE 10105439, quindi e' SOLO SUA:**
    la sedia viva `770611` gira con la geometria che **non passa il cancello di
-   costo (23,5x contro 40x)** e che **R55 misura sfondare il 10% con 1,5 punti di
-   slippage**. A 0,65% il margine viene **dalla taglia, non dal motore**. Non
+   costo** — **23,5x** con lo stop DERIVATO, **29,5x** con lo stop **MISURATO
+   su 7 gambe vere** (59,0 idx, `CANCELLO_COSTO_FLOTTA` §5.1): **sotto il
+   pavimento di 40x con tutti e due** — e che **R55 misura sfondare il 10% con
+   1,5 punti di slippage**. A 0,65% il margine viene **dalla taglia, non dal motore**. Non
    propongo di toccarla adesso — propongo di **misurare il ramo OPPRANGE con
    R125** e poi metterle a confronto con i numeri in mano.
 

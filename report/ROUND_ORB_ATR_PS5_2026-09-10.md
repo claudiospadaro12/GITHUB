@@ -253,6 +253,9 @@ Pavimenti: **DI LAVORO** `40x`, **DURO** `13,3x`. Stop OPPRANGE = `range + 10
 (ingresso) + buffer`. Stop HALFRANGE = `0,5 × range + buffer`.
 
 ### 🇺🇸 U30USD — range ~94 (banda 85-103) · spread **2,00** / P95 **3,00**
+> ⚠️ **Tabella costruita sul range DERIVATO ~94.** Il range **MISURATO** e'
+> **~118** (§2.2-bis, classe 198): questi numeri sono la **stima prudente**,
+> non la migliore che abbiamo. Nessuna riga cambia colore.
 | geometria | stop | **/2,00** | 40x = 80,0 | /3,00 (P95) |
 |---|---:|---:|:---:|---:|
 | **HALFRANGE + 0 — LA SEDIA VIVA SUL REALE** | ~47 | **23,5x** | 🔴 **NO** (59%) | 15,7x |
