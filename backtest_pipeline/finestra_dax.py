@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 """
-MARCATORE_FINESTRA_DAX_v3
+MARCATORE_FINESTRA_DAX_v4
 
 LA CONVENZIONE ORARIA DEL DAX 2019/2024-2026: SI RIPARA COL TAGLIO?
 Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
@@ -67,7 +67,7 @@ Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
 import argparse, os, re, sys, zipfile
 from collections import defaultdict
 
-MARCATORE       = "MARCATORE_FINESTRA_DAX_v3"
+MARCATORE       = "MARCATORE_FINESTRA_DAX_v4"
 FINESTRA_SANI   = (2, 15)                       # ore incluse
 ANNI_SANI       = list(range(2010, 2019))
 ANNI_IPOTESI    = [2019, 2024, 2025, 2026]      # CLASSE 180: elencati, non per differenza
@@ -77,6 +77,13 @@ NUCLEO_FRAZ     = 0.60      # il nucleo e' >= 60% dell'ora di PICCO dell'anno
 NUCLEO_PAV      = 10.0      # pavimento anti-rumore, NON un criterio
 NUCLEO_SEPARAZ  = 1.6       # sotto questo rapporto picco/fondo il nucleo NON esiste
 LAG_MARGINE_MIN = 0.02      # sotto questo margine l'argmax NON discrimina
+GIORNI_MIN      = 60        # SCELTA dichiarata, non misura: un trimestre di sedute.
+                            # Sui dati veri gli anni dell'ipotesi ne hanno 181-313 e i
+                            # sani 248-257, MA il 2010 ne ha 33 (HistData sul DAX parte
+                            # il 15/11/2010): senza pavimento quell'anno tronco vota nel
+                            # controllo positivo e pesa 1/9 del profilo di riferimento
+                            # invece di 1/70. E' l'emendamento della finestra applicato
+                            # ai GIORNI invece che alle operazioni.
 INIZIO_ATTESO   = 2                             # ora di New York
 OROLOGI         = [("New York", 2), ("UTC", 6), ("CET/Berlino", 8)]
 
@@ -177,6 +184,13 @@ def nucleo(d, aa):
     picco = max(p)
     if picco <= 0:
         return None, None, "nessuna barra"
+    #  PERCHE' 0,60 x picco separa davvero, e non e' una taratura fortunata:
+    #  dai numeri veri del referto, il 2024 fa 1.062-1.106 barre/GIORNO su 23 ore
+    #  coperte, e la seduta piena da 14 ore ne vale 838 (misurata sui sani,
+    #  837-839/giorno per nove anni di fila). Quindi la notte vale al massimo
+    #  (1.106 - 838) / 9 ore = ~30 barre/ora, mentre la soglia sta a
+    #  0,60 x ~60 = ~36. Con le barre/giorno OSSERVATE la notte NON PUO'
+    #  arrivare alla soglia: la separazione e' un conto, non una speranza.
     soglia = max(NUCLEO_PAV, NUCLEO_FRAZ * picco)
     dense = [h for h in range(24) if p[h] >= soglia]
     fondo = [p[h] for h in range(24) if p[h] < soglia]
@@ -224,7 +238,13 @@ def rapporto(d, anni_visti, mostra_profilo):
     log("-" * 92)
     ris = {}
     p_sani = None
-    sani_ok = [a for a in ANNI_SANI if a in anni_visti and len(d["giorni"][a]) > 0]
+    sani_ok = [a for a in ANNI_SANI if a in anni_visti and len(d["giorni"][a]) >= GIORNI_MIN]
+    esclusi_rif = [a for a in ANNI_SANI
+                   if a in anni_visti and 0 < len(d["giorni"][a]) < GIORNI_MIN]
+    if esclusi_rif:
+        log("  profilo di riferimento: solo sani con >= %d giorni. ESCLUSI per campione"
+            " sottile: %s" % (GIORNI_MIN, ", ".join("%d (%d gg)" % (a, len(d["giorni"][a]))
+                                                    for a in esclusi_rif)))
     if sani_ok:
         acc = [0.0] * 24
         for a in sani_ok:
@@ -244,15 +264,17 @@ def rapporto(d, anni_visti, mostra_profilo):
                "marcio" if aa in ANNI_MARCI else "altro")
         ris[aa] = {"dens_r": dr, "nucleo": (n0, n1), "perche": perche, "lag": lg,
                    "margine": marg, "gruppo": grp, "giorni": gg, "barre": tot,
-                   "coperte": len(cop)}
+                   "coperte": len(cop), "sottile": (gg < GIORNI_MIN)}
         log("%-5d %-10s %-8d %-7d %-8d %-8s %-8s %-11s %s" % (
             aa, grp, tot, gg, len(cop),
             ("%.1f" % dt) if dt else "n/d",
             ("%02d-%02d" % (n0, n1)) if n0 is not None else "n/d",
             ("%.1f" % dr) if dr else "NON MIS.",
             ("%+d (%.1f%%)" % (lg, marg * 100.0)) if lg is not None else ("n.d. (%.1f%%)" % (marg * 100.0))))
-        if n0 is None:
-            log("        nucleo NON MISURATO: " + perche)
+        # il "perche'" si stampa SEMPRE: quando il nucleo passa e' la PROVA che
+        # la soglia stava nel posto giusto, e oggi quella prova non si vedeva mai.
+        log("        nucleo: " + perche + ("" if gg >= GIORNI_MIN
+            else ("   [CAMPIONE SOTTILE: %d giorni < %d]" % (gg, GIORNI_MIN))))
         if mostra_profilo and (aa in ANNI_IPOTESI or aa in ANNI_SANI[-1:]):
             stampa_profilo(d, aa)
     return ris
@@ -305,7 +327,8 @@ def verdetto(ris, mancanti, rotti, saltati):
             if ip[a]["lag"] is not None
             else ("NON DISCRIMINANTE (margine %.1f%%)" % (ip[a]["margine"] * 100.0))))
     if sa:
-        s0 = [v["nucleo"][0] for v in sa.values() if v["nucleo"][0] is not None]
+        s0 = [v["nucleo"][0] for v in sa.values()
+              if v["nucleo"][0] is not None and not v["sottile"]]
         if not s0:
             log("     !! NESSUN anno SANO ha un nucleo misurabile: il difetto e' in")
             log("        questo script o nella regola del nucleo, NON nei dati.")
@@ -324,15 +347,29 @@ def verdetto(ris, mancanti, rotti, saltati):
         log("")
         log("  ESITO: SMENTITA -- NON e' (solo) copertura: e' L'OROLOGIO.")
         for a, h in sorted(fuori.items()):
-            log("     %d comincia alle %02d invece che alle %02d (lag %+d)"
-                % (a, h, INIZIO_ATTESO, ris[a]["lag"] or 0))
-        log("     Quegli anni NON si riparano col taglio: si SPOSTANO del lag")
-        log("     misurato, e poi si rimisura. Non archiviare come 'bucati'.")
+            lg = ris[a]["lag"]
+            # CLASSE 184: 'ris[a]["lag"] or 0' faceva rientrare il None come 0 e
+            # stampava "lag +0" tre righe sotto un "NON DISCRIMINANTE".
+            log("     %d comincia alle %02d invece che alle %02d -- %s"
+                % (a, h, INIZIO_ATTESO,
+                   ("lag %+d (margine %.1f%%)" % (lg, ris[a]["margine"] * 100.0))
+                   if lg is not None else
+                   ("lag NON DISCRIMINANTE (margine %.1f%%): lo spostamento si legge "
+                    "dall'ORA DI INIZIO, non dal lag" % (ris[a]["margine"] * 100.0))))
+        log("     Quegli anni NON si riparano col taglio: si SPOSTANO della")
+        log("     differenza fra l'ora di inizio misurata e le %02d attese." % INIZIO_ATTESO)
         if fermo:
             log("     ...MA LA CACHE E' INCOMPLETA: questa e' una smentita PARZIALE,")
             log("        non un verdetto. Rifare con la cache completa.")
             return 2
         return 1
+    sottili = [a for a in ip if ip[a]["sottile"]]
+    if sottili:
+        log("     CAMPIONE SOTTILE su %s (< %d giorni): misurati, NON giudicati."
+            % (", ".join("%d (%d gg)" % (a, ip[a]["giorni"]) for a in sorted(sottili)),
+               GIORNI_MIN))
+        log("     Un anno sotto il pavimento non puo' contribuire a un ESITO VERDE.")
+        return 2
     log("     ESITO A: PASSATO -- tutti gli anni dell'ipotesi cominciano alle %02d." % INIZIO_ATTESO)
     # B) conferma sulla densita' ristretta
     log("")
@@ -380,13 +417,18 @@ def autotest():
         log(("  [ok ] " if cond else "  [KO ] ") + nome)
 
     cart = tempfile.mkdtemp(prefix="fdax_")
-    def scrivi(anno, ore_barre, giorni=20, simbolo="GRXEUR", nomecsv=None):
+    def scrivi(anno, ore_barre, giorni=200, simbolo="GRXEUR", nomecsv=None):
         """ore_barre: {ora: barre_per_giorno}"""
+        # le date devono essere VALIDE: il lettore scarta gg > 31, e con giorni=200
+        # su un mese solo si perdevano 169 giornate su 200 in silenzio. Si spalma
+        # su piu' mesi da 28.
         righe = []
-        for g in range(1, giorni + 1):
+        for i in range(giorni):
+            mm = i // 28 + 1
+            gg = i % 28 + 1
             for h, n in ore_barre.items():
                 for mnt in range(n):
-                    righe.append("%04d%02d%02d %02d%02d00;1.0;1.0;1.0;1.0;0" % (anno, 1, g, h, mnt))
+                    righe.append("%04d%02d%02d %02d%02d00;1.0;1.0;1.0;1.0;0" % (anno, mm, gg, h, mnt))
         buf = _io.BytesIO()
         with zipfile.ZipFile(buf, "w") as z:
             z.writestr(nomecsv or ("DAT_ASCII_%s_M1_%d.csv" % (simbolo, anno)), "\n".join(righe))
@@ -468,7 +510,7 @@ def autotest():
     scrivi(2018, dict((h, 59) for h in range(0, 24)), simbolo="XXXXXX", nomecsv="roba.csv")
     dd = misura(cart, "grxeur")
     esito("CSV dal nome non riconosciuto: SALTATO e nominato (v1 lo contava)",
-          len(dd["saltati"]) == 1 and len(dd["giorni"].get(2018, [])) == 20)
+          len(dd["saltati"]) == 1 and len(dd["giorni"].get(2018, [])) == 200)
 
     # 9. CLASSE 181: profilo PIATTO -> nucleo NON DISTINGUIBILE, non "inizio 00"
     pulisci()
@@ -518,6 +560,48 @@ def autotest():
     r = rapporto(dd, sorted(dd["giorni"].keys()), False)
     esito("cache incompleta + orologio spostato: smentita PARZIALE, rc 2 non 1",
           verdetto(r, [2019, 2025, 2026], [], []) == 2)
+
+    # 13. CLASSE 184: nucleo STRETTO e spostato -> lag non discriminante, e la
+    #     frase della SMENTITA non deve contenere "lag +0"
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2024, dict(list(dict((h, 59) for h in range(3, 5)).items()) +
+                      list(dict((h, 25) for h in list(range(0, 3)) + list(range(5, 24))).items())))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    import io as _io2, contextlib
+    buf = _io2.StringIO()
+    with contextlib.redirect_stdout(buf):
+        rc13 = verdetto(r, [], [], [])
+    testo13 = buf.getvalue()
+    esito("nucleo stretto e spostato: il nucleo si misura (03) ma il lag NO",
+          r[2024]["nucleo"][0] == 3 and r[2024]["lag"] is None)
+    esito("  -> la SMENTITA non stampa 'lag +0' (classe 184)",
+          "lag +0" not in testo13 and "NON DISCRIMINANTE" in testo13)
+    esito("  -> e resta una smentita (rc 1)", rc13 == 1)
+
+    # 14. CLASSE 185: un anno dell'ipotesi con DUE giorni non puo' fare verde
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2019, dict(list(SEDUTA.items()) + list(NOTTE.items())))
+    scrivi(2024, dict(list(SEDUTA.items()) + list(NOTTE.items())), giorni=2)
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("anno con 2 giorni: marcato campione SOTTILE", r[2024]["sottile"] is True)
+    esito("  -> e il verdetto NON esce verde (rc 2, non rc 0)",
+          verdetto(r, [], [], []) == 2)
+
+    # 15. CLASSE 185 sul controllo positivo: un SANO tronco (il 2010 vero, 33 gg)
+    #     non deve votare ne' pesare nel profilo di riferimento
+    pulisci()
+    scrivi(2010, dict((h, 59) for h in range(5, 19)), giorni=33)   # tronco E spostato
+    scrivi(2018, SEDUTA)
+    scrivi(2024, dict(list(SEDUTA.items()) + list(NOTTE.items())))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("un SANO tronco (33 gg) e' marcato sottile", r[2010]["sottile"] is True)
+    esito("  -> non blocca il controllo positivo: la corsa arriva a CONFERMATA",
+          verdetto(r, [], [], []) == 0)
 
     for f in os.listdir(cart):
         os.remove(os.path.join(cart, f))
@@ -586,7 +670,8 @@ def main():
                            if y in ANNI_IPOTESI or y in ANNI_SANI[-2:]]
             for aa in (da_mostrare or sorted(dc["giorni"].keys())[-6:]):
                 n0, n1, perche = nucleo(dc, aa)
-                log("  %d: nucleo %s   (cash USA 09:30 NY -> atteso ~09 se il file e' NY)"
+                log("  %d: nucleo %s   (INDIZIO, non misura: ~09 SE il picco del Nasdaq"
+                    " HistData e' la sessione cash 09:30 NY -- mai verificato)"
                     % (aa, ("%02d-%02d" % (n0, n1)) if n0 is not None else ("n/d -- " + perche)))
         else:
             log("")

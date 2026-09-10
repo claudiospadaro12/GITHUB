@@ -11712,3 +11712,93 @@ insiemistica.
 > per differenza.** `ANNI_IPOTESI = [2019, 2024, 2025, 2026]`, e tutto il resto si
 > misura, si stampa ed e' **etichettato fuori ipotesi**. "Tutto cio' che non e' X"
 > e' comodo da scrivere e raccoglie sempre qualcosa che non c'entra.
+
+---
+
+## 184. 🧮 IL `None` CHE RIENTRA COME ZERO — `x or 0`
+
+**Pagata il 10/09/2026**, `finestra_dax.py` v3, e fa impressione perche' la classe
+era **appena stata chiusa**. `lag_migliore()` torna `None` quando il margine e'
+0,0% (classe 182), la tabella stampa correttamente **`NON DISCRIMINANTE`**... e
+tre righe sotto il verdetto stampava:
+
+```
+2024 -> inizio nucleo 03   lag contro i sani NON DISCRIMINANTE (margine 0.0%)
+...
+2024 comincia alle 03 invece che alle 02 (lag +0)          <-- QUI
+Quegli anni NON si riparano col taglio: si SPOSTANO del lag misurato
+```
+
+🔴 **"Spostali di zero ore"** — insieme falso (l'ora di inizio dice +1) e
+inattuabile. Colpevole: `ris[a]["lag"] or 0`. In Python `None or 0` fa **0**.
+
+E il punto dove rientra non e' casuale: e' **l'unica riga che qualcuno userebbe
+per decidere il passo successivo**. Il "non misurato" era difeso nella funzione e
+nella tabella, e si e' riaperto nella frase operativa.
+
+> ### 🔴 LA REGOLA
+> **Un "non misurato" non si difende una volta sola.** Il default `or 0` /
+> `or ""` / `or 0.0` e' il buco da cui rientra travestito da numero vero.
+> Quando un campo puo' valere `None`, si cerca **ogni** `or <default>` su quel
+> campo — e soprattutto **nelle frasi che dicono cosa fare**, non solo nelle
+> tabelle che dicono cosa si e' visto.
+
+---
+
+## 185. 📅 IL PAVIMENTO CHE MANCA SUL **CAMPIONE**, non sul valore
+
+Stesso giorno, stessa riga. Un anno con **DUE giornate** di dati produceva un
+`ESITO: CONFERMATA`, **rc 0**, identico a un anno con 313 — e rc 0 vuol dire
+*"serve una FIRMA per usare quegli anni"*. Firmare l'uso di un anno su due
+giornate e' esattamente il difetto contro cui e' scritto l'emendamento della
+finestra (*"la soglia dei 150 morde davvero"*): li' l'unita' e' l'operazione,
+qui e' il **giorno**, e il pavimento **non c'era**.
+
+🎯 **E non e' teorico: morde su un anno vero.** Dai conteggi di
+`MAPPA_SESSIONI.txt`: il **2010 ha 33 giorni** (HistData sul DAX parte il
+**15/11/2010**), contro i 248-257 degli altri sani. Quei 33 giorni entravano in
+due punti con potere di veto:
+1. il **controllo positivo** (*"se i sani non cominciano alle 02, fermati"*): un
+   anno tronco e tutto invernale poteva **bloccare l'intera corsa**;
+2. il **profilo di riferimento** per il lag, che e' una somma non pesata: il 2010
+   pesava **1/9** del riferimento invece di **1/70**.
+
+> ### 🔴 LA REGOLA
+> **Ogni misura per gruppo dichiara il suo PAVIMENTO DI CAMPIONE prima dei
+> numeri, e sotto il pavimento si MISURA ma NON si GIUDICA.** E' l'emendamento
+> della finestra applicato ai giorni invece che alle operazioni. Il pavimento
+> vale in tutti e due i versi: il gruppo sottile non entra nel verdetto **e** non
+> entra nel riferimento contro cui gli altri vengono confrontati.
+
+---
+
+## 186. 🧪 IL BANCO CHE PERDE I DATI IN SILENZIO — generatore e lettore che non si parlano
+
+Trovata **da me, non dal cancello**, mentre riparavo la 185 — ed e' la piu'
+istruttiva delle tre. Il generatore dell'autotest scriveva le date cosi':
+
+```python
+for g in range(1, giorni + 1):
+    righe.append("%04d%02d%02d ..." % (anno, 1, g, ...))     # mese SEMPRE 1
+```
+
+Con `giorni = 20` funzionava. Alzato il campione a **200** per rispettare il
+pavimento nuovo, il lettore — che valida `1 <= gg <= 31`, giustamente — ha
+**scartato in silenzio 169 giornate su 200**. Risultato: **12 test su 27 rossi
+tutti insieme**, e per un attimo ho creduto di aver rotto il codice buono.
+
+🔴 **Il difetto non era nel codice sotto esame: era nel banco che lo esaminava.**
+E un banco che perde dati senza dirlo produce **verdetti falsi in tutti e due i
+versi** — rossi che spaventano, ma anche verdi che rassicurano.
+
+> ### 🔴 LA REGOLA
+> 1. **Il generatore dei dati di prova e il lettore devono validare le STESSE
+>    cose.** Se il lettore scarta, il generatore deve non produrre — e se
+>    produce, il banco deve **contare quanto e' stato scartato** e fallire se
+>    non e' zero.
+> 2. **Quando molti test cadono insieme dopo un cambio di parametro, il primo
+>    sospettato e' il BANCO, non il codice.** Un difetto vero e' quasi sempre
+>    localizzato; 12 rossi in un colpo sono un'infrastruttura che ha ceduto.
+> 3. Gemella della **183** (l'inventario legge i nomi, la misura legge i
+>    contenuti): ogni volta che due pezzi guardano gli stessi dati con regole
+>    diverse, la differenza va **riconciliata e dichiarata**.
