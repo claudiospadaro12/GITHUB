@@ -1,13 +1,13 @@
 # =====================================================================
 #  EA: ABTG_ORB_Ottimizzato
-#  R120b -- IL PARZIALE: la manopola dell'uscita spazzolata UNA VOLTA
+#  R125b -- IL PARZIALE: la manopola dell'uscita spazzolata UNA VOLTA
 #           SOLA in tutta la storia del progetto.   U30USD  M5
 #
 #  Si lancia con:
-#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120b_parziale_U30USD.txt
-#    -Simbolo U30USD -Deposito 100000 -Etichetta r120b -Modello 4
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125b_parziale_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r125b -Modello 4
 #  (-SoloControllo deve stampare 5 celle per finestra.)
-#  CRITERI: prove\R120_ORB_COSTO_CRITERI.md
+#  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------
 #  IL BUCO, MISURATO NELL'ARCHIVIO (10/09/2026)
 #    InpTP1Pct compare come ASSE in UN SOLO file prova su 153:
@@ -42,12 +42,12 @@
 # ---------------------------------------------------------------------
 #  IL CANCELLO DEL COSTO SU QUESTA CELLA
 #    Qui InpSLMode=3 (HALFRANGE, la cella VIVA): stop ~47 punti indice
-#    [DERIVATO, vedi R120a] contro spread mediano ora 14 di 2,00
+#    [DERIVATO, vedi R125a] contro spread mediano ora 14 di 2,00
 #    = 23,5x. SOPRA il pavimento DURO 13,3x, SOTTO quello DI LAVORO 40x.
 #    >>> LO DICHIARO PRIMA: questo file NON puo' produrre una sedia.
 #        Misura un MECCANISMO sulla cella che gia' gira sul conto reale,
 #        per sapere se quella sedia sta lasciando soldi per terra col
-#        parziale spento. La sedia schierabile la cerca R120a, che il
+#        parziale spento. La sedia schierabile la cerca R125a, che il
 #        cancello del costo lo passa. Due domande diverse, due file.
 # ---------------------------------------------------------------------
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI

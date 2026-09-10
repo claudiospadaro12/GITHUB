@@ -1,0 +1,155 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R125f -- LA FINESTRA CHE IL CANCELLO DEL COSTO PERMETTE SUL NASDAQ.
+#           NASUSD  M5  -- 15 minuti DOPO l'apertura, non 5 PRIMA
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125f_finestra15_NASUSD.txt
+#    -Simbolo NASUSD -Deposito 100000 -Etichetta r125f -Modello 4
+#  (-SoloControllo deve stampare 7 celle per finestra.)
+#  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  IL FATTO CHE APRE QUESTO FILE, ED E' UNA MISURA IN CAMPO
+#    Il 06/08/2026 la sedia ORB viva sul Nasdaq (magic 770601) ha fatto
+#    due trade, agli atti in report/giornata_2026-08-06.md:
+#      14:30:28  BUY   29 250,20 -> stop 29 202,50
+#      14:31:24  SELL  29 192,50 -> stop 29 240,20
+#    Lo stop misurato e' 47,70 PUNTI INDICE in tutte e due le gambe.
+#    Spread NASUSD ora 14 MISURATO su 10.455.143 tick: mediana 1,80.
+#    >>> 47,70 / 1,80 = 26,5x. Il pavimento DI LAVORO chiede 40x, cioe'
+#        72,0 punti indice. LA SEDIA VIVA SUL NASDAQ STA AL 66% DEL
+#        RICHIESTO. Passa il pavimento DURO (13,3x = 23,9), non quello
+#        di lavoro.
+#    E i due trade dicono anche un'altra cosa: -45,47 e -45,47, cioe'
+#    TUTTE E DUE LE GAMBE RIEMPITE E TUTTE E DUE STOPPATE in 90 secondi.
+#    E' il difetto OCO/PositionSelect gia' a verbale (AUDIT del 03/09) e
+#    NON e' riproducibile nel tester (nel tester l'EA e' solo sul
+#    simbolo, il ticket piu' basso e' sempre il suo). Va scritto qui:
+#    i numeri di questo round sono di un OCO che FUNZIONA. In campo,
+#    finche' la v1.04 non e' compilata dove serve, non funziona.
+#
+#  LA CAUSA DEL 26,5x NON E' IL SIMBOLO: E' LA FINESTRA.
+#    La sedia viva costruisce il range su 14:25-14:30, cioe' i 5 minuti
+#    PRIMA dell'apertura del cash USA. Cinque minuti di pre-apertura
+#    danno un range piccolo, e uno stop piccolo paga tutto lo spread.
+#    Il Dow, con gli stessi identici input tranne la finestra
+#    (14:30-14:45, 15 minuti DOPO), sta a 52x. Non e' un altro motore:
+#    e' un altro contenitore.
+#    >>> QUESTO FILE PORTA SUL NASDAQ LA FINESTRA DEL DOW. Non e' mai
+#        stato fatto: nel censimento del 09/09 tutte le corse NASUSD
+#        dell'ORB (r7a, r7b, r8, r9, r9largo, r12, r13, r44b) girano
+#        sulla finestra da 5 minuti o su varianti dei filtri, MAI sulla
+#        geometria 14:30-14:45 + OPPRANGE + trailing di R15/R88.
+#
+#  QUANTO CI ASPETTIAMO CHE VALGA LO STOP QUI [INFERITO, dichiarato]
+#    Range di giornata NASUSD MISURATO su 24 giornate vere
+#    (trades_auto.csv, session_high/low): mediana 313,8 punti indice.
+#    Regola di scala x sqrt(15/1440) = 32,0; fattore di amplificazione
+#    dell'apertura 3,05 (MISURATO SUL DAX, trasportato) -> ~97,6.
+#    Stop OPPRANGE = 97,6 + 10 + buffer.
+#      buffer  0 -> 107,6 = 59,8x  PASSA (+50%)
+#      buffer 20 -> 127,6 = 70,9x  PASSA (+77%), e 47,3x al P95 (2,70)
+#    >>> E IL CONTRO-ESEMPIO CHE DEVO DICHIARARE, PERCHE' MI SMENTISCE
+#        IN PARTE: la stessa formula applicata alla finestra da 5 minuti
+#        (313,8 x sqrt(5/1440) x 3,05 = 56,4 + 10 = 66,4) predice 66,4
+#        contro i 47,70 MISURATI. Sbaglia del 39% verso l'alto.
+#        La spiegazione che regge: 14:25-14:30 sta PRIMA dell'apertura,
+#        e il fattore di amplificazione dell'apertura li' non si applica.
+#        Senza amplificazione: 313,8 x sqrt(5/1440) + 10 = 28,5, che
+#        sottostima. Il vero sta in mezzo, e con UNA giornata sola non
+#        si decide.
+#        >>> QUINDI LA STIMA DEI 97,6 SU 15 MINUTI E' [INFERITO] E
+#            PUO' ESSERE ALTA. Se il round esce con n giusto ma il
+#            costo va riletto, la misura che serve e' UNA: la
+#            distribuzione dell'ampiezza del range 14:30-14:45 su
+#            NASUSD. Costa una corsa diagnostica, non un round.
+#            NON riempio quel buco con una stima spacciata per misura.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    - n: 100-220 per finestra (il Nasdaq nell'ORB e' sempre stato il
+#      piu' generoso dei tre: r12 fa 171 IS / 267 OOS).
+#      Se n OOS < 95 -> NON MISURABILE (soglia C4).
+#    - DD OOS: MONOTONO DECRESCENTE col buffer. Attesa 6% - 16%.
+#      Il Nasdaq e' il piu' volatile dei tre: mi aspetto il DD peggiore
+#      del round, e lo scrivo prima.
+#    - PF OOS: attesa 0,95 - 1,35. BASSA APPOSTA. Su NASUSD l'ORB ha
+#      gia' 8 corse in archivio e il PF OOS mediano non ha mai superato
+#      1,16 (r13 1,027 mediana / 1,156 massimo; r44b 1,111 / 1,156).
+#      >>> SE ESCE SOPRA 1,40 SU UN ALTOPIANO, la causa dei fallimenti
+#          passati era la FINESTRA, non il simbolo -- ed e' una
+#          scoperta che vale per tutta la famiglia.
+#          Se resta a 1,05-1,15 come le otto volte precedenti, il
+#          Nasdaq esce da questa famiglia con un numero e una riga in
+#          REGISTRO_TEST.md, e la sedia 770601 va rivista.
+#    FALSIFICAZIONE: PF OOS < 1,10 su tutto l'altopiano -> la finestra
+#    non era la causa, e nove corse concordi chiudono il capitolo.
+# ---------------------------------------------------------------------
+#  UNITA': NASUSD Digits=2, Point=0,01 -> 100 punti MT5 = 1 punto indice
+#  (sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv, riga NASUSD).
+#  FINESTRA: 2024.09.26, muro dei tick BCM MISURATO
+#  (misura_tick/REFERTO_MISURA_TICK_NASUSD.txt).
+#  MAGIC VERGINE 779840.
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- LA FINESTRA DEL DOW, portata sul Nasdaq: 14:30->14:45 SERVER
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+InpSLMode=0
+InpTPMode=0
+InpTP_R=1.5
+InpTPRangeMult=1.5
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+InpRiskPercent=1.0
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779840
+
+# --- L'ASSE, UNO SOLO: 0..3000 punti MT5 = 0..30 punti indice = 7 celle
+InpSLBufferPts=0||0||500||3000||Y

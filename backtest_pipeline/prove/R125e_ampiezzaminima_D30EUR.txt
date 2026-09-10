@@ -1,0 +1,139 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R125e -- L'AMPIEZZA MINIMA DI RANGE, con la soglia RICAVATA DAL
+#           CANCELLO DEL COSTO invece che copiata.   D30EUR  M5
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125e_ampiezzaminima_D30EUR.txt
+#    -Simbolo D30EUR -Deposito 100000 -Etichetta r125e -Modello 4
+#  (-SoloControllo deve stampare 5 celle per finestra.)
+#  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  PRIMA CORREZIONE, E VA DETTA SUBITO: NOI CE L'ABBIAMO.
+#    Era stato riportato che l'ampiezza minima di range "noi non ce
+#    l'abbiamo per niente". FALSO: InpMinRangePct esiste in
+#    ABTG_ORB_Ottimizzato.mq5 r.200 dal giorno zero, ed e' agganciato
+#    (r.503: "if(InpMinRangePct>0 && rng < px*InpMinRangePct/100.0)").
+#    Quello che manca non e' la manopola: e' che sia stata GIRATA.
+#    Nel censimento dei 153 file prova compare come ASSE una volta sola
+#    (R11, D30EUR, valori {0 ; 0,2}) e su U30USD/NASUSD MAI.
+#    >>> E' una casella LIBERA, non una casella provata. E' esattamente
+#        la distinzione che il censimento del 09/09 ha aperto.
+#
+#  SECONDA CORREZIONE: la soglia NON si copia dal collega.
+#    Lui usa InpATR_MinMult = 0,02727 x ATR(14) D1 del SUO broker sui
+#    SUOI simboli. Non e' un numero trasportabile, e non serve
+#    trasportarlo: da noi la soglia la detta IL CANCELLO DEL COSTO, che
+#    e' una misura nostra.
+#    Il conto, per intero:
+#      stop = ampiezza_range + 10 (ingresso) + buffer
+#      il cancello chiede stop >= 40 x spread mediano dell'ora
+#      D30EUR ora 8: spread mediano 1,70 -> stop >= 68,0 punti indice
+#      con buffer 20:  ampiezza_range >= 68,0 - 10 - 20 = 38,0
+#      D30EUR a ~25.421 (prezzo mediano MISURATO su 162 operazioni vere,
+#      data/statements/trades_auto.csv) -> 38,0 / 25.421 = 0,149%
+#    >>> LA SOGLIA DERIVATA E' 0,15%. Non e' pescata: e' il cancello
+#        del costo riscritto nell'unita' della manopola.
+#    E per lo spread P95 (2,70): stop >= 108,0 -> range >= 78,0 ->
+#    0,307%. Quel valore NON e' nella griglia, e dico perche': a 0,3%
+#    sul DAX si taglierebbero i due terzi delle giornate e n crollerebbe
+#    sotto la soglia del merito. Il P95 su questo simbolo si chiude
+#    altrove (buffer piu' grande), non qui.
+#
+#  IL VALORE 0,20 RESTA NELLA GRIGLIA, ed e' l'unico gia' misurato:
+#  R11 lo ha girato sulla finestra da 65 minuti (dove ~48 punti indice
+#  erano lo 0,2% dell'indice di allora). Sulla finestra da 15 minuti lo
+#  stesso 0,20% vale ~51 punti indice contro un range tipico di ~58,7:
+#  taglierebbe circa META' delle giornate. E' l'estremo alto
+#  dell'altopiano, non un candidato.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    - n: in CALO MONOTONO al crescere della soglia. E' l'unica cosa che
+#      questa manopola puo' fare per costruzione. Attesa: 0,00 -> n
+#      pieno; 0,05 -> -0% / -10%; 0,10 -> -10% / -30%; 0,15 -> -25% /
+#      -50%; 0,20 -> -40% / -65%.
+#      >>> CANARINO DI MANOPOLA INERTE, scritto prima: se a 0,05 e a
+#          0,10 n NON cambia di almeno il 5%, la manopola NON HA MORSO
+#          a quei valori e i loro PF non si citano. E' la lezione dei
+#          874 CSV con esiti identici del censimento 09/09: una
+#          manopola che non morde non e' una manopola provata.
+#    - PF OOS: attesa in SALITA leggera fino a 0,15 e poi PIATTA o in
+#      calo, perche' oltre quel punto si perde campione piu' in fretta
+#      di quanto si guadagni in qualita'. Attesa 1,00 - 1,45.
+#    - DD OOS: attesa in calo, 4% - 12%.
+#    FALSIFICAZIONE, e qui e' severa: se il PF sale in modo MONOTONO
+#    fino a 0,20 mentre n crolla, NON e' un edge: e' selezione di
+#    campione. In quel caso la lettura giusta e' "meno trade, non trade
+#    migliori", si scrive cosi', e non si promuove niente.
+#    ESITO POSSIBILE E ONESTO: "il default 0 va bene". Se il PF resta
+#    dentro +/- 0,15 su tutta la griglia, la manopola non serve su
+#    questo motore e lo si dichiara -- e' un risultato.
+# ---------------------------------------------------------------------
+#  BUFFER PINNATO A 2000 (20 punti indice): e' il valore che in R125c
+#  passa il cancello del costo con margine (+16%). Cosi' questo file
+#  misura l'ampiezza minima DENTRO la frontiera, non fuori.
+#  MAGIC VERGINE 779850.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=8
+InpRangeStartMin=0
+InpRangeEndHour=8
+InpRangeEndMin=15
+InpEndHour=17
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+InpSLMode=0
+InpSLBufferPts=2000
+InpTPMode=0
+InpTP_R=1.5
+InpTPRangeMult=1.5
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+InpRiskPercent=1.0
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779850
+
+# --- L'ASSE, UNO SOLO: 0 / 0,05 / 0,10 / 0,15 / 0,20 % del prezzo.
+#     0,15 e' la soglia RICAVATA dal cancello del costo (vedi testa).
+InpMinRangePct=0||0||0.05||0.20||Y

@@ -11840,3 +11840,43 @@ davvero`; pin v2 + marcatore v4 → **BLOCCANTE**.
 > (classe 183), file `.set` e grafico vivo — il cancello deve **incrociarli**,
 > non limitarsi a validarli uno per uno. Chiedersi sempre: *"questi due parlano
 > della stessa cosa?"*, non solo *"ognuno e' valido?"*.
+
+---
+
+## 188. 📸 IL DIFETTO «IRRAGGIUNGIBILE» PERCHE' LO DICONO I DATI DI OGGI
+
+**10/09/2026, `finestra_dax.py` v4 → v5.** Il cancello aveva trovato due rami
+sbagliati — un **verdetto rosso definitivo su un campione sottile** e una **causa
+stampata sbagliata** quando tutti gli anni di riferimento sono tronchi — e li
+aveva declassati a *"per il prossimo giro"*, con un argomento **misurato e
+corretto**: sui conteggi veri di `MAPPA_SESSIONI.txt` gli anni dell'ipotesi hanno
+**312-313 giorni** contro un pavimento di **60**, quindi quei rami **non possono
+scattare**.
+
+🔴 **L'argomento e' giusto e la conclusione e' sbagliata**, per una ragione sola:
+
+> ## **Una premessa sullo STATO DEI DATI non declassa un difetto del CODICE.**
+
+I dati cambiano. La premessa **non e' versionata** e **nessuno la rilegge**: fra
+tre mesi resta il codice, senza il post-it che diceva *"questo ramo e' sicuro
+perche' il 2024 ha 313 giorni"*. Il ramo sbagliato resta li', e il giorno che
+scatta **scrive un archivio falso** — nel caso concreto, una **SMENTITA
+definitiva su due giornate di dati**, che finisce in `REGISTRO_TEST.md` e diventa
+**un morto senza certificato**.
+
+✅ **Chiuse tutte e due nello stesso pomeriggio: quattro righe.** E la versione
+riparata e' risultata **migliore anche nella forma**: adesso il referto stampa
+comunque l'ora di inizio e il lag dell'anno sottile (**si misura**), poi dichiara
+perche' non lo giudica (**non si archivia**). Misurare e giudicare sono due cose
+diverse, e il pavimento separa la seconda, non la prima.
+
+> ### 🔴 LA REGOLA
+> 1. **"Non morde oggi" non e' una riparazione: e' una fotografia.** Se un
+>    difetto e' reale, il fatto che i dati attuali non lo attivino sposta la
+>    priorita', **non la classificazione**.
+> 2. **Se la correzione e' di poche righe, si fa SUBITO.** Rimandare costa un
+>    contesto intero: fra un mese nessuno ricorda ne' il difetto ne' perche' era
+>    stato considerato innocuo.
+> 3. **E se davvero si rimanda**, la premessa va scritta **nel codice**, accanto
+>    al ramo, con la data e il numero che la sostiene — non in un referto che
+>    nessuno riaprira'.

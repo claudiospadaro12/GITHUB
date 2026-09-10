@@ -1,13 +1,13 @@
 # =====================================================================
 #  EA: ABTG_ORB_Ottimizzato
-#  R120c -- LA GEOMETRIA DEL DOW PORTATA SUL DAX, sull'apertura di
+#  R125c -- LA GEOMETRIA DEL DOW PORTATA SUL DAX, sull'apertura di
 #           Francoforte.  D30EUR  M5  -- OPPRANGE + buffer 0..30
 #
 #  Si lancia con:
-#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120c_costo_buffer_D30EUR.txt
-#    -Simbolo D30EUR -Deposito 100000 -Etichetta r120c -Modello 4
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125c_costo_buffer_D30EUR.txt
+#    -Simbolo D30EUR -Deposito 100000 -Etichetta r125c -Modello 4
 #  (-SoloControllo deve stampare 7 celle per finestra.)
-#  CRITERI: prove\R120_ORB_COSTO_CRITERI.md
+#  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------
 #  IL BUCO, MISURATO NELL'ARCHIVIO (censimento del 09/09 + lettura 10/09)
 #    Nel CENSIMENTO_PF_TUTTI_2026-09-09.csv l'ORB su D30EUR compare in
@@ -77,7 +77,7 @@
 #    adesso, non dopo aver visto un PF bello.
 #    >>> Percio' su questo simbolo il verdetto di COSTO si dara' allo
 #        spread MEDIANO, dichiarando che al P95 non tiene. Chi vuole
-#        chiudere quel buco: InpMinRangePct, ed e' il file R120e.
+#        chiudere quel buco: InpMinRangePct, ed e' il file R125e.
 # ---------------------------------------------------------------------
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
 #    - n: qui NON e' invariante come sul Dow, perche' il DAX in questa

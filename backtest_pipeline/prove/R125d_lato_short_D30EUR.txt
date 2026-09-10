@@ -1,0 +1,131 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R125d -- IL LATO SHORT SUL DAX: mai misurato da solo, mai su questa
+#           finestra.   D30EUR  M5  (asse TECNICO: gemelli G1)
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125d_lato_short_D30EUR.txt
+#    -Simbolo D30EUR -Deposito 100000 -Etichetta r125d -Modello 4
+#  (-SoloControllo deve stampare 2 celle per finestra.)
+#  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE: la REGOLA DEI DUE LATI del 25/08 ("su Nasdaq, DAX e
+#  Dow ogni analisi misura SEMPRE tutti e due i lati"). Sul DAX il lato
+#  short dell'ORB non e' MAI stato isolato: R11 girava con entrambi i
+#  lati accesi e non li ha mai separati, e la finestra era un'altra.
+#
+#  E IL LATO CHE INVECE E' GIA' MORTO, che qui NON si rifa':
+#    U30USD SHORT -- R54 (14/08, tick reali, REFERTO_ROUND54_LATI_DOW.md)
+#      IS  PF 0,681 - DD 13,72% - n 64
+#      OOS PF 0,520 - DD 26,37% - n 100
+#    Bocciato per MERITO in tutte e due le finestre, con n sopra soglia,
+#    e bocciato per RISCHIO (DD 26,37%, e il rischio si legge a
+#    qualunque n -- Emendamento B). IL CERTIFICATO DI MORTE E' COMPLETO
+#    E NON SI RIESUMA SENZA UNA TESI NUOVA. Cambiare la geometria dello
+#    stop non e' una tesi per un lato che PERDE in tutte e due le
+#    finestre: allargare lo stop a un perdente da' un perdente con meno
+#    drawdown. L'unica cosa che lo riaprirebbe e' un REGIME diverso (un
+#    orso vero), e i tick BCM partono dal 2024.09.26: non ce l'abbiamo.
+#    >>> Zero passate spese su U30USD short. E' l'altra meta' del
+#        mandato: non mollare e non illudersi sono la stessa disciplina.
+# ---------------------------------------------------------------------
+#  L'ASSE E' TECNICO, E IL PERCHE' E' DICHIARATO
+#    Qui non si cerca nessun parametro: si CONTA se il lato short del
+#    DAX su questa finestra esiste. Un file prova senza asse Y il driver
+#    lo rifiuta (controlla_prova.py, controllo 4), quindi l'asse e' il
+#    MAGIC su due valori: DUE CELLE IDENTICHE PER COSTRUZIONE.
+#    E' lo schema di casa (R102/R103/R116/R119) e regala gratis il
+#    cancello G1 di determinismo: se le due passate NON escono identiche
+#    al centesimo, il banco e' sporco e il round si ferma PRIMA di
+#    leggere qualunque altro numero.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    - le due celle: IDENTICHE al centesimo su Profit, PF, DD, n.
+#      Qualunque differenza = STOP.
+#    - n: 60-140 per finestra. Il filtro EMA200 e' simmetrico, quindi
+#      in un DAX che sale lo short vede meno giornate del long.
+#      Se n OOS < 95 -> NON MISURABILE (soglia C4), non "bocciato".
+#    - PF OOS: attesa 0,70 - 1,20. La scrivo BASSA e dico perche':
+#      su TUTTI i simboli dove il lato e' stato isolato, lo short
+#      dell'apertura ha perso (U30USD ORB 0,520; U30USD Dow Apertura
+#      0,840). Due simboli, due volte, stessa direzione.
+#      >>> SE ESCE SOPRA 1,40 SU n >= 95, e' il risultato piu'
+#          importante di tutto il round, perche' raddoppia la frequenza
+#          della FAMIGLIA -- che e' l'unita' del pavimento firmato il
+#          07/09 -- senza aggiungere un simbolo nuovo.
+#    - DD OOS: attesa 6% - 20%. Sopra 9,7623% la cella e' scartata secca
+#      (par.5 dei criteri).
+#    FALSIFICAZIONE: PF OOS < 1,10 -> il lato short esce dalla famiglia
+#    su tutti e tre gli indici misurati, e quella diventa una REGOLA di
+#    casa scritta con tre numeri, non un'impressione.
+# ---------------------------------------------------------------------
+#  COSTO: identico a R125c a buffer 20 (78,7 punti indice = 46,3x lo
+#  spread mediano dell'ora 8). Il buffer e' pinnato a 2000 apposta: e'
+#  il primo valore che passa il cancello con margine (+16%), non quello
+#  che passa di misura.
+#  MAGIC VERGINI 779830 / 779880.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpRangeStartHour=8
+InpRangeStartMin=0
+InpRangeEndHour=8
+InpRangeEndMin=15
+InpEndHour=17
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+
+# --- IL PUNTO DI QUESTO FILE: SOLO SHORT
+InpAllowLong=0
+InpAllowShort=1
+
+InpSLMode=0
+InpSLBufferPts=2000
+InpTPMode=0
+InpTP_R=1.5
+InpTPRangeMult=1.5
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+InpRiskPercent=1.0
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+
+# --- ASSE TECNICO: 2 celle gemelle (cancello G1 di determinismo)
+InpMagic=779830||779830||50||779880||Y

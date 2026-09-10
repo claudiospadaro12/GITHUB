@@ -1,4 +1,4 @@
-# R120 -- ORB DENTRO LA FRONTIERA DEL COSTO -- CRITERI CONGELATI
+# R125 -- ORB DENTRO LA FRONTIERA DEL COSTO -- CRITERI CONGELATI
 
 > **Questi criteri si leggono PRIMA dei numeri. Data: 10/09/2026.**
 > Se un numero di questo round viene letto senza questa pagina davanti,

@@ -1,16 +1,16 @@
 # =====================================================================
 #  EA: ABTG_ORB_Ottimizzato
-#  R120a -- LA FRONTIERA DEL COSTO, SULL'ASSE CHE NESSUNO HA MAI FINITO
+#  R125a -- LA FRONTIERA DEL COSTO, SULL'ASSE CHE NESSUNO HA MAI FINITO
 #           U30USD  M5  -- OPPRANGE + buffer 0..30 punti indice
 #
 #  Si lancia con:
-#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120a_costo_buffer_U30USD.txt
-#    -Simbolo U30USD -Deposito 100000 -Etichetta r120a -Modello 4
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R125a_costo_buffer_U30USD.txt
+#    -Simbolo U30USD -Deposito 100000 -Etichetta r125a -Modello 4
 #  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
 #   Se ne stampa un numero diverso, ci si ferma.)
 #
 #  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
-#      backtest_pipeline\prove\R120_ORB_COSTO_CRITERI.md
+#      backtest_pipeline\prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------
 #  PERCHE' QUESTO ROUND ESISTE (tre fatti misurati, nessuna opinione)
 #
