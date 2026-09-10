@@ -167,8 +167,54 @@ Fonte: `backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md` §2 e
 
 Lo spread si legge **all'ORA in cui la sedia opera davvero**, non sulla mediana
 di giornata (R125 §2). Sull'oro entra anche la **commissione misurata 3,48
-EUR/lotto** (`ORO_1530_CANCELLO_COSTO` §2.4): sugli indici e sul nostro forex la
-commissione è **0,00** — verificata su 7 simboli.
+EUR/lotto** (`ORO_1530_CANCELLO_COSTO` §2.4).
+
+> # 🛑 CORREZIONE DELL'11/09/2026 — QUESTA RIGA ERA FALSA, E TUTTE LE RIGHE FOREX DI QUESTO REFERTO NE DIPENDONO
+>
+> La v1 diceva: *"sugli indici e sul nostro forex la commissione e' **0,00** —
+> verificata su 7 simboli"*. 🔴 **Sugli indici e' vero. Sul forex e' FALSO**, e
+> i "7 simboli" erano **tutti indici**: l'insieme era stato scelto male, non
+> misurato male.
+>
+> **Rimisurato su `data/statements/trades_auto.csv`, colonna `commission`:**
+>
+> | classe | commissione | n | valori distinti |
+> |---|---:|---:|---|
+> | indici (7 simboli) | **0,0000** | 302 | **uno solo** |
+> | forex base **EUR** | 🔴 **−4,0000 esatti** | 84 | **UNO SOLO, varianza ZERO** |
+> | base GBP / USD / AUD / NZD | −4,65 / −3,42 / −2,44 / −2,00 | ~250 | seguono il cambio |
+>
+> 📐 **La legge**: `0,004% del nozionale in valuta base, giro completo`. I
+> cambi impliciti tornano su **otto basi valutarie**: GBP/EUR **1,1613**,
+> USD/EUR **0,8552**, AUD/EUR **0,6090**, NZD/EUR **0,5000**. E ancorata
+> all'oro da' **0,0404 $** contro lo **0,0403 $** gia' scritto in un altro
+> referto: verificata contro un numero di qualcun altro, non contro se stessa.
+>
+> ### 🎯 E COSI' SI SCIOGLIE LA CONTRADDIZIONE, senza mediare niente
+> La sonda diceva **0,2-0,4 pip**, le schede del broker **0,8-1,0**. 👉
+> **Erano vere tutte e due, e mancava un TERMINE, non una misura**: il conto e'
+> **a commissione** (profilo raw), le schede citano lo **STANDARD**. Spread
+> **0,3** + commissione **~0,5** = **0,86 pip all-in su EURUSD** — dentro la
+> forbice delle schede. **Errore di CATEGORIA, non di misura.**
+>
+> ### 🔴 CONSEGUENZA: **CINQUE SEDIE RIBALTANO IL VERDETTO**
+> `772361` CostToCost EURJPY (73,0x → **25,6x**) · `772162` BreakingBand EURUSD
+> (55,2x → **25,6x**) · `771201`/`771202`/`771203` PostNews (62,5-83,3x →
+> **21,9 / 28,9 / 26,8x**). Una sopravvive col fiato corto: `772422` EasyTrend
+> GBPUSD, margine da **+338% a +18%**.
+>
+> ### 🚨 E LA PRIMA SEDIA DELLA FLOTTA CHE SFONDA IL PAVIMENTO **DURO**
+> **`771201` PostNews EURJPY, dopo il trailing a 15 pip** (`ABTG_PostNews.mq5`
+> r.105): `15,0 / 1,139 =` **13,2x**, contro un pavimento duro di **13,3x**.
+> Questo referto la dava a **37,5x**. Gemelle trailate: `771202` 17,4x,
+> `771203` 16,1x. 🛑 **Ed e' la sedia che ha operato ieri.**
+>
+> 📄 Dimostrazione completa e contro-esempi:
+> `backtest_pipeline/prove/COLLAUDO_SPREAD_FLOTTA_CRITERI.md`.
+> 📌 **Correggo anche il conteggio di questo stesso referto** (§4.3): diceva
+> *"otto sedie che passano non passano piu'"* a 1,0 pip. A 1,0 pip ne ribaltano
+> **sei**; col pedaggio all-in misurato ne ribaltano **cinque**. Le altre due
+> dell'"otto" a 1,0 pip **passano**: erano i due condizionati, non ribaltamenti.
 
 ---
 
