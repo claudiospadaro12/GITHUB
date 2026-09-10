@@ -104,9 +104,12 @@ asse, su tutte e tre le metriche.**
 
 500 e' il centro dell'**ASSE**, non dell'**ALTOPIANO**. Sono due cose diverse, e
 avevo scambiato la seconda per la prima. Applicando la forma operativa che
-**R125 congela da solo** (`R125_ORB_COSTO_CRITERI.md` par.3: *vicini col PF
-entro ±0,15*): `|1,8385 − 1,6454| = **0,193 > 0,15**` ⇒ **su questo asse NON
-c'e' una configurazione robusta.**
+**R125 congela da solo** -- 🆕 e da oggi e' la **procedura `P1..P8`** del
+par. 4-bis, **non** il par.3 nudo (classe 209, quinto giro): i tre punti danno
+un solo blocco massimale, `{0, 500}`, perche' `|1,8385 − 1,6454| = **0,193 >
+0,15**` esclude la 1000; **due celle**, quindi **P4** ⇒ **su questo asse NON
+c'e' una configurazione robusta.** 🟢 **Il verdetto della v2 non cambia** --
+cambia il passo che lo firma, e adesso e' citabile.
 
 👉 **Ed e' un motivo IN PIU' per lanciare R125 con l'asse a 7 valori, non un
 motivo per promuovere.** L'altopiano, se c'e', si vede con la griglia fitta —
@@ -229,7 +232,19 @@ Costruito prima di consegnare, come vuole la regola del 10/09.
    > - ⏳ **E cosa servirebbe DAVVERO per una sedia sul Dow:** tick sotto il
    >   muro del **2024.09.26** (che non abbiamo) **oppure** un secondo regime
    >   da un altro simbolo. 👉 **Questo e' il buco da segnalare a Claudio, non
-   >   da subire** — e' esattamente il caso in cui si e' messo a disposizione. 6 file prova, 33 celle, 66 passate, **~7 minuti di macchina**. 🔴 **La v1 diceva "~67 minuti": sbagliato di un fattore 10 esatto** (classe 192). Il vero ritmo e' misurato: `REFERTO_R88.txt` da' **13,7 min per 136 passate** = **0,101 min/passata** — le "2,3 ore" del referto R88 sono di **tutta la notte**, R87+R89+R86 compresi.
+   >   da subire** — e' esattamente il caso in cui si e' messo a disposizione.
+   > - 🆕 🟠 **E NON COMPRA NEMMENO LA CERTEZZA CHE UNA CELLA VENGA SCELTA**
+   >   (classe 209, quinto giro). La procedura `P1..P8` ha **tre uscite a mani
+   >   vuote, tutte legittime**: *"non c'e' una configurazione robusta"* (P4),
+   >   *"l'altopiano esce dalla griglia, si estende l'asse"* (P5/P6) e
+   >   *"nessuna cella ammissibile"* (P2). 🔴 **E la seconda non e' remota su
+   >   questo asse:** il DD **cala col buffer**, quindi lo spareggio di P3
+   >   premia il blocco piu' a destra, che e' proprio quello che contiene il
+   >   bordo **3000**. 👉 In quel caso il round **consegna una misura e chiede
+   >   un altro round** (asse esteso di due gradini: **+2 celle = 4 passate =
+   >   ~0,4 minuti**). **Va saputo PRIMA di firmare, non dopo.**
+
+   6 file prova, 33 celle, 66 passate, **~7 minuti di macchina**. 🔴 **La v1 diceva "~67 minuti": sbagliato di un fattore 10 esatto** (classe 192). Il vero ritmo e' misurato: `REFERTO_R88.txt` da' **13,7 min per 136 passate** = **0,101 min/passata** — le "2,3 ore" del referto R88 sono di **tutta la notte**, R87+R89+R86 compresi.
 2. 🔴 **Una domanda che riguarda il conto REALE 10105439, quindi e' SOLO SUA:**
    la sedia viva `770611` gira con la geometria che **non passa il cancello di
    costo** — **23,5x** con lo stop DERIVATO, **29,5x** con lo stop **MISURATO

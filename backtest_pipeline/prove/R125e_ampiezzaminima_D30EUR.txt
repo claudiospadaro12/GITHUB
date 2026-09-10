@@ -83,6 +83,18 @@
 #    fino a 0,20 mentre n crolla, NON e' un edge: e' selezione di
 #    campione. In quel caso la lettura giusta e' "meno trade, non trade
 #    migliori", si scrive cosi', e non si promuove niente.
+#    >>> E LA PAROLA "ALTOPIANO" QUI DENTRO VUOL DIRE UNA COSA SOLA:
+#        il BLOCCO della PROCEDURA P1..P8 del par. 4-bis dei criteri
+#        (>= 3 celle contigue, tutte ammissibili ai cancelli
+#        R125-G0/G1/G2/G3/G4, con max(PF OOS)-min(PF OOS) <= 0,15 SUL
+#        BLOCCO INTERO), e la cella la sceglie P7 col baricentro.
+#        Accanto al numero si scrive QUALE PASSO ha deciso (P8).
+#        >>> Non e' un dettaglio di forma: il par. 3-bis da solo
+#            ammetteva DUE verdetti opposti sulla stessa griglia
+#            (classe 206), e il quinto giro di cancello ha trovato che
+#            il puntatore alla procedura era finito SOLO in R125a --
+#            cioe' in uno dei quattro file che hanno un altopiano da
+#            leggere (classe 209, stessa famiglia della 194).
 #    ESITO POSSIBILE E ONESTO: "il default 0 va bene". Se il PF resta
 #    dentro +/- 0,15 su tutta la griglia, la manopola non serve su
 #    questo motore e lo si dichiara -- e' un risultato.

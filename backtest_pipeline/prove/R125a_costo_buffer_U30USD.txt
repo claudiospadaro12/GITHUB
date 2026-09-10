@@ -167,13 +167,27 @@
 #    - PF IS: attesa fra 0,90 e 1,10, in calo lento. Lo scrivo prima
 #      perche' e' la parte che NON mi piace e va detta lo stesso.
 #    - DD IS: attesa fra 4,0% e 6,0% (i tre punti noti fanno 4,4-4,8).
-#    - Cella attesa al centro dell'altopiano: buffer 500-1500.
+#    - Cella attesa, e la sceglie P7 (non l'occhio): buffer 500-1500.
 #
 #  I TRE ESITI POSSIBILI, dichiarati adesso perche' due su tre sono
 #  esiti che NON mi piacciono:
-#    E1  L'altopiano c'e': PF OOS >= 1,40 su >= 4 celle adiacenti entro
-#        +/- 0,15, DD OOS <= 7,00% su tutte. -> si propone il CENTRO
-#        (non il massimo) e si va alla prova di regime.
+#    E1  L'altopiano c'e' SECONDO LA PROCEDURA P1..P8 (par. 4-bis dei
+#        criteri): esiste un BLOCCO massimale di almeno 3 celle
+#        contigue, tutte ammissibili (R125-G0/G1/G2/G3/G4), con
+#        max(PF OOS) - min(PF OOS) <= 0,15 SUL BLOCCO INTERO, che
+#        sopravvive a P5 (bordo 3000) e a P6. -> la cella la sceglie
+#        P7, non l'occhio, e si va alla prova di regime.
+#        >>> LA VERSIONE PRECEDENTE DI QUESTA RIGA ERA SBAGLIATA DUE
+#            VOLTE, ed e' il difetto che il QUINTO giro di cancello ha
+#            trovato qui dentro (classe 209). Diceva ">= 4 celle
+#            ADIACENTI entro +/- 0,15", cioe':
+#            (a) la forma NON TRANSITIVA che il par. 4-bis aveva gia'
+#                bocciato come classe 206 (lo span si misura sul
+#                BLOCCO INTERO, non fra vicine);
+#            (b) una soglia di esistenza di QUATTRO celle, mentre P4
+#                ne chiede TRE.
+#            Su un blocco da 3 celle i due testi davano verdetti
+#            OPPOSTI -- e questo e' il documento che si ESEGUE.
 #        >>> E ANCHE IN E1 QUESTO FILE NON SCHIERA NIENTE (classe 205):
 #            n OOS resta 119, sotto i 150 dell'Emendamento A, quindi il
 #            MERITO resta SOSPESO e il cancello R125-G3 dice "merito non

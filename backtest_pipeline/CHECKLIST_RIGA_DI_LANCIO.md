@@ -12534,3 +12534,147 @@ in un elenco di contro-esempi: cioe' **fuori dal punto in cui si decide**.
 > documento che si esegue) e della **193** (il numero corretto e i suoi
 > discendenti lasciati liberi): **la correzione vale dove viene LETTA, non dove
 > e' stata SCRITTA.**
+
+---
+
+## 🆕 AGGIUNTE DEL 10/09/2026 (QUINTO GIRO) — il giro **MIRATO**: bersaglio i **cinque buchi che il quarto giro aveva dichiarato da solo** nel proprio "non coperto". 🟢 **E la prima cosa da scrivere e' quello che ha RETTO**, perche' un elenco di soli difetti descrive male la realta': la procedura `P1..P8` e' stata **ESEGUITA A MANO su otto griglie avversarie** costruite per romperla, e **sei su otto hanno retto** — altopiano di lunghezza **pari** (lo spareggio DD e poi il parametro funzionano), altopiano che tocca **tutti e due i bordi** (P5 toglie solo il ✂️, il 🧱 resta e conta), **buco in mezzo** (la cella non ammissibile spezza, come scritto), **span mai soddisfatto** (P4 esce pulito), e soprattutto il difetto **206**: l'enumerazione dei blocchi massimali di P2 **NON dipende piu' dalla cella di ancoraggio** — su una salita a gradini escono **cinque** blocchi massimali sempre gli stessi, da qualunque cella si parta. 🟢 Hanno retto anche: i **6 file prova** ripassano `controlla_prova.py` con **0 problemi** (33 celle, 66 passate, un asse ciascuno) e sono **ASCII puro**; la soglia **150** e' nominata in **tutti e quattro** i file prova non-Dow (`R125c/d/e/f`) e in `R125a`, col riquadro che separa **`R125-G4` a 95 (leggibilita')** dai **150 (merito)** — la classe 207 e' stata inseguita bene; il riquadro dei **233/357** dice la stessa cosa in **tutti e tre** i documenti. Le tre voci qui sotto sono i difetti **nuovi**.
+
+## 209. 🔁 IL BLOCCO VINCENTE CHE **MUORE AL PASSO DOPO** — e la procedura non dice cosa succede allora
+
+**10/09/2026, QUINTO giro di cancello su R125.** La procedura `P1..P8` (nata il
+giorno prima per togliere l'ambiguita' della classe **206**) sceglie il blocco
+vincente a **P3** e poi, a **P5**, gli toglie le celle di bordo ✂️. 🔴 **Non
+diceva niente su cosa fare se il blocco vincente, dopo P5, non esiste piu'.**
+
+Griglia che lo rompe, sull'asse vero a 7 valori:
+`PF = 1,70 · 1,74 · 1,78 | 1,20 | 1,60 · 1,66 · 1,72` con
+`DD = 5,90 · 5,80 · 5,85 | 6,00 | 4,10 · 4,05 · 3,90`.
+Blocchi massimali: `{0,500,1000}` e `{2000,2500,3000}`, **tutti e due da 3
+celle**. Lo spareggio (a) di P3 guarda il **DD massimo** e premia il secondo
+(4,10 contro 5,90); poi **P5 gli toglie la 3000** e ne restano **2**.
+- **Lettore 1** si ferma al testo: *"esce dalla griglia, si estende l'asse"*,
+  **nessuna cella scelta**.
+- **Lettore 2** vede `{0,500,1000}` intatto (il **0** e' 🧱 limite fisico) e
+  sceglie la **500**.
+
+🔴 **Stessa griglia, due verdetti** — cioe' **la classe 206 nella sua seconda
+vita**, semplicemente spostata da P2 a P3. E il blocco buttato via aveva
+**il PF piu' alto della griglia**: e' un'**occasione persa** per costruzione.
+
+⚠️ **E non e' un caso di scuola su QUESTO asse:** il DD **cala al crescere del
+buffer** (R118), quindi a parita' di lunghezza lo spareggio (a) premia **quasi
+sempre** il blocco piu' a destra — che e' proprio quello che contiene il bordo
+✂️ **3000**. Il verdetto tipico del round sarebbe stato *"estendi l'asse"*
+**anche con un altopiano buono gia' misurato piu' a sinistra**.
+
+> ### 🔴 LA REGOLA
+> 1. **Ogni passo che puo' ANNULLARE il candidato scelto da un passo
+>    precedente deve dire dove si torna.** Se non lo dice, la procedura ha una
+>    **uscita non definita**, e le uscite non definite le riempie il lettore —
+>    cioe' due lettori le riempiono in due modi.
+> 2. Forma adottata: **P3-bis, RIPESCAGGIO.** Il blocco annullato **esce dalla
+>    corsa** e si **torna a P3** sui rimanenti; il verdetto globale *"esce dalla
+>    griglia"* si pronuncia **solo se non sopravvive nessun blocco**.
+> 3. 🛑 **Ma il ripescaggio NON assolve:** l'annullamento **si porta dietro il
+>    suo verdetto**, e accanto alla cella scelta si scrive lo stesso
+>    *"l'asse e' APERTO da quel lato e va esteso di almeno due gradini"*.
+>    Altrimenti ripescare diventa un modo elegante di non vedere il bordo.
+> 4. 📌 **E il test di collaudo di una regola di selezione e' questo, sempre:**
+>    *due persone con la procedura in mano e la stessa griglia devono scegliere
+>    la STESSA cella, e devono poterlo dimostrare **citando il passo**.*
+>    Si prova su **griglie costruite per romperla**, non sull'esempio che l'ha
+>    ispirata.
+
+**🧬 E i DISCENDENTI, che sono la meta' del difetto** (stessa famiglia di 193 /
+194 / 203): la procedura era nata nei **criteri**, e il puntatore *"la regola
+che sceglie e' P1..P8"* era finito in **`R125a` soltanto** — cioe' in **uno dei
+quattro file prova che hanno un altopiano da leggere**. Peggio: `R125a`
+conteneva **tutte e due le regole insieme**, perche' il suo esito `E1` diceva
+ancora *"PF OOS >= 1,40 su **>= 4 celle ADIACENTI** entro +/- 0,15"* — cioe'
+(a) la forma **non transitiva** gia' bocciata come 206 e (b) una soglia di
+esistenza di **4** celle **contro le 3 di P4**. Su un blocco da 3 celle il file
+che si **ESEGUE** e il file dei **CRITERI** davano verdetti **opposti**.
+👉 Corretti `R125a`, `R125c`, `R125e`, `R125f` e il §3.3 del dossier (dove i
+punti 2-4 restano come **forma storica**, marcati **SUPERATI**).
+
+---
+
+## 210. 🏔️ L'ALTOPIANO DI CELLE **PERDENTI** CHE VINCE PERCHE' E' PIU' LUNGO — il falso NEGATIVO
+
+**10/09/2026, QUINTO giro.** `P1` elencava i cancelli di ammissibilita'
+(`G0` costo, `G1`/`G2` rischio, `G4` campione) e **lasciava fuori `G3`, il PF**.
+Sembrava coerente (*"il PF non entra nella scelta del blocco"*), **e invece
+apriva un buco dalla parte opposta**.
+
+Griglia che lo rompe: `PF = 1,70 · 1,75 · 1,80 | 1,05 · 1,00 · 0,95 · 0,90`,
+con **DD in calo** (4,2 → 3,2%) e tutte le celle dentro il rischio.
+I blocchi massimali sono `{0,500,1000}` (span 0,10, **tutte sopra 1,40**) e
+`{1500,2000,2500,3000}` (span 0,15, **tutte SOTTO 1,00**).
+🔴 **P3 premia il piu' LUNGO: vince l'altopiano PERDENTE**, P7 sceglie la
+**2000 a PF 1,00**, e il round chiude con *"la cella scelta non passa `R125-G3`,
+nessuna configurazione robusta"* — **mentre tre celle a PF 1,70-1,80, gia'
+misurate e dentro tutti i cancelli, non vengono mai nominate.**
+
+⚠️ **Ed e' la forma ATTESA del fondo di questo asse**, non un caso raro:
+allargare il buffer **abbassa il DD** (R118) e **diluisce l'edge** — cioe'
+produce esattamente *"coda lunga, piatta, perdente, con poco drawdown"*.
+
+**Secondo buco, trovato nella stessa passata:** se **nessuna** cella e'
+ammissibile, non c'e' nessun blocco, e **P3 non aveva output**. La procedura si
+fermava senza verdetto scritto.
+
+> ### 🔴 LA REGOLA
+> 1. **In una procedura di selezione, il criterio di QUALITA' va messo
+>    nell'AMMISSIBILITA', non solo nel giudizio finale.** Se entra solo alla
+>    fine, la procedura puo' **eleggere un candidato che poi boccia**, e
+>    quell'elezione **nasconde i candidati buoni**: e' un **falso NEGATIVO**,
+>    la forma piu' costosa di errore per noi (motto del 09/09).
+> 2. **Ogni procedura dichiara il suo caso VUOTO.** *"Nessun elemento
+>    ammissibile"* e' un esito, e va **scritto**, con i cancelli che hanno
+>    escluso ogni cella **elencati per nome** (classe 180: mai per differenza).
+> 3. 🛑 **E la contropartita obbligatoria, perche' una soglia in piu' PUO'
+>    distruggere una misura:** quando l'unico cancello che esclude le celle e'
+>    quello di qualita', si calcolano **lo stesso** i blocchi ignorandolo
+>    (**"blocchi GEOMETRICI"**) e si scrivono come
+>    **"ALTOPIANO NON PROFITTEVOLE: si legge come misura, non si sceglie"**,
+>    col PF, il DD e l'`n`. Un altopiano piatto a PF 1,20 **dice qualcosa sul
+>    motore** (la manopola non morde), e i fatti non si buttano.
+
+---
+
+## 211. 🪦 LA TABELLA DEI MORTI INTITOLATA **"CON IL CERTIFICATO COMPLETO"** — con dentro una riga senza certificato
+
+**10/09/2026, QUINTO giro.** Il §1.2 del dossier `ROUND_ORB_ATR_PS5` si
+intitolava *"Quello che e' MORTO, **con il certificato completo** (e non si
+rifa')"*. 🔴 **Su cinque righe, una il certificato non ce l'aveva — e il titolo
+la copriva.**
+
+`ORB_Fibo NASUSD`, archiviato **🔴 morto**:
+- **`n` OOS = 75.** 🔴 **Sotto il 95 di `R125-G4`** — la soglia di leggibilita'
+  **di questo stesso round** — e sotto i **150** dell'Emendamento A: il
+  **merito e' SOSPESO**, quindi il `PF OOS 0,968` **non boccia niente**;
+- **DD scritto `—`**, mentre il censimento che la riga cita **ce l'ha**:
+  **3,02% IS / 3,10% OOS**, cioe' **il DD piu' basso di tutta la tabella**;
+- **1 sola passata utile**, modello **OHLC e non tick**, **nessun simbolo
+  gemello**, **TF mai cambiato**, **gestione dell'uscita mai messa ad asse**.
+
+👉 Verdetto corretto: **"NON ANCORA MISURATO"**, e in `REGISTRO_TEST.md` con
+**l'elenco di cosa manca** (fatto: riga `O2`). 🛑 *Un morto senza certificato non
+e' un morto: e' un'occasione persa che nessuno ritrovera' piu'.*
+
+> ### 🔴 LA REGOLA
+> 1. **Un titolo che certifica vale per OGNI riga della tabella, e va
+>    verificato riga per riga PRIMA di scriverlo.** *"Con il certificato
+>    completo"* messo in testa a un elenco e' una **firma collettiva**: copre
+>    anche la riga che non la merita, e da quel momento nessuno ricontrolla.
+> 2. **Un `—` nella colonna DD si scrive solo dopo aver cercato il numero
+>    nella fonte che la riga stessa cita.** Qui la fonte era il censimento del
+>    09/09, e il numero c'era. Un *"non misurato"* falso e' un difetto di
+>    misura come un numero sbagliato — **e piu' velenoso**, perche' spegne la
+>    ricerca invece di farla ripartire.
+> 3. ⚠️ **Il cancello di leggibilita' del round in corso si applica ANCHE
+>    all'archivio che quel round cita.** Se `n < R125-G4` boccia una cella
+>    nuova come *"non misurabile"*, la stessa `n` **non puo'** aver ucciso una
+>    riga vecchia come *"morta"*: sarebbero due pesi e due misure, e la piu'
+>    morbida sarebbe quella applicata a noi.
+

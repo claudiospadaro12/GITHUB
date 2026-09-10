@@ -126,15 +126,23 @@ La colonna **uniche IS** contro **passate IS** e' la firma:
 - **r12: 48 → 24** e **r55b: 10 → 5**, **r88c: 4 → 2**: stesso schema.
 - 🟢 **r118a: 25 → 25.** Tutte distinte: quel round ha morso ovunque.
 
-## 1.2 🪦 Quello che e' MORTO, con il certificato completo (e non si rifa')
+## 1.2 🪦 Quello che e' MORTO, **con il certificato** -- e la riga che il certificato NON ce l'ha
+
+> 🔴 🆕 **Il titolo diceva "con il certificato completo" per tutte e cinque le righe.
+> Per una era falso** (classe 211, quinto giro di cancello): `ORB_Fibo NASUSD`
+> era archiviato **MORTO** con `n` OOS **75** -- sotto la soglia di leggibilita'
+> **R125-G4 (95)** di questo stesso round -- e con il **DD scritto `—`** mentre
+> il censimento che la riga cita **ce l'ha** (3,10%). 👉 Corretta qui sotto in
+> **"NON ANCORA MISURATO"**. 🛑 *Un morto senza certificato non e' un morto:
+> e' un'occasione persa che nessuno ritrovera' piu'.*
 
 | candidato | fonte | PF | DD | n | verdetto |
 |---|---|---|---|---|---|
 | **U30USD SHORT** (ORB-EMA200) | `REFERTO_ROUND54_LATI_DOW.md` | IS **0,681** · OOS **0,520** | IS 13,72% · **OOS 26,37%** | 64 / 100 | 🔴 **MORTO per MERITO in ENTRAMBE le finestre** (n sopra soglia) **e per RISCHIO** (DD 26,37%, e il rischio si legge a qualunque n). Certificato completo |
 | **U30USD long+short** | idem | OOS 1,047 | OOS 17,16% | 219 | 🔴 morto: meno profitto **e** DD doppio del solo long |
 | **DAX scheda "open range 07:00-08:05"** | `REFERTO_ROUND11.md` | OOS 0,940-1,022 | OOS 17,5-29,7% | 191-267 | 🔴 morto **quella ricetta** — vedi §1.3 |
-| **ORB su oro / EURUSD / GBPUSD (Londra)** | R10, R45 | OOS 0,63-0,88 | — | 189-323 | 🔴 morto, 0/48 celle |
-| **ORB_Fibo NASUSD** | censimento | OOS 0,968 | — | 75 | 🔴 morto |
+| **ORB su oro / EURUSD / GBPUSD (Londra)** | R10, R45 | OOS 0,63-0,88 | 🆕 **OOS 7,26 / 17,57 / 20,20%** (XAU r45a · EUR r45b · GBP r45c) | 189-323 | 🔴 **MORTO per MERITO** a n sopra 150, su **tre simboli gemelli** e 0/48 celle. Il DD c'era gia' nel censimento e questa riga scriveva `—` (classe 211) |
+| **ORB_Fibo NASUSD** | censimento | IS **0,835** · OOS **0,968** | IS 3,02% · OOS **3,10%** | IS 91 · **OOS 75** | 🟠 🆕 **NON ANCORA MISURATO, non "morto"** (classe 211): `n` OOS **75** sta **sotto R125-G4 (95)** e sotto i 150 dell'Emendamento A, quindi il **merito e' sospeso**; **1 sola passata utile**, modello **OHLC e non tick**, **nessun simbolo gemello**, **nessun TF cambiato**, **gestione dell'uscita mai messa ad asse**. Il DD (3,10%) non boccia nulla. 👉 Manca il **certificato**: va in `REGISTRO_TEST.md` con cosa manca |
 
 > 🚫 **Nessuna passata di questo round e' spesa su U30USD short.** Non e'
 > stanchezza: e' che allargare lo stop a un lato che **perde in tutte e due le
@@ -420,6 +428,17 @@ brucia la challenge.
 
 ## 3.3 🎯 LA REGOLA DI SELEZIONE, scritta **insieme** ai numeri e non dopo
 
+> 🔴 🆕 **LEGGERE PRIMA, quinto giro di cancello (classe 209):** la forma
+> che si **ESEGUE** e' la **PROCEDURA `P1..P8`** del par. 4-bis dei criteri.
+> I punti **2, 3 e 4** qui sotto sono la forma **STORICA**, conservata perche'
+> spiega da dove nasce la regola -- ma **sono SUPERATI e non si applicano**:
+> il punto 2 e' la banda **non transitiva** (classe 206), il 4 non dice
+> *"interna rispetto a cosa"*, e il punto 5 sotto usa una soglia (*"solo il
+> bordo e la sua unica vicina"*) che **contraddice P5** proprio sulla griglia
+> di contro-esempio dei criteri: per il punto 5 si sceglierebbe la **2500**,
+> per la procedura il verdetto e' *"non c'e' una configurazione robusta, e
+> l'asse e' APERTO a destra"*. 👉 **Quando i due parlano, vince la procedura.**
+>
 > **CENTRO DELL'ALTOPIANO, MAI IL PICCO.** Operativamente:
 > 1. l'asse `InpSLBufferPts` si guarda come una **curva**, non come 7 numeri;
 > 2. una cella si accetta **solo se le due adiacenti** stanno dalla stessa

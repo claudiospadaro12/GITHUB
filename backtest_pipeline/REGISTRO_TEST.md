@@ -130,7 +130,7 @@ misurare, **mai** un risultato da citare.
 | # | EA | Sym | Miglior config | Risultato | Verdetto |
 |---|---|---|---|---|---|
 | O1 | ORB | NASUSD | EntryPoints 20, TP_R 2.5, entrambe | real tick: 50% pos, best PF 1.15, DD 16%, 625 tr | 🟡 marginale |
-| O2 | ORB_Fibo | NASUSD | — | OHLC 29% pos | 🔴 morto |
+| O2 | ORB_Fibo | NASUSD | — | **PF IS 0,835 · PF OOS 0,968** · **DD IS 3,02% · DD OOS 3,10%** · **n IS 91 · n OOS 75** (censimento 09/09, `ABTG_ORB_Fibo`, modello **OHLC**, **1 sola passata utile**) | 🟠 **NON ANCORA MISURATO** (10/09, quinto giro di cancello, classe 211) — era scritto "morto" **senza certificato**. Manca: **(a)** `n` OOS **75 < 95** (`R125-G4`) e **< 150** (Emendamento A) → **merito SOSPESO**, non bocciato; **(b)** mai girato a **tick**; **(c)** **nessun simbolo gemello** (solo NASUSD); **(d)** **TF mai cambiato**; **(e)** **gestione dell'uscita mai messa ad asse**. 🔴 Il DD (3,10%) **non boccia**: e' il piu' basso della tabella. 👉 Rientra in coda all'imbuto, **mai in campo in automatico** |
 | O3 | DAX_M3 | D30EUR | — | OHLC 33% pos, short 0% | 🔴 morto |
 | O4 | Londra_ORB | GBPUSD | — | OHLC 11% pos, DD 23% | 🔴 morto |
 

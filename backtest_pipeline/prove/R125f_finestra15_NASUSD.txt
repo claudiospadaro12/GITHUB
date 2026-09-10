@@ -87,7 +87,11 @@
 #              questo file PUO' finire sotto, e in quel caso il round
 #              NON schiera nemmeno su questo simbolo. Chi firma i
 #              criteri compra una MISURA, non una sedia promessa.
-#    - DD OOS: MONOTONO DECRESCENTE col buffer. Attesa 6% - 16%.
+#    - DD OOS: attesa in CALO, 6% - 16%. NON PROMETTO MONOTONIA, e la
+#      riga precedente la prometteva sbagliando (classe 209, quinto
+#      giro di cancello): la monotonia misurata in R118 sta sul ramo
+#      HALFRANGE + TP_RANGE, non su questo (OPPRANGE, InpSLMode=0),
+#      dove i tre punti noti di R88 fanno 4,20 -> 3,84 -> 4,40.
 #      Il Nasdaq e' il piu' volatile dei tre: mi aspetto il DD peggiore
 #      del round, e lo scrivo prima.
 #    - PF OOS: attesa 0,95 - 1,35. BASSA APPOSTA. Su NASUSD l'ORB ha
@@ -99,6 +103,18 @@
 #          Se resta a 1,05-1,15 come le otto volte precedenti, il
 #          Nasdaq esce da questa famiglia con un numero e una riga in
 #          REGISTRO_TEST.md, e la sedia 770601 va rivista.
+#    >>> E LA PAROLA "ALTOPIANO" QUI DENTRO VUOL DIRE UNA COSA SOLA:
+#        il BLOCCO della PROCEDURA P1..P8 del par. 4-bis dei criteri
+#        (>= 3 celle contigue, tutte ammissibili ai cancelli
+#        R125-G0/G1/G2/G3/G4, con max(PF OOS)-min(PF OOS) <= 0,15 SUL
+#        BLOCCO INTERO), e la cella la sceglie P7 col baricentro.
+#        Accanto al numero si scrive QUALE PASSO ha deciso (P8).
+#        >>> Non e' un dettaglio di forma: il par. 3-bis da solo
+#            ammetteva DUE verdetti opposti sulla stessa griglia
+#            (classe 206), e il quinto giro di cancello ha trovato che
+#            il puntatore alla procedura era finito SOLO in R125a --
+#            cioe' in uno dei quattro file che hanno un altopiano da
+#            leggere (classe 209, stessa famiglia della 194).
 #    FALSIFICAZIONE: PF OOS < 1,10 su tutto l'altopiano -> la finestra
 #    non era la causa, e nove corse concordi chiudono il capitolo.
 # ---------------------------------------------------------------------

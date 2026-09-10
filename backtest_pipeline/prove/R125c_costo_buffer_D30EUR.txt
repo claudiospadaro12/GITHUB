@@ -103,8 +103,15 @@
 #              questo file PUO' finire sotto, e in quel caso il round
 #              NON schiera nemmeno su questo simbolo. Chi firma i
 #              criteri compra una MISURA, non una sedia promessa.
-#    - DD OOS: MONOTONO DECRESCENTE col buffer, come su U30USD.
-#      Attesa 5% - 15% a buffer 0, 4% - 10% a buffer 30.
+#    - DD OOS: attesa in CALO, 5% - 15% a buffer 0 e 4% - 10% a
+#      buffer 30. NON PROMETTO MONOTONIA, e la riga precedente di
+#      questo file la prometteva sbagliando (classe 209, quinto giro
+#      di cancello): diceva "MONOTONO DECRESCENTE col buffer, come su
+#      U30USD", ma su U30USD la monotonia e' misurata sul ramo
+#      HALFRANGE + TP_RANGE (R118), che e' UN ALTRO RAMO. Su questo
+#      ramo (OPPRANGE + TP in R, InpSLMode=0) i tre punti noti di R88
+#      fanno 4,20 -> 3,84 -> 4,40: NON e' monotono. Lo dice gia'
+#      R125a, e la correzione non era arrivata fin qui.
 #    - PF OOS: attesa 0,95 - 1,45. LO SCRIVO BASSO APPOSTA: R11 ha gia'
 #      misurato 0,94-1,02 su questo simbolo con un'altra uscita, e la
 #      FASE M ha validato il DAX solo col RETEST, mai col breakout.
@@ -112,6 +119,19 @@
 #          vuol dire che sul DAX mancava la GESTIONE, non l'edge.
 #          Se esce a 1,05 come R11, la gestione non salva il DAX e il
 #          capitolo si chiude con un numero, non con una stanchezza.
+#    >>> E LA PAROLA "ALTOPIANO" QUI DENTRO VUOL DIRE UNA COSA SOLA:
+#        il BLOCCO della PROCEDURA P1..P8 del par. 4-bis dei criteri
+#        (>= 3 celle contigue, tutte ammissibili ai cancelli
+#        R125-G0/G1/G2/G3/G4, con max(PF OOS)-min(PF OOS) <= 0,15 SUL
+#        BLOCCO INTERO), e la cella la sceglie P7 col baricentro.
+#        Accanto al numero si scrive QUALE PASSO ha deciso (P8).
+#        >>> Non e' un dettaglio di forma: il par. 3-bis da solo
+#            ammetteva DUE verdetti opposti sulla stessa griglia
+#            (classe 206), e il quinto giro di cancello ha trovato che
+#            il puntatore alla procedura era finito SOLO in R125a --
+#            cioe' in uno dei quattro file che hanno un altopiano da
+#            leggere (classe 209, stessa famiglia della 194).
+
 #    FALSIFICAZIONE: PF OOS < 1,10 su tutto l'altopiano -> il DAX esce
 #    da questa famiglia e si scrive in REGISTRO_TEST.md con PF, DD, n e
 #    cancello, come chiede il certificato di morte.
