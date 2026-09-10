@@ -277,7 +277,24 @@ def controlla_terminali(path, testo, dove, stretta=False):
     grezze = {n: l for n, l in enumerate(testo.splitlines(), 1)}
     for k, (i, nudo) in enumerate(righe):
         cruda = grezze.get(i, "")
-        if not re.search(GUARDIA_STRETTA, cruda, re.I):
+        # CLASSE 222 (11/09/2026) -- QUI NON C'E' NESSUNA ESENZIONE, ED E' VOLUTO.
+        # La 221 aveva subordinato questo blocco a "se non c'e' una guardia
+        # stretta sulla riga". Contro-esempio misurato stanotte sulla riga vera
+        # di R125: OGNI riga di lancio di casa porta gia' un
+        #     if(-not (Select-String ... -Pattern 'MARCATORE_...')){ throw '...' }
+        # cioe' un 'throw' del tutto legittimo che non c'entra niente col
+        # terminale. Su UNA riga sola quel throw copriva l'intera riga, e
+        #     -TerminaleBacktest 'C:\BCM_Reale'   (conto REALE 10105439)
+        # usciva "nessun difetto meccanico". Il buco non era raro: era ATTIVO
+        # su tutte le righe del progetto, perche' il controllo del marcatore e'
+        # obbligatorio e porta sempre un throw.
+        # La regola giusta non e' una guardia piu' stretta, e' che
+        # UN TERMINALE VIETATO PASSATO COME BERSAGLIO NON E' MAI INNOCENTE:
+        # nessun throw altrove sulla riga puo' renderlo tale. Una guardia vera
+        # nomina il percorso per RIFIUTARLO (dentro un -like/-eq), non lo passa
+        # come valore di -Terminal.../-Percorso... -- e in quel caso
+        # bersagli_vietati() non lo cattura affatto.
+        if True:
             for v, val in bersagli_vietati(cruda):
                 blocca("221", "r." + str(i) + ": il terminale VIETATO '" + v + "' e' passato come"
                               " BERSAGLIO (-Terminal.../-Percorso... = '" + val + "'). Nessuna"

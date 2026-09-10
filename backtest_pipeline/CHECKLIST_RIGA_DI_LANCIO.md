@@ -13058,3 +13058,50 @@ Trovata la causa in CODA_08, e' stata **cercata in tutti gli altri `CODA_`**:
 `grep -rn -i "profiles" CODA_*.ps1` -> **solo 05 e 08**. Nella stessa passata e'
 uscito il fratello minore in `CODA_10`, che saltava **in silenzio** i terminali
 senza file dello SlippageLogger: adesso ognuno stampa `GUARDATO e NIENTE: <programma>`.
+
+## 222. Il `throw` legittimo che zittisce il divieto sul terminale (11/09/2026)
+
+**Il caso.** La classe 221 aveva ristretto la guardia sul terminale bersaglio da
+`(Muori|throw|exit 1|VIETATO|notlike|-ne|Write-Host|Red)` a
+`(Muori|throw|exit 1|VIETATO)`, e sembrava chiusa. **Non lo era.**
+
+Contro-esempio misurato sulla riga vera di R125: **ogni riga di lancio di casa
+porta gia' un `throw`**, ed e' il controllo del marcatore, che e' obbligatorio:
+
+```
+if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_...' -Quiet)){ throw 'SCRIPT VECCHIO' }
+```
+
+Su **una riga sola** quel `throw` copriva l'intera riga. Risultato misurato,
+con la stessa riga e quattro bersagli diversi:
+
+| bersaglio | prima | dopo |
+|---|---:|---:|
+| `C:\BCM_Reale` — **conto REALE 10105439** | 🔴 **0 bloccanti** | 🟢 1 |
+| `... BCM Markets MT5 Terminal -V3` — 100k 50504263 | 🔴 **0** | 🟢 2 |
+| `C:\Program Files\BCM Markets MT5 Terminal` — piccolo 50503392, **40 sedie vive** | 🔴 **0** | 🟢 1 |
+| `C:\MT5_Backtest` — il bersaglio giusto | 🟢 0 | 🟢 0 |
+
+🔴 **Il buco non era raro: era ATTIVO SU TUTTE LE RIGHE DEL PROGETTO**, perche'
+il controllo del marcatore e' obbligatorio e porta sempre un `throw`. Il cancello
+rispondeva *"nessun difetto meccanico"* a una riga che puntava al conto reale.
+
+**La regola.** Non serviva una guardia **piu' stretta**: serviva accorgersi che
+**un terminale vietato passato come BERSAGLIO non e' MAI innocente.** Nessun
+`throw` altrove sulla riga puo' renderlo tale. Una guardia vera **nomina il
+percorso per RIFIUTARLO** (dentro un `-like`/`-eq`), e in quel caso non compare
+come valore di `-Terminal.../-Percorso...`, quindi non viene catturato affatto —
+verificato con un contro-esempio apposta, che **passa**.
+
+📌 **E la forma generale, che vale oltre questo caso:** una guardia riconosciuta
+per **presenza di un token** invece che per **posizione** e' falsificabile da
+qualunque uso legittimo dello stesso token. Se il token e' obbligatorio altrove
+nello stesso oggetto, la guardia non e' debole: **e' spenta.**
+
+🧪 Contro-esempi da tenere: 4 bersagli (3 vietati + 1 buono) + 1 guardia
+legittima. Regressione: **237 `.ps1`, 0 falliti.**
+
+⚠️ **E chiude anche il rilievo aperto della classe 220**: il piccolo
+**50503392** (quello con le sedie vive) ora e' protetto come gli altri due.
+
+---
