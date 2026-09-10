@@ -1,11 +1,43 @@
 # 📬 STORICO INDICI — **LE RIGHE DA MANDARE**
 
+> # 🛑 10/09/2026 — QUESTO FOGLIO E' STATO RIPINNATO. LEGGI PRIMA DI COPIARE.
+>
+> Le righe qui sotto puntavano al pin `2ba0286…`, che contiene il driver **v1**.
+> **La v1 sul VPS e' PERICOLOSA**, e non e' un'opinione — sono tre difetti misurati
+> il 10/09 dopo il censimento dei terminali delle 07:21:
+>
+> 1. 🔴 **Sceglieva il terminale sbagliato.** Cercava sotto `C:\Program Files*` e
+>    prendeva il primo `BCM Markets MT5 Terminal` non `-V3` → **il PICCOLO 50503392,
+>    che e' in FORWARD**. E `C:\MT5_Backtest` (demo 50504400) non sta sotto Program
+>    Files: **non veniva MAI trovato**. F6 avrebbe scritto CSV e preset dentro il
+>    piccolo, F7 ci avrebbe compilato e fatto girare uno script dentro.
+> 2. 🔴 **`ChiudiMT5Pulito` chiudeva e poi AMMAZZAVA (`Stop-Process -Force`) OGNI
+>    `terminal64` della macchina** — sul VPS: flotta in forward spenta, **REALE
+>    10105439 compreso**.
+> 3. 🔴 **La guardia "MT5 aperto" non copriva `-Prepara`**, che pero' SCRIVE nella
+>    cartella dati del terminale.
+>
+> Dal **pin `52a7a838…`** il driver e' la **v2 chirurgica**: `RisolviTerminale()`
+> unica e dichiarata a schermo, `-TerminaleBacktest` obbligatorio sul VPS, confronto
+> per percorso **normalizzato** (mai `-like`: scambierebbe `C:\MT5_Backtest` con
+> `C:\MT5_Backtest_OLD`), guardia che **elenca i processi risparmiati e non li tocca**,
+> e chiusura che tocca **solo il PID del terminale bersaglio**.
+>
+> 🐍 **E c'e' `-PathPython`**: sul VPS l'installer di python.org e' **vietato dalla
+> policy di sistema** (`0x80070659`). Gira il pacchetto **embeddable** scompattato in
+> `C:\python313\`, che resta fuori dal PATH — quindi il percorso glielo diciamo noi.
+>
+> ⚠️ **Una riga con un pin vecchio scarica lo script vecchio**: il marcatore nuovo
+> (`..._v2_TERMINALE_CHIRURGICO`) protegge chi copia la riga NUOVA con un pin
+> VECCHIO (muore con "SCRIPT VECCHIO"), **ma non protegge chi copia la riga vecchia
+> per intero**. Se trovi in giro una riga con `2ba0286…`, **cestinala.**
+
 **La richiesta**: Claudio, 25/08/2026 — _"per gli Indici cerchiamo di fare i
 test con piu' anni di storico"_.
 **Criteri**: `risultati_archivio/STORICO_INDICI_CRITERI.md` — ✅ **FIRMATI** ("FIRMO CON PROPOSTE", Claudio 25/08 sera) **+ EMENDAMENTO D-B** ("FIRMO x S&P", 26/08: simboli `NASUSD,SPXUSD`). Pin attuale nelle righe = `2ba0286…` (quello dell'emendamento).
 
 > ☠️ **PIN SUPERATI di questo foglio** (storia, non si tocca): `bcc483f` (difetti pre-verifica) → `461948f` (corretto, pre-firma) → `490f112` (firma, solo NASUSD) → **`2ba0286` (attuale: emendamento S&P)**. Con un pin vecchio la corsa gira sui criteri di quel momento: la riga di lancio dice sempre quello giusto.
-**Driver**: `righe/RIGA_STORICO_INDICI.ps1` (marcatore `MARCATORE_RIGA_STORICO_INDICI_v1`).
+**Driver**: `righe/RIGA_STORICO_INDICI.ps1` (marcatore `MARCATORE_RIGA_STORICO_INDICI_v2_TERMINALE_CHIRURGICO`).
 **Script MQL5 nuovo**: `mql5/Scripts/ABTG_ContaBarreEXT.mq5` (`CONTA-EXT-v1`) — **mai compilato**, lo compila il driver.
 
 > ✅ **PASSATE DAL VERIFICATORE-STRINGHE il 25/08** (verdetto FAIL → corretto:
@@ -19,7 +51,7 @@ versione con il preset del conteggio che usciva **su una riga sola** e la
 conversione a 16 anni in un colpo solo (~3,8 GB di RAM, misurati).
 
 **Il pin da usare e' quello del commit che porta le correzioni**, e nelle **tre
-righe di lancio** qui sotto sta scritto come `2ba0286d6ea228dffc581fe59f01f3c7ead44976`. Dopo il commit+push si
+righe di lancio** qui sotto sta scritto come `52a7a83830ba6cadd19fa2e313365b31ee8cc6b2`. Dopo il commit+push si
 esegue **una volta sola** questo (sostituisce **tutte** le occorrenze del
 segnaposto, compresa quella dentro il comando stesso: e' fatto apposta, dopo
 questo giro il foglio e' pinnato e non si ri-sostituisce):
@@ -122,10 +154,10 @@ spazio, **misura** lo spazio libero, e si ferma.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='2ba0286d6ea228dffc581fe59f01f3c7ead44976';
+    $pin='52a7a83830ba6cadd19fa2e313365b31ee8cc6b2';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO: il pin non contiene il driver nuovo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v2_TERMINALE_CHIRURGICO' -Quiet)){ throw 'SCRIPT VECCHIO: il pin non contiene il driver nuovo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -SoloControllo;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE -- il referto e lo zip ci sono lo stesso: mandali.' -ForegroundColor Yellow } }
 ```
@@ -152,11 +184,11 @@ MT5.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='2ba0286d6ea228dffc581fe59f01f3c7ead44976';
+    $pin='52a7a83830ba6cadd19fa2e313365b31ee8cc6b2';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -Prepara -OreMax 6;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v2_TERMINALE_CHIRURGICO' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -PathPython 'C:\python313\python.exe' -Prepara -OreMax 6;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE -- e'' gia'' una risposta: manda lo zip, i problemi sono nel referto.' -ForegroundColor Yellow } }
 ```
 
@@ -173,15 +205,38 @@ mandare**. Quello da mandare è `STORICO_INDICI_<data>_<ora>.zip`.
 
 ---
 
-## ▶️ RIGA 2 — **IMPORT IN MT5 + VERIFICA** (⚠️ **MT5 E METAEDITOR CHIUSI**)
+## ▶️ RIGA 2 — **IMPORT IN MT5 + VERIFICA**
 
-> 🛑 **PRIMA CHIUDI METATRADER *E* METAEDITOR, TUTTE LE ISTANZE.** Il driver si
-> rifiuta di partire se li trova aperti, e **non li ammazza**: potrebbe essere
-> Claudio che sta guardando un grafico. MT5 riscrive i suoi file all'uscita;
-> e **MetaEditor è single-instance**, quindi con una copia già aperta il
-> `/compile` torna subito **senza compilare** e il referto direbbe "non
-> compila" di uno script sano.
-> 🛑 **NON SI LANCIA SUL VPS**: spegnerebbe la flotta in forward.
+> ## ⏳ 10/09/2026 — QUESTA RIGA **NON E' ANCORA PASSATA DAL CANCELLO**
+> È stata **riscritta** per la v2 chirurgica ma **non ha ancora un PASS**: il
+> `controllo-preventivo` ha dato il PASS alla riga dello **scarico**, non a questa.
+> 🔴 **Non si manda a Claudio finché non ha il suo.** Regola del 09/09.
+>
+> ### ✅ Cosa è cambiato rispetto alla v1
+> Il vecchio avviso diceva **"NON SI LANCIA SUL VPS: spegnerebbe la flotta in
+> forward"**, ed era **vero**: la v1 ammazzava ogni `terminal64` della macchina.
+> Con la **v2** non è più così — la guardia è **chirurgica** (blocca solo se è vivo
+> il terminale **bersaglio**, elenca i risparmiati e non li tocca) e
+> `ChiudiMT5Pulito` chiude **solo il PID del terminale scelto**.
+> 🎯 Quindi sul VPS si può fare, **ma solo con `-TerminaleBacktest "C:\MT5_Backtest"`
+> (demo 50504400), che è OBBLIGATORIO**: senza, il ripiego automatico guarda solo
+> sotto `Program Files`, trova **esattamente un candidato** (il **piccolo 50503392**,
+> in forward) e non scatta nemmeno il "non tiro a indovinare". Oggi a salvarci
+> sarebbe solo la guardia, perché il piccolo è **acceso**: se Claudio lo chiude,
+> quella rete sparisce.
+>
+> ### 🛑 E prima di lanciarla, due cose vanno **misurate**, non dedotte
+> 1. **`C:\MT5_Backtest` (50504400) dev'essere ACCESO almeno una volta** perché la
+>    sua cartella dati esista e sia registrata. Al censimento delle 07:21 del 10/09
+>    era l'unico dei quattro terminali BCM **spento**.
+> 2. **Il single-instance di MetaEditor è per-installazione o per-macchina?**
+>    La checklist 39 **non lo dice**. Se fosse per-macchina, un MetaEditor aperto sul
+>    piccolo farebbe tornare il `/compile` a vuoto e il referto direbbe *"non
+>    compila"* di un sorgente **sano**. 🧪 Si misura in 30 secondi: con il MetaEditor
+>    del piccolo aperto, lanciare quello di `C:\MT5_Backtest` e vedere se **nasce un
+>    secondo PID**. 🛡️ Mitigazione già in casa: `CompilaMQL5` giudica sull'**artefatto**
+>    (il `.ex5` riscritto), non sul processo — quindi il caso peggiore è un **falso
+>    "non compilato"**, mai un compilato-sbagliato. Ma va saputo prima, non dopo.
 
 **Cosa fa**: ripassa lo scarico (gli anni in cache li salta), **rifà la
 conversione** (~qualche minuto: è il prezzo di avere il CSV di sicuro fresco),
@@ -193,13 +248,15 @@ Il tester gira sempre con `AllowLiveTrading=false`.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $vivi=@(Get-Process -Name terminal64,metaeditor64 -EA SilentlyContinue);
-    if($vivi.Count -gt 0){ throw ('APERTO: ' + (($vivi | ForEach-Object { $_.ProcessName } | Sort-Object -Unique) -join ', ') + ' -- chiudi MT5 E MetaEditor (tutte le istanze) e rilancia.') };
-    $pin='2ba0286d6ea228dffc581fe59f01f3c7ead44976';
+    $med=@(Get-Process -Name metaeditor64 -EA SilentlyContinue);
+    if($med.Count -gt 0){ throw ('METAEDITOR APERTO (' + $med.Count + ' istanze): finche il single-instance non e MISURATO, il /compile puo tornare a vuoto e il referto direbbe "non compila" di uno script sano. Chiudi MetaEditor e rilancia.') };
+    $bt=@(Get-Process -Name terminal64 -EA SilentlyContinue | Where-Object { $_.Path -and ($_.Path.TrimEnd('\').ToLower() -eq 'c:\mt5_backtest\terminal64.exe') });
+    if($bt.Count -gt 0){ throw ('IL TERMINALE BERSAGLIO C:\MT5_Backtest E APERTO (pid ' + (($bt | ForEach-Object { $_.Id }) -join ', ') + '): chiudi QUELLO e rilancia. Gli altri terminali in forward NON si toccano.') };
+    $pin='52a7a83830ba6cadd19fa2e313365b31ee8cc6b2';
     $p="$env:USERPROFILE\RIGA_STORICO_INDICI.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_STORICO_INDICI.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v1' -Quiet)){ throw 'SCRIPT VECCHIO' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -Importa -Verifica -OreMax 4;
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_STORICO_INDICI_v2_TERMINALE_CHIRURGICO' -Quiet)){ throw 'SCRIPT VECCHIO' };
+    $global:LASTEXITCODE=0; & $p -Pin $pin -PathPython 'C:\python313\python.exe' -TerminaleBacktest "C:\MT5_Backtest" -Importa -Verifica -OreMax 4;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE -- manda lo zip: i problemi sono elencati nel referto.' -ForegroundColor Yellow } }
 ```
 
