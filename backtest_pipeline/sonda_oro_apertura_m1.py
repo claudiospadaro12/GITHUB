@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # =====================================================================
-#  MARCATORE_SONDA_ORO_APERTURA_M1_v2
+#  MARCATORE_SONDA_ORO_APERTURA_M1_v3
 #  sonda_oro_apertura_m1.py
 #  L'ORO NEI MINUTI DOPO LA ROTTURA DELLA PRIMA CANDELA M5
 #  DELL'APERTURA USA -- MISURA DESCRITTIVA, NON UN BACKTEST
@@ -95,17 +95,35 @@
 #  passaggio dal pre-apertura all'apertura. E' un'informazione diversa
 #  da quella che sembra a occhio sul grafico.
 #
-#  IPOTESI PRINCIPALE (una sola, dichiarata):
-#    E-ORDINE  EMA9 > EMA21 alla chiusura di A+5 per una rottura LONG
-#              (EMA9 < EMA21 per una SHORT). E' lo STATO, non l'evento:
-#              e' la condizione con piu' osservazioni, quindi la piu'
-#              leggibile.
-#  VARIANTI DICHIARATE (tre, e restano varianti anche se vincono):
-#    E-FRESCO  l'incrocio e' AVVENUTO in una delle ultime 5 barre
-#              (A+1..A+5) ed e' nel verso della rottura.
-#    E-BARRA   l'incrocio e' avvenuto ESATTAMENTE nella barra A+5.
-#    S-ORDINE  come E-ORDINE ma con medie SEMPLICI (SMA), per vedere
-#              se il risultato dipende dal tipo di media.
+#  IPOTESI PRINCIPALE (una sola, dichiarata) -- ED E' L'INCLINAZIONE,
+#  NON L'INCROCIO:
+#    INCLINATE  le DUE medie sono inclinate nel verso della rottura
+#               (EMA9 e EMA21 entrambe piu' alte -- o piu' basse -- di
+#               3 barre M1 fa). E' lo STATO come filtro di LATO, non
+#               l'incrocio come innesco.
+#    PERCHE' QUESTA E NON L'INCROCIO, e va detto:
+#      (a) e' la variante GIA' SCRITTA IN CASA: REGISTRO_TEST.md riga
+#          230 la elenca fra le regole d'ingresso RICORRENTI -- "medie
+#          9/21 INCLINATE nella direzione". Non e' un'invenzione di
+#          oggi, e' una regola che gia' circolava non misurata.
+#      (b) l'incrocio su M1 alle 15:36 arriva TARDI: [INFERITO, non
+#          misurato] con lag EMA ~ (N-1)/2 la 9 ritarda ~4 barre e la
+#          21 ~10, quindi in 4-5 minuti l'incrocio tipicamente NON e'
+#          ancora avvenuto. Misurare come principale una condizione che
+#          quasi non si verifica vuol dire misurare il vuoto.
+#      (c) la caccia esterna NON ha trovato nessuna evidenza misurata
+#          sull'incrocio 9/21 su M1.
+#  VARIANTI DICHIARATE (quattro, e restano varianti anche se vincono):
+#    E-ORDINE    EMA9 > EMA21 alla chiusura di A+5 nel verso della
+#                rottura (l'ORDINE, non la pendenza).
+#    E-FRESCO    l'incrocio e' AVVENUTO in una delle ultime 5 barre
+#                (A+1..A+5) ed e' nel verso della rottura.
+#    E-BARRA     l'incrocio e' avvenuto ESATTAMENTE nella barra A+5.
+#                E-FRESCO ed E-BARRA sono l'ipotesi LETTERALE di
+#                Claudio: si misurano, e se escono con n piccolissima
+#                quella E' la risposta.
+#    S-INCLINATE come INCLINATE ma con medie SEMPLICI (SMA), per vedere
+#                se il risultato dipende dal tipo di media.
 #  LA MISURA E' UN CONFRONTO A DUE GRUPPI: giorni CON la condizione
 #  contro giorni SENZA, sugli STESSI giorni e con la STESSA geometria.
 #  Se la mediana del movimento a favore e' la stessa, l'incrocio NON
@@ -118,11 +136,11 @@
 #  IL CONTO DELLE IPOTESI -- perche' senza questo si pesca
 #  ==================================================================
 #  Ipotesi PRINCIPALE, dichiarata prima di ogni numero, UNA:
-#    APERTURA_NY x definizione T x condizione E-ORDINE, confrontata
+#    APERTURA_NY x definizione T x condizione INCLINATE, confrontata
 #    con CTRL_QUIETO. E' su questa che si dira' si' o no.
-#  Varianti dichiarate: 2 definizioni di rottura (C, M) + 3 condizioni
-#  9/21 (E-FRESCO, E-BARRA, S-ORDINE) = 5. Tutto il resto e'
-#  DESCRIZIONE, non prova.
+#  Varianti dichiarate: 2 definizioni di rottura (C, M) + 4 condizioni
+#  9/21 (E-ORDINE, E-FRESCO, E-BARRA, S-INCLINATE) = 6. Tutto il resto
+#  e' DESCRIZIONE, non prova.
 #  DIFESA CONTRO LA PESCA: il campione e' spezzato in due.
 #    IS   2006-03 -> 2015-12   (~2.450 giornate)  <- qui si guarda
 #    OOS  2016-01 -> 2020-05   (~1.100 giornate)  <- la CASSAFORTE
@@ -222,12 +240,14 @@
 #    2. OHLC M1, non tick: dentro il minuto non si sa l'ordine dei
 #       prezzi. Qui non si simula nessuna uscita, quindi l'ambiguita'
 #       intrabarra tocca solo MFE/MAE, che sono ESTREMI e non esiti.
-#    3. ZERO COSTI. Lo spread BCM sull'oro NON E' MAI STATO MISURATO
-#       (buco aperto dal 25/08, riconfermato il 06/09 e il 08/09).
-#       --spread e' il POSTO DOVE INFILARE il numero quando arrivera'
-#       dal cancello di costo: serve solo a stampare i due pavimenti
-#       di casa (13,3x = duro, 40x = di lavoro) accanto all'ampiezza
-#       misurata. Finche' e' dichiarato, e' dichiarato.
+#    3. ZERO COSTI DEDOTTI dai numeri: MFE e MAE sono LORDI. Il costo
+#       pieno di un giro completo e' stato MISURATO il 10/09/2026 e vale
+#       0,2003 $/oncia = spread 0,1600 + commissione 0,0403
+#       (report/ORO_1530_CANCELLO_COSTO_2026-09-10.md). Qui compare
+#       solo come METRO: i pavimenti di casa 13,3x = 2,66 $ (duro) e
+#       40x = 8,01 $ (di lavoro) sono stampati accanto all'ampiezza.
+#       ERRATA: il numero "spread oro misurato in casa 0,24 $" che
+#       gira in un dossier del 08/09 NON HA FONTE nel repo. Ritirato.
 #    4. La finestra dei dati (2006-2020) NON copre il regime 2021-2026
 #       ne' l'oro sopra i 3.000 $.
 #
@@ -307,7 +327,7 @@ import time
 import urllib.request
 from datetime import date, datetime, timedelta
 
-VERSIONE = "MARCATORE_SONDA_ORO_APERTURA_M1_v2"
+VERSIONE = "MARCATORE_SONDA_ORO_APERTURA_M1_v3"
 
 BASE_RAW = ("https://raw.githubusercontent.com/FutureSharks/financial-data/"
             "master/pyfinancialdata/data/currencies/oanda")
@@ -318,10 +338,22 @@ ANNO_CASSAFORTE = 2016          # da qui in poi e' OOS
 
 MIN_GIORNI_GRUPPO = 400
 MIN_GIORNI_ANNO = 100
+MIN_BRACCIO_921 = 100          # sotto: il confronto CON/SENZA non e' leggibile
 PAVIMENTO_DURO = 13.3
 PAVIMENTO_LAVORO = 40.0
 
-CONDIZIONI = ("E-ORDINE", "E-FRESCO", "E-BARRA", "S-ORDINE")
+CONDIZIONI = ("INCLINATE", "E-ORDINE", "E-FRESCO", "E-BARRA", "S-INCLINATE")
+CONDIZIONE_PRINCIPALE = "INCLINATE"
+PENDENZA_BARRE = 3              # su quante barre M1 si misura l'inclinazione
+
+# COSTO PIENO DI UN GIRO COMPLETO SULL'ORO BCM, in $/oncia -- MISURATO
+# il 10/09/2026 (report/ORO_1530_CANCELLO_COSTO_2026-09-10.md):
+#   spread 0,1600 $ (SpreadPt 16, Digits 2, Point 0,01, verificato per
+#   triangolazione) + commissione 0,0403 $ (3,4858 EUR/lotto su 520 righe
+#   di data/statements/trades_auto.csv) = 0,2003 $/oz = 20,03 USD/lotto.
+# ATTENZIONE: sull'oro la COMMISSIONE ESISTE, mentre sugli indici e' ZERO.
+# Nessun conto di casa la teneva prima del 10/09/2026.
+COSTO_ORO_MISURATO = 0.2003
 
 
 def log(msg):
@@ -688,7 +720,29 @@ def bandiere_921(minuti, A, riscaldamento, min_frazione=0.667):
     ds = [a1 - b1 for a1, b1 in zip(s9, s21)]
     fuori = {}
     fuori["E-ORDINE"] = segno(de[-1])
-    fuori["S-ORDINE"] = segno(ds[-1])
+
+    def inclinate(m9, m21):
+        """LE MEDIE INCLINATE nella direzione -- e' lo STATO, non
+        l'innesco: tutte e due le medie salgono (o scendono) rispetto a
+        PENDENZA_BARRE barre fa. E' la variante gia' scritta in casa
+        (REGISTRO_TEST.md riga 230, regola d'ingresso RICORRENTE:
+        'medie 9/21 INCLINATE nella direzione'), e non ha il ritardo
+        dell'incrocio: [INFERITO] con lag EMA ~ (N-1)/2 la 9 ritarda ~4
+        barre e la 21 ~10, quindi alle 15:36 su M1 un incrocio spesso
+        non e' ancora avvenuto."""
+        k = PENDENZA_BARRE
+        if len(m9) <= k or len(m21) <= k:
+            return 0
+        su = m9[-1] > m9[-1 - k] and m21[-1] > m21[-1 - k]
+        giu = m9[-1] < m9[-1 - k] and m21[-1] < m21[-1 - k]
+        if su:
+            return 1
+        if giu:
+            return -1
+        return 0
+
+    fuori["INCLINATE"] = inclinate(e9, e21)
+    fuori["S-INCLINATE"] = inclinate(s9, s21)
     # E-BARRA: il segno e' cambiato ESATTAMENTE all'ultima barra
     fuori["E-BARRA"] = segno(de[-1]) if (len(de) > 1 and segno(de[-1]) != 0
                                          and segno(de[-2]) == -segno(de[-1])) else 0
@@ -883,7 +937,7 @@ def f(x, cifre=3):
     return ("%." + str(cifre) + "f") % x
 
 
-def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
+def referto_gruppo(nome, giorni, defi, costo, orizzonte, stampa):
     stampa.append("")
     stampa.append("=" * 78)
     stampa.append("GRUPPO %s   (definizione di rottura: %s)" % (nome, defi))
@@ -939,13 +993,31 @@ def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
                      f(quantile(r5p, .75), 4)))
     stampa.append("      range della candela M5 di SETUP ($): mediana %s  Q3 %s"
                   % (f(mediana(rset), 2), f(quantile(rset, .75), 2)))
-    stampa.append("      PAVIMENTI DI CASA con spread DICHIARATO %.2f $" % spread)
-    stampa.append("      [NON MISURATO su BCM: il numero vero arriva dal cancello")
-    stampa.append("       di costo, report/ORO_1530_CANCELLO_COSTO_2026-09-10.md]")
-    stampa.append("        duro    stop >= %4.1f x spread = %5.2f $"
-                  % (PAVIMENTO_DURO, PAVIMENTO_DURO * spread))
-    stampa.append("        lavoro  stop >= %4.1f x spread = %5.2f $"
-                  % (PAVIMENTO_LAVORO, PAVIMENTO_LAVORO * spread))
+    duro = PAVIMENTO_DURO * costo
+    lavoro = PAVIMENTO_LAVORO * costo
+    stampa.append("      IL METRO DEL COSTO -- costo pieno %.4f $/oz MISURATO"
+                  % costo)
+    stampa.append("      (spread 0,1600 + commissione 0,0403; sull'oro la")
+    stampa.append("       commissione ESISTE, sugli indici e' zero)")
+    stampa.append("        pavimento DURO      stop >= %4.1f x costo = %5.2f $"
+                  % (PAVIMENTO_DURO, duro))
+    stampa.append("        pavimento DI LAVORO stop >= %4.1f x costo = %5.2f $"
+                  % (PAVIMENTO_LAVORO, lavoro))
+    q_set = sum(1 for x in rset if x >= lavoro)
+    q_r5 = sum(1 for x in r5 if x >= lavoro)
+    stampa.append(riga_freq("candela M5 di setup >= pavimento DI LAVORO",
+                            q_set, n))
+    stampa.append(riga_freq("range dei 5 minuti >= pavimento DI LAVORO",
+                            q_r5, n))
+    mr5 = mediana(r5)
+    if mr5:
+        stampa.append("      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento")
+        stampa.append("      mediano dei 5 minuti per arrivare al pavimento DI")
+        stampa.append("      LAVORO: %s volte  (mediana %s $ contro %.2f $)"
+                      % (f(lavoro / mr5, 2), f(mr5, 2), lavoro))
+        stampa.append("      E' il numero che dice a quale TF quel movimento")
+        stampa.append("      diventa pagabile: NON e' un verdetto di strategia,")
+        stampa.append("      e' una divisione.")
 
     # ---- (b) direzionale
     stampa.append("")
@@ -996,9 +1068,14 @@ def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
                   % (f(quantile(mae, .25), 2), f(mediana(mae), 2),
                      f(quantile(mae, .75), 2), f(quantile(mae, .80), 2),
                      f(quantile(mae, .90), 2)))
+    p80 = quantile(mae, .80)
     stampa.append("       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%")
     stampa.append("       delle escursioni contrarie vale %s $ (P80 del MAE)."
-                  % f(quantile(mae, .80), 2))
+                  % f(p80, 2))
+    if p80:
+        stampa.append("       quello stop vale %s volte il costo pieno, contro il"
+                      % f(p80 / costo, 1))
+        stampa.append("       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.")
     stampa.append("       MFE (%%): mediana %s      MAE (%%): mediana %s"
                   % (f(mediana(mfep), 4), f(mediana(maep), 4)))
     stampa.append("       netto a fine 5 minuti ($): Q1 %s  mediana %s  Q3 %s"
@@ -1051,6 +1128,10 @@ def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
     stampa.append("  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA")
     stampa.append("      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;")
     stampa.append("       a 21 periodi la media guarda indietro PRIMA dell'apertura)")
+    stampa.append("      PRINCIPALE = %s (le medie INCLINATE nel verso della rottura,"
+                  % CONDIZIONE_PRINCIPALE)
+    stampa.append("      pendenza su %d barre M1). L'INCROCIO e' una VARIANTE."
+                  % PENDENZA_BARRE)
     riass["c921"] = {}
     for cond in CONDIZIONI:
         con = [g for g in rotti if g["b921"] is not None
@@ -1071,6 +1152,16 @@ def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
         k4s = sum(1 for x in dsen if x[3] >= 4)
         stampa.append("      --- %s  (CON n=%d, SENZA n=%d, riscaldamento assente %d)"
                       % (cond, len(con), len(senza), nd))
+        quota = 100.0 * len(con) / (len(con) + len(senza))
+        stampa.append("          la condizione si accende nel %.1f%% dei giorni con rottura"
+                      % quota)
+        if min(len(con), len(senza)) < MIN_BRACCIO_921:
+            stampa.append("          SOSPESA: il braccio piu' piccolo ha %d osservazioni"
+                          % min(len(con), len(senza)))
+            stampa.append("          (pavimento %d). Un confronto con un braccio cosi'"
+                          % MIN_BRACCIO_921)
+            stampa.append("          sottile non e' leggibile, e una condizione che si")
+            stampa.append("          accende quasi sempre non FILTRA: doppia con la rottura.")
         stampa.append("          MFE mediano   CON %s $   SENZA %s $   delta %s $ (%s%%)"
                       % (f(mfc, 2), f(mfs, 2), f(mfc - mfs, 2),
                          f(100.0 * (mfc - mfs) / mfs, 1) if mfs else "n/d"))
@@ -1080,7 +1171,7 @@ def referto_gruppo(nome, giorni, defi, spread, orizzonte, stampa):
                       % (f(nec, 2), f(nes, 2)))
         stampa.append(confronta("          k >= 4 nella direzione",
                                 k4c, len(con), k4s, len(senza)))
-        if cond == "E-ORDINE":
+        if cond == CONDIZIONE_PRINCIPALE:
             riass["c921"]["mfe_con"] = mfc
             riass["c921"]["mfe_senza"] = mfs
             riass["c921"]["k4_con"] = k4c
@@ -1273,7 +1364,8 @@ def autotest():
         msu[A + 6 + i] = barra(103.3, 103.4, 103.2, 103.35)
     b = bandiere_921(msu, A, 45)
     assert b is not None and b["E-ORDINE"] == 1, b
-    assert b["S-ORDINE"] == 1, b
+    assert b["INCLINATE"] == 1, b
+    assert b["S-INCLINATE"] == 1, b
     # serie che SCENDE: EMA9 sotto EMA21
     mgiu = {}
     for i in range(60):
@@ -1283,11 +1375,23 @@ def autotest():
         p = 107.0 - 0.05 * i
         mgiu[A + i] = barra(p, p + 0.3, p - 0.3, p)
     b2 = bandiere_921(mgiu, A, 45)
-    assert b2["E-ORDINE"] == -1 and b2["S-ORDINE"] == -1, b2
+    assert b2["E-ORDINE"] == -1 and b2["INCLINATE"] == -1, b2
+    assert b2["S-INCLINATE"] == -1, b2
     # riscaldamento troppo bucato -> n/d, e il giorno resta valido per il resto
     mbuco = {k2: v2 for k2, v2 in msu.items() if k2 >= A - 5}
     assert bandiere_921(mbuco, A, 45) is None
-    log("10. medie 9/21: ordine giusto in salita e in discesa, n/d se bucate: OK")
+    log("10. medie 9/21: ordine e INCLINAZIONE in salita e in discesa,")
+    log("    n/d se il riscaldamento e' bucato: OK")
+    ok += 1
+
+    # 10b. serie PIATTA: le medie non sono inclinate da nessuna parte
+    mpiatta = {}
+    for i in range(70):
+        mpiatta[A - 60 + i] = barra(100.0, 100.05, 99.95, 100.0)
+    bp = bandiere_921(mpiatta, A, 45)
+    assert bp is not None and bp["INCLINATE"] == 0, bp
+    assert bp["S-INCLINATE"] == 0, bp
+    log("10b. serie piatta -> INCLINATE = 0 (nessun verso): OK")
     ok += 1
 
     # 11. E-BARRA: l'incrocio avviene ESATTAMENTE nella barra A+5
@@ -1314,7 +1418,7 @@ def autotest():
     ok += 1
 
     log("")
-    log("AUTOTEST: %d/13 OK" % ok)
+    log("AUTOTEST: %d/14 OK" % ok)
     return 0
 
 
@@ -1348,8 +1452,10 @@ def main():
                     help="minuti M1 osservati oltre l'ingresso (default 10)")
     ap.add_argument("--riscaldamento", type=int, default=45,
                     help="barre M1 prima di A per le medie 9/21")
-    ap.add_argument("--spread", type=float, default=0.25,
-                    help="spread oro DICHIARATO in $ (BCM: NON MISURATO)")
+    ap.add_argument("--costo", type=float, default=COSTO_ORO_MISURATO,
+                    help="costo PIENO di un giro completo in $/oncia. Default "
+                         "0,2003 = spread 0,1600 + commissione 0,0403, MISURATO "
+                         "il 10/09/2026 sul conto vero")
     ap.add_argument("--seme", type=int, default=20260910)
     ap.add_argument("--definizione", default="T", choices=["T", "C", "M"])
     ap.add_argument("--fase", default="is", choices=["is", "oos", "tutto"],
@@ -1395,7 +1501,11 @@ def main():
     stampa.append("orizzonte osservato: %d minuti M1" % args.orizzonte)
     stampa.append("riscaldamento medie 9/21: %d barre M1" % args.riscaldamento)
     stampa.append("seme del controllo casuale: %d" % args.seme)
-    stampa.append("spread oro DICHIARATO: %.2f $  -- [NON MISURATO su BCM]" % args.spread)
+    stampa.append("COSTO PIENO giro completo: %.4f $/oz  (spread 0,1600 + "
+                  "commissione 0,0403)" % args.costo)
+    stampa.append("  MISURATO il 10/09/2026, report/ORO_1530_CANCELLO_COSTO_2026-09-10.md")
+    stampa.append("  pavimenti di casa: DURO %.2f $ (13,3x)   DI LAVORO %.2f $ (40x)"
+                  % (PAVIMENTO_DURO * args.costo, PAVIMENTO_LAVORO * args.costo))
     stampa.append("FASE: %s" % args.fase.upper())
     if args.fase == "oos":
         stampa.append("")
@@ -1413,10 +1523,12 @@ def main():
     stampa.append("e' BCM. Manuale non vuol dire esente dai cancelli: lo spread lo")
     stampa.append("paga anche la mano.")
     stampa.append("")
-    stampa.append("IPOTESI PRINCIPALE (una): APERTURA_NY x rottura %s x 9/21 E-ORDINE,"
-                  % args.definizione)
-    stampa.append("confrontata con CTRL_QUIETO. Varianti dichiarate: 5. Il resto e'")
+    stampa.append("IPOTESI PRINCIPALE (una): APERTURA_NY x rottura %s x 9/21 %s,"
+                  % (args.definizione, CONDIZIONE_PRINCIPALE))
+    stampa.append("confrontata con CTRL_QUIETO. Varianti dichiarate: 6. Il resto e'")
     stampa.append("descrizione, non prova.")
+    stampa.append("L'inclinazione e' la PRINCIPALE e l'incrocio una VARIANTE, non il")
+    stampa.append("contrario: su M1 a 4-5 minuti dall'apertura l'incrocio arriva tardi.")
 
     if not args.salta_orologio:
         scelti = scegli_file_orologio(files)
@@ -1554,14 +1666,14 @@ def main():
     riass = {}
     for nome, _, _ in GRUPPI:
         riass[nome] = referto_gruppo(nome, risultati[nome], args.definizione,
-                                     args.spread, args.orizzonte, stampa)
+                                     args.costo, args.orizzonte, stampa)
     ny_disc = [r for r in risultati["APERTURA_NY"] if r["discorde"]]
     roma_disc = [r for r in risultati["APERTURA_ROMA"] if r["discorde"]]
     if ny_disc:
         referto_gruppo("NY_SOLO_GIORNI_DISCORDI", ny_disc, args.definizione,
-                       args.spread, args.orizzonte, stampa)
+                       args.costo, args.orizzonte, stampa)
         referto_gruppo("ROMA_SOLO_GIORNI_DISCORDI", roma_disc, args.definizione,
-                       args.spread, args.orizzonte, stampa)
+                       args.costo, args.orizzonte, stampa)
 
     # ---- il confronto che rende onesta la misura
     stampa.append("")
@@ -1595,7 +1707,8 @@ def main():
         b9 = base.get("c921", {})
         c9 = c.get("c921", {})
         if b9.get("mfe_senza") and c9.get("mfe_senza"):
-            stampa.append("  9/21 E-ORDINE, guadagno di MFE mediano CON contro SENZA:")
+            stampa.append("  9/21 %s, guadagno di MFE mediano CON contro SENZA:"
+                          % CONDIZIONE_PRINCIPALE)
             stampa.append("      APERTURA_NY  %s $ -> %s $  (%s%%)"
                           % (f(b9["mfe_senza"], 2), f(b9["mfe_con"], 2),
                              f(100.0 * (b9["mfe_con"] - b9["mfe_senza"]) / b9["mfe_senza"], 1)))
@@ -1613,13 +1726,14 @@ def main():
     stampa.append("   OCCASIONI, mai un verdetto (regola F6).")
     stampa.append("2. OHLC M1, non tick: MFE e MAE sono ESTREMI raggiunti, non esiti")
     stampa.append("   di un'uscita simulata. Nessuna uscita e' simulata qui.")
-    stampa.append("3. ZERO COSTI dedotti. Lo spread BCM sull'oro NON E' MAI STATO")
-    stampa.append("   MISURATO: i pavimenti stampati usano un numero DICHIARATO, e il")
-    stampa.append("   posto per quello vero e' --spread.")
+    stampa.append("3. ZERO COSTI DEDOTTI dai numeri: MFE e MAE sono lordi. Il costo")
+    stampa.append("   pieno MISURATO (0,2003 $/oz) compare solo come METRO, nelle")
+    stampa.append("   righe dei pavimenti. Chi legge un MFE senza sottrarre 0,2003")
+    stampa.append("   sta leggendo un numero che non esiste.")
     stampa.append("4. Il campione finisce nel 2020: non copre il regime 2021-2026.")
     stampa.append("5. Un picco isolato in un anno solo non e' un comportamento: si")
     stampa.append("   guarda la tabella per anno prima di dire qualunque cosa.")
-    stampa.append("6. Ipotesi provate: 1 principale + 5 varianti dichiarate. La")
+    stampa.append("6. Ipotesi provate: 1 principale + 6 varianti dichiarate. La")
     stampa.append("   cassaforte %d-%d serve a confermare, non a scegliere."
                   % (ANNO_CASSAFORTE, ULTIMO_ANNO))
 
