@@ -478,3 +478,61 @@ _Fonti primarie, tutte sul branch `lavoro`:
 `report/CACCIA_APERTURE_ORO_2026-09-08.md` §2 (e la sua **errata**, §2.2 qui) ·
 `report/SONDA_TICK_ORO_ATTENZIONE.md` ·
 `backtest_pipeline/righe/RIGA_SPREADLOGGER_DA_MANDARE.md`._
+
+---
+
+# 🔎 VERIFICA INDIPENDENTE DELLA SESSIONE PRINCIPALE — 10/09/2026
+
+Rifatti i conti da zero su `data/statements/trades_auto.csv` (1.296 righe), senza
+guardare i numeri del referto. **Il verdetto regge. Due cifre di contorno vanno
+corrette**, e si correggono qui perche' un referto che porta un numero storto lo
+porta per sempre.
+
+## ✅ CONFERMATO AL CENTESIMO
+| cosa | referto | ricontato | esito |
+|---|---|---|---|
+| commissione XAUUSD per lotto, giro completo | −3,48 EUR | **−3,4858 EUR** (352,28 lotti, −1.227,99 EUR) | ✅ |
+| commissione su **D30EUR, NASUSD, U30USD, SPXUSD, 225JPY, F40EUR, USOIL** | 0,00 | **0,00 su tutti e sette** | ✅ |
+| operazioni oro aperte 14:35-14:40 server | 33 | **33** | ✅ |
+| giornate distinte | 19 | **19** | ✅ |
+| magic | 0 (manuale) | **0, tutte e 33** | ✅ |
+| P/L netto | −785,99 EUR | **−785,99 EUR** | ✅ |
+| operazioni vinte | 22 su 33 = 66,7% | **22 su 33 = 66,7%** | ✅ |
+| durata mediana | 1,9 min | **1,9 min** (min 0,2 · max 34,5) | ✅ |
+| escursione mediana | 1,41 $ | **1,410 $** | ✅ |
+
+🎯 **Il fatto centrale e' vero e va ripetuto: 2 operazioni su 3 vinte, e il conto
+chiude a −785,99 EUR.** E' la firma di un cancello di costo, non della sfortuna.
+
+## 🔧 CORREZIONE 1 — la n della commissione: **520, non 385**
+Le righe XAUUSD in `trades_auto.csv` sono **520** (352,28 lotti). Il rapporto
+commissione/lotto non cambia di un centesimo, ma **la n dichiarata dev'essere
+quella vera**: qui si sbaglia sempre nel verso di sembrare piu' prudenti di
+quanto si e', e anche quello e' un errore di misura.
+
+## 🔧 CORREZIONE 2 — il pedaggio: **~501 EUR (64%)**, e per meta' e' STIMATO
+Il referto scrive *"~473 EUR (60%) sono solo pedaggio"*. Rifatto:
+- **commissione VERA, letta dalla colonna: −95,24 EUR** su quelle 33 operazioni
+  (27,37 lotti). Questo pezzo e' **misurato**.
+- **spread: STIMATO**, perche' nella finestra 14:30-14:41 server **non e'
+  misurato** (e' il buco n.1 del referto). Ai 27,37 lotti:
+  | spread ipotizzato | costo spread | + commissione | % della perdita |
+  |---|---:|---:|---:|
+  | **0,16 $** (la lettura piu' FAVOREVOLE che abbiamo) | 405,74 EUR | **500,98 EUR** | **64%** |
+  | 0,22 $ (l'altra lettura) | 557,90 EUR | 653,14 EUR | **83%** |
+
+> ### 🔴 E QUESTA E' LA RIGA CHE CONTA
+> **Il pedaggio misurato e' solo la commissione: 95,24 EUR, il 12%.** Il resto —
+> dal 12% al 64% — **e' stimato con uno spread letto in un altro momento della
+> giornata**. La conclusione non cambia (anche col numero piu' favorevole il
+> pedaggio si mangia i due terzi della perdita, e il rapporto stop/spread resta
+> 8,8-12,5x contro i 40x richiesti), **ma la parola "misurato" non si usa per la
+> parte stimata**. Il modo di chiudere il buco e' gia' scritto nel referto:
+> aggiungere `,XAUUSD` allo `ABTG_SpreadLogger` sul demo **50503392**.
+
+## 🧾 NOTA DI METODO
+Il verdetto **non poggia sui 33 trade** — poggia sull'aritmetica di
+`stop >= 40 x spread`, che vale anche senza di loro. I 33 trade sono la
+**conferma indipendente**, e con n=33 restano sotto la soglia del MERITO
+(valvola R59): sospendono il giudizio sul merito, **mai** quello sul RISCHIO e
+sul COSTO.
