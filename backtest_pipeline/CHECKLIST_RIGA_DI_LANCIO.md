@@ -11346,7 +11346,7 @@ Sul 04/09 **si accende**; in 40 giorni sbaglia **3 volte invece di 13**.
 
 ---
 
-## 173. 🚪 IL CANCELLO CHIEDE UN **PIN** A UNA RIGA CHE NON SCARICA NIENTE — e cosi' boccia proprio il **censimento di sola lettura** che CLAUDE.md pretende prima di ogni lavoro
+## 173. 🚪 IL CANCELLO CHE CHIEDE UN **PIN** A UNA RIGA CHE NON SCARICA NIENTE — e la toppa che, tolto il pin, **lasciava passare `$_.Kill()` sul conto REALE**
 
 **Caso reale, 10/09/2026.** Prima di importare i nove anni di storico DAX serviva
 il **censimento dei terminali** imposto dalla REGOLA DEI TERMINALI MULTIPLI (06/09):
@@ -11355,77 +11355,135 @@ il **censimento dei terminali** imposto dalla REGOLA DEI TERMINALI MULTIPLI (06/
 Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id, MainWindowTitle, Path | Format-Table -AutoSize
 ```
 
-`controlla_riga.py` ha risposto **FAIL** con **due bloccanti**:
+`controlla_riga.py` ha risposto **FAIL** con **due bloccanti** — `[PIN]` e
+`[MARCATORE]` — **tutti e due falsi**: una riga che non scarica e non esegue
+nessuno script **non ha niente da appuntare a un commit**, e non ha nessun
+marcatore da controllare perche' non c'e' nessun file. Il cancello chiedeva il
+passaporto a chi non attraversa la frontiera. E il falso positivo di un cancello
+**bloccante** non e' un fastidio: costringe a scavalcarlo a mano, e il giorno in
+cui scavalcarlo diventa abitudine il cancello ha smesso di proteggere.
 
-```
-X [PIN]       nessun pin trovato nella riga: la riga deve puntare a un COMMIT, non a un branch
-X [MARCATORE] la riga non verifica il MARCATORE dello script scaricato
-```
+### 🩸 MA LA PRIMA TOPPA HA APERTO UN BUCO VERO — e l'ha trovato il controllo, non l'autore
+La prima riparazione dimostrava la sola lettura con una **LISTA NERA** di cmdlet
+che scrivono. Il `controllo-preventivo` ha scritto **11 righe di prova** e le ha
+passate alla versione vecchia e alla nuova. Risultato **misurato**: **8 righe
+pericolose che prima erano bloccate passavano con rc=0.**
 
-🔴 **Tutti e due FALSI.** Quella riga non scarica nessuno script e non ne esegue
-nessuno: non c'e' **niente** da appuntare a un commit, e non c'e' nessun
-marcatore da controllare perche' non c'e' nessun file. Il cancello stava
-chiedendo il passaporto a chi non attraversa la frontiera.
-
-### 🤔 PERCHE' E' GRAVE, e non un fastidio
-E' la **terza** classe di falsi positivi del cancello stesso (dopo la 167 sui
-`||` del formato `.ini`). E il falso positivo di un cancello **bloccante** non e'
-neutro: la regola di casa dice *"il primo che fallisce blocca"*, quindi un
-allarme falso costringe a **scavalcare il cancello a mano** — e il giorno in cui
-si prende l'abitudine di scavalcarlo, il cancello ha smesso di proteggere.
-👉 **Un cancello che grida al lupo si ripara con la stessa urgenza di uno che
-lascia passare un lupo.**
-
-### 🛠️ LA RIPARAZIONE — si RESTRINGE l'ambito, non si ammorbidisce il criterio
-In `controlla_riga.py`, `esegue_uno_script(riga)` decide se la riga
-**scarica codice** (`irm`/`iwr`/`curl`/`wget`/`Invoke-RestMethod`/
-`Invoke-WebRequest`/`githubusercontent.com`) **oppure esegue uno script**
-(`.ps1`, `& powershell`, `powershell.exe`):
-
-- ✅ **se SI** → `PIN`, `MARCATORE` e `RACCOLTA` restano **esattamente come
-  prima**, bloccanti. Nessuno sconto.
-- ✅ **se NO** → la riga e' esente, **ma deve pagare il pedaggio**: se nomina
-  anche solo uno fra `Remove-Item`, `Set-Content`, `Add-Content`, `Out-File`,
-  `Copy-Item`, `Move-Item`, `New-Item`, `Start-Process`, `Invoke-Expression`,
-  `iex`, `DownloadString`, `Compress-Archive`, `Stop-Process` o una
-  redirezione, **torna BLOCCANTE con codice 173**. Il ragionamento: una riga
-  senza pin e' ammessa **solo** se e' di **SOLA LETTURA**; una riga che scrive
-  e non e' appuntabile a un commit non e' ne' pinnata ne' innocua, ed e' il
-  peggio dei due mondi.
-
-### 🧪 IL BANCO (3 casi su 3, e vanno tenuti tutti e tre)
-| riga | atteso | esito |
+| riga di prova | prima | con la lista nera |
 |---|---|---|
-| censimento `Get-Process ... Select-Object Id, MainWindowTitle, Path` | PASS | ✅ PASS |
-| riga che **scarica** uno `.ps1` **senza pin** (`.../lavoro/...`) | FAIL | ✅ FAIL (PIN + MARCATORE) |
-| riga senza download che chiama **`Remove-Item`** | FAIL | ✅ FAIL (173) |
+| `Get-Process terminal64 \| ForEach-Object { $_.Kill() }` | FAIL | 🔴 **PASS** — ammazza anche il **REALE 10105439** |
+| `taskkill /IM terminal64.exe /F` | FAIL | 🔴 **PASS** |
+| `rm "C:\BCM_Reale\MQL5\Experts\Guardian.ex5"` | FAIL | 🔴 **PASS** |
+| `& "C:\BCM_Reale\terminal64.exe" /portable` | FAIL | 🔴 **PASS** |
+| `Export-Csv` · `Rename-Item` · `Tee-Object` · `sc` (alias di `Set-Content`) | FAIL | 🔴 **PASS** |
+| `Get-Process terminal64 && Get-Date` | FAIL | 🔴 **PASS** (costrutto pwsh-7) |
 
-Piu' il **risweep di non-regressione**: `--ps1` su **243 file `.ps1`** del repo →
-**0 bloccanti**, come prima della modifica.
+👉 **Una lista nera dimentica sempre qualcosa**: gli **alias** (`rm`, `sc`, `ni`,
+`kill`, `iex`, `epcsv`, `mkdir`), i **nativi** (`taskkill`, `cmd`), i **metodi**
+(`$_.Kill()`), l'**operatore di chiamata `&`**, e i cmdlet semplicemente non
+elencati (`Export-Csv`, `Rename-Item`, `Tee-Object`).
 
-### 🐛 E UN DIFETTO DENTRO LA RIPARAZIONE, trovato al banco
-La prima stesura cercava i cmdlet che scrivono con un `in` su stringa: e
-`"Remove-Item"` **contiene** `"Move-Item"`, quindi il messaggio accusava la riga
-di due cmdlet quando ne aveva uno. Bloccava giusto per il motivo giusto, ma
-**diceva un numero falso** — e un cancello che esagera l'accusa si fa credere
-meno la volta dopo. Riparato col confine di parola
-`(?<![A-Za-z-]) ... (?![A-Za-z])`.
+### 🕳️ E ha smascherato DUE buchi che il `[PIN]` copriva per caso
+Finche' **ogni** riga non pinnata veniva bocciata, questi due non si vedevano:
+1. **`controlla_terminali()` gira su `senza_stringhe()`**: in una riga sola il
+   percorso del REALE sta **sempre fra virgolette**, quindi `"C:\BCM_Reale\..."`
+   era **invisibile** al controllo TERMINALE.
+2. **`PWSH7_ONLY` non era MAI applicato alla `--riga`**, solo ai `.ps1`. Ma
+   **senza pin la riga E' il codice che gira**: `&&` passava liscio.
 
-### 📌 E LA LEZIONE SUL NUMERO DELLA CLASSE
-Questa classe era stata scritta nel codice come **169**: numero **gia' occupato**
-(169 = lo script che rigenera un `.md` scritto a mano). Il numero si sceglie
-**leggendo la coda della checklist**, non contando a memoria dall'ultima classe
-che si ricorda: due classi con lo stesso numero rendono la memoria del progetto
-**inconsultabile**, che e' l'unica cosa che questa checklist deve garantire.
+### 🛠️ LA RIPARAZIONE BUONA — lista **BIANCA**, non lista nera
+- pin, marcatore e raccolta restano **bloccanti** per ogni riga che scarica
+  codice (`irm`/`iwr`/`curl`/`wget`/`Invoke-RestMethod`/`Invoke-WebRequest`/
+  `githubusercontent`) o esegue uno script (`.ps1`, `& powershell`);
+- una riga senza pin e' ammessa **solo** se e' di **SOLA LETTURA DIMOSTRATA**:
+  ogni token `Verbo-Nome` **fuori dalla lista bianca** e' **BLOCCANTE**, piu' i
+  divieti espliciti che quella forma non ce l'hanno — operatore `&`, nativi,
+  alias, metodi (`.Kill(`, `.Delete(`, `.WriteAllText`), `New-Object`,
+  `[System.IO.`, redirezione `>`;
+- sulla riga si applicano anche **`PWSH7_ONLY`** e i **percorsi vietati cercati
+  DENTRO le stringhe**, e li' la guardia vale solo se e' un **rifiuto vero**
+  (`Muori`/`throw`/`exit 1`/`VIETATO`): la `GUARDIA` generica contiene
+  `Write-Host` e `-ne`, e su una riga sola basterebbero quelli a zittire il
+  divieto sul percorso del REALE.
+
+**Banco**: **14 casi su 14** giusti (13 devono restare rosse, il censimento
+verde). **Non-regressione**: `--ps1` su **243 file `.ps1`** del repo → **0
+bloccanti**, e la riga pinnata vera da' **lo stesso esito di prima**.
+
+### 🐛 Un difetto dentro la riparazione stessa
+La prima stesura cercava i cmdlet con un `in` su stringa: `"Remove-Item"`
+**contiene** `"Move-Item"`, quindi il cancello accusava di due cmdlet una riga
+che ne aveva uno. Bloccava per il motivo giusto ma **diceva un numero falso** —
+e un cancello che esagera l'accusa si fa credere meno la volta dopo. Riparato
+col confine di parola.
+
+### 📌 E il numero di classe: era stato scritto **169**, gia' occupata
+169 e' lo script che rigenera un `.md` scritto a mano (r.11208). Il numero si
+sceglie **leggendo la coda della checklist**, non contando a memoria: due classi
+con lo stesso numero rendono inconsultabile l'unica cosa che questa checklist
+deve garantire.
 
 > ### 🔴 LA REGOLA
-> 1. **Un controllo bloccante si applica SOLO alle righe di cui e' vero.**
->    Il pin protegge dal codice che cambia sotto i piedi: dove non gira codice,
->    non c'e' niente da proteggere e l'allarme e' rumore.
-> 2. **Restringere l'ambito NON e' ammorbidire il criterio** — ma va dimostrato:
->    ogni restrizione si accompagna a un caso di banco che **deve ancora
->    fallire** (qui: la riga che scarica senza pin) e a un **risweep** di tutti
->    i file gia' approvati.
-> 3. **L'esenzione si paga**: chi non e' pinnato deve essere di sola lettura.
->    Nessuna riga sta nella terra di mezzo (scrive **e** non e' appuntabile).
-> 4. **Il numero di classe si legge in coda alla checklist prima di scriverlo.**
+> 1. **Un controllo bloccante si applica SOLO alle righe di cui e' vero.** Il
+>    pin protegge dal codice che cambia sotto i piedi: dove non gira codice, non
+>    c'e' niente da proteggere e l'allarme e' rumore.
+> 2. **L'esenzione si paga con una LISTA BIANCA, mai con una lista nera.** La
+>    sola lettura si **dimostra**; una lista nera dimentica sempre qualcosa, e
+>    quello che dimentica il 10/09 era `$_.Kill()` sul conto reale.
+> 3. **Senza pin, LA RIGA E' IL CODICE**: su di essa vanno fatti anche i
+>    controlli nati per i `.ps1` — costrutti pwsh-7 e percorsi vietati cercati
+>    **anche dentro le stringhe** (in una riga sola ci stanno sempre).
+> 4. **Un ALLENTAMENTO del cancello non si consegna senza la PROVA DI
+>    REGRESSIONE**: la lista delle righe pericolose che devono restare rosse,
+>    girata prima e dopo. Chi allenta un cancello ha l'onere della prova, e la
+>    prova e' una tabella, non una convinzione.
+> 5. **Il numero di classe si legge in coda alla checklist prima di scriverlo.**
+
+---
+
+## 174. 📋 `Format-Table -AutoSize` **TRONCA L'ULTIMA COLONNA** — e nel censimento dei terminali l'ultima colonna e' quella che distingue il **100k** dal **piccolo**
+
+**Trovato il 10/09 dal `controllo-preventivo` sulla riga del censimento.**
+`-AutoSize` dimensiona le colonne sul contenuto **ma resta dentro la larghezza
+della console**: quando la somma sfonda, taglia l'**ultima** colonna con `...`.
+Nel censimento l'ultima colonna e' `Path`, e i tre programmi si distinguono
+**in coda**:
+
+```
+...\BCM Markets MT5 Terminal\terminal64.exe          <- piccolo 50503392
+...\BCM Markets MT5 Terminal -V3\terminal64.exe      <- 100k    50504263
+```
+
+Con un titolo MT5 lungo (`50504263: Nome - BCM Markets ... [GER40,H1]`) la riga
+sfonda, e **` -V3` e' la prima cosa che sparisce**: il 100k stampato **identico**
+al piccolo. 🔴 E' **l'incidente del 06/09 ricreato da un flag di formattazione** —
+quella volta un attacco EA destinato al piccolo stava per finire sul REALE.
+
+Due difetti gemelli sulla stessa riga:
+- **`-ErrorAction SilentlyContinue` da solo** rende *"zero terminali accesi"*
+  **indistinguibile** da *"la riga non ha funzionato"*: output vuoto in tutti e
+  due i casi. Per un censimento che deve produrre un **FATTO STAMPATO**, il
+  vuoto non e' un fatto: va detto **a parole**.
+- **`Path` e `MainWindowTitle` possono tornare VUOTI in silenzio**: `Path` e'
+  una ScriptProperty su `MainModule.FileName` e su un processo di **altro utente
+  o elevato** (i terminali avviati da attivita' pianificate lo sono — vedi
+  `scarica_pagella` delle 23:15) l'accesso e' negato e PowerShell **inghiotte
+  l'errore**. Una colonna bianca senza spiegazione e' peggio di un errore.
+
+> ### 🔴 LA REGOLA
+> 1. **In un censimento che deve IDENTIFICARE qualcosa si usa `Format-List`, mai
+>    `Format-Table`** (e `Out-String -Width 400` per il pipe). `Format-List` non
+>    tronca in nessun caso.
+> 2. **Un elenco vuoto si dichiara a parole**, con il conteggio stampato prima:
+>    `processi vivi: 0` + *"censimento RIUSCITO, elenco vuoto"*.
+> 3. **Un campo che puo' essere illeggibile si ETICHETTA**, non si lascia bianco:
+>    *"NON LEGGIBILE (processo di altro utente o elevato)"* dice cosa fare;
+>    il bianco no.
+> 4. **`Path` dice quale PROGRAMMA, non quale CONTO.** Il conto vive nella
+>    cartella **DATI** (`%APPDATA%\MetaQuotes\Terminal\<hash>`), che
+>    `Get-Process` non stampa: la mappa cartella→conto e' una **convenzione** di
+>    CLAUDE.md, non un fatto letto dal terminale. Chi lo legge davvero e'
+>    `backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1`. Il censimento dei
+>    processi dice **chi e' vivo adesso**; CODA_03 dice **quale conto sta in
+>    quale cartella**. Da sola, nessuna delle due chiude la REGOLA DEI TERMINALI
+>    MULTIPLI.

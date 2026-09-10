@@ -254,10 +254,31 @@ def controlla_terminali(path, testo, dove):
 # verso e li' NON si tocca: se la riga scarica o esegue uno .ps1, pin e marcatore
 # restano BLOCCANTI. In cambio la riga esente deve dimostrare di essere di sola
 # lettura: se nomina un cmdlet che scrive, l'esenzione decade e torna bloccante.
-SCRITTURA = ["Remove-Item", "Set-Content", "Add-Content", "Out-File", "Copy-Item",
-             "Move-Item", "New-Item", "Start-Process", "Invoke-Expression", "iex ",
-             "DownloadString", "Compress-Archive", "Stop-Process", "> "]
-
+# LISTA BIANCA: la sola lettura si DIMOSTRA, non si presume. Una lista NERA
+# dimentica sempre qualcosa -- misurato il 10/09: con la lista nera passavano
+# "Get-Process terminal64 | ForEach-Object { $_.Kill() }", "taskkill /IM
+# terminal64.exe /F", "rm C:\...\Guardian.ex5" e "& C:\BCM_Reale\terminal64.exe".
+LETTURA_AMMESSI = set(x.lower() for x in [
+    "Get-Process", "Get-Service", "Get-Date", "Get-ChildItem", "Get-Item",
+    "Get-Content", "Get-ItemProperty", "Get-CimInstance", "Get-WmiObject",
+    "Get-ScheduledTask", "Get-ComputerInfo", "Get-Volume", "Get-PSDrive",
+    "Get-Location", "Get-Command", "Get-Member", "Get-Host", "Get-Random",
+    "Select-Object", "Sort-Object", "Where-Object", "ForEach-Object",
+    "Group-Object", "Measure-Object", "Compare-Object", "Format-Table",
+    "Format-List", "Out-String", "Out-Host", "Select-String", "Write-Output",
+    "Write-Host", "Test-Path", "Join-Path", "Split-Path", "Resolve-Path",
+    "Convert-Path", "ConvertTo-Json", "ConvertFrom-Json", "Import-Csv",
+])
+# comandi nativi, alias e METODI che scrivono/uccidono e che non hanno la forma Verbo-Nome
+LETTURA_VIETATI = [
+    (r"(?<![A-Za-z0-9_$-])&(?!&)",            "l'operatore di chiamata '&': una riga senza pin non puo' invocare un eseguibile"),
+    (r"\b(taskkill|schtasks|net|reg|attrib|xcopy|robocopy|cmd|wmic|sc)\b", "comando nativo che puo' modificare la macchina"),
+    (r"\b(rm|del|erase|rd|rmdir|ri|mv|cp|ni|cpi|mi|sp|spps|saps|kill|start|echo|tee|ac|iex|ii|si|rp|rni|epcsv|md|mkdir|clc|cli|sal|sbp|rjb|spjb)\b", "alias PowerShell/DOS che scrive o uccide"),
+    (r"\.(Kill|Close|CloseMainWindow|Stop|Delete|Remove|Save|WriteAllText|WriteAllLines|AppendText|Create)\s*\(", "chiamata a un METODO che modifica lo stato (es. $_.Kill())"),
+    (r"\bNew-Object\b",                      "New-Object: puo' costruire un WebClient o uno scrittore di file"),
+    (r"\[\s*System\.IO\.",                   "accesso diretto a System.IO"),
+    (r">",                                    "redirezione: scrive un file"),
+]
 def esegue_uno_script(riga):
     """True se la riga scarica codice o manda in esecuzione uno .ps1.
     Solo in quel caso il pin e il marcatore hanno un senso (e sono bloccanti)."""
@@ -275,12 +296,30 @@ def controlla_riga_lancio(riga):
     con_script = esegue_uno_script(riga)
     if not con_script:
         # confine di parola: senza, "Remove-Item" fa scattare anche "Move-Item"
-        sporche = [v for v in SCRITTURA
-                   if re.search(r"(?<![A-Za-z-])" + re.escape(v.strip()) + r"(?![A-Za-z])", riga, re.I)]
+        nudo = senza_stringhe(riga)
+        sporche = []
+        for cmdlet in re.findall(r"(?<![A-Za-z0-9_.-])([A-Za-z]+-[A-Za-z]+)", nudo):
+            if cmdlet.lower() not in LETTURA_AMMESSI:
+                sporche.append("cmdlet '" + cmdlet + "' non e' nella lista bianca di sola lettura")
+        for pat, perche in LETTURA_VIETATI:
+            if re.search(pat, nudo, re.I):
+                sporche.append(perche)
+        # i costrutti pwsh-7 sulla RIGA: senza pin, la riga E' il codice che gira
+        for pat, nome in PWSH7_ONLY:
+            if re.search(pat, nudo):
+                blocca("PWSH7", "la riga usa " + nome + ": sul VPS gira Windows PowerShell 5.1")
+        # i percorsi vietati vanno cercati anche DENTRO le stringhe: in una riga
+        # sola il percorso del REALE sta sempre fra virgolette
+        # su UNA riga sola la GUARDIA generica e' troppo larga (basterebbe un
+        # "Write-Host" per zittire il divieto): qui vale solo un RIFIUTO vero
+        GUARDIA_RIGA = r"(Muori|throw|exit\s+1|VIETATO)"
+        for v in VIETATI_PERCORSO:
+            if v in riga and not re.search(GUARDIA_RIGA, riga, re.I):
+                blocca("TERMINALE", "la riga nomina '" + v + "' (anche dentro una stringa) e non e' una guardia che lo rifiuta")
         if sporche:
-            blocca("173", "la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA nomina " + ", ".join(sporche) + ": una riga senza pin e' ammessa solo se e' di SOLA LETTURA. Cosi' com'e' non e' ne' pinnata ne' innocua")
+            blocca("173", "la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
         else:
-            passa("riga di SOLA LETTURA locale: nessuno script scaricato o eseguito, nessun cmdlet che scrive -> pin e marcatore non si applicano (classe 173)")
+            passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
 
     # --- 1. il PIN deve essere un COMMIT (classe 164): 40 esadecimali
     pins = re.findall(r"githubusercontent\.com/[^/]+/[^/]+/([A-Za-z0-9_.-]+)/", riga)
