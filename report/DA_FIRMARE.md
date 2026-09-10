@@ -1,5 +1,5 @@
 # ✍️ COSA DEVE DECIDERE E FIRMARE CLAUDIO
-_Aggiornato: 08/09/2026, sera. **23 giorni al 1° ottobre.**_
+_Aggiornato: 10/09/2026, sera. **21 giorni al 1° ottobre.**_
 
 Tre tipi di riga, e sono diversi:
 - 🖊️ **FIRMA** — una decisione. La prendi tu, io non posso.
@@ -67,15 +67,34 @@ non e' mai stata caricata su nessun grafico — **ma il preset e' li', pronto**.
 🔴 **Ma resta di Claudio**, perche' un magic identifica una sedia e cambiarlo
 significa che le operazioni vecchie e nuove non si sommano piu' nelle statistiche.
 
-## 3. 🖊️ LA BCE DEL 10/09: si arma o no?
-**Il fatto**: nel calendario ci sono **3 righe USD** (residuo NFP) e **ZERO righe
-BCE**. Così com'è, giovedì **non spara niente** — ed è il comportamento corretto.
-**Due decisioni distinte**:
-   a) **si arma?** Scrivere la riga BCE in `abtg_news.csv` è **fuori dal perimetro
-      firmato del runner**: o lo fai tu, o si firma un allargamento;
-   b) **con quale coppia?** Solo **EURJPY** (preset già collaudato) oppure **anche
-      EURUSD** (preset nuovo `ABTG_PostNews_ECB_EURUSD.set`, magic 771202, **mai girato**).
-⚠️ Se la risposta è "non si arma", va detto: è una decisione, non una dimenticanza.
+## 3. ✅ LA BCE DEL 10/09: **CHIUSA — armata da Claudio, e ha sparato**
+**Esito misurato**: la sedia ECB **EURJPY 771201** ha fatto la sua **prima
+operazione in assoluto** e ha perso **80,90 EUR su 5.427,56 = 1,4905%**, contro
+lo **0,65% del contratto scritto la mattina stessa**. **2,3 volte.**
+📄 `report/CONTRATTO_POSTNEWS_ECB_771201_2026-09-10.md` (scritto PRIMA) ·
+`report/POSTNEWS_ECB_ESITO_2026-09-10.md` (l'esito e la causa).
+
+🔴 **La causa non e' il preset: e' il DEFAULT COMPILATO.** Il `.set` nel repo
+dice 1.30 ed e' giusto; `mql5/Experts/ABTG_PostNews.mq5` riga **113** dice
+`input double InpRiskPercent = 3.0;`. Il lotto uscito (**0,58**) e' quello del
+3,0 — non quello dell'1,3 (che avrebbe dato **0,25**).
+⚠️ **Nota da ripetere ogni volta che si cita il 3,0**: si traduce in **1,50%
+per gamba stoppata**, non in 3,00%, perche' il lotto si dimensiona su
+`InpRiskRefSLpips = 50` mentre lo stop piazzato e' **25**. Il 3,0 descrive
+l'evento a doppio stop.
+
+👉 **Resta aperto e diventa il punto 3-bis.**
+
+## 3-bis. 🖱️ POSTNEWS: portare il **default compilato** al metro di casa (tutte e 3)
+**Perche' non basta sistemare il `.set`**: il `.set` giusto **non protegge da un
+`Resetta`**. Finche' il default compilato e' 3.0, **ogni ricarica riarma il 4,6x
+in silenzio** — ed e' esattamente quello che e' successo il 10/09.
+**Cosa serve**: cambiare la riga 113 e **ricompilare**. 🔴 **E' la TAGLIA,
+quindi e' firma tua.**
+📏 **E un numero che manca, da 30 secondi**: aprire **F7 su EURJPY** sul piccolo
+**50503392** (cartella `BCM Markets MT5 Terminal`) e leggere `InpRiskPercent`:
+dice **1.3** o **3.0**? Dice **quando** e' tornato a 3.0 — al `Resetta` o prima —
+e chiude la ricostruzione.
 
 ---
 
