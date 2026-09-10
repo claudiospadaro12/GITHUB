@@ -304,6 +304,21 @@ def controlla_riga_lancio(riga):
         for pat, perche in LETTURA_VIETATI:
             if re.search(pat, nudo, re.I):
                 sporche.append(perche)
+        # CLASSE 175 (10/09/2026): la lista bianca fermava "& x.exe" ma NON un
+        # eseguibile invocato PER PERCORSO senza '&' -- in PowerShell
+        # "C:\python313\python.exe -c ..." parte lo stesso. Il cancello
+        # stampava "riga di SOLA LETTURA" su una riga che ESEGUE codice: e' la
+        # bugia, non l'esecuzione, il difetto. Se l'eseguibile e' un terminale
+        # o sta in un percorso vietato e' BLOCCANTE; altrimenti si DICHIARA.
+        esegui = re.findall(r"(?<![A-Za-z0-9_])([A-Za-z]:\\[^\"';|]*?\.(?:exe|bat|cmd|com|msi|msix|vbs|js|py|ps1))", nudo, re.I)
+        esegui_ko = []
+        for e in esegui:
+            b = e.lower()
+            if ("terminal64" in b) or ("metaeditor64" in b) or any(v.lower() in b for v in VIETATI_PERCORSO):
+                esegui_ko.append(e)
+                blocca("175", "la riga ESEGUE '" + e + "': e' un terminale MT5 o sta in un percorso vietato. Non si avvia un terminale da una riga senza pin")
+            else:
+                rileva("175", "la riga ESEGUE '" + e + "': NON e' una riga di sola lettura. Non e' vietato, ma va letto a mano cosa gli viene passato (qui il cancello non puo' dire altro)")
         # i costrutti pwsh-7 sulla RIGA: senza pin, la riga E' il codice che gira
         for pat, nome in PWSH7_ONLY:
             if re.search(pat, nudo):
@@ -316,7 +331,11 @@ def controlla_riga_lancio(riga):
         for v in VIETATI_PERCORSO:
             if v in riga and not re.search(GUARDIA_RIGA, riga, re.I):
                 blocca("TERMINALE", "la riga nomina '" + v + "' (anche dentro una stringa) e non e' una guardia che lo rifiuta")
-        if sporche:
+        if esegui_ko:
+            pass          # gia' bloccata sopra: non si stampa nessun "passa"
+        elif esegui and not sporche:
+            passa("riga locale senza download: nessun cmdlet fuori dalla lista bianca (ma ESEGUE " + ", ".join(esegui) + ": vedi il rilievo 175)")
+        elif sporche:
             blocca("173", "la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
         else:
             passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
