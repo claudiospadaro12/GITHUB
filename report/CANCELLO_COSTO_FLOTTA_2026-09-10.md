@@ -80,14 +80,78 @@ esegue, su **52 sedie censite** (che è la flotta di oggi, non quella di agosto)
    `ABTG_ORB_Ottimizzato` U30USD, **29,5x** (74% del pavimento) con lo stop
    misurato, **23,5x** con quello di R125. È la stessa sedia che R55 misura
    sfondare il 10% di DD con **1,5 punti indice** di slippage e che R88 misura
-   fare **DD 9,76% dove il ramo OPPRANGE ne fa 3,84%**. **Quattro misure
-   indipendenti, la stessa casella.**
+   fare **DD 9,76% dove il ramo OPPRANGE ne fa 3,84%**.
+   🔴 **CORRETTO DAL CANCELLO**: la v1 scriveva *"quattro misure indipendenti"*,
+   ed è una **recidiva della classe 196** aperta ieri. Le misure sono **DUE, e
+   condividono un dato**: la cella HALFRANGE di R55 (41.057,00 · 1,6742 ·
+   9,7623 · n=119) è **la stessa riga di CSV** di R88a. Quindi: **(1)** la
+   sensibilità allo slippage (R55) e **(2)** il confronto OOS fra i due rami
+   (R88), sulla **stessa** configurazione di base; questo referto aggiunge
+   **(3)** il pedaggio, che è l'unico asse davvero nuovo. **R125 non è una
+   misura: è una griglia proposta e mai girata.**
 6. 🧪 **E il contro-esempio mi smentisce dove conta**: sulla flotta, il rapporto
    `stop/spread` **NON predice il drawdown** (Spearman ρ = **+0,32** con l'oro
    dentro, **−0,02** senza). Il cancello del costo dice *"quanto ti mangia il
    pedaggio"*, **non** *"quanto drawdown farai"*. Due sedie a **13,6x e 13,7x**
    hanno DD promessi di **0,14% e 11,59%**. **Chi usasse questa tabella come
    classifica di rischio userebbe lo strumento sbagliato.**
+
+---
+
+# 0-bis. 🔧 COSA HA CORRETTO IL CANCELLO (10/09) — e cosa ha confermato
+
+**Corretto (7):**
+1. 🔴 **Sedie gemelle scambiate**: la geometria `14:25-14:30` attribuita a
+   `770611` è di **`770601` NASUSD**. `770611` gira su **14:30-14:45 (15')**.
+   Corretto in §5.1 e §6.1. **Classe 197.**
+2. 🔢 **Conseguenza mai propagata**: dal 59,0 misurato esce un **range implicito
+   ~118 idx**, che sta **SOPRA la banda inferita 85-103** di R125. Ricalcolati e
+   pubblicati **OPPRANGE ~64,0x** (era 52,0x) e **~42,7x al P95** (dove R125
+   chiedeva buffer ≥15). §5.1 riquadro + §7.1. **Classe 198.**
+3. 📅 **Sotto-campione di `770101` sporco**: includeva la gamba del **06/08**,
+   che `giornata_2026-08-06.md` r.93-95 dichiara **della geometria VECCHIA**
+   (*"la configurazione validata RETEST 35/500 è entrata in produzione solo alle
+   19:25 di stasera"*, e il trade è delle **08:18**). Sottocampione vero: n=2,
+   mediana **56,10 → 33,0x** (era 59,9 → 35,2x). **Classe 199.**
+4. 📏 **Range usato come stop** su `770202`: il 97,9 della strada 3 è il
+   **range**; lo stop di `SL_RANGE` è `range + 2×buffer` ≈ **102 → 51,0x**
+   (era 49,0x). Verdicto invariato (PASSA). **Classe 200.**
+5. 🧮 **Conteggio**: "sette sedie" in §0.4 che ne elencava **sei**.
+6. 💱 **Colonna "prudente" non prudente** dove il dato manca: 1,0 pip su
+   **cross** con `SpreadPt=0`. I 🟢 di `772421` e `772344` diventano
+   **[CONDIZIONATI]**, col numero che li ribalta. **Classe 201.**
+7. 🔁 **"Quattro misure indipendenti"** su `770611` (§0.5): **recidiva della
+   classe 196**, aperta il giorno prima. Sono **due**, e condividono la riga di
+   CSV (R55 = R88a); R125 non ha mai girato. Riscritto.
+
+**E un difetto dello STRUMENTO, non del referto (classe 202):**
+`controlla_riga.py` su un `.md` esce **FAIL con 8 bloccanti** — emoji, `[PIN]`,
+`[MARCATORE]`, numeri di conto — che su un referto sono **tutti falsi positivi
+per costruzione** (le emoji nei `.md` sono regola di casa; i numeri di conto in
+chiaro pure). Esito riportato come **NON APPLICABILE**, con l'elenco. 🔧 Riparazione
+proposta e **non fatta** (andrebbe a sua volta verificata): un flag
+`--oggetto {riga,ps1,md}`.
+
+**Confermato, rifacendo il conto dai dati grezzi (non rileggendo):**
+- ✅ **tutte e 21 le mediane di stop**, i due ancoraggi (114,40 e 47,70), tutte
+  le **ore modali**, tutti gli **spread orari** citati (§2.2 riquadro);
+- ✅ **il fattore di conversione ×100** su D30EUR/U30USD/NASUSD/XAUUSD e **×1**
+  su 225JPY, verificato in **tre** modi indipendenti: `Digits/Point` della sonda
+  `InfoBroker`, l'intestazione dei CSV di spread (*"1 pto indice = 100 pti
+  MT5"*), e la compatibilità di `SpreadPt 280` con la distribuzione dell'ora 17
+  (mediana 2,60, **massimo 10,70**: 28,0 sarebbe fuori dal massimo assoluto).
+  🔴 **Il "fattore 10" del brief era sbagliato: il referto aveva ragione.**
+  ✅ E il fattore è applicato **in modo coerente in tutte le righe**: gli stop
+  non ci passano mai (vengono da differenze di prezzo), e i pip del forex
+  tornano uno per uno (`0,00389 → 38,9` · `0,470 → 47,0` · `0,586 → 58,6`);
+- ✅ **la geometria di ogni riferimento `.mq5` citato** (r.145 ORB, r.84/89 e
+  r.345-346 DAX, r.69/234/282/313 Dow, r.78-80 SuperWave, r.68/74 EMA200,
+  r.152-153 Larry, r.139-141 GapFill, r.156 CostToCost, r.205 EasyTrend,
+  r.98/103/105 PostNews, r.328 BreakingBand, r.145 GapContinuation,
+  r.145/148 MaxMinNotte, r.75/78 MaxMin DAX Short);
+- ✅ **le 19 NON ANCORA MISURATE**: sono 19, e **ognuna dice cosa le manca**.
+  Nessun candidato è archiviato come morto in questo file;
+- ✅ **il contro-esempio della ρ** (§6.3), rifatto per via indipendente.
 
 ---
 
@@ -278,7 +342,7 @@ demo (n a fianco) · **[INF]** = inferito, con la strada dichiarata ·
 
 | sedia (magic) | EA | simb | TF | conto | geometria dello stop | stop | fonte del numero | spread | **stop/spr** | **40x?** | **13,3x?** |
 |---|---|---|---|---|---|---:|---|---:|---:|:---:|:---:|
-| **770101** | DAX_Apertura_EU | D30EUR | M5 | 🔵🟣🔴 | `SLMode = ABTG_SL_RANGE` (estremo opposto del range 35', buffer 500 pt = **5 idx**) — `.mq5` r.314 + `#define` r.84/89 | **71,9 idx** [MIS] n=7 | `trades_auto.csv`, 7 gambe 23/07→14/08 | **1,70** (ora 8) | **42,3x** | 🟢 SI (+6%) | 🟢 SI |
+| **770101** | DAX_Apertura_EU | D30EUR | M5 | 🔵🟣🔴 | `SLMode = ABTG_SL_RANGE` (estremo opposto del range 35', buffer 500 pt = **5 idx**) — `.mq5` r.314 + `#define` r.84/89; **entrata `RETEST`** (`InpEntryMode=2`, offset 200 pt = 2 idx) nel preset REALE, non BREAKOUT | **71,9 idx** [MIS] n=7 | `trades_auto.csv`, 7 gambe 23/07→14/08 | **1,70** (ora 8) | **42,3x** | 🟢 SI (+6%) | 🟢 SI |
 | ↳ *stesso, allo spread P95* | | | | | | 71,9 | idem | 2,70 (P95) | **26,6x** | 🔴 **NO** (67%) | 🟢 SI |
 | ↳ *stesso, sotto-campione della geometria VIVA* | | | | | *(dopo il cambio range 15→35, buffer 200→500, entrata RETEST offset 200)* | **56,1** [MIS] n=2 | idem, gambe **10/08 (59,90) e 14/08 (52,30)** | 1,70 | **33,0x** | 🔴 **NO** (82%) | 🟢 SI |
 | ↳ *idem, allo spread P95* | | | | | | 56,1 | idem | 2,70 (P95) | **20,8x** | 🔴 **NO** (52%) | 🟢 SI |
@@ -520,7 +584,7 @@ dell'errore: i "PASSA" sono solidi, i "NON PASSA" sono da confermare.**
 | **770511** SuperWave_DOW U30USD H1 | **38,5x** (96%!) | 🟢 **SÌ** | idem sopra: `InpSLBufferAtr` **esiste** in `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` r.80 (*">0: buffer SL in ATR, IGNORA InpSLBufferPips"*) ed è a **0**. 🔓 **Manopola mai messa ad asse**: bastano ~0,05 ATR per superare il pavimento |
 | **772234** GapFill U30USD H1 | **35,0x** (88%) | 🟢 **SÌ** | `InpSLMode: 0 → 1` (ATR(D1) × `InpAtrSlMult 1.5`, r.139-141): sul Dow 1,5 × ATR(D1) ≈ **470 idx** ≫ pavimento. Oppure `InpSLGapMult: 1,0 → 1,5`. ⚠️ n=1: **misurare prima** |
 | **772362** CostToCost GBPCAD H4 | **32,4x** (81%) | 🟢 **SÌ** | `InpSLBufferATR: 0,2 → 0,45` (r.156). GBPCAD è il simbolo **col spread più largo del nostro forex** (1,2 pip): è l'unico dove il buffer morde davvero |
-| **770101** DAX_Apertura D30EUR M5 🔴🟣🔵 | 42,3x mediana ma **26,6x al P95** e **35,2x sul sotto-campione recente** | 🟡 **SÌ, ma va misurato prima** | `InpMinStopPts` **esiste ed è a 0** (r.345) con `InpSkipIfTight = true` (r.346) — cioè oggi il DAX **salta** i trade a stop stretto invece di allargarli. Un floor a **6.800 pt = 68 idx** metterebbe il 40x per costruzione. 🔴 **Ma `InpSkipIfTight=true` significa che alzarlo TAGLIA operazioni**, e la frequenza è il requisito n.1 di ottobre: **prima si misura quante ne perde** |
+| **770101** DAX_Apertura D30EUR M5 🔴🟣🔵 | 42,3x mediana ma **26,6x al P95** e **33,0x sulla geometria VIVA** (n=2, §5.1 — 🔴 corretto dal cancello: era 35,2x con dentro una gamba della geometria vecchia) | 🟡 **SÌ, ma va misurato prima** | `InpMinStopPts` **esiste ed è a 0** (r.345) con `InpSkipIfTight = true` (r.346) — cioè oggi il DAX **salta** i trade a stop stretto invece di allargarli. Un floor a **6.800 pt = 68 idx** metterebbe il 40x per costruzione. 🔴 **Ma `InpSkipIfTight=true` significa che alzarlo TAGLIA operazioni**, e la frequenza è il requisito n.1 di ottobre: **prima si misura quante ne perde** |
 
 ## 7.2 🟡 NON PASSANO ma il numero è INFERITO da un lato (2)
 
@@ -565,6 +629,8 @@ pieno commissione compresa.** Sull'oro il problema **non è mai stato il costo**
 | **spread al MINUTO** dentro l'ora | 🔴 [NON MISURATO] su tutti i simboli. Direzione dell'errore **nota e sfavorevole** (U30USD ora 14 ha `max = 47,0`) | SpreadLogger | — |
 | **slippage** | 🔴 quasi tutto [NON MISURATO]: `n=1` sul reale, 0 righe oro | — | — |
 | **spread di Tickmill** (sedia `250604`) | 🔴 [NON MISURATO] | — | — |
+| **il range 14:30-14:45 di U30USD, misurato direttamente** | 🟡 oggi è **DERIVATO** dallo stop (≈118 idx): non è mai stato letto dalle barre | una corsa diagnostica sulla distribuzione del range d'apertura (la stessa che `ROUND_ORB_ATR_PS5` §2.3 chiede per NASUSD) | una corsa |
+| **il confine del 06/08 su `770101`** | 🟡 il cambio 15→35 è andato in produzione alle **19:25**: il sotto-campione della geometria viva ha **n=2** | tempo, o la lettura dei log di attacco | — |
 | **11 sedie senza una sola gamba chiusa in stop** | 🔴 il campione non c'è: è **assenza di dato**, non un dato buono | tempo, o un backtest che riporti la distanza di stop | — |
 
 ---
@@ -584,8 +650,16 @@ pieno commissione compresa.** Sull'oro il problema **non è mai stato il costo**
 > `770611` la manopola è `InpSLMode → OPPRANGE`, che R88 misura dimezzare anche
 > il DD (9,76 → 3,84%). **19 sedie restano NON ANCORA MISURATE** (spread orario
 > mancante su 10 simboli, o zero gambe in stop). 🔴 **Contro-esempio a verbale:
-> sulla flotta `stop/spread` NON predice il DD (ρ = −0,02 senza l'oro)**: il
-> cancello misura il pedaggio, non il rischio.
+> sulla flotta `stop/spread` NON predice il DD (ρ = −0,02 senza l'oro; ρ = +0,07
+> nella ricostruzione indipendente del cancello)**: il cancello misura il
+> pedaggio, non il rischio.
+> 🔧 **Passato dal cancello il 10/09 con 6 correzioni** (classi 197-201): la più
+> pesante è che `770611` gira su **14:30-14:45**, non su 14:25-14:30 (quella è
+> `770601`), e che dal 59,0 misurato esce un **range implicito ~118** — sopra la
+> banda inferita 85-103 di R125 — che porta **OPPRANGE a ~64,0x e a ~42,7x anche
+> al P95**, cioè **sopra il pavimento di lavoro senza bisogno di buffer**.
+> Corretto anche il sotto-campione della geometria viva di `770101`, sedia del
+> **conto reale 10105439**: **n=2, 56,10 idx, 33,0x** (non 59,9/35,2x).
 
 ---
 

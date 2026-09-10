@@ -12150,3 +12150,158 @@ in tre paragrafi diventa un precedente.
 > 3. **Se una correzione ritira "fonti indipendenti" in un paragrafo, la stessa
 >    formula va cercata in TUTTO il documento** (e' la classe 193 applicata alle
 >    parole invece che ai numeri).
+
+## 197. 👯 LE SEDIE **GEMELLE SCAMBIATE**: la geometria di una attribuita all'altra
+
+**10/09/2026**, `CANCELLO_COSTO_FLOTTA` r.237 e r.331 (v1): la sedia **`770611`
+U30USD** — che gira anche sul **CONTO REALE 10105439** — descritta come
+*"`SLMode = HALFRANGE` (50% del range **14:25-14:30**)"*.
+
+🔴 **Falso.** I suoi due preset (`Presets/conto_reale/...770611_REALE.set` e
+`Presets/sedie_piccolo/recupero2/...770611.set`) dicono tutti e due
+`InpRangeStartHour=14 / Min=30`, `InpRangeEndHour=14 / Min=45`: **14:30-14:45,
+quindici minuti**. I 5 minuti 14:25-14:30 sono di **`770601` NASUSD**
+(`Presets/ABTG_ORB_US.set`, che per giunta ha `InpSLMode=0` = OPPRANGE, un'altra
+geometria ancora). Due sedie dello **stesso EA**, magic contigui, un simbolo
+diverso: la confusione e' costata la **derivazione** del numero (classe 198).
+
+⚠️ Aggravante misurata: la frase sbagliata **esisteva gia'** in un altro
+referto (`ORO_1530_RISPOSTA` r.130 dice che *"770601 e 770611 costruiscono il
+range su 14:25-14:30"*, e per 770611 e' falso). **Un errore di attribuzione si
+propaga da un referto all'altro molto piu' in fretta di un errore di calcolo**,
+perche' nessuno ricontrolla una frase descrittiva.
+
+> ### 🔴 LA REGOLA
+> 1. **La geometria di una sedia si legge dal SUO preset**, cercato per
+>    `InpMagic`, non dal ricordo ne' da un referto che la nomina.
+> 2. **Quando due sedie sono gemelle (stesso EA, magic vicini), si aprono TUTTI
+>    E DUE i preset e si scrive la differenza**, anche se serve solo uno.
+> 3. **La contro-prova costa dieci secondi e va fatta: l'ORARIO DEI
+>    RIEMPIMENTI.** Una sedia il cui range finisce alle 14:45 si riempie da
+>    14:45 in poi (`770611`: 14:45:13, 14:45:31); una che finisce alle 14:30 si
+>    riempie da 14:30 (`770601`: 14:30:00, 14:30:51). **Il campo dice qual e' la
+>    geometria viva, e non si smentisce.**
+
+## 198. 📐 LA **MISURA CADE FUORI DALLA BANDA INFERITA** — e nessuno ricalcola a valle
+
+**10/09/2026**, stesso referto. Lo stop di `770611` viene **misurato** a
+**59,0 punti indice** (7 gambe vere). In `HALFRANGE` lo stop **e'**
+`0,5 x range + buffer`, e il buffer e' `0`: quindi quel 59,0 **contiene** il
+range d'apertura, che risulta **~118**. R125 lo aveva **INFERITO a ~94 (banda
+85-103)** e su quella banda aveva costruito tre numeri pubblicati (OPPRANGE
+52,0x, "al P95 31,7x", "serve buffer >= 15").
+
+🔴 **La misura sta SOPRA il bordo alto della banda, e i tre numeri sono rimasti
+in piedi come se niente fosse** — nello stesso documento che pubblicava la
+misura. Ricalcolati: **OPPRANGE ~64,0x** e **~42,7x al P95**, cioe' **passa il
+pavimento anche senza buffer**. La conclusione non si ribalta (rafforza lo
+stesso ramo), ma **e' fortuna**: con la misura dall'altra parte sarebbe stata
+una promozione costruita su un numero superato.
+
+> ### 🔴 LA REGOLA
+> 1. **Quando una MISURA entra in un documento, si cerca ogni numero INFERITO
+>    che quella misura tocca, e lo si ricalcola nella stessa consegna.** Una
+>    misura e un'inferenza sulla stessa grandezza non convivono: la banda va
+>    dichiarata **superata**, con la data.
+> 2. **Se lo stop e' una funzione nota della geometria, la misura dello stop
+>    MISURA ANCHE LA GEOMETRIA.** Va scritto: e' spesso il dato piu' prezioso
+>    della corsa, e nel 90% dei casi nessuno lo estrae.
+> 3. **E si dichiara il VERSO dei due disturbi**: lo slippage al riempimento
+>    gonfia la distanza misurata, il trailing/pari la riduce. Il numero si
+>    consegna come **forbice** (qui 115-118+), non come punto.
+
+## 199. 📅 IL SOTTO-CAMPIONE "DOPO IL CAMBIO" CHE CONTIENE **IL GIORNO DEL CAMBIO**
+
+**10/09/2026**, stesso referto, riga di `770101` D30EUR — **conto reale
+10105439**. Sotto-campione dichiarato *"post-06/08, dopo il cambio range 15->35
+e buffer 200->500"*: **3 gambe, 06->14/08, mediana 59,9**.
+
+🔴 **La gamba del 06/08 e' della geometria VECCHIA**, e lo dice **la stessa
+fonte che il referto cita due righe sopra** per l'ancoraggio del 114,40:
+`giornata_2026-08-06.md` r.93-95 — *"questa perdita e' della **geometria
+vecchia** (BREAKOUT range 15, buffer 200)... la configurazione validata (RETEST
+35/500/offset 200) e' entrata in produzione solo alle **19:25 di stasera**"*. Il
+trade e' delle **08:18**. Sottocampione vero: **n=2, mediana 56,10, 33,0x**
+(non 35,2x).
+
+> ### 🔴 LA REGOLA
+> 1. **Il taglio di un sotto-campione e' un ORARIO, non una data.** "Dal 06/08"
+>    e' ambiguo per definizione: si scrive "dal 06/08 19:25".
+> 2. **Il giorno del cambio si esclude finche' non si e' letta l'ora del
+>    dispiegamento**, e l'ora si cerca **nel referto della giornata**, che di
+>    solito ce l'ha gia' scritta.
+> 3. **Se il sotto-campione corretto scende sotto n=3, si dichiara `n` accanto
+>    al numero e si scrive che e' sottile** — non si allarga la finestra per
+>    farlo tornare grasso.
+
+## 200. 📏 LA GRANDEZZA **INTERMEDIA** USATA COME GRANDEZZA **FINALE** (range al posto di stop)
+
+**10/09/2026**, stesso referto, riga di `770202` U30USD: stop `~98 idx [INF]`
+con fonte *"`ROUND_ORB_ATR_PS5` §2.2 strada 3 (314,5 x sqrt(15/1440) x 3,05)"*.
+
+🔴 **Quella formula produce il RANGE, non lo stop.** Nella fonte citata sta
+scritto testualmente *"strada 1 da' **range** 85-103, strada 3 da' 97,9"*. Lo
+stop di `ABTG_SL_RANGE` e' `range + 2 x buffer` (r.897/921: entry
+`high+buffer`, SL `low-buffer`) = **~102**, e il rapporto giusto e' **51,0x**,
+non 49,0x. Qui il verdetto (PASSA) non cambia, ma la stessa svista su una sedia
+al confine sposta un 🔴 in 🟢.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di copiare un numero da un altro referto, si legge la frase che
+>    dice CHE COSA E'.** Range, stop, R, distanza d'ingresso e ampiezza di barra
+>    sono cinque grandezze diverse con lo stesso ordine di grandezza: **si
+>    confondono senza rumore**.
+> 2. **La catena si scrive per intero nella cella**: `range -> +ingresso ->
+>    +buffer -> stop`. Se una cella contiene un solo numero senza catena, quel
+>    numero non e' verificabile.
+
+## 201. 💱 LA COLONNA "**PRUDENTE**" CHE NON E' PRUDENTE PROPRIO DOVE IL DATO MANCA
+
+**10/09/2026**, stesso referto §5.4. Ogni riga forex e' scritta due volte: con
+lo spread letto e con **"1,0 pip prudente"**. Ma la colonna prudente usa **2,0
+pip su GBPCAD** (perche' li' la sonda legge 1,2) e **1,0 pip su CHFJPY, GBPJPY,
+EURAUD** — che sono **cross**, e che alla sonda escono **`SpreadPt = 0`, cioe'
+ILLEGGIBILI**.
+
+🔴 **Sui simboli dove il dato manca la colonna e' OTTIMISTA, non prudente** — e
+sono esattamente i simboli dove la prudenza serviva. Due 🟢 dipendono da quella
+scelta: `772421` CHFJPY passa **solo se lo spread vero e' <= 1,17 pip**,
+`772344` GBPJPY **solo se <= 1,47 pip**.
+
+> ### 🔴 LA REGOLA
+> 1. **Una colonna "prudente" si costruisce dal simbolo PIU' SFAVOREVOLE della
+>    stessa classe**, non da un numero tondo unico: se un major sta a 1,0, un
+>    cross non sta a 1,0.
+> 2. **Dove il dato e' ILLEGGIBILE la prudenza deve essere MAGGIORE, non
+>    uguale**: l'assenza di misura e' un rischio in piu', non uguale.
+> 3. **Ogni verdetto che dipende da un'assunzione si consegna col numero che lo
+>    RIBALTA** (*"passa solo se <= 1,17"*), mai col solo semaforo.
+
+## 202. 🤖 IL CANCELLO DETERMINISTICO **NON SA CHE OGGETTO STA GUARDANDO** — e dice FAIL con sicurezza
+
+**10/09/2026**. `controlla_riga.py` lanciato — come prescrive il cancello del
+09/09 (*"si esegue SEMPRE, per primo"*) — su un **referto `.md`**
+(`CANCELLO_COSTO_FLOTTA`) esce **`ESITO: FAIL`** con **8 bloccanti**: `[ASCII]`
+(le emoji, che nei `.md` sono **obbligatorie** per regola di casa), `[PIN]`,
+`[MARCATORE]` (non esistono: non c'e' nessuna riga di lancio) e cinque `[CONTO]`
+per i numeri di conto citati — che la **REGOLA DEI TERMINALI MULTIPLI** impone
+di scrivere in chiaro.
+
+🔴 **Tutti e otto sono falsi positivi per costruzione**: lo strumento e' fatto
+per righe di lancio e `.ps1`. Ma **stampa un FAIL identico a quello vero**, e la
+regola dice "se esce FAIL, il verdetto e' FAIL, punto". 👉 E' lo stesso difetto
+del 10/09 mattina (`finestra_dax.py` che certificava il falso): **uno strumento
+che si pronuncia su un oggetto per cui non e' stato costruito**. Il rischio
+concreto non e' teorico: qualcuno "ripara" il referto **togliendo le emoji da un
+`.md`**, cioe' peggiorandolo per far tacere il cancello.
+
+> ### 🔴 LA REGOLA, finche' lo strumento non ha una guardia sul tipo di oggetto
+> 1. **`controlla_riga.py` si esegue SEMPRE**, anche sugli oggetti che non sono
+>    righe di lancio — **ma il suo esito su un `.md` si riporta come `NON
+>    APPLICABILE`, elencando i bloccanti e perche' sono falsi positivi.** Non si
+>    nasconde e non si obbedisce alla cieca: si dichiara.
+> 2. **Non si modifica MAI un documento per far tacere un controllo nato per un
+>    altro oggetto.**
+> 3. 🔧 **Riparazione da fare (aperta)**: un `--oggetto {riga,ps1,md}` che, per i
+>    `.md`, spenga `[ASCII]`, `[PIN]`, `[MARCATORE]`, `[RACCOLTA]` e trasformi
+>    `[CONTO]` in RILIEVO. Finche' non c'e', vale il punto 1.
