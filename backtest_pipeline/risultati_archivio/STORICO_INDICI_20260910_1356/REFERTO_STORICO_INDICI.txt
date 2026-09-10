@@ -1,0 +1,69 @@
+=====================================================================
+ REFERTO -- STORICO ESTERNO DEGLI INDICI
+=====================================================================
+data: 2026-09-10 14:06:37   <-- QUESTA DATA DEVE ESSERE DI ADESSO
+avvio: 2026-09-10 13:56:19   durata: 0.17 h
+macchina: VMI3047753   utente: Administrator
+pin: 52a7a83830ba6cadd19fa2e313365b31ee8cc6b2
+modo: CORSA VERA
+
+!!! I DATI SONO DI UN ALTRO BROKER (histdata), NON DI BCM.
+    Spread, orari di seduta e prezzi NON sono quelli su cui si opera.
+    Nel tester lo spread e' quello che si imposta, non quello storico:
+    su stop stretti puo' spostare il verdetto (R55: 1,5 punti indice).
+
+!!! IL CANCELLO ZERO SUGLI INDICI _EXT E' ANCORA CHIUSO.
+    diff media H1 misurata 0,061-0,101% contro il <=0,05% richiesto
+    (REFERTO_HISTDATA_FATTIBILITA.md par. 14-15). Questi dati si
+    PRODUCONO e si MISURANO; NON sono autorizzati per i round.
+
+REGOLA D'USO (D-C): i simboli _EXT sono PROVA DI REGIME a parametri
+CONGELATI. Qui non si tara niente e non si promuove nessuna cella.
+
+--- DECISIONI LETTE AL PIN ---
+  D-A   FONTE                  histdata                 FIRMATO
+  D-B   SIMBOLI                NASUSD,SPXUSD,D30EUR     FIRMATO
+  D-C   USO                    SOLO_PROVA_REGIME        FIRMATO
+  D-D   FINESTRA               2010-2026                FIRMATO
+  D-E   SOGLIA_CANARINO_ORE    20                       FIRMATO
+  D-F   STRADA_DAX             diagnosi_prima           FIRMATO
+  D-G   DAX_SOTTOINSIEME       2010_2018                FIRMATO
+  D-H   FINESTRA_PER_SIMBOLO   D30EUR:2010-2018         FIRMATO
+
+--- I CINQUE INDICI: NESSUNO SPARISCE DA QUESTO ELENCO ---
+  BCM      CHE          FASE                               BARRE / PERCHE'
+  NASUSD   Nasdaq 100   SCARICATO (17 anni su 17)          5261984 righe M1, anni: 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
+  D30EUR   DAX 40       SCARICATO (9 anni su 9)            1718805 righe M1, anni: 2010 2011 2012 2013 2014 2015 2016 2017 2018
+  U30USD   Dow Jones    FUORI GIRO (dichiarato)            HistData non ha il Dow; Dukascopy si' (2012) ma costa ~12,7 giorni di crawl
+  SPXUSD   S&P 500      SCARICATO (17 anni su 17)          4627209 righe M1, anni: 2010 2011 2012 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023 2024 2025 2026
+  225JPY   Nikkei 225   FUORI GIRO (dichiarato)            non incluso in D-B per questo giro
+
+--- CANARINO DI RITMO ---
+  VERDE (0.2 ore <= 20.0)   (proiezione 0.2 ore, soglia 20.0)
+
+--- PASSI ---
+  FASE  PASSO                                    INIZIO    FINE      MIN     ESITO
+  F1    criteri al pin                           13:56:19  13:56:21  0.0     OK  -- 8 decisioni, 0 da firmare
+  F2    sonda Dow                                13:56:21  13:56:21  0.0     GIA' MISURATA (giro3 15/08) - non rilanciata  -- USA30IDXUSD = 2012
+  F3    spazio disco                             13:56:21  13:56:22  0.0     OK  -- 3.98 GB stimati
+  F4    python trovato e >= 3.8                  13:56:22  13:56:22  0.0     OK  -- C:\python313\python.exe  (parametro esplicito -PathPython)
+  F4    histdata_m1.py al pin                    13:56:22  13:56:23  0.0     OK  -- marcatore HD-M1-v4 verificato
+  F4    canarino di ritmo                        13:56:23  13:58:27  0.0     VERDE  -- esplorazione 124.2 s, rc 0
+  F5    NASUSD 2026                              13:58:27  13:58:33  0.1     OK  -- 8 zip, 5.2 s
+  F5    NASUSD conversione tranche 1/3 (2010-2017) 13:58:33  13:59:49  1.3     OK  -- 2338466 barre M1
+  F5    NASUSD conversione tranche 2/3 (2018-2025) 13:59:52  14:01:30  1.6     OK  -- 2696269 barre M1
+  F5    NASUSD conversione tranche 3/3 (2026-2026) 14:01:33  14:01:41  0.1     OK  -- 227249 barre M1
+  F5    SPXUSD 2026                              14:02:26  14:02:31  0.1     OK  -- 8 zip, 5.1 s
+  F5    SPXUSD conversione tranche 1/3 (2010-2017) 14:02:31  14:03:22  0.8     OK  -- 1807286 barre M1
+  F5    SPXUSD conversione tranche 2/3 (2018-2025) 14:03:23  14:04:45  1.4     OK  -- 2592814 barre M1
+  F5    SPXUSD conversione tranche 3/3 (2026-2026) 14:04:47  14:04:55  0.1     OK  -- 227109 barre M1
+  F5    D30EUR conversione tranche 1/2 (2010-2017) 14:05:31  14:06:16  0.7     OK  -- 1505532 barre M1
+  F5    D30EUR conversione tranche 2/2 (2018-2018) 14:06:17  14:06:23  0.1     OK  -- 213273 barre M1
+
+--- NOTE ---
+  - F5: NASUSD: la conversione e' stata fatta in 3 TRANCHE di anni (2010-2017, 2018-2025, 2026-2026) e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.
+  - F5: SPXUSD: la conversione e' stata fatta in 3 TRANCHE di anni (2010-2017, 2018-2025, 2026-2026) e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.
+  - F5: D30EUR gira su 2010-2018 invece di 2010-2026 (D-H D30EUR).
+  - F5: D30EUR: la conversione e' stata fatta in 2 TRANCHE di anni (2010-2017, 2018-2018) e i pezzi sono stati concatenati in ordine di anno. E' DICHIARATO: il CSV finale non nasce da una sola passata. Motivo: ~690 byte di RAM per barra M1 misurati, 5,6 M barre sarebbero ~3,8 GB in un colpo solo.
+
+ESITO: OK

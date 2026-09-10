@@ -1,0 +1,30 @@
+=== HISTDATA -> M1 ===  versione HD-M1-v4
+data: 2026-09-10 13:58 (ora del PC)
+
+--- CONTROLLO POSITIVO prima di scaricare ---
+CONTROLLO POSITIVO: OK
+--- scarico nsxusd ---
+  nsxusd 2026/01: CACHE
+  nsxusd 2026/02: CACHE
+  nsxusd 2026/03: CACHE
+  nsxusd 2026/04: CACHE
+  nsxusd 2026/05: CACHE
+  nsxusd 2026/06: CACHE
+  nsxusd 2026/07: CACHE
+  nsxusd 2026/08: CACHE
+=== HISTDATA -> M1: referto ===
+versione: HD-M1-v4
+comando : --scarica --simboli nsxusd --da 2026 --a 2026 --cartella C:\Users\Administrator\histdata_m1
+data: 2026-09-10 13:58 (ora del PC)
+cartella ZIP: C:\Users\Administrator\histdata_m1
+
+CONTROLLO POSITIVO (eurusd 2019, token trovato): OK
+scaricati 0 ZIP (0.0 MB), 8 gia' in cache, 0 assenti, 0 falliti
+
+ESITO: OK
+
+REFERTO: C:\Users\Administrator\histdata_m1\referto_histdata_2026-09-10_1358.txt
+
+RACCOLTA: C:\Users\Administrator\Desktop\histdata_m1
+ZIP PRONTO DA MANDARE: C:\Users\Administrator\Desktop\histdata_m1.zip
+Attesi dentro: referto_histdata_2026-09-10_1358.txt
