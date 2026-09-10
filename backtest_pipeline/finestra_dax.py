@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 """
-MARCATORE_FINESTRA_DAX_v4
+MARCATORE_FINESTRA_DAX_v5
 
 LA CONVENZIONE ORARIA DEL DAX 2019/2024-2026: SI RIPARA COL TAGLIO?
 Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
@@ -67,7 +67,7 @@ Richiesta di Claudio, 10/09/2026: "RIPARA LA CONVENZIONE ORARIA DEL DAX".
 import argparse, os, re, sys, zipfile
 from collections import defaultdict
 
-MARCATORE       = "MARCATORE_FINESTRA_DAX_v4"
+MARCATORE       = "MARCATORE_FINESTRA_DAX_v5"
 FINESTRA_SANI   = (2, 15)                       # ore incluse
 ANNI_SANI       = list(range(2010, 2019))
 ANNI_IPOTESI    = [2019, 2024, 2025, 2026]      # CLASSE 180: elencati, non per differenza
@@ -330,8 +330,16 @@ def verdetto(ris, mancanti, rotti, saltati):
         s0 = [v["nucleo"][0] for v in sa.values()
               if v["nucleo"][0] is not None and not v["sottile"]]
         if not s0:
-            log("     !! NESSUN anno SANO ha un nucleo misurabile: il difetto e' in")
-            log("        questo script o nella regola del nucleo, NON nei dati.")
+            #  R2: distinguere "nucleo non misurabile" da "campione sotto il
+            #  pavimento". Il messaggio vecchio mandava a debuggare codice SANO,
+            #  ed e' la stessa famiglia del "buchi veri" della v1: rc giusto,
+            #  causa sbagliata.
+            if all(v["sottile"] for v in sa.values()):
+                log("     TUTTI i sani sono sotto il pavimento di %d giorni: NON CONCLUSIVO." % GIORNI_MIN)
+                log("     Non e' un difetto dello script: e' una cache senza anni sani pieni.")
+            else:
+                log("     !! NESSUN anno SANO ha un nucleo misurabile: il difetto e' in")
+                log("        questo script o nella regola del nucleo, NON nei dati.")
             return 2
         if s0:
             log("     controllo positivo (SANI): inizio nucleo %02d-%02d" % (min(s0), max(s0)))
@@ -341,6 +349,17 @@ def verdetto(ris, mancanti, rotti, saltati):
                 return 2
     if any(v is None for v in inizi.values()):
         log("     ESITO A: NON MISURATO su almeno un anno -> non si conclude.")
+        return 2
+    #  R1: il pavimento ferma ANCHE il rosso. La prima stesura diceva "non puo'
+    #  contribuire a un ESITO VERDE" e la lettera era troppo stretta: una SMENTITA
+    #  su due giornate finisce in REGISTRO_TEST.md e diventa un archivio. Sotto il
+    #  pavimento non si giudica, ne' in verde ne' in rosso.
+    sottili = [a for a in ip if ip[a]["sottile"]]
+    if sottili:
+        log("     CAMPIONE SOTTILE su %s (< %d giorni): misurati, NON giudicati."
+            % (", ".join("%d (%d gg)" % (a, ip[a]["giorni"]) for a in sorted(sottili)),
+               GIORNI_MIN))
+        log("     Sotto il pavimento non si giudica: ne' un verde ne' una smentita.")
         return 2
     fuori = {a: h for a, h in inizi.items() if h != INIZIO_ATTESO}
     if fuori:
@@ -363,13 +382,6 @@ def verdetto(ris, mancanti, rotti, saltati):
             log("        non un verdetto. Rifare con la cache completa.")
             return 2
         return 1
-    sottili = [a for a in ip if ip[a]["sottile"]]
-    if sottili:
-        log("     CAMPIONE SOTTILE su %s (< %d giorni): misurati, NON giudicati."
-            % (", ".join("%d (%d gg)" % (a, ip[a]["giorni"]) for a in sorted(sottili)),
-               GIORNI_MIN))
-        log("     Un anno sotto il pavimento non puo' contribuire a un ESITO VERDE.")
-        return 2
     log("     ESITO A: PASSATO -- tutti gli anni dell'ipotesi cominciano alle %02d." % INIZIO_ATTESO)
     # B) conferma sulla densita' ristretta
     log("")
@@ -602,6 +614,35 @@ def autotest():
     esito("un SANO tronco (33 gg) e' marcato sottile", r[2010]["sottile"] is True)
     esito("  -> non blocca il controllo positivo: la corsa arriva a CONFERMATA",
           verdetto(r, [], [], []) == 0)
+
+    # 16. R1: campione sottile E orologio spostato -> NON deve uscire una
+    #     SMENTITA definitiva su due giornate (rc 2, non rc 1)
+    pulisci()
+    scrivi(2018, SEDUTA)
+    scrivi(2019, dict(list(SEDUTA.items()) + list(NOTTE.items())))
+    scrivi(2024, dict(list(dict((h, 59) for h in range(3, 17)).items()) +
+                      list(dict((h, 25) for h in list(range(0, 3)) + list(range(17, 24))).items())),
+           giorni=2)
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    esito("campione sottile + orologio spostato: NON e' una smentita, e' rc 2",
+          verdetto(r, [], [], []) == 2)
+
+    # 17. R2: se TUTTI i sani sono sottili, il motivo dev'essere il PAVIMENTO,
+    #     non "il difetto e' nello script"
+    pulisci()
+    scrivi(2010, SEDUTA, giorni=33)
+    scrivi(2024, dict(list(SEDUTA.items()) + list(NOTTE.items())))
+    dd = misura(cart, "grxeur")
+    r = rapporto(dd, sorted(dd["giorni"].keys()), False)
+    import io as _io3, contextlib as _cx3
+    b3 = _io3.StringIO()
+    with _cx3.redirect_stdout(b3):
+        rc17 = verdetto(r, [], [], [])
+    t17 = b3.getvalue()
+    esito("tutti i sani sottili: dice PAVIMENTO, non 'difetto dello script'",
+          rc17 == 2 and "sotto il pavimento" in t17
+          and "il difetto e' in" not in t17)
 
     for f in os.listdir(cart):
         os.remove(os.path.join(cart, f))

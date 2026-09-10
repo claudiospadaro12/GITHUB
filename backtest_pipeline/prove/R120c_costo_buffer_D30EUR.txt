@@ -1,0 +1,171 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R120c -- LA GEOMETRIA DEL DOW PORTATA SUL DAX, sull'apertura di
+#           Francoforte.  D30EUR  M5  -- OPPRANGE + buffer 0..30
+#
+#  Si lancia con:
+#    -Expert ABTG_ORB_Ottimizzato -Prova prove\R120c_costo_buffer_D30EUR.txt
+#    -Simbolo D30EUR -Deposito 100000 -Etichetta r120c -Modello 4
+#  (-SoloControllo deve stampare 7 celle per finestra.)
+#  CRITERI: prove\R120_ORB_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  IL BUCO, MISURATO NELL'ARCHIVIO (censimento del 09/09 + lettura 10/09)
+#    Nel CENSIMENTO_PF_TUTTI_2026-09-09.csv l'ORB su D30EUR compare in
+#    UNA riga sola: etichetta r11, QUATTRO passate in tutto. Contro le
+#    ~170 passate di U30USD. Il DAX e' il simbolo gemello meno esplorato
+#    che abbiamo.
+#    E R11 (08/08, tick reali) NON e' questa geometria:
+#      - finestra 07:00->08:05 SERVER (65 minuti, a cavallo
+#        dell'apertura) invece dei 15 minuti DOPO l'apertura;
+#      - NIENTE trailing, NIENTE parziale, NIENTE breakeven
+#        (InpUseTrailEMA=0, InpTP1Pct=0, InpBreakeven=0);
+#      - EMA 50, non 200; nessun tetto di ampiezza.
+#      Esito: PF OOS 0,940-1,022, DD OOS 17,5-29,7%.
+#    >>> QUINDI: quello che e' morto sul DAX e' UN'ALTRA RICETTA. La
+#        gestione dell'uscita di R15/R88 -- che sul Dow porta il DD da
+#        9,76% a 3,84% -- sul DAX non e' MAI stata provata. E' la
+#        casella che il certificato di morte indica come quasi sempre
+#        vuota, ed e' vuota anche qui.
+#        NON e' "un'altra griglia su un motore morto" (vietata dalla
+#        regola del 19/08): e' un MECCANISMO DI USCITA mai messo ad asse
+#        su questo simbolo.
+#
+#  LA FINESTRA 08:00-08:15 SERVER, E PERCHE' PROPRIO QUESTA
+#    E' la ricetta RICORRENTE dei docenti, gia' a verbale in
+#    REGISTRO_TEST.md r.219: "ORB = prima candela M15, 09:00-09:15 IT
+#    (08:00-08:15 server). Si opera dalle 09:15." Mai misurata.
+#    E' anche la traduzione onesta della sessione DAX del collega
+#    (08:55 IT), con una differenza dichiarata: lui costruisce il range
+#    PRIMA dell'apertura, noi DOPO. La sua e' irreplicabile a costo
+#    accettabile, e il numero e' sotto.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO, APPLICATO PRIMA
+#    Spread D30EUR MISURATO (spread_flotta/spread_orario_D30EUR.csv):
+#      ora 8 (apertura cash EU): mediana 1,70 - P95 2,70 - max 12,0
+#                                (1.847.049 tick)
+#      ora 7 (PRE-apertura)    : mediana 2,80 - P95 4,10 - max 19,1
+#    >>> LA PRE-APERTURA COSTA IL 65% IN PIU'. E' il numero che boccia
+#        la finestra del collega da noi: costruire il range prima
+#        dell'apertura vuol dire piazzare i pendenti in una fascia a
+#        2,80 invece che a 1,70. Non e' un'opinione sulla sua
+#        strategia: e' il nostro listino.
+#    Pavimento DI LAVORO 40 x 1,70 = 68,0 punti indice.
+#    Pavimento DURO     13,3 x 1,70 = 22,6.
+#
+#    QUANTO VALE LO STOP QUI (MISURATO IN CAMPO, non derivato):
+#      report/giornata_2026-08-06.md r.98: "lo stop era di 114,40 punti
+#      indice, contro un R medio misurato di ~58,7 punti indice sul DAX.
+#      Il range delle 08:00-08:15 era circa il doppio del solito."
+#      E' la stessa geometria (range 15 minuti d'apertura, stop
+#      all'estremo opposto), sul nostro broker, in forward.
+#      -> stop tipico OPPRANGE ~58,7 punti indice.
+#      CONTROPROVA: range di giornata D30EUR MISURATO su 49 giornate
+#      vere (trades_auto.csv) = 186,5 punti indice; x sqrt(15/1440) =
+#      19,0; x il fattore di amplificazione dell'apertura = 58,7.
+#      >>> ATTENZIONE, QUESTA CONTROPROVA E' CIRCOLARE: il fattore 3,05
+#          l'ho RICAVATO da questo stesso numero. Sul DAX vale come
+#          coerenza interna, NON come conferma indipendente. Lo scrivo
+#          perche' presentarla come conferma sarebbe barare.
+#
+#    IL VERDETTO DI COSTO, CELLA PER CELLA (stop = range + 10 + buffer):
+#      buffer  0 -> 58,7 = 34,5x  NON PASSA (86% del richiesto)
+#      buffer 10 -> 68,7 = 40,4x  PASSA di misura (+0,9%)
+#      buffer 20 -> 78,7 = 46,3x  PASSA (+16%)
+#      buffer 30 -> 88,7 = 52,2x  PASSA (+30%)
+#    ALLO SPREAD P95 (2,70) NESSUNA CELLA PASSA IL 40x, nemmeno a
+#    buffer 30 (32,9x). Il DAX sta un gradino sotto il Dow, e va detto
+#    adesso, non dopo aver visto un PF bello.
+#    >>> Percio' su questo simbolo il verdetto di COSTO si dara' allo
+#        spread MEDIANO, dichiarando che al P95 non tiene. Chi vuole
+#        chiudere quel buco: InpMinRangePct, ed e' il file R120e.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    - n: qui NON e' invariante come sul Dow, perche' il DAX in questa
+#      finestra non e' mai stato contato. Attesa 90-190 per finestra
+#      (frequenza ~1 setup al giorno x ~250 giorni x 40/60 di taglio,
+#      meno i giorni filtrati dalla EMA200). SE n OOS < 95 la cella e'
+#      NON MISURABILE, non bocciata: e' la soglia C4 dei criteri.
+#    - DD OOS: MONOTONO DECRESCENTE col buffer, come su U30USD.
+#      Attesa 5% - 15% a buffer 0, 4% - 10% a buffer 30.
+#    - PF OOS: attesa 0,95 - 1,45. LO SCRIVO BASSO APPOSTA: R11 ha gia'
+#      misurato 0,94-1,02 su questo simbolo con un'altra uscita, e la
+#      FASE M ha validato il DAX solo col RETEST, mai col breakout.
+#      >>> SE ESCE SOPRA 1,40 SU UN ALTOPIANO, E' UNA SCOPERTA VERA e
+#          vuol dire che sul DAX mancava la GESTIONE, non l'edge.
+#          Se esce a 1,05 come R11, la gestione non salva il DAX e il
+#          capitolo si chiude con un numero, non con una stanchezza.
+#    FALSIFICAZIONE: PF OOS < 1,10 su tutto l'altopiano -> il DAX esce
+#    da questa famiglia e si scrive in REGISTRO_TEST.md con PF, DD, n e
+#    cancello, come chiede il certificato di morte.
+# ---------------------------------------------------------------------
+#  UNITA': su D30EUR Digits=2, Point=0,01 -> 100 PUNTI MT5 = 1 PUNTO
+#  INDICE (misurato: sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv,
+#  riga D30EUR). Stessa scala di U30USD. 0..3000 = 0..30 punti indice.
+#  FINESTRA: 2024.09.26, muro dei tick BCM MISURATO su questo simbolo
+#  (misura_tick/REFERTO_MISURA_TICK_D30EUR.txt: 35.408.137 tick, la
+#  data d'inizio dei tick COINCIDE col muro delle barre M1).
+#  MAGIC VERGINE 779820.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- APERTURA DI FRANCOFORTE: prima candela M15, 08:00->08:15 SERVER
+InpRangeStartHour=8
+InpRangeStartMin=0
+InpRangeEndHour=8
+InpRangeEndMin=15
+InpEndHour=17
+InpEndMin=0
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpPendingExpiryMin=600
+
+InpUseCloseConfirm=0
+InpEntryPoints=10
+InpK=1.0
+InpAllowLong=1
+InpAllowShort=0
+
+InpSLMode=0
+InpTPMode=0
+InpTP_R=1.5
+InpTPRangeMult=1.5
+InpSLFixedPts=1000.0
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+
+InpExecTF=5
+InpTP1Pct=0
+InpBreakeven=1
+InpUseTrailEMA=1
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=0
+
+InpUseEmaFilter=0
+InpUseEma200Filter=1
+InpEma200Period=200
+InpMinBodyPct=50.0
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=0
+InpVolMult=1.5
+InpVolAvgBars=20
+
+InpRiskPercent=1.0
+InpSlippagePts=0
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=1
+InpUsaGuardian=1
+InpAutoTest=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779820
+
+# --- L'ASSE, UNO SOLO: 0..3000 punti MT5 = 0..30 punti indice = 7 celle
+InpSLBufferPts=0||0||500||3000||Y
