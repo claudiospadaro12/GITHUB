@@ -11802,3 +11802,41 @@ versi** — rossi che spaventano, ma anche verdi che rassicurano.
 > 3. Gemella della **183** (l'inventario legge i nomi, la misura legge i
 >    contenuti): ogni volta che due pezzi guardano gli stessi dati con regole
 >    diverse, la differenza va **riconciliata e dichiarata**.
+
+---
+
+## 187. 🔗 IL CANCELLO VERIFICAVA CHE IL PIN FOSSE **UN** COMMIT, NON **IL** COMMIT
+
+**10/09/2026.** Dopo tre giri di correzioni su `finestra_dax.py` (v1 → v4) la riga
+di lancio portava **il marcatore della v4** e **il pin della v2**. Il cancello
+deterministico ha detto:
+
+```
+OK   pin f3d5f414 e' un commit vero (git cat-file)
+OK   la riga controlla il MARCATORE dello script scaricato
+ESITO: nessun difetto meccanico.
+```
+
+Tutti e due i controlli **passavano**, ognuno per conto suo: il pin **e'** un
+commit, e la riga **controlla** un marcatore. 🔴 **Ma erano di due versioni
+diverse**, e nessuno incrociava le due cose.
+
+🟢 **Non era pericoloso** — sul VPS la riga sarebbe morta con *"SCRIPT VECCHIO"*,
+cioe' **fallisce chiuso**, che e' come deve fare. **Ma buttava un giro di
+Claudio**, e i giri di Claudio sono la risorsa scarsa a tre settimane da ottobre.
+
+**Riparato**: il cancello adesso estrae il **percorso del file** dall'URL (che
+porta `$PIN` come variabile, non l'esadecimale: vanno accettati tutti e due,
+altrimenti il controllo non trova mai niente) e fa `git show <pin>:<percorso>`,
+poi cerca **dentro** quel contenuto il marcatore che la riga andra' a pretendere.
+Blocca anche se il **file non esiste** al pin (404 annunciato prima di partire).
+
+Provato in tutti e due i versi: pin v4 + marcatore v4 → `OK il marcatore c'e'
+davvero`; pin v2 + marcatore v4 → **BLOCCANTE**.
+
+> ### 🔴 LA REGOLA
+> **Due controlli che passano separatamente non fanno un controllo.** Quando due
+> campi devono essere COERENTI FRA LORO — pin e marcatore, inventario e misura
+> (classe 183), file `.set` e grafico vivo — il cancello deve **incrociarli**,
+> non limitarsi a validarli uno per uno. Chiedersi sempre: *"questi due parlano
+> della stessa cosa?"*, non solo *"ognuno e' valido?"*.

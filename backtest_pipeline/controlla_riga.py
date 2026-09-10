@@ -365,6 +365,34 @@ def controlla_riga_lancio(riga):
     # --- 2. il MARCATORE va controllato prima di eseguire
     if "Select-String" in riga and "SimpleMatch" in riga and "MARCATORE" in riga:
         passa("la riga controlla il MARCATORE dello script scaricato")
+        # CLASSE 187 (10/09/2026): fin qui il cancello verificava che il pin fosse
+        # UN commit, non IL commit. Con marcatore v4 e pin della v2 la riga muore
+        # sul VPS con "SCRIPT VECCHIO" -- fallisce chiuso, quindi non e' pericolosa,
+        # ma butta un giro di Claudio. Qui il pin e il marcatore si incrociano
+        # PRIMA di partire: il file al pin deve contenere davvero quel marcatore.
+        marcatori = re.findall(r"-Pattern\s+'([A-Za-z0-9_]*MARCATORE[A-Za-z0-9_]*)'", riga)
+        # nell URL il pin di solito e' la VARIABILE $PIN, non l'esadecimale:
+        # si accettano tutti e due, altrimenti questo controllo non trova mai niente.
+        percorsi  = re.findall(r"githubusercontent\.com/[^/]+/[^/]+/(?:\$\w+|[0-9a-fA-F]{40})/([A-Za-z0-9_./-]+)", riga)
+        for pin in [x for x in visti if re.fullmatch(r"[0-9a-f]{40}", x)]:
+            for perc in percorsi:
+                try:
+                    t = subprocess.run(["git", "show", pin + ":" + perc],
+                                       capture_output=True, text=True, timeout=30)
+                except Exception as e:
+                    rileva("187", "non ho potuto leggere " + perc + " al pin: " + str(e))
+                    continue
+                if t.returncode != 0:
+                    blocca("187", "il file '" + perc + "' NON esiste al pin " + pin[:8]
+                           + ": la riga scarichera' un 404")
+                    continue
+                for m in marcatori:
+                    if m in t.stdout:
+                        passa("il marcatore " + m + " c'e' davvero in " + perc + " al pin " + pin[:8])
+                    else:
+                        blocca("187", "il pin " + pin[:8] + " NON contiene il marcatore '" + m
+                               + "' cercato in '" + perc + "': la riga morira' con SCRIPT VECCHIO"
+                               + " (pin e marcatore appartengono a due versioni diverse)")
     elif not con_script:
         pass          # classe 173: niente script scaricato, niente marcatore da controllare
     else:
