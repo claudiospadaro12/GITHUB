@@ -12982,3 +12982,79 @@ I due buchi, indipendenti, tutti e due dentro `controlla_terminali()`:
 > X"*, si cerca **ogni** posto dove X vale, e lo si prova. Verifica fatta:
 > i tre contro-esempi ora **bloccano**, la riga vera resta verde, e su
 > **237 `.ps1`** del progetto la classe 221 produce **0 falsi positivi**.
+
+---
+
+## 222. 🕳️ IL PERCORSO SBAGLIATO CHE NON DA' ERRORE: `profiles\charts` (MT4) al posto di `MQL5\Profiles\Charts` (MT5) — e lo ZERO che ne esce
+
+**10/09/2026, corsa del runner delle 03:30.** `CODA_08_preset_dai_chr` ha
+stampato **una riga sola**: `TOTALE SEDIE STAMPATE: 0`. Nessun errore, nessun
+avviso, uscita 0. `CODA_05_foto_fresca` diceva **"la cartella del profilo
+attivo non esiste"** su **6 terminali su 6**. Nella stessa notte `CODA_01`
+leggeva **49 sedie** (40 + 7 + 2) dagli stessi file.
+
+La causa e' **un pezzo di percorso**, e non e' un refuso di battitura: e' un
+percorso **di un altro programma**.
+
+```
+CODA_05/08 (v1):  <cartella dati>\profiles\charts\<profilo>     <-- MT4
+CODA_01 (giusto): <cartella dati>\MQL5\Profiles\Charts\<profilo> <-- MT5
+```
+
+`Test-Path` su una cartella che non c'e' non e' un errore: e' `$false`. Il
+ciclo faceva `continue` per tutte e sei le cartelle dati e il totale restava a
+zero. **Uno strumento cieco che non si lamenta di essere cieco.**
+
+> ### 🔴 LA REGOLA, in due meta'
+> **1. Un percorso dentro il terminale non si scrive a memoria: si COPIA dallo
+> script della stessa famiglia che GIA' FUNZIONA.** `cerca_mt4.ps1` in questo
+> repo spiega da mesi che *"il pezzo `MQL5\` in MT4 NON ESISTE"* — la risposta
+> era in casa, in due file diversi, e l'ho riscritta a mano sbagliata.
+>
+> **2. 🧪 UNO ZERO DEVE DIRE DI CHE TIPO E'.** Ogni ramo che salta un
+> terminale stampa una frase DIVERSA, e in fondo ci va il conto di **dove ho
+> guardato**:
+> - **A** cartella dei profili NON TROVATA -> *non ho guardato*
+> - **B** profilo attivo NON DETERMINATO -> *non so dove guardare*
+> - **C** cartella del profilo attivo NON TROVATA
+> - **D** cartella TROVATA ma VUOTA (0 `.chr`) -> *nessuna foto*
+> - **E** `.chr` letti, nessun EA sopra -> **questa e' l'unica MISURA**
+>
+> 👉 Se A, B, C, D ed E escono uguali, non hai misurato zero: **hai spostato il
+> silenzio**. E' la classe 177 applicata agli strumenti di lettura, ed e' la
+> lezione del 04/09 (*"il +0,00 non e' un fatto: e' un file fermo stampato
+> come uno zero"*).
+
+### 💸 IL COSTO, che non e' lo zero
+Il referto `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` ha dovuto leggere
+**tutte** le geometrie delle 40 sedie dal **sorgente e dai `.set` del repo** —
+cioe' da cio' che **dovrebbe** girare — e dichiararlo nel suo "non coperto".
+Con CODA_08 muto, **non sappiamo cosa gira davvero**: ogni misura di quel
+referto resta **condizionata**.
+
+### 🧪 IL CONTRO-ESEMPIO, costruito e passato
+Albero finto di **7 terminali** (uno buono MT5, uno senza cartella profili, uno
+senza profilo attivo, uno con `.chr` ma senza EA, uno in forma MT4, uno muto,
+uno col profilo dichiarato **esistente ma vuoto**), eseguito con `pwsh`:
+- **v1 su quell'albero: 1 sedia su 4** (trovava solo il terminale in forma MT4
+  — cioe' esattamente il sintomo di produzione, dove sono tutti MT5: **0**);
+- **v2: 4 sedie su 4**, e i cinque esiti escono tutti **distinti**.
+
+E due difetti di contorno, trovati **perche'** il contro-esempio era finto e
+quindi sporco — le prove pulite non rompono niente:
+1. 🔢 **il divario col SEGNO letto come distanza** (CODA_05): `.chr` salvato
+   **dopo** l'ultimo log -> divario **-88 ore**, e `-88 -lt 2` e' vero:
+   stampava **"FOTO FRESCA"** su un terminale **muto da 109 ore**. Provato
+   riga per riga. Adesso quel caso e' **"TERMINALE MUTO"**, che e' la notizia
+   opposta.
+2. 💥 **`[int]"-"` esplode** (CODA_01, funzione `TF`): un `.chr` senza
+   `period_type` fa arrivare li' il trattino del campo mancante,
+   `InvalidArgument` finisce nello **standard error** — che il runner **non
+   pubblica** — e nel referto resta una colonna vuota senza spiegazione.
+   Adesso `TryParse` a cultura invariante e `?`.
+
+### 🧯 E LA REGOLA N.2 DELLA CHECKLIST, applicata
+Trovata la causa in CODA_08, e' stata **cercata in tutti gli altri `CODA_`**:
+`grep -rn -i "profiles" CODA_*.ps1` -> **solo 05 e 08**. Nella stessa passata e'
+uscito il fratello minore in `CODA_10`, che saltava **in silenzio** i terminali
+senza file dello SlippageLogger: adesso ognuno stampa `GUARDATO e NIENTE: <programma>`.
