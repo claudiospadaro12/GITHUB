@@ -1,0 +1,9 @@
+=== I PARAMETRI DI OGNI SEDIA, IN FORMA DI .set ===
+data lettura: 2026-09-10 03:31:37  (ora locale)
+letti dai .chr del PROFILO ATTIVO. I .chr sono una foto al salvataggio del profilo.
+
+TOTALE SEDIE STAMPATE: 0
+COME SI USA: si copiano le righe Inp* di una sedia in un file .set del repo.
+Quel .set va poi CONFRONTATO col preset gia' esistente, se c'e': se differiscono,
+vince cio' che GIRA, ma la differenza va dichiarata, non appianata in silenzio.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
