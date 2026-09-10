@@ -11621,3 +11621,94 @@ gia' agli atti dall'08/09. Su un log che il terminale sta scrivendo il risultato
 sarebbe stato "nessuna riga `[PostNews]`": di nuovo **uno zero che sembra una
 buona notizia**. Il rimedio e' sempre lo stesso: `Leggi-Condiviso` (FileShare
 ReadWrite + BOM/euristica UTF-16), gia' in casa dal primo giorno del runner.
+
+---
+
+## 178. 📏 LA BANDA DI ATTESA IL CUI BORDO **AMMETTE PROPRIO L'IPOTESI ALTERNATIVA**
+
+**Pagata il 10/09/2026** su `finestra_dax.py` v1. Dovevo decidere se il DAX
+2019/2024-2026 avesse solo una **copertura** piu' larga (si ripara col taglio)
+oppure un **orologio spostato** (si ripara spostando). Ho scritto l'attesa prima,
+come vuole la regola di casa: *"densita' ristretta fra **55,0 e 62,0**"*.
+
+🔬 Il `controllo-preventivo` ha costruito un anno finto con l'orologio spostato di
+**UNA SOLA ORA** e copertura 24h. Risultato:
+
+```
+2024 -> 55.6   DENTRO la banda
+ESITO: CONFERMATA. L'orologio e' LO STESSO e cambia solo la copertura     rc 0
+```
+
+🔴 **Lo strumento ha certificato "stesso orologio" su un feed spostato di un'ora.**
+E non era un caso limite: uno spostamento di 1 ora e' **lo scenario piu'
+probabile di tutti** (UTC contro NY-DST), ed e' la stessa ampiezza del ballo che
+i dati mostravano gia' (`2013-03=03:00`).
+La banda non era "larga": era **posizionata esattamente dove l'alternativa
+atterra**. Scala misurata: +1h → 55,6 (passa) · +2h → 52,3 · +5h → 42,2.
+
+> ### 🔴 LA REGOLA
+> 1. **Un'attesa scritta prima si prova contro l'IPOTESI ALTERNATIVA, non solo
+>    contro il nulla.** "Se non c'e' niente esce un numero basso" non basta:
+>    bisogna chiedersi **quale numero produce l'altra spiegazione**, e verificare
+>    che cada FUORI.
+> 2. **Un bordo irraggiungibile per costruzione va dichiarato tale.** Il 62 era
+>    sopra il massimo fisico (60 barre/ora): il test era **a una coda sola** e
+>    fingeva di essere una banda.
+> 3. **Quando due ipotesi producono numeri vicini, la banda non e' lo strumento
+>    giusto**: serve un discriminante che le separi per NATURA. Qui era l'**ora
+>    di inizio del nucleo** (New York 02 · UTC 06 · CET 08), che ha tre valori
+>    lontani e non ha bisogno di soglie.
+> 4. E il dato per farlo **c'era gia' e veniva buttato**: l'istogramma orario era
+>    in memoria e non veniva mai stampato. **Prima di aggiungere una soglia,
+>    guardare cosa si sta gia' calcolando e non si guarda.**
+
+---
+
+## 179. 🕐 IL DISCRIMINANTE CHE DIVENTA **VACUO** QUANDO IL SUO INGRESSO DIVENTA COSTANTE
+
+Stesso giorno, stesso dossier. Il referto di diagnosi decide il fuso del feed
+cosi': *"se GENNAIO e LUGLIO danno la STESSA ora di apertura modale → il feed
+segue il DST americano = ora locale di New York"*.
+
+Funziona **sui nove anni sani**, dove l'apertura modale balla davvero
+(`2013-03=03:00` contro `02:00` negli altri mesi). 🔴 **Ma sugli anni a copertura
+24h l'apertura modale e' `00:00` in TUTTI E DODICI I MESI** — perche' il feed
+comincia a mezzanotte, non perche' segua un fuso. Gennaio = Luglio = 00:00
+**sempre**, qualunque sia l'orologio.
+
+👉 Quindi la frase *"il feed SEGUE il DST → ora locale di New York"* che il
+referto stampa accanto a **2019, 2024, 2025 e 2026** **non prova niente** — ed e'
+esattamente la prova su cui stavo per appoggiare la riparazione.
+
+> ### 🔴 LA REGOLA
+> **Prima di citare un verdetto automatico, verificare che il suo INGRESSO VARI
+> ancora.** Un test che confronta due valori smette di essere un test quando i
+> due valori diventano costanti per un motivo diverso da quello che il test
+> voleva misurare. Non stampa "non applicabile": stampa **la risposta buona**,
+> ed e' per questo che inganna.
+
+---
+
+## 180. 🎯 IL VERDETTO CHE BOCCIA SULL'INSIEME SBAGLIATO — *"tutto cio' che non e' sano"*
+
+Stesso strumento. Avevo scritto `ANNI_SANI = 2010..2018` e trattato **tutto il
+resto** come "da riparare". Ma nel resto ci sono anche i **MARCI 2020-2023**, che
+contengono **un altro strumento** (prezzi 3.200-4.400 contro 16.000-20.500) e che
+**non fanno parte dell'ipotesi**.
+
+Sul banco, con i quattro anni dell'ipotesi costruiti **perfettamente conformi**:
+```
+2019 -> 59.0 DENTRO   2024 -> 59.0 DENTRO   2025 -> 59.0 DENTRO   2026 -> 59.0 DENTRO
+2020..2023 -> 52.0 SOTTO
+ESITO: SMENTITA (o parziale).                                        rc 1
+```
+🔴 **Falsa smentita garantita sulla cache vera** — e la conseguenza non e'
+cosmetica: la sessione avrebbe archiviato *"il DAX 2024-2026 non si ripara"* su
+un dataset da **866.458 barre**. Un morto senza certificato, per un errore di
+insiemistica.
+
+> ### 🔴 LA REGOLA
+> **L'insieme su cui si pronuncia un verdetto si ELENCA PER NOME, non si ricava
+> per differenza.** `ANNI_IPOTESI = [2019, 2024, 2025, 2026]`, e tutto il resto si
+> misura, si stampa ed e' **etichettato fuori ipotesi**. "Tutto cio' che non e' X"
+> e' comodo da scrivere e raccoglie sempre qualcosa che non c'entra.
