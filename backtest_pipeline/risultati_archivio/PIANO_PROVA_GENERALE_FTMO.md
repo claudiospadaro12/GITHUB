@@ -219,7 +219,7 @@ con `InpDailyResetHour = 1` su FTMO** come già scritto in tabella.
 | | `InpPlaceHour:Min` | **07:00** | 08:00 | **09:00** | idem ⚠️ **diverso dal DAX** |
 | | `InpEntryCutoffHour:Min` | **08:30** | 09:30 | **10:30** | idem |
 | | `InpCloseHour:Min` | **17:30** | 18:30 | **19:30** | idem |
-| **ORB_Ottimizzato** 770611 · U30USD | `InpRangeStartHour:Min` | **14:25** | 15:25 | **16:25** | `ABTG_ORB_US.set` |
+| **ORB_Ottimizzato** 770611 · U30USD | `InpRangeStartHour:Min` | **14:30** | 15:30 | **16:30** | `conto_reale/ABTG_ORB_Ottimizzato_770611_REALE.set` 🔴 **corretto 10/09: la v1 leggeva 14:25 da `ABTG_ORB_US.set`, che e' il preset di `770601` NASUSD, un'ALTRA sedia** |
 | | `InpRangeEndHour:Min` | **14:30** | 15:30 | **16:30** | idem |
 | | `InpEndHour:Min` | **22:59** | 23:59 | 🛑 **NON 00:59 — vedi § 2.4** → **23:59** | idem |
 | **GapContinuation** 774101 · 225JPY | `InpSessionOpenHour:Min` | **01:00** | 02:00 | **03:00** | `ABTG_GapContinuation_FORWARD.set` |
@@ -885,3 +885,11 @@ Margin call **100%** / stop-out **50%** confermati su tutti e 4 (`ACCOUNT_MARGIN
 | 27/08/2026 | **v1** | Prima stesura. Fonti lette in questo giro: `PROPOSTA_GUARDIAN_FTMO_2026-08-27.md` (preset firmato + §3.3 fuso), `FLOTTA_ATTIVA.md`, `backtest_pipeline/RIEPILOGO_FORWARD.md`, `DOSSIER_PROP_CANDIDATE_2026-08-26.md`, `ANALISI_TAGLIA_FASE1_2026-08-27.md`, `R114_REFERTO.md`, `ANALISI_TRADEEXPORTER_2026-08-27.md`, `CONTRATTI_SEDIE.md`, `censimento_rischio_2026-08-25_0731.txt`, CHECKLIST punti **86** e **89**, `docs/REGOLAMENTO_FTMO_2026-08.md` §10, e i **sorgenti** `ABTG_ORB_Ottimizzato.mq5`, `ABTG_MaxMinNotte*.mq5`, `ABTG_GapContinuation.mq5`, `ABTG_EasyTrend.mq5`, `ABTG_EMA200.mq5`, `ABTG_SondaMargine.mq5`, `ABTG_TradeExporter.mq5`, `scarica_ottimizzati.ps1` + i `.set` vivi. **Trovato leggendo il codice** (non nei referti): la trappola ORB § 2.4 e il modo sessione del GapContinuation § 2.5. **12 conflitti** dichiarati, **10 buchi** assegnati. Nessun file toccato, nessun commit. |
 
 _Fine del piano. Nessun numero nudo, nessun orario senza il suo orologio._
+
+> 🔁 **CORREZIONE del 10/09/2026 (classe 193).** La riga qui sopra attribuisce a
+> **`770611`** il range **14:25-14:30**: e' **FALSO**. Quella e' la geometria di
+> **`770601` NASUSD**. `770611` U30USD gira su **14:30-14:45 (15 minuti)**,
+> `SLMode=3`, buffer 0 — lo dicono tutti e due i suoi preset, e lo conferma il
+> campo: si riempie alle **14:45:13 / 14:45:31**, subito dopo la fine del SUO
+> range (`770601` si riempie alle 14:30:00 / 14:30:51).
+> Referto: `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md`.

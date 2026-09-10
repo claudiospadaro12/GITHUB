@@ -191,7 +191,7 @@ minuti** nella stessa direzione (Master ≥25k) — **HARD BREACH**; FundingPips
 | finestra (ora server) | sedie della migrazione dentro la finestra | il numero misurato |
 |---|---|---|
 | **08:00-08:16 — apertura DAX** | 770101 (DAX Apertura); a contorno le posizioni notturne ancora vive (770411 MaxMin DAX short, 880402 MaxMin oro) | M2: il picco del giorno e' caduto in questa finestra il 03, 04, 06 e 07/08; il 03/08 il terzetto DAX sparava **nello stesso secondo** (08:15:29-34) — oggi dei tre resta solo 770101, ma gli swing sotto restano |
-| **14:30-14:46 — apertura US** | 770202 (Dow Apertura) + 770611 (ORB, range 14:25-14:30) **stesso simbolo U30USD, stessa direzione di breakout, stessi minuti** + 881531 (EMA200 Dow, intraday sul Dow) | R105: Dow_Apertura+ORB co-perdenti **17 giorni**; DAX_Apertura+ORB 20. Per la regola dei 10 minuti, Dow+ORB long insieme = **una "idea" da 0,95-1,30% combinato** → sotto il 2%, MA ogni terza sedia Dow nella finestra avvicina il muro |
+| **14:30-14:46 — apertura US** | 770202 (Dow Apertura) + 770611 (ORB, range **14:30-14:45** — corretto il 10/09, vedi nota in fondo) **stesso simbolo U30USD, stessa direzione di breakout, stessi minuti** + 881531 (EMA200 Dow, intraday sul Dow) | R105: Dow_Apertura+ORB co-perdenti **17 giorni**; DAX_Apertura+ORB 20. Per la regola dei 10 minuti, Dow+ORB long insieme = **una "idea" da 0,95-1,30% combinato** → sotto il 2%, MA ogni terza sedia Dow nella finestra avvicina il muro |
 | **lunedi' apertura settimana** | GapFill ×3 (se rientrano) + PunteLarry Oops (gap-based, 6 sedie D1) | R105: il **peggior giorno del banco intero (−4,74%) e' il cluster GapFill del lunedi'** (Nikkei+Dow+AUDUSD insieme per costruzione) — con 3 GapFill + Larry attivi il lunedi' mattina e' la finestra piu' affollata del calendario |
 | **notte (23:00→mattina)** | 770411 (box 23:00), 880402 (oro notte), swing H4 tenuti | M2: MAXMIN ORO + STREV DOW H1 215 min insieme; secondario ma si somma agli altri |
 | **tutto il giorno (swing H1/H4)** | 889901, 880913, 880511, 880531, 882161, 882345/6/2, 882361/2, 882343 | M2: **il cluster swing domina i MINUTI** (coppie insieme per 3.751-5.976 min in 17 giorni): gli swing si accumulano per giorni, le aperture ci si sommano sopra in un secondo — e' l'anatomia esatta del 5,85% |
@@ -269,3 +269,11 @@ preset o grafico toccato: solo carta. I numeri vengono da: PIANO_PROP.md v16
 Area H · CONTRATTI_SEDIE.md · censimento .chr 25/08 07:31 · R105_REFERTO.md ·
 REFERTO_M2_SOVRAPPOSIZIONE.md · FIRME_2026-08-18.md · CONTRATTO_GATEDSHORT_770250.md ·
 CENSIMENTO_FREQUENZA_FLOTTA_2026-08-22.md._
+
+> 🔁 **CORREZIONE del 10/09/2026 (classe 193).** La riga qui sopra attribuisce a
+> **`770611`** il range **14:25-14:30**: e' **FALSO**. Quella e' la geometria di
+> **`770601` NASUSD**. `770611` U30USD gira su **14:30-14:45 (15 minuti)**,
+> `SLMode=3`, buffer 0 — lo dicono tutti e due i suoi preset, e lo conferma il
+> campo: si riempie alle **14:45:13 / 14:45:31**, subito dopo la fine del SUO
+> range (`770601` si riempie alle 14:30:00 / 14:30:51).
+> Referto: `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md`.
