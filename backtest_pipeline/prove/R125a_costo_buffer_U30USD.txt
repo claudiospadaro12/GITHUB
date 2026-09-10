@@ -78,29 +78,77 @@
 #  di esecuzione e' M5 ma la GEOMETRIA e' da 15 minuti: lo stop e' 104
 #  punti indice. Il TF non decide il costo: lo decide lo stop.
 # ---------------------------------------------------------------------
+#  QUELLO CHE R88 HA GIA' MISURATO SU QUESTO ESATTO RAMO
+#  (letto dai CSV grezzi r88_csv/, NON dalla prosa del referto:
+#   InpSLMode=0 + InpTPMode=0 + InpTP_R=1.5, le uniche 3 celle esistenti)
+#
+#    buffer |  PF IS  DD IS  n  |  PF OOS   DD OOS   n
+#       0   | 1.06124 4.4336 71 | 1.76162  4.2025  119
+#     500   | 1.06346 4.7839 71 | 1.83850  3.8395  119
+#    1000   | 1.00555 4.5695 71 | 1.64542  4.4027  119
+#
+#  >>> LEGGERE QUESTE TRE RIGHE PRIMA DI TUTTO IL RESTO. Dicono due
+#      cose, e la seconda mi contraddice:
+#      (a) TUTTE E TRE passano il cancello del MERITO (C3, PF OOS >=
+#          1,40) e TUTTE E TRE passano quello del RISCHIO (C1, DD OOS
+#          <= 7,00%), con n 119 >= 95. Tre celle ADIACENTI dalla stessa
+#          parte del cancello: NON e' una cella sola che sporge.
+#      (b) MA sul PF il buffer 500 e' un MASSIMO, non un piano:
+#          1,762 -> 1,839 -> 1,645. Con la regola di casa (vicine entro
+#          +/- 0,15) la coppia 0/500 sta dentro (0,077), la coppia
+#          500/1000 sta FUORI (0,193).
+#      >>> QUINDI, DETTO SENZA GIRARCI INTORNO: su tre punti quella
+#          cella e' PIU' UN PICCO CHE UN ALTOPIANO, e per la nostra
+#          regola un picco NON si sceglie. E' esattamente il motivo per
+#          cui questo file mette SETTE punti dove ce n'erano tre.
+#      >>> E CANCELLA UN'ATTESA CHE AVEVO SCRITTO E CHE ERA SBAGLIATA:
+#          il "piano inclinato" del DD misurato in R118 (9,76 -> 6,89,
+#          monotono) sta sul ramo HALFRANGE + TP_RANGE, che e' un ALTRO
+#          ramo. Su OPPRANGE + TP in R il DD sui tre punti fa
+#          4,20 -> 3,84 -> 4,40: NON e' monotono. Trasportare la
+#          monotonia da un ramo all'altro sarebbe stato pescare.
+# ---------------------------------------------------------------------
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI (falsificabile)
 #    - n: INVARIANTE lungo tutto l'asse. IS 71, OOS 119, in tutte e 7
-#      le celle. Il buffer sposta lo STOP, non decide se si entra.
+#      le celle (R88 lo mostra gia' sui suoi tre punti). Il buffer
+#      sposta lo STOP, non decide se si entra.
 #      Se n cambia, c'e' un effetto che non ho capito: ci si ferma.
-#    - DD OOS: MONOTONO DECRESCENTE, prosecuzione del piano inclinato di
-#      R118. Attesa 3,5% - 5,5% nella zona buffer 15-30.
-#    - PF OOS: fra 1,55 e 1,90, NON monotono (R88 e R118 concordano che
-#      il PF sul buffer non e' riproducibile mentre il DD lo e').
-#    - PF IS: fra 0,90 e 1,10, in calo col buffer. Lo scrivo prima
+#    - PF OOS: attesa fra 1,40 e 1,90, con il massimo fra buffer 0 e
+#      1000 e un CALO LENTO oltre. Motivo: allargare lo stop riduce il
+#      lotto, quindi ogni trade vinto pesa meno, mentre i trade salvati
+#      dallo stop piu' largo sono pochi (l'ampiezza del range e' gia'
+#      grande).
+#    - DD OOS: attesa fra 3,0% e 5,5% su tutto l'asse, PIATTA o in
+#      calo lento. NON prometto monotonia: sul ramo OPPRANGE non c'e'.
+#    - PF IS: attesa fra 0,90 e 1,10, in calo lento. Lo scrivo prima
 #      perche' e' la parte che NON mi piace e va detta lo stesso.
-#    - Cella attesa al centro dell'altopiano: buffer 1500-2000.
-#  FALSIFICAZIONE: se il DD OOS smette di scendere, o risale, oltre 20
-#  punti indice, il piano inclinato di R118 finisce li' e va scritto:
-#  vorrebbe dire che il beneficio dello stop largo si esaurisce PRIMA
-#  del punto in cui il cancello del costo si chiude, e allora questa
-#  geometria non e' schierabile e lo si dice.
+#    - DD IS: attesa fra 4,0% e 6,0% (i tre punti noti fanno 4,4-4,8).
+#    - Cella attesa al centro dell'altopiano: buffer 500-1500.
+#
+#  I TRE ESITI POSSIBILI, dichiarati adesso perche' due su tre sono
+#  esiti che NON mi piacciono:
+#    E1  L'altopiano c'e': PF OOS >= 1,40 su >= 4 celle adiacenti entro
+#        +/- 0,15, DD OOS <= 7,00% su tutte. -> si propone il CENTRO
+#        (non il massimo) e si va alla prova di regime.
+#    E2  Il picco resta un picco: solo buffer 500 tiene, le vicine no.
+#        -> IL VERDETTO E' "NON C'E' UNA CONFIGURAZIONE ROBUSTA", si
+#        scrive cosi', e NON si propone niente. Il PF 1,8385 diventa
+#        un numero da archivio, non un candidato.
+#    E3  Il PF cala in modo monotono col buffer. -> il cancello del
+#        COSTO e il MERITO tirano in direzioni opposte su questo ramo:
+#        il costo vuole piu' buffer, i numeri ne vogliono meno.
+#        In quel caso la cella schierabile e' la piu' PICCOLA che passa
+#        il costo, e va detto che il margine e' quello e non di piu'.
+#  FALSIFICAZIONE DELLA TESI DEL ROUND: se nessuna cella tiene insieme
+#  C0 (costo), C1 (DD) e C3 (PF) su un altopiano, allora l'ORB sul Dow
+#  non ha una configurazione che stia dentro la frontiera del costo, e
+#  si scrive in REGISTRO_TEST.md con PF, DD, n e cancello.
 # ---------------------------------------------------------------------
 #  LE ANCORE GRATIS (si controllano PRIMA di leggere il resto)
-#    La cella buffer 500 con questo corpo deve riprodurre R88 riga
-#    "OPPRANGE / 500 / TP in R 1,5": +23.003,35 - PF 1,8385 - DD 3,840%.
-#    La cella buffer 1000 deve riprodurre "OPPRANGE / 1000 / R 2,0"?
-#    NO: quella riga aveva TP_R 2,0, qui e' 1,5. Non e' un'ancora.
-#    L'unica ancora vera e' buffer 500. Se non riproduce, ci si ferma.
+#    Le celle buffer 0, 500 e 1000 devono riprodurre AL CENTESIMO le tre
+#    righe di R88 qui sopra. TRE ancore, non una.
+#    Se anche una sola non riproduce, ci si ferma e si cerca il perche'
+#    PRIMA di guardare le quattro celle nuove (1500/2000/2500/3000).
 # ---------------------------------------------------------------------
 #  UNITA', DICHIARATA: 100 PUNTI MT5 = 1 PUNTO INDICE su U30USD a BCM.
 #  MISURATO (REFERTO_ROUND55_SLIPPAGE.md, R55b_slippage_ORB.txt r.25).
