@@ -37,11 +37,35 @@ ottobre resta a **2 sedie schierabili**.
 📄 `report/FIX_LOTTO_PENDENTE_2026-09-08.md`
 
 ## 2. 🖱️ POSTNEWS EURUSD: `InpRiskPercent` **3.0 → 1.30**
-**Stato**: EURJPY l'hai aperto e visto; **EURUSD (magic 771202) resta a 3.0**.
+**Stato al 10/09**: il `.chr` vivo dice **`InpRiskPercent=3.0` su TUTTE E DUE** (chart43 EURJPY 771201, chart44 EURUSD 771202) — **ma quella foto e' del 06/09 22:55**, cioe' PRIMA che Claudio controllasse, e un `.chr` si risalva solo al cambio profilo o alla chiusura del terminale. 🔴 **Quindi la foto NON smentisce il suo ricordo e NON conferma il 3.0 di adesso: l'unico modo di saperlo e' aprire il pannello F7 sul grafico.** I preset nel repo sono corretti (1.30) su tutti e due.
 **Dove**: piccolo **50503392**, grafico **EURUSD M5**. Solo quel numero, nessun preset.
 **Perché**: 3.0 significa **1,50% per gamba stoppata** (la size si calcola su
 `InpRiskRefSLpips=50` mentre lo stop vero è 25). 1.30 = **0,65%**, la taglia firmata il 18/08.
 📄 `report/FIRMA_POSTNEWS_130_2026-09-08.md`
+
+## 2-bis. 🚨 COLLISIONE DI MAGIC: `ECB_EURUSD` e `FOMC_EURUSD` hanno **LO STESSO 771202**
+
+**Trovato il 10/09** leggendo i `.chr` vivi sul piccolo **50503392**.
+
+| preset | magic | filtro titolo | ora azione (server) |
+|---|---:|---|---|
+| `ABTG_PostNews_FOMC_EURUSD.set` | **771202** | FOMC | 19:40 |
+| `ABTG_PostNews_ECB_EURUSD.set` | **771202** | ECB | 14:00 |
+
+Il preset ECB EURUSD e' nato l'08/09 con l'intestazione *"NATO PER EVITARE UNA
+COLLISIONE DI MAGIC"* — ma **riusa il magic della sedia FOMC**, che e' quella
+gia' viva su `chart44.chr` (EURUSD, `InpNewsTitleMatch=FOMC`, azione 19:40).
+
+🔴 **Cosa succede se un giorno si caricano tutte e due**: due sedie con lo
+stesso magic **si vedono le posizioni a vicenda**. Con `InpUseOCO=true` (che e'
+il default e sta scritto in tutti e due i `.chr`) la prima che si riempie fa
+cancellare i pendenti **anche all'altra**. Oggi non morde perche' la ECB EURUSD
+non e' mai stata caricata su nessun grafico — **ma il preset e' li', pronto**.
+
+✅ **La riparazione e' un numero**: dare alla ECB EURUSD un magic libero
+(es. **771204**). E' un cambio di file, non tocca niente in forward.
+🔴 **Ma resta di Claudio**, perche' un magic identifica una sedia e cambiarlo
+significa che le operazioni vecchie e nuove non si sommano piu' nelle statistiche.
 
 ## 3. 🖊️ LA BCE DEL 10/09: si arma o no?
 **Il fatto**: nel calendario ci sono **3 righe USD** (residuo NFP) e **ZERO righe
