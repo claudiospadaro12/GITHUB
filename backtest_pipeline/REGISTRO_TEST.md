@@ -1995,3 +1995,55 @@ segnali serali (finestra DAX ~11 ore contro 5,5 degli USA, asimmetria
 misurabile da queste colonne**: serve una colonna `Ora Ingresso` nell'OnTester.
 Finche' non c'e', il numero del DAX e' **non verificabile su quel punto** —
 il che non e' la stessa cosa che "sporco".
+
+---
+
+## 🚧 ORO — FINESTRA 15:36 M1 (metodo del collega di Claudio) — 🔴 BOCCIATO PER COSTO (10/09/2026)
+
+**Cella giudicata:** XAUUSD · range M5 **14:30-14:35 server** (15:30-15:35 IT) ·
+rottura su **M1 alle 14:36** · ingresso **a mercato** · uscita dopo **3-4 candele M1**.
+Referto completo: `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`.
+
+**I NUMERI (misurati, con fonte):**
+- **spread BCM sull'oro**: **0,16 $** (17/08 17:34 srv, `sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv` r.59)
+  e **0,22 $** (27/08 08:5x srv, `R114_CORSA_20260827/REFERTO_R114.txt` r.112-113).
+  🔴 **Nella finestra 14:30-14:41 e' [NON MISURATO]** — i conti usano il numero PIU' FAVOREVOLE.
+  ✍️ **ERRATA**: il "0,24 $ misurato in casa" di `CACCIA_APERTURE_ORO_2026-09-08.md` r.208/390
+  **non ha fonte nel repo** e va ritirato.
+- **commissione MISURATA**: **−3,48 EUR/lotto giro completo** (n=385, `data/statements/trades_auto.csv`).
+  🚨 **L'oro paga commissione; D30EUR/NASUSD/U30USD pagano ZERO.** = 0,0403 $ = 25% dello spread.
+- **costo pieno giro completo**: **0,2003 $ = 20,03 USD/lotto = 17,28 EUR**. Contratto **100 oz/lotto**,
+  1 punto (0,01 $) = **1,00 USD/lotto**.
+- **frontiera `40 x spread`** → stop minimo **6,40 $** (**8,01 $** col pedaggio pieno);
+  pavimento DURO `13,3x` → 2,13 $.
+- **movimento MISURATO del trade in quella finestra**: **1,41 $** (mediana, n=33 aperture
+  14:35-14:40 srv su **19 giornate**, magic 0 = trading manuale di Claudio; durata mediana **1,9 min**).
+  Controprova indipendente: range di giornata mediano **40,50 $** (n=60 giorni) con la regola √t
+  dà 1,47 $ → **scarto 4,3%**.
+- **rapporto stop/spread reale: 8,8x - 12,5x** → **sotto anche il pavimento DURO**.
+  Manca un fattore **3,2-4,5x** al pavimento di lavoro. *(Per confronto: U30USD H1 = 56,9x,
+  margine +42%, il più sottile mai accettato; gli indici su M5 sono già esclusi PER COSTO.)*
+
+**PROVA SPERIMENTALE IN CAMPO (non è solo aritmetica):** le stesse 33 operazioni fanno
+**22 vinte su 33 (66,7%)** e chiudono a **−785,99 EUR netti**, di cui **~473 EUR (60%)
+sono solo pedaggio** (377,92 spread stimato + 95,24 commissione misurata).
+**Vincere due volte su tre e perdere è la firma del cancello di costo.**
+⚠️ n=33 è sottile per il MERITO (valvola R59) — ma il verdetto di costo non poggia su questi
+trade: poggia sull'aritmetica. Questi sono la conferma indipendente.
+
+**VALE IDENTICO PER IL TRADING A MANO.** Spread e commissione li mette il broker, non l'EA.
+E a mano il costo è **più alto**: ogni secondo di esitazione vale **~1,24 USD/lotto**
+(derivato da 1,41 $ / 1,9 min), ed è un **limite inferiore** perché sulla rottura la velocità
+è sopra la media.
+
+**🔓 NON È MORTA LA TESI — il TF più basso che la frontiera lascia passare sull'oro:**
+**M30 con stop ≥ ~8,8 $** (1,5 × il range tipico, margine **+9,7%** — sottile: a +50% di spread
+non passa più) · **H1 = il gradino robusto** (+55% a 1,5x). Il range d'apertura su M30
+(14:30-15:00 srv) è lo stesso meccanismo di `ABTG_ORB` / `ABTG_Nasdaq_Apertura_US`, macchine
+già in casa. **Ma non è più il trade del collega**: range 30 min, durata ore, stop ≥ 8,8 $.
+
+**BUCHI DICHIARATI (nessuno di questi è "morto", sono [NON MISURATO]):**
+spread nella finestra 14:30-14:41 · slippage sull'oro (0 righe XAUUSD in tutti i dataset:
+il `SlippageLogger` sta sul REALE 10105439, che ha solo D30EUR) · slippage della reazione
+umana · requote/rifiuti · **profondità a tick di XAUUSD** (blocca ogni verdetto di MERITO
+sull'oro, regola F6) · ATR per TF sull'oro (oggi [INFERITO]).
