@@ -1,0 +1,163 @@
+# =====================================================================
+#  EA: ABTG_SuperWave
+#  R126d -- IL MECCANISMO SU UN SECONDO SIMBOLO (non una seconda sedia)
+#           NASUSD  H1  --  InpSLBufferAtr  0 .. 1,000 ATR  (9 celle)
+#
+#  Si lancia con:
+#    -Expert ABTG_SuperWave
+#    -Prova prove\R126d_costo_bufferatr_NASUSD.txt
+#    -Simbolo NASUSD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r126d -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#
+#  !! ATTENZIONE, EA DIVERSO DAGLI ALTRI TRE FILE DI R126: qui e'
+#     ABTG_SuperWave (il generico), non ABTG_SuperWave_DOW_H1_Ottimizzato.
+#     I suoi DEFAULT COMPILATI sono un altro motore (InpTF = H4,
+#     InpStMult = 3,5, InpTP_RR = 2,0): per questo qui sotto e' pinnato
+#     TUTTO per nome. Un default non e' un pin.
+#     La riga di lancio deve dire -Expert ABTG_SuperWave: se per sbaglio
+#     dice ...DOW_H1_Ottimizzato, il round misura un altro EA e i CSV non
+#     lo dicono.
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026): se e'
+#     vuoto il driver sceglie col RIPIEGO, e sulla macchina ci sono TRE
+#     terminali MT5 di cui uno con le SEDIE VIVE. "C:\MT5_Backtest" =
+#     VPS, demo 50504400, zero EA attaccati.
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      backtest_pipeline\prove\R126_SUPERWAVE_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON PUO' PROMUOVERE NIENTE, E LO DICHIARA ADESSO <<<
+#
+#  La base di NASUSD H1 con QUESTA geometria (StMult 2,5 / TP_RR 3,0) e'
+#  PF 1,02213 - DD 3,3131% - n 97 (valid_SuperWave_NASUSD_H1.csv, OHLC,
+#  finestra piena). PF 1,02 e' indistinguibile da zero edge.
+#  Cercare una "cella buona" qui sarebbe esattamente la griglia piu'
+#  fitta su un motore senza edge che la regola del 19/08 vieta.
+#
+#  QUINDI, congelato prima dei numeri:
+#    - R126d NON HA i cancelli R126-G1..G5. Non ha celle "ammissibili",
+#      non ha blocchi, non ha una cella scelta. La procedura P1..P8 NON
+#      gli si applica.
+#    - R126d produce UNA SOLA lettura, ed e' DIFFERENZIALE: come si
+#      muovono PF, DD e n di OGNI cella RISPETTO ALLA PROPRIA CELLA 0.
+#      Cioe' il SEGNO e la GRANDEZZA dell'effetto del buffer.
+#    - Nel referto sta in un riquadro etichettato
+#      "R126d -- TRASPORTO DEL MECCANISMO (non si sceglie)", separato
+#      dalla tabella di R126a. Un numero giusto nella colonna sbagliata e'
+#      un numero sbagliato (classe 212).
+#
+#  E ALLORA A COSA SERVE, visto che costa 1,82 minuti?
+#  A rispondere a UNA domanda che R126a da solo non puo' chiudere:
+#      l'effetto del buffer che misureremo sul Dow e' una proprieta' del
+#      MECCANISMO (stop piu' largo -> uscite trailing/flip che rendono
+#      meno, in proporzione a stop(0)/stop(b)) oppure e' una particolarita'
+#      di quella serie di prezzi?
+#  Se su NASUSD il PF cala e il DD sale nella STESSA proporzione prevista
+#  dal fattore del par. 3 dei criteri, allora il compromesso e' una legge
+#  del motore e la cella scelta su U30USD e' credibile. Se su NASUSD va
+#  nell'altro verso, la cella scelta su U30USD e' un fatto locale, e va
+#  detto accanto al numero.
+#  >>> LA GEOMETRIA E' TENUTA IDENTICA A QUELLA DEL DOW APPOSTA
+#      (StMult 2,5 / TP_RR 3,0), anche se sul Nasdaq la riga migliore
+#      d'archivio e' un'altra (StMult 3,0 / TP_RR 2,0, PF 1,26478, n 95).
+#      Prendere la riga migliore del Nasdaq sarebbe stato scegliere un
+#      PICCO gia' visto, e avrebbe cambiato DUE cose insieme (simbolo E
+#      geometria): non sarebbe piu' stato un trasporto.
+# ---------------------------------------------------------------------
+#  I NUMERI DI COSTO DI NASUSD, per completezza (NON sono un cancello qui)
+#  Spread NASUSD, spread_orario_NASUSD.csv, 156,1 milioni di tick:
+#      riga TUTTO  mediana 1,80  P95 2,70
+#  ATR(10) H1 di NASUSD ~ 64,1 punti indice [INFERITO], stessa strada di
+#  R126a: range di giornata MISURATO su 24 giornate vere (trades_auto.csv,
+#  session_high/low) = 313,85 punti indice mediana, x sqrt(60/1440).
+#  >>> E LO SPREAD ORARIO ALLE ORE VERE QUI E' [NON MISURATO]: SuperWave
+#      su NASUSD non ha mai girato in forward, quindi non esistono
+#      posizioni vere da cui leggere le ore. Uso la riga TUTTO e LO
+#      DICHIARO. E' un altro motivo per cui questo file non promuove.
+#  >>> E lo stop iniziale di SuperWave su NASUSD e' [NON MISURATO]: zero
+#      gambe reali. Non esiste nemmeno la forbice che esiste sul Dow.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (falsificabile)
+#    - n: quasi INVARIANTE, entro +/- 8. Stesso motivo di R126a (r.181).
+#    - PF: CALO LENTO col buffer, dello stesso ORDINE di grandezza del
+#      calo che vedremo su U30USD. Il confronto si fa sui DELTA rispetto
+#      alla cella 0 di CIASCUN simbolo, mai sui PF assoluti: le due basi
+#      sono diverse (1,33 contro 1,02) e confrontarle direttamente
+#      sarebbe un errore di lettura.
+#    - DD: LIEVE SALITA, come su U30USD.
+#    - LA FALSIFICAZIONE: se su NASUSD il PF SALE col buffer mentre su
+#      U30USD SCENDE (o viceversa), il "compromesso" del par. 3 dei
+#      criteri NON e' una legge del motore, e la cella di R126a va
+#      dichiarata FATTO LOCALE.
+#  ANCORA DI QUESTO FILE: la cella b = 0 deve avvicinare
+#  PF 1,02213 - DD 3,3131% - n 97 dell'archivio. ATTENZIONE, quel numero
+#  e' OHLC e a FINESTRA PIENA, mentre qui si gira a TICK REALI su due
+#  finestre: NON e' un'ancora al centesimo, e' un ordine di grandezza.
+#  Un numero OHLC non e' mai un verdetto: e' screening.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779340 (7793xx liberi al 10/09/2026, verificato per grep
+#  su tutto il repo).
+# =====================================================================
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- il MOTORE, pinnato sulla STESSA geometria della sedia del Dow.
+#     I default compilati di ABTG_SuperWave sono H4 / 3,5 / 2,0: qui
+#     TUTTO e' scritto per nome apposta.
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpTP_RR=3.0
+
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=0
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingAtr=0
+InpPendingExpiryBars=3
+
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=0
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpUsaGuardian=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779340
+
+# --- L'ASSE, UNO SOLO: identico a R126a, cifra per cifra, perche' il
+#     confronto fra i due file abbia senso. 0 .. 1,000 passo 0,125 = 9
+#     celle, tutte esatte in binario (multipli di 1/8).
+#     Bordo BASSO 0 = LIMITE FISICO. Bordo ALTO 1,000 = FINE GRIGLIA.
+InpSLBufferAtr=0||0||0.125||1.0||Y

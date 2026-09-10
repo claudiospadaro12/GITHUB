@@ -1,0 +1,401 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R126a -- LA MANOPOLA CHE ESISTE, E' A ZERO, E NON HA MAI GIRATO
+#           U30USD  H1  --  InpSLBufferAtr  0 .. 1,000 ATR  (9 celle)
+#
+#  Si lancia con:
+#    -Expert ABTG_SuperWave_DOW_H1_Ottimizzato
+#    -Prova prove\R126a_costo_bufferatr_U30USD.txt
+#    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r126a -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026).
+#     Se il parametro e' vuoto, walkforward_generico.ps1 sceglie il
+#     terminale col RIPIEGO. Sulla macchina ci sono TRE terminali MT5 e
+#     uno ha le SEDIE VIVE: la cartella si NOMINA A MANO, col numero di
+#     conto in chiaro accanto -- "C:\MT5_Backtest" = VPS, demo 50504400,
+#     zero EA attaccati.
+#  !! -Fino 2026.06.30 e' il DEFAULT del driver, e si scrive lo stesso:
+#     uno stato implicito non e' uno stato dichiarato. Da qui esce tutta
+#     l'aritmetica delle ancore (criteri par. 5.5).
+#  !! -Deposito 10000 e' il DEFAULT del driver, e si scrive lo stesso:
+#     e' il valore con cui l'archivio e' confrontabile, ed e' la voce
+#     M-C5 del piano di ottobre ("deposito del round NON DICHIARATO").
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      backtest_pipeline\prove\R126_SUPERWAVE_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND ESISTE (fatti misurati, nessuna opinione)
+#
+#  1. LA MANOPOLA E' VERGINE. InpSLBufferAtr esiste (r.80 del sorgente,
+#     "> 0: buffer SL in ATR del TF operativo, IGNORA InpSLBufferPips")
+#     ed e' a ZERO. In OGNI passata archiviata di questo motore vale 0,
+#     e il ripiego InpSLBufferPips=3 su U30USD (Digits=2, PipSize() torna
+#     _Point) vale 0,03 PUNTI INDICE: inerte. L'input e' nato il 17/08 col
+#     commit 7f80a87, DOPO la fase 0 dell'08/08 che ha prodotto tutti i
+#     CSV di questo EA. Verificato: grep -rl InpSLBufferAtr non trova
+#     nessun CSV di SuperWave.
+#
+#  2. IL MOTORE NON E' MORTO, quindi allargare qui NON viola la regola
+#     del 19/08. Numeri, non aggettivi (valid_SuperWaveRT_U30USD_H1_
+#     realtick.csv, tick reali, finestra piena):
+#        PF 1,52140  -  DD 4,0151%  -  n 227  -  9 combo positive su 9
+#     e spezzato in due finestre (risultati_prove/, tick reali):
+#        IS   PF 1,84892  DD 3,7267%  n  84
+#        OOS  PF 1,32770  DD 3,9082%  n 143      (84 + 143 = 227)
+#
+#  3. IL CANCELLO DEL COSTO E' A UN SOFFIO, MA IL SOFFIO NON E' 4%.
+#     CANCELLO_COSTO_FLOTTA_2026-09-10.md da' 38,5x (96% del pavimento).
+#     Aperto e rifatto: quel numero e' sbagliato DA TUTTE E DUE LE PARTI.
+#       - lo stop 77,1 e' un LIMITE INFERIORE (4 gambe chiuse in stop; il
+#         trailing r.341 e il breakeven r.331 possono solo STRINGERE);
+#       - lo spread 2,00 e' la riga TUTTO del file dei tick, pesata sui
+#         tick: le ore 14-21 portano 44,83 milioni di tick su 64,71 (69%)
+#         ma questa sedia ha aperto li' solo 2 posizioni su 8 (25%).
+#     MISURA NUOVA, ESATTA, MAI FATTA: il TP e' posato a entry +/- risk *
+#     InpTP_RR con InpTP_RR = 3,0 (r.256, e r.281 per la gamba pendente),
+#     quindi su ogni posizione chiusa in TP
+#         stop INIZIALE = |chiusura - apertura| / 3, esatto.
+#     Sulle 3 posizioni di 770511 chiuse in TP (e le due gambe di ognuna
+#     danno lo STESSO numero al centesimo -- verifica interna del metodo):
+#         55,00  -  171,30  -  171,50      mediana 171,30
+#     >>> E L'IDENTITA' SI AUTO-VERIFICA TRE VOLTE, NON UNA:
+#         (i)   la gamba pendente si apre ESATTAMENTE 0,20 punti indice
+#               sotto quella a mercato su tutte e tre le posizioni, che e'
+#               InpPendingPips 20 x PipSize() con PipSize() = _Point =
+#               0,01 (r.123-127, Digits=2). E' la PRIMA conferma DA DATI
+#               DI CAMPO che i "20 pip" del documento valgono 0,20 punti
+#               indice su questo simbolo;
+#         (ii)  la distanza di TP delle DUE gambe di ogni posizione e'
+#               identica al centesimo (165,00/165,00 - 513,90/513,90 -
+#               514,50/514,50), come impone tpP = px +/- risk*InpTP_RR;
+#         (iii) i tre valori divisi per 3 danno numeri regolari.
+#         Se avessi letto male una di queste tre righe di codice, almeno
+#         uno dei tre controlli non tornerebbe.
+#     >>> LO STOP INIZIALE E' UNA FORBICE [77,1 ; 171,3], NON UN NUMERO.
+#         Il rapporto col costo va da 25,7x a 85,7x. Il verdetto "770511
+#         non passa" NON E' DECISO. I conti di questo file si fanno
+#         SEMPRE all'angolo PESSIMISTA (stop 77,1), e l'altro angolo si
+#         stampa accanto. Mai la media dei due.
+#     >>> E IL SOTTOCAMPIONE E' SELEZIONATO IN DUE VERSI OPPOSTI (un TP a
+#         3R e' piu' lontano se lo stop e' largo, quindi sfavorisce gli
+#         stop larghi; ma uno stop largo vive di piu', quindi li
+#         favorisce). Quale domina e' [NON MISURATO]. E le 3 posizioni in
+#         TP sono tutte SHORT, le 3 in stop tutte LONG: con n=3 e n=4
+#         questo non e' un campione, e' un indizio. Lo scrivo perche' mi
+#         indebolisce.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO, APPLICATO PRIMA DI SCEGLIERE I VALORI
+#
+#  Spread U30USD ALLE ORE IN CUI LA SEDIA OPERA DAVVERO (ore server delle
+#  8 posizioni vere: 3, 4, 5, 6, 8, 11, 17, 20), da 64,7 milioni di tick
+#  di spread_orario_U30USD.csv:
+#      mediane   2,70 2,70 2,70 2,70 2,60 2,60 1,90 1,90  ->  MEDIANA 2,65
+#      P95       3,00 3,00 3,00 3,00 3,00 3,00 2,00 2,00  ->  MEDIANA 3,00
+#  (la riga TUTTO del file dice 2,00 / 2,80: e' quasi solo cash USA)
+#  LIMITE: n = 8 posizioni, sei settimane. La DIREZIONE e' strutturale
+#  (il conto sui tick qui sopra), il VALORE 2,65 e' [MISURATO SU n=8].
+#
+#  IL CONTRO-ESEMPIO, cioe' L'IPOTESI ALTERNATIVA, MISURATA. Otto
+#  posizioni sono poche. Ma c'e' una seconda strada che non usa i trade
+#  veri per niente: l'ingresso e' un incrocio EMA14 x EMA200 sulla barra
+#  H1 chiusa (r.191-205), che NON ha preferenze per l'ora del giorno.
+#  Se fosse uniforme sulle 24 barre H1, il numero giusto sarebbe la
+#  mediana NON PESATA delle 24 mediane orarie:
+#     A  ore vere della sedia (n=8) .............. mediana 2,65  media 2,475
+#     B  ipotesi alternativa: ore UNIFORMI ....... mediana 2,60  media 2,400
+#     B' come B, tolte le ore 22-23 (quasi chiuse) mediana 2,60  media 2,395
+#     C  riga TUTTO, pesata sui TICK (il referto) . mediana 2,00  media 2,105
+#  >>> A e B sono costruiti su dati diversi e ipotesi opposte, e cadono
+#      TUTTI E DUE a 2,60-2,65. C sta il 23% piu' in basso. L'ALTRA
+#      SPIEGAZIONE NON CADE DENTRO LA BANDA: ci cade SOPRA. Il 2,00 non e'
+#      una lettura alternativa dello stesso fenomeno, e' un altro
+#      fenomeno (la distribuzione dei TICK, non quella dei TRADE).
+#      Il cancello si congela a 2,65, il piu' sfavorevole dei due
+#      stimatori concordi.
+#  >>> E UN LIMITE DEL CONCETTO, che vale per tutta la flotta: il pedaggio
+#      si paga DUE VOLTE, all'ingresso e all'uscita, e l'ora dell'USCITA e'
+#      [NON MISURATO]. Il pavimento di casa 40x e' definito contro UNO
+#      spread e va lasciato cosi', altrimenti questa sedia non sarebbe
+#      piu' confrontabile con le altre 41. Ma va scritto: IL PEDAGGIO VERO
+#      E' CIRCA IL DOPPIO DI QUELLO CHE IL CANCELLO MISURA, SU TUTTE.
+#
+#  Pavimento DI LAVORO 40x -> lo stop deve valere >= 106,0 punti indice.
+#  Pavimento DURO 13,3x    -> >= 35,25 punti indice: NESSUNA cella lo
+#                             sfonda (il minimo dell'asse e' 77,1).
+#
+#  IL BUFFER E' ADDITIVO, ED E' PER QUESTO CHE IL ROUND FUNZIONA ANCHE
+#  SENZA SAPERE stop(0):    stop(b) = stop(0) + b * ATR(10) H1   (r.239)
+#
+#  ATR(10) H1 di U30USD ~ 64,2 punti indice [INFERITO]. Strada identica a
+#  R125a: range di giornata MISURATO su 24 giornate vere (trades_auto.csv,
+#  session_high/low) = 314,5 punti indice mediana, scalato x sqrt(60/1440)
+#  = 64,2.  CONTROPROVA cercata apposta per rompere il numero: con
+#  InpStMult 2,5 la banda del Supertrend vale 2,5 x ATR = ~160, e i due
+#  stop iniziali ESATTI piu' larghi misurati in campo sono 171,30 e
+#  171,50. Compatibile. NON e' una dimostrazione (lo stop e' il piu'
+#  protettivo fra linea ST ed estremo a 5 barre), ma un ATR di 30 o di
+#  130 sarebbe INCOMPATIBILE, e questo il controllo lo esclude.
+#  Banda per la sensibilita': 50 - 90.
+#
+#  QUINDI, ALL'ANGOLO PESSIMISTA (stop 77,1 - spread 2,65 - ATR 64,2):
+#    buffer  0     -> stop  77,1 =  29,1x   NON passa (73%)
+#    buffer  0,125 ->       85,1 =  32,1x   NON passa (80%)
+#    buffer  0,250 ->       93,2 =  35,2x   NON passa (88%)
+#    buffer  0,375 ->      101,2 =  38,2x   NON passa (95%)
+#    buffer  0,500 ->      109,2 =  41,2x   PASSA (+3%)
+#    buffer  0,625 ->      117,2 =  44,2x   PASSA (+11%)
+#    buffer  0,750 ->      125,3 =  47,3x   PASSA (+18%)
+#    buffer  0,875 ->      133,3 =  50,3x   PASSA (+26%)
+#    buffer  1,000 ->      141,3 =  53,3x   PASSA (+33%)
+#  E all'angolo OTTIMISTA (stop 171,3) PASSA GIA' LA CELLA 0 (64,6x).
+#  >>> ECCO PERCHE' L'ASSE ARRIVA A 1,000 E NON SI FERMA A 0,5: il punto
+#      in cui il cancello si chiude nel caso sfavorevole sta DENTRO la
+#      griglia, con celle da tutte e due le parti. E' il disegno che rende
+#      leggibile la risposta, non un allargamento a caso.
+#  >>> E IL CASO CHE L'ASSE NON COPRE, DETTO ADESSO: al P95 dell'ora vera
+#      (3,00) il pavimento e' 120,0 punti indice, cioe' b >= 0,668:
+#      ammissibili solo 0,750 / 0,875 / 1,000, e P5 toglie il bordo ->
+#      2 celle -> P4 boccia. AL P95 QUESTO ASSE E' TROPPO CORTO e
+#      servirebbe estenderlo a 1,25. Il P95 non e' il cancello (il
+#      cancello e' la mediana): e' uno stress che il round DICHIARA di
+#      non poter superare, non uno che fallisce a sorpresa.
+# ---------------------------------------------------------------------
+#  IL COMPROMESSO, QUANTIFICATO PRIMA (e in parte NON e' quello che
+#  sembra: letto il codice, il buffer NON costa dove ci si aspetta)
+#
+#    stop pieno colpito .... perdita = risk_money        INVARIANTE
+#    TP finale a 3R ........ guadagno = 3 x risk_money   INVARIANTE
+#    parziale a 1R + pari .. r.319, in unita' di R       INVARIANTE
+#    uscita sul TRAILING ... r.341, prezzo ASSOLUTO  ->  x stop(0)/stop(b)
+#    uscita su FLIP ........ r.180, prezzo ASSOLUTO  ->  x stop(0)/stop(b)
+#
+#  Il lotto e' risk_money/stop (r.394-421) e TP e parziale sono in R:
+#  scalano INSIEME al lotto. Il buffer costa SOLO sulle uscite a prezzo
+#  assoluto -- trailing e flip -- che qui sono accese tutte e due.
+#  Fattore, ai due angoli della forbice:
+#      b        angolo 77,1     angolo 171,3
+#      0,125       0,906           0,955
+#      0,250       0,827           0,914
+#      0,375       0,762           0,877
+#      0,500       0,706           0,842
+#      0,625       0,658           0,810
+#      0,750       0,615           0,781
+#      0,875       0,578           0,753
+#      1,000       0,546           0,727
+#
+#  E UN SECONDO EFFETTO, LETTO NEL CODICE E MAI SCRITTO DA NESSUNO:
+#  il trailing riscrive lo stop a stLine NUDO, SENZA buffer (r.341: il
+#  buffer compare solo in Enter(), r.239). QUINDI IL BUFFER PROTEGGE SOLO
+#  FINO AL PRIMO AGGIORNAMENTO DEL TRAILING. Il beneficio "salva i trade
+#  fermati per un soffio" vale solo sui perdenti RAPIDI; il costo sul
+#  fattore qui sopra vale su TUTTE le uscite trailing/flip, sempre.
+#
+#  R126-RESA (congelata adesso, criteri par. 3): se la cella scelta da P7
+#  ha PF OOS < PF OOS(cella 0) - 0,15, il verdetto e' "il margine di costo
+#  si compra solo pagandolo col merito": non si propone niente, si scrive
+#  il numero, e il cancello del costo resta APERTO e dichiarato tale.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (falsificabile) -- E NON E' QUELLA
+#  DI R118: SU QUESTO MOTORE C'E' GIA' UNA MISURA CHE DICE L'OPPOSTO.
+#
+#  L'asse InpStMult di QUESTO EA e' gia' girato a tick reali
+#  (..._U30USD_{IS,OOS}_r3.csv). InpStMult allarga la banda del
+#  Supertrend, cioe' ALLARGA LO STOP. Ecco cosa ha fatto:
+#      StMult    1,5      2,0    2,5(vivo)   3,0      3,5
+#      PF OOS   1,60552 1,48377  1,32770  1,09636  1,18710
+#      DD OOS   3,2790  3,6658   3,9082   5,1118   5,0178
+#      n OOS      165     153      143      143      134
+#  >>> ALLARGANDO LO STOP, SU QUESTO MOTORE IL DD SALE E IL PF SCENDE.
+#      E' l'esatto contrario del "piano inclinato" di R118. Trasportare
+#      qui la monotonia di R118 sarebbe stato pescare.
+#  >>> LIMITE DI QUESTA LETTURA, DICHIARATO: InpStMult cambia DUE cose --
+#      larghezza dello stop E frequenza dei flip (che e' anche il filtro
+#      d'ingresso e l'uscita). E' un confondimento. InpSLBufferAtr invece
+#      cambia SOLO lo stop iniziale: non tocca il segnale, non tocca i
+#      flip, non tocca il livello del trailing. PER QUESTO L'ASSE DI
+#      QUESTO FILE E' IL BUFFER E NON LO StMult.
+#
+#    - n: quasi INVARIANTE, entro +/- 10 su tutto l'asse. Il buffer non
+#      decide SE si entra (l'ingresso e' il cross EMA14x200 a favore del
+#      Supertrend, r.191-205); tocca n solo di rimbalzo, perche' r.181
+#      ("con posizione aperta non cerco nuovi ingressi") lega gli ingressi
+#      successivi a QUANDO si esce.
+#      SE n SI MUOVE DI PIU' DI 20 SU UNA CELLA, C'E' UN MECCANISMO CHE
+#      NON HO CAPITO: IL ROUND SI FERMA E SI ATTRIBUISCE PRIMA DI LEGGERE
+#      QUALUNQUE ALTRA COSA.
+#    - PF OOS: CALO LENTO E MONOTONO, da ~1,33 a 1,10-1,25 a b = 1,000.
+#    - DD OOS: LIEVE SALITA, da ~3,9% a 4,3-5,5%.
+#    - PF IS: 1,4-1,9, rumorosa (n IS ~85). Lo scrivo perche' non serve al
+#      verdetto e va detto lo stesso.
+#    - DD IS: 3,5-5,5%.
+#    - Cella attesa, e la sceglie P7 (non l'occhio): 0,625.
+#
+#  I TRE ESITI, dichiarati adesso perche' due su tre non mi piacciono:
+#    E1  L'altopiano c'e' secondo P1..P8 e la cella scelta passa
+#        R126-RESA -> prova di regime e riga per Claudio.
+#        >>> E1 NON SCHIERA NIENTE DA SOLO: n OOS atteso ~129, sotto i 150
+#            dell'Emendamento A, quindi il MERITO resta SOSPESO e
+#            R126-G3 dice "merito non escluso", non "merito dimostrato".
+#    E2  Una cella sporge e le vicine no -> "NON C'E' UNA CONFIGURAZIONE
+#        ROBUSTA", si scrive cosi', e non si propone niente.
+#    E3  R126-RESA scatta -> costo e merito tirano in direzioni opposte:
+#        la risposta onesta e' "IL DEFAULT VA BENE, e il cancello del
+#        costo resta aperto". E' un risultato, non un fallimento.
+#  FALSIFICAZIONE DELLA TESI: se nessuna cella tiene insieme R126-G0
+#  (costo), R126-G1 (DD OOS), R126-G3 (PF OOS) e R126-G3b (non
+#  regressione) su un altopiano, allora su SuperWave Dow H1 il margine di
+#  costo NON si compra col buffer, e la riga va in REGISTRO_TEST.md con
+#  PF, DD, n e cancello.
+# ---------------------------------------------------------------------
+#  LE ANCORE (si controllano PRIMA di leggere qualunque altra cosa)
+#
+#  La cella b = 0 E' LA CELLA VIVA: con InpSLBufferAtr = 0 il codice
+#  ricade su InpSLBufferPips * pip = 3 * 0,01 = 0,03 punti indice (r.239),
+#  identico a tutte le passate d'archivio. Deve riprodurre:
+#      IS   PF 1,84892   DD 3,7267%   n  84
+#      OOS  PF 1,32770   DD 3,9082%   n 143
+#  MA LA FINESTRA NON E' LA STESSA E VA DETTO PRIMA: quei CSV sono del
+#  commit 400a462 dell'08/08/2026, e il driver taglia l'IS al 40% dei
+#  GIORNI fra -DaQuando e -Fino (r.661). Con -Fino 2026.06.30 la finestra
+#  e' 642 giorni: IS 256 giorni, OOS 386. Al ritmo 227/681 = 0,333
+#  operazioni al giorno di calendario escono n IS ~85 e n OOS ~129.
+#  TRE GRADI, congelati adesso:
+#    GRADO A  n IS 84 e n OOS 143 -> finestra identica -> PF e DD devono
+#             combaciare AL CENTESIMO.
+#    GRADO B  n dentro le bande IS 70-100 / OOS 110-150 -> la differenza
+#             e' della FINESTRA -> PF entro +/- 0,15 e DD entro +/- 1,0.
+#    GRADO C  fuori -> IL ROUND SI FERMA e si attribuisce PRIMA di
+#             guardare le altre otto celle.
+#  E I TRE SOSPETTI, IN ORDINE, SE SCATTA IL GRADO C (fra l'08/08 e oggi
+#  il sorgente e' cambiato quattro volte, git log alla mano):
+#    1. 872dba8 (08/09) pavimento del lotto minimo prima di lotPend.
+#       PREDIZIONE ARITMETICA FALSIFICABILE: E' INERTE QUI. Il ramo bacato
+#       scatta solo se NormVol(totLot * 0,3333) = 0, cioe' totLot < 0,03;
+#       a deposito 10.000 e rischio 1% servirebbe uno stop > 3.766 punti
+#       indice. Non succede in nessuna cella. Se l'ancora riproduce,
+#       questa predizione e' confermata GRATIS.
+#    2. f8ebc32 (19/08) Guardian: nel tester le sue GlobalVariable non
+#       esistono, la guardia e' fail-open (r.36-43). Inerte.
+#    3. 7f80a87 (17/08) ha AGGIUNTO InpSLBufferAtr e InpPendingAtr,
+#       default 0 = nessun cambio di comportamento.
+#  ALTRE DUE ANCORE: la cella InpSLLookback=5 di R126b e le due celle di
+#  R126c devono dare LO STESSO NUMERO di questa cella b=0. Quattro letture
+#  della stessa configurazione.
+# ---------------------------------------------------------------------
+#  UNITA', DICHIARATA. Su U30USD a BCM Digits=2 e Point=0,01, quindi
+#  1 PUNTO INDICE = 100 PUNTI MT5, e PipSize() (r.123-127) torna _Point =
+#  0,01 punti indice. Verificato sui trade veri: 0,10 lotti x 12,70 punti
+#  indice = 1,27 USD = 1,12 EUR riportati -> contract size 1.
+#  InpSLBufferAtr NON passa da nessuna conversione: e' un moltiplicatore
+#  dell'ATR, che e' gia' in unita' dello strumento.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL SUO LIMITE
+#    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM su
+#    U30USD, MISURATO (REFERTO_SONDA_STORICO_17-08.md: stato COMPLETO = il
+#    broker NON HA piu' storico). NON si puo' allargare indietro.
+#    Un regime solo: Dow prevalentemente al rialzo.
+#    >>> E QUINDI IL MERITO RESTA SOSPESO, ED E' ARITMETICA: 227
+#        operazioni in tutta la storia disponibile NON SI DIVIDONO IN
+#        150 + 150. Ne servono 300. Nessuna FrazioneIS esiste.
+#        (PIANO_CHALLENGE_OTTOBRE.md r.76 scrive "n 227 = MERITO PIENO":
+#         il 227 e' della corsa a FINESTRA PIENA, che non ha nessun fuori
+#         campione. Spezzata, la stessa corsa fa 84 e 143.)
+#  ATTENZIONE ALL'ORDINE DEI ROUND: prove\R120b_*.txt (uscite Supertrend,
+#  trail x flip, 4 file, PREPARATO E MAI GIRATO) tocca QUESTA sedia.
+#  Qui trailing e flip sono PINNATI ACCESI (la configurazione in campo).
+#  Se R120b girasse e spostasse la cella di riferimento, R126a andrebbe
+#  rifatto sulla nuova base.
+#  MAGIC VERGINE 779300 (7793xx liberi al 10/09/2026: grep -rn "7793[0-9][0-9]"
+#  su tutto il repo trova UNA riga, ed e' un decimale dentro un JSON).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- il MOTORE, pinnato sulla cella viva (StMult 2,5 / TP_RR 3,0):
+#     e' la riga PF 1,52140 - DD 4,0151% - n 227 di
+#     valid_SuperWaveRT_U30USD_H1_realtick.csv. Pinnata: NON e' l'asse.
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpTP_RR=3.0
+
+# --- pattern e filtri: come in campo, tutti e due i lati (regola dei due
+#     lati del 25/08 -- questo motore in campo gira long E short)
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=0
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+# --- ingresso frazionato pinnato (1/3 a mercato + 2/3 pendente).
+#     InpFirstFraction e' un buco vero dell'AUDIT_USCITE (ZERO volte ad
+#     asse in tutto il repo) ma NON e' l'asse di questo file: cambiarlo
+#     qui misurerebbe due cose insieme. Sta in R124a.
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingAtr=0
+InpPendingExpiryBars=3
+
+# --- STOP: qui c'e' l'asse. Lookback pinnato a 5 (e' l'asse di R126b),
+#     InpSLBufferPips pinnato a 3 = 0,03 punti indice = il ripiego inerte
+#     che vale SOLO quando InpSLBufferAtr = 0 (r.239). Nella cella 0
+#     dell'asse questo file riproduce ESATTAMENTE la cella viva.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- gestione dell'uscita pinnata SULLA CONFIGURAZIONE IN CAMPO.
+#     Trailing e flip ACCESI: sono l'asse di R120b, non di questo file.
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+
+# --- rischio pinnato all'1,00%: NON e' la taglia di campo (0,65%). E' il
+#     valore comune che rende queste celle confrontabili con l'archivio e
+#     con CONTRATTI_SEDIE.md. LE TAGLIE RESTANO DI CLAUDIO.
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+# --- finestra oraria e notizie: SPENTE, come in campo.
+#     InpNewsFile e InpNewsCurrencies sono STRINGHE e NON si pinnano:
+#     un pin di stringa a valore vuoto MT5 lo IGNORA in silenzio, ed e'
+#     il difetto per cui controlla_prova.py e' nato. Col filtro spento
+#     il nome del file non e' letto.
+InpUseTimeWindow=0
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpUsaGuardian=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779300
+
+# --- L'ASSE, UNO SOLO: InpSLBufferAtr 0 .. 1,000 passo 0,125 = 9 celle.
+#     Bordo BASSO 0 = LIMITE FISICO (un buffer negativo non esiste) ed e'
+#     anche la CELLA DI RIFERIMENTO del round.
+#     Bordo ALTO 1,000 = FINE GRIGLIA, scelto con una ragione aritmetica
+#     dichiarata: a 1,000 ATR il buffer RADDOPPIA lo stop e riduce al
+#     54,6% il guadagno di ogni uscita trailing/flip. Oltre, il
+#     compromesso e' sfavorevole PER CONTO, non per stanchezza.
+#     Resta un bordo FINE GRIGLIA e P5 lo toglie: dall'altra parte non
+#     manca un valore che non esiste, manca una misura.
+#     Tutti e nove i valori sono esatti in binario (multipli di 1/8):
+#     nessun arrotondamento puo' spostare una cella.
+InpSLBufferAtr=0||0||0.125||1.0||Y

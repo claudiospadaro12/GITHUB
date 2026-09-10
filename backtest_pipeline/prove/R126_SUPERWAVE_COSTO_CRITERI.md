@@ -7,11 +7,34 @@
 > **STATO: NON FIRMATO.** Nessuna cella di R126 e' mai girata (verificato:
 > nessun CSV `r126*` nel repo). La firma e' di Claudio, non mia.
 >
-> **QUESTO FILE E' IN ASCII PURO, APPOSTA.** Classe 202 (10/09): su un `.md`
-> pieno di emoji `controlla_riga.py` esce FAIL con 8 bloccanti che sono tutti
-> falsi positivi per costruzione. Scritto in ASCII, lo strumento e'
-> utilizzabile anche su questa pagina. Non e' un cambio di stile di casa: le
-> emoji restano nei referti e nei messaggi.
+> **QUESTO FILE E' IN ASCII PURO, APPOSTA -- e l'ho VERIFICATO, non
+> supposto.** Classe 202 (10/09): su un `.md` pieno di emoji
+> `controlla_riga.py` produce solo falsi positivi. Provato adesso su questa
+> pagina: `python3 backtest_pipeline/controlla_riga.py --ps1 <questo file>`
+> -> **4 PASS, zero difetti** (`ASCII puro`, `nessun costrutto pwsh-7-only`,
+> `formati .NET`, `nessun Parse decimale senza cultura invariante`).
+> **Correzione di una cosa che stavo per scrivere senza controllarla:** il
+> difetto della classe 202 non e' che lo strumento "esce FAIL con 8
+> bloccanti" su un `.md` -- **lo strumento non ha proprio un modo per i
+> `.md`**: accetta solo `--riga` e `--ps1` (r.515-516) e su un percorso
+> posizionale muore con `unrecognized arguments`. Scritto in ASCII, il `.md`
+> passa dalla porta `--ps1` e i controlli meccanici girano davvero.
+> Non e' un cambio di stile di casa: le emoji restano nei referti e nei
+> messaggi in chat.
+>
+> **E UN AVVISO CHE MI SONO GUADAGNATO SBAGLIANDO, DIECI MINUTI FA.** Ho
+> provato la stessa porta `--ps1` sui QUATTRO file prova `.txt` di questo
+> round: **ESITO FAIL su tutti e quattro**, difetto `[PWSH7] operatore doppia
+> pipe (pwsh 7)`. **E' un falso positivo al 100%**: la doppia pipe di un file
+> prova e' il separatore della sintassi dell'asse (i cinque campi
+> `valore` / `start` / `passo` / `stop` / `Y`), non un operatore PowerShell.
+> `--ps1` su un file prova e' **lo strumento sbagliato**: il
+> controllo giusto per un `.txt` di `prove/` e' **`controlla_prova.py`**, che
+> su questi quattro file esce **OK, 0 problemi, 27 celle, 54 passate**.
+> Lo scrivo qui perche' chiunque rifara' questo giro cadra' nella stessa
+> buca, e vedra' quattro FAIL rossi su file che sono a posto.
+> *(E questa pagina non nomina mai la doppia pipe per esteso, apposta:
+> alla prima stesura la nominava, e si auto-bocciava.)*
 
 ---
 
@@ -89,6 +112,18 @@ interna del metodo):
 
 **Mediana degli stop iniziali ESATTI: 171,30 punti indice** (n=3).
 
+**E l'identita' si auto-verifica TRE VOLTE, non una.** Su tutte e tre le
+posizioni: (i) la gamba pendente si apre **esattamente 0,20 punti indice**
+sotto la gamba a mercato -- che e' `InpPendingPips 20 x PipSize()` con
+`PipSize()` = `_Point` = **0,01** su U30USD (r.123-127, `Digits`=2): la
+"distanza di 20 pip" del documento vale **0,20 punti indice**, ed e' la prima
+volta che questa inerzia e' confermata **da dati di campo** e non dedotta dal
+codice; (ii) la distanza di TP delle **due** gambe di ogni posizione e'
+identica al centesimo (165,00/165,00 - 513,90/513,90 - 514,50/514,50), come
+impone `tpP = px +/- risk*InpTP_RR` con lo stesso `risk`; (iii) i tre valori
+divisi per 3 danno numeri regolari. **Se avessi sbagliato a leggere una di
+queste tre righe di codice, almeno uno dei tre controlli non tornerebbe.**
+
 **IL CONTRO-ESEMPIO, costruito prima di usarlo.** Il sottocampione "chiuse in
 TP" e' selezionato, e la selezione tira in **due** versi opposti:
 - (a) un TP a 3R e' **piu' lontano in punti** quanto piu' lo stop e' largo,
@@ -127,6 +162,38 @@ quell'ora, dai 64,7 milioni di tick del file:
 | P95 | 3,00 | 3,00 | 3,00 | 3,00 | 3,00 | 3,00 | 2,00 | 2,00 |
 
 **Mediana delle otto = 2,65. Mediana dei P95 = 3,00.**
+
+**IL CONTRO-ESEMPIO, cioe' L'IPOTESI ALTERNATIVA, misurata invece che
+evocata.** Otto posizioni sono poche. Ma esiste una seconda strada che non usa
+i trade veri per niente: **l'ingresso e' un incrocio EMA14 x EMA200 sulla barra
+H1 chiusa (r.191-205), che non ha nessuna preferenza per l'ora del giorno.**
+Se cosi' fosse, la distribuzione oraria degli ingressi sarebbe **uniforme sulle
+24 barre H1**, e il numero giusto sarebbe la mediana **non pesata** delle 24
+mediane orarie:
+
+| stimatore | come e' costruito | mediana | media |
+|---|---|---:|---:|
+| **A** | le 8 ore in cui la sedia ha aperto davvero | **2,65** | 2,475 |
+| **B** | ipotesi alternativa: ingressi **uniformi** sulle 24 ore | **2,60** | 2,400 |
+| B' | come B, tolte le ore 22-23 (quasi chiuse: 104k e 454k tick contro milioni) | **2,60** | 2,395 |
+| **C** | riga `TUTTO`, pesata sui **tick** -- quella usata dal referto | **2,00** | 2,105 |
+
+> **A e B, costruiti su dati diversi e con ipotesi opposte, cadono a 2,60-2,65.
+> C sta il 23% piu' in basso.** Questa e' la prova che chiedeva la regola del
+> 10/09: *"quale numero produce l'ALTRA spiegazione? se cade dentro la banda, la
+> banda non misura niente"*. **Non ci cade: ci cade sopra.** Il 2,00 non e' una
+> lettura alternativa dello stesso fenomeno, e' un altro fenomeno (la
+> distribuzione dei **tick**, non quella dei **trade**).
+> **Il cancello di R126 si congela a 2,65** -- il piu' sfavorevole dei due
+> stimatori concordi.
+
+**E un limite del CONCETTO, che vale per tutta la flotta e non solo per
+questa sedia:** il pedaggio si paga **due volte**, all'ingresso e all'uscita,
+e l'ora dell'**uscita** e' [NON MISURATO]. Il pavimento di casa `40x` e'
+definito contro **uno** spread (R55/R125) e va lasciato cosi', altrimenti
+questa sedia non sarebbe piu' confrontabile con le altre 41. Ma va scritto:
+**il pedaggio vero e' circa il doppio di quello che il cancello misura, su
+tutte le sedie.**
 
 **Perche' la riga `TUTTO` sbaglia in verso FAVOREVOLE, col numero:** la riga
 `TUTTO` e' pesata sui **tick**, e le ore 14-21 (cash USA) portano **44,83

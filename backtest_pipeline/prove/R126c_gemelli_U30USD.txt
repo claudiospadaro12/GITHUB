@@ -1,0 +1,116 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R126c -- IL CANCELLO DEI GEMELLI: due celle IDENTICHE PER COSTRUZIONE
+#           U30USD  H1  --  asse TECNICO su InpMagic  (2 celle)
+#
+#  Si lancia con:
+#    -Expert ABTG_SuperWave_DOW_H1_Ottimizzato
+#    -Prova prove\R126c_gemelli_U30USD.txt
+#    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r126c -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026): se e'
+#     vuoto il driver sceglie col RIPIEGO, e sulla macchina ci sono TRE
+#     terminali MT5 di cui uno con le SEDIE VIVE. "C:\MT5_Backtest" =
+#     VPS, demo 50504400, zero EA attaccati.
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      backtest_pipeline\prove\R126_SUPERWAVE_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  COSA MISURA, E COSA NON MISURA
+#
+#  L'asse e' il MAGIC su DUE valori (779320 e 779330): DUE CELLE
+#  IDENTICHE PER COSTRUZIONE. InpMagic entra solo in
+#  SetExpertMagicNumber (r.129) e nel filtro delle posizioni: NON tocca
+#  nessuna decisione di trading.
+#  Le due celle si leggono INSIEME: se non escono IDENTICHE AL CENTESIMO
+#  il banco e' sporco e TUTTO R126 si ferma PRIMA di qualunque altro
+#  numero. E' il cancello di casa G1 (gemelli / determinismo), presente
+#  in 51 file prova del repo.
+#  >>> DA NON CONFONDERE con R126-G1, che nei criteri di QUESTO round e'
+#      il cancello del RISCHIO (DD OOS <= 7,00%). Il cancello dei gemelli
+#      in R126 si chiama sempre per esteso, mai "G1" nudo. Classe 194.
+#
+#  >>> R126c NON HA UN ASSE DI ALTOPIANO, e la procedura P1..P8 dei
+#      criteri (par. 4-bis di R125, riusata) NON GLI SI APPLICA: con 2
+#      celle P4 boccerebbe sempre. Non e' un buco: e' un file che risponde
+#      a un'altra domanda.
+#
+#  E LA DOMANDA E' DIVERSA DA QUELLA DELLE ANCORE, ED E' PER QUESTO CHE
+#  CI SONO TUTTE E DUE:
+#     i GEMELLI dicono  "il banco e' DETERMINISTICO oggi";
+#     le ANCORE dicono  "il banco e' LO STESSO BANCO dell'08/08/2026".
+#  Solo avendole entrambe si puo' ATTRIBUIRE uno scostamento invece di
+#  subirlo. Se i gemelli combaciano e l'ancora no, la differenza e' della
+#  FINESTRA o del SORGENTE (par. 5.5 dei criteri, i tre sospetti in
+#  ordine). Se i gemelli NON combaciano, non si legge piu' niente.
+#
+#  E VALE ANCHE COME TERZA E QUARTA LETTURA DELLA CELLA VIVA: queste due
+#  celle sono la STESSA configurazione della cella b=0 di R126a e della
+#  cella lookback=5 di R126b. Quattro numeri che devono coincidere.
+# ---------------------------------------------------------------------
+#  COSTO: 2 celle x 2 finestre = 4 passate = 0,40 minuti al ritmo
+#  MISURATO di 0,101 min/passata (R88: 13,7 min per 136 passate).
+#  E' l'assicurazione piu' economica del round.
+#  MAGIC VERGINI 779320 / 779330 (7793xx liberi al 10/09/2026, verificato
+#  per grep su tutto il repo: l'unico riscontro e' un decimale in un JSON).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- TUTTO pinnato sulla cella VIVA, identico a R126a cella b=0
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpTP_RR=3.0
+
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=0
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingAtr=0
+InpPendingExpiryBars=3
+
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpSLBufferAtr=0
+
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=0
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpUsaGuardian=1
+InpMaxSpread=0
+InpVerbose=0
+
+# --- L'ASSE, UNO SOLO, ed e' TECNICO: due magic vergini = due celle
+#     identiche per costruzione. Nessun bordo da classificare: non c'e'
+#     nessun altopiano da leggere su questo asse.
+InpMagic=779320||779320||10||779330||Y

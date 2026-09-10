@@ -1,0 +1,183 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R126b -- LA SECONDA MANOPOLA DELLO STOP, ANCH'ESSA MAI MOSSA
+#           U30USD  H1  --  InpSLLookback  1 .. 13  (7 celle)
+#
+#  Si lancia con:
+#    -Expert ABTG_SuperWave_DOW_H1_Ottimizzato
+#    -Prova prove\R126b_stop_lookback_U30USD.txt
+#    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r126b -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204, 10/09/2026): se e'
+#     vuoto il driver sceglie col RIPIEGO, e sulla macchina ci sono TRE
+#     terminali MT5 di cui uno con le SEDIE VIVE. "C:\MT5_Backtest" =
+#     VPS, demo 50504400, zero EA attaccati.
+#
+#  >>> I CRITERI SI LEGGONO PRIMA DEI NUMERI:
+#      backtest_pipeline\prove\R126_SUPERWAVE_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE, ACCANTO A R126a
+#
+#  Lo stop di questo motore e' (r.237-239):
+#      ext = estremo (min/max) delle ultime InpSLLookback barre chiuse
+#      sl  = il PIU' PROTETTIVO fra la linea del Supertrend e ext,
+#            meno il buffer
+#  Quindi ci sono DUE manopole che allargano lo stop, e NESSUNA delle DUE
+#  e' mai stata messa ad asse: il buffer (R126a) e il LOOKBACK (questo).
+#  InpSLLookback vale 5 in OGNI passata archiviata di questo EA
+#  (verificato nei CSV di risultati_archivio/SuperWave/ e di
+#  risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/: colonna
+#  InpSLLookback = 5 su TUTTE le righe, in tutti i file).
+#
+#  E SONO DUE MECCANISMI DIVERSI, non due nomi della stessa cosa:
+#    - il BUFFER e' proporzionale alla VOLATILITA' (b x ATR): si adatta;
+#    - il LOOKBACK e' STRUTTURALE: prende un estremo di prezzo vero, e
+#      quanto allarga dipende da com'e' fatto il grafico, non dall'ATR.
+#  Se l'altopiano c'e' su tutti e due, e' una proprieta' del motore. Se
+#  c'e' su uno solo, e' una proprieta' di quella manopola. Sono due
+#  informazioni diverse e questo file costa 1,41 minuti.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO (identico a R126a: stessa sedia, stesse ore)
+#  Spread alle ore vere della sedia (3,4,5,6,8,11,17,20): MEDIANA 2,65,
+#  P95 3,00. Pavimento di lavoro 40x -> 106,0 punti indice. Pavimento
+#  duro 13,3x -> 35,25.
+#  Stop iniziale: FORBICE [77,1 ; 171,3] (par. 2 dei criteri: 77,1 e' un
+#  limite inferiore su n=4, 171,3 e' esatto su n=3 dalla identita' TP=3R).
+#
+#  >>> MA QUI IL CANCELLO NON SI PUO' CALCOLARE IN ANTICIPO, E VA DETTO.
+#      Per il buffer lo stop e' stop(0) + b*ATR: additivo, quindi noto.
+#      Per il lookback l'incremento e' la differenza fra l'estremo a k
+#      barre e quello a 5, che dipende dai dati: e' [NON MISURATO] e
+#      questo round NON lo misura (il CSV del tester non ha una colonna
+#      "distanza di stop"). QUINDI SU QUESTO ASSE R126-G0 NON E'
+#      VALUTABILE CELLA PER CELLA.
+#      CONSEGUENZA, congelata adesso: R126b NON PROPONE NESSUNA CELLA e
+#      NON SI APPLICA la procedura P1..P8 per SCEGLIERE. R126b produce
+#      DUE cose e basta:
+#        (1) l'ANCORA (cella 5 = cella viva, v. sotto);
+#        (2) la FORMA di PF, DD e n lungo un secondo asse dello stop, da
+#            leggere ACCANTO a R126a per dire se l'effetto e' del
+#            MECCANISMO o della MANOPOLA.
+#      Le celle di questo file NON sono promuovibili, NON sono citabili
+#      come candidate, e nel referto stanno in un riquadro etichettato
+#      "R126b -- FORMA (non si sceglie)".
+#      >>> Questo NON e' un ripiego: e' la stessa disciplina che R125
+#          impone ai blocchi geometrici (classe 212). Un numero giusto
+#          nella colonna sbagliata e' un numero sbagliato.
+# ---------------------------------------------------------------------
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (falsificabile, e una parte serve
+#  proprio a controllare che io abbia letto bene il codice)
+#
+#    - CELLE 1 e 3 QUASI IDENTICHE FRA LORO. Motivo, r.239: sl e' il PIU'
+#      PROTETTIVO fra linea ST ed estremo. Con lookback corto l'estremo
+#      di 1-3 barre e' quasi sempre PIU' VICINO della linea ST, quindi
+#      vince la linea ST e lo stop SATURA. Sotto un certo k la manopola
+#      NON MORDE PIU'.
+#      >>> SE LE CELLE 1 E 3 DIFFERISCONO DI PIU' DI 0,10 DI PF, HO LETTO
+#          MALE LA GEOMETRIA: IL ROUND SI FERMA E SI RILEGGE IL SORGENTE.
+#      >>> E se saturano davvero, questa e' la prima MISURA di casa su una
+#          MANOPOLA INERTE colta sul fatto invece che dedotta dai CSV.
+#    - CELLE 9..13: l'estremo domina, lo stop si allarga, e vale lo stesso
+#      compromesso di R126a (le uscite trailing/flip scalano come
+#      stop(0)/stop(k), r.180 e r.341).
+#    - n: qui NON e' invariante come in R126a, e la direzione e' opposta.
+#      Uno stop piu' STRETTO (k piccolo) viene colpito prima, la posizione
+#      si chiude prima, e r.181 ("con posizione aperta non cerco nuovi
+#      ingressi") LIBERA LO SLOT: piu' operazioni. Attesa n OOS 115-165.
+#      >>> ED E' L'UNICA COSA IN TUTTO R126 CHE PUO' AVVICINARE I 150
+#          DELL'EMENDAMENTO A SU UNA FINESTRA FUORI CAMPIONE. Se una
+#          cella arriva a n OOS >= 150, quella e' la PRIMA lettura di
+#          merito NON sospesa mai avuta su questa sedia.
+#      >>> E VA DETTO SUBITO CHE PROBABILMENTE COSTA: piu' stop-out vuol
+#          dire PF piu' basso. Se la cella a n >= 150 ha PF OOS sotto
+#          1,10 (R126-G3), il campione arriva e il merito non c'e': si
+#          scrive cosi', non si sceglie l'una o l'altra meta'.
+#    - PF OOS: attesa 1,05-1,45 su tutto l'asse, con il massimo NON
+#      necessariamente a 5. Se il massimo cade a 5 esatto -- cioe' sul
+#      valore che gira da luglio senza che nessuno l'abbia mai misurato --
+#      quella e' una coincidenza da dichiarare, non da festeggiare.
+#    - DD OOS: attesa 3,0-6,0%.
+# ---------------------------------------------------------------------
+#  L'ANCORA (si controlla PRIMA di leggere qualunque altra cosa)
+#  La cella InpSLLookback = 5 E' LA CELLA VIVA, ed e' la STESSA
+#  configurazione della cella b=0 di R126a. Deve dare lo STESSO numero di
+#  quella, AL CENTESIMO, sulla stessa finestra -- e deve avvicinare
+#  l'archivio dell'08/08 (IS PF 1,84892 DD 3,7267% n 84; OOS PF 1,32770
+#  DD 3,9082% n 143) secondo i TRE GRADI A/B/C del par. 5.5 dei criteri.
+#  Due file diversi, stessa cella: se non coincidono al centesimo il banco
+#  e' sporco e TUTTO R126 si ferma prima di qualunque altro numero.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779310 (7793xx liberi al 10/09/2026, verificato per grep
+#  su tutto il repo).
+#  ORDINE DEI ROUND: prove\R120b_*.txt (uscite Supertrend, preparato e mai
+#  girato) tocca questa stessa sedia. Qui trailing e flip sono PINNATI
+#  ACCESI, come in campo.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- il MOTORE, pinnato sulla cella viva (StMult 2,5 / TP_RR 3,0)
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpTP_RR=3.0
+
+InpNearAtr=1.0
+InpRequireConfirmBody=1
+InpAllowLong=1
+InpAllowShort=1
+InpUseConfluence=0
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=1
+InpPendingPips=20
+InpPendingAtr=0
+InpPendingExpiryBars=3
+
+# --- STOP: il BUFFER e' pinnato al ripiego inerte (0,03 punti indice),
+#     esattamente come in ogni passata d'archivio. Il buffer ATR e' a 0:
+#     e' l'asse di R126a, non di questo file.
+InpSLBufferPips=3.0
+InpSLBufferAtr=0
+
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=1
+InpTrailOnST=1
+InpExitOnFlip=1
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=0
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=0
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpUsaGuardian=1
+InpMaxSpread=0
+InpVerbose=0
+InpMagic=779310
+
+# --- L'ASSE, UNO SOLO: InpSLLookback 1 .. 13 passo 2 = 7 celle
+#     (1, 3, 5, 7, 9, 11, 13). Il valore VIVO, 5, cade all'indice 2:
+#     NON e' un bordo, quindi l'ancora e' leggibile e la cella e'
+#     confrontabile con le sue due vicine.
+#     Bordo BASSO 1 = LIMITE FISICO: iLowest(...,count,1) con count 0 non
+#     esiste. Bordo ALTO 13 = FINE GRIGLIA (l'ho scelto io).
+#     Tutti interi: nessun arrotondamento possibile.
+InpSLLookback=5||1||2||13||Y
