@@ -13795,3 +13795,81 @@ Dei 118, ne sono stati **letti a mano 14**. Gli altri **104 sono classificati
 per pattern + numero di riga**, quindi **presunti**. Riparati oggi:
 `scarica_storico.ps1`, `RIGA_SPREAD_FLOTTA.ps1`, `RIGA_SPREAD_NASUSD.ps1`.
 Restano in coda `run_all.ps1` e `scan_market.ps1` (fascia 1) e ~60 di fascia 2.
+
+---
+
+## 240. 🚪 LA GUARDIA NUOVA CENSITA SUI FILE INVECE CHE SUI CHIAMANTI (12/09/2026)
+
+**Il caso.** Il 12/09 e' stata chiusa la porta su `@FINOA` in
+`walkforward_generico.ps1` (r.523-543): se `-Fino` **non** e' passato vince
+`@FINOA`; se e' passato **e diverso**, si muore. Il referto che accompagnava la
+modifica dichiarava **"DANNO MISURATO AD OGGI: NESSUNO"**, e il censimento a
+sostegno guardava **i 44 file prova con una `@FINOA` diversa dal default**,
+dimostrando che nessuno di quei 44 passa dal generico.
+
+🔴 **Il censimento era sul lato sbagliato della guardia.** La guardia scatta
+quando le **due fonti divergono**, e la divergenza si puo' creare da
+**tutti e due i lati**:
+- lato file (guardato): `@FINOA` non-default + `-Fino` di fabbrica;
+- lato **chiamante (NON guardato)**: `@FINOA` = default `2026.06.30` e il
+  **lanciatore che passa apposta un `-Fino` diverso**.
+
+**Il contro-esempio, uno e misurato.** `backtest_pipeline/righe/RIGA_DIAG_GBPUSD.ps1`,
+`-Passo C`: r.641 `$Fino = "2013.01.01"`, r.1059 `"-Fino",$Fino`, su
+`prove/SONDA_OROLOGIO_00_GEMELLI.txt` che dichiara `@FINOA 2026.06.30`. Lo
+script **sa** di divergere e lo mette agli atti (r.955: *"i parametri di riga
+di comando VINCONO sulle direttive @ ... qui si misura un TEMPO, non un
+orologio"*). Con la guardia nuova quel passo **muore** con *"DUE DATE DI FINE,
+DIVERSE, E NON SCELGO IO"*. Unico caso su tutto il repo — ma un caso c'era, e
+il referto diceva zero.
+
+**La regola.** 👉 **Una guardia nuova su un parametro si censisce sui CHIAMANTI
+che quel parametro lo PASSANO, non sui file che lo DICHIARANO.** Il conto da
+stampare non e' *"quanti file hanno il tag"* ma *"per quante coppie
+(chiamante, file) i due valori sarebbero DIVERSI"* — ed e' un prodotto
+cartesiano, non un elenco.
+📌 E la divergenza **deliberata e documentata** e' la piu' insidiosa: e'
+l'unico posto dove qualcuno ha scritto di proposito due date diverse, quindi e'
+l'unico posto che una guardia "le due fonti devono coincidere" rompe di sicuro.
+Prima di far morire un chiamante, si legge **perche'** diverge: qui divergeva
+per una ragione buona (misurare un TEMPO su una finestra vecchia).
+
+✅ **Come si ricava il numero, e si stampa:** si estraggono i valori di `-Fino`
+effettivamente passati da ogni script (compresi quelli assegnati **dentro un
+`if`**, non solo i default del `param()`), si risolvono i file prova che quello
+script lancia, e si incrociano. Un censimento che legge solo il `param()`
+**non vede** `RIGA_DIAG_GBPUSD` — perche' li' il valore che rompe e' scritto
+600 righe piu' in basso.
+
+---
+
+## 241. 🔢 IL NUMERO ATTESO EREDITATO DAL PACCHETTO PRECEDENTE (12/09/2026)
+
+**Il caso.** In `report/PACCHETTO_VPS_v2_2026-09-12.md` la **RIGA 3B** vaglia la
+coda a vuoto e poi giudica da sola:
+```
+if($rif -eq 0 -and $rnd -eq 1){ ... 'la riga R125d passa i cancelli' ... }
+```
+ma la coda di quel pacchetto ha **QUATTRO** righe di corsia ROUND, e la riga di
+prosa **due centimetri sotto** dice: *"Deve dire `righe RIFIUTATE: 0` e `righe
+accettate in corsia ROUND: 4`"*.
+
+🔴 **Il danno.** Con tutto perfetto la riga stampa il verdetto **ROSSO**
+*"ESITO: NON E QUELLO CHE MI ASPETTO -- mandami lo zip e NON lasciarla in
+coda"*. Chi esegue fa la cosa giusta (toglie la coda) per un motivo falso: la
+notte si perde e la colpa cade sui cancelli, che invece avevano funzionato.
+La soglia `1` e il nome `R125d` sono **residui del pacchetto del giorno prima**,
+dove la coda era di una riga sola.
+
+**La regola.** 👉 **Ogni numero atteso dentro una riga di lancio e' un DATO che
+dipende dal contenuto del pacchetto, e va RICALCOLATO quando il contenuto
+cambia — non copiato.** In pratica: quando una riga di verifica contiene un
+letterale numerico (`-eq 1`, `su 8 attesi`, `50 su 50`), quel letterale si
+confronta **con la prosa dello stesso documento** prima di consegnare. Se prosa
+e codice dicono numeri diversi, **il codice non e' stato riletto**.
+📌 Sintomo che li' trova sempre qualcosa: **un nome proprio del pacchetto
+precedente** rimasto in una stringa (`R125d`). Dove c'e' il nome vecchio, c'e'
+quasi sempre anche la soglia vecchia.
+✅ **Forma robusta**, che non va aggiornata a mano ad ogni pacchetto: contare le
+righe di coda attese e confrontare con quello, oppure scrivere la soglia **una
+volta sola** in una variabile in cima alla riga.
