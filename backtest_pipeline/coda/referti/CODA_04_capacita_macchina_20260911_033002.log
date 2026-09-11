@@ -1,0 +1,31 @@
+=== CAPACITA' DELLA MACCHINA ===
+data lettura: 2026-09-11 03:30:18  (ora locale)
+nome macchina: VMI3047753   utente: Administrator
+    CPU: AMD EPYC Processor (with IBPB)
+    core fisici: 6   processori logici: 6
+
+    VERDETTO CPU: SUFFICIENTE. Tetto consigliato agli agenti: 3 su 6.
+
+    RAM totale: 11.99 GB   libera adesso: 5.93 GB
+
+    DISCHI:
+      C:  totale 199.7 GB   LIBERO 93.4 GB (46.8%)
+
+    QUANTO OCCUPANO GIA' LE CARTELLE DATI MT5:
+      04C7A32B575E40027B4FF8724D14D702   1.82 GB
+      15BEB048A4E0532395CCA693EA561D8C   0.07 GB
+      215D85D767A1C39E22D242C8114BF9F5   20.6 GB
+      73B7A2420D6397DFF9014A20F1201F97   0.12 GB
+      857385E4B0F2356AD99AA95CDF40FAE9   12.08 GB
+      BCA8AD18563BF5B64A433C2662D0A104   7.56 GB
+      Common   0 GB
+      Community   0.99 GB
+      E23E1504A8D02A22179395F0652B86B6   0.22 GB
+      FF5C0E29FAC93F5DD90858C939E9C0E8   0 GB
+      Help   0 GB
+      --- totale: 43.46 GB
+      (un terminale nuovo riscarica il suo storico: conta almeno altrettanto della piu' grossa)
+
+PROMEMORIA: questa riga misura la MACCHINA, non il CARICO durante un round.
+Il collaudo vero resta il canarino sul forward dopo la prima notte.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
