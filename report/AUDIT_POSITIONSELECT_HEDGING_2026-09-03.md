@@ -83,7 +83,7 @@ criterio: un 🔴 senza sedia viva sta sotto a un 🟠 con sedia viva su U30USD.
 | **1** | `ABTG_ORB_Ottimizzato` | 🔴 | **U30USD · 770611** (piccolo E 100k) | **9** | **MISURATO 3 volte** (19/08, 21/08, 02/09). Contratto DD 9,92% col doppio asterisco |
 | **2** | `ABTG_MaxMinNotte` | 🔴 | **XAUUSD · 770402** + EURUSD M15 | **13** / 6 | Due istanze vive. Contratto R100 DD 10,0% a 0,5%. **Motore a OCO**: la cecita' non toglie solo la gestione, **sblocca il secondo lato** (vedi sotto) |
 | **3** | `Gold_Ichimoku_TK_ATR_EA` | 🔴 | **XAUUSD · 250604** | **13** | Sedia viva a 0,5%, contratto 🟡 PARZIALE. Oro = simbolo piu' affollato della flotta |
-| **4** | `ABTG_DAX_Apertura_EU_Ottimizzato` | 🟠 | **D30EUR · 770101** | **7** | Sedia con contratto PIENO e **DD 10,60%** (R83). `EndOfSession()` puo' chiudere il DAX del vicino |
+| **4** | `ABTG_DAX_Apertura_EU_Ottimizzato` | 🟠 | **D30EUR · 770101** | **7** | Sedia con contratto PIENO e ~~**DD 10,60%** (R83)~~ 🔴🆕 **ERRATA 11/09: DD 4,3501% @0,65%** (⚠️ dep. 10.000 EUR; a 100k **[NON MISURATO]**) — il 10,60% e' di R83, che ha `InpAllowShort=1`, **un'altra configurazione**. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. `EndOfSession()` puo' chiudere il DAX del vicino |
 | **5** | `ABTG_Dow_Apertura_US` | 🟠 | **U30USD · 770202** | **9** | Stesso quadro, sul simbolo piu' affollato. `PIANO_MIGRAZIONE_100K` dice che ORB/Dow_Apertura/EMA200 operano **negli stessi minuti** |
 | **6** | `ABTG_Nasdaq_Apertura_US_Ottimizzato` | 🟠 | NASUSD | **6** | sedia apertura viva |
 | **7** | `ABTG_Nasdaq_Apertura_US` | 🟠 | **NASUSD · 770250** (conto piccolo ~5k) | **6** | GATED SHORT, deploy 30/08 |

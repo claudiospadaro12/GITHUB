@@ -594,7 +594,7 @@ le tre sedie oro. **Cioè: nessuna relazione.**
 > rilevato: **le 20 coppie non sono pubblicate qui**, quindi il numero non è
 > riproducibile leggendo il referto. Il cancello ha ricostruito le coppie da
 > zero — `stop/spr` da questa tabella, `DD @1%` da `CONTRATTI_SEDIE.md`
-> (`770101` 10,60 · `770202` 4,22 · `770611` 9,92 · `770511` 4,0 · `770531` 2,96
+> (`770101` ~~10,60~~ 🔴🆕 **6,7111 @1%** *(ERRATA 11/09: il 10,60 e' R83 con `InpAllowShort=1`; ⚠️ dep. 10.000 EUR — 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`)* · `770202` 4,22 · `770611` 9,92 · `770511` 4,0 · `770531` 2,96
 > · `771531` 7,21 · `772341` 3,9 · `772234` 2,3 · `771321` 2,18 · `970912` 5,7 ·
 > `970913` 1,17 · `770402` 19,72 · `971501` 45,91 · `970901` 9,0 · `772343`
 > 29,74 · `770924` 0,14 · `774101` 11,59 · `772422` 4,58 · `772361` 9,33 ·
@@ -604,6 +604,18 @@ le tre sedie oro. **Cioè: nessuna relazione.**
 > conclusione, e nessuna delle due versioni è distinguibile da zero** (a n≈20
 > servirebbe |ρ| ≳ 0,44 per parlare). **La riga regge, ed è per questo che il
 > cancello l'ha spostata in cima al referto.**
+>
+> ### 🔴🆕 ERRATA 11/09 — **e dichiaro anche cosa NON ho rifatto**
+> Il `DD @1%` della **`770101`** usato in queste correlazioni era **10,60**, che
+> è di R83 (**`InpAllowShort=1`**): il valore giusto è **6,7111 @1%**
+> (📄 `report/CONFLITTO_DD_770101_2026-09-11.md`). È un **cambio di RANGO** — la
+> `770101` scende da 3ª a 6ª più alta dell'insieme — quindi **ρ cambia**.
+> 🔴 **I due ρ (+0,32 / +0,38 con l'oro · −0,02 / +0,07 senza) NON sono stati
+> ricalcolati qui: sono `[DA RIFARE]`**, e li lascio scritti come sono invece di
+> stimarli a occhio. ✅ **Ciò che NON cambia è l'argomento**: la soglia di
+> leggibilità dichiarata è **|ρ| ≳ 0,44 a n≈20**, e **un solo punto su 21 che
+> cambia rango non porta un ρ da ~0,35 sopra 0,44**. La conclusione *"nessuna
+> relazione"* regge; il numero da ripubblicare, no.
 
 > ### 🔑 LA LETTURA ONESTA, che salva il criterio invece di buttarlo
 > R55 confronta **la stessa sedia con se stessa** (stesso motore, stessi trade,

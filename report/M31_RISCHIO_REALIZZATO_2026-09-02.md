@@ -209,3 +209,46 @@ r.81 · `backtest_pipeline/risultati_archivio/REFERTO_ROUND83_INGRESSI.md`
 (DD 10,60% della cella RETEST). Script di calcolo: ricostruzione saldo
 ancorata + serie normalizzata, eseguito in sessione (scratchpad), esiti
 integralmente in questo referto.
+
+---
+
+# 🪦 ERRATA 11/09/2026 — **IL 10,60% USATO QUI NON E' DI QUESTA SEDIA, E IL CONFRONTO SI RIBALTA**
+
+🚫 **Referto datato: non riscritto.** Correzione in coda, per la regola di casa.
+📄 Dossier: `report/CONFLITTO_DD_770101_2026-09-11.md`.
+
+Il **10,60%** che in questo referto compare come *"DD OOS misurato in R83 della
+cella RETEST oggi viva"* (r.128, 136, 142, 186, 199, 209) esce da
+`r83_csv/..._r83d1.csv`, che ha **`InpAllowShort=1`**, `InpRiskPercent=1` e
+`InpMagic=777120/777121`. 🔴 **E' lo stesso motore col LATO CORTO ACCESO**, che
+nel preset del reale e' `false`. Il DD della cella davvero viva e' **6,7111% a
+1,0%** e **4,3501% a 0,65%** — ⚠️ **[MISURATO a deposito 10.000 EUR]**; su banco
+**100.000 EUR** e' **[NON MISURATO]** (+7,8% misurato sul solo effetto deposito).
+
+## 🧮 IL CONFRONTO DELLA CORSIA RISCHIO, RIFATTO (tutto a taglia 1,0%)
+
+| DD forward **normalizzato** | vs **6,25%** (R16) | vs **10,60%** (R83, usato qui) | vs 🆕 **6,7111%** (contratto VERO) |
+|---|---|---|---|
+| **7,36%** (centrale) | 1,18x 🔴 sfora | **0,69x 🟢 dentro** | **1,10x 🔴 SFORA** |
+| 7,21% (basso della forchetta) | 1,15x 🔴 | 0,68x 🟢 | **1,07x 🔴 SFORA** |
+| 8,41% (alto della forchetta) | 1,35x 🔴 | 0,79x 🟢 | **1,25x 🔴 SFORA** |
+
+🔴 **IL VERDETTO CAMBIA, ed e' il pezzo che conta.** La *"via di mezzo
+disponibile"* di r.199 — *aggiornare il contratto alla cella realmente promossa
+(R83, 10,60%)* — sembrava far **rientrare** la corsia RISCHIO su tutta la
+forchetta. Col numero giusto **non la fa rientrare in NESSUN punto della
+forchetta**. 👉 **Era un'amnistia costruita sul DD di un'altra configurazione**,
+e cade.
+
+🟢 **Cio' che invece ne esce RAFFORZATO**: la serie **RETEST-only** normalizzata
+ha DD **0,28%** — contro un contratto di **6,7111%** e' dentro di **24x** (r.186
+diceva *"contro il 10,60% che la sua stessa misura le concede"*: la concessione
+era prestata, il margine no). **Tutto lo sforo continua a venire dalle modalita'
+BUY/SELL, che non sono in campo**, e ora lo si puo' dire **contro il metro
+giusto**.
+
+⚪ **Cosa NON cambia**: la corsia **MERITO** resta scattata (−277,64 EUR su 42
+operazioni) — non dipende dal DD promesso. E il mandato di questo referto resta
+quello che era: **mettere i numeri sul tavolo, non decidere.** La parola resta a
+Claudio.
+

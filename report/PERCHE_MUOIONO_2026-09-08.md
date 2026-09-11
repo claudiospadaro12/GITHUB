@@ -59,7 +59,7 @@ finestre. La stessa corsa ancora dell'08/09 ha anche una meta' IS, e dice altro.
 |---|---|---|---:|---:|---:|---:|---:|---:|
 | `ABTG_DAX_Apertura_EU` 770101 D30EUR M5 | **IS** ancora 08/09 | `ancora_passo7/ABTG_DAX_Apertura_EU_D30EUR_IS_ANCORA.csv` | **175** | 🟡 **1,15396** | 3,1749 | 0,65% | −0,6572 | ~0,97 |
 | idem | **OOS** ancora 08/09 | `..._OOS_ANCORA.csv` | **270** | **1,41105** | 4,3501 | 0,65% | −0,6825 | ~0,98 |
-| idem | **OOS R83/R118** (= la cella del CONTRATTO) | `r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv` | **311** | 🟡 **1,18776** | 🔴 **10,5984** | **1,0%** | −1,0671 | ~0,97 |
+| idem | **OOS R83/R118** ~~(= la cella del CONTRATTO)~~ 🔴🆕 **ERRATA 11/09: NON e' la cella del contratto** — ha **`InpAllowShort=1`** (lato corto ACCESO, spento nel preset vivo) e magic di laboratorio. La cella del contratto e' quella dell'ancora qui sopra (**4,3501% @0,65%**) e, a 1,0%, **6,7111%** (`aperture_r35/..._OOS_r35.csv` r.8, PF 1,41521, n 270). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` | `r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv` | **311** | 🟡 **1,18776** | 🔴 **10,5984** | **1,0%** | −1,0671 | ~0,97 |
 | idem | **21 mesi R103** | `R103_REFERTO_BLOCCO1_INDICI.md` r.14 | **446** | **1,34** | 4,73 (7,28 @1%) | 0,65% | — | 0,98 |
 | `ABTG_ORB_Ottimizzato` 770611 U30USD M5 | **IS** ancora 08/09 | `ancora_passo7/ABTG_ORB_Ottimizzato_U30USD_IS_ANCORA.csv` | 🟠 **71** | **1,23076** | 5,6530 | 0,65% | — | ~0,39 |
 | idem | **OOS** ancora 08/09 | `..._OOS_ANCORA.csv` | 🟠 **119** | **1,67490** | 6,5389 | 0,65% | — | ~0,43 |
@@ -68,8 +68,16 @@ finestre. La stessa corsa ancora dell'08/09 ha anche una meta' IS, e dice altro.
 
 > ### 🔴 TRE FATTI CHE IL MANDATO NON AVEVA, e cambiano la domanda
 > 1. **Il DAX ha PF 1,154 sull'IS della stessa corsa ancora.** Il "1,41" e' la
->    finestra buona di due. E la **cella del contratto** (R83/R118, 1%) da'
->    **PF 1,188 e DD 10,5984% — sopra il muro del 10%**.
+>    finestra buona di due. ~~E la **cella del contratto** (R83/R118, 1%) da'
+>    **PF 1,188 e DD 10,5984% — sopra il muro del 10%**.~~
+>    🔴🆕 **ERRATA 11/09 — questa mezza riga e' SBAGLIATA, e cade.** R83/R118
+>    **non e' la cella del contratto**: ha **`InpAllowShort=1`**, cioe' il lato
+>    corto acceso, che sul conto reale non gira. La cella del contratto, a 1,0%,
+>    fa **PF 1,41521 e DD 6,7111%** — **dentro** il muro del 10%, con 3,3 punti
+>    di margine; a 0,65% fa **4,3501%** ⚠️ **[MISURATO a deposito 10.000 EUR]**
+>    (su banco 100.000 EUR: **[NON MISURATO]**). Il lato corto da solo valeva
+>    **+3,8873 punti** di DD. 🟢 **Il primo fatto — PF 1,154 sull'IS — resta in
+>    piedi**: e' l'unica meta' della riga che regge. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`.
 > 2. **L'ORB non ha MAI avuto un giudizio di merito leggibile**: `n` 71 e 119,
 >    **sotto 150 in ENTRAMBE le finestre**. Il "PF 1,675" e' un numero a merito
 >    formalmente **sospeso** dalla nostra stessa regola (`CENSIMENTO_CONTRATTI.md`
@@ -426,7 +434,7 @@ fosse costante come vorrebbe la formula, dovrebbe stare in una banda stretta.
 
 | # | il buco | chi | la domanda esatta |
 |---|---|---|---|
-| 1 | 🔴 **Il PF del DAX 770101 ha QUATTRO valori diversi** (1,154 · 1,188 · 1,34 · 1,411) su quattro finestre. **Non e' un conflitto di fonti: sono quattro finestre diverse.** Ma il "DD promesso" del contratto (R83, **10,5984% a 1%**) e' **sopra il muro** e non coincide con l'ancora (4,35% a 0,65% ⇒ **6,69% a 1%**) | **Claudio + chi gira i round** | *"Qual e' la finestra di riferimento del contratto della 770101? Perche' R83 (n 311, 1%) da' DD 10,60% e l'ancora dell'08/09 (n 270, 0,65%) da' 4,35% = 6,69% a 1%? Le due celle sono la stessa cella?"* |
+| 1 | ✅ 🆕 **RISPOSTO l'11/09 — e la domanda posta qui era ESATTA.** ~~**Il PF del DAX 770101 ha QUATTRO valori diversi** (1,154 · 1,188 · 1,34 · 1,411) su quattro finestre. **Non e' un conflitto di fonti: sono quattro finestre diverse.**~~ 🔴 **Mezza riga era sbagliata**: il **1,188** non e' *un'altra finestra*, e' **un'altra CONFIGURAZIONE** — R83/R118 gira con **`InpAllowShort=1`**, finestra e split **identici** all'ancora. Le altre tre restano finestre diverse. 🎯 **E la domanda finale — *"Le due celle sono la stessa cella?"* — ha risposta: NO.** Il "DD promesso" del contratto era quello della cella col lato corto acceso; quello vero e' **4,3501% @0,65%** e **6,7111% @1,0%**, ⚠️ **[MISURATO a deposito 10.000 EUR]** (a 100k: **[NON MISURATO]**). 🏆 **E il conto abbozzato qui era buono al terzo decimale**: *"4,35% a 0,65% ⇒ 6,69% a 1%"* contro **6,7111% misurato** — scarto **0,3%**. La scala lineare del rischio regge, era la CELLA a essere sbagliata. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` | **Claudio + chi gira i round** | *"Qual e' la finestra di riferimento del contratto della 770101? Perche' R83 (n 311, 1%) da' DD 10,60% e l'ancora dell'08/09 (n 270, 0,65%) da' 4,35% = 6,69% a 1%? Le due celle sono la stessa cella?"* → ✅ **chiusa** |
 | 2 | 🟠 **L'ORB 770611 non ha MAI avuto un merito leggibile** (n 71 e 119, sotto 150 in **entrambe** le finestre) ed e' **sul conto reale** | **cacciatore-strategie** | *"Esiste una finestra sul Dow che porti l'ORB sopra 150 operazioni in ENTRAMBI i lati dello split? Se no, quante settimane di forward servono?"* (aritmetica gia' fatta per RELATIVO in R117: si fa uguale) |
 | 3 | 🚨 **Un solo regime sugli indici.** Tutte le sedie indici sono misurate su 21 mesi di toro, e i loro lati long sono **SCELTI**, non strutturali (`R52_CENSIMENTO_LATI.md`) | **cacciatore-strategie** | *"La prova di regime (Emendamento §C) sulle due sedie vive: si puo' fare con lo storico `_EXT` in frigo, o serve Dukascopy?"* |
 | 4 | ❓ **`SupRev_NAS_H1` 970913 domina l'ORB su tutti e tre gli assi** (n 172 · PF 1,65 · DD **1,48%** · 0,34 op/g) e **non e' sul reale** | **Claudio** | *"C'e' una ragione — che io non trovo nei file — per cui la 970913 non e' fra le due sedie del conto reale?"* |

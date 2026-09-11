@@ -195,13 +195,27 @@ vero = dichiarato.
 
 | lettura | oggi | **dopo il fix** | delta |
 |---|---:|---:|---:|
-| 🔴 **STRETTA** — R1/R2/R3/R4 tutti e quattro ✅ pieni | **2** | 🔴 **2** | **+0** |
-| 🟠 **LARGA** — si accetta R1 🟠 (`REGISTRO_TEST`) e R2 🟠 (deposito ignoto) | **2** | 🟠 **4** | **+2** |
+| 🔴 **STRETTA** — R1/R2/R3/R4 tutti e quattro ✅ pieni | ~~2~~ 🆕 **3** | 🔴 ~~2~~ 🆕 **3** | **+0** |
+| 🟠 **LARGA** — si accetta R1 🟠 (`REGISTRO_TEST`) e R2 🟠 (deposito ignoto) | ~~2~~ 🆕 **3** | 🟠 ~~4~~ 🆕 **5** | **+2** |
+
+> ### 🆕 **PERCHE' I NUMERI SONO SALITI DI UNO (11/09 sera)**
+> La **`770101`** entra nella lettura STRETTA: il suo unico requisito rotto era
+> **R2**, e il conflitto di DD **e' stato chiuso** (**4,3501% @0,65%**, dep.
+> **10.000 EUR**, tick — `report/CONFLITTO_DD_770101_2026-09-11.md`).
+> 🔴 **Ma NON grazie a questa firma**: e' stata una **lettura d'archivio**, e il
+> **delta della firma resta +0**, che e' esattamente cio' che questa pagina
+> sostiene. ⚠️ E il conto dei quattro requisiti **non include il cancello del
+> costo (R5)**, che la `770101` **non passa** (**33,0x** contro 40x richiesti),
+> ne' l'asterisco del deposito (**a 100.000 EUR il DD promesso e'
+> `[NON MISURATO]`**). **Tre sedie che passano quattro requisiti non sono tre
+> sedie schierabili.**
 
 > ## 🔴 **LA RIGA CHE CLAUDIO DEVE LEGGERE: il numero "5" del piano NON ESCE IN NESSUNA DELLE DUE LETTURE.**
-> Il massimo raggiungibile con questa firma e' **4**, e solo abbassando due
-> requisiti. **Con i requisiti come sono scritti, la firma di domani porta le
-> schierabili da 2 a 2.**
+> Il massimo raggiungibile con questa firma e' ~~**4**~~ 🆕 **5**, e solo
+> abbassando due requisiti — 🔴 **e ci si arriva solo perche' una sedia e'
+> rientrata da sola, non per effetto della firma**. **Con i requisiti come sono
+> scritti, la firma di domani porta le schierabili da ~~2 a 2~~ 🆕 3 a 3: il
+> delta e' e resta ZERO.**
 
 ### 😐 E allora perche' firmarla lo stesso? Tre motivi, tutti veri
 

@@ -14,7 +14,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770101",
@@ -29,7 +30,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770101",
@@ -40,11 +42,12 @@
    "cat": "stop:modo",
    "default": "ABTG_SL_RANGE",
    "riga": 314,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "CORSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770101",
@@ -59,7 +62,41 @@
    "mai": false,
    "inerte": true,
    "motivo": "ramo SL_ATR morto: InpSLMode=0 (SL_RANGE) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_H_drawdown_IS.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_H_drawdown_OOS.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r42/ABTG_DAX_Apertura_EU_D30EUR_IS_r42.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r42/ABTG_DAX_Apertura_EU_D30EUR_OOS_r42.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -70,11 +107,27 @@
    "cat": "parziale",
    "default": "1.0",
    "riga": 317,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv",
+     [
+      "0.5",
+      "1.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_OOS.csv",
+     [
+      "0.5",
+      "1.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -89,7 +142,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_OOS.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_IS_r46a.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_OOS_r46a.csv",
+     [
+      "0",
+      "50"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -100,11 +183,34 @@
    "cat": "breakeven",
    "default": "true",
    "riga": 319,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_OOS.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -115,11 +221,20 @@
    "cat": "breakeven",
    "default": "0",
    "riga": 320,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -134,7 +249,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/DAX_trailing.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_IS_r46a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_OOS_r46a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -149,7 +294,29 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -164,7 +331,31 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_IS_r46a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_OOS_r46a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -179,7 +370,50 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/DAX_trailing.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_I_trailing_IS.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_I_trailing_OOS.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -194,7 +428,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo TRAIL_ATR morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770101",
@@ -205,11 +440,65 @@
    "cat": "trailing",
    "default": "410",
    "riga": 326,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": true,
    "motivo": "ramo TRAIL_FIXED morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Apertura_nuovi_indici/valid_Apertura_100GBP_FTSE.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Apertura_nuovi_indici/valid_Apertura_U30USD_Dow.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Ingresso/DAX_ingresso.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/DAX_trailing.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -224,7 +513,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770101",
@@ -239,7 +529,49 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_IS_r118b.csv",
+     [
+      "0",
+      "2000",
+      "4000",
+      "6000",
+      "8000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_IS_r118c.csv",
+     [
+      "0",
+      "2000",
+      "4000",
+      "6000",
+      "8000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118b.csv",
+     [
+      "0",
+      "2000",
+      "4000",
+      "6000",
+      "8000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv",
+     [
+      "0",
+      "2000",
+      "4000",
+      "6000",
+      "8000"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770101",
@@ -254,7 +586,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_IS_r118b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_IS_r118c.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770202",
@@ -269,7 +631,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -284,7 +647,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -299,7 +663,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -314,7 +679,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo SL_ATR morto: InpSLMode=0 (SL_RANGE) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -329,7 +695,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -344,7 +711,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_IS_r46b.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_OOS_r46b.csv",
+     [
+      "0",
+      "50"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770202",
@@ -359,7 +742,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -374,7 +758,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -389,7 +774,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_IS_r46b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_OOS_r46b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770202",
@@ -404,7 +805,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -419,7 +821,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_IS_r46b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r46/ABTG_Dow_Apertura_US_U30USD_OOS_r46b.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770202",
@@ -434,7 +852,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -449,7 +868,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo TRAIL_ATR morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -464,7 +884,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo TRAIL_FIXED morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -479,7 +900,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -494,7 +916,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770202",
@@ -509,7 +932,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -524,7 +948,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -539,7 +964,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -550,11 +976,12 @@
    "cat": "stop:modo",
    "default": "ABTG_SL_RANGE",
    "riga": 261,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "CORSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -569,7 +996,41 @@
    "mai": false,
    "inerte": true,
    "motivo": "ramo SL_ATR morto: InpSLMode=0 (SL_RANGE) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_H_drawdown_IS.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_H_drawdown_OOS.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r42/ABTG_Nasdaq_Apertura_US_NASUSD_IS_r42.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/aperture_r42/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r42.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -580,11 +1041,47 @@
    "cat": "parziale",
    "default": "1.0",
    "riga": 264,
-   "stato": "CORSE",
+   "stato": "ASSE",
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_distanze.csv",
+     [
+      "0.33",
+      "0.50",
+      "0.67",
+      "0.84"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_walkforward_IS.csv",
+     [
+      "0.33",
+      "0.50",
+      "0.67",
+      "0.84"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_walkforward_OOS.csv",
+     [
+      "0.33",
+      "0.50",
+      "0.67",
+      "0.84"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_IS.csv",
+     [
+      "0.5",
+      "1.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -595,11 +1092,34 @@
    "cat": "parziale",
    "default": "50",
    "riga": 265,
-   "stato": "CORSE",
+   "stato": "ASSE",
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_IS.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_OOS.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv",
+     [
+      "0",
+      "50"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -610,11 +1130,34 @@
    "cat": "breakeven",
    "default": "true",
    "riga": 266,
-   "stato": "CORSE",
+   "stato": "ASSE",
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_IS.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_OOS.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -625,11 +1168,28 @@
    "cat": "breakeven",
    "default": "0",
    "riga": 267,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_distanze.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -640,11 +1200,27 @@
    "cat": "trailing",
    "default": "true",
    "riga": 268,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -659,7 +1235,29 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_Nasdaq_Apertura_US/ABTG_Nasdaq_Apertura_US_NASUSD_IS_r24.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_Nasdaq_Apertura_US/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r24.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -670,11 +1268,28 @@
    "cat": "trailing",
    "default": "(ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE",
    "riga": 270,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_trailing.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -689,7 +1304,51 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_trailing.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_trailing2.csv",
+     [
+      "10",
+      "12",
+      "15",
+      "20",
+      "5",
+      "6"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_I_trailing_IS.csv",
+     [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -700,11 +1359,21 @@
    "cat": "trailing",
    "default": "2.0",
    "riga": 272,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": true,
    "motivo": "ramo TRAIL_ATR morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_trailing.csv",
+     [
+      "1",
+      "2",
+      "3"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -715,11 +1384,61 @@
    "cat": "trailing",
    "default": "410",
    "riga": 273,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": true,
    "motivo": "ramo TRAIL_FIXED morto: InpTrailMode=1 (PREVBAR) nel preset vivo",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Ingresso/NASDAQ_ingresso.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Dow_Apertura/dow_distanze.csv",
+     [
+      "12000",
+      "3000",
+      "6000",
+      "9000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/Nasdaq_Apertura/apert_US_M5_doc_brk_realtick_NASUSD.csv",
+     [
+      "100",
+      "200",
+      "300",
+      "400",
+      "500",
+      "600",
+      "700",
+      "800"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770250",
@@ -730,11 +1449,12 @@
    "cat": "parziale",
    "default": "0.0",
    "riga": 282,
-   "stato": "MAI-assente",
+   "stato": "MAI-ovunque",
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -749,7 +1469,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -764,7 +1485,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770250",
@@ -779,7 +1501,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -794,7 +1517,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -809,7 +1533,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -820,11 +1545,45 @@
    "cat": "stop:modo",
    "default": "MM_SL_ATR",
    "riga": 145,
-   "stato": "CORSE",
+   "stato": "ASSE",
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/MaxMin_Oro/oro_maxmin_fase1_H1.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMin_Oro/oro_maxmin_fase1_M15.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMin_Oro/oro_maxmin_fase1_M30.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMin_Oro/oro_maxmin_fase1_M5.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770402",
@@ -835,11 +1594,21 @@
    "cat": "stop:misura",
    "default": "1.5",
    "riga": 148,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/MaxMinNotte/valid_MaxMin_DAX_short_refine.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770402",
@@ -854,7 +1623,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -869,7 +1639,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -884,7 +1655,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -899,7 +1671,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -910,11 +1683,57 @@
    "cat": "parziale",
    "default": "2.5",
    "riga": 155,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/MaxMinNotte/080957cf-valid_MaxMin_D30EUR.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0",
+      "3.5",
+      "4.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMinNotte/4528c79b-valid_MaxMin_F40EUR.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0",
+      "3.5",
+      "4.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMinNotte/8eefb007-valid_MaxMin_E50EUR.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0",
+      "3.5",
+      "4.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/MaxMinNotte/efe054b5-valid_MaxMin_100GBP.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0",
+      "3.5",
+      "4.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770402",
@@ -929,7 +1748,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -944,7 +1764,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -959,7 +1780,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -974,7 +1796,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -989,7 +1812,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770402",
@@ -1004,7 +1828,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1019,7 +1844,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1034,7 +1860,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1049,7 +1876,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1064,7 +1892,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1079,7 +1908,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo FIXED morto: InpSLMode=1 (ATR) in ABTG_MaxMinNotte_DAX.set",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1094,7 +1924,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1109,7 +1940,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1124,7 +1956,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1139,7 +1972,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1154,7 +1988,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1169,7 +2004,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1184,7 +2020,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1199,7 +2036,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1214,7 +2052,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770411",
@@ -1229,7 +2068,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1244,7 +2084,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1259,7 +2100,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1274,7 +2116,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1289,7 +2132,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1304,7 +2148,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1319,7 +2164,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1334,7 +2180,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1349,7 +2196,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1364,7 +2212,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1379,7 +2228,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770511",
@@ -1394,7 +2244,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1409,7 +2260,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1424,7 +2276,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1439,7 +2292,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1454,7 +2308,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1469,7 +2324,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1484,7 +2340,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1499,7 +2356,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1510,11 +2368,45 @@
    "cat": "target",
    "default": "2.0",
    "riga": 84,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/SuperWave/valid_SuperWaveRT_D30EUR_H4_realtick.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SuperWave/valid_SuperWaveRT_U30USD_H1_realtick.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SuperWave/valid_SuperWave_D30EUR_H1.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SuperWave/valid_SuperWave_D30EUR_H4.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770531",
@@ -1529,7 +2421,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1544,7 +2437,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770531",
@@ -1559,7 +2453,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1574,7 +2469,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c.csv",
+     [
+      "21",
+      "22"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c2.csv",
+     [
+      "21",
+      "22"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c3.csv",
+     [
+      "21",
+      "22"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88c.csv",
+     [
+      "21",
+      "22"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1589,7 +2514,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c.csv",
+     [
+      "0",
+      "59"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c2.csv",
+     [
+      "0",
+      "59"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88c3.csv",
+     [
+      "0",
+      "59"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88c.csv",
+     [
+      "0",
+      "59"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1604,7 +2559,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1619,7 +2575,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88a.csv",
+     [
+      "0",
+      "1",
+      "2",
+      "3"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88a.csv",
+     [
+      "0",
+      "1",
+      "2",
+      "3"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r12.csv",
+     [
+      "0",
+      "1",
+      "2",
+      "3"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r13.csv",
+     [
+      "0",
+      "1",
+      "2",
+      "3"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1634,7 +2628,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo ORB_SL_ATR morto: InpSLMode=3 (HALFRANGE) nel preset reale",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1649,7 +2644,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "ramo ORB_SL_FIXED morto: InpSLMode=3 (HALFRANGE) nel preset reale",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1664,7 +2660,43 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88a.csv",
+     [
+      "1.5",
+      "2.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88a.csv",
+     [
+      "1.5",
+      "2.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r9largo.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_OOS_r9largo.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1679,7 +2711,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88a.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1694,7 +2742,41 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r12.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_IS_r13.csv",
+     [
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_OOS_r12.csv",
+     [
+      "1.0",
+      "1.5",
+      "2.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_NASUSD_OOS_r13.csv",
+     [
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1709,7 +2791,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r15.csv",
+     [
+      "0",
+      "50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r15.csv",
+     [
+      "0",
+      "50"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1724,7 +2822,8 @@
    "mai": false,
    "inerte": true,
    "motivo": "ABTG_ORB_Ottimizzato.mq5 r.662 lo stampa: InpTP1Pct=0 -> nessuno stop in pari",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1739,7 +2838,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_IS_r15.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_ORB_Ottimizzato/ABTG_ORB_Ottimizzato_U30USD_OOS_r15.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1754,7 +2869,8 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770611",
@@ -1769,7 +2885,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r118a.csv",
+     [
+      "0",
+      "1000",
+      "1500",
+      "2000",
+      "500"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r118_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r118a.csv",
+     [
+      "0",
+      "1000",
+      "1500",
+      "2000",
+      "500"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_IS_r88a.csv",
+     [
+      "0",
+      "1000",
+      "500"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/r88_csv/ABTG_ORB_Ottimizzato_U30USD_OOS_r88a.csv",
+     [
+      "0",
+      "1000",
+      "500"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770611",
@@ -1784,7 +2938,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "InNewsBlackout() torna false con InpUseNewsFilter=false (ORB r.1353 / Apertura r.558 / MaxMin r.812); false in ogni preset vivo",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1799,7 +2954,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1814,7 +2970,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1829,7 +2986,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1844,7 +3002,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1859,7 +3018,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1874,7 +3034,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1889,7 +3050,41 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/00616ea4-valid_SupRevScr_E50EUR_H4.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/11855548-valid_SupRevScr_E50EUR_H1.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/2ab6d7d9-valid_SupRevScr_100GBP_H4.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/36fc3017-valid_SupRevScr_F40EUR_H1.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770901",
@@ -1904,7 +3099,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1919,7 +3115,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1934,7 +3131,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1949,7 +3147,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770901",
@@ -1964,7 +3163,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -1979,7 +3179,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -1994,7 +3195,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2009,7 +3211,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2024,7 +3227,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2039,7 +3243,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2054,7 +3259,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2069,7 +3275,41 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/00616ea4-valid_SupRevScr_E50EUR_H4.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/11855548-valid_SupRevScr_E50EUR_H1.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/2ab6d7d9-valid_SupRevScr_100GBP_H4.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/SupRev_nuovi_indici/36fc3017-valid_SupRevScr_F40EUR_H1.csv",
+     [
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770924",
@@ -2084,7 +3324,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2099,7 +3340,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2114,7 +3356,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2129,7 +3372,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "770924",
@@ -2144,7 +3388,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2159,7 +3404,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2174,7 +3420,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2189,7 +3436,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2204,7 +3452,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2219,7 +3468,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2234,7 +3484,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2249,7 +3500,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2264,7 +3516,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2279,7 +3532,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771201",
@@ -2294,7 +3548,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2309,7 +3564,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2324,7 +3580,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2339,7 +3596,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2354,7 +3612,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2369,7 +3628,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2384,7 +3644,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2399,7 +3660,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2414,7 +3676,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2429,7 +3692,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771202",
@@ -2444,7 +3708,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2459,7 +3724,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2474,7 +3740,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2489,7 +3756,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2504,7 +3772,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2519,7 +3788,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2534,7 +3804,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2549,7 +3820,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2564,7 +3836,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2579,7 +3852,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771203",
@@ -2594,7 +3868,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "771321",
@@ -2609,7 +3884,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771321",
@@ -2624,7 +3900,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771321",
@@ -2639,7 +3953,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771321",
@@ -2654,7 +3969,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771321",
@@ -2669,7 +3985,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771321",
@@ -2684,7 +4038,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771322",
@@ -2699,7 +4054,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771322",
@@ -2714,7 +4070,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771322",
@@ -2729,7 +4123,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771322",
@@ -2744,7 +4139,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771322",
@@ -2759,7 +4155,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771322",
@@ -2774,7 +4208,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771332",
@@ -2789,7 +4224,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771332",
@@ -2804,7 +4240,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_IS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PTE/ABTG_PTE_225JPY_OOS_ohlc.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771332",
@@ -2819,7 +4293,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771332",
@@ -2834,7 +4309,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771332",
@@ -2849,7 +4325,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_IS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte1.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/PTE_accoppiamento/ABTG_PTE_GBPUSD_OOS_ohlc_pte2.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771332",
@@ -2864,7 +4378,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2879,7 +4394,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2894,7 +4410,45 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/EMA200/H1_OHLC/scan_ABTG_EMA200_H1_100GBP.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/EMA200/H1_OHLC/scan_ABTG_EMA200_H1_200AUD.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/EMA200/H1_OHLC/scan_ABTG_EMA200_H1_225JPY.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/EMA200/H1_OHLC/scan_ABTG_EMA200_H1_AUDJPY.csv",
+     [
+      "1.5",
+      "2.0",
+      "2.5",
+      "3.0"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771531",
@@ -2909,7 +4463,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2924,7 +4479,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2939,7 +4495,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2954,7 +4511,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2969,7 +4527,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "771531",
@@ -2984,7 +4543,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -2999,7 +4559,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3014,7 +4575,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3029,7 +4591,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3044,7 +4607,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3059,7 +4623,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3074,7 +4639,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "772161",
@@ -3089,7 +4655,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3104,7 +4671,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3119,7 +4687,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3134,7 +4703,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3149,7 +4719,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3164,7 +4735,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3179,7 +4751,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "772162",
@@ -3194,7 +4767,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3209,7 +4783,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3224,7 +4799,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3239,7 +4815,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3254,7 +4831,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3269,7 +4847,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3284,7 +4863,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "772163",
@@ -3299,7 +4879,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772231",
@@ -3314,7 +4895,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772231",
@@ -3329,7 +4911,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772231",
@@ -3344,7 +4927,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772231",
@@ -3359,7 +4943,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772232",
@@ -3374,7 +4959,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772232",
@@ -3389,7 +4975,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772232",
@@ -3404,7 +4991,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772232",
@@ -3419,7 +5007,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772233",
@@ -3434,7 +5023,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772233",
@@ -3449,7 +5039,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772233",
@@ -3464,7 +5055,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772233",
@@ -3479,7 +5071,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772234",
@@ -3494,7 +5087,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772234",
@@ -3509,7 +5103,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772234",
@@ -3524,7 +5119,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772234",
@@ -3539,7 +5135,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772235",
@@ -3554,7 +5151,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772235",
@@ -3569,7 +5167,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 6
+   "celle": 6,
+   "prove": []
   },
   {
    "magic": "772235",
@@ -3584,7 +5183,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772235",
@@ -3599,7 +5199,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772341",
@@ -3614,7 +5215,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772341",
@@ -3629,7 +5260,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772341",
@@ -3644,7 +5276,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772341",
@@ -3659,7 +5292,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772341",
@@ -3674,7 +5308,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772341",
@@ -3689,7 +5324,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772342",
@@ -3704,7 +5340,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772342",
@@ -3719,7 +5385,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772342",
@@ -3734,7 +5401,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772342",
@@ -3749,7 +5417,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772342",
@@ -3764,7 +5433,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772342",
@@ -3779,7 +5449,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772343",
@@ -3794,7 +5465,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772343",
@@ -3809,7 +5510,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772343",
@@ -3824,7 +5526,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772343",
@@ -3839,7 +5542,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772343",
@@ -3854,7 +5558,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772343",
@@ -3869,7 +5574,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772344",
@@ -3884,7 +5590,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772344",
@@ -3899,7 +5635,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772344",
@@ -3914,7 +5651,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772344",
@@ -3929,7 +5667,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772344",
@@ -3944,7 +5683,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772344",
@@ -3959,7 +5699,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772345",
@@ -3974,7 +5715,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772345",
@@ -3989,7 +5760,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772345",
@@ -4004,7 +5776,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772345",
@@ -4019,7 +5792,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772345",
@@ -4034,7 +5808,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772345",
@@ -4049,7 +5824,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772346",
@@ -4064,7 +5840,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_100GBP.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_200AUD.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_225JPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_PunteLarry/notte/scan_larry_AUDJPY.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772346",
@@ -4079,7 +5885,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772346",
@@ -4094,7 +5901,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772346",
@@ -4109,7 +5917,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772346",
@@ -4124,7 +5933,8 @@
    "mai": true,
    "inerte": true,
    "motivo": "serve solo con InpSLMode=1, che vale 0 in ogni corsa d'archivio",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772346",
@@ -4139,7 +5949,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "772361",
@@ -4154,7 +5965,41 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_100GBP.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_200AUD.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_225JPY.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_AUDJPY.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772361",
@@ -4169,7 +6014,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772361",
@@ -4184,7 +6030,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772361",
@@ -4199,7 +6046,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 8
+   "celle": 8,
+   "prove": []
   },
   {
    "magic": "772362",
@@ -4214,7 +6062,41 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_100GBP.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_200AUD.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_225JPY.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h1/scan_ABTG_CostToCost_AUDJPY.csv",
+     [
+      "0",
+      "1",
+      "2"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772362",
@@ -4229,7 +6111,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772362",
@@ -4244,7 +6127,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772362",
@@ -4259,7 +6143,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 8
+   "celle": 8,
+   "prove": []
   },
   {
    "magic": "772421",
@@ -4274,7 +6159,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772421",
@@ -4289,7 +6175,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_AUDJPY_IS_r48d.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_AUDJPY_OOS_r48d.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_CHFJPY_IS_r48b.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_CHFJPY_OOS_r48b.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772422",
@@ -4304,7 +6220,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "772422",
@@ -4319,7 +6236,37 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_AUDJPY_IS_r48d.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_AUDJPY_OOS_r48d.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_CHFJPY_IS_r48b.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/ABTG_EasyTrend/r48/ABTG_EasyTrend_CHFJPY_OOS_r48b.csv",
+     [
+      "1.0",
+      "1.5"
+     ]
+    ]
+   ]
   },
   {
    "magic": "774101",
@@ -4334,7 +6281,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "774101",
@@ -4349,7 +6297,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 4
+   "celle": 4,
+   "prove": []
   },
   {
    "magic": "774101",
@@ -4364,7 +6313,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "774101",
@@ -4379,7 +6329,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "774101",
@@ -4394,7 +6345,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "774101",
@@ -4409,7 +6361,23 @@
    "mai": false,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": [
+    [
+     "backtest_pipeline/risultati_archivio/GapContinuation/ABTG_GapContinuation_225JPY_IS_ohlc_gc1.csv",
+     [
+      "2",
+      "3"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_archivio/GapContinuation/ABTG_GapContinuation_225JPY_OOS_ohlc_gc1.csv",
+     [
+      "2",
+      "3"
+     ]
+    ]
+   ]
   },
   {
    "magic": "774101",
@@ -4424,7 +6392,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4439,7 +6408,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4454,7 +6424,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4469,7 +6440,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4484,7 +6456,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4499,7 +6472,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4514,7 +6488,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4529,7 +6504,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4544,7 +6520,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4559,7 +6536,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970901",
@@ -4574,7 +6552,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4589,7 +6568,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4604,7 +6584,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4619,7 +6600,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4634,7 +6616,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4649,7 +6632,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4664,7 +6648,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4679,7 +6664,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4694,7 +6680,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4709,7 +6696,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970912",
@@ -4724,7 +6712,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4739,7 +6728,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 3
+   "celle": 3,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4754,7 +6744,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 7
+   "celle": 7,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4769,7 +6760,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 9
+   "celle": 9,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4784,7 +6776,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4799,7 +6792,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4814,7 +6808,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4829,7 +6824,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4844,7 +6840,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4859,7 +6856,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 2
+   "celle": 2,
+   "prove": []
   },
   {
    "magic": "970913",
@@ -4874,7 +6872,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4889,7 +6888,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4904,7 +6904,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4919,7 +6920,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4934,7 +6936,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4949,7 +6952,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4964,7 +6968,8 @@
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4974,12 +6979,13 @@
    "knob": "InpFridayClose",
    "cat": "uscita:orario",
    "default": "false",
-   "riga": 102,
+   "riga": 139,
    "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   },
   {
    "magic": "971501",
@@ -4989,12 +6995,13 @@
    "knob": "InpFridayCloseHour",
    "cat": "uscita:orario",
    "default": "20",
-   "riga": 103,
+   "riga": 140,
    "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
-   "celle": 5
+   "celle": 5,
+   "prove": []
   }
  ]
 }

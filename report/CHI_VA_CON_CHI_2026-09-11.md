@@ -240,7 +240,8 @@ Valori nella finestra, per le sole coppie che entrano nelle proposte:
 giornate. Applicando quel rapporto (🟡 **indicativo, NON una misura di questi
 gruppi**): Gruppo 1 ≈ ~~5,6%~~ 🆕 **4,5%**, Gruppo 2 ≈ ~~6,4%~~ 🆕 **5,4%**,
 Gruppo 3 ≈ ~~6,4%~~ 🆕 **5,3%**.
-**Il limite inferiore certo è il max singolo — 🆕 `4,3501%` nel Gruppo 1,
+**Il limite inferiore certo è il max singolo — 🆕 `4,3501%` nel Gruppo 1
+(⚠️ **[MISURATO a deposito 10.000 €]**; a 100.000 € è **[NON MISURATO]**),
 `4,69%` (`771531`) nei Gruppi 2 e 3 — e il limite superiore certo è
 la somma.** 👉 Il numero vero si ottiene solo lanciando `dd_portafoglio.py` sui
 CSV per-trade dei backtest di quelle 5 sedie: **è una corsa da preparare, non un

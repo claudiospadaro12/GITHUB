@@ -192,8 +192,44 @@ Di queste: **35 hanno un PF da R103** · **2 hanno un PF altrove** (GatedShort, 
 | sedia | passa? | il fatto che lo smonta |
 |---|---|---|
 | `ABTG_EMA200_Ott` **XAUUSD** 971501 | ✅ sulla carta (PF 1,20 · DD 7,8% · n 610 su 6,5 anni) | 🔴 **R100 lo rimisura su 22 anni: DD 45,91% a rischio 1% = 10,4× il promesso originale.** La firma del 23/08 dice testualmente **"prop: NO a nessuna taglia"** (`CENSIMENTO_CONTRATTI.md` §4b). **Il suo passaggio e' un artefatto della finestra corta.** |
-| `ABTG_DAX_Apertura_EU` **D30EUR** 770101 | ✅ su R103 (PF 1,34 · DD@1% 7,28% · n 446) | 🔴 **Sulla cella del suo CONTRATTO (R83/R118, tick, rischio 1%) fa DD 10,5984% — SOPRA il muro del 10% — con PF 1,18776 e n 311** (`r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv`). Sta dentro **perche' gira a 0,65%**: il margine viene dalla taglia. E sull'IS dell'ancora dell'08/09 fa **PF 1,15396** |
+| `ABTG_DAX_Apertura_EU` **D30EUR** 770101 | ✅ su R103 (PF 1,34 · DD@1% 7,28% · n 446) | ~~🔴 **Sulla cella del suo CONTRATTO (R83/R118, tick, rischio 1%) fa DD 10,5984% — SOPRA il muro del 10% — con PF 1,18776 e n 311** (`r118_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_r118c.csv`). Sta dentro **perche' gira a 0,65%**: il margine viene dalla taglia.~~ 🔴🆕 **ERRATA 11/09 — QUESTO SMONTAGGIO NON REGGE PIU', ED E' UN ERRORE MIO DI ATTRIBUZIONE.** R83/R118 **non e' la cella del suo contratto**: quelle corse hanno **`InpAllowShort=1`** (e magic di laboratorio), cioe' **il lato corto acceso**, che sul conto reale 10105439 **non gira e non e' mai girato** (`InpAllowShort=false` nel preset vivo). La cella **davvero viva** e' long-only e fa **DD 6,7111% a rischio 1,0%** (`aperture_r35/..._OOS_r35.csv` r.8, PF 1,41521, n 270) e **4,3501% a 0,65%** (`ritardo_r119b_csv/..._R119_DAX_D0000.csv` r.2, `InpMagic=770101`, PF 1,41105). 👉 **Cade la conclusione *"sta dentro solo perche' gira a 0,65%"*: sta dentro il muro del 10% ANCHE a 1,0%, con 3,3 punti di margine.** Il lato corto da solo valeva **+3,8873 punti** di DD. ⚠️ **[MISURATO a deposito 10.000 EUR]** — su banco **100.000 EUR** e' **[NON MISURATO]** (+7,8% misurato sul solo effetto deposito). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. 🟢 **E la riga del §3 va letta di conseguenza: questa sedia non e' un sopravvissuto *smontato*.** Resta ferma per **altro** (R3 0,97 op/g da sola, R5 33,0x sul cancello del costo), non per il suo DD. E sull'IS dell'ancora dell'08/09 fa **PF 1,15396** |
 | `ABTG_EMA200` **U30USD** 771531 | ✅ **e regge lo smontaggio** — PF **1,42** · DD **6,48%** · **n 712** · peggior giornata **−2,24%** (massimo del blocco indici) · **1,55 op/giorno da sola** | 🟡 Unico buco: **C3 [NON MISURATO]** (lo stop mediano in punti indice non e' in archivio). E il DD viene da **OHLC** = limite inferiore |
+
+> ### 🔴🆕 ERRATA 11/09 — **HO SMONTATO LA `770101` COL NUMERO DI UN'ALTRA SEDIA. E HO CONTROLLATO SE IL VERDETTO SI RIBALTA: NO.**
+> Lo smontaggio della `770101` qui sopra poggiava su **R83/R118 (DD 10,5984% a
+> tick)**, che e' la cella **col lato corto ACCESO** — non quella che gira. La
+> cella viva, **long-only e a tick**, fa **DD 6,7111% @1,0%** con **PF 1,41521**
+> (`aperture_r35/..._OOS_r35.csv` r.8) e **4,3501% @0,65%**
+> (`ritardo_r119b_csv/..._R119_DAX_D0000.csv` r.2). 🔴 **Quindi lo smontaggio,
+> come e' scritto, CADE: sul DD questa sedia non e' sopra il muro, ne' a 0,65%
+> ne' a 1,0%.** 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`.
+>
+> 🧪 **E allora i sopravvissuti diventano DUE? Ho provato a romperlo, e la
+> risposta e' NO — per un motivo diverso da quello che avevo scritto:**
+>
+> | criterio del §3 | la cella VIVA a tick (R35/R119) | esito |
+> |---|---|---|
+> | PF ≥ 1,15 | **1,41521** | ✅ |
+> | DD ≤ 8,0% (a 1%) | **6,7111%** | ✅ |
+> | **`n` ≥ 300** | 🔴 **270 uscite — e in POSIZIONI sono 193** | ❌ **BOCCIA** |
+>
+> 👉 **Il `n = 311` che l'aveva fatta entrare nella riga «alla lettera» e' della
+> cella col corto acceso, non di questa.** Sulla cella viva il campione **non
+> arriva a 300**, e la sedia esce dalla riga `n ≥ 300` **dalla porta del
+> campione invece che da quella del rischio**.
+> ⚠️ **E l'`n = 446` di R103 non la salva**: R103 e' **OHLC M1** — limite
+> inferiore dichiarato al §0/§3 — e da' l'`n` **totale** della finestra, **non**
+> lo split IS/OOS. Usarlo per riammetterla sarebbe **scegliere la misura piu'
+> comoda**, che e' l'errore opposto a quello che sto correggendo.
+>
+> ✅ **CONCLUSIONE: il titolo qui sotto RESTA VERO, e il conto resta UNO.** Cio'
+> che cambia e' **il capo d'imputazione della `770101`**: non *"fa un DD sopra
+> il muro"*, ma *"sulla cella che gira davvero il campione si ferma a 270"*.
+> 🟢 **Ed e' una notizia buona travestita da errata**: sul **rischio** questa
+> sedia e' **piu' sana** di come l'avevo descritta.
+> ⚠️ Con l'asterisco di sempre: **[MISURATO a deposito 10.000 EUR]**; su banco
+> **100.000 EUR** il DD promesso e' **[NON MISURATO]** (+7,8% misurato sul solo
+> effetto deposito).
 
 > ## 🔴 **LA RIGA CHE CLAUDIO DEVE LEGGERE DUE VOLTE**
 > ## **DELLE 41 SEDIE CHE HA IN CAMPO, OGGI NE PASSEREBBE UNA.**

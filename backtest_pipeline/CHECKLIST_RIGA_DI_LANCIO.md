@@ -13694,3 +13694,48 @@ confronto contiene gia' cio' che si sta verificando. Provate tutte e due:
 dell'esaminato (classe 186 il delimitatore, 230 la forma scambiata per
 semantica, 233 la base che si sposta). 📌 **La lezione che si ripete: quando un
 controllo dice OK, la prima domanda non e' "funziona?" ma "ha guardato?".**
+
+---
+
+## 239. 🧮 IL RICONOSCITORE ANCORATO IN TESTA: 668 file veri dichiarati inesistenti (11/09/2026)
+
+**Il caso.** `backtest_pipeline/censimento_uscite.py` attribuiva ogni CSV a un EA
+con `ea_of()`, che riconosceva il file **solo se il basename COMINCIAVA col nome
+dell'EA** (`b.startswith(e)`) o se stava in una cartella omonima. Misurato:
+**668 CSV su 2.087** tornavano `None` — e non erano scarti, erano **risultati di
+round veri**, tutti con le colonne `InpMagic` **e** `Profit`: tutti i
+`gestione_ABTG_*`, tutti i `DAX_F_gestione_*` di `Walkforward_Aperture/`, e
+**tutte le 153 corse `ABTG_EMA200`** (`scan_*`, `valid_*` a tick reali).
+
+🔴 **Il danno pagato.** Il referto ha dichiarato *"manopola d'uscita MAI messa ad
+asse"* per **14 manopole che erano state mosse**, ed e' finito in chat a Claudio.
+E' esattamente la casella del CERTIFICATO DI MORTE segnata vuota quando e' piena:
+i totali `274 / 247 / 2.436` erano **limiti superiori**, non misure
+(veri: `260 / 236 / 2.326`).
+
+**La regola.** 👉 **Un riconoscitore che ancora il confronto in TESTA
+(`startswith`, `^`, "il file si chiama come...") va sempre provato contro i nomi
+che il progetto genera DAVVERO**, non contro quelli che ci si aspetta. Qui
+bastavano tre prefissi di uso quotidiano (`gestione_`, `valid_`, `scan_`) per
+rendere invisibile un terzo dell'archivio. 📌 **E il conto "quanti ne ho scartati"
+si STAMPA sempre**: un riconoscitore che butta via il 32% dei file senza dirlo e'
+un filtro silenzioso, e un filtro silenzioso mente.
+
+🛑 **E la trappola opposta, che e' peggio.** Allargare il riconoscimento crea
+**falsi positivi**, e un falso positivo fa dichiarare *"provata"* una manopola che
+non lo e'. Rimedio applicato, tre vie in ordine di forza della prova (nome nel
+percorso → `InpMagic` incrociato con la mappa che il repo GIA' possiede → firma
+delle colonne), **tutte e tre sotto lo stesso VETO**: *ogni colonna `Inp*` del CSV
+dev'essere un input dichiarato in quell'EA*. Misurato che serve: due file
+`regime_r50/r59` portano `InpMagic=772700` (**ABTG_Bulge**) ma le loro colonne
+sono di **EasyTrend** e **PunteLarry** — il magic da solo li avrebbe attribuiti
+all'EA sbagliato. Se restano due candidati, il file si dichiara **ignoto**
+(93 file su 2.087): **si dichiara, non si indovina.**
+
+✅ **Collaudo, che e' la parte che rende la regola pagata:**
+`python3 backtest_pipeline/censimento_uscite.py --autotest` → **16 casi VERI del
+repo su 16**, fra cui **6 negativi** che devono restare `None`
+(`flotta_attesa.csv`, `ABTG_StoricoScaricato.csv`, `misura_tick_*.csv`, e un round
+vero ma ambiguo). E `--delta` stampa il confronto col conto vecchio: **0
+regressioni**. 📌 **Una riparazione di un riconoscitore senza il caso NEGATIVO in
+autotest non e' una riparazione: e' uno spostamento del difetto.**

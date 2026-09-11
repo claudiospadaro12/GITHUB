@@ -331,7 +331,7 @@ pagato** questa confusione con una promozione revocata (970914, PF 2,77 →
   `ABTG_DEF_RISK`), **B1/B2** (cap 4,0/4,9 e 9,9), **B3** (reset 23, DST
   [INCERTO]), **C3** (criterio di uscita), **H2/H3** (fabbisogno di portata),
   **H12** (spread misurato ora per ora)
-- `report/CONTRATTI_SEDIE.md` — DAX 770101 **10,60%** (R83) · ORB 770611
+- `report/CONTRATTI_SEDIE.md` — DAX 770101 ~~**10,60%** (R83)~~ 🔴🆕 **ERRATA 11/09: 4,3501% @0,65%** / **6,7111% @1,0%** (⚠️ dep. 10.000 EUR; a 100k **[NON MISURATO]**) — il 10,60% e' R83 con `InpAllowShort=1`. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` · ORB 770611
   **9,92%** (R15, *doppio asterisco*) · SupRev_DOW_H4 970914 (**revocata,
   illusione OHLC**)
 - `report/FIRME_2026-08-18.md` — le tre firme (Guardian, uscita sedie, cap)
