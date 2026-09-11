@@ -1,5 +1,38 @@
 # 📜 CENSIMENTO DEI CONTRATTI — che cosa il backtest ha PROMESSO, sedia per sedia
 
+> # 🛑 QUESTO FILE È IL **v1 (07/09)** E **NON È PIÙ IL DOCUMENTO VIVO**
+> ## 👉 Il censimento che comanda è **[`report/CENSIMENTO_CONTRATTI_v2.md`](CENSIMENTO_CONTRATTI_v2.md)** (11/09/2026).
+>
+> **Non usare questa pagina per far scattare niente.** Fra il 10 e l'11/09 sei
+> sue premesse sono state **misurate false o incomplete**, e ognuna cambia un
+> numero che decide:
+> 1. 🔴 `771531` EMA200 Dow: promette **7,21% · n 444**. Il numero giusto è
+>    **7,8323% · 517 uscite = 257 posizioni · deposito 100.000 · tick**
+>    (R31 = R110 = R112, riprodotto tre volte al centesimo). 👉 **Col contratto
+>    di questa pagina un forward al 7,5% sarebbe una violazione. Col contratto
+>    giusto, no.**
+> 2. 🔴 **Classe 226** — il `n` conta le **USCITE**, non le operazioni, e il
+>    fattore **non è costante** (misurato **1,00 – 2,31**): non si corregge
+>    dividendo per due. **17 `n` di questa pagina diventano `[NON MISURATO]`.**
+>    E il grep originale cercava un nome solo: `InpTP1_ClosePct` (le due
+>    Aperture, la Nasdaq) e `InpPartialClosePercent` (GapContinuation)
+>    **erano sfuggiti**.
+> 3. 🔴 **Classe 224** — un `n` letto sulla **finestra piena** non ha fuori
+>    campione: **15 finestre** di questa pagina perdono l'etichetta, fra cui
+>    `970913` ⭐ e `970912` (verificate per misura sulla griglia del 26/07).
+> 4. 🔴 Il **cancello del costo con la COMMISSIONE dentro**: **cinque sedie
+>    ribaltano il verdetto** e `771201` dopo il trailing fa **13,2x contro il
+>    pavimento DURO di 13,3x**.
+> 5. 🔴 Manca la colonna **frequenza DI CAMPO**: senza, il tagliando firmato
+>    *"frequenza molto sotto il promesso → revisione"* **non è applicabile**.
+>    Misurata: la flotta gira al **58%** del promesso (`p = 0,00035`).
+> 6. 🔴 Il campo gira **codice di AGOSTO** (42 sorgenti su 42 sul piccolo):
+>    **39 righe-sedia su 47** hanno un DD promesso che descrive **un programma
+>    che non è in campo**.
+>
+> 🧊 **Resta qui come VERBALE di quello che credevamo il 07/09**, perché
+> cancellarlo cancellerebbe la prova che il metodo ha trovato i sei difetti.
+
 _Compilato il **07/09/2026**. È il **prerequisito dichiarato** del criterio di
 uscita delle sedie firmato il 18/08/2026 (`report/FIRME_2026-08-18.md`, corsia
 RISCHIO: **"DD forward > DD promesso dal backtest della cella promossa →
