@@ -102,12 +102,31 @@ opposti) e `771531` (pavimento del lotto **per gamba**). Guadagna R4 solo su
 📄 Pacchetto completo: `report/PACCHETTO_R4_DA_FIRMARE_2026-09-11.md`
 📄 `report/FIX_LOTTO_PENDENTE_2026-09-08.md`
 
-## 2. 🖱️ POSTNEWS EURUSD: `InpRiskPercent` **3.0 → 1.30**
-**Stato al 10/09**: il `.chr` vivo dice **`InpRiskPercent=3.0` su TUTTE E DUE** (chart43 EURJPY 771201, chart44 EURUSD 771202) — **ma quella foto e' del 06/09 22:55**, cioe' PRIMA che Claudio controllasse, e un `.chr` si risalva solo al cambio profilo o alla chiusura del terminale. 🔴 **Quindi la foto NON smentisce il suo ricordo e NON conferma il 3.0 di adesso: l'unico modo di saperlo e' aprire il pannello F7 sul grafico.** I preset nel repo sono corretti (1.30) su tutti e due.
-**Dove**: piccolo **50503392**, grafico **EURUSD M5**. Solo quel numero, nessun preset.
-**Perché**: 3.0 significa **1,50% per gamba stoppata** (la size si calcola su
-`InpRiskRefSLpips=50` mentre lo stop vero è 25). 1.30 = **0,65%**, la taglia firmata il 18/08.
-📄 `report/FIRMA_POSTNEWS_130_2026-09-08.md`
+## 2. ✅ POSTNEWS: **CHIUSO IN CAMPO — tutte e tre a 1.30** (Claudio, 11/09 mattina)
+
+> 🗣️ **Claudio, testuale: _"adesso le 3 post news sono a 1.3"_.**
+
+**Fatto da lui al pannello F7** sul piccolo **50503392**
+(`C:\Program Files\BCM Markets MT5 Terminal`): `771201` EURJPY, `771202`
+EURUSD, `771203` USDJPY. 📸 Foto agli atti per EURJPY (11/09, 01:13).
+
+🟢 **Cosa risolve, e il conto e' esatto:** `1.30` con
+`InpRiskRefSLpips = 50` e stop piazzato a **25** = **0,65% per gamba stoppata**,
+cioe' **il metro di casa firmato il 18/08**. Da **1,50%** a **0,65%**: il
+rapporto sul metro passa da **2,31x** a **1,00x**.
+
+🔴 **Cosa NON risolve, e va detto ogni volta che si cita:**
+1. **Il default compilato resta 3.0** (`mql5/Experts/ABTG_PostNews.mq5` r.113).
+   Il pannello e' uno **stato di sessione**: a ogni `Resetta`, ricarica o
+   ricompilazione **torna 3.0 in silenzio** — ed e' esattamente com'e' tornato il
+   10/09, costando **80,90 EUR**. 👉 **Il punto 3-bis resta aperto.**
+2. 🚨 **E il problema piu' grande di queste tre sedie non e' la TAGLIA: e' il
+   PEDAGGIO.** Misurato l'11/09 (`COLLAUDO_SPREAD_FLOTTA_CRITERI.md`), con la
+   commissione dentro: `771201` dopo il trailing a 15 pip fa **13,2x** contro il
+   pavimento **DURO di 13,3x**. Gemelle trailate: `771202` **17,4x**,
+   `771203` **16,1x** — tutte e tre **sotto il pavimento di lavoro (40x)**.
+   📌 **La taglia la cambi. Il pedaggio no.** Questa e' una decisione
+   diversa da quella appena presa, e resta aperta.
 
 ## 2-bis. 🚨 COLLISIONE DI MAGIC: `ECB_EURUSD` e `FOMC_EURUSD` hanno **LO STESSO 771202**
 
