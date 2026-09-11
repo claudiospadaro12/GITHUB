@@ -5,8 +5,27 @@
 
 # 🛡️ STANOTTE NESSUNO SCRIPT DI QUESTA CASA PUO' PIU' SPEGNERE IL CONTO REALE
 
-Erano **11 punti** del repo. Adesso sono **zero**. E non e' una cosa che
-cercavo: e' saltata fuori scavando per un'altra.
+Erano **14 punti** del repo. Adesso sono **zero** — e stavolta lo **zero e' una
+misura**, non una mia dichiarazione: lo rifa' una macchina
+(`backtest_pipeline/audit_kill_terminali.py`: **239 file, 17 chiusure, 0
+nude, 0 ambigue**). E non e' una cosa che cercavo: e' saltata fuori scavando
+per un'altra.
+
+> ✏️ **E qui devo correggere me stesso, perche' e' la lezione piu' importante
+> della notte.** A meta' lavoro avevo dichiarato *"erano 11, adesso zero"*.
+> 🔴 **Era falso.** Ne restavano **tre**, e **due erano vivi** — li ha trovati
+> il cancello **dopo** la mia dichiarazione.
+> **Perche' li avevo persi**: cercavo la **forma** (`Get-Process` e
+> `Stop-Process` sulla stessa riga) invece della **semantica** — li' stavano su
+> righe diverse, legati da una variabile.
+> 🚨 **E il colpo peggiore**: la regola giusta l'avevo scritta **io**, poche ore
+> prima, **dentro quello stesso file** — *"un ramo morto con l'arma carica
+> resta un'arma"* — e **non l'avevo applicata 213 righe sopra, sul kill
+> identico**. Una regola scritta e non applicata a se stessi **non e' una
+> regola: e' una frase.**
+> ✅ Adesso i tre sono chiusi, e soprattutto **il numero non lo scrivo piu' io**:
+> lo conta uno strumento che si auto-prova **sui casi che mi avevano
+> ingannato** (autotest 9 su 9).
 
 ---
 
