@@ -878,7 +878,20 @@ try{
     # E IL PARAMETRO SU CUI SI REGGE TUTTO IL PASSO: -Simbolo, -DaQuando,
     # -Fino, -Etichetta e -Rifai devono ESISTERE nel param() del driver
     # che sto per lanciare, non in quello che ricordo io.
-    foreach($p in @('\$Simbolo','\$DaQuando','\$Fino','\$Etichetta','\$Rifai','\$Modello','\$Deposito','\$Prova')){
+    # 12/09/2026 (classe 243): '\$FinoDallaRiga' AGGIUNTO alla lista.
+    # Questa guardia esiste per dire -- col suo messaggio -- "la riga
+    # passerebbe un interruttore che il driver non ha". Quando a r.1069 e'
+    # stato aggiunto -FinoDallaRiga, la lista NON e' cresciuta: con un -Pin
+    # anteriore al commit che introduce lo switch, la guardia passava (gli
+    # otto vecchi c'erano), il driver partiva senza conoscerlo e moriva con
+    # "A parameter cannot be found that matches parameter name
+    # 'FinoDallaRiga'" -- un errore grezzo che manda a cercare il guasto
+    # nella rete o nel driver invece che NEL PIN. Cioe' esattamente il danno
+    # che questa guardia esisteva per prevenire.
+    # REGOLA: chi aggiunge un argomento alla riga aggiunge la voce QUI,
+    # nello stesso commit. Una guardia che non cresce coi suoi argomenti
+    # smette di essere una guardia senza dirlo a nessuno.
+    foreach($p in @('\$Simbolo','\$DaQuando','\$Fino','\$FinoDallaRiga','\$Etichetta','\$Rifai','\$Modello','\$Deposito','\$Prova')){
       if($testoDrv -notmatch ('(?m)^\s*\[[A-Za-z\[\]]+\]' + $p + '\b')){
         throw ("walkforward_generico.ps1 al pin non dichiara il parametro " + ($p -replace '\\','') + " nel suo param(): la riga passerebbe un interruttore che il driver non ha.")
       }

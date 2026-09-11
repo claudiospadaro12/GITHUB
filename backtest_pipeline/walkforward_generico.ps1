@@ -543,7 +543,10 @@ if($Direttive.ContainsKey("FINOA")){
         # DIVERGENZA DICHIARATA. Non e' un'eccezione comoda: e' una firma.
         # Chi lancia ha scritto -FinoDallaRiga, cioe' "lo so, la sto
         # cambiando apposta". E siccome un avviso dentro mille righe di log
-        # non lo legge nessuno, esce a banda larga e si RIPETE piu' sotto.
+        # non lo legge nessuno, esce a banda larga: riquadro pieno, magenta,
+        # con le DUE date accanto. (12/09: qui c'era scritto "e si RIPETE piu'
+        # sotto" -- NON si ripete, esce una volta sola. Frase falsa dentro byte
+        # inchiodati da un pin: corretta appena trovata.)
         Write-Host ""
         Write-Host "*********************************************************************" -ForegroundColor Magenta
         Write-Host "  ATTENZIONE: LA FINESTRA NON E' QUELLA DEL FILE PROVA." -ForegroundColor Magenta

@@ -14069,3 +14069,40 @@ trova un kill nudo.
 - **Misura sul repo vero: 239 file `.ps1`, 17 `Stop-Process`, `NUDO = 0`,
   `DA_LEGGERE = 0`.** Questo numero si puo' difendere, perche' lo rifa' una
   macchina.
+
+---
+
+## 🛑 CLASSE 243 (12/09/2026) — UNA GUARDIA CHE NON CRESCE COI SUOI ARGOMENTI
+
+**Il fatto.** `RIGA_DIAG_GBPUSD.ps1` ha una guardia bella: prima di lanciare
+il driver, verifica che il `param()` del driver **al pin** dichiari davvero
+tutti gli argomenti che sta per passargli. Il suo messaggio d'errore e',
+testuale: *"la riga passerebbe **un interruttore che il driver non ha**"*.
+
+🔴 Stanotte ho aggiunto l'argomento `-FinoDallaRiga` alla riga (r.1069)
+**e non ho aggiunto la voce alla lista** (r.881). Con un `-Pin` anteriore al
+commit che introduce lo switch, la guardia **passava** (gli otto vecchi
+c'erano), il driver partiva **senza conoscerlo** e moriva con
+*"A parameter cannot be found that matches parameter name 'FinoDallaRiga'"*:
+un errore grezzo, che manda a cercare il guasto **nella rete o nel driver
+invece che NEL PIN**. 👉 **Esattamente il danno che quella guardia esisteva
+per prevenire.**
+
+### ✅ LA REGOLA
+**Chi aggiunge un argomento a una riga di lancio aggiunge la voce nella
+guardia, NELLO STESSO COMMIT.** Una guardia che non cresce coi suoi argomenti
+**smette di essere una guardia senza dirlo a nessuno** — e una guardia che
+tace e' peggio di una guardia che non c'e', perche' la si crede.
+
+📌 Verificato che il riconoscitore prende il parametro vero: la regex
+`(?m)^\s*\[[A-Za-z\[\]]+\]\$FinoDallaRiga\b` combacia con
+`  [switch]$FinoDallaRiga,`. **La voce e' stata aggiunta E provata**, non solo
+aggiunta.
+
+### 📎 E una coda della stessa giornata
+Dentro i byte **inchiodati da un pin** c'era una frase falsa: il commento del
+driver diceva che il banner *"si RIPETE piu' sotto"*. **Non si ripete**, esce
+una volta sola. Innocua per il codice, **ma e' una frase falsa in un file che
+si distribuisce a impronta**: corretta appena trovata. 🔴 Se un commento
+dentro byte pinnati puo' mentire, l'impronta garantisce i byte e non la
+verita' — e allora si ricontrolla anche la prosa, non solo l'hash.
