@@ -115,6 +115,58 @@ def controlla_ascii(path, dati):
     if not in_codice and not in_commento:
         passa("ASCII puro: " + os.path.basename(path))
 
+def controlla_parser(path):
+    """CLASSE 242 (12/09/2026) -- IL CANCELLO NON COMPILAVA NIENTE.
+
+    Il fatto che l'ha aperta: stanotte questo cancello ha stampato
+    "ESITO: nessun difetto meccanico" su un file .ps1 che **non
+    compilava affatto** (un `@(` aperto e mai chiuso, per un taglio
+    sbagliato delle prime righe). Tutti i controlli qui dentro sono
+    TESTUALI -- ASCII, formati, cultura, terminali -- e nessuno di loro
+    guarda se il file e' PowerShell valido. E' la stessa classe pagata
+    l'11/09 contando le graffe a mano: forma dove serviva semantica.
+
+    Adesso, se sulla macchina c'e' `pwsh`, si chiama il PARSER VERO
+    (`System.Management.Automation.Language.Parser`), che e' l'unica
+    autorita' sulla sintassi. Un errore di sintassi e' BLOCCANTE: uno
+    script che non compila non e' un difetto di stile, e' un file che non
+    gira.
+
+    Se `pwsh` NON c'e', il controllo si DICHIARA SALTATO invece di
+    tacere: un cancello che salta un controllo in silenzio fa credere di
+    averlo fatto.
+
+    NB: `pwsh` e' la 7, sul VPS gira la 5.1. Le differenze fra le due
+    versioni le prende `controlla_pwsh7` qui sopra; questo controllo
+    serve a un'altra domanda -- "il file e' sintatticamente un file
+    PowerShell?" -- e quella risposta e' la stessa in tutte e due.
+    """
+    import shutil, subprocess, json
+    if not shutil.which("pwsh"):
+        rileva("PARSER", "controllo di SINTASSI SALTATO: su questa macchina non c'e' 'pwsh'. "
+                         "Questo cancello e' TESTUALE: senza parser non sa se il file compila. "
+                         "Dichiarato, non taciuto.", path)
+        return
+    cmd = ("$e=$null; $t=$null; "
+           "[void][System.Management.Automation.Language.Parser]::ParseFile("
+           "(Resolve-Path -LiteralPath $env:ABTG_FILE).Path, [ref]$t, [ref]$e); "
+           "@($e) | ForEach-Object { '' + $_.Extent.StartLineNumber + ': ' + $_.Message }")
+    try:
+        amb = dict(os.environ); amb["ABTG_FILE"] = os.path.abspath(path)
+        r = subprocess.run(["pwsh", "-NoProfile", "-Command", cmd],
+                           capture_output=True, text=True, timeout=120, env=amb)
+    except Exception as e:
+        rileva("PARSER", "controllo di SINTASSI NON ESEGUITO ('pwsh' c'e' ma non risponde: "
+                         + str(e) + "). Dichiarato, non taciuto.", path)
+        return
+    errori = [x.strip() for x in r.stdout.splitlines() if x.strip()]
+    if errori:
+        blocca("PARSER", "IL FILE NON COMPILA. Il parser di PowerShell riporta "
+               + str(len(errori)) + " errore/i di sintassi: " + " | ".join(errori[:4]), path)
+    else:
+        passa("compila: 0 errori dal parser PowerShell vero (" + os.path.basename(path) + ")")
+
+
 def righe_utili(testo):
     """Righe con (numero, codice nudo). Salta commenti e HERE-STRING.
 
@@ -810,6 +862,7 @@ def esamina(tipo, percorso):
         controlla_riga_lancio(riga)
     elif tipo == "ps1":
         controlla_ascii(percorso, dati)
+        controlla_parser(percorso)
         controlla_pwsh7(percorso, testo)
         controlla_formati_net(percorso, testo)
         controlla_cultura(percorso, testo)

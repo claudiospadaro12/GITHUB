@@ -13873,3 +13873,48 @@ quasi sempre anche la soglia vecchia.
 ✅ **Forma robusta**, che non va aggiornata a mano ad ogni pacchetto: contare le
 righe di coda attese e confrontare con quello, oppure scrivere la soglia **una
 volta sola** in una variabile in cima alla riga.
+
+---
+
+## 🛑 CLASSE 242 (12/09/2026) — IL CANCELLO NON COMPILAVA NIENTE
+
+**Il fatto.** Stanotte questo cancello ha stampato **`ESITO: nessun difetto
+meccanico`** su un file `.ps1` che **non compilava affatto** (un `@(` aperto e
+mai chiuso, per un taglio sbagliato delle prime righe).
+
+🔴 **E' la stessa classe pagata l'11/09**, quando avevo contato le graffe a
+mano e dichiarato uno sbilanciamento che non c'era: **forma dove serviva
+semantica**. Tutti i controlli del cancello erano **TESTUALI** — ASCII,
+formati .NET, cultura invariante, terminali — e **nessuno** guardava se il
+file fosse PowerShell valido. Un cancello che non compila puo' dire "tutto
+bene" su un file che non gira.
+
+### ✅ LA RIPARAZIONE
+`controlla_riga.py` ora chiama **il parser vero**
+(`System.Management.Automation.Language.Parser`) su ogni `.ps1`. Un errore di
+sintassi e' **BLOCCANTE**: uno script che non compila non e' un difetto di
+stile, e' un file che non gira.
+
+📌 **E se `pwsh` non c'e' sulla macchina, il controllo si DICHIARA SALTATO**
+invece di tacere. **Un cancello che salta un controllo in silenzio fa credere
+di averlo fatto** — ed e' peggio di un cancello che non ce l'ha.
+
+⚠️ **Non sostituisce `controlla_pwsh7`**: quello risponde a *"questa sintassi
+gira anche sulla 5.1 del VPS?"*; il parser risponde a *"questo file e'
+sintatticamente PowerShell?"*. Due domande diverse, e servono tutte e due.
+
+### 🧪 IL CONTRO-ESEMPIO, ESEGUITO (e la prima volta NON ha sparato)
+Alla prima prova avevo tagliato una riga a caso da un file sano per
+"romperlo": il cancello l'ha dato **buono**, perche' **il file era ancora
+valido** — avevo rotto niente. 👉 **Un contro-esempio che non fallisce non ha
+verificato nulla.** Rifatto con tre rotture costruite apposta, e sono le due
+classi che il progetto ha gia' pagato piu' una:
+
+| file di prova | errore del parser | FAIL? |
+|---|---|---|
+| `@(` aperto e mai chiuso | *Missing closing ')' in subexpression* | ✅ |
+| `{` aperto e mai chiuso | *Missing closing '}' in statement block* | ✅ **la classe dell'11/09** |
+| stringa senza chiusura | *The string is missing the terminator* | ✅ **la classe del 17/08 (emoji in stringa)** |
+
+**Collaudo sul parco vero: 19 script su 19** (i 16 toccati stanotte + runner,
+driver e riga di round) → **`compila: 0 errori` su tutti e 19**.
