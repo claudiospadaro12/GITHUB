@@ -1,0 +1,352 @@
+=== QUALE CODICE GIRA DAVVERO -- sorgenti dentro MQL5\Experts ===
+data lettura: 2026-09-11 03:30:29  (ora locale)
+cartelle dati: 6
+
+=== CARTELLA 04C7A32B575E40027B4FF8724D14D702
+    programma: C:\MT5_Backtest
+    sorgenti .mq5 trovati: 47
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_DAX_Apertura_EU.mq5                    1.01       2368  SI     2026-09-09 09:37
+    ABTG_IBRetest.mq5                           1.00       1399  SI     2026-09-09 08:43
+    ABTG_LVNArbitro.mq5                         1.00       1010  SI     2026-09-08 22:42
+    ABTG_Nasdaq_Apertura_US.mq5                 1.02       2567  SI     2026-09-09 09:54
+    ABTG_Nightly.mq5                            1.00        440  SI     2026-09-09 08:04
+    ABTG_OpeningReversalB.mq5                   1.00       1405  no     2026-09-08 18:56
+    ABTG_ORB_Ottimizzato.mq5                    1.04       1464  SI     2026-09-08 17:52
+    ABTG_SupRev_DOW_H1_Ottimizzato.mq5          1.01        616  SI     2026-09-09 19:53
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-09-07 23:41
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-09-07 23:41
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-09-07 23:41
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-09-07 23:41
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-09-07 23:41
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-09-07 23:41
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-09-07 23:41
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-09-07 23:41
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-09-07 23:41
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-09-07 23:41
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-09-07 23:41
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-09-07 23:41
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-09-07 23:41
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-09-07 23:41
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-09-07 23:41
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-09-07 23:41
+    ChartInChart.mq5                            ?           437  no     2026-09-07 23:41
+    Controls.mq5                                1.00         46  no     2026-09-07 23:41
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-09-07 23:41
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-09-07 23:41
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-09-07 23:41
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-09-07 23:41
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-09-07 23:41
+    ExpertMACD.mq5                              1.00        169  no     2026-09-07 23:40
+    ExpertMAMA.mq5                              1.00        176  no     2026-09-07 23:40
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-09-07 23:40
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-09-07 23:41
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-09-07 23:41
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-09-07 23:41
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-09-07 23:41
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-09-07 23:41
+    MACD Sample.mq5                             5.50        452  no     2026-09-07 23:41
+    Math 3D Morpher.mq5                         1.00        455  no     2026-09-07 23:41
+    Math 3D.mq5                                 ?            84  no     2026-09-07 23:41
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-09-07 23:41
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-09-07 23:41
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-09-07 23:41
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-09-07 23:41
+    Moving Average.mq5                          1.00        234  no     2026-09-07 23:41
+
+=== CARTELLA 215D85D767A1C39E22D242C8114BF9F5
+    programma: C:\Program Files\BCM Markets MT5 Terminal
+    sorgenti .mq5 trovati: 91
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_Apertura_Marco.mq5                     1.00       1402  no     2026-08-05 10:44
+    ABTG_BreakingBand.mq5                       1.02       1578  no     2026-08-13 07:29
+    ABTG_CostToCost.mq5                         1.00       1079  no     2026-08-13 19:46
+    ABTG_DAX_Apertura_EU.mq5                    1.00       2133  no     2026-08-08 14:23
+    ABTG_DAX_Apertura_EU_Ottimizzato.mq5        1.00       1380  no     2026-08-08 14:25
+    ABTG_DAX_Live5m.mq5                         1.00       1194  no     2026-08-06 19:34
+    ABTG_DAX_Live5m_v2.mq5                      1.00       1308  no     2026-08-06 19:34
+    ABTG_DAX_M3.mq5                             1.00        542  no     2026-08-06 19:34
+    ABTG_Dow_Apertura_US.mq5                    1.00       2065  no     2026-08-08 14:26
+    ABTG_EasyTrend.mq5                          1.00       1606  no     2026-08-14 08:49
+    ABTG_EMA200.mq5                             1.00        487  no     2026-08-06 19:33
+    ABTG_EMA200_Ottimizzato.mq5                 1.00        487  no     2026-08-06 19:32
+    ABTG_FiboH4_Multi.mq5                       1.00        534  no     2026-08-06 19:35
+    ABTG_GapContinuation.mq5                    1.50       1552  no     2026-08-16 20:44
+    ABTG_GapFill.mq5                            1.00        791  no     2026-08-13 14:30
+    ABTG_GoldenCross.mq5                        1.00        744  no     2026-08-06 19:33
+    ABTG_GoldenCross_Ottimizzato.mq5            1.00        679  no     2026-08-06 19:32
+    ABTG_Guardian.mq5                           1.10        414  no     2026-08-09 19:23
+    ABTG_HARSI.mq5                              1.00        360  no     2026-08-06 19:34
+    ABTG_Londra_ORB.mq5                         1.00        464  no     2026-08-06 19:34
+    ABTG_MaxMinNotte.mq5                        1.10        540  no     2026-08-06 19:33
+    ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5  1.10        605  no     2026-08-18 14:03
+    ABTG_Nasdaq_Apertura_US.mq5                 1.00       2033  no     2026-08-08 14:25
+    ABTG_Nasdaq_Apertura_US_Ottimizzato.mq5     1.00       1332  no     2026-08-08 14:25
+    ABTG_Nasdaq_Live5m.mq5                      1.00       1197  no     2026-08-06 19:34
+    ABTG_Nightly.mq5                            1.00        411  no     2026-08-06 19:33
+    ABTG_Nightly_Ottimizzato.mq5                1.00        411  no     2026-08-06 19:33
+    ABTG_ORB.mq5                                1.00        595  no     2026-08-06 19:34
+    ABTG_ORB_Fibo.mq5                           1.00        503  no     2026-08-06 19:34
+    ABTG_ORB_Ottimizzato.mq5                    1.04       1464  SI     2026-09-03 16:14
+    ABTG_PostNews.mq5                           1.10        667  SI     2026-09-04 13:24
+    ABTG_PTE.mq5                                1.00        526  no     2026-08-06 19:34
+    ABTG_PunteLarry.mq5                         1.00       1200  no     2026-08-13 18:17
+    ABTG_SpreadLogger.mq5                       1.00       1019  no     2026-09-06 22:24
+    ABTG_SupertrendInvert.mq5                   1.00        526  no     2026-08-06 19:34
+    ABTG_SupertrendReversal.mq5                 1.00        605  no     2026-08-08 14:16
+    ABTG_SupertrendReversal_Multi.mq5           1.00        581  no     2026-08-06 19:33
+    ABTG_SupertrendReversal_Multi_Ottimizzato.mq51.00        581  no     2026-08-06 19:32
+    ABTG_SupertrendReversal_Ottimizzato.mq5     1.00        577  no     2026-08-06 19:32
+    ABTG_SuperWave.mq5                          1.00        564  no     2026-08-06 19:33
+    ABTG_SuperWave_DAX_H4_Ottimizzato.mq5       1.00        564  no     2026-08-06 19:33
+    ABTG_SuperWave_DOW_H1_Ottimizzato.mq5       1.00        564  no     2026-08-06 19:33
+    ABTG_SuperWave_EA.mq5                       1.00        254  no     2026-08-06 19:33
+    ABTG_SupRev_CAC_H4_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:33
+    ABTG_SupRev_DAX_H1_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:32
+    ABTG_SupRev_DAX_H4_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:33
+    ABTG_SupRev_DOW_H1_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:33
+    ABTG_SupRev_DOW_H4_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:33
+    ABTG_SupRev_NAS_H1_Ottimizzato.mq5          1.00        578  no     2026-08-06 19:33
+    ABTG_TradeExporter.mq5                      1.00        212  no     2026-08-06 19:35
+    ABTG_WOL.mq5                                1.00        492  no     2026-08-06 19:34
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-03-14 20:34
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-03-14 20:34
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-03-14 20:34
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-03-14 20:34
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-03-14 20:34
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-03-14 20:34
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-03-14 20:34
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-03-14 20:34
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-03-14 20:34
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-03-14 20:34
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-03-14 20:34
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-03-14 20:34
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-03-14 20:34
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-03-14 20:34
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-03-14 20:34
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-03-14 20:34
+    ChartInChart.mq5                            ?           437  no     2026-03-14 20:34
+    Controls.mq5                                1.00         46  no     2026-03-14 20:34
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-03-14 20:34
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-03-14 20:34
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-03-14 20:34
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-03-14 20:34
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-03-14 20:34
+    ExpertMACD.mq5                              1.00        169  no     2026-03-14 20:34
+    ExpertMAMA.mq5                              1.00        176  no     2026-03-14 20:34
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-03-14 20:34
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-03-14 20:34
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-03-14 20:34
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-03-14 20:34
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-03-14 20:34
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-03-14 20:34
+    IchiTrend_Gold_Base.mq5                     1.00        332  no     2026-08-06 19:35
+    MACD Sample.mq5                             5.50        452  no     2026-03-14 20:34
+    Math 3D Morpher.mq5                         1.00        455  no     2026-03-14 20:34
+    Math 3D.mq5                                 ?            84  no     2026-03-14 20:34
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-03-14 20:34
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-03-14 20:34
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-03-14 20:34
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-03-14 20:34
+    Moving Average.mq5                          1.00        234  no     2026-03-14 20:34
+    ATTENZIONE: 1 .ex5 SENZA il .mq5 accanto -- girano, ma il sorgente non e' qui:
+      NasdaqOpeningBreakout_EA_v21_OPTIMIZED (1).ex52026-08-12 07:53
+
+=== CARTELLA 73B7A2420D6397DFF9014A20F1201F97
+    programma: C:\Program Files\Pepperstone MetaTrader 5
+    sorgenti .mq5 trovati: 41
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_Guardian.mq5                           1.10        414  no     (nessun .ex5)
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-06-18 16:02
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-06-18 16:02
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-06-18 16:02
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-06-18 16:02
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-06-18 16:02
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-06-18 16:02
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-06-18 16:02
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-06-18 16:02
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-06-18 16:02
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-06-18 16:02
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-06-18 16:02
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-06-18 16:02
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-06-18 16:03
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-06-18 16:03
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-06-18 16:03
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-06-18 16:03
+    ChartInChart.mq5                            ?           354  no     2026-06-18 16:02
+    Controls.mq5                                1.00         46  no     2026-06-18 16:02
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-06-18 16:02
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-06-18 16:03
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-06-18 16:03
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-06-18 16:03
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-06-18 16:03
+    ExpertMACD.mq5                              1.00        169  no     2026-06-18 16:02
+    ExpertMAMA.mq5                              1.00        176  no     2026-06-18 16:02
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-06-18 16:02
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-06-18 16:02
+    Gold_Ichimoku_TK_ATR_EA.mq5                 3.00        708  no     2026-06-17 09:31
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-06-18 16:03
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-06-18 16:03
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-06-18 16:03
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-06-18 16:03
+    MACD Sample.mq5                             5.50        452  no     2026-06-18 16:02
+    Math 3D Morpher.mq5                         1.00        455  no     2026-06-18 16:02
+    Math 3D.mq5                                 ?            84  no     2026-06-18 16:02
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-06-18 16:03
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-06-18 16:03
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-06-18 16:03
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-06-18 16:03
+    Moving Average.mq5                          1.00        234  no     2026-06-18 16:02
+
+=== CARTELLA 857385E4B0F2356AD99AA95CDF40FAE9
+    programma: C:\Program Files\Tickmill Europe MT5 Terminal
+    sorgenti .mq5 trovati: 45
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_Guardian.mq5                           1.10        414  no     (nessun .ex5)
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-06-18 19:44
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-06-18 19:44
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-06-18 19:44
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-06-18 19:44
+    BREAKOUT_EA_JPY_v3.mq5                      3.00       1016  no     2026-07-02 16:40
+    BULGE_MASTER.mq5                            4.00       1105  no     2026-06-19 17:17
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-06-18 19:44
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-06-18 19:44
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-06-18 19:44
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-06-18 19:44
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-06-18 19:44
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-06-18 19:44
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-06-18 19:44
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-06-18 19:44
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-06-18 19:44
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-06-18 19:44
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-06-18 19:44
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-06-18 19:44
+    ChartInChart.mq5                            ?           354  no     2026-06-18 19:43
+    Controls.mq5                                1.00         46  no     2026-06-18 19:43
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-06-18 19:43
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-06-18 19:44
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-06-18 19:44
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-06-18 19:44
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-06-18 19:44
+    DAX_MASTER_PROP.mq5                         3.10       2626  no     2026-06-19 16:09
+    ExpertMACD.mq5                              1.00        169  no     2026-06-18 19:43
+    ExpertMAMA.mq5                              1.00        176  no     2026-06-18 19:43
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-06-18 19:43
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-06-18 19:43
+    Gold_Ichimoku_TK_ATR_EA.mq5                 3.00        708  no     2026-06-17 09:31
+    Gold_Scalper_TK_BB_BE_EA.mq5                1.10       1067  no     2026-06-19 07:51
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-06-18 19:44
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-06-18 19:44
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-06-18 19:44
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-06-18 19:44
+    MACD Sample.mq5                             5.50        452  no     2026-06-18 19:43
+    Math 3D Morpher.mq5                         1.00        455  no     2026-06-18 19:44
+    Math 3D.mq5                                 ?            84  no     2026-06-18 19:43
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-06-18 19:44
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-06-18 19:44
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-06-18 19:44
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-06-18 19:44
+    Moving Average.mq5                          1.00        234  no     2026-06-18 19:44
+
+=== CARTELLA BCA8AD18563BF5B64A433C2662D0A104
+    programma: C:\Program Files\BCM Markets MT5 Terminal -V3
+    sorgenti .mq5 trovati: 46
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_DAX_Apertura_EU.mq5                    1.01       2361  SI     2026-08-19 23:09
+    ABTG_Dow_Apertura_US.mq5                    1.01       2148  SI     2026-08-19 23:09
+    ABTG_Guardian.mq5                           1.11        468  no     2026-08-19 23:10
+    ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5  1.10        620  SI     2026-08-19 23:10
+    ABTG_ORB_Ottimizzato.mq5                    1.02        823  SI     2026-08-22 15:11
+    ABTG_SupertrendReversal.mq5                 1.00        657  SI     2026-08-19 23:10
+    ABTG_TradeExporter.mq5                      1.00        212  no     2026-08-06 19:35
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-05-04 23:13
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-05-04 23:13
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-05-04 23:13
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-05-04 23:13
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-05-04 23:13
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-05-04 23:13
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-05-04 23:13
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-05-04 23:13
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-05-04 23:13
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-05-04 23:13
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-05-04 23:13
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-05-04 23:13
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-05-04 23:13
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-05-04 23:13
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-05-04 23:13
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-05-04 23:14
+    ChartInChart.mq5                            ?           437  no     2026-05-04 23:13
+    Controls.mq5                                1.00         46  no     2026-05-04 23:13
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-05-04 23:13
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-05-04 23:14
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-05-04 23:14
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-05-04 23:14
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-05-04 23:14
+    ExpertMACD.mq5                              1.00        169  no     2026-05-04 23:13
+    ExpertMAMA.mq5                              1.00        176  no     2026-05-04 23:13
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-05-04 23:13
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-05-04 23:13
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-05-04 23:14
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-05-04 23:14
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-05-04 23:14
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-05-04 23:14
+    MACD Sample.mq5                             5.50        452  no     2026-05-04 23:13
+    Math 3D Morpher.mq5                         1.00        455  no     2026-05-04 23:13
+    Math 3D.mq5                                 ?            84  no     2026-05-04 23:13
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-05-04 23:14
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-05-04 23:14
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-05-04 23:14
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-05-04 23:14
+    Moving Average.mq5                          1.00        234  no     2026-05-04 23:13
+
+=== CARTELLA E23E1504A8D02A22179395F0652B86B6
+    programma: C:\BCM_Reale
+    sorgenti .mq5 trovati: 43
+    NOME                                        VER       RIGHE  GUARD  COMPILATO IL
+    ABTG_DAX_Apertura_EU.mq5                    1.01       2368  SI     2026-09-06 09:58
+    ABTG_Guardian.mq5                           1.12        513  no     2026-09-06 17:34
+    ABTG_ORB_Ottimizzato.mq5                    1.04       1464  SI     2026-09-06 09:58
+    ABTG_SlippageLogger.mq5                     1.00       1823  no     2026-09-06 08:46
+    BlackCrows WhiteSoldiers CCI.mq5            1.00        658  no     2026-09-05 22:47
+    BlackCrows WhiteSoldiers MFI.mq5            1.00        658  no     2026-09-05 22:47
+    BlackCrows WhiteSoldiers RSI.mq5            1.00        658  no     2026-09-05 22:47
+    BlackCrows WhiteSoldiers Stoch.mq5          1.00        662  no     2026-09-05 22:47
+    BullishBearish Engulfing CCI.mq5            1.00        683  no     2026-09-05 22:47
+    BullishBearish Engulfing MFI.mq5            1.00        683  no     2026-09-05 22:47
+    BullishBearish Engulfing RSI.mq5            1.00        683  no     2026-09-05 22:47
+    BullishBearish Engulfing Stoch.mq5          1.00        689  no     2026-09-05 22:47
+    BullishBearish Harami CCI.mq5               1.00        683  no     2026-09-05 22:47
+    BullishBearish Harami MFI.mq5               1.00        683  no     2026-09-05 22:47
+    BullishBearish Harami RSI.mq5               1.00        683  no     2026-09-05 22:47
+    BullishBearish Harami Stoch.mq5             1.00        686  no     2026-09-05 22:47
+    BullishBearish MeetingLines CCI.mq5         1.00        655  no     2026-09-05 22:47
+    BullishBearish MeetingLines MFI.mq5         1.00        653  no     2026-09-05 22:47
+    BullishBearish MeetingLines RSI.mq5         1.00        654  no     2026-09-05 22:47
+    BullishBearish MeetingLines Stoch.mq5       1.00        663  no     2026-09-05 22:47
+    ChartInChart.mq5                            ?           437  no     2026-09-05 22:47
+    Controls.mq5                                1.00         46  no     2026-09-05 22:47
+    Correlation Matrix 3D.mq5                   1.00       1003  no     2026-09-05 22:47
+    DarkCloud PiercingLine CCI.mq5              1.00        683  no     2026-09-05 22:47
+    DarkCloud PiercingLine MFI.mq5              1.00        682  no     2026-09-05 22:47
+    DarkCloud PiercingLine RSI.mq5              1.00        684  no     2026-09-05 22:47
+    DarkCloud PiercingLine Stoch.mq5            1.00        688  no     2026-09-05 22:47
+    ExpertMACD.mq5                              1.00        169  no     2026-09-05 22:47
+    ExpertMAMA.mq5                              1.00        176  no     2026-09-05 22:47
+    ExpertMAPSAR.mq5                            1.00        172  no     2026-09-05 22:47
+    ExpertMAPSARSizeOptimized.mq5               1.00        177  no     2026-09-05 22:47
+    HangingMan Hammer CCI.mq5                   1.00        680  no     2026-09-05 22:47
+    HangingMan Hammer MFI.mq5                   1.00        680  no     2026-09-05 22:47
+    HangingMan Hammer RSI.mq5                   1.00        678  no     2026-09-05 22:47
+    HangingMan Hammer Stoch.mq5                 1.00        684  no     2026-09-05 22:48
+    MACD Sample.mq5                             5.50        452  no     2026-09-05 22:47
+    Math 3D Morpher.mq5                         1.00        455  no     2026-09-05 22:47
+    Math 3D.mq5                                 ?            84  no     2026-09-05 22:47
+    MorningEvening StarDoji CCI.mq5             1.00        686  no     2026-09-05 22:48
+    MorningEvening StarDoji MFI.mq5             1.00        687  no     2026-09-05 22:48
+    MorningEvening StarDoji RSI.mq5             1.00        687  no     2026-09-05 22:48
+    MorningEvening StarDoji Stoch.mq5           1.00        692  no     2026-09-05 22:48
+    Moving Average.mq5                          1.00        234  no     2026-09-05 22:47
+
+COME SI LEGGE: 'GUARD = no' su un EA che nel repo ce l'ha vuol dire albero standalone.
+Un .ex5 piu' VECCHIO del .mq5 accanto vuol dire che il sorgente e' cambiato e nessuno ha ricompilato.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
