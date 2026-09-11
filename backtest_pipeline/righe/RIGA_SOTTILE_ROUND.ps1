@@ -155,7 +155,25 @@ $BancoBT = 'C:\MT5_Backtest'
 #  segnaposto e' qui, lo script MUORE al controllo qui sotto: e' il
 #  fallimento giusto -- rumoroso, e prima di scaricare qualunque cosa.
 # ---------------------------------------------------------------------
-$PIN = '7991c56258e6623b0be1146cd9a12ee618144313'
+#  QUARTO GIRO (12/09/2026) -- IL PIN E' STATO SPOSTATO IN AVANTI, E NON
+#  PERCHE' IL CODICE SIA CAMBIATO.
+#  Al pin precedente 7991c562 i due file inchiodati qui sotto ci sono gia'
+#  e sono IDENTICI AL BYTE a quelli di adesso (verificato: git diff fra i
+#  due commit su RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 e' VUOTO,
+#  e le due impronte qui sotto NON sono state ricalcolate perche' non
+#  cambiano). Quello che manca a 7991c562 sono I FILE PROVA:
+#      prove\R133a_livelliTF_NASUSD.txt     -- NON ESISTE a 7991c562
+#      prove\R133b_filtrovolumi_U30USD.txt  -- NON ESISTE a 7991c562
+#      prove\R133c_ampiezzabox_D30EUR.txt   -- NON ESISTE a 7991c562
+#  e i tre R132 a quel pin sono la versione con il "-Modello 1 = TICK
+#  REALI" scritto al CONTRARIO (corretto poi in 1764a0e).
+#  Il driver prende il file prova DALLO STESSO $PIN (-Pin qui sotto):
+#  quindi con il pin vecchio i tre round R133 morirebbero sullo scarico
+#  del file prova, e i tre R132 porterebbero in cartella un file che
+#  dice la cosa sbagliata. Il pin nuovo e' 4083d7e2, dove ci sono tutti
+#  e sei.
+# ---------------------------------------------------------------------
+$PIN = '4083d7e25fb4bef50b1a84b94302e5f26171711f'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
