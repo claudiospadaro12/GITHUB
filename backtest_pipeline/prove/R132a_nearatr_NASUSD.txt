@@ -11,11 +11,14 @@
 #    -Expert ABTG_SupRev_NAS_H1_Ottimizzato
 #    -Prova prove\R132a_nearatr_NASUSD.txt
 #    -Simbolo NASUSD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
-#    -Deposito 10000 -Etichetta r132a -Modello 1
+#    -Deposito 10000 -Etichetta r132a -Modello 4
 #    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.
 #   Se ne stampa un numero diverso, ci si ferma.)
-#  -Modello 1 = TICK REALI. I tick BCM di NASUSD partono dal 2024.09.26,
+#  -Modello 4 = TICK REALI (walkforward_generico.ps1 r.172: "4 = tick reali
+#  (verita'). 1 = OHLC M1: SOLO screening"). Corretto il 12/09/2026:
+#  i tre file dicevano -Modello 1 scrivendo accanto "tick reali", che e' il
+#  CONTRARIO. I tick BCM di NASUSD partono dal 2024.09.26,
 #  che e' l'inizio della finestra: non si chiede al tester dati che non ha.
 #  Lo storico esterno NASUSD 2010-2026 ESISTE (5.261.984 barre M1,
 #  report\STORICO_INDICI_SCARICATO_2026-09-10.md) ma NON E' AUTORIZZATO

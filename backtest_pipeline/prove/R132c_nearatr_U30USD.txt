@@ -12,12 +12,18 @@
 #    -Expert ABTG_SupRev_DOW_H1_Ottimizzato
 #    -Prova prove\R132c_nearatr_U30USD.txt
 #    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
-#    -Deposito 10000 -Etichetta r132c -Modello 1
+#    -Deposito 10000 -Etichetta r132c -Modello 4
 #    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.)
 #  >>> QUESTO E' IL PRIMO FILE DA LANCIARE DEI TRE. Costa 16 passate e,
 #      se il cancello qui sotto fallisce, gli altri due non si lanciano.
-#  -Modello 1 = TICK REALI, come R123D. Se si cambia modello, il cancello
+#  -Modello 4 = TICK REALI, come R123D. Corretto il 12/09/2026: era scritto
+#  -Modello 1, che e' OHLC M1 (r.172) -- cosi' il cancello qui sotto sarebbe
+#  fallito PER COSTRUZIONE. Prova che R123D era a tick reali: con Modello
+#  diverso da 4 il driver aggiunge il suffisso _ohlc al nome del CSV
+#  (r.1347), e i due CSV R123D NON ce l'hanno. Che quel suffisso funzioni
+#  davvero e non sia lettera morta e' dimostrato dai 10 CSV _ohlc di R82 in
+#  risultati_archivio\r82_csv\. Se si cambia modello, il cancello
 #  decade e questo file va riscritto.
 # ---------------------------------------------------------------------
 #  IL CANCELLO -- ed e' BLOCCANTE, non un'ancora morbida
