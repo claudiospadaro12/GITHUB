@@ -13318,3 +13318,58 @@ MAI**, e il forward sul piccolo si', in silenzio.
 **rende visibile** lo sforo, **non lo corregge**. Va detto cosi', perche' un
 commit intitolato "il pavimento adesso PARLA" si legge facilmente come "il
 rischio adesso e' a posto", e **non lo e'**: l'1,62% e' ancora vivo in forward.
+
+## 229. Il difetto che il BANCO non puo' vedere, perche' dipende dalla TAGLIA (11/09/2026)
+
+**Il caso.** Il pavimento del lotto su `EMA200` fa rischiare **1,62% contro
+l'1,00% dichiarato** sul conto piccolo. Calcolata la soglia:
+
+| gamba | perdita per lotto | il pavimento smette di mordere sopra |
+|---|---:|---:|
+| 1 (SL largo) | 5.491 EUR | **10.983 EUR** di saldo |
+| 2 (SL stretto) | 3.328 EUR | **6.656 EUR** di saldo |
+
+🔴 **I nostri backtest girano a deposito 10.000 e 100.000.** A 100.000 il
+pavimento **non morde mai**: il difetto e' **strutturalmente invisibile** a
+qualunque corsa fatta a quella taglia, per quanto lunga e per quanti tick si
+usino. Non e' sfuggito: **non poteva comparire.**
+
+**La regola.** Un difetto che dipende dalla **taglia del conto** non si trova
+misurando meglio: si trova **misurando alla taglia giusta**. 👉 Ogni volta che
+un numero di backtest viene usato per descrivere una sedia in campo, si
+verifica che **il DEPOSITO del banco sia quello del conto vero** — e se non lo
+e', si dichiara che la lettura e' valida *a quella taglia soltanto*.
+
+📌 **E la famiglia e' piu' larga del lotto minimo**: qualunque quantita'
+discreta (lotto minimo, passo del volume, tick di prezzo, margine richiesto)
+produce difetti che compaiono **solo** sotto una certa dimensione. Il banco a
+100k e' cieco a tutti quanti.
+
+⚠️ **Conseguenza aperta, non ancora misurata**: il cap del Guardian sul rischio
+aperto (3,25%) e' alimentato dalla **percentuale dichiarata** o dallo **stop
+reale delle posizioni**? Se fosse la prima, sui conti piccoli il cap conterebbe
+**meno rischio di quello vero**, ed e' la stessa forma di difetto.
+
+---
+
+## 230. Verificare la FORMA quando serviva la SEMANTICA (11/09/2026)
+
+**Il caso.** Consegnando una modifica a un EA ho dichiarato questi controlli:
+*"graffe 60/60, parentesi 436/436, zero byte non ASCII"*. Suonano rigorosi.
+🔴 **Il file non compilava.** Avevo messo quattro variabili globali **dopo** la
+funzione che le legge: in MQL5 le *funzioni* si possono chiamare in avanti, le
+*variabili globali* no. Al primo `F7` sarebbe uscito
+`'gLastFloorMorso' - undeclared identifier`, **e la sedia non sarebbe
+ripartita**.
+
+**La regola.** I miei tre controlli dicevano che il file e' **BILANCIATO**, non
+che **COMPILA**. 👉 **Un controllo di forma non diventa un controllo di
+semantica perche' e' stato eseguito con cura.** Prima di dichiarare "verificato"
+su del codice, si nomina **quale classe di errori** il controllo puo' prendere e
+**quale no** — altrimenti l'elenco dei controlli passati e' rassicurazione, non
+prova.
+
+📌 Controlli minimi da fare a mano su un `.mq5`, finche' il cancello non ha
+un modo `--mq5` (classe 225): **ordine di dichiarazione delle globali**, enum
+dichiarata prima dell'input che la usa, **specificatori di `StringFormat` contro
+gli argomenti**, e il confronto della convenzione col resto del repo.
