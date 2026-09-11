@@ -1,0 +1,376 @@
+# =====================================================================
+#  EA: ABTG_MaxMinNotte
+#  R134a -- QUANDO FINISCE LA NOTTE?
+#           L'asse InpBoxEndHour, mai messo ad asse in 526 passate
+#           D30EUR M15 -- 4 celle (3, 4, 5, 6 ora SERVER)
+#  Scritto il 11/09/2026 dall'agente cercatore di parametri.
+#  Nasce da una domanda di Claudio: "l'indicatore che guardo io usa
+#  00:00-08:00 ORA ITALIANA, i preset vivi usano una scatola che
+#  finisce alle 04:59 server. Chi ha ragione?"
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R134a_scatolanotte_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M15
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 10000 -Modello 4
+#    -Etichetta r134a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -Modello 4 = TICK REALI (walkforward_generico.ps1 r.172; con un
+#     modello != 4 il CSV esce col suffisso _ohlc, r.1347, ed e' SOLO
+#     screening: non e' mai un verdetto).
+#  !! -DaQuando 2024.09.26: i tick BCM di D30EUR partono da li',
+#     VERIFICATO nel passo 0 di R86 (r88_csv\REFERTO_R88.txt r.41:
+#     "R86 D30EUR 2024.09.26 tick dal 2024.09.26 ok").
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati.
+#  (-SoloControllo deve stampare: InpBoxEndHour  4 celle.)
+# ---------------------------------------------------------------------
+#  PARTE 1 -- PERCHE' L'ARCHIVIO NON RISPONDE (e sembrava di si')
+#
+#  In archivio ci sono 526 passate che portano la colonna
+#  InpBoxEndHour (61 CSV, elencati con:
+#    grep -rl InpBoxEndHour --include=*.csv . | grep -v ./.git ).
+#  I valori presenti sono DUE soltanto:
+#      InpBoxEndHour = 4  -> 414 passate   (sempre con InpBoxEndMin=59)
+#      InpBoxEndHour = 6  -> 112 passate   (sempre con InpBoxEndMin=59)
+#  Sembra materiale per un confronto. NON LO E', e il motivo e' che
+#  la manopola e' CONFUSA con altre due, al 100%:
+#
+#    valore 4 -> InpBoxStartHour=23 ... e i simboli sono
+#                D30EUR(154) 100GBP(72) E50EUR(72) F40EUR(72) EURUSD(4)
+#    valore 6 -> InpBoxStartHour=22 ... e il simbolo e' UNO SOLO:
+#                XAUUSD (112 passate: MaxMin_Oro fase1/fase2/r17/r19)
+#
+#  GRUPPI CONFRONTABILI A PARITA' DI TUTTO IL RESTO: **ZERO**.
+#  Contati a macchina: raggruppando per EA + simbolo + finestra +
+#  TUTTE le altre colonne Inp* (escluso InpMagic, che e' l'asse
+#  tecnico), NESSUN gruppo contiene due valori diversi di fine box.
+#  Nessun singolo CSV, dei 61, contiene due valori diversi di
+#  (InpBoxEndHour, InpBoxEndMin).
+#
+#  >>> L'asse non e' stato "provato con esito debole". NON E' MAI
+#      STATO GIRATO. E' una casella chiusa, non una casella vuota.
+#
+#  IL NUMERO CIECO, e perche' non va usato:
+#      aggregato end=4: 374 passate, Trades mediana 87,0, PF mediana 0,610
+#      aggregato end=6: 112 passate, Trades mediana 82,5, PF mediana 1,314
+#  Chi si fermasse qui direbbe "la scatola lunga raddoppia il PF".
+#  Falso: le 112 passate a end=6 sono TUTTE oro, e le 374 a end=4 sono
+#  in maggioranza FTSE/CAC/Stoxx, cioe' i tre simboli che il
+#  REGISTRO_TEST.md r.456-458 dichiara MORTI su questo motore
+#  (PF max 0,67 / ~1,0 / 0,59). Quel 1,314 e' l'oro, non la scatola.
+# ---------------------------------------------------------------------
+#  PARTE 2 -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA DEI NUMERI
+#
+#  Tesi da battere (la mia, quindi quella da rompere):
+#    "la scatola che finisce piu' tardi e' MEGLIO".
+#  Ipotesi ALTERNATIVA, seria e sufficiente a spiegare tutto:
+#    "la scatola che finisce piu' tardi e' solo piu' LARGA. Max e min
+#     si allontanano, i pendenti stanno piu' lontani, scattano meno
+#     volte. Meno operazioni con PF piu' alto non e' un edge: e' un
+#     campione diverso."
+#
+#  QUINDI SI GUARDA LA COLONNA Trades PRIMA DELLA COLONNA PF. Sempre.
+#
+#  E c'e' di meglio: l'archivio contiene GIA' la curva di riferimento
+#  di quella ipotesi alternativa, perche' InpBufferPoints fa la STESSA
+#  identica cosa (allontana i livelli, taglia le rotture) ed e' stato
+#  girato davvero. File: risultati_archivio\MaxMinNotte\
+#  valid_MaxMin_DAX_short_refine.csv, correlazione SPENTA, D30EUR short:
+#      buf  700 / ATR 1,5 -> n 103  PF 0,9549  DD 8,99
+#      buf 1000 / ATR 1,5 -> n 107  PF 1,1874  DD 7,29
+#      buf 1000 / ATR 2,0 -> n 104  PF 1,2484  DD 9,04
+#      buf 1000 / ATR 2,5 -> n  98  PF 1,1808  DD 6,10
+#      buf 1300 / ATR 1,5 -> n 102  PF 1,1756  DD 6,85
+#      buf 1300 / ATR 2,0 -> n  96  PF 0,9475  DD 8,82
+#      buf 1300 / ATR 2,5 -> n  96  PF 1,2295  DD 6,70
+#  Due letture, ed e' tutto quello che serve:
+#   (a) allargare i livelli del 90% (da 7 a 13 punti indice) taglia le
+#       operazioni solo del 10% (107 -> 96) e NON alza il PF in modo
+#       sistematico. La leva "meno rotture" su questo motore e' debole.
+#   (b) E IL RUMORE E' MISURATO: due celle con lo STESSO n=96, stesso
+#       simbolo, stessa finestra, differiscono di 0,282 di PF (0,9475
+#       contro 1,2295) solo cambiando il moltiplicatore ATR.
+#       >>> A n~100, su questo motore, mezza differenza di PF sotto
+#           0,28 NON E' UN SEGNALE. E' il rumore di casa, misurato in
+#           casa. Questa e' la soglia B2 qui sotto.
+#
+#  COME QUESTO ROUND SI FA ROMPERE: la cella 3 (scatola PIU' CORTA
+#  del preset vivo) sta nella griglia apposta. Se il risultato e'
+#  semplicemente "Trades scende e PF sale" lungo TUTTE e quattro le
+#  celle, dalla 3 alla 6, allora la manopola sta facendo il lavoro del
+#  buffer e la scatola di Claudio non ha niente di speciale: e'
+#  "livelli piu' larghi", detto in un altro modo. Il verdetto in quel
+#  caso e' NON DIMOSTRATO, e va scritto cosi'.
+# ---------------------------------------------------------------------
+#  PARTE 3 -- QUAL E' LA SCATOLA DI CLAUDIO, IN ORA SERVER
+#
+#  Come il codice USA il parametro (ABTG_MaxMinNotte.mq5, ComputeBox(),
+#  r.301-320):
+#      tEnd  = oggi alle (InpBoxEndHour : InpBoxEndMin)
+#      tStart= oggi alle (InpBoxStartHour : InpBoxStartMin)
+#      if(tStart>=tEnd) tStart -= 86400          <- lo scavalco c'e'
+#      iS/iE = iBarShift(M1, ..., false)
+#      count = |iS-iE| + 1                       <- INCLUSIVO
+#      max/min su quelle barre M1
+#  Quindi InpBoxEndHour:InpBoxEndMin nomina L'ULTIMA BARRA M1 INCLUSA,
+#  non il bordo escluso: con 4:59 la scatola copre fino alle
+#  04:59:59 SERVER. Non e' una mia deduzione: lo scrive il sorgente
+#  stesso alla r.120-121 ("BCM: 4:59 = 05:59 CET") e alla r.11
+#  ("default 00:00-05:59 CET"). Il file che aveva gia' la risposta
+#  stava nella stessa cartella, e concorda.
+#
+#  Regola di casa: server BCM = ora italiana - 1 (CLAUDE.md).
+#  Claudio guarda 00:00-08:00 ORA ITALIANA, cioe' fino alle 07:59:59
+#  italiane comprese = fino alle 06:59:59 SERVER.
+#
+#  >>> LA RISPOSTA E' InpBoxEndHour = 6 con InpBoxEndMin = 59.
+#      NON e' 7. Il "7" viene da 08:00 IT = 07:00 server, che e' vero
+#      come ISTANTE ma sbagliato come PARAMETRO: qui il parametro
+#      nomina l'ultimo minuto DENTRO, non il bordo fuori. Chi scrive
+#      7:59 allunga la notte fino alle 08:59:59 italiane, un'ora in
+#      piu' di quella che Claudio guarda.
+#      L'unica altra lettura difendibile e' 7:00 (EndHour=7,
+#      EndMin=0), che aggiunge il solo minuto 08:00-08:00:59 IT: la
+#      differenza fra le due e' UN MINUTO su otto ore, e cade dentro
+#      il rumore. Prendo la 6:59, che e' anche gia' esistente in
+#      archivio come valore.
+#
+#  >>> E SI FERMA A 6 ANCHE PER UN MOTIVO MECCANICO, non solo per
+#      ortodossia: i pendenti si piazzano alle 07:59 server
+#      (InpPlaceHour=7 / InpPlaceMin=59, r.126-127). Con
+#      InpBoxEndHour=7 e InpBoxEndMin=59 la barra M1 di fine scatola
+#      E' LA BARRA IN FORMAZIONE nel momento in cui si piazza: max e
+#      min di quella barra dipendono da quanti tick sono arrivati nei
+#      primi secondi. Quella cella non e' deterministica e NON entra
+#      in griglia. Esclusa per COSTRUZIONE, con la riga di codice
+#      accanto.
+#
+#  >>> LA SCATOLA DI CLAUDIO NON E' MAI STATA PROVATA SUL DAX.
+#      Le 112 passate a end=6 in archivio sono oro, e per giunta con
+#      InpBoxStartHour=22 (= 23:00 italiane), che NON e' la partenza
+#      di Claudio. Nessuna riga d'archivio, su nessun simbolo, tiene
+#      insieme start 23 + end 6:59.
+# ---------------------------------------------------------------------
+#  NOTA DI SERVIZIO TROVATA STRADA FACENDO (non e' questo round, ma
+#  non si butta): la sedia VIVA dell'oro 770402 gira con box
+#  23:00-04:59 (Presets\sedie_piccolo\sedia_MAXMIN_ORO_770402.set
+#  r.2-5), mentre TUTTI i suoi backtest d'archivio sono girati con
+#  22:00-06:59. Il file prova R100_ABTG_MaxMinNotte_770402.txt r.20-23
+#  chiama 22/6:59 "CELLA VIVA (artefatto di deploy)", il successivo
+#  R103_ABTG_MaxMinNotte_XAUUSD_770402.txt r.55-58 chiama 23/4:59
+#  "cella viva (= al default del sorgente)". Fra i due la scatola e'
+#  cambiata e NESSUNO ha misurato cosa costa. Va in coda, non qui.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DELL'EDGE (regola del 19/08), applicato PRIMA
+#
+#  Vietato infittire la griglia di un motore SENZA EDGE. Qui il motore
+#  sta sopra la soglia, e sono numeri d'archivio (stesso file citato
+#  sopra, cella MEDIANA e non il picco):
+#      D30EUR short, corr spenta: PF 1,187 - n 107 - DD 7,29%
+#      la cella pinnata qui (buffer 1000, ATR 2,0, corr 0):
+#      PF 1,24835 - n 104 - DD 9,037% - profit 886,66
+#  >>> E comunque questo NON e' un infittimento dei parametri
+#      d'ingresso: e' un MECCANISMO (quale finestra oraria definisce
+#      il livello) mai messo ad asse. E' esattamente l'allargamento
+#      che la regola del 19/08 PERMETTE.
+#  >>> Il picco NON si usa: la cella piu' alta del file d'archivio e'
+#      PF 2,246 con n=38 (correlazione accesa), e da n=38 non si
+#      promuove niente.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#   1. Trades DEVE SCENDERE da cella 3 a cella 6, in modo monotono.
+#      Motivo: piu' ore di notte dentro la scatola = max piu' alto e
+#      min piu' basso = livelli piu' lontani = meno rotture. Se
+#      Trades SALE allungando la scatola, o l'ho capita al contrario
+#      o il codice non fa quello che credo, e la prima cosa da
+#      guardare e' iBarShift/count in ComputeBox().
+#   2. La cella 4 e' l'ANCORA: e' il preset VIVO (23:00-04:59). Attesa
+#      n dell'ordine di ~100 sulla finestra piena, che qui e' spezzata
+#      in IS 40% / OOS 60%, quindi n atteso IS ~40 e OOS ~60.
+#      >>> L'ancora e' MORBIDA e il motivo e' scritto prima: il 03/09
+#          l'EA e' cambiato (commit 7d0da9f, v1.11: InpOneTradePerDay
+#          da inerte a letto davvero) e il commit stesso prevede
+#          "attesi MENO trade". Se n scende, la prima spiegazione e'
+#          la v1.11, non la scatola. E la FINESTRA della corsa
+#          d'archivio non e' scritta da nessuna parte: il confronto
+#          coi 104 trade e' indicativo, NON un cancello.
+#   3. PF: [NON MISURATO] per tutte e quattro le celle, e non invento
+#      una banda. Quello che dichiaro e' la REGOLA DI LETTURA, non il
+#      numero: vedi B2.
+#   4. DD: riferimento d'archivio 9,04% @1% di rischio.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE PRIMA
+#
+#   B1 RISCHIO, a qualunque n (Emendamento B del 16/08): una cella con
+#      Equity DD > 15,0% @1% e' SCARTATA. Un drawdown e' un fatto
+#      accaduto, non una stima, e si legge anche su campione sottile.
+#   B2 MERITO, la soglia vera: perche' una cella sia anche solo
+#      GUARDABILE deve battere la cella 4 (l'ancora) di PIU' DI 0,28
+#      di PF, che e' il rumore MISURATO fra celle vicine a n~100 su
+#      questo motore (0,9475 contro 1,2295 a parita' di n=96, file
+#      citato sopra). Sotto 0,28 la risposta onesta e' "la scatola
+#      viva va bene".
+#   B3 ALTOPIANO, mai il picco: una cella conta solo se la sua VICINA
+#      va nella stessa direzione. Cella 5 alta con 4 e 6 basse = picco
+#      = rumore, e si scrive "non c'e' una configurazione robusta".
+#   B4 IL MURO DEI 150, e qui e' una condanna dichiarata PRIMA:
+#      questo motore fa ~1 operazione ogni 4-5 giorni a lato singolo, e
+#      i tick BCM di D30EUR partono dal 2024.09.26. Sulla finestra
+#      intera si arriva a ~100 operazioni, e spezzata IS/OOS si sta
+#      sotto i 60 per finestra.
+#      >>> NESSUNA CELLA DI QUESTO ROUND POTRA' PROMUOVERE NIENTE.
+#          Il merito e' SOSPESO per costruzione, non per sfortuna.
+#          Lo scrivo prima cosi' nessuno si illude leggendo un PF alto
+#          su n=45. Quello che il round consegna e' la FORMA di
+#          Trades(fine scatola) e se il PF si muove oltre il rumore.
+#      >>> Le due sole vie note per arrivare a 150 su questo simbolo, e
+#          i loro costi: (a) accendere anche il LONG, che raddoppia la
+#          frequenza ma cambia il motore misurato (e il lato long sul
+#          DAX night-box non ha mai avuto edge, REGISTRO_TEST r.462);
+#          (b) storico piu' lungo a -Modello 1 (OHLC), che pero' e'
+#          SCREENING e non fa verdetti. Nessuna delle due entra qui.
+# ---------------------------------------------------------------------
+#  COSTO IN TEMPO MACCHINA
+#   4 celle x 2 finestre (IS + OOS) = 8 PASSATE.
+#   Calibrazione MISURATA su round della STESSA taglia, a tick reali,
+#   dallo stesso referto (r88_csv\REFERTO_R88.txt r.12-14):
+#      R88c  4 celle x 2 = 8 passate -> 1,3 min
+#      R88c2 4 celle x 2 = 8 passate -> 1,2 min
+#      R88c3 4 celle x 2 = 8 passate -> 1,1 min
+#   >>> ATTESO 1,1 - 1,3 MINUTI.
+#   NOTA ONESTA: quei tre round sono ABTG_ORB su U30USD M5. Qui l'EA
+#   ricostruisce il box sui dati M1 di 5-8 ore di notte a ogni
+#   giornata: il costo per passata su QUESTO EA e' [NON MISURATO] e
+#   potrebbe essere piu' alto. Anche al triplo siamo sotto i 4 minuti.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#   1. LATO SHORT SOLTANTO (InpAllowLong=false), come il file
+#      d'archivio da cui vengono i pin. La regola dei due lati del
+#      25/08 chiede di misurare anche il long: NON lo faccio qui,
+#      apposta, perche' mescolare due cambiamenti in un round e' il
+#      modo di non capire niente. Il gemello long e' R134b, che NON
+#      ESISTE ANCORA: stesse 4 celle, altre 8 passate, altri ~1,3
+#      minuti. E' un buco che si chiude con due minuti di macchina.
+#   2. FINESTRA UNICA, 21 mesi, un solo regime: nessuna prova di
+#      regime. Il round non promuove e quindi non deve pagarla
+#      (regola del 16/08 punto C), ma va detto.
+#   3. IL FUSO NON E' MISURATO SU TUTTO L'ANNO. La regola "server =
+#      italiana - 1" e' verificata in agosto (report\METRO_PROP.md
+#      r.510: "BCM = italiana - 1 = UTC+1 in agosto"). Se BCM segue
+#      l'ora legale europea, d'inverno lo scarto NON e' 1 ora, e una
+#      scatola scritta in ora server scivola di un'ora rispetto
+#      all'indicatore di Claudio per meta' anno. Su un motore che vive
+#      di una finestra oraria questo NON e' un dettaglio.
+#      >>> [NON MISURATO]. Va chiuso con una sonda sul feed, non con
+#          un ragionamento. Questo round misura comunque la forma
+#          della curva, che non dipende dal fuso; l'etichetta "questa
+#          e' la scatola di Claudio" invece SI'.
+#   4. LA FRONTIERA DEL COSTO stop >= 40 x spread NON E' VERIFICABILE
+#      qui. Lo stop e' ATR(14) M15 x 2,0, e
+#      report\CANCELLO_COSTO_FLOTTA_2026-09-10.md r.408 e r.662
+#      dichiarano per la sedia gemella 770411 "ATR M15 del DAX mai
+#      misurato" e "0 gambe in stop su 5 trade": il rapporto e' [NM].
+#      Lo spread D30EUR dell'ora 8 e' invece misurato: mediana 1,70
+#      idx, P95 2,70 idx (stesso file r.321-322), quindi servirebbero
+#      >= 68 punti indice di stop. Il round non promuove e non deve
+#      pagare questo cancello; una promozione SI'.
+#   5. CORRELAZIONE SPXUSD SPENTA (come nell'altopiano scelto). Con
+#      corr=1 il campione crolla a ~38 e la scala misurerebbe rumore.
+#
+#  MAGIC VERGINE 779680 (cercato su tutto il repo l'11/09/2026,
+#  .git escluso: ZERO occorrenze). Le sedie vive non si toccano:
+#  770402 (oro) e 770411 (DAX short) restano dove sono.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- I PIN: la riga d'archivio (buffer 1000 / ATR 2,0 / corr 0) di
+#     valid_MaxMin_DAX_short_refine.csv, copiata campo per campo dal
+#     CSV -- gli stessi pin di R133c, cosi' i due round sono
+#     confrontabili fra loro cella per cella. Differenze DICHIARATE
+#     rispetto al CSV d'archivio:
+#       InpMagic   770401 -> 779680  (magic vergine)
+#       InpVerbose 1 -> false        (log spento nelle corse lunghe)
+#     InpBoxEndHour NON e' qui: e' l'asse, in fondo al file.
+InpUsaGuardian=true
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.0
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=R134A SCATOLA
+InpMagic=779680
+InpMaxSpread=0
+InpVerbose=false
+InpAutoTest=true
+
+# --- L'UNICO ASSE: InpBoxEndHour da 3 a 6, passo 1 = 4 celle.
+#     InpBoxEndMin resta pinnato a 59 (vedi PIN qui sopra), quindi
+#     ogni cella nomina l'ultima barra M1 inclusa nella scatola.
+#     In ORA ITALIANA (= server + 1), scatola dalle 00:00:
+#       3 -> 00:00-04:59:59 IT   scatola PIU' CORTA del vivo.
+#                                Sta qui per FARSI ROMPERE: se la
+#                                curva Trades/PF e' monotona anche
+#                                da 3 a 4, la manopola sta solo
+#                                facendo il lavoro del buffer.
+#       4 -> 00:00-05:59:59 IT   L'ANCORA. E' il preset VIVO di
+#                                770402 e 770411, ed e' il default
+#                                del sorgente (r.120-121).
+#       5 -> 00:00-06:59:59 IT   cella di mezzo: serve a B3, senza
+#                                di lei "altopiano" non si puo' dire.
+#       6 -> 00:00-07:59:59 IT   >>> LA SCATOLA DI CLAUDIO <<<
+#                                mai girata sul DAX, mai girata con
+#                                partenza 23:00 su nessun simbolo.
+#     Il 7 NON c'e', ed e' una scelta con una riga di codice sotto:
+#     i pendenti si piazzano alle 07:59 server (r.126-127), quindi a
+#     EndHour=7/EndMin=59 la barra di fine scatola sarebbe quella in
+#     formazione. Cella non deterministica, esclusa.
+InpBoxEndHour=4||3||1||6||Y
+# =====================================================================
