@@ -160,6 +160,17 @@ contro `wc -l` del repo di oggi.
 essere stato aggiornato senza ricompilare. La **data di compilazione** è la
 prova più forte che abbiamo, **non è una prova del contenuto del binario**.
 
+> 📌 **IL PIN DELLA COLONNA, perché i numeri restino verificabili.** Tutti i
+> conteggi `wc -l` del **repo** di questa colonna sono presi sullo stato
+> **`da6d08b`** (branch `lavoro`, 11/09). 🔴 **Mentre scrivevo, un altro agente
+> stava modificando 11 sorgenti** (`ABTG_EMA200` 552→690, `ABTG_PTE` 649→776,
+> `ABTG_SuperWave` 637→766, `ABTG_CostToCost` 1093→1207,
+> `ABTG_GapContinuation` 1568→1654, e altri): **quelle righe non sono ancora
+> committate e NON sono in campo.** Chi rifà il conto contro il repo di domani
+> troverà **numeri più grandi e una distanza dal campo ancora maggiore** — il
+> verso non cambia, la cifra sì. **Si riconta contro il pin, non contro
+> "adesso".**
+
 ## 1.6 Il pedaggio — 🆕 stop/spread **ALL-IN**
 Pavimenti (`R125` §2 · `CLAUDE.md`): **DI LAVORO `stop ≥ 40 × spread`** ·
 **DURO `stop ≥ 13,3 × spread`**.
