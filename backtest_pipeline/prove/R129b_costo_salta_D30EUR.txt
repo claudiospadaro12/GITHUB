@@ -1,0 +1,293 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R129b -- LA SOGLIA DI COSTO, RAMO "SALTA IL TRADE"
+#           D30EUR M5 -- geometria RETEST LONG-ONLY (la sedia 770101)
+#           asse InpMinStopPts 0 -> 9200 punti MT5, passo 400
+#           InpSkipIfTight = TRUE  (pinnato: qui il pavimento SCARTA)
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R129_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R129b_costo_salta_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r129b
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204).
+#  !! -FrazioneIS 0.50, identica a R129a: le due tabelle si leggono
+#     cella per cella, e con due frazioni diverse non si potrebbe.
+#  (-SoloControllo deve stampare 24 CELLE per finestra.)
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE, VISTO CHE LA DOMANDA E' GIA' RISPOSTA DA R129a
+#
+#  R129a apre il cancello di costo SENZA perdere trade. Allora perche'
+#  misurare anche il ramo che i trade li butta via?
+#  PER DUE MOTIVI, e nessuno dei due e' "cerchiamo un PF piu' alto".
+#
+#  (1) >>> QUESTO FILE E' UNO STRUMENTO DI MISURA. <<<
+#      Nel ramo SALTA, n(cella) / n(0) E' LA CURVA DI SOPRAVVIVENZA
+#      DELLO STOP RETEST: la frazione di giornate in cui
+#      range + 3,0 punti indice supera il pavimento.
+#      Con 24 celle da 0 a 92 punti indice usciamo con 24 punti della
+#      distribuzione EMPIRICA dello stop -- una cosa che oggi in casa
+#      NON ESISTE. Oggi il numero che gira nei referti e' "49,10 punti
+#      indice", ed e' DERIVATO DA n=2 GAMBE. Questo file lo sostituisce
+#      con una misura su ~325 ingressi.
+#
+#  (2) E' LA META' CHE ROMPE IL CONTRO-ESEMPIO (vedi sotto).
+#
+#  MA IL MERITO, QUI, E' SOSPESO QUASI SUBITO -- E LO DICO PRIMA.
+#  Stima dalla curva d'archivio (r118c, IS+OOS sommati, 508 righe):
+#      floor 0     -> 508 righe   sopravvivenza 1,0000
+#      floor 2000  -> 504         0,9921
+#      floor 4000  -> 431         0,8484
+#      floor 6000  -> 335         0,6594
+#      floor 8000  -> 223         0,4390
+#  Con 325 ingressi e FrazioneIS 0.50 l'IS parte da ~163. Per restare
+#  a 150 serve una sopravvivenza >= 150/162,5 = 0,9231, che per
+#  interpolazione lineare cade a InpMinStopPts ~ 2961 punti MT5.
+#  >>> QUINDI: SOPRA CIRCA 3000 PUNTI MT5 (30 PUNTI INDICE) L'IS DI
+#      QUESTO FILE SCENDE SOTTO 150 E IL MERITO E' SOSPESO.
+#      ALLA SOGLIA DI COSTO 6800 la sopravvivenza stimata e' 0,571 ->
+#      IS ~93 ingressi. IL MERITO LI' NON SI LEGGE, NE' IN BENE NE' IN
+#      MALE. Si legge solo il COSTO (quanti trade restano) e il RISCHIO
+#      (Emendamento B: il rischio si legge a qualunque n).
+#  >>> DETTO IN UNA RIGA: IL RAMO "SALTA" E' STRUTTURALMENTE INCAPACE
+#      DI ARRIVARE A 150 INGRESSI ALLA SOGLIA DI COSTO. Chi sceglie una
+#      cella qui sopra i 3000 sta scegliendo su un campione sospeso.
+#      E' esattamente l'errore che il picco 1,4382 ci ha quasi fatto
+#      fare (report\R118c_IL_PICCO_2026-09-11.md).
+# ---------------------------------------------------------------------
+#  COSA FA DAVVERO LA MANOPOLA -- LETTO NEL SORGENTE
+#  ABTG_DAX_Apertura_EU.mq5, ramo RETEST BUY, r.1493-1497:
+#     if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#       {
+#        if(InpSkipIfTight) { skip=true; ... }          <-- QUESTO FILE
+#        else { sl = ...; dist = entry - sl; }          <-- R129a
+#       }
+#  r.1498: double lot = skip ? 0.0 : CalcLotByRisk(dist);
+#  r.1501: if(!skip && lot > 0 && dist > 0) ... BuyLimit(...)
+#  Con skip=true NON SI PIAZZA NIENTE: il trade non esiste.
+#  I trade che RESTANO hanno la geometria ORIGINALE, intatta: stop,
+#  lotto e TP identici a quelli della cella 0. QUI SI CAMBIA SOLO CHI
+#  ENTRA, MAI COME ENTRA. E' il complemento esatto di R129a.
+# ---------------------------------------------------------------------
+#  LE UNITA': 100 PUNTI MT5 = 1 PUNTO INDICE su D30EUR (2 decimali).
+#  La soglia di costo 68,0 punti indice = 6800 punti MT5.
+#  68,0 = 40 x 1,7000, dove 1,7000 e' lo spread MEDIANO dell'ora
+#  server 8 misurato su 1.847.049 tick
+#  (risultati_archivio\spread_flotta\spread_orario_D30EUR.csv, r.10).
+# ---------------------------------------------------------------------
+#  LE ANCORE -- archivio, RAMO SALTA (InpSkipIfTight=1)
+#  Fonte: risultati_archivio\r118_csv\..._{IS,OOS}_r118c.csv, r.6-10.
+#  ATTENZIONE: quella corsa e' M15, SHORT ACCESO, parziale 50%. Non
+#  sono ancore al centesimo: sono la FORMA ATTESA.
+#
+#    floor   idx   IS PF    IS n   OOS PF    OOS n   OOS DD%
+#        0     0   1,07810   197   1,18776    311    10,5984
+#     2000    20   1,11281   193   1,18776    311    10,5984
+#     4000    40   1,05646   158   1,28607    273     6,7947
+#     6000    60   1,00767   109   1,43822    226     6,6448
+#     8000    80   1,06558    70   1,15293    153     6,6042
+#
+#  >>> LA CELLA 6000/OOS E' IL PICCO DA NON INSEGUIRE. <<< I vicini
+#  stanno a 1,28607 e 1,15293, in IS quella cella e' PIATTA (1,00767)
+#  e ha n=109 righe PARZIALI INCLUSI, cioe' MENO di 109 ingressi.
+#  Su questa sedia la correlazione IS->OOS e' misurata a -0,44: qui non
+#  si sceglie sull'IS, e non si sceglie nemmeno sull'OOS piu' bello.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: in CALO MONOTONO lungo l'asse. Attesa alla soglia 6800:
+#    IS ~93 e OOS ~93 (sopravvivenza stimata 0,571 su ~163 ciascuno),
+#    banda larga 75-115 perche' la stima viene da una corsa M15 con lo
+#    short acceso. SE n NON CALA, non ho capito il codice: ci si ferma.
+#  - PF OOS: attesa 1,10 - 1,45. NON E' UN CRITERIO DI SCELTA sopra i
+#    3000: sopra quella riga e' un numero su campione sospeso.
+#  - DD OOS: attesa 5% - 11% (rischio 1%), in miglioramento salendo.
+#    QUESTO SI LEGGE A QUALUNQUE n (Emendamento B del 16/08).
+#  - FREQUENZA: e' il numero piu' importante di questo file.
+#    325 ingressi su 459 giorni feriali [CONTATI] = 0,708 op/giorno;
+#    su ~422 giorni al netto di una stima -8% di festivi = 0,770.
+#    Alla soglia 6800 restano ~186 ingressi = 0,40 - 0,44 op/giorno.
+#    IL PAVIMENTO DI FAMIGLIA E' 1,00 op/giorno (firma 07/09) E QUESTA
+#    FAMIGLIA HA UN SIMBOLO SOLO. Gia' a pavimento spento sta al 71-77%
+#    del pavimento; a 6800 scende al 40-44%.
+#
+#  >>> L'ATTESA COMPLESSIVA, DETTA CHIARA: MI ASPETTO CHE QUESTO RAMO
+#      PERDA CONTRO R129a. Compra lo stesso cancello di costo pagandolo
+#      in frequenza, e la frequenza e' il requisito n.1 verso ottobre.
+#      Se esce cosi', NON e' un fallimento del round: e' la risposta.
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    SE il DD OOS di questo ramo alla soglia batte quello di R129a di
+#    oltre 2 punti percentuali E il PF regge sui tre vicini 6400 /
+#    6800 / 7200 senza sporgenze sopra il +10%, allora il ramo SALTA
+#    ha un valore che non gli attribuivo, e va portato avanti CON la
+#    frequenza dichiarata accanto, mai senza.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO -- E QUESTO E' IL FILE SU CUI SI GIOCA
+#
+#  IPOTESI ALTERNATIVA: "InpMinStopPts non migliora nessuna geometria:
+#  toglie di mezzo dei trade, e i trade che toglie sono i peggiori."
+#  CHE FORMA AVREBBE?
+#    (a) taglio CASUALE: il PF NON cambia in media, e la dispersione
+#        cresce man mano che n scende. Nessun gradino, solo rumore che
+#        si allarga verso destra.
+#    (b) taglio SELETTIVO (le giornate a range stretto sono giornate
+#        brutte): il PF sale in modo MONOTONO con la frazione tolta.
+#        Monotono: 0 -> 4000 -> 6800 -> 9200 tutti in salita.
+#    (c) SOGLIA DI COSTO VERA: NON una rampa, un GRADINO. Sotto la
+#        soglia lo spread si mangia il margine, sopra no; quindi il
+#        salto si concentra in poche celle attorno a 6800 e poi la
+#        curva si appiattisce invece di continuare a salire.
+#
+#  COME LA GRIGLIA LI DISTINGUE, TUTTI E TRE:
+#    1. IL PASSO. 400 punti MT5 = 4 punti indice, CINQUE VOLTE piu'
+#       fitto del passo 2000 d'archivio. Con passo 2000 (b) e (c)
+#       danno la stessa tabella: era una verifica che non discrimina.
+#    2. LA MONOTONIA. (b) chiede salita fino in fondo. L'archivio dice
+#       gia' di NO: 1,18776 / 1,18776 / 1,28607 / 1,43822 / 1,15293 --
+#       sale e poi CROLLA. Non e' "taglio dei peggiori": e' rumore su
+#       n che si assottiglia. E' anche il motivo per cui il picco non
+#       si compra.
+#    3. >>> IL COMPAGNO R129a, CHE E' LA PROVA DECISIVA. <<<
+#       In R129a NESSUN trade viene tolto (n costante per costruzione).
+#       Quindi sotto l'ipotesi (a) e sotto la (b) R129a DEVE ESSERE UNA
+#       RIGA PIATTA. Se R129a e' piatto e qui c'e' movimento -> e'
+#       TUTTA selezione, e la soglia di costo non si vede nel
+#       rendimento. Se R129a si muove CON un gradino attorno a 6800 ->
+#       c'e' geometria, ed e' (c).
+#       NESSUNA COMBINAZIONE FA COINCIDERE I TRE MONDI: (a) e (b)
+#       impongono R129a piatto, (c) impone R129a mosso. Il verdetto
+#       non dipende da come guardo la tabella.
+# ---------------------------------------------------------------------
+#  IL CANCELLO G1 REGALATO: le celle basse sono INERTI per costruzione.
+#  Se nessun trade ha stop sotto 4 punti indice, le celle 0 e 400
+#  devono uscire IDENTICHE AL CENTESIMO, e cosi' le successive finche'
+#  il pavimento non morde. In archivio floor 0 e floor 2000 danno in
+#  OOS le stesse quattro cifre (999,42 / 1,18776 / 10,5984 / 311).
+#  SE LE PRIME CELLE NON COINCIDONO, il banco e' sporco.
+#  E UN SECONDO CANCELLO INCROCIATO, GRATIS: la cella 0 di QUESTO file
+#  deve coincidere AL CENTESIMO con la cella 0 di R129a. A pavimento
+#  spento InpSkipIfTight non e' nemmeno letto (r.1493: il test e'
+#  InpMinStopPts > 0). Se le due celle 0 differiscono, qualcosa nel
+#  banco non e' deterministico e il round si ferma li'.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779570 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro.
+#  InpTP1_ClosePct=0 (parziale SPENTO): QUI E' ESSENZIALE, non
+#  cosmetico. Tutta la lettura di questo file passa da n, e con il
+#  parziale acceso n conta ingressi PIU' parziali -- che e' il difetto
+#  con cui la curva d'archivio qui sopra e' stata stimata, e che qui
+#  viene chiuso.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779570
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpMinStopPts da 0 a 9200, passo 400
+#     Formato: default||start||step||stop||Y
+#     = 24 celle per finestra = 48 passate. Identico a R129a: le due
+#     tabelle si leggono cella per cella, e con due assi diversi non
+#     si potrebbe.
+#     In PUNTI INDICE: 0 / 4 / 8 / ... / 88 / 92.
+#     6800 (68,0 idx) = LA SOGLIA DI COSTO, sulla griglia per
+#     costruzione (6800 = 0 + 17 x 400).
+#     LA CELLA 0 E' IL CONTROLLO: pavimento SPENTO = la sedia viva.
+InpMinStopPts=0||0||400||9200||Y

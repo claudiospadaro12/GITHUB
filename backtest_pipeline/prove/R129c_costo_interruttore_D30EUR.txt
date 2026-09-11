@@ -1,0 +1,264 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R129c -- L'INTERRUTTORE: ALZA CONTRO SALTA, SULLA SOGLIA ESATTA
+#           D30EUR M5 -- geometria RETEST LONG-ONLY (la sedia 770101)
+#           InpMinStopPts PINNATO a 6800 (= 68,0 punti indice)
+#           asse InpSkipIfTight 0 / 1 -- 2 celle
+#           >>> E' IL CANCELLO INCROCIATO DEL ROUND. <<<
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R129_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R129c_costo_interruttore_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r129c
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204).
+#  !! -FrazioneIS 0.50, identica a R129a e R129b: senza la stessa
+#     frazione il confronto incrociato non vale niente.
+#  (-SoloControllo deve stampare 2 CELLE per finestra.)
+#  >>> SI LANCIA PER PRIMO: e' il piu' corto (4 passate) ed e' il
+#      cancello. Se non riproduce R129a/R129b, il round si ferma PRIMA
+#      di spendere macchina sulle altre 96 passate.
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE, VISTO CHE E' UN DOPPIONE
+#
+#  E' un doppione APPOSTA. Le sue due celle esistono gia':
+#    cella InpSkipIfTight=0 == cella 6800 di R129a
+#    cella InpSkipIfTight=1 == cella 6800 di R129b
+#  >>> DEVONO COINCIDERE AL CENTESIMO. Profit, Profit Factor, Equity
+#      DD % e Trades, su TUTTE E DUE le finestre. <<<
+#  Se non coincidono, una delle tre corse ha letto il file prova in un
+#  modo che non capisco, e nessuna delle 100 passate vale niente.
+#  E' il cancello G1 di determinismo di questo round, e a differenza di
+#  due celle gemelle sul magic ATTRAVERSA TRE FILE DIVERSI: e' una
+#  verifica piu' forte, perche' un errore di scrittura di uno dei tre
+#  file la rompe.
+#
+#  IN PIU' e' il confronto che il round deve consegnare a Claudio in
+#  UNA RIGA SOLA: alla soglia di costo, quanto costa saltare invece di
+#  allargare -- in trade, in PF e in drawdown. Su due celle, senza
+#  dover leggere due tabelle da 24.
+# ---------------------------------------------------------------------
+#  PERCHE' 6800 E NON UN ALTRO NUMERO -- IL CONTO, PER INTERO
+#
+#  Spread mediano dell'ora server 8 su D30EUR: 1,7000 punti indice,
+#  misurato su 1.847.049 tick.
+#  Fonte: risultati_archivio\spread_flotta\spread_orario_D30EUR.csv,
+#         riga dell'ora 8 (media 1,9194 / mediana 1,7000 / p95 2,7000).
+#  Frontiera del costo di casa: stop >= 40 x spread.
+#      40 x 1,7000 = 68,0 punti indice.
+#  Unita': su D30EUR (2 decimali) 100 PUNTI MT5 = 1 PUNTO INDICE,
+#  e nel codice il pavimento e' InpMinStopPts * _Point.
+#      68,0 punti indice = 6800 PUNTI MT5.
+#  Chi scrivesse 68 imposterebbe 0,68 punti indice: un no-op perfetto.
+#
+#  E il verso della frontiera, dichiarato: con la mediana si e' a 40,0x
+#  esatti; con il P95 dell'ora 8 (2,7000) 68,0 punti indice valgono
+#  25,2x, cioe' SOTTO la frontiera. La frontiera di casa e' scritta
+#  sulla MEDIANA e cosi' si applica qui -- ma il bias ha un verso noto
+#  (sui giorni a spread largo il cancello resta chiuso) e si dichiara.
+# ---------------------------------------------------------------------
+#  COSA FA DAVVERO L'ASSE -- LETTO NEL SORGENTE, NON A MEMORIA
+#  ABTG_DAX_Apertura_EU.mq5, ramo RETEST BUY, r.1493-1497:
+#     if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#       {
+#        if(InpSkipIfTight) { skip=true; ... }
+#        else { sl = NormalizePrice(entry - InpMinStopPts*_Point);
+#               dist = entry - sl; }
+#       }
+#  InpSkipIfTight NON e' un filtro d'ingresso ne' una manopola di
+#  rischio: e' L'INTERRUTTORE CHE SCEGLIE QUALE DELLE DUE COSE FA IL
+#  PAVIMENTO.
+#    0 (false) -> ALZA lo stop a 68,0 punti indice. Il trade si fa.
+#                 Cambiano stop, LOTTO (CalcLotByRisk(dist), r.1498) e
+#                 TAKE PROFIT (dist*TpTotalR(), r.1500). n NON cambia.
+#    1 (true)  -> SALTA il trade. La geometria dei superstiti resta
+#                 IDENTICA. n CALA.
+#  >>> UNA CELLA CAMBIA LA GEOMETRIA SENZA TOCCARE IL CAMPIONE.
+#      L'ALTRA CAMBIA IL CAMPIONE SENZA TOCCARE LA GEOMETRIA.
+#      E' per questo che due celle bastano a separare le due cause. <<<
+# ---------------------------------------------------------------------
+#  LE ANCORE -- archivio r118_csv, cella 6000 (60,0 punti indice)
+#  NON e' 6800 e NON e' la stessa corsa (M15, short ACCESO, parziale
+#  50%): e' la FORMA ATTESA, non un numero da riprodurre.
+#    SkipIfTight=0 (ALZA) : IS PF 1,06253 n 199 | OOS PF 1,19693 n 311
+#                           OOS DD 7,9334%
+#    SkipIfTight=1 (SALTA): IS PF 1,00767 n 109 | OOS PF 1,43822 n 226
+#                           OOS DD 6,6448%
+#  Cella di riferimento a pavimento SPENTO (floor 0), stessa corsa:
+#                           IS PF 1,07810 n 197 | OOS PF 1,18776 n 311
+#                           OOS DD 10,5984%
+#  >>> IL PF 1,43822 E' UN PICCO E NON E' IL BERSAGLIO. I suoi vicini
+#      stanno a 1,28607 e 1,15293, in IS la cella e' piatta (1,00767) e
+#      n=109 sono RIGHE CON I PARZIALI DENTRO, quindi MENO di 109
+#      ingressi: sotto il pavimento dei 150, merito SOSPESO.
+#      Su questa sedia la correlazione IS->OOS e' misurata a -0,44.
+#      Referto: report\R118c_IL_PICCO_2026-09-11.md
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n (ingressi, parziale spento):
+#      cella 0 (ALZA)  : ~163 in IS e ~162 in OOS, cioe' IDENTICI alla
+#                        sedia a pavimento spento. SOPRA il pavimento
+#                        dei 150: QUI IL MERITO SI LEGGE.
+#      cella 1 (SALTA) : ~93 in IS e ~93 in OOS (sopravvivenza stimata
+#                        0,571 dalla curva d'archivio), banda 75-115.
+#                        SOTTO 150: QUI IL MERITO E' SOSPESO, si legge
+#                        solo il rischio (Emendamento B del 16/08).
+#  - PF OOS: 1,10 - 1,30 da ALZA; 1,15 - 1,50 da SALTA (e il secondo
+#    numero NON e' un criterio di scelta, per il punto sopra).
+#  - DD OOS: 6% - 11% da ALZA; 5% - 10% da SALTA (rischio 1%).
+#  - FREQUENZA, che e' il numero che decide:
+#      ALZA  : 325 ingressi / 459 giorni feriali [CONTATI] = 0,708
+#              op/giorno; su ~422 giorni al netto di una stima -8% di
+#              festivi = 0,770. IDENTICA alla sedia di oggi.
+#      SALTA : ~186 ingressi = 0,40 - 0,44 op/giorno.
+#      Pavimento di famiglia firmato il 07/09: 1,00 op/giorno, E QUESTA
+#      FAMIGLIA HA UN SIMBOLO SOLO. Gia' oggi sta al 71-77%; il ramo
+#      SALTA la porta al 40-44%.
+#
+#  >>> MI ASPETTO CHE LA CELLA "ALZA" VINCA, e non per il PF: perche'
+#      compra lo stesso cancello di costo SENZA PAGARLO IN FREQUENZA.
+#      Lo scrivo prima di vedere i numeri. Se esce cosi', il round non
+#      ha trovato una cella d'oro: ha trovato QUALE DELLE DUE VIE SI
+#      PUO' PERMETTERE UNA SEDIA CHE DEVE ESSERE IN CAMPO IL 1 OTTOBRE.
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    SE la cella SALTA batte la cella ALZA sul DRAWDOWN di oltre 2
+#    punti percentuali in OOS, allora sta comprando rischio vero e non
+#    solo un campione piu' piccolo, e va portata avanti -- ma SOLO con
+#    la frequenza scritta accanto, e con la famiglia allargata a un
+#    secondo simbolo per rientrare nel pavimento.
+#    SE la cella ALZA ha n DIVERSO dalla cella a pavimento spento, NON
+#    HO CAPITO IL CODICE e il round si ferma prima di ogni lettura.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, IN DUE CELLE
+#  "E se il pavimento non facesse altro che togliere i trade peggiori?"
+#  Allora la cella SALTA si muoverebbe e la cella ALZA no, perche' la
+#  cella ALZA non toglie NIENTE (n costante per costruzione).
+#  Quindi: ALZA fermo + SALTA mosso = e' tutta SELEZIONE, nessuna
+#  soglia di costo nel rendimento. ALZA mosso = c'e' GEOMETRIA.
+#  Le due letture non possono essere vere insieme, e la tabella le
+#  separa senza che io debba scegliere come guardarla.
+#  (La forma completa -- gradino contro rampa -- la danno le 24 celle
+#   di R129a e R129b: qui ci sono solo i due estremi alla soglia.)
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779580 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro.
+#  InpTP1_ClosePct=0 (parziale SPENTO) come R129a/R129b, cosi' la
+#  colonna Trades conta INGRESSI. Il preset VIVO ha 50: questa non e'
+#  la sedia in campo, e' il modo di far parlare n.
+#  InpSkipIfTight e' un BOOL e si scrive 0/1, NON false/true: nel
+#  driver walkforward_generico.ps1 Risolvi() converte true->1 e
+#  false->0 e stampa il numero, ed e' la forma con cui sono girati
+#  tutti i round di questa casa (nota gia' agli atti in
+#  prove\R118c_pavimento_DAX_RETEST_D30EUR.txt r.231-239).
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=6800
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779580
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpSkipIfTight 0 e 1 = 2 CELLE
+#     Formato: default||start||step||stop||Y
+#     0 = ALZA lo stop al pavimento  -> n INVARIATO, geometria mossa
+#     1 = SALTA il trade             -> n CALA,      geometria intatta
+#     Bool: start 0 / step 1 / stop 1 = DUE celle, non degenere.
+#     Verificarlo nella stampa di -SoloControllo, non darlo per buono.
+InpSkipIfTight=0||0||1||1||Y

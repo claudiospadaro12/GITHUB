@@ -1,0 +1,327 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R129a -- LA SOGLIA DI COSTO, RAMO "ALZA LO STOP"
+#           D30EUR M5 -- geometria RETEST LONG-ONLY (la sedia 770101)
+#           asse InpMinStopPts 0 -> 9200 punti MT5, passo 400
+#           InpSkipIfTight = FALSE  (pinnato: qui il pavimento ALZA)
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R129_COSTO_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R129a_costo_alza_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r129a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA. Gli altri MT5 hanno le sedie VIVE.
+#  !! -FrazioneIS 0.50 come R128b/c/d/e: 325 ingressi sull'intera
+#     finestra -> IS ~163, OOS ~162. A 0.40 l'IS farebbe ~130, SOTTO il
+#     pavimento dei 150 dell'Emendamento A.
+#  (-SoloControllo deve stampare 24 CELLE per finestra. Altro numero =
+#   file letto male: FERMARSI.)
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND, E NON E' "QUALE CELLA HA IL PF PIU' ALTO"
+#
+#    "Qual e' il InpMinStopPts PIU' BASSO che porta lo stop realizzato
+#     sopra i 68,0 punti indice (= 40 x lo spread mediano 1,7000
+#     dell'ora server 8, misurato su 1.847.049 tick in
+#     backtest_pipeline\risultati_archivio\spread_flotta\
+#     spread_orario_D30EUR.csv), e l'altopiano di merito attorno a
+#     quella soglia regge?"
+#
+#  E' UNA DOMANDA DI COSTO. Il merito serve solo a dire quanto costa
+#  aprire quel cancello, non a scegliere la cella piu' verde.
+#
+#  >>> L'AVVERTIMENTO, SCRITTO QUI PERCHE' NON SI RIPETA: <<<
+#  In archivio (r118_csv, tick reali, 07/09) esiste una cella con
+#  OOS PF 1,4382 -- InpMinStopPts=6000 con InpSkipIfTight=1.
+#  NON E' IL BERSAGLIO DI QUESTO ROUND. E' un PICCO:
+#    - i vicini stanno a 1,2861 (4000) e 1,1529 (8000): sporge del +18%
+#      sopra la media dei vicini e crolla subito dopo -> G5 la vieta;
+#    - IN CAMPIONE quella cella e' piatta: IS PF 1,0077;
+#    - IS e OOS si muovono in DIREZIONI OPPOSTE lungo l'asse (IS scende
+#      1,1128 -> 1,0077, OOS sale 1,1878 -> 1,4382): e' la firma che il
+#      cancello G7 cerca, e su questa sedia la correlazione IS->OOS e'
+#      gia' misurata a -0,44;
+#    - n=109 in IS, e sono RIGHE CON I PARZIALI DENTRO (quella corsa
+#      aveva InpTP1_ClosePct=50), quindi gli INGRESSI erano ANCORA MENO
+#      di 109. Sotto il pavimento dei 150: il merito li' e' SOSPESO.
+#  Referto: report\R118c_IL_PICCO_2026-09-11.md
+# ---------------------------------------------------------------------
+#  COSA FA DAVVERO LA MANOPOLA -- LETTO NEL SORGENTE, NON A MEMORIA
+#
+#  ABTG_DAX_Apertura_EU.mq5, ramo RETEST BUY, r.1493-1497:
+#
+#     if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#       {
+#        if(InpSkipIfTight) { skip=true; ... }          <-- SALTA
+#        else { sl = NormalizePrice(entry - InpMinStopPts*_Point);
+#               dist = entry - sl; }                    <-- ALZA
+#       }
+#
+#  >>> E' UN INTERRUTTORE A DUE VIE, E LE DUE VIE NON SONO LA STESSA
+#      COSA. InpSkipIfTight decide QUALE:
+#        FALSE -> ALZA lo stop al pavimento. Il trade si fa lo stesso.
+#                 La FREQUENZA NON SI TOCCA.
+#        TRUE  -> SCARTA il trade. Il rapporto stop/spread migliora
+#                 perche' i trade stretti spariscono, ma SI PAGA IN
+#                 FREQUENZA -- e la frequenza e' il requisito n.1
+#                 verso ottobre.
+#  QUESTO FILE PINNA InpSkipIfTight=false: RAMO "ALZA".
+#  Il ramo "SALTA" e' R129b. La cella di confronto diretto e' R129c.
+#
+#  E LA MANOPOLA, IN QUESTO RAMO, MUOVE TRE COSE INSIEME -- dichiarato
+#  prima perche' e' un confondente, non una finezza:
+#    1. lo STOP (r.1496);
+#    2. il LOTTO, perche' CalcLotByRisk(dist) e' chiamato DOPO
+#       (r.1498): stop piu' largo -> lotto piu' piccolo, rischio % fermo;
+#    3. il TAKE PROFIT: tp = entry + dist*TpTotalR() (r.1500), e
+#       TpTotalR() e' cablato a 3 x InpTP1_R (r.1621-1627).
+#  Una manopola, tre effetti. NON si potra' dire "e' lo stop che ha
+#  fatto la differenza" guardando solo questo file.
+# ---------------------------------------------------------------------
+#  LE UNITA' -- LA TRAPPOLA CHE DA SOLA ANNULLEREBBE IL ROUND
+#    Nel codice il pavimento e' InpMinStopPts * _Point: PUNTI MT5.
+#    >>> Su D30EUR (2 decimali) 100 PUNTI MT5 = 1 PUNTO INDICE. <<<
+#    Chi scrivesse 68 imposterebbe 0,68 punti indice: un no-op, 24
+#    colonne identiche e un referto che conclude il FALSO con numeri
+#    VERI. OGNI VALORE, QUI E NEL REFERTO, IN TUTTE E DUE LE UNITA'.
+# ---------------------------------------------------------------------
+#  LA GEOMETRIA DELLO STOP RETEST -- DERIVATA DAL CODICE
+#
+#    r.1487 : entry = gRangeHigh - InpRetestOffsetPts*_Point
+#    r.1488 : sl    = sellPx = gRangeLow - gBuffer   (SLMode=0=RANGE)
+#    r.1490 : dist  = entry - sl
+#           = range + buffer - offset
+#           = range + 500 - 200 punti MT5 = range + 3,0 punti indice
+#    (il ramo BREAKOUT, r.1045-1060, fa range + 2 x buffer = range + 10
+#     punti indice: 7 punti indice PIU' LARGO. Ma quel ramo e' SPENTO
+#     dal 14/08 e non e' questa sedia.)
+#
+#  >>> IL RANGE SI CALCOLA SU M1, NON SUL TIMEFRAME DEL GRAFICO. <<<
+#    ComputeRangeWindow() r.1008-1015 usa iBarShift/iHighest/iLowest su
+#    PERIOD_M1 esplicito. Conseguenza VERIFICATA e importante: la
+#    distribuzione dello stop RETEST e' la STESSA su M5 e su M15, ed e'
+#    per questo che la corsa d'archivio r118c -- che girava su M15 --
+#    e' un stimatore lecito della distribuzione anche qui su M5.
+#    Cio' che NON trasferisce da r118c: lo short era ACCESO
+#    (InpAllowShort=1) e il parziale era al 50%. Qui: long-only e
+#    parziale SPENTO.
+# ---------------------------------------------------------------------
+#  QUALE VALORE APRE IL CANCELLO -- E' UN FATTO DI COSTRUZIONE
+#
+#  In questo ramo lo stop realizzato e' max(range + 300 ; InpMinStopPts)
+#  punti MT5. Quindi il valore piu' basso che porta OGNI trade sopra i
+#  68,0 punti indice e' esattamente 6800 punti MT5, per costruzione.
+#  NON E' UNA MISURA: e' aritmetica, e si scrive cosi'.
+#  QUELLO CHE SI MISURA QUI E' QUANTO COSTA, e se attorno a 6800 c'e'
+#  un altopiano o un dirupo.
+#
+#  Sotto i 6800 il pavimento tocca solo la CODA SINISTRA. Quanto pesa
+#  quella coda e' la seconda cosa che il round misura -- e in R129b la
+#  misura direttamente, perche' li' n(cella)/n(0) E' la curva di
+#  sopravvivenza dello stop.
+# ---------------------------------------------------------------------
+#  LE ANCORE -- prese dall'archivio, RAMO ALZA (InpSkipIfTight=0)
+#  Fonte: risultati_archivio\r118_csv\
+#         ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r118c.csv
+#  ATTENZIONE: quella corsa e' M15, SHORT ACCESO, parziale 50%, e la
+#  sua frazione IS non e' la nostra (n 197/311 -> ~0,40). NON SONO
+#  ANCORE AL CENTESIMO: sono la FORMA ATTESA, e basta.
+#
+#    floor   idx   IS PF    IS n   OOS PF    OOS n   OOS DD%
+#        0     0   1,07810   197   1,18776    311    10,5984
+#     2000    20   1,07740   197   1,18776    311    10,5984
+#     4000    40   1,11054   198   1,21009    312    10,8753
+#     6000    60   1,06253   199   1,19693    311     7,9334
+#     8000    80   0,94663   199   1,14515    310     8,0580
+#
+#  >>> DUE COSE SALTANO FUORI DA QUESTA TABELLA, E NESSUNA ERA NEL
+#      REFERTO DI R118c, CHE AVEVA PUBBLICATO SOLO L'ALTRO RAMO:
+#      1. n RESTA A ~311. Alzare lo stop NON costa NEANCHE UN TRADE.
+#      2. il PF sta fermo entro +/-2% fino a 6000 mentre il DD scende
+#         da 10,5984% a 7,9334% (-25%). Cioe': il ramo ALZA compra
+#         RISCHIO, non rendimento. E lo compra GRATIS in frequenza.
+#  E' l'esito che mi aspetto di piu' anche qui, ed e' scritto PRIMA.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: ~163 in IS e ~162 in OOS, PRATICAMENTE COSTANTE su tutte e 24
+#    le celle (tolleranza +/-3 trade). QUESTO E' IL CANCELLO PIU'
+#    IMPORTANTE DEL FILE: se n si muove di piu', il ramo "alza" sta
+#    scartando trade e allora NON HO CAPITO IL CODICE. Ci si ferma li'.
+#  - PF OOS: attesa 1,10 - 1,30 su TUTTO l'asse, PIATTA entro +/-5%
+#    fino a ~6800, in CALO oltre 8000.
+#  - DD OOS: attesa 6% - 12% (rischio 1%), in MIGLIORAMENTO salendo,
+#    con il grosso del guadagno fra 4000 e 7000.
+#  - Profitto: attesa in CALO lento salendo (lotto piu' piccolo a
+#    parita' di rischio %, uscita per lo piu' via trailing e non via
+#    stop pieno: le vincite in EUR si rimpiccioliscono con il lotto).
+#
+#  >>> NON MI ASPETTO UN MIGLIORAMENTO DI MERITO, E LO DICO PRIMA. <<<
+#  L'esito che mi aspetto di piu' e' "il PF non si muove, il DD
+#  migliora, la frequenza resta intatta". Se esce quello, la risposta
+#  onesta e' che 6800 SI PUO' METTERE E COSTA POCO -- non che abbiamo
+#  trovato una cella d'oro.
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    SE il PF OOS del ramo ALZA SALE in modo netto e con un GRADINO
+#    attorno a 6800 (>= +10% rispetto alla media delle celle sotto i
+#    5000, con i tre vicini d'accordo), allora il canale di COSTO e'
+#    reale e visibile nel rendimento, non solo nel rischio.
+#    SE il PF resta piatto e solo il DD migliora, il canale e' di
+#    RISCHIO: si scrive cosi' e si smette di raccontarlo come merito.
+#    SE il PF SCENDE gia' sotto i 6800, il pavimento costa merito e la
+#    soglia di costo va comprata con un prezzo dichiarato.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, E PERCHE' QUESTO FILE E' LA META' CHE LO ROMPE
+#
+#  IPOTESI ALTERNATIVA: "InpMinStopPts non fa niente di geometrico --
+#  si limita a togliere di mezzo i trade peggiori."
+#  Che forma avrebbe? Un taglio (casuale o selettivo) alza il PF in
+#  modo MONOTONO col numero di trade tolti, e lo fa SOLO dove i trade
+#  vengono tolti.
+#
+#  >>> QUI I TRADE NON VENGONO TOLTI: n resta ~311 in archivio e deve
+#      restare ~163/~162 qui. QUINDI IN QUESTO FILE L'IPOTESI
+#      ALTERNATIVA PREVEDE UNA RIGA PIATTA, ESATTAMENTE PIATTA. <<<
+#  Ogni movimento di PF o DD che si vede QUI e' geometria pura, perche'
+#  la selezione e' spenta per costruzione.
+#  Ogni movimento che si vede SOLO in R129b e non qui e' selezione pura.
+#  I DUE FILE SEPARANO SELEZIONE E GEOMETRIA. E' questo il round.
+#
+#  E C'E' UN TERZO MONDO DA DISTINGUERE: il GRADINO. Una soglia di
+#  costo vera non e' una rampa: sotto la soglia il rumore dello spread
+#  mangia il trade, sopra no. Percio' il passo e' 400 punti MT5 = 4
+#  punti indice, CINQUE VOLTE piu' fitto del passo 2000 d'archivio:
+#  con passo 2000 un gradino e una rampa sono indistinguibili.
+# ---------------------------------------------------------------------
+#  IL CANCELLO G1 REGALATO DA QUESTA GRIGLIA
+#  Le celle in basso sono INERTI per costruzione: se nessun trade ha
+#  stop sotto 400 punti MT5 (4 punti indice), le celle 0 e 400 devono
+#  uscire IDENTICHE AL CENTESIMO. In archivio succede gia': floor 0 e
+#  floor 2000 danno in OOS 999,42 / 1,18776 / 10,5984 / 311 -- le
+#  stesse quattro cifre. SE LE PRIME CELLE NON COINCIDONO, il banco e'
+#  sporco e si guarda quello prima di tutto il resto.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779560 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro.
+#  InpTP1_ClosePct=0 (parziale SPENTO) COME IN R128b/c/d/e: serve a far
+#  si' che la colonna Trades conti INGRESSI e non ingressi+parziali.
+#  Con il parziale al 50% -- che e' il valore del preset VIVO -- la
+#  stessa finestra stampava 476/524/445/330 righe invece di 325.
+#  Non e' la sedia in campo: e' il modo di far parlare n.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpSkipIfTight=false
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779560
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpMinStopPts da 0 a 9200, passo 400
+#     Formato: default||start||step||stop||Y
+#     = 24 celle per finestra = 48 passate.
+#     In PUNTI INDICE: 0 / 4 / 8 / ... / 88 / 92.
+#     LA SOGLIA DI COSTO 6800 (68,0 idx) E' SULLA GRIGLIA
+#     (6800 = 0 + 17 x 400): non ci si arriva per interpolazione.
+#     I suoi vicini 6400 (64,0) e 7200 (72,0) sono li' apposta:
+#     senza vicini un altopiano non si distingue da un picco.
+#     LA CELLA 0 E' IL CONTROLLO: pavimento SPENTO = la sedia viva.
+#     Le ultime tre celle (8400, 8800, 9200) sono OLTRE il massimo
+#     provato in archivio (8000): li' non ho nessuna attesa misurata,
+#     servono come LIMITE (stop quasi sempre = pavimento = stop fisso).
+InpMinStopPts=0||0||400||9200||Y
