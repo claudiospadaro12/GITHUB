@@ -4,10 +4,10 @@
 #  strumenti rende di piu' in ~2,5 anni.
 #
 #  Uso (-Robot):
-#    ABTG_MaxMinNotte · ABTG_Nightly · ABTG_HARSI (M5)
-#    ABTG_SupertrendReversal (H4) · ABTG_EMA200 (H4) · ABTG_GoldenCross (H1)
-#    ABTG_SuperWave (H4) · ABTG_SupertrendInvert (H1) · ABTG_PTE (H4)
-#    ABTG_WOL (D1) · ABTG_FiboH4_Multi (H4)
+#    ABTG_MaxMinNotte - ABTG_Nightly - ABTG_HARSI (M5)
+#    ABTG_SupertrendReversal (H4) - ABTG_EMA200 (H4) - ABTG_GoldenCross (H1)
+#    ABTG_SuperWave (H4) - ABTG_SupertrendInvert (H1) - ABTG_PTE (H4)
+#    ABTG_WOL (D1) - ABTG_FiboH4_Multi (H4)
 #    ABTG_Bulge (H1, i 22 cross del basket -- vedi la nota qui sotto)
 #
 #  NOTA ABTG_Bulge (R92-scan, 21/08/2026): questo EA e' MULTI-SIMBOLO
@@ -426,12 +426,31 @@ Write-Host "=== SCAN MARKET: $EA su $($Symbols.Count) simboli x $($Varianti.Coun
 New-Item -ItemType Directory -Force -Path (Join-Path $Work "src_v2"),(Join-Path $Work "ini_scan") | Out-Null
 try{Invoke-WebRequest -Uri "$RawBase/mql5/Experts/$EA.mq5" -OutFile (Join-Path $Work "src_v2\$EA.mq5") -UseBasicParsing; Write-Host "   OK src_v2\$EA.mq5" -ForegroundColor Green}
 catch{Write-Host "   ERRORE download $EA" -ForegroundColor Red; exit 1}
+# --- RIPIEGO_BANCO_v1 (12/09/2026): il ripiego prende IL BANCO, non "il
+#  primo BCM". Il filtro di prima ("*BCM Markets MT5 Terminal*" e non
+#  "*-V3*") sul VPS e' IL PICCOLO 50503392, CON LE SEDIE VIVE.
+#  -UseSpare resta com'era: e' una richiesta ESPLICITA del -V3, e
+#  sceglierlo io al posto di chi ha scritto la riga sarebbe lo stesso
+#  difetto visto dall'altra parte.
 if(-not $Terminal){
-  $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-  if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
-  else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
-  if(-not $c){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*"}|Select -First 1}
-  if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+  if($UseSpare){
+    $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
+    $c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1
+    if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
+  }else{
+    $BANCO_PERC="C:\MT5_Backtest"
+    $eseBanco=Join-Path $BANCO_PERC "terminal64.exe"
+    if(-not (Test-Path -LiteralPath $eseBanco)){
+      Write-Host "STOP: il banco da backtest non c'e'." -ForegroundColor Red
+      Write-Host ("    cercato : " + $eseBanco) -ForegroundColor Red
+      Write-Host "    NON ripiego su Program Files: li' c'e' il piccolo 50503392, che ha" -ForegroundColor Red
+      Write-Host "    le sedie VIVE, e questo script compila dentro il terminale scelto." -ForegroundColor Red
+      Write-Host "    Per un altro bersaglio: -Terminal 'C:\...\terminal64.exe'" -ForegroundColor Red
+      exit 1
+    }
+    $Terminal=$eseBanco; $MetaEditor=Join-Path $BANCO_PERC "metaeditor64.exe"
+    Write-Host ("   terminale scelto (RIPIEGO SUL BANCO): " + $BANCO_PERC) -ForegroundColor Yellow
+  }
 }
 if($Terminal -and -not $DataFolder){
   $instDir=Split-Path -Parent $Terminal; $termRoot=Join-Path $env:APPDATA "MetaQuotes\Terminal"

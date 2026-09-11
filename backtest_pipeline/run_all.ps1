@@ -42,11 +42,27 @@ $RepoRoot   = Split-Path -Parent $MyInvocation.MyCommand.Path
 Write-Host "=== OTTIMIZZAZIONE AUTOMATICA EA ===" -ForegroundColor Cyan
 
 # --- rileva il terminale BCM (preferisce quello NON -V3) -------------
+# --- RIPIEGO_BANCO_v1 (12/09/2026): IL BERSAGLIO E' IL BANCO ----------
+#  Questo script si dichiara in testa "(VPS)", compila TUTTI gli EA e
+#  lancia il tester. Col selettore di prima ("*BCM Markets MT5 Terminal*"
+#  e non "*-V3*") quel bersaglio sul VPS e' IL PICCOLO 50503392, CON LE
+#  SEDIE VIVE -- e qui non c'e' NESSUNA guardia "MT5 aperto" prima della
+#  compilazione. Se il banco non c'e', si muore: non si ripiega su
+#  Program Files.
 if (-not $Terminal) {
-    $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-    $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-    if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-    if ($cand) { $Terminal = $cand.FullName; $MetaEditor = Join-Path $cand.DirectoryName "metaeditor64.exe" }
+    $BANCO_PERC = "C:\MT5_Backtest"
+    $eseBanco   = Join-Path $BANCO_PERC "terminal64.exe"
+    if (-not (Test-Path -LiteralPath $eseBanco)) {
+        Write-Host "STOP: il banco da backtest non c'e'." -ForegroundColor Red
+        Write-Host ("    cercato : " + $eseBanco) -ForegroundColor Red
+        Write-Host "    NON ripiego su Program Files: li' c'e' il piccolo 50503392 con le" -ForegroundColor Red
+        Write-Host "    sedie VIVE, e questo script compila dentro il terminale scelto." -ForegroundColor Red
+        Write-Host "    Se ti serve un altro terminale, passalo con -Terminal." -ForegroundColor Red
+        exit 1
+    }
+    $Terminal   = $eseBanco
+    $MetaEditor = Join-Path $BANCO_PERC "metaeditor64.exe"
+    Write-Host ("   terminale scelto (RIPIEGO SUL BANCO): " + $BANCO_PERC) -ForegroundColor Yellow
 }
 # --- rileva la cartella dati abbinata (via origin.txt) ---------------
 if ($Terminal -and -not $DataFolder) {

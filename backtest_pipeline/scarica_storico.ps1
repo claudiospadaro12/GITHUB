@@ -275,13 +275,24 @@ if ($TerminaleBacktest) {
   $ViaTerminale = "parametro esplicito -TerminaleBacktest"
 }
 
+# ---------------------------------------------------------------------
+#  IL VECCHIO RIPIEGO SU PROGRAM FILES: TOLTO IL 12/09/2026.
+#  Questo blocco e' IRRAGGIUNGIBILE da quando il ripiego assegna il banco
+#  qui sopra (l'unica assegnazione di $TerminaleBacktest e' quella, e o
+#  assegna o esce 1). Ma lasciarci dentro il selettore vecchio -- quello
+#  che prendeva "*BCM Markets MT5 Terminal*" e non "*-V3*", cioe' IL
+#  PICCOLO 50503392 CON LE SEDIE VIVE -- sarebbe una trappola per chi
+#  legge fra un mese: sembra codice vivo, e se qualcuno togliesse il
+#  ripiego di sopra tornerebbe a mordere in silenzio.
+#  Quindi resta il controllo, ma senza il selettore: se per qualsiasi
+#  ragione arrivassimo qui, si MUORE. Rumoroso batte silenzioso.
+# ---------------------------------------------------------------------
 if (-not $instDir) {
-  $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-  if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-  if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
-  $instDir = $cand.DirectoryName
-  $ViaTerminale = "RIPIEGO automatico su 'BCM Markets' sotto Program Files"
+  Muori ("nessun terminale scelto, e qui NON si ripiega piu' su Program Files.`n" +
+         "    Il ripiego automatico adesso prende il banco C:\MT5_Backtest e, se non`n" +
+         "    c'e', esce prima di arrivare fin qui. Se leggi questo messaggio, qualcuno`n" +
+         "    ha tolto quel blocco: rimettilo, oppure passa -TerminaleBacktest a mano.`n" +
+         "    NON si spazzola Program Files: li' c'e' il piccolo 50503392 con le sedie VIVE.")
 }
 
 # --- 08/09/2026: la 37-quater era ancora aperta QUI.
