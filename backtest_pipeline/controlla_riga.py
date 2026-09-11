@@ -754,11 +754,26 @@ def controlla_file_prova(path, dati, testo):
         blocca("ASCII", "il file prova contiene byte non-ASCII: lo legge PowerShell 5.1"
                " (ANSI) e finisce dentro un .ini del tester", path)
     # ora SERVER, non italiana (regola fissa di CLAUDE.md: server = italiana - 1)
+    # Due livelli, e la differenza e' voluta:
+    #  - i due nomi NOTI (InpSessionHour, InpIbInizioOra) con 9 o 15 sono il
+    #    difetto gia' pagato: BLOCCANTE, come nel controllo della riga.
+    #  - gli ALTRI nomi di ora d'INIZIO (RangeStart, Inizio, Start) con 9 o 15
+    #    sono un RILIEVO e non un errore: ogni EA chiama i suoi input come vuole
+    #    e un 15 puo' essere legittimo. Quello che NON puo' essere legittimo e'
+    #    non essersene accorti. (Un'ora di CHIUSURA a 15 o a 21 non si tocca:
+    #    li' il 15 e' un orario di fine, non l'apertura sbagliata di un cash.)
     for i, r in enumerate(testo.splitlines(), 1):
         m = re.match(r"\s*(InpSessionHour|InpIbInizioOra)\s*=\s*(\d+)", r)
         if m and m.group(2) in ("9", "15"):
             blocca("FUSO", "r." + str(i) + ": " + m.group(1) + "=" + m.group(2)
                    + " e' ora ITALIANA. Il server BCM e' un'ora indietro: DAX 8, Nasdaq 14", path)
+            continue
+        m = re.match(r"\s*(Inp\w*(?:RangeStart|Inizio|Start)\w*Hour)\s*=\s*(\d+)", r, re.I)
+        if m and m.group(2) in ("9", "15"):
+            rileva("FUSO", "r." + str(i) + ": " + m.group(1) + "=" + m.group(2)
+                   + " e' un'ora d'INIZIO che vale 9 o 15, cioe' l'ora ITALIANA di apertura"
+                   + " di DAX e Nasdaq. In ora SERVER sarebbero 8 e 14. Va confermato a mano:"
+                   + " il cancello non sa come si chiamano gli input di questo EA", path)
     controlla_terminali(path, testo, path)
     rileva("225", "controlli PowerShell (PWSH7, cultura, formati .NET) SPENTI su questo"
            " oggetto: un file prova non e' uno script. Il cancello SEMANTICO dei file prova"

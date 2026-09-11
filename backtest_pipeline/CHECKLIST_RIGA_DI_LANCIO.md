@@ -13413,3 +13413,36 @@ Sulla stessa famiglia, dove il pavimento **non** morde, le due gambe escono
 👉 Stesso disegno, stesso codice, **taglie diverse fra le gambe quando il
 pavimento non c'e'**. La diagnosi non era solo plausibile: **ha un controllo
 positivo**, e l'ho trovato solo perche' mi hanno corretto la sedia.
+
+## 232. Cercare il NOME invece di misurare l'EFFETTO (11/09/2026)
+
+**Il caso.** Verificando la classe 226 (*il `n` conta le uscite, non le
+operazioni*) ho dichiarato **salve** le due Aperture, perche' il mio `grep` di
+`InpTP1Pct` non le trovava. 🔴 **Sbagliato: hanno la stessa funzione con un
+NOME DIVERSO.**
+
+| EA | come si chiama il parziale | riga |
+|---|---|---|
+| `ABTG_DAX_Apertura_EU` | **`InpTP1_ClosePct = 50`** | 318, usato a **1899-1914** |
+| `ABTG_GapContinuation` | **`InpPartialClosePercent = 40`** | 159, usato a **1177** |
+| gli altri | `InpTP1Pct = 50` | — |
+
+**Tre nomi per la stessa cosa.** Il mio controllo cercava **uno** dei tre, e ha
+risposto *"non ce l'ha"* dove la risposta giusta era *"non ha QUEL NOME"*.
+
+**La regola.** Per sapere se una funzione c'e', **si misura l'effetto**, non si
+cerca l'identificatore. 👉 Qui l'effetto e' contabile e non ammette sinonimi:
+**quante USCITE per POSIZIONE** ci sono nei per-trade. Se il fattore e' `1,00`
+esatto il parziale non c'e'; se e' sopra, c'e' — **comunque si chiami**.
+
+📌 **E vale oltre questo caso**: ogni volta che un controllo cerca un
+**identificatore** (nome di input, di funzione, di colonna) sta assumendo una
+**convenzione di denominazione** che nessuno ha mai imposto. In un repo con 111
+EA scritti in mesi diversi, quella assunzione **e' falsa per costruzione**.
+
+⚠️ **Verificato da me solo a meta', e lo dichiaro**: la prova nel **codice** l'ho
+confermata (le righe sopra ci sono e fanno una chiusura parziale). Il
+**conteggio** che l'agente porta — `770101`: 311 righe / **245 posizioni**, 179
+con una uscita e 66 con due — **non l'ho potuto riprodurre**: i per-trade di
+quella sedia non li ho trovati in archivio con quella colonna. 👉 Il
+ritrovamento regge sul codice; **il numero resta suo, non mio**.
