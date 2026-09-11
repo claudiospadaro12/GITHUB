@@ -13170,6 +13170,29 @@ giusto esiste gia' e si chiama `controlla_prova.py`: finche' il modo non c'e',
 
 ## 226. Il `n` dell'OPTFRAME conta i DEAL DI USCITA, non le POSIZIONI (11/09/2026)
 
+
+> ✅ **RIVERIFICATO A MANO l'11/09 sui per-trade di R112**, con il
+> delimitatore giusto (`;` — il mio primo controllo usava la virgola e dava
+> rapporto 1,01: **il banco era rotto, non l'esaminato**, per la terza volta
+> in due giorni). Rapporti veri, e **non sono costanti**:
+> `517/257 = **2,01**` · `302/140 = **2,16**` · `315/140 = **2,25**` ·
+> `324/140 = **2,31**`. 👉 **Il fattore dipende da quante volte il parziale
+> scatta davvero**, quindi non si puo' correggere dividendo per due: va
+> **ricontato dai `position_id`**, caso per caso.
+>
+> 🧮 **Chi e' colpito, verificato nei sorgenti**: `InpTP1Pct = 50` in
+> `ABTG_SuperWave`, `ABTG_SupertrendReversal`, `ABTG_EMA200`,
+> `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`. 🟢 **Chi si salva**: le due
+> Aperture (`InpTP1Pct` non esiste proprio) e l'**ORB `770611`**, dove il
+> CSV di R88 dice `InpTP1Pct = 0` in tutte le righe e il preset del conto
+> reale conferma `InpTP1Pct=0.0`. 👉 **Il suo n=119 e' vero.**
+>
+> 🔴 **E la somma con la classe 224 e' la notizia vera**: 224 dice che un
+> `n` letto sulla finestra piena non ha fuori campione, 226 dice che quel
+> numero conta **uscite, non operazioni**. Le due si moltiplicano. **Diversi
+> giudizi di merito del progetto poggiano su campioni piu' piccoli di quanto
+> credevamo**, e la soglia dei 150 va riletta ovunque contando i
+> `position_id`.
 **Il caso.** `PIANO_CHALLENGE_OTTOBRE.md` §1.2 confrontava con la soglia dei 150
 operazioni dei `n` presi dalla colonna `Trades` dei CSV del tester. **Quella
 colonna (`STAT_TRADES`) conta i deal di uscita.** Con `InpTP1Pct = 50` (parziale
