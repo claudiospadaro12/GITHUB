@@ -195,6 +195,47 @@ function Avviso-ChiusuraTotale($processi){
 #  riga per riga.
 $instDir = ""
 $ViaTerminale = ""
+
+# ---------------------------------------------------------------------
+#  RIPIEGO_BANCO_v1 (12/09/2026) -- IL RIPIEGO PREFERISCE IL BANCO.
+#  Stessa riparazione gia' accettata in walkforward_generico.ps1: il
+#  ripiego NON sceglie per conto suo, ENTRA NELLO STESSO RAMO di
+#  -TerminaleBacktest, cosi' passa dalle STESSE guardie (niente -V3,
+#  niente BCM_Reale) e dalla STESSA chiusura chirurgica.
+#  Senza questa riga il ripiego qui sotto sceglieva
+#  "*BCM Markets MT5 Terminal*" e non "*-V3*", che sul VPS e' IL PICCOLO
+#  50503392 CON LE SEDIE VIVE -- e questo script ci COPIA e ci COMPILA
+#  ABTG_HistoryDownloader PRIMA ancora di guardare se MT5 e' aperto.
+#  E c'e' un secondo effetto, piu' grosso: con $TerminaleBacktest vuoto
+#  la chiusura finale prendeva il ramo "else" e faceva
+#      Get-Process terminal64 | Stop-Process -Force
+#  cioe' ammazzava TUTTI i terminali della macchina, IL CONTO REALE
+#  10105439 COMPRESO, mentre ha posizioni aperte. Con -Auto l'avviso non
+#  blocca nemmeno. Assegnando qui il banco, quel ramo diventa
+#  IRRAGGIUNGIBILE e la chiusura e' sempre quella chirurgica.
+#  Se il banco non c'e', NON si ripiega altrove: si muore.
+# ---------------------------------------------------------------------
+if (-not $TerminaleBacktest) {
+  $BANCO_PERC = "C:\MT5_Backtest"
+  if (Test-Path -LiteralPath $BANCO_PERC -PathType Container) {
+    Write-Host ""
+    Write-Host "--- RIPIEGO: NESSUN TERMINALE NOMINATO, PRENDO IL BANCO -------------" -ForegroundColor Yellow
+    Write-Host ("    cartella : " + $BANCO_PERC) -ForegroundColor White
+    Write-Host "    conto    : 50504400  (demo solo-tester, zero EA attaccati)" -ForegroundColor White
+    Write-Host "    NON e' il piccolo 50503392, NON il 100k 50504263, NON il REALE 10105439." -ForegroundColor White
+    Write-Host "---------------------------------------------------------------------" -ForegroundColor Yellow
+    $TerminaleBacktest = $BANCO_PERC
+  } else {
+    Write-Host ""
+    Write-Host "STOP: -TerminaleBacktest non passato e il banco non c'e'." -ForegroundColor Red
+    Write-Host ("    cercato : " + $BANCO_PERC) -ForegroundColor Red
+    Write-Host "    NON ripiego su Program Files: li' c'e' il piccolo 50503392, che ha" -ForegroundColor Red
+    Write-Host "    le sedie VIVE, e questo script COMPILA dentro il terminale scelto." -ForegroundColor Red
+    Write-Host "    Se ti serve un altro terminale, nominalo con -TerminaleBacktest." -ForegroundColor Red
+    exit 1
+  }
+}
+
 if ($TerminaleBacktest) {
   # La guardia di casa NON si allenta perche' il percorso e' scritto a
   # mano: anzi, e' proprio quando si scrive a mano che si sbaglia riga.
