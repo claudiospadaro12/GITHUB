@@ -1,0 +1,131 @@
+# =====================================================================
+#  EA: ABTG_CostToCost
+#  R127c -- L'OROLOGIO CHE E' L'UNICA PROTEZIONE DI QUESTA SEDIA
+#           E CHE NON E' MAI STATO TARATO
+#           EURJPY H4 -- asse InpMaxBarsHold, 8 celle
+#  Scritto il 11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R127_USCITE_CRITERI.md
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_CostToCost
+#    -Prova prove\R127c_orologio_EURJPY.txt
+#    -Simbolo EURJPY -Periodo H4 -DaQuando 2020.01.01 -Fino 2026.06.30
+#    -Deposito 100000 -Etichetta r127c -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#  -Modello 4 = OHLC M1, come la corsa R103 che e' l'ANCORA di questo
+#  file. Un numero OHLC e' SCREENING, mai un verdetto.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
+#
+#  1) NON E' MAI STATA MOSSA. Verificato il 11/09/2026 su tutti i 2.087
+#     CSV del repo con colonne Inp*: InpMaxBarsHold compare in 128 file e
+#     vale SEMPRE 100. Zero file con due valori, zero variazioni fra
+#     corse, zero file prova / .ini / .ps1 che la mettano ad asse.
+#     Il commento del sorgente la chiama "guinzaglio largo" (r.114):
+#     e' stata scelta a occhio e mai piu' toccata.
+#
+#  2) SU QUESTO MOTORE E' L'UNICA PROTEZIONE CHE ESISTE.
+#     ABTG_CostToCost non ha breakeven, non ha trailing, non ha parziale:
+#     ha lo stop, il target e l'orologio. E il campo l'ha gia' vista
+#     mordere, testualmente in report\DIARIO.md alla riga del 24/08/2026:
+#     "COST EURJPY L chiuso da expert alle 16:00 col 54% catturato:
+#      COST non ha BE ne' trailing, il suo unico meccanismo di protezione
+#      e' l'orologio".
+#     Quel giorno l'orologio ha lasciato meta' del movimento sul tavolo, e
+#     nessuno ha mai misurato se 100 barre siano troppe o troppo poche.
+#
+#  3) LA SEDIA HA IL CAMPIONE PER PARLARE DI MERITO, ed e' rara.
+#     Magic 772361, EURJPY H4, conto piccolo 50503392.
+#       PF 1,41 . DD 12,3% . n 394 . 1 anno negativo su 7
+#     Fonte: R103_REFERTO_FINALE.md posizione 2 (6,5 anni, OHLC,
+#     normalizzato a rischio 1,0%), ripreso in report\CENSIMENTO_CONTRATTI.md.
+#     n = 394 e' MOLTO sopra le 150 operazioni: qui il MERITO si legge,
+#     mentre su 28 righe-sedia su 43 della flotta e' sospeso.
+#
+#  4) ED E' IL DD IL PROBLEMA, non il PF. 12,3% a rischio 1% e' il terzo
+#     DD promesso piu' alto della flotta. Un time-stop piu' corto taglia
+#     la coda delle posizioni che marciscono: e' esattamente il meccanismo
+#     che governa il DD su un motore senza altre protezioni.
+#     La regola del 19/08 vieta di infittire la griglia di un motore SENZA
+#     EDGE: PF 1,41 su 394 operazioni dice che questo non lo e'.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  La cella InpMaxBarsHold = 100 E' LA CELLA VIVA, e i pin di questo file
+#  sono copiati riga per riga da prove\R103_ABTG_CostToCost_EURJPY_772361.txt
+#  (l'artefatto che ha prodotto il numero), non scritti a memoria.
+#    PF 1,41 . DD 12,3% . n 394
+#  TOLLERANZA CONGELATA: n entro +/- 2%, PF entro +/- 0,03.
+#  Fuori da li' si DICHIARA la differenza e ci si ferma.
+#  NOTA: R103 riporta i numeri della FINESTRA PIENA 6,5 anni. Il driver
+#  qui spezza in IS/OOS: l'ancora si verifica ricomponendo le due
+#  finestre (n_IS + n_OOS deve fare 394 +/- 2%), e questo va scritto
+#  accanto al numero, non dato per scontato.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: in AUMENTO al calare del time-stop. Un guinzaglio piu' corto
+#    libera prima il motore per il segnale successivo. Attesa: da ~350
+#    (200 barre) a ~450 (25 barre) sulla finestra piena. Se n NON cambia
+#    lungo l'asse, vuol dire che il time-stop non scatta quasi mai, e
+#    allora questa manopola e' INERTE DI FATTO: e' un risultato, si scrive
+#    con quelle parole, e si chiude la casella per sempre.
+#  - PF: attesa 1,15 - 1,50. Non mi aspetto una salita monotona.
+#  - DD: attesa 8% - 16%. L'IPOTESI DEL ROUND e' che il DD CALI accorciando
+#    il guinzaglio. E' la cosa che puo' essere smentita, ed e' per questo
+#    che e' scritta qui prima.
+#  - E VA DETTO SUBITO CHE PROBABILMENTE COSTA: il 19/08 e' agli atti il
+#    contro-esempio, sempre da report\DIARIO.md -- "COST GBPCAD L ha fatto
+#    tp pieno +72,97 proprio perche' non ha protezioni", con la frase
+#    "il rimedio che propongo avrebbe tagliato anche il +72,97".
+#    Se il DD scende ma il PF va sotto 1,00 (cancello R127-G3), la
+#    risposta onesta e' "accorciare l'orologio compra rischio vendendo
+#    tutto il merito", e si scrive cosi'.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': un altopiano largo fra 75 e 150
+#    barre con DD simile. In quel caso la risposta e' "il default va
+#    bene" -- ed e' un risultato, non un fallimento.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779430 (verificato per ricerca su tutto il repo,
+#  11/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: InpExitMode di questo EA E' gia' stato messo ad asse
+#  (scan_market.ps1, 864 celle) e qui e' PINNATO a 2, il valore della
+#  sedia viva. Questo file NON rimette in discussione quello.
+# =====================================================================
+
+@SIMBOLO  EURJPY
+@PERIODO  H4
+@DAQUANDO 2020.01.01
+
+# --- IL MOTORE, pinnato sulla cella viva.
+#     Fonte dei pin: prove\R103_ABTG_CostToCost_EURJPY_772361.txt,
+#     copiati riga per riga.
+InpUsaGuardian=true
+InpTF=16388
+InpExitMode=2
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpComment=R127C OROLOGIO
+InpMagic=779430
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpMaxBarsHold da 25 a 200, passo 25 = 8 celle
+#     25 . 50 . 75 . 100 . 125 . 150 . 175 . 200
+#     Su H4 sono: 4,2 . 8,3 . 12,5 . 16,7 . 20,8 . 25,0 . 29,2 . 33,3
+#     giorni di calendario a 6 barre al giorno (5 giorni di mercato su 7).
+#     Il valore VIVO, 100, cade all'indice 3: NON e' un bordo.
+#     Bordo BASSO 25 e bordo ALTO 200 sono ENTRAMBI FINE GRIGLIA: li ho
+#     scelti io, e P5 li toglie dal blocco se il blocco ci si appoggia.
+#     NON metto lo 0 (= time-stop spento): sarebbe una geometria diversa,
+#     non un valore piu' grande della stessa, e con il bordo 200 gia'
+#     dentro l'asse il caso "guinzaglio lunghissimo" e' rappresentato.
+#     Tutti interi: nessun arrotondamento possibile.
+InpMaxBarsHold=100||25||25||200||Y

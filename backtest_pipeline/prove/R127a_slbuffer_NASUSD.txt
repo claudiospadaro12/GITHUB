@@ -1,0 +1,176 @@
+# =====================================================================
+#  EA: ABTG_SupRev_NAS_H1_Ottimizzato
+#  R127a -- IL BUFFER DELLO STOP CHE NON E' MAI STATO MOSSO
+#           NASUSD H1 -- asse InpSLBufferPips, 9 celle
+#  Scritto il 11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R127_USCITE_CRITERI.md
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_SupRev_NAS_H1_Ottimizzato
+#    -Prova prove\R127a_slbuffer_NASUSD.txt
+#    -Simbolo NASUSD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r127a -Modello 1
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#  -Modello 1 = TICK REALI: su questo simbolo e questa finestra i tick BCM
+#  ci sono (il muro e' 2024.09.26, che e' l'inizio della finestra).
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
+#
+#  1) NON E' MAI STATA MOSSA. Verificato il 11/09/2026 su tutti i 2.087
+#     CSV del repo che hanno colonne Inp*: la colonna InpSLBufferPips
+#     compare in 280 file e vale SEMPRE 3. Zero file con due valori.
+#     Zero variazioni fra corse diverse. E fuori dai CSV: zero file prova,
+#     zero .ini, zero .ps1 che la mettano ad asse.
+#     Gira al default da luglio e nessuno ha mai misurato quanto vale.
+#
+#  2) E' L'UNICA MANOPOLA DI QUESTO EA CHE ALLARGA LO STOP.
+#     ABTG_SupRev_NAS_H1_Ottimizzato NON ha InpSLBufferAtr (verificato:
+#     quell'input esiste solo nella famiglia SuperWave / STREV_Multi).
+#     Restano InpSLLookback (asse di R127b su un altro simbolo) e questa.
+#
+#  3) AL VALORE VIVO E' PRATICAMENTE INERTE, ED E' UN CONTO, NON UN'IDEA.
+#     NASUSD ha Digits=2, quindi _Point = 0,01 punti indice, e PipSize()
+#     di questo EA (r.121-125) torna _Point quando Digits non e' 3 o 5.
+#     Quindi InpSLBufferPips=3 vale 0,03 punti indice su uno stop mediano
+#     misurato di 51,65 punti indice: lo 0,06% dello stop.
+#     Fonte della tabella delle unita':
+#     report\CANCELLO_COSTO_FLOTTA_2026-09-10.md, riga
+#     "D30EUR . U30USD . NASUSD | 2 | 0,01 | 1 punto indice = 100 punti MT5".
+#
+#  4) LA SEDIA E' A RIDOSSO DI UN CANCELLO.
+#     Magic 970913, conto piccolo 50503392, NASUSD H1.
+#     stop mediano misurato 51,65 punti indice (n=4 gambe in stop)
+#     spread mediano dell'ora modale (ora 15) 1,80
+#     rapporto 28,7x  contro il pavimento di lavoro 40x  =  72% DEL PAVIMENTO
+#     Fonte: report\CANCELLO_COSTO_FLOTTA_2026-09-10.md.
+#     Con un buffer b (in punti indice) lo stop diventa 51,65 + b, quindi
+#     il pavimento si tocca a b >= 20,35 punti indice = 2035 punti MT5.
+#     QUEL PUNTO CADE DENTRO L'ASSE, fra la cella 1878 e la cella 2253.
+#
+#  5) ED E' UNA SEDIA CHE VALE LA PENA SALVARE, non un motore morto.
+#     PF 1,57 . DD 1,17% . n 155 (REGISTRO_TEST.md par. 4 riga S5v)
+#     e' l'unica sedia della flotta etichettata "il prop-friendly".
+#     La regola del 19/08 vieta di infittire la griglia di un motore SENZA
+#     EDGE: questo non lo e', e il numero sopra e' la prova.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  La cella InpSLBufferPips = 3 E' LA CELLA VIVA ed e' la STESSA
+#  configurazione delle corse d'archivio dell'08/08 (tick reali):
+#    IS  : PF 1,34237 . DD 0,9670% . n 69  . profit +118,82
+#    OOS : PF 1,68815 . DD 0,8567% . n 86  . profit +300,61
+#  Fonte primaria, riga InpTF=16385 di:
+#    risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\
+#      ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_{IS,OOS}.csv
+#  69 + 86 = 155: la coppia IS/OOS partiziona esattamente il campione
+#  della riga S5v del REGISTRO. Verificato, non assunto.
+#  TOLLERANZA CONGELATA: n IDENTICO, PF entro +/- 0,5%. Fuori da li' il
+#  banco e' sporco e il round si ferma prima di qualunque altro numero.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#
+#  - n: quasi COSTANTE lungo l'asse. Il buffer non tocca l'ingresso (il
+#    segnale e' il Supertrend + confluenza EMA), tocca solo dove muore il
+#    trade. Attesa: n OOS fra 80 e 95 su tutte e 9 le celle. Se n crolla
+#    sotto 60 o esplode sopra 120, il buffer sta cambiando qualcosa che
+#    non capisco e il round si ferma per capire cosa.
+#  - PF: attesa 1,3 - 1,9 in OOS. NON mi aspetto una salita monotona:
+#    uno stop piu' largo compra win rate e vende payoff (misurato in R47
+#    sul parziale, stesso meccanismo economico).
+#  - DD: attesa 0,7% - 2,0%. Il rischio per trade resta l'1% (il lotto si
+#    riduce quando lo stop si allarga), quindi il DD NON deve esplodere.
+#    Se lo fa, vuol dire che le perdite si stanno raggruppando: e' un
+#    fatto accaduto e si scrive, a qualunque n.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': un altopiano PIATTO, cioe' "il
+#    buffer non morde". Sarebbe una manopola INERTE DI FATTO, e va detto
+#    con quelle parole -- e' un risultato, non un fallimento.
+#  - E VA DETTO SUBITO CHE PROBABILMENTE COSTA: arrivare a 40x vuol dire
+#    quadruplicare lo stop, e su un motore che vive di stop stretti puo'
+#    ammazzare il PF. Se la cella oltre 2035 ha PF sotto 1,00, la risposta
+#    onesta e' "dentro la frontiera del costo questa sedia non ha merito",
+#    e si scrive cosi'.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779410 (verificato per ricerca su tutto il repo,
+#  11/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: prove\R110_SUPNAS_0{1,2}*.txt (lati long/short) tocca
+#  questa stessa sedia. Qui i due lati sono PINNATI ENTRAMBI ACCESI, come
+#  in campo. R120a (uscite Supertrend su NASUSD, preparato e mai girato)
+#  tocca trailing e flip: qui sono PINNATI ACCESI, non sono l'asse.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+
+# --- IL MOTORE, pinnato sulla cella viva (StMult 3,0 / AtrP 10 / TP_RR 3,0)
+#     Fonte dei pin: prove\R110_SUPNAS_01_long.txt, che a sua volta li ha
+#     letti dal sorgente. Qui InpAllowShort torna a true: la sedia VIVA
+#     opera su tutti e due i lati.
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.0
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- STOP: il LOOKBACK e' pinnato al valore vivo. E' l'altra manopola
+#     mai mossa di questo EA, ed e' l'asse di un ALTRO file (regola di
+#     casa: un file prova misura UNA variabile).
+InpSLLookback=5
+
+# --- USCITA: tutto pinnato com'e' in campo. Trailing sul Supertrend e
+#     uscita al flip sono ACCESI: sono l'asse di R120a, non di questo file.
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R127A SLBUF
+InpMagic=779410
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpSLBufferPips da 3 a 3003, passo 375 = 9 celle
+#     3 . 378 . 753 . 1128 . 1503 . 1878 . 2253 . 2628 . 3003
+#     in punti indice NASUSD (x 0,01):
+#     0,03 . 3,78 . 7,53 . 11,28 . 15,03 . 18,78 . 22,53 . 26,28 . 30,03
+#
+#     La cella 3 e' ESATTAMENTE il valore vivo e sta all'indice 0:
+#     e' l'ANCORA, ed e' un bordo LIMITE FISICO (sotto si andrebbe a
+#     buffer negativo, cioe' stop DENTRO lo swing = un'altra geometria,
+#     non un valore piu' piccolo della stessa).
+#     La cella 3003 e' un bordo FINE GRIGLIA: l'ho scelta io.
+#     La soglia del cancello di costo (2035) cade fra le celle 1878 e
+#     2253, cioe' DENTRO l'asse, con celle da tutte e due le parti:
+#     l'altopiano si puo' leggere sia sotto sia sopra la frontiera.
+#     Tutti interi: nessun arrotondamento possibile.
+InpSLBufferPips=3||3||375||3003||Y

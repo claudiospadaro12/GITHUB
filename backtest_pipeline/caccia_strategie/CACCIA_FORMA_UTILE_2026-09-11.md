@@ -250,3 +250,53 @@ dj_ermoloff.
 (sorgente aperto e letto). I rapporti stop/spread sono **[INFERITO]** dai
 default del sorgente e dai costi misurati in casa. Le fonti a 403/308/000 sono
 **[INCERTO]**: non raggiunte, non "vuote".
+
+---
+
+# 🔍 VERIFICA DELLA SESSIONE PRINCIPALE (11/09) — il confronto 3,0x contro 40x NON regge
+
+Il dossier presenta come titolo il fatto che `SMC Liquidity Sweep Scalper` (CB 77094)
+implementa **il nostro stesso cancello** a `InpMinSLToSpreadRatio = 3.0`, contro il
+nostro **40**, e ne trae: *"un autore che si e' posto esattamente il nostro problema
+lo ha risolto a 1/13 della nostra severita'"*.
+
+🔴 **Ho verificato da dove viene il nostro 40x, e le due soglie NON rispondono alla
+stessa domanda.** Derivazione, testuale da
+`caccia_strategie/CACCIA_TFBASSO_FREQUENZA_2026-09-06.md` r.339-342:
+
+| soglia | da cosa deriva | che domanda risponde |
+|---:|---|---|
+| **40x** | `spread / stop <= 0,025` — il pedaggio puo' mangiare al massimo il **2,5%** del cancello | *"quanto edge sono disposto a regalare al broker?"* |
+| **13,3x** | `spread / stop <= 0,075` — il pedaggio si mangia **tutto** il cancello, il motore deve produrre **il doppio in lordo** | *"sotto quale soglia non vale nemmeno la pena provare?"* |
+| **3,0x** (loro) | rifiuta i setup con stop assurdamente piccolo rispetto allo spread | *"questo setup e' degenere?"* |
+
+👉 **Il nostro 40x e' un BUDGET di edge. Il loro 3,0x e' un controllo di SANITA'.**
+Sono due strumenti diversi che usano la stessa forma algebrica — e confrontare i
+numeri e' come confrontare un limite di velocita' con il giro di motore massimo.
+
+🔁 **Ed e' esattamente la stessa classe dell'errore sciolto ieri notte** (la
+commissione: sonda 0,3 contro broker 0,9, *"vere tutte e due, mancava un termine"*):
+quando due numeri onesti si contraddicono di un fattore grande, l'ipotesi da provare
+per prima e' **"stanno misurando due cose diverse"**, non *"uno dei due sbaglia"*.
+
+## 🛑 E soprattutto: questo NON e' un argomento per abbassare il 40x
+
+La regola di casa dice che insistere vuol dire cercare **una misura in piu'**, mai un
+criterio piu' morbido. 👉 La domanda legittima che resta aperta e' un'altra, e va
+posta bene:
+
+> ### 🔴 **Il 2,5% e' una SCELTA, non una misura. Non e' mai stato misurato quanto edge il pedaggio si mangi DAVVERO sulle nostre celle.**
+
+E la misura esiste gia' in casa, parzialmente: R55 ha misurato il **costo per trade in
+frazione di R** (PTE **0,41% di un R**, ORB **4,5% di un R**: undici volte). 👉 **Quello
+e' il numero giusto per tarare il budget**, e a quel metro l'ORB era gia' fuori.
+
+✅ **Quello che il confronto dimostra davvero, e vale:** siamo gli unici a
+trattare il costo come un **budget di edge** invece che come un filtro anti-assurdita'.
+Non e' severita' eccessiva: e' una domanda diversa — e spiega perche' il catalogo
+pubblico non produce candidati per noi.
+
+🎁 **E il bonus del dossier regge ed e' prezioso**: l'autore di CB 77094 dichiara in
+testa al sorgente di aver aggiunto il filtro di trend HTF **dopo** che i backtest erano
+tornati negativi. E' la **prima conferma esterna documentata** del nostro
+**0 successi su 5** sul filtro appiccicato dopo.

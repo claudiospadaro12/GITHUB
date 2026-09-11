@@ -1,0 +1,162 @@
+# =====================================================================
+#  EA: ABTG_SupertrendReversal_Ottimizzato
+#  R127b -- QUANTE BARRE GUARDA LO STOP: la manopola mai mossa della
+#           sedia d'oro che sta a 0,98 punti dal muro prop
+#           XAUUSD H4 -- asse InpSLLookback, 7 celle
+#  Scritto il 11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R127_USCITE_CRITERI.md
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_SupertrendReversal_Ottimizzato
+#    -Prova prove\R127b_sllookback_XAUUSD.txt
+#    -Simbolo XAUUSD -Periodo H4 -DaQuando 2004.06.11 -Fino 2026.06.30
+#    -Deposito 100000 -Etichetta r127b -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#  -Modello 4 = OHLC M1, ED E' UN LIMITE DICHIARATO: su 22 anni i tick
+#  non esistono. Un numero OHLC e' SCREENING, mai un verdetto. Si usa
+#  qui perche' l'ANCORA di questo file (R99) e' nata cosi', e due numeri
+#  con modelli diversi non si confrontano.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
+#
+#  1) NON E' MAI STATA MOSSA. Verificato il 11/09/2026 su tutti i 2.087
+#     CSV del repo con colonne Inp*: InpSLLookback compare in 290 file e
+#     vale SEMPRE 5. Zero file con due valori, zero variazioni fra corse.
+#     Esiste UN solo file prova che la mette ad asse
+#     (R126b_stop_lookback_U30USD.txt) ma e' su un ALTRO EA e un ALTRO
+#     simbolo, NON e' mai girato e R126 NON e' firmato.
+#
+#  2) ALLARGA LO STOP IN MODO STAZIONARIO, e questo e' il punto.
+#     Lo stop e' min(linea Supertrend, minimo delle ultime InpSLLookback
+#     barre) meno il buffer (r.236-239 del sorgente). Guardare piu'
+#     indietro = stop piu' lontano, in proporzione alla volatilita' del
+#     periodo. Su una finestra di 22 anni in cui l'oro va da 400 a 3.500
+#     dollari, un buffer in PUNTI FISSI non e' confrontabile fra il 2004 e
+#     il 2026; un LOOKBACK in barre si'. E' il motivo per cui su questa
+#     sedia l'asse e' il lookback e non il buffer.
+#
+#  3) LA SEDIA E' A RIDOSSO DI UN CANCELLO, e ha il campione per parlare.
+#     Magic 970901, XAUUSD H4.
+#       DD massimo equity 2004->2026 : 9,02%   contro un muro prop del 10%
+#       n                            : 657     (MERITO PIENO, 657 >> 150)
+#       margine sul muro             : 0,98 punti
+#     Fonte: risultati_archivio\R99_REFERTO.md par. "I TRE NUMERI FIRMATI",
+#     riga A, corsa del 23/08/2026, zip R99_ORO_22ANNI_CORSA_20260823_1333,
+#     criteri firmati da Claudio lo stesso giorno.
+#     R99 scrive testualmente: "il margine e' SOTTILE".
+#
+#  4) E LA DIREZIONE E' TESTABILE, non un auspicio.
+#     A rischio per trade fisso (1%), uno stop piu' largo riduce il LOTTO.
+#     L'ipotesi e' che un lookback piu' lungo compri margine sul muro del
+#     10% vendendo un po' di merito. Il round misura QUANTO merito costa.
+#     Se il DD non scende, l'ipotesi e' falsificata e si scrive cosi'.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  La cella InpSLLookback = 5 E' LA CELLA VIVA e la stessa di R99:
+#    DD massimo equity 22 anni : 9,02%
+#    n                         : 657
+#  TOLLERANZA CONGELATA: n entro +/- 2%, DD entro +/- 0,20 punti.
+#  Fuori da li' NON si prosegue in silenzio: si DICHIARA la differenza e
+#  ci si ferma. R99 e' una corsa OHLC di un altro giorno con un altro
+#  driver: una differenza piccola e' attesa, una grande no.
+#  NOTA ONESTA: R99 dichiara DD, peggior giornata e DD per regime, ma NON
+#  dichiara il PF di quella cella. Quindi il PF dell'ancora di questo file
+#  e' [NON MISURATO] e non si puo' confrontare con niente: lo si legge per
+#  la prima volta qui, e va detto.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: in CALO al crescere del lookback, ma poco. Il lookback non tocca
+#    l'ingresso; tocca dove muore il trade, e uno stop piu' largo lascia
+#    vivere posizioni che prima morivano. Attesa: n fra 600 e 700 su tutte
+#    e 7 le celle. Se n esce da quella banda, il lookback sta cambiando
+#    qualcosa che non capisco e il round si ferma per capire cosa.
+#  - DD 22 anni: attesa 6,5% - 11,0%, in CALO al crescere del lookback.
+#    E' l'ipotesi del round, ed e' quella che puo' essere smentita.
+#  - PF: [NON MISURATO] all'ancora, quindi non dichiaro una banda che non
+#    posso giustificare. Dichiaro invece il CANCELLO: R127-G3 chiede
+#    PF > 1,00 perche' una cella sia ammissibile.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': che il DD si muova POCO (meno di
+#    1,5 punti su tutto l'asse). In quel caso la risposta onesta e' "il
+#    default va bene, il margine sul muro non si compra da qui" -- ed e'
+#    un risultato, non un fallimento.
+#  - E IL RISULTATO CHE MI FAREBBE FERMARE: se la cella 1 (stop strettissimo)
+#    avesse DD PIU' BASSO delle altre. Vorrebbe dire che il DD di questa
+#    sedia non e' governato dalla larghezza dello stop ma dalla frequenza
+#    degli stop-out, e allora la leva giusta e' un'altra.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779420 (verificato per ricerca su tutto il repo,
+#  11/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: prove\R120c_XAUUSD_*.txt (uscite Supertrend sull'oro,
+#  preparato e mai girato) tocca la stessa famiglia: li' trailing e flip
+#  sono l'asse, qui sono PINNATI ACCESI come in campo.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H4
+@DAQUANDO 2004.06.11
+
+# --- IL MOTORE, pinnato sulla cella di R99 (StMult 2,5 / AtrP 7 / TP_RR 2,5)
+#     Fonte dei pin: prove\R99_ORO_22ANNI_RISCHIO.txt, che e' l'artefatto
+#     che ha prodotto il 9,02%. Copiati riga per riga, non a memoria.
+InpUsaGuardian=true
+InpTF=16388
+InpStMult=2.5
+InpStAtrPeriod=7
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20
+InpPendingExpiryBars=3
+
+# --- STOP: il BUFFER e' pinnato al valore vivo (3 x _Point = 0,03 dollari
+#     su XAUUSD a Digits=2: praticamente nullo). E' l'asse di R127a su un
+#     ALTRO simbolo, non di questo file.
+InpSLBufferPips=3
+
+# --- USCITA: tutto pinnato com'e' in campo.
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP_RR=2.5
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R127B LOOKBACK
+InpMagic=779420
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpSLLookback da 1 a 13, passo 2 = 7 celle
+#     1 . 3 . 5 . 7 . 9 . 11 . 13
+#     Il valore VIVO, 5, cade all'indice 2: NON e' un bordo, quindi
+#     l'ancora e' leggibile e la cella ha vicini da tutte e due le parti.
+#     Bordo BASSO 1 = LIMITE FISICO: iLowest(...,count,1) con count 0 non
+#     esiste. Bordo ALTO 13 = FINE GRIGLIA, l'ho scelto io.
+#     Tutti interi: nessun arrotondamento possibile.
+InpSLLookback=5||1||2||13||Y
