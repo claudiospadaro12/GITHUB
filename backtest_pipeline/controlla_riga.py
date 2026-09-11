@@ -19,10 +19,23 @@ DIVISIONE DEL LAVORO, dichiarata:
     file prova misura la cosa giusta? l'ora e' quella del server?).
   - Passare questo script NON sostituisce l'agente. Fallirlo lo blocca.
 
-USO:
+USO -- si DICHIARA che oggetto e' (classe 225, 11/09/2026):
   python3 backtest_pipeline/controlla_riga.py --riga FILE_CON_LA_RIGA.txt
   python3 backtest_pipeline/controlla_riga.py --ps1 backtest_pipeline/righe/X.ps1
-  python3 backtest_pipeline/controlla_riga.py --riga R.txt --ps1 A.ps1 --ps1 B.ps1
+  python3 backtest_pipeline/controlla_riga.py --oggetto md  righe/RIGA_R125_DA_MANDARE.md
+  python3 backtest_pipeline/controlla_riga.py --oggetto prova prove/R125a_costo_buffer_U30USD.txt
+  python3 backtest_pipeline/controlla_riga.py righe/X.ps1 righe/RIGA_Y_DA_MANDARE.md
+     (senza --oggetto il tipo si deduce da .ps1 / .md / prove\, e la deduzione
+      viene STAMPATA. Su un .txt ambiguo il programma si rifiuta e chiede.)
+
+I QUATTRO OGGETTI, e perche' non si controllano allo stesso modo:
+  riga  -- una riga di lancio da incollare: pin, marcatore, raccolta, bersaglio.
+  ps1   -- uno script: ASCII, costrutti pwsh-7, formati .NET, cultura, terminali.
+  prova -- il formato di casa "InpTal=1.0||1.0||0||1.0||N". NON e' PowerShell:
+           i "||" sono l'asse della griglia. Controlli PowerShell SPENTI.
+  md    -- un documento: si estraggono i blocchi ``` e si controllano QUELLI.
+           La prosa NON viene trattata come codice -- ma non viene nemmeno
+           ignorata: vedi controlla_prosa(), che tiene chiusa la classe 223.
 
 USCITA: 0 = nessun difetto BLOCCANTE. 1 = almeno uno. I RILIEVI non bloccano.
 """
@@ -32,12 +45,21 @@ BLOCCANTI = []
 RILIEVI   = []
 PASSATI   = []
 
+# CLASSE 225 (11/09/2026): il cancello non sapeva CHE OGGETTO stava guardando.
+# Da qui in avanti lo sa, e lo dice: ogni messaggio porta davanti il pezzo da
+# cui viene (quale blocco di quale .md). Un difetto senza indirizzo costringe
+# a rileggere tutto il documento per trovarlo, e chi rilegge tutto salta.
+CONTESTO = ""
+
+def _pre(msg):
+    return (CONTESTO + " " + msg) if CONTESTO else msg
+
 def blocca(classe, msg, dove=""):
-    BLOCCANTI.append((classe, msg, dove))
+    BLOCCANTI.append((classe, _pre(msg), dove))
 def rileva(classe, msg, dove=""):
-    RILIEVI.append((classe, msg, dove))
+    RILIEVI.append((classe, _pre(msg), dove))
 def passa(msg):
-    PASSATI.append(msg)
+    PASSATI.append(_pre(msg))
 
 # --- percorsi e conti che non si toccano MAI (regola dei terminali multipli) --
 VIETATI_PERCORSO = ["-V3", "BCM_Reale", "BCM Markets MT5 Terminal"]
@@ -334,15 +356,80 @@ LETTURA_AMMESSI = set(x.lower() for x in [
     "Convert-Path", "ConvertTo-Json", "ConvertFrom-Json", "Import-Csv",
 ])
 # comandi nativi, alias e METODI che scrivono/uccidono e che non hanno la forma Verbo-Nome
+# CLASSE 233 (11/09/2026) -- DUE falsi positivi misurati sullo stesso blocco,
+# il PASSO 3 (la raccolta) di RIGA_R125_DA_MANDARE.md:
+#   a) "& {" NON invoca un eseguibile: apre uno SCRIPTBLOCK, ed e' la forma
+#      con cui comincia OGNI riga di lancio di casa. Chiedere il pin per un
+#      "& {" vuol dire bocciare la forma standard del progetto. Il contenuto
+#      dello scriptblock resta esaminato da tutti gli altri controlli, perche'
+#      e' testo della stessa riga: qui non si perde niente.
+#   b) "\b(rm|rd|ni|md|sp|si|...)\b" scattava sul NOME DI UNA VARIABILE:
+#      "$rd = Join-Path ..." contiene "rd" preceduto da "$", e "$" non e' un
+#      carattere di parola, quindi \b apriva. Tre dei sei difetti del blocco
+#      erano questo. Adesso l'alias non vale se preceduto da $ (variabile),
+#      da - (parametro) o da . (proprieta'/metodo).
 LETTURA_VIETATI = [
-    (r"(?<![A-Za-z0-9_$-])&(?!&)",            "l'operatore di chiamata '&': una riga senza pin non puo' invocare un eseguibile"),
+    (r"(?<![A-Za-z0-9_$-])&(?!&)(?!\s*\{)",   "l'operatore di chiamata '&' su qualcosa che non e' uno scriptblock: una riga senza pin non puo' invocare un eseguibile"),
     (r"\b(taskkill|schtasks|net|reg|attrib|xcopy|robocopy|cmd|wmic|sc)\b", "comando nativo che puo' modificare la macchina"),
-    (r"\b(rm|del|erase|rd|rmdir|ri|mv|cp|ni|cpi|mi|sp|spps|saps|kill|start|echo|tee|ac|iex|ii|si|rp|rni|epcsv|md|mkdir|clc|cli|sal|sbp|rjb|spjb)\b", "alias PowerShell/DOS che scrive o uccide"),
+    (r"(?<![A-Za-z0-9_$.-])(rm|del|erase|rd|rmdir|ri|mv|cp|ni|cpi|mi|sp|spps|saps|kill|start|echo|tee|ac|iex|ii|si|rp|rni|epcsv|md|mkdir|clc|cli|sal|sbp|rjb|spjb)\b", "alias PowerShell/DOS che scrive o uccide"),
     (r"\.(Kill|Close|CloseMainWindow|Stop|Delete|Remove|Save|WriteAllText|WriteAllLines|AppendText|Create)\s*\(", "chiamata a un METODO che modifica lo stato (es. $_.Kill())"),
     (r"\bNew-Object\b",                      "New-Object: puo' costruire un WebClient o uno scrittore di file"),
     (r"\[\s*System\.IO\.",                   "accesso diretto a System.IO"),
     (r">",                                    "redirezione: scrive un file"),
 ]
+# CLASSE 234 (11/09/2026) -- IL BLOCCO DI RACCOLTA E' OBBLIGATORIO E IL CANCELLO
+# LO BOCCIAVA. La regola delle righe di lancio (CLAUDE.md, punto 2) IMPONE la
+# riga di raccolta: copia sul Desktop + Compress-Archive. Quel blocco non scarica
+# niente (quindi non e' pinnabile: non c'e' nessuno script a cui appuntare un
+# commit) e per forza SCRIVE. Con la sola classe 173 usciva BLOCCANTE:
+#   "New-Item, Copy-Item, Compress-Archive non sono nella lista bianca".
+# Cioe' il cancello bocciava la forma che la regola di casa impone. Un cancello
+# che boccia l'unica forma ammessa e' un cancello che si impara a scavalcare.
+#
+# LA REGOLA, e non e' un'esenzione al buio: una RACCOLTA copia RISULTATI.
+# Si declassa a RILIEVO solo se TUTTE e due:
+#   1) gli unici comandi fuori dalla lista bianca stanno in SCRITTURA_RACCOLTA
+#      (creare una cartella, copiare, zippare: niente cancellazioni, niente
+#      esecuzioni, niente comandi nativi);
+#   2) nel testo non compare NESSUN bersaglio delicato -- terminali, profili,
+#      preset, sorgenti, binari, .ini. Una "raccolta" che nomina Experts\ o un
+#      .set non sta raccogliendo: sta toccando il campo, e resta BLOCCANTE.
+# Il cancello FALLISCE CHIUSO: se non riconosce la forma, blocca.
+SCRITTURA_RACCOLTA = set(x.lower() for x in [
+    "New-Item", "Copy-Item", "Compress-Archive", "Expand-Archive",
+    "Out-Null", "Out-File", "Export-Csv", "Add-Content", "Set-Content",
+])
+BERSAGLI_DELICATI = [
+    (r"MetaQuotes", "la cartella dati di MT5"),
+    (r"Experts\\|Indicators\\|Profiles\\|Presets\\|config\\", "una cartella di codice o di configurazione di MT5"),
+    (r"\.(set|ex5|mq5|mqh|chr|ini)\b", "un preset, un sorgente, un binario, un grafico o un .ini"),
+    (r"Program Files", "la cartella dei programmi (li' stanno i terminali)"),
+    (r"terminal64|metaeditor64", "un eseguibile di MetaTrader"),
+]
+
+def raccolta_innocua(crudo, sporche_cmdlet, sporche_pattern):
+    """(True, "") se questo blocco e' una raccolta di risultati e nient'altro.
+
+    ATTENZIONE, ed e' costato un contro-esempio durante la scrittura: i bersagli
+    delicati si cercano nel testo CRUDO, non in quello ripulito dalle stringhe.
+    La prima stesura guardava il testo passato da senza_stringhe(), e un blocco
+    che copiava da
+        "$env:USERPROFILE\MetaQuotes\Terminal\ABC\MQL5\Experts"
+    usciva "raccolta innocua", perche' il percorso sta FRA VIRGOLETTE e li' era
+    gia' stato cancellato. E' la stessa forma delle classi 221 e 223: un percorso
+    sta SEMPRE dentro una stringa, quindi un controllo sui percorsi che guarda il
+    codice nudo non guarda niente.
+    """
+    if sporche_pattern:
+        return False, "usa costrutti che non sono di sola raccolta"
+    for c in sporche_cmdlet:
+        if c.lower() not in SCRITTURA_RACCOLTA:
+            return False, "il cmdlet '" + c + "' non e' fra quelli di una raccolta"
+    for pat, che in BERSAGLI_DELICATI:
+        if re.search(pat, crudo, re.I):
+            return False, "nomina " + che + ": una raccolta copia risultati, non tocca il campo"
+    return True, ""
+
 def esegue_uno_script(riga):
     """True se la riga scarica codice o manda in esecuzione uno .ps1.
     Solo in quel caso il pin e il marcatore hanno un senso (e sono bloccanti)."""
@@ -362,12 +449,15 @@ def controlla_riga_lancio(riga):
         # confine di parola: senza, "Remove-Item" fa scattare anche "Move-Item"
         nudo = senza_stringhe(riga)
         sporche = []
+        sporche_cmdlet, sporche_pattern = [], []
         for cmdlet in re.findall(r"(?<![A-Za-z0-9_.-])([A-Za-z]+-[A-Za-z]+)", nudo):
             if cmdlet.lower() not in LETTURA_AMMESSI:
                 sporche.append("cmdlet '" + cmdlet + "' non e' nella lista bianca di sola lettura")
+                sporche_cmdlet.append(cmdlet)
         for pat, perche in LETTURA_VIETATI:
             if re.search(pat, nudo, re.I):
                 sporche.append(perche)
+                sporche_pattern.append(perche)
         # CLASSE 175 (10/09/2026): la lista bianca fermava "& x.exe" ma NON un
         # eseguibile invocato PER PERCORSO senza '&' -- in PowerShell
         # "C:\python313\python.exe -c ..." parte lo stesso. Il cancello
@@ -399,8 +489,15 @@ def controlla_riga_lancio(riga):
             pass          # gia' bloccata sopra: non si stampa nessun "passa"
         elif esegui and not sporche:
             passa("riga locale senza download: nessun cmdlet fuori dalla lista bianca (ma ESEGUE " + ", ".join(esegui) + ": vedi il rilievo 175)")
+        elif sporche and raccolta_innocua(riga, sporche_cmdlet, sporche_pattern)[0]:
+            # classe 234: e' la riga di raccolta, che la regola di casa IMPONE.
+            rileva("234", "la riga SCRIVE (" + ", ".join(sorted(set(sporche_cmdlet)))
+                   + ") ma e' una RACCOLTA di risultati: nessun terminale, nessun preset,"
+                   + " nessun sorgente, nessuna cancellazione. Non e' pinnata perche' non"
+                   + " scarica niente. Va comunque letto a mano DOVE copia")
         elif sporche:
-            blocca("173", "la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
+            blocca("173", "[" + raccolta_innocua(riga, sporche_cmdlet, sporche_pattern)[1]
+                   + "] la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
         else:
             passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
 
@@ -510,40 +607,250 @@ def controlla_riga_lancio(riga):
     if re.search(r"(InpSessionHour|InpIbInizioOra|SessionHour)\s*[= ]\s*(9|15)\b", riga):
         blocca("FUSO", "ora ITALIANA al posto dell'ora SERVER: server BCM = italiana - 1. DAX = 8 (non 9), Nasdaq = 14 (non 15)")
 
-def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--riga", help="file di testo con la riga di lancio")
-    ap.add_argument("--ps1", action="append", default=[], help="script .ps1 da controllare (ripetibile)")
-    a = ap.parse_args()
+# =====================================================================
+# CLASSE 225 (11/09/2026) -- IL CANCELLO ADESSO SA CHE OGGETTO STA GUARDANDO.
+# Prima c'erano due modi soli (--riga, --ps1) e tre oggetti veri. Costo misurato:
+#   - "--ps1 <file prova .txt>" usciva FAIL con "[PWSH7] operatore doppia pipe":
+#     falso positivo al 100%, perche' nei file prova "||" e' il separatore
+#     dell'asse della griglia, non l'operatore di pwsh 7;
+#   - sui .md non c'era nessun modo, e un percorso posizionale moriva con
+#     "unrecognized arguments";
+#   - "--riga <documento .md>" bocciava la PROSA: RIGA_R125_DA_MANDARE.md usciva
+#     FAIL perche' il testo dice "non tocca il conto reale 10105439" -- cioe' la
+#     frase che PROMETTE di non toccarlo. I tre blocchi PowerShell dentro,
+#     estratti, non avevano nessun difetto meccanico. Un round firmato da Claudio
+#     e' rimasto fermo per questo.
+# Un FAIL plausibile su un oggetto sano insegna a ignorare il cancello, che e' il
+# modo piu' rapido per spegnere una rete di sicurezza senza toccarla.
+# =====================================================================
 
-    if not a.riga and not a.ps1:
-        print("niente da controllare: passa --riga e/o --ps1")
-        return 2
+# linguaggi di blocco che NON sono PowerShell: li' dentro non si cerca codice
+LINGUAGGI_NON_PS = set([
+    "text", "txt", "csv", "ini", "json", "yaml", "yml", "xml", "md", "diff",
+    "mql5", "mq5", "cpp", "c", "python", "py", "bash", "sh", "sql", "log",
+    "console", "output", "tabella",
+])
+LINGUAGGI_PS = set(["powershell", "ps", "ps1", "pwsh", "posh"])
+# come si riconosce un blocco SENZA linguaggio dichiarato: se odora di PowerShell
+# lo si controlla lo stesso. Meglio un controllo in piu' su un blocco di testo che
+# un blocco di comandi non guardato perche' mancava l'etichetta.
+ODORE_PS = re.compile(r"(\birm\b|\biwr\b|Invoke-RestMethod|& powershell|powershell\.exe|"
+                      r"Write-Host|Get-ChildItem|Compress-Archive|\$env:|\$pin|-Terminal|"
+                      r"Select-String|New-Item|Copy-Item|\bexit\b)", re.I)
 
-    if a.riga:
-        if not os.path.exists(a.riga):
-            print("ERRORE: file riga non trovato: " + a.riga); return 2
-        riga = open(a.riga, "r", encoding="utf-8", errors="replace").read().strip()
+def blocchi_md(testo):
+    """(numero_riga_apertura, linguaggio, contenuto) di ogni blocco ``` del .md."""
+    fuori = []
+    dentro = False
+    ling, inizio, buf = "", 0, []
+    for i, riga in enumerate(testo.splitlines(), 1):
+        m = re.match(r"^[ \t]*```([A-Za-z0-9_+-]*)[ \t]*$", riga)
+        if m and not dentro:
+            dentro, ling, inizio, buf = True, m.group(1).lower(), i, []
+            continue
+        if dentro and re.match(r"^[ \t]*```[ \t]*$", riga):
+            fuori.append((inizio, ling, "\n".join(buf)))
+            dentro = False
+            continue
+        if dentro:
+            buf.append(riga)
+    if dentro:                       # recinto aperto e mai chiuso: si dichiara
+        fuori.append((inizio, ling, "\n".join(buf)))
+    return fuori
+
+def prosa_di(testo, blocchi):
+    """Le righe del .md che NON stanno dentro un blocco ```."""
+    dentro = set()
+    for inizio, _l, cont in blocchi:
+        n = len(cont.splitlines())
+        for k in range(inizio, inizio + n + 2):
+            dentro.add(k)
+    return [(i, r) for i, r in enumerate(testo.splitlines(), 1) if i not in dentro]
+
+def controlla_prosa(path, testo, blocchi):
+    """LA PARTE DELICATA. Spegnere i controlli sulla prosa NON deve riaprire il
+    buco della classe 223 (una riga puntata sul conto reale che esce pulita).
+
+    Quindi la prosa non e' ignorata, e' trattata per quello che e':
+      - un percorso vietato passato come VALORE di -Terminal.../-Percorso...
+        BLOCCA anche se sta nella prosa. La regola della 221 non dipende dal
+        recinto: un bersaglio vietato non e' mai innocente, ovunque sia scritto.
+      - una riga di prosa che ha la FORMA di un comando (irm, & powershell,
+        terminal64.exe) e nomina un percorso vietato BLOCCA: fuori dai recinti
+        si scrive in italiano, non si scrivono comandi.
+      - la semplice MENZIONE ("il driver muore se punta a C:\BCM_Reale") e' un
+        RILIEVO, non un errore: e' la frase che PROMETTE di non toccarlo.
+    """
+    prosa = prosa_di(testo, blocchi)
+    menzioni, comandi = [], 0
+    for i, r in prosa:
+        for v, val in bersagli_vietati(r):
+            blocca("221", "r." + str(i) + " (PROSA): il terminale VIETATO '" + v
+                   + "' e' passato come BERSAGLIO (-Terminal.../-Percorso... = '" + val
+                   + "'). Fuori da un blocco o dentro, un bersaglio vietato non e' mai innocente", path)
+        pare_comando = re.search(r"(\birm\b|& powershell|powershell\.exe|terminal64\.exe|"
+                                 r"Invoke-RestMethod|Start-Process)", r, re.I)
+        nominati = [v for v in VIETATI_PERCORSO if v in r] + [c for c in CONTI_VIETATI if c in r]
+        if pare_comando and nominati:
+            comandi += 1
+            blocca("225", "r." + str(i) + " (PROSA): riga con la FORMA di un COMANDO che nomina "
+                   + ", ".join(nominati) + " e sta FUORI da un blocco ```. Un comando fuori dal"
+                   + " recinto non e' controllabile e non deve esistere: o entra in un blocco"
+                   + " powershell, o si riscrive in italiano", path)
+        elif nominati:
+            menzioni.append(str(i) + ":" + "/".join(nominati))
+    if menzioni:
+        rileva("225", "la PROSA nomina terminali o conti vietati in " + str(len(menzioni))
+               + " righe (" + ", ".join(menzioni[:8]) + "): NON e' un difetto -- in un documento"
+               + " che spiega cosa non si tocca queste frasi ci DEVONO essere -- ma vanno"
+               + " rilette a occhio, perche' qui il cancello non giudica", path)
+    if not menzioni and not comandi:
+        passa("la prosa non nomina nessun terminale o conto vietato: " + os.path.basename(path))
+
+def controlla_md(path, testo):
+    global CONTESTO
+    blocchi = blocchi_md(testo)
+    if not blocchi:
+        rileva("225", "nessun blocco ``` in questo .md: non c'e' niente da controllare"
+               + " meccanicamente. Se il documento contiene comandi, vanno messi in un"
+               + " blocco ```powershell, altrimenti nessun cancello li vedra' mai", path)
+    controllati, saltati = 0, []
+    for inizio, ling, cont in blocchi:
+        if not cont.strip():
+            continue
+        e_ps = (ling in LINGUAGGI_PS) or (ling == "" and bool(ODORE_PS.search(cont)))
+        if not e_ps:
+            saltati.append("r." + str(inizio) + " (```" + (ling or "senza linguaggio") + ")")
+            continue
+        controllati += 1
+        CONTESTO = "[blocco r." + str(inizio) + "]"
+        try:
+            riga = cont.strip()
+            try:
+                riga.encode("ascii")
+            except UnicodeEncodeError:
+                blocca("ASCII", "il blocco contiene caratteri non-ASCII (emoji?):"
+                       " incollato in PowerShell 5.1 puo' rompersi")
+            controlla_riga_lancio(riga)
+        finally:
+            CONTESTO = ""
+    passa("blocchi ``` trovati: " + str(len(blocchi)) + ", controllati come riga di lancio: "
+          + str(controllati) + ("; NON controllati: " + ", ".join(saltati) if saltati else "")
+          + "  [" + os.path.basename(path) + "]")
+    controlla_prosa(path, testo, blocchi)
+
+def controlla_file_prova(path, dati, testo):
+    """Un file prova NON e' PowerShell: e' il formato di casa
+       InpTal=1.0||1.0||0||1.0||N
+    I controlli PWSH7 / cultura / formati .NET qui non hanno senso, e il '||'
+    dell'asse li fa gridare al lupo. Restano quelli che un file prova PUO'
+    davvero sbagliare: byte non-ASCII, ora italiana al posto dell'ora server,
+    e il nome di un terminale che qui non ci deve stare proprio.
+    """
+    try:
+        dati.decode("ascii")
+        passa("file prova ASCII puro: " + os.path.basename(path))
+    except UnicodeDecodeError:
+        blocca("ASCII", "il file prova contiene byte non-ASCII: lo legge PowerShell 5.1"
+               " (ANSI) e finisce dentro un .ini del tester", path)
+    # ora SERVER, non italiana (regola fissa di CLAUDE.md: server = italiana - 1)
+    for i, r in enumerate(testo.splitlines(), 1):
+        m = re.match(r"\s*(InpSessionHour|InpIbInizioOra)\s*=\s*(\d+)", r)
+        if m and m.group(2) in ("9", "15"):
+            blocca("FUSO", "r." + str(i) + ": " + m.group(1) + "=" + m.group(2)
+                   + " e' ora ITALIANA. Il server BCM e' un'ora indietro: DAX 8, Nasdaq 14", path)
+    controlla_terminali(path, testo, path)
+    rileva("225", "controlli PowerShell (PWSH7, cultura, formati .NET) SPENTI su questo"
+           " oggetto: un file prova non e' uno script. Il cancello SEMANTICO dei file prova"
+           " e' un altro programma, e va lanciato a parte:"
+           " python3 backtest_pipeline/controlla_prova.py " + path, path)
+
+def tipo_dedotto(path):
+    """Che oggetto e'? Si DEDUCE solo quando e' inequivocabile, altrimenti si CHIEDE.
+    Indovinare il tipo e' esattamente il difetto della classe 225."""
+    b = path.lower()
+    if b.endswith(".ps1"):
+        return "ps1"
+    if b.endswith(".md"):
+        return "md"
+    if "/prove/" in b.replace("\\", "/") or "\\prove\\" in b:
+        return "prova"
+    return None
+
+def esamina(tipo, percorso):
+    """Un oggetto, un tipo dichiarato, i controlli che a quel tipo si applicano."""
+    if not os.path.exists(percorso):
+        blocca("FILE", "file non trovato: " + percorso)
+        return
+    dati  = leggi(percorso)
+    testo = dati.decode("utf-8", errors="replace")
+
+    if tipo == "riga":
+        riga = testo.strip()
         try:
             riga.encode("ascii")
             passa("la riga di lancio e' ASCII puro")
         except UnicodeEncodeError:
             blocca("ASCII", "la riga di lancio contiene caratteri non-ASCII (emoji?): incollata in PowerShell 5.1 puo' rompersi")
         controlla_riga_lancio(riga)
+    elif tipo == "ps1":
+        controlla_ascii(percorso, dati)
+        controlla_pwsh7(percorso, testo)
+        controlla_formati_net(percorso, testo)
+        controlla_cultura(percorso, testo)
+        controlla_terminali(percorso, testo, percorso)
+    elif tipo == "prova":
+        controlla_file_prova(percorso, dati, testo)
+    elif tipo == "md":
+        controlla_md(percorso, testo)
 
-    for p in a.ps1:
-        if not os.path.exists(p):
-            blocca("FILE", "script non trovato: " + p); continue
-        dati = leggi(p)
-        testo = dati.decode("utf-8", errors="replace")
-        controlla_ascii(p, dati)
-        controlla_pwsh7(p, testo)
-        controlla_formati_net(p, testo)
-        controlla_cultura(p, testo)
-        controlla_terminali(p, testo, p)
+def main():
+    ap = argparse.ArgumentParser(
+        description="Il cancello deterministico. DIMMI CHE OGGETTO E': "
+                    "--oggetto riga|ps1|prova|md (classe 225).")
+    ap.add_argument("file", nargs="*", help="file da controllare (con --oggetto, o con un'estensione che parla da sola)")
+    ap.add_argument("--oggetto", choices=["riga", "ps1", "prova", "md"],
+                    help="che cosa sono i file passati. Senza, si deduce da .ps1/.md/prove/ e si DICHIARA")
+    ap.add_argument("--riga", help="file di testo con la riga di lancio")
+    ap.add_argument("--ps1", action="append", default=[], help="script .ps1 da controllare (ripetibile)")
+    ap.add_argument("--prova", action="append", default=[], help="file prova (formato di casa, NON PowerShell)")
+    ap.add_argument("--md", action="append", default=[], help="documento .md: si controllano i BLOCCHI ``` dentro")
+    a = ap.parse_args()
+
+    lavoro = []
+    if a.riga:  lavoro.append(("riga", a.riga))
+    for x in a.ps1:   lavoro.append(("ps1", x))
+    for x in a.prova: lavoro.append(("prova", x))
+    for x in a.md:    lavoro.append(("md", x))
+    for x in a.file:
+        t = a.oggetto or tipo_dedotto(x)
+        if t is None:
+            print("NON SO CHE OGGETTO E': " + x)
+            print("  un .txt puo' essere una riga di lancio O un file prova, e i controlli")
+            print("  sono diversi. Dimmelo: --oggetto riga|ps1|prova|md " + x)
+            return 2
+        if not a.oggetto:
+            print("[dedotto] " + x + " -> oggetto '" + t + "' (dall'estensione/percorso)")
+        lavoro.append((t, x))
+    # --oggetto vale anche sui file passati con i modi espliciti: se qualcuno
+    # scrive "--ps1 file_prova.txt --oggetto prova", comanda l'oggetto.
+    if a.oggetto:
+        lavoro = [(a.oggetto, q) for _t, q in lavoro]
+
+    if not lavoro:
+        print("niente da controllare.")
+        print("  python3 controlla_riga.py --riga RIGA.txt")
+        print("  python3 controlla_riga.py --ps1 script.ps1")
+        print("  python3 controlla_riga.py --oggetto md backtest_pipeline/righe/RIGA_X_DA_MANDARE.md")
+        print("  python3 controlla_riga.py --oggetto prova backtest_pipeline/prove/R125a.txt")
+        return 2
+
+    for tipo, percorso in lavoro:
+        esamina(tipo, percorso)
 
     print("=" * 70)
     print("  CONTROLLO PREVENTIVO -- cancello deterministico")
+    print("  OGGETTI ESAMINATI: " + ", ".join(t + " -> " + q for t, q in lavoro))
     print("=" * 70)
     if PASSATI:
         print("\n  PASSATI (" + str(len(PASSATI)) + "):")

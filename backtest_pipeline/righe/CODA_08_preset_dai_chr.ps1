@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_CODA_08_PRESET_DAI_CHR_v2
+#  MARCATORE_CODA_08_PRESET_DAI_CHR_v3
 #  RUNNER_SOLA_LETTURA
 # ---------------------------------------------------------------------
 #  COSA FA: per OGNI sedia del profilo ATTIVO stampa TUTTI i suoi
@@ -66,6 +66,44 @@
 #        niente. "Uno zero non e' una prova finche' non dimostri di aver
 #        guardato nel posto giusto."
 # =====================================================================
+#  PERCHE' ESISTE LA v3 -- classe 232, trovata l'11/09/2026
+#  La v2 stampava OGNI riga "Inp*=" trovata NEL FILE, in qualunque punto
+#  del .chr stesse. Ma un .chr non e' una lista piatta: ha BLOCCHI.
+#     <chart> ... <expert> ... <inputs> ...gli input dell'EA... </inputs>
+#              ...  </expert> <window> <indicator> ... <inputs>
+#              ...gli input dell'INDICATORE... </inputs> </indicator>
+#  Risultato misurato sul referto del 11/09 03:31:
+#     - "ABTG_Dow_Apertura_US" stampava 112 parametri; l'EA ne dichiara 81
+#       (100k, col Guardian) / 80 (piccolo). I 32 di troppo sono, NELLO
+#       STESSO ORDINE, i 32 input di mql5/Indicators/ABTG_Look.mq5;
+#     - "ABTG_TradeExporter" stampava 36 parametri; il sorgente ne ha 4.
+#       4 + 32 = 36. Gli stessi 32.
+#     - e InpVerbose compariva DUE VOLTE (true dall'EA, false da ABTG_Look):
+#       un .set cosi' su un EA NON e' caricabile -- in MQL5 due input con
+#       lo stesso nome non esistono.
+#
+#  >>> IL DANNO: l'11/09 un preset vero e' stato scritto COPIANDO da questo
+#      stampato (mql5\Presets\ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set).
+#      Chi copia un blocco senza sapere che e' mescolato ci mette 32 righe
+#      false, su una sedia VIVA. Quel preset e' stato verificato riga per
+#      riga contro il sorgente ed e' PULITO (81 su 81, stesso ordine) --
+#      ma e' pulito perche' chi l'ha scritto si e' accorto del difetto,
+#      non perche' lo strumento glielo impedisse. Il prossimo non se ne
+#      accorge.
+#
+#  La correzione della v3:
+#   C3 - si ESTRAE prima <expert>...</expert>, poi <inputs>...</inputs>
+#        DENTRO quel blocco, e si stampa SOLO quello. Stesso ancoraggio gia'
+#        usato da estrai_set_forward.ps1 e verifica_vivaio_r23.ps1 (che nel
+#        commento aveva gia' scritto il perche': "sul grafico possono
+#        esserci indicatori custom col proprio blocco <inputs>").
+#   C4 - cio' che si scarta si DICHIARA, con nome e path dell'indicatore
+#        a cui appartiene, piu' il residuo eventuale fuori da ogni blocco.
+#        Un numero tolto in silenzio e' lo stesso difetto di un numero
+#        aggiunto in silenzio.
+#   C5 - si controlla che nel blocco stampato non ci siano NOMI DOPPI: se
+#        ce ne sono, il .set non caricherebbe, e va detto sul momento.
+# =====================================================================
 
 function Leggi-Condiviso($path){
   $b = $null
@@ -84,9 +122,64 @@ function Leggi-Condiviso($path){
 }
 
 function Campo($txt,$nome){
-  $m = [regex]::Match($txt, "(?im)^\s*" + [regex]::Escape($nome) + "\s*=\s*(.*)$")
-  if($m.Success){ return $m.Groups[1].Value.Trim() }
+  # 11/09/2026: "\s" comprende l'A-CAPO. Con "\s*=\s*(.*)$" un campo VUOTO
+  #   path=
+  #   apply=1
+  # restituiva "apply=1", cioe' il valore della riga DOPO. Su un .chr i campi
+  # vuoti sono normali (path= dell'indicatore Main, InpNewsCurrencies= dell'EA):
+  # qui si resta sulla RIGA, spazi e tabulazioni e basta.
+  # stessa forma gia' in uso in CODA_01 v2, che questo difetto non l'aveva
+  $m = [regex]::Match($txt, "(?im)^[ \t]*" + [regex]::Escape($nome) + "[ \t]*=[ \t]*(.*?)[ \t]*$")
+  if($m.Success -and $m.Groups[1].Value.Trim().Length -gt 0){ return $m.Groups[1].Value.Trim() }
   return "-"
+}
+
+# --- C3: I BLOCCHI DEL .chr. Un .chr NON e' una lista piatta di Inp*.
+#     <expert> ... <inputs> input DELL'EA </inputs> ... </expert>
+#     <window> <indicator> ... <inputs> input DELL'INDICATORE </inputs> ...
+#     Si estrae PRIMA il blocco, POI gli <inputs> DENTRO quel blocco: mai
+#     "<expert>.*?<inputs>" in un colpo solo, perche' se l'EA non ha input
+#     quella ricerca scavalca </expert> e pesca gli input del primo
+#     indicatore -- cioe' rifarebbe lo stesso difetto in forma piu' subdola.
+function Blocco-Expert($txt){
+  $m = [regex]::Match($txt, "(?s)<expert>(.*?)</expert>")
+  if($m.Success){ return $m.Groups[1].Value }
+  return ""
+}
+
+function Blocco-Inputs($blocco){
+  if(-not $blocco){ return "" }
+  $m = [regex]::Match($blocco, "(?s)<inputs>(.*?)</inputs>")
+  if($m.Success){ return $m.Groups[1].Value }
+  return ""
+}
+
+# righe "Inp*=..." di un pezzo di testo, nell'ordine in cui stanno
+function Righe-Inp($blocco){
+  $out = @()
+  if(-not $blocco){ return $out }
+  foreach($riga in ($blocco -split "`r?`n")){
+    $r = $riga.Trim()
+    if($r -match "^(Inp[A-Za-z0-9_]+)\s*=\s*(.*)$"){
+      $out += (New-Object psobject -Property @{ Nome=$matches[1]; Valore=$matches[2].Trim() })
+    }
+  }
+  return $out
+}
+
+# --- C4: DI CHI SONO I PARAMETRI CHE NON STAMPO. Nome e path, non "altri".
+function Indicatori-Con-Input($txt){
+  $out = @()
+  foreach($m in [regex]::Matches($txt, "(?s)<indicator>(.*?)</indicator>")){
+    $b    = $m.Groups[1].Value
+    $ins  = Blocco-Inputs $b
+    $n    = @(Righe-Inp $ins).Count
+    if($n -eq 0){ continue }   # un indicatore senza input non e' una notizia
+    $nome = Campo $b "name"
+    $path = Campo $b "path"
+    $out += (New-Object psobject -Property @{ Nome=$nome; Path=$path; Quanti=$n })
+  }
+  return $out
 }
 
 # --- C1: DOVE stanno i profili. Si prova, non si assume, e si dichiara.
@@ -169,10 +262,12 @@ function Trova-ProfiloAttivo($dataFolder,$profili){
 }
 
 $root = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-Write-Host "=== I PARAMETRI DI OGNI SEDIA, IN FORMA DI .set (v2) ==="
+Write-Host "=== I PARAMETRI DI OGNI SEDIA, IN FORMA DI .set (v3) ==="
 Write-Host ("data lettura: " + (Get-Date -Format "yyyy-MM-dd HH:mm:ss") + "  (ora locale)")
 Write-Host "letti dai .chr del PROFILO ATTIVO. I .chr sono una foto al salvataggio del profilo."
 Write-Host "v2: percorso dei profili RISOLTO e dichiarato; ogni zero dice PERCHE' e' zero."
+Write-Host "v3: si stampano SOLO gli input del blocco <expert>. Quelli degli INDICATORI"
+Write-Host "    appesi al grafico sono esclusi e contati a parte, indicatore per indicatore."
 if(-not (Test-Path $root)){ Write-Host "NESSUNA cartella MetaQuotes\Terminal"; exit 1 }
 
 $cart = @(Get-ChildItem $root -Directory -ErrorAction SilentlyContinue | Where-Object { Test-Path (Join-Path $_.FullName "MQL5") })
@@ -235,15 +330,34 @@ foreach($d in $cart){
   foreach($x in $chr){
     $txt = Leggi-Condiviso $x.FullName
     if(-not $txt){ $illeggibili++; continue }
-    $ea = Campo $txt "name"
+
+    # v3: il blocco <expert> PRIMA di ogni altra cosa. Senza quel blocco
+    #     non c'e' nessuna sedia, e il 'name=' del file sarebbe quello
+    #     della finestra del grafico ('Main') o di un indicatore.
+    $bloccoEa = Blocco-Expert $txt
+    if(-not $bloccoEa){ $scartNoExpert++; continue }
+
+    $ea = Campo $bloccoEa "name"
+    if($ea -eq "-"){
+      $mp = [regex]::Match($bloccoEa, "(?i)path\s*=\s*Experts\\(.+?)\.ex5")
+      if($mp.Success){ $ea = [IO.Path]::GetFileNameWithoutExtension($mp.Groups[1].Value) }
+    }
     if($ea -eq "-" -or $ea -ieq "Main"){ $scartMain++; continue }
-    if($txt -notmatch "<expert>"){ $scartNoExpert++; continue }
+
     $totSedie++
     $sedieQui++
 
+    $inputsEa = Blocco-Inputs $bloccoEa
+    $pEa      = @(Righe-Inp $inputsEa)
+    $indic    = @(Indicatori-Con-Input $txt)
+    $totFile  = @(Righe-Inp $txt).Count
+    $totInd   = 0
+    foreach($i in $indic){ $totInd += $i.Quanti }
+    $altrove  = $totFile - $pEa.Count - $totInd
+
     $sym   = Campo $txt "symbol"
-    $magic = Campo $txt "InpMagic"
-    if($magic -eq "-"){ $magic = Campo $txt "InpMagicNumber" }
+    $magic = Campo $inputsEa "InpMagic"
+    if($magic -eq "-"){ $magic = Campo $inputsEa "InpMagicNumber" }
 
     Write-Host ""
     Write-Host ("--- SEDIA: " + $ea + "  su " + $sym + "   magic " + $magic + "   [" + $x.Name + "] ---")
@@ -251,20 +365,37 @@ foreach($d in $cart){
     Write-Host ("; terminale: " + $prog + " . profilo: " + $att.Nome)
     Write-Host ("; EA: " + $ea + " . simbolo del grafico: " + $sym)
     Write-Host ("; .chr modificato il: " + $x.LastWriteTime.ToString("yyyy-MM-dd HH:mm"))
+    Write-Host "; v3: sotto ci sono SOLO gli input del blocco <expert>. Copiabile in un .set."
 
-    # tutte le righe Inp* dentro il file, nell'ordine in cui stanno
-    $n = 0
-    foreach($riga in ($txt -split "`r?`n")){
-      $r = $riga.Trim()
-      if($r -match "^(Inp[A-Za-z0-9_]+)\s*=\s*(.*)$"){
-        $n++
-        Write-Host ($matches[1] + "=" + $matches[2].Trim())
+    foreach($p in $pEa){ Write-Host ($p.Nome + "=" + $p.Valore) }
+
+    if($pEa.Count -eq 0){
+      if(-not $inputsEa){
+        Write-Host "; NESSUN blocco <inputs> dentro <expert>: l'EA e' attaccato ma il profilo non e' mai stato salvato dopo, oppure l'EA non ha input."
+      } else {
+        Write-Host "; blocco <inputs> dell'EA TROVATO ma VUOTO di righe Inp*: l'EA usa nomi diversi da 'Inp...'."
+      }
+    } else {
+      Write-Host ("; parametri dell'EA stampati: " + $pEa.Count)
+    }
+
+    # C5: due input con lo stesso nome = .set che non carica. Si dice subito.
+    $dupl = @($pEa | Group-Object Nome | Where-Object { $_.Count -gt 1 })
+    if($dupl.Count -gt 0){
+      Write-Host ("; [!!] NOMI DOPPI nel blocco dell'EA (" + (($dupl | ForEach-Object { $_.Name }) -join ", ") + "): un .set cosi' NON carica. Va capito prima di usarlo.")
+    }
+
+    # C4: cio' che NON ho stampato, e di chi era. Mai un taglio muto.
+    Write-Host ("; SCARTATI perche' NON dell'EA: " + ($totInd + [math]::Max(0,$altrove)) + " su " + $totFile + " righe Inp* presenti nel .chr")
+    if($indic.Count -eq 0){
+      Write-Host ";   nessun indicatore con input sul grafico"
+    } else {
+      foreach($i in $indic){
+        Write-Host (";   INDICATORE '" + $i.Nome + "' (" + $i.Path + "): " + $i.Quanti + " input scartati")
       }
     }
-    if($n -eq 0){
-      Write-Host "; NESSUN parametro Inp* trovato in questo .chr: l'EA usa altri nomi, oppure il profilo non e' mai stato salvato dopo l'attacco."
-    } else {
-      Write-Host ("; parametri stampati: " + $n)
+    if($altrove -gt 0){
+      Write-Host ("; [!] " + $altrove + " righe Inp* stanno FUORI da <expert> e fuori da ogni <indicator>: non so di chi sono, e NON le ho stampate.")
     }
   }
 
@@ -297,6 +428,12 @@ if($totSedie -eq 0){
 }
 Write-Host "====================================================================="
 Write-Host "COME SI USA: si copiano le righe Inp* di una sedia in un file .set del repo."
+Write-Host "v3: le righe stampate sono SOLO quelle del blocco <expert>, quindi il blocco e'"
+Write-Host "copiabile cosi' com'e'. Le righe '; SCARTATI' dicono quante ne ho tolte e di CHI"
+Write-Host "erano: se quel numero non e' zero, il vecchio referto della v2 era contaminato."
+Write-Host "CONTROLLO FINALE CHE RESTA A CHI SCRIVE IL .set: i nomi stampati devono coincidere"
+Write-Host "con le dichiarazioni 'input' del sorgente dell'EA. Lo strumento separa i blocchi,"
+Write-Host "non certifica il sorgente."
 Write-Host "Quel .set va poi CONFRONTATO col preset gia' esistente, se c'e': se differiscono,"
 Write-Host "vince cio' che GIRA, ma la differenza va dichiarata, non appianata in silenzio."
 Write-Host "Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente."

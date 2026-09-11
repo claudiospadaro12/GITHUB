@@ -181,6 +181,14 @@ input long   InpMagic          = 772311;  // magic number
 input string InpComment        = "COST";  // commento ordini
 input bool   InpVerbose        = true;    // log estesi
 
+//--- IMBUTO DI MORTALITA' (11/09/2026): governa SOLO il log, non il trading.
+//    true  = a fine giornata scrive nel Giornale una riga che dice quante
+//            candidate d'ingresso sono state scartate e DA QUALE condizione.
+//    false = nessuna riga (i contatori girano lo stesso, in memoria).
+//    Default true: un log non e' un rischio, e senza di lui questa sedia era
+//    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
+input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
+
 //==================================================================
 //  STATO
 //==================================================================
@@ -239,6 +247,111 @@ double gWorstDayPct    = 0.0;   // numero NEGATIVO
 int    gDayEqStamp     = -1;
 
 void Log(string m){ if(InpVerbose) Print("[COST] ", m); }
+
+//==================================================================
+//  IMBUTO IN FORWARD [COST-IMBUTO] -- SOLO DIAGNOSTICA (11/09/2026)
+//  Il funnel [COST-FUNNEL] qui sopra esisteva gia', ma lo stampa SOLO
+//  OnTester(): in backtest parla, in FORWARD mai (i contatori si
+//  riempiono in memoria e muoiono a OnDeinit). Referto:
+//  report/PERCHE_ENTRANO_POCO_2026-09-11.md, paragrafo 5.4.
+//  Qui si aggiunge un riepilogo di FINE GIORNATA che stampa le stesse
+//  quantita' come DIFFERENZA rispetto a inizio giornata. I contatori
+//  restano cumulativi: OnTester continua a vedere esattamente cio' che
+//  vedeva prima.
+//  !! Solo incrementi e Print. Nessuna condizione, soglia o ordine.
+//  I QUATTRO CONTATORI NUOVI servono a CHIUDERE la somma: senza di
+//  loro tre rami di TryEnter non erano contati da nessuno, e cF_busy
+//  veniva incrementato in DUE punti diversi (ValutaSegnale e TryEnter)
+//  finendo per contare due cose diverse nella stessa casella.
+//==================================================================
+long cV_conferme=0;    // chiamate di ValutaSegnale: e' il DENOMINATORE vero dello stadio 1
+long cA_armati=0;      // segnali ARMATI (passati tutti i filtri di ValutaSegnale)
+long cT_busy=0;        // posto occupato fra la conferma e la riprova (parte di cF_busy)
+long cT_dup=0;         // deal gia' presenti da questa conferma: niente doppione
+long cT_guardian=0;    // fermato dal Guardian del conto (il segnale resta armato)
+//--- riepilogo di fine giornata: i contatori restano CUMULATIVI e la
+//    riga stampa la DIFFERENZA con la fotografia di inizio giornata.
+long     gImbSnap[];
+int      gImbGiorno=-1;
+datetime gImbData=0;
+
+//==================================================================
+//  IMBUTO: raccolta, stampa e giro di giornata.
+//  COME SI LEGGE, e quali somme TORNANO davvero:
+//   - stadio CONFERME -> GREZZI: chiuso (quadratura stampata);
+//   - stadio GREZZI -> ARMATI: chiuso (quadratura stampata), usando
+//     cF_busy-cT_busy per separare i due punti che incrementano cF_busy;
+//   - stadio ARMATI -> ESITI: NON si chiude dentro la giornata, ed e'
+//     giusto cosi': un segnale armato la sera puo' entrare il giorno
+//     dopo (finestra di riprova InpEntryWindowBars) e il Guardian puo'
+//     bloccarlo piu' volte lasciandolo armato. Quella riga si legge
+//     come elenco di cause, non come somma. DICHIARATO, non nascosto.
+//==================================================================
+void ImbutoRaccogli(long &v[])
+  {
+   ArrayResize(v,21);
+   v[0]=cR_noim;      v[1]=cR_contro;   v[2]=cS_long;     v[3]=cS_short;
+   v[4]=cR_late;      v[5]=cF_side;     v[6]=cF_busy;     v[7]=cF_target;
+   v[8]=cF_range;     v[9]=cF_atr;      v[10]=cA_armati;
+   v[11]=cT_busy;     v[12]=cT_dup;     v[13]=cT_guardian;
+   v[14]=cO_spread;   v[15]=cO_failLevel; v[16]=cO_failLot; v[17]=cO_failSend;
+   v[18]=cI_long;     v[19]=cI_short;   v[20]=cV_conferme;
+  }
+
+void ImbutoStampa(string quando)
+  {
+   if(!InpLogImbuto) return;
+   long v[]; ImbutoRaccogli(v);
+   int n=ArraySize(v);
+   if(ArraySize(gImbSnap)!=n){ ArrayResize(gImbSnap,n); ArrayInitialize(gImbSnap,0); }
+   long d[]; ArrayResize(d,n);
+   long tot=0;
+   for(int i=0;i<n;i++){ d[i]=v[i]-gImbSnap[i]; tot+=d[i]; }
+   if(tot<=0) return;   // giornata senza conferme di punta: niente riga
+   long grezzi   = d[2]+d[3];
+   long conferme = d[20];              // contato a monte, NON dedotto dalla somma
+   long busyVal  = d[6]-d[11];          // la parte di cF_busy nata in ValutaSegnale
+   long s2       = d[4]+d[5]+busyVal+d[7]+d[8]+d[9]+d[10];
+   long entrati  = d[18]+d[19];
+   string testa="[COST-IMBUTO] "+_Symbol+" "+EnumToString(InpTF)+" "+quando;
+   Print(testa+" | CONFERME di punta "+IntegerToString(conferme)+
+         " | trend intermedio indefinito "+IntegerToString(d[0])+
+         " | conferma contro trend "+IntegerToString(d[1])+
+         " | SEGNALI GREZZI "+IntegerToString(grezzi)+" (long "+IntegerToString(d[2])+
+         " short "+IntegerToString(d[3])+")"+
+         " | quadratura "+((d[0]+d[1]+grezzi==conferme)?"OK":
+          ("ROTTA: somma "+IntegerToString(d[0]+d[1]+grezzi)+" contro conferme "+IntegerToString(conferme))));
+   Print(testa+" | dai GREZZI: conferma vecchia "+IntegerToString(d[4])+
+         " | lato spento "+IntegerToString(d[5])+
+         " | posizione aperta "+IntegerToString(busyVal)+
+         " | target assente/sbagliato "+IntegerToString(d[7])+
+         " | range sotto il minimo "+IntegerToString(d[8])+
+         " | ATR n/d "+IntegerToString(d[9])+
+         " | ARMATI "+IntegerToString(d[10])+
+         " | quadratura "+((s2==grezzi)?"OK":
+          ("ROTTA: somma "+IntegerToString(s2)+" contro grezzi "+IntegerToString(grezzi))));
+   Print(testa+" | dagli ARMATI (elenco di cause, NON una somma: un armato puo' entrare il giorno dopo):"+
+         " posto occupato alla riprova "+IntegerToString(d[11])+
+         " | gia' operato da questa conferma "+IntegerToString(d[12])+
+         " | guardian "+IntegerToString(d[13])+
+         " | spread per tutta la finestra "+IntegerToString(d[14])+
+         " | livello SL/TP "+IntegerToString(d[15])+
+         " | lotto nullo "+IntegerToString(d[16])+
+         " | invio fallito "+IntegerToString(d[17])+
+         " | ENTRATI "+IntegerToString(entrati));
+  }
+
+void ImbutoGiro()
+  {
+   if(!InpLogImbuto) return;
+   datetime ora=TimeCurrent();
+   MqlDateTime t; TimeToStruct(ora,t);
+   if(gImbGiorno<0){ gImbGiorno=t.day_of_year; gImbData=ora; ImbutoRaccogli(gImbSnap); return; }
+   if(t.day_of_year==gImbGiorno) return;
+   ImbutoStampa("giorno "+TimeToString(gImbData,TIME_DATE));
+   ImbutoRaccogli(gImbSnap);
+   gImbGiorno=t.day_of_year; gImbData=ora;
+  }
 
 string ExitModeName(int m)
   {
@@ -316,6 +429,7 @@ int OnInit()
 
 void OnDeinit(const int reason)
   {
+   ImbutoStampa("parziale del "+TimeToString(gImbData,TIME_DATE));
    if(hAtr!=INVALID_HANDLE){ IndicatorRelease(hAtr); hAtr=INVALID_HANDLE; }
   }
 
@@ -365,6 +479,7 @@ void RicostruisciStruttura()
 //==================================================================
 void OnTick()
   {
+   ImbutoGiro();   // IMBUTO: solo log, nessuna decisione
    //--- metrica da prop: quanto sono sceso OGGI rispetto all'apertura del
    //    giorno. Sta QUI e non dopo il filtro della nuova barra: su H1/H4 la
    //    caduta peggiore di giornata succede in mezzo alla candela.
@@ -563,6 +678,7 @@ void RegistraBottom(double p)
 //==================================================================
 void ValutaSegnale(int conf,int shift)
   {
+   cV_conferme++;               // IMBUTO: una conferma di punta valutata
    bool isLong=(conf>0);
 
    //--- trend intermedio: senza almeno una coppia di punte sul lato che
@@ -625,6 +741,7 @@ void ValutaSegnale(int conf,int shift)
    //    qui; il prezzo d'ingresso vero e' quello di mercato al momento
    //    dell'invio (una conferma a barra chiusa si esegue a mercato).
    gSigArmed=true;
+   cA_armati++;                 // IMBUTO: chiude la somma dello stadio GREZZI->ARMATI
    gSigDir=conf;
    gSigEntryRef=entryRef;
    gSigTarget=target;
@@ -651,13 +768,13 @@ void TryEnter()
 
    //--- il posto puo' essersi occupato fra la conferma e la riprova
    if(CountPositions()>0)
-     { cF_busy++; DisarmaSegnale(); return; }
+     { cF_busy++; cT_busy++; DisarmaSegnale(); return; }   // cT_busy: separa questo punto da quello di ValutaSegnale
 
    //--- guardia reload-safe: se lo storico dei deal dice che su questa
    //    stessa conferma abbiamo gia' aperto (riavvio a cavallo della
    //    barra), non si raddoppia.
    if(GiaOperatoDallaBarra(gSigBarTime))
-     { Log("risultano gia' deal del magic da questa conferma: nessun ingresso."); DisarmaSegnale(); return; }
+     { cT_dup++; Log("risultano gia' deal del magic da questa conferma: nessun ingresso."); DisarmaSegnale(); return; }
 
    //--- filtro spread: non si entra dentro un allargamento. Si riprova
    //    sulle barre successive finche' la finestra regge; poi il segnale
@@ -735,7 +852,7 @@ void TryEnter()
 
    string cm=InpComment+(isLong?" L":" S");
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_CostToCost")) return;
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_CostToCost")){ cT_guardian++; return; }   // il segnale resta ARMATO: puo' riprovare
    bool ok = isLong ? gTrade.Buy (lot,_Symbol,ask,sl,tp,cm)
                     : gTrade.Sell(lot,_Symbol,bid,sl,tp,cm);
    if(!ok)

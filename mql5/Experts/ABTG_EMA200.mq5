@@ -105,6 +105,14 @@ input long   InpMagic     = 771501;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
 
+//--- IMBUTO DI MORTALITA' (11/09/2026): governa SOLO il log, non il trading.
+//    true  = a fine giornata scrive nel Giornale una riga che dice quante
+//            candidate d'ingresso sono state scartate e DA QUALE condizione.
+//    false = nessuna riga (i contatori girano lo stesso, in memoria).
+//    Default true: un log non e' un rischio, e senza di lui questa sedia era
+//    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
+input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
+
 //==================================================================
 //  STATO
 //==================================================================
@@ -115,6 +123,131 @@ int  gDay=-1, gTradesToday=0;
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
 void Log(string m){ if(InpVerbose) Print("[EMA200] ", m); }
+
+//==================================================================
+//  IMBUTO DI MORTALITA' [EMA200-IMBUTO] -- SOLO DIAGNOSTICA (11/09/2026)
+//  PERCHE': su questa sedia il rifiuto d'ingresso era MUTO. Dal log
+//  non si distingueva "non c'era il segnale" da "il segnale c'era e
+//  qualcosa l'ha fermato" (report/PERCHE_ENTRANO_POCO_2026-09-11.md,
+//  paragrafo 5: sedie cieche). Qui si conta CHI ha ucciso l'ingresso.
+//  !! Sono SOLO incrementi e Print: nessun contatore entra in una
+//  condizione, nessuna soglia, nessun lotto, nessun ordine cambiano.
+//  COME SI LEGGE -- l'imbuto e' ORDINATO: ogni candidata e' attribuita
+//  alla PRIMA condizione che la ferma, nell'ordine in cui il codice le
+//  controlla. Uno zero su un filtro in fondo NON vuol dire che quel
+//  filtro non morde mai: vuol dire che le candidate erano gia' morte
+//  prima. La 'quadratura' in fondo alla riga e' la prova che nessun
+//  ramo sfugge al conteggio: somma dei rifiuti + ENTRATE == valutate.
+//  DUE STADI, DUE QUADRATURE -- e qui serve, perche' questa sedia
+//  piazza DUE ordini limite per ogni candidata: contare gli ordini
+//  insieme alle candidate darebbe una somma che non torna mai.
+//    stadio 1 (CANDIDATE): valutate = rifiuti + ARMATE
+//    stadio 2 (ORDINI):    tentati  = rifiuti + PIAZZATI
+//==================================================================
+long cV_valutate=0;  // barre nuove arrivate alla valutazione d'ingresso
+long cB_occupata=0;  // posizione o pendente gia' vivi: candidata scartata
+long cB_maxday=0;    // tetto di operazioni giornaliere raggiunto
+long cB_news=0;      // blackout news
+long cB_spread=0;    // spread oltre il massimo
+long cF_ind=0;       // EMA o ATR non disponibili
+long cF_fascia=0;    // distanza dalla EMA fuori dalla fascia ATR
+long cF_adr=0;       // filtro ADR-distanza
+long cF_lato=0;      // lato disabilitato da input
+long cF_ema14=0;     // bias EMA14 contrario
+long cA_armate=0;    // CANDIDATE ARRIVATE AL PIAZZAMENTO ORDINI
+long cO_tentati=0;   // ordini limite tentati (1 o 2 per candidata)
+long cO_sl=0;        // distanza di SL non valida
+long cO_rr=0;        // RR sotto il minimo richiesto
+long cO_lotto=0;     // lotto nullo
+long cO_guardian=0;  // fermato dal Guardian del conto
+long cO_invio=0;     // invio dell'ordine fallito
+long cI_ordini=0;    // ORDINI LIMITE PIAZZATI
+//--- riepilogo di fine giornata: i contatori restano CUMULATIVI (non si
+//    azzerano mai, cosi' non si perde niente e OnTester resta valido) e
+//    la riga stampa la DIFFERENZA con la fotografia di inizio giornata.
+long     gImbSnap[];
+int      gImbGiorno=-1;
+datetime gImbData=0;
+
+//==================================================================
+//  IMBUTO: raccolta, stampa e giro di giornata. Non toccano ne' il
+//  mercato ne' lo stato dell'EA: leggono contatori e scrivono due
+//  righe. Escono al primo tick del giorno DOPO (e a OnDeinit per
+//  l'ultimo giorno aperto): un riepilogo al giorno, non per tick.
+//==================================================================
+void ImbutoRaccogli(long &v[])
+  {
+   ArrayResize(v,18);
+   v[0]=cV_valutate;
+   v[1]=cB_occupata;
+   v[2]=cB_maxday;
+   v[3]=cB_news;
+   v[4]=cB_spread;
+   v[5]=cF_ind;
+   v[6]=cF_fascia;
+   v[7]=cF_adr;
+   v[8]=cF_lato;
+   v[9]=cF_ema14;
+   v[10]=cA_armate;
+   v[11]=cO_tentati;
+   v[12]=cO_sl;
+   v[13]=cO_rr;
+   v[14]=cO_lotto;
+   v[15]=cO_guardian;
+   v[16]=cO_invio;
+   v[17]=cI_ordini;
+  }
+
+void ImbutoStampa(string quando)
+  {
+   if(!InpLogImbuto) return;
+   long v[]; ImbutoRaccogli(v);
+   int n=ArraySize(v);
+   if(ArraySize(gImbSnap)!=n){ ArrayResize(gImbSnap,n); ArrayInitialize(gImbSnap,0); }
+   long d[]; ArrayResize(d,n);
+   for(int i=0;i<n;i++) d[i]=v[i]-gImbSnap[i];
+   long s1=0; for(int i=1;i<11;i++) s1+=d[i];   // stadio 1: rifiuti + armate
+   long s2=0; for(int i=12;i<n;i++) s2+=d[i];   // stadio 2: rifiuti + piazzati
+   if(d[0]<=0 && s1<=0 && s2<=0) return;   // giornata senza candidate: niente riga
+   string a="[EMA200-IMBUTO] "+_Symbol+" "+EnumToString(InpTF)+" "+quando+
+            " | CANDIDATE valutate "+IntegerToString(d[0])+
+            " | occupata (posizione/pendente) "+IntegerToString(d[1])+
+            " | tetto giornaliero "+IntegerToString(d[2])+
+            " | news "+IntegerToString(d[3])+
+            " | spread "+IntegerToString(d[4])+
+            " | indicatori n/d "+IntegerToString(d[5])+
+            " | fuori fascia ATR "+IntegerToString(d[6])+
+            " | filtro ADR "+IntegerToString(d[7])+
+            " | lato spento "+IntegerToString(d[8])+
+            " | bias EMA14 "+IntegerToString(d[9])+
+            " | ARMATE "+IntegerToString(d[10])+
+            " | quadratura "+((s1==d[0])?"OK":
+             ("ROTTA: somma "+IntegerToString(s1)+" contro valutate "+IntegerToString(d[0])));
+   Print(a);
+   string b="[EMA200-IMBUTO] "+_Symbol+" "+quando+
+            " | ORDINI tentati "+IntegerToString(d[11])+
+            " | SL non valido "+IntegerToString(d[12])+
+            " | RR sotto il minimo "+IntegerToString(d[13])+
+            " | lotto nullo "+IntegerToString(d[14])+
+            " | guardian "+IntegerToString(d[15])+
+            " | invio fallito "+IntegerToString(d[16])+
+            " | PIAZZATI "+IntegerToString(d[17])+
+            " | quadratura "+((s2==d[11])?"OK":
+             ("ROTTA: somma "+IntegerToString(s2)+" contro tentati "+IntegerToString(d[11])));
+   Print(b);
+  }
+
+void ImbutoGiro()
+  {
+   if(!InpLogImbuto) return;
+   datetime ora=TimeCurrent();
+   MqlDateTime t; TimeToStruct(ora,t);
+   if(gImbGiorno<0){ gImbGiorno=t.day_of_year; gImbData=ora; ImbutoRaccogli(gImbSnap); return; }
+   if(t.day_of_year==gImbGiorno) return;
+   ImbutoStampa("giorno "+TimeToString(gImbData,TIME_DATE));
+   ImbutoRaccogli(gImbSnap);
+   gImbGiorno=t.day_of_year; gImbData=ora;
+  }
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -134,6 +267,7 @@ int OnInit()
 
 void OnDeinit(const int reason)
   {
+   ImbutoStampa("parziale del "+TimeToString(gImbData,TIME_DATE));
    int hs[3]={hEma,hEma14,hAtr};
    for(int i=0;i<3;i++) if(hs[i]!=INVALID_HANDLE) IndicatorRelease(hs[i]);
   }
@@ -152,6 +286,7 @@ bool FridayCloseCheck()
 
 void OnTick()
   {
+   ImbutoGiro();   // IMBUTO: solo log, nessuna decisione
    if(FridayCloseCheck()) return;   // venerdi' oltre l'ora: chiudo e non riapro
    ManageAll();
    CutoffCheck();
@@ -183,31 +318,33 @@ double AdrValue()
 
 void OnNewBar()
   {
-   if(HasPosition() || HasPending()) return;         // gia' impegnati
-   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
-   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
-   if(!SpreadOK()) return;
+   cV_valutate++;                                   // IMBUTO: una candidata per barra nuova
+   if(HasPosition() || HasPending()){ cB_occupata++; return; }         // gia' impegnati
+   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay){ cB_maxday++; return; }
+   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())){ cB_news++; return; }
+   if(!SpreadOK()){ cB_spread++; return; }
 
    double ema=EmaVal(hEma), atr=AtrVal();
-   if(ema<=0 || atr<=0) return;
+   if(ema<=0 || atr<=0){ cF_ind++; return; }
    double close1=iClose(_Symbol,InpTF,1);
    double dist=MathAbs(close1-ema);
-   if(dist < InpMinDistAtr*atr || dist > InpMaxDistAtr*atr) return; // prezzo nella fascia utile
+   if(dist < InpMinDistAtr*atr || dist > InpMaxDistAtr*atr){ cF_fascia++; return; } // prezzo nella fascia utile
    if(InpUseAdrFilter)                                              // filtro ADR-distanza (live Paolo)
      {
       double adr=AdrValue();
-      if(adr>0 && (dist < InpAdrDistMin*adr || dist > InpAdrDistMax*adr)) return;
+      if(adr>0 && (dist < InpAdrDistMin*adr || dist > InpAdrDistMax*adr)){ cF_adr++; return; }
      }
 
    bool up=(close1>ema);      // prezzo sopra EMA200 -> rimbalzo LONG; sotto -> SHORT
-   if(up && !InpAllowLong) return;
-   if(!up && !InpAllowShort) return;
+   if(up && !InpAllowLong){ cF_lato++; return; }
+   if(!up && !InpAllowShort){ cF_lato++; return; }
    if(InpUseEma14Bias)
      {
       double e14=EmaVal(hEma14);
-      if(e14>0 && ((up && e14<ema)||(!up && e14>ema))) return; // EMA14 deve confermare il lato
+      if(e14>0 && ((up && e14<ema)||(!up && e14>ema))){ cF_ema14++; return; } // EMA14 deve confermare il lato
      }
 
+   cA_armate++;               // IMBUTO: da qui in poi si conta per ORDINE, non per candidata
    PlaceOrders(up,ema,atr);
   }
 
@@ -231,21 +368,22 @@ void PlaceOrders(bool isLong,double ema,double atr)
 
 void PlaceLimit(bool isLong,double px,double sl,double riskPct,string tag)
   {
+   cO_tentati++;                                    // IMBUTO: un tentativo per gamba
    double risk=isLong?(px-sl):(sl-px);
-   if(risk<=0){ Log("distanza SL non valida ("+tag+")."); return; }
-   double rr=InpTP_RR; if(rr<InpMinRR) return;
+   if(risk<=0){ cO_sl++; Log("distanza SL non valida ("+tag+")."); return; }
+   double rr=InpTP_RR; if(rr<InpMinRR){ cO_rr++; return; }
    double tp = isLong ? NormalizePrice(px+risk*InpTP_RR) : NormalizePrice(px-risk*InpTP_RR);
    double lot=LotByRisk(risk,riskPct);
-   if(lot<=0){ Log("lotto nullo ("+tag+")."); return; }
+   if(lot<=0){ cO_lotto++; Log("lotto nullo ("+tag+")."); return; }
    datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
    string cm=InpComment+(isLong?" L":" S")+tag;
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200")) return;
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200")){ cO_guardian++; return; }
    bool ok=isLong?gTrade.BuyLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm)
                  :gTrade.SellLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm);
-   if(ok){ gTradesToday++; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
+   if(ok){ cI_ordini++; gTradesToday++; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
            isLong?"BUY":"SELL",tag,DoubleToString(px,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot)); }
-   else Log("ordine "+tag+" fallito: "+gTrade.ResultRetcodeDescription());
+   else { cO_invio++; Log("ordine "+tag+" fallito: "+gTrade.ResultRetcodeDescription()); }
   }
 
 //+------------------------------------------------------------------+

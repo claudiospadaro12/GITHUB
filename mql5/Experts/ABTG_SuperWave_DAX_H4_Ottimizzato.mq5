@@ -109,6 +109,14 @@ input long   InpMagic     = 770512;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
 
+//--- IMBUTO DI MORTALITA' (11/09/2026): governa SOLO il log, non il trading.
+//    true  = a fine giornata scrive nel Giornale una riga che dice quante
+//            candidate d'ingresso sono state scartate e DA QUALE condizione.
+//    false = nessuna riga (i contatori girano lo stesso, in memoria).
+//    Default true: un log non e' un rischio, e senza di lui questa sedia era
+//    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
+input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
+
 //==================================================================
 //  STATO
 //==================================================================
@@ -119,6 +127,122 @@ int  gDay=-1, gTradesToday=0;
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
 void Log(string m){ if(InpVerbose) Print("[SuperWave] ", m); }
+
+//==================================================================
+//  IMBUTO DI MORTALITA' [SUPERWAVE-IMBUTO] -- SOLO DIAGNOSTICA (11/09/2026)
+//  PERCHE': su questa sedia il rifiuto d'ingresso era MUTO. Dal log
+//  non si distingueva "non c'era il segnale" da "il segnale c'era e
+//  qualcosa l'ha fermato" (report/PERCHE_ENTRANO_POCO_2026-09-11.md,
+//  paragrafo 5: sedie cieche). Qui si conta CHI ha ucciso l'ingresso.
+//  !! Sono SOLO incrementi e Print: nessun contatore entra in una
+//  condizione, nessuna soglia, nessun lotto, nessun ordine cambiano.
+//  COME SI LEGGE -- l'imbuto e' ORDINATO: ogni candidata e' attribuita
+//  alla PRIMA condizione che la ferma, nell'ordine in cui il codice le
+//  controlla. Uno zero su un filtro in fondo NON vuol dire che quel
+//  filtro non morde mai: vuol dire che le candidate erano gia' morte
+//  prima. La 'quadratura' in fondo alla riga e' la prova che nessun
+//  ramo sfugge al conteggio: somma dei rifiuti + ENTRATE == valutate.
+//==================================================================
+long cV_valutate=0;  // barre nuove arrivate alla valutazione d'ingresso
+long cB_stnd=0;      // Supertrend non calcolabile (storico corto)
+long cB_occupata=0;  // posizione gia' aperta: non si cercano ingressi
+long cB_pendente=0;  // pendente 2/3 ancora in attesa
+long cB_maxday=0;    // tetto di operazioni giornaliere raggiunto
+long cB_orario=0;    // fuori dalla finestra oraria
+long cB_news=0;      // blackout news
+long cB_spread=0;    // spread oltre il massimo
+long cF_emand=0;     // buffer EMA non leggibili
+long cF_nocross=0;   // nessun incrocio EMA14 x EMA200 sulla barra [1]
+long cF_stcontro=0;  // incrocio contrario al Supertrend
+long cF_lato=0;      // lato disabilitato da input
+long cF_atr=0;       // ATR non disponibile
+long cO_sl=0;        // SL troppo vicino (stops level / buffer)
+long cO_lotto=0;     // lotto nullo
+long cO_guardian=0;  // fermato dal Guardian del conto
+long cO_invio=0;     // invio dell'ordine a mercato fallito
+long cI_entrate=0;   // INGRESSI ESEGUITI (tranche a mercato)
+//--- riepilogo di fine giornata: i contatori restano CUMULATIVI (non si
+//    azzerano mai, cosi' non si perde niente e OnTester resta valido) e
+//    la riga stampa la DIFFERENZA con la fotografia di inizio giornata.
+long     gImbSnap[];
+int      gImbGiorno=-1;
+datetime gImbData=0;
+
+//==================================================================
+//  IMBUTO: raccolta, stampa e giro di giornata. Tre funzioni che
+//  NON toccano ne' il mercato ne' lo stato dell'EA: leggono contatori
+//  e scrivono una riga. La riga esce al primo tick del giorno DOPO
+//  (e a OnDeinit per l'ultimo giorno aperto): un riepilogo per
+//  giornata, non una riga per tick.
+//==================================================================
+void ImbutoRaccogli(long &v[])
+  {
+   ArrayResize(v,18);
+   v[0]=cV_valutate;
+   v[1]=cB_stnd;
+   v[2]=cB_occupata;
+   v[3]=cB_pendente;
+   v[4]=cB_maxday;
+   v[5]=cB_orario;
+   v[6]=cB_news;
+   v[7]=cB_spread;
+   v[8]=cF_emand;
+   v[9]=cF_nocross;
+   v[10]=cF_stcontro;
+   v[11]=cF_lato;
+   v[12]=cF_atr;
+   v[13]=cO_sl;
+   v[14]=cO_lotto;
+   v[15]=cO_guardian;
+   v[16]=cO_invio;
+   v[17]=cI_entrate;
+  }
+
+void ImbutoStampa(string quando)
+  {
+   if(!InpLogImbuto) return;
+   long v[]; ImbutoRaccogli(v);
+   int n=ArraySize(v);
+   if(ArraySize(gImbSnap)!=n){ ArrayResize(gImbSnap,n); ArrayInitialize(gImbSnap,0); }
+   long d[]; ArrayResize(d,n);
+   for(int i=0;i<n;i++) d[i]=v[i]-gImbSnap[i];
+   long somma=0; for(int i=1;i<n;i++) somma+=d[i];
+   if(d[0]<=0 && somma<=0) return;   // giornata senza candidate: niente riga
+   string s="[SUPERWAVE-IMBUTO] "+_Symbol+" "+EnumToString(InpTF)+" "+quando+
+            " | valutate "+IntegerToString(d[0])+
+            " | supertrend n/d "+IntegerToString(d[1])+
+            " | occupata "+IntegerToString(d[2])+
+            " | pendente in attesa "+IntegerToString(d[3])+
+            " | tetto giornaliero "+IntegerToString(d[4])+
+            " | fuori orario "+IntegerToString(d[5])+
+            " | news "+IntegerToString(d[6])+
+            " | spread "+IntegerToString(d[7])+
+            " | EMA n/d "+IntegerToString(d[8])+
+            " | niente incrocio EMA "+IntegerToString(d[9])+
+            " | supertrend discorde "+IntegerToString(d[10])+
+            " | lato spento "+IntegerToString(d[11])+
+            " | ATR n/d "+IntegerToString(d[12])+
+            " | SL troppo vicino "+IntegerToString(d[13])+
+            " | lotto nullo "+IntegerToString(d[14])+
+            " | guardian "+IntegerToString(d[15])+
+            " | invio fallito "+IntegerToString(d[16])+
+            " | ENTRATE "+IntegerToString(d[17])+
+            " | quadratura "+((somma==d[0])?"OK":
+             ("ROTTA: somma "+IntegerToString(somma)+" contro valutate "+IntegerToString(d[0])));
+   Print(s);
+  }
+
+void ImbutoGiro()
+  {
+   if(!InpLogImbuto) return;
+   datetime ora=TimeCurrent();
+   MqlDateTime t; TimeToStruct(ora,t);
+   if(gImbGiorno<0){ gImbGiorno=t.day_of_year; gImbData=ora; ImbutoRaccogli(gImbSnap); return; }
+   if(t.day_of_year==gImbGiorno) return;
+   ImbutoStampa("giorno "+TimeToString(gImbData,TIME_DATE));
+   ImbutoRaccogli(gImbSnap);
+   gImbGiorno=t.day_of_year; gImbData=ora;
+  }
 
 //+------------------------------------------------------------------+
 double PipSize()
@@ -147,6 +271,7 @@ int OnInit()
 
 void OnDeinit(const int reason)
   {
+   ImbutoStampa("parziale del "+TimeToString(gImbData,TIME_DATE));
    int hs[5]={hAtr,hE1,hE2,hE3,hE4};
    for(int i=0;i<5;i++) if(hs[i]!=INVALID_HANDLE) IndicatorRelease(hs[i]);
   }
@@ -154,6 +279,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   ImbutoGiro();   // IMBUTO: solo log, nessuna decisione
    ManageAll();
 
    datetime t=iTime(_Symbol,InpTF,0);
@@ -169,43 +295,45 @@ void OnTick()
 //+------------------------------------------------------------------+
 void OnNewBar(MqlDateTime &now)
   {
+   cV_valutate++;                                  // IMBUTO: una candidata per barra nuova
    double dir[],line[];
-   if(!SupertrendSeries(5,dir,line)) return;
+   if(!SupertrendSeries(5,dir,line)){ cB_stnd++; return; }
 
    //--- uscita su flip (runner): chiude TUTTE le posizioni del magic
    if(HasPosition())
      {
+      cB_occupata++;   // IMBUTO: un solo incremento per ENTRAMBE le uscite del blocco
       int d1=(int)dir[1];
       if(InpExitOnFlip && ((d1<0 && LongOpen())||(d1>0 && ShortOpen())))
         { CloseAllPositions(); CancelPendings(); Log("Supertrend flip: uscita."); return; }
       return;                       // con posizione aperta non cerco nuovi ingressi
      }
-   if(HasPending()) return;         // pendente 2/3 gia' in attesa
+   if(HasPending()){ cB_pendente++; return; }   // pendente 2/3 gia' in attesa
 
    //--- filtri generali
-   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
-   if(InpUseTimeWindow && (now.hour<InpStartHour || now.hour>=InpEndHour)) return;
-   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
-   if(!SpreadOK()) return;
+   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay){ cB_maxday++; return; }
+   if(InpUseTimeWindow && (now.hour<InpStartHour || now.hour>=InpEndHour)){ cB_orario++; return; }
+   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())){ cB_news++; return; }
+   if(!SpreadOK()){ cB_spread++; return; }
 
    //--- SEGNALE SuperWave: incrocio EMA14 x EMA200 sulla barra chiusa [1],
    //    ACCETTATO solo se a favore del Supertrend (dir[1]).
    double e14[2], e200[2];
-   if(CopyBuffer(hE1,0,1,2,e14)!=2)  return;   // hE1 = EMA InpEma1 (14)
-   if(CopyBuffer(hE4,0,1,2,e200)!=2) return;   // hE4 = EMA InpEma4 (200)
+   if(CopyBuffer(hE1,0,1,2,e14)!=2) { cF_emand++; return; }   // hE1 = EMA InpEma1 (14)
+   if(CopyBuffer(hE4,0,1,2,e200)!=2){ cF_emand++; return; }   // hE4 = EMA InpEma4 (200)
    // e14[1]=barra1 (piu' recente chiusa), e14[0]=barra2 (precedente)
    bool crossUp = (e14[0] <= e200[0]) && (e14[1] > e200[1]);
    bool crossDn = (e14[0] >= e200[0]) && (e14[1] < e200[1]);
-   if(!crossUp && !crossDn) return;
+   if(!crossUp && !crossDn){ cF_nocross++; return; }
 
    int d1=(int)dir[1];
    bool up = crossUp;
-   if(crossUp && d1<=0) return;   // cross rialzista ma Supertrend non concorda
-   if(crossDn && d1>=0) return;   // cross ribassista ma Supertrend non concorda
-   if(up && !InpAllowLong) return;
-   if(!up && !InpAllowShort) return;
+   if(crossUp && d1<=0){ cF_stcontro++; return; }   // cross rialzista ma Supertrend non concorda
+   if(crossDn && d1>=0){ cF_stcontro++; return; }   // cross ribassista ma Supertrend non concorda
+   if(up && !InpAllowLong){ cF_lato++; return; }
+   if(!up && !InpAllowShort){ cF_lato++; return; }
 
-   double atr=AtrVal(); if(atr<=0) return;
+   double atr=AtrVal(); if(atr<=0){ cF_atr++; return; }
 
    Enter(up,line[1]);
   }
@@ -242,13 +370,13 @@ void Enter(bool isLong,double stLine)
 
    double risk=isLong?(entry-sl):(sl-entry);
    double minDist=MathMax(buf,(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point);
-   if(risk<minDist){ Log("SL troppo vicino: skip."); return; }
+   if(risk<minDist){ cO_sl++; Log("SL troppo vicino: skip."); return; }
 
    double tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR;
    tp=NormalizePrice(tp);
 
    double totLot=LotByRisk(risk);
-   if(totLot<=0){ Log("lotto nullo."); return; }
+   if(totLot<=0){ cO_lotto++; Log("lotto nullo."); return; }
 
    double lotMkt=NormVol(totLot*InpFirstFraction);
    //--- CORREZIONE 08/09/2026: il pavimento del lotto minimo ora e' applicato
@@ -264,10 +392,11 @@ void Enter(bool isLong,double stLine)
    double lotPend=NormVol(totLot-lotMkt);
 
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_SuperWave_DAX_H4_Ottimizzato")) return;
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_SuperWave_DAX_H4_Ottimizzato")){ cO_guardian++; return; }
    bool ok=isLong?gTrade.Buy(lotMkt,_Symbol,ask,sl,tp,InpComment+" L 1/3")
                  :gTrade.Sell(lotMkt,_Symbol,bid,sl,tp,InpComment+" S 1/3");
-   if(!ok){ Log("apertura a mercato fallita: "+gTrade.ResultRetcodeDescription()); return; }
+   if(!ok){ cO_invio++; Log("apertura a mercato fallita: "+gTrade.ResultRetcodeDescription()); return; }
+   cI_entrate++;
    gTradesToday++;
    Log(StringFormat("%s mercato %.2f lot @ %s SL %s TP %s",isLong?"LONG":"SHORT",lotMkt,
        DoubleToString(entry,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits)));

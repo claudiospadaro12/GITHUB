@@ -107,6 +107,14 @@ input long   InpMagic     = 771301;
 input int    InpMaxSpread = 0;
 input bool   InpVerbose   = true;
 
+//--- IMBUTO DI MORTALITA' (11/09/2026): governa SOLO il log, non il trading.
+//    true  = a fine giornata scrive nel Giornale una riga che dice quante
+//            candidate d'ingresso sono state scartate e DA QUALE condizione.
+//    false = nessuna riga (i contatori girano lo stesso, in memoria).
+//    Default true: un log non e' un rischio, e senza di lui questa sedia era
+//    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
+input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
+
 input group "=== Slippage stimato (R55: quanto scala questa cella) ==="
 //  PERCHE' (15/08/2026, R55). Tutti i backtest del progetto girano con
 //  riempimento PERFETTO: entry esatta, sempre. E' un'approssimazione
@@ -155,6 +163,122 @@ datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
 
 void Log(string m){ if(InpVerbose) Print("[PTE] ", m); }
 
+//==================================================================
+//  IMBUTO DI MORTALITA' [PTE-IMBUTO] -- SOLO DIAGNOSTICA (11/09/2026)
+//  PERCHE': su questa sedia il rifiuto d'ingresso era MUTO. Dal log
+//  non si distingueva "non c'era il segnale" da "il segnale c'era e
+//  qualcosa l'ha fermato" (report/PERCHE_ENTRANO_POCO_2026-09-11.md,
+//  paragrafo 5: sedie cieche). Qui si conta CHI ha ucciso l'ingresso.
+//  !! Sono SOLO incrementi e Print: nessun contatore entra in una
+//  condizione, nessuna soglia, nessun lotto, nessun ordine cambiano.
+//  COME SI LEGGE -- l'imbuto e' ORDINATO: ogni candidata e' attribuita
+//  alla PRIMA condizione che la ferma, nell'ordine in cui il codice le
+//  controlla. Uno zero su un filtro in fondo NON vuol dire che quel
+//  filtro non morde mai: vuol dire che le candidate erano gia' morte
+//  prima. La 'quadratura' in fondo alla riga e' la prova che nessun
+//  ramo sfugge al conteggio: somma dei rifiuti + ENTRATE == valutate.
+//==================================================================
+long cV_valutate=0;  // barre nuove arrivate alla valutazione d'ingresso
+long cB_occupata=0;  // gia' al massimo di posizioni aperte (InpMaxPositions)
+long cB_maxday=0;    // tetto di operazioni giornaliere raggiunto
+long cB_news=0;      // blackout news
+long cB_spread=0;    // spread oltre il massimo
+long cF_nodoji=0;    // la barra [2] non e' una doji
+long cF_tma=0;       // canali TMA non calcolabili (storico corto)
+long cF_dentro=0;    // corpo della doji DENTRO il canale veloce
+long cF_noflip=0;    // manca il cambio colore sulla barra [1]
+long cF_lato=0;      // lato disabilitato da input
+long cF_ema200=0;    // bias EMA200 contrario
+long cF_wpr=0;       // filtro Williams %R
+long cO_atr=0;       // ATR d'uscita non disponibile
+long cO_sl=0;        // SL dentro lo stops level del broker
+long cO_lotto=0;     // lotto nullo
+long cO_guardian=0;  // fermato dal Guardian del conto
+long cO_invio=0;     // invio dell'ordine fallito
+long cI_entrate=0;   // INGRESSI ESEGUITI
+//--- riepilogo di fine giornata: i contatori restano CUMULATIVI (non si
+//    azzerano mai, cosi' non si perde niente e OnTester resta valido) e
+//    la riga stampa la DIFFERENZA con la fotografia di inizio giornata.
+long     gImbSnap[];
+int      gImbGiorno=-1;
+datetime gImbData=0;
+
+//==================================================================
+//  IMBUTO: raccolta, stampa e giro di giornata. Tre funzioni che
+//  NON toccano ne' il mercato ne' lo stato dell'EA: leggono contatori
+//  e scrivono una riga. La riga esce al primo tick del giorno DOPO
+//  (e a OnDeinit per l'ultimo giorno aperto): un riepilogo per
+//  giornata, non una riga per tick.
+//==================================================================
+void ImbutoRaccogli(long &v[])
+  {
+   ArrayResize(v,18);
+   v[0]=cV_valutate;
+   v[1]=cB_occupata;
+   v[2]=cB_maxday;
+   v[3]=cB_news;
+   v[4]=cB_spread;
+   v[5]=cF_nodoji;
+   v[6]=cF_tma;
+   v[7]=cF_dentro;
+   v[8]=cF_noflip;
+   v[9]=cF_lato;
+   v[10]=cF_ema200;
+   v[11]=cF_wpr;
+   v[12]=cO_atr;
+   v[13]=cO_sl;
+   v[14]=cO_lotto;
+   v[15]=cO_guardian;
+   v[16]=cO_invio;
+   v[17]=cI_entrate;
+  }
+
+void ImbutoStampa(string quando)
+  {
+   if(!InpLogImbuto) return;
+   long v[]; ImbutoRaccogli(v);
+   int n=ArraySize(v);
+   if(ArraySize(gImbSnap)!=n){ ArrayResize(gImbSnap,n); ArrayInitialize(gImbSnap,0); }
+   long d[]; ArrayResize(d,n);
+   for(int i=0;i<n;i++) d[i]=v[i]-gImbSnap[i];
+   long somma=0; for(int i=1;i<n;i++) somma+=d[i];
+   if(d[0]<=0 && somma<=0) return;   // giornata senza candidate: niente riga
+   string s="[PTE-IMBUTO] "+_Symbol+" "+EnumToString(InpTF)+" "+quando+
+            " | valutate "+IntegerToString(d[0])+
+            " | occupata "+IntegerToString(d[1])+
+            " | tetto giornaliero "+IntegerToString(d[2])+
+            " | news "+IntegerToString(d[3])+
+            " | spread "+IntegerToString(d[4])+
+            " | niente doji "+IntegerToString(d[5])+
+            " | TMA n/d "+IntegerToString(d[6])+
+            " | corpo dentro la banda "+IntegerToString(d[7])+
+            " | niente color flip "+IntegerToString(d[8])+
+            " | lato spento "+IntegerToString(d[9])+
+            " | bias EMA200 "+IntegerToString(d[10])+
+            " | WPR "+IntegerToString(d[11])+
+            " | ATR n/d "+IntegerToString(d[12])+
+            " | SL non valido "+IntegerToString(d[13])+
+            " | lotto nullo "+IntegerToString(d[14])+
+            " | guardian "+IntegerToString(d[15])+
+            " | invio fallito "+IntegerToString(d[16])+
+            " | ENTRATE "+IntegerToString(d[17])+
+            " | quadratura "+((somma==d[0])?"OK":
+             ("ROTTA: somma "+IntegerToString(somma)+" contro valutate "+IntegerToString(d[0])));
+   Print(s);
+  }
+
+void ImbutoGiro()
+  {
+   if(!InpLogImbuto) return;
+   datetime ora=TimeCurrent();
+   MqlDateTime t; TimeToStruct(ora,t);
+   if(gImbGiorno<0){ gImbGiorno=t.day_of_year; gImbData=ora; ImbutoRaccogli(gImbSnap); return; }
+   if(t.day_of_year==gImbGiorno) return;
+   ImbutoStampa("giorno "+TimeToString(gImbData,TIME_DATE));
+   ImbutoRaccogli(gImbSnap);
+   gImbGiorno=t.day_of_year; gImbData=ora;
+  }
+
 //+------------------------------------------------------------------+
 double PipSize()
   {
@@ -184,6 +308,7 @@ int OnInit()
 
 void OnDeinit(const int reason)
   {
+   ImbutoStampa("parziale del "+TimeToString(gImbData,TIME_DATE));
    int hs[6]={hAtrSlow,hAtrFast,hAtrExit,hEma200,hEma14,hWpr};
    for(int i=0;i<6;i++) if(hs[i]!=INVALID_HANDLE) IndicatorRelease(hs[i]);
   }
@@ -191,6 +316,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   ImbutoGiro();   // IMBUTO: solo log, nessuna decisione
    ManageAll();
 
    //--- metrica da prop: quanto sono sceso OGGI rispetto all'apertura del giorno.
@@ -269,27 +395,28 @@ bool IsDoji(double o,double h,double l,double c)
 //+------------------------------------------------------------------+
 void OnNewBar()
   {
-   if(CountPositions()>=InpMaxPositions) return;
-   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
-   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
-   if(!SpreadOK()) return;
+   cV_valutate++;                                   // IMBUTO: una candidata per barra nuova
+   if(CountPositions()>=InpMaxPositions){ cB_occupata++; return; }
+   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay){ cB_maxday++; return; }
+   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())){ cB_news++; return; }
+   if(!SpreadOK()){ cB_spread++; return; }
 
    // Doji sulla barra [2], conferma sulla barra [1]
    double o2,h2,l2,c2, o1,h1,l1,c1;
    GetCandle(2,o2,h2,l2,c2);
    GetCandle(1,o1,h1,l1,c1);
-   if(!IsDoji(o2,h2,l2,c2)) return;
+   if(!IsDoji(o2,h2,l2,c2)){ cF_nodoji++; return; }
 
    double midF,upF,loF, midS,upS,loS;
-   if(!TmaBand(InpTmaFast,hAtrFast,InpMultFast,2,midF,upF,loF)) return;
-   if(!TmaBand(InpTmaSlow,hAtrSlow,InpMultSlow,2,midS,upS,loS)) return;
+   if(!TmaBand(InpTmaFast,hAtrFast,InpMultFast,2,midF,upF,loF)){ cF_tma++; return; }
+   if(!TmaBand(InpTmaSlow,hAtrSlow,InpMultSlow,2,midS,upS,loS)){ cF_tma++; return; }
 
    double body_hi=MathMax(o2,c2), body_lo=MathMin(o2,c2);
 
    //--- Doji col corpo FUORI dal canale veloce (sine qua non): sopra=short, sotto=long
    bool dojiAbove = (body_lo>upF) && (!InpRequireOutSlow || body_lo>upS);
    bool dojiBelow = (body_hi<loF) && (!InpRequireOutSlow || body_hi<loS);
-   if(!(dojiAbove||dojiBelow)) return;
+   if(!(dojiAbove||dojiBelow)){ cF_dentro++; return; }
 
    bool wantShort = dojiAbove;
    bool wantLong  = dojiBelow;
@@ -298,15 +425,15 @@ void OnNewBar()
    bool bear1=(c1<o1), bull1=(c1>o1);
    if(InpRequireColorFlip)
      {
-      if(wantShort && !bear1) return;
-      if(wantLong  && !bull1) return;
+      if(wantShort && !bear1){ cF_noflip++; return; }
+      if(wantLong  && !bull1){ cF_noflip++; return; }
      }
 
    // filtri opzionali
-   if(wantLong && !InpAllowLong) return;
-   if(wantShort && !InpAllowShort) return;
-   if(InpUseEma200Bias && !Ema200BiasOK(wantLong)) return;
-   if(InpUseWPR && !WprOK(wantLong)) return;
+   if(wantLong && !InpAllowLong){ cF_lato++; return; }
+   if(wantShort && !InpAllowShort){ cF_lato++; return; }
+   if(InpUseEma200Bias && !Ema200BiasOK(wantLong)){ cF_ema200++; return; }
+   if(InpUseWPR && !WprOK(wantLong)){ cF_wpr++; return; }
 
    Enter(wantLong,h2,l2);
   }
@@ -335,7 +462,7 @@ void Enter(bool isLong,double dojiHigh,double dojiLow)
    double pip=PipSize();
    double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
    double entry=isLong?ask:bid;
-   double a[1]; if(CopyBuffer(hAtrExit,0,1,1,a)!=1||a[0]<=0){ Log("ATR non disp."); return; }
+   double a[1]; if(CopyBuffer(hAtrExit,0,1,1,a)!=1||a[0]<=0){ cO_atr++; Log("ATR non disp."); return; }
    double atr=a[0];
 
    double sl;
@@ -345,14 +472,14 @@ void Enter(bool isLong,double dojiHigh,double dojiLow)
 
    double risk=isLong?(entry-sl):(sl-entry);
    double minDist=(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point;
-   if(risk<=minDist){ Log("SL non valido: skip."); return; }
+   if(risk<=minDist){ cO_sl++; Log("SL non valido: skip."); return; }
 
    // TP finale = 2 ATR (o tecnico). TP intermedio gestito a runtime (EMA14 / TP1_ATR).
    double tp = isLong ? entry+atr*InpTP2_ATRmult : entry-atr*InpTP2_ATRmult;
    tp=NormalizePrice(tp);
 
    double lot=LotByRisk(risk);   // il lotto viene dal rischio ORIGINALE, prima dello slippage
-   if(lot<=0){ Log("lotto nullo."); return; }
+   if(lot<=0){ cO_lotto++; Log("lotto nullo."); return; }
 
    // R55: slippage. SL e TP si spostano di X punti nel verso contrario al
    //      trade: lo stop scatta X piu' in la' (si perde di piu') e il TP
@@ -367,12 +494,12 @@ void Enter(bool isLong,double dojiHigh,double dojiLow)
 
    string cm=InpComment+(isLong?" L":" S");
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_PTE")) return;
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_PTE")){ cO_guardian++; return; }
    bool ok=isLong?gTrade.Buy(lot,_Symbol,ask,sl,tp,cm)
                  :gTrade.Sell(lot,_Symbol,bid,sl,tp,cm);
-   if(ok){ gTradesToday++; Log(StringFormat("%s @ %s SL %s TP %s lot %.2f",isLong?"LONG":"SHORT",
+   if(ok){ cI_entrate++; gTradesToday++; Log(StringFormat("%s @ %s SL %s TP %s lot %.2f",isLong?"LONG":"SHORT",
            DoubleToString(entry,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot)); }
-   else Log("apertura fallita: "+gTrade.ResultRetcodeDescription());
+   else { cO_invio++; Log("apertura fallita: "+gTrade.ResultRetcodeDescription()); }
   }
 
 //+------------------------------------------------------------------+

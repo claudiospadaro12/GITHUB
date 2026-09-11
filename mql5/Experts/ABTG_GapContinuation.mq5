@@ -175,6 +175,14 @@ input bool     InpPrintDailyDiagnostics    = true;    // Print daily diagnostic 
 //    dall'app del cellulare, dove si vede il commento e non il magic.
 input string   InpComment                  = "GAPCONT"; // commento ordini
 
+//--- IMBUTO DI MORTALITA' (11/09/2026): governa SOLO il log, non il trading.
+//    true  = a fine giornata scrive nel Giornale una riga che dice quante
+//            candidate d'ingresso sono state scartate e DA QUALE condizione.
+//    false = nessuna riga (i contatori girano lo stesso, in memoria).
+//    Default true: un log non e' un rischio, e senza di lui questa sedia era
+//    CIECA (report/PERCHE_ENTRANO_POCO_2026-09-11.md).
+input bool   InpLogImbuto = true;   // Imbuto: riepilogo giornaliero dei rifiuti nel Giornale
+
 // Daily state
 int      g_day_key          = -1;
 datetime g_session_open     = 0;
@@ -265,6 +273,82 @@ bool fNoRange      = false;
 bool fNoVwap       = false;
 bool fSpreadFisso  = false;
 bool fSpreadDin    = false;
+
+//==================================================================
+//  IMBUTO IN FORWARD [GAPCONT-IMBUTO] -- SOLO DIAGNOSTICA (11/09/2026)
+//  I contatori cnt* qui sopra ci sono gia', ma li stampa SOLO
+//  PrintFunnel() da OnTester(): in backtest parlano, in FORWARD mai.
+//  Referto: report/PERCHE_ENTRANO_POCO_2026-09-11.md, paragrafo 5.4.
+//  Qui si aggiunge un riepilogo di FINE GIORNATA con le stesse
+//  quantita' come DIFFERENZA rispetto a inizio giornata. I contatori
+//  restano cumulativi: PrintFunnel/OnTester vedono cio' che vedevano.
+//  !! Solo lettura di contatori e Print. Nessuna condizione, nessuna
+//  soglia, nessun ordine cambiano.
+//  DUE COSE DA SAPERE, e sono il motivo per cui questo blocco esiste:
+//   1) i cnt* si incrementano SEMPRE, anche con
+//      InpPrintDailyDiagnostics=false (quel flag guarda solo i Print).
+//      Quindi questa sedia smette di essere cieca SENZA toccare
+//      nessun parametro vivo: basta ricompilare.
+//   2) i conteggi sono per GIORNO e NON sono una partizione: nello
+//      stesso giorno possono alzarsi piu' bandierine (per esempio
+//      "senza chiusura precedente" al mattino e "gap sotto soglia"
+//      piu' tardi). Percio' qui NON si stampa nessuna quadratura:
+//      sarebbe una somma finta. Si legge come elenco di cause.
+//==================================================================
+long     gImbSnap[];
+int      gImbGiorno=-1;
+datetime gImbData=0;
+
+void ImbutoRaccogli(long &v[])
+  {
+   ArrayResize(v,16);
+   v[0]=cntGiorni;        v[1]=cntNoPrevClose;  v[2]=cntNoRange;     v[3]=cntNoVwap;
+   v[4]=cntGapSotto;      v[5]=cntLatoSpento;   v[6]=cntSetupPronti; v[7]=cntFill50;
+   v[8]=cntFinestraScad;  v[9]=cntSpreadFisso;  v[10]=cntSpreadDin;  v[11]=cntVolZero;
+   v[12]=cntInvioFallito; v[13]=cntIngressiLong; v[14]=cntIngressiShort;
+   v[15]=cntParzialeSaltato;
+  }
+
+void ImbutoStampa(string quando)
+  {
+   if(!InpLogImbuto) return;
+   long v[]; ImbutoRaccogli(v);
+   int n=ArraySize(v);
+   if(ArraySize(gImbSnap)!=n){ ArrayResize(gImbSnap,n); ArrayInitialize(gImbSnap,0); }
+   long d[]; ArrayResize(d,n);
+   long tot=0;
+   for(int i=0;i<n;i++){ d[i]=v[i]-gImbSnap[i]; tot+=d[i]; }
+   if(tot<=0) return;   // giornata senza nulla da dire: niente riga
+   Print("[GAPCONT-IMBUTO] "+_Symbol+" "+quando+
+         " | giornate "+IntegerToString(d[0])+
+         " | senza chiusura precedente "+IntegerToString(d[1])+
+         " | senza range di apertura "+IntegerToString(d[2])+
+         " | senza VWAP "+IntegerToString(d[3])+
+         " | gap sotto soglia "+IntegerToString(d[4])+
+         " | lato spento "+IntegerToString(d[5])+
+         " | EVENTI VALIDI "+IntegerToString(d[6])+
+         " | meta' gap richiusa "+IntegerToString(d[7])+
+         " | finestra scaduta "+IntegerToString(d[8])+
+         " | spread in punti "+IntegerToString(d[9])+
+         " | spread % dello stop "+IntegerToString(d[10])+
+         " | lotto oltre il rischio "+IntegerToString(d[11])+
+         " | invio fallito "+IntegerToString(d[12])+
+         " | ENTRATE "+IntegerToString(d[13]+d[14])+
+         " | parziale saltato (lotto indivisibile) "+IntegerToString(d[15])+
+         " | NB: conteggi per GIORNO, piu' cause possono convivere: NON si sommano");
+  }
+
+void ImbutoGiro()
+  {
+   if(!InpLogImbuto) return;
+   datetime ora=TimeCurrent();
+   MqlDateTime t; TimeToStruct(ora,t);
+   if(gImbGiorno<0){ gImbGiorno=t.day_of_year; gImbData=ora; ImbutoRaccogli(gImbSnap); return; }
+   if(t.day_of_year==gImbGiorno) return;
+   ImbutoStampa("giorno "+TimeToString(gImbData,TIME_DATE));
+   ImbutoRaccogli(gImbSnap);
+   gImbGiorno=t.day_of_year; gImbData=ora;
+  }
 
 //+------------------------------------------------------------------+
 //| Date and state utilities                                         |
@@ -1318,6 +1402,7 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
+   ImbutoStampa("parziale del "+TimeToString(gImbData,TIME_DATE));
    if(InpShowStatusOnChart)
       Comment("");
   }
@@ -1327,6 +1412,7 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+   ImbutoGiro();   // IMBUTO: solo log, nessuna decisione
 //--- AGGIUNTA NOSTRA (metrica da prop): quanto sono sceso OGGI rispetto
 //    all'apertura del giorno. Sta QUI, in cima e prima di ogni return,
 //    perche' la caduta peggiore di giornata succede DENTRO la seduta e
