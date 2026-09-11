@@ -13918,3 +13918,92 @@ classi che il progetto ha gia' pagato piu' una:
 
 **Collaudo sul parco vero: 19 script su 19** (i 16 toccati stanotte + runner,
 driver e riga di round) → **`compila: 0 errori` su tutti e 19**.
+
+---
+
+## 242. 🔪 LA RIPARAZIONE APPLICATA A UN SITO E NON AL SUO GEMELLO, NELLO STESSO FILE (12/09/2026)
+
+**Il caso.** Il commit `ee2dc18` si intitola **"ZERO kill incondizionati: nessuno
+script puo' piu' spegnere il conto reale"** e dichiara *"ADESSO: zero"*. Misurato
+subito dopo, cercando **ogni** `Stop-Process` del repo e classificandolo:
+**tre kill nudi sono rimasti**, e due sono su un percorso di codice **VIVO**:
+
+| file | riga | stato |
+|---|---:|---|
+| `righe/RIGA_SPREAD_NASUSD.ps1` | **194** | 🔴 **VIVO** (sezione "F4 - guardia MT5", si esegue sempre) |
+| `righe/RIGA_SPREAD_FLOTTA.ps1` | **366** | 🔴 **VIVO** (stessa sezione F4) |
+| `scarica_storico.ps1` | **514** | 🟡 ramo morto (il ripiego assegna sempre `$TerminaleBacktest`) |
+
+Tutti e tre nella forma che il commit dice di aver abolito:
+```
+$running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue   # TUTTI
+if($running -and $ChiudiMT5){ $running | Stop-Process -Force ... }        # ammazza TUTTI
+```
+Cioe': `-ChiudiMT5` su quelle due righe spegne **ogni** terminale della macchina,
+il **REALE 10105439 compreso, mentre ha posizioni aperte**.
+
+🔴 **La causa, ed e' geometrica.** In **tutti e tre i file il filtro chirurgico
+GIA' ESISTE**, poche centinaia di righe piu' sotto
+(`$_.Path -like ($instDir + "\*")` a `NASUSD:301`, `FLOTTA:540`,
+`scarica_storico:716`). La riparazione ha preso **il kill che il grep mostrava
+per primo** e ha lasciato il gemello. E `$instDir` e' assegnato a
+`NASUSD:135` / `FLOTTA:276`, cioe' **prima** del kill nudo: non c'era **nessuna
+ragione tecnica** per lasciarlo nudo.
+
+🚨 **E il commit aveva scritto la regola giusta, senza applicarla a se stesso.**
+A `scarica_storico:727` sta: *"un ramo morto con l'arma ancora carica resta
+un'arma: basta che domani qualcuno tolga quel blocco e questo torna a sparare,
+in silenzio. Quindi l'arma si scarica e si lascia il rumore."* Detto li',
+**non** fatto 213 righe sopra, nello stesso file, sul kill identico.
+
+**La regola.** 👉 **Un difetto di CLASSE si chiude contando le OCCORRENZE, non
+riparando i siti che si incontrano.** Il conto si stampa: *"trovati N, riparati
+N, residui 0"*. Un titolo di commit che dice **ZERO** e' una misura, e va
+misurata: `grep -rn 'Stop-Process' --include=*.ps1` e ogni riga classificata
+**filtrato / nudo**, una per una.
+📌 **Il sintomo che lo trova sempre: il filtro giusto e' nello stesso file.**
+Quando la forma corretta e quella sbagliata convivono in un file, non e' una
+scelta di progetto — e' una riparazione parziale.
+🛑 **E un `Write-Host "MAI SUL VPS"` non e' una guardia.** In tutti e tre i siti
+l'avvertenza c'era, stampata in rosso. Ha protetto zero volte: il 10/09 il
+REALE e' stato spento comunque.
+
+✅ **Forma corretta, e non cambia la REGOLA DI RIFIUTO** (se resta aperto
+qualunque terminale si esce 1, come prima: cambia solo **CHI** viene chiuso):
+```
+$bers  = @($running | Where-Object { $_.Path -and ($_.Path -like ($instDir + "\*")) })
+$salvi = @($running | Where-Object { -not ($_.Path -and ($_.Path -like ($instDir + "\*"))) })
+# si STAMPANO i risparmiati (forward e REALE), poi si chiudono SOLO i $bers
+```
+
+---
+
+## 243. 🔌 LA GUARDIA SUL CONTRATTO DEL CHIAMATO NON CRESCE COL CHIAMANTE (12/09/2026)
+
+**Il caso.** `righe/RIGA_DIAG_GBPUSD.ps1` ha una guardia (r.881-886) che, **prima
+di lanciare il driver**, verifica che il `param()` del driver **al pin** dichiari
+davvero gli argomenti che sta per passargli. Il suo messaggio di errore dice,
+testuale: *"la riga passerebbe **un interruttore che il driver non ha**"*.
+
+L'elenco controllato e':
+`Simbolo, DaQuando, Fino, Etichetta, Rifai, Modello, Deposito, Prova` — **otto.**
+
+Il 12/09 alla riga di lancio (r.1069) e' stato **aggiunto un nono argomento**,
+`-FinoDallaRiga`, e **l'elenco non e' stato aggiornato**. Risultato: con un
+`-Pin` anteriore a `537270e1` la guardia passa (gli otto vecchi ci sono tutti),
+il driver parte senza conoscere `-FinoDallaRiga`, e PowerShell muore con
+*"A parameter cannot be found that matches parameter name 'FinoDallaRiga'"* —
+un errore grezzo, che **manda a cercare il guasto nella rete o nel driver**
+invece che nel pin. Esattamente il danno che quella guardia esisteva per evitare.
+
+**La regola.** 👉 **Quando si aggiunge un argomento a una chiamata, si aggiunge
+nello stesso momento alla lista che verifica il contratto del chiamato.** Sono
+due modifiche di **una** modifica: la seconda non e' un rifinimento, e' la meta'
+che rende la prima diagnosticabile.
+📌 **Controllo meccanico che chiude la classe**, da fare a ogni aggiunta: gli
+argomenti `-Xxx` letterali nell'`$argv` verso il driver devono essere un
+**sottoinsieme** della lista gattata. Qui: 9 passati, 8 gattati -> 1 scoperto.
+
+✅ **Riparazione:** aggiungere `'\$FinoDallaRiga'` all'elenco. Verificato che il
+riconoscitore lo prende: la regex `(?m)^\s*\[[A-Za-z\[\]]+\]\$FinoDallaRiga\b`
+combacia con la riga vera del driver `  [switch]$FinoDallaRiga,`.
