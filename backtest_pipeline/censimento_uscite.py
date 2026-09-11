@@ -211,6 +211,9 @@ def indice_csv():
                 for c in inpc:
                     vals[c].add((r.get(c) or '').strip())
             rel = os.path.relpath(p, ROOT)
+            # scheda del file: serve all'attribuzione (ea_of) -- vie MAGIC e FIRMA
+            META[rel] = dict(cols=[c.strip() for c in inpc],
+                             magics=sorted(v for v in vals.get('InpMagic', ()) if v))
             for c in inpc:
                 vs = sorted(vals[c])
                 if len(vs) > 1:
@@ -222,24 +225,153 @@ def indice_csv():
 EAS = sorted([f[:-4] for f in os.listdir(os.path.join(ROOT, 'mql5', 'Experts'))
               if f.endswith('.mq5')], key=len, reverse=True)
 
-def ea_of(rel):
+# ============================================================================
+# CHI HA PRODOTTO QUESTO CSV -- attribuzione (riparata l'11/09/2026)
+# ----------------------------------------------------------------------------
+# IL DIFETTO RIPARATO: la versione precedente riconosceva un CSV solo se il
+# BASENAME COMINCIAVA col nome dell'EA (o se stava in una cartella omonima).
+# Misurato: 668 file che SONO risultati di round (colonne InpMagic E Profit)
+# tornavano None -- fra cui TUTTE le corse EMA200 (scan_*/valid_*), tutti i
+# gestione_* e i DAX_F_gestione_*. Il censimento leggeva 1.419 CSV su 2.087:
+# i suoi totali erano LIMITI SUPERIORI, non misure.
+#
+# LA DIREZIONE OPPOSTA, che e' il pericolo vero: allargare il riconoscimento
+# crea FALSI POSITIVI, e un falso positivo e' PEGGIO di un falso negativo --
+# fa dichiarare "provata" una manopola che non lo e'. Percio' ogni via passa
+# lo stesso VETO, e le vie sono ordinate per forza della prova.
+#
+#   VETO (uguale per tutte e tre): ogni colonna Inp* del CSV dev'essere un
+#   input DICHIARATO in quell'EA (firma delle colonne). Un CSV lo scrive il
+#   tester copiando i nomi degli input: se una colonna non esiste in quell'EA,
+#   quel CSV non l'ha prodotto quell'EA. Misurato: su tutti i file che la
+#   versione vecchia attribuiva, la copertura e' 1,000 -- il veto non toglie
+#   nulla di gia' buono (0 regressioni), e taglia i falsi positivi.
+#
+#   VIA 1 -- PATH: il nome dell'EA compare OVUNQUE nel percorso (non solo in
+#     testa). I nomi che si contengono a vicenda (ABTG_PTE dentro
+#     ABTG_PTE_Ottimizzato) si risolvono tenendo solo i MASSIMALI: se il
+#     percorso contiene il nome lungo, il corto non e' una prova a se'.
+#     Se restano DUE nomi massimali diversi -> AMBIGUO -> None.
+#   VIA 2 -- MAGIC: la colonna InpMagic incrociata con la mappa magic->EA che
+#     il repo GIA' possiede: il default dichiarato nel sorgente dell'EA
+#     (input InpMagic / #define ABTG_DEF_MAGIC) piu' la tabella SEDIE qui
+#     sopra (fonte: report/CENSIMENTO_CONTRATTI.md). Nessun numero inventato.
+#     I magic usati da PIU' EA (770301 GoldenCross/V1, 771401 AltaVelocita/WOL,
+#     250604 i tre EA oro, 20260304) sono SCARTATI, non indovinati.
+#     Il magic e' la via DEBOLE: i round lo ri-etichettano per distinguere le
+#     celle (R83: InpMagic 777120/777121 dentro un CSV di Apertura_3Ingressi),
+#     quindi vale solo quando il percorso tace. MISURATO che sbaglia: due file
+#     r50/r59 portano InpMagic=772700 (ABTG_Bulge) ma le loro colonne sono di
+#     ABTG_EasyTrend e ABTG_PunteLarry -- il veto li ferma entrambi.
+#   VIA 3 -- FIRMA: se percorso e magic tacciono, e UN SOLO EA di tutto il
+#     parco ha un insieme di input che CONTIENE tutte le colonne Inp* del CSV,
+#     e' quello. Se ne bastano due -> AMBIGUO -> None (i 40 PTEGBP_* di R80
+#     restano None cosi': ABTG_PTE e ABTG_PTE_Ottimizzato li contengono
+#     entrambi, e tirare a indovinare sarebbe esattamente il falso positivo).
+# ============================================================================
+
+_RX_DEF_MAGIC = re.compile(r'^\s*#define\s+ABTG_DEF_MAGIC\s+(\d+)')
+_RX_INP_MAGIC = re.compile(r'^\s*(?:s?input)\s+\w+\s+InpMagic(?:Number)?\s*=\s*(\w+)')
+
+def _sorgente(ea):
+    return os.path.join(ROOT, 'mql5', 'Experts', ea + '.mq5')
+
+def _magic_dichiarato(ea):
+    """Il magic DI DEFAULT scritto nel sorgente dell'EA. None se non c'e'."""
+    dfn = None
+    mag = None
+    for l in open(_sorgente(ea), encoding='utf-8', errors='replace'):
+        if dfn is None:
+            m = _RX_DEF_MAGIC.match(l)
+            if m:
+                dfn = m.group(1)
+        if mag is None:
+            m = _RX_INP_MAGIC.match(l)
+            if m:
+                mag = m.group(1)
+    if mag == 'ABTG_DEF_MAGIC':
+        mag = dfn
+    return mag if (mag and mag.isdigit()) else None
+
+def _mappa_magic():
+    per_magic = collections.defaultdict(set)
+    for e in EAS:
+        m = _magic_dichiarato(e)
+        if m:
+            per_magic[m].add(e)
+    for magic, ea, _s, _t in SEDIE:      # report/CENSIMENTO_CONTRATTI.md
+        per_magic[magic].add(ea)
+    uni = {m: next(iter(v)) for m, v in per_magic.items() if len(v) == 1}
+    amb = {m: sorted(v) for m, v in per_magic.items() if len(v) > 1}
+    return uni, amb
+
+MAGIC2EA, MAGIC_AMBIGUI = _mappa_magic()
+EA_INPUTS = {e: {u['nome'] for u in inputs_ea(_sorgente(e))} for e in EAS}
+
+# rel -> {'cols': [colonne Inp*], 'magics': [valori distinti di InpMagic]}
+# lo riempie indice_csv(); l'autotest lo riempie a mano coi file veri.
+META = {}
+
+def _firma_ok(ea, cols):
+    """VETO: ogni colonna Inp* del CSV dev'essere un input di quell'EA."""
+    cols = set(cols or ())
+    return bool(cols) and cols <= EA_INPUTS.get(ea, set())
+
+def ea_of(rel, cols=None, magics=None, con_via=False):
+    """L'EA che ha prodotto il CSV `rel`, o None se non e' dimostrabile."""
+    if cols is None:
+        cols = META.get(rel, {}).get('cols', [])
+    if magics is None:
+        magics = META.get(rel, {}).get('magics', [])
+    low = rel.lower()
+
+    # VIA 1 -- il nome nel percorso, solo i massimali
+    hit = [e for e in EAS if e.lower() in low]
+    hit = [e for e in hit if not any(o != e and e.lower() in o.lower() for o in hit)]
+    ok = [e for e in hit if _firma_ok(e, cols)]
+    if len(ok) == 1:
+        return (ok[0], 'PATH') if con_via else ok[0]
+    if len(ok) > 1:
+        return (None, 'PATH-AMBIGUO') if con_via else None
+
+    # VIA 2 -- il magic, incrociato con la mappa del repo
+    mg = sorted({MAGIC2EA[m] for m in magics if m in MAGIC2EA})
+    mg = [e for e in mg if _firma_ok(e, cols)]
+    if len(mg) == 1:
+        return (mg[0], 'MAGIC') if con_via else mg[0]
+    if len(mg) > 1:
+        return (None, 'MAGIC-AMBIGUO') if con_via else None
+
+    # VIA 3 -- la firma delle colonne, e dev'essere UNICA
+    fw = [e for e in EAS if _firma_ok(e, cols)]
+    if len(fw) == 1:
+        return (fw[0], 'FIRMA') if con_via else fw[0]
+    return (None, 'FIRMA-AMBIGUA' if fw else 'NESSUNA') if con_via else None
+
+def ea_of_vecchia(rel, cols=None, magics=None, con_via=False):
+    """La versione ROTTA, tenuta SOLO per misurare il delta (--delta)."""
     b = os.path.basename(rel)
     for e in EAS:
         if b.startswith(e) or ('/' + e + '/') in rel or ('/' + e.lower() + '/') in rel.lower():
-            return e
-    return None
+            return (e, 'VECCHIA') if con_via else e
+    return (None, 'VECCHIA') if con_via else None
 
-def main():
-    ax, cost, ncsv = indice_csv()
-    # pre-aggregazione per EA
+def censimento(ax, cost, attr=None):
+    """Le righe sedia x manopola, con l'attribuzione `attr` (default: ea_of)."""
+    attr = attr or ea_of
     per_ea_ax = collections.defaultdict(lambda: collections.Counter())
     per_ea_cost = collections.defaultdict(lambda: collections.defaultdict(collections.Counter))
+    # quale CSV dimostra cosa: (ea, knob) -> {rel: [valori distinti]}
+    prova = collections.defaultdict(dict)
     for c, m in ax.items():
-        for rel in m:
-            per_ea_ax[c][ea_of(rel)] += 1
+        for rel, vs in m.items():
+            e = attr(rel)
+            per_ea_ax[c][e] += 1
+            if e:
+                prova[(e, c)][rel] = vs
     for c, m in cost.items():
         for rel, v in m.items():
-            per_ea_cost[c][ea_of(rel)][v] += 1
+            per_ea_cost[c][attr(rel)][v] += 1
 
     righe = []
     for magic, ea, sym, tf in SEDIE:
@@ -273,10 +405,19 @@ def main():
                               mai=st.startswith('MAI'),
                               inerte=(magic, c) in INERTI,
                               motivo=INERTI.get((magic, c), ''),
-                              celle=CELLE.get(c, CELLE_DEF)))
+                              celle=CELLE.get(c, CELLE_DEF),
+                              prove=sorted(prova.get((ea, c), {}).items())[:4]))
+    return righe
+
+def main():
+    ax, cost, ncsv = indice_csv()
+    righe = censimento(ax, cost)
     out = os.path.join(ROOT, 'backtest_pipeline', 'risultati_archivio',
                        'CENSIMENTO_USCITE_2026-09-11.json')
     json.dump(dict(csv_con_inp=ncsv, righe=righe), open(out, 'w'), indent=1)
+    attrib = sum(1 for r in META if ea_of(r))
+    print("csv attribuiti a un EA:", attrib, "/", len(META),
+          "| non attribuibili (dichiarati, non indovinati):", len(META) - attrib)
 
     mai = [r for r in righe if r.get('mai')]
     ine = [r for r in mai if r['inerte']]

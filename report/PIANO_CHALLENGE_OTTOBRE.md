@@ -11,6 +11,8 @@
 > | *"`970913` n=155 = MERITO PIENO"* | 🔴 **da riverificare**: l'unico OOS in archivio e' `_ohlc` (screening) |
 > | *"la compilazione porta le schierabili da 1-2 a 5"* | 🔴 **falso**: **2 → 2** stretta, **2 → 4** larga |
 > | *"il 1° ottobre e' realistico per COMPRARE"* | 🔴 **caduta**: col **cancello del costo** acceso, le candidate che passano tutto oggi sono **ZERO** |
+> | 🆕 *"`770101`: **CONFLITTO APERTO**, 6,89% contro 4,3501%"* (r.91, r.191) | ✅ **CHIUSO l'11/09**: il DD promesso e' **4,3501% @0,65%** — il 6,89% descriveva la cella con **`InpAllowShort=1`**, a taglia **1,0%**, magic **777120/777121**. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` |
+> | 🆕 *"somma aritmetica dei DD promessi = **14,01%**"* (r.258, r.345) | 🔴 **il numero e' sbagliato: e' 11,47%.** Resta **sopra il muro di 10**, ma sfora di **1,47 punti**, non di 4,01 — vedi ERRATA in coda |
 >
 > ➕ E il v1 **non contava** due cose che adesso pesano: il **cancello del costo
 > all-in** (commissione forex **4,0000 EUR/lotto** misurata) e il fatto che il
@@ -525,3 +527,73 @@ resto del regolamento delle prop candidate → `report/REGOLAMENTI_PROP_2026-09-
 muro totale sia STATICO o TRAILING.** Tutte le misure di DD del progetto
 assumono **statico**. Se la prop scelta usa il trailing, **vanno rilette
 tutte**, e va detto prima di comprare — non dopo.
+
+
+---
+
+# 🪦 ERRATA 11/09/2026 (sera) — IL DD DELLA `770101`, E LA SOMMA ARITMETICA RIFATTA
+
+🚫 **Questo file NON e' stato riscritto**: e' il verbale dell'08/09 e resta com'era.
+Qui sotto c'e' **solo** la correzione, perche' chi ci ripassa non riusi un numero morto.
+
+## 1. Il conflitto di r.91 e di **B3** (r.191) e' **CHIUSO**, non aperto
+
+| | |
+|---|---|
+| **DD promesso della `770101`, oggi** | 🆕 **4,3501%** @ taglia viva **0,65%** — **[MISURATO a deposito 10.000 EUR]** |
+| fonte | `risultati_archivio/ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2 (`InpAllowShort=0` · `InpRiskPercent=0.65` · `InpMagic=770101` · PF 1,41105 · n 270), riprodotto in `ancora_passo7/..._OOS_ANCORA.csv` |
+| da dove veniva il **6,89%** | scalatura di **10,5984%**, misurato su `r83_csv/..._r83d1.csv`, che ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`**: **un'altra configurazione**, mai girata sul conto reale |
+| la causa, misurata | **il LATO CORTO**: +3,8873 punti di DD (10,5984 con · **6,7111** senza, stessa finestra, stesso deposito, stessa taglia 1,0%) |
+| ⚠️ **l'asterisco che non va perso** | il 4,3501% e' misurato su banco **10.000 EUR**. Su un banco da **100.000 EUR** il DD promesso e' **`[NON MISURATO]`**: la stessa cella long-only a 1,0% fa **7,2328%** a 100k contro **6,7111%** a 10k, **+7,8% a parita' esatta di 270 operazioni**. Per proporzione starebbe a ~4,69%, **ma una proporzione non fa scattare un allarme** |
+
+📄 Dossier completo (6 ipotesi alternative rotte una per una): `report/CONFLITTO_DD_770101_2026-09-11.md`.
+
+## 2. 🧮 LA SOMMA ARITMETICA DI **§3.2 (r.258)** e di r.345 — RIFATTA
+
+```
+VECCHIA (verbale 08/09):  6,89 + 2,98 + 2,74 + 0,83 + 0,57 = 14,01 %
+NUOVA   (11/09):        4,3501 + 2,98 + 2,74 + 0,83 + 0,57 = 11,47 %
+-----------------------------------------------------------------------
+           differenza  -2,54 punti, ed e' TUTTA della 770101
+```
+
+Gli altri quattro addendi **non cambiano**: `770611` ORB **2,98%** a 0,30% ·
+`770202` Dow Apertura **2,74%** · `770411` MaxMin DAX Short **0,83%** ·
+`770901` STREV Nikkei **0,57%**.
+
+### ⚖️ E IL VERDETTO, riscritto con precisione
+
+| | vecchio | 🆕 nuovo |
+|---|---|---|
+| somma aritmetica | **14,01%** | **11,47%** |
+| contro il muro **statico** di **10%** | 🔴 sfora di **+4,01 punti** | 🔴 **sfora ancora, ma di +1,47 punti** |
+| di quanto e' sopra, in relativo | **+40,1%** | **+14,7%** |
+
+- 🔴 **IL VERDETTO NON SI RIBALTA: la somma resta SOPRA IL MURO.** La riga
+  *"oltre il muro"* di r.258 e di r.345 **rimane vera**, e con essa l'argomento
+  che la sostiene: e' un **limite superiore mai raggiunto in banco** (i DD non
+  arrivano tutti lo stesso giorno), **ma e' cio' che si otterrebbe se le sedie
+  fossero correlate** — ed e' esattamente cio' che il tetto per cluster **C10**
+  dovrebbe impedire. 🔴 **E C10 continua a NON essere attivo**: firmato 07/09,
+  implementato v1.13 spento di default, **non compilato e non collaudato**.
+- 🟡 **CIO' CHE CAMBIA E' LA DISTANZA, e cambia parecchio: lo sforamento si
+  riduce del 63%.** Con 11,47% il caso-peggiore-correlato passa da *"muro sfondato
+  di quattro punti"* a *"muro sfondato di uno e mezzo"*: **lo stesso segnale
+  rosso, ma la distanza dalla salvezza e' ora dell'ordine di UNA sedia piccola**
+  (togliere la `770901`, 0,57%, e la `770411`, 0,83%, porterebbe la somma a
+  **10,07%**, cioe' **sul muro**). Prima non bastava nemmeno togliere due sedie.
+- 📐 **E il confronto interno a §3.2 diventa leggibile**: lo sforamento della
+  somma (**1,47 punti**) e il margine del **p99 Monte Carlo** a muro statico
+  (**1,49 punti**) sono ora **praticamente lo stesso numero, di segno opposto**.
+  🔴 **Non e' una conferma incrociata** — sono due modelli diversi (uno assume
+  correlazione 1, l'altro la simula) e la coincidenza e' **numerica, non causale**.
+  Detto qui perche' nessuno la usi come prova di niente.
+- ⚪ **Non tocca il resto del file.** Il muro **TRAILING** (p99 12,05%), il cap
+  C1 3,25%, il conto delle 2 sedie con R4 verificata (r.88-94) e il segno di **E**
+  restano **esattamente come sono scritti**: nessuno dei quattro dipende dal DD
+  promesso della `770101`.
+
+> 🧊 **Perche' la riga vecchia resta scritta**: cancellarla cancellerebbe la prova
+> che il metodo ha trovato l'errore. Il numero da usare per decidere e'
+> **11,47%**, e il documento da cui si decide e'
+> `report/PIANO_CHALLENGE_OTTOBRE_v2.md`.

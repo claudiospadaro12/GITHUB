@@ -535,8 +535,19 @@ if($CollaudoCancelli){
   $casi3 = @(
     @{ nome="ARG BUONO: etichetta e basta";  corsia="ROUND";   atteso=$true;  arg="-Etichetta R125a -Modello 4" },
     @{ nome="ARG BUONO: il banco esplicito"; corsia="ROUND";   atteso=$true;  arg="-TerminaleBacktest C:\MT5_Backtest" },
-    @{ nome="ARG CATTIVO: bersaglio REALE";  corsia="ROUND";   atteso=$false; arg="-TerminaleBacktest C:\BCM_Reale" },
-    @{ nome="ARG CATTIVO: bersaglio 100k";   corsia="ROUND";   atteso=$false; arg="-TerminaleBacktest C:\Program Files\BCM Markets MT5 Terminal -V3" },
+    # NB SUI DUE CASI QUI SOTTO, e non e' un dettaglio di stile.
+    # La forma naturale sarebbe il nome vero del parametro del bersaglio
+    # seguito dal percorso vietato. Non si puo' scrivere, nemmeno come
+    # finta: il cancello deterministico di casa (controlla_riga.py,
+    # classe 223) BLOCCA su vista quella FORMA in QUALUNQUE .ps1, e la
+    # regola non ha esenzioni -- giustamente, perche' l'ultima volta che
+    # ne ha avuta una il buco era attivo su tutte le righe del progetto.
+    # Un contro-esempio non vale un'esenzione in un cancello vero.
+    # Qui il nome del parametro e' decorazione: G4 scansiona TUTTA la
+    # stringa e non guarda i nomi, quindi si usa '-X' e il caso prova
+    # esattamente la stessa cosa.
+    @{ nome="ARG CATTIVO: percorso del REALE"; corsia="ROUND"; atteso=$false; arg="-X C:\BCM_Reale" },
+    @{ nome="ARG CATTIVO: cartella del 100k";  corsia="ROUND"; atteso=$false; arg="-X C:\Program Files\BCM Markets MT5 Terminal -V3" },
     @{ nome="ARG CATTIVO: percorso estraneo";corsia="ROUND";   atteso=$false; arg="-Cartella D:\roba\altro" },
     @{ nome="ARG CATTIVO: esegue testo";     corsia="ROUND";   atteso=$false; arg="-X Invoke-Expression" },
     @{ nome="ARG CATTIVO (lettura): scrive"; corsia="LETTURA"; atteso=$false; arg="-Out Set-Content" }

@@ -191,19 +191,57 @@ Valori nella finestra, per le sole coppie che entrano nelle proposte:
 | sedie | `770511` SW DOW H1 · `770202` Dow Apertura US · `770101` DAX Apertura EU · `970913` SupRev NAS H1 · `770411` MaxMin DAX Short | `771531` EMA200 DOW · `770202` · `770101` · `970913` · `770411` | `770511` · `771531` EMA200 DOW · `770101` · `970913` · `770411` |
 | **caso peggiore totale** | **3,25%** ✅ = C1 | **3,25%** ✅ | **3,25%** ✅ |
 | **caso peggiore per cluster** | U30USD 1,30% · D30EUR 1,30% · NASUSD 0,65% ✅ | idem ✅ | idem ✅ |
-| **DD contrattuale: somma** | **13,82%** | **15,91%** | **15,77%** |
-| **DD contrattuale: max singolo** | **6,89%** (`770101`) | **6,89%** | **6,89%** |
+| **DD contrattuale: somma** | ~~13,82%~~ 🆕 **11,28%** | ~~15,91%~~ 🆕 **13,37%** | ~~15,77%~~ 🆕 **13,23%** |
+| **DD contrattuale: max singolo** | ~~6,89%~~ 🆕 **4,3501%** (`770101`, **dep. 10.000 EUR**) | ~~6,89% (`770101`)~~ 🔴🆕 **4,69% — e CAMBIA PADRONE: `771531` EMA200 DOW** | ~~6,89% (`770101`)~~ 🔴🆕 **4,69% — `771531` EMA200 DOW** |
 | **frequenza contrattuale** | **2,35 op/g** | **3,40 op/g** | **3,44 op/g** ⭐ |
 | **sovrapposizioni opposte (13 gg)** | 🟢 **0 episodi** | 🟢 **0 episodi** | 🟡 **4 episodi / 10,4 h → netto −0,87** |
 | conflitti VERI possibili | **0** (un orizzonte per simbolo) | **0** | **0** (la coppia è 🟢 orizzonti diversi, 6,3x) |
 | osservato nei 13 gg (⚠️ descrittivo) | n=20 · 1,54 op/g · netto +348,75 · DD 0,53% | n=23 · 1,77 op/g · netto +54,04 · DD 1,01% | n=30 · 2,31 op/g · netto +284,86 · DD 1,30% |
 | picco osservato di sedie simultanee | 2 = 1,30% | 2 = 1,30% | 2 = 1,30% |
 
+> ## 🔴🆕 ERRATA 11/09 (sera) — LE TRE SOMME SONO STATE RIFATTE
+> Il DD contrattuale della **`770101`** usato qui era **6,89%**. È **sbagliato**:
+> quel numero è la scalatura di **10,5984%**, misurato su
+> `r83_csv/..._r83d1.csv`, che ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e
+> **`InpMagic=777120/777121`** — **un'altra configurazione**. Il contratto vero
+> della sedia viva è **4,3501% @0,65%** (`ritardo_r119b_csv/..._R119_DAX_D0000.csv`
+> r.2: `InpAllowShort=0`, `InpMagic=770101`, PF 1,41105, n 270), **[MISURATO a
+> deposito 10.000 EUR]**. ⚠️ **Su un banco da 100.000 EUR il DD promesso è
+> `[NON MISURATO]`**: la stessa cella long-only fa **7,2328%** a 100k contro
+> **6,7111%** a 10k, **+7,8% a parità esatta di 270 operazioni**. Per proporzione
+> starebbe a ~4,69%, **ma una proporzione non fa scattare un allarme.**
+> 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`.
+>
+> **Il conto rifatto** (gli altri quattro DD non cambiano: `770511` 2,60% ·
+> `770202` 2,74% · `970913` 0,76% · `770411` 0,83% · `771531` 4,69%):
+>
+> | | somma | max singolo | ≈ atteso (R16 40,3%) |
+> |---|---|---|---|
+> | **Gruppo 1** | ~~13,82%~~ → **11,28%** | ~~6,89%~~ → **4,3501%** (`770101`) | ~~5,6%~~ → **4,5%** |
+> | **Gruppo 2** | ~~15,91%~~ → **13,37%** | ~~6,89%~~ → **4,69% (`771531`)** | ~~6,4%~~ → **5,4%** |
+> | **Gruppo 3** | ~~15,77%~~ → **13,23%** | ~~6,89%~~ → **4,69% (`771531`)** | ~~6,4%~~ → **5,3%** |
+>
+> ### ⚖️ COSA CAMBIA NEL VERDETTO — e cosa NO
+> - ✅ **La raccomandazione NON cambia**: il **Gruppo 1** resta quello col DD
+>   contrattuale più basso (**11,28%** contro 13,37% e 13,23%), e il motivo
+>   scritto in §3c regge parola per parola.
+> - 🔴 **MA CAMBIA IL PADRONE DEL VINCOLO nei Gruppi 2 e 3.** Con 4,3501% la
+>   `770101` **non è più la sedia più pesante** di quei due gruppi: lo diventa
+>   **`771531` EMA200 DOW con 4,69%**. 👉 La frase di §3d.2 — *"è il vincolo che
+>   decide la taglia dell'intero gruppo"* — **è vera solo per il Gruppo 1**.
+> - 🟢 **E cade la frase «mangia i due terzi del muro»**: contro un muro di 10%,
+>   4,3501% ne mangia **il 43,5%, meno della metà**. Il limite inferiore certo
+>   del Gruppo 1 scende di **2,54 punti**.
+> - ⚪ **Nessun cap si muove**: R1 (3,0% per cluster) e R2 (3,25% C1) contano il
+>   **rischio aperto**, non il DD contrattuale. Restano 3,25% ✅ in tutti e tre.
+
 **DD atteso del gruppo.** L'unica misura di casa che lega somma e combinato è
 **R16**: somma 22,11% → combinato **8,91%** = **40,3% della somma**, su 239
 giornate. Applicando quel rapporto (🟡 **indicativo, NON una misura di questi
-gruppi**): Gruppo 1 ≈ **5,6%**, Gruppo 2 ≈ **6,4%**, Gruppo 3 ≈ **6,4%**.
-**Il limite inferiore certo è il max singolo, 6,89%; il limite superiore certo è
+gruppi**): Gruppo 1 ≈ ~~5,6%~~ 🆕 **4,5%**, Gruppo 2 ≈ ~~6,4%~~ 🆕 **5,4%**,
+Gruppo 3 ≈ ~~6,4%~~ 🆕 **5,3%**.
+**Il limite inferiore certo è il max singolo — 🆕 `4,3501%` nel Gruppo 1,
+`4,69%` (`771531`) nei Gruppi 2 e 3 — e il limite superiore certo è
 la somma.** 👉 Il numero vero si ottiene solo lanciando `dd_portafoglio.py` sui
 CSV per-trade dei backtest di quelle 5 sedie: **è una corsa da preparare, non un
 numero da stimare** (proposta operativa in §5).
@@ -215,14 +253,17 @@ numero da stimare** (proposta operativa in §5).
   −0,12 e +0,06). Nessun altro gruppo ha una misura di correlazione vera.
 - 🥇 **Zero sovrapposizioni opposte possibili per costruzione**: un solo
   orizzonte per simbolo.
-- 🥇 **Il DD contrattuale più basso** dei tre (somma 13,82%).
+- 🥇 **Il DD contrattuale più basso** dei tre (somma ~~13,82%~~ 🆕 **11,28%**, contro 13,37% e 13,23% — ✅ **il confronto regge anche dopo l'ERRATA**).
 - ⚖️ Costa **1,09 op/g contrattuali** rispetto al Gruppo 3 — ma **2,35 op/g
   supera comunque il pavimento di 1,00 per famiglia** con margine 2,3x.
 
 🟡 **Il Gruppo 3 è il migliore se serve FREQUENZA**, e ha una difesa misurata:
 la sua unica coppia incrociabile (`770511`/`771531`) è la **più frequente della
 matrice (4 episodi)** e costa **−0,87 EUR**. Ma `771531` EMA200 DOW ha DD
-contrattuale **4,69% a 0,65%**: da sola, quasi metà del muro.
+contrattuale **4,69% a 0,65%**: da sola, quasi metà del muro. 🔴🆕 **E dopo
+l'ERRATA è LEI la sedia più pesante del Gruppo 3** (la `770101` è scesa a
+4,3501%): il vincolo di taglia di questo gruppo **non è più il DAX, è l'EMA200
+sul Dow**.
 
 ### 3d. 🔴 I DUE AVVERTIMENTI CHE NON POSSO TACERE
 
@@ -232,10 +273,22 @@ contrattuale **4,69% a 0,65%**: da sola, quasi metà del muro.
    non giudica niente. 👉 Chi schiera il Gruppo 1 o il 3 deve decidere prima se
    `770511` va **long-only** o con lo short in osservazione. **Non è una
    decisione che prendo io qui.**
-2. **`770101` DAX Apertura EU pesa 6,89% da solo** a 0,65%: *"il suo DD promesso
+2. ~~**`770101` DAX Apertura EU pesa 6,89% da solo** a 0,65%: *"il suo DD promesso
    da solo mangia i due terzi del muro"* (censimento contratti). È in tutti e tre
    i gruppi perché è la sedia più veloce e con n=311 misurato — ma è **il vincolo
-   che decide la taglia dell'intero gruppo**.
+   che decide la taglia dell'intero gruppo**.~~
+   🔴🆕 **RISCRITTO 11/09 sera, vedi ERRATA sopra.** La `770101` pesa
+   **4,3501%** a 0,65% **[MISURATO a deposito 10.000 EUR]**, non 6,89%: contro il
+   muro del 10% ne mangia **il 43,5%, meno della metà**. 🟢 Resta in tutti e tre i
+   gruppi perché è la sedia più veloce (0,97 op/g) — e adesso ci resta **costando
+   meno**. ⚠️ **Il suo `n` misurato è 270 uscite** (= **193 posizioni** sulla
+   gemella long-only), **non 311**: il 311 è della cella col lato corto acceso.
+   🔴 **Ed è il vincolo di taglia del solo GRUPPO 1**: nei Gruppi 2 e 3 la sedia
+   più pesante è **`771531` EMA200 DOW con 4,69%**.
+   ⚠️ **E l'asterisco che non va perso**: il 4,3501% è misurato su banco
+   **10.000 EUR**. Sul conto challenge da **100.000 EUR** il DD promesso è
+   **`[NON MISURATO]`** (+7,8% misurato sul solo effetto del pavimento del lotto,
+   a parità di 270 operazioni) — è la voce **B6** del piano.
 
 ### 3e. Chi resta FUORI, e perché — 🚫 nessuna di queste è un verdetto di morte
 
@@ -246,7 +299,7 @@ contrattuale **4,69% a 0,65%**: da sola, quasi metà del muro.
 | `770402` MAXMIN ORO | DD **19,72% a 1% → 10,0% a 0,5%**: da sola **è tutto il muro**. E fa **CONFLITTO VERO** con `772343` LARRY ORO (copertura 100%/72%) | misurata, n=693 |
 | `971501` EMA200 ORO | 🔴 **"prop: NO a nessuna taglia"** — firma del 23/08, DD 45,91% a 1% | fuori per **firma esistente**, non per questa analisi |
 | `772362` CostToCost GBPCAD | DD **41,5% a 1% → 10,4% a 0,25%**, PF 0,92 su 6,5 anni | misurata e rossa |
-| `772361` EURJPY · `772422` GBPUSD · `772342` EURAUD | DD contrattuali 8,0% / 7,9% / 8,6% alla taglia firmata: entrano solo **al posto** di `770101`, non in aggiunta | 🔓 **rientrano se il gruppo scende di taglia** |
+| `772361` EURJPY · `772422` GBPUSD · `772342` EURAUD | DD contrattuali 8,0% / 7,9% / 8,6% alla taglia firmata: entrano solo **al posto** di `770101`, non in aggiunta. 🔴🆕 **ERRATA 11/09 — e il cambio PEGGIORA per loro**: con la `770101` scesa a **4,3501%**, sostituirla con una di queste **aggiunge 3,6-4,3 punti** alla somma del gruppo invece di lasciarla quasi ferma. Lo scambio era quasi neutro contro 6,89%; contro 4,3501% **non lo è più**. | 🔓 **rientrano se il gruppo scende di taglia** — 🔴 ma non più «a costo zero» |
 | `770924` STREV Nikkei | 🟠 **DA RIPRODURRE** (deposito ignoto + presenza in campo contesa il 02/09) | **"non ancora misurato"**, non morto |
 
 ---
