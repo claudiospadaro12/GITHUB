@@ -130,9 +130,17 @@
 #      6 celle x 2 finestre = 12 passate, UN SOLO agente locale MT5
 #      (classe 129: le celle leggono lo stesso calendario e con piu'
 #      agenti i gemelli non escono identici).
-#      [STIMATO] 2-4 minuti a passata su 14 anni di M1 oro in OHLC ->
-#      25-50 minuti, PIU' lo scarico delle M1 di XAUUSD la prima volta
-#      (decine di minuti, una volta sola per tutto il round).
+#      [STIMA CON DUE ANCORE MISURATE, non a occhio]
+#        ancora bassa: R88a ha girato 48 celle in 8,0 minuti
+#          (risultati_archivio/r88_csv/REFERTO_R88.txt r.10) = 10 s a
+#          passata, su un altro motore e un'altra finestra;
+#        ancora alta: la riga POSTNEWS 1330 su USDJPY dichiara 10-45
+#          minuti per l'INTERA corsa, "quasi tutti nella misura
+#          storico" (RIGA_POSTNEWS_1330_DA_MANDARE.md r.139).
+#      Attesa: da 10 secondi a ~3 minuti a passata (14 anni di M1 oro
+#      sono piu' dati di U30USD in R88a), PIU' lo scarico delle M1 di
+#      XAUUSD la PRIMA volta -- decine di minuti, ma UNA volta sola per
+#      tutto il round.
 #
 #  @DAQUANDO come direttiva e' OMESSO di proposito: va misurato con
 #    powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto

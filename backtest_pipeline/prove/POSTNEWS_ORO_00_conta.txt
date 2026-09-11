@@ -148,6 +148,45 @@
 #      DD ATTESO: il gemello USDJPY a rischio identico ha fatto 4,75% e
 #      4,56%. Attesa 4-8%. Sopra il 10% il RISCHIO parla a qualunque n.
 #
+#  >>> TRE CONTRO-ESEMPI COSTRUITI CONTRO QUESTO STESSO FILE
+#      (regola del 10/09: prima di consegnare una misura devo costruire
+#       io il caso che la farebbe sbagliare, e far vedere che non
+#       sbaglia -- oppure dire dove sbaglia)
+#      1. "E SE L'ORO FOSSE QUOTATO A 3 DECIMALI?" Alcuni broker lo
+#         fanno. Con Digits=3 il Point sarebbe 0,001 e PipSize()
+#         restituirebbe Point x 10 = 0,01. >>> LO STESSO IDENTICO
+#         NUMERO. La conversione "1 pip = 0,01 $" NON dipende da quale
+#         delle due convenzioni usa il broker. (A BCM comunque Digits=2,
+#         misurato da DUE sonde indipendenti.)
+#      2. "E SE TICKVALUE 0,86289 NON FOSSE PER LOTTO?" Prova contro un
+#         numero scritto da qualcun altro: report/DIARIO.md r.10,
+#         pagella 08/09, 0,01 lotti d'oro per 30,76 $ di movimento
+#         danno -26,57 EUR riportati. Il mio conto: 30,76 x 100 x 0,01
+#         x 0,86289 = 26,54 EUR. Scarto 0,11%. >>> LA CONVERSIONE
+#         REGGE contro un dato che non e' mio.
+#      3. "IL PF_H0 = 0,970 E' DAVVERO IL PEGGIO CHE H0 PUO' FARE?" No,
+#         e va detto: quella formula ignora le operazioni che NON
+#         toccano ne' SL ne' TP e vengono chiuse dall'orologio alle
+#         14:45. Quelle pagano il pedaggio su un lordo piccolo, quindi
+#         abbassano il PF. >>> 0,970 E' UN LIMITE SUPERIORE per H0: se
+#         il round torna SOTTO 0,970, e' ancora piu' chiaro che il
+#         meccanismo non c'e'.
+#
+#  >>> E UNA COSA CHE IL CSV NON DIRA', ma va guardata a mano
+#      Le operazioni chiuse dall'OROLOGIO (14:45) possono finire a
+#      QUALUNQUE distanza, anche minuscola: e' esattamente il secondo
+#      trade di Claudio dell'11/09 (+0,57 $ = 2,8x il costo pieno,
+#      SOTTO il pavimento DURO di 13,3x). Il cancello del costo
+#      protegge lo STOP, non l'uscita a orologio.
+#      >>> Da leggere sul registro affari della cella scelta: quante
+#          operazioni chiudono per TP, quante per SL, quante
+#          dall'orologio, e quanto vale la mediana di queste ultime.
+#          [NON DISPONIBILE dal CSV del driver: e' un passo a mano.]
+#      Stessa cosa per la concentrazione: se il profitto viene da 2-3
+#      giornate su 347, non e' un meccanismo, sono valori estremi.
+#      Controllo dichiarato prima: togliendo l'1% di operazioni
+#      migliori, il PF deve restare sopra 1,00.
+#
 #  >>> IL CANARINO, DA CONTROLLARE PRIMA DI LEGGERE QUALSIASI NUMERO
 #      Nel log della passata devono comparire TRE righe:
 #        [PostNews][NEWS] letto da Common\Files | righe 644 |
