@@ -115,8 +115,13 @@
 #  E da questa versione il terminale scelto viene sempre DICHIARATO
 #  a schermo (percorso + da quale via), perche' il difetto che stiamo
 #  chiudendo non e' scegliere male: e' scegliere in silenzio.
-#  SENZA il parametro il comportamento resta identico a prima, riga per
-#  riga: le righe di lancio gia' scritte non cambiano di una virgola.
+#  SENZA il parametro, dall'11/09/2026, IL DRIVER NON SI SCEGLIE PIU' UN
+#  TERMINALE DA SOLO: sul broker BCM il ripiego valorizza lui stesso
+#  questo parametro col BANCO C:\MT5_Backtest (demo 50504400) e passa
+#  quindi dagli STESSI controlli di qui sotto; se il banco non c'e',
+#  MUORE invece di spazzolare Program Files. Vedi il punto 7-ter.
+#  Le righe di lancio gia' scritte non cambiano di una virgola nel TESTO
+#  -- cambia DOVE atterrano sul VPS: il banco, non il piccolo 50503392.
 #    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 -Expert ABTG_ORB -TerminaleBacktest "C:\MT5_Backtest"
 #
 #  PERCHE' ESISTE LA v5 -- GLI #include NOSTRI (08/09/2026)
@@ -213,7 +218,10 @@ param(
                                      #   se NON E' IL BANCO: la guardia e' POSITIVA e ammette
                                      #   il solo C:\MT5_Backtest. Per un bersaglio legittimo
                                      #   diverso (altro broker, PC di casa) c'e' -Terminal.
-                                     #   Vuoto (default) = ripiego di sempre, immutato.
+                                     #   Vuoto (default) = dall'11/09/2026 ce lo mette il
+                                     #   DRIVER STESSO, col banco, se il banco c'e'. Se non
+                                     #   c'e', il round MUORE: niente piu' ripiego che si
+                                     #   sceglie un terminale fra quelli di Program Files.
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$PermettiCellaSingola,     # round a CELLA CONGELATA (zero assi Y): salta SOLO
                                      #   il controllo "nessun parametro da spazzolare".
@@ -920,6 +928,35 @@ function MotivoRifiutoBanco([string]$chiesto){
 # ---------------------------------------------------------------------
 
 # ---------------------------------------------------------------------
+#  NomeVietato -- LA SECONDA RETE, E SERVE ALL'ALTRO RAMO (11/09/2026)
+#  NON fa parte del blocco copiato qui sopra: sta fuori apposta, perche'
+#  quel blocco deve restare identico byte per byte all'originale.
+#
+#  A COSA SERVE, e nasce da un CONTRO-ESEMPIO trovato provando a rompere
+#  la riparazione di oggi: $BrokerBCM vale ($BrokerPattern -match
+#  '^(?i)bcm$'), cioe' e' vero SOLO per la parola esatta "BCM". Chi passa
+#  -BrokerPattern "BCM Markets" finisce nel ramo dell'ALTRO broker qui
+#  sotto, che cerca "*BCM Markets*" sotto Program Files e -- senza questa
+#  rete -- si prende IL PICCOLO 50503392. Sarebbe il buco di oggi con un
+#  vestito nuovo, raggiungibile da riga di comando.
+#
+#  PERCHE' QUI LA LISTA E' NEGATIVA e non positiva come per il banco: in
+#  quel ramo il bersaglio LEGITTIMO e' un terminale di un altro broker
+#  (Pepperstone, 14/08), che per definizione non si puo' elencare in
+#  anticipo. Una lista nera dimentica, e va detto: questa NON promette
+#  "il bersaglio e' giusto", promette solo "NON e' uno dei nostri MT5 con
+#  le sedie vive". E' meno forte della guardia positiva, ed e' il massimo
+#  che si puo' fare senza chiudere un uso vero.
+# ---------------------------------------------------------------------
+function NomeVietato([string]$cartella){
+  $d = ("" + $cartella)
+  foreach($v in $TERMINALI_VIETATI){
+    if($d -like ("*" + $v.p + "*")){ return $v.chi }
+  }
+  return ""
+}
+
+# ---------------------------------------------------------------------
 #  7-bis. IL TERMINALE NOMINATO A MANO (-TerminaleBacktest)
 #  Sta PRIMA di tutto il resto e, se valorizzato, riempie $Terminal: i
 #  due blocchi di ripiego qui sotto sono entrambi guardati da
@@ -929,6 +966,58 @@ function MotivoRifiutoBanco([string]$chiesto){
 # ---------------------------------------------------------------------
 $ViaTerminale=""
 if($Terminal){ $ViaTerminale="parametro esplicito -Terminal" }
+
+# ---------------------------------------------------------------------
+#  RIPIEGO_BANCO_v1_INIZIO (11/09/2026) -- IL RIPIEGO PREFERISCE IL BANCO
+#
+#  IL BUCO CHE QUESTA RIGA CHIUDE, ed e' misurato leggendo il file, non
+#  dedotto: la guardia positiva stava TUTTA DENTRO "if($TerminaleBacktest)".
+#  Chi lancia il driver A MANO senza quel parametro -- e le righe di
+#  report\PASSI_OPERATIVI.md (r.95-97) sono scritte proprio cosi' -- non
+#  la sfiorava nemmeno: partiva il ripiego del punto 7, che spazzolava
+#  Program Files col filtro "*BCM Markets MT5 Terminal*" e non "*-V3*".
+#  SUL VPS QUEL FILTRO E' IL PICCOLO 50503392, CON LE SEDIE VIVE SOPRA.
+#
+#  LA RIPARAZIONE, in una riga: il ripiego non "controlla anche lui", il
+#  ripiego ENTRA NELLO STESSO RAMO. Qui si valorizza $TerminaleBacktest
+#  con la COSTANTE $BANCO_PERC e si lascia fare al blocco 7-bis qui
+#  sotto, che e' identico e non e' stato toccato. Cosi' il percorso del
+#  ripiego passa dalla STESSA MotivoRifiutoBanco e dagli STESSI gradini
+#  fisici: cartella esistente, NON junction, terminal64.exe,
+#  metaeditor64.exe. Un ripiego con controlli PROPRI sarebbe il buco di
+#  prima con un vestito nuovo: due copie divergono, e la copia che
+#  diverge e' sempre quella che nessuno rilegge.
+#
+#  PERCHE' NON SI FIRMA DA SOLO IL BANCO QUANDO C'E' -UseSpare: perche'
+#  -UseSpare e' una richiesta ESPLICITA di un altro terminale (il -V3,
+#  cioe' il 100k 50504263). Dargli il banco in silenzio sarebbe scegliere
+#  al posto di chi ha scritto la riga, cioe' lo stesso difetto di classe
+#  37-quater visto dall'altra parte. Con -UseSpare si cade nel 7-ter e si
+#  muore dicendolo: se quel terminale serve davvero, si passa -Terminal
+#  col percorso per esteso, che e' un atto consapevole e scritto.
+#
+#  E SE IL BANCO NON C'E'? Non si ripiega altrove: si muore (punto 7-ter).
+# ---------------------------------------------------------------------
+$RipiegoSulBanco = $false
+if(-not $Terminal -and -not $TerminaleBacktest -and $BrokerBCM -and -not $UseSpare){
+  # Test-Path -PathType Container e' l'UNICA cosa decisa qui, e decide
+  # solo "provo o non provo". Tutto il resto -- junction compresa -- lo
+  # decide il blocco 7-bis. Una junction risponde SI' a questa riga ed e'
+  # giusto cosi': deve morire piu' sotto, col messaggio che spiega DOVE
+  # potrebbe puntare, non sparire in silenzio come "banco assente".
+  if(Test-Path -LiteralPath $BANCO_PERC -PathType Container){
+    Write-Host ""
+    Write-Host "--- RIPIEGO: NESSUN TERMINALE NOMINATO, PRENDO IL BANCO -------------" -ForegroundColor Yellow
+    Write-Host ("    cartella : " + $BANCO_PERC) -ForegroundColor White
+    Write-Host ("    conto    : " + $BANCO_CONTO + "  (demo solo-tester, zero EA attaccati)") -ForegroundColor White
+    Write-Host "    NON e' il piccolo 50503392, NON e' il 100k 50504263, NON e' il REALE 10105439." -ForegroundColor White
+    Write-Host "    Adesso questo bersaglio passa dagli stessi controlli di -TerminaleBacktest." -ForegroundColor DarkYellow
+    Write-Host "---------------------------------------------------------------------" -ForegroundColor Yellow
+    $TerminaleBacktest = $BANCO_PERC
+    $RipiegoSulBanco   = $true
+  }
+}
+
 if($TerminaleBacktest){
   if($Terminal){
     Muori ("-TerminaleBacktest e -Terminal dicono due cose diverse: passane UNO solo.`n" +
@@ -961,6 +1050,9 @@ if($TerminaleBacktest){
   # -TerminaleBacktest al solo banco non toglie quindi nessun uso vero --
   # ma va detto, ed e' scritto nel referto, che -Terminal resta SENZA
   # guardia: questa riga chiude la porta che il VPS usa, non tutte.
+  # 11/09/2026: il ramo -BrokerPattern qui sotto ha adesso la rete
+  # NomeVietato, quindi non puo' piu' atterrare su uno dei NOSTRI MT5 con
+  # le sedie vive. -Terminal invece resta scoperto, ed e' voluto.
   $motivoNo = MotivoRifiutoBanco $TerminaleBacktest
   if($motivoNo -ne ""){
     Muori ($motivoNo + "`n" +
@@ -1030,38 +1122,70 @@ if($TerminaleBacktest){
   $MetaEditor=$medBT
   $ViaTerminale="parametro esplicito -TerminaleBacktest"
 }
-
-if(-not $Terminal -and $BrokerBCM){
-  $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-  if($UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
-  else{$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select-Object -First 1}
-  # 37-quater (07/09): il RIPIEGO perdeva l'esclusione del -V3, quindi quando
-  # l'installazione giusta mancava si pigliava IL 100k (50504263, in Fase 1) e
-  # ci scriveva dentro l'EA -- con PROBLEMI: 0 e uscita 0. Riprodotto eseguendo.
-  # Adesso il ripiego mantiene le stesse esclusioni del ramo principale, e se
-  # non trova niente NON si arrangia: si ferma rumorosamente.
-  if(-not $c -and -not $UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -notlike "*-V3*" -and $_.DirectoryName -notlike "*BCM_Reale*"}|Select-Object -First 1}
-  if(-not $c -and $UseSpare){$c=$allTerm|Where-Object{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select-Object -First 1}
-  if($c -and -not $UseSpare -and ($c.DirectoryName -like "*-V3*" -or $c.DirectoryName -like "*BCM_Reale*")){
-    Write-Host ("TERMINALE SBAGLIATO: " + $c.DirectoryName) -ForegroundColor Red
-    Write-Host "Senza -UseSpare NON si scrive nel 100k (-V3) ne' nel conto REALE. Mi fermo." -ForegroundColor Red
-    exit 1
-  }
-  # 123: se non si trova niente MA esistono solo terminali VIETATI, dirlo.
-  # "terminale non trovato" nasconderebbe la causa vera e manderebbe a caccia
-  # di un'installazione mancante che invece c'e', ed e' solo quella sbagliata.
-  if(-not $c -and -not $UseSpare){
-    $vietati=@($allTerm|Where-Object{$_.DirectoryName -like "*-V3*" -or $_.DirectoryName -like "*BCM_Reale*"})
-    if($vietati.Count -gt 0){
-      Write-Host "NESSUN TERMINALE UTILIZZABILE, ma ce ne sono di VIETATI:" -ForegroundColor Red
-      foreach($v in $vietati){ Write-Host ("   " + $v.DirectoryName) -ForegroundColor Red }
-      Write-Host "Il 100k (-V3) e il conto REALE non si toccano senza -UseSpare. Mi fermo." -ForegroundColor Red
-      exit 1
-    }
-  }
-  if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"
-         $ViaTerminale="RIPIEGO automatico su BrokerPattern 'BCM'" + $(if($UseSpare){" con -UseSpare"}else{""})}
+# LA VIA VA DETTA PER QUELLA CHE E'. Se ci siamo arrivati dal ripiego,
+# nessuno ha passato -TerminaleBacktest: scriverlo sarebbe una bugia
+# stampata, e il banner "TERMINALE SCELTO" esiste apposta per non far
+# tirare a indovinare. Questa riga sta FUORI dal blocco perche' dentro il
+# blocco si puo' morire: se si e' arrivati qui, i controlli sono passati.
+if($RipiegoSulBanco){
+  $ViaTerminale = "RIPIEGO automatico SUL BANCO " + $BANCO_PERC + " (demo " + $BANCO_CONTO + ")"
 }
+
+# ---------------------------------------------------------------------
+#  7-ter. IL RIPIEGO CHE SPAZZOLAVA Program Files E' STATO TOLTO
+#  (11/09/2026, RIPIEGO_BANCO_v1)
+#
+#  QUI CI SI ARRIVA SOLO IN DUE CASI, e nessuno dei due ammette una
+#  scelta automatica:
+#    a) il banco C:\MT5_Backtest NON esiste (o non e' una cartella);
+#    b) e' stato passato -UseSpare, che chiede un terminale con le sedie
+#       vive sopra (il -V3 = 100k 50504263).
+#
+#  PERCHE' SI MUORE E NON SI CERCA ANCORA. Le due strade offerte erano
+#  "morire" oppure "ripiegare solo su cio' che MotivoRifiutoBanco non
+#  rifiuta". La seconda, GUARDATA DA VICINO, e' la prima travestita: la
+#  guardia e' POSITIVA e ammette UN SOLO percorso, C:\MT5_Backtest. Un
+#  ripiego che puo' accettare un bersaglio solo e in questo ramo sa gia'
+#  che quel bersaglio non c'e' e' un modo piu' lento di morire -- con in
+#  piu' una spazzolata ricorsiva di Program Files che tocca le cartelle
+#  del conto REALE per poi buttare via il risultato. Fra comodo e
+#  stretto, stretto: si muore, e si dice cosa passare.
+#
+#  E LA PERDITA DI COMODITA' E' REALE, VA DETTA: su una macchina dove il
+#  banco non e' installato (un PC nuovo, un collega) le righe vecchie
+#  senza -TerminaleBacktest adesso non partono piu' da sole. Il rimedio
+#  e' una riga sola (-Terminal col percorso per esteso), ed e' un atto
+#  consapevole: e' esattamente cio' che il 06/09 e' mancato, quando un
+#  attacco destinato al piccolo 50503392 e' quasi finito sul REALE.
+# ---------------------------------------------------------------------
+if(-not $Terminal -and $BrokerBCM){
+  $perche = ("IL BANCO NON C'E': '" + $BANCO_PERC + "' non esiste, o non e' una cartella.")
+  if($UseSpare){
+    $perche = ("-UseSpare chiede il terminale '-V3', cioe' IL 100k 50504263, che ha SEDIE" +
+               "`n             VIVE sopra. Dall'11/09/2026 il driver non se lo sceglie piu' da solo.")
+  }
+  Muori ("NESSUN TERMINALE DA USARE, e non me ne scelgo uno io.`n" +
+         "    motivo : " + $perche + "`n" +
+         "`n" +
+         "    Il driver NON spazzola piu' Program Files per indovinare un terminale:`n" +
+         "    su questa macchina ce ne possono essere quattro, e tre hanno SEDIE VIVE`n" +
+         "    sopra (piccolo 50503392, 100k 50504263, REALE 10105439). Sbagliare`n" +
+         "    finestra e' gia' costato: incidente del 06/09/2026.`n" +
+         "`n" +
+         "    COSA FARE, in ordine di preferenza:`n" +
+         "      1) se il banco c'e' ma sta altrove, passalo per esteso:`n" +
+         "           -TerminaleBacktest `"" + $BANCO_PERC + "`"`n" +
+         "         (ammesso SOLO quel percorso: la guardia e' positiva)`n" +
+         "      2) se ti serve davvero un ALTRO terminale -- un secondo broker, il`n" +
+         "         PC di backtest di casa, il -V3 -- passa -Terminal col percorso`n" +
+         "         COMPLETO di terminal64.exe. E' l'unica porta senza guardia, e si`n" +
+         "         apre a mano apposta:`n" +
+         "           -Terminal `"C:\...\terminal64.exe`"`n" +
+         "`n" +
+         "    Per vedere cosa c'e' vivo adesso, in SOLA LETTURA:`n" +
+         "      Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path")
+}
+#  RIPIEGO_BANCO_v1_FINE
 if(-not $Terminal -and -not $BrokerBCM){
   # TERMINALE DI UN ALTRO BROKER. Si parte da origin.txt (ogni cartella
   # dati dice da quale installazione arriva): e' l'unico modo affidabile,
@@ -1075,6 +1199,14 @@ if(-not $Terminal -and -not $BrokerBCM){
     $inst=""
     try{ $inst=(Get-Content $o -Raw -ErrorAction Stop).Trim() }catch{ continue }
     if($inst -notlike "*$BrokerPattern*"){ continue }
+    # 11/09/2026: -BrokerPattern non e' una porta di servizio sui NOSTRI
+    # terminali. "BCM Markets" qui dentro pescherebbe il piccolo 50503392.
+    $chiVietato = NomeVietato $inst
+    if($chiVietato -ne ""){
+      Write-Host ("    SCARTATO, e' un terminale VIETATO: " + $inst) -ForegroundColor Red
+      Write-Host ("    (" + $chiVietato + "). -BrokerPattern serve per un ALTRO broker.") -ForegroundColor Red
+      continue
+    }
     $t=Join-Path $inst "terminal64.exe"
     if(-not (Test-Path $t)){ continue }
     $Terminal=$t
@@ -1085,7 +1217,18 @@ if(-not $Terminal -and -not $BrokerBCM){
   }
   if(-not $Terminal){
     $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-    $c=$allTerm|Where-Object{$_.DirectoryName -like "*$BrokerPattern*"}|Select-Object -First 1
+    # 11/09/2026: stessa rete di sopra. Il "primo che capita" non deve mai
+    # poter essere uno dei nostri MT5 con le sedie vive.
+    $c=$null
+    foreach($x in @($allTerm|Where-Object{$_.DirectoryName -like "*$BrokerPattern*"})){
+      $chiVietato = NomeVietato $x.DirectoryName
+      if($chiVietato -ne ""){
+        Write-Host ("    SCARTATO, e' un terminale VIETATO: " + $x.DirectoryName) -ForegroundColor Red
+        Write-Host ("    (" + $chiVietato + "). -BrokerPattern serve per un ALTRO broker.") -ForegroundColor Red
+        continue
+      }
+      $c=$x; break
+    }
     if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"
            $ViaTerminale="RIPIEGO su Program Files per BrokerPattern '$BrokerPattern'"}
   }
