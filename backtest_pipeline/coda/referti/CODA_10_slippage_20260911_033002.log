@@ -1,0 +1,96 @@
+=== LO SLIPPAGE MISURATO SUL CAMPO ===
+data lettura: 2026-09-11 03:31:54  (ora locale)
+file cercati: MQL5\Files\ABTG_Slippage*  (ledger dei deal e sintesi)
+    GUARDATO e NIENTE: C:\MT5_Backtest -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+    GUARDATO e NIENTE: C:\Program Files\BCM Markets MT5 Terminal -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+    GUARDATO e NIENTE: C:\Program Files\Pepperstone MetaTrader 5 -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+    GUARDATO e NIENTE: C:\Program Files\Tickmill Europe MT5 Terminal -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+    GUARDATO e NIENTE: C:\Program Files\BCM Markets MT5 Terminal -V3 -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+
+=====================================================================
+=== C:\BCM_Reale
+=== file dello SlippageLogger trovati: 3
+=====================================================================
+
+>>> ABTG_SlippageLogger_10105439_deal.csv   (1.01 KB, ultima scrittura 2026-09-08 14:35)
+    righe non vuote: 4
+    | deal;ordine;posizione;ora_server;ora_msc;login;tipo_conto;simbolo;magic;entrata;tipo_deal;motivo;volume;prezzo_eseguito;prezzo_richiesto;fonte_richiesto;rich_commento;rich_ordine;rich_snapshot;eta_snapshot_sec;slip_punti;slip_unita;unita;slip_valuta;commissione;swap;profitto;digits;point;commento
+    | 2899263;3333785;3333785;2026.09.08 12:50:48;1788871848267;10105439;REALE;D30EUR;770101;IN;ACQUISTO;EA;0.30;25983.80000000;25983.10000000;ORDINE;n/d;25983.10000000;n/d;n/d;70.00;0.7000;punti indice;0.21;0.00;0.00;0.00;2;0.01000000;DAX Apertura EU RETEST BUY
+    | 2899773;3334313;3333785;2026.09.08 13:30:00;1788874200802;10105439;REALE;D30EUR;770101;OUT;VENDITA;EA;0.10;26014.50000000;n/d;NESSUNA;n/d;n/d;n/d;0.0;n/d;n/d;punti indice;n/d;0.00;0.00;3.07;2;0.01000000;-
+    | 2899892;3334434;3333785;2026.09.08 13:35:07;1788874507097;10105439;REALE;D30EUR;770101;OUT;VENDITA;SL;0.20;26006.70000000;26006.70000000;COMMENTO;26006.70000000;26006.70000000;26006.70000000;1.0;0.00;0.0000;punti indice;0.00;0.00;0.00;4.58;2;0.01000000;[sl 26006.70]
+
+>>> ABTG_SlippageLogger_10105439_REFERTO.txt   (5.11 KB, ultima scrittura 2026-09-11 03:30)
+    righe non vuote: 65
+    | =====================================================================
+    |   SLIPPAGE VERO -- ABTG_SlippageLogger v1.00 - logger di SOLA LETTURA, slippage vero dai deal
+    | =====================================================================
+    | conto              : 10105439 @ BCMMarkets-Server   tipo: REALE
+    | scritto il (server): 2026.09.11 02:30:00
+    | avvio di QUESTA istanza (server): 2026.09.04 21:54:59
+    | registro           : ABTG_SlippageLogger_10105439_deal.csv
+    | ripresa all'avvio  : nessun registro precedente: raccolta NUOVA da zero (ABTG_SlippageLogger_10105439_deal.csv)
+    | deal esaminati     : 2161   registrati NUOVI: 3   movimenti di conto saltati: 0
+    | campioni in memoria: 3   scansioni: 35850   salvataggi: 1201
+    | posizioni sotto foto: 1 (tetto 512, foto buttate per il tetto: 0)
+    | autotest           : casi falliti 0 (0 = le funzioni di segno, parsing e percentile sono verificate a tavolino)
+    | COME SI LEGGE -- e cosa NON c'e' dentro:
+    |  - SEGNO: positivo = AVVERSO, cioe' abbiamo pagato PEGGIO del richiesto.
+    |    Negativo = riempimento MIGLIORE del richiesto (capita, non e' un errore).
+    |  - le colonne sono nell'unita' pratica del simbolo (pip nel forex, punti
+    |    indice negli indici); nel registro c'e' anche il grezzo in PUNTI MT5.
+    |  - la riga che conta e' quella del motivo SL: e' li' che una scivolata
+    |    allarga una perdita gia' presa.
+    |  - il costo in valuta usa il valore del tick di ADESSO, non quello del
+    |    momento del deal: su simboli in valuta diversa e' un'approssimazione.
+    |  - le ORE sono in ORA SERVER. Le schede Esperti/Giornale di MT5 sono in
+    |    ora LOCALE (un'ora avanti sul VPS): non si confrontano.
+    |  - NON c'e' lo SPREAD (quello e' ABTG_SpreadLogger, e misura un'altra cosa).
+    |  - broker singolo (BCM), un conto solo, un terminale solo.
+    | ---------------------------------------------------------------------
+    |   COERENZA DELLE TRE FONTI DEL PREZZO RICHIESTO (sulle sole USCITE)
+    | ---------------------------------------------------------------------
+    |   uscite in memoria .................: 2
+    |   con COMMENTO del server (fonte C) .: 1
+    |   con prezzo dell'ORDINE (fonte B) ..: 1
+    |   con la nostra FOTO SL/TP (fonte A) : 1
+    |   SENZA nessuna fonte (scarto n/d) ..: 1
+    |   C e B confrontabili 1, d'accordo 1 (100.0%)
+    |   fonte B che COINCIDE con l'eseguito: 1 su 1
+    |   fonte C che COINCIDE con l'eseguito: 1 su 1
+    |   >> ATTENZIONE: la fonte B coincide con l'eseguito in TUTTE le righe.
+    |      Vuol dire che questo server NON riporta il livello richiesto nel
+    |      prezzo dell'ordine: una misura basata su B direbbe 'slippage zero'
+    |      su QUALUNQUE conto. Sulle righe dove esiste, fa fede la fonte C.
+    | ---------------------------------------------------------------------
+    |   SCARTO PER SIMBOLO E PER MOTIVO DELL'USCITA (positivo = AVVERSO)
+    | ---------------------------------------------------------------------
+    |   gruppo                             |     n |   mediana |       P95 |       max |     media |   costo tot | unita        |
+    | -------------------------------------+-------+-----------+-----------+-----------+-----------+-------------+--------------+
+    |   D30EUR uscita SL                   |     1 |     0.000 |     0.000 |     0.000 |     0.000 |        0.00 | punti indice | senza richiesto 0
+    |   D30EUR uscita EA                   |     0 |    nessuno scarto calcolabile (1 deal senza prezzo richiesto)
+    |   D30EUR INGRESSI                    |     1 |     0.700 |     0.700 |     0.700 |     0.700 |        0.21 | punti indice | senza richiesto 0
+    | -------------------------------------+-------+-----------+-----------+-----------+-----------+-------------+--------------+
+    | ---------------------------------------------------------------------
+    |   SCARTO PER SEDIA (magic) -- solo le uscite in STOP
+    | ---------------------------------------------------------------------
+    |   gruppo                             |     n |   mediana |       P95 |       max |     media |   costo tot | unita        |
+    | -------------------------------------+-------+-----------+-----------+-----------+-----------+-------------+--------------+
+    |   magic 770101 uscite SL             |     1 |     0.000 |     0.000 |     0.000 |     0.000 |        0.00 | punti indice | senza richiesto 0
+    |   magic 770101 TUTTE le uscite       |     1 |     0.000 |     0.000 |     0.000 |     0.000 |        0.00 | punti indice | senza richiesto 1
+    | ---------------------------------------------------------------------
+    |   LE 10 SCIVOLATE PEGGIORI (le medie non le fanno vedere)
+    | ---------------------------------------------------------------------
+    |   2026.09.08 12:50:48 | D30EUR   | magic  770101 | IN EA        | vol    0.30 | chiesto     25983.10 | eseguito     25983.80 | scarto     0.700 punti indice | costo 0.21 | fonte ORDINE | eta' foto n/d s
+    ... altre 5 righe non stampate (tetto).
+
+>>> ABTG_SlippageLogger_10105439_sintesi.csv   (0.47 KB, ultima scrittura 2026-09-11 03:30)
+    righe non vuote: 4
+    | simbolo;magic;entrata;motivo;n;senza_richiesto;mediana_punti;p95_punti;max_punti;media_punti;mediana_unita;p95_unita;max_unita;unita;costo_totale_valuta;tipo_conto;login
+    | D30EUR;770101;OUT;SL;1;0;0.00;0.00;0.00;0.00;0.0000;0.0000;0.0000;punti indice;0.00;REALE;10105439
+    | D30EUR;770101;OUT;EA;0;1;0.00;0.00;0.00;0.00;0.0000;0.0000;0.0000;punti MT5;0.00;REALE;10105439
+    | D30EUR;770101;IN;QUALUNQUE;1;0;70.00;70.00;70.00;70.00;0.7000;0.7000;0.7000;punti indice;0.21;REALE;10105439
+
+file stampati: 3
+PROMEMORIA: sul DEMO lo slippage e' zero per costruzione. La misura che
+conta e' quella del conto vero.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
