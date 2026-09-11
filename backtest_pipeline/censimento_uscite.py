@@ -35,7 +35,7 @@ E UN CONTROLLO CHE LO SCRIPT NON PUO' FARE DA SOLO:
 
 Nessun numero stimato. Dove manca -> [NON MISURATO].
 """
-import csv, os, re, json, collections
+import csv, os, re, sys, json, collections
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -433,5 +433,138 @@ def main():
           sum(r['celle'] * 2 for r in mai if not r['inerte']))
     print("scritto:", os.path.relpath(out, ROOT))
 
+# ============================================================================
+# AUTOTEST -- casi VERI presi dal repo. `python3 censimento_uscite.py --autotest`
+# Non e' una decorazione: e' il collaudo dell'attribuzione. Ogni caso dice
+# PERCHE' sta nella lista, cosi' se un domani cade si sa cosa si e' rotto.
+# ============================================================================
+CASI = [
+ # (file, EA atteso, via attesa, perche' il caso e' in lista)
+ ('backtest_pipeline/risultati_prove/gestione_20260909/'
+  'gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv', 'ABTG_DAX_Apertura_EU', 'PATH',
+  'il basename COMINCIA per "gestione_": la versione vecchia tornava None'),
+ ('backtest_pipeline/risultati_prove/gestione_20260909/'
+  'gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv', 'ABTG_Nasdaq_Apertura_US', 'PATH',
+  'stesso difetto, sedia diversa'),
+ ('backtest_pipeline/risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv',
+  'ABTG_DAX_Apertura_EU', 'MAGIC',
+  'il nome dell EA non compare da nessuna parte: lo salva InpMagic=770101'),
+ ('backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_F_gestione_OOS.csv',
+  'ABTG_Nasdaq_Apertura_US', 'MAGIC', 'come sopra, via InpMagic=770201'),
+ ('backtest_pipeline/risultati_archivio/EMA200/realtick_H4/'
+  'valid_ABTG_EMA200_H4_realtick_GBPUSD.csv', 'ABTG_EMA200', 'PATH',
+  'validazione a tick reali EMA200: basename "valid_" -> era invisibile'),
+ ('backtest_pipeline/risultati_archivio/EMA200/H1_OHLC/scan_ABTG_EMA200_H1_U30USD.csv',
+  'ABTG_EMA200', 'PATH',
+  'la scansione H1 sul DOW: la sedia 771531 del piano di ottobre'),
+ ('backtest_pipeline/risultati_archivio/csv_R74/ABTG_PTE_Ottimizzato_GBPUSD_IS_ott74a.csv',
+  'ABTG_PTE_Ottimizzato', 'PATH',
+  'CONTENIMENTO: ABTG_PTE e dentro ABTG_PTE_Ottimizzato -> deve vincere il LUNGO'),
+ ('backtest_pipeline/risultati_archivio/csv_R72/ABTG_PTE_GBPUSD_IS_pte72gbp.csv',
+  'ABTG_PTE', 'PATH',
+  'CONTENIMENTO dall altro lato: qui il lungo NON c e, deve vincere il corto'),
+ ('backtest_pipeline/risultati_archivio/r81_csv/'
+  'ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r81a.csv',
+  'ABTG_MaxMinNotte_DAX_Short_Ottimizzato', 'PATH',
+  'CONTENIMENTO a tre: MaxMinNotte < ..._Ottimizzato < ..._Ottimizzato_MFE'),
+ ('backtest_pipeline/risultati_prove/regime_r59/EZ_AUDJPY_LATERALE_r59.csv',
+  'ABTG_EasyTrend', 'FIRMA',
+  'FALSO POSITIVO da magic: porta InpMagic=772700 (ABTG_Bulge) ma le colonne '
+  'sono di EasyTrend. Il veto della firma ferma il magic e la firma corregge'),
+ ('backtest_pipeline/risultati_prove/regime_r50/LARRY_ORO_CROLLO_r50.csv',
+  'ABTG_PunteLarry', 'FIRMA', 'stesso falso positivo da InpMagic=772700'),
+ # ---- casi NEGATIVI: devono restare None ----
+ ('backtest_pipeline/flotta_attesa.csv', None, 'NESSUNA',
+  'NEGATIVO: non e un risultato di round, e un elenco di cosa deve girare'),
+ ('backtest_pipeline/risultati_archivio/ABTG_StoricoScaricato.csv', None, 'NESSUNA',
+  'NEGATIVO: comincia per ABTG_ ma e una sonda di storico, zero colonne Inp*'),
+ ('backtest_pipeline/risultati_archivio/misura_tick/misura_tick_NASUSD.csv', None, 'NESSUNA',
+  'NEGATIVO: misura di storico, non un round'),
+ ('backtest_pipeline/risultati_archivio/gapcash_passo0_csv/misura_tick_NASUSD.csv', None,
+  'NESSUNA', 'NEGATIVO: omonimo in altra cartella'),
+ ('backtest_pipeline/risultati_archivio/csv_R80/PTEGBP_B25_TORO_r80nat.csv', None,
+  'FIRMA-AMBIGUA',
+  'NEGATIVO DURO: e un round VERO ma ABTG_PTE e ABTG_PTE_Ottimizzato lo '
+  'contengono entrambi e il magic 772637/772638 non e in mappa -> si DICHIARA '
+  'ignoto, non si indovina'),
+]
+
+def _scheda(rel):
+    """Legge il CSV vero e ne ricava colonne Inp* e valori di InpMagic."""
+    raw = leggi(os.path.join(ROOT, rel))
+    if raw is None:
+        return None
+    lines = raw.splitlines()
+    if not lines:
+        return dict(cols=[], magics=[])
+    delim = ';' if lines[0].count(';') > lines[0].count(',') else ','
+    rdr = csv.DictReader(lines, delimiter=delim)
+    cols = [c.strip() for c in (rdr.fieldnames or []) if c and c.strip().startswith('Inp')]
+    mg = set()
+    if 'InpMagic' in cols:
+        for r in rdr:
+            v = (r.get('InpMagic') or '').strip()
+            if v:
+                mg.add(v)
+    return dict(cols=cols, magics=sorted(mg))
+
+def autotest():
+    ko = 0
+    print("AUTOTEST ea_of() -- %d casi VERI dal repo" % len(CASI))
+    print("mappa magic->EA: %d magic univoci | scartati perche' usati da piu' EA: %s"
+          % (len(MAGIC2EA), MAGIC_AMBIGUI))
+    print("-" * 78)
+    for rel, atteso, via_att, perche in CASI:
+        sc = _scheda(rel)
+        if sc is None:
+            print("KO  FILE ASSENTE  %s" % rel)
+            ko += 1
+            continue
+        got, via = ea_of(rel, sc['cols'], sc['magics'], con_via=True)
+        ok = (got == atteso) and (via == via_att)
+        ko += 0 if ok else 1
+        print("%s  %-38s via %-14s %s" % ('OK ' if ok else 'KO ', str(got), via,
+                                          os.path.basename(rel)))
+        print("      perche': %s" % perche)
+        if not ok:
+            print("      ATTESO: %s via %s" % (atteso, via_att))
+    print("-" * 78)
+    print("AUTOTEST: %d/%d passati" % (len(CASI) - ko, len(CASI)))
+    return ko
+
+def delta():
+    """Il DELTA fra il censimento VECCHIO (ea_of rotta) e quello riparato."""
+    ax, cost, ncsv = indice_csv()
+    vecchie = {(r['magic'], r['knob']): r for r in censimento(ax, cost, ea_of_vecchia)
+               if 'knob' in r}
+    nuove = {(r['magic'], r['knob']): r for r in censimento(ax, cost, ea_of) if 'knob' in r}
+    va = sum(1 for r in META if ea_of_vecchia(r))
+    na = sum(1 for r in META if ea_of(r))
+    print("CSV con colonne Inp*: %d | attribuiti VECCHIA %d -> NUOVA %d (+%d)"
+          % (len(META), va, na, na - va))
+    cambi = [(k, vecchie[k]['stato'], nuove[k]['stato']) for k in nuove
+             if vecchie[k]['stato'] != nuove[k]['stato']]
+    risorte = [k for k, a, b in cambi if a.startswith('MAI') and not b.startswith('MAI')]
+    peggio = [(k, a, b) for k, a, b in cambi if not a.startswith('MAI') and b.startswith('MAI')]
+    print("coppie sedia x manopola: %d | stato cambiato: %d"
+          % (len(nuove), len(cambi)))
+    print("DA 'MAI PROVATA' A 'PROVATA': %d | regressioni (provata -> mai): %d"
+          % (len(risorte), len(peggio)))
+    print("-" * 78)
+    for k in sorted(risorte):
+        r = nuove[k]
+        print("%s  %-28s %-26s %s -> %s" % (k[0], r['ea'], k[1],
+                                            vecchie[k]['stato'], r['stato']))
+        for rel, vs in r['prove'][:2]:
+            print("      %s  valori: %s" % (rel, ','.join(vs[:8])))
+    for k, a, b in peggio:
+        print("REGRESSIONE %s %s: %s -> %s" % (k[0], k[1], a, b))
+    return len(risorte)
+
 if __name__ == '__main__':
-    main()
+    if '--autotest' in sys.argv:
+        sys.exit(1 if autotest() else 0)
+    elif '--delta' in sys.argv:
+        delta()
+    else:
+        main()
