@@ -86,6 +86,22 @@ input int    InpCutoffMin   = 0;
 
 input group "=== Rischio ==="
 input double InpRiskPercent = 1.0;   // rischio % TOTALE (diviso tra gli ordini)
+
+//  11/09/2026 -- IL PAVIMENTO DEL LOTTO, RESO VISIBILE E GOVERNABILE.
+//  TROVATO IN CAMPO da Claudio: due gambe con distanze di stop diverse
+//  (64,25 e 38,94 $ su XAUUSD) uscivano tutte e due a 0,01 lotti, mentre il
+//  rapporto delle distanze chiede 1,65x. Causa: i lotti CALCOLATI erano
+//  0,0049 e 0,0082, cioe' sotto il minimo, e MathMax(mn,...) li ALZAVA a 0,01
+//  IN SILENZIO. Effetto misurato: rischio vero 1,01% + 0,61% = 1,62% contro
+//  l'1,00% che l'input qui sopra dichiara come TOTALE.
+//  Il difetto NON e' il pavimento (il broker non vende meno di 0,01): e' che
+//  il codice prometteva un TOTALE e non lo faceva rispettare, senza dirlo.
+//  ALZA            = come ha sempre fatto (default: ricompilare non cambia nulla)
+//  SALTA_GAMBA     = non piazza la gamba che non sta nel suo budget
+//  RISPETTA_TOTALE = piazza finche' il totale floorato resta <= budget dichiarato
+enum ENUM_ABTG_FLOOR { ABTG_FLOOR_ALZA=0, ABTG_FLOOR_SALTA_GAMBA=1, ABTG_FLOOR_RISPETTA_TOTALE=2 };
+input ENUM_ABTG_FLOOR InpFloorPolicy = ABTG_FLOOR_ALZA; // pavimento lotto: ALZA / SALTA / RISPETTA TOTALE
+input bool InpFloorVerbose = true;  // scrivi nel log ogni volta che il pavimento morde
 input int    InpMaxTradesPerDay = 0;
 
 input group "=== Filtro notizie ==="
@@ -222,6 +238,7 @@ void PlaceOrders(bool isLong,double ema,double atr)
 
    int nOrders = InpUseOrder2 ? 2 : 1;
    double riskPct = InpRiskPercent/nOrders;
+   gRischioPiazzatoOggi = 0;   // 11/09: si azzera a ogni segnale, non a ogni giorno
 
    // 1o ordine
    PlaceLimit(isLong,o1,sl,riskPct,"1");
@@ -237,13 +254,40 @@ void PlaceLimit(bool isLong,double px,double sl,double riskPct,string tag)
    double tp = isLong ? NormalizePrice(px+risk*InpTP_RR) : NormalizePrice(px-risk*InpTP_RR);
    double lot=LotByRisk(risk,riskPct);
    if(lot<=0){ Log("lotto nullo ("+tag+")."); return; }
+
+   //--- 11/09/2026: IL PAVIMENTO PARLA. Prima alzava il lotto in silenzio.
+   if(gLastFloorMorso)
+     {
+      double budget   = AccountInfoDouble(ACCOUNT_BALANCE)*riskPct/100.0;
+      double veroEur  = lot*gLastLossPerLot;
+      double fattore  = (budget>0 ? veroEur/budget : 0);
+      if(InpFloorVerbose)
+         Log(StringFormat("PAVIMENTO LOTTO (%s): calcolato %.4f -> piazzato %.2f. "
+             "Rischio voluto %.2f, vero %.2f = %.2fx il dichiarato.",
+             tag,gLastLotGrezzo,lot,budget,veroEur,fattore));
+
+      if(InpFloorPolicy==ABTG_FLOOR_SALTA_GAMBA)
+        { Log("PAVIMENTO: gamba "+tag+" NON piazzata (politica SALTA_GAMBA)."); return; }
+
+      if(InpFloorPolicy==ABTG_FLOOR_RISPETTA_TOTALE)
+        {
+         double budgetTot = AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0;
+         if(gRischioPiazzatoOggi+veroEur > budgetTot+1e-9)
+           {
+            Log(StringFormat("PAVIMENTO: gamba %s NON piazzata: %.2f gia' impegnati "
+                "+ %.2f sforerebbero il TOTALE dichiarato di %.2f.",
+                tag,gRischioPiazzatoOggi,veroEur,budgetTot));
+            return;
+           }
+        }
+     }
    datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
    string cm=InpComment+(isLong?" L":" S")+tag;
    //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
    if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200_Ottimizzato")) return;
    bool ok=isLong?gTrade.BuyLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm)
                  :gTrade.SellLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm);
-   if(ok){ gTradesToday++; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
+   if(ok){ gTradesToday++; gRischioPiazzatoOggi += lot*gLastLossPerLot; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
            isLong?"BUY":"SELL",tag,DoubleToString(px,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot)); }
    else Log("ordine "+tag+" fallito: "+gTrade.ResultRetcodeDescription());
   }
@@ -326,6 +370,13 @@ double NormalizePrice(double price)
    return(NormalizeDouble(MathRound(price/ts)*ts,dg));
   }
 
+//  11/09/2026 -- fotografia dell'ultimo dimensionamento, per il log e per le
+//  politiche del pavimento. Scritte da LotByRisk(), lette da PlaceLimit().
+double gRischioPiazzatoOggi = 0;   // rischio in valuta gia' impegnato dal segnale corrente
+double gLastLotGrezzo  = 0;
+double gLastLossPerLot = 0;
+bool   gLastFloorMorso = false;
+
 double LotByRisk(double slDist,double riskPct)
   {
    if(slDist<=0) return(0);
@@ -353,8 +404,15 @@ double LotByRisk(double slDist,double riskPct)
    double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
    double mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
    double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP); if(st<=0) st=0.01;
+   //  11/09/2026: il lotto GREZZO e la PERDITA PER LOTTO escono dalla funzione,
+   //  perche' senza di loro chi chiama non puo' sapere se il pavimento ha morso
+   //  ne' quanto rischia davvero. Prima si perdevano dentro il return.
+   gLastLotGrezzo   = lot;
+   gLastLossPerLot  = lossPerLot;
    lot=MathFloor(lot/st)*st;
-   return(MathMax(mn,MathMin(mx,lot)));
+   double finale=MathMax(mn,MathMin(mx,lot));
+   gLastFloorMorso  = (finale>lot+1e-12);
+   return(finale);
   }
 
 double NormVol(double v)
