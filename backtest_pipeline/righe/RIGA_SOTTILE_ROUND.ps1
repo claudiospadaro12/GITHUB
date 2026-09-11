@@ -177,7 +177,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #   nella riga $PIN, non quello citato in un commento: un commento che
 #   nomina un pin invecchia, il codice no. Segnalato dal cancello.)
 # ---------------------------------------------------------------------
-$PIN = '537270e17a9530641a24705d930091399419c37f'
+$PIN = '9cba7a1000b97b346c8028cf43e3c3e1c8529dc2'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -207,7 +207,7 @@ $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
 #    un '@FINOA' poteva essere ignorato in silenzio.
 #    Per i sei file prova R132/R133 non cambia NIENTE: dichiarano tutti
 #    @FINOA 2026.06.30, identica al default del driver.
-$SHA_WALK  = '5EED2C6934E663746A5DB05A5AE92D667ADF4EEED31AE8368EDAC28C1F05180B'
+$SHA_WALK  = '02E2FE8F90CCBD079E92A7A6C74B54D96C536982927BEC06AE68ECFB9ECF3FEA'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
