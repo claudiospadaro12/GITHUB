@@ -6,7 +6,8 @@ commenti). Ogni riga residua viene stampata: e' li' che si nasconde un
 cambio di comportamento."""
 import re, subprocess, sys
 
-# CLASSE 233 (11/09/2026) -- IL DEFAULT "HEAD~1" HA PRODOTTO UNO ZERO VUOTO.
+# CLASSE 238 (11/09/2026, nata 233 e rinumerata: il 233 era gia' preso)
+# -- IL DEFAULT "HEAD~1" HA PRODOTTO UNO ZERO VUOTO.
 # Il default valeva finche' l'imbuto era l'ULTIMO commit. Appena un altro
 # commit ci e' finito sopra (i controlli, piu' un commit "in corso d'opera"
 # della sessione principale), HEAD~1 conteneva GIA' l'imbuto: git diff non

@@ -13649,7 +13649,17 @@ nudo, EA senza indicatori, EA con un nome doppio). 👉 **Un `.ps1` che si puo'
 FAR GIRARE su dati finti va fatto girare, non solo riletto.** Cinque file inventati
 in due minuti hanno trovato quello che due riletture non avevano visto.
 
-## 233. Il banco che si sposta sotto i piedi: `HEAD~1` come base di confronto (11/09/2026)
+## 238. Il banco che si sposta sotto i piedi: `HEAD~1` come base di confronto (11/09/2026)
+
+> 🔁 **Era nata come 233, rinumerata a 238 poche ore dopo.** Il 233 era gia'
+> stato preso da un altro agente, che aveva committato **prima** (`0254fe2`,
+> CODA_08 e il cancello) dopo aver ricontrollato il numero sul remoto al momento
+> del commit. 👉 E' la **classe 194 per la TERZA volta in 24 ore** — dopo la
+> 222/223 della notte e il 232 di stamattina. 📌 Il `grep` al momento del
+> commit **non basta piu'**: con piu' agenti in parallelo la finestra fra il
+> `grep` e il `push` e' abbastanza larga da perderci dentro un numero. La regola
+> che funziona e' una sola: **chi committa DOPO rinumera**, e lo verifica con
+> `git fetch` subito **dopo** il push, non solo prima.
 
 **Il caso.** La verifica piu' forte della giornata: *"togliendo dai file nuovi
 tutto cio' che e' imbuto si ricostruisce l'originale, 11 file su 11, residuo
