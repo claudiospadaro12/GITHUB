@@ -180,8 +180,8 @@ insieme. **Verificato alla fonte e corretto il 12/09** (commit `1764a0e`).
 > **Il contro-esempio che chiude la verifica**: con `Modello != 4` il driver
 > appende `_ohlc` al nome del CSV (`:1347`), e i due CSV R123D **non ce
 > l'hanno**. Ma l'assenza di un suffisso e' una prova solo se quel suffisso
-> **spara davvero**: e spara — ci sono **10 CSV `_ohlc`** in
-> `risultati_archivio/r82_csv/`. Senza quel secondo controllo, "non c'e'
+> **spara davvero**: e spara — ci sono **14 CSV `_ohlc`** in
+> `backtest_pipeline/risultati_archivio/r82_csv/` (328 in tutto il repo). Senza quel secondo controllo, "non c'e'
 > `_ohlc`" poteva voler dire solo "quel pezzo di codice non ha mai funzionato".
 
 **(b) La priorita' n.1 del referto del 09/09 e' GIA' STATA FATTA, e v1 non

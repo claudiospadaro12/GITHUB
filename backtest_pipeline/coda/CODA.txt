@@ -92,3 +92,42 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_prese
 #     riga li porta fuori dal terminale. Distingue "ledger vuoto" da "ledger
 #     pieno di zeri": sono due cose diverse.
 d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
+
+# =====================================================================
+#  ROUND DI STANOTTE (12/09/2026) -- 4 righe, 52 passate, ~4-5 minuti
+# ---------------------------------------------------------------------
+#  ATTENZIONE, si legge prima di lanciare:
+#  - queste righe girano SOLO col runner v3. Col v2 ancora installato
+#    vengono RIFIUTATE al primo cancello (G1: manca il marcatore
+#    RUNNER_SOLA_LETTURA): nessun round parte, nessun terminale viene
+#    toccato, e il referto del mattino lo dice a chiare lettere. Quindi
+#    lasciarle qui NON fa danno anche se l'installazione slitta.
+#  - le 10 righe di SOLA LETTURA qui sopra RESTANO: queste si AGGIUNGONO,
+#    non le sostituiscono.
+#  - il bersaglio e' sempre e solo il banco C:\MT5_Backtest (demo
+#    50504400). La riga sottile lo porta scritto in codice e non c'e'
+#    argomento che possa cambiarlo.
+#  - perche' R132a e R132b NON sono qui: R132c e' un CANCELLO DI
+#    DETERMINISMO (deve riprodurre 5 celle di R123D cifra per cifra) e il
+#    suo stesso file ordina che gli altri due non partano finche' non ha
+#    riprodotto. Il runner la coda la esegue tutta senza fermarsi: il
+#    cancello lo legge una persona, sui CSV. Quindi a/b partono DOPO.
+#  Referto: report/PACCHETTO_VPS_v3_2026-09-12.md
+# ---------------------------------------------------------------------
+#  a) R132c -- il pavimento dello stop sul Dow. 16 passate.
+#     PRIMO DEI TRE, ed e' il cancello: 5 celle su 8 sono gia' girate in
+#     R123D sullo stesso binario e devono tornare IDENTICHE.
+5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
+
+#  b) R133b -- un filtro SCRITTO E MAI ESEGUITO (52 gruppi su 52 morti in
+#     archivio). 4 passate, ~20 secondi. -Deposito 100000 NON e'
+#     opzionale: e' il valore con cui e' girata la cella di riferimento.
+5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
+
+#  c) R133a -- InpLevelTF, mai messo ad asse in 0 CSV su 2.083, ed e'
+#     l'unica cosa che decide i livelli su quella sedia. 14 passate.
+5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
+
+#  d) R133c -- InpMinBoxPts: 18 gruppi su 18 identici, la scala era fuori
+#     range di 10 volte. 18 passate.
+5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000

@@ -12,33 +12,70 @@
 ## 1. 🔴 LA COSA GROSSA: UNA SEDIA VIVA GIRA UNA SCATOLA MAI BACKTESTATA
 
 **`MaxMinNotte` oro, magic 770402.** E' viva davvero — **9 operazioni** nei
-trade veri (`data/statements/trades_auto.csv`) — e in `HANDOFF.md:1121` ha un
-**DD promesso del 5,3%**.
+trade veri (`data/statements/trades_auto.csv`).
 
 | | |
 |---|---|
 | scatola che gira **in campo** (`Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set`, r.2-5) | **23:00 -> 04:59** |
-| scatole effettivamente **backtestate** sull'oro, tutto l'archivio | **22:00 -> 06:59** (112 passate) · **22:00 -> 04:59** (4 passate) |
+| scatola su cui e' misurato **tutto** l'archivio dell'oro | **22:00 -> 06:59** (112 passate) |
 | passate sulla scatola che gira davvero | 🔴 **ZERO** |
 
-👉 **Il DD del 5,3% e' promesso da una cella che non e' quella schierata.**
-Non e' un errore di misura: e' una promessa che non copre l'oggetto.
-Questo tocca il **CRITERIO DI USCITA, corsia RISCHIO** (firmato 18/08: *"DD
-forward > DD promesso dal backtest della cella promossa -> revisione
-IMMEDIATA"*). Qui il problema e' a monte: **manca il backtest della cella
-promossa.**
+### ✏️ E QUI CORREGGO UN NUMERO CHE AVEVO SCRITTO IO
+Avevo detto *"DD promesso 5,3%"*, preso da `HANDOFF.md:1121`. **E' il numero
+VECCHIO**, e in quella tabella sta li' apposta per essere confrontato con
+quello nuovo. Il contratto **in vigore** e' un altro, ed e' peggio:
 
-### 🧪 Il contro-esempio, perche' questa non diventi un allarme gonfiato
+| | |
+|---|---|
+| DD promesso **vecchio** | 5,30% |
+| DD **misurato** su 22 anni a rischio 1% (R100) | 🔴 **19,72%** — cioe' **3,7 volte** il promesso |
+| verdetto R100 | 🔴 **REVISIONE** |
+| contratto firmato il **23/08** (`CONTRATTI_SEDIE.md:95`) | rischio **dimezzato a 0,5%**, DD promesso **10,0%** — dichiarato da se' *"APPROSSIMATO lineare"* |
+
+👉 Quindi la sedia **era gia' in revisione**. Il fatto nuovo e' un altro:
+**anche il 19,72% e' misurato sulla scatola 22:00->06:59**, non su quella
+schierata. 🔴 **Nessun numero di questa sedia descrive l'oggetto che sta in
+campo.**
+
+### 🚨 E C'E' UNA TERZA COSA, che tocca la firma del 23/08
+Le **9 operazioni sono tutte e nove a volume 0,01**, cioe' **il lotto
+minimo**:
+
+```
+XAUUSD 0.01 -15,76 expert | 0.01 +13,24 expert | 0.01  -0,39 expert
+XAUUSD 0.01 +27,65 expert | 0.01 -34,89 sl     | 0.01  +2,25 expert
+XAUUSD 0.01 -21,70 sl     | 0.01 -22,84 expert | 0.01 +26,40 expert
+```
+
+E `LotByRisk()` finisce con `MathMax(mn, MathMin(mx, lot))`
+(`ABTG_MaxMinNotte.mq5:758`): **se il lotto calcolato sta sotto il minimo
+del broker, viene schiacciato SUL minimo**.
+
+🔴 **Conseguenza sulla firma**: il contratto del 23/08 dimezza il rischio da
+1,0% a 0,5% **e assume che il DD si dimezzi con lui** (lo dichiara:
+*"APPROSSIMATO lineare"*). Ma **se la taglia era gia' incollata al pavimento,
+dimezzare `InpRiskPercent` in campo non ha dimezzato niente.** Il rischio
+vero non e' sceso.
+
+⚠️ **Onesta' su cosa ho misurato e cosa no**: ho visto **il sintomo dello
+schiacciamento** (9 operazioni su 9 alla stessa taglia minima, con distanze
+di stop diverse — se il rischio comandasse, il lotto varierebbe con lo stop)
+e **la riga di codice che schiaccia**. **NON** ho calcolato il lotto teorico
+a 0,5% su quel saldo. Quindi: **sintomo + meccanismo, non la misura diretta.**
+E' un rilievo che merita un round suo, non un verdetto di oggi.
+
+### 🧪 Il contro-esempio, perche' questo non diventi un allarme gonfiato
 La stessa prova sulla **gemella DAX 770411** (viva, `FLOTTA_ATTIVA.md:48`):
 archivio = **23:00 -> 04:59, 154 passate**, cioe' **esattamente** la scatola
-del preset. 🟢 **La gemella e' a posto.** Quindi non e' un difetto di
-processo diffuso: e' **una sedia sola**, e si chiama per nome.
+del preset. 🟢 **La gemella e' a posto.** Non e' un difetto di processo
+diffuso: e' **una sedia sola**, e si chiama per nome.
+
+📌 **E le 4 passate "22:00->04:59" che sembravano un'ancora alternativa NON
+lo sono**: sono di **`ABTG_Nightly`** (altro EA), OHLC, e hanno **Trades = 0**
+tutte e quattro.
 
 **Che cosa NON si fa**: non si tocca la sedia. Si misura la sua scatola vera
-e si confronta col contratto. La sedia si tocca solo dopo, e lo decide
-Claudio.
-
----
+e si confronta col contratto. La sedia la tocca Claudio, non io.
 
 ## 2. 📏 LA CORREZIONE SUL NUMERO: la scatola di Claudio in ora server e' **6**, non 7
 
@@ -150,6 +187,49 @@ A ~1 operazione ogni 4-5 giorni su un lato solo, e coi tick BCM dal
 2024.09.26, viene **n < 60 per finestra**. Merito **sospeso per
 costruzione**; le due sole vie per arrivare a 150 sono nominate nel file coi
 loro costi.
+
+---
+
+## 5-bis. ✅ E I DUE FILE PROVA PER LA SEDIA ORO: `R134b` + `R134c`
+
+Sono **due**, non uno, e il motivo e' una regola di casa: le due scatole da
+confrontare differiscono per **DUE input** (`InpBoxStartHour` **e**
+`InpBoxEndHour`), e un salto a due manopole da' una differenza **non
+attribuibile**. Quindi due salti, uniti da una **cella ponte**:
+
+```
+   ANCORA           PONTE            SCHIERATA
+22:00->06:59  --  23:00->06:59  --  23:00->04:59
+\____R134c____/   \_____________R134b___________/
+```
+
+Il **ponte e' misurato in tutti e due i file** e deve uscire **identico
+cifra per cifra**: e' un cancello di determinismo **gratis**, e in piu' dice
+**quale delle due manopole** porta il rischio — cosa che un salto unico non
+direbbe. **R134c si lancia per primo: e' il cancello.**
+
+**L'ancora, cifra per cifra** (R19, XAUUSD M5, 2025.03.01->2026.06.30,
+deposito **100k**, tick reali, box 22:00->06:59):
+```
+IS    profit  3788,45 | n 59 | PF 1,42495 | DD 2,6837 %
+OOS   profit 15848,75 | n 92 | PF 2,45189 | DD 4,2436 %
+```
+Ha gia' passato un cancello di determinismo nel 2026-08: **quattro magic**
+diversi danno le **stesse cifre**.
+
+📐 **E il rumore, di nuovo misurato**: la **stessa identica** configurazione
+fa **DD 2,68% (IS)** e **4,24% (OOS)** — **fattore 1,58** fra due finestre.
+👉 **Un DD su una finestra non e' il DD della sedia.** La soglia e'
+congelata su quel fattore.
+
+🧪 **Il contro-esempio, dichiarato prima**: se la cella schierata uscisse a
+DD 6% sarei tentato di scrivere *"piu' sicura del promesso"*. **Falso**: il
+19,72% e' 22 anni OHLC, questo round e' **16 mesi di toro dell'oro**. Il
+confronto col contratto e' **asimmetrico**, e si dichiara prima: **un
+superamento e' informativo, un NON-superamento non dimostra niente.** L'unico
+confronto simmetrico e' cella contro cella, dentro il round.
+
+**Costo: 10 passate, ~1,9 minuti.** Magic vergini 779681 / 779682.
 
 ---
 

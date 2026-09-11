@@ -14,9 +14,11 @@ cercavo: e' saltata fuori scavando per un'altra.
 
 **Undici** script facevano questo, **senza nessuna condizione**:
 
-```powershell
-Get-Process terminal64 | Stop-Process -Force
-```
+> ⛔ **QUESTO NON SI INCOLLA DA NESSUNA PARTE** — e' l'esempio del difetto,
+> non una riga da lanciare. Per questo non e' marcato come PowerShell:
+> il cancello, giustamente, mi ha bocciato il referto la prima volta.
+
+    Get-Process terminal64 | Stop-Process -Force
 
 Tradotto: **non sbagliano terminale — li ammazzano TUTTI.** Compreso
 `C:\BCM_Reale`, **conto 10105439**, mentre ha posizioni aperte.
@@ -42,7 +44,7 @@ contro-esempio ha pagato, ancora una volta.**
 
 ## 2. 🎯 IL PACCHETTO VPS E' RIFATTO — e ieri sera NON si sarebbe lanciato
 
-`report/PACCHETTO_VPS_v2_2026-09-12.md`. Due difetti, **tutti e due
+`report/PACCHETTO_VPS_v3_2026-09-12.md`. Due difetti, **tutti e due
 bloccanti**, trovati **prima** che la riga partisse:
 
 ### 🔴 (a) R133 non era lanciabile. Proprio per niente.
@@ -59,7 +61,7 @@ costruzione**, portandosi dietro R132a e R132b. Tre round buttati.
 > diverso da 4 il driver aggiunge `_ohlc` al nome del CSV, e i CSV di
 > riferimento **non ce l'hanno**. Ma l'assenza di un'etichetta prova
 > qualcosa **solo se quell'etichetta funziona davvero**: e funziona — ci
-> sono **10 CSV `_ohlc`** in archivio. Senza quel secondo controllo,
+> sono **14 CSV `_ohlc`** in archivio (328 in tutto il repo). Senza quel secondo controllo,
 > *"non c'e' `_ohlc`"* poteva voler dire solo *"quel pezzo di codice non ha
 > mai funzionato"*.
 
@@ -83,10 +85,28 @@ trade veri, e un **DD promesso del 5,3%** scritto in `HANDOFF.md`.
 | | |
 |---|---|
 | scatola che gira **in campo** | **23:00 -> 04:59** |
-| scatole **backtestate** sull'oro | 22:00 -> 06:59 (112 passate) · 22:00 -> 04:59 (4) |
+| scatola su cui e' misurato **tutto** l'archivio dell'oro | 22:00 -> 06:59 (112 passate) |
 | passate sulla scatola vera | 🔴 **ZERO** |
 
-👉 **Quel 5,3% e' promesso da una cella che non e' quella schierata.**
+### ✏️ E qui correggo un numero che avevo dato io poche ore fa
+Avevo scritto *"DD promesso 5,3%"*. **E' il numero VECCHIO.** Quello vero,
+misurato da R100 su 22 anni, e' **19,72%** — **3,7 volte** il promesso — e il
+verdetto era gia' 🔴 **REVISIONE**. Il contratto firmato il **23/08** dimezza
+il rischio a 0,5% e promette **10,0%**.
+
+🔴 **Ma anche il 19,72% e' misurato sulla scatola 22:00->06:59.** Quindi:
+**nessun numero di questa sedia descrive l'oggetto che sta in campo.**
+
+### 🚨 E c'e' una terza cosa, che tocca la firma del 23/08
+Le **9 operazioni sono tutte e nove a volume 0,01**, cioe' **il lotto
+minimo**. E `LotByRisk()` finisce con `MathMax(minimo, ...)`: se il lotto
+calcolato sta sotto il minimo, **viene schiacciato sul minimo**.
+👉 Il contratto dimezza il rischio **assumendo che il DD si dimezzi con lui**
+(lo dichiara: *"APPROSSIMATO lineare"*). Ma **se la taglia era gia' incollata
+al pavimento, dimezzare non ha dimezzato niente.**
+⚠️ Onesta': ho misurato **il sintomo** (9 su 9 alla stessa taglia minima con
+stop diversi) e **la riga che schiaccia**. **Non** ho calcolato il lotto
+teorico su quel saldo. Sintomo + meccanismo, non la misura diretta.
 
 🧪 **Contro-esempio, perche' l'allarme resti della misura giusta**: la
 gemella DAX **770411** e' **a posto** — archivio 23:00->04:59, **154
@@ -149,10 +169,28 @@ motore morto: quella e' la regola del 19/08.
 
 ## 7. ⏳ COSA STA ANCORA GIRANDO MENTRE DORMI
 
-- il **cancello di giudizio** sul pacchetto VPS (🔴 finche' non torna PASS,
-  quel pacchetto **non si lancia** — e' la regola del 09/09, e il 09/09 e'
-  andata bene **per fortuna, non per metodo**);
-- il file prova per la **scatola vera della sedia oro**.
+🟢 **Sono rientrati tutti e due, e hanno lavorato.**
+
+**Il cancello di giudizio sul pacchetto VPS ha detto FAIL**, con **due
+difetti bloccanti** — e aveva ragione su tutti e due:
+1. la riga di verifica della coda controllava **1** round invece di **4**:
+   con tutto perfetto avrebbe stampato ROSSO e **la notte si perdeva per un
+   numero copiato**;
+2. 🔴 **una guardia che avevo aggiunto io stanotte armava una mina**: faceva
+   morire `RIGA_DIAG_GBPUSD -Passo C`, che cambia la finestra **apposta** e
+   lo dichiara nel suo stesso codice. E la mia frase *"danno zero"* era
+   **falsa**: avevo censito un lato solo della contraddizione.
+   ✅ Riparato **senza ammorbidire la guardia**, con un interruttore che
+   obbliga a **dichiarare** l'intento da tutte e due le parti.
+
+👉 **Il pacchetto e' stato rifatto (v3) e adesso i cancelli passano tutti.**
+📌 E questo e' il punto: **il difetto piu' pericoloso di stanotte l'ho
+prodotto io, e l'ha preso il cancello.** La regola del 09/09 — *"niente esce
+senza un PASS"* — stanotte si e' ripagata da sola.
+
+**E il secondo agente ha consegnato i due file prova per la sedia oro**
+(`R134b` + `R134c`), con l'ancora d'archivio cifra per cifra e tre correzioni
+ai miei numeri, tutte accolte.
 
 ---
 
