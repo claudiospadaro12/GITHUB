@@ -76,3 +76,33 @@ lista dei divieti di **entrambe** le corsie, e nella regola dei terminali.
 descrive **zero** con 109k.
 
 > ## 🔥 Un conto che non è in nessun registro non è un segreto: è una cosa che fra sei mesi nessuno saprà più leggere. **Apriamogli la scheda adesso, che costa dieci minuti.**
+
+---
+
+## ➕ AGGIORNAMENTO (18:30) — **sul 109k NON GIRA NESSUN EA**
+
+Claudio, testuale: *"Eseguito manuale non con Ea"* · *"Non si è aperto nessun Ea."*
+
+### 🔴 Conseguenze, e la prima è di sicurezza
+| | |
+|---|---|
+| 🛡️ **il Guardian non lo vede** | i cap firmati — **C1 rischio aperto 3,25%**, tetto per cluster 3,0% — **su quel conto NON ESISTONO** |
+| 📏 il pavimento del lotto, il rischio 0,65%, la frontiera del costo | **nessuno di questi metri è applicato lì** |
+| 🪑 sedie vive | **zero** |
+| ✍️ chi decide | **solo Claudio, ogni singola operazione** |
+
+📌 **Va scritto nel registro dei conti**, perché oggi `CENSIMENTO_CONTRATTI_v2`
+descrive tre conti e **non ha una riga per questo**. Un conto senza scheda è un
+conto che fra sei mesi nessuno sa leggere.
+
+### 🟢 E LA CONSEGUENZA BUONA, che è grossa
+**Nessun EA sopra = nessun rumore.** Ogni operazione su quel conto è **una
+decisione umana pura**, quindi **ogni operazione è un dato pulito sul METODO**.
+
+👉 **È il miglior banco di prova che abbiamo per capire la regola dei livelli**:
+niente si mescola, niente va attribuito.
+
+### 🙋 E quindi la richiesta resta una sola, da 10 secondi
+**Screenshot del grafico CON le righe disegnate sopra, quando piazzi.**
+Da **cinque** foto così la regola si ricostruisce misurandola — e poi diventa
+codice. Oggi il tuo grafico ha già chiuso una domanda che io avevo sbagliato.
