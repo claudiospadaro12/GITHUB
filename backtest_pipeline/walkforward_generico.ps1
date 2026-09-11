@@ -106,9 +106,13 @@
 #  37-QUATER, pagata il 07/09: un ripiego che sceglie il terminale
 #  sbagliato e non lo dice.
 #  Con questo parametro la cartella si NOMINA, e il driver muore se non
-#  la trova o se non contiene terminal64.exe. Le guardie NON si
-#  allentano: -V3 e BCM_Reale restano vietati anche quando li nomini a
-#  mano. E da questa versione il terminale scelto viene sempre DICHIARATO
+#  la trova o se non contiene terminal64.exe. E dall'11/09/2026 la
+#  guardia su questo parametro e' POSITIVA: non elenca i vietati, AMMETTE
+#  il solo banco C:\MT5_Backtest (demo 50504400) e uccide tutto il resto,
+#  compreso cio' che non e' in nessuna lista e compreso cio' che nascera'
+#  domani. Un bersaglio legittimo diverso dal banco si passa con
+#  -Terminal, che e' il parametro nato per quello.
+#  E da questa versione il terminale scelto viene sempre DICHIARATO
 #  a schermo (percorso + da quale via), perche' il difetto che stiamo
 #  chiudendo non e' scegliere male: e' scegliere in silenzio.
 #  SENZA il parametro il comportamento resta identico a prima, riga per
@@ -205,8 +209,10 @@ param(
                                      #   Se passato si usa QUELLO E SOLO QUELLO: niente
                                      #   ripiego, niente inferenza sull'ordine delle
                                      #   cartelle. Muore se la cartella non esiste, se non
-                                     #   contiene terminal64.exe, o se e' un terminale
-                                     #   VIETATO (-V3 = 100k, BCM_Reale = conto reale).
+                                     #   contiene terminal64.exe, o -- dall'11/09/2026 --
+                                     #   se NON E' IL BANCO: la guardia e' POSITIVA e ammette
+                                     #   il solo C:\MT5_Backtest. Per un bersaglio legittimo
+                                     #   diverso (altro broker, PC di casa) c'e' -Terminal.
                                      #   Vuoto (default) = ripiego di sempre, immutato.
   [switch]$SoloControllo,            # controlla e stampa l'ini, NON lancia MT5
   [switch]$PermettiCellaSingola,     # round a CELLA CONGELATA (zero assi Y): salta SOLO
@@ -760,6 +766,159 @@ $InputsTxt
 # =====================================================================
 #  7. MT5: trova, compila, gira
 # =====================================================================
+# =====================================================================
+#  GUARDIA_BANCO_POSITIVA_v1 -- INIZIO DEL BLOCCO COPIATO
+#
+#  QUESTA E' UNA COPIA, NON CODICE NUOVO, e non va "migliorata" qui.
+#  ORIGINALE: backtest_pipeline\righe\RIGA_ROUND_VPS.ps1, righe 282-386
+#  al commit e2d5dc3be1c05d275d8c45c353caa46f929f846e (11/09/2026).
+#  Le righe fra questo marcatore e quello di FINE sono IDENTICHE BYTE
+#  PER BYTE all'originale, e si verifica cosi' (zero differenze attese):
+#     sed -n '282,386p' backtest_pipeline/righe/RIGA_ROUND_VPS.ps1 > /tmp/a
+#     sed -n '<prima riga di codice>,<ultima>p' QUESTO_FILE > /tmp/b
+#     diff /tmp/a /tmp/b
+#  (i due numeri si leggono qui accanto ai marcatori; il comando per
+#   intero sta nel referto di consegna dell'11/09/2026).
+#
+#  NOTA PER CHI TOCCA QUESTE RIGHE: il marcatore di INIZIO e quello di
+#  FINE devono comparire in questo file UNA VOLTA SOLA CIASCUNO. Sono
+#  presi come confini da chi estrae il blocco per rigirarci sopra i
+#  contro-esempi, e una seconda occorrenza dentro un commento accorcia il
+#  blocco estratto senza dire niente. Misurato l'11/09/2026, sbagliando:
+#  la prima stesura di questa intestazione citava i due marcatori per
+#  esteso dentro un esempio di comando, e il banco di prova ha estratto
+#  NOVE righe invece di centocinque -- verdetto "RIFIUTATO" su tutto,
+#  banco compreso, per un difetto del banco e non della guardia.
+#
+#  PERCHE' COPIATA E NON INCLUSA -- scelta dichiarata, col suo costo.
+#  Un include sarebbe UNA DIPENDENZA IN PIU' DA PINNARE, e qui il pin e'
+#  la sola cosa che lega il codice che gira al codice che qualcuno ha
+#  letto: RIGA_SOTTILE_ROUND.ps1 inchioda al byte (SHA-256 + pin di
+#  commit) i .ps1 che esegue, e RIGA_ROUND_VPS.ps1 scarica questo driver
+#  da solo, un file alla volta. Con un include il file incluso o viaggia
+#  NON pinnato -- e allora il pin non vuol dire piu' niente -- oppure va
+#  aggiunto a mano a ogni catena di scaricamento e a ogni elenco di
+#  impronte: tre punti nuovi in cui sbagliare, per risparmiare una copia.
+#  Fra comodo e stretto, stretto: si duplica, e si DICHIARA.
+#
+#  IL COSTO DELLA COPIA, detto per intero: se un giorno la guardia si
+#  corregge, va corretta in TUTTI i posti che portano questo marcatore.
+#  Si trovano con:
+#     grep -rn "GUARDIA_BANCO_POSITIVA_v1" backtest_pipeline
+#  L'originale NON porta il marcatore (la sua impronta e' gia' pinnata
+#  altrove e toccarlo vorrebbe dire ri-pinnare tutta la catena): sta
+#  scritto qui sopra col nome e col commit, ed e' il primo posto da
+#  aprire.
+# =====================================================================
+$BANCO_PERC  = "C:\MT5_Backtest"
+$BANCO_CONTO = "50504400"
+
+# I vietati per NOME. NON decidono piu' niente -- decide la guardia
+# positiva qui sotto -- ma servono a due cose che contano: dare il
+# messaggio GIUSTO (chi e' il terminale che stavi per toccare, col suo
+# numero di conto in chiaro, regola dei terminali multipli del 06/09), e
+# fare da seconda rete se un domani qualcuno allentasse il confronto.
+$TERMINALI_VIETATI = @(
+  @{ p = "BCM_Reale";                chi = "il terminale del conto REALE 10105439" },
+  @{ p = "-V3";                      chi = "il terminale del 100k, conto 50504263" },
+  @{ p = "BCM Markets MT5 Terminal"; chi = "un terminale con SEDIE VIVE sopra: il piccolo 50503392 (e il 100k, che sta nella stessa famiglia di cartelle)" },
+  @{ p = "10105439";                 chi = "il conto REALE" },
+  @{ p = "50504263";                 chi = "il 100k" },
+  @{ p = "50503392";                 chi = "il piccolo" }
+)
+
+# Canonicalizza UNA SCRITTURA DI PERCORSO DI WINDOWS: '/' diventa '\',
+# i separatori doppi si collassano, '.' e '..' si risolvono, il
+# separatore finale sparisce. Torna "" quando la forma NON e' riducibile
+# a un percorso ancorato a una lettera di disco -- e "" vuol dire NO.
+# Regola dichiarata: cio' che non so risolvere lo RIFIUTO, non lo
+# indovino. L'errore cade sempre verso il no.
+#
+# PERCHE' NON USO [IO.Path]::GetFullPath(), che farebbe le prime quattro
+# cose da solo: perche' il suo risultato DIPENDE DALLA PIATTAFORMA e dal
+# runtime. Su Linux -- dove questa guardia e' stata collaudata riga per
+# riga -- '\' non e' un separatore e GetFullPath("C:\MT5_Backtest")
+# torna "<cartella corrente>/C:\MT5_Backtest"; fra .NET Framework 4 (il
+# VPS) e .NET Core cambia anche il trattamento di punti e spazi finali.
+# Una guardia il cui significato cambia col runtime e' una guardia che
+# non si puo' collaudare, e una che non si puo' collaudare non si sa se
+# protegge. Questa fa lo stesso identico conto ovunque.
+# Il pezzo che il DISCO deve dire (e che nessuna stringa sa) e' un altro,
+# ed e' l'attributo ReparsePoint: sta al PUNTO 1, non qui.
+function NormalizzaPercorsoWin([string]$p){
+  if($null -eq $p){ return "" }
+  $s = ("" + $p).Trim()
+  if($s -eq ""){ return "" }
+  $s = $s.Replace("/","\")
+  if($s.Contains("~")){ return "" }              # nome 8.3 (PROGRA~1): espanderlo richiede Win32, quindi si rifiuta
+  if($s -match '[\*\?\[\]"|<>]'){ return "" }    # jolly e caratteri che in un percorso non ci vanno
+  if($s -notmatch '^[A-Za-z]:\\'){ return "" }   # solo "X:\...": niente UNC, niente \\?\, niente "C:senza-barra"
+  $disco = $s.Substring(0,2).ToUpper()
+  $resto = $s.Substring(2)
+  if($resto.Contains(":")){ return "" }          # un secondo ':' non e' un percorso (flusso NTFS, argomenti incollati)
+  $pezzi = New-Object System.Collections.ArrayList
+  foreach($t in $resto.Split("\")){
+    if($t -eq "" -or $t -eq "."){ continue }
+    if($t -eq ".."){
+      if($pezzi.Count -eq 0){ return "" }        # si risale sopra la radice: forma senza senso
+      $pezzi.RemoveAt($pezzi.Count - 1)
+      continue
+    }
+    [void]$pezzi.Add($t)
+  }
+  if($pezzi.Count -eq 0){ return ($disco + "\") }   # la RADICE di un disco: normalizzata, e rifiutata piu' sotto
+  return ($disco + "\" + ($pezzi -join "\"))
+}
+
+# La radice di un disco ("C:\", "D:\") non e' un terminale: e' TUTTO il
+# disco. Ha una riga sua perche' merita un messaggio suo -- con un
+# bersaglio cosi' la pipe di chiusura diventa "C:\*", cioe' ogni
+# terminal64 della macchina, conto reale compreso.
+function RadiceDiDisco([string]$norm){
+  if($null -eq $norm){ return $false }
+  return ($norm -match '^[A-Za-z]:\\$')
+}
+
+# IL VERDETTO SUL BERSAGLIO, in una funzione sola e senza effetti: torna
+# "" se il bersaglio E' il banco, altrimenti il MOTIVO del rifiuto.
+# L'ordine dei controlli e' scelto: prima i divieti per nome (che sanno
+# dire CHI stavi per toccare), poi la normalizzazione, poi il confronto
+# positivo. Il confronto positivo da solo basterebbe a rifiutare tutto
+# quanto; gli altri servono a dire perche'.
+function MotivoRifiutoBanco([string]$chiesto){
+  $g = ("" + $chiesto).Trim()
+  if($g -eq ""){ return "BERSAGLIO VUOTO: -TerminaleBacktest non dice niente." }
+  foreach($v in $TERMINALI_VIETATI){
+    if($g -like ("*" + $v.p + "*")){
+      return ("TERMINALE VIETATO: '" + $g + "' nomina " + $v.chi + ".")
+    }
+  }
+  $n = NormalizzaPercorsoWin $g
+  if($n -eq ""){
+    return ("BERSAGLIO NON RICONDUCIBILE A UNA CARTELLA DI WINDOWS: '" + $g + "'." +
+            " Un nome 8.3 (PROGRA~1 = C:\Program Files scritto in un altro modo), un" +
+            " percorso di rete, un \\?\, un carattere jolly o un percorso non ancorato" +
+            " a un disco non si indovinano: si rifiutano.")
+  }
+  if(RadiceDiDisco $n){
+    return ("RADICE DI UN DISCO: '" + $g + "'. Un disco intero non e' un terminale:" +
+            " con un bersaglio cosi' la pipe di chiusura diventa '" + $n + "*', cioe'" +
+            " OGNI terminal64 della macchina.")
+  }
+  # Confronto ORDINALE, non -ieq. Il -eq di PowerShell passa dalla CULTURA
+  # del thread, e una regola di casa di questo stesso file e' che la cultura
+  # non deve mai entrare in un confronto (vedi NumInv, qui sopra): su un
+  # confronto culturale certi caratteri invisibili vengono IGNORATI, cioe'
+  # due stringhe diverse risultano uguali. Qui si guardano i byte.
+  if(-not [string]::Equals($n, $BANCO_PERC, [StringComparison]::OrdinalIgnoreCase)){
+    return ("NON E' IL BANCO: '" + $g + "' (normalizzato: '" + $n + "').")
+  }
+  return ""
+}
+# ---------------------------------------------------------------------
+#  GUARDIA_BANCO_POSITIVA_v1 -- FINE DEL BLOCCO COPIATO
+# ---------------------------------------------------------------------
+
 # ---------------------------------------------------------------------
 #  7-bis. IL TERMINALE NOMINATO A MANO (-TerminaleBacktest)
 #  Sta PRIMA di tutto il resto e, se valorizzato, riempie $Terminal: i
@@ -776,15 +935,50 @@ if($TerminaleBacktest){
            "    -TerminaleBacktest = '$TerminaleBacktest'`n" +
            "    -Terminal          = '$Terminal'")
   }
-  # La guardia di casa NON si allenta perche' il percorso e' scritto a
-  # mano: anzi, e' proprio quando si scrive a mano che si sbaglia riga.
-  if($TerminaleBacktest -like "*-V3*" -or $TerminaleBacktest -like "*BCM_Reale*"){
-    Muori ("TERMINALE VIETATO in -TerminaleBacktest: '$TerminaleBacktest'`n" +
-           "    Il 100k (-V3, conto 50504263) e il conto REALE (BCM_Reale, 10105439)`n" +
-           "    non si toccano da questo driver, nemmeno nominandoli a mano.`n" +
-           "    Il terminale da backtest e' C:\MT5_Backtest (conto demo 50504400).")
+  # LA GUARDIA E' POSITIVA (rifatta l'11/09/2026, GUARDIA_BANCO_POSITIVA_v1
+  # qui sopra). PRIMA ERA NEGATIVA e PERDEVA: diceva "non deve essere -V3
+  # ne' BCM_Reale", e con quella lista PASSAVANO quattro bersagli, tre dei
+  # quali sono terminali VERI di questa macchina --
+  #   C:\Program Files\BCM Markets MT5 Terminal  -> il PICCOLO 50503392,
+  #       che ha le sedie VIVE sopra;
+  #   C:\  -> la RADICE di un disco. Qui il danno non e' teorico: piu'
+  #       avanti $cartellaBT diventa il percorso di terminal64.exe e, nelle
+  #       righe che ci girano intorno, la pipe di chiusura ($cartellaBT +
+  #       "\*") con la radice vale "C:\*", cioe' OGNI terminal64 del disco,
+  #       conto REALE 10105439 compreso;
+  #   C:\PROGRA~1\BCMMAR~1  -> lo stesso posto di sopra scritto in nome
+  #       8.3: una lista di divieti guarda le LETTERE, non il POSTO;
+  #   C:\MT5_Backtest\..\Program Files\BCM Markets MT5 Terminal -> il nome
+  #       del banco c'e', ma il '..' porta altrove.
+  # Misurato eseguendo, non dedotto. Adesso la guardia dice UNA COSA SOLA:
+  # DEVE ESSERE IL BANCO, confrontato DOPO normalizzazione e con confronto
+  # ORDINALE.
+  #
+  # E CHI HA UN BERSAGLIO LEGITTIMO DIVERSO DAL BANCO? Passa -Terminal
+  # (l'altro parametro, qui sopra): quella porta NON e' toccata da questa
+  # modifica ed e' quella che usano le righe vecchie sul PC di backtest di
+  # casa e il ramo -BrokerPattern per un secondo broker. Restringere
+  # -TerminaleBacktest al solo banco non toglie quindi nessun uso vero --
+  # ma va detto, ed e' scritto nel referto, che -Terminal resta SENZA
+  # guardia: questa riga chiude la porta che il VPS usa, non tutte.
+  $motivoNo = MotivoRifiutoBanco $TerminaleBacktest
+  if($motivoNo -ne ""){
+    Muori ($motivoNo + "`n" +
+           "    L'UNICO bersaglio ammesso in -TerminaleBacktest e' " + $BANCO_PERC + "`n" +
+           "    (demo " + $BANCO_CONTO + ", solo-tester). Gli altri MT5 del VPS hanno SEDIE`n" +
+           "    VIVE sopra e non si toccano: il piccolo 50503392, il 100k 50504263 e`n" +
+           "    il conto REALE 10105439.`n" +
+           "    La guardia e' POSITIVA: non elenca i vietati, AMMETTE il banco. Se`n" +
+           "    davvero ti serve un altro terminale (un secondo broker, il PC di`n" +
+           "    backtest di casa) usa -Terminal, che e' il parametro nato per quello.`n" +
+           "    Se invece il banco cambiasse casa, si cambia la COSTANTE, a mano, e`n" +
+           "    si ripassa dal cancello.")
   }
-  $cartellaBT=$TerminaleBacktest.TrimEnd('\','/')
+  # LA COSTANTE, NON LA STRINGA DI FUORI: da qui in avanti la stringa
+  # arrivata da fuori e' stata GIUDICATA e si butta. E' questa riga che
+  # impedisce a $cartellaBT di diventare "C:\" per colpa di come e' stato
+  # scritto un argomento.
+  $cartellaBT=$BANCO_PERC
   if(-not (Test-Path -LiteralPath $cartellaBT -PathType Container)){
     Muori ("-TerminaleBacktest: la cartella NON esiste.`n" +
            "    cercata  : '$cartellaBT'`n" +

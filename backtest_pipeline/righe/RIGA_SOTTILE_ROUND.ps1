@@ -135,17 +135,22 @@ $BancoBT = 'C:\MT5_Backtest'
 #  DIVENTARLO: e' l'unica cosa che lega il codice che gira al codice che
 #  e' stato letto.
 #
-#  >>> 11/09/2026 -- IL PIN E' UN SEGNAPOSTO, E VA SOSTITUITO A MANO. <<<
-#  RIGA_ROUND_VPS.ps1 e' cambiata (la guardia sul terminale e' diventata
-#  POSITIVA: ammette il banco invece di elencare i vietati), quindi la
-#  sua impronta e' cambiata e il vecchio pin 89b393f3 non porta piu' il
-#  file giusto. Il pin nuovo NON PUO' ESISTERE ADESSO: e' l'hash del
-#  commit che contiene QUESTA riga, e quel commit lo fa Claudio.
+#  >>> 11/09/2026 (SECONDO GIRO) -- IL PIN E' DI NUOVO UN SEGNAPOSTO. <<<
+#  Il primo giro aveva gia' ri-pinnato su e2d5dc3 (guardia POSITIVA in
+#  RIGA_ROUND_VPS.ps1). Adesso e' cambiato ANCHE walkforward_generico.ps1:
+#  la stessa guardia positiva e' stata portata nel driver, che a mano
+#  aveva ancora la versione NEGATIVA con tutti e quattro i buchi (il
+#  piccolo 50503392, la radice di un disco, i nomi 8.3, la fuga col '..').
+#  Quindi l'impronta del driver e' cambiata -- vedi $SHA_WALK qui sotto --
+#  e il pin e2d5dc3 non porta piu' i byte giusti: lo scarico morirebbe
+#  sull'impronta, che e' il fallimento giusto, ma per la ragione sbagliata.
+#  Il pin nuovo NON PUO' ESISTERE ADESSO: e' l'hash del commit che contiene
+#  QUESTA riga, e quel commit lo fa Claudio.
 #  Il comando esatto sta in fondo al referto di consegna. Finche' il
 #  segnaposto e' qui, lo script MUORE al controllo qui sotto: e' il
 #  fallimento giusto -- rumoroso, e prima di scaricare qualunque cosa.
 # ---------------------------------------------------------------------
-$PIN = 'e2d5dc3be1c05d275d8c45c353caa46f929f846e'
+$PIN = 'PIN_DA_RIMPIAZZARE_DOPO_IL_COMMIT'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -154,9 +159,16 @@ $PIN = 'e2d5dc3be1c05d275d8c45c353caa46f929f846e'
 #    nomi 8.3). Se un giorno tornasse a valere quella vecchia, vorrebbe
 #    dire che il pin punta indietro: e' proprio quello che l'impronta
 #    deve far scoprire.
-#  - SHA_WALK: INVARIATA, walkforward_generico.ps1 non e' stato toccato.
+#  - SHA_WALK: RICALCOLATA l'11/09/2026 (secondo giro). Prima era
+#    36370C65...041EE998, cioe' il driver con la guardia NEGATIVA su
+#    -TerminaleBacktest: lanciato A MANO lasciava passare il piccolo
+#    50503392, la radice di un disco, i nomi 8.3 e la fuga col '..'.
+#    Dal driver il round la riceveva gia' buona (RIGA_ROUND_VPS gli passa
+#    la COSTANTE), quindi la strada del round era gia' chiusa: e' la
+#    strada A MANO che era aperta, ed e' quella che questa impronta nuova
+#    inchioda.
 $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
-$SHA_WALK  = '36370C656EAD0747CF395CDD28EE978191FABFAF6C7FDC71994FB0C8041EE998'
+$SHA_WALK  = 'AB989B006F0CC0A463BACD8032C211655FFD0F4A85898FB0704068067B2BEA8B'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
