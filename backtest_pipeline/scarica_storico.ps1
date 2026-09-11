@@ -722,9 +722,17 @@ if ($TerminaleBacktest) {
     Stampa-Terminali "  ATTENZIONE: il terminale da backtest e' ANCORA vivo:" $dopo.Bersagli "Yellow"
   }
 } else {
-  Stampa-Terminali "  CHIUDO TUTTI questi (nessun -TerminaleBacktest):" @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue) "Red"
-  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
-  Start-Sleep -Seconds 3
+  # 12/09/2026: QUI C'ERA IL KILL DI TUTTI I TERMINALI, conto REALE
+  # 10105439 compreso. Il ramo e' IRRAGGIUNGIBILE da quando il ripiego
+  # assegna il banco (unica assegnazione di $TerminaleBacktest: o assegna
+  # o esce 1). Ma un ramo morto con l'arma ancora carica resta un'arma:
+  # basta che domani qualcuno tolga quel blocco e questo torna a sparare,
+  # in silenzio. Quindi l'arma si scarica e si lascia il rumore.
+  Muori ("nessun -TerminaleBacktest, e qui NON si chiudono piu' TUTTI i terminali.`n" +
+         "    Chiudere tutti vuol dire chiudere anche il conto REALE 10105439 mentre`n" +
+         "    ha posizioni aperte -- e il 10/09 e' successo davvero.`n" +
+         "    Se leggi questo messaggio, qualcuno ha tolto il ripiego sul banco:`n" +
+         "    rimettilo, oppure passa -TerminaleBacktest a mano.")
 }
 Mostra-Referto
 

@@ -26,8 +26,8 @@
 #  Dal gradino B in poi: stop fisso mai spostato, TP 1:2, rischio 2%,
 #  news 2 ore prima (tutto come da ToolKit).
 #
-#  ⚠️ SUL PC DI BACKTEST (non il VPS). MetaTrader CHIUSO. E' lungo (ore).
-#  ⚠️ Un backtest alla volta: non lanciarlo insieme all'ablazione.
+#   SUL PC DI BACKTEST (non il VPS). MetaTrader CHIUSO. E' lungo (ore).
+#   Un backtest alla volta: non lanciarlo insieme all'ablazione.
 #
 #  Lancia con UNA riga:
 #    irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/backtest_pipeline/test_orb_toolkit.ps1" | iex
@@ -173,7 +173,10 @@ $I
     Write-Host "   $sym (M5 Model $Model)..." -ForegroundColor Cyan
     (Start-Process -FilePath $Terminal -ArgumentList "/config:`"$ini`"" -PassThru).WaitForExit()
     for($w=0;$w -lt 20;$w++){ if(-not (Get-Process -Name terminal64 -ErrorAction SilentlyContinue)){break}; Start-Sleep -Seconds 3 }
-    Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    # CHIUSURA CHIRURGICA (12/09/2026). Prima ammazzava TUTTI i terminal64
+    # della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha posizioni
+    # aperte. Adesso muore SOLO il terminale che questo script ha avviato.
+    Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) } | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 2
     if(Test-Path $csv){
       try{

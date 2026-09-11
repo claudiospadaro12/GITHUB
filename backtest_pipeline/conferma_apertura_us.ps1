@@ -29,7 +29,7 @@
 #    Griglia automatica: attesa 15/30/45 min x direzione break/mid/candela.
 #    CSV in ..._delay_realtick.
 #
-#  ⭐ CONFIGURAZIONE DEI DOCUMENTI (PDF ABTG + slide) - aggiungi -Doc a qualunque motore:
+#   CONFIGURAZIONE DEI DOCUMENTI (PDF ABTG + slide) - aggiungi -Doc a qualunque motore:
 #    .\conferma_apertura_us.ps1 -Model 4 -EntryMode 4 -Doc     <- il PDF: "entra DOPO la chiusura
 #                                                    della candela di breakout, non durante"
 #    .\conferma_apertura_us.ps1 -Model 4 -EntryMode 0 -Doc     <- le slide Nasdaq: ordini STOP su H1
@@ -38,8 +38,8 @@
 # =====================================================================
 param(
   [string[]]$Symbols=@("U30USD","NASUSD"),
-  [int]$Model=1,                              # 1=OHLC (veloce) · 4=tick reali (verita')
-  [int]$EntryMode=0,                          # 0=BREAKOUT (stop) · 2=RETEST (limit) · 3=RANGE_FADE (fada gli estremi) · 4=DELAYED (entrata ritardata)
+  [int]$Model=1,                              # 1=OHLC (veloce) - 4=tick reali (verita')
+  [int]$EntryMode=0,                          # 0=BREAKOUT (stop) - 2=RETEST (limit) - 3=RANGE_FADE (fada gli estremi) - 4=DELAYED (entrata ritardata)
   [double]$RetestOffset=0,                     # (solo RETEST) offset del limit DENTRO il livello, in punti
   [double]$FadeOffset=0,                        # (solo RANGE_FADE) offset del limit OLTRE l'estremo, in punti
   [int]$RangeMin=0,                            # se >0 forza InpRangeMinutes (es. 15 = ORB dei primi 15 min)
@@ -111,7 +111,7 @@ if($Doc){
   # === CONFIGURAZIONE PRESCRITTA DAI DOCUMENTI (PDF ABTG + slide "Strategia Nasdaq") ===
   #  livelli : max/min della candela H1 PRECEDENTE ("ordini nel time frame H1, SELL STOP
   #            sotto i minimi precedenti, BUY STOP sopra i massimi precedenti")
-  #  filtri  : vol=volumi>=+50% · atr=ATR>=media · h4=trend su H4 · corr=SPXUSD · news
+  #  filtri  : vol=volumi>=+50% - atr=ATR>=media - h4=trend su H4 - corr=SPXUSD - news
   #  rischio : max 2% del capitale
   # --- quali filtri accendere: -Filters "vol,atr,..." per l'ABLAZIONE; se non lo passi, TUTTI ---
   $fl = if($PSBoundParameters.ContainsKey('Filters')){ $Filters } else { "vol,atr,h4,corr,news" }
@@ -236,7 +236,10 @@ $Inputs
   # il tester a volte lascia terminal64 appeso (es. simbolo senza storico) -> lo chiudo,
   # cosi' il test successivo (o lo script successivo) non si blocca su "Chiudi MetaTrader".
   for($__w=0;$__w -lt 20;$__w++){ if(-not (Get-Process -Name terminal64 -ErrorAction SilentlyContinue)){break}; Start-Sleep -Seconds 3 }
-  Get-Process -Name terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  # CHIUSURA CHIRURGICA (12/09/2026). Prima ammazzava TUTTI i terminal64
+  # della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha posizioni
+  # aperte. Adesso muore SOLO il terminale che questo script ha avviato.
+  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) } | Stop-Process -Force -ErrorAction SilentlyContinue
   Start-Sleep -Seconds 2
   if(Test-Path $csv){
     # salvataggio ROBUSTO: la cartella dei risultati puo' non esserci piu' (sync/AV la

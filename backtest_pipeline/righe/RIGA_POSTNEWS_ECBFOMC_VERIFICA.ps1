@@ -1028,7 +1028,10 @@ try{
       $proc = Start-Process -FilePath $Terminal64 -ArgumentList ("/config:`"" + $Stato[$s.Id].IniPath + "`"") -PassThru
       $uscito = $proc.WaitForExit($TimeoutMin * 60 * 1000)
       if(-not $uscito){
-        try{ Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue }catch{}
+        try{ # CHIUSURA CHIRURGICA (12/09/2026). Prima ammazzava TUTTI i terminal64
+        # della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha posizioni
+        # aperte. Adesso muore SOLO il terminale che questo script ha avviato.
+        Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal64) } | Stop-Process -Force -ErrorAction SilentlyContinue }catch{}
         Start-Sleep -Seconds 3
         [void]$Problemi.Add("sedia " + $s.Id + ": il tester NON e' uscito entro " + $TimeoutMin + " minuti ed e' stato chiuso a forza. Due nomi possibili (non uno): (1) storico M1 di " + $s.Sym + " mancante e scarico in corso; (2) una finestra modale del terminale. Le righe di log qui sotto valgono lo stesso, ma la corsa NON e' completa.")
         $Stato[$s.Id].Corsa = "INTERROTTA dal tetto di " + $TimeoutMin + " minuti"

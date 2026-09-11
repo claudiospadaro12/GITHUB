@@ -296,7 +296,10 @@ Period=H1
   $ErrorActionPreference = "Stop"
 
   Dico "chiudo MT5..." "DarkGray"
-  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+  # CHIUSURA CHIRURGICA (12/09/2026). Prima ammazzava TUTTI i terminal64
+  # della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha posizioni
+  # aperte. Adesso muore SOLO il terminale che questo script ha avviato.
+  Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) } | Stop-Process -Force -ErrorAction SilentlyContinue
   Start-Sleep -Seconds 3
 
   if(-not $visto){

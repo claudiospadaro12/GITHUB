@@ -372,12 +372,19 @@ function RaccogliLog(){
 #  RIGA_SONDA_OROLOGIO.ps1 (681-683). Su una macchina con due istanze
 #  due selettori diversi scelgono terminali diversi: e' il punto 37.
 # =====================================================================
+# RIPIEGO_BANCO_v1 (12/09/2026): il selettore copiato da
+# walkforward_generico.ps1 e' stato RIPARATO alla fonte l'11/09 -- prendeva
+# "*BCM Markets MT5 Terminal*" e non "*-V3*", cioe' IL PICCOLO 50503392
+# CON LE SEDIE VIVE. Qui ne era rimasta la copia. Adesso il bersaglio e'
+# il banco, SCRITTO IN CHIARO, e se non c'e' si muore: cosi' il percorso
+# del terminale e' NOTO, e la chiusura piu' sotto puo' essere chirurgica
+# invece di ammazzare tutti i terminal64 della macchina.
+$BANCO_PERC = "C:\MT5_Backtest"
 function TrovaTerminale(){
-  $allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
-  $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-  if(-not $cand){ throw "terminale BCM non trovato: e' lo stesso selettore di walkforward_generico.ps1 (righe 545-548)." }
-  $inst = $cand.DirectoryName
+  $inst = "C:\MT5_Backtest"
+  if(-not (Test-Path -LiteralPath (Join-Path $inst "terminal64.exe"))){
+    throw ("il banco da backtest non c'e': cercato " + (Join-Path $inst "terminal64.exe") + ". NON ripiego su Program Files: li' c'e' il piccolo 50503392 con le sedie VIVE.")
+  }
   $tr   = Join-Path $env:APPDATA "MetaQuotes\Terminal"
   $dati = (Get-ChildItem -LiteralPath $tr -Directory -ErrorAction SilentlyContinue | Where-Object { $o = Join-Path $_.FullName "origin.txt"; (Test-Path -LiteralPath $o) -and ((Get-Content -LiteralPath $o -Raw).Trim() -ieq $inst) } | Select-Object -First 1 -ExpandProperty FullName)
   if(-not $dati){ throw ("cartella dati MT5 non trovata per " + $inst) }
@@ -432,7 +439,10 @@ function EseguiConGuardia($argv,[string]$dataFolder,[string]$sym){
     Dico ("TETTO DI " + $TimeoutMin + " MINUTI SFONDATO: fermo tutto. QUESTO E' IL RISULTATO, non un guasto.") "Red"
     try{ Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue }catch{}
     Start-Sleep -Seconds 2
-    Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+    # CHIUSURA CHIRURGICA (12/09/2026). Prima ammazzava TUTTI i terminal64
+    # della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha posizioni
+    # aperte. Adesso muore SOLO il terminale che questo script ha avviato.
+    Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like ($BANCO_PERC + "\*")) } | Stop-Process -Force -ErrorAction SilentlyContinue
     Start-Sleep -Seconds 3
     $rcTxt = "non pertinente: la corsa e' stata FERMATA dal tetto, non e' uscita da sola"
   }
