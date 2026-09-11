@@ -326,7 +326,27 @@ function BersaglioOk([string]$testo){
     $buona = $false
     if($segno -eq '='){ $buona = RhsPortaIlBanco $rhs $approvate }   # '+=' non e' mai verificabile
     if($buona){ $approvate[$nome] = $true }
-    else { $bocciate[$nome] = $true }
+    else {
+      $bocciate[$nome] = $true
+      # 11/09/2026 -- LA SQUALIFICA SI PROPAGA, E PRIMA NON LO FACEVA.
+      # Difetto trovato con un contro-esempio, non leggendo: in CINQUE
+      # righe
+      #     $BancoBT  = 'C:\MT5_Backtest'
+      #     $BancoBT  = 'D:\MT5_Altro'
+      #     $exeBanco = Join-Path $BancoBT 'terminal64.exe'
+      # il cancello diceva "G3 passato". Motivo: $bocciate veniva
+      # sottratto SOLO alla fine, mentre RhsPortaIlBanco consulta
+      # $approvate MENTRE scorre -- e li' dentro 'BancoBT' c'era ancora.
+      # Cosi' $exeBanco NASCEVA APPROVATA da una sorgente gia' squalificata,
+      # e portava con se' il via libera fino alla riga del terminale.
+      # Cioe' l'INSIDIOSO 2 (la riassegnazione) si aggirava con UN SOLO
+      # passaggio di indirezione, che e' la forma normale in cui si scrive
+      # un percorso: si assegna la cartella, poi si compone l'exe.
+      # Togliendo la chiave da $approvate la vista incrementale torna
+      # uguale a quella finale. La modifica puo' solo RIFIUTARE DI PIU',
+      # mai di meno: nessuna variabile diventa buona per questa riga.
+      $approvate.Remove($nome)
+    }
   }
   $buone = @{}
   foreach($k in $approvate.Keys){ if(-not $bocciate.ContainsKey($k)){ $buone[$k] = $true } }
@@ -550,7 +570,18 @@ if($CollaudoCancelli){
     @{ nome="ARG CATTIVO: cartella del 100k";  corsia="ROUND"; atteso=$false; arg="-X C:\Program Files\BCM Markets MT5 Terminal -V3" },
     @{ nome="ARG CATTIVO: percorso estraneo";corsia="ROUND";   atteso=$false; arg="-Cartella D:\roba\altro" },
     @{ nome="ARG CATTIVO: esegue testo";     corsia="ROUND";   atteso=$false; arg="-X Invoke-Expression" },
-    @{ nome="ARG CATTIVO (lettura): scrive"; corsia="LETTURA"; atteso=$false; arg="-Out Set-Content" }
+    @{ nome="ARG CATTIVO (lettura): scrive"; corsia="LETTURA"; atteso=$false; arg="-Out Set-Content" },
+    # ---- 11/09/2026: GLI ARGOMENTI VERI DELLA RIGA SOTTILE.
+    #  Non un caso finto: e' la stringa che finisce nel terzo campo della
+    #  riga di coda di R125. Se G4 la bocciasse, la corsia ROUND
+    #  resterebbe chiusa anche con lo script giusto.
+    @{ nome="ARG BUONO: la riga sottile R125"; corsia="ROUND"; atteso=$true;
+       arg="-Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Deposito 100000 -Modello 4" },
+    #  E lo stesso argomento con un percorso appiccicato in coda: e' il
+    #  modo piu' banale di dirottare un round dalla coda, ed e' il motivo
+    #  per cui G4 esiste.
+    @{ nome="ARG CATTIVO: riga sottile dirottata"; corsia="ROUND"; atteso=$false;
+       arg="-Expert ABTG_ORB_Ottimizzato -Etichetta r125a -X D:\MT5_Altro" }
   )
   foreach($c in $casi3){
     $r = VagliaArgomenti $c.arg $c.corsia
@@ -558,6 +589,49 @@ if($CollaudoCancelli){
     if($giusto){ $ok++ } else { $ko++ }
     $col = if($giusto){"Green"}else{"Red"}
     Write-Host ("  [{0}] {1,-42} -> {2}" -f $(if($giusto){"OK "}else{"KO "}), $c.nome, $r.motivo) -ForegroundColor $col
+  }
+
+  # ---- PARTE 4 (11/09/2026): LO SCRIPT VERO, LETTO DAL DISCO.
+  #  Fino a qui il collaudo prova il cancello su casi SCRITTI PER IL
+  #  COLLAUDO. Un cancello provato solo sui propri casi finti dice quanto
+  #  e' coerente con se stesso, non se fa passare il lavoro vero: il
+  #  motivo per cui la corsia ROUND e' rimasta chiusa fino a oggi e'
+  #  proprio questo (nessuno script vero le passava). Qui si legge dal
+  #  disco IL FILE CHE ANDRA' IN CODA, e accanto il suo GEMELLO CATTIVO.
+  Write-Host ""
+  Write-Host "  --- PARTE 4: LA RIGA SOTTILE VERA, LETTA DAL DISCO ---" -ForegroundColor Cyan
+  $fileSottile = Join-Path (Join-Path $PSScriptRoot "righe") "RIGA_SOTTILE_ROUND.ps1"
+  if(-not (Test-Path -LiteralPath $fileSottile)){
+    $ko++
+    Write-Host ("  [{0}] {1,-42} -> {2}" -f "KO ", "RIGA SOTTILE: file non trovato", $fileSottile) -ForegroundColor Red
+  }
+  else{
+    $vero = [IO.File]::ReadAllText($fileSottile)
+    # IL GEMELLO CATTIVO si costruisce PER SOSTITUZIONE dal file vero,
+    # non si riscrive a mano: cosi' l'unica differenza fra i due casi e'
+    # il BERSAGLIO, ed e' esattamente quella differenza che il cancello
+    # deve vedere. Se lo riscrivessi a mano proverei due file diversi e
+    # non saprei quale differenza ha deciso l'esito.
+    $gemello = $vero.Replace("C:\MT5_Backtest", "C:\Program Files\BCM Markets MT5 Terminal -V3")
+    # IL SECONDO GEMELLO CATTIVO, quello che ha trovato un difetto vero.
+    # Qui il bersaglio non diventa un terminale VIETATO (che G2 vedrebbe
+    # come testo): diventa una cartella qualunque. Nessun divieto la
+    # nomina, quindi a fermarla puo' essere SOLO G3. L'11/09/2026 non la
+    # fermava: vedi la nota sulla propagazione della squalifica.
+    $dirottato = $vero.Replace("`$BancoBT = 'C:\MT5_Backtest'",
+                               "`$BancoBT = 'C:\MT5_Backtest'`n`$BancoBT = 'D:\MT5_Altro'")
+    $casi4 = @(
+      @{ nome="RIGA SOTTILE VERA: deve passare";  atteso=$true;  txt=$vero },
+      @{ nome="GEMELLO CATTIVO: bersaglio 100k";  atteso=$false; txt=$gemello },
+      @{ nome="GEMELLO CATTIVO: banco riassegnato"; atteso=$false; txt=$dirottato }
+    )
+    foreach($c in $casi4){
+      $r = VagliaScript $c.txt $c.nome
+      $giusto = ($r.ok -eq $c.atteso)
+      if($giusto){ $ok++ } else { $ko++ }
+      $col = if($giusto){"Green"}else{"Red"}
+      Write-Host ("  [{0}] {1,-42} -> {2}" -f $(if($giusto){"OK "}else{"KO "}), $c.nome, $r.motivo) -ForegroundColor $col
+    }
   }
 
   Write-Host ""
