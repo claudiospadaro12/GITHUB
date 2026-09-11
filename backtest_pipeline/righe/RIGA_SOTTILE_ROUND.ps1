@@ -135,14 +135,19 @@ $BancoBT = 'C:\MT5_Backtest'
 #  DIVENTARLO: e' l'unica cosa che lega il codice che gira al codice che
 #  e' stato letto.
 #
-#  >>> 11/09/2026 (SECONDO GIRO) -- IL PIN E' DI NUOVO UN SEGNAPOSTO. <<<
-#  Il primo giro aveva gia' ri-pinnato su e2d5dc3 (guardia POSITIVA in
-#  RIGA_ROUND_VPS.ps1). Adesso e' cambiato ANCHE walkforward_generico.ps1:
-#  la stessa guardia positiva e' stata portata nel driver, che a mano
-#  aveva ancora la versione NEGATIVA con tutti e quattro i buchi (il
-#  piccolo 50503392, la radice di un disco, i nomi 8.3, la fuga col '..').
+#  >>> 11/09/2026 (TERZO GIRO) -- IL PIN E' DI NUOVO UN SEGNAPOSTO. <<<
+#  Primo giro: ri-pin su e2d5dc3 (guardia POSITIVA in RIGA_ROUND_VPS.ps1).
+#  Secondo giro: la stessa guardia positiva portata dentro il driver.
+#  TERZO GIRO (questo): nel driver e' stato CHIUSO IL RIPIEGO. La guardia
+#  positiva c'era gia' ma stava DENTRO "if($TerminaleBacktest)": chi
+#  lanciava walkforward_generico.ps1 A MANO senza quel parametro -- come
+#  fanno le righe di report\PASSI_OPERATIVI.md -- non la sfiorava, e il
+#  ripiego automatico sceglieva IL PICCOLO 50503392, quello con le sedie
+#  vive sopra. Adesso il ripiego prende IL BANCO C:\MT5_Backtest (demo
+#  50504400) entrando nello STESSO ramo guardato, e se il banco non c'e'
+#  MUORE invece di spazzolare Program Files.
 #  Quindi l'impronta del driver e' cambiata -- vedi $SHA_WALK qui sotto --
-#  e il pin e2d5dc3 non porta piu' i byte giusti: lo scarico morirebbe
+#  e il pin vecchio non porta piu' i byte giusti: lo scarico morirebbe
 #  sull'impronta, che e' il fallimento giusto, ma per la ragione sbagliata.
 #  Il pin nuovo NON PUO' ESISTERE ADESSO: e' l'hash del commit che contiene
 #  QUESTA riga, e quel commit lo fa Claudio.
@@ -150,7 +155,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #  segnaposto e' qui, lo script MUORE al controllo qui sotto: e' il
 #  fallimento giusto -- rumoroso, e prima di scaricare qualunque cosa.
 # ---------------------------------------------------------------------
-$PIN = 'a895dbc5b4511b3afe4ccf2340ac0d917f141403'
+$PIN = 'PIN_DA_RIMPIAZZARE_DOPO_IL_COMMIT'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -159,16 +164,18 @@ $PIN = 'a895dbc5b4511b3afe4ccf2340ac0d917f141403'
 #    nomi 8.3). Se un giorno tornasse a valere quella vecchia, vorrebbe
 #    dire che il pin punta indietro: e' proprio quello che l'impronta
 #    deve far scoprire.
-#  - SHA_WALK: RICALCOLATA l'11/09/2026 (secondo giro). Prima era
-#    36370C65...041EE998, cioe' il driver con la guardia NEGATIVA su
-#    -TerminaleBacktest: lanciato A MANO lasciava passare il piccolo
-#    50503392, la radice di un disco, i nomi 8.3 e la fuga col '..'.
-#    Dal driver il round la riceveva gia' buona (RIGA_ROUND_VPS gli passa
-#    la COSTANTE), quindi la strada del round era gia' chiusa: e' la
-#    strada A MANO che era aperta, ed e' quella che questa impronta nuova
-#    inchioda.
+#  - SHA_WALK: RICALCOLATA l'11/09/2026 (TERZO giro). Prima era
+#    BAE1A08C...DF6AD251 (secondo giro: guardia positiva nel driver, ma
+#    solo DENTRO il ramo di -TerminaleBacktest), e prima ancora
+#    36370C65...041EE998 (guardia NEGATIVA, quattro buchi).
+#    Questo terzo giro inchioda il driver che NON SI SCEGLIE PIU' UN
+#    TERMINALE DA SOLO. Per il round lanciato da QUESTA riga non cambia
+#    niente -- il banco glielo passiamo noi, con -TerminaleBacktest, qui
+#    sotto -- ma l'impronta e' l'unica cosa che impedisce a una copia
+#    VECCHIA del driver, quella col ripiego aperto, di girare al posto
+#    di questa.
 $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
-$SHA_WALK  = 'BAE1A08C1D0F35E01F7F1AC0B9A94234A51F0070DB3457B97A707D4CDF6AD251'
+$SHA_WALK  = '6DB57DF1DB92228B7B1DBB720C2E94103CEDD87A3C51EDA3A0E2E1D1981DA495'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
