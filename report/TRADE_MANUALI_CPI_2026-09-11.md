@@ -121,3 +121,40 @@ istante** (±72 secondi), e **+22,49 dollari presi**.
    calendario `USD1330` (644 righe, 2010-2023) portato su **XAUUSD**.
 
 > ## 🔥 Complimenti socio. **+1.980,69 netti**, il conto torna al centesimo, e hai scelto lo stesso minuto che il nostro EA avrebbe scelto da solo. **Il metodo e l'istinto si sono dati ragione a vicenda.**
+
+---
+
+## ➕ AGGIUNTA (16:21) — **gli ingressi erano a MERCATO, non pendenti**
+
+Rileggendo la scheda *Affari* per esteso: **le due righe di ingresso (`buy, in`)
+non hanno nessun commento**, mentre le due di uscita ce l'hanno
+(`[tp 4380.78]` · `[sl 4391.24]`).
+
+👉 **Un ordine pendente lascia una traccia; un ingresso a mercato no.**
+Quindi Claudio è **entrato a mercato, a mano**, dopo aver letto la direzione —
+**non con due pendenti piazzati prima.**
+
+🎯 **Conta per la discussione sull'OCO**: il metodo che oggi ha funzionato
+**non è lo straddle**. È *"aspetta 14 minuti, guarda da che parte va, entra a
+mercato"* — cioè **la stessa logica della sedia `PostNews`**, non quella dei due
+ordini opposti.
+
+### 🔗 Catena dei ticket, per il verbale
+| ora | affare | ordine | posizione |
+|---|---:|---:|---:|
+| 13:43:48 `buy in` | 2928027 | 3364204 | **3364204** |
+| 13:54:18 `sell out` | 2928248 | 3364423 | **3364204** |
+| 14:03:40 `buy in` | 2928512 | 3364695 | **3364695** |
+| 14:29:57 `sell out` | 2928782 | 3365001 | **3364695** |
+
+✅ Le posizioni si chiudono con l'ordine giusto: **nessun incrocio, nessuna
+copertura**. Due operazioni pulite, aperte e chiuse in sequenza.
+
+## 🔴 QUELLO CHE ANCORA MANCA
+Questa scheda è **filtrata su oggi**: le righe del **09/09** e **10/09** non
+compaiono, e sono proprio quelle che servono.
+👉 **Icona del calendario in alto a destra → allarga il periodo al 9 settembre.**
+Mi serve **una sola cosa**: se la riga di chiusura dello short da **0,50** del
+09/09 ha il commento **`[sl …]`** oppure **niente**.
+📌 Con `[sl …]` lo stop c'era ed era largo 63 dollari. Senza, **non c'era** — e
+il conto del rischio va rifatto.
