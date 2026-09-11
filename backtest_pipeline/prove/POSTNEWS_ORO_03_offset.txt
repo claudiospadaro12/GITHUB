@@ -1,0 +1,145 @@
+# =====================================================================
+#  ROUND 2 / CELLA 03 -- POST NEWS 13:30 SU ORO -- L'ASSE E' IL BUFFER
+#  DI ROTTURA (quanto sopra il massimo del range si arma il BUY STOP)
+#  XAUUSD M5, blocco USD1330OKF
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_USD1330_XAUUSD.set
+#  Scritto l'11/09/2026. NON LANCIATO (chi scrive non ha MT5).
+#  >>> ROUND 2: si lancia SOLO se il round 1 (celle 00, 01, 02) ha
+#      trovato almeno una cella con PF > 1,00 su TUTTE E DUE le
+#      finestre. Se il round 1 e' piatto sulla curva H0, questo file
+#      NON si lancia: sarebbe la griglia fitta su un motore morto che
+#      la regola del 19/08 vieta.
+# =====================================================================
+#
+#  PERCHE' QUESTO ASSE
+#    InpBuyOffsetPips / InpSellOffsetPips non sono MAI stati messi ad
+#    asse [MISURATO l'11/09: zero occorrenze "||Y" in tutto
+#    backtest_pipeline/]. Il valore ereditato (3 pip) viene dalla slide
+#    NFP del corso e su ORO vale 0,03 $, cioe' il 19% dello spread
+#    MISURATO (0,16 $): un "breakout" che scatta DENTRO lo spread, sotto
+#    il massimo vero del range. Non e' una taratura da rifinire: e' un
+#    numero che sull'oro non significa niente.
+#
+#  >>> LE CELLE, IN DOLLARI (1 "pip" = 0,01 $ per oncia)
+#      48  -> 0,48 $ =  3,0x lo spread MISURATO (0,16)
+#      96  -> 0,96 $ =  6,0x   (e' il valore del lato SELL, fisso)
+#      144 -> 1,44 $ =  9,0x   <- CELLA BASE del preset
+#      192 -> 1,92 $ = 12,0x
+#      240 -> 2,40 $ = 15,0x
+#      Sotto 1x lo spread l'offset non esiste come concetto: la cella
+#      piu' stretta sta a 3,0x apposta. Il valore ereditato (0,19x) e'
+#      FUORI GRIGLIA, e il motivo e' scritto sopra.
+#      Riferimento di scala: il range tipico di DUE candele M5 su una
+#      giornata qualunque e' 3,38 $ [INFERITO dal range di giornata
+#      MISURATO 40,50 $, n=60 giornate, regola di scala validata al
+#      4,3%]. Le celle vanno dal 14% al 71% di quel range.
+#
+#  >>> SI MUOVE SOLO IL LATO BUY, ED E' VOLUTO
+#      Il lato SELL resta fisso a 0,96 $ in tutte le celle. E' un
+#      CONTROLLO: con InpUseOCO=false le due gambe non interagiscono,
+#      quindi le operazioni SHORT devono essere IDENTICHE fra le cinque
+#      celle. Se cambiano, qualcosa e' rotto.
+#      >>> LIMITE DICHIARATO: il CSV del driver e' aggregato e NON
+#          separa i due lati. Il controllo si fa sul registro affari di
+#          UNA cella contro un'altra, a mano, non dalla colonna Trades.
+#          [NON DISPONIBILE dal CSV] -- e va detto, non sottinteso.
+#      Simmetrizzare i due offset e' un asse a parte (round 3), perche'
+#      cambierebbe DUE cose insieme.
+#
+#  >>> ATTESA DICHIARATA PRIMA DEI NUMERI -- il contro-esempio, di nuovo
+#      Sotto H0 (nessuna direzione prendibile dopo la notizia) il PF non
+#      dipende da DOVE si entra: resta 0,970 in tutte e cinque le celle
+#      (SL 12,00, TP 14,40, pedaggio 0,2003).
+#      Cambia solo il NUMERO di operazioni: piu' largo il buffer, meno
+#      gambe scattano. Attesa sul conteggio: monotona DECRESCENTE da 48
+#      a 240. Se Trades NON decresce, l'asse non e' arrivato all'EA.
+#      >>> Cinque PF piatti attorno a 0,97 con un conteggio che cala =
+#          "il buffer non conta e il meccanismo non c'e'".
+#
+#  >>> SOGLIE CONGELATE PRIMA DEI NUMERI
+#      - centro dell'altopiano, mai il picco: serve la cella scelta E le
+#        due vicine sopra 1,00, in IS e in OOS;
+#      - MERITO solo sopra 150 operazioni per finestra; RISCHIO sempre;
+#      - le celle larghe (192, 240) taglieranno operazioni: se scendono
+#        sotto 150 il loro merito e' SOSPESO anche se il PF e' bello;
+#      - se la cella migliore in IS non e' la migliore in OOS -> "il
+#        buffer non e' dimostrato", si tiene la cella base 144;
+#      - DD di cella > 10% -> il RISCHIO parla, a qualunque n.
+#
+#  >>> COSTO IN TEMPO MACCHINA
+#      5 celle x 2 finestre = 10 passate, UN SOLO agente locale MT5
+#      (classe 129). [STIMATO] 2-4 min a passata -> 20-40 minuti.
+#
+#  @DAQUANDO come direttiva e' OMESSO di proposito: va misurato con
+#  scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto. Vedi la cella 00.
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_ORO_03_offset.txt `
+#       -Simbolo XAUUSD -Periodo M5 -DaQuando <data MISURATA> `
+#       -Fino 2023.12.31 -Modello 1 -Deposito 100000 `
+#       -Etichetta ORO1330_03OF -SoloControllo
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+# ATTENZIONE, e' una DICHIARAZIONE, NON UN PIN: walkforward_generico.ps1
+# legge @SIMBOLO, @PERIODO e @DAQUANDO, ma NON @FINOA (verificato sul
+# sorgente l'11/09: r.474-476). La fine finestra si impone con
+# -Fino 2023.12.31 sulla riga di lancio, oppure con un wrapper
+# RIGA_*.ps1 che gatti @FINOA contro -Fino, come fanno gia'
+# RIGA_POSTNEWS_NFP.ps1 e RIGA_DAXREENTRY.ps1. Senza una delle due cose
+# il driver userebbe il suo default 2026.06.30 e due anni e mezzo di
+# passata girerebbero su un calendario VUOTO (finisce il 2023.12.14).
+@FINOA    2023.12.31
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+InpActionHour=13||13||0||13||N
+InpActionMin=45||45||0||45||N
+InpExpiryHour=14||14||0||14||N
+InpExpiryMin=45||45||0||45||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_usd1330_2010_2023_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+InpNewsTitleMatch=USD1330OKF
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti (1 pip = 0,01 $). Il lato SELL e' il CONTROLLO ---
+InpSellOffsetPips=96.0||96.0||0||96.0||N
+InpTPpips=1440.0||1440.0||0||1440.0||N
+InpSLpips=1200.0||1200.0||0||1200.0||N
+InpUseOCO=false||false||0||false||N
+InpCloseAtExpiry=true||true||0||true||N
+
+# --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false||false||0||false||N
+InpTrailTriggerPips=1200.0||1200.0||0||1200.0||N
+InpTrailNewSLpips=800.0||800.0||0||800.0||N
+
+# --- rete di sicurezza del venerdi' ---
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpRiskRefSLpips=2400.0||2400.0||0||2400.0||N
+
+# --- generali ---
+InpComment=USD1330 ORO PostNews
+InpMagic=774803||774803||0||774803||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: il buffer di rottura del lato BUY, in centesimi
+# di dollaro d'oro. 48 = 0,48 $ ... 240 = 2,40 $, passo 0,48 $.
+InpBuyOffsetPips=144.0||48.0||48||240.0||Y

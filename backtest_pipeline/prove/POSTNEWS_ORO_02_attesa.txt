@@ -1,0 +1,186 @@
+# =====================================================================
+#  ROUND 1 / CELLA 02 -- POST NEWS 13:30 SU ORO -- L'ASSE E' L'ATTESA
+#  Quanti minuti si lascia passare dopo la notizia prima di armare
+#  XAUUSD M5, blocco USD1330OKF
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_USD1330_XAUUSD.set
+#  Scritto l'11/09/2026. NON LANCIATO (chi scrive non ha MT5).
+#  >>> SI LANCIA SOLO DOPO POSTNEWS_ORO_00_conta.txt (canarino verde,
+#      gemelli identici, Trades > 0).
+# =====================================================================
+#
+#  PERCHE' QUESTO ASSE E' IL PIU' INTERESSANTE DI TUTTO IL ROUND
+#    1. InpActionMin non e' MAI stato messo ad asse, su nessun simbolo e
+#       in nessun round [MISURATO l'11/09: zero occorrenze
+#       "InpActionMin...||Y" in tutto backtest_pipeline/]. E' una
+#       manopola vergine, non una griglia infittita.
+#    2. Il REGISTRO lo dice da solo (voce del 03/09, caccia notizie):
+#       "il corso BUTTA la candela della notizia sull'ECB e la TIENE sul
+#       FOMC, senza mai spiegare perche'. Sono 5 minuti di InpActionMin:
+#       nessuna delle due versioni ha mai avuto un numero."
+#       Questo asse GLIELO DA', e costa 4 celle.
+#    3. E l'11/09 c'e' un dato nuovo, anche se vale n=1: Claudio, a
+#       mano, e' entrato a news+13:48 -- 72 secondi PRIMA dell'ora
+#       d'azione di questo meccanismo (news+15) -- e ha preso +22,49 $.
+#       Il suo istinto e il nostro orario hanno scelto lo stesso
+#       momento. Questo asse misura se quel momento e' davvero speciale
+#       o se e' indifferente.
+#
+#  >>> COSA LEGGE L'EA IN OGNI CELLA (la cosa da capire prima di tutto)
+#      La barra d'azione e' quella che SI APRE all'orario impostato;
+#      l'EA usa le barre M5 [1] e [2], cioe' le DUE precedenti.
+#      Notizia alle 13:30 server (= 14:30 italiane = 08:30 New York).
+#        cella 40 -> agisce 13:40 = news+10 -> legge 13:35 e 13:30
+#                    >>> INCLUDE LA CANDELA DELLA NOTIZIA. L'11/09 quella
+#                        candela ha fatto 46 $ di range [LETTO DAL
+#                        GRAFICO]: i due pendenti nascerebbero lontani
+#                        ~48 $ l'uno dall'altro. E' un'altra strategia,
+#                        non una sfumatura, ed e' quella che il corso
+#                        usa sul FOMC.
+#        cella 45 -> agisce 13:45 = news+15 -> legge 13:40 e 13:35
+#                    >>> LA CELLA BASE, post notizia PURO (la candela
+#                        del dato non la tocca). E' quella del gemello
+#                        USDJPY e della sedia NFP viva.
+#        cella 50 -> agisce 13:50 = news+20 -> legge 13:45 e 13:40
+#        cella 55 -> agisce 13:55 = news+25 -> legge 13:50 e 13:45
+#
+#  >>> DUE CONFONDIMENTI, DICHIARATI PRIMA E NON SCOPERTI DOPO
+#    (a) LA SCADENZA RESTA FISSA a 14:45 server, quindi piu' tardi si
+#        arma e meno vive la posizione: 60 / 55 / 50 / 45 minuti.
+#        Non e' separabile con un asse solo (l'EA non ha un orario di
+#        cancellazione dei pendenti distinto dalla scadenza). Va letto
+#        cosi': l'asse misura "attesa + durata residua", e se la cella
+#        55 perde NON si puo' dire quale delle due cose l'ha affondata.
+#        La separazione costa una modifica all'EA ed e' una proposta,
+#        non un aggiramento.
+#    (b) IL NUMERO DI OPERAZIONI CAMBIA FRA LE CELLE, ed e' il punto:
+#        un range piu' largo (cella 40) fa scattare meno gambe, un range
+#        stretto ne fa scattare di piu'. Percio' qui, al contrario della
+#        cella 01, Trades DEVE cambiare. Se NON cambiasse, sarebbe il
+#        segnale che l'orario non e' arrivato all'EA.
+#
+#  >>> FTMO: TUTTE E QUATTRO LE CELLE SONO FUORI DAL MURO
+#      Il divieto e' +/-2 minuti attorno all'annuncio, e solo su conto
+#      Standard funded; XAUUSD e' ESPLICITAMENTE fra gli strumenti
+#      colpiti dagli eventi USD (docs/REGOLAMENTO_FTMO_2026-08.md r.57).
+#      La cella piu' vicina al dato e' news+10: otto minuti di margine.
+#      Nessun ordine, SL o TP puo' cadere nella finestra vietata delle
+#      13:28-13:32 perche' a quell'ora non c'e' ancora niente di aperto.
+#
+#  >>> ATTESA DICHIARATA PRIMA DEI NUMERI -- ED E' IL CONTRO-ESEMPIO
+#      Ipotesi H0 ("l'11/09 e' stata fortuna, il post notizia non ha
+#      direzione prendibile"): su una passeggiata senza deriva il PF
+#      atteso NON DIPENDE DA DOVE SI ENTRA. Con SL 12,00, TP 14,40 e
+#      pedaggio 0,2003:
+#          PF_H0 = SL x (TP - c) / (TP x (SL + c)) = 0,970
+#      IN TUTTE E QUATTRO LE CELLE, con vincenti attese 45,45%.
+#      >>> QUINDI: SE I QUATTRO PF ESCONO PIATTI ATTORNO A 0,97, LA
+#          RISPOSTA E' "IL MOMENTO NON CONTA E IL MECCANISMO NON C'E'".
+#          Se esce una FORMA -- per esempio un massimo a news+15 che
+#          decade a +10 e a +25 -- allora c'e' una struttura temporale,
+#          ed e' esattamente quello che il trade dell'11/09 suggerisce
+#          senza poterlo dimostrare da solo.
+#      >>> E ATTENZIONE AL TRANELLO: una forma con UN SOLO picco su
+#          quattro celle e' rumore finche' non la confermano IS e OOS
+#          INSIEME. Quattro celle sono poche per parlare di altopiano:
+#          questo asse puo' SCARTARE, difficilmente puo' PROMUOVERE.
+#      n atteso: cella 45 come da cella 00 (IS 107-167, OOS 205-319);
+#      le altre celle [NON MISURATO], perche' dipendono dal range delle
+#      candele che leggono, che sull'oro non ha mai contato nessuno.
+#
+#  >>> SOGLIE CONGELATE PRIMA DEI NUMERI
+#      - il MERITO si legge solo sopra le 150 operazioni per finestra;
+#        il RISCHIO a qualunque n;
+#      - per dire "l'ora d'azione conta" serve che la stessa cella sia
+#        la migliore in IS E in OOS, e che il suo PF superi 1,00 in
+#        tutte e due. Se la migliore in IS non e' la migliore in OOS,
+#        la risposta onesta e' "l'attesa non e' dimostrata" e si tiene
+#        il DEFAULT (news+15), che e' gia' la scelta della sedia NFP;
+#      - un numero OHLC non e' mai un verdetto: qui e' screening, e
+#        sull'oro la profondita' a tick e' [NON MISURATO], quindi il
+#        passo dei tick reali oggi non e' nemmeno disponibile;
+#      - DD di cella > 10% -> il RISCHIO parla, a qualunque n.
+#
+#  >>> COSTO IN TEMPO MACCHINA
+#      4 celle x 2 finestre = 8 passate, UN SOLO agente locale MT5
+#      (classe 129). [STIMATO] 2-4 minuti a passata -> 15-35 minuti.
+#
+#  @DAQUANDO come direttiva e' OMESSO di proposito: va misurato con
+#  scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto e passato come
+#  -DaQuando. Vedi POSTNEWS_ORO_00_conta.txt.
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_ORO_02_attesa.txt `
+#       -Simbolo XAUUSD -Periodo M5 -DaQuando <data MISURATA> `
+#       -Fino 2023.12.31 -Modello 1 -Deposito 100000 `
+#       -Etichetta ORO1330_02AT -SoloControllo
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+# ATTENZIONE, e' una DICHIARAZIONE, NON UN PIN: walkforward_generico.ps1
+# legge @SIMBOLO, @PERIODO e @DAQUANDO, ma NON @FINOA (verificato sul
+# sorgente l'11/09: r.474-476). La fine finestra si impone con
+# -Fino 2023.12.31 sulla riga di lancio, oppure con un wrapper
+# RIGA_*.ps1 che gatti @FINOA contro -Fino, come fanno gia'
+# RIGA_POSTNEWS_NFP.ps1 e RIGA_DAXREENTRY.ps1. Senza una delle due cose
+# il driver userebbe il suo default 2026.06.30 e due anni e mezzo di
+# passata girerebbero su un calendario VUOTO (finisce il 2023.12.14).
+@FINOA    2023.12.31
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+InpActionHour=13||13||0||13||N
+# scadenza FISSA 14:45 = news+75 (vedi confondimento (a))
+InpExpiryHour=14||14||0||14||N
+InpExpiryMin=45||45||0||45||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_usd1330_2010_2023_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+InpNewsTitleMatch=USD1330OKF
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti, IN CENTESIMI DI DOLLARO D'ORO (1 pip = 0,01 $) ---
+InpBuyOffsetPips=144.0||144.0||0||144.0||N
+InpSellOffsetPips=96.0||96.0||0||96.0||N
+InpTPpips=1440.0||1440.0||0||1440.0||N
+InpSLpips=1200.0||1200.0||0||1200.0||N
+InpUseOCO=false||false||0||false||N
+InpCloseAtExpiry=true||true||0||true||N
+
+# --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false||false||0||false||N
+InpTrailTriggerPips=1200.0||1200.0||0||1200.0||N
+InpTrailNewSLpips=800.0||800.0||0||800.0||N
+
+# --- rete di sicurezza del venerdi' ---
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio: 0,325% per gamba, 0,65% per evento nel caso peggiore ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpRiskRefSLpips=2400.0||2400.0||0||2400.0||N
+
+# --- generali ---
+InpComment=USD1330 ORO PostNews
+InpMagic=774803||774803||0||774803||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: il MINUTO dell'ora d'azione (ora server) ---
+# 40 = news+10 (LEGGE ANCHE LA CANDELA DELLA NOTIZIA)
+# 45 = news+15 (cella base, post notizia puro)
+# 50 = news+20 | 55 = news+25
+# Il passo 5 non e' una scelta di comodo: sotto M5 la barra d'azione
+# non esiste (l'EA legge iTime su PERIOD_M5), quindi 5 minuti e' la
+# risoluzione VERA di questa manopola.
+InpActionMin=45||40||5||55||Y

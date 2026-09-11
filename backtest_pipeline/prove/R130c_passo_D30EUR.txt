@@ -1,0 +1,407 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R130c -- IL PASSO DEL LIVELLO, TUTTO PULITO DI COSTO
+#            D30EUR M5 -- asse InpRoundStep 10->100, 10 celle
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R130_LIVELLI_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R130c_passo_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r130c
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): su quella macchina ci
+#     sono TRE MT5 con sedie VIVE, incluso il conto REALE 10105439.
+#     C:\MT5_Backtest = demo 50504400, zero EA attaccati.
+#  !! -FrazioneIS 0.50 NON E' OPZIONALE: e' il conto degli INGRESSI, non una
+#     preferenza (vedi "IL CAMPIONE" piu' sotto).
+#  !! -Modello 4 (TICK REALI) NON E' OPZIONALE: un numero OHLC qui non e' un
+#     verdetto, e' screening.
+#  (-SoloControllo deve stampare 10 CELLE PER FINESTRA. Altro numero = file
+#   letto male: FERMARSI.)
+# ---------------------------------------------------------------------
+# ---------------------------------------------------------------------
+#  CHE COSA FA DAVVERO QUESTA MANOPOLA -- LETTO DAL CODICE, NON A MEMORIA
+#
+#  mql5\Experts\ABTG_DAX_Apertura_EU.mq5 r.1899-1908, DENTRO il blocco
+#  "PARZIALE al primo obiettivo":
+#
+#     if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+#       {
+#        double target;
+#        if(InpUseRoundLevels && InpRoundStep > 0)
+#           target = NextRoundLevel(openP, dirSign, InpRoundStep,
+#                                   InpRoundMinDistPts*_Point);
+#        else
+#           target = openP + dirSign*riskDist*InpTP1_R;
+#
+#  'grep NextRoundLevel' su tutte le 2.367 righe del sorgente da' TRE
+#  occorrenze: la definizione (r.2040), l'input (r.330) e QUESTA. Quindi:
+#
+#    >>> NON TOCCA IL TP TOTALE. Il TP dell'ordine e' cablato a 3 x InpTP1_R
+#        (TpTotalR(), r.1621-1627) ed e' lo stesso in TUTTE le celle.
+#    >>> NON TOCCA LO STOP.
+#    >>> Sposta SOLO il bersaglio del PARZIALE -- e, di rimbalzo, IL MOMENTO
+#        IN CUI SCATTA IL BREAKEVEN, che vive dentro lo stesso blocco (r.1931).
+#
+#  LA DOMANDA DEL ROUND SI RESTRINGE DI CONSEGUENZA, ED E' ONESTO SCRIVERLO:
+#  non "un take profit sul livello", ma "UN PARZIALE (e il breakeven che gli
+#  sta dietro) SUL LIVELLO, CONTRO UN PARZIALE A MULTIPLI DI RISCHIO".
+#  (E la meta' "STOP sul livello" del metodo di Claudio NEL CODICE NON ESISTE:
+#   si segnala, non si scrive dentro un round di misura.)
+# ---------------------------------------------------------------------
+#  LE UNITA' -- DUE INPUT ADIACENTI, DUE UNITA' DIVERSE, E IL NOME NON LO DICE
+#  D30EUR: Digits=2, _Point=0,01  ->  1 PUNTO INDICE = 100 PUNTI MT5.
+#
+#    InpRoundStep        usato NUDO sul prezzo (MathCeil(price/step)*step)
+#                        --> PUNTI INDICE.   100.0 = 100 punti indice.
+#    InpRoundMinDistPts  moltiplicato per _Point (r.1906)
+#                        --> PUNTI MT5.      50 = 0,50 PUNTI INDICE.
+#
+#  >>> IL DEFAULT COMPILATO InpRoundMinDistPts=50 NON E' "50 di distanza
+#      minima": E' MEZZO PUNTO INDICE, cioe' la distanza minima di fatto
+#      SPENTA (0,29 volte lo spread mediano). Chi scrivesse 68 credendo di
+#      mettere il pavimento di costo metterebbe 0,68 punti indice: un no-op,
+#      celle identiche, e un referto che conclude il FALSO con numeri VERI.
+#      OGNI VALORE, QUI E NEL REFERTO, IN TUTTE E DUE LE UNITA'. SEMPRE.
+# ---------------------------------------------------------------------
+#  LA GEOMETRIA, DERIVATA E POI VERIFICATA IN SIMULAZIONE
+#  NextRoundLevel(price, dir, S, D) con S = passo (idx), D = dist. minima (idx):
+#      lvl = MathCeil(price/S)*S ;  while(lvl - price < D) lvl += S
+#  Se il prezzo e' uniforme modulo S, la distanza X fra ingresso e bersaglio e'
+#
+#      >>>  X ~ UNIFORME(D, D+S)   media D+S/2,  minimo D,  massimo D+S  <<<
+#
+#  Verificato su 200.000 estrazioni nel range DAX 18.800-25.900 (feed
+#  INDIPENDENTE HistData, report\DAX_13_ANNI_2026-09-10.md):
+#      S=100 D=0,5  -> media 50,56  (attesa 50,5)
+#      S=100 D=68   -> media 118,10 (attesa 118,0)
+#      S=75  D=68   -> media 105,43 (attesa 105,5)
+#  CONTRO-ESEMPIO GIA' FATTO: se i prezzi si ADDENSANO sui tondi (30% entro
+#  +/-3 idx da un multiplo di 100), la mediana di X passa da 50,64 a 54,07 col
+#  passo 100 e scende a 48,01 col passo 97. Cioe' i passi tondi e non tondi NON
+#  sono appaiati in distanza al 100%: il residuo e' ~12%, ed e' NEL VERSO CHE
+#  FAVORISCE IL PASSO 100. Si corregge con la pendenza profitto/distanza di
+#  R130c. Non si nasconde: si quantifica.
+# ---------------------------------------------------------------------
+#  LA FRONTIERA DEL COSTO, E LE CELLE DEGENERI SCARTATE PRIMA DI GIRARLE
+#    spread mediano D30EUR ora server 8 = 1,7000 punti indice su 1.847.049
+#    tick (risultati_archivio\spread_flotta\spread_orario_D30EUR.csv).
+#      pavimento di lavoro 40x  = 68,00 punti indice = 6800 punti MT5
+#      pavimento duro     13,3x = 22,61 punti indice
+#      TP totale (3R)           = ~147,3 punti indice -> oltre quello il
+#                                 livello e' SCAVALCATO dal TP e il parziale
+#                                 non scatta mai (degenere "nessun parziale")
+#      IL CONTROLLO (parziale a 1R) = 49,10 punti indice = 28,9x lo spread
+#            >>> ANCHE IL CONTROLLO E' SOTTO IL PAVIMENTO, al 72%. VA DETTO
+#                PER PRIMO: non e' una colpa dei tondi, e' lo stato della
+#                sedia viva (R128 par. 5.2; stop DERIVATO dal codice, n=2).
+#    Condizione perche' OGNI bersaglio di una cella sia pulito:
+#      D >= 68,0  E  D+S <= 147,3   =>   S <= 79,3 con D = 68,0
+#    La finestra NON e' vuota solo perche' lo stop supera 13,3x lo spread
+#    (28,9x > 13,3x). Su una sedia sotto il pavimento duro sarebbe VUOTA e
+#    questo round non si potrebbe nemmeno scrivere. Cancello controllato prima.
+# ---------------------------------------------------------------------
+#  IL CAMPIONE, E IL NUMERO CHE NESSUNO AVEVA LETTO
+#    Gli INGRESSI veri di questa sedia sono 325 sull'intera finestra -- non
+#    175, non 270: quelli contavano anche i PARZIALI. E' misurato, non stimato:
+#    R120 (09/09, TICK REALI) da' Trades=325 in TUTTE E QUATTRO le strutture
+#    d'uscita col parziale spento, e 445 col parziale al 50%.
+#      >>> 445 - 325 = 120 PARZIALI SCATTATI SU 325 INGRESSI = 36,9%.
+#          E' IL TASSO DI TOCCO DELLA CELLA DI CONTROLLO, ed e' il metro di
+#          tutto il round (R130_LIVELLI_CRITERI.md par. 8).
+#    A -FrazioneIS 0.50: IS ~163 / OOS ~162 ingressi. Sopra 150 tutte e due,
+#    MARGINE SOTTILE (+8%): se una finestra scendesse sotto, il MERITO di
+#    quella finestra e' SOSPESO e si legge solo il RISCHIO (Emendamento B).
+# ---------------------------------------------------------------------
+#  IL CANCELLO G1 -- QUI E' ROVESCIATO RISPETTO A R128, ATTENZIONE
+#    In R128b la colonna Trades doveva restare IDENTICA fra le celle.
+#    >>> IN R130 DEVE CAMBIARE: Trades - 325 E' LA MISURA (il tasso di tocco).
+#    Il canarino si sposta: se in qualche cella Trades scendesse SOTTO 325 in
+#    totale, l'uscita sta toccando gli INGRESSI e il round si ferma prima di
+#    leggere qualunque altro numero.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- CANCELLO BLOCCANTE
+#    La cella di controllo di questo round e' la cella R120
+#    "parziale 50 / PREVBAR / trailing ON / BreakevenAtTP1 1 / BEatR 0",
+#    misurata il 09/09 a TICK REALI sulla finestra piena 2024.09.26-2026.06.30:
+#
+#        Trades 445 | Profit +2207,74 | PF 1,29574 | DD 6,8866%
+#
+#    Fonte: risultati_prove\gestione_20260909\
+#           gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv
+#    (righe con InpMagic 770101 e 770151, verificate IDENTICHE fra loro; pin
+#     controllati uno per uno: InpEntryMode=2, InpRangeMinutes=35,
+#     InpBufferPoints=500, InpRetestOffsetPts=200, InpAllowLong=1,
+#     InpAllowShort=0, InpRiskPercent=1, InpTP1_R=1, InpTrailTF=5).
+#
+#    QUELLA CORSA E' A FINESTRA PIENA, SENZA SPLIT: l'ancora NON puo' tornare
+#    al centesimo su una singola finestra. TOLLERANZA CONGELATA, SUL TOTALE:
+#        n(IS) + n(OOS)             fra 440 e 450
+#        Profit(IS) + Profit(OOS)   entro +/- 5% di 2207,74
+#    Fuori da li' IL BANCO E' SPORCO e il round si ferma.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- COI NUMERI
+#    Stessa manopola, stesso archivio (R120, tick reali, finestra piena),
+#    stessa cella (parziale 50 / PREVBAR / trailing ON / BEatTP1 1):
+#       770101 ABTG_DAX_Apertura_EU  D30EUR: n 445  PF 1,29574  DD 6,8866%
+#       770201 ABTG_Nasdaq_Apertura_US NASUSD: n 483 PF 0,99284 DD 16,9070%
+#    >>> Sul Nasdaq TUTTE E 48 le celle di quel CSV hanno Profit NEGATIVO e
+#        PF < 1,00 (migliore 0,99284, peggiore 0,86024). Mettere una griglia
+#        nuova li' e' esattamente cio' che la REGOLA DEL 19/08 vieta ("su un
+#        motore senza edge una griglia piu' fitta trova solo picchi di
+#        rumore"). ESCLUSA CON IL NUMERO ACCANTO, non per gusto.
+#    ABTG_Dow_Apertura_US (770202, U30USD) ha la stessa manopola ma NON ha un
+#    CSV equivalente in gestione_20260909\: il suo conteggio di ingressi
+#    invariante e' [NON MISURATO]. E' un buco da 4 passate, segnalato a
+#    Claudio, ed e' il candidato di R131 -- non di R130.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO FILE ESISTE -- ED E' IL PIU' IMPORTANTE DEI QUATTRO "MERITO"
+#
+#  1) TUTTE E DIECI LE CELLE SONO PULITE DI COSTO, E LO SONO PER COSTRUZIONE.
+#     Con InpRoundMinDistPts = 6800 (= 68,00 punti indice) e X ~ U(D, D+S), il
+#     MINIMO di X e' 68,00 in OGNI cella: il pavimento 40 x spread e' rispettato
+#     da TUTTI i bersagli, sempre. Nessun'altra scelta di passo puo' ottenerlo,
+#     perche' X >= D per costruzione e il passo non sposta il minimo.
+#     >>> InpRoundMinDistPts >= 6800 E' LA CONDIZIONE NECESSARIA E SUFFICIENTE
+#         perche' una cella sia schierabile. Qui e' pinnata, ed e' il motivo
+#         per cui una cella di QUESTO file puo' essere proposta.
+#
+#  2) L'ASSE DEL PASSO E' UN CONTINUO FRA DUE MECCANISMI DIVERSI.
+#     Per S -> 0 il meccanismo DEGENERA in un TP1 A DISTANZA ASSOLUTA FISSA di
+#     D punti indice:  S=10 -> X ~ U(68 ; 78), praticamente un punto.
+#     Per S grande diventa una vera griglia di livelli: S=100 -> U(68 ; 168).
+#     >>> E LA DISTANZA ASSOLUTA FISSA IN PUNTI INDICE NON ESISTE COME INPUT IN
+#         QUESTO EA (c'e' solo InpTP1_R, che e' in R e scala col range del
+#         giorno). QUESTO FILE E' L'UNICO MODO DI MISURARLA SENZA TOCCARE IL
+#         CODICE -- e da solo vale il round.
+#
+#  3) IL PASSO E' SCELTO CON LA TESTA, E LE TRE ANCORE SONO SCRITTE PRIMA:
+#     a. l'AMPIEZZA DEL MOVIMENTO DELLA SEDIA: stop RETEST derivato 49,1 idx,
+#        range del setup di 35 minuti ~46 idx (= stop - 3, dalla geometria
+#        stop = range + buffer - offset), TP totale ~147,3 idx. La banda che ha
+#        senso per un PRIMO obiettivo sta fra il pavimento (68) e il TP (147);
+#     b. la FRONTIERA: con D=68 serve S <= 79,3 perche' il massimo resti dentro
+#        il TP totale. L'asse arriva a 100 -- APPENA OLTRE -- per VEDERE IL
+#        BORDO invece di appoggiarcisi (regola di R118c: la frontiera dentro
+#        la griglia, mai ai bordi). Le celle 90 e 100 hanno rispettivamente
+#        l'11,9% e il 20,7% dei bersagli oltre il TP totale: DICHIARATO PRIMA;
+#     c. i VALORI CHE LA CASA HA GIA' SCRITTO, con la fonte: InpRoundStep vale
+#        50.0 in ABTG_DAX_Apertura_EU_LEGACY_2pct.set e ABTG_DAX_Live5m.set, e
+#        100.0 in conto_reale\ABTG_DAX_Apertura_EU_770101_REALE.set,
+#        ABTG_Nasdaq_GapFill.set e ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set.
+#        ENTRAMBI STANNO DENTRO L'ASSE 10-100.
+# ---------------------------------------------------------------------
+#  DOVE CADE IL LIVELLO, CELLA PER CELLA -- CALCOLATO PRIMA DI GIRARE
+#  (X ~ U(68,0 ; 68,0+S) in punti indice; tasso di tocco e parziali attesi sono
+#   una STIMA calibrata sull'UNICO punto misurato che abbiamo, T(49,10)=36,9%,
+#   con T(x)=exp(-x/lambda) e banda lambda 40 / 49,28 / 65. E' una STIMA: serve
+#   a scartare le degeneri PRIMA, NON a giudicare dopo.)
+#
+#    S     X va da  a      media   x spread   oltre il TP   tocco    parziali
+#   ---   --------------  -------  ---------  -----------  --------  --------
+#    10   68,0 -  78,0     73,0     42,9x        0,0%       22,8%      ~74
+#    20   68,0 -  88,0     78,0     45,9x        0,0%       20,7%      ~67
+#    30   68,0 -  98,0     83,0     48,8x        0,0%       18,8%      ~61
+#    40   68,0 - 108,0     88,0     51,8x        0,0%       17,2%      ~56
+#    50   68,0 - 118,0     93,0     54,7x        0,0%       15,8%      ~51
+#    60   68,0 - 128,0     98,0     57,6x        0,0%       14,5%      ~47
+#    70   68,0 - 138,0    103,0     60,6x        0,0%       13,4%      ~44
+#    80   68,0 - 148,0    108,0     63,5x        0,9%       12,4%      ~40
+#    90   68,0 - 158,0    113,0     66,5x       11,9%       11,6%      ~38
+#   100   68,0 - 168,0    118,0     69,4x       20,7%       10,8%      ~35
+#
+#  >>> NESSUNA CELLA E' DEGENERE PER COSTO (il minimo e' 68,0 = 40,0x ovunque).
+#  >>> NESSUNA CELLA E' DEGENERE PER CAMPIONE alla stima centrale (tutte sopra
+#      i 30 parziali attesi). MA NELLA BANDA PESSIMISTICA (lambda=40) la cella
+#      S=100 scende a ~22 parziali: SOTTO 30 IL MERITO DI QUEL PARZIALE E'
+#      SOSPESO, e va scritto accanto al numero invece di essere scoperto dopo.
+# ---------------------------------------------------------------------
+#  LE ATTESE, SCRITTE PRIMA DEI NUMERI
+#
+#  >>> MI ASPETTO UNA CURVA MONOTONA, NON UN OTTIMO INTERNO. <<<
+#  Ragione: passo grande = bersaglio lontano = meno parziali = piu' vicino alla
+#  configurazione "niente parziale", che R120 ha gia' misurato come migliore in
+#  Profit (2970,43 contro 2207,74) e in DD (6,027% contro 6,887%). Quindi mi
+#  aspetto Profit IN SALITA col passo, e DD che NON peggiora molto.
+#  >>> SE FOSSE COSI', LA LETTURA ONESTA NON E' "IL PASSO 100 E' IL MIGLIORE":
+#      E' "IL PARZIALE COSTA, E QUESTO ASSE LO STA SOLO ALLONTANANDO". La
+#      verifica e' incrociata e gratis: la cella S=100 (media 118 idx, ~35
+#      parziali) deve TENDERE verso la cella "parziale spento" di R128b. Se non
+#      ci tende, il banco e' sporco.
+#
+#  CONDIZIONI DI FALSIFICAZIONE, DICHIARATE ORA:
+#    (a) UN MASSIMO INTERNO (una cella che batte sia S=10 sia S=100 di piu'
+#        dello scarto misurato fra i vicini di R130e) -> esiste un passo
+#        OTTIMO, e NON e' un effetto di sola distanza. Sarebbe il risultato
+#        piu' forte del round;
+#    (b) curva PIATTA entro la banda di R130e -> il passo non morde, e la
+#        risposta e' "il livello e' solo un TP a distanza variabile";
+#    (c) curva DECRESCENTE -> il bersaglio giusto e' PIU' VICINO, cioe'
+#        l'opposto della tesi, e va detto con lo stesso peso.
+#
+#  >>> QUESTO FILE HA UN ALTOPIANO (10 celle) E QUINDI PUO' PROPORRE UNA CELLA.
+#      Ma solo col cancello G5: si propone il CENTRO DELL'ALTOPIANO, MAI IL
+#      PICCO, e solo se i DUE vicini sull'asse passano anche loro G3 (DD OOS
+#      <= 10,00%) e G4 (PF OOS >= 1,10).
+#  >>> E NESSUNA DIFFERENZA SI DICHIARA REALE SE E' PIU' PICCOLA DELLO SCARTO
+#      MASSIMO FRA GLI OTTO VICINI DI R130e (cancello G9). Senza quel file,
+#      questi numeri sono SCREENING.
+# ---------------------------------------------------------------------
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#         ^ muro MISURATO dei tick BCM sugli indici (walkforward_generico.ps1
+#           r.39-40). Sotto quella data NON CI SONO TICK: non esistono finestre
+#           piu' lunghe da comprare, e non si spezza in tranche cio' che non
+#           esiste. Con -FrazioneIS 0.50 e -Fino 2026.06.30:
+#             IS  2024.09.26 -> 2025.08.13   230 feriali   ~163 INGRESSI
+#             OOS 2025.08.14 -> 2026.06.30   229 feriali   ~162 INGRESSI
+#           REGIME DICHIARATO: l'IS contiene la correzione di feb-apr 2025,
+#           unico tratto di discesa vera dentro i tick BCM. Niente orso 2022,
+#           niente crollo 2020: l'EMENDAMENTO C (prova di regime) NON E'
+#           ESEGUIBILE, e va scritto accanto a ogni tabella del referto.
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana: IT - 1) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: RETEST LONG-ONLY. E' LA GEOMETRIA VIVA, ED E' PINNATA.
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+# --- FILTRI: TUTTI SPENTI, come in campo e come in R120.
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- IL PARZIALE E' ACCESO, ED E' LA CONDIZIONE DI ESISTENZA DEL ROUND.
+#     r.1899: if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+#     Con InpTP1_ClosePct = 0 oppure 100 quel blocco NON ENTRA e
+#     InpUseRoundLevels diventa UN NO-OP TOTALE: uscirebbero celle identiche al
+#     centesimo e un referto che non ha misurato niente.
+#     >>> 50 NON E' UN VALORE DI COMODO: e' il valore del PRESET VIVO
+#         (mql5\Presets\conto_reale\ABTG_DAX_Apertura_EU_770101_REALE.set e
+#          mql5\Presets\sedie_piccolo\recupero2\sedia_..._770101.set).
+#     >>> DICHIARATO: col parziale ACCESO R120 misura PF 1,29574 contro 1,37886
+#         col parziale SPENTO. QUESTA NON E' LA CELLA MIGLIORE D'ARCHIVIO: e'
+#         LA CELLA DI CAMPO, ed e' l'unica su cui la manopola di questo round
+#         esiste. (R128b misura l'altra meta', col parziale spento: i due round
+#         non si sovrappongono per costruzione.)
+#     >>> E R130 MUOVE ANCHE IL BREAKEVEN, perche' InpBreakevenAtTP1 vive
+#         dentro lo stesso blocco. Numero gia' misurato da R120 sulla finestra
+#         piena: BEatTP1=0 -> 2329,60 ; BEatTP1=1 -> 2207,74. IL BREAKEVEN AL
+#         PRIMO OBIETTIVO COSTA 121,86 EUR (-5,2%). Spostare il bersaglio
+#         sposta anche quello, e il referto DEVE dirlo.
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+# --- SLIPPAGE PINNATO A ZERO, e il motivo NON e' comodita': la 770101 gira in
+#     RETEST (InpEntryMode=2) = ordine LIMIT, e nel sorgente lo slippage e'
+#     applicato SOLO agli ingressi a pendente STOP (r.1059, r.1083). Sul
+#     retest, r.1487, il commento e' esplicito: "limit sul livello (niente
+#     buffer/slippage)". Scrivere InpSlippagePts>0 qui NON cambierebbe UN
+#     CENTESIMO: uscirebbero colonne identiche e un referto che sembra aver
+#     misurato qualcosa. L'asse NON C'E', ed e' scritto perche' non c'e'.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpMaxSpread=0
+InpVerbose=false
+
+# --- I LIVELLI TONDI: i pin e (in fondo) l'asse.
+#     Unita' in testa al file: Step in PUNTI INDICE, MinDist in PUNTI MT5.
+InpUseRoundLevels=1
+InpRoundMinDistPts=6800
+#                  ^ 6800 punti MT5 = 68,00 PUNTI INDICE = 40,0 x lo spread
+#                    mediano dell'ora 8 (1,7000 idx su 1.847.049 tick).
+#                    E' IL PAVIMENTO DI COSTO, MESSO ESATTAMENTE SUL BORDO.
+#                    Con X >= D per costruzione, questo pin da solo rende
+#                    PULITE TUTTE E DIECI LE CELLE.
+
+# --- MAGIC VERGINE 779890 (cercato su tutto il repo l'11/09/2026:
+#     ZERO occorrenze). NON SI SFIORA IL 770101, vivo sul conto REALE 10105439.
+InpMagic=779890
+
+# --- L'ASSE, UNO SOLO: InpRoundStep da 10 a 100 con passo 10 = 10 CELLE.
+#     InpRoundStep e' un double USATO NUDO SUL PREZZO: questi sono PUNTI
+#     INDICE, non punti MT5. 10 = 10 punti indice = 1000 punti MT5.
+#     Nessun enum: l'aritmetica del driver e' rispettata e le celle sono 10
+#     esatte. Verificarlo nella stampa di -SoloControllo.
+#     Il bordo basso (10) e' il LIMITE "distanza fissa"; il bordo alto (100) e'
+#     scelto da me per tenere la frontiera S<=79,3 DENTRO la griglia.
+InpRoundStep=100.0||10||10||100||Y

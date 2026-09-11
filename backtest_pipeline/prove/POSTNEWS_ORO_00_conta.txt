@@ -1,0 +1,281 @@
+# =====================================================================
+#  PASSO 0 -- POST NEWS / BLOCCO DELLE 13:30 SERVER, SU ORO
+#  (CPI m/m . Retail Sales . Core Retail Sales . PPI m/m) su XAUUSD M5
+#  cella 00_conta : CONTARE LE OCCASIONI e provare il DETERMINISMO,
+#                   non giudicare la strategia
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_USD1330_XAUUSD.set
+#  Scritto l'11/09/2026. NON LANCIATO (chi scrive non ha MT5).
+# =====================================================================
+#
+#  DA DOVE VIENE QUESTA CELLA
+#  L'11/09/2026 la CPI ha mosso l'oro di ~106 $ (~531x il costo pieno)
+#  e Claudio ha preso +22,49 $ a mano entrando a news+13:48, cioe' 72
+#  secondi prima di quando questo meccanismo sarebbe entrato (news+15).
+#  Referti: report/ORO_CPI_11-09_IL_GRAFICO_2026-09-11.md e
+#           report/TRADE_MANUALI_CPI_2026-09-11.md
+#  >>> MA E' n=1, E UN TRADE NON E' UN EDGE. Questa cella esiste per
+#      trasformare un aneddoto in un campione.
+#
+#  >>> E VA DETTO SUBITO, PRIMA DI QUALUNQUE ENTUSIASMO:
+#      QUESTO MOTORE NON HA ANCORA MAI FATTO UN PF SOPRA 1.
+#      Stesso EA, STESSO calendario, su USDJPY (magic 774801/774806,
+#      round del 05/09, REGISTRO_TEST.md r.1298+):
+#         IS 2010-2015 n=151 PF 0,66 profit -4.084,87 DD 4,75%
+#         OOS 2015-2023 n=253 PF 0,90 profit -1.979,08 DD 4,56%
+#      e sul candidato ISM/EURUSD: PF 0,76 (n=234) e 0,79 (n=312).
+#      QUATTRO LETTURE, TUTTE SOTTO 1.
+#
+#  >>> ALLORA PERCHE' SI INSISTE? Per DUE motivi, tutti e due misurati,
+#      e per nessun altro:
+#      (a) IL SIMBOLO E' UN ASSE AMMESSO. La regola di casa vieta di
+#          infittire la griglia d'INGRESSO di un motore senza edge;
+#          permette esplicitamente di allargare su MOTORI, MECCANISMI,
+#          SIMBOLI, TF, USCITE. Qui cambia il simbolo.
+#      (b) SL, TP E OFFSET DI QUESTO EA NON SONO MAI STATI MESSI AD ASSE
+#          SU NESSUN SIMBOLO. [MISURATO l'11/09: zero occorrenze di
+#          InpSLpips / InpTPpips / InpBuyOffsetPips / InpSellOffsetPips
+#          con "||Y" in tutto backtest_pipeline/.] I quattro PF sotto 1
+#          vengono da valori COPIATI DALLA SLIDE NFP e mai ritarati.
+#          Non e' "una griglia piu' fitta su un motore morto": e' una
+#          manopola mai girata.
+#      Stessa cosa per le uscite: InpCloseAtExpiry, InpExpiryHour,
+#      InpUseTrail25, InpUseOCO e InpActionMin hanno ZERO occorrenze ad
+#      asse in tutto il repo [MISURATO l'11/09]. InpCloseAtEnd e
+#      famiglia sono gia' nella Tabella B dei MAI MISURATI
+#      (report/AUDIT_USCITE_2026-09-09.md, righe "flat di fine seduta"
+#      e "time-stop a ore").
+#
+#  >>> IL PROBLEMA DEI PIP, CHE E' IL PRIMO E IL PIU' GROSSO
+#      ABTG_PostNews.mq5 r.137-141:
+#          PipSize() = (digits==3 || digits==5) ? Point*10 : Point
+#      XAUUSD a BCM ha Digits=2, Point=0,01, ContractSize=100 once,
+#      TickValue 0,86289 EUR su TickSize 0,01 [MISURATO: sonda
+#      sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv r.59, confermato
+#      da R114_CORSA_20260827/REFERTO_R114.txt r.102].
+#      Digits=2 non e' ne' 3 ne' 5, quindi:
+#        >>> UN "PIP" D'ORO, PER QUESTO CODICE, E' 0,01 $ PER ONCIA
+#            = 1,00 USD PER LOTTO = 0,86289 EUR PER LOTTO. <<<
+#      Controprova indipendente dai due trade veri dell'11/09: cambio
+#      implicito 1,16031 -> 100/1,16031 = 86,18 EUR per dollaro d'oro,
+#      contro 86,289 della sonda del 17/08. Scarto 0,13%.
+#
+#      COSA PRODURREBBE IL PRESET USDJPY TRASPORTATO DI PESO:
+#        offset BUY 3 pip -> 0,03 $ = il 19% dello spread MISURATO
+#                            (0,16 $): il "breakout" scatterebbe DENTRO
+#                            lo spread, sotto il massimo del range
+#        SL 25 pip        -> 0,25 $ = 1,25x il costo pieno (0,2003 $)
+#        TP 30 pip        -> 0,30 $
+#      Con la size a rischio il pedaggio e' una frazione FISSA del
+#      rischio e vale costo/SL:
+#        preset trasportato : 0,2003/0,25  = 80,1% del rischio bruciato
+#        questa cella       : 0,2003/12,00 =  1,67%
+#      Il budget di casa e' 2,5% (gate R55), che e' ALGEBRICAMENTE lo
+#      stesso pavimento di "stop >= 40 x costo" (1/40 = 2,5%).
+#      >>> E' UN DIFETTO DEL CODICE (PipSize non conosce le classi di
+#          simbolo e non c'e' nessuna guardia che rifiuti uno SL piu'
+#          piccolo di k volte lo spread) ED E' SEGNALATO, NON AGGIRATO
+#          IN SILENZIO: qui l'EA NON si tocca, i numeri si scrivono in
+#          centesimi di dollaro e si dichiara la conversione.
+#
+#  >>> LE DISTANZE DI QUESTA CELLA, UNA PER UNA
+#      costi MISURATI (report/ORO_1530_CANCELLO_COSTO_2026-09-10.md):
+#        spread 0,16 $ (S1, ora liquida) / 0,22 $ (S2, prudente)
+#        commissione 3,4858 EUR/lotto giro completo = 0,0403 $
+#          [MISURATA su 520 operazioni XAUUSD vere]
+#        costo pieno 0,2003 $ (S1) / 0,2603 $ (S2)
+#        pavimento DURO 13,3x = 2,66 / 3,46 $
+#        pavimento LAVORO 40x = 8,01 / 10,41 $
+#      SL 12,00 $ (InpSLpips=1200):
+#        +49,8% sul pavimento di LAVORO a costo S1 (8,01)
+#        +15,3% sul pavimento di LAVORO a costo prudente S2 (10,41)
+#        = 59,9x il costo pieno S1 (il margine piu' sottile mai accettato
+#          in casa e' +42%, U30USD H1)
+#        = 3,55x il range tipico di DUE candele M5 su giornata qualunque
+#          (3,38 $) [INFERITO dal range di giornata MISURATO 40,50 $,
+#          n=60 giornate, regola di scala validata al 4,3%]
+#        = 53,3% del movimento REALIZZATO da Claudio l'11/09 (22,49 $)
+#      TP 14,40 $ = 1,20 x SL, identico al rapporto NFP (30/25)
+#      offset 1,44 / 0,96 $ = stessi rapporti NFP (0,12 e 0,08 dello SL)
+#        controllo: 9,0x e 6,0x lo spread MISURATO -> buffer VERI
+#      riferimento rischio 24,00 $ = 2,00 x SL, rapporto NFP (50/25)
+#        -> 0,325% per gamba, 0,65% per evento nel caso peggiore
+#
+#  >>> IL DEPOSITO DEL TESTER NON E' UN DETTAGLIO: -Deposito 100000
+#      Perdita per lotto al riferimento = 24,00 $ x 100 once = 2.400 USD
+#      = 2.070,9 EUR (a TickValue 0,86289).
+#        deposito  10.000 EUR -> lotto 0,0314 -> 0,03 = rischio 0,621%
+#                                (-4,4%: il passo del lotto morde)
+#        deposito 100.000 EUR -> lotto 0,3139 -> 0,31 = rischio 0,642%
+#                                (-1,2%)
+#      La riga va lanciata a -Deposito 100000 (nota gia' scritta nel
+#      driver, walkforward_generico.ps1 r.164), altrimenti la
+#      quantizzazione del lotto rende le celle non confrontabili.
+#
+#  >>> COSA DEVE RISPONDERE QUESTA CELLA, E NIENT'ALTRO
+#      1. il calendario e' arrivato agli agenti? (canarino, sotto)
+#      2. quante OPERAZIONI escono (colonna Trades) per finestra
+#      3. le due gemelle escono IDENTICHE? (cancello G1 di determinismo)
+#      >>> DA QUESTA CELLA NON PUO' USCIRE NESSUNA PROMOZIONE. Banco
+#          Modello 1 (OHLC) = SCREENING. E sull'oro c'e' un vincolo in
+#          piu': la profondita' a TICK di XAUUSD e' [NON MISURATO]
+#          (risultati_archivio/misura_tick/ ha solo D30EUR, NASUSD,
+#          U30USD), quindi sull'oro oggi si puo' fare SOLO screening.
+#
+#  >>> ATTESA DICHIARATA PRIMA DEI NUMERI (si scrive qui, non a voce)
+#      OCCASIONI: il calendario ha 347 GIORNATE distinte con l'etichetta
+#      USD1330OKF, dal 2010.01.14 al 2023.12.14 [RICONTATE l'11/09 sul
+#      file]. Con lo split 0,40 di casa: IS 119 giornate, OOS 228.
+#      OPERAZIONI ATTESE: su USDJPY lo stesso calendario ha reso 151
+#      trade su 119 occasioni (1,269) e 253 su 228 (1,110). Sull'oro il
+#      tasso di scatto dipende dal rapporto fra offset e range post
+#      notizia, che e' [NON MISURATO]. Attesa dichiarata:
+#         IS  107 - 167 operazioni   (119 x 0,9 - 1,4)
+#         OOS 205 - 319 operazioni   (228 x 0,9 - 1,4)
+#      >>> QUINDI L'IS PUO' BENISSIMO FINIRE SOTTO 150. E' un rischio
+#          noto, non una sorpresa: se succede, il MERITO resta sospeso
+#          (Emendamento A) e si legge solo il RISCHIO (Emendamento B),
+#          oppure si ritaglia la finestra sulle OPERAZIONI e non sugli
+#          anni, dichiarando il regime che contiene.
+#      PF ATTESO SOTTO L'IPOTESI "OGGI E' STATA FORTUNA" (H0): con
+#      TP 14,40 e SL 12,00 su una passeggiata senza deriva, la
+#      probabilita' di toccare prima il TP e' SL/(SL+TP) = 45,45% e il
+#      PF atteso, tolto il pedaggio, e'
+#         PF_H0 = SL x (TP-c) / (TP x (SL+c)) = 0,970   (c = 0,2003)
+#      >>> SE IL ROUND TORNA CON PF 0,95-1,00 E VINCENTI ~45%, IL
+#          MECCANISMO NON C'E' E LO SI SCRIVE. La griglia DEVE poter
+#          dire di no, e questo e' il numero che glielo fa dire.
+#      DD ATTESO: il gemello USDJPY a rischio identico ha fatto 4,75% e
+#      4,56%. Attesa 4-8%. Sopra il 10% il RISCHIO parla a qualunque n.
+#
+#  >>> IL CANARINO, DA CONTROLLARE PRIMA DI LEGGERE QUALSIASI NUMERO
+#      Nel log della passata devono comparire TRE righe:
+#        [PostNews][NEWS] letto da Common\Files | righe 644 |
+#          UTILI per questo preset 541 | dal 2010.01.14 al 2023.12.14
+#        [PostNews] avviato su XAUUSD ... 1 pip=0.01000
+#        [PostNews][AUTOTEST] [ok ] pip di XAUUSD (digits 2): 0.01000
+#      Le ultime due sono la PROVA IN LOG che il pip vale 0,01 $: se
+#      stampassero 0.10000 tutti i numeri di questo file andrebbero
+#      divisi per dieci. Se N=0 o compare CALENDARIO CIECO, LA PASSATA
+#      SI BUTTA: non e' "niente edge", e' "non e' girata".
+#
+#  >>> IL CALENDARIO, E DOVE VA MESSO (il passo che uccide i round)
+#      File: mql5\Files\abtg_news_usd1330_2010_2023_UTC.csv
+#      VA COPIATO IN TUTTE E DUE:
+#         %APPDATA%\MetaQuotes\Terminal\Common\Files\
+#         <DataFolder del terminale>\MQL5\Files\
+#      NON si tocca abtg_news.csv, che e' il file del FORWARD.
+#
+#  >>> UN SOLO AGENTE LOCALE MT5 (classe 129, gia' pagata).
+#      Le due celle gemelle leggono lo stesso file di calendario: con
+#      piu' agenti attivi in R-ISM i gemelli non sono MAI usciti
+#      identici (scarti 2-39 operazioni) e compariva CALENDARIO CIECO.
+#      Pannello Strategy Tester -> Agenti -> lasciare acceso solo Core 1.
+#
+#  >>> LA DATA DI INIZIO NON E' SCRITTA QUI APPOSTA.
+#      @DAQUANDO come direttiva e' OMESSO di proposito, come nel gemello
+#      USDJPY: il driver si ferma e obbliga a misurare lo storico M1
+#      dell'oro prima di partire.
+#        powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto
+#      Poi si passa -DaQuando <il PIU' TARDI fra la data M1 misurata e
+#      il pavimento 2010.01.01, che e' il mese in cui comincia questo
+#      calendario> e si scrivono TUTTI E DUE i numeri nel referto.
+#      Quello che gia' sappiamo: BCM DICHIARA le M1 di XAUUSD dal
+#      2004.06.11 e i round R99/R100 hanno gia' girato l'oro su 22 anni
+#      in OHLC M1 -> la finestra 2010-2023 e' fattibile. Ma il 24/08
+#      (R103 r.2064) il disco locale aveva le M1 solo dal 2019.12.30
+#      ("MANCA STORICO LOCALE: rilancia"): lo scarico va rifatto e puo'
+#      durare decine di minuti. Su EURUSD BCM ha gia' dichiarato barre
+#      "dal 1971" con la prima operazione vera nel 1999 (R102): la data
+#      dichiarata dal broker non e' una data misurata.
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_ORO_00_conta.txt `
+#       -Simbolo XAUUSD -Periodo M5 -DaQuando <data MISURATA> `
+#       -Fino 2023.12.31 -Modello 1 -Deposito 100000 `
+#       -Etichetta ORO1330_00 -SoloControllo
+#    >>> LA RIGA VERA LA DETTA CHI HA IL CANCELLO IN MANO. Questo file
+#        NON e' un'autorizzazione a lanciare: e' il contratto della
+#        cella.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+# ATTENZIONE, e' una DICHIARAZIONE, NON UN PIN: walkforward_generico.ps1
+# legge @SIMBOLO, @PERIODO e @DAQUANDO, ma NON @FINOA (verificato sul
+# sorgente l'11/09: r.474-476). La fine finestra si impone con
+# -Fino 2023.12.31 sulla riga di lancio, oppure con un wrapper
+# RIGA_*.ps1 che gatti @FINOA contro -Fino, come fanno gia'
+# RIGA_POSTNEWS_NFP.ps1 e RIGA_DAXREENTRY.ps1. Senza una delle due cose
+# il driver userebbe il suo default 2026.06.30 e due anni e mezzo di
+# passata girerebbero su un calendario VUOTO (finisce il 2023.12.14).
+@FINOA    2023.12.31
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+# notizia 14:30 IT = 13:30 server; candele di riferimento 13:35 e 13:40;
+# la barra d'azione e' quella che si APRE alle 13:45 (l'EA legge le
+# barre [1] e [2] = proprio quelle due). IDENTICA al gemello USDJPY.
+InpActionHour=13||13||0||13||N
+InpActionMin=45||45||0||45||N
+# scadenza 15:45 IT = 14:45 server (news+75), con chiusura forzata
+InpExpiryHour=14||14||0||14||N
+InpExpiryMin=45||45||0||45||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_usd1330_2010_2023_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+# USD1330OKF = ora canonica 13:30 + SOLO eventi NON ristretti FTMO.
+# Sull'oro la lista vale identica: docs/REGOLAMENTO_FTMO_2026-08.md
+# r.57 nomina XAUUSD ESPLICITAMENTE fra gli strumenti colpiti dagli
+# eventi USD, e non esiste una riga "oro" separata nella tabella.
+InpNewsTitleMatch=USD1330OKF
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti, IN CENTESIMI DI DOLLARO D'ORO (1 pip = 0,01 $) ---
+# 144 = 1,44 $ sopra il massimo | 96 = 0,96 $ sotto il minimo
+# 1440 = TP 14,40 $ | 1200 = SL 12,00 $, dall'INGRESSO
+InpBuyOffsetPips=144.0||144.0||0||144.0||N
+InpSellOffsetPips=96.0||96.0||0||96.0||N
+InpTPpips=1440.0||1440.0||0||1440.0||N
+InpSLpips=1200.0||1200.0||0||1200.0||N
+# niente OCO. L'11/09 il grafico dell'oro ha dato un contro-esempio
+# all'OCO (prima -46 $ poi +106 $: avrebbe cancellato la gamba buona).
+# Resta n=1 e resta una manopola MAI messa ad asse.
+InpUseOCO=false||false||0||false||N
+InpCloseAtExpiry=true||true||0||true||N
+
+# --- nessun trailing: si misura il meccanismo nudo ---
+InpUseTrail25=false||false||0||false||N
+InpTrailTriggerPips=1200.0||1200.0||0||1200.0||N
+InpTrailNewSLpips=800.0||800.0||0||800.0||N
+
+# --- rete di sicurezza del venerdi' (con CloseAtExpiry=true non scatta
+# mai: resta accesa perche' non costa niente) ---
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio: 0,325% per gamba, 0,65% per evento nel caso peggiore.
+# 2400 = 24,00 $ = 2,00 x SL, stesso rapporto del preset NFP (50/25).
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpRiskRefSLpips=2400.0||2400.0||0||2400.0||N
+
+# --- generali ---
+InpComment=USD1330 ORO PostNews
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- l'unico sweep: due gemelle che DEVONO uscire identiche ---
+# 774803 = il magic del preset (LEAD), 774808 = gemello di DETERMINISMO.
+# Verificati VERGINI sul repo l'11/09/2026 (zero occorrenze), insieme a
+# 774804, 774805, 774807, 774809. 774802 e' RISERVATO al gemello
+# EURUSD e 774806 e' gia' bruciato dal round USDJPY: non si riusano.
+InpMagic=774803||774803||5||774808||Y

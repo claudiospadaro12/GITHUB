@@ -1,0 +1,167 @@
+# =====================================================================
+#  ROUND 2 / CELLA 04 -- POST NEWS 13:30 SU ORO -- L'ASSE E' L'USCITA
+#  (a quanti dollari di profitto si accorcia lo stop)
+#  XAUUSD M5, blocco USD1330OKF
+#  EA: ABTG_PostNews.mq5 v1.10+   Preset gemello:
+#      mql5\Presets\ABTG_PostNews_USD1330_XAUUSD.set
+#  Scritto l'11/09/2026. NON LANCIATO (chi scrive non ha MT5).
+#  >>> ROUND 2: si lancia SOLO se il round 1 (celle 00, 01, 02) ha
+#      trovato almeno una cella con PF > 1,00 su TUTTE E DUE le
+#      finestre. Altrimenti NON si lancia.
+# =====================================================================
+#
+#  PERCHE' QUESTO ASSE -- e' il buco piu' documentato del progetto
+#    report/AUDIT_USCITE_2026-09-09.md, Tabella B: su 32 meccanismi
+#    d'uscita censiti, 13 non sono MAI stati messi ad asse. Per questo
+#    EA la situazione e' completa: InpUseTrail25, InpTrailTriggerPips,
+#    InpTrailNewSLpips, InpCloseAtExpiry, InpExpiryHour e InpUseOCO
+#    hanno TUTTI zero occorrenze ad asse in tutto il repo [MISURATO
+#    l'11/09]. Il motore e' stato giudicato quattro volte (PF 0,66 /
+#    0,76 / 0,79 / 0,90) senza che nessuno abbia mai toccato l'uscita.
+#    E c'e' il precedente di campo: tre volte in pagella (17/08, 18/08,
+#    19/08) un trade giusto e' tornato a casa a pari perche' l'uscita
+#    era al default che nessuno aveva mai misurato.
+#
+#  >>> LE CELLE (1 "pip" = 0,01 $ per oncia)
+#      trigger  600 ->  6,00 $ di profitto  (0,50 x SL)
+#      trigger  900 ->  9,00 $              (0,75 x SL)
+#      trigger 1200 -> 12,00 $              (1,00 x SL = 1 R)
+#      trigger 1500 -> 15,00 $              (1,25 x SL)
+#      trigger 1800 -> 18,00 $              (1,50 x SL)
+#      Quando scatta, lo stop si sposta da 12,00 $ a 9,00 $
+#      DALL'INGRESSO (InpTrailNewSLpips=900, fisso in tutte le celle).
+#      >>> Perche' 9,00 e non 0 (pareggio): 9,00 $ e' 44,9x il costo
+#          pieno MISURATO (0,2003 $), quindi lo stop residuo resta
+#          sopra il pavimento di LAVORO di 40x. Un pareggio secco
+#          (InpTrailNewSLpips=0) e' un'altra domanda e va in un asse
+#          suo: sull'oro un pareggio "vero" perde comunque lo spread,
+#          e mescolarlo qui misurerebbe due cose insieme.
+#      >>> ATTENZIONE: con TP 14,40 $, le celle 1500 e 1800 hanno il
+#          trigger SOPRA il take profit: il trailing non puo' armarsi
+#          quasi mai. SONO CELLE DI CONTROLLO, e devono uscire quasi
+#          identiche alla cella base senza trailing del round 1. Se non
+#          lo fanno, il round e' rotto. Non e' spreco: e' il termometro.
+#
+#  >>> ATTESA DICHIARATA PRIMA DEI NUMERI -- e stavolta il contro-esempio
+#      e' un TEOREMA, non una simulazione
+#      Sotto H0 (prezzo senza deriva dopo la notizia) il tempo di
+#      chiusura e' LIMITATO (InpCloseAtExpiry=true chiude tutto alle
+#      14:45 server). Per il teorema dell'arresto facoltativo, QUALUNQUE
+#      regola d'uscita con tempo d'arresto limitato ha valore atteso
+#      LORDO zero. Quindi:
+#         somma dei lordi vinti = somma dei lordi persi
+#         PF_netto = (W - n_vinc x c) / (W + n_pers x c) < 1  SEMPRE
+#      >>> SOTTO H0, NESSUNA CELLA DI QUESTO ASSE -- NE' DI NESSUN ALTRO
+#          ASSE D'USCITA -- PUO' USCIRE SOPRA 1. Il trailing non crea
+#          direzione: la protegge, se c'e'. Se una cella esce a 1,30 e
+#          la cella base senza trailing del round 1 sta a 0,97, quella
+#          cella e' un PICCO DI RUMORE finche' non lo conferma l'OOS.
+#      Ordine di grandezza dello scarto: con SL 12,00, TP 14,40 e
+#      pedaggio 0,2003 la cella base vale PF_H0 = 0,970.
+#      Le celle con trailing: [NON CALCOLABILE in forma chiusa qui]
+#      (barriera mobile), ma il teorema sopra le tiene tutte sotto 1.
+#      Trades: IDENTICO in tutte e cinque le celle (il trailing tocca
+#      le uscite, non gli ingressi). Se cambia, il round si butta.
+#
+#  >>> SOGLIE CONGELATE PRIMA DEI NUMERI
+#      - il confronto e' contro la CELLA BASE SENZA TRAILING del round 1
+#        (stesso simbolo, stessa finestra, stesso SL): se il guadagno di
+#        PF e' dentro il rumore, la risposta onesta e' "IL DEFAULT VA
+#        BENE, il trailing non serve" -- ed e' un risultato, non un
+#        fallimento;
+#      - centro dell'altopiano, mai il picco: la cella scelta e le due
+#        vicine devono migliorare la base, in IS e in OOS;
+#      - MERITO solo sopra 150 operazioni per finestra; RISCHIO sempre;
+#      - le celle 1500 e 1800 sono controlli: se NON tornano uguali alla
+#        base, round NULLO;
+#      - DD di cella > 10% -> il RISCHIO parla, a qualunque n.
+#
+#  >>> LA DOMANDA D'USCITA CHE QUESTO FILE NON PUO' FARE
+#      "Quanto conviene TENERE la posizione" (InpExpiryHour 14/15/16)
+#      NON e' misurabile con un asse pulito: l'orario di scadenza fa due
+#      mestieri insieme -- chiude la posizione E cancella i pendenti non
+#      scattati. Allungarlo allunga anche la finestra d'ingresso, e alle
+#      15:00 server ci sono altri eventi (ISM, UoM). Misurarlo davvero
+#      chiede una modifica all'EA (un orario di cancellazione dei
+#      pendenti distinto dalla scadenza): e' una PROPOSTA a Claudio, non
+#      un aggiramento da fare di nascosto.
+#
+#  >>> COSTO IN TEMPO MACCHINA
+#      5 celle x 2 finestre = 10 passate, UN SOLO agente locale MT5
+#      (classe 129). [STIMATO] 2-4 min a passata -> 20-40 minuti.
+#
+#  @DAQUANDO come direttiva e' OMESSO di proposito: va misurato con
+#  scarica_storico.ps1 -Simboli "XAUUSD" -SoloReferto. Vedi la cella 00.
+#
+#  RIGA DI LANCIO (PC di backtest, MT5 CHIUSO; prima sempre -SoloControllo):
+#    powershell -ExecutionPolicy Bypass -File .\walkforward_generico.ps1 `
+#       -Expert ABTG_PostNews -Prova prove\POSTNEWS_ORO_04_uscita.txt `
+#       -Simbolo XAUUSD -Periodo M5 -DaQuando <data MISURATA> `
+#       -Fino 2023.12.31 -Modello 1 -Deposito 100000 `
+#       -Etichetta ORO1330_04US -SoloControllo
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+# ATTENZIONE, e' una DICHIARAZIONE, NON UN PIN: walkforward_generico.ps1
+# legge @SIMBOLO, @PERIODO e @DAQUANDO, ma NON @FINOA (verificato sul
+# sorgente l'11/09: r.474-476). La fine finestra si impone con
+# -Fino 2023.12.31 sulla riga di lancio, oppure con un wrapper
+# RIGA_*.ps1 che gatti @FINOA contro -Fino, come fanno gia'
+# RIGA_POSTNEWS_NFP.ps1 e RIGA_DAXREENTRY.ps1. Senza una delle due cose
+# il driver userebbe il suo default 2026.06.30 e due anni e mezzo di
+# passata girerebbero su un calendario VUOTO (finisce il 2023.12.14).
+@FINOA    2023.12.31
+
+InpUsaGuardian=true||true||0||true||N
+
+# --- orari, ORA SERVER (= ora italiana - 1) ---
+InpActionHour=13||13||0||13||N
+InpActionMin=45||45||0||45||N
+InpExpiryHour=14||14||0||14||N
+InpExpiryMin=45||45||0||45||N
+
+# --- l'evento ---
+InpRestrictToNews=true||true||0||true||N
+InpUseNewsFilter=true||true||0||true||N
+InpNewsFile=abtg_news_usd1330_2010_2023_UTC.csv
+InpNewsCommon=true||true||0||true||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsCurrencies=USD
+InpNewsTitleMatch=USD1330OKF
+InpNewsShiftMinutes=0||0||0||0||N
+
+# --- i due pendenti (1 pip = 0,01 $) ---
+InpBuyOffsetPips=144.0||144.0||0||144.0||N
+InpSellOffsetPips=96.0||96.0||0||96.0||N
+InpTPpips=1440.0||1440.0||0||1440.0||N
+InpSLpips=1200.0||1200.0||0||1200.0||N
+InpUseOCO=false||false||0||false||N
+InpCloseAtExpiry=true||true||0||true||N
+
+# --- IL TRAILING E' ACCESO: e' l'oggetto di questo round ---
+# quando scatta, lo stop passa da 12,00 $ a 9,00 $ dall'ingresso
+# (9,00 = 44,9x il costo pieno MISURATO: resta sopra il pavimento 40x)
+InpUseTrail25=true||true||0||true||N
+InpTrailNewSLpips=900.0||900.0||0||900.0||N
+
+# --- rete di sicurezza del venerdi' ---
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=21||21||0||21||N
+InpFridayCloseMin=50||50||0||50||N
+
+# --- rischio ---
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpRiskRefSLpips=2400.0||2400.0||0||2400.0||N
+
+# --- generali ---
+InpComment=USD1330 ORO PostNews
+InpMagic=774803||774803||0||774803||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: a quanti dollari di profitto si arma il trailing.
+# 600 = 6,00 $ ... 1800 = 18,00 $, passo 3,00 $. Le ultime due celle
+# stanno SOPRA il TP (14,40 $) e sono controlli, vedi intestazione.
+InpTrailTriggerPips=1200.0||600.0||300||1800.0||Y
