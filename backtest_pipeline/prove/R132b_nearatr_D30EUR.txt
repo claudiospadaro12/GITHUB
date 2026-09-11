@@ -1,0 +1,155 @@
+# =====================================================================
+#  EA: ABTG_SupRev_DAX_H1_Ottimizzato
+#  R132b -- IL PAVIMENTO DELLO STOP: SALVA O UCCIDE? -- IL GEMELLO GROSSO
+#           D30EUR H1 -- asse InpNearAtr, 8 celle
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  report\R132_PAVIMENTO_SUPREV_2026-09-11.md
+#  Il ragionamento completo (meccanismo, contro-esempio, cosa l'asse
+#  permette e cosa no) sta nella testa di prove\R132a_nearatr_NASUSD.txt
+#  e NON si ripete qui: qui ci sono solo le cose DIVERSE.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_SupRev_DAX_H1_Ottimizzato
+#    -Prova prove\R132b_nearatr_D30EUR.txt
+#    -Simbolo D30EUR -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r132b -Modello 1
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.)
+#  -Modello 1 = TICK REALI. I tick BCM di D30EUR partono dal 2024.09.26.
+#  Lo storico esterno D30EUR esiste solo 2010-2018 e NON si sovrappone
+#  al nativo BCM nemmeno di un giorno: il cancello ZERO li' non e'
+#  chiuso, e' INAPPLICABILE (report\STORICO_INDICI_SCARICATO_2026-09-10.md).
+#  Non si usa, e il perche' e' scritto qui.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO FILE ESISTE, ed e' il motivo piu' forte di tutto R132
+#
+#  E' L'UNICA SEDIA DELLA FAMIGLIA CHE PUO' PRODURRE UN VERDETTO DI
+#  MERITO SU QUESTA DOMANDA, perche' e' l'unica che ha il campione.
+#    D30EUR H1 OOS, cella viva, tick reali:  n = 156   (>= 150)
+#    NASUSD H1 OOS, cella viva, tick reali:  n =  86   (merito sospeso)
+#    U30USD H1 OOS, cella viva, tick reali:  n = 152-155 (al pelo)
+#  Su R132a ho gia' dichiarato che il pavimento dei 150 non si raggiunge.
+#  Qui si raggiunge nella finestra OOS, e SOLO li'.
+#
+#  E c'e' un secondo motivo, di regola: "un candidato non si archivia
+#  finche' non e' stato misurato in almeno DUE modi diversi". Tre simboli
+#  della stessa famiglia sullo stesso asse sono tre misure indipendenti.
+#  Se il segno e' lo stesso su tutti e tre, la risposta vale; se no, la
+#  risposta e' "non dimostrato" e si scrive cosi'.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  La cella InpNearAtr = 1.0 e' LA CELLA VIVA (magic 970911, conto piccolo
+#  50503392) e deve ridare i numeri d'archivio a tick reali dell'08/08:
+#    IS  : PF 0,72984 . DD 5,5321% . n  67 . profit -240,28
+#    OOS : PF 1,86556 . DD 4,4742% . n 156 . profit +1312,28
+#  Fonte primaria, riga InpTF=16385 di:
+#    risultati_prove\ABTG_SupRev_DAX_H1_Ottimizzato\
+#      ABTG_SupRev_DAX_H1_Ottimizzato_D30EUR_{IS,OOS}.csv
+#  TOLLERANZA CONGELATA: n entro +/- 3, PF entro +/- 1%. NON bloccante,
+#  per gli stessi tre commit sull'EA elencati in R132a par. 7.
+#
+#  >>> E VA DETTO SUBITO, perche' altrimenti il round si legge male:
+#      QUESTA SEDIA HA L'IS ROSSO (PF 0,72984) e l'OOS verde (1,86556).
+#      Non e' un motore "sano" su cui si cerca il decimale: e' un motore
+#      il cui segno CAMBIA fra le due meta' della stessa finestra.
+#      Qualunque cella di questo file va letta in ENTRAMBE le finestre, e
+#      una cella bella solo in OOS non vale niente. La riga S1v di
+#      REGISTRO_TEST.md (PF 1,45 . DD 5,6% . n 223) e' il periodo INTERO,
+#      cioe' la media di quelle due meta'.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n: in SALITA monotona con NearAtr (B2 di R132a: se non sale, round
+#    NULLO). Attesa OOS: da ~60-90 a 0,25 fino a ~170-210 a 2,00.
+#  - SATURAZIONE attesa sopra 1,50, come su U30USD. Celle clone = B3.
+#  - PF della banda stretta (0,25 / 0,50): attesa 0,60-1,40 in OOS, cioe'
+#    SOTTO la cella viva (1,87). E' la previsione falsificabile.
+#  - IL NUMERO CHE DECIDE, e vale solo qui: se una cella ha n OOS >= 150
+#    E n IS >= 150, il suo PF conta per il MERITO e non solo come
+#    pendenza. Attesa: succede solo dalle celle >= 1,25 in OOS.
+#  - DD: attesa 3%-9%. Se una cella supera il 10%, e' un fatto di RISCHIO
+#    e vale a qualunque n (Emendamento B). Riferimento: viva 4,47% OOS.
+#  - PRECEDENTE R118 (07/09): allargare lo stop fa scendere il DD in modo
+#    riproducibile e muove il PF come una monetina. Se si ripete qui, la
+#    risposta onesta e' "il pavimento compra rischio, non merito".
+# ---------------------------------------------------------------------
+#  SOGLIE: valgono B1-B7 di prove\R132a_nearatr_NASUSD.txt, identiche,
+#  con UNA aggiunta che vale solo per questo file:
+#  B8  MERITO. Una cella puo' contare A FAVORE solo se ha PF IS > 1,00 E
+#      PF OOS >= 1,20 E n >= 150 in ENTRAMBE le finestre. La cella viva
+#      NON lo soddisfa (PF IS 0,73): se nessuna cella lo soddisfa, il
+#      verdetto e' "nessuna configurazione robusta", e si scrive cosi'.
+#      E comunque NON PROMUOVE NIENTE: una cella scelta guardando anche
+#      l'OOS va a una finestra nuova, non in campo.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI: gli stessi di R132a par. 10 (un solo regime, lato
+#  short non separato, peggior giornata non producibile, i due effetti di
+#  NearAtr non separabili, InpNewsCurrencies non pinnabile da vuoto,
+#  Guardian fail-open nel tester).
+#
+#  MAGIC VERGINE 779450 (verificato per ricerca su tutto il repo,
+#  11/09/2026, .git escluso: zero occorrenze).
+#  La sedia 970911 e' VIVA: questo round NON la tocca.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- IL MOTORE, pinnato sulla cella VIVA (StMult 3,5 / AtrP 10 / TP_RR 3,0)
+#     Fonte dei pin: i default del sorgente
+#     mql5\Experts\ABTG_SupRev_DAX_H1_Ottimizzato.mq5, riga per riga.
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=10
+# InpNearAtr -> E' L'ASSE, in fondo al file.
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R132B NEARATR
+InpMagic=779450
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'UNICO ASSE: InpNearAtr da 0,25 a 2,00, passo 0,25 = 8 celle
+#     Identico a R132a: le tre sedie vanno confrontate sullo STESSO asse,
+#     altrimenti "tre misure indipendenti" non sono confrontabili.
+#     La cella VIVA, 1,00, cade all'indice 3 (non e' un bordo).
+InpNearAtr=1.0||0.25||0.25||2.00||Y
+# =====================================================================

@@ -1,0 +1,157 @@
+# =====================================================================
+#  EA: ABTG_SupRev_DOW_H1_Ottimizzato
+#  R132c -- IL PAVIMENTO DELLO STOP: SALVA O UCCIDE? -- IL BANCO
+#           U30USD H1 -- asse InpNearAtr, 8 celle
+#           QUESTO FILE E' PRIMA DI TUTTO UN CANCELLO DI DETERMINISMO.
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  report\R132_PAVIMENTO_SUPREV_2026-09-11.md
+#  Il ragionamento completo sta nella testa di
+#  prove\R132a_nearatr_NASUSD.txt e NON si ripete qui.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_SupRev_DOW_H1_Ottimizzato
+#    -Prova prove\R132c_nearatr_U30USD.txt
+#    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r132c -Modello 1
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.)
+#  >>> QUESTO E' IL PRIMO FILE DA LANCIARE DEI TRE. Costa 16 passate e,
+#      se il cancello qui sotto fallisce, gli altri due non si lanciano.
+#  -Modello 1 = TICK REALI, come R123D. Se si cambia modello, il cancello
+#  decade e questo file va riscritto.
+# ---------------------------------------------------------------------
+#  IL CANCELLO -- ed e' BLOCCANTE, non un'ancora morbida
+#
+#  Cinque delle otto celle di questo asse SONO GIA' GIRATE, sullo stesso
+#  simbolo, stesso TF, stessa finestra, stesso modello, e -- questo e' il
+#  punto -- SULLO STESSO BINARIO.
+#    corsa R123D : 09/09/2026 20:19 (data dei commit dei CSV dal VPS)
+#    ultimo commit sull'EA: 872dba8, 08/09/2026 07:13
+#  Fra la corsa e oggi NON c'e' nessun cambio di codice. Verificato con
+#  git log su mql5\Experts\ABTG_SupRev_DOW_H1_Ottimizzato.mq5.
+#
+#  >>> QUINDI LE CINQUE CELLE DEVONO TORNARE IDENTICHE, CIFRA PER CIFRA.
+#      Non "simili", non "entro il 1%": identiche.
+#  Fonte: risultati_prove\r123_dal_vps\
+#    ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123DNEARATR.csv
+#    ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123DNEARATR.csv
+#
+#    NearAtr | IS profit / PF / DD% / n      | OOS profit / PF / DD% / n
+#      0,50  | -315,18 / 0,63495 / 4,5938/ 64| -12,28 / 0,99155 / 6,2075/122
+#      0,75  | -284,14 / 0,76952 / 6,2458/ 99| 423,33 / 1,28433 / 6,2075/133
+#      1,00  |  -15,58 / 0,98837 / 6,1656/117| 622,79 / 1,38944 / 5,9091/152
+#      1,25  |    6,74 / 1,00474 / 5,9539/122| 643,57 / 1,32197 / 6,4033/172
+#      1,50  | -220,72 / 0,86503 / 7,1676/128| 643,57 / 1,32197 / 6,4033/172
+#
+#  L'UNICA differenza fra questo file e R123D e' InpMagic (779460 invece
+#  di 784130) e InpComment. Che il magic non sposti i numeri e' MISURATO,
+#  non assunto: cancello G1 passato 949/949 su celle gemelle sul magic
+#  (report\MANOPOLE_INERTI_2026-09-09.md r.40).
+#
+#  >>> SE LE CINQUE CELLE NON TORNANO IDENTICHE, IL ROUND E' NULLO e
+#      R132a e R132b NON SI LANCIANO. Non e' pignoleria: vorrebbe dire
+#      che il banco di oggi non e' quello del 09/09, e allora nessun
+#      numero di R132 si potrebbe confrontare con nessun numero
+#      d'archivio. E' il cancello piu' economico del round: 16 passate.
+#  >>> E se non tornano, la prima cosa da guardare NON e' il PF: e' n.
+#      Un n diverso = dati o binario diversi. Un PF diverso a n uguale =
+#      sizing diverso, ed e' un'altra diagnosi.
+# ---------------------------------------------------------------------
+#  LE TRE CELLE NUOVE, e perche' proprio quelle
+#    0,25  -> la BANDA STRETTISSIMA isolata. Su U30USD la 0,50 gia' perde
+#             in tutte e due le finestre (0,635 e 0,992): la 0,25 dice se
+#             la pendenza continua o se si rovescia. E' la cella che
+#             risponde alla domanda del round.
+#    1,75 e 2,00 -> la verifica della SATURAZIONE. In OOS 1,25 e 1,50
+#             sono gia' identici cifra per cifra: se anche 1,75 e 2,00 lo
+#             sono, l'asse e' INERTE sopra 1,25 ed e' MISURATO, non
+#             supposto (soglia B3). E' un risultato, non un fallimento.
+# ---------------------------------------------------------------------
+#  L'ATTESA SULLE CELLE NUOVE, SCRITTA PRIMA DEI NUMERI
+#  - 0,25: n OOS atteso 60-110 (sotto i 122 della 0,50), PF OOS atteso
+#    0,50-1,10. Se invece PF(0,25) > 1,40, la pendenza si rovescia e la
+#    tesi dell'EA ("vicino alla linea = setup migliore") torna in piedi
+#    proprio dove sembrava caduta: sarebbe la scoperta del round, e
+#    andrebbe scritta in grassetto insieme al fatto che contraddice la
+#    lettura della 0,50.
+#  - 1,75 e 2,00: n OOS atteso 172 esatti (cloni della 1,50). Se sono
+#    cloni, B3 li esclude dal conteggio.
+#  - DD: attesa 4,5%-7,5% dappertutto. Riferimento: 5,9-7,2% su R123D.
+#    Sopra il 10% e' un fatto di RISCHIO a qualunque n (Emendamento B).
+#  - MERITO: n OOS 152-172 e' SOPRA i 150 -> su questo simbolo il merito
+#    NON e' sospeso in OOS. In IS (n 64-128) lo e' sempre.
+# ---------------------------------------------------------------------
+#  SOGLIE: valgono B1-B7 di prove\R132a_nearatr_NASUSD.txt, con B1
+#  SOSTITUITA e resa BLOCCANTE dal cancello di riproduzione qui sopra.
+#
+#  E UN AVVERTIMENTO CHE VIENE DALL'ARCHIVIO, non da me: la sedia 970916
+#  e' SPENTA dall'11/08/2026 (IS rosso, risultati_archivio\
+#  REFERTO_FUORILISTA.md r.15). Questo round NON la riaccende. Serve come
+#  BANCO e come terza misura indipendente, non come candidato.
+#
+#  BUCHI DICHIARATI: gli stessi di R132a par. 10.
+#  MAGIC VERGINE 779460 (verificato per ricerca su tutto il repo,
+#  11/09/2026, .git escluso: zero occorrenze).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- IL MOTORE, pinnato ESATTAMENTE come R123D (StMult 3,5 / AtrP 9 /
+#     TP_RR 3,0). Copiato campo per campo dalle righe dei CSV R123D, non
+#     a memoria: se un solo pin differisce, il cancello non e' un cancello.
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.5
+InpStAtrPeriod=9
+# InpNearAtr -> E' L'ASSE, in fondo al file.
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R132C NEARATR
+InpMagic=779460
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'UNICO ASSE: InpNearAtr da 0,25 a 2,00, passo 0,25 = 8 celle
+#     Contiene per costruzione i cinque valori di R123D (0,50 . 0,75 .
+#     1,00 . 1,25 . 1,50) piu' le tre nuove (0,25 . 1,75 . 2,00).
+InpNearAtr=1.0||0.25||0.25||2.00||Y
+# =====================================================================

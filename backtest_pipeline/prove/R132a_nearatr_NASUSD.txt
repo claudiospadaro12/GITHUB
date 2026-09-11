@@ -1,0 +1,341 @@
+# =====================================================================
+#  EA: ABTG_SupRev_NAS_H1_Ottimizzato
+#  R132a -- IL PAVIMENTO DELLO STOP: SALVA O UCCIDE?
+#           NASUSD H1 -- asse InpNearAtr, 8 celle
+#           LA SEDIA DEI NOVE SECONDI (magic vivo 970913, conto piccolo
+#           50503392). QUI SI MISURA E BASTA: la sedia NON si tocca.
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  report\R132_PAVIMENTO_SUPREV_2026-09-11.md
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_SupRev_NAS_H1_Ottimizzato
+#    -Prova prove\R132a_nearatr_NASUSD.txt
+#    -Simbolo NASUSD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 10000 -Etichetta r132a -Modello 1
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#  -Modello 1 = TICK REALI. I tick BCM di NASUSD partono dal 2024.09.26,
+#  che e' l'inizio della finestra: non si chiede al tester dati che non ha.
+#  Lo storico esterno NASUSD 2010-2026 ESISTE (5.261.984 barre M1,
+#  report\STORICO_INDICI_SCARICATO_2026-09-10.md) ma NON E' AUTORIZZATO
+#  per i round: il cancello ZERO e' chiuso (diff media H1 0,061-0,101%
+#  contro <=0,05% richiesto). Non si usa, e il perche' e' scritto qui.
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND, in una riga
+#
+#  "Su una sedia che finisce con lo stop SULLA LINEA del Supertrend, le
+#   operazioni con lo stop piu' stretto -- quelle che un pavimento
+#   toglierebbe -- guadagnavano o perdevano?"
+#
+#  NON e' "quale valore di InpNearAtr fa il PF piu' alto". Quella e' la
+#  domanda che produce picchi di rumore.
+# ---------------------------------------------------------------------
+#  1. IL FATTO CHE APRE IL ROUND (11/09/2026)
+#
+#  La sedia STREV NAS H1 S 1/3 ha aperto alle 09:00:00 e chiuso alle
+#  09:00:09 per 'sl': NOVE SECONDI, -12,80 punti indice, -6,62 EUR.
+#  Fonte primaria: data\statements\trades_auto.csv, riga pid 3361860
+#  (29220.50 -> 29233.30, sell, magic 970913).
+#  Spread NASUSD ora server 9: mediana 2,6000 su 5.696.275 tick
+#  (risultati_archivio\spread_flotta\spread_orario_NASUSD.csv, riga 9).
+#  12,80 / 2,60 = 4,9x. Pavimento DURO di casa 13,3x = 34,6 punti.
+#  Pavimento DI LAVORO 40x = 104,0 punti. Quello stop ne valeva 4,9.
+#
+#  2. IL MECCANISMO, LETTO NEL SORGENTE -- E C'E' UNA CORREZIONE
+#
+#  r.248:  sl = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf
+#  dove ext = estremo delle ultime InpSLLookback(=5) barre, stLine =
+#  line[1] del Supertrend, buf = InpSLBufferPips * PipSize().
+#
+#  >>> LO STOP INIZIALE NON E' SULLA LINEA. E' SULL'ESTREMO A 5 BARRE.
+#      Dimostrazione, dalle sole condizioni d'ingresso dello stesso file:
+#       - per entrare serve touch: lo2 <= stTouch, cioe' il minimo della
+#         barra 2 e' SOTTO la linea di quella barra (r.205 long, r.212 short);
+#       - ext e' il minimo delle barre 1..5, che CONTIENE la barra 2,
+#         quindi ext <= lo2 <= line[2] (r.245-246);
+#       - per entrare serve dir[1]==dir[2] (r.191), e in trend su la
+#         banda inferiore non scende: line[1] >= line[2] (r.378, r.383).
+#      Quindi MathMin(line[1], ext) = ext SEMPRE. Il MathMin e' DEGENERE.
+#      Simmetrico per lo short con MathMax e l'estremo superiore.
+#
+#  >>> MA POI ARRIVA IL TRAILING, E LO STOP TORNA SULLA LINEA.
+#      ManageAll() e' chiamata a OGNI TICK da OnTick (r.155) e a r.348-349 fa:
+#        long : if(stLine > slNow && stLine < bid) PositionModify(stLine)
+#        short: if((stLine < slNow || slNow==0) && stLine > ask) ...
+#      Con slNow = ext -+ buf e ext oltre la linea, la prima condizione e'
+#      VERA GIA' AL PRIMO TICK DOPO L'INGRESSO. Il trailing non "segue"
+#      il prezzo: la prima cosa che fa e' STRINGERE lo stop dall'estremo
+#      alla linea.
+#
+#  >>> CONTRO-ESEMPIO, e passa (non e' solo una lettura del codice).
+#      Ipotesi alternativa: "lo stop resta sull'estremo a 5 barre".
+#      Predizione dell'alternativa: due posizioni aperte a 5 ore di
+#      distanza guardano finestre di 5 barre DISGIUNTE, quindi devono
+#      morire a due prezzi DIVERSI.
+#      Misura (data\statements\trades_auto.csv, magic 970916 U30USD):
+#        pid 3113664, ingresso 2026.08.10 16:00, chiusura 53867.60
+#        pid 3115526, ingresso 2026.08.10 21:00, chiusura 53867.60
+#      STESSO PREZZO AL CENTESIMO, da finestre disgiunte. L'alternativa
+#      lo spiega solo con una coincidenza al centesimo; il trailing sulla
+#      linea lo spiega perche' ManageAll modifica TUTTE le posizioni del
+#      magic allo STESSO stLine. Stessa firma su XAUUSD: cinque gambe
+#      aperte fra il 30/07 e il 31/07 chiudono tutte a 4111.19
+#      (pid 2946915, 2946917, 2957060, 2957063, 2958388).
+#
+#  3. CONSEGUENZA CHE CAMBIA IL ROUND, e va detta prima
+#
+#  Le manopole che allargano lo STOP INIZIALE (InpSLBufferPips di R127a,
+#  InpSLLookback di R127b) sono candidate a essere INERTI su questa
+#  geometria: il trailing le sovrascrive al primo tick. Non e' un
+#  verdetto -- R127a e R127b non sono mai girati -- ma e' una PREDIZIONE
+#  FALSIFICABILE, scritta prima, e R127a puo' confermarla o smentirla.
+#  L'unica manopola gia' esistente che sposta la distanza fra ingresso e
+#  LINEA e' InpNearAtr. Per questo l'asse e' questo.
+# ---------------------------------------------------------------------
+#  4. COSA QUESTO ASSE PERMETTE E NON PERMETTE, ed e' il punto piu'
+#     importante del file
+#
+#  InpNearAtr e' un MASSIMO, non un minimo (r.206/213):
+#     up:   closeNear = (cl2 > stTouch) && ((cl2 - stTouch) <= N*atr)
+#     down: closeNear = (cl2 < stTouch) && ((stTouch - cl2) <= N*atr)
+#  Abbassarlo tiene SOLO le operazioni vicine alla linea, cioe' SOLO
+#  quelle a stop stretto. Alzarlo AGGIUNGE quelle lontane.
+#
+#  >>> PERMETTE: di leggere DA SOLA la banda che un pavimento
+#      cancellerebbe. La cella NearAtr 0,25 e' la banda strettissima
+#      ISOLATA: se il suo PF e' sotto 1,00, le operazioni che il
+#      pavimento toglierebbe erano perdenti e IL PAVIMENTO SALVA. Se il
+#      suo PF e' sopra quello della cella viva, IL PAVIMENTO UCCIDE.
+#      Questa lettura NON richiede nessuna ipotesi di annidamento: e' la
+#      cella, letta da sola.
+#  >>> NON PERMETTE: di simulare un pavimento. Un pavimento TOGLIE le
+#      strette e TIENE le larghe; questo asse fa il contrario o niente.
+#      L'insieme complementare NON e' raggiungibile con nessun input
+#      esistente di questo EA (verificato input per input sul sorgente).
+#      Servirebbe InpMinStopPts / InpSkipIfTight -> MODIFICA DI CODICE,
+#      non un round. Vedi il par. 6 del referto.
+#  >>> E NON PERMETTE la differenza fra celle come misura pulita. Le
+#      celle NON sono insiemi annidati: l'EA tiene UNA posizione alla
+#      volta (r.174 HasPosition, r.181 HasPending), quindi ammettere un
+#      segnale in piu' puo' CANCELLARE un segnale successivo. La
+#      sottrazione PL(1,50) - PL(0,25) e' un'APPROSSIMAZIONE e si scrive
+#      come tale.
+#  >>> E NON SEPARA I DUE EFFETTI. Alzare NearAtr allarga lo stop E rende
+#      il setup meno selettivo, nello stesso gesto. Se una cella migliora,
+#      DA QUALE DEI DUE VIENE NON E' DISTINGUIBILE QUI, e il referto deve
+#      scriverlo con queste parole. Il round che lo separerebbe e' R127a
+#      (buffer: allarga lo stop a ingressi IDENTICI, n costante), che pero'
+#      ha il problema di inerzia del par. 3.
+# ---------------------------------------------------------------------
+#  5. QUANTO E' VERGINE QUESTA MANOPOLA SU QUESTO SIMBOLO
+#
+#  Verificato l'11/09/2026 su TUTTI i CSV del repo con colonne Inp*:
+#  la colonna InpNearAtr prende PIU' DI UN VALORE in DUE file soli,
+#  ed e' lo stesso round su un altro simbolo:
+#    risultati_prove\r123_dal_vps\
+#      ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_IS_R123DNEARATR.csv
+#      ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_OOS_R123DNEARATR.csv
+#  In tutti gli altri (290 file con colonne della famiglia) vale 1.
+#  SU NASUSD, MAI. Zero volte, su ogni TF, su ogni finestra.
+#
+#  6. E COSA DICE L'UNICA CORSA ESISTENTE (U30USD, R123D) -- si legge
+#     PRIMA, perche' e' l'attesa di questo file
+#
+#    NearAtr |  IS: n / PF      |  OOS: n / PF
+#      0,50  |   64 / 0,63495   |  122 / 0,99155
+#      0,75  |   99 / 0,76952   |  133 / 1,28433
+#      1,00  |  117 / 0,98837   |  152 / 1,38944   <- la cella viva
+#      1,25  |  122 / 1,00474   |  172 / 1,32197
+#      1,50  |  128 / 0,86503   |  172 / 1,32197
+#
+#  >>> Sul Dow la banda STRETTA presa da sola PERDE in tutte e due le
+#      finestre (0,635 e 0,992). La tesi dell'EA ("vicino alla linea =
+#      setup migliore") li' e' FALSIFICATA: la cella piu' selettiva e' la
+#      peggiore, non la migliore.
+#  >>> MA il merito e' SOSPESO su quelle celle: n 64 e n 122, sotto il
+#      pavimento dei 150 (Emendamento A). Contano come PENDENZA della
+#      superficie (soglia A2 di R123), non come certificato.
+#  >>> E l'asse SATURA: 1,25 e 1,50 in OOS sono IDENTICI cifra per cifra
+#      (172 / 1,32197 / 6,4033). Sopra 1,25 la manopola non morde piu'.
+#      Per questo l'asse di qui sotto scende a 0,25 (dove c'e' segnale)
+#      invece di salire a 3,0 (dove non c'e').
+# ---------------------------------------------------------------------
+#  7. L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#
+#  La cella InpNearAtr = 1.0 E' LA CELLA VIVA e deve ridare i numeri
+#  d'archivio a tick reali dell'08/08:
+#    IS  : PF 1,34237 . DD 0,9670% . n 69 . profit +118,82
+#    OOS : PF 1,68815 . DD 0,8567% . n 86 . profit +300,61
+#  Fonte primaria, riga InpTF=16385 di:
+#    risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\
+#      ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_{IS,OOS}.csv
+#  69 + 86 = 155 = l'n della riga S5v di REGISTRO_TEST.md. Verificato.
+#
+#  TOLLERANZA CONGELATA: n entro +/- 3, PF entro +/- 1%.
+#  L'ANCORA NON E' BLOCCANTE, e il perche' e' documentato: fra i CSV
+#  dell'08/08 e oggi ci sono TRE commit sull'EA (fix sizing 08/08 11:48,
+#  migrazione Guardian 19/08, fix pavimento del lotto 08/09). Se l'ancora
+#  non torna, il round si legge lo stesso (tutte le celle girano sullo
+#  STESSO binario) ma il referto deve dire, PRIMA di ogni altro numero,
+#  che il 1,68815 agli atti non e' piu' il numero di questo motore.
+# ---------------------------------------------------------------------
+#  8. L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: in SALITA monotona con NearAtr. E' l'unica cosa di cui sono
+#    sicuro: il filtro ammette piu' segnali. Attesa OOS: da ~35-55 a
+#    0,25 fino a ~95-120 a 2,00. SE n NON SALE, il pin e' stato ignorato
+#    e il round si ferma prima di guardare il PF.
+#  - SATURAZIONE: mi aspetto che 1,75 e 2,00 siano CLONI di 1,50 (su
+#    U30USD gia' 1,25 e 1,50 lo erano). Se lo sono, quelle celle NON
+#    contano come celle: e' un tratto di asse INERTE, MISURATO, e si
+#    scrive con quelle parole. E' un risultato, non un fallimento.
+#  - PF della banda stretta (0,25 e 0,50): attesa 0,60-1,10, cioe' SOTTO
+#    la cella viva. E' la replica dell'esito U30USD ed e' la previsione
+#    che questo file puo' vedersi smentire. Se invece 0,25 tornasse con
+#    PF > 1,70, la tesi dell'EA avrebbe ragione su NASUSD e AVREBBE
+#    TORTO SUL DOW: due simboli in disaccordo = non dimostrato, e il
+#    pavimento NON si fa. Va scritto anche quello.
+#  - IL PAVIMENTO DEI 150 NON SI RAGGIUNGE, E LO DICHIARO ORA. La cella
+#    viva fa n OOS = 86. Nemmeno l'estremo alto dell'asse ci arriva.
+#    >>> QUINDI: da questo file NON esce nessun certificato di MERITO.
+#        Esce una PENDENZA (soglia A2: una pendenza non ha bisogno di 150
+#        operazioni per essere una pendenza) e un fatto di RISCHIO (il DD
+#        vale a qualunque n, Emendamento B del 16/08). Chi legge questo
+#        round come una promozione lo sta leggendo male.
+#  - DD: attesa 0,5%-3,0% su tutte le celle. Il rischio per trade resta
+#    1% e il lotto si riduce quando lo stop si allarga. Se una cella
+#    supera il 5%, e' un fatto accaduto e si scrive, a qualunque n.
+#  - PRECEDENTE DI CASA CHE VALE PIU' DELLA MIA ATTESA: R118 (07/09,
+#    risultati_archivio\REFERTO_R118_PAVIMENTO_STOP.md par. 0.3) ha
+#    misurato su tre geometrie che allargare lo stop fa SCENDERE IL DD in
+#    modo riproducibile (46/58 celle IS, 51/56 OOS, finestre concordi) e
+#    muove il PF in modo NON riproducibile (53/58 IS ma 29/56 OOS = una
+#    monetina). Se qui esce la stessa asimmetria, il round e' coerente
+#    con tre misure indipendenti e la risposta onesta e'
+#    "il pavimento compra rischio, non merito".
+# ---------------------------------------------------------------------
+#  9. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#
+#  B1  ANCORA (par. 7). Non bloccante, ma se salta va dichiarato per primo.
+#  B2  MONOTONIA DI n. Se n non sale al salire di NearAtr, il round e'
+#      NULLO: vuol dire che l'asse non e' arrivato all'EA.
+#  B3  ANTI-CLONE. Due celle contigue con n identico E PF identico alla
+#      quarta cifra sono UNA cella misurata due volte. Non contano.
+#      (Censimento 09/09: 874 CSV su 1.960 con passate a esito identico.)
+#  B4  LA RISPOSTA ALLA DOMANDA DEL ROUND, e si decide qui:
+#        PF(0,25) e PF(0,50) ENTRAMBI < 1,00  -> "la banda stretta perde:
+#           un pavimento su questa sedia SALVA" (pendenza, non merito).
+#        PF(0,25) o PF(0,50) > PF(1,00)+0,15  -> "la banda stretta e' la
+#           migliore: un pavimento UCCIDE". In questo caso il pavimento
+#           esce dal tavolo e non se ne riparla.
+#        tutto il resto -> "non c'e' una risposta robusta", e si scrive
+#           cosi'. E' l'esito piu' probabile con n di questa taglia.
+#  B5  RISCHIO, a qualunque n: ogni cella con DD > 5,0% va segnalata.
+#  B6  SELEZIONE: se un altopiano ci fosse, si prende il CENTRO, MAI il
+#      picco. Ma vedi B4: da qui non si promuove niente.
+#  B7  NESSUNA PROMOZIONE. La sedia 970913 e' VIVA sul conto piccolo
+#      50503392. Questo round NON la tocca, non cambia il preset, non
+#      cambia l'EA. Qualunque cambio e' una firma di Claudio.
+# ---------------------------------------------------------------------
+#  10. BUCHI DICHIARATI
+#
+#  - REGIME: 21 mesi di tick BCM sugli indici = UN SOLO REGIME (toro).
+#    Emendamento della Finestra, regola C: NON soddisfatta, e non lo sara'
+#    alla fine di questo round.
+#  - PAVIMENTO 150: non raggiunto. Vedi par. 8.
+#  - LATO SHORT DA SOLO: [NON MISURATO]. Qui girano L+S come la sedia
+#    viva. La regola dei due lati del 25/08 chiede il lato separato: e'
+#    un round suo (R110 lo prepara), non questo.
+#  - PEGGIOR GIORNATA: [NON MISURATO] e non producibile: il CSV di
+#    ottimizzazione MT5 non ha la colonna.
+#  - SEPARAZIONE DEI DUE EFFETTI: [NON MISURABILE DA QUI]. Par. 4.
+#  - InpNewsCurrencies NON e' pinnato di proposito: il pin di una stringa
+#    a valore VUOTO viene IGNORATO da MT5 (classe FiboH4, controllo 3 di
+#    controlla_prova.py). Il default compilato e' gia' la stringa vuota.
+#  - GUARDIAN: InpUsaGuardian=true e' il default, ma nel Strategy Tester
+#    le sue GlobalVariable non esistono e la guardia lascia passare tutto
+#    (fail-open dichiarato nel sorgente r.34-42). I numeri restano
+#    confrontabili con quelli dell'08/08.
+#
+#  MAGIC VERGINE 779440 (verificato per ricerca su tutto il repo,
+#  11/09/2026, .git escluso: zero occorrenze).
+#  ORDINE DEI ROUND: R120a (uscite Supertrend su NASUSD) e R127a (buffer
+#  dello stop su NASUSD) toccano la stessa sedia e NON sono mai girati.
+#  Qui trailing, flip, buffer e lookback sono PINNATI AL VALORE VIVO:
+#  sono l'asse di quei file, non di questo.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- IL MOTORE, pinnato sulla cella VIVA (StMult 3,0 / AtrP 10 / TP_RR 3,0)
+#     Fonte dei pin: mql5\Presets\sedie_piccolo\recupero2\
+#     sedia_ABTG_SupRev_NAS_H1_Ottimizzato_970913.set, copiato riga per
+#     riga, non a memoria.
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=3.0
+InpStAtrPeriod=10
+# InpNearAtr -> E' L'ASSE, in fondo al file.
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+
+# --- STOP: buffer e lookback PINNATI al valore vivo. Sono gli assi di
+#     R127a e R127b, non di questo file.
+InpSLLookback=5
+InpSLBufferPips=3.0
+
+# --- USCITA: tutto pinnato com'e' in campo. Trailing sul Supertrend e
+#     uscita al flip ACCESI: sono l'asse di R120a, non di questo file.
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+
+InpComment=R132A NEARATR
+InpMagic=779440
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'UNICO ASSE: InpNearAtr da 0,25 a 2,00, passo 0,25 = 8 celle
+#     0,25 . 0,50 . 0,75 . 1,00 . 1,25 . 1,50 . 1,75 . 2,00
+#     La cella VIVA, 1,00, cade all'indice 3: NON e' un bordo, ha vicini
+#     da tutte e due le parti e l'ancora e' leggibile.
+#     Bordo BASSO 0,25 = FINE GRIGLIA scelta da me (sotto, il filtro
+#     ammetterebbe cosi' poco che n crollerebbe a due cifre basse).
+#     Bordo ALTO 2,00 = FINE GRIGLIA: sopra, l'asse e' gia' misurato
+#     INERTE su U30USD (1,25 = 1,50 cifra per cifra).
+#     ARITMETICA: 0,25 e 2,00 sono esatti in binario e (2,00-0,25)/0,25
+#     fa 7 senza residuo -> 8 celle, nessun arrotondamento possibile.
+InpNearAtr=1.0||0.25||0.25||2.00||Y
+# =====================================================================
