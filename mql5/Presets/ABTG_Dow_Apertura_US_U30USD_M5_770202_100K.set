@@ -1,0 +1,323 @@
+; ==========================================================================
+; ABTG_Dow_Apertura_US -- SEDIA 770202 -- U30USD M5
+; Conto: DEMO 100K 50504263, cartella "C:\Program Files\BCM Markets MT5
+; Terminal -V3", profilo ATTIVO "SQUADRA 100K".
+; NON il piccolo 50503392 (cartella SENZA -V3). NON il reale 10105439.
+; Scritto il 11/09/2026 dall'architetto-prop. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; CHE COS'E' QUESTO FILE, in una riga:
+;   E' la FOTOGRAFIA dei parametri che GIRANO OGGI, non una proposta e non
+;   un miglioramento. NESSUN VALORE E' STATO SCELTO DA ME: sono tutti COPIATI
+;   dalla foto del .chr vivo. Dove qualcosa non mi torna c'e' un RILIEVO in
+;   fondo, e il valore resta com'e'.
+;
+; --------------------------------------------------------------------------
+; 1) DA DOVE VIENE OGNI RIGA -- una sola fonte, dichiarata
+; --------------------------------------------------------------------------
+;   FONTE [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20260911_033002.log
+;     righe 3267-3386, blocco:
+;       "--- SEDIA: ABTG_Dow_Apertura_US su U30USD magic 770202 [chart02.chr]"
+;       "; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "; profilo: SQUADRA 100K"
+;     Il log e' una LETTURA del file
+;     ...\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts\
+;     SQUADRA 100K\chart02.chr  -- nessuna scrittura, nessun terminale toccato.
+;
+;   SIMBOLO E TIMEFRAME [stessa corsa del runner, file gemello]:
+;     CODA_01_sedie_attaccate_20260911_033002.log riga 74:
+;       "ABTG_Dow_Apertura_US  U30USD  M5  magic 770202  rischio 0.65"
+;
+;   QUALE CONTO STA IN QUELLA CARTELLA [letto dai GIORNALI, non da una tabella]:
+;     CODA_03_conti_dei_terminali_20260911_033002.log:
+;       "CARTELLA BCA8AD18563BF5B64A433C2662D0A104 ->
+;        C:\Program Files\BCM Markets MT5 Terminal -V3 -> CONTO 50504263"
+;
+; --------------------------------------------------------------------------
+; 2) *** LA DATA DELLA FOTO -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA ***
+; --------------------------------------------------------------------------
+; DOMANDA: un preset scritto da un .chr del 6 settembre descrive la sedia di
+; OGGI, 11 settembre?
+;   -> Il log lo dichiara: "; .chr modificato il: 2026-09-06 08:01".
+;      LA FOTO HA CINQUE GIORNI. Un .chr si riscrive quando il profilo viene
+;      SALVATO (o alla chiusura del terminale), non a ogni tick: se qualcuno
+;      avesse cambiato un input il 7, l'8 o il 9 SENZA salvare il profilo,
+;      QUESTO FILE NON LO SAPREBBE.
+;   -> QUANTO E' GRAVE, misurato e non stimato: il .chr del 6/09 08:01 e'
+;      COERENTE con la riga di CODA_01 della corsa di STANOTTE (11/09 03:30),
+;      che rilegge gli stessi file e stampa "rischio 0.65" -- ma e' la STESSA
+;      fonte riletta, quindi NON e' una conferma indipendente.
+;   -> CONCLUSIONE ONESTA: questo preset e' *** LA MIGLIOR FOTO CHE ABBIAMO,
+;      ED E' DEL 06/09/2026 ***. L'unica conferma indipendente possibile e'
+;      leggere la finestra Input dell'EA sul terminale 50504263 (-V3), che e'
+;      un gesto sul campo e NON e' nel mio perimetro.
+;
+; --------------------------------------------------------------------------
+; 3) *** COSA C'E' NEL .CHR E QUI NON C'E' -- la differenza dichiarata ***
+; --------------------------------------------------------------------------
+; Il blocco del log stampa "; parametri stampati: 113". Qui sotto ce ne sono
+; *** 81 ***. I 32 mancanti NON sono stati tolti per scelta: NON SONO DELL'EA.
+;
+;   LA PROVA, e non e' un'impressione:
+;   a) i 32 (InpMostraEma, InpMostraBollinger, InpEma1..InpEma4, InpBbPeriodo,
+;      InpBbDeviazione, InpMostraMaxIeri..., InpCol*, InpStile*, InpSpes*,
+;      InpMostraEtichette, InpFontSize e un SECONDO InpVerbose) compaiono
+;      IDENTICI anche sotto "SEDIA: ABTG_TradeExporter su NZDCAD" (riga 27 del
+;      log) -- e ABTG_TradeExporter.mq5 ha QUATTRO input in tutto (righe 25-28);
+;   b) l'unico file del repo che dichiara InpMostraEma e'
+;      mql5/Indicators/ABTG_Look.mq5 -- e' un INDICATORE, non un EA;
+;   c) due input con lo stesso nome (InpVerbose due volte, a true e a false)
+;      NON possono stare nello stesso EA: in MQL5 non compila.
+;   -> Quei 32 valori sono gli input dell'INDICATORE ABTG_Look appeso al
+;      grafico, che lo strumento CODA_08 accorpa al blocco <expert>.
+;      *** E' UN DIFETTO DELLO STRUMENTO, segnalato qui e nel rilievo R4. ***
+;      Metterli in un preset di EA vorrebbe dire scrivere il falso.
+;
+;   VERIFICA CHE I 81 SIANO ESATTAMENTE GLI INPUT DELL'EA (meccanica):
+;     i nomi delle 81 righe qui sotto, NELL'ORDINE, sono IDENTICI ai nomi delle
+;     81 dichiarazioni "input" di mql5/Experts/ABTG_Dow_Apertura_US.mq5
+;     (confronto riga per riga: diff vuoto). Stesso insieme, stesso ordine.
+;
+; --------------------------------------------------------------------------
+; 4) *** QUALE BINARIO DESCRIVE -- e qui la notizia e' BUONA ***
+; --------------------------------------------------------------------------
+; report/IL_CAMPO_E_FERMO_A_AGOSTO_2026-09-11.md misura che in campo girano
+; 42 sorgenti su 42 DIVERSI dal repo. [!!] Va detto ogni volta. MA quel referto
+; guarda il terminale del PICCOLO. Su QUESTO terminale (-V3, conto 50504263):
+;
+;   CODA_06_quale_codice_gira_20260911_033002.log riga 256:
+;     ABTG_Dow_Apertura_US.mq5   VER 1.01   RIGHE 2148   GUARD SI
+;     compilato il 2026-08-19 23:09
+;   repo:  #property version "1.01"  .  wc -l = 2147  .  InpUsaGuardian presente
+;   ultimo commit che tocca il file: d83c196 del 2026-08-19
+;     ("Migrazione Guardian (pezzo 7): la famiglia Apertura")
+;
+;   -> SCARTO DI UNA RIGA SOLA (2148 contro 2147), e la data di compilazione
+;      e' LO STESSO GIORNO dell'ultimo commit. Questa sedia NON e' fra le 42
+;      ferme ad agosto in senso pieno: e' allineata al repo di oggi.
+;      [LIMITE, lo stesso del referto: MT5 esegue l'.ex5, e il .mq5 accanto
+;      non e' una prova del contenuto del binario. E lo scarto di 1 riga non
+;      e' spiegato -- probabile riga finale senza a-capo, NON VERIFICATO.]
+;   -> CONFERMA INDIPENDENTE, ed e' la piu' forte: il .chr del binario in campo
+;      contiene InpUsaGuardian, e nell'ordine giusto. Il binario del PICCOLO
+;      (v1.00, 2065 righe, GUARD "no", compilato 08/08) NON ce l'ha: infatti il
+;      suo .chr stampa 112 parametri invece di 113. La differenza fra i due
+;      terminali si LEGGE nei dati, non si assume.
+;   -> COSA MANCA COMUNQUE: il fix del lotto dell'08/09 (commit 872dba8) NON
+;      ha toccato questo file (ultimo commit 19/08), quindi qui non manca
+;      niente. Ma il PAVIMENTO DEL LOTTO nel codice c'e' lo stesso
+;      (riga 1657: lot = MathMax(minLot, MathMin(maxLot, lot))). Vedi R3.
+;
+; --------------------------------------------------------------------------
+; 5) LA SECONDA ISTANZA DELLA STESSA SEDIA -- differenza campo per campo
+; --------------------------------------------------------------------------
+; Lo stesso magic 770202 gira ANCHE sul piccolo 50503392 (profilo ORO,
+; chart31.chr, log righe 1878-1996). Confronto meccanico dei due blocchi:
+;
+;   | campo            | 100k 50504263 (QUESTO FILE) | piccolo 50503392 |
+;   | InpUsaGuardian   | true                        | *** ASSENTE ***  |
+;   | InpRiskPercent   | 0.65                        | 1.0              |
+;   ... e NIENT'ALTRO: gli altri 79 campi sono identici carattere per
+;   carattere (diff dei due blocchi: 2 sole differenze).
+;
+; [!!] DUE SEDIE DIVERSE CON LO STESSO MAGIC SU DUE CONTI DIVERSI. Non e' un
+;    problema di esecuzione (i conti sono separati), ma lo diventa per la
+;    CONTABILITA': qualunque conteggio che filtri per magic 770202 senza
+;    filtrare anche il CONTO mescola due taglie diverse. Rilievo R1.
+; [!!] Un preset per il piccolo NON e' questo file con 0.65 -> 1.0: il binario
+;    del piccolo NON HA l'input InpUsaGuardian, quindi caricare 81 righe su un
+;    EA che ne accetta 80 e' un preset che non corrisponde. Chi lo scrivera'
+;    deve partire dal blocco del piccolo, non da questo. NON l'ho scritto io
+;    qui: sarebbe stato un file dedotto, e i file dedotti sono il difetto.
+;
+; --------------------------------------------------------------------------
+; 6) E ADESSO I VALORI. NON SONO I DEFAULT DEL SORGENTE, ed e' il punto.
+; --------------------------------------------------------------------------
+; Sette campi in cui il .chr vivo e il DEFAULT COMPILATO divergono. Senza
+; questo file, trascinare l'EA su un grafico da' UN'ALTRA STRATEGIA:
+;
+;   | campo             | default sorgente        | QUI (cio' che gira) |
+;   | InpEntryMode      | ABTG_BREAKOUT (0)       | 2 = RETEST          |
+;   | InpRangeMinutes   | 15 (ABTG_DEF_RANGE_MIN) | 35                  |
+;   | InpBufferPoints   | 200 (ABTG_DEF_BUFFER)   | 1000.0              |
+;   | InpRetestOffsetPts| 0                       | 400.0               |
+;   | InpTP1_R          | 0.5                     | 1.0                 |
+;   | InpTP1_ClosePct   | 0                       | 50.0                |
+;   | InpBreakevenAtTP1 | false                   | true                |
+;   | InpAllowShort     | true                    | false               |
+;   | InpRiskPercent    | 1.0 (ABTG_DEF_RISK r.67)| 0.65                |
+;
+; NOTA su una riga del piano che va corretta: PIANO_CHALLENGE_OTTOBRE_v2.md
+; r.131 scrive "il sorgente porta ABTG_DEF_RISK 2.0". Nel sorgente di QUESTO
+; EA il default e' *** 1.0 *** (riga 67); il 2.0 e' il fallback generico del
+; blocco #ifndef (riga 140), che qui non si applica. Il senso della frase
+; resta valido (il default NON e' 0,65), il numero no.
+;
+; TRADUZIONE DEI CODICI, per chi rilegge (NON sono scelte, sono letture):
+;   InpSessionHour=14 / InpSessionMin=30 -> 14:30 ORA SERVER BCM = 15:30
+;     italiana, apertura del cash USA (regola del fuso, CLAUDE.md). CORRETTO.
+;   InpCloseHour=17 / InpCloseMin=30     -> 17:30 server = 18:30 italiane.
+;   InpLevelTF=16385 = PERIOD_H1 . InpFilterTF=16388 = PERIOD_H4
+;   InpStTF=16385 = H1 . InpCorrTF=16385 = H1 . InpVwapTF=15 = PERIOD_M15
+;   InpTrailTF=5 = PERIOD_M5 . InpOCTimeframe=0 = PERIOD_CURRENT
+;   InpEntryMode=2 = ABTG_RETEST . InpRangeMode=0 = ABTG_RANGE_OPENING
+;   InpSLMode=0 = ABTG_SL_RANGE . InpTrailMode=1 = ABTG_TRAIL_PREVBAR
+;   InpDelayDirMode=0 = ABTG_DIR_BREAK . InpConfirmMode=0 = ABTG_CONF_OR
+; ==========================================================================
+
+InpUsaGuardian=true
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=400.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.65
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770202
+InpMaxSpread=0
+InpVerbose=true
+
+; ==========================================================================
+; 7) *** LA VERIFICA CHE NON MI ASPETTAVO DI POTER FARE: R1 SI CHIUDE ***
+; --------------------------------------------------------------------------
+; R1 = "esiste un round che ha promosso ESATTAMENTE la configurazione che
+; gira?". Per quasi tutta la flotta non e' verificabile. Qui SI', e a mano.
+;
+; PASSO 1 -- quali campi del vivo NON sono il default compilato? Confronto
+; meccanico fra le 81 righe qui sopra e i #define del sorgente (righe 57-69,
+; che sono quelli in vigore: il blocco #ifndef delle righe 119-164 e' il
+; fallback generico e NON si applica a questo EA). Escono NOVE campi:
+;   InpRangeMinutes 35 . InpEntryMode 2 . InpBufferPoints 1000 .
+;   InpAllowShort false . InpRetestOffsetPts 400 . InpTP1_R 1.0 .
+;   InpTP1_ClosePct 50 . InpBreakevenAtTP1 true . InpRiskPercent 0.65
+;
+; PASSO 2 -- il file prova del round R16 (backtest_pipeline/prove/
+; R16c_pertrade_Dow.txt, @SIMBOLO U30USD @PERIODO M5 @DAQUANDO 2024.09.26)
+; fissa: InpEntryMode=2 . InpRangeMode=0 . InpRangeMinutes=35 .
+; InpBufferPoints=1000 . InpRetestOffsetPts=400 . InpAllowLong=1 .
+; InpAllowShort=0 . InpRiskPercent=1.0 . InpTP1_R=1.0 . InpTP1_ClosePct=50 .
+; InpBreakevenAtTP1=1 . InpUseTrailing=1 . InpTrailMode=1 . InpTrailTF=5.
+;
+; -> *** OTTO DEI NOVE CAMPI NON-DEFAULT SONO FISSATI DA R16c ALLO STESSO
+;    IDENTICO VALORE. *** Il nono e' InpRiskPercent: banco 1,0% / campo 0,65%
+;    (la taglia A1 firmata da Claudio il 09/08). Tutti gli altri 72 campi del
+;    vivo sono i default compilati, cioe' quelli con cui R16c e' girato.
+;    La sedia che gira E' la cella di R16, alla taglia firmata. Non e' una
+;    ricostruzione: sono due liste confrontate riga per riga.
+; -> [LIMITE, dichiarato] R16c gira a Deposito 100.000 (lancia_r54.ps1:91 usa
+;    la stessa taglia per la famiglia) e il DD di quel round e' misurato a
+;    rischio 1,0%: il DD a 0,65% e' un APPROSSIMATO lineare, convenzione di
+;    casa, non una misura.
+;
+; ==========================================================================
+; 8) RILIEVI -- cose che NON ho corretto, e che vanno lette
+; ==========================================================================
+; R1 [!!] STESSO MAGIC, DUE CONTI, DUE TAGLIE. 770202 gira a 0,65% sul 100k
+;    50504263 e a 1,0% sul piccolo 50503392 (par. 5). Ogni conteggio che
+;    filtri per magic senza filtrare il CONTO mescola due sedie diverse.
+;    NON TOCCATO: e' cio' che gira. Serve una decisione di Claudio, non mia.
+;
+; R2 [!] InpMaxSpread=0 -> IL FILTRO SPREAD E' SPENTO, e questa sedia entra
+;    alle 14:30 server, cioe' nel minuto di apertura del cash USA, che e' il
+;    momento in cui lo spread e' piu' largo della giornata. Il costo all-in
+;    misurato dal piano (51,0x il pavimento) usa uno stop *** INFERITO ***
+;    (~102 punti indice, ZERO gambe in stop misurate):
+;    PIANO_CHALLENGE_OTTOBRE_v2.md r.131. NON TOCCATO.
+;
+; R3 [ok] PAVIMENTO DEL LOTTO (classe 229): QUI NON MORDE, e il conto e' questo.
+;    U30USD ha VOLUME_MIN 0,10 e vale ~0,861 EUR per punto indice per lotto
+;    (DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md r.148 e r.163, misurato su
+;    quattro fonti indipendenti). Con stop ~102 punti, 0,10 lotti rischiano
+;    ~8,8 EUR: il pavimento morderebbe solo sotto ~1.350 EUR di saldo a 0,65%.
+;    Il 100k e' due ordini di grandezza sopra. -> Il rischio dichiarato qui
+;    e' anche il rischio vero. [CALCOLATO su numeri misurati, non misurato
+;    in campo: 0 gambe in stop di questa sedia sono mai state osservate.]
+;
+; R4 [!!] DIFETTO DELLO STRUMENTO, non della sedia: CODA_08 accorpa al blocco
+;    <expert> gli input degli INDICATORI appesi al grafico (par. 3). Chi
+;    mantiene la coda del runner dovrebbe separarli: oggi chiunque copi un
+;    blocco del log dentro un .set ci mette 32 righe false.
+;
+; R5 [!] InpUseNewsFilter=false. Questa sedia NON ferma niente sulle notizie,
+;    e apre a mercato aperto USA. E' coerente col fatto misurato oggi
+;    (commit 7006b4e: le sedie che operano il filtro notizie non ce l'hanno),
+;    ma resta un rischio dichiarato per una challenge con muro giornaliero.
+;
+; R6 [ok] InpVerbose=true: NON toccarlo. E' la riga di Giornale che permette di
+;    leggere il lotto piazzato, unico modo di accorgersi del pavimento (R3).
+;
+; R7 [--] InpTrailFixedPts=410 e InpDelayMinutes=30 sono INERTI in questa
+;    configurazione (InpTrailMode=1 = candela precedente; InpEntryMode=2 =
+;    RETEST, non DELAYED). Restano scritti perche' questo file FOTOGRAFA.
+; ==========================================================================
