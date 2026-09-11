@@ -43,7 +43,7 @@ toccare un numero, e le dichiaro perché siano verificabili contro di me:
 |---|---|---|
 | 🧮 **Non "aggiustare" un `n` che non ho misurato** | dove il per-trade non è in archivio ho scritto **`[NON MISURATO]` + la forbice**, **mai** una divisione per 2. Il fattore uscite/posizioni **non è costante**: l'ho misurato su **31 file** e va da **1,00 a 2,31** | §1.3 |
 | 📏 **"Più vero" ≠ "più nuovo"** | ogni DD porta **deposito + rischio + modello di barre**. Un numero misurato a un deposito che non è quello del conto **non è migliore: è diverso** | colonna *"a quale taglia"* |
-| ⬆️ **Ogni contratto ALLARGATO va giustificato con la misura** | i contratti che salgono sono **2** e tutti e due hanno una misura sotto: `771531` (7,21 → **7,83%**, riprodotta 3 volte al centesimo) e `770101` (nessun cambio di DD, cambia il `n`). 🔴 **I contratti che peggiorano peggiorano e basta** | §5 |
+| ⬆️ **Ogni contratto ALLARGATO va giustificato con la misura** | i contratti che salgono sono **2** e tutti e due hanno una misura sotto: `771531` (7,21 → **7,83%**, riprodotta 3 volte al centesimo) e `770101` (**rivisto l'11/09 sera: il DD SCENDE**, 6,89 → **4,3501% @0,65%**, perché il vecchio numero **misurava un'altra configurazione** — `InpAllowShort=1` a taglia 1,0% — **non** perché si sia scelto il numero più comodo; §5 riga 4 e `report/CONFLITTO_DD_770101_2026-09-11.md`). 🔴 **I contratti che peggiorano peggiorano e basta** | §5 |
 
 ## 🔴 E il contro-esempio che MI HA SMENTITO — due volte, e va detto per primo
 
@@ -54,7 +54,7 @@ meccanismo, **altro nome**. E `ABTG_GapContinuation` ne ha un **terzo**:
 `InpPartialClosePercent = 40` (r.159).
 
 > 📐 **La prova non è il grep, è il conteggio**: sul per-trade della cella di
-> contratto di `770101` (`r83_csv/pertrade_r83d1_777120.csv`) le righe sono
+> R83 (`r83_csv/pertrade_r83d1_777120.csv`) — 🆕 che l'11/09 **non è più la cella di contratto della `770101`** (§2: ha `InpAllowShort=1`), ma resta l'esempio buono del metodo — le righe sono
 > **311** e i `position_id` distinti **245** → **fattore 1,27**, e la
 > distribuzione è **179 posizioni con 1 uscita + 66 con 2**. Se il parziale non
 > ci fosse, il fattore sarebbe **1,00 esatto**. 👉 **Il `n = 311` del contratto
@@ -82,11 +82,25 @@ fattore misurato sulla **stessa cella** (2,01) fa **~118 posizioni**, cioè
    riconciliazione R29↔R112 di `771531` il metro lineare sbaglia del **6%**
    (`PIANO_PROP.md` J2). Dove la sedia gira a taglia diversa dal banco, il DD
    alla taglia viva è marcato `≈` **e non vale come numero di contratto**.
+   🆕 **11/09 — e adesso c'è anche il caso in cui il metro lineare regge, misurato
+   su un insieme di trade IDENTICO**: sulla `770101` long-only, `4,3501 / 6,7111 =
+   0,6482` contro un rapporto di taglia di **0,65** → **sbaglia dello 0,28%**,
+   con **n = 270 in tutte e due** e ogni altro input uguale
+   (`aperture_r35/..._OOS_r35.csv` r.8 contro `ritardo_r119b_csv/..._OOS_R119_DAX_D0000.csv` r.2).
+   👉 La forbice nota del metro lineare è quindi **0,28% – 6%**: resta
+   `[APPROSSIMATO]`, ma **non è più senza numero**.
 3. **Il DD% è ~indipendente dal deposito** a rischio percentuale — 🔴 **ma solo
    finché il PAVIMENTO DEL LOTTO non morde** (classe 228/229). A deposito
    piccolo `MathFloor` sullo step taglia il lotto e la sedia rischia **meno**
    del dichiarato: su `771531` a 10.000 € il rischio effettivo è **~0,87%**
    invece di 1,00%. **Gli euro non scalano mai.**
+   🆕 **11/09 — secondo caso misurato, e sulla sedia del conto reale**: la stessa
+   cella long-only della `770101` a 1,0% fa **6,7111% a 10.000 €** e **7,2328% a
+   100.000 €** — **+0,52 punti = +7,8%** a **parità esatta di 270 operazioni**
+   (`aperture_r35/..._OOS_r35.csv` r.8 · `aperture_r47/..._OOS_r47a.csv` r.2).
+   🔴 **Quindi «il DD% è ~indipendente dal deposito» è falso di quasi l'8% proprio
+   dove ci serve**: un contratto misurato a 10.000 € **non è il contratto di un
+   banco da 100.000 €**, e va scritto con l'asterisco ogni volta.
 4. `tick` = tick reali (Modello 4) · `OHLC` = M1 OHLC (Modello 1) = **limite
    INFERIORE del DD, mai un permesso**.
 
@@ -198,7 +212,7 @@ OOS, non sulla somma** (classi 224+226 insieme).
 
 | EA · Magic · Sym | **DD PROMESSO** | a quale **deposito/rischio/modello** | `n` **uscite → POSIZIONI** | finestra · **OOS vero?** | **freq. PROMESSA** | **freq. DI CAMPO** | **codice misurato → in campo** | **stop/spread ALL-IN** | ❓ **descrive la sedia che gira?** |
 |---|---|---|---|---|---|---|---|---|---|
-| `ABTG_DAX_Apertura_EU` **770101** D30EUR M5 · vivo **0,65%** | 🆕 **4,3501%** @ **0,65%** — **già alla taglia viva** · **[MISURATO]** · ⚠️ **a deposito 10.000 €** (vedi l'asterisco sotto la tabella) | 🆕 **10.000 €** · **0,65%** · **tick** | 🆕 **270 uscite → 193 POSIZIONI** [MISURATO sulla **gemella long-only** `aperture_r47/..._OOS_r47a.csv`; il per-trade della cella R119 non è in archivio] · fattore **1,40** | OOS **2025.06.10→2026.06.30**, 12,7 mesi · ✅ **OOS vero** · 🔴 **UN SOLO REGIME (toro)** | 🆕 **~0,84 op/g** *(in uscite; in posizioni ~**0,60**)* — ricalcolato in proporzione sulla stessa finestra e con lo stesso divisore del vecchio 0,97 | 🔴 `[NON MISURATO]` sul reale | misurato: repo **R119** (07/09, ri-misurato ANCORA 08/09) · campo: **v1.01, 2368 righe, 06/09** = **repo+1** → ✅ **ALLINEATO** | **42,3x** 🟢 *(geometria piena)* · **33,0x** 🔴 *(sottocampione della geometria VIVA)* · **26,6x** 🔴 @P95 | 🆕 🟢 **SÌ sulla cella e sulla TAGLIA** — codice ✅, cella ✅ (`InpAllowShort=0`, `InpRiskPercent=0,65`, `InpMagic=770101`, trailing 410: **tutti uguali al preset vivo**). ⚠️ **unico caveat rimasto**: banco a **10.000 €**, equità vera **~7.500 €** → il pavimento del lotto a quella equità è **[NON MISURATO]** |
+| `ABTG_DAX_Apertura_EU` **770101** D30EUR M5 · vivo **0,65%** | 🆕 **4,3501%** @ **0,65%** — **già alla taglia viva** · **[MISURATO]** · ⚠️ **a deposito 10.000 €** (vedi l'asterisco sotto la tabella) | 🆕 **10.000 €** · **0,65%** · **tick** | 🆕 **270 uscite → 193 POSIZIONI** [MISURATO sulla **gemella long-only** `aperture_r47/..._OOS_r47a.csv`; il per-trade della cella R119 non è in archivio] · fattore **1,40** | OOS **2025.06.10→2026.06.30**, 12,7 mesi · ✅ **OOS vero** · 🔴 **UN SOLO REGIME (toro)** | 🆕 **~0,84 op/g** *(in uscite; in posizioni ~**0,60**)* — ricalcolato in proporzione sulla stessa finestra e con lo stesso divisore del vecchio 0,97 | 🔴 `[NON MISURATO]` sul reale | misurato: repo **R119** (07/09, ri-misurato ANCORA 08/09) · campo: **v1.01, 2368 righe, 06/09** = **repo+1** → ✅ **ALLINEATO** | **42,3x** 🟢 *(geometria piena)* · **33,0x** 🔴 *(sottocampione della geometria VIVA)* · **26,6x** 🔴 @P95 | 🟠 **NON MISURATO** — 🆕 **due terzi della domanda sono passati a ✅**: codice ✅ e ora anche **la TAGLIA** ✅ (il banco è 0,65% come il campo; prima il banco era 1,0%) e la **cella** ✅ (`InpAllowShort=0`, `InpMagic=770101`, trailing 410 = preset vivo — letto in `mql5/Presets/conto_reale/ABTG_DAX_Apertura_EU_770101_REALE.set`: `InpAllowShort=false`, `InpRiskPercent=0.65`, `InpMagic=770101`, `InpTrailFixedPts=410.0`). 🔴 **Resta NON verificata la terza**: banco **10.000 €** contro equità vera **~7.500 €** → il pavimento del lotto a quella equità è `[NON MISURATO]`, e per regola (§1.7) **una sola non verificata basta** |
 | `ABTG_ORB_Ottimizzato` **770611** U30USD M5 · vivo **0,65%** | **6,5389%** OOS · **5,6530%** IS — **già alla taglia viva** | **10.000 €** · **0,65%** · **tick** | **119 OOS · 71 IS = POSIZIONI** 🟢 (`InpTP1Pct=0` verificato nel CSV R119 **e** nel preset reale) | IS 2024.09.26→2025.06.09 / OOS 2025.06.10→2026.06.30 · ✅ **OOS vero** | ~0,43 op/g | 🔴 `[NON MISURATO]` sul reale *(sul **piccolo** la gemella fa **0,23**)* | misurato: repo R119 (07/09) · campo: **v1.04, 1464 righe, 06/09** = repo+1 → ✅ **ALLINEATO** | 🔴 **29,5x** (74% del pavimento di lavoro) · **19,7x** @P95 · 🟢 sopra il duro 13,3x | 🟢 **SÌ** — codice ✅, rischio ✅ (0,65% = 0,65%), cella ✅. ⚠️ **unico caveat**: banco a 10.000 €, equità vera ~7.500 € |
 
 
@@ -242,7 +256,7 @@ _Il 100k è ancora il quintetto del 09/08: nessun magic `88xxxx` del
 
 | EA · Magic · Sym | **DD PROMESSO** | deposito/rischio/modello | `n` **uscite → POSIZIONI** | finestra · **OOS vero?** | **freq. PROMESSA** | **freq. DI CAMPO** | **codice misurato → in campo** | **stop/spr ALL-IN** | ❓ **descrive la sedia che gira?** |
 |---|---|---|---|---|---|---|---|---|---|
-| `DAX_Apertura_EU` **770101** D30EUR M5 · **0,65%** | **10,5984%** @1% → ≈6,89% | 10.000 € · 1,0% · tick | 🆕 **311 → 245 [MIS]** | OOS 12,6 mesi · ✅ | ~0,97 (uscite) / ~0,76 (pos.) | 🔴 `[NON MISURATO]` | campo **2361** righe, **19/08** contro repo+1 = 2368 → 🔴 **−7, DIVERSO** | 42,3x / 33,0x / 26,6x@P95 | 🔴 **NO** — il binario in campo **non è** quello misurato |
+| `DAX_Apertura_EU` **770101** D30EUR M5 · **0,65%** | 🆕 **4,3501%** @ **0,65%** **[MISURATO a dep. 10.000 €]** · 🔴 **ASTERISCO 100k: su un banco da 100.000 € il DD promesso è `[NON MISURATO]`** — la stessa cella long-only a 1,0% fa **6,7111% a 10.000** e **7,2328% a 100.000** (**+7,8%**, 270 trade identici), quindi per sola **proporzione** starebbe a **≈4,69%**: proporzione, **non misura** | 🆕 **10.000 €** · **0,65%** · **tick** | 🆕 **270 uscite → 193 pos. [MIS. sulla gemella `r47a`]** | OOS 12,7 mesi · ✅ · 🔴 un solo regime | 🆕 ~0,84 (uscite) / ~0,60 (pos.) | 🔴 `[NON MISURATO]` | campo **2361** righe, **19/08** contro repo+1 = 2368 → 🔴 **−7, DIVERSO** | 42,3x / 33,0x / 26,6x@P95 | 🔴 **NO** — il binario in campo **non è** quello misurato, **il banco è a 10.000 € mentre il conto è da 100.000**, e 🆕 🔴 **sul 100k `InpAllowShort` è `[NON MISURATO]`**: non esiste nessun `.set` di questa sedia per il 100k nel repo (ci sono solo quello del **reale** e quello del **piccolo**, tutti e due `false`) e **il default dell'EA è `true`** (`ABTG_DAX_Apertura_EU.mq5` r.272). 👉 **Se il 100k girasse col corto acceso, il suo contratto tornerebbe a ~6,89% @0,65% e andrebbe RIMISURATO, non dedotto** |
 | `Dow_Apertura_US` **770202** U30USD M5 · **0,65%** | **4,22%** @1% → ≈2,74% | **100.000 €** · **1,0%** · **tick** | 🔴 **130 → `[NON MISURATO]`** — il banco R16c ha **`InpTP1_ClosePct=50`** (r.30) e **il per-trade di R16 non è in archivio**. Forbice: **56-130** | OOS 2025.06.10→2026.06.30 · ✅ | ~0,46 op/g (uscite) | **0,08 op/g** *(1 posizione in 13 giornate, `p = 0,018`)* 🔴 **17% del promesso** | campo **2148**, **19/08** = repo+1 → ✅ **ALLINEATO**; e **8 dei 9 campi non-default del `.chr` vivo coincidono con R16c** (`PIANO_PROP` v21) | **51,0x** 🟢 (+28%) | 🟠 **NON MISURATO** — codice ✅ e cella ✅ (8/9), **ma il nono campo è la taglia**: banco 1,0%, campo 0,65% |
 | `ORB_Ottimizzato` **770611** U30USD M5 · **0,30%** | **9,92%** @1% (R15, ⚠️ doppio asterisco) / **9,72%** a 100k (R16) → ≈2,98% @0,30% | R15: 10.000 € · 1,0% · tick — R16: 100.000 € · 1,0% · tick | **119 = POSIZIONI** 🟢 | OOS 12,6 mesi · ✅ | ~0,43 op/g | 🔴 `[NON MISURATO]` | campo **823** righe **v1.02, 22/08** contro repo+1 = 1464 → 🔴 **−641, DIVERSO** *(e nemmeno la stessa versione dell'EA del reale)* | 🔴 29,5x | 🔴 **NO** — **binario diverso di 641 righe** dal reale e dal repo |
 | `MaxMinNotte_DAX_Short_Ott` **770411** D30EUR M15 · **0,65%** | **1,27%** @1% → ≈0,83% | **100.000 €** · **1,0%** · **tick** | 🔴 **21 → `[NON MISURATO]`** (`InpTP1Pct=50`; per-trade R16 assente). Forbice **9-21**. 📐 su R81, stesso EA, il fattore misurato va da **1,00 a 1,57** | OOS 12,6 mesi · ✅ | ~0,078 op/g | **0,15 op/g** sul **piccolo** (197% del promesso) 🟢 | campo **620**, **19/08** = repo+1 → ✅ **ALLINEATO** | `[NON MISURATO]` — nessuna gamba in stop | 🟠 **NON MISURATO** — codice ✅, taglia 1,0% vs 0,65% |
@@ -280,7 +294,7 @@ Guardian sul piccolo**, perché il DD della flotta si deve vedere **NON FRENATO*
 
 | EA · Magic · Sym | **DD PROMESSO** | deposito/rischio/modello | `n` **uscite → POSIZIONI** | finestra · **OOS vero?** | **freq. PROM.** | **freq. CAMPO** | **codice** | **stop/spr ALL-IN** | ❓ **gira?** |
 |---|---|---|---|---|---|---|---|---|---|
-| `DAX_Apertura_EU` **770101** D30EUR M5 · **1,0%** | **10,5984%** | 10.000 € · 1,0% · tick | 🆕 **311 → 245 [MIS]** | OOS 12,6 m · ✅ | 0,97 / **0,76** pos. | **0,54** (56%, `p=0,066`) 🟠 | **2133** vs repo+1 2368 → 🔴 **−235** | 42,3x / 33,0x / 26,6x@P95 | 🔴 **NO** (codice) |
+| `DAX_Apertura_EU` **770101** D30EUR M5 · **1,0%** | 🆕 **6,7111%** @1% **[MISURATO]** *(era 10,5984%: quello è R83 con **`InpAllowShort=1`**, un'altra configurazione)* | 10.000 € · 1,0% · tick — 🥇 `risultati_prove/aperture_r35/ABTG_DAX_Apertura_EU_D30EUR_OOS_r35.csv` **riga 8** (`Pass=4`, `InpMagic=770101`, `InpAllowShort=0`, PF 1,41521, n 270). 🟢 **E la cella combacia col preset del piccolo**: `mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_DAX_Apertura_EU_770101.set` ha **`InpAllowShort=false`, `InpRiskPercent=1`, `InpMagic=770101`** — verificato, non dedotto | 🆕 **270 uscite → 193 pos. [MIS. sulla gemella `r47a`]** | OOS 12,7 m · ✅ | 🆕 ~0,84 / **~0,60** pos. | **0,54** — 🆕 **64%** del nuovo promesso (0,84); era «56%» del vecchio 0,97 ⚠️ il `p=0,066` **non è stato ricalcolato** 🟠 | **2133** vs repo+1 2368 → 🔴 **−235** | 42,3x / 33,0x / 26,6x@P95 | 🔴 **NO** (codice) |
 | `Dow_Apertura_US` **770202** U30USD M5 · **1,0%** | **4,22%** | 100.000 € · 1,0% · tick | 🔴 **130 → `[NON MIS.]`**, forbice **56-130** | OOS · ✅ | ~0,46 | **0,08** (17%, `p=0,018`) 🔴 | **2065** vs 2148 → 🔴 **−83** | 51,0x 🟢 | 🔴 **NO** (codice) |
 | `ORB_Ottimizzato` **770611** U30USD M5 · **1,0%** | **9,92%** ⚠️ doppio asterisco | 10.000 € · 1,0% · tick | **119 = POSIZIONI** 🟢 | OOS · ✅ | ~0,43 | **0,23** (54%, `p=0,192`) 🟠 | **1464 v1.04, 03/09** = repo+1 → ✅ **ALLINEATO** | 🔴 29,5x | 🟠 **NON MISURATO** — codice ✅, ma il banco è a 0,65% e qui gira a **1,0%** |
 | `MaxMinNotte_DAX_Short_Ott` **770411** D30EUR M15 · **1,0%** | **1,27%** | 100.000 € · 1,0% · tick | 🔴 **21 → `[NON MIS.]`**, forbice **9-21** | OOS · ✅ | ~0,078 | **0,15** (197%) 🟢 | **605** vs 620 → 🔴 −15 | `[NON MIS.]` | 🔴 **NO** (codice) |
@@ -363,8 +377,8 @@ sorgente: i loro `n` SONO posizioni.** 🔴 `BreakingBand` sì (`InpTP1Pct=50.0`
 |---:|---|---|---|:---:|---|
 | 1 | `771531` **DD** | **7,21%** | 🆕 **7,8323%** @ **dep. 100.000** · tick · OOS | ⬆️ **ALLARGATO** | 🥇 R31 = R110 = R112, **riprodotto tre volte al centesimo** (primo `G0-B` applicabile della storia della macchina). Il 7,21% di R29 è **la stessa cella a deposito 10.000**, dove `MathFloor` taglia il lotto e la sedia rischia **~0,87%** invece di 1,00%. 🔴 **Allargato, e giustificato dalla misura — non dalla comodità.** Il verso fisico regge: `OHLC 6,48% < tick@10k 7,21% < tick@100k 7,83%` |
 | 2 | `771531` **`n`** | **444** | 🆕 **517 uscite = 257 POSIZIONI** (OOS) · **IS 237 uscite = `[NON MISURATO]`** | ↔️ | il 444 è di R29 (10k); la cella a 100k ne fa **517**, e i `position_id` sono **257**. 🔴 **E l'IS NON è verificato in posizioni: ~118 stimate, sotto 150** |
-| 3 | `770101` **`n`** | **311** | 🆕 **311 uscite = 245 POSIZIONI [MISURATO]** | ⬇️ | `pertrade_r83d1_777120.csv`: 311 righe, 245 `position_id`, **179 con 1 uscita + 66 con 2**. Il Pass del CSV di contratto (`DD 10.5984 · Trades 311 · entry=1`) combacia col magic del per-trade. 🟢 **Resta sopra 150: merito PIENO** |
-| 4 | `770101` **DD** | 10,60% | **10,5984%** (stesso numero, scritto per intero) | ↔️ | nessun cambio |
+| 3 | `770101` **`n`** | **311** | 🆕 **270 uscite → 193 POSIZIONI** *(rifatto l'11/09 sera: **la cella di contratto è cambiata**, riga 4)* | ⬇️ | il **311 → 245** misurato sul per-trade `pertrade_r83d1_777120.csv` resta vero, **ma di R83** (corto ACCESO). La cella viva è R119: **270 uscite**, e le posizioni sono **193** sulla gemella long-only `aperture_r47/..._OOS_r47a.csv` (il per-trade di R119 non è in archivio). 🟢 **Resta sopra 150: merito PIENO** |
+| 4 | `770101` **DD** | 10,60% | 🆕 **4,3501% @0,65%** *(e **6,7111% @1,0%**)*, dep. **10.000 €** · tick | ⬇️ **RIDOTTO** | 🔴 **Non è un contratto "allargato per comodità": è un contratto che descriveva UN'ALTRA SEDIA.** Il 10,5984% viene da `r83_csv/..._OOS_r83d1.csv`, che ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`**. La 770101 è **long-only a 0,65%**: `ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2 → **PF 1,41105 · DD 4,3501% · n 270 · profit 1103,31**, riprodotto da `ancora_passo7/..._OOS_ANCORA.csv`. Il lato corto da solo vale **+3,8873 punti** (10,5984 con · 6,7111 senza, stessa finestra e stesso deposito a 1,0%). 🟢 Trailing **410 identico** nei due round = scagionato. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` |
 | 5 | `770202` **`n`** | 130 | 🆕 **130 uscite → `[NON MISURATO]`**, forbice **56-130** | ⬇️ | il banco R16c ha `InpTP1_ClosePct=50`; **il per-trade non è in archivio** |
 | 6 | `770411` · `770901` · `770924` · `770402` · `971501` · `970901` · `970912` · `970913` · `770511` · `771332` · `772161-63` · `774101` · `770250` **`n`** | numeri secchi | 🆕 **`[NON MISURATO]` + forbice** | ⬇️ | `InpTP1Pct`/`InpTP1_ClosePct`/`InpPartialClosePercent` ≠ 0 e per-trade assente. 🔴 **Non ho diviso per due nemmeno una volta** |
 | 7 | `771321` · `771322` · `770531` **`n`** | 40 · 49 · 88 «chiusure» | 🆕 **23 · 27 · 50 POSIZIONI [MISURATO]** | ⬇️ | contati i `position_id` in `risultati_prove/trades_candidati_r23/`. Fattori **1,74 · 1,81 · 1,76** |
@@ -391,7 +405,7 @@ sono state toccate); una **RIGA-SEDIA** è la stessa cella su un conto (`770101`
 | **righe-sedia censite** | **47** (= 41 sedie uniche) |
 | ✏️ **CELLE di contratto corrette in questo giro** | **27** (= **31 righe-sedia**) |
 | 🔴 di cui `n` che diventa **`[NON MISURATO]` + forbice** | **17** — `770202` · `770411` · `770901` · `770924` · `770402` · `771332` · `971501` · `970901` · `970912` · `970913` · `770511` · `772161` · `772162` · `772163` · `774101` · `770250` · `771531` **(solo l'IS)** |
-| 🆕 di cui `n` **ricontato in POSIZIONI, MISURATO** | **5** — `771531` OOS (517→**257**) · `770101` (311→**245**) · `771321` (40→**23**) · `771322` (49→**27**) · `770531` (88→**50**) |
+| 🆕 di cui `n` **ricontato in POSIZIONI, MISURATO** | **5** — `771531` OOS (517→**257**) · `770101` (🆕 **cella cambiata l'11/09**: 270 uscite → **193** pos., misurate sulla gemella `r47a`) · `771321` (40→**23**) · `771322` (49→**27**) · `770531` (88→**50**) |
 | 🔴 finestre che perdono l'etichetta di **fuori campione** | **15** — `770924` · `770402` · `971501` · `970901` · `970912` · `970913` · `770511` · `770250` · `771332` · `772342` · `772343` · `772361` · `772362` · `772421` · `772422` |
 | 🔴 **contratti che descrivono un codice NON in campo** | **39 righe-sedia su 47** *(38 con un binario diverso + `BREAKOUT_EA_JPY_v3`, il cui `.mq5` non è in nessun terminale)* |
 | ✅ **«descrive la sedia che gira?» = SÌ** | **1** — `770611` sul **REALE** |
@@ -481,6 +495,21 @@ solo un mese di modifiche mai girate su quel conto, **comprese quelle che
 cambiano le taglie**. Una sedia per volta, col rapporto dei lotti prima/dopo
 come prova.
 
+### 5️⃣-bis M-C12 🆕🔴 — **`InpAllowShort` della `770101` SUL 100k: `[NON MISURATO]`**
+Il lato corto è la variabile che da sola vale **+3,8873 punti di DD** su questa
+sedia (10,5984% con · 6,7111% senza, stessa finestra, stesso deposito, taglia
+1,0%). È **verificato spento** nel preset del **REALE**
+(`mql5/Presets/conto_reale/ABTG_DAX_Apertura_EU_770101_REALE.set`) e in quello del
+**PICCOLO** (`mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_DAX_Apertura_EU_770101.set`),
+tutti e due `InpAllowShort=false`. 🔴 **Per il 100k non esiste nessun `.set` nel
+repo, e il default dell'EA è `true`** (`ABTG_DAX_Apertura_EU.mq5` r.272).
+👉 **Finché non si legge il `.chr` vivo del 50504263, il contratto di quella
+riga sta fra 4,35% e ~6,89%**, e i due numeri **non si scelgono a occhio**.
+📐 Costo della misura: **zero round** — è la lettura di un file.
+*(Nota di rischio indipendente: il lato corto di questo motore è già misurato in
+perdita — R107 DAX short, **PF 0,957 su n=257**,
+`report/CENSIMENTO_LATO_SHORT_2026-09-09.md`.)*
+
 ### 6️⃣ M-C4 — **Riprodurre `771322` PTE GBPUSD per sciogliere il contratto conteso**
 R23 (tick, 12,5 mesi) **2,64%** · R78 (OHLC, 13 anni) **17,68% PF 0,972** · R103
 (OHLC, 6,5 anni) **13,1% PF 0,96**. ⚠️ Il round lungo **a tick non si può fare**
@@ -551,7 +580,7 @@ E lo slippaggio vero sul conto che paga è **`[NON MISURATO]`** (`SlippageLogger
 |---|---:|---|---|
 | `772362` CostToCost GBPCAD | **~10,4%** | piccolo | da solo **è tutto il muro FTMO del 10%**, PF 0,92 su 6,5 anni, e col pedaggio all-in sta a **20,0x** |
 | `971501` EMA200_Ott XAUUSD | **~11,5%** | piccolo | **oltre il muro**; DD @1% **45,91%**. **Prop: NO a nessuna taglia** (firma 23/08) |
-| `770101` DAX Apertura EU | **~6,89%** @0,65% (10,5984% @1%) | **REALE** + 100k + piccolo | è la più veloce sul conto reale e il suo DD **mangia i due terzi del muro**. 🆕 **E il suo `n` vero è 245, non 311** |
+| `770101` DAX Apertura EU | 🆕 **4,3501%** @0,65% **[MISURATO, dep. 10.000 €]** *(6,7111% @1,0%)* | **REALE** + 100k + piccolo | è la più veloce sul conto reale e il suo DD **si mangia meno della metà del muro del 10%** — 🆕 **corretto l'11/09: il vecchio «~6,89% = due terzi del muro» era R83 con il lato corto ACCESO a taglia 1,0%, cioè un'altra configurazione** (`report/CONFLITTO_DD_770101_2026-09-11.md`). 🔴 **Asterisco**: il numero è a **10.000 €**; su un banco da **100.000 €** è `[NON MISURATO]` (+7,8% misurato sul deposito ⇒ ≈4,69% **per proporzione**). 🆕 E il suo `n` vero è **270 uscite = 193 posizioni**, non 311 |
 
 ---
 
@@ -562,6 +591,7 @@ E lo slippaggio vero sul conto che paga è **`[NON MISURATO]`** (`SlippageLogger
 | 07/09/2026 | **v1** | prima stesura: 47 righe-sedia, DD promesso + fonte + `n`, 4 buchi di perimetro, 6 misure richieste |
 | 09/09/2026 | v1.1 | chiusura della contraddizione C3 sull'ORB `770611` |
 | **11/09/2026** | 🆕 **v2 — QUESTO FILE, IL VIVO** | **27 celle di contratto corrette (= 31 righe-sedia).** (1) `771531` **7,21% → 7,8323%** @dep. 100.000, `n` **444 → 517 uscite = 257 posizioni**; (2) **classe 226 applicata e ALLARGATA**: trovati **due nomi di parametro che il grep originale non cercava** (`InpTP1_ClosePct` sulle due Aperture e sulla Nasdaq, `InpPartialClosePercent` su GapContinuation) → **17 `n` diventano `[NON MISURATO]` con forbice**, **5 ricontati e MISURATI**; (3) **classe 224 applicata**: **15 finestre** perdono l'etichetta di fuori campione, fra cui `970913` e `970912` **verificate per misura** sulla griglia del 26/07; (4) **colonna stop/spread ALL-IN** con la commissione misurata; (5) 🆕 **colonna frequenza DI CAMPO** su 31 magic; (6) 🆕 **colonna versione del codice** misurata contro quella in campo → **39 righe su 47 descrivono un codice non in campo**; (7) 🆕 **colonna «descrive la sedia che gira?»** → **SÌ su 1 riga sola**. Aperti **M-C7 · M-C8 · M-C9 · M-C10 · M-C11**; chiuso il dubbio sulla presenza in campo di `770924` |
+| **11/09/2026 sera** | 🆕 **v2.1** | 🪦 **ERRATA sulla `770101` — 5 celle corrette in questo file.** Il DD promesso citava `r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`, che ha **`InpAllowShort=1`, `InpRiskPercent=1`, `InpMagic=777120/777121`**: **non è la sedia 770101**. La cella viva è **long-only a 0,65%** → **4,3501%** (`ritardo_r119b_csv/..._OOS_R119_DAX_D0000.csv` r.2, riprodotta da `ancora_passo7/..._OOS_ANCORA.csv`) e **6,7111%** a 1,0% (`aperture_r35/..._OOS_r35.csv` r.8). Aggiornate: §2 (reale), §3 (100k), §4a (piccolo @1,0%), §5 righe 3-4, §8.2. Cadono la sigla `[APPROSSIMATO]` e la frase *«mangia i due terzi del muro»*. 🔴 **Aggiunto l'ASTERISCO DEL DEPOSITO**: il 4,3501% è a **10.000 €**; a **100.000 €** il DD promesso è `[NON MISURATO]` (la stessa cella a 1,0% fa 6,7111% a 10k e **7,2328% a 100k, +7,8%**, 270 trade identici). 🟢 Trailing **410 scagionato** (identico nei due round). 🆕 **Buco nuovo aperto dallo stesso controllo (M-C12)**: il long-only è **verificato nei preset del REALE e del PICCOLO** (`conto_reale/..._770101_REALE.set` e `sedie_piccolo/recupero2/sedia_..._770101.set`, tutti e due `InpAllowShort=false`), ma **sul 100k non esiste nessun `.set` nel repo** e il **default dell'EA è `true`**: là il lato corto è `[NON MISURATO]`. Aggiornati anche **§1.1 punti 2 e 3** (il metro lineare sbaglia dello **0,28%** qui contro il 6% di `771531`; e il deposito vale **+7,8%**). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` |
 
 ---
 

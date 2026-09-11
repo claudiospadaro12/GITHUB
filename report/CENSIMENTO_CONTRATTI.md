@@ -3,7 +3,7 @@
 > # 🛑 QUESTO FILE È IL **v1 (07/09)** E **NON È PIÙ IL DOCUMENTO VIVO**
 > ## 👉 Il censimento che comanda è **[`report/CENSIMENTO_CONTRATTI_v2.md`](CENSIMENTO_CONTRATTI_v2.md)** (11/09/2026).
 >
-> **Non usare questa pagina per far scattare niente.** Fra il 10 e l'11/09 sei
+> **Non usare questa pagina per far scattare niente.** Fra il 10 e l'11/09 **sette**
 > sue premesse sono state **misurate false o incomplete**, e ognuna cambia un
 > numero che decide:
 > 1. 🔴 `771531` EMA200 Dow: promette **7,21% · n 444**. Il numero giusto è
@@ -30,8 +30,19 @@
 >    **39 righe-sedia su 47** hanno un DD promesso che descrive **un programma
 >    che non è in campo**.
 >
+> 7. 🔴🆕 **(11/09 sera, settimo difetto)** — Il DD promesso della **`770101`**
+>    (`ABTG_DAX_Apertura_EU`, la sedia **più veloce del conto REALE 10105439**)
+>    cita `r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`, che ha
+>    **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`**:
+>    **è un'altra configurazione**, non quella sedia. Il contratto vero è
+>    **4,3501% @0,65%** (long-only, `InpMagic=770101`, = preset del reale) e
+>    **6,7111% @1,0%**. 👉 Il «≈6,89%» e la frase *«mangia i due terzi del muro»*
+>    **cadono**. ⚠️ E il 4,3501% è misurato a **deposito 10.000 €**: a 100.000 € il
+>    DD promesso è **`[NON MISURATO]`** (+7,8% misurato sul solo deposito).
+>    📄 `report/CONFLITTO_DD_770101_2026-09-11.md`.
+>
 > 🧊 **Resta qui come VERBALE di quello che credevamo il 07/09**, perché
-> cancellarlo cancellerebbe la prova che il metodo ha trovato i sei difetti.
+> cancellarlo cancellerebbe la prova che il metodo ha trovato i **sette** difetti.
 
 _Compilato il **07/09/2026**. È il **prerequisito dichiarato** del criterio di
 uscita delle sedie firmato il 18/08/2026 (`report/FIRME_2026-08-18.md`, corsia
@@ -98,7 +109,7 @@ Guardian 779002 e SlippageLogger sono utility: non tradano, non hanno contratto.
 
 | EA | Magic | Sym | TF | Rischio VIVO | **DD PROMESSO** | Deposito/rischio del backtest | `n` | MERITO | **Freq. promessa** | Fonte | STATO |
 |---|---:|---|---|---:|---|---|---:|---|---|---|---|
-| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **0,65%** | **10,60%** a 1% → **≈6,89%** a 0,65% | **10.000 €** · **1,0%** · **tick** · OOS 2024.09.26+split, 12,6 mesi | **311** | 🟢 **PIENO** (311 ≥ 150) | ~21 op/mese ⇒ **~0,97 op/g** | `risultati_archivio/r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv` riga `entry=1` (DD 10,5984 · n 311 · PF 1,18776 · profit +999,42 · pegg. giorno −1,0671%) — **R83**, cella RETEST = la cella viva; revisione firmata 02/09 (`FIRME_2026-09-02.md`) | ✅ **MISURATO** |
+| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **0,65%** | **10,60%** a 1% → **≈6,89%** a 0,65% | **10.000 €** · **1,0%** · **tick** · OOS 2024.09.26+split, 12,6 mesi | **311** | 🟢 **PIENO** (311 ≥ 150) | ~21 op/mese ⇒ **~0,97 op/g** | `risultati_archivio/r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv` riga `entry=1` (DD 10,5984 · n 311 · PF 1,18776 · profit +999,42 · pegg. giorno −1,0671%) — **R83**, cella RETEST = la cella viva; revisione firmata 02/09 (`FIRME_2026-09-02.md`) | ✅ **MISURATO** 🔴🆕 **ERRATA 11/09**: questo DD **non è della `770101`**. La fonte citata (`r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`) ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`** — verificato nelle colonne del CSV. Il contratto vero della sedia viva è **4,3501% @0,65%** (`ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2: `InpAllowShort=0`, `InpMagic=770101`, PF 1,41105, n 270) e **6,7111% @1,0%** (`aperture_r35/..._OOS_r35.csv` r.8). ⚠️ **A deposito 10.000 €**: a 100.000 € è `[NON MISURATO]` (+7,8% misurato). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. |
 | `ABTG_ORB_Ottimizzato` | 770611 | U30USD | M5 | **0,65%** | **6,5389%** (OOS) · **5,6530%** (IS) — **già alla taglia viva** | **10.000 €** · **0,65%** · **tick** · IS 2024.09.26→2025.06.09 / OOS 2025.06.10→2026.06.30 | **119** OOS · **71** IS | 🟠 **SOSPESO** (119 e 71 < 150) | ~9,4 op/mese ⇒ **~0,43 op/g** | `risultati_archivio/ritardo_r119_csv/ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_R119_ORB_D0000.csv` · referto `REFERTO_RITARDO_R119_PRIMO_GIRO.md` — **R119, 07/09/2026** | ✅ **MISURATO** (il più recente e il più pulito del parco: taglia del backtest = taglia viva) |
 
 > 🔴 **Nota di rischio che va detta ogni volta che si cita l'ORB sul reale**:
@@ -182,7 +193,7 @@ nessuna pagella né in nessun censimento. Il 100k è ancora il quintetto del 09/
 
 | EA | Magic | Sym | TF | Rischio VIVO | **DD PROMESSO** | Deposito/rischio del backtest | `n` | MERITO | **Freq. promessa** | Fonte | STATO |
 |---|---:|---|---|---:|---|---|---:|---|---|---|---|
-| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **0,65%** | **10,60%** a 1% → **≈6,89%** | 10.000 € · 1,0% · tick · 12,6 mesi | **311** | 🟢 PIENO | ~0,97 op/g | R83 (come sopra) | ✅ **MISURATO** |
+| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **0,65%** | **10,60%** a 1% → **≈6,89%** | 10.000 € · 1,0% · tick · 12,6 mesi | **311** | 🟢 PIENO | ~0,97 op/g | R83 (come sopra) | ✅ **MISURATO** 🔴🆕 **ERRATA 11/09**: questo DD **non è della `770101`**. La fonte citata (`r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`) ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`** — verificato nelle colonne del CSV. Il contratto vero della sedia viva è **4,3501% @0,65%** (`ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2: `InpAllowShort=0`, `InpMagic=770101`, PF 1,41105, n 270) e **6,7111% @1,0%** (`aperture_r35/..._OOS_r35.csv` r.8). ⚠️ **A deposito 10.000 €**: a 100.000 € è `[NON MISURATO]` (+7,8% misurato). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. |
 | `ABTG_Dow_Apertura_US` | 770202 | U30USD | M5 | **0,65%** | **4,22%** a 1% → **≈2,74%** | **100.000 €** · **1,0%** · **tick** · OOS 2025.06.10→2026.06.30 | **130** | 🟠 **SOSPESO** (130 < 150) | ~10 op/mese ⇒ **~0,46 op/g** | `REFERTO_PORTAFOGLIO_R16.md` §serie (riga `Dow Apertura ricetta 770206`: 130 tr · +6.721,93 · DD 4,22%); riconferma R54 4,39% PF 1,270 | ✅ **MISURATO** |
 | `ABTG_ORB_Ottimizzato` | 770611 | U30USD | M5 | **0,30%** | **9,92%** a 1% (R15, doppio asterisco) / **9,72%** a 100k (R16) → **≈2,98%** a 0,30% | R15: 10.000 € · 1,0% · tick — R16: 100.000 € · 1,0% · tick | **119** | 🟠 **SOSPESO** | ~0,43 op/g | `REFERTO_ROUND15_ORB_GESTIONE.md` · `REFERTO_PORTAFOGLIO_R16.md` (riga `ORB-EMA200 lab 770612`) | ✅ **MISURATO** |
 | `ABTG_MaxMinNotte_DAX_Short_Ott` | 770411 | D30EUR | M15 | **0,65%** | **1,27%** a 1% → **≈0,83%** | **100.000 €** · **1,0%** · **tick** · OOS 12,6 mesi | **21** | 🟠 **SOSPESO** (21 ≪ 150) | ~1,7 op/mese ⇒ **~0,078 op/g** | `REFERTO_PORTAFOGLIO_R16.md` (riga `MaxMinNotte DAX Short 770413`: 21 tr · DD 1,27%) | ✅ **MISURATO** ⚠️ campione minuscolo |
@@ -201,7 +212,7 @@ numero potato con un numero intero (`HANDOFF.md` §3 del 06/09).
 
 | EA | Magic | Sym | TF | Rischio VIVO | **DD PROMESSO** | Deposito/rischio del backtest | `n` | MERITO | **Freq. promessa** | Fonte | STATO |
 |---|---:|---|---|---:|---|---|---:|---|---|---|---|
-| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **1,0%** | **10,60%** | 10.000 € · 1,0% · tick · 12,6 mesi | **311** | 🟢 PIENO | ~0,97 op/g | R83 — CSV citato in §2 | ✅ **MISURATO** |
+| `ABTG_DAX_Apertura_EU` | 770101 | D30EUR | M5 | **1,0%** | **10,60%** | 10.000 € · 1,0% · tick · 12,6 mesi | **311** | 🟢 PIENO | ~0,97 op/g | R83 — CSV citato in §2 | ✅ **MISURATO** 🔴🆕 **ERRATA 11/09**: questo DD **non è della `770101`**. La fonte citata (`r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`) ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`** — verificato nelle colonne del CSV. Il contratto vero della sedia viva è **4,3501% @0,65%** (`ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2: `InpAllowShort=0`, `InpMagic=770101`, PF 1,41105, n 270) e **6,7111% @1,0%** (`aperture_r35/..._OOS_r35.csv` r.8). ⚠️ **A deposito 10.000 €**: a 100.000 € è `[NON MISURATO]` (+7,8% misurato). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. |
 | `ABTG_Dow_Apertura_US` | 770202 | U30USD | M5 | **1,0%** | **4,22%** | 100.000 € · 1,0% · tick | **130** | 🟠 SOSPESO | ~0,46 op/g | R16 · R54 | ✅ **MISURATO** |
 | `ABTG_ORB_Ottimizzato` | 770611 | U30USD | M5 | **1,0%** | **9,92%** ⚠️ doppio asterisco | 10.000 € · 1,0% · tick | **119** | 🟠 SOSPESO | ~0,43 op/g | R15 · R16 · R119 | ✅ **MISURATO** |
 | `ABTG_MaxMinNotte_DAX_Short_Ott` | 770411 | D30EUR | M15 | **1,0%** | **1,27%** | 100.000 € · 1,0% · tick | **21** | 🟠 SOSPESO | ~0,078 op/g | R16 | ✅ **MISURATO** |
@@ -334,7 +345,7 @@ colonna esiste**: le promesse nascono a **1,0%** (quasi tutte), a **0,65%**
 |---|---:|---|---|
 | `772362` CostToCost GBPCAD | **~10,4%** | piccolo | da solo **è tutto il muro FTMO del 10%**, e il motore ha PF 0,92 su 6,5 anni |
 | `971501` EMA200_Ott XAUUSD | **~11,5%** | piccolo | **oltre il muro**, e il DD a 1% è 45,91% (10,4x il promesso originale) |
-| `770101` DAX Apertura EU | **~6,89%** a 0,65% (10,60% a 1%) | **REALE** + 100k + piccolo | è la sedia **più veloce sul conto reale** (~0,97 op/g) e il suo DD promesso da solo mangia i due terzi del muro |
+| `770101` DAX Apertura EU | **~6,89%** a 0,65% (10,60% a 1%) | **REALE** + 100k + piccolo | è la sedia **più veloce sul conto reale** (~0,97 op/g) e ~~il suo DD promesso da solo mangia i due terzi del muro~~ 🔴 **FALSO, vedi ERRATA**: col 4,3501% ne mangia **meno della metà** 🔴🆕 **ERRATA 11/09**: questo DD **non è della `770101`**. La fonte citata (`r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`) ha **`InpAllowShort=1`**, **`InpRiskPercent=1`** e **`InpMagic=777120/777121`** — verificato nelle colonne del CSV. Il contratto vero della sedia viva è **4,3501% @0,65%** (`ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2: `InpAllowShort=0`, `InpMagic=770101`, PF 1,41105, n 270) e **6,7111% @1,0%** (`aperture_r35/..._OOS_r35.csv` r.8). ⚠️ **A deposito 10.000 €**: a 100.000 € è `[NON MISURATO]` (+7,8% misurato). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`. |
 
 ---
 

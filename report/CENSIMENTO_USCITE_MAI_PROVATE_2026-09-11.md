@@ -12,13 +12,13 @@
 ## 🎯 1. LA RISPOSTA IN TRE RIGHE
 
 > **1.** Sulle **41 sedie vive** ci sono **333 coppie (sedia × manopola d'uscita)**.
-> **274 di quelle coppie non sono MAI state mosse su quella sedia** — e **110** non hanno
+> **274 di quelle coppie non sono MAI state mosse su quella sedia** 🔴🆕 *(LIMITE SUPERIORE: almeno **271**, vedi §3-bis)* — e **110** non hanno
 > **mai preso due valori in NESSUNO dei 2.087 CSV** con colonne `Inp*` del repo
 > (65 coppie distinte EA × manopola).
 >
 > **2.** Ma **27 di quelle 274 sono INERTI PER COSTRUZIONE** nella configurazione viva:
 > girarle costa passate e **non misura niente**. Sono **falsi positivi**, verificati
-> nel codice e nei preset vivi uno per uno. 👉 Le coppie **mai mosse E vive** sono **247**.
+> nel codice e nei preset vivi uno per uno. 👉 Le coppie **mai mosse E vive** sono **247** 🔴🆕 *(limite superiore: almeno **244**, §3-bis)*.
 >
 > **3.** Le tre che valgono il round: **🥇 `InpSLBufferPips` su `970913` SupRev NAS H1**
 > (sedia al **72% del pavimento di costo**, PF 1,57 su n=155) · **🥈 `InpSLLookback` su
@@ -108,7 +108,7 @@ colonna dopo). "mai in nessun CSV" = la colonna non ha mai preso due valori in n
 
 | sedia (magic) | EA | simbolo | TF | manopole dell'USCITA che esistono | **mai mosse su questa sedia** | 🧊 inerti per costruzione | **passate per metterle tutte ad asse** |
 |---|---|---|---|---|---|---|---:|
-| **770101** | `ABTG_DAX_Apertura_EU` | D30EUR | M5 | 17 — `InpBEatR` `InpBreakevenAtTP1` `InpTP1_ClosePct` `InpTP1_R` `InpAtrSlMult` `InpMinStopPts` `InpSkipIfTight` `InpSLMode` `InpTrailAtrMult` `InpTrailFixedPts` `InpTrailMode` `InpTrailStartR` `InpTrailTF` `InpUseTrailing` `InpNewsFlatten` `InpCloseAtEnd` `InpCloseHour` | **6** (di cui **1** mai in nessun CSV) — `InpBEatR`(0) `InpBreakevenAtTP1`(true) `InpTP1_R`(1.0) `InpSLMode`(ABTG_SL_RANGE) `InpCloseAtEnd`(true) `InpCloseHour`(ABTG_DEF_CLOSE_HOUR) | `InpAtrSlMult` `InpTrailAtrMult` `InpTrailFixedPts` `InpNewsFlatten` | **54** |
+| **770101** | `ABTG_DAX_Apertura_EU` | D30EUR | M5 | 17 — `InpBEatR` `InpBreakevenAtTP1` `InpTP1_ClosePct` `InpTP1_R` `InpAtrSlMult` `InpMinStopPts` `InpSkipIfTight` `InpSLMode` `InpTrailAtrMult` `InpTrailFixedPts` `InpTrailMode` `InpTrailStartR` `InpTrailTF` `InpUseTrailing` `InpNewsFlatten` `InpCloseAtEnd` `InpCloseHour` | 🆕 **3** (di cui **1** mai in nessun CSV) — `InpSLMode`(ABTG_SL_RANGE) `InpCloseAtEnd`(true) `InpCloseHour`(ABTG_DEF_CLOSE_HOUR) · 🔴 **ERRATA 11/09**: qui c'erano anche `InpBEatR` `InpBreakevenAtTP1` `InpTP1_R`, e **sono tutte e tre GIÀ STATE MESSE AD ASSE su questa sedia** — `InpBEatR` **0/1** e `InpBreakevenAtTP1` **0/1** in `backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv` (96 righe, `InpMagic` 770101/770151); `InpBreakevenAtTP1` **0/1** e `InpTP1_R` **0,5/1,0** anche in `risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv` e `..._OOS.csv` (8 righe, `InpMagic=770101`) | `InpAtrSlMult` `InpTrailAtrMult` `InpTrailFixedPts` `InpNewsFlatten` | 🆕 **24** *(era 54)* |
 | **770202** | `ABTG_Dow_Apertura_US` | U30USD | M5 | 17 — `InpBEatR` `InpBreakevenAtTP1` `InpTP1_ClosePct` `InpTP1_R` `InpAtrSlMult` `InpMinStopPts` `InpSkipIfTight` `InpSLMode` `InpTrailAtrMult` `InpTrailFixedPts` `InpTrailMode` `InpTrailStartR` `InpTrailTF` `InpUseTrailing` `InpNewsFlatten` `InpCloseAtEnd` `InpCloseHour` | **10** (di cui **1** mai in nessun CSV) — `InpBEatR`(0) `InpBreakevenAtTP1`(false) `InpTP1_R`(0.5) `InpMinStopPts`(500) `InpSkipIfTight`(false) `InpSLMode`(ABTG_SL_RANGE) `InpTrailStartR`(0) `InpTrailTF`(PERIOD_M5) `InpCloseAtEnd`(true) `InpCloseHour`(ABTG_DEF_CLOSE_HOUR) | `InpAtrSlMult` `InpTrailAtrMult` `InpTrailFixedPts` `InpNewsFlatten` | **94** |
 | **770250** | `ABTG_Nasdaq_Apertura_US` | NASUSD | M15 | 18 — `InpBEatR` `InpBreakevenAtTP1` `InpRunnerTP_R` `InpTP1_ClosePct` `InpTP1_R` `InpAtrSlMult` `InpMinStopPts` `InpSkipIfTight` `InpSLMode` `InpTrailAtrMult` `InpTrailFixedPts` `InpTrailMode` `InpTrailStartR` `InpTrailTF` `InpUseTrailing` `InpNewsFlatten` `InpCloseAtEnd` `InpCloseHour` | **6** (di cui **1** mai in nessun CSV) — `InpBEatR`(0) `InpRunnerTP_R`(0.0) `InpSLMode`(ABTG_SL_RANGE) `InpTrailMode`((ENUM_ABTG_TRAIL)ABTG_DEF_TRAIL_MODE) `InpUseTrailing`(true) `InpCloseAtEnd`(true) | `InpAtrSlMult` `InpTrailAtrMult` `InpTrailFixedPts` `InpNewsFlatten` | **54** |
 | **770402** | `ABTG_MaxMinNotte` | XAUUSD | H2 | 15 — `InpBreakeven` `InpTP1Pct` `InpTP1_R` `InpTP2Pct` `InpTP2_R` `InpAtrSLmult` `InpSLFixedPts` `InpSLMode` `InpTPfinal_R` `InpUseEMA200Target` `InpTrailAtrMult` `InpUseTrailing` `InpNewsFlatten` `InpCloseAtEnd` `InpCloseHour` | **13** (di cui **1** mai in nessun CSV) — `InpBreakeven`(true) `InpTP1Pct`(50) `InpTP1_R`(1.0) `InpTP2Pct`(50) `InpTP2_R`(2.5) `InpAtrSLmult`(1.5) `InpSLFixedPts`(3000) `InpTPfinal_R`(4.0) `InpUseEMA200Target`(true) `InpTrailAtrMult`(2.0) `InpUseTrailing`(true) `InpCloseAtEnd`(true) `InpCloseHour`(17) | `InpNewsFlatten` | **124** |
@@ -148,7 +148,46 @@ colonna dopo). "mai in nessun CSV" = la colonna non ha mai preso due valori in n
 | **970912** | `ABTG_SupRev_DAX_H4_Ottimizzato` | D30EUR | H4 | 10 — `InpBreakeven` `InpFirstFraction` `InpTP1Pct` `InpTP1_R` `InpSLBufferPips` `InpSLLookback` `InpTP_RR` `InpTrailOnST` `InpEndHour` `InpExitOnFlip` | **10** (di cui **5** mai in nessun CSV) — `InpBreakeven`(true) `InpFirstFraction`(0.3333) `InpTP1Pct`(50) `InpTP1_R`(1.0) `InpSLBufferPips`(3) `InpSLLookback`(5) `InpTP_RR`(3.0) `InpTrailOnST`(true) `InpEndHour`(24) `InpExitOnFlip`(true) | — | **96** |
 | **970913** | `ABTG_SupRev_NAS_H1_Ottimizzato` | NASUSD | H1 | 10 — `InpBreakeven` `InpFirstFraction` `InpTP1Pct` `InpTP1_R` `InpSLBufferPips` `InpSLLookback` `InpTP_RR` `InpTrailOnST` `InpEndHour` `InpExitOnFlip` | **10** (di cui **5** mai in nessun CSV) — `InpBreakeven`(true) `InpFirstFraction`(0.3333) `InpTP1Pct`(50) `InpTP1_R`(1.0) `InpSLBufferPips`(3) `InpSLLookback`(5) `InpTP_RR`(3.0) `InpTrailOnST`(true) `InpEndHour`(24) `InpExitOnFlip`(true) | — | **96** |
 | **971501** | `ABTG_EMA200_Ottimizzato` | XAUUSD | H4 | 8 — `InpBreakeven` `InpTP1Pct` `InpTP1_ATRmult` `InpSLatr` `InpTP_RR` `InpUseTrailing` `InpFridayClose` `InpFridayCloseHour` | **8** (di cui **0** mai in nessun CSV) — `InpBreakeven`(true) `InpTP1Pct`(50) `InpTP1_ATRmult`(0.0) `InpSLatr`(1.0) `InpTP_RR`(2.0) `InpUseTrailing`(true) `InpFridayClose`(false) `InpFridayCloseHour`(20) | — | **80** |
+## 🔴🆕 3-bis. ERRATA DELL'11/09 SERA — `ea_of()` non vede 668 CSV, e il conto è un LIMITE SUPERIORE
+
+**Il fatto, misurato:** la riga della **`770101`** dichiarava «mai mosse: 6», e **tre di
+quelle sei erano già state messe ad asse su quella stessa sedia**. I file:
+
+| manopola | valori presi | file (magic verificato dentro il CSV) |
+|---|---|---|
+| `InpBEatR` | **0 / 1** | `backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv` — 96 righe, `InpMagic` **770101/770151** |
+| `InpBreakevenAtTP1` | **0 / 1** | lo stesso file **+** `risultati_archivio/Walkforward_Aperture/DAX_F_gestione_IS.csv` e `..._OOS.csv` (8 righe, `InpMagic=770101`) |
+| `InpTP1_R` | **0,5 / 1,0** | `Walkforward_Aperture/DAX_F_gestione_IS.csv` e `..._OOS.csv` |
+
+🔎 **La causa, letta nel codice, non dedotta:** `censimento_uscite.py` attribuisce un CSV
+a un EA con `ea_of()` (r.222-228), che riconosce solo i file il cui **basename comincia**
+col nome dell'EA, oppure che stanno in una **cartella chiamata come l'EA**. I file qui
+sopra si chiamano `gestione_ABTG_...` (il nome dell'EA c'è, ma **non in testa**) e
+`DAX_F_gestione_*` dentro `Walkforward_Aperture/` (il nome dell'EA **non c'è affatto**):
+`ea_of()` torna **`None`** e il file **non conta per nessun motore**.
+
+📏 **Quanto è grande il buco, misurato e non stimato: `ea_of()` torna `None` su 668 CSV
+dei 2.087 con colonne `Inp*`, e sono CSV che hanno almeno una colonna AD ASSE.**
+
+🔴 **Conseguenza sui numeri di questo referto — e va detta prima di usarli:**
+- i **274 «mai mosse»**, i **247 «mai mosse E vive»** e le **2.436 passate** sono un
+  **LIMITE SUPERIORE**, non una misura: `[DA RIVERIFICARE]`;
+- di sicuro sono **almeno 3 di meno** (271 e 244) e le passate **al più 2.406**, perché
+  le tre coppie della `770101` sono **verificate false una per una**;
+- 🟢 **il verso dell'errore è quello buono per il RISCHIO** (dice «mai provata» dove
+  invece è stata provata: fa **sprecare passate**, non prendere rischi), **ma è quello
+  cattivo per il CERTIFICATO DI MORTE**: una casella *«gestione messa ad asse?»* segnata
+  vuota quando è piena **è lo stesso errore di misura, rovesciato**.
+
+🛠️ **La correzione vera è una riga di `ea_of()`** (riconoscere il nome dell'EA **ovunque**
+nel percorso, e in seconda battuta attribuire per `InpMagic`), **poi si rigira lo script e
+si rifà la tabella**. Qui ho corretto **solo la riga della `770101`**, che è quella che ho
+verificato a mano file per file: **non dichiaro corrette le altre 39.**
+
+---
+
 > **Totale: 2.436 passate** per mettere ad asse **tutto** il mai-mosso della flotta.
+> 🔴🆕 **Limite superiore: al più 2.406** — vedi l'errata del §3-bis.
 > 💰 **Nessuno lancerà mai 2.436 passate.** Il numero serve a una cosa sola: dire che
 > questa miniera non si esaurisce in un round, e che va scavata **in ordine di valore**.
 > È esattamente il senso del §4.
