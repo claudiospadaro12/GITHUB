@@ -153,6 +153,40 @@ motore morto: quella e' la regola del 19/08.
 
 ---
 
+## 5-bis. 🧰 E IL CANCELLO ADESSO **COMPILA**
+
+Trovato stanotte, ed era un buco nel **controllore**, non nel controllato:
+il cancello ha stampato *"nessun difetto meccanico"* su un file che **non
+compilava affatto**. Tutti i suoi controlli erano **testuali** — ASCII,
+formati, ore, terminali — e **nessuno** guardava se il file fosse PowerShell
+valido. 📌 E' la stessa classe che abbiamo pagato l'11/09, quando contavo le
+graffe a mano.
+
+✅ Adesso chiama **il parser vero**, e un errore di sintassi **blocca**. E se
+`pwsh` non c'e' sulla macchina, **lo dichiara invece di tacere** — un cancello
+che salta un controllo in silenzio fa credere di averlo fatto.
+
+🧪 **E il contro-esempio, la prima volta, NON ha sparato**: avevo tagliato una
+riga a caso da un file sano per "romperlo", e il cancello l'ha dato buono —
+**perche' aveva ragione**, il file era ancora valido. 👉 *Un contro-esempio
+che non fallisce non ha verificato niente.* Rifatto con tre rotture costruite
+apposta: **3 FAIL su 3**, e due sono **esattamente le classi che avevamo gia'
+pagato** (la graffa dell'11/09 e la stringa non chiusa del 17/08).
+**Collaudo: 19 script su 19 compilano.**
+
+### 🧪 E il kill chirurgico non l'ho solo scritto: l'ho **eseguito**
+`backtest_pipeline/prove_strumenti/prova_kill_chirurgico.ps1` — rilanciabile
+con una riga, non tocca niente (i processi sono finti). **5 prove su 5**:
+
+| prova | esito |
+|---|---|
+| il **vecchio** kill prendeva tutti e cinque, **reale compreso** | ✅ dimostrato |
+| il **nuovo** prende **solo il banco**, in entrambe le forme | ✅ |
+| se il bersaglio fosse il piccolo, il filtro **lo segue** (quindi non e' una lista nera cablata) e **non** prende il reale | ✅ |
+| la trappola del prefisso: `C:\MT5_Backtest` **non** cattura `C:\MT5_Backtest_V3` | ✅ |
+
+---
+
 ## 6. 🙋 QUELLO CHE DECIDI TU (io non ci metto mano)
 
 1. 🔴 **IL REPO E' PUBBLICO.** Verificato l'altro ieri. Da allora non
