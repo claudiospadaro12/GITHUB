@@ -380,8 +380,8 @@ piccolo e 100k — e' **ottimista per costruzione** sul fronte esecuzione.
 | orario (**ora server BCM** = italiana − 1) | apertura **08:00 srv** = 09:00 IT · range 35 min · flat **17:30 srv** = 18:30 IT | range **14:30-14:45 srv** = 15:30-15:45 IT · flat **21:00 srv** = 22:00 IT |
 | lato | **solo LONG** (`InpAllowShort=false`) | **solo LONG** (`InpAllowShort=false`) |
 | rischio | **0,65%** (unica differenza dalla cella viva sul demo, che gira a 1,0%) | **0,65%** (idem) |
-| **DD promesso** 🆕 | **10,60% a 1,0% → ≈6,89% alla taglia viva 0,65%** — cella **R83 RETEST**, che e' **la cella viva** (dep. 10.000 · tick · **n=311, merito PIENO**). 📌 Il **6,25% di R16** che stava in `CONTRATTI_SEDIE.md` descrive una cella **che non gira piu'** (M31): il numero da usare e' questo | **6,5389% OOS · 5,6530% IS — gia' ALLA TAGLIA VIVA** (dep. 10.000 · **0,65%** · tick). 🟠 **Merito SOSPESO** (119 e 71 < 150). 🔴 Due avvertenze che vanno **sempre** con questo numero: il contratto **storico** e' **9,92% a rischio 1% (R15)**, che passava il muro del 10% **per otto centesimi**; e R118 misura che **la configurazione VIVA e' l'unica che sfonda il muro sotto slippage** (9,76 → **10,34%** a 1%). *Il margine viene dalla taglia, non dal motore.* |
-| fonte del DD | 🥇 `report/CENSIMENTO_CONTRATTI.md` §2 (07/09) → `r83_csv/..._OOS_r83d1.csv` riga `entry=1`. 🔴 **CONFLITTO APERTO IN SERATA**: R119 (16 CSV, tick, **stessa taglia 0,65%**) misura sulla stessa sedia **3,1749% IS / 4,3501% OOS** con **n 175 / 270 = merito PIENO** — finestre e split diversi e trailing fisso 410 nel preset del reale: **la differenza va attribuita prima di scegliere quale numero usa la C3** (§BLOCCO 2) | 🥇 `report/CENSIMENTO_CONTRATTI.md` §2 (07/09) → `ritardo_r119_csv/...` + `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5; ✅ **riconfermato dal giro MISURATO** (`ritardo_r119b_csv/`): **5,6530% IS / 6,5389% OOS**, identici |
+| **DD promesso** 🆕 | 🆕 **4,3501% alla taglia viva 0,65%** · **6,7111% a 1,0%** — cella **long-only R119/R35**, che e' **la cella viva** (`InpAllowShort=0`, `InpMagic=770101`, dep. **10.000 EUR** · tick · **n=270 uscite = 193 posizioni**, merito PIENO). ⚠️ **ASTERISCO DEL DEPOSITO**: a **100.000 EUR** il DD promesso e' **[NON MISURATO]** — la stessa cella a 1,0% fa **7,2328%** su banco 100k contro **6,7111%** su banco 10k, **+7,8% a parita' esatta di 270 operazioni**. Per proporzione starebbe a ~4,69%, **ma una proporzione non fa scattare un allarme** (voce **B6**). 🔴 **ERRATA 11/09**: il ~~10,60% a 1,0% -> ≈6,89% a 0,65% (cella R83 RETEST, n=311)~~ **non e' di questa sedia** — quella corsa ha `InpAllowShort=1`, `InpRiskPercent=1`, `InpMagic=777120/777121`. Il lato corto da solo vale **+3,8873 punti** di DD. 📌 Cronologia: 6,25% (R16, cella che non gira piu') -> 10,60% (R83, 02/09) -> **4,3501%** (R119, 11/09). | **6,5389% OOS · 5,6530% IS — gia' ALLA TAGLIA VIVA** (dep. 10.000 · **0,65%** · tick). 🟠 **Merito SOSPESO** (119 e 71 < 150). 🔴 Due avvertenze che vanno **sempre** con questo numero: il contratto **storico** e' **9,92% a rischio 1% (R15)**, che passava il muro del 10% **per otto centesimi**; e R118 misura che **la configurazione VIVA e' l'unica che sfonda il muro sotto slippage** (9,76 → **10,34%** a 1%). *Il margine viene dalla taglia, non dal motore.* |
+| fonte del DD | 🥇 `risultati_archivio/ritardo_r119b_csv/ABTG_DAX_Apertura_EU_D30EUR_OOS_R119_DAX_D0000.csv` r.2 (**3,1749% IS / 4,3501% OOS**, n 175/270, PF 1,41105) + riproduzione indipendente su macchina diversa `ancora_passo7/..._OOS_ANCORA.csv` r.2 · a 1,0%: `risultati_prove/aperture_r35/..._OOS_r35.csv` r.8. ✅ 🆕 **CONFLITTO CHIUSO l'11/09** (compito **B3**): **non era un errore di misura e non erano finestre diverse** — `@DAQUANDO`, split, modello tick, spread e deposito sono **identici**, e il **trailing 410 e' identico nei due round** (sospettato scagionato). La causa e' **`InpAllowShort` 1 contro 0**, misurata in positivo sulle singole operazioni: **119 posizioni corte**, **-1.134,55 EUR** sui **63 giorni contesi** (dove il corto ruba la giornata al lungo, `InpOneTradePerDay=1`), **12 corti dentro l'episodio peggiore** contro 25 lunghi. Anche il **TF M15 vs M5 e' misurato INERTE**: 126 lunghi su 126 con **stesso prezzo e stesso minuto di uscita**. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md` | 🥇 `report/CENSIMENTO_CONTRATTI.md` §2 (07/09) → `ritardo_r119_csv/...` + `REFERTO_RITARDO_R119_PRIMO_GIRO.md` §5; ✅ **riconfermato dal giro MISURATO** (`ritardo_r119b_csv/`): **5,6530% IS / 6,5389% OOS**, identici |
 | frequenza promessa | ~21 op/mese ⇒ **~0,97 op/giorno** | ~9,4 op/mese ⇒ **~0,43 op/giorno** |
 | **merito** | 🔵 **SOSPESO** — 0 operazioni sul reale | 🔵 **SOSPESO** — 0 operazioni sul reale; e in banco **71 IS / 119 OOS < 150** (regola 16/08) |
 
@@ -602,12 +602,23 @@ e **la 770101 ha il merito PIENO in tutte e due le meta'** (n **175** IS e
 | **770101** D30EUR M5 RETEST 0,65% | **175** · 1,1540 · **3,1749%** | **270** · 1,4110 · **4,3501%** | 🟢 **PIENO** (175 e 270 ≥ 150) |
 | **770611** U30USD M5 0,65% | 71 · 1,2308 · **5,6530%** | 119 · 1,6749 · **6,5389%** | 🟠 **SOSPESO** (71 e 119 < 150) |
 
-🔴 **E apre un conflitto che va scritto, non risolto a mente**: il censimento
-dei contratti dello stesso giorno da' alla `770101` **10,60% a 1% → ≈6,89% a
-0,65%** (da R83), mentre qui la stessa sedia alla stessa taglia misura **4,35%
-OOS**. **Finestre e split diversi, e il preset del reale ha il trailing fisso a
-410**: le due misure **non sono la stessa cosa** e la differenza va **attribuita
-prima** di scegliere quale numero usa la corsia RISCHIO della C3.
+✅ 🆕 **E il conflitto che questo blocco aveva aperto e' stato CHIUSO l'11/09**
+(compito **B3**). Il censimento dei contratti dava alla `770101` **10,60% a 1% →
+≈6,89% a 0,65%** (da R83) contro il **4,35% OOS** misurato qui alla stessa
+taglia. 🔴 **L'ipotesi scritta allora — "finestre e split diversi, e il trailing
+fisso a 410" — e' MISURATA FALSA**: `@DAQUANDO`, `-Fino`, `-FrazioneIS`, split,
+modello a tick reali, spread e deposito sono **identici**, e
+**`InpTrailFixedPts=410` e' lo stesso numero nei due CSV**. Anche il timeframe
+(M15 contro M5) e' misurato **inerte**: 126 lunghi su 126 escono allo **stesso
+prezzo e allo stesso minuto**.
+🎯 **La causa vera e' `InpAllowShort`: 1 in R83, 0 in R119** — cioe' **R83 non
+ha misurato la sedia 770101**, ha misurato lo stesso motore col lato corto
+acceso, a taglia doppia, con magic di laboratorio 777190/777191. Il lato corto
+da solo vale **+3,8873 punti** di DD (10,5984 con · **6,7111** senza, a parita'
+di taglia 1,0%).
+👉 **La corsia RISCHIO della C3 usa 4,3501%**, ⚠️ **[MISURATO a deposito
+10.000 EUR]** — a 100.000 EUR e' **[NON MISURATO]** (+7,8% misurato sul solo
+effetto deposito). 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`.
 🟢 **E il determinismo regge su tutte e otto le corse**: gemelli `G1`
 **IDENTICI** ovunque — **il banco e' deterministico**, cosa che il round
 dell'orologio dello stesso giorno ha dovuto dichiarare come **limite non
@@ -2228,11 +2239,17 @@ non e' un costo**: il meccanismo **non e' spiegato** e finche' non lo e' **non s
 tara niente** su questo numero. E il **verdetto formale contro S1-S4 non e'
 ancora scritto**. 📌 Resta la correzione di formulazione: `ExecutionMode=0` era
 **dichiarato nell'`.ini` dal 07/08** — *non era nascosto, era non letto*;
-**(2-bis)** 🔴 **due misure di casa in conflitto sul DD promesso della `770101`**:
+**(2-bis)** ~~🔴 **due misure di casa in conflitto sul DD promesso della `770101`**:
 il censimento dei contratti dice **≈6,89% a 0,65%** (da R83), R119 misura
 **4,35% OOS** alla stessa taglia. **Finestre e split diversi, e il preset del
 reale ha il trailing fisso a 410**: la differenza va **attribuita prima** di
-scegliere quale numero usa la corsia RISCHIO;
+scegliere quale numero usa la corsia RISCHIO;~~
+✅ 🆕 **CHIUSO l'11/09, e l'attribuzione ipotizzata qui era SBAGLIATA**: non
+erano ne' le finestre ne' il trailing 410 (identici in tutti e due i CSV, come
+lo split e il deposito). Era **`InpAllowShort` 1 contro 0**: R83 aveva il lato
+corto acceso, che da solo vale **+3,8873 punti** di DD. 👉 La corsia RISCHIO
+usa **4,3501%** ⚠️ **[MISURATO a deposito 10.000 EUR]** — a 100.000 EUR il
+promesso resta **[NON MISURATO]**. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`;
 **(3)** 🔴 **0 deal**: ogni gradino di slippage di ogni round e' uno **scenario
 assunto**, e la configurazione **VIVA** dell'ORB e' **l'unica che sfonda il muro
 del 10%** sotto quello scenario (9,76% → 10,34%);
