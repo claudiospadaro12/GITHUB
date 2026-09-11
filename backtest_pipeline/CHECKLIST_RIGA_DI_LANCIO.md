@@ -13648,3 +13648,39 @@ trovati la rilettura, li ha trovati **una corsa vera** dello script su un albero
 nudo, EA senza indicatori, EA con un nome doppio). 👉 **Un `.ps1` che si puo'
 FAR GIRARE su dati finti va fatto girare, non solo riletto.** Cinque file inventati
 in due minuti hanno trovato quello che due riletture non avevano visto.
+
+## 233. Il banco che si sposta sotto i piedi: `HEAD~1` come base di confronto (11/09/2026)
+
+**Il caso.** La verifica piu' forte della giornata: *"togliendo dai file nuovi
+tutto cio' che e' imbuto si ricostruisce l'originale, 11 file su 11, residuo
+**0**"*. Eseguita, stampava **`righe residue totali: 0`**. 🟢 Sembrava chiusa.
+
+🔴 **Era vuota.** Lo script confrontava con **`HEAD~1`** per default, e
+`HEAD~1` **conteneva gia' l'imbuto**: `git diff --name-only HEAD~1` restituiva
+**zero file**, il ciclo non girava mai, e lo zero finale voleva dire **"non ho
+guardato niente"**, non *"non ho trovato differenze"*.
+
+📌 **E la causa scatenante e' MIA**: avevo committato i file dell'agente
+mentre lavorava ancora (per tenere il branch pulito), e **quel commit ha spostato
+la base**. Il banco era corretto quando e' stato scritto; **e' diventato falso
+per un commit di qualcun altro.**
+
+✅ **Rifatto con la base giusta** (`e2a10a7`, l'ultimo commit prima dell'imbuto):
+**11 file esaminati, 11 ricostruiti IDENTICI, residuo 0.** 👉 Il risultato era
+vero — **ma non lo era la prova**, e le due cose vanno tenute separate.
+
+**La regola.** Un riferimento **relativo** (`HEAD~1`, *"il file piu' recente"*,
+*"l'ultima corsa"*) e' una bomba a orologeria in un banco di prova: e' corretto
+quando lo scrivi e **diventa falso quando qualcun altro fa un commit**. 👉 **La
+base di un confronto si passa per NOME e non ha un default.**
+
+🛡️ **Rimedio applicato allo strumento**, perche' una regola senza rimedio si
+ripaga: niente default, e **due guardie che fanno MORIRE lo script** invece di
+stamparlo, uno zero — se non c'e' nessun file da esaminare, e se il commit di
+confronto contiene gia' cio' che si sta verificando. Provate tutte e due:
+`HEAD~1` ora esce con *"FERMO: uno zero qui NON sarebbe una verifica"*.
+
+🎯 **E' la terza volta oggi** che un banco di prova mente prima
+dell'esaminato (classe 186 il delimitatore, 230 la forma scambiata per
+semantica, 233 la base che si sposta). 📌 **La lezione che si ripete: quando un
+controllo dice OK, la prima domanda non e' "funziona?" ma "ha guardato?".**

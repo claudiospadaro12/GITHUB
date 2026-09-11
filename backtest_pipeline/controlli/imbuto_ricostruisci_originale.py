@@ -6,10 +6,33 @@ commenti). Ogni riga residua viene stampata: e' li' che si nasconde un
 cambio di comportamento."""
 import re, subprocess, sys
 
-RIF = sys.argv[1] if len(sys.argv) > 1 else "HEAD~1"   # commit di confronto
+# CLASSE 233 (11/09/2026) -- IL DEFAULT "HEAD~1" HA PRODOTTO UNO ZERO VUOTO.
+# Il default valeva finche' l'imbuto era l'ULTIMO commit. Appena un altro
+# commit ci e' finito sopra (i controlli, piu' un commit "in corso d'opera"
+# della sessione principale), HEAD~1 conteneva GIA' l'imbuto: git diff non
+# restituiva nessun file, il ciclo non girava, e lo script stampava
+# "righe residue totali: 0" -- che si legge come "tutto verificato" e
+# invece vuol dire "non ho guardato niente".
+# Rimedio: niente default. Il commit di confronto si passa, e lo script
+# MUORE se quel commit contiene gia' l'imbuto o se non c'e' nessun file da
+# esaminare. Uno zero deve poter uscire solo DOPO aver guardato.
+if len(sys.argv) < 2:
+    sys.exit("USO: imbuto_ricostruisci_originale.py <commit PRIMA dell'imbuto>\n"
+             "     niente default: un confronto col commit sbagliato stampa uno zero vuoto.")
+RIF = sys.argv[1]
 
 FILES = subprocess.check_output(
     ["git", "diff", "--name-only", RIF, "--", "mql5/Experts"], text=True).split()
+if not FILES:
+    sys.exit("FERMO: nessun file differisce fra " + RIF + " e il lavoro attuale.\n"
+             "       Il commit di confronto e' sbagliato (probabilmente contiene gia'\n"
+             "       l'imbuto). Uno zero qui NON sarebbe una verifica.")
+_sporchi = [f for f in FILES
+            if "InpLogImbuto" in subprocess.run(["git","show",RIF+":"+f],
+               capture_output=True, text=True).stdout]
+if _sporchi:
+    sys.exit("FERMO: il commit " + RIF + " CONTIENE GIA' l'imbuto in " +
+             str(len(_sporchi)) + " file. Serve un commit PRECEDENTE.")
 
 def togli_blocchi(testo):
     righe = testo.split("\n")
