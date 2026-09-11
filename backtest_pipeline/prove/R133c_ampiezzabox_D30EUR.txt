@@ -1,0 +1,258 @@
+# =====================================================================
+#  EA: ABTG_MaxMinNotte
+#  R133c -- LA SCALA CHE MISURA L'AMPIEZZA DEL BOX NOTTURNO
+#           (e che NON PUO' tornare inerte, per costruzione)
+#           D30EUR M15 -- asse InpMinBoxPts, 9 celle
+#  Scritto il 12/09/2026 dall'agente cercatore di parametri.
+#  Dossier: censimento manopole inerti v2 (backtest_pipeline\
+#  manopole_inerti_v2.py, 2.083 CSV, 61.829 passate).
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R133c_ampiezzabox_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M15
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 10000 -Modello 4
+#    -Etichetta r133c
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -Modello 4 = TICK REALI (walkforward_generico.ps1 r.172; col
+#     modello != 4 il CSV esce col suffisso _ohlc, r.1347).
+#  !! -DaQuando 2024.09.26: i tick BCM di D30EUR partono da li',
+#     VERIFICATO nel passo 0 di R86 (r88_csv\REFERTO_R88.txt r.41:
+#     "R86 D30EUR 2024.09.26 tick dal 2024.09.26 ok").
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati.
+#  (-SoloControllo deve stampare: InpMinBoxPts  9 celle.)
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND -- E' IL CASO DI SCUOLA DELL'INTERO DOSSIER
+#
+#  1) LA MANOPOLA E' STATA GIRATA E NON HA MOSSO UN CENTESIMO.
+#     File: risultati_archivio\MaxMinNotte\valid_MaxMin_DAX_short_refine.csv
+#     36 passate, 18 esiti. InpMinBoxPts girava su due valori (0 e
+#     1500) dentro 18 gruppi di confronto VIVI (>=30 operazioni), e
+#     18 su 18 danno esito IDENTICO CIFRA PER CIFRA. Esempio, riga per
+#     riga (buffer 700, ATR 1,5, corr 0):
+#         MinBoxPts=0     profit -163,82  PF 0,95488  n 103  DD 8,9919
+#         MinBoxPts=1500  profit -163,82  PF 0,95488  n 103  DD 8,9919
+#     >>> Questa e' la prova secca dell'INERZIA, e non va confusa con
+#         "influenza debole": debole vuol dire numeri DIVERSI di poco.
+#         Qui sono LO STESSO NUMERO. La manopola non e' stata letta.
+#
+#  2) IL CODICE DICE PERCHE'. ABTG_MaxMinNotte.mq5 r.329-331:
+#         double widthPts=(gBoxHigh-gBoxLow)/_Point;
+#         if(InpMinBoxPts>0 && widthPts<InpMinBoxPts) { ...niente trade }
+#     Il filtro scatta SOLO se il box e' piu' STRETTO della soglia. Su
+#     D30EUR _Point vale 0,01 (il piano di casa scrive "700 punti = 7
+#     punti indice"), quindi 1500 punti = 15 PUNTI INDICE: un box
+#     notturno di sei ore sul DAX non e' mai stato cosi' stretto. La
+#     soglia era FUORI RANGE, non sbagliata di poco.
+#     >>> La casella non e' provata: e' rimasta chiusa, e la chiave
+#         non e' un altro interruttore -- e' la SCALA del valore.
+#
+#  3) E LA DISTRIBUZIONE DELL'AMPIEZZA DEL BOX E' [NON MISURATO].
+#     Il referto del 09/09 lo aveva gia' scritto come buco n.1
+#     (report\MANOPOLE_INERTI_2026-09-09.md par. 7): "so che 1500 non
+#     morde, non so da dove inizia a mordere". Questo round chiude
+#     quel buco SENZA una sonda separata, e il come sta qui sotto.
+# ---------------------------------------------------------------------
+#  L'IDEA DEL ROUND: LA COLONNA Trades E' LA DISTRIBUZIONE
+#
+#  Il filtro salta la notte quando widthPts < soglia. Quindi il numero
+#  di operazioni a soglia S e' il numero di notti con box >= S:
+#  la colonna Trades, letta lungo la scala, E' la funzione di
+#  sopravvivenza empirica dell'ampiezza del box. Nove celle danno nove
+#  punti di quella curva. Non serve nessuna sonda dedicata, nessun
+#  indicatore nuovo, nessun codice in piu': serve una scala scelta
+#  larga abbastanza.
+#
+#  LA SCALA: 0, 1500, 3000, 4500, 6000, 7500, 9000, 10500, 12000
+#  punti = 0, 15, 30, 45, 60, 75, 90, 105, 120 PUNTI INDICE.
+#  - la cella 0 e' il comportamento attuale (filtro spento);
+#  - la cella 1500 e' il valore d'archivio: deve dare lo STESSO
+#    risultato della cella 0, ed e' cosi' che questo file RI-MISURA
+#    l'inerzia invece di darla per buona;
+#  - la cella 12000 (120 punti indice) e' scelta perche' un box
+#    notturno DAX di quella ampiezza e' raro: li' le operazioni devono
+#    crollare.
+#
+#  >>> IL CONTRO-ESEMPIO, COSTRUITO PRIMA: questa scala NON PUO'
+#      tornare tutta inerte se il codice e' sano. Se anche la cella
+#      12000 desse lo stesso numero di operazioni della cella 0,
+#      vorrebbe dire che NESSUNA notte ha un box piu' stretto di 120
+#      punti indice -- cosa che il DAX smentisce da solo -- e allora
+#      il difetto sarebbe nel codice (widthPts non calcolato, filtro
+#      mai valutato). In quel caso il round ha trovato un bug, e va
+#      scritto cosi'. "Non cambia niente" qui e' un risultato, non un
+#      fallimento.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DELL'EDGE (regola del 19/08), applicato PRIMA
+#
+#  Vietato infittire la griglia di un motore SENZA EDGE. Qui il motore
+#  sta SOPRA la soglia, e sono numeri d'archivio:
+#    valid_MaxMin_DAX_short_refine.csv -- cella MEDIANA (non il picco):
+#      PF 1,187 - n 107 - DD 7,29%   (36 passate, 18 esiti distinti)
+#    la cella pinnata qui (buffer 1000, ATR 2,0, corr 0):
+#      PF 1,24835 - n 104 - DD 9,037% - profit 886,66
+#  >>> n=104 e' SOTTO il muro dei 150: MERITO SOSPESO. Questo round
+#      NON promuove: misura una distribuzione e apre una casella.
+#  >>> E il picco NON si usa: la cella piu' alta del file d'archivio e'
+#      PF 2,246 con n=38 (correlazione accesa). n=38 e' un campione da
+#      cui non si promuove niente, e prendere quella cella sarebbe
+#      esattamente l'errore che la casa vieta dal 16/08. Percio' il
+#      pin e' il CENTRO dell'altopiano a correlazione SPENTA
+#      (buffer 1000: PF 1,187 / 1,248 / 1,181 al variare dell'ATR --
+#      tre vicine dalla stessa parte), non il massimo.
+# ---------------------------------------------------------------------
+#  L'ANCORA E' MORBIDA, E IL MOTIVO E' SCRITTO PRIMA
+#  Il 03/09 l'EA e' cambiato: commit 7d0da9f "InpOneTradePerDay ora e'
+#  letto davvero (MaxMinNotte v1.11)". Prima quell'input era
+#  DICHIARATO E MAI LETTO -- un'altra manopola inerte, trovata a mano
+#  e corretta. Il file d'archivio girava con InpOneTradePerDay=1, cioe'
+#  con una promessa che il codice non manteneva.
+#  Il commit stesso prevede l'effetto: "ABTG_MaxMinNotte: puo' cambiare
+#  i numeri anche nel tester... Attesi MENO trade."
+#  >>> Quindi la cella 0 di oggi NON deve necessariamente riprodurre i
+#      104 trade d'archivio, e io NON lo prometto. Se n scende, la
+#      prima spiegazione e' la v1.11, non il filtro.
+#  >>> Se un giorno servisse l'ancora ESATTA, si rilancia questo stesso
+#      file con InpOneTradePerDay=false (il commit dichiara che quel
+#      valore riproduce la versione precedente): altre 18 passate,
+#      ~1,5 minuti. Non lo faccio ora perche' l'ancora non e' lo scopo.
+#  >>> ALTRO BUCO, DICHIARATO: la FINESTRA della corsa d'archivio non
+#      e' scritta da nessuna parte (il CSV non la porta e non c'e' un
+#      referto per quel file). Quindi il confronto con i 104 trade e'
+#      indicativo, NON un cancello.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#   - cella 0 e cella 1500: IDENTICHE fra loro, cifra per cifra. Se
+#     non lo sono, il filtro morde gia' a 15 punti indice e tutta la
+#     lettura del 09/09 va corretta (sarebbe una notizia).
+#   - da 3000 in su: Trades che SCENDE in modo monotono. Se sale
+#     anche una sola volta, il filtro non fa quello che dice il nome
+#     e la prima cosa da controllare e' il segno della disuguaglianza.
+#   - cella 12000: Trades ATTESO sotto il 20% della cella 0.
+#   - PF: [NON MISURATO] per le celle nuove, e non invento una banda.
+#     Tesi del filtro, falsificabile: togliere le notti a box stretto
+#     dovrebbe togliere piu' perdenti che vincenti (il box stretto e'
+#     lateralita' e la rottura e' falsa). Se il PF NON sale mentre n
+#     scende, la tesi anti-lateralita' su questo simbolo e' smentita,
+#     e si scrive.
+#   - DD: riferimento 9,04% @1%. Sopra il 15% @1% e' un fatto di
+#     RISCHIO a qualunque n (Emendamento B del 16/08).
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE PRIMA
+#   B1 RISCHIO, a qualunque n: DD > 15,0% @1% -> cella SCARTATA.
+#   B2 MERITO: si legge SOLO a n >= 150. Qui si parte da ~104 e la
+#      scala FA SCENDERE n: nessuna cella di questo round potra' mai
+#      promuovere niente. DICHIARATO PRIMA, cosi' nessuno si illude
+#      leggendo un PF alto su n=30.
+#   B3 ALTOPIANO: una soglia si considera solo se le due celle vicine
+#      della scala vanno nella stessa direzione. Una cella che sporge
+#      da sola, con n gia' piccolo, e' rumore per definizione.
+#   B4 QUELLO CHE SI PORTA A CASA COMUNQUE: la curva Trades(soglia),
+#      cioe' la distribuzione dell'ampiezza del box. Quella e' utile
+#      anche se ogni cella viene scartata per merito, e vale anche per
+#      la sedia VIVA 770411 (ABTG_MaxMinNotte_DAX_Short_Ottimizzato),
+#      che ha lo STESSO filtro alla riga 230 del suo sorgente.
+#      >>> Ma "vale" come IPOTESI da confermare sul suo EA, non come
+#          risultato trasferito: sono due binari diversi.
+# ---------------------------------------------------------------------
+#  COSTO IN TEMPO MACCHINA
+#   9 celle x 2 finestre = 18 passate.
+#   Calibrazione MISURATA A TICK REALI: 5,0 s/passata (R88a, U30USD M5,
+#   96 passate in 8,0 min, r88_csv\REFERTO_R88.txt r.10). Forbice dello
+#   stesso referto: 2,9 - 33,0 s/passata.
+#   >>> 18 passate = 1,5 minuti alla calibrazione centrale,
+#       0,9 - 9,9 minuti nella forbice.
+#   NOTA ONESTA: quella calibrazione e' su M5/H1 di indici e forex. Qui
+#   l'EA costruisce il box sui dati M1 di sei ore di notte: il costo
+#   per passata su QUESTO EA e' [NON MISURATO].
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#   1. Finestra unica, 21 mesi: nessuna prova di regime. Il round non
+#      promuove e quindi non deve pagarla, ma va detto.
+#   2. Lato SHORT soltanto (InpAllowLong=false, come il file
+#      d'archivio): la regola dei due lati del 25/08 chiede di misurare
+#      anche il long. Qui NON lo faccio, apposta: mescolare due
+#      cambiamenti in un round e' il modo di non capire niente. Il
+#      gemello long e' il file R133c2, che non esiste ancora.
+#   3. La correlazione con SPXUSD resta SPENTA (come nell'altopiano
+#      scelto). Con corr=1 il campione crolla a ~38 e la scala
+#      misurerebbe rumore.
+#
+#  MAGIC VERGINE 779670 (cercato su tutto il repo il 12/09/2026,
+#  .git escluso: zero occorrenze).
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- I PIN: la riga d'archivio (buffer 1000 / ATR 2,0 / corr 0) di
+#     valid_MaxMin_DAX_short_refine.csv, copiata campo per campo dal
+#     CSV. Differenze DICHIARATE:
+#       InpMagic   770401 -> 779670  (magic vergine)
+#       InpVerbose 1 -> false        (log spento nelle corse lunghe)
+#     InpMinBoxPts NON e' qui: e' l'asse, in fondo al file.
+InpUsaGuardian=true
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.0
+InpSLFixedPts=3000
+InpTP1_R=1
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=3
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4
+InpUseTrailing=true
+InpTrailAtrMult=2
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=R133C AMPIEZZA
+InpMagic=779670
+InpMaxSpread=0
+InpVerbose=false
+InpAutoTest=true
+
+# --- L'UNICO ASSE: InpMinBoxPts da 0 a 12000, passo 1500 = 9 celle.
+#     E' un double, non un enum: aritmetica e driver coincidono, e
+#     -SoloControllo deve stampare 9.
+#     0 = filtro spento (comportamento attuale)
+#     1500 = il valore d'archivio, che deve dare lo stesso esito di 0
+#     12000 = 120 punti indice: qui le operazioni devono crollare
+InpMinBoxPts=0||0||1500||12000||Y
+# =====================================================================

@@ -1,0 +1,252 @@
+# =====================================================================
+#  EA: ABTG_ORB_Ottimizzato
+#  R133b -- IL FILTRO VOLUMI CHE E' SCRITTO NEL CODICE E NON E' MAI
+#           STATO ESEGUITO -- U30USD M5, asse InpUseCloseConfirm, 2 celle
+#  Scritto il 12/09/2026 dall'agente cercatore di parametri.
+#  Dossier: censimento manopole inerti v2 (backtest_pipeline\
+#  manopole_inerti_v2.py, 2.083 CSV, 61.829 passate).
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_ORB_Ottimizzato
+#    -Prova prove\R133b_filtrovolumi_U30USD.txt
+#    -Simbolo U30USD -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 100000 -Modello 4
+#    -Etichetta r133b
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -Deposito 100000 e -Modello 4 NON SONO OPZIONALI: sono i valori
+#     di R88a (prove\R88a_stoplargo_U30USD.txt r.6-7). Con un deposito
+#     diverso il confronto con l'archivio non si puo' fare sul Profit.
+#  !! -Modello 4 = TICK REALI (walkforward_generico.ps1 r.172; col
+#     modello != 4 il CSV esce col suffisso _ohlc, r.1347).
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): C:\MT5_Backtest
+#     = demo 50504400, zero EA. Gli altri terminali hanno le sedie
+#     VIVE, incluso il conto REALE 10105439 -- e la 770611 e' UNA DI
+#     QUELLE: gira sul reale (mql5\Presets\conto_reale\
+#     ABTG_ORB_Ottimizzato_770611_REALE.set).
+#  (-SoloControllo deve stampare: InpUseCloseConfirm  2 celle.)
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND, CON I NUMERI SOTTO
+#
+#  1) IL FILTRO VOLUMI E' STATO "MESSO AD ASSE" E NON HA MAI MISURATO
+#     NIENTE. Misura ceteris paribus del 12/09 su tutti i CSV attribuiti
+#     a ABTG_ORB_Ottimizzato: InpUseVolumeFilter ha 84 gruppi di
+#     confronto VIVI (>=30 operazioni);
+#         52 danno esito IDENTICO CIFRA PER CIFRA,
+#         32 danno esito diverso.
+#     E la separazione e' PERFETTA (purezza 100%):
+#         InpUseCloseConfirm=0 -> 52 identici, 0 diversi
+#         InpUseCloseConfirm=1 -> 0 identici, 32 diversi
+#     I 52 morti stanno tutti in due file:
+#       risultati_prove\ABTG_ORB_Ottimizzato\..._NASUSD_IS_r12.csv
+#       risultati_prove\ABTG_ORB_Ottimizzato\..._NASUSD_OOS_r12.csv
+#       (48 passate x 2 file con il filtro volumi acceso e spento,
+#        e 24 esiti: meta' delle passate erano gemelle).
+#
+#  2) E IL CODICE DICE PERCHE'. ABTG_ORB_Ottimizzato.mq5:
+#       r.533  VolumeOK() -> if(!InpUseVolumeFilter) return(true);
+#       r.573  VolumeOK() e' chiamata SOLO da TryCloseConfirmEntry()
+#       r.394-398 TryCloseConfirmEntry() gira SOLO in fase ORB_ARMED
+#       r.384-390 e in ORB_ARMED ci si va SOLO se InpUseCloseConfirm
+#     Con InpUseCloseConfirm=false il ramo e' irraggiungibile: il
+#     filtro volumi non viene nemmeno guardato. NON e' "poco
+#     influente": non e' LETTO.
+#
+#  3) LA CELLA VIVA GIRA PROPRIO COSI'. Preset del conto REALE
+#     (ABTG_ORB_Ottimizzato_770611_REALE.set): InpUseCloseConfirm=false
+#     E InpUseVolumeFilter=false. Quindi il filtro volumi di questa
+#     sedia non e' "provato e scartato": non e' mai partito.
+# ---------------------------------------------------------------------
+#  IL CANCELLO DELL'EDGE (regola del 19/08), applicato PRIMA
+#
+#  Vietato infittire la griglia di un motore SENZA EDGE. Qui il motore
+#  ha un edge MISURATO sul lato che gira (long, U30USD), e sono numeri
+#  d'archivio, non impressioni -- cella SLMode=3 / TPMode=1 /
+#  SLBufferPts=0, R88a, tick reali, 21 mesi:
+#      IS  profit  9.509,39  PF 1,24979  DD 7,8885%  n  71
+#      OOS profit 41.057,00  PF 1,67419  DD 9,7623%  n 119
+#  (risultati_archivio\r88_csv\ABTG_ORB_Ottimizzato_U30USD_{IS,OOS}_r88a.csv)
+#  >>> n OOS 119 e' SOTTO il muro dei 150: il merito resta SOSPESO, e
+#      questo round NON promuove niente. Serve a sapere se una porta
+#      chiusa da sempre porta da qualche parte.
+#  >>> E il lato SHORT di questa sedia e' MISURATO E ROSSO (PF OOS
+#      0,520, DD 26,37%, report\CENSIMENTO_LATO_SHORT_2026-09-09.md
+#      r.392): per questo InpAllowShort resta false, come in campo.
+# ---------------------------------------------------------------------
+#  COME E' FATTO L'ASSE, E PERCHE' PROPRIO COSI'
+#
+#  L'asse e' InpUseCloseConfirm (2 celle), con InpUseVolumeFilter
+#  PINNATO A TRUE. Le due celle sono:
+#    cella 0  CloseConfirm=false, VolumeFilter=true
+#             -> il filtro volumi resta IRRAGGIUNGIBILE. Questa cella
+#                deve dare lo STESSO risultato della cella d'archivio
+#                r88a, che girava con VolumeFilter=false.
+#                >>> E' LA MISURA DELL'INERZIA, non un'assunzione: se
+#                    esce identica, il filtro volumi e' morto anche
+#                    sul binario di oggi; se esce diversa, la mia
+#                    lettura del codice e' sbagliata e va riscritta.
+#    cella 1  CloseConfirm=true, VolumeFilter=true
+#             -> la PRIMA volta in tutto l'archivio che VolumeOK()
+#                viene eseguita su U30USD.
+#
+#  PERCHE' NON DUE ASSI (2x2): un file prova misura UNA variabile
+#  (controlla_prova.py lo impone). La separazione dei due effetti,
+#  se la cella 1 si muove, la fa il file successivo R133b2 (asse
+#  InpUseVolumeFilter con CloseConfirm=true pinnato): 2 celle,
+#  4 passate, ~20 secondi. NON si lancia prima: senza il risultato
+#  di qui non si sa se serve.
+# ---------------------------------------------------------------------
+#  L'ANCORA E' MORBIDA, E IL MOTIVO E' SCRITTO PRIMA
+#  Fra R88a (19-20/08) e oggi l'EA e' cambiato due volte:
+#    ad1f024 02/09 v1.03 "solo strumentazione, nessun cambio di logica"
+#    19312c8 03/09 v1.04 selezione HEDGE-SAFE per simbolo+magic,
+#                        chiusure per TICKET
+#  La v1.04 tocca selezione e chiusura delle posizioni: NON posso
+#  promettere che la cella 0 torni identica al centesimo, e non lo
+#  prometto. Se differisce:
+#    - guardare PRIMA n (71 IS / 119 OOS). n diverso = il motore entra
+#      in modo diverso -> e' la v1.04, non il filtro volumi;
+#    - il confronto INTERNO cella 0 vs cella 1 resta valido comunque,
+#      perche' girano sullo stesso binario nello stesso round. E' quello
+#      il numero del round.
+# ---------------------------------------------------------------------
+#  UN'ALTRA INERZIA, MISURATA, CHE GIUSTIFICA UN PIN
+#  InpTP_R e' pinnato a 1,0 (valore vivo) invece che a 1,5 (valore di
+#  R88a) e questo NON sposta niente, perche' con InpTPMode=1
+#  (ORB_TP_RANGE) il target lo fa InpTPRangeMult e InpTP_R non viene
+#  letto: r.588-589 del sorgente. MISURATO in R88a: le celle TP_R 1,5 e
+#  TP_R 2,0 sono identiche cifra per cifra (IS 9.509,39 entrambe, OOS
+#  41.057,00 entrambe), 12 coppie su 24. Il pin e' quindi gratis, ed e'
+#  scritto qui perche' un pin "gratis" non dimostrato e' una trappola.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#   cella 0: IS n 71, PF 1,250, DD 7,89% -- OOS n 119, PF 1,674,
+#            DD 9,76% (i numeri di r88a). Tolleranza dichiarata: se
+#            n e' lo stesso e il PF differisce di meno di 0,01 lo
+#            chiamo "riprodotto"; oltre, "binario diverso".
+#   cella 1: n ATTESO PIU' BASSO. Due motivi che si sommano:
+#            l'ingresso a chiusura confermata salta le rotture che
+#            rientrano dentro la candela, e sopra ci va il filtro
+#            volumi. Banda dichiarata: n OOS fra 40 e 110.
+#            Se n(cella 1) >= n(cella 0) ho capito male il meccanismo
+#            e va scritto a referto prima di ogni altra lettura.
+#   PF cella 1: [NON MISURATO]. Non invento una banda.
+#   >>> E il numero che conta davvero e' un terzo: DD. Su questa sedia
+#       il difetto storico non e' il PF ma il drawdown (R55: "non muore
+#       di PF, muore di drawdown"). Se la cella 1 ha PF piu' alto E DD
+#       piu' alto, per questa casa e' un peggioramento.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE PRIMA
+#   B1 RISCHIO, a qualunque n: DD > 12,0% @1% -> cella SCARTATA.
+#      (riferimento: 9,76% della cella viva. Sopra il 12% si e' fuori
+#       dal profilo con cui la sedia e' andata sul reale.)
+#   B2 MERITO: si legge SOLO a n >= 150. Qui non ci si arriva (119):
+#      il round NON promuove, DICHIARATO PRIMA.
+#   B3 INERZIA: se cella 0 e cella 1 sono identiche cifra per cifra,
+#      allora nemmeno InpUseCloseConfirm viene letto -> difetto di
+#      codice, si apre la segnalazione. (E' il contro-esempio di
+#      questo file: il risultato "non cambia niente" qui e' una
+#      SCOPERTA, non un fallimento.)
+#   B4 Se la cella 1 e' migliore su PF *e* su DD *e* n resta >= 100,
+#      NON si promuove lo stesso: si lancia R133b2 per separare il
+#      filtro volumi dalla conferma di chiusura, e poi si chiede una
+#      prova di regime. Due misure, non una (motto del 09/09).
+# ---------------------------------------------------------------------
+#  COSTO IN TEMPO MACCHINA
+#   2 celle x 2 finestre = 4 passate.
+#   Calibrazione MISURATA sullo STESSO simbolo, TF, finestra e modello
+#   (tick reali): R88a, 96 passate in 8,0 minuti = 5,0 s/passata
+#   (r88_csv\REFERTO_R88.txt r.10).
+#   >>> 4 passate = 20 secondi. E' il round piu' economico del dossier,
+#       e apre una porta chiusa da 12 CSV.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#   1. n OOS 119 < 150: nessun verdetto di merito, mai, da questo file.
+#   2. Finestra unica (21 mesi di toro): niente prova di regime.
+#   3. Il filtro volumi sul Dow e' gia' stato misurato NEGATIVO in un
+#      ALTRO ramo (ingresso classico con pendenti): DOW_MOTORE.md,
+#      "PF 1,03 / 0,99 / 1,05 al variare della soglia -- la firma del
+#      rumore", e sopra il filtro H4 fa danno (1,24 -> 0,96). Quel
+#      risultato NON si trasferisce automaticamente al ramo a chiusura
+#      confermata (e' un altro ingresso), ma abbassa l'attesa: se esce
+#      rumore anche qui, e' coerente con cio' che gia' sappiamo.
+#   4. InpVolMult resta 1,5 (default). La soglia del volume NON e' un
+#      asse di questo round: prima si guarda se il ramo e' vivo.
+#
+#  MAGIC VERGINE 779660 (cercato su tutto il repo il 12/09/2026,
+#  .git escluso: zero occorrenze).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- I PIN: la cella d'archivio R88a SLMode=3 / SLBufferPts=0 /
+#     TPMode=1 (la geometria della sedia viva 770611), copiata campo
+#     per campo dalla riga del CSV. Differenze DICHIARATE:
+#       InpUseVolumeFilter false -> true  (e' il punto del round)
+#       InpTP_R            1.5   -> 1.0   (inerte con TPMode=1, vedi sopra)
+#       InpMagic           770611 -> 779660 (vergine: la sedia viva non si tocca)
+#       InpVerbose         0 -> false     (log spento nelle corse lunghe)
+#     InpUseCloseConfirm NON e' qui: e' l'asse, in fondo al file.
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10
+InpK=1
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0
+InpMinBodyPct=50
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=true
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=R133B VOLFILT
+InpMagic=779660
+InpMaxSpread=0
+InpVerbose=false
+InpAutoTest=true
+InpSlippagePts=0
+
+# --- L'UNICO ASSE: InpUseCloseConfirm, da false(0) a true(1) = 2 celle.
+#     E' un bool, non un enum: il conteggio aritmetico e quello del
+#     driver coincidono, e -SoloControllo deve stampare 2.
+InpUseCloseConfirm=false||0||1||1||Y
+# =====================================================================

@@ -1,0 +1,295 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US
+#  R133a -- IL TF DEI LIVELLI: LA MANOPOLA CHE DECIDE TUTTO SULLA
+#           SEDIA VIVA 770250, E CHE NON E' MAI STATA MESSA AD ASSE
+#           NASUSD M15 -- asse InpLevelTF, 7 celle (enum)
+#  Scritto il 12/09/2026 dall'agente cercatore di parametri.
+#  Dossier: censimento manopole inerti v2 (backtest_pipeline\
+#  manopole_inerti_v2.py, 2.083 CSV, 61.829 passate).
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_Nasdaq_Apertura_US
+#    -Prova prove\R133a_livelliTF_NASUSD.txt
+#    -Simbolo NASUSD -Periodo M15
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 10000 -Modello 4
+#    -Etichetta r133a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -Modello 4 = TICK REALI. E' il numero del driver, verificato:
+#     walkforward_generico.ps1 r.172 ("4 = tick reali (verita'). 1 =
+#     OHLC M1: SOLO screening") e r.1347 (col modello != 4 il CSV esce
+#     col suffisso _ohlc). NON si scrive -Modello 1 pensando ai tick.
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): sulle macchine
+#     di casa ci sono terminali con le sedie VIVE, incluso il conto
+#     REALE 10105439. C:\MT5_Backtest = demo 50504400, zero EA.
+#  !! -DaQuando 2024.09.26: i tick BCM sugli indici partono da li'
+#     (REFERTO_SHORTGATE_2026-08-30.md, riserva 2). Prima non ci sono.
+#
+#  PRIMA SEMPRE CON -SoloControllo. Deve stampare:
+#      InpLevelTF   7 celle   (enum ENUM_TIMEFRAMES - lo step e' ignorato)
+#  >>> SE STAMPA 16374, CI SI FERMA: vuol dire che il driver non ha
+#      riconosciuto l'enum e girerebbe 16.374 valori che non sono
+#      timeframe. Il conteggio giusto lo fa walkforward_generico.ps1
+#      r.538-543 sui MEMBRI dell'enum fra start e stop:
+#      M15(15) M20(20) M30(30) H1(16385) H2(16386) H3(16387) H4(16388).
+#  >>> NOTA: controlla_prova.py stampa celle=16374 per questo file.
+#      E' ATTESO e non e' un difetto: quello strumento conta
+#      aritmeticamente e non conosce gli enum (stessa nota di
+#      R128a, dove 26 aritmetiche erano 7 vere).
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, CON I NUMERI SOTTO
+#
+#  1) NON E' MAI STATA MESSA AD ASSE. NEMMENO UNA VOLTA.
+#     Misurato il 12/09/2026 su TUTTI i CSV di risultati del repo
+#     (2.083 file con colonne Inp* e Profit Factor, 61.829 passate):
+#     InpLevelTF varia in ZERO file. Nei CSV della famiglia Apertura
+#     (DAX + Dow + Nasdaq) e' presente come colonna e vale sempre
+#     16385 (H1).
+#
+#  2) SULLA SEDIA VIVA 770250 E' L'UNICA COSA CHE DECIDE I LIVELLI.
+#     Preset vivo mql5\presets\ABTG_GatedShort_NASUSD_770250_LIVE.set:
+#     InpRangeMode=2 (ABTG_RANGE_PREVBAR). Nel codice
+#     (ABTG_Nasdaq_Apertura_US.mq5 r.907-914) ComputeLevels() con
+#     PREVBAR fa hi=iHigh(_Symbol,InpLevelTF,1), lo=iLow(...) e
+#     RITORNA SUBITO: non legge InpRangeMinutes, non legge
+#     InpPrevWindowMin. Il livello di rottura della sedia viva viene
+#     da UNA candela H1, e quella scelta non e' mai stata misurata.
+#
+#  3) E QUELLO CHE E' STATO GIRATO AL SUO POSTO ERA MORTO.
+#     Con InpRangeMode=2 la manopola InpRangeMinutes non fa niente, e
+#     i round che la giravano lo hanno pagato in tempo macchina:
+#       apert_US_M5_doc_brk_realtick_NASUSD.csv  136 passate ->  4 esiti
+#       apert_US_M5_doc_brk_realtick_U30USD.csv  143 passate ->  4 esiti
+#       apert_APERT_US_M5_fade_realtick_U30USD.csv 137 passate -> 1 esito
+#     Misura ceteris paribus (v2): su questi file InpRangeMinutes ha
+#     32+29+32 = 93 gruppi di confronto VIVI (>=30 operazioni) e
+#     93 su 93 danno esito IDENTICO CIFRA PER CIFRA (Profit, PF,
+#     Trades, Equity DD %). Non "poco influente": NON LETTA.
+#     >>> La casella non era "gia' provata": era chiusa a chiave. La
+#         chiave e' InpRangeMode, e la manopola vera e' questa.
+#
+#  4) E PUO' TOCCARE ANCHE IL PROBLEMA N.1 DI OTTOBRE: LA FREQUENZA.
+#     La sedia 770250 promette ~5 operazioni al mese (contratto
+#     report\CONTRATTO_GATEDSHORT_770250.md). Un LevelTF piu' basso
+#     stringe la candela di riferimento, quindi avvicina il livello:
+#     piu' rotture, piu' operazioni. E' una previsione di DIREZIONE,
+#     non di valore, ed e' scritta prima (vedi ATTESA).
+# ---------------------------------------------------------------------
+#  IL CANCELLO DELL'EDGE (regola del 19/08), applicato PRIMA
+#
+#  La regola vieta di infittire la griglia dei parametri d'ingresso di
+#  un motore GIA' DICHIARATO SENZA EDGE. Qui non e' il caso, e il
+#  motivo va scritto per intero:
+#    - misura tick 21 mesi (toro): n 104, PF 1,097, DD 4,54% @0,65%
+#      (report\CENSIMENTO_LATO_SHORT_2026-09-09.md r.363 e
+#       report\CONTRATTO_GATEDSHORT_770250.md).
+#      >>> n=104 e' SOTTO il muro dei 150: il MERITO e' formalmente
+#          SOSPESO, non bocciato. "Sospeso" non e' "senza edge".
+#    - misura OHLC 2020-2024 (orso+crollo): n 93, PF 1,84, DD 2,07%
+#      (risultati_archivio\REFERTO_SHORTGATE_2026-08-30.md).
+#    - e questo asse NON e' un parametro d'ingresso fine: e' un
+#      TIMEFRAME, cioe' la classe di manopola che il censimento del
+#      09/09 ha misurato come la PIU' potente dell'archivio (le prime
+#      sei per spostamento del PF sono tutte e sei InpTF, dPF mediano
+#      1,8-8,4 contro 1,1 della migliore non-TF).
+#  BUCO DICHIARATO: il CSV della corsa tick del 30/08 che produce
+#  "n 104 / PF 1,097" NON E' NEL REPO (cercato il 12/09 su tutti i
+#  2.083 CSV: nessuna riga NASUSD solo-short con n fra 95 e 112).
+#  Quindi la cella H1 di questo round NON E' UN CANCELLO DI
+#  RIPRODUZIONE: e' un'ancora MORBIDA. Se torna n molto diverso da
+#  104, la prima cosa da NON fare e' dare la colpa al LevelTF.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  n (21 mesi, solo short, gate EMA 50x200 H4):
+#    H1  (la cella viva)  -> 80-130   [ancora morbida: 104]
+#    M30 -> 1,3-2,5 volte la cella H1 (candela piu' corta = livello piu'
+#           vicino = piu' rotture). Se n(M30) <= n(H1) la mia lettura
+#           del meccanismo e' SBAGLIATA e va scritto.
+#    M15/M20 -> ancora piu' alto, con il rischio di rumore di apertura.
+#    H2/H3/H4 -> piu' basso di H1; sotto n=30 la cella non e' leggibile
+#           nemmeno per il rischio e si dichiara MUTA, non "cattiva".
+#  PF: [NON MISURATO] per tutte e sei le celle nuove. Non scrivo una
+#    banda che non ho: sarebbe un numero inventato. L'unica cosa che
+#    dichiaro prima e' COME si legge (soglie qui sotto).
+#  DD: riferimento 4,54% @0,65% sulla cella viva. Sopra il 10% @0,65%
+#    e' un fatto di RISCHIO a qualunque n (Emendamento B del 16/08).
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE PRIMA (si scarta con il numero accanto)
+#   B1 RISCHIO, a qualunque n: DD > 10,0% @0,65% -> cella SCARTATA.
+#   B2 MERITO: si legge SOLO a n >= 150. Sotto, il giudizio e' sospeso
+#      e la cella NON si promuove, qualunque PF abbia.
+#   B3 ALTOPIANO: si guarda una cella solo se le sue VICINE nell'ordine
+#      dei TF stanno dalla stessa parte. Una cella che sporge da sola
+#      = rumore, e il verdetto e' "non c'e' una configurazione
+#      robusta", non "abbiamo trovato H3".
+#   B4 FREQUENZA: si riporta op/mese per cella. Il pavimento di 1,00
+#      op/giorno e' di FAMIGLIA (firma 07/09), non di sedia: questo
+#      round misura, non promuove.
+#   B5 INERZIA (il contro-esempio di questo file): se TUTTE E SETTE le
+#      celle danno lo stesso esito cifra per cifra, allora InpLevelTF
+#      non viene letto e il difetto e' nel codice, non nel mercato.
+#      In quel caso il round NON e' fallito: ha trovato un bug, e va
+#      aperta la segnalazione con le righe 907-914 in mano.
+#   B6 NIENTE PROMOZIONI da questo file: e' OOS/IS su una finestra
+#      sola di toro. Ogni allargamento si paga con una prova di
+#      regime (regola C del 16/08), che qui NON c'e'.
+# ---------------------------------------------------------------------
+#  COSTO IN TEMPO MACCHINA
+#   7 celle x 2 finestre = 14 passate.
+#   Calibrazione MISURATA A TICK REALI (non OHLC): R88a, U30USD M5,
+#   21 mesi, 96 passate in 8,0 minuti = 5,0 s/passata
+#   (risultati_archivio\r88_csv\REFERTO_R88.txt r.10, e le sue prove
+#   girano con -Modello 4). Forbice dello stesso referto: 2,9 s
+#   (R87b NZDUSD) - 33,0 s (R86a XAUUSD).
+#   >>> 14 passate = 1,2 minuti alla calibrazione centrale,
+#       0,7 - 7,7 minuti nella forbice. E' il round piu' economico
+#       del dossier.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#   1. La finestra e' 21 mesi di TORO. Sul lato short questo e' il
+#      caso PEGGIORE per il merito e va detto: un PF basso qui non
+#      boccia il motore, un DD alto qui lo boccia eccome.
+#   2. L'ancora H1 e' morbida (vedi sopra): CSV sorgente non trovato.
+#   3. Non misuro l'interazione LevelTF x RangeMode: RangeMode resta
+#      pinnato a 2 come nella sedia viva. Con RangeMode=0 questo asse
+#      sarebbe di nuovo inerte -- ed e' esattamente l'errore che
+#      questo file evita.
+#   4. 17 input dell'EA non sono nel preset vivo (SR filter, VolRegime,
+#      RunnerTP_R, MinBreakoutRangeATR): qui sono pinnati al DEFAULT
+#      COMPILATO, scritto a mano, perche' il default silenzioso e' la
+#      trappola chiusa il 02/09 (VERBALE_CHIUSURA_770101).
+#
+#  MAGIC VERGINE 779650 (cercato su tutto il repo il 12/09/2026,
+#  .git escluso: zero occorrenze).
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- I PIN: copiati dal preset VIVO della sedia 770250, campo per
+#     campo, con tre sole differenze DICHIARATE:
+#       InpRiskPercent 0,35 -> 0,65  (cosi' il DD si legge contro il
+#                                     4,54% misurato, che e' a 0,65)
+#       InpMagic 770250 -> 779650    (magic vergine, la sedia viva non
+#                                     si tocca)
+#       InpVerbose true -> false     (log spento nelle corse lunghe)
+#     InpLevelTF NON e' qui: e' l'asse, in fondo al file.
+InpUsaGuardian=true
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=20
+InpCloseMin=45
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=0
+InpRangeMode=2
+InpPrevWindowMin=60
+InpBufferPoints=300.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=false
+InpAllowShort=true
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=0.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=50
+InpEmaSlow=200
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.65
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpRunnerTP_R=0.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500
+InpSkipIfTight=false
+InpMinBreakoutRangeATR=0.0
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseVolRegime=false
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20.0
+InpVolHighPct=80.0
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=false
+InpSRProximityPts=1500
+InpSRUsePrevDay=true
+InpSRUseRoundNumbers=true
+InpSRRoundInterval=10000
+InpMagic=779650
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'UNICO ASSE: InpLevelTF da M15 (15) a H4 (16388).
+#     ENUM: il driver ignora lo step e spazzola i MEMBRI fra start e
+#     stop (walkforward_generico.ps1 r.538-543, tabella TF r.387-392):
+#       M15 M20 M30 H1 H2 H3 H4 = 7 CELLE.
+#
+#     >>> PERCHE' LO STEP E' 1 E NON UN NUMERO CHE "FA TORNARE" 7.
+#     Con step 1 le due ipotesi danno numeri DIVERSI e riconoscibili:
+#       enum riconosciuto      -> il driver stampa 7
+#       enum NON riconosciuto  -> il driver stampa 16374
+#     Se invece scrivessi uno step calcolato per far tornare 7 anche
+#     in aritmetica, il controllo stamperebbe 7 in TUTTI E DUE i casi
+#     e non distinguerebbe piu' niente: sarebbe una banda che non
+#     misura (classe 178). Il numero brutto e' il controllo.
+#
+#     La cella H1 (16385) e' il valore VIVO della sedia 770250: sta
+#     dentro l'asse apposta, come ancora (morbida, vedi testa).
+InpLevelTF=16385||15||1||16388||Y
+# =====================================================================
