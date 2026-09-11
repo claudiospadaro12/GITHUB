@@ -508,13 +508,18 @@ if ($TerminaleBacktest) {
 } else {
   # --- NESSUN PARAMETRO: comportamento IDENTICO alla v2, ma dichiarato.
   Avviso-ChiusuraTotale $tuttiTerm
-  $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
-  if ($running -and $ChiudiMT5) {
-    Write-Host "`nMT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
-    $running | Stop-Process -Force -ErrorAction SilentlyContinue
-    Start-Sleep -Seconds 5
-    $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
-  }
+  # 12/09/2026: QUI C'ERA IL SECONDO KILL DI TUTTI I TERMINALI, gemello di
+  # quello gia' scaricato 200 righe piu' sotto. Il ramo e' IRRAGGIUNGIBILE
+  # (il ripiego assegna il banco o esce 1), ma la regola l'avevo scritta
+  # IO poche righe sotto -- "un ramo morto con l'arma ancora carica resta
+  # un'arma" -- e non l'avevo applicata qui. Scritta e non fatta, nello
+  # stesso file, sul kill identico.
+  Muori ("nessun -TerminaleBacktest, e qui NON si chiudono piu' TUTTI i terminali.`n" +
+         "    Chiudere tutti vuol dire chiudere anche il conto REALE 10105439 mentre`n" +
+         "    ha posizioni aperte -- e il 10/09 e' successo davvero.`n" +
+         "    Se leggi questo messaggio, qualcuno ha tolto il ripiego sul banco:`n" +
+         "    rimettilo, oppure passa -TerminaleBacktest a mano.")
+  $running = @()
   if ($running) {
     Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
     Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red

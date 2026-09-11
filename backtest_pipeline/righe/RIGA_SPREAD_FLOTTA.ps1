@@ -362,9 +362,33 @@ Write-Host ("   preset: " + $SetFile) -ForegroundColor Green
 Titolo "F4 - guardia MT5"
 $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 if($running -and $ChiudiMT5){
-  Write-Host "   MT5 e' aperto: lo chiudo (-ChiudiMT5)." -ForegroundColor Yellow
-  $running | Stop-Process -Force -ErrorAction SilentlyContinue
-  Start-Sleep -Seconds 5
+  # 12/09/2026 -- QUI IL KILL ERA NUDO, e ci e' arrivato un cancello di
+  # giudizio a trovarlo DOPO che un commit di questo repo aveva dichiarato
+  # "ZERO kill incondizionati". Il mio censimento cercava la FORMA
+  # 'Get-Process ... | Stop-Process' su UNA riga; qui il Get-Process e il
+  # Stop-Process stanno su righe DIVERSE, legati da $running. Cercare la
+  # forma invece della semantica me l'ha fatto perdere.
+  # Senza filtro, $running sono TUTTI i terminal64 della macchina: il
+  # REALE 10105439 compreso, mentre ha posizioni aperte (il 10/09 e'
+  # successo davvero). E il filtro chirurgico stava GIA' in questo stesso
+  # file poche centinaia di righe sotto, con $instDir assegnato molto
+  # prima di qui: non c'era nessuna ragione tecnica per lasciarlo scoperto.
+  # NB: LA REGOLA DI RIFIUTO NON CAMBIA. Se dopo la chiusura resta aperto
+  # QUALUNQUE terminale, si esce 1 come prima (il controllo qui sotto
+  # guarda ancora tutti). Cambia solo CHI viene chiuso.
+  $bers  = @($running | Where-Object { $_.Path -and ($_.Path -like ($instDir + "\*")) })
+  $salvi = @($running | Where-Object { -not ($_.Path -and ($_.Path -like ($instDir + "\*"))) })
+  if($salvi.Count -gt 0){
+    Write-Host "   LASCIATI VIVI (forward e CONTO REALE: NON li tocco):" -ForegroundColor Green
+    foreach($s in $salvi){ Write-Host ("     PID " + $s.Id + "   " + $(if($s.Path){$s.Path}else{"percorso non leggibile"})) -ForegroundColor Green }
+  }
+  if($bers.Count -eq 0){
+    Write-Host ("   -ChiudiMT5 passato, ma NESSUN terminale gira da " + $instDir + ": non chiudo niente.") -ForegroundColor Yellow
+  } else {
+    Write-Host ("   chiudo SOLO il terminale di " + $instDir) -ForegroundColor Yellow
+    $bers | Stop-Process -Force -ErrorAction SilentlyContinue
+    Start-Sleep -Seconds 5
+  }
   $running = Get-Process -Name "terminal64" -ErrorAction SilentlyContinue
 }
 if($running){

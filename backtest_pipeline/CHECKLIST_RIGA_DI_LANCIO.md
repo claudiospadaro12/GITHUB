@@ -14007,3 +14007,65 @@ argomenti `-Xxx` letterali nell'`$argv` verso il driver devono essere un
 ✅ **Riparazione:** aggiungere `'\$FinoDallaRiga'` all'elenco. Verificato che il
 riconoscitore lo prende: la regex `(?m)^\s*\[[A-Za-z\[\]]+\]\$FinoDallaRiga\b`
 combacia con la riga vera del driver `  [switch]$FinoDallaRiga,`.
+
+---
+
+## 🛑 CLASSE 244 (12/09/2026) — "ZERO" ERA UNA MISURA, E LA MISURA ERA 3
+
+**Il fatto.** Il commit `ee2dc18` di stanotte si intitola **"ZERO kill
+incondizionati: nessuno script puo' piu' spegnere il conto reale"**. 🔴 **Era
+falso quando l'ho scritto: ne restavano TRE, e due erano VIVI**
+(`RIGA_SPREAD_NASUSD.ps1:194`, `RIGA_SPREAD_FLOTTA.ps1:366` — sezione *"F4 -
+guardia MT5"*, eseguita a ogni corsa — piu' `scarica_storico.ps1:514`, ramo
+morto). Li ha trovati il cancello di giudizio **dopo** la mia dichiarazione.
+
+### 🔎 PERCHE' LI AVEVO PERSI: cercavo la FORMA, non la SEMANTICA
+Il mio censimento cercava `Get-Process ... | Stop-Process` **sulla stessa
+riga**. Nei tre casi stanno su righe **diverse**, legati da una variabile:
+
+    $running = Get-Process -Name "terminal64"          <- TUTTI
+    if($running -and $ChiudiMT5){ $running | Stop-Process -Force }
+
+Un `grep` di forma non lo vede. **Ed e' la stessa classe dell'11/09** (contare
+le graffe a mano) e della **242** (il cancello che non compilava): 👉 **tre
+volte in due giorni ho misurato la forma dove serviva la semantica.**
+
+### 🚨 E LA PARTE CHE FA PIU' MALE: la regola giusta l'avevo scritta io
+A `scarica_storico.ps1:727`, di mia mano, poche ore prima:
+> *"un ramo morto con l'arma ancora carica resta un'arma: basta che domani
+> qualcuno tolga quel blocco e questo torna a sparare, in silenzio. Quindi
+> l'arma si scarica e si lascia il rumore."*
+
+**Scritta li'. Non applicata 213 righe sopra, nello stesso file, sul kill
+identico.** Una regola scritta e non applicata a se stessi non e' una regola:
+e' una frase.
+
+📌 In tutti e tre i file **il filtro chirurgico esisteva GIA'** poche centinaia
+di righe sotto, e `$instDir` era assegnato **molto prima** del kill nudo:
+**non c'era nessuna ragione tecnica** per lasciarlo scoperto. E il
+`Write-Host "MAI SUL VPS: spegneresti la FLOTTA"` c'era, in rosso, in tutti e
+tre i siti: **ha protetto zero volte** — il 10/09 il REALE e' stato spento
+comunque.
+
+### ✅ LA REGOLA
+1. **Un censimento di sicurezza si fa per SEMANTICA.** Per ogni
+   `Stop-Process` si risale a **cosa gli viene pipato dentro** e si chiede se
+   quella collezione e' **filtrata per percorso**. Il `grep` di forma e'
+   un'indicazione, non una misura.
+2. **Una dichiarazione con un numero dentro ("ZERO", "tutti", "nessuno") si
+   fa solo con lo strumento che quel numero lo RICALCOLA.** Se il numero lo
+   scrivo a mano, e' un'opinione con l'aspetto di una misura — ed e' la cosa
+   piu' pericolosa che questo progetto possa produrre.
+3. **Quando non si riesce a decidere, si scrive `DA_LEGGERE`.** Un audit che
+   tace sui casi difficili fa credere di averli controllati.
+
+### 🧰 STRUMENTO, perche' la classe sia pagata e non solo raccontata
+`backtest_pipeline/audit_kill_terminali.py` — rilanciabile, uscita 1 se
+trova un kill nudo.
+- **Autotest: 9 casi su 9**, e ci sono dentro **i casi che DEVONO risultare
+  NUDI nella forma esatta che mi aveva ingannato** (`$r = Get-Process` su una
+  riga, `$r | Stop-Process` su un'altra, anche dentro un `if`). Un autotest
+  coi soli casi buoni non prova niente.
+- **Misura sul repo vero: 239 file `.ps1`, 17 `Stop-Process`, `NUDO = 0`,
+  `DA_LEGGERE = 0`.** Questo numero si puo' difendere, perche' lo rifa' una
+  macchina.
