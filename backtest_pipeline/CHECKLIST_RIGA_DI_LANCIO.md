@@ -13232,3 +13232,89 @@ numero, e' **un numero piu' l'unita' in cui e' contato piu' la finestra da cui
 viene**. Un campione "sopra soglia" contato nell'unita' sbagliata e' **un campione
 sottile travestito da campione buono** — cioe' esattamente la cosa che
 l'Emendamento della finestra esiste per impedire.
+
+---
+
+## 227. La variabile globale di un `.mq5` dichiarata DOPO la funzione che la usa: MetaEditor non perdona, e qui non c'e' MetaEditor (11/09/2026)
+
+**Il caso, vero.** Commit `6ee2ec0` su `ABTG_EMA200_Ottimizzato.mq5` (la sedia
+`971501`, viva in forward sul piccolo **50503392**). Quattro globali nuove
+— `gRischioPiazzatoOggi`, `gLastLotGrezzo`, `gLastLossPerLot`,
+`gLastFloorMorso` — erano state messe **accanto alla funzione che le scrive**
+(`LotByRisk()`, riga 375), che e' logico da leggere ma sta **120 righe sotto**
+le funzioni che le leggono (`PlaceOrders()` riga 241, `PlaceLimit()` riga 259).
+
+🔴 **In MQL5 una globale dev'essere dichiarata PRIMA della riga che la usa**
+(le funzioni no: quelle si possono chiamare in avanti; le variabili si'). Il
+sintomo non e' un lotto sbagliato, e' `'gLastFloorMorso' - undeclared
+identifier` al `F7`: **l'EA non ricompila e la sedia non riparte**. E siccome
+nella sessione **non c'e' MetaEditor**, questo difetto non ha nessuno strato
+automatico che lo prenda: o lo trova il cancello leggendo, o lo trova Claudio
+davanti a un errore rosso.
+
+**La prova che la convenzione e' quella, e non una mia impressione:** scansione
+di **tutti** i `.mq5`/`.mqh` del progetto — questo commit era **l'unico punto
+del repo** con una globale usata prima della sua dichiarazione. Tutti gli altri
+EA dichiarano lo stato nel blocco `// STATO` sopra le funzioni.
+
+> **Regola.** In un `.mq5`, ogni variabile globale nuova va nel **blocco
+> `STATO` in cima**, mai accanto alla funzione che la scrive. E il controllo e'
+> meccanico, si fa in tre righe: per ogni globale, il numero di riga della
+> **prima occorrenza** dev'essere >= al numero di riga della **dichiarazione**.
+> 📌 Nota di metodo: non bastano "graffe 60/60, parentesi 436/436, zero byte non
+> ASCII" (i controlli dichiarati nel commit). Quelli dicono che il file e'
+> **bilanciato**, non che **compila**.
+
+---
+
+## 228. Il PAVIMENTO DEL LOTTO che alza in silenzio — e la politica che lo governa cambia effetto col SALDO (11/09/2026)
+
+**Il caso, trovato da Claudio guardando il telefono.** Due pendenti della stessa
+sedia (`EMA200` su XAUUSD, conto piccolo **50503392**) con distanze di stop
+**64,25** e **38,94** $ — rapporto **1,65x** — ma **lo stesso identico lotto
+0,01**. Causa: i lotti calcolati erano **0,0049** e **0,0082**, sotto il minimo
+del broker, e `MathMax(mn, ...)` li alzava a 0,01 **senza scriverlo da nessuna
+parte**. Effetto misurato: rischio vero **1,01% + 0,61% = 1,62%** contro
+l'**1,00%** che l'input dichiara come **TOTALE**.
+
+🔴 **La forma generale, che vale per OGNI EA con `InpRiskPercent`:** quando il
+lotto calcolato finisce **sotto il minimo del broker**, il rischio per
+operazione **non e' piu' quello dichiarato** e la proporzione fra le gambe
+**sparisce**. E' un difetto che si vede **solo sui conti piccoli** e che
+**scompare** appena il saldo cresce (misurato sullo stesso motore: a 20.000 il
+pavimento non morde piu'). 👉 Quindi **un backtest a 100k non lo mostrera'
+MAI**, e il forward sul piccolo si', in silenzio.
+
+> **Regola A.** Un EA che ha un input di rischio **deve scrivere nel log quando
+> il pavimento morde**: lotto calcolato, lotto piazzato, rischio voluto,
+> rischio vero, fattore. Un rischio che sfora **dichiarato** e' un problema di
+> taglia; un rischio che sfora **in silenzio** e' un problema di fiducia.
+
+> **Regola B, ed e' la meta' che non si vede.** Le politiche che "rispettano il
+> budget" **non sono un rischio piu' basso: sono un altro motore.** Simulato
+> sui numeri veri delle due gambe (perdita per lotto 6425 / 3894):
+> | saldo | ALZA (default) | SALTA_GAMBA | RISPETTA_TOTALE |
+> |---|---|---|---|
+> | 3.000 | gambe 1+2, **3,44%** | **nessun ordine** | **nessun ordine** |
+> | 6.300 (il caso vero) | gambe 1+2, **1,64%** | **nessun ordine** | **solo gamba 2**, 0,62% |
+> | 10.000 | gambe 1+2, 1,03% | **solo gamba 2**, 0,39% | gambe 1+2, 1,03% |
+> | 20.000+ | gambe 1+2 | identico ad ALZA | identico ad ALZA |
+>
+> Tre cose da qui, tutte e tre da dire a voce a chi sceglie l'input:
+> 1. con **una gamba sola** (`InpUseOrder2=false`) SALTA e RISPETTA sono
+>    **identiche**, perche' se il pavimento morde il rischio vero supera
+>    **sempre** il budget: la sedia **si spegne**, senza spegnerla;
+> 2. la gamba scartata **non e' sempre la stessa**: al saldo 6.300 salta la 1,
+>    al saldo 10.000 salta la 2 (verificato per forza bruta su tutti i saldi
+>    500-300.000: escono tutte e quattro le combinazioni). 🔴 **Un input di
+>    rischio il cui EFFETTO dipende dal SALDO rende il backtest non
+>    trasferibile**: la corsa fatta a 10k descrive un altro EA rispetto alla
+>    stessa impostazione a 6k;
+> 3. l'ordine di valutazione **conta**: si valuta la gamba 1 per prima, ed e'
+>    quella con lo SL piu' largo, quindi il lotto piu' piccolo e il pavimento
+>    che morde piu' forte.
+
+🪧 **E il default resta `ALZA`**, cioe' il comportamento di oggi: la modifica
+**rende visibile** lo sforo, **non lo corregge**. Va detto cosi', perche' un
+commit intitolato "il pavimento adesso PARLA" si legge facilmente come "il
+rischio adesso e' a posto", e **non lo e'**: l'1,62% e' ancora vivo in forward.

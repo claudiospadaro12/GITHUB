@@ -99,6 +99,27 @@ input double InpRiskPercent = 1.0;   // rischio % TOTALE (diviso tra gli ordini)
 //  ALZA            = come ha sempre fatto (default: ricompilare non cambia nulla)
 //  SALTA_GAMBA     = non piazza la gamba che non sta nel suo budget
 //  RISPETTA_TOTALE = piazza finche' il totale floorato resta <= budget dichiarato
+//
+//  11/09/2026, CONTROLLO PREVENTIVO -- COSA COSTANO LE DUE POLITICHE NON
+//  DEFAULT. Non sono equivalenti a 'rischiare meno': cambiano QUALI ordini
+//  esistono, ed e' misurato sui numeri veri del piccolo 50503392 (XAUUSD,
+//  lotti grezzi 0,0049 e 0,0082, minimo 0,01):
+//   - quando il pavimento morde, il rischio vero e' SEMPRE > budget della
+//     gamba (il pavimento morde solo se il lotto grezzo < minimo). Quindi
+//     con InpUseOrder2=false (UNA gamba sola) SALTA_GAMBA e RISPETTA_TOTALE
+//     fanno la STESSA COSA: nessun ordine. Su un conto dove il pavimento
+//     morde sempre, sceglierle = SPEGNERE LA SEDIA, in silenzio.
+//   - con due gambe e SALTA_GAMBA: se il pavimento morde su tutte e due
+//     (il caso del piccolo) non si piazza NIENTE.
+//   - con due gambe e RISPETTA_TOTALE l'ordine di valutazione CONTA: la
+//     gamba 1 e' la prima ad essere valutata ed e' quella con lo SL piu'
+//     LARGO (1,65 ATR contro 1,00), quindi il lotto piu' piccolo e il
+//     pavimento che morde piu' forte: 1,01% > 1,00% totale -> la gamba 1
+//     viene SALTATA e passa la 2 (0,61%). Risultato: l'EA diventa
+//     'solo overshoot'. Non e' lo stesso motore con meno rischio: e' un
+//     altro motore, con un'altra frequenza e un altro backtest.
+//  -> Cambiare questo input e' una DECISIONE DI RISCHIO E DI TAGLIA: resta
+//     di Claudio, e prima va rimisurata in backtest.
 enum ENUM_ABTG_FLOOR { ABTG_FLOOR_ALZA=0, ABTG_FLOOR_SALTA_GAMBA=1, ABTG_FLOOR_RISPETTA_TOTALE=2 };
 input ENUM_ABTG_FLOOR InpFloorPolicy = ABTG_FLOOR_ALZA; // pavimento lotto: ALZA / SALTA / RISPETTA TOTALE
 input bool InpFloorVerbose = true;  // scrivi nel log ogni volta che il pavimento morde
@@ -129,6 +150,19 @@ datetime gLastBar=0;
 int  gDay=-1, gTradesToday=0;
 
 datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
+
+//  11/09/2026 -- fotografia dell'ultimo dimensionamento, per il log e per le
+//  politiche del pavimento. Scritte da LotByRisk(), lette da PlaceLimit().
+//  ATTENZIONE, stanno QUI e non accanto a LotByRisk() per un motivo di
+//  COMPILAZIONE: in MQL5 una variabile globale deve essere dichiarata PRIMA
+//  della riga che la usa, e PlaceOrders()/PlaceLimit() stanno piu' su di
+//  LotByRisk(). Dichiararle in fondo = 'undeclared identifier' e l'EA non
+//  riparte. Tutte le altre globali di questo file stanno qui per lo stesso
+//  motivo: non spostarle in fondo.
+double gRischioSegnale = 0;   // rischio in valuta gia' impegnato dal SEGNALE corrente
+double gLastLotGrezzo  = 0;   // lotto calcolato prima del pavimento/passo
+double gLastLossPerLot = 0;   // perdita in valuta conto per 1.0 lotto, sullo SL di QUESTA gamba
+bool   gLastFloorMorso = false;  // true se il minimo del broker ha ALZATO il lotto
 
 void Log(string m){ if(InpVerbose) Print("[EMA200] ", m); }
 
@@ -238,7 +272,7 @@ void PlaceOrders(bool isLong,double ema,double atr)
 
    int nOrders = InpUseOrder2 ? 2 : 1;
    double riskPct = InpRiskPercent/nOrders;
-   gRischioPiazzatoOggi = 0;   // 11/09: si azzera a ogni segnale, non a ogni giorno
+   gRischioSegnale = 0;   // 11/09: si azzera a ogni SEGNALE (non a ogni giorno: il nome lo dice)
 
    // 1o ordine
    PlaceLimit(isLong,o1,sl,riskPct,"1");
@@ -255,16 +289,26 @@ void PlaceLimit(bool isLong,double px,double sl,double riskPct,string tag)
    double lot=LotByRisk(risk,riskPct);
    if(lot<=0){ Log("lotto nullo ("+tag+")."); return; }
 
+   datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
+   string cm=InpComment+(isLong?" L":" S")+tag;
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200_Ottimizzato")) return;
+
    //--- 11/09/2026: IL PAVIMENTO PARLA. Prima alzava il lotto in silenzio.
+   //  Sta DOPO la guardia di proposito: se il Guardian blocca l'ingresso non
+   //  c'e' nessun lotto da commentare, e un log che dice 'lotto usato' su un
+   //  ordine mai spedito e' un log che mente.
    if(gLastFloorMorso)
      {
       double budget   = AccountInfoDouble(ACCOUNT_BALANCE)*riskPct/100.0;
       double veroEur  = lot*gLastLossPerLot;
       double fattore  = (budget>0 ? veroEur/budget : 0);
       if(InpFloorVerbose)
-         Log(StringFormat("PAVIMENTO LOTTO (%s): calcolato %.4f -> piazzato %.2f. "
-             "Rischio voluto %.2f, vero %.2f = %.2fx il dichiarato.",
-             tag,gLastLotGrezzo,lot,budget,veroEur,fattore));
+         Log(StringFormat("PAVIMENTO LOTTO (gamba %s): calcolato %.4f -> lotto usato %.2f. "
+             "Budget di QUESTA gamba %.2f (il totale dichiarato e' %.2f), rischio vero "
+             "%.2f = %.2fx il budget della gamba.",
+             tag,gLastLotGrezzo,lot,budget,
+             AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0,veroEur,fattore));
 
       if(InpFloorPolicy==ABTG_FLOOR_SALTA_GAMBA)
         { Log("PAVIMENTO: gamba "+tag+" NON piazzata (politica SALTA_GAMBA)."); return; }
@@ -272,22 +316,18 @@ void PlaceLimit(bool isLong,double px,double sl,double riskPct,string tag)
       if(InpFloorPolicy==ABTG_FLOOR_RISPETTA_TOTALE)
         {
          double budgetTot = AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0;
-         if(gRischioPiazzatoOggi+veroEur > budgetTot+1e-9)
+         if(gRischioSegnale+veroEur > budgetTot+1e-9)
            {
             Log(StringFormat("PAVIMENTO: gamba %s NON piazzata: %.2f gia' impegnati "
                 "+ %.2f sforerebbero il TOTALE dichiarato di %.2f.",
-                tag,gRischioPiazzatoOggi,veroEur,budgetTot));
+                tag,gRischioSegnale,veroEur,budgetTot));
             return;
            }
         }
      }
-   datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
-   string cm=InpComment+(isLong?" L":" S")+tag;
-   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200_Ottimizzato")) return;
    bool ok=isLong?gTrade.BuyLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm)
                  :gTrade.SellLimit(lot,px,_Symbol,sl,tp,ORDER_TIME_SPECIFIED,exp,cm);
-   if(ok){ gTradesToday++; gRischioPiazzatoOggi += lot*gLastLossPerLot; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
+   if(ok){ gTradesToday++; gRischioSegnale += lot*gLastLossPerLot; Log(StringFormat("%s LIMIT %s @ %s SL %s TP %s lot %.2f",
            isLong?"BUY":"SELL",tag,DoubleToString(px,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits),lot)); }
    else Log("ordine "+tag+" fallito: "+gTrade.ResultRetcodeDescription());
   }
@@ -369,13 +409,6 @@ double NormalizePrice(double price)
    if(ts<=0) return(NormalizeDouble(price,dg));
    return(NormalizeDouble(MathRound(price/ts)*ts,dg));
   }
-
-//  11/09/2026 -- fotografia dell'ultimo dimensionamento, per il log e per le
-//  politiche del pavimento. Scritte da LotByRisk(), lette da PlaceLimit().
-double gRischioPiazzatoOggi = 0;   // rischio in valuta gia' impegnato dal segnale corrente
-double gLastLotGrezzo  = 0;
-double gLastLossPerLot = 0;
-bool   gLastFloorMorso = false;
 
 double LotByRisk(double slDist,double riskPct)
   {
