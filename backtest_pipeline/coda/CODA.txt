@@ -117,17 +117,17 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 #  a) R132c -- il pavimento dello stop sul Dow. 16 passate.
 #     PRIMO DEI TRE, ed e' il cancello: 5 celle su 8 sono gia' girate in
 #     R123D sullo stesso binario e devono tornare IDENTICHE.
-5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
+8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
 
 #  b) R133b -- un filtro SCRITTO E MAI ESEGUITO (52 gruppi su 52 morti in
 #     archivio). 4 passate, ~20 secondi. -Deposito 100000 NON e'
 #     opzionale: e' il valore con cui e' girata la cella di riferimento.
-5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
+8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
 
 #  c) R133a -- InpLevelTF, mai messo ad asse in 0 CSV su 2.083, ed e'
 #     l'unica cosa che decide i livelli su quella sedia. 14 passate.
-5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
+8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
 
 #  d) R133c -- InpMinBoxPts: 18 gruppi su 18 identici, la scala era fuori
 #     range di 10 volte. 18 passate.
-5602b036342e3acf78c5a28d1ff453222ae148e5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
+8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
