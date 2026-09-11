@@ -1,0 +1,258 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R128c -- LA DISTANZA DEL TRAILING IN PUNTI ASSOLUTI
+#           D30EUR M5 -- asse InpTrailFixedPts, 8 celle, TrailMode=FIXED
+#           >>> E' L'UNICO FILE DEL ROUND IN CUI LA FRONTIERA DEL COSTO
+#               SI PUO' CALCOLARE PRIMA DELLA CORSA. <<<
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R128_USCITA_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R128c_trailingfisso_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r128c
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA. Gli altri tre MT5 hanno le sedie VIVE,
+#     incluso il conto REALE 10105439.
+#  !! -FrazioneIS 0.50 come R128b/d/e (vedi "IL CAMPIONE" in R128b).
+#  (-SoloControllo deve stampare 8 celle per finestra.)
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA
+#
+#  1) NON E' MAI STATA MOSSA. NEMMENO UNA VOLTA.
+#     Verificato l'11/09/2026 su tutti e 46 i CSV con 'DAX_Apertura' nel
+#     nome (1.148 righe con colonne Inp*): InpTrailFixedPts vale 410 in
+#     TUTTE E 1.148 LE RIGHE. Zero file con due valori.
+#     L'unico posto dove compare ad asse e' scan_gestione.ps1 r.98 (fase
+#     "distanze"), SCRITTA DAL 14/08 E MAI LANCIATA.
+#
+#  2) E IL VALORE VIVO STA DENTRO IL COSTO DI TRANSAZIONE.
+#     Su D30EUR Digits=2 e _Point=0,01, quindi 1 punto indice = 100 punti
+#     MT5 (report\CANCELLO_COSTO_FLOTTA_2026-09-10.md r.290).
+#       InpTrailFixedPts = 410  =  4,10 PUNTI INDICE.
+#     Spread misurato all'ora 8 (l'ora d'ingresso di questa sedia), su
+#     1.847.049 tick -- risultati_archivio\spread_flotta\
+#     spread_orario_D30EUR.csv, riga ora_server=8:
+#       media 1,9194   MEDIANA 1,7000   P95 2,7000   MAX 12,0000
+#     Quindi il trailing vivo vale 4,10 / 1,70 = 2,4x LO SPREAD MEDIANO,
+#     e 1,5x il P95. IL PAVIMENTO DI LAVORO E' 40x.
+#     >>> IL VALORE COMPILATO, IL VALORE DEL PRESET E IL VALORE DEL PIANO
+#         DAX SONO 17 VOLTE SOTTO IL PAVIMENTO.
+#     Il ramo e' MORTO nel preset (InpTrailMode=1), quindi non ha mai
+#     fatto danni in campo -- ma il 03/08 quel numero e' gia' costato TRE
+#     EA del DAX chiusi in 39 SECONDI con +12 punti su un movimento da
+#     +83 (scan_gestione.ps1 r.68-74). Il ramo esiste e qualcuno prima o
+#     poi lo accende: meglio sapere quanto vale.
+#
+#  3) E' L'UNICA FORMA DI "DISTANZA DEL TRAILING" CHE SI PUO' MISURARE
+#     CONTRO IL COSTO PRIMA DELLA CORSA. Il ramo PREVBAR (R128a) mette lo
+#     stop sul minimo della candela precedente (r.2001-2005): la distanza
+#     NON e' un parametro, e' l'ampiezza di una candela, e l'ampiezza
+#     mediana della candela del DAX all'ora 8 e' [NON MISURATO] in questo
+#     repo. Qui invece la distanza E' il numero, e il conto si fa prima.
+# ---------------------------------------------------------------------
+#  LA FRONTIERA DEL COSTO, CALCOLATA PRIMA, CELLA PER CELLA
+#     pavimento alla MEDIANA :  40 x 1,70 =  68,0 idx =  6.800 punti MT5
+#     pavimento al P95       :  40 x 2,70 = 108,0 idx = 10.800 punti MT5
+#
+#      cella    idx     /1,70    /2,70    schierabile?
+#        410    4,10     2,4x     1,5x    NO -- 17 volte sotto  <-- VIVO
+#       2210   22,10    13,0x     8,2x    NO
+#       4010   40,10    23,6x    14,9x    NO
+#       5810   58,10    34,2x    21,5x    NO (85% del pavimento)
+#       7610   76,10    44,8x    28,2x    SI alla mediana, NO al P95
+#       9410   94,10    55,4x    34,9x    SI alla mediana, NO al P95
+#      11210  112,10    65,9x    41,5x    SI ANCHE AL P95
+#      13010  130,10    76,5x    48,2x    SI ANCHE AL P95
+#
+#  >>> CANCELLO G8, CONGELATO ADESSO: NESSUNA CELLA SOTTO 6.800 PUNTI PUO'
+#      ESSERE PROPOSTA PER LO SCHIERAMENTO, QUALUNQUE NUMERO FACCIA.
+#      Restano in griglia per leggere la FORMA della curva, e per tenerci
+#      dentro l'ANCORA (410). Nient'altro.
+#      Le due frontiere cadono TUTTE E DUE DENTRO L'ASSE, con celle da
+#      tutte e due le parti (6.800 fra 5810 e 7610; 10.800 fra 9410 e
+#      11210): l'altopiano si legge sia sotto sia sopra.
+# ---------------------------------------------------------------------
+#  L'ANCORA
+#  La cella InpTrailFixedPts = 410 con parziale spento E' ESATTAMENTE la
+#  cella "parziale 0 / trailing FIXED / BEatR 0" di R120, misurata il
+#  09/09 a TICK REALI sulla finestra piena 2024.09.26 -> 2026.06.30:
+#        Profit +328,26   PF 1,1538   DD 6,555%   n 325
+#  Fonte: risultati_prove\gestione_20260909\
+#         gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv
+#  TOLLERANZA CONGELATA, sul TOTALE (quella corsa non ha split):
+#        n(IS) + n(OOS)  fra 320 e 330
+#        Profit(IS) + Profit(OOS)  entro +/- 5% di 328,26
+#  >>> ATTENZIONE: 328,26 e' un numero PICCOLO, quindi il +/-5% e' una
+#      banda stretta in valore assoluto (+/- 16,41 EUR). Se sfora di
+#      poco NON si allarga la tolleranza a posteriori: si dichiara lo
+#      scostamento col numero e si dice che l'ancora e' DEBOLE su questa
+#      cella. I criteri si cambiano prima dei numeri, non dopo.
+# ---------------------------------------------------------------------
+#  IL CANCELLO INCROCIATO CHE NON COSTA NIENTE
+#  La cella 13010 vale 130,1 punti indice, cioe' PIU' LARGA DELLO STOP
+#  INIZIALE STESSO (~49,1 idx derivati per la RETEST). Un trailing cosi'
+#  largo puo' agire solo se il prezzo va oltre +130 idx dall'ingresso:
+#  su una sessione DAX e' raro.
+#  >>> QUINDI LA CELLA 13010 DEVE CONVERGERE VERSO LA CELLA "TRAILING
+#      SPENTO" DI R128d (stessa finestra, stessi pin, stesso deposito).
+#      "Convergere", non "essere identica": una manciata di giornate
+#      estreme puo' ancora farlo scattare, e quelle vanno nella direzione
+#      di un profitto un po' piu' alto e un DD un po' piu' basso della
+#      cella spenta.
+#      SE INVECE 13010 e' MOLTO PEGGIO della cella spenta, o molto
+#      meglio, il banco e' sporco e le due corse non sono confrontabili:
+#      il round si ferma e si capisce perche'.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - FORMA: profitto in SALITA ripida da 410 verso ~5810, poi altopiano,
+#    poi convergenza verso "trailing spento". DD in SALITA con la
+#    distanza: e' lo stesso meccanismo che in R120 porta il DD da 6,03%
+#    (PREVBAR) a 22,21% (nessun trailing).
+#  - n: IDENTICO IN TUTTE E 8 LE CELLE, per finestra (cancello G1: col
+#    parziale spento la distanza del trailing non tocca gli INGRESSI).
+#    Attesa ~163 in IS e ~162 in OOS. Se la colonna Trades si muove fra
+#    le celle, IL ROUND SI FERMA.
+#  - PF OOS: attesa 1,05 - 1,40. L'ancora a 410 fa 1,1538 sulla finestra
+#    piena; il PREVBAR fa 1,3789. NON mi aspetto che il FIXED superi il
+#    PREVBAR: mi aspetto che lo AVVICINI, e che il punto in cui lo
+#    avvicina stia SOPRA la frontiera del costo.
+#  - DD OOS: attesa 6% - 22% a rischio 1%. Sopra 10,00% cella SCARTATA
+#    SECCA (G3), e a distanze grandi me lo aspetto: il rischio e' un
+#    fatto accaduto e si legge a qualunque n (Emendamento B).
+#
+#  >>> IL RISULTATO CHE MI ASPETTO DI PIU': che nessuna cella SOPRA 6.800
+#      punti batta il PREVBAR M5 della cella viva. In quel caso la
+#      risposta e' "IL TRAILING A PUNTI FISSI NON E' LA STRADA SU QUESTA
+#      SEDIA", e si scrive cosi'. E' un risultato, non un fallimento.
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    SE IL MASSIMO DEL PROFITTO OOS CADE SOTTO 6.800 PUNTI, la cella
+#    migliore e' FUORI DALLA FRONTIERA DEL COSTO, e il verdetto e'
+#    "su questa geometria il trailing a punti fissi NON E' SCHIERABILE".
+#    NON e' "abbiamo trovato 4.010". Questa riga esiste apposta perche'
+#    la tentazione arrivera' quando il numero sara' bello.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779530 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro (r.1600 dell'include).
+#  InpTrailMode=2 E' UN PIN DIVERSO DAL VIVO (in campo e' 1, PREVBAR):
+#  senza quel pin l'asse di questo file sarebbe INERTE PER COSTRUZIONE,
+#  perche' InpTrailFixedPts viene letto SOLO nel ramo FIXED
+#  (r.2005 e r.2019). E' dichiarato, non nascosto.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- USCITA: parziale SPENTO (n pulito, cancello G1) e TRAILING IN
+#     MODALITA' FIXED -- il pin che rende vivo l'asse di questo file.
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=2
+InpTrailTF=5
+InpTrailAtrMult=2.0
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779530
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpTrailFixedPts da 410 a 13010, passo 1800
+#     410 . 2210 . 4010 . 5810 . 7610 . 9410 . 11210 . 13010 = 8 CELLE
+#     (in punti indice: 4,10 . 22,10 . 40,10 . 58,10 . 76,10 . 94,10 .
+#      112,10 . 130,10)
+#     Tutti INTERI: nessun arrotondamento possibile.
+#     La cella 410 e' ESATTAMENTE il valore vivo/compilato e sta
+#     all'indice 0: e' l'ANCORA, ed e' un bordo DICHIARATO (sotto 410 si
+#     scenderebbe ancora piu' dentro lo spread: non serve misurarlo).
+#     La cella 13010 e' un bordo scelto da me perche' e' PIU' LARGA DELLO
+#     STOP INIZIALE: e' il punto in cui l'asse deve convergere verso
+#     "trailing spento" (R128d), ed e' il cancello incrociato del round.
+InpTrailFixedPts=410||410||1800||13010||Y

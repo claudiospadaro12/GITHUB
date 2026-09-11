@@ -1,0 +1,284 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R128b -- IL BERSAGLIO CHE NON E' MAI STATO MOSSO
+#           D30EUR M5 -- asse InpTP1_R, 7 celle, PARZIALE SPENTO
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R128_USCITA_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R128b_bersaglio_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r128b
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): su questa
+#     macchina ci sono TRE MT5 con le sedie VIVE, incluso il conto REALE
+#     10105439. C:\MT5_Backtest = demo 50504400, zero EA attaccati.
+#  !! -FrazioneIS 0.50 NON E' OPZIONALE, ED E' DIVERSO DA R128a.
+#     Il perche' e' un CONTO, non una preferenza: vedi "IL CAMPIONE".
+#  (-SoloControllo deve stampare 7 celle per finestra.)
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA
+#
+#  1) NON E' MAI STATA MOSSA. NEMMENO UNA VOLTA.
+#     Verificato l'11/09/2026 su tutti e 46 i CSV del repo che hanno
+#     'DAX_Apertura' nel nome (1.148 righe con colonne Inp*):
+#     la colonna InpTP1_R vale 1 in TUTTE E 1.148 LE RIGHE.
+#     Zero file con due valori. Zero file prova, zero .ini, zero .ps1
+#     che la mettano ad asse. L'unico posto dove compare ad asse e'
+#     backtest_pipeline\scan_gestione.ps1 r.97 (fase "distanze"), che
+#     E' SCRITTA DAL 14/08 E NON E' MAI STATA LANCIATA (l'unica corsa,
+#     il 09/09, e' partita con -Fase struttura, che e' il default).
+#
+#  2) ED E' L'UNICA MANOPOLA CHE MUOVE IL TAKE PROFIT DI QUESTO EA.
+#     Dal sorgente, r.1621-1627:
+#         double TpTotalR()
+#           { double r = InpTP1_R > 0 ? InpTP1_R*3.0 : 0.0;
+#             return(r <= 0 ? 3.0 : r); }
+#     IL TP DELL'ORDINE E' CABLATO A 3 x InpTP1_R. Non esiste un input
+#     separato per il TP totale. Quindi:
+#        InpTP1_R = 0    -> nessun TP (r.1070: tp=0.0 se InpTP1_R<=0)
+#        InpTP1_R = 0,5  -> TP a 1,5R
+#        InpTP1_R = 1,0  -> TP a 3,0R   <-- IL VALORE VIVO
+#        InpTP1_R = 3,0  -> TP a 9,0R
+#
+#  3) E QUI L'ASSE E' PULITO, perche' IL PARZIALE E' SPENTO.
+#     Normalmente InpTP1_R farebbe DUE cose insieme (spostare il parziale
+#     E spostare il TP): sarebbe una manopola con due effetti, non un
+#     asse. Con InpTP1_ClosePct=0 il blocco del parziale non entra
+#     nemmeno (r.1898: if(!partialDone && InpTP1_ClosePct > 0 &&
+#     InpTP1_ClosePct < 100)), e con lui salta anche InpBreakevenAtTP1,
+#     che vive DENTRO quel blocco.
+#     >>> DICHIARATO: QUESTA NON E' LA GEOMETRIA VIVA. Il parziale in
+#         campo e' acceso. Questo file misura IL TP IN ASSENZA DI
+#         PARZIALE. Per misurarli separatamente sulla geometria viva
+#         servirebbe un input nuovo (InpTpTotaleR): NON LO SCRIVO, LO
+#         SEGNALO. Le modifiche all'EA non si fanno dentro un round.
+#
+#  4) E IL PARZIALE SPENTO NON E' UNA SCELTA A CASO: e' la cella
+#     MIGLIORE misurata il 09/09 a tick reali sulla finestra piena
+#     (R120, report\R120_GESTIONE_APERTURE_2026-09-09.md):
+#        parziale 0  + PREVBAR : PF 1,3789  DD 6,027%  n 325
+#        parziale 50 + PREVBAR : PF 1,3090  DD 6,877%  n 445
+#     Meglio su tutti e due gli assi. Terza conferma indipendente che il
+#     parziale al 50% costa (R46 del 14/08: 1,49 contro 1,40).
+# ---------------------------------------------------------------------
+#  L'ANCORA
+#  La cella InpTP1_R = 1,0 con parziale spento E' ESATTAMENTE la cella
+#  "parziale 0 / trailing PREVBAR / BEatR 0" di R120, misurata il 09/09
+#  a TICK REALI sulla stessa finestra 2024.09.26 -> 2026.06.30:
+#        Profit +2970,43   PF 1,3789   DD 6,027%   n 325
+#  Fonte: risultati_prove\gestione_20260909\
+#         gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv
+#  (pin verificati uno per uno in quel CSV: InpEntryMode=2,
+#   InpRangeMinutes=35, InpBufferPoints=500, InpRetestOffsetPts=200,
+#   InpAllowLong=1, InpAllowShort=0, InpRiskPercent=1, InpTrailTF=5,
+#   InpTrailStartR=0 -- e' la geometria RETEST long-only viva.)
+#
+#  ATTENZIONE: QUELLA CORSA E' A FINESTRA PIENA, SENZA SPLIT. Quindi
+#  l'ancora NON puo' tornare al centesimo su una singola finestra.
+#  TOLLERANZA CONGELATA, sul TOTALE:
+#      n(IS) + n(OOS)  deve stare fra 320 e 330
+#      Profit(IS) + Profit(OOS)  entro +/- 5% di 2970,43
+#  Fuori da li' il banco e' sporco e il round si ferma PRIMA di leggere
+#  qualunque altro numero.
+# ---------------------------------------------------------------------
+#  IL CAMPIONE -- perche' FrazioneIS 0.50 e non 0.40
+#
+#  Il numero di INGRESSI di questa sedia sulla finestra piena e' 325, e
+#  NON E' UN'OPINIONE: con il parziale spento R120 misura 325 righe in
+#  TUTTE E QUATTRO le strutture d'uscita (trailing OFF / ATR / PREVBAR /
+#  FIXED), mentre col parziale al 50% le stesse quattro danno
+#  476 / 524 / 445 / 330. Gli ingressi sono fissati da InpOneTradePerDay
+#  + InpCloseAtEnd e l'uscita non li tocca: le righe in piu' SONO I
+#  PARZIALI (445 - 325 = 120).
+#
+#  >>> CONSEGUENZA: i "n=175 / n=270" che l'archivio cita per questa
+#      sedia NON SONO INGRESSI. A FrazioneIS 0.40 gli ingressi veri sono
+#      ~130 in IS -- SOTTO IL PAVIMENTO DEI 150 DELL'EMENDAMENTO A.
+#      A FrazioneIS 0.50:
+#          IS  2024.09.26 -> 2025.08.13   230 feriali   ~163 ingressi
+#          OOS 2025.08.14 -> 2026.06.30   229 feriali   ~162 ingressi
+#      TUTTE E DUE SOPRA 150, con margine sottile (+8%).
+#      >>> IL MARGINE E' SOTTILE E VA DETTO: se una finestra scende sotto
+#          150 ingressi veri, il MERITO di quella finestra e' SOSPESO e
+#          si legge solo il RISCHIO (Emendamento B). Non si arrotonda.
+#
+#  IL REGIME, dichiarato:
+#     IS  contiene la correzione di FEBBRAIO-APRILE 2025 (minimi di
+#         aprile) -- unico tratto di discesa vera dentro i tick BCM.
+#         Fonte gia' agli atti per questa finestra:
+#         risultati_archivio\R110_CRITERI.md r.263-266.
+#     OOS 2025.08.14 -> 2026.06.30. Range del DAX misurato da un feed
+#         INDIPENDENTE (HistData M1, report\DAX_13_ANNI_2026-09-10.md):
+#         2025 18.809,68-24.773,30  -  2026 21.859,78-25.903,90.
+#         L'ORDINE dei due estremi NON e' misurato, e non lo invento.
+#     Emendamento C (prova di regime) NON e' eseguibile: i tick BCM sugli
+#     indici partono dal 2024.09.26, niente orso 2022, niente 2020.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  >>> MI ASPETTO UN ASSE QUASI INERTE DA 1,0 IN SU, E DICO PERCHE'.
+#      Lo stop iniziale della RETEST, DERIVATO dal codice, e' ~49,1 punti
+#      indice (r.1471-1489: stop = range + buffer - offset; le due gambe
+#      con la geometria giusta danno 52,90 e 45,30). Quindi:
+#          TP a 3R  = ~147 punti indice sopra l'ingresso
+#          TP a 9R  = ~442 punti indice
+#      Il DAX intraday, da un ingresso delle 9 del mattino a un flat
+#      delle 17:30, quasi mai fa 147 punti nella direzione giusta.
+#      >>> QUINDI IL TP A 3R PROBABILMENTE NON VIENE MAI TOCCATO, e le
+#          celle 1,0 / 1,5 / 2,0 / 2,5 / 3,0 dovrebbero uscire IDENTICHE.
+#          Se e' cosi', la risposta e' "IL TP NON E' LA MANOPOLA", ed e'
+#          UN RISULTATO: chiude una casella del certificato di morte a
+#          costo 14 passate.
+#
+#  - n: IDENTICO IN TUTTE E 7 LE CELLE, per finestra (cancello G1). Il TP
+#    non puo' cambiare gli INGRESSI. Se la colonna Trades si muove fra le
+#    celle, IL ROUND SI FERMA e si capisce perche' prima di leggere altro.
+#  - PF OOS: attesa 1,20 - 1,55 (l'ancora a finestra piena fa 1,3789).
+#  - DD OOS: attesa 5% - 11% a rischio 1%. Sopra 10,00% cella SCARTATA
+#    SECCA (G3): il rischio si legge a qualunque n.
+#  - La cella InpTP1_R = 0 (NESSUN TP) e' quella interessante: e' il
+#    "lascia correre il vincitore" portato al limite. Mi aspetto che sia
+#    indistinguibile da 1,0 se il TP non viene mai toccato. SE INVECE
+#    FOSSE MEGLIO IN MODO VISIBILE, vuol dire che il TP a 3R sta
+#    chiudendo trade che avrebbero corso ancora.
+#
+#  CONDIZIONI DI FALSIFICAZIONE, DICHIARATE ORA:
+#    (a) se le celle 1,5 / 2,0 / 2,5 / 3,0 DIFFERISCONO fra loro di piu'
+#        dell'1% su profitto, il TP MORDE e va tarato: la mia attesa di
+#        inerzia e' sbagliata e lo scrivo;
+#    (b) se la cella 0,5 (TP a 1,5R) BATTE la 1,0 su profitto E su DD,
+#        allora il bersaglio giusto e' PIU' VICINO, non piu' lontano --
+#        cioe' l'esatto contrario della tesi "lasciamo correre";
+#    (c) se la cella 0 (nessun TP) batte la 1,0 di >= +10% a DD non
+#        peggiore, il TP a 3R sta costando, e va detto col numero.
+#
+#  E IL PROMEMORIA CHE VIENE PRIMA DI OGNI PROPOSTA:
+#    la sedia sta al 72% della frontiera del costo (stop RETEST derivato
+#    ~49,1 idx contro un pavimento di 40 x 1,70 = 68,0 idx all'ora 8).
+#    Nessuna cella di questo file cambia lo stop iniziale, quindi quel
+#    rapporto e' lo stesso in tutte e 7: R128b non lo puo' migliorare e
+#    non lo puo' peggiorare, MA VA SCRITTO ACCANTO A OGNI CELLA PROPOSTA.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779520 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian pinnato a false = no-op puro
+#  (ABTG_PausaGuardian.mqh r.1600), stessa ragione di R128a.
+#  InpBreakevenAtTP1 resta a true SOLO PER LEGGIBILITA': col parziale
+#  spento e' INERTE PER COSTRUZIONE (vive dentro il blocco r.1898), e
+#  metterlo ad asse costerebbe passate senza misurare niente.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- IL PUNTO DI QUESTO FILE: PARZIALE SPENTO, cosi' l'asse e' PURO.
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779520
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpTP1_R da 0 a 3,0 con passo 0,5 = 7 CELLE
+#       0    -> NESSUN TP (r.1070: tp=0.0). E' il "lascia correre" al limite
+#       0,5  -> TP a 1,5R  (~ 74 punti indice)
+#       1,0  -> TP a 3,0R  (~147)   <-- LA CELLA VIVA, L'ANCORA
+#       1,5  -> TP a 4,5R  (~221)
+#       2,0  -> TP a 6,0R  (~295)
+#       2,5  -> TP a 7,5R  (~368)
+#       3,0  -> TP a 9,0R  (~442)
+#     (conversione in punti indice sullo stop RETEST derivato ~49,1 idx:
+#      e' una STIMA per leggere la tabella, non un dato del CSV)
+#     InpTP1_R e' un double: nessun enum, passo rispettato, 7 celle
+#     esatte. Il bordo basso 0 e' un LIMITE FISICO (sotto zero il TP non
+#     esiste comunque); il bordo alto 3,0 l'ho scelto io.
+InpTP1_R=1.0||0||0.5||3.0||Y

@@ -1,0 +1,280 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R128a -- LA META' DI ASSE CHE NON E' MAI STATA PERCORSA
+#           D30EUR M5 -- asse InpTrailTF da M5 a M30, 7 celle
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R128_USCITA_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R128a_trailingTF_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 10000 -Modello 4
+#    -Etichetta r128a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): se e' vuoto il
+#     driver sceglie il terminale col RIPIEGO, e su questa macchina ci
+#     sono TRE MT5 con dentro le sedie VIVE, incluso il conto REALE
+#     10105439. C:\MT5_Backtest = demo 50504400, zero EA attaccati.
+#  !! -FrazioneIS 0.40 NON E' OPZIONALE QUI: e' il taglio con cui e'
+#     stata fatta la corsa d'ancora dell'08/08. Con un altro taglio
+#     l'ancora non torna e il file non e' leggibile.
+#  !! -Deposito 10000 (il default del driver) e -Modello 4: idem.
+#
+#  PRIMA SEMPRE CON -SoloControllo. Deve stampare:
+#      InpTrailTF    7 celle   (enum ENUM_TIMEFRAMES - lo step e' ignorato)
+#  >>> SE STAMPA 26, CI SI FERMA. 26 e' il conteggio ARITMETICO, e vuol
+#      dire che il driver non ha riconosciuto l'enum: girerebbe valori
+#      che non sono timeframe.
+#  (nota: controlla_prova.py stampera' 26 comunque -- lui l'enum non lo
+#   conosce. Il numero vero lo dice il DRIVER, non il controllore.)
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, E NON E' UN'OPINIONE
+#
+#  1) L'ASSE E' STATO PERCORSO A META', E SI E' FERMATO SUL VALORE VIVO.
+#     Il 08/08/2026 questa identica sedia ha girato una griglia 5x5 a
+#     TICK REALI: InpTrailTF da M1 a M5 x InpTrailStartR 0..1,00.
+#     CSV: risultati_prove\ABTG_DAX_Apertura_EU\
+#            ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}.csv
+#     Referto: risultati_archivio\Walkforward_Aperture\
+#            REFERTO_TRAILING_SOGLIA.md
+#     >>> M5 E' IL BORDO ALTO DELL'ASSE. Sopra M5 non c'e' NIENTE, in
+#         nessuno dei 46 CSV di questa famiglia (1.148 righe con colonne
+#         Inp*, contate l'11/09/2026).
+#
+#  2) E SUL BORDO LA SUPERFICIE SI STAVA ANCORA MUOVENDO.
+#     Profitto OOS a soglia 0, riga per riga (tick reali):
+#        M1 +1139,64   M2 +1865,70   M3 +1861,04   M4 +2155,58   M5 +1810,72
+#        PF  1,5782         1,6914        1,5769        1,5709        1,4152
+#        DD  2,716%         4,976%        4,841%        7,885%        6,711%
+#        n     220            238           249           265           270
+#     Un massimo a M4 e una ricaduta a M5 NON dicono cosa succede a M10.
+#     "Non lo sappiamo" e' diverso da "l'abbiamo provato".
+#
+#  3) QUESTA E' LA DISTANZA DEL TRAILING NELLA MODALITA' CHE GIRA DAVVERO.
+#     Nel preset vivo InpTrailMode=1 (ABTG_TRAIL_PREVBAR): lo stop va sul
+#     minimo della candela precedente del TF scelto (.mq5 r.2001-2005).
+#     Salire di TF = allargare il trailing. E' l'unica leva di DISTANZA
+#     che agisce sul ramo acceso.
+#
+#  4) E LA DIAGNOSI DI PARTENZA E' STATA CORRETTA -- va detto qui.
+#     Il round era nato dalla tesi "il trailing taglia i vincitori".
+#     Rifatto il conto sulla fonte (data\statements\trades_auto.csv,
+#     colonna 'strategy', magic 770101, n=35) quella tesi NON regge sulla
+#     sedia VIVA:
+#        ROTTURA (spenta dal 14/08), n=24 : -482,10 punti, rapporto 1:10,42
+#        RETEST  (la sedia VIVA),   n=11 : +176,30 punti, rapporto 1:1,59
+#     E delle 11 operazioni RETEST: 10 chiuse dal TRAILING, TUTTE E DIECI
+#     IN GUADAGNO; 1 sola in perdita (-23,40), chiusa dal FLAT DI FINE
+#     SESSIONE, non dal trailing. ZERO stop pieni in 11 operazioni.
+#     Correzione agli atti: report\CORREZIONE_TRAILING_770101_2026-09-11.md
+#     >>> QUINDI QUESTO FILE NON VA A RIPARARE NIENTE. Va a dare un 'n' e
+#         un altopiano a una configurazione che in campo ne ha 11.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- SI CONTROLLA PRIMA DI LEGGERE QUALUNQUE ALTRA COSA
+#  La cella InpTrailTF = 5 (M5) e' LA CELLA VIVA, ed e' la STESSA
+#  configurazione della corsa d'archivio dell'08/08 a tick reali:
+#     IS  (2024.09.26 -> 2025.06.09) : Profit  +380,71  PF 1,1311  DD 5,359%  n 175
+#     OOS (2025.06.10 -> 2026.06.30) : Profit +1810,72  PF 1,4152  DD 6,711%  n 270
+#  Fonte, riga InpTrailTF=5 e InpTrailStartR=0.00 di:
+#     risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}.csv
+#  TOLLERANZA CONGELATA: n IDENTICO (175 / 270), PF entro +/- 0,5%.
+#  Fuori da li' il banco e' sporco e il round si ferma PRIMA di leggere
+#  qualunque altro numero.
+#
+#  CONTROPROVA INCROCIATA, gia' fatta a tavolino: la stessa cella con
+#  rischio 0,65 invece di 1,0 e' l'ANCORA R119 del passo 7
+#  (risultati_archivio\ancora_passo7\..._OOS_ANCORA.csv):
+#     OOS +1103,31  PF 1,41105  DD 4,3501%  n 270
+#  n IDENTICO (270) e DD in rapporto 6,711/4,3501 = 1,543 contro un
+#  rapporto di rischio 1,00/0,65 = 1,538. Le due corse sono la stessa
+#  cosa a due taglie. VERIFICATO, non assunto.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#
+#  >>> NON MI ASPETTO UN MIGLIORAMENTO, E LO DICO ADESSO.
+#      Questa configurazione fa gia' PF OOS 1,4152 a tick reali su 21
+#      mesi. Non e' una sedia rotta: e' una sedia senza campione.
+#      IL RISULTATO CHE MI ASPETTO DI PIU' E' UN ALTOPIANO CHE RESTA
+#      BASSO (M2-M5) E CELLE M10-M30 PEGGIORI. Se esce cosi', la risposta
+#      onesta e' "IL DEFAULT VA BENE", e si scrive con quelle parole.
+#
+#  - n: in SALITA col TF, fra 270 e 340 in OOS. Motivo meccanico: un
+#    trailing piu' largo lascia vivere il trade abbastanza da toccare 1R,
+#    e la chiusura parziale aggiunge una riga alla colonna Trades (misurato:
+#    da M1 a M5 n OOS sale 220 -> 270). SE n CROLLA SOTTO 240, il trailing
+#    largo sta cambiando qualcosa che non capisco: il round si ferma.
+#  - PF OOS: attesa 1,20 - 1,50. Non mi aspetto che salga: da M2 a M5 il
+#    PF OOS scende gia' 1,691 -> 1,415 mentre il TF cresce.
+#  - DD OOS: attesa 6% - 13% (a rischio 1%). Mi aspetto che SALGA col TF:
+#    un trailing piu' largo restituisce di piu' prima di chiudere.
+#    Sopra il 10,00% la cella e' SCARTATA SECCA (cancello G3): il rischio
+#    e' un fatto accaduto e si legge a qualunque n (Emendamento B).
+#  - IS: il MERITO E' SOSPESO. Gli INGRESSI veri in IS sono ~130, non 175
+#    (i 175 contano anche i parziali: con parziale spento la stessa
+#    finestra piena da' 325 righe invece di 445 -- R120, 09/09).
+#    L'IS qui serve a due cose sole: leggere il RISCHIO e guardare il
+#    SEGNO della correlazione IS->OOS.
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    Se una cella fra M6 e M30 fa profitto OOS >= +1.991,79 (cioe' +10%
+#    su M5) CON DD OOS <= 6,711% E coi vicini sull'asse anch'essi
+#    migliori della cella viva, allora IL TRAILING ERA TROPPO STRETTO e
+#    la griglia dell'08/08 si era fermata troppo presto. In quel caso si
+#    scrive che avevamo lasciato dei soldi sul tavolo per 34 giorni.
+#    Sono i criteri (a)(b)(c) dell'08/08, quelli che bocciarono M4:
+#    NON si riscrivono oggi per far passare qualcosa.
+#
+#  E IL CANCELLO CHE VIENE PRIMA DI OGNI PROPOSTA:
+#    la frontiera del costo su PREVBAR NON E' CALCOLABILE PRIMA della
+#    corsa, perche' la distanza non e' un parametro ma l'ampiezza di una
+#    candela, e l'ampiezza mediana della candela M5/M30 del DAX all'ora 8
+#    e' [NON MISURATO] in questo repo. Se una cella viene proposta, quella
+#    misura va fatta PRIMA. Non si inventa una conversione.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779510 (cercato su tutto il repo l'11/09/2026, .git
+#  escluso: zero occorrenze). Il magic non entra in nessuna decisione del
+#  codice (serve solo a selezionare ordini e posizioni), quindi l'ancora
+#  deve tornare lo stesso al centesimo anche se l'archivio girava a
+#  770101 -- che e' il magic VIVO e qui NON si usa apposta.
+#
+#  InpUsaGuardian e' pinnato a FALSE e il perche' e' scritto:
+#  ABTG_PausaGuardian.mqh r.1600 fa "if(!attiva) return(true)", cioe' un
+#  no-op puro. La corsa d'ancora dell'08/08 e' PRECEDENTE all'esistenza
+#  di questo input (le sue 80 colonne Inp non lo contengono). Pinnarlo a
+#  false e' l'unico modo di essere identici a quella corsa senza
+#  dipendere dal fatto che il Guardian sia fail-open nel tester.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- IL MOTORE, PINNATO PER NOME SULLA CELLA VIVA (RETEST, SOLO LONG)
+#     Fonte: mql5\Presets\sedie_piccolo\recupero2\
+#            sedia_ABTG_DAX_Apertura_EU_770101.set
+#     confrontata colonna per colonna col CSV d'archivio dell'08/08.
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- USCITA: tutto com'e' in campo. Il parziale resta al 50% APPOSTA:
+#     questo file deve riprodurre l'ancora dell'08/08 al centesimo, e
+#     quella corsa aveva il parziale acceso.
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779510
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpTrailTF da M5 (5) a M30 (30)
+#     InpTrailTF e' ENUM_TIMEFRAMES. MT5 e il driver IGNORANO lo step e
+#     spazzolano i MEMBRI dell'enum compresi fra start e stop:
+#         M5(5)  M6(6)  M10(10)  M12(12)  M15(15)  M20(20)  M30(30)
+#     = 7 CELLE.
+#
+#     >>> E QUESTO NON E' "cosi' si e' sempre detto", e' verificato:
+#         la nota dell'08/08 diceva "misurato il 07/08" su
+#         InpTrailTF=5||1||1||5, cioe' M1..M5 con passo 1 -- dove
+#         ARITMETICA ed ENUMERAZIONE danno la STESSA risposta (1,2,3,4,5).
+#         QUEL TEST NON DISTINGUE NIENTE.
+#         La prova che distingue e' un'altra e sta in archivio:
+#         InpTF=16385||15||1||16408||Y ha prodotto 11 RIGHE coi valori
+#         15,20,30,16385,16386,16387,16388,16390,16392,16396,16408
+#         (oltre 40 CSV in risultati_prove\, fra cui
+#          ABTG_SupertrendReversal_D30EUR_IS.csv) -- l'aritmetica ne
+#         avrebbe fatte 16.394. E il driver lo implementa cosi' apposta:
+#         walkforward_generico.ps1 r.348-349 e r.526-530, con la tabella
+#         PERIOD_M20=20.
+#
+#     La cella 5 (M5) e' ESATTAMENTE il valore vivo e sta all'indice 0:
+#     e' l'ANCORA, ed e' un BORDO DICHIARATO (sotto M5 e' tutto gia'
+#     misurato l'08/08 e non si ricompra).
+#     La cella 30 (M30) e' un bordo FINE GRIGLIA: l'ho scelta io, e la
+#     ragione e' che oltre M30 la candela precedente diventa piu' lunga
+#     dell'intera sessione utile di questa sedia (ingresso ~08:35,
+#     flat 17:30 server).
+InpTrailTF=5||5||1||30||Y

@@ -1,0 +1,217 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R128d -- IL CONTROLLO: TRAILING SPENTO CONTRO TRAILING ACCESO
+#           D30EUR M5 -- asse InpUseTrailing, 2 celle
+#           >>> E' IL METRO DI TUTTO IL ROUND. <<<
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R128_USCITA_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R128d_controllo_trailing_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r128d
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA. Gli altri MT5 hanno le sedie VIVE,
+#     incluso il conto REALE 10105439.
+#  !! -FrazioneIS 0.50 come R128b/c/e.
+#  (-SoloControllo deve stampare 2 celle per finestra.)
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE QUESTO FILE, ED E' IL PIU' IMPORTANTE DEI CINQUE
+#
+#  Tutto il round R128 gira intorno a una domanda: IL TRAILING DI QUESTA
+#  SEDIA E' UN PROBLEMA, UN BENEFICIO, O E' INDIFFERENTE?
+#  R128a e R128c allargano la distanza per due strade indipendenti.
+#  QUESTO FILE PORTA LA DISTANZA A INFINITO: e' il LIMITE dei due assi,
+#  e senza di lui le altre due tabelle non hanno un metro.
+#
+#  E' ANCHE LA CELLA CHE IL BRIEF CHIEDEVA ESPLICITAMENTE ("includi
+#  sempre la cella trailing spento come controllo").
+#
+#  >>> PERCHE' NON BASTA QUELLO CHE ABBIAMO GIA': R120 (09/09, tick
+#      reali) HA GIA' MISURATO TRAILING ON/OFF -- MA SU UNA SOLA
+#      FINESTRA, senza split IS/OOS (scan_gestione.ps1 r.173-174:
+#      FromDate=2024.09.26 ToDate=2026.06.30, Optimization=1).
+#      Una struttura d'uscita scelta su una finestra sola non ha NIENTE
+#      fuori campione. Qui si ripete su DUE finestre, e costa 4 passate.
+# ---------------------------------------------------------------------
+#  LE DUE ANCORE -- una per cella
+#  Corsa R120 del 09/09, TICK REALI, finestra piena 2024.09.26 ->
+#  2026.06.30, geometria RETEST long-only, rischio 1%, parziale 0,
+#  BEatR 0, trailing PREVBAR M5:
+#     InpUseTrailing = 1 (ACCESO) : Profit +2970,43  PF 1,3789  DD  6,027%  n 325
+#     InpUseTrailing = 0 (SPENTO) : Profit +2689,78  PF 1,1060  DD 22,211%  n 325
+#  Fonte: risultati_prove\gestione_20260909\
+#         gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv
+#  (pin verificati uno per uno in quel CSV: InpEntryMode=2,
+#   InpRangeMinutes=35, InpBufferPoints=500, InpRetestOffsetPts=200,
+#   InpAllowLong=1, InpAllowShort=0, InpRiskPercent=1, InpTrailTF=5,
+#   InpTrailStartR=0, InpTP1_R=1.)
+#
+#  TOLLERANZA CONGELATA, sul TOTALE (quella corsa non ha split):
+#     per OGNUNA delle due celle:  n(IS) + n(OOS)  fra 320 e 330
+#     e la somma dei profitti entro +/- 5% del suo numero R120.
+#  Fuori da li' il banco e' sporco e il round si ferma.
+#
+#  E UN CANCELLO REGALATO: le due celle devono avere lo STESSO n, in
+#  entrambe le finestre. R120 lo misura (325 contro 325): spegnere il
+#  trailing NON cambia gli INGRESSI, perche' InpOneTradePerDay e
+#  InpCloseAtEnd li fissano. SE QUI n E' DIVERSO FRA LE DUE CELLE, c'e'
+#  qualcosa che non capisco e si guarda quello PRIMA di tutto il resto.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  >>> MI ASPETTO CHE IL TRAILING ACCESO VINCA, E DI MOLTO, SUL RISCHIO.
+#      Sulla finestra piena la differenza e' DD 6,03% contro 22,21%:
+#      non e' rifinitura, e' la differenza fra una sedia schierabile e
+#      una che sfonda il muro prop. Sul PROFITTO invece la distanza e'
+#      piccola (+2970 contro +2690 = +10,4%): LA META' INTERESSANTE E' IL
+#      RISCHIO, NON IL RENDIMENTO, e lo dico prima di vedere i numeri.
+#
+#  - n: ~163 in IS e ~162 in OOS, IDENTICO nelle due celle (vedi sopra).
+#  - PF OOS: attesa 1,25 - 1,55 da acceso, 1,00 - 1,25 da spento.
+#  - DD OOS: attesa 5% - 9% da acceso, 15% - 28% da spento (rischio 1%).
+#    La cella SPENTA sara' quasi certamente SCARTATA DAL CANCELLO G3
+#    (DD > 10,00%) -- ed e' giusto cosi': G3 e' scritto prima e non si
+#    piega. Ma la cella serve lo stesso: SENZA DI LEI LE ALTRE TABELLE
+#    NON HANNO UN METRO.
+#  - E VA DETTO COSA SIGNIFICA IN CAMPO: un DD del 22,2% al rischio 1%
+#    vale 14,4% al rischio 0,65% del conto reale. SOPRA IL MURO DEL 10%
+#    DI CASA. SPEGNERE IL TRAILING SU QUESTA SEDIA NON E' UN'OPZIONE DI
+#    TARATURA: E' FUORI DAL MURO PROP, e il rischio si legge a qualunque
+#    n (Emendamento B del 16/08).
+#
+#  CONDIZIONE DI FALSIFICAZIONE, DICHIARATA ORA:
+#    SE LA CELLA SPENTA BATTE QUELLA ACCESA SU PROFITTO **E** SU PF IN
+#    OOS, allora la tesi "il trailing taglia i vincitori" torna in gioco
+#    e il round cambia direzione: R128a e R128c diventano la ricerca del
+#    punto giusto, non una conferma del default.
+#    SE INVECE LA SPENTA PERDE SU PF E SFONDA IL DD -- come dice R120
+#    sulla finestra piena -- allora IL TRAILING E' QUELLO CHE TIENE IN
+#    PIEDI QUESTA SEDIA, e va scritto con quelle parole.
+#
+#  >>> E IL CONTESTO CHE IL CAMPO AGGIUNGE, MISURATO OGGI:
+#      delle 11 operazioni della configurazione RETEST viva (07/08 ->
+#      08/09, data\statements\trades_auto.csv, colonna 'strategy'),
+#      DIECI sono state chiuse dal TRAILING e TUTTE E DIECI IN GUADAGNO.
+#      L'unica perdita (-23,40) e' del FLAT DI FINE SESSIONE.
+#      n=11 non dimostra niente, ma punta nella stessa direzione di R120.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779540 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro (ABTG_PausaGuardian.mqh
+#  r.1600). Parziale SPENTO come in R128b/c, cosi' le tre tabelle sono
+#  confrontabili cella per cella e n resta un conteggio di INGRESSI.
+#  InpTrailMode=1 (PREVBAR) e InpTrailTF=5 sono PINNATI ai valori vivi:
+#  qui l'asse e' l'INTERRUTTORE, non la distanza.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779540
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpUseTrailing 0 e 1 = 2 CELLE
+#     0 = trailing SPENTO  -> l'uscita resta: stop iniziale, TP a 3R,
+#         flat di fine sessione. E' il LIMITE di R128a e R128c.
+#     1 = trailing ACCESO   <-- LA CELLA VIVA, l'ANCORA principale.
+#     Bool: nessun enum, 2 celle esatte, non degenere.
+#     >>> QUESTE DUE CELLE NON SONO GEMELLE: il cancello G1 di
+#         determinismo NON e' coperto da questo file. Lo copre R128a,
+#         che deve riprodurre AL CENTESIMO una corsa d'archivio
+#         dell'08/08 -- una verifica piu' forte di due gemelle, perche'
+#         attraversa due corse diverse a 34 giorni di distanza.
+InpUseTrailing=1||0||1||1||Y

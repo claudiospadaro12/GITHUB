@@ -1,0 +1,258 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R128e -- L'OROLOGIO: L'UNICA MANOPOLA D'USCITA CHE IN CAMPO HA GIA'
+#           PRODOTTO UNA PERDITA, E NON E' MAI STATA MOSSA
+#           D30EUR M5 -- asse InpCloseHour, 6 celle
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R128_USCITA_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R128e_orologio_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r128e
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA. Gli altri MT5 hanno le sedie VIVE,
+#     incluso il conto REALE 10105439.
+#  !! -FrazioneIS 0.50 come R128b/c/d.
+#  (-SoloControllo deve stampare 6 celle per finestra.)
+#
+#  !! GLI ORARI SONO IN ORA SERVER BCM = ORA ITALIANA MENO UNO.
+#     InpCloseHour=17 con InpCloseMin=30 vuol dire 17:30 SERVER =
+#     18:30 ITALIANE. La sessione cash del DAX finisce alle 17:30
+#     italiane = 16:30 SERVER. Chi legge questa tabella in ora italiana
+#     la legge sbagliata di un'ora, ed e' un errore gia' fatto il 06/08.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, E PERCHE' PROPRIO ADESSO
+#
+#  1) NON E' MAI STATA MOSSA. NEMMENO UNA VOLTA.
+#     Verificato l'11/09/2026 su tutti e 46 i CSV con 'DAX_Apertura' nel
+#     nome (1.148 righe con colonne Inp*):
+#        InpCloseHour  vale 17 in TUTTE E 1.148 LE RIGHE
+#        InpCloseAtEnd vale  1 in TUTTE E 1.148 LE RIGHE
+#     Zero file con due valori. Gira al default da luglio e nessuno ha
+#     mai misurato quanto vale.
+#
+#  2) ED E' L'UNICA MANOPOLA D'USCITA CHE IN CAMPO HA GIA' PRODOTTO UNA
+#     PERDITA SULLA CONFIGURAZIONE VIVA.
+#     Misurato oggi da data\statements\trades_auto.csv (separatore ';'),
+#     magic 770101, colonna 'strategy' = 'DAX Apertura EU RETEST BUY',
+#     n = 11 operazioni dal 07/08 al 08/09:
+#        10 chiuse con close_reason = 'sl'     -> TUTTE E DIECI IN UTILE
+#                                                 (+4,50 +3,00 +17,00
+#                                                  +4,40 +65,00 +36,20
+#                                                  +12,50 +28,10 +5,40
+#                                                  +23,60 punti)
+#         1 chiusa con close_reason = 'expert' -> -23,40 punti
+#     L'unica chiusura 'expert' e' il FLAT DI FINE SESSIONE
+#     (EndOfSession(), r.2098-2107, che scatta su InpCloseHour/Min).
+#     Il trade era stato aperto il 28/08 alle 16:56:41 ed e' stato chiuso
+#     34 minuti dopo dall'orologio.
+#     >>> IN 11 OPERAZIONI LA SEDIA VIVA NON HA MAI PRESO UNO STOP PIENO,
+#         IL TRAILING HA CHIUSO 10 VOLTE SU 10 IN PROFITTO, E L'UNICA
+#         PERDITA E' DELL'OROLOGIO.
+#     n=11 NON DIMOSTRA NIENTE. Ma dice DOVE GUARDARE, e guardare costa
+#     12 passate.
+#
+#  3) ED E' L'ALTRA STRADA PER "LASCIAR CRESCERE IL VINCITORE".
+#     Il brief chiedeva un asse che permetta al vincitore di crescere.
+#     R128b lo fa col TP. Questo lo fa col TEMPO: se il flat arriva prima
+#     che il movimento sia finito, il vincitore viene tagliato
+#     dall'orologio esattamente come lo sarebbe da un TP troppo vicino.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- ED E' INCROCIATA CON UN ALTRO FILE
+#  Questo file ha gli STESSI PIN di R128b, con una sola differenza:
+#  qui l'asse e' InpCloseHour e InpTP1_R e' pinnato a 1,0.
+#  >>> QUINDI LA CELLA InpCloseHour = 17 DEVE RIPRODURRE AL CENTESIMO LA
+#      CELLA InpTP1_R = 1,0 DI R128b, in tutte e due le finestre, su
+#      Profit, PF, DD ed n.
+#      E' un cancello che non costa nemmeno una passata in piu' e che
+#      verifica due cose insieme: che il banco sia deterministico e che
+#      i due file prova siano davvero la stessa configurazione.
+#      SE NON COMBACIANO, UNO DEI DUE FILE HA UN PIN SBAGLIATO, e si
+#      trova quale PRIMA di leggere qualunque altro numero.
+#
+#  E a sua volta quella cella ha l'ancora d'archivio di R128b:
+#  R120 (09/09, tick reali, finestra piena) parziale 0 + PREVBAR:
+#     Profit +2970,43   PF 1,3789   DD 6,027%   n 325
+#  TOLLERANZA sul TOTALE: n(IS)+n(OOS) fra 320 e 330, somma profitti
+#  entro +/- 5%.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  >>> MI ASPETTO CHE LE CELLE 15, 17, 19 E 21 SIANO IDENTICHE AL
+#      CENTESIMO, E DICO PERCHE': la sessione cash del DAX finisce alle
+#      16:30 SERVER. Con InpOneTradePerDay e un ingresso che avviene di
+#      mattina, dopo le 16:30 non c'e' quasi mai una posizione viva da
+#      chiudere. Se e' cosi', L'OROLOGIO E' INERTE PER COSTRUZIONE SU
+#      QUESTA SEDIA, e va scritto con quelle parole: e' un risultato, e
+#      chiude una casella del certificato di morte a costo 12 passate.
+#
+#  - n: mi aspetto n COSTANTE su 15/17/19/21 e IN CALO su 11 e 13, dove
+#    il flat taglia trade ancora aperti.
+#    >>> ATTENZIONE, QUESTO E' L'UNICO FILE DEL ROUND IN CUI IL CANCELLO
+#        G1 (ingressi invarianti) NON SI APPLICA: un flat piu' tardi puo'
+#        lasciare una posizione viva oltre la mezzanotte, e allora
+#        InpOneTradePerDay puo' bloccare l'ingresso del giorno dopo.
+#        Se n CALA salendo di ora, e' proprio quello, ed e' un FATTO da
+#        leggere, non un difetto. Se n cala di piu' del 15% su 19 o 21,
+#        la cella e' un'altra sedia e non si confronta.
+#  - PF OOS: attesa 1,20 - 1,50 su 15/17/19/21; attesa PIU' BASSA su
+#    11 e 13 (il flat anticipato taglia i vincitori).
+#  - DD OOS: attesa 5% - 11% a rischio 1%. Sopra 10,00% cella SCARTATA
+#    SECCA (cancello G3), a qualunque n (Emendamento B).
+#  - E il rischio NUOVO che le celle 19 e 21 introducono va dichiarato
+#    adesso: tenere una posizione oltre la chiusura del cash vuol dire
+#    esporsi al gap, e un gap e' un rischio che il DD medio NON
+#    descrive. Se 19 o 21 escono migliori sul profitto ma con "Peggior
+#    Giornata %" peggiore, VINCE LA PEGGIOR GIORNATA.
+#
+#  CONDIZIONI DI FALSIFICAZIONE, DICHIARATE ORA:
+#    (a) se 19 e 21 sono DIVERSI da 17, esistono posizioni vive nel
+#        dopo-borsa: l'orologio E' una manopola viva, e la perdita del
+#        28/08 smette di essere un aneddoto;
+#    (b) se 11 o 13 BATTONO 17 su profitto E su DD, allora il flat va
+#        ANTICIPATO, non ritardato -- cioe' l'esatto contrario di quello
+#        che suggerisce il singolo trade del 28/08. Un campione da 1 puo'
+#        indicare la direzione sbagliata, ed e' esattamente il motivo per
+#        cui questo round esiste.
+#
+#  >>> E LA MANOPOLA CHE SERVIREBBE DAVVERO NON ESISTE, e va segnalata:
+#      il trade perdente del 28/08 e' ENTRATO alle 16:56 sapendo che il
+#      flat era alle 17:30. Quello che lo avrebbe evitato non e' un flat
+#      piu' tardi: e' un "NON ENTRARE DOPO L'ORA X", che in questo EA
+#      NON ESISTE (cercato nel sorgente: c'e' solo InpPendingExpiryMin,
+#      che cancella il PENDENTE dopo N minuti, non l'ingresso tardivo).
+#      >>> E' UNA MODIFICA ALL'EA, NON UN PARAMETRO: LA SEGNALO, NON LA
+#          SCRIVO. Le modifiche all'EA non si fanno dentro un round.
+# ---------------------------------------------------------------------
+#  MAGIC VERGINE 779550 (cercato su tutto il repo l'11/09/2026: zero
+#  occorrenze). InpUsaGuardian=false = no-op puro (ABTG_PausaGuardian.mqh
+#  r.1600). InpCloseMin resta 30 in tutte le celle: l'asse e' l'ORA, e
+#  muovere anche i minuti sarebbe una seconda variabile.
+#  InpCloseAtEnd resta true in tutte le celle: se fosse false l'orologio
+#  cancellerebbe solo i pendenti e l'asse sarebbe INERTE PER COSTRUZIONE
+#  (r.2098-2107: la chiusura della posizione e' dentro
+#  "if(InpCloseAtEnd && SelectMyPosition())").
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- USCITA: identica a R128b con InpTP1_R=1,0 (parziale spento).
+#     E' cosi' APPOSTA: la cella InpCloseHour=17 deve combaciare al
+#     centesimo con la cella InpTP1_R=1,0 di R128b.
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779550
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpCloseHour da 11 a 21, passo 2 = 6 CELLE
+#     (ORA SERVER BCM. Con InpCloseMin=30 pinnato, le sei celle sono:)
+#       11 -> flat 11:30 server = 12:30 italiane
+#       13 -> flat 13:30 server = 14:30 italiane
+#       15 -> flat 15:30 server = 16:30 italiane
+#       17 -> flat 17:30 server = 18:30 italiane   <-- LA CELLA VIVA
+#       19 -> flat 19:30 server = 20:30 italiane
+#       21 -> flat 21:30 server = 22:30 italiane
+#     Riferimento: la sessione CASH del DAX chiude alle 16:30 SERVER.
+#     Quindi le celle 11 e 13 tagliano DENTRO la sessione, la 15 taglia
+#     quasi sulla chiusura, la 17 (viva) e' gia' un'ora dopo, e 19/21
+#     stanno nel dopo-borsa del future.
+#     InpCloseHour e' un int: nessun enum, passo rispettato, 6 celle.
+#     I due bordi li ho scelti io: 11 perche' sotto taglierebbe prima
+#     ancora che il retest si riempia in molte giornate (l'ingresso
+#     tipico misurato in campo sta fra le 08:16 e le 10:26 server), 21
+#     perche' oltre si entrerebbe nella sessione successiva.
+InpCloseHour=17||11||2||21||Y
