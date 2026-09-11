@@ -170,6 +170,11 @@ param(
   [string]$Periodo   = "",           # TF del grafico nel tester (@PERIODO nel file prova)
   [double]$FrazioneIS = 0.40,        # 40% dentro campione, 60% fuori
   [int]$Modello      = 4,            # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
+  [switch]$FinoDallaRiga,            # 12/09/2026: dichiara che -Fino VINCE su '@FINOA'.
+                                     #   Senza, le due date che si contraddicono fanno MORIRE la corsa.
+                                     #   Serve a chi misura APPOSTA una finestra diversa da quella
+                                     #   del file prova (unico caso in casa: RIGA_DIAG_GBPUSD.ps1
+                                     #   -Passo C, che misura un TEMPO, non un orologio).
   [int]$Deposito     = 10000,        # deposito del tester. 100000 = taglia prop: serve dove il lotto minimo schiaccia il rischio
   [string]$Etichetta = "",           # suffisso nei nomi dei CSV: un round nuovo NON sovrascrive il precedente
   [int]$Spread       = -1,           # 19/08/2026 (R84-bis, stress spread). -1 = NON scrive la riga
@@ -500,8 +505,15 @@ if(-not $DaQuando -and $Direttive.ContainsKey("DAQUANDO")){ $DaQuando=$Direttive
 #  "finestra fino al 2012.12.31" e il tester girava fino al 2026.06.30
 #  senza dire niente a nessuno. Il verdetto sarebbe uscito su un'altra
 #  finestra, con l'etichetta di quella giusta.
-#  DANNO MISURATO AD OGGI: NESSUNO, e il perche' e' un fatto, non una
-#  speranza. I 44 file con la data diversa NON passano di qui:
+#  DANNO MISURATO: UNO, ed e' DICHIARATO. Al primo giro avevo scritto
+#  "NESSUNO", e mi sbagliavo per un difetto di metodo, non di codice:
+#  avevo censito i FILE PROVA con '@FINOA' non-default, ma la divergenza
+#  si crea da DUE lati, e il secondo e' il CHIAMANTE che passa -Fino
+#  apposta. Il caso vero, unico su tutto il repo:
+#  RIGA_DIAG_GBPUSD.ps1 -Passo C passa -Fino 2013.01.01 su un file prova
+#  che dichiara @FINOA 2026.06.30, DI PROPOSITO ("qui si misura un TEMPO,
+#  non un orologio"). Per lui esiste -FinoDallaRiga, qui sotto.
+#  Gli altri 44 file con la data diversa NON passano di qui:
 #    - i 18 R113_F* usano RIGA_R113_REGIME_NASUSD.ps1, che si scrive gli
 #      .ini da solo (r.54-55: "NIENTE walkforward_generico") e confronta
 #      @FINOA con la tabella congelata dei criteri (r.893-894);
@@ -527,12 +539,29 @@ if($Direttive.ContainsKey("FINOA")){
   }
   if($PSBoundParameters.ContainsKey("Fino")){
     if($Fino -ne $finoDaFile){
-      Muori ("DUE DATE DI FINE, DIVERSE, E NON SCELGO IO.`n" +
-             "    -Fino passato a mano : " + $Fino + "`n" +
-             "    '@FINOA' nel file    : " + $finoDaFile + "`n" +
-             "    Il file prova dice che la finestra finisce in una data, la riga`n" +
-             "    di lancio ne dice un'altra. Una delle due e' sbagliata: si`n" +
-             "    guarda QUALE, non si esegue la piu' comoda.")
+      if($FinoDallaRiga){
+        # DIVERGENZA DICHIARATA. Non e' un'eccezione comoda: e' una firma.
+        # Chi lancia ha scritto -FinoDallaRiga, cioe' "lo so, la sto
+        # cambiando apposta". E siccome un avviso dentro mille righe di log
+        # non lo legge nessuno, esce a banda larga e si RIPETE piu' sotto.
+        Write-Host ""
+        Write-Host "*********************************************************************" -ForegroundColor Magenta
+        Write-Host "  ATTENZIONE: LA FINESTRA NON E' QUELLA DEL FILE PROVA." -ForegroundColor Magenta
+        Write-Host ("    '@FINOA' nel file    : " + $finoDaFile) -ForegroundColor Magenta
+        Write-Host ("    -Fino usato DAVVERO  : " + $Fino) -ForegroundColor Magenta
+        Write-Host "  Vince la riga di lancio perche' e' stato passato -FinoDallaRiga." -ForegroundColor Magenta
+        Write-Host "  I numeri che escono NON descrivono la cella del file prova." -ForegroundColor Magenta
+        Write-Host "*********************************************************************" -ForegroundColor Magenta
+        Write-Host ""
+      } else {
+        Muori ("DUE DATE DI FINE, DIVERSE, E NON SCELGO IO.`n" +
+               "    -Fino passato a mano : " + $Fino + "`n" +
+               "    '@FINOA' nel file    : " + $finoDaFile + "`n" +
+               "    Il file prova dice che la finestra finisce in una data, la riga`n" +
+               "    di lancio ne dice un'altra. Una delle due e' sbagliata: si`n" +
+               "    guarda QUALE, non si esegue la piu' comoda.`n" +
+               "    Se la differenza e' VOLUTA, si dichiara: aggiungi -FinoDallaRiga.")
+      }
     }
   } else {
     $Fino = $finoDaFile

@@ -962,7 +962,7 @@ try{
     #     file prova su simbolo e finestra. Prosa e parametri che dicono
     #     due geometrie diverse sono la classe del 31/08: la divergenza
     #     non si nasconde, si DICHIARA e si stampa accanto al numero.
-    [void]$Rilievi.Add("QUESTA NON E' LA CELLA 00_gemelli DELLA SONDA. Il file prova " + $Prova + " dichiara @SIMBOLO " + $dir["@SIMBOLO"] + ", @DAQUANDO " + $dir["@DAQUANDO"] + ", @FINOA " + $dir["@FINOA"] + "; questa corsa gira su " + $Simbolo + " " + $DaQuando + " -> " + $Fino + " perche' i parametri di riga di comando VINCONO sulle direttive @ (walkforward_generico.ps1 righe 303-305; @FINOA il generico non la legge affatto e prende -Fino). I numeri che escono NON entrano nel round della sonda e non si confrontano con la sua tabella: qui si misura un TEMPO, non un orologio.")
+    [void]$Rilievi.Add("QUESTA NON E' LA CELLA 00_gemelli DELLA SONDA. Il file prova " + $Prova + " dichiara @SIMBOLO " + $dir["@SIMBOLO"] + ", @DAQUANDO " + $dir["@DAQUANDO"] + ", @FINOA " + $dir["@FINOA"] + "; questa corsa gira su " + $Simbolo + " " + $DaQuando + " -> " + $Fino + " perche' i parametri di riga di comando VINCONO sulle direttive @ (walkforward_generico.ps1 righe 303-305; dal 12/09/2026 il generico @FINOA la LEGGE, e due date diverse lo fanno MORIRE: qui la divergenza e' dichiarata con -FinoDallaRiga). I numeri che escono NON entrano nel round della sonda e non si confrontano con la sua tabella: qui si misura un TEMPO, non un orologio.")
     if($Passo -eq "C"){
       [void]$Rilievi.Add("FINESTRA C INTERAMENTE PRIMA DEL PAVIMENTO DEI TICK REALI (" + $TickPavimento + ", MISURATO il 01/09 nel Diario del tester): a Modello 4 MT5 NON si ferma, GENERA i tick dalle barre M1 e non lo dice. E' VOLUTO -- e' proprio il tratto che si sta cronometrando -- ma qualunque colonna che dipende dallo spread (Spread Mediano Ingresso, Rapporto Lordo Su Spread) in questa corsa NON e' lo spread del feed e non si legge. Qui si legge il CRONOMETRO.")
     }
@@ -1066,7 +1066,7 @@ try{
               "-Simbolo",$Simbolo,
               "-Periodo",$Periodo,
               "-DaQuando",$DaQuando,
-              "-Fino",$Fino,
+              "-Fino",$Fino,"-FinoDallaRiga",
               "-Modello",("" + $Modello),
               "-Deposito",("" + $Deposito),
               "-Rifai")
