@@ -13373,3 +13373,43 @@ prova.
 un modo `--mq5` (classe 225): **ordine di dichiarazione delle globali**, enum
 dichiarata prima dell'input che la usa, **specificatori di `StringFormat` contro
 gli argomenti**, e il confronto della convenzione col resto del repo.
+
+## 231. Il ritrovamento spostato di SEDIA (11/09/2026)
+
+**Il caso.** Analizzando la foto del telefono di Claudio (due ordini XAUUSD con
+lo stesso lotto e distanze di stop diverse) ho trovato il difetto del pavimento
+del lotto. Corretto. 🔴 **Poi l'ho collegato a un secondo ritrovamento — *"e
+questa sedia gira al 55% della frequenza promessa"* — e le due misure sono di
+DUE SEDIE DIVERSE:**
+
+| magic | EA | simbolo | operazioni |
+|---|---|---|---:|
+| **`971501`** | `EMA200_Ottimizzato` | **XAUUSD** | 7 |
+| **`771531`** | `EMA200` | **U30USD** | 21 |
+
+Il pavimento del lotto e' di **`971501` sull'oro**. Il 55% di frequenza e' di
+**`771531` sul Dow**. Avevo scritto *"due misure indipendenti che dicono la
+stessa cosa"*: 🔴 **dicono due cose, su due sedie.**
+
+📌 E' la **classe 207 in forma nuova** (*"la promessa non e' stata tolta: e'
+stata spostata di simbolo"*). Li' una promessa migrava da un simbolo all'altro;
+qui un **ritrovamento** migra da una sedia all'altra, e il nome quasi identico
+delle due (`EMA200` e `EMA200 OTT`) e' cio' che lo rende facile.
+
+**La regola.** Due ritrovamenti si collegano **solo dopo aver verificato che
+parlino della STESSA riga**: stesso magic, stesso simbolo, stesso conto. 👉 **Il
+nome dell'EA non basta**: la nostra unita' e' la SEDIA, non il motore, ed e'
+scritto nei criteri da mesi.
+
+🟢 **E la verifica ha prodotto un REGALO: la prova positiva del meccanismo.**
+Sulla stessa famiglia, dove il pavimento **non** morde, le due gambe escono
+**davvero diverse**:
+
+| | gamba 1 | gamba 2 | |
+|---|---:|---:|---|
+| **`971501` oro** (minimo 0,01) | **0,01** | **0,01** | 🔴 schiacciate dal pavimento |
+| **`771531` Dow** (minimo 0,10) | **0,20** | **0,30** | 🟢 libere, e diverse |
+
+👉 Stesso disegno, stesso codice, **taglie diverse fra le gambe quando il
+pavimento non c'e'**. La diagnosi non era solo plausibile: **ha un controllo
+positivo**, e l'ho trovato solo perche' mi hanno corretto la sedia.
