@@ -1,0 +1,122 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-09-11 03:31:50  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 6
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260908   (6.7 KB, ultima scrittura 2026-09-08 22:44) ---
+    righe totali: 26
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260909   (4.9 KB, ultima scrittura 2026-09-09 20:18) ---
+    righe totali: 18
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20260910   (25.9 KB, ultima scrittura 2026-09-10 23:53) ---
+    righe totali: 94
+    RIGHE DI ORDINE / DEAL: 12
+      DH000:59:00.062ABTG_PunteLarry (XAUUSD,H1)[LARRY] pendente non piu' attivo (scaduto o cancellato): giornata chiusa.
+      PK008:00:00.654ABTG_MaxMinNotte (XAUUSD,M15)CTrade::OrderSend: buy stop 0.01 XAUUSD at 4423.59 sl: 4387.26 tp: 4568.91 [invalid price]
+      MP008:00:00.806ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4387.26 SL 4423.59 TP 4241.94 lot 0.01
+      EE008:59:00.442ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)[MaxMinNotte] SELL STOP @ 25518.00 SL 25553.90 TP 25374.40 lot 1.50
+      IK014:16:54.190ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T1 ECB EURJPY 07/03/2024 | BUY 160.810/160.560/161.310 (attesi 160.810/160.560/161.310) | SELL 160.587/160.837/160.087 (attesi 160.587/160.837/160.087)
+      EK014:16:54.190ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T2 FOMC EURUSD 20/03/2024 | BUY 1.08922/1.08672/1.09422 (attesi 1.08922/1.08672/1.09422) | SELL 1.08636/1.08886/1.08136 (attesi 1.08636/1.08886/1.08136)
+      LM014:16:54.190ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T3 slide NFP USDJPY | BUY 150.530/150.280/150.830 (attesi 150.530/150.280/150.830) | SELL 149.980/150.230/149.680 (attesi 149.980/150.230/149.680)
+      JM014:17:02.513ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T1 ECB EURJPY 07/03/2024 | BUY 160.810/160.560/161.310 (attesi 160.810/160.560/161.310) | SELL 160.587/160.837/160.087 (attesi 160.587/160.837/160.087)
+      FE014:17:02.513ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T2 FOMC EURUSD 20/03/2024 | BUY 1.08922/1.08672/1.09422 (attesi 1.08922/1.08672/1.09422) | SELL 1.08636/1.08886/1.08136 (attesi 1.08636/1.08886/1.08136)
+      CH014:17:02.513ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T3 slide NFP USDJPY | BUY 150.530/150.280/150.830 (attesi 150.530/150.280/150.830) | SELL 149.980/150.230/149.680 (attesi 149.980/150.230/149.680)
+      QO015:00:00.173ABTG_PostNews (EURJPY,M5)[PostNews] BUY STOP @ 179.230 SL 178.980 TP 179.730 lot 0.58
+      PE015:00:00.211ABTG_PostNews (EURJPY,M5)[PostNews] SELL STOP @ 178.981 SL 179.231 TP 178.481 lot 0.58
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260911   (10.8 KB, ultima scrittura 2026-09-11 03:23) ---
+    righe totali: 35
+    RIGHE DI ORDINE / DEAL: 5
+      QJ001:05:00.196ABTG_PunteLarry (XAUUSD,H1)[LARRY] SETUP LONG [SMASH libro] del 2026.09.11: ingresso STOP @ 4434.48 (punta/gap 27.63 = 0.29 x ATR D1).
+      EM001:05:00.262ABTG_PunteLarry (XAUUSD,H1)[LARRY] PENDENTE BUY STOP @ 4434.48  SL 4304.15  TP 4629.97  lot 0.01  (pattern SMASH libro, punta/gap 0.29 x ATR, scadenza 2026.09.11 23:59, ordine 3358802)
+      QL001:13:35.565ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T1 ECB EURJPY 07/03/2024 | BUY 160.810/160.560/161.310 (attesi 160.810/160.560/161.310) | SELL 160.587/160.837/160.087 (attesi 160.587/160.837/160.087)
+      MD001:13:35.565ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T2 FOMC EURUSD 20/03/2024 | BUY 1.08922/1.08672/1.09422 (attesi 1.08922/1.08672/1.09422) | SELL 1.08636/1.08886/1.08136 (attesi 1.08636/1.08886/1.08136)
+      DJ001:13:35.565ABTG_PostNews (EURJPY,M5)[PostNews][AUTOTEST] [ok ] T3 slide NFP USDJPY | BUY 150.530/150.280/150.830 (attesi 150.530/150.280/150.830) | SELL 149.980/150.230/149.680 (attesi 149.980/150.230/149.680)
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20260910   (98 KB, ultima scrittura 2026-09-10 23:55) ---
+    righe totali: 344
+    RIGHE DI ORDINE / DEAL: 1
+      GR008:59:00.508ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)[MaxMinNotte] SELL STOP @ 25518.00 SL 25553.90 TP 25374.40 lot 18.60
+    GUARDIAN, ultima riga del giorno:
+      JD023:55:01.090ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=103025.49  dayLoss=0.00%  totDD=-3.03%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260911   (15.1 KB, ultima scrittura 2026-09-11 03:25) ---
+    righe totali: 55
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      EQ003:30:04.976ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=103025.49  dayLoss=0.00%  totDD=-3.03%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20260910   (83.4 KB, ultima scrittura 2026-09-10 23:55) ---
+    righe totali: 291
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      RK023:55:00.949ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7507.65  dayLoss=0.00%  totDD=-0.10%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260911   (12.7 KB, ultima scrittura 2026-09-11 03:25) ---
+    righe totali: 46
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      GH003:30:00.798ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7507.65  dayLoss=0.00%  totDD=-0.10%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
