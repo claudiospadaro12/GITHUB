@@ -155,7 +155,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #  segnaposto e' qui, lo script MUORE al controllo qui sotto: e' il
 #  fallimento giusto -- rumoroso, e prima di scaricare qualunque cosa.
 # ---------------------------------------------------------------------
-$PIN = 'PIN_DA_RIMPIAZZARE_DOPO_IL_COMMIT'
+$PIN = '7991c56258e6623b0be1146cd9a12ee618144313'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
