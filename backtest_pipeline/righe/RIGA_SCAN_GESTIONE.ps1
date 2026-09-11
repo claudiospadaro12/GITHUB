@@ -251,6 +251,28 @@ if($motivoNo -ne ""){
 $cartellaBT = $BANCO_PERC
 Write-Host ("  bersaglio AMMESSO dalla guardia positiva: " + $cartellaBT + "   (conto " + $BANCO_CONTO + ")") -ForegroundColor Green
 if(-not (Test-Path -LiteralPath $cartellaBT -PathType Container)){ Muori ("la cartella '" + $cartellaBT + "' non esiste.") }
+# --- GUARDIA_BANCO_POSITIVA_v1, GRADINO f: COPIA da RIGA_ROUND_VPS.ps1
+#     righe 480-497 al commit e2d5dc3 (stesse regole di sopra). E' il
+#     gradino che la sola stringa NON puo' fare: un nome giusto puo'
+#     puntare nel posto sbagliato se la cartella e' una junction.
+# IL GRADINO CHE NESSUNA STRINGA PUO' FARE. Un nome giusto puo' puntare
+# nel posto sbagliato: basta che la cartella sia una junction o un link
+# simbolico. Il testo e' identico, il posto no -- e quello lo sa solo il
+# filesystem. Se e' un collegamento non si parte: non si indovina dove va.
+$infoBT = $null
+try  { $infoBT = Get-Item -LiteralPath $cartellaBT -Force -ErrorAction Stop }
+catch{ $infoBT = $null }
+if($null -eq $infoBT){
+  Muori ("la cartella '" + $cartellaBT + "' non e' leggibile: non posso dire DOVE punta, e quindi non parto.")
+}
+if((([int]$infoBT.Attributes) -band ([int][IO.FileAttributes]::ReparsePoint)) -ne 0){
+  Muori ("IL BANCO E' UN COLLEGAMENTO: '" + $cartellaBT + "' non e' una cartella vera,`n" +
+         "    e' una junction (o un link simbolico) che rimanda altrove. Il nome e'`n" +
+         "    quello giusto, il posto potrebbe non esserlo, e nessun controllo sulla`n" +
+         "    STRINGA se ne accorgerebbe.`n" +
+         "    Se il banco 50504400 e' davvero installato cosi', si guarda insieme dove`n" +
+         "    punta e si cambia questa riga. Non si tira a indovinare.")
+}
 $exeBT = Join-Path $cartellaBT "terminal64.exe"
 $medBT = Join-Path $cartellaBT "metaeditor64.exe"
 if(-not (Test-Path -LiteralPath $exeBT -PathType Leaf)){ Muori ("in '" + $cartellaBT + "' non c'e' terminal64.exe.") }

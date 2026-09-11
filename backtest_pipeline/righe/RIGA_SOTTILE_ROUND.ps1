@@ -168,7 +168,7 @@ $PIN = 'PIN_DA_RIMPIAZZARE_DOPO_IL_COMMIT'
 #    strada A MANO che era aperta, ed e' quella che questa impronta nuova
 #    inchioda.
 $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
-$SHA_WALK  = 'AB989B006F0CC0A463BACD8032C211655FFD0F4A85898FB0704068067B2BEA8B'
+$SHA_WALK  = 'BAE1A08C1D0F35E01F7F1AC0B9A94234A51F0070DB3457B97A707D4CDF6AD251'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
