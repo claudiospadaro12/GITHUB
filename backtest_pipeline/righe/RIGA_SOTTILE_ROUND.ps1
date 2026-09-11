@@ -173,7 +173,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #  dice la cosa sbagliata. Il pin nuovo e' 4083d7e2, dove ci sono tutti
 #  e sei.
 # ---------------------------------------------------------------------
-$PIN = '4083d7e25fb4bef50b1a84b94302e5f26171711f'
+$PIN = 'c2b157c325811c44c359adf93104f9409450f3fc'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -193,7 +193,17 @@ $PIN = '4083d7e25fb4bef50b1a84b94302e5f26171711f'
 #    VECCHIA del driver, quella col ripiego aperto, di girare al posto
 #    di questa.
 $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
-$SHA_WALK  = '6DB57DF1DB92228B7B1DBB720C2E94103CEDD87A3C51EDA3A0E2E1D1981DA495'
+#    QUINTO GIRO (12/09/2026): RICALCOLATA. Prima era
+#    6DB57DF1...981DA495. E' cambiata perche' nel driver e' stata chiusa
+#    l'ultima porta su '@FINOA': il tag della data di FINE finestra
+#    finiva nelle direttive e poi non veniva MAI usato. I 32 script
+#    dedicati quella porta ce l'avevano gia' chiusa dal 31/08 (passano
+#    -Fino e gattano @FINOA contro quel valore); QUESTA riga sottile e'
+#    l'unico percorso che -Fino non lo passa, quindi era l'unico da cui
+#    un '@FINOA' poteva essere ignorato in silenzio.
+#    Per i sei file prova R132/R133 non cambia NIENTE: dichiarano tutti
+#    @FINOA 2026.06.30, identica al default del driver.
+$SHA_WALK  = '0DFB3B239D66BE3EC1D20C66782B3E7AAE8C601E815DFAAEA8B35F74D1185171'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
