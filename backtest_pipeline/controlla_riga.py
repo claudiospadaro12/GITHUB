@@ -356,7 +356,7 @@ LETTURA_AMMESSI = set(x.lower() for x in [
     "Convert-Path", "ConvertTo-Json", "ConvertFrom-Json", "Import-Csv",
 ])
 # comandi nativi, alias e METODI che scrivono/uccidono e che non hanno la forma Verbo-Nome
-# CLASSE 233 (11/09/2026) -- DUE falsi positivi misurati sullo stesso blocco,
+# CLASSE 234 (11/09/2026) -- DUE falsi positivi misurati sullo stesso blocco,
 # il PASSO 3 (la raccolta) di RIGA_R125_DA_MANDARE.md:
 #   a) "& {" NON invoca un eseguibile: apre uno SCRIPTBLOCK, ed e' la forma
 #      con cui comincia OGNI riga di lancio di casa. Chiedere il pin per un
@@ -377,7 +377,7 @@ LETTURA_VIETATI = [
     (r"\[\s*System\.IO\.",                   "accesso diretto a System.IO"),
     (r">",                                    "redirezione: scrive un file"),
 ]
-# CLASSE 234 (11/09/2026) -- IL BLOCCO DI RACCOLTA E' OBBLIGATORIO E IL CANCELLO
+# CLASSE 235 (11/09/2026) -- IL BLOCCO DI RACCOLTA E' OBBLIGATORIO E IL CANCELLO
 # LO BOCCIAVA. La regola delle righe di lancio (CLAUDE.md, punto 2) IMPONE la
 # riga di raccolta: copia sul Desktop + Compress-Archive. Quel blocco non scarica
 # niente (quindi non e' pinnabile: non c'e' nessuno script a cui appuntare un
@@ -490,8 +490,8 @@ def controlla_riga_lancio(riga):
         elif esegui and not sporche:
             passa("riga locale senza download: nessun cmdlet fuori dalla lista bianca (ma ESEGUE " + ", ".join(esegui) + ": vedi il rilievo 175)")
         elif sporche and raccolta_innocua(riga, sporche_cmdlet, sporche_pattern)[0]:
-            # classe 234: e' la riga di raccolta, che la regola di casa IMPONE.
-            rileva("234", "la riga SCRIVE (" + ", ".join(sorted(set(sporche_cmdlet)))
+            # classe 235: e' la riga di raccolta, che la regola di casa IMPONE.
+            rileva("235", "la riga SCRIVE (" + ", ".join(sorted(set(sporche_cmdlet)))
                    + ") ma e' una RACCOLTA di risultati: nessun terminale, nessun preset,"
                    + " nessun sorgente, nessuna cancellazione. Non e' pinnata perche' non"
                    + " scarica niente. Va comunque letto a mano DOVE copia")

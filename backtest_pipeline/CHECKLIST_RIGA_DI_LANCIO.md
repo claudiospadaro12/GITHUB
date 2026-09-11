@@ -13161,10 +13161,49 @@ sta guardando"* — e il costo non e' teorico: un FAIL plausibile su un oggetto
 sano insegna a **ignorare l'esito del cancello**, che e' il modo piu' rapido per
 disattivare una rete di sicurezza senza toccarla.
 
-**Il rimedio proposto (non applicato):** `--oggetto {riga,ps1,prova,md}`, con i
+**Il rimedio proposto:** `--oggetto {riga,ps1,prova,md}`, con i
 controlli PowerShell **spenti** su `prova` e `md`. Per i file prova il cancello
 giusto esiste gia' e si chiama `controlla_prova.py`: finche' il modo non c'e',
 **e' quello che va usato**, e usare `--ps1` su un `.txt` e' un errore d'uso.
+
+### ✅ APPLICATO lo stesso giorno, 11/09/2026 — e la parte delicata e' un'altra
+
+I quattro modi ci sono (`--oggetto riga|ps1|prova|md`, piu' la deduzione da
+`.ps1`/`.md`/`prove\` che viene **stampata**, e il rifiuto esplicito su un `.txt`
+ambiguo: *"un `.txt` puo' essere una riga di lancio O un file prova, dimmelo"*).
+Misurato: **R125 passa** (10 PASSATI, 0 bloccanti, 4 rilievi), i **6 file prova**
+passano in modo `prova` dove in modo `--ps1` uscivano FAIL sul `||` dell'asse.
+
+🔴 **MA IL PUNTO NON E' FAR PASSARE LA PROSA: E' NON RIAPRIRE LA 223.** Un `.md`
+si controlla estraendo i blocchi ```` ``` ````, e se ci si fermasse li' un
+documento con la **prosa innocua** e un **blocco puntato sul conto reale**
+passerebbe. Quindi:
+
+- **i blocchi si controllano tutti**, anche quelli **senza linguaggio
+  dichiarato**, se il contenuto odora di PowerShell (`irm`, `& powershell`,
+  `-Terminal`, `$env:`...). Un comando non guardato perche' mancava l'etichetta
+  e' esattamente il buco che si stava chiudendo;
+- **la prosa non e' ignorata, e' trattata per quello che e'**: un bersaglio
+  vietato passato come valore di `-Terminal.../-Percorso...` **BLOCCA anche nella
+  prosa** (la regola della 221 non dipende dal recinto); una riga di prosa che ha
+  la **forma di un comando** e nomina un terminale vietato **BLOCCA** (fuori dai
+  recinti si scrive in italiano, non si scrivono comandi); la semplice
+  **menzione** — *"il driver muore se punta a `C:\BCM_Reale`"* — e' un **RILIEVO**,
+  perche' e' la frase che **promette** di non toccarlo.
+
+🧪 **I contro-esempi non stanno piu' in un messaggio di chat**: sono in
+`backtest_pipeline/controesempi_cancello.py` e si rigirano con un comando.
+**10 su 10** si comportano come devono — i 5 della 223 (`C:\BCM_Reale`, `-V3`,
+piccolo, `C:\MT5_Backtest`, guardia legittima) piu' 5 nuovi sui `.md`.
+Regressione: **243 `.ps1`, 0 falliti**.
+
+📌 E una cosa che il modo `md` ha trovato **subito**, su documenti vecchi: in
+`RIGA_POSTNEWS_ECBFOMC_VERIFICA_DA_MANDARE.md` un blocco passa
+`-Terminale 'C:\Program Files\BCM Markets MT5 Terminal'` — **il piccolo 50503392,
+quello con le 40 sedie vive** — e in `RIGA_R118_DA_MANDARE.md` un blocco
+```` ```powershell ```` contiene dei **puntini di sospensione non-ASCII**, che su
+PS 5.1 non si incollano. Non li ho toccati (sono documenti gia' spediti), **ma
+vanno riletti prima di riusarli**.
 
 ---
 
@@ -13446,3 +13485,166 @@ confermata (le righe sopra ci sono e fanno una chiusura parziale). Il
 con una uscita e 66 con due — **non l'ho potuto riprodurre**: i per-trade di
 quella sedia non li ho trovati in archivio con quella colonna. 👉 Il
 ritrovamento regge sul codice; **il numero resta suo, non mio**.
+
+---
+
+## 233. 🧪 GLI INPUT DELL'INDICATORE FINITI DENTRO IL PRESET DELL'EA (11/09/2026)
+
+**Il caso, e non e' teorico: un preset vero e' stato scritto da questo stampato.**
+`CODA_08_preset_dai_chr.ps1` v2 stampava, per ogni sedia, **ogni riga `Inp*=`
+trovata nel file `.chr`**, in qualunque punto stesse. Ma un `.chr` **non e' una
+lista piatta**: e' fatto a blocchi.
+
+```
+<chart> ... <expert> ... <inputs>   <- GLI INPUT DELL'EA
+                        </inputs> </expert>
+        <window> <indicator> ... <inputs>   <- GLI INPUT DELL'INDICATORE
+                                </inputs> </indicator> </window> </chart>
+```
+
+**I numeri, misurati sul referto del runner delle 03:31:**
+
+| sedia stampata | parametri stampati | input veri del sorgente | di troppo |
+|---|---:|---:|---:|
+| `ABTG_Dow_Apertura_US` (100k) | **113** | **81** | **32** |
+| `ABTG_Dow_Apertura_US` (piccolo, senza Guardian) | 112 | 80 | 32 |
+| `ABTG_TradeExporter` | **36** | **4** | **32** |
+
+🔴 **Gli stessi 32, nello stesso ordine, sotto EA diversi**: sono gli input di
+`mql5/Indicators/ABTG_Look.mq5` — un **indicatore**, appeso allo stesso grafico.
+La prova che chiude il caso e' la piu' semplice: nel blocco compariva
+**`InpVerbose` due volte** (`true` dall'EA, `false` dall'indicatore), e in MQL5
+**due input con lo stesso nome non esistono**: un `.set` cosi' non si carica.
+
+**Il danno vero non e' il numero storto: e' che quel giorno da quello stampato e'
+stato scritto un preset di una sedia VIVA** (`ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set`).
+Quel file e' **PULITO** — 81 righe su 81, stesso insieme e stesso ordine delle
+dichiarazioni `input` del sorgente, `diff` vuoto — **ma e' pulito perche' chi lo
+ha scritto si e' accorto del difetto e lo ha dichiarato nel file (rilievo R4),
+non perche' lo strumento glielo impedisse.** 👉 **Il prossimo non se ne accorge, e
+si ritrova 32 righe false in un preset.**
+
+**La regola.** Quando si legge un formato **a blocchi**, si estrae **prima il
+blocco** e poi il campo *dentro* quel blocco. Mai un `regex` che attraversa i
+recinti. E **cio' che si scarta si dichiara**: la v3 stampa
+`; SCARTATI perche' NON dell'EA: 32 ... INDICATORE 'Custom Indicator'
+(Indicators\ABTG_Look.ex5)`. Un numero tolto in silenzio e' lo stesso difetto di
+un numero aggiunto in silenzio.
+
+⚠️ **E la trappola dentro la trappola**: `"(?s)<expert>.*?<inputs>(.*?)</inputs>"`
+in un colpo solo **sembra** la correzione ed e' il difetto in forma piu' subdola —
+se l'EA non ha un blocco `<inputs>`, quel `.*?` **scavalca `</expert>`** e pesca
+gli input del **primo indicatore**, spacciandoli per dell'EA. Verificato con un
+`.chr` costruito apposta (EA senza `<inputs>`, indicatore con 32): la v3 stampa
+*"NESSUN blocco `<inputs>` dentro `<expert>`"* e **non ruba niente**.
+
+---
+
+## 234. 🐛 IL CANCELLO CHE LEGGE UN NOME DI VARIABILE COME UN COMANDO (11/09/2026)
+
+Due falsi positivi **sullo stesso blocco**, il PASSO 3 (la raccolta) di
+`RIGA_R125_DA_MANDARE.md`, e tutti e due nella lista "dimostrami che sei di sola
+lettura" della classe 173:
+
+1. **`& {` non invoca un eseguibile**: apre uno **scriptblock**, ed e' la forma
+   con cui comincia **ogni riga di lancio di casa**. Il pattern `&(?!&)` lo
+   trattava come chiamata a un programma esterno. Cioe' il cancello bocciava la
+   forma standard del progetto.
+2. **`$rd` veniva letto come l'alias `rd`** (`rmdir`). Il pattern era
+   `\b(rm|del|rd|ni|md|sp|si|...)\b`: fra `$` e `r` c'e' un **confine di parola**,
+   perche' `$` non e' un carattere di parola. **Tre dei sei difetti del blocco
+   erano la variabile `$rd = Join-Path ...`.**
+
+📌 **La forma generale**: in PowerShell **i nomi di variabile, di parametro e di
+proprieta' vivono nello stesso spazio di caratteri dei comandi**. Un `\b` non
+basta a distinguerli: serve dire **cosa NON puo' stare prima** (`$`, `-`, `.`).
+Un cancello che confonde un nome con un comando produce difetti **plausibili**, ed
+e' il tipo peggiore: si perde tempo a cercare un errore che non c'e'.
+
+---
+
+## 235. 📦 IL CANCELLO BOCCIAVA LA RIGA DI RACCOLTA — cioe' l'unica forma che la regola di casa IMPONE (11/09/2026)
+
+**Il caso.** La regola delle righe di lancio (CLAUDE.md, punto 2) **obbliga** il
+blocco di raccolta: copia dei risultati sul Desktop + `Compress-Archive`. Quel
+blocco **non scarica niente** (non c'e' nessuno script a cui appuntare un commit)
+e per forza **scrive**. Risultato: classe 173 → **BLOCCANTE**, con la motivazione
+*"`New-Item`, `Copy-Item`, `Compress-Archive` non sono nella lista bianca di sola
+lettura"*.
+
+🔴 **Il cancello bocciava l'unica forma ammessa dalla regola di casa.** E un
+cancello che boccia cio' che il manuale impone non viene corretto: viene
+**scavalcato**.
+
+**La regola, e non e' un'esenzione al buio.** Una raccolta **copia risultati**. Si
+declassa a RILIEVO **solo se tutte e due**:
+1. gli unici comandi fuori dalla lista bianca sono di **creazione/copia/zip**
+   (niente cancellazioni, niente esecuzioni, niente comandi nativi);
+2. nel testo **non compare nessun bersaglio delicato** — `MetaQuotes`,
+   `Experts\`, `Presets\`, `.set`, `.ex5`, `.mq5`, `.chr`, `.ini`,
+   `Program Files`, `terminal64`. Una "raccolta" che nomina `Experts\` non sta
+   raccogliendo: sta toccando il campo, e resta **BLOCCANTE**.
+
+🧪 **E il contro-esempio che mi ha corretto mentre lo scrivevo** (e' la ragione per
+cui questa voce esiste in questa forma): la prima stesura cercava i bersagli
+delicati nel testo **ripulito dalle stringhe**, e un blocco che copiava da
+`"$env:USERPROFILE\MetaQuotes\Terminal\ABC\MQL5\Experts"` usciva **"raccolta
+innocua"** — perche' il percorso sta **fra virgolette**, e li' era gia' stato
+cancellato. 👉 **E' la stessa forma delle classi 221 e 223: un percorso sta SEMPRE
+dentro una stringa, quindi un controllo sui percorsi che guarda il codice nudo
+non guarda niente.** Tre classi, un difetto solo: **se il controllo e' sui
+PERCORSI, il testo da guardare e' quello CRUDO.**
+
+---
+
+## 236. 🩹 `\s` COMPRENDE L'A-CAPO: il campo vuoto che restituisce la riga dopo (11/09/2026)
+
+**Il caso.** La funzione `Campo()` di `CODA_08` cercava
+`"(?im)^\s*" + nome + "\s*=\s*(.*)$"`. Su un `.chr` i campi vuoti sono normali:
+
+```
+path=
+apply=1
+```
+
+`\s*` dopo l'uguale **ingoia l'a-capo**, e `(.*)$` aggancia la riga successiva:
+`Campo($b,"path")` restituiva **`apply=1`**. Nel referto usciva
+`INDICATORE 'Main' (apply=1)`: un valore **inventato dalla riga sotto**, con
+l'aria di un dato letto. Stesso pericolo su `InpNewsCurrencies=` (vuoto per
+scelta in mezza flotta): il cancello avrebbe letto il valore del parametro
+seguente.
+
+📌 **La regola: dentro un formato A RIGHE, gli spazi si scrivono `[ \t]`, mai
+`\s`.** E la controprova era in casa: `CODA_01 v2` la forma giusta ce l'aveva
+gia' (`^[ \t]*chiave[ \t]*=[ \t]*(.*?)[ \t]*$`), e infatti questo difetto non lo
+aveva. 👉 **Quando due script della stessa coda scrivono lo stesso regex in due
+modi diversi, uno dei due e' sbagliato: vale la pena guardare quale, subito.**
+
+---
+
+## 237. 🔢 `return ,$out` + `@(...)`: l'array dentro l'array, e il vuoto che conta 1 (11/09/2026)
+
+**Il caso.** In PowerShell la virgola davanti (`return ,$out`) serve a impedire
+che un array venga srotolato. Ma se **il chiamante** lo riavvolge con `@(...)`, il
+risultato e' **un array di UN elemento che contiene l'array**. Effetti misurati su
+`CODA_08 v3` prima della correzione:
+
+- `@(Righe-Inp $ins).Count` valeva **1 anche su zero righe** (`@(,@())` ha un
+  elemento), quindi il ramo *"questo indicatore non ha input, non e' una
+  notizia"* **non scattava mai**;
+- `$pEa.Count` diceva **1** dove gli input erano **81**;
+- e `$p.Nome` su quell'unico elemento faceva scattare la **member enumeration**:
+  stampava `InpFile InpFromYear InpExportMinutes InpUseCommon = ...`, cioe' i
+  quattro nomi **incollati su una riga sola**.
+
+🔴 **Nessun errore, nessuna eccezione: numeri sbagliati stampati con sicurezza.**
+La regola: **o la virgola, o `@()` — mai tutti e due.** In casa si tiene `@()` dal
+lato del chiamante (normalizza il vuoto e il singolo), quindi la funzione fa
+`return $out` e basta.
+
+🧪 **E la lezione di metodo, che vale piu' del bug**: questi tre difetti non li ha
+trovati la rilettura, li ha trovati **una corsa vera** dello script su un albero
+`.chr` finto costruito apposta (EA + indicatore, EA senza `<inputs>`, grafico
+nudo, EA senza indicatori, EA con un nome doppio). 👉 **Un `.ps1` che si puo'
+FAR GIRARE su dati finti va fatto girare, non solo riletto.** Cinque file inventati
+in due minuti hanno trovato quello che due riletture non avevano visto.

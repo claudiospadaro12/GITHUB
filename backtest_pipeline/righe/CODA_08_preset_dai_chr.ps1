@@ -66,7 +66,7 @@
 #        niente. "Uno zero non e' una prova finche' non dimostri di aver
 #        guardato nel posto giusto."
 # =====================================================================
-#  PERCHE' ESISTE LA v3 -- classe 232, trovata l'11/09/2026
+#  PERCHE' ESISTE LA v3 -- classe 233, trovata l'11/09/2026
 #  La v2 stampava OGNI riga "Inp*=" trovata NEL FILE, in qualunque punto
 #  del .chr stesse. Ma un .chr non e' una lista piatta: ha BLOCCHI.
 #     <chart> ... <expert> ... <inputs> ...gli input dell'EA... </inputs>
