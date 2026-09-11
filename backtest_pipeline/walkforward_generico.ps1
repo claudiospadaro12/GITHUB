@@ -488,6 +488,57 @@ if($RigheProvaUtili.Count -eq 0){ Muori "in prove\$Expert.txt non c'e' nessuna r
 if(-not $Simbolo  -and $Direttive.ContainsKey("SIMBOLO")){  $Simbolo =$Direttive["SIMBOLO"] }
 if(-not $Periodo  -and $Direttive.ContainsKey("PERIODO")){  $Periodo =$Direttive["PERIODO"] }
 if(-not $DaQuando -and $Direttive.ContainsKey("DAQUANDO")){ $DaQuando=$Direttive["DAQUANDO"] }
+
+# ---------------------------------------------------------------------
+#  @FINOA -- CHIUSA IL 12/09/2026, ED ERA UNA TRAPPOLA SILENZIOSA.
+#  Il tag @FINOA nasce in R113 (finestre di regime: la data di FINE fa
+#  parte dell'identita' della cella, non e' un default). Da allora sta in
+#  111 file prova, 44 dei quali con una data DIVERSA da quella di
+#  fabbrica qui sopra ($Fino = 2026.06.30).
+#  Questo driver lo leggeva -- finisce in $Direttive come tutti gli altri
+#  -- e poi NON LO USAVA MAI. Cioe': un file prova poteva dichiarare
+#  "finestra fino al 2012.12.31" e il tester girava fino al 2026.06.30
+#  senza dire niente a nessuno. Il verdetto sarebbe uscito su un'altra
+#  finestra, con l'etichetta di quella giusta.
+#  DANNO MISURATO AD OGGI: NESSUNO, e il perche' e' un fatto, non una
+#  speranza. I 44 file con la data diversa NON passano di qui:
+#    - i 18 R113_F* usano RIGA_R113_REGIME_NASUSD.ps1, che si scrive gli
+#      .ini da solo (r.54-55: "NIENTE walkforward_generico") e confronta
+#      @FINOA con la tabella congelata dei criteri (r.893-894);
+#    - i POSTNEWS_ORO passano -Fino a mano nella loro riga di lancio;
+#    - gli altri hanno ciascuno il proprio script dedicato fra i 33 che
+#      leggono @FINOA.
+#  Quindi qui non si ripara un danno: si chiude la porta PRIMA che il
+#  prossimo file prova ci entri.
+#  DUE COMPORTAMENTI, e sono diversi apposta:
+#    a) -Fino NON passato a mano  -> @FINOA VINCE (e' l'identita' della
+#       cella, scritta nel file da chi l'ha pensata);
+#    b) -Fino passato a mano E diverso da @FINOA -> SI MUORE. Non si
+#       sceglie per conto di chi ha scritto la riga: le due fonti si
+#       contraddicono e la contraddizione va vista, non risolta di
+#       nascosto.
+#  I 67 file con @FINOA 2026.06.30 non cambiano comportamento: la data
+#  che vince e' identica a quella di fabbrica.
+# ---------------------------------------------------------------------
+if($Direttive.ContainsKey("FINOA")){
+  $finoDaFile = $Direttive["FINOA"]
+  if($finoDaFile -notmatch '^[0-9]{4}\.[0-9]{2}\.[0-9]{2}$'){
+    Muori ("la direttiva '@FINOA " + $finoDaFile + "' non e' una data aaaa.mm.gg.")
+  }
+  if($PSBoundParameters.ContainsKey("Fino")){
+    if($Fino -ne $finoDaFile){
+      Muori ("DUE DATE DI FINE, DIVERSE, E NON SCELGO IO.`n" +
+             "    -Fino passato a mano : " + $Fino + "`n" +
+             "    '@FINOA' nel file    : " + $finoDaFile + "`n" +
+             "    Il file prova dice che la finestra finisce in una data, la riga`n" +
+             "    di lancio ne dice un'altra. Una delle due e' sbagliata: si`n" +
+             "    guarda QUALE, non si esegue la piu' comoda.")
+    }
+  } else {
+    $Fino = $finoDaFile
+    Write-Host ("    finestra di fine presa da '@FINOA' nel file prova: " + $Fino) -ForegroundColor Yellow
+  }
+}
 if(-not $Simbolo){ Muori "manca il simbolo. Passalo con -Simbolo NASUSD, o scrivi '@SIMBOLO NASUSD' nel file della prova." }
 if(-not $DaQuando){ Muori ("manca la data di inizio storico.`n" +
     "    NON metterla a caso: misurala prima con`n" +
