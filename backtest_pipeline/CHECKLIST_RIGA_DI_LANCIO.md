@@ -13165,3 +13165,47 @@ disattivare una rete di sicurezza senza toccarla.
 controlli PowerShell **spenti** su `prova` e `md`. Per i file prova il cancello
 giusto esiste gia' e si chiama `controlla_prova.py`: finche' il modo non c'e',
 **e' quello che va usato**, e usare `--ps1` su un `.txt` e' un errore d'uso.
+
+---
+
+## 226. Il `n` dell'OPTFRAME conta i DEAL DI USCITA, non le POSIZIONI (11/09/2026)
+
+**Il caso.** `PIANO_CHALLENGE_OTTOBRE.md` §1.2 confrontava con la soglia dei 150
+operazioni dei `n` presi dalla colonna `Trades` dei CSV del tester. **Quella
+colonna (`STAT_TRADES`) conta i deal di uscita.** Con `InpTP1Pct = 50` (parziale
+al 50%) ogni posizione produce **due** righe; con `InpUsePending` e la tranche
+`1/3 + 2/3` ogni **segnale** produce **due posizioni**, quindi fino a **quattro**
+righe.
+
+**La misura, non la deduzione.** `R112_CORSA_20260826/pertrade_*.csv` ha la
+colonna `position_id`. Contate le posizioni distinte:
+
+| cella | righe `Trades` | posizioni distinte | fattore |
+|---|---:|---:|---:|
+| `00_metro` EMA200 U30USD OOS | **517** | **257** | **2,01** |
+| `01_short_r1` OOS | **302** | **140** | **2,16** |
+
+Il referto R112 lo scriveva gia' (§3, *"la scoperta di contabilita'"*), **ma non
+era mai stato propagato ai `n` usati per i verdetti di merito.**
+
+🔴 **Effetto misurato sul parco:** **sei EA candidati su otto** hanno
+`InpTP1Pct = 50` — verificato con `grep` nei sorgenti: `ABTG_ORB_Ottimizzato`,
+`ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, `ABTG_SupertrendReversal`,
+`ABTG_SupRev_NAS_H1_Ottimizzato`, `ABTG_SuperWave_DOW_H1_Ottimizzato`,
+`ABTG_EMA200`. Due (`ABTG_DAX_Apertura_EU`, `ABTG_Dow_Apertura_US`) non ce
+l'hanno.
+
+**La regola.** Prima di confrontare un `n` con la soglia dei 150 si verifica
+**nel CSV stesso** il valore di `InpTP1Pct` e di `InpUsePending`:
+- `InpTP1Pct = 0` e nessun pendente → 🟢 **`Trades` sono posizioni**, il confronto
+  vale (verificato cosi' su `770611`: il CSV R119 dice `InpTP1Pct = 0`, quindi
+  119 e 71 **sono** posizioni);
+- altrimenti 🔴 **il `n` e' gonfiato di un fattore fra 2 e 4**, e il confronto va
+  fatto sulle **posizioni distinte** del per-trade. Se il per-trade non e' in
+  archivio, il verdetto e' **"NON ANCORA MISURATO"**, e si scrive la forbice.
+
+📌 **E la forma generale, che e' la stessa della classe 224:** un `n` non e' un
+numero, e' **un numero piu' l'unita' in cui e' contato piu' la finestra da cui
+viene**. Un campione "sopra soglia" contato nell'unita' sbagliata e' **un campione
+sottile travestito da campione buono** — cioe' esattamente la cosa che
+l'Emendamento della finestra esiste per impedire.

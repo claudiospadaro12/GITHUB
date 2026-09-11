@@ -1,3 +1,23 @@
+> # 🔴 SUPERATO — NON USARE QUESTO FILE PER DECIDERE
+> **Il piano vivo e' `report/PIANO_CHALLENGE_OTTOBRE_v2.md` (11/09/2026).**
+> Questo v1 resta in archivio come **verbale di quello che credevamo l'08/09**,
+> e non e' stato sovrascritto apposta: **quattro sue affermazioni sono state
+> MISURATE FALSE** fra il 10 e l'11/09, e cancellarle cancellerebbe la prova che
+> il metodo le ha trovate.
+>
+> | cosa dice il v1 | cosa e' misurato ora |
+> |---|---|
+> | *"`770511` n=227 = MERITO PIENO"* | 🔴 **falso**: finestra piena, spezzata fa **84 e 143** (classe **224**) |
+> | *"`970913` n=155 = MERITO PIENO"* | 🔴 **da riverificare**: l'unico OOS in archivio e' `_ohlc` (screening) |
+> | *"la compilazione porta le schierabili da 1-2 a 5"* | 🔴 **falso**: **2 → 2** stretta, **2 → 4** larga |
+> | *"il 1° ottobre e' realistico per COMPRARE"* | 🔴 **caduta**: col **cancello del costo** acceso, le candidate che passano tutto oggi sono **ZERO** |
+>
+> ➕ E il v1 **non contava** due cose che adesso pesano: il **cancello del costo
+> all-in** (commissione forex **4,0000 EUR/lotto** misurata) e il fatto che il
+> `n` dell'OPTFRAME conta i **deal di uscita**, non le posizioni (classe **226**).
+
+---
+
 # 📅 PIANO CHALLENGE OTTOBRE — costruito ALL'INDIETRO dal 1 ottobre 2026
 
 _Scritto dall'**architetto-prop** l'**08/09/2026**. Prodotto su un fatto nuovo:
