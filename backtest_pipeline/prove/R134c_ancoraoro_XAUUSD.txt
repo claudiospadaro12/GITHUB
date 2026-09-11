@@ -1,0 +1,268 @@
+# =====================================================================
+#  EA: ABTG_MaxMinNotte
+#  R134c -- L'ANCORA. IL CANCELLO DI R134b.
+#           XAUUSD M5 -- asse InpBoxStartHour, 2 celle (22, 23 server)
+#           con InpBoxEndHour PINNATO a 6:59 = quello dell'archivio
+#  Scritto l'11/09/2026 dall'agente cercatore di parametri.
+#  SI LEGGE PER PRIMO. Se questo file non riproduce l'archivio,
+#  R134b_scatolaoro_XAUUSD.txt NON SI LEGGE AFFATTO.
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R134c_ancoraoro_XAUUSD.txt
+#    -Simbolo XAUUSD -Periodo M5
+#    -DaQuando 2025.03.01 -Fino 2026.06.30
+#    -FrazioneIS 0.40 -Deposito 100000 -Modello 4
+#    -Etichetta r134c
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -Deposito 100000: R19 e' girata a 100k (prove\R19_pertrade_oro
+#     .txt r.3). A 10k il lotto minimo sull'oro puo' schiacciare il
+#     rischio e l'ancora NON TORNA. E' il parametro che rende o
+#     distrugge questo round.
+#  !! -Modello 4 = TICK REALI (walkforward_generico.ps1 r.172). I CSV
+#     di R19 non hanno il suffisso _ohlc (r.1347): l'ancora e' a tick
+#     reali, e si confronta tick con tick.
+#  !! -FrazioneIS 0.40: e' il default del driver ed e' quello sotto
+#     cui l'ancora si e' spezzata 59/92. Cambiarlo sposta il taglio e
+#     il confronto salta.
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati.
+#  (-SoloControllo deve stampare: InpBoxStartHour  2 celle.)
+# ---------------------------------------------------------------------
+#  A COSA SERVE, in una riga
+#
+#  La catena che porta dal numero d'archivio alla sedia viva ha due
+#  salti, perche' le due configurazioni differiscono per DUE input e
+#  la regola di casa e' una variabile per file:
+#
+#     ANCORA          PONTE            SCHIERATA
+#     22:00->06:59 -- 23:00->06:59 -- 23:00->04:59
+#     \___R134c (questo file)__/\______R134b________/
+#
+#  Questo file misura il PRIMO salto e, soprattutto, RI-MISURA
+#  L'ANCORA. La cella PONTE esce sia da qui (cella 23) sia da R134b
+#  (cella 6): le due devono essere IDENTICHE cifra per cifra.
+#  >>> E' il cancello G1 di determinismo, ottenuto senza spendere due
+#      celle gemelle sul magic. Se il ponte diverge, la catena e'
+#      rotta e non si legge niente.
+# ---------------------------------------------------------------------
+#  L'ANCORA, CIFRA PER CIFRA -- questi numeri DEVONO USCIRE
+#
+#  Corsa R19, XAUUSD M5, 2025.03.01 -> 2026.06.30, deposito 100k, tick
+#  reali, box 22:00->06:59, entrambi i lati, rischio 1%, TF gestione
+#  H2 (16386), stop al box opposto (SLMode 0), buffer 250.
+#  Fonte: risultati_prove\MaxMin_Oro_r19\ABTG_MaxMinNotte_XAUUSD_IS_
+#  r19b.csv e ..._OOS_r19b.csv (magic 770405/770406); le stesse cifre
+#  in risultati_prove\ABTG_MaxMinNotte\ABTG_MaxMinNotte_XAUUSD_{IS,
+#  OOS}_r19.csv (magic 770403/770404).
+#
+#      CELLA 22, finestra IS :  profit  3788,45 | n 59 | PF 1,42495 | DD 2,6837 %
+#      CELLA 22, finestra OOS:  profit 15848,75 | n 92 | PF 2,45189 | DD 4,2436 %
+#
+#  Quattro magic diversi danno le stesse cifre: l'ancora ha gia'
+#  passato un G1 nel 2026-08. Non e' un numero fortunato.
+# ---------------------------------------------------------------------
+#  LA SCELTA CHE FA FUNZIONARE IL CANCELLO: InpOneTradePerDay=false
+#
+#  R19 scrive `InpOneTradePerDay=1`, ma e' girata il 10/08, quando
+#  quell'input era DICHIARATO E MAI LETTO (un'altra manopola inerte).
+#  Il 03/09 il commit 7d0da9f (v1.11) lo ha reso vivo e il changelog
+#  dell'EA r.69-78 dichiara l'effetto -- "Attesi MENO trade...
+#  InpOneTradePerDay=false riproduce la v1.10 esatta".
+#  >>> Pinnato a FALSE, apposta: e' l'unico valore sotto cui "l'ancora
+#      non torna" vorrebbe dire davvero "qualcosa e' cambiato", invece
+#      di "ho cambiato io l'EA in mezzo".
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#   A1 CELLA 22 = le quattro cifre qui sopra, IDENTICHE, su tutte e
+#      due le finestre. Non "simili": identiche. E' una riproduzione,
+#      non una stima.
+#   A2 CELLA 23 (ponte): scatola piu' stretta di un'ora (otto ore
+#      invece di nove) = livelli piu' vicini = PIU' rotture.
+#      >>> Trades ATTESO IN SALITA rispetto alla cella 22.
+#      >>> Se SCENDE, la geometria e' al contrario e si guarda
+#          ComputeBox() r.301-320. Condizione di falsifica, scritta
+#          prima.
+#   A3 DD e PF della cella 23: [NON MISURATO]. Non invento una banda.
+#      L'unica cosa che dichiaro e' la scala del rumore, ed e'
+#      misurata: la STESSA configurazione fa DD 2,6837% su IS e
+#      4,2436% su OOS, FATTORE 1,58 fra due finestre. Ogni differenza
+#      fra celle si pesa contro quel numero, non contro l'intuito.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE PRIMA
+#
+#   S0 IL CANCELLO. Cella 22 diversa dalle cifre d'archivio anche di
+#      un centesimo -> la catena NON si legge, e R134b nemmeno.
+#      In quel caso NON si aggiusta il verdetto: si cerca il perche'.
+#      L'ordine delle ipotesi, deciso adesso e non dopo:
+#        (1) versione dell'EA (rilancio a InpOneTradePerDay=true:
+#            4 passate, ~0,9 min);
+#        (2) deposito/FrazioneIS/Modello diversi da quelli di R19;
+#        (3) dati tick del terminale diversi da quelli di allora
+#            (e allora e' una notizia piu' grossa di questo round,
+#            perche' tocca OGNI confronto storico della casa).
+#   S1 IL PONTE. Cella 23 di questo file diversa dalla cella 6 di
+#      R134b -> determinismo rotto -> nessuno dei due si legge.
+#   S2 RISCHIO, a qualunque n (Emendamento B): una cella con
+#      Equity DD > 19,72% @1% e' un FATTO ACCADUTO che tocca il
+#      contratto della sedia (CONTRATTI_SEDIE.md r.95 = 10,0% @0,5%
+#      = 19,72% @1%; origine R100_REFERTO.md r.15). Vale anche qui,
+#      anche se la cella schierata sta nell'altro file.
+#   S3 MERITO: SOSPESO. n atteso ~59 (IS) e ~92 (OOS), sotto il muro
+#      dei 150. Questo round NON promuove niente e NON tocca il
+#      forward. La sedia viva 770402 resta dov'e'.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO APPOSTA
+#
+#  LA TRAPPOLA: la cella 22 esce "quasi uguale" -- diciamo n 59 e
+#  profit 3788,40 invece di 3788,45 -- e io scrivo "riprodotta".
+#  >>> SAREBBE FALSO. Una riproduzione a tick reali dello stesso EA,
+#      sugli stessi dati, con gli stessi pin, e' BIT A BIT o non e'.
+#      Lo dimostra l'archivio stesso: quattro magic diversi
+#      (770403/04/05/06) danno 3788,45 tutte e quattro, cifra per
+#      cifra. Se oggi esce un numero vicino ma diverso, e' cambiato
+#      QUALCOSA, e quel qualcosa va trovato prima di leggere R134b --
+#      non archiviato come arrotondamento.
+#      Cosi' il cancello e' un cancello e non un colino.
+#
+#  SECONDA TRAPPOLA, quella in cui sono quasi cascato oggi: in
+#  archivio esistono 4 passate su XAUUSD con box 22:00->04:59, e a
+#  colpo d'occhio sembrano un'ancora alternativa piu' vicina alla
+#  cella schierata. NON LO SONO, e si vede aprendo il file:
+#  sono di un ALTRO EA (ABTG_Nightly), sono OHLC (suffisso _ohlc) e
+#  hanno >>> Trades = 0 <<< tutte e quattro (risultati_prove\
+#  ABTG_Nightly\ABTG_Nightly_XAUUSD_{IS,OOS}_ohlc.csv, magic
+#  771701/771702): e' il filtro QB che su oro e indici non scatta
+#  mai, rettifica gia' a verbale in REGISTRO_TEST.md.
+#  Un'ancora da zero operazioni non e' un'ancora, e' un file vuoto
+#  con l'intestazione giusta.
+# ---------------------------------------------------------------------
+#  COSTO IN TEMPO MACCHINA
+#   2 celle x 2 finestre = 4 PASSATE.
+#   Calibrazione MISURATA su un round della STESSA taglia, tick reali
+#   (r88_csv\REFERTO_R88.txt r.15): R87a, 2 celle x 2 = 4 passate,
+#   >>> 0,9 min.
+#   Con R134b (6 passate, ~1,0 min): TOTALE ~1,9 MINUTI.
+#   NOTA ONESTA: R87a e' ABTG_GoldenCross su USDCHF. Qui l'EA
+#   ricostruisce il box sui dati M1 di 8-9 ore di notte, su grafico M5
+#   e 16 mesi di tick d'oro: il costo per passata su QUESTO EA e'
+#   [NON MISURATO]. Anche al triplo si sta sotto i 3 minuti.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#   1. FINESTRA DI SEDICI MESI, UN SOLO REGIME (toro dell'oro): per il
+#      RISCHIO si legge lo stesso (Emendamento B), ma e' un LIMITE
+#      INFERIORE. La finestra e' questa e non piu' lunga per un motivo
+#      con un numero sotto, vedi punto 2.
+#   2. PROFONDITA' TICK DI XAUUSD: [NON MISURATA] in tutto il repo
+#      (prove\REFERTO_PREPARAZIONE_G1PAOLO.md r.114 e r.262: "mai
+#      misurata... il 2024.07.05 e' INFERITO da GBPUSD").
+#      >>> IL PAVIMENTO DIMOSTRATO e' 2025.03.01: R19 ci ha girato a
+#          Modello 4 e ha prodotto 151 operazioni, quindi li' i tick
+#          ci sono. NON allungo a caso: se serve piu' storico, lo
+#          misura il PASSO 0 della riga.
+#   3. LA SCALA VERSO LA SEDIA VIVA HA QUATTRO PIOLI, non due:
+#      InpBoxStartHour 22->23 (questo file), InpBoxEndHour 6->4
+#      (R134b), InpEntryCutoffHour 9->8 e InpMaxSpread 0->150
+#      (NON SCRITTI: 4 passate e ~0,9 min l'uno). Piu' una firma:
+#      InpRiskPercent, 1,0 nel .set del repo contro 0,5 nel contratto
+#      firmato il 23/08 -- quale giri sul VPS e' [NON MISURATO].
+#   4. IL FUSO e' verificato in agosto (report\METRO_PROP.md r.510).
+#      Sedici mesi attraversano due cambi d'ora: [NON MISURATO] se
+#      BCM segua l'ora legale europea. Non tocca il confronto FRA
+#      celle (scivolano insieme), tocca l'etichetta delle ore.
+#
+#  MAGIC VERGINE 779682 (cercato su tutto il repo l'11/09/2026, .git
+#  escluso: ZERO occorrenze). 779680 = R134a, 779681 = R134b.
+#  LA SEDIA VIVA 770402 NON SI TOCCA: qui non si scrive un preset,
+#  non si promuove niente, non si tocca il forward.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  M5
+@DAQUANDO 2025.03.01
+@FINOA    2026.06.30
+
+# --- I PIN: identici a R134b campo per campo, TRANNE il magic e il
+#     commento -- e con InpBoxEndHour PINNATO a 6 invece che sull'asse.
+#     Cosi' la cella ponte dei due file e' la stessa cosa per
+#     costruzione, e il confronto e' legittimo.
+#     Origine dei pin: prove\R19_pertrade_oro.txt, copiati campo per
+#     campo. Differenze DICHIARATE:
+#       InpOneTradePerDay  1 -> false  (semantica v1.10, changelog EA
+#                                       r.69-78)
+#       InpMagic      770405 -> 779682 (magic vergine)
+#       InpVerbose       n/d -> false  (log spento)
+#     InpUsaGuardian non esisteva ai tempi di R19: qui true, e INERTE
+#     NEL TESTER per costruzione (sorgente r.103-107).
+#     InpBoxStartHour NON e' qui: e' l'asse, in fondo al file.
+InpUsaGuardian=true
+InpBoxStartMin=0
+InpBoxEndHour=6
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=9
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=false
+InpPendingExpiryMin=90
+InpBufferPoints=250
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpMgmtTF=16386
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=2.5
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+InpComment=R134C ANCORA ORO
+InpMagic=779682
+InpMaxSpread=0
+InpVerbose=false
+InpAutoTest=true
+
+# --- L'UNICO ASSE: InpBoxStartHour da 22 a 23, passo 1 = 2 celle.
+#     In ORA ITALIANA (= server + 1), scatola fino alle 07:59:59 IT:
+#       22 -> 23:00-07:59:59 IT  >>> L'ANCORA <<<
+#                                e' la scatola delle 112 passate
+#                                d'archivio dell'oro e della corsa
+#                                R19. DEVE riprodurre:
+#                                IS  3788,45 / 59 / 1,42495 / 2,6837
+#                                OOS 15848,75 / 92 / 2,45189 / 4,2436
+#       23 -> 00:00-07:59:59 IT  >>> LA CELLA PONTE <<<
+#                                la stessa che R134b misura come sua
+#                                cella 6. Le due misure devono uscire
+#                                IDENTICHE: e' il G1 della catena.
+#                                (Ed e' anche, per inciso, la scatola
+#                                che Claudio guarda a mano -- vedi
+#                                R134a: 00:00-08:00 ora italiana.)
+InpBoxStartHour=22||22||1||23||Y
+# =====================================================================

@@ -252,7 +252,7 @@
 #      d'archivio da cui vengono i pin. La regola dei due lati del
 #      25/08 chiede di misurare anche il long: NON lo faccio qui,
 #      apposta, perche' mescolare due cambiamenti in un round e' il
-#      modo di non capire niente. Il gemello long e' R134b, che NON
+#      modo di non capire niente. Il gemello long e' R134e, che NON
 #      ESISTE ANCORA: stesse 4 celle, altre 8 passate, altri ~1,3
 #      minuti. E' un buco che si chiude con due minuti di macchina.
 #   2. FINESTRA UNICA, 21 mesi, un solo regime: nessuna prova di
