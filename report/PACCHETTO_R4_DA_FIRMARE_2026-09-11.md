@@ -183,7 +183,7 @@ vero = dichiarato.
 | # | candidata · magic | R1 | R2 | R3 | **R4 OGGI** | **R4 DOPO IL FIX** | **passa tutti e 4 dopo?** |
 |---:|---|:---:|:---:|:---:|:---:|:---:|---|
 | 1 | `ORB_Ottimizzato` **770611** 🏛️ | ✅ | ✅ | ✅ | ✅ | ✅ *(fix non la tocca)* | ✅ **SI — e passava gia' ieri** |
-| 2 | `DAX_Apertura_EU` **770101** 🏛️ | ✅ | 🔴 conflitto R83 vs R119 | ✅ | ✅ | ✅ *(non la tocca)* | ❌ **NO — la blocca R2, non R4** |
+| 2 | `DAX_Apertura_EU` **770101** 🏛️ | ✅ | ~~🔴 conflitto R83 vs R119~~ ✅ 🆕 **CHIUSO 11/09** — **4,3501% @0,65%**, dep. **10.000 EUR**, tick | ✅ | ✅ | ✅ *(non la tocca)* | ~~❌ **NO — la blocca R2, non R4**~~ → 🆕 ✅ **SI, ALLA LETTERA DEI QUATTRO** (R2 era l'unico requisito rotto ed e' stato chiuso **da una lettura d'archivio, non da questa firma**). 🔴 **MA NON E' UN VIA LIBERA, e per due motivi misurati**: **(a)** il **quinto** requisito, il **cancello del costo** (`R5 >= 40x`), la boccia — **33,0x sulla geometria VIVA**; **(b)** il DD promesso e' **[MISURATO a deposito 10.000 EUR]** e su un banco da **100.000 EUR** e' **[NON MISURATO]** (+7,8% misurato sul solo effetto deposito). 📄 `CONFLITTO_DD_770101_2026-09-11.md` |
 | 3 | `Dow_Apertura_US` **770202** | ✅ | ✅ | ✅ | 🔴 nessun preset su file | 🔴 **invariato** | ❌ **NO — serve un `.set`, non una compilazione** |
 | 4 | `MaxMinNotte_DAX_Short_Ott` **770411** | ✅ | ✅ | ✅ | 🟠 2 pendenti opposti | 🟠 **invariato** | ❌ **NO — altro difetto, il fix non lo tocca** |
 | 5 | `SupertrendReversal` **770901** | ✅ | ✅ | ✅ | ✅ *(il bug non morde a 100k)* | ✅ *(nessun cambio)* | ✅ **SI — e passava gia' ieri** |
@@ -216,7 +216,7 @@ vero = dichiarato.
 3. ⏱️ **Perche' costa dieci minuti** e il lavoro pericoloso e' gia' fatto.
 
 ### 🔴 E la cosa che va detta con altrettanta forza: **la firma di domani non e' la strada per le 5 sedie.** Le altre tre passano solo con:
-- **770101** → attribuire il conflitto **R83 (6,89%) vs R119 (4,35%)**;
+- ~~**770101** → attribuire il conflitto **R83 (6,89%) vs R119 (4,35%)**;~~ ✅ 🆕 **FATTO l'11/09**: la causa e' **`InpAllowShort` 1 contro 0** (R83 aveva il lato corto acceso, a taglia 1,0%, magic 777120/777121). **DD promesso = 4,3501% @0,65%**, ⚠️ **[MISURATO a deposito 10.000 EUR]** — su banco **100.000 EUR** e' **[NON MISURATO]** (+7,8% misurato sul solo effetto deposito: 7,2328% contro 6,7111% a parita' di 270 operazioni). 🔴 **Ma questo NON sblocca la sedia**: il conflitto era un buco di MISURA, non di R4 — la `770101` aveva gia' **R4 verificata** e resta ferma su cio' che le manca altrove. 📄 `report/CONFLITTO_DD_770101_2026-09-11.md`;
 - **770202** → **scrivere un `.set`** con `InpRiskPercent=0.65` e `InpAllowShort=false`;
 - **771531 EMA200** → misurare `S*` (`volMin` + valore punto) e sapere se il
   pavimento per gamba morde a 100k.
