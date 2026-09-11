@@ -13739,3 +13739,59 @@ repo su 16**, fra cui **6 negativi** che devono restare `None`
 vero ma ambiguo). E `--delta` stampa il confronto col conto vecchio: **0
 regressioni**. 📌 **Una riparazione di un riconoscitore senza il caso NEGATIVO in
 autotest non e' una riparazione: e' uno spostamento del difetto.**
+
+---
+
+## 🛑 CLASSE NUOVA (12/09/2026) — UNA GUARDIA CHE ARRIVA **DOPO** LA SCRITTURA NON E' UNA GUARDIA
+
+**Il caso reale.** Censimento sui 244 `.ps1` del repo: **118** portano ancora,
+in **codice attivo**, la firma del ripiego vecchio
+`-like "*BCM Markets MT5 Terminal*" -and ... -notlike "*-V3*"` — che sul VPS
+e' **il piccolo 50503392, quello con le sedie VIVE**.
+
+🟢 Il primo riflesso ("sono 118 bombe") e' stato **smontato da due
+contro-esempi che reggono**: il **runner li respinge tutti e 118** in entrambe
+le corsie (`Stop-Process` e `BCM Markets MT5 Terminal` sono nei divieti), e
+**4 di quegli script puntano al piccolo di PROPOSITO** (`aggiorna_ea.ps1` &
+c.: il bersaglio e' il forward, per mandato). 👉 **Il vettore vero non e'
+l'automatismo: e' il lancio A MANO.**
+
+**Il discriminante non e' "porta la firma". E' L'ORDINE:**
+
+| | selettore | scrive+compila | guardia "MT5 aperto" | |
+|---|---:|---:|---:|---|
+| `scarica_storico.ps1` | 239 | **362-366** | 431 | 🔴 a danno gia' fatto |
+| `RIGA_SPREAD_FLOTTA.ps1` | 257 | **287-309** | 351 | 🔴 a danno gia' fatto |
+| `RIGA_SPREAD_NASUSD.ps1` | 117 | **137-147** | 176 | 🔴 a danno gia' fatto |
+| `scan_gestione.ps1` | 128 | 155 | **149, CHIRURGICA** | ✅ il modello |
+
+### 🚨 E sotto c'era una classe PIU' GRAVE di quella cercata
+**11 punti** del repo fanno
+`Get-Process -Name "terminal64" | Stop-Process -Force` **senza nessuna
+condizione**: non sbagliano terminale, **li ammazzano tutti** — **conto REALE
+10105439 compreso, mentre ha posizioni aperte**. Non e' un'ipotesi:
+`runner_abtg.ps1:139` ricorda che il **10/09 "ChiudiMT5Pulito ammazzo' anche
+il REALE"**.
+
+### ✅ LA REGOLA
+1. **La guardia sta PRIMA della prima scrittura.** Se copi o compili dentro
+   la cartella di un terminale, la domanda *"quale terminale e'?"* si fa
+   **prima**, non dopo.
+2. **La guardia e' sul CHI, non sul QUANTI.** *"C'e' un MT5 acceso, esco"* non
+   e' una protezione: e' un effetto collaterale che sparisce appena il VPS si
+   riavvia. Si guarda `$_.Path` contro la cartella scelta
+   (`$_.Path -like ($instDir + "\*")`), come fa `scan_gestione.ps1`.
+3. **Il ripiego non sceglie: ASSEGNA il banco ed entra nello stesso ramo
+   guardato.** Se il banco non c'e', **si muore** invece di spazzolare
+   Program Files.
+4. 📌 **E il foglio `_DA_MANDARE.md` va riletto insieme allo script.** Due
+   fogli certificavano *"se lo trova aperto esce 1 — non lo ammazza"*: vero
+   sulla guardia in ENTRATA, **muto** sul kill in USCITA. **Una
+   documentazione vera a meta' e' peggio di nessuna documentazione**, perche'
+   viene creduta.
+
+### 🕳️ Buco dichiarato
+Dei 118, ne sono stati **letti a mano 14**. Gli altri **104 sono classificati
+per pattern + numero di riga**, quindi **presunti**. Riparati oggi:
+`scarica_storico.ps1`, `RIGA_SPREAD_FLOTTA.ps1`, `RIGA_SPREAD_NASUSD.ps1`.
+Restano in coda `run_all.ps1` e `scan_market.ps1` (fascia 1) e ~60 di fascia 2.

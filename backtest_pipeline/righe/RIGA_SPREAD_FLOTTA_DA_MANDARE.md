@@ -33,6 +33,18 @@ giorni.
 > la **FLOTTA IN FORWARD**: **spegneresti gli EA veri.** Se trova MT5 **già
 > APERTO**, **ESCE 1 e lo dice** (non lo ammazza) — a meno di `-ChiudiMT5`
 > esplicito. **Sul PC di backtest, con MT5 e MetaEditor CHIUSI** (il blocco lo
+> 🔧 **AGGIORNATO IL 12/09/2026 — quello che c'era scritto qui era VERO A META', e la meta' mancante era la piu' pericolosa.**
+> La frase qui sopra descrive la **guardia in ENTRATA**, e quella funzionava.
+> Ma lo script, **alla FINE della corsa**, faceva
+> `Get-Process terminal64 | Stop-Process -Force`: **TUTTI** i terminali della
+> macchina, **il conto REALE 10105439 compreso**, mentre ha posizioni aperte.
+> E la **compilazione** avveniva **PRIMA** della guardia, quindi il terminale
+> veniva gia' toccato.
+> **Adesso**: il bersaglio e' il **banco `C:\MT5_Backtest`** (demo 50504400) e
+> se non c'e' lo script **muore** invece di ripiegare su Program Files; e la
+> chiusura finale e' **CHIRURGICA** — muore solo il processo che sta sotto la
+> cartella scelta.
+> 📌 Classe nuova, da ricordare: **una guardia che arriva DOPO la scrittura non e' una guardia.**
 > controlla da solo prima di scaricare qualsiasi cosa).
 
 ---

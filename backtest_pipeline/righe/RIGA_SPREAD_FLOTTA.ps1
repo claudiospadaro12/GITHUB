@@ -253,14 +253,26 @@ Dico ("raccolta : " + $Cart)
 #      collaudata di scarica_storico.ps1 / RIGA_SPREAD_NASUSD)
 # =====================================================================
 Titolo "F1 - terminale BCM + cartella dati"
-$allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-if(-not $cand){
-  Write-Host "Terminale BCM non trovato." -ForegroundColor Red
-  ScriviRefertoRiga "FERMATA" "terminale BCM (terminal64.exe) non trovato in Program Files"
+# ---------------------------------------------------------------------
+#  RIPIEGO_BANCO_v1 (12/09/2026): IL BERSAGLIO E' IL BANCO, non "il primo
+#  BCM che trovo". Il selettore di prima prendeva
+#  "*BCM Markets MT5 Terminal*" e non "*-V3*", che sul VPS e' IL PICCOLO
+#  50503392 CON LE SEDIE VIVE -- e questo script COMPILA dentro il
+#  terminale scelto PRIMA di guardare se MT5 e' aperto: la "rete che
+#  protegge il forward" scattava a danno gia' fatto.
+#  Se il banco non c'e', NON si ripiega su Program Files: si muore.
+# ---------------------------------------------------------------------
+$BANCO_PERC = "C:\MT5_Backtest"
+$eseBanco   = Join-Path $BANCO_PERC "terminal64.exe"
+if(-not (Test-Path -LiteralPath $eseBanco)){
+  Write-Host "STOP: il banco da backtest non c'e'." -ForegroundColor Red
+  Write-Host ("    cercato : " + $eseBanco) -ForegroundColor Red
+  Write-Host "    NON ripiego su Program Files: li' c'e' il piccolo 50503392, che ha" -ForegroundColor Red
+  Write-Host "    le sedie VIVE, e questo script compila dentro il terminale scelto." -ForegroundColor Red
+  ScriviRefertoRiga "FERMATA" ("banco da backtest assente: " + $eseBanco + " -- NON ripiego sui terminali in forward")
   exit 1
 }
+$cand = Get-Item -LiteralPath $eseBanco
 $instDir    = $cand.DirectoryName
 $Terminal   = Join-Path $instDir "terminal64.exe"
 $MetaEditor = Join-Path $instDir "metaeditor64.exe"
@@ -521,7 +533,11 @@ while((Get-Date) -lt $scaduto){
 $ErrorActionPreference = $ErrPref0
 
 Write-Host "   chiudo MT5..." -ForegroundColor DarkGray
-Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+# CHIUSURA CHIRURGICA (12/09/2026). Prima era il kill di TUTTI i
+# terminal64 della macchina, IL CONTO REALE 10105439 COMPRESO, mentre ha
+# posizioni aperte -- e il foglio _DA_MANDARE.md certificava il contrario.
+# Adesso muore solo quello che sta sotto la cartella scelta.
+Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like ($instDir + "\*")) } | Stop-Process -Force -ErrorAction SilentlyContinue
 Start-Sleep -Seconds 3
 
 # =====================================================================
