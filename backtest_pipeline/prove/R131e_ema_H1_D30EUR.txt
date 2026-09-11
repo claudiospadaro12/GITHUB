@@ -1,0 +1,438 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R131e -- QUANTO IN ALTO CONVIENE GUARDARE
+#            D30EUR M5 -- scala EMA, filtro su H1, asse InpUseEmaFilter 0/1
+#  Scritto l'11/09/2026. Criteri congelati PRIMA dei numeri:
+#  backtest_pipeline\prove\R131_TIMEFRAME_CRITERI.md
+# ---------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova prove\R131e_ema_H1_D30EUR.txt
+#    -Simbolo D30EUR -Periodo M5
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -FrazioneIS 0.50 -Deposito 10000 -Modello 4
+#    -Etichetta r131e
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204): su quella macchina ci
+#     sono TRE MT5 con sedie VIVE. C:\MT5_Backtest = demo 50504400, zero EA.
+#  !! -Modello 4 (TICK REALI) NON E' OPZIONALE: l'ancora di questo round
+#     (R120, 09/09) e' a tick reali e a OHLC non tornerebbe.
+#  (-SoloControllo deve stampare 2 CELLE PER FINESTRA. Altro numero = file
+#   letto male: FERMARSI.)
+# ---------------------------------------------------------------------
+#  DA DOVE NASCE IL ROUND (Claudio, 11/09/2026)
+#    "Emiliano dice che la candela WEEKLY e' la piu' importante. Io ho visto
+#     che 15min, H1, H4, daily e weekly erano short e sono entrato."
+#  LA DOMANDA, DICHIARATA PRIMA DEI NUMERI:
+#    "Salire con il timeframe del filtro di direzione (H1 -> H4 -> D1 -> W1)
+#     migliora il merito, e a quale prezzo in frequenza?"
+# ---------------------------------------------------------------------
+#  CHE COSA FA DAVVERO IL FILTRO -- LETTO DAL CODICE, NON A MEMORIA
+#  mql5\Experts\ABTG_DAX_Apertura_EU.mq5:
+#
+#    r.1660 TrendBias()      -> 0 nessun vincolo, +1 solo long, -1 solo short,
+#                               2 conflitto (blocca tutto)
+#    r.1664-1672  if(InpUseEmaFilter): CopyBuffer(EMA veloce/lenta, shift 1)
+#                 su InpFilterTF; e = +1 se veloce > lenta, -1 se minore.
+#                 >>> SHIFT 1 = CANDELA CHIUSA: nessun look-ahead. Verificato.
+#                 >>> SE CopyBuffer NON RIESCE, bias RESTA 0: il filtro non
+#                     blocca niente E NON LO DICE. E' la trappola n.1 di
+#                     questo round (vedi "IL MURO DEI DATI" sotto).
+#    r.1674-1679  if(InpUseSupertrend): SupertrendDir(_Symbol, InpStTF, ...)
+#    r.1444 / r.1358  TrendBias() si valuta UNA VOLTA AL GIORNO, all'arming
+#                 (ore 8:00 server), e finisce in gBias.
+#    r.1477-1478  longOK = (gBias == 0 || gBias == +1)
+#                 shortOK = (gBias == 0 || gBias == -1)
+#    r.1480 / r.1513  l'ordine parte solo se InpAllowLong && longOK (e simm.)
+#
+#  >>> QUINDI IL FILTRO E' UN VETO, NON UN INNESCO E NON UN SELETTORE DI LATO.
+#      Su questa sedia InpAllowShort=false (geometria viva, artefatto della
+#      770101): il ramo short e' gia' chiuso, quindi il filtro puo' fare UNA
+#      COSA SOLA -- TOGLIERE GIORNATE LONG quando il suo timeframe dice GIU'.
+#      NON E' UN RAMO MORTO: il veto e' effettivo (r.1480 lo legge). Ma la
+#      domanda che il round puo' porre si restringe, ed e' onesto scriverlo:
+#      NON "il filtro sceglie la direzione giusta", MA "le giornate che il
+#      filtro toglie erano peggiori di quelle che tiene?".
+#
+#  >>> CONSEGUENZA ARITMETICA, ED E' IL CANCELLO G1 GRATIS DI QUESTO ROUND:
+#      un veto puo' solo TOGLIERE operazioni, mai aggiungerne.
+#          Trades(cella FILTRO ON)  <=  Trades(cella CONTROLLO)   SEMPRE.
+#      Se una cella ON avesse PIU' operazioni del controllo, il banco e'
+#      sporco e il round si ferma prima di leggere qualunque altro numero.
+# ---------------------------------------------------------------------
+#  IL MURO DEI DATI -- IL NUMERO CHE CAMBIA LA FORMA DEL ROUND
+#  [MISURATO] backtest_pipeline\risultati_archivio\ABTG_StoricoScaricato.csv:
+#      D30EUR  M1  643.567 barre  prima data 2024.09.26  verdetto COMPLETO
+#      D30EUR  M5  129.930 barre  prima data 2024.09.26  verdetto COMPLETO
+#      (controprova: 129.930 x 5 = 649.650 ~ 643.567, i due conteggi tornano)
+#  COMPLETO vuol dire "non manca sul disco": IL BROKER NON CE L'HA. Prima del
+#  26/09/2024 non esiste UNA barra di D30EUR su BCM, di nessun timeframe.
+#
+#  >>> DA 2024.09.26 A 2026.06.30 CI SONO AL MASSIMO 92 BARRE W1. NOVANTADUE.
+#
+#  Quante barre serve al filtro prima di essere DEFINITO (conto esatto: D1 fa
+#  una barra al giorno feriale, W1 una alla settimana -- non e' una stima):
+#
+#    EMA lenta = 50 periodi (r.1664 pretende CopyBuffer == 1 su ENTRAMBE)
+#      H1  ~50 ore di quotazione   ~2-3 giorni feriali   cieco <1,5% dell'IS
+#      H4  ~50 x 4 ore             ~9-10 giorni feriali  cieco ~4% dell'IS
+#      D1  50 giorni feriali   -> ~2024.12.05   CIECO PER IL 21,7% DELL'IS
+#      W1  50 settimane        -> ~2025.09.11   CIECO PER IL 100% DELL'IS
+#                                               e per l'8,8% dell'OOS
+#    SUPERTREND (r.1570-1574: need=215, ma basta copied >= atrPeriod+5 = 15)
+#      H1  15 ore                  meno di un giorno     cieco ~0%
+#      H4  15 x 4 ore              ~3 giorni feriali     cieco ~1%
+#      D1  15 giorni feriali   -> ~2024.10.17   cieco per il 6,5% dell'IS
+#      W1  15 settimane        -> ~2025.01.09   cieco per il 32,6% dell'IS
+#                                               e per lo 0% dell'OOS
+#
+#  >>> DUE CONSEGUENZE, SCRITTE ORA E NON DOPO:
+#      1. CON L'EMA, LA CELLA W1 NON E' UNA MISURA: E' UN PLACEBO. Per tutto
+#         l'IS CopyBuffer non ha 50 barre settimanali, bias resta 0, il filtro
+#         NON BLOCCA NIENTE. La previsione nulla e' scritta piu' sotto ed e'
+#         falsificabile all'unita'.
+#      2. L'UNICO STRUMENTO DI CASA CHE ARRIVA DAVVERO A W1 E' IL SUPERTREND,
+#         perche' si accontenta di 15 barre invece di 50. Per questo il round
+#         ha DUE scale e non una, e per questo la prova secca dell'affermazione
+#         di Emiliano sta sulla scala SUPERTREND (R131d), non sull'EMA.
+# ---------------------------------------------------------------------
+#  COSA DICE L'ARCHIVIO -- CENSIMENTO RIFATTO DA ME L'11/09/2026
+#  Lettura della COLONNA su tutti i CSV del repo (non del nome del file):
+#      InpFilterTF   198 file, 5.068 righe, valori distinti: 16385 (H1, 2.749)
+#                    e 16388 (H4, 2.319).   D1 (16408): MAI.  W1 (32769): MAI.
+#      InpStTF       198 file, 5.068 righe, valore distinto: 16385 (H1). SOLO.
+#      InpUseSupertrend  acceso in 20 righe su 5.068 = 0,39%, SEMPRE su H1,
+#                    e MAI su questa sedia (sono r84f Nasdaq e DAX_Live5m_v2).
+#      InpUseEmaFilter acceso in 1.257 righe su 5.892, ma su questa sedia
+#                    (ABTG_DAX_Apertura_EU / D30EUR) in ZERO righe.
+#  >>> SU QUESTA SEDIA IL FILTRO DI DIREZIONE NON E' MAI STATO ACCESO, NE'
+#      EMA NE' SUPERTREND. NON E' "GIA' PROVATO": E' UNA CASELLA LIBERA.
+#  >>> E in tutto l'archivio la candela che Emiliano chiama la piu' importante
+#      non e' mai stata usata come filtro di direzione. Nemmeno una volta.
+#
+#  IL PRECEDENTE CHE ESISTE, ED E' IL MOTIVO PER CUI IL ROUND VALE:
+#    risultati_archivio\Dow_Apertura\dow_motore.csv (03/08/2026, tick reali,
+#    U30USD M5, BREAKOUT, gestione nuda, due lati, EmaFast=1 EmaSlow=50):
+#        filtro H4 SPENTO : Trades 445  Profit  +632,94  PF 1,03079  DD 14,9407%
+#        filtro H4 ACCESO : Trades 329  Profit +3917,49  PF 1,23808  DD  6,9201%
+#    >>> -26,1% DI OPERAZIONI, PF DA 1,03 A 1,24, DRAWDOWN DIMEZZATO. E' il
+#        precedente in casa che dice che il filtro di direzione PUO' portare
+#        informazione. E' su un ALTRO indice e con un'ALTRA geometria: e' una
+#        ragione per misurare, NON un numero da riportare sul DAX.
+#    >>> E dow_robustezza.csv misura l'ALTOPIANO del periodo: EmaSlow da 20 a
+#        200, 10 celle su 10 sopra PF 1,20 (min 1,202 max 1,299), con la regola
+#        operativa scritta li': "stare sotto i 100".
+#  IL CONTRO-PRECEDENTE, e va detto per primo perche' e' contro di noi:
+#    DOW_MOTORE.md riporta la stima di FASE A secondo cui il filtro di trend H4
+#    e' DANNOSO sugli indici europei (DAX -0,043 R/trade, CAC -0,053, IBEX
+#    -0,081). E' una STIMA di FASE A, non una misura a tick su questa sedia --
+#    ed e' esattamente il numero che questo round va a falsificare o confermare.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- COI NUMERI, E LA RISPOSTA E' IL CAMPIONE
+#    D30EUR 770101 (questa sedia), cella viva col parziale SPENTO, R120 tick
+#      reali finestra piena:  325 INGRESSI  (Trades = ingressi, esatto)
+#      -FrazioneIS 0.50  ->  IS ~163 / OOS ~162.  SOPRA 150 TUTTE E DUE.
+#    U30USD 770202 (Dow), cella viva (RangeMin 35, long-only, filtro H4 ON),
+#      risultati_prove\ABTG_Dow_Apertura_US\..._ptc.csv:
+#      IS  Trades  74  Profit +2811,84  PF 1,22247  DD 5,6692%
+#      OOS Trades 130  Profit +6721,93  PF 1,27013  DD 4,3941%
+#      >>> 74 E 130 SONO GIA' SOTTO 150 PRIMA DI FILTRARE QUALSIASI COSA, e
+#          quei Trades contengono anche i PARZIALI: gli INGRESSI sono meno
+#          ancora. Il Dow e' ESCLUSO PER CAMPIONE, col numero accanto, non per
+#          gusto. (E il censimento contratti lo segna gia' 'SOSPESO 130<150'.)
+#    NASUSD 770201: R120 misura PF 0,99284 su n=483, e TUTTE E 48 le celle di
+#      quel CSV hanno Profit negativo. Mettere una griglia li' e' cio' che la
+#      REGOLA DEL 19/08 vieta. ESCLUSO COL NUMERO ACCANTO.
+#    >>> E questa sedia NON e' un motore senza edge: R120, tick reali, finestra
+#        piena, parziale spento -> PF 1,37886. La regola del 19/08 non morde.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- CANCELLO BLOCCANTE, E LA CELLA DI CONTROLLO E' REPLICATA 8 VOLTE
+#    La cella FILTRO SPENTO di questo file e' la stessa cella di R120 misurata
+#    il 09/09 a TICK REALI sulla finestra piena 2024.09.26-2026.06.30:
+#
+#        Trades 325 | Profit +2970,43 | PF 1,37886 | DD 6,0271%
+#                   | peggior giornata -1,0569%
+#
+#    Fonte: risultati_prove\gestione_20260909\
+#           gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv, riga
+#           InpMagic=770101 InpTP1_ClosePct=0 InpUseTrailing=1 InpTrailMode=1
+#           InpBreakevenAtTP1=1 InpBEatR=0. Pin letti UNO PER UNO dal CSV e
+#           ricopiati qui sotto (compreso InpUsaGuardian=1, vedi nota).
+#    In quel CSV Trades = 325 in TUTTE E 24 le righe col parziale spento, con
+#    quattro strutture d'uscita diverse: 325 E' L'INVARIANTE DEGLI INGRESSI.
+#
+#    QUELLA CORSA E' A FINESTRA PIENA, SENZA SPLIT: l'ancora non puo' tornare
+#    al centesimo su una singola finestra. TOLLERANZA CONGELATA, SUL TOTALE:
+#        Trades(IS) + Trades(OOS)   fra 321 e 329
+#        Profit(IS) + Profit(OOS)   entro +/- 5% di 2970,43
+#    Fuori da li' IL BANCO E' SPORCO e il round si ferma.
+#
+#    >>> E LA CELLA DI CONTROLLO E' LA STESSA IN TUTTI E OTTO I FILE DI R131:
+#        con il filtro spento InpFilterTF e InpStTF sono INERTI (r.444 crea
+#        i buffer EMA solo dentro if(InpUseEmaFilter); SupertrendDir e'
+#        chiamata solo dentro if(InpUseSupertrend)). Quindi le OTTO celle OFF
+#        devono uscire IDENTICHE fra loro: Trades uguale all'unita', Profit
+#        entro +/- 0,01 EUR (la tolleranza e' quella gia' misurata in casa fra
+#        magic gemelli: ptc 770202 vs 770203 differiscono di 0,01).
+#        E' un cancello di determinismo a OTTO repliche, e costa ZERO passate.
+# ---------------------------------------------------------------------
+#  PERCHE' OTTO FILE E NON UN ASSE SUL TIMEFRAME -- IL CONTO DELLE CELLE
+#    InpFilterTF e InpStTF sono ENUM_TIMEFRAMES. walkforward_generico.ps1
+#    r.526-536: su un enum MT5 IGNORA LO STEP e spazzola i MEMBRI fra start e
+#    stop. La tabella dei membri e' nel driver stesso, r.380-387.
+#    Un asse 16385||16385||1||32769||Y NON farebbe 4 celle: ne farebbe NOVE
+#      H1 16385, H2 16386, H3 16387, H4 16388, H6 16390, H8 16392,
+#      H12 16396, D1 16408, W1 32769
+#    e per di piu' non conterrebbe LA CELLA DI CONTROLLO (filtro spento), che
+#    e' l'ancora e il cancello G1. In piu' controlla_prova.py non conosce gli
+#    enum e stamperebbe int(|32769-16385|/1)+1 = 16385 CELLE: un numero falso
+#    in faccia a chi approva la riga.
+#    >>> Per questo il TF e' un PIN e l'asse e' l'interruttore: 2 celle vere
+#        per file, e controlla_prova.py stampa 2, cioe' il numero GIUSTO.
+# ---------------------------------------------------------------------
+#  LE ATTESE, SCRITTE PRIMA DEI NUMERI (le condizioni di falsificazione
+#  complete stanno in R131_TIMEFRAME_CRITERI.md; qui le tre che riguardano
+#  QUESTO file)
+#
+#  >>> UN PF PIU' ALTO CON META' DEI TRADE NON E' UN MIGLIORAMENTO: E' UN
+#      MOTORE DIVERSO, E PIU' LENTO. Si scrive qui, prima dei numeri, perche'
+#      dopo non ci sia modo di raccontarla diversamente. La frequenza e' il
+#      requisito n.1 verso ottobre, e su questa sedia il controllo fa 325
+#      ingressi in 459 giorni feriali = 0,708 operazioni/giorno. Il pavimento
+#      firmato il 07/09 e' 1,00 op/g PER FAMIGLIA (motore x simboli): la
+#      famiglia Aperture ci arriva gia' col fiatone, e ogni giornata che il
+#      filtro toglie la allontana.
+#
+#  >>> IL VERSO DELLA COLONNA Trades, E QUI CORREGGO UN'ATTESA SBAGLIATA.
+#      Verrebbe da dire "salendo di TF il filtro e' piu' raro, quindi Trades
+#      CALA". SU UN VETO A UN LATO SOLO E' IL CONTRARIO, e il motivo e'
+#      aritmetico: il filtro toglie i giorni in cui il suo TF dice GIU'; su un
+#      mercato con deriva positiva il segno di un orizzonte LUNGO dice 'su'
+#      PIU' spesso di uno corto (la deriva cresce come T, il rumore come
+#      radice di T). QUINDI L'ATTESA E':
+#          Trades(H1) <= Trades(H4) <= Trades(D1) <= Trades(W1) <= 325
+#      cioe' Trades CRESCE salendo di timeframe, e il controllo e' il TETTO.
+#      Il 325 e' un tetto DURO (viene dal codice), l'ordinamento in mezzo e'
+#      un'attesa di mercato e puo' essere smentita: se lo e', si scrive che
+#      la deriva del DAX in questa finestra non era quella che pensavo.
+#
+#  >>> LA MISURA VERA DEL ROUND NON E' IL PF, E' IL P/L DEI GIORNI TOLTI.
+#      La cella filtrata e' un SOTTOINSIEME del controllo, non un campione
+#      indipendente: confrontare due PF su insiemi annidati sovrastima la
+#      differenza. La domanda giusta si calcola dal CSV senza una passata in
+#      piu':
+#          m            = 325 - Trades(ON)            (giorni tolti)
+#          medio_tolti  = [Profit(OFF) - Profit(ON)] / m
+#          medio_tenuti = Profit(ON) / Trades(ON)
+#      IL FILTRO PORTA INFORMAZIONE SOLO SE medio_tolti < 0, IN ENTRAMBE LE
+#      FINESTRE. Soglia di rumore congelata: sigma per trade DERIVATA (non
+#      misurata) da 1R = 1% di 10.000 = 100 EUR e TP totale 3R -> esiti fra
+#      -100 e +300, sigma ~120 EUR; serve |medio_tolti| > 2*120/radice(m).
+#      Con m=60 sono 31 EUR/trade; con m=100 sono 24 EUR/trade. Sotto quella
+#      soglia la risposta onesta e' "IL DEFAULT (filtro spento) VA BENE", ed
+#      e' un RISULTATO, non un fallimento.
+# ---------------------------------------------------------------------
+#  IL REGIME, E IL BUCO CHE NE ESCE -- SI DICHIARA, NON SI NASCONDE
+#    IS  2024.09.26 -> 2025.08.13   230 giorni feriali   ~163 ingressi
+#    OOS 2025.08.14 -> 2026.06.30   229 giorni feriali   ~162 ingressi
+#    L'IS contiene la correzione di feb-apr 2025, UNICO tratto di discesa vera
+#    dentro i tick BCM (regime dichiarato in R130a con la stessa fonte).
+#    >>> UN FILTRO DI DIREZIONE SU UNA SEDIA SOLO-LONG GUADAGNA QUANDO C'E'
+#        UNA DISCESA DA SCHIVARE. In questa finestra la discesa e' UNA SOLA ed
+#        e' TUTTA IN IS. Quindi la forma "il filtro vince in IS e pareggia o
+#        perde in OOS" NON E' UNA CONFERMA: e' la firma di UN SOLO EPISODIO,
+#        cioe' n=1 in termini di regime. La prova di regime dell'Emendamento C
+#        (toro/orso/laterale/crollo) su questi dati NON E' ESEGUIBILE, e va
+#        scritto accanto a ogni tabella del referto.
+# ---------------------------------------------------------------------
+#  IL COSTO DEL TRADE NON CAMBIA IN NESSUNA CELLA, E VA DETTO
+#    spread mediano D30EUR all'ora server 8 = 1,7000 punti indice su 1.847.049
+#    tick (risultati_archivio\spread_flotta\spread_orario_D30EUR.csv).
+#    Lo stop di questa sedia e' il bordo opposto del range: ~49,10 punti
+#    indice = 28,9x lo spread (derivato in R130, n=2), cioe' SOTTO il pavimento
+#    di lavoro 40x (72%) e SOPRA il pavimento duro 13,3x.
+#    >>> IL FILTRO NON TOCCA NE' LO STOP NE' L'INGRESSO: quel 28,9x e'
+#        IDENTICO in tutte e 16 le celle del round. Nessuna cella si puo'
+#        escludere per costo e nessuna migliora il costo. R131 NON E' UN ROUND
+#        DI COSTO. E la regola "si preferiscono i TF piu' bassi" riguarda il
+#        TF DELL'INGRESSO (qui M5 sempre), non quello del filtro.
+# ---------------------------------------------------------------------
+#  QUESTO FILE: SCALA EMA, TIMEFRAME H1
+#    Strumento: EMA(1) contro EMA(50) su InpFilterTF, shift 1 (candela
+#    chiusa). Con EmaFast=1 la media veloce E' la chiusura: il filtro dice
+#    "la chiusura dell'ultima candela H1 sta sopra la sua EMA50?".
+#    E' la manopola di casa (InpUseEmaFilter + InpFilterTF) ed e' quella che
+#    la tabella di Claudio chiama "direzione filtrata su un TF".
+#    >>> H1 (16385) e' uno dei due soli valori mai usciti da questa manopola in
+#        tutto l'archivio (2.749 righe). Riscaldamento ~2-3 giorni feriali.
+#        E' il METRO della scala: se nemmeno H1 tocca la colonna Trades, il
+#        filtro non sta filtrando e il round e' nullo.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#         ^ muro MISURATO dei dati BCM sugli indici: ABTG_StoricoScaricato.csv
+#           dice prima barra 2024.09.26 con verdetto COMPLETO su M1 e M5.
+#           Sotto quella data NON C'E' NIENTE da comprare e niente da spezzare
+#           in tranche. E' anche il motivo per cui le barre W1 disponibili in
+#           tutta la finestra sono al massimo 92.
+
+# --- IL GUARDIAN E' ACCESO PERCHE' LO ERA NELL'ANCORA (CSV R120: InpUsaGuardian=1).
+#     R130a pinna false sulla STESSA ancora: e' una discrepanza segnalata, non
+#     copiata. Con rischio 1% e InpOneTradePerDay una sola posizione per volta:
+#     la pausa giornaliera B1 (-4,0%) e il cap rischio aperto C1 (3,25%) non
+#     sono raggiungibili da questa sedia da sola, quindi le due scelte DEVONO
+#     dare lo stesso numero -- e il cancello dell'ancora lo DIMOSTRA invece di
+#     darlo per buono.
+InpUsaGuardian=true
+InpAllowReverse=false
+
+# --- SESSIONE (ORE DEL SERVER BCM, mai l'ora italiana: IT - 1) ---
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+# --- INGRESSO: RETEST LONG-ONLY. E' LA GEOMETRIA VIVA, ED E' PINNATA.
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+
+# --- IL FILTRO DI DIREZIONE. QUI STA TUTTO IL ROUND.
+#     InpEmaFast=1 e InpEmaSlow=50 NON sono i default compilati di QUESTO EA
+#     (14 e 200): sono i valori della sedia GEMELLA VIVA 770202 sul Dow, ed e'
+#     una scelta dichiarata con due motivi misurati:
+#       1. dow_robustezza.csv misura l'altopiano del periodo (20..200, 10/10
+#          sopra PF 1,20) con la regola scritta li': "stare sotto i 100";
+#       2. con EmaSlow=200 la cella D1 avrebbe bisogno di 200 giorni feriali
+#          (definita solo da ~2025.07.11, cioe' CIECA per il 90% dell'IS) e la
+#          cella W1 di 200 SETTIMANE, che su BCM NON ESISTONO (ce ne sono 92):
+#          sarebbe cieca PER SEMPRE. A 200 questo round non misurerebbe "il TF
+#          alto non serve": misurerebbe "il filtro non era acceso".
+#     I due valori sono IDENTICI in tutti e otto i file: la variabile e' UNA,
+#     ed e' il timeframe.
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- IL PARZIALE E' SPENTO, ED E' UNA SCELTA DI MISURA, NON DI GUSTO.
+#     Con InpTP1_ClosePct=0 il blocco r.1899 non entra: niente parziali,
+#     quindi LA COLONNA Trades E' UN CONTATORE DI INGRESSI, ESATTO. Questo
+#     round misura PRIMA DI TUTTO quante giornate il filtro toglie: se Trades
+#     contasse anche i parziali (445 invece di 325 nella cella viva), il
+#     conteggio dei giorni tolti sarebbe sporco e il cancello G1 non
+#     esisterebbe. Stessa scelta di R128b.
+#     >>> DICHIARATO: questa NON e' la geometria di campo (che ha il parziale
+#         al 50%). E' la geometria dell'ANCORA, ed e' anche quella che R120
+#         misura MIGLIORE: PF 1,37886 col parziale spento contro 1,29574 col
+#         parziale al 50%.
+#     >>> InpBreakevenAtTP1 vive DENTRO quel blocco: col parziale spento e' un
+#         NO-OP. Verificato sul CSV R120: le righe BEatTP1=0 e BEatTP1=1 con
+#         ClosePct=0 sono identiche al centesimo (325 / 2970,43 / 1,37886).
+#         Resta pinnato true perche' true e' il valore della sedia viva.
+InpTP1_R=1.0
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+# --- InpNewsCurrencies NON E' PINNATO DI PROPOSITO: e' una stringa e il suo
+#     valore e' la stringa VUOTA. Un pin vuoto MT5 lo IGNORA e usa il default
+#     compilato (che e' "" -- r.340), quindi il pin sarebbe inutile; e
+#     controlla_prova.py lo bloccherebbe come PIN VUOTO. Default e valore
+#     voluto coincidono: e' scritto perche' non c'e', non dimenticato.
+
+# --- SLIPPAGE PINNATO A ZERO: la sedia gira in RETEST (InpEntryMode=2), cioe'
+#     ordine LIMIT, e nel sorgente lo slippage e' applicato SOLO agli ingressi
+#     a pendente STOP (r.1059, r.1083). Sul retest (r.1487) il commento e'
+#     esplicito: "limit sul livello (niente buffer/slippage)". Un valore > 0
+#     qui non cambierebbe UN CENTESIMO.
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpMaxSpread=0
+# --- InpVerbose=false: ABTGLog (r.422-426) fa SOLO Print(), non tocca un
+#     ordine. L'ancora R120 girava con InpVerbose=1: la differenza non puo'
+#     cambiare un trade, ed e' scritta qui perche' sia verificabile.
+InpVerbose=false
+
+# --- MAGIC VERGINE 779956 (cercato su TUTTO il repo l'11/09/2026: ZERO
+#     occorrenze, come i sette fratelli 779952-779959). NON SI SFIORA il
+#     770101, che e' vivo anche sul conto REALE.
+InpMagic=779956
+
+# --- L'ASSE, UNO SOLO: InpUseEmaFilter 0/1 = 2 CELLE.
+#   0 = FILTRO SPENTO. E' l'ANCORA (325 / +2970,43 / 1,37886 / 6,0271%) ed e'
+#       la stessa cella negli otto file del round: devono uscire identiche.
+#   1 = FILTRO ACCESO su H1.
+# Un bool si scrive 0/1 e non false/true: walkforward_generico.ps1, quando
+# blinda un bool da solo, stampa gia' la forma NUMERICA (Risolvi() converte
+# true->1) ed e' la forma con cui sono girati tutti i round di questa casa.
+# start 0 / step 1 / stop 1 = DUE celle. Verificarlo nella stampa di
+# -SoloControllo, non darlo per buono.
+InpUseEmaFilter=0||0||1||1||Y
