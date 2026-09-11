@@ -198,8 +198,33 @@ OOS, non sulla somma** (classi 224+226 insieme).
 
 | EA · Magic · Sym | **DD PROMESSO** | a quale **deposito/rischio/modello** | `n` **uscite → POSIZIONI** | finestra · **OOS vero?** | **freq. PROMESSA** | **freq. DI CAMPO** | **codice misurato → in campo** | **stop/spread ALL-IN** | ❓ **descrive la sedia che gira?** |
 |---|---|---|---|---|---|---|---|---|---|
-| `ABTG_DAX_Apertura_EU` **770101** D30EUR M5 · vivo **0,65%** | **10,5984%** @1% → ≈6,89% @0,65% 🔴[APPROSSIMATO] | **10.000 €** · **1,0%** · **tick** | 🆕 **311 → 245 [MISURATO]** (era «311») · fattore **1,27** | OOS 2025.06.12→2026.06.30, 12,6 mesi · ✅ **OOS vero** | ~0,97 op/g *(in uscite; in posizioni ~**0,76**)* | 🔴 `[NON MISURATO]` sul reale | misurato: repo R83 (19/08) · campo: **v1.01, 2368 righe, 06/09** = **repo+1** → ✅ **ALLINEATO** | **42,3x** 🟢 *(geometria piena)* · **33,0x** 🔴 *(sottocampione della geometria VIVA)* · **26,6x** 🔴 @P95 | 🟠 **NON MISURATO** — codice ✅ e cella ✅, ma il **rischio** vivo è 0,65% e il banco 1,0%, e l'**equità vera è ~7.500 €** contro 10.000 del banco: il pavimento del lotto **a quella taglia non è stato verificato** |
+| `ABTG_DAX_Apertura_EU` **770101** D30EUR M5 · vivo **0,65%** | 🆕 **4,3501%** @ **0,65%** — **già alla taglia viva** · **[MISURATO]** · ⚠️ **a deposito 10.000 €** (vedi l'asterisco sotto la tabella) | 🆕 **10.000 €** · **0,65%** · **tick** | 🆕 **270 uscite → 193 POSIZIONI** [MISURATO sulla **gemella long-only** `aperture_r47/..._OOS_r47a.csv`; il per-trade della cella R119 non è in archivio] · fattore **1,40** | OOS **2025.06.10→2026.06.30**, 12,7 mesi · ✅ **OOS vero** · 🔴 **UN SOLO REGIME (toro)** | 🆕 **~0,84 op/g** *(in uscite; in posizioni ~**0,60**)* — ricalcolato in proporzione sulla stessa finestra e con lo stesso divisore del vecchio 0,97 | 🔴 `[NON MISURATO]` sul reale | misurato: repo **R119** (07/09, ri-misurato ANCORA 08/09) · campo: **v1.01, 2368 righe, 06/09** = **repo+1** → ✅ **ALLINEATO** | **42,3x** 🟢 *(geometria piena)* · **33,0x** 🔴 *(sottocampione della geometria VIVA)* · **26,6x** 🔴 @P95 | 🆕 🟢 **SÌ sulla cella e sulla TAGLIA** — codice ✅, cella ✅ (`InpAllowShort=0`, `InpRiskPercent=0,65`, `InpMagic=770101`, trailing 410: **tutti uguali al preset vivo**). ⚠️ **unico caveat rimasto**: banco a **10.000 €**, equità vera **~7.500 €** → il pavimento del lotto a quella equità è **[NON MISURATO]** |
 | `ABTG_ORB_Ottimizzato` **770611** U30USD M5 · vivo **0,65%** | **6,5389%** OOS · **5,6530%** IS — **già alla taglia viva** | **10.000 €** · **0,65%** · **tick** | **119 OOS · 71 IS = POSIZIONI** 🟢 (`InpTP1Pct=0` verificato nel CSV R119 **e** nel preset reale) | IS 2024.09.26→2025.06.09 / OOS 2025.06.10→2026.06.30 · ✅ **OOS vero** | ~0,43 op/g | 🔴 `[NON MISURATO]` sul reale *(sul **piccolo** la gemella fa **0,23**)* | misurato: repo R119 (07/09) · campo: **v1.04, 1464 righe, 06/09** = repo+1 → ✅ **ALLINEATO** | 🔴 **29,5x** (74% del pavimento di lavoro) · **19,7x** @P95 · 🟢 sopra il duro 13,3x | 🟢 **SÌ** — codice ✅, rischio ✅ (0,65% = 0,65%), cella ✅. ⚠️ **unico caveat**: banco a 10.000 €, equità vera ~7.500 € |
+
+
+> ## 🆕 ⚠️ L'ASTERISCO DEL DEPOSITO — va con il 4,3501% **ogni volta che lo si cita**
+> Il **4,3501% è misurato a deposito 10.000 €**. Il deposito **morde**, ed è misurato
+> su questa stessa sedia: la **stessa cella long-only a 1,0%** fa **6,7111%** a
+> **10.000 €** (`risultati_prove/aperture_r35/ABTG_DAX_Apertura_EU_D30EUR_OOS_r35.csv`
+> riga 8, `Pass=4`, `InpMagic=770101`, `InpAllowShort=0`) e **7,2328%** a **100.000 €**
+> (`risultati_prove/aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_OOS_r47a.csv` r.2), **+7,8%
+> a parità esatta di 270 operazioni** — è il pavimento del lotto, non il motore.
+> 🔴 **Quindi su un banco da 100.000 € il DD promesso di questa sedia è**
+> **`[NON MISURATO]`**: per sola proporzione starebbe a **≈4,69%**, ma quella è una
+> **proporzione, non una misura**, e non si usa per far scattare niente finché la
+> corsa a 100.000 € non è stata fatta. *(È la voce **B6** del piano.)*
+
+> ## 🆕 🪦 ERRATA — da dove veniva il «6,89%» che stava qui fino all'11/09
+> Il v2 scriveva **10,5984% @1% → ≈6,89% @0,65%**, con fonte
+> `r83_csv/ABTG_Apertura_3Ingressi_D30EUR_OOS_r83d1.csv`. 🔴 **Quel CSV ha**
+> **`InpAllowShort=1`, `InpRiskPercent=1` e `InpMagic=777120/777121`** (verificato
+> colonna per colonna, non per riassunto): **non è la sedia 770101**, è lo stesso
+> motore **con il lato corto ACCESO a taglia doppia e magic di laboratorio**. Il
+> lato corto da solo vale **+3,8873 punti di DD** (10,5984 con corto contro 6,7111
+> senza, stessa finestra, stesso deposito, stessa taglia 1,0%). 📄 Dossier completo,
+> con le 6 spiegazioni alternative rotte una per una:
+> `report/CONFLITTO_DD_770101_2026-09-11.md`.
+> 🟢 **E il trailing fisso 410 è SCAGIONATO**: è **identico (410)** nei due round.
 
 > 🔴 **La nota di rischio che va detta ogni volta che si cita l'ORB sul reale**:
 > il contratto **storico** è **9,92% a rischio 1%** (R15) col **doppio
