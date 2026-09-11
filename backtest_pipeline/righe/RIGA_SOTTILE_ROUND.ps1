@@ -134,12 +134,28 @@ $BancoBT = 'C:\MT5_Backtest'
 #  IL PIN DEL CODICE ESEGUITO. FISSO. NON E' UN ARGOMENTO, E NON DEVE
 #  DIVENTARLO: e' l'unica cosa che lega il codice che gira al codice che
 #  e' stato letto.
-#  Commit: 89b393f3 dell'11/09/2026, su origin/lavoro.
+#
+#  >>> 11/09/2026 -- IL PIN E' UN SEGNAPOSTO, E VA SOSTITUITO A MANO. <<<
+#  RIGA_ROUND_VPS.ps1 e' cambiata (la guardia sul terminale e' diventata
+#  POSITIVA: ammette il banco invece di elencare i vietati), quindi la
+#  sua impronta e' cambiata e il vecchio pin 89b393f3 non porta piu' il
+#  file giusto. Il pin nuovo NON PUO' ESISTERE ADESSO: e' l'hash del
+#  commit che contiene QUESTA riga, e quel commit lo fa Claudio.
+#  Il comando esatto sta in fondo al referto di consegna. Finche' il
+#  segnaposto e' qui, lo script MUORE al controllo qui sotto: e' il
+#  fallimento giusto -- rumoroso, e prima di scaricare qualunque cosa.
 # ---------------------------------------------------------------------
-$PIN = '89b393f34b6192d47912fa9265d8bea137da8a0d'
+$PIN = 'PIN_DA_RIMPIAZZARE_DOPO_IL_COMMIT'
 
-# Le impronte dei due file A QUEL PIN, misurate sul blob git l'11/09/2026.
-$SHA_ROUND = 'A063B0E25A0937BAF864F59A553B6C7A99D7B8A75CECE5994D4C7D60B784D8BA'
+# Le impronte dei due file A QUEL PIN, misurate sul blob git.
+#  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
+#    (prima era A063B0E2...B784D8BA, cioe' il file con la guardia vecchia
+#    che lasciava passare il piccolo 50503392, la radice di un disco e i
+#    nomi 8.3). Se un giorno tornasse a valere quella vecchia, vorrebbe
+#    dire che il pin punta indietro: e' proprio quello che l'impronta
+#    deve far scoprire.
+#  - SHA_WALK: INVARIATA, walkforward_generico.ps1 non e' stato toccato.
+$SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
 $SHA_WALK  = '36370C656EAD0747CF395CDD28EE978191FABFAF6C7FDC71994FB0C8041EE998'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
@@ -169,6 +185,26 @@ if(-not (Pulito $Prova)){     Muori ("-Prova non passa la lista bianca: '" + $Pr
 if(-not (Pulito $Etichetta)){ Muori ("-Etichetta non passa la lista bianca: '" + $Etichetta + "'. E' il suffisso dei CSV: senza, un round nuovo sovrascrive il precedente.") }
 if($Modello -lt 0 -or $Modello -gt 4){ Muori ("-Modello ammette 0..4. Ricevuto: " + $Modello + ". 4 = tick reali, la verita'; 1 = OHLC M1, solo screening.") }
 if($Deposito -le 0){ Muori ("-Deposito deve essere positivo. Ricevuto: " + $Deposito) }
+
+# ---------------------------------------------------------------------
+#  2-bis. IL PIN DEVE ESSERE UN COMMIT: 40 cifre esadecimali minuscole.
+#  Senza questo controllo un segnaposto -- o un pin tagliato a meta' --
+#  diventa solo una URL sbagliata, e il messaggio che si legge due passi
+#  dopo e' "scarico fallito: 404": manda a cercare il guasto dalla parte
+#  sbagliata (la rete) invece che dove sta davvero (il pin).
+#  STA QUI, dopo la lista bianca e prima di qualunque scaricamento, per
+#  la stessa ragione scritta piu' sotto per il pre-volo sul banco: i
+#  controlli si mettono in ordine di costo e di chiarezza, e un argomento
+#  sbagliato deve morire col SUO messaggio, non con quello del pin.
+# ---------------------------------------------------------------------
+if($PIN -notmatch '^[0-9a-f]{40}$'){
+  Muori ("IL PIN NON E' UN COMMIT: '" + $PIN + "'.`n" +
+         "    Qui ci va l'hash a 40 cifre del commit che contiene questa riga.`n" +
+         "    Se leggi ancora il segnaposto, il ri-pin dopo il commit NON e' stato fatto:`n" +
+         "    si sostituisce il segnaposto con l'uscita di 'git rev-parse HEAD' e si`n" +
+         "    ricontrolla che l'impronta di RIGA_ROUND_VPS.ps1 a quel pin sia quella`n" +
+         "    scritta in cima. Non si esegue niente finche' non torna.")
+}
 
 Write-Host "=== RIGA SOTTILE -- UN ROUND SUL SOLO TERMINALE DA BACKTEST ==="
 Write-Host ("    " + $MARC_MIO) -ForegroundColor DarkGray
