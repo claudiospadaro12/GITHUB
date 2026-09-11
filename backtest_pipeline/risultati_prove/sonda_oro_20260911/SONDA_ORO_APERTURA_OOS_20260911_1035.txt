@@ -1,0 +1,1251 @@
+==============================================================================
+MARCATORE_SONDA_ORO_APERTURA_M1_v3
+==============================================================================
+cartella dati : /tmp/claude-0/-home-user-GITHUB/c2d73886-9ef2-5105-8937-d770bc36d6df/scratchpad/oro/dati_oos  (53 file)
+formato letto : oanda
+fuso dichiarato del file: utc
+definizione di rottura (principale): T
+margine k = 0.10 x range del setup
+orizzonte osservato: 10 minuti M1
+riscaldamento medie 9/21: 45 barre M1
+seme del controllo casuale: 20260910
+COSTO PIENO giro completo: 0.2003 $/oz  (spread 0,1600 + commissione 0,0403)
+  MISURATO il 10/09/2026, report/ORO_1530_CANCELLO_COSTO_2026-09-10.md
+  pavimenti di casa: DURO 2.66 $ (13,3x)   DI LAVORO 8.01 $ (40x)
+FASE: OOS
+
+**********************************************************
+*  CASSAFORTE APERTA: questi sono gli anni 2016-2020.        *
+*  Vanno letti SOLO per CONFERMARE un'ipotesi gia'        *
+*  scritta sull'IS. Se qualcuno costruisce un'ipotesi     *
+*  NUOVA guardando questi numeri, la cassaforte e' bruciata*
+*  e non c'e' piu' nessun fuori campione.                 *
+**********************************************************
+
+QUESTO NON E' UN BACKTEST. Nessun PF, nessuna equity, nessun costo
+dedotto, nessuna uscita simulata, nessuna promozione. Il feed NON
+e' BCM. Manuale non vuol dire esente dai cancelli: lo spread lo
+paga anche la mano.
+
+IPOTESI PRINCIPALE (una): APERTURA_NY x rottura T x 9/21 INCLINATE,
+confrontata con CTRL_QUIETO. Varianti dichiarate: 6. Il resto e'
+descrizione, non prova.
+L'inclinazione e' la PRINCIPALE e l'incrocio una VARIANTE, non il
+contrario: su M1 a 4-5 minuti dall'apertura l'incrocio arriva tardi.
+
+file usati per il collaudo dell'orologio (5):
+  XAU_USD-2016-01.csv
+  XAU_USD-2016-07.csv
+  XAU_USD-2018-01.csv
+  XAU_USD-2018-07.csv
+  XAU_USD-2020-01.csv
+
+COLLAUDO DELL'OROLOGIO (si gira PRIMA di ogni altro numero)
+  metodo: il minuto del giorno con la |close-open| media piu' alta,
+  mesi invernali (12-1-2) contro mesi estivi (6-7-8). Qualunque
+  evento ancorato a un fuso con ora legale (le 8:30 di New York, il
+  fixing di Londra) si sposta di -60 min in UTC d'estate, e non si
+  sposta se il file e' scritto in ora locale americana.
+  INVERNO -- i 10 minuti piu' mossi (ora COME SCRITTA nel file):
+    13:30  |close-open| medio 0.7292  (n=64)
+    23:01  |close-open| medio 0.6115  (n=64)
+    13:20  |close-open| medio 0.5765  (n=64)
+    15:00  |close-open| medio 0.5474  (n=64)
+    23:00  |close-open| medio 0.5455  (n=64)
+    01:00  |close-open| medio 0.5292  (n=63)
+    13:32  |close-open| medio 0.4701  (n=64)
+    14:31  |close-open| medio 0.4454  (n=64)
+    13:00  |close-open| medio 0.4437  (n=64)
+    14:40  |close-open| medio 0.4176  (n=64)
+  ESTATE  -- i 10 minuti piu' mossi:
+    12:30  |close-open| medio 1.1205  (n=43)
+    01:00  |close-open| medio 0.6106  (n=43)
+    22:00  |close-open| medio 0.5728  (n=44)
+    14:00  |close-open| medio 0.5620  (n=43)
+    12:20  |close-open| medio 0.4672  (n=43)
+    12:31  |close-open| medio 0.4599  (n=43)
+    13:45  |close-open| medio 0.4310  (n=43)
+    13:15  |close-open| medio 0.4201  (n=43)
+    13:04  |close-open| medio 0.4094  (n=43)
+    13:00  |close-open| medio 0.4037  (n=43)
+  picco inverno 13:30   picco estate 12:30   spostamento -60 min
+  VERDETTO OROLOGIO: il file e' in UTC.
+  fuso DICHIARATO per questi file: utc
+  L'orologio misurato CONFERMA il fuso dichiarato: si prosegue.
+
+LETTURA: 1508566 barre M1 in 4 s (378 mila barre/s)
+  righe scartate 0, OHLC incoerenti 0, file di formato ignoto 0,
+  righe fuori ordine (giorno gia' chiuso) 0
+  giornate di calendario con dati: 1358, dal 2016-01-01 al 2020-05-14
+  giornate in cui 15:30 ROMA e 09:30 NEW YORK NON coincidono: 95 (7.0%)
+  (sono le ~3-4 settimane l'anno con i due calendari di ora legale
+   sfasati: NON vengono buttate, sono misurate a parte)
+
+GIORNATE PER GRUPPO (solo giorni feriali, fase OOS)
+  gruppo            complete  incomplete   descrizione
+  APERTURA_NY          1123          12   l'evento vero: 09:30 America/New_York
+  APERTURA_ROMA        1122          13   l'ora del collega: 15:30 Europe/Rome
+  CTRL_DOPO            1111          24   controllo: un'ora DOPO l'apertura (10:30 New York)
+  CTRL_QUIETO          1028         107   controllo: ora quieta (11:30 Europe/Rome)
+  CTRL_CASO            1047          88   controllo APPAIATO: minuto a sorte 07:00-19:00 UTC
+
+==============================================================================
+GRUPPO APERTURA_NY   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 1123
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=1123     4.19%  +/- 1.20 (2SE)
+    di cui tutte VERDI                       n=1123     2.49%  +/- 0.93 (2SE)
+    di cui tutte ROSSE                       n=1123     1.69%  +/- 0.77 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=1123     7.75%  +/- 1.60 (2SE)
+      serie massima = 2                      n=1123    45.06%  +/- 2.97 (2SE)
+      serie massima = 3                      n=1123    29.83%  +/- 2.73 (2SE)
+      serie massima = 4                      n=1123    13.18%  +/- 2.02 (2SE)
+      serie massima = 5                      n=1123     4.19%  +/- 1.20 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=1123     4.19%  +/- 1.20 (2SE)
+      1 cambi                                n=1123    25.47%  +/- 2.60 (2SE)
+      2 cambi                                n=1123    36.60%  +/- 2.87 (2SE)
+      3 cambi                                n=1123    26.09%  +/- 2.62 (2SE)
+      4 cambi                                n=1123     7.66%  +/- 1.59 (2SE)
+  giorni con almeno un DOJI                  n=1123     1.16%  +/- 0.64 (2SE)
+      doji totali: 14 su 5615 candele (0.25%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.93  mediana 1.28  Q3 1.87  P90 2.85
+      range dei 5 minuti (%):  Q1 0.0722  mediana 0.0978  Q3 0.1412
+      range della candela M5 di SETUP ($): mediana 1.40  Q3 1.93
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=1123     0.71%  +/- 0.50 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=1123     0.45%  +/- 0.40 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 6.25 volte  (mediana 1.28 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=1123    23.33%  +/- 2.52 (2SE)
+  rottura SHORT                              n=1123    24.13%  +/- 2.55 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=1123    52.45%  +/- 2.98 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=1123     0.09%  +/- 0.18 (2SE)
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=533      3.56%  +/- 1.61 (2SE)
+      k = 1                                  n=533     19.32%  +/- 3.42 (2SE)
+      k = 2                                  n=533     35.83%  +/- 4.15 (2SE)
+      k = 3                                  n=533     27.02%  +/- 3.85 (2SE)
+      k = 4                                  n=533     13.51%  +/- 2.96 (2SE)
+      k = 5                                  n=533      0.75%  +/- 0.75 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=533     14.26%  +/- 3.03 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=533     41.28%  +/- 4.27 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=533     54.78%  +/- 4.31 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.20  mediana 0.50  Q3 1.08  P90 1.78
+       MAE ($):  Q1 0.27  mediana 0.63  Q3 1.12  P80 1.31  P90 1.67
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 1.31 $ (P80 del MAE).
+       quello stop vale 6.5 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0376      MAE (%): mediana 0.0475
+       netto a fine 5 minuti ($): Q1 -0.70  mediana -0.11  Q3 0.45
+       rapporto mediana MFE / mediana MAE: 0.794
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1    533      0.25      0.28       -0.03       45.0%
+      j= 2    533      0.32      0.38       -0.03       46.7%
+      j= 3    533      0.39      0.47       -0.11       43.9%
+      j= 4    533      0.43      0.53       -0.09       44.5%
+      j= 5    533      0.50      0.63       -0.11       45.2%
+      j= 6    533      0.53      0.67       -0.12       42.6%
+      j= 7    533      0.57      0.73       -0.19       42.4%
+      j= 8    533      0.59      0.78       -0.13       44.5%
+      j= 9    532      0.65      0.83       -0.16       43.0%
+      j=10    532      0.70      0.88       -0.12       43.2%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  30.6%  (n=163)
+        picco al minuto  2:   9.2%  (n=49)
+        picco al minuto  3:   7.5%  (n=40)
+        picco al minuto  4:   6.4%  (n=34)
+        picco al minuto  5:   7.9%  (n=42)
+        picco al minuto  6:   4.7%  (n=25)
+        picco al minuto  7:   4.7%  (n=25)
+        picco al minuto  8:   6.0%  (n=32)
+        picco al minuto  9:   5.4%  (n=29)
+        picco al minuto 10:  17.6%  (n=94)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=457, SENZA n=76, riscaldamento assente 0)
+          la condizione si accende nel 85.7% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 76 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.50 $   SENZA 0.48 $   delta 0.02 $ (4.7%)
+          MAE mediano   CON 0.66 $   SENZA 0.50 $
+          netto 5 min   CON -0.12 $   SENZA -0.04 $
+            k >= 4 nella direzione            -6.39 pt  +/- 9.67 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=406, SENZA n=127, riscaldamento assente 0)
+          la condizione si accende nel 76.2% dei giorni con rottura
+          MFE mediano   CON 0.50 $   SENZA 0.48 $   delta 0.02 $ (4.8%)
+          MAE mediano   CON 0.67 $   SENZA 0.53 $
+          netto 5 min   CON -0.11 $   SENZA -0.09 $
+            k >= 4 nella direzione            +0.11 pt  +/- 7.10 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=157, SENZA n=376, riscaldamento assente 0)
+          la condizione si accende nel 29.5% dei giorni con rottura
+          MFE mediano   CON 0.45 $   SENZA 0.50 $   delta -0.05 $ (-9.7%)
+          MAE mediano   CON 0.65 $   SENZA 0.62 $
+          netto 5 min   CON -0.11 $   SENZA -0.12 $
+            k >= 4 nella direzione            -2.15 pt  +/- 6.47 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=53, SENZA n=480, riscaldamento assente 0)
+          la condizione si accende nel 9.9% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 53 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.41 $   SENZA 0.50 $   delta -0.09 $ (-18.3%)
+          MAE mediano   CON 0.66 $   SENZA 0.62 $
+          netto 5 min   CON 0.02 $   SENZA -0.12 $
+            k >= 4 nella direzione            -3.26 pt  +/- 9.28 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=340, SENZA n=193, riscaldamento assente 0)
+          la condizione si accende nel 63.8% dei giorni con rottura
+          MFE mediano   CON 0.50 $   SENZA 0.48 $   delta 0.02 $ (3.5%)
+          MAE mediano   CON 0.69 $   SENZA 0.51 $
+          netto 5 min   CON -0.12 $   SENZA -0.09 $
+            k >= 4 nella direzione            +0.42 pt  +/- 6.28 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016   257     2.72%      134   18.7%   55.2%      0.64     0.78
+      2017   256     6.25%      125   11.2%   56.8%      0.49     0.47
+      2018   258     2.71%      111    8.1%   57.7%      0.37     0.49
+      2019   258     6.20%      123   15.4%   51.2%      0.48     0.60
+      2020    94     1.06%       40   22.5%   50.0%      1.02     1.37  SOTTILE
+
+==============================================================================
+GRUPPO APERTURA_ROMA   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 1122
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=1122     4.81%  +/- 1.28 (2SE)
+    di cui tutte VERDI                       n=1122     2.58%  +/- 0.95 (2SE)
+    di cui tutte ROSSE                       n=1122     2.23%  +/- 0.88 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=1122     7.66%  +/- 1.59 (2SE)
+      serie massima = 2                      n=1122    45.01%  +/- 2.97 (2SE)
+      serie massima = 3                      n=1122    29.68%  +/- 2.73 (2SE)
+      serie massima = 4                      n=1122    12.83%  +/- 2.00 (2SE)
+      serie massima = 5                      n=1122     4.81%  +/- 1.28 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=1122     4.81%  +/- 1.28 (2SE)
+      1 cambi                                n=1122    25.04%  +/- 2.59 (2SE)
+      2 cambi                                n=1122    36.36%  +/- 2.87 (2SE)
+      3 cambi                                n=1122    26.20%  +/- 2.63 (2SE)
+      4 cambi                                n=1122     7.58%  +/- 1.58 (2SE)
+  giorni con almeno un DOJI                  n=1122     1.25%  +/- 0.66 (2SE)
+      doji totali: 15 su 5610 candele (0.27%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.92  mediana 1.27  Q3 1.87  P90 2.83
+      range dei 5 minuti (%):  Q1 0.0716  mediana 0.0975  Q3 0.1412
+      range della candela M5 di SETUP ($): mediana 1.39  Q3 1.90
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=1122     0.18%  +/- 0.25 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=1122     0.00%  +/- 0.00 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 6.31 volte  (mediana 1.27 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=1122    23.71%  +/- 2.54 (2SE)
+  rottura SHORT                              n=1122    24.06%  +/- 2.55 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=1122    52.14%  +/- 2.98 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=1122     0.09%  +/- 0.18 (2SE)
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=536      4.10%  +/- 1.71 (2SE)
+      k = 1                                  n=536     19.22%  +/- 3.40 (2SE)
+      k = 2                                  n=536     35.45%  +/- 4.13 (2SE)
+      k = 3                                  n=536     27.05%  +/- 3.84 (2SE)
+      k = 4                                  n=536     13.43%  +/- 2.95 (2SE)
+      k = 5                                  n=536      0.75%  +/- 0.74 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=536     14.18%  +/- 3.01 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=536     41.23%  +/- 4.25 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=536     54.48%  +/- 4.30 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.20  mediana 0.51  Q3 1.07  P90 1.78
+       MAE ($):  Q1 0.26  mediana 0.61  Q3 1.10  P80 1.29  P90 1.67
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 1.29 $ (P80 del MAE).
+       quello stop vale 6.5 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0393      MAE (%): mediana 0.0458
+       netto a fine 5 minuti ($): Q1 -0.68  mediana -0.12  Q3 0.46
+       rapporto mediana MFE / mediana MAE: 0.836
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1    536      0.24      0.27       -0.03       45.0%
+      j= 2    536      0.31      0.37       -0.03       47.0%
+      j= 3    536      0.39      0.44       -0.10       44.8%
+      j= 4    536      0.44      0.51       -0.07       45.1%
+      j= 5    536      0.51      0.61       -0.12       45.5%
+      j= 6    536      0.54      0.67       -0.12       42.4%
+      j= 7    536      0.59      0.73       -0.19       42.9%
+      j= 8    536      0.60      0.77       -0.12       44.4%
+      j= 9    535      0.67      0.80       -0.15       43.6%
+      j=10    535      0.72      0.85       -0.11       43.7%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  30.6%  (n=164)
+        picco al minuto  2:   8.6%  (n=46)
+        picco al minuto  3:   7.8%  (n=42)
+        picco al minuto  4:   6.2%  (n=33)
+        picco al minuto  5:   7.6%  (n=41)
+        picco al minuto  6:   4.9%  (n=26)
+        picco al minuto  7:   4.5%  (n=24)
+        picco al minuto  8:   6.7%  (n=36)
+        picco al minuto  9:   5.4%  (n=29)
+        picco al minuto 10:  17.7%  (n=95)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=454, SENZA n=82, riscaldamento assente 0)
+          la condizione si accende nel 84.7% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 82 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.50 $   SENZA 0.52 $   delta -0.02 $ (-3.9%)
+          MAE mediano   CON 0.64 $   SENZA 0.48 $
+          netto 5 min   CON -0.12 $   SENZA -0.04 $
+            k >= 4 nella direzione            -6.30 pt  +/- 9.31 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=406, SENZA n=130, riscaldamento assente 0)
+          la condizione si accende nel 75.7% dei giorni con rottura
+          MFE mediano   CON 0.50 $   SENZA 0.51 $   delta -0.01 $ (-1.1%)
+          MAE mediano   CON 0.66 $   SENZA 0.51 $
+          netto 5 min   CON -0.12 $   SENZA -0.09 $
+            k >= 4 nella direzione            -0.58 pt  +/- 7.09 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=158, SENZA n=378, riscaldamento assente 0)
+          la condizione si accende nel 29.5% dei giorni con rottura
+          MFE mediano   CON 0.46 $   SENZA 0.51 $   delta -0.05 $ (-10.4%)
+          MAE mediano   CON 0.64 $   SENZA 0.60 $
+          netto 5 min   CON -0.12 $   SENZA -0.12 $
+            k >= 4 nella direzione            -2.16 pt  +/- 6.43 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=52, SENZA n=484, riscaldamento assente 0)
+          la condizione si accende nel 9.7% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 52 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.40 $   SENZA 0.51 $   delta -0.11 $ (-20.9%)
+          MAE mediano   CON 0.58 $   SENZA 0.61 $
+          netto 5 min   CON -0.08 $   SENZA -0.12 $
+            k >= 4 nella direzione            -5.05 pt  +/- 8.79 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=339, SENZA n=197, riscaldamento assente 0)
+          la condizione si accende nel 63.2% dei giorni con rottura
+          MFE mediano   CON 0.51 $   SENZA 0.50 $   delta 0.01 $ (1.6%)
+          MAE mediano   CON 0.67 $   SENZA 0.49 $
+          netto 5 min   CON -0.15 $   SENZA -0.09 $
+            k >= 4 nella direzione            +0.75 pt  +/- 6.21 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016   257     3.50%      137   16.8%   55.5%      0.67     0.77
+      2017   255     6.67%      126   11.1%   57.1%      0.50     0.43
+      2018   258     3.10%      111    9.9%   57.7%      0.36     0.51
+      2019   258     6.59%      121   16.5%   49.6%      0.51     0.55
+      2020    94     3.19%       41   19.5%   48.8%      1.25     1.37  SOTTILE
+
+==============================================================================
+GRUPPO CTRL_DOPO   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 1111
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=1111     4.77%  +/- 1.28 (2SE)
+    di cui tutte VERDI                       n=1111     1.62%  +/- 0.76 (2SE)
+    di cui tutte ROSSE                       n=1111     3.15%  +/- 1.05 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=1111     7.74%  +/- 1.60 (2SE)
+      serie massima = 2                      n=1111    45.09%  +/- 2.99 (2SE)
+      serie massima = 3                      n=1111    30.15%  +/- 2.75 (2SE)
+      serie massima = 4                      n=1111    12.24%  +/- 1.97 (2SE)
+      serie massima = 5                      n=1111     4.77%  +/- 1.28 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=1111     4.77%  +/- 1.28 (2SE)
+      1 cambi                                n=1111    23.40%  +/- 2.54 (2SE)
+      2 cambi                                n=1111    37.53%  +/- 2.91 (2SE)
+      3 cambi                                n=1111    26.55%  +/- 2.65 (2SE)
+      4 cambi                                n=1111     7.74%  +/- 1.60 (2SE)
+  giorni con almeno un DOJI                  n=1111     0.90%  +/- 0.57 (2SE)
+      doji totali: 10 su 5555 candele (0.18%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.75  mediana 1.02  Q3 1.52  P90 2.27
+      range dei 5 minuti (%):  Q1 0.0580  mediana 0.0782  Q3 0.1171
+      range della candela M5 di SETUP ($): mediana 1.12  Q3 1.63
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=1111     0.27%  +/- 0.31 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=1111     0.36%  +/- 0.36 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 7.84 volte  (mediana 1.02 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=1111    22.14%  +/- 2.49 (2SE)
+  rottura SHORT                              n=1111    22.41%  +/- 2.50 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=1111    55.45%  +/- 2.98 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=1111     0.00%  +/- 0.00 (2SE)
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=495      3.03%  +/- 1.54 (2SE)
+      k = 1                                  n=495     20.61%  +/- 3.64 (2SE)
+      k = 2                                  n=495     30.51%  +/- 4.14 (2SE)
+      k = 3                                  n=495     28.48%  +/- 4.06 (2SE)
+      k = 4                                  n=495     14.95%  +/- 3.21 (2SE)
+      k = 5                                  n=495      2.42%  +/- 1.38 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=495     17.37%  +/- 3.41 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=495     45.86%  +/- 4.48 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=495     56.57%  +/- 4.46 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.16  mediana 0.41  Q3 0.83  P90 1.47
+       MAE ($):  Q1 0.22  mediana 0.48  Q3 0.85  P80 0.98  P90 1.40
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 0.98 $ (P80 del MAE).
+       quello stop vale 4.9 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0319      MAE (%): mediana 0.0380
+       netto a fine 5 minuti ($): Q1 -0.52  mediana -0.10  Q3 0.35
+       rapporto mediana MFE / mediana MAE: 0.843
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1    495      0.18      0.21       -0.04       44.0%
+      j= 2    495      0.25      0.31       -0.06       44.0%
+      j= 3    495      0.32      0.38       -0.05       45.5%
+      j= 4    495      0.36      0.44       -0.11       44.6%
+      j= 5    495      0.41      0.48       -0.10       43.4%
+      j= 6    495      0.44      0.53       -0.10       43.4%
+      j= 7    495      0.47      0.60       -0.15       40.6%
+      j= 8    495      0.51      0.65       -0.18       41.6%
+      j= 9    495      0.52      0.74       -0.14       43.2%
+      j=10    495      0.55      0.75       -0.19       42.2%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  25.1%  (n=124)
+        picco al minuto  2:  10.7%  (n=53)
+        picco al minuto  3:   8.9%  (n=44)
+        picco al minuto  4:   7.5%  (n=37)
+        picco al minuto  5:   6.5%  (n=32)
+        picco al minuto  6:   7.1%  (n=35)
+        picco al minuto  7:   4.4%  (n=22)
+        picco al minuto  8:   7.9%  (n=39)
+        picco al minuto  9:   5.5%  (n=27)
+        picco al minuto 10:  16.6%  (n=82)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=404, SENZA n=91, riscaldamento assente 0)
+          la condizione si accende nel 81.6% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 91 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.37 $   SENZA 0.53 $   delta -0.16 $ (-29.7%)
+          MAE mediano   CON 0.51 $   SENZA 0.32 $
+          netto 5 min   CON -0.13 $   SENZA -0.00 $
+            k >= 4 nella direzione            -6.99 pt  +/- 9.56 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=353, SENZA n=142, riscaldamento assente 0)
+          la condizione si accende nel 71.3% dei giorni con rottura
+          MFE mediano   CON 0.39 $   SENZA 0.42 $   delta -0.03 $ (-6.6%)
+          MAE mediano   CON 0.51 $   SENZA 0.40 $
+          netto 5 min   CON -0.14 $   SENZA -0.01 $
+            k >= 4 nella direzione            -6.25 pt  +/- 7.94 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=123, SENZA n=372, riscaldamento assente 0)
+          la condizione si accende nel 24.8% dei giorni con rottura
+          MFE mediano   CON 0.40 $   SENZA 0.41 $   delta -0.01 $ (-3.5%)
+          MAE mediano   CON 0.52 $   SENZA 0.46 $
+          netto 5 min   CON -0.14 $   SENZA -0.08 $
+            k >= 4 nella direzione            -3.65 pt  +/- 7.53 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=37, SENZA n=458, riscaldamento assente 0)
+          la condizione si accende nel 7.5% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 37 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.34 $   SENZA 0.42 $   delta -0.08 $ (-18.4%)
+          MAE mediano   CON 0.55 $   SENZA 0.48 $
+          netto 5 min   CON -0.25 $   SENZA -0.09 $
+            k >= 4 nella direzione            -7.09 pt  +/- 10.82 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=289, SENZA n=206, riscaldamento assente 0)
+          la condizione si accende nel 58.4% dei giorni con rottura
+          MFE mediano   CON 0.39 $   SENZA 0.42 $   delta -0.03 $ (-6.1%)
+          MAE mediano   CON 0.54 $   SENZA 0.39 $
+          netto 5 min   CON -0.13 $   SENZA -0.05 $
+            k >= 4 nella direzione            -2.67 pt  +/- 6.97 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016   256     5.86%      115   14.8%   60.0%      0.55     0.60
+      2017   252     5.16%      111   14.4%   64.9%      0.35     0.47
+      2018   255     3.53%      114   21.9%   48.2%      0.39     0.34
+      2019   255     4.31%      118   16.1%   55.9%      0.32     0.46
+      2020    93     5.38%       37   24.3%   48.6%      0.93     0.84  SOTTILE
+
+==============================================================================
+GRUPPO CTRL_QUIETO   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 1028
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=1028     6.13%  +/- 1.50 (2SE)
+    di cui tutte VERDI                       n=1028     2.53%  +/- 0.98 (2SE)
+    di cui tutte ROSSE                       n=1028     3.60%  +/- 1.16 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=1028     8.37%  +/- 1.73 (2SE)
+      serie massima = 2                      n=1028    47.28%  +/- 3.11 (2SE)
+      serie massima = 3                      n=1028    27.14%  +/- 2.77 (2SE)
+      serie massima = 4                      n=1028    11.09%  +/- 1.96 (2SE)
+      serie massima = 5                      n=1028     6.13%  +/- 1.50 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=1028     6.13%  +/- 1.50 (2SE)
+      1 cambi                                n=1028    21.11%  +/- 2.55 (2SE)
+      2 cambi                                n=1028    35.12%  +/- 2.98 (2SE)
+      3 cambi                                n=1028    29.38%  +/- 2.84 (2SE)
+      4 cambi                                n=1028     8.27%  +/- 1.72 (2SE)
+  giorni con almeno un DOJI                  n=1028     7.10%  +/- 1.60 (2SE)
+      doji totali: 82 su 5140 candele (1.60%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.42  mediana 0.59  Q3 0.83  P90 1.22
+      range dei 5 minuti (%):  Q1 0.0326  mediana 0.0445  Q3 0.0631
+      range della candela M5 di SETUP ($): mediana 0.76  Q3 1.15
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=1028     0.19%  +/- 0.27 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=1028     0.00%  +/- 0.00 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 13.70 volte  (mediana 0.59 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=1028    19.16%  +/- 2.46 (2SE)
+  rottura SHORT                              n=1028    17.12%  +/- 2.35 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=1028    63.52%  +/- 3.00 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=1028     0.19%  +/- 0.27 (2SE)
+      RILIEVO: 373 giorni con rottura, sotto il pavimento 400.
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=373      4.29%  +/- 2.10 (2SE)
+      k = 1                                  n=373     14.21%  +/- 3.62 (2SE)
+      k = 2                                  n=373     35.39%  +/- 4.95 (2SE)
+      k = 3                                  n=373     30.29%  +/- 4.76 (2SE)
+      k = 4                                  n=373     13.40%  +/- 3.53 (2SE)
+      k = 5                                  n=373      2.41%  +/- 1.59 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=373     15.82%  +/- 3.78 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=373     46.11%  +/- 5.16 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=373     56.84%  +/- 5.13 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.10  mediana 0.23  Q3 0.45  P90 0.78
+       MAE ($):  Q1 0.14  mediana 0.28  Q3 0.48  P80 0.54  P90 0.80
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 0.54 $ (P80 del MAE).
+       quello stop vale 2.7 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0175      MAE (%): mediana 0.0214
+       netto a fine 5 minuti ($): Q1 -0.27  mediana -0.07  Q3 0.17
+       rapporto mediana MFE / mediana MAE: 0.839
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1    373      0.11      0.13       -0.02       44.2%
+      j= 2    373      0.14      0.19       -0.00       48.5%
+      j= 3    373      0.19      0.22       -0.01       48.5%
+      j= 4    373      0.20      0.25       -0.06       43.7%
+      j= 5    373      0.23      0.28       -0.07       43.2%
+      j= 6    364      0.26      0.30       -0.08       41.8%
+      j= 7    361      0.30      0.33       -0.08       42.1%
+      j= 8    355      0.33      0.35       -0.06       44.8%
+      j= 9    347      0.34      0.36       -0.01       48.4%
+      j=10    341      0.38      0.39       -0.03       46.3%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  24.1%  (n=90)
+        picco al minuto  2:   9.1%  (n=34)
+        picco al minuto  3:  12.1%  (n=45)
+        picco al minuto  4:   7.0%  (n=26)
+        picco al minuto  5:   6.7%  (n=25)
+        picco al minuto  6:   5.1%  (n=19)
+        picco al minuto  7:   5.4%  (n=20)
+        picco al minuto  8:   7.2%  (n=27)
+        picco al minuto  9:   8.0%  (n=30)
+        picco al minuto 10:  15.3%  (n=57)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=294, SENZA n=79, riscaldamento assente 0)
+          la condizione si accende nel 78.8% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 79 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.24 $   SENZA 0.20 $   delta 0.04 $ (20.0%)
+          MAE mediano   CON 0.28 $   SENZA 0.28 $
+          netto 5 min   CON -0.07 $   SENZA -0.06 $
+            k >= 4 nella direzione            +0.80 pt  +/- 9.14 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=256, SENZA n=117, riscaldamento assente 0)
+          la condizione si accende nel 68.6% dei giorni con rottura
+          MFE mediano   CON 0.27 $   SENZA 0.21 $   delta 0.06 $ (26.8%)
+          MAE mediano   CON 0.29 $   SENZA 0.27 $
+          netto 5 min   CON -0.07 $   SENZA -0.04 $
+            k >= 4 nella direzione            +5.61 pt  +/- 7.66 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=91, SENZA n=282, riscaldamento assente 0)
+          la condizione si accende nel 24.4% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 91 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.29 $   SENZA 0.22 $   delta 0.07 $ (33.3%)
+          MAE mediano   CON 0.28 $   SENZA 0.28 $
+          netto 5 min   CON -0.04 $   SENZA -0.07 $
+            k >= 4 nella direzione            +8.15 pt  +/- 9.61 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=29, SENZA n=344, riscaldamento assente 0)
+          la condizione si accende nel 7.8% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 29 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.24 $   SENZA 0.23 $   delta 0.01 $ (5.2%)
+          MAE mediano   CON 0.30 $   SENZA 0.28 $
+          netto 5 min   CON -0.14 $   SENZA -0.06 $
+            k >= 4 nella direzione            +1.54 pt  +/- 14.57 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=205, SENZA n=168, riscaldamento assente 0)
+          la condizione si accende nel 55.0% dei giorni con rottura
+          MFE mediano   CON 0.28 $   SENZA 0.22 $   delta 0.06 $ (27.6%)
+          MAE mediano   CON 0.28 $   SENZA 0.28 $
+          netto 5 min   CON -0.07 $   SENZA -0.06 $
+            k >= 4 nella direzione            +4.95 pt  +/- 7.48 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016   245     4.08%       87   12.6%   64.4%      0.30     0.32
+      2017   231     9.09%       82   17.1%   48.8%      0.25     0.23
+      2018   242     6.61%       88   20.5%   58.0%      0.20     0.30
+      2019   221     4.07%       80   12.5%   56.2%      0.17     0.22
+      2020    89     7.87%       36   16.7%   55.6%      0.32     0.65  SOTTILE
+
+==============================================================================
+GRUPPO CTRL_CASO   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 1047
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=1047     5.92%  +/- 1.46 (2SE)
+    di cui tutte VERDI                       n=1047     3.06%  +/- 1.06 (2SE)
+    di cui tutte ROSSE                       n=1047     2.87%  +/- 1.03 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=1047     7.45%  +/- 1.62 (2SE)
+      serie massima = 2                      n=1047    43.94%  +/- 3.07 (2SE)
+      serie massima = 3                      n=1047    31.71%  +/- 2.88 (2SE)
+      serie massima = 4                      n=1047    10.98%  +/- 1.93 (2SE)
+      serie massima = 5                      n=1047     5.92%  +/- 1.46 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=1047     5.92%  +/- 1.46 (2SE)
+      1 cambi                                n=1047    24.36%  +/- 2.65 (2SE)
+      2 cambi                                n=1047    35.91%  +/- 2.97 (2SE)
+      3 cambi                                n=1047    26.36%  +/- 2.72 (2SE)
+      4 cambi                                n=1047     7.45%  +/- 1.62 (2SE)
+  giorni con almeno un DOJI                  n=1047     3.15%  +/- 1.08 (2SE)
+      doji totali: 35 su 5235 candele (0.67%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.57  mediana 0.81  Q3 1.20  P90 1.94
+      range dei 5 minuti (%):  Q1 0.0435  mediana 0.0624  Q3 0.0913
+      range della candela M5 di SETUP ($): mediana 0.81  Q3 1.17
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=1047     0.10%  +/- 0.19 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=1047     0.10%  +/- 0.19 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 9.89 volte  (mediana 0.81 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=1047    23.21%  +/- 2.61 (2SE)
+  rottura SHORT                              n=1047    20.82%  +/- 2.51 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=1047    55.97%  +/- 3.07 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=1047     0.00%  +/- 0.00 (2SE)
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=461      5.86%  +/- 2.19 (2SE)
+      k = 1                                  n=461     16.05%  +/- 3.42 (2SE)
+      k = 2                                  n=461     37.53%  +/- 4.51 (2SE)
+      k = 3                                  n=461     27.11%  +/- 4.14 (2SE)
+      k = 4                                  n=461     11.06%  +/- 2.92 (2SE)
+      k = 5                                  n=461      2.39%  +/- 1.42 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=461     13.45%  +/- 3.18 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=461     40.56%  +/- 4.57 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=461     56.83%  +/- 4.61 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.13  mediana 0.31  Q3 0.65  P90 1.14
+       MAE ($):  Q1 0.19  mediana 0.37  Q3 0.63  P80 0.73  P90 1.14
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 0.73 $ (P80 del MAE).
+       quello stop vale 3.7 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0243      MAE (%): mediana 0.0286
+       netto a fine 5 minuti ($): Q1 -0.40  mediana -0.08  Q3 0.31
+       rapporto mediana MFE / mediana MAE: 0.831
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1    461      0.13      0.17       -0.03       44.0%
+      j= 2    461      0.18      0.22       -0.00       49.5%
+      j= 3    461      0.25      0.28       -0.05       44.7%
+      j= 4    461      0.27      0.33       -0.08       43.2%
+      j= 5    461      0.31      0.37       -0.08       43.2%
+      j= 6    461      0.34      0.44       -0.05       46.6%
+      j= 7    457      0.38      0.45       -0.09       44.0%
+      j= 8    453      0.39      0.49       -0.12       43.0%
+      j= 9    453      0.42      0.51       -0.11       42.6%
+      j=10    451      0.46      0.53       -0.08       45.2%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  25.6%  (n=118)
+        picco al minuto  2:  12.6%  (n=58)
+        picco al minuto  3:   8.7%  (n=40)
+        picco al minuto  4:   5.0%  (n=23)
+        picco al minuto  5:   4.8%  (n=22)
+        picco al minuto  6:   5.9%  (n=27)
+        picco al minuto  7:   5.9%  (n=27)
+        picco al minuto  8:   8.7%  (n=40)
+        picco al minuto  9:   7.6%  (n=35)
+        picco al minuto 10:  15.4%  (n=71)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=345, SENZA n=116, riscaldamento assente 0)
+          la condizione si accende nel 74.8% dei giorni con rottura
+          MFE mediano   CON 0.32 $   SENZA 0.28 $   delta 0.04 $ (12.8%)
+          MAE mediano   CON 0.39 $   SENZA 0.35 $
+          netto 5 min   CON -0.06 $   SENZA -0.12 $
+            k >= 4 nella direzione            -5.07 pt  +/- 7.85 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=294, SENZA n=167, riscaldamento assente 0)
+          la condizione si accende nel 63.8% dei giorni con rottura
+          MFE mediano   CON 0.31 $   SENZA 0.31 $   delta -0.00 $ (-1.4%)
+          MAE mediano   CON 0.40 $   SENZA 0.35 $
+          netto 5 min   CON -0.08 $   SENZA -0.07 $
+            k >= 4 nella direzione            -7.08 pt  +/- 6.96 (2SE)   FUORI DAL RUMORE
+      --- E-FRESCO  (CON n=90, SENZA n=371, riscaldamento assente 0)
+          la condizione si accende nel 19.5% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 90 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.34 $   SENZA 0.30 $   delta 0.03 $ (11.3%)
+          MAE mediano   CON 0.34 $   SENZA 0.39 $
+          netto 5 min   CON -0.03 $   SENZA -0.09 $
+            k >= 4 nella direzione            -0.14 pt  +/- 8.00 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=24, SENZA n=437, riscaldamento assente 0)
+          la condizione si accende nel 5.2% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 24 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.36 $   SENZA 0.31 $   delta 0.05 $ (17.5%)
+          MAE mediano   CON 0.35 $   SENZA 0.38 $
+          netto 5 min   CON -0.08 $   SENZA -0.08 $
+            k >= 4 nella direzione            -1.00 pt  +/- 13.89 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=251, SENZA n=210, riscaldamento assente 0)
+          la condizione si accende nel 54.4% dei giorni con rottura
+          MFE mediano   CON 0.31 $   SENZA 0.30 $   delta 0.01 $ (2.3%)
+          MAE mediano   CON 0.40 $   SENZA 0.36 $
+          netto 5 min   CON -0.08 $   SENZA -0.08 $
+            k >= 4 nella direzione            -5.91 pt  +/- 6.46 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016   246     4.88%      111   13.5%   50.5%      0.39     0.39
+      2017   237     8.02%      108   11.1%   61.1%      0.27     0.36
+      2018   245     5.71%      104   11.5%   54.8%      0.26     0.39
+      2019   228     4.39%      107   15.9%   58.9%      0.26     0.30
+      2020    91     7.69%       31   19.4%   64.5%      0.58     0.60  SOTTILE
+
+==============================================================================
+GRUPPO NY_SOLO_GIORNI_DISCORDI   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 79
+  RILIEVO: sotto il pavimento dichiarato di 400 giornate ->
+  questo gruppo si legge come SOSPESO, non come misurato.
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=79       1.27%  +/- 2.52 (2SE)
+    di cui tutte VERDI                       n=79       1.27%  +/- 2.52 (2SE)
+    di cui tutte ROSSE                       n=79       0.00%  +/- 0.00 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=79       3.80%  +/- 4.30 (2SE)
+      serie massima = 2                      n=79      48.10%  +/- 11.24 (2SE)
+      serie massima = 3                      n=79      32.91%  +/- 10.57 (2SE)
+      serie massima = 4                      n=79      13.92%  +/- 7.79 (2SE)
+      serie massima = 5                      n=79       1.27%  +/- 2.52 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=79       1.27%  +/- 2.52 (2SE)
+      1 cambi                                n=79      29.11%  +/- 10.22 (2SE)
+      2 cambi                                n=79      34.18%  +/- 10.67 (2SE)
+      3 cambi                                n=79      31.65%  +/- 10.47 (2SE)
+      4 cambi                                n=79       3.80%  +/- 4.30 (2SE)
+  giorni con almeno un DOJI                  n=79       0.00%  +/- 0.00 (2SE)
+      doji totali: 0 su 395 candele (0.00%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.91  mediana 1.38  Q3 2.26  P90 5.98
+      range dei 5 minuti (%):  Q1 0.0695  mediana 0.1068  Q3 0.1462
+      range della candela M5 di SETUP ($): mediana 1.43  Q3 2.55
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=79       8.86%  +/- 6.39 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=79       6.33%  +/- 5.48 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 5.83 volte  (mediana 1.38 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=79      20.25%  +/- 9.04 (2SE)
+  rottura SHORT                              n=79      30.38%  +/- 10.35 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=79      49.37%  +/- 11.25 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=79       0.00%  +/- 0.00 (2SE)
+      RILIEVO: 40 giorni con rottura, sotto il pavimento 400.
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=40       0.00%  +/- 0.00 (2SE)
+      k = 1                                  n=40      20.00%  +/- 12.65 (2SE)
+      k = 2                                  n=40      32.50%  +/- 14.81 (2SE)
+      k = 3                                  n=40      27.50%  +/- 14.12 (2SE)
+      k = 4                                  n=40      20.00%  +/- 12.65 (2SE)
+      k = 5                                  n=40       0.00%  +/- 0.00 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=40      20.00%  +/- 12.65 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=40      47.50%  +/- 15.79 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=40      55.00%  +/- 15.73 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.16  mediana 0.42  Q3 1.18  P90 2.43
+       MAE ($):  Q1 0.41  mediana 0.83  Q3 1.37  P80 1.38  P90 1.78
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 1.38 $ (P80 del MAE).
+       quello stop vale 6.9 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0317      MAE (%): mediana 0.0631
+       netto a fine 5 minuti ($): Q1 -0.80  mediana -0.08  Q3 0.38
+       rapporto mediana MFE / mediana MAE: 0.509
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1     40      0.25      0.28       -0.07       45.0%
+      j= 2     40      0.30      0.52       -0.10       42.5%
+      j= 3     40      0.34      0.62       -0.15       45.0%
+      j= 4     40      0.37      0.64       -0.11       40.0%
+      j= 5     40      0.42      0.83       -0.08       45.0%
+      j= 6     40      0.44      0.93       -0.16       45.0%
+      j= 7     40      0.49      0.95       -0.24       40.0%
+      j= 8     40      0.51      1.05       -0.42       42.5%
+      j= 9     40      0.51      1.13       -0.26       37.5%
+      j=10     40      0.59      1.37       -0.28       40.0%
+      minuto in cui il MFE tocca il massimo: mediana 4.0,
+        picco al minuto  1:  27.5%  (n=11)
+        picco al minuto  2:  10.0%  (n=4)
+        picco al minuto  3:   7.5%  (n=3)
+        picco al minuto  4:   7.5%  (n=3)
+        picco al minuto  5:  12.5%  (n=5)
+        picco al minuto  6:   2.5%  (n=1)
+        picco al minuto  7:   5.0%  (n=2)
+        picco al minuto  8:   5.0%  (n=2)
+        picco al minuto  9:   5.0%  (n=2)
+        picco al minuto 10:  17.5%  (n=7)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=35, SENZA n=5, riscaldamento assente 0)
+          la condizione si accende nel 87.5% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 5 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.45 $   SENZA 0.17 $   delta 0.28 $ (170.7%)
+          MAE mediano   CON 0.84 $   SENZA 0.82 $
+          netto 5 min   CON -0.07 $   SENZA -0.09 $
+            k >= 4 nella direzione            +0.00 pt  +/- 38.25 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=30, SENZA n=10, riscaldamento assente 0)
+          la condizione si accende nel 75.0% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 10 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.47 $   SENZA 0.25 $   delta 0.22 $ (88.4%)
+          MAE mediano   CON 0.83 $   SENZA 0.87 $
+          netto 5 min   CON 0.01 $   SENZA -0.41 $
+            k >= 4 nella direzione            +0.00 pt  +/- 29.21 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=12, SENZA n=28, riscaldamento assente 0)
+          la condizione si accende nel 30.0% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 12 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.48 $   SENZA 0.37 $   delta 0.11 $ (28.5%)
+          MAE mediano   CON 0.65 $   SENZA 0.88 $
+          netto 5 min   CON 0.01 $   SENZA -0.14 $
+            k >= 4 nella direzione            -4.76 pt  +/- 26.52 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=5, SENZA n=35, riscaldamento assente 0)
+          la condizione si accende nel 12.5% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 5 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.94 $   SENZA 0.34 $   delta 0.60 $ (174.6%)
+          MAE mediano   CON 0.32 $   SENZA 0.84 $
+          netto 5 min   CON 0.28 $   SENZA -0.19 $
+            k >= 4 nella direzione            +0.00 pt  +/- 38.25 (2SE)   DENTRO IL RUMORE
+      --- S-INCLINATE  (CON n=28, SENZA n=12, riscaldamento assente 0)
+          la condizione si accende nel 70.0% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 12 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.44 $   SENZA 0.34 $   delta 0.11 $ (31.5%)
+          MAE mediano   CON 0.98 $   SENZA 0.53 $
+          netto 5 min   CON -0.01 $   SENZA -0.27 $
+            k >= 4 nella direzione            +4.76 pt  +/- 26.52 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016    14     0.00%        6   50.0%   33.3%      0.42     1.06  SOTTILE
+      2017    15     0.00%        8   12.5%   50.0%      0.31     0.54  SOTTILE
+      2018    15     0.00%        8    0.0%   62.5%      0.41     0.46  SOTTILE
+      2019    20     5.00%       10   10.0%   60.0%      0.25     0.62  SOTTILE
+      2020    15     0.00%        8   37.5%   62.5%      1.32     1.71  SOTTILE
+
+==============================================================================
+GRUPPO ROMA_SOLO_GIORNI_DISCORDI   (definizione di rottura: T)
+==============================================================================
+  giornate complete (11 barre M1 del nucleo tutte presenti): 78
+  RILIEVO: sotto il pavimento dichiarato di 400 giornate ->
+  questo gruppo si legge come SOSPESO, non come misurato.
+
+  (a) COLORE DELLE 5 CANDELE -- su TUTTI i giorni, senza
+      condizionare alla rottura (la domanda letterale di Claudio)
+  5 candele su 5 dello STESSO colore         n=78      10.26%  +/- 6.87 (2SE)
+    di cui tutte VERDI                       n=78       2.56%  +/- 3.58 (2SE)
+    di cui tutte ROSSE                       n=78       7.69%  +/- 6.03 (2SE)
+      base di riferimento a testa e croce: 6,25%
+      serie piu' lunga di colore uguale (1-5):
+      serie massima = 1                      n=78       2.56%  +/- 3.58 (2SE)
+      serie massima = 2                      n=78      47.44%  +/- 11.31 (2SE)
+      serie massima = 3                      n=78      30.77%  +/- 10.45 (2SE)
+      serie massima = 4                      n=78       8.97%  +/- 6.47 (2SE)
+      serie massima = 5                      n=78      10.26%  +/- 6.87 (2SE)
+      cambi di colore fra le 5 candele (0-4):
+      0 cambi                                n=78      10.26%  +/- 6.87 (2SE)
+      1 cambi                                n=78      23.08%  +/- 9.54 (2SE)
+      2 cambi                                n=78      30.77%  +/- 10.45 (2SE)
+      3 cambi                                n=78      33.33%  +/- 10.68 (2SE)
+      4 cambi                                n=78       2.56%  +/- 3.58 (2SE)
+  giorni con almeno un DOJI                  n=78       1.28%  +/- 2.55 (2SE)
+      doji totali: 1 su 390 candele (0.26%)
+
+  (c1) AMPIEZZA DEI 5 MINUTI -- su TUTTI i giorni
+      range dei 5 minuti ($):  Q1 0.82  mediana 1.22  Q3 2.14  P90 4.05
+      range dei 5 minuti (%):  Q1 0.0627  mediana 0.0917  Q3 0.1552
+      range della candela M5 di SETUP ($): mediana 1.21  Q3 1.71
+      IL METRO DEL COSTO -- costo pieno 0.2003 $/oz MISURATO
+      (spread 0,1600 + commissione 0,0403; sull'oro la
+       commissione ESISTE, sugli indici e' zero)
+        pavimento DURO      stop >= 13.3 x costo =  2.66 $
+        pavimento DI LAVORO stop >= 40.0 x costo =  8.01 $
+  candela M5 di setup >= pavimento DI LAVORO n=78       1.28%  +/- 2.55 (2SE)
+  range dei 5 minuti >= pavimento DI LAVORO  n=78       0.00%  +/- 0.00 (2SE)
+      QUANTE VOLTE PIU' GRANDE dovrebbe essere il movimento
+      mediano dei 5 minuti per arrivare al pavimento DI
+      LAVORO: 6.59 volte  (mediana 1.22 $ contro 8.01 $)
+      E' il numero che dice a quale TF quel movimento
+      diventa pagabile: NON e' un verdetto di strategia,
+      e' una divisione.
+
+  (b) DIREZIONE -- solo i giorni con una rottura al minuto A+5
+  rottura LONG                               n=78      25.64%  +/- 9.89 (2SE)
+  rottura SHORT                              n=78      29.49%  +/- 10.33 (2SE)
+  NESSUNA rottura (l'operazione non esiste)  n=78      44.87%  +/- 11.26 (2SE)
+  AMBIGUA irrisolta (esclusa)                n=78       0.00%  +/- 0.00 (2SE)
+      RILIEVO: 43 giorni con rottura, sotto il pavimento 400.
+      candele NELLA DIREZIONE della rottura (k su 5):
+      k = 0                                  n=43       6.98%  +/- 7.77 (2SE)
+      k = 1                                  n=43      18.60%  +/- 11.87 (2SE)
+      k = 2                                  n=43      27.91%  +/- 13.68 (2SE)
+      k = 3                                  n=43      27.91%  +/- 13.68 (2SE)
+      k = 4                                  n=43      18.60%  +/- 11.87 (2SE)
+      k = 5                                  n=43       0.00%  +/- 0.00 (2SE)
+    k >= 4 (almeno 4 su 5)                   n=43      18.60%  +/- 11.87 (2SE)
+    k >= 3 (almeno 3 su 5)                   n=43      46.51%  +/- 15.21 (2SE)
+  INVERSIONE (chiusura contro la rottura)    n=43      51.16%  +/- 15.25 (2SE)
+
+  (c2) MOVIMENTO nei 5 minuti dal prezzo di riferimento
+       (MFE = escursione massima a FAVORE, MAE = CONTRO)
+       MFE ($):  Q1 0.12  mediana 0.68  Q3 1.15  P90 2.15
+       MAE ($):  Q1 0.15  mediana 0.51  Q3 1.29  P80 1.46  P90 1.80
+       QUANTO COSTA SBAGLIARE: uno stop che sopravvive all'80%
+       delle escursioni contrarie vale 1.46 $ (P80 del MAE).
+       quello stop vale 7.3 volte il costo pieno, contro il
+       pavimento DI LAVORO che ne chiede 40 e quello DURO 13,3.
+       MFE (%): mediana 0.0521      MAE (%): mediana 0.0415
+       netto a fine 5 minuti ($): Q1 -0.50  mediana -0.01  Q3 0.59
+       rapporto mediana MFE / mediana MAE: 1.336
+
+  (e) QUANTO DURA LA SPINTA -- minuto per minuto (per la MANO)
+      Ogni riga e' lo stato dopo j minuti dall'ingresso.
+      j = minuto | n | MFE med | MAE med | chiusura med | % ancora sopra 0
+      j= 1     43      0.15      0.22       -0.04       44.2%
+      j= 2     43      0.22      0.29       -0.05       46.5%
+      j= 3     43      0.36      0.42        0.08       55.8%
+      j= 4     43      0.46      0.46       -0.03       48.8%
+      j= 5     43      0.68      0.51       -0.01       48.8%
+      j= 6     43      0.73      0.52       -0.09       41.9%
+      j= 7     43      0.76      0.75       -0.06       46.5%
+      j= 8     43      0.78      0.76       -0.27       41.9%
+      j= 9     43      0.82      0.80       -0.13       44.2%
+      j=10     43      0.82      0.81       -0.03       46.5%
+      minuto in cui il MFE tocca il massimo: mediana 5.0,
+        picco al minuto  1:  27.9%  (n=12)
+        picco al minuto  2:   2.3%  (n=1)
+        picco al minuto  3:  11.6%  (n=5)
+        picco al minuto  4:   4.7%  (n=2)
+        picco al minuto  5:   9.3%  (n=4)
+        picco al minuto  6:   4.7%  (n=2)
+        picco al minuto  7:   2.3%  (n=1)
+        picco al minuto  8:  14.0%  (n=6)
+        picco al minuto  9:   4.7%  (n=2)
+        picco al minuto 10:  18.6%  (n=8)
+      COME SI LEGGE: se la mediana del MFE smette di crescere al
+      minuto j, tenere oltre j non paga di piu' in mediana. Non e'
+      una regola d'uscita: e' la forma della spinta.
+
+  (f) IPOTESI 9/21 -- giorni CON la condizione contro giorni SENZA
+      (medie su M1, prezzo di CHIUSURA, aggiornate fino ad A+5;
+       a 21 periodi la media guarda indietro PRIMA dell'apertura)
+      PRINCIPALE = INCLINATE (le medie INCLINATE nel verso della rottura,
+      pendenza su 3 barre M1). L'INCROCIO e' una VARIANTE.
+      --- INCLINATE  (CON n=32, SENZA n=11, riscaldamento assente 0)
+          la condizione si accende nel 74.4% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 11 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.52 $   SENZA 0.70 $   delta -0.17 $ (-25.0%)
+          MAE mediano   CON 0.52 $   SENZA 0.32 $
+          netto 5 min   CON 0.06 $   SENZA -0.14 $
+            k >= 4 nella direzione            +0.57 pt  +/- 27.04 (2SE)   DENTRO IL RUMORE
+      --- E-ORDINE  (CON n=30, SENZA n=13, riscaldamento assente 0)
+          la condizione si accende nel 69.8% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 13 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.52 $   SENZA 0.70 $   delta -0.17 $ (-25.0%)
+          MAE mediano   CON 0.52 $   SENZA 0.32 $
+          netto 5 min   CON -0.06 $   SENZA -0.01 $
+            k >= 4 nella direzione            -6.41 pt  +/- 27.04 (2SE)   DENTRO IL RUMORE
+      --- E-FRESCO  (CON n=13, SENZA n=30, riscaldamento assente 0)
+          la condizione si accende nel 30.2% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 13 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.73 $   SENZA 0.63 $   delta 0.10 $ (16.1%)
+          MAE mediano   CON 0.29 $   SENZA 0.64 $
+          netto 5 min   CON 0.13 $   SENZA -0.07 $
+            k >= 4 nella direzione            -4.62 pt  +/- 24.78 (2SE)   DENTRO IL RUMORE
+      --- E-BARRA  (CON n=4, SENZA n=39, riscaldamento assente 0)
+          la condizione si accende nel 9.3% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 4 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 1.31 $   SENZA 0.59 $   delta 0.73 $ (123.7%)
+          MAE mediano   CON 0.26 $   SENZA 0.52 $
+          netto 5 min   CON 0.32 $   SENZA -0.01 $
+            k >= 4 nella direzione           -20.51 pt  +/- 12.93 (2SE)   FUORI DAL RUMORE
+      --- S-INCLINATE  (CON n=27, SENZA n=16, riscaldamento assente 0)
+          la condizione si accende nel 62.8% dei giorni con rottura
+          SOSPESA: il braccio piu' piccolo ha 16 osservazioni
+          (pavimento 100). Un confronto con un braccio cosi'
+          sottile non e' leggibile, e una condizione che si
+          accende quasi sempre non FILTRA: doppia con la rottura.
+          MFE mediano   CON 0.73 $   SENZA 0.63 $   delta 0.10 $ (16.1%)
+          MAE mediano   CON 0.52 $   SENZA 0.31 $
+          netto 5 min   CON 0.13 $   SENZA -0.07 $
+            k >= 4 nella direzione            +9.72 pt  +/- 23.01 (2SE)   DENTRO IL RUMORE
+
+  (d) ANNO PER ANNO (sotto 100 giornate: SOTTILE)
+      anno    n   5/5 col.   n rott.   k>=4   invers.  MFE med  MAE med
+      2016    14    14.29%        9   11.1%   44.4%      0.87     0.52  SOTTILE
+      2017    14     7.14%        9   11.1%   55.6%      0.36     0.32  SOTTILE
+      2018    15     6.67%        8   25.0%   62.5%      0.21     0.63  SOTTILE
+      2019    20    10.00%        8   25.0%   37.5%      0.52     0.23  SOTTILE
+      2020    15    13.33%        9   22.2%   55.6%      1.47     1.82  SOTTILE
+
+==============================================================================
+IL CONFRONTO COI CONTROLLI -- senza questo la misura non vale niente
+==============================================================================
+Se l'oro fa gli stessi numeri alle 11:36, alle 15:36 non c'e' nessuna
+apertura: c'e' come sono fatte le candele M1.
+
+  APERTURA_NY contro CTRL_DOPO
+  5 su 5 stesso colore                        -0.59 pt  +/- 1.75 (2SE)   DENTRO IL RUMORE
+  k >= 4 nella direzione                      -3.11 pt  +/- 4.56 (2SE)   DENTRO IL RUMORE
+  k = 5 nella direzione                       -1.67 pt  +/- 1.57 (2SE)   FUORI DAL RUMORE
+  inversione a fine 5 minuti                  -1.78 pt  +/- 6.20 (2SE)   DENTRO IL RUMORE
+  MFE mediano                                0.50 $ contro 0.41 $  (rapporto 1.22)
+  MAE mediano                                0.63 $ contro 0.48 $  (rapporto 1.29)
+  9/21 INCLINATE, guadagno di MFE mediano CON contro SENZA:
+      APERTURA_NY  0.48 $ -> 0.50 $  (4.7%)
+      CTRL_DOPO    0.53 $ -> 0.37 $  (-29.7%)
+      se le due percentuali si somigliano, il 9/21 sta
+      descrivendo le medie su M1, NON l'apertura.
+
+  APERTURA_NY contro CTRL_QUIETO
+  5 su 5 stesso colore                        -1.94 pt  +/- 1.91 (2SE)   FUORI DAL RUMORE
+  k >= 4 nella direzione                      -1.56 pt  +/- 4.84 (2SE)   DENTRO IL RUMORE
+  k = 5 nella direzione                       -1.66 pt  +/- 1.76 (2SE)   DENTRO IL RUMORE
+  inversione a fine 5 minuti                  -2.05 pt  +/- 6.70 (2SE)   DENTRO IL RUMORE
+  MFE mediano                                0.50 $ contro 0.23 $  (rapporto 2.13)
+  MAE mediano                                0.63 $ contro 0.28 $  (rapporto 2.25)
+  9/21 INCLINATE, guadagno di MFE mediano CON contro SENZA:
+      APERTURA_NY  0.48 $ -> 0.50 $  (4.7%)
+      CTRL_QUIETO  0.20 $ -> 0.24 $  (20.0%)
+      se le due percentuali si somigliano, il 9/21 sta
+      descrivendo le medie su M1, NON l'apertura.
+
+  APERTURA_NY contro CTRL_CASO
+  5 su 5 stesso colore                        -1.74 pt  +/- 1.89 (2SE)   DENTRO IL RUMORE
+  k >= 4 nella direzione                      +0.81 pt  +/- 4.39 (2SE)   DENTRO IL RUMORE
+  k = 5 nella direzione                       -1.64 pt  +/- 1.61 (2SE)   FUORI DAL RUMORE
+  inversione a fine 5 minuti                  -2.05 pt  +/- 6.31 (2SE)   DENTRO IL RUMORE
+  MFE mediano                                0.50 $ contro 0.31 $  (rapporto 1.61)
+  MAE mediano                                0.63 $ contro 0.37 $  (rapporto 1.68)
+  9/21 INCLINATE, guadagno di MFE mediano CON contro SENZA:
+      APERTURA_NY  0.48 $ -> 0.50 $  (4.7%)
+      CTRL_CASO    0.28 $ -> 0.32 $  (12.8%)
+      se le due percentuali si somigliano, il 9/21 sta
+      descrivendo le medie su M1, NON l'apertura.
+
+==============================================================================
+PROMEMORIA DI LETTURA (vale per ogni numero qui sopra)
+==============================================================================
+1. NON E' BCM: altro broker, altri orari, altro spread. Misura di
+   OCCASIONI, mai un verdetto (regola F6).
+2. OHLC M1, non tick: MFE e MAE sono ESTREMI raggiunti, non esiti
+   di un'uscita simulata. Nessuna uscita e' simulata qui.
+3. ZERO COSTI DEDOTTI dai numeri: MFE e MAE sono lordi. Il costo
+   pieno MISURATO (0,2003 $/oz) compare solo come METRO, nelle
+   righe dei pavimenti. Chi legge un MFE senza sottrarre 0,2003
+   sta leggendo un numero che non esiste.
+4. Il campione finisce nel 2020: non copre il regime 2021-2026.
+5. Un picco isolato in un anno solo non e' un comportamento: si
+   guarda la tabella per anno prima di dire qualunque cosa.
+6. Ipotesi provate: 1 principale + 6 varianti dichiarate. La
+   cassaforte 2016-2020 serve a confermare, non a scegliere.
