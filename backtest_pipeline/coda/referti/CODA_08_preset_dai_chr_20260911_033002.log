@@ -1,0 +1,3946 @@
+=== I PARAMETRI DI OGNI SEDIA, IN FORMA DI .set (v2) ===
+data lettura: 2026-09-11 03:31:21  (ora locale)
+letti dai .chr del PROFILO ATTIVO. I .chr sono una foto al salvataggio del profilo.
+v2: percorso dei profili RISOLTO e dichiarato; ogni zero dice PERCHE' e' zero.
+cartelle dati: 6
+
+=====================================================================
+=== C:\MT5_Backtest
+=== cartella dati: 04C7A32B575E40027B4FF8724D14D702
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\04C7A32B575E40027B4FF8724D14D702\MQL5\Profiles\Charts
+    profili sul disco: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    file chart*.chr nel profilo attivo: 5
+
+    ESITO E -- ZERO SEDIE DAVVERO: 5 file .chr letti nel profilo attivo, nessuno con un EA sopra.
+        scartati: 'Main'/senza nome 5 . senza blocco <expert> 0 . illeggibili 0
+        Questo SI' e' uno zero misurato: ho guardato nel posto giusto e non c'era niente.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== cartella dati: 215D85D767A1C39E22D242C8114BF9F5
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5\MQL5\Profiles\Charts
+    profili sul disco: 5   ATTIVO: 'ORO'   [CONFIG] config\common.ini -> ProfileLast=ORO
+    file chart*.chr nel profilo attivo: 45
+
+--- SEDIA: ABTG_TradeExporter  su NZDCAD   magic -   [chart01.chr] ---
+; preset ricostruito da chart01.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_TradeExporter . simbolo del grafico: NZDCAD
+; .chr modificato il: 2026-09-06 22:55
+InpFile=ABTG_Trades.csv
+InpFromYear=2024
+InpExportMinutes=30
+InpUseCommon=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 36
+
+--- SEDIA: ABTG_PTE  su U30USD   magic 771321   [chart02.chr] ---
+; preset ricostruito da chart02.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PTE . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+InpSLbufferPips=5.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=PTE DOW
+InpMagic=771321
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 74
+
+--- SEDIA: ABTG_BreakingBand  su GBPUSD   magic 772161   [chart03.chr] ---
+; preset ricostruito da chart03.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_BreakingBand . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpBBPeriod=20
+InpBBDev=2.0
+InpStdPeriod=20
+InpStdSmaPeriod=50
+InpAtrPeriod=14
+InpPatternMode=2
+InpBulgeWidthMult=1.35
+InpBulgeRefBars=20
+InpBulgeMinBars=3
+InpBulgeMaxBars=20
+InpBulgeMinImpBars=1
+InpBulgeCandleMaxATR=0.0
+InpBulgeNetMoveATR=1.0
+InpBulgeMedianDistPct=0.75
+InpBulgeEndMode=1
+InpBulgeDirMode=1
+InpImpulseATR=1.5
+InpRientroMaxATR=1.5
+InpInvViolentBars=3
+InpZigZagATR=1.5
+InpDeepSpikeATR=1.5
+InpPostATRRef=1
+InpBandRidingMaxBars=20
+InpPostBulgeMaxBars=30
+InpReinflateTolPct=1.05
+InpUseShadowFilter=false
+InpShadowBodyMult=1.5
+InpUseRangeReduction=false
+InpRangeReductionPct=30.0
+InpContNoImpulseBandReturn=false
+InpNarrowBars=2
+InpStdDownMode=0
+InpFlatSlopeATR=0.05
+InpSlopeSource=0
+InpRetestBufferATR=0.15
+InpContRequireNarrow=true
+InpContRequireStdDown=true
+InpUseReversalCandle=false
+InpRevBodyMaxPct=33.0
+InpRevShadowMinPct=50.0
+InpMinSolidita=0.0
+InpSL_ATRmult=3.0
+InpTPMode=0
+InpTP1Pct=50.0
+InpTPRefreshBars=1
+InpBEatATR=1.0
+InpBEMode=0
+InpMinTPatATR=0.0
+InpUseCongestionFilter=false
+InpCongBars=15
+InpCongCSMin=4
+InpCongCDAStdBars=10
+InpCongWidthDropPct=15.0
+InpCongLateralATR=1.0
+InpRiskPercent=1.0
+InpMaxPositions=1
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=BB GBPUSD
+InpMagic=772161
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 101
+
+--- SEDIA: ABTG_BreakingBand  su EURUSD   magic 772162   [chart04.chr] ---
+; preset ricostruito da chart04.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_BreakingBand . simbolo del grafico: EURUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpBBPeriod=20
+InpBBDev=2.0
+InpStdPeriod=20
+InpStdSmaPeriod=50
+InpAtrPeriod=14
+InpPatternMode=0
+InpBulgeWidthMult=1.35
+InpBulgeRefBars=20
+InpBulgeMinBars=3
+InpBulgeMaxBars=20
+InpBulgeMinImpBars=1
+InpBulgeCandleMaxATR=0.0
+InpBulgeNetMoveATR=1.0
+InpBulgeMedianDistPct=0.75
+InpBulgeEndMode=1
+InpBulgeDirMode=1
+InpImpulseATR=1.5
+InpRientroMaxATR=1.5
+InpInvViolentBars=3
+InpZigZagATR=1.5
+InpDeepSpikeATR=1.5
+InpPostATRRef=1
+InpBandRidingMaxBars=20
+InpPostBulgeMaxBars=30
+InpReinflateTolPct=1.05
+InpUseShadowFilter=false
+InpShadowBodyMult=1.5
+InpUseRangeReduction=false
+InpRangeReductionPct=30.0
+InpContNoImpulseBandReturn=false
+InpNarrowBars=2
+InpStdDownMode=0
+InpFlatSlopeATR=0.05
+InpSlopeSource=0
+InpRetestBufferATR=0.15
+InpContRequireNarrow=true
+InpContRequireStdDown=true
+InpUseReversalCandle=false
+InpRevBodyMaxPct=33.0
+InpRevShadowMinPct=50.0
+InpMinSolidita=0.0
+InpSL_ATRmult=3.0
+InpTPMode=0
+InpTP1Pct=50.0
+InpTPRefreshBars=1
+InpBEatATR=1.0
+InpBEMode=0
+InpMinTPatATR=0.0
+InpUseCongestionFilter=false
+InpCongBars=15
+InpCongCSMin=4
+InpCongCDAStdBars=10
+InpCongWidthDropPct=15.0
+InpCongLateralATR=1.0
+InpRiskPercent=1.0
+InpMaxPositions=1
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=BB EURUSD
+InpMagic=772162
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 101
+
+--- SEDIA: ABTG_BreakingBand  su AUDUSD   magic 772163   [chart05.chr] ---
+; preset ricostruito da chart05.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_BreakingBand . simbolo del grafico: AUDUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpBBPeriod=20
+InpBBDev=2.0
+InpStdPeriod=20
+InpStdSmaPeriod=50
+InpAtrPeriod=14
+InpPatternMode=1
+InpBulgeWidthMult=1.35
+InpBulgeRefBars=20
+InpBulgeMinBars=3
+InpBulgeMaxBars=20
+InpBulgeMinImpBars=1
+InpBulgeCandleMaxATR=0.0
+InpBulgeNetMoveATR=1.0
+InpBulgeMedianDistPct=0.75
+InpBulgeEndMode=1
+InpBulgeDirMode=1
+InpImpulseATR=1.5
+InpRientroMaxATR=1.5
+InpInvViolentBars=3
+InpZigZagATR=1.5
+InpDeepSpikeATR=1.5
+InpPostATRRef=1
+InpBandRidingMaxBars=20
+InpPostBulgeMaxBars=30
+InpReinflateTolPct=1.05
+InpUseShadowFilter=false
+InpShadowBodyMult=1.5
+InpUseRangeReduction=false
+InpRangeReductionPct=30.0
+InpContNoImpulseBandReturn=false
+InpNarrowBars=2
+InpStdDownMode=0
+InpFlatSlopeATR=0.05
+InpSlopeSource=0
+InpRetestBufferATR=0.15
+InpContRequireNarrow=true
+InpContRequireStdDown=true
+InpUseReversalCandle=false
+InpRevBodyMaxPct=33.0
+InpRevShadowMinPct=50.0
+InpMinSolidita=0.0
+InpSL_ATRmult=3.0
+InpTPMode=0
+InpTP1Pct=50.0
+InpTPRefreshBars=1
+InpBEatATR=1.0
+InpBEMode=0
+InpMinTPatATR=0.0
+InpUseCongestionFilter=false
+InpCongBars=15
+InpCongCSMin=4
+InpCongCDAStdBars=10
+InpCongWidthDropPct=15.0
+InpCongLateralATR=1.0
+InpRiskPercent=1.0
+InpMaxPositions=1
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=BB AUDUSD
+InpMagic=772163
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 101
+
+--- SEDIA: ABTG_GapFill  su GBPUSD   magic 772231   [chart06.chr] ---
+; preset ricostruito da chart06.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapFill . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpAtrPeriodD1=14
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpFillPct=100.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpAtrSlMult=1.5
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772231
+InpComment=GAP GBPUSD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 47
+
+--- SEDIA: ABTG_GapFill  su EURUSD   magic 772232   [chart07.chr] ---
+; preset ricostruito da chart07.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapFill . simbolo del grafico: EURUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpAtrPeriodD1=14
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpFillPct=50.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpAtrSlMult=1.5
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772232
+InpComment=GAP EURUSD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 47
+
+--- SEDIA: ABTG_GapFill  su AUDUSD   magic 772233   [chart08.chr] ---
+; preset ricostruito da chart08.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapFill . simbolo del grafico: AUDUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpAtrPeriodD1=14
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpFillPct=100.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpAtrSlMult=1.5
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772233
+InpComment=GAP AUDUSD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 47
+
+--- SEDIA: ABTG_GapFill  su U30USD   magic 772234   [chart09.chr] ---
+; preset ricostruito da chart09.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapFill . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpAtrPeriodD1=14
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpFillPct=100.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpAtrSlMult=1.5
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772234
+InpComment=GAP DOW
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 47
+
+--- SEDIA: ABTG_GapFill  su 225JPY   magic 772235   [chart10.chr] ---
+; preset ricostruito da chart10.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapFill . simbolo del grafico: 225JPY
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpAtrPeriodD1=14
+InpGapMinATR=0.3
+InpGapMaxATR=2.0
+InpFillPct=75.0
+InpSLMode=0
+InpSLGapMult=1.0
+InpAtrSlMult=1.5
+InpMaxHours=48
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772235
+InpComment=GAP NIKKEI
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 47
+
+--- SEDIA: ABTG_PunteLarry  su U30USD   magic 772341   [chart11.chr] ---
+; preset ricostruito da chart11.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=true
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772341
+InpComment=LARRY DOW
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_PunteLarry  su EURAUD   magic 772342   [chart12.chr] ---
+; preset ricostruito da chart12.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: EURAUD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=true
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=0.5
+InpMagic=772342
+InpComment=LARRY EURAUD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_PunteLarry  su XAUUSD   magic 772343   [chart13.chr] ---
+; preset ricostruito da chart13.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: XAUUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=0
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=0.3
+InpMagic=772343
+InpComment=LARRY ORO
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_PunteLarry  su GBPJPY   magic 772344   [chart14.chr] ---
+; preset ricostruito da chart14.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: GBPJPY
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772344
+InpComment=LARRY GBPJPY
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_PunteLarry  su GBPUSD   magic 772345   [chart15.chr] ---
+; preset ricostruito da chart15.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=0
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=0
+InpAllowShort=1
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772345
+InpComment=LARRY GBPUSD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_PunteLarry  su EURCAD   magic 772346   [chart16.chr] ---
+; preset ricostruito da chart16.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PunteLarry . simbolo del grafico: EURCAD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpPatternMode=1
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=772346
+InpComment=LARRY EURCAD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 51
+
+--- SEDIA: ABTG_CostToCost  su EURJPY   magic 772361   [chart17.chr] ---
+; preset ricostruito da chart17.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_CostToCost . simbolo del grafico: EURJPY
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16388
+InpExitMode=2
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=0.65
+InpMagic=772361
+InpComment=COST EURJPY
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 48
+
+--- SEDIA: ABTG_CostToCost  su GBPCAD   magic 772362   [chart18.chr] ---
+; preset ricostruito da chart18.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_CostToCost . simbolo del grafico: GBPCAD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16388
+InpExitMode=1
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=0.25
+InpMagic=772362
+InpComment=COST GBPCAD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 48
+
+--- SEDIA: ABTG_EasyTrend  su CHFJPY   magic 772421   [chart20.chr] ---
+; preset ricostruito da chart20.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_EasyTrend . simbolo del grafico: CHFJPY
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpLinRegLen=11
+InpPlotMode=0
+InpPlotLen=11
+InpCciPeriod=20
+InpPivotL=5
+InpPivotR=3
+InpPivotSource=0
+InpMaxPivotDist=60
+InpDivMaxBars=0
+InpDivDieOnFail=false
+InpHourStart=8
+InpHourEnd=18
+InpPrevBars=3
+InpEntryWindowBars=3
+InpMarketIfTooClose=true
+InpSLBufferPts=30
+InpTP_R=1.5
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=true
+InpMaxSpreadPts=30
+InpRiskPercent=0.3
+InpMagic=772421
+InpComment=EASYTREND CHFJPY
+InpVerbose=true
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 81
+
+--- SEDIA: ABTG_EasyTrend  su GBPUSD   magic 772422   [chart21.chr] ---
+; preset ricostruito da chart21.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_EasyTrend . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpLinRegLen=11
+InpPlotMode=0
+InpPlotLen=11
+InpCciPeriod=20
+InpPivotL=5
+InpPivotR=3
+InpPivotSource=0
+InpMaxPivotDist=60
+InpDivMaxBars=0
+InpDivDieOnFail=false
+InpHourStart=8
+InpHourEnd=18
+InpPrevBars=3
+InpEntryWindowBars=3
+InpMarketIfTooClose=true
+InpSLBufferPts=30
+InpTP_R=1.5
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=true
+InpMaxSpreadPts=30
+InpRiskPercent=0.5
+InpMagic=772422
+InpComment=EASYTREND GBPUSD
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 58
+
+--- SEDIA: ABTG_GapContinuation  su 225JPY   magic 774101   [chart23.chr] ---
+; preset ricostruito da chart23.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_GapContinuation . simbolo del grafico: 225JPY
+; .chr modificato il: 2026-09-06 22:55
+InpSessionTimeMode=1
+InpSessionOpenHour=1
+InpSessionOpenMinute=0
+InpSessionCloseHour=7
+InpSessionCloseMinute=30
+InpOpeningRangeMinutes=15
+InpMaxEntryMinutesFromOpen=90
+InpExitMinutesBeforeClose=5
+InpEnableBuyGaps=true
+InpMinimumBuyGapPercent=1.0
+InpEnableSellGaps=true
+InpMinimumSellGapPercent=1.0
+InpUseRealVolumeIfAvailable=true
+InpMaxSpreadPoints=0.0
+InpMaxSpreadToStopPercent=10.0
+InpStopBufferPoints=0.0
+InpBuyRiskPercent=1.0
+InpSellRiskPercent=1.0
+InpReduceRiskOnSmallSellGap=false
+InpSellFullRiskFromGapPct=1.25
+InpSmallSellRiskPercent=0.25
+InpFixedLots=0.0
+InpMaxLots=0.0
+InpPartialClosePercent=40.0
+InpPartialTargetR=1.0
+InpFinalTargetR=3.0
+InpMoveStopToBreakEven=true
+InpMagicNumber=774101
+InpMaxSlippagePoints=30
+InpShowStatusOnChart=true
+InpPrintDailyDiagnostics=false
+InpComment=GAPCONT
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 64
+
+--- SEDIA: ABTG_PTE  su GBPUSD   magic 771332   [chart24.chr] ---
+; preset ricostruito da chart24.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PTE . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+InpSLbufferPips=25.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_ATRmult=3.0
+InpUseTrailing=true
+InpRiskPercent=0.5
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=PTE GBPUSD B25
+InpMagic=771332
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 74
+
+--- SEDIA: ABTG_PTE  su GBPUSD   magic 771322   [chart26.chr] ---
+; preset ricostruito da chart26.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PTE . simbolo del grafico: GBPUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+InpAtrExitPeriod=14
+InpSLbufferPips=5.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+InpRiskPercent=0.5
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=PTE GBPUSD
+InpMagic=771322
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 74
+
+--- SEDIA: ABTG_SuperWave  su U30USD   magic 770531   [chart27.chr] ---
+; preset ricostruito da chart27.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SuperWave . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16386
+InpStMult=3.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP_RR=2.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=SW DOW H2
+InpMagic=770531
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 73
+
+--- SEDIA: ABTG_MaxMinNotte  su XAUUSD   magic 770402   [chart29.chr] ---
+; preset ricostruito da chart29.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_MaxMinNotte . simbolo del grafico: XAUUSD
+; .chr modificato il: 2026-09-06 22:55
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=250.0
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpMgmtTF=16386
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=2.5
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=0.5
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpComment=MAXMIN ORO
+InpMagic=770402
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 83
+
+--- SEDIA: ABTG_DAX_Apertura_EU  su D30EUR   magic 770101   [chart30.chr] ---
+; preset ricostruito da chart30.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_DAX_Apertura_EU . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 22:55
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770101
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 112
+
+--- SEDIA: ABTG_Dow_Apertura_US  su U30USD   magic 770202   [chart31.chr] ---
+; preset ricostruito da chart31.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_Dow_Apertura_US . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=400.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770202
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 112
+
+--- SEDIA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato  su D30EUR   magic 770411   [chart32.chr] ---
+; preset ricostruito da chart32.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 22:55
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000.0
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=3.0
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMagic=770411
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 83
+
+--- SEDIA: ABTG_EMA200  su U30USD   magic 771531   [chart33.chr] ---
+; preset ricostruito da chart33.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_EMA200 . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200 DOW
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=771531
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 74
+
+--- SEDIA: ABTG_EMA200_Ottimizzato  su XAUUSD   magic 971501   [chart34.chr] ---
+; preset ricostruito da chart34.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_EMA200_Ottimizzato . simbolo del grafico: XAUUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16388
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.05
+InpOrder2Atr=0.6
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=0.25
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200 OTT
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=971501
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 74
+
+--- SEDIA: ABTG_SupertrendReversal  su 225JPY   magic 770924   [chart35.chr] ---
+; preset ricostruito da chart35.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SupertrendReversal . simbolo del grafico: 225JPY
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16386
+InpStMult=3.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=2.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV FW Nik
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=770924
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 75
+
+--- SEDIA: ABTG_SupertrendReversal_Ottimizzato  su XAUUSD   magic 970901   [chart36.chr] ---
+; preset ricostruito da chart36.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SupertrendReversal_Ottimizzato . simbolo del grafico: XAUUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16388
+InpStMult=2.5
+InpStAtrPeriod=7
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=2.5
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV OTT
+InpMagic=970901
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 73
+
+--- SEDIA: ABTG_SuperWave_DOW_H1_Ottimizzato  su U30USD   magic 770511   [chart37.chr] ---
+; preset ricostruito da chart37.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SuperWave_DOW_H1_Ottimizzato . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=SUPERWAVE DOW H1
+InpMagic=770511
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 73
+
+--- SEDIA: ABTG_SupRev_DAX_H4_Ottimizzato  su D30EUR   magic 970912   [chart38.chr] ---
+; preset ricostruito da chart38.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SupRev_DAX_H4_Ottimizzato . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16388
+InpStMult=3.0
+InpStAtrPeriod=9
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV DAX H4
+InpMagic=970912
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 73
+
+--- SEDIA: ABTG_SupRev_NAS_H1_Ottimizzato  su NASUSD   magic 970913   [chart39.chr] ---
+; preset ricostruito da chart39.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_SupRev_NAS_H1_Ottimizzato . simbolo del grafico: NASUSD
+; .chr modificato il: 2026-09-06 22:55
+InpTF=16385
+InpStMult=3.0
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV NAS H1
+InpMagic=970913
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 73
+
+--- SEDIA: ABTG_ORB_Ottimizzato  su U30USD   magic 770611   [chart40.chr] ---
+; preset ricostruito da chart40.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_ORB_Ottimizzato . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 22:55
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770611
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpSlippagePts=0.0
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 86
+
+--- SEDIA: ABTG_Nasdaq_Apertura_US  su NASUSD   magic 770250   [chart41.chr] ---
+; preset ricostruito da chart41.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_Nasdaq_Apertura_US . simbolo del grafico: NASUSD
+; .chr modificato il: 2026-09-06 22:55
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=20
+InpCloseMin=45
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=0
+InpRangeMode=2
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=300.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=false
+InpAllowShort=true
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=0.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=50
+InpEmaSlow=200
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.35
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770250
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 112
+
+--- SEDIA: ABTG_PostNews  su USDJPY   magic 771203   [chart42.chr] ---
+; preset ricostruito da chart42.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PostNews . simbolo del grafico: USDJPY
+; .chr modificato il: 2026-09-06 22:55
+InpUsaGuardian=true
+InpActionHour=13
+InpActionMin=45
+InpExpiryHour=16
+InpExpiryMin=59
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news_live_2026-09-04.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=Unemployment Rate
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=2.0
+InpTPpips=30.0
+InpSLpips=25.0
+InpUseOCO=false
+InpCloseAtExpiry=false
+InpUseTrail25=false
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpRiskPercent=1.30
+InpRiskRefSLpips=50.0
+InpComment=NFP PostNews
+InpMagic=771203
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 64
+
+--- SEDIA: ABTG_PostNews  su EURJPY   magic 771201   [chart43.chr] ---
+; preset ricostruito da chart43.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PostNews . simbolo del grafico: EURJPY
+; .chr modificato il: 2026-09-06 22:55
+InpUsaGuardian=true
+InpActionHour=14
+InpActionMin=0
+InpExpiryHour=17
+InpExpiryMin=15
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=EUR
+InpNewsTitleMatch=ECB
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseOCO=true
+InpCloseAtExpiry=true
+InpUseTrail25=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpRiskPercent=3.0
+InpRiskRefSLpips=50.0
+InpComment=ECB PostNews
+InpMagic=771201
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 64
+
+--- SEDIA: ABTG_PostNews  su EURUSD   magic 771202   [chart44.chr] ---
+; preset ricostruito da chart44.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal . profilo: ORO
+; EA: ABTG_PostNews . simbolo del grafico: EURUSD
+; .chr modificato il: 2026-09-06 22:55
+InpUsaGuardian=true
+InpActionHour=19
+InpActionMin=40
+InpExpiryHour=20
+InpExpiryMin=45
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=FOMC
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseOCO=true
+InpCloseAtExpiry=true
+InpUseTrail25=false
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpRiskPercent=3.0
+InpRiskRefSLpips=50.0
+InpComment=FOMC PostNews
+InpMagic=771202
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 64
+
+    sedie stampate su questo terminale: 40   (su 45 file .chr: 'Main'/senza nome 5, senza <expert> 0, illeggibili 0)
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== cartella dati: 73B7A2420D6397DFF9014A20F1201F97
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\73B7A2420D6397DFF9014A20F1201F97\MQL5\Profiles\Charts
+    profili sul disco: 4   ATTIVO: 'Euro'   [CONFIG] config\common.ini -> ProfileLast=Euro
+    file chart*.chr nel profilo attivo: 4
+
+    ESITO E -- ZERO SEDIE DAVVERO: 4 file .chr letti nel profilo attivo, nessuno con un EA sopra.
+        scartati: 'Main'/senza nome 4 . senza blocco <expert> 0 . illeggibili 0
+        Questo SI' e' uno zero misurato: ho guardato nel posto giusto e non c'era niente.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== cartella dati: 857385E4B0F2356AD99AA95CDF40FAE9
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\857385E4B0F2356AD99AA95CDF40FAE9\MQL5\Profiles\Charts
+    profili sul disco: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    file chart*.chr nel profilo attivo: 4
+
+--- SEDIA: Gold_Ichimoku_TK_ATR_EA  su XAUUSD   magic 250604   [chart01.chr] ---
+; preset ricostruito da chart01.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\Tickmill Europe MT5 Terminal . profilo: Default
+; EA: Gold_Ichimoku_TK_ATR_EA . simbolo del grafico: XAUUSD
+; .chr modificato il: 2026-07-20 22:19
+InpTenkan=7
+InpKijun=22
+InpSenkouB=44
+InpBBLen=20
+InpBBMult=2.0
+InpSqzLen=50
+InpSqzFactor=0.8
+InpUseKumoFilter=true
+InpUseADXFilter=false
+InpAdxLen=14
+InpAdxMin=22.0
+InpUseExpansionFilter=false
+InpUseKijunFilter=false
+InpTradeDirection=1
+InpExitMode=1
+InpAtrLen=14
+InpAtrMultSL=1.5
+InpRewardRatio=2.0
+InpAtrTrailMult=3.0
+InpUseOppositeExit=true
+InpRiskPercent=0.5
+InpMagic=250604
+InpMaxSpreadPoints=0
+; parametri stampati: 23
+
+--- SEDIA: BREAKOUT_EA_JPY_v3  su USDJPY   magic -   [chart02.chr] ---
+; preset ricostruito da chart02.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\Tickmill Europe MT5 Terminal . profilo: Default
+; EA: BREAKOUT_EA_JPY_v3 . simbolo del grafico: USDJPY
+; .chr modificato il: 2026-07-20 22:19
+InpSymbols=USDJPY,EURJPY,GBPJPY,CHFJPY,CADJPY,NZDJPY,AUDJPY
+; parametri stampati: 1
+
+    sedie stampate su questo terminale: 2   (su 4 file .chr: 'Main'/senza nome 2, senza <expert> 0, illeggibili 0)
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== cartella dati: BCA8AD18563BF5B64A433C2662D0A104
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts
+    profili sul disco: 5   ATTIVO: 'SQUADRA 100K'   [CONFIG] config\common.ini -> ProfileLast=SQUADRA 100K
+    file chart*.chr nel profilo attivo: 8
+
+--- SEDIA: ABTG_DAX_Apertura_EU  su D30EUR   magic 770101   [chart01.chr] ---
+; preset ricostruito da chart01.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_DAX_Apertura_EU . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 08:01
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.65
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770101
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 114
+
+--- SEDIA: ABTG_Dow_Apertura_US  su U30USD   magic 770202   [chart02.chr] ---
+; preset ricostruito da chart02.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_Dow_Apertura_US . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 08:01
+InpUsaGuardian=true
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=1000.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=400.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=true
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.65
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770202
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 113
+
+--- SEDIA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato  su D30EUR   magic 770411   [chart03.chr] ---
+; preset ricostruito da chart03.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 08:01
+InpUsaGuardian=true
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000.0
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=3.0
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=0.65
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMagic=770411
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 84
+
+--- SEDIA: ABTG_SupertrendReversal  su 225JPY   magic 770901   [chart04.chr] ---
+; preset ricostruito da chart04.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_SupertrendReversal . simbolo del grafico: 225JPY
+; .chr modificato il: 2026-09-06 08:01
+InpUsaGuardian=true
+InpTF=16386
+InpStMult=3.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=true
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=2.0
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=0.65
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=STREV
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=770901
+InpMaxSpread=0
+InpVerbose=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 76
+
+--- SEDIA: ABTG_TradeExporter  su EURUSD   magic -   [chart05.chr] ---
+; preset ricostruito da chart05.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_TradeExporter . simbolo del grafico: EURUSD
+; .chr modificato il: 2026-09-06 08:01
+InpFile=ABTG_Trades_100k.csv
+InpFromYear=2024
+InpExportMinutes=30
+InpUseCommon=true
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 36
+
+--- SEDIA: ABTG_ORB_Ottimizzato  su U30USD   magic 770611   [chart06.chr] ---
+; preset ricostruito da chart06.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_ORB_Ottimizzato . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 08:01
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=0.3
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770611
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0.0
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 85
+
+--- SEDIA: ABTG_Guardian  su AUDNZD   magic 779001   [chart07.chr] ---
+; preset ricostruito da chart07.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3 . profilo: SQUADRA 100K
+; EA: ABTG_Guardian . simbolo del grafico: AUDNZD
+; .chr modificato il: 2026-09-06 08:01
+InpStartBalance=100000
+InpDailyLossPct=4.9
+InpTotalDDPct=9.9
+InpDDMode=0
+InpDailyResetHour=23
+InpDailyPausePct=4.0
+InpMaxOpenRiskPct=3.25
+InpRiskMode=0
+InpWarnNoSL=true
+InpAction=0
+InpCloseAllMagics=true
+InpShowPanel=true
+InpMagic=779001
+InpComment=GUARDIAN FTMO 2STEP
+InpVerbose=true
+InpAutotest=false
+InpMostraEma=true
+InpMostraBollinger=true
+InpMostraLivelli=true
+InpEma1=9
+InpEma2=21
+InpEma3=50
+InpEma4=200
+InpBbPeriodo=20
+InpBbDeviazione=2.0
+InpMostraMaxIeri=true
+InpMostraMinIeri=true
+InpMostraOpenOggi=true
+InpMostraMaxSettimana=true
+InpMostraMinSettimana=true
+InpColMaxIeri=42495
+InpStileMaxIeri=0
+InpSpesMaxIeri=2
+InpColMinIeri=3329330
+InpStileMinIeri=0
+InpSpesMinIeri=2
+InpColOpenOggi=55295
+InpStileOpenOggi=1
+InpSpesOpenOggi=1
+InpColMaxSett=13850042
+InpStileMaxSett=3
+InpSpesMaxSett=1
+InpColMinSett=16760576
+InpStileMinSett=3
+InpSpesMinSett=1
+InpMostraEtichette=true
+InpFontSize=9
+InpVerbose=false
+; parametri stampati: 48
+
+    sedie stampate su questo terminale: 7   (su 8 file .chr: 'Main'/senza nome 1, senza <expert> 0, illeggibili 0)
+
+=====================================================================
+=== C:\BCM_Reale
+=== cartella dati: E23E1504A8D02A22179395F0652B86B6
+=====================================================================
+    cartella profili: C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\E23E1504A8D02A22179395F0652B86B6\MQL5\Profiles\Charts
+    profili sul disco: 4   ATTIVO: 'Default'   [CONFIG] config\common.ini -> ProfileLast=Default
+    file chart*.chr nel profilo attivo: 4
+
+--- SEDIA: ABTG_DAX_Apertura_EU  su D30EUR   magic 770101   [chart01.chr] ---
+; preset ricostruito da chart01.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\BCM_Reale . profilo: Default
+; EA: ABTG_DAX_Apertura_EU . simbolo del grafico: D30EUR
+; .chr modificato il: 2026-09-06 23:10
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=0.65
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=770101
+InpMaxSpread=0
+InpVerbose=true
+; parametri stampati: 82
+
+--- SEDIA: ABTG_ORB_Ottimizzato  su U30USD   magic 770611   [chart02.chr] ---
+; preset ricostruito da chart02.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\BCM_Reale . profilo: Default
+; EA: ABTG_ORB_Ottimizzato . simbolo del grafico: U30USD
+; .chr modificato il: 2026-09-06 23:10
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=0.65
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770611
+InpMaxSpread=0
+InpVerbose=true
+InpAutoTest=true
+InpSlippagePts=0.0
+; parametri stampati: 54
+
+--- SEDIA: ABTG_SlippageLogger  su EURJPY   magic -   [chart03.chr] ---
+; preset ricostruito da chart03.chr il 2026-09-11 -- LETTO, non scritto
+; terminale: C:\BCM_Reale . profilo: Default
+; EA: ABTG_SlippageLogger . simbolo del grafico: EURJPY
+; .chr modificato il: 2026-09-06 23:10
+InpLoginAtteso=0
+InpSoloContoReale=false
+InpScanSec=10
+InpFinestraScanSec=7200
+InpGiorniStorico=30
+InpSnapshotSec=1
+InpLoggaIngressi=true
+InpSalvaSec=300
+InpPrefissoFile=ABTG_SlippageLogger
+InpMostraComment=true
+InpLogOgniDeal=true
+InpAutoTest=true
+; parametri stampati: 12
+
+    sedie stampate su questo terminale: 3   (su 4 file .chr: 'Main'/senza nome 1, senza <expert> 0, illeggibili 0)
+
+=====================================================================
+TOTALE SEDIE STAMPATE: 52
+--- DOVE HO GUARDATO, cartella per cartella (un totale senza questo e' cieco) ---
+    cartelle dati esaminate                          : 6
+    con sedie stampate                               : 4
+    ESITO A -- cartella dei profili NON TROVATA      : 0
+    ESITO B -- profilo attivo NON DETERMINATO        : 0
+    ESITO C -- cartella del profilo attivo NON TROVATA: 0
+    ESITO D -- cartella trovata ma VUOTA (0 .chr)    : 0
+    ESITO E -- zero sedie DAVVERO (.chr letti, 0 EA) : 2
+=====================================================================
+COME SI USA: si copiano le righe Inp* di una sedia in un file .set del repo.
+Quel .set va poi CONFRONTATO col preset gia' esistente, se c'e': se differiscono,
+vince cio' che GIRA, ma la differenza va dichiarata, non appianata in silenzio.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
