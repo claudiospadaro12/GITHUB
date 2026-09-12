@@ -1,0 +1,59 @@
+
+=== COLLAUDO DEI CANCELLI G0-G4 (nessuna rete, nessun MT5) ===
+  MARCATORE_RUNNER_ABTG_v3
+  [OK ] BUONO: legge e stampa                      -> G1 e G2 passati
+  [OK ] CATTIVO: manca il marcatore                -> G1: manca il marcatore 'RUNNER_SOLA_LETTURA' (corsia lettura) oppure 'RUNNER_ROUND_BACKTEST' (corsia round). Uno script non entra in coda per sbaglio.
+  [OK ] CATTIVO: tocca il REALE                    -> G2: riga 2 contiene 'BCM_Reale' -- tocca il terminale del CONTO REALE 10105439
+  [OK ] CATTIVO: nomina il conto reale             -> G2: riga 2 contiene '10105439' -- nomina il CONTO REALE
+  [OK ] CATTIVO: scrive un file                    -> G2: riga 2 contiene 'Set-Content' -- scrive file
+  [OK ] CATTIVO: cancella                          -> G2: riga 2 contiene 'Remove-Item' -- cancella file
+  [OK ] CATTIVO: esegue testo                      -> G2: riga 2 contiene 'Invoke-Expression' -- esegue testo arbitrario: qualunque scansione diventa inutile
+  [OK ] CATTIVO: avvia un processo                 -> G2: riga 2 contiene 'terminal64.exe' -- avvia o pilota un terminale
+  [OK ] CATTIVO: -EseguiDavvero                    -> G2: riga 2 contiene 'EseguiDavvero' -- e' uno script che AGISCE sulle sedie: nemmeno un round ne ha bisogno
+  [OK ] BUONO: il divieto e' in un COMMENTO        -> G1 e G2 passati
+  [OK ] CATTIVO: sorgente vuoto                    -> G0: sorgente vuoto o non scaricato
+  [OK ] ROUND BUONO: punta al banco                -> G1, G2 e G3 passato: bersaglio dichiarato e coerente
+  [OK ] ROUND BUONO: Join-Path del banco           -> G1, G2 e G3 passato: bersaglio dichiarato e coerente
+  [OK ] ROUND CATTIVO: bersaglio 100k              -> G2: riga 3 contiene '50504263' -- nomina il conto 100k 50504263, che ha POSIZIONI VIVE
+  [OK ] ROUND CATTIVO: cartella -V3                -> G2: riga 2 contiene 'MT5 Terminal -V3' -- e' la cartella programma del 100k 50504263
+  [OK ] ROUND CATTIVO: cartella REALE              -> G2: riga 2 contiene 'BCM_Reale' -- tocca il terminale del CONTO REALE 10105439
+  [OK ] ROUND CATTIVO: conto REALE                 -> G2: riga 3 contiene '10105439' -- nomina il CONTO REALE
+  [OK ] ROUND CATTIVO: conto piccolo               -> G2: riga 3 contiene '50503392' -- nomina il conto PICCOLO 50503392: ha sedie vive, non e' il banco
+  [OK ] ROUND CATTIVO: nessun bersaglio            -> G3: nessun bersaglio dichiarato. Un round deve nominare 'C:\MT5_Backtest' o il conto 50504400 in CODICE (non in un commento).
+  [OK ] ROUND CATTIVO: Invoke-Expression           -> G2: riga 3 contiene 'Invoke-Expression' -- esegue testo arbitrario: qualunque scansione diventa inutile
+  [OK ] ROUND CATTIVO: Stop-Process                -> G2: riga 3 contiene 'Stop-Process' -- puo' uccidere un terminale MT5 vivo, e un cancello TESTUALE non puo' dire quale (10/09: ChiudiMT5Pulito ammazzo' anche il REALE)
+  [OK ] ROUND CATTIVO: Remove-Item                 -> G2: riga 3 contiene 'Remove-Item' -- cancella file
+  [OK ] ROUND CATTIVO: avvia un exe qualunque      -> G3: riga 3 avvia un programma non riconoscibile. In corsia ROUND si avviano solo powershell.exe, terminal64, metatester, metaeditor o una variabile che porta il banco.
+  [OK ] CATTIVO: TUTTI E DUE i marcatori           -> G1: lo script ha TUTTI E DUE i marcatori ('RUNNER_SOLA_LETTURA' e 'RUNNER_ROUND_BACKTEST'). L'ambiguita' non si interpreta: si rifiuta.
+  [OK ] LETTURA CATTIVO: avvia un processo         -> G2: riga 3 contiene 'Start-Process' -- avvia programmi: nella corsia di sola lettura non serve a nessuna lettura
+  [OK ] LETTURA CATTIVO: avvia metatester          -> G2: riga 2 contiene 'metatester' -- avvia il tester: in sola lettura non serve
+  [OK ] LETTURA CATTIVO: scrive con Out-File       -> G2: riga 2 contiene 'Out-File' -- scrive file
+  [OK ] LETTURA BUONO: nomina il piccolo           -> G1 e G2 passati
+  [OK ] INSIDIOSO 1: bersaglio nel commento in CODA -> G3: nessun bersaglio dichiarato. Un round deve nominare 'C:\MT5_Backtest' o il conto 50504400 in CODICE (non in un commento).
+  [OK ] INSIDIOSO 2: variabile riassegnata         -> G3: riga 4 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+  [OK ] INSIDIOSO 3: percorso ricucito a runtime   -> G3: riga 4 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+  [OK ] INSIDIOSO 4: riassegnata con la forma graffa -> G3: riga 4 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+  [OK ] INSIDIOSO 5: riassegnata con l'ambito      -> G3: riga 4 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+  [OK ] INSIDIOSO 6: lancia con l'operatore &      -> G3: riga 3 avvia un programma non riconoscibile. In corsia ROUND si avviano solo powershell.exe, terminal64, metatester, metaeditor o una variabile che porta il banco.
+  [OK ] INSIDIOSO 7: percorso vietato spezzato     -> G3: riga 4 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+  [OK ] INSIDIOSO 8: Set-Variable                  -> G2: riga 3 contiene 'Set-Variable' -- cambia una variabile senza che G3 lo veda
+  [OK ] INSIDIOSO 9: alias saps                    -> G2: riga 3 contiene 'saps' -- alias di Start-Process
+  [OK ] ROUND CATTIVO: banco dichiarato ma riga cieca -> G3: riga 3 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+
+  --- G4: GLI ARGOMENTI DELLA RIGA DI CODA ---
+  [OK ] ARG BUONO: etichetta e basta               -> G4 passato
+  [OK ] ARG BUONO: il banco esplicito              -> G4 passato
+  [OK ] ARG CATTIVO: percorso del REALE            -> G4: gli argomenti contengono 'BCM_Reale' -- tocca il terminale del CONTO REALE 10105439
+  [OK ] ARG CATTIVO: cartella del 100k             -> G4: gli argomenti contengono 'MT5 Terminal -V3' -- e' la cartella programma del 100k 50504263
+  [OK ] ARG CATTIVO: percorso estraneo             -> G4: gli argomenti portano un percorso fuori dal banco: 'D:\roba\altro'. In corsia ROUND si passa solo roba sotto C:\MT5_Backtest.
+  [OK ] ARG CATTIVO: esegue testo                  -> G4: gli argomenti contengono 'Invoke-Expression' -- esegue testo arbitrario: qualunque scansione diventa inutile
+  [OK ] ARG CATTIVO (lettura): scrive              -> G4: gli argomenti contengono 'Set-Content' -- scrive file
+  [OK ] ARG BUONO: la riga sottile R125            -> G4 passato
+  [OK ] ARG CATTIVO: riga sottile dirottata        -> G4: gli argomenti portano un percorso fuori dal banco: 'D:\MT5_Altro'. In corsia ROUND si passa solo roba sotto C:\MT5_Backtest.
+
+  --- PARTE 4: LA RIGA SOTTILE VERA, LETTA DAL DISCO ---
+  [OK ] RIGA SOTTILE VERA: deve passare            -> G1, G2 e G3 passato: bersaglio dichiarato e coerente
+  [OK ] GEMELLO CATTIVO: bersaglio 100k            -> G2: riga 131 contiene 'MT5 Terminal -V3' -- e' la cartella programma del 100k 50504263
+  [OK ] GEMELLO CATTIVO: banco riassegnato         -> G3: riga 306 nomina un terminale senza puntare al banco. Serve 'C:\MT5_Backtest' sulla riga stessa, o una variabile assegnata a QUEL percorso letterale.
+
+COLLAUDO: 50 giusti, 0 sbagliati su 50
