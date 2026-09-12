@@ -488,7 +488,43 @@ $BancoBT = 'C:\MT5_Backtest'
 #  Il beneficio dell'ordine PER LA LETTURA resta ZERO (classe 274).
 #  Referto: report\SETTE_IN_CODA_2026-09-12.md
 # ---------------------------------------------------------------------
-$PIN = '23314d61d26ea7e15c01462e4c4549291cf6684d'
+# ---------------------------------------------------------------------
+#  QUINDICESIMO GIRO (12/09/2026 sera) -- I QUATTRO EA MAI GIRATI
+#
+#  PERCHE': quattro motori scritti fra il 22/08 e l'08/09 non sono mai
+#  stati interrogati nemmeno una volta, e nessuno aveva una riga in
+#  REGISTRO_TEST.md: ne' vivi ne' morti, INVISIBILI.
+#
+#  IL PREREQUISITO CHE VIENE PRIMA DI TUTTO, trovato dal cancello prima
+#  che da me: il driver scarica il FILE PROVA da $PIN, non dal branch.
+#  I file R141 sono nati OGGI, dopo e6c0d70e, dopo 69e252b3 e dopo
+#  23314d61 -- verificato con git cat-file: NON ESISTONO a nessuno dei
+#  tre. Righe formalmente perfette avrebbero dato HTTP 404 = quattro
+#  round morti e quattro buchi nel referto. E' lo stesso guasto pagato
+#  due volte (i commenti sopra lo scrivono per R133a e R136a). Quindi
+#  l'ordine e' questo, e si sbaglia una volta sola:
+#      1. questa riga sottile ($PIN), commit, push
+#      2. POI la colonna dei pin in CODA.txt, su QUEL commit
+#
+#  >>> UN SOLO VALORE CAMBIA: $PIN. <<<
+#  MISURATO prima di spostarlo, non assunto: al pin nuovo 55f0eb1b il
+#  driver fa sha256 15DE7D5F...6828F1C6 (= $SHA_WALK, INVARIATO),
+#  RIGA_ROUND_VPS fa 348ED533...9D0A315B (= $SHA_ROUND, INVARIATO), e
+#  tutti e quattro i file prova ci sono. Se una delle due impronte non
+#  combaciasse, 'function Prendi' chiamerebbe Muori e OGNI round
+#  morirebbe sull'impronta.
+#  I SETTE round del quattordicesimo giro NON si muovono: la loro riga
+#  di coda pinna 0c38419f, che porta $PIN=23314d61, congelato.
+#
+#  QUATTRO RIGHE, NON CINQUE. R141e (daxva) e' FUORI, e il motivo e' un
+#  numero: il suo falsificatore non falsifica. A edge ZERO il PF SALE
+#  monotono del 18% per sola geometria e pedaggio (il costo vale il
+#  21,3% dello stop sulla cella 800 e il 2,5% sulla 6800), quindi "il PF
+#  sale col buffer" NON distingue la legge dell'ancora unica dal costo:
+#  i due spingono in versi opposti e si sottraggono. Rientra domani con
+#  la toppa del gradiente nullo, gia' scritta nel file.
+# ---------------------------------------------------------------------
+$PIN = '55f0eb1bde87786039edcd5cce02ddec018fe7b1'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
