@@ -208,12 +208,23 @@ Tutti in `backtest_pipeline/prove/`, **ASCII puro**, corpo = **copia riga per ri
 I sette file girano sul **driver generico**, che ha già tutti i parametri che servono (`-Prova`, `-Etichetta`, `-Spread`, `-Ritardo`, `-Deposito`, `-SoloControllo`). Parametri congelati, identici al banco di R112 — **niente si cambia dentro un collaudo**:
 
 ```
--Expert ABTG_EMA200 -Prova prove\COLLAUDO_EMADOW_<NN>_<nome>.txt
--Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
--FrazioneIS 0.40 -Modello 4 -Deposito 100000 -Etichetta COLL_<NN>
-   prova 01: aggiungere -Spread 0 | 238 | 285 | 380   (quattro corse)
-   prova 06: aggiungere -Ritardo 0 | 50 | 100 | 500   (quattro corse)
-   prova 02: aggiungere -FrazioneIS 1.0 -FinoDallaRiga (finestra IS da sola)
+prove 00 / 03 / 04 / 05 / 06 / 01  (finestra piena, split 40/60):
+  -Expert ABTG_EMA200 -Prova prove\COLLAUDO_EMADOW_<NN>_<nome>.txt
+  -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+  -FrazioneIS 0.40 -Modello 4 -Deposito 100000 -Etichetta COLL_<NN>
+     prova 01: aggiungere -Spread 0 | 238 | 285 | 380   (quattro corse)
+     prova 06: aggiungere -Ritardo 0 | 50 | 100 | 500   (quattro corse)
+
+prova 02  (finestra IS da sola) -- E QUI LA RIGA E' DIVERSA, ATTENZIONE:
+  -Expert ABTG_EMA200 -Prova prove\COLLAUDO_EMADOW_02_pertrade_IS.txt
+  -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26
+  -FrazioneIS 1.0 -Modello 4 -Deposito 100000 -Etichetta COLL_02
+  >>> -Fino NON si passa, e NON e' una dimenticanza: il file dichiara
+      '@FINOA 2025.06.10' e la regola del driver (r.526) e' "-Fino NON
+      passato a mano -> @FINOA VINCE". Se si passasse -Fino 2026.06.30
+      la corsa MUORE (date in contraddizione, r.562); se si aggiungesse
+      -FinoDallaRiga la corsa GIRA ma sulla finestra SBAGLIATA, ed e' il
+      caso peggiore dei due. Niente -Fino, niente -FinoDallaRiga.
 ```
 
 🪟 **BERSAGLIO, per la regola del 12/09: PC DI BACKTEST, terminale `50504400` (`C:\MT5_Backtest`).** Sul VPS **non si lancia niente** — lì vivono i quattro terminali BCM (`50503392`, `50504263`, `10105439`, `50504400`) più Pepperstone e Tickmill, e **nessuno di loro viene toccato da questo pacchetto**.
