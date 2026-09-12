@@ -37,8 +37,14 @@
 #        1 deve dare n ESATTAMENTE 116 IS / 175 OOS);
 #      - fra le due celle l'n e' ATTESO VARIABILE, E IL VERSO E'
 #        DICHIARATO ORA, PRIMA DEI NUMERI: la cella 0 (trailing spento)
-#        fa PIU' deal della cella 1. Se ne facesse MENO, c'e' qualcosa
-#        da leggere.
+#        fa PIU' deal della cella 1.
+#        >>> E QUI IL VERSO E' UN TEOREMA, non una tendenza: il trailing
+#            pone lo stop SOLO sopra l'entrata (newSL > openP, r.1044),
+#            cioe' e' una condizione d'uscita AGGIUNTIVA. Spegnerla la
+#            RIMUOVE, quindi n(0) >= n(1) SEMPRE, senza eccezioni.
+#            (Su R142b lo stesso verso e' solo una TENDENZA: li' si
+#            cambia il TF della candela, non si toglie una condizione.)
+#        Se n(0) < n(1), c'e' qualcosa da leggere.
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
@@ -111,6 +117,20 @@
 #
 #     CANCELLO DURO   -> l'n: 116 IS e 175 OOS, esatti. Se l'n non torna,
 #                        CATENA ROTTA e non si legge nessun PF.
+#                        UNICA ECCEZIONE DICHIARATA: l'n non e' STRETTAMENTE
+#                        invariante al lotto -- il clamp di r.1151
+#                        (if(v < mn) v = 0) puo' togliere il deal della
+#                        parziale. Si diagnostica nel log, r.1017
+#                        ("parziale impossibile al lotto X"). Fuori da
+#                        quella via, l'n e' duro.
+#                        >>> E IL DURO E' MIRATO, non comodo: ho provato a
+#                            romperlo. Finestra sbagliata, taglio IS/OOS
+#                            sbagliato, un input d'ingresso divergente, un
+#                            build con logica d'ingresso diversa -- tutti
+#                            toccano le POSIZIONI, quindi l'n, quindi
+#                            scattano. L'UNICA cosa che passa e' proprio
+#                            il fix di sizing, che e' quello che il
+#                            cancello morbido e' li' per prendere.
 #     CANCELLO MORBIDO-> PF / DD / Profit. Se l'n torna ma i tre numeri
 #                        si discostano, il PRIMO SOSPETTO E' DICHIARATO
 #                        ORA: il fix di sizing 3af47ed. NON si va a

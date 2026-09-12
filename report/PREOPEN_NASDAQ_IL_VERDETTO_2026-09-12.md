@@ -207,7 +207,7 @@ di Q4 arriva a **+0,158 < +0,20** → **ipotesi alternativa respinta al 95%** �
    decimale**; al P95 (1,90) scende a **12,63x**, cioe' **sotto**.
 3. 🔴 **Doppio fill possibile** con posizione **orfana** non gestita, e
    `g_tradesToday` che ne conta **1**.
-4. 🔴 **`InpTimeframe != M5` da' ZERO trade in silenzio.**
+4. 🔴 **`InpTimeframe != M5` da' ZERO trade in silenzio** (r.36 e r.834: l'input esiste, e `OnInit` stampa un avviso e **prosegue**).
 5. Piu': **nessun filtro di spread, nessun filtro news, nessun Guardian**.
 
 👉 **D1 + il costo bastano da soli.** 🟢 Questa parte del verdetto e' **confermata
@@ -226,7 +226,7 @@ difetto formale che ha fatto scattare il FAIL.)_
 | 2 | **n e DD** | 🟢 **SI** — 116 / 175 **deal** · 11,52% / **19,40% @ rischio 2%** ⚠️ (175 deal = **88-175 posizioni**: potrebbe stare sotto 150) |
 | 3 | **uscita ad asse** | 🔴 **NO** — `NASDAQ_{A..M}` girano **tutti** con `RangeMode=0`. **Nessun asse d'uscita e' MAI girato su `RangeMode=1/PrevWin=5`**, cioe' su QUESTO ingresso |
 | 4 | **gemelli** | 🟠 **PARZIALE** — `ABTG_DAX_Live5m.mq5` r.32-33 ha `MINRANGE 0`/`MAXRANGE 0`: 🔴 **il cancello 17-40, che e' ingrediente DEFINITORIO, era SPENTO sul gemello**. U30USD/SPXUSD mai provati |
-| 5 | **TF cambiato** | 🔴 **NO** — e non e' cambiabile (`InpTimeframe != M5` → zero trade **in silenzio**). **Un TF che non si puo' cambiare non conta come cambiato**, e il surrogato (la larghezza) non e' un asse controllato (§3) |
+| 5 | **TF cambiato** | 🔴 **NO**, ma ✅ **CORRETTO IL 13/09 — la prima ragione era di un ALTRO EA.** Avevo scritto *"non e' cambiabile: `InpTimeframe != M5` da' zero trade"*: 🔴 **quell'input e' dell'EA ESTERNO** (r.36), e in `ABTG_Nasdaq_Live5m` le occorrenze di `InpTimeframe` sono **ZERO**. La ragione vera e' **piu' forte**: il TF del grafico **non entra nei numeri** — il range nasce da barre **M1**, il trailing da `InpTrailTF`, i filtri sono spenti, e l'**unica** occorrenza di `PERIOD_CURRENT` in tutto il sorgente e' r.296 (l'ATR), il cui ramo e' morto con `InpTrailStartR=0`. 👉 Girare a M15 darebbe **gli STESSI numeri, non zero trade**: cambiare il TF del grafico **non e' una misura**. ✍️ **E la voce 5 si chiude solo toccando il TF che definisce l'INGRESSO** (`InpPrevWindowMin` / `InpLevelTF`) — che e' **FIRMA DI CLAUDIO**. E' una porta da portargli, non una chiusa |
 
 ### 🔴 E il ponte che doveva tappare la voce 3 **e' rotto** — classe 297
 ~~*"l'INTERO asse uscita muove il PF di 0,052"*~~. L'aritmetica citata era giusta

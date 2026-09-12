@@ -63,8 +63,18 @@
 #      - l'ingresso si verifica SULLA CELLA DI RIPRODUZIONE (M1 deve dare
 #        n ESATTAMENTE 116 IS / 175 OOS), NON sull'uguaglianza fra celle;
 #      - l'n fra le celle e' ATTESO VARIABILE, e IL VERSO E' DICHIARATO
-#        ORA, PRIMA DEI NUMERI: l'n CRESCE quando il trailing si allenta
-#        (M1 -> M5). Se crescesse al contrario, c'e' qualcosa da leggere.
+#        ORA, PRIMA DEI NUMERI: l'n TENDE A CRESCERE quando il trailing
+#        si allenta (M1 -> M5).
+#        >>> E' UNA TENDENZA, NON UN TEOREMA, e la differenza va scritta.
+#            Il trailing usa iLow(TF,1), cioe' la barra precedente
+#            COMPLETATA: la M5 e' piu' VECCHIA e copre cinque minuti, la
+#            M1 e' piu' RECENTE. DI NORMA la M5 sta piu' in basso (stop
+#            piu' lasco -> meno uscite premature -> piu' posizioni
+#            arrivano a 1R -> piu' parziali -> n piu' alto), MA in un
+#            movimento veloce l'ultima M1 puo' avere un minimo PIU' BASSO
+#            della M5 completata prima. Quindi un'inversione locale non
+#            e' una catena rotta.
+#        >>> Su R142c, invece, il verso E' un teorema: vedi quel file.
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
@@ -107,9 +117,14 @@
 #  ###  COSA NON MISURA  ###
 # ---------------------------------------------------------------------
 #  Come R142a: NON la larghezza della finestra (serve la firma di Claudio
-#  PRIMA), NON i gemelli, NON il TF del grafico (non e' cambiabile), e
-#  resta UN SOLO REGIME. In piu': NON prova il trailing SPENTO, che e'
-#  R142c.
+#  PRIMA), NON i gemelli, e resta UN SOLO REGIME. In piu': NON prova il
+#  trailing SPENTO, che e' R142c.
+#  NON il TF del grafico (voce 5): NON ENTRA NEI NUMERI -- cambiarlo
+#  darebbe gli STESSI numeri, non zero trade (unica occorrenza di
+#  PERIOD_CURRENT a r.296, ramo morto con InpTrailStartR=0). La voce 5 si
+#  chiude solo toccando il TF dell'INGRESSO = firma di Claudio. Vedi
+#  R142a: la frase "InpTimeframe != M5 da' zero trade" era dell'EA
+#  ESTERNO, non di questo (classe 301).
 #
 # ---------------------------------------------------------------------
 #  ###  IL CONTRO-ESEMPIO INCORPORATO -- E IL SUO LIMITE, NOMINATO  ###
@@ -143,6 +158,20 @@
 #
 #     CANCELLO DURO   -> l'n: 116 IS e 175 OOS, esatti. Se l'n non torna,
 #                        CATENA ROTTA e non si legge nessun PF.
+#                        UNICA ECCEZIONE DICHIARATA: l'n non e' STRETTAMENTE
+#                        invariante al lotto -- il clamp di r.1151
+#                        (if(v < mn) v = 0) puo' togliere il deal della
+#                        parziale. Si diagnostica nel log, r.1017
+#                        ("parziale impossibile al lotto X"). Fuori da
+#                        quella via, l'n e' duro.
+#                        >>> E IL DURO E' MIRATO, non comodo: ho provato a
+#                            romperlo. Finestra sbagliata, taglio IS/OOS
+#                            sbagliato, un input d'ingresso divergente, un
+#                            build con logica d'ingresso diversa -- tutti
+#                            toccano le POSIZIONI, quindi l'n, quindi
+#                            scattano. L'UNICA cosa che passa e' proprio
+#                            il fix di sizing, che e' quello che il
+#                            cancello morbido e' li' per prendere.
 #     CANCELLO MORBIDO-> PF / DD / Profit. Se l'n torna ma i tre numeri
 #                        si discostano, il PRIMO SOSPETTO E' DICHIARATO
 #                        ORA: il fix di sizing 3af47ed. NON si va a

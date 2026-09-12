@@ -41,13 +41,35 @@
 #  >>> L'ASSE CORRETTO: InpTP1_ClosePct = 0 || 25 || 50 || 75.
 #      4 celle. Il 100 e' ESPULSO perche' r.977 lo esclude col "< 100":
 #      sarebbe un DOPPIONE ESATTO dello 0.
-#      25 e 75 sono due punti NUOVI e MORDONO davvero (0 < x < 100).
-#      50 resta la RIPRODUZIONE.
+#      25 e 75 sono due punti NUOVI e mordono per CODICE (0 < x < 100:
+#      gli unici consumatori di InpTP1_ClosePct sono r.220, r.325, r.977
+#      e r.992 -- nessun altro if li collassa). 50 resta la RIPRODUZIONE.
+#      >>> MA ESISTE UN COLLASSO PER DATO, NON PER CODICE, e va detto:
+#          closeVol = NormalizeVolume(vol * pct/100) e r.1151 fa
+#          "if(v < mn) v = 0". Se il lotto siede al minimo del broker, il
+#          25% (o tutti e tre) normalizza a ZERO -> nessuna parziale, ma
+#          il breakeven parte lo stesso (r.1002, fuori dal ramo).
+#          >>> QUINDI: se 25/50/75 danno numeri IDENTICI, NON e' "l'asse
+#              non morde". E' IL CLAMP AL LOTTO MINIMO, e si legge nel
+#              log (r.1017: "parziale impossibile al lotto X") e nel
+#              confronto con la cella 0.
+#          La stima aritmetica dice di no (~145 EUR a perdita a PF 0,963
+#          = un 2% vero di 10.000, non un lotto minimo), ma e' una STIMA:
+#          VOLUME_MIN di BCM non e' agli atti.
 #
 #  >>> E LA CELLA 0 NON E' UN PUNTO PURO DELL'ASSE DELLA PARZIALE.
-#      CONFONDIMENTO DICHIARATO: spegne la parziale E il breakeven
-#      INSIEME, perche' condividono lo stesso if. Va letta come "nessuna
-#      gestione al primo obiettivo", non come "parziale a zero".
+#      CONFONDIMENTO DICHIARATO, e i pezzi sono TRE:
+#        (1) spegne la parziale;
+#        (2) spegne il BREAKEVEN, perche' condivide lo stesso if;
+#        (3) gPartialDone non diventa MAI true, quindi InitialSL (r.1090)
+#            non prende mai il ripiego sull'ATR -- mentre nelle celle
+#            25/50/75, dopo la parziale, riskDist viene dall'ATR sul TF
+#            DEL GRAFICO. Oggi (3) e' INERTE, e per la stessa ragione del
+#            TF: riskDist alimenta solo profR -> trailArmato, e
+#            InpTrailStartR=0 cortocircuita a true (r.1038). Ma e' la
+#            STESSA dipendenza da pin, quindi sta scritta qui.
+#      Va letta come "nessuna gestione al primo obiettivo", non come
+#      "parziale a zero".
 #  >>> E L'USCITA SECCA A 1R NON E' RAGGIUNGIBILE DA NESSUN VALORE
 #      DELL'INPUT. Servirebbe una modifica dentro l'EA = fuori dal
 #      perimetro di un file prova. Sta scritto perche' e' una cosa che
@@ -62,11 +84,19 @@
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
-#  n atteso: la cella 50 riproduce 116 IS / 175 OOS (cancello DURO).
-#     Le celle 25 e 75 fanno LO STESSO numero di posizioni ma un numero
-#     di deal che puo' differire (chi tocca 1R fa 2 deal). La cella 0 fa
-#     MENO deal: attesa 88-116 IS e 130-175 OOS, e il numero esatto e'
-#     proprio l'informazione che cerco.
+#  n atteso, E QUI SI PUO' ESSERE ESATTI, non vaghi:
+#     la parziale scatta allo STESSO ISTANTE per 25, 50 e 75 -- il
+#     "target" di r.986 non dipende da InpTP1_ClosePct, cambia solo
+#     QUANTO esce. Quindi, chiamando P le posizioni e R quelle che
+#     toccano 1R:
+#         n(25) = n(50) = n(75) = P + R   ESATTAMENTE UGUALI
+#         n(0)  = P                       (posizioni pure)
+#     >>> n(50) = 116 IS / 175 OOS e' il cancello DURO.
+#     >>> n(0) deve stare fra 88 e 175 in OOS (classe 226), e
+#         R = 175 - n(0) e' il numero di posizioni che toccano 1R:
+#         un dato che oggi NON abbiamo e che esce gratis.
+#     >>> E una differenza FRA 25, 50 e 75 non e' un risultato: e' il
+#         clamp al lotto minimo (vedi sopra).
 #  PF atteso: [NON MISURATO]. Banda dichiarata dall'unico asse d'uscita
 #     confrontabile (NASDAQ_I, span 0,192 su RangeMode=0): ~0,80 - ~1,15.
 #     Non invento un punto centrale.
@@ -107,9 +137,25 @@
 #     risolvere prima: il cancello 17-40 punti indice e' 0,059%-0,138%
 #     del prezzo su NASUSD e NON si copia nudo su un indice con un altro
 #     livello di prezzo.
-#  3. NON cambia il TF del grafico (voce 5) e non puo': InpTimeframe !=
-#     M5 da' zero trade in silenzio. Un TF che non si puo' cambiare non
-#     conta come cambiato, e resta scritto nel certificato.
+#  3. NON chiude la voce 5 (TF cambiato), e il motivo NON e' "il TF non
+#     si puo' cambiare": e' che IL TF DEL GRAFICO NON ENTRA NEI NUMERI.
+#     Verificato: l'EA non ha nessun input di timeframe (i suoi input
+#     sono r.171-247, e le occorrenze di InpTimeframe sono ZERO), il
+#     range nasce da barre M1, il trailing da InpTrailTF, i filtri sono
+#     spenti, e l'UNICA occorrenza di PERIOD_CURRENT in tutto il sorgente
+#     e' r.296 (l'ATR), il cui ramo e' morto con InpTrailStartR=0 pinnato.
+#     >>> Girare a @PERIODO M15 darebbe gli STESSI numeri, non zero
+#         trade: cambiare il TF del grafico NON E' UNA MISURA.
+#     >>> CONSEGUENZA PER IL CERTIFICATO: la voce 5 su questo motore non
+#         si chiude col TF del grafico. Si chiuderebbe solo cambiando il
+#         TF che definisce l'INGRESSO (InpPrevWindowMin / InpLevelTF) =
+#         FIRMA DI CLAUDIO. Va scritto cosi' in REGISTRO_TEST.md.
+#     >>> DA DOVE VENIVA LA FRASE SBAGLIATA, perche' la classe conta:
+#         "InpTimeframe != M5 da' zero trade in silenzio" e' VERO, ma
+#         dell'EA ESTERNO (Nasdaq_PreOpen_Breakout_EA.mq5 r.36 e r.834).
+#         L'avevo applicata all'EA DI CASA, che quell'input non ce l'ha.
+#         Stessa famiglia, codice diverso: un rilievo non si trasferisce
+#         da un sorgente all'altro senza riaprirlo. Classe 301.
 #  4. UN SOLO REGIME (21 mesi di tick BCM sugli indici). Nessuna cella e'
 #     promuovibile senza la prova di regime (Emendamento, regola C).
 #
@@ -145,6 +191,20 @@
 #
 #     CANCELLO DURO   -> l'n: 116 IS e 175 OOS, esatti. Se l'n non torna,
 #                        CATENA ROTTA e non si legge nessun PF.
+#                        UNICA ECCEZIONE DICHIARATA: l'n non e' STRETTAMENTE
+#                        invariante al lotto -- il clamp di r.1151
+#                        (if(v < mn) v = 0) puo' togliere il deal della
+#                        parziale. Si diagnostica nel log, r.1017
+#                        ("parziale impossibile al lotto X"). Fuori da
+#                        quella via, l'n e' duro.
+#                        >>> E IL DURO E' MIRATO, non comodo: ho provato a
+#                            romperlo. Finestra sbagliata, taglio IS/OOS
+#                            sbagliato, un input d'ingresso divergente, un
+#                            build con logica d'ingresso diversa -- tutti
+#                            toccano le POSIZIONI, quindi l'n, quindi
+#                            scattano. L'UNICA cosa che passa e' proprio
+#                            il fix di sizing, che e' quello che il
+#                            cancello morbido e' li' per prendere.
 #     CANCELLO MORBIDO-> PF / DD / Profit. Se l'n torna ma i tre numeri
 #                        si discostano, il PRIMO SOSPETTO E' DICHIARATO
 #                        ORA: il fix di sizing 3af47ed. NON si va a
