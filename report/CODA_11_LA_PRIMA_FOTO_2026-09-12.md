@@ -10,11 +10,14 @@
 
 Il comando vero dell'attivita' `ABTG_AggiornaNews`, letto dal registro:
 
-```
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File
-"C:\Users\Administrator\Desktop\GITHUB-claude-creating-agents-SgGpD (1)\
- GITHUB-claude-creating-agents-SgGpD\backtest_pipeline\aggiorna_news.ps1"
-```
+> ⛔ **QUESTO NON SI INCOLLA DA NESSUNA PARTE**: e' il comando **letto dal
+> registro delle attivita'**, cioe' una PROVA di cosa fa il VPS — non una riga
+> da lanciare. Per questo non e' in un blocco eseguibile: il cancello, la prima
+> volta, mi ha bocciato il referto proprio per questo, e aveva ragione.
+
+    powershell.exe -NoProfile -ExecutionPolicy Bypass -File
+    "C:\Users\Administrator\Desktop\GITHUB-claude-creating-agents-SgGpD (1)\
+     GITHUB-claude-creating-agents-SgGpD\backtest_pipeline\aggiorna_news.ps1"
 
 Tre cose, tutte e tre verificate:
 1. 🔴 **non parte da `C:\ABTG`** e **non parte dal repo di lavoro**: parte da una

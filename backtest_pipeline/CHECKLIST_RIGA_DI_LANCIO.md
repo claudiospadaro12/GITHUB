@@ -14748,3 +14748,39 @@ runner (registra e cancella attività) e **un divieto non si aggira** —
 ✅ **Collaudo eseguito, non letto**: caricate le funzioni vere del runner e
 fatto girare `VagliaScript` sul file nuovo →
 **`ok = True · motivo = G1 e G2 passati · corsia = LETTURA`**.
+
+---
+
+## 🔁 CLASSE 254 (12/09/2026) — IL CANCELLO INCATENATO AL PUSH: IL VERDETTO ARRIVA DOPO
+
+**Il fatto, due volte nella stessa notte.** Ho scritto comandi della forma
+
+    python3 controlla_riga.py ...  &&  git commit ...  &&  git push
+
+e **tutte e due le volte il cancello ha detto FAIL e il push e' partito lo
+stesso** — perche' `controlla_riga.py` **stampa** il verdetto ma esce con
+codice **0**, quindi la catena `&&` prosegue. Il verdetto l'ho letto **dopo**
+che la roba era gia' sul remoto.
+
+🔴 **E' la regola del 09/09 aggirata dalla forma del comando, non
+dall'intenzione**: *"se il controllo non e' ancora tornato, SI ASPETTA"*.
+Incatenare il controllo alla consegna vuol dire **non aspettare mai**.
+
+### ✅ LA REGOLA
+**Il cancello si lancia DA SOLO. Si LEGGE. Poi, in un comando separato, si
+committa.** Niente `&&` fra un controllo e una consegna.
+📌 E vale anche quando il controllo sembra una formalita': le due volte in cui
+e' successo, il FAIL era **vero** tutte e due le volte (un blocco `powershell`
+con dentro `Stop-Process`; un blocco con il comando di un'attivita' pianificata
+citato come prova). **Un cancello che non puo' fermare la mano non e' un
+cancello: e' un commento.**
+
+### 🧾 E LA CLASSE FIGLIA: UN BLOCCO CITATO SEMBRA UN BLOCCO DA LANCIARE
+Tutte e due le bocciature hanno la **stessa forma**: un blocco di codice
+**citato come PROVA** (*"guarda cosa fa il VPS"*, *"guarda com'era il difetto"*)
+scritto in un blocco ```` ```powershell ```` — che per il cancello, e per chi
+legge, e' **una riga da incollare**.
+👉 **Le prove si scrivono in un blocco NON eseguibile** (indentato), con sopra
+una riga che dice **"questo non si incolla da nessuna parte"**. Il cancello ha
+ragione a bocciare: in un referto che Claudio legge, un blocco `powershell` e'
+un invito.
