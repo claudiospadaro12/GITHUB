@@ -46,12 +46,12 @@
 #      IL DRIVER COMPILA L'EA DALLA TESTA DEL BRANCH 'lavoro', NON DAL
 #      PIN ($EABranch="lavoro" e' cablato in walkforward_generico.ps1).
 #      Per questo i round di questa tabella sono stati SCELTI guardando
-#      a che commit sta il loro .mq5: nessuno dei sette EA qui sotto sta
+#      a che commit sta il loro .mq5: nessuno dei SEI EA qui sotto sta
 #      su un commit "IN CORSO D'OPERA -- NON COMPILARE". I dodici file
 #      prova che ci stavano sono stati TOLTI, e il motivo e' scritto nel
 #      blocco ESCLUSI qui sotto.
 #      >>> Se fra la scrittura di questo file e la corsa qualcuno
-#          committa su uno di quei sette EA, questa garanzia scade.
+#          committa su uno di quei SEI EA, questa garanzia scade.
 #          Il controllo si rifa' in un secondo, per ogni EA:
 #             git log -1 -- mql5/Experts/<NOME>.mq5
 # =====================================================================
@@ -345,7 +345,7 @@ if($SoloControllo){
 if($Da -ne ""){ Write-Host ("RIPARTENZA: si comincia da '" + $Da + "', i round prima sono SALTATI.") -ForegroundColor Yellow }
 Write-Host ""
 Write-Host "AVVERTENZA DICHIARATA: il driver prende l'EA .mq5 e gli include dalla" -ForegroundColor Yellow
-Write-Host "TESTA del branch 'lavoro', NON da questo pin. I sette EA di questa" -ForegroundColor Yellow
+Write-Host "TESTA del branch 'lavoro', NON da questo pin. I sei EA di questa" -ForegroundColor Yellow
 Write-Host "tabella sono stati controllati uno per uno e NESSUNO sta su un commit" -ForegroundColor Yellow
 Write-Host "'NON COMPILARE'. Se qualcuno ha committato da allora, la garanzia scade." -ForegroundColor Yellow
 
