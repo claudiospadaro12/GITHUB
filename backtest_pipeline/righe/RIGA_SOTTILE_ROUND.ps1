@@ -542,7 +542,23 @@ $BancoBT = 'C:\MT5_Backtest'
 #  canarina, 8d9d4fb9, 0c38419f, ab1a206f), che porta il PROPRIO $PIN
 #  congelato. Solo le TRE righe nuove pinnano il commit di questo giro.
 # ---------------------------------------------------------------------
-$PIN = '41c635f89eff17cabc7db83a883426caa9851c55'
+#
+#  DICIASSETTESIMO GIRO (13/09/2026, notte). $PIN 41c635f8 -> c5a7d225.
+#  Obbligato: il driver prende il file prova DA $PIN, quindi coi file
+#  vecchi al pin vecchio girerebbe la VERSIONE SBAGLIATA. I tre R142
+#  sono stati riscritti dopo un FAIL del cancello (classi 299 e 300:
+#  un asse con due celle identiche per costruzione, e un falsificatore
+#  che scattava sull'ipotesi VERA). Il commit nuovo tocca SOLO quei tre
+#  file prova.
+#  MISURATO al pin nuovo c5a7d225, non assunto:
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      i tre file prova                           presenti (git cat-file -e)
+#      41c635f8 e' ANTENATO di c5a7d225           (git merge-base, exit 0)
+#  Le righe gia' in coda non si muovono: ognuna pinna il PROPRIO commit
+#  di questa riga sottile, che porta il PROPRIO $PIN congelato.
+# ---------------------------------------------------------------------
+$PIN = 'c5a7d225513415445125254b377b5bc1bbe6a543'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
