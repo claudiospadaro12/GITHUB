@@ -15914,3 +15914,88 @@ era stato aperto**, e se ne erano lette **due colonne su quattordici**.
 >    su USD/EUR differiscono dello **0,9%** (0,86287 contro 0,8552). Si usano
 >    lo stesso — sono l'unica misura che c'e' — ma **la data va accanto al
 >    numero**, sempre.
+
+---
+
+## 272. 🛤️ LA GUARDIA SU UN PERCORSO CONFRONTATO COME **STRINGA**: sei grafie su otto passavano, e la guardia si dichiarava «a tre tracce» (12/09/2026)
+
+**Il caso reale.** `RIGA_SPREADLOGGER_RACCOLTA.ps1` v2 era nata **proprio** per
+chiudere un buco: il **REALE 10105439** e il **banco 50504400**, essendo BCM e
+senza `-V3` nel percorso, passavano l'eleggibilita'. La correzione aggiungeva il
+rifiuto, e il referto la dichiarava *"rifiutati con lo stesso schema a **tre
+tracce** indipendenti del 100k (`origin.txt`, percorso, login nei log)"*.
+
+🔴 **Le tracce erano DUE**, e mancava proprio quella robusta. Il codice:
+
+```powershell
+# quello che c'era (v2) -- UGUAGLIANZA ESATTA, e il percorso non si guarda
+if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_REALE){ ... }
+if($c.VistoReale){ ... }
+```
+
+contro il `-V3`, che invece era fatto bene:
+
+```powershell
+if($c.Origin   -like "*-V3*"){ ... }   # sottostringa
+if($c.Percorso -like "*-V3*"){ ... }   # E ANCHE sul percorso
+```
+
+**Misurato ESEGUENDO** lo script su otto cartelle finte (non leggendo:
+eseguendo). **Sei su otto PASSAVANO il gate:**
+
+| grafia | esito v2 |
+|---|---|
+| reale in modo **PORTABILE**: nessun `origin.txt`, nessun login recente nei log | 🔴 **PASSA** |
+| banco in modo **PORTABILE** | 🔴 **PASSA** |
+| `C:/BCM_Reale` — slash invece di backslash | 🔴 **PASSA** |
+| `C:\BCM_RE~1` — **nome 8.3** (su Windows esiste SEMPRE) | 🔴 **PASSA** |
+| `C:\BCM_Reale\..\BCM_Reale` — la fuga col `..\` | 🔴 **PASSA** |
+| `"C:\BCM_Reale \"` — spazio in coda, invisibile a occhio | 🔴 **PASSA** |
+| `c:\bcm_REALE` — maiuscole miste | 🟢 rifiutato (`-ieq`) |
+| `C:\BCM_Reale` — identico | 🟢 rifiutato |
+
+🔴 **E' la ricaduta esatta del 10/09**, dove tre gemelli di una guardia analoga
+passavano tutti (la radice di un disco, i nomi 8.3, la fuga col `..\`). La
+classe era gia' pagata una volta: e' stata ripagata perche' la correzione
+successiva non l'ha riletta.
+
+### 🎓 LE TRE COSE DA PORTARE VIA
+1. 🛤️ **Confrontare due PERCORSI non e' confrontare due STRINGHE.** Lo stesso
+   posto sul disco ha infinite scritture legittime: `/` per `\`, il nome 8.3,
+   `..\`, lo spazio o l'apice in coda, l'UNC, il link. Un percorso si
+   **normalizza** prima di confrontarlo (`Get-Item ... .FullName`, ripiego
+   `[IO.Path]::GetFullPath`), e si tiene **una seconda cintura a
+   sottostringa** per quando la cartella non esiste (li' `Get-Item` non
+   scioglie niente). Per il nome 8.3 il segno e' il prefisso troncato:
+   `BCM_RE~`, `MT5_BA~`.
+2. 🚪 **«Rifiuta cio' che riconosco» e' fail-OPEN PER COSTRUZIONE.** Una
+   lista di cose da scartare protegge solo dalle cose che qualcuno ha gia'
+   scritto nella lista: una grafia nuova, o un terminale in modo **portabile**
+   senza `origin.txt`, ci passa davanti. Dove il percorso lo **incolla una
+   persona** (`-CartellaDati`, `-Terminal`, `-Percorso`), la guardia va
+   girata al verso giusto: **pretendere un FATTO POSITIVO** che sia il
+   bersaglio voluto, non l'assenza degli altri.
+3. 🧪 **Una correzione di sicurezza si prova ESEGUENDO le grafie, e l'elenco
+   dei casi va scritto con dentro le grafie.** L'autore aveva provato **6 casi
+   su 6 verdi** — e aveva ragione: **tutti e sei esercitavano `origin.txt` o i
+   log**, cioe' le due tracce che c'erano. **Un test che non puo' fallire non
+   e' un test.** Il caso che rompeva era il settimo, e il settimo lo costruisce
+   chi **non** ha scritto la correzione.
+
+### ✅ COME SI CONTROLLA, in tre domande
+- **Il percorso viene NORMALIZZATO prima del confronto?** Se nel codice c'e'
+  `-eq`/`-ieq` fra un percorso e una costante, la risposta e' no.
+- **La guardia guarda sia il CONTENUTO (`origin.txt`, un log) sia il
+  PERCORSO?** Una traccia sola non e' "tre tracce", e va scritto il numero
+  vero nel referto.
+- **C'e' una manopola che accetta un percorso a mano? Allora chiede una PROVA
+  POSITIVA?** Se no, tutta la robustezza di sopra e' aggirabile con un
+  parametro.
+
+**Riparazione**: `INDURIMENTO_GRAFIE_v1`, pin
+`f13218a265bf626b1ba663229b332cbff9958ac4`, marcatore
+`MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3`. Provato eseguendo: **14 casi su 14**
+(9 grafie di reale/banco rifiutate, 100k rifiutato, cartella anonima fermata
+col motivo, piccolo che passa per tutte e tre le prove positive) piu' la
+regressione sul percorso automatico. Referto:
+`report/MISURA_SPREAD_FOREX_2026-09-12.md` §4.

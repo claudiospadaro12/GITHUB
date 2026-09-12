@@ -31,7 +31,14 @@ percorsi proposti.
    **0,7425** invece di 0,67, e il pavimento 40x chiede **29,7 pip invece di
    26,8** (§3).
    🧪 **E non dipende dalla data dei cambi**: rifatto con una tabella
-   **indipendente**, lo scarto e' **0,124%** (§3.1-bis). Il ritrovamento tiene.
+   **indipendente**, su GBPUSD lo scarto e' **0,124%** e sul **vantaggio di
+   AUDUSD** (che e' IL numero strategico) **0,128%** (§3.1-bis). Il
+   ritrovamento tiene.
+   🟠 **E si dice anche DOVE non tiene, perche' e' un fatto e non un difetto:**
+   sulle coppie a base **EUR** l'euro e' il **numerario**, la deriva **non si
+   cancella**, e su EURUSD lo scarto e' **0,897%**. Nessuno dei numeri
+   strategici passa da una coppia a base EUR — e' per questo che reggono, non
+   perche' regga ogni riga.
 4. 🧪 **E il contro-esempio morde piu' di quanto la caccia temesse.** Non serve
    che lo spread esca 0,5: **alla lettura unica di 0,2 che abbiamo GIA'**, un
    M30 con stop 28 pip fa **37,7x** — **sotto il 40x**. Perche' il bersaglio a
@@ -202,10 +209,29 @@ coppie **diverse**, torna. Scarto relativo massimo **0,012%**.
 | **GBP** | 1,17026 | EURGBP | 🟡 1 coppia |
 | **AUD** | 0,61372 | EURAUD | 🟡 1 coppia |
 
-### Il conteggio ONESTO delle ancore, rifatto
+### Il conteggio ONESTO delle ancore, rifatto — **e la v2 ne contava ancora uno di troppo**
+
+> 🔴 **CORRETTO DAL CANCELLO (secondo giro).** La v2 metteva accanto a EURUSD
+> **due** numeri "scritti da altri": `~0,5` (10/09) e `0,47` (CACCIA_SABATO 2.3).
+> **Il secondo non e' un riscontro: e' LA STESSA DERIVAZIONE.** Testuale,
+> `CACCIA_SABATO_2026-09-13.md` r.128-130: _«su EURUSD **la mia derivazione**
+> da' 0,47 pip»_. Contarlo e' **lo stesso errore fatto su USDJPY**, in versione
+> piu' piccola: un numero circolare promosso a conferma.
+> 🟢 **E l'ancora vera e' piu' FORTE di quella che citavo.** Il referto del
+> 10/09 scrive un **all-in EURUSD di 0,86 pip**, e lo scrive partendo dalle
+> **commissioni MISURATE** (−4,0000 EUR esatti, n=84, varianza zero): ingressi
+> **diversi** dai nostri (noi leggiamo `TickValue` dal disco). Con lo spread
+> della sonda (`SpreadPt=4` = **0,4 pip**) quell'all-in implica una commissione
+> di **0,46**. La nostra derivazione da' **0,4636**: riproduce a **due
+> decimali**, non a una cifra.
+> 🟠 **[RESIDUO DICHIARATO]** l'indipendenza e' sui **dati**, non sulla
+> **formula**: non e' escluso che il 10/09 quei 4,0 EUR siano stati divisi per
+> il valore del pip con la stessa legge. Va detto cosi' invece di promettere di
+> piu'.
+
 | coppia | derivato | scritto da altri | esito |
 |---|---:|---:|---|
-| **EURUSD** | **0,4636** pip | `~0,5` (10/09) · `0,47` (CACCIA_SABATO 2.3) | 🟢 **riproduce — l'UNICA ancora genuina** |
+| **EURUSD** | **0,4636** pip | **0,86 all-in** (10/09) − **0,4 spread** (sonda) = **0,46** | 🟢 **riproduce a due decimali — l'UNICA ancora genuina** |
 | **USDJPY** | **0,6374** pip | `~0,60` (CACCIA_SABATO 2.3) | 🔴 **NON riproduce** — e ora si sa perche': quel numero poggiava su un USDJPY **assunto a 150** |
 | **GBPUSD** | **0,5425** pip | `~0,47` *(= il numero di EURUSD)* | 🔴 **NON riproduce** |
 
@@ -220,11 +246,22 @@ Rifatto con la tabella **indipendente** del 10/09 (i cambi impliciti nelle
 commissioni **misurate**): **non dipende**, perche' la commissione e' un
 **RAPPORTO** fra due valute e la deriva comune **si cancella**.
 
+🔴 **MA VALE SOLO SE NESSUNA DELLE DUE GAMBE E' L'EURO**, e la v2 non lo
+diceva. Il conto e' in EUR: l'euro e' il **numerario**. Su GBPUSD e AUDUSD
+(base e quota entrambe non-EUR) la deriva del dollaro sta **sopra e sotto** e
+si cancella; su EURUSD la base **e'** l'euro, il rapporto e' `1/(USD/EUR)` e la
+deriva passa **tutta**. Quindi lo **0,897%** di EURUSD e' **atteso per
+costruzione**, non un difetto — e l'autotest ora lo **dichiara prima** di
+stamparlo invece di contarlo come un verde di misura (prima passava col
+**10% di margine**: una data un po' piu' distante e lo strumento si sarebbe
+rifiutato di stampare per un fatto di mercato).
+
 | coppia | cambi 17/08 | cambi 10/09 | scarto |
 |---|---:|---:|---:|
-| **GBPUSD** | **0,5425** | **0,5432** | 🟢 **0,124%** |
-| AUDUSD | 0,2845 | 0,2848 | 🟢 0,121% |
-| EURUSD | 0,4636 | 0,4677 | 🟢 0,897% |
+| **GBPUSD** | **0,5425** | **0,5432** | 🟢 **0,124%** *(ne' base ne' quota sono EUR)* |
+| AUDUSD | 0,2845 | 0,2848 | 🟢 0,121% *(idem)* |
+| 🎯 **vantaggio AUDUSD su GBPUSD** | **0,2580** | **0,2583** | 🟢 **0,128%** ⬅️ *e' questo il numero strategico* |
+| EURUSD | 0,4636 | 0,4677 | 🟠 0,897% — **atteso**: base EUR = numerario |
 
 🟡 **Le due date vanno dichiarate, ed erano mescolate nella v1**: su `USD/EUR`
 differiscono dello **0,9%** (0,86287 contro 0,8552) — e' deriva di cambio fra
@@ -360,29 +397,75 @@ due), **3** `[TERMINALE]` + **1** `[CONTO]` su **prosa italiana che nomina il
 100k per RIFIUTARLO**. 👉 **Il documento non e' una riga di lancio: la riga e'
 il BLOCCO 3 dentro il documento**, e va estratta prima di passarla al cancello.
 
-### 🔴 E LA RIGA E' STATA RI-PINNATA OGGI, perche' ho indurito lo script
+### 🔴 E LA RIGA E' STATA RI-PINNATA OGGI **DUE VOLTE**, e la seconda l'ha chiesta il cancello
+
+**Primo indurimento (`INDURIMENTO_VISTOPICCOLO_v1`, marcatore `_v2`).**
 `VistoPiccolo` era **misurato** (r.222) e **mai usato come cancello**:
 l'eleggibilita' era `MQL5 + bases BCM + non-V3`, quindi il **REALE 10105439** e
 il **banco 50504400** — anch'essi BCM e **senza** `-V3` — **passavano il
 gate**. Non e' mai diventato un incidente per **tre fortune** (la riga non
 scrive sul terminale, la discriminante finale e' il **file di stato del
 logger**, e sull'ambiguita' **si ferma** con un `throw`). 🔴 **Tre fortune non
-sono un metodo**, quindi il buco e' chiuso:
-- reale e banco ora **rifiutati** con lo stesso schema a **tre tracce**
-  indipendenti del 100k (`origin.txt`, percorso, login nei log);
-- `VistoPiccolo` promosso a criterio di selezione **dove restringe**;
-- 🟢 **fallisce in SICUREZZA**: se `origin.txt` manca e i log non nominano
-  nessuno, **non cambia niente** rispetto a prima.
+sono un metodo**, quindi il buco e' stato chiuso.
 
-**Provato**: `Parser::ParseFile` **0 errori** (5.924 token) e **6 casi su 6
-verdi** (reale con e senza `\` finale, minuscolo, banco, **il piccolo che DEVE
-passare**, `origin.txt` vuoto).
+### 🔴 SECONDO INDURIMENTO (`INDURIMENTO_GRAFIE_v1`, marcatore `_v3`) — **la mia correzione era fail-OPEN, ed e' MISURATO**
+La v2 diceva *"rifiutati con lo stesso schema a **tre tracce** indipendenti del
+100k"*. 🔴 **Era falso: le tracce erano DUE**, e mancava proprio quella robusta.
+Il `-V3` si rifiuta con `-like "*-V3*"` su `origin.txt` **e sul percorso**;
+reale e banco li rifiutavo con l'**uguaglianza esatta** del contenuto di
+`origin.txt` e **senza guardare il percorso**.
 
-🔴 **Conseguenza da non perdere:** marcatore -> **`..._RACCOLTA_v2`** e pin del
-BLOCCO 3 -> **`e86deb5a367ca19da918c5a16248d35b4307143a`**. **I BLOCCHI 1-2
+🧪 **Il cancello ha costruito il settimo caso ed ESEGUITO lo script su otto
+cartelle finte. SEI PASSAVANO:**
+
+| grafia provata | v2 | v3 |
+|---|---|---|
+| reale in modo **PORTABILE** (nessun `origin.txt`, nessun login recente nei log) | 🔴 **PASSA** | 🟢 rifiutato *(percorso)* |
+| banco in modo **PORTABILE** | 🔴 **PASSA** | 🟢 rifiutato *(percorso)* |
+| `origin.txt = C:/BCM_Reale` *(slash)* | 🔴 **PASSA** | 🟢 rifiutato |
+| `origin.txt = C:\BCM_RE~1` *(nome 8.3)* | 🔴 **PASSA** | 🟢 rifiutato |
+| `origin.txt = C:\BCM_Reale\..\BCM_Reale` *(la fuga)* | 🔴 **PASSA** | 🟢 rifiutato |
+| `origin.txt = "C:\BCM_Reale \"` *(spazio in coda)* | 🔴 **PASSA** | 🟢 rifiutato |
+| `origin.txt = c:\bcm_REALE` *(maiuscole miste)* | 🟢 rifiutato | 🟢 rifiutato |
+| `origin.txt = C:\BCM_Reale` *(identico)* | 🟢 rifiutato | 🟢 rifiutato |
+
+🔴 **E' la stessa classe del 10/09** (*"tre gemelli di una guardia analoga
+passavano tutti: la radice di un disco, i nomi 8.3, la fuga col `..\`"*) →
+**checklist classe 272**. La lezione, che e' piu' grossa del difetto:
+**confrontare due percorsi NON e' confrontare due stringhe**, e una guardia
+costruita come *"rifiuta cio' che riconosco"* e' **fail-OPEN per costruzione** —
+basta una grafia nuova per passarle davanti.
+
+**La v3, per intero:**
+- `NormalizzaPercorso()`: `/` → `\`, apici e spazi via, `..\` e **nome 8.3**
+  sciolti con `Get-Item`, ripiego su `GetFullPath`;
+- **tre tracce anche per reale e banco**, come il `-V3`: `origin.txt`
+  **normalizzato**, **percorso** normalizzato, login nei log — piu' i **segni
+  8.3** (`BCM_RE~`, `MT5_BA~`) cercati a sottostringa;
+- 🔒 **`-CartellaDati` ora FALLISCE CHIUSA**: pretende un **fatto POSITIVO**
+  che la cartella sia del piccolo (file di stato del logger, *oppure* login
+  `50503392` nei suoi log, *oppure* `origin.txt`/percorso che nominano
+  `BCM Markets MT5 Terminal` **senza** `-V3`). Era la via **raggiungibile**:
+  la scelta automatica e' protetta a monte dal filtro sul profilo `%APPDATA%`,
+  la manopola accettava **qualunque** percorso — ed e' proprio la manopola che
+  `RIGA_SPREADLOGGER_DA_MANDARE.md` dice a Claudio di **incollare a mano**.
+
+**Provato eseguendo, 14 casi su 14**: le **9** grafie di reale/banco
+**rifiutate**, il **100k rifiutato**, la cartella **muta e anonima FERMATA** col
+motivo scritto, il **piccolo che PASSA** per tutte e tre le prove positive, e la
+**regressione sul percorso automatico** (tre candidate: sceglie il piccolo,
+rifiuta reale e 100k). `Parser::ParseFile` **0 errori**, **ASCII puro**.
+
+🔴 **Conseguenza da non perdere:** marcatore → **`..._RACCOLTA_v3`** e pin del
+BLOCCO 3 → **`f13218a265bf626b1ba663229b332cbff9958ac4`**. **I BLOCCHI 1-2
 restano al pin vecchio** (l'EA non e' stato toccato): **la pagina ha due pin,
-apposta**, e §2 lo dice. 🚦 **Il pin nuovo non e' ancora verificato via `raw`**
-(il commit e' di oggi): va fatto prima dell'invio.
+apposta**, e §2 lo dice.
+✅ **Pin verificato via `raw` END-TO-END**: HTTP **200**, **37.775 byte**,
+**identico byte per byte** alla copia locale (`86736d74…`), marcatore `_v3`
+presente e `_v2` **assente** (quindi il pin vecchio, quello con la guardia
+bucata, **non puo' piu' girare per sbaglio**: il controllo del marcatore lo
+boccia), **0** occorrenze di `Stop-Process`/`Start-Process`/`CloseMainWindow`/
+`.Kill(`/`taskkill`, **0** byte non-ASCII.
 
 ### ⏳ E I GIORNI CI SONO — oggi e' il giorno giusto
 `HANDOFF.md` §06/09: *"lanciare `RIGA_SPREADLOGGER_RACCOLTA.ps1` dopo **5
@@ -466,6 +549,7 @@ Va ripetuto ogni volta che si cita un suo numero.
 | **l'esecuzione della PROP vera** | e' il feed **BCM**. Un broker prop puo' avere spread e regole diverse |
 | **lo spread al MINUTO** | il grano e' l'**ORA**. Su un'apertura di sessione la direzione dell'errore e' **nota e sfavorevole** |
 | **gli stop M30 forex** | 🔴 **[NON MISURATO]**, §3.4. Senza, il rapporto `stop/all-in` su M30 **non si chiude** |
+| **se i tick reali FOREX siano sul disco del banco** | 🔴 **[NON MISURATO]**, §4/B1 — e non e' una nota a margine: **la Strada B1 NON PARTE senza questa misura**. La sonda del 17/08 **non ha nessuna colonna sui tick** (`BarreTF`/`BarreD1` sono BARRE), quindi non dice **ne' che ci sono ne' che mancano**. Il mio *"potrebbero esserci"* era un **ragionamento**, non una misura |
 | ~~il cambio del CHF~~ | 🟢 **BUCO CHIUSO**: il CHF e' sul disco dal 17/08 (`USDCHF`/`EURCHF`). **CHFJPY = 0,7872 pip.** La v1 lo dichiarava `[NON CALCOLABILE]`: era falso |
 | **i cambi sono di UNA data** | 17/08 17:34. Fra 17/08 e 10/09 `USD/EUR` deriva dello **0,9%**. Sui **rapporti** si cancella (§3.1-bis), ma un uso futuro a valuta singola va ri-ancorato |
 
@@ -476,7 +560,7 @@ Va ripetuto ogni volta che si cita un suo numero.
 | file | che cos'e' |
 |---|---|
 | `report/MISURA_SPREAD_FOREX_2026-09-12.md` | questo referto |
-| `backtest_pipeline/calcola_pedaggio_forex.py` | il pedaggio all-in per coppia, ASCII puro, **autotest contro numeri di altre sessioni**, contro-esempio incorporato. **Zero passate di tester** |
+| `backtest_pipeline/calcola_pedaggio_forex.py` | il pedaggio all-in per coppia, ASCII puro, **autotest contro numeri di altre sessioni**, contro-esempio incorporato. **Zero passate di tester**. **v3**: l'ancora e' ora l'all-in 0,86 del 10/09 (non il `0,47` circolare), `--cambi 10-09` **etichetta la data giusta** (la v2 stampava comunque 17/08), e la robustezza alla data e' **dichiarata per classe di coppia** invece di essere una soglia sola |
 | `.../biblioteca/sorgenti/RealCostSpreadP95Logger_SongBoZhong-NOLICENSE_mql5code74148_2026-09-12.mq5` | il sorgente di terzi, **letto e scartato con motivo** (§2) |
 
 **Nessuno script nuovo verso il VPS**, perche' non serviva: la riga della
@@ -500,7 +584,9 @@ python3 backtest_pipeline/calcola_pedaggio_forex.py \
 | `controlla_riga.py --ps1 ...RACCOLTA.ps1` (indurito) | 🟢 **0** |
 | `controlla_riga.py --riga <il .md intero> --ps1 ...RACCOLTA.ps1` | 🔴 **1**, 9 bloccanti — **tutti falsi positivi**, §4 |
 | `controlla_prova.py` | ⚪ **2** = *"arguments are required: prove"* -> **non applicabile**: nessun file prova, perche' **nessuna delle due strade usa il tester** |
-| `pwsh Parser::ParseFile` su `...RACCOLTA.ps1` | 🟢 **0 errori**, 5.924 token |
+| `pwsh Parser::ParseFile` su `...RACCOLTA.ps1` (v3) | 🟢 **0 errori** |
+| 🧪 **guardia reale/banco ESEGUITA su 14 casi finti** (9 grafie + 100k + cartella anonima + 3 prove positive del piccolo) | 🟢 **14/14**, e in v2 erano **6 su 8 che passavano** |
+| 🧪 **regressione: percorso AUTOMATICO con 3 candidate** | 🟢 sceglie il **piccolo**, rifiuta **reale** e **100k** |
 | `calcola_pedaggio_forex.py --autotest` (e `--cambi 10-09`) | 🟢 **0**, tutto VERDE |
 
 🧪 **E due difetti li ho trovati provando a rompere la MIA correzione**, non
