@@ -656,3 +656,62 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  CLAUDIO: si segnala e non si tocca.
 # =====================================================================
 ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  SEDICESIMO GIRO -- LE TRE RIGHE R142: GLI ASSI D'USCITA SULLA
+#  PRE-APERTURA DEL NASDAQ. Pinnate a 4dc16e9, che porta $PIN=41c635f8.
+#
+#  NASCONO DA UN FAIL DEL CANCELLO, NON DA UN'IDEA.
+#  Il 12/09 avevo archiviato ABTG_Nasdaq_Live5m (770203) come SCARTATO.
+#  Il secondo strato lo ha bocciato: al CERTIFICATO DI MORTE mancano la
+#  voce 3 (uscita messa ad asse) e la voce 5 (TF cambiato), e la voce 4
+#  (gemelli) e' parziale. Un morto senza certificato non e' un morto.
+#  La voce 3 e' l'unica delle tre che si puo' chiudere STANOTTE, senza
+#  firme: e' una misura, non una decisione.
+#
+#  IL BUCO, VERIFICATO FILE PER FILE: gli assi d'uscita in archivio
+#  (NASDAQ_{A..M}) girano TUTTI con InpRangeMode=0, cioe' sul range di
+#  APERTURA. NESSUNO e' mai girato su RangeMode=1 / PrevWin=5, che e'
+#  QUESTO ingresso. E il ponte che doveva tapparlo e' rotto (classe
+#  297): NASDAQ_I_trailing_OOS.csv ha span 0,19152, e
+#  0,96265 + 0,19152 = 1,15417 > 1,10.
+#
+#  IL CONTRO-ESEMPIO E' DENTRO OGNI ROUND, non accanto: in ciascuno dei
+#  tre una cella E' la configurazione gia' in archivio e DEVE riprodurre
+#      OOS  PF 0.96265   n 175   DD 19.4006   Profit -326.54
+#      IS   PF 1.01621   n 116   DD 11.5160   Profit  +98.96
+#  Se non riproduce, NESSUNA altra cella si legge: CATENA ROTTA.
+#  Protegge in particolare il TF del grafico, che nella corsa archiviata
+#  e' [NON SCRITTO] (il file prova del 07/08 non aveva @PERIODO).
+#
+#  DEPOSITO 10000 e RISCHIO 2%: sono i valori della corsa archiviata,
+#  cioe' la RIPRODUZIONE, non una scelta. Il DD che ne esce NON e'
+#  leggibile contro i cancelli prop scritti per l'1% / 0,65%: serve una
+#  rigirata a 0,65 prima di qualunque giudizio di RISCHIO.
+#
+#  FUORI DI PROPOSITO: l'asse InpPrevWindowMin (la larghezza della
+#  finestra pre-apertura). E' la misura che scioglierebbe la
+#  contraddizione fra i due agenti, costa 1,52 minuti -- MA il cancello
+#  ha scritto che merita la FIRMA DI CLAUDIO PRIMA, non dopo, perche' la
+#  distinzione fra "definizione del meccanismo" e "griglia piu' fitta su
+#  un motore senza edge" (regola 19/08) e' sottile. Non si arma da soli.
+#
+#  COSTO: 10 celle x 2 finestre = 20 passate = 3,34 minuti.
+#  Primo strato (controlla_prova.py): OK, 0 problemi -- e il difetto di
+#  R142c (asse bool scritto true/false invece che 1/0) lo ha trovato lui.
+#
+#  >>> LE TRE RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
+#  Portano il prefisso '#DISARMATA# ', quindi NON iniziano con 40 cifre
+#  esadecimali e il runner NON le vede: la corsa delle 03:30 gira le 45
+#  righe di sempre, esattamente come ieri.
+#  Motivo: il SECONDO STRATO del cancello (l'agente controllo-preventivo)
+#  non e' ancora tornato, e la regola di Claudio del 09/09 e' BLOCCANTE --
+#  niente esce verso il VPS senza un PASS, e se il controllo non e'
+#  tornato SI ASPETTA. Sono committate cosi' per non perderle (Regola #1),
+#  non per farle girare.
+#  >>> SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo un
+#      PASS del secondo strato. Se il cancello dice FAIL, si cancellano.
+# =====================================================================
+#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
