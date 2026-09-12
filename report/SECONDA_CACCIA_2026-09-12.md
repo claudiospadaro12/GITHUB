@@ -408,7 +408,7 @@ la cosa piu' facile da allucinare che ci sia: si apre, o non esiste.**
 
 | buco | cosa ci costa |
 |---|---|
-| 🔴 **GitHub ricerca: 403 STRUTTURALE** | il corpo della risposta dice *"sessions are bound to their configured repositories"*: **non e' quota, non e' un 404, non passera' riprovando.** E' la fonte che di solito da' **il sorgente col contorno** (`.set`, risultati, storia dei commit). **Quarta caccia di fila senza GitHub.** 🙋 **Serve una decisione, non un altro tentativo**: o `gh` CLI autenticato, o due minuti del browser di Claudio su una query concordata |
+| 🔴 **GitHub ricerca: 403 STRUTTURALE** | il corpo della risposta dice *"sessions are bound to their configured repositories"*: **non e' quota, non e' un 404, non passera' riprovando.** E' la fonte che di solito da' **il sorgente col contorno** (`.set`, risultati, storia dei commit). **E' almeno la QUINTA caccia di fila senza GitHub** (02/09, 05/09, 06/09, la SUPREV di stamattina, questa). 🙋 **Serve una decisione, non un altro tentativo**: o `gh` CLI autenticato, o due minuti del browser di Claudio su una query concordata |
 | 🔴 **SSRN 403 (quinta volta)** | non ho letto **SSRN 3829582** (Vojtko-Hanicova), la fonte primaria della scheda Quantpedia che ho usato. Della tesi ho la **descrizione della scheda**, non il paper. 🙋 **Due minuti del browser di Claudio** |
 | 🔴 **newyorkfed.org e stooq.com: `connect_rejected` dal proxy** | niente *staff report* sulla overnight drift, e niente dati giornalieri di indice a basso costo (avrei voluto **decenni**, non 9 anni) |
 | 🔴 **Forex Factory 403** | resta chiuso il solo posto dove si legge **come una strategia e' invecchiata** |
