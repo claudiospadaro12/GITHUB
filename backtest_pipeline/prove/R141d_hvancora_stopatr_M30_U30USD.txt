@@ -35,16 +35,53 @@
 #    (risultati_archivio/spread_flotta/spread_orario_U30USD.csv):
 #        ore 08-13  2,60  (1.676.013 tick alla sola ora 08)
 #        ore 14-20  1,90 - 2,00  (4.931.660 tick alla sola ora 14)
-#    range giornaliero U30USD MISURATO 314,5 punti indice su 24 giorni
-#    (report/ROUND_ORB_ATR_PS5_2026-09-10.md r.233)
-#    -> range di barra M30 [DERIVATO] = 314,5 x sqrt(30/1440) = 45,4 idx
-#    -> con InpStopAtr = 1,0 lo stop tipico e' 45,4 punti indice
-#    -> spread / stop = 2,00 / 45,4 = 4,41%  (ore 14-20)
-#                     = 2,60 / 45,4 = 5,73%  (ore 08-13)
+#    ###  I NUMERI DELLO STOP SONO STATI CORRETTI DAL CANCELLO IL
+#    ###  12/09 -- CLASSE 291. IL VERDETTO NON CAMBIA, LA CIFRA SI'.
+#    Qui c'era scritto: range giornaliero 314,5 x sqrt(30/1440) = 45,4.
+#    DUE difetti in quella riga:
+#      (a) 314,5 viene dalle colonne session_high/session_low di
+#          trades_auto.csv, e ABTG_TradeExporter.mq5 r.79-96 le misura
+#          DALL'INGRESSO DEL TRADE ALLE 23:59, non su 1440 minuti. La
+#          finestra mediana MISURATA su U30USD e' 578 minuti (n=74
+#          righe, min 149 max 1379): il denominatore 1440 e' sbagliato
+#          di un fattore sqrt(1440/578) = 1,58.
+#      (b) il numero VERO esisteva GIA' nel repo, ed e' nello STESSO
+#          referto che questo file cita per la banda d'errore:
+#          report/EMA200_I_DUE_REQUISITI_2026-09-12.md par. 4.3 ->
+#          ATR(H1) U30USD MISURATO = 78,0 - 88,2 punti indice, da cui
+#          ATR(M30) = 55,2 - 62,4. Citavo il referto per la SOTTOSTIMA
+#          e non per il VALORE.
+#    -> ATR(M30) U30USD = 55,2 - 62,4 idx [ancorato all'H1 MISURATO],
+#       centro 58,8. La vecchia derivazione ADR (45,4) sottostima del
+#       22-37%, coerente col 18-27% gia' misurato in casa.
+#    -> con InpStopAtr = 1,0 lo stop tipico e' 58,8 punti indice
+#    -> spread / stop = 2,00 / 58,8 = 3,40%  (ore 14-20)
+#                     = 2,60 / 58,8 = 4,42%  (ore 08-13)
 #    -> IL CANCELLO CHIEDE <= 2,50%.
+#    >>> E IL CONTRO-ESEMPIO, costruito per ROMPERE questa conclusione:
+#        perche' il cancello si APRA a k=1,0 serve stop >= 40 x spread,
+#        cioe' >= 76,0 idx (pomeriggio) e >= 104,0 idx (mattino).
+#        Il massimo della banda H1-ancorata e' 62,4. SERVIREBBE un
+#        ATR(M30) piu' grande del 22% del massimo della banda MISURATA.
+#        Anche con la correzione della finestra 578 (71,6 idx) il
+#        pomeriggio resta a 2,79% > 2,50%.
+#        >>> LA CONCLUSIONE REGGE SU TRE STRADE INDIPENDENTI. Il
+#            cancello interno rifiuta a k=1,0 a ogni ora della finestra.
 #
 #  >>> CONCLUSIONE: col pin del 08/09 l'EA RIFIUTA il trade a OGNI ora
 #      della finestra, e la corsa tornerebbe con ~ZERO OPERAZIONI.
+#      >>> PRECISATO DAL CANCELLO IL 12/09, e la precisione conta:
+#          "~ZERO" e' giusto, "il 100%" no. Il cancello si applica
+#          TICK PER TICK (r.935, spreadPrezzo = ask-bid di QUEL tick),
+#          e lo spread e' una DISTRIBUZIONE: a k=1,0 serve uno spread
+#          <= 1,47 idx (2,50% di 58,8), contro una mediana pomeridiana
+#          di 1,90, una media di 1,84 e un p95 di 2,00. La soglia sta
+#          nella coda SINISTRA di una distribuzione stretta: la
+#          frazione ammessa e' [NON MISURATA] ma piccola, non nulla.
+#          >>> Quindi l'attesa "50-200 operazioni" del file del 08/09
+#              e' IRRAGGIUNGIBILE (e' la classe 278, ed e' il punto),
+#              ma il numero atteso e' "pochi", non "esattamente zero".
+#              Un difetto gonfiato costa quanto uno taciuto.
 #      Le 50-200 operazioni attese sono impossibili PER COSTRUZIONE.
 #      E il danno peggiore non e' la corsa buttata: e' che uno zero
 #      letto come "niente segnali" avrebbe SEPOLTO un motore che
@@ -150,12 +187,26 @@
 #
 #  B) LA SCALA DI QUESTO ROUND, a M30, col cancello dentro l'EA
 #     (soglia 2,50% dello spread sullo stop):
-#       k = 1,0  stop  45,4 idx  spread/stop 4,41% (14-20) 5,73% (08-13)  RIFIUTA sempre
-#       k = 1,5  stop  68,1 idx  spread/stop 2,94% (14-20) 3,82% (08-13)  RIFIUTA sempre
-#       k = 2,0  stop  90,8 idx  spread/stop 2,20% (14-20) 2,86% (08-13)  PASSA il pomeriggio
-#       k = 2,5  stop 113,5 idx  spread/stop 1,76% (14-20) 2,29% (08-13)  PASSA a tutte le ore
-#     in rapporti: 22,7x / 34,1x / 45,4x / 56,7x (ore 14-20)
-#                  17,5x / 26,2x / 34,9x / 43,7x (ore 08-13)
+#     ###  RIFATTA DAL CANCELLO col numero H1-ancorato (58,8 idx).
+#     ###  LA TABELLA VECCHIA (base 45,4) E' SOTTO, per confronto.
+#       k = 1,0  stop  58,8 idx  spread/stop 3,40% (14-20) 4,42% (08-13)  RIFIUTA sempre
+#       k = 1,5  stop  88,2 idx  spread/stop 2,27% (14-20) 2,95% (08-13)  PASSA il pomeriggio
+#       k = 2,0  stop 117,6 idx  spread/stop 1,70% (14-20) 2,21% (08-13)  PASSA a tutte le ore
+#       k = 2,5  stop 147,0 idx  spread/stop 1,36% (14-20) 1,77% (08-13)  PASSA a tutte le ore
+#     in rapporti: 29,4x / 44,1x / 58,8x / 73,5x (ore 14-20)
+#                  22,6x / 33,9x / 45,2x / 56,5x (ore 08-13)
+#     (vecchia tabella base 45,4: 22,7x / 34,1x / 45,4x / 56,7x)
+#     >>> IL MURO SI SPOSTA DI UNA CELLA IN BASSO: cade fra k=1,0 e
+#         k=1,5, non fra k=1,5 e k=2,0. E' ESATTAMENTE la previsione
+#         falsificabile scritta piu' sotto ("se compaiono gia' a k=1,5
+#         allora la derivazione ADR sottostima"): il cancello l'ha
+#         verificata sul repo PRIMA della corsa, e la risposta e' SI.
+#         >>> CONSEGUENZA SULLE BANDE DI Trades: la previsione
+#             0-5 / 0-20 / 20-110 / 40-200 va letta traslata di una
+#             cella. Se k=1,5 esce SOPRA la sua banda di 0-20, la
+#             spiegazione candidata n.1 NON e' un baco: e' che lo stop
+#             vero e' quello H1-ancorato. Dichiarato adesso, cosi'
+#             domattina non si spiega via niente.
 #     >>> L'ESITO POSITIVO E' RAGGIUNGIBILE (classe 278): le celle 2,0
 #         e 2,5 stanno SOPRA il pavimento di lavoro, e la 2,5 ci sta a
 #         tutte le ore della finestra. Se il limite superiore della
@@ -207,6 +258,13 @@
 #      idx, cioe' la mia derivazione da ADR sottostima di almeno il
 #      17% -- che e' ESATTAMENTE la sottostima del 18-27% gia'
 #      misurata in casa su un altro motore. Due strade indipendenti.
+#      >>> AGGIORNATO: la TERZA strada e' stata trovata dal cancello
+#          PRIMA della corsa (ATR(H1) MISURATO 78,0-88,2 ->
+#          ATR(M30) 55,2-62,4 >= 53,3). Quindi questo round non
+#          SCOPRE piu' la sottostima: la CONFERMA o la SMENTISCE, e
+#          la previsione e' che le prime operazioni compaiano a k=1,5.
+#          Se compaiono solo a k=2,0 sono io ad aver sbagliato, e va
+#          scritto cosi'.
 #      Se invece non compaiono nemmeno a k=2,5, la derivazione
 #      SOVRASTIMA e va rifatta.
 #

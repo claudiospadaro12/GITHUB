@@ -60,13 +60,22 @@
 #         separa i due simboli.
 #
 #  2) edge contro costo (il cancello che decide):
-#     costo andata+ritorno = 1,90 (ora 20) + 1,80 (ora 21) = 3,70 punti
-#     indice per operazione. MISURATO.
-#     >>> 8,8% PIU' CARO di NASUSD (3,40). Con un edge atteso di
+#     ###  CORRETTO DAL CANCELLO IL 12/09 -- CLASSE 290: LO SPREAD ERA
+#     ###  CONTATO DUE VOLTE.
+#     Un giro completo attraversa il bid/ask UNA volta (si entra
+#     all'ASK, si esce al BID: s/2 + s/2 = s). Ingresso all'ora 20
+#     (1,90) e uscita all'ora 21 (1,80) -> costo GIRO COMPLETO = media
+#     = 1,85 punti indice. Commissione indici 0,0000 MISURATA (n=302).
+#     >>> Qui c'era "1,90 + 1,80 = 3,70", in contraddizione col conto
+#         (1) sopra, che divide per 1,90 UNA volta (90,8/1,90 = 47,8x).
+#     >>> 8,8% PIU' CARO di NASUSD (1,70). Con un edge atteso di
 #         1,98-3,96 punti col solo r1 (conto del file madre, scalato
 #         sul range 314,5 quasi identico a 313,8), il rapporto
-#         edge/costo scende a 0,53-1,07: la meta' alta della banda e'
-#         appena sopra il pareggio.
+#         edge/costo e' 1,07 - 2,14 (era dichiarato 0,53-1,07).
+#         >>> SOPRA il pareggio in tutta la banda, ma l'estremo basso
+#             e' a +7%: su U30USD il margine e' la META' di quello di
+#             NASUSD (+16%). L'ORDINE FRA I DUE SIMBOLI NON CAMBIA, e
+#             adesso ha due ragioni concordi invece di una.
 #
 # ---------------------------------------------------------------------
 #  ATTESA E TRE USCITE
@@ -77,13 +86,28 @@
 #  PF atteso: 0,92 - 1,12. La banda e' CENTRATA SUL PEDAGGIO e sta un
 #  gradino SOTTO quella di NASUSD, perche' il pedaggio e' l'8,8% piu'
 #  alto e il p25 del range e' il 28% piu' basso.
+#  >>> CON IL COSTO CORRETTO (1,85) l'aritmetica del file madre da'
+#      PF = p(m-c)/((1-p)(m+c)) con p = 0,5437 (paper):
+#          m = 22,7  ->  1,028      m = 45,4  ->  1,102
+#      cioe' PF previsto 1,03 - 1,10, contro una soglia di scarto a
+#      1,10. !!! L'ESITO POSITIVO STA SUL BORDO ESATTO DELLA SOGLIA, e
+#      serve in ENTRAMBE le finestre: la cella A di questo gemello e'
+#      una MISURA, non una candidata, e va letta cosi'. La soglia NON
+#      si abbassa (sarebbe abbassare l'asticella dopo l'aritmetica).
 #
 #   (a) NUMERO BUONO: PF >= 1,10 con n >= 150 su ENTRAMBI i simboli ->
 #       il momentum di fine seduta e' un fatto della campanella USA e
 #       non del sottostante. E' il caso migliore possibile.
 #   (b) NUMERO BRUTTO, PIU' PROBABILE: PF < 1,10 con n >= 150 ->
-#       certificato scritto su DUE mercati invece che su uno, e il
-#       motore si chiude con un numero solido.
+#       numero scritto su DUE mercati invece che su uno.
+#       >>> !!! CORRETTO DAL CANCELLO 12/09: qui c'era "il motore si
+#           CHIUDE con un numero solido". NON SI CHIUDE, e un file
+#           prova non puo' pre-autorizzarlo. Vedi l'elenco delle CINQUE
+#           caselle del certificato nell'uscita (b) del file madre:
+#           dopo questa notte mancano ancora la GESTIONE DELL'USCITA ad
+#           asse, il TF vero (InpAtrTF) e due gemelli (D30EUR con
+#           campanella 16:30 server, 225JPY). In REGISTRO_TEST.md si
+#           scrive "NON ANCORA MISURATO, con PF/n/DD", mai "MORTO".
 #       >>> E IL CASO INTERESSANTE, che va letto e non buttato: se
 #           NASUSD passa e U30USD no, NON si promuove la famiglia. Si
 #           scrive "il fatto e' del Nasdaq" e si misura il terzo indice

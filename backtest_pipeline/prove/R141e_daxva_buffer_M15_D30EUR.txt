@@ -246,6 +246,54 @@
 #        questo round puo' dare. Lo scrivo adesso perche' altrimenti
 #        dopo lo spiegherei via.
 #
+#  ###################################################################
+#  ###  BOCCIATO DAL CANCELLO IL 12/09 -- CLASSE 292 (NUOVA).
+#  ###  IL FALSIFICATORE QUI SOPRA NON FALSIFICA NIENTE.
+#  ###################################################################
+#  La riga "se il PF SALE la legge e' falsificata" e' stata provata
+#  contro il NULLA, non contro l'IPOTESI ALTERNATIVA. E l'ipotesi
+#  alternativa e': NESSUN EDGE, solo geometria e pedaggio.
+#  Quale numero produce quella spiegazione? Si calcola.
+#    target fisso d = 37,5 idx (meta' VA, banda 33-42)
+#    costo c = 1,70 idx  |  stop s = il buffer
+#    su una passeggiata SENZA DERIVA: p = s/(s+d)
+#    PF = p(d-c) / ((1-p)(s+c))
+#
+#      cella   stop s     p      PF a EDGE ZERO
+#        800      8,0   0,176        0,79
+#       2800     28,0   0,427        0,90
+#       4800     48,0   0,561        0,92
+#       6800     68,0   0,645        0,93
+#
+#  >>> A EDGE ZERO IL PF SALE MONOTONO: +18% dalla cella 800 alla 6800.
+#      Cioe' IL SEGNALE CHE AVREI CHIAMATO "FALSIFICAZIONE DELLA LEGGE"
+#      E' LA FIRMA DI "nessun edge piu' un pedaggio fisso". Il motivo
+#      e' aritmetico e sta scritto nel blocco (C) qui sopra: il costo
+#      vale il 21,3% dello stop sulla cella 800 e il 2,5% sulla 6800.
+#      Il pedaggio schiaccia le celle strette IN PROPORZIONE, e la
+#      legge dell'ancora unica spinge nel verso OPPOSTO: le due
+#      spiegazioni si SOTTRAGGONO, e leggere il solo SEGNO della
+#      pendenza non le distingue.
+#
+#  >>> LA REGOLA DI LETTURA CORRETTA, congelata adesso:
+#      (i)  PF DECRESCENTE col buffer -> la legge dell'ancora unica e'
+#           CONFERMATA, e piu' forte di quanto credessi: ha vinto
+#           contro un gradiente nullo che tirava nell'altro verso.
+#      (ii) PF CRESCENTE ma DENTRO il gradiente nullo (da ~0,79 a
+#           ~0,93, cioe' +18% o meno, con tutte le celle sotto 1,10)
+#           -> NON falsifica niente: e' il pedaggio allo specchio, e
+#           il verdetto e' "nessun edge misurabile con questa
+#           geometria".
+#      (iii) PF crescente OLTRE il gradiente nullo E almeno una cella
+#           sopra 1,10 -> ALLORA SI, la legge e' falsificata su questo
+#           motore, ed e' il risultato grosso.
+#  >>> E IL CONTROLLO CHE ASSOLVE IL METODO: la stessa prova su
+#      un'ancora UNICA (R141d, tp = InpRR x slDist) da' p = 1/3 a ogni
+#      cella e PF nullo = 0,95 / 0,97 / 0,975 / 0,98, cioe' +3%, quasi
+#      piatto. Su un'ancora unica un asse sullo stop e' interpretabile;
+#      su ancore DIVERSE il gradiente nullo vale SEI VOLTE tanto e va
+#      sottratto prima di guardare il segno.
+#
 #  PF atteso in valore: [NON MISURATO]. Nessun PF di questo motore
 #      esiste, su nessun simbolo e nessun TF.
 #  DD atteso: [NON MISURATO]. Rischio 0,65% per operazione, tetto 2 al

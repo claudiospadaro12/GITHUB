@@ -16874,6 +16874,17 @@ il file del 30/08 girerebbe su D30EUR M5 e ci sarebbe un CSV in archivio. **Misu
 E l'ordine delle due `if` in `walkforward_generico.ps1` r.497-498 e' **letto**, non dedotto.
 🟢 **L'alternativa e' falsificata sul codice e sull'archivio.**
 
+### 🆕 LA VARIANTE **SILENZIOSA**, trovata dal secondo strato il 12/09 — ed e' PEGGIORE della morte
+La riga muore solo se il simbolo manca **anche** dagli argomenti. Ma una riga di coda che passa
+`-Simbolo` e `-DaQuando` a mano **sopravvive** — e allora scatta `walkforward_generico.ps1` **r.744**:
+```
+if(-not $Periodo){ $Periodo="M5" }
+```
+🔴 **Con `@PERIODO` dentro un commento e il simbolo passato a mano, il round gira in SILENZIO a M5
+invece del TF che il file dichiara** — e su M5 gli indici sfondano il pavimento duro del costo *e* il
+tetto delle barre. 👉 **Una morte è rumorosa e si corregge; un M5 silenzioso produce un numero
+FALSO che entra in archivio.** Per questo il controllo va fatto sul file, non sulla riga.
+
 ⚠️ **E il limite di questa classe, dichiarato**: `controlla_prova.py` **non e' stato toccato**. La
 riparazione giusta sta nel controllo 5 (cercare `^@DAQUANDO` in modo ancorato, come fa il driver),
 ma quel file e' inchiodato da un pin nella coda e cambiarlo va **misurato in un lavoro suo** — fra
@@ -16905,12 +16916,16 @@ applicato tick per tick dall'EA stesso.**
 
 | ingrediente | numero | rango |
 |---|---:|---|
-| range giornaliero U30USD (n=24 giorni) | **314,5 punti indice** | 🥇 MISURATO, `ROUND_ORB_ATR_PS5` r.233 |
-| range di barra M30 | **45,4** | [DERIVATO] `x sqrt(30/1440)` |
+| ~~range giornaliero U30USD (n=24 giorni)~~ | ~~314,5 punti indice~~ | ⚠️ **NON e' un range giornaliero: vedi classe 291** |
+| **ATR(M30) U30USD** | 🥇 **55,2 - 62,4** (centro **58,8**) | **ancorato all'H1 MISURATO** 78,0-88,2, `EMA200_I_DUE_REQUISITI` §4.3 |
 | spread mediano ore 08-13 / 14-20 | **2,60** / **1,90-2,00** | 🥇 MISURATO su 64.711.285 tick |
-| **spread / stop** con `InpStopAtr = 1,0` | **5,73%** / **4,41%** | contro una soglia di **2,50%** |
+| **spread / stop** con `InpStopAtr = 1,0` | **4,42%** / **3,40%** | contro una soglia di **2,50%** |
 
-> ## 🔴 **L'EA avrebbe rifiutato il 100% dei trade, a ogni ora della finestra. Le 50-200 operazioni erano impossibili PER COSTRUZIONE.**
+> ### ✏️ CORRETTO DAL SECONDO STRATO DEL CANCELLO, 12/09 — la v1 di questa classe usava **45,4** (ADR × `√(30/1440)`) e dava **5,73% / 4,41%**. Quei numeri sono **sbagliati** (classe 291) e il file che aveva la risposta era **lo stesso che questa classe cita**. 🟢 **Il verdetto non cambia**, la cifra sì — e una classe di checklist è memoria permanente: ci va il numero giusto.
+
+> ## 🔴 **L'EA avrebbe rifiutato il trade a OGNI ORA della finestra. Le 50-200 operazioni erano IRRAGGIUNGIBILI.**
+> 🧪 **Contro-esempio costruito contro questa conclusione, e persa dall'alternativa**: perché il cancello si apra a `k=1,0` serve `stop >= 40 × spread`, cioè **>= 76,0** idx (pomeriggio) e **>= 104,0** (mattino). Il **massimo** della banda `ATR(M30)` MISURATA è **62,4**. Regge su **tre** derivazioni indipendenti (ADR 45,4 · H1-ancorata 55,2-62,4 · finestra-corretta 71,6): **tutte e tre sotto la soglia.**
+> ✏️ **Ma "il 100% dei trade" è una parola di troppo, e va corretta**: il cancello si applica **tick per tick** (r.935, `ask-bid` di *quel* tick) e lo spread è una **distribuzione**. A `k=1,0` serve uno spread `<= 1,47` idx contro una **mediana** pomeridiana di 1,90, una **media** di 1,84 e un **p95** di 2,00: la soglia sta nella **coda sinistra** di una distribuzione strettissima. **Frazione ammessa: [NON MISURATA] ma piccola, non nulla.** 👉 L'attesa era **irraggiungibile** (ed è il punto, classe 278), ma il numero atteso è *"pochi"*, non *"esattamente zero"*. **Un difetto gonfiato costa quanto uno taciuto.**
 > 🔴 **E il danno non e' la corsa buttata: e' che uno zero letto come «niente segnali» avrebbe SEPOLTO un motore che non era nemmeno stato interrogato.** Un `n=0` interpretato come verdetto e' esattamente il modo in cui `ABTG_OutOfNoise` e' stato perso per 14 giorni (baco di warmup, 29/08).
 
 ### ✅ COSA SI FA, e sono tre righe di lettura per candidato
@@ -16936,8 +16951,196 @@ tetto delle barre — e non lo vede nessuno degli strumenti di casa.*
 `prove/R141d_hvancora_stopatr_M30_U30USD.txt` mette **`InpStopAtr` sull'asse** (1,0 / 1,5 / 2,0 /
 2,5): le prime due celle il cancello le rifiuta, le ultime due le passa (**45,4x** e **56,7x**).
 👉 **Cosi' lo zero delle celle basse NON e' un verdetto: e' la MISURA di dove cade il muro** — e il
-`k` a cui compaiono le prime operazioni **misura l'`ATR(M30)` vero di U30USD**, che oggi e'
-`[DERIVATO]` e mai misurato.
+`k` a cui compaiono le prime operazioni **misura l'`ATR(M30)` vero di U30USD**.
+✏️ **Corretto il 12/09**: col numero H1-ancorato (58,8) i rapporti delle celle alte sono **58,8x** e
+**73,5x** (non 45,4x e 56,7x), e **il muro cade fra `k=1,0` e `k=1,5`**, non fra 1,5 e 2,0. La griglia
+**straddla il muro comunque**, su tutte e tre le derivazioni: per questo `R141d` resta valido e la
+sua previsione per cella va letta **traslata di una cella**.
 🔴 **E l'allargamento dello stop e' legittimo SOLO perche' su quel motore l'ANCORA E' UNICA**
 (r.945 `tp = entry + InpRR * slDist`, cioe' il target e' in unita' dello stop): su un motore ad
 ancore diverse lo stesso asse sarebbe **curve fitting sul costo**.
+
+---
+
+## 290. 💸✌️ LO SPREAD CONTATO **DUE VOLTE**: `1,70 + 1,70 = 3,40` di pedaggio dove il pedaggio e' `1,70`, e il verdetto nasce pessimista (12/09/2026)
+
+Un giro completo attraversa il bid/ask **UNA volta**: si entra all'**ask** (`mid + s/2`), si esce al
+**bid** (`mid - s/2`). Costo contro il mid: `s/2 + s/2 = s`. **Uno spread, non due.**
+
+**Il caso reale**: `prove/R141a_momentum_NASUSD_r12.txt` r.133-134 scrive
+> *"costo ANDATA+RITORNO = 1,70 (ingresso ora 20) + 1,70 (uscita ora 21) = 3,40 punti indice"*
+
+e ne ricava `edge/costo = 0,58 - 1,16`, cioe' *"la meta' bassa della banda e' in perdita PRIMA di
+cominciare"*. 🔴 **Col pedaggio vero (1,70) la banda e' `1,16 - 2,33`: nessuna parte e' in perdita.**
+Gemello identico in `R141b` (`1,90 + 1,80 = 3,70` dove il pedaggio e' **~1,85**).
+
+### 🧷 E LA PROVA CHE E' UN ERRORE E NON UNA CONVENZIONE, dentro lo stesso file
+| dove | conto | spread contato |
+|---|---|---:|
+| `R141a` r.118 (cancello di casa) | `90,6 / 1,70 = 53,3x` | **una volta** |
+| `R141a` r.133 (cancello che decide) | `1,70 + 1,70 = 3,40` | **due volte** |
+
+**Lo stesso file usa due convenzioni diverse a quindici righe di distanza.** E la convenzione di
+casa e' inequivocabile su tre ancore indipendenti:
+- il pavimento `stop >= 40 x spread` vale *"il pedaggio e' <= 2,5% del movimento"* → `1/40` = **uno** spread;
+- `CANCELLO_COSTO_FLOTTA` r.197: *"spread 0,3 + commissione ~0,5 = 0,86 pip all-in su EURUSD"* — uno
+  spread **piu'** una commissione di **giro completo** (che sugli indici e' **0,0000**, n=302 deal);
+- `771201`: `15,0 / 1,139 = 13,2x` — uno spread.
+- 🧮 E `ABTG_HVAncora.mq5` r.239/935 lo implementa: `spread <= 2,5% dello stop` = **uno** spread.
+
+### 🔴 PERCHE' E' BLOCCANTE ANCHE SE L'ERRORE E' **PESSIMISTA**
+Perche' e' **la stessa meccanica della classe 289**, in direzione opposta: un'attesa sbagliata
+scritta **prima** dei numeri e' quella che poi li interpreta. Un file che dichiara *"mi aspetto PF
+~1,0"* e una soglia *"scarta se PF < 1,10"* legge un PF misurato di 1,08 come **conferma** e firma un
+certificato di morte — quando l'aritmetica vera diceva di aspettarsi di piu' e che qualcosa non
+torna. 👉 **Un errore prudente sull'attesa non e' prudente: seppellisce.**
+
+### ✅ COSA SI FA
+Il pedaggio di un giro completo e' **uno** spread — quello dell'ora d'INGRESSO se entrata e uscita
+stanno in ore diverse, o la **media** delle due se si vuole essere precisi (`(s_in + s_out)/2`), **piu'**
+la commissione di giro completo (indici: 0). Se in un file compaiono due convenzioni, **quella
+sbagliata e' sempre quella che non regge il confronto col pavimento 40x**.
+
+---
+
+## 291. 📐🕳️ LA «RANGE GIORNALIERO MISURATO» CHE **NON E' UN GIORNO**: `session_high/low` copre dall'ingresso alle 23:59, e `√(t/1440)` lo tratta come 1440 minuti (12/09/2026)
+
+Tutta la catena di derivazione degli stop di casa sugli indici parte da una riga sola:
+> `ROUND_ORB_ATR_PS5_2026-09-10.md` §2.3: *"Range di giornata **MISURATO su operazioni vere**
+> (`trades_auto.csv`, colonne `session_high`/`session_low`)"* → U30USD **314,5** · NASUSD **313,8** ·
+> D30EUR **186,5**
+
+e prosegue con `range(t) ≈ range(giorno) x √(t/1440)`. 🔴 **Ma `session_high/low` NON e' il range di
+un giorno.** `ABTG_TradeExporter.mq5` r.79-96 (`SessionRange`):
+```
+MqlDateTime d; TimeToStruct(from,d);
+d.hour=23; d.min=59; ...     // from = ORA DI INGRESSO del trade
+```
+cioe' **dall'ingresso del trade alle 23:59 dello stesso giorno server**. La finestra non e' fissa: la
+**misuro** su `data/statements/trades_auto.csv`:
+
+| simbolo | righe | **finestra mediana** | minimo | massimo |
+|---|---:|---:|---:|---:|
+| U30USD | 74 | **578 min** | 149 | 1379 |
+| NASUSD | 59 | **568 min** | 228 | 1439 |
+| D30EUR | 163 | **933 min** | 392 | 1313 |
+
+👉 **Il denominatore giusto e' ~578, non 1440: un fattore `√(1440/578) = 1,58` di sottostima.**
+E la finestra varia **di nove volte fra le righe**, quindi non e' nemmeno una costante da correggere.
+
+### 🔬 IL CONTRO-ESEMPIO CHE MI SONO COSTRUITO CONTRO — e che ho perso, poi vinto
+`ORO_1530_CANCELLO_COSTO` §4.2 dichiara la legge **"validata al 4,3%"**: `40,50 x √(1,9/1440) = 1,47`
+contro **1,41 misurato**. Col denominatore 578 darebbe **2,35**, cioe' un errore del 67%. 🔴 **Quindi
+il 1440 vince?** No: quella validazione **non e' indipendente**. Usa lo **stesso**
+`session_high/low` nello **stesso** denominatore, e lo confronta con l'**escursione entrata→uscita**
+dell'operazione — che lo stesso referto ammette *"non e' un ATR"* e che e' per costruzione **piu'
+piccola** del range di barra. **Due sottostime che si elidono**: e' la formula verificata contro due
+numeri con due incognite libere, classe della regola del 10/09.
+
+### 🥇 E IL NUMERO VERO ESISTEVA GIA' NEL REPO, scritto da qualcun altro
+`EMA200_I_DUE_REQUISITI_2026-09-12.md` §4.3 — **ATR(H1) U30USD MISURATO = 78,0 - 88,2 punti indice**,
+e ne deriva **ATR(M30) = 55,2 - 62,4**. Confronto:
+
+| strada | ATR(M30) U30USD |
+|---|---:|
+| ADR x `√(30/1440)` (usata dai cinque R141) | **45,4** |
+| ancorata all'**H1 MISURATO** | 🥇 **55,2 - 62,4** |
+| correzione della finestra 578 | 71,6 |
+
+**La strada ADR sottostima del 22-37%** — ed e' esattamente la *"sottostima del 18-27%"* che i file
+R141 **citano** per la banda d'errore **senza usarne il valore**. 👉 **Il file che aveva la risposta e'
+lo stesso che citano.**
+
+### ✅ COSA SI FA
+1. 🚫 **`session_high/low` non si chiama mai "range giornaliero"**: e' un *range dall'ingresso a fine
+   giorno*, e la sua finestra si **stampa accanto al numero** (mediana e min-max).
+2. 🥇 **Prima di derivare un ATR, si cerca un ATR MISURATO nel repo** (`grep -rn "ATR(H1)\|ATR(M30)" report/`).
+   Un misurato su un TF piu' alto, riscalato con `√(T1/T2)`, elide l'errore comune e lascia **rapporti**.
+3. 📌 Se la derivazione ADR si usa comunque, si scrive **`[DERIVATO, PAVIMENTO: sottostima 22-37%]`** —
+   non `[DERIVATO]` liscio.
+
+---
+
+## 292. 🎭📈 IL FALSIFICATORE CHE L'**IPOTESI NULLA** SODDISFA DA SOLA: «se il PF sale col buffer la legge e' falsificata» — e col buffer il PF sale anche a edge ZERO (12/09/2026)
+
+Sorella maggiore della **classe 178** (*una banda si prova contro l'ipotesi ALTERNATIVA, non contro il
+nulla*), applicata a un **asse sullo stop**.
+
+**Il caso reale**: `prove/R141e_daxva_buffer_M15_D30EUR.txt` mette `InpSlBufferPts` sull'asse
+(800/2800/4800/6800 punti MT5 = 8/28/48/68 punti indice) su un motore ad **ancore diverse** (lo stop
+nasce dal bordo della Value Area, il target dal POC: **non scala con lo stop**) e dichiara:
+> *"PF: DECRESCENTE salendo la scala. **SE IL PF SALE COL BUFFER, LA MIA LEGGE E' FALSIFICATA**"*
+
+### 🧪 IL CONTRO-ESEMPIO, calcolato: **quale numero produce l'ALTRA spiegazione?**
+Ipotesi nulla = **nessun edge**, solo geometria e costo. Target fisso `d = 37,5` idx (meta' VA,
+33-42), costo `c = 1,70` idx, stop `s` = il buffer. Su una passeggiata senza deriva la probabilita'
+di toccare il target prima dello stop e' `p = s/(s+d)`, e
+`PF = p(d-c) / ((1-p)(s+c))`:
+
+| cella | stop `s` | `p` | **PF a edge ZERO** |
+|---|---:|---:|---:|
+| 800 | 8,0 | 0,176 | **0,79** |
+| 2800 | 28,0 | 0,427 | **0,90** |
+| 4800 | 48,0 | 0,561 | **0,92** |
+| 6800 | 68,0 | 0,645 | **0,93** |
+
+> ## 🔴 **A EDGE ZERO IL PF SALE MONOTONO: +18% dalla cella 800 alla 6800.**
+> Cioe' **il segnale dichiarato come falsificazione della legge e' la FIRMA di "nessun edge + un
+> pedaggio fisso"**. Il motivo e' aritmetico: il costo vale **21,3% dello stop** sulla cella 800 e
+> **2,5%** sulla 6800 — il pedaggio schiaccia le celle strette **in proporzione**, e la legge
+> dell'ancora unica spinge nel verso **opposto**. Le due spiegazioni si sottraggono, e chi legge il
+> solo **segno** della pendenza non puo' distinguerle.
+
+### 🟢 IL CONTROLLO CHE ASSOLVE IL METODO — la stessa prova su un'ancora UNICA
+`R141d` mette `InpStopAtr` sull'asse su `ABTG_HVAncora`, dove `tp = entry + InpRR x slDist` (r.945):
+il target **scala** con lo stop, quindi `p = 1/3` a ogni cella e
+`PF = (2s-c)/(2(s+c))` → **0,95 / 0,97 / 0,975 / 0,98**: il gradiente nullo e' **+3%, quasi piatto**.
+👉 **Su un'ancora unica un asse sullo stop e' interpretabile; su ancore diverse il gradiente nullo
+vale sei volte tanto e va sottratto prima di leggere il segno.**
+
+### ✅ COSA SI FA
+1. 🧮 **Prima di dichiarare un falsificatore su un asse dello stop, si calcola il PF dell'IPOTESI
+   NULLA cella per cella** (`p = s/(s+d)` se il target e' fisso, `p = 1/(1+RR)` se scala) **e la
+   tabella si scrive nel file prova, accanto alla previsione.**
+2. 📏 La falsificazione vale solo se la pendenza misurata **supera** quella nulla **e** almeno una
+   cella sta sopra la soglia di merito. Una pendenza **dentro** il gradiente nullo non e' una
+   misura: e' il pedaggio che si guarda allo specchio.
+3. 🚫 **E vale al contrario**: se il PF misurato **decresce**, la legge e' confermata **piu' forte** di
+   quanto il file credeva — perche' ha vinto contro un gradiente nullo che tirava nell'altro verso.
+
+---
+
+## 293. 💥📝 `open(path,'w')` TRONCA **PRIMA** DI CODIFICARE: una `UnicodeEncodeError` lascia il file a **ZERO BYTE** (12/09/2026)
+
+**Il caso reale, e l'ho fatto io stesso mentre correggevo gli altri**: uno script di riparazione su
+`prove/R141b_momentum_U30USD_gemello.txt` finiva con
+```python
+open(p,'w',encoding='ascii').write(t)
+```
+Il testo nuovo conteneva un'emoji (🔴). `open(...,'w')` **tronca il file all'apertura**, poi `.write()`
+solleva `UnicodeEncodeError`. Risultato: **file da 8.194 byte -> 0 byte**, e lo script esce con
+errore *dopo* aver distrutto il contenuto. Recuperato con `git checkout --` (e **solo** perché il
+file era già committato: su un file non tracciato sarebbe stato **perso**).
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+È la collisione di due regole di casa: i `.ps1` **e i file prova** vanno in **ASCII puro** (PS 5.1 li
+legge come ANSI), e le nostre emoji stanno in ogni testo che scriviamo. Quindi `encoding='ascii'` su
+un testo nostro **fallisce spesso**, ed è esattamente il caso in cui il troncamento scatta.
+
+### ✅ COSA SI FA — si codifica PRIMA, si scrive DOPO, e in modo atomico
+```python
+b = t.encode('ascii')          # se fallisce, il file su disco e' INTATTO
+tmp = p + '.tmp'
+open(tmp,'wb').write(b)
+os.replace(tmp, p)             # atomico: o il vecchio, o il nuovo, mai il vuoto
+```
+📌 E la verifica dopo ogni riparazione, che costa una riga:
+```
+python3 -c "b=open('FILE','rb').read(); print(len(b), sum(1 for c in b if c>127))"
+```
+Byte **> 0** e non-ASCII **= 0**. 🔴 **Mai `grep '[^\x00-\x7F]'`: è rotta** (già in checklist) — il
+conteggio si fa con `python3`.
+
+### 🔑 La regola in una riga
+*Uno strumento di riparazione che può distruggere il file che sta riparando è più pericoloso del
+difetto che corregge. Codifica prima, `os.replace` dopo, e rileggi i byte.*

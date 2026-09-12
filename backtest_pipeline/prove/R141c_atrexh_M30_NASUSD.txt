@@ -355,6 +355,25 @@ InpOneTradePerLevel=false||false||0||false||N
 InpUseHourFilter=true||true||0||true||N
 InpHourStart=14||14||0||14||N
 InpHourEnd=20||20||0||20||N
+#     >>> InpFridayClose: IL SORGENTE STA A false (r.161), qui e'
+#         true. E' una SCELTA, ed e' PIU' PRUDENTE del default (il
+#         default tiene le posizioni nel weekend, cioe' espone al gap
+#         del lunedi' senza stop efficace).
+#         >>> GIUDIZIO DEL CANCELLO (12/09): resta DENTRO il perimetro
+#             di un file prova e NON serve una firma di Claudio.
+#             Motivo: le manopole riservate a Claudio sono il conto
+#             reale, le TAGLIE e il RISCHIO PER OPERAZIONE (qui
+#             InpRiskPercent = 0,65, cioe' il contratto di casa, non
+#             una scelta). InpFridayClose non cambia la taglia ne' il
+#             rischio per trade: cambia la FINESTRA DI ESPOSIZIONE, ed
+#             e' della stessa famiglia del flat di seduta che tutti i
+#             nostri file prova pinnano.
+#         >>> MA E' UN PIN CHE CAMBIA IL NUMERO, e va detto: toglie le
+#             operazioni del venerdi' oltre le 20 server e vieta di
+#             riaprire. Quindi il n misurato e' un PAVIMENTO rispetto
+#             alla configurazione dell'autore, e se questo motore
+#             arrivasse a una sedia la scelta va RIMISURATA a false
+#             come ablazione, non ereditata.
 InpFridayClose=true||true||0||true||N
 InpFridayCloseHour=20||20||0||20||N
 

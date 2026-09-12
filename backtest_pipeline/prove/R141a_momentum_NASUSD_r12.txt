@@ -95,7 +95,10 @@
 #  SPREAD NASUSD, MISURATO ora per ora su 156.146.398 tick
 #  (risultati_archivio/spread_flotta/spread_orario_NASUSD.csv):
 #    ora 14 (misura di r1)  mediana 1,80  p95 2,70  max 8,20
-#    ora 20 (INGRESSO)      mediana 1,70  p95 1,80  max 6,10   <-- 11.182.176 tick
+#    ora 20 (INGRESSO)      mediana 1,70  p95 1,80  max 6,10   <-- 11.458.986 tick
+#       >>> CORRETTO DAL CANCELLO 12/09: qui c'era 11.182.176, che e' il
+#           conteggio dell'ora 19, non della 20. Non sposta niente, ma
+#           era il numero di un'altra riga del CSV.
 #    ora 21 (USCITA)        mediana 1,70  p95 2,70  max 8,10
 #  >>> L'ora 20 sta nella FASCIA PIU' ECONOMICA della giornata su
 #      NASUSD, e il numero esatto va detto perche' avevo scritto
@@ -130,8 +133,19 @@
 #         PIU' LARGO, quindi i rapporti qui sopra sono un PAVIMENTO.
 #
 #  2) IL CANCELLO CHE DECIDE DAVVERO (edge contro costo):
-#     costo ANDATA+RITORNO = 1,70 (ingresso ora 20) + 1,70 (uscita ora
-#     21) = 3,40 punti indice per operazione. MISURATO, non stimato.
+#     ###  CORRETTO DAL CANCELLO IL 12/09 -- CLASSE 290. LO SPREAD ERA
+#     ###  CONTATO DUE VOLTE, E L'ERRORE ERA PESSIMISTA.
+#     Un giro completo attraversa il bid/ask UNA volta: si entra
+#     all'ASK (mid + s/2), si esce al BID (mid - s/2). Costo contro il
+#     mid = s/2 + s/2 = s. UNO spread.
+#     costo GIRO COMPLETO = 1,70 punti indice (ingresso ora 20 e uscita
+#     ora 21 hanno la STESSA mediana 1,70; se differissero si userebbe
+#     la media). Commissione indici 0,0000 MISURATA (n=302).
+#     >>> Qui c'era scritto "1,70 + 1,70 = 3,40", in contraddizione con
+#         il conto (1) quindici righe sopra, che divide per 1,70 UNA
+#         volta (90,6/1,70 = 53,3x). Due convenzioni nello stesso file:
+#         quella sbagliata e' quella che non regge il confronto col
+#         pavimento 40x, cioe' `1/40 = 2,5% = UNO spread`.
 #     Movimento disponibile nella mezz'ora finale:
 #       range 30' [DERIVATO] = 45,3 idx; il movimento medio ASSOLUTO e'
 #       una FRAZIONE del range, e la frazione e' [NON MISURATA]:
@@ -139,14 +153,15 @@
 #     Col success rate DEL PAPER (54,37% col solo r1, su SPY 1993-2013
 #     -- [DICHIARATO NEL PAPER, NON MISURATO DA NOI]):
 #       edge = (2 x 0,5437 - 1) x [22,7..45,3] = 1,98 - 3,96 punti idx
-#       edge / costo = 0,58 - 1,16
+#       edge / costo = 1,16 - 2,33   (era 0,58-1,16 col costo doppio)
 #     >>> LEGGERE QUESTA RIGA PRIMA DI SPERARE: col SOLO r1, e usando
-#         il numero DEL PAPER, questo motore sta FRA 0,58 e 1,16 VOLTE
-#         il suo pedaggio sul nostro feed. Cioe' e' sul filo, e la
-#         meta' bassa della banda e' in perdita PRIMA di cominciare.
+#         il numero DEL PAPER, questo motore sta FRA 1,16 e 2,33 VOLTE
+#         il suo pedaggio. E' SOPRA il pareggio in tutta la banda, ma
+#         il margine piu' basso e' del 16%: un margine del 16% su un
+#         numero PRESO DA UN PAPER SU SPY 1993-2013 non e' un margine.
 #     Col doppio predittore (77,05% dichiarato dal paper):
 #       edge = 0,541 x [22,7..45,3] = 12,3 - 24,5 punti idx
-#       edge / costo = 3,6 - 7,2                    <-- ha margine
+#       edge / costo = 7,2 - 14,4                   <-- ha margine
 #     >>> E' ESATTAMENTE PERCHE' L'ASSE DI QUESTO ROUND E' r12.
 #         Non e' una taratura: e' l'unica cosa che, in aritmetica,
 #         separa un motore che paga il pedaggio da uno che non lo paga.
@@ -173,7 +188,22 @@
 #        n >= 150 IN TUTTE E DUE LE FINESTRE. Il campione non e' una
 #        speranza: e' aritmetica del calendario.
 #    PF atteso: 0,95 - 1,15. La banda e' CENTRATA SUL PEDAGGIO, non
-#    sull'ottimismo: il conto (2) qui sopra da' edge/costo 0,58-1,16.
+#    sull'ottimismo.
+#    >>> E ADESSO LA BANDA HA UN CONTO SOTTO, non un'impressione
+#        (aggiunto dal cancello il 12/09). Con p = 0,5437 (paper),
+#        movimento m e costo c = 1,70:
+#              PF = p(m-c) / ((1-p)(m+c))
+#          m = 22,7  ->  PF = 1,026
+#          m = 45,3  ->  PF = 1,105
+#        cioe' l'aritmetica prevede PF 1,03 - 1,11.
+#    >>> !!! E QUESTO VA LETTO ACCANTO ALLA SOGLIA "scarta se PF < 1,10":
+#        l'esito POSITIVO sta all'ESTREMO ALTO della banda prevista, e
+#        serve in ENTRAMBE le finestre. La soglia NON si abbassa (sarebbe
+#        abbassare l'asticella dopo aver visto l'aritmetica, che e' il
+#        divieto di casa): si DICHIARA che la cella A e' quasi certamente
+#        un CERTIFICATO e non una promozione, e che la cella che puo'
+#        vincere e' la B (edge/costo 7,2-14,4). La cella A resta la
+#        MISURA di riferimento, non la candidata.
 #    DD atteso: [NON MISURATO]. Con stop 2 x ATR(M30) a rischio 0,65%
 #    per operazione e 1 operazione/giorno, una striscia di 8 stop di
 #    fila costa ~5,2%. La colonna DD e' un cancello di RISCHIO e si
@@ -185,6 +215,60 @@
 #    >>> Se n IS < 150 la cella B ha il MERITO SOSPESO (valvola R59) e
 #        il RISCHIO leggibile. Non e' promuovibile, e' un'ablazione.
 #
+# ---------------------------------------------------------------------
+#  ###  IL FALSIFICATORE DELLO STOP: **NON E' LEGGIBILE NEL CSV**  ###
+#  ###  aggiunto dal cancello il 12/09, ed e' un VINCOLO DI LETTURA
+# ---------------------------------------------------------------------
+#  Il dossier (I_QUATTRO_INVISIBILI r.499) propone come falsificatore
+#  della prima posizione: "frazione di uscite per stop < 10-15%", e
+#  scrive che "si legge nello stesso CSV del round".
+#  >>> VERIFICATO NEL CODICE: E' FALSO. Il CSV che il round produce e'
+#      OptResults_ABTG_IntradayMomentum_NASUSD.csv, scritto da
+#      OnTesterDeinit (r.980-1007), e le sue colonne sono ESATTAMENTE:
+#        Pass, Profit, Expected Payoff, Profit Factor, Recovery Factor,
+#        Sharpe Ratio, Equity DD %, Trades  + una colonna per input.
+#      NESSUNA colonna di motivo d'uscita. NESSUN orario di chiusura.
+#  >>> E il per-trade non copre il buco: ExportTrades (r.934-959) scrive
+#      close_time -- da cui la frazione SAREBBE ricavabile (l'uscita
+#      alla campanella cade alle 20:59, uno stop cade altrove) -- ma
+#      (1) il nome del file contiene il MAGIC, che e' lo stesso nelle
+#      due celle, quindi ogni passata SOVRASCRIVE la precedente e
+#      sopravvive solo L'ULTIMA delle 4; (2) sta in FILE_COMMON e
+#      walkforward_generico.ps1 NON lo raccoglie (raccoglie solo
+#      OptResults_*, r.1673-1689).
+#
+#  >>> CONSEGUENZA, E SI APPLICA ALLA LETTURA DI DOMATTINA:
+#      la frazione di uscite per stop resta [NON MISURATA] da questo
+#      round. Quindi un PF basso NON e' interpretabile come "il motore
+#      non ha edge": e' "PF X con un guardrail a 2 x ATR(M30) di cui
+#      non sappiamo quanto ha morso". !!! Il verdetto ammesso e' il
+#      numero, MAI la diagnosi del meccanismo.
+#      La via corta al numero mancante e' un round con asse
+#      InpSLatr (oppure InpUseStopLoss), che e' il round DOPO.
+#
+#  >>> E IL CONTO DELL'AMPLIFICAZIONE, rifatto dal cancello: il timore
+#      e' "con amplificazione x2 il range della mezz'ora = 90,6 =
+#      esattamente lo stop -> meta' delle operazioni muore sullo stop".
+#      NON REGGE, e il motivo e' che confronta due cose diverse:
+#      lo stop NON e' 2 x 45,3 (il 45,3 e' una DERIVAZIONE per il
+#      cancello di costo). Lo stop e' 2 x ATR_14(M30) letto sulla
+#      barra CHIUSA (r.693, CopyBuffer shift 1), cioe' 2 volte la
+#      MEDIA delle ultime 14 barre M30 = 13:30-20:30 server. Una
+#      mezz'ora amplificata x2 contribuisce 1/14 a quella media: non
+#      la sposta. Quindi lo stop resta ~2 x (media di sessione) e la
+#      barra finale ha range ~A x (media di sessione).
+#      Perche' lo stop scatti serve che l'escursione AVVERSA
+#      DALL'INGRESSO superi 2 x media: ad A = 2 servirebbe che
+#      l'ingresso cada sull'estremo favorevole E che tutto il range
+#      vada contro. NON e' "meta' delle operazioni": e' una frazione
+#      piccola. Ad A = 3,05 (il fattore MISURATO -- ma sul DAX, a 15
+#      minuti, in APERTURA: tre estrapolazioni) serve un'escursione
+#      avversa oltre il 66% del range della barra, che su una barra
+#      qualunque vale [NON MISURATO] ma e' dell'ordine del 15-25%.
+#      >>> LA PRIMA POSIZIONE REGGE. Ma regge su un conto, non su una
+#          misura: la frazione vera non e' leggibile in questo round
+#          (vedi sopra), e per questo il round MISURA e NON PROMUOVE.
+#
 #  LE TRE USCITE, congelate adesso:
 #   (a) NUMERO BUONO: cella A con n >= 150 in entrambe E PF >= 1,10 in
 #       entrambe -> e' il primo motore di casa che paga il pedaggio con
@@ -192,9 +276,30 @@
 #       separati (regola 25/08), gemelli D30EUR e 225JPY, e la scelta
 #       di cella al CENTRO DELL'ALTOPIANO, mai il picco.
 #   (b) NUMERO BRUTTO, E ME L'ASPETTO PIU' PROBABILE: cella A con
-#       n >= 150 e PF < 1,10 -> cancello C0. Si scrive il CERTIFICATO
-#       con PF/n/DD e il motore si chiude CON UN NUMERO. E' un buon
-#       esito: chiude un candidato di classe A1 fermo da 21 giorni.
+#       n >= 150 e PF < 1,10 -> cancello C0. Si scrive il numero con
+#       PF/n/DD.
+#       >>> !!! CORRETTO DAL CANCELLO IL 12/09: qui c'era scritto "il
+#           motore si CHIUDE con un numero". NON SI CHIUDE, e questo
+#           file non puo' pre-autorizzarlo. Il certificato di morte
+#           del 09/09 chiede CINQUE caselle, e dopo questo round e
+#           R141b lo stato e':
+#             1. PF misurato .............. SI (lo da' questo round)
+#             2. n e DD ................... SI
+#             3. gestione dell'uscita ad
+#                asse almeno una volta .... !!! NO -- l'uscita e' la
+#                campanella e non e' MAI stata variata (ne' via
+#                InpSLatr, ne' via InpExitSafetyMin, ne' via
+#                InpMinAbsR1Pct)
+#             4. simboli gemelli .......... PARZIALE -- NASUSD+U30USD
+#                stanotte; D30EUR (campanella 16:30 server) e 225JPY NO
+#             5. TF cambiato .............. !!! NO -- e non basta dire
+#                "il TF del grafico non conta": la manopola di TF vera
+#                di questo motore e' InpAtrTF, pinnata a M30 e mai
+#                variata
+#       >>> QUINDI l'esito (b) si scrive in REGISTRO_TEST.md come
+#           **"NON ANCORA MISURATO, con PF/n/DD"** e con l'elenco delle
+#           tre caselle mancanti. NON "MORTO". Un morto senza
+#           certificato e' un'occasione persa che nessuno ritrova.
 #       >>> E SE la cella B (r12) passasse mentre la A no, il verdetto
 #           NON e' "promosso": e' "il filtro morde, e va misurato su un
 #           campione suo". Una cella su due con n sotto 150 non e' una
