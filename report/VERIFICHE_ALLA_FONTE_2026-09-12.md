@@ -64,3 +64,68 @@ Due pacchetti, **nessuno dei due e' uscito** (regola del 09/09):
    la famiglia a **0,945 pos/giorno** togliendo una sedia firmata «prop: NO», e
    l'edge che vive su **un simbolo solo** (`U30USD` 98/98, ma `D30EUR` 0/80,
    `NASUSD` 2/83, `SPXUSD` 4/86).
+
+---
+
+# 🔬 SECONDO GIRO DI VERIFICHE (sera del 12/09)
+
+## 🟢 UNA BUONA NOTIZIA SUL NOSTRO STRUMENTO, e va detta precisa
+
+Il cancello sul pacchetto ricompilazione ha scritto che il cancello
+deterministico *"era stato dichiarato passato ma non lo era, perche' era stato
+invocato con `--riga` su un `.md`"*. **Sono andato a provarlo**, perche' un
+cancello che dichiara PASS quando lo invochi male sarebbe il difetto peggiore
+che abbiamo:
+
+```
+con --riga su un .md : uscita = 1   (14 controlli)
+con --md   sullo stesso: uscita = 0   ( 6 controlli)
+```
+
+🟢 **L'invocazione sbagliata FALLISCE CHIUSA.** `--riga` tratta tutto il `.md`
+come una riga sola, quindi la **prosa** — che *deve* nominare i conti vietati,
+lo pretende la regola dei terminali — fa scattare i controlli ASCII e
+CONTO/TERMINALE. Escono **falsi FAIL, non falsi PASS**. E fallire chiusi e' il
+verso giusto.
+
+🟠 **Il limite vero, che resta ed e' dichiarato** (classe 225): con `--md` girano
+**6** controlli invece di 14, perche' `--md` guarda **solo i blocchi di codice**.
+La **prosa di un `.md` non e' gattata**, e lo strumento lo dice da se'. Quindi su
+un documento di consegna la prosa va **riletta a occhio**: il cancello li' non
+giudica.
+
+## 🟢 IL PIN NUOVO, verificato end-to-end
+
+| controllo | esito |
+|---|---|
+| `60a2ee45…` e' un commit vero | 🟢 `git cat-file` -> commit |
+| GitHub lo serve | 🟢 **HTTP 200**, 33.334 byte |
+| impronta del file servito = copia locale | 🟢 **identica** (`D28FA0FD…`) |
+| marcatore | 🟢 presente (2 occorrenze) |
+| il pin **bruciato** `c6a63026` nei blocchi di codice | 🟢 **ZERO** |
+| il pin bruciato nella prosa | 🟢 **1, dentro l'avviso "non rilanciare il vecchio pin"** |
+
+🔑 **E quest'ultima riga e' la gestione giusta, non un difetto**: un pin bruciato
+si **nomina** perche' sia riconoscibile e rifiutabile, non si cancella. Cancellarlo
+lascerebbe Claudio senza il modo di accorgersi di avere in mano quello vecchio.
+
+## 😅 IL CONTEGGIO DEI MIEI FALSI ALLARMI DI OGGI: **sette**
+
+1. `cATRpillar` contiene la sottostringa `catrp` -> "CATRP era gia' citato" (no)
+2. "OTTO cartelle dati, non sei" -> `CODA_03` filtrava per `MQL5`, e aveva ragione
+3. "84 su 84 e' falso, sono 137" -> 53 celle hanno `Trades == 0`
+4. "la protezione del bersaglio e' stata indebolita" -> era stata **rafforzata**
+   (lista unica + permesso esatto `-ne $SOLO_QUESTO`)
+5. "il pin bruciato e' ancora nel documento" -> sta nell'avviso, non nel codice
+6. "il cancello invocato male da' un PASS falso" -> fallisce **chiuso**
+7. (+ i criteri di R123 che erano congelati e non avevo cercato)
+
+🔴 **La causa e' UNA e non cambia mai: guardo il numero prima della
+DEFINIZIONE.** Ogni volta che un mio conteggio contraddice quello di un altro,
+la spiegazione giusta e' stata **"stiamo contando popolazioni diverse"** — non
+"l'altro ha sbagliato".
+
+🟢 **Ma la regola che mi sono scritto stamattina sta funzionando**: dei sette,
+i primi due li ho scritti prima di verificare, gli **ultimi cinque li ho
+verificati prima di aprire bocca**. La differenza fra un errore e un
+quasi-errore e' tutta li'.
