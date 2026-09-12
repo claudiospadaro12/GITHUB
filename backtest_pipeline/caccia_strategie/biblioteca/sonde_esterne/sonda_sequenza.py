@@ -109,6 +109,18 @@ def in_sessione(b, sym):
     return lo <= t < hi
 
 
+ALLIN = os.environ.get('ALLIN', '0') == '1'
+
+
+def pattern_in_sessione(b, i, N, sym):
+    """Con ALLIN=1 pretende che TUTTE le barre del pattern (madre inclusa) stiano
+    nella sessione cash: e' il contro-esempio contro i pattern che cominciano
+    nella notte e finiscono all'apertura."""
+    if not ALLIN:
+        return True
+    return all(in_sessione(b[j], sym) for j in range(i - N, i + 1))
+
+
 def setup_long(b, i, N):
     """True se la sequenza LONG e' completa alla barra i (ingresso al close di i)."""
     m = i - N
@@ -191,6 +203,8 @@ def main():
                     sig = []
                     for i in range(N + 1, len(b) - 1):
                         if not in_sessione(b[i], sym):
+                            continue
+                        if not pattern_in_sessione(b, i, N, sym):
                             continue
                         ok = setup_long(b, i, N) if side == 'L' else setup_short(b, i, N)
                         if not ok:

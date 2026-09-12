@@ -2076,6 +2076,20 @@ zero EA toccati.**
   **H1 N=3 SHORT E netta +0,057R** (n=251, 1R 85,8 pt = **52× lo spread**) contro
   **H1 N=3 LONG −0,211R** (n=265). Sul medesimo segnale il lato opposto fa **27,8%**
   di TP-prima-di-SL dove lo short fa 35,9%.
+- 🔁 **IL CONTRO-ESEMPIO CONTRO ME STESSO, e una cella si e' ribaltata (dichiarato).**
+  Nella prima passata filtravo dentro la sessione **solo la barra d'ingresso**: un
+  pattern poteva cominciare **nella notte**. Con la variante `ALLIN=1` (tutte le barre
+  del pattern in sessione) **M30 N=3 SHORT passa a 3/4** (+0,117 / −0,199 / +0,038 /
+  +0,159, n 87-128 per anno). 🔴 **Non cambia il verdetto, e il conto e' questo:** ho
+  guardato **24 celle** (12 × 2 varianti) e il cancello "3 anni su 4" sotto una moneta
+  annuale passa il **31,25%** delle volte → su 24 celle una moneta ne darebbe **~7,5**,
+  io ne trovo **2**. 📌 **Lezione di metodo da tenere: un test di SEGNO su 4 anni non e'
+  un cancello severo** — serve segno **+** taglia, o piu' anni.
+- 🎯 **E CIO' CHE NON E' RUMORE: il segno lo decide l'ANNO, non il parametro.** Celle
+  short positive per anno (6 celle N × TF): **2015 5/6** (crollo d'agosto) · **2016
+  1/6** · **2017 1/6** (il toro piu' tranquillo del decennio) · **2018 6/6** (orso).
+  Non dipende da N, non dipende dal TF, non dipende da RR: e' un **interruttore di
+  regime**.
 - 🔴 **IL CANCELLO CHE L'HA FERMATA, scritto PRIMA dei numeri** (intestazione di
   `sonda_sequenza_anni.py`): *"il segno della E netta deve reggere in ≥3 anni su 4"*.
   Esito: **2 su 4** su tutte le celle con campione — **H1 N=3 SHORT: +0,297 (2015) /

@@ -21,7 +21,10 @@ INDICE ESTERNI** (histdata via `raw.githubusercontent.com`), non da MT5.
 > il cancello che gli avevo scritto addosso prima di guardare i numeri**: il segno
 > della E netta doveva reggere in **≥3 anni su 4** e regge in **2 su 4** — positivo
 > nel **2015 (crollo d'agosto)** e nel **2018 (orso)**, negativo nel **2016 e 2017
-> (toro tranquillo)**.
+> (toro tranquillo)**. E il cancello lo passano **2 celle su 24 guardate**, quando una
+> moneta annuale ne regalerebbe **~7,5**: il segno lo decide **l'ANNO**, non il
+> parametro — 2015 **5 celle short positive su 6**, 2016 **1/6**, 2017 **1/6**,
+> 2018 **6/6**.
 >
 > 🎯 **E questo non e' un caso isolato: e' la TERZA misura indipendente che dice la
 > stessa cosa.** In casa, `ABTG_InvEsaurimento` E3 (conferma di spinta persa) fa
@@ -199,7 +202,7 @@ falsi positivi su "perdite consecutive" e "corse consecutive").
 
 Sonda: `backtest_pipeline/caccia_strategie/biblioteca/sonde_esterne/sonda_sequenza.py`
 (geometria copiata riga per riga dal Pine, verificata punto per punto contro il
-sorgente). Ambiguita' intrabarra **sempre a sfavore** (lo SL si controlla **prima** del
+sorgente; variante `ALLIN=1` = tutte le barre del pattern dentro la sessione). Ambiguita' intrabarra **sempre a sfavore** (lo SL si controlla **prima** del
 TP), zero costi dentro la sonda, costo aggiunto dopo **in R** con gli spread misurati
 di casa. **Controllo APPAIATO** come da regola del 05/09: stessa barra, stesso 1R,
 **lato opposto**.
@@ -268,12 +271,52 @@ questa famiglia, e' **avere dentro un anno di orso**.
 | M30 | 3 | L | +0,081 | −0,208 | −0,063 | −0,351 | 1/4 ❌ |
 | H1 | 3 | L | −0,084 | −0,171 | −0,293 | −0,314 | **0/4** ❌ |
 
+#### 🔁 E POI HO PROVATO A ROMPERE IL MIO PROPRIO VERDETTO — e una cella si e' ribaltata
+
+Difetto vero della prima passata, trovato da me e non nascosto: filtravo **solo la
+barra d'ingresso** dentro la sessione cash, quindi un pattern poteva **cominciare
+nella notte** (candela madre a liquidita' zero) e chiudersi all'apertura. Ho aggiunto
+la variante `ALLIN=1` che pretende **tutte** le barre del pattern dentro la sessione.
+Esito, GRXEUR RR 2,0, E netta per anno:
+
+| TF | N | lato | 2015 | 2016 | 2017 | 2018 | anni positivi |
+|---|---:|---|---:|---:|---:|---:|:---:|
+| **M30** | **3** | **S** | **+0,117** | −0,199 | **+0,038** | **+0,159** | 🟡 **3/4** (n 87-128 per anno) |
+| M30 | 2 | S | +0,101 | −0,126 | −0,114 | +0,193 | 2/4 |
+| H1 | 3 | S | +0,279 | −0,058 | −0,327 | +0,022 | 2/4 |
+| M30 | 3 | L | +0,072 | −0,222 | −0,075 | −0,401 | 1/4 |
+
+**Lo dichiaro perche' e' un ribaltamento, ma non cambia il verdetto — e il motivo e'
+aritmetico:** ho ormai guardato **24 celle** (12 × 2 varianti) e il cancello "3 anni su
+4" e' **debole**: sotto una moneta annuale ci passa il **31,25%** delle celle
+(5/16), quindi su 24 celle una moneta ne produrrebbe **~7,5** a 3/4. **Io ne trovo 2.**
+Cioe' **meno di quante ne darebbe il caso**: un cancello superato da 1 cella su 24 non
+e' una scoperta, e' quello che resta quando cerchi in 24 posti.
+
+#### 🎯 E LA COSA CHE INVECE **NON** E' RUMORE: il segno lo decide L'ANNO, non la cella
+
+Contati sui 6 cella-short della passata base (N × TF), anno per anno:
+
+| anno | celle short positive | che anno era |
+|---|:---:|---|
+| **2015** | **5 su 6** | crollo d'agosto (Cina), volatilita' alta |
+| 2016 | **1 su 6** | toro, dopo il minimo di febbraio |
+| 2017 | **1 su 6** | il toro piu' tranquillo del decennio (VIX ai minimi storici) |
+| **2018** | **6 su 6** | orso: febbraio e Q4 |
+
+> 🔴 **Questa non e' dispersione casuale: e' un interruttore.** Il segno **non
+> dipende** da N, non dipende dal TF, non dipende da RR — dipende **dall'anno**. E' la
+> definizione operativa di *"regime-condizionale"*, e coincide riga per riga con quello
+> che `ABTG_InvEsaurimento` E3 ha misurato in casa con una geometria **diversa** e su
+> un simbolo **diverso**.
+
 > ### 🔴 VERDETTO: **IL CANDIDATO NON ENTRA NELL'IMBUTO.**
 > Il lato short e' positivo **esattamente e solo** nei due anni con volatilita' e
 > discese (**2015**: crollo d'agosto; **2018**: orso di febbraio e del Q4) e negativo
-> **in entrambi** gli anni di toro tranquillo (**2016, 2017**). L'unica riga che passa
-> il cancello 3/4 (H1 N=4) lo fa con **21-26 operazioni per anno**: e' un campione su
-> cui non si pronuncia nessuno, e sta nel capo **ad alta varianza** della griglia.
+> **in entrambi** gli anni di toro tranquillo (**2016, 2017**). Le due sole righe che
+> passano il cancello 3/4 su **24 celle guardate** lo fanno una con **21-26 operazioni
+> per anno** (H1 N=4, capo ad alta varianza della griglia) e l'altra **solo nella
+> variante `ALLIN`** — e su 24 celle una moneta annuale ne regalerebbe **~7,5**.
 >
 > ✅ **E l'altra meta' del contro-esempio: ho provato anche a ROMPERE il risultato
 > al contrario.** Se il lato long e' un perdente affidabile (0/4 anni su H1 N=3,
@@ -462,7 +505,7 @@ motore, o non nascere.
 | sorgenti **letti riga per riga** | **5** |
 | candidati **portati alla misura** | **1** |
 | barre M1 di dati indice **misurate** | **1.942.126** (GRXEUR + SPXUSD, 2015-2018) |
-| celle di sonda calcolate | **~200** (2 simboli × 2 TF × 4 N × 2 lati × 3 RR + 96 celle per anno) |
+| celle di sonda calcolate | **~250** (2 simboli × 2 TF × 4 N × 2 lati × 3 RR + 96 celle per anno × 2 varianti di sessione) |
 | **promossi** | **0** |
 | EA / preset / parametri di forward toccati | **0** |
 | passate di tester spese | **0** |

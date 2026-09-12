@@ -220,3 +220,42 @@
 # --- L'UNICO ASSE, se un giorno si lancia (4 celle x 2 finestre = 8 passate)
 # InpSeqLen=3||2||1||5||Y
 # ======================================================================
+
+# ======================================================================
+#  AGGIUNTA DELLO STESSO GIORNO (12/09/2026) -- IL CONTRO-ESEMPIO CONTRO
+#  ME STESSO, e una cella che si ribalta. Va letta, perche' cambia la
+#  FORZA del verdetto anche se non ne cambia il segno.
+#
+#  DIFETTO TROVATO NELLA MIA PRIMA PASSATA: filtravo dentro la sessione
+#  cash SOLO la barra d'ingresso, quindi un pattern poteva COMINCIARE
+#  nella notte (candela madre a liquidita' zero) e chiudersi
+#  all'apertura. Aggiunta la variante ALLIN=1 (tutte le barre del
+#  pattern dentro la sessione).
+#
+#  ESITO, GRXEUR RR 2,0, E netta per anno, variante ALLIN=1:
+#    M30 3 SHORT  +0,117 / -0,199 / +0,038 / +0,159  -> 3/4  (n 87-128/anno)
+#    M30 2 SHORT  +0,101 / -0,126 / -0,114 / +0,193  -> 2/4
+#    H1  3 SHORT  +0,279 / -0,058 / -0,327 / +0,022  -> 2/4
+#    M30 3 LONG   +0,072 / -0,222 / -0,075 / -0,401  -> 1/4
+#
+#  PERCHE' NON CAMBIA IL VERDETTO, e il conto:
+#    Ho guardato in tutto 24 celle (12 x 2 varianti). Il cancello
+#    "3 anni su 4" e' DEBOLE: sotto una moneta annuale lo passa il
+#    31,25% delle celle (5/16), cioe' su 24 celle una moneta ne
+#    produrrebbe ~7,5. Io ne trovo 2. Un cancello passato da 1 cella su
+#    24 non e' una scoperta: e' quello che resta quando si cerca in 24
+#    posti. (Da qui una lezione di metodo per chi viene dopo: un test di
+#    SEGNO su 4 anni non e' un cancello severo. Serve il segno + la
+#    taglia, o piu' anni.)
+#
+#  E LA COSA CHE INVECE NON E' RUMORE -- il segno lo decide l'ANNO:
+#    celle short positive per anno (6 celle N x TF, passata base)
+#      2015: 5/6   (crollo d'agosto)
+#      2016: 1/6   (toro)
+#      2017: 1/6   (il toro piu' tranquillo del decennio)
+#      2018: 6/6   (orso di febbraio e del Q4)
+#    Il segno NON dipende da N, NON dipende dal TF, NON dipende da RR.
+#    E' un interruttore di REGIME, ed e' la stessa forma misurata in casa
+#    da ABTG_InvEsaurimento E3 con una geometria diversa e su un simbolo
+#    diverso.
+# ======================================================================

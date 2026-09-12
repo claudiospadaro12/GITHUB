@@ -43,6 +43,8 @@ for sym in ('GRXEUR', 'SPXUSD'):
                 for i in range(N + 1, len(b) - 1):
                     if not sq.in_sessione(b[i], sym):
                         continue
+                    if not sq.pattern_in_sessione(b, i, N, sym):
+                        continue
                     ok = sq.setup_long(b, i, N) if side == 'L' else sq.setup_short(b, i, N)
                     if not ok:
                         continue
