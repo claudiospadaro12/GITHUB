@@ -1,0 +1,216 @@
+======================================================================
+  CENSIMENTO MT5 DELLA MACCHINA -- SOLA LETTURA
+  data: 2026-09-12 08:46:19
+  pin:  fd622c39657404a45190bac46003947e204a2be5
+======================================================================
+
+=== 1. CHE MACCHINA E' QUESTA ===
+    nome computer   : VMI3047753
+    utente          : Administrator
+    sessione        : RDP-Tcp#1   -> c'e' un DESKTOP REMOTO di mezzo: tutto quello che segue descrive la macchina che si chiama VMI3047753, NON quella che hai fisicamente davanti
+    VERDETTO        : QUESTA E' LA MACCHINA DEL VPS (VMI3047753, nome misurato il 12/09/2026 da CODA_04).
+    Il NOME e' la prova. Sessione, batteria e modello sono indizi, non verdetti.
+    marca/modello   : QEMU / Standard PC (i440FX + PIIX, 1996)
+    processori      : 6 logici
+    RAM             : 12 GB
+    tipo            : VIRTUALE (marca/modello di macchina virtuale)
+    batteria        : NESSUNA -> compatibile con un VPS o un desktop fisso. Nemmeno questo e' un verdetto.
+    Windows         : Microsoft Windows Server 2022 Datacenter  (build 20348)
+    accesa da       : 2026-07-06 15:06
+
+    LO DICO CHIARO: questo referto descrive UNA macchina sola, quella il cui
+    nome e' stampato qui sopra (VMI3047753). Per sapere com'e' fatta
+    l'ALTRA, la riga va lanciata SULL'ALTRA: servono DUE corse, e i due nomi
+    si CONFRONTANO. Quale delle due sia "il VPS" lo dice il NOME, non la sessione.
+
+=== 2. I terminal64.exe TROVATI NEI RAMI ELENCATI QUI SOTTO ===
+    (il Pannello di controllo non vede le copie e i portable:
+     mostra UN BCM, e noi ne abbiamo misurati QUATTRO)
+    NON e' "tutto il disco": i rami cercati e la profondita' sono stampati,
+    e cio' che sta FUORI da questo elenco NON e' stato guardato.
+    unita' FISSE viste: C:\
+    rami ESCLUSI per nome: Windows, $Recycle.Bin, System Volume Information, $WinREAgent, Recovery, PerfLogs, Config.Msi, OneDriveTemp
+    cerco sotto: C:\ABTG  (profondita' 3)
+    cerco sotto: C:\BCM_Reale  (profondita' 3)
+    cerco sotto: C:\config  (profondita' 3)
+    cerco sotto: C:\inetpub  (profondita' 3)
+    cerco sotto: C:\MT5_Backtest  (profondita' 3)
+    cerco sotto: C:\Program Files  (profondita' 3)
+    cerco sotto: C:\Program Files (x86)  (profondita' 3)
+    cerco sotto: C:\python313  (profondita' 3)
+    cerco sotto: C:\report_scheduler  (profondita' 3)
+    cerco sotto: C:\Users  (profondita' 3)
+    cerco sotto: C:\Users\Administrator\AppData\Local  (profondita' 3)
+    cerco sotto: C:\Users\Administrator  (profondita' 3)
+
+    processi terminal64 VIVI ADESSO: 3   (percorso leggibile 3, NON leggibile 0)
+
+    TROVATI 6 terminal64.exe
+
+    C:\BCM_Reale
+       [NOTO: 10105439  CONTO REALE]   ACCESO ADESSO, PID 7824
+       versione 5.0.0.6182   file del 2026-09-06
+
+    C:\MT5_Backtest
+       [NOTO: 50504400  banco backtest]   spento
+       versione 5.0.0.6184   file del 2026-09-07
+
+    C:\Program Files\BCM Markets MT5 Terminal -V3
+       [NOTO: 50504263  dry-run 100k]   ACCESO ADESSO, PID 8664
+       versione 5.0.0.6182   file del 2026-09-06
+
+    C:\Program Files\BCM Markets MT5 Terminal
+       [NOTO: 50503392  demo piccolo]   ACCESO ADESSO, PID 9780
+       versione 5.0.0.6182   file del 2026-09-06
+
+    C:\Program Files\Pepperstone MetaTrader 5
+       [ESTERNO / NON IN MAPPA]   spento
+       versione 5.0.0.5836   file del 2026-06-18
+
+    C:\Program Files\Tickmill Europe MT5 Terminal
+       [ESTERNO / NON IN MAPPA]   spento
+       versione 5.0.0.5836   file del 2026-06-18
+
+=== 3. LE CARTELLE DATI IN APPDATA, E CHE CONTO HANNO DENTRO ===
+    cartelle DATI vere (hanno MQL5 dentro): 6   -- il 12/09 sul VPS erano 6 (CODA_03)
+    altre 5 cartelle SENZA MQL5, che NON sono terminali (cartelle condivise di MetaQuotes e residui): 15BEB048A4E0532395CCA693EA561D8C, Common, Community, FF5C0E29FAC93F5DD90858C939E9C0E8, Help
+    Non si contano, non si censiscono, non si disinstallano.
+
+    04C7A32B575E40027B4FF8724D14D702
+       origin.txt : C:\MT5_Backtest
+       in mappa?  : [NOTO: 50504400  banco backtest]
+       giornali   : 4 file, il piu' recente del 2026-09-09 20:18   (20260909.log)
+       CONTO      : 50504400   su server BCMMarkets-Server
+       AZIENDA    : BCMMarkets-Server: no demo/preliminary groups on server side   <- e' questa la riga che dice DI CHI e' il terminale
+       grafici    : 17 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 0
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+    215D85D767A1C39E22D242C8114BF9F5
+       origin.txt : C:\Program Files\BCM Markets MT5 Terminal
+       in mappa?  : [NOTO: 50503392  demo piccolo]
+       giornali   : 179 file, il piu' recente del 2026-09-12 01:15   (20260912.log)
+       CONTO      : 50503392   su server BCMMarkets-Server
+       AZIENDA    : [nessuna riga company/broker nei giornali letti]
+       grafici    : 63 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 40
+          ABTG_TradeExporter  NZDCAD   (chart01.chr, salvato il 2026-09-06 22:55)
+          ABTG_PTE  U30USD   (chart02.chr, salvato il 2026-09-06 22:55)
+          ABTG_BreakingBand  GBPUSD   (chart03.chr, salvato il 2026-09-06 22:55)
+          ABTG_BreakingBand  EURUSD   (chart04.chr, salvato il 2026-09-06 22:55)
+          ABTG_BreakingBand  AUDUSD   (chart05.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapFill  GBPUSD   (chart06.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapFill  EURUSD   (chart07.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapFill  AUDUSD   (chart08.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapFill  U30USD   (chart09.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapFill  225JPY   (chart10.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  U30USD   (chart11.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  EURAUD   (chart12.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  XAUUSD   (chart13.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  GBPJPY   (chart14.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  GBPUSD   (chart15.chr, salvato il 2026-09-06 22:55)
+          ABTG_PunteLarry  EURCAD   (chart16.chr, salvato il 2026-09-06 22:55)
+          ABTG_CostToCost  EURJPY   (chart17.chr, salvato il 2026-09-06 22:55)
+          ABTG_CostToCost  GBPCAD   (chart18.chr, salvato il 2026-09-06 22:55)
+          ABTG_EasyTrend  CHFJPY   (chart20.chr, salvato il 2026-09-06 22:55)
+          ABTG_EasyTrend  GBPUSD   (chart21.chr, salvato il 2026-09-06 22:55)
+          ABTG_GapContinuation  225JPY   (chart23.chr, salvato il 2026-09-06 22:55)
+          ABTG_PTE  GBPUSD   (chart24.chr, salvato il 2026-09-06 22:55)
+          ABTG_PTE  GBPUSD   (chart26.chr, salvato il 2026-09-06 22:55)
+          ABTG_SuperWave  U30USD   (chart27.chr, salvato il 2026-09-06 22:55)
+          ABTG_MaxMinNotte  XAUUSD   (chart29.chr, salvato il 2026-09-06 22:55)
+          ABTG_DAX_Apertura_EU  D30EUR   (chart30.chr, salvato il 2026-09-06 22:55)
+          ABTG_Dow_Apertura_US  U30USD   (chart31.chr, salvato il 2026-09-06 22:55)
+          ABTG_MaxMinNotte_DAX_Short_Ottimizzato  D30EUR   (chart32.chr, salvato il 2026-09-06 22:55)
+          ABTG_EMA200  U30USD   (chart33.chr, salvato il 2026-09-06 22:55)
+          ABTG_EMA200_Ottimizzato  XAUUSD   (chart34.chr, salvato il 2026-09-06 22:55)
+          ABTG_SupertrendReversal  225JPY   (chart35.chr, salvato il 2026-09-06 22:55)
+          ABTG_SupertrendReversal_Ottimizzato  XAUUSD   (chart36.chr, salvato il 2026-09-06 22:55)
+          ABTG_SuperWave_DOW_H1_Ottimizzato  U30USD   (chart37.chr, salvato il 2026-09-06 22:55)
+          ABTG_SupRev_DAX_H4_Ottimizzato  D30EUR   (chart38.chr, salvato il 2026-09-06 22:55)
+          ABTG_SupRev_NAS_H1_Ottimizzato  NASUSD   (chart39.chr, salvato il 2026-09-06 22:55)
+          ABTG_ORB_Ottimizzato  U30USD   (chart40.chr, salvato il 2026-09-06 22:55)
+          ABTG_Nasdaq_Apertura_US  NASUSD   (chart41.chr, salvato il 2026-09-06 22:55)
+          ABTG_PostNews  USDJPY   (chart42.chr, salvato il 2026-09-06 22:55)
+          ABTG_PostNews  EURJPY   (chart43.chr, salvato il 2026-09-06 22:55)
+          ABTG_PostNews  EURUSD   (chart44.chr, salvato il 2026-09-06 22:55)
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+    73B7A2420D6397DFF9014A20F1201F97
+       origin.txt : C:\Program Files\Pepperstone MetaTrader 5
+       in mappa?  : [ESTERNO / NON IN MAPPA]
+       giornali   : 2 file, il piu' recente del 2026-06-18 19:22   (20260618.log)
+       CONTO      : 62128200   [nessun "authorized on" nei giornali letti]
+       AZIENDA    : PepperstoneUK-Live: no demo/preliminary groups on server side   <- e' questa la riga che dice DI CHI e' il terminale
+       grafici    : 13 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 0
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+    857385E4B0F2356AD99AA95CDF40FAE9
+       origin.txt : C:\Program Files\Tickmill Europe MT5 Terminal
+       in mappa?  : [ESTERNO / NON IN MAPPA]
+       giornali   : 11 file, il piu' recente del 2026-07-30 14:11   (metaeditor.log)
+       CONTO      : 25336156   [nessun "authorized on" nei giornali letti]
+       AZIENDA    : [nessuna riga company/broker nei giornali letti]
+       grafici    : 16 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 2
+          Gold_Ichimoku_TK_ATR_EA  XAUUSD   (chart01.chr, salvato il 2026-07-20 22:19)
+          BREAKOUT_EA_JPY_v3  USDJPY   (chart02.chr, salvato il 2026-07-20 22:19)
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+    BCA8AD18563BF5B64A433C2662D0A104
+       origin.txt : C:\Program Files\BCM Markets MT5 Terminal -V3
+       in mappa?  : [NOTO: 50504263  dry-run 100k]
+       giornali   : 72 file, il piu' recente del 2026-09-12 01:15   (20260912.log)
+       CONTO      : 50504263   su server BCMMarkets-Server
+       AZIENDA    : [nessuna riga company/broker nei giornali letti]
+       grafici    : 26 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 13
+          ABTG_Guardian  AUDCAD   (chart01.chr, salvato il 2026-08-09 20:22)
+          ABTG_DAX_Apertura_EU  D30EUR   (chart02.chr, salvato il 2026-08-09 20:22)
+          ABTG_Dow_Apertura_US  U30USD   (chart03.chr, salvato il 2026-08-09 20:22)
+          ABTG_MaxMinNotte_DAX_Short_Ottimizzato  D30EUR   (chart04.chr, salvato il 2026-08-09 20:22)
+          ABTG_SupertrendReversal  225JPY   (chart05.chr, salvato il 2026-08-09 20:22)
+          ABTG_ORB_Ottimizzato  U30USD   (chart06.chr, salvato il 2026-08-09 20:22)
+          ABTG_DAX_Apertura_EU  D30EUR   (chart01.chr, salvato il 2026-09-06 08:01)
+          ABTG_Dow_Apertura_US  U30USD   (chart02.chr, salvato il 2026-09-06 08:01)
+          ABTG_MaxMinNotte_DAX_Short_Ottimizzato  D30EUR   (chart03.chr, salvato il 2026-09-06 08:01)
+          ABTG_SupertrendReversal  225JPY   (chart04.chr, salvato il 2026-09-06 08:01)
+          ABTG_TradeExporter  EURUSD   (chart05.chr, salvato il 2026-09-06 08:01)
+          ABTG_ORB_Ottimizzato  U30USD   (chart06.chr, salvato il 2026-09-06 08:01)
+          ABTG_Guardian  AUDNZD   (chart07.chr, salvato il 2026-09-06 08:01)
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+    E23E1504A8D02A22179395F0652B86B6
+       origin.txt : C:\BCM_Reale
+       in mappa?  : [NOTO: 10105439  CONTO REALE]
+       giornali   : 9 file, il piu' recente del 2026-09-12 01:16   (20260912.log)
+       CONTO      : 10105439   su server BCMMarkets-Server
+       AZIENDA    : [nessuna riga company/broker nei giornali letti]
+       grafici    : 17 file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: 4
+          ABTG_DAX_Apertura_EU  D30EUR   (chart01.chr, salvato il 2026-09-12 00:21)
+          ABTG_ORB_Ottimizzato  U30USD   (chart02.chr, salvato il 2026-09-12 00:21)
+          ABTG_SlippageLogger  EURJPY   (chart03.chr, salvato il 2026-09-12 00:21)
+          ABTG_Guardian  EURGBP   (chart04.chr, salvato il 2026-09-12 00:21)
+       LIMITE: un .chr e' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"
+       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia
+       nell'ultimo profilo salvato", e il profilo si salva alla chiusura.
+
+=== 4. RIASSUNTO ===
+    terminal64.exe in tutto        : 6
+    di cui NOTI (i quattro BCM)    : 4
+    di cui ESTERNI / non in mappa   : 2
+       C:\Program Files\Pepperstone MetaTrader 5
+       C:\Program Files\Tickmill Europe MT5 Terminal
+
+fine: 2026-09-12 08:46:27
+NON e' stato aperto, chiuso, installato o disinstallato NIENTE.
+NESSUN terminale e' stato avviato: le sedie sono lette dai file .chr sul disco.
+FILE: il referto e' scritto in ASCII, come i .ps1 di casa. Gli accenti dei
+messaggi di Windows diventano "?": e' estetica, nessun numero cambia.
+CENSIMENTO COMPLETO: la corsa e' arrivata in fondo. Se questa riga MANCA, il referto e' TRONCATO.

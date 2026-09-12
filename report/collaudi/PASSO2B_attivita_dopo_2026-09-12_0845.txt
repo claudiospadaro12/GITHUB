@@ -1,0 +1,30 @@
+
+Cartella: \
+Nome host:                                                    VMI3047753
+Nome attivit?:                                                \ABTG_Runner
+Prossima esecuzione:                                          13/09/2026 03:30:00
+Stato:                                                        Pronta
+Modalit? accesso:                                             Solo interattivo
+Ultima esecuzione:                                            30/11/1999 00:00:00
+Ultimo esito:                                                 267011
+Autore:                                                       VMI3047753\Administrator
+Attivit? da eseguire:                                         powershell -NoProfile -ExecutionPolicy Bypass -File C:\ABTG\runner_abtg.ps1
+Avvio in:                                                     N/D
+Commento:                                                     N/D
+Stato attivit? pianificata:                                   Abilitata
+Tempo di inattivit?:                                          Disabilitata
+Risparmio energia:                                            Interrompi in modalit? di alimentazione a batterie, Non avviare se il sistema ? alimentato a batterie
+Esegui come utente:                                           Administrator
+Elimina l'attivit? se non ripianificata:                      Disabilitata
+Interrompi l'attivit? se ? in esecuzione da X ore e X minuti: 72:00:00
+Pianificazione:                                               Dati di pianificazione non disponibili in questo formato.
+Tipo di pianificazione:                                       Ogni giorno 
+Ora di avvio:                                                 03:30:00
+Data di avvio:                                                12/09/2026
+Data di fine:                                                 N/D
+giorni:                                                       Ogni 1 giorni
+mesi:                                                         N/D
+Ripeti: Ogni:                                                 Disabilitata
+Ripeti: Fino a: Ora:                                          Disabilitata
+Ripeti: Fino a: Durata:                                       Disabilitata
+Ripeti: Interrompi se ancora in esecuzione:                   Disabilitata
