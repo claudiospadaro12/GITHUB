@@ -1383,6 +1383,22 @@ Write-Host "     Trade\PositionInfo.mqh, Trade\SymbolInfo.mqh, Trade\AccountInfo
 Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
 
 Copy-Item $srcFile -Destination $MqlExperts -Force
+
+# --- 12/09/2026, CLASSE 270: L'EX5 STANTIO CHE PASSA PER COMPILATO.
+#     Fino a oggi qui si compilava e poi si faceva Test-Path sull'.ex5, SENZA
+#     cancellarlo prima e SENZA guardare la data. Difetto misurato dal
+#     cancello: se la compilazione FALLISCE e un .ex5 c'era gia' da una corsa
+#     precedente, Test-Path e' VERO, il driver stampa "compilato" in VERDE e
+#     gira il BINARIO VECCHIO. I numeri di un commit finiscono attribuiti a
+#     un altro, senza un segnale a schermo.
+#     E non e' teorico: su questi EA l'archivio ha 116 / 52 / 6 / 4 CSV,
+#     quindi l'.ex5 preesistente e' lo scenario NORMALE, non l'eccezione.
+#     La toppa e' una riga: si cancella PRIMA, cosi' Test-Path torna a
+#     misurare "la compilazione di ADESSO ha prodotto un artefatto" invece di
+#     "esiste un artefatto, di chissa' quando".
+$ex5Atteso = Join-Path $MqlExperts "$Expert.ex5"
+Remove-Item -LiteralPath $ex5Atteso -Force -ErrorAction SilentlyContinue
+
 & $MetaEditor "/compile:$(Join-Path $MqlExperts "$Expert.mq5")" "/log" | Out-Null
 if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){
   # --- v5: il messaggio di morte deve dire PERCHE'.
