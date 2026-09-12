@@ -1,3 +1,23 @@
+# ##########################################################################
+# ##  RITIRATO IL 12/09/2026, LO STESSO GIORNO IN CUI E' NATO -- E NON
+# ##  PERCHE' ERA SBAGLIATO: PERCHE' UN ALTRO AGENTE, IN PARALLELO, HA
+# ##  SCRITTO LA STESSA MISURA PIU' LARGA NELLO STESSO POMERIGGIO.
+# ##
+# ##  SOSTITUITO DA: prove/R136c_parziale_U30USD.txt  (commit 63e10ba, round r136 -- quattro
+# ##  file sull'uscita della stessa cella: InpSLatr, InpTP1_ATRmult,
+# ##  InpTP1Pct, InpUseTrailing, 40 passate, criteri suoi).
+# ##  Il suo asse e' InpTP1Pct=0/25/50/75 (4 celle); il mio aveva anche la
+# ##  cella 100 (chiude tutto a TP1). UNICO rilievo da girargli: la 100
+# ##  manca, e a 100 il rapporto deal/posizione va a 1,00 -- che e' il
+# ##  numero della classe 226. Se gli serve, e' un asse da 5 celle.
+# ##
+# ##  NON SI LANCIA. Due file prova che misurano la stessa variabile sulla
+# ##  stessa cella con magic diversi sono il modo piu' rapido di ottenere
+# ##  due numeri che litigano. Si tiene UNO, e si tiene quello piu' largo.
+# ##  Questo file resta in repo come RECORD del requisito 3 del
+# ##  certificato (la gestione dell'uscita, mai messa ad asse fino a
+# ##  oggi): vedi report/EMA200_DOW_COSA_MANCA_2026-09-12.md par.1.
+# ##########################################################################
 # ==========================================================================
 #  EA: ABTG_EMA200
 #  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_03_uscita_TP1PCT.txt.
