@@ -71,7 +71,7 @@ scrive «non misurabile», MAI «robusta allo spread».**
 🔴 **La scala di casa «peggiora ogni INGRESSO A MERCATO di N punti» NON E'
 APPLICABILE a questa cella, e non e' un'omissione: e' un fatto di codice.**
 `InpEntryMode=2` (`ABTG_RETEST`) entra con **`BuyLimit`** — `ABTG_DAX_Apertura_EU.mq5`
-r.1505. Un ordine LIMIT non si riempie *peggio* per latenza: si riempie **al
+r.1504. Un ordine LIMIT non si riempie *peggio* per latenza: si riempie **al
 prezzo o meglio**, oppure **non si riempie**. Peggiorare il prezzo d'ingresso
 modellerebbe una cosa che non esiste.
 
