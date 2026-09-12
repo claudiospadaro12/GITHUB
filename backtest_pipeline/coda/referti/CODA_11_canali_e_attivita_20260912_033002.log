@@ -1,0 +1,64 @@
+
+=== CODA 11 - I CANALI CHE ENTRANO IN QUESTA MACCHINA ===
+  ora locale : 2026-09-12 03:31:42
+
+=== 1. ATTIVITA' PIANIFICATE ===
+  --- ABTG_AggiornaNews
+      stato        : Ready
+      ultima corsa : 09/11/2026 07:20:20
+      ultimo esito : 0   (0 = bene)
+      prossima     : 09/12/2026 07:20:20
+      esegue       : powershell.exe
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -File "C:\Users\Administrator\Desktop\GITHUB-claude-creating-agents-SgGpD (1)\GITHUB-claude-creating-agents-SgGpD\backtest_pipeline\aggiorna_news.ps1"
+  --- ABTG_PubblicaTrades
+      stato        : Ready
+      ultima corsa : 09/11/2026 22:45:45
+      ultimo esito : 0   (0 = bene)
+      prossima     : 09/14/2026 22:45:45
+      esegue       : powershell.exe
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\ABTG\pubblica_trades.ps1 -Branch lavoro
+  --- ABTG_Runner
+      stato        : Running
+      ultima corsa : 09/12/2026 03:30:30
+      ultimo esito : 267009   (0 = bene)
+      prossima     : 09/13/2026 03:30:30
+      esegue       : powershell
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -File C:\ABTG\runner_abtg.ps1
+  --- ABTG_ScaricaPagella
+      stato        : Ready
+      ultima corsa : 09/11/2026 23:15:15
+      ultimo esito : 0   (0 = bene)
+      prossima     : 09/12/2026 23:15:15
+      esegue       : powershell.exe
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File C:\ABTG\scarica_pagella.ps1 -Branch lavoro
+  --- ReportMercatoGiornaliero
+      stato        : Ready
+      ultima corsa : 09/11/2026 07:00:00
+      ultimo esito : 0   (0 = bene)
+      prossima     : 09/14/2026 07:00:00
+      esegue       : powershell.exe
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "C:\report_scheduler\trigger_report.ps1"
+  --- ReportSettimanaleTrading
+      stato        : Ready
+      ultima corsa : 09/05/2026 09:00:00
+      ultimo esito : 0   (0 = bene)
+      prossima     : 09/12/2026 09:00:00
+      esegue       : powershell.exe
+      argomenti    : -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File "C:\report_scheduler\trigger_weekly.ps1"
+
+  ATTESA MA NON TROVATA: ABTG_Pagella
+  ATTIVITA' NUOVA, non nell'elenco di casa: ABTG_PubblicaTrades
+  ATTIVITA' NUOVA, non nell'elenco di casa: ABTG_ScaricaPagella
+
+=== 2. IL RUNNER INSTALLATO - impronta, data, marcatore ===
+  file      : C:\ABTG\runner_abtg.ps1
+  byte      : 18605
+  modificato: 2026-09-07 22:59:19
+  SHA-256   : 74BD28846444F215EB38463239D3C32D3C87F0F4EF4795A285E1FCB83A603C86
+  marcatore v3 presente: False
+
+  >>> QUESTA IMPRONTA VA CONFRONTATA CON QUELLA DI IERI.
+      Se cambia senza un pacchetto firmato, qualcuno ha cambiato il
+      codice che gira da solo alle 03:30. Questa riga e' la prova.
+
+=== FINE CODA 11 ===
