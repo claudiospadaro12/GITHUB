@@ -14758,9 +14758,39 @@ fatto girare `VagliaScript` sul file nuovo →
     python3 controlla_riga.py ...  &&  git commit ...  &&  git push
 
 e **tutte e due le volte il cancello ha detto FAIL e il push e' partito lo
-stesso** — perche' `controlla_riga.py` **stampa** il verdetto ma esce con
-codice **0**, quindi la catena `&&` prosegue. Il verdetto l'ho letto **dopo**
-che la roba era gia' sul remoto.
+stesso**. Il verdetto l'ho letto **dopo** che la roba era gia' sul remoto.
+
+### ✏️ CORRETTA IL 12/09 MATTINA — LA CAUSA CHE AVEVO SCRITTO ERA FALSA, E LA VERA E' PEGGIO
+Qui avevo scritto *"perche' `controlla_riga.py` stampa il verdetto ma esce con
+codice 0"*. 🔴 **Falso, e misurato:** su un file rotto quel cancello esce con
+**1**. **Poteva fermarmi.**
+
+**L'ho disarmato IO**, e con una cosa che sembrava innocua: per accorciare
+l'output pipavo il cancello in `grep`
+
+    python3 controlla_riga.py ... | grep -E "ESITO"   &&   git commit && git push
+
+e in una pipeline **il codice di uscita e' quello dell'ULTIMO comando** — cioe'
+`grep`, che trova la riga e torna **0**. 👉 **La pipe ha buttato via il verdetto
+del cancello e l'ha sostituito con "ho trovato del testo".**
+
+| forma | uscita su file rotto | `&&` |
+|---|---:|---|
+| cancello **nudo** | **1** | 🟢 si ferma |
+| cancello **`\| grep`** ← quello che ho scritto io | **0** | 🔴 prosegue |
+| `set -o pipefail` + `\| grep` | **1** | 🟢 si ferma |
+
+📌 **Non era uno strumento debole: era una mia abbreviazione che gli ha tolto la
+voce.** Ed e' la classe 244 di nuovo, in un posto nuovo: guardavo **la forma**
+dell'output (la riga `ESITO`) invece del **significato** (il codice di uscita).
+
+### ✅ LA REGOLA, riscritta
+1. **Il cancello si lancia DA SOLO. Si LEGGE. Poi, in un comando separato, si
+   committa.** Niente `&&` fra un controllo e una consegna.
+2. 🔴 **E MAI pipare un cancello in `grep`/`head`/`tail` dentro una catena**: la
+   pipe ne cancella il verdetto. Se serve accorciare l'output, si usa
+   `set -o pipefail`, oppure si guarda `${PIPESTATUS[0]}`, oppure si legge
+   tutto.
 
 🔴 **E' la regola del 09/09 aggirata dalla forma del comando, non
 dall'intenzione**: *"se il controllo non e' ancora tornato, SI ASPETTA"*.
