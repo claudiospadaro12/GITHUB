@@ -524,7 +524,25 @@ $BancoBT = 'C:\MT5_Backtest'
 #  i due spingono in versi opposti e si sottraggono. Rientra domani con
 #  la toppa del gradiente nullo, gia' scritta nel file.
 # ---------------------------------------------------------------------
-$PIN = '55f0eb1bde87786039edcd5cce02ddec018fe7b1'
+#
+#  SEDICESIMO GIRO (13/09/2026, notte). $PIN 55f0eb1b -> 41c635f8.
+#  Il commit nuovo aggiunge SOLO tre file prova (R142a/b/c, gli assi
+#  d'USCITA sulla pre-apertura del Nasdaq). Nessun'altra riga cambia.
+#  MISURATO prima di spostarlo, non assunto, al pin nuovo 41c635f8:
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      marcatori v5_INCLUDE e RIGA_ROUND_VPS_v1   presenti
+#      i tre file prova nuovi                     presenti (git cat-file -e)
+#      55f0eb1b e' ANTENATO di 41c635f8           (git merge-base, exit 0)
+#  Le impronte restano le stesse perche' il commit NON tocca ne' il
+#  driver ne' RIGA_ROUND_VPS: se una delle due si muovesse, 'function
+#  Prendi' chiamerebbe Muori e OGNI round morirebbe sull'impronta.
+#  E le 45 RIGHE GIA' IN CODA NON SI MUOVONO: ognuna pinna il PROPRIO
+#  commit di questa riga sottile (1445abf8 per i 19, 84999392 per la
+#  canarina, 8d9d4fb9, 0c38419f, ab1a206f), che porta il PROPRIO $PIN
+#  congelato. Solo le TRE righe nuove pinnano il commit di questo giro.
+# ---------------------------------------------------------------------
+$PIN = '41c635f89eff17cabc7db83a883426caa9851c55'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
