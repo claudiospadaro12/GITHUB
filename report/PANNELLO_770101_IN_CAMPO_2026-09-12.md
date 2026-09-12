@@ -87,3 +87,44 @@ d'apertura e' difendibile (l'apertura *e'* l'evento), ma va **dichiarato**, non 
 3. **La versione 1.01 contro il sorgente a HEAD**: se il campo gira un binario piu'
    vecchio, i numeri del backtest sono di un altro codice.
 4. **Se `InpMaxSpread=0` sia una scelta o una dimenticanza.** Domanda per Claudio.
+
+---
+
+# 🔴 ERRATA DELLO STESSO GIORNO — IL CASO ERA GIA' CHIUSO IL 02/09
+
+Ho riaperto da zero un caso che aveva **gia' un verbale nel repo**:
+`report/VERBALE_CHIUSURA_770101_2026-09-02.md`, commit `9638318`. Settima volta
+oggi con la stessa causa: **la risposta c'era gia', scritta da qualcun altro.**
+
+## Cosa dice quel verbale, e cosa smonta della mia indagine
+
+| mia "scoperta" di stasera | il verbale del 02/09 |
+|---|---|
+| *"770101 esiste su DUE conti"* | 🟢 **E' il MIRROR, ed e' una DECISIONE FIRMATA** (n.2 del 02/09: stesso magic su piccolo + 100k, rinumerazione prevista alla challenge). **Non e' contaminazione: e' il disegno.** |
+| *"due SELL allo stesso secondo il 29/07 = due istanze"* | 🟢 Gia' indagato: attribuito a una configurazione **di PRIMA del 17/08**, **non riproducibile ne' osservabile oggi**. C1 del 02/09: lista Expert del piccolo = **UN SOLO grafico** con `DAX_Apertura` |
+| *"potrebbe girare il preset LEGACY_2pct al 2%"* | 🔴 **Il rinominare quel preset in `LEGACY_2pct` ERA IL FIX**, firmato ed eseguito il 02/09 (C4.2). Stavo sospettando di un file **ritirato dieci giorni fa, e ritirato apposta** |
+| *"`ABTG_DEF_RISK 2.0` e' una trappola da chiudere"* | 🟢 Chiuso il 02/09 su questo EA: `2.0 -> 1.0` (C4.1). *(Resta aperto su `ABTG_Nasdaq_Apertura_US`, che e' un altro EA.)* |
+
+## 🟢 Ma la mia lettura del pannello aggiunge DUE fatti che il verbale non poteva avere
+
+**1. IL RISCHIO E' SCESO DA 1,0 A 0,65 dopo il 02/09.**
+Il verbale C2 registra `InpRiskPercent = **1.0**` (il contratto di allora). La foto di
+stasera dice **0.65**. 🟢 E' **esattamente** la conclusione del collaudo prop di oggi
+(*"lo 0,65% e' la condizione di sopravvivenza, non una preferenza: a 1,00% il DD
+combinato fa p99 12,17%"*) — quindi qualcuno l'ha **gia' applicata**.
+🔴 **Ma e' un parametro di rischio cambiato fra il 02/09 e oggi, e va confermato da
+Claudio**, non dedotto da me.
+
+**2. `A1: tetto posizioni+pendenti sul simbolo` E' ANCORA `0` = SPENTO.**
+Il verbale lo segnalava (*"l'EA ha GIA' questo input, oggi 0=spento -> la proposta P0
+puo' riusare input esistenti"*), e **dieci giorni dopo e' ancora spento**. 👉 E' la
+protezione che avrebbe impedito le due SELL gemelle del 29/07, **il codice c'e' gia'**,
+e manca **solo una firma**. Zero righe da scrivere.
+
+## 🧾 E quindi cosa resta DAVVERO aperto, ridotto all'osso
+1. 🔴 **`Spread massimo = 0`** (nessun limite) + **slippage 0** + **floor 0**: le tre
+   difese dal costo spente, mentre stasera ho misurato spread che su U30USD arrivano
+   a **30,0 punti indice**. **Da quantificare, poi da firmare.**
+2. 🔴 **`A1 tetto` = 0**: una firma, zero codice.
+3. 🔴 **`InpTP1_ClosePct` = 50** contro il regalo a **0** (PF 1,397->1,491, DD 7,23%->6,27%).
+4. ⚠️ La conferma che il **rischio a 0,65** sia voluto.
