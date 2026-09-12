@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1
+#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v2
 #  RIGA_SPREADLOGGER_RACCOLTA.ps1 -- RACCOGLIE e LEGGE i dati accumulati
 #  da ABTG_SpreadLogger sul terminale del conto PICCOLO 50503392.
 #
@@ -53,6 +53,16 @@ $INV = [Globalization.CultureInfo]::InvariantCulture
 
 $CONTO_PICCOLO = "50503392"
 $CONTO_GRANDE  = "50504263"
+# INDURIMENTO_VISTOPICCOLO_v1 (12/09/2026): il 100k era rifiutato in tre
+# modi, ma il REALE e il BANCO -- che sono anch'essi BCM e NON hanno
+# "-V3" nel percorso -- passavano l'eleggibilita'. Non e' mai diventato
+# un incidente per tre fortune (la riga non scrive, la discriminante
+# finale e' il file di stato del logger, e sull'ambiguita' si ferma):
+# qui si chiude il buco invece di appoggiarsi alle fortune.
+$CONTO_REALE   = "10105439"
+$CONTO_BANCO   = "50504400"
+$PERC_REALE    = "C:\BCM_Reale"
+$PERC_BANCO    = "C:\MT5_Backtest"
 $BASE_BCM      = "BCMMarkets-Server"
 $MAXBIN        = 10001
 
@@ -123,6 +133,7 @@ function AggiungiCandidata([string]$percorso,[string]$origine){
   [void]$Cand.Add([pscustomobject]@{
     Percorso=$full; Origine=$origine; HaMql=$mq; Origin=""; BaseBcm=$false
     VistoPiccolo=$false; VistoGrande=$false; TracciaV3=""; Eleggibile=$false
+    VistoReale=$false; VistoBanco=$false; TracciaAltro=""
     Profilo=$false; Scarto=""; HaStato=$false
   })
 }
@@ -221,6 +232,8 @@ try{
         $txt = ((LeggiTesto $f.FullName) -join "`n")
         if($txt.IndexOf("'" + $CONTO_PICCOLO + "'") -ge 0){ $c.VistoPiccolo = $true }
         if($txt.IndexOf("'" + $CONTO_GRANDE + "'") -ge 0){ $c.VistoGrande = $true }
+        if($txt.IndexOf("'" + $CONTO_REALE + "'") -ge 0){ $c.VistoReale = $true }
+        if($txt.IndexOf("'" + $CONTO_BANCO + "'") -ge 0){ $c.VistoBanco = $true }
       }
     }
     $tr = New-Object System.Collections.ArrayList
@@ -228,10 +241,21 @@ try{
     if($c.Percorso -like "*-V3*"){ [void]$tr.Add("percorso contiene -V3") }
     if($c.VistoGrande){ [void]$tr.Add("login " + $CONTO_GRANDE + " nei log") }
     $c.TracciaV3 = (@($tr) -join "; ")
+    # stesso schema del -V3, applicato al REALE e al BANCO: tre tracce
+    # indipendenti (origin.txt, percorso, login nei log). Fallisce in
+    # SICUREZZA: se origin.txt manca e i log non nominano nessuno, non
+    # cambia niente rispetto a prima.
+    $ta = New-Object System.Collections.ArrayList
+    if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_REALE){ [void]$ta.Add("origin.txt = " + $PERC_REALE) }
+    if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_BANCO){ [void]$ta.Add("origin.txt = " + $PERC_BANCO) }
+    if($c.VistoReale){ [void]$ta.Add("login " + $CONTO_REALE + " (REALE) nei log") }
+    if($c.VistoBanco){ [void]$ta.Add("login " + $CONTO_BANCO + " (banco) nei log") }
+    $c.TracciaAltro = (@($ta) -join "; ")
     if($env:APPDATA){ $c.Profilo = $c.Percorso.StartsWith(($env:APPDATA.TrimEnd("\")), [System.StringComparison]::OrdinalIgnoreCase) }
     if(-not $c.HaMql){ $c.Scarto = "nessuna cartella MQL5\"; continue }
     if(-not $c.BaseBcm){ $c.Scarto = "nessuna bases\" + $BASE_BCM; continue }
     if($c.TracciaV3 -ne ""){ $c.Scarto = "E' IL 100k/-V3 (" + $c.TracciaV3 + "): fuori dal perimetro"; continue }
+    if($c.TracciaAltro -ne ""){ $c.Scarto = "NON E' IL PICCOLO (" + $c.TracciaAltro + "): fuori dal perimetro"; continue }
     $c.Eleggibile = $true
     if(-not $c.Profilo){ $c.Scarto = "eleggibile per i fatti, ma sotto un ALTRO profilo utente (sessione " + $env:USERNAME + ")" }
   }
@@ -241,7 +265,8 @@ try{
     $tag = "scartata"
     if($c.Eleggibile -and $c.Profilo){ $tag = "ELEGGIBILE" }
     elseif($c.Eleggibile){ $tag = "eleggibile ma sotto un ALTRO profilo" }
-    [void]$righeC.Add("  --- " + $c.Percorso + "   [" + $tag + "]   file di stato del logger presente=" + $c.HaStato)
+    [void]$righeC.Add("  --- " + $c.Percorso + "   [" + $tag + "]   file di stato del logger presente=" + $c.HaStato + "   login " + $CONTO_PICCOLO + " nei log=" + $c.VistoPiccolo)
+    if($c.TracciaAltro -ne ""){ [void]$righeC.Add("      RIFIUTATA, non e' il piccolo: " + $c.TracciaAltro) }
     [void]$righeC.Add("      trovata come: " + $c.Origine + "   origin.txt: " + $c.Origin)
     [void]$righeC.Add("      bases BCM=" + $c.BaseBcm + "   piccolo=" + $c.VistoPiccolo + "   grande=" + $c.VistoGrande)
     if($c.Scarto -ne ""){ [void]$righeC.Add("      nota: " + $c.Scarto) }
@@ -253,6 +278,13 @@ try{
   # fra le eleggibili, se una sola HA il file di stato, e' quella: il
   # dato che cerchiamo e' un FATTO piu' forte del profilo.
   $conStato = @($auto | Where-Object { $_.HaStato })
+  # VistoPiccolo era MISURATO (sopra) e mai USATO. Qui diventa un
+  # criterio di selezione, ma solo DOVE RESTRINGE: se c'e' ambiguita' e
+  # una sola candidata ha il login 50503392 nei propri log, e' quella.
+  # Non fallisce closed: se nessuna lo ha (log ruotati, cartella
+  # appena creata), la scelta resta quella di prima.
+  $vp        = @($auto     | Where-Object { $_.VistoPiccolo })
+  $vpConStato= @($conStato | Where-Object { $_.VistoPiccolo })
   $scelto = $null
   if($CartellaDati -ne ""){
     $imp = @($Cand | Where-Object { $_.Origine -like "*IMPOSTA A MANO*" })
@@ -261,9 +293,11 @@ try{
     $scelto = $imp[0]; $Criterio = "IMPOSTA A MANO con -CartellaDati (gate passati)"
   }
   elseif($conStato.Count -eq 1){ $scelto = $conStato[0]; $Criterio = "FATTO: unica cartella eleggibile sotto questo profilo che contiene gia' il file di stato del logger" }
+  elseif($vpConStato.Count -eq 1){ $scelto = $vpConStato[0]; $Criterio = "FATTO: unica cartella col file di stato del logger E col login " + $CONTO_PICCOLO + " nei propri log" }
   elseif($auto.Count -eq 1){ $scelto = $auto[0]; $Criterio = "FATTO: unica cartella dati eleggibile sotto il profilo di questa sessione (nessun file di stato trovato: la raccolta dira' che non c'e' niente da leggere)" }
+  elseif($vp.Count -eq 1){ $scelto = $vp[0]; $Criterio = "FATTO: unica cartella eleggibile col login " + $CONTO_PICCOLO + " nei propri log" }
   else{
-    throw ("NON SO DA QUALE CARTELLA DATI RACCOGLIERE (eleggibili sotto questo profilo " + $auto.Count + ", con file di stato " + $conStato.Count + "). L'elenco e' qui sopra. Rilancia aggiungendo al driver: -CartellaDati ""<percorso>"".")
+    throw ("NON SO DA QUALE CARTELLA DATI RACCOGLIERE (eleggibili sotto questo profilo " + $auto.Count + ", con file di stato " + $conStato.Count + ", col login " + $CONTO_PICCOLO + " nei log " + $vp.Count + "). L'elenco e' qui sopra. Rilancia aggiungendo al driver: -CartellaDati ""<percorso>"".")
   }
   $Scelta = $scelto.Percorso
   Dico ("cartella dati: " + $Scelta) "Yellow"
