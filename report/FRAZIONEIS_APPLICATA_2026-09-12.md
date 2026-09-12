@@ -503,17 +503,80 @@ modo **giusto** di rompersi, ma resta un round perso e una notte buttata.
 📌 Ed e' un passo **separato e successivo**, da fare **quando esistono i file
 prova che usano la direttiva**. Oggi non esistono.
 
-## 7.c — LE DUE RIGHE NUOVE IN `RIGA_SOTTILE_ROUND.ps1`
+## 7.c — LE DUE RIGHE NUOVE IN `RIGA_SOTTILE_ROUND.ps1` (**+78 / −2**)
 ```text
-$PIN       = '<PIN_NUOVO>'
-$SHA_WALK  = 'BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875'
+r.338  $PIN       = '115254dc64b2c7ac9493a33b8f5bbc09f814ea1b'
+r.381  $SHA_WALK  = 'BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875'
+r.357  $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'   <-- NON TOCCATA
+r.387  $MARC_WALK = "MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE"                          <-- NON TOCCATO
 ```
-`$SHA_ROUND` **NON e' stata toccata** — e l'ho **ricalcolata sul blob del pin
-nuovo per dirlo, non assunta**. Il commento dell'undicesimo giro sta accanto agli
-altri dieci (r.128-275), come hanno fatto i dieci prima di me.
+- `$SHA_ROUND` **NON e' stata toccata** — e l'ho **ricalcolata sul blob del pin
+  nuovo per dirlo, non assunta**: `348ED533...` a `115254dc` e' identica a
+  `348ED533...` a `e6c0d70e`.
+- `$MARC_WALK` **resta `v5_INCLUDE`**: nel driver il `v6` e' stato **aggiunto
+  accanto**, non al posto.
+- 🟢 **La lista bianca sugli argomenti non e' toccata di una virgola.** Lo dice
+  il cancello da solo: `param block RICONOSCIUTO (Expert,Prova,Etichetta,
+  Modello,Deposito,SoloControllo)` — **zero argomenti nuovi**, zero caratteri
+  nuovi ammessi, nessun parametro che possa nominare un percorso.
+- Il commento dell'undicesimo giro sta **accanto** agli altri dieci (r.128-337),
+  come hanno fatto i dieci prima di me. **Nessun commento vecchio cancellato**
+  (−2 righe = le due valorizzazioni sostituite).
 
-> Le verifiche `raw` (HTTP 200 + `sha256` che combacia) sono nel paragrafo 7.d,
-> **eseguite dopo il push** — e sono la condizione per cui questo giro vale.
+## 7.d — 🔴 LA VERIFICA VIA `raw`, che e' la condizione per cui questo giro vale
+Il runner scarica da **`raw`**, non da git: verificare solo su git non
+dimostrerebbe che la catena funziona.
+
+```console
+=== 1) HTTP del driver al pin nuovo ===
+  HTTP 200   byte 102955
+=== 2) sha256 di quello che ARRIVA da raw ===
+  BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+=== 3) sha256 dell'albero locale ===
+  BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+=== 4) sha256 del blob git al pin ===
+  BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+=== 5) marcatore v5 nel file SCARICATO (e' quello che la corsia controlla) ===
+  2
+=== 6) la toppa 270 (Remove-Item dell'ex5) e' dentro? ===
+  1
+=== 7) merge-base: 124db40 (toppa 270) e' antenata del pin nuovo? ===
+  SI (exit 0)
+=== e i FILE PROVA sono al pin nuovo? (la corsia li scarica dallo STESSO $PIN) ===
+  R132c_nearatr_U30USD.txt   -> HTTP 200
+  R136a_slatr_U30USD.txt     -> HTTP 200
+  R128b_bersaglio_D30EUR.txt -> HTTP 200
+```
+✅ **Tutti e TRE gli sha combaciano** (`raw` = albero locale = blob git).
+🟢 **E la toppa classe 270 del decimo giro resta dentro**: il pin nuovo e'
+**discendente**, non un ramo diverso.
+
+## 7.e — 🔑 E L'IMPRONTA PROVATA CON **IL COMANDO DELLA CORSIA**, non col mio
+`sha256sum | tr a-z A-Z` e' il *mio* modo di calcolarla. La corsia usa
+`Get-FileHash` (r.432 e dintorni). Se i due formati non coincidessero, il round
+morirebbe sull'impronta **con l'impronta giusta scritta dentro** — il peggiore
+dei fallimenti, perche' manda a cercare il guasto nella rete.
+
+```console
+$ pwsh -NoProfile -Command '(Get-FileHash -Algorithm SHA256 <driver scaricato da raw>).Hash'
+  Get-FileHash del driver scaricato : BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+  $SHA_WALK scritto nella corsia    : BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+  COMBACIANO                        : True
+  marcatore v5 nel file scaricato   : True
+```
+✅ **Maiuscolo, senza separatori, identico.** Il formato non e' un'assunzione.
+
+## 7.f — E IL CONTRO-ESEMPIO, altrimenti quei "combacia" non valgono niente
+```console
+=== al pin PRECEDENTE e6c0d70e la toppa @FRAZIONEIS c'e'? ===
+  0        <-- la stringa 'FRAZIONEIS' compare ZERO volte nel driver
+=== e il suo sha e' DIVERSO da quello nuovo? ===
+  62A53763A186195DBE3FB3DAEE01B45A53B80F09BDC831B68046BD50F7CBB7BC
+  nuovo: BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875
+```
+✅ **Il controllo distingue i due casi**, quindi il suo "uguale" dice qualcosa.
+Se leggete ancora `62A53763...` da qualche parte, il pin punta a un driver
+**senza** la direttiva e lo scarico muore sull'impronta: il fallimento giusto.
 
 ---
 
