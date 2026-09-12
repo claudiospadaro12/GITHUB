@@ -17228,3 +17228,127 @@ nessuna parte** — e chi legge il referto fra tre mesi vede due elenchi diversi
 ### 🔑 La regola in una riga
 *Un file prova che si discosta dai criteri congelati senza dirlo obbliga chi lo legge a rifare il
 `git log`. Una riga nel file costa nulla e sostituisce un'indagine.*
+
+---
+
+## 296. 📉🧩 LA "CURVA MONOTONA" COSTRUITA CON PUNTI DI **ROUND DIVERSI** — e un punto che non sta nemmeno sull'asse (12/09/2026)
+
+**Il caso reale**: il verdetto sul `Nasdaq_PreOpen_Breakout_EA` chiudeva la contraddizione fra due
+agenti con *«la finestra pre-apertura e' OOS-negativa a OGNI larghezza: 5' 0,963 · 60' 0,798 ·
+H1 0,665 — gradiente MONOTONO»*. Letti i CSV, i tre punti **non stanno sulla stessa curva**:
+
+| punto | file | EA/magic | buffer | MinRange | MaxRange | CloseHour | Risk |
+|---|---|---|---:|---:|---:|---|---:|
+| **5'** | `risultati_prove/ABTG_Nasdaq_Live5m/..._OOS.csv` | `770203` | **700** | **1700** | **4000** | **20:45** | **2%** |
+| **60'** | `Walkforward_Aperture/NASDAQ_L_rangemode_OOS.csv` | `770201` | **500** | **0** | **0** | **17:30** | **1%** |
+| **H1** | stesso file | `770201` | 500 | 0 | 0 | 17:30 | 1% |
+
+**Sette input diversi fra il primo punto e gli altri due**, compresa la CloseHour (3h15m di
+finestra di detenzione in piu' per un breakout direzionale) e il rischio, che cambia la scala del DD.
+
+🔴 **E il terzo punto non e' una larghezza.** `RangeMode=2` e' `iHigh(_Symbol, PERIOD_H1, 1)`
+(`ABTG_Nasdaq_Live5m.mq5` r.578-583): alle 14:30 server la candela H1 **chiusa** e' la
+**13:00-14:00**, che **finisce 30 minuti PRIMA dell'apertura**. Non e' una finestra *piu' larga*:
+e' una finestra **SPOSTATA**. Su un asse "larghezza della finestra pre-apertura" **non ci sta**.
+
+👉 **Punti realmente controllati sull'asse della larghezza: ZERO.** Due (60' e H1) condividono la
+configurazione ma non l'asse; il terzo (5') sta sull'asse ma non condivide la configurazione.
+
+### 🧪 IL CONTRO-ESEMPIO CHE LO SMASCHERA IN DIECI SECONDI
+Nello **stesso** `NASDAQ_L_rangemode_OOS.csv` le due righe `RangeMode=1` con `InpRangeMinutes`
+15 e 35 danno numeri **identici al quinto decimale** (0,79830 · n 329 · DD 17,3476), perche' per
+`RangeMode!=0` l'input `InpRangeMinutes` e' **inerte**. Le sei passate del file sono **quattro
+esiti**. Chi non apre il CSV conta sei misure dove ce ne sono quattro.
+
+### ✅ COSA SI FA
+- Un asse si dichiara con **la lista degli input che variano E la lista di quelli fissi**. Se i
+  punti vengono da **round diversi**, non e' un asse: sono **misure separate**, e vanno scritte
+  cosi'. La monotonia **non si afferma** finche' non esiste una corsa in cui **solo** la manopola
+  dell'asse si muove.
+- Prima di mettere due punti sulla stessa curva, si apre il codice e si verifica che la manopola
+  **misuri la stessa grandezza**: `RangeMode` cambia **il MECCANISMO**, `PrevWindowMin` cambia **la
+  larghezza**. Sono due assi, non uno.
+- 📌 E si **contano gli esiti distinti**, non le passate: le passate con input inerti sono
+  **duplicati**, e gonfiano il campione di misure a costo zero di verita'.
+
+### 🔑 La regola in una riga
+*Una pendenza si misura solo dove una manopola sola si e' mossa. Tre numeri presi da due round
+con sette input diversi non fanno una curva: fanno tre numeri.*
+
+---
+
+## 297. 🎚️⬇️ LO SPAN DELL'ASSE CITATO E' IL **PIU' PICCOLO** DEI DUE ASSI DISPONIBILI — e il piu' grande sta nella stessa cartella (12/09/2026)
+
+**Il caso reale**: la difesa *«si' ma l'EA esterno ha un'uscita diversa»* veniva chiusa con un
+numero: *«l'INTERO asse uscita sposta il PF OOS di **0,052**, e ne mancano 0,085 per arrivare a
+1,10 — il **163%** di tutto quello che l'uscita ha mai prodotto su questo motore»*.
+
+🟢 **L'aritmetica e' giusta**: `NASDAQ_F_gestione_OOS.csv`, max 1,02413 − min 0,97237 = **0,05176**.
+🔴 **Ma "l'INTERO asse uscita" non e' quel file.** Nella **stessa cartella**, stesso round, stesso
+`RangeMode=0`, c'e' `NASDAQ_I_trailing_OOS.csv`: **cinque passate in cui varia SOLO `InpTrailTF`**
+— una manopola d'uscita — con PF OOS da **0,74308** a **0,93460**, span **0,19152**.
+
+**`0,963 + 0,192 = 1,155 > 1,10`.** Con la **stessa identica logica di trasferimento** usata per
+costruire la difesa, la difesa **cade**. E il referto **nominava il file `I`** due paragrafi sopra
+(*«gli assi F e I girarono con RangeMode=0»*): non e' un file che non si e' trovato, e' un file che
+non si e' usato perche' il numero piu' piccolo tornava meglio.
+
+🔴 **Terzo strato**: la manopola dell'EA esterno — **target a PUNTI FISSI** — non sta in **nessuno**
+dei due assi, e il referto stesso lo scrive (*«manopola vergine in assoluto»*). Un limite superiore
+costruito sulle manopole A, B e C **non dice niente** sulla manopola D.
+
+### ✅ COSA SI FA
+- Prima di scrivere *«l'INTERO asse X sposta il PF di N»*, si fa `ls` della cartella e si
+  **elencano per nome tutti i file di quell'asse** (classe 180). Lo span e' il **massimo fra i
+  file**, non quello del file che si e' aperto per primo.
+- Se la manopola in discussione **non compare in nessun CSV**, il limite superiore **non esiste**:
+  il verdetto onesto e' `[NON MISURATO]`, non "quantificato e non regge".
+- 🧪 **E il contro-esempio obbligatorio (classe 178) e' sempre lo stesso**: *quale span farebbe
+  passare il cancello?* Qui bastava **0,137**. Con 0,192 gia' in archivio, la domanda si rispondeva
+  da sola **prima** di scrivere il 163%.
+
+### 🔑 La regola in una riga
+*Un limite superiore vale quanto il file piu' generoso che non hai aperto. Si elencano tutti i file
+dell'asse PRIMA di dichiarare il massimo, e si dichiara quali manopole l'asse non contiene.*
+
+---
+
+## 298. 🎲📊 QUATTRO QUARTILI IN ORDINE NON SONO UNA TENDENZA: `t = 0,70` (12/09/2026)
+
+**Il caso reale**: il contro-esempio che doveva far cadere il verdetto sul preopen Nasdaq —
+*«a range largo il breakout tiene di piu'?»* — veniva dichiarato **misurato falso e falso nel verso
+opposto**: *«win rate PIATTO 36-40%, attesa MONOTONA al ribasso da +0,055 R a −0,069 R»*, su
+**447 breakout veri** (`risultati_archivio/studio_apertura/Studio_NASUSD.csv`).
+
+🟢 **La tabella si riproduce al decimale** (rifatta da zero: Q1 +0,055 · Q2 +0,039 · Q3 −0,021 ·
+Q4 −0,069, ampiezze e win% tutti uguali). 🔴 **Ma la "monotonia" e' rumore:**
+
+| misura | valore |
+|---|---|
+| differenza **Q1 − Q4** | **+0,124 R** (err.std **0,178**) -> **t = 0,70** |
+| correlazione di Pearson **ampiezza ~ R**, n=447 | **−0,036** (t = −0,77) |
+| IC 95% di **ogni** quartile | **scavalcano lo zero e si sovrappongono tutti** |
+| **R totale** sui 447 trade | **+0,31** |
+
+**Quattro numeri finiscono in ordine perfetto per puro caso 1 volta su 24 (4,2%).** Qui la
+distanza fra il primo e l'ultimo vale **0,7 errori standard**: non e' una pendenza, e' la stessa
+media letta quattro volte.
+
+🟢 **E va detto che il contro-esempio FUNZIONA lo stesso, ma solo nella sua forma NEGATIVA**: il
+referto aveva dichiarato prima della misura che un *«Q4 >= +0,20 R»* sarebbe stato un SI', e il
+limite superiore dell'IC 95% di Q4 e' **+0,158 < +0,20**. 👉 **L'ipotesi alternativa e' respinta,
+la pendenza non e' misurata.** Sono due frasi diverse, e solo la prima e' vera.
+
+### ✅ COSA SI FA
+- Un gradiente si dichiara con **l'errore standard accanto**. Senza, e' un ordinamento, non una
+  tendenza. Costano tre righe di `statistics` e si fanno **prima** di scrivere "monotono".
+- 🔴 **Mai contare un gradiente non significativo come una SECONDA misura indipendente**
+  (*«due misure indipendenti, stessa pendenza»*): due rumori concordi restano zero misure, e
+  violano la regola di casa *«misurato in almeno DUE modi diversi»* pur sembrando di rispettarla.
+- ✅ Si scrive quello che la misura dice davvero: **«la relazione ampiezza->attesa e' PIATTA e
+  indistinguibile da zero; l'ipotesi che SALGA sopra +0,20 R e' respinta al 95%»**. E' piu' corta,
+  e' piu' forte, ed e' vera.
+
+### 🔑 La regola in una riga
+*Prima di scrivere "monotono", si calcola `t`. Un ordinamento di quattro medie con IC che si
+sovrappongono e' l'aspetto tipico del caso, non di una legge.*
