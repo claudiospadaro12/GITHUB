@@ -225,7 +225,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #  peggiore di sbagliare. E l'.ex5 preesistente NON e' l'eccezione: sui
 #  quattro EA di questi round l'archivio ha 48 / 14 / 6 / 4 CSV, cioe'
 #  e' LA NORMA.
-#  Con la toppa (r.1400 del driver:
+#  Con la toppa (r.1570 del driver:
 #      Remove-Item -LiteralPath $ex5Atteso -Force -ErrorAction SilentlyContinue
 #  PRIMA di compilare) ogni round e' il proprio collaudo di compilazione:
 #  se la compilazione fallisce, Test-Path fallisce e il driver MUORE

@@ -459,11 +459,11 @@ $ pwsh -c 'Select-String -SimpleMatch ... (lo STESSO comando delle corsie)'
   MARCATORE_WALKFORWARD_GENERICO_v4_TERMINALE_BACKTEST -> True
   MARCATORE_WALKFORWARD_GENERICO_v6_FRAZIONEIS         -> True
 ```
-`RIGA_SOTTILE_ROUND.ps1` r.311 e `RIGA_ROUND_VPS.ps1` r.104 cercano
+`RIGA_SOTTILE_ROUND.ps1` r.387 e `RIGA_ROUND_VPS.ps1` r.104 cercano
 **`v5_INCLUDE`** con `Select-String -SimpleMatch` **sul FILE scaricato**: e' li',
 intatto (x2 nel file). ✅
 🟢 **E nessuna delle due parsa lo stdout per posizione o per conteggio righe**:
-`RIGA_SOTTILE_ROUND.ps1` r.487-488 lo **ristampa tutto** con un `foreach`. Le 2
+`RIGA_SOTTILE_ROUND.ps1` r.563-564 lo **ristampa tutto** con un `foreach`. Le 2
 righe nuove non possono spostare niente.
 
 ---
@@ -712,7 +712,7 @@ il risultato fosse quello che mi aspettavo. Se avessi letto solo la colonna
    vera**, con lo scarico dal pin e il controllo d'impronta. Le mie prove girano
    in locale, sul file, non attraverso `raw`.
 5. ⚠️ **`Muori()` esce con `1`, non con `9`.** Il mandato diceva `exit 9` in
-   quattro punti; il driver ha `function Muori($t){ ...; exit 1 }` (r.244) da
+   quattro punti; il driver ha `function Muori($t){ ...; exit 1 }` (r.256) da
    sempre. 👉 **E' il mandato a essere impreciso, e NON ho toccato `Muori`**:
    cambiarla cambierebbe **ogni percorso di morte** del driver, per 35 script e
    due corsie, in una toppa che parla d'altro. Misurato che **nessuno gatta sul

@@ -15833,3 +15833,70 @@ che aveva gia' letto gli stessi dati.
 > rifatti a mano: chi ricostruisce da zero dovrebbe aprirlo **per primo**.
 > ⚠️ **E quando NON c'e'** — come per i blocchi **C e D** — quella conferma
 > indipendente **manca**, e va dichiarato invece che taciuto.
+
+---
+
+## 271. 📍➕ LA CITAZIONE DI RIGA CHE **LA TOPPA STESSA** HA SPOSTATO: il commento che documenta un `+170` cita i numeri validi solo **PRIMA di se'** (12/09/2026)
+
+**Trovato dal cancello di giudizio** sulla toppa `@FRAZIONEIS`
+(`backtest_pipeline/walkforward_generico.ps1`, blocco r.588-736, `+170 / -0`).
+La toppa e' **corretta**: cultura invariante misurata, regressione 19/19 sui
+round in coda, marcatori additivi, pin verificato via `raw`. Il difetto e'
+**tutto nei commenti** — e per questo e' sfuggito a due strati di controllo.
+
+**Il fatto, misurato.** Il blocco di commento che **documenta l'inserimento**
+cita cinque numeri di riga del proprio file. Tutti e cinque sono gli indirizzi
+del file **PRIMA** dell'inserimento, cioe' spostati in giu' di esattamente il
+`+170` che il blocco stesso aggiunge:
+
+| citazione nel commento nuovo | dove atterrava | dov'e' **davvero** |
+|---|---|---|
+| «per analogia con `r.493-495`» | giusta a `e6c0d70e` | **r.506-508** |
+| «la stessa chiave usata da @FINOA (`r.559`)» | ne' vecchia ne' nuova | **r.553** |
+| «il parser generico di `r.493`» | la riga di `@SIMBOLO` | **r.499** |
+| «il cancello di `r.574-579`» (**x2**) | il messaggio di morte di `@FINOA` | **r.737-742** |
+| e nella riga sottile: «`r.1400` del driver: `Remove-Item`» | commento sulla guardia | **r.1570** (+170 esatto) |
+
+🔴 **Perche' e' una classe NUOVA e non la 43.** La **43** e' la citazione che
+*drifta dopo* una correzione fatta **in un altro commit**: la mappa resta
+indietro rispetto al territorio. Qui e' peggio e piu' prevedibile: **e' il
+territorio che si muove sotto la mappa nello STESSO commit**, e lo muove
+**l'autore della mappa**. Ogni toppa **additiva** in mezzo a un file lungo
+produce questo difetto **per costruzione**, e produce anche il caso piu'
+velenoso: un commento **giusto quando e' stato scritto** (`r.574-579` era
+esatta un secondo prima dell'incollaggio) e **falso quando viene pushato**.
+
+**Quanto costa.** Il verificatore che apre `r.574-579` ci trova il messaggio di
+morte di `@FINOA` — cioe' **un'altra guardia** — e ha due strade, entrambe un
+giro a vuoto: rifare la mappa a mano, oppure **concludere che la citazione e'
+inventata e bocciare una toppa sana**. E un FAIL falso costa quanto un PASS
+falso: rimanda round che erano pronti (qui: **~20**, su una sedia DAX a tre
+settimane da ottobre). Peggio: il numero e' dentro byte che un **pin** inchioda,
+quindi la frase falsa **non si corregge senza un giro di pin nuovo**.
+
+> ✅ **REGOLA.** Dopo aver inserito un blocco in mezzo a un file, **ogni `r.N`
+> citata NEL BLOCCO NUOVO si riverifica con `grep -n` sul file DOPO
+> l'inserimento**, mai su quello aperto per scriverlo. Meccanico, dieci secondi:
+> ```
+> sed -n 'INI,FINp' FILE | grep -oE 'r\.[0-9]+(-[0-9]+)?'
+> ```
+> e per ognuna un `sed -n 'Np' FILE` che deve stampare **quello che la frase
+> promette**.
+> 🔴 **E vale anche per i commenti di ALTRI file che citano quello toccato**: la
+> riga sottile citava `r.1400` del driver, ed e' diventata falsa **per colpa
+> della toppa**, non per colpa sua. Chi aggiunge N righe a un file cerca
+> `grep -rn 'del driver' backtest_pipeline/righe/` prima di pushare.
+> 🥈 **Ripiego che non invecchia**: citare il **marcatore** invece della riga
+> (`cerca 'if(-not $Simbolo)'`), come gia' dice la classe 43. Il marcatore si
+> sposta col codice, il numero no.
+> ⚠️ **Il cancello deterministico NON puo' prenderlo** (un numero di riga in un
+> commento e' sintatticamente sano): e' un controllo di **giudizio**, e va fatto
+> da chi legge. Questo e' il motivo per cui i due strati servono entrambi.
+
+**Corretto lo stesso giorno**, comment-only: zero righe di codice toccate
+(`diff` sulle righe non-commento = vuoto), conteggio righe invariato (1748),
+cancello a `EXIT 0`, regressione **19/19 identica** rifatta dopo la correzione.
+🔴 **Conseguenza da non dimenticare**: la correzione e' a `HEAD`, quindi **NON
+e' dentro il pin `115254dc`** che la riga sottile scarica. Va dentro il
+**dodicesimo giro di pin** — quello che serve comunque per mettere in coda i
+round con `@FRAZIONEIS`. Se quel giro la dimentica, si paga un giro in piu'.

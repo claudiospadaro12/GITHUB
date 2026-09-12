@@ -609,7 +609,7 @@ if($Direttive.ContainsKey("FINOA")){
 #
 #  >>> PERCHE' QUESTO BLOCCO COPIA @FINOA E **NON** @SIMBOLO. <<<
 #  E' LA TRAPPOLA, ED E' STATA MISURATA CON POWERSHELL VERO, NON
-#  RAGIONATA. La riga "ovvia", per analogia con r.493-495, sarebbe:
+#  RAGIONATA. La riga "ovvia", per analogia con r.506-508, sarebbe:
 #      if(-not $FrazioneIS -and $Direttive.ContainsKey("FRAZIONEIS")){ ... }
 #  e NON FUNZIONA MAI. In PowerShell (-not 0.40) vale False: un [double]
 #  con default 0.40 e' sempre "vero", quindi la condizione e' sempre
@@ -622,7 +622,7 @@ if($Direttive.ContainsKey("FINOA")){
 #  default "" -- cioe' "falso" quando non passati. Su un numero no.
 #  Qui la guardia interroga $PSBoundParameters.ContainsKey("FrazioneIS"),
 #  che risponde a "l'argomento e' stato PASSATO?", non a "il suo valore
-#  e' VERO?". E' la stessa chiave usata da @FINOA (r.559).
+#  e' VERO?". E' la stessa chiave usata da @FINOA (r.553).
 #
 #  >>> E PERCHE' LA COLLISIONE MUORE INVECE DI SCEGLIERE. <<<
 #  35 script dedicati passano -FrazioneIS SEMPRE ed esplicitamente. Due
@@ -653,7 +653,7 @@ if($Direttive.ContainsKey("FINOA")){
 # ---------------------------------------------------------------------
 #  >>> LA DIRETTIVA SCRITTA SENZA VALORE: UN BUCO TROVATO PROVANDO A
 #      ROMPERE QUESTA STESSA TOPPA, IL 12/09/2026. <<<
-#  Il parser generico di r.493 accetta solo '^@(\w+)\s+(.+)$': una riga
+#  Il parser generico di r.499 accetta solo '^@(\w+)\s+(.+)$': una riga
 #  '@FRAZIONEIS' SENZA valore NON matcha, quindi non entra in $Direttive
 #  e il blocco qui sotto non scatta nemmeno. Risultato: il file CREDE di
 #  aver dichiarato un taglio, il driver gira col default 0.40, e NON DICE
@@ -662,7 +662,7 @@ if($Direttive.ContainsKey("FINOA")){
 #  MISURATO che il buco NON e' mio ma del parser, ed e' CONDIVISO: con
 #  '@FINOA' scritta da sola, oggi, il driver tira dritto sulla data di
 #  fabbrica senza una riga di avviso (provato, exit 0). Su @SIMBOLO,
-#  @PERIODO e @DAQUANDO il silenzio lo intercetta il cancello di r.574-579
+#  @PERIODO e @DAQUANDO il silenzio lo intercetta il cancello di r.737-742
 #  ('if(-not $Simbolo){ Muori ... }'): quei tre hanno default "" e muoiono
 #  dopo. @FINOA e @FRAZIONEIS hanno un default VALIDO, quindi no.
 #  QUI chiudo SOLO il mio: la riparazione giusta sta nel parser e vale per
@@ -671,7 +671,7 @@ if($Direttive.ContainsKey("FINOA")){
 #  CINQUE che portano un '@DAQUANDO' senza valore (ABTG_BandFade,
 #  ABTG_CanaleLento, ABTG_RangeBudget, ABTG_TurnaroundTuesday,
 #  SESSIONREOPEN_ORO_BOZZA). Quelli oggi muoiono comunque sul cancello di
-#  r.574-579, ma una riga di lancio che passi -DaQuando a mano li fa
+#  r.737-742, ma una riga di lancio che passi -DaQuando a mano li fa
 #  girare: cambiare il parser cambierebbe il comportamento di quei cinque,
 #  e va misurato in un lavoro suo. Dichiarato, non fatto di nascosto.
 #  QUESTA guardia invece e' un NO-OP DIMOSTRATO: il 12/09 nessuno dei 675
