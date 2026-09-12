@@ -2136,3 +2136,119 @@ zero EA toccati.**
   · GitHub **403** UI e API · Forex Factory **403** · arXiv **API in timeout** (la
   pagina elenco invece passa). 🟢 **Nuovo canale confermato vivo:** `mql5.com/en/code/download/<ID>`
   restituisce lo **zip col `.mq5` vero** senza autenticazione.
+
+---
+
+## CACCIA DEL SABATO (13/09/2026, TF basso · priorita' FOREX) — 0 EA promossi, 0 file prova, 3 sorgenti letti, 2 porte chiuse
+
+Dossier completo: `report/CACCIA_SABATO_2026-09-13.md`. Il resto sta li', non si
+duplica. **ZERO EA promossi, ZERO file prova nuovi, nessun EA / preset / sedia /
+parametro di forward toccato, nessun backtest eseguito.** 320 titoli del Code
+Base sfogliati su 8 pagine (649.349 byte), 12 schede aperte (200), 3 sorgenti
+scaricati e letti riga per riga e archiviati in `biblioteca/sorgenti/`.
+
+- **PORTA CHIUSA — `Market Miner` (Code Base 74818, amarfx, 09/07/2026): ZERO
+  STOP LOSS IN 861 RIGHE.** `grep -i "PositionModify|SetStopLoss|stoploss"` ->
+  **zero righe**. Tutti e otto gli invii sono `trade.Buy(lot, _Symbol, Ask)` a
+  **tre argomenti** (r.336/371/442/477/548/583/654/689): nessun `sl`, nessun
+  `tp`. L'uscita e' un **obiettivo di equity di paniere per magic** (r.325,
+  chiusura su `Profit()+Swap()` sommati, r.725-745): si chiude in utile e **mai
+  in perdita**. Oltre: **90 input** (6x il tetto), `Account_Risk_percent = 99`
+  (r.62), `LotSize = 0.01` fisso (r.59). **Nome interno del file: `CycleTrade.mq5`**
+  (r.2) — il titolo pubblicato *"Market Miner - A multi strategy EA gold mine"*
+  e' marketing; `#property copyright "Amarnath Kondiyan Mohan"`. **Quattro cicli
+  con magic 111/333/555/777, taglia separata e obiettivo di equity separato**, su
+  inviluppi a deviazione 0,3/0,7/0,7 (r.74/90/106 -> `iEnvelopes` r.203-207).
+  ⚠️ Precisione: quelle deviazioni sono **larghezze di banda, NON passi di
+  griglia**, e `Distance=10` (r.107) e' un filtro d'ingresso, non uno step —
+  **non e' una griglia a passo fisso**; ma quattro sistemi senza stop sullo
+  stesso simbolo che chiudono solo per utile di paniere accumulano contro il
+  prezzo, e **funzionalmente e' mediazione** `[INFERITO dalla struttura]`.
+  **Chiude la porta H1 lasciata
+  ESPLICITAMENTE aperta il 06/09** (`CACCIA_TFBASSO_FREQUENZA` r.476: _"non e'
+  un cadavere, e' fuori dal MIO perimetro. Chi batte H1 lo apra"_).
+- **FATTO VERIFICATO — Code Base 77220 `ZetaBurst Scalper EA` e 77167
+  `PulseStrike Scalper` SONO LO STESSO FILE BYTE PER BYTE.**
+  `md5sum = 0d1ad42e8bef432b2b99bceca1ab8b41`, `diff` vuoto, 20.306 byte,
+  stesso autore (`ranaali878`), pubblicati a un giorno di distanza (10/09 e
+  09/09). **Chi conta i candidati del Code Base per titolo li conta doppi.**
+  SCARTO: (a) il **gate di costo dell'autore stesso** (`InpMinTPToSpreadRatio=3`
+  con `SL/TP = 0,55/0,35`) implica `stop/spread >= 4,71x` contro il nostro
+  pavimento **DURO di 13,3x** = **35%**, e **11,8%** del pavimento di lavoro
+  40x; (b) e' **M31 salto statistico** con uno stimatore a 4 secondi invece di
+  Lee-Mykland: famiglia **sepolta due volte** (M5 16/16 sotto il cancello; M15
+  con la contro-prova _"l'edge per segnale e' una QUANTITA' FISSA DI ATR
+  (~0,16): nessuna geometria salva l'aritmetica"_, che chiude anche la fuga
+  "portalo su H1"); (c) **RR 0,64** (TP 0,35 ATR / SL 0,55 ATR) = win rate >61%
+  solo per il pari. **Il setaccio §4 lo passa pulito** (nessuna martingala,
+  nessuna griglia, stop vero al broker, rischio in %): muore di costo e di
+  doppione, e va scritto cosi'. 🟢 **E lo stop e' STRUTTURALE, verificato**:
+  `slDist = InpStopLossATRMult * atr` (r.403) su `iATR(_Symbol,_Period,...)`
+  (r.141) + pavimento al minimo del broker (r.386-388), **nessun numero fisso in
+  pip** — e' l'unico dei tre sorgenti di oggi con uno stop strutturale vero.
+  ⚠️ **Nome interno `PulseStrike_Scalper.mq5`** anche nel file scaricato da
+  77220: il titolo pubblicato non e' il nome del sorgente.
+- **SCARTO — `Heikin Ashi Engulfing` (Code Base 35628, traderonemax,
+  14/07/2021):** r.826 `VolumeMode == "martingale"` -> `BetMartingale(...
+  mmMgMultiplyOnLoss ...)` definita a r.3165 = **martingala nel codice**;
+  r.4323 **WebRequest**; r.1331 `iCustom("Examples\\Heiken_Ashi")`; lotto fisso
+  `0.01`; stop a **pip FISSI** (50) = non strutturale; 8.213 righe da
+  costruttore visuale. **E' materiale di un VENDITORE COMMERCIALE**:
+  `#property copyright "https://payhip.com/forexeas"` (r.2-3). ⚠️ La martingala
+  e' **UNA delle ~11 modalita' selezionabili** di `VolumeMode` (r.809-826), non
+  il default: **modulo OPZIONALE ma PRESENTE**, e resta scarto per RISCHIO (un EA
+  che *puo'* mediare su un conto prop non serve), non solo per lettera.
+- 🔎 **DUE CONTROLLI NUOVI, nati da `Market Miner` e da applicare a OGNI
+  candidato prima di promuoverlo.** (1) **Il grep non e' un verdetto:** su
+  `Market Miner` il grep di `martingal|grid|averag|recover|hedge|Multiplier` ha
+  dato **ZERO righe** e la mediazione c'era comunque, nascosta nella STRUTTURA
+  (quattro cicli) e nei NOMI (`c1_lot`…`c4_lot`). 👉 **Aprire le chiamate di
+  apertura e CONTARE GLI ARGOMENTI**: `trade.Buy(lot,symbol,price)` = tre
+  argomenti = **`sl=0`**, contro la firma
+  `(volume,symbol,price,sl,tp,comment)`. Costa dieci secondi.
+  (2) **Confrontare il NOME INTERNO col TITOLO PUBBLICATO**: `Market Miner` ->
+  `CycleTrade.mq5`; `ZetaBurst Scalper` -> `PulseStrike_Scalper`. **Quando
+  divergono, il titolo e' marketing e il sorgente e' il fatto — oggi due
+  candidati su tre divergono.**
+- **IL CONTO CHE RISPONDE ALLA RICHIESTA "TROPPI POCHI EA DAL TF BASSO", e
+  contraddice l'assunto del brief.** Col costo **all-in** (spread misurato +
+  commissione 0,004% del nozionale in valuta base, giro completo) **EURUSD M5 e
+  M15 sfondano il pavimento DURO, non solo quello di lavoro**:
+  M5 stop 8,0 pip / 0,86 all-in = **9,30x** (70% del duro, 23% del 40x);
+  M15 stop 10,8 pip / 0,86 = **12,56x** (94% del duro, 31% del 40x).
+  Per il 40x su EURUSD serve uno stop **>= 34,4 pip**. **Il major piu'
+  economico e' GBPUSD** (spread 0,2 [LETTURA UNICA] + ~0,47 commissione
+  [INFERITO] = **~0,67 pip**): pavimento duro a **>= 8,9 pip**, pavimento di
+  lavoro a **>= 26,8 pip**. **Bersaglio indicato: GBPUSD M30.**
+- **E UNA LEZIONE DI METODO, CON IL FINDING UCCISO DALL'AUTORE.** Avevo trovato
+  che le cacce M5/M15 del 05/09 usavano la **convenzione 1,0 pip** mentre la
+  sonda del 10/09 **misura 0,4** su EURUSD, e che a 0,4 pip il salto statistico
+  M31 ribaltava il segno (lordo +0,0922R, netto da **−0,033R** a **+0,042R**).
+  **L'aritmetica torna al centesimo, e la tesi e' comunque FALSA:** nello
+  **stesso referto**, poche righe sopra la tabella, c'e' il termine che mancava
+  — _"spread 0,3 + commissione ~0,5 = **0,86 pip all-in su EURUSD**"_. La
+  convenzione di 1,0 pip era corretta entro il **14%**, non pessimista di 2,5
+  volte. **Nessun ribaltamento. Classe di errore: ho letto la tabella che mi
+  dava ragione e non il paragrafo sopra.**
+- **CONSEGUENZA SULLA FREQUENZA, ed e' una inferenza dichiarata (non una
+  misura):** 150 posizioni per lato in 18 giorni di mercato richiedono **11,5
+  op/giorno per lato**, che a TF basso e' territorio di pedaggio insostenibile.
+  **Quindi le 150 posizioni per il 1 ottobre possono venire solo dal BACKTEST,
+  non dal forward** — e allora l'asse che rende schierabile una sedia e' la
+  **PROFONDITA' DELLO STORICO** (forex: gennaio 1999, R102; indici: 21 mesi),
+  non la velocita' del motore. Decide Claudio.
+- **BUCHI DICHIARATI:** **TradingView NON aperta** in questa battuta (e' il buco
+  vero: prima fonte della prossima); SSRN 403, Quantpedia 308/502, GitHub UI
+  403, Forex Factory 403, arXiv API timeout (non aggirati); popolarita' delle
+  schede Code Base **[NON MISURATO]** (contatori in JS); **lo spread forex BCM
+  e' UNA lettura di UN istante (17/08 17:34 srv)** e su **AUDUSD/EURAUD/GBPJPY/
+  CHFJPY la sonda legge 0 = nessun tick**, quindi il loro costo e' **[NON
+  MISURATO]**; **gli stop tipici M30 sul forex sono [NON MISURATO]** e NON
+  sono stati estrapolati.
+- **MOSSA PIU' ECONOMICA (decide Claudio):** far girare il *RealCost Spread P95
+  Logger MT5* (Code Base **74148**, a1066832477, 20/06/2026, scheda aperta oggi
+  HTTP 200) su GBPUSD/EURUSD/USDJPY nelle fasce di lavoro. **Costo: ZERO passate
+  di tester** (e' un logger dal vivo). Promosso in casa il 23/08 e **mai usato**:
+  lo segnalano **sette cacce di fila**. Se GBPUSD nella fascia di lavoro fosse
+  0,5 invece di 0,2, la soglia del 40x passerebbe da 26,8 a **38,8 pip** e il
+  bersaglio M30 sparirebbe.
