@@ -658,8 +658,8 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
 
 # =====================================================================
-#  SEDICESIMO GIRO -- LE TRE RIGHE R142: GLI ASSI D'USCITA SULLA
-#  PRE-APERTURA DEL NASDAQ. Pinnate a 4dc16e9, che porta $PIN=41c635f8.
+#  DICIASSETTESIMO GIRO -- LE TRE RIGHE R142: GLI ASSI D'USCITA SULLA
+#  PRE-APERTURA DEL NASDAQ. Pinnate a b9e685d, che porta $PIN=c5a7d225 (file prova VERSIONE 2).
 #
 #  NASCONO DA UN FAIL DEL CANCELLO, NON DA UN'IDEA.
 #  Il 12/09 avevo archiviato ABTG_Nasdaq_Live5m (770203) come SCARTATO.
@@ -680,9 +680,16 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  tre una cella E' la configurazione gia' in archivio e DEVE riprodurre
 #      OOS  PF 0.96265   n 175   DD 19.4006   Profit -326.54
 #      IS   PF 1.01621   n 116   DD 11.5160   Profit  +98.96
-#  Se non riproduce, NESSUNA altra cella si legge: CATENA ROTTA.
-#  Protegge in particolare il TF del grafico, che nella corsa archiviata
-#  e' [NON SCRITTO] (il file prova del 07/08 non aveva @PERIODO).
+#  E si legge a DUE livelli, perche' il binario di oggi NON e' quello dei
+#  CSV (400a462, 08/08 06:54): dopo ci sono 3af47ed (fix sizing) e
+#  d83c196 (Guardian, ASSOLTO -- il CSV non ha la colonna e il pin false
+#  e' un no-op, ABTG_PausaGuardian.mqh r.1600).
+#      n            -> cancello DURO. Se non torna, CATENA ROTTA.
+#      PF/DD/Profit -> cancello MORBIDO, col fix di sizing come PRIMO
+#                      SOSPETTO DICHIARATO ORA.
+#  E il TF NON e' piu' un'incognita: e' M5, provato da
+#  walkforward_generico.ps1 r.743 (default esistente dalla nascita del
+#  driver, a0b4c12 07/08 19:10, cioe' PRIMA della corsa archiviata).
 #
 #  DEPOSITO 10000 e RISCHIO 2%: sono i valori della corsa archiviata,
 #  cioe' la RIPRODUZIONE, non una scelta. Il DD che ne esce NON e'
@@ -696,9 +703,35 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  distinzione fra "definizione del meccanismo" e "griglia piu' fitta su
 #  un motore senza edge" (regola 19/08) e' sottile. Non si arma da soli.
 #
-#  COSTO: 10 celle x 2 finestre = 20 passate = 3,34 minuti.
-#  Primo strato (controlla_prova.py): OK, 0 problemi -- e il difetto di
-#  R142c (asse bool scritto true/false invece che 1/0) lo ha trovato lui.
+#  COSTO: 11 celle x 2 finestre = 22 passate = 3,49 minuti.
+#  Primo strato (controlla_prova.py): OK, 0 problemi.
+#
+#  >>> VERSIONE 2. LA 1 E' STATA BOCCIATA DAL CANCELLO, e aveva DUE
+#      difetti BLOCCANTI che avrei spedito -- verificati poi da me nel
+#      sorgente, riga per riga:
+#      classe 299 (R142a): le celle 0 e 100 di InpTP1_ClosePct erano LA
+#        STESSA configurazione. r.977 dell'EA le esclude tutte e due
+#        (> 0 && < 100): a 100 non usciva a 1R, il trailing restava
+#        acceso, il breakeven era inerte. E la soglia congelata chiedeva
+#        "tre PF DISTINTI", quindi era INSODDISFACIBILE: il round si
+#        sarebbe auto-dichiarato fallito qualunque cosa dicesse il
+#        mercato. Asse corretto: 0 || 25 || 50 || 75, 4 celle.
+#      classe 300 (R142b/c): la regola "l'n deve restare identico fra le
+#        celle, altrimenti CATENA ROTTA" era un falsificatore che
+#        scattava sull'ipotesi VERA. Trades sono DEAL di chiusura e il
+#        trailing arma subito (InpTrailStartR=0): allentandolo PIU'
+#        posizioni arrivano a 1R, PIU' parziali, l'n SALE -- ed e'
+#        corretto. Avrebbe buttato via i PF proprio quando il round
+#        funzionava. Ora l'n e' dichiarato ATTESO VARIABILE col VERSO
+#        scritto prima dei numeri, e la verifica d'ingresso sta sulla
+#        CELLA DI RIPRODUZIONE.
+#
+#  >>> E LA RAGIONE DEL ROUND ORA E' SCRITTA ONESTA: NON resuscitare il
+#      motore. L'ingresso sta a 13,3x-26,1x lo spread misurato contro un
+#      pavimento di lavoro di 40x, e NESSUN asse d'USCITA puo' spostarlo
+#      (il rapporto stop/spread e' una proprieta' dell'INGRESSO). Si
+#      spende per CHIUDERE LA VOCE 3 DEL CERTIFICATO COL NUMERO: senza,
+#      il verdetto resta "NON ANCORA MISURATO" per sempre.
 #
 #  >>> LE TRE RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
 #  Portano il prefisso '#DISARMATA# ', quindi NON iniziano con 40 cifre
@@ -712,6 +745,6 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  >>> SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo un
 #      PASS del secondo strato. Se il cancello dice FAIL, si cancellano.
 # =====================================================================
-#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
-#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
-#DISARMATA# 4dc16e9439e882d53556253481e8f0d5a63ce376 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+#DISARMATA# b9e685d539070936ca943539893634caae7c7ec8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+#DISARMATA# b9e685d539070936ca943539893634caae7c7ec8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+#DISARMATA# b9e685d539070936ca943539893634caae7c7ec8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
