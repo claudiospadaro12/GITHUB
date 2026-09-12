@@ -139,9 +139,23 @@ ALTO di quella forbice.
 - ⚠️ Firmato lo stesso giorno il **tetto per cluster/valuta al 3,0%** (la
   larghezza senza controllo della correlazione e' la trappola: i portafogli
   larghi letti hanno DD misurati del 32,6% e 45,6%). 🔴 **E' FIRMATO MA NON
-  ATTIVO**: nel Guardian il tetto per cluster non esiste ancora. Finche' non e'
-  implementato e collaudato e' un'intenzione, non una protezione — e va detto
-  ogni volta che si cita. Verbale: `report/FIRME_2026-09-07.md`.
+  ATTIVO** — e va detto ogni volta che si cita. Verbale:
+  `report/FIRME_2026-09-07.md`.
+  ✏️ **CORRETTO IL 12/09/2026, e la differenza conta.** Qui c'era scritto
+  *"nel Guardian il tetto per cluster non esiste ancora"*: **falso**. E'
+  **implementato** (`ABTG_Guardian.mq5` r.165 dichiarazione · r.471-472 tetto
+  per singolo cluster · r.631 cancello di accensione · r.877/896 applicazione
+  e log). La conclusione *"non attivo"* era giusta, la ragione no — e cambia
+  **cosa si deve fare**. E' spento in **TRE modi indipendenti**, e ognuno e'
+  una cosa DIVERSA: **(1)** default `0` = no-op; **(2)** 🔴 **nessuno dei due
+  preset del Guardian lo valorizza** — verificato riga per riga: portano
+  `InpMaxOpenRiskPct=3.25` (il cap **C1**) e nessuna riga di cluster, quindi
+  e' una **firma di Claudio**, non un lavoro; **(3)** 🔴 la versione **in
+  campo** non ha nemmeno la manopola (Guardian di agosto: 15 input contro 19).
+  🟢 Confronto che assolve il meccanismo: il **C1 al 3,25% e' VIVO**,
+  implementato *e* acceso in tutti e due i preset. 👉 Da oggi la frase giusta
+  e' *"va valorizzato e portato in campo"*, non *"va implementato"*.
+  Misura: `report/IL_GUARDIAN_IN_CAMPO_2026-09-12.md`.
 
 ## 🚦 IL CANCELLO PRIMA DI OGNI PASSAGGIO (firmato da Claudio, 09/09/2026)
 Nato da due sue frasi dello stesso giorno, e da un fatto:
