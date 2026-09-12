@@ -33,6 +33,11 @@ INDICE ESTERNI** (histdata via `raw.githubusercontent.com`), non da MT5.
 > famiglie di segnale, 947 giorni) chiude con *"MNQ OU mean reversion permanently
 > rejected (Hurst 0.59, trending)"* e *"MNQ is momentum-dominant at 5-minute
 > resolution"*.
+> ⚠️ **Provenienza di queste due citazioni, detta con precisione:** le ho lette in una
+> **estrazione testuale del paper gia' presente nell'area di lavoro** (scaricata il
+> 03/09 da un'altra sessione), **non** in una pagina che ho aperto io oggi. Il paper e'
+> gia' agli atti del repo (la sua lapide **D127** e' citata in `REGISTRO_TEST.md`).
+> Se serve la verifica alla fonte primaria, l'URL e' `arxiv.org/pdf/2605.04004`.
 >
 > ➡️ **L'inversione da esaurimento su indice non e' un motore: e' una scommessa sul
 > REGIME.** E la cassaforte tick BCM sugli indici e' **21 mesi di UN SOLO toro**
