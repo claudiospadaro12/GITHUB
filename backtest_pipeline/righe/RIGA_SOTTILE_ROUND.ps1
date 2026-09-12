@@ -571,7 +571,21 @@ $BancoBT = 'C:\MT5_Backtest'
 #      i tre file prova                           presenti
 #      c5a7d225 e' ANTENATO di 0230e8f5           (git merge-base, exit 0)
 # ---------------------------------------------------------------------
-$PIN = '0230e8f58be5e43846b66e00d2bcdce4f6c9ad71'
+#
+#  DICIANNOVESIMO GIRO (13/09/2026, notte). $PIN 0230e8f5 -> d6809008.
+#  Quarta stesura dei tre R142. Terza passata del cancello: la toppa
+#  sulla voce 5 era arrivata su due file su tre (ricaduta della classe
+#  301: uno script multi-patch che fallisce un'assert perde le write
+#  che stanno dopo), e R142a autorizzava a ribaltare la riga L2 di
+#  REGISTRO_TEST a 3 voci su 5 -- cioe' l'archiviazione che il primo
+#  FAIL aveva bloccato.
+#  MISURATO al pin nuovo d6809008, non assunto:
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      i tre file prova                           presenti
+#      0230e8f5 e' ANTENATO di d6809008           (git merge-base, exit 0)
+# ---------------------------------------------------------------------
+$PIN = 'd68090083d170a4689ac943cef1930c55f1eb26b'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
