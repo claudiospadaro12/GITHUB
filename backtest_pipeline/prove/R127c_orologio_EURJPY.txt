@@ -10,12 +10,37 @@
 #    -Expert ABTG_CostToCost
 #    -Prova prove\R127c_orologio_EURJPY.txt
 #    -Simbolo EURJPY -Periodo H4 -DaQuando 2020.01.01 -Fino 2026.06.30
-#    -Deposito 100000 -Etichetta r127c -Modello 4
+#    -Deposito 100000 -Etichetta r127c -Modello 1
 #    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 8 celle per finestra.
 #   Se ne stampa un numero diverso, ci si ferma.)
-#  -Modello 4 = OHLC M1, come la corsa R103 che e' l'ANCORA di questo
+#  -Modello 1 = OHLC M1, come la corsa R103 che e' l'ANCORA di questo
 #  file. Un numero OHLC e' SCREENING, mai un verdetto.
+#  >>> CORRETTO IL 12/09/2026 -- IL NUMERO DEL MODELLO ERA INVERTITO,
+#      ED E' BLOCCANTE. Qui c'era scritto "-Modello 4" con accanto
+#      "= OHLC M1". E' il contrario: walkforward_generico.ps1 r.172
+#      documenta "4 = tick reali (verita'). 1 = OHLC M1: SOLO screening,
+#      mai verdetti". Stesso difetto, stesso giorno, degli altri tre file
+#      prova corretti dal commit 1764a0e (R132a/b/c, 11/09 sera), solo
+#      specchiato: la' il numero era 1 con l'etichetta "tick reali".
+#      L'INTENTO DI QUESTO FILE NON CAMBIA -- girare con lo STESSO modello
+#      dell'ancora, perche' due numeri con modelli diversi non si
+#      confrontano. Cambia il NUMERO che lo realizza: 1, non 4.
+#      CONTRO-ESEMPIO CHE LO PROVA, e non e' una lettura, e' una misura in
+#      archivio: con Modello != 4 il driver appende "_ohlc" al nome del CSV
+#      (walkforward_generico.ps1 r.1446), e quel suffisso NON e' lettera
+#      morta -- nel repo esistono 288 CSV "_ohlc" (misurato il 12/09/2026:
+#      find backtest_pipeline -name "*_ohlc*.csv" | wc -l).
+#      E LA PROVA CHE L'ANCORA E' OHLC STA SCRITTA NELLA SUA FONTE:
+#      backtest_pipeline/risultati_archivio/R103_REFERTO_FINALE.md, r.6-7
+#      dell'intestazione: "Pin 7e2fb0d (v3). OHLC M1 -> il DD e' un LIMITE
+#      INFERIORE e il profitto una STIMA DEL LORDO".
+#      COSTO DELL'ERRORE, SE FOSSE PARTITO COSI': questo round e' IL
+#      CANARINO della notte (report/IL_WIP_E_DIAGNOSTICA_2026-09-12.md par.0
+#      e 6.4) e a tick reali non avrebbe potuto ricomporre 394 +/- 2% ne'
+#      PF 1,41 +/- 0,03 PER COSTRUZIONE. Il canarino sarebbe morto per il
+#      MODELLO, e la colpa sarebbe andata al binario b45dd00 -- fermando
+#      gli altri undici round per niente.
 # ---------------------------------------------------------------------
 #  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
 #
