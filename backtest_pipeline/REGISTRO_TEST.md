@@ -2883,3 +2883,231 @@ coordinatore.** Magic **787701/787751 · 787702/787752 · 787704/787754**, VERGI
    attesa dichiarata) NON E' MAI STATO LANCIATO dall'08/09.** Sono **4 passate =
    0,91 minuti** sulla banda M30 esatta che Claudio ha chiesto. **Zero righe da
    scrivere: serve solo la decisione di metterlo in coda.**
+
+---
+
+## 🔦 12/09/2026 — I QUATTRO INVISIBILI: le prime righe di registro di quattro EA scritti e mai girati (dossier `report/I_QUATTRO_INVISIBILI_2026-09-12.md`)
+
+> 🔴 **Fatto, misurato oggi:** quattro EA in `mql5/Experts/` scritti fra il **22/08** e
+> l'**08/09** non hanno **NESSUNA** riga in questo registro, **NESSUN** CSV in
+> `risultati_prove/` e **NESSUN** round in coda. Non sono ne' vivi ne' morti: sono
+> **invisibili**, ed e' esattamente la classe di perdita che il 09/09 Claudio ha chiamato
+> *"NON E' ACCETTABILE"*. Queste sono le loro **prime quattro righe**.
+> 🛑 **Nessun backtest eseguito. `CODA.txt` NON toccata (39 righe). Nessun EA, preset,
+> magic o sedia in forward toccati.** Il **secondo strato del cancello** (agente
+> `controllo-preventivo`) **non e' invocabile dall'agente**: lo lancia il coordinatore,
+> e sta dichiarato in tutti e cinque i file prova.
+
+### 📋 LA TABELLA DEI QUATTRO — verdetto, ancora, ancoraggio, costo
+
+| EA (data del `.mq5`) | verdetto | **ANCORA UNICA** (file:riga) | **barre o calendario** | `stop/spread` M5 / M15 / M30 / H1 | PF · n · DD |
+|---|---|---|---|---|---|
+| `ABTG_IntradayMomentum` (22/08) | ⚪ **NON ANCORA MISURATO** — misura proposta `R141a`/`R141b` | 🔴 **NO** — stop `2,0 x ATR(InpAtrTF=M30)` r.157-160 · uscita = **CAMPANELLA** r.136-137 | 🔴 **CALENDARIO 100%** (r.57-60: *"IL TF DEL GRAFICO NON CONTA"*) · guadagno di frequenza scendendo di TF **0,00 op/g, MISURATO DAL CODICE** | il TF e' **irrilevante**: lo stop e' `2 x ATR(M30)` a qualunque grafico. **NASUSD 53,3x** · **U30USD 47,8x** (mediane MIS ora 20) | **[NON MISURATO]** tutti e tre |
+| `ABTG_AtrExhaustVol` (25/08) | ⚪ **NON ANCORA MISURATO** — misura proposta `R141c` | 🟢 **SI** — stop `min(pivot, low[1]) - buffer` r.500/514 · `tp = entry + R x InpTP_RR` r.649 con **R = lo stop** | 🟢 **BARRE piene (classe S)**: pivot (5,5), ATR(14) e media volume **tutti sul grafico**. E' **l'unico dei quattro** a cui *"scendere di TF"* si applica alla lettera | NASUSD: **10,9x** 🔴 · **18,8x** · **26,6x** · **37,7x** (spread MIS 1,70) — 🔴 **M5 ESCLUSO PER COSTO** (10,9x contro il duro 13,3x) | **[NON MISURATO]** tutti e tre |
+| `ABTG_HVAncora` (08/09) | ⚪ **NON ANCORA MISURATO** — misura proposta `R141d` | 🟢 **SI**, con una crepa — stop `InpStopAtr x ATR` r.927 · `tp = entry + InpRR x slDist` r.945. 🔴 **CREPA: il flat 21:00 (r.223-225) e' un'ancora di CALENDARIO** e a `InpStopAtr=2,5` il TP sta al **72% del range giornaliero MISURATO (314,5 idx)** -> quasi mai raggiunto | 🟡 **MISTO**: HV su 30/252 **barre**, stop in **ATR del grafico** (classe S), ma `InpAncoraSoloOggi=true` e il flat sono **calendario** | U30USD a `InpStopAtr=1,0`: **9,3x** 🔴 · **16,0x** (12,3x al mattino) 🔴 · **22,7x** · **32,1x**. 🔴 **Nessun TF passa il 40x a 1,0**; M30 e' il piu' basso sopra il duro a **tutte** le ore | **[NON MISURATO]** tutti e tre |
+| `ABTG_DaxValueArea` (30/08) | ⚪ **NON ANCORA MISURATO** — misura proposta `R141e` | 🔴 **NO** — stop = (escursione di **una barra**) + **buffer FISSO** r.415-421 · target = **larghezza della VALUE AREA** r.432-446 | 🔴 **CALENDARIO per il segnale** (1 VA/giorno, tetto 2/giorno, cassa 08:00-16:30) · **BARRE per lo stop**. 👉 **il peggiore dei quattro abbinamenti: scendere di TF costa DUE volte** (come `ABTG_ImpulsoApertura`) | D30EUR col buffer della fonte (3,0 idx): **5,6x** 🔴 · **8,5x** 🔴 · **11,3x** 🔴 · **15,2x**. 🔴 **SFONDA IL PAVIMENTO DURO 13,3x A M5, M15 E M30** | **[NON MISURATO]** tutti e tre |
+
+🔴 **Nessuno dei quattro si archivia**: manca **il PF**, manca **n**, manca **DD**, e
+delle cinque caselle del certificato del 09/09 **ne mancano cinque su cinque**. Il
+verdetto e' **"NON ANCORA MISURATO"**, non *"morto"*, e la via piu' corta al numero
+costa **5,16 minuti di macchina** in tutto.
+
+---
+
+### 🚨 IL DIFETTO PIU' GRAVE, ED E' DI ARITMETICA — `prove/ABTG_HVAncora_00_conta.txt` (08/09) **HA UN'ATTESA IMPOSSIBILE**
+
+Il buco **#4** della sezione precedente di questo registro dice *"cancello VERDE, attesa
+dichiarata, 4 passate = 0,91 minuti, serve solo la decisione di metterlo in coda"*.
+🔴 **VA CORRETTO, e la correzione cambia cosa si deve fare.**
+
+```
+ABTG_HVAncora.mq5 r.239   input double InpMaxSpreadPctOfStop = 2.5;
+ABTG_HVAncora.mq5 r.935   if(spreadPrezzo > (InpMaxSpreadPctOfStop/100.0)*slDist)
+                             -> IL TRADE SI SALTA
+```
+2,5% dello stop = *"spread <= 1/40 dello stop"* = il **pavimento di lavoro
+`stop >= 40 x spread`, applicato tick per tick dall'EA**.
+
+| ingrediente | numero | fonte |
+|---|---:|---|
+| range giornaliero U30USD | **314,5 punti indice** (n = 24 giorni) | 🥇 **MISURATO**, `report/ROUND_ORB_ATR_PS5_2026-09-10.md` r.233 |
+| range di barra M30 | **45,4 punti indice** | [DERIVATO] `314,5 x sqrt(30/1440)` |
+| spread U30USD ore 08-13 (mediana) | **2,60** | 🥇 **MISURATO** su 64.711.285 tick, `spread_flotta/spread_orario_U30USD.csv` |
+| spread U30USD ore 14-20 (mediana) | **1,90 - 2,00** | 🥇 **MISURATO**, 4.931.660 tick alla sola ora 14 |
+| **spread / stop** con `InpStopAtr = 1,0` | **4,41%** (pomeriggio) · **5,73%** (mattino) | contro una soglia di **2,50%** |
+
+> ## 🔴 **Col pin del 08/09 l'EA avrebbe RIFIUTATO IL 100% DEI TRADE, a ogni ora della finestra. Le "50-200 operazioni" attese sono impossibili PER COSTRUZIONE (classe 278).**
+> E il danno peggiore non e' la corsa buttata: **uno zero letto come "niente segnali"
+> avrebbe SEPOLTO un motore che non era nemmeno stato interrogato.**
+
+- 🟢 **Il file del 08/09 NON e' stato modificato** (stessa scelta fatta oggi su
+  `prove/ABTG_ImpulsoApertura.txt`): resta come reperto dei criteri, che sono buoni.
+- 🟢 **La riparazione e' `prove/R141d_hvancora_stopatr_M30_U30USD.txt`**: l'asse e'
+  `InpStopAtr` (1,0 / 1,5 / 2,0 / 2,5) e **misura dove cade il muro dei rifiuti**.
+  Ed e' legittimo allargare lo stop **solo** perche' su questo motore **l'ANCORA E'
+  UNICA** (`tp = entry + InpRR x slDist`, r.945): su un motore ad ancore diverse lo
+  stesso asse sarebbe **curve fitting sul costo**.
+- 🎁 **Effetto collaterale che vale da solo**: il `k` a cui compaiono le prime
+  operazioni **MISURA l'ATR(M30) vero di U30USD**, che oggi e' `[DERIVATO]` e mai
+  misurato. Se compaiono gia' a `k = 1,5`, allora `ATR(M30) >= 53,3 idx`, cioe' la
+  derivazione da ADR **sottostima di almeno il 17%** — che e' **esattamente** la
+  sottostima del **18-27%** gia' misurata in casa su un altro motore
+  (`report/EMA200_I_DUE_REQUISITI_2026-09-12.md` r.182). **Due strade indipendenti.**
+
+---
+
+### 🚨 QUATTRO DIFETTI BLOCCANTI in `prove/ABTG_DaxValueArea.txt` (30/08) — **NON LANCIABILE**
+
+| # | difetto | conseguenza, verificata sul sorgente del driver |
+|---|---|---|
+| 1 | **TRE assi Y** (`InpVaPercent`, `InpAcceptBars`, `InpSide`) | `controlla_prova.py` **FALLISCE**: un file prova misura UNA variabile alla volta |
+| 2 | 🔴 **le direttive `@` sono COMMENTATE**: `# @SIMBOLO  D30EUR`, `# @PERIODO  M5`, `# @DAQUANDO ...` | `walkforward_generico.ps1` **r.495-501** salta le righe che iniziano con `#` **PRIMA** di guardare la `@` -> `$Direttive` resta vuoto -> il driver **MUORE** su **r.737** (*"manca il simbolo"*) |
+| 3 | **nessuna riga `#  EA: <nome>`** nell'intestazione | il cancello stampa *"EA NON TROVATO -> non misurabile"* e **non controlla niente** |
+| 4 | **`@PERIODO M5`** su D30EUR per 21 mesi | **~126.700 barre** [DERIVATO: 276 barre/giorno x ~459 feriali], **sopra** il tetto delle ~100.000: la finestra vera sarebbe piu' corta di quella dichiarata, **in silenzio** |
+
+🔴 **E UN PUNTO CIECO DEL CANCELLO, che e' una classe nuova**: `controlla_prova.py`
+verifica la finestra cercando la **sottostringa** `"@DAQUANDO"` nel testo — e la trova
+**dentro il commento**. Quindi su questo file il cancello **dichiarava la finestra
+presente mentre il driver non l'avrebbe vista**. Va in `CHECKLIST_RIGA_DI_LANCIO.md`.
+🟢 Il file del 30/08 **NON e' stato modificato**: resta reperto.
+
+---
+
+### 🔧 UNA MANOPOLA INERTE TROVATA **LEGGENDO**, prima di spendere una notte
+
+`ABTG_AtrExhaustVol.mq5` r.557-561:
+```
+double Tolleranza(livello, atr)
+  { if(InpProxMode==EX_PROX_ATR) return(atr*InpProxAtrMult);
+    return(livello*InpProxPercent/100.0); }
+```
+Col modo **dell'autore** (`EX_PROX_PERC`, `InpProxPercent = 0,5`) la tolleranza e' lo
+**0,5% del prezzo del pivot**. Su NASUSD, prezzo mediano **MISURATO 29.001**
+(`ROUND_ORB_ATR_PS5` r.234):
+
+| | numero |
+|---|---:|
+| tolleranza di prossimita' | **145,0 punti indice** |
+| range di barra M30 | **45,3 punti indice** [DERIVATO da 313,8 MIS] |
+| **tolleranza in range di barra** | 🔴 **3,2 BARRE INTERE** |
+
+> 🔴 **Una delle TRE condizioni COSTITUTIVE del motore non filtra niente.** L'autore ha
+> tarato lo 0,5% su uno strumento dove 0,5% e' dell'ordine della barra; su un indice a
+> cinque cifre non lo e'. Col modo `EX_PROX_ATR` (`0,5 x ATR(14)` = **~22,6 idx** =
+> **mezza barra**) morde.
+> 👉 E' la classe di difetto del censimento del 09/09 (**874 CSV su 1.960 con esiti
+> IDENTICI** = manopole girate senza che mordessero). **Qui la manopola non era ancora
+> stata girata, e la si trova inerte PRIMA di pagarla.** L'asse di `R141c` **e' proprio
+> quella manopola.**
+
+---
+
+### 📦 I CINQUE FILE PROVA CONSEGNATI — 14 celle, **28 passate, 5,16 minuti**
+
+Metro di casa: **`T(min) = 0,6 + 0,077 x passate`, per ROUND.**
+Riferimento: la coda di stanotte fa **258 passate** in tutto.
+
+| ord. | file | EA · simbolo · TF | asse unico | celle | passate | **T (min)** |
+|---:|---|---|---|---:|---:|---:|
+| **1** | `prove/R141a_momentum_NASUSD_r12.txt` | `IntradayMomentum` · NASUSD · M30 | `InpUseSecondSignal` (il predittore r12) | 2 | 4 | **0,91** |
+| **2** | `prove/R141b_momentum_U30USD_gemello.txt` | `IntradayMomentum` · U30USD · M30 | `InpUseSecondSignal` (gemello, ablazione a stella) | 2 | 4 | **0,91** |
+| **3** | `prove/R141c_atrexh_M30_NASUSD.txt` | `AtrExhaustVol` · NASUSD · M30 | `InpProxMode` (PERC inerte contro ATR) | 2 | 4 | **0,91** |
+| **4** | `prove/R141d_hvancora_stopatr_M30_U30USD.txt` | `HVAncora` · U30USD · M30 | `InpStopAtr` (1,0 / 1,5 / 2,0 / 2,5) | 4 | 8 | **1,22** |
+| **5** | `prove/R141e_daxva_buffer_M15_D30EUR.txt` | `DaxValueArea` · D30EUR · M15 | `InpSlBufferPts` (800 / 2800 / 4800 / 6800) | 4 | 8 | **1,22** |
+| | **TOTALE** | | | **14** | **28** | **5,16** |
+
+**Cancello deterministico, riprodotto:**
+```
+=== CONTROLLO FILE PROVA ===
+  R141a_momentum_NASUSD_r12.txt          ABTG_IntradayMomentum.mq5  pin=27 celle= 2  OK
+  R141b_momentum_U30USD_gemello.txt      ABTG_IntradayMomentum.mq5  pin=27 celle= 2  OK
+  R141c_atrexh_M30_NASUSD.txt            ABTG_AtrExhaustVol.mq5     pin=35 celle= 2  OK
+      . asse ENUM (ENUM_EX_PROX): il passo e' IGNORATO, celle = membri fra 0 e 1 = 2
+  R141d_hvancora_stopatr_M30_U30USD.txt  ABTG_HVAncora.mq5          pin=29 celle= 4  OK
+  R141e_daxva_buffer_M15_D30EUR.txt      ABTG_DaxValueArea.mq5      pin=25 celle= 4  OK
+file: 5 | celle totali: 14 | passate: 28 | problemi: 0        ESITO: OK
+controlla_riga.py --oggetto prova : EXIT 0 su 5 file su 5
+byte >127 (contati con python3, MAI con grep '[^\x00-\x7F]'): 0 su tutti e cinque
+magic 784101 · 784102 · 784103 · 784104 · 784105 : grep -rl repo-wide, .git escluso -> ZERO
+etichetta blocco r141 : ZERO collisioni con le 29 in coda (la piu' alta e' r139c)
+```
+
+🚨 **CLASSE 273, e in tutti e cinque i file il commento NON e' invertito:**
+**`-Modello 4` = TICK REALI · `-Modello 1` = OHLC M1 = SOLO SCREENING.** Il modello non
+e' pinnato nei file: arriva dalla riga di lancio, dove il default del driver e' **4**
+(`walkforward_generico.ps1` r.180).
+🚨 **CLASSE NUOVISSIMA (asse ENUM come intervallo con passo)**: gli unici ENUM in gioco
+sono `InpAtrTF` (pinnato col **valore esplicito 30** = `PERIOD_M30`), `InpProxMode` e
+`InpTrigMode` (due membri ciascuno, **valori espliciti 0 e 1**). **Nessun intervallo
+largo su un enum.** Il numero di celle e' stato **guardato** dopo aver scritto ogni
+file, come impone la classe: 2 · 2 · 2 · 4 · 4, cioe' quello che doveva essere.
+🕐 **ORA SERVER BCM in tutti e cinque** (= ora italiana - 1): `InpSessionHour = 8` per
+il DAX (**non 9**), `InpEntryHour = 20` / `InpExitHour = 21` / `InpHourStart = 14` per
+gli USA (**non 21 / 22 / 15**). **Un CSV con l'ora italiana si CESTINA.**
+
+---
+
+### 🪦 GLI SCARTI COL NUMERO usciti da questa lettura
+
+| candidato | TF | cancello che lo ferma | numero | verdetto |
+|---|---|---|---|---|
+| `ABTG_AtrExhaustVol` **NASUSD M5** | M5 | 🔴 **COSTO** | stop ~**18,5 idx** [DER] / spread **1,70** MIS = **10,9x** contro il pavimento DURO **13,3x** | 🪦 **ESCLUSO PER COSTO, col numero** |
+| `ABTG_HVAncora` **U30USD M5** | M5 | 🔴 **COSTO** | **9,3x** (ore 14-20) e **7,1x** (ore 08-13), contro il duro 13,3x | 🪦 **ESCLUSO PER COSTO** |
+| `ABTG_HVAncora` **U30USD M15** | M15 | 🔴 **COSTO** alle ore 08-13 | **12,3x** al mattino (sotto il duro), **16,0x** al pomeriggio | 🪦 **ESCLUSO PER COSTO** nella meta' mattutina della sua finestra |
+| `ABTG_DaxValueArea` **D30EUR M5 · M15 · M30** col buffer della fonte (3,0 idx) | M5/M15/M30 | 🔴 **COSTO** | **5,6x · 8,5x · 11,3x**, tutti e tre **sotto il pavimento DURO 13,3x**. E `InpMinStopPts = 500` punti MT5 = **5,0 idx = 2,9x** non protegge niente | 🪦 **SFONDA IL DURO A TUTTI E TRE I TF.** Non e' salvabile scendendo: **peggiora** |
+| `ABTG_DaxValueArea` **D30EUR M30** come profilo volumetrico | M30 | 🔴 **DEGENERAZIONE DEL PROFILO** | a M30 la seduta cash ha **17 barre** e ognuna spalma il volume su **5,4 dei ~22 bin** (r.286-312) = **il 25% del profilo per barra** -> il POC tende al centro del range e la VA al range x 0,7 | 🪦 **il profilo volumetrico degenera in una statistica geometrica di RANGE**, cioe' un **ORB con un altro nome** — e l'ORB in casa e' chiuso con **~210 celle a tick** (R45 0/48, R12 48/48 negative OOS) |
+| `ABTG_DaxValueArea` **D30EUR M5** | M5 | 🔴 **TETTO DELLE BARRE** | **~126.700 barre** sopra il tetto delle ~100.000 | 🪦 **escluso per il tetto**, non per il costo — e il costo lo escluderebbe comunque (5,6x) |
+| `ABTG_DaxValueArea` — celle `InpSlBufferPts` **800** e **2800** di `R141e` | M15 | 🔴 **COSTO, pre-dichiarato** | **4,7x** e **16,5x**, sotto il pavimento di LAVORO 40x (la prima anche sotto il duro) | 🪦 **INFORMATIVE E NON PROMUOVIBILI, qualunque numero diano.** Stesso trattamento gia' dato alle celle M5/M15/M20/M30 di `ABTG_EMA200` su U30USD |
+| `ABTG_HVAncora` — celle `InpStopAtr` **1,0** e **1,5** di `R141d` | M30 | 🔴 **COSTO, e lo applica l'EA stesso** | spread/stop **4,41%** e **2,94%** contro la soglia **2,50%** di `InpMaxSpreadPctOfStop` -> **il trade si salta** | 🪦 **Trades attesi ~0. Non e' un baco: e' il cancello che funziona.** Girano come **misura di dove cade il muro** |
+| `ABTG_IntradayMomentum` — **la discesa di TF** | qualunque | 🔴 **nessun guadagno** | **0,00 op/giorno** guadagnate scendendo, **MISURATO DAL CODICE** (segnale, ingresso e uscita sono tutti d'orologio; lo stop e' `ATR(InpAtrTF)`, input separato) | 🪦 **non si scende: non c'e' niente da comprare.** E non gli serve: fa gia' **1 op/giorno**, **3 di famiglia** su tre indici |
+| `ABTG_DaxValueArea` — **la discesa di TF** | qualunque | 🔴 **costa DUE volte** | segnale a **CALENDARIO** (1 VA/giorno, tetto **2/giorno**) -> **0,00 op/g** guadagnate; stop a **BARRE** -> si stringe | 🪦 **il peggiore dei quattro abbinamenti**, come `ABTG_ImpulsoApertura` (`LA_BANDA_BASSA` par. 4) |
+
+---
+
+### 📊 LA COSA CHE CAMBIA LA CLASSIFICA, e non e' il timeframe: **IL CAMPIONE**
+
+Sedute nella finestra `@DAQUANDO 2024.09.26` -> `@FINOA 2026.06.30`: **643 giorni di
+calendario -> ~459 feriali -> ~443 sedute** (meno le feste). Taglio del driver
+`FrazioneIS = 0,40` -> **IS ~177 sedute, OOS ~266 sedute**.
+
+| EA | operazioni/giorno attese | **n atteso IS** | **n atteso OOS** | arriva a 150 in ENTRAMBE? |
+|---|---|---:|---:|:--:|
+| `IntradayMomentum` (cella r12 spento) | **1,00 per costruzione** (`InpMinAbsR1Pct = 0`) | **160-180** | **240-270** | 🟢 **SI, per aritmetica del calendario** |
+| `DaxValueArea` | 0,4 - 1,2 [NON MISURATO] | 72-212 | 108-318 | 🟡 **meta' delle volte** |
+| `AtrExhaustVol` | 0,10 - 1,20 [NON MISURATO] | 18-212 | 26-318 | 🟡 **solo la meta' alta** |
+| `HVAncora` | 0,11 - 0,45 (attesa del file 08/09) | 20-80 | 30-120 | 🔴 **NO** — merito **SOSPESO** (valvola R59), rischio leggibile |
+
+> ## 🟢 **`ABTG_IntradayMomentum` e' l'UNICO dei quattro che arriva a `n >= 150` in TUTTE E DUE le finestre, e non per fortuna: perche' opera una volta al giorno e i giorni ci sono.** Con `1,00 op/giorno` su un simbolo e **3 indici** in famiglia fa **3 op/giorno di famiglia**, cioe' **tre volte** il pavimento firmato il 07/09.
+> 🔴 **E la parte scomoda, scritta prima:** il suo pedaggio **MISURATO** e' `1,70 + 1,70 = 3,40 punti indice` andata e ritorno su NASUSD (ore 20 e 21, mediane su 11,2 e 6,8 milioni di tick). Col success rate **DEL PAPER** (54,37%, `[DICHIARATO NEL PAPER, NON MISURATO DA NOI]`) l'edge atteso e' **1,98 - 3,96 punti**, cioe' **edge/costo = 0,58 - 1,16**. 👉 **Col solo `r1` questo motore sta SUL FILO del suo pedaggio, e la meta' bassa della banda e' in perdita prima di cominciare.** Col doppio predittore (77,05% dichiarato) il rapporto sale a **3,6 - 7,2**. **E' per questo che l'asse del round e' `r12`: non e' una taratura, e' l'unica cosa che in aritmetica separa i due casi.**
+
+### 🔬 E IL NUMERO CHE SEPARA NASUSD DA U30USD, perche' la frontiera e' una **DISTRIBUZIONE**
+
+| simbolo | range giornaliero **p25** (MIS) | ATR(M30) al p25 [DER] | stop `2 x ATR` | spread ora 20 (MIS) | **stop/spread al p25** |
+|---|---:|---:|---:|---:|---:|
+| **NASUSD** | **239,4** | 34,6 | 69,1 | **1,70** | 🟢 **40,6x — passa ANCORA il 40x** |
+| **U30USD** | **172,0** | 24,8 | 49,7 | **1,90** | 🟡 **26,1x — sopra il duro, sotto il 40x** |
+| D30EUR | 146,0 | 21,1 | 42,2 | 1,70 (ora 16) | 🟡 **24,8x** |
+
+> 🎯 **NASUSD e' l'unico dei tre indici dove anche il giorno al 25esimo percentile sta
+> sopra il pavimento di lavoro.** E' l'unico numero che ordina i due gemelli, e **e'
+> per questo che `R141a` e' NASUSD e `R141b` e' U30USD, non il contrario.**
+> 🔴 **Frazione delle operazioni sotto il 40x su U30USD: almeno il 25%** [DERIVATO dal
+> p25 del range]. **Sotto il duro 13,3x: [NON MISURATO]** — servirebbe un giorno **1,7
+> volte piu' quieto del p25**.
+
+---
+
+### 🎯 L'ORDINE PROPOSTO, e il NO col motivo
+
+| ord. | chi | perche' in quest'ordine |
+|---:|---|---|
+| 🥇 **1** | `R141a` + `R141b` — `IntradayMomentum` NASUSD e U30USD | **L'unico dei quattro con `n >= 150` garantito in entrambe le finestre**, **1 op/giorno** senza chiedere niente al timeframe, e la frontiera del costo **passata con margine** all'ora piu' economica del feed (53,3x e 47,8x). Otto passate, **1,82 minuti**, e rispondono **in tutti e due i versi** |
+| 🥈 **2** | `R141c` — `AtrExhaustVol` NASUSD M30 | **L'unico ad ANCORA UNICA + BARRE piene**: e' il solo dei quattro a cui la domanda di Claudio (*"M5, M15 e M30"*) si applica alla lettera, e il solo su cui la frontiera del costo **si compra senza pagare edge**. Ma la **frequenza e' `[NON MISURATA]`** e la meta' bassa della banda sta sotto 150 |
+| 🥉 **3** | `R141d` — `HVAncora` U30USD M30 | Ripara un'**attesa impossibile** e **misura l'ATR(M30) vero di U30USD**, che non abbiamo. Ma l'attesa di frequenza del file del 08/09 **non arriva a 150 in nessuna finestra**: e' un **PASSO 0 di costo**, non un candidato a sedia |
+| 🔴 **4 — NON stanotte** | `R141e` — `DaxValueArea` D30EUR M15 | 🔴 **ANCORA UNICA = NO** + **CALENDARIO per il segnale e BARRE per lo stop** + il profilo che **degenera in un ORB** salendo di TF + il **tetto delle barre** che chiude M5. La cella che paga il pedaggio (40,0x) ha **RR ~1,0 sul target finale e ~0,5 sul primo**; la cella con RR buono (4,1-5,2) sta a **4,7x**, tre volte sotto il duro. 👉 **DOPPIA MORSA, scritta col numero prima della corsa.** Gira come **misura di una legge**, non come candidato: se il PF **sale** col buffer, la regola dell'ancora unica e' **falsificata** su questo motore — e quello e' il risultato piu' importante che il round puo' dare |
+
+🙋 **E UNA COSA CHE CHIEDE UNA FIRMA, NON UN ROUND:** in `R141c` il pin
+`InpFridayClose = true` e' **NOSTRO** (il sorgente parte a `false`, cioe' tiene le
+posizioni nel fine settimana: su un CFD indice quello misurerebbe il **gap del
+weekend**, non il motore). E' una restrizione **piu' prudente** del default, ma
+**rischio e taglie sono di Claudio** e va segnalata, non decisa.
