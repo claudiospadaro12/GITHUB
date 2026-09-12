@@ -14686,3 +14686,65 @@ quello script scriva e compili.
 `return $null` (il ripiego del chiamante e' voluto e documentato), **oppure**
 stampare un avviso e tornare `$null`. Il divieto di allargare il bersaglio
 resta comunque: il selettore largo non e' stato reintrodotto.
+
+---
+
+## 🪤 CLASSE 253 (12/09/2026) — UN `param()` FUORI POSTO È **INERTE IN SILENZIO**
+
+**Il fatto, ed è mio, di stanotte.** Ho aggiunto un parametro a
+`aggiorna_news.ps1` mettendo il blocco `param(...)` **dopo** la prima
+istruzione. Il parser di PowerShell ha detto **`0 errori`**, il cancello ha
+detto **`nessun difetto meccanico`**, e **il parametro non esisteva**:
+`param(...)` dopo un'istruzione è sintatticamente una **chiamata di comando**
+valida. Passarlo dalla riga di comando non avrebbe fatto niente, e **la
+guardia che dipendeva da lui era morta.**
+
+🔴 **È la classe 242 rovesciata.** Là il cancello **non compilava**; qui
+**compila, e non basta**:
+
+| domanda | chi risponde |
+|---|---|
+| *"questo file è sintatticamente PowerShell?"* | il conteggio degli errori del parser |
+| *"il blocco dei parametri viene RICONOSCIUTO come tale?"* | 👉 **la STRUTTURA dell'albero** (`ScriptBlockAst.ParamBlock`) |
+
+### ✅ LA REGOLA
+**Al parser si chiede la struttura, non solo gli errori.** `0 errori` significa
+*"si compila"*, non *"fa quello che dice"*. Ogni volta che una guardia dipende
+da un pezzo di sintassi, si verifica che **quel pezzo sia stato riconosciuto**,
+non che il file compili.
+
+📌 E il `param()` va **prima di qualunque istruzione**. Non è stile: è
+l'unica posizione in cui esiste.
+
+### 🧪 COLLAUDO, e la buona notizia è misurata
+Aggiunto `controlla_param_block()` a `controlla_riga.py`, con il
+contro-esempio eseguito:
+- `param()` **dopo** un'istruzione → **FAIL bloccante** ✅
+- `param()` **al posto giusto** → `param block RICONOSCIUTO (X)` ✅
+
+**Censimento su tutto il repo: 187 file `.ps1` dichiarano `param()`, e
+187 su 187 sono RICONOSCIUTI. Inerti: ZERO.**
+🟢 **Quindi il difetto era solo mio e solo di stanotte** — e ora c'è un
+cancello che lo prende al prossimo.
+
+---
+
+## 👁️ E IL CANALE ADESSO SI GUARDA — `CODA_11_canali_e_attivita.ps1`
+
+Chiusura operativa della **classe 251**. Ogni notte, in **sola lettura**,
+stampa le due cose che nessun cancello guardava:
+1. le **attività pianificate** — nome, stato, ultimo esito, prossima corsa e
+   **il comando che eseguono** (elencate per nome, più tutto ciò che porta
+   `ABTG` nel nome, così **una attività NUOVA si vede** invece di restare
+   fuori dall'elenco: classe 180);
+2. l'**impronta SHA-256 del runner INSTALLATO**, con data e marcatore — perché
+   *il runner vaglia la coda e nessuno vaglia il runner*: la sua impronta si
+   confrontava col pin **una volta sola**, all'installazione.
+
+📌 **Non usa `schtasks`, ed è voluto**: quel comando è fra i **divieti** del
+runner (registra e cancella attività) e **un divieto non si aggira** —
+`Get-ScheduledTask` / `Get-ScheduledTaskInfo` **leggono e basta**.
+
+✅ **Collaudo eseguito, non letto**: caricate le funzioni vere del runner e
+fatto girare `VagliaScript` sul file nuovo →
+**`ok = True · motivo = G1 e G2 passati · corsia = LETTURA`**.

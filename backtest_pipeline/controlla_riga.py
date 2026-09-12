@@ -167,6 +167,57 @@ def controlla_parser(path):
         passa("compila: 0 errori dal parser PowerShell vero (" + os.path.basename(path) + ")")
 
 
+def controlla_param_block(path):
+    """CLASSE 253 (12/09/2026) -- UN param() FUORI POSTO E' INERTE IN SILENZIO.
+
+    Il fatto: il 12/09 ho aggiunto un parametro a aggiorna_news.ps1
+    mettendo il blocco `param(...)` DOPO la prima istruzione. Il parser
+    di PowerShell ha detto **0 errori** -- perche' `param(...)` dopo
+    un'istruzione e' sintatticamente una CHIAMATA DI COMANDO valida -- e
+    il parametro **non esisteva**: passarlo dalla riga di comando non
+    avrebbe fatto niente, e la guardia che dipendeva da lui era morta.
+
+    E' la lezione della classe 242 rovesciata: la' il cancello non
+    compilava; qui **compila e non basta**. Il parser risponde a "questo
+    file e' sintatticamente PowerShell?"; questa domanda e' diversa: "il
+    blocco dei parametri viene RICONOSCIUTO come tale?".
+
+    Si chiede al parser la STRUTTURA (ScriptBlockAst.ParamBlock), non il
+    solo conteggio degli errori. Se il file scrive `param(` ma l'albero
+    non ha un ParamBlock, il blocco e' inerte: BLOCCANTE.
+    """
+    import shutil, subprocess
+    if not shutil.which("pwsh"):
+        return                     # il salto lo dichiara gia' controlla_parser
+    testo = ""
+    try:
+        testo = open(path, encoding="utf-8", errors="replace").read()
+    except Exception:
+        return
+    # interessa solo chi DICE di avere dei parametri
+    if not re.search(r"(?im)^\s*param\s*\(", testo):
+        return
+    cmd = ("$e=$null; $t=$null; "
+           "$a=[System.Management.Automation.Language.Parser]::ParseFile("
+           "(Resolve-Path -LiteralPath $env:ABTG_FILE).Path, [ref]$t, [ref]$e); "
+           "if($a.ParamBlock){ 'SI:' + (($a.ParamBlock.Parameters | "
+           "ForEach-Object { $_.Name.VariablePath.UserPath }) -join ',') } else { 'NO' }")
+    try:
+        amb = dict(os.environ); amb["ABTG_FILE"] = os.path.abspath(path)
+        r = subprocess.run(["pwsh", "-NoProfile", "-Command", cmd],
+                           capture_output=True, text=True, timeout=120, env=amb)
+    except Exception:
+        return
+    out = (r.stdout or "").strip()
+    if out.startswith("SI:"):
+        passa("param block RICONOSCIUTO (" + out[3:] + "): " + os.path.basename(path))
+    elif out == "NO":
+        blocca("PARAM", "il file scrive 'param(' ma il parser NON riconosce nessun "
+               "PARAM BLOCK: messo dopo la prima istruzione, PowerShell lo legge come "
+               "una CHIAMATA DI COMANDO e i parametri NON ESISTONO (e il parser non "
+               "da' errore). Il blocco param va PRIMA di qualunque istruzione.", path)
+
+
 def righe_utili(testo):
     """Righe con (numero, codice nudo). Salta commenti e HERE-STRING.
 
@@ -863,6 +914,7 @@ def esamina(tipo, percorso):
     elif tipo == "ps1":
         controlla_ascii(percorso, dati)
         controlla_parser(percorso)
+        controlla_param_block(percorso)
         controlla_pwsh7(percorso, testo)
         controlla_formati_net(percorso, testo)
         controlla_cultura(percorso, testo)

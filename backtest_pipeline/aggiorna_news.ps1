@@ -5,6 +5,17 @@
 #  e lo copia in MQL5\Files del terminale BCM. Da schedulare ogni mattina
 #  sul VPS (dopo il report). L'EA PostNews lo ricarica da solo ogni giorno.
 # =====================================================================
+param(
+  # 12/09/2026: opzionale. Senza, si usa il selettore stretto piu' sotto.
+  #  NB: questo blocco DEVE stare prima di qualunque istruzione. Messo dopo,
+  #  PowerShell lo legge come una CHIAMATA DI COMANDO "param(...)": il
+  #  parser non da' errore e il parametro NON ESISTE. Trovato il 12/09
+  #  proprio cosi' -- "0 errori dal parser" su un file rotto. Il parser e'
+  #  necessario, non sufficiente: qui serviva chiedere al parser se il
+  #  PARAM BLOCK viene riconosciuto, non solo se il file compila.
+  [string]$TerminaleDati = ""
+)
+
 $ErrorActionPreference = "Stop"
 #  IL BRANCH (corretto il 15/08/2026, dopo una pagella vuota)
 #  Qui c'era "claude/creating-agents-SgGpD", il vecchio branch di default:
@@ -14,7 +25,23 @@ $ErrorActionPreference = "Stop"
 #  MT5. Il lavoro sta tutto su `lavoro`.
 $RawUrl = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/lavoro/data/abtg_news.csv"
 
-Write-Host "=== AGGIORNO abtg_news.csv IN MT5 ===" -ForegroundColor Cyan
+# =====================================================================
+#  IL LOG, e non e' un vezzo (classe 251, 12/09/2026)
+#  Questo script gira da un'ATTIVITA' PIANIFICATA (ABTG_AggiornaNews,
+#  ogni giorno alle 07:20). In Task Scheduler il Write-Host VA NEL NULLA:
+#  finora, se qualcosa andava storto, non se ne accorgeva nessuno --
+#  e il file che questo script scrive lo leggono 55 EA di questo repo.
+#  Quindi tutto quello che si stampa finisce ANCHE in un log datato.
+# =====================================================================
+$LogDir = Join-Path $env:USERPROFILE "abtg_news_log"
+New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
+$LogFile = Join-Path $LogDir ("aggiorna_news_" + (Get-Date -Format "yyyyMMdd_HHmmss") + ".log")
+function Dico([string]$t,[string]$c="Gray"){
+  Write-Host $t -ForegroundColor $c
+  try { Add-Content -LiteralPath $LogFile -Value ((Get-Date -Format "HH:mm:ss") + "  " + $t) -Encoding ASCII } catch { }
+}
+Dico "=== AGGIORNO abtg_news.csv IN MT5 ===" "Cyan"
+Dico ("log di questa corsa: " + $LogFile) "DarkGray"
 
 # --- rileva il terminale BCM + la sua cartella dati ------------------
 $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
@@ -38,8 +65,26 @@ if(-not $cand){
   # try non c'e', throw termina comunque lo script. Sicuro in tutti e due.
   throw "Terminale non trovato col selettore stretto, e NON allargo la ricerca: il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263), e questo script scrive e compila dentro il terminale che sceglie. Nomina il terminale a mano, oppure passa il banco C:\MT5_Backtest."
 }
-if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
 $instDir = $cand.DirectoryName
+# --- LA GUARDIA SUL BERSAGLIO, e si DICE quale e' (classe 251) --------
+#  Questo script scrive dentro MQL5\Files del terminale che scegli qui, e
+#  quel file lo leggono 55 EA. Il bersaglio LEGITTIMO e' il piccolo
+#  50503392 (e' il mandato: aggiornare il calendario delle sedie vive).
+#  Ma finora nessuno STAMPAVA quale terminale fosse stato scelto: se il
+#  selettore avesse preso un altro, non si sarebbe saputo.
+#  Si puo' anche nominarlo a mano con -TerminaleDati, e il reale e il 100k
+#  sono rifiutati PER NOME in tutti i casi.
+if($TerminaleDati){
+  $instDir = $TerminaleDati.TrimEnd('\','/')
+  Dico ("terminale NOMINATO a mano: " + $instDir) "Yellow"
+}
+if($instDir -like "*BCM_Reale*" -or $instDir -like "*-V3*"){
+  Dico ("TERMINALE VIETATO: " + $instDir) "Red"
+  Dico "  Questo script sovrascrive il calendario che gli EA leggono. Il conto" "Red"
+  Dico "  REALE 10105439 e il 100k 50504263 non si toccano da qui." "Red"
+  exit 1
+}
+Dico ("bersaglio scelto : " + $instDir) "White"
 $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
 $DataFolder = Get-ChildItem $termRoot -Directory -ErrorAction SilentlyContinue | Where-Object {
     $o = Join-Path $_.FullName "origin.txt"
@@ -121,6 +166,6 @@ Move-Item -LiteralPath $Tmp -Destination $Dest -Force
 Write-Host "   verificato e messo in campo (la copia di prima e' in abtg_news.csv.prima)" -ForegroundColor Green
 
 $n = (Get-Content $Dest | Measure-Object -Line).Lines
-Write-Host "OK: abtg_news.csv aggiornato ($n eventi) in:" -ForegroundColor Green
-Write-Host "   $Dest"
-Write-Host "L'EA PostNews lo ricaricera' automaticamente." -ForegroundColor White
+Dico "OK: abtg_news.csv aggiornato ($n eventi) in:" "Green"
+Dico ("   " + $Dest)
+Dico "L'EA PostNews lo ricaricera' automaticamente." "White"
