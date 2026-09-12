@@ -613,10 +613,80 @@ $ LC_ALL=C grep -nP '[^\x00-\x7F]' <esca con 'è' e un'emoji>
 `\x`** — il comando "passava" stampando tutto il file. Senza l'esca non me ne
 sarei accorto. **Un controllo che non puo' fallire non e' un controllo.**
 
+## 7.g — 🔴 «HO ROTTO LA CODA?» — la domanda si risponde con una misura, non con un ragionamento
+Il mio commit sposta `$PIN` dentro `RIGA_SOTTILE_ROUND.ps1`. Le 19 righe in coda
+scaricano **una copia congelata** di quel file da `1445abf8`. Che sia davvero
+cosi' **l'ho percorso fino in fondo**, come lo percorre il runner:
+
+```console
+=== 1) la riga sottile CONGELATA che i 19 round scaricano (pin 1445abf8) ===
+  RIGA_SOTTILE_ROUND @1445abf8 -> HTTP 200  byte 30541
+=== 2) che PIN e che SHA_WALK porta QUELLA copia ===
+  $PIN       = 'e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b'
+  $SHA_WALK  = '62A53763A186195DBE3FB3DAEE01B45A53B80F09BDC831B68046BD50F7CBB7BC'
+=== 3) il driver a QUEL pin, e la sua impronta contro IL SUO SHA_WALK ===
+  driver @e6c0d70e -> HTTP 200  byte 92067
+  Get-FileHash                    : 62A53763...F7CBB7BC
+  atteso dalla copia congelata    : 62A53763...F7CBB7BC
+  LA CODA DI STANOTTE E SANA      : True
+  v5_INCLUDE nel driver congelato : True
+=== 4) CODA.txt e' stata toccata da me? ===
+  (vuoto = NO)
+```
+✅ **La catena della coda e' intatta e indipendente dalla mia.** I 19 round di
+stanotte scaricano il driver **senza** `@FRAZIONEIS` e girano identici a come
+sono stati collaudati.
+
+### 🐛 E QUI HO SBAGLIATO UN TEST PER LA TERZA VOLTA OGGI — e lo scrivo
+Il controllo sopra, al primo giro, stampava anche:
+```console
+  FRAZIONEIS nel driver congelato : True      <-- ALLARME
+```
+cioe' *"la direttiva e' nel driver congelato"*, che sarebbe stato un guaio.
+🔴 **Era falso, e la colpa era del mio test**: `Select-String` in PowerShell e'
+**case-INsensitive per default**, e stava trovando il **parametro** `$FrazioneIS`
+(r.171, r.758) — che nel driver vecchio c'e' da sempre — non la direttiva.
+Rifatto con il comando fatto bene:
+```console
+$ grep -c 'ContainsKey("FRAZIONEIS")' <driver congelato>   ->  0   (nessun blocco)
+$ grep -c 'FrazioneDallaRiga'         <driver congelato>   ->  0   (nessuno switch)
+$ Select-String -SimpleMatch -CaseSensitive 'FRAZIONEIS'
+    congelato -> False        nuovo -> True
+```
+✅ Il driver congelato ha **solo** il parametro, **non** la direttiva. Come deve.
+
+## 7.h — 📋 TRE DIFETTI, TUTTI E TRE NEL MIO BANCO DI PROVA, NESSUNO NEL CODICE
+Li metto insieme perche' raccontano una cosa sola, ed e' la lezione del 10/09:
+
+| # | il test sbagliato | come si travestiva da PASS | come l'ho beccato |
+|---|---|---|---|
+| 1 | `grep -n '[^\x00-\x7F]'` **senza `-P`** | GNU grep in BRE non interpreta `\x`: il comando stampava tutto il file e non poteva dire "ASCII puro" | l'**esca** con `è` e un'emoji |
+| 2 | `-Prova` passato **due volte** nel banco | 19/19 «IDENTICO» con **exit 1 su tutti**: un fallimento identico | ho guardato il **codice d'uscita**, non la colonna |
+| 3 | `Select-String` **case-insensitive** | trovava `$FrazioneIS` e diceva che la direttiva era nel driver congelato | il confronto **grep case-sensitive** |
+
+🔴 **Tre volte su tre il difetto era nello strumento che doveva misurare, non
+nella cosa misurata.** E tre volte su tre il modo di beccarlo e' stato lo stesso:
+**chiedersi quale numero produce l'ALTRA spiegazione**, invece di controllare che
+il risultato fosse quello che mi aspettavo. Se avessi letto solo la colonna
+"IDENTICO" avrei consegnato tre PASS inventati.
+
 ---
 
 # 9️⃣ 🔴 COSA RESTA **NON MISURATO** — detto per intero
 
+0. 🔴 **IL SECONDO STRATO DEL CANCELLO NON L'HO ESEGUITO, E NON POTEVO.** La
+   regola del 09/09 vuole **due** strati: `controlla_riga.py` (deterministico) **e**
+   l'agente **`controllo-preventivo`** (giudizio). Il primo e' passato su tutti e
+   tre i file, da solo e senza pipe. 🔴 **Il secondo no: in questa sessione non ho
+   uno strumento per lanciare un sottoagente**, quindi `.claude/agents/controllo-preventivo.md`
+   **non e' stato invocato**. Lo dico invece di far finta che un PASS meccanico
+   sia un PASS: **non lo e', e la regola lo dice a chiare lettere.**
+   🟢 Attenuante di fatto, non di principio: **niente e' uscito verso Claudio o
+   verso il VPS.** `CODA.txt` non e' stata toccata, nessuna riga di lancio e'
+   stata prodotta, nessun round e' in coda. La condizione bloccante della regola
+   — *"niente esce senza un PASS"* — **non e' stata violata**, perche' niente e'
+   uscito. 👉 **Ma prima che `@FRAZIONEIS` entri in coda, quel secondo strato va
+   fatto passare.** E' il primo lavoro di chi raccoglie questa consegna.
 1. 🔴 **Il buco del parser su `@FINOA` e' APERTO.** Una riga `@FINOA` senza
    valore passa liscia oggi (provato, EXIT=0, nessun avviso). Ho chiuso solo
    `@FRAZIONEIS`. La riparazione giusta sta nel parser di r.493, vale per tutte
