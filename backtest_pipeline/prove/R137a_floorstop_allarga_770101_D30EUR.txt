@@ -1,0 +1,408 @@
+# ======================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R137a -- IL CANCELLO DEL COSTO DELLA SECONDA SEDIA: ALLARGARE LO STOP
+#  D30EUR M5 FISSO, LONG. Asse: InpMinStopPts. InpSkipIfTight = FALSE
+#  (cioe': lo stop troppo stretto viene ALLARGATO, non saltato).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  >>> NON SI LEGGE PRIMA DI R137c: quello e' il cancello. <<<
+# ======================================================================
+#
+#  PERCHE' QUESTA SEDIA -- report/LA_SECONDA_SEDIA_2026-09-12.md par.2.
+#    `770101` ABTG_DAX_Apertura_EU D30EUR M5 LONG e' la prima classificata
+#    al SECONDO seggio. I numeri, tutti MISURATI e tutti ricontati da me
+#    sui file grezzi:
+#      n in POSIZIONI: OOS 193 · IS 132  -- CONTATE, non derivate
+#        (risultati_prove/aperture_r47/abtg_trades_ABTG_DAX_Apertura_EU_
+#         D30EUR_772501.csv -> 270 deal = 193 position_id, rapporto
+#         1,3990 ; ..._772503.csv -> 193 deal = 193 position_id, 1,0000)
+#      PF / DD OOS: 1,39709 / 7,2328% a rischio 1,0% su banco 100.000,
+#        TICK REALI (risultati_prove/aperture_r47/ABTG_DAX_Apertura_EU_
+#        D30EUR_OOS_r47a.csv)
+#      R1: la cella di R47a e la cella VIVA del preset 100k coincidono su
+#        80 input su 80 confrontabili. Uniche differenze: InpRiskPercent
+#        (1,0 banco / 0,65 campo) e InpMagic. Verificato manopola per
+#        manopola, non creduto.
+#      CLUSTER: D30EUR, fuori dal cluster U30USD dove sta il primo seggio
+#        (771531) e altre 9 istanze del parco. Il tetto C10 al 3,0% e'
+#        firmato il 07/09 e NON attivo: la decorrelazione, oggi, si
+#        compra scegliendo il simbolo.
+#
+#  PERCHE' QUESTA MANOPOLA E NON UN'ALTRA -- e qui sta tutto il round
+#    Alla sedia mancano DUE requisiti dei cinque del piano di ottobre:
+#      R3 FREQUENZA -> 0,72-0,73 POSIZIONI/giorno feriale (193/265 in OOS,
+#         132/183 in IS: due finestre, stesso numero) contro 1,00 per
+#         FAMIGLIA. NON si chiude con un asse: si chiude allargando la
+#         famiglia a un secondo simbolo europeo (proposta R138).
+#      R5 COSTO -> ed e' QUESTO round.
+#    Il conto di R5, con i numeri misurati e le fonti:
+#      stop delle gambe vere: mediana 71,9 idx su n=7
+#        (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.244/391, da
+#         data/statements/trades_auto.csv, 7 gambe 23/07->14/08)
+#      stop sulla GEOMETRIA VIVA: 56,1 idx (stesso referto, r.541)
+#      spread D30EUR all'ora modale 08 (19 gambe su 34):
+#        mediana 1,70 idx · p95 2,70 idx · max 12,0
+#        MISURATO su 30.974.789 tick --
+#        risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10
+#      => 71,9/1,70 = 42,3x   56,1/1,70 = 33,0x   71,9/2,70 = 26,6x
+#      Tutti e tre riprodotti da me e coincidenti col referto del 10/09.
+#    >>> IL NUMERO CHE CONTA E' 33,0x: il pavimento di LAVORO e' 40x, e
+#        sulla geometria viva NON si passa. Il pavimento DURO 13,3x si
+#        passa con margine 2,5x, quindi non e' uno scarto per
+#        aritmetica: e' una RACCOMANDAZIONE (lettura congelata di R5,
+#        report/PIANO_CHALLENGE_OTTOBRE_v2.md par.1).
+#
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#    mql5/Experts/ABTG_DAX_Apertura_EU.mq5
+#      r.345  input double InpMinStopPts = 0;   // floor di STOP in PUNTI
+#      r.346  input bool   InpSkipIfTight = true;
+#      r.1493-1496 (ramo RETEST BUY, che e' il ramo VIVO --
+#                   InpEntryMode=2 nel preset):
+#         if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#           { if(InpSkipIfTight) skip = true;
+#             else { sl = entry - InpMinStopPts*_Point; dist = ...; } }
+#    >>> QUINDI InpMinStopPts E' IL CANCELLO DEL COSTO IMPLEMENTATO
+#        DENTRO L'EA, e InpSkipIfTight decide QUALE dei due cancelli:
+#          false -> ALLARGA lo stop (n invariato, geometria cambiata)
+#          true  -> SALTA il trade (geometria invariata, n che scende)
+#        Sono DUE DOMANDE DIVERSE e per questo sono DUE FILE.
+#    >>> E con InpMinStopPts = 0 (il valore VIVO) la riga e' morta per
+#        cortocircuito: `InpMinStopPts > 0` e' falso, InpSkipIfTight non
+#        viene mai letto. E' il motivo per cui in campo quella manopola
+#        non fa niente OGGI, ed e' anche il motivo per cui il valore 0
+#        NON compare in questo asse: il suo esito e' gia' misurato da
+#        R47a e viene riprodotto da R137c.
+#
+#  LA MANOPOLA E' MAI STATA UN ASSE? NO, ED E' CONTATO
+#    grep 'InpMinStopPts' su backtest_pipeline/prove/ come asse ||Y:
+#      ZERO occorrenze.
+#    Nei CSV d'archivio della famiglia aperture il valore e' 0 (DAX) o
+#    500 (Dow, dow_walkforward_*.csv r.'InpMinStopPts'=500): due valori
+#    esistono nel parco, ma su SIMBOLI DIVERSI e in FILE DIVERSI --
+#    mai due valori dentro lo stesso file, cioe' MAI UN ASSE.
+#    E' una casella LIBERA, non una casella provata.
+#
+#  IL COSTO, CELLA PER CELLA, CONGELATO PRIMA DEI NUMERI
+#    Il floor GARANTISCE un rapporto stop/spread MINIMO: nessuna gamba
+#    puo' piu' avere uno stop sotto il floor. E' su quel MINIMO che il
+#    cancello R5 va letto (una singola gamba sotto 13,3x e' un problema
+#    di aritmetica, non di mediana).
+#      floor pt   floor idx   min x @1,70   min x @2,70(p95)   verdetto
+#         800         8,0         4,7x            3,0x       SOTTO IL DURO
+#        2800        28,0        16,5x           10,4x       sotto il lavoro
+#        4800        48,0        28,2x           17,8x       sotto il lavoro
+#        6800        68,0      * 40,0x *         25,2x       PAVIMENTO DI
+#                                                            LAVORO, esatto
+#        8800        88,0        51,8x           32,6x       dentro
+#       10800       108,0        63,5x         * 40,0x *     dentro ANCHE
+#                                                            al p95
+#       12800       128,0        75,3x           47,4x       dentro
+#    >>> DUE CELLE CADONO ESATTAMENTE SULLE DUE FRONTIERE, e non e' un
+#        caso: l'asse e' stato costruito per farle cadere li'
+#        (68,0 x 1,70 = 40,0 ; 108,0 x 2,70 = 40,0). E' il motivo per cui
+#        il passo parte da 800 e non da 0.
+#    >>> CONSEGUENZA CONGELATA ORA: le celle 800 / 2800 / 4800 sono
+#        ESCLUSE PER COSTO qualunque numero producano. Se una di loro
+#        vincesse il round, il verdetto e' "vince una cella FUORI COSTO",
+#        non "abbiamo trovato una configurazione migliore".
+#        La cella 800 e' ESCLUSA ANCHE PER ARITMETICA (4,7x < 13,3x).
+#    >>> E LA CELLA 800 SERVE A UN'ALTRA COSA, che e' una misura che non
+#        abbiamo: 270 - Trades(800) = QUANTE GAMBE AVEVANO UNO STOP
+#        GEOMETRICO SOTTO 8 IDX. Se il numero e' 0, la manopola e' inerte
+#        a 800 e quella cella riproduce R47a (n 270 / PF 1,39709 /
+#        DD 7,2328%) -- ed e' una seconda riproduzione gratis. Se e' > 0,
+#        allora esistono gambe con stop sotto 8 idx, cioe' SOTTO 4,7x, e
+#        quella e' una notizia sul rischio della sedia viva che va in
+#        cima al referto.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- e con il verso, non con un PF
+#    L'unico punto MISURATO su questo asse e' il floor = 0 (cioe' OFF):
+#      R47a, tick, dep. 100.000, rischio 1,0%, finestra identica:
+#        IS  n 175 deal = 132 POSIZIONI | PF 1,12634 | DD 5,4362%
+#        OOS n 270 deal = 193 POSIZIONI | PF 1,39709 | DD 7,2328%
+#    Le altre celle: PF e DD sono [NON MISURATI]. Non invento una curva:
+#    dichiaro la FORMA che mi aspetto e cosa la smentisce.
+#      Trades: atteso INVARIATO o quasi. Con InpSkipIfTight=false il
+#        floor non tocca la SELEZIONE: allarga lo stop, non salta il
+#        trade. Gli ingressi sono gli stessi. Se Trades cambia di molto,
+#        o il lotto va a zero (sentinella del pavimento del lotto) o ho
+#        letto male il codice: in entrambi i casi e' una notizia.
+#      Posizioni: invariate a 193 OOS / 132 IS. Il rapporto deal/posizioni
+#        puo' invece MUOVERSI, perche' il parziale a TP1_R=1,0 e' ora piu'
+#        lontano in punti: mi aspetto MENO parziali, cioe' un rapporto che
+#        scende da 1,3990 verso 1,0. Non e' misurabile dal CSV di
+#        riepilogo: si vede solo come Trades che scende a posizioni
+#        costanti, ed e' la ragione per cui il referto DEVE distinguere
+#        le due unita'.
+#      PF: [NON MISURATO]. Il verso non e' prevedibile e non lo invento:
+#        lo stop piu' largo alza il payoff e abbassa il win rate; quale
+#        dei due vinca e' esattamente la domanda del round.
+#      DD: atteso fra 5% e 9% su tutte le celle. Il DD NON scende
+#        automaticamente con lo stop largo: la perdita per operazione e'
+#        costante (rischio % fisso), quindi il DD dipende solo dalla
+#        SEQUENZA delle perdite. Chi si aspetta "stop largo = DD basso"
+#        confonde la larghezza dello stop con la taglia.
+#    >>> LA PREVISIONE SCOMODA, scritta prima: MI ASPETTO CHE IL FLOOR
+#        COSTI EDGE, e che il verdetto sia "chiudere R5 con questa
+#        manopola costa X punti di PF: baratto, non riparazione".
+#        Ragione: su questo motore lo stop e' GEOMETRICO (estremo opposto
+#        del range di 35 minuti) e quindi porta informazione -- e' la
+#        larghezza del campo da gioco di quel giorno. Un floor la
+#        cancella nei giorni compressi, che sono anche i giorni in cui il
+#        range dice "oggi non c'e' movimento". Un motore che vive di
+#        rotture di range e a cui si toglie l'informazione sull'ampiezza
+#        del range dovrebbe peggiorare.
+#        SE ESCE COSI', LA RISPOSTA ONESTA E' "R5 su questa sedia si
+#        chiude PAGANDO, e il prezzo e' questo numero" -- ed e' un
+#        RISULTATO: oggi quel prezzo non lo conosce nessuno, e senza di
+#        lui la raccomandazione R5 non e' decidibile.
+#
+#  B4 -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella 10800 (108 idx, l'unica che passa 40x anche al p95)
+#        torna PF 1,55 e DD 6,0%. Sembra "abbiamo chiuso R5 e guadagnato".
+#        Sarebbero invece TRE artefatti sovrapposti, tutti prevedibili ora:
+#        (i)  SOPRAVVIVENZA. Uno stop a 108 idx non viene toccato da
+#             storni che a 56 idx chiudevano in perdita. In 21 mesi di
+#             indice IN SALITA quegli storni rientrano quasi sempre.
+#             In un orso NO -- e l'orso in questa finestra non c'e'.
+#        (ii) IL TP SI SPOSTA CON LO STOP. TP1_R = 1,0 e' in R: stop
+#             largo = target lontano = piu' tempo in posizione = piu'
+#             trailing e meno parziali. Il PF puo' salire solo perche'
+#             cambia la MISCELA delle uscite, non perche' il segnale sia
+#             migliore.
+#        (iii)IL CONFRONTO CON LA CELLA SBAGLIATA. Se qualcuno confronta
+#             la 10800 con il 1,49140 di InpTP1_ClosePct=0 invece che col
+#             1,39709 della cella VIVA, sta confrontando DUE manopole
+#             mosse insieme. E' l'errore che l'11/09 e' costato mezza
+#             giornata sui file DAX_F_gestione_*.
+#    >>> COME LO DISTINGUO DA UN EDGE VERO, con misure che ho:
+#        1. ALTOPIANO, non picco (A1 + A4): servono 3 celle contigue.
+#           Un artefatto di sopravvivenza cresce MONOTONO col floor, non
+#           fa un piano.
+#        2. IL SEGNO DELL'IS. Se il guadagno c'e' solo in OOS e l'IS
+#           peggiora, e' regime, non geometria.
+#        3. PROFITTO PER POSIZIONE, non solo PF. Se il PF sale e il
+#           profitto per POSIZIONE resta piatto, sto solo contando meno
+#           deal. Si calcola sulle 193 posizioni, non sui Trades.
+#        4. MONOTONIA. Se PF e DD migliorano MONOTONAMENTE dal floor piu'
+#           stretto al piu' largo, la spiegazione piu' semplice e' la
+#           sopravvivenza, non un ottimo: e un asse monotono NON ha un
+#           centro d'altopiano da scegliere.
+#        5. SE PASSANO TUTTI E QUATTRO, IL ROUND NON PROMUOVE NIENTE
+#           LO STESSO: una cella scelta guardando l'OOS va portata a una
+#           finestra NUOVA o a una prova di regime, e quella prova questo
+#           round non la contiene.
+#
+#  S1 / S2 -- LE SENTINELLE
+#    S1  Il cancello di riproduzione di questo gruppo E' R137c (la sua
+#        cella InpTP1_ClosePct=50 e' la cella VIVA esatta e deve tornare
+#        175/1,12634/5,4362 e 270/1,39709/7,2328). QUI la sentinella e'
+#        piu' debole per costruzione, perche' nessuna cella di questo
+#        asse e' la cella viva: la piu' vicina e' 800, ed e' vicina solo
+#        SE non esistono gambe con stop geometrico sotto 8 idx.
+#        >>> Quindi: se la cella 800 torna 270/1,39709/7,2328, la
+#            riproduzione e' passata E si e' misurato che quelle gambe
+#            non esistono. Se torna diversa, il numero 270 - Trades(800)
+#            e' la misura di quante sono, e va in cima al referto.
+#    S2  CONTEGGIO DELLE CELLE: 7 valori distinti di InpMinStopPts nel
+#        CSV (800 / 2800 / 4800 / 6800 / 8800 / 10800 / 12800). In
+#        virgola mobile MT5 puo' fermarsi a 6: se sono 6, si dichiara
+#        QUALE manca, e non e' un risultato, e' un buco.
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    A1  ALTOPIANO (merito). Servono >= 3 CELLE CONTIGUE con, CIASCUNA:
+#        PF OOS >= 1,40  E  posizioni OOS >= 150  E  DD OOS <= 8,0%
+#        E  rapporto minimo garantito >= 40x.
+#        PF 1,40 e non 1,10: non si cerca l'ammissione di un candidato,
+#        si cerca se il floor BATTE un 1,39709 gia' misurato. Una soglia
+#        sotto il valore in essere premierebbe un peggioramento.
+#        DD 8,0% e non 10%: il contratto in essere e' 7,2328% @1% e il
+#        muro prop e' 10%. 8,0 lascia 2 punti e non consente a una cella
+#        di peggiorare il contratto per comprarsi un PF.
+#    A2  IL PAVIMENTO DEI 150 E' ASIMMETRICO. Una cella con posizioni
+#        OOS < 150 non puo' MAI contare A FAVORE di A1; puo' contare
+#        CONTRO, come fatto di FORMA (una pendenza non ha bisogno di 150
+#        operazioni per essere una pendenza).
+#        >>> L'IS E' SOSPESO PER COSTRUZIONE: 132 posizioni < 150.
+#            Serve al SEGNO e al RISCHIO (Emendamento B del 16/08), mai
+#            al merito. Dichiarato adesso.
+#    A3  ANTI-ALTOPIANO-FINTO. Due celle contigue con Trades IDENTICO e
+#        PF identico alla quarta cifra NON sono due celle: sono un tratto
+#        di asse INERTE (censimento 09/09: 874 CSV su 1.960 con passate a
+#        esito identico). Non contano per A1.
+#    A4  PICCO. Se una cella passa A1 e ENTRAMBE le vicine immediate
+#        fanno PF OOS < 1,30, l'asse dichiara PICCO e il verdetto di
+#        altopiano e' annullato.
+#    A5  ASSE INERTE. Se tutte le celle cadono sotto A3, si scrive
+#        "manopola inerte, MISURATA". E' un risultato, non un round
+#        buttato: chiude una casella che oggi e' VUOTA.
+#    A6  VERDETTO. "Esiste un floor che chiude R5 senza costare edge" si
+#        scrive solo se A1 passa E il CENTRO del tratto contiguo ha
+#        rapporto minimo >= 40x. In ogni altro caso il verdetto e' o
+#        "chiudere R5 con questa manopola COSTA <quanto>, ed e' un
+#        baratto che decide Claudio", o "non c'e' una configurazione
+#        robusta su questo asse". E si scrive cosi'.
+#    A7  RISCHIO, a qualunque n. Ogni cella con DD OOS o DD IS > 8,0% e'
+#        cella di rischio, non entra in un altopiano, e va segnalata
+#        anche se il PF e' bello.
+#    A8  SELEZIONE: si porta avanti il CENTRO del tratto contiguo, MAI IL
+#        PICCO. Se il centro e' una cella fuori costo, non si porta
+#        avanti niente.
+#    A9  BANDA DI RUMORE. Un vantaggio di PF < 0,10 su UNA sola cella non
+#        e' un vantaggio: serve o un altopiano (A1) o un margine >= 0,10
+#        con le due vicine concordi.
+#   A10  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non accende
+#        una sedia, non tocca il forward, non nomina il conto reale
+#        10105439. Taglie, rischio e accensioni sono [FIRMA DI CLAUDIO].
+#
+#  IL PAVIMENTO DEL LOTTO NON MORDE, ED E' UN CONTO
+#    Deposito 100.000, rischio 1,0% = 1.000 EUR per operazione. Alla
+#    cella piu' larga (128 idx) il lotto e' 1.000 / (128 x valore del
+#    punto). Il valore del punto di D30EUR NON e' nella sonda del 17/08
+#    (la riga D30EUR non ha TickValue leggibile): [NON MISURATO]. Con un
+#    valore dell'ordine di 1 EUR/idx/lotto il lotto uscirebbe ~7,8,
+#    cioe' 78 volte il passo minimo tipico: il pavimento non morde.
+#    >>> SENTINELLA DI SICUREZZA: se una cella larga torna con Trades
+#        MOLTO piu' basso delle vicine E profitto ~0, il sospetto e'
+#        LOTTO NULLO, non edge. Si controlla il Giornale della passata.
+#    >>> E' PER QUESTO CHE IL DEPOSITO E' 100.000 E NON 10.000, oltre al
+#        fatto che 100.000 e' il banco della challenge e che R47a (il
+#        confronto) gira proprio a 100.000.
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO 1,0 per
+#    essere confrontabile con R47a. FrazioneIS 0,40 (default del driver,
+#    walkforward_generico.ps1 r.179):
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642 x 0,40) = 256
+#      IS  2024.09.26 - 2025.06.09      OOS 2025.06.10 - 2026.06.30
+#    Stesse finestre di R47 (che non dichiara @FINOA e prende il default
+#    -Fino 2026.06.30, r.177) e di R112. Se la riga di lancio cambia
+#    FrazioneIS, deposito o modello, i confronti decadono e questo file
+#    va riscritto.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente. Lo storico BCM di D30EUR parte dal
+#      2024.09.26 con stato COMPLETO (il broker non ha nulla prima:
+#      risultati_archivio/sonda_storico_17-08/). 21 mesi = UN REGIME.
+#      La regola C dell'Emendamento della Finestra NON e' soddisfatta e
+#      non lo sara' alla fine del round. Niente e' promuovibile di qui.
+#    - VALORE DEL PUNTO di D30EUR: [NON MISURATO] (vedi sopra).
+#    - SPREAD AL MINUTO dentro l'ora 08: [NON MISURATO]. L'istogramma e'
+#      ORARIO. L'ora 08 e' l'ora dell'APERTURA europea, cioe' il minuto
+#      peggiore dell'ora: i 33,0x e 40,0x qui sopra sono OTTIMISTI PER
+#      COSTRUZIONE, e va scritto ogni volta che si citano.
+#    - IL PEDAGGIO SI PAGA DUE VOLTE (ingresso e uscita) e l'ora
+#      dell'USCITA e' [NON MISURATA]. Il pavimento 40x di casa e'
+#      definito contro UNO spread e resta cosi' per confrontabilita',
+#      ma il pedaggio vero e' circa il doppio.
+#    - LATO SHORT: non c'e', e non e' una dimenticanza: la sedia viva e'
+#      LONG-ONLY (InpAllowShort=false nel preset). La regola dei due lati
+#      del 25/08 e' soddisfatta altrove sulla stessa EA e sullo stesso
+#      simbolo (r83_csv, r118_csv, csv_r51 girano con InpAllowShort=1;
+#      il lato corto da solo vale +3,8873 punti di DD --
+#      report/CONFLITTO_DD_770101_2026-09-11.md). Qui si misura la SEDIA,
+#      non il motore.
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e non misurabile in
+#      ottimizzazione (l'export per-trade viene sovrascritto a ogni
+#      passata: sopravvive solo l'ultima cella).
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester le
+#      GlobalVariable non esistono e la guardia e' fail-open, come in R47.
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     (rischio portato a 1,0 per essere confrontabile con R47a)
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpSkipIfTight=false
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=786202
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     800 / 2800 / 4800 / 6800 / 8800 / 10800 / 12800 punti MT5
+#     = 8 / 28 / 48 / 68 / 88 / 108 / 128 punti indice (1 idx = 100 pt,
+#       verificato: 'buffer 500 pt = 5 idx' in CANCELLO_COSTO_FLOTTA r.391)
+#     68,0 e 108,0 cadono ESATTAMENTE sulle due frontiere di costo.
+InpMinStopPts=800||800||2000||12800||Y
+# ======================================================================

@@ -1,0 +1,292 @@
+# ======================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R138a -- IL GEMELLO EUROPEO DELLA SECONDA SEDIA: F40EUR (CAC 40)
+#  CELLA UNICA, identica a quella VIVA di 770101. Cambia SOLO il simbolo.
+#  Asse tecnico: InpMagic gemello (2 valori) -- il cancello G1 di
+#  determinismo, come in R47a. Nessun parametro di trading spazzolato.
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+# ======================================================================
+#
+#  A CHE DOMANDA RISPONDE, UNA SOLA
+#    "La FAMIGLIA di ABTG_DAX_Apertura_EU arriva al pavimento di 1,00
+#     operazione/giorno se le si aggiunge UN secondo simbolo europeo?"
+#    NON "il CAC e' un buon mercato". NON "questa e' una sedia nuova".
+#
+#  PERCHE' SERVE, col numero
+#    report/LA_SECONDA_SEDIA_2026-09-12.md par.2-3. La sedia `770101`
+#    (D30EUR M5 LONG, la prima classificata al secondo seggio) ha DUE
+#    requisiti rotti su cinque, e uno e' R3:
+#      frequenza MISURATA IN POSIZIONI = 0,72-0,73 pos/giorno feriale
+#        OOS: 193 posizioni / 265 giorni feriali = 0,728
+#        IS : 132 posizioni /  183 giorni feriali = 0,721
+#        (due finestre indipendenti, stesso numero: non e' rumore)
+#      pavimento firmato: 1,00 op/giorno PER FAMIGLIA (firma 07/09,
+#        report/FIRME_2026-09-07.md) -- non per sedia.
+#    >>> 0,72 + 0,72 = 1,44. UN SOLO simbolo in piu' porta la famiglia
+#        SOPRA il pavimento, con margine del 44%. Questo round misura se
+#        quel secondo 0,72 esiste.
+#    >>> E CORREGGE UN NUMERO DEL PIANO: report/PIANO_
+#        CHALLENGE_OTTOBRE_v2.md par.2 riga 2 scrive '0,97 op/g [MIS]'.
+#        Quel 0,97 conta i DEAL (270 uscite / 276 giorni), non le
+#        POSIZIONI. In posizioni sono 0,728 -- e la firma del 18/08 e
+#        quella del 07/09 parlano di OPERAZIONI, cioe' di posizioni.
+#
+#  PERCHE' F40EUR E NON UN ALTRO SIMBOLO
+#    (a) APRE ALLA STESSA ORA. Parigi apre alle 09:00 CET = 08:00 ORA
+#        SERVER BCM, esattamente come Francoforte. Quindi
+#        InpSessionHour=8 resta CORRETTO senza toccarlo, e il motore
+#        misura la STESSA inefficienza (la rottura del range dei primi
+#        35 minuti dell'apertura europea) su un secondo mercato.
+#        >>> Verificato contro la regola di casa: 'DAX apre 09:00 IT =
+#            08:00 server BCM' (CLAUDE.md, FUSO ORARIO BCM). Se nel CSV
+#            la colonna InpSessionHour non e' 8, il file va cestinato.
+#    (b) LO STORICO C'E'. F40EUR e' fra i 12 simboli misurati dalla
+#        sonda del 17/08 con prima data 2024.09.26 e stato COMPLETO
+#        (risultati_archivio/sonda_storico_17-08/). Stessa finestra di
+#        D30EUR, quindi i due numeri sono confrontabili per costruzione.
+#    (c) NON E' MAI STATO MISURATO CON QUESTO MOTORE, ED E' CONTATO.
+#        risultati_archivio/DAX_Apertura/ contiene 5 CSV e sono TUTTI
+#        D30EUR (apert_DAX_M5_{brk,doc_brk,doc_delay,fade,retest}_
+#        realtick_D30EUR.csv). Nessun file di questa EA porta F40EUR nel
+#        nome ne' nelle colonne. E' una casella LIBERA, non provata.
+#
+#  BUCO DICHIARATO, E NON LO COLMO IO
+#    Esiste in casa uno 'studio aperture FASE A' su 8 INDICI e ~3.500
+#    trade a tick reali, citato da almeno quattro referti
+#    (risultati_archivio/APERTURE_TRAILING_DAX_NASDAQ.md r.40,
+#     REFERTO_HISTDATA_FATTIBILITA.md r.1132,
+#     ANALISI_CANCELLO_ZERO_EXT_2026-08-25.md r.79, DOW_MOTORE.md).
+#    🔴 NON HO TROVATO LA SUA TABELLA PER SIMBOLO nel repo, e quindi
+#    NON SO se F40EUR abbia gia' un'aspettativa misurata li' dentro.
+#    DOW_MOTORE.md riporta di seconda mano 'FASE A: DAX -0,043, CAC
+#    -0,053, IBEX -0,081' -- ma quei numeri sono l'effetto del FILTRO
+#    TREND H4, non l'aspettativa del motore, e in questa cella il filtro
+#    e' SPENTO (InpUseEmaFilter=false nel preset vivo).
+#    >>> QUINDI: prima di leggere questo round, si cerca quella tabella.
+#        Se F40EUR ha un numero negativo nella FASE A, questo round va
+#        letto come RITEST di una bocciatura, non come casella libera --
+#        e la regola della seconda caccia chiede una TESI NUOVA per
+#        riesumare un caduto. La tesi nuova, in quel caso, e' che la
+#        cella viva non e' la rottura cieca: e' un RETEST
+#        (InpEntryMode=2) con offset 200 pt, che la FASE A non misurava.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Su F40EUR con questo motore NON C'E' NESSUN NUMERO IN ARCHIVIO:
+#    PF, DD e n sono tutti [NON MISURATI]. Non invento una curva.
+#    Quello che dichiaro e' l'ATTESA DI FREQUENZA, che e' il motivo del
+#    round, e ha una base: il motore fa UNA operazione al giorno al
+#    massimo (InpOneTradePerDay=true) e su D30EUR ne fa 0,72-0,73. Il
+#    filtro che le toglie e' il RETEST: il pendente a 200 pt dal livello
+#    non viene sempre riagganciato.
+#      n OOS atteso: 130-230 POSIZIONI  [STIMATO]
+#        (= 0,49-0,87 pos/g: la banda e' larga di proposito, perche' la
+#         quota di retest riagganciati e' una proprieta' del mercato e su
+#         F40EUR non la conosco)
+#      frequenza attesa: 0,49-0,87 pos/g  [STIMATO]
+#      PF: [NON MISURATO]. Non dichiaro un'attesa di PF che non ho.
+#      DD: [NON MISURATO]. Attesa di ORDINE DI GRANDEZZA, dal solo fatto
+#        che il rischio per operazione e' fisso: 4-12% a rischio 1,0%.
+#    >>> LA PREVISIONE SCOMODA, scritta prima: mi aspetto che F40EUR sia
+#        PIU' LENTO del DAX, non piu' veloce. Ragione: il CAC ha un
+#        controvalore scambiato minore e range di apertura piu' stretti
+#        in punti indice, quindi piu' giorni sotto le soglie geometriche.
+#        Se esce sotto 0,49 pos/g, il round NON chiude R3 e la risposta
+#        onesta e' "serve un TERZO simbolo, oppure R3 resta rotto".
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    F1  FREQUENZA (il criterio del round). Questo round PASSA se
+#        F40EUR fa >= 0,28 POSIZIONI/giorno feriale in OOS -- cioe' se
+#        0,728 + suo >= 1,00 per la FAMIGLIA. E' un pavimento basso ED E'
+#        GIUSTO COSI': il round chiede alla famiglia di arrivare a 1,00,
+#        non a F40EUR di essere un campione.
+#        >>> E la frequenza si conta in POSIZIONI. Su questa EA il
+#            rapporto deal/posizioni con InpTP1_ClosePct=50 e' 1,3990
+#            MISURATO su D30EUR (per-trade 772501). Su F40EUR il rapporto
+#            e' [NON MISURATO]: il referto deve scrivere il n in DEAL e
+#            dichiarare la banda in posizioni fra n/1,40 e n/1,00.
+#            >>> LA VIA PIU' CORTA AL NUMERO VERO: questo file NON
+#                esporta il per-trade, quindi il conteggio esatto delle
+#                posizioni di F40EUR resta [NON MISURATO] anche dopo la
+#                corsa. Chiuderlo costa UNA corsa a cella singola con
+#                l'export attivo (2 passate), come fece R47.
+#    F2  MERITO. Il merito si legge SOLO se le posizioni OOS sono >= 150
+#        (Emendamento A). Se escono 130, il merito e' SOSPESO e il round
+#        risponde solo a R3. Dichiarato adesso: e' l'esito piu' probabile.
+#    F3  RISCHIO, a qualunque n (Emendamento B del 16/08). Se il DD OOS
+#        supera 10,0% a rischio 1,0%, F40EUR e' BOCCIATO PER RISCHIO e
+#        non entra nella famiglia, qualunque frequenza abbia. Questo
+#        criterio morde anche con 20 operazioni.
+#    F4  COSTO. Lo spread di F40EUR e' [NON MISURATO]:
+#        risultati_archivio/spread_flotta/ ha 3 file su 13 simboli
+#        (D30EUR, NASUSD, U30USD) e F40EUR non c'e'. Quindi R5 su F40EUR
+#        e' ⚪ NON ANCORA MISURATO, non 🟢 e non 🔴.
+#        >>> NESSUNA SEDIA SU F40EUR SI ACCENDE PRIMA CHE QUEL NUMERO
+#            ESISTA. La via piu' corta: ABTG_SpreadOrario su F40EUR con
+#            -PuntiPerIndice 100 (il fattore degli indici, verificato in
+#            CANCELLO_COSTO_FLOTTA r.138), zero passate di tester.
+#    F5  IL ROUND NON PROMUOVE NIENTE e non accende nessuna sedia. Anche
+#        se F40EUR uscisse migliore del DAX, la cella non e' stata scelta
+#        su F40EUR: e' stata COPIATA dal DAX. Portarla in campo
+#        richiederebbe una finestra nuova, e questo round non la contiene.
+#        Taglie, rischio e accensioni sono [FIRMA DI CLAUDIO].
+#    F6  G1 DETERMINISMO. I due magic gemelli devono dare righe IDENTICHE
+#        al centesimo su tutte le colonne. Se divergono, il guasto e'
+#        nella macchina (classe 129: UN SOLO agente locale nel tester) e
+#        i numeri NON si leggono.
+#
+#  B4 -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> LA TRAPPOLA: F40EUR torna PF 1,7 e 60 posizioni, e qualcuno
+#        scrive "abbiamo trovato la terza sedia". Falso due volte:
+#        (i) 60 posizioni sono il 40% del pavimento -> merito SOSPESO
+#            (F2), e su 60 operazioni un PF 1,7 e' compatibile col caso;
+#        (ii) 60 posizioni sono 0,23 pos/g, cioe' SOTTO il 0,28 che
+#            servirebbe alla famiglia -> il round FALLISCE il suo unico
+#            criterio (F1) proprio nella cella che sembra vincere.
+#        >>> Cioe': su questo round un PF alto con poche operazioni e'
+#            un FALLIMENTO, non un successo. Scritto prima, perche' dopo
+#            e' tardi.
+#    >>> LA SECONDA TRAPPOLA, piu' subdola: F40EUR e D30EUR sono DUE
+#        INDICI EUROPEI CHE APRONO ALLO STESSO MINUTO. Se la famiglia
+#        arriva a 1,44 pos/g sommando due sedie che fanno LA STESSA
+#        OPERAZIONE nello stesso momento sulla stessa direzione, la
+#        frequenza e' doppia e la DIVERSIFICAZIONE E' ZERO -- e il
+#        rischio aperto simultaneo raddoppia.
+#        >>> COME SI MISURA, e non costa un round: la correlazione dei
+#            giorni operativi. Dal CSV di riepilogo NON si ricava.
+#            Serve il per-trade dei due simboli e un confronto delle
+#            date d'ingresso (backtest_pipeline/sovrapposizione_sedie.py
+#            e chi_va_con_chi.py esistono gia').
+#        >>> QUINDI IL VERDETTO DI QUESTO ROUND E' CONDIZIONATO: "R3 si
+#            chiude" si scrive solo se la frequenza passa F1 **E** la
+#            sovrapposizione dei giorni e' misurata e dichiarata. Senza
+#            il secondo numero, il verdetto e' "F40EUR ha frequenza X, e
+#            la sovrapposizione con D30EUR e' [NON MISURATA]".
+#            E' esattamente la trappola che il tetto per cluster C10 al
+#            3,0% (firmato 07/09, NON attivo) dovrebbe coprire.
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO 1,0 per
+#    essere confrontabile con R47a su D30EUR. FrazioneIS 0,40 (default
+#    del driver, walkforward_generico.ps1 r.179):
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642 x 0,40) = 256
+#      IS  2024.09.26 - 2025.06.09      OOS 2025.06.10 - 2026.06.30
+#    Stesse finestre di R47 e R112: i due simboli si confrontano sulle
+#    STESSE date, non su due periodi diversi.
+#    REGIME: 21 mesi, UN SOLO REGIME (toro). La regola C dell'Emendamento
+#    della Finestra NON e' soddisfatta e non lo sara' alla fine del
+#    round. Dichiarato come buco, non come dettaglio.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - SPREAD di F40EUR: [NON MISURATO] -> R5 non calcolabile (F4).
+#    - VALORE DEL PUNTO di F40EUR: [NON MISURATO]. Se il lotto andasse a
+#      zero per pavimento di volume, il round tornerebbe n basso e
+#      profitto ~0: sentinella, si controlla il Giornale.
+#    - n in POSIZIONI: [NON MISURATO] anche dopo la corsa (F1).
+#    - SOVRAPPOSIZIONE con D30EUR: [NON MISURATA] (B4).
+#    - PROVA DI REGIME: assente.
+#    - LATO SHORT su F40EUR: [NON MISURATO]. Qui si copia la sedia viva,
+#      che e' LONG-ONLY. La regola dei due lati del 25/08 chiede il lato
+#      separato: su F40EUR e' un round suo, e va in coda dichiarato.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva; nel tester la
+#      guardia e' fail-open, come in R47.
+# ======================================================================
+@SIMBOLO  F40EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a quella VIVA di 770101, copiata campo per campo
+#     da mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set.
+#     UNICO cambio di trading: NESSUNO. Cambiano solo @SIMBOLO, il magic
+#     (vergine) e il rischio (1,0 per il confronto con R47a).
+#     InpSessionHour resta 8 = ORA SERVER BCM (Parigi apre 09:00 IT).
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'ASSE TECNICO: magic GEMELLO (2 celle x 2 finestre = 4 passate)
+#     Non e' un parametro di trading: e' il cancello G1 di determinismo.
+#     Le due righe DEVONO uscire identiche al centesimo (F6).
+#     786204 / 786205 verificati VERGINI nel repo il 12/09/2026
+#     (grep -rl su tutto il repo, .git escluso -> 0 file).
+InpMagic=786204||786204||1||786205||Y
+# ======================================================================

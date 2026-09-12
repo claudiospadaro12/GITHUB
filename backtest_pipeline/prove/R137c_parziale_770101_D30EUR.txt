@@ -1,0 +1,273 @@
+# ======================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R137c -- IL CANCELLO: RIPRODURRE R47a/R47b SUL BINARIO DI OGGI,
+#           e portare a referto la cella a UNA MANOPOLA che la batte.
+#  D30EUR M5 FISSO, LONG. Asse: InpTP1_ClosePct (0 / 50).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  >>> SI LEGGE PER PRIMO: e' il cancello di R137a e R137b. <<<
+# ======================================================================
+#
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- la bussola, coi numeri
+#    report/LA_SECONDA_SEDIA_2026-09-12.md par.2: fra tutti i candidati
+#    al SECONDO seggio, `770101` ABTG_DAX_Apertura_EU D30EUR M5 LONG e'
+#    l'unico che porta insieme queste quattro cose, tutte MISURATE:
+#      (a) n in POSIZIONI sopra il pavimento dei 150 in OOS:
+#          OOS 193 POSIZIONI  ·  IS 132 POSIZIONI
+#          e NON sono derivate da un rapporto: sono CONTATE nei per-trade
+#          risultati_prove/aperture_r47/abtg_trades_ABTG_DAX_Apertura_EU_
+#          D30EUR_{772501,772503}.csv  (270 deal = 193 position_id
+#          distinti, rapporto 1,3990 · 193 deal = 193 position_id,
+#          rapporto 1,0000: due configurazioni che differiscono per UNA
+#          manopola, stesse entrate, stesse 193 posizioni)
+#      (b) R1 PIENO E VERIFICATO MANOPOLA PER MANOPOLA: la cella di R47a
+#          e la cella VIVA del preset 100k coincidono su 80 input su 80
+#          confrontabili. Le UNICHE due differenze sono InpRiskPercent
+#          (1,0 nel banco / 0,65 in campo: pura taglia) e InpMagic.
+#          Questo e' il controllo che l'11/09 ha bocciato i file
+#          Walkforward_Aperture/DAX_F_gestione_* (sei manopole diverse,
+#          fra cui InpAllowShort): qui le differenze sono DUE e sono
+#          entrambe innocue.
+#      (c) CLUSTER DIVERSO dal primo seggio. La prima sedia (771531
+#          ABTG_EMA200) sta su U30USD, dove il parco ha gia' 10 istanze.
+#          D30EUR e' l'unico simbolo fuori dal cluster americano con una
+#          sedia a merito leggibile. Il tetto per cluster C10 al 3,0% e'
+#          firmato il 07/09 e NON attivo: fino ad allora la
+#          decorrelazione si compra scegliendo il simbolo, non col
+#          Guardian.
+#      (d) il RISCHIO letto sul banco della challenge, e non scalato a
+#          mano: R47a gira a Deposito 100.000 (verificato per aritmetica:
+#          profit 18.029,58 su 193 posizioni a rischio 1% = 0,093 R per
+#          posizione; a deposito 10.000 sarebbero 0,93 R per posizione,
+#          che e' assurdo -- e R119, a deposito 10.000 e rischio 0,65%,
+#          da' 1.103,31 / 193 = 5,72 EUR = 0,088 R, cioe' LO STESSO edge
+#          sui due banchi). Quindi: DD OOS 7,2328% a rischio 1,0% SU
+#          BANCO 100.000 -- che il piano di ottobre v2 dichiara
+#          '[NON MISURATO]'. Lo e'.
+#
+#  I DUE REQUISITI CHE LE MANCANO, per nome e col numero
+#    R3 FREQUENZA: 0,72-0,73 POSIZIONI/giorno feriale (193/265 in OOS e
+#       132/183 in IS: due finestre indipendenti, stesso numero) contro
+#       un pavimento di 1,00 PER FAMIGLIA (firma 07/09). 🔴 Il '0,97 op/g'
+#       del piano v2 conta i DEAL (270/276), non le posizioni.
+#       NON si chiude con questo round: si chiude allargando la FAMIGLIA
+#       a un secondo simbolo europeo (proposta R138, vedi dossier).
+#    R5 COSTO: stop mediano MISURATO 71,9 idx su 7 gambe vere, ma
+#       56,1 idx SULLA GEOMETRIA VIVA; spread D30EUR mediano dell'ora
+#       modale 08 = 1,70 idx (misurato su 30.974.789 tick,
+#       risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10).
+#         71,9 / 1,70 = 42,3x   (stop pieno, mediana)
+#         56,1 / 1,70 = 33,0x   (geometria viva, mediana)   <-- il numero
+#         71,9 / 2,70 = 26,6x   (stop pieno, p95 dell'ora 08)
+#       Tutti e tre riprodotti da me sui file grezzi, e tutti e tre
+#       coincidono con report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.391.
+#       Pavimento di LAVORO 40x: NON passato sulla geometria viva.
+#       Pavimento DURO 13,3x: passato con margine 2,5x.
+#       >>> R137a e R137b esistono per questo, e per nient'altro.
+#
+#  IL REGIME, dichiarato come buco e non come dettaglio
+#    Lo storico BCM di D30EUR parte dal 2024.09.26 con stato COMPLETO
+#    (misurato: risultati_archivio/sonda_storico_17-08/, il broker NON
+#    ha nulla prima). 21 mesi = UN SOLO REGIME. La regola C
+#    dell'Emendamento della Finestra NON e' soddisfatta e non lo sara'
+#    alla fine di questo round. Niente che esca di qui e' promuovibile
+#    senza una prova di regime che questo round non contiene.
+#
+#  A10  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non accende
+#       una sedia, non tocca il forward. Taglie, rischio, accensioni e
+#       il conto reale 10105439 sono [FIRMA DI CLAUDIO].
+#
+#  PERCHE' QUESTA MANOPOLA, e perche' e' un round di DUE passate utili
+#    In archivio la coppia R47a/R47b misura la stessa sedia con
+#    InpTP1_ClosePct = 50 (la cella VIVA) e = 0, TUTTO IL RESTO IDENTICO.
+#    Verificato da me input per input: fra le due celle cambia UNA
+#    manopola sola. E il risultato, gia' sul disco da agosto:
+#
+#      InpTP1_ClosePct=50 (VIVA)   IS  n 175 | PF 1,12634 | DD 5,4362% | +3.789,36
+#                                  OOS n 270 | PF 1,39709 | DD 7,2328% | +18.029,58
+#      InpTP1_ClosePct=0           IS  n 132 | PF 1,18323 | DD 4,9576% | +5.569,37
+#                                  OOS n 193 | PF 1,49140 | DD 6,2719% | +23.607,28
+#      (risultati_prove/aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_
+#       {IS,OOS}_r47{a,b}.csv -- due righe gemelle per file, identiche)
+#
+#    >>> LA CELLA A UNA MANOPOLA E' MEGLIO SU TUTTI E DUE GLI ASSI, IN
+#        TUTTE E DUE LE FINESTRE: PF sale (1,12634->1,18323 in IS,
+#        1,39709->1,49140 in OOS), DD scende (5,4362->4,9576 e
+#        7,2328->6,2719), profitto +47% in IS e +31% in OOS.
+#        E LE POSIZIONI NON CAMBIANO: 132 e 193 in tutte e due le
+#        configurazioni. Non e' selezione, e' gestione -- il segnale
+#        d'ingresso e' identico, cambia solo cosa succede dopo.
+#    >>> NON E' UNA SCOPERTA MIA. La stessa cella e' stata trovata il
+#        09/09 (report/R120_GESTIONE_APERTURE_2026-09-09.md) e ritrovata
+#        dal setaccio del 12/09 (report/SETACCIO_ARCHIVIO_2026-09-12.md
+#        par.0, riga marcata "meglio su TUTTI E DUE gli assi -- mai
+#        portata in campo"). Tre letture indipendenti, stessa cella.
+#        Quello che manca non e' una misura: e' una FIRMA.
+#    >>> ALLORA PERCHE' SPENDERE 4 PASSATE? Per due ragioni che valgono
+#        piu' del round:
+#        1. IL BINARIO. R47 e' del 14/08/2026. Il driver compila
+#           ABTG_DAX_Apertura_EU dalla TESTA del branch 'lavoro'. Fra
+#           agosto e oggi quel sorgente ha preso almeno il fix
+#           ABTG_DEF_RISK 2.0 -> 1.0 (02/09, report/
+#           VERBALE_CHIUSURA_770101_2026-09-02.md) e la correzione del
+#           trailing dell'11/09 (report/CORREZIONE_TRAILING_770101_
+#           2026-09-11.md). Il rischio qui e' PINNATO a 1,0 da riga,
+#           quindi il cambio di default NON deve mordere -- ma questo si
+#           VERIFICA, non si crede.
+#        2. LA FIRMA VA DAVANTI A CLAUDIO CON UN NUMERO DI OGGI, non con
+#           un numero di un mese fa misurato su un altro binario.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- ed e' una RIPRODUZIONE ESATTA
+#    Non c'e' niente da scoprire: i quattro esiti sono scritti sopra, al
+#    quinto decimale. L'attesa e' che TORNINO IDENTICI.
+#    >>> S1 (BLOCCANTE PER R137a E R137b): tutti e otto i numeri qui
+#        sopra devono tornare. Se anche UNO diverge, il verdetto non e'
+#        "il parziale non serve": e' "IL BINARIO DI OGGI NON E' QUELLO DI
+#        R47", va in cima al referto in grassetto, e R137a/R137b NON si
+#        leggono finche' non e' spiegato.
+#    >>> S2: 2 valori distinti di InpTP1_ClosePct nel CSV (0 e 50).
+#    >>> E SE TORNANO: il referto porta a Claudio UNA RIGA:
+#        "770101 InpTP1_ClosePct 50 -> 0: PF OOS 1,39709 -> 1,49140,
+#         DD OOS 7,2328% -> 6,2719%, a parita' di 193 posizioni,
+#         riprodotto sul binario del 12/09. E' una FIRMA, non un round."
+#
+#  SOGLIE CONGELATE ORA
+#    C1  RIPRODUZIONE: i 4 esiti (2 celle x 2 finestre) devono coincidere
+#        con R47 su PF, DD e Trades. Tolleranza: ZERO sul conteggio
+#        Trades, e quarta cifra su PF e DD.
+#    C2  SELEZIONE: la cella da portare avanti e' quella dichiarata QUI
+#        (InpTP1_ClosePct=0), non quella che risultera' migliore. Se
+#        vincesse la 50 contro R47, vale C1: e' un problema di binario.
+#    C3  RISCHIO (Emendamento B, a qualunque n): nessuna cella con
+#        DD OOS > 8,0% o DD IS > 8,0% puo' essere raccomandata. Il
+#        contratto in essere e' 7,2328% @1% e il muro prop e' 10%.
+#    C4  IL ROUND NON DA' UN VERDETTO DI MERITO NUOVO. L'IS ha 132
+#        POSIZIONI, sotto il pavimento dei 150: l'IS serve al SEGNO e al
+#        RISCHIO, non al merito (Emendamento B del 16/08). Il merito lo
+#        porta l'OOS, con 193 posizioni MISURATE.
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO 1,0 (per
+#    essere confrontabile con R47a/R47b, che girano a 1,0).
+#    FrazioneIS 0,40 (default del driver, walkforward_generico.ps1 r.179).
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di R47 (che non dichiarava @FINOA e ha
+#    preso il default del driver, -Fino 2026.06.30, r.177). Se la riga
+#    di lancio cambia FrazioneIS, deposito o modello, S1 decade e questo
+#    file va riscritto, non "letto con prudenza".
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente (un solo regime, 21 mesi).
+#    - LATO SHORT: non c'e', e non e' una dimenticanza. La sedia viva e'
+#      LONG-ONLY (InpAllowShort=false nel preset). La regola dei due lati
+#      del 25/08 e' soddisfatta ALTROVE su questa famiglia: R83/R118/R51
+#      hanno misurato la stessa EA su D30EUR con InpAllowShort=1 (r83_csv,
+#      r118_csv, csv_r51) e il lato corto da solo vale +3,8873 punti di DD
+#      (report/CONFLITTO_DD_770101_2026-09-11.md). Qui si misura la sedia,
+#      non il motore.
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e non misurabile in
+#      ottimizzazione (l'export per-trade viene sovrascritto a ogni
+#      passata; sopravvive solo l'ultima cella).
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester le
+#      sue GlobalVariable non esistono e la guardia e' fail-open. R47
+#      girava allo stesso modo: i numeri restano confrontabili.
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     e riverificata contro risultati_prove/aperture_r47/
+#     ABTG_DAX_Apertura_EU_D30EUR_OOS_r47a.csv (80 input su 80: solo
+#     InpRiskPercent e InpMagic differiscono, e qui il rischio e' 1,0
+#     come nel CSV).
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMagic=786201
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = la candidata (meglio su PF E DD, IS E OOS) | 50 = la cella VIVA
+InpTP1_ClosePct=0||0||50||50||Y
+# ======================================================================
