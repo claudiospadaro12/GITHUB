@@ -2703,3 +2703,183 @@ su **1.266.562 barre M1** GRXEUR (DAX cash histdata), **1.493 sedute 2013-2018**
   alexandria.unisg.ch 000**, **quantseeker/quantitativo/quantmacro/
   quantifiedstrategies EGRESS_BLOCKED**, **Quantpedia non tentata**, ampiezza
   del cono su **NASUSD e U30USD [NON MISURATA]** (non estrapolata).
+
+---
+
+## 🪦 12/09/2026 — LA BANDA BASSA (M5 / M15 / M30): scarti col numero
+**Dossier completo: `report/LA_BANDA_BASSA_2026-09-12.md`.** Scavo di **sola lettura**
+d'archivio + lettura di sorgente. **Nessun backtest lanciato, `CODA.txt` non toccata.**
+Nasce dalla richiesta di Claudio del 12/09: *"Ma sono tutti in h1 o h4. Dobbiamo
+trovare m5, 15 e 30 x le prop"*.
+
+### 🔴 CORREZIONE DI UN FATTO, prima degli scarti
+*"Di M30 non esiste niente"* e' **falso sull'archivio** e vero solo sulla flotta e
+sulla colonna `@PERIODO` della coda. Misurato oggi:
+- **flotta viva (42 sedie)**: `M1 1 · M5 7 · M15 4 · **M30 0** · H1 22 · H2 2 · H4 6`;
+- **coda di stanotte (28 round, per `@PERIODO`)**: `H1 16 · M5 6 · H4 5 · M15 1 · M30 0`
+  -- **ma `COLLAUDO_EMADOW_05_tf_U30USD.txt` r.126 porta `InpTF=16385||15||1||16388||Y`
+  = M15/M20/M30/H1/H2/H3/H4**, quindi M30 in coda **c'e'**, dentro un file
+  etichettato `@PERIODO H1`;
+- **archivio**: **168 CSV con una cella M30**, di cui **68 a TICK REALI**, su **12
+  simboli** e **8 famiglie**, piu' **34 coppie IS/OOS complete** a tick.
+👉 **La causa del falso zero e' che su 8 famiglie il TF operativo e' `InpTF`, non il
+grafico** (`SuperWave` r.52 · `EMA200` r.49 · `BreakingBand` r.269 · `PTE` r.51 ·
+`CostToCost` r.149 · `EasyTrend` r.179 · `GapFill` r.128 · i `SupRev_*_Ott`).
+**Un censimento fatto su `@PERIODO` non vede la banda bassa.**
+
+### 🪦 SCARTO 1 — LA BANDA M30 E M20 SUI MOTORI A STOP SCALANTE (8 famiglie)
+**34 coppie IS/OOS a TICK REALI con la cella M30: `PF >= 1,10` in ENTRAMBE le
+finestre in 0 casi su 34. A M20 anche 0 su 34.** Negli **stessi** 34 sweep, a H1
+sono **4** e a H4 sono **9** (contro-esempio costruito: l'alternativa *"quelle 34
+corse sono una famiglia debole"* prevedeva zero anche a H1/H4 -- **falsificata**).
+🔴 **Il campione NON e' la scusa:** **24 su 34** hanno `n >= 150` in OOS e il piu'
+grosso fa **n = 1.151** (`EMA200` GBPUSD M30 OOS).
+E il **DD OOS mediano sale MONOTONO scendendo**: H4 **2,74%** -> H1 **4,82%** ->
+M30 **6,61%** -> M15 **8,63%** -> M20 **8,90%**.
+Famiglie coperte, per nome: `SuperWave` · `WOL` · `EMA200` · `SupertrendInvert` ·
+`SupertrendReversal` · i cinque `SupRev_*_Ottimizzato` · `EMA200_Ottimizzato` ·
+`SuperWave_*_Ottimizzato`. (Piu' `BreakingBand`, chiusa a parte da **R111**.)
+⚠️ **Limite dichiarato, e mi corregge:** in quelle 34 coppie le celle con
+`PF >= 1,10` **E** `n >= 150` in entrambe le finestre sono **0 a TUTTI i TF**. Quindi
+il verdetto onesto e' *"a M30 il merito e' misurato e negativo su 34 serie"*, **non**
+*"a M30 non esiste un motore"*.
+
+### 🪦 SCARTO 2 — le celle M30/M15 singole, col PF, il DD, l'n e il cancello
+| candidato | TF | n (IS/OOS) | PF (IS/OOS) | DD (IS/OOS) | rischio | cancello | verdetto |
+|---|---|---|---|---|---|---|---|
+| `ABTG_SupertrendReversal_Multi_Ott` XAUUSD | M30 | 257 / 427 (**deal**) | **1,25637 / 1,08718** | 10,66% / 22,06% | **2,0%** | 🔴 **PICCO, non altopiano**: vicini sullo stesso asse **M20 IS 0,709** e **H1 IS 0,984** · PF OOS **1,087 < 1,10** | 🪦 **scartata per REGOLA DI SELEZIONE.** 🟢 **NON per rischio**: 22,06% e' a 2,0%, a 0,65% fa **~7,17%** [DERIV. lineare] |
+| `ABTG_SupertrendReversal_Multi_Ott` XAUUSD | **M15** | 511 / 882 | 0,75293 / 1,14283 | **42,58%** / 18,48% | 2,0% | 🔴 **IS in perdita** · DD IS **42,58% = 13,84% a 0,65%** [DERIV.] | 🪦 **scartata per RISCHIO** |
+| `ABTG_EMA200_Ottimizzato` XAUUSD | M30 | 460 / 674 | 0,78220 / 1,10258 | 16,91% / 9,68% | 1,0% | 🔴 IS in perdita · DD IS 16,91% > 10% | 🪦 scartata |
+| `ABTG_SupRev_DOW_H4_Ott` U30USD | M30 | 163 / 362 | 0,66190 / 1,36960 | 7,78% / 5,24% | 1,0% | 🔴 IS in perdita (merito incoerente fra finestre) | 🪦 scartata |
+| `ABTG_SuperWave` U30USD | M30 | 122 / 290 | 1,20400 / 0,93050 | 4,79% / 8,48% | 1,0% | 🔴 OOS in perdita · n IS 122 < 150 | 🪦 scartata |
+| `ABTG_SupRev_DAX_H1_Ott` D30EUR | M30 | 181 / 328 | 0,60690 / 0,98750 | 12,00% / 9,41% | 1,0% | 🔴 entrambe sotto 1,10 · DD IS 12,00% > 10% | 🪦 scartata |
+| `ABTG_SupRev_NAS_H1_Ott` NASUSD | M30 | 84 / 185 | 0,78190 / 0,86810 | 3,74% / 4,21% | 1,0% | 🔴 entrambe sotto 1,10 | 🪦 scartata |
+| `ABTG_EMA200` XAUUSD/GBPUSD/AUDJPY/GBPJPY/SPXUSD | M30 | 415-1.151 | **0 su 5** con PF >= 1,10 in entrambe | fino a 37,72% | 1,0% | 🔴 merito, su campione **abbondante** | 🪦 scartate |
+
+### 🪦 SCARTO 3 — ESCLUSI PER COSTO A M30, col numero
+Pedaggio **all-in**: sugli indici e sull'oro e' **lo spread** (commissione **0,0000
+MISURATA**, n=302 deal); sul forex si aggiunge **0,004% del nozionale in valuta
+base** (su GBPUSD la commissione e' il **73,1%** del pedaggio). Due leggi di scala,
+**tenute separate e non mediate**: `k = 0,50` **ASSUNTA** (radice del tempo) e
+`k = 0,968` **MISURATA** sull'unica coppia a due TF dello stesso codice e simbolo che
+possediamo (`SuperWave` U30USD: **77,1 idx a H1** n=4 contro **295,5 a H4** n=8,
+geometria identica riga per riga -- la radice del tempo **sovrastima del 92%**).
+
+`stop/spread` a **M30** con `k = 0,968` (prudente): `EMA200` U30USD **28,1x** ·
+`EasyTrend` GBPUSD **24,1x** · `EMA200_Ott` XAUUSD **21,7x** · `SuperWave`
+U30USD **19,7x** · `SupertrendRev_Ott` XAUUSD **18,1x** · `PTE` U30USD **16,6x** ·
+`SupRev_NAS_H1` NASUSD **14,7x** · `SupRev_DAX_H4` D30EUR **13,4x** ·
+`BreakingBand` EURUSD **13,1x** · `SupertrendReversal` 225JPY **3,6x** ·
+`CostToCost` EURJPY **3,4x** e GBPCAD **2,7x**.
+🔴 **ZERO dei 14 motori di classe S misurati passa il 40x a M30 col `k` misurato.**
+Gli ultimi tre **sfondano anche il pavimento DURO 13,3x**.
+
+### 🪦 SCARTO 4 — LA DISCESA DI TF SULLA CLASSE G: guadagno `0,00`, **MISURATO DAL CODICE**
+**21 sedie su 42** hanno lo stop ancorato al **CALENDARIO** (minuti di sessione,
+box notturno, candela D1, gap, pip fissi) e **non alle barre**. Su tutte e 21
+scendere di TF **non compra nemmeno un'operazione**, e la prova e' una riga:
+`ABTG_DAX_Apertura_EU` r.1007-1020 (range su **`PERIOD_M1` cablato**) + r.679
+(macchina a fasi su **minuti d'orologio**) + `InpOneTradePerDay=true` ·
+`ABTG_Dow_Apertura_US` r.226 · `ABTG_Nasdaq_Apertura_US` r.205 ·
+`ABTG_ORB_Ottimizzato` r.135 · `ABTG_PunteLarry` r.142 (*"i pattern restano su
+D1"*) + r.415-420 + r.283 · `ABTG_GapFill` r.128 + r.245 (`ATR` su **`PERIOD_D1`**) ·
+`ABTG_MaxMinNotte` r.51-54 (box 23:00-04:59 **ora server**) + r.76 (`InpMgmtTF`,
+input **separato** dal grafico) · `ABTG_PostNews` r.98 (`InpSLpips = 25` **fisso**) ·
+`ABTG_GapContinuation` (nessun `ENUM_TIMEFRAMES`, nessun `iATR`).
+
+### 📏 E LA LEGGE CHE NE ESCE, falsificabile
+> **Un motore guadagna operazioni scendendo di TF se e solo se il suo stop si
+> stringe scendendo di TF.** Non sono due proprieta' correlate: sono **la stessa**,
+> perche' dipendono entrambe dall'ANCORAGGIO del setup (barre contro calendario).
+👉 **La banda bassa non e' un serbatoio di frequenza, per costruzione.** La
+frequenza ha un solo interruttore misurato, ed e' il **numero di SIMBOLI** (firma
+del 07/09, pavimento 1,00 op/giorno per **FAMIGLIA**).
+Il guadagno sulla classe S e' **MISURATO su 58 serie** (asse `InpTF` dentro lo
+stesso CSV, quindi la finestra si elide): **H1 -> M30 mediana 1,97x** (banda
+1,13-3,33) · **M30 -> M15 mediana 1,85x** (banda 0,93-2,67, e **una serie sta sotto
+1,00**). 🔬 Verifica contro numeri di altri: **R108/R111** (due round indipendenti,
+BreakingBand GBPUSD, stessa epoca 2022-2026, tick) danno `227/174 = 1,304` --
+**dentro la banda**. 👉 **Il moltiplicatore dipende dal MOTORE: 1,30 su una banda,
+1,85 su un supertrend. Non si usa un solo numero per tutti.**
+
+### 🔧 UN DIFETTO TROVATO E RIPARATO, non uno scarto
+`prove/ABTG_ImpulsoApertura.txt` (08/09) e' **NON LANCIABILE**: `controlla_prova.py`
+-> *"2 assi Y (`InpImpulseATRMult`, `InpRR`)"*, **ESITO: FALLITO**. Piu' due difetti
+letti oggi: **`InpAllowShort` pinnato a 0** mentre il suo criterio **C2** dice *"DUE
+LATI, SEMPRE (regola 25/08)"*; e **salta il suo stesso PASSO 0** (il C0 chiede un
+conteggio prima di qualunque griglia, il file e' una griglia 5x4). Il file **non e'
+stato toccato**: resta agli atti come specifica dei criteri C0-C9.
+🔴 **E un vincolo di CODICE che nessuno aveva scritto:** `ABTG_ImpulsoApertura.mq5`
+r.329-332, `OnInit` **RIFIUTA** se l'ora d'apertura non cade su un confine di barra.
+Dow e Nasdaq aprono alle **14:30 server** = 870 minuti: `870 % 60 = 30` ->
+🔴 **H1 e H2 sono ILLEGALI su U30USD e NASUSD, e M30 e' il TF piu' ALTO legale.**
+Chi avesse provato a "salire di TF" avrebbe avuto un EA che non parte, in silenzio.
+
+### 📦 TRE FILE PROVA NUOVI — 6 celle, **12 passate, T = 2,72 min**, entrambi i cancelli VERDI
+`controlla_prova.py` **OK 3/3, 0 problemi** · `controlla_riga.py --oggetto prova`
+**EXIT 0, ASCII puro 3/3** (byte >127 contati con **python3**, mai con `grep`).
+🔴 **Il secondo strato (`controllo-preventivo`) NON e' stato invocato: lo lancia il
+coordinatore.** Magic **787701/787751 · 787702/787752 · 787704/787754**, VERGINI
+(`grep -rl` repo-wide, `.git` escluso, 0 file). **Niente messo in coda.**
+- `prove/R140a_impulso_M30_D30EUR.txt` -- `ABTG_ImpulsoApertura` D30EUR **M30**, due
+  lati, asse tecnico sul magic (G1). Il **PASSO 0** del solo motore M30 mai
+  misurato. Costo pre-calcolato come **BANDA 15,8x - 48,3x** (ADR 186,5 idx MIS x
+  sqrt(30/1440), con e senza il fattore d'apertura **3,05** MIS sul DAX): il limite
+  superiore sta **sopra** il 40x, quindi **l'esito positivo e' RAGGIUNGIBILE**
+  (classe 278). Attesa piu' probabile dichiarata: **(b) il numero brutto**,
+  `Reject >= 60%` -> *"a M30 non arriva alla frontiera, si sale a H1"*.
+- `prove/R140b_impulso_M30_U30USD.txt` -- stesso motore, **secondo simbolo della
+  FAMIGLIA**. Banda **22,7x - 69,2x**. E su questo simbolo **non c'e' un TF piu'
+  alto legale**, quindi un no **chiude il simbolo** invece di rimandarlo.
+  🔴 Cancello duro **C4**: alle 14:30 su U30USD operano gia' **770202** e **770611**,
+  **entrambe SOLO LONG** -> il ramo long e' promuovibile **solo** se i giorni-segnale
+  non coincidono (misura sui per-trade, **ZERO passate**).
+- `prove/R140c_tfingresso_M15_770101_D30EUR.txt` -- `ABTG_DAX_Apertura_EU` D30EUR
+  **M15**: chiude la **casella 5** del certificato della **SECONDA SEDIA** (*"il TF
+  d'ingresso, MAI cambiato"*, `LA_SECONDA_SEDIA` par. 3.2). **Invarianza prevista dal
+  sorgente**: range su `PERIOD_M1` cablato (r.1007-1020), fasi su minuti d'orologio
+  (r.679), e le **tre** dipendenze da `PERIOD_CURRENT` (r.437 · r.1370 · r.2202)
+  sono **tutte inerti** con i pin della cella viva (`SLMode=0`, `TrailMode=1`,
+  `AtrFilter=false`, `VolumeFilter=false`, `EntryMode=2`, `TrailStartR=0`,
+  `BEatR=0`). Atteso: **identita' con R47a alla quinta cifra**.
+  🔴 **Verifica OBBLIGATORIA**: un'identita' perfetta puo' essere una misura **o** un
+  artefatto (se `@PERIODO` non arrivasse al tester, la corsa girerebbe **a M5 due
+  volte** e darebbe **lo stesso CSV**) -> **si legge il `.ini` / il Giornale**, dove
+  il TF del simbolo e' scritto.
+
+### 🔓 ESCLUSIONI "PER SOLA FREQUENZA" RILETTE con la firma del 07/09
+- `ABTG_MaxMinNotte_DAX_Short` 770411 (era *"0,078 op/g = 13x sotto"*): la famiglia
+  a due sedie resta **sotto 1,00**, e 🔴 **scendere di TF non aiuta** (box notturno +
+  ATR su `InpMgmtTF`, input separato: **1 setup a notte a qualunque TF**). La
+  frequenza qui si compra **solo con altri simboli** -> **in coda all'imbuto**.
+- `ABTG_EMA200` H4 sui 5 gemelli: gia' rilette in `LA_SECONDA_SEDIA` par. 2.1
+  (famiglia 0,55-0,80 pos/g). 🆕 **E la discesa a M30 non le salva**: 28,1x col `k`
+  misurato, e le celle M30 di `EMA200` sui 5 simboli sono **0 su 5** con n 415-1.151.
+- `ABTG_LVNArbitro` U30USD M30: **resta bocciato e la firma non lo tocca** -- era
+  bocciato per **DD** (11,33%/18,01% a 0,65%; 11,76%/19,35% a 100k), non per
+  frequenza, che era **1,57 op/g**, la migliore del parco.
+- `ABTG_IBRetest` M30: **resta chiuso**, PF famiglia **0,7798** e' un numero
+  **misurato e brutto**. Cio' che si puo' riprendere e' la **gestione dell'uscita**
+  (**il 62% dei trade muore del flat di fine seduta**), e sarebbe **un motore nuovo**.
+
+### 🚧 BUCHI DICHIARATI (i tre che pesano)
+1. 🔴 **L'esponente `k` ha UN SOLO punto di misura** (n=4 / n=8, due epoche). Con
+   `k = 0,50` sette motori di classe S passano il 40x a M30; con `k = 0,968`
+   **zero**. **E' il buco piu' importante del dossier**, e l'ho scritto in due
+   colonne invece di scegliere.
+2. **Spread orario [NON MISURATO] su `F40EUR`, `225JPY`, `AUDJPY`, `GBPJPY`,
+   `CHFJPY`, `EURAUD`, `AUDUSD`** (alla sonda leggono `SpreadPt = 0` = *nessun tick
+   in quell'istante*, **non** spread nullo): **16 righe della graduatoria restano
+   sospese, non promosse**. Si chiude con `ABTG_SpreadLogger`, **ZERO passate**.
+3. **«Max barre nel grafico» sul terminale di backtest `50504400` (`C:\MT5_Backtest`)
+   e' [NON MISURATO]**, e `walkforward_generico.ps1` **NON scrive `[Charts] MaxBars`**
+   (grep: zero occorrenze; lo scrivono solo `RIGA_R107`, `RIGA_R111`,
+   `RIGA_STORICO_INDICI`). 21 mesi di D30EUR a **M5** sono **~126.000 barre**
+   [DERIVATO], **sopra** il tetto delle ~100.000. 🟢 **Che il tetto abbia tagliato
+   l'IS di R47 e' FALSIFICATO**: la frequenza IS e' **0,721 pos/g** contro **0,728**
+   in OOS, **scarto 1,0%** -- l'alternativa prevedeva uno scarto grande.
+   🔴 Ma il **valore** del tetto resta ignoto, e leggerlo costa **zero passate**.
+4. 🔴 **`prove/ABTG_HVAncora_00_conta.txt` (U30USD M30, due lati, cancello VERDE,
+   attesa dichiarata) NON E' MAI STATO LANCIATO dall'08/09.** Sono **4 passate =
+   0,91 minuti** sulla banda M30 esatta che Claudio ha chiesto. **Zero righe da
+   scrivere: serve solo la decisione di metterlo in coda.**
