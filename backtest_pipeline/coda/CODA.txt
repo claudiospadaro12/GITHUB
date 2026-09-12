@@ -413,3 +413,40 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #  Referto: report/CANARINO_FRAZIONEIS_2026-09-12.md
 # =====================================================================
 84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
+# =====================================================================
+#  L'n DELL'IS DI EMA200 IN *POSIZIONI* -- due righe, e l'ordine conta
+#  Aggiunte il 12/09/2026 dopo PASS dei DUE strati del cancello.
+#
+#  PERCHE': ABTG_EMA200 e' l'unica delle 41 sedie vive che passa i
+#  cancelli di oggi alla lettera, e le manca il requisito 2 del
+#  CERTIFICATO DI MORTE: l'n dell'IS in POSIZIONI. La banda dichiarata e'
+#  102-165 e il pavimento 150 cade DENTRO la banda, quindi la misura
+#  DISCRIMINA: puo' uscire sopra o sotto, e non e' scontata in partenza.
+#
+#  >>> L'ORDINE NON E' ESTETICO: LA SECONDA LEGGE CIO' CHE LA PRIMA
+#  >>> PRODUCE. 'cemad02' scrive i per-trade, 'CODA_12' li conta.
+#  Il beneficio dell'ordine PER LA LETTURA e' invece ZERO (classe 274:
+#  W() accumula in memoria, il referto nasce dopo la fine del ciclo).
+#  Messa ultima, CODA_12 vede i per-trade di TUTTI i round della notte.
+#
+#  CLASSE 226, ed e' il punto: le 150 sono POSIZIONI, non DEAL. La
+#  colonna 'Trades' del tester conta i deal di USCITA (fattore misurato
+#  1,000-2,314; su EMA200 2,0117). CODA_12 conta i position_id DISTINTI.
+#
+#  IL DIFETTO CHE QUESTE DUE RIGHE HANNO PAGATO (classe 278): il file
+#  prova, com'era, girava col DEFAULT 0.40 e con '@FINOA' messo sul
+#  primo giorno dell'OOS -> OOS 2025.01.07-2025.06.10, cioe' 111 giorni
+#  feriali contro i 183 dell'IS (il 60,66 per cento). Avrebbe dato
+#  62/72/91/100 per un vero di 102/118/150/165: ZERO casi su quattro
+#  sopra 150, COMPRESI I DUE IN CUI LA SEDIA PASSA. Una misura che non
+#  puo' dare una risposta positiva non e' una misura.
+#
+#  COME SI LEGGE DOMATTINA -- si cerca 'cemad02' e poi 'CODA_12':
+#    POSIZIONI IS >= 150  -> requisito 2 CHIUSO, EMA200 a 5 su 5
+#    POSIZIONI IS <  150  -> l'Emendamento A non passa, e si dice
+#    niente riga / scarico fallito / impronta -> catena rotta a monte,
+#                            NON e' una risposta
+#  Referto: report/EMA200_IS_IN_CODA_2026-09-12.md
+# =====================================================================
+8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_02_pertrade_IS.txt -Etichetta cemad02 -Modello 4 -Deposito 100000
+8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
