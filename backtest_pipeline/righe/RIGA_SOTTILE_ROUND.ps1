@@ -335,7 +335,83 @@ $BancoBT = 'C:\MT5_Backtest'
 #  il modo GIUSTO di rompersi, ma resta un round perso e una notte buttata.
 #  Referto: report\FRAZIONEIS_APPLICATA_2026-09-12.md
 # ---------------------------------------------------------------------
-$PIN = '115254dc64b2c7ac9493a33b8f5bbc09f814ea1b'
+#  DODICESIMO GIRO (12/09/2026) -- IL CANARINO DI @FRAZIONEIS ENTRA IN CODA
+#
+#  PERCHE': la toppa '@FRAZIONEIS' ha un PASS da tutti e due gli strati
+#  del cancello, ma il cancello aveva dichiarato un NON COPERTO che era
+#  l'unico che contava: la CATENA VERA (scarico da raw -> controllo
+#  d'impronta -> driver) non era MAI stata girata con la direttiva dentro.
+#  Questo giro serve a UN round di collaudo che gira con -SoloControllo e
+#  quindi NON fa girare il tester: zero passate, zero CSV, zero secondi
+#  sottratti ai round veri, nessun terminale MT5 toccato.
+#      file prova: backtest_pipeline\prove\CANARINO_FRAZIONEIS_D30EUR.txt
+#      attesa DICHIARATA PRIMA, e sono DUE uscite DIVERSE:
+#        direttiva ONORATA  -> IS 2024.09.26 - 2025.08.13
+#        direttiva IGNORATA -> IS 2024.09.26 - 2025.06.09
+#      65 giorni di differenza: le due uscite NON sono confondibili, ed e'
+#      questo che rende il canarino una MISURA e non una conferma. Le due
+#      date non sono inventate qui: le dichiara da giorni la sezione dei
+#      criteri di backtest_pipeline\prove\R128b_bersaglio_D30EUR.txt.
+#
+#  >>> E IL MOTIVO PER CUI QUESTO GIRO DI PIN E' OBBLIGATORIO, misurato
+#      il 12/09/2026 con un 404 in faccia. <<<
+#  UN $PIN SERVE DUE COSE, NON UNA. Oltre al driver, da qui viene anche
+#  IL FILE PROVA: RIGA_ROUND_VPS.ps1 costruisce il suo $RawBase sul -Pin
+#  che gli passiamo qui sotto, e da LI' scarica sia
+#  walkforward_generico.ps1 sia backtest_pipeline/prove/<Prova>.
+#  Quindi un file prova NUOVO non e' raggiungibile da un pin VECCHIO:
+#      canarino @115254dc (il pin dell'11o giro) -> HTTP 404
+#      R128b    @115254dc                        -> HTTP 200
+#  Il secondo e' il CONTRO-ESEMPIO, e senza di lui il 404 non direbbe
+#  niente: stessa URL, stesso pin, stesso percorso, uno c'e' e uno no.
+#  Quindi a mancare e' IL PIN, non la rete e non il nome del file.
+#  >>> CHI AGGIUNGE UN FILE PROVA NUOVO DEVE FARE QUESTO GIRO. SEMPRE. <<<
+#
+#  I VALORI CAMBIATI SONO DUE, E SERVONO TUTTI E DUE:
+#   - $PIN -> b7979d8, il primo commit che contiene INSIEME il canarino e
+#     il driver di HEAD.
+#   - $SHA_WALK -> 15DE7D5F...6828F1C6. E' CAMBIATA, e la ragione e'
+#     innocua ma va detta: IL DRIVER A HEAD NON E' QUELLO DELL'11o GIRO.
+#     Il commit f14831b ("classe 271 pagata") cambia CINQUE righe su
+#     cinque e sono TUTTE COMMENTI -- citazioni di numero di riga
+#     corrette. Misurato, non creduto: git diff 115254dc..HEAD sul driver,
+#     righe non-commento cambiate = ZERO.
+#     >>> CHI CAMBIA SOLO $PIN PERDE IL ROUND SULL'IMPRONTA. <<<
+#   - $SHA_ROUND NON E' TOCCATA, e non e' un'assunzione: RIGA_ROUND_VPS.ps1
+#     ha impronta 348ED533...9D0A315B identica al pin vecchio e al nuovo,
+#     misurata sul file SCARICATO DA raw, con Get-FileHash.
+#   - $MARC_WALK resta v5_INCLUDE. E la LISTA BIANCA sugli argomenti e la
+#     function Pulito NON sono toccate di una virgola: la corsia ROUND
+#     firmata l'11/09 accetta SOLO i sei argomenti (-Expert -Prova
+#     -Etichetta -Modello -Deposito -SoloControllo), e questo giro non ne
+#     aggiunge NESSUNO. Nessun perimetro allargato, nessuna firma nuova.
+#
+#  VERIFICHE VIA raw AL PIN NUOVO -- il runner scarica da raw, non da git,
+#  e con Get-FileHash, che e' il comando di QUESTA corsia e non sha256sum:
+#      driver     @b7979d8 -> HTTP 200  102.955 byte  15DE7D5F...6828F1C6
+#      RIGA_ROUND @b7979d8 -> HTTP 200   44.054 byte  348ED533...9D0A315B
+#      canarino   @b7979d8 -> HTTP 200    8.496 byte  D6D323F9...2580F75
+#      marcatori v5 e v6 nel driver scaricato -> presenti entrambi
+#      124db40 (classe 270) e 115254dc (11o giro) -> ANTENATI di b7979d8
+#      Remove-Item dell'.ex5 nel driver scaricato -> presente (toppa 270)
+#
+#  >>> E LE 19 RIGHE ROUND IN CODA NON SONO TOCCATE. <<<
+#  Restano pinnate a 1445abf8, cioe' a una COPIA CONGELATA di questo file
+#  che porta il SUO $PIN e il SUO $SHA_WALK: quello che scrivo qui NON le
+#  raggiunge. La riga del canarino e' una riga IN PIU', pinnata al commit
+#  di questo giro, e sta PRIMA delle altre perche' il runner NON si ferma
+#  su una riga che muore: ogni via di fallimento e' un 'continue', nel
+#  ciclo della coda non c'e' nessun break e nessun exit, e non esiste
+#  nessun tetto di righe ne' di tempo. Misurato su runner_abtg.ps1 il
+#  12/09/2026, non intuito.
+#
+#  CLASSE 271, PAGATA IN ANTICIPO: in questo blocco NON cito nessun numero
+#  di riga di QUESTO file. Inserire un commento sposta tutto cio' che sta
+#  sotto, quindi una citazione 'r.N' scritta qui sarebbe falsa un minuto
+#  dopo averla salvata. Si citano i FILE e i NOMI, che non si spostano.
+#  Referto: report\CANARINO_FRAZIONEIS_2026-09-12.md
+# ---------------------------------------------------------------------
+$PIN = 'b7979d82ec9d35c2ef4c9cb94ebcd1126aba2ce8'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -378,7 +454,16 @@ $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
 #    scaricato da raw la riga Remove-Item dell'.ex5 compare 1 volta).
 #    Per le 19 righe in coda non cambia NIENTE: sono pinnate a 1445abf8,
 #    che porta il $PIN vecchio -- vedi il blocco dell'undicesimo giro.
-$SHA_WALK  = 'BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875'
+#    DODICESIMO GIRO (12/09/2026): RICALCOLATA. Prima era
+#    BF53EC27...FAF59875 (undicesimo giro). E' cambiata SOLO perche' il
+#    commit f14831b ha corretto CINQUE CITAZIONI DI NUMERO DI RIGA nei
+#    commenti del driver (classe 271: una citazione 'r.N' vale solo prima
+#    di se stessa). Righe NON-commento cambiate: ZERO, misurato con
+#    git diff. Il comportamento del driver e' identico al byte di codice.
+#    Ricalcolata sul file SCARICATO DA raw al pin nuovo con Get-FileHash
+#    -- non sulla copia locale, e non con sha256sum, che e' un altro
+#    comando e un altro formato.
+$SHA_WALK  = '15DE7D5F5A342BB3D2DFEFCE8C970AA93C440B25DE136AFC050ED5B66828F1C6'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
