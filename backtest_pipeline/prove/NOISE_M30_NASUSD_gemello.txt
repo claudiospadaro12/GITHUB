@@ -1,0 +1,116 @@
+# =====================================================================
+#  EA: ABTG_OutOfNoise
+#  NOISE M30 NASUSD -- IL GEMELLO SUL MERCATO DELLA FONTE.
+#                      Stesso asse: CONO (strutturale) contro ATR.
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:  report/CACCIA_TF_BASSO_2026-09-12.md
+#  FILE MADRE:         prove/NOISE_M30_D30EUR_ancora.txt
+#
+#  E' il file madre con DUE COSE CAMBIATE e nient'altro:
+#    @SIMBOLO              D30EUR -> NASUSD
+#    sessione (ora SERVER) 08:00-16:30 -> 14:30-21:00
+#    InpMagic              773810 -> 773820
+#  Ablazione A STELLA: ogni altra riga e' identica carattere per
+#  carattere. L'IPOTESI, i CRITERI A1-A4 e i CANCELLI B1-B3 sono quelli
+#  scritti in testa al file madre e NON si riscrivono qui.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE -- ed e' un CONTRO-ESEMPIO, non un raddoppio
+# ---------------------------------------------------------------------
+#  La mia sonda del 12/09 misura informazione direzionale +0,0012 R
+#  (n=1012, 1.493 sedute 2013-2018) sul DAX cash. ZERO.
+#  >>> Ma l'evidenza della fonte NON E' SUL DAX: e' su SPY, cioe' su un
+#      INDICE AZIONARIO USA, sessione cash 14:30-21:00 server.
+#  Se il meccanismo esiste, deve mostrarsi DOVE la fonte dice che c'e'.
+#  Se il gemello USA e' zero come il DAX, allora il "niente" e' del
+#  MECCANISMO e non del mercato, e la famiglia M18 si chiude con un
+#  certificato su DUE mercati invece che su uno.
+#  Se invece il gemello USA vive e il DAX no, la conclusione e'
+#  l'opposto e va scritta cosi': il cono e' un fatto dell'indice USA.
+#  >>> In entrambi i casi la coppia di corse RISPONDE. Una sola no.
+#
+#  La voce "SIMBOLI GEMELLI PROVATI" e' una delle cinque del
+#  certificato di morte (regola del 09/09). Senza questo file quella
+#  voce resta vuota e nessun verdetto e' archiviabile.
+#
+# ---------------------------------------------------------------------
+#  IL COSTO SU QUESTO SIMBOLO, con lo spread MISURATO
+# ---------------------------------------------------------------------
+#  NASUSD, mediana di sessione 1,6-1,8 punti indice
+#  (risultati_archivio/spread_flotta/spread_orario_NASUSD.csv,
+#   via report/CANCELLO_COSTO_FLOTTA_2026-09-10.md).
+#  Commissione sugli indici: 0,0000 MISURATA (n=302 deal) -> il
+#  pedaggio all-in e' lo SPREAD e basta.
+#  Pavimento DURO 13,3x -> stop mediano richiesto >= 23,9 punti indice.
+#  Pavimento di lavoro 40x -> 72,0 punti indice.
+#  >>> L'ampiezza del cono su NASUSD e' [NON MISURATA DA ME]: la mia
+#      sonda ha girato sul DAX (GRXEUR). NON la estrapolo. La misura
+#      la fa questa corsa, e il cancello A2 la legge.
+#
+# ---------------------------------------------------------------------
+#  ORARI -- ORA SERVER BCM, E QUI IL DEFAULT DEL SORGENTE E' SBAGLIATO
+# ---------------------------------------------------------------------
+#  Il default del .mq5 e' il DAX (08:00-16:30). Su NASUSD servono
+#  14:30-21:00 SERVER (= 15:30-22:00 ITALIANA). Senza le quattro righe
+#  qui sotto l'EA girerebbe il Nasdaq con gli orari del DAX -- il
+#  driver generico blinda tutto al default del sorgente.
+#  Un CSV con InpSessionStartHour=15 (ora italiana) e' da CESTINARE.
+#
+#  MAGIC VERGINE 773820: cercato in tutto il repo il 12/09/2026 ->
+#  ZERO occorrenze.
+#
+#  COSTO, col metro di casa T(min) = 0,6 + 0,077 x passate:
+#    2 celle x 2 finestre = 4 passate -> T = 0,91 minuti.
+#    I due file insieme: 8 passate -> T = 1,22 minuti.
+#
+# ---------------------------------------------------------------------
+#  FINESTRA -- identica al file madre
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 = inizio MISURATO dei tick reali BCM sugli
+#  indici. REGIME CONTENUTO: !! UNO SOLO, rialzista.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE IN ORA SERVER BCM: Nasdaq cash 14:30-21:00 server
+InpSessionStartHour=14||14||0||14||N
+InpSessionStartMin=30||30||0||30||N
+InpSessionEndHour=21||21||0||21||N
+InpSessionEndMin=0||0||0||0||N
+
+# --- CONVERSIONE PUNTI INDICE: 1 punto indice = 100 punti MT5 su
+#     NASUSD (R97, due misure concordi; riconfermato in
+#     report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.290)
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- IL MOTORE COME LO SCRIVE LA FONTE
+InpConeDays=14||14||0||14||N
+InpConeMinDays=14||14||0||14||N
+
+# --- USCITA: trailing su VWAP + chiusura sul grilletto opposto
+InpCloseOnOpposite=1||1||0||1||N
+
+# --- DUE LATI INSIEME (i lati si separano solo se passa B1)
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- RISCHIO E CAP: i default di casa, pinnati
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+
+# --- PAVIMENTO SL OBBLIGATORIO (R109) e il moltiplicatore di confronto
+InpSlFloorAtrMult=0.5||0.5||0||0.5||N
+InpSlFloorPtsIndice=0||0||0||0||N
+InpAtrPeriod=14||14||0||14||N
+InpSlAtrMult=1.5||1.5||0||1.5||N
+
+# --- GENERALI
+InpComment=NOISE||NOISE||0||NOISE||N
+InpMagic=773820||773820||0||773820||N
+InpMaxSpread=0||0||0||0||N
+
+# --- L'UNICO ASSE: DA DOVE NASCE LO STOP. 0 = CONO (bordo opposto,
+#     strutturale, MAI GIRATO) | 1 = ATR del TF corrente (il default).
+InpSlMode=1||0||1||1||Y

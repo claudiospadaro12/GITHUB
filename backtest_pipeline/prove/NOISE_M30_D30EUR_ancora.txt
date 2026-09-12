@@ -1,0 +1,217 @@
+# =====================================================================
+#  EA: ABTG_OutOfNoise
+#  NOISE M30 D30EUR -- L'ANCORA DELLO STOP: CONO (strutturale) contro
+#                      ATR (del TF corrente). UN SOLO ASSE.
+# ---------------------------------------------------------------------
+#  DOSSIER DI CACCIA:  report/CACCIA_TF_BASSO_2026-09-12.md
+#
+#  QUESTO NON E' UN ROUND E NON DA' UN VERDETTO DI MERITO.
+#  E' la corsa che chiude un buco di certificato: ABTG_OutOfNoise NON HA
+#  MAI PRODOTTO UN TRADE. L'unica corsa mai fatta (PASSO 0 del 29/08) e'
+#  uscita n=0 per un BACO DI WARMUP, corretto in v1.01 (commit 65df62c)
+#  e mai piu' rigirata. Quindi oggi mancano TUTTE E CINQUE le voci del
+#  certificato di morte (PF, n, DD, gestione dell'uscita ad asse,
+#  gemelli): il verdetto di casa e' "NON ANCORA MISURATO", non "morto".
+#
+# ---------------------------------------------------------------------
+#  LA DOMANDA, UNA SOLA
+# ---------------------------------------------------------------------
+#  Lo STOP di questo motore puo' nascere da due posti, ed e' un enum:
+#    InpSlMode = SL_CONO (0) -> bordo OPPOSTO del cono di rumore
+#                               = STRUTTURALE, larghezza data dal
+#                                 movimento tipico A QUELL'ORA
+#    InpSlMode = SL_ATR  (1) -> ATR(14) del TF del grafico x 1,5
+#                               = si STRINGE insieme al TF  <- default
+#  Il modo SL_CONO esiste nel sorgente (r.143 enum, r.814-815
+#  slRaw = isLong ? lower : upper) e NON E' MAI STATO GIRATO.
+#
+#  >>> Domanda: su D30EUR M30, a tick reali, il modo CONO produce piu'
+#      R netti del modo ATR, e con quale campione?
+#
+# ---------------------------------------------------------------------
+#  I NUMERI CHE HO MISURATO IO PRIMA DI SCRIVERE QUESTO FILE
+#  (sonda esterna, DAX cash GRXEUR histdata, 1.266.562 barre M1,
+#   1.493 sedute 2013-2018, dossier par. 4 -- NON sono numeri BCM)
+# ---------------------------------------------------------------------
+#  AMPIEZZA DEL CONO = lo stop in modo SL_CONO, in punti indice DAX:
+#    mediana su tutti i 17 controlli a orologio  89,1 pti  -> 52,4x
+#    mediana SULLE OPERAZIONI VERE (gap-adj)     98,1 pti  -> 57,7x
+#    quota sotto il pavimento DURO 13,3x                     0,4%
+#  Spread MISURATO D30EUR (30.974.789 tick,
+#  risultati_archivio/spread_flotta/spread_orario_D30EUR.csv):
+#    ore 08-16 server, mediana 1,6-1,7 -- p95 1,9-2,9.
+#    Uso 1,70 (il valore dell'ora 08, il piu' alto della seduta).
+#    Allo stress p95 (2,7) lo stop resta 36,3x; a spread +100% (3,40)
+#    resta 28,9x. >>> LA FRONTIERA DEL COSTO NON E' IL PROBLEMA QUI.
+#
+#  E IL NUMERO SCOMODO, scritto PRIMA della corsa perche' e' il motivo
+#  per cui questo file NON promuove niente:
+#    sulla geometria FEDELE (gap adjustment come nel sorgente,
+#    baseUp=max(open,close_pre) r.697-700), uscita alla campanella o
+#    stop al cono, n=1012 operazioni:
+#      E netta                                  -0,0131 R  (t = -0,49)
+#      controllo APPAIATO (lato opposto,
+#      stessa barra, stessa distanza)            -0,0156 R
+#      informazione DIREZIONALE = (E - Eopp)/2   +0,0012 R  = ZERO
+#    e senza gap adjustment (variante NON fedele): +0,0243 R, t = +0,86,
+#    comunque SOTTO il cancello H8 di 0,075 R.
+#
+#  >>> COSA QUELLA SONDA NON PUO' DIRE, e per cui la corsa serve:
+#      (a) e' un cammino su OHLC M1, non tick reali -> SCREENING;
+#      (b) prende UN SOLO segnale per seduta, il motore ne ammette 2;
+#      (c) !! NON PUO' misurare l'uscita che la fonte e la letteratura
+#          di seguito dichiarano DECISIVA: il trailing su VWAP. Nei file
+#          histdata degli indici la colonna volume e' 0, quindi la VWAP
+#          NON E' CALCOLABILE. L'EA ce l'ha implementata (r.161-162,
+#          UscitaTrail_Calc r.317).
+#      (d) e' DAX cash 2013-2018, non il CFD D30EUR di BCM 2024-2026.
+#      >>> Sono quattro scostamenti dichiarati, non quattro speranze.
+#
+# ---------------------------------------------------------------------
+#  ATTRIBUZIONE (regola di casa: si cita sempre)
+# ---------------------------------------------------------------------
+#  Meccanica: Zarattini, Aziz, Barbon, "Beat the Market: An Effective
+#  Intraday Momentum Strategy for S&P500 ETF (SPY)", Swiss Finance
+#  Institute Research Paper 24-97 (SSRN 4824172).
+#  [ATTENZIONE: il PDF del paper NON E' STATO APERTO -- SSRN 403 il
+#   12/09/2026, e alexandria.unisg.ch non risponde. Le regole citate
+#   vengono dagli estratti raccolti in casa il 03/09 e da una pagina
+#   TradingView di replica aperta oggi (HTTP 200). E' [LETTO-VIA-SEARCH],
+#   non [VERIFICATO SUL PAPER].]
+#  Implementazione MT5: porting del Pine di Yuri Lopukhov (TradingView
+#  gJeM3LZ5, MIT), fatto in casa il 28/08/2026.
+#  I NUMERI DEGLI AUTORI (1.985% dal 2007, 19,6% annuo, Sharpe 1,33)
+#  SONO [DICHIARATI DALL'AUTORE, NON VERIFICATI] e NON pesano su niente.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' M30 E NON M15 -- ed e' una ragione di MECCANISMO
+# ---------------------------------------------------------------------
+#  La fonte valuta il grilletto SOLO all'ora e alla mezz'ora piene
+#  ("at any clock hour or half-hour"). L'EA decide in OnNewBar (r.518),
+#  cioe' sulla chiusura della barra del grafico: su M30 la griglia delle
+#  decisioni COINCIDE con l'orologio della fonte (HH:00 / HH:30), su M15
+#  meta' delle decisioni cadono in minuti che la fonte non guarda.
+#  >>> M30 non e' una preferenza di moda: e' la riproduzione fedele.
+#  In piu' M30 e' il TF con ZERO round nella coda di stanotte (H1 16,
+#  M5 6, H4 5, M15 1, M30 0) e 21 mesi a M30 sono ~7.900 barre, molto
+#  sotto il tetto ~100.000 del tester.
+#
+# ---------------------------------------------------------------------
+#  CRITERI DI ACCETTAZIONE -- CONGELATI PRIMA DI QUALUNQUE NUMERO
+# ---------------------------------------------------------------------
+#  A1  CAMPIONE.  n in POSIZIONI (non deal: classe 226, fattore misurato
+#      1,000-2,314) >= 150 su tutta la finestra.
+#      Stima da sonda: 0,678 primi-segnali/giorno x ~440 sedute = ~300,
+#      e il motore ammette 2 ingressi/giorno -> il campione C'E'.
+#      Se n < 150 -> MERITO SOSPESO (valvola R59), RISCHIO no.
+#
+#  A2  COSTO.  stop mediano in punti indice >= 13,3 x 1,70 = 22,6
+#      (pavimento DURO) e si DICHIARA la distanza dal 40x (= 68,0).
+#      Attesa dalla sonda: 98,1 pti. Se la corsa ne misura meno di 22,6
+#      la sonda era sbagliata e lo si scrive.
+#
+#  A3  RISCHIO, mai sospeso a nessun n: DD < 10% E peggior giornata
+#      < 5% (colonne "Equity DD %" e "Peggior Giornata %" dell'OPTFRAME).
+#      Riferimento di casa: peggior giornata misurata -2,06% (R51).
+#
+#  A4  IL CONFRONTO E' FRA LE DUE CELLE, non contro il mercato:
+#      si legge PF, n, DD e stop mediano di CONO contro ATR.
+#
+#  CANCELLI DI BOCCIATURA (dichiarati adesso):
+#    B1  entrambe le celle con PF < 1,10 alla finestra a campione pieno
+#        -> SCARTO senza griglia (cancello C0, lo stesso che ha chiuso
+#           ABTG_IBRetest il 09/09). E allora si scrive il
+#           CERTIFICATO, con PF/n/DD, e la famiglia M18 si chiude.
+#    B2  n=0 di nuovo -> il baco di warmup NON e' chiuso: si legge
+#        QUALE cancello mangia le barre nelle colonne di diagnostica
+#        v1.02 (Ret Warmup, Ret Cono Ko, Cono Ok, Max nDays) e si
+#        riapre il baco, NON si cambia parametro.
+#    B3  DD > 10% o peggior giornata > 5% in una qualunque delle due
+#        celle -> SCARTO PER RISCHIO, e vale a qualunque n.
+#
+#  >>> COSA QUESTO FILE NON FA, detto prima:
+#      - non spazzola il cono (InpConeDays resta 14, quello della
+#        fonte): una griglia su un motore non ancora misurato trova
+#        picchi di rumore (regola del 19/08);
+#      - non misura i due lati separati. Qui girano INSIEME perche' la
+#        domanda e' sull'ANCORA DELLO STOP, non sui lati. I lati si
+#        separano SOLO se questa corsa passa B1 (regola dei due lati
+#        del 25/08: il seguito e' dovuto, non facoltativo);
+#      - non ha l'asse gemello sui magic (il controllo di determinismo
+#        G1): il driver ammette UN SOLO asse Y e l'asse e' InpSlMode.
+#        Il determinismo di questo EA e' [NON MISURATO].
+#      - !! i due passaggi scrivono lo stesso file per-trade
+#        (abtg_trades_ABTG_OutOfNoise_D30EUR_773810.csv: il nome porta
+#        il MAGIC, non la cella) -> il secondo SOVRASCRIVE il primo.
+#        I numeri delle due celle si leggono nell'OPTFRAME, che ha una
+#        riga per passata, MAI in quel file.
+#
+#  MAGIC VERGINE 773810: cercato in tutto il repo il 12/09/2026 ->
+#  ZERO occorrenze. Il magic del sorgente (773500) non compare qui.
+#
+#  COSTO, col metro di casa T(min) = 0,6 + 0,077 x passate:
+#    2 celle x 2 finestre = 4 passate -> T = 0,91 minuti.
+#
+# ---------------------------------------------------------------------
+#  FINESTRA
+# ---------------------------------------------------------------------
+#  @DAQUANDO 2024.09.26 = inizio MISURATO dei TICK REALI BCM sugli
+#  indici (fonte in casa: report/DIAGNOSI_GBPUSD_LENTA_2026-09-02.md F4,
+#  Diario MT5). Non e' assunto e non e' il default del driver (che
+#  diceva 2024.01.01: meta' finestra non esisteva).
+#  REGIME CONTENUTO: UNO SOLO, rialzista. Nessun orso, nessun crollo,
+#  nessun laterale lungo. Questa corsa NON da' un verdetto di regime.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+
+# --- SESSIONE IN ORA SERVER BCM (italiana - 1). DAX cash 08:00-16:30
+#     server = 09:00-17:30 IT. Un CSV con InpSessionStartHour=9 e' da
+#     CESTINARE. Sono anche i default del sorgente: pinnati comunque,
+#     perche' un default non e' una dichiarazione.
+InpSessionStartHour=8||8||0||8||N
+InpSessionStartMin=0||0||0||0||N
+InpSessionEndHour=16||16||0||16||N
+InpSessionEndMin=30||30||0||30||N
+
+# --- CONVERSIONE PUNTI INDICE: 1 punto indice = 100 punti MT5 su
+#     D30EUR. MISURATO, non assunto: report/CANCELLO_COSTO_FLOTTA_
+#     2026-09-10.md r.290 (D30EUR/U30USD/NASUSD, 2 decimali,
+#     _Point = 0,01). Load-bearing per il cancello A2.
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- IL MOTORE COME LO SCRIVE LA FONTE: 14 giorni, minimo 14
+InpConeDays=14||14||0||14||N
+InpConeMinDays=14||14||0||14||N
+
+# --- USCITA: trailing su VWAP + chiusura sul grilletto opposto, come
+#     nella fonte. E' PROPRIO il pezzo che la mia sonda NON ha potuto
+#     misurare (volume 0 nei file histdata).
+InpCloseOnOpposite=1||1||0||1||N
+
+# --- DUE LATI INSIEME (vedi "cosa questo file non fa")
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+
+# --- RISCHIO E CAP: i default di casa, pinnati
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxTradesPerDay=2||2||0||2||N
+
+# --- PAVIMENTO SL OBBLIGATORIO (R109: mai stop a zero) e il
+#     moltiplicatore ATR del modo di confronto
+InpSlFloorAtrMult=0.5||0.5||0||0.5||N
+InpSlFloorPtsIndice=0||0||0||0||N
+InpAtrPeriod=14||14||0||14||N
+InpSlAtrMult=1.5||1.5||0||1.5||N
+
+# --- GENERALI
+InpComment=NOISE||NOISE||0||NOISE||N
+InpMagic=773810||773810||0||773810||N
+InpMaxSpread=0||0||0||0||N
+
+# --- L'UNICO ASSE: DA DOVE NASCE LO STOP. 0 = CONO (bordo opposto,
+#     strutturale, MAI GIRATO) | 1 = ATR del TF corrente (il default).
+#     Enum: MT5 ignora lo step e spazzola i membri fra start e stop.
+InpSlMode=1||0||1||1||Y

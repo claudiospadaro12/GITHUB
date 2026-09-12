@@ -2619,3 +2619,87 @@ T = 0,6 + 0,077 x 22 = 2,29 min.** Magic vergini 771560 / 771561 / 772060. ASCII
 verificato con `python3`. 🚨 **Tutti e tre a `-Modello 1` = OHLC M1** (NON tick), e il motivo
 e' misurato: il pavimento **tick** del forex e' **2024.07.05**, quindi su 16,5-27,5 anni i
 tick **non esistono** — classe 273. **Nessuno dei tre e' in `CODA.txt`: non e' stata toccata.**
+
+---
+
+## CACCIA TF BASSO (12/09/2026, M5/M15/M30 con STOP STRUTTURALE) — 0 EA esterni promossi, 1 sorgente letto e scartato col numero, 1 REGOLA NUOVA
+
+Dossier completo: `report/CACCIA_TF_BASSO_2026-09-12.md`. Il resto sta li', non
+si duplica. **ZERO EA scritti o toccati, ZERO backtest eseguiti, ZERO righe in
+`CODA.txt`.** Fonte dei numeri: sonde
+`caccia_strategie/biblioteca/sonde_esterne/sonda_cono_{ampiezza,rumore}_dax.py`
+su **1.266.562 barre M1** GRXEUR (DAX cash histdata), **1.493 sedute 2013-2018**.
+
+- 🔑 **REGOLA NUOVA — L'ANCORA UNICA. Lo stop strutturalmente largo NON compra
+  edge: lo compra solo se il TARGET nasce dalla STESSA struttura dello stop.**
+  `E_netta(R) = (edge_punti - costo_punti) / stop_punti`: il costo e' fisso,
+  quindi allargare lo stop **divide** l'edge in R. Misurato oggi sul cono di
+  rumore per terzili di ampiezza dello stop: stop da **34,6 a 94,7 punti**
+  (x2,7) ed edge lordo da **+3,07 a +3,31 punti** (+7,8%) -> **E in R da
+  +0,0542 a +0,0118, diviso 4,6**. Contro-prova a favore: `ABTG_DAX_Apertura_EU`
+  (770101, VIVA) ha `tp = entry + dist*TpTotalR()` con `dist` = **lo stop
+  stesso** (r.1070) e stop dall'estremo opposto del range (`ABTG_SL_RANGE`,
+  r.236) -> **stessa ancora, E in R invariante**. E' la seconda misura
+  indipendente dopo M31 del 05/09 (_"l'edge e' una quantita' fissa di ATR"_).
+  👉 **Da oggi ogni scheda di caccia su TF basso porta la colonna "ANCORA
+  UNICA?" accanto a `stop/spread`. Senza quella colonna, `stop/spread` e' un
+  numero cosmetico.**
+- 📏 **MISURA NUOVA — lo stop strutturale del CONO DI RUMORE sul DAX (M18).**
+  Ampiezza intera del cono (= stop in modo `SL_CONO`), punti indice: mediana
+  **89,1** su 25.239 controlli a orologio -> **52,4x** lo spread MISURATO
+  (1,70, 30.974.789 tick); **0,4%** sotto il pavimento DURO 13,3x; allo stress
+  p95 (2,70) resta **36,3x**, a spread +100% resta **28,9x**. Cresce con l'ora:
+  **27,8x alle 08:30 -> 76,9x alle 16:30 server**. 🟢 **Su M30 la frontiera del
+  costo NON e' il collo di bottiglia.**
+- 🔴 **E L'EDGE DEL CONO, sulla geometria FEDELE al sorgente (gap adjustment
+  `baseUp=max(open,close_pre)`, `ABTG_OutOfNoise.mq5` r.697-700): informazione
+  direzionale +0,0012 R = ZERO.** n=1012, 0,678 op/gg, E netta -0,0131 R
+  (t=-0,49) contro controllo **APPAIATO** (stessa barra, stessa distanza, lato
+  opposto) -0,0156 R. Senza gap adjustment (variante **NON fedele**) +0,0243 R
+  con t=+0,86, comunque sotto il cancello H8 di **0,075 R**.
+  ⚠️ **Non e' un certificato di morte**: (a) OHLC M1, non tick reali; (b) un
+  solo primo-segnale per seduta contro i 2 ammessi; (c) 🔴 **la VWAP non e'
+  calcolabile** su quei file (colonna volume = 0) e il trailing su VWAP e'
+  l'uscita che la fonte e la letteratura di seguito dichiarano decisiva;
+  (d) DAX cash 2013-2018, non il CFD BCM 2024-2026. **Verdetto: NON ANCORA
+  MISURATO.**
+- 🪦 **SCARTO COL NUMERO — `Exp_DarvasBoxes_System`** (Code Base **15907**,
+  `GODZILLA`, 2016.10.10, NOLICENSE, **sorgente scaricato e letto: 144 righe,
+  16 input**). `input int StopLoss_=1000` / `TakeProfit_=2000` **punti MT5
+  FISSI** (r.29-30): su D30EUR 1000 punti MT5 = **10 punti indice** ->
+  **5,9x** lo spread = **44% del pavimento DURO 13,3x**. **Bocciato per
+  COSTO.** In piu': `MM=0.1` con `MMMode=LOT` = **lotto fisso** (r.27-28) e
+  l'enum `MarginMode` espone **`LOSSFREEMARGIN`/`LOSSBALANCE`** (r.20-21) =
+  taglia in funzione delle perdite. 🟢 A suo credito: `SignalBar=1` = decide su
+  barra chiusa (nessun repaint) e l'indicatore e' **allegato**.
+- 🗺️ **Le cinque geometrie di sessione confermate PIENE** (mappa di
+  `CACCIA_NOTTE_2026-09-12.md` §2.1): 72 strategie TradingView e ~1.642 titoli
+  Code Base sfogliati oggi **cadono tutte** su rottura (~210 celle) · fade
+  (R42 0/24+0/24) · falsa rottura (BreakinBox PF 1,007 DD 24,1%) · sweep+reclaim
+  (R95 0/30) · rottura-retest-rirottura (IBRetest PF 0,7798 su n=344). E le
+  classi a **stop ATR del TF corrente** sono fuori mandato per costruzione
+  (su U30USD **11,5-13,1x a M5**, **20,0-22,6x a M15**).
+- 📐 **CHIUSA DI PASSAGGIO la riga M23 di `PIANO_PROP.md`** (*"conversione punti
+  su DAX: 100 come US? da VERIFICARE"*): e' **MISURATA a 100**, cioe' 1 punto
+  indice = 100 punti MT5 anche su D30EUR -- `report/CANCELLO_COSTO_FLOTTA_
+  2026-09-10.md` r.290 (D30EUR/U30USD/NASUSD, 2 decimali, `_Point = 0,01`).
+- 📦 **DUE FILE PROVA NUOVI, cancello deterministico PASSATO** (`controlla_prova.py`,
+  `ESITO: OK`, 0 problemi): `prove/NOISE_M30_D30EUR_ancora.txt` (magic **773810**
+  vergine) e `prove/NOISE_M30_NASUSD_gemello.txt` (magic **773820** vergine).
+  Un solo asse: **`InpSlMode` CONO(0) contro ATR(1)**, il modo `SL_CONO` che
+  esiste nel sorgente (r.143 enum, r.814-815) e **non e' mai stato girato**.
+  4 celle, **8 passate, T = 1,22 minuti**. Da girare a **tick reali
+  (`-Modello 4`)**. Tre uscite dichiarate, compresa **C: n=0 o catena rotta NON
+  e' una risposta** -> si leggono le colonne di diagnostica v1.02 e si riapre il
+  baco, non si cambia parametro.
+- 🚧 **Buchi dichiarati:** **SSRN 403** su `4824172` (Zarattini, il paper della
+  fonte) **e** su `5095349` (Maroy, *"Improvements to Intraday Momentum
+  Strategies..."*, che secondo l'indice di ricerca dichiara **VWAP e "ladder"**
+  come le uscite migliori -- cioe' proprio il pezzo non misurabile dalle mie
+  sonde): **nessuno dei due PDF e' stato aperto**, e sono i due documenti piu'
+  utili al candidato. 🙋 **Claudio li scarica da un browser normale in due
+  minuti.** Piu': **arXiv API 429 -> 503** (non raggiunta OGGI, **non e' un
+  404**), **api.github.com 403 strutturale**, **researchgate e
+  alexandria.unisg.ch 000**, **quantseeker/quantitativo/quantmacro/
+  quantifiedstrategies EGRESS_BLOCKED**, **Quantpedia non tentata**, ampiezza
+  del cono su **NASUSD e U30USD [NON MISURATA]** (non estrapolata).
