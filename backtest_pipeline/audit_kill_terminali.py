@@ -43,8 +43,42 @@ RADICE = os.path.dirname(os.path.abspath(__file__))
 # da solo non lo sa (per questo il runner vieta Stop-Process in corsia ROUND)
 SEGNI_FILTRO = [r"-EsePath", r"Bersagli", r"\.Bersagli"]
 
-# un CONFRONTO vero sul percorso: $_.Path <op> qualcosa che non sia il jolly "*"
-CONFRONTO_PATH = re.compile(r"\$_\.Path\s*-(?:like|ieq|eq|match)\s*([^\s)}]+)")
+# un CONFRONTO sul percorso. SOLO due operatori contano:
+#   -eq/-ieq : uguaglianza ESATTA sull'eseguibile -> restringe per definizione
+#   -like    : vale SOLO se il modello e' un PREFISSO DI CARTELLA ancorato
+# -match NON conta: una regex universale ("." ) e' indistinguibile da una
+# ancorata senza interpretarla, e un audit non interpreta: dichiara.
+CONFRONTO_PATH = re.compile(r"\$_\.Path\s*-(eq|ieq|like)\s*([^\s)}]+)")
+
+# QUALUNQUE forma di negazione: sotto negazione il predicato seleziona i
+# RISPARMIATI, e usarlo per uccidere ammazza esattamente quelli da salvare.
+# Si cercano TUTTE le grafie, non una: "-not (", "!(", "-eq $false",
+# "-ne $true". Cercarne una sola e' di nuovo la FORMA invece del SENSO.
+NEGAZIONI = [r"-not\s*\(", r"!\s*\(", r"-eq\s*\$false", r"-ne\s*\$true", r"-notlike", r"-notmatch", r"-ne\s"]
+
+def _modello_universale(op, operando):
+    """questo modello puo' combaciare con PIU' DI UNA installazione?"""
+    v = operando.strip().strip('"\'')
+    if v in ("", "*"):
+        return True
+    if op in ("eq", "ieq"):
+        return False               # uguaglianza esatta: un eseguibile solo
+    # -like: serve un PREFISSO DI CARTELLA ancorato.
+    if v.startswith("*"):
+        return True                # "*terminal64.exe" combacia con tutti
+    if re.match(r"^[A-Za-z]:\\\*?$", v):
+        return True                # "C:\*" = tutto il disco
+    if "\\" not in v and "+" not in v and not v.startswith("$") and not v.startswith("("):
+        return True                # nessun separatore: non ancora niente
+    # L'operando e' un'ESPRESSIONE ($x, ($x + "\\*")): uno strumento statico
+    # non sa a cosa si espande. Si rifiutano almeno le espressioni che
+    # portano una RADICE DI DISCO, che e' il caso universale noto
+    # (RIGA_ROUND_VPS.ps1 ha una funzione dedicata a rifiutarla).
+    if re.search(r"env:(SystemDrive|HOMEDRIVE)|SystemDrive|HOMEDRIVE", v, re.I):
+        return True
+    if re.search(r"[\"\']\s*[A-Za-z]:\\\\?[\"\']", v):
+        return True
+    return False
 
 def filtro_vero(riga):
     """la riga contiene un filtro sul percorso che RESTRINGE davvero?"""
@@ -53,12 +87,9 @@ def filtro_vero(riga):
     m = CONFRONTO_PATH.search(riga)
     if not m:
         return False
-    # un jolly che prende tutto NON e' un filtro: "-like \"*\"" ammazza tutto
-    if m.group(1).strip('"\'') in ("*", ""):
+    if any(re.search(n, riga) for n in NEGAZIONI):
         return False
-    # il confronto sotto -not seleziona i RISPARMIATI: usarlo per uccidere
-    # ammazza esattamente quelli da salvare. Non e' un filtro: e' il suo opposto.
-    if re.search(r"-not\s*\(\s*\$_\.Path", riga):
+    if _modello_universale(m.group(1), m.group(2)):
         return False
     return True
 
@@ -233,6 +264,24 @@ def autotest():
         # e la continuazione VERA deve restare riconosciuta: qui $b continua
         # sulla riga dopo perche' la prima finisce con una pipe aperta
         ('$b = @($tutti |\n  Where-Object { $_.Path -like ($d + "\\*") })\n$b | Stop-Process -Force', "FILTRATO"),
+
+        # --- LE SEI MENZOGNE del terzo giro (12/09/2026). Sulla v2, che era
+        #     in produzione, tornavano TUTTE "FILTRATO" -- cioe' "questo kill
+        #     e' sicuro" su sei kill che ammazzano tutto. Provate a mano una
+        #     per una prima di adottare la v3.
+        #     Causa unica, ed e' la classe 244 per la QUINTA volta: la
+        #     negazione cercata in UNA sola grafia (-not) e il jolly cercato
+        #     come stringa esatta ("*"). Due FORME, non due significati:
+        #     !(...), -eq $false, -ne $true, -notlike sono la stessa cosa; e
+        #     "C:\\*", "*terminal64.exe", "." combaciano con tutto senza
+        #     essere "*".
+        #     Nessuna di queste puo' piu' tornare FILTRATO.
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { !($_.Path -like $d) } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { ($_.Path -like $d) -eq $false } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path -like "C:\\*" } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path -match "." } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path -like ($env:SystemDrive + "\\*") } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path -like "*terminal64.exe" } | Stop-Process -Force', "DA_LEGGERE"),
     ]
     import tempfile
     giusti = 0

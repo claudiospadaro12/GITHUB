@@ -74,10 +74,15 @@ if (Test-Path $ExpertsSrc) {
   # 09/08: VPS, niente repo clonato -> si scarica dal repo il SOLO EA chiesto.
   #  Serve il NOME ESATTO (cosi' non si toccano i fratelli con nomi simili:
   #  "SupertrendReversal" da solo prenderebbe anche _Multi e _Ottimizzato).
-  if (-not $Only) {
-    Write-Host "Qui non c'e' il repo clonato: serve il nome esatto dell'EA." -ForegroundColor Red
-    Write-Host "  Esempio:  .\aggiorna_ea.ps1 ABTG_SupertrendReversal" -ForegroundColor Yellow
-    exit 1
+  if(-not $Only){
+    # 12/09/2026 (cancello): qui avevo messo "exit 1", e in 30 script su 84
+    # quel blocco sta DENTRO un try{} il cui catch{} scrive il referto e fa
+    # lo zip da mandare. Con exit il processo muore sul posto: niente catch,
+    # niente referto, NIENTE ZIP -- cioe' la regola delle righe di lancio
+    # (punto 2: si raccoglie sempre) annullata proprio nel caso in cui serve
+    # di piu'. Con throw il catch la raccoglie e la raccolta parte; e dove il
+    # try non c'e', throw termina comunque lo script. Sicuro in tutti e due.
+    throw "Terminale non trovato col selettore stretto, e NON allargo la ricerca: il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263), e questo script scrive e compila dentro il terminale che sceglie. Nomina il terminale a mano, oppure passa il banco C:\MT5_Backtest."
   }
   [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
   $nome = $Only -replace '\.mq5$',''

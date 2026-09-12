@@ -14470,3 +14470,92 @@ parser erano contenti su 84 file su 84.
 trovato col selettore stretto, e NON allargo la ricerca: …"`. Il `catch`
 esistente lo raccoglie, il referto lo scrive, lo zip parte, e l'`if(-not
 $cand){ throw }` sotto torna coerente invece che morto.
+
+---
+
+## 🗡️ CLASSE 250 (12/09/2026) — L'ARMA CHE **SCRIVE**, e non aveva nessun selettore da sbagliare
+
+**La piu' grave trovata in tutta la notte**, e sfuggiva a **ogni** caccia fatta
+prima — perche' tutte cercavano *"un bersaglio scelto male"*, e qui il
+bersaglio **non era scelto**: era **tutto**.
+
+`backtest_pipeline/abbassa_rischio.ps1` faceva:
+
+    $root = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+    $dirs = Get-ChildItem $root -Directory        # <-- TUTTE
+    foreach($d in $dirs){ ... [System.IO.File]::WriteAllText($chr.FullName, ...) }
+
+👉 **TUTTE le cartelle dati MT5 della macchina, quella del conto REALE
+10105439 COMPRESA.** E questo script **non legge: SCRIVE nei `.chr`**, cioe'
+**nei parametri delle SEDIE VIVE** — e sul 100k le taglie 0,65 e 0,30 **vivono
+solo li'**. Se un magic dell'elenco vive anche sul reale, **gli si riscriveva
+la TAGLIA**.
+
+🔴 **E le taglie sono la cosa che il mandato riserva a Claudio**, insieme al
+rischio e ai soldi. Uno script che le riscrive da solo su un conto non
+nominato **non e' un bug: e' uno sconfinamento**.
+
+### 🕳️ Perche' nessuna caccia lo aveva visto
+| caccia fatta | cosa cercava | perche' lo perdeva |
+|---|---|---|
+| audit dei kill | `Stop-Process` | qui non si uccide: **si scrive** |
+| censimento `CloseMainWindow` | un **verbo** di chiusura | idem |
+| caccia al ripiego | un **selettore** largo o sbagliato | 🔴 **non c'e' nessun selettore** |
+
+📌 **`"tutte le cartelle dati"` E' un bersaglio, non l'assenza di un
+bersaglio.** Ed e' per questo che sfugge: si cerca sempre la scelta sbagliata,
+mai la scelta che non c'e'.
+
+### 🚨 E la sua unica guardia proteggeva la cosa sbagliata
+`Get-Process terminal64` (non filtrato) -> *"MT5 e' aperto, chiudilo"*. Quella
+guardia protegge la **coerenza del file** (MT5 alla chiusura riscrive i `.chr`
+e cancellerebbe la modifica), **non QUALE CONTO**. 🔴 A MT5 chiuso — cioe'
+**dopo un riavvio del VPS** — l'arma era **carica**.
+
+### ✅ LA REGOLA
+1. **Chi SCRIVE dichiara DOVE.** Il terminale si **nomina** (parametro
+   obbligatorio) e si incrocia con `origin.txt`: mai *"tutte le cartelle che
+   trovo"*.
+2. **Il reale si rifiuta PER NOME**, non si spera che non capiti.
+3. **Si STAMPA quale cartella si sta per toccare e quali si lasciano stare**:
+   la prova che il reale non e' stato sfiorato deve finire nel referto,
+   altrimenti e' una promessa.
+4. 📐 **E un censimento di armi si fa sui VERBI *e* sugli OGGETTI**: chi
+   termina (`Stop-Process`, `CloseMainWindow`, `.Kill()`, `taskkill`), chi
+   **scrive** (`WriteAllText`, `Copy-Item`, `Set-Content`, `Out-File`), chi
+   cancella, chi **ricompila** — e per ognuno: **su quale terminale, e come
+   l'ha scelto?**
+
+🟡 **Il quinto verbo, trovato e dichiarato SANO:**
+`verifica_autotest_guardian.ps1:211` fa `$proc.Kill()`, e `$proc` viene da
+`Start-Process -PassThru`: e' il PID che lo script ha avviato, quindi e'
+corretto. **Ma `.Kill()` non lo cercava nessuno**: domani un
+`Get-Process terminal64 | % { $_.Kill() }` sarebbe invisibile all'audit dei
+kill, alla caccia dei `CloseMainWindow` **e** a `taskkill`.
+
+---
+
+## 🧾 CLASSE 249 (12/09/2026) — `exit` AL POSTO DI `throw`: LA RACCOLTA CHE NON PARTE
+
+**Difetto mio, introdotto stanotte riparando la classe 246-bis.** Il blocco
+nuovo (*"se il selettore stretto non trova niente, si muore"*) l'ho scritto con
+`Write-Host` + **`exit 1`**. In **30 script su 84** quel blocco finisce
+**dentro un `try{`** il cui `catch{` scrive il referto e fa lo
+**`Compress-Archive`**.
+
+🔴 **Con `exit` il processo muore sul posto: nessun `catch`, nessun referto,
+NIENTE ZIP.** Cioe' la **regola delle righe di lancio, punto 2** (*"a fine test
+la riga di raccolta, sempre"*) annullata **proprio nel caso in cui serve di
+piu'** — quando qualcosa e' andato storto e Claudio deve mandarmi i pezzi.
+
+📌 **Il segno che lo urlava**, e si vedeva a occhio: subito sotto il blocco
+nuovo era rimasto il vecchio `if(-not $cand){ throw ... }`, **ora
+irraggiungibile**. 👉 **Un gestore d'errore morto sotto un gestore nuovo vuol
+dire che il percorso d'errore e' cambiato senza che nessuno l'abbia deciso.**
+
+### ✅ LA REGOLA
+**In uno script che raccoglie, si muore con `throw`, non con `exit`.** `throw`
+lo raccoglie il `catch` (referto + zip), e **dove il `try` non c'e' termina lo
+script comunque**: e' sicuro in tutti e due i casi, `exit` in uno solo.
+Convertiti **83 file** (tutti, non solo i 30: la conversione e' sempre
+migliore), parser vero **0 errori**.

@@ -23,7 +23,11 @@
 param(
   [double]$Da = 2.0,
   [double]$A  = 1.0,
-  [string[]]$Magics = @("770101","770203","970901")
+  [string[]]$Magics = @("770101","770203","970901"),
+  # 12/09/2026: OBBLIGATORIO. Vedi il riquadro qui sotto: senza, questo
+  # script scriveva nelle cartelle dati di TUTTI i terminali della
+  # macchina, quella del conto REALE compresa.
+  [Parameter(Mandatory=$true)][string]$TerminaleDati
 )
 $ErrorActionPreference = "Stop"
 
@@ -34,10 +38,61 @@ if($mt5){
   exit 1
 }
 
+# =====================================================================
+#  12/09/2026 -- QUI C'ERA L'ARMA PIU' GRAVE TROVATA IN TUTTA LA NOTTE,
+#  e non aveva nessun selettore da sbagliare: era
+#      $dirs = Get-ChildItem $root -Directory
+#  cioe' **TUTTE** le cartelle dati MT5 della macchina, quella del conto
+#  REALE 10105439 COMPRESA. E questo script non legge: SCRIVE nei .chr,
+#  cioe' NEI PARAMETRI DELLE SEDIE VIVE (sul 100k le taglie 0,65 e 0,30
+#  vivono SOLO li'). Se un magic dell'elenco vive anche sul reale, gli si
+#  riscriveva la TAGLIA.
+#  E' il caso che sfuggiva a ogni caccia: non c'era un ripiego sbagliato
+#  ne' un selettore largo. "Tutte le cartelle dati" E' un bersaglio.
+#  La sua unica guardia ("MT5 e' aperto, chiudilo") protegge la COERENZA
+#  DEL FILE, non QUALE CONTO -- e a MT5 chiuso, cioe' dopo un riavvio del
+#  VPS, l'arma era carica.
+#  Adesso: il terminale si NOMINA (-TerminaleDati, obbligatorio), si
+#  incrocia con origin.txt, e il REALE e' rifiutato per nome. Il modello
+#  del confronto e' RIGA_R96_APERTURA_USA.ps1:423-427.
+#  E si STAMPA quale cartella si sta per toccare e quali si lasciano
+#  stare: la prova che il reale non e' stato sfiorato finisce nel referto.
+# =====================================================================
+$cartTerm = $TerminaleDati.TrimEnd('\','/')
+if($cartTerm -like "*BCM_Reale*" -or $cartTerm -like "*-V3*"){
+  Write-Host "TERMINALE VIETATO: '$cartTerm'" -ForegroundColor Red
+  Write-Host "  Questo script SCRIVE le taglie nei .chr. Il conto REALE 10105439" -ForegroundColor Red
+  Write-Host "  e il 100k 50504263 non si toccano da qui, nemmeno nominandoli." -ForegroundColor Red
+  Write-Host "  Le taglie e i parametri di rischio sono decisioni di Claudio." -ForegroundColor Red
+  exit 1
+}
+if(-not (Test-Path -LiteralPath $cartTerm -PathType Container)){
+  Write-Host "-TerminaleDati: la cartella programma non esiste: '$cartTerm'" -ForegroundColor Red
+  Write-Host "  Va passata la CARTELLA PROGRAMMA del terminale (quella con terminal64.exe)." -ForegroundColor Red
+  exit 1
+}
 $root = Join-Path $env:APPDATA "MetaQuotes\Terminal"
-$dirs = Get-ChildItem $root -Directory -ErrorAction SilentlyContinue |
-        Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") }
-if(-not $dirs){ Write-Host "Nessuna cartella dati MT5 trovata." -ForegroundColor Red; exit 1 }
+$tutteDati = @(Get-ChildItem $root -Directory -ErrorAction SilentlyContinue |
+        Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") })
+$dirs = @($tutteDati | Where-Object {
+          $o = Join-Path $_.FullName "origin.txt"
+          (Test-Path -LiteralPath $o) -and ((Get-Content -LiteralPath $o -Raw).Trim() -ieq $cartTerm) })
+$scartate = @($tutteDati | Where-Object { $dirs -notcontains $_ })
+Write-Host ""
+Write-Host "--- QUALI CARTELLE DATI TOCCO, E QUALI NO -------------------------" -ForegroundColor Cyan
+Write-Host ("  terminale nominato : " + $cartTerm) -ForegroundColor White
+foreach($x in $dirs){     Write-Host ("  TOCCO        : " + $x.FullName) -ForegroundColor Yellow }
+foreach($x in $scartate){ Write-Host ("  NON TOCCO    : " + $x.FullName) -ForegroundColor Green }
+Write-Host "-------------------------------------------------------------------" -ForegroundColor Cyan
+if($dirs.Count -eq 0){
+  Write-Host "Nessuna cartella dati corrisponde a '$cartTerm' (origin.txt)." -ForegroundColor Red
+  Write-Host "  NON ripiego su tutte le cartelle: li' dentro c'e' anche il REALE." -ForegroundColor Red
+  exit 1
+}
+if($dirs.Count -gt 1){
+  Write-Host "AMBIGUO: $($dirs.Count) cartelle dati puntano allo stesso terminale. Mi fermo." -ForegroundColor Red
+  exit 1
+}
 
 $Righe = New-Object System.Collections.ArrayList
 function Rec($s,$col){ [void]$Righe.Add($s); if($col){Write-Host $s -ForegroundColor $col}else{Write-Host $s} }
