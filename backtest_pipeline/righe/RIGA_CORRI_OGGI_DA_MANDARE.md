@@ -1,5 +1,98 @@
 # 📬 CORRI OGGI — **LE RIGHE DA MANDARE** (21 round, mai girati, ~25 min)
 
+---
+
+# 🛑 ERRATA DEL CANCELLO — LEGGI QUESTO BLOCCO PRIMA DEL RESTO
+
+> Il cancello di giudizio ha dato **FAIL al foglio** (non al codice): i 21 round
+> sono **sani e girano tutti e ventuno**. Quello che era sbagliato erano le
+> **istruzioni di lettura**. Qui sotto le cinque correzioni.
+
+## 🕐 A. LO STATO DELLA MACCHINA, dichiarato per nome (classe 266)
+
+| variabile | oggi |
+|---|---|
+| giorno | **SABATO 12/09/2026** — misurato con `date`, non ricordato |
+| mercati | **CHIUSI.** Nessuna sedia puo' perdere un tick perche' il tester le mangia la CPU |
+| terminali accesi | `50503392` · `50504263` · **`10105439` il REALE (PID 7824)** · Pepperstone · Tickmill — **nessuno viene toccato**, e la prova la stampa il driver (PID PRIMA = PID DOPO) |
+| CPU/RAM lasciate a loro mentre il tester macina | 🔴 **[NON MISURATO]** |
+| 21 round in fila su questa macchina | 🔴 **MAI FATTO PRIMA.** Non e' una ripetizione: e' la prima volta |
+
+## ⚓ B. SE UN'ANCORA NON TORNA, **NON SI BUTTA IL ROUND** (classe 267-bis)
+
+🔴 Il foglio diceva: *"se un'ancora non torna il guasto e' nel banco o nel
+binario, e i parametri NON si leggono"*. **C'e' una TERZA causa, documentata e
+VOLUTA**, e il cancello l'ha misurata con `git log`:
+
+| quando | cosa |
+|---|---|
+| `400a462` **08/08 06:54** | i CSV d'ancora (PF OOS **1,68815**, n **86**) |
+| `3af47ed` 08/08 11:48 | fix sizing: `OrderCalcProfit` invece del tick value nudo |
+| `f8ebc32` 19/08 | migrazione Guardian |
+| `872dba8` **08/09 07:13** | pavimento del lotto minimo **PRIMA** di `lotPend` — 🔴 **puo' cambiare ANCHE il numero di operazioni** |
+
+Il driver compila dalla **TESTA di `lavoro`**: il binario di oggi ha **tre
+cambi** di differenza dall'ancora, e **nessuna riproduzione post-fix esiste** in
+archivio.
+
+👉 **Quindi: se l'ancora non torna, il round resta LEGGIBILE** — tutte le celle
+girano sullo **stesso** binario — **e muore SOLO il confronto con l'archivio**,
+che va scritto forte nel referto. Vale per `r127a`, `r120a11`, `r120d11`,
+`r120c11`. 🟢 La formulazione giusta era **gia' nel repo**, in
+`R124a_U30USD_04_firstfraction.txt` r.103-127.
+🔴 **NON si buttano 9 celle buone per un cambio di codice documentato e voluto.**
+
+## 🔴 C. `r127a` PORTA DENTRO UN COMMENTO FALSO
+
+Il file prova dice `-Modello 1 = TICK REALI`: **e' al contrario**. Il driver
+r.172 dice *"4 = tick reali (verita'); 1 = OHLC M1, SOLO screening, mai
+verdetti"*. 🟢 **Lo script passa `4` e lo sovrascrive**, quindi **il numero di
+oggi e' giusto**.
+🔴 **Ma quel file finisce DENTRO lo zip**, accanto a un referto che dice
+`modello: 4`: due carte che si contraddicono nella stessa cartella. 👉 **Chi
+riapre `ROUND_r127a` NON rilanci a `-Modello 1`**: sulla stessa cella tick da'
+**PF 1,68815**, OHLC da' **1,85106** — il **9,6% di PF regalato**. Il file va
+corretto al prossimo movimento del pin interno `fb9b4731`.
+
+## 🥇 D. `r120c` × 4 — IL RILEVATORE SI GUARDA **PRIMA** DEL PF
+
+Il file prova dichiara un **prerequisito BLOCCANTE mai eseguito**: la profondita'
+**a tick** di XAUUSD non e' **MAI** stata misurata (in `misura_tick/` ci sono
+solo D30EUR, NASUSD, U30USD).
+👉 `R120c11` dichiara **`n OOS atteso 200-400`**, derivato dai 6,5 anni di
+finestra. **Se `n OOS` esce sotto ~150, la finestra NON parte dal 2020**: i tick
+BCM cominciano dopo, MT5 l'ha accorciata **in silenzio**, e i quattro `r120c`
+sono **SCREENING, non verdetti**.
+🟢 In compenso quel numero **misura gratis** una cosa che non abbiamo mai
+misurato: **da quando esistono i tick XAUUSD**.
+
+## 🟡 E. IL GIRO A VUOTO FINISCE IN **ROSSO**, ED E' NORMALE
+
+La raccolta gira lo stesso: stampera' **63 righe `ASSENTE`** e un **`ZIP NON
+FATTO`** in rosso. 🔴 **NON e' un guasto**: in `-SoloControllo` nessun CSV esiste
+ancora. L'unica cosa da leggere nel giro a vuoto e' la riga **`celle per
+finestra`**: su `r128a` deve dire **`InpTrailTF  7 celle  (enum
+ENUM_TIMEFRAMES - lo step e' ignorato)`**. 🔴 **Se dice 26, si ferma tutto.**
+
+## ⏱️ F. IL TEMPO: **`[NON MISURATO]`**, e non serve indovinarlo
+
+**~25 minuti di SOLE passate** (banda 13-50). 🔴 Ma il tempo **totale** e' non
+misurato, per tre motivi dichiarati: (1) la retta `T = 0,6 + 0,077 x passate` e'
+tarata su **un** EA e **un** simbolo, qui ce ne sono **sei** e **quattro**; (2)
+una misura parallela fatta **oggi sulla stessa macchina** da' **45-90 min per
+QUATTRO** round, dove la retta darebbe 5,5; (3) lo **scarico dei tick** e' fuori
+dalla stima per costruzione.
+🟢 **Non serve indovinare: dopo il PRIMO round (`r127a`, 9 celle) lo script
+stampa i secondi veri**, e alla fine stampa il **costo VERO per passata**. Se il
+primo round costa molto piu' di ~1,3 minuti, si sa **subito**.
+
+## 📦 G. E ARRIVERANNO **22 ZIP**, non uno
+Il driver scrive `Desktop\ROUND_<etichetta>.zip` **per ogni round**. Quello da
+mandare e' **`CORRI_OGGI_*.zip`**: gli altri 21 sono copie per round.
+
+---
+
+
 > 🛑 **NON ANCORA CONSEGNATE.** Manca il PASS dell'agente `controllo-preventivo`
 > (lo strato di GIUDIZIO). I due cancelli **meccanici** sono passati — i codici
 > di uscita stanno in fondo — ma il cancello deterministico lo stampa da sé che

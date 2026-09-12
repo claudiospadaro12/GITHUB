@@ -15637,7 +15637,7 @@ diventa **dichiarato e fotografato**, non eliminato.
 
 ---
 
-## 267. 🎚️ PASSARE `controlla_prova.py` E ESSERE **LANCIABILE** SONO DUE COSE DIVERSE: il cancello non sa niente degli **ARGOMENTI DEL DRIVER** (12/09/2026)
+## 268. 🎚️ PASSARE `controlla_prova.py` E ESSERE **LANCIABILE** SONO DUE COSE DIVERSE: il cancello non sa niente degli **ARGOMENTI DEL DRIVER** (12/09/2026)
 
 **Il caso reale.** Pacchetto `CORRI OGGI`: 53 file prova in archivio, tutti verdi
 al cancello. Ne partono 21. Degli altri, **VENTI non sono raggiungibili da nessuna
