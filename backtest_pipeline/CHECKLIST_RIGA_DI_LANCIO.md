@@ -15791,3 +15791,126 @@ che aveva gia' letto gli stessi dati.
 >    referto precedente: nella prima stesura il blocco D dichiarava il magic
 >    del blocco C (**784120** invece di **784130**) proprio dentro il
 >    paragrafo che serviva a dimostrare di non toccare le sedie vive.
+
+## 270. 👻 L'`.ex5` STANTIO CHE RENDE MUTO UN FALLIMENTO DI COMPILAZIONE — «il fallimento e' rumoroso e innocuo» e' vero SOLO su un'installazione vergine (12/09/2026)
+
+**Il fatto.** Il referto `report/IL_WIP_E_DIAGNOSTICA_2026-09-12.md` §6 punto 2
+autorizzava a mettere **12 round in coda** senza compilare, con questo
+argomento testuale:
+
+> *"Il fallimento, se c'e', e' quello giusto: rumoroso e innocuo — il driver
+> non trova il `.ex5`, esce con un messaggio che dice perche', e non produce
+> nessun numero falso."*
+
+**Misurato su `backtest_pipeline/walkforward_generico.ps1`:** e' vero solo a
+metta'. Le due righe che decidono sono la 1386 e la 1387:
+
+```
+Copy-Item $srcFile -Destination $MqlExperts -Force
+& $MetaEditor "/compile:$(Join-Path $MqlExperts "$Expert.mq5")" "/log" | Out-Null
+if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ ... Muori ... }
+```
+
+🔴 **Il driver non cancella l'`.ex5` precedente e non guarda la sua data**
+(verificato: **zero** `Remove-Item` su `.ex5`, **zero** controlli di
+`LastWriteTime`). Quindi su un terminale che ha gia' girato quell'EA:
+1. `metaeditor` fallisce e non produce niente;
+2. `Test-Path <EA>.ex5` trova il file **VECCHIO** ed e' **vero**;
+3. il driver stampa `compilato <EA>` **in verde** e prosegue;
+4. il round gira col **binario vecchio** e i numeri finiscono attribuiti al
+   sorgente NUOVO.
+
+👉 Non e' "rumoroso e innocuo": e' **silenzioso e falsificante**, cioe' il
+peggiore dei due modi di sbagliare. Ed e' la stessa famiglia del **"rc=0
+muto"** del 22/08 (editor aperto), che `RIGA_COLLAUDO_RICOMPILA.ps1` ha gia'
+in testa ai suoi commenti — ma quella lezione e' stata incorporata nel
+COLLAUDO e **non nel driver**.
+
+📏 **E il caso non e' teorico**: i quattro EA di quel referto hanno corse
+d'archivio (CSV contati nel repo: `ABTG_SuperWave` **52**, `ABTG_CostToCost`
+**116**, `ABTG_SuperWave_DOW_H1_Ottimizzato` **6**,
+`ABTG_SupertrendReversal_Ottimizzato` **4**). Un `.ex5` preesistente e' lo
+scenario **normale**, non l'eccezione.
+
+> ### 🔴 LA REGOLA
+> 1. **«Il fallimento e' innocuo» si dimostra sullo STATO REALE della
+>    macchina, non sul codice del ramo d'errore.** La domanda non e' *"che
+>    cosa fa il driver se non trova l'`.ex5`?"* ma *"l'`.ex5` PUO' esserci
+>    da prima?"*. Se puo', il ramo d'errore **non viene nemmeno preso**.
+> 2. **Un cancello che verifica la PRESENZA di un artefatto prodotto non e'
+>    un cancello**: deve verificare che l'artefatto sia **di ADESSO**
+>    (cancellarlo prima, oppure confrontare `LastWriteTime` con l'ora
+>    d'avvio — lo stesso schema che la riga di raccolta usa gia' bene sullo
+>    zip: `Where-Object { $_.LastWriteTime -ge $t0 }`).
+> 3. **Un verdetto di neutralita' letto a `git diff` NON autorizza una coda.**
+>    Diff neutro risponde a *"cambia il comportamento?"*; la coda ha bisogno
+>    anche di *"compila?"* e di *"il binario che gira e' quello?"*. Sono
+>    **tre** domande e vanno chiuse **tutte e tre**, ognuna con la sua misura.
+> 4. ⚠️ **E il collaudo va puntato al commit GIUSTO**: nello stesso caso,
+>    `RIGA_COLLAUDO_RICOMPILA.ps1` era citato come lo strumento per chiudere
+>    il dubbio, ma i suoi bersagli sono pinnati all'**ultimo commit NON-WIP**
+>    (`872dba8`) **proprio per escludere** `b45dd00`. Girarla avrebbe
+>    compilato il codice **gia' verificato** e dichiarato il dubbio chiuso.
+>    **Prima di citare uno strumento come soluzione, si legge a quale commit
+>    punta.**
+
+## 271. ➗ IL CAMBIO ASSUNTO CHE SI CANCELLA ALGEBRICAMENTE: l'ancora «riproduce ESATTO» verificava **solo se stessa** — e il cambio vero era nel file gia' aperto (12/09/2026)
+
+**Il fatto.** `backtest_pipeline/calcola_pedaggio_forex.py` dichiara — con
+onesta', nel sorgente (r.71-75) — `USDJPY_ASSUNTO = 150.0` come *"l'UNICO
+numero di questo file che non viene da una misura di casa"*. Ma il referto
+`report/MISURA_SPREAD_FOREX_2026-09-12.md` §3.1 lo usa come **ancora di
+validazione**, e in tabella:
+
+| coppia | derivazione | scritto da altri | esito |
+|---|---:|---:|:---:|
+| USDJPY | **0,6000** pip | `~0,60` | 🟢 riproduce **esatto** |
+
+🔴 **Quell'"esatto" non e' una conferma: e' un'identita'.** Il conto e'
+`comm_pip = 4,0 x (base/EUR) / (JPY/EUR) / (lotto x pip_size)` con
+`JPY/EUR := (USD/EUR) / usdjpy` (r.102). Su USDJPY la base **e'** USD, quindi
+`USD/EUR` **si cancella** e resta `comm_pip = 4,0 x usdjpy / 1000`. Con
+`usdjpy = 150,0` esce **0,600 per costruzione**, qualunque cosa dicano le
+commissioni misurate. **Potere di falsificazione: zero.** Delle "due ancore su
+tre che riproducono", quella genuina era **una**.
+
+🔵 **E la meta' che costa: il cambio vero era nel file che l'agente aveva GIA'
+APERTO.** La sonda `backtest_pipeline/risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`
+e' stata letta per le colonne `Digits`/`Point` — e ne ha **quattordici**. Con
+`Valuta,EUR` (r.7) e `quota/EUR = TickValue / (ContractSize x TickSize)`:
+
+| da | TickValue | si ricava |
+|---|---:|---|
+| `EURUSD` | 0,86287 | USD/EUR = **0,86287** |
+| `USDJPY` | 0,54147 | JPY/EUR = **0,0054147** |
+| `CHFJPY` | 0,54148 | JPY/EUR = **0,0054148** (controprova: coincide a 7 cifre) |
+| `USDCHF` | 1,06559 | **CHF/EUR = 1,06559** |
+
+⇒ **USD/JPY = 159,36**, non 150,0. Conseguenze misurate: commissione
+`USDJPY` **0,637** pip (non 0,600), `EURJPY` **0,739** (non 0,702), `GBPJPY`
+**0,858** (non 0,815). E **`CHFJPY` NON era incalcolabile**: con
+`CHF/EUR = 1,06559` vale **0,787 pip**. Il referto scriveva
+*"🔴 [NON CALCOLABILE] — il cambio del CHF non e' fra gli otto misurati"*:
+vero che non e' fra gli **otto del 10/09**, falso che non sia **sul disco**.
+
+🪞 **E' la regola del 10/09 di `CLAUDE.md` ripagata alla lettera** (*"prima si
+cerca il file che ha gia' la risposta"*) con un aggravante nuova: **il file
+era stato aperto**, e se ne erano lette **due colonne su quattordici**.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di chiamare "ancora" un numero, si semplifica la formula a
+>    mano.** Se il valore assunto e' l'**unico** simbolo che sopravvive alla
+>    semplificazione, l'ancora sta verificando l'assunto, non la legge. Il
+>    test: **cambia l'assunto e guarda se l'ancora si sposta con lui.** Se si
+>    sposta al 100%, non e' un'ancora.
+> 2. **Un'ancora "ESATTA" su un numero TONDO e' sospetta, non rassicurante.**
+>    `0,6000` da `150,0` e' aritmetica, non misura. Le ancore vere sono
+>    sporche (`0,4677` contro `~0,47`, `1,1625` contro `1,1613`).
+> 3. **Un file aperto per due colonne si LEGGE TUTTO** — almeno l'intestazione.
+>    `head -1` sul CSV costa un secondo e qui valeva quattro numeri e un
+>    "[NON CALCOLABILE]" ritirato.
+> 4. ⚠️ **E i cambi di DATE DIVERSE non si mescolano in silenzio**: i cambi
+>    ricavati sono del **17/08**, gli otto dalle commissioni del **10/09**, e
+>    su USD/EUR differiscono dello **0,9%** (0,86287 contro 0,8552). Si usano
+>    lo stesso — sono l'unica misura che c'e' — ma **la data va accanto al
+>    numero**, sempre.
