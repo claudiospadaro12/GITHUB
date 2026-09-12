@@ -172,6 +172,42 @@ motore morto: quella e' la regola del 19/08.
 
 ---
 
+## 4-bis. 🔨 E SOTTO I KILL C'ERANO ALTRE DUE CLASSI DI ARMA
+
+Il cancello mi ha chiesto: *"c'e' un'ALTRA classe che non hai nemmeno
+cercato?"* **La risposta e' si', due.** E le ho chiuse.
+
+### 1️⃣ La stessa arma con un **ALTRO VERBO**
+Tre script chiedevano `CloseMainWindow()` a **OGNI** terminale della macchina
+— **senza filtro e senza bisogno di nessun interruttore**. Per un terminale
+che opera, *"chiuditi per favore"* e' **fatale quanto un kill**: il reale
+restava senza sorveglianza con le posizioni aperte.
+🔴 **E nessun audit dei kill lo vedeva**, perche' la parola `Stop-Process`
+non c'era.
+📌 In piu' due dei tre avevano ancora la **ricorsione infinita** riparata in
+**una** copia il 15/08 e **mai ricopiata nelle altre due**: tre copie della
+stessa funzione, una sana e due malate. **Chiuse tutte e tre.**
+
+### 2️⃣ Il bersaglio scelto **per sorteggio**, dove si SCRIVE e si RICOMPILA
+**84 script** che copiano e ricompilano dentro un terminale portavano questa
+riga:
+
+    if(-not $c){ $c = $allTerm | ?{ $_.DirectoryName -like "*BCM Markets*" } | Select -First 1 }
+
+- `"*BCM Markets*"` **comprende anche il 100k** (50504263): un ripiego che
+  **allarga** il bersaglio di uno script che ricompila **e' un incidente
+  rimandato**;
+- `-First 1` senza ordinamento e' *"quello che il filesystem ha dato per
+  primo"*. 👉 **Su un insieme trovato per ricerca non e' una scelta: e' un
+  sorteggio.**
+
+✅ **Riparati tutti e 84**: se il selettore stretto non trova niente, **si
+muore**. Collaudo col parser vero: **84 file, 0 errori, 0 byte non-ASCII**.
+🟢 E la catena dei pin **non e' stata toccata**: verificato che nessuno dei
+file inchiodati e' cambiato, quindi il pacchetto resta valido com'e'.
+
+---
+
 ## 5-bis. 🧰 E IL CANCELLO ADESSO **COMPILA**
 
 Trovato stanotte, ed era un buco nel **controllore**, non nel controllato:
