@@ -1,0 +1,217 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  CANARINO_FRAZIONEIS -- COLLAUDO DELLA CATENA, NON UN ROUND DI MERCATO
+#  D30EUR M5 -- copia di R128b_bersaglio_D30EUR.txt con '@FRAZIONEIS 0.50'
+#  Scritto il 12/09/2026.
+# ---------------------------------------------------------------------
+#  >>> QUESTO FILE NON PRODUCE NESSUN VERDETTO DI MERCATO. <<<
+#  Non si legge nessun PF, nessun DD, nessun n. Non e' un candidato, non
+#  chiude nessuna casella del certificato di morte, non promuove e non
+#  boccia niente. Serve a UNA cosa sola: far dire alla CATENA VERA
+#  (scarico da raw -> controllo d'impronta -> driver -> stampa delle due
+#  finestre) se la direttiva '@FRAZIONEIS' viene ONORATA oppure IGNORATA
+#  IN SILENZIO. Il numero di mercato su questa sedia lo fa R128b, e
+#  R128b NON E' STATO TOCCATO: i suoi criteri sono congelati.
+# ---------------------------------------------------------------------
+#  SI LANCIA CON '-SoloControllo', E QUESTO NON E' OPZIONALE:
+#    -Expert ABTG_DAX_Apertura_EU
+#    -Prova CANARINO_FRAZIONEIS_D30EUR.txt
+#    -Etichetta canfrz
+#    -Modello 4 -Deposito 10000
+#    -SoloControllo
+#  Con '-SoloControllo' il driver si ferma PRIMA di aprire MT5 (stampa
+#  'SOLO CONTROLLO: MT5 non e' stato aperto'): ZERO passate di tester,
+#  zero CSV, zero secondi di macchina sottratti ai round veri. Nessuno
+#  dei quattro terminali MT5 viene toccato.
+#  >>> SENZA '-SoloControllo' questo file girerebbe 14 passate a tick
+#      reali e NON SERVIREBBE A NIENTE DI PIU': la risposta che cerchiamo
+#      sta nelle due righe di finestra, che il driver stampa PRIMA del
+#      tester. Se lo si lancia per davvero, e' tempo macchina buttato.
+# ---------------------------------------------------------------------
+#  L'ATTESA, DICHIARATA PRIMA DEI NUMERI -- E LE DUE USCITE
+#
+#  La domanda: il driver che la corsia scarica dal suo pin LEGGE la
+#  direttiva '@FRAZIONEIS 0.50' scritta qui sotto, oppure tira dritto sul
+#  taglio di fabbrica 0.40 senza dirlo a nessuno?
+#
+#  USCITA A -- DIRETTIVA ONORATA (taglio 0.50). Il driver deve stampare:
+#        taglio IS/OOS preso da '@FRAZIONEIS' nel file prova: 0.5
+#        taglio IS/OOS: FrazioneIS 0.5
+#        IS  2024.09.26 - 2025.08.13
+#        OOS 2025.08.14 - 2026.06.30
+#
+#  USCITA B -- DIRETTIVA IGNORATA (taglio di fabbrica 0.40). Stamperebbe:
+#        taglio IS/OOS: FrazioneIS 0.4
+#        IS  2024.09.26 - 2025.06.09
+#        OOS 2025.06.10 - 2026.06.30
+#     e NESSUNA riga "taglio IS/OOS preso da '@FRAZIONEIS'".
+#
+#  >>> LE DUE USCITE SONO DIVERSE E NON CONFONDIBILI: 2025.08.13 contro
+#      2025.06.09, cioe' 65 giorni di calendario. E' questo che rende il
+#      canarino una MISURA e non una conferma: se le due uscite fossero
+#      uguali, la prova non distinguerebbe niente e non varrebbe nulla.
+#
+#  E LE DATE DELL'USCITA A NON SONO MIE. Sono scritte da mesi in
+#  backtest_pipeline\prove\R128b_bersaglio_D30EUR.txt r.103-104:
+#        IS  2024.09.26 -> 2025.08.13   230 feriali   ~163 ingressi
+#        OOS 2025.08.14 -> 2026.06.30   229 feriali   ~162 ingressi
+#  Il confronto e' contro numeri di qualcun altro, non contro i miei.
+#
+#  COSA VUOL DIRE CIASCUNA DELLE DUE:
+#    USCITA A -> la catena vera onora la direttiva. Si apre la coda dei
+#                ~20 round che dichiarano un taglio 0.50 nei propri
+#                criteri (R128b in testa).
+#    USCITA B -> la direttiva e' IGNORATA nella catena vera anche se
+#                funziona in locale. SI FERMA TUTTO e si cerca il guasto
+#                PRIMA di mettere in coda un solo round a 0.50: un round
+#                che gira a 0.40 credendo di girare a 0.50 produce
+#                numeri che nessuno puo' usare.
+#    Una TERZA uscita e' possibile e va riconosciuta: il round muore
+#    prima di arrivare alle finestre (scarico fallito, impronta che non
+#    torna, compilazione). Quello NON e' ne' A ne' B: e' 'catena rotta a
+#    monte', si legge il messaggio e si ripara quello.
+# ---------------------------------------------------------------------
+#  PERCHE' LA FINESTRA DI FINE E' 2026.06.30 SENZA CHE SIA SCRITTA QUI
+#  Come R128b, questo file NON porta '@FINOA'. La data di fine arriva dal
+#  default del driver (walkforward_generico.ps1 r.177,
+#  [string]$Fino = "2026.06.30"), verificato nel sorgente e non assunto.
+#  NON aggiungo '@FINOA': la coerenza con R128b si tiene alla lettera,
+#  altrimenti le due date attese qui sopra non sono piu' le sue.
+# ---------------------------------------------------------------------
+#  LE DIRETTIVE SONO LE STESSE DI R128b, PIU' UNA
+#    @SIMBOLO  D30EUR        identica a R128b r.175
+#    @PERIODO  M5            identica a R128b r.176
+#    @DAQUANDO 2024.09.26    identica a R128b r.177
+#    @FRAZIONEIS 0.50        <-- L'UNICA AGGIUNTA, ed e' il punto del file
+#  Se una di queste tre cambiasse, le due date attese cambierebbero e il
+#  canarino non misurerebbe piu' niente.
+# ---------------------------------------------------------------------
+#  IL BLOCCO DEI PARAMETRI QUI SOTTO E' COPIATO DA R128b ALLA LETTERA
+#  (r.179-284), con UNA SOLA differenza: InpMagic.
+#    R128b   InpMagic=779520
+#    qui     InpMagic=779521   <-- cercato su tutto il repo il 12/09/2026:
+#                                  ZERO occorrenze, quindi vergine.
+#  Perche' cambiarlo: con '-SoloControllo' non nasce nessun ordine e
+#  nessun CSV, quindi il magic e' inerte. Ma se un giorno qualcuno
+#  lanciasse questo file per davvero, con il magic di R128b i suoi deal
+#  finirebbero mescolati a quelli dell'ancora. Un magic vergine costa
+#  zero e toglie una trappola.
+#  L'asse InpTP1_R resta quello di R128b (7 celle) di proposito: cosi'
+#  '-SoloControllo' deve stampare 'celle per finestra: 7 -> 14 pass',
+#  che e' lo STESSO numero che R128b dichiara a r.22, ed e' un controllo
+#  in piu' gratis: se stampasse un numero diverso, il file che la corsia
+#  ha scaricato non e' questo.
+#  InpUsaGuardian resta pinnato a false (no-op puro), come in R128b.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FRAZIONEIS 0.50
+
+InpUsaGuardian=false
+InpAllowReverse=false
+
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=200
+InpFadeOffsetPts=0
+InpDelayMinutes=30
+InpDelayDirMode=0
+
+InpUseGapFill=false
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+
+# --- IL PUNTO DI QUESTO FILE: PARZIALE SPENTO, cosi' l'asse e' PURO.
+InpTP1_ClosePct=0
+InpBreakevenAtTP1=true
+InpBEatR=0
+InpUseTrailing=true
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+
+InpUseRoundLevels=false
+InpRoundStep=100
+InpRoundMinDistPts=50
+
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsFlatten=true
+
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=true
+
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+
+InpMagic=779521
+InpMaxSpread=0
+InpVerbose=false
+
+# --- L'ASSE, UNO SOLO: InpTP1_R da 0 a 3,0 con passo 0,5 = 7 CELLE
+#       0    -> NESSUN TP (r.1070: tp=0.0). E' il "lascia correre" al limite
+#       0,5  -> TP a 1,5R  (~ 74 punti indice)
+#       1,0  -> TP a 3,0R  (~147)   <-- LA CELLA VIVA, L'ANCORA
+#       1,5  -> TP a 4,5R  (~221)
+#       2,0  -> TP a 6,0R  (~295)
+#       2,5  -> TP a 7,5R  (~368)
+#       3,0  -> TP a 9,0R  (~442)
+#     (conversione in punti indice sullo stop RETEST derivato ~49,1 idx:
+#      e' una STIMA per leggere la tabella, non un dato del CSV)
+#     InpTP1_R e' un double: nessun enum, passo rispettato, 7 celle
+#     esatte. Il bordo basso 0 e' un LIMITE FISICO (sotto zero il TP non
+#     esiste comunque); il bordo alto 3,0 l'ho scelto io.
+InpTP1_R=1.0||0||0.5||3.0||Y
