@@ -15792,310 +15792,44 @@ che aveva gia' letto gli stessi dati.
 >    del blocco C (**784120** invece di **784130**) proprio dentro il
 >    paragrafo che serviva a dimostrare di non toccare le sedie vive.
 
-> ### 🔧 EMENDAMENTO ALLA REGOLA 1 (12/09/2026, sera) — **la ricerca in due cartelle ha un buco STRUTTURALE, e si sarebbe ripetuto a OGNI round**
+> ### 🔧 EMENDAMENTO ALLA REGOLA 1 (12/09/2026, sera) — **la ricerca in due cartelle manca una FAMIGLIA INTERA di lettori**
 > **Il caso**: la ricostruzione del blocco B ha censito i lettori dei CSV
 > `..._{IS,OOS}_R123BSTMULT.csv` e ne ha trovati **tre**. Erano **CINQUE**, e il
 > mancante era il **piu' diretto**:
 > `backtest_pipeline/risultati_prove/r123/REFERTO_ROUND_R123BSTMULT.txt` — il
-> **referto automatico del driver**, che stampa **tutti e 40 i numeri** del round.
+> referto di round scritto dalla **RIGA DI LANCIO**, che stampa **tutti e 40 i
+> numeri**.
 >
-> 🔴 **E non e' un caso sfortunato: e' permanente.** Quel referto il driver lo
-> scrive **a ogni round**, sempre in `risultati_prove/`. Cercando solo in
-> `report/` e `risultati_archivio/`, la regola 1 **si sarebbe mancata da sola su
-> ogni round futuro**.
+> 🔴 **E non e' un file isolato: e' una FAMIGLIA.** Nel repo ci sono **90**
+> `REFERTO_ROUND*`, e **78 stanno gia' in `risultati_archivio/`**, cioe' dove la
+> regola guarda. **Sono i 12 in `risultati_prove/` a sfuggire** — sparsi su
+> **6 cartelle di EA diversi** (`ABTG_OpeningReversalB`, `ABTG_IBRetest`, `r123`,
+> `ibretest_p0`, `ABTG_LVNArbitro`, `ABTG_Nightly`). Li scrivono
+> `righe/RIGA_ROUND_VPS.ps1`, `RIGA_CORRI_OGGI.ps1`, `RIGA_R96_APERTURA_USA.ps1`,
+> `RIGA_R101_ABLAZIONE.ps1`, `RIGA_R107_LATI_SHORT.ps1` e
+> `deploy_vivaio_ema200.ps1`.
+>
+> ⚠️ **E va detto cosa NON e', perche' la PRIMA stesura di questo emendamento lo
+> diceva sbagliato:** **non** lo scrive `walkforward_generico.ps1` (`grep
+> REFERTO_ROUND` sul driver da' **ZERO**), e **non** esce *"a ogni round"* — dei
+> **quattro** blocchi di R123 ce l'hanno **solo A e B**; **C e D no**. Dipende
+> dalla **riga di lancio** usata, non dal motore.
+>
+> 🪞 **E la lezione dentro la lezione, che vale piu' dell'emendamento.** Quei due
+> fatti falsi **me li aveva suggeriti il cancello**, e io li ho adottati
+> scrivendo *"argomento piu' forte del mio"* — **senza misurarli**. Li ha poi
+> smontati il cancello stesso, rileggendo la propria proposta su mia richiesta.
+> 🔴 **Un argomento piu' FORTE non e' un argomento MISURATO — nemmeno quando
+> arriva dal controllo.** Il cancello non e' esente dal cancello.
 >
 > 👉 **La ricerca si fa sul NOME BASE del CSV in TUTTO il repo**
 > (`grep -rl NOME --exclude-dir=.git .`), non in due cartelle. Le tre famiglie di
-> lettori misurate: **referti** (`report/`, `risultati_archivio/`), **referto
-> automatico del driver** (`risultati_prove/`), **log di coda**
+> lettori misurate: **referti** (`report/`, `risultati_archivio/`), **referto di
+> round della riga di lancio** (`risultati_prove/`), **log di coda**
 > (`coda/referti/CODA_*.log`).
 >
-> 🟢 **E la meta' buona, che va detta**: il referto del driver **non ruba merito
-> a nessuno** — non giudica, lo dichiara lui stesso — ed e' la **conferma
-> indipendente** dei numeri rifatti a mano. Chi ricostruisce da zero dovrebbe
-> aprirlo **per primo**, non trovarlo per ultimo.
-
-## 270. 👻 L'`.ex5` STANTIO CHE RENDE MUTO UN FALLIMENTO DI COMPILAZIONE — «il fallimento e' rumoroso e innocuo» e' vero SOLO su un'installazione vergine (12/09/2026)
-
-**Il fatto.** Il referto `report/IL_WIP_E_DIAGNOSTICA_2026-09-12.md` §6 punto 2
-autorizzava a mettere **12 round in coda** senza compilare, con questo
-argomento testuale:
-
-> *"Il fallimento, se c'e', e' quello giusto: rumoroso e innocuo — il driver
-> non trova il `.ex5`, esce con un messaggio che dice perche', e non produce
-> nessun numero falso."*
-
-**Misurato su `backtest_pipeline/walkforward_generico.ps1`:** e' vero solo a
-metta'. Le due righe che decidono sono la 1386 e la 1387:
-
-```
-Copy-Item $srcFile -Destination $MqlExperts -Force
-& $MetaEditor "/compile:$(Join-Path $MqlExperts "$Expert.mq5")" "/log" | Out-Null
-if(-not (Test-Path (Join-Path $MqlExperts "$Expert.ex5"))){ ... Muori ... }
-```
-
-🔴 **Il driver non cancella l'`.ex5` precedente e non guarda la sua data**
-(verificato: **zero** `Remove-Item` su `.ex5`, **zero** controlli di
-`LastWriteTime`). Quindi su un terminale che ha gia' girato quell'EA:
-1. `metaeditor` fallisce e non produce niente;
-2. `Test-Path <EA>.ex5` trova il file **VECCHIO** ed e' **vero**;
-3. il driver stampa `compilato <EA>` **in verde** e prosegue;
-4. il round gira col **binario vecchio** e i numeri finiscono attribuiti al
-   sorgente NUOVO.
-
-👉 Non e' "rumoroso e innocuo": e' **silenzioso e falsificante**, cioe' il
-peggiore dei due modi di sbagliare. Ed e' la stessa famiglia del **"rc=0
-muto"** del 22/08 (editor aperto), che `RIGA_COLLAUDO_RICOMPILA.ps1` ha gia'
-in testa ai suoi commenti — ma quella lezione e' stata incorporata nel
-COLLAUDO e **non nel driver**.
-
-📏 **E il caso non e' teorico**: i quattro EA di quel referto hanno corse
-d'archivio (CSV contati nel repo: `ABTG_SuperWave` **52**, `ABTG_CostToCost`
-**116**, `ABTG_SuperWave_DOW_H1_Ottimizzato` **6**,
-`ABTG_SupertrendReversal_Ottimizzato` **4**). Un `.ex5` preesistente e' lo
-scenario **normale**, non l'eccezione.
-
-> ### 🔴 LA REGOLA
-> 1. **«Il fallimento e' innocuo» si dimostra sullo STATO REALE della
->    macchina, non sul codice del ramo d'errore.** La domanda non e' *"che
->    cosa fa il driver se non trova l'`.ex5`?"* ma *"l'`.ex5` PUO' esserci
->    da prima?"*. Se puo', il ramo d'errore **non viene nemmeno preso**.
-> 2. **Un cancello che verifica la PRESENZA di un artefatto prodotto non e'
->    un cancello**: deve verificare che l'artefatto sia **di ADESSO**
->    (cancellarlo prima, oppure confrontare `LastWriteTime` con l'ora
->    d'avvio — lo stesso schema che la riga di raccolta usa gia' bene sullo
->    zip: `Where-Object { $_.LastWriteTime -ge $t0 }`).
-> 3. **Un verdetto di neutralita' letto a `git diff` NON autorizza una coda.**
->    Diff neutro risponde a *"cambia il comportamento?"*; la coda ha bisogno
->    anche di *"compila?"* e di *"il binario che gira e' quello?"*. Sono
->    **tre** domande e vanno chiuse **tutte e tre**, ognuna con la sua misura.
-> 4. ⚠️ **E il collaudo va puntato al commit GIUSTO**: nello stesso caso,
->    `RIGA_COLLAUDO_RICOMPILA.ps1` era citato come lo strumento per chiudere
->    il dubbio, ma i suoi bersagli sono pinnati all'**ultimo commit NON-WIP**
->    (`872dba8`) **proprio per escludere** `b45dd00`. Girarla avrebbe
->    compilato il codice **gia' verificato** e dichiarato il dubbio chiuso.
->    **Prima di citare uno strumento come soluzione, si legge a quale commit
->    punta.**
-
-## 271. ➗ IL CAMBIO ASSUNTO CHE SI CANCELLA ALGEBRICAMENTE: l'ancora «riproduce ESATTO» verificava **solo se stessa** — e il cambio vero era nel file gia' aperto (12/09/2026)
-
-**Il fatto.** `backtest_pipeline/calcola_pedaggio_forex.py` dichiara — con
-onesta', nel sorgente (r.71-75) — `USDJPY_ASSUNTO = 150.0` come *"l'UNICO
-numero di questo file che non viene da una misura di casa"*. Ma il referto
-`report/MISURA_SPREAD_FOREX_2026-09-12.md` §3.1 lo usa come **ancora di
-validazione**, e in tabella:
-
-| coppia | derivazione | scritto da altri | esito |
-|---|---:|---:|:---:|
-| USDJPY | **0,6000** pip | `~0,60` | 🟢 riproduce **esatto** |
-
-🔴 **Quell'"esatto" non e' una conferma: e' un'identita'.** Il conto e'
-`comm_pip = 4,0 x (base/EUR) / (JPY/EUR) / (lotto x pip_size)` con
-`JPY/EUR := (USD/EUR) / usdjpy` (r.102). Su USDJPY la base **e'** USD, quindi
-`USD/EUR` **si cancella** e resta `comm_pip = 4,0 x usdjpy / 1000`. Con
-`usdjpy = 150,0` esce **0,600 per costruzione**, qualunque cosa dicano le
-commissioni misurate. **Potere di falsificazione: zero.** Delle "due ancore su
-tre che riproducono", quella genuina era **una**.
-
-🔵 **E la meta' che costa: il cambio vero era nel file che l'agente aveva GIA'
-APERTO.** La sonda `backtest_pipeline/risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv`
-e' stata letta per le colonne `Digits`/`Point` — e ne ha **quattordici**. Con
-`Valuta,EUR` (r.7) e `quota/EUR = TickValue / (ContractSize x TickSize)`:
-
-| da | TickValue | si ricava |
-|---|---:|---|
-| `EURUSD` | 0,86287 | USD/EUR = **0,86287** |
-| `USDJPY` | 0,54147 | JPY/EUR = **0,0054147** |
-| `CHFJPY` | 0,54148 | JPY/EUR = **0,0054148** (controprova: coincide a 7 cifre) |
-| `USDCHF` | 1,06559 | **CHF/EUR = 1,06559** |
-
-⇒ **USD/JPY = 159,36**, non 150,0. Conseguenze misurate: commissione
-`USDJPY` **0,637** pip (non 0,600), `EURJPY` **0,739** (non 0,702), `GBPJPY`
-**0,858** (non 0,815). E **`CHFJPY` NON era incalcolabile**: con
-`CHF/EUR = 1,06559` vale **0,787 pip**. Il referto scriveva
-*"🔴 [NON CALCOLABILE] — il cambio del CHF non e' fra gli otto misurati"*:
-vero che non e' fra gli **otto del 10/09**, falso che non sia **sul disco**.
-
-🪞 **E' la regola del 10/09 di `CLAUDE.md` ripagata alla lettera** (*"prima si
-cerca il file che ha gia' la risposta"*) con un aggravante nuova: **il file
-era stato aperto**, e se ne erano lette **due colonne su quattordici**.
-
-> ### 🔴 LA REGOLA
-> 1. **Prima di chiamare "ancora" un numero, si semplifica la formula a
->    mano.** Se il valore assunto e' l'**unico** simbolo che sopravvive alla
->    semplificazione, l'ancora sta verificando l'assunto, non la legge. Il
->    test: **cambia l'assunto e guarda se l'ancora si sposta con lui.** Se si
->    sposta al 100%, non e' un'ancora.
-> 2. **Un'ancora "ESATTA" su un numero TONDO e' sospetta, non rassicurante.**
->    `0,6000` da `150,0` e' aritmetica, non misura. Le ancore vere sono
->    sporche (`0,4677` contro `~0,47`, `1,1625` contro `1,1613`).
-> 3. **Un file aperto per due colonne si LEGGE TUTTO** — almeno l'intestazione.
->    `head -1` sul CSV costa un secondo e qui valeva quattro numeri e un
->    "[NON CALCOLABILE]" ritirato.
-> 4. ⚠️ **E i cambi di DATE DIVERSE non si mescolano in silenzio**: i cambi
->    ricavati sono del **17/08**, gli otto dalle commissioni del **10/09**, e
->    su USD/EUR differiscono dello **0,9%** (0,86287 contro 0,8552). Si usano
->    lo stesso — sono l'unica misura che c'e' — ma **la data va accanto al
->    numero**, sempre.
-
----
-
-## 272. 🛤️ LA GUARDIA SU UN PERCORSO CONFRONTATO COME **STRINGA**: sei grafie su otto passavano, e la guardia si dichiarava «a tre tracce» (12/09/2026)
-
-**Il caso reale.** `RIGA_SPREADLOGGER_RACCOLTA.ps1` v2 era nata **proprio** per
-chiudere un buco: il **REALE 10105439** e il **banco 50504400**, essendo BCM e
-senza `-V3` nel percorso, passavano l'eleggibilita'. La correzione aggiungeva il
-rifiuto, e il referto la dichiarava *"rifiutati con lo stesso schema a **tre
-tracce** indipendenti del 100k (`origin.txt`, percorso, login nei log)"*.
-
-🔴 **Le tracce erano DUE**, e mancava proprio quella robusta. Il codice:
-
-```powershell
-# quello che c'era (v2) -- UGUAGLIANZA ESATTA, e il percorso non si guarda
-if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_REALE){ ... }
-if($c.VistoReale){ ... }
-```
-
-contro il `-V3`, che invece era fatto bene:
-
-```powershell
-if($c.Origin   -like "*-V3*"){ ... }   # sottostringa
-if($c.Percorso -like "*-V3*"){ ... }   # E ANCHE sul percorso
-```
-
-**Misurato ESEGUENDO** lo script su otto cartelle finte (non leggendo:
-eseguendo). **Sei su otto PASSAVANO il gate:**
-
-| grafia | esito v2 |
-|---|---|
-| reale in modo **PORTABILE**: nessun `origin.txt`, nessun login recente nei log | 🔴 **PASSA** |
-| banco in modo **PORTABILE** | 🔴 **PASSA** |
-| `C:/BCM_Reale` — slash invece di backslash | 🔴 **PASSA** |
-| `C:\BCM_RE~1` — **nome 8.3** (su Windows esiste SEMPRE) | 🔴 **PASSA** |
-| `C:\BCM_Reale\..\BCM_Reale` — la fuga col `..\` | 🔴 **PASSA** |
-| `"C:\BCM_Reale \"` — spazio in coda, invisibile a occhio | 🔴 **PASSA** |
-| `c:\bcm_REALE` — maiuscole miste | 🟢 rifiutato (`-ieq`) |
-| `C:\BCM_Reale` — identico | 🟢 rifiutato |
-
-🔴 **E' la ricaduta esatta del 10/09**, dove tre gemelli di una guardia analoga
-passavano tutti (la radice di un disco, i nomi 8.3, la fuga col `..\`). La
-classe era gia' pagata una volta: e' stata ripagata perche' la correzione
-successiva non l'ha riletta.
-
-### 🎓 LE TRE COSE DA PORTARE VIA
-1. 🛤️ **Confrontare due PERCORSI non e' confrontare due STRINGHE.** Lo stesso
-   posto sul disco ha infinite scritture legittime: `/` per `\`, il nome 8.3,
-   `..\`, lo spazio o l'apice in coda, l'UNC, il link. Un percorso si
-   **normalizza** prima di confrontarlo (`Get-Item ... .FullName`, ripiego
-   `[IO.Path]::GetFullPath`), e si tiene **una seconda cintura a
-   sottostringa** per quando la cartella non esiste (li' `Get-Item` non
-   scioglie niente). Per il nome 8.3 il segno e' il prefisso troncato:
-   `BCM_RE~`, `MT5_BA~`.
-2. 🚪 **«Rifiuta cio' che riconosco» e' fail-OPEN PER COSTRUZIONE.** Una
-   lista di cose da scartare protegge solo dalle cose che qualcuno ha gia'
-   scritto nella lista: una grafia nuova, o un terminale in modo **portabile**
-   senza `origin.txt`, ci passa davanti. Dove il percorso lo **incolla una
-   persona** (`-CartellaDati`, `-Terminal`, `-Percorso`), la guardia va
-   girata al verso giusto: **pretendere un FATTO POSITIVO** che sia il
-   bersaglio voluto, non l'assenza degli altri.
-3. 🧪 **Una correzione di sicurezza si prova ESEGUENDO le grafie, e l'elenco
-   dei casi va scritto con dentro le grafie.** L'autore aveva provato **6 casi
-   su 6 verdi** — e aveva ragione: **tutti e sei esercitavano `origin.txt` o i
-   log**, cioe' le due tracce che c'erano. **Un test che non puo' fallire non
-   e' un test.** Il caso che rompeva era il settimo, e il settimo lo costruisce
-   chi **non** ha scritto la correzione.
-
-### ✅ COME SI CONTROLLA, in tre domande
-- **Il percorso viene NORMALIZZATO prima del confronto?** Se nel codice c'e'
-  `-eq`/`-ieq` fra un percorso e una costante, la risposta e' no.
-- **La guardia guarda sia il CONTENUTO (`origin.txt`, un log) sia il
-  PERCORSO?** Una traccia sola non e' "tre tracce", e va scritto il numero
-  vero nel referto.
-- **C'e' una manopola che accetta un percorso a mano? Allora chiede una PROVA
-  POSITIVA?** Se no, tutta la robustezza di sopra e' aggirabile con un
-  parametro.
-
-**Riparazione**: `INDURIMENTO_GRAFIE_v1`, pin
-`f13218a265bf626b1ba663229b332cbff9958ac4`, marcatore
-`MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3`. Provato eseguendo: **14 casi su 14**
-(9 grafie di reale/banco rifiutate, 100k rifiutato, cartella anonima fermata
-col motivo, piccolo che passa per tutte e tre le prove positive) piu' la
-regressione sul percorso automatico. Referto:
-`report/MISURA_SPREAD_FOREX_2026-09-12.md` §4.
-
-## 273. 🎛️ IL `-Modello` CON L'ETICHETTA INVERTITA nel file prova — e la prova che una classe non scritta si ripaga in 12 ore (12/09/2026)
-
-**Il caso reale, ed è il SECONDO in due giorni.**
-L'11/09 sera il commit `1764a0e` correggeva tre file prova (`R132a/b/c`) che
-dicevano **`-Modello 1`** scrivendoci accanto **«= TICK REALI»**. Il messaggio di
-quel commit chiamava il difetto **BLOCCANTE** e spiegava perché: `R132c` è un
-cancello di riproduzione, e lanciato in OHLC sarebbe fallito **per costruzione**,
-annullando `R132a` e `R132b` con sé.
-
-🔴 **Quella classe non è mai entrata in questa checklist.** Il 12/09 mattina lo
-stesso difetto, **specchiato**, era dentro altri due file prova già in lista per
-la notte:
-
-```
-prove/R127c_orologio_EURJPY.txt   r.13  "-Deposito 100000 -Etichetta r127c -Modello 4"
-                                  r.17  "-Modello 4 = OHLC M1, come la corsa R103..."
-prove/R127b_sllookback_XAUUSD.txt r.13  "... -Modello 4"
-                                  r.17  "-Modello 4 = OHLC M1, ED E' UN LIMITE DICHIARATO..."
-```
-
-La verità sta in **una riga sola**, `walkforward_generico.ps1` r.172:
-
-```powershell
-[int]$Modello = 4,   # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
-```
-
-**Perché costa più di un numero sbagliato.** `r127c` era **il canarino** della
-notte del weekend: doveva ricomporre `n 394 ±2%` e `PF 1,41 ±0,03` da un'ancora
-**OHLC M1** (R103), e se non ricomponeva **gli altri undici round si
-fermavano**. A `-Modello 4` non poteva ricomporla **per costruzione**: il
-referto del mattino avrebbe scritto *«canarino morto, sospetto il binario
-`b45dd00`»* — undici round fermati e un verdetto **falso** su un commit
-innocente. Su `r127b` (XAUUSD dal 2004, dove **i tick reali non esistono**) il
-PF si legge **per la prima volta**: sarebbe nato non attribuibile.
-
-> ✅ **REGOLA (due mosse, e la seconda è quella che non si salta).**
-> **(1)** In un file prova il `-Modello` si scrive **col numero E con
-> l'etichetta**, e l'etichetta si copia dalla **r.172 del driver**, non a
-> memoria. `4 = tick reali` · `1 = OHLC M1`.
-> **(2)** 🔴 **Il numero giusto lo decide il MODELLO DELL'ANCORA, non la
-> preferenza di casa.** Se il file ha un'ancora con tolleranza al centesimo, il
-> modello **deve** essere quello dell'ancora — «i tick reali sono la verità» non
-> autorizza a confrontare due numeri nati con modelli diversi.
-
-### 🧪 E COME SI ATTRIBUISCE IL MODELLO DI UN'ANCORA senza indovinare
-
-Non si chiede all'autore: si **misura**. Il driver (r.1446) appende `_ohlc` al
-nome del CSV **quando il modello non è 4**:
-
-```powershell
-$Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }
-```
-
-e quel suffisso **non è lettera morta**: nel repo ci sono **288** CSV `_ohlc`
-(`find backtest_pipeline -name "*_ohlc*.csv" | wc -l`, 12/09/2026). Quindi
-l'**assenza** del suffisso è una misura, non un silenzio. Applicato in senso
-opposto sullo stesso round-set, il che è ciò che rende la misura una misura:
-
-| round | dove sta l'ancora | suffisso | modello |
-|---|---|---|---|
-| `r126a` | `..._U30USD_IS.csv` (contiene `1.84892`, verificato con `grep -l`) | **assente** | **tick reali** → `-Modello 4` era GIUSTO |
-| `r127c` | `risultati_archivio/R103_REFERTO_FINALE.md`, intestazione r.6-7: *«Pin `7e2fb0d` (v3). **OHLC M1** → il DD è un LIMITE INFERIORE»* | — | **OHLC M1** → serve `-Modello 1` |
-
-🟡 **E un difetto minore del driver, trovato insieme e NON toccato:** r.830
-scrive `Model=4` **cablato** nell'`.ini` di **anteprima** di `-SoloControllo`,
-mentre la corsa vera scrive `Model=$Modello` (r.1484). Chi gira `-SoloControllo`
-con `-Modello 1` legge *«Model=4»*: un'anteprima che **mente** sul modello.
-Nessun impatto sul runner (non passa `-SoloControllo`), ma è uno stato implicito
-da chiudere.
-
-📌 **La lezione di metodo, che è il motivo per cui questa voce esiste:** il
-difetto del 11/09 era stato **trovato, corretto e spiegato bene** — e non
-registrato. Dodici ore dopo era di nuovo in coda, su due file diversi, e a
-trovarlo è stata la lettura riga per riga dei file prova, non un cancello.
-**Una classe che non entra qui non è stata pagata: è stata rinviata.**
-Referto: `report/CODA_DEL_WEEKEND_2026-09-12.md` §2.
+> 🟢 **E la meta' buona**: quel referto **non ruba merito a nessuno** — non
+> giudica, lo dichiara lui stesso — ed e' la **conferma indipendente** dei numeri
+> rifatti a mano: chi ricostruisce da zero dovrebbe aprirlo **per primo**.
+> ⚠️ **E quando NON c'e'** — come per i blocchi **C e D** — quella conferma
+> indipendente **manca**, e va dichiarato invece che taciuto.

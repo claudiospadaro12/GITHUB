@@ -12,8 +12,10 @@ del 12/09 su A4 e A7. Qui sta **solo cio' che la ricostruzione AGGIUNGE**.
 - **classe 269** — cercato **chi aveva gia' letto questi CSV**. ⚠️ **Il primo
   censimento ne aveva trovati tre; sono CINQUE**, e quello mancante e' il piu'
   diretto: `backtest_pipeline/risultati_prove/r123/REFERTO_ROUND_R123BSTMULT.txt`
-  — il **referto automatico del driver** (09/09 18:50, pin `7cd7b27e`,
-  `modello: 4`), che stampa **gia' tutti e 40 i numeri**. 🟢 Per me e' una buona
+  — il **referto di round scritto dalla RIGA DI LANCIO** (09/09 18:50, pin
+  `7cd7b27e`, `modello: 4`), che stampa **gia' tutti e 40 i numeri**. ⚠️ **Non
+  lo scrive il driver**: `grep REFERTO_ROUND walkforward_generico.ps1` da'
+  **zero** — lo scrivono `RIGA_ROUND_VPS.ps1` e sorelle. 🟢 Per me e' una buona
   notizia: e' la **conferma indipendente** della ricostruzione. Gli altri
   quattro: `R123_RISULTATI_2026-09-09.md`, `ROUND_ALTOPIANO_SUPREV_2026-09-09.md`,
   `IL_WIP_E_DIAGNOSTICA_2026-09-12.md`, `MANOPOLE_INERTI_v2_2026-09-12.md`.
@@ -48,7 +50,7 @@ due passi: **PASSO 1** da OHLC a tick (banda misurata su 8 coppie, +0,054 a
 dichiarato il proprio punto debole:
 
 > *"Questo rapporto e' misurato su **UNA cella sola**. E' **l'anello debole
-> della catena** e va detto**: se le altre celle hanno un'asimmetria IS/OOS
+> della catena** e va detto: **se le altre celle hanno un'asimmetria IS/OOS
 > diversa, la stima sbaglia**."*
 
 🎯 **E la meta' che avevo troncato nella prima stesura e' esattamente quella che
@@ -90,9 +92,36 @@ sul metodo**, mai a favore di A1 _(soglia A2, non sfiorata)_.
 calibrazione). La regola di metodo qui sotto nasce da **n=2 sugli scarti** e da
 **n=5 sulla dispersione del PASSO 2**: si dichiara, non si nasconde.
 
+#### 🎁 E i test indipendenti sono QUATTRO, non due — i due in piu' erano gia' nel repo
+
+Il **blocco C** usa **la stessa catena** (`R123c...txt` r.128-152). Le sue due
+celle stimate, confrontate coi CSV di C _(punti segnalati dal cancello, numeri
+riverificati da me sul file prova e sui CSV)_:
+
+| cella | atteso | misurato | scarto | anelli |
+|---|---|---|---|---|
+| `C · AtrP 8` | ~1,09 [1,03-1,16] | **1,16409** | **+0,074** | **DUE** (solo OHLC 1,015 come base) |
+| `C · AtrP 10` | ~0,85 | **0,61023** | **−0,240** | **UNO** (base tick **0,706** × 1,202 = 0,849) |
+
+➡️ **E la localizzazione sul PASSO 2 si irrobustisce invece di diluirsi:**
+
+| | casi | esito |
+|---|---|---|
+| **solo PASSO 2** | `B 3,0` −0,297 · `C AtrP 10` −0,240 | 🔴 **2 su 2, tutti e due OTTIMISTI, un quarto di punto** |
+| **due anelli** | `B 2,5` −0,266 · `C AtrP 8` **+0,074** | ⚪ **segni OPPOSTI** — e `AtrP 8` cade **dentro** la sua banda dichiarata |
+
 👉 **La regola, con la sua base:** quella catena — e in particolare il **PASSO 2
 calibrato su una cella sola** — va usata per **DIMENSIONARE, mai per DECIDERE**,
-e chi la usa scrive la banda **±0,3**, non ±0,1.
+e chi la usa scrive la banda **±0,3**, non ±0,1. **Base: n=4 sugli scarti**
+(due per R123b, due per R123c) **e n=5 sulla dispersione del PASSO 2.**
+
+✅ **E una preoccupazione e' stata CHIUSA**: il letterale `1,202` fuori da
+`ROUND_ALTOPIANO_SUPREV` **non esiste**, e il metodo compare in **cinque file
+soli** — i due file prova, il piano del round, questo referto, e
+`R135a_U30USD_atrperiod_oltre12.txt`, che e' **RITIRATO** (*"NON METTERE IN
+CODA, NON LANCIARE"*). 👉 **La catena non ha mai stimato nessun motore fuori da
+R123.** _(Misurato dal cancello, su mia richiesta: era la cosa che mi
+preoccupava di piu'.)_
 
 _(⚠️ **Classe 269, e stavolta morde me**: che la stima fosse fallita su `2,5` e
 `3,0` **e' gia' scritto** in `R123_RISULTATI` r.103-105, coi due numeri. Qui e'
@@ -165,17 +194,16 @@ sorpresa da spiegare: e' cio' che il 1,040 richiede.**
 🔎 **E il contro-esempio, costruito apposta perche' questa conclusione sbagli:**
 trasponendo l'unico scarto di binario misurato (+0,065), l'IS vecchio di `3,0`
 sarebbe **~1,019** — ancora verde, ma con un margine **quattro volte piu'
-sottile** di come l'avevo presentato.
+sottile** di come l'avevo presentato. E l'unione calcolata dai numeri **di
+OGGI** vale **0,99619**, non 1,040: lo scarto di binario **non e' uniforme fra
+le celle**.
 
 > 🔎 **E qui il contro-esempio morde davvero, piu' di quanto avessi visto**:
-> **1,019 sta SOTTO 1,040**. Nella trasposizione la condizione della mediante
+> **1,019 sta SOTTO 1,040.** Nella trasposizione la condizione della mediante
 > **non regge nemmeno**, e la mediante pretenderebbe un OOS **sopra** 1,040 —
 > l'opposto di quello che serve. 🔴 **Le due letture del 1,040 sono
-> incompatibili fra loro**: e' questo, piu' di tutto il resto, che rende la sua
-> scomposizione **[NON RECUPERABILE]**, non solo non misurata. E soprattutto: **l'unione calcolata dai
-numeri di OGGI vale 0,99619, non 1,040**. Lo scarto di binario **non e'
-uniforme fra le celle** — motivo in piu' per chiudere con **[NON MISURATA]**,
-non con *"verde"*.
+> incompatibili fra loro**: e' questo, piu' di tutto il resto, che rende quella
+> scomposizione **[NON RECUPERABILE]** — non semplicemente *"non misurata"*.
 
 _(Nella prima stesura avevo scritto *"l'IS non e' rosso: e' VERDE"* come se
 fosse un fatto acquisito. E' il difetto che il cancello ha nominato meglio di
