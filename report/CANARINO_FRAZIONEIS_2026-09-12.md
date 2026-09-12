@@ -572,3 +572,20 @@ rete, il nome o il percorso. **Il controllo distingue i due casi.**
 vanno RIFATTI sul commit nuovo** — il `$PIN` dev'essere un commit che contiene
 `CANARINO_FRAZIONEIS_D30EUR.txt`, e `$SHA_WALK` l'impronta del driver **a quel
 commit**. Non si copiano da qui a memoria: si ricalcolano da `raw`, come sopra.
+
+### ✏️ NOTA AGGIUNTA SUBITO DOPO — e la scrivo perche' la mia stessa avvertenza mi riguarda
+L'avvertenza qui sopra dice *"se dopo `be6781c` qualcuno committa ancora, i due
+valori vanno rifatti"*. **Il commit dopo l'ho fatto io** (`daa0db6`, che aggiunge
+questa appendice al referto). Quindi l'ho verificato invece di lasciare il dubbio:
+
+```console
+$ curl "$B/daa0db6/backtest_pipeline/prove/CANARINO_FRAZIONEIS_D30EUR.txt"
+  HTTP 200   byte 8496   sha256 D6D323F9...2580F75   (identico all'albero, cmp -s)
+$ curl "$B/daa0db6/backtest_pipeline/walkforward_generico.ps1"
+  HTTP 200   byte 102955 sha256 15DE7D5F...6828F1C6
+```
+✅ **`be6781c` e `daa0db6` vanno BENE entrambi come `$PIN`**, con lo **stesso**
+`$SHA_WALK = 15DE7D5F...`: il secondo commit tocca **solo** un `.md`, quindi ne'
+il file prova ne' il driver cambiano di un byte. 🟢 Chi fa il dodicesimo giro puo'
+usare `daa0db6` (la testa) senza ricalcolare niente — **ma se nel frattempo
+qualcun altro ha committato, la regola resta: si ricalcola da `raw`.**
