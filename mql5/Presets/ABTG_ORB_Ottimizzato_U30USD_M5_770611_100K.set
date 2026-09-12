@@ -1,0 +1,237 @@
+; ==========================================================================
+; ABTG_ORB_Ottimizzato -- SEDIA 770611 -- U30USD M5
+; Conto: DEMO 100K 50504263, cartella "C:\Program Files\BCM Markets MT5
+; Terminal -V3", profilo ATTIVO "SQUADRA 100K".
+; NON il piccolo 50503392 (cartella SENZA -V3). NON il reale 10105439.
+; Scritto il 12/09/2026 dall'architetto-prop. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; CHE COS'E' QUESTO FILE, in una riga:
+;   E' la FOTOGRAFIA dei parametri che GIRANO OGGI, non una proposta e non un
+;   miglioramento. NESSUN VALORE E' STATO SCELTO DA ME: sono tutti COPIATI
+;   dalla foto del .chr vivo. Dove qualcosa non torna c'e' un RILIEVO in fondo,
+;   e il valore resta com'e'.
+;
+; --------------------------------------------------------------------------
+; 1) DA DOVE VIENE OGNI RIGA -- una sola fonte, dichiarata
+; --------------------------------------------------------------------------
+;   FONTE [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20260911_033002.log
+;     righe 3604-3694, blocco:
+;       "--- SEDIA: ABTG_ORB_Ottimizzato su U30USD magic 770611 [chart06.chr]"
+;       "; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "; profilo: SQUADRA 100K"
+;     Il log e' una LETTURA del file
+;     ...\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts\
+;     SQUADRA 100K\chart06.chr  -- nessuna scrittura, nessun terminale toccato.
+;
+;   SIMBOLO E TIMEFRAME [stessa corsa del runner, file gemello]:
+;     CODA_01_sedie_attaccate_20260911_033002.log riga 78:
+;       "ABTG_ORB_Ottimizzato U30USD M5 magic 770611 rischio 0.3 [SQUADRA 100K\chart06.chr]"
+;
+;   QUALE CONTO STA IN QUELLA CARTELLA [letto dai GIORNALI, non da una tabella]:
+;     CODA_03_conti_dei_terminali_20260911_033002.log:
+;       "CARTELLA BCA8AD18563BF5B64A433C2662D0A104 ->
+;        C:\Program Files\BCM Markets MT5 Terminal -V3 -> CONTO 50504263"
+;
+; --------------------------------------------------------------------------
+; 2) *** LA DATA DELLA FOTO -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA ***
+; --------------------------------------------------------------------------
+; DOMANDA: un preset scritto da un .chr del 6 settembre descrive la sedia di
+; OGGI, 12 settembre?
+;   -> Il log lo dichiara: "; .chr modificato il: 2026-09-06 08:01".
+;      LA FOTO HA SEI GIORNI. Un .chr si riscrive quando il profilo viene
+;      SALVATO (o alla chiusura del terminale), non a ogni tick: se qualcuno
+;      avesse cambiato un input il 7, l'8, il 9 o dopo SENZA salvare il
+;      profilo, QUESTO FILE NON LO SAPREBBE.
+;   -> QUANTO E' GRAVE, misurato e non stimato: il .chr e' COERENTE con la riga
+;      di CODA_01 della corsa dell'11/09 03:30, che rilegge gli stessi file e
+;      stampa "rischio 0.3" -- ma e' la STESSA fonte riletta, quindi NON e'
+;      una conferma indipendente.
+;   -> CONCLUSIONE ONESTA: questo preset e' *** LA MIGLIOR FOTO CHE ABBIAMO,
+;      ED E' DEL 06/09/2026 ***. L'unica conferma indipendente possibile e'
+;      leggere la finestra Input dell'EA sul terminale 50504263 (-V3), che e'
+;      un gesto sul campo e NON e' nel mio perimetro.
+;
+; --------------------------------------------------------------------------
+; 3) *** COSA C'E' NEL .CHR E QUI NON C'E' -- la differenza dichiarata ***
+; --------------------------------------------------------------------------
+; Il blocco del log stampa "; parametri stampati: 85". Qui sotto ce ne sono
+; *** 53 ***. I 32 mancanti NON sono stati tolti per scelta: NON SONO DELL'EA.
+;
+;   LA PROVA, e non e' un'impressione:
+;   a) gli ultimi 32 (InpMostraEma, InpMostraBollinger, InpEma1..InpEma4,
+;      InpBbPeriodo, InpBbDeviazione, InpMostraMaxIeri..., InpCol*, InpStile*,
+;      InpSpes*, InpMostraEtichette, InpFontSize e un SECONDO InpVerbose) sono
+;      ESATTAMENTE i 32 input di mql5/Indicators/ABTG_Look.mq5, NELLO STESSO
+;      ORDINE -- confronto meccanico dei nomi: coincidono tutti e 32.
+;      ABTG_Look e' un INDICATORE, non un EA.
+;   b) gli stessi 32 compaiono IDENTICI anche sotto "SEDIA: ABTG_TradeExporter
+;      su NZDCAD" (riga 27 del log) -- e ABTG_TradeExporter.mq5 ha QUATTRO
+;      input in tutto;
+;   c) due input con lo stesso nome (InpVerbose due volte, a true e a false)
+;      NON possono stare nello stesso EA: in MQL5 non compila.
+;   -> Quei 32 valori sono gli input dell'INDICATORE ABTG_Look appeso al
+;      grafico, che lo strumento CODA_08 accorpa al blocco <expert>.
+;      *** E' UN DIFETTO DELLO STRUMENTO, segnalato nel rilievo R2. ***
+;      Metterli in un preset di EA vorrebbe dire scrivere il falso.
+;
+;   COME HO DECISO DOVE TAGLIARE (meccanica, non occhio):
+;     ho allineato POSIZIONALMENTE i nomi del blocco del log con le
+;     dichiarazioni "input" di mql5/Experts/ABTG_ORB_Ottimizzato.mq5
+;     (escluse le righe "input group", che sono etichette e non parametri) e ho
+;     tenuto il PIU' LUNGO PREFISSO in cui i nomi coincidono uno per uno.
+;     Risultato: 52 nomi coincidono nell'ordine; poi il repo devia.
+;     MA la riga successiva del .chr, InpSlippagePts, E' un input dell'EA
+;     (sorgente r.248) e NON e' fra i 32 di ABTG_Look: percio' la TENGO,
+;     e il conto torna (52 + 1 + 32 = 85). Gli altri 32 sono i 32
+;     dell'indicatore.
+;     *** PERCHE' POSIZIONALE E NON "FILTRA PER NOME": *** su questa famiglia i
+;     nomi InpEma1..InpEma4 e InpVerbose compaiono DUE VOLTE nel blocco (una
+;     volta dell'EA, una volta dell'indicatore). Un filtro per nome avrebbe
+;     preso il valore sbagliato. L'ordine e' l'unica cosa che li distingue.
+;
+; --------------------------------------------------------------------------
+; 4) QUALE BINARIO DESCRIVE
+; --------------------------------------------------------------------------
+;   CODA_06_quale_codice_gira_20260911_033002.log (cartella
+;   BCA8AD18563BF5B64A433C2662D0A104):
+;     ABTG_ORB_Ottimizzato.mq5
+;       VER 1.02   RIGHE 823   compilato il 2026-08-22 15:11
+;   repo oggi: VER 1.04   RIGHE 1463   (mql5/Experts/)
+;   -> [!!] IL BINARIO IN CAMPO E' INDIETRO RISPETTO AL REPO (1.02 contro 1.04).
+;      E non e' un'inferenza dal numero di versione: si VEDE nei dati.
+;      Il sorgente del repo dichiara 54 input, il .chr vivo ne porta 53,
+;      e il primo che il repo ha in piu' e' *** InpAutoTest ***.
+;      DUE MISURE INDIPENDENTI (versione da CODA_06, elenco input dal
+;      .chr) dicono la stessa cosa. Vedi rilievo R4.
+;
+; --------------------------------------------------------------------------
+; 5) E ADESSO I VALORI: DOVE IL VIVO DIVERGE DAL DEFAULT COMPILATO
+; --------------------------------------------------------------------------
+; Senza questo file, trascinare l'EA su un grafico da' un'ALTRA strategia.
+; I default sono stati RISOLTI (macro #define ed enum sostituiti col numero),
+; non letti a occhio; le voci che non ho potuto risolvere sono dichiarate.
+;
+;   | campo                  | default sorgente   | cio' che GIRA
+;   | InpRangeStartMin       | default 25         | VIVO 30
+;   | InpRangeEndMin         | default 30         | VIVO 45
+;   | InpEndHour             | default 22         | VIVO 21
+;   | InpEndMin              | default 59         | VIVO 0
+;   | InpAllowShort          | default true       | VIVO false
+;   | InpSLMode              | default 0          | VIVO 3
+;   | InpTP_R                | default 2          | VIVO 1.0
+;   | InpTPMode              | default 0          | VIVO 1
+;   | InpTP1Pct              | default 50         | VIVO 0.0
+;   | InpExitOnEmaClose      | default true       | VIVO false
+;   | InpUseEma200Filter     | default false      | VIVO true
+;   | InpMaxRangePct         | default 0          | VIVO 0.8
+;   | InpRiskPercent         | default 1          | VIVO 0.3
+;
+;   Default NON risolvibili in un numero (sono STRINGHE), esclusi dal
+;   confronto sopra. Li elenco per nome, col valore vivo accanto:
+;     InpNewsFile            default "abtg_news.csv" -- VIVO "abtg_news.csv"
+;     InpNewsCurrencies      default "USD" -- VIVO "USD"
+;     InpComment             default "ORB OTT" -- VIVO "ORB OTT"
+;
+; TRADUZIONE DEI CODICI, per chi rilegge (NON sono scelte, sono letture):
+; InpRangeStartHour=14 / Min=30 -> 14:30 ORA SERVER BCM = 15:30 italiane,
+;   apertura del cash USA. Range 14:30-14:45 server = 15:30-15:45 IT. CORRETTO.
+; InpEndHour=21 / InpEndMin=0 -> chiusura 21:00 server = 22:00 italiane.
+; InpExecTF=5 = PERIOD_M5
+; InpSLMode=3 = ORB_SL_HALFRANGE (enum a r.121 del sorgente:
+;   OPPRANGE=0, ATR=1, FIXED=2, HALFRANGE=3) -> lo stop vivo e' META' RANGE.
+;   [!!] E' ESATTAMENTE IL PUNTO DELL'AZIONE A4 DEL PIANO, che propone di
+;   FIRMARE OPPRANGE (=0) al suo posto. QUI RESTA 3 PERCHE' 3 E' CIO' CHE GIRA:
+;   io trascrivo, non scelgo. La firma e' di Claudio. Vedi rilievo R6.
+; InpTPMode=1 = ORB_TP_RANGE -> il target e' InpTPRangeMult=1.5 volte
+;   l'ampiezza del range, NON 1.0 R (InpTP_R=1.0 e' INERTE con TPMode=1).
+; InpTP1Pct=0.0 -> nessuna chiusura parziale: la posizione va tutta al target.
+;
+; --------------------------------------------------------------------------
+; 6) RILIEVI -- cose che ho trovato e NON ho sistemato (non e' il mio mestiere)
+; --------------------------------------------------------------------------
+; R1. MAGIC DOPPIO SU DUE CONTI. Lo stesso magic 770611 gira anche sul
+;     piccolo 50503392. Non e' un problema di esecuzione (i conti sono
+;     separati) ma lo e' per la CONTABILITA': qualunque conteggio che filtri
+;     per magic senza filtrare anche il CONTO mescola due taglie diverse.
+;     Il piano lo sa: azione C1, "rinumerare i magic del conto challenge".
+; R2. DIFETTO DI CODA_08: accorpa al blocco <expert> i 32 input
+;     dell'INDICATORE ABTG_Look. Chiunque usi quel log come fonte senza
+;     accorgersene scrive 32 righe false in un preset di EA. Da correggere
+;     nello strumento (backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1).
+; R3. LA FOTO E' DEL 06/09. Serve una foto .chr fresca prima del giorno 1:
+;     e' l'azione C4 del piano. Questo file va RIGENERATO su quella foto.
+; R4. L'.ex5 NON E' IL .mq5. MT5 esegue il binario; il sorgente accanto non
+;     e' una prova del suo contenuto. Tutto cio' che dico sul binario viene
+;     dall'elenco degli input nel .chr, che e' l'unica traccia del binario
+;     VERO -- ed e' per questo che l'ho usato per tagliare, e non il sorgente.
+; R5. ATTENZIONE AL PRESET OMONIMO GIA' IN REPO:
+;     mql5/Presets/ABTG_ORB_US.set NON e' questa sedia (InpMagic=770601,
+;     range 14:25-14:30, InpSLMode=0, InpTP_R=2.0, InpRiskPercent=1.0) ed e'
+;     per l'EA ABTG_ORB, non per ABTG_ORB_Ottimizzato. Non l'ho toccato.
+; R6. *** AZIONE A4 DEL PIANO: QUI C'E' IL NUMERO CHE SERVE A CLAUDIO. ***
+;     InpSLMode=3 = HALFRANGE e' CIO' CHE GIRA OGGI sul conto challenge.
+;     Il piano propone di firmare OPPRANGE (=0), che vale -4,04 punti di DD
+;     (9,7623 -> 3,840 @1%). IO NON L'HO CAMBIATO: il valore nel .set e' 3.
+;     Se Claudio firma OPPRANGE, questo file va riscritto con InpSLMode=0 --
+;     e a quel punto NON sara' piu' una trascrizione, sara' una DECISIONE,
+;     e come tale deve portare la sua firma e la sua data.
+; R7. TAGLIA DIVERSA DALLE ALTRE: InpRiskPercent=0.3 (le altre quattro sono
+;     a 0.65). Non e' un errore di trascrizione: e' il mezzo peso deciso il
+;     09/08 (report/DEPLOY_GUARDIANO_100K.md, 'ORB a 0,3%').
+; ==========================================================================
+
+InpUsaGuardian=true
+InpRangeStartHour=14
+InpRangeStartMin=30
+InpRangeEndHour=14
+InpRangeEndMin=45
+InpEndHour=21
+InpEndMin=0
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=600
+InpEntryPoints=10.0
+InpK=1.0
+InpAllowLong=true
+InpAllowShort=false
+InpSLMode=3
+InpExecTF=5
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=1000.0
+InpTP_R=1.0
+InpTPMode=1
+InpTPRangeMult=1.5
+InpTP1Pct=0.0
+InpBreakeven=true
+InpUseTrailEMA=true
+InpEmaFast=9
+InpEmaSlow=21
+InpExitOnEmaClose=false
+InpSLBufferPts=0.0
+InpUseCloseConfirm=false
+InpMinBodyPct=50.0
+InpUseEmaFilter=false
+InpUseEma200Filter=true
+InpEma200Period=200
+InpMinRangePct=0.0
+InpMaxRangePct=0.8
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpRiskPercent=0.3
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=USD
+InpNewsFlatten=true
+InpComment=ORB OTT
+InpMagic=770611
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0.0
