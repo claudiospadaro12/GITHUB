@@ -15634,3 +15634,115 @@ dalla v2. Quindi non e' una ripetizione anticipata: e' **la prima volta in
 assoluto**. Quello resta vero **anche di sabato**, e per questo la riga corretta
 tiene la **foto PRIMA/DOPO** di PID e RAM e il `Read-Host 'SI'`: il rischio
 diventa **dichiarato e fotografato**, non eliminato.
+
+---
+
+## 267. 🎚️ PASSARE `controlla_prova.py` E ESSERE **LANCIABILE** SONO DUE COSE DIVERSE: il cancello non sa niente degli **ARGOMENTI DEL DRIVER** (12/09/2026)
+
+**Il caso reale.** Pacchetto `CORRI OGGI`: 53 file prova in archivio, tutti verdi
+al cancello. Ne partono 21. Degli altri, **VENTI non sono raggiungibili da nessuna
+riga esistente** — e non per un difetto loro, ma per un argomento che nessuno
+passa.
+
+🔢 **Misurato, non stimato** (`grep -l "FrazioneIS 0.50" backtest_pipeline/prove/*.txt` = **20**):
+`R128b R128c R128d R128e` · `R129a R129b R129c` · `R130a..R130e` · `R131a..R131h`.
+Tutti e venti scrivono in testa **`-FrazioneIS 0.50 NON E' OPZIONALE`**.
+
+🔴 **Ma `RIGA_SOTTILE_ROUND.ps1` accetta cinque argomenti** — `-Expert -Prova
+-Etichetta -Modello -Deposito` (r.99-106) — **e `-FrazioneIS` non e' fra quelli**;
+`RIGA_ROUND_VPS.ps1` non lo passa al driver (r.647-650); e
+`walkforward_generico.ps1` r.171 ha **`[double]$FrazioneIS = 0.40`**.
+👉 Girarli da quella strada darebbe un taglio **40/60** dove i criteri sono
+congelati su **50/50**: IS e OOS non sarebbero le finestre su cui le soglie sono
+state decise, e **la misura non e' attribuibile**. Non uscirebbe un errore:
+uscirebbero **numeri belli e muti**.
+
+🟢 **E si vede che il 40/60 NON e' sbagliato in se'**: sulla finestra
+`2024.09.26 -> 2026.06.30` da' `IS 2024.09.26-2025.06.09 / OOS 2025.06.10-2026.06.30`,
+identiche a `risultati_archivio/REFERTO_WEEKEND_FASE0.md` r.7 (gia' ricalcolate a
+mano il 09/09). Il difetto non e' il valore: e' che **il file ne chiede un altro e
+nessuno se ne accorge**.
+
+### ✅ LA REGOLA
+**`controlla_prova.py` valida il CONTENUTO del file prova, non la sua
+RAGGIUNGIBILITA'.** Prima di dire *"questi N file sono pronti"* si apre la riga
+che dovrebbe lanciarli e si confronta **argomento per argomento**:
+1. ogni `NON E' OPZIONALE` scritto nel file prova ha **un parametro corrispondente
+   nella riga**?
+2. se il parametro non c'e', **il default del driver coincide** col valore chiesto?
+   (`-FrazioneIS 0.40` chiesto da `R128a` = default: raggiungibile. `0.50`: no.)
+3. se non coincide, il file **non e' "pronto", e' BLOCCATO** — e va scritto con
+   il nome del parametro, non con un generico "da fare".
+
+🧪 **Il contro-esempio, costruito prima**: *"se l'argomento non contasse, cosa
+dovrei vedere?"* — Dovrei vedere i venti file girare e dare le stesse finestre di
+archivio. Invece `0,50 x 21 mesi` sposta il confine IS/OOS di **~3 mesi** rispetto
+a `0,40`: due finestre diverse, due campioni diversi, **stesse soglie**. Il numero
+uscirebbe lo stesso, e sarebbe di un altro esperimento.
+
+📌 **Generalizza a ogni parametro del driver che un file prova pretende e la riga
+non porta**: `-Fino` / `@FINOA`, `-Spread`, `-Ritardo`, `-PermettiCellaSingola`,
+`-Deposito`. **Un cancello verde su un file non lanciabile e' un falso verde.**
+
+---
+
+## 267-bis. ⚓ L'ANCORA D'ARCHIVIO CONFRONTATA CON UN **BINARIO CHE NON ESISTE PIU'** — e il verdetto che butta le celle buone (12/09/2026)
+
+**Il caso reale.** Stesso pacchetto. Il foglio da mandare a Claudio diceva:
+> *"Se un'ancora non torna, il guasto e' nel BANCO o nel BINARIO, non nei
+> parametri — e i parametri NON si leggono."*
+
+E `R127a_slbuffer_NASUSD.txt` r.68: *"Fuori da li' il banco e' sporco e il round
+si ferma prima di qualunque altro numero."*
+
+🔴 **C'e' una TERZA causa, documentata e VOLUTA, e nessuna delle due frasi la
+nomina: l'EA e' cambiato DOPO la misura d'ancora.** Misurato con `git log`:
+
+| quando | cosa |
+|---|---|
+| `400a462` **08/08 06:54** | i CSV d'ancora di `ABTG_SupRev_NAS_H1_Ottimizzato` (PF OOS 1,68815 · n 86) |
+| `3af47ed` 08/08 **11:48** | fix sizing: `OrderCalcProfit` al posto del tick value nudo |
+| `f8ebc32` 19/08 | migrazione Guardian |
+| `872dba8` **08/09 07:13** | pavimento del lotto minimo **PRIMA** di `lotPend` |
+
+E `walkforward_generico.ps1` compila **dalla TESTA del branch `lavoro`**
+(`$EABranch="lavoro"` cablato), non dal pin. Quindi il binario di oggi ha **tre
+cambi** di differenza dall'ancora. Il terzo puo' muovere **anche il numero di
+operazioni**: col codice vecchio, quando `totLot*InpFirstFraction` normalizzava a
+zero, il pendente veniva piazzato lo stesso (secondo trade); col nuovo viene
+saltato. Verificato che **nessuna riproduzione post-fix esiste**: tutti i CSV di
+quell'EA in archivio sono del **08/08**.
+
+🟢 **E il repo aveva gia' la formulazione giusta, scritta da qualcun altro**:
+`R124a_U30USD_04_firstfraction.txt` r.103-127 — *"la sentinella NON e' un cancello
+di validita' del round. Se fallisce, il round resta leggibile (tutte le celle
+girano sullo STESSO binario) ma muore il confronto con l'archivio, e il referto
+deve dirlo forte."* Quel file **corregge esplicitamente** la soglia dei gemelli
+`A1_SUPREV_DOW_H1_01/02` che dice *"se non riproduce -> FILE INVALIDO"*.
+
+### ✅ LA REGOLA
+**Prima di scrivere "l'ancora deve tornare", si data l'ancora e si data il
+binario.** Se fra i due c'e' anche un solo commit sul `.mq5` (o su un suo
+`#include`), l'ancora **non e' piu' un cancello di validita'**: e' un
+**confronto con l'archivio**, e i due esiti sono diversi.
+
+| l'ancora non torna | verdetto giusto |
+|---|---|
+| binario **identico** all'ancora | **banco sporco / corsa non valida** → i parametri NON si leggono |
+| binario **cambiato** dopo l'ancora | **round LEGGIBILE** (tutte le celle sullo stesso binario) → muore il **confronto con l'archivio**, e il referto lo grida |
+
+🔴 Scritta al contrario, la regola fa **buttare 9 celle buone** per un cambio di
+codice documentato e voluto. E' l'errore **opposto** a leggere un numero falso, e
+costa esattamente uguale: un round pagato e non letto.
+
+🧪 **Il contro-esempio**: *"se il binario non contasse, cosa dovrei vedere?"* —
+Dovrei vedere almeno una riproduzione dell'ancora fatta **dopo** l'ultimo commit
+sull'EA. Non c'e': l'ultima e' di **trentadue giorni prima**. Quindi il binario
+conta, e non saperlo non e' un'opinione neutra.
+
+📌 **Il comando, che costa un secondo per EA:**
+```
+git log -1 --format="%h %ad" --date=format:'%d/%m %H:%M' -- mql5/Experts/<NOME>.mq5
+git log -1 --format="%h %ad" --date=format:'%d/%m %H:%M' -- <il CSV dell'ancora>
+```
+Se la prima data e' **dopo** la seconda, l'ancora e' un confronto, non un cancello.
