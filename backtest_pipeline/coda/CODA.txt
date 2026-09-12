@@ -126,7 +126,42 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 
 #  c) R133a -- InpLevelTF, mai messo ad asse in 0 CSV su 2.083, ed e'
 #     l'unica cosa che decide i livelli su quella sedia. 14 passate.
-8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
+# =====================================================================
+#  r133a RITIRATA DALLA CODA IL 12/09/2026 -- e non e' prudenza, e' un conto.
+#
+#  MOTIVO, in tre fatti misurati:
+#  (1) Il driver compila l'EA .mq5 dalla TESTA del branch 'lavoro', NON dal
+#      pin. E' cablato: $EABranch="lavoro" in walkforward_generico.ps1, e la
+#      riga sottile lo DICHIARA a r.54-60 e lo stampa prima di partire.
+#  (2) La testa di 'lavoro' per mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 e'
+#      b5d904a = "WIP FASE 2 DRIVE: modifica in corso". Verificato con
+#      git log -1 su quel file. E NON e' diagnostica: 198 righe aggiunte,
+#      14 togliate, e cambia la LOGICA.
+#  (3) Il cambio morde ESATTAMENTE questo round. Prima:
+#          if(InpEntryMode == ABTG_OPENCONFIRM) MonitorOpenConfirm();
+#          else                                 MonitorRetest();
+#      Dopo:
+#          else if(InpEntryMode == ABTG_BREAKOUT) MonitorBreakoutStrength();
+#      e ABTG_BREAKOUT = 0 (enum r.151), che e' proprio InpEntryMode=0 del
+#      file prova R133a (r.190).
+#
+#  E NON basta che il file prova pinni a neutro i due input nuovi
+#  (InpRunnerTP_R=0.0 r.237, InpMinBreakoutRangeATR=0.0 r.251): quelli
+#  spengono il filtro F1, ma il MECCANISMO D'INGRESSO resta cambiato.
+#  Letto nel codice: MonitorBreakoutStrength pretende che la candela CHIUDA
+#  oltre il livello (cl >= buyTrig) ed entra A MERCATO; MonitorRetest
+#  aspettava la rottura e metteva un LIMIT sul livello. Sono due cose
+#  diverse, e col filtro a 0 la seconda non torna.
+#
+#  CONSEGUENZA: la misura di InpLevelTF sarebbe NON ATTRIBUIBILE -- se
+#  uscisse un numero bello o brutto non sapremmo se e' il TF dei livelli o
+#  il meccanismo d'ingresso nuovo. Una notte spesa per un numero che non si
+#  puo' usare e' peggio di una notte con tre round invece di quattro.
+#
+#  RIENTRA da sola appena ABTG_Nasdaq_Apertura_US e' a un commit NON-WIP.
+#  La riga e' qui sotto, pronta: si togli il '# ' davanti.
+# 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
+# =====================================================================
 
 #  d) R133c -- InpMinBoxPts: 18 gruppi su 18 identici, la scala era fuori
 #     range di 10 volte. 18 passate.
