@@ -1,0 +1,420 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R136a -- LA GEOMETRIA DELLO STOP DELLA SEDIA MIGLIORE DELLA FLOTTA
+#  U30USD H1 FISSO. Asse: InpSLatr. Tutto il resto PINNATO alla cella
+#  della sedia viva 771531 (la cella di R110/R112, riprodotta due volte).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  E' LA PRIMA DELLE QUATTRO DI r136: SI LEGGE PER PRIMA (vedi S1).
+# ======================================================================
+#
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- la bussola, coi numeri
+#    report/PIANO_CHALLENGE_OTTOBRE_v2.md par.2, tabella delle 8
+#    candidate: la 771531 (ABTG_EMA200 U30USD H1) e' l'UNICA che porta
+#    R1, R3, R4 e R5 tutti verdi:
+#      R1 cella promossa : R29 walk-forward 30/30 PASS, cella CENTRO
+#      R3 frequenza      : 1,55 uscite/g = 0,945 POSIZIONI/g (la piu' alta)
+#      R4 rischio vero   : 1,00x MISURATO (l'unica dove dichiarato=vero)
+#      R5 costo all-in   : 54,9x (stop 104,30 idx / spread 1,90) >= 40x
+#    L'unico requisito rotto e' R2 (tre misure di DD nostre che non
+#    coincidono: 6,48% R103 OHLC, 7,21% R29, 7,8323% R112 tick).
+#
+#  PERCHE' QUESTA MANOPOLA E NON UN'ALTRA -- e questo e' il punto
+#    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md par.3-ter, e la
+#    misura e' netta: sulle 153 corse ABTG_EMA200 in archivio (scan H1
+#    OHLC su ~57 simboli + validazioni H4 a tick reali) le colonne messe
+#    ad asse sono CINQUE e sempre le stesse -- InpAllowLong,
+#    InpAllowShort, InpOrder1Atr, InpOrder2Atr (tutte e quattro
+#    dell'INGRESSO) e InpTP_RR. Nient'altro.
+#    >>> SU QUESTO MOTORE E' STATO OTTIMIZZATO L'INGRESSO. L'USCITA NO.
+#    Verificato oggi 12/09/2026 da capo, in due modi indipendenti:
+#      (a) sui CSV: in TUTTI i file d'archivio che hanno la colonna,
+#          InpSLatr vale 1 e basta. Zero file con due valori.
+#            for f in $(grep -rl InpSLatr --include=*.csv backtest_pipeline/)
+#            -> 60 file letti, valori distinti sempre {'1'}
+#      (b) sui file prova: zero occorrenze di InpSLatr come asse.
+#            grep -rn "InpSLatr=.*||Y" backtest_pipeline/prove/  -> 0 righe
+#            (il censimento degli assi di tutti i 153 file prova non ha
+#             la voce InpSLatr: e' una casella LIBERA, non una provata)
+#    E' la manopola che decide la LARGHEZZA DELLO STOP, cioe' la
+#    grandezza che governa i due requisiti in ballo: R2 (il DD) e R5 (il
+#    costo). Su questo motore non e' mai stata girata di un millimetro,
+#    su nessun simbolo, in nessuna delle 153 corse.
+#
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#    mql5/Experts/ABTG_EMA200.mq5, PlaceOrders() r.354-368:
+#      o1 = ema +/- InpOrder1Atr*atr        (1o limite, verso il prezzo)
+#      o2 = ema -/+ InpOrder2Atr*atr        (2o limite, overshoot)
+#      sl = o2 -/+ InpSLatr*atr             r.358
+#    e PlaceLimit() r.369-377:
+#      risk = |px - sl|
+#      rr   = InpTP_RR;  if(rr < InpMinRR) return;      r.374
+#      tp   = px +/- risk*InpTP_RR                       r.375
+#      lot  = LotByRisk(risk, riskPct)                   r.376
+#    >>> QUINDI, e va detto con precisione perche' e' il motivo per cui
+#        questo asse si puo' leggere:
+#        1. I PREZZI D'INGRESSO NON CAMBIANO. o1 e o2 non contengono
+#           InpSLatr. Tutte e 7 le celle piazzano i pendenti agli
+#           STESSI prezzi, nelle STESSE barre.
+#        2. IL FILTRO RR NON MORDE. rr = InpTP_RR = 2,0 e InpMinRR =
+#           1,0: il confronto di r.374 e' 2,0 >= 1,0 in OGNI cella,
+#           INDIPENDENTEMENTE da InpSLatr. Quindi questo asse NON
+#           cambia il numero di ordini per via del filtro RR.
+#        3. IL RISCHIO IN DENARO PER OPERAZIONE E' COSTANTE. lot si
+#           calcola da risk a rischio % fisso: stop piu' largo = lotto
+#           piu' piccolo, perdita in euro invariata. Il confronto fra
+#           celle e' quindi ONESTO per costruzione (non e' una leva).
+#        4. MA IL NUMERO DI OPERAZIONI SCENDE, ED E' MECCANICO.
+#           OnBarNuova r.~330: "if(HasPosition() || HasPending()) return"
+#           -- UNA posizione alla volta. Stop piu' largo + TP piu'
+#           lontano (il TP e' in R, quindi si allarga con lo stop) =
+#           posizioni che vivono PIU' A LUNGO = piu' candidate scartate
+#           perche' la sedia e' occupata. n SCENDE al crescere di
+#           InpSLatr, e non perche' il motore peggiori.
+#           >>> QUESTO E' IL TRANELLO DI QUESTO ROUND. Vedi B4.
+#
+#  IL PAVIMENTO DEL LOTTO NON MORDE, ED E' UN CONTO, NON UNA SPERANZA
+#    Deposito 100.000, rischio 1,0% totale diviso su 2 gambe = 500 EUR
+#    per gamba. Valore del punto U30USD: 0,861 EUR/idx/lotto (misurato
+#    su 4 fonti indipendenti, report/DOSSIER_SCHIERAMENTO_EMA200_DOW_
+#    2026-09-09.md r.148-163). Alla cella piu' larga dell'asse lo stop
+#    vale ~167 idx = 143,7 EUR/lotto -> lotto 3,48. VOLUME_MIN 0,10,
+#    step 0,10 (R114). Margine sul pavimento: 35 volte. Nessuna gamba
+#    viene persa per lotto nullo in nessuna cella.
+#    >>> E' PER QUESTO CHE IL DEPOSITO DI QUESTO ROUND E' 100.000 E NON
+#        10.000. A 10.000 il lotto alla cella larga sarebbe 0,348 ->
+#        MathFloor sullo step 0,10 -> 0,30, cioe' un taglio del 14% del
+#        rischio SOLO sulle celle larghe: l'asse misurerebbe in parte il
+#        pavimento del lotto invece della geometria dello stop. E' lo
+#        stesso effetto che ha prodotto il 7,21% di R29 contro il
+#        7,8323% di R112 (stessa cella, depositi diversi: dossier par.1.1).
+#        LA RIGA DI LANCIO DEVE PORTARE -Deposito 100000. Se parte a
+#        10.000 questo file va riscritto, non "letto con prudenza".
+#
+#  L'ASSE E IL PASSO -- 0,4 .. 1,6 con passo 0,2, centrato su 1,0
+#    7 celle, TRE PER PARTE attorno alla cella viva (1,0). Non e' gusto:
+#    e' la regola che il progetto ha gia' scritto in R123c (centro
+#    esatto, tre celle per parte, cosi' un altopiano di 3 celle puo'
+#    esistere DA TUTTE E DUE le parti della cella viva).
+#    Passo 0,2 = 20% di ATR per passo: sullo stop misurato (104,30 idx)
+#    sono ~17-21 idx per passo, cioe' 9-11 volte lo spread mediano
+#    (1,90). Un passo che muove lo stop di dieci spread e' un passo che
+#    puo' mordere; un passo di 0,05 sarebbe sotto il rumore del feed.
+#    >>> ATTENZIONE AL CONTEGGIO DELLE CELLE: 0,4 + 6*0,2 = 1,6, cioe'
+#        SETTE celle. In virgola mobile MT5 puo' fermarsi a SEI. Il
+#        referto deve contare i valori DISTINTI di InpSLatr nel CSV: se
+#        sono 6, la settima e' un BUCO DICHIARATO, non un risultato.
+#
+#  IL COSTO, CELLA PER CELLA, PAGATO COL NUMERO E PRIMA DEI NUMERI
+#    Pavimento di casa: stop >= 40 x spread (R5). Per questa sedia il
+#    referto del 10/09 (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#    r.246 e r.325) misura: stop mediano 104,30 idx, spread mediano
+#    1,90, P95 2,00 -> 54,9x.
+#    Lo stop dipende dalla gamba: gamba 1 rischia (O1+O2+SLatr)*atr =
+#    (0,5+SLatr)*atr, gamba 2 rischia SLatr*atr. Quindi dal solo stop
+#    mediano misurato l'ATR(14) H1 di U30USD non si ricava a un numero:
+#    sta nella banda [69,5 ; 104,3] idx. ATR NON MISURATO DIRETTAMENTE:
+#    si dichiara la banda e si portano TUTTI E DUE gli angoli.
+#      stop(SLatr) = 104,30 * (SLatr + c)/(1,0 + c)   con c in [0 ; 0,5]
+#      SLatr   stop idx (banda)   x spread 1,90      verdetto R5
+#      0,4      41,7 -  62,6      21,9 - 32,9x   FUORI COSTO ai due angoli
+#      0,6      62,6 -  76,5      32,9 - 40,3x   A CAVALLO del pavimento
+#      0,8      83,4 -  90,4      43,9 - 47,6x   dentro ai due angoli
+#      1,0     104,30 MISURATO         54,9x     dentro (cella viva)
+#      1,2     118,2 - 125,2      62,2 - 65,9x   dentro
+#      1,4     132,1 - 146,0      69,5 - 76,8x   dentro
+#      1,6     146,0 - 166,9      76,8 - 87,8x   dentro
+#    >>> CONSEGUENZA CONGELATA ORA: la cella 0,4 e' ESCLUSA PER COSTO
+#        qualunque numero produca, e la 0,6 e' esclusa se il suo angolo
+#        pessimista resta sotto 40x. Se una di queste due celle vincesse
+#        il round, il verdetto e' "vince una cella FUORI COSTO", non
+#        "abbiamo trovato una configurazione migliore". Lo scrivo adesso
+#        per non poterlo dimenticare dopo.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Il solo punto MISURATO su questo asse e' SLatr = 1,0:
+#      R112 (tick, dep. 100.000, rischio 1,0%, finestra identica a questa)
+#        IS  n 237 | PF 1,20110 | DD 5,7325% | profit +4.585,40
+#        OOS n 517 | PF 1,52365 | DD 7,8323% | profit +23.321,47
+#      (backtest_pipeline/risultati_archivio/R112_CORSA_20260826/
+#       ABTG_EMA200_U30USD_{IS,OOS}_00_metro.csv -- due righe gemelle
+#       identiche al centesimo, G0-C passato)
+#    Le altre sei celle: PF e DD sono [NON MISURATI]. Non invento una
+#    curva: dichiaro cosa mi aspetto come FORMA e cosa la smentisce.
+#      n OOS (uscite): atteso in CALO MONOTONO al crescere di InpSLatr,
+#        per il motivo meccanico del punto 4 qui sopra. Ordine di
+#        grandezza atteso: 560-620 a 0,4 ; 517 a 1,0 (misurato) ;
+#        400-480 a 1,6. Sono STIME, non misure: [STIMATO] sull'unico
+#        vincolo noto (una posizione alla volta, durata che cresce
+#        col TP in R).
+#      DD OOS: atteso fra 5% e 11% su tutte le celle. Il DD NON scende
+#        automaticamente con lo stop largo: la perdita per operazione e'
+#        costante (rischio % fisso), quindi il DD dipende solo dalla
+#        SEQUENZA di perdite. Chi si aspetta "stop largo = DD basso" sta
+#        confondendo la larghezza dello stop con la taglia.
+#      PF OOS: [NON MISURATO] su sei celle su sette.
+#    >>> LA PREVISIONE SCOMODA, scritta prima: MI ASPETTO CHE IL
+#        DEFAULT VINCA, o che ci vada cosi' vicino da non distinguersi.
+#        Ragione: e' l'unico parametro di questo motore che NON e' stato
+#        scelto guardando i dati -- viene dalla guida originale ("SL =
+#        1*ATR oltre il 2o ordine", r.74) -- e i due parametri vicini
+#        che INVECE sono stati ottimizzati (O1, O2) hanno prodotto un
+#        altopiano largo (sul Dow le prime tre celle dello scan H1 fanno
+#        1,549 / 1,510 / 1,508 con O1/O2/TP tutti diversi). Un motore il
+#        cui ingresso e' piatto su tutta la griglia e' un motore che non
+#        vive di dettagli geometrici: non e' la larghezza dello stop a
+#        fargli l'edge. SE ESCE COSI', LA RISPOSTA ONESTA E' "IL DEFAULT
+#        VA BENE" -- ed e' un RISULTATO, non un round buttato: chiude la
+#        casella 3 del certificato di morte sulla sedia migliore che
+#        abbiamo, che oggi e' VUOTA.
+#
+#  B4 -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella SLatr 1,6 torna PF 1,80, DD 5,5% e profitto piu' alto
+#        della cella viva. Sembra una scoperta. Sarebbero invece TRE
+#        artefatti sovrapposti, tutti e tre prevedibili adesso:
+#        (i)  MENO OPERAZIONI, PIU' LUNGHE. Il vincolo "una posizione
+#             alla volta" fa si' che lo stop largo selezioni un
+#             SOTTOINSIEME di operazioni piu' lunghe. In 21 mesi di
+#             INDICE IN SALITA (un solo regime, dichiarato sotto) le
+#             operazioni lunghe long sono favorite DAL REGIME.
+#        (ii) SOPRAVVIVENZA. Uno stop a 167 idx non viene toccato da
+#             storni che a 104 idx chiudevano in perdita. In un toro
+#             quegli storni rientrano quasi sempre. In un orso NO -- e
+#             l'orso in questa finestra non c'e'.
+#        (iii)CAMPIONE. Se n scende sotto ~300 uscite = ~150 posizioni,
+#             il merito e' SOSPESO (Emendamento A) e un PF alto non e'
+#             un merito: e' un numero senza campione.
+#    >>> COME LO DISTINGUO DA UN EDGE VERO, con misure che ho:
+#        1. ALTOPIANO, non picco: servono 3 celle CONTIGUE che passano
+#           tutte (A1). Un artefatto di sopravvivenza cresce monotono
+#           col numero, non fa un piano con la cella viva dentro.
+#        2. IL SEGNO DELL'IS. L'IS (2024.09-2025.06) e' una sottoepoca
+#           diversa. Se il guadagno c'e' solo in OOS e l'IS peggiora,
+#           e' regime, non geometria.
+#        3. PROFITTO PER POSIZIONE, non solo PF. Se PF sale mentre il
+#           profitto per posizione resta piatto, sto solo contando
+#           meno operazioni. Si calcola: profit / (Trades/2,0117).
+#           (2,0117 = fattore uscite/posizioni MISURATO su questa
+#           sedia: 517 uscite = 257 posizioni, per-trade R112,
+#           classe 226. NON e' un numero preso da un'altra sedia.)
+#        4. IL COSTO. Una cella larga vince quasi sempre sul pedaggio:
+#           ma il pedaggio e' gia' contato nella tabella R5 qui sopra,
+#           e non e' quello che cambia un PF di 0,28 punti.
+#        5. SE PASSANO TUTTI E QUATTRO, IL ROUND NON PROMUOVE
+#           NIENTE LO STESSO: una cella scelta guardando l'OOS va a una
+#           finestra NUOVA (o a una prova di regime), e quella prova
+#           questo round non la contiene.
+#
+#  S1 / S2 -- LE DUE SENTINELLE, E NON SONO LA STESSA COSA
+#    S1  RIPRODUZIONE, ED E' IL CANCELLO DI TUTTE E QUATTRO LE r136.
+#        La cella SLatr = 1,0 di questo file e' la cella 00_metro di
+#        R110/R112, con la stessa finestra, lo stesso split (40/60), lo
+#        stesso modello (4), lo stesso deposito (100.000) e lo stesso
+#        rischio (1,0%). DEVE tornare:
+#          IS  n 237 | PF 1,20110 | DD 5,7325%
+#          OOS n 517 | PF 1,52365 | DD 7,8323%
+#        >>> E QUESTA VOLTA S1 HA UN MOTIVO IN PIU' PER ESISTERE, ed e'
+#            un rilievo che questo file porta e che va letto anche se il
+#            round non interessa: l'ABTG_EMA200 sul branch 'lavoro' NON
+#            E' PIU' IL BINARIO DI R112. Il driver compila l'EA dalla
+#            TESTA del branch (dichiarato dalla riga sottile a schermo),
+#            e la testa di ABTG_EMA200.mq5 e' il commit b45dd00 dell'
+#            11/09/2026, il cui messaggio dice "IN CORSO D'OPERA -- NON
+#            COMPILARE: agenti ancora al lavoro".
+#            Il diff fra il pin di R112 (f33f374) e la testa e' stato
+#            LETTO, non assunto: +154/-16 righe, e sono TUTTE l'imbuto
+#            di mortalita' dell'11/09 (contatori long, funzioni
+#            ImbutoRaccogli/ImbutoStampa/ImbutoGiro, un input nuovo
+#            InpLogImbuto) piu' l'aggiunta di "cXX++;" dentro le
+#            condizioni d'ingresso GIA' ESISTENTI. Nessuna condizione
+#            cambiata, nessuna soglia, nessun lotto, nessun ordine.
+#            >>> Quindi l'attesa e' che S1 PASSI. Se passa, questo round
+#                e' anche il COLLAUDO che la patch diagnostica dell'
+#                11/09 e' neutra sul trading, sulla sedia migliore della
+#                flotta -- un risultato che oggi non ha nessuno.
+#            >>> Se S1 NON passa, il verdetto non e' "il round e'
+#                sbagliato": e' "UNA PATCH DICHIARATA DIAGNOSTICA HA
+#                MOSSO I NUMERI", e quella notizia vale piu' di tutto il
+#                round. Va in cima al referto, in grassetto, e le altre
+#                tre r136 NON si leggono finche' non e' spiegata.
+#        S1 E' BLOCCANTE PER L'INTERO GRUPPO r136a/b/c/d: tutti e
+#        quattro i file contengono la cella viva, quindi tutti e quattro
+#        devono ridare quei sei numeri. Quattro riproduzioni indipendenti
+#        della stessa cella, in quattro corse separate: se una sola
+#        diverge, il guasto e' nella macchina o nel binario, non nei
+#        parametri, e i parametri non si leggono.
+#    S2  CONTEGGIO DELLE CELLE. 7 valori distinti di InpSLatr nel CSV.
+#        Se sono 6, si dichiara quale manca (vedi nota sul passo).
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI -- valgono per tutte le r136
+#    A1  ALTOPIANO (merito). Servono >= 3 CELLE CONTIGUE sullo stesso
+#        asse con, CIASCUNA: PF OOS >= 1,40  E  posizioni OOS >= 150
+#        E  DD OOS <= 8,5%  E  costo >= 40x all'angolo PESSIMISTA,
+#        E la cella viva DENTRO la terna.
+#        PF 1,40 e non 1,10: qui non si cerca l'ammissione di un
+#        candidato, si cerca se una manopola BATTE un 1,52365 gia'
+#        misurato. Una soglia sotto il valore in essere premierebbe un
+#        peggioramento.
+#        DD 8,5% e non 10%: il DD promesso di questa sedia e' 7,8323%
+#        (R112) e il muro prop e' 10% totale. 8,5% lascia 1,5 punti di
+#        margine e non consente a una cella di peggiorare il contratto
+#        in essere per comprarsi un PF.
+#        Posizioni e non uscite: Trades/2,0117 (classe 226).
+#    A2  IL PAVIMENTO DEI 150 E' ASIMMETRICO. Una cella con posizioni
+#        OOS < 150 non puo' MAI contare A FAVORE di A1. Puo' contare
+#        CONTRO, come fatto di FORMA della superficie (una pendenza non
+#        ha bisogno di 150 operazioni per essere una pendenza).
+#        >>> E L'IS E' SOSPESO PER COSTRUZIONE SU TUTTE LE CELLE:
+#            237 uscite / 2,0117 = 117,8 posizioni [INFERITO], sotto
+#            150. L'IS di questo round serve al SEGNO e al RISCHIO
+#            (Emendamento B), non al merito. Dichiarato adesso.
+#    A3  ANTI-ALTOPIANO-FINTO. Due celle contigue con n IDENTICO e PF
+#        identico alla quarta cifra NON sono due celle: sono una cella
+#        misurata due volte, cioe' un tratto di asse INERTE. Non
+#        contano per A1. (Censimento 09/09: 874 CSV su 1.960 con
+#        passate a esito identico.)
+#    A4  PICCO. Se la cella viva fa PF OOS >= 1,40 e ENTRAMBE le vicine
+#        immediate fanno PF OOS < 1,25, l'asse dichiara PICCO. Un asse
+#        che dichiara PICCO annulla il verdetto di altopiano.
+#    A5  ASSE INERTE. Se tutte le celle cadono sotto A3, l'asse esce dal
+#        denominatore e si scrive "manopola inerte, MISURATA". E' un
+#        risultato: chiude la casella 3 del certificato lo stesso.
+#    A6  VERDETTO. "C'e' una configurazione migliore del default" si
+#        scrive solo se A1 passa E la cella al CENTRO dell'altopiano e'
+#        DIVERSA dalla viva E il suo vantaggio supera il rumore (vedi
+#        A9). In ogni altro caso il verdetto e' "il default va bene" o
+#        "non c'e' una configurazione robusta su questo asse", e si
+#        scrive cosi'.
+#    A7  RISCHIO, a qualunque n (Emendamento B). Ogni cella con DD OOS
+#        o DD IS > 8,5% e' cella di rischio, non entra in un altopiano,
+#        e va segnalata anche se il PF e' bello.
+#    A8  LA REGOLA DI SELEZIONE, dichiarata INSIEME al numero: si porta
+#        avanti il CENTRO del tratto contiguo, MAI IL PICCO. Se il
+#        centro coincide con la cella viva, la cella viva e' confermata
+#        e non si tocca niente. Il picco non si sceglie mai, nemmeno se
+#        e' bellissimo (in R70 i confronti fatti col picco si sono
+#        RIBALTATI quando sono stati rifatti con questa regola).
+#    A9  BANDA DI RUMORE, e va fissata adesso. Senza un secondo campione
+#        indipendente il rumore su PF non e' misurabile qui. Si usa il
+#        solo riferimento in casa: R112 ha riprodotto R110 al centesimo
+#        su 7 colonne (rumore di macchina = 0). Quindi il rumore che
+#        conta e' quello di CAMPIONE, e si dichiara come soglia
+#        pratica: un vantaggio di PF < 0,10 su una sola cella NON e' un
+#        vantaggio. Serve o un altopiano (A1) o un margine >= 0,10 con
+#        le due vicine concordi.
+#   A10  IL ROUND NON PROMUOVE NIENTE, e non e' una formalita'. Anche
+#        un altopiano perfetto qui dentro non cambia un preset, non
+#        accende una sedia e non tocca il forward. Riaccensioni, taglie
+#        e rischio sono [FIRMA DI CLAUDIO].
+#
+#  BANCO E FINESTRA -- verificate col conto, non ricordate
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver, walkforward_generico.ps1 r.171). Il calcolo:
+#      walkforward_generico.ps1 r.758:
+#        Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#      2024.09.26 -> 2026.06.30 = 642 giorni, floor(642*0,40) = 256,
+#      Meta = 2025.06.09. Quindi:
+#        IS  2024.09.26 - 2025.06.09
+#        OOS 2025.06.10 - 2026.06.30
+#      Sono ESATTAMENTE le finestre stampate nel referto di R112
+#      (R112_CORSA_20260826/REFERTO_R112.txt r.8-10). Se la riga di
+#      lancio cambia FrazioneIS, deposito o @FINOA, S1 decade e questo
+#      file va riscritto.
+#    REGIME: 21 mesi di tick BCM sugli indici = UN SOLO REGIME (toro).
+#      Emendamento della Finestra regola C: NON soddisfatta, e non lo
+#      sara' alla fine di questo round. Dichiarato come buco, non come
+#      dettaglio. E' anche la ragione per cui il contro-esempio B4
+#      punto (ii) non e' escludibile con i dati di questo round.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - ATR(14) H1 di U30USD: [NON MISURATO]. La tabella del costo porta
+#      per questo una BANDA a due angoli, non un numero.
+#    - PROVA DI REGIME: assente (un solo toro, 21 mesi). Niente di
+#      quello che esce di qui e' promuovibile.
+#    - PEGGIOR GIORNATA: in optimizzazione l'export per-trade di questo
+#      EA viene sovrascritto a ogni passata, quindi sopravvive solo
+#      l'ultima cella. La peggior giornata PER CELLA resta [NON
+#      MISURATA] anche dopo la corsa. Il conteggio in POSIZIONI si
+#      ricava dal fattore 2,0117 misurato su questa sedia, che e' una
+#      DERIVAZIONE e va scritta come tale.
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva. La regola dei due lati del 25/08 chiede il lato separato:
+#      su questa sedia esiste gia' (R112 celle 01/02/03_short a dial
+#      1/2/3, PF OOS 1,891/1,886/1,873) ma NON incrociato con InpSLatr.
+#      E' un round suo.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester
+#      le sue GlobalVariable non esistono e la guardia lascia passare
+#      tutto (fail-open dichiarato nel sorgente). I numeri restano
+#      confrontabili con quelli di R112, che girava allo stesso modo.
+#    - InpNewsCurrencies NON e' pinnato di proposito: il pin di una
+#      stringa a valore VUOTO viene IGNORATO da MT5 (classe FiboH4,
+#      controlla_prova.py controllo 3). Il default compilato e' gia' la
+#      stringa vuota che serve. Per la stessa ragione la riga NON va
+#      aggiunta "per completezza": aggiungerla fa fallire il cancello.
+#    - InpLogImbuto e' pinnato a FALSE, e non e' il default. Motivo: in
+#      optimizzazione il Giornale e' per-passata e non si legge, quindi
+#      450 righe di imbuto per passata x 14 passate sono rumore e tempo
+#      macchina. I contatori girano lo stesso (sono fuori dal flag):
+#      l'unica cosa spenta e' la stampa. Non tocca nessuna decisione di
+#      trading -- verificato: il flag e' letto solo in ImbutoStampa() e
+#      ImbutoGiro(), mai in una condizione d'ingresso o d'uscita.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: copiata campo per campo dall'antenato R110_EMADOW_00_metro
+#     e riverificata contro la riga del CSV d'archivio
+#     R112_CORSA_20260826/ABTG_EMA200_U30USD_OOS_00_metro.csv
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+# InpSLatr -> E' L'ASSE, in fondo al file.
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R136A
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC FISSO E VERGINE 786100 (verificato repo-wide il 12/09/2026:
+# grep -rl "786100" . --exclude-dir=.git -> 0 file).
+InpMagic=786100
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     0,4 / 0,6 / 0,8 / 1,0 / 1,2 / 1,4 / 1,6 -- centrato sulla viva 1,0
+InpSLatr=1.0||0.4||0.2||1.6||Y
+# ======================================================================

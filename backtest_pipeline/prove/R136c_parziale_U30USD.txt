@@ -1,0 +1,266 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R136c -- QUANTO SI PORTA A CASA AL PRIMO BERSAGLIO (e la cella NUDA)
+#  U30USD H1 FISSO. Asse: InpTP1Pct. Tutto il resto PINNATO alla cella
+#  della sedia viva 771531 (cella 00_metro di R110/R112).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  SI LEGGE DOPO R136a: la sentinella S1 e' la stessa per tutte e
+#  quattro le r136 (vedi R136a_slatr_U30USD.txt, paragrafo S1/S2).
+# ======================================================================
+#
+#  LA DOMANDA, in una riga
+#    Il 50% sul primo bersaglio non e' mai stato messo in discussione in
+#    153 corse. Questo round chiede: 25 e' meglio? 75? E soprattutto --
+#    LA GESTIONE SERVE, o la sedia va meglio NUDA?
+#
+#  >>> LA CELLA 0 E' LA CELLA NUDA, ED E' LA PIU' IMPORTANTE DEL ROUND.
+#      Letto nel sorgente, ManageAll() r.410 e r.436:
+#        if(!beDone && InpTP1Pct>0 && InpTP1Pct<100) { ... }
+#        if(InpUseTrailing && beDone && e14>0)       { ... }
+#      Con InpTP1Pct = 0 il blocco non entra MAI, quindi beDone resta
+#      false PER SEMPRE, quindi:
+#        - nessun parziale
+#        - NESSUNO STOP IN PARI (anche se InpBreakeven=true)
+#        - NESSUN TRAILING (anche se InpUseTrailing=true)
+#      La cella 0 e' la sedia che porta SOLO stop e TP fissi. Tre
+#      meccanismi spenti da una manopola sola.
+#      E' esattamente la classe di difetto che il censimento dell'11/09
+#      ha contato 24 volte nella flotta (trappola B: "la manopola c'e',
+#      ma un'altra la spegne" -- e sull'ABTG_ORB e' il codice stesso a
+#      stamparlo: "con InpTP1Pct=0 NESSUNO stop in pari, anche se
+#      InpBreakeven=true"). Qui NON e' un difetto: e' il punto. Ma va
+#      scritto adesso, perche' leggere la cella 0 come "parziale
+#      diverso" sarebbe leggere la cosa sbagliata.
+#
+#  PERCHE' E' UNA CASELLA LIBERA -- misurato, non ricordato
+#    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md, riga 771531:
+#    InpTP1Pct e' fra le sette manopole d'uscita MAI MOSSE su questa
+#    sedia. Riverificato oggi 12/09/2026:
+#      - nelle 153 corse ABTG_EMA200 d'archivio InpTP1Pct vale 50 in
+#        tutte e 153 (le sole colonne ad asse sono InpAllowLong,
+#        InpAllowShort, InpOrder1Atr, InpOrder2Atr, InpTP_RR);
+#      - nei 153 file prova del repo InpTP1Pct compare come asse DUE
+#        volte, e su altri EA.
+#    >>> Su questo motore la frazione da incassare al primo bersaglio
+#        non e' mai stata girata di un punto.
+#
+#  E C'E' UN SECONDO MOTIVO PER CUI QUESTO ROUND VALE, e non riguarda i
+#  parametri: CHIUDE LA CLASSE 226 SU QUESTA SEDIA, CON UNA MISURA.
+#    La colonna Trades dei nostri CSV conta DEAL DI USCITA, non
+#    posizioni, e il fattore deal/posizione e' guidato proprio da
+#    InpTP1Pct (classe 226, verificata su 66 file per-trade su 66).
+#    Su questa sedia il fattore misurato e' 2,0117 (517 uscite = 257
+#    posizioni, per-trade R112_CORSA_20260826/pertrade_00_metro_763400.csv).
+#    >>> Nella cella 0 il parziale NON ESISTE, quindi ogni posizione
+#        chiude in UN deal e il fattore e' 1,000 PER COSTRUZIONE.
+#        Quindi Trades(cella 0) E' IL NUMERO DI POSIZIONI, letto
+#        direttamente dal CSV di ottimizzazione, senza per-trade e senza
+#        inferenze. E il rapporto Trades(50)/Trades(0), corretto per la
+#        variazione di durata, e' una SECONDA misura indipendente del
+#        fattore 2,0117 -- su un binario diverso da quello che l'ha
+#        prodotto.
+#        Attesa dichiarata: Trades(0) in OOS attorno a 250-290, cioe'
+#        circa la META' di 517. [STIMATO] Se tornasse ~517, vorrebbe
+#        dire che il parziale NON stava scattando nemmeno nella cella
+#        viva, e sarebbe un rilievo grosso sulla sedia migliore della
+#        flotta.
+#
+#  L'ASSE E IL PASSO -- 0 / 25 / 50 / 75
+#    4 celle, la viva (50) dentro, una per parte piu' la NUDA.
+#    >>> 100 E' ESCLUSO DI PROPOSITO, e non e' una dimenticanza: la
+#        guardia r.410 e' "InpTP1Pct > 0 && InpTP1Pct < 100", quindi a
+#        100 il blocco si spegne ESATTAMENTE come a 0. La cella 100
+#        sarebbe la cella 0 misurata due volte -- una passata buttata e
+#        un finto altopiano (soglia A3). Con passo 25 da 0 a 75 il
+#        problema non esiste.
+#    Passo 25 e non 10: il parziale agisce sul VOLUME, e il volume passa
+#      da NormVol (step del lotto 0,10 su U30USD). A deposito 100.000 il
+#      lotto per gamba sta attorno a 5,5 (rischio 500 EUR / 89,7 EUR per
+#      lotto sullo stop misurato di 104,30 idx x 0,861 EUR/idx/lotto):
+#      il 25% di 5,5 = 1,38 -> 1,3 dopo lo step. Un passo del 10%
+#      (0,55 lotti) sarebbe a ridosso della granularita' del lotto e
+#      misurerebbe in parte l'arrotondamento. Il passo 25 no.
+#      >>> E' anche il motivo per cui questo round gira a deposito
+#          100.000 e non 10.000: a 10.000 il lotto per gamba e' ~0,55 e
+#          il 25% di 0,55 = 0,14 -> 0,10 dopo lo step, cioe' il 18%
+#          invece del 25%. A 100.000 lo scarto e' dell'ordine del 5%.
+#          Lo scarto resta e va dichiarato: LA FRAZIONE EFFETTIVA NON E'
+#          ESATTAMENTE QUELLA NOMINALE in nessuna cella.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Il solo punto MISURATO e' InpTP1Pct = 50 (il default):
+#      R112, tick, dep. 100.000, rischio 1,0%, finestra identica:
+#        IS  n 237 | PF 1,20110 | DD 5,7325%
+#        OOS n 517 | PF 1,52365 | DD 7,8323%
+#    Le altre tre celle: PF e DD [NON MISURATI]. Forma attesa:
+#      n (uscite) OOS:  cella 0  -> 250-290  [STIMATO, vedi sopra]
+#                       cella 25 -> 480-560
+#                       cella 50 -> 517 (MISURATO)
+#                       cella 75 -> 480-560
+#      DD OOS: atteso PIU' ALTO nella cella 0 (nessuno stop in pari,
+#        nessun trailing: ogni operazione perdente perde lo stop pieno)
+#        e piu' basso nella 75. Banda attesa 5%-13%. La cella 0 puo'
+#        sfondare la soglia A7 (8,5%): se succede, NON e' una bocciatura
+#        del round, e' la MISURA del valore della gestione.
+#      PF OOS: [NON MISURATO] su tre celle su quattro.
+#    >>> LA PREVISIONE SCOMODA, e vale la pena scriverla perche' e'
+#        contro-intuitiva: MI ASPETTO CHE LA CELLA NUDA (0) ABBIA UN PF
+#        PIU' ALTO E UN DD PIU' ALTO della cella viva. Ragione: incassare
+#        il 50% a un bersaglio vicino taglia le code positive (il TP
+#        finale e' a 2R e il primo bersaglio sta molto prima), e il
+#        rapporto profitti/perdite ne soffre; in cambio lo stop in pari e
+#        il trailing riducono le perdite piene. E' il baratto classico
+#        fra PF e DD.
+#        >>> SE ESCE COSI', IL VERDETTO NON E' "TOGLIAMO IL PARZIALE".
+#            E' "il parziale COMPRA drawdown col profit factor", e la
+#            scelta fra i due e' una decisione di RISCHIO, cioe'
+#            [FIRMA DI CLAUDIO], non un'ottimizzazione. Su un conto
+#            prop col muro al 10% totale, un DD piu' basso vale piu' di
+#            un PF piu' alto -- ma quella frase la firma lui, non io.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella 0 torna PF 1,90 e profitto doppio. Sembra la scoperta
+#        del mese sulla sedia migliore della flotta. Invece:
+#        (i)  la cella 0 ha META' DELLE OPERAZIONI (circa 270 uscite
+#             contro 517). Ma attenzione: in POSIZIONI sono le STESSE
+#             (~257 contro ~257), perche' il calo e' solo il parziale
+#             che non c'e' piu'. Quindi il campione NON e' peggiorato:
+#             e' la stessa storia contata in un'unita' diversa.
+#             >>> QUESTO E' IL TRANELLO PIU' INSIDIOSO DEL ROUND: chi
+#                 legge Trades come "operazioni" concludera' che la
+#                 cella 0 ha meno campione. E' FALSO. La conversione si
+#                 fa PRIMA di ogni giudizio (classe 226).
+#        (ii) senza trailing, in 21 mesi di INDICE IN SALITA le
+#             posizioni long corrono fino al TP a 2R molto piu' spesso
+#             di quanto correrebbero in un laterale o in un orso. La
+#             cella nuda e' FAVORITA DAL REGIME, e questo round non ha
+#             un orso.
+#        (iii)un PF piu' alto con un DD piu' alto e' una LEVA, non un
+#             miglioramento: si ottiene lo stesso effetto alzando la
+#             taglia, ed e' una decisione di Claudio.
+#    >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO:
+#        1. TUTTI i confronti in POSIZIONI: Trades/2,0117 per le celle
+#           25/50/75, Trades/1,000 per la cella 0. Il denominatore NON
+#           E' LO STESSO fra le celle, ed e' la cosa piu' facile da
+#           sbagliare in questo file.
+#        2. DD <= 8,5% (A7). Se la cella 0 sfonda, e' fuori da qualunque
+#           altopiano anche col PF piu' bello del round.
+#        3. il segno dell'IS deve concordare (l'IS e' un'altra
+#           sottoepoca).
+#        4. la cella 25 e la 75 devono raccontare una storia MONOTONA
+#           con la 50. Se il PF facesse su-giu-su (0 alto, 25 basso, 50
+#           medio, 75 alto), non c'e' una superficie: c'e' rumore, e il
+#           verdetto e' "non c'e' una configurazione robusta su questo
+#           asse".
+#        5. con 4 celle sole, un ALTOPIANO di 3 contigue e' possibile
+#           una volta sola (25-50-75). Se l'altopiano e' quello E il suo
+#           centro e' la 50, la risposta e' "IL DEFAULT VA BENE" -- ed
+#           e' un risultato pieno, non un fallimento.
+#
+#  SOGLIE: valgono le A1..A10 congelate in R136a_slatr_U30USD.txt, con
+#    DUE precisazioni dichiarate qui e solo per questo file:
+#      A1-bis  con 4 celle l'unica terna contigua possibile e' 25-50-75.
+#              La cella 0 NON puo' far parte di un altopiano: e' un
+#              MECCANISMO diverso (tre uscite spente), non un punto
+#              della stessa scala. Si legge da sola, come CONTROLLO.
+#      A2-bis  la conversione in posizioni usa DUE fattori diversi
+#              (1,000 per la cella 0, 2,0117 per le altre tre) e va
+#              scritta accanto a ogni numero. Un confronto fatto con un
+#              fattore solo e' sbagliato di due volte.
+#      A1-ter  il costo (R5) NON cambia su questo asse: lo stop non
+#              dipende da InpTP1Pct. Tutte le celle stanno a 54,9x
+#              (stop 104,30 idx / spread mediano 1,90 --
+#              CANCELLO_COSTO_FLOTTA_2026-09-10.md r.246 e r.325).
+#              Nessuna cella esclusa PER COSTO.
+#
+#  BANCO E FINESTRA -- identici a R136a, e devono esserlo per S1
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver). IS 2024.09.26-2025.06.09, OOS 2025.06.10-2026.06.30.
+#    REGIME: 21 mesi, UN SOLO regime (toro). Regola C dell'Emendamento
+#    della Finestra: NON soddisfatta. Buco dichiarato.
+#    >>> IL DEPOSITO 100.000 NON E' OPZIONALE: e' il valore della cella
+#        di riferimento, ed e' anche quello che rende il passo del 25%
+#        leggibile sopra la granularita' del lotto (vedi sopra).
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - FRAZIONE EFFETTIVA != NOMINALE: NormVol arrotonda allo step 0,10.
+#      Lo scarto e' dell'ordine del 5% a deposito 100.000, ma esiste in
+#      tutte le celle e non e' misurato cella per cella.
+#    - ATTRIBUZIONE nella cella 0: spegne parziale + stop in pari +
+#      trailing INSIEME. Da sola non dice quale dei tre pesa. Il pezzo
+#      mancante lo da' R136d, che spegne il SOLO trailing: la
+#      differenza fra le due attribuisce, e lo stop in pari si ricava
+#      per sottrazione. SI LEGGE IL TERZETTO (b, c, d), non il singolo.
+#    - PROVA DI REGIME: assente. Niente di quello che esce di qui e'
+#      promuovibile.
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e non producibile qui
+#      (in optimizzazione l'export per-trade viene sovrascritto a ogni
+#      passata: sopravvive solo l'ultima cella).
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva.
+#    - GUARDIAN: fail-open nel tester, come in R112. Confrontabile.
+#    - InpNewsCurrencies NON pinnato di proposito (pin di stringa vuota
+#      ignorato da MT5: classe FiboH4, controlla_prova.py controllo 3).
+#    - InpLogImbuto pinnato a false: in optimizzazione il Giornale non
+#      si legge. Non tocca nessuna decisione di trading.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a R136a, che e' l'antenato R110_EMADOW_00_metro
+#     riverificato contro R112_CORSA_20260826/..._OOS_00_metro.csv
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+# InpTP1Pct -> E' L'ASSE, in fondo al file.
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R136C
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC FISSO E VERGINE 786300 (verificato repo-wide il 12/09/2026:
+# grep -rl "786300" . --exclude-dir=.git -> 0 file).
+InpMagic=786300
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (4 celle x 2 finestre = 8 passate)
+#     0 (NUDA: niente parziale, niente pari, niente trailing) / 25 /
+#     50 (la cella viva) / 75.  100 escluso: sarebbe la cella 0 due volte.
+InpTP1Pct=50.0||0||25||75||Y
+# ======================================================================

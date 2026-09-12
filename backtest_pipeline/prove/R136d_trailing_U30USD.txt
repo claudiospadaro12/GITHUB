@@ -1,0 +1,265 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R136d -- IL TRAILING SULLA EMA14: SERVE O E' UN'ABITUDINE?
+#  U30USD H1 FISSO. Asse: InpUseTrailing (interruttore, 2 celle).
+#  Tutto il resto PINNATO alla cella della sedia viva 771531.
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  E' IL FILE DI ATTRIBUZIONE DEL TERZETTO b/c/d: da solo dice poco,
+#  insieme a R136c dice CHI ha fatto cosa.
+#  SI LEGGE DOPO R136a: la sentinella S1 e' la stessa per tutte e
+#  quattro le r136 (vedi R136a_slatr_U30USD.txt, paragrafo S1/S2).
+# ======================================================================
+#
+#  LA DOMANDA, in una riga
+#    Dopo il primo bersaglio questa sedia insegue il prezzo con la EMA14.
+#    In 153 corse quell'interruttore e' stato true 153 volte. Questo
+#    round lo spegne UNA volta, e misura la differenza.
+#
+#  PERCHE' QUATTRO PASSATE SONO BEN SPESE -- e non e' un round "minore"
+#    1. E' L'ANELLO CHE CHIUDE L'ATTRIBUZIONE. R136c spegne TRE cose
+#       insieme (parziale + stop in pari + trailing, tutte agganciate a
+#       beDone). Da solo quel file dice "la gestione vale X" ma non dice
+#       QUALE pezzo. Questo file spegne SOLO il trailing, a parita' di
+#       tutto il resto. Quindi:
+#         effetto(trailing)   = cella 1 - cella 0  DI QUESTO FILE
+#         effetto(parziale+pari) = (cella 0 di R136c) - (cella 0 di qui)
+#       Due misure, tre meccanismi separati, 12 passate in tutto fra i
+#       due file. Senza questo file la spesa di R136c resta ambigua.
+#    2. E' LA CASELLA 3 DEL CERTIFICATO DI MORTE, sulla sedia migliore
+#       della flotta. report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md
+#       riga 771531: InpUseTrailing e' fra le sette manopole d'uscita
+#       MAI MOSSE. Riverificato oggi 12/09/2026: nelle 153 corse
+#       ABTG_EMA200 vale 1 in tutte e 153; nei 153 file prova del repo
+#       InpUseTrailing compare come asse TRE volte, e MAI su questo EA.
+#    3. COSTA 4 PASSATE. Al ritmo misurato su questo stesso EA, stessa
+#       finestra, stesso simbolo (R112: 16 passate in ~6 minuti) sono
+#       circa UN MINUTO E MEZZO di macchina.
+#
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE
+#    mql5/Experts/ABTG_EMA200.mq5, ManageAll() r.436 e seguenti:
+#      if(InpUseTrailing && beDone && e14>0) { ... stop inseguito
+#                                                  sulla EMA14 ... }
+#    >>> Due cose da dire, e sono entrambe verificate nel codice:
+#      (a) IL TRAILING VIVE SOLO DOPO IL PRIMO BERSAGLIO. La guardia
+#          "beDone" e' la stessa che accende lo stop in pari: finche' il
+#          parziale non e' scattato, il trailing non esiste. Quindi
+#          questo interruttore NON e' "trailing dall'ingresso": e'
+#          "inseguimento della seconda meta' della posizione".
+#      (b) NON E' INERTE PER COSTRUZIONE nella configurazione viva.
+#          Serve InpTP1Pct strettamente fra 0 e 100 (qui e' 50) perche'
+#          beDone possa diventare true, e serve la EMA14 disponibile
+#          (e14 > 0, sempre vero dopo le prime 14 barre). Le due
+#          condizioni sono soddisfatte dalla cella viva: l'interruttore
+#          MORDE. Controllato proprio perche' il censimento dell'11/09
+#          ha trovato 24 manopole "mai mosse" che erano in realta'
+#          spente da un'altra manopola: girarle costa passate e non
+#          misura niente. Questa no.
+#
+#  L'ASSE: 2 CELLE, E NON DI PIU'
+#    InpUseTrailing e' un bool: i valori possibili sono due. Non c'e'
+#    niente da raffinare, non c'e' un passo da scegliere, non c'e' un
+#    altopiano da cercare. E' un interruttore, e si misura come tale.
+#    >>> E' anche il motivo per cui questo file NON puo' produrre un
+#        "picco di rumore" nel senso della regola del 19/08: con due
+#        celle non esiste una griglia in cui pescare. C'e' un confronto
+#        fra due configurazioni, e un solo numero di differenza.
+#        Il rischio qui e' l'OPPOSTO: che la differenza sia dentro il
+#        rumore di campione e venga letta come un segnale. Vedi il
+#        contro-esempio.
+#    ORDINE: la cella VIVA (1) e' nella griglia. Insieme alle altre tre
+#    r136 fa la quarta riproduzione indipendente della cella 00_metro.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Cella 1 (trailing acceso) = la cella viva, MISURATA da R112 a tick,
+#    deposito 100.000, rischio 1,0%, finestra identica a questa:
+#      IS  n 237 | PF 1,20110 | DD 5,7325% | profit +4.585,40
+#      OOS n 517 | PF 1,52365 | DD 7,8323% | profit +23.321,47
+#    Cella 0 (trailing spento): PF, DD e n [NON MISURATI].
+#    Forma attesa, dichiarata col verso:
+#      n (uscite) OOS: QUASI INVARIANTE fra le due celle. Il trailing
+#        non cambia gli ingressi (non entra in o1/o2 ne' nel filtro RR)
+#        e non cambia il parziale, quindi il fattore uscite/posizioni
+#        resta ~2,0117 in entrambe. Variazione attesa solo per la
+#        DURATA delle posizioni (vincolo "una alla volta"): spegnendo il
+#        trailing la seconda meta' resta aperta fino al TP a 2R o allo
+#        stop in pari, quindi in media PIU' A LUNGO -> n leggermente piu'
+#        BASSO. Banda attesa: 470-530 uscite. [STIMATO]
+#        >>> Se n uscisse da questa banda, qualcosa che non ho previsto
+#            si e' mosso, e va capito PRIMA di leggere il PF.
+#      DD OOS: atteso PIU' ALTO a trailing spento (la seconda meta' non
+#        viene protetta al di la' dello stop in pari). Banda 6%-12%.
+#      PF OOS: atteso PIU' ALTO a trailing spento, se e solo se il TP a
+#        2R viene raggiunto abbastanza spesso: il trailing taglia le
+#        code positive in cambio di uscite meno profonde.
+#    >>> LA PREVISIONE SCOMODA: mi aspetto una differenza PICCOLA, di
+#        qualche centesimo di PF, perche' il trailing agisce solo sulla
+#        META' della posizione e solo DOPO il primo bersaglio. Se la
+#        differenza fosse grande (oltre 0,15 di PF), la spiegazione piu'
+#        probabile NON e' "il trailing e' decisivo": e' che la EMA14 su
+#        H1 stia agendo come un'uscita anticipata sistematica, e allora
+#        la domanda giusta diventa un'altra (quale TF per la media
+#        dell'inseguimento) e va a un round suo.
+#    >>> E SE LA DIFFERENZA E' PRATICAMENTE ZERO: il verdetto e'
+#        "manopola INERTE, MISURATA" (soglia A5), e vale. Chiude la
+#        casella 3 del certificato su questa sedia con un numero, e
+#        toglie un'incognita dal contratto della sedia migliore che
+#        abbiamo. Un "non cambia niente" misurato e' un risultato.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella 0 torna PF 1,61 contro 1,524 e profitto +15%. Con due
+#        celle sole la tentazione e' dire "spegniamo il trailing".
+#        Sarebbe un errore per tre ragioni, tutte prevedibili adesso:
+#        (i)   DUE CELLE NON FANNO UN ALTOPIANO. Non esiste nessun
+#              vicino che confermi. La regola di casa (centro
+#              dell'altopiano, mai il picco) qui non si puo' nemmeno
+#              applicare: l'unico controllo disponibile e' la
+#              CONCORDANZA IS/OOS.
+#        (ii)  IL REGIME. Non inseguire il prezzo in 21 mesi di INDICE
+#              IN SALITA e' favorito DAL REGIME: le posizioni long
+#              lasciate correre arrivano al TP perche' il mercato sale,
+#              non perche' la geometria sia giusta. Questo round non ha
+#              un orso ne' un laterale.
+#        (iii) IL VERSO DEL RISCHIO. Se il PF sale e il DD sale, e'
+#              una LEVA: si compra lo stesso effetto con la taglia, ed
+#              e' una decisione di Claudio, non un'ottimizzazione.
+#    >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO -- e qui il test e'
+#        piu' severo che negli altri tre file, proprio perche' non c'e'
+#        un altopiano da invocare:
+#        1. LA CONCORDANZA IS/OOS E' OBBLIGATORIA. Il vantaggio deve
+#           esserci in ENTRAMBE le finestre, con lo stesso segno. Su
+#           due celle sole, se il segno si inverte fra IS e OOS il
+#           verdetto e' "non misurabile", non "meta' buono".
+#        2. IL DD NON DEVE PEGGIORARE oltre A7 (8,5%). Il DD promesso
+#           in essere e' 7,8323%: una cella che lo alza cambia il
+#           CONTRATTO della sedia, e un contratto non si cambia per
+#           comprarsi un PF.
+#        3. MARGINE >= 0,10 DI PF (A9). Sotto, e' rumore di campione e
+#           la risposta e' "il default va bene".
+#        4. PROFITTO PER POSIZIONE, non per uscita: profit/(Trades/2,0117),
+#           con 2,0117 misurato su QUESTA sedia (517 uscite = 257
+#           posizioni, per-trade R112, classe 226). Il fattore vale per
+#           entrambe le celle di questo file (il parziale c'e' in tutte
+#           e due), a differenza di R136c dove cambia.
+#        5. COERENZA COL TERZETTO: l'effetto misurato qui deve stare
+#           DENTRO l'effetto totale misurato da R136c (cella 0 di R136c
+#           spegne anche questo). Se l'effetto del solo trailing fosse
+#           PIU' GRANDE dell'effetto di tutti e tre i meccanismi
+#           insieme, uno dei due round sta misurando qualcos'altro, e
+#           va capito prima di scrivere un verdetto. Questo e' il
+#           controllo piu' potente che questa notte produce, e nasce
+#           dal fatto che i due file girano sullo STESSO binario, con la
+#           STESSA finestra e lo STESSO deposito.
+#
+#  SOGLIE: valgono le A1..A10 congelate in R136a_slatr_U30USD.txt, con
+#    DUE precisazioni dichiarate qui e solo per questo file:
+#      A1-bis  A1 (altopiano di 3 celle) E' INAPPLICABILE: le celle sono
+#              due. Il round NON puo' concludere "c'e' una
+#              configurazione robusta". Puo' concludere una di queste
+#              tre, e nessun'altra:
+#                - "il default va bene" (differenza sotto A9);
+#                - "manopola inerte, MISURATA" (A5, differenza ~0);
+#                - "c'e' un CANDIDATO a spegnere il trailing", che per
+#                  diventare altro deve passare da una finestra nuova o
+#                  da una prova di regime. Non promuove niente da qui.
+#      A1-ter  il costo (R5) NON cambia su questo asse: lo stop
+#              d'ingresso non dipende da InpUseTrailing. Entrambe le
+#              celle stanno a 54,9x all'ingresso (stop 104,30 idx /
+#              spread mediano 1,90 -- CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#              r.246 e r.325). Nessuna cella esclusa PER COSTO.
+#              >>> Ma va detto: il trailing ACCESO fa pagare il pedaggio
+#                  di USCITA a un prezzo diverso, e l'ora dell'uscita e'
+#                  [NON MISURATA] su tutta la flotta (limite dichiarato
+#                  in cima al referto del cancello del costo). Il round
+#                  non lo chiude.
+#
+#  BANCO E FINESTRA -- identici a R136a, e devono esserlo per S1
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver). IS 2024.09.26-2025.06.09, OOS 2025.06.10-2026.06.30.
+#    REGIME: 21 mesi, UN SOLO regime (toro). Regola C dell'Emendamento
+#    della Finestra: NON soddisfatta. Buco dichiarato, ed e' il piu'
+#    grosso di questo file (vedi contro-esempio, punto ii).
+#    >>> IL DEPOSITO 100.000 NON E' OPZIONALE: e' il valore con cui e'
+#        girata la cella di riferimento. Con 10.000 S1 non torna.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - DUE CELLE: nessun altopiano possibile, per costruzione. Il
+#      controllo e' la concordanza IS/OOS e la coerenza col terzetto.
+#    - IL TF DELLA MEDIA DELL'INSEGUIMENTO (EMA14 su H1) non e' un
+#      input di questo EA: non c'e' niente da mettere ad asse. Se il
+#      trailing risultasse decisivo, la domanda "quale media" richiede
+#      una MODIFICA AL SORGENTE, che non e' un round ed e' una
+#      decisione separata.
+#    - PROVA DI REGIME: assente. Niente di quello che esce di qui e'
+#      promuovibile.
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e non producibile qui
+#      (in optimizzazione l'export per-trade viene sovrascritto a ogni
+#      passata: sopravvive solo l'ultima cella).
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva.
+#    - GUARDIAN: fail-open nel tester, come in R112. Confrontabile.
+#    - InpNewsCurrencies NON pinnato di proposito (pin di stringa vuota
+#      ignorato da MT5: classe FiboH4, controlla_prova.py controllo 3).
+#    - InpLogImbuto pinnato a false: in optimizzazione il Giornale non
+#      si legge. Non tocca nessuna decisione di trading.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a R136a, che e' l'antenato R110_EMADOW_00_metro
+#     riverificato contro R112_CORSA_20260826/..._OOS_00_metro.csv
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+# InpUseTrailing -> E' L'ASSE, in fondo al file.
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R136D
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC FISSO E VERGINE 786400 (verificato repo-wide il 12/09/2026:
+# grep -rl "786400" . --exclude-dir=.git -> 0 file).
+InpMagic=786400
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = trailing spento / 1 = acceso (la cella viva).
+#     Bool: si scrive in 0/1, non in true/false, perche' l'asse deve
+#     essere numerico (controlla_prova.py controllo 4).
+InpUseTrailing=1||0||1||1||Y
+# ======================================================================

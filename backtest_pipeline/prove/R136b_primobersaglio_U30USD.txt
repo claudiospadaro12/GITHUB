@@ -1,0 +1,261 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R136b -- IL PRIMO BERSAGLIO: LA EMA14 E' UN BERSAGLIO O UN'ABITUDINE?
+#  U30USD H1 FISSO. Asse: InpTP1_ATRmult. Tutto il resto PINNATO alla
+#  cella della sedia viva 771531 (cella 00_metro di R110/R112).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  SI LEGGE DOPO R136a: la sentinella S1 e' la stessa e vale per tutte
+#  e quattro le r136 (vedi R136a_slatr_U30USD.txt, paragrafo S1/S2).
+# ======================================================================
+#
+#  LA DOMANDA, in una riga
+#    Questa sedia porta a casa il 50% della posizione sul PRIMO
+#    bersaglio, e quel bersaglio e' "la EMA14", cioe' un bersaglio
+#    MOBILE. Nessuno ha mai misurato se un bersaglio FISSO (N x ATR)
+#    faccia meglio, peggio o uguale. Questo round lo misura.
+#
+#  PERCHE' E' UNA CASELLA LIBERA E NON UNA GIA' PROVATA -- misurato
+#    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md, riga 771531:
+#    sette manopole d'uscita mai mosse su questa sedia, e
+#    InpTP1_ATRmult e' una delle sette. Verificato oggi 12/09/2026:
+#      - nei 2.087 CSV con colonne Inp*: nelle 153 corse ABTG_EMA200
+#        d'archivio le colonne ad asse sono solo InpAllowLong,
+#        InpAllowShort, InpOrder1Atr, InpOrder2Atr e InpTP_RR.
+#        InpTP1_ATRmult vale 0 in tutte e 153.
+#      - nei file prova: InpTP1_ATRmult compare come asse UNA volta in
+#        tutto il repo (censimento degli assi dei 153 file prova), e
+#        NON su questo EA.
+#    >>> Quindi: il "50% sulla EMA14" non e' una scelta misurata. E' il
+#        default della prima stesura, mai messo in discussione in 153
+#        corse. Il censimento delle uscite lo chiama esattamente cosi':
+#        "su quel motore e' stato ottimizzato l'INGRESSO, l'uscita no".
+#
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE
+#    mql5/Experts/ABTG_EMA200.mq5, ManageAll() r.410-430:
+#      if(!beDone && InpTP1Pct>0 && InpTP1Pct<100)
+#        {
+#         tgt = e14;                                       (la EMA14)
+#         if(InpTP1_ATRmult>0 && atr>0)                    r.413
+#            tgt = openP +/- atr*InpTP1_ATRmult;
+#         ... se il prezzo raggiunge tgt:
+#             chiude InpTP1Pct% della posizione             r.421
+#             if(InpBreakeven) porta lo stop in pari        r.429
+#             beDone = true   -> da qui in poi si abilita il trailing
+#        }
+#    >>> 0 = bersaglio MOBILE sulla EMA14 (il default vivo).
+#        N > 0 = bersaglio FISSO a N x ATR dal prezzo d'ingresso.
+#    >>> E LA MANOPOLA NON FA SOLO IL PARZIALE: sposta anche il momento
+#        in cui scattano lo stop in pari E il trailing, perche' tutti e
+#        tre sono agganciati allo stesso beDone. Un bersaglio piu'
+#        vicino = si protegge prima, si incassa meno; piu' lontano =
+#        si resta esposti piu' a lungo con lo stop originale.
+#        Questo va detto: l'asse muove TRE cose insieme. Non e' un
+#        difetto del round, e' un fatto del motore -- ma vuol dire che
+#        un peggioramento qui NON dice quale dei tre effetti l'ha fatto.
+#
+#  IL RANGE: 0 .. 1,5 con passo 0,25, e il tetto NON e' arbitrario
+#    >>> IL TETTO E' UN CONTO FATTO NEL CODICE, e ha scartato la prima
+#        idea (che era 0..2,5).
+#        Il TP finale sta a risk * InpTP_RR dall'ingresso (r.375), con
+#        risk = (0,5+SLatr)*atr sulla gamba 1 e SLatr*atr sulla gamba 2.
+#        Con SLatr 1,0 e TP_RR 2,0:
+#          gamba 1: TP a 3,00 x ATR dall'ingresso
+#          gamba 2: TP a 2,00 x ATR dall'ingresso
+#        Un primo bersaglio a 2,0 x ATR cadrebbe ESATTAMENTE sul TP
+#        della gamba 2, e a 2,5 lo SUPERAREBBE: su quella gamba il
+#        parziale NON SCATTEREBBE MAI, la posizione chiuderebbe al TP
+#        pieno e la cella misurerebbe "niente parziale" invece di
+#        "parziale piu' lontano". Sarebbero due celle INERTI PER
+#        COSTRUZIONE su meta' delle gambe -- esattamente il difetto che
+#        il censimento dell'11/09 ha contato 24 volte nella flotta
+#        (trappola B: "la manopola c'e', ma un'altra la spegne").
+#        Il tetto 1,5 sta sotto il TP di ENTRAMBE le gambe con margine
+#        (1,5 < 2,0 < 3,0): tutte e sette le celle sono VIVE.
+#    Passo 0,25: la fascia in cui il motore entra e' 0,3-1,5 ATR dalla
+#      EMA200 (InpMinDistAtr/InpMaxDistAtr), quindi la distanza
+#      ingresso->EMA14 sta nello stesso ordine di grandezza. Un passo
+#      di 0,25 ATR (su un ATR fra 69 e 104 idx = 17-26 idx per passo,
+#      cioe' 9-14 volte lo spread mediano 1,90) e' un passo che puo'
+#      mordere e non e' sotto il rumore del feed.
+#    7 celle: 0 / 0,25 / 0,50 / 0,75 / 1,00 / 1,25 / 1,50.
+#      0 + 6*0,25 = 1,5. Se MT5 ne fa 6 per virgola mobile, si dichiara
+#      quale manca (stessa nota di R136a).
+#
+#  >>> LA CELLA VIVA STA AL BORDO, E QUESTA VOLTA E' GIUSTO COSI'.
+#      Attenzione, perche' contraddice in apparenza la regola di casa
+#      ("centro esatto, tre celle per parte"): qui il valore vivo e' 0 e
+#      lo 0 NON E' UN PUNTO DELLA SCALA -- e' un MECCANISMO DIVERSO
+#      (bersaglio mobile contro bersaglio fisso). Non esiste un "meno
+#      0,25" da mettere dall'altra parte. Quindi:
+#        - l'ALTOPIANO si cerca fra le SEI celle fisse (0,25..1,50), e
+#          servono 3 contigue fra quelle;
+#        - il confronto col DEFAULT e' una lettura SEPARATA, e passa da
+#          A9 (margine di PF >= 0,10 con le due vicine concordi).
+#      Detto adesso, non dopo: altrimenti a fine round si sceglierebbe
+#      il criterio che fa vincere il numero che e' uscito.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    Il solo punto MISURATO e' TP1_ATRmult = 0 (il default):
+#      R112, tick, dep. 100.000, rischio 1,0%, finestra identica:
+#        IS  n 237 | PF 1,20110 | DD 5,7325%
+#        OOS n 517 | PF 1,52365 | DD 7,8323%
+#    Le altre sei celle: PF e DD [NON MISURATI]. Quello che dichiaro e'
+#    la FORMA attesa e il verso, non i numeri:
+#      - n (uscite) atteso QUASI INVARIANTE fra le celle: i prezzi
+#        d'ingresso non dipendono da questa manopola (o1/o2 non la
+#        contengono) e il parziale resta al 50% in tutte e sette, quindi
+#        il fattore uscite/posizioni resta ~2. Variazioni attese solo
+#        dalla DURATA delle posizioni (vincolo "una alla volta").
+#        Banda attesa: 480-560 uscite in OOS. [STIMATO]
+#        >>> UNA CELLA CHE ESCE DA QUESTA BANDA E' UN CAMPANELLO: vuol
+#            dire che sta cambiando qualcosa che non ho previsto, e va
+#            capito PRIMA di leggerne il PF.
+#      - DD OOS: atteso fra 5% e 11%. Un bersaglio piu' VICINO dovrebbe
+#        ABBASSARE il DD (si protegge prima) e abbassare anche il
+#        profitto; uno piu' LONTANO il contrario. Se DD e profitto si
+#        muovessero nello STESSO verso, la lettura ovvia e' sbagliata e
+#        va rifatta.
+#      - PF OOS: [NON MISURATO] su sei celle su sette.
+#    >>> LA PREVISIONE SCOMODA: mi aspetto che le celle vicine (0,25 e
+#        0,50) somiglino al default, perche' in quella fascia il
+#        bersaglio fisso cade dove la EMA14 sta in media, e che le
+#        lontane (1,25-1,50) alzino il profitto e ANCHE il DD. Se
+#        succede, il round NON ha trovato una configurazione migliore:
+#        ha trovato una LEVA, e una leva si compra con la taglia, non
+#        coi parametri. Va scritto cosi'.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#        la cella 1,50 torna PF 1,75 e profitto +40%. Sembra che
+#        "lasciar correre il primo bersaglio" sia meglio. Ma:
+#        (i)   piu' il primo bersaglio e' lontano, piu' la posizione
+#              somiglia a "nessun parziale", e in 21 mesi di INDICE IN
+#              SALITA non mettere via il 50% e' favorito DAL REGIME,
+#              non dalla geometria. Questo round non ha un orso.
+#        (ii)  il trailing e lo stop in pari scattano piu' tardi: in un
+#              toro e' un vantaggio, in un crollo e' esattamente il
+#              modo in cui si prende un DD.
+#        (iii) se il DD sale insieme al profitto, il PF puo' salire
+#              mentre il RISCHIO peggiora. Il rischio si legge a
+#              qualunque n (Emendamento B) e A7 lo boccia a 8,5%.
+#    >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO:
+#        1. il DD deve restare <= 8,5% (A7). Un PF piu' alto pagato con
+#           un DD piu' alto non e' un miglioramento: e' piu' leva.
+#        2. serve l'ALTOPIANO fra le celle fisse (3 contigue, A1), non
+#           la cella di bordo da sola. Se vince SOLO la 1,50 -- cioe'
+#           l'estremo della griglia -- non e' un altopiano: e' un BORDO,
+#           e un bordo si estende in un round suo (4 celle in piu' =
+#           8 passate), non si promuove.
+#        3. il segno dell'IS deve concordare.
+#        4. profitto per POSIZIONE, non per uscita: profit/(Trades/2,0117)
+#           con 2,0117 = fattore misurato su QUESTA sedia (517 uscite =
+#           257 posizioni, per-trade R112, classe 226).
+#        >>> E se il vantaggio sta tutto nella coda lontana con DD in
+#            crescita, il verdetto onesto e': "il default va bene, e
+#            chi vuole piu' profitto compra leva, non geometria".
+#
+#  SOGLIE: valgono le A1..A10 congelate in R136a_slatr_U30USD.txt, con
+#    UNA modifica dichiarata qui e solo per questo file:
+#      A1-bis  l'altopiano si cerca fra le SEI celle FISSE (0,25..1,50)
+#              e la cella viva (0) NON deve stare nella terna, perche'
+#              non e' un punto della stessa scala. Restano identiche le
+#              soglie: PF OOS >= 1,40, posizioni OOS >= 150, DD OOS
+#              <= 8,5%, costo >= 40x all'angolo pessimista.
+#      A1-ter  il costo (R5) NON cambia su questo asse: lo stop non
+#              dipende da InpTP1_ATRmult. Tutte le celle stanno a
+#              54,9x, come la cella viva (stop 104,30 idx / spread
+#              1,90 -- CANCELLO_COSTO_FLOTTA_2026-09-10.md r.246 e
+#              r.325). Nessuna cella e' esclusa PER COSTO in questo
+#              file, e questo lo rende l'asse piu' "libero" dei quattro.
+#
+#  BANCO E FINESTRA -- identici a R136a, e devono esserlo per S1
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver). IS 2024.09.26-2025.06.09, OOS 2025.06.10-2026.06.30
+#    (conto in R136a, verificato contro REFERTO_R112.txt r.8-10).
+#    REGIME: 21 mesi, UN SOLO regime (toro). Regola C dell'Emendamento
+#    della Finestra: NON soddisfatta. Dichiarato come buco.
+#    >>> IL DEPOSITO 100.000 NON E' OPZIONALE: e' il valore con cui e'
+#        girata la cella di riferimento. Con 10.000 la sentinella S1
+#        non torna e il confronto con l'archivio muore.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - ATTRIBUZIONE: l'asse muove parziale + stop in pari + inizio del
+#      trailing INSIEME (tutti agganciati a beDone). Un risultato qui
+#      NON dice quale dei tre ha agito. L'attribuzione arriva incrociando
+#      questo file con R136c (che spegne tutto il blocco) e R136d (che
+#      spegne il solo trailing). Si legge il TERZETTO, non il singolo.
+#    - ATR(14) H1 di U30USD: [NON MISURATO]. Serve solo per tradurre il
+#      passo in punti indice, e li' la banda e' dichiarata.
+#    - PROVA DI REGIME: assente. Niente di quello che esce di qui e'
+#      promuovibile.
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e non producibile qui
+#      (in optimizzazione l'export per-trade viene sovrascritto a ogni
+#      passata: sopravvive solo l'ultima cella).
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva; il lato separato esiste in R112 ma non incrociato con
+#      questo asse.
+#    - GUARDIAN: fail-open nel tester, come in R112. Confrontabile.
+#    - InpNewsCurrencies NON pinnato di proposito (pin di stringa vuota
+#      ignorato da MT5: classe FiboH4, controlla_prova.py controllo 3).
+#    - InpLogImbuto pinnato a false: in optimizzazione il Giornale non
+#      si legge. Non tocca nessuna decisione di trading (il flag e'
+#      letto solo in ImbutoStampa/ImbutoGiro, mai in una condizione).
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a R136a, che e' l'antenato R110_EMADOW_00_metro
+#     riverificato contro R112_CORSA_20260826/..._OOS_00_metro.csv
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+# InpTP1_ATRmult -> E' L'ASSE, in fondo al file.
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R136B
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC FISSO E VERGINE 786200 (verificato repo-wide il 12/09/2026:
+# grep -rl "786200" . --exclude-dir=.git -> 0 file).
+InpMagic=786200
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     0 (EMA14, la cella viva) / 0,25 / 0,50 / 0,75 / 1,00 / 1,25 / 1,50
+InpTP1_ATRmult=0.0||0||0.25||1.5||Y
+# ======================================================================
