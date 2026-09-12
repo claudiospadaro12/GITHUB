@@ -22,10 +22,14 @@
 #     Lo screenshot sembra un'altra macchina. Una delle due cose e' sbagliata,
 #     e non si indovina: si stampa il nome del computer.
 #
-#  COSA FA: legge. Nome macchina, tipo di sessione (console o Desktop
-#  remoto), presenza di batteria; poi TUTTI i terminal64.exe trovati SUL
-#  DISCO, tutte le cartelle dati, e per ognuna il conto e il server letti dai
-#  giornali e dai config -- SENZA APRIRE NESSUN TERMINALE.
+#  COSA FA: legge. Il NOME della macchina (che e' il VERDETTO: confrontato
+#  con VMI3047753, il nome del VPS misurato il 12/09 da CODA_04), il tipo di
+#  sessione e la batteria come INDIZI dichiarati tali; poi i terminal64.exe
+#  trovati NEI RAMI CHE STAMPA (tutte le unita' fisse, meno Windows e simili, a
+#  profondita' dichiarata -- NON "tutto il disco"), le cartelle DATI vere
+#  (quelle con MQL5 dentro, come CODA_03 r.63), e per ognuna il CONTO, il
+#  SERVER e l'AZIENDA letti dai giornali IN CONDIVISIONE (classe 163)
+#  -- SENZA APRIRE NESSUN TERMINALE.
 #
 #  COSA NON FA: non apre, non chiude, non installa, non disinstalla, non
 #  scrive niente dentro nessuna cartella di MT5, non tocca nessun processo.
@@ -68,7 +72,7 @@ function Nota([string]$s, [string]$col = 'Gray') {
   $righe.Add($s) | Out-Null
   # SCRIVE SUBITO (classe 94-bis): se la corsa muore a meta', il referto
   # esiste comunque con tutto cio' che si e' misurato fino a quel punto.
-  # Dentro un & { } un errore terminante ammazza anche la raccolta della
+  # Dentro il guscio di una riga di lancio un errore terminante ammazza
   # riga di lancio (classe 153-ter): senza questo, Claudio resta con niente.
   try { Add-Content -LiteralPath $script:refPath -Value $s -Encoding ASCII -ErrorAction SilentlyContinue } catch { }
 }
@@ -181,14 +185,33 @@ Nota '    e cio'' che sta FUORI da questo elenco NON e'' stato guardato.' 'Yello
 $ESCLUDI = @('Windows', '$Recycle.Bin', 'System Volume Information', '$WinREAgent', 'Recovery', 'PerfLogs', 'Config.Msi', 'OneDriveTemp')
 $radici  = New-Object System.Collections.Generic.List[string]
 $piatte  = New-Object System.Collections.Generic.List[string]
-foreach ($dl in @(Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction SilentlyContinue)) {
-  $rd = $dl.DeviceID + '\'
-  $piatte.Add($rd) | Out-Null
-  foreach ($c in @(Get-ChildItem -LiteralPath $rd -Directory -ErrorAction SilentlyContinue)) {
-    if ($ESCLUDI -notcontains $c.Name) { $radici.Add($c.FullName) | Out-Null }
+# try/catch OBBLIGATORIO: -ErrorAction SilentlyContinue NON copre il caso in
+# cui il comando stesso non si risolve, ne' un CIM/WMI rotto, e con
+# $ErrorActionPreference='Stop' quello ammazza tutta la corsa. Misurato al
+# banco il 12/09/2026: senza questo try la corsa moriva QUI, a sezione 2.
+$unita = @()
+try { $unita = @(Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction Stop) } catch { $unita = @() }
+if ($unita.Count -eq 0) {
+  Nota '    unita'' fisse NON elencabili (CIM non ha risposto): ripiego su C: sola.' 'Yellow'
+  Nota '    ATTENZIONE: se un MT5 stesse su un''altra unita'', questa corsa NON lo vedrebbe.' 'Yellow'
+  $unita = $null
+  # Test-Path prima: su una radice che non si risolve, -Directory non e'
+  # nemmeno un parametro valido (errore di BINDING, che -ErrorAction non zittisce).
+  if (Test-Path -LiteralPath 'C:\') {
+    $piatte.Add('C:\') | Out-Null
+    foreach ($c in @(Get-ChildItem -LiteralPath 'C:\' -Directory -ErrorAction SilentlyContinue)) {
+      if ($ESCLUDI -notcontains $c.Name) { $radici.Add($c.FullName) | Out-Null }
+    }
+  }
+} else {
+  foreach ($dl in $unita) {
+    $rd = $dl.DeviceID + '\'
+    $piatte.Add($rd) | Out-Null
+    foreach ($c in @(Get-ChildItem -LiteralPath $rd -Directory -ErrorAction SilentlyContinue)) {
+      if ($ESCLUDI -notcontains $c.Name) { $radici.Add($c.FullName) | Out-Null }
+    }
   }
 }
-if ($piatte.Count -eq 0) { $piatte.Add('C:\') | Out-Null; $radici.Add('C:\') | Out-Null }
 foreach ($p in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, $env:LOCALAPPDATA, $env:USERPROFILE)) {
   if ($p) { $radici.Add($p) | Out-Null }
 }
@@ -199,6 +222,7 @@ Nota ('    rami ESCLUSI per nome: ' + ($ESCLUDI -join ', ')) 'DarkGray'
 $exe = New-Object System.Collections.Generic.List[string]
 # la radice di ogni unita', piatta: un terminal64.exe messo in C:\ diretto
 foreach ($r in $piatte) {
+  if (-not (Test-Path -LiteralPath $r)) { continue }
   foreach ($f in @(Get-ChildItem -LiteralPath $r -Filter 'terminal64.exe' -File -ErrorAction SilentlyContinue)) {
     if (-not $exe.Contains($f.FullName)) { $exe.Add($f.FullName) | Out-Null }
   }
@@ -258,12 +282,29 @@ foreach ($x in ($exe | Sort-Object)) {
 Nota ''
 Nota '=== 3. LE CARTELLE DATI IN APPDATA, E CHE CONTO HANNO DENTRO ===' 'Cyan'
 
-$root = Join-Path $env:APPDATA 'MetaQuotes\Terminal'
+# Se APPDATA non c'e', Join-Path con $null TIRA e ammazza la corsa qui
+# (misurato al banco il 12/09/2026: morte a sezione 3, referto troncato).
+$appd = $env:APPDATA
+if (-not $appd) { $appd = Join-Path $env:USERPROFILE 'AppData\Roaming' }
+$root = Join-Path $appd 'MetaQuotes\Terminal'
 if (-not (Test-Path -LiteralPath $root)) {
   Nota ('    NON ESISTE ' + $root + ' -- nessuna cartella dati in APPDATA') 'Yellow'
 } else {
-  $dirs = @(Get-ChildItem -LiteralPath $root -Directory -ErrorAction SilentlyContinue)
-  Nota ('    cartelle dati trovate: ' + $dirs.Count)
+  # Una cartella DATI e' una cartella che ha MQL5 dentro. Stesso filtro di
+  # CODA_03_conti_dei_terminali.ps1 r.63, che il 12/09 sul VPS ha contato 6:
+  # quel 6 e' giusto e completo. Le altre (Common, Community, Help e due
+  # residui con nome a hash) NON sono terminali e non vanno contate: senza
+  # questo filtro il referto stamperebbe 11 righe, 5 delle quali marcate
+  # "ESTERNO / NON IN MAPPA" in un documento che serve a decidere se si puo'
+  # disinstallare qualcosa.
+  $tutte = @(Get-ChildItem -LiteralPath $root -Directory -ErrorAction SilentlyContinue)
+  $dirs  = @($tutte | Where-Object { Test-Path -LiteralPath (Join-Path $_.FullName 'MQL5') })
+  $altre = @($tutte | Where-Object { -not (Test-Path -LiteralPath (Join-Path $_.FullName 'MQL5')) })
+  Nota ('    cartelle DATI vere (hanno MQL5 dentro): ' + $dirs.Count + '   -- il 12/09 sul VPS erano 6 (CODA_03)')
+  if ($altre.Count -gt 0) {
+    Nota ('    altre ' + $altre.Count + ' cartelle SENZA MQL5, che NON sono terminali (cartelle condivise di MetaQuotes e residui): ' + (($altre | ForEach-Object { $_.Name }) -join ', ')) 'DarkGray'
+    Nota '    Non si contano, non si censiscono, non si disinstallano.' 'DarkGray'
+  }
 
   foreach ($d in $dirs) {
     $o = Join-Path $d.FullName 'origin.txt'
@@ -277,13 +318,27 @@ if (-not (Test-Path -LiteralPath $root)) {
     Nota ''
     Nota ('    ' + $d.Name) 'White'
     Nota ('       origin.txt : ' + $orig)
-    Nota ('       verdetto   : ' + $etichetta)
+    Nota ('       in mappa?  : ' + $etichetta)
 
-    # --- il conto e il server, dai GIORNALI (non si apre niente) --------
-    $conto  = '[NON TROVATO nei giornali]'
-    $server = ''
-    $ultimo = '[nessun giornale]'
-    $nlog   = 0
+    # --- il conto, il server e l'AZIENDA, dai GIORNALI (non si apre niente)
+    #
+    #  Ogni campo si cerca nell'ultima riga che LO CONTIENE, non nell'ultima
+    #  riga che combacia con un ALTRO campo. Nei giornali veri del VPS
+    #  (CODA_03_conti_dei_terminali_20260912_033002.log) la riga del conto e':
+    #      '50503392': previous successful authorization performed from ...
+    #  che NON contiene nessun server: cercandolo li' dentro si resta a mani
+    #  vuote su tutte e sei le cartelle.
+    #
+    #  E la riga che dice DI CHI e' il terminale e' un'altra ancora (company/
+    #  broker): su Pepperstone e Tickmill, dove il conto NON si trova nei
+    #  giornali, quella e' l'UNICA misura disponibile -- ed e' la ragione per
+    #  cui questo censimento esiste. Regex presa da CODA_03 r.96.
+    $conto   = '[NON TROVATO nei giornali]'
+    $server  = ''
+    $azienda = ''
+    $ultimo  = '[nessun giornale]'
+    $nlog    = 0
+    $logMuti = 0
     foreach ($sotto in @('logs', 'MQL5\Logs')) {
       $lp = Join-Path $d.FullName $sotto
       if (-not (Test-Path -LiteralPath $lp)) { continue }
@@ -293,19 +348,26 @@ if (-not (Test-Path -LiteralPath $root)) {
         $ultimo = $lg[0].LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV) + '   (' + $lg[0].Name + ')'
       }
       foreach ($f in ($lg | Select-Object -First 5)) {
-        $m = @(Select-String -LiteralPath $f.FullName -Pattern "'([0-9]{4,12})'\s*:\s*(?:authorized|previous successful|login)" -AllMatches -ErrorAction SilentlyContinue)
-        if ($m.Count -gt 0) {
-          $ult = $m[$m.Count - 1]
-          $conto = $ult.Matches[$ult.Matches.Count - 1].Groups[1].Value
-          $ms = [regex]::Match($ult.Line, '(?:authorized on|to)\s+([A-Za-z0-9_\-\. ]+)')
-          if ($ms.Success) { $server = $ms.Groups[1].Value.Trim() }
-          break
+        $txt = Leggi-Condiviso $f.FullName
+        if (-not $txt) { $logMuti++; continue }
+        $mc = [regex]::Matches($txt, "'([0-9]{6,12})'\s*:\s*(?:login|authoriz|connesso|previous)")
+        if ($mc.Count -gt 0 -and $conto -like '*NON TROVATO*') { $conto = $mc[$mc.Count - 1].Groups[1].Value }
+        if (-not $server) {
+          $sv = [regex]::Matches($txt, 'authorized on\s+([A-Za-z0-9_\-\.]+)')
+          if ($sv.Count -gt 0) { $server = $sv[$sv.Count - 1].Groups[1].Value }
+        }
+        if (-not $azienda) {
+          $ma = [regex]::Match($txt, '(?im)^.*\b(company|azienda|broker)\b\s*:?\s*(.+?)\s*$')
+          if ($ma.Success) { $azienda = $ma.Groups[2].Value.Trim() }
         }
       }
       if ($conto -notlike '*NON TROVATO*') { break }
     }
-    Nota ('       giornali   : ' + $nlog + ' file, il piu'' recente del ' + $ultimo)
-    Nota ('       CONTO      : ' + $conto + $(if ($server) { '   su server ' + $server } else { '' })) $(if ($conto -like '*NON TROVATO*') { 'Yellow' } else { 'Green' })
+    Nota ('       giornali   : ' + $nlog + ' file, il piu'' recente del ' + $ultimo + $(if ($logMuti -gt 0) { '   [' + $logMuti + ' NON LEGGIBILI]' } else { '' })) $(if ($logMuti -gt 0) { 'Yellow' } else { 'Gray' })
+    if ($logMuti -gt 0) { Nota '       ATTENZIONE: giornali NON letti -> un "NON TROVATO" qui sotto puo'' essere un buco di lettura, non un''assenza.' 'Yellow' }
+    Nota ('       CONTO      : ' + $conto + $(if ($server) { '   su server ' + $server } else { '   [nessun "authorized on" nei giornali letti]' })) $(if ($conto -like '*NON TROVATO*') { 'Yellow' } else { 'Green' })
+    if ($azienda) { Nota ('       AZIENDA    : ' + $azienda + '   <- e'' questa la riga che dice DI CHI e'' il terminale') 'Green' }
+    else { Nota '       AZIENDA    : [nessuna riga company/broker nei giornali letti]' 'Yellow' }
 
     # --- e se i giornali non lo dicono, i config ------------------------
     if ($conto -like '*NON TROVATO*') {
@@ -332,23 +394,31 @@ if (-not (Test-Path -LiteralPath $root)) {
     if (Test-Path -LiteralPath $pr) {
       $ch = @(Get-ChildItem -LiteralPath $pr -Recurse -File -Filter '*.chr' -ErrorAction SilentlyContinue)
       $sedie = New-Object System.Collections.Generic.List[string]
+      $chrMuti = 0
       foreach ($x in $ch) {
-        $t = Get-Content -LiteralPath $x.FullName -Raw -ErrorAction SilentlyContinue
-        if (-not $t) { continue }
+        $t = Leggi-Condiviso $x.FullName
+        if (-not $t) { $chrMuti++; continue }
+        # symbol= sta nel blocco CHART, non dentro <expert>: cercato li'
+        # dentro non si trova MAI e la colonna stamperebbe '-' sempre.
+        $msy = [regex]::Match($t, '(?m)^\s*symbol=([^\r\n]+)')
+        $syChart = if ($msy.Success) { $msy.Groups[1].Value.Trim() } else { '[simbolo non letto]' }
         $m = [regex]::Match($t, '(?s)<expert>(.*?)</expert>')
         while ($m.Success) {
           $b = $m.Groups[1].Value
           $mn = [regex]::Match($b, '(?m)^\s*name=([^\r\n]+)')
           $ms2 = [regex]::Match($b, '(?m)^\s*symbol=([^\r\n]+)')
           if ($mn.Success) {
-            $sy = if ($ms2.Success) { $ms2.Groups[1].Value.Trim() } else { '-' }
-            $sedie.Add($mn.Groups[1].Value.Trim() + '  ' + $sy) | Out-Null
+            $sy = if ($ms2.Success) { $ms2.Groups[1].Value.Trim() } else { $syChart }
+            $sedie.Add($mn.Groups[1].Value.Trim() + '  ' + $sy + '   (' + $x.Name + ', salvato il ' + $x.LastWriteTime.ToString('yyyy-MM-dd HH:mm', $INV) + ')') | Out-Null
           }
           $m = $m.NextMatch()
         }
       }
-      Nota ('       grafici    : ' + $ch.Count + ' file .chr,  SEDIE agganciate: ' + $sedie.Count) $(if ($sedie.Count -gt 0) { 'Yellow' } else { 'Gray' })
+      Nota ('       grafici    : ' + $ch.Count + ' file .chr (TUTTI i profili salvati, non solo quello attivo),  SEDIE agganciate: ' + $sedie.Count + $(if ($chrMuti -gt 0) { '   [' + $chrMuti + ' .chr NON LEGGIBILI]' } else { '' })) $(if ($sedie.Count -gt 0 -or $chrMuti -gt 0) { 'Yellow' } else { 'Gray' })
       foreach ($s in $sedie) { Nota ('          ' + $s) 'White' }
+      Nota '       LIMITE: un .chr e'' una FOTO SALVATA, non lo stato vivo (CODA_05). "0 sedie"' 'Yellow'
+      Nota '       qui NON autorizza a disinstallare niente: vuol dire "nessuna sedia' 'Yellow'
+      Nota '       nell''ultimo profilo salvato", e il profilo si salva alla chiusura.' 'Yellow'
     }
   }
 }
@@ -373,6 +443,9 @@ Nota ''
 Nota ('fine: ' + (Get-Date).ToString('yyyy-MM-dd HH:mm:ss', $INV))
 Nota 'NON e'' stato aperto, chiuso, installato o disinstallato NIENTE.' 'Green'
 Nota 'NESSUN terminale e'' stato avviato: le sedie sono lette dai file .chr sul disco.' 'Green'
+Nota 'FILE: il referto e'' scritto in ASCII, come i .ps1 di casa. Gli accenti dei'
+Nota 'messaggi di Windows diventano "?": e'' estetica, nessun numero cambia.'
+Nota 'CENSIMENTO COMPLETO: la corsa e'' arrivata in fondo. Se questa riga MANCA, il referto e'' TRONCATO.'
 
 Set-Content -LiteralPath $refPath -Value $righe -Encoding ASCII
 
