@@ -42,7 +42,19 @@ scritto. **Non lo decido io.**
 
 # 1️⃣ 🖥️ IL TERMINALE — sei installazioni, una sola e' quella giusta
 
-✏️ **CORRETTO IL 12/09/2026: non SEI, OTTO.** Qui c'era scritto *"Sul VPS ci
+✏️ **NOTA DEL 12/09/2026 — e la prima versione di questa nota era SBAGLIATA.**
+🟢 **Il SEI e' GIUSTO.** `CODA_03` r.63 conta cartella dati chi ha **`MQL5`
+dentro**, che e' la definizione giusta, e sul VPS sono **sei**. Sotto
+`MetaQuotes\Terminal` ci sono anche `Common`, `Community`, `Help` e **due
+residui senza `MQL5`** (`15BEB048…` 0,07 GB e `FF5C0E29…` 0,00 GB): `CODA_04`
+li **pesa** perche' misura il disco, ma **non sono terminali**.
+🔴 Stamattina avevo scritto qui *"non SEI, OTTO"*: **era un mio errore**, e la
+causa e' che ho confrontato due conteggi senza leggere la **definizione** dietro
+a ciascuno. Memoria: `report/DUE_MACCHINE_2026-09-12.md` (sezione ERRATA).
+
+<details>
+<summary>La nota sbagliata, lasciata per memoria</summary>
+✏️ ~~**CORRETTO IL 12/09/2026: non SEI, OTTO.**~~ Qui c'era scritto *"Sul VPS ci
 sono SEI cartelle dati MT5"*: **falso**, e l'errore e' mio. `CODA_03` scrive
 *"cartelle dati: 6"* perche' conta quelle di cui **sa dire il programma** — ed
 e' corretto lui. Incrociando con `CODA_04`, che le **pesa tutte**, le cartelle
@@ -53,7 +65,9 @@ una misura. E la cautela era **scritta nel referto** (`CODA_03` dice *"NON
 TROVATO nei giornali recenti (non vuol dire che non ci sia)"*): l'ho ignorata
 scrivendo un totale. Misura: `report/DUE_MACCHINE_2026-09-12.md`.
 
-Sul VPS ci sono **SEI cartelle dati MT5 IDENTIFICATE** (misurato stanotte,
+</details>
+
+Sul VPS ci sono **SEI** cartelle dati MT5 (misurato stanotte,
 `backtest_pipeline/coda/referti/CODA_03_conti_dei_terminali_20260911_033002.log`):
 
 ## ✅ L'UNICO DA TOCCARE

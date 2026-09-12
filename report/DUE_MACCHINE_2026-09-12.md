@@ -53,7 +53,37 @@ Tickmill del VPS**, non sul PC desktop. Quindi:
   avrebbe stampato *"NON INSTALLATO"* su Tickmill. Difetto trovato **prima** di
   consegnarla, ma trovato per fortuna di un referto, non per metodo.
 
-## 🔴 E UN NUMERO DI CASA CHE ERA SBAGLIATO: **non SEI, OTTO**
+## ✏️ ERRATA DEL 12/09 (poche ore dopo) — **QUI SOTTO AVEVO SBAGLIATO IO, E IL NUMERO GIUSTO ERA IL SUO**
+
+🔴 **Tutto il paragrafo che segue e' da leggere come un mio errore, non come una
+correzione.** Ho accusato `CODA_03` di contare solo le cartelle *identificate*.
+**Falso.** Sono andato a leggere il codice — `CODA_03_conti_dei_terminali.ps1`
+**r.63**:
+
+```powershell
+$cart = @(Get-ChildItem $root -Directory | Where-Object { Test-Path (Join-Path $_.FullName "MQL5") })
+```
+
+👉 Conta cartella dati **chi ha `MQL5` dentro**, che e' la **definizione giusta**
+di cartella dati. Quindi **`15BEB048…` e `FF5C0E29…` NON sono terminali**: sono
+**residui** (0,07 GB e 0,00 GB, coerente). Il **6** di `CODA_03` e' **giusto E
+completo**, e le cartelle dati sul VPS sono **SEI**.
+
+🔑 **La causa del mio errore, che e' la stessa di due ore prima**: ho confrontato
+due numeri **senza leggere la definizione dietro a ciascuno**. `CODA_04` pesa
+*tutte* le cartelle (compresi `Common`, `Community`, `Help` e i residui);
+`CODA_03` conta *i terminali*. Non sono lo stesso insieme, e la differenza non
+era un buco: era **il filtro giusto**. Ho corretto un numero corretto, e ci ho
+messo dentro un allarme che non esisteva.
+
+📌 **Classe da ricordare: prima di dire che due conteggi non tornano, si legge
+la DEFINIZIONE di ciascuno.** Due numeri diversi sullo stesso nome non sono una
+contraddizione: spesso sono due misure di due cose.
+
+<details>
+<summary>Il paragrafo sbagliato, lasciato per memoria</summary>
+
+## ~~🔴 E UN NUMERO DI CASA CHE ERA SBAGLIATO: non SEI, OTTO~~
 
 `report/EXPORTER_SUL_REALE_2026-09-11.md` dice *"Sul VPS ci sono **SEI**
 cartelle dati MT5 (misurato stanotte)"*. **Falso.** Incrociando `CODA_04`
@@ -70,10 +100,10 @@ cartelle dati MT5 (misurato stanotte)"*. **Falso.** Incrociando `CODA_04`
 | 🔴 `15BEB048…` | 0,07 GB | **MAI IDENTIFICATA** |
 | 🔴 `FF5C0E29…` | 0,00 GB | **MAI IDENTIFICATA** |
 
-**OTTO esistono, SEI sono identificate.** `CODA_03` scrive *"cartelle dati: 6"*
-perche' conta quelle di cui **sa dire il programma** — ed e' corretto lui: sono
-io che ho riportato il numero delle **identificate** come numero delle
-**esistenti**.
+~~**OTTO esistono, SEI sono identificate.**~~ 🔴 **SBAGLIATO**: sei sono le
+cartelle dati, e le altre due non sono terminali. Vedi l'errata qui sopra.
+
+</details>
 
 🔑 **Ed e' la stessa classe di errore che avevo appena messo per iscritto**:
 `CODA_03` dice, su Pepperstone e Tickmill, *"CONTO: NON TROVATO nei giornali
