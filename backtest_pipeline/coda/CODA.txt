@@ -212,3 +212,60 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136b_primobersaglio_U30USD.txt -Etichetta r136b -Modello 4 -Deposito 100000
 0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136c_parziale_U30USD.txt -Etichetta r136c -Modello 4 -Deposito 100000
 0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136d_trailing_U30USD.txt -Etichetta r136d -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  AGGIUNTE IL 12/09/2026 (sabato) -- LA CODA DEL WEEKEND, 12 round.
+#  PASS del cancello di giudizio. Pin e6c0d70e (10o giro).
+#
+#  PERCHE' ORA: il runner parte domenica 03:30 e i mercati riaprono
+#  lunedi' 08:00 server. Sono ~28 ore di macchina libera: la finestra
+#  piu' grande che avremo prima del 1 ottobre. Costo di queste 12: 118
+#  passate, 16,3 min col metro misurato, banda onesta 2,2-4,4 h.
+#
+#  🔑 QUESTE 12 SCARICANO IL DRIVER CON LA TOPPA DELLA CLASSE 270.
+#  Verificato: git merge-base --is-ancestor 124db40 e6c0d70e -> 0, e sul
+#  pin vecchio -> 1. Senza la toppa, una compilazione FALLITA lasciava
+#  girare l'.ex5 vecchio stampando "compilato" in verde.
+#
+#  🔴 LE 7 RIGHE PIU' SOPRA NON HANNO LA TOPPA (pin 8027068f / 0c7d98af).
+#  Conseguenza da sapere leggendo il referto di domani: se la loro
+#  compilazione fallisse e girasse un .ex5 vecchio, r132c riprodurrebbe
+#  R123D PERFETTAMENTE confermando il nulla. Il loro PASS non e' un
+#  collaudo di b45dd00. Vanno ri-pinnate al prossimo giro.
+#
+#  ORDINE, fissato dal cancello e non inventato:
+#  1. r127c e' il CANARINO GRATUITO: fra la sua ancora (R103) e oggi c'e'
+#     UN SOLO commit, ed e' b45dd00. Deve ricomporre n = 394 +/-2% e
+#     PF = 1,41 +/-0,03. Se non ricompone, gli altri undici si fermano li'.
+#     ⚠️ E gira a -Modello 1 (OHLC M1) PERCHE' LA SUA ANCORA E' OHLC M1
+#     (R103_REFERTO_FINALE.md r.6). Un agente aveva scritto -Modello 4 con
+#     accanto "= OHLC M1": a tick reali il canarino NON poteva ricomporre
+#     394 PER COSTRUZIONE, e il referto del mattino avrebbe accusato un
+#     commit innocente fermando undici round. Classe 273.
+#  2. r126a -- 96% del pavimento di costo, deriva del sorgente a SEI commit.
+#  3. r127b -- InpSLLookback, asse d'uscita mai mosso in tutto l'archivio.
+#  4. r126b, r126d.
+#  5. r120b x4 e r120e x2 per ultimi: chiudono la riga a ZERO della Tabella B
+#     dell'audit uscite (InpTrailOnST x InpExitOnFlip, mai un asse in tutto
+#     l'archivio). Sono gemelli (classe 129) ma con InpUseNewsFilter=false, e
+#     se divergono si dichiarano nulli da se' costando 0,91 min.
+#  + cemad05, che chiude il requisito 5 su ABTG_EMA200.
+#
+#  🚫 r126c RESTA FUORI di proposito: per il suo stesso testo una divergenza
+#     "ferma TUTTO R126", quindi annullerebbe anche r126a/b/d = 50 passate.
+#     E' l'unico il cui fallimento costa altri tre round. Va girato a mano
+#     con UN SOLO agente locale: 4 passate, e ridà il cancello di
+#     determinismo di tutto R126.
+# =====================================================================
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R127c_orologio_EURJPY.txt -Etichetta r127c -Modello 1 -Deposito 100000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126a_costo_bufferatr_U30USD.txt -Etichetta r126a -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
