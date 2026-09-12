@@ -17352,3 +17352,97 @@ la pendenza non e' misurata.** Sono due frasi diverse, e solo la prima e' vera.
 ### 🔑 La regola in una riga
 *Prima di scrivere "monotono", si calcola `t`. Un ordinamento di quattro medie con IC che si
 sovrappongono e' l'aspetto tipico del caso, non di una legge.*
+
+---
+
+## 299. 🎚️👯 DUE CELLE DELL'ASSE CHE SONO LA **STESSA CONFIGURAZIONE**: l'estremo e' escluso da una condizione dentro l'EA, e la soglia congelata pretende che differiscano (13/09/2026)
+
+**Il caso reale**: `prove/R142a_preopen_parziale.txt` mette ad asse la parziale con
+`InpTP1_ClosePct=50||0||50||100||Y` e dichiara *"tre USCITE QUALITATIVAMENTE DIVERSE"*,
+con la cella `100` descritta come *"uscita SECCA a 1R. Nessun trailing, nessuna coda."*
+
+🔴 **`ABTG_Nasdaq_Live5m.mq5` r.977**:
+```
+if(!gPartialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+```
+A **100** il blocco e' saltato **esattamente come a 0**. Quindi:
+- la cella `100` **non esce affatto** a 1R, e il trailing resta **ACCESO**
+  (`InpUseTrailing=true` pinnato): la descrizione e' falsa su due punti;
+- il **breakeven** (r.1002-1019) sta **dentro lo stesso `if`**, quindi a 0 e a 100
+  anche `InpBreakevenAtTP1=true` e' **inerte** -- e il file dichiarava inerte solo
+  `InpTP1_R`, non il breakeven;
+- l'asse ha **2 celle distinte su 3**, e il conteggio del cancello (`celle=3`) e' giusto
+  come **aritmetica dell'.ini** e sbagliato come **numero di configurazioni**.
+
+🔴 **E il danno non e' il costo delle 2 passate sprecate: e' la SOGLIA.** Il file
+congelava *"la voce 3 e' CHIUSA se e solo se ... le tre celle danno tre PF distinti
+(l'asse morde)"*. Con due celle identiche per costruzione quella soglia **non e'
+soddisfacibile**, e il round si sarebbe auto-dichiarato fallito qualunque cosa dicesse
+il mercato. E' la classe **289** (attesa resa impossibile da un cancello dentro l'EA)
+applicata a un **asse** invece che agli ingressi.
+
+### ✅ CHE COSA SI FA
+1. Prima di mettere un input ad asse, si apre **ogni `if` che lo nomina** (`grep -n` sul
+   nome dell'input nel `.mq5`) e si guarda se gli **ESTREMI** dell'intervallo cadono
+   dentro o fuori la condizione. `> 0 && < 100` esclude tutti e due gli estremi
+   "naturali" di una percentuale: e' il caso piu' frequente, non un'eccezione.
+2. Le celle si contano come **configurazioni**, non come valori: due valori che portano
+   allo stesso ramo di codice sono **una** cella.
+3. Se una cella spegne **due meccanismi insieme** (qui: parziale **e** breakeven, perche'
+   condividono l'`if`), e' un **confondimento** e va **DICHIARATO nel file**, non
+   scoperto leggendo i risultati.
+4. Se la configurazione che si voleva provare **non e' raggiungibile da nessun valore
+   dell'input** (qui: l'uscita secca a 1R), si scrive che **serve una modifica all'EA**
+   -- cioe' che e' fuori dal perimetro di un round -- invece di far finta che un valore
+   la produca.
+
+### 🔑 La regola in una riga
+*Un asse si convalida sul CODICE che legge l'input, non sull'intervallo che sembra
+ovvio: gli estremi sono il posto dove le condizioni dell'EA mangiano le celle.*
+
+---
+
+## 300. 🚨🔁 L'INVARIANTE DICHIARATO CHE IL CODICE SMENTISCE — e la sua violazione e' scritta come «CATENA ROTTA» (13/09/2026)
+
+**Il caso reale**: `prove/R142b_preopen_trailing.txt` e `R142c_preopen_trailonoff.txt`
+dichiarano, come *"secondo controllo gratis"*:
+> *"TUTTE le celle devono dare lo STESSO n (116 IS / 175 OOS). Il trailing cambia DOVE
+> si esce, MAI se si entra. Se l'n cambia da cella a cella, il trailing sta toccando
+> l'ingresso"* -> e l'uscita (c) del file: **CATENA ROTTA, non si legge nessun PF**.
+
+🔴 **L'invariante e' falso, e lo smentisce l'EA stesso.**
+- `Trades` nell'OPTFRAME e' `STAT_TRADES` = i **deal di chiusura**, non le posizioni.
+  Con la parziale al 50% una posizione fa **2** deal se arriva a 1R, **1** se no.
+- Il trailing arma **subito** (`InpTrailStartR=0`, r.1037-1039) e chiude posizioni
+  **prima di 1R**: lo scrive il commento dell'EA a r.1029-1033 --
+  *"tre trade usciti dal trailing a +0,043R, +0,077R, +0,027R"*.
+👉 Quindi **allentando il TF del trailing (M1->M5) o spegnendolo, PIU' posizioni
+arrivano a 1R, PIU' parziali partono, e `n` SALE.** Il verso e' prevedibile e il
+fenomeno e' **esattamente il comportamento corretto**.
+
+🔴 **E' peggio di un invariante sbagliato: e' un FALSIFICATORE CHE SCATTA SULL'IPOTESI
+VERA.** Il round si sarebbe dichiarato "catena rotta" **proprio quando funzionava**,
+buttando i PF che erano l'unica ragione per cui esisteva -- e riportando il candidato a
+`[NON ANCORA MISURATO]` dopo aver speso la macchina. E' la classe **292** girata al
+contrario: li' il falsificatore lo soddisfaceva anche l'ipotesi nulla, qui lo fa
+scattare anche l'ipotesi vera.
+
+### ✅ CHE COSA SI FA
+1. Un invariante fra celle si **dimostra sul codice prima di scriverlo**: si cerca il
+   punto in cui il parametro dell'asse potrebbe toccare la grandezza che si dichiara
+   costante. Qui bastava `grep -n gPartialDone` e leggere due `if`.
+2. **Si separa il controllo di RIPRODUZIONE dal confronto FRA CELLE.** L'ingresso si
+   verifica sulla **cella di riproduzione** (n esattamente 116/175), che e' un confronto
+   con un numero d'archivio; **non** sull'uguaglianza fra celle, che misura l'uscita.
+3. Se `n` e' atteso **variabile**, si dichiara **il verso prima dei numeri**
+   (*"n cresce quando il trailing si allenta"*): cosi' resta un controllo, e diventa
+   perfino piu' informativo di un'uguaglianza.
+4. 🔴 **Nessuna regola che getta via l'intero round ("non si legge nessun PF") si scrive
+   senza aver calcolato PRIMA quanto e' probabile che scatti da sola.** Un cancello che
+   si arma sul comportamento normale non e' prudenza: e' un modo elegante di non
+   misurare.
+
+### 🔑 La regola in una riga
+*Prima di scrivere "se X cambia e' catena rotta", si verifica sul codice che X non
+possa cambiare per il motivo GIUSTO -- altrimenti si e' costruito un cancello che boccia
+la verita'.*
