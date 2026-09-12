@@ -14106,3 +14106,128 @@ una volta sola. Innocua per il codice, **ma e' una frase falsa in un file che
 si distribuisce a impronta**: corretta appena trovata. 🔴 Se un commento
 dentro byte pinnati puo' mentire, l'impronta garantisce i byte e non la
 verita' — e allora si ricontrolla anche la prosa, non solo l'hash.
+
+---
+
+## 245. 🪤 LO STRUMENTO NATO PER CHIUDERE LA CLASSE 244 LA RIPRODUCE DENTRO DI SE' (12/09/2026)
+
+**Il caso.** `backtest_pipeline/audit_kill_terminali.py` e' stato scritto per
+cercare i kill sui terminali **per semantica e non per forma** (classe 244).
+Autotest 9/9, misura sul repo *"239 file, 17 Stop-Process, NUDO=0, DA_LEGGERE=0"*.
+Provato a rompere con **15 casi avversari**: ne sbaglia **10**, di cui **4 sono
+menzogne** (un kill che ammazza TUTTO, classificato `FILTRATO`) e **5
+invisibilita'** (la riga non viene nemmeno esaminata).
+
+🔴 **Le quattro menzogne hanno UNA causa sola, ed e' la classe 244 di nuovo:**
+`nudo(riga)` dichiara "filtrato" appena la **stringa** `$_.Path` compare da
+qualche parte sulla riga. Cioe' cerca la **forma** `$_.Path`, non il
+**significato** "questa collezione e' ristretta a un percorso":
+
+| caso avversario | verita' | lo strumento dice |
+|---|---|---|
+| `Where-Object { $_.Path }` (= "ha un percorso leggibile") | **ammazza tutti** | `FILTRATO` |
+| `Where-Object { -not ($_.Path -like $d) }` | **ammazza esattamente quelli da SALVARE** | `FILTRATO` |
+| `$b = @($r \| Where { $_.Path -like $d }); $r \| Stop-Process` | **ammazza tutti** (pipa la variabile sbagliata) | `FILTRATO` |
+| `Where-Object { $_.Path -like "*" }` | **ammazza tutti** | `FILTRATO` |
+
+🚨 **E le invisibilita' hanno nascosto un kill nudo VERO, vivo nel repo.**
+`prepara_broker_esterno.ps1:129-131`:
+```
+foreach ($p in @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)) {
+  try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch { }
+}
+```
+Semanticamente **identico** ai tre riparati, e chiamato da **tre** punti
+(r.818/878/921). Lo strumento non lo vede per lo `continue` su
+`"Stop-Process -Id" in riga` ("un PID preciso: e' il contrario di un kill
+cieco") — vero per `-Id $proc.Id` preso da `Start-Process`, **falso** per
+`-Id $p.Id` dentro un `foreach` su una lista intera. 👉 **`NUDO=0` era falso:
+erano 1.** Stessi salti, stessi esiti: `"txt=" in riga` (salta QUALUNQUE riga
+che contenga `txt=`, kill compresi) e l'assenza degli alias `kill` / `spps`.
+
+**La regola.** 👉 **Uno strumento che chiude una classe va provato con i casi
+che la classe stessa suggerisce.** Qui bastava chiedersi: *"se cercassi la
+FORMA `$_.Path` invece del significato, quale kill mi sfuggirebbe?"* — ed e' la
+stessa domanda che aveva generato lo strumento.
+📌 **Un autotest coi soli casi che ci si aspetta non prova niente**: i 9 casi
+erano tutti "il filtro c'e' / non c'e'", **nessuno** era un filtro **finto**,
+**negato** o **scartato**. Il caso avversario va scritto da chi vuole rompere,
+non da chi vuole confermare.
+🛑 **E uno `continue` in un audit e' un'affermazione, non una comodita'**: ogni
+riga saltata dice *"questa non puo' essere il difetto"*, e va dimostrata come
+qualunque altra misura. Se non si riesce, si scrive `DA_LEGGERE`.
+
+✅ **Riparazioni, in ordine di gravita':**
+1. `nudo()` non deve accettare `$_.Path` nudo: pretendere un **confronto**
+   (`-like`/`-ieq`/`-eq`) con qualcosa che **non** sia `"*"`, e **rifiutare** la
+   riga se il confronto e' sotto `-not`.
+2. Quando sulla riga c'e' un `$_.Path` **ma** cio' che viene pipato e' una
+   variabile, decidere **dalla variabile** (`filtrata_a_monte`), non dalla riga.
+3. `Stop-Process -Id`: saltare solo se il PID viene da un `$proc` di
+   `Start-Process`; se viene da un `foreach` su `Get-Process`, e' **NUDO**.
+4. Togliere il salto su `txt=` e restringerlo alle sole righe del runner.
+5. Aggiungere gli alias `kill`, `spps`, e la pipeline **su due righe**.
+
+---
+
+## 246. 🔨 LA STESSA ARMA CON UN ALTRO VERBO, E CON UN ALTRO BERSAGLIO (12/09/2026)
+
+Cercati i kill, ho chiesto: *"c'e' un'altra classe di arma nuda?"*. **Si', due.**
+
+### (a) Il verbo che non e' un kill ma uccide lo stesso: `CloseMainWindow()`
+Tre siti chiedono la **chiusura educata a OGNI terminale della macchina**, senza
+filtro e **senza bisogno di nessun interruttore**:
+`prepara_broker_esterno.ps1:113` · `installa_pepperstone.ps1:88` ·
+`importa_storico_esterno.ps1:88`
+```
+$procs = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+foreach ($p in $procs) { try { [void]$p.CloseMainWindow() } catch { } }
+```
+🔴 Per un terminale che opera, *"chiuditi per favore"* e' **fatale quanto un
+kill**: il REALE 10105439 resta senza sorveglianza con le posizioni aperte. E
+**nessun audit di kill lo vede**, perche' la parola `Stop-Process` non c'e'.
+(`RIGA_STORICO_INDICI.ps1:647` fa la stessa chiamata ma su `$procs` **filtrato
+per percorso**: e' il modello giusto, nello stesso repo.)
+⚠️ In piu' `installa_pepperstone.ps1:100` e `importa_storico_esterno.ps1:100`
+hanno ancora la **ricorsione infinita** di `Chiudi-MT5-Pulito` che chiama se
+stessa, riparata in `prepara_broker_esterno` il 15/08 e **mai ricopiata qui**:
+tre copie della stessa funzione, una riparata e due no.
+
+### (b) Il bersaglio scelto per RICERCA, dove si SCRIVE e si RICOMPILA
+Misurato: **107 script** scelgono il terminale cosi' —
+```
+$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" }
+```
+cioe' **il PICCOLO 50503392, quello con le SEDIE VIVE** — e poi ci fanno
+`Copy-Item -Force` dentro `MQL5\Experts` / `MQL5\Include` e
+`& $MetaEditor /compile:`. **Zero** di quei 107 dichiara il banco
+`C:\MT5_Backtest`. E' la classe dell'incidente `scan_gestione.ps1` del 09/09,
+**per 107**.
+- **102 su 107** hanno, prima di compilare, una rete che li ferma se un MT5 e'
+  aperto: sul VPS (tre terminali sempre accesi) **rifiutano di partire**. E'
+  una protezione **per effetto collaterale**, non per progetto — sparisce al
+  primo riavvio del VPS.
+- **10 su 107 NON l'hanno.** I due peggiori hanno anche un **ripiego** che
+  allarga il bersaglio:
+  `aggiorna_ea.ps1:23-24` e `installa_script.ps1:15-16`
+  ```
+  if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  ```
+  `*BCM Markets*` prende **anche il 100k `-V3`**, e `-First 1` **senza
+  ordinamento** significa "quello che il filesystem ha restituito per primo".
+  Poi `Copy-Item -Force` + `/compile:` dentro quel terminale.
+
+**La regola.** 👉 **Un censimento di armi si fa sui VERBI, non su un verbo.**
+Le domande da rifare ogni volta: *chi termina un processo* (`Stop-Process`,
+`CloseMainWindow`, `taskkill`), *chi scrive dentro la cartella di un terminale*
+(`Copy-Item`, `Set-Content`, `Out-File`, `New-Item`), *chi cancella*
+(`Remove-Item`), *chi ricompila* (`/compile:`). Per ognuno, la stessa domanda
+unica: **su QUALE terminale, e come l'ha scelto?**
+📌 **E un `-First 1` su un insieme trovato per ricerca non e' una scelta: e'
+un sorteggio.** Se i candidati sono piu' di uno si **muore**, come fa gia'
+`RIGA_R96_APERTURA_USA.ps1:417` (*"trovati N terminali che corrispondono:
+ambiguo, mi fermo"*).
+🎯 **Priorita' dichiarata:** i 10 senza rete prima, poi i tre
+`CloseMainWindow`, poi i 97 restanti. **Nessuno dei 107 puo' entrare in coda**
+(G1 del runner li rifiuta: non hanno marcatore) — verificato — quindi la coda
+di stanotte non e' esposta.
