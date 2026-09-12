@@ -1,0 +1,222 @@
+# ======================================================================
+#  SPEC DI ROUND -- "SEQUENZA DI INVERSIONE MONOTONA" su INDICI, M30/H1
+#  Scritto il 12/09/2026 dalla caccia CACCIA_SUPREV_ALTERNATIVE.
+#  Dossier: report/CACCIA_SUPREV_ALTERNATIVE_2026-09-12.md
+#
+#  >>>>>>>>>>>>>>>>>>>>>>  NON SI LANCIA  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+#  QUESTO FILE NON E' ESEGUIBILE, E PER DUE MOTIVI INDIPENDENTI:
+#    (1) L'EA NON ESISTE. Il motore e' stato letto in un sorgente Pine di
+#        terzi e NON e' stato scritto in MQL5: scrivere EA non e' il
+#        perimetro del cacciatore (lo fa mql5-ea-developer). I nomi degli
+#        input qui sotto sono PROPOSTI, non esistono in nessun .mq5.
+#    (2) IL CANDIDATO HA FALLITO IL SUO CANCELLO ESTERNO, misurato PRIMA
+#        di chiedere una passata di tester: vedi "LA MISURA" e "IL
+#        CANCELLO" qui sotto. Il segno della E netta doveva reggere in
+#        almeno 3 anni su 4 e regge in 2 su 4.
+#  Allora perche' questo file esiste? Perche' la regola di casa dice che
+#  un candidato non si archivia senza NUMERI e senza MOTIVO, e perche' se
+#  un giorno (a) l'EA venisse scritto per altre ragioni, oppure (b) BCM
+#  avesse dati d'ORSO sugli indici, il round e' GIA' SCRITTO con i
+#  criteri congelati e nessuno deve ricacciare da zero.
+# ======================================================================
+#
+#  DA DOVE VIENE -- attribuzione, come da regola di casa
+#    Geometria letta (NON copiata) dal sorgente Pine
+#      "Momentum Sequence Strategy [Herman]", autore helmans13,
+#      licenza MPL 2.0, creato 2026-09-04
+#      https://www.tradingview.com/script/mmrInMTp-Momentum-Sequence-Strategy-Herman/
+#      sorgente: pine-facade PUB;11d65a5fe0724173b72c230c576947fc (open_no_auth)
+#    Presa la MECCANICA e la TESI. NON presi i suoi parametri e NON preso
+#    nessun numero di performance dell'autore (non l'ho nemmeno guardato).
+#
+#  PERCHE' NON E' UN SUPERTREND RITARATO (regola della seconda caccia, 19/08)
+#    ABTG_SupRev decide con iATR + moltiplicatore di banda e conferma con
+#    corpo candela + confluenza EMA. Questo motore NON HA INDICATORI:
+#    nessun ATR, nessuna EMA, nessuna banda, nessun oscillatore. Il
+#    detector e' la FORMA della sequenza di chiusure; lo stop e' un
+#    livello STRUTTURALE (l'estremo della candela madre), non un multiplo
+#    di ATR. In tutto il repo la geometria "N chiusure monotone" ha ZERO
+#    occorrenze precedenti (verificato per grep su report/ e
+#    backtest_pipeline/: soli falsi positivi su "perdite consecutive").
+#
+#  LA MECCANICA, letta riga per riga nel sorgente (r.137-233)
+#    LONG   la barra i-N e' BEARISH (close<open) = "candela madre";
+#           le N barre successive (N in 2..5) sono TUTTE bullish,
+#           TUTTE con low > low(madre),
+#           e con chiusure STRETTAMENTE crescenti;
+#           ingresso al CLOSE della barra i (barra chiusa, mai in corso);
+#           SL = low(madre); 1R = entry - SL; TP = entry + RR x 1R.
+#    SHORT  specchio esatto (madre bullish, N barre bearish monotone
+#           discendenti, tutte con high < high(madre), SL = high(madre)).
+#    Una posizione per volta, nessuna aggiunta, nessuna piramidazione.
+#
+#  TESI IN UNA RIGA (e la sua meta' scomoda)
+#    "Dopo una candela direzionale, una sequenza MONOTONA di candele
+#     contrarie che non viola l'estremo di quella candela dice che il
+#     movimento e' finito e che il nuovo verso e' stato ACCETTATO."
+#    E la variante misurata, che e' piu' precisa: "su un indice una
+#    sequenza monotona di chiusure in DISCESA che rispetta il massimo
+#    della madre e' una LIQUIDAZIONE in corso e continua; la stessa
+#    geometria in salita non paga, perche' il rialzo di un indice non
+#    liquida nessuno."
+#
+#  BANDIERE ROSSE (setaccio sez.4) -- controllate una per una nel sorgente
+#    martingala            NO  (nessun lotto dipendente dall'esito)
+#    griglia / averaging   NO  (pyramiding = 0, una posizione)
+#    recovery / hedge      NO
+#    niente stop           NO -- lo stop ESISTE ed e' vero:
+#                              strategy.exit(stop=..., limit=...)
+#    repaint / look-ahead  NO  (calc_on_every_tick non impostato =
+#                              default false; nessun request.security)
+#    size variabile        NO
+#    lotto fisso           SI  -> e' l'UNICO difetto, e sta nella
+#                              GESTIONE, non nel motore: da sostituire
+#                              con LotByRisk di casa. Rischio: [FIRMA DI
+#                              CLAUDIO], la taglia non la decide un agente.
+#
+#  LA MISURA FATTA PRIMA DI CHIEDERE IL TESTER (12/09/2026)
+#    Sonde: caccia_strategie/biblioteca/sonde_esterne/sonda_sequenza.py
+#           e sonda_sequenza_anni.py
+#    Dati:  histdata M1 via FutureSharks/financial-data (GPL-3.0),
+#           GRXEUR (DAX) e SPXUSD, 2015-2018, 1.942.126 barre M1.
+#    Orologio COLLAUDATO da me su questi stessi file: GRXEUR picca alle
+#           03:00 file (= 08:00 server), SPXUSD alle 15:59 e 09:31
+#           -> "ora file + 5 = ora server BCM" confermata, non ereditata.
+#    Convenzioni: sessione CASH, ambiguita' intrabarra SEMPRE a sfavore
+#           (lo SL si controlla prima del TP), zero costi dentro la sonda,
+#           costo aggiunto dopo in R con lo spread MISURATO del DAX
+#           (1,65 punti indice), CONTROLLO APPAIATO (stessa barra, stesso
+#           1R, lato opposto -- regola del 05/09).
+#
+#    GRXEUR, RR 2,0 (le righe che decidono):
+#      TF  N lato    n    op/gg  1R med   1R/spread  E netta   appaiato
+#      M30 2 SHORT  1097  1,090   43,5      26,4x    +0,032R    33,1%
+#      M30 3 SHORT   498  0,495   59,3      35,9x    +0,041R    30,1%
+#      M30 4 SHORT   209  0,208   83,3      50,5x    +0,006R    28,7%
+#      H1  2 SHORT   564  0,561   60,1      36,4x    +0,055R    33,2%
+#      H1  3 SHORT   251  0,250   85,8      52,0x    +0,057R    27,8%
+#      H1  4 SHORT    97  0,096  103,5      62,7x    +0,061R    21,9%
+#      H1  3 LONG    265  0,263   79,3      48,0x    -0,211R    33,2%
+#      (il LONG e' negativo in 6 combinazioni su 6; lo SHORT positivo in
+#       6 su 6. L'asimmetria e' il fatto piu' solido della misura.)
+#
+#  IL CANCELLO, scritto PRIMA di guardare l'uscita, e il suo esito
+#    "Il segno della E netta deve reggere in almeno 3 ANNI SU 4."
+#    GRXEUR, RR 2,0, E netta per anno (2015 / 2016 / 2017 / 2018):
+#      M30 3 SHORT  +0,061 / -0,119 / -0,004 / +0,169   -> 2/4  FALLITO
+#      H1  3 SHORT  +0,297 / -0,115 / -0,241 / +0,201   -> 2/4  FALLITO
+#      H1  2 SHORT  +0,266 / -0,013 / -0,062 / +0,025   -> 2/4  FALLITO
+#      H1  4 SHORT  +0,337 / +0,125 / -0,420 / +0,222   -> 3/4 ma n=21-26
+#                                                          per anno: non
+#                                                          giudicabile
+#      H1  3 LONG   -0,084 / -0,171 / -0,293 / -0,314   -> 0/4
+#    LETTURA: il lato short paga SOLO nei due anni con discese e
+#    volatilita' (2015 crollo d'agosto, 2018 orso) e perde in ENTRAMBI
+#    gli anni di toro tranquillo (2016, 2017). NON e' un motore: e' una
+#    scommessa sul REGIME.
+#
+#  E IL MOTIVO PER CUI QUESTO CHIUDE IL DISCORSO OGGI
+#    La cassaforte tick BCM sugli indici e' 2024.09.26 -> oggi, stato
+#    COMPLETO (sonda del 17/08, REFERTO_SONDA_STORICO_17-08.md sez.3), cioe'
+#    21 mesi e UN SOLO REGIME: un toro. E' esattamente il regime in cui
+#    questa famiglia perde. Un round qui comprerebbe un rosso prevedibile
+#    che non boccia il meccanismo (Emendamento B: il vecchio giudica il
+#    rischio, il recente il merito -- qui non abbiamo ne' l'uno ne'
+#    l'altro sul regime che serve).
+#    CONVERGE con la misura di casa: ABTG_InvEsaurimento E3 fa PF 1,16 nel
+#    totale ma -5.604 nel toro 2017 e +2.946 nell'orso Q4-2018
+#    (REFERTO_INVES_2026-08-30.md). Due geometrie diverse, due fonti dati
+#    diverse, la stessa conclusione.
+#
+#  LA TENAGLIA DEL CAMPIONE E DEL COSTO -- il conto, non un'opinione
+#    Frontiera del costo di casa: stop >= 40 x spread. Sul DAX, con
+#    spread MISURATO 1,65 punti indice, fa 66 PUNTI INDICE.
+#      passa il costo:  H1 N>=3 (85,8 pt = 52x) e M30 N=4 (83,3 pt = 50x)
+#      NON passa:       M30 N=2 (24-26x), M30 N=3 (33-36x), H1 N=2 (35x)
+#    Campione sui 459 feriali della cassaforte (Emendamento A, >=150
+#    OPERAZIONI per finestra, e in POSIZIONI non in deal):
+#      H1  N=3 SHORT  0,250/gg -> 115 in tutto -> 46 IS / 69 OOS  SOTTO
+#      H1  N=3 L+S    0,513/gg -> 235          -> 94 / 141        SOTTO
+#      M30 N=3 L+S    1,035/gg -> 475          -> 190 / 285       sopra
+#      M30 N=2 L+S    2,228/gg -> 1022         -> 409 / 613       sopra
+#    >>> Dove passa il costo NON passa il campione, e dove passa il
+#        campione NON passa il costo. Nessuna cella passa entrambi su un
+#        simbolo solo. (E le op/gg della sonda sono un TETTO: conta anche
+#        i setup SOVRAPPOSTI, mentre un EA entra solo se e' piatto.)
+#
+#  SE UN GIORNO SI LANCIA -- i criteri, congelati ORA
+#    S1  CAMPIONE. >=150 operazioni per finestra, in POSIZIONI (classe
+#        226: la colonna Trades dei nostri CSV conta i deal di uscita,
+#        fattore 1,000-2,314). Sotto 150 il MERITO e' sospeso, non
+#        bocciato; il RISCHIO morde a qualunque n.
+#    S2  LATI SEPARATI, ed e' il cuore del round. La misura esterna dice
+#        LONG negativo 6/6 e SHORT positivo 6/6: se a tick il long
+#        risultasse migliore dello short, la tesi e' FALSIFICATA e non si
+#        cerca un'altra taratura. Regola dei due lati (25/08): si misurano
+#        entrambi SEMPRE, anche quello che ci si aspetta perdente.
+#    S3  COSTO. Ogni cella dichiara 1R IN PUNTI INDICE e il costo in R
+#        nella prima riga del referto, PRIMA di qualunque win rate. Celle
+#        con 1R < 40 x spread si leggono ma non si promuovono.
+#    S4  ALTOPIANO sull'asse N: >=3 celle CONTIGUE con PF OOS >= 1,20,
+#        n OOS >= 150, DD OOS <= 10,0%. Due celle adiacenti sono un
+#        segmento, non un piano.
+#    S5  PICCO. Se una cella fa PF OOS >= 1,20 con ENTRAMBE le vicine
+#        sotto 1,05, l'asse dichiara PICCO e il round NON promuove.
+#    S6  SELEZIONE: centro dell'altopiano, MAI il picco (12 Spearman
+#        IS->OOS negative su 13). La regola di selezione si dichiara
+#        INSIEME al numero.
+#    S7  RISCHIO, a qualunque n: DD > 10,0% in una finestra = cella di
+#        rischio, fuori da qualunque altopiano. Peggior giornata < -2,5%
+#        = segnalata (muro prop giornaliero 5% = -5.000 su 100k).
+#    S8  REGIME. Il round su BCM gira in UN SOLO toro: qualunque verdetto
+#        nasce con l'etichetta "per questa epoca". Un verde qui NON
+#        riabilita la famiglia, e un rosso qui NON la uccide.
+#    S9  ANTI-ALTOPIANO-FINTO: due celle contigue con n e PF identici
+#        alla quarta cifra sono UNA cella misurata due volte (asse
+#        inerte), e non contano.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI (se un giorno si lancia)
+#    Sul toro 2024-2026 mi aspetto: LONG rosso in tutte le celle; SHORT
+#    fra 0,90 e 1,10 di PF, cioe' una moneta, perche' il 2016-2017 (toro
+#    tranquillo) e' il regime piu' simile e la' la E netta short era
+#    -0,119 e -0,004. COSA MI FAREBBE CAMBIARE IDEA, col numero: uno
+#    SHORT con PF OOS >= 1,20 su n >= 150 in questo toro. Sarebbe la
+#    prova che la sequenza non e' regime-condizionale e che la misura
+#    esterna sbagliava -- ed e' l'unico esito che riaprirebbe il
+#    capitolo.
+#
+#  BUCHI DICHIARATI
+#    - EA INESISTENTE: i nomi di input qui sotto sono PROPOSTI.
+#    - PEGGIOR GIORNATA: non producibile senza export per-trade.
+#    - SPXUSD: spread BCM [NON MISURATO]; nella sonda ho usato 1,95
+#      (valore U30USD) come PROXY dichiarato, ed e' sbagliato in scala.
+#      Nessuna conclusione di questo file poggia su SPXUSD.
+#    - SLIPPAGE: zero dentro le sonde.
+#    - La sonda conta setup SOVRAPPOSTI: le op/gg sono un TETTO.
+#
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+# ^ MISURATA, non ipotizzata: sonda del 17/08/2026 su tutti i 59 simboli,
+#   D30EUR prima data 2024.09.26, stato COMPLETO
+#   (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md, sez. 3).
+@FINOA    2026.06.30
+#
+# --- INPUT PROPOSTI (NON ESISTONO: nessun .mq5 li implementa)
+# InpTF=2003                  (M30; H1 = 16385 nel round gemello)
+# InpSeqLen=3                 L'ASSE. 2..5. Lunghezza della sequenza monotona.
+# InpTP_RR=2.0                TP in multipli di R (il sorgente offre 0,5/1/1,5/2)
+# InpSide=0                   0 = L+S, 1 = solo long, 2 = solo short  (asse del round gemello)
+# InpSessionHour=8            ORA SERVER BCM: DAX cash 08:00 (= 09:00 italiane)
+# InpSessionEndHour=16        ORA SERVER: 16:00 (DAX cash chiude 17:30 IT = 16:30 server)
+# InpFlatSessionEnd=true      flat obbligatorio a fine seduta, mai overnight
+# InpRiskPercent=0.65         [FIRMA DI CLAUDIO] -- la taglia non la decide un agente
+# InpMaxTradesPerDay=2        cap giornaliero (rischio giornaliero prop)
+# InpMinStopPts=...           pavimento SL obbligatorio (lezione R109), MAI 0
+# InpMaxSpread=...            in punti MT5
+# InpMagic=<VERGINE>          da verificare libero nel repo prima di girare
+#
+# --- L'UNICO ASSE, se un giorno si lancia (4 celle x 2 finestre = 8 passate)
+# InpSeqLen=3||2||1||5||Y
+# ======================================================================
