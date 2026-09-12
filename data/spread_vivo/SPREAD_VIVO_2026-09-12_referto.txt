@@ -1,0 +1,355 @@
+=====================================================================
+  SPREAD VIVO -- RACCOLTA DEL 2026-09-12 20:31 (ora locale del PC)
+  fonte: ABTG_SpreadLogger sul terminale C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5
+=====================================================================
+ESITO DELLA RACCOLTA    : letta e ricalcolata (se qui sotto compare '!!! FERMATO' il giro si e' interrotto e i numeri non ci sono)
+conto nel file di stato : 50503392 @ BCMMarkets-Server
+primo campione (server) : 2026.09.04 21:54:59
+ultimo campione (ora SERVER): 2026.09.11 21:50:00   -- l'orologio di questo PC segna 2026.09.12 20:31:05 in ora LOCALE (= server + 1 in questo periodo)
+passo di campionamento  : 5 s   salvataggi 1438   riprese dello stato 5
+campioni validi         : 650484   scartati (mercato fermo / tick vecchio): 32543
+confronto EA/ricalcolo  : OK: 187 righe confrontate, ZERO differenze fra il conto dell'EA (MQL5) e il ricalcolo di questa riga (PowerShell)
+
+COME SI LEGGE:
+ - ore in ORA SERVER (= ora italiana meno 1 in questo periodo).
+ - i valori sono in unita' pratiche: pip nel forex, punti indice negli indici.
+   Fra parentesi quadre c'e' sempre il numero GREZZO in punti MT5.
+ - GG = giornate distinte entrate in quel secchio. E' QUESTO il numero che
+   dice se la riga si puo' citare: i campioni consecutivi sono
+   autocorrelati, 3.000 campioni di UN giorno restano un giorno solo.
+   Le righe con GG < 5 sono marcate SOTTILE.
+ - i percentili di FASCIA si calcolano SOMMANDO gli istogrammi delle ore,
+   non facendo la media dei percentili (che non sarebbe il P95 di niente).
+ - qui NON c'e' lo slippage, non ci sono commissioni ne' swap: e' spread.
+
+---------------------------------------------------------------------
+  225JPY   (vivo, 0 decimali, 1 punti indice = 1 punti MT5)
+  campioni validi 78926, giornate massime in un secchio 5
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3595 |  5 |   35.000 |   35.000 |   35.000 |   35.000 | 
+    01 |      3600 |  5 |   22.000 |   22.000 |   35.000 |   35.000 | 
+    02 |      3600 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+    03 |      3600 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+    04 |      3600 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+    05 |      3600 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+    06 |      3585 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+    07 |      3600 |  5 |   22.000 |   35.000 |   35.000 |   35.000 | 
+    08 |      3596 |  5 |   35.000 |   35.000 |   35.000 |   35.000 | 
+    09 |      3596 |  5 |   23.000 |   23.000 |   35.000 |   35.000 | 
+    10 |      3580 |  5 |   22.000 |   23.000 |   23.000 |   23.000 | 
+    11 |      3562 |  5 |   23.000 |   23.000 |   23.000 |   23.000 | 
+    12 |      3567 |  5 |   22.000 |   23.000 |   23.000 |   23.000 | 
+    13 |      3564 |  5 |   22.000 |   23.000 |   23.000 |   23.000 | 
+    14 |      3578 |  5 |   22.000 |   23.000 |   23.000 |   23.000 | 
+    15 |      3538 |  5 |   23.000 |   23.000 |   23.000 |   23.000 | 
+    16 |      3600 |  5 |   23.000 |   23.000 |   23.000 |   23.000 | 
+    17 |      3600 |  5 |   23.000 |   23.000 |   23.000 |   23.000 | 
+    18 |      2898 |  5 |   23.000 |   23.000 |   23.000 |   23.000 | 
+    19 |      2880 |  4 |   23.000 |   23.000 |   23.000 |   23.000 | SOTTILE (GG<5)
+    20 |      2880 |  4 |   22.000 |   23.000 |   23.000 |   23.000 | SOTTILE (GG<5)
+    21 |      2622 |  4 |   23.000 |   35.000 |   35.000 |   35.000 | SOTTILE (GG<5)
+    22 |   2987 sc |  - |      n/d |      n/d |      n/d |      n/d | solo campioni scartati (mercato fermo)
+    23 |      3085 |  5 |   22.000 |   22.000 |   22.000 |   22.000 | 
+   >> TUTTA LA GIORNATA: n=78926 GG=5  mediana 22.000 [22 punti MT5]  P95 35.000 [35 punti MT5]  (punti indice)
+   >> cash EUROPA 8-15: n=28581 GG=5  mediana 23.000 [23 punti MT5]  P95 35.000 [35 punti MT5]  (punti indice)
+   >> cash USA 14-20: n=22974 GG=5  mediana 23.000 [23 punti MT5]  P95 23.000 [23 punti MT5]  (punti indice)
+   >> sera/notte 21-23: n=5707 GG=5  mediana 22.000 [22 punti MT5]  P95 35.000 [35 punti MT5]  (punti indice)
+   >> notte 0-6: n=25180 GG=5  mediana 22.000 [22 punti MT5]  P95 35.000 [35 punti MT5]  (punti indice)
+
+---------------------------------------------------------------------
+  D30EUR   (vivo, 2 decimali, 1 punti indice = 100 punti MT5)
+  campioni validi 78314, giornate massime in un secchio 6
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      2879 |  4 |    2.800 |    2.800 |    2.800 |    2.800 | SOTTILE (GG<5)
+    01 |      2772 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    02 |      3600 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    03 |      3600 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    04 |      3600 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    05 |      3600 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    06 |      3585 |  5 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    07 |      3600 |  5 |    1.600 |    1.700 |    1.700 |    2.800 | 
+    08 |      3596 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    09 |      3596 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    10 |      3580 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    11 |      3562 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    12 |      3567 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    13 |      3564 |  5 |    1.600 |    1.700 |    1.700 |    2.800 | 
+    14 |      3578 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    15 |      3538 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    16 |      3600 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    17 |      3600 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    18 |      3580 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    19 |      3538 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    20 |      3577 |  5 |    1.600 |    1.700 |    1.700 |    1.700 | 
+    21 |      2064 |  6 |    2.800 |    2.800 |    2.800 |    2.800 | 
+    22 |   2987 sc |  - |      n/d |      n/d |      n/d |      n/d | solo campioni scartati (mercato fermo)
+    23 |      2538 |  4 |    2.800 |    2.800 |    2.800 |    2.800 | SOTTILE (GG<5)
+   >> TUTTA LA GIORNATA: n=78314 GG=6  mediana 1.700 [170 punti MT5]  P95 2.800 [280 punti MT5]  (punti indice)
+   >> cash EUROPA 8-15: n=28581 GG=5  mediana 1.600 [160 punti MT5]  P95 1.700 [170 punti MT5]  (punti indice)
+   >> cash USA 14-20: n=25011 GG=5  mediana 1.600 [160 punti MT5]  P95 1.700 [170 punti MT5]  (punti indice)
+   >> sera/notte 21-23: n=4602 GG=6  mediana 2.800 [280 punti MT5]  P95 2.800 [280 punti MT5]  (punti indice)
+   >> notte 0-6: n=23636 GG=5  mediana 2.800 [280 punti MT5]  P95 2.800 [280 punti MT5]  (punti indice)
+
+---------------------------------------------------------------------
+  EURUSD   (vivo, 5 decimali, 1 pip = 10 punti MT5)
+  campioni validi 84997, giornate massime in un secchio 6
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3593 |  5 |    0.300 |    0.500 |    0.500 |    0.600 | 
+    01 |      3600 |  5 |    0.300 |    0.400 |    0.500 |    0.500 | 
+    02 |      3600 |  5 |    0.300 |    0.400 |    0.500 |    0.600 | 
+    03 |      3600 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    04 |      3600 |  5 |    0.200 |    0.400 |    0.500 |    0.600 | 
+    05 |      3600 |  5 |    0.300 |    0.400 |    0.500 |    0.500 | 
+    06 |      3585 |  5 |    0.300 |    0.400 |    0.500 |    0.500 | 
+    07 |      3600 |  5 |    0.200 |    0.400 |    0.500 |    0.600 | 
+    08 |      3596 |  5 |    0.200 |    0.400 |    0.400 |    0.500 | 
+    09 |      3596 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    10 |      3580 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    11 |      3562 |  5 |    0.200 |    0.400 |    0.500 |    0.600 | 
+    12 |      3567 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    13 |      3564 |  5 |    0.300 |    0.400 |    0.500 |    1.300 | 
+    14 |      3578 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    15 |      3597 |  5 |    0.200 |    0.400 |    0.500 |    0.600 | 
+    16 |      3600 |  5 |    0.200 |    0.400 |    0.500 |    0.500 | 
+    17 |      3600 |  5 |    0.200 |    0.400 |    0.400 |    0.500 | 
+    18 |      3600 |  5 |    0.200 |    0.400 |    0.400 |    0.500 | 
+    19 |      3591 |  5 |    0.200 |    0.400 |    0.400 |    0.500 | 
+    20 |      3565 |  5 |    0.200 |    0.400 |    0.400 |    0.500 | 
+    21 |      3250 |  6 |    0.200 |    0.400 |    0.500 |    0.600 | 
+    22 |      2827 |  5 |    1.400 |    3.100 |    3.700 |    3.700 | 
+    23 |      3546 |  5 |    0.300 |    0.600 |    0.700 |    2.500 | 
+   >> TUTTA LA GIORNATA: n=84997 GG=6  mediana 0.200 [2 punti MT5]  P95 0.500 [5 punti MT5]  (pip)
+   >> cash EUROPA 8-15: n=28640 GG=5  mediana 0.200 [2 punti MT5]  P95 0.400 [4 punti MT5]  (pip)
+   >> cash USA 14-20: n=25131 GG=5  mediana 0.200 [2 punti MT5]  P95 0.400 [4 punti MT5]  (pip)
+   >> sera/notte 21-23: n=9623 GG=6  mediana 0.400 [4 punti MT5]  P95 2.700 [27 punti MT5]  (pip)
+   >> notte 0-6: n=25178 GG=5  mediana 0.300 [3 punti MT5]  P95 0.400 [4 punti MT5]  (pip)
+
+---------------------------------------------------------------------
+  GBPUSD   (vivo, 5 decimali, 1 pip = 10 punti MT5)
+  campioni validi 84968, giornate massime in un secchio 6
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3599 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    01 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    02 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    03 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.600 | 
+    04 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    05 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    06 |      3585 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    07 |      3600 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    08 |      3596 |  5 |    0.300 |    0.700 |    0.700 |    1.000 | 
+    09 |      3596 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    10 |      3580 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    11 |      3562 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    12 |      3567 |  5 |    0.300 |    0.700 |    0.700 |    0.800 | 
+    13 |      3564 |  5 |    0.300 |    0.700 |    0.700 |    8.000 | 
+    14 |      3578 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    15 |      3597 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    16 |      3600 |  5 |    0.300 |    0.700 |    0.700 |    0.700 | 
+    17 |      3600 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    18 |      3600 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    19 |      3597 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    20 |      3594 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    21 |      3269 |  6 |    0.500 |    1.100 |    1.400 |    2.100 | 
+    22 |      2689 |  5 |    8.000 |    8.000 |    8.000 |    8.000 | 
+    23 |      3595 |  5 |    0.300 |    1.000 |    1.000 |    8.000 | 
+   >> TUTTA LA GIORNATA: n=84968 GG=6  mediana 0.300 [3 punti MT5]  P95 1.000 [10 punti MT5]  (pip)
+   >> cash EUROPA 8-15: n=28640 GG=5  mediana 0.300 [3 punti MT5]  P95 0.700 [7 punti MT5]  (pip)
+   >> cash USA 14-20: n=25166 GG=5  mediana 0.300 [3 punti MT5]  P95 0.900 [9 punti MT5]  (pip)
+   >> sera/notte 21-23: n=9553 GG=6  mediana 0.600 [6 punti MT5]  P95 8.000 [80 punti MT5]  (pip)
+   >> notte 0-6: n=25184 GG=5  mediana 0.300 [3 punti MT5]  P95 1.000 [10 punti MT5]  (pip)
+
+---------------------------------------------------------------------
+  NASUSD   (vivo, 2 decimali, 1 punti indice = 100 punti MT5)
+  campioni validi 79150, giornate massime in un secchio 5
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3599 |  5 |    1.800 |    1.900 |    1.900 |    4.900 | 
+    01 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    02 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    3.400 | 
+    03 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    4.700 | 
+    04 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    05 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    06 |      3585 |  5 |    1.800 |    1.900 |    1.900 |    3.400 | 
+    07 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    08 |      3596 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    09 |      3596 |  5 |    1.800 |    1.900 |    1.900 |    3.400 | 
+    10 |      3580 |  5 |    1.800 |    1.900 |    1.900 |    3.900 | 
+    11 |      3562 |  5 |    1.800 |    1.900 |    1.900 |    3.700 | 
+    12 |      3567 |  5 |    1.800 |    1.900 |    1.900 |    4.100 | 
+    13 |      3564 |  5 |    1.800 |    1.900 |    1.900 |    6.100 | 
+    14 |      3578 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    15 |      3538 |  5 |    1.800 |    1.900 |    1.900 |    3.800 | 
+    16 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    17 |      3600 |  5 |    1.800 |    1.900 |    1.900 |    3.400 | 
+    18 |      2898 |  5 |    1.800 |    1.900 |    1.900 |    1.900 | 
+    19 |      2880 |  4 |    1.800 |    1.900 |    1.900 |    6.100 | SOTTILE (GG<5)
+    20 |      2880 |  4 |    1.800 |    1.900 |    1.900 |    3.400 | SOTTILE (GG<5)
+    21 |      2628 |  5 |    1.800 |    1.900 |    1.900 |    3.900 | 
+    22 |   2987 sc |  - |      n/d |      n/d |      n/d |      n/d | solo campioni scartati (mercato fermo)
+    23 |      3299 |  5 |    1.800 |    1.900 |    1.900 |    3.700 | 
+   >> TUTTA LA GIORNATA: n=79150 GG=5  mediana 1.800 [180 punti MT5]  P95 1.900 [190 punti MT5]  (punti indice)
+   >> cash EUROPA 8-15: n=28581 GG=5  mediana 1.800 [180 punti MT5]  P95 1.900 [190 punti MT5]  (punti indice)
+   >> cash USA 14-20: n=22974 GG=5  mediana 1.800 [180 punti MT5]  P95 1.900 [190 punti MT5]  (punti indice)
+   >> sera/notte 21-23: n=5927 GG=5  mediana 1.800 [180 punti MT5]  P95 1.900 [190 punti MT5]  (punti indice)
+   >> notte 0-6: n=25184 GG=5  mediana 1.800 [180 punti MT5]  P95 1.900 [190 punti MT5]  (punti indice)
+
+---------------------------------------------------------------------
+  U30USD   (vivo, 2 decimali, 1 punti indice = 100 punti MT5)
+  campioni validi 79138, giornate massime in un secchio 5
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3599 |  5 |    3.000 |    6.000 |    8.000 |   11.000 | 
+    01 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    6.000 | 
+    02 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    3.000 | 
+    03 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    3.000 | 
+    04 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    6.000 | 
+    05 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    6.000 | 
+    06 |      3585 |  5 |    2.000 |    3.000 |    3.000 |    6.000 | 
+    07 |      3600 |  5 |    3.000 |    3.000 |    3.000 |    6.000 | 
+    08 |      3596 |  5 |    3.000 |    3.000 |    3.000 |    7.000 | 
+    09 |      3596 |  5 |    3.000 |    3.000 |    6.000 |    8.000 | 
+    10 |      3580 |  5 |    3.000 |    3.000 |    3.000 |    7.000 | 
+    11 |      3562 |  5 |    3.000 |    3.000 |    6.000 |    7.000 | 
+    12 |      3567 |  5 |    3.000 |    3.000 |    3.000 |    6.000 | 
+    13 |      3564 |  5 |    3.000 |    3.000 |    8.000 |   30.000 | 
+    14 |      3578 |  5 |    3.000 |    3.000 |    3.000 |    9.000 | 
+    15 |      3529 |  5 |    2.000 |    3.000 |    3.000 |    8.000 | 
+    16 |      3600 |  5 |    2.000 |    3.000 |    3.000 |    8.000 | 
+    17 |      3600 |  5 |    2.000 |    3.000 |    9.000 |   11.000 | 
+    18 |      2897 |  5 |    2.000 |    3.000 |    3.000 |   10.000 | 
+    19 |      2880 |  4 |    2.000 |    3.000 |    3.000 |    8.000 | SOTTILE (GG<5)
+    20 |      2880 |  4 |    2.000 |    3.000 |    3.000 |    6.000 | SOTTILE (GG<5)
+    21 |      2626 |  5 |    2.000 |    3.000 |    3.000 |    8.000 | 
+    22 |   2987 sc |  - |      n/d |      n/d |      n/d |      n/d | solo campioni scartati (mercato fermo)
+    23 |      3299 |  5 |    3.000 |    8.000 |   10.000 |   14.000 | 
+   >> TUTTA LA GIORNATA: n=79138 GG=5  mediana 2.000 [200 punti MT5]  P95 3.000 [300 punti MT5]  (punti indice)
+   >> cash EUROPA 8-15: n=28572 GG=5  mediana 3.000 [300 punti MT5]  P95 3.000 [300 punti MT5]  (punti indice)
+   >> cash USA 14-20: n=22964 GG=5  mediana 2.000 [200 punti MT5]  P95 3.000 [300 punti MT5]  (punti indice)
+   >> sera/notte 21-23: n=5925 GG=5  mediana 2.000 [200 punti MT5]  P95 7.000 [700 punti MT5]  (punti indice)
+   >> notte 0-6: n=25184 GG=5  mediana 2.000 [200 punti MT5]  P95 3.000 [300 punti MT5]  (punti indice)
+
+---------------------------------------------------------------------
+  USDJPY   (vivo, 3 decimali, 1 pip = 10 punti MT5)
+  campioni validi 84852, giornate massime in un secchio 6
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3599 |  5 |    0.500 |    1.000 |    1.000 |    1.000 | 
+    01 |      3600 |  5 |    0.400 |    1.000 |    1.000 |    1.000 | 
+    02 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    03 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    04 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    05 |      3600 |  5 |    0.300 |    1.000 |    1.000 |    1.000 | 
+    06 |      3585 |  5 |    0.600 |    1.000 |    1.000 |    1.000 | 
+    07 |      3600 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    08 |      3596 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    09 |      3596 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    10 |      3580 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    11 |      3562 |  5 |    0.300 |    0.800 |    0.800 |    1.000 | 
+    12 |      3567 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    13 |      3564 |  5 |    0.400 |    0.800 |    0.800 |    8.200 | 
+    14 |      3578 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    15 |      3597 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    16 |      3600 |  5 |    0.300 |    0.800 |    0.800 |    0.800 | 
+    17 |      3600 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    18 |      3600 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    19 |      3597 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    20 |      3589 |  5 |    0.300 |    0.900 |    0.900 |    0.900 | 
+    21 |      3276 |  6 |    0.400 |    1.300 |    1.600 |    2.100 | 
+    22 |      2567 |  5 |    6.800 |    9.000 |    9.000 |    9.000 | 
+    23 |      3599 |  5 |    0.300 |    0.900 |    1.000 |    9.000 | 
+   >> TUTTA LA GIORNATA: n=84852 GG=6  mediana 0.300 [3 punti MT5]  P95 1.000 [10 punti MT5]  (pip)
+   >> cash EUROPA 8-15: n=28640 GG=5  mediana 0.300 [3 punti MT5]  P95 0.800 [8 punti MT5]  (pip)
+   >> cash USA 14-20: n=25161 GG=5  mediana 0.300 [3 punti MT5]  P95 0.900 [9 punti MT5]  (pip)
+   >> sera/notte 21-23: n=9442 GG=6  mediana 0.500 [5 punti MT5]  P95 9.000 [90 punti MT5]  (pip)
+   >> notte 0-6: n=25184 GG=5  mediana 0.300 [3 punti MT5]  P95 1.000 [10 punti MT5]  (pip)
+
+---------------------------------------------------------------------
+  XAUUSD   (vivo, 2 decimali, 1 punti indice = 100 punti MT5)
+  campioni validi 80139, giornate massime in un secchio 5
+---------------------------------------------------------------------
+   ora |  campioni | GG |  mediana |      P95 |      P99 |  max     | nota
+   ----+-----------+----+----------+----------+----------+----------+------
+    00 |      3515 |  5 |    0.270 |    0.280 |    0.280 |    0.280 | 
+    01 |      3600 |  5 |    0.270 |    0.280 |    0.280 |    0.280 | 
+    02 |      3600 |  5 |    0.270 |    0.280 |    0.280 |    0.280 | 
+    03 |      3600 |  5 |    0.260 |    0.280 |    0.280 |    0.280 | 
+    04 |      3600 |  5 |    0.260 |    0.280 |    0.280 |    0.280 | 
+    05 |      3600 |  5 |    0.250 |    0.280 |    0.280 |    0.280 | 
+    06 |      3585 |  5 |    0.270 |    0.280 |    0.280 |    0.280 | 
+    07 |      3600 |  5 |    0.210 |    0.240 |    0.240 |    0.240 | 
+    08 |      3596 |  5 |    0.210 |    0.230 |    0.230 |    0.230 | 
+    09 |      3596 |  5 |    0.200 |    0.230 |    0.230 |    0.230 | 
+    10 |      3580 |  5 |    0.200 |    0.220 |    0.230 |    0.230 | 
+    11 |      3562 |  5 |    0.210 |    0.230 |    0.230 |    0.230 | 
+    12 |      3567 |  5 |    0.200 |    0.230 |    0.240 |    0.240 | 
+    13 |      3564 |  5 |    0.210 |    0.230 |    0.240 |    2.880 | 
+    14 |      3578 |  5 |    0.210 |    0.220 |    0.230 |    0.230 | 
+    15 |      3597 |  5 |    0.180 |    0.220 |    0.230 |    0.240 | 
+    16 |      3600 |  5 |    0.180 |    0.220 |    0.220 |    0.230 | 
+    17 |      3600 |  5 |    0.200 |    0.230 |    0.230 |    0.230 | 
+    18 |      3600 |  5 |    0.200 |    0.230 |    0.230 |    0.230 | 
+    19 |      3258 |  5 |    0.210 |    0.230 |    0.230 |    0.230 | 
+    20 |      2880 |  4 |    0.200 |    0.230 |    0.240 |    0.240 | SOTTILE (GG<5)
+    21 |      2622 |  4 |    0.220 |    0.290 |    0.290 |    1.480 | SOTTILE (GG<5)
+    22 |   2987 sc |  - |      n/d |      n/d |      n/d |      n/d | solo campioni scartati (mercato fermo)
+    23 |      3239 |  5 |    0.270 |    0.280 |    0.280 |    0.280 | 
+   >> TUTTA LA GIORNATA: n=80139 GG=5  mediana 0.220 [22 punti MT5]  P95 0.270 [27 punti MT5]  (punti indice)
+   >> cash EUROPA 8-15: n=28640 GG=5  mediana 0.200 [20 punti MT5]  P95 0.230 [23 punti MT5]  (punti indice)
+   >> cash USA 14-20: n=24113 GG=5  mediana 0.200 [20 punti MT5]  P95 0.230 [23 punti MT5]  (punti indice)
+   >> sera/notte 21-23: n=5861 GG=5  mediana 0.270 [27 punti MT5]  P95 0.280 [28 punti MT5]  (punti indice)
+   >> notte 0-6: n=25100 GG=5  mediana 0.270 [27 punti MT5]  P95 0.280 [28 punti MT5]  (punti indice)
+
+FILE COPIATI DAL TERMINALE (sola lettura):
+  - ABTG_SpreadLogger_stato.csv: 34794 byte, sha256 7787812484F8B1D0, 2026-09-11 22:50:03
+  - ABTG_SpreadLogger_orario.csv: 14312 byte, sha256 49FD0FACED8DEDE2, 2026-09-11 22:50:03
+  - ABTG_SpreadLogger_REFERTO.txt: 20123 byte, sha256 21FCFE71FBD057EC, 2026-09-11 22:50:03
+  - ABTG_SpreadLogger_stato.tmp: ASSENTE nel terminale
+
+PROBLEMI: 0
+RILIEVI: 0
+
+CARTELLE GUARDATE (candidate 8):
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\04C7A32B575E40027B4FF8724D14D702   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      RIFIUTATA, non e' il piccolo: origin.txt (normalizzato) = C:\MT5_Backtest; origin.txt porta un segno del banco; login 50504400 (banco) nei log
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\MT5_Backtest
+      bases BCM=True   piccolo=False   grande=False
+      nota: NON E' IL PICCOLO (origin.txt (normalizzato) = C:\MT5_Backtest; origin.txt porta un segno del banco; login 50504400 (banco) nei log): fuori dal perimetro
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\15BEB048A4E0532395CCA693EA561D8C   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\Program Files (x86)\BCM Markets MT4 Terminal
+      bases BCM=False   piccolo=False   grande=False
+      nota: nessuna cartella MQL5\
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\215D85D767A1C39E22D242C8114BF9F5   [ELEGGIBILE]   file di stato del logger presente=True   login 50503392 nei log=True
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\Program Files\BCM Markets MT5 Terminal
+      bases BCM=True   piccolo=True   grande=False
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\73B7A2420D6397DFF9014A20F1201F97   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\Program Files\Pepperstone MetaTrader 5
+      bases BCM=False   piccolo=False   grande=False
+      nota: nessuna bases\BCMMarkets-Server
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\857385E4B0F2356AD99AA95CDF40FAE9   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\Program Files\Tickmill Europe MT5 Terminal
+      bases BCM=False   piccolo=False   grande=False
+      nota: nessuna bases\BCMMarkets-Server
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\BCA8AD18563BF5B64A433C2662D0A104   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\Program Files\BCM Markets MT5 Terminal -V3
+      bases BCM=True   piccolo=False   grande=True
+      nota: E' IL 100k/-V3 (origin.txt contiene -V3; login 50504263 nei log): fuori dal perimetro
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\E23E1504A8D02A22179395F0652B86B6   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      RIFIUTATA, non e' il piccolo: origin.txt (normalizzato) = C:\BCM_Reale; origin.txt porta un segno del REALE; login 10105439 (REALE) nei log
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: C:\BCM_Reale
+      bases BCM=True   piccolo=False   grande=False
+      nota: NON E' IL PICCOLO (origin.txt (normalizzato) = C:\BCM_Reale; origin.txt porta un segno del REALE; login 10105439 (REALE) nei log): fuori dal perimetro
+  --- C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\FF5C0E29FAC93F5DD90858C939E9C0E8   [scartata]   file di stato del logger presente=False   login 50503392 nei log=False
+      trovata come: cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal + cartella dati sotto C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal   origin.txt: 
+      bases BCM=False   piccolo=False   grande=False
+      nota: nessuna cartella MQL5\
