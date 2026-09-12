@@ -42,7 +42,18 @@ scritto. **Non lo decido io.**
 
 # 1️⃣ 🖥️ IL TERMINALE — sei installazioni, una sola e' quella giusta
 
-Sul VPS ci sono **SEI** cartelle dati MT5 (misurato stanotte,
+✏️ **CORRETTO IL 12/09/2026: non SEI, OTTO.** Qui c'era scritto *"Sul VPS ci
+sono SEI cartelle dati MT5"*: **falso**, e l'errore e' mio. `CODA_03` scrive
+*"cartelle dati: 6"* perche' conta quelle di cui **sa dire il programma** — ed
+e' corretto lui. Incrociando con `CODA_04`, che le **pesa tutte**, le cartelle
+dati sono **OTTO**: le due in piu' sono **`15BEB048…` (0,07 GB)** e
+**`FF5C0E29…` (0,00 GB)**, e **non sono mai state identificate**. Piccole,
+quindi probabilmente terminali aperti e mai usati — 🔴 *"probabilmente"* non e'
+una misura. E la cautela era **scritta nel referto** (`CODA_03` dice *"NON
+TROVATO nei giornali recenti (non vuol dire che non ci sia)"*): l'ho ignorata
+scrivendo un totale. Misura: `report/DUE_MACCHINE_2026-09-12.md`.
+
+Sul VPS ci sono **SEI cartelle dati MT5 IDENTIFICATE** (misurato stanotte,
 `backtest_pipeline/coda/referti/CODA_03_conti_dei_terminali_20260911_033002.log`):
 
 ## ✅ L'UNICO DA TOCCARE
