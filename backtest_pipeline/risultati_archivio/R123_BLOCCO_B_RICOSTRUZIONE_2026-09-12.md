@@ -9,10 +9,17 @@ del 12/09 su A4 e A7. Qui sta **solo cio' che la ricostruzione AGGIUNGE**.
 🪞 **Le due lezioni di stamattina, applicate PRIMA di toccare un numero:**
 - **classe 258** — file prova aperto per primo: `R123b_U30USD_01_stmult.txt`,
   criteri A1-A8 e **attesa cella per cella** alle righe 140-190;
-- **classe 269** — cercato **chi aveva gia' letto questi CSV**: tre file
-  (`R123_RISULTATI_2026-09-09.md`, `ROUND_ALTOPIANO_SUPREV_2026-09-09.md`,
-  `IL_WIP_E_DIAGNOSTICA_2026-09-12.md`). Quello che dicono gia', **qui non lo
-  rivendico**.
+- **classe 269** — cercato **chi aveva gia' letto questi CSV**. ⚠️ **Il primo
+  censimento ne aveva trovati tre; sono CINQUE**, e quello mancante e' il piu'
+  diretto: `backtest_pipeline/risultati_prove/r123/REFERTO_ROUND_R123BSTMULT.txt`
+  — il **referto automatico del driver** (09/09 18:50, pin `7cd7b27e`,
+  `modello: 4`), che stampa **gia' tutti e 40 i numeri**. 🟢 Per me e' una buona
+  notizia: e' la **conferma indipendente** della ricostruzione. Gli altri
+  quattro: `R123_RISULTATI_2026-09-09.md`, `ROUND_ALTOPIANO_SUPREV_2026-09-09.md`,
+  `IL_WIP_E_DIAGNOSTICA_2026-09-12.md`, `MANOPOLE_INERTI_v2_2026-09-12.md`.
+  **Quello che dicono gia', qui non lo rivendico** — e la regola 1 della classe
+  269 (*cercare in `report/` e `risultati_archivio/`*) **ha un buco: il lettore
+  piu' diretto stava in `risultati_prove/`**.
 - E il **magic riletto dal CSV**: **784110** _(il blocco C e' 784120, il D
   784130: tre magic diversi per tre blocchi — copiarlo dal referto accanto e'
   proprio l'errore pagato stamattina)_.
@@ -33,81 +40,134 @@ mestiere"*). E `A4`/`A7` sono gia' nell'errata del 12/09.
 
 ## 🆕 QUELLO CHE LA RICOSTRUZIONE AGGIUNGE
 
-### 1. 📉 **LA CATENA DI STIMA SI E' ROTTA — esattamente dove il file prova diceva che era debole**
+### 1. 📉 **L'ANELLO ROTTO E' IL *PASSO 2* — e la sua dispersione si misura su CINQUE celle**
 
-Il file prova (r.140-160) non si era limitato a sperare: aveva costruito una
-**stima derivata** del PF OOS cella per cella, passando da OHLC a tick (banda
-misurata su 8 coppie: da +0,054 a +0,157) e da periodo intero a OOS (rapporto
-**1,202**). E aveva dichiarato il proprio punto debole:
+Il file prova (r.140-160) aveva costruito una **stima derivata** del PF OOS in
+due passi: **PASSO 1** da OHLC a tick (banda misurata su 8 coppie, +0,054 a
++0,157) e **PASSO 2** da periodo intero a OOS (rapporto **1,202**). E aveva
+dichiarato il proprio punto debole:
 
 > *"Questo rapporto e' misurato su **UNA cella sola**. E' **l'anello debole
-> della catena** e va detto: se le altre celle hanno un'asimmetria IS/OOS
-> diversa, la stima sbaglia."*
+> della catena** e va detto."*
 
-**L'anello debole si e' rotto:**
-
-| StMult | PF OOS **atteso** | PF OOS **misurato** | scarto | com'era ottenuto |
+| StMult | PF OOS **atteso** | **misurato** | scarto | anelli usati |
 |---|---|---|---|---|
-| 2,5 | ~**1,18** [1,11-1,24] | **0,91405** | **−0,266** | 🔴 **STIMATO** |
-| 3,0 | ~**1,25** | **0,95320** | **−0,297** | 🔴 **STIMATO** |
-| 3,5 | **1,43648** | **1,38944** | −0,047 | ✅ **MISURATO** (ancora) |
+| 2,5 | ~**1,18** [1,11-1,24] | **0,91405** | **−0,266** | 🔴 **DUE** (OHLC→tick, poi ×1,202) |
+| 3,0 | ~**1,25** | **0,95320** | **−0,297** | 🔴 **UNO** (base a tick misurata, solo ×1,202) |
+| 3,5 | **1,43648** | **1,38944** | −0,047 | ✅ **nessuno**: e' l'**ancora**, la sentinella S2 |
 
-➡️ **Le due celle STIMATE sbagliano di ~0,28 di PF; quella MISURATA riproduce
-entro 0,05.** La catena di stima ha aggiunto **circa un quarto di punto di
-Profit Factor di errore**, e sempre **nella direzione ottimista**.
+🎯 **E la colpa si localizza**: `3,0` **non ha mai usato il PASSO 1** — partiva da
+un numero a tick gia' misurato — ed e' quella che sbaglia **di piu'**. Quindi
+**non e' la conversione OHLC→tick a rompersi: e' il rapporto 1,202.**
 
-⚠️ **Perche' conta oltre R123**: quella catena — *OHLC → tick* piu' *periodo
-intero → OOS*, **calibrata su una cella sola** — non e' roba di questo round.
-E' un metodo. **Da qui in avanti va usata per stimare l'ORDINE DI GRANDEZZA,
-mai per decidere**, e chi la usa deve scrivere la banda ±0,3, non ±0,1.
+#### 🔬 E il PASSO 2 si puo' MISURARE su tutte e cinque le celle, dai CSV di oggi
 
-### 2. ✅ **E il contrappeso, che va detto: sul CAMPIONE la stima e' stata OTTIMA**
+Il PF di periodo intero e' ricavabile esattamente da Profit e PF
+(`GL = Profit/(PF−1)`, `GP = PF·GL`, e il PF dell'unione e' la **mediante**):
 
-| StMult | n OOS atteso | misurato |
-|---|---|---|
-| 2,5 | ~252 | **261** |
-| 3,0 | ~198 | **200** |
-| 3,5 | 155 | **152** |
-| 4,0 | ~121 | **112** |
-| 4,5 | ~94 | **117** |
+| StMult | PF IS | PF OOS | PF unione | **rapporto OOS/intero** |
+|---|---|---|---|---|
+| 2,5 | 0,87674 | 0,91405 | 0,89785 | 1,018 |
+| 3,0 | 1,08369 | 0,95320 | 0,99619 | **0,957** |
+| 3,5 | 0,98837 | 1,38944 | 1,20662 | **1,152** |
+| 4,0 | 0,72133 | 1,09271 | 0,89342 | 1,223 |
+| 4,5 | 2,01707 | 1,41820 | 1,65142 | **0,859** |
 
-**Cinque previsioni su cinque vicine**, tre entro il 5%. 👉 Quindi la conclusione
-precisa non e' *"la catena di stima non vale niente"*, e': **prevede bene il
-CAMPIONE e male il PROFIT FACTOR.** Ha senso — `n` dipende dalla geometria del
-segnale, il PF dipende da come vanno i singoli trade.
+➡️ **Il 1,202 assunto sta al BORDO ALTO di una banda misurata `0,859 - 1,223`.**
+E l'ancora stessa, ricalibrata sulla cella viva col **binario di oggi**, vale
+**1,152**, non 1,202.
 
-### 3. 🛑 **IL RAMO "ERA RUMORE" E' SCATTATO — ma la "scoperta" che gli era attribuita NON C'E'**
+⚠️ `4,0` e `4,5` hanno **n OOS sotto 150**: entrano qui **solo come aritmetica
+sul metodo**, mai a favore di A1 _(soglia A2, non sfiorata)_.
 
-Il file prova aveva dichiarato **prima dei numeri** il proprio test di
-falsificazione:
+⚠️ **E i test indipendenti della catena sono DUE, non tre** (`3,5` e' il punto di
+calibrazione). La regola di metodo qui sotto nasce da **n=2 sugli scarti** e da
+**n=5 sulla dispersione del PASSO 2**: si dichiara, non si nasconde.
+
+👉 **La regola, con la sua base:** quella catena — e in particolare il **PASSO 2
+calibrato su una cella sola** — va usata per **DIMENSIONARE, mai per DECIDERE**,
+e chi la usa scrive la banda **±0,3**, non ±0,1.
+
+_(⚠️ **Classe 269, e stavolta morde me**: che la stima fosse fallita su `2,5` e
+`3,0` **e' gia' scritto** in `R123_RISULTATI` r.103-105, coi due numeri. Qui e'
+nuova la **quantificazione contro le attese cella per cella**, la separazione
+**STIMATO/MISURATO**, la **localizzazione sul PASSO 2** e la **banda misurata su
+cinque celle** — non il fallimento.)_
+
+### 2. ⚖️ **Sul CAMPIONE la stima ha tenuto MEGLIO — ma non "cinque su cinque"**
+
+| StMult | n OOS atteso | misurato | scarto | com'era ottenuto |
+|---|---|---|---|---|
+| 2,5 | ~252 | **261** | +3,6% | 🔴 STIMATO |
+| 3,0 | ~198 | **200** | +1,0% | 🔴 STIMATO |
+| 3,5 | 155 | **152** | −1,9% | ✅ **MISURATO**: e' la sentinella S2 |
+| 4,0 | ~121 | **112** | −7,4% | 🔴 STIMATO |
+| 4,5 | ~94 | **117** | **+24,5%** | 🔴 STIMATO |
+
+⚠️ **Le previsioni vere sono QUATTRO, non cinque**: il `155` di `3,5` e' il
+numero d'archivio e — per la stessa disciplina di §1 — **non puo' contare come
+previsione**. Quindi: **due su quattro entro il 5%**, una al 7,4%, e **`4,5`
+sbaglia di un quarto**.
+
+🔴 **E la conclusione NON e' "ottima sul campione".** In termini **relativi** gli
+errori sul PF (−22,5% e −23,7%) sono **della stessa taglia** dell'errore su
+`4,5` (+24,5%). Cio' che separa le due meta' **non e' la dimensione dell'errore,
+e' la CONSEGUENZA**: un `n` sbagliato del 10% non sposta nessuna decisione; un
+PF sbagliato di **0,28** sposta una cella da *"passa 1,20"* a *"sotto 1,00"*.
+
+### 3. 🛑 **IL RAMO "ERA RUMORE" E' SCATTATO — ma la premessa NON E' MAI STATA MISURATA**
+
+Il file prova aveva dichiarato **prima dei numeri**:
 
 > *"SE ERA RUMORE mi aspetto **3.0 sotto 1.05** — il che **contraddirebbe** il
 > suo numero a tick di periodo intero (**1.040 con l'IS rosso dentro**) e
 > **sarebbe gia' di per se' una scoperta**."*
 
-**Misurato: `StMult 3,0` fa PF OOS 0,95320 → sotto 1,05. Il ramo e' scattato.**
+**Misurato: `StMult 3,0` fa PF OOS 0,95320 → il ramo e' scattato.**
 
-🔴 **Ma prima di annunciare la scoperta ho controllato la PREMESSA** — ed e'
-sbagliata:
+🔴 **Ma la premessa non regge, e per due motivi diversi:**
 
 ```
-StMult 3,0   IS : Profit +108,26   PF 1,08369   n 144   <- l'IS e' VERDE
-             OOS: Profit -123,22   PF 0,95320   n 200
-             periodo intero (archivio, a tick): 1,040
+1,040 = periodo intero, a tick, ARCHIVIO 26/07         <- BINARIO DEL 08/08
+        (valid_SupRevRT_U30USD_H1_realtick.csv, cella 3.0 / AtrP 9 / TP_RR 3.0, n 346)
+StMult 3,0  IS : +108,26  PF 1,08369  n 144            <- BINARIO DI OGGI
+            OOS: -123,22  PF 0,95320  n 200            <- BINARIO DI OGGI
 ```
 
-Il file prova dava quella cella con **"l'IS rosso dentro"**. **Non e' rosso: fa
-+108,26 e PF 1,084.** E allora un periodo intero a **1,040**, **fra** un IS a
-1,084 e un OOS a 0,953, e' **perfettamente coerente**: nessuna contraddizione,
-e quindi **nessuna scoperta**.
+**(a) Di quel 1,040 non esiste da nessuna parte una scomposizione IS/OOS**:
+prima di R123 la cella `3,0` non era mai stata girata con split (file prova
+r.108-110, *"mai con split IS/OOS su U30USD"*). **L'"IS rosso dentro" era
+EREDITATO dalla cella viva, non misurato su questa.** Non si puo' contraddire
+una premessa mai misurata.
 
-➡️ **Il ramo di falsificazione ha funzionato come test** (ha separato "vero" da
-"rumore", e ha detto rumore), **ma il bonus che si era promesso era appoggiato a
-una premessa sbagliata sulla cella.** Va tolto dal tabellino, non incassato.
+**(b) E il confronto con l'archivio era gia' stato dichiarato MORTO.** File
+prova r.278-281: *"la sentinella **S2** NON e' un cancello di validita' del
+round. Se fallisce, il round resta leggibile ma **muore il confronto con
+l'archivio, e il referto deve dirlo forte**."*
+🔴 **S2 E' FALLITA, e proprio sul PF IS**: `0,92343 → 0,98837`, **+0,065**
+contro tolleranza **±0,05** (`R123_RISULTATI` r.46). **Quindi 1,040 e 1,08369
+non sono dello stesso banco**, e questo referto lo dice forte come era stato
+chiesto.
 
-_(E' la regola del 10/09 applicata a me stesso: stavo per scrivere "il ramo
-dichiarato e' scattato, e il file prova diceva che sarebbe stata una scoperta" —
-che e' vero a meta' e suona benissimo. Controllare la premessa l'ha ucciso.)_
+✅ **La conclusione — nessuna scoperta da incassare — regge lo stesso, e regge
+MEGLIO**, perche' ora c'e' anche l'argomento aritmetico: il PF dell'unione e'
+`gross profit / gross loss`, cioe' la **MEDIANTE** di due frazioni, e una
+mediante **sta SEMPRE fra le due**. Con l'IS **sopra** 1,040, un periodo intero
+a 1,040 **OBBLIGA** l'OOS a stare **sotto**. ➡️ **Un OOS a 0,953 non e' una
+sorpresa da spiegare: e' cio' che il 1,040 richiede.**
+
+🔎 **E il contro-esempio, costruito apposta perche' questa conclusione sbagli:**
+trasponendo l'unico scarto di binario misurato (+0,065), l'IS vecchio di `3,0`
+sarebbe **~1,019** — ancora verde, ma con un margine **quattro volte piu'
+sottile** di come l'avevo presentato. E soprattutto: **l'unione calcolata dai
+numeri di OGGI vale 0,99619, non 1,040**. Lo scarto di binario **non e'
+uniforme fra le celle** — motivo in piu' per chiudere con **[NON MISURATA]**,
+non con *"verde"*.
+
+_(Nella prima stesura avevo scritto *"l'IS non e' rosso: e' VERDE"* come se
+fosse un fatto acquisito. E' il difetto che il cancello ha nominato meglio di
+me: **nei due punti in cui il risultato mi dava ragione avevo smesso di provare
+a rompermi.**)_
 
 ---
 
