@@ -3,8 +3,21 @@
 **12/09/2026** · nessuna compilazione, nessun backtest, nessun EA modificato.
 Solo lettura di `git diff` + tre controlli meccanici + quattro contro-esempi.
 
-> 🔴 **QUESTO NON È UN PASS.** Dopo di me il pacchetto passa dall'agente
-> `controllo-preventivo`. È scritto per farsi rompere, non per convincere.
+> 🟢 **PASSATO DAL CANCELLO il 12/09**, e non fidandosi: l'agente
+> `controllo-preventivo` **ha riscritto da zero i miei tre controlli** e li ha
+> girati per conto suo. Verdetto testuale: *«La neutralità dei 30 hunk è
+> DIMOSTRATA»*. Combaciano: diff per EA identici · hunk **30** ·
+> `b45dd00 == HEAD` sui quattro file · righe rimosse senza gemella
+> **0/0/0/0** · contatori in una condizione **0 su 108/108/102/142
+> condizioni** · chiamate di trading identiche · `GlobalVariableSet`
+> **0/0/0/0** · unica differenza `input` **+1**. E ha rifatto **quattro**
+> contro-esempi (i miei tre + un contatore infilato in una condizione):
+> li becca tutti e quattro, la riga vera non emerge.
+>
+> ✏️ **Questa versione incorpora le CINQUE correzioni del cancello**
+> (12/09, richiesta di Claudio *«fatele adesso»*): due bloccanti — §6.2 e
+> §6.3, dove **mi ero sbagliato in modo che contava** — e tre minori (§5).
+> Le lascio visibili come correzioni, non le riscrivo in silenzio.
 
 ---
 
@@ -26,7 +39,27 @@ di una conferma**, e stanno in §4 e §5:
    **non è `b45dd00`**: fra l'ancora (R99, 23/08) e oggi c'è `872dba8`
    (08/09), che su quell'EA è un **cambio di comportamento vero** sul volume.
    Vale la **classe 267-bis**: il round resta **LEGGIBILE**, muore solo il
-   confronto con l'archivio (§5).
+   confronto con l'archivio (§5.1). 🟢 Il cancello ha ricontrollato: fra
+   `f8ebc32` e oggi ci sono **esattamente** `872dba8` e `b45dd00`, e
+   `872dba8` non è diagnostica → **il colpevole non è il WIP: confermato**.
+
+### 🐦 E LA COSA CHE VALE PIÙ DI TUTTE: `r127c` È IL CANARINO GRATUITO
+
+Non la metto in nota, perché è la sola parte di questo referto che può
+**dimostrarmi sbagliato senza costare una passata in più**.
+
+`ABTG_CostToCost` ha **tre commit in tutta la sua vita**. Fra l'ancora di
+`r127c` (R103, binario `26a1856`) e oggi **ce n'è UNO SOLO, ed è `b45dd00`**.
+
+👉 Quindi `r127c` non è solo un round: è il **collaudo empirico di questo
+referto**. Predizione registrata **prima** di guardare i numeri:
+
+> **`n_IS + n_OOS` deve ricomporre 394 ±2% e il PF stare a 1,41 ±0,03.**
+> **Se non torna, il §3 di questo referto ha sbagliato** — ed è l'unico dei
+> dodici in cui l'ancora punta il dito su `b45dd00` senza ambiguità.
+
+🔴 **Per questo `r127c` va lanciato PRIMO** (§6.5): se il canarino muore, gli
+altri undici si fermano lì e si risparmiano **undici round**.
 
 ---
 
@@ -39,7 +72,7 @@ il lavoro:
 |---|---|---|
 | esiste già un'analisi di `b45dd00`? | **SÌ, ma solo su `ABTG_EMA200`** (`report/CODA_NOTTE_2_2026-09-12.md` §1 punto 2 e §7 punto 9): diff letto, +154/−16, diagnostica pura | ✅ nessuna sovrapposizione: i miei quattro non erano coperti |
 | l'elenco dei 12 round bloccati esiste già? | **SÌ**: `report/CORRI_OGGI_2026-09-13.md` §2, tabella a r.34-39 | ✅ i nomi sono suoi, non miei (§6) |
-| la deriva del binario è già stata misurata? | 🟢 **SÌ, e bene**: `prove/R126a_costo_bufferatr_U30USD.txt` r.255-288 nomina il **commit del binario dell'ancora (`400a462`, 08/08)** e i **tre sospetti** successivi, con una predizione aritmetica falsificabile su ciascuno | ✅ non ho rifatto il lavoro: l'ho **esteso** (quel blocco dice *"il sorgente è cambiato quattro volte"* — oggi sono **cinque**, §5) |
+| la deriva del binario è già stata misurata? | 🟢 **SÌ, e bene**: `backtest_pipeline/prove/R126a_costo_bufferatr_U30USD.txt` r.255-288 nomina il **commit del binario dell'ancora (`400a462`, 08/08)** e i **tre sospetti** successivi, con una predizione aritmetica falsificabile su ciascuno | ✅ non ho rifatto il lavoro: l'ho **esteso** (quel blocco dice *"il sorgente è cambiato quattro volte"* — oggi sono **SEI**, §5.0) |
 | il tetto cluster nel Guardian: implementato o no? | `CLAUDE.md` (correzione 12/09): **implementato, spento in tre modi** | ✅ mi ha risparmiato di ri-misurarlo, e mi ha indirizzato sull'include |
 
 ---
@@ -267,7 +300,7 @@ Le dichiaro perché «neutro sul trading» non è «identico»:
 occorrenze di `#include` sono in due commenti): la catena è **profonda 1**, non
 c'è un terzo livello da inseguire.
 
-E il driver li porta davvero: `walkforward_generico.ps1` r.239
+E il driver li porta davvero: `backtest_pipeline/walkforward_generico.ps1` r.239
 `$EABranch="lavoro"`, r.240 `$RawBase=.../$EABranch`, poi la lista
 `$NostriInclude` (`ABTG_PausaGuardian.mqh` con `Serve=$true`) scaricata e
 copiata sul terminale. **Stessa testa del `.mq5`.**
@@ -283,8 +316,18 @@ collegato, SPENTO di default. E PIANO_PROP»**.
 (`git diff --stat e2a10a7 b45dd00 -- mql5/Include/` è **vuoto**): è un WIP
 **indipendente e più vecchio di quattro giorni**.
 
-Dall'ultima verifica dell'include (`e72546e`) a `cdb2037` sono **+506 / −2**
-righe.
+Dall'ultima verifica dell'include (`e72546e`, *«VERIFICA P0: include a v1.51»*)
+a `cdb2037` sono **+506 / −2** righe.
+
+⚠️ **E dichiaro la definizione, perché su questo numero il cancello e io
+abbiamo divergito** (quinta divergenza-per-definizione della giornata, e
+stavolta il difetto era nel confronto, non nel numero): **+506/−2 è il
+CUMULATIVO** `git diff --numstat e72546e cdb2037` (= `506  2`, verificato).
+Il **singolo** commit `cdb2037` fa `git diff --numstat cdb2037^ cdb2037` =
+**+162/−1**. 🟢 Due numeri giusti che rispondono a due domande diverse: qui
+serve il cumulativo, perché la domanda è *«quanto si è mosso l'include da
+quando è stato verificato l'ultima volta»*, non *«quanto pesa l'ultimo
+commit»*.
 
 ### 4.3 🟢 Perché quel movimento è INERTE per questi quattro EA
 
@@ -366,11 +409,11 @@ mandato, ma chi lancia lo sappia.
 
 | round | EA | ancora (PF · n · DD) | fonte | **commit del BINARIO** | commit di deriva **fino a oggi** | l'ancora è un cancello di validità? |
 |---|---|---|---|---|---|---|
-| **r126a** · r126b · r126c | `SuperWave_DOW_H1_Ott.` | IS **PF 1,84892 · n 84 · DD 3,7267%** / OOS **PF 1,32770 · n 143 · DD 3,9082%** | `risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/..._{IS,OOS}.csv`, **dichiarato nel file prova r.262-263** | 🟢 **`400a462` (08/08/2026)** — scritto nel file prova, non ricavato da me | `7f80a87`(17/08) · `f8ebc32`(19/08) · `872dba8`(08/09) · **`b45dd00`(11/09)** | 🟡 **NO come cancello, SÌ come metro** — e il file prova lo sa già: ha **tre gradi** (A/B/C) e la finestra è diversa (`-Fino` taglia 642 giorni) |
+| **r126a** · r126b · r126c | `SuperWave_DOW_H1_Ott.` | IS **PF 1,84892 · n 84 · DD 3,7267%** / OOS **PF 1,32770 · n 143 · DD 3,9082%** | `backtest_pipeline/risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/..._{IS,OOS}.csv`, **dichiarato nel file prova r.262-263** | 🟢 **`400a462` (08/08/2026 **06:54**)** — scritto nel file prova, non ricavato da me | ✏️ **SEI**: **`3af47ed`**(08/08 11:48) · **`6074126`**(08/08 18:23) · `7f80a87`(17/08) · `f8ebc32`(19/08) · `872dba8`(08/09) · **`b45dd00`**(11/09) | 🟡 **NO come cancello, SÌ come metro** — e il file prova lo sa già: ha **tre gradi** (A/B/C) e la finestra è diversa (`-Fino` taglia 642 giorni) |
 | r120b ×4 · r120e ×2 | `SuperWave_DOW_H1_Ott.` | finestra piena **PF 1,52 · n 227 · DD 4,0%**; r3 tick: IS **PF 1,44 n 75 DD 4,77%** / OOS **PF 1,33 n 143 DD 3,91%** | `REGISTRO_TEST.md` r.476 (26/07) + censimento 09/09 r.111 | 🟡 **`a4107cf` (26/07/2026)** — *ricavato da me* dalla data del CSV d'archivio, **non dichiarato nel file prova** | **sei** commit, fra cui `3af47ed`(08/08 sizing) e `872dba8`(08/09) | 🔴 **NO**: il file prova chiama quei numeri *"il METRO, non il verdetto"* — ed è la parola giusta |
-| **r126d** | `SuperWave` | **PF 1,02213 · n 97 · DD 3,3131%** (OHLC) | `risultati_archivio/SuperWave/valid_SuperWave_NASUSD_H1.csv` | 🟡 **`a4107cf`/`a86089c` (26/07/2026)** — *ricavato da me* | come sopra + `a5d36d8`(11/08) | 🔴 **NO**, e il file prova lo dice da sé: *"NON è un'ancora al centesimo, è un ordine di grandezza"* |
-| **r127b** | `SupertrendReversal_Ott.` | **DD 9,02% · n 657** · PF **[NON MISURATO]** | `prove/R99_ORO_22ANNI_RISCHIO.txt` (23/08) | 🟢 **`f8ebc32` (19/08/2026)** — *ricavato da me* (è l'unico commit del `.mq5` prima del 23/08) | 🔴 **`872dba8`(08/09)** + **`b45dd00`(11/09)** | 🔴 **NO — e il motivo NON è `b45dd00`**: vedi §5.1 |
-| **r127c** | `CostToCost` | **PF 1,41 · n 394 · DD 12,3%** (OHLC M1, finestra piena 6,5 anni) | `prove/R103_ABTG_CostToCost_EURJPY_772361.txt`, copiato riga per riga nel file prova | 🟢 **`26a1856` (19/08/2026)** — *ricavato da me* | 🟢 **SOLO `b45dd00`** | 🟢 **SÌ, ed è il caso più pulito dei quattro**: vedi §5.2 |
+| **r126d** | `SuperWave` | **PF 1,02213 · n 97 · DD 3,3131%** (OHLC) | `backtest_pipeline/risultati_archivio/SuperWave/valid_SuperWave_NASUSD_H1.csv` | 🟡 **`a4107cf`/`a86089c` (26/07/2026)** — *ricavato da me* | come sopra + `a5d36d8`(11/08) | 🔴 **NO**, e il file prova lo dice da sé: *"NON è un'ancora al centesimo, è un ordine di grandezza"* |
+| **r127b** | `SupertrendReversal_Ott.` | **DD 9,02% · n 657** · PF **[NON MISURATO]** | `backtest_pipeline/prove/R99_ORO_22ANNI_RISCHIO.txt` (23/08) | 🟢 **`f8ebc32` (19/08/2026)** — *ricavato da me* (è l'unico commit del `.mq5` prima del 23/08) | 🔴 **`872dba8`(08/09)** + **`b45dd00`(11/09)** | 🔴 **NO — e il motivo NON è `b45dd00`**: vedi §5.1 |
+| **r127c** | `CostToCost` | **PF 1,41 · n 394 · DD 12,3%** (OHLC M1, finestra piena 6,5 anni) | ✏️ **`backtest_pipeline/risultati_archivio/R103_REFERTO_FINALE.md` r.15** (riga *"2 \| CostToCost EURJPY \| 1,0% \| +94.302 \| ... \| 1,41 \| 12,3% \| 394 \| 1/7"*) | 🟢 **`26a1856` (19/08/2026)** — *ricavato da me*, ed è l'unico possibile: l'EA ha **tre commit in tutto** | 🟢 **SOLO `b45dd00`** | 🟢 **SÌ, ed è il caso più pulito dei quattro**: vedi §5.2 |
 
 ### 5.1 🔴 `r127b`: l'ancora è a rischio per una ragione che non è il WIP
 
@@ -402,6 +445,30 @@ attribuire la differenza a `b45dd00`**: il sospetto numero 1 è `872dba8`, e
 sarebbe comunque solo **n + DD**, e il PF si leggerebbe lì **per la prima
 volta**. Il file prova lo scrive già (r.64-67). 🟢 Onestà già in casa.
 
+### ✏️ 5.0 DUE CORREZIONI DEL CANCELLO A QUESTA TABELLA — e la seconda era un'attribuzione sbagliata
+
+**(a) `r126a`: la deriva è SEI commit, non quattro né cinque.** Avevo scritto
+cinque e nella §5.3 originale avevo detto che il sospetto nuovo era *"il meno
+sospetto di tutti"*. **Sbagliato due volte.** Mancavano **`3af47ed`** (*"fix
+sizing su 41 EA: OrderCalcProfit al posto del tick value nudo"*, 08/08 **11:48**)
+e **`6074126`** (08/08 **18:23**), **entrambi dopo** l'ancora `400a462` (08/08
+**06:54** — sei ore prima, lo stesso giorno: è questo che me li aveva fatti
+scivolare). 🔴 **E `3af47ed` è un fix di SIZING sulla sedia dichiarata al 96%
+del pavimento di costo**: non è il meno sospetto, è **il più** — insieme a
+`872dba8`. Lo cito per `r120b`/`r120e` e l'avevo **omesso** proprio dove pesa
+di più. Ordine dei sospetti su `r126a`: **`3af47ed` e `872dba8` (sizing)**,
+poi `f8ebc32` / `7f80a87` / `6074126`, **e `b45dd00` per ultimo** (§3).
+
+**(b) `r127c`: la fonte del 394 non è quella che avevo scritto.** Avevo
+attribuito PF/n/DD a `backtest_pipeline/prove/R103_ABTG_CostToCost_EURJPY_772361.txt`.
+🔴 **Quel file NON contiene nessuno dei tre numeri** (verificato: **zero**
+occorrenze di `1,41`, `394`, `12,3`): è un file di **pin**. La fonte vera è
+**`backtest_pipeline/risultati_archivio/R103_REFERTO_FINALE.md` r.15**.
+🟢 E il file prova `R127c` r.42-44 l'attribuzione **ce l'ha giusta** (*"Fonte:
+R103_REFERTO_FINALE.md posizione 2"*): l'errore era **solo mio**, in questo
+referto. Il numero non cambia; **cambia chi lo garantisce**, e citare il file
+sbagliato è esattamente il difetto che questo progetto paga più spesso.
+
 ### 5.2 🟢 `r127c`: il round che collauda il WIP
 
 `ABTG_CostToCost` ha una storia di **tre** commit in tutto: `9b1c611` (13/08,
@@ -417,14 +484,20 @@ cui l'ancora punta il dito su `b45dd00` senza ambiguità.
 
 ### 5.3 ✏️ Un aggiornamento che serve a `R126a` (non l'ho fatto io: non tocco i file prova)
 
-`prove/R126a_costo_bufferatr_U30USD.txt` r.269-270 dice: *«fra l'08/08 e oggi
+`backtest_pipeline/prove/R126a_costo_bufferatr_U30USD.txt` r.269-270 dice: *«fra l'08/08 e oggi
 il sorgente è cambiato **quattro** volte, git log alla mano»* e poi elenca
 **tre** sospetti (`872dba8`, `f8ebc32`, `7f80a87`).
 
-🟡 **Oggi sono CINQUE**: manca **`b45dd00`**, che è arrivato dopo che quel file
-è stato scritto. 🟢 Il **sospetto nuovo è il meno sospetto di tutti** (§3), ma
-la lista va chiusa, perché il valore di quel blocco è di essere **completo**:
-una lista di sospetti con un buco è peggio di nessuna lista.
+✏️ **Oggi sono SEI** (§5.0 punto a). Alla lista mancano **tre** commit, non uno:
+**`b45dd00`** (11/09, arrivato dopo che quel file è stato scritto),
+**`3af47ed`** (08/08 11:48) e **`6074126`** (08/08 18:23) — questi due erano già
+lì il giorno in cui il blocco è stato scritto, e sono sfuggiti perché cadono
+**lo stesso giorno dell'ancora**, poche ore dopo.
+
+🔴 **E il buco che pesa non è `b45dd00`: è `3af47ed`**, un fix di **sizing**
+su una sedia che si sta valutando **al 96% del pavimento di costo**. Il valore
+di quel blocco è di essere **completo**: una lista di sospetti con un buco è
+peggio di nessuna lista, e il buco stava sul sospetto più pesante.
 👉 Segnalato, **non modificato** — i file prova non sono nel mio mandato.
 
 ---
@@ -437,45 +510,142 @@ COMPILARE»*.
 
 | # | file prova | EA | 🔓 sbloccato da questa lettura? |
 |---|---|---|---|
-| 1 | `prove/R120b_U30USD_00_nuda.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 2 | `prove/R120b_U30USD_01_notrail.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 3 | `prove/R120b_U30USD_10_noflip.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 4 | `prove/R120b_U30USD_11_vivo.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 5 | `prove/R120e_U30USD_00_nuda_TAGLIA.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 6 | `prove/R120e_U30USD_11_vivo_TAGLIA.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 7 | **`prove/R126a_costo_bufferatr_U30USD.txt`** | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** — la sedia al **96% del pavimento di costo** |
-| 8 | `prove/R126b_stop_lookback_U30USD.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 9 | `prove/R126c_gemelli_U30USD.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
-| 10 | `prove/R126d_costo_bufferatr_NASUSD.txt` | `SuperWave` | 🟢 **SÌ** |
-| 11 | **`prove/R127b_sllookback_XAUUSD.txt`** | `SupertrendReversal_Ott.` | 🟢 **SÌ** — `InpSLLookback`, **1 dei 3 assi d'uscita mai mossi** (5 valori in 290 CSV) · ⚠️ leggere §5.1 sull'ancora |
-| 12 | **`prove/R127c_orologio_EURJPY.txt`** | `CostToCost` | 🟢 **SÌ** — `InpMaxBarsHold`, **1 dei 3 assi mai mossi** (100 in 128 CSV) · 🟢 ancora la più solida (§5.2) |
+| 1 | `backtest_pipeline/prove/R120b_U30USD_00_nuda.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 2 | `backtest_pipeline/prove/R120b_U30USD_01_notrail.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 3 | `backtest_pipeline/prove/R120b_U30USD_10_noflip.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 4 | `backtest_pipeline/prove/R120b_U30USD_11_vivo.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 5 | `backtest_pipeline/prove/R120e_U30USD_00_nuda_TAGLIA.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 6 | `backtest_pipeline/prove/R120e_U30USD_11_vivo_TAGLIA.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 7 | **`backtest_pipeline/prove/R126a_costo_bufferatr_U30USD.txt`** | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** — la sedia al **96% del pavimento di costo** |
+| 8 | `backtest_pipeline/prove/R126b_stop_lookback_U30USD.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 9 | `backtest_pipeline/prove/R126c_gemelli_U30USD.txt` | `SuperWave_DOW_H1_Ott.` | 🟢 **SÌ** |
+| 10 | `backtest_pipeline/prove/R126d_costo_bufferatr_NASUSD.txt` | `SuperWave` | 🟢 **SÌ** |
+| 11 | **`backtest_pipeline/prove/R127b_sllookback_XAUUSD.txt`** | `SupertrendReversal_Ott.` | 🟢 **SÌ** — `InpSLLookback`, **1 dei 3 assi d'uscita mai mossi** (5 valori in 290 CSV) · ⚠️ leggere §5.1 sull'ancora |
+| 12 | **`backtest_pipeline/prove/R127c_orologio_EURJPY.txt`** | `CostToCost` | 🟢 **SÌ** — `InpMaxBarsHold`, **1 dei 3 assi mai mossi** (100 in 128 CSV) · 🟢 ancora la più solida (§5.2) |
 
 ### 🔴 MA «SBLOCCATO DA QUESTO CANCELLO» ≠ «LANCIABILE». Cosa NON ho verificato
 
 Il mio verdetto apre **una** porta. Le altre le tiene chiuse qualcun altro, e
 **due sono già scritte in casa**:
 
-1. 🔴 **`CORRI_OGGI` §3 dice che 20 dei 53 non sono lanciabili per un'altra
-   ragione** (la riga `-FrazioneIS 0.50 NON E' OPZIONALE`). **Non ho
-   controllato se qualcuno di questi 12 è fra quei 20.** Va fatto prima di
-   metterli in coda — è fuori dal mio mandato ma dentro il rischio.
-2. 🔴 **Nessuno di questi quattro `.mq5` è mai stato compilato.** «Il diff è
-   neutro» **non è** «compila». Ho fatto solo i controlli che si possono fare
-   a occhio: `ABTG_LATO_NULLO` è a r.1124 e le quattro funzioni cluster a
-   r.1333-1485, tutte **prima** di `ABTG_GuardiaIngresso` (r.1587) → nessuna
-   dipendenza in avanti; le tre `Imbuto*` sono dichiarate prima di chi le
-   chiama; i contatori di `CostToCost` (r.229-238 e r.267-271) prima di
-   `ImbutoRaccogli` (r.293). 🟡 **Sono indizi, non una prova.**
-   👉 **Il fallimento, se c'è, è quello giusto: rumoroso e innocuo** — il
-   driver non trova il `.ex5`, esce con un messaggio che dice perché, e non
-   produce nessun numero falso.
-3. 🟡 **Il modo più economico di chiudere il punto 2 esiste già** e non sono io
-   a doverlo inventare: `backtest_pipeline/righe/RIGA_COLLAUDO_RICOMPILA.ps1`
-   cita `b45dd00`. 👉 **Una compilazione sola su UNO dei quattro** (consiglio
-   **`ABTG_SuperWave`**: il diff più grande dei tre gemelli, e il suo verdetto
-   è matematicamente lo stesso di `SuperWave_DOW`, quindi copre **10 round su
-   12** in un colpo) chiude il dubbio su tutti. È il rapporto
-   valore/costo più alto che resta su questo tavolo.
+### ✅ 6.1 UNA PORTA CHE CREDEVO APERTA ED È CHIUSA: i 20 di `-FrazioneIS`
+
+Nella prima stesura avevo scritto *«non ho controllato se qualcuno di questi 12
+è fra quei 20»* e l'avevo lasciato a qualcun altro. 🔴 **Sbagliato: era
+misurabile in trenta secondi, e "non l'ho controllato" su una cosa a costo zero
+è pigrizia travestita da prudenza.** Chiuso adesso:
+
+I 20 fermi per `-FrazioneIS` sono, **per nome**: `r128b` `r128c` `r128d`
+`r128e` · `r129a` `r129b` `r129c` · `r130a` `r130b` `r130c` `r130d` `r130e` ·
+`r131a` `r131b` `r131c` `r131d` `r131e` `r131f` `r131g` `r131h`. Sono **20**
+(contati) e **tutti su D30EUR**.
+
+🟢 **`comm -12` fra i due insiemi ordinati → VUOTO. Nessuno dei 12 è fra i 20.**
+E i conti di `CORRI_OGGI` chiudono: **53 = 21 + 12 + 20**.
+👉 Porta chiusa: **quel cancello non ferma nessuno dei dodici.**
+
+### 🔴 6.2 LA PORTA CHE RESTA: non è mai stato compilato — e il fallimento NON è innocuo (**classe 270**)
+
+«Il diff è neutro» **non è** «compila». Gli indizi che si possono raccogliere a
+occhio sono buoni — `ABTG_LATO_NULLO` a r.1124 e le quattro funzioni cluster a
+r.1333-1485, tutte **prima** di `ABTG_GuardiaIngresso` (r.1587) → nessuna
+dipendenza in avanti; le tre `Imbuto*` dichiarate prima di chi le chiama; i
+contatori di `CostToCost` (r.229-238 e r.267-271) prima di `ImbutoRaccogli`
+(r.293) — 🟡 **ma sono indizi, non una prova.**
+
+🔴 **E QUI AVEVO SCRITTO UNA COSA FALSA, che è la correzione più importante di
+questa revisione.** Avevo scritto: *«il fallimento, se c'è, è quello giusto:
+rumoroso e innocuo — il driver non trova il `.ex5` e muore»*. **Non era vero, ed
+è la classe 270.**
+
+`backtest_pipeline/walkforward_generico.ps1` compilava e poi faceva `Test-Path`
+sull'`.ex5` **senza cancellarlo prima e senza guardarne la data**. Quindi con
+una compilazione **fallita** e un `.ex5` **preesistente**: `Test-Path` è VERO,
+il driver stampa *«compilato»* in **verde**, e gira il **binario VECCHIO**.
+🔴 Non un errore rumoroso: un **falso positivo silenzioso**, cioè il modo
+peggiore di sbagliare.
+
+E l'`.ex5` preesistente è lo scenario **normale**, non l'eccezione — questi
+quattro EA hanno già un archivio di corse. Misurato con
+`find backtest_pipeline -name "<NOME>_*.csv"`:
+
+| EA | CSV in archivio (prefisso esatto) |
+|---|---|
+| `ABTG_SuperWave` | **48** |
+| `ABTG_CostToCost` | **14** |
+| `ABTG_SuperWave_DOW_H1_Ottimizzato` | **6** |
+| `ABTG_SupertrendReversal_Ottimizzato` | **4** |
+
+⚠️ **E dichiaro la definizione, perché il numero cambia con lei** (è la quarta
+divergenza-per-definizione della giornata): col glob più largo
+`*<NOME>*.csv` gli stessi quattro fanno **52 / 116 / 6 / 4** — `CostToCost`
+salta da 14 a 116 perché entrano i file `gestione_*` e i per-simbolo di R103.
+🟢 **La conclusione non dipende da quale conteggio si usa: tutti e quattro
+hanno ≥ 4, quindi l'`.ex5` stantio è la norma.**
+
+🟢 **LA BUONA NOTIZIA: la toppa è già applicata sulla TESTA** — commit
+`124db40` (12/09 09:47, *«CLASSE 270, TOPPATA NEL DRIVER: l'ex5 stantio che
+passava per compilato»*), r.1400:
+`Remove-Item -LiteralPath $ex5Atteso -Force -ErrorAction SilentlyContinue`
+**prima** di compilare. Non l'ho toccata io e non va toccata.
+
+🔴 **MA IL RISCHIO NON È SPARITO, e questo è il punto da portare in coda:** i
+round pinnati scaricano **il driver dal LORO pin**. Una riga appuntata a un
+commit **anteriore** a `124db40` gira la versione **senza** `Remove-Item` — e
+il falso positivo torna. 👉 **Le righe di questi dodici round vanno pinnate a
+`124db40` o successivo.** E il **rilevatore di riserva sono le ANCORE**: se il
+driver gira un binario vecchio, l'ancora di `r127c` (che ha **un solo** commit
+di deriva, §5.2) **non ricompone 394** — cioè il canarino del §0 becca anche
+questo, non solo la mia neutralità.
+
+### 🔴 6.3 COME SI CHIUDE IL PUNTO 6.2 — e non con la riga che avevo indicato
+
+🔴 **Avevo proposto `backtest_pipeline/righe/RIGA_COLLAUDO_RICOMPILA.ps1`
+perché «cita `b45dd00`». Errore di lettura, e grosso: quella riga cita
+`b45dd00` solo per RIFIUTARLO.** Il suo commento r.31-42 dice testualmente
+*«HEAD NON È UN BERSAGLIO DI COMPILAZIONE... ogni sorgente si scarica al SUO
+commit bersaglio, che è l'ultimo NON-WIP che tocca quel file»*. E la lista
+`$BERSAGLI` (r.100-104) pinna `ABTG_SuperWave`, `ABTG_SuperWave_DOW_H1_Ottimizzato`
+e `ABTG_SupertrendReversal_Ottimizzato` a **`872dba8`** — e
+**`ABTG_CostToCost` non è nemmeno un bersaglio** (r.45 lo elenca fra i 4 file
+del WIP che *non* sono bersagli).
+👉 **Girarla collauderebbe il codice GIÀ BUONO e darebbe ZERO informazione
+nuova** sull'imbuto. Buona riga, domanda sbagliata.
+
+✅ **Serve un collaudo A `b45dd00`, su TRE bersagli**, perché i tre diff sono
+**oggetti diversi** e **non c'è copertura per analogia**:
+
+| bersaglio | perché serve il suo, e non basta un altro |
+|---|---|
+| `ABTG_SuperWave` **oppure** `ABTG_SuperWave_DOW_H1_Ottimizzato` | uno dei due basta (sotto) |
+| `ABTG_SupertrendReversal_Ottimizzato` | ha **un hunk in più** (blocco pattern/confluenza) e **3 contatori diversi** (`cF_stgirato`, `cF_pattern`, `cF_confl`) |
+| `ABTG_CostToCost` | schema **tutto suo**: funnel `[COST-FUNNEL]` preesistente + 5 contatori nuovi + `ImbutoRaccogli` a **21 voci** con due quadrature |
+
+📏 **E perché uno dei due SuperWave basta — con il limite dichiarato.** I
+**file interi** a `b45dd00` differiscono per **26 righe**, e sono: `#property
+description`, `InpTF` (H4 vs H1), `InpStMult` (3.5 vs 2.5), `InpTP_RR` (2.0 vs
+3.0), `InpComment`, `InpMagic`, il **nome** passato alla guardia, un commento
+su `ExportTrades()` e 9 righe di commento. **Nessuna differenza
+strutturale.**
+🟢 Compilare uno è **evidenza forte** sull'altro.
+🔴 **Ma non è una prova, e la distinzione conta: MetaEditor compila FILE, non
+diff.** Il *«stesso oggetto matematico»* del §2 vale per la **NEUTRALITÀ**
+(che è una proprietà del diff), **non per la COMPILABILITÀ** (che è una
+proprietà del file). Sono due domande, e la seconda l'ho risposta solo per
+indizi.
+
+### 🥇 6.4 L'ORDINE DI LANCIO
+
+Non è un elenco di preferenze: il primo è scelto perché **può fermare gli
+altri undici gratis**.
+
+| ordine | round | perché qui |
+|---|---|---|
+| **1°** | **`r127c`** (`InpMaxBarsHold`) | 🐦 **il CANARINO, sempre primo**: un solo commit fra ancora e oggi, ed è `b45dd00`. 🔴 Se `n` non ricompone **394 ±2%** e il PF **1,41 ±0,03**, **gli altri undici si fermano lì** |
+| **2°** | **`r126a`** | la sedia al **96% del pavimento di costo** — e si legge **con la deriva dichiarata a SEI commit** (§5.0a), sospetti `3af47ed` e `872dba8` in testa |
+| **3°** | **`r127b`** (`InpSLLookback`) | asse d'uscita mai mosso; sospetto `872dba8`, e il **PF si legge per la prima volta** (R99 non lo dichiara) |
+| **4°** | `r126b` · `r126c` · `r126d` | |
+| **5°** | `r120b`×4 · `r120e`×2 | **per ultimi**: le loro ancore sono **metro, non verdetto** — sono le parole del file prova, e sono quelle giuste |
 
 ---
 
@@ -486,9 +656,11 @@ Il mio verdetto apre **una** porta. Le altre le tiene chiuse qualcun altro, e
 2. 🔴 **Non ho modificato nessun EA**, nessun `#define`, nessun default,
    nessun file prova, **nessuna riga di `CODA.txt`**, nessun preset, niente
    forward, nessuna taglia, nessun rischio.
-3. 🟡 **«Neutro sul trading» è dimostrato per i 30 hunk letti**, con tre
-   controlli meccanici **validati da contro-esempi**. Non è dimostrato che il
-   codice **compili** (§6 punto 2).
+3. 🟢 **«Neutro sul trading» è DIMOSTRATO per i 30 hunk**, con tre controlli
+   meccanici validati da contro-esempi — **e riprodotti dal cancello con
+   strumenti riscritti da zero** (intestazione). 🔴 **Non** è dimostrato che
+   il codice **compili** (§6.2): quella è una proprietà del **file**, non del
+   **diff**, e su quella ho solo indizi.
 4. 🟡 **Due commit del binario sono ricavati da me, non dichiarati in un
    file**: `a4107cf` (r120b/r120e/r126d) e `f8ebc32` (r127b), ottenuti dalla
    data dell'artefatto d'ancora incrociata col `git log` del `.mq5`. 🔴 È
@@ -505,3 +677,27 @@ Il mio verdetto apre **una** porta. Le altre le tiene chiuse qualcun altro, e
    vengono tutti da un CSV o da un file prova **citato per nome**. Gli unici
    conti che ho fatto io sono conteggi di righe, di hunk e di trade —
    riproducibili con i comandi in §2 e §3.
+8. ✏️ **I QUATTRO ERRORI MIEI CHE IL CANCELLO HA TROVATO**, in chiaro e non
+   riscritti in silenzio, perché il valore di un referto è anche la sua lista
+   degli errori:
+   - 🔴 **«il fallimento è rumoroso e innocuo» era FALSO** (classe 270): il
+     driver poteva stampare *«compilato»* in verde e girare il binario vecchio
+     → §6.2;
+   - 🔴 **avevo proposto la riga di collaudo sbagliata**:
+     `RIGA_COLLAUDO_RICOMPILA.ps1` pinna a `872dba8` proprio per **escludere**
+     `b45dd00`, e `CostToCost` non è in lista → §6.3;
+   - 🟠 **deriva di `r126a` a cinque commit invece di sei**, e avevo omesso
+     `3af47ed` (**sizing**) proprio sulla sedia al 96% del pavimento di costo
+     → §5.0a;
+   - 🟠 **fonte del 394 attribuita al file sbagliato** (un file di pin che non
+     contiene nessuno dei tre numeri) → §5.0b.
+     🔴 **La causa comune dei primi due è la stessa: ho letto un file
+     cercando la conferma di quello che volevo trovare** (*«cita `b45dd00`,
+     quindi serve»*; *«se non compila muore, quindi è innocuo»*) **invece di
+     leggere cosa dice**. È la causa scritta nella regola del 10/09. I
+     contro-esempi li avevo costruiti sul **diff**, dove ho tenuto; non li
+     avevo costruiti sugli **strumenti intorno**, dove ho ceduto.
+9. 🟡 **Una porta l'ho lasciata aperta per pigrizia e l'ho chiusa in
+   revisione**: la disgiunzione dai 20 di `-FrazioneIS` costava trenta secondi
+   di `comm -12` e l'avevo delegata (§6.1). *«Non l'ho controllato»* su una
+   misura a costo zero non è prudenza.
