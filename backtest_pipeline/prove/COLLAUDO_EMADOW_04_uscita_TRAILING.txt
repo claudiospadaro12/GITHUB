@@ -1,0 +1,101 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_04_uscita_TRAILING.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         finestra 2024.09.26 -> 2026.06.30, split 40/60 -- IDENTICO a
+#         R112/R110. Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+#  LA DOMANDA: IL TRAILING SU EMA14 REGGE O E' UN REGALO DEL REGIME?
+#    Seconda meta' del requisito 3 del CERTIFICATO. InpUseTrailing non
+#    ha MAI variato in nessun CSV di questo EA (verificato file per
+#    file il 12/09). E il trailing e' il meccanismo che, in 21 mesi di
+#    indici in salita, puo' aver fatto tutto il lavoro -- oppure aver
+#    tagliato le gambe ai vincenti. Non si sa: non e' mai stato spento.
+#
+#  PERCHE' CONTA PER UNA PROP, e non e' una curiosita'
+#    Il trailing su una media mobile in un toro lungo e' il classico
+#    meccanismo che in un LATERALE si rovescia (esce in anticipo e
+#    rientra peggio). Il collaudo prop chiede: se il regime cambia, il
+#    profitto era del motore o del trailing?
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+#    cella 1 = la sedia viva = OOS PF 1.52365 | DD 7.8323% | 517 deal
+#              (G0-B: se non riproduce, il round e' nullo)
+#    cella 0 = trailing spento, breakeven ancora acceso. Attesa sul
+#              VERSO, non sulla misura: meno deal per posizione (il
+#              trailing e' una delle cause delle uscite multiple),
+#              e DD atteso PIU' ALTO o uguale. Se il DD scendesse
+#              con il trailing SPENTO, vorrebbe dire che il trailing
+#              sta chiudendo tardi, non presto: e sarebbe la scoperta
+#              piu' importante del round.
+#    >>> Non si promuove niente da qui. Si misura una dipendenza.
+#
+#  QUANTO COSTA: 2 celle x 2 gemelli = 4 passate per gamba.
+#  L'UNICO DELTA sull'antenato: InpUseTrailing (l'asse) e InpMagic.
+#
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+#
+# --- I FISSI: copia dell'antenato R112_00_metro.txt
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una
+# stringa a valore vuoto MT5 lo IGNORA e usa il default
+# compilato (controlla_prova.py, controllo 3 -- difetto
+# ereditato dall antenato R112_00_metro.txt r.96). Default = "".
+InpComment=COLLAUDO EMADOW uscita TRAILING
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=766640
+#
+# --- L'UNICO ASSE: 0 = trailing EMA14 SPENTO | 1 = la sedia viva
+InpUseTrailing=1||0||1||1||Y
+# ==========================================================================

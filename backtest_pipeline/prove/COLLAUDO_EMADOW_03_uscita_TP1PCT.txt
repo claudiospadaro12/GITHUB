@@ -1,0 +1,115 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_03_uscita_TP1PCT.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         finestra 2024.09.26 -> 2026.06.30, split 40/60 -- IDENTICO a
+#         R112/R110. Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+#  LA DOMANDA: LA GESTIONE DELL'USCITA E' MAI STATA MESSA AD ASSE?
+#    Requisito 3 del CERTIFICATO (regola del 09/09). Risposta misurata
+#    oggi, leggendo le colonne che VARIANO in tutti i CSV di questo EA:
+#    su U30USD sono stati messi ad asse SOLO InpOrder1Atr, InpOrder2Atr
+#    e InpTP_RR (R29b, R28/valid_realtick) piu' i due lati (R110/R112).
+#    InpTP1Pct, InpBreakeven, InpUseTrailing, InpSLatr e
+#    InpPendingExpiryBars non hanno MAI variato in NESSUN CSV di
+#    ABTG_EMA200, su NESSUN simbolo. Verificato file per file.
+#    >>> Cioe': la macchina d'uscita che produce il rapporto 2.01
+#        deal/posizione, il 50% di parziale, il breakeven e il trailing
+#        EMA14 -- quella che decide il DD -- e' MAI STATA MISURATA
+#        contro un'alternativa. Il PF 1.52 e' il PF di UNA gestione.
+#
+#  PERCHE' PROPRIO InpTP1Pct, e prima delle altre
+#    1. e' il parametro che GUIDA il rapporto deal/posizione (classe
+#       226): a TP1Pct=0 il rapporto deve andare verso 1.00, e allora
+#       le 257 posizioni OOS diventano leggibili in DEAL senza
+#       ambiguita', e il cancello del campione si chiude da solo;
+#    2. il parziale al 50% e' esattamente cio' che una prop guarda:
+#       toglie rischio presto e taglia la coda dei vincenti;
+#    3. e' un input, non codice nuovo. Niente si tocca nell'EA.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+#    cella 50 = la sedia viva = OOS PF 1.52365 | DD 7.8323% | 517 deal
+#               (G0-B: se questa cella non riproduce, il round e' nullo)
+#    cella 0   (nessun parziale): rapporto deal/posizione -> ~1.0, deal
+#               attesi ~260-290; PF NON prevedibile nel segno -- il
+#               parziale al 50% puo' star togliendo o aggiungendo edge;
+#    celle 25/75/100: servono a vedere se c'e' un ALTOPIANO o un picco.
+#    >>> LA REGOLA DI SELEZIONE, dichiarata col numero: se il profilo e'
+#        piatto si TIENE LA CELLA VIVA (50), non la migliore. Si cambia
+#        la sedia solo se una cella batte la viva su DD *e* su PF *e*
+#        ha le vicine d'accordo. CENTRO DELL'ALTOPIANO, MAI IL PICCO.
+#    >>> E il limite di casa: questo file NON promuove niente da solo.
+#        Un parametro nuovo su una cella promossa cambia la sedia e va
+#        rivalidato da zero. Qui si misura la FRAGILITA' della gestione,
+#        che e' una domanda di collaudo, non di ottimizzazione.
+#
+#  QUANTO COSTA: 5 celle x 2 gemelli = 10 passate per gamba (IS + OOS).
+#  L'UNICO DELTA sull'antenato: InpTP1Pct (l'asse) e InpMagic.
+#
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+#
+# --- I FISSI: copia dell'antenato R112_00_metro.txt
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una
+# stringa a valore vuoto MT5 lo IGNORA e usa il default
+# compilato (controlla_prova.py, controllo 3 -- difetto
+# ereditato dall antenato R112_00_metro.txt r.96). Default = "".
+InpComment=COLLAUDO EMADOW uscita TP1PCT
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=766630
+#
+# --- L'UNICO ASSE: quota del parziale al primo bersaglio, in percento
+#     0 = nessun parziale | 50 = la sedia viva | 100 = chiude tutto a TP1
+InpTP1Pct=50.0||0.0||25.0||100.0||Y
+# ==========================================================================

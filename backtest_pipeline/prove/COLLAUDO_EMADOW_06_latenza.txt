@@ -1,0 +1,117 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_06_latenza.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         finestra 2024.09.26 -> 2026.06.30, split 40/60 -- IDENTICO a
+#         R112/R110. Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+#  LA PROVA DELLA LATENZA -- E IL SUO CANARINO E' GIA' IN ARCHIVIO.
+#    Il driver ha il parametro -Ritardo, che scrive ExecutionMode
+#    nell'.ini (walkforward_generico.ps1 r.193). NON e' una chiave
+#    inventata: il primo giro di R119 scriveva "Delay=" e il canarino
+#    ha trovato i CSV IDENTICI BYTE PER BYTE (classe 156, MT5 ignora in
+#    silenzio le chiavi che non conosce). Corretta la chiave, il secondo
+#    giro MISURA l'effetto -- e lo si legge dai CSV in archivio:
+#      risultati_archivio/ritardo_r119b_csv/ , somma Profit OOS
+#        ABTG_DAX_Apertura_EU D30EUR : 2206.62 / 2212.22 / 2217.78 / 2240.50
+#                                      (0 / 50 / 100 / 500 ms)  -> SI MUOVE
+#        ABTG_ORB_Ottimizzato U30USD : 4968.34 in tutti e quattro -> FERMO
+#    >>> QUINDI IL CANARINO NON VA RIFATTO: la chiave funziona, e' provata
+#        su un EA nello stesso round, e non serve bruciare macchina per
+#        riprovarla. Questo e' il file che ha gia' la risposta.
+#    >>> E ATTENZIONE AL VERSO, che e' la parte contro-intuitiva: sul DAX
+#        il ritardo ha MIGLIORATO il risultato (+1.5% a 500 ms). Il
+#        ritardo del tester NON e' uno slippage avverso: e' un ritardo,
+#        e puo' cadere da tutte e due le parti. Chi lo legge come
+#        "costo" sbaglia di segno.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI, e qui e' una PREVISIONE precisa
+#    Questa cella entra con DUE ORDINI LIMIT PENDENTI (.mq5 r.226-228),
+#    non a mercato. Un LIMIT viene riempito al suo prezzo o non viene
+#    riempito: il ritardo di esecuzione dell'INVIO non sposta il prezzo
+#    di riempimento. Quindi l'attesa e': numeri IDENTICI o quasi
+#    identici su tutti e quattro i gradini, come l'ORB.
+#    >>> E QUESTO E' IL PUNTO DELICATO DEL FILE, scritto prima:
+#        se escono identici, NON si scrive "immune alla latenza".
+#        Si scrive: "il ritardo del tester non tocca il riempimento di
+#        un LIMIT" -- che e' una frase sul MODELLO, non sulla sedia.
+#        La latenza vera morde su altro (il pendente piazzato in
+#        ritardo, il requote, il rifiuto) e quelle cose MT5 non le
+#        modella: restano [NON MISURABILI] e vanno nel referto.
+#    >>> Se invece i numeri si MUOVESSERO, sarebbe la notizia: vorrebbe
+#        dire che il tester ritarda il PIAZZAMENTO del pendente, e
+#        allora la scala misura una cosa vera e va letta contro le
+#        soglie dei criteri (par.2).
+#
+#  I GRADINI, congelati: -Ritardo 0 / 50 / 100 / 500 ms.
+#    Sono gli stessi di R119b, di proposito: cosi' i due round si
+#    leggono sulla stessa scala e il confronto EMA200-vs-ORB (stesso
+#    simbolo, U30USD!) e' un confronto, non un aneddoto.
+#
+#  QUANTO COSTA: 1 cella x 2 gemelli x 4 gradini = 8 passate per gamba.
+#  L'UNICO DELTA sull'antenato: InpMagic.
+#
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+#
+# --- I FISSI: copia dell'antenato R112_00_metro.txt
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una
+# stringa a valore vuoto MT5 lo IGNORA e usa il default
+# compilato (controlla_prova.py, controllo 3 -- difetto
+# ereditato dall antenato R112_00_metro.txt r.96). Default = "".
+InpComment=COLLAUDO EMADOW latenza
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=766660||766660||1||766661||Y
+# ==========================================================================

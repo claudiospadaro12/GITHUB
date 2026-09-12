@@ -1,0 +1,115 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_01_spread_scala_ini.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         finestra 2024.09.26 -> 2026.06.30, split 40/60 -- IDENTICO a
+#         R112/R110. Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+#  LA PROVA A -- LA SCALA DI SPREAD. E PARTE SOLO SE IL CANARINO DICE (A).
+#    Questo file NON si lancia prima di COLLAUDO_EMADOW_00_canarino_spread.
+#    Se il canarino esce (B) o (C), questo file va ARCHIVIATO NON LANCIATO
+#    e il referto lo scrive. Lanciarlo comunque produrrebbe quattro
+#    colonne identiche e un verdetto falso -- il tipo di numero che costa
+#    una challenge.
+#
+#  IL GRADINO NON STA IN QUESTO FILE, E NON E' UNA DIMENTICANZA
+#    Lo spread e' un PARAMETRO DI BANCO: sta nella riga Spread= dell'.ini,
+#    che la scrive il DRIVER, non il file prova (stessa convenzione di
+#    R114, dove Deposit/Leverage/Model stanno nel driver). Quindi: UNA
+#    cella, QUATTRO corse, e i quattro valori sono questi -- congelati:
+#      Spread=0     base, spread dei tick registrati   (gia' misurata)
+#      Spread=238   +25%  (1.9 idx x 1.25 = 2.375 idx)
+#      Spread=285   +50%  (1.9 x 1.50 = 2.85 idx)
+#      Spread=380   +100% (1.9 x 2.00 = 3.8 idx)
+#    Da dove esce l'1.9: MEDIANA MISURATA delle ore 14-21 server, dove
+#    cade il 55.7% delle uscite della base (spread_orario_U30USD.csv,
+#    64.7 M tick). Non e' una stima: e' un percentile di 64 milioni di
+#    tick, e la conversione 100 punti MT5 = 1 punto indice e' dichiarata.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+#    Base: OOS PF 1.52365 | DD 7.8323% | 517 deal | +23321.47.
+#    Il costo di 1 punto indice su OGNI ingresso e' MISURATO sul
+#    per-trade della base: 1553.40 lotti chiusi x 0.861 EUR = 1337.48 EUR,
+#    cioe' il 5.73% del profitto per punto. Quindi, se il tester applica
+#    lo spread forzato agli ingressi e alle uscite, l'attesa aritmetica e':
+#      +25% (+0.475 idx) ~= -635 EUR   -> netto ~ +22690, PF ~ 1.505
+#      +50% (+0.95  idx) ~= -1271 EUR  -> netto ~ +22050, PF ~ 1.489
+#      +100% (+1.9  idx) ~= -2541 EUR  -> netto ~ +20780, PF ~ 1.456
+#    >>> E QUESTO E' IL CONTRO-ESEMPIO DEL FILE: se i numeri veri
+#        cadessero LONTANO da questa riga (per esempio un crollo del 40%
+#        a +25%), non sarebbe "un risultato": vorrebbe dire che lo
+#        spread forzato agisce su un'altra grandezza (il grilletto, il
+#        riempimento del LIMIT) e il gradino andrebbe capito prima di
+#        essere letto.
+#
+#  SOGLIE: quelle congelate in COLLAUDO_EMA200_DOW_CRITERI.md par.2.
+#    PASS = a +50%: netto > 0 E PF >= 1.10 E DD <= 10.0% E peggior
+#    giornata chiusi > -3.50%. Niente di questo si rilegge dopo.
+#
+#  QUANTO COSTA: 1 cella x 2 gemelli x 4 valori di spread = 8 passate
+#  per gamba. L'UNICO DELTA sull'antenato: InpMagic.
+#
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+#
+# --- I FISSI: copia dell'antenato R112_00_metro.txt
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una
+# stringa a valore vuoto MT5 lo IGNORA e usa il default
+# compilato (controlla_prova.py, controllo 3 -- difetto
+# ereditato dall antenato R112_00_metro.txt r.96). Default = "".
+InpComment=COLLAUDO EMADOW scala spread
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=766610||766610||1||766611||Y
+# ==========================================================================

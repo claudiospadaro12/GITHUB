@@ -1,0 +1,114 @@
+# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_02_pertrade_IS.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         finestra 2024.09.26 -> 2026.06.30, split 40/60 -- IDENTICO a
+#         R112/R110. Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+#  LA DOMANDA: QUANTE POSIZIONI HA L'IS DI QUESTA CELLA?
+#    E' il numero che manca al CERTIFICATO (requisito 2: n e DD) e che
+#    decide un cancello. L'Emendamento A chiede >= 150 OPERAZIONI per
+#    parte; la colonna Trades dei nostri CSV conta DEAL DI USCITA, non
+#    posizioni (classe 226). Misurato oggi sui per-trade di R112:
+#      00_metro     517 deal = 257 posizioni  (rapporto 2.0117)
+#      01_short_r1  302 deal = 140 posizioni  (2.1571)
+#      02_short_r2  315 deal = 140 posizioni  (2.2500)
+#      03_short_r3  324 deal = 140 posizioni  (2.3143)
+#    L'OOS quindi e' 257 posizioni: PASSA. L'IS ha 237 deal e il suo
+#    per-trade NON ESISTE in archivio (R112 dichiara "IS n/d PER
+#    COSTRUZIONE"): stimato 237/2.0117 = 118 posizioni, cioe' SOTTO 150.
+#    >>> Ma e' una STIMA, e su una stima non si archivia un cancello.
+#        Questo file la trasforma in una misura, in una passata.
+#
+#  COME: la finestra IS da sola, tranche unica (FrazioneIS 1.0 dalla
+#  riga di lancio), e si CONTANO i position_id distinti nel per-trade
+#  che l'EA esporta a fine test.
+#
+#  LA SENTINELLA -- e serve, perche' la data del confine e' DEDOTTA
+#    Il confine IS/OOS non e' scritto in nessun file prova: e' il 40%
+#    di 2024.09.26 -> 2026.06.30 calcolato dal driver. Il primo close
+#    del per-trade OOS di R112 e' il 2025.06.12 13:44:51, e il file
+#    LATI_A2 del 09/09 ha dedotto 2025.06.10. Qui si usa 2025.06.10 e
+#    si CONTROLLA: questa corsa deve riprodurre l'IS di R112
+#      237 deal (tolleranza +-2%) | PF 1.20110 (+-0.05) | DD 5.7325%
+#    Fuori tolleranza = la data del confine e' un'altra, il file va
+#    riscritto con quella, e il conteggio delle posizioni NON si legge.
+#
+#  ATTESA DICHIARATA PRIMA: posizioni fra 102 e 118 (= 237 diviso per
+#  il rapporto misurato 2.3143 - 2.0117). Perche' l'intervallo e' quello
+#  e non "fra 1 e 237": il rapporto e' guidato da InpTP1Pct, che qui e'
+#  50.0 come nella cella 00_metro, dove il rapporto misurato e' 2.0117.
+#    >>> CONTRO-ESEMPIO: per arrivare a 150 posizioni il rapporto dovrebbe
+#        scendere a 1.58, FUORI dalla banda misurata su quattro varianti
+#        della stessa cella. Se il numero vero uscisse >= 150, allora
+#        sarebbe il MODELLO del rapporto a essere sbagliato, non il
+#        cancello -- e andrebbe riaperta la classe 226.
+#
+#  QUANTO COSTA: 1 cella x 2 gemelli = 2 passate, UNA SOLA GAMBA.
+#  L'UNICO DELTA sull'antenato: InpMagic e la finestra (dichiarata qui).
+#
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2025.06.10
+#
+# --- I FISSI: copia dell'antenato R112_00_metro.txt
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una
+# stringa a valore vuoto MT5 lo IGNORA e usa il default
+# compilato (controlla_prova.py, controllo 3 -- difetto
+# ereditato dall antenato R112_00_metro.txt r.96). Default = "".
+InpComment=COLLAUDO EMADOW pertrade IS
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=766620||766620||1||766621||Y
+# ==========================================================================
