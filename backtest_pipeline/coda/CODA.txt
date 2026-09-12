@@ -181,3 +181,34 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 #     Get-ScheduledTask legge e basta. Collaudata eseguendo VagliaScript
 #     vero del runner: ok=True, corsia=LETTURA.
 bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canali_e_attivita.ps1
+
+# =====================================================================
+#  AGGIUNTE IL 13/09/2026 -- R136a-d, l'USCITA di ABTG_EMA200 su U30USD.
+#  40 passate. PASS del cancello di giudizio (4 su 4).
+#
+#  PERCHE' ENTRANO SENZA UNA FIRMA NUOVA: usano la corsia ROUND sul banco
+#  50504400, firmata l'11/09, e stanno dentro la lista bianca della riga
+#  sottile (-Expert -Prova -Etichetta -Modello -Deposito -SoloControllo).
+#  Nessun perimetro allargato.
+#
+#  PERCHE' VALGONO: chiudono il requisito 3 del certificato (la gestione
+#  dell'USCITA), che su ABTG_EMA200 era MAI stato messo ad asse -- sui 213
+#  CSV d'archivio di quel motore e' stato ottimizzato solo l'INGRESSO.
+#
+#  R136a VA PER PRIMA: e' il cancello S1. Ogni file contiene la cella viva
+#  e DEVE ridare IS 237 deal / PF 1,20110 / DD 5,7325% e OOS 517 / 1,52365
+#  / 7,8323%. Se S1 passa, il round e' ANCHE il collaudo che la patch
+#  b45dd00 e' neutra sul trading; se non passa, il primo sospetto e' il
+#  BINARIO, non i parametri.
+#
+#  🔴 DA QUI A QUANDO QUESTI ROUND HANNO GIRATO: NON SI TOCCA
+#     mql5/Experts/ABTG_EMA200.mq5 NE' mql5/Include/ABTG_PausaGuardian.mqh.
+#     Il driver compila dalla TESTA del branch, non dal pin: una modifica
+#     adesso (per esempio aggiungere open_time al per-trade, proposta P1
+#     del 13/09) farebbe compilare quella modifica e romperebbe S1.
+#     P1 si applica DOPO.
+# =====================================================================
+0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136a_slatr_U30USD.txt -Etichetta r136a -Modello 4 -Deposito 100000
+0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136b_primobersaglio_U30USD.txt -Etichetta r136b -Modello 4 -Deposito 100000
+0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136c_parziale_U30USD.txt -Etichetta r136c -Modello 4 -Deposito 100000
+0c7d98af7cb1b3e77aed764c1ab86e49026a3244 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136d_trailing_U30USD.txt -Etichetta r136d -Modello 4 -Deposito 100000
