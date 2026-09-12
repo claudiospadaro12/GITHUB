@@ -17495,3 +17495,15 @@ Claudio**.
 ### 🔑 La regola in una riga
 *Una v2 non e' "la v1 piu' le correzioni": e' un file nuovo, e va riletto tutto -- perche' il
 paragrafo che nessuno ha toccato e' quello che adesso mente.*
+
+### ⚠️ RICADUTA LA STESSA NOTTE, ed e' il corollario che mancava: **LA TOPPA APPLICATA A 2 FILE SU 3**
+La v3 ha applicato la correzione in `R142a` (per esteso), in `R142b` (forma corta), nel
+**referto** e in **`REGISTRO_TEST.md` L2` -- e **NON** in `R142c`, che a r.84-86 portava
+ancora, intatta, la frase falsa: *"NON il TF del grafico (non e' cambiabile)"*.
+🔴 **La famiglia e' l'unita' di correzione, non il file.** Quando tre file prova nascono
+insieme e condividono i paragrafi, una toppa vale solo se applicata a **tutti**: quello
+dimenticato e' l'unico che qualcuno leggera' da solo.
+✅ Quindi al punto 2 si aggiunge: il `grep` della parola chiave si fa **su tutta la
+famiglia in un colpo** (`grep -n "TF del grafico" prove/R142*.txt`), e si conta che le
+occorrenze **dicano la stessa cosa in ogni file**. Costa gli stessi dieci secondi, e la
+prima volta che non si e' fatto e' costata una quarta passata del cancello.
