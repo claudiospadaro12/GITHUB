@@ -10,7 +10,7 @@
 #
 #  LA DOMANDA, in una riga
 #    Il 50% sul primo bersaglio non e' mai stato messo in discussione in
-#    153 corse. Questo round chiede: 25 e' meglio? 75? E soprattutto --
+#    213 CSV. Questo round chiede: 25 e' meglio? 75? E soprattutto --
 #    LA GESTIONE SERVE, o la sedia va meglio NUDA?
 #
 #  >>> LA CELLA 0 E' LA CELLA NUDA, ED E' LA PIU' IMPORTANTE DEL ROUND.
@@ -36,11 +36,16 @@
 #    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md, riga 771531:
 #    InpTP1Pct e' fra le sette manopole d'uscita MAI MOSSE su questa
 #    sedia. Riverificato oggi 12/09/2026:
-#      - nelle 153 corse ABTG_EMA200 d'archivio InpTP1Pct vale 50 in
-#        tutte e 153 (le sole colonne ad asse sono InpAllowLong,
-#        InpAllowShort, InpOrder1Atr, InpOrder2Atr, InpTP_RR);
-#      - nei 153 file prova del repo InpTP1Pct compare come asse DUE
-#        volte, e su altri EA.
+#      - sui CSV, CONTATI TUTTI (non a campione -- la prima stesura di
+#        R136a aveva sbagliato per una lettura tagliata a 'head -60', ed
+#        e' un'errata scritta in quel file): 1.184 CSV d'archivio
+#        portano la colonna InpTP1Pct; 213 di quelli sono ABTG_EMA200 e
+#        su TUTTI E 213 vale 50; file con piu' di un valore dentro, fra
+#        i 213: ZERO. Le sole colonne ad asse su questo EA sono
+#        InpAllowLong, InpAllowShort, InpOrder1Atr, InpOrder2Atr e
+#        InpTP_RR;
+#      - nei file prova del repo InpTP1Pct compare come asse DUE volte,
+#        e su altri EA.
 #    >>> Su questo motore la frazione da incassare al primo bersaglio
 #        non e' mai stata girata di un punto.
 #

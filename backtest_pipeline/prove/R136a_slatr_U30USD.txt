@@ -20,17 +20,40 @@
 #
 #  PERCHE' QUESTA MANOPOLA E NON UN'ALTRA -- e questo e' il punto
 #    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md par.3-ter, e la
-#    misura e' netta: sulle 153 corse ABTG_EMA200 in archivio (scan H1
+#    misura e' netta: sui 213 CSV ABTG_EMA200 in archivio (scan H1
 #    OHLC su ~57 simboli + validazioni H4 a tick reali) le colonne messe
 #    ad asse sono CINQUE e sempre le stesse -- InpAllowLong,
 #    InpAllowShort, InpOrder1Atr, InpOrder2Atr (tutte e quattro
 #    dell'INGRESSO) e InpTP_RR. Nient'altro.
 #    >>> SU QUESTO MOTORE E' STATO OTTIMIZZATO L'INGRESSO. L'USCITA NO.
-#    Verificato oggi 12/09/2026 da capo, in due modi indipendenti:
-#      (a) sui CSV: in TUTTI i file d'archivio che hanno la colonna,
-#          InpSLatr vale 1 e basta. Zero file con due valori.
-#            for f in $(grep -rl InpSLatr --include=*.csv backtest_pipeline/)
-#            -> 60 file letti, valori distinti sempre {'1'}
+#    Verificato oggi 12/09/2026 da capo, in due modi indipendenti.
+#    >>> ERRATA DI QUESTO FILE, 12/09/2026: la prima stesura del punto (a)
+#        diceva "60 file letti, valori distinti sempre {'1'}". ERA UN
+#        LIMITE SUPERIORE, NON UNA MISURA: la lettura era tagliata a
+#        'head -60'. Rifatta su TUTTI i file, i numeri sono quelli qui
+#        sotto e sono DIVERSI -- in archivio la colonna prende anche 1.5.
+#        La conclusione non cambia (mai un asse), la frase si'. La lascio
+#        scritta perche' e' lo stesso difetto che il censimento
+#        dell'11/09 ha dovuto correggere su se stesso (par.0).
+#      (a) sui CSV, contati tutti: 257 file d'archivio portano la colonna
+#          InpSLatr. Di questi:
+#            213 sono ABTG_EMA200 (per percorso) -> valore 1 in TUTTI
+#             20 sono ABTG_CrossEma / ABTG_LiquiditySweep -> valore 1.5
+#             24 sono ABTG_Nightly / ABTG_SondaOrologio -> valore VUOTO
+#          >>> E IL DATO CHE CONTA: file con PIU' DI UN valore dentro =
+#              ZERO su 257. Cioe' la manopola non e' MAI stata un ASSE,
+#              da nessuna parte, su nessun EA.
+#          >>> Il 1.5 NON e' questo motore: sta su altri due EA che
+#              hanno un input con lo stesso nome. Su ABTG_EMA200 il
+#              valore e' 1 in tutti e 213 i file. Se si guardassero i
+#              valori senza attribuire l'EA, si concluderebbe "provata a
+#              corse separate" -- che e' la trappola A del censimento
+#              dell'11/09, e qui e' FALSA.
+#          (conteggio delle corse: il censimento dell'11/09 ne dichiara
+#           153, io ne conto 213. La differenza e' il metodo di
+#           attribuzione -- il suo incrocia magic e firma delle colonne,
+#           il mio e' il percorso. Nessuno dei due cambia il risultato,
+#           ma il numero non e' lo stesso e non lo spaccio per tale.)
 #      (b) sui file prova: zero occorrenze di InpSLatr come asse.
 #            grep -rn "InpSLatr=.*||Y" backtest_pipeline/prove/  -> 0 righe
 #            (il censimento degli assi di tutti i 153 file prova non ha
@@ -38,7 +61,7 @@
 #    E' la manopola che decide la LARGHEZZA DELLO STOP, cioe' la
 #    grandezza che governa i due requisiti in ballo: R2 (il DD) e R5 (il
 #    costo). Su questo motore non e' mai stata girata di un millimetro,
-#    su nessun simbolo, in nessuna delle 153 corse.
+#    su nessun simbolo, in nessuno dei 213 CSV.
 #
 #  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
 #    mql5/Experts/ABTG_EMA200.mq5, PlaceOrders() r.354-368:

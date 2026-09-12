@@ -18,16 +18,22 @@
 #    report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md, riga 771531:
 #    sette manopole d'uscita mai mosse su questa sedia, e
 #    InpTP1_ATRmult e' una delle sette. Verificato oggi 12/09/2026:
-#      - nei 2.087 CSV con colonne Inp*: nelle 153 corse ABTG_EMA200
-#        d'archivio le colonne ad asse sono solo InpAllowLong,
-#        InpAllowShort, InpOrder1Atr, InpOrder2Atr e InpTP_RR.
-#        InpTP1_ATRmult vale 0 in tutte e 153.
+#      - sui CSV, CONTATI TUTTI (non a campione: la prima stesura di
+#        R136a aveva sbagliato proprio per una lettura tagliata a
+#        'head -60', ed e' un'errata scritta in quel file):
+#          411 CSV d'archivio portano la colonna InpTP1_ATRmult;
+#          213 di quelli sono ABTG_EMA200, e su TUTTI E 213 vale 0;
+#          file con piu' di un valore dentro, fra i 213: ZERO.
+#        Le sole colonne ad asse sulle corse di questo EA sono
+#        InpAllowLong, InpAllowShort, InpOrder1Atr, InpOrder2Atr e
+#        InpTP_RR (quest'ultima ad asse in 161 file su 213: e' l'UNICA
+#        manopola d'uscita mai mossa su questo motore).
 #      - nei file prova: InpTP1_ATRmult compare come asse UNA volta in
-#        tutto il repo (censimento degli assi dei 153 file prova), e
+#        tutto il repo (censimento degli assi dei file prova), e
 #        NON su questo EA.
 #    >>> Quindi: il "50% sulla EMA14" non e' una scelta misurata. E' il
-#        default della prima stesura, mai messo in discussione in 153
-#        corse. Il censimento delle uscite lo chiama esattamente cosi':
+#        default della prima stesura, mai messo in discussione in 213
+#        CSV. Il censimento delle uscite lo chiama esattamente cosi':
 #        "su quel motore e' stato ottimizzato l'INGRESSO, l'uscita no".
 #
 #  COSA FA IL PARAMETRO, LETTO NEL SORGENTE

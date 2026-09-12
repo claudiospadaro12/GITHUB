@@ -12,7 +12,8 @@
 #
 #  LA DOMANDA, in una riga
 #    Dopo il primo bersaglio questa sedia insegue il prezzo con la EMA14.
-#    In 153 corse quell'interruttore e' stato true 153 volte. Questo
+#    In 213 CSV d'archivio quell'interruttore e' stato true 213 volte
+#    su 213. Questo
 #    round lo spegne UNA volta, e misura la differenza.
 #
 #  PERCHE' QUATTRO PASSATE SONO BEN SPESE -- e non e' un round "minore"
@@ -28,9 +29,14 @@
 #    2. E' LA CASELLA 3 DEL CERTIFICATO DI MORTE, sulla sedia migliore
 #       della flotta. report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md
 #       riga 771531: InpUseTrailing e' fra le sette manopole d'uscita
-#       MAI MOSSE. Riverificato oggi 12/09/2026: nelle 153 corse
-#       ABTG_EMA200 vale 1 in tutte e 153; nei 153 file prova del repo
-#       InpUseTrailing compare come asse TRE volte, e MAI su questo EA.
+#       MAI MOSSE. Riverificato oggi 12/09/2026 contando TUTTI i file
+#       (non a campione -- la prima stesura di R136a aveva sbagliato per
+#       una lettura tagliata a 'head -60', ed e' un'errata scritta in
+#       quel file): 650 CSV d'archivio portano la colonna
+#       InpUseTrailing; 213 di quelli sono ABTG_EMA200 e su TUTTI E 213
+#       vale 1; file con piu' di un valore dentro, fra i 213: ZERO.
+#       Nei file prova del repo InpUseTrailing compare come asse TRE
+#       volte, e MAI su questo EA.
 #    3. COSTA 4 PASSATE. Al ritmo misurato su questo stesso EA, stessa
 #       finestra, stesso simbolo (R112: 16 passate in ~6 minuti) sono
 #       circa UN MINUTO E MEZZO di macchina.
