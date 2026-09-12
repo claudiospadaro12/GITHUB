@@ -15503,3 +15503,96 @@ copiate da una riga che ha girato bene.
 realta': la cascata a due pin NON e' un difetto del progetto, e' quello che
 rende il file prova **immutabile** dopo il lancio. Il difetto e' averla
 lasciata **implicita nella riga di coda**, dove si legge un pin solo.
+
+---
+
+## 266. 🕐 «È LA STESSA COSA, PRIMA»: l'ANTICIPO di una corsa notturna cambia **una variabile che nessuno dichiara** — l'ORARIO — e con essa il **carico sulle sedie vive** (12/09/2026)
+
+**Il caso reale.** Claudio, alle 09:57 italiane: *"Non andiamo alle 3.30, se puoi
+anticipare, fallo. Anche ora."* È arrivata al cancello una riga che faceva girare
+**subito** la coda del runner delle 03:30, presentata — in perfetta buona fede e
+con tre verifiche vere sotto (pin che è un commit, impronta SHA-256, marcatore) —
+come **«la stessa cosa, prima»**.
+
+🟢 **Ed era vera la metà che era stata controllata**: il codice è identico al byte
+(`21AC6672…`), il bersaglio resta il solo banco `50504400`, i default del runner
+(`-DestDir`, `-CodaPath`, `-Branch`, `-TokenFile`) sono **costanti letterali** e
+non dipendono dalla cartella da cui parte lo script. Verificato leggendo: gli
+unici `$PSScriptRoot` / `$PSCommandPath` del runner stanno dentro `-Installa` e
+`-CollaudoCancelli`, **due rami che la riga non invoca**, e ogni anello della
+catena (`abtg_runner` → `abtg_sottile` → `abtg_round`) si ricrea sotto
+`$env:USERPROFILE`. Quel controllo è stato fatto bene.
+
+🔴 **La metà mancante**: **l'ora non è un dettaglio di comodo, è un parametro
+dell'esperimento.** Le 03:30 non erano un orario qualunque:
+
+| variabile | alle 03:30 | adesso (08:57 server) |
+|---|---|---|
+| mercati | **chiusi** | DAX **aperto** dalle 08:00 server |
+| sedie in forward | ferme | **armate** su tre terminali, uno col conto REALE |
+| processori liberi | ~6 su 6 | 6 su 6 **condivisi con sei terminali MT5** |
+| carico del tester | mai misurato | mai misurato |
+
+E il progetto **lo sapeva e l'aveva scritto**: il log `CODA_04` della notte stessa
+chiude con *"questa riga misura la MACCHINA, non il CARICO durante un round. **Il
+collaudo vero resta il canarino sul forward dopo la prima notte.**"* La prima
+notte **non era ancora avvenuta**: il referto del 12/09 03:30 mostra i 4 round
+`RIFIUTATO -- G1` dal runner v2. Quindi l'anticipo non era «la stessa cosa
+prima»: era **la prima volta in assoluto**, spostata dentro l'orario di mercato.
+
+### ✅ LA REGOLA
+**Quando si ANTICIPA (o si posticipa) una corsa pianificata, si elenca per nome
+ciò che cambia OLTRE al codice.** Il confronto giusto non è *"gira lo stesso
+script?"* ma *"gira nello stesso STATO DELLA MACCHINA?"*. Almeno:
+1. **i mercati sono aperti?** (ora **server** BCM = italiana − 1)
+2. **quali terminali con sedie vive sono accesi** in quel momento?
+3. **quante CPU e quanta RAM restano** a quelle sedie mentre il tester macina?
+4. **è già stato misurato** quel carico almeno una volta? Se no, **si dice**.
+
+🔴 E se la risposta al punto 4 è NO, la riga **non può dichiarare innocuità**: può
+solo **dichiarare l'ignoranza, misurarla e far accettare il rischio a chi lo
+possiede**. La riga bocciata faceva il contrario — l'unica menzione dell'orario
+era un `Write-Host` finale che rassicurava (*"Non e un problema"*) su un'altra
+cosa. Correzione applicata, tutta dentro il perimetro di sola lettura: foto
+PRIMA/DOPO dei PID `terminal64` e della RAM libera, avviso a schermo con i numeri
+veri, e **un `Read-Host 'SI'`** — perché il rischio sulle sedie vive è di Claudio,
+e le cose di Claudio si firmano, non si presumono.
+
+### 🧪 IL CONTRO-ESEMPIO, costruito prima di consegnare
+*"Se l'ora non contasse, cosa dovrei vedere?"* — Dovrei vedere l'attività
+pianificata a un'ora **qualunque**. Invece è a **03:30**, cioè nella finestra in
+cui non esiste una sedia che possa essere affamata di CPU. **L'ora è una scelta di
+progetto, e spostarla è modificare l'esperimento.** Chi anticipa una corsa
+notturna sta cambiando l'unico parametro che il progettista aveva fissato apposta.
+
+---
+
+## 266-bis. 🚪 LA GUARDIA ANTI-DOPPIA-CORSA CHE **FALLISCE APERTA**: `Where-Object` su un campo che può essere `$null` non trova niente, ed è il verso sbagliato (12/09/2026)
+
+Stessa riga. La guardia era:
+```
+$gia=@(Get-CimInstance Win32_Process -Filter "Name='powershell.exe'" | Where-Object { $_.CommandLine -like '*runner_abtg.ps1*' }); if($gia.Count -gt 0){ throw ... }
+```
+🟢 **Due contro-esempi su tre li superava, ed erano quelli difficili:**
+- l'attività delle 03:30 gira `powershell -File C:\ABTG\runner_abtg.ps1`: la
+  `CommandLine` **contiene** la stringa → la guardia scatta. ✅
+- **si vede da sola?** No: il controllo sta **prima** di `New-Item`, del download
+  e di `Start-Process`, e la console in cui si incolla la riga ha una
+  `CommandLine` che non contiene il nome del file. **L'ordine era giusto.** ✅
+
+🔴 **Il terzo no**: se `CommandLine` non è leggibile (permessi, processo di un
+altro utente, race in chiusura) il campo è `$null`, `-like` è falso,
+`Where-Object` non restituisce niente e la guardia **dice "via libera"**. Una
+guardia che, quando non sa, risponde *"nessun pericolo"*, è peggio di nessuna
+guardia: dà fiducia senza dare copertura.
+
+### ✅ LA REGOLA
+**Una guardia costruita su un campo che può essere `$null` deve avere un terzo
+esito: PASSA / BLOCCA / NON LO SO.** E il "non lo so" si stampa con i PID, non si
+nasconde. Meglio ancora: **si affianca un secondo segnale che non dipende da quel
+campo.** Qui: `Get-Process metatester64` — se un tester sta già macinando, la
+corsa è in atto, e quel nome non ha bisogno di nessuna `CommandLine`.
+
+📌 Generalizzazione: vale per ogni filtro su `CommandLine`, `Path`,
+`MainWindowTitle`, `.Description` — campi che **Windows può negare senza errore**.
+Il `-EA SilentlyContinue` accanto li rende silenziosi due volte.
