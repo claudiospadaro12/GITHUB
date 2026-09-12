@@ -38,6 +38,32 @@ avanti, OGNI VOLTA che chiedo a Claudio di aprire/toccare un terminale specifico
 Nato da un incidente reale (06/09): senza il numero di conto in chiaro, un
 attacco EA destinato al piccolo è stato quasi fatto sul terminale del REALE.
 
+### 🖊️ AMPLIAMENTO DEL 12/09/2026 — «SCRIVIMI SEMPRE SU CHE TERMINALE MANDARE LA STRINGA»
+Richiesta testuale di Claudio, ed e' **BLOCCANTE come il resto della regola**:
+> _"SCRIVIMI SEMPRE SU CHE TERMINALE MANDARE LA STRINGA"_
+
+Quindi **ogni** stringa che gli arriva porta in TESTA, prima del blocco di
+codice, la riga del bersaglio. E la risposta e' una di queste quattro, scritta
+per esteso — mai "il piccolo", mai "quello di prima":
+- 🖥️ **finestra PowerShell sul VPS** (nessun MT5 da aprire: la riga legge e
+  basta, oppure pilota lei il terminale che le serve);
+- 🖥️ **finestra PowerShell sul PC di backtest**;
+- 🪟 **un terminale MT5 preciso**: `50503392` (`BCM Markets MT5 Terminal`) ·
+  `50504263` (`... MT5 Terminal -V3`) · `10105439` (`C:\BCM_Reale`) ·
+  `50504400` (`C:\MT5_Backtest`);
+- ✋ **azione a mano dentro MT5**: e allora vale il punto 2 qui sopra (gli
+  arriva anche la stringa che stampa PID + titolo + cartella).
+
+🔴 **E la riga del bersaglio dice anche che cosa NON viene toccato**, quando la
+stringa gira su una macchina che ospita terminali vivi. Sul VPS convivono
+**SEI** cartelle dati (i quattro BCM + Pepperstone + Tickmill): "gira sul VPS"
+da solo **non e' un bersaglio**, e' un indirizzo.
+
+📌 Perche' e' una regola e non una cortesia: il 12/09 gli ho dettato righe
+senza nominare il bersaglio, dopo che la stessa lacuna il 06/09 aveva quasi
+fatto finire un EA sul conto REALE. Il numero di conto in chiaro costa tre
+parole e vale una challenge.
+
 ## REGOLA DELLE RIGHE DI LANCIO (richiesta esplicita di Claudio, 10/08)
 Ogni riga di lancio dettata a Claudio include SEMPRE, senza eccezioni:
 1. **l'`irm` davanti** che riscarica script e prova dal branch `lavoro` (il 10/08
