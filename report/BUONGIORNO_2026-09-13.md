@@ -74,7 +74,7 @@ ti mostra la curva di un motore M5, quasi certamente ti sta mostrando quella da
 
 ---
 
-## 4. 🔬 E STANOTTE HO PREPARATO LE MISURE CHE CHIUDONO IL BUCO
+## 4. 🔬 E STANOTTE HO ARMATO LE MISURE CHE CHIUDONO IL BUCO
 
 Non mi sono fermato al «ho sbagliato». Il cancello ha detto **cosa manca** e
 quanto costa: la voce 3 del certificato (l'uscita mai messa ad asse su questo
@@ -82,9 +82,13 @@ ingresso) si chiude con **3,34 minuti** di macchina. Li ho preparati.
 
 | round | asse | celle | cosa chiede |
 |---|---|---:|---|
-| **R142a** | `InpTP1_ClosePct` 0 / 50 / 100 | 3 | la parziale al primo obiettivo aiuta o taglia le gambe? |
+| **R142a** | `InpTP1_ClosePct` 0 / 25 / 50 / 75 | 4 | la parziale al primo obiettivo aiuta o taglia le gambe? |
 | **R142b** | `InpTrailTF` M1..M5 | 5 | **e' l'asse che ha rotto il mio verdetto**: span misurato 0,192 |
 | **R142c** | `InpUseTrailing` 0 / 1 | 2 | il trailing **serve**, su un breakout con flat d'orologio? |
+
+**11 celle · 22 passate · 3,50 minuti.** Girano sul **banco `C:\MT5_Backtest`
+(demo solo-tester 50504400)**. 🔴 **Non vengono toccati** il piccolo `50503392`,
+il 100k `50504263`, il **reale `10105439`**, ne' Pepperstone e Tickmill.
 
 ### 🧪 E il contro-esempio sta DENTRO ogni round, non accanto
 In ciascuno dei tre, **una cella E' la configurazione gia' in archivio** e **deve
@@ -98,6 +102,34 @@ Costa **zero passate in piu'**, perche' e' una cella che comunque serviva.
   potrebbero stare **sotto il pavimento dei 150**. Lo sapremo senza spendere nulla.
 - su R142b e R142c l'**n deve restare identico** fra le celle: il trailing cambia
   dove si **esce**, mai se si **entra**. Se l'n si muove, c'e' un difetto da leggere.
+
+---
+
+## 4-bis. 🚦 E IL CANCELLO MI HA BOCCIATO **TRE VOLTE** PRIMA DI FARMI PASSARE
+
+Claudio, questa e' la parte che volevo raccontarti per intera, perche' e' la tua
+regola del 09/09 che lavora — quella dove hai scritto _"ED ALLORA SOCIO, DEVI
+ASPETTARE"_.
+
+Le tre righe sono rimaste **disarmate per quasi tre ore** mentre il cancello
+faceva **quattro passate**. Ecco cosa sarebbe girato se le avessi armate subito:
+
+| versione | cosa avrebbe fatto |
+|---|---|
+| **v1** | 🔴 Due celle **identiche per costruzione** (r.977 dell'EA esclude sia 0 che 100), e una soglia congelata che chiedeva *"tre PF distinti"*: **insoddisfacibile**. Il round si sarebbe **auto-dichiarato fallito qualunque cosa dicesse il mercato**. Piu': la regola *"l'n deve restare identico"* era un falsificatore **che scattava sull'ipotesi VERA** |
+| **v2** | 🔴 La voce 5 del certificato portava la ragione **di un ALTRO EA** (`InpTimeframe` e' dell'EA esterno; quello di casa non ce l'ha) |
+| **v3** | 🔴 La toppa era arrivata su **due file su tre** (uno script con una sola `write` alla fine, persa su un errore), e un file **autorizzava a dichiarare morto** il motore a 3 voci su 5 |
+| **v4** | ✅ **PASS pulito** |
+
+🔴 **La terza e' quella che mi spaventa di piu'**: quella riga, letta alle 03:30 da
+chi guarda i risultati, autorizzava a riportare il motore da *"non ancora
+misurato"* a **morto**. Cioe' **esattamente l'archiviazione che la prima
+bocciatura aveva bloccato**, e che il 09/09 ci e' costata quattro candidati.
+
+🟢 **E una cosa bella**: alla terza passata il cancello si e' **auto-verificato**
+— ha controllato di non stare inventando paletti nuovi a ogni giro, ha constatato
+che i due rilievi erano **gia' chiesti**, e ha **chiuso la lista** prima della
+quarta. E' il contrario del burocrate che non finisce mai. 💪
 
 ---
 
@@ -130,10 +162,9 @@ allora la tua regola del 19/08 la **vieta**. La distinzione e' sottile e **decid
 
 **19 giorni** alla challenge. 🎯
 
-- 🟢 La coda delle 03:30 e' armata: **45 righe gia' congelate**, piu' le **3 di
-  R142** che alle 01:10 erano ancora **in mano al cancello** (non si pusha niente
-  verso il VPS senza un PASS -- e' la tua regola, e stanotte l'ho rispettata anche
-  avendo fretta). Gli esiti dei round arrivano in un referto a parte.
+- 🟢 La coda delle 03:30 e' armata: **48 righe**, le 45 di sempre piu' le 3 di
+  R142. Verificate sugli URL veri che scarichera' il runner. Gli esiti dei round
+  arrivano in un referto a parte.
 - 🟢 Abbiamo **650.484 campioni veri di spread** raccolti da te ieri: da oggi la
   frontiera del costo non e' piu' una stima, e' un **numero misurato**.
 - 🟢 Il preset della sedia viva `771531` **esiste** — non era mai esistito.
