@@ -15999,3 +15999,80 @@ successiva non l'ha riletta.
 col motivo, piccolo che passa per tutte e tre le prove positive) piu' la
 regressione sul percorso automatico. Referto:
 `report/MISURA_SPREAD_FOREX_2026-09-12.md` §4.
+
+## 273. 🎛️ IL `-Modello` CON L'ETICHETTA INVERTITA nel file prova — e la prova che una classe non scritta si ripaga in 12 ore (12/09/2026)
+
+**Il caso reale, ed è il SECONDO in due giorni.**
+L'11/09 sera il commit `1764a0e` correggeva tre file prova (`R132a/b/c`) che
+dicevano **`-Modello 1`** scrivendoci accanto **«= TICK REALI»**. Il messaggio di
+quel commit chiamava il difetto **BLOCCANTE** e spiegava perché: `R132c` è un
+cancello di riproduzione, e lanciato in OHLC sarebbe fallito **per costruzione**,
+annullando `R132a` e `R132b` con sé.
+
+🔴 **Quella classe non è mai entrata in questa checklist.** Il 12/09 mattina lo
+stesso difetto, **specchiato**, era dentro altri due file prova già in lista per
+la notte:
+
+```
+prove/R127c_orologio_EURJPY.txt   r.13  "-Deposito 100000 -Etichetta r127c -Modello 4"
+                                  r.17  "-Modello 4 = OHLC M1, come la corsa R103..."
+prove/R127b_sllookback_XAUUSD.txt r.13  "... -Modello 4"
+                                  r.17  "-Modello 4 = OHLC M1, ED E' UN LIMITE DICHIARATO..."
+```
+
+La verità sta in **una riga sola**, `walkforward_generico.ps1` r.172:
+
+```powershell
+[int]$Modello = 4,   # 4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti
+```
+
+**Perché costa più di un numero sbagliato.** `r127c` era **il canarino** della
+notte del weekend: doveva ricomporre `n 394 ±2%` e `PF 1,41 ±0,03` da un'ancora
+**OHLC M1** (R103), e se non ricomponeva **gli altri undici round si
+fermavano**. A `-Modello 4` non poteva ricomporla **per costruzione**: il
+referto del mattino avrebbe scritto *«canarino morto, sospetto il binario
+`b45dd00`»* — undici round fermati e un verdetto **falso** su un commit
+innocente. Su `r127b` (XAUUSD dal 2004, dove **i tick reali non esistono**) il
+PF si legge **per la prima volta**: sarebbe nato non attribuibile.
+
+> ✅ **REGOLA (due mosse, e la seconda è quella che non si salta).**
+> **(1)** In un file prova il `-Modello` si scrive **col numero E con
+> l'etichetta**, e l'etichetta si copia dalla **r.172 del driver**, non a
+> memoria. `4 = tick reali` · `1 = OHLC M1`.
+> **(2)** 🔴 **Il numero giusto lo decide il MODELLO DELL'ANCORA, non la
+> preferenza di casa.** Se il file ha un'ancora con tolleranza al centesimo, il
+> modello **deve** essere quello dell'ancora — «i tick reali sono la verità» non
+> autorizza a confrontare due numeri nati con modelli diversi.
+
+### 🧪 E COME SI ATTRIBUISCE IL MODELLO DI UN'ANCORA senza indovinare
+
+Non si chiede all'autore: si **misura**. Il driver (r.1446) appende `_ohlc` al
+nome del CSV **quando il modello non è 4**:
+
+```powershell
+$Suffisso = if($Modello -eq 4){ "" } else { "_ohlc" }
+```
+
+e quel suffisso **non è lettera morta**: nel repo ci sono **288** CSV `_ohlc`
+(`find backtest_pipeline -name "*_ohlc*.csv" | wc -l`, 12/09/2026). Quindi
+l'**assenza** del suffisso è una misura, non un silenzio. Applicato in senso
+opposto sullo stesso round-set, il che è ciò che rende la misura una misura:
+
+| round | dove sta l'ancora | suffisso | modello |
+|---|---|---|---|
+| `r126a` | `..._U30USD_IS.csv` (contiene `1.84892`, verificato con `grep -l`) | **assente** | **tick reali** → `-Modello 4` era GIUSTO |
+| `r127c` | `risultati_archivio/R103_REFERTO_FINALE.md`, intestazione r.6-7: *«Pin `7e2fb0d` (v3). **OHLC M1** → il DD è un LIMITE INFERIORE»* | — | **OHLC M1** → serve `-Modello 1` |
+
+🟡 **E un difetto minore del driver, trovato insieme e NON toccato:** r.830
+scrive `Model=4` **cablato** nell'`.ini` di **anteprima** di `-SoloControllo`,
+mentre la corsa vera scrive `Model=$Modello` (r.1484). Chi gira `-SoloControllo`
+con `-Modello 1` legge *«Model=4»*: un'anteprima che **mente** sul modello.
+Nessun impatto sul runner (non passa `-SoloControllo`), ma è uno stato implicito
+da chiudere.
+
+📌 **La lezione di metodo, che è il motivo per cui questa voce esiste:** il
+difetto del 11/09 era stato **trovato, corretto e spiegato bene** — e non
+registrato. Dodici ore dopo era di nuovo in coda, su due file diversi, e a
+trovarlo è stata la lettura riga per riga dei file prova, non un cancello.
+**Una classe che non entra qui non è stata pagata: è stata rinviata.**
+Referto: `report/CODA_DEL_WEEKEND_2026-09-12.md` §2.
