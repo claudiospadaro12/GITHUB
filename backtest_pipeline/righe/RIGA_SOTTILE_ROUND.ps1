@@ -411,7 +411,44 @@ $BancoBT = 'C:\MT5_Backtest'
 #  dopo averla salvata. Si citano i FILE e i NOMI, che non si spostano.
 #  Referto: report\CANARINO_FRAZIONEIS_2026-09-12.md
 # ---------------------------------------------------------------------
-$PIN = 'b7979d82ec9d35c2ef4c9cb94ebcd1126aba2ce8'
+# ---------------------------------------------------------------------
+#  TREDICESIMO GIRO (12/09/2026) -- IL CANALE PER-TRADE PER L'n IN POSIZIONI
+#
+#  PERCHE': la corsia ROUND non aveva NESSUN canale per il per-trade --
+#  'abtg_trades' ha ZERO occorrenze in runner_abtg.ps1, in questa riga
+#  sottile e in RIGA_ROUND_VPS.ps1, mentre 36 script su 98 in righe\RIGA_*
+#  lo raccolgono. Senza quel canale il requisito 2 del CERTIFICATO DI
+#  MORTE (l'n dell'IS in POSIZIONI, non in deal -- classe 226) non si
+#  chiude su ABTG_EMA200, che e' l'unica delle 41 sedie vive che passa i
+#  cancelli di oggi alla lettera.
+#
+#  >>> UN SOLO VALORE CAMBIA: $PIN. <<<
+#  $SHA_WALK, $SHA_ROUND, $MARC_WALK, il param() e la function Pulito NON
+#  si toccano -- ed e' MISURATO, non assunto: al pin nuovo 69e252b il
+#  driver fa sha256 15DE7D5F...6828F1C6 (= $SHA_WALK) e RIGA_ROUND_VPS
+#  fa 348ED533...9D0A315B (= $SHA_ROUND). Se una delle due non
+#  combaciasse, 'function Prendi' chiamerebbe Muori e OGNI round morirebbe
+#  sull'impronta.
+#
+#  IL DIFETTO CHE QUESTO GIRO HA PAGATO, e vale piu' del giro (classe 278):
+#  il file prova COLLAUDO_EMADOW_02, com'era, girava col DEFAULT 0.40 e
+#  con un '@FINOA' messo sul primo giorno dell'OOS. Misurato col driver
+#  vero scaricato da raw: OOS 2025.01.07 - 2025.06.10, cioe' 111 feriali
+#  contro i 183 dell'IS = 60,66%. Il conteggio avrebbe dato 62/72/91/100
+#  per un vero di 102/118/150/165: ZERO casi su quattro sopra 150,
+#  COMPRESI I DUE IN CUI LA SEDIA PASSA. Una misura che non puo' dare una
+#  risposta positiva non e' una misura: e' una condanna travestita da
+#  test, e sarebbe arrivata con un referto verde.
+#
+#  E le due righe nuove vanno IN FONDO a CODA.txt, in quest'ordine:
+#      1. il round 'cemad02' (produce i per-trade)
+#      2. CODA_12_pertrade_posizioni.ps1 (li conta)
+#  L'ordine NON e' estetico: la seconda legge cio' che la prima produce.
+#  Il beneficio dell'ordine PER LA LETTURA e' invece ZERO (classe 274:
+#  W() accumula in memoria, il referto nasce dopo la fine del ciclo).
+#  Referto: report\EMA200_IS_IN_CODA_2026-09-12.md
+# ---------------------------------------------------------------------
+$PIN = '69e252b3c4605ba316d28a572296e0c54841b25f'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
