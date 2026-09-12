@@ -1,4 +1,37 @@
 # -*- coding: ascii -*-
+# ##########################################################################
+# ##  FERMO: QUESTO GENERATORE E' VECCHIO. NON LANCIARLO "PER RIGENERARE". ##
+# ##########################################################################
+#  MISURATO il 12/09/2026, girandolo in una cartella di prova e
+#  confrontando l'uscita coi file che stanno in repo:
+#     COLLAUDO_EMADOW_01_spread_scala_ini.txt   50 righe diverse
+#     COLLAUDO_EMADOW_03_uscita_TP1PCT.txt      30 righe diverse
+#     COLLAUDO_EMADOW_04_uscita_TRAILING.txt    18 righe diverse
+#     COLLAUDO_EMADOW_06_latenza.txt             4 righe diverse
+#     COLLAUDO_EMADOW_05_tf_U30USD.txt           2 righe diverse
+#     COLLAUDO_EMADOW_00_*                      NOME DIVERSO: qui dentro
+#        si chiama 00_canarino_spread.txt, in repo c'e'
+#        00_manopola_maxspread.txt -> lanciarlo crea un OTTAVO file
+#        orfano e lascia in piedi quello vero.
+#  PERCHE': il commit 92c9621 ("secondo giro: applicati 5 bloccanti + 4
+#  gravi del cancello di giudizio") ha corretto i file .txt A MANO e NON
+#  ha toccato questo generatore. Le correzioni stanno nei .txt, non qui.
+#
+#  >>> E IL DANNO NON E' TEORICO: COLLAUDO_EMADOW_05_tf_U30USD.txt E' IN
+#      backtest_pipeline/coda/CODA.txt (etichetta cemad05). Le sue 2
+#      righe diverse sono la riga del COSTO, che qui dentro dice ancora
+#      "14 passate PER GAMBA" invece di "14 passate" in tutto: chi
+#      rigenerasse rimetterebbe in circolo un costo sbagliato su un file
+#      che gira.
+#
+#  COME SI USA, ADESSO: si lancia, si tiene SOLO il file che si voleva
+#  rifare, e si riporta indietro tutto il resto
+#  (git checkout -- <gli altri>, e si cancella l'orfano 00_canarino_*).
+#  Verifica obbligatoria dopo: "git status --porcelain
+#  backtest_pipeline/prove/" deve nominare SOLO il file voluto.
+#  Chi vuole rimetterlo in pari deve RIPORTARE QUI le correzioni dei
+#  cinque .txt, non il contrario: i .txt sono la verita', questo file no.
+# ##########################################################################
 import os, io
 BASE='/home/user/GITHUB/backtest_pipeline/prove/'
 src=[l.rstrip('\n') for l in open(BASE+'R112_00_metro.txt')]
@@ -44,11 +77,18 @@ TESTA = """# ===================================================================
 #         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
 # ==========================================================================
 """
-def scrivi(nome, testa_extra, skip, magic, comment, asse, coda=''):
+# 12/09/2026 -- DUE SOVRASCRITTURE, e servono a UN SOLO file (il 02).
+#  'testa' rimpiazza TESTA per intero, 'dirs' rimpiazza il blocco delle
+#  direttive. Sono OPZIONALI e con default None: i sei file gemelli
+#  escono BYTE PER BYTE come prima (verificato col diff dopo la modifica).
+#  Perche' non ho parametrizzato TESTA: TESTA e' condivisa da sette file,
+#  e cambiarla avrebbe riscritto anche gli altri sei, che oggi non sono
+#  miei. Fra comodo e stretto, stretto.
+def scrivi(nome, testa_extra, skip, magic, comment, asse, coda='', testa=None, dirs=None):
     f=io.open(BASE+nome,'w',newline='\n')
-    f.write(TESTA % nome)
+    f.write(TESTA % nome if testa is None else testa)
     f.write(testa_extra)
-    f.write("@SIMBOLO  U30USD\n@PERIODO  H1\n@DAQUANDO 2024.09.26\n")
+    f.write("@SIMBOLO  U30USD\n@PERIODO  H1\n@DAQUANDO 2024.09.26\n" if dirs is None else dirs)
     f.write(coda)
     f.write("#\n# --- I FISSI: copia dell'antenato R112_00_metro.txt\n")
     f.write("\n".join(body(skip, magic, comment))+"\n")
@@ -176,53 +216,219 @@ scrivi('COLLAUDO_EMADOW_01_spread_scala_ini.txt', """#
      comment='COLLAUDO EMADOW scala spread',
      asse="")
 
-# ------------------------------------------------------------------ 02
-scrivi('COLLAUDO_EMADOW_02_pertrade_IS.txt', """#
+TESTA_02 = r"""# ==========================================================================
+#  EA: ABTG_EMA200
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_02_pertrade_IS.txt.
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
+#    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, leva 100, rischio 1.0%,
+#         IDENTICO a R112/R110 tranne la finestra, dichiarata qui sotto.
+#         Non si cambia il banco dentro un collaudo.
+#  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
+#         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
+#         41 chiavi identiche su 42 comuni; unico delta InpMagic. L'EA ha
+#         44 input, il .set 42, questo file 43: due input NON sono coperti
+#         dal .set e prendono il default compilato -- InpUsaGuardian=true
+#         e InpLogImbuto=true, quest'ultimo solo log. Il numero "46 su 46"
+#         della prima stesura era SOPRA L'UNIVERSO: corretto il 12/09/2026
+#         dal cancello di giudizio, classe 263).
+#  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
+#  MAGIC: blocco 7666xx, VERGINE -- riverificato repo-wide il 12/09/2026
+#         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> solo questo
+#         file e il suo generatore).
+#         VIETATI: 771531 (sedia viva), 771501 (sorgente), 7633xx (R110),
+#         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
+# ==========================================================================
+#
+# ##########################################################################
+# ##  FERMO. QUESTO FILE NON SI METTE IN backtest_pipeline/coda/CODA.txt   ##
+# ##  FINCHE' LA CORSIA ROUND NON HA UN CANALE PER IL PER-TRADE.           ##
+# ##########################################################################
+#  MISURATO il 12/09/2026, contando le occorrenze nella catena che gira:
+#    runner_abtg.ps1                 abtg_trades -> 0
+#    righe/RIGA_SOTTILE_ROUND.ps1    abtg_trades -> 0
+#    righe/RIGA_ROUND_VPS.ps1        abtg_trades -> 0   (e la cartella
+#                                    "Common" viene SALTATA di proposito)
+#    walkforward_generico.ps1        abtg_trades -> 2, e sono DUE Write-Host
+#                                    di consiglio, non codice che copia
+#  CONTRO-ESEMPIO che rende la misura una misura e non un grep a vuoto:
+#    36 script su 98 in righe/RIGA_*.ps1 NOMINANO abtg_trades e lo
+#    raccolgono (RIGA_BREAKIN, RIGA_CRT_*, RIGA_NYRETEST, ...). Il token
+#    esiste nel repo: e' la corsia ROUND che non lo ha.
+#  E la raccolta della corsia ROUND e' scritta a chiare lettere:
+#    RIGA_ROUND_VPS.ps1 copia SOLO $csvIS e $csvOOS (i due CSV di
+#    riepilogo) + il REFERTO + questo file prova. Nient'altro.
+#  >>> CONSEGUENZA: messo in coda COSI', questo round girerebbe, scriverebbe
+#      il per-trade in Common\Files del banco, e lo ZIP della mattina
+#      NON LO CONTERREBBE. L'unico numero leggibile sarebbe la colonna
+#      Trades, che conta i DEAL DI USCITA (classe 226) -- cioe'
+#      ESATTAMENTE il numero che questo file esiste per NON leggere.
+#      Un referto verde, due CSV, e la domanda ancora aperta.
+#  >>> COSA SERVE PRIMA (una delle due, e basta una):
+#      (a) una riga di SOLA LETTURA in coda, DOPO questo round, che conti
+#          i position_id distinti nei per-trade di Common\Files e metta i
+#          numeri nel referto. Proposta pronta e gatata:
+#          righe/CODA_12_pertrade_posizioni.ps1
+#      (b) la raccolta del per-trade dentro RIGA_ROUND_VPS.ps1 (cambia
+#          $SHA_ROUND: giro di pin completo).
+#      La (a) non tocca NESSUNO script della catena pinnata dei round.
+#  Regola di casa gia' scritta su questo stesso guasto:
+#    CHECKLIST_RIGA_DI_LANCIO.md, regola tripla, punto 2: "gli artefatti
+#    si RICONTANO, non si Test-Path. Per un per-trade il conto e'
+#    righe - 1 ... va NEL REFERTO, non lasciato a chi apre il CSV."
+# ##########################################################################
+#
 #  LA DOMANDA: QUANTE POSIZIONI HA L'IS DI QUESTA CELLA?
 #    E' il numero che manca al CERTIFICATO (requisito 2: n e DD) e che
 #    decide un cancello. L'Emendamento A chiede >= 150 OPERAZIONI per
 #    parte; la colonna Trades dei nostri CSV conta DEAL DI USCITA, non
-#    posizioni (classe 226). Misurato oggi sui per-trade di R112:
+#    posizioni (classe 226). Misurato sui per-trade di R112:
 #      00_metro     517 deal = 257 posizioni  (rapporto 2.0117)
 #      01_short_r1  302 deal = 140 posizioni  (2.1571)
 #      02_short_r2  315 deal = 140 posizioni  (2.2500)
 #      03_short_r3  324 deal = 140 posizioni  (2.3143)
 #    L'OOS quindi e' 257 posizioni: PASSA. L'IS ha 237 deal e il suo
-#    per-trade NON ESISTE in archivio (R112 dichiara "IS n/d PER
-#    COSTRUZIONE"): stimato 237/2.0117 = 118 posizioni, cioe' SOTTO 150.
-#    >>> Ma e' una STIMA, e su una stima non si archivia un cancello.
-#        Questo file la trasforma in una misura, in una passata.
+#    per-trade NON ESISTE in archivio, e il motivo e' strutturale:
+#    ExportTrades() (ABTG_EMA200.mq5 r.616-619) compone il nome con
+#    EA + simbolo + MAGIC, non con la FINESTRA, e lo apre in FILE_WRITE
+#    (= troncando). Le due gambe dello stesso walkforward condividono i
+#    magic, la gamba OOS gira PER SECONDA: il per-trade della IS viene
+#    SOVRASCRITTO, per costruzione. Nessun round passato puo' averlo.
 #
-#  COME: la finestra IS da sola, tranche unica (FrazioneIS 1.0 dalla
-#  riga di lancio), e si CONTANO i position_id distinti nel per-trade
-#  che l'EA esporta a fine test.
+#  COME, ED E' LA PARTE CHE E' STATA RISCRITTA IL 12/09/2026
+#    >>> La prima stesura diceva "tranche unica (FrazioneIS 1.0 dalla riga
+#        di lancio)". ERA FALSO su questa corsia, e falso in modo costoso:
+#        righe/RIGA_SOTTILE_ROUND.ps1 passa SEI argomenti (-Expert -Prova
+#        -Etichetta -Modello -Deposito -SoloControllo) e -FrazioneIS NON
+#        e' fra quelli. Il driver avrebbe usato il default 0.40, spezzato
+#        la finestra in due, e la gamba che gira per SECONDA avrebbe
+#        sovrascritto il per-trade buono. Il file prometteva una tranche
+#        e ne avrebbe girate due.
+#    Il canale che esiste su questa corsia e' la direttiva '@FRAZIONEIS',
+#    aperta nel driver il 12/09/2026 (marcatore
+#    MARCATORE_WALKFORWARD_GENERICO_v6_FRAZIONEIS).
+#    >>> E NON si usa '@FRAZIONEIS 1.0'. Il driver gira SEMPRE due gambe
+#        (walkforward_generico.ps1 r.921-925: il ciclo e' cablato, non
+#        c'e' nessun -SoloIS). Con 1.0 la seconda gamba esce con
+#        FromDate > ToDate, e COSA FA MT5 CON FromDate > ToDate NON E'
+#        MISURATO -- lo dice la casa, non lo dico io:
+#        CHECKLIST_RIGA_DI_LANCIO.md ("Cosa fa MT5 con FromDate > ToDate
+#        NON E' MISURATO ... se MT5 esegue anche una sola passata a zero
+#        operazioni su quella finestra, il per-trade della IS resta con
+#        la sola intestazione"). Con 1.0 la sentinella passerebbe e il
+#        conteggio sarebbe sbagliato: il caso peggiore di tutti.
+#    >>> QUINDI SI USA L'ORDINE, che e' un fatto e non un'ipotesi.
+#        '@FRAZIONEIS 0.002' sulla finestra 2024.09.26 -> 2025.06.09:
+#          giorni 256, floor(256 * 0.002) = 0, quindi
+#          gamba "IS"  = 2024.09.26 -> 2024.09.26   (gira PRIMA, si butta)
+#          gamba "OOS" = 2024.09.27 -> 2025.06.09   (gira DOPO, E' LA MIA)
+#        La gamba che gira per SECONDA e' quella che vogliamo misurare:
+#        qualunque cosa faccia la prima, il suo per-trade viene
+#        sovrascritto da quello buono, non il contrario. L'ordine e' la
+#        garanzia, e non dipende da niente di non misurato.
+#        E resta valido anche il giorno in cui qualcuno applichera' la
+#        toppa "mai troncare" all'EA: allora la prima gamba non creerebbe
+#        nemmeno il file, e la seconda lo scriverebbe uguale.
 #
-#  LA SENTINELLA -- e serve, perche' la data del confine e' DEDOTTA
-#    Il confine IS/OOS non e' scritto in nessun file prova: e' il 40%
-#    di 2024.09.26 -> 2026.06.30 calcolato dal driver. Il primo close
-#    del per-trade OOS di R112 e' il 2025.06.12 13:44:51, e il file
-#    LATI_A2 del 09/09 ha dedotto 2025.06.10. Qui si usa 2025.06.10 e
-#    si CONTROLLA: questa corsa deve riprodurre l'IS di R112
-#      237 deal (tolleranza +-2%) | PF 1.20110 (+-0.05) | DD 5.7325%
-#    Fuori tolleranza = la data del confine e' un'altra, il file va
-#    riscritto con quella, e il conteggio delle posizioni NON si legge.
+#  >>> IL CSV CHE CONTA E' IL *_OOS*, NON IL *_IS*. Si legge al contrario
+#      del solito, e va detto tre volte:
+#        ABTG_EMA200_U30USD_OOS_<etichetta>.csv  = la finestra IS di R112
+#        ABTG_EMA200_U30USD_IS_<etichetta>.csv   = un giorno solo, atteso
+#                                                  VUOTO o assente
+#      Il referto di RIGA_ROUND_VPS stampa "CSV di QUESTA corsa copiati: N
+#      (attesi 2)". Qui l'atteso e' 1, e quel 1 e' la spia che la gamba
+#      morta e' morta davvero.
 #
-#  ATTESA DICHIARATA PRIMA: posizioni fra 102 e 118 (= 237 diviso per
-#  il rapporto misurato 2.3143 - 2.0117). Perche' l'intervallo e' quello
-#  e non "fra 1 e 237": il rapporto e' guidato da InpTP1Pct, che qui e'
-#  50.0 come nella cella 00_metro, dove il rapporto misurato e' 2.0117.
-#    >>> CONTRO-ESEMPIO: per arrivare a 150 posizioni il rapporto dovrebbe
-#        scendere a 1.58, FUORI dalla banda misurata su quattro varianti
-#        della stessa cella. Se il numero vero uscisse >= 150, allora
-#        sarebbe il MODELLO del rapporto a essere sbagliato, non il
-#        cancello -- e andrebbe riaperta la classe 226.
+#  IL PREZZO DELL'ORDINE, dichiarato: la finestra misurata e'
+#  2024.09.27 -> 2025.06.09, cioe' l'IS di R112 MENO il solo 2024.09.26.
+#    Costo in operazioni: ZERO, e si dimostra dal codice, non si assume.
+#    ABTG_EMA200.mq5 r.305 (EmaVal torna 0 se CopyBuffer non riempie) e
+#    la guardia di OnNewBar ("if(ema<=0 || atr<=0) return"): finche'
+#    l'EMA200 su H1 non ha 200 barre l'EA NON PUO' piazzare niente. Il
+#    feed BCM sugli indici parte il 2024.09.26 (sonda 17/08): 200 barre
+#    H1 sono circa 9 giorni di borsa, quindi la prima operazione
+#    possibile e' intorno al 2024.10.08. Il 2024.09.26 e' dentro il
+#    riscaldamento dell'indicatore.
+#    Margine residuo dichiarato: il tester carica pre-storico prima di
+#    FromDate quando ce n'e', e con FromDate 2024.09.27 ha 24 barre in
+#    piu' da spendere nel riscaldamento. Effetto atteso: uno spostamento
+#    di +-24 barre su quando l'EMA200 diventa valida, cioe' 0-1 posizione
+#    in piu' o in meno. Su una banda 102-165 con la soglia a 150, e' sotto
+#    la risoluzione della domanda. E LA SENTINELLA LO INTERCETTA COMUNQUE.
 #
-#  QUANTO COSTA: 1 cella x 2 gemelli = 2 passate, UNA SOLA GAMBA.
-#  L'UNICO DELTA sull'antenato: InpMagic e la finestra (dichiarata qui).
+#  LA SENTINELLA -- si legge sul CSV *_OOS*
+#    Quella corsa deve riprodurre l'IS di R112:
+#      237 deal (tolleranza +-2%, cioe' 232-242) | PF 1.20110 (+-0.05)
+#      | DD equity 5.7325%
+#    Fuori tolleranza = la finestra girata non e' quella, e IL CONTEGGIO
+#    DELLE POSIZIONI NON SI LEGGE. Due modi in cui puo' andare storta, e
+#    si distinguono dal log:
+#      - "taglio IS/OOS: FrazioneIS 0.4" e nessuna riga "taglio IS/OOS
+#        preso da '@FRAZIONEIS' nel file prova: 0.002" = la direttiva e'
+#        stata IGNORATA (il driver scaricato non ha il v6). Si ripara il
+#        pin, non il file;
+#      - righe presenti ma numeri diversi = il banco non e' quello di
+#        R112. Primo sospetto: la riga Spread. R112 passava -Spread 0
+#        (Spread=0 nell'ini, "spread corrente dichiarato"); questa corsia
+#        NON passa -Spread, quindi il driver usa il default -1 e la riga
+#        Spread NON viene scritta: MT5 usa il valore che ha in memoria.
+#        Difetto EREDITATO da tutti i 19 round gia' in coda, non
+#        introdotto qui, e il rilevatore e' r136a (stessa ancora).
 #
-""", skip=[], magic='766620||766620||1||766621||Y',
+#  ATTESA DICHIARATA PRIMA -- e la prima stesura l'aveva SBAGLIATA
+#    Banda: 102 - 165 posizioni.
+#      102 = 237 / 2.3143  (il rapporto piu' alto misurato sulle varianti)
+#      165 = 237 / 1.4397  (il rapporto se il parziale TP1 non scattasse
+#                           MAI e lo spezzettamento restasse com'e')
+#    >>> LA SOGLIA 150 CADE DENTRO LA BANDA. La misura DISCRIMINA: puo'
+#        uscire sopra o sotto, e non e' scontata in partenza.
+#    >>> CORREZIONE DEL 12/09/2026, e cambia il senso del file. La prima
+#        stesura dichiarava 102-118 e ci metteva accanto questo
+#        contro-esempio: "per arrivare a 150 posizioni il rapporto
+#        dovrebbe scendere a 1.58, FUORI dalla banda misurata". E' FALSO:
+#        237/150 = 1.58, e 1.58 sta DENTRO l'intervallo dei rapporti
+#        ammessi dalla decomposizione, il cui pavimento e' 1.4397.
+#        La decomposizione, misurata sul per-trade di R112:
+#          2.0117 = 1 + 0.5720 (parziale TP1, 147 posizioni a 2 deal)
+#                     + 0.4397 (chiusure SPEZZATE, 20 posizioni,
+#                               113 deal in piu', riempimento frazionato
+#                               in mercato veloce -- NESSUN parametro
+#                               lo governa)
+#        Cioe' il 43.97% del rapporto non lo controlla nessuna manopola,
+#        e una banda costruita sui rapporti di tre CELLE diverse (r1/r2/r3)
+#        non e' una banda sulle FINESTRE. Con 102-118 questo file
+#        dichiarava un esito GIA' DECISO, e un file prova che conosce la
+#        risposta non sta misurando: sta confermando.
+#    Fonte della decomposizione: report/EMA200_I_DUE_REQUISITI_2026-09-12.md
+#    par. 3.2.
+#
+#  QUANTO COSTA, col metro di casa T = 0.6 + 0.077 x passate
+#    Passate NOMINALI (quelle che conta controlla_prova.py): 2 celle x 2
+#    finestre = 4  ->  T = 0.6 + 0.077 x 4 = 0.908 minuti.
+#    Passate VERE nel tester: 2 sulla gamba buona; la gamba di un giorno
+#    solo ne gira 2 a vuoto o nessuna (dipende da quanto storico H1 c'e'
+#    in quel giorno), e in ogni caso non produce operazioni.
+#    >>> La prima stesura diceva "2 passate, 0.75 minuti". Era il conto di
+#        una tranche unica che questa corsia non puo' dare. Il numero
+#        giusto e' 4 passate nominali / 0.908 minuti, e lo dice il
+#        cancello: controlla_prova.py stampa "passate (celle x 2
+#        finestre): 4".
+#    L'UNICO DELTA sull'antenato: InpMagic e la finestra (dichiarata qui).
+#
+"""
+
+DIRS_02 = r"""@SIMBOLO    U30USD
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2025.06.09
+@FRAZIONEIS 0.002
+"""
+
+# ------------------------------------------------------------------ 02
+scrivi('COLLAUDO_EMADOW_02_pertrade_IS.txt', "", skip=[], magic='766620||766620||1||766621||Y',
      comment='COLLAUDO EMADOW pertrade IS',
-     asse="", coda="@FINOA    2025.06.10\n")
+     asse="", coda="", testa=TESTA_02, dirs=DIRS_02)
 
 # ------------------------------------------------------------------ 03
 scrivi('COLLAUDO_EMADOW_03_uscita_TP1PCT.txt', """#
