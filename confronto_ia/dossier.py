@@ -177,6 +177,14 @@ def config_ea(nome_ea: str) -> tuple[dict | None, dict]:
     for voce in cfg.get("experts", []):
         if voce.get("file", "").lower() in (nome_ea.lower(), base.lower()):
             return voce, defaults
+    # Le varianti (es. ABTG_MaxMinNotte_DAX_Short_Ottimizzato) non stanno in config:
+    # uso la griglia dell'EA di partenza (ABTG_MaxMinNotte), segnalandolo nel dossier.
+    prefissi = [v for v in cfg.get("experts", [])
+                if v.get("file") and base.lower().startswith(v["file"].lower())]
+    if prefissi:
+        voce = max(prefissi, key=lambda v: len(v["file"]))
+        voce = dict(voce, _ereditata_da=voce["file"])
+        return voce, defaults
     return None, defaults
 
 
@@ -361,7 +369,11 @@ def riassumi_risultati(path: Path, top: int = 5, min_trades: int = 20) -> str:
 def estratti_documenti(nome_ea: str, max_righe: int = 12) -> str:
     """Righe dei file di progetto che citano questo EA (forward, classifiche...)."""
     chiave = nome_ea.replace("ABTG_", "").replace("_Ottimizzato", "")
-    pezzi_chiave = [chiave] + [t for t in re.split(r"[_\-]", chiave) if len(t) > 3]
+    # Cerco il nome della STRATEGIA, non parole comuni come "short" o "multi":
+    # altrimenti il dossier si riempie di righe che parlano di altri EA.
+    generiche = {"short", "long", "multi", "base", "live", "study", "indici"}
+    pezzi_chiave = [chiave] + [t for t in re.split(r"[_\-]", chiave)
+                               if len(t) >= 5 and t.lower() not in generiche]
     blocchi = []
     for doc in DOC_PROGETTO:
         if not doc.is_file():
@@ -431,6 +443,11 @@ def componi(nome_ea: str, domanda: str = "", con_codice: bool = False) -> str:
     p.append("## 4. Griglia di ottimizzazione usata")
     p.append("")
     if voce:
+        if voce.get("_ereditata_da"):
+            p.append(f"> ATTENZIONE: questa variante non ha una sua voce in `ea_config.json`. "
+                     f"Quella qui sotto e' la griglia dell'EA di partenza **{voce['_ereditata_da']}**: "
+                     f"i valori attuali della sezione 3 possono stare FUORI da questi range.")
+            p.append("")
         p.append(f"- simbolo: `{voce.get('symbol', '?')}` — timeframe: `{voce.get('period', '?')}`")
         if voce.get("_note"):
             p.append(f"- nota: {voce['_note']}")
