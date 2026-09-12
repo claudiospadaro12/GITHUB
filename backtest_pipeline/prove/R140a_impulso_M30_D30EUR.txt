@@ -1,0 +1,318 @@
+# ======================================================================
+#  EA: ABTG_ImpulsoApertura
+#  R140a -- PASSO 0 DELLA BANDA BASSA: LA BARRA D'APERTURA IMPULSIVA
+#  D30EUR M30, DUE LATI. Asse: InpMagic (ASSE TECNICO, cancello G1).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  Dossier: report/LA_BANDA_BASSA_2026-09-12.md
+# ======================================================================
+#
+#  PERCHE' QUESTO FILE ESISTE, quando ne esiste GIA' uno per questo EA
+#    backtest_pipeline/prove/ABTG_ImpulsoApertura.txt (08/09/2026) e'
+#    un ottimo documento di criteri e un file prova NON LANCIABILE.
+#    Misurato oggi, non ricordato:
+#      python3 backtest_pipeline/controlla_prova.py \
+#              backtest_pipeline/prove/ABTG_ImpulsoApertura.txt
+#      -> "2 assi Y: un file prova misura UNA variabile alla volta
+#          (InpImpulseATRMult, InpRR)"   ESITO: FALLITO
+#    Difetti trovati oggi in quel file, tutti e tre verificabili:
+#      (1) DUE assi Y -> il driver non lo lancia. BLOCCANTE.
+#      (2) InpAllowShort PINNATO A 0, mentre il criterio C2 dello STESSO
+#          file dice "DUE LATI, SEMPRE (regola di casa 25/08)". Il file
+#          contraddice il proprio criterio.
+#      (3) salta il suo PASSO 0. Il suo C0 dice, testuale: "Prima di
+#          qualunque griglia si CONTANO i segnali (una passata,
+#          InpImpulseATRMult al valore centrale)". Il file e' invece
+#          una griglia 5x4.
+#    >>> QUESTO FILE E' IL SUO PASSO 0, scritto come lo chiede lui.
+#        Non tocca il file del 08/09 e non lo sostituisce: quello resta
+#        agli atti come specifica dei criteri (C0-C9), che qui NON
+#        vengono riscritti ma richiamati per nome.
+#
+#  PERCHE' QUESTO MOTORE E QUESTA BANDA -- la domanda di Claudio
+#    Claudio, 12/09/2026: "Ma sono tutti in h1 o h4. Dobbiamo trovare
+#    m5, 15 e 30 x le prop".
+#    Misurato oggi sull'archivio (dossier par. 1):
+#      - a M30 esistono 168 CSV con la cella M30, di cui 68 a TICK
+#        REALI, e 34 coppie IS/OOS complete;
+#      - di quelle 34 coppie, ZERO hanno PF >= 1,10 in ENTRAMBE le
+#        finestre. Quindici hanno n >= 150 in entrambe, quindi il
+#        campione NON e' la scusa;
+#      - i quattro round M30 dedicati sono tutti chiusi col numero:
+#        R95 (LiquiditySweep EURJPY, 0/30), R111 (BreakingBand, 0/3),
+#        P0 IBRetest (PF famiglia 0,7798), P0 LVNArbitro (DD 11,76%
+#        e 19,35% contro un muro del 10%).
+#    >>> Quindi la banda M30 NON e' vergine: e' MISURATA E NEGATIVA su
+#        otto famiglie di motori. Cio' che resta vergine sono TRE
+#        motori, e questo e' uno dei tre (gli altri due:
+#        ABTG_HVAncora, gia' pronto e mai lanciato, e la via
+#        GAPCASH_RICONQUISTA).
+#
+#  PERCHE' QUESTO MOTORE NON E' UN RIPESCAGGIO -- la lista dei caduti
+#    ABTG_ImpulsoApertura NON compare in backtest_pipeline/REGISTRO_TEST.md
+#    (grep fatto oggi: zero occorrenze) e NON ha nessun CSV in archivio
+#    (find su risultati_*: zero file). E' un motore MAI MISURATO, non un
+#    motore bocciato. Il verdetto di oggi su di lui e' "NON ANCORA
+#    MISURATO", che non e' un no.
+#    Il suo dossier di caccia e' report/EA_IMPULSO_APERTURA_2026-09-08.md.
+#
+#  LA DIFFERENZA STRUTTURALE CHE LO RENDE UN CANDIDATO DELLA BANDA BASSA
+#    E LETTA NEL SORGENTE, non assunta:
+#      mql5/Experts/ABTG_ImpulsoApertura.mq5
+#        r.165  ENUM_TIMEFRAMES gTF = PERIOD_CURRENT;
+#               -> il TF OPERATIVO E' IL TF DEL GRAFICO. Quindi
+#                  @PERIODO qui e' una VARIABILE VERA, non un'etichetta.
+#        r.115  InpImpulseATRMult = 1.5  (gate costitutivo: range della
+#               barra >= K x ATR; senza, nessun segnale)
+#        r.144  InpSLMode = 0 = CANDELA: stop al minimo/massimo della
+#               barra d'impulso -> LO STOP E' IL RANGE DELLA BARRA
+#               OPERATIVA, quindi SCALA col TF.
+#        r.146  InpMinStopPts = 25 (pavimento in PUNTI INDICE)
+#        r.155  InpMaxSpreadPctOfStop = 2.5
+#               -> spread <= 2,5% dello stop  ==  stop >= 40 x spread.
+#                  IL CANCELLO DI COSTO DI CASA E' IMPLEMENTATO DENTRO
+#                  QUESTO EA, e quando non passa IL TRADE SI SALTA.
+#    >>> CONSEGUENZA, ed e' il cuore del round: su questo motore il
+#        cancello 40x non e' una colonna di un foglio, e' un INPUT che
+#        rifiuta gli ordini. Un TF troppo basso non produce trade
+#        brutti: produce RIFIUTI. E i rifiuti si contano.
+#
+#  IL CONTO DEL COSTO, FATTO PRIMA -- e con la banda, non con un numero
+#    Spread D30EUR all'ora 8 (l'ora della campanella, ORA SERVER):
+#      mediana 1,70 idx  -  p95 2,70  -  max 12,0
+#      MISURATO su 1.847.049 tick a quell'ora e 30.974.789 in totale
+#      (risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10).
+#    Il 40x chiede quindi uno stop >= 68,0 idx alla mediana e >= 108,0
+#    al p95. Il pavimento DURO 13,3x chiede >= 22,6 idx.
+#    Range d'apertura a 30 minuti sul DAX, le due strade di casa:
+#      (a) SENZA amplificazione:
+#          ADR D30EUR 186,5 idx (MISURATO su 49 giorni,
+#          report/ROUND_ORB_ATR_PS5_2026-09-10.md r.234)
+#          x sqrt(30/1440) = 186,5 x 0,14434 = 26,9 idx -> 15,8x
+#      (b) CON il fattore d'apertura 3,05 MISURATO sul DAX
+#          (58,7 / 19,0, stesso referto par. 2.2):
+#          26,9 x 3,05 = 82,1 idx -> 48,3x
+#    >>> LA BANDA E' 15,8x - 48,3x, ED E' LARGA. La dichiaro larga
+#        invece di scegliere l'estremo che mi conviene. Il fattore 3,05
+#        e' MISURATO su una finestra di 15 minuti: applicarlo a 30
+#        minuti e' un'ESTRAPOLAZIONE, e va nella direzione OTTIMISTA
+#        (l'esplosione d'apertura e' concentrata all'inizio, quindi
+#        l'amplificazione DECADE allungando la finestra). Il 48,3x e'
+#        un LIMITE SUPERIORE, non una previsione.
+#    >>> E il gate d'ampiezza sposta la distribuzione in ALTO: l'EA
+#        entra solo quando range >= 1,5 x ATR di riferimento
+#        (InpATRSuAperture = true: la media dei range delle aperture
+#        PRECEDENTI). Quindi i giorni selezionati hanno, per
+#        costruzione, un range sopra la media -> lo stop dei trade
+#        FATTI e' piu' largo di quello dei giorni scartati.
+#    >>> IL NUMERO CHE QUESTO ROUND MISURA, e che nessuno ha:
+#        quante barre d'apertura M30 del DAX superano 68,0 idx.
+#        La colonna Reject dell'OnTester lo dice per differenza.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- CON TRE USCITE
+#    (a) IL NUMERO BUONO: Trades fra 120 e 420 sui 21 mesi per lato +
+#        lato, cioe' 0,26-0,92 op/giorno di seduta (459 sedute
+#        stimate), con Reject < 40% dei segnali e PF >= 1,10 in
+#        ENTRAMBE le finestre. In quel caso il motore e' un candidato
+#        della banda M30 e si passa alla griglia del file del 08/09
+#        (una manopola per file).
+#    (b) IL NUMERO BRUTTO, e me lo aspetto piu' probabile:
+#        Reject >= 60% dei segnali. Vuol dire che la barra d'apertura
+#        M30 del DAX sta SOTTO i 68 idx nella maggioranza dei giorni,
+#        cioe' che la banda vera e' verso il 15,8x e non verso il
+#        48,3x. VERDETTO in quel caso: "a M30 questo motore non
+#        raggiunge la frontiera di costo, e SI SALE A H1" -- che e'
+#        esattamente il C1 del file del 08/09, applicato col numero e
+#        non con un'impressione. E' un RISULTATO: chiude la banda M30
+#        su questo motore senza girare nessuna griglia.
+#    (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: zero passate, zero
+#        Trades su ENTRAMBE le celle con Reject ANCHE zero, EA non
+#        compilato, celle gemelle diverse fra loro. In nessuno di
+#        questi casi si scrive un verdetto sul motore: si scrive
+#        "la misura non e' avvenuta" e si ripara la catena.
+#    >>> PF e DD: [NON MISURATI] e non ne invento l'attesa. Su un
+#        motore mai girato non esiste una curva da prevedere, esiste
+#        un conteggio da fare. Questo file conta.
+#
+#  L'ESITO POSITIVO E' RAGGIUNGIBILE? SI, E LO VERIFICO (classe 278)
+#    Una misura che non puo' dare una risposta positiva non e' una
+#    misura. Qui il positivo richiede stop >= 68 idx sulla maggioranza
+#    dei giorni selezionati. Il limite superiore del conto (a) e' 82,1
+#    idx, che e' SOPRA 68: quindi esiste un valore dentro la banda
+#    derivata dai nostri numeri misurati che produce il PASS.
+#    Se invece il conto avesse dato un limite superiore SOTTO 68, il
+#    round sarebbe stato una condanna travestita da test e questo file
+#    NON andava scritto: si andava direttamente a H1.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO
+#        Torna Trades = 200 e PF = 1,45 in entrambe le finestre, e
+#        sembra "abbiamo trovato la sedia M30". Sarebbero invece tre
+#        artefatti, tutti prevedibili ORA:
+#        (i)   SELEZIONE DAL CANCELLO, NON DAL MOTORE. Il gate di
+#              spread a 2,5% tiene solo i giorni con stop largo, cioe'
+#              i giorni ad alta volatilita'. Su 21 mesi di indice IN
+#              SALITA i giorni volatili d'apertura sono in gran parte
+#              gap di apertura AL RIALZO: il PF sarebbe una misura del
+#              regime, non del segnale.
+#              >>> COME LO DISTINGUO: il ramo SHORT. Se il PF viene dal
+#                  regime, il long e' verde e lo short e' rosso. Se
+#                  viene dal segnale, i due rami sono dello stesso
+#                  ordine. Long e short si leggono SEPARATI (C2), e
+#                  qui sono ENTRAMBI accesi proprio per avere questa
+#                  discriminante nello stesso CSV.
+#        (ii)  IL DOPPIONE DELLA CAMPANELLA. Alle 8 server sul D30EUR
+#              c'e' gia' 770101 (ABTG_DAX_Apertura_EU, SOLO LONG).
+#              Un ramo long che opera negli STESSI giorni non
+#              diversifica: raddoppia il rischio sullo stesso evento.
+#              E' il C4 del file del 08/09 e resta un CANCELLO DURO.
+#              >>> COME LO MISURO: i per-trade di questa corsa contro
+#                  quelli di R47 (risultati_prove/aperture_r47/
+#                  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_772503.csv),
+#                  con gli strumenti che abbiamo gia' in casa
+#                  (sovrapposizione_sedie.py, chi_va_con_chi.py).
+#                  ZERO passate di tester.
+#        (iii) IL CAMPIONE. 21 mesi di storico a tick sugli indici
+#              (2024.09.26, stato COMPLETO: il broker non ha nulla
+#              prima) sono UN SOLO REGIME, toro. La regola C
+#              dell'Emendamento della Finestra NON e' soddisfatta e
+#              non lo sara' alla fine del round.
+#    >>> E L'IPOTESI ALTERNATIVA, che e' la parte che conta: se il
+#        round torna Reject BASSO e Trades ALTO, la spiegazione
+#        alternativa a "il motore ha una geometria di costo sana" e'
+#        "il gate d'ampiezza e' decorativo e l'EA entra quasi ogni
+#        giorno". QUALE NUMERO PRODUCE L'ALTRA SPIEGAZIONE?
+#        Produce Trades ~= 459 x 2 lati / (una per seduta per lato) ~=
+#        800-900, cioe' quasi una operazione per lato per seduta.
+#        Se Trades finisce sopra 700, il gate NON sta selezionando:
+#        allora il numero non misura una geometria, misura un'assenza
+#        di filtro, e il verdetto e' "gate decorativo -> SCARTO" (C5
+#        del file del 08/09), non "motore veloce".
+#
+#  S1 / S2 / S3 -- LE SENTINELLE
+#    S1  GEMELLI (cancello G1 di determinismo). Le due celle
+#        differiscono SOLO per InpMagic. Devono tornare IDENTICHE alla
+#        cifra su Trades, Profit Factor, Equity DD % e Reject. Se
+#        divergono, la corsa e' girata con PIU' DI UN AGENTE locale
+#        (classe 129) e nessun numero di questo round si legge.
+#        >>> UN SOLO agente in MT5 -> Strategy Tester -> Agenti.
+#    S2  CONTEGGIO CELLE: 2 valori distinti di InpMagic nel CSV
+#        (787701 / 787751). Se sono 1, l'asse non ha morso.
+#    S3  PAVIMENTO DELLO STOP. InpMinStopPts = 25 idx = 14,7x alla
+#        mediana dello spread: SOTTO il pavimento di lavoro 40x e
+#        SOPRA il duro 13,3x, per 1,4 decimi. Se la maggioranza dei
+#        trade uscisse esattamente a 25 idx, il round starebbe
+#        misurando il PAVIMENTO e non la geometria del motore. Lo si
+#        vede dai per-trade, non dal riepilogo: e' un buco dichiarato
+#        di questo round.
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    A1  FREQUENZA (il metro firmato il 07/09): il pavimento e' 1,00
+#        op/giorno per FAMIGLIA, e la famiglia qui e'
+#        {D30EUR, U30USD, NASUSD} x {long, short}. Questo round misura
+#        UN simbolo: il suo compito e' produrre il suo addendo, non un
+#        verdetto di famiglia. Se D30EUR fa >= 0,34 op/giorno, tre
+#        simboli simili arrivano a 1,00.
+#    A2  CAMPIONE. Il MERITO si legge sopra 150 operazioni per
+#        finestra. Sotto, e' SOSPESO (non negativo): il RISCHIO si
+#        legge a qualunque n (Emendamento B del 16/08).
+#    A3  RISCHIO, cancello duro a qualunque n: Equity DD > 10,0% in
+#        una qualunque delle due finestre -> BOCCIATO PER RISCHIO
+#        senza altre discussioni, come e' stato fatto il 08/09 su
+#        ABTG_LVNArbitro (DD 11,33% e 18,01%, poi 11,76% e 19,35% a
+#        deposito 100.000). Il rischio qui gira a 0,65%, che e' la
+#        taglia firmata: un DD sopra 10 a 0,65% non si aggiusta con
+#        la taglia.
+#    A4  MURO GIORNALIERO. Peggior Giornata % oltre -4,0% ->
+#        segnalazione immediata (la pausa del Guardian e' a 4,0).
+#    A5  COSTO. Se Reject >= 60% dei segnali, il verdetto e' sul TF e
+#        non sul motore: "M30 non arriva alla frontiera, si sale a H1".
+#    A6  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non
+#        accende una sedia, non tocca il forward, non nomina il conto
+#        reale 10105439. Taglie, rischio e accensioni sono [FIRMA DI
+#        CLAUDIO].
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI): e' un PASSO 0 di conteggio, ma il
+#    conteggio dei RIFIUTI dipende dallo spread, e lo spread esiste
+#    solo nei tick. In OHLC M1 il cancello di costo misurerebbe uno
+#    spread finto. >>> QUESTO ROUND NON HA UNA VERSIONE OHLC.
+#    Deposito: 10.000 (e' un conteggio, non un contratto). Se il
+#    pavimento del lotto mordesse si vedrebbe come profitto ~0 con
+#    Trades normale: e' la sentinella, non un'assunzione.
+#      Misurato su un caso vicino (P0 LVNArbitro, U30USD M30, stop
+#      1,5xATR): il profitto scala 11,1-12,8x per un deposito 10x,
+#      quindi a 10.000 il pavimento NON mordeva. Non si estende a
+#      questo motore, ma dice dove guardare.
+#    FrazioneIS 0,40 (default del driver, walkforward_generico.ps1
+#    r.179): 2024.09.26 -> 2026.06.30 = 642 giorni;
+#    floor(642 x 0,40) = 256
+#      IS  2024.09.26 - 2025.06.09      OOS 2025.06.10 - 2026.06.30
+#    @DAQUANDO 2024.09.26 e' MISURATO, non ipotizzato:
+#      risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt
+#      ("I TICK REALI DI D30EUR PARTONO DAL 2024.09.26").
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente. 21 mesi = UN regime (toro). La regola
+#      C dell'Emendamento della Finestra non e' soddisfatta e non lo
+#      sara' alla fine del round. Niente e' promuovibile di qui.
+#    - SPREAD AL MINUTO dentro l'ora 8: [NON MISURATO]. L'istogramma e'
+#      ORARIO e l'ora 8 E' l'apertura europea, cioe' il minuto peggiore
+#      dell'ora. La mediana 1,70 e' quindi OTTIMISTA PER COSTRUZIONE, e
+#      il cancello dell'EA la usa dal vivo (legge lo spread corrente),
+#      non la mediana: i due numeri non sono lo stesso numero, e questo
+#      round misura il PRIMO.
+#    - IL PEDAGGIO SI PAGA DUE VOLTE (ingresso e uscita). Il cancello
+#      40x di casa e' definito contro UNO spread e resta cosi' per
+#      confrontabilita'.
+#    - COMMISSIONE: 0,0000 MISURATA sugli indici (n=302 deal,
+#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181-183), quindi
+#      sul DAX il pedaggio all-in E' lo spread. Sul forex NO: la' la
+#      commissione e' il 73,1% del pedaggio.
+#    - VALORE DEL PUNTO di D30EUR: [NON MISURATO] (la riga D30EUR della
+#      sonda del 17/08 non ha TickValue leggibile). Derivato coerente:
+#      ~1 EUR/idx/lotto (report/INDURIMENTO_PROP_DUE_SEDIE par. 2.3).
+#    - L'ORA DEI TRADE RIEMPITI non e' misurabile dalle colonne
+#      dell'OnTester (buco dichiarato dal P0 IBRetest del 09/09).
+#    - SOVRAPPOSIZIONE con 770101: da misurare sui per-trade DOPO la
+#      corsa, ZERO passate. Il verdetto del ramo LONG e' CONDIZIONATO
+#      a quella misura (C4).
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- TUTTI GLI INPUT DELL'EA, PINNATI. Valori = i default del sorgente
+#     (mql5/Experts/ABTG_ImpulsoApertura.mq5), tranne dove annotato.
+InpUsaGuardian=true
+InpImpulseATRMult=1.5
+InpATRPeriod=14
+InpATRSuAperture=true
+InpAllowLong=true
+InpAllowShort=true
+InpOpenHour=8
+InpOpenMinute=0
+InpFlatHour=21
+InpFlatMinute=0
+InpSLMode=0
+InpSLAtrMult=0.5
+InpMinStopPts=25
+InpMT5PerPuntoIndice=100
+InpRR=3.0
+InpBEatR=2.0
+InpRiskPercent=0.65
+InpMaxSpreadPctOfStop=2.5
+InpVerbose=true
+# InpComment NON pinnato di proposito: il default compilato e' "IMPULSO",
+#   gia' ASCII e non vuoto. Un pin di stringa e' la classe di difetto che
+#   e' costata il round FiboH4 (MT5 ignora in silenzio il pin vuoto), e
+#   qui non serve.
+#
+# --- L'UNICO ASSE: TECNICO (2 celle x 2 finestre = 4 passate)
+#     Due celle gemelle sul magic. Non misura una manopola: misura il
+#     DETERMINISMO del banco (cancello G1). E' la forma giusta per un
+#     PASSO 0, dove la domanda e' "quanti segnali" e non "quale valore".
+#     787701 / 787751 VERIFICATI VERGINI nel repo il 12/09/2026
+#     (grep -rl, .git escluso: 0 file).
+InpMagic=787701||787701||50||787751||Y
+# ======================================================================

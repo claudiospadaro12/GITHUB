@@ -1,0 +1,359 @@
+# ======================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R140c -- CHIUDE LA CASELLA 5 DEL CERTIFICATO DELLA SECONDA SEDIA:
+#  IL TF D'INGRESSO DI 770101, MAI CAMBIATO IN VENTUNO MESI.
+#  D30EUR @PERIODO M15 (la cella viva gira a M5), LONG.
+#  Asse: InpMagic (ASSE TECNICO, cancello G1).
+#  Scritto il 12/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/LA_BANDA_BASSA_2026-09-12.md
+# ======================================================================
+#
+#  IL BUCO CHE QUESTO ROUND CHIUDE, e non e' un buco mio
+#    report/LA_SECONDA_SEDIA_2026-09-12.md par. 3.2, casella 5 del
+#    CERTIFICATO DI MORTE (firmato il 09/09/2026), testuale:
+#      "5 | TF cambiato | il TF del grafico e' M5 in TUTTE le corse;
+#       sono stati cambiati InpTrailTF (M1->M20), InpFilterTF (H1/H4) e
+#       InpLevelTF. >>> Il TF D'INGRESSO, MAI. Buco dichiarato."
+#    E il par. 5 dello stesso dossier lo elenca fra i 12 buchi, n. 11:
+#      "il TF d'ingresso di 770101 -- M5 in tutte le corse d'archivio
+#       -- casella 5 del certificato: PARZIALE".
+#    >>> 770101 e' la SECONDA SEDIA proposta per il 1 ottobre. La
+#        regola del 09/09 dice che un candidato non si archivia se una
+#        delle cinque caselle manca; qui la sedia non va archiviata, va
+#        SCHIERATA -- e schierare con una casella parziale e' lo stesso
+#        difetto al contrario. Questo round costa 4 passate e la chiude.
+#
+#  E CHIUDE ANCHE LA DOMANDA DI CLAUDIO DEL 12/09, sulla sedia giusta
+#    Claudio: "Ma sono tutti in h1 o h4. Dobbiamo trovare m5, 15 e 30 x
+#    le prop". Sulla flotta VIVA la risposta e' che sette sedie girano
+#    gia' a M5 e tre a M15 (dossier par. 2) -- e 770101 e' una di
+#    quelle sette. La domanda vera diventa allora l'opposto:
+#    >>> "questa sedia e' a M5 perche' DEVE, o perche' e' nata cosi'?"
+#        Se il TF e' indifferente, allora il "M5" di 770101 non e' una
+#        scelta di banda bassa: e' un'etichetta, e la sedia e' un
+#        motore di SESSIONE ancorato ai minuti. Cambia come si legge la
+#        flotta e cambia cosa si cerca nei prossimi round.
+#
+#  LA PREVISIONE E' LETTA NEL SORGENTE, riga per riga, PRIMA DELLA CORSA
+#    mql5/Experts/ABTG_DAX_Apertura_EU.mq5
+#    (1) IL RANGE E LO STOP NON DIPENDONO DAL TF DEL GRAFICO.
+#        r.1007-1008  iBarShift(_Symbol, PERIOD_M1, tStart/tEnd, false)
+#        r.1015-1016  iHighest/iLowest(_Symbol, PERIOD_M1, ...)
+#        r.1019-1020  hi = iHigh(_Symbol, PERIOD_M1, hIdx)
+#                     lo = iLow (_Symbol, PERIOD_M1, lIdx)
+#        >>> Il massimo e il minimo della finestra d'apertura si
+#            leggono su PERIOD_M1 CABLATO, non sul TF del grafico.
+#            Quindi i LIVELLI d'ingresso e lo STOP (che con
+#            InpSLMode=0 = SL_RANGE e' l'estremo opposto del range)
+#            sono gli stessi a M5, M15 e M30.
+#    (2) LA MACCHINA A FASI E' A OROLOGIO, NON A BARRE.
+#        r.679  int nowMin = TimeInMinutes(now);
+#        r.687/711/717/723/729/738/744  tutte le transizioni sono
+#               "if(nowMin >= ...)", cioe' su MINUTI DI OROLOGIO.
+#        r.586-589  ABTG_OnTick() gestisce la posizione A OGNI TICK.
+#        >>> Non c'e' nessun "aspetta la chiusura della barra". A
+#            Modello 4 (TICK REALI) MT5 consegna tutti i tick veri
+#            qualunque sia il TF del grafico: la sequenza degli
+#            eventi non cambia.
+#    (3) LE TRE DIPENDENZE DAL TF DEL GRAFICO CHE ESISTONO SONO
+#        INERTI CON I PIN DELLA CELLA VIVA -- le ho cercate e sono tre,
+#        elencate per nome (classe 180), non "tutto il resto":
+#        r.437   gAtrH = iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt)
+#                usato da AtrValue() (r.1781-1784), che entra in:
+#                  - lo stop, solo se InpSLMode != SL_RANGE
+#                    (r.1060/1084/1489/1522) -> QUI InpSLMode = 0 = OFF
+#                  - il trailing ATR (r.2007/2020), solo se
+#                    InpTrailMode = ABTG_TRAIL_ATR -> QUI InpTrailMode
+#                    = 1 = FIXED (410 pt) -> OFF
+#                  - il filtro ATR (r.2172-2177), solo se
+#                    InpUseAtrFilter -> QUI false -> OFF
+#                  - InitialSL() (r.2028-2032) quando la parziale e'
+#                    gia' fatta o lo stop e' a pari: il riskDist che
+#                    ne esce alimenta SOLO profR (r.1978) e beTarget
+#                    (r.2013). profR e' usato da
+#                    "trailArmato = (InpTrailStartR <= 0) || ..."
+#                    e QUI InpTrailStartR = 0 -> trailArmato e' SEMPRE
+#                    vero -> profR NON viene mai letto. beTarget e'
+#                    dentro "if(InpBEatR > 0 ...)" e QUI InpBEatR = 0
+#                    -> OFF.
+#                  >>> E l'obiettivo della PARZIALE (r.1909) usa il
+#                      riskDist calcolato con partialDone = false, che
+#                      torna curSL, cioe' lo stop VERO del range: non
+#                      passa dall'ATR. Verificato, perche' era la
+#                      candidata piu' probabile a rompere l'invarianza.
+#        r.1370  octf = (InpOCTimeframe == PERIOD_CURRENT) ? Period()
+#                usato SOLO nel ramo OPENCONFIRM -> QUI InpEntryMode
+#                = 2 = ABTG_RETEST -> OFF
+#        r.2202  VolumeOK() -> VolumeOKtf(PERIOD_CURRENT)
+#                dentro "if(!InpUseVolumeFilter && !InpUseAtrFilter)
+#                return(true)" (r.2155) -> QUI entrambi false -> OFF
+#    >>> CONCLUSIONE DELLA LETTURA: con i pin della CELLA VIVA il TF
+#        del grafico e' INERTE. La previsione non e' "piu' o meno
+#        uguale": e' IDENTICO ALLA CIFRA.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- CON TRE USCITE
+#    Il punto MISURATO con cui si confronta e' R47a (tick reali,
+#    deposito 100.000, rischio 1,0%, stessa finestra, @PERIODO M5):
+#      IS   Trades 175  (= 132 POSIZIONI)  PF 1,12634  DD 5,4362%
+#      OOS  Trades 270  (= 193 POSIZIONI)  PF 1,39709  DD 7,2328%
+#      fonte: risultati_prove/aperture_r47/
+#             ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r47a.csv r.2
+#      posizioni CONTATE nei per-trade:
+#             abtg_trades_..._772501.csv (270 deal / 193 position_id)
+#             abtg_trades_..._772503.csv (193 / 193)
+#    (a) IL NUMERO BUONO -- ed e' l'IDENTITA':
+#        Trades 175 / PF 1,12634 / DD 5,4362% in IS e
+#        Trades 270 / PF 1,39709 / DD 7,2328% in OOS, alla quinta
+#        cifra. VERDETTO: "il TF d'ingresso di 770101 e' INERTE, ed e'
+#        MISURATO oltre che letto nel codice" -> casella 5 del
+#        certificato CHIUSA, e la sedia si schiera senza quel buco.
+#        >>> PIU' UN REGALO CHE CONTA PER IL FUTURO: se il TF e'
+#            inerte, le corse future su questa sedia possono girare a
+#            M15 o M30 e leggere finestre PIU' LUNGHE a parita' di
+#            tetto delle barre. Il conto: ~23 ore di quotazione al
+#            giorno x ~459 sedute nei 21 mesi fanno ~126.000 barre a
+#            M5 [DERIVATO], ~42.000 a M15, ~21.000 a M30. Il tetto
+#            delle ~100.000 barre a M5 e' SUPERATO sulla carta, a M15
+#            resta il 42%. Oggi non e' un problema misurato (vedi il
+#            contro-esempio), ma e' un vincolo che morderebbe appena
+#            la finestra si allungasse.
+#    (b) IL NUMERO BRUTTO: i numeri DIFFERISCONO. Vuol dire che esiste
+#        una dipendenza dal TF del grafico che la mia lettura del
+#        sorgente NON ha trovato, dentro una sedia proposta per il 1
+#        ottobre. VERDETTO: "770101 ha una dipendenza dal TF NON
+#        DICHIARATA" -> e' un rilievo che va in cima al referto e
+#        davanti allo schieramento, non dietro. E si trova subito
+#        dove: se cambia solo il DD, e' la gestione; se cambia Trades,
+#        e' l'ingresso o la macchina a fasi.
+#        >>> Questa uscita e' PIU' IMPORTANTE dell'altra, ed e' il
+#            motivo per cui il round vale 4 passate anche se mi
+#            aspetto (a).
+#    (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: zero passate; le due
+#        celle gemelle diverse fra loro; Trades = 0; oppure la corsa
+#        girata con deposito diverso da 100.000 o modello diverso da 4
+#        -- in quel caso il confronto con R47a DECADE e il file va
+#        RILANCIATO, non "letto con prudenza".
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> IL DIFETTO DA NON RIFARE, e oggi lo abbiamo pagato altrove:
+#        se i numeri tornano IDENTICI ALLA QUINTA CIFRA, la prima
+#        reazione NON deve essere "che bella conferma". Un'identita'
+#        perfetta puo' essere una MISURA o puo' essere un
+#        ARTEFATTO PER COSTRUZIONE -- per esempio se @PERIODO non
+#        fosse arrivato al tester e la corsa fosse girata a M5 due
+#        volte. Le due spiegazioni producono lo STESSO CSV.
+#        >>> COME LE DISTINGUO, e serve PRIMA di leggere i numeri:
+#            si legge il .ini generato dal driver e/o l'intestazione
+#            del Giornale della passata, dove il TF del simbolo e'
+#            scritto. Se il .ini dice M5, il round NON ha misurato
+#            niente e va rifatto. Questa verifica e' OBBLIGATORIA su
+#            questo round e non e' facoltativa: e' l'unico controllo
+#            che separa una misura da un'identita'.
+#    >>> L'IPOTESI ALTERNATIVA sul tetto delle barre, e cade.
+#        Ipotesi: "a M5 la corsa di R47 ha sbattuto contro il tetto
+#        delle ~100.000 barre, quindi la finestra vera e' piu' corta
+#        di quella nominale e le 193 posizioni stanno su meno storico".
+#        QUALE NUMERO PRODUCE QUESTA SPIEGAZIONE? Il tetto taglia lo
+#        storico piu' VECCHIO, cioe' l'IS: allora la frequenza
+#        dell'IS dovrebbe essere molto PIU' BASSA di quella dell'OOS.
+#        MISURATO: IS 132 posizioni / 183 giorni feriali = 0,721
+#        pos/giorno; OOS 193 / 265 = 0,728 pos/giorno.
+#        SCARTO 1,0% su 325 posizioni.
+#        >>> L'alternativa prevede uno scarto grande e la misura ne
+#            trova l'1,0%: FALSIFICATA SUI DATI, non sul nulla.
+#            (Le due frequenze non le ho stimate io: sono contate nei
+#             per-trade di R47, e lo stesso conto sta in
+#             report/LA_SECONDA_SEDIA_2026-09-12.md par. 1.3.)
+#        >>> LIMITE DICHIARATO: questo falsifica "il tetto ha tagliato
+#            l'IS", NON "il tetto e' alto". Il valore vero di
+#            "Max barre nel grafico" sul PC di backtest (terminale
+#            50504400, C:\MT5_Backtest) e' [NON MISURATO], e
+#            walkforward_generico.ps1 NON scrive "[Charts] MaxBars"
+#            (verificato oggi: grep, zero occorrenze; lo scrivono
+#            invece RIGA_R107, RIGA_R111 e RIGA_STORICO_INDICI, che
+#            sono driver dedicati). Leggerlo costa ZERO passate.
+#
+#  S1 / S2 / S3 -- LE SENTINELLE
+#    S1  GEMELLI (cancello G1 di determinismo). Le due celle
+#        differiscono SOLO per InpMagic e devono tornare IDENTICHE
+#        alla cifra. >>> UN SOLO agente locale in MT5 -> Strategy
+#        Tester -> Agenti (classe 129).
+#    S2  CONTEGGIO CELLE: 2 valori distinti di InpMagic nel CSV
+#        (787704 / 787754).
+#    S3  ORA SERVER. Nel CSV la colonna InpSessionHour deve valere 8.
+#        Se vale 9, l'ora e' ITALIANA e non SERVER e la corsa si
+#        CESTINA (regola fissa sul fuso BCM: il DAX apre 09:00 IT =
+#        08:00 server).
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    A1  IDENTITA'. Si dichiara "TF INERTE" solo se TUTTI E SEI i
+#        numeri (Trades, PF, DD in IS e in OOS) coincidono con R47a
+#        entro la quinta cifra significativa. Uno solo che diverge
+#        BASTA per scrivere "dipendenza dal TF PRESENTE", e allora si
+#        dice QUALE numero e' cambiato e di quanto.
+#    A2  IL ROUND NON MISURA IL MERITO. Non c'e' nessuna manopola
+#        d'ingresso ad asse: PF e DD servono solo come IMPRONTA da
+#        confrontare. Nessuna cella di questo round si porta avanti,
+#        nessun altopiano da cercare, nessun centro da scegliere --
+#        e lo scrivo perche' la regola di casa vuole la regola di
+#        selezione accanto al numero, e qui la regola e' "nessuna
+#        selezione: e' un confronto d'identita'".
+#    A3  IL PAVIMENTO DEI 150 non si applica a questo round: le 132
+#        posizioni dell'IS restano sotto e restano SOSPESE per il
+#        merito (Emendamento B del 16/08). Il RISCHIO si legge lo
+#        stesso, a qualunque n.
+#    A4  RISCHIO. Un DD superiore a 8,0% in una qualunque finestra e'
+#        una NOTIZIA, perche' il contratto in essere di questa sedia
+#        e' 7,2328% a rischio 1,0% su banco 100.000 e il muro prop e'
+#        10%. Se il DD sale cambiando SOLO il TF del grafico, il
+#        contratto della sedia va riscritto prima di schierarla.
+#    A5  IL ROUND NON PROMUOVE NIENTE E NON TOCCA NIENTE. Non cambia
+#        un preset, non accende una sedia, non tocca il forward, non
+#        nomina il conto reale 10105439. Taglie, rischio e accensioni
+#        sono [FIRMA DI CLAUDIO].
+#
+#  BANCO E FINESTRA -- devono essere QUELLI DI R47a, o il round e' muto
+#    Modello 4 (TICK REALI). Deposito 100.000. Rischio PINNATO 1,0 per
+#    essere confrontabile con R47a (in campo la sedia gira a 0,65%:
+#    qui la taglia e' alzata per il CONFRONTO, non per il contratto).
+#    FrazioneIS 0,40 (default del driver, walkforward_generico.ps1
+#    r.179): 2024.09.26 -> 2026.06.30 = 642 giorni;
+#    floor(642 x 0,40) = 256
+#      IS  2024.09.26 - 2025.06.09      OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di R47 (che non dichiara @FINOA e prende
+#    il default -Fino 2026.06.30, r.177), di R112 e di R137c.
+#    >>> La riga di lancio DEVE portare -Deposito 100000 e -Modello 4.
+#        Se parte a 10.000 o in OHLC, il confronto con R47a decade e
+#        questo file va RISCRITTO, non interpretato.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - NON misura M30, che e' la banda che Claudio ha chiesto. Un
+#      gradino alla volta: se M15 e' identico a M5, M30 si aggiunge
+#      con altre 4 passate e la stessa attesa. Se M15 NON e'
+#      identico, M30 non si misura affatto finche' non si e' capito
+#      perche'.
+#    - NON misura il LATO SHORT: la sedia viva e' long-only
+#      (InpAllowShort=false nel preset). La regola dei due lati del
+#      25/08 e' soddisfatta ALTROVE sulla stessa EA e sullo stesso
+#      simbolo (r83_csv, r118_csv, csv_r51 girano con
+#      InpAllowShort=1; il lato corto da solo vale +3,8873 punti di
+#      DD -- report/CONFLITTO_DD_770101_2026-09-11.md). Qui si misura
+#      la SEDIA, non il motore.
+#    - PROVA DI REGIME: assente e non colmabile. Lo storico BCM di
+#      D30EUR parte dal 2024.09.26 con stato COMPLETO: 21 mesi = UN
+#      regime, toro.
+#    - PEGGIOR GIORNATA per cella: la colonna esiste
+#      ("Peggior Giornata %", scritta dall'OnTester di questa EA,
+#      r.382-384 + r.616-623) e per la cella viva vale -1,0780%. Va
+#      confrontata anche lei: se cambia col TF, cambia la grandezza
+#      che decide il muro giornaliero della prop.
+#    - IL VALORE DI "Max barre nel grafico" sul terminale di backtest
+#      50504400: [NON MISURATO]. Costa zero passate leggerlo ed e' la
+#      sola cosa che rende il confronto (a) interpretabile senza
+#      riserve.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester
+#      le GlobalVariable non esistono e la guardia e' fail-open, come
+#      in R47 e in R137.
+# ======================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     (rischio portato a 1,0 per essere confrontabile con R47a).
+#     Identica a R137c riga per riga tranne il magic: se un pin
+#     divergesse, il round misurerebbe due cose insieme.
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato: il default compilato e' gia' la stringa
+#   vuota. Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di
+#   controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE: TECNICO (2 celle x 2 finestre = 4 passate)
+#     La variabile vera di questo round e' @PERIODO, che NON e' un
+#     input dell'EA: e' il TF del grafico e lo mette la riga di lancio.
+#     Quindi l'asse dentro il file e' il magic, e serve al cancello G1.
+#     787704 / 787754 VERIFICATI VERGINI nel repo il 12/09/2026
+#     (grep -rl, .git escluso: 0 file).
+InpMagic=787704||787704||50||787754||Y
+# ======================================================================

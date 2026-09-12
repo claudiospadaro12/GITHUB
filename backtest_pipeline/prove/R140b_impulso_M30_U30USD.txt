@@ -1,0 +1,336 @@
+# ======================================================================
+#  EA: ABTG_ImpulsoApertura
+#  R140b -- IL SECONDO SIMBOLO DELLA FAMIGLIA: U30USD M30, DUE LATI.
+#  Asse: InpMagic (ASSE TECNICO, cancello G1).
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  >>> NON SI LEGGE PRIMA DI R140a: su D30EUR c'e' il gemello di
+#      metodo, e la FREQUENZA si somma, non si confronta. <<<
+#  Dossier: report/LA_BANDA_BASSA_2026-09-12.md
+# ======================================================================
+#
+#  PERCHE' UN SECONDO SIMBOLO E NON UN SECONDO TIMEFRAME
+#    Questa e' la scelta piu' importante del file e ha una ragione
+#    LETTA NEL SORGENTE, non un'opinione.
+#      mql5/Experts/ABTG_ImpulsoApertura.mq5
+#        r.409  if(d.hour!=InpOpenHour || d.min!=InpOpenMinute) return;
+#        r.413-415  "UN SOLO TENTATIVO PER SEDUTA" (gSessioneTentata)
+#    >>> L'EA valuta UNA SOLA BARRA AL GIORNO: quella che comincia
+#        all'ora d'apertura. Quindi il numero di SEGNALI non dipende
+#        dal timeframe: e' al massimo uno per seduta per simbolo, a
+#        M30 come a M15 come a M5.
+#    >>> Scendere di TF su questo motore NON compra operazioni. Compra
+#        una barra piu' CORTA, quindi uno stop piu' STRETTO, quindi un
+#        rapporto stop/spread piu' BASSO, quindi piu' RIFIUTI dal suo
+#        cancello di costo (InpMaxSpreadPctOfStop, r.155). E' una
+#        perdita secca, e il conto sta nel dossier par. 4.
+#    >>> La frequenza di questo motore si compra con i SIMBOLI, ed e'
+#        esattamente l'unita' "FAMIGLIA" firmata da Claudio il 07/09:
+#        pavimento 1,00 op/giorno su (motore x simboli schierabili).
+#        La famiglia qui e' {D30EUR, U30USD, NASUSD} x {long, short}.
+#        R140a porta il primo addendo, questo file il secondo.
+#
+#  E C'E' UN SECONDO MOTIVO, ED E' UN VINCOLO DI CODICE
+#    r.329-332 dell'EA:
+#      if(((long)MinutiDelGiorno_Calc(InpOpenHour,InpOpenMinute)*60)
+#          % PeriodSeconds() != 0)
+#         -> "ERRORE: l'ora d'apertura NON cade su un confine di barra
+#             del TF: la barra d'apertura non esisterebbe MAI e l'EA
+#             non opererebbe, in silenzio. Cambia TF o orario."
+#             (OnInit RIFIUTA e l'EA non parte)
+#    Il Dow e il Nasdaq aprono alle 14:30 ORA SERVER BCM (15:30
+#    italiane). 14:30 = 870 minuti dalla mezzanotte:
+#      870 % 30 = 0   -> M30  LEGALE
+#      870 % 15 = 0   -> M15  legale
+#      870 % 5  = 0   -> M5   legale
+#      870 % 60 = 30  -> H1   ILLEGALE: l'EA NON PARTE
+#      870 % 120 = 30 -> H2   ILLEGALE
+#    >>> Quindi su U30USD e NASUSD questo motore NON PUO' girare a H1.
+#        M30 e' il TF PIU' ALTO LEGALE. La banda bassa qui non e' una
+#        preferenza: e' l'unica banda esistente.
+#        Sul D30EUR (apertura 8:00 = 480 minuti) tutti i TF sono
+#        legali, ed e' per questo che R140a puo' fare da metro.
+#
+#  PERCHE' NON E' UN RIPESCAGGIO -- la lista dei caduti
+#    ABTG_ImpulsoApertura NON compare in backtest_pipeline/REGISTRO_TEST.md
+#    (grep del 12/09: zero occorrenze) e non ha nessun CSV in archivio
+#    (find su risultati_*: zero file). E' un motore MAI MISURATO.
+#    Dossier di caccia: report/EA_IMPULSO_APERTURA_2026-09-08.md.
+#    Criteri C0-C9 congelati in backtest_pipeline/prove/ABTG_ImpulsoApertura.txt
+#    (08/09), che resta agli atti come specifica e NON e' lanciabile
+#    (2 assi Y: bocciato da controlla_prova.py, vedi R140a).
+#
+#  IL CONTO DEL COSTO, FATTO PRIMA -- con la banda, non con un numero
+#    Spread U30USD all'ora 14 (l'ora della campanella, ORA SERVER):
+#      mediana 2,00 idx  -  p95 3,00  -  max 47,0
+#      MISURATO su 4.931.660 tick a quell'ora e 64.711.285 in totale
+#      (risultati_archivio/spread_flotta/spread_orario_U30USD.csv r.16).
+#    Commissione sugli indici: 0,0000 MISURATA su n=302 deal
+#    (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181-183), quindi sul
+#    Dow il pedaggio ALL-IN E' LO SPREAD. Sul forex NO (la' la
+#    commissione e' il 73,1% del pedaggio): i due casi non si mescolano.
+#    Il 40x chiede uno stop >= 80,0 idx alla mediana e >= 120,0 al p95.
+#    Il pavimento DURO 13,3x chiede >= 26,6 idx.
+#    Range d'apertura a 30 minuti sul Dow, le due strade di casa:
+#      (a) SENZA amplificazione:
+#          ADR U30USD 314,5 idx (MISURATO su 24 giorni,
+#          report/ROUND_ORB_ATR_PS5_2026-09-10.md r.233)
+#          x sqrt(30/1440) = 314,5 x 0,14434 = 45,4 idx -> 22,7x
+#      (b) CON il fattore d'apertura 3,05:
+#          45,4 x 3,05 = 138,5 idx -> 69,2x
+#    >>> LA BANDA E' 22,7x - 69,2x. La dichiaro larga invece di
+#        scegliere l'estremo che mi conviene.
+#        Il 22,7x sta SOPRA il pavimento DURO (13,3x) e SOTTO quello di
+#        lavoro (40x). Il 69,2x sta SOPRA tutti e due.
+#        >>> Quindi l'esito POSITIVO E' RAGGIUNGIBILE (classe 278):
+#            esiste un valore dentro la banda derivata dai nostri
+#            numeri misurati che produce il PASS. Se la banda fosse
+#            stata tutta sotto 40x, questo file non andava scritto.
+#    >>> E IL FATTORE 3,05 E' MISURATO SUL DAX, non sul Dow
+#        (58,7 / 19,0, ROUND_ORB_ATR_PS5 par. 2.2): portarlo sul Dow e'
+#        [INFERITO]. Di piu': e' misurato su una finestra di 15 minuti
+#        e qui e' applicato a 30, quindi va nella direzione OTTIMISTA
+#        (l'esplosione d'apertura e' concentrata all'inizio: allungando
+#        la finestra l'amplificazione DECADE). Il 69,2x e' un LIMITE
+#        SUPERIORE, non una previsione.
+#    >>> C'E' ANCHE UNA MISURA DIRETTA CHE ORIENTA, e va citata perche'
+#        e' dello stesso simbolo e della stessa ora: la sedia 770202
+#        (ABTG_Dow_Apertura_US, range 15 minuti 14:30-14:45, stop
+#        all'estremo opposto) ha stop stimato ~102 idx = 51,0x, banda
+#        44,5-53,5x (CANCELLO_COSTO_FLOTTA r.395). Una barra da 30
+#        minuti e' PIU' AMPIA di una da 15: quindi il nostro stop
+#        atteso sta PIU' IN ALTO di 102, non piu' in basso.
+#        >>> Questo e' l'argomento piu' forte del file, ed e' anche il
+#            piu' pericoloso: e' un ALTRO motore. Lo uso per orientare
+#            la banda, NON come attesa. La differenza fra i due e' che
+#            770202 mette lo stop all'estremo OPPOSTO del range
+#            (entrata su un lato, stop sull'altro) mentre qui lo stop
+#            e' l'estremo della barra dalla parte del segnale: sono
+#            geometrie diverse e non si confrontano al centesimo.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI -- CON TRE USCITE
+#    (a) IL NUMERO BUONO: Trades fra 90 e 300 sui 21 mesi (somma dei
+#        due lati), cioe' 0,20-0,65 op/giorno di seduta su ~459 sedute,
+#        con Reject < 40% dei segnali e PF >= 1,10 in ENTRAMBE le
+#        finestre. Verdetto: candidato della banda M30, e si passa alla
+#        griglia (una manopola per file, criteri C5/C7 del file 08/09).
+#    (b) IL NUMERO BRUTTO: Reject >= 60% dei segnali, oppure PF < 1,10
+#        in una delle due finestre. Verdetto: "su U30USD a M30 questo
+#        motore non arriva alla frontiera di costo / non ha edge, col
+#        numero" -- e siccome H1 qui e' ILLEGALE (r.329), non c'e'
+#        nessun TF piu' alto a cui salire: il verdetto CHIUDE il
+#        simbolo, non lo rimanda. E' un risultato, ed e' un risultato
+#        DEFINITIVO, che e' meglio di un risultato rimandato.
+#    (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: zero passate; EA che
+#        non compila; celle gemelle diverse fra loro; Trades = 0 con
+#        Reject ANCHE zero (vorrebbe dire che la barra d'apertura non
+#        e' stata trovata: si controlla che InpOpenMinute=30 sia
+#        arrivato, perche' col default 0 l'EA cercherebbe la barra
+#        delle 14:00 e su U30USD quella barra ESISTE -- quindi
+#        l'errore NON si vedrebbe come zero trade, si vedrebbe come
+#        trade all'ora sbagliata). >>> E' la sentinella S4, ed e' il
+#        modo piu' insidioso in cui questo round puo' "riuscire"
+#        misurando la cosa sbagliata.
+#    >>> PF e DD: [NON MISURATI] e non ne invento l'attesa. Su un
+#        motore mai girato non esiste una curva da prevedere, esiste
+#        un conteggio da fare.
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO
+#        (i)   IL REGIME. 21 mesi di Dow a tick (dal 2024.09.26, stato
+#              COMPLETO: il broker non ha nulla prima) sono UN SOLO
+#              REGIME, toro. Un motore che entra A FAVORE dell'impulso
+#              d'apertura, in un toro, ha il vento in poppa sul ramo
+#              long per costruzione.
+#              >>> DISCRIMINANTE: il ramo SHORT, letto SEPARATO (C2
+#                  del file 08/09, regola di casa del 25/08). Se il PF
+#                  viene dal regime, long verde e short rosso. Se
+#                  viene dal segnale, i due rami sono dello stesso
+#                  ordine. Entrambi i lati sono accesi in questo file
+#                  PROPRIO per avere la discriminante nello stesso CSV.
+#        (ii)  IL DOPPIONE DELLA CAMPANELLA, e su U30USD e' PEGGIO che
+#              sul DAX. Alle 14:30 server su U30USD operano GIA' due
+#              sedie, entrambe SOLO LONG:
+#                770202 ABTG_Dow_Apertura_US  (range 15', RETEST)
+#                770611 ABTG_ORB_Ottimizzato  (HALFRANGE 14:30-14:45)
+#              Un terzo ramo long negli STESSI giorni non diversifica:
+#              triplica il rischio sullo stesso evento, ed e' la
+#              malattia del doppione Apertura_Marco ritirato il 06/08.
+#              E il tetto per cluster al 3,0% e' FIRMATO il 07/09 ma
+#              NON ATTIVO (default 0, nessun preset lo valorizza, la
+#              versione in campo non ha la manopola --
+#              report/IL_GUARDIAN_IN_CAMPO_2026-09-12.md): oggi la
+#              decorrelazione si compra scegliendo, non col Guardian.
+#              >>> CANCELLO DURO (C4): il ramo LONG di questo motore su
+#                  U30USD e' PROMUOVIBILE SOLO SE i suoi giorni-segnale
+#                  NON coincidono con quelli di 770202 e 770611. Si
+#                  misura sui per-trade DOPO la corsa, con strumenti
+#                  che abbiamo (sovrapposizione_sedie.py,
+#                  chi_va_con_chi.py), a ZERO passate.
+#              >>> E il ramo SHORT non collide con nessuna sedia viva
+#                  sulle aperture USA: e' li' che sta il valore atteso
+#                  di questo round, e lo scrivo PRIMA per non farmi
+#                  ingannare dopo da un long verde.
+#        (iii) LA SELEZIONE FATTA DAL CANCELLO E NON DAL MOTORE. Il
+#              gate di spread a 2,5% tiene solo i giorni con stop
+#              largo, cioe' i giorni volatili. Il PF dei sopravvissuti
+#              non e' il PF del motore: e' il PF del motore SUI GIORNI
+#              VOLATILI. Va scritto cosi' nel referto, sempre.
+#    >>> E L'IPOTESI ALTERNATIVA, che e' la parte che conta. Se il
+#        round torna Trades ALTO e Reject BASSO, l'alternativa a "la
+#        geometria di costo e' sana" e' "il gate d'ampiezza e'
+#        decorativo e l'EA entra quasi ogni giorno".
+#        QUALE NUMERO PRODUCE L'ALTRA SPIEGAZIONE? Una operazione per
+#        seduta per lato: ~459 sedute -> Trades verso 700-900.
+#        Se Trades supera 700, il gate NON sta selezionando, e il
+#        verdetto e' "gate decorativo -> SCARTO" (C5 del file 08/09),
+#        non "motore veloce".
+#        >>> Il gate d'ampiezza qui e' SCALE-INVARIANTE per costruzione
+#            (r.476-484: il riferimento e' la MEDIA DEI RANGE DELLE
+#            APERTURE PRECEDENTI sullo stesso TF, non un ATR
+#            assoluto): quindi la quota di giorni che lo passano NON
+#            dipende dal TF, e un Trades alto NON e' spiegabile col
+#            TF. Questa e' la ragione per cui l'alternativa e'
+#            distinguibile.
+#
+#  S1 / S2 / S3 / S4 -- LE SENTINELLE
+#    S1  GEMELLI (cancello G1 di determinismo). Le due celle
+#        differiscono SOLO per InpMagic e devono tornare IDENTICHE
+#        alla cifra su Trades, Profit Factor, Equity DD % e Reject.
+#        >>> UN SOLO agente locale in MT5 -> Strategy Tester ->
+#            Agenti (classe 129): con piu' agenti le gemelle
+#            divergono e il cancello d'identita' non misura niente.
+#    S2  CONTEGGIO CELLE: 2 valori distinti di InpMagic nel CSV
+#        (787703 / 787753). Se e' 1, l'asse non ha morso.
+#    S3  PAVIMENTO DELLO STOP, e su U30USD e' un rilievo:
+#        InpMinStopPts = 25 idx contro uno spread mediano di 2,00
+#        idx fa 12,5x, cioe' SOTTO il pavimento DURO 13,3x.
+#        Un trade che finisse esattamente sul pavimento starebbe
+#        sotto il duro. >>> Non e' un difetto operativo, perche' il
+#        cancello di costo (2,5% = 40x) rifiuta comunque prima: i due
+#        input sono coerenti fra loro. Ma va DICHIARATO, perche' se
+#        qualcuno un giorno allentasse InpMaxSpreadPctOfStop, il
+#        pavimento da solo NON protegge su questo simbolo.
+#    S4  ORA D'APERTURA. Nel CSV la colonna InpOpenHour deve valere
+#        14 e InpOpenMinute 30. Se InpOpenHour fosse 15 l'ora e'
+#        ITALIANA e non SERVER: la corsa va CESTINATA (regola di casa
+#        sul fuso BCM). Se InpOpenMinute fosse 0, l'EA ha misurato la
+#        barra delle 14:00, che esiste: la corsa sembrerebbe riuscita
+#        e avrebbe misurato un'ALTRA ora.
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    A1  FREQUENZA (metro firmato il 07/09): pavimento 1,00 op/giorno
+#        per FAMIGLIA {D30EUR, U30USD, NASUSD} x {long, short}. Questo
+#        round produce UN addendo, non un verdetto di famiglia. Se
+#        U30USD fa >= 0,34 op/giorno, tre simboli simili arrivano a
+#        1,00. Sotto 0,10 op/giorno il simbolo non aiuta la famiglia e
+#        va detto col numero.
+#    A2  CAMPIONE. Il MERITO si legge sopra 150 operazioni per
+#        finestra. Sotto, e' SOSPESO -- non negativo. Il RISCHIO si
+#        legge a qualunque n (Emendamento B del 16/08).
+#    A3  RISCHIO, cancello duro a qualunque n: Equity DD > 10,0% in
+#        una qualunque delle due finestre -> BOCCIATO PER RISCHIO,
+#        senza discussioni. Precedente misurato: ABTG_LVNArbitro,
+#        stesso simbolo, stesso TF, bocciato l'08/09 con DD 11,33% e
+#        18,01% a 10.000 e 11,76% e 19,35% a 100.000
+#        (report/P0_LVNARBITRO_2026-09-08.md). Il rischio qui gira a
+#        0,65%, che e' la taglia firmata: un DD sopra 10 a 0,65% non
+#        si aggiusta con la taglia.
+#    A4  MURO GIORNALIERO. Peggior Giornata % oltre -4,0% ->
+#        segnalazione immediata (la pausa del Guardian e' a 4,0).
+#    A5  COSTO. Se Reject >= 60% dei segnali il verdetto e' sul COSTO
+#        e non sul motore -- e su questo simbolo non c'e' un TF piu'
+#        alto legale, quindi CHIUDE il simbolo.
+#    A6  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non
+#        accende una sedia, non tocca il forward, non nomina il conto
+#        reale 10105439. Taglie, rischio e accensioni sono [FIRMA DI
+#        CLAUDIO].
+#
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI), e non e' un dettaglio su questo round: il
+#    conteggio dei RIFIUTI dipende dallo SPREAD, e lo spread esiste
+#    solo nei tick. In OHLC M1 il cancello di costo misurerebbe uno
+#    spread finto. >>> QUESTO ROUND NON HA UNA VERSIONE OHLC.
+#    Deposito: 10.000 (e' un conteggio, non un contratto).
+#      Sentinella del pavimento del lotto: profitto ~0 con Trades
+#      normale. Misurato su un caso vicino (P0 LVNArbitro, U30USD
+#      M30): il profitto scala 11,1-12,8x per un deposito 10x, quindi
+#      a 10.000 il pavimento NON mordeva su questo simbolo. Non si
+#      estende a questa geometria, ma dice dove guardare.
+#    FrazioneIS 0,40 (default del driver, walkforward_generico.ps1
+#    r.179): 2024.09.26 -> 2026.06.30 = 642 giorni;
+#    floor(642 x 0,40) = 256
+#      IS  2024.09.26 - 2025.06.09      OOS 2025.06.10 - 2026.06.30
+#    @DAQUANDO 2024.09.26: i tick BCM sugli indici partono da li',
+#    stato COMPLETO (risultati_archivio/misura_tick/ e
+#    risultati_archivio/REFERTO_SONDA_STORICO_17-08.md par. 3).
+#    Tetto delle barre: 21 mesi di U30USD a M30 sono ~21.000 barre
+#    [DERIVATO], il tetto delle ~100.000 non morde.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente. 21 mesi di indice = UN regime (toro).
+#      La regola C dell'Emendamento della Finestra non e' soddisfatta e
+#      non lo sara' alla fine del round. Niente e' promuovibile di qui.
+#    - SPREAD AL MINUTO dentro l'ora 14: [NON MISURATO]. L'istogramma
+#      e' ORARIO e l'ora 14 CONTIENE la campanella: il primo minuto e'
+#      il peggiore dell'ora. La mediana 2,00 e' OTTIMISTA PER
+#      COSTRUZIONE, e va scritto ogni volta che si cita.
+#      Indizio nel dato stesso: a U30USD l'ora 14 ha mediana 2,00 e
+#      max 47,0, contro un max di 42,0 all'ora 16 -- la coda esiste.
+#    - IL PEDAGGIO SI PAGA DUE VOLTE (ingresso e uscita) e l'ora
+#      dell'USCITA e' [NON MISURATA]. Il 40x di casa e' definito
+#      contro UNO spread e resta cosi' per confrontabilita'.
+#    - IL FATTORE D'APERTURA 3,05 e' misurato sul DAX e su 15 minuti:
+#      qui e' [INFERITO] due volte (altro simbolo, altra finestra).
+#    - VALORE DEL PUNTO di U30USD: MISURATO 0,8569-0,8628
+#      unita'/punto/lotto, n=8 (report/INDURIMENTO_PROP_DUE_SEDIE
+#      par. 2.3). E' l'unico dei tre indici in cui NON e' un buco.
+#    - L'ORA DEI TRADE RIEMPITI non e' leggibile dalle colonne
+#      dell'OnTester (buco dichiarato dal P0 IBRetest del 09/09):
+#      serve una colonna "Ora Ingresso". Finche' non c'e', S4 si
+#      verifica sui pin del CSV e non sull'esito.
+#    - SOVRAPPOSIZIONE con 770202 e 770611: da misurare sui per-trade
+#      DOPO la corsa, ZERO passate. Il verdetto del ramo LONG e'
+#      CONDIZIONATO a quella misura (C4).
+#    - NASUSD, il terzo simbolo della famiglia, NON e' in questo
+#      round: apre alla stessa ora (14:30 server) e la sua riga si
+#      scrive identica a questa. Non l'ho scritta per non consegnare
+#      12 passate quando la domanda si decide sulle prime 8.
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- GLI STESSI PIN DI R140a, tranne l'ORA D'APERTURA, che e' l'unica
+#     cosa che cambia fra DAX e Dow: 8:00 -> 14:30 ORA SERVER BCM
+#     (15:30 italiane). REGOLA DI CASA: in un CSV la colonna
+#     InpOpenHour deve valere 14. Se vale 15, l'ora e' italiana e la
+#     corsa si CESTINA.
+InpUsaGuardian=true
+InpImpulseATRMult=1.5
+InpATRPeriod=14
+InpATRSuAperture=true
+InpAllowLong=true
+InpAllowShort=true
+InpOpenHour=14
+InpOpenMinute=30
+InpFlatHour=21
+InpFlatMinute=0
+InpSLMode=0
+InpSLAtrMult=0.5
+InpMinStopPts=25
+InpMT5PerPuntoIndice=100
+InpRR=3.0
+InpBEatR=2.0
+InpRiskPercent=0.65
+InpMaxSpreadPctOfStop=2.5
+InpVerbose=true
+# InpComment NON pinnato: il default compilato e' "IMPULSO", ASCII e
+#   non vuoto. Un pin di stringa VUOTA viene IGNORATO da MT5 (e' la
+#   classe di difetto che e' costata il round FiboH4): qui non serve.
+#
+# --- L'UNICO ASSE: TECNICO (2 celle x 2 finestre = 4 passate)
+#     787703 / 787753 VERIFICATI VERGINI nel repo il 12/09/2026
+#     (grep -rl, .git escluso: 0 file).
+InpMagic=787703||787703||50||787753||Y
+# ======================================================================
