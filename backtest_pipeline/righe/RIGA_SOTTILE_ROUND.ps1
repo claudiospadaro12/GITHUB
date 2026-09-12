@@ -558,7 +558,20 @@ $BancoBT = 'C:\MT5_Backtest'
 #  Le righe gia' in coda non si muovono: ognuna pinna il PROPRIO commit
 #  di questa riga sottile, che porta il PROPRIO $PIN congelato.
 # ---------------------------------------------------------------------
-$PIN = 'c5a7d225513415445125254b377b5bc1bbe6a543'
+#
+#  DICIOTTESIMO GIRO (13/09/2026, notte). $PIN c5a7d225 -> 0230e8f5.
+#  Terza passata del cancello sui tre R142: classe 301 -- la voce 5 del
+#  certificato portava la ragione di un ALTRO EA ('InpTimeframe != M5
+#  da' zero trade' e' dell'EA ESTERNO; quello di casa quell'input non
+#  ce l'ha). Il commit nuovo tocca i tre file prova piu' i due documenti
+#  che portavano la stessa frase.
+#  MISURATO al pin nuovo 0230e8f5, non assunto:
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      i tre file prova                           presenti
+#      c5a7d225 e' ANTENATO di 0230e8f5           (git merge-base, exit 0)
+# ---------------------------------------------------------------------
+$PIN = '0230e8f58be5e43846b66e00d2bcdce4f6c9ad71'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
