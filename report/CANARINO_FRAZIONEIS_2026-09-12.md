@@ -508,3 +508,67 @@ sarebbe una notte buttata **e** un numero che nessuno puo' usare.
 **Il passo piu' corto, ed e' uno**: dodicesimo giro di pin (`$PIN` +
 `$SHA_WALK`), i due strati del cancello, e la riga del paragrafo 6.c in testa al
 blocco round. Poi domattina si cerca **una stringa sola** e si sa. 💪
+
+---
+
+# 1️⃣1️⃣ 🔑 APPENDICE — LE VERIFICHE `raw` AL COMMIT DI QUESTA CONSEGNA
+
+Commit: **`be6781c353282db7e08e49d90bdf4a30692ff5f6`** su `lavoro`.
+Il runner scarica da **`raw`**, non da `git`: verificare solo su `git` non
+dimostrerebbe che la catena funziona. Quindi tutto quello che segue passa da
+`raw.githubusercontent.com`.
+
+## (a) 🟢 IL FILE PROVA AL COMMIT NUOVO — e' identico alla copia locale
+```console
+$ curl "$B/be6781c/backtest_pipeline/prove/CANARINO_FRAZIONEIS_D30EUR.txt"
+  HTTP 200   byte 8496
+  sha256 da raw     : D6D323F97DFDED053CFDE646822D54D81F3BEBD1022D78DE7DFDDBB5C2580F75
+  sha256 albero loc : D6D323F97DFDED053CFDE646822D54D81F3BEBD1022D78DE7DFDDBB5C2580F75
+  IDENTICI byte per byte: SI       (cmp -s)
+```
+✅ **200, e i due sha combaciano.** Non "sembrano uguali": `cmp` byte per byte.
+
+## (b) 🟢 IL DRIVER AL COMMIT NUOVO — e sarebbe il `$SHA_WALK` del 12o giro
+```console
+$ curl "$B/be6781c/backtest_pipeline/walkforward_generico.ps1"
+  HTTP 200   byte 102955
+  sha256sum                              : 15DE7D5F5A342BB3D2DFEFCE8C970AA93C440B25DE136AFC050ED5B66828F1C6
+  Get-FileHash (IL COMANDO DELLA CORSIA) : 15DE7D5F5A342BB3D2DFEFCE8C970AA93C440B25DE136AFC050ED5B66828F1C6
+```
+🔑 **Provata col comando della corsia, non col mio.** `sha256sum | tr a-z A-Z`
+e' il *mio* modo di calcolare l'impronta; la corsia usa `Get-FileHash`. Se i due
+formati non coincidessero, il round morirebbe sull'impronta **con l'impronta
+giusta scritta dentro** — il peggiore dei fallimenti, perche' manda a cercare il
+guasto nella rete. ✅ **Maiuscolo, senza separatori, identico: il formato non e'
+un'assunzione.**
+
+## (c) 🟢 `RIGA_ROUND_VPS.ps1` AL COMMIT NUOVO — `$SHA_ROUND` resta valido
+```console
+$ curl "$B/be6781c/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1"
+  HTTP 200   byte 44054
+  sha256            : 348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B
+  $SHA_ROUND scritto: 348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B
+```
+✅ **Combacia.** Confermato sui byte veri: il dodicesimo giro **non** deve
+toccare `$SHA_ROUND`.
+
+## (d) 🧪 IL CONTRO-ESEMPIO, di nuovo, sul commit vecchio
+```console
+$ curl "$B/115254dc/backtest_pipeline/prove/CANARINO_FRAZIONEIS_D30EUR.txt"
+  HTTP 404
+```
+✅ **Lo stesso file, la stessa URL, due pin: 200 al nuovo, 404 al vecchio.** E'
+la prova pulita che il fatto bloccante del paragrafo 2 e' **il pin** e non la
+rete, il nome o il percorso. **Il controllo distingue i due casi.**
+
+## 📋 RIEPILOGO PER IL DODICESIMO GIRO — i tre valori, tutti da `raw`
+| riga di `RIGA_SOTTILE_ROUND.ps1` | valore da scrivere | stato |
+|---|---|---|
+| r.338 `$PIN` | `be6781c353282db7e08e49d90bdf4a30692ff5f6` | 🔴 **da cambiare** |
+| r.381 `$SHA_WALK` | `15DE7D5F5A342BB3D2DFEFCE8C970AA93C440B25DE136AFC050ED5B66828F1C6` | 🔴 **da cambiare** |
+| r.357 `$SHA_ROUND` | `348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B` | 🟢 **NON si tocca** |
+
+⚠️ **E se dopo `be6781c` qualcuno committa ancora su `lavoro`, questi due valori
+vanno RIFATTI sul commit nuovo** — il `$PIN` dev'essere un commit che contiene
+`CANARINO_FRAZIONEIS_D30EUR.txt`, e `$SHA_WALK` l'impronta del driver **a quel
+commit**. Non si copiano da qui a memoria: si ricalcolano da `raw`, come sopra.
