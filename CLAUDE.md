@@ -350,7 +350,15 @@ Su Nasdaq, DAX e Dow:
 
 ## Contesto
 - Conto DEMO BCM 50503392, tipo HEDGING.
-- Sviluppo sul branch `claude/creating-agents-SgGpD`.
+- Sviluppo sul branch **`lavoro`** (vedi Regola #1).
+  ✏️ **CORRETTO IL 12/09/2026.** Qui c'era scritto *"Sviluppo sul branch
+  `claude/creating-agents-SgGpD`"*, in contraddizione con la Regola #1 dieci
+  righe sopra. Non era un dettaglio: sul VPS **l'attivita' delle 07:20 gira
+  `aggiorna_news.ps1` da una copia sul Desktop di QUEL branch** (cartella
+  `GITHUB-claude-creating-agents-SgGpD (1)`, cioe' uno zip scaricato), quindi
+  le riparazioni fatte su `lavoro` **non arrivano a quello che gira**.
+  Trovato da `CODA_11` alla sua prima notte. Misura:
+  `report/CODA_11_LA_PRIMA_FOTO_2026-09-12.md`.
 - Ottimizzazioni/backtest sul PC di backtest; gli EA girano in forward sul VPS.
 - Regola EA: gli `_Ottimizzato` girano in parallelo agli originali (magic diversi), mai sostituirli.
 
