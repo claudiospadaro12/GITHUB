@@ -16561,3 +16561,172 @@ UNITÀ in cui la corsa li consumerà.* Tick per `-Modello 4`, barre M1 per
 `-Modello 1`. Una sonda che risponde a una domanda diversa non è una misura
 sbagliata: è **la misura di un'altra cosa**, ed è per questo che passa
 inosservata.
+
+---
+
+## 283. 🐌 LA LATENZA ADDEBITATA ANCHE ALLE USCITE IN **LIMIT**: lo stesso referto che rifiuta di far slittare l'INGRESSO perche' e' un `BuyLimit` poi fa slittare **tutto** il volume in uscita, TP compresi (12/09/2026)
+
+**Il caso reale.** `report/INDURIMENTO_PROP_DUE_SEDIE_2026-09-12.md` §3 argomenta —
+e argomenta **bene** — che la scala di slippage di casa **non si applica
+all'ingresso** di `770101`, perche' l'ingresso e' un `gTrade.BuyLimit(...)`
+(`ABTG_DAX_Apertura_EU.mq5` r.1504) e *"un ordine LIMIT non si riempie peggio
+per latenza: si riempie al prezzo o meglio, oppure non si riempie"*.
+🔴 **Poi applica il pedaggio di latenza al volume chiuso TOTALE** (3.245,30
+lotti), che comprende le uscite in **TP** — e il TP e' passato allo **stesso**
+`BuyLimit` come `tp`, piu' la chiusura parziale di `InpTP1_ClosePct`. **Sono
+ordini LIMIT anche quelli**, e l'argomento di §3 vale identico.
+
+### 🔴 PERCHE' MORDE: SPOSTA UN VERDETTO, NON UN DECIMALE
+Misurato sui per-trade veri, cella VIVA, gradino **5 idx**:
+
+| come si addebita la latenza | PF a 5 idx | contro il pavimento 1,10 |
+|---|---:|---|
+| su **tutto** il volume chiuso (quello che fa il referto) | **1,0353** | 🔴 **SOTTO** |
+| solo sulle uscite in **stop** (le sole a mercato al trigger) | **1,2736** | 🟢 **SOPRA, con larghezza** |
+
+Il volume vincente e' **2.363,90 lotti su 3.245,30 = il 73%**: addebitarlo o no
+cambia il pedaggio di **3,7 volte**. 👉 **Il pavimento 1,10 cade DENTRO la
+banda**, quindi la frase *"a 5 idx la cella VIVA e' MORTA"* **non e' determinata
+dalla misura**: e' determinata da una scelta di modello non dichiarata.
+⚠️ E non e' che il verso giusto sia l'altro: in campo molte vincenti escono su
+uno **stop spostato** (trailing), che **e' a mercato**. La verita' sta in mezzo
+— ed e' proprio per questo che va data come **banda**, non come punto.
+
+### ✅ CHE COSA SI FA
+1. **Si addebita la latenza SOLO a cio' che esce a mercato**: stop iniziale,
+   stop spostato, chiusura a orario. **Mai a un TP ne' a un parziale in limit.**
+2. Se il per-trade **non porta `close_reason`** (e quello di R47 non lo porta),
+   🔴 **non si sceglie un estremo: si consegnano TUTTI E DUE** — "PF fra 1,0353
+   e 1,2736" — e si dichiara che il numero alto e' il pavimento pessimista.
+3. La frase *"e' il punto di rottura"* si puo' scrivere **solo** se il pavimento
+   sta **fuori** dalla banda.
+
+🔑 **La regola in una riga**: *l'argomento che assolve l'ingresso assolve anche
+l'uscita, quando l'uscita e' lo stesso tipo d'ordine.* Chi usa "e' un LIMIT" per
+non pagare da una parte non puo' ignorarlo dall'altra.
+
+---
+
+## 284. 🧮 IL DENOMINATORE CAMBIATO FRA L'ATTESA E LA MISURA: l'ipotesi "torna" solo perche' i due numeri non sono lo stesso rapporto (12/09/2026)
+
+**Il caso reale.** Stesso referto, §8. Misura solida e senza calibrazioni: sullo
+stesso demo `50503392`, uno **stop pieno** di `770101` costa **104,60** unita' e
+un **segnale completo** di `771531` (due gambe) ne costa **40,30** →
+rapporto **2,596**. Il contrattuale e' **0,65% : 1,00% = 0,65**. Discrepanza
+**2,596 / 0,65 = 3,99 ≈ 4,0x**.
+🟢 **E il 4,0x e' SOLIDO e invariante al denominatore** — verificato: per
+**gamba** fa `104,60 : 20,15 = 5,192` contro `0,65 : 0,50 = 1,30`, e
+`5,192/1,30 = 3,99`. **Stesso numero.** Quella parte del referto regge.
+
+🔴 **Ma l'ipotesi che dovrebbe spiegarlo e' verificata con un denominatore
+DIVERSO.** Il referto scrive: *"un rischio del 2% darebbe esattamente un
+rapporto di ~4x contro lo 0,5% di gamba della gemella"* — cioe' `2,0/0,5 = 4`,
+che usa la gamba. Ma la **misura** e' stata fatta sul **segnale**. Con il
+denominatore **coerente**:
+
+| | rapporto atteso | discrepanza attesa | misurato |
+|---|---:|---:|---:|
+| ipotesi **LEGACY 2,0%** | 2,0/1,00 = **2,00** | 2,0/0,65 = **3,08x** | **2,60** / **4,0x** |
+| rischio che riproduce la misura | 2,60/1,00 = 2,60 | **4,0x** | ✅ |
+
+👉 L'ipotesi LEGACY **sbaglia del 30%** e **non e' dimostrata**; il rischio
+implicito e' **2,60%**, e **nessun preset in repo lo porta** (i quattro `.set`
+col magic 770101 portano 2,0 · 1 · 0,65 · 0,65). **Il "4" dell'attesa e il "4"
+della misura erano due quattro diversi.**
+
+### 🔴 PERCHE' MORDE
+E' la **classe 178 travestita**: l'attesa non discrimina, perche' e' stata
+costruita su un rapporto che non e' quello misurato. E qui costava una
+**richiesta sbagliata a Claudio** ("controlla se gira il preset LEGACY al 2%")
+invece di quella giusta ("2,60% non e' nessuno dei preset: **quante istanze**
+di questo EA hanno il magic 770101?").
+
+### ✅ CHE COSA SI FA
+1. **Numeratore e denominatore dell'attesa si scrivono accanto a quelli della
+   misura**, per esteso, prima di dire "torna".
+2. Se un rapporto e' **invariante al denominatore** (come il 4,0x qui), **si
+   dimostra**: si rifa' il conto con l'altro denominatore e si fa vedere che
+   esce lo stesso numero. Vale come contro-esempio.
+3. 🔴 **Un rapporto fra due importi di rischio misurati in DATE DIVERSE su un
+   conto vivo NON misura il rapporto fra le percentuali**: fra le due date il
+   **saldo si muove**, e il saldo **non si elide**. Va verificato e dichiarato
+   (qui: −134,26 unita' fra 14/08 e 04/09, trascurabile — ma **misurato**, non
+   assunto).
+
+🔑 **La regola in una riga**: *prima di dire che un'ipotesi "da' esattamente
+quel numero", si controlla che il numero atteso e il numero misurato siano lo
+stesso rapporto.*
+
+---
+
+## 285. ⚖️ LA «MEDIANA PESATA» CHE E' UNA **MEDIA** PESATA: e l'estremo pessimista che non e' il piu' pessimista (12/09/2026)
+
+**Il caso reale.** Stesso referto, §4.3/§9.4. Per ripesare la base di spread di
+`771531` sulle ore vere delle **257 posizioni** dichiara *"mediana pesata"*:
+**2,221** (ora di chiusura) · **2,374** (−2h) · **2,440** (−4h), e conclude
+*"uso 2,44, l'estremo pessimista"*.
+🔴 **Sono MEDIE pesate delle mediane orarie, non mediane.** Riprodotte:
+**2,224 / 2,371 / 2,438**. La **mediana pesata vera** vale **2,000** (ora di
+chiusura) e **2,600** (−2h e −4h).
+
+### 🔴 PERCHE' MORDE: IL VERSO E' QUELLO CATTIVO
+👉 **2,60 > 2,44**: la lettura *mediana* e' **piu' severa** dell'"estremo
+pessimista" dichiarato, del **6,6%**. Quindi la frase *"uso l'estremo
+pessimista"* e' **falsa**, e lo e' nel verso che **allarga** il margine.
+👉 E c'e' un'**incoerenza di metro dentro lo stesso referto**: la base di
+`D30EUR` (**1,70**) e' una **mediana vera** letta dall'istogramma; quella di
+`U30USD` (**2,44**) e' una media di mediane. **Due sedie confrontate con due
+statistiche diverse.** Morde perche' `771531` e' **gia' FRAGILE** a +50%
+(DD 8,18% contro una soglia di 8,0%): una base piu' alta la peggiora.
+
+### ✅ CHE COSA SI FA
+1. **Si scrive quale statistica e', e si tiene la stessa su tutti i simboli.**
+   Mediana pesata = mediana della distribuzione dei valori pesati, non media.
+2. Se le due letture divergono, **si consegnano entrambe** e si usa la
+   **peggiore** — che e' cio' che "pessimista" significa.
+3. 🟢 Resta valido il rilievo di fondo (`COLLAUDO_EMADOW_01` con base **1,9**
+   sottostima: il **60,3%** delle uscite cade nelle ore 14-21, non il 55,7%
+   dichiarato, e il restante 39,7% cade dove la mediana e' **2,6-2,8**). Cambia
+   la **banda**: la sottostima e' **+5% ÷ +37%**, non "+17% ÷ +28%".
+
+🔑 **La regola in una riga**: *"media" e "mediana" non sono sinonimi eleganti;
+e "pessimista" e' un fatto verificabile, non un aggettivo.*
+
+---
+
+## 286. 🎯 LA MEDIANA DI UNA POPOLAZIONE E LA CODA DI UN'ALTRA, NELLA STESSA RIGA: `n=2` accanto a `n=193` senza l'`n` (12/09/2026)
+
+**Il caso reale.** Stesso referto, §4.1 e §4.4. La riga che il referto stesso
+promuove a titolo: *"a +100% la mediana di `770101` sta a **16,5x**, sopra il
+pavimento duro — ma il **19,7%** delle 193 posizioni ci finisce SOTTO"*.
+🔴 **I due numeri vengono da due popolazioni diverse:**
+- **16,5x** = `56,1 / 3,40`, e **56,1 idx** e' lo stop mediano del
+  *sotto-campione della geometria viva* **misurato su n=2 gambe** in campo
+  (`CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.391, che l'`n=2` **lo dichiara**);
+- **19,7%** e' una quota sulla distribuzione delle **193 posizioni di
+  backtest**, il cui stop mediano e' **77,8 idx** → **22,9x**, non 16,5x.
+
+🟢 **Le otto quote sono giuste e le ho riprodotte tutte** (sotto 40x:
+38,9/59,6/74,1/91,2 · sotto 13,3x: 0,5/2,1/7,3/**19,7**), con p10 **37,9**
+e mediana **77,8**. Il difetto non e' nei conti: e' nell'**accostamento**.
+
+### 🔴 PERCHE' MORDE
+1. Il referto **non riporta l'`n=2`** che la fonte dichiarava: una mediana su
+   **due** gambe diventa indistinguibile da una su 193.
+2. Letto **coerentemente** sulle 193 posizioni, il gradino +100% da' mediana
+   **22,9x** — il referto ne dichiara **16,5x**, cioe' **39% piu' pessimista**.
+   Letto coerentemente sulle 2 gambe di campo, la quota sotto 13,3x sarebbe
+   **piu' alta** del 19,7%. 👉 **Le due letture sbagliano in versi OPPOSTI**,
+   quindi l'accostamento non e' "prudente": e' **indeterminato**.
+
+### ✅ CHE COSA SI FA
+1. **Centro e coda della stessa frase si calcolano sulla STESSA popolazione**,
+   e l'`n` si scrive accanto a ciascuno.
+2. Se si vogliono tenere le due popolazioni (una e' il campo, l'altra il banco),
+   **si mettono su DUE righe con due `n`**, mai in una.
+3. 🔴 **Un `n` dichiarato dalla fonte non si perde nella citazione.** Se la
+   fonte scrive `[MIS] n=2`, chi la cita scrive `n=2`.
+
+🔑 **La regola in una riga**: *una mediana e una coda messe nella stessa riga
+promettono di descrivere la stessa distribuzione. Se non e' vero, la riga e'
+un'inferenza, non una misura.*
