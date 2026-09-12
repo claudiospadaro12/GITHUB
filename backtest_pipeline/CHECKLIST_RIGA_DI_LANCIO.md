@@ -16048,3 +16048,109 @@ python3 backtest_pipeline/controlla_prova.py <file prova>           -> celle 7, 
 > `LC_ALL=C grep -n '[^\x00-\x7F]'`: GNU grep in BRE **non espande `\x`** senza
 > `-P`, e quella ricetta da' migliaia di falsi positivi su file puliti. Classe
 > gemella del 12/09: la ricetta rotta era in un prompt di casa.
+
+---
+
+## 276. 🔤⚖️ DUE CANCELLI, LO STESSO FILE PROVA, **VERDETTI OPPOSTI** — e quello che il nome invita a usare e' quello CIECO (12/09/2026)
+
+**Il caso reale.** I quattro file prova `R137a/b/c` e `R138a` (seconda sedia,
+`ABTG_DAX_Apertura_EU` D30EUR) sono stati scritti e vagliati con
+`controlla_prova.py`: **`ESITO: OK`, 0 problemi, exit 0**. Contenevano **6, 6, 8
+e 15 byte non-ASCII** (`·` = U+00B7, piu' qualche emoji), contati con `python3`.
+Li ha trovati **il coordinatore, a mano**, non il cancello.
+
+### 🔎 IL FATTO, misurato: i due cancelli NON danno la stessa risposta sullo stesso oggetto
+
+| strumento | cosa controlla | verdetto sul file sporco |
+|---|---|---|
+| `controlla_prova.py` | 5 controlli **semantici**: nome ignoto all'EA, parametro doppio, **pin di stringa vuoto**, esattamente un asse `Y` non degenere, `@DAQUANDO` presente | 🔴 **`ESITO: OK`, exit 0** — **non guarda nemmeno un byte** |
+| `controlla_riga.py --oggetto prova` | ASCII (r.853 `dati.decode("ascii")`), fuso orario (`InpSessionHour` 9/15), nomi di terminale | ✅ **`ESITO: FAIL`, exit 1, `[ASCII] BLOCCANTE`** |
+
+🔴 **Quindi la regola dell'ASCII vale FORMALMENTE anche per i file prova `.txt`,
+e non e' un'interpretazione: e' gia' codificata** in
+`backtest_pipeline/controlla_riga.py` r.845-858 (`controlla_file_prova()`), col
+messaggio che nomina il meccanismo — *"lo legge PowerShell 5.1 (ANSI) e finisce
+dentro un .ini del tester"*. **La rubrica di `CLAUDE.md` nomina i `.ps1` perche'
+li' il difetto rompe il PARSER; sui file prova rompe un DATO, che e' peggio
+perche' non fa rumore.**
+
+### 🧪 IL CONTRO-ESEMPIO, costruito prima di scrivere la classe — e il difetto e' REALE, non teorico
+Si prende un file prova **pulito** e si sporca **una riga DI DATI** (non un
+commento), su un input che l'EA ha davvero, cosi' che l'UNICO difetto sia il byte:
+```text
+InpCorrSymbol=SPXUSD  ->  InpCorrSymbol=SPXUSD<U+00B9>
+
+python3 backtest_pipeline/controlla_prova.py --ea ...ABTG_DAX_Apertura_EU.mq5 <file>
+   -> celle 7, problemi 0, ESITO: OK          EXIT=0     <-- CIECO
+python3 backtest_pipeline/controlla_riga.py  --oggetto prova <file>
+   -> X [ASCII] ... ESITO: FAIL               EXIT=1     <-- vede
+```
+**E la catena che il byte percorre, letta nel codice e non immaginata:**
+```
+walkforward_generico.ps1 r.490   $righeProva = Get-Content $ProvaFile   <-- NESSUN -Encoding
+                                 PS 5.1 senza -Encoding decodifica ANSI (salvo BOM):
+                                 un carattere UTF-8 a 2 byte diventa DUE caratteri
+                         r.497   if($t.StartsWith("#")){ continue }     <-- i commenti muoiono QUI
+                         r.503   if($t -match "="){ ...Add($t) }        <-- le righe di DATI passano
+                        r.1671   ... | Set-Content -Path $ini -Encoding ASCII
+                                 -> il carattere sconosciuto diventa '?' IN SILENZIO
+```
+👉 **Un byte non-ASCII in un valore di pin arriva all'EA STORPIATO e nessuno lo
+dice.** E' la classe gemella del **pin di stringa VUOTO** (controllo 3 di
+`controlla_prova.py`, nato da `ABTG_FiboH4_Multi`): la riga c'e', sembra
+applicata, e non e' quella che credevi.
+
+### 🔴 E LA SECONDA META', che va nell'altra direzione: sui file prova `controlla_riga.py` e' TROPPO SEVERO
+Sporcando invece una riga di **commento** (`# ... POSIZIONI ·`):
+```text
+controlla_riga.py --oggetto prova  ->  X [ASCII] BLOCCANTE, ESITO: FAIL
+```
+Ma `r.497` del driver **scarta le righe `#` prima di qualunque regex**: un byte
+su un commento **non puo' raggiungere** ne' una direttiva `@`, ne' un pin, ne'
+l'`.ini`. E' un **RILIEVO** (viola l'igiene di casa), **non un bloccante**.
+🔬 E la taratura giusta **esiste gia' dentro lo stesso programma, per un altro
+oggetto**: su un `.ps1`, `controlla_ascii()` r.84-116 distingue
+**codice/stringa = BLOCCA** da **commento = RILEVA**, con la motivazione scritta
+(*"un cancello che grida al lupo..."*). 🔴 **Quella distinzione non e' stata
+portata su `controlla_file_prova()`**, che fa `decode("ascii")` sull'**intero
+file**.
+
+> ## ⚖️ **Le due tarature sono sbagliate in DIREZIONI OPPOSTE sullo stesso oggetto: `controlla_prova.py` non blocca nemmeno una riga di DATI, `controlla_riga.py` blocca anche un COMMENTO.**
+
+### ✅ LA REGOLA, in tre righe
+1. 🔤 **I FILE PROVA SI SCRIVONO IN ASCII PURO**, come i `.ps1`. Il punto mediano
+   `·` e le emoji vanno nei referti `.md`, dove servono e dove funzionano. In un
+   file prova si scrive `-` oppure ` | `, e al posto di un'emoji **una parola**
+   (`ATTENZIONE`, `NON MISURATO`).
+2. 🚦 **UN FILE PROVA NON E' VAGLIATO FINCHE' NON HA PASSATO TUTTI E DUE I
+   CANCELLI**, e vanno lanciati **entrambi, esplicitamente**:
+   ```
+   python3 backtest_pipeline/controlla_prova.py <file>                    # semantica
+   python3 backtest_pipeline/controlla_riga.py --oggetto prova <file>      # byte e fuso
+   ```
+   🔴 **`controlla_prova.py` da solo NON basta, e il suo nome inganna**: e' il
+   cancello della *semantica*, non del *file*. (Lo dice pure `controlla_riga.py`
+   nel suo rilievo `[225]`, ma **al contrario** — rimanda a `controlla_prova.py`
+   come "il cancello semantico", senza dire che quello non guarda i byte.)
+3. 🔢 **I byte non-ASCII si contano con `python3`**, mai con
+   `grep '[^\x00-\x7F]'` (classe 275: GNU grep in BRE non espande `\x` senza `-P`):
+   ```
+   python3 -c "b=open('F','rb').read(); print(sum(1 for x in b if x>127))"
+   ```
+
+### ➡️ LE DUE TOPPE PROPOSTE (non applicate: toccano i cancelli, e i cancelli sono infrastruttura)
+| # | dove | cosa | costo |
+|---|---|---|---|
+| **T1** | `controlla_prova.py`, controllo **6** nuovo | contare i byte >127 **riga per riga**: su una riga `#` → **RILIEVO**; su una riga `@` o di pin → **BLOCCANTE**, col numero di riga | ~15 righe, zero passate |
+| **T2** | `controlla_riga.py`, `controlla_file_prova()` r.853 | portare li' la distinzione codice/commento che r.84-116 ha gia' per i `.ps1`, cosi' un commento sporco esce come **RILIEVO** e non come FAIL | ~10 righe, zero passate |
+
+🔴 **Perche' non le ho applicate io:** i due cancelli sono l'infrastruttura che
+vaglia **tutto** quello che esce dalla sessione, e stanotte in coda ci sono **19
+round piu' un canarino**. Una modifica a un cancello si fa **quando la coda e'
+ferma**, con la sua regressione sui file prova esistenti — non la sera prima.
+**Fino ad allora vale il punto 2 della regola: si lanciano tutti e due a mano.**
+
+📌 **Esito sui quattro file del caso**: ripuliti in ASCII puro il 12/09
+(0 byte >127, verificati con `python3`), e **ricontrollati con tutti e due i
+cancelli**: `controlla_prova.py` → *celle 18, passate 36, 0 problemi*;
+`controlla_riga.py --oggetto prova` → *`OK file prova ASCII puro`*, exit 0.

@@ -2345,3 +2345,157 @@ netto -126,27. SCATTATO.**
   questa sedia.**
 - **la classe 226 NON tocca il PF**: 1,52365 per deal contro **1,52370** per
   posizione. Decide `n`, la frequenza e i cancelli di campione; **non** PF ne' DD.
+
+---
+
+## 12/09/2026 — SCARTI E RIPESCAGGI SULLA CACCIA ALLA **SECONDA SEDIA** (dossier `report/LA_SECONDA_SEDIA_2026-09-12.md`)
+
+Metro: i cinque requisiti del CERTIFICATO DI MORTE + i cinque del piano di ottobre v2.
+**Nessun backtest eseguito**: tutto ricontato sui CSV e sui per-trade d'archivio.
+Unita' del campione: **POSIZIONI** (`position_id` distinti), non deal (classe 226).
+
+### 🪦 `ABTG_PTE` GBPUSD H1 (`771332`, candidata R78) — SCARTATA COME SECONDA SEDIA, col numero
+- **PF OOS 1,095** · **DD 9,87% @1%** · **n 477 DEAL** su OOS 2013.04→2026.06 (13 anni).
+- 📋 **Modello 1 (OHLC) = SCREENING**, non un verdetto. Fonte: `risultati_archivio/REFERTO_ROUND78_SEDIA_VERA_FINESTRA_LUNGA.md` §2.
+- 🎯 **A TICK REALI lo stesso motore fa n = 49** (IS 25 / OOS 49, finestra 2024.07.05→2026.06.30,
+  `REFERTO_ROUND58_PTE_TICK_REALI.md`).
+- 🚧 **CANCELLO: PF 1,095 < 1,10** su un campione che e' screening, **e** a tick il campione e' **49**,
+  cioe' il **33%** del pavimento dei 150.
+- 📌 E' anche il **contro-esempio che smonta il riframing "comanda la profondita' di storico"**:
+  **ventisei anni di barre producono 49 operazioni di verdetto**, perche' i tick BCM partono dal
+  **2024.07.05**. La sedia del duello **non e' toccata**: qui si scarta la sua candidatura al 2 seggio.
+
+### 🪦 `ABTG_EMA200` **EURUSD H1 a DUE LATI (`AllowLong=1` E `AllowShort=1`)** — resta BOCCIATA (R29), e il numero e' quello
+- **PF OOS 1,076-1,224** · **DD OOS 9,05-11,98% @1%** · **n 583-759 deal** · IS: PF 0,986-1,222, DD 8,36-10,15%.
+- Fonte ricontata da me: `risultati_prove/ABTG_EMA200/ABTG_EMA200_EURUSD_{IS,OOS}_r29a.csv`
+  (30 celle ciascuno, assi `InpOrder1Atr` x `InpOrder2Atr` x `InpTP_RR`).
+- 🚧 **CANCELLO (R29, 12/08/2026): 7/30 PASS pieni, sparsi** — meta' regione manca `PF 1,10` (1,08-1,13),
+  meta' sfonda `DD 10%` (10,0-12,0 @1%). Verdetto scritto: *"e' un no"*.
+
+### ⏸️ `ABTG_EMA200` **EURUSD H1 LATO LONG DA SOLO** — **NON ANCORA MISURATO**, e va in coda all'imbuto
+- 🎯 **Tick reali**, finestra UNICA 2024.01.01→2026.06.30, rischio 1%: **34 celle long, 34/34 in utile**,
+  **33/34** con PF>=1,10 e n>=150 **deal**, **PF mediana 1,2742** (best 1,37120), **DD 6,22-8,25%**,
+  n **530-754 deal**. Il lato **short** da solo: PF mediana 1,1070, DD **7,46-13,91%**. I due lati insieme:
+  DD **9,53-13,91%** — **cioe' esattamente il difetto che R29 aveva visto**.
+  Fonte: `risultati_prove/risultati_valid_ABTG_EMA200_H1_realtick/valid_ABTG_EMA200_H1_realtick_EURUSD.csv`
+  (143 righe; 94 celle vive, 94/94 in utile; le 49 celle a zero sono `AllowLong=0 E AllowShort=0`, cioe'
+  **motore spento**, non spazio sterile).
+- 🔴 **PERCHE' NON E' UN MORTO**: in **tutte e 30** le celle di R29 `InpAllowLong=1` **E**
+  `InpAllowShort=1` (verificato da me nei CSV). **Il lato separato non ha MAI visto uno split IS/OOS.**
+  E R29 scrive: *"si riapre SOLO con una tesi nuova, non con un ritocco delle soglie"* — **il LATO e' una
+  tesi nuova**, ed e' la regola dei due lati firmata il 25/08.
+- 🔴 **COSA MANCA, per nome**: (1) **n in POSIZIONI** — nessun per-trade EURUSD in archivio, il rapporto
+  2,0117 e' misurato su U30USD e applicarlo e' una **derivazione**; (2) **nessuno split IS/OOS**;
+  (3) `Optimization=2` = **GENETICO** (`valida_realtick.ps1` r.181) ⇒ **34 celle su 120 combinazioni long:
+  le celle NON sono un campione uniforme della griglia**, e va detto ogni volta che si cita il 34/34;
+  (4) i primi ~6 mesi della finestra (2024.01.01→2024.07.05) hanno tick **GENERATI dalle M1**, non veri.
+- 🚧 **E UN CANCELLO CHE MORDE SUBITO — TF ESCLUSO PER COSTO, col numero**: stop `1,0 x ATR(H1)`
+  ~ **18,0 pip** [DERIVATO da `ATR(14) M15 EURUSD = 9,00 pip` misurato, scalato `x sqrt(60/15)`],
+  pedaggio all-in EURUSD **0,864 pip** [MISURATO: spread 0,4 + commissione 0,4636, verificato con
+  `calcola_pedaggio_forex.py --autotest` tutto VERDE] ⇒ **20,8x**, cioe' **il 52% del pavimento di lavoro
+  40x**. 🔴 **H1 ESCLUSO PER COSTO** (sopra il duro 13,3x). 🟢 **A H4: 36,0 pip / 0,864 = 41,7x, PASSA.**
+- ➡️ **Costo per chiudere**: 30 celle x 2 finestre = **60 passate** = `T = 0,6 + 0,077 x 60` = **5,22 min**,
+  piu' **2 passate** per il per-trade. **Non e' un ostacolo.** Va in coda, **mai in campo in automatico**.
+
+### 🟠 `ABTG_EMA200` H4 su `AUDJPY` `GBPJPY` `GBPUSD` `200AUD` `SPXUSD` (`771511`-`771515`) — FUORI PER **ARITMETICA DEL CAMPIONE**, non per edge
+- 🎯 Tick reali, finestra 2024.01.01→2026.06.30, rischio 1%, **lato per lato** (ricontato da me su
+  `risultati_archivio/EMA200/realtick_H4/`, 8 file):
+
+| simbolo | lato | celle in utile | con PF>=1,10 **e** n>=150 deal | PF mediana | DD |
+|---|---|---:|---:|---:|---|
+| `AUDJPY` | **LONG** | **24/24** | **21/24** | **1,8628** | 2,15-5,23% |
+| `GBPJPY` | **LONG** | **32/32** | **24/32** | **1,7564** | 3,18-4,53% |
+| `GBPUSD` | **SHORT** | **32/32** | **20/32** | **1,6760** | 3,58-5,86% |
+| `GBPUSD` | LONG | 8/31 | 0/31 | **0,9644** | 3,70-7,60% |
+| `200AUD` | LONG | 25/25 | 0/25 | 1,9515 | 1,39-2,56% |
+| `SPXUSD` | LONG | 31/31 | 0/31 | 1,5914 | 1,96-3,79% |
+
+- 🚧 **CANCELLO: n.** 138-200 **deal** su 30 mesi; col rapporto 2,0117 ⇒ **69-99 POSIZIONI**, cioe'
+  **0,11-0,16 pos/giorno feriale**. 🔴 **150 posizioni PER FINESTRA a H4 non esistono nel banco a tick**,
+  ne' oggi ne' il 30/09: e' aritmetica, non frequenza. E in **forward**: **0 posizioni** nello statement
+  30/03→11/09.
+- 🟢 **E CONFERMANO LA REGOLA DEI DUE LATI col numero**: su `GBPUSD` H4 lo **short** fa 32/32 in utile
+  (PF mediana 1,676) e il **long** 8/31 (PF mediana 0,964). **Stesso simbolo, stesso TF, segno opposto.**
+- ⚪ **E il costo su quei simboli NON e' misurato**: alla sonda del 17/08 `AUDJPY`, `GBPJPY`, `AUDUSD`,
+  `CADJPY`, `USDNOK` leggono **`SpreadPt = 0`**, che vuol dire **nessun tick in quel momento**, non spread
+  nullo. Commissione derivata: **AUDJPY 0,4534 pip** · **GBPJPY 0,8645 pip** (4,0 unita' base convertite
+  con `AUD/EUR = 0,6137` e `GBP/EUR = 1,1703`, ricavati dalle commissioni misurate). Per 40x su AUDJPY
+  serve stop **>= 38,1 pip** se lo spread e' 0,5. **R5 su questi simboli e' NON ANCORA MISURATO.**
+- ➡️ **Verdetto: in coda all'imbuto per DOPO ottobre.** Non morti: **fuori per frequenza, col numero.**
+
+### 🔴 `ABTG_Dow_Apertura_US` U30USD M5 LONG (`770202`) — SECONDO in graduatoria, ma **MERITO SOSPESO PER ARITMETICA**, e il piano ha un numero sbagliato
+- 🎯 Tick reali, dep. 100.000, rischio 1%: **OOS PF 1,27013 · DD 4,3941% · IS PF 1,22247 · DD 5,6692%**
+  (`risultati_prove/aperture_r47/ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_r47c.csv`).
+- 🔴 **n in POSIZIONI = 96 OOS e 56 IS, CONTATE** — **non 130**, come scrive
+  `report/PIANO_CHALLENGE_OTTOBRE_v2.md` §2 riga 3. La riga del piano dice *"senza `InpTP1Pct`, quindi
+  sono posizioni"*: **l'input di questa famiglia si chiama `InpTP1_ClosePct`** e nel preset vivo
+  (`mql5/Presets/ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set`) vale **50,0**.
+  Misura: `abtg_trades_ABTG_Dow_Apertura_US_U30USD_772505.csv` → **130 deal = 96 `position_id`**
+  (rapporto **1,3542**) · `..._772507.csv` → **96 deal = 96** (rapporto **1,0000**).
+- 🚧 **CANCELLO: 96 posizioni = 64% del pavimento, e NON COLMABILE.** Frequenza **0,362 pos/g**, sotto lo
+  **0,57** che serve per avere 150 in OOS; e il banco a tick e' **tutta** la storia BCM dell'indice
+  (2024.09.26, stato `COMPLETO`). **Nessun round lo chiude entro ottobre.**
+- 🟢 Quello che invece **regge**: R1 pieno e verificato (R47c vs preset vivo: **80 input su 80**, solo
+  `InpRiskPercent` e `InpMagic` differiscono) e il `.set` del 100k **esiste** (commit `d4fd83a`).
+- 📌 **E sul Dow il parziale SERVE**, al contrario del DAX: `InpTP1_ClosePct` 50 → 0 fa PF OOS
+  1,27013 → **1,25809** e DD 4,3941% → **5,4280%**, cioe' **peggio su tutti e due gli assi** (R47d).
+  Sul DAX lo stesso cambio migliora tutti e due. **Due indici, stessa manopola, verso opposto: misurato.**
+
+### 🚫 `Dow_Apertura` U30USD — IL **40/40 OOS** NON E' UTILIZZABILE PER `770202` (trappola disinnescata)
+- `risultati_archivio/Dow_Apertura/dow_walkforward_{IS,OOS}.csv`: **Modello 4**, dep. 10.000,
+  **OOS 40/40 celle in utile, PF 1,267-1,560 (mediana 1,376), DD max 8,70%, n 186-198**; IS 39/40.
+  E' il numero piu' seducente dell'intero archivio.
+- 🔴 **Misura un'ALTRA sedia.** Diff manopola per manopola contro il preset vivo di `770202`: **DODICI
+  input differiscono**, fra cui `InpEntryMode` **0 (BREAKOUT)** contro **2 (RETEST)**, `InpRangeMinutes`
+  **15** contro **35**, `InpBufferPoints` **200** contro **1000**, `InpAllowShort` **1** contro **false**,
+  `InpTP1_ClosePct` **0** contro **50**, `InpTP1_R` **0,33-0,84** (l'asse) contro **1,0 (fuori dall'asse)**.
+- 📌 **Classe 224 alla lettera.** Chi avesse portato *"il Dow ha un 40/40 fuori campione"* davanti a una
+  firma avrebbe consegnato il numero di un'altra configurazione. **Il 40/40 resta valido: per il motore
+  BREAKOUT a due lati con range di 15 minuti, che non e' una sedia del parco.**
+
+### ✅ IL RIPESCAGGIO — `ABTG_DAX_Apertura_EU` su **F40EUR / E50EUR / E35EUR**: non esclusi, **MAI PROVATI**
+- `risultati_archivio/DAX_Apertura/` contiene **5 CSV e sono tutti `D30EUR`**. Nessun file di questa EA
+  porta `F40EUR` nel nome ne' nelle colonne. **Casella LIBERA, non provata.**
+- 🎯 **Perche' conta**: e' la via piu' economica per chiudere **R3** sulla prima classificata
+  (`0,728 + 0,728 = 1,44` contro un pavimento di **1,00 per FAMIGLIA**, firma 07/09). Parigi apre
+  **09:00 IT = 08:00 ORA SERVER**, quindi `InpSessionHour=8` resta corretto senza toccarlo.
+- 📄 File prova scritto oggi e passato da **tutti e due** i cancelli:
+  `backtest_pipeline/prove/R138a_gemello_F40EUR_770101.txt` — **4 passate = 0,91 min**.
+- 🔴 **BUCO DICHIARATO, NON COLMATO**: esiste in casa uno **"studio aperture FASE A" su 8 INDICI e ~3.500
+  trade a tick reali**, citato da **quattro** referti (`APERTURE_TRAILING_DAX_NASDAQ.md` r.40 ·
+  `REFERTO_HISTDATA_FATTIBILITA.md` r.1132 · `ANALISI_CANCELLO_ZERO_EXT_2026-08-25.md` r.79 ·
+  `Dow_Apertura/DOW_MOTORE.md`). **La sua tabella per simbolo non l'ho trovata nel repo.** Se `F40EUR` ha
+  gia' un numero negativo li' dentro, R138a e' un **RITEST di un caduto** e serve una tesi nuova — e la
+  tesi nuova ci sarebbe (la cella viva non e' la rottura cieca: e' un **RETEST** con offset 200 pt, che la
+  FASE A non misurava). **Va cercata PRIMA di lanciare**, ed e' scritto dentro il file prova.
+- ⚠️ **E un secondo condizionale, scritto prima della corsa**: `D30EUR` e `F40EUR` **aprono allo stesso
+  minuto**. Se la famiglia arrivasse a 1,44 pos/g sommando due sedie che fanno **la stessa operazione nello
+  stesso momento**, la frequenza sarebbe doppia e la **diversificazione ZERO**. Il verdetto di R138a e'
+  **condizionato** alla misura della sovrapposizione dei giorni operativi (strumenti gia' in casa:
+  `sovrapposizione_sedie.py`, `chi_va_con_chi.py`).
+
+### 🟢 E IL CONTRARIO DI UNO SCARTO: `ABTG_DAX_Apertura_EU` D30EUR M5 LONG (`770101`) e' la **PRIMA CLASSIFICATA** al secondo seggio
+- **n in POSIZIONI: OOS 193 · IS 132, CONTATE** (`abtg_trades_..._772501.csv` → 270 deal = 193 `position_id`,
+  rapporto **1,3990**; `..._772503.csv` → 193 deal = 193, rapporto **1,0000**: **stesse entrate, stesse 193
+  posizioni**, due configurazioni a **una** manopola di distanza). 🟢 **OOS sopra il pavimento dei 150.**
+- 🎯 **DD sul banco della challenge: 7,2328% a rischio 1,0% su deposito 100.000 EUR, TICK REALI** — che il
+  piano v2 dichiara `[NON MISURATO]`. **Il deposito e' dedotto dai P/L, non dai commenti**: 18.029,58 / 193
+  posizioni a rischio 1% = **0,0934 R/posizione** se il banco e' 100.000 (plausibile: `E alta` di casa =
+  0,075R) e **0,934 R** se e' 10.000 (assurdo). Controprova incrociata: R119, a 0,65%, da'
+  1.103,31 / 193 = **0,0879 R** ⇒ **lo stesso edge su due banchi diversi**, scarto 6,3%.
+- 🟡 **R5: 33,0x sulla geometria viva** (56,1 idx / spread mediano 1,70 dell'ora modale 08, misurato su
+  **30.974.789 tick**), 42,3x sullo stop pieno (71,9 idx, n=7 gambe vere), **26,6x al p95**. Pavimento di
+  lavoro 40x **non passato**; pavimento **DURO 13,3x passato x2,5** ⇒ **raccomandazione, non spegnimento**.
+- 🟠 **R3: 0,728 pos/giorno feriale** (non 0,97: quello conta i DEAL), contro 1,00 per famiglia.
+- 🎁 **E in archivio c'e' gia' una cella che la batte con UNA SOLA MANOPOLA, mai portata in campo**:
+  `InpTP1_ClosePct` 50 → 0 ⇒ **PF OOS 1,39709 → 1,49140 · DD OOS 7,2328% → 6,2719% · profitto +31% · a
+  parita' di 193 posizioni**; e in IS **PF 1,12634 → 1,18323 · DD 5,4362% → 4,9576% · profitto +47%**.
+  **Meglio su tutti e due gli assi in tutte e due le finestre.** Trovata tre volte da tre letture
+  indipendenti (R120 del 09/09, il setaccio del 12/09, e oggi). **Non manca una misura: manca una FIRMA.**
+  ⚠️ Il vantaggio di PF in OOS (**+0,094**) e' **appena sotto** la soglia di rumore di 0,10 usata in casa
+  per una cella isolata: il verdetto non poggia sul PF da solo, poggia su PF **e** DD **e** profitto che
+  migliorano insieme su due finestre a campione costante.
+- 📄 Round proposti, **tutti e due i cancelli verdi**: `prove/R137c_parziale_770101_D30EUR.txt` (4 passate,
+  **0,91 min**, il cancello del gruppo) · `R137a_floorstop_allarga_770101_D30EUR.txt` (14, **1,68 min**) ·
+  `R137b_floorstop_salta_770101_D30EUR.txt` (14, **1,68 min**) · `R138a_gemello_F40EUR_770101.txt` (4,
+  **0,91 min**). **Totale 36 passate = 5,17 min** col metro `T = 0,6 + 0,077 x passate` per round.

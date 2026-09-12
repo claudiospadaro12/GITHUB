@@ -422,9 +422,33 @@ persa che nessuno ritrovera' piu'"*.
 
 ---
 
-# 7. ✅ IL CANCELLO SUI FILE PROVA — esito, riprodotto qui
+# 7. ✅ IL CANCELLO SUI FILE PROVA — esito, riprodotto qui, **e i due cancelli servono tutti e due**
+
+> ## 🆕 CLASSE **276** APERTA OGGI, e nasce da un difetto **mio** trovato dal coordinatore
+> I quattro file, alla prima stesura, contenevano **6, 6, 8 e 15 byte non-ASCII** (`·` e qualche emoji).
+> `controlla_prova.py` li ha dati **`ESITO: OK`, exit 0**: 🔴 **non guarda nemmeno un byte.**
+> `controlla_riga.py --oggetto prova` invece **blocca** (r.845-858).
+> 🔬 **Ho misurato il difetto invece di crederlo**: sporcando **una riga DI DATI** (`InpCorrSymbol=SPXUSD¹`,
+> su un input che l'EA ha davvero) `controlla_prova.py` torna **exit 0 / 0 problemi** e
+> `controlla_riga.py` **exit 1 / BLOCCANTE**. E la catena nel codice e' questa:
+> `Get-Content` **senza `-Encoding`** (r.490) ⇒ PS 5.1 decodifica **ANSI** ⇒ un pin sporco finisce
+> nell'`.ini`, scritto `-Encoding ASCII` (r.1671) ⇒ **diventa `?` in silenzio.** E' la classe gemella del
+> **pin di stringa vuoto**.
+> 🟢 **E la risposta alla domanda "la regola ASCII vale anche per i `.txt`?" e' SI', e non e'
+> un'interpretazione: e' gia' codificata** in `controlla_riga.py`, che la chiama **bloccante**.
+> ⚖️ **Ma le due tarature sono sbagliate in direzioni opposte**: `controlla_prova.py` non blocca nemmeno
+> una riga di dati, `controlla_riga.py` blocca anche un **commento** — e il driver **scarta le righe `#`
+> prima di qualunque regex** (r.497), quindi su un commento il byte e' **provatamente inerte**.
+> 👉 Classe scritta con le due toppe proposte e **non applicate** (i cancelli sono infrastruttura, e
+> stanotte in coda ci sono 19 round): `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` **§276**.
+> **Fino ad allora la regola operativa e': si lanciano TUTTI E DUE i cancelli, a mano, su ogni file prova.**
+
+**Esito finale, dopo la ripulitura in ASCII puro — tutti e due i cancelli, verdi:**
 
 ```
+byte >127 (contati con python3, non con grep): 0 · 0 · 0 · 0
+controlla_riga.py --oggetto prova : EXIT 0 su 4 file su 4  ("OK file prova ASCII puro")
+
 === CONTROLLO FILE PROVA ===
   R137a_floorstop_allarga_770101_D30EUR.txt  ABTG_DAX_Apertura_EU.mq5  pin=81 celle= 7  OK
   R137b_floorstop_salta_770101_D30EUR.txt    ABTG_DAX_Apertura_EU.mq5  pin=81 celle= 7  OK
