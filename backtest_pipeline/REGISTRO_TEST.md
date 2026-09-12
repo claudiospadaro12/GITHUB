@@ -2047,3 +2047,78 @@ spread nella finestra 14:30-14:41 · slippage sull'oro (0 righe XAUUSD in tutti 
 il `SlippageLogger` sta sul REALE 10105439, che ha solo D30EUR) · slippage della reazione
 umana · requote/rifiuti · **profondità a tick di XAUUSD** (blocca ogni verdetto di MERITO
 sull'oro, regola F6) · ATR per TF sull'oro (oggi [INFERITO]).
+
+---
+
+## 🪦 12/09/2026 — SEQUENZA DI INVERSIONE MONOTONA su indici: **MISURATA FUORI, NON ENTRA** (e il certificato ha i numeri)
+
+Nata dalla **regola della seconda caccia** dopo l'**A6** dei blocchi B e C di
+`ABTG_SupRev` (`risultati_archivio/R123_BLOCCO_C_2026-09-12.md`). Dossier completo:
+`report/CACCIA_SUPREV_ALTERNATIVE_2026-09-12.md`. **Zero passate di tester spese,
+zero EA toccati.**
+
+- 🧬 **MECCANISMO (vergine in casa: `grep` su "streak/consecutiv" = zero occorrenze
+  come motore).** Candela madre direzionale + N candele monotone contrarie (tutte
+  dallo stesso lato, chiusure strettamente progressive, nessuna che viola l'estremo
+  della madre) → ingresso al close della N-esima, **SL strutturale all'estremo della
+  madre**, TP a multiplo di R. Fonte letta nel sorgente: `Momentum Sequence Strategy
+  [Herman]`, helmans13, **MPL 2.0**, TradingView `mmrInMTp` /
+  pine-facade `PUB;11d65a5fe0724173b72c230c576947fc`. **Zero bandiere del §4**
+  (stop vero, `pyramiding=0`, nessun repaint); unico difetto = **lotto fisso**, che
+  sta nella gestione e non nel motore.
+- 🔬 **MISURA (sonde nuove: `caccia_strategie/biblioteca/sonde_esterne/sonda_sequenza.py`
+  e `sonda_sequenza_anni.py`)** su **1.942.126 barre M1** di `GRXEUR` + `SPXUSD`
+  2015-2018 (histdata, GPL-3.0), sessione cash, ambiguita' intrabarra **a sfavore**,
+  **controllo appaiato** (stessa barra, lato opposto), orologio **ricollaudato**
+  (GRXEUR picca 03:00 file = 08:00 server).
+- 🐻 **IL FATTO CHE TENGO: l'asimmetria dei lati.** Su DAX, RR 2,0: **SHORT positivo in
+  6 combinazioni su 6** (N × TF), **LONG negativo in 6 su 6**. Le due piu' pulite:
+  **H1 N=3 SHORT E netta +0,057R** (n=251, 1R 85,8 pt = **52× lo spread**) contro
+  **H1 N=3 LONG −0,211R** (n=265). Sul medesimo segnale il lato opposto fa **27,8%**
+  di TP-prima-di-SL dove lo short fa 35,9%.
+- 🔴 **IL CANCELLO CHE L'HA FERMATA, scritto PRIMA dei numeri** (intestazione di
+  `sonda_sequenza_anni.py`): *"il segno della E netta deve reggere in ≥3 anni su 4"*.
+  Esito: **2 su 4** su tutte le celle con campione — **H1 N=3 SHORT: +0,297 (2015) /
+  −0,115 (2016) / −0,241 (2017) / +0,201 (2018)**. Positiva **solo** negli anni con
+  discese e volatilita', negativa in **entrambi** gli anni di toro tranquillo.
+  L'unica riga a 3/4 (H1 N=4 SHORT) ha **21-26 operazioni per anno**.
+- 🧲 **LA TENAGLIA, col conto:** frontiera `stop ≥ 40 × spread` sul DAX (spread
+  misurato 1,65) = **66 punti indice** → la passano **solo** H1 N≥3 (85,8 pt) e M30
+  N=4 (83,3 pt). Ma sui **459 feriali** della cassaforte tick BCM quelle celle fanno
+  **115-235 operazioni totali** → **46/69** e **94/141** per finestra, **sotto il
+  pavimento dei 150**. Le celle che passano il campione (M30 N=3 L+S, ~475 op; N=2
+  L+S, ~1.020) hanno **1R a 24-36× lo spread**: fuori per costo. **Dove passa il
+  costo non passa il campione, e viceversa** — identico a M31.
+- 🔗 **TERZA CONFERMA INDIPENDENTE che la famiglia e' REGIME-CONDIZIONALE**, e le altre
+  due erano gia' agli atti: `ABTG_InvEsaurimento` **E3** (PF 1,16 totale ma **−5.604
+  nel toro 2017** / **+2.946 nell'orso Q4-2018**, `REFERTO_INVES_2026-08-30.md`) e il
+  paper **arXiv 2605.04004** su MNQ (*"MNQ OU mean reversion permanently rejected
+  (Hurst 0.59, trending)"*, *"momentum-dominant at 5-minute resolution"*, 14 famiglie
+  di segnale, 947 giorni, **nessuna passata**).
+  ➡️ **Conseguenza operativa: sugli indici BCM (21 mesi, UN solo toro) un round di
+  questa famiglia compra un rosso prevedibile.** Non e' un verdetto sul meccanismo:
+  e' un verdetto sul rapporto valore/costo **oggi**, a tre settimane dalla challenge.
+- 📌 **STATO: ⏸️ CONGELATO, NON MORTO.** Spec con criteri **S1-S9 congelati** e attesa
+  dichiarata in `backtest_pipeline/prove/SEQUENZA_INDICI_SPEC.txt` (**NON LANCIABILE**:
+  l'EA non esiste). Riapre **solo** con dati d'orso sugli indici o con una variabile di
+  regime **costitutiva** (il filtro appiccicato dopo e' **0 successi su 5** in casa).
+- 🚫 **E I QUATTRO SCARTATI DELLA STESSA CACCIA, letti nel sorgente** (nessuno ha
+  prodotto un numero perche' nessuno ha superato il setaccio):
+  `EA KCI Embeded Sniper` (Code Base **74582**, 234 righe) → tesi non scrivibile (somma
+  di differenze di z-score) + `CopyTickVolume` su CFD + lotto fisso; 🧨 **e un baco
+  vero: r.206-215, con `InpUseTrendFilter=true` l'EA non puo' aprire NIENTE** (le due
+  guardie opposte si applicano entrambe) ·
+  `The Bar Counter Trend Reversal Strategy` (tradedots, `0KAtQQDD`) → **nessuno stop**
+  (zero `strategy.exit`) + motore = esaurimento grezzo + bordo di canale = **E1 (PF
+  0,95) + M14 (6 finestre su 6 rosse)** ·
+  `AxMan Exhaustion / Sniper V4` (Axj_Stev, `72gQqAzW`) → **nessuno stop** + RSI/volume
+  spike (**R109, DD 44-68%**) + liquidity grab (**M24, 0/30**) ·
+  `Bearish Wick Reversal` (Botnet101, `Kz4wRzup`) → **nessuno stop** +
+  `calc_on_every_tick=true` + un lato solo + soglia **1% del prezzo** (≈240 punti DAX
+  in una barra: su H1 in sessione non capita).
+- 🕳️ **Fonti NULLE dichiarate quel giorno:** SSRN **403** (e restano fuori i due paper
+  che servirebbero: Grant-Wolf-Yu `abstract_id=689282`, Baltussen-Da-Soebhag `=5039009`
+  — **visti solo come titolo in un elenco di ricerca, non aperti**) · Quantpedia **308**
+  · GitHub **403** UI e API · Forex Factory **403** · arXiv **API in timeout** (la
+  pagina elenco invece passa). 🟢 **Nuovo canale confermato vivo:** `mql5.com/en/code/download/<ID>`
+  restituisce lo **zip col `.mq5` vero** senza autenticazione.

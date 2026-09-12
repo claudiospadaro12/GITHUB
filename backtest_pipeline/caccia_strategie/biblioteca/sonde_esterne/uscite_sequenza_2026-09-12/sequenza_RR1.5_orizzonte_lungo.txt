@@ -1,0 +1,44 @@
+SONDA SEQUENZA -- candela madre + N candele monotone contrarie
+RR = 1.5  |  ambiguita' intrabarra A SFAVORE  |  zero costi dentro la sonda
+Il costo si aggiunge DOPO, in R, con gli spread misurati di casa.
+
+=== GRXEUR  (845681 barre M1, anni 2015, 2016, 2017, 2018) ===
+  M30 N=2 L: n= 1145 (1.138/gg) 1R_med=  40.50 pti costo=0.0407R | TP= 460 SL= 672 aperti=  13 WR= 40.6% (appaiato  39.3%) | E=+0.0159R netta=-0.0248R  (appaiata -0.0167R)
+  M30 N=2 S: n= 1097 (1.090/gg) 1R_med=  43.50 pti costo=0.0379R | TP= 455 SL= 635 aperti=   7 WR= 41.7% (appaiato  40.1%) | E=+0.0436R netta=+0.0056R  (appaiata +0.0014R)
+  M30 N=3 L: n=  543 (0.540/gg) 1R_med=  55.00 pti costo=0.0300R | TP= 208 SL= 318 aperti=  17 WR= 39.5% (appaiato  38.9%) | E=-0.0114R netta=-0.0414R  (appaiata -0.0267R)
+  M30 N=3 S: n=  498 (0.495/gg) 1R_med=  59.25 pti costo=0.0278R | TP= 204 SL= 283 aperti=  11 WR= 41.9% (appaiato  37.1%) | E=+0.0472R netta=+0.0194R  (appaiata -0.0722R)
+  M30 N=4 L: n=  233 (0.232/gg) 1R_med=  74.00 pti costo=0.0223R | TP=  87 SL= 132 aperti=  14 WR= 39.7% (appaiato  41.1%) | E=-0.0068R netta=-0.0291R  (appaiata +0.0274R)
+  M30 N=4 S: n=  209 (0.208/gg) 1R_med=  83.25 pti costo=0.0198R | TP=  87 SL= 112 aperti=  10 WR= 43.7% (appaiato  39.4%) | E=+0.0930R netta=+0.0731R  (appaiata -0.0155R)
+  M30 N=5 L: n=  108 (0.107/gg) 1R_med=  87.25 pti costo=0.0189R | TP=  43 SL=  50 aperti=  15 WR= 46.2% (appaiato  34.7%) | E=+0.1559R netta=+0.1370R  (appaiata -0.1327R)
+  M30 N=5 S: n=   91 (0.090/gg) 1R_med=  94.00 pti costo=0.0176R | TP=  39 SL=  48 aperti=   4 WR= 44.8% (appaiato  40.7%) | E=+0.1207R netta=+0.1031R  (appaiata +0.0185R)
+  -- M30: 1006 giorni di sessione, maxbars=96
+  M60 N=2 L: n=  596 (0.592/gg) 1R_med=  57.50 pti costo=0.0287R | TP= 213 SL= 352 aperti=  31 WR= 37.7% (appaiato  39.6%) | E=-0.0575R netta=-0.0862R  (appaiata -0.0098R)
+  M60 N=2 S: n=  564 (0.561/gg) 1R_med=  60.12 pti costo=0.0274R | TP= 233 SL= 321 aperti=  10 WR= 42.1% (appaiato  39.6%) | E=+0.0514R netta=+0.0240R  (appaiata -0.0092R)
+  M60 N=3 L: n=  265 (0.263/gg) 1R_med=  79.25 pti costo=0.0208R | TP=  80 SL= 156 aperti=  29 WR= 33.9% (appaiato  42.3%) | E=-0.1525R netta=-0.1734R  (appaiata +0.0577R)
+  M60 N=3 S: n=  251 (0.250/gg) 1R_med=  85.75 pti costo=0.0192R | TP=  97 SL= 136 aperti=  18 WR= 41.6% (appaiato  40.1%) | E=+0.0408R netta=+0.0215R  (appaiata +0.0022R)
+  M60 N=4 L: n=  125 (0.124/gg) 1R_med= 111.00 pti costo=0.0149R | TP=  36 SL=  68 aperti=  21 WR= 34.6% (appaiato  41.4%) | E=-0.1346R netta=-0.1495R  (appaiata +0.0354R)
+  M60 N=4 S: n=   97 (0.096/gg) 1R_med= 103.50 pti costo=0.0159R | TP=  40 SL=  46 aperti=  11 WR= 46.5% (appaiato  32.1%) | E=+0.1628R netta=+0.1468R  (appaiata -0.1975R)
+  M60 N=5 L: n=   54 (0.054/gg) 1R_med= 127.00 pti costo=0.0130R | TP=  11 SL=  29 aperti=  14 WR= 27.5% (appaiato  48.7%) | E=-0.3125R netta=-0.3255R  (appaiata +0.2179R)
+  M60 N=5 S: n=   45 (0.045/gg) 1R_med= 129.00 pti costo=0.0128R | TP=  19 SL=  14 aperti=  12 WR= 57.6% (appaiato  14.3%) | E=+0.4394R netta=+0.4266R  (appaiata -0.6429R)
+  -- M60: 1006 giorni di sessione, maxbars=48
+
+=== SPXUSD  (1096445 barre M1, anni 2015, 2016, 2017, 2018) ===
+  M30 N=2 L: n=  689 (0.672/gg) 1R_med=   6.50 pti costo=0.3000R | TP= 269 SL= 397 aperti=  23 WR= 40.4% (appaiato  38.5%) | E=+0.0098R netta=-0.2902R  (appaiata -0.0373R)
+  M30 N=2 S: n=  607 (0.592/gg) 1R_med=   7.25 pti costo=0.2690R | TP= 238 SL= 360 aperti=   9 WR= 39.8% (appaiato  39.3%) | E=-0.0050R netta=-0.2740R  (appaiata -0.0177R)
+  M30 N=3 L: n=  329 (0.321/gg) 1R_med=   9.00 pti costo=0.2167R | TP= 130 SL= 176 aperti=  23 WR= 42.5% (appaiato  31.8%) | E=+0.0621R netta=-0.1546R  (appaiata -0.2049R)
+  M30 N=3 S: n=  250 (0.244/gg) 1R_med=  10.25 pti costo=0.1902R | TP=  96 SL= 141 aperti=  13 WR= 40.5% (appaiato  37.0%) | E=+0.0127R netta=-0.1776R  (appaiata -0.0745R)
+  M30 N=4 L: n=  153 (0.149/gg) 1R_med=  11.50 pti costo=0.1696R | TP=  47 SL=  83 aperti=  23 WR= 36.2% (appaiato  35.1%) | E=-0.0962R netta=-0.2657R  (appaiata -0.1231R)
+  M30 N=4 S: n=  106 (0.103/gg) 1R_med=  12.25 pti costo=0.1592R | TP=  47 SL=  49 aperti=  10 WR= 49.0% (appaiato  35.1%) | E=+0.2240R netta=+0.0648R  (appaiata -0.1237R)
+  M30 N=5 L: n=   84 (0.082/gg) 1R_med=  14.00 pti costo=0.1393R | TP=  22 SL=  39 aperti=  23 WR= 36.1% (appaiato  29.7%) | E=-0.0984R netta=-0.2376R  (appaiata -0.2578R)
+  M30 N=5 S: n=   44 (0.043/gg) 1R_med=  14.88 pti costo=0.1311R | TP=  22 SL=  16 aperti=   6 WR= 57.9% (appaiato  19.0%) | E=+0.4474R netta=+0.3163R  (appaiata -0.5238R)
+  -- M30: 1026 giorni di sessione, maxbars=96
+  M60 N=2 L: n=  355 (0.346/gg) 1R_med=   9.50 pti costo=0.2053R | TP= 117 SL= 196 aperti=  42 WR= 37.4% (appaiato  37.2%) | E=-0.0655R netta=-0.2708R  (appaiata -0.0696R)
+  M60 N=2 S: n=  269 (0.262/gg) 1R_med=   9.50 pti costo=0.2053R | TP= 107 SL= 144 aperti=  18 WR= 42.6% (appaiato  36.3%) | E=+0.0657R netta=-0.1395R  (appaiata -0.0936R)
+  M60 N=3 L: n=  165 (0.161/gg) 1R_med=  12.75 pti costo=0.1529R | TP=  42 SL=  85 aperti=  38 WR= 33.1% (appaiato  40.5%) | E=-0.1732R netta=-0.3262R  (appaiata +0.0124R)
+  M60 N=3 S: n=  123 (0.120/gg) 1R_med=  15.00 pti costo=0.1300R | TP=  41 SL=  61 aperti=  21 WR= 40.2% (appaiato  33.0%) | E=+0.0049R netta=-0.1251R  (appaiata -0.1748R)
+  M60 N=4 L: n=   86 (0.084/gg) 1R_med=  15.12 pti costo=0.1289R | TP=  18 SL=  40 aperti=  28 WR= 31.0% (appaiato  37.7%) | E=-0.2241R netta=-0.3531R  (appaiata -0.0566R)
+  M60 N=4 S: n=   60 (0.059/gg) 1R_med=  19.75 pti costo=0.0987R | TP=  14 SL=  23 aperti=  23 WR= 37.8% (appaiato  31.7%) | E=-0.0541R netta=-0.1528R  (appaiata -0.2073R)
+  M60 N=5 L: n=   47 (0.046/gg) 1R_med=  17.00 pti costo=0.1147R | TP=   5 SL=  22 aperti=  20 WR= 18.5% (appaiato  57.1%) | E=-0.5370R netta=-0.6517R  (appaiata +0.4286R)
+  M60 N=5 S: n=   34 (0.033/gg) 1R_med=  25.82 pti costo=0.0755R | TP=   7 SL=  11 aperti=  16 WR= 38.9% (appaiato  27.8%) | E=-0.0278R netta=-0.1033R  (appaiata -0.3056R)
+  -- M60: 1025 giorni di sessione, maxbars=48
+
