@@ -1,0 +1,237 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
+#  R142a -- ASSE USCITA #1: LA PARZIALE. NASUSD, ingresso PRE-APERTURA.
+#           Nasce da un FAIL del cancello, non da un'idea.
+# ---------------------------------------------------------------------
+#  DOSSIER: report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md (v2)
+#
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+#  Il 12/09 avevo scritto un verdetto che archiviava questo meccanismo
+#  come SCARTATO. Il secondo strato del cancello lo ha BOCCIATO: alla
+#  lettera del CERTIFICATO DI MORTE (CLAUDE.md) mancano la voce 3
+#  (gestione dell'uscita messa ad asse) e la voce 5 (TF cambiato), e la
+#  voce 4 (gemelli) e' parziale. Un morto senza certificato non e' un
+#  morto.
+#
+#  IL BUCO, MISURATO: gli assi d'uscita esistenti in archivio
+#  (NASDAQ_F_gestione, NASDAQ_I_trailing e tutti gli altri
+#  NASDAQ_{A..M}) girano TUTTI con InpRangeMode=0, cioe' sul range di
+#  APERTURA. NESSUN asse d'uscita e' MAI girato su InpRangeMode=1 /
+#  InpPrevWindowMin=5, che e' QUESTO ingresso. Zero, verificato file
+#  per file.
+#
+#  E IL PONTE CHE DOVEVA TAPPARE IL BUCO E' ROTTO (classe 297): la
+#  difesa diceva "l'intero asse uscita muove il PF di 0,052", ma quello
+#  e' solo NASDAQ_F. Nella STESSA cartella, STESSO round, STESSO
+#  RangeMode=0, il file NASDAQ_I_trailing_OOS.csv fa:
+#      M1 0.85808 | M2 0.93460 | M3 0.74308 | M4 0.75179 | M5 0.78510
+#      span = 0.19152
+#  0,96265 + 0,19152 = 1,15417 > 1,10. Con la stessa logica di
+#  trasferimento, la difesa cade. Quindi si MISURA.
+#
+# ---------------------------------------------------------------------
+#  ###  L'ASSE, E PERCHE' QUESTO  ###
+# ---------------------------------------------------------------------
+#  InpTP1_ClosePct = 0 || 50 || 100. Tre celle, e sono tre USCITE
+#  QUALITATIVAMENTE DIVERSE, non tre tarature dello stesso numero:
+#     0   = NESSUNA parziale. La posizione vive o muore intera.
+#           InpTP1_R e InpBreakevenAtTP1 diventano INERTI (dichiarato).
+#     50  = LA CELLA IN ARCHIVIO. Meta' a 1R, poi pari, poi trailing.
+#     100 = uscita SECCA a 1R. Nessun trailing, nessuna coda.
+#
+#  >>> E LA CELLA 50 E' IL CONTRO-ESEMPIO INCORPORATO. <<<
+#  Non e' una cella in piu': e' ESATTAMENTE la configurazione gia'
+#  misurata in archivio. DEVE riprodurre, a tick reali:
+#         IS  PF 1.01621   n 116   DD 11.5160   Profit  +98.96
+#         OOS PF 0.96265   n 175   DD 19.4006   Profit  -326.54
+#  Se NON riproduce, questo round non misura l'uscita: misura una
+#  catena rotta (TF del grafico, finestra, taglio IS/OOS o build
+#  dell'EA diversi), e il verdetto e' CATENA ROTTA, non un numero.
+#  Il TF del grafico e' il pezzo che questo controllo protegge: il
+#  file prova originale (ABTG_Nasdaq_Live5m.txt, 07/08) NON aveva
+#  @PERIODO, quindi il TF della corsa archiviata e' [NON SCRITTO].
+#  Qui si dichiara M5 e si fa VERIFICARE alla cella 50.
+#
+#  >>> E LA CELLA 0 CHIUDE LA CLASSE 226 SU QUESTA CELLA. <<<
+#  Con la parziale spenta ogni posizione produce UN SOLO deal di
+#  uscita, quindi la colonna Trades e' il numero di POSIZIONI, non di
+#  deal. Oggi i 175 OOS sono deal e valgono fra 88 e 175 posizioni:
+#  potrebbe stare SOTTO il pavimento dei 150. La cella 0 lo dice, e
+#  costa zero passate in piu'.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n atteso: la cella 50 riproduce 116 / 175 deal. Le celle 0 e 100
+#     fanno MENO deal (una sola uscita per posizione) ma LE STESSE
+#     posizioni: attesa 88-116 IS e 130-175 OOS, e il numero esatto
+#     e' proprio l'informazione che cerco.
+#  PF atteso: [NON MISURATO]. Banda dichiarata dall'unico asse d'uscita
+#     confrontabile (NASDAQ_I, span 0,192 su RangeMode=0): il PF di
+#     queste tre celle puo' stare fra ~0,80 e ~1,15. Non invento un
+#     punto centrale.
+#  DD atteso: >= 11,52% IS e >= 19,40% OOS a rischio 2% per la cella 50
+#     (e' la cella archiviata). Le altre due: [NON MISURATO].
+#
+#  LE TRE USCITE:
+#   (a) UNA CELLA CON PF >= 1,10 IN ENTRAMBE LE FINESTRE -> la voce 3
+#       del certificato e' chiusa E il meccanismo non era morto. Si
+#       apre il round vero (due lati separati, gemelli, DD a 0,65).
+#       ATTENZIONE: NON si promuove niente da qui. Il DD misurato e'
+#       a rischio 2% e NON e' leggibile contro i cancelli prop scritti
+#       per l'1% / 0,65%: serve una rigirata a 0,65 prima di qualunque
+#       giudizio di RISCHIO.
+#   (b) TUTTE E TRE SOTTO 1,10 in OOS -> la voce 3 del certificato e'
+#       chiusa col NUMERO, e il certificato di morte diventa
+#       compilabile su 3 voci su 5 (restano 4 e 5). Buon esito: si
+#       archivia CON il numero, che e' l'unico modo consentito.
+#   (c) LA CELLA 50 NON RIPRODUCE 0,96265 -> CATENA ROTTA. Non si
+#       legge nessuna delle altre due celle, non si cambia nessun
+#       parametro: si cerca la differenza (TF, finestra, build).
+#
+#  SOGLIE CONGELATE PRIMA:
+#    la voce 3 del certificato e' CHIUSA se e solo se la cella 50
+#      riproduce E le tre celle danno tre PF distinti (l'asse morde).
+#    scarta se  tutte e tre le celle hanno PF OOS < 1,10 con n >= 150
+#    non giudica il merito se n < 150 (valvola R59, Emendamento B)
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA, scritto prima  ###
+# ---------------------------------------------------------------------
+#  1. NON misura la LARGHEZZA della finestra pre-apertura. Quell'asse
+#     (InpPrevWindowMin) e' [NON MISURATO] e RESTA fuori: il cancello
+#     ha scritto che merita la FIRMA DI CLAUDIO PRIMA, non dopo,
+#     perche' la distinzione fra "definizione del meccanismo" e
+#     "griglia piu' fitta su un motore senza edge" (regola 19/08) e'
+#     sottile. NON si arma senza di lui.
+#  2. NON misura i GEMELLI (voce 4). U30USD e SPXUSD non sono qui, e
+#     D30EUR ha un problema di SCALA da risolvere prima: il cancello
+#     17-40 punti indice e' 0,059%-0,138% del prezzo su NASUSD e NON
+#     si copia nudo su un indice con un altro livello di prezzo.
+#     Serve la conversione MISURATA, non copiata.
+#  3. NON cambia il TF (voce 5) e non puo': InpTimeframe != M5 da'
+#     zero trade in silenzio. Un TF che non si puo' cambiare non conta
+#     come cambiato, e resta scritto nel certificato.
+#  4. UN SOLO REGIME. 21 mesi di tick BCM sugli indici = un regime
+#     solo. Nessuna cella di questo round e' promuovibile senza la
+#     prova di regime (Emendamento della Finestra, regola C).
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening: e' un verdetto.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS. Il default del driver e'
+#     0,40 e la corsa archiviata torna: 116/(116+175) = 0,3986.
+#     Pinnarlo a mano sarebbe una seconda verita' sullo stesso numero.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#  RISCHIO 2%: NON e' una scelta, e' la RIPRODUZIONE della cella
+#     archiviata. Tenerlo costante e' l'unico modo di leggere l'asse
+#     a una variabile alla volta. E il DD che ne esce NON si confronta
+#     con i cancelli prop dell'1%: sta scritto due volte, apposta.
+#  TETTO BARRE: M5 su NASUSD, 21 mesi = ~124.000 barre [DERIVATO: 276
+#     barre/giorno di cassa x ~450 feriali]. >>> SFONDA il tetto delle
+#     ~100.000 del tester. MA la corsa archiviata ha prodotto 175 deal
+#     OOS su questa stessa finestra, quindi il tester ce l'ha fatta:
+#     il tetto morde sulle barre DISPONIBILI a ritroso, non sulla
+#     finestra. Lo scrivo perche' e' l'assunzione piu' debole del file,
+#     ed e' proprio la cella 50 a verificarla.
+#  ENUM: nessun asse su ENUM in questo file (classe 287 non si applica).
+#  MAGIC 770203: e' il magic di casa dell'EA, gia' in archivio con
+#     questi stessi CSV. Nessuna collisione nuova.
+#  ETICHETTA r142a: zero collisioni con le 45 righe in coda.
+#  PER-TRADE: le tre celle condividono il magic -> si sovrascrivono.
+#     I numeri si leggono nell'OPTFRAME, non nel per-trade.
+#  NESSUN PIN DI STRINGA: InpNewsFile e InpNewsCurrencies restano al
+#     default compilato.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#
+#  COSTO: 3 celle x 2 finestre = 6 passate -> T = 0,6 + 0,077 x 6 =
+#         1,06 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#     SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#     coordinatore. DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN: spento come nella corsa archiviata (edge RAW).
+InpUsaGuardian=false||false||0||false||N
+
+# --- SESSIONE: ORA SERVER BCM. 14:30 server = 15:30 italiana.
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+# --- INGRESSO: LA PRE-APERTURA. E' l'identita' del round, non si tocca.
+#     RangeMode=1 + PrevWindowMin=5 = la finestra dei 5 minuti PRIMA
+#     dell'apertura. (Nota letta nel sorgente r.600-625: sono in realta'
+#     SEI barre M1, perche' iBarShift su tEnd include la barra che
+#     contiene le 14:30. E' un difetto noto e DICHIARATO nel dossier,
+#     non si ripara qui: riparandolo cambierebbe l'ingresso e questo
+#     round non misurerebbe piu' l'uscita.)
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+InpMinRangePts=1700||1700||0||1700||N
+InpMaxRangePts=4000||4000||0||4000||N
+
+# --- DUE LATI INSIEME (regola di casa 25/08). Si separano dopo.
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- FILTRI TUTTI SPENTI, come nella corsa archiviata.
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+# --- STOP: bordo opposto del range (SL_RANGE = 0). Non si tocca.
+InpSLMode=0||0||0||0||N
+
+# --- TRAILING: pinnato alla cella archiviata. E' l'asse di R142b,
+#     non di questo file: una manopola alla volta.
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+# --- RISCHIO: 2, cioe' la RIPRODUZIONE della cella archiviata.
+#     Taglie e rischio sono di CLAUDIO: qui si RIPRODUCE, non si decide.
+InpRiskPercent=2||2||0||2||N
+
+# --- GENERALI.
+InpMagic=770203||770203||0||770203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- IL PRIMO OBIETTIVO: 1R, il valore della cella archiviata.
+#     Inerte quando InpTP1_ClosePct = 0 (dichiarato sopra).
+InpTP1_R=1.0||1.0||0||1.0||N
+
+# --- PARI DOPO LA PARZIALE: acceso, come la cella archiviata.
+#     Inerte quando InpTP1_ClosePct = 0 (dichiarato sopra).
+InpBreakevenAtTP1=true||true||0||true||N
+
+# --- L'UNICO ASSE: QUANTA POSIZIONE ESCE AL PRIMO OBIETTIVO.
+#       0 = nessuna parziale (e Trades = POSIZIONI: chiude la classe 226)
+#      50 = LA CELLA IN ARCHIVIO = il contro-esempio incorporato
+#           (DEVE dare OOS PF 0.96265, n 175, DD 19.4006)
+#     100 = uscita secca a 1R
+InpTP1_ClosePct=50||0||50||100||Y

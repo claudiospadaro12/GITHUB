@@ -1,0 +1,150 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
+#  R142c -- ASSE USCITA #3: IL TRAILING ESISTE O NO. NASUSD, PRE-APERTURA.
+# ---------------------------------------------------------------------
+#  DOSSIER: report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md (v2)
+#  GEMELLI: R142a (parziale) e R142b (TF del trailing). Stesso
+#           ingresso, stessa finestra, stesso rischio, una manopola
+#           alla volta.
+#
+#  ###  PERCHE' QUESTA MANOPOLA, E PERCHE' DA SOLA  ###
+#  R142b chiede SU QUALE CANDELA si appoggia il trailing. Questo file
+#  chiede una cosa piu' grossa e mai chiesta: SE IL TRAILING SERVE.
+#  Con InpUseTrailing=false, dopo la parziale del 50% a 1R e lo stop
+#  in pari, la meta' che resta NON viene piu' inseguita: vive fino al
+#  flat di seduta delle 20:45 server (InpCloseAtEnd=true) oppure fino
+#  allo stop in pari. E' un'USCITA DIVERSA, non una taratura.
+#  Su un breakout direzionale con un flat d'orologio, il trailing su
+#  candela M1 e' la cosa che piu' facilmente taglia la coda buona: e'
+#  un'ipotesi, ed e' [NON MISURATA] su questo ingresso. Due celle.
+#
+#  >>> E LA CELLA true E' IL CONTRO-ESEMPIO INCORPORATO. <<<
+#  true e' ESATTAMENTE la configurazione gia' in archivio. DEVE
+#  riprodurre, a tick reali:
+#         IS  PF 1.01621   n 116   DD 11.5160   Profit  +98.96
+#         OOS PF 0.96265   n 175   DD 19.4006   Profit  -326.54
+#  Se non riproduce, la cella false NON si legge: e' CATENA ROTTA.
+#
+#  >>> E UN SECONDO CONTROLLO GRATIS: l'n DEVE essere identico nelle
+#      due celle (116 / 175). Il trailing cambia dove si ESCE, mai se
+#      si ENTRA. Se l'n si muove, il trailing sta toccando l'ingresso.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  PF atteso: [NON MISURATO]. NON dichiaro un verso: non ho una misura
+#     di questo motore senza trailing, su nessun ingresso. Dichiarare
+#     "senza trailing va meglio" sarebbe raccontare l'ipotesi come
+#     misura, che e' il difetto del 10/09.
+#  DD atteso: la cella false ha lo stop in pari come unica protezione
+#     dopo 1R, quindi il DD puo' PEGGIORARE. Il DD e' un cancello di
+#     RISCHIO e si legge a qualunque n -- ma qui e' a rischio 2% e NON
+#     si confronta coi cancelli prop dell'1% / 0,65%.
+#
+#  LE TRE USCITE:
+#   (a) la cella false fa PF >= 1,10 in ENTRAMBE le finestre -> la
+#       voce 3 del certificato e' chiusa E il meccanismo non era morto.
+#       NON si promuove da qui: serve la rigirata a 0,65 per il DD, e
+#       due celle non sono un altopiano.
+#   (b) tutte e due sotto 1,10 in OOS -> insieme a R142a e R142b la
+#       voce 3 e' chiusa COL NUMERO su tre manopole d'uscita diverse,
+#       e il certificato diventa compilabile su 3 voci su 5.
+#   (c) la cella true non riproduce, o l'n si muove fra le due celle
+#       -> CATENA ROTTA. Non si legge nessun PF.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    scarta se  tutte e due le celle hanno PF OOS < 1,10 con n >= 150
+#    non giudica il merito se n < 150 (valvola R59, Emendamento B)
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA  ###
+# ---------------------------------------------------------------------
+#  Come R142a e R142b: NON la larghezza della finestra (serve la firma
+#  di Claudio PRIMA), NON i gemelli, NON il TF del grafico (non e'
+#  cambiabile), e resta UN SOLO REGIME.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. @DAQUANDO 2024.09.26 = pavimento MISURATO.
+#  @FINOA 2026.06.30 = la fine della corsa archiviata.
+#  Nessun @FRAZIONEIS: il default 0,40 riproduce la corsa archiviata
+#     (116/291 = 0,3986).
+#  ORE IN ORA SERVER BCM: InpSessionHour=14, InpSessionMin=30.
+#  RISCHIO 2%: riproduzione, non scelta. Il DD non e' un numero prop.
+#  ENUM: nessun asse su ENUM in questo file.
+#  ETICHETTA r142c: zero collisioni con le 45 righe in coda.
+#  MAGIC 770203: gia' in archivio, nessuna collisione nuova.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale (classe 129).
+#
+#  COSTO: 2 celle x 2 finestre = 4 passate -> T = 0,6 + 0,077 x 4 =
+#         0,91 minuti.
+#
+#  CANCELLO: primo strato lanciato da me; il secondo lo lancia il
+#     coordinatore. DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+InpMinRangePts=1700||1700||0||1700||N
+InpMaxRangePts=4000||4000||0||4000||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+
+# --- TRAILING: modo e TF pinnati alla cella archiviata. Inerti
+#     quando InpUseTrailing=false (dichiarato).
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770203||770203||0||770203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL TRAILING ESISTE O NO.
+#     false = la meta' residua vive fino al flat delle 20:45 server,
+#             protetta solo dallo stop in pari. MAI MISURATA.
+#     true  = LA CELLA IN ARCHIVIO = il contro-esempio incorporato
+#             (DEVE dare OOS PF 0.96265, n 175, DD 19.4006).
+#     >>> SCRITTO IN NUMERICO (1/0) E NON true/false: un asse su un
+#         input bool si pinna coi NUMERI -- e' quello che MT5 scrive
+#         nell'.ini, ed e' il precedente gia' in casa
+#         (InpUseMidGate=1||0||1||1||Y). Con true/false il cancello
+#         deterministico lo rifiuta: 'asse non numerico', celle = 0.
+#         Trovato dal cancello il 13/09, non indovinato.
+InpUseTrailing=1||0||1||1||Y
