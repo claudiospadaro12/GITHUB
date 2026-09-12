@@ -1,56 +1,72 @@
 # =====================================================================
 #  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
 #  R142c -- ASSE USCITA #3: IL TRAILING ESISTE O NO. NASUSD, PRE-APERTURA.
+#           VERSIONE 2: la 1 e' stata BOCCIATA dal cancello (classe 300).
 # ---------------------------------------------------------------------
 #  DOSSIER: report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md (v2)
-#  GEMELLI: R142a (parziale) e R142b (TF del trailing). Stesso
-#           ingresso, stessa finestra, stesso rischio, una manopola
-#           alla volta.
+#  GEMELLI: R142a (parziale) e R142b (TF del trailing).
 #
-#  ###  PERCHE' QUESTA MANOPOLA, E PERCHE' DA SOLA  ###
+#  ###  PERCHE' QUESTA MANOPOLA  ###
 #  R142b chiede SU QUALE CANDELA si appoggia il trailing. Questo file
 #  chiede una cosa piu' grossa e mai chiesta: SE IL TRAILING SERVE.
-#  Con InpUseTrailing=false, dopo la parziale del 50% a 1R e lo stop
-#  in pari, la meta' che resta NON viene piu' inseguita: vive fino al
-#  flat di seduta delle 20:45 server (InpCloseAtEnd=true) oppure fino
-#  allo stop in pari. E' un'USCITA DIVERSA, non una taratura.
+#  Con InpUseTrailing=0, dopo la parziale del 50% a 1R e lo stop in pari,
+#  la meta' che resta NON viene piu' inseguita: vive fino al flat di
+#  seduta delle 20:45 server (InpCloseAtEnd=true) oppure fino allo stop
+#  in pari. E' un'USCITA DIVERSA, non una taratura.
 #  Su un breakout direzionale con un flat d'orologio, il trailing su
-#  candela M1 e' la cosa che piu' facilmente taglia la coda buona: e'
-#  un'ipotesi, ed e' [NON MISURATA] su questo ingresso. Due celle.
+#  candela M1 e' la cosa che piu' facilmente taglia la coda buona. E' una
+#  IPOTESI, ed e' [NON MISURATA] su questo ingresso. Due celle.
 #
-#  >>> E LA CELLA true E' IL CONTRO-ESEMPIO INCORPORATO. <<<
-#  true e' ESATTAMENTE la configurazione gia' in archivio. DEVE
-#  riprodurre, a tick reali:
-#         IS  PF 1.01621   n 116   DD 11.5160   Profit  +98.96
-#         OOS PF 0.96265   n 175   DD 19.4006   Profit  -326.54
-#  Se non riproduce, la cella false NON si legge: e' CATENA ROTTA.
+# ---------------------------------------------------------------------
+#  ###  IL DIFETTO DELLA VERSIONE 1 -- classe 300  ###
+# ---------------------------------------------------------------------
+#  La v1 scriveva: "l'n DEVE essere identico nelle due celle. Se si muove,
+#  il trailing sta toccando l'ingresso."
+#  >>> SBAGLIATO, ed e' lo stesso difetto di R142b: Trades sono DEAL di
+#      chiusura, e con la parziale al 50% una posizione fa 2 deal se
+#      arriva a 1R e 1 se no. Il trailing arma SUBITO (InpTrailStartR=0,
+#      r.1037-1039) e puo' chiudere PRIMA di 1R -- il commento dell'EA a
+#      r.1029-1033 cita tre uscite a +0,043R, +0,077R, +0,027R.
+#      >>> SPEGNENDO il trailing, PIU' posizioni arrivano a 1R -> PIU'
+#          parziali -> l'n SALE. E' il comportamento CORRETTO, e la
+#          regola della v1 avrebbe buttato via i PF proprio quando il
+#          round funzionava.
 #
-#  >>> E UN SECONDO CONTROLLO GRATIS: l'n DEVE essere identico nelle
-#      due celle (116 / 175). Il trailing cambia dove si ESCE, mai se
-#      si ENTRA. Se l'n si muove, il trailing sta toccando l'ingresso.
+#  >>> LA REGOLA CORRETTA:
+#      - la verifica d'ingresso sta SULLA CELLA DI RIPRODUZIONE (la cella
+#        1 deve dare n ESATTAMENTE 116 IS / 175 OOS);
+#      - fra le due celle l'n e' ATTESO VARIABILE, E IL VERSO E'
+#        DICHIARATO ORA, PRIMA DEI NUMERI: la cella 0 (trailing spento)
+#        fa PIU' deal della cella 1. Se ne facesse MENO, c'e' qualcosa
+#        da leggere.
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
-#  PF atteso: [NON MISURATO]. NON dichiaro un verso: non ho una misura
-#     di questo motore senza trailing, su nessun ingresso. Dichiarare
-#     "senza trailing va meglio" sarebbe raccontare l'ipotesi come
-#     misura, che e' il difetto del 10/09.
-#  DD atteso: la cella false ha lo stop in pari come unica protezione
-#     dopo 1R, quindi il DD puo' PEGGIORARE. Il DD e' un cancello di
-#     RISCHIO e si legge a qualunque n -- ma qui e' a rischio 2% e NON
-#     si confronta coi cancelli prop dell'1% / 0,65%.
+#  n atteso: cella 1 = 116 / 175 esatti (cancello DURO). Cella 0 =
+#     MAGGIORE. Quanto: [NON MISURATO].
+#  PF atteso: [NON MISURATO]. NON dichiaro un verso: non ho una misura di
+#     questo motore senza trailing, su nessun ingresso. Dichiarare "senza
+#     trailing va meglio" sarebbe raccontare l'ipotesi come misura, che
+#     e' il difetto del 10/09.
+#  DD atteso: la cella 0 ha lo stop in pari come unica protezione dopo
+#     1R, quindi il DD puo' PEGGIORARE. E' un cancello di RISCHIO e si
+#     legge a qualunque n -- ma qui e' a rischio 2% e non si confronta
+#     coi cancelli prop dell'1% / 0,65%.
 #
 #  LE TRE USCITE:
-#   (a) la cella false fa PF >= 1,10 in ENTRAMBE le finestre -> la
-#       voce 3 del certificato e' chiusa E il meccanismo non era morto.
-#       NON si promuove da qui: serve la rigirata a 0,65 per il DD, e
-#       due celle non sono un altopiano.
-#   (b) tutte e due sotto 1,10 in OOS -> insieme a R142a e R142b la
-#       voce 3 e' chiusa COL NUMERO su tre manopole d'uscita diverse,
-#       e il certificato diventa compilabile su 3 voci su 5.
-#   (c) la cella true non riproduce, o l'n si muove fra le due celle
-#       -> CATENA ROTTA. Non si legge nessun PF.
+#   (a) la cella 0 fa PF >= 1,10 in ENTRAMBE le finestre -> la voce 3 del
+#       certificato e' chiusa E il meccanismo non era morto sull'uscita.
+#       >>> MA NON SI PROMUOVE NIENTE: l'ingresso resta SOTTO IL
+#           PAVIMENTO DI COSTO (13,3x - 26,1x contro 40x), nessun asse
+#           d'uscita lo sposta, e due celle non sono un altopiano.
+#   (b) tutte e due sotto 1,10 in OOS -> insieme a R142a e R142b la voce
+#       3 e' chiusa COL NUMERO su tre manopole d'uscita diverse, e il
+#       certificato diventa compilabile su 3 voci su 5. BUON ESITO.
+#   (c) la cella 1 non riproduce l'n -> CATENA ROTTA. Non si legge
+#       nessun PF.
+#       >>> NON e' piu' catena rotta se l'n varia fra le due celle:
+#           quello e' il comportamento atteso (classe 300).
 #
 #  SOGLIE CONGELATE PRIMA:
 #    scarta se  tutte e due le celle hanno PF OOS < 1,10 con n >= 150
@@ -59,29 +75,140 @@
 # ---------------------------------------------------------------------
 #  ###  COSA NON MISURA  ###
 # ---------------------------------------------------------------------
-#  Come R142a e R142b: NON la larghezza della finestra (serve la firma
-#  di Claudio PRIMA), NON i gemelli, NON il TF del grafico (non e'
+#  Come R142a e R142b: NON la larghezza della finestra (serve la firma di
+#  Claudio PRIMA), NON i gemelli, NON il TF del grafico (non e'
 #  cambiabile), e resta UN SOLO REGIME.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO INCORPORATO -- E IL SUO LIMITE, NOMINATO  ###
+# ---------------------------------------------------------------------
+#  Una cella di questo round E' la configurazione gia' misurata in
+#  archivio, e DEVE riprodurre, a tick reali:
+#      IS   PF 1.01621   n 116   DD 11.5160   Profit  +98.96
+#      OOS  PF 0.96265   n 175   DD 19.4006   Profit  -326.54
+#
+#  >>> MA IL BINARIO DI OGGI NON E' QUELLO DI ALLORA, E SI SA PER NOME.
+#  I CSV archiviati sono al commit 400a462 (08/08 06:54). Dopo, l'EA e'
+#  stato toccato DUE volte:
+#     3af47ed  08/08 11:48  "fix sizing: OrderCalcProfit al posto del
+#                            tick value nudo" -- riscrive CalcLotByRisk
+#     d83c196  19/08 07:52  aggiunge InpUsaGuardian (default true)
+#
+#  Il Guardian e' ASSOLTO, con due prove: (a) il CSV archiviato NON ha
+#  la colonna InpUsaGuardian, quindi il binario era precedente; (b) il
+#  pin InpUsaGuardian=false e' un NO-OP puro -- ABTG_PausaGuardian.mqh
+#  r.1600: if(!attiva) return(true).
+#
+#  Il fix di sizing NO. Il lotto si calcola su ACCOUNT_BALANCE (r.863-864),
+#  cioe' a CAPITALE COMPOSTO: un cambio di scala del lotto NON e' neutro
+#  sul PF, e via NormalizeVolume (r.1151: if(v < mn) v = 0) puo' cambiare
+#  anche l'n, perche' al lotto minimo la parziale non parte.
+#  Stima che conforta ma resta una STIMA: a PF 0,96265 le perdite valgono
+#  ~8.742 EUR e i profitti ~8.415; con ~60 perdenti fa ~145 EUR a perdita,
+#  coerente con un 2% VERO di 10.000 e NON con un clamp al lotto minimo.
+#  Quindi il fix e' PROBABILMENTE un no-op su NASUSD. "Probabilmente" non
+#  e' "misurato", e percio' la riproduzione si legge a DUE livelli:
+#
+#     CANCELLO DURO   -> l'n: 116 IS e 175 OOS, esatti. Se l'n non torna,
+#                        CATENA ROTTA e non si legge nessun PF.
+#     CANCELLO MORBIDO-> PF / DD / Profit. Se l'n torna ma i tre numeri
+#                        si discostano, il PRIMO SOSPETTO E' DICHIARATO
+#                        ORA: il fix di sizing 3af47ed. NON si va a
+#                        cercare il TF del grafico, che e' gia' risolto
+#                        qui sotto.
+#
+# ---------------------------------------------------------------------
+#  ###  IL TF DEL GRAFICO: E' M5, ED E' PROVATO SENZA SPENDERE MACCHINA
+# ---------------------------------------------------------------------
+#  Il file prova originale (07/08) non ha @PERIODO, ma il driver ha un
+#  DEFAULT: walkforward_generico.ps1 r.743 "if(-not $Periodo){ $Periodo=
+#  "M5" }", e quella riga c'e' DALLA NASCITA del driver (a0b4c12, 07/08
+#  19:10), cioe' PRIMA della corsa archiviata. Quindi la corsa e' M5, e
+#  @PERIODO M5 qui sotto la riproduce.
+#
+#  >>> E IL TF DEL GRAFICO E' INERTE PER QUESTO EA, MA PER UNA RAGIONE
+#      PRECISA CHE VA SCRITTA, PERCHE' DIPENDE DA UN PIN.
+#  Il range nasce da barre M1 (ComputeRangeWindow), il trailing da
+#  InpTrailTF, i filtri sono spenti. L'unica via d'ingresso del TF del
+#  grafico e' gAtrH = iATR(_Symbol, PERIOD_CURRENT, ...) (r.296) ->
+#  InitialSL (r.1090-1092) quando gPartialDone; quel riskDist alimenta
+#  SOLO profR -> trailArmato, che con InpTrailStartR=0 PINNATO e' vero
+#  comunque (r.1038).
+#  >>> QUINDI: il giorno in cui qualcuno mette un asse su InpTrailStartR,
+#      il TF del grafico RIENTRA nei numeri. Oggi no, perche' e' pinnato.
+#
+# ---------------------------------------------------------------------
+#  ###  IL COSTO: QUESTO INGRESSO STA SOTTO IL PAVIMENTO, E NESSUN ASSE
+#       D'USCITA PUO' SPOSTARLO  ###
+# ---------------------------------------------------------------------
+#  Spread NASUSD MISURATO (data/spread_vivo, ora 14 SERVER): n=3578,
+#  mediana 1,80, massimo 1,90. Stop = ampiezza del range + buffer 7 idx:
+#      range MIN 17 idx -> stop 24 idx -> 24/1,80 = 13,33x
+#      range MAX 40 idx -> stop 47 idx -> 47/1,80 = 26,1x
+#  Il pavimento di LAVORO e' 40x, quello DURO 13,3x.
+#  >>> NESSUNA CELLA DI QUESTO ROUND ARRIVA AL PAVIMENTO DI LAVORO, e
+#      NESSUN asse d'USCITA puo' spostarlo: il rapporto stop/spread e'
+#      una proprieta' dell'INGRESSO.
+#
+#  >>> ALLORA PERCHE' SI SPENDONO QUESTI MINUTI? Non per resuscitare il
+#      motore: il costo lo blocca comunque, ed e' scritto qui sopra col
+#      numero. Si spendono per CHIUDERE LA VOCE 3 DEL CERTIFICATO COL
+#      NUMERO. Senza quella voce il verdetto resta "NON ANCORA MISURATO"
+#      per sempre, e un'incertezza permanente costa piu' di un morto
+#      certificato. Questa e' la ragione vera, e non se ne dichiarano
+#      altre.
+#
+# ---------------------------------------------------------------------
+#  ###  IL RISCHIO AL 2%: E' RIPRODUZIONE, E NON SI TRASFERISCE  ###
+# ---------------------------------------------------------------------
+#  InpRiskPercent=2 e' il valore della corsa archiviata, non una scelta:
+#  tenerlo costante e' l'unico modo di leggere un asse a una variabile
+#  alla volta.
+#  >>> IL DD CHE NE ESCE NON E' LEGGIBILE contro i cancelli prop scritti
+#      per l'1% / 0,65%.
+#  >>> E NEMMENO IL PF SI TRASFERISCE A 0,65%. CalcLotByRisk dimensiona
+#      su ACCOUNT_BALANCE (r.863-864), cioe' a capitale COMPOSTO:
+#      cambiando la taglia cambia la traiettoria del saldo, quindi i pesi
+#      relativi dei trade, quindi Somma(vincite)/Somma(perdite). Conta,
+#      perche' il cancello e' 1,10 e l'ancora e' 0,96.
+#      Prima di QUALUNQUE giudizio a 0,65 serve una rigirata a 0,65.
 #
 # ---------------------------------------------------------------------
 #  IGIENE, VERIFICATA A MANO
 # ---------------------------------------------------------------------
-#  -Modello 4 = TICK REALI. @DAQUANDO 2024.09.26 = pavimento MISURATO.
-#  @FINOA 2026.06.30 = la fine della corsa archiviata.
-#  Nessun @FRAZIONEIS: il default 0,40 riproduce la corsa archiviata
-#     (116/291 = 0,3986).
-#  ORE IN ORA SERVER BCM: InpSessionHour=14, InpSessionMin=30.
-#  RISCHIO 2%: riproduzione, non scelta. Il DD non e' un numero prop.
-#  ENUM: nessun asse su ENUM in questo file.
-#  ETICHETTA r142c: zero collisioni con le 45 righe in coda.
-#  MAGIC 770203: gia' in archivio, nessuna collisione nuova.
+#  -Modello 4 = TICK REALI. Qui non e' screening: e' un verdetto.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver. E la prova che riproduce NON e' 116/(116+175)=0,3986 --
+#     quello e' un rapporto di OPERAZIONI, mentre il driver taglia sul
+#     TEMPO (r.922-925): sarebbe una coincidenza spacciata per prova
+#     (classe 284). La prova vera sta in casa, gia' scritta da qualcun
+#     altro: backtest_pipeline/risultati_archivio/REFERTO_WEEKEND_FASE0.md
+#     r.7 -- "IS 26/09/2024->09/06/2025 - OOS 10/06/2025->30/06/2026".
+#     642 giorni x 0,40 = 256,8 -> IS finisce il 09/06/2025. COMBACIA AL
+#     GIORNO.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#  DEPOSITO 10000 = default del driver = quello della corsa archiviata.
+#  TETTO BARRE: NON e' un problema, e la stesura precedente sbagliava il
+#     conto. Il driver non gira mai 21 mesi in una passata: gira DUE
+#     finestre (r.922-925). IS 257 giorni = ~71.000 barre M5, OOS 385 =
+#     ~106.000. Le ~124.000 non esistono in nessuna corsa. E questo EA
+#     legge le M1 del giorno e la candela precedente del trailing: un
+#     tetto sulle barre a ritroso non lo uccide. Nota, non assunzione.
+#  MAGIC 770203: il magic di casa dell'EA, gia' in archivio.
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I numeri
+#     si leggono nell'OPTFRAME.
 #  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale (classe 129).
 #
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me; il secondo
+#     strato lo lancia il coordinatore. DICHIARATO.
+#
+#  ETICHETTA r142c: zero collisioni con le righe in coda.
 #  COSTO: 2 celle x 2 finestre = 4 passate -> T = 0,6 + 0,077 x 4 =
 #         0,91 minuti.
-#
-#  CANCELLO: primo strato lanciato da me; il secondo lo lancia il
-#     coordinatore. DICHIARATO.
 # =====================================================================
 
 @SIMBOLO  NASUSD
@@ -124,8 +251,9 @@ InpTP1_R=1.0||1.0||0||1.0||N
 InpTP1_ClosePct=50||50||0||50||N
 InpBreakevenAtTP1=true||true||0||true||N
 
-# --- TRAILING: modo e TF pinnati alla cella archiviata. Inerti
-#     quando InpUseTrailing=false (dichiarato).
+# --- Modo e TF del trailing pinnati alla cella archiviata. INERTI nella
+#     cella 0. InpTrailStartR=0 e' anche cio' che rende INERTE il TF del
+#     grafico (vedi sopra): non si tocca in questo round.
 InpTrailStartR=0||0||0||0||N
 InpTrailMode=1||1||0||1||N
 InpTrailTF=1||1||0||1||N
@@ -136,15 +264,13 @@ InpMagic=770203||770203||0||770203||N
 InpMaxSpread=0||0||0||0||N
 InpVerbose=true||true||0||true||N
 
-# --- L'UNICO ASSE: IL TRAILING ESISTE O NO.
-#     false = la meta' residua vive fino al flat delle 20:45 server,
-#             protetta solo dallo stop in pari. MAI MISURATA.
-#     true  = LA CELLA IN ARCHIVIO = il contro-esempio incorporato
-#             (DEVE dare OOS PF 0.96265, n 175, DD 19.4006).
-#     >>> SCRITTO IN NUMERICO (1/0) E NON true/false: un asse su un
-#         input bool si pinna coi NUMERI -- e' quello che MT5 scrive
-#         nell'.ini, ed e' il precedente gia' in casa
-#         (InpUseMidGate=1||0||1||1||Y). Con true/false il cancello
-#         deterministico lo rifiuta: 'asse non numerico', celle = 0.
-#         Trovato dal cancello il 13/09, non indovinato.
+# --- L'UNICO ASSE: IL TRAILING ESISTE O NO. Scritto in NUMERICO (1/0) e
+#     non true/false: e' quello che MT5 scrive nell'.ini, ed e' il
+#     precedente gia' in casa (InpUseMidGate=1||0||1||1||Y). Con
+#     true/false il cancello deterministico lo rifiuta: "asse non
+#     numerico", celle = 0. Trovato dal cancello, non indovinato.
+#     0 = la meta' residua vive fino al flat delle 20:45 server, protetta
+#         solo dallo stop in pari. MAI MISURATA.
+#     1 = LA CELLA IN ARCHIVIO = il contro-esempio incorporato
+#         (cancello DURO sull'n: 116 IS / 175 OOS).
 InpUseTrailing=1||0||1||1||Y
