@@ -16830,3 +16830,114 @@ spenta per un numero **mai verificato contro la sua fonte**. Prima di togliere
 una riga da una coda, il costo che le si attribuisce si **misura col
 `-SoloControllo` del driver** — che e' l'unico che conta come conta MT5 — o
 almeno si legge il **file prova**, che qui la risposta ce l'aveva scritta.
+
+---
+
+## 288. 🕳️ IL CANCELLO CHE TROVA LA DIRETTIVA **DENTRO UN COMMENTO**: `controlla_prova.py` certifica la finestra, il driver muore su «manca il simbolo» (12/09/2026)
+
+**Il caso reale**: `backtest_pipeline/prove/ABTG_DaxValueArea.txt` (30/08/2026) scrive le sue
+direttive **dentro il blocco di commento**:
+```
+# @SIMBOLO  D30EUR
+# @PERIODO  M5
+# @DAQUANDO 2024.09.26          # muro tick BCM sugli indici
+# @FINOA    2026.06.30
+```
+
+🔴 **I due strumenti di casa leggono quelle quattro righe in modi INCOMPATIBILI, e nessuno dei due
+lo dice.**
+
+| strumento | come legge | esito su quel file |
+|---|---|---|
+| `walkforward_generico.ps1` **r.495-501** | `if($t.StartsWith("#")){ continue }` viene **PRIMA** di `if($t.StartsWith("@"))` | 🔴 `$Direttive` resta **VUOTO** → il driver **MUORE** su **r.737** (*"manca il simbolo. Passalo con -Simbolo NASUSD, o scrivi '@SIMBOLO NASUSD' nel file della prova"*) |
+| `controlla_prova.py` (controllo 5) | `if "@DAQUANDO" not in testo:` — cerca la **SOTTOSTRINGA nel testo intero** | 🟢 **PASSA**: la trova **dentro il commento** |
+
+> ## 🔑 **Il cancello dichiarava la finestra PRESENTE mentre il driver non l'avrebbe vista.** Un file prova puo' essere **verde al cancello e non lanciabile dal driver**, e il messaggio d'errore che arriva (*"manca il simbolo"*) manda a cercare il guasto **dalla parte sbagliata**: sembra che manchi una riga, e invece c'e' e ha un `#` davanti.
+
+### ✅ COSA SI FA, prima di mandare un file prova
+1. Le quattro direttive (`@SIMBOLO`, `@PERIODO`, `@DAQUANDO`, `@FINOA`) si scrivono **a colonna
+   zero**, **fuori** da qualunque blocco di commento, e **dopo** l'intestazione.
+2. Il controllo lampo, che costa un comando e non un ragionamento:
+   ```
+   grep -nE '^@' backtest_pipeline/prove/<file>.txt
+   ```
+   **Se non stampa `@SIMBOLO` e `@PERIODO`, il driver non li vedra'**, qualunque cosa dica il
+   cancello. (Su `ABTG_DaxValueArea.txt` quel `grep` stampa **zero righe**.)
+3. Un commento che *cita* una direttiva va scritto **senza la chiocciola all'inizio della parola**
+   (per esempio *"la direttiva DAQUANDO vale ..."*), cosi' non si confonde con quella vera.
+
+### 🧪 IL CONTRO-ESEMPIO, perche' un cancello cieco e' peggio di un cancello assente
+L'ipotesi alternativa era *"il difetto e' mio, il parser del driver legge anche le righe
+commentate"*. **Quale numero produce l'altra spiegazione?** Se il driver leggesse i commenti, allora
+il file del 30/08 girerebbe su D30EUR M5 e ci sarebbe un CSV in archivio. **Misurato: zero CSV per
+`ABTG_DaxValueArea` in tutto `risultati_prove/`, e zero righe in `REGISTRO_TEST.md`.**
+E l'ordine delle due `if` in `walkforward_generico.ps1` r.497-498 e' **letto**, non dedotto.
+🟢 **L'alternativa e' falsificata sul codice e sull'archivio.**
+
+⚠️ **E il limite di questa classe, dichiarato**: `controlla_prova.py` **non e' stato toccato**. La
+riparazione giusta sta nel controllo 5 (cercare `^@DAQUANDO` in modo ancorato, come fa il driver),
+ma quel file e' inchiodato da un pin nella coda e cambiarlo va **misurato in un lavoro suo** — fra
+i 689 file prova del repo ce ne sono **cinque** che portano un `@DAQUANDO` **senza valore**
+(`ABTG_BandFade`, `ABTG_CanaleLento`, `ABTG_RangeBudget`, `ABTG_TurnaroundTuesday`,
+`SESSIONREOPEN_ORO_BOZZA`) e un controllo piu' severo cambierebbe il loro esito.
+**Dichiarato, non fatto di nascosto.**
+
+---
+
+## 289. 🚫🎯 L'ATTESA RESA IMPOSSIBILE DA UN CANCELLO **DENTRO L'EA**: il file prova promette 50-200 operazioni e il motore le rifiuta tutte (12/09/2026)
+
+È la **classe 278** (*l'esito positivo deve essere RAGGIUNGIBILE*) in una veste nuova e piu'
+insidiosa: **il muro non sta nella griglia e non sta nel driver — sta dentro il sorgente dell'EA**, e
+chi scrive il file prova non lo vede perche' sta guardando i parametri, non il codice.
+
+**Il caso reale**: `backtest_pipeline/prove/ABTG_HVAncora_00_conta.txt` (08/09/2026) —
+cancello **VERDE**, 2 celle gemelle sul magic, attesa scritta per esteso, **mai lanciato**. Dichiara:
+> *"ATTESA CENTRALE: 130-350 ANCORE e 50-200 OPERAZIONI nei 21 mesi su U30USD"*
+
+e pinna `InpStopAtr = 1.0` (il valore della fonte). Ma:
+```
+ABTG_HVAncora.mq5 r.239   input double InpMaxSpreadPctOfStop = 2.5;
+ABTG_HVAncora.mq5 r.935   if(spreadPrezzo > (InpMaxSpreadPctOfStop/100.0)*slDist)
+                             -> IL TRADE SI SALTA
+```
+`2,5%` dello stop = *"spread <= 1/40 dello stop"* = **il pavimento di lavoro `stop >= 40 x spread`,
+applicato tick per tick dall'EA stesso.**
+
+| ingrediente | numero | rango |
+|---|---:|---|
+| range giornaliero U30USD (n=24 giorni) | **314,5 punti indice** | 🥇 MISURATO, `ROUND_ORB_ATR_PS5` r.233 |
+| range di barra M30 | **45,4** | [DERIVATO] `x sqrt(30/1440)` |
+| spread mediano ore 08-13 / 14-20 | **2,60** / **1,90-2,00** | 🥇 MISURATO su 64.711.285 tick |
+| **spread / stop** con `InpStopAtr = 1,0` | **5,73%** / **4,41%** | contro una soglia di **2,50%** |
+
+> ## 🔴 **L'EA avrebbe rifiutato il 100% dei trade, a ogni ora della finestra. Le 50-200 operazioni erano impossibili PER COSTRUZIONE.**
+> 🔴 **E il danno non e' la corsa buttata: e' che uno zero letto come «niente segnali» avrebbe SEPOLTO un motore che non era nemmeno stato interrogato.** Un `n=0` interpretato come verdetto e' esattamente il modo in cui `ABTG_OutOfNoise` e' stato perso per 14 giorni (baco di warmup, 29/08).
+
+### ✅ COSA SI FA, e sono tre righe di lettura per candidato
+1. 🔎 **Si cerca nel `.mq5` se esiste un cancello che SALTA il trade**, non solo uno che lo
+   dimensiona. Le parole da cercare sono poche:
+   ```
+   grep -nE "MaxSpread|PctOfStop|return\(false\)|salto|skip|Reject" mql5/Experts/<EA>.mq5
+   ```
+2. 🧮 **Se c'e', si verifica che la GEOMETRIA PINNATA lo passi**, col numero: stop atteso contro
+   spread **MISURATO nell'ora vera** del motore. Se non lo passa, **l'attesa scritta nel file e'
+   finzione** e il file va riscritto **prima** di entrare in coda.
+3. 📊 **Si guarda se l'EA ha una colonna di RIFIUTI.** Se ce l'ha (`Reject`, contatori di
+   diagnostica), lo zero e' leggibile e il round resta utile. **Se non ce l'ha, uno zero e'
+   ambiguo** — e allora la griglia deve contenere **almeno una cella che il cancello passa**, cosi'
+   che lo zero delle altre sia interpretabile per confronto.
+
+### 🔑 La regola in una riga
+*Un file prova non si giudica solo contro il driver e contro i propri criteri: si giudica contro il
+**codice dell'EA**. Un cancello dentro il motore e' un vincolo della griglia esattamente come il
+tetto delle barre — e non lo vede nessuno degli strumenti di casa.*
+
+### 🟢 La riparazione, che e' anche il modo giusto di usare questa classe
+`prove/R141d_hvancora_stopatr_M30_U30USD.txt` mette **`InpStopAtr` sull'asse** (1,0 / 1,5 / 2,0 /
+2,5): le prime due celle il cancello le rifiuta, le ultime due le passa (**45,4x** e **56,7x**).
+👉 **Cosi' lo zero delle celle basse NON e' un verdetto: e' la MISURA di dove cade il muro** — e il
+`k` a cui compaiono le prime operazioni **misura l'`ATR(M30)` vero di U30USD**, che oggi e'
+`[DERIVATO]` e mai misurato.
+🔴 **E l'allargamento dello stop e' legittimo SOLO perche' su quel motore l'ANCORA E' UNICA**
+(r.945 `tp = entry + InpRR * slDist`, cioe' il target e' in unita' dello stop): su un motore ad
+ancore diverse lo stesso asse sarebbe **curve fitting sul costo**.
