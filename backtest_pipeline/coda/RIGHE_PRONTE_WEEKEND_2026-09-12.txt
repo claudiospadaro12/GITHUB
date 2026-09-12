@@ -1,0 +1,156 @@
+# =====================================================================
+#  RIGHE DI CODA PRONTE -- finestra del weekend, 12/09/2026
+# ---------------------------------------------------------------------
+#  QUESTO FILE NON VIENE LETTO DA NESSUNO CHE ESEGUA. Verificato:
+#  runner_abtg.ps1 r.96 legge SOLO "backtest_pipeline/coda/CODA.txt", e
+#  nessuno script del repo fa un glob sulla cartella coda\. Questo e' un
+#  foglio da COPIARE A MANO in CODA.txt, dopo il PASS del cancello di
+#  giudizio. Non tocco CODA.txt: quello lo fa chi ha il mandato.
+#
+#  PIN DI TUTTE LE RIGHE QUI SOTTO:
+#      e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b
+#  e la cosa che lo rende diverso dai pin delle 7 righe gia' in coda e'
+#  UNA SOLA, ed e' verificabile con un comando:
+#      git merge-base --is-ancestor 124db40 e6c0d70e   ->  0   (la toppa C'E')
+#      git merge-base --is-ancestor 124db40 8027068f   ->  1   (NON c'e')
+#      git merge-base --is-ancestor 124db40 0c7d98af   ->  1   (NON c'e')
+#  124db40 = "CLASSE 270, TOPPATA NEL DRIVER: l'ex5 stantio che passava
+#  per compilato". Senza quella toppa una compilazione FALLITA con un
+#  .ex5 preesistente fa stampare "compilato" in verde e girare il binario
+#  VECCHIO, in silenzio.
+#
+#  REFERTO: report\CODA_DEL_WEEKEND_2026-09-12.md
+# =====================================================================
+
+# =====================================================================
+#  BLOCCO A -- LE SEI RIGHE PULITE, IN QUEST'ORDINE E NON IN UN ALTRO
+#  94 passate . 10,8 minuti col metro misurato . banda 1,4-2,9 ore
+# =====================================================================
+
+#  A1) r127c -- IL CANARINO, SEMPRE PRIMO. ABTG_CostToCost EURJPY H4,
+#      asse InpMaxBarsHold (8 celle). Fra la sua ancora (R103, binario
+#      26a1856 del 19/08) e oggi c'e' UN SOLO commit, ed e' b45dd00.
+#      DEVE ricomporre n_IS + n_OOS = 394 +/- 2% e PF = 1,41 +/- 0,03
+#      (fonte: risultati_archivio\R103_REFERTO_FINALE.md r.15).
+#      Se non ricompone, gli altri cinque si FERMANO qui, e il primo
+#      sospetto e' il binario, non i parametri.
+#      >>> -Modello 1 = OHLC M1, e NON e' un errore: e' il modello
+#          dell'ancora R103, dichiarato nella sua intestazione
+#          ("Pin 7e2fb0d (v3). OHLC M1 -> il DD e' un LIMITE INFERIORE").
+#          A -Modello 4 il canarino sarebbe morto per il MODELLO.
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R127c_orologio_EURJPY.txt -Etichetta r127c -Modello 1 -Deposito 100000
+
+#  A2) r126a -- la sedia al 96% del pavimento di costo. SuperWave_DOW_H1
+#      U30USD H1, asse InpSLBufferAtr (9 celle). Ancora: IS PF 1,84892 /
+#      n 84 / DD 3,7267% e OOS PF 1,32770 / n 143 / DD 3,9082%, binario
+#      400a462 (08/08 06:54) -- SCRITTO nel file prova, non ricavato.
+#      Deriva del sorgente: SEI commit, e i due sospetti in testa sono
+#      3af47ed (fix di SIZING, 08/08 11:48) e 872dba8 (08/09).
+#      -Modello 4 e' GIUSTO qui: l'ancora sta nei CSV SENZA suffisso
+#      "_ohlc" (misurato con grep, non assunto) = tick reali.
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126a_costo_bufferatr_U30USD.txt -Etichetta r126a -Modello 4 -Deposito 10000
+
+#  A3) r127b -- InpSLLookback, asse d'uscita MAI mosso in tutto
+#      l'archivio (290 CSV, vale sempre 5). SupertrendReversal_Ott
+#      XAUUSD H4, 7 celle, 22 anni. Ancora R99: DD 9,02% / n 657, e il
+#      PF e' [NON MISURATO] -- si legge qui PER LA PRIMA VOLTA.
+#      Sospetto numero 1: 872dba8, che su questo EA NON e' diagnostica
+#      (sposta il pavimento del lotto minimo prima di lotPend).
+#      >>> -Modello 1 = OHLC M1: su 22 anni di XAUUSD i tick reali NON
+#          ESISTONO, e R99 e' nata OHLC. Lo dice il file prova stesso.
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
+
+#  A4) r126b -- InpSLLookback sulla sedia del Dow (7 celle). La sua cella
+#      lookback=5 E' LA STESSA CONFIGURAZIONE della cella b=0 di r126a:
+#      due letture indipendenti dello stesso numero, ed e' il cancello di
+#      determinismo che resta disponibile senza r126c (vedi BLOCCO C).
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
+
+#  A5) r126d -- LO STESSO MECCANISMO SU UN SECONDO SIMBOLO (requisito 4
+#      del certificato). ATTENZIONE: EA DIVERSO -- ABTG_SuperWave, NON
+#      ...DOW_H1_Ottimizzato. I default compilati del generico sono un
+#      altro motore (H4 / StMult 3,5 / TP_RR 2,0), per questo il file
+#      pinna tutto per nome. Ancora: PF 1,02213 / n 97 / DD 3,3131%, e il
+#      file dichiara da se' che e' "un ordine di grandezza", non
+#      un'ancora al centesimo (quella e' OHLC a finestra piena, qui si
+#      gira a tick reali su due finestre).
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
+
+#  A6) cemad05 -- CHIUDE IL REQUISITO 5 (il TF cambiato) su ABTG_EMA200,
+#      l'unica delle 41 sedie vive che passa i cancelli di oggi alla
+#      lettera. Asse InpTF: 7 celle (15 / 20 / 30 / 16385 / 16386 /
+#      16387 / 16388), non 16374 -- controlla_prova.py conta l'enum
+#      ARITMETICAMENTE e lo dichiara; il driver conta i MEMBRI
+#      (walkforward_generico.ps1 r.622-626) e ne trova 7.
+#      G0-B: la cella H1 (16385) deve ridare OOS PF 1,52365 / DD 7,8323%
+#      / 517 deal, altrimenti il round e' nullo.
+#      >>> -Deposito 100000 NON E' OPZIONALE: il file dichiara
+#          "deposito 100000" a r.7 ed e' il banco di R110/R112. Il
+#          tentativo precedente passava 10000: era uno dei due motivi
+#          della bocciatura.
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  BLOCCO B -- LE SEI RIGHE DI R120b / R120e, CON UN RISCHIO DICHIARATO
+#  24 passate . 5,4 minuti . SI METTONO DOPO IL BLOCCO A
+# ---------------------------------------------------------------------
+#  PERCHE' VALGONO PIU' DELLE ALTRE, e va detto per primo: le quattro
+#  R120b sono un FATTORIALE 2x2 su InpTrailOnST x InpExitOnFlip
+#  (verificato riga per riga: nuda 0/0, notrail 0/1, noflip 1/0,
+#  vivo 1/1). Quella famiglia -- InpTrailOnST, InpExitOnFlip,
+#  InpFirstFraction -- e' la riga a ZERO di report\AUDIT_USCITE_2026-09-09.md
+#  Tabella B: MAI messa ad asse in tutto l'archivio. Le due R120e
+#  rifanno nuda e vivo a -Deposito 100000 (l'UNICO delta: la taglia).
+#
+#  IL RISCHIO, DICHIARATO COL NUMERO: in ognuno dei sei l'asse spazzolato
+#  e' InpMagic su DUE celle adiacenti, e ogni file contiene il cancello
+#  G0 DETERMINISMO -- "le due passate gemelle devono [coincidere],
+#  altrimenti il banco non e' deterministico e IL ROUND E' NULLO".
+#  E' la CLASSE 129: un asse gemello si legge con UN SOLO agente locale
+#  MT5 (pannello Strategy Tester -> Agenti), che e' un passo A MANO
+#  dentro MT5 e il runner NON PUO' FARLO.
+#  >>> MA LA CAUSA MISURATA DELLA 129 QUI NON C'E': la divergenza fu
+#      misurata su RIGA_POSTNEWS_ISM, dove 4 metatester leggevano lo
+#      STESSO calendario news nello stesso istante. In tutti e sei
+#      questi file InpUseNewsFilter=false (verificato). Quindi i gemelli
+#      POSSONO uscire identici -- non e' garantito, e' possibile.
+#  >>> E IL CONTO CHE FA DECIDERE: provare costa 0,91 minuti a round su
+#      una finestra di 28 ore. Se i gemelli divergono, il round si
+#      dichiara nullo DA SE' e si perde meno di un minuto. Nessuno degli
+#      altri round ne viene toccato: ognuno di questi sei sta in piedi
+#      da solo.
+#  >>> ORDINE: dopo il blocco A, perche' le loro ancore sono "il METRO,
+#      non il verdetto" (parole del file prova, e sono quelle giuste).
+# =====================================================================
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
+e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  BLOCCO C -- LA RIGA CHE TENGO FUORI, E IL MOTIVO E' IL CONTAGIO
+#  r126c . 4 passate . 0,91 minuti . NON VA IN CODA
+# ---------------------------------------------------------------------
+#  r126c e' anche lui un asse gemello su InpMagic (779320 / 779330), come
+#  i sei del blocco B. Ma e' DIVERSO da loro in una cosa che decide, e
+#  sta scritta nel suo file prova:
+#      "Le due celle si leggono INSIEME: se non escono IDENTICHE AL
+#       CENTESIMO il banco e' sporco e TUTTO R126 si ferma PRIMA di
+#       qualunque altro numero."
+#  Cioe': una divergenza da classe 129 -- da PIU' AGENTI, non da un banco
+#  sporco -- annullerebbe ANCHE r126a, r126b e r126d, che sono 50 passate
+#  e tre dei sei round buoni della notte. E' l'unico dei tredici il cui
+#  fallimento non costa se stesso, ma altri tre.
+#  >>> E NON LASCIA UN BUCO, perche' il determinismo si legge comunque:
+#      la cella b=0 di r126a e la cella lookback=5 di r126b sono LA
+#      STESSA configurazione, e devono dare lo stesso numero. Due
+#      letture, da due corse separate.
+#  >>> COME SI CHIUDE: a mano sul PC di backtest, con UN SOLO agente
+#      locale nel pannello Strategy Tester -> Agenti, prima o dopo la
+#      notte. Costa 4 passate.
+#  La riga e' qui sotto, pronta, COMMENTATA. Si toglie il "# " davanti
+#  solo dopo che qualcuno ha fissato gli agenti a 1.
+# e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126c_gemelli_U30USD.txt -Etichetta r126c -Modello 4 -Deposito 10000
+# =====================================================================

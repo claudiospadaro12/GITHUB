@@ -69,21 +69,41 @@ misurato il 03/09: entrambi i `terminal64` girano sotto quell'utente).
 
 ## 2. 📌 I PIN — 🔴 **ORA SONO DUE, e non e' un dettaglio**
 
-> 🔴 **CAMBIATO IL 12/09/2026.** Il **BLOCCO 3 (raccolta)** e' stato ri-pinnato a
-> **`e86deb5a367ca19da918c5a16248d35b4307143a`** con marcatore
-> **`..._RACCOLTA_v2`**, perche' `RIGA_SPREADLOGGER_RACCOLTA.ps1` e' stata
-> **indurita** (`INDURIMENTO_VISTOPICCOLO_v1`): `VistoPiccolo` era *misurato e
-> mai usato come cancello*, e il **REALE 10105439** e il **banco 50504400** —
-> che sono anch'essi BCM e **non** hanno `-V3` nel percorso — **passavano
-> l'eleggibilita'**. Ora sono **rifiutati** con lo stesso schema a tre tracce
-> del 100k, e `VistoPiccolo` e' criterio di selezione **dove restringe**.
-> 🟢 **Fallisce in SICUREZZA**: se `origin.txt` manca e i log non nominano
-> nessuno, **non cambia niente** rispetto a prima.
+> 🔴 **CAMBIATO IL 12/09/2026, DUE VOLTE.** Il **BLOCCO 3 (raccolta)** e' ora
+> al pin **`f13218a265bf626b1ba663229b332cbff9958ac4`** con marcatore
+> **`..._RACCOLTA_v3`**. La storia, per intero, perche' la seconda correzione
+> nasce dal primo giro che si credeva finito:
+>
+> 1. **`INDURIMENTO_VISTOPICCOLO_v1`** (pin `e86deb5a…`, marcatore `_v2`):
+>    `VistoPiccolo` era *misurato e mai usato come cancello*, e il **REALE
+>    10105439** e il **banco 50504400** — anch'essi BCM e **senza** `-V3` nel
+>    percorso — **passavano l'eleggibilita'**. Aggiunto il rifiuto di
+>    reale/banco e `VistoPiccolo` come criterio **dove restringe**.
+> 2. 🔴 **`INDURIMENTO_GRAFIE_v1`** (pin `f13218a…`, marcatore `_v3`) — e
+>    questo l'ha trovato il cancello di giudizio **eseguendo**, non leggendo.
+>    Il rifiuto del punto 1 confrontava origin.txt per **uguaglianza esatta** e
+>    **non guardava il percorso**: su otto grafie, **SEI PASSAVANO** — reale in
+>    modo **portabile** (nessun `origin.txt`, nessun login recente nei log),
+>    `C:/BCM_Reale` con lo slash, il nome 8.3 `C:\BCM_RE~1`, la fuga
+>    `C:\BCM_Reale\..\BCM_Reale`, lo spazio in coda. **Rifiutava solo la
+>    stringa identica.** E' la **classe 272**, gemella del 10/09.
+>    Ora le tracce sono **tre come per il `-V3`** (origin.txt **normalizzato**,
+>    **percorso** normalizzato, login nei log) piu' i **segni 8.3**, e la
+>    manopola `-CartellaDati` **pretende un fatto POSITIVO** che la cartella
+>    sia del piccolo, invece di accontentarsi di non riconoscere le altre.
+> 🧪 **Provato eseguendo, 14 casi su 14**: le **9** grafie di reale/banco
+> rifiutate, il 100k rifiutato, la cartella muta e anonima **fermata col
+> motivo**, e il **piccolo che PASSA** per tutte e tre le prove positive; piu'
+> la regressione sul percorso automatico (tre candidate, sceglie il piccolo).
+> ✅ **Pin `f13218a…` verificato via `raw` END-TO-END**: HTTP **200**, **37.775
+> byte**, **identico byte per byte** alla copia locale (`86736d74…`), marcatore
+> `_v3` presente, `_v2` **assente** (quindi il pin vecchio non puo' piu' girare
+> per sbaglio: il controllo del marcatore lo boccia), **0** occorrenze di
+> `Stop-Process`/`Start-Process`/`CloseMainWindow`/`.Kill(`/`taskkill`, **0**
+> byte non-ASCII.
 > ⚠️ **I BLOCCHI 1 e 2 (installazione dell'EA) restano al pin vecchio
 > `41728ee1…`**, che e' quello verificato per l'EA: l'EA **non e' stato
 > toccato**. Quindi in questa pagina **ci sono due pin diversi, apposta**.
-> 🚦 Il pin nuovo **non e' ancora stato verificato via `raw`** (il commit e'
-> di oggi): va fatto prima dell'invio, come per tutti gli altri.
 
 ## 2-bis. 📌 IL PIN DEI BLOCCHI 1-2 — **`41728ee14525c468d05c980780c3ad20976b997c`** ✅ **VERIFICATO**
 
@@ -94,10 +114,10 @@ pagina** (HTTP 200 + sha256 identico al repo + presente in `git ls-tree`):
 |---|---|
 | `mql5/Experts/ABTG_SpreadLogger.mq5` | 200, identico (`b59c8bec…`, 51.703 byte), `#property version "1.00"`, **0 caratteri non-ASCII**, **0 token vietati** |
 | `backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1` | 200, identico (`e2d5836a…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
-| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | ⚠️ **SUPERATO**: a questo pin e' la **v1** (`a38e8cd4…`, marcatore `..._RACCOLTA_v1`). La raccolta ora usa il pin **`e86deb5a…`** e la **v2** — vedi §2. Al pin nuovo: **ASCII puro** verificato, `Parser::ParseFile` **0 errori** (5.924 token), e 6 casi su 6 verdi sul rifiuto di reale/banco |
+| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | ⚠️ **SUPERATO**: a questo pin e' la **v1** (`a38e8cd4…`, marcatore `..._RACCOLTA_v1`). La raccolta ora usa il pin **`f13218a…`** e la **v3** — vedi §2. Al pin nuovo: **ASCII puro** verificato, `Parser::ParseFile` **0 errori**, e **14 casi su 14** verdi sul rifiuto di reale/banco in nove grafie |
 
 Il pin dei blocchi 1-2 è scritto **tre volte** (§2-bis e i blocchi **1** e **2**).
-🔴 **Il BLOCCO 3 porta l'altro pin** (`e86deb5a…`): prima di incollare, si
+🔴 **Il BLOCCO 3 porta l'altro pin** (`f13218a…`): prima di incollare, si
 controlla **quale blocco si sta usando**.
 
 > 🔁 **Perché il pin è cambiato** (era `b314ec4e…`): la verifica prima dell'invio
@@ -114,6 +134,17 @@ controlla **quale blocco si sta usando**.
 ---
 
 ## ▶️ BLOCCO 1 — **CONTROLLO** (giro a vuoto: non scrive niente nel terminale)
+
+🖥️ **BERSAGLIO: finestra PowerShell sul VPS `VMI3047753`.** Nessun MT5 da
+aprire, nessuno da chiudere: questo giro **legge e basta**.
+🪟 **Cartella dati guardata: quella del solo terminale PICCOLO `50503392`**
+(`C:\Program Files\BCM Markets MT5 Terminal`, **senza** `-V3`) — e in questo
+blocco **non ci scrive nemmeno lei**.
+🔴 **COSA NON VIENE TOCCATO:** il **REALE 10105439** (`C:\BCM_Reale`, **ACCESO
+con sedie vive**), il **100k 50504263** (`... MT5 Terminal -V3`, in Fase 1), il
+**banco 50504400** (`C:\MT5_Backtest`), e le cartelle dati **Pepperstone** e
+**Tickmill**. Sul VPS convivono **SEI** cartelle dati: *"gira sul VPS"* da solo
+non e' un bersaglio, e' un indirizzo.
 
 Si lancia **prima**, anche di giorno, con MT5 aperto. Torna l'elenco delle cartelle
 guardate, la cartella scelta col suo **criterio**, i gate sul sorgente e le foto.
@@ -137,6 +168,22 @@ guardate, la cartella scelta col suo **criterio**, i gate sul sorgente e le foto
 ---
 
 ## ▶️ BLOCCO 2 — **CORSA** (installa e compila nel SOLO piccolo)
+
+🖥️ **BERSAGLIO: finestra PowerShell sul VPS `VMI3047753`.**
+🪟 **SCRIVE dentro UNA cartella dati e una sola: il PICCOLO `50503392`**
+(`C:\Program Files\BCM Markets MT5 Terminal`, **senza** `-V3`), e dentro quella
+tocca **solo** `MQL5\Experts\ABTG_SpreadLogger.mq5`/`.ex5`. **Nessun `.set`,
+nessun `.chr`, nessun `.ini`, nessun parametro di nessuna sedia.**
+✋ **Nessun MT5 da aprire e nessuno da chiudere** — MT5 resta APERTO ed e'
+voluto. **MetaEditor invece va CHIUSO** (se e' aperto la riga si ferma da sola,
+prima di scaricare).
+🔴 **E' l'UNICO dei tre blocchi che SCRIVE**: se hai un dubbio su quale stai
+incollando, e' questo quello da guardare due volte.
+🔴 **COSA NON VIENE TOCCATO:** il **REALE 10105439** (`C:\BCM_Reale`, **ACCESO
+con sedie vive**), il **100k 50504263** (`... MT5 Terminal -V3`, in Fase 1), il
+**banco 50504400** (`C:\MT5_Backtest`), e le cartelle dati **Pepperstone** e
+**Tickmill**. Sul VPS convivono **SEI** cartelle dati: *"gira sul VPS"* da solo
+non e' un bersaglio, e' un indirizzo.
 
 **Solo dopo un CONTROLLO pulito** (`ESITO DEL GIRO: COMPLETATO`, `PROBLEMI: 0`) e
 con **MetaEditor CHIUSO**. **MT5 resta aperto**: la flotta continua a lavorare.
@@ -228,15 +275,30 @@ e due volte è il minimo per dire che è una regola e non un giorno storto.
 
 ## ▶️ BLOCCO 3 — **RACCOLTA** (si può lanciare quando vuoi, anche a metà)
 
+🖥️ **BERSAGLIO: finestra PowerShell sul VPS `VMI3047753`.**
+🪟 **LEGGE la cartella dati del solo terminale PICCOLO `50503392`**
+(`C:\Program Files\BCM Markets MT5 Terminal`, **senza** `-V3`) e scrive **solo**
+nella propria cartella di lavoro e sul **Desktop**.
+✋ **Nessun MT5 da aprire e NESSUNO da chiudere**, nessuna compilazione,
+**nessun processo fermato** (misurato al pin: **0** occorrenze di
+`Stop-Process`/`Start-Process`/`CloseMainWindow`/`.Kill(`/`taskkill`). 🟢 Quindi
+**l'incidente del 10/09 — una chiusura "pulita" che ammazzo' anche il reale —
+qui non puo' ripetersi: non si chiude niente.**
+🔴 **COSA NON VIENE TOCCATO:** il **REALE 10105439** (`C:\BCM_Reale`, **ACCESO
+con sedie vive**), il **100k 50504263** (`... MT5 Terminal -V3`, in Fase 1), il
+**banco 50504400** (`C:\MT5_Backtest`), e le cartelle dati **Pepperstone** e
+**Tickmill**. Sul VPS convivono **SEI** cartelle dati: *"gira sul VPS"* da solo
+non e' un bersaglio, e' un indirizzo.
+
 **Non tocca niente**: legge dalla cartella dati, ricalcola mediana e P95 da solo e
 li **confronta** col conto fatto dall'EA. **MT5 resta aperto**, l'EA continua ad
 accumulare. Si può rilanciare tutte le volte che si vuole.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='e86deb5a367ca19da918c5a16248d35b4307143a'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='f13218a265bf626b1ba663229b332cbff9958ac4'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SPREADLOGGER_RACCOLTA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);

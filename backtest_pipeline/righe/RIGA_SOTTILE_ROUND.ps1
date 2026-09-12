@@ -211,7 +211,68 @@ $BancoBT = 'C:\MT5_Backtest'
 #  (verificato scaricandolo: la riga corretta c'e').
 #  Le due impronte qui sotto sono state RICALCOLATE anche a questo pin e
 #  sono identiche: non sono state toccate.
-$PIN = 'fb9b4731391c221b6229409f8e9fd7ca44bc2514'
+#  DECIMO GIRO (12/09/2026) -- E QUESTA VOLTA IL PIN SI MUOVE PERCHE' IL
+#  CODICE DEL DRIVER E' CAMBIATO DAVVERO. Non e' un file prova nuovo: e'
+#  la TOPPA DELLA CLASSE 270, commit 124db40 (12/09 09:47, "CLASSE 270,
+#  TOPPATA NEL DRIVER: l'ex5 stantio che passava per compilato").
+#
+#  IL DIFETTO CHE LA TOPPA CHIUDE, detto per intero perche' e' il motivo
+#  di tutto questo giro: walkforward_generico.ps1 compilava l'EA e poi
+#  faceva Test-Path sull'.ex5 SENZA CANCELLARLO PRIMA. Con una
+#  compilazione FALLITA e un .ex5 preesistente, Test-Path era VERO: il
+#  driver stampava "compilato" IN VERDE e girava IL BINARIO VECCHIO.
+#  Numeri di un commit attribuiti a un altro, IN SILENZIO -- il modo
+#  peggiore di sbagliare. E l'.ex5 preesistente NON e' l'eccezione: sui
+#  quattro EA di questi round l'archivio ha 48 / 14 / 6 / 4 CSV, cioe'
+#  e' LA NORMA.
+#  Con la toppa (r.1400 del driver:
+#      Remove-Item -LiteralPath $ex5Atteso -Force -ErrorAction SilentlyContinue
+#  PRIMA di compilare) ogni round e' il proprio collaudo di compilazione:
+#  se la compilazione fallisce, Test-Path fallisce e il driver MUORE
+#  leggendo il log del compilatore. Rumoroso e senza numeri, invece di
+#  silenzioso e falso.
+#
+#  IL PIN NUOVO E' e6c0d70e, E LA COSA DA VERIFICARE E' UNA SOLA:
+#      git merge-base --is-ancestor 124db40 e6c0d70e   ->  esce 0
+#  cioe' la toppa E' dentro il pin. Verificato il 12/09/2026, e verificato
+#  anche AL CONTRARIO (il contro-esempio, altrimenti quello "0" non vale
+#  niente): sul pin PRECEDENTE fb9b4731 lo stesso comando esce 1, e nel
+#  driver a quel pin la riga Remove-Item compare ZERO volte. Il controllo
+#  distingue i due casi, quindi il suo "0" dice qualcosa.
+#
+#  >>> E QUESTA VOLTA L'IMPRONTA DEL DRIVER CAMBIA, ed e' giusto cosi':
+#      $SHA_WALK passa da 02E2FE8F...9ECF3FEA a 62A53763...F7CBB7BC.
+#      Se leggete ancora la vecchia, il pin punta a un driver SENZA la
+#      toppa e lo scarico muore sull'impronta: il fallimento giusto.
+#      $SHA_ROUND invece NON e' stata toccata -- ed e' stata RICALCOLATA
+#      sul blob del pin nuovo per dirlo, non assunta: 348ED533... a
+#      e6c0d70e e' identica a 348ED533... a fb9b4731.
+#
+#  E IL PIN PORTA ANCHE DUE FILE PROVA CORRETTI, che al pin precedente
+#  erano SBAGLIATI in modo bloccante:
+#      prove\R127c_orologio_EURJPY.txt   -- dicevano "-Modello 4" con
+#      prove\R127b_sllookback_XAUUSD.txt    accanto "= OHLC M1"
+#  cioe' il numero invertito rispetto alla r.172 del driver ("4 = tick
+#  reali (verita'). 1 = OHLC M1"). E' lo stesso difetto che l'11/09 sera
+#  il commit 1764a0e ha corretto sui tre file R132, specchiato. Su r127c
+#  pesava il doppio, perche' r127c e' IL CANARINO della notte: a tick
+#  reali non avrebbe potuto ricomporre l'ancora OHLC di R103 (394 +/- 2%,
+#  PF 1,41 +/- 0,03) PER COSTRUZIONE, e avrebbe fermato gli altri undici
+#  round dando la colpa al binario.
+#  Il driver prende il file prova DA QUESTO $PIN: col pin vecchio
+#  girerebbe la versione col numero invertito.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: r132c / r133b / r133c
+#      pinnano a 8027068f e i quattro r136 a 0c7d98af, cioe' a COPIE
+#      CONGELATE di questo file. E VA DETTO, perche' e' una misura e non
+#      un dettaglio: su NESSUNO di quei due pin la toppa 270 e' presente
+#      (merge-base esce 1 su entrambi, e la riga Remove-Item compare 0
+#      volte nel loro driver). Quelle sette righe restano al loro pin per
+#      mandato -- ma chi legge i loro CSV la mattina sappia che per loro
+#      il falso positivo silenzioso e' ancora possibile, e che il
+#      rilevatore di riserva sono le loro ancore (r132c deve riprodurre 5
+#      celle di R123D, r136a la cella viva 237 / 1,20110 / 5,7325%).
+$PIN = 'e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -241,7 +302,7 @@ $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
 #    un '@FINOA' poteva essere ignorato in silenzio.
 #    Per i sei file prova R132/R133 non cambia NIENTE: dichiarano tutti
 #    @FINOA 2026.06.30, identica al default del driver.
-$SHA_WALK  = '02E2FE8F90CCBD079E92A7A6C74B54D96C536982927BEC06AE68ECFB9ECF3FEA'
+$SHA_WALK  = '62A53763A186195DBE3FB3DAEE01B45A53B80F09BDC831B68046BD50F7CBB7BC'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
