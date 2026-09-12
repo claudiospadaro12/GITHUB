@@ -1,0 +1,271 @@
+# ==========================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  COLLAUDO PROP -- SCALA DI SPREAD sulla cella viva D30EUR M5 LONG
+#  (sedia 770101). File COLLAUDO_DAX101_01_spread_scala_ini.txt.
+#
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/COLLAUDO_DAX101_CRITERI.md
+#    (commit f3bc255, 12/09/2026 -- committato PRIMA di questo file)
+#
+#  BANCO: Modello 4 (TICK REALI), deposito 100000, rischio PINNATO 1,0,
+#         finestra 2024.09.26 -> default del driver 2026.06.30,
+#         FrazioneIS 0,40. E' il banco di R47a/R47b: non si cambia dentro
+#         un collaudo.
+#         IS  2024.09.26 - 2025.06.09   OOS 2025.06.10 - 2026.06.30
+#
+#  PERCHE' NON C'E' '@FINOA', e non e' una dimenticanza: senza quella riga
+#  il driver puo' ricevere -DaQuando/-Fino, e il CANARINO qui sotto ne ha
+#  bisogno (gira su una tranche unica che copre l'OOS). R47 stesso non
+#  dichiarava @FINOA e ha preso il default -Fino 2026.06.30 (r.177).
+#
+#  L'ANTENATO, riga per riga: il corpo dei fissi e' la COPIA di
+#  prove/R137c_parziale_770101_D30EUR.txt (gia' passato da tutti e due i
+#  cancelli il 12/09), che a sua volta e' la copia campo per campo di
+#  mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set verificata
+#  contro il CSV di R47a su 80 input su 80. UNICO delta: InpMagic.
+#
+#  MAGIC: 787101, VERGINE -- verificato repo-wide il 12/09/2026
+#         (grep -rE "\b7871[0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#         VIETATI: 770101 (sedia viva), 7725xx (R47), 7862xx (R137).
+# ==========================================================================
+#
+#  CHE COSA SI CHIEDE A QUESTO ROUND, in una riga
+#    La sedia sopravvive se il broker prop allarga lo spread quanto puo'
+#    allargarlo? Non "e' buona": SOPRAVVIVE. Il metro sta nei criteri.
+#
+# ##########################################################################
+# ##  IL CANARINO VIENE PRIMA, ED E' QUESTO STESSO FILE GIRATO DUE VOLTE
+# ##
+# ##  Motivo, e lo dice il driver a schermo (walkforward_generico.ps1
+# ##  r.950-955): NON E' MISURATO che MT5 onori la riga Spread= dell'.ini
+# ##  quando il modello e' 4 (tick reali). Se non lo onora, i quattro
+# ##  gradini tornano IDENTICI alla base -- e "identico alla base" NON
+# ##  vuol dire "robusta allo spread": vuol dire RIGA IGNORATA.
+# ##
+# ##  Due corse, una tranche unica che copre l'OOS
+# ##  (-DaQuando 2025.06.10 -Fino 2026.06.30 -FrazioneIS 1.0):
+# ##      K1:  -Spread 0       -Etichetta CAN_S0
+# ##      K2:  -Spread 99999   -Etichetta CAN_S99999
+# ##  99999 punti MT5 = 999,99 punti indice: ottantatre volte il massimo
+# ##  mai misurato su D30EUR (12,0 idx all'ora 08, 25,7 all'ora 01).
+# ##  Assurdo di proposito: se un numero cosi' non sposta niente, la riga
+# ##  e' ignorata e non c'e' una seconda spiegazione.
+# ##  NB: con -FrazioneIS 1.0 la tranche unica esce etichettata '_IS' nei
+# ##  nomi dei CSV anche se copre l'OOS. Va dichiarato nel referto:
+# ##  l'etichetta CAN_* serve a questo.
+# ##
+# ##      K1 == K2 alla cifra  =>  PROVA A MORTA. Si scrive "NON
+# ##                               MISURABILE a tick reali", e lo stress
+# ##                               di costo resta il post-processing sui
+# ##                               per-trade (referto INDURIMENTO_PROP,
+# ##                               par. 4). MAI "robusta allo spread".
+# ##      K1 != K2             =>  la riga e' onorata. SOLO ALLORA partono
+# ##                               i quattro gradini.
+# ##########################################################################
+#
+#  I GRADINI NON STANNO IN QUESTO FILE, E NON E' UN BUCO
+#    Lo spread e' un parametro di BANCO: sta nella riga Spread= dell'.ini,
+#    che la scrive il DRIVER (-Spread), non il file prova. Stessa
+#    convenzione di Deposito/Leva/Modello. Quindi: UNA cella per gradino,
+#    QUATTRO corse, e i valori sono questi, CONGELATI:
+#
+#      -Spread 0     base   (spread dei tick registrati, agli atti)
+#      -Spread 213   +25%   (1,70 idx x 1,25 = 2,125 idx)
+#      -Spread 255   +50%   (1,70 x 1,50 = 2,55 idx)
+#      -Spread 340   +100%  (1,70 x 2,00 = 3,40 idx)
+#
+#    DA DOVE ESCE L'1,70, e non e' una stima: MEDIANA MISURATA dell'ora
+#    SERVER 08 -- l'ora del motore (InpSessionHour=8 = 09:00 italiane) --
+#    su 30.974.789 tick. Fonte:
+#    risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10
+#    (ora 08: media 1,9194 | mediana 1,7000 | p95 2,7000 | max 12,0).
+#    Le ore 09 e 10, dove cade il resto dei riempimenti, hanno la STESSA
+#    mediana 1,70 ma un p95 piu' BASSO (1,90): l'ora 08 e' la peggiore
+#    delle tre, quindi la base scelta e' la piu' pessimista.
+#    Conversione DICHIARATA: 1 punto indice = 100 punti MT5
+#    (ABTG_SpreadOrario.mq5 r.57, valida sui tre indici).
+#
+#  L'ASSE, e perche' sono DUE celle e non una
+#    InpTP1_ClosePct = 50 (la cella VIVA) e 0 (il REGALO d'archivio, che
+#    in base batte la viva su PF, DD e profitto a parita' di 193
+#    posizioni). La domanda del collaudo non e' solo "la viva regge": e'
+#    anche "il regalo regge MEGLIO O PEGGIO sotto stress?". Chiudere il
+#    parziale a 0 tiene la posizione INTERA piu' a lungo, quindi il
+#    sospetto da falsificare e': "il vantaggio del regalo e' solo un
+#    pedaggio piu' basso, e sotto stress si inverte".
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- ed e' un'attesa ARITMETICA
+#    Il pedaggio di 1 punto indice su OGNI posizione e' MISURATO sui
+#    per-trade della base: il volume chiuso totale e' 3245,30 lotti
+#    (cella 50) e 3338,60 lotti (cella 0); il valore del punto di D30EUR
+#    e' 1,0 EUR per punto indice per lotto (DERIVATO e verificato: con
+#    PV=1,0 lo stop implicito rischio/lotti ha mediana 77,8 idx, contro i
+#    71,9 idx MISURATI su 7 gambe vere in trades_auto.csv; con PV=0,5 la
+#    mediana sarebbe 155,7 idx e con PV=2,0 sarebbe 38,9 idx, entrambe
+#    fuori dal misurato). Quindi 1 idx costa 3245 EUR (cella 50) e 3339
+#    EUR (cella 0) su tutta la finestra OOS.
+#
+#    OOS, cella 50 (VIVA):  base +18029,58 | PF 1,39709 | DD 7,2328%
+#      +25%  (+0,425 idx) -> profitto ~ +16650  PF ~ 1,364  DD ~ 7,45%
+#      +50%  (+0,850 idx) -> profitto ~ +15271  PF ~ 1,331  DD ~ 7,66%
+#      +100% (+1,700 idx) -> profitto ~ +12513  PF ~ 1,266  DD ~ 8,11%
+#    OOS, cella 0 (REGALO): base +23607,28 | PF 1,49140 | DD 6,2719%
+#      +25%  -> profitto ~ +22188  PF ~ 1,458  DD ~ 6,46%
+#      +50%  -> profitto ~ +20769  PF ~ 1,425  DD ~ 6,65%
+#      +100% -> profitto ~ +17932  PF ~ 1,360  DD ~ 7,03%
+#    (DD stimato = DD sui CHIUSI ricalcolato x il fattore flottante
+#     misurato al gradino base: 1,15695 per la cella 50, 1,16213 per la 0.
+#     Il numero MISURATO e' il DD di equity della base; gli altri tre
+#     sono DERIVATI e vanno letti come tali.)
+#
+#  >>> E QUESTO E' IL CONTRO-ESEMPIO DEL FILE. Se i numeri veri cadessero
+#      LONTANO da queste righe, non sarebbe "un risultato": vorrebbe dire
+#      che lo spread forzato agisce su un'altra grandezza -- il
+#      RIEMPIMENTO DEL BUY LIMIT di retest, che con l'ask piu' alto si
+#      innesca in giorni DIVERSI -- e allora cambierebbe il conteggio
+#      delle posizioni, non solo il P/L. Sentinella esplicita:
+#      >>> se 'Trades' cambia piu' del 5% fra un gradino e la base, il
+#          gradino misura la SELEZIONE e non il COSTO, e va dichiarato
+#          cosi' prima di qualunque verdetto di sopravvivenza.
+#
+#  SOGLIE: quelle congelate in COLLAUDO_DAX101_CRITERI.md par. 2.
+#    PASS a +50% = profitto > 0 E PF >= 1,10 E DD equity <= 8,0% E
+#    peggior giornata equity >= -2,50% E posizioni OOS >= 150.
+#    Niente di questo si rilegge dopo.
+#
+#  LA PEGGIOR GIORNATA DI EQUITY LA MISURA L'EA, e va detto perche' due
+#  referti la danno per [NON MISURABILE]: ABTG_DAX_Apertura_EU.mq5
+#  r.382-384 + r.616-623 campiona AccountInfoDouble(ACCOUNT_EQUITY) a
+#  OGNI tick (nessun return prima, la funzione parte a r.587) e tiene il
+#  minimo della giornata contro l'equity d'apertura; r.2283 lo scrive
+#  nella colonna 'Peggior Giornata %' del CSV. Nella base vale
+#  -1,0780% (cella 50) e -1,0793% (cella 0). RIPRODOTTI dai per-trade
+#  al quarto decimale.
+#
+#  QUANTO COSTA, nel formato di casa celle x gemelli x corse x gambe
+#    CANARINO   2 celle x 1 x 2 corse x 1 gamba (tranche unica) =  4 passate
+#    SCALA      2 celle x 1 x 4 corse x 2 gambe (IS+OOS)        = 16 passate
+#    Metro T = 0,6 + 0,077 x passate, PER ROUND (ogni -Spread e' un round):
+#      canarino  2 round x (0,6 + 0,077x2) = 1,51 min
+#      scala     4 round x (0,6 + 0,077x4) = 3,63 min
+#      TOTALE 20 passate, 6 round, 5,14 minuti
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PROVA DI REGIME: assente. 21 mesi di storico BCM su D30EUR, stato
+#      COMPLETO: UN SOLO REGIME (toro). Niente che esca di qui e' promuovibile
+#      senza una prova di regime che questo round non contiene.
+#    - LATO SHORT: la sedia e' LONG-ONLY (InpAllowShort=false nel preset).
+#      La regola dei due lati del 25/08 e' soddisfatta ALTROVE sulla stessa
+#      EA e sullo stesso simbolo (r83_csv, r118_csv, csv_r51 girano con
+#      InpAllowShort=1). Qui si collauda la SEDIA, non il motore.
+#    - SPREAD AL MINUTO dentro l'ora 08: l'istogramma e' ORARIO, e l'ora 08
+#      e' l'apertura europea, cioe' il minuto peggiore dell'ora. I rapporti
+#      stop/spread di questo round sono OTTIMISTI PER COSTRUZIONE.
+#    - PROP VERA: si collauda contro il feed e i costi di BCM. Il profilo
+#      commissioni della prop e' [NON MISURATO]. Requote e rifiuti d'ordine
+#      NON sono modellati da nessun gradino.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester le sue
+#      GlobalVariable non esistono e la guardia e' fail-open. R47 girava
+#      allo stesso modo: i numeri restano confrontabili.
+#
+#  A10  IL ROUND NON PROMUOVE NIENTE. Non cambia un preset, non accende una
+#       sedia, non tocca il forward. Taglie, rischio, accensioni e il conto
+#       reale 10105439 sono [FIRMA DI CLAUDIO].
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     e riverificata contro risultati_prove/aperture_r47/
+#     ABTG_DAX_Apertura_EU_D30EUR_OOS_r47a.csv (80 input su 80: solo
+#     InpRiskPercent e InpMagic differiscono, e qui il rischio e' 1,0
+#     come nel CSV).
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=787101
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate per gradino)
+#     50 = la cella VIVA | 0 = il REGALO d'archivio
+InpTP1_ClosePct=0||0||50||50||Y
+# ==========================================================================
