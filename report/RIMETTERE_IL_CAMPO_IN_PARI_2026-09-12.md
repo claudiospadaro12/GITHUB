@@ -305,6 +305,26 @@ pieni). 👉 ✅ **NON MORDE. Verde confermato.**
 esattamente 2×**, e il P/L misurato dà **1,42% su un contratto 1,0%**.
 👉 🔴 **MORDE, e il meccanismo è confermato da un secondo calcolo indipendente.**
 
+### 5.3-ante ✅ **LA PROVA DIRETTA DI #3 E #4, per grep, non per data**
+Le date dei commit dicono *quando*. Ho voluto la prova che dice *cosa*:
+
+| oggetto | comando | atteso | ottenuto |
+|---|---|---|---|
+| `DAX_Apertura_EU` @ `3af47ed` (**in campo**) | `grep -c storicoOk` | 0 | **0** ✅ |
+| `Dow_Apertura_US` @ `3af47ed` (**in campo**) | idem | 0 | **0** ✅ |
+| `Nasdaq_Apertura_US` @ `3af47ed` (**in campo**) | idem | 0 | **0** ✅ |
+| `DAX_Apertura_EU` @ `9638318` (**bersaglio**) | idem | >0 | **7** ✅ |
+| `Dow_Apertura_US` @ `d83c196` (**bersaglio**) | idem | >0 | **7** ✅ |
+| `Nasdaq_Apertura_US` @ `d83c196` (**bersaglio**) | idem | >0 | **7** ✅ |
+
+👉 **La guardia A4 è assente dai tre binari in campo e presente nei tre
+bersagli. Non è un'inferenza dalle date: è un conteggio.**
+E per **#4** la stessa cosa sul blocco del breakeven: nel blob **in campo**
+(`0823951`, r.301-303) il `PositionModify` di pareggio è **dentro**
+`if(cv>0 && cv<vol && PositionClosePartial(...))`; nel repo di oggi (r.422-430)
+`parzOK` è un **bool separato** e `beFatto` non dipende da lui. 👉 **Il difetto
+c'è nel campo e la cura c'è nel bersaglio, letti entrambi.**
+
 ### 5.3 #3, la guardia A4 — *"è un difetto solo al riavvio"*
 **Il caso in cui non morde:** (a) se `InpOneTradePerDay=false` il blocco non
 gira affatto; (b) serve un riavvio con lo storico non ancora sincronizzato.
