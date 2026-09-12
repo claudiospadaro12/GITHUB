@@ -16430,3 +16430,134 @@ legge domani trova un `FERMO` su un file che **e' girato**.
 vecchia: e' una contraddizione firmata.** Si sostituisce con la **CONDIZIONE**
 (*"va in coda SOLO se la riga successiva e' CODA_12"*), che resta vera anche
 dopo.
+
+---
+
+## 281. 🎭 IL `-SoloControllo` CHE **MENTE SUL MODELLO**: l'anteprima scrive `Model=4` **fisso**, e il pre-volo stampa "tick reali" anche a `-Modello 1` (12/09/2026)
+
+**Trovato dal cancello di giudizio sui sette round di stanotte, e trovato
+FACENDO quello che il mandato chiedeva**: *"ricava le finestre ESEGUENDO il
+driver scaricato da raw con `-SoloControllo`, non leggendo i commenti."*
+Eseguendolo, è uscito questo.
+
+```text
+walkforward_generico.ps1  r.1000   Model=4           <<< l'.ini di ANTEPRIMA (-SoloControllo): COSTANTE
+walkforward_generico.ps1  r.1654   Model=$Modello    <<< l'.ini VERO della corsa: corretto
+walkforward_generico.ps1  r.880    "... pass a tick reali in tutto"   <<< stampato SEMPRE
+walkforward_generico.ps1  r.890    "... pass a tick reali in tutto"   <<< stampato SEMPRE
+```
+
+🔴 **Il ramo di verifica a secco dichiara un modello DIVERSO da quello che
+girerà**, e non tace: **afferma il valore sbagliato**. Lanciando
+`-Modello 1` su tre file prova, il pre-volo ha stampato *"6 pass a **tick
+reali**"* — ed erano **OHLC M1**.
+
+🟢 **La corsa vera NON è sbagliata**: l'`.ini` che viene eseguito (r.1654) usa
+`$Modello`. Nessun round ha mai girato col modello sbagliato per questa causa.
+
+🔴 **MA È IL POSTO PEGGIORE DOVE POTEVA STARE.** La **classe 273**
+(`-Modello 4` = tick reali, `-Modello 1` = OHLC M1) è stata pagata **TRE volte
+il 12/09/2026**. Lo strumento che si usa per **verificarla in anticipo** è
+**cieco proprio su quella variabile**. 👉 **Un controllo che conferma il falso
+è peggio di un controllo che manca**: è la stessa causa del 10/09 —
+*"avevo controllato che la mia risposta fosse COERENTE con quello che mi
+aspettavo, invece di provare a ROMPERLA"*.
+
+📌 **Il difetto è generale, non è questa riga**: quando un ramo "a secco"
+esiste per **anteprima**, ogni valore che quel ramo scrive **costante** invece
+di prenderlo dal parametro diventa una **bugia certificata**. Il `Model=4` di
+r.1000 era giusto il giorno in cui a Modello 4 girava tutto; è diventato un
+difetto il giorno in cui è nato `-Modello 1`.
+
+### ✅ CHE COSA SI FA
+1. 🔍 **Chi usa `-SoloControllo` per verificare un round NON può leggerne il
+   modello.** Finestre e conteggio celle sì (quelli sono calcolati dal codice
+   vero, r.919-935). Il modello **si verifica altrove**: r.1654, più il
+   confronto fra la riga di coda e il banco dichiarato nel file prova.
+2. 🚫 **Non si corregge "di passaggio".** `walkforward_generico.ps1` è
+   **inchiodato al byte** da `$SHA_WALK` dentro `RIGA_SOTTILE_ROUND.ps1`: un
+   solo byte diverso — **anche in un commento** — e `function Prendi` chiama
+   `Muori`, e **OGNI round in coda muore**, compresi quelli di altri. La toppa
+   va in un **giro di pin DEDICATO** (`Model=$Modello` a r.1000 e la stringa
+   condizionata a r.880/890), con la ricalcolatura di `$SHA_WALK`.
+3. 📐 **Regola che ne esce, e vale per ogni ramo di anteprima**: *un ramo a
+   secco non scrive MAI un valore costante dove la corsa vera usa un
+   parametro.* Se non lo può leggere, **lo dichiara `[NON NOTO]`** invece di
+   inventarne uno.
+
+🔑 **E la contro-prova che questo non è un sospetto**: la differenza è di **una
+sola riga su due** nello stesso file, `Model=4` contro `Model=$Modello`.
+Entrambe le righe generano un `.ini` con lo stesso nome di chiave. **Solo una
+delle due viene eseguita dal tester**, e non è quella che l'operatore legge.
+
+---
+
+## 282. 🕯️ LA PROFONDITÀ **TICK** DEDOTTA DA UNA SONDA DI **BARRE**: uno stato `COMPLETO` non è un permesso per `-Modello 4` (12/09/2026)
+
+**Caso reale**: `R138a_gemello_F40EUR_770101.txt`, round a **`-Modello 4` (tick
+reali)** su `F40EUR` dal `2024.09.26`. Giustifica la finestra così:
+> *"LO STORICO C'È. F40EUR è fra i 12 simboli misurati dalla sonda del 17/08
+> con prima data 2024.09.26 e stato COMPLETO."*
+
+🔴 **Ma quella sonda misura BARRE H1, non TICK.** La riga, per intero:
+```text
+F40EUR,CAC 40 Index CFD,2,0.01000000,10.00,0.10000,0.10000000,170,H1,6713,2024.09.26,481,2024.09.26,COMPLETO
+                                                                  ^^ ^^^^ ^^^^^^^^^^            ^^^^^^^^
+                                                                  TF  barre  prima data          stato
+```
+`risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv` r.68.
+**Non c'è nessuna colonna di tick.**
+
+🔑 **E la casa CONOSCE la distinzione** — sul forex ha misurato **due pavimenti
+diversi**, ed è per questo che il difetto è tanto più insidioso sugli indici:
+```text
+forex, pavimento BARRE : 1999.01.04   MISURATO (R102_REFERTO_BLOCCO1)
+forex, pavimento TICK  : 2024.07.05   MISURATO su GBPUSD     <<< 25 anni di differenza
+```
+Sugli **indici** i due numeri sono stati **confusi**, e nessuno se n'era
+accorto per una ragione che assolve chi l'ha scritto: su `D30EUR` una corsa a
+**tick** su **quella stessa finestra** era **già andata a buon fine** (R47a,
+270 deal). Quindi l'inferenza *"D30EUR parte dal 26/09/2024 a tick → F40EUR
+pure, la sonda dice COMPLETO"* **sembra** verificata. **Non lo è**: è
+verificata **su un altro simbolo**.
+
+### 🔴 PERCHÉ MORDE: IL VERSO DELL'ERRORE È QUELLO CATTIVO
+Un buco di tick **non fa sbagliare il PF in su**: fa **sparire operazioni**.
+Quindi **abbassa la frequenza**. E su `R138a` la **frequenza è l'UNICO
+criterio** (`F1`: ≥ 0,28 posizioni/giorno feriale in OOS, cioè il numero che
+porta la famiglia al pavimento di 1,00).
+👉 **Esito**: `F1` fallisce, il referto sembra dire *"il CAC è più lento del
+DAX"* — che è anche la **previsione scritta nel file**, quindi **conferma
+l'attesa** — e il verdetto *"R3 resta rotto, serve un TERZO simbolo"* sarebbe
+**un falso negativo prodotto da un buco di dati**. Un round che chiude un
+requisito della **seconda sedia** perso su una colonna di CSV letta per
+un'altra.
+
+### ✅ CHE COSA SI FA
+1. 📏 **Uno stato `COMPLETO` in una sonda di BARRE non autorizza `-Modello 4`.**
+   Sono **due profondità diverse** e vanno nominate diverse: *"storico barre
+   H1 COMPLETO dal … (MISURATO); profondità TICK **[NON MISURATA]**"*.
+2. 🆓 **La contromisura costa ZERO e va letta SEMPRE**: il driver stampa la
+   **prima e l'ultima operazione**, e `CODA_12` stampa `close_time dal … al …`.
+   **Se non coprono la finestra dichiarata, la frequenza NON si legge come un
+   fatto sul mercato.** Il driver lo grida già da solo, a r.937-938:
+   > *"Lo storico di $Simbolo parte DAVVERO dal $DaQuando? Se non l'hai
+   > MISURATO, fermati: sugli indici diceva 2024.01.01 e partiva dal 26/09/2024."*
+   👉 Quell'avviso esiste **proprio per questo**, ed era stato letto come
+   soddisfatto da una sonda che risponde a un'altra domanda.
+3. 🚫 **NON è un motivo per bocciare il round**, e va detto: i tre indici
+   (`D30EUR` 10.553 barre, `F40EUR` 6.713, `U30USD` 10.859) hanno **la stessa
+   data d'inizio** e **lo stesso stato** nella stessa sonda, e su uno dei tre
+   il tick su quella finestra **è provato da una corsa finita**. L'inferenza è
+   **ragionevole**. Va **dichiarata**, non rimossa.
+4. 🔎 **E un numero gratis che stava già nella sonda**: `F40EUR` ha **6.713**
+   barre H1 contro le **10.553** di `D30EUR` sullo **stesso periodo** — il
+   **64%**. Chi dichiara *"mi aspetto che il CAC sia più lento"* ha già lì un
+   pezzo di conferma, e chi legge la frequenza domattina deve sapere che
+   **parte di quel 64% potrebbe essere copertura dati, non mercato**.
+
+🔑 **La regola in una riga**: *la profondità dei dati si misura NELLA STESSA
+UNITÀ in cui la corsa li consumerà.* Tick per `-Modello 4`, barre M1 per
+`-Modello 1`. Una sonda che risponde a una domanda diversa non è una misura
+sbagliata: è **la misura di un'altra cosa**, ed è per questo che passa
+inosservata.
