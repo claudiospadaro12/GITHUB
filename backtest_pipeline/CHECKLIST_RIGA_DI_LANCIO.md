@@ -14814,3 +14814,119 @@ legge, e' **una riga da incollare**.
 una riga che dice **"questo non si incolla da nessuna parte"**. Il cancello ha
 ragione a bocciare: in un referto che Claudio legge, un blocco `powershell` e'
 un invito.
+
+---
+
+## 255. 🪞 LA GUARDIA CHE RICONTROLLA LA STRINGA SU CUI HA APPENA FATTO MATCH (12/09/2026)
+
+**Il caso.** `backtest_pipeline/righe/RIGA_SALVA_BROKER_ESTERNI.ps1` v1 (lo
+script che salva Pepperstone e Tickmill prima che Claudio li disinstalli) ha
+**due** cancelli anti-BCM. Il secondo, a valle della risoluzione della cartella
+dati, e' questo:
+
+    $dati = ... | Where-Object { (Get-Content origin.txt).Trim() -ieq $p }   # match ESATTO
+    ...
+    $orig = (Get-Content (Join-Path $d 'origin.txt')).Trim()
+    foreach ($v in $VIETATI) { if ($orig -like ('*' + $v + '*')) { $brutto2 = $true } }
+
+🔴 `$orig` **e' la stessa stringa su cui il filtro ha appena fatto match**: per
+costruzione `$orig -ieq $p`. Quindi il cancello 2 non puo' fallire se non
+fallisce anche il cancello 1, che gira su `$p` — e `$p` viene da una lista
+scritta a mano che non contiene nessuno dei quattro nomi vietati. **Le due
+guardie sono tautologicamente false: 14 righe che non possono dire no.**
+
+E il buco che lasciano aperto e' proprio quello che sembrano chiudere: se una
+cartella dati **BCM** avesse nel suo `origin.txt` il percorso del bersaglio,
+il filtro la sceglierebbe e il cancello 2 — che rilegge **quello stesso
+`origin.txt`** — direbbe *"non e' un BCM"*. (Probabilita' bassa: `origin.txt`
+lo scrive MT5. Ma la guardia esiste per i casi improbabili: se copre solo
+quelli probabili, non serve.)
+
+📌 **La regola: una guardia deve misurare un fatto INDIPENDENTE da quello che
+ha usato per scegliere.** Se sceglie per `origin.txt`, deve verificare con
+qualcos'altro. Qui il fatto indipendente esisteva gia' in casa:
+`RIGA_ALLINEALONDRA.ps1:854` riconosce un terminale BCM da **`bases\*BCM*`**,
+cioe' dal **feed**, che non dipende da nessun percorso scritto in un file di
+testo. Correzione: si tengono tutte e due, e si **dichiara** che la prima
+puo' solo confermare.
+
+🪞 **E' la classe del 10/09 (*"avevo controllato che la mia risposta fosse
+COERENTE con quello che mi aspettavo, invece di provare a ROMPERLA"*) scritta
+in codice**: qui non e' un agente a confermarsi da solo, e' un `if`.
+👉 Domanda da fare a ogni guardia nuova: **esiste un input che la fa dire NO?**
+Se non si riesce a costruirlo, la guardia non e' severa: e' finta.
+
+---
+
+## 256. 📦 LA RACCOLTA CHE APPIATTISCE LE SOTTOCARTELLE: gli omonimi si sovrascrivono in silenzio, e il numero stampato e' quello TROVATO (12/09/2026)
+
+**Il caso.** Stesso script, tre cicli di copia su tre alberi `-Recurse`, ma
+destinazione **piatta**:
+
+    $out = Join-Path (Join-Path $dst 'EX5_SENZA_SORGENTE') ($sub + '_' + $x.Name)   # solo il NOME
+    $out = Join-Path (Join-Path $dst 'Presets') $x.Name                              # solo il NOME
+    ...
+    Copy-Item -LiteralPath $x.FullName -Destination $out -Force
+    Nota ('    Presets: ' + $s.Count + ' file .set salvati')                         # conta i TROVATI
+
+**Misurato il 12/09** su un albero di prova con due `Breakout.ex5` orfani in
+`Experts\Vendor_A` e `Experts\Vendor_B` e due `taglia.set` in `Presets\setA` e
+`Presets\setB`:
+
+| | stampato | sul disco |
+|---|---:|---:|
+| originale | `EX5 SENZA SORGENTE 2` + `Presets 2 file .set salvati` | **2 file su 5** |
+| corretto (struttura conservata) | `3` orfani | **5 file su 5** |
+
+🔴 **Tre file su cinque persi, e la console diceva che erano salvati.** In piu'
+**quale** dei due omonimi sopravvive dipende dall'ordine di enumerazione del
+filesystem: non e' una scelta, e' un sorteggio (echo della **246**). Qui il
+danno e' definitivo: lo script serve a salvare i sorgenti **prima di
+disinstallare il terminale**.
+
+📌 **Due regole, e servono tutte e due:**
+1. **Una copia `-Recurse` si scrive in una destinazione `-Recurse`**: il
+   percorso relativo si conserva (`$x.FullName.Substring($src.Length)`), come
+   il ciclo dei sorgenti dello stesso file faceva **gia' giusto** tre righe
+   sopra. 👉 Quando due cicli vicini nello stesso file usano due schemi
+   diversi, uno dei due e' sbagliato (**236**, stessa forma).
+2. 🔢 **Il numero che si stampa e' quello SALVATO, non quello TROVATO**, e se
+   sono diversi si stampano **entrambi in rosso**. Un `-Force` su una
+   destinazione appiattita e' l'unico tipo di perdita che **non lascia
+   nessuna traccia**: nessun errore, nessun warning, e un contatore che
+   rassicura.
+
+---
+
+## 236-bis. 🩹 `[ \t]*$` SU UN FILE CRLF: LA CORREZIONE DELLA 236 NON BASTA SE IL PATTERN E' ANCORATO IN CODA (12/09/2026)
+
+**Il caso, e l'ho fatto io correggendo la 236 alla lettera.** Scrivendo la v1.1
+di `RIGA_SALVA_BROKER_ESTERNI.ps1` ho applicato la regola della **236**
+(*"dentro un formato a righe gli spazi si scrivono `[ \t]`, mai `\s`"*) al
+regex del magic, e l'ho anche **ancorato in coda** per essere piu' severo:
+
+    '(?mi)^[ \t]*[A-Za-z_]*Magic[A-Za-z_]*[ \t]*=[ \t]*([0-9]+)[ \t]*$'
+
+Provato su un `.chr` di prova costruito a posta (UTF-16, `InpMagic=770777`):
+**magic = `-`**. Zero match, su tutte le righe.
+
+🔴 **Perche':** i `.chr` hanno fine riga **CRLF**, e in .NET `$` in modo
+multilinea si piazza **prima del `\n`** — quindi il `\r` resta da consumare, e
+`[ \t]` non contiene `\r`. La `Campo()` di casa **non** ha questo difetto per
+un motivo che non e' l'ancora: il suo `(.*?)` ingoia il `\r` e poi c'e' un
+`.Trim()`. Cioe' **la forma buona della 236 funziona solo finche' il gruppo
+catturato e' permissivo**; appena si stringe la cattura (`[0-9]+`), l'ancora
+in coda diventa un muro.
+
+📌 **La regola: in un formato a righe con CRLF, la classe di chiusura e
+`[ \t\r]*$`, oppure non si ancora in coda e si valida dopo.** E il modo di
+scoprirlo e' UNO: il **contro-esempio col file vero fatto a mano**. Il parser
+era contento, il cancello deterministico dava sei verdi su sei, `pwsh` diceva
+0 errori. Il difetto e' uscito solo costruendo il `.chr` e leggendo il
+risultato.
+👉 **Un regex non si consegna mai "perche' segue la regola": si consegna
+perche' ha girato su un dato che somiglia al vero.** (E qui il dato vero c'e'
+gratis: basta far girare la stessa funzione delle `CODA_*`, che su quel
+formato ha gia' pagato quattro difetti.)
+
+---
