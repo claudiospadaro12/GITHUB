@@ -139,3 +139,84 @@ slippage vero su 5 deal.
 misura**, non una sedia in piu'. Le due sedie candidate (`771531` EMA200 Dow L+S e
 `770101` DAX M5 long) sono le stesse di stamattina — **meglio misurate, non piu'
 numerose**. Il primo numero di mercato dai round arriva col referto delle **03:30**.
+
+---
+
+# 🔴 ERRATA DELLE 21:40 — DUE DELLE QUATTRO FIRME NON SI FIRMANO
+
+Il resoconto qui sopra, scritto alle 21:00, presentava quattro manopole come
+"firme pronte". **Un'ora dopo, due sono cadute e una è cambiata di segno.**
+Tutto misurato, e verificato da me alla fonte.
+
+## 1️⃣ `InpMaxSpread=0` — la mia tesi era **falsa per POPOLAZIONE**
+Avevo scritto: *"nelle ore cash D30EUR non ha coda (max = P95 = 1,700), quindi un
+tetto sarebbe quasi inerte"*. Quel numero viene dal **logger vivo: 5 giornate,
+campionate nel TEMPO** (ogni 5 s).
+🔴 **Il tick storico dello STESSO feed su cui R47 ha girato** dice un'altra cosa —
+`risultati_archivio/spread_flotta/spread_orario_D30EUR.csv`, verificato da me:
+
+| ora server | tick | mediana | p95 | **MAX** |
+|---|---:|---:|---:|---:|
+| 07 | 746.714 | 2,80 | 4,10 | 🔴 **19,10** |
+| **08** ← dove la sedia spara | **1.847.049** | 1,70 | **2,70** | 🔴 **12,00** |
+| 09 | 2.391.503 | 1,70 | 1,90 | 11,90 |
+
+👉 **A 12,00 punti indice il 95,9% delle geometrie della sedia sta SOTTO il pavimento
+duro 13,3x**, e la mediana crolla a **6,5x**. Con la manopola a **0** la sedia
+entra lì. 🔴 **Cinque giornate campionate nel tempo non contenevano quei giorni.**
+👉 Verdetto onesto: **`[NON MISURATO]`**, non "inerte". E serve il round.
+🔑 Più un fatto di codice che nessuno aveva scritto: nel ramo RETEST `SpreadOK()` è
+chiamata **una sola volta**, alle **08:35 server** dentro `ArmRetest()` →
+**protezione parziale per costruzione**: non copre il riempimento né l'uscita.
+
+## 2️⃣ `A1 tetto posizioni` — **BOCCIATO. RESTA A ZERO.**
+Avevo scritto: *"il codice esiste già, zero righe, manca solo una firma"*.
+🔴 **Falso come raccomandazione.** Misurato da me su `trades_auto.csv`:
+```
+posizioni D30EUR sul demo: 163, su 14 MAGIC DISTINTI
+giornate con posizioni: 50
+  tetto 1 -> 28 giornate su 50 = 56,0% perse
+  tetto 2 -> 20 su 50 = 40,0%     tetto 3 -> 30,0%     tetto 4 -> 24,0%
+```
+**A1 conta le posizioni sul SIMBOLO, da TUTTI gli EA.** Un tetto a 1 su D30EUR
+bloccherebbe `770101` ogni volta che uno degli altri 13 magic è già dentro — e
+**quattro EA sparano fra le 08:00:00 e le 08:00:45**, dentro la finestra di
+costruzione del range di `770101`.
+👉 **Dimezzerebbe la frequenza, che è il requisito principale.** Non si firma.
+📌 *(L'agente misura 53,6% su una finestra di 28 giornate, io 56,0% su tutte e 50:
+è una differenza di POPOLAZIONE, non un errore — e la conclusione è la stessa.)*
+🟢 E il difetto che il tetto doveva curare **è già chiuso da solo**: le 6 co-sparate
+stanno **tutte fra il 28/07 e il 06/08**; dal 07/08 sono **16 giornate, 16 posizioni,
+una al giorno**.
+
+## 3️⃣ `InpSlippagePts` e `InpMinStopPts` — restano **entrambe a 0**, e per due ragioni opposte
+- `InpSlippagePts` è usato **solo nel ramo BREAKOUT**. L'ingresso RETEST non lo
+  contiene → **inerte per costruzione, a qualunque valore**.
+- 🔴 `InpMinStopPts`: **qui avevo il segno sbagliato.** Il gruppo che un floor
+  taglierebbe ha **PF > 1,00 a ogni livello** (a F=30 idx: 6 posizioni, **PF 4,888**),
+  e **il famoso 19,7% sotto il pavimento duro ha PF 1,358**. 👉 **Non va difeso:
+  PORTA il motore.** Un floor lo amputerebbe.
+
+## 4️⃣ 🎁 `InpTP1_ClosePct 50→0` — **resta RACCOMANDATO, con riserva**
+Regge con **entrambe** le basi di spread (la storica 1,7054 e la viva 1,6000) a tutti
+e quattro i gradini. Esposizione: in **tempo ZERO** (`close_time` identico in
+**191/193**), in **taglia il doppio per 8,6 minuti mediani** su 77/193, tutto dentro
+la seduta. **Muro giornaliero invariato**: −0,7015% contro il 4,9%.
+🔑 E una causa nel codice: **a `ClosePct=0` il breakeven al 1° obiettivo non scatta
+MAI**, perché annidato dentro il ramo della parziale. Va misurato (file prova pronto).
+
+## 🔴 E un'ERRATA a un referto di stamattina
+`INDURIMENTO_PROP_DUE_SEDIE` §11 diceva *"il regalo batte la viva a tutti e quattro i
+gradini su PF, DD **e peggior giornata**"*: **falso sulla peggior giornata a 3 gradini
+su 4** (−1,0780 contro −1,0793). Causa misurata: **arrotondamento `MathFloor` del
+lotto** = **0,00128 punti**. Non è rischio, è aritmetica — ma la frase era sbagliata.
+
+## 🧾 QUINDI, COSA ASPETTA DAVVERO CLAUDIO
+| | prima dicevo | **adesso** |
+|---|---|---|
+| `InpMaxSpread` | *"firma un tetto"* | 🔴 **`[NON MISURATO]`** — prima il round (1 round, 1,52 min) |
+| `A1 tetto` | *"protezione gratis"* | 🔴 **BOCCIATO**, resta 0 |
+| `InpMinStopPts` | *"difende il 19,7%"* | 🔴 **segno invertito**: quel 19,7% porta il motore |
+| `InpTP1_ClosePct 50→0` | raccomandato | 🟢 **resta raccomandato**, con il BE da misurare |
+
+👉 **Da quattro firme a UNA**, e due round da 2,74 minuti per guadagnarne un'altra.
