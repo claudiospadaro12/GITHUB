@@ -447,8 +447,48 @@ $BancoBT = 'C:\MT5_Backtest'
 #  Il beneficio dell'ordine PER LA LETTURA e' invece ZERO (classe 274:
 #  W() accumula in memoria, il referto nasce dopo la fine del ciclo).
 #  Referto: report\EMA200_IS_IN_CODA_2026-09-12.md
+#
+#  >>> QUATTORDICESIMO GIRO (12/09/2026) -- SETTE FILE PROVA NUOVI. <<<
+#  Prima era 69e252b3c4605ba316d28a572296e0c54841b25f (tredicesimo giro).
+#  Cambia per la ragione di SEMPRE, quella scoperta da un 404 il 12/09:
+#  il file prova lo scarica IL DRIVER, da QUESTO $PIN
+#  (RIGA_ROUND_VPS.ps1 r.600). Un file prova che a questo pin non esiste
+#  fa morire il round su un 404, e la notte e' persa. I sette che entrano
+#  in coda con questo giro:
+#      R137a_floorstop_allarga_770101_D30EUR.txt   (7 celle)
+#      R137b_floorstop_salta_770101_D30EUR.txt     (7 celle)
+#      R137c_parziale_770101_D30EUR.txt            (2 celle)  <<< il cancello
+#      R138a_gemello_F40EUR_770101.txt             (2 celle)
+#      R139a_EMA200_AUDJPY_H4_LS.txt               (4 celle)
+#      R139b_EMA200_GBPUSD_H4_LS.txt               (4 celle)
+#      R139c_FIBOH4_GBPUSD_unsimbolo.txt           (3 celle)
+#  29 celle, 58 passate. Tutti e sette VERIFICATI a 200 su raw a questo
+#  pin, e byte-identici alla copia locale; piu' due controlli NEGATIVI a
+#  404 (nome inesistente allo stesso pin, e nome buono a un pin di zeri),
+#  perche' senza quelli i 200 non dicono niente.
+#
+#  >>> UN SOLO VALORE CAMBIA, ANCHE QUESTA VOLTA: $PIN. <<<
+#  $SHA_WALK e $SHA_ROUND NON si toccano, ed e' MISURATO PRIMA di
+#  spostare il pin, non assunto. Al pin nuovo 23314d61:
+#      walkforward_generico.ps1 -> 15DE7D5F...6828F1C6  (= $SHA_WALK)
+#      RIGA_ROUND_VPS.ps1       -> 348ED533...9D0A315B  (= $SHA_ROUND)
+#  misurate DUE volte e in DUE modi: sul blob git (git show | sha256sum)
+#  e sul file SCARICATO DA raw a questo pin. Le quattro impronte
+#  coincidono. Se una non combaciasse, 'function Prendi' chiamerebbe
+#  Muori e OGNI round morirebbe sull'impronta -- compresi i 19 vecchi.
+#  NIENTE ALTRO E' CAMBIATO: $MARC_WALK, $MARC_ROUND, il param(), la
+#  function Pulito e il $BancoBT restano quelli letti a mano.
+#
+#  E LE SETTE RIGHE NUOVE VANNO **PRIMA** DI CODA_12, NON IN FONDO.
+#  Non e' una preferenza, e' una misura: CODA_12 conta i per-trade che
+#  trova in Common\Files, e li conta di TUTTI i round girati PRIMA di
+#  lei. Messe prima, i sette si portano a casa GRATIS il conteggio in
+#  POSIZIONI (classe 226: la colonna Trades conta i DEAL di uscita) e il
+#  confronto dei GEMELLI di R138a. Messe dopo, CODA_12 non li vede.
+#  Il beneficio dell'ordine PER LA LETTURA resta ZERO (classe 274).
+#  Referto: report\SETTE_IN_CODA_2026-09-12.md
 # ---------------------------------------------------------------------
-$PIN = '69e252b3c4605ba316d28a572296e0c54841b25f'
+$PIN = '23314d61d26ea7e15c01462e4c4549291cf6684d'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
