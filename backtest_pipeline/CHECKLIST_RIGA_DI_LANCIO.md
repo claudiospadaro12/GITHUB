@@ -14559,3 +14559,130 @@ lo raccoglie il `catch` (referto + zip), e **dove il `try` non c'e' termina lo
 script comunque**: e' sicuro in tutti e due i casi, `exit` in uno solo.
 Convertiti **83 file** (tutti, non solo i 30: la conversione e' sempre
 migliore), parser vero **0 errori**.
+
+---
+
+## 251. 🕰️ IL TERZO ASSE: NON IL VERBO, NON L'OGGETTO — IL **CANALE** E IL **MOMENTO** (12/09/2026)
+
+Chiusi i **verbi** (classe 248: `Stop-Process`, `CloseMainWindow`, `.Kill()`,
+`taskkill`, WMI) e l'**oggetto** (classe 250: i `.chr`, cioe' le taglie), la
+domanda che restava era: **c'e' un terzo asse?** Si': **da quale canale entra
+il codice, e chi c'e' davanti quando gira.**
+
+### 🔴 IL CASO VIVO: `aggiorna_news.ps1`, ogni mattina alle 07:20, senza nessuno davanti
+Attivita' pianificata **`ABTG_AggiornaNews`** (`setup_news_task.ps1:18`, daily
+07:20). Lo script che esegue:
+```
+$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" }
+$Dest = Join-Path $FilesDir "abtg_news.csv"
+Invoke-WebRequest -Uri $RawUrl -OutFile $Dest -UseBasicParsing -TimeoutSec 30
+```
+1. il bersaglio e' **il PICCOLO 50503392, quello con le SEDIE VIVE**;
+2. il file e' **`abtg_news.csv`**, cioe' **esattamente quello che le sedie vive
+   leggono** (`InpNewsFile=abtg_news.csv` in ogni prova e in ogni preset del
+   reale; letto in `ABTG_ApertureCore.mqh:282` con
+   `FileOpen(InpNewsFile, FILE_READ|FILE_CSV|FILE_ANSI, ';')`);
+3. 🔴 **`-OutFile $Dest` scrive DIRETTAMENTE sul file di destinazione**: niente
+   cartella temporanea, niente copia di sicurezza, nessuna validazione prima di
+   sostituire. Un download che parte e si spezza a meta' lascia
+   `abtg_news.csv` **troncato**; e se falliscono tutti e 4 i tentativi,
+   `exit 1` arriva **dopo** che il primo tentativo ha gia' azzerato il file.
+4. il controllo `$n = (Get-Content $Dest | Measure-Object -Line).Lines` **non
+   decide niente**: lo stampa. E in un'attivita' pianificata **il `Write-Host`
+   va nel nulla.** Zero log, zero referto.
+
+👉 **Un `abtg_news.csv` troncato non e' un guasto rumoroso: e' una misura
+sbagliata su un conto vivo.** L'EA carica meta' calendario, entra nelle
+finestre che doveva saltare, e **nessuno lo sa** perche' non c'e' niente da
+leggere la mattina dopo.
+🚨 E questo file **e' stato toccato ieri** dalla riparazione di massa (ha il
+`throw` della classe 249 a r.39): la passata di riparazione gli e' **passata
+sopra senza accorgersi che gira da solo su un conto vivo.**
+
+### 🔴 I QUATTRO CANALI, e i cancelli ne guardano UNO
+| canale | vagliato da | esito |
+|---|---|---|
+| `CODA.txt` -> runner | G1-G4 + `controlla_riga.py` + agente | ✅ |
+| righe incollate a mano | `controlla_riga.py` + agente | ✅ (per processo, non per macchina) |
+| **5 attivita' pianificate** (`ABTG_Runner` 03:30, `ABTG_AggiornaNews` 07:20, `ABTG_Pagella` 23:15, `ReportMercatoGiornaliero` fer. 07:00, `ReportSettimanaleTrading` sab. 09:00) | **nessuno** | 🔴 |
+| `$EABranch="lavoro"`: l'`.mq5` compilato viene dalla TESTA, non dal pin | nessuno (dichiarato) | 🔴 |
+
+E il buco strutturale dentro il canale che crediamo protetto: **il runner
+vaglia la coda, ma NESSUNO vaglia il runner installato.** L'impronta di
+`C:\ABTG\runner_abtg.ps1` si confronta col pin **una volta sola**, nel momento
+dell'installazione (RIGA 2A). Dopo, quel file gira alle 03:30 come un file
+qualunque, e **nessuna riga di coda ne stampa l'impronta** (verificato: zero
+`CODA_*.ps1` nomina `C:\ABTG`, `ABTG_Runner` o `schtasks`).
+
+**La regola.** 👉 **Un censimento delle armi ha TRE assi: il VERBO (chi
+agisce), l'OGGETTO (su cosa) e il CANALE (da dove entra, e chi c'e' davanti).**
+Il terzo e' il piu' facile da dimenticare perche' non compare in nessun grep:
+un'attivita' pianificata e' **una riga di lancio che nessuno rilegge piu'**.
+📌 **E il criterio di rischio non e' "cosa fa" ma "chi legge se e' andata
+storta".** Uno script interattivo che sbaglia lo vedi; lo stesso script in Task
+Scheduler che sbaglia **non lo vede nessuno** — quindi per lo stesso codice il
+canale non-presidiato e' **piu' grave**, non meno.
+
+✅ **Tre correzioni, in ordine:**
+1. `aggiorna_news.ps1`: scaricare in un **temporaneo**, validare (righe > soglia,
+   intestazione attesa), **poi** sostituire con copia `.prima`; e scrivere un
+   **log datato** che una riga di coda pubblica, cosi' la mattina si legge.
+2. Una **riga di coda di sola lettura** che stampa ogni notte: `schtasks /Query`
+   di tutte e 5 le attivita' + l'**impronta SHA-256** di
+   `C:\ABTG\runner_abtg.ps1`. Un cambiamento si vede il giorno dopo, non al
+   prossimo pacchetto.
+3. `aggiorna_news.ps1` deve **nominare** il terminale (`-TerminaleDati`
+   obbligatorio, come la classe 250), non cercarlo.
+
+### ✅ E i canali che ho cercato e NON esistono (misurati, non assunti)
+`GlobalVariableSet` in MQL5 come canale di comando: **0** negli include ABTG ·
+letture `FILE_COMMON` da parte degli EA: **0** (il file news lo leggono dal
+**proprio** `MQL5\Files`, non da `Common\Files`) · quindi le 3 scritture in
+`Terminal\Common\Files` (`RIGA_POSTNEWS_*:990/1136/1167`) **non raggiungono
+nessun EA vivo**: nome file diverso (`abtg_news_postnews_2010_2025_UTC.csv`) e
+flag diverso. 🔴 **Questa era la mia ipotesi principale ed era SBAGLIATA**: l'ho
+scartata leggendo il sorgente MQL5, non ragionandoci sopra.
+
+---
+
+## 252. 🔁 IL `throw` MESSO DAVANTI A UN `return`: il ripiego LEGITTIMO che non viene piu' provato (12/09/2026)
+
+**Il caso.** La conversione `exit` -> `throw` (classe 249) e' giusta in 83 file
+su 84. **In uno no**, e la causa e' che il blocco e' stato inserito **dentro una
+funzione il cui gestore d'errore era un `return`, non un'uscita.**
+
+`righe/RIGA_MISURA_TICK_NASUSD.ps1`, `function TrovaCsvDati()` (r.174-205):
+```
+  throw "Terminale non trovato ... e questo script scrive e compila dentro il terminale che sceglie."   <- r.194, NUOVO
+  if(-not $cand){ return $null }                                                                       <- r.196, ORIGINALE, ora MORTO
+```
+e il chiamante, r.209-211:
+```
+$c1 = TrovaCsvDati
+if($c1){ $candidati += $c1 }                                          <- gestisce il null
+$candidati += (Join-Path $Dsk "storico_bcm\ABTG_StoricoScaricato.csv")  <- IL RIPIEGO LEGITTIMO
+```
+👉 "Terminale non trovato" **non era fatale**: la funzione tornava `$null`, il
+chiamante saltava quel candidato e provava **la copia sul Desktop**, e la misura
+andava avanti. Adesso il `throw` **uccide lo script** e il secondo candidato
+**non viene mai provato**.
+📌 E il messaggio del `throw` **dice il falso proprio qui**: `TrovaCsvDati`
+**non scrive e non compila** (verificato r.174-205: zero `Copy-Item`,
+`Set-Content`, `Out-File`, `/compile:`) — **legge** un percorso per cercare un
+CSV. Il testo della riparazione e' stato copiato uguale su 84 file senza
+guardare cosa fa ciascuno.
+
+**La regola.** 👉 **Prima di sostituire un'uscita, si guarda CHE COSA la
+funzione tornava e se qualcuno lo GESTIVA.** `exit`, `throw` e `return $null`
+non sono tre gradi della stessa cosa: il terzo e' un **valore**, e un valore
+puo' avere un ripiego a valle. Il segno che lo trova: **un `return` originale
+rimasto irraggiungibile sotto il blocco nuovo** — la stessa firma della 249, ma
+con `return` al posto di `throw`, e va cercata anche quella.
+📌 **E un messaggio d'errore copiato identico su 84 file mente su qualcuno di
+loro.** Se il testo dice "questo script scrive e compila", va verificato che
+quello script scriva e compili.
+
+✅ **Correzione:** in `TrovaCsvDati` togliere il `throw` e lasciare il
+`return $null` (il ripiego del chiamante e' voluto e documentato), **oppure**
+stampare un avviso e tornare `$null`. Il divieto di allargare il bersaglio
+resta comunque: il selettore largo non e' stato reintrodotto.
