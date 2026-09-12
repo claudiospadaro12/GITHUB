@@ -19,9 +19,23 @@ compilabili**:
 | `b45dd00` | 11/09 | **10** | *"**IN CORSO D'OPERA — NON COMPILARE**… NESSUNO DI QUESTI EA VA COMPILATO O CARICATO finché non c'è un PASS"* |
 | `b5d904a` | 29/08 | **1** | *"WIP FASE 2 DRIVE… Build ancora in corso"* — ed **è ancora `HEAD` per il Nasdaq** |
 
-👉 Un F7 largo sul repo di oggi porterebbe in campo **2.208 righe non
-verificate**. Quindi **ogni sorgente si scarica al SUO commit**, che è l'ultimo
-**non-WIP** che tocca quel file.
+👉 Un F7 largo sul repo di oggi porterebbe in campo **1.742 righe di codice EA
+non verificate** (`b45dd00`: **1.544** su **11** file di `mql5/Experts/` +
+`b5d904a`: **198** sul Nasdaq). Quindi **ogni sorgente si scarica al SUO
+commit**, che è l'ultimo **non-WIP** che tocca quel file.
+
+> ✏️ **Numero corretto dal cancello (classe 261).** Qui c'era scritto **2.208**:
+> è il totale di `git show --stat b45dd00`, ma comprende **664 righe** di
+> `controlla_riga.py`, `controesempi_cancello.py` e `CODA_08_preset_dai_chr.ps1`
+> — **che nessun F7 compila**. E il titolo del commit dice *"10 EA"* mentre di
+> EA **ne tocca 11**. 🟢 **La tesi non cambia** (1.742 righe non verificate sono
+> un motivo pieno per non compilare `HEAD`): era il **numero** a essere gonfiato
+> del 27%.
+> 🔴 **E i due insiemi da 11 NON sono lo stesso insieme**: **3 bersagli** di
+> questa riga non sono toccati da nessun WIP (`SupRev_DAX_H4_Ott`,
+> `SupRev_NAS_H1_Ott`, `ORB_Ottimizzato`) e **4 file del WIP** non sono bersagli
+> (`PTE_Ottimizzato`, `SuperWave_DAX_H4_Ottimizzato`, `CostToCost`,
+> `GapContinuation`).
 
 | | |
 |---|---|
@@ -56,6 +70,15 @@ diventa una 404 raccontata come "errore di rete".
 
 ## ▶️ IL BLOCCO (uno solo)
 
+> 🖥️ **DOVE MANDARE QUESTA STRINGA: finestra PowerShell sul PC / banco di
+> BACKTEST — terminale `50504400` = `C:\MT5_Backtest`.**
+> 🔴 **CHE COSA NON VIENE TOCCATO:** il demo piccolo **`50503392`**
+> (`C:\Program Files\BCM Markets MT5 Terminal`), il dry-run **`50504263`**
+> (`...MT5 Terminal -V3`), il conto **REALE `10105439`** (`C:\BCM_Reale`),
+> **Pepperstone** e **Tickmill**. La riga **rifiuta** quei percorsi per
+> costruzione e non scrive **in nessuna** cartella di terminale.
+> ✋ **MetaEditor va CHIUSO. MT5 può restare aperto.**
+
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process metaeditor64 -EA SilentlyContinue){ throw 'METAEDITOR APERTO: chiudilo e rilancia (MT5 invece puo'' restare aperto).' };
@@ -79,9 +102,22 @@ Zip sul Desktop **`collaudo_ricompila_<AAAAMMGG_HHmm>.zip`** con
 (il log vero di MetaEditor: è lì che sta il *perché* di un fallimento).
 
 ## 🔎 COME SI LEGGE, in quest'ordine
-1. **`foto PRIMA`** e **`foto DOPO`** del `MQL5\Experts` del banco: devono
-   **coincidere**. È la prova che la riga non ha scritto nel terminale — e se
-   non coincidono il referto lo dice fra i rilievi, invece di tacere.
+1. **`inventario PRIMA`** e **`inventario DOPO`** del `MQL5\Experts` **e** del
+   `MQL5\Include` del banco: devono **coincidere** (conteggio, byte totali e
+   **impronta SHA256 dell'elenco per file**). Sotto ci sono i **due elenchi per
+   file** — `percorso | byte | data` — perché **l'impronta dice *se* è
+   cambiato, l'elenco dice *cosa***. Se non coincidono il referto lo dice fra i
+   rilievi, invece di tacere.
+   > ✏️ **Corretto dal cancello (classe 260).** La prima stesura fotografava la
+   > **cartella** e chiamava "prova" il fatto che la data non cambiasse. **Non
+   > lo era**: il `LastWriteTime` di una directory cambia solo se una voce viene
+   > **aggiunta, tolta o rinominata** — una **sovrascrittura in loco** di un
+   > `.ex5` che c'era già (cioè **l'unico evento che questo collaudo esiste per
+   > escludere**) la lascia **identica**. E il percorso guardato era
+   > `<installazione>\MQL5\Experts`, che esiste **solo** se l'installazione è
+   > *portable*: altrimenti usciva `ASSENTE` prima e `ASSENTE` dopo →
+   > "coincidono" → **prova stampata avendo guardato il vuoto**. Adesso la
+   > cartella dati si **risolve** da `origin.txt` e l'inventario è **per file**.
 2. **`ESITI, bersaglio per bersaglio`** — quattro stati, tutti veri:
    - **`OK -- .ex5 fresco`** → quel bersaglio **compila**;
    - **`ERRORI: Result: N errors...`** → **quello È il risultato**: gli errori
@@ -99,6 +135,7 @@ Zip sul Desktop **`collaudo_ricompila_<AAAAMMGG_HHmm>.zip`** con
 | **MetaEditor aperto** (si ferma **prima** di scaricare) | ❌ **NO** | il messaggio rosso; poi chiudi MetaEditor e rilancia |
 | **`SCRIPT VECCHIO`** o download fallito | ❌ **NO** | il messaggio (se è un 404 sul pin appena creato: aspetta 5 minuti e rilancia **la stessa riga**) |
 | **Gate del driver** (pin, bersaglio non ammesso, versione/righe che non tornano, include nuovo) | ✅ **SÌ** | lo zip: c'è `FERMATO DA UNA GUARDIA` col motivo |
+| 🆕 **`LIBRERIA STANDARD NON TROVATA`** (né nella cartella dati né nell'installazione) | ✅ **SÌ** | lo zip. **Non è un errore tuo**: il banco `C:\MT5_Backtest` è già stato *"un'installazione NUOVA E VUOTA"* (`RIGA_ANCORA_R119.ps1` r.60-64). Il messaggio porta **il comando che stampa la cartella dati vera**: incollalo e mandami l'uscita |
 | **Una o più compilazioni fallite** | ✅ **SÌ** | lo zip: **è il risultato del passo** |
 | **Tutto OK** | ✅ **SÌ** | lo zip, e si passa alle **firme** (passi 3-10 del referto) |
 

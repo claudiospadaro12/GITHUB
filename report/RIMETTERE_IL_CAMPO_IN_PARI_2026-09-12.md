@@ -189,12 +189,38 @@ integrato** (§4.1). 👉 Il bersaglio di compilazione è **`d83c196`**, non HEA
 
 | commit | data | cosa dice | file di EA toccati |
 |---|---|---|---:|
-| `b45dd00` | 11/09 | *"**IN CORSO D'OPERA — NON COMPILARE**: questi file NON sono verificati, NON sono passati dal cancello... NESSUNO DI QUESTI EA VA COMPILATO O CARICATO finché non c'è un PASS"* | **10** |
-| `b5d904a` | 29/08 | *"WIP FASE 2 DRIVE... Build ancora in corso"* — ed **è ancora HEAD** per il Nasdaq | **1** |
+| `b45dd00` | 11/09 | *"**IN CORSO D'OPERA — NON COMPILARE**: questi file NON sono verificati, NON sono passati dal cancello... NESSUNO DI QUESTI EA VA COMPILATO O CARICATO finché non c'è un PASS"* | **11** (+1.544 righe) |
+| `b5d904a` | 29/08 | *"WIP FASE 2 DRIVE... Build ancora in corso"* — ed **è ancora HEAD** per il Nasdaq | **1** (+198) |
 
-🔴 **Quindi: chi apre MetaEditor sul repo di oggi e preme F7 su uno di questi 11
-file compila codice non verificato.** Ecco il **bersaglio giusto** per ognuno —
-l'ultimo commit **non-WIP** che tocca quel file:
+✏️ **DUE NUMERI CORRETTI DAL CANCELLO, e li dico io (classe 261).**
+🔴 **(a)** questa tabella diceva *"**10** file di EA"* per `b45dd00`, copiato dal
+**titolo del commit** (*"10 EA e 2 strumenti"*): il commit **ne tocca 11 di EA e
+3 di strumenti** — si era contato male il suo stesso autore, e io gli ho
+creduto invece di contare l'albero.
+🔴 **(b)** il peso dell'F7 **non è 2.208 righe**: quello è il totale di
+`git show --stat b45dd00` e comprende **664 righe** di `controlla_riga.py`,
+`controesempi_cancello.py` e `CODA_08_preset_dai_chr.ps1`, **che nessun F7
+compila**. Il numero giusto è **1.544** (codice EA di `b45dd00`) **+ 198**
+(`b5d904a`) = **1.742 righe su 12 file**.
+🟢 **La conclusione non si muove di un millimetro** — 1.742 righe non verificate
+sono un motivo pieno per non compilare `HEAD` — **era il numero a essere
+gonfiato del 27%**, e un numero gonfiato costa la fiducia negli altri numeri
+della stessa pagina, che erano giusti.
+
+🔴 **E I DUE INSIEMI DA 11 NON SONO LO STESSO INSIEME.** Avevo scritto *"chi
+preme F7 su uno di questi 11 file compila codice non verificato"*, saltando
+dagli 11 file del WIP agli 11 bersagli della riga **perché hanno lo stesso
+numero**. Elencati per nome e diffati:
+- **3 bersaglio che nessun WIP tocca** (per loro `HEAD` **è** il bersaglio, e la
+  tabella qui sotto lo dice già): `ABTG_SupRev_DAX_H4_Ottimizzato`,
+  `ABTG_SupRev_NAS_H1_Ottimizzato`, `ABTG_ORB_Ottimizzato`;
+- **4 file del WIP che non sono bersagli**: `ABTG_PTE_Ottimizzato`,
+  `ABTG_SuperWave_DAX_H4_Ottimizzato` (nessuna sedia viva), `ABTG_CostToCost` e
+  `ABTG_GapContinuation` (🟠 arancioni, passo **11**).
+
+👉 La frase giusta è: **chi preme F7 sui 12 file toccati dai due WIP compila
+codice non verificato.** Ecco il **bersaglio giusto** per ognuno degli **11 che
+questa riga collauda** — l'ultimo commit **non-WIP** che tocca quel file:
 
 | EA | 🎯 bersaglio (commit) | data | versione | righe | contiene la riparazione |
 |---|---|---|:---:|---:|---|
@@ -392,7 +418,7 @@ che può fare un agente · 👁️ = sola lettura, rischio zero.
 | # | passo | bersaglio (in chiaro) | rischio | chi |
 |---:|---|---|---|:---:|
 | **0** | Leggere `Get-Process terminal64 \| Select Id, MainWindowTitle, Path` e poi, sul terminale così identificato, la **versione nella scheda Esperti** di `ABTG_SupertrendReversal` | 🖥️ PowerShell **sul VPS** (legge) + ✋ a mano nel terminale `50503392` (`C:\Program Files\BCM Markets MT5 Terminal`) | **ZERO** | 👁️ |
-| **1** | Leggere gli input del `Guardian` sul **reale** e verificare 4,9 / 9,9 / reset 23 | ✋ a mano, terminale `10105439` (`C:\BCM_Reale`), grafico **EURGBP H1** — **solo leggere** | **ZERO** | 👁️ |
+| **1** | Leggere gli input del `Guardian` sul **reale** e verificare 4,9 / 9,9 / reset 23 | ✋ a mano, terminale `10105439` (`C:\BCM_Reale`) — **riconosciuto dalla stampa del passo 0, mai a occhio dal titolo** — grafico **EURGBP H1** — **solo leggere**. 🔴 **SI ESCE CON `Annulla`, MAI CON `OK`, E NON SI SFIORA `Ripristina`**: è l'**unico conto con i soldi**, e un `Ripristina`+`OK` lì rimette i **default compilati** (§3 e §4.3). Precedente di casa: 03/09, *"piccolo verificato a 1,0% e chiuso con Annulla"* | **quasi zero: l'unico rischio è il dito, e si chiude con `Annulla`** | 👁️ |
 | **2** | 🔬 **Compilazione di PROVA** degli 11 bersagli di §4.1, in albero di lavoro | 🖥️ PowerShell sul **banco di backtest**, terminale `50504400` = `C:\MT5_Backtest`. 🔴 **NON** `50503392`, **NON** `50504263`, **NON** `10105439` | **ZERO** (non scrive in nessun terminale) | 🤖 |
 | **3** | ✍️ **FIRMA C4-bis**: `DEF_RISK` 2.0→1.0 sul Nasdaq, r.47 **e** r.119 | repo (nessun terminale) | cambia i **default** dei backtest futuri | ✍️ |
 | **4** | ✍️ **100k — `ORB_Ottimizzato` v1.02 → v1.04**: ricompilare e leggere la versione | ✋ terminale `50504263` = `C:\Program Files\BCM Markets MT5 Terminal -V3` | **il più alto beneficio della lista** (smette di gestire la posizione del vicino). Porta dentro *"atteso: MENO trade sui giorni con vicini"* — **lo dichiara il commit stesso** | ✍️ |
@@ -410,10 +436,12 @@ la gestione di un'uscita in campo**. I passi **0, 1, 2** e **11** non ne hanno
 bisogno: leggono, o compilano fuori dai terminali vivi.
 
 ## ❌ E QUELLO CHE NON PROPONGO
-**"Ricompila tutto"**, e ho un motivo nuovo: `HEAD` **contiene 11 file
+**"Ricompila tutto"**, e ho un motivo nuovo: `HEAD` **contiene 12 file
 dichiarati non compilabili dai loro stessi commit**. Un F7 largo sul repo di
-oggi non sarebbe un allineamento: sarebbe portare in campo **2.208 righe non
-verificate** in un colpo solo.
+oggi non sarebbe un allineamento: sarebbe portare in campo **1.742 righe di
+codice EA non verificate** in un colpo solo (numero corretto dal cancello: il
+`2.208` che avevo scritto comprendeva **664 righe di `.py` e `.ps1` che
+MetaEditor non compila** — classe 261).
 
 ---
 
@@ -445,7 +473,7 @@ verificate** in un colpo solo.
 conto che simula la challenge è fermo al 19-22 agosto con quattro riparazioni
 che tocca i soldi già scritte e mai arrivate.** 🆕 **E sul piccolo ne ho trovate
 tre che nessun referto aveva nominato — una osservata in campo col
-millisecondo.** 🎯 **Il bersaglio di ricompilazione NON è `HEAD`: 11 file sono
-dichiarati non compilabili dai loro stessi commit, e adesso c'è la tabella dei
-bersagli giusti.** 🚀 **Non ci accontentiamo: due dei miei sette allarmi li ha
+millisecondo.** 🎯 **Il bersaglio di ricompilazione NON è `HEAD`: 12 file
+(1.742 righe di codice EA) sono dichiarati non compilabili dai loro stessi
+commit, e adesso c'è la tabella dei bersagli giusti.** 🚀 **Non ci accontentiamo: due dei miei sette allarmi li ha
 declassati il contro-esempio, e vanno letti così.**
