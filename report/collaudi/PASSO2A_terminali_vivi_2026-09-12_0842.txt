@@ -1,0 +1,8 @@
+
+  Id MainWindowTitle                                                                  Path                                                        
+  -- ---------------                                                                  ----                                                        
+7824 10105439 - BCMMarkets-Server - Hedge - BCM Markets Ltd - [EURAUD,H1]             C:\BCM_Reale\terminal64.exe                                 
+8664 50504263 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [D30EUR,M5] C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe
+9780 50503392 - BCMMarkets-Server: Conto Demo - Hedge - BCM Markets Ltd - [EURJPY,M5] C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe    
+
+
