@@ -1,0 +1,79 @@
+﻿REFERTO RUNNER ABTG -- 2026-09-12 03:30:02 (ora locale VPS)
+marcatore : MARCATORE_RUNNER_ABTG_v2
+branch    : lavoro
+perimetro : SOLA LETTURA -- report/PERIMETRO_RUNNER.md
+
+righe di coda: 15
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 6s, uscita 0
+    log: CODA_01_sedie_attaccate_20260912_033002.log
+
+--- 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_02_chi_ha_operato_20260912_033002.log
+
+--- d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_03_conti_dei_terminali_20260912_033002.log
+
+--- 269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 7s, uscita 0
+    log: CODA_04_capacita_macchina_20260912_033002.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_05_foto_fresca_20260912_033002.log
+
+--- 32718b9f6eb99728fe532a5c512ae39f83c0db6b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 11s, uscita 0
+    log: CODA_06_quale_codice_gira_20260912_033002.log
+
+--- 3a648eb6299ee287995358b87bee0a93e7a063be | backtest_pipeline/righe/CODA_07_desktop.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 30s, uscita 0
+    log: CODA_07_desktop_20260912_033002.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 27s, uscita 0
+    log: CODA_08_preset_dai_chr_20260912_033002.log
+
+--- 4833b9dc218d1767f33faa5d613ce3d1d00779b7 | backtest_pipeline/righe/CODA_09_giornale_operativo.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_09_giornale_operativo_20260912_033002.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_10_slippage_20260912_033002.log
+
+--- 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
+    RIFIUTATO -- G1: manca il marcatore 'RUNNER_SOLA_LETTURA'. Uno script non entra in coda per sbaglio.
+
+--- 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
+    RIFIUTATO -- G1: manca il marcatore 'RUNNER_SOLA_LETTURA'. Uno script non entra in coda per sbaglio.
+
+--- 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R133a_livelliTF_NASUSD.txt -Etichetta r133a -Modello 4 -Deposito 10000
+    RIFIUTATO -- G1: manca il marcatore 'RUNNER_SOLA_LETTURA'. Uno script non entra in coda per sbaglio.
+
+--- 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
+    RIFIUTATO -- G1: manca il marcatore 'RUNNER_SOLA_LETTURA'. Uno script non entra in coda per sbaglio.
+
+--- bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canali_e_attivita.ps1
+    cancelli: G1 e G2 passati
+    ESEGUITO in 4s, uscita 0
+    log: CODA_11_canali_e_attivita_20260912_033002.log
+
+--- RIEPILOGO ---
+eseguiti  : 11
+rifiutati : 4
+falliti   : 0
+ESITO: PARZIALE
