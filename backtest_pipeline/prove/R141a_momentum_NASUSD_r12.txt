@@ -97,9 +97,19 @@
 #    ora 14 (misura di r1)  mediana 1,80  p95 2,70  max 8,20
 #    ora 20 (INGRESSO)      mediana 1,70  p95 1,80  max 6,10   <-- 11.182.176 tick
 #    ora 21 (USCITA)        mediana 1,70  p95 2,70  max 8,10
-#  >>> L'ora 20 e' la PIU' ECONOMICA della giornata su NASUSD. Non e'
-#      una coincidenza fortunata: e' l'ora di massima liquidita' di
-#      cassa USA. Il motore entra nel punto piu' economico del feed.
+#  >>> L'ora 20 sta nella FASCIA PIU' ECONOMICA della giornata su
+#      NASUSD, e il numero esatto va detto perche' avevo scritto
+#      "la PIU' economica" ed era FALSO: l'ora piu' economica e' la 19
+#      con mediana 1,60. Le mediane orarie MISURATE sono 1,60 (ora 19),
+#      1,70 (ore 16, 17, 18, 20, 21), 1,80 (ore 14, 15) e 2,30-2,60
+#      (ore 22-13, cioe' fuori dalla cassa USA).
+#      >>> Quindi: l'ora 20 e' a 1,70 contro una mediana di giornata di
+#          1,80 e un minimo di 1,60. E' nella fascia buona, non e' il
+#          minimo. Il motore entra nella parte liquida della seduta, e
+#          questo NON e' una coincidenza fortunata (e' l'ora di massima
+#          attivita' di cassa USA) -- ma non e' nemmeno il punto piu'
+#          economico del feed, e chiamarlo cosi' sarebbe stato un
+#          numero gonfiato dell'1 punto base su tre.
 #
 #  1) IL CANCELLO DI CASA (stop/spread), che qui e' cosmetico:
 #     ATR(M30) NASUSD [DERIVATO]: range giornaliero MISURATO 313,8 idx
