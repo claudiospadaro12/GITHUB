@@ -15119,3 +15119,129 @@ tutti e undici. Dieci tornavano, uno no.
 >    due i casi il numero **esiste, è vero, ed è di un altro oggetto.** Un
 >    numero giusto sull'oggetto sbagliato è il difetto più difficile da vedere,
 >    perché **supera qualunque controllo di plausibilità.**
+
+---
+
+## 260. 🖼️ LA FOTO DELLA **CARTELLA** SPACCIATA PER FOTO DEI **FILE**: la sovrascrittura in loco e' INVISIBILE, e il referto la chiama "prova" (12/09/2026)
+
+**Il caso vero**, trovato dal cancello su `RIGA_COLLAUDO_RICOMPILA.ps1` (il
+collaudo di ricompilazione degli 11 bersagli non-WIP, bersaglio il solo banco
+`C:\MT5_Backtest` / conto `50504400`).
+
+Lo script deve dimostrare **di non avere scritto nel `MQL5\Experts` di nessun
+terminale**. Lo fa con una foto PRIMA e una RIFATTA DOPO, e il `_DA_MANDARE.md`
+dice a Claudio, testuale: *"devono coincidere. E' la prova che la riga non ha
+scritto nel terminale"*. 🔴 **Ma la foto era di una CARTELLA:**
+
+```powershell
+$ExpTerm   = Join-Path $TermScelto "MQL5\Experts"
+$FotoPrima = "cartella " + $ExpTerm + " -> " + (Descrivi $ExpTerm)
+# function Descrivi: $i = Get-Item $path; return ("esiste, " + $i.Length + " byte, " + $i.LastWriteTime...)
+```
+
+**Due difetti indipendenti nella stessa riga, e nessuno dei due si vede
+rileggendo il codice per capire se fa quello che intendevi:**
+
+1. 🧨 **`LastWriteTime` di una directory cambia solo se una voce viene
+   AGGIUNTA, TOLTA o RINOMINATA.** Una **SOVRASCRITTURA IN LOCO** di un
+   `ABTG_PTE.ex5` che stava gia' li' **la lascia identica al secondo**. Cioe'
+   l'unico evento che il collaudo esiste per escludere — un `.ex5` nuovo
+   scritto sopra quello vecchio dentro un terminale — e' **precisamente quello
+   che la foto non vede**. La foto non era debole: era **cieca sul caso utile**.
+2. 🫥 **`$i.Length` su un `DirectoryInfo` NON ESISTE.** Su PS 5.1 senza
+   `Set-StrictMode` non e' un errore: e' `$null`, e la stringa esce
+   `"esiste, , 2026-09-12 07:30:00"` — un campo vuoto fra due virgole che
+   nessuno legge come un difetto.
+
+➕ **E il terzo pezzo, che moltiplica i primi due**: il percorso fotografato era
+`<installazione>\MQL5\Experts`, che esiste **solo se l'installazione e'
+portable**. Su un'installazione normale (MQL5 nella cartella dati sotto
+`%APPDATA%\MetaQuotes\Terminal\<hash>`) quel percorso **non c'e'** → la foto
+esce `ASSENTE` prima e `ASSENTE` dopo → **coincidono** → il referto stampa la
+"prova", **avendo guardato una cartella che non esiste** mentre quella vera non
+e' stata nemmeno aperta. 📌 E' la **classe 117** (*la foto di un file che non
+c'e' esce `INVARIATO`*) applicata a una directory: la 117 e' del 2026 e non
+era bastata, perche' era scritta sui FILE.
+
+> ### 🔴 LA REGOLA
+> 1. **Una "prova di non-scrittura" si fa per FILE, mai per cartella.**
+>    L'unita' e' `(percorso relativo, byte, LastWriteTime)` di **ogni** file
+>    sotto la radice, ordinati, piu' il **conteggio** e i **byte totali**. Se
+>    l'elenco e' lungo, si riassume con un'**impronta** (SHA256 dell'elenco),
+>    ma l'elenco **va nel referto**: l'impronta dice *se* e' cambiato, l'elenco
+>    dice *cosa*.
+> 2. **Nessun campo di una foto si stampa senza sapere su che tipo si legge.**
+>    `DirectoryInfo` non ha `Length`; `FileInfo` non ha `Count`. Un campo vuoto
+>    in un referto e' un difetto, non un dettaglio grafico.
+> 3. 🔴 **Il contro-esempio obbligatorio, e va costruito PRIMA di scrivere la
+>    parola "prova"**: *quale scrittura passerebbe questo controllo senza
+>    farlo scattare?* Se la risposta esiste — e qui era "una sovrascrittura in
+>    loco", cioe' **il caso normale** — il controllo **non e' una prova**, e il
+>    referto non ha il diritto di chiamarla cosi'.
+> 4. 📌 **Una foto va presa dove l'oggetto VIVE, non dove si spera che viva.**
+>    Per MT5: la cartella dati si risolve da
+>    `%APPDATA%\MetaQuotes\Terminal\*\origin.txt`, e l'installazione e' il
+>    **ripiego portable**, da dichiarare come rilievo. Il modello di casa che
+>    lo fa giusto era nella stessa cartella: `RIGA_COMPILA_ORB104.ps1`
+>    r.426-436 (le prova tutte e due) e r.188-196 (`Foto` per FILE, con
+>    `Esiste` + `Len` + `Ora`). 👉 Vedi **classe 257**.
+
+---
+
+## 261. 📏 IL NUMERO DELL'INSIEME PIU' LARGO USATO COME PESO DELL'AZIONE PIU' STRETTA: `2.208 righe` per un F7 che ne compila `1.544` (12/09/2026)
+
+**Il caso vero**, trovato dal cancello su
+`report/RIMETTERE_IL_CAMPO_IN_PARI_2026-09-12.md` e ripetuto in tutti e tre i
+pezzi del pacchetto (referto, `.ps1`, `_DA_MANDARE.md`).
+
+La frase che giustifica l'intera riga di collaudo era:
+> *"Un F7 largo sul repo di oggi porterebbe in campo **2.208 righe non
+> verificate**"*
+
+**Il 2.208 e' vero**, ed e' il numero che stampa `git show --stat b45dd00`:
+`14 files changed, 2208 insertions(+)`. 🔴 **Ma l'azione di cui e' il peso e'
+`F7` in MetaEditor, che compila `.mq5` e NIENT'ALTRO** — e di quei 14 file,
+**tre non sono codice MQL5**: `controlla_riga.py` (+367),
+`controesempi_cancello.py` (+172), `CODA_08_preset_dai_chr.ps1` (+173) =
+**+664 righe che nessun F7 ha mai portato in campo**. Il numero giusto e':
+
+| insieme | file | righe aggiunte |
+|---|---:|---:|
+| `b45dd00` intero (quello che dice `--stat`) | 14 | **2.208** |
+| — di cui **non compilabili** (py + ps1) | 3 | **664** |
+| ✅ **codice EA di `b45dd00`** | **11** | **1.544** |
+| ✅ **+ `b5d904a`** (il WIP sul Nasdaq) | 1 | **198** |
+| 🎯 **il peso vero dell'F7 largo** | **12** | **1.742** |
+
+➕ **E nello stesso paragrafo un secondo numero non contato**: il referto
+scriveva *"file di EA toccati: **10**"*, copiato dal **titolo del commit**
+(*"10 EA e 2 strumenti"*). Il commit **ne tocca 11 di EA e 3 strumenti**: si
+era contato male il suo stesso autore, e chi l'ha citato ha **creduto al
+messaggio invece di contare l'albero**.
+
+➕ **E un terzo**: *"questi **11** file"* non erano gli **11 bersagli** della
+riga. Gli insiemi si intersecano ma **non coincidono**: **3 bersagli** non
+sono toccati da **nessun** WIP (`ABTG_SupRev_DAX_H4_Ottimizzato`,
+`ABTG_SupRev_NAS_H1_Ottimizzato`, `ABTG_ORB_Ottimizzato`) e **4 file del WIP**
+non sono fra i bersagli (`ABTG_PTE_Ottimizzato`,
+`ABTG_SuperWave_DAX_H4_Ottimizzato`, `ABTG_CostToCost`,
+`ABTG_GapContinuation`). Due insiemi di **cardinalita' 11** che sembrano lo
+stesso insieme **perche' hanno lo stesso numero**.
+
+> ### 🔴 LA REGOLA
+> 1. **Il peso di un'azione si misura sull'insieme che quell'azione TOCCA**,
+>    filtrato per estensione e per cartella — non sul totale che stampa
+>    `--stat`. `git show --numstat <commit> | awk '$3 ~ /^mql5\/Experts\//'`
+>    costa una riga e da' il numero giusto.
+> 2. **Il titolo di un commit non e' una misura**: e' la memoria di chi
+>    l'ha scritto. Se un numero sta in un titolo, si **ricontano i file**.
+> 3. 🔴 **Due insiemi con la stessa cardinalita' vanno elencati per NOME e
+>    diffati** (`comm -23` / `comm -13`), mai dichiarati uguali. Se si
+>    intersecano parzialmente, si scrivono **le due differenze**, entrambe.
+>    📌 Parente della **classe 180** (*l'insieme definito per differenza*) e
+>    della **259** (*il numero giusto sull'oggetto sbagliato*).
+> 4. ✅ **E il difetto NON annulla la conclusione, che va detto**: 1.742 righe
+>    non verificate sono comunque un motivo pieno per non compilare `HEAD`. La
+>    tesi regge; **era il numero a essere gonfiato del 27%** — e un numero
+>    gonfiato in una riga che va a Claudio costa la fiducia negli altri
+>    numeri della stessa pagina, che erano giusti.

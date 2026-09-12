@@ -17,16 +17,33 @@
 #      che e' il path RELATIVO che il compilatore si aspetta, e
 #      metaeditor64.exe viene chiamato con /inc su QUELL'albero.
 #      Il MQL5\Experts di ogni terminale resta come sta: la riga lo
-#      DIMOSTRA con una foto (esiste? quanti byte? che data?) presa
-#      PRIMA e RIFATTA DOPO, non con una frase.
+#      DIMOSTRA con un INVENTARIO PER FILE (percorso, byte, data di
+#      ogni file, piu' conteggio, byte totali e impronta SHA256
+#      dell'elenco) preso PRIMA e RIFATTO DOPO, non con una frase.
+#      >>> CLASSE 260, PAGATA QUI: la prima stesura fotografava la
+#      CARTELLA. Non e' una prova: il LastWriteTime di una directory
+#      cambia solo se una voce viene AGGIUNTA, TOLTA o RINOMINATA, e
+#      una SOVRASCRITTURA IN LOCO di un .ex5 che c'era gia' -- cioe'
+#      l'unico evento che questo collaudo esiste per escludere -- la
+#      lascia IDENTICA. E $i.Length su una DirectoryInfo non esiste:
+#      stampava un campo vuoto fra due virgole.
 #
 #  >>> PERCHE' ESISTE: il 12/09 e' stato misurato che HEAD **NON E' UN
 #      BERSAGLIO DI COMPILAZIONE**. Due commit dichiarano da soli di non
-#      esserlo: b45dd00 ("IN CORSO D'OPERA -- NON COMPILARE", 10 EA) e
-#      b5d904a (WIP del 29/08, ed e' ancora HEAD per il Nasdaq). Un F7
-#      largo sul repo di oggi porterebbe in campo 2.208 righe non
-#      verificate. Quindi ogni sorgente si scarica al SUO commit
-#      bersaglio, che e' l'ultimo NON-WIP che tocca quel file.
+#      esserlo: b45dd00 ("IN CORSO D'OPERA -- NON COMPILARE") e b5d904a
+#      (WIP del 29/08, ed e' ancora HEAD per il Nasdaq).
+#      IL PESO, CONTATO SULL'INSIEME CHE UN F7 TOCCA DAVVERO (classe
+#      261): b45dd00 dichiara "10 EA" nel titolo ma ne tocca 11, e le
+#      2.208 righe del suo --stat comprendono 664 righe di .py e .ps1
+#      che nessun F7 compila. Codice EA non verificato: 1.544 righe
+#      (b45dd00, 11 file) + 198 (b5d904a, il Nasdaq) = 1.742 su 12 file.
+#      Quindi ogni sorgente si scarica al SUO commit bersaglio, che e'
+#      l'ultimo NON-WIP che tocca quel file.
+#      E L'INSIEME NON E' LO STESSO: 3 dei bersagli qui sotto
+#      (SupRev_DAX_H4_Ott, SupRev_NAS_H1_Ott, ORB_Ottimizzato) non sono
+#      toccati da nessun WIP, e 4 file del WIP (PTE_Ottimizzato,
+#      SuperWave_DAX_H4_Ottimizzato, CostToCost, GapContinuation) non
+#      sono bersagli. Due insiemi da 11 che NON coincidono.
 #
 #  >>> IL PIN E IL BERSAGLIO SONO DUE COSE DIVERSE, ed e' voluto:
 #      -Pin appunta QUESTO script e l'include condiviso al commit da cui
@@ -134,6 +151,10 @@ $LibStd     = "NON COPIATA"
 $IncTxt     = "NON SCARICATO"
 $FotoPrima  = "NON PRESA"
 $FotoDopo   = "NON PRESA"
+$DetPrima   = @("non ci siamo arrivati")
+$DetDopo    = @("non ci siamo arrivati")
+$DataFolder = "NON RISOLTA"
+$BaseTerm   = "NON RISOLTA"
 $Modo = "CORSA"
 if($SoloControllo){ $Modo = "CONTROLLO" }
 
@@ -155,6 +176,35 @@ function Descrivi([string]$path){
   if(-not (Test-Path -LiteralPath $path)){ return "ASSENTE" }
   $i = Get-Item -LiteralPath $path
   return ("esiste, " + $i.Length + " byte, " + $i.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss", $INV))
+}
+
+# INVENTARIO PER FILE di una radice del terminale: E' LA PROVA del
+# "nessun deploy", e va fatta per FILE (classe 260). Torna un riassunto
+# corto e confrontabile (conteggio + byte totali + impronta SHA256
+# dell'elenco) e il DETTAGLIO riga per riga, che finisce nel referto:
+# l'impronta dice SE e' cambiato, l'elenco dice COSA.
+function Inventario([string]$radice){
+  if(-not (Test-Path -LiteralPath $radice)){
+    return @{ Riassunto = ("ASSENTE (la cartella non esiste): " + $radice); Dettaglio = @("-- cartella assente --") }
+  }
+  $det = New-Object System.Collections.ArrayList
+  $n = 0
+  $tot = 0
+  foreach($f in @(Get-ChildItem -LiteralPath $radice -Recurse -File -ErrorAction SilentlyContinue | Sort-Object FullName)){
+    $n = $n + 1
+    $tot = $tot + $f.Length
+    $rel = $f.FullName
+    if($rel.Length -gt $radice.Length){ $rel = $rel.Substring($radice.Length).TrimStart("\") }
+    [void]$det.Add($rel + " | " + $f.Length + " byte | " + $f.LastWriteTimeUtc.ToString("yyyy-MM-dd HH:mm:ss", $INV) + "Z")
+  }
+  $imp = "cartella vuota"
+  if($n -gt 0){
+    $alg = [Security.Cryptography.SHA256]::Create()
+    $byt = [Text.Encoding]::UTF8.GetBytes(($det -join "`n"))
+    $imp = ([BitConverter]::ToString($alg.ComputeHash($byt))).Replace("-","").Substring(0,16)
+  }
+  if($det.Count -eq 0){ [void]$det.Add("-- nessun file --") }
+  return @{ Riassunto = ($radice + " -> " + $n + " file, " + $tot + " byte totali, impronta " + $imp); Dettaglio = $det }
 }
 
 function LeggiTesto([string]$path){
@@ -271,13 +321,52 @@ try{
   }
   Dico ("banco scelto ... " + $TermScelto) "Green"
 
+  # LA CARTELLA DATI SI RISOLVE, NON SI ASSUME (classe 260 punto 4).
+  # MQL5\Experts e MQL5\Include vivono nella CARTELLA DATI
+  # (%APPDATA%\MetaQuotes\Terminal\<hash>, appaiata all'installazione da
+  # origin.txt) e stanno accanto all'exe SOLO in un'installazione
+  # portable. Il modello di casa che lo fa giusto era nella stessa
+  # cartella: RIGA_COMPILA_ORB104.ps1 r.426-436. Se qui si guardasse
+  # solo <installazione>\MQL5\Experts, su un'installazione normale la
+  # foto uscirebbe ASSENTE prima e ASSENTE dopo, "coinciderebbero", e il
+  # referto stamperebbe la prova avendo guardato il vuoto (classe 117).
+  $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+  foreach($d in @(Get-ChildItem -LiteralPath $termRoot -Directory -ErrorAction SilentlyContinue)){
+    $o = Join-Path $d.FullName "origin.txt"
+    if(Test-Path -LiteralPath $o){
+      $org = (Get-Content -LiteralPath $o -Raw -ErrorAction SilentlyContinue)
+      if($null -ne $org){
+        if($org.Trim().TrimEnd("\") -ieq $TermScelto.TrimEnd("\")){ $DataFolder = $d.FullName }
+      }
+    }
+  }
+  if(($DataFolder -ne "NON RISOLTA") -and (Test-Path -LiteralPath (Join-Path $DataFolder "MQL5\Include\Trade\Trade.mqh"))){
+    $BaseTerm = $DataFolder
+    Dico ("cartella dati .. " + $DataFolder + "  (appaiata da origin.txt)") "Green"
+  }
+  elseif(Test-Path -LiteralPath (Join-Path $TermScelto "MQL5\Include\Trade\Trade.mqh")){
+    $BaseTerm = $TermScelto
+    [void]$Rilievi.Add("libreria standard e MQL5 presi dalla cartella di INSTALLAZIONE (" + $TermScelto + "): installazione portable o senza cartella dati appaiata. Dichiarato, non assunto.")
+    Dico ("cartella dati .. " + $TermScelto + "  (RIPIEGO portable)") "Yellow"
+  }
+  else{
+    throw ("LIBRERIA STANDARD NON TROVATA: ne' in " + (Join-Path $DataFolder "MQL5\Include\Trade\Trade.mqh") + " ne' in " + (Join-Path $TermScelto "MQL5\Include\Trade\Trade.mqh") + ". Senza <Trade/Trade.mqh> non compila NIENTE: mi fermo qui senza toccare niente. Il repo ha agli atti che " + $SOLO_QUESTO + " e' stata un'installazione NUOVA E VUOTA (RIGA_ANCORA_R119.ps1 r.60-64), cioe' proprio questo caso. La cartella dati si stampa con: Get-ChildItem (Join-Path $env:APPDATA 'MetaQuotes\Terminal') -Directory | ForEach-Object { $_.FullName + ' <- ' + (Get-Content (Join-Path $_.FullName 'origin.txt') -Raw -EA SilentlyContinue) }")
+  }
+  $LibSorg = Join-Path $BaseTerm "MQL5\Include"
+
   # -------------------------------------------------------------------
-  #  2. FOTO PRIMA -- la prova che non tocchiamo il terminale
+  #  2. INVENTARIO PRIMA -- la prova che non tocchiamo il terminale
   # -------------------------------------------------------------------
-  Titolo "2. FOTO PRIMA (MQL5\Experts del banco)"
-  $ExpTerm = Join-Path $TermScelto "MQL5\Experts"
-  $FotoPrima = "cartella " + $ExpTerm + " -> " + (Descrivi $ExpTerm)
-  Write-Host ("  " + $FotoPrima)
+  Titolo "2. INVENTARIO PRIMA (MQL5\Experts e MQL5\Include del banco, PER FILE)"
+  $ExpTerm = Join-Path $BaseTerm "MQL5\Experts"
+  $IncTerm = Join-Path $BaseTerm "MQL5\Include"
+  $iE = Inventario $ExpTerm
+  $iI = Inventario $IncTerm
+  $FotoPrima = $iE.Riassunto + "  ;;  " + $iI.Riassunto
+  $DetPrima  = @("[Experts] " + $iE.Riassunto) + @($iE.Dettaglio | ForEach-Object { "    " + $_ }) + @("[Include] " + $iI.Riassunto) + @($iI.Dettaglio | ForEach-Object { "    " + $_ })
+  Write-Host ("  " + $iE.Riassunto)
+  Write-Host ("  " + $iI.Riassunto)
+  Write-Host "  (il dettaglio per file sta nel referto: l'impronta dice SE, l'elenco dice COSA)" -ForegroundColor DarkGray
 
   # -------------------------------------------------------------------
   #  3. ALBERO DI LAVORO, RIFATTO DA ZERO
@@ -288,13 +377,22 @@ try{
   Remove-Item -LiteralPath $Work -Recurse -Force -ErrorAction SilentlyContinue
   New-Item -ItemType Directory -Path $ExpW -Force | Out-Null
   New-Item -ItemType Directory -Path $IncW -Force | Out-Null
-  # libreria standard: senza Trade\Trade.mqh non compila niente
-  $LibSorg = Join-Path $TermScelto "MQL5\Include"
-  if(Test-Path -LiteralPath $LibSorg){
-    Copy-Item -LiteralPath $LibSorg -Destination $MqlW -Recurse -Force
-    $LibStd = "COPIATA da " + $LibSorg
+  # LIBRERIA STANDARD. $LibSorg e' gia' stato RISOLTO e VERIFICATO su
+  # Trade\Trade.mqh nella sezione 1: qui si copia soltanto.
+  # FORMA NON AMBIGUA: si copia il CONTENUTO (\*) in una Include che
+  # esiste gia'. La forma -LiteralPath <cartella> -Destination <cartella>
+  # su PS 5.1 puo' annidare (Include\Include) quando la destinazione
+  # contiene gia' una cartella con quel nome, ed e' per questo che il
+  # modello provato (RIGA_COMPILA_ORB104.ps1 r.437) usa il \*.
+  Copy-Item -Path (Join-Path $LibSorg "*") -Destination $IncW -Recurse -Force -ErrorAction Stop
+  # UNA COPIA NON SI DICHIARA: SI VERIFICA. Senza questo controllo un
+  # annidamento uscirebbe come "COPIATA" e morirebbe dopo, in
+  # compilazione, con un messaggio che accusa il sorgente.
+  if(-not (Test-Path -LiteralPath (Join-Path $IncW "Trade\Trade.mqh"))){
+    throw ("COPIA DELLA LIBRERIA STANDARD NON VERIFICATA: nell'albero di lavoro manca Trade\Trade.mqh dopo la copia da " + $LibSorg + ". NON compilo.")
   }
-  else{ throw ("libreria standard non trovata: " + $LibSorg) }
+  $nLib = @(Get-ChildItem -LiteralPath $IncW -Recurse -File -ErrorAction SilentlyContinue).Count
+  $LibStd = "COPIATA da " + $LibSorg + " -- " + $nLib + " file nell'albero di lavoro, verificata su Trade\Trade.mqh"
   Dico $LibStd
 
   # -------------------------------------------------------------------
@@ -381,12 +479,18 @@ try{
   # -------------------------------------------------------------------
   #  7. FOTO DOPO -- la prova che il terminale non e' stato toccato
   # -------------------------------------------------------------------
-  Titolo "7. FOTO DOPO (stessa cartella di prima)"
-  $FotoDopo = "cartella " + $ExpTerm + " -> " + (Descrivi $ExpTerm)
-  Write-Host ("  " + $FotoDopo)
+  Titolo "7. INVENTARIO DOPO (le stesse due cartelle di prima, PER FILE)"
+  $jE = Inventario $ExpTerm
+  $jI = Inventario $IncTerm
+  $FotoDopo = $jE.Riassunto + "  ;;  " + $jI.Riassunto
+  $DetDopo  = @("[Experts] " + $jE.Riassunto) + @($jE.Dettaglio | ForEach-Object { "    " + $_ }) + @("[Include] " + $jI.Riassunto) + @($jI.Dettaglio | ForEach-Object { "    " + $_ })
+  Write-Host ("  " + $jE.Riassunto)
+  Write-Host ("  " + $jI.Riassunto)
   if($FotoPrima -ne $FotoDopo){
-    [void]$Rilievi.Add("LA FOTO PRIMA E LA FOTO DOPO NON COINCIDONO. Questa riga non scrive in quella cartella: se e' cambiata, qualcos'altro l'ha toccata mentre girava. Da capire PRIMA di fidarsi di questo referto.")
+    [void]$Rilievi.Add("L'INVENTARIO PRIMA E QUELLO DOPO NON COINCIDONO (conteggio, byte o impronta dell'elenco). Questa riga non scrive in quelle cartelle: se sono cambiate, qualcos'altro le ha toccate mentre girava. Confronta i due elenchi per file qui sotto e capisci COSA e' cambiato PRIMA di fidarti di questo referto.")
+    Write-Host "  ATTENZIONE: inventario CAMBIATO. Vedi i due elenchi nel referto." -ForegroundColor Red
   }
+  else{ Write-Host "  coincidono: nessun file aggiunto, toccato o rimosso nelle due cartelle del banco." -ForegroundColor Green }
 }
 catch{
   $Fatale = $_.Exception.Message
@@ -421,8 +525,21 @@ $out = New-Object System.Collections.ArrayList
 [void]$out.Add("banco scelto ..... " + $TermScelto)
 [void]$out.Add("libreria std ..... " + $LibStd)
 [void]$out.Add("include nostri ... " + $IncTxt)
-[void]$out.Add("foto PRIMA ....... " + $FotoPrima)
-[void]$out.Add("foto DOPO ........ " + $FotoDopo)
+[void]$out.Add("cartella dati .... " + $DataFolder)
+[void]$out.Add("radice usata ..... " + $BaseTerm)
+[void]$out.Add("inventario PRIMA . " + $FotoPrima)
+[void]$out.Add("inventario DOPO .. " + $FotoDopo)
+if($FotoPrima -eq $FotoDopo){ [void]$out.Add("  -> COINCIDONO: nessun file aggiunto, toccato o rimosso nel banco.") }
+else{ [void]$out.Add("  -> NON COINCIDONO: vedi i due elenchi per file qui sotto.") }
+[void]$out.Add("")
+[void]$out.Add("=== INVENTARIO PER FILE -- PRIMA ===")
+[void]$out.Add("  (la prova del 'nessun deploy' e' questo elenco, non la data di una")
+[void]$out.Add("   cartella: il LastWriteTime di una directory NON cambia se un file")
+[void]$out.Add("   che c'era gia' viene SOVRASCRITTO IN LOCO. Classe 260.)")
+foreach($r in $DetPrima){ [void]$out.Add("  " + $r) }
+[void]$out.Add("")
+[void]$out.Add("=== INVENTARIO PER FILE -- DOPO ===")
+foreach($r in $DetDopo){ [void]$out.Add("  " + $r) }
 [void]$out.Add("")
 [void]$out.Add("=== ESITI, bersaglio per bersaglio ===")
 if($Esiti.Count -eq 0){ [void]$out.Add("  nessuna compilazione tentata.") }
