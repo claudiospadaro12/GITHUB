@@ -734,18 +734,26 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #      spende per CHIUDERE LA VOCE 3 DEL CERTIFICATO COL NUMERO: senza,
 #      il verdetto resta "NON ANCORA MISURATO" per sempre.
 #
-#  >>> LE TRE RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
-#  Portano il prefisso '#DISARMATA# ', quindi NON iniziano con 40 cifre
-#  esadecimali e il runner NON le vede: la corsa delle 03:30 gira le 45
-#  righe di sempre, esattamente come ieri.
-#  Motivo: il SECONDO STRATO del cancello (l'agente controllo-preventivo)
-#  non e' ancora tornato, e la regola di Claudio del 09/09 e' BLOCCANTE --
-#  niente esce verso il VPS senza un PASS, e se il controllo non e'
-#  tornato SI ASPETTA. Sono committate cosi' per non perderle (Regola #1),
-#  non per farle girare.
-#  >>> SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo un
-#      PASS del secondo strato. Se il cancello dice FAIL, si cancellano.
+#  >>> ARMATE alle 01:30 del 13/09, DOPO IL PASS DEL SECONDO STRATO. <<<
+#  Sono rimaste col prefisso '#DISARMATA# ' per quasi tre ore, mentre il
+#  cancello faceva QUATTRO passate. Non e' stato un ritardo: e' la regola
+#  di Claudio del 09/09 ("ED ALLORA SOCIO, DEVI ASPETTARE") applicata.
+#  Cosa avrebbe girato ciascuna versione, se l'avessi armata subito:
+#    v1 -> classe 299: le celle 0 e 100 di InpTP1_ClosePct erano LA STESSA
+#          configurazione (r.977 le esclude tutt'e due), e la soglia
+#          congelata chiedeva "tre PF distinti": INSODDISFACIBILE. Il
+#          round si sarebbe auto-dichiarato fallito comunque.
+#          Piu' classe 300: "l'n deve restare identico fra le celle" era
+#          un falsificatore che scattava sull'ipotesi VERA.
+#    v2 -> classe 301: la voce 5 del certificato portava la ragione di un
+#          ALTRO EA ("InpTimeframe != M5" e' dell'EA ESTERNO).
+#    v3 -> la toppa della 301 era arrivata su due file su tre (una write
+#          sola a fine script, persa su un'assert), e R142a autorizzava a
+#          ribaltare la riga L2 di REGISTRO_TEST a 3 voci su 5.
+#    v4 -> PASS pulito. E' questa.
+#  Il cancello si e' anche auto-verificato sul ratchet alla terza passata
+#  (nessun criterio nuovo) e ha chiuso la lista prima della quarta.
 # =====================================================================
-#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
-#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
-#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
