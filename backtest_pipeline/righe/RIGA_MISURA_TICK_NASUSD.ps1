@@ -183,16 +183,20 @@ function TrovaCsvDati(){
   #    restituito per primo".
   # E questo script SCRIVE e RICOMPILA dentro il terminale che sceglie.
   # Adesso il bersaglio non si allarga mai da solo: si muore.
-  if(-not $cand){
-    # 12/09/2026 (cancello): qui avevo messo "exit 1", e in 30 script su 84
-    # quel blocco sta DENTRO un try{} il cui catch{} scrive il referto e fa
-    # lo zip da mandare. Con exit il processo muore sul posto: niente catch,
-    # niente referto, NIENTE ZIP -- cioe' la regola delle righe di lancio
-    # (punto 2: si raccoglie sempre) annullata proprio nel caso in cui serve
-    # di piu'. Con throw il catch la raccoglie e la raccolta parte; e dove il
-    # try non c'e', throw termina comunque lo script. Sicuro in tutti e due.
-    throw "Terminale non trovato col selettore stretto, e NON allargo la ricerca: il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263), e questo script scrive e compila dentro il terminale che sceglie. Nomina il terminale a mano, oppure passa il banco C:\MT5_Backtest."
-  }
+  # 12/09/2026 -- TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO (come negli
+  # altri 83 script), MA QUI *SENZA* throw, e il motivo e' importante:
+  # TrovaCsvDati() e' un LOCALIZZATORE, non un passo fatale. Tornare
+  # $null e' un suo esito LEGITTIMO (riga qui sotto), e il chiamante ha
+  # un RIPIEGO vero: prova la copia sul Desktop
+  # (storico_bcm\ABTG_StoricoScaricato.csv). Un throw qui uccideva lo
+  # script PRIMA che quel ripiego venisse provato -- cioe' la
+  # conversione exit->throw, giusta in 83 file su 84, era SBAGLIATA in
+  # questo. Trovata dal cancello di giudizio, non da me.
+  # E il messaggio diceva anche "questo script scrive e compila": falso,
+  # questa funzione SOLO LEGGE.
+  # REGOLA: prima di far morire un ramo, si guarda se il CHIAMANTE
+  # sapeva gia' gestirne l'assenza. Un ripiego legittimo non si
+  # scambia per un difetto solo perche' somiglia a un ripiego sbagliato.
   if(-not $cand){ return $null }
   $instDir = $cand.DirectoryName
   $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"

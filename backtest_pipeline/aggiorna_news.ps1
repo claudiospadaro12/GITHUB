@@ -51,18 +51,74 @@ $FilesDir = Join-Path $DataFolder "MQL5\Files"
 New-Item -ItemType Directory -Force -Path $FilesDir | Out-Null
 $Dest = Join-Path $FilesDir "abtg_news.csv"
 
-# --- scarica il file (con retry) -------------------------------------
+# =====================================================================
+#  SCARICO IN DUE TEMPI -- RIPARATO IL 12/09/2026 (classe 251)
+# ---------------------------------------------------------------------
+#  QUI C'ERA: Invoke-WebRequest -OutFile $Dest, cioe' il download scritto
+#  DIRETTAMENTE SUL BERSAGLIO. E il bersaglio non e' un file di lavoro:
+#  e' abtg_news.csv dentro MQL5\Files del terminale con le SEDIE VIVE, e
+#  lo leggono 55 EA di questo repo (misurato).
+#  Un download spezzato a meta' -- rete che cade, 502, timeout dopo i
+#  primi byte -- lasciava quel file TRONCATO sotto 55 sedie, e il retry
+#  ripartiva su un file gia' rovinato. In piu' questo script gira da
+#  un'ATTIVITA' PIANIFICATA (07:20): il Write-Host di controllo va nel
+#  nulla, quindi non se ne accorgeva nessuno.
+#  ADESSO: si scarica in un file TEMPORANEO, lo si VERIFICA, e solo se
+#  passa si sostituisce quello vero (tenendo la copia precedente).
+#  Se la verifica non passa, il file in campo NON VIENE TOCCATO: meglio
+#  news di ieri che un file troncato.
+# =====================================================================
+$Tmp  = Join-Path $env:TEMP ("abtg_news_" + (Get-Date -Format "yyyyMMdd_HHmmss") + ".tmp")
 $ok = $false
 for ($i=1; $i -le 4 -and -not $ok; $i++) {
     try {
-        Invoke-WebRequest -Uri $RawUrl -OutFile $Dest -UseBasicParsing -TimeoutSec 30
+        if (Test-Path -LiteralPath $Tmp) { Remove-Item -LiteralPath $Tmp -Force -ErrorAction SilentlyContinue }
+        Invoke-WebRequest -Uri $RawUrl -OutFile $Tmp -UseBasicParsing -TimeoutSec 30
         $ok = $true
     } catch {
         Write-Host "   tentativo $i fallito, riprovo..." -ForegroundColor Yellow
         Start-Sleep -Seconds ([math]::Pow(2,$i))
     }
 }
-if (-not $ok) { Write-Host "Download fallito." -ForegroundColor Red; exit 1 }
+if (-not $ok) {
+    Write-Host "Download fallito: il file in campo NON e' stato toccato." -ForegroundColor Red
+    if (Test-Path -LiteralPath $Dest) { Write-Host ("   resta in campo quello di prima: " + (Get-Item -LiteralPath $Dest).LastWriteTime) -ForegroundColor Yellow }
+    exit 1
+}
+
+# --- LA VERIFICA, prima di toccare il file che leggono 55 EA ----------
+$guasti = @()
+if (-not (Test-Path -LiteralPath $Tmp -PathType Leaf)) { $guasti += "il file scaricato non esiste" }
+else {
+    $len = (Get-Item -LiteralPath $Tmp).Length
+    if ($len -eq 0) { $guasti += "file VUOTO (0 byte)" }
+    $righe = @(Get-Content -LiteralPath $Tmp -ErrorAction SilentlyContinue)
+    if ($righe.Count -lt 2) { $guasti += ("solo " + $righe.Count + " righe: un CSV di news ne ha almeno 2 (intestazione + un evento)") }
+    # ogni riga viva deve avere lo stesso numero di separatori della prima:
+    # un troncamento a meta' riga si vede QUI e non in campo
+    $vive = @($righe | Where-Object { $_ -and $_.Trim() -ne "" })
+    if ($vive.Count -ge 2) {
+        $sep0 = ($vive[0].ToCharArray() | Where-Object { $_ -eq ',' -or $_ -eq ';' }).Count
+        $storte = @($vive | Where-Object { (($_.ToCharArray() | Where-Object { $_ -eq ',' -or $_ -eq ';' }).Count) -ne $sep0 })
+        if ($storte.Count -gt 0) { $guasti += ($storte.Count + " righe con un numero di separatori diverso dalla prima: il file e' TRONCATO o malformato") }
+    }
+}
+if ($guasti.Count -gt 0) {
+    Write-Host "" 
+    Write-Host "SCARICATO MA NON VALIDO: non tocco il file in campo." -ForegroundColor Red
+    foreach ($g in $guasti) { Write-Host ("   - " + $g) -ForegroundColor Red }
+    Write-Host "   Meglio le news di ieri che un file troncato sotto 55 sedie." -ForegroundColor Yellow
+    if (Test-Path -LiteralPath $Dest) { Write-Host ("   resta in campo quello di prima: " + (Get-Item -LiteralPath $Dest).LastWriteTime) -ForegroundColor Yellow }
+    Remove-Item -LiteralPath $Tmp -Force -ErrorAction SilentlyContinue
+    exit 1
+}
+
+# --- SOSTITUZIONE, con la copia di prima tenuta da parte -------------
+if (Test-Path -LiteralPath $Dest) {
+    Copy-Item -LiteralPath $Dest -Destination ($Dest + ".prima") -Force -ErrorAction SilentlyContinue
+}
+Move-Item -LiteralPath $Tmp -Destination $Dest -Force
+Write-Host "   verificato e messo in campo (la copia di prima e' in abtg_news.csv.prima)" -ForegroundColor Green
 
 $n = (Get-Content $Dest | Measure-Object -Line).Lines
 Write-Host "OK: abtg_news.csv aggiornato ($n eventi) in:" -ForegroundColor Green
