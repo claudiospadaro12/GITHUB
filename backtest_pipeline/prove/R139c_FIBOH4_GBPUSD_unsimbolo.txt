@@ -1,0 +1,237 @@
+# ======================================================================
+#  EA: ABTG_FiboH4_Multi
+#  R139c -- LA PRIMA VOLTA CHE QUESTO MOTORE VIENE MISURATO SU UN
+#  SIMBOLO SOLO. GBPUSD H4. Asse: InpEngulfLookback.
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  Dossier: report/I_BOCCIATI_HANNO_UN_CERTIFICATO_2026-09-12.md
+# ======================================================================
+#
+#  PERCHE' ESISTE: IL "0/8" NON E' UN VERDETTO, E ADESSO HA IL CONTO
+#    Il capitolo 2-bis di REGISTRO_TEST.md lo dice dal 21/08. Oggi
+#    12/09 l'ho RICONTATO su tutte le 96 righe dei 16 CSV di
+#    risultati_prove/ABTG_FiboH4_Multi/:
+#      - la colonna InpSymbols vale "GBPUSD;USDJPY;EURUSD" in
+#        96 righe su 96. Nessuna passata ha mai operato su un
+#        simbolo solo.
+#      - 7 file su 8 danno lo STESSO numero a meno del terzo decimale
+#        (IS da -384,56 a -394,13 / OOS da +116,17 a +118,68), e lo
+#        scarto residuo e' la conversione di valuta del conto, non il
+#        mercato.
+#      - l'ottavo (XAUUSD) differisce (IS -536,71 / OOS +299,89, n 67
+#        e 70 invece di 72 e 82) perche' OnTick e' guidato dalle BARRE
+#        DEL SIMBOLO DEL GRAFICO: cambia la cadenza con cui l'EA
+#        guarda lo stesso basket, non il basket.
+#    >>> Il "0/8 promossi" della coda fascia B e' UNA configurazione
+#        contata otto volte, campionata a otto cadenze diverse.
+#    CAUSA, letta nel sorgente: ABTG_FiboH4_Multi.mq5 r.278-287 usa
+#    InpSymbols e ripiega su _Symbol SOLO se la lista e' vuota. Il file
+#    prova scriveva "InpSymbols=" con sopra la nota "il pin sotto e'
+#    OBBLIGATORIO", e MT5 IGNORA il pin di una stringa vuota: e' stato
+#    usato il default compilato. La riga c'era, sembrava applicata, e
+#    non lo era.
+#
+#  IL CERTIFICATO DI MORTE NON E' COMPILABILE -- 3 voci su 5 mancano
+#    1 PF                       SI'  (0,594-0,697 IS / 0,783-1,281 OOS)
+#    2 n e DD                   SI'  (n 63-83 deal, DD 3,12-7,55%)
+#    3 gestione uscita ad asse  NO   InpTP1_R / InpTP1Pct / InpBreakeven
+#                                    / InpUseTrailing / InpTrailAtrMult
+#                                    sono PINNATI in tutte le 96 righe.
+#                                    L'unico asse mai girato e'
+#                                    InpEngulfLookback, che e' l'INGRESSO.
+#    4 simboli gemelli          NO   un basket, otto volte. ZERO simboli.
+#    5 TF cambiato              NO   InpTF = 16388 in 96 righe su 96.
+#    >>> Verdetto d'archivio: NON ANCORA MISURATO. Questo round chiude
+#        la voce 4, che e' quella da cui dipendono le altre: non ha
+#        senso spazzolare l'uscita di un motore su un basket che non
+#        avremmo mai schierato.
+#
+#  PERCHE' GBPUSD, e non uno degli altri sette
+#    (a) E' il PRIMO della lista di default, quindi e' dentro i numeri
+#        d'archivio: il confronto "basket contro simbolo singolo" e'
+#        diretto.
+#    (b) E' il MAJOR PIU' ECONOMICO di casa: ~0,67 pip all-in (spread
+#        0,2 [LETTURA UNICA 17/08 17:34 srv] + commissione ~0,47
+#        [INFERITO dal 0,004% del nozionale]), contro 0,86 di EURUSD.
+#    (c) Il pavimento storico e' MISURATO su questo simbolo: prima
+#        operazione 1999.01.14 (R102_REFERTO_BLOCCO1.md r.105). Su
+#        GBPUSD la finestra lunga e' un fatto, non un'assunzione.
+#
+#  IL CANCELLO CHE VIENE PRIMA DI TUTTO, ED E' GRATIS -- F0
+#    >>> Nel CSV la colonna InpSymbols DEVE leggere esattamente
+#        GBPUSD. Se legge ancora "GBPUSD;USDJPY;EURUSD", il pin non e'
+#        arrivato e QUESTO ROUND E' NULLO, qualunque numero esca.
+#    >>> Secondo controllo, indipendente dal primo: i numeri DEVONO
+#        ESSERE DIVERSI da quelli d'archivio. Se la cella lookback=8
+#        ridesse OOS profit 118,68 / PF 1,09427 / DD 3,7359 / 82 deal,
+#        vuol dire che sta girando il basket, non il simbolo.
+#        >>> Qui l'IDENTITA' e' il SINTOMO DI GUASTO, non la prova di
+#            determinismo. E' il verso opposto del solito, e va scritto
+#            adesso perche' e' esattamente l'errore che nel 2026-08 ha
+#            prodotto un verdetto falso.
+#    Un cancello che non legge niente non e' un cancello verde.
+#
+#  IL CAMPIONE: FACCIO IL CONTO PRIMA, E NON TORNA DEL TUTTO
+#    Frequenza d'archivio (CENSIMENTO_REGOLA_FINESTRA.md r.125-130):
+#    73 trade/anno sul BASKET di 3 simboli = ~24 DEAL/anno/simbolo.
+#    Su questo EA il parziale e' al 50% con due ordini frazionati
+#    (InpFirstFraction 0,3333), quindi il fattore deal/posizione e'
+#    ~2 come su tutti i motori di casa con TP1Pct=50 (classe 226,
+#    fattore misurato 1,000-2,314 sui 66 file per-trade del repo;
+#    su questo EA il file per-trade NON esiste, quindi il fattore e'
+#    [INFERITO], non misurato).
+#    >>> ~12 POSIZIONI/anno su GBPUSD da solo.
+#    Su 1999.01.04 -> 2026.06.30 = 27,5 anni:
+#      totale atteso        ~330 posizioni
+#      IS  (FrazioneIS 0,40)  ~132   >>> SOTTO il pavimento dei 150
+#      OOS (0,60)             ~198   >>> sopra
+#    >>> ATTESA DICHIARATA E SCOMODA: l'IS NON arrivera' ai 150. Quindi
+#        il MERITO su questa gamba e' SOSPESO PER COSTRUZIONE (valvola
+#        R59) e il round consegna: (1) il RISCHIO, che vale a qualunque
+#        n (Emendamento B), (2) la prima lettura di questo motore su un
+#        mercato solo, (3) l'OOS a campione pieno.
+#        Lo scrivo PRIMA perche' leggere un PF IS su 132 posizioni come
+#        un verdetto sarebbe esattamente l'errore che questo file
+#        esiste per non ripetere.
+#    >>> @FRAZIONEIS 0,50 porterebbe a ~165/165 e chiuderebbe il buco,
+#        MA quella direttiva e' sotto CANARINO nella coda del 12/09 e
+#        non e' mai stata verificata nella catena vera. Non ci si
+#        appoggia a una cosa non ancora misurata: se il canarino di
+#        stanotte dice ONORATA, questo file si riscrive con 0,50 e il
+#        problema sparisce. Questa e' una dipendenza dichiarata, non
+#        un rimpianto.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    n: IS 240-290 DEAL (~120-145 posizioni), OOS 360-440 DEAL.
+#       Se n IS scende sotto 120 deal, il primo sospetto e' la finestra
+#       o il filtro InpMinDistPips=50 (che su GBPUSD da solo taglia
+#       piu' che su un basket), non il motore.
+#    PF: sul basket l'IS e' 0,64-0,70 e l'OOS 0,78-1,09. Su un simbolo
+#       solo NON HO UN SEGNO DA PREDIRE, e non lo invento: attesa
+#       larga e dichiarata, PF IS 0,70-1,20 e PF OOS 0,70-1,30.
+#       >>> Dichiaro che l'esito PIU' PROBABILE e' un NO: tre delle
+#           quattro letture d'archivio stanno sotto 1,00. Se esce un
+#           PF sopra 1,30 su entrambe le finestre, il primo sospetto e'
+#           un baco, non una scoperta.
+#    DD: sul basket 3,12-7,55% a rischio 1%. Su un simbolo solo il
+#       rischio e' MENO diversificato, quindi atteso PIU' ALTO:
+#       DD IS 6-16%, DD OOS 5-14%. 27,5 anni contengono 2008, 2015
+#       (SNB), 2016 (Brexit, GBPUSD -8% in una notte), 2020, 2022
+#       (mini-budget, 1,035).
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    F0  IL CANCELLO DI COPERTURA, BLOCCANTE: colonna InpSymbols =
+#        GBPUSD, e numeri DIVERSI dall'archivio. Se no, round NULLO.
+#    F1  RISCHIO, e vale a qualunque n: DD <= 14,0% a rischio 1,0% in
+#        ENTRAMBE le finestre (= ~9,1% alla taglia di flotta 0,65%).
+#        Sopra: SCARTATO PER RISCHIO, e il PF non si legge nemmeno.
+#    F2  MERITO, e si applica SOLO alla finestra che supera 300 DEAL
+#        (~150 posizioni), cioe' presumibilmente solo l'OOS:
+#        PF >= 1,10, su ALMENO 2 celle su 3.
+#    F3  SE F2 FALLISCE SULL'OOS A CAMPIONE PIENO, IL CAPITOLO SI
+#        CHIUDE con il certificato completo: il motore avrebbe PF, n,
+#        DD, un simbolo vero e una finestra lunga. Restano fuori la
+#        voce 3 (uscita) e la 5 (TF) -- e allora il verdetto sara'
+#        "MORTO su GBPUSD H4, NON ANCORA MISURATO come famiglia", che
+#        e' una frase diversa e va scritta diversa.
+#    F4  NON SI RIGRIGLIA L'INGRESSO. Se F2 fallisce, non si cerca un
+#        altro InpEZ1ratio / InpEZ2ratio / InpMinDistPips sugli stessi
+#        dati: sarebbe il curve-fitting della regola del 19/08. Si
+#        cambia SIMBOLO (gli altri sette non sono mai stati misurati) o
+#        si cambia MECCANISMO.
+#    F5  MANOPOLA INERTE. Se le tre celle danno n e PF identici al
+#        centesimo, InpEngulfLookback e' INERTE su un simbolo solo, e
+#        va scritto "manopola inerte, MISURATA".
+#    F6  QUESTO ROUND NON PROMUOVE NIENTE. Modello 1 = OHLC M1 =
+#        SCREENING. Un numero OHLC non e' mai un verdetto, e su questo
+#        motore il tick non e' nemmeno raggiungibile sulla finestra
+#        lunga (pavimento tick forex 2024.07.05 MISURATO).
+#
+#  BUCHI DICHIARATI
+#    - FATTORE DEAL/POSIZIONE: [INFERITO] a ~2, non misurato: questo EA
+#      non ha nessun file per-trade in archivio. Tutti i conti sul
+#      campione ereditano quell'incertezza, e il verso puo' andare da
+#      1,0 (nessun parziale eseguito, campione DOPPIO di quanto stimo)
+#      a 2,3 (campione piu' piccolo). La banda e' dichiarata, non
+#      nascosta.
+#    - SPREAD: 0,2 pip e' UNA lettura di UN istante; la commissione e'
+#      [INFERITO]. Su OHLC lo spread e' quello corrente, quindi i PF di
+#      questo round sono OTTIMISTI di una quantita' non misurata.
+#    - STOP TIPICO: InpSLratio=4,236 su un ritracciamento piu'
+#      InpSLbufferPips=3. In pip e' [NON MISURATO], quindi la frontiera
+#      "stop >= 40 x spread" su questa geometria NON e' verificata. Va
+#      letta nel referto dallo stop mediano, se il driver lo stampa.
+#    - PROVA DI REGIME: nessuna, separata. 27,5 anni contigui
+#      DILUISCONO (Emendamento C). La lettura per anno va fatta sul
+#      referto.
+#    - PEGGIOR GIORNATA: [NON MISURATO], la colonna non esiste nel CSV
+#      di ottimizzazione MT5.
+#    - GUARDIAN inerte nel tester (dichiarato nel sorgente r.243).
+#
+#  BANCO: Modello 1 (OHLC M1). Deposito 10000. FrazioneIS di fabbrica
+#         del driver (0,40). NON si usa @FRAZIONEIS: e' sotto canarino.
+@SIMBOLO  GBPUSD
+@PERIODO  H4
+@DAQUANDO 1999.01.04
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica a quella d'archivio, campo per campo dalle
+#     colonne di ABTG_FiboH4_Multi_GBPUSD_OOS_ohlc.csv (Pass 3),
+#     TRANNE InpSymbols -- che e' il punto di tutto il round.
+#
+# >>> LA RIGA PER CUI ESISTE QUESTO FILE. Un solo simbolo, mai fatto.
+InpSymbols=GBPUSD
+InpTF=16388
+InpMaxTotalPositions=1
+InpAllowTwoCandle=true
+InpMinEngulfBodyPct=25.0
+InpAllowLong=true
+InpAllowShort=true
+InpEZ1ratio=1.88
+InpEZ2ratio=2.88
+InpSLratio=4.236
+InpUseEZ2=true
+InpMinDistPips=50.0
+InpAtrPeriod=14
+InpMaxEngulfAtr=3.0
+InpPendingExpiryBars=6
+InpSLbufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpRiskPercent=1.0
+InpFirstFraction=0.3333
+InpUseCutoff=true
+InpCutoffHour=17
+InpCutoffMin=45
+InpFridayClose=true
+InpFridayCloseHour=21
+InpFridayCloseMin=50
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsCommon=true
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsPerCurrency=false
+InpNewsCancelPendings=false
+InpNewsDerogaPips=100.0
+InpComment=R139C
+InpMaxSpread=0
+InpVerbose=true
+InpUsaGuardian=true
+InpAutoTest=true
+# MAGIC VERGINE 772060 (cercato repo-wide il 12/09/2026: 0 occorrenze).
+# NON si riusa 772002/772003 dell'archivio: un CSV di questo round non
+# deve poter essere riletto al posto di uno del 16/08.
+InpMagic=772060
+#
+# --- L'UNICO ASSE (3 celle x 2 finestre = 6 passate)
+#     Lo STESSO asse del round d'archivio (8 / 12 / 16), cosi' il
+#     confronto "basket contro simbolo singolo" e' cella per cella.
+#     Riferimenti d'archivio sul BASKET, OOS: 8 -> PF 1,094 |
+#     12 -> 0,819 | 16 -> 0,699.
+InpEngulfLookback=8||8||4||16||Y
+# ======================================================================

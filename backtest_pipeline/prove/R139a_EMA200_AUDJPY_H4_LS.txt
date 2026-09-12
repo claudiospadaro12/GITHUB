@@ -1,0 +1,236 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R139a -- IL NUMERO CHE NON ESISTE: LO SPLIT IS/OOS DI EMA200 H4.
+#  AUDJPY H4, DUE LATI (L+S). Asse: InpTP_RR.
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  Dossier: report/I_BOCCIATI_HANNO_UN_CERTIFICATO_2026-09-12.md
+# ======================================================================
+#
+#  LA DOMANDA, in una riga
+#    Su ABTG_EMA200 a H4 esiste un altopiano a TICK REALI largo e con il
+#    campione pieno -- e NON esiste NEMMENO UNA LETTURA FUORI CAMPIONE.
+#    Tutte le 135 celle di AUDJPY vengono da UNA finestra sola,
+#    ottimizzata intera. Questo round chiede il numero che manca.
+#
+#  I NUMERI CHE CI SONO GIA', copiati dal CSV, non ricordati
+#    Fonte: risultati_archivio/EMA200/realtick_H4/
+#           valid_ABTG_EMA200_H4_realtick_AUDJPY.csv
+#    Banco di quella corsa: backtest_pipeline/ini/ABTG_EMA200.ini
+#           Model=4 (TICK REALI), FromDate 2024.01.01, ToDate 2026.06.30,
+#           Deposit 10000, Optimization=2. UNA finestra, nessuno split.
+#
+#    Celle con i DUE LATI accesi (InpAllowLong=1 E InpAllowShort=1): 28.
+#    POSITIVE: 28 su 28. PF da 1,076 a 1,845. DD da 2,889 a 9,464.
+#    Trades (DEAL DI USCITA) da 255 a 347.
+#
+#    Il CENTRO dell'altopiano -- NON il picco -- e' O1=0,25 / O2=0,50:
+#      O1=0.25 O2=0.5 TP=1.5 -> PF 1,711  DD 2,889  deal 276
+#      O1=0.25 O2=0.5 TP=2.0 -> PF 1,623  DD 2,901  deal 283
+#      O1=0.25 O2=0.5 TP=3.0 -> PF 1,641  DD 2,917  deal 286
+#      (TP=2.5 NON esiste in archivio su questa coppia O1/O2: la griglia
+#       del 01/08 e' SPARSA, 135 celle su 6x5x4x4 = 480 possibili.
+#       Quindi UNA delle quattro celle di questo round e' nuova anche
+#       come parametro, e va detto.)
+#    Il PICCO sta altrove (O1=0.30 O2=0.4 TP=1.5 -> PF 1,845) e NON E'
+#    LA CELLA DI QUESTO ROUND: regola di casa, centro dell'altopiano,
+#    mai il picco. La regola di selezione e' dichiarata qui, insieme ai
+#    numeri, altrimenti i numeri non vogliono dire niente.
+#
+#  PERCHE' I DUE LATI E NON IL SOLO LONG -- ed e' il CONTRO-ESEMPIO
+#    Sul lato LONG da solo AUDJPY fa 24 celle su 24 positive, PF mediano
+#    1,852. Sembra un motore. MA LA SPIEGAZIONE ALTERNATIVA E' LA DERIVA
+#    DEL CARRY AUD/JPY, e va misurata, non negata. Il numero che la
+#    discrimina l'ho cercato PRIMA di scrivere questo file, sugli stessi
+#    CSV:
+#      LONG only   24 celle, 24 positive, PF mediano 1,852
+#      SHORT only  32 celle, 16 positive, PF mediano 0,991
+#      L+S         28 celle, 28 positive, PF mediano 1,516
+#    >>> Il lato short e' CENTRATO SULLO ZERO (0,991), non negativo.
+#        Se fosse pura deriva rialzista lo short sarebbe sistematicamente
+#        ROSSO (come SuperWave DOW short, PF OOS 0,429, o SupRev DAX
+#        short, <=0,92). Non lo e'.
+#    >>> E una configurazione a DUE LATI non puo' raccogliere una deriva
+#        in UNA direzione: prende anche l'altra. Per questo il round
+#        gira su L+S e non sul long: L+S e' la cella che FALSIFICA, il
+#        long e' la cella che conferma. Si misura quella che falsifica.
+#
+#  CLASSE 226, E QUI MORDE NEL VERSO CHE FA MALE
+#    La colonna Trades conta DEAL DI USCITA, non POSIZIONI. Su questo
+#    motore il fattore MISURATO e' 2,0117 (517 deal = 257 posizioni,
+#    R112_CORSA_20260826/pertrade_00_metro_763400.csv, confermato da un
+#    secondo conteggio indipendente su magic diverso in
+#    risultati_prove/trades_candidati_r23/).
+#    >>> Quindi l'altopiano di AUDJPY a "255-347 trade" e' in realta'
+#        128-174 POSIZIONI. Il verso e' quello SFAVOREVOLE: ne abbiamo
+#        MENO di quante sembrava. La cella centrale a 283 deal fa ~141
+#        posizioni -- SOTTO il pavimento dei 150, su UNA finestra, e
+#        quindi TRE volte sotto se si pretende 150 per finestra.
+#    >>> E' questo, e non altro, il motivo per cui nessuno ha mai
+#        promosso EMA200 H4: non il PF, il CAMPIONE. Il numero non era
+#        mai stato scritto.
+#
+#  DA DOVE VIENE IL CAMPIONE CHE MANCA: dalla PROFONDITA' DI STORICO
+#    Il forex su BCM ha ~27,5 anni di M1 OHLC, pavimento MISURATO
+#    1999.01.04 (R102_REFERTO_BLOCCO1.md r.103-123 e BLOCCO2 r.18-23).
+#    Il TICK forex parte invece dal 2024.07.05 MISURATO su GBPUSD: a
+#    tick questa misura NON E' FATTIBILE, e va detto subito.
+#    Frequenza ricavata dai numeri sopra (banda, non punto singolo):
+#      ~141 posizioni su una finestra di 24-30 mesi = 56-71 pos/anno
+#      (24 mesi se il tick vero parte dal pavimento 2024.07.05,
+#       30 mesi se la finestra dichiarata nell'ini e' stata piena;
+#       QUALE DELLE DUE SIA E' [NON MISURATO] -- si tiene la banda)
+#    Su 2010.01.01 -> 2026.06.30 = 16,5 anni:
+#      totale atteso           930 - 1.163 posizioni
+#      IS  (FrazioneIS 0,40)   372 -   466   >>> sopra 150
+#      OOS (0,60)              558 -   699   >>> sopra 150
+#    >>> E' la PRIMA volta che questo motore vedrebbe il pavimento dei
+#        150 IN ENTRAMBE LE FINESTRE. E' questo il numero che decide.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    n: IS 370-470 posizioni, OOS 550-700 (in DEAL: circa il doppio).
+#       Se n IS scende sotto 250 il primo sospetto e' la finestra o i
+#       dati, non il motore.
+#    PF: banda larga e dichiarata, perche' l'OHLC e' OTTIMISTA e la
+#       finestra contiene regimi che il tick non ha mai visto:
+#       PF IS 1,10-1,70 e PF OOS 1,05-1,60.
+#    DD: in SALITA rispetto ai 2,9% del tick, perche' 16,5 anni
+#       contengono 2008-2009 (fuori finestra), 2015, 2018, 2020 e lo
+#       yen 2024. Attesa DD IS 6-14%, DD OOS 5-12%, a rischio 1,0%.
+#    Scriverlo prima serve a una cosa: se esce PF 2,5 con DD 3% su
+#    16,5 anni, il primo sospetto e' un baco, non una scoperta.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    S1  CAMPIONE. n >= 300 DEAL in ENTRAMBE le finestre (= ~150
+#        posizioni al fattore misurato 2,0117). Sotto: il MERITO e'
+#        SOSPESO (valvola R59), e il round si legge SOLO sul rischio.
+#    S2  MERITO. PF >= 1,10 in ENTRAMBE le finestre, su ALMENO 3 delle 4
+#        celle. Due celle su quattro non sono un altopiano.
+#    S3  RISCHIO, e vale a qualunque n (Emendamento B del 16/08):
+#        DD <= 14,0% a rischio 1,0% in entrambe le finestre. Sopra, la
+#        cella e' scartata PER RISCHIO e non si discute il PF.
+#        (14,0% a 1,0% corrisponde a ~9,1% a 0,65%, la taglia di flotta.)
+#    S4  COERENZA DEI SEGNI. Se IS e OOS hanno segno OPPOSTO su piu' di
+#        una cella, il verdetto e' "REGIME, non edge" e NON si promuove
+#        niente -- e' lo schema gia' pagato sulla PTE H3 (DAX -484 ->
+#        +1.352) e sulla Sequenza del 12/09 ("il segno lo decide
+#        l'ANNO, non il parametro").
+#    S5  MANOPOLA INERTE. Se le quattro celle danno n e PF identici al
+#        centesimo, InpTP_RR e' INERTE su questo motore e va scritto
+#        cosi': "manopola inerte, MISURATA", non "provato e non va".
+#        E' la classe che il censimento del 09/09 ha trovato 874 volte
+#        su 1.960 CSV.
+#    S6  QUESTO ROUND NON PROMUOVE NIENTE, E NON E' UNA FORMALITA'.
+#        E' Modello 1 = OHLC M1 = SCREENING. Un numero OHLC non e' mai
+#        un verdetto (regola di casa). Il verdetto a tick su questa
+#        coppia e' LIMITATO a 24-30 mesi per profondita' dei dati, e
+#        quel numero c'e' GIA' (PF 1,623 DD 2,901 su 283 deal).
+#        Quello che manca, e che questo round da', e' se quel numero
+#        REGGE FUORI CAMPIONE E FUORI REGIME.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PAVIMENTO STORICO DI AUDJPY: [INFERITO]. R102 ha MISURATO il
+#      1999.01.04 su SEI simboli (GBPUSD, EURUSD, AUDUSD nel Blocco 1;
+#      tre nel Blocco 2) e AUDJPY NON E' FRA QUELLI. Il 2010.01.01 di
+#      questo file sta 11 anni dentro il pavimento misurato, quindi il
+#      rischio e' basso -- ma se il referto stampa una prima operazione
+#      molto dopo il 2010, il numero di questo round e' su una finestra
+#      piu' corta di quella dichiarata e va riletto.
+#    - COSTO: lo SPREAD BCM su AUDJPY e' [NON MISURATO]. La sonda del
+#      17/08 legge 0 (nessun tick) su AUDUSD/EURAUD/GBPJPY/CHFJPY, e
+#      AUDJPY non e' fra i simboli con una lettura. Quindi la frontiera
+#      "stop >= 40 x spread" su questa coppia NON E' VERIFICABILE qui.
+#      >>> Contro-argomento onesto, e regge solo a meta': il costo vero
+#          E' GIA' DENTRO i numeri a tick (PF 1,623 con DD 2,901 su
+#          283 deal, spread reale BCM incluso). Su OHLC invece lo
+#          spread e' quello corrente, quindi i PF di QUESTO round sono
+#          OTTIMISTI di una quantita' non misurata.
+#      >>> La mossa che chiude il buco costa ZERO passate di tester:
+#          RealCost Spread P95 Logger MT5 (Code Base 74148), promosso
+#          in casa il 23/08 e mai usato, segnalato da sette cacce.
+#    - UN SOLO BANCO: nessuna prova di regime SEPARATA. 16,5 anni
+#      contigui DILUISCONO (Emendamento C): sei anni brutti piu' dieci
+#      buoni fanno una media che non descrive nessun mercato. La lettura
+#      per ANNO va fatta sul referto, e se il driver non la stampa va
+#      chiesta come round separato.
+#    - PEGGIOR GIORNATA: [NON MISURATO] e non producibile da qui (il
+#      CSV di ottimizzazione MT5 non ha quella colonna). Con DD atteso
+#      6-14% il muro prop giornaliero del 5% NON e' implicato: resta
+#      dentro il cono del possibile, e va scritto nel referto.
+#    - TAGLIA: rischio 1,0% e non 0,65%, PER SCELTA: e' la taglia con
+#      cui e' girato tutto l'archivio H4 (ini Deposit 10000), ed e' la
+#      sola condizione per cui i numeri sono confrontabili.
+#    - GUARDIAN: InpUsaGuardian=true e' il default, ma nel tester le
+#      GlobalVariable non esistono e la guardia lascia passare tutto
+#      (fail-open dichiarato nel sorgente). Non sposta nessun numero.
+#
+#  BANCO: Modello 1 (OHLC M1) -- SCREENING, non verdetto.
+#         Deposito 10000. FrazioneIS: quella di fabbrica del driver
+#         (0,40). NON si usa @FRAZIONEIS: quella direttiva e' sotto
+#         canarino nella coda di stanotte e non ci si appoggia a una
+#         cosa non ancora misurata.
+@SIMBOLO  AUDJPY
+@PERIODO  H4
+@DAQUANDO 2010.01.01
+@FINOA    2026.06.30
+#
+# --- LA CELLA: centro dell'altopiano L+S di AUDJPY a tick, campo per
+#     campo dalle colonne di valid_ABTG_EMA200_H4_realtick_AUDJPY.csv
+InpUsaGuardian=true
+InpTF=16388
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+# DUE LATI: e' la cella che falsifica l'ipotesi "deriva del carry".
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.25
+InpOrder2Atr=0.5
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON e' pinnato di proposito: il pin di una stringa a
+# valore VUOTO viene IGNORATO da MT5 (classe FiboH4, controllo 3 di
+# controlla_prova.py). Il default compilato e' gia' la stringa vuota.
+InpComment=R139A
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC VERGINE 771560 (cercato repo-wide il 12/09/2026: 0 occorrenze).
+# NON si riusa il 771512 della sedia in forward: un CSV di questo round
+# non deve poter essere riletto al posto di uno del 01/08.
+InpMagic=771560
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+#
+# --- L'UNICO ASSE (4 celle x 2 finestre = 8 passate)
+#     InpTP_RR e' un parametro d'USCITA, e le tre celle 1,5 / 2,0 / 3,0
+#     hanno GIA' un numero a tick sulla stessa coppia O1/O2 (1,711 /
+#     1,623 / 1,641). La 2,5 e' nuova anche come parametro.
+#     >>> Non e' una sentinella di riproduzione: banco e finestra sono
+#         DIVERSI (OHLC contro tick, 16,5 anni contro 2-2,5). E' un
+#         riferimento di CONTINUITA', e va letto come tale.
+InpTP_RR=1.5||1.5||0.5||3.0||Y
+# ======================================================================

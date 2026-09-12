@@ -1,0 +1,200 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R139b -- IL GEMELLO PIU' ECONOMICO: GBPUSD H4, DUE LATI (L+S).
+#  Asse: InpTP_RR. Stesso disegno di R139a, simbolo diverso.
+#  Scritto il 12/09/2026. Criteri congelati PRIMA dei numeri.
+#  Dossier: report/I_BOCCIATI_HANNO_UN_CERTIFICATO_2026-09-12.md
+# ======================================================================
+#
+#  PERCHE' ESISTE, E PERCHE' PROPRIO GBPUSD
+#    (a) E' IL MAJOR PIU' ECONOMICO DI CASA, con il numero accanto.
+#        Caccia del sabato, REGISTRO_TEST.md r.2226-2232: GBPUSD spread
+#        0,2 [LETTURA UNICA] + commissione ~0,47 [INFERITO] = ~0,67 pip
+#        ALL-IN, contro 0,86 di EURUSD. Pavimento DURO 13,3x a >= 8,9
+#        pip, pavimento di LAVORO 40x a >= 26,8 pip. Su H4 lo stop di
+#        questo motore e' 1,0 x ATR(14) H4, cioe' molte decine di pip:
+#        la frontiera del costo NON e' il collo di bottiglia qui.
+#        >>> E' l'unico simbolo di questo pacchetto in cui il costo non
+#            e' un buco: su AUDJPY (R139a) e' [NON MISURATO].
+#    (b) E' UNO DEI SEI SIMBOLI SU CUI IL PAVIMENTO STORICO E'
+#        MISURATO, non inferito: prima operazione 1999.01.14
+#        (R102_REFERTO_BLOCCO1.md r.105). Quindi su GBPUSD la finestra
+#        lunga e' un FATTO, non un'assunzione.
+#    (c) E' il gemello che lavora sull'ALTRO LATO, ed e' il pezzo che
+#        la regola dei due lati chiede. A tick, la cella migliore di
+#        GBPUSD H4 e' SHORT-only (PF 2,066, DD 4,398, 150 deal), mentre
+#        su AUDJPY e' LONG-only. Lo stesso motore cambia lato col
+#        simbolo: e' un'informazione, non un dettaglio.
+#
+#  I NUMERI CHE CI SONO GIA', copiati dal CSV
+#    Fonte: risultati_archivio/EMA200/realtick_H4/
+#           valid_ABTG_EMA200_H4_realtick_GBPUSD.csv
+#    Banco: ini/ABTG_EMA200.ini -- Model=4 (TICK REALI),
+#           2024.01.01 -> 2026.06.30, Deposit 10000. UNA finestra.
+#
+#    Celle con i DUE LATI accesi: 24. POSITIVE: 24 su 24.
+#    PF da 1,147 a 1,348 -- la banda PIU' STRETTA di tutto il set a 8
+#    simboli. DD da 5,783 a 9,223. Trades (DEAL) da 274 a 380.
+#    >>> 24 su 24 positive dentro 0,20 punti di PF non e' un picco: e'
+#        un pianoro. Ed e' proprio la piattezza che lo rende
+#        interessante, perche' un pianoro largo e basso e' il profilo
+#        opposto di una cella verde per caso.
+#
+#    Il CENTRO dell'altopiano -- NON il picco -- e' O1=0,25 / O2=0,40:
+#      O1=0.25 O2=0.4 TP=3.0 -> PF 1,328  DD 5,979  deal 295
+#      vicini, tutti positivi:
+#      O1=0.20 O2=0.3 TP=2.0 -> PF 1,235  DD 6,831  deal 340
+#      O1=0.25 O2=0.3 TP=2.0 -> PF 1,207  DD 6,500  deal 328
+#      O1=0.25 O2=0.6 TP=1.5 -> PF 1,316  DD 6,067  deal 276
+#      O1=0.30 O2=0.4 TP=2.0 -> PF 1,283  DD 5,810  deal 303
+#      O1=0.30 O2=0.4 TP=3.0 -> PF 1,290  DD 5,783  deal 304
+#    Il PICCO del simbolo (PF 2,066) e' una cella SHORT-ONLY e NON e'
+#    la cella di questo round. Regola di casa: centro dell'altopiano,
+#    mai il picco -- e la regola e' scritta qui accanto al numero.
+#
+#  IL CONTRO-ESEMPIO, misurato sugli stessi CSV
+#    L'ipotesi alternativa da battere e' "e' la deriva del cable, non
+#    il motore". I tre numeri che la discriminano:
+#      LONG only    n.d. come blocco omogeneo; il set completo fa
+#                   64 pass positivi su 135 (47%)
+#      L+S          24 celle, 24 positive, PF mediano 1,235
+#      la cella migliore in assoluto e' SHORT (PF 2,066)
+#    >>> Una configurazione a DUE LATI non puo' raccogliere una deriva
+#        in una direzione: prende anche l'altra. E su GBPUSD il lato
+#        forte e' lo SHORT, cioe' il verso OPPOSTO a quello di AUDJPY
+#        con lo STESSO motore. Se fosse deriva, il lato forte sarebbe
+#        lo stesso dei due simboli. Non lo e'.
+#
+#  CLASSE 226, NEL VERSO SFAVOREVOLE
+#    Trades = DEAL DI USCITA. Fattore MISURATO su questo motore 2,0117
+#    (517 deal = 257 posizioni, R112_CORSA_20260826/
+#    pertrade_00_metro_763400.csv, secondo conteggio indipendente in
+#    risultati_prove/trades_candidati_r23/).
+#    >>> 274-380 deal = 136-189 POSIZIONI su UNA finestra. La cella
+#        centrale a 295 deal fa ~147 posizioni: SOTTO il pavimento dei
+#        150 anche su una sola finestra, e molto sotto se si pretendono
+#        150 PER FINESTRA. Ne abbiamo MENO di quante sembrava.
+#    >>> Ed e' questo il motivo per cui la sedia 771514 non e' mai stata
+#        promossa: il CAMPIONE, non il PF.
+#
+#  DA DOVE VIENE IL CAMPIONE: PROFONDITA' DI STORICO, misurata
+#    ~27,5 anni di M1 OHLC dal 1999.01.14 MISURATO su GBPUSD. Il TICK
+#    invece parte dal 2024.07.05, MISURATO proprio su questo simbolo:
+#    a tick questa misura non e' fattibile, e va detto.
+#    Frequenza dai numeri sopra (banda, non punto):
+#      ~147 posizioni su 24-30 mesi = 59-74 pos/anno
+#      (24 mesi se il tick vero parte dal pavimento 2024.07.05,
+#       30 se la finestra dell'ini e' stata piena: QUALE DELLE DUE
+#       SIA E' [NON MISURATO], si tiene la banda)
+#    Su 2010.01.01 -> 2026.06.30 = 16,5 anni:
+#      totale atteso           973 - 1.221 posizioni
+#      IS  (FrazioneIS 0,40)   389 -   488   >>> sopra 150
+#      OOS (0,60)              584 -   733   >>> sopra 150
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    n: IS 380-490 posizioni, OOS 580-740 (in DEAL, circa il doppio).
+#    PF: banda larga, e piu' BASSA di AUDJPY perche' il pianoro a tick
+#       e' piu' basso: PF IS 1,00-1,40 e PF OOS 0,95-1,35.
+#       >>> Dichiaro che l'esito piu' probabile e' UN PF INTORNO A 1,1,
+#           cioe' A CAVALLO del cancello. Scriverlo prima e' quello che
+#           impedisce di leggere 1,12 come una promozione.
+#    DD: in salita rispetto al 6,0% del tick, perche' 16,5 anni
+#       contengono 2015 (SNB), 2016 (Brexit, GBPUSD -8% in un giorno),
+#       2020 e 2022 (mini-budget, GBPUSD 1,035). Attesa DD IS 10-20%,
+#       DD OOS 8-18%, a rischio 1,0%.
+#       >>> E' un'attesa SCOMODA e la scrivo comunque: se il DD esce
+#           oltre S3 questo candidato muore PER RISCHIO, e il PF non
+#           si discute nemmeno.
+#
+#  SOGLIE CONGELATE (decise ORA, col numero accanto)
+#    S1  CAMPIONE. n >= 300 DEAL in ENTRAMBE le finestre (~150 posizioni
+#        al fattore 2,0117). Sotto: MERITO SOSPESO (valvola R59).
+#    S2  MERITO. PF >= 1,10 in ENTRAMBE le finestre, su ALMENO 3 celle
+#        su 4. Due su quattro non sono un altopiano.
+#    S3  RISCHIO, a qualunque n (Emendamento B): DD <= 14,0% a rischio
+#        1,0% in entrambe le finestre (= ~9,1% a 0,65%). Sopra: cella
+#        SCARTATA PER RISCHIO, il PF non si legge.
+#    S4  COERENZA DEI SEGNI. IS e OOS di segno opposto su piu' di una
+#        cella = "REGIME, non edge", e non si promuove niente.
+#    S5  MANOPOLA INERTE. Quattro celle con n e PF identici al
+#        centesimo = InpTP_RR inerte su questo motore, e si scrive
+#        "manopola inerte, MISURATA".
+#    S6  CONFRONTO COL DEFAULT, obbligatorio. Il default del sorgente e'
+#        InpTP_RR = 2,0 (ABTG_EMA200.mq5 r.76). Se la cella migliore
+#        batte la 2,0 di meno di 0,05 di PF, la risposta onesta e'
+#        "IL DEFAULT VA BENE" -- ed e' un risultato, non un fallimento.
+#    S7  QUESTO ROUND NON PROMUOVE NIENTE. Modello 1 = OHLC M1 =
+#        SCREENING. Un numero OHLC non e' mai un verdetto.
+#
+#  BUCHI DICHIARATI
+#    - SPREAD: 0,2 pip e' UNA LETTURA DI UN ISTANTE (17/08 17:34 srv) e
+#      la commissione ~0,47 pip e' [INFERITO] dal 0,004% del nozionale.
+#      Su OHLC lo spread e' quello corrente, quindi i PF di questo round
+#      sono OTTIMISTI di una quantita' non misurata.
+#    - Nessuna PROVA DI REGIME separata: 16,5 anni contigui diluiscono
+#      (Emendamento C). La lettura per anno va fatta sul referto.
+#    - PEGGIOR GIORNATA: [NON MISURATO], la colonna non esiste nel CSV
+#      di ottimizzazione MT5. Con DD atteso 10-20% il muro giornaliero
+#      del 5% NON e' escluso: va scritto nel referto.
+#    - TAGLIA: rischio 1,0% e non 0,65%, per confrontabilita' con
+#      l'archivio H4. La rilettura a 0,65% e' una domanda SEPARATA.
+#    - GUARDIAN inerte nel tester (fail-open dichiarato nel sorgente).
+#
+#  BANCO: Modello 1 (OHLC M1). Deposito 10000. FrazioneIS di fabbrica
+#         del driver (0,40). NON si usa @FRAZIONEIS: e' sotto canarino.
+@SIMBOLO  GBPUSD
+@PERIODO  H4
+@DAQUANDO 2010.01.01
+@FINOA    2026.06.30
+#
+# --- LA CELLA: centro dell'altopiano L+S di GBPUSD a tick
+InpUsaGuardian=true
+InpTF=16388
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.25
+InpOrder2Atr=0.4
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito: pin di stringa vuota
+# ignorato da MT5 (classe FiboH4). Il default compilato e' gia' vuoto.
+InpComment=R139B
+InpFridayClose=false
+InpFridayCloseHour=20
+# MAGIC VERGINE 771561 (cercato repo-wide il 12/09/2026: 0 occorrenze).
+# NON si riusa il 771514 della sedia in forward.
+InpMagic=771561
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
+#
+# --- L'UNICO ASSE (4 celle x 2 finestre = 8 passate)
+InpTP_RR=1.5||1.5||0.5||3.0||Y
+# ======================================================================
