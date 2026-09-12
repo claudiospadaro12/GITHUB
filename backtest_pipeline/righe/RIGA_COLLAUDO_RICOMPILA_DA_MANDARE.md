@@ -45,7 +45,13 @@ commit**, che è l'ultimo **non-WIP** che tocca quel file.
 | **MT5** | **può restare aperto** (non si scrive in nessuna cartella di terminale). **MetaEditor NO: va CHIUSO** — con l'editor aperto la compilazione da riga di comando torna `rc=0` **senza compilare niente** (lezione del 22/08) |
 | **Quanto ci mette** | 1 copia della libreria standard + 12 download + 11 compilazioni = **5-12 minuti** `[STIMA]` |
 
-## 📌 IL PIN — **`c6a63026832b8ac5a6997350d1523d25fea1b252`**
+## 📌 IL PIN — **`60a2ee45734b3726bf604e7d9c905d09fc7c39e3`**
+
+> 🔄 **RI-APPUNTATO DAL CANCELLO.** Il pin precedente
+> (`c6a63026`) appuntava la stesura **bocciata**: quella con la foto della
+> cartella (classe **260**) e senza la cartella dati risolta. Questo pin
+> appunta il driver **corretto**. 🔴 **Non rilanciare il vecchio pin: non
+> fallirebbe, e sarebbe peggio — stamperebbe una "prova" che non prova.**
 Commit di `lavoro` che contiene **questo driver**. I **sorgenti EA non usano il
 pin**: ognuno ha il suo commit bersaglio, scritto nella tabella del driver e
 **stampato a schermo**. Il pin appunta **lo script** e **l'include condiviso**.
@@ -82,7 +88,7 @@ diventa una 404 raccontata come "errore di rete".
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process metaeditor64 -EA SilentlyContinue){ throw 'METAEDITOR APERTO: chiudilo e rilancia (MT5 invece puo'' restare aperto).' };
-    $pin='c6a63026832b8ac5a6997350d1523d25fea1b252'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_RICOMPILA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='60a2ee45734b3726bf604e7d9c905d09fc7c39e3'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_COLLAUDO_RICOMPILA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_COLLAUDO_RICOMPILA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_COLLAUDO_RICOMPILA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
