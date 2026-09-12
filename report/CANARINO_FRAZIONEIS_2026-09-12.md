@@ -1,4 +1,4 @@
-# 🐤 IL CANARINO `@FRAZIONEIS` — **IN CODA**, primo della lista, costo zero minuti
+# 🐤 IL CANARINO `@FRAZIONEIS` — **IN CODA**, **ULTIMA riga** (spostato dal cancello, vedi 5.b), costo zero minuti
 
 **12/09/2026** (sabato) · branch `lavoro` · runner sul VPS: **domenica 03:30**
 **Mandato**: mettere in coda **una** riga di canarino che stanotte, da sola,
@@ -249,7 +249,57 @@ E' **la prima riga di corsia ROUND** del file (r.167), subito dopo le 11 di sola
 lettura e **prima** dei 19 round. `-Modello 4` e `-Deposito 10000` sono quelli di
 R128b.
 
-## 5.b — 🟢 PERCHE' PRIMA, e non e' un'intuizione
+## 5.b — 🔴 CORRETTO DAL CANCELLO DI GIUDIZIO (12/09/2026): **la riga e' stata SPOSTATA IN FONDO**
+
+> 🔴 **Il titolo originale di questo paragrafo era «PERCHE' PRIMA, e non e'
+> un'intuizione». La meta' "non e' un'intuizione" era vera; la conclusione
+> "PRIMA" era SBAGLIATA, e il cancello l'ha bocciata.** Il paragrafo qui sotto
+> resta **integrale** perche' la sua parte misurata vale ancora — si legge con
+> questa correzione davanti.
+>
+> **Quello che restava vero e che il cancello ha riverificato:** ogni via di
+> fallimento del ciclo e' un `continue`, zero `break`/`exit`/`throw` nel corpo,
+> nessun tetto di righe ne' di tempo. Riprova indipendente: **runner vero
+> lanciato con `-SoloControllo -NonPubblicare` -> 31/31 righe passano G1-G4,
+> 0 rifiutati.**
+>
+> **Quello che era falso, in due fatti:**
+> 1. 🔬 **il referto non esiste finche' il ciclo non e' finito.** `runner_abtg.ps1`
+>    r.780 chiude il `foreach`; r.793-794 scrivono il referto; r.801+ lo
+>    pubblicano. `W()` accumula in memoria. Quindi l'ordine sposta **il testo
+>    dentro il file**, non l'ora in cui la risposta e' leggibile: in riga 11 e in
+>    riga 31 arriva **nello stesso momento**. Il beneficio dichiarato
+>    ("la risposta all'inizio del referto") e' **cosmetico**;
+> 2. 🔢 **accoppiamento ZERO, contato.** `grep -rln '^@FRAZIONEIS'
+>    backtest_pipeline/prove/` -> **un solo file, il canarino**. Nessuno dei 19
+>    round di stanotte legge la direttiva: l'esito non puo' cambiare niente di
+>    cio' che gira dopo.
+>
+> ⚠️ **E il prezzo di quel beneficio zero non era zero:** il `continue` protegge
+> da una riga che **muore**, non da una che **si pianta**, e nella catena **non
+> c'e' nessun timeout** (tre `Start-Process -Wait` annidati — runner r.774,
+> `RIGA_SOTTILE_ROUND` r.636, `RIGA_ROUND_VPS` r.655 — piu' `Invoke-WebRequest`
+> del driver a r.304 e r.342 **senza** `-TimeoutSec`). E il canarino e' la
+> **prima riga di coda in assoluto** a entrare nel ramo `-SoloControllo` del
+> driver, che chiama `Set-Clipboard` (`walkforward_generico.ps1` r.1023): **mai
+> misurato in sessione non interattiva** (attivita' pianificata, Session 0,
+> nessun desktop), e il `try/catch` che lo avvolge cattura un **errore**, non un
+> **blocco**. 🟢 **Nessuno afferma che si pianti: si afferma che NON E' MISURATO**
+> — e un rischio ignoto davanti a 19 round, per un beneficio zero, si sposta
+> invece di discuterlo. **Costo dello spostamento: una riga mossa.**
+>
+> ✅ **Fatto**: la riga e' ora **31 di 31**, ultima. Le 30 righe preesistenti
+> sono **intatte al byte e nello stesso ordine** (19/19 a `1445abf8`, 11 di sola
+> lettura), la riga del canarino e' **identica al byte** a quella pushata, i byte
+> >127 restano **30, tutti su righe `#`**. Classe **274** in
+> `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
+> 📌 **Resta stale, e si dichiara**: il commento del dodicesimo giro dentro
+> `RIGA_SOTTILE_ROUND.ps1` dice ancora *"sta PRIMA delle altre"*. Quei byte sono
+> **inchiodati dal pin** `8499939` che la coda usa: correggerli richiede un
+> **tredicesimo giro di pin**, e NON si fa stanotte per la stessa ragione di
+> sopra (beneficio zero, rischio non zero). Si corregge al prossimo giro.
+
+## 5.b-bis (testo originale, conservato) — PERCHE' PRIMA, e non e' un'intuizione
 ```console
 $ sed -n '734,782p' backtest_pipeline/runner_abtg.ps1 | grep -n 'break\|exit\|throw\|return'
   (nessuna riga)     esito grep = 1   ->  ZERO break, ZERO exit, ZERO throw nel corpo del ciclo
@@ -402,7 +452,11 @@ e' un controllo.
 
 # 8️⃣ 📖 COME SI LEGGE IL REFERTO DOMATTINA — **il canarino ADESSO C'E'**
 
-## 🐤 CERCALO. E' LA PRIMA RIGA DI ROUND DEL REFERTO.
+## 🐤 CERCALO. E' L'**ULTIMA** RIGA DI ROUND DEL REFERTO (riga 31 di 31).
+🔴 **Corretto il 12/09/2026**: qui c'era scritto *"E' LA PRIMA RIGA DI ROUND"*.
+E' stata **spostata in fondo** dal cancello di giudizio — la posizione non cambia
+**quando** la risposta e' leggibile (il referto si scrive dopo il ciclo), cambia
+solo **dove** cercarla. Vedi 5.b.
 Nel referto del runner si cerca la sezione della riga con **`-Etichetta canfrz`**
 (o la stringa `CANARINO_FRAZIONEIS`), e **UNA SOLA STRINGA DECIDE**:
 
@@ -478,7 +532,7 @@ riproduce, **il primo sospetto e' il binario, non i parametri.**
 
 # 🔟 🎯 DOVE SIAMO, DA SOCIO
 
-🟢 **Il canarino e' in coda, primo della lista, e costa zero minuti.** Domattina
+🟢 **Il canarino e' in coda, ULTIMA riga (31 di 31), e costa zero minuti.** Domattina
 si cerca **una stringa sola** e si sa se ~20 round sulla sedia del DAX possono
 partire. Questo era il collo di bottiglia, e da stanotte non lo e' piu'.
 🟢 **E il giro di pin e' uscito piu' solido di come e' entrato**: due righe

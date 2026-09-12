@@ -15900,3 +15900,151 @@ cancello a `EXIT 0`, regressione **19/19 identica** rifatta dopo la correzione.
 e' dentro il pin `115254dc`** che la riga sottile scarica. Va dentro il
 **dodicesimo giro di pin** — quello che serve comunque per mettere in coda i
 round con `@FRAZIONEIS`. Se quel giro la dimentica, si paga un giro in piu'.
+
+---
+
+## 274. 🥇 IL VANTAGGIO DELL'**ORDINE IN CODA** CHE NON ESISTE: il referto si scrive **DOPO** il ciclo, quindi "stare in testa" non anticipa **niente** — e per quel niente si mette davanti a **19 round** un ramo di codice **mai eseguito prima**, in una catena **senza nessun timeout** (12/09/2026)
+
+**Il caso reale.** Il canarino di `@FRAZIONEIS` e' stato messo **riga 11 di 31**
+in `backtest_pipeline/coda/CODA.txt`, cioe' **prima** dei 19 round della notte,
+con questa motivazione scritta nel referto (§5.b) e nel commento della coda:
+
+> *"metterlo in testa fa trovare la risposta **all'inizio** del referto invece
+> che in fondo, e se muore **non ferma i 19 round**"*
+
+La seconda meta' e' **vera e misurata** (ogni via di fallimento del ciclo e' un
+`continue`; zero `break`/`exit`/`throw` nel corpo; nessun tetto di righe ne' di
+tempo — riverificato leggendo il codice **e** girando il runner vero con
+`-SoloControllo -NonPubblicare`: **31/31 righe passano G1-G4, 0 rifiutati**).
+🔴 **La prima meta' e' FALSA, e il difetto sta li'.**
+
+### 🔬 LA MISURA CHE LA SMONTA — due fatti, nessuna opinione
+```text
+runner_abtg.ps1   r.780  }                        <-- chiude il foreach della coda
+                  r.793  $ref = Join-Path $Lavoro ("REFERTO_RUNNER_...")
+                  r.794  $R -join "`r`n" | Set-Content -LiteralPath $ref
+                  r.801+ PUBBLICAZIONE sul repo (dopo il ciclo)
+```
+1. **Il referto non esiste finche' il ciclo non e' finito.** `W()` accumula in
+   `$R` **in memoria**; il file viene scritto e pubblicato **solo dopo** l'ultima
+   riga della coda. Quindi l'ordine delle righe cambia **la posizione del testo
+   dentro il file**, e *nient'altro*: a che ora Claudio legge la risposta e'
+   **identico** in riga 11 e in riga 31.
+2. **L'accoppiamento e' ZERO, contato.** `grep -rln '^@FRAZIONEIS'
+   backtest_pipeline/prove/` -> **un solo file, il canarino**. Nessuno dei 19
+   round di stanotte legge quella direttiva: l'esito del canarino **non puo'**
+   cambiare niente di cio' che gira dopo. Non c'e' nemmeno il vantaggio
+   "se dice B fermo la coda" — la coda non la ferma nessuno a runtime.
+
+👉 **Beneficio dell'ordine: zero.** Non "piccolo": **zero**, e si dimostra in due
+righe di codice.
+
+### 🔴 E IL PREZZO DI QUELLO ZERO: la catena non ha **NESSUN** timeout
+```text
+runner_abtg.ps1          r.774  Start-Process powershell.exe ... -Wait   (nessun timeout)
+RIGA_SOTTILE_ROUND.ps1   r.636  Start-Process powershell.exe ... -Wait   (nessun timeout)
+RIGA_ROUND_VPS.ps1       r.655  Start-Process powershell.exe ... -Wait   (nessun timeout)
+walkforward_generico.ps1 r.304  Invoke-WebRequest ...  SENZA -TimeoutSec
+                         r.342  Invoke-WebRequest ...  SENZA -TimeoutSec
+```
+`continue` protegge da una riga che **MUORE**. Non protegge da una riga che
+**SI PIANTA**: con tre `Start-Process -Wait` annidati e zero timeout, una riga
+appesa **blocca la coda per sempre** e i round che stanno sotto **non girano**.
+🔴 **E il canarino e' la PRIMA riga di coda in assoluto a entrare nel ramo
+`-SoloControllo` del driver**, che contiene una chiamata che su questa macchina
+**nessuno ha mai misurato in sessione non interattiva** (attivita' pianificata,
+Session 0, nessun desktop):
+```text
+walkforward_generico.ps1 r.1023   try{ Set-Clipboard -Value $anteprima }catch{}
+```
+Il `try/catch` cattura un **errore**, non un **blocco**. Non sto dicendo che si
+pianta: sto dicendo che **non e' misurato**, ed e' davanti a 19 round.
+
+### ⚖️ PERCHE' E' UNA CLASSE, e non un capriccio del verificatore
+Non e' "il rischio e' alto": il rischio e' **basso e ignoto**. E' l'**asimmetria**
+a essere bloccante, ed e' la stessa aritmetica del progetto:
+| | in testa (riga 11) | in fondo (riga 31) |
+|---|---|---|
+| quando arriva la risposta | dopo tutta la coda | dopo tutta la coda (**identico**) |
+| se si pianta | 🔴 **19 round persi** | 🟢 **zero round persi** |
+| costo dello spostamento | — | **una riga mossa** |
+
+> ✅ **REGOLA.** **La posizione di una riga in coda si giustifica con un beneficio
+> MISURATO, non con uno intuito.** Prima di metterne una davanti a lavoro che
+> vale piu' di lei si risponde a due domande, con il codice in mano:
+> 1. **il risultato arriva prima davvero?** Si guarda **dove** viene scritto il
+>    referto: se sta dopo il ciclo, l'ordine non anticipa nulla e il beneficio
+>    e' **zero**;
+> 2. **qualcosa che gira dopo LEGGE questo risultato?** Si conta con un `grep`
+>    sui file veri. Se la risposta e' no, l'accoppiamento e' **zero**.
+>
+> 🔴 **Con beneficio zero, la riga va IN FONDO. Sempre.** E vale con piu' forza
+> se la riga percorre un **ramo di codice che la coda non ha mai eseguito**: la
+> prima volta che si gira un ramo nuovo, si gira **dopo** il lavoro che conta,
+> non prima.
+> 📌 **Corollario, e vale per tutta la corsia ROUND:** finche' i tre
+> `Start-Process -Wait` e i due `Invoke-WebRequest` del driver non hanno un
+> timeout, **"il runner non si ferma su una riga che muore" NON e' la stessa
+> frase di "il runner non si ferma"**. La prima e' misurata; la seconda no.
+> Le due non si usano una al posto dell'altra.
+> ⚠️ **Il cancello deterministico non puo' prenderlo** (una riga di coda con
+> l'ordine sbagliato e' sintatticamente perfetta, e infatti G1-G4 la passano
+> tutta): e' un controllo di **giudizio**. Ennesimo motivo per cui i due strati
+> servono entrambi.
+
+---
+
+## 275. 🎯 IL CANCELLO DETERMINISTICO INVOCATO CON L'**OGGETTO SBAGLIATO**: un FAIL che non e' un difetto, e come si distingue da uno vero (12/09/2026)
+
+**Il caso reale.** Per vagliare la modifica a `backtest_pipeline/coda/CODA.txt`
+e' stato lanciato:
+```
+python3 backtest_pipeline/controlla_riga.py --oggetto riga --riga backtest_pipeline/coda/CODA.txt
+```
+Uscita: **`ESITO: FAIL`**, tre bloccanti — `[ASCII]`, `[PIN]`, `[MARCATORE]`.
+🔴 **Nessuno dei tre e' un difetto della modifica**, e la ragione e' che
+`CODA.txt` **non e' nessuno dei quattro oggetti che il cancello conosce**:
+`--oggetto` ammette `riga | ps1 | prova | md` (verificato su `--help`), e
+**`coda` non c'e'**. Una coda e' un **elenco** di righe `pin | percorso |
+argomenti`, non una riga di lancio da incollare in PowerShell: il cancello le
+applica i controlli di un oggetto che non e', e i tre bloccanti sono la
+conseguenza meccanica di quello.
+
+### 🧪 IL CONTRO-ESEMPIO CHE LO DIMOSTRA — e senza questo il FAIL non si smonta
+Si rilancia **identico** sulla coda **PRIMA** della modifica (`git show`):
+```text
+CODA.txt @ 8499939 (prima)  ->  FAIL   ASCII + PIN + MARCATORE   (3 bloccanti)
+CODA.txt @ a8671cf (dopo)   ->  FAIL   ASCII + PIN + MARCATORE   (3 bloccanti)
+delta introdotto dalla modifica: ZERO
+byte >127: 30 prima, 30 dopo (contati con python3), TUTTI su righe '#'
+           che il runner scarta (runner_abtg.ps1: -not $_.StartsWith("#"))
+```
+👉 **Il FAIL e' una proprieta' dello STRUMENTO MAL PUNTATO, non del lavoro.** E
+questo si dice **solo** col confronto sul file non toccato: il FAIL da solo non
+distingue "il difetto c'era gia'" da "l'ho appena creato io".
+
+### 🟢 E GLI OGGETTI GIUSTI, che al cancello si possono dare davvero
+```text
+--oggetto ps1   --ps1 backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1
+                --ps1 backtest_pipeline/righe/RIGA_ROUND_VPS.ps1   -> 12 PASSATI, 0 difetti
+--oggetto prova --prova backtest_pipeline/prove/CANARINO_FRAZIONEIS_D30EUR.txt -> 0 difetti
+python3 backtest_pipeline/controlla_prova.py <file prova>           -> celle 7, passate 14, OK
+```
+
+> ✅ **REGOLA.** **Un FAIL del cancello non e' un verdetto finche' non si sa su
+> QUALE oggetto e' stato emesso.** Tre passi, in quest'ordine:
+> 1. **l'oggetto esiste?** `--oggetto` ammette solo `riga|ps1|prova|md`. Se
+>    quello che hai in mano non e' uno dei quattro (una **coda**, un `.csv`, un
+>    `.ini`, un `.set`), il cancello **non ha un parere** su di lui: si vagliano
+>    **i suoi pezzi** con l'oggetto giusto (gli `.ps1` che la coda cita, i file
+>    prova che nomina);
+> 2. **rilancia identico sulla versione NON TOCCATA** (`git show <prima>:<file>`
+>    in un file temporaneo). Se il FAIL e' lo stesso, il **delta e' zero** e va
+>    scritto cosi';
+> 3. **il FAIL si dichiara comunque**, con il contro-esempio accanto. 🔴 Un FAIL
+>    taciuto perche' "era dello strumento" e' esattamente come un FAIL nascosto:
+>    chi legge non ha modo di sapere quale dei due era.
+> 🔤 **E i byte non-ASCII si contano con `python3`**, mai con
+> `LC_ALL=C grep -n '[^\x00-\x7F]'`: GNU grep in BRE **non espande `\x`** senza
+> `-P`, e quella ricetta da' migliaia di falsi positivi su file puliti. Classe
+> gemella del 12/09: la ricetta rotta era in un prompt di casa.

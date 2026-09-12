@@ -102,71 +102,6 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_prese
 d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
 
 # =====================================================================
-#  0. IL CANARINO DI '@FRAZIONEIS' -- E' IL PRIMO ROUND DI PROPOSITO.
-#     Aggiunto il 12/09/2026 (sabato), per il runner di domenica 03:30.
-# ---------------------------------------------------------------------
-#  COSTO: ~ZERO. Gira con -SoloControllo, che ferma il driver PRIMA di
-#  aprire MT5: zero passate di tester, zero CSV, nessun terminale MT5
-#  toccato. Non sottrae niente ai 19 round qui sotto.
-#
-#  NON PRODUCE NESSUN VERDETTO DI MERCATO. Non si legge nessun PF, nessun
-#  DD, nessun n. Risponde a UNA domanda sola, che era l'unico NON COPERTO
-#  del cancello sulla toppa '@FRAZIONEIS': la CATENA VERA (scarico da raw
-#  -> controllo d'impronta -> driver) ONORA la direttiva, o tira dritto
-#  sul taglio di fabbrica senza dirlo a nessuno?
-#
-#  L'ATTESA E' DICHIARATA PRIMA, E SONO DUE USCITE DIVERSE. Nel referto
-#  del mattino si cerca UNA riga sola, nella sezione della riga 'canfrz':
-#     ONORATA   -> "IS  2024.09.26 - 2025.08.13"   (e la riga
-#                  "taglio IS/OOS preso da '@FRAZIONEIS' ...: 0.5")
-#                  >>> SI APRE la coda dei ~20 round a taglio 0.50.
-#     IGNORATA  -> "IS  2024.09.26 - 2025.06.09"   (e NESSUNA riga
-#                  "preso da '@FRAZIONEIS'")
-#                  >>> SI FERMA TUTTO: un round che gira a 0.40 credendo
-#                      di girare a 0.50 fa numeri che nessuno puo' usare.
-#     MORTA     -> "scarico fallito" / impronta che non torna / RIFIUTATO
-#                  >>> ne' l'una ne' l'altra: catena rotta A MONTE, si
-#                      ripara quella. NON si conta come risposta.
-#  65 giorni separano le due date: NON sono confondibili, ed e' questo che
-#  rende il canarino una MISURA e non una conferma. E non sono date
-#  inventate: le dichiara la sezione dei criteri di R128b da giorni.
-#  CONTROLLO DI APPOGGIO, gratis: la stessa uscita deve portare
-#  "celle per finestra : 7 -> 14 pass". Se il numero e' diverso, il file
-#  prova scaricato NON e' questo e nessuna delle tre righe sopra vale.
-#
-#  PERCHE' STA PRIMA DEI ROUND, e non e' un'intuizione: nel runner ogni
-#  via di fallimento e' un 'continue'; nel ciclo della coda non c'e'
-#  nessun break, nessun exit e nessun throw (misurato su runner_abtg.ps1
-#  il 12/09/2026, corpo del ciclo); e non esiste nessun tetto di righe ne'
-#  di tempo -- $nRound e' un contatore per il riepilogo, non un cancello.
-#  Quindi se il canarino muore NON ferma i 19 round, e metterlo in testa
-#  fa trovare la risposta all'INIZIO del referto invece che in fondo.
-#  Se il runner fermasse la coda su una riga morta, questa riga andrebbe
-#  IN FONDO -- 19 round valgono piu' di una risposta anticipata -- ma non
-#  la ferma.
-#
-#  PERCHE' ENTRA SENZA UNA FIRMA NUOVA: usa la corsia ROUND sul banco
-#  50504400 firmata l'11/09, e '-SoloControllo' e' uno dei SEI argomenti
-#  di quella firma. Verificato sul param() della riga sottile, e il
-#  cancello lo ristampa da solo: param block RICONOSCIUTO (Expert, Prova,
-#  Etichetta, Modello, Deposito, SoloControllo). Nessun perimetro
-#  allargato, nessun argomento nuovo.
-#
-#  IL PIN DI QUESTA RIGA E' DIVERSO DA QUELLO DELLE 19, ED E' VOLUTO.
-#  8499939 e' il DODICESIMO giro: la sua RIGA_SOTTILE_ROUND.ps1 porta
-#  $PIN = b7979d8 e $SHA_WALK = 15DE7D5F..., cioe' il driver di HEAD E il
-#  file prova del canarino. Le 19 righe qui sotto restano a 1445abf8 e
-#  NON sono toccate: pin, argomenti e ordine invariati.
-#  >>> E IL MOTIVO PER CUI IL GIRO DI PIN ERA OBBLIGATORIO: da $PIN non
-#      viene solo il driver, VIENE ANCHE IL FILE PROVA. Il canarino al pin
-#      precedente (115254dc) dava HTTP 404, mentre R128b allo stesso pin
-#      dava 200 -- quindi a mancare era il PIN, non la rete. Chi aggiunge
-#      un file prova NUOVO deve fare un giro di pin. Sempre.
-#  Referto: report/CANARINO_FRAZIONEIS_2026-09-12.md
-# =====================================================================
-84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
-
-# =====================================================================
 #  ROUND DI STANOTTE (12/09/2026) -- 4 righe, 52 passate, ~4-5 minuti
 # ---------------------------------------------------------------------
 #  ATTENZIONE, si legge prima di lanciare:
@@ -365,3 +300,116 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
+
+
+# =====================================================================
+#  >>> SPOSTATA IN FONDO IL 12/09/2026 DAL CANCELLO DI GIUDIZIO. <<<
+#  Prima stava in riga 11 di 31, DAVANTI ai 19 round, con la
+#  motivazione 'fa trovare la risposta all'inizio del referto'.
+#  QUELLA MOTIVAZIONE E' FALSA, ed e' misurata su due fatti:
+#    1) il referto NON esiste finche' il ciclo non e' finito: runner_abtg
+#       accumula in memoria (funzione W) e scrive il file solo DOPO il
+#       foreach (r.780 chiude il ciclo, r.793-794 scrivono il referto,
+#       r.801+ pubblica). L'ordine sposta il testo DENTRO il file, non
+#       l'ora in cui la risposta e' leggibile: in riga 11 e in riga 31
+#       arriva nello STESSO momento.
+#    2) accoppiamento ZERO, contato: grep '^@FRAZIONEIS' su tutti i file
+#       prova del repo -> UN SOLO file, questo. Nessuno dei 19 round di
+#       stanotte legge la direttiva, quindi l'esito del canarino non
+#       puo' cambiare niente di cio' che gira dopo.
+#  Beneficio dell'ordine: ZERO. E il prezzo di quello zero non era zero:
+#  nella catena NON c'e' NESSUN timeout (tre Start-Process -Wait
+#  annidati: runner r.774, RIGA_SOTTILE r.636, RIGA_ROUND_VPS r.655;
+#  piu' due Invoke-WebRequest del driver a r.304 e r.342 SENZA
+#  -TimeoutSec). Il 'continue' del runner protegge da una riga che MUORE,
+#  non da una riga che SI PIANTA -- e questa e' la PRIMA riga di coda in
+#  assoluto a entrare nel ramo '-SoloControllo' del driver, che contiene
+#  'Set-Clipboard' (walkforward_generico r.1023): mai misurato in
+#  sessione non interattiva (attivita' pianificata, Session 0, nessun
+#  desktop). Il try/catch che lo avvolge cattura un ERRORE, non un
+#  BLOCCO. Nessuno afferma che si pianti: si afferma che NON E' MISURATO,
+#  e un rischio ignoto davanti a 19 round, per un beneficio zero, si
+#  sposta invece di discuterlo. In fondo costa una riga mossa.
+#  CLASSE 274 della checklist. Le 19 righe round NON sono state toccate:
+#  pin, argomenti e ordine relativo invariati al byte.
+# ---------------------------------------------------------------------
+# =====================================================================
+#  99. IL CANARINO DI '@FRAZIONEIS' -- E' L'ULTIMA RIGA DI PROPOSITO.
+#     Aggiunto il 12/09/2026 (sabato), per il runner di domenica 03:30.
+# ---------------------------------------------------------------------
+#  COSTO: ~ZERO. Gira con -SoloControllo, che ferma il driver PRIMA di
+#  aprire MT5: zero passate di tester, zero CSV, nessun terminale MT5
+#  toccato. Non sottrae niente ai 19 round qui sotto.
+#
+#  NON PRODUCE NESSUN VERDETTO DI MERCATO. Non si legge nessun PF, nessun
+#  DD, nessun n. Risponde a UNA domanda sola, che era l'unico NON COPERTO
+#  del cancello sulla toppa '@FRAZIONEIS': la CATENA VERA (scarico da raw
+#  -> controllo d'impronta -> driver) ONORA la direttiva, o tira dritto
+#  sul taglio di fabbrica senza dirlo a nessuno?
+#
+#  L'ATTESA E' DICHIARATA PRIMA, E SONO DUE USCITE DIVERSE. Nel referto
+#  del mattino si cerca UNA riga sola, nella sezione della riga 'canfrz':
+#     ONORATA   -> "IS  2024.09.26 - 2025.08.13"   (e la riga
+#                  "taglio IS/OOS preso da '@FRAZIONEIS' ...: 0.5")
+#                  >>> SI APRE la coda dei ~20 round a taglio 0.50.
+#     IGNORATA  -> "IS  2024.09.26 - 2025.06.09"   (e NESSUNA riga
+#                  "preso da '@FRAZIONEIS'")
+#                  >>> SI FERMA TUTTO: un round che gira a 0.40 credendo
+#                      di girare a 0.50 fa numeri che nessuno puo' usare.
+#     MORTA     -> "scarico fallito" / impronta che non torna / RIFIUTATO
+#                  >>> ne' l'una ne' l'altra: catena rotta A MONTE, si
+#                      ripara quella. NON si conta come risposta.
+#  65 giorni separano le due date: NON sono confondibili, ed e' questo che
+#  rende il canarino una MISURA e non una conferma. E non sono date
+#  inventate: le dichiara la sezione dei criteri di R128b da giorni.
+#  CONTROLLO DI APPOGGIO, gratis: la stessa uscita deve portare
+#  "celle per finestra : 7 -> 14 pass". Se il numero e' diverso, il file
+#  prova scaricato NON e' questo e nessuna delle tre righe sopra vale.
+#
+#  PERCHE' STA IN FONDO -- e la prima stesura diceva 'PRIMA', sbagliando.
+#  Cio' che RESTA VERO e misurato (runner_abtg.ps1, corpo del ciclo, il
+#  12/09/2026): ogni via di fallimento e' un 'continue'; nel ciclo della
+#  coda non c'e' nessun break, nessun exit e nessun throw; non esiste
+#  nessun tetto di righe ne' di tempo -- $nRound e' un contatore per il
+#  riepilogo, non un cancello. Quindi una riga che MUORE non ferma le
+#  successive, ed e' stato riverificato girando il runner vero con
+#  -SoloControllo -NonPubblicare: 31/31 righe passano G1-G4, 0 rifiutati.
+#  Cio' che era FALSO: 'metterlo in testa fa trovare la risposta
+#  all'INIZIO del referto'. Il referto non esiste finche' il ciclo non e'
+#  finito (r.780 chiude il foreach, r.793-794 lo scrivono, r.801+ lo
+#  pubblicano): l'ordine sposta il testo DENTRO il file, non l'ora in cui
+#  la risposta e' leggibile. Beneficio dell'ordine = ZERO, e nessuno dei
+#  19 round legge '@FRAZIONEIS' (contato: un solo file prova nel repo la
+#  contiene, questo). Con beneficio zero la riga va IN FONDO: 19 round
+#  valgono piu' della posizione di una frase in un file di testo.
+#  >>> E IL 'continue' NON COPRE TUTTO: protegge da una riga che MUORE,
+#      non da una che SI PIANTA. Nella catena non c'e' NESSUN timeout
+#      (Start-Process -Wait a runner r.774, RIGA_SOTTILE r.636,
+#      RIGA_ROUND_VPS r.655; Invoke-WebRequest del driver r.304 e r.342
+#      senza -TimeoutSec), e questa e' la PRIMA riga di coda a entrare nel
+#      ramo '-SoloControllo' del driver, che chiama Set-Clipboard
+#      (walkforward_generico r.1023) -- mai misurato in sessione non
+#      interattiva. Non e' un difetto dimostrato: e' un rischio IGNOTO, e
+#      un rischio ignoto non si mette davanti al lavoro della notte.
+#      CLASSE 274.
+#
+#  PERCHE' ENTRA SENZA UNA FIRMA NUOVA: usa la corsia ROUND sul banco
+#  50504400 firmata l'11/09, e '-SoloControllo' e' uno dei SEI argomenti
+#  di quella firma. Verificato sul param() della riga sottile, e il
+#  cancello lo ristampa da solo: param block RICONOSCIUTO (Expert, Prova,
+#  Etichetta, Modello, Deposito, SoloControllo). Nessun perimetro
+#  allargato, nessun argomento nuovo.
+#
+#  IL PIN DI QUESTA RIGA E' DIVERSO DA QUELLO DELLE 19, ED E' VOLUTO.
+#  8499939 e' il DODICESIMO giro: la sua RIGA_SOTTILE_ROUND.ps1 porta
+#  $PIN = b7979d8 e $SHA_WALK = 15DE7D5F..., cioe' il driver di HEAD E il
+#  file prova del canarino. Le 19 righe qui sotto restano a 1445abf8 e
+#  NON sono toccate: pin, argomenti e ordine invariati.
+#  >>> E IL MOTIVO PER CUI IL GIRO DI PIN ERA OBBLIGATORIO: da $PIN non
+#      viene solo il driver, VIENE ANCHE IL FILE PROVA. Il canarino al pin
+#      precedente (115254dc) dava HTTP 404, mentre R128b allo stesso pin
+#      dava 200 -- quindi a mancare era il PIN, non la rete. Chi aggiunge
+#      un file prova NUOVO deve fare un giro di pin. Sempre.
+#  Referto: report/CANARINO_FRAZIONEIS_2026-09-12.md
+# =====================================================================
+84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
