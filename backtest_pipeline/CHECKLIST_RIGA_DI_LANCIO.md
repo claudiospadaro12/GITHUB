@@ -15028,3 +15028,44 @@ agganciare un IP (`connecting to 185.66.1.2` → server = `185.66.1.2`).
 > (incollate da un giornale), non su una riga inventata che torna.
 
 ---
+## 258. 📋 IL REFERTO DI ROUND SCRITTO SENZA APRIRE IL FILE PROVA CHE NE CONTIENE I CRITERI CONGELATI — **la parola "picco" dichiarata mentre la regola NON scattava**
+
+**Il fatto, 12/09/2026.** Leggendo i sette risultati del blocco C di R123 ho
+scritto un referto completo — tabella, contro-esempio, verdetto — **senza aprire
+`backtest_pipeline/prove/R123c_U30USD_02_atrperiod.txt`**, che stava a due
+cartelle di distanza e conteneva **379 righe** con:
+- i criteri **A1-A8 congelati PRIMA della corsa**;
+- l'**attesa numerica cella per cella**, con la banda dichiarata;
+- la frase *"cosa mi farebbe cambiare idea"*, scritta prima di vedere i numeri.
+
+**Cosa e' costato, in concreto:**
+
+| | |
+|---|---|
+| **A4 (PICCO)** | Ho usato la parola **"picco" quattro volte** e ci ho costruito sopra la tesi. **A4 non scattava**: pretende che **ENTRAMBE** le vicine della cella viva stiano sotto PF OOS 1,05, e una faceva **1,164**. La parola **non era guadagnata** |
+| **A8** | Il file prova dichiarava **in anticipo** quale scoperta sarebbe valsa piu' del round intero. Una cella la centrava **2 volte su 3**, mancandola **solo su `n`**. Il file ordinava di riportarla **in grassetto**. **Non l'ho nemmeno nominata** |
+| **A2** | Il pavimento dei 150 e' **asimmetrico** e la cella che avevo eletto a protagonista aveva **n OOS = 133**: per regola congelata **non poteva contare a favore**. L'avevo usata come prova principale |
+| **attesa** | Mai confrontata coi numeri. Le previsioni di `n` erano **buone** (181→179, 155→152, 125→133): il round aveva predetto bene e nessuno l'ha detto |
+
+⚠️ **E il difetto gemello, nello stesso giro**: l'affermazione *"questo blocco
+non e' citato in NESSUN file"* era **falsa**, perche' avevo cercato il
+**suffisso del CSV** (`CATRP`) invece del **nome del round** (`R123c`). Era
+citato in quattro posti, e due contenevano i risultati. **L'affermazione vera e
+piu' forte era un'altra**: *i risultati c'erano da due giorni e nessuno li aveva
+GIUDICATI*.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di giudicare i risultati di un round si APRE il suo file prova.**
+>    Se un round ha dei criteri congelati, il referto li applica **alla
+>    lettera** e li cita per nome (A1, A4, A8...): un verdetto scritto con
+>    criteri inventati dopo i numeri **non e' un verdetto**, e' un'opinione.
+> 2. **Le parole dei criteri sono TECNICHE, non descrittive.** "Picco",
+>    "altopiano", "inerte" **hanno una regola che le autorizza**. Se la regola
+>    non scatta, la parola non si usa — anche quando il grafico "sembra" quello.
+> 3. **L'attesa dichiarata prima della corsa va SEMPRE confrontata coi numeri**,
+>    e il confronto va nel referto. E' l'unico modo per sapere se il metodo sta
+>    imparando o sta solo producendo.
+> 4. **Cercare per NOME DEL ROUND, non per suffisso di file.** Un round vive
+>    con nomi diversi in posti diversi (file prova, piano, log della coda, CSV):
+>    una query su una sola di quelle forme trova il vuoto e lo scambia per
+>    assenza. _(Parente stretta della classe 180.)_
