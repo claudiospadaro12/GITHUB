@@ -67,7 +67,25 @@ misurato il 03/09: entrambi i `terminal64` girano sotto quell'utente).
 
 ---
 
-## 2. 📌 IL PIN — **`41728ee14525c468d05c980780c3ad20976b997c`** ✅ **INSERITO E VERIFICATO**
+## 2. 📌 I PIN — 🔴 **ORA SONO DUE, e non e' un dettaglio**
+
+> 🔴 **CAMBIATO IL 12/09/2026.** Il **BLOCCO 3 (raccolta)** e' stato ri-pinnato a
+> **`e86deb5a367ca19da918c5a16248d35b4307143a`** con marcatore
+> **`..._RACCOLTA_v2`**, perche' `RIGA_SPREADLOGGER_RACCOLTA.ps1` e' stata
+> **indurita** (`INDURIMENTO_VISTOPICCOLO_v1`): `VistoPiccolo` era *misurato e
+> mai usato come cancello*, e il **REALE 10105439** e il **banco 50504400** —
+> che sono anch'essi BCM e **non** hanno `-V3` nel percorso — **passavano
+> l'eleggibilita'**. Ora sono **rifiutati** con lo stesso schema a tre tracce
+> del 100k, e `VistoPiccolo` e' criterio di selezione **dove restringe**.
+> 🟢 **Fallisce in SICUREZZA**: se `origin.txt` manca e i log non nominano
+> nessuno, **non cambia niente** rispetto a prima.
+> ⚠️ **I BLOCCHI 1 e 2 (installazione dell'EA) restano al pin vecchio
+> `41728ee1…`**, che e' quello verificato per l'EA: l'EA **non e' stato
+> toccato**. Quindi in questa pagina **ci sono due pin diversi, apposta**.
+> 🚦 Il pin nuovo **non e' ancora stato verificato via `raw`** (il commit e'
+> di oggi): va fatto prima dell'invio, come per tutti gli altri.
+
+## 2-bis. 📌 IL PIN DEI BLOCCHI 1-2 — **`41728ee14525c468d05c980780c3ad20976b997c`** ✅ **VERIFICATO**
 
 Commit di `lavoro`. **Verificato uno per uno via `raw` prima di scrivere questa
 pagina** (HTTP 200 + sha256 identico al repo + presente in `git ls-tree`):
@@ -76,10 +94,11 @@ pagina** (HTTP 200 + sha256 identico al repo + presente in `git ls-tree`):
 |---|---|
 | `mql5/Experts/ABTG_SpreadLogger.mq5` | 200, identico (`b59c8bec…`, 51.703 byte), `#property version "1.00"`, **0 caratteri non-ASCII**, **0 token vietati** |
 | `backtest_pipeline/righe/RIGA_SPREADLOGGER.ps1` | 200, identico (`e2d5836a…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
-| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | 200, identico (`a38e8cd4…`), marcatore `MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1`, **ASCII puro**, `Parser::ParseFile` **0 errori** |
+| `backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1` | ⚠️ **SUPERATO**: a questo pin e' la **v1** (`a38e8cd4…`, marcatore `..._RACCOLTA_v1`). La raccolta ora usa il pin **`e86deb5a…`** e la **v2** — vedi §2. Al pin nuovo: **ASCII puro** verificato, `Parser::ParseFile` **0 errori** (5.924 token), e 6 casi su 6 verdi sul rifiuto di reale/banco |
 
-Il pin è scritto **quattro volte** in questa pagina (qui e nei **tre** blocchi) ed
-è sempre **la stessa identica stringa da 40 hex**.
+Il pin dei blocchi 1-2 è scritto **tre volte** (§2-bis e i blocchi **1** e **2**).
+🔴 **Il BLOCCO 3 porta l'altro pin** (`e86deb5a…`): prima di incollare, si
+controlla **quale blocco si sta usando**.
 
 > 🔁 **Perché il pin è cambiato** (era `b314ec4e…`): la verifica prima dell'invio
 > ha trovato — **eseguendo**, su un banco che imita i file veri dell'EA — che la
@@ -215,9 +234,9 @@ accumulare. Si può rilanciare tutte le volte che si vuole.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='41728ee14525c468d05c980780c3ad20976b997c'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='e86deb5a367ca19da918c5a16248d35b4307143a'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREADLOGGER_RACCOLTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREADLOGGER_RACCOLTA.ps1" -OutFile $p -EA Stop;
-    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
+    if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v2' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin; $rc=$LASTEXITCODE;
     $d=$null; foreach($c in @([Environment]::GetFolderPath('Desktop'),(Join-Path $env:USERPROFILE 'Desktop'),(Join-Path $env:USERPROFILE 'OneDrive\Desktop'))){ if((-not $d) -and $c -and (Test-Path -LiteralPath $c)){ $d=$c } }; if(-not $d){ $d=$env:USERPROFILE };
     $z=@(Get-ChildItem (Join-Path $d 'SPREADLOGGER_RACCOLTA_*.zip') -EA SilentlyContinue | Where-Object { $_.LastWriteTime -ge $t0 } | Sort-Object LastWriteTime -Descending);

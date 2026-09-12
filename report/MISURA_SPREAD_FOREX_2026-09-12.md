@@ -27,20 +27,26 @@ percorsi proposti.
    MISURARE QUALUNQUE COSA.** La commissione si paga sul **nozionale in valuta
    BASE**, ma il pip si incassa nella valuta **QUOTA**: quindi **in pip la
    commissione NON e' la stessa per tutte le coppie.** Su GBPUSD vale
-   **0,543 pip**, non 0,47 (che e' il numero di EURUSD, riusato). All-in GBPUSD
-   **0,743** invece di 0,67, e il pavimento 40x chiede **29,7 pip invece di
+   **0,5425 pip**, non 0,47 (che e' il numero di EURUSD, riusato). All-in GBPUSD
+   **0,7425** invece di 0,67, e il pavimento 40x chiede **29,7 pip invece di
    26,8** (§3).
+   🧪 **E non dipende dalla data dei cambi**: rifatto con una tabella
+   **indipendente**, lo scarto e' **0,124%** (§3.1-bis). Il ritrovamento tiene.
 4. 🧪 **E il contro-esempio morde piu' di quanto la caccia temesse.** Non serve
    che lo spread esca 0,5: **alla lettura unica di 0,2 che abbiamo GIA'**, un
    M30 con stop 28 pip fa **37,7x** — **sotto il 40x**. Perche' il bersaglio a
-   28 pip tenga, lo spread deve uscire **<= 0,157 pip**, cioe' **piu' basso
+   28 pip tenga, lo spread deve uscire **<= 0,158 pip**, cioe' **piu' basso
    della lettura ottimista da cui siamo partiti** (§3.2).
-5. 🎯 **E la coppia giusta forse non e' GBPUSD: potrebbe essere AUDUSD** — che
-   e' una delle quattro **[NON MISURATE]**. Quando la commissione e' il **73%**
-   del pedaggio, quello che conta non e' lo spread piu' stretto ma la **valuta
-   base piu' economica**: AUDUSD paga **0,285 pip** di commissione contro i
-   0,543 di GBPUSD, **0,258 pip di vantaggio strutturale**. **AUDUSD batte
-   GBPUSD se il suo spread esce sotto 0,458 pip** (§3.3).
+5. 🎯 **E LA COPPIA GIUSTA FORSE NON E' GBPUSD: POTREBBE ESSERE AUDUSD** — che
+   e' una delle quattro **[NON MISURATE]**. Quando la commissione e' il
+   **73,1%** del pedaggio, quello che conta non e' lo spread piu' stretto ma la
+   **valuta base piu' economica**: AUDUSD paga **0,2845 pip** di commissione
+   contro i **0,5425** di GBPUSD, **0,258 pip di vantaggio strutturale**.
+   **AUDUSD batte GBPUSD se il suo spread esce sotto 0,458 pip** (§3.3).
+   🔥 **QUESTO E' IL RITROVAMENTO, e le correzioni del cancello non lo
+   intaccano**: nessuno di questi numeri passa dal JPY, e tutti sono
+   date-robusti. 👉 **Le quattro coppie cieche passano da "completezza" a
+   DECISIVE.**
 
 ---
 
@@ -149,38 +155,102 @@ la commissione **in pip** dipende da **quanto vale la valuta base**:
 comm_pip = 4,0 x (base/quota) / (100.000 x pip_size)
 ```
 
-Strumento nuovo, ASCII puro, **zero passate di tester**:
+Strumento, ASCII puro, **zero passate di tester**:
 `backtest_pipeline/calcola_pedaggio_forex.py`.
 
-🧪 **Non si verifica contro se stesso.** L'autotest lo confronta con **numeri
-scritti da ALTRE sessioni** — e riproducono **tutti e due**:
+### 🔴 E QUI IL CANCELLO MI HA CORRETTO DUE VOLTE — le correzioni, per intero
 
-| coppia | la mia derivazione | scritto da altri | esito |
-|---|---:|---:|:---:|
-| **EURUSD** | **0,4677** pip | `~0,5` (10/09) · `0,47` (CACCIA_SABATO 2.3) | 🟢 riproduce |
-| **USDJPY** | **0,6000** pip | `~0,60` (CACCIA_SABATO 2.3) | 🟢 riproduce **esatto** |
-| **GBPUSD** | **0,5432** pip | `~0,47` *(= il numero di EURUSD)* | 🔴 **NON riproduce** |
+**a) La v1 dichiarava "due ancore su tre". LA GENUINA ERA UNA.**
+La v1 ricavava `JPY/EUR = (USD/EUR) / 150,0` con il **150,0 ASSUNTO**. Ma su
+USDJPY **la base E' USD**, quindi `USD/EUR` **si cancella algebricamente** e
+restava:
 
-E i **cambi impliciti** tornano indipendentemente dal rapporto delle
-commissioni **misurate** in EUR (`4,65/4,00 = 1,1625` contro `1,1613` in
-tabella; `3,42/4,00 = 0,8550` contro `0,8552`): la derivazione **e' ancorata a
-dati, non a un cambio che ho scelto io**.
+```
+comm_USDJPY = 4,0 x 150 / 1.000 = 0,600   <-- PER COSTRUZIONE
+```
 
-👉 **Due ancore su tre riproducono, la terza no: e la terza e' proprio GBPUSD**,
-la coppia su cui poggia tutta la direzione strategica di oggi. Il `~0,47` di
-GBPUSD e' **il valore di EURUSD riusato**, non una derivazione.
+🔴 **Non era una conferma: era un'identita'.** Potere di falsificazione
+**ZERO** — quel numero sarebbe uscito 0,600 qualunque cosa facesse il mercato.
+🟢 Va detto in difesa dello *strumento*: il sorgente **dichiarava l'assunto**.
+E' il **referto** che l'ha promosso ad ancora, e quello e' un mio errore di
+lettura, non un difetto del codice.
 
-### La classifica del pedaggio, e non e' quella che ci aspettavamo
+**b) Il cambio vero era nel file che avevo GIA' APERTO.** La regola del 10/09
+(*"prima si cerca il file che ha gia' la risposta"*) si ripaga con
+un'aggravante: della sonda `215D85D7_ABTG_InfoBroker.csv` avevo letto **due
+colonne su quattordici** (`Digits`, `Point`). Il conto e' in **EUR** (sezione
+SERVER, r.7 `Valuta,EUR`), quindi:
+
+```
+quota/EUR = TickValue / (ContractSize x TickSize)
+```
+
+⇒ **`USD/JPY = 0,86287 / 0,0054147 = 159,36`, non 150,0.**
+
+### 🟢 E LA TABELLA CHE NE ESCE E' MOLTO PIU' FORTE DI QUELLA CHE AVEVO
+Una **sola istantanea** (17/08 17:34 srv) che copre **tutte** le valute che
+servono, e **controprovata dentro se stessa**: la stessa valuta quota, letta da
+coppie **diverse**, torna. Scarto relativo massimo **0,012%**.
+
+| valuta | X/EUR | letto da | controprova |
+|---|---:|---|---|
+| **USD** | 0,86287 | EURUSD · GBPUSD · AUDUSD · NZDUSD | 🟢 **4 coppie** |
+| **JPY** | 0,0054147 | USDJPY · CHFJPY · GBPJPY · EURJPY | 🟢 **4 coppie** |
+| **CAD** | 0,62216 | EURCAD · USDCAD · GBPCAD | 🟢 3 coppie |
+| **CHF** | 1,06559 | USDCHF (EURCHF: 1,06550) | 🟢 2 coppie |
+| **NZD** | 0,50988 | EURNZD · AUDNZD | 🟢 2 coppie |
+| **GBP** | 1,17026 | EURGBP | 🟡 1 coppia |
+| **AUD** | 0,61372 | EURAUD | 🟡 1 coppia |
+
+### Il conteggio ONESTO delle ancore, rifatto
+| coppia | derivato | scritto da altri | esito |
+|---|---:|---:|---|
+| **EURUSD** | **0,4636** pip | `~0,5` (10/09) · `0,47` (CACCIA_SABATO 2.3) | 🟢 **riproduce — l'UNICA ancora genuina** |
+| **USDJPY** | **0,6374** pip | `~0,60` (CACCIA_SABATO 2.3) | 🔴 **NON riproduce** — e ora si sa perche': quel numero poggiava su un USDJPY **assunto a 150** |
+| **GBPUSD** | **0,5425** pip | `~0,47` *(= il numero di EURUSD)* | 🔴 **NON riproduce** |
+
+👉 **Una ancora genuina, e DUE numeri della caccia da correggere** (non uno).
+Il `~0,47` di GBPUSD e' il valore di EURUSD riusato; il `~0,60` di USDJPY
+poggiava su un cambio assunto che **il disco smentisce**.
+
+## 3.1-bis 🧪 LA PROVA CHE IL RITROVAMENTO NON E' FRAGILE
+
+Se il verdetto dipendesse da **quale data** dei cambi uso, sarebbe fragile.
+Rifatto con la tabella **indipendente** del 10/09 (i cambi impliciti nelle
+commissioni **misurate**): **non dipende**, perche' la commissione e' un
+**RAPPORTO** fra due valute e la deriva comune **si cancella**.
+
+| coppia | cambi 17/08 | cambi 10/09 | scarto |
+|---|---:|---:|---:|
+| **GBPUSD** | **0,5425** | **0,5432** | 🟢 **0,124%** |
+| AUDUSD | 0,2845 | 0,2848 | 🟢 0,121% |
+| EURUSD | 0,4636 | 0,4677 | 🟢 0,897% |
+
+🟡 **Le due date vanno dichiarate, ed erano mescolate nella v1**: su `USD/EUR`
+differiscono dello **0,9%** (0,86287 contro 0,8552) — e' deriva di cambio fra
+17/08 e 10/09, non un errore. **La tabella primaria e' ora una sola data.**
+
+### La classifica del pedaggio, ristampata coi cambi del disco
 | coppia | valuta base | **commissione (pip)** |
 |---|---|---:|
-| **AUDUSD** | AUD | 🥇 **0,285** |
-| EURUSD | EUR | 0,468 |
-| **GBPUSD** | GBP | **0,543** |
-| USDJPY | USD | 0,600 |
-| EURAUD | EUR | 0,657 |
-| EURJPY | EUR | 0,702 |
-| GBPJPY | GBP | 0,815 |
-| **CHFJPY** | CHF | 🔴 **[NON CALCOLABILE]** — il cambio del CHF **non e' fra gli otto misurati**. Lo strumento **si rifiuta** di stimarlo |
+| **AUDUSD** | AUD | 🥇 **0,2845** |
+| EURUSD | EUR | 0,4636 |
+| **GBPUSD** | GBP | **0,5425** |
+| EURAUD | EUR | 0,6518 |
+| USDJPY | USD | 0,6374 |
+| EURJPY | EUR | 0,7387 |
+| GBPCAD | GBP | 0,7524 |
+| **CHFJPY** | CHF | **0,7872** 🟢 *era dichiarata `[NON CALCOLABILE]`: vedi sotto* |
+| GBPJPY | GBP | 0,8645 |
+
+> 🔴 **E UNA MIA AFFERMAZIONE ERA FALSA.** La v1 scriveva *"il cambio del CHF
+> non e' fra gli otto misurati"* e dichiarava **CHFJPY `[NON CALCOLABILE]`**.
+> **Vero per il 10/09, falso per il disco**: il CHF e' sul disco dal **17/08**
+> (`USDCHF` -> `CHF/EUR = 1,06559`, controprovato da `EURCHF` -> 1,06550).
+> **CHFJPY paga 0,7872 pip** ed e' la **seconda piu' cara** del gruppo.
+> 🟢 Il meccanismo del rifiuto, pero', **funziona**: provato con il JPY
+> **togliendolo** dalla tabella, lo strumento torna `n/d` invece di stimare.
+> Era giusto il codice, sbagliata la tabella che gli davo.
 
 ## 3.2 🧪 IL CONTRO-ESEMPIO — e smentisce il bersaglio **piu' presto** del previsto
 
@@ -190,13 +260,13 @@ bersaglio sparisce gia' allo spread che abbiamo gia' letto:**
 
 | spread misurato | all-in | stop 28 pip fa | esito del bersaglio |
 |---:|---:|---:|---|
-| 0,1 | 0,643 | **43,5x** | 🟢 TIENE |
-| **0,2** *(la lettura unica di oggi)* | **0,743** | **37,7x** | 🔴 **SPARITO** |
-| 0,3 | 0,843 | 33,2x | 🔴 SPARITO |
-| 0,5 *(l'ipotesi della caccia)* | 1,043 | 26,8x | 🔴 SPARITO |
-| 1,0 | 1,543 | 18,1x | 🔴 SPARITO |
+| 0,1 | 0,642 | **43,6x** | 🟢 TIENE |
+| **0,2** *(la lettura unica di oggi)* | **0,742** | **37,7x** | 🔴 **SPARITO** |
+| 0,3 | 0,842 | 33,2x | 🔴 SPARITO |
+| 0,5 *(l'ipotesi della caccia)* | 1,042 | 26,9x | 🔴 SPARITO |
+| 1,0 | 1,542 | 18,2x | 🔴 SPARITO |
 
-🔴 **La soglia che decide: lo spread GBPUSD deve uscire `<= 0,157 pip`** perche'
+🔴 **La soglia che decide: lo spread GBPUSD deve uscire `<= 0,158 pip`** perche'
 un M30 con stop 28 pip tenga il 40x. **Nessuno spread sotto 1,56 pip sfonda il
 pavimento DURO**, quindi non e' una bocciatura: e' il **40x di lavoro** che
 diventa irraggiungibile a quello stop.
@@ -208,14 +278,19 @@ decide davvero**, in tutte e due le direzioni.
 
 ## 3.3 🎯 LA CONSEGUENZA STRATEGICA: forse la coppia giusta e' AUDUSD
 
-Sul GBPUSD la commissione e' il **73%** del pedaggio (0,543 su 0,743). Quando
-una voce pesa il 73%, **ottimizzare l'altra e' rumore**. La caccia ha scelto
+Sul GBPUSD la commissione e' il **73,1%** del pedaggio (0,5425 su 0,7425).
+Quando una voce pesa il 73%, **ottimizzare l'altra e' rumore**. La caccia ha scelto
 GBPUSD perche' aveva lo **spread** piu' stretto; ma la variabile che domina e'
 la **valuta base**.
 
 > **AUDUSD parte con 0,258 pip di vantaggio strutturale** e batte GBPUSD se il
 > suo spread misurato esce **sotto 0,458 pip** — un valore largo, che la
 > maggioranza dei major rispetta.
+> 🟡 **E quel `0,458` poggia su uno spread GBPUSD di 0,2 pip, che e' una
+> `[LETTURA UNICA]`** (sonda istantanea del 17/08 17:34, **non** una
+> distribuzione). Se il GBPUSD vero e' piu' largo, **la soglia si alza e AUDUSD
+> vince ancora piu' facilmente**: la direzione dell'incertezza, qui, e'
+> **favorevole** al ritrovamento.
 > 🔴 **E AUDUSD e' una delle quattro coppie dove la sonda legge `0`.**
 
 👉 Quindi la misura non serve solo a **confermare o smentire** GBPUSD M30:
@@ -259,13 +334,55 @@ cartelle dati del VPS questa riga ne legge **una**.
 (una chiusura "pulita" che ammazzo' anche il reale) **non puo' ripetersi qui**,
 perche' qui **non si chiude niente**.
 
-🟢 **La riga esiste gia', ed e' gia' passata dal cancello**: BLOCCO 3 di
-`backtest_pipeline/righe/RIGA_SPREADLOGGER_DA_MANDARE.md` — con `irm` + pin
-`41728ee14525c468d05c980780c3ad20976b997c` + marcatore
-`MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v1` + **raccolta** (cartella Desktop +
-`Compress-Archive` + elenco dei file attesi). **Non la riscrivo**: riscriverla
-sarebbe inventare rischio dove non ce n'e'. `RIGA_SPREADLOGGER_RACCOLTA.ps1`
-**non e' cambiato** dal giorno in cui quel pin e' stato verificato.
+🟢 **La riga esiste gia'**: BLOCCO 3 di
+`backtest_pipeline/righe/RIGA_SPREADLOGGER_DA_MANDARE.md` — con `irm` + pin +
+marcatore + **raccolta** (cartella Desktop + `Compress-Archive` + elenco dei
+file attesi). **Non l'ho riscritta**: riscriverla sarebbe inventare rischio
+dove non ce n'e'.
+
+### 🔴 MA IL MIO «GIA' PASSATA DAL CANCELLO» NON ERA RIPRODUCIBILE COM'ERA SCRITTO
+Detto cosi', chi rifa' il controllo **trova FAIL e si ferma**. Il cancello
+dipende da **come si dichiarano gli oggetti**, e va scritta l'invocazione
+esatta. Misurato in quattro modi, e **riprodotto da me**:
+
+| invocazione | esito |
+|---|---|
+| `--riga <BLOCCO 3 estratto> --ps1 ...RACCOLTA.ps1` | 🟢 **uscita 0**, *"nessun difetto meccanico"* ⬅️ **questa e' quella giusta** |
+| `--ps1 ...RACCOLTA.ps1` da solo | 🟢 uscita 0 |
+| `--riga <il .md intero> --ps1 ...RACCOLTA.ps1` | 🔴 **uscita 1, 9 bloccanti** |
+| idem con **entrambi** gli `--ps1` | 🔴 uscita 1, 9 bloccanti |
+
+🟢 **I 9 bloccanti sono TUTTI falsi positivi del passare il `.md` come riga di
+lancio**, e li ho contati uno per uno: **1** `[ASCII]` (emoji in un `.md`, che
+la regola di casa **vuole**), **4** `[187]` (incroci marcatore x script su un
+documento che ne contiene **due** — gli accoppiamenti giusti passano tutti e
+due), **3** `[TERMINALE]` + **1** `[CONTO]` su **prosa italiana che nomina il
+100k per RIFIUTARLO**. 👉 **Il documento non e' una riga di lancio: la riga e'
+il BLOCCO 3 dentro il documento**, e va estratta prima di passarla al cancello.
+
+### 🔴 E LA RIGA E' STATA RI-PINNATA OGGI, perche' ho indurito lo script
+`VistoPiccolo` era **misurato** (r.222) e **mai usato come cancello**:
+l'eleggibilita' era `MQL5 + bases BCM + non-V3`, quindi il **REALE 10105439** e
+il **banco 50504400** — anch'essi BCM e **senza** `-V3` — **passavano il
+gate**. Non e' mai diventato un incidente per **tre fortune** (la riga non
+scrive sul terminale, la discriminante finale e' il **file di stato del
+logger**, e sull'ambiguita' **si ferma** con un `throw`). 🔴 **Tre fortune non
+sono un metodo**, quindi il buco e' chiuso:
+- reale e banco ora **rifiutati** con lo stesso schema a **tre tracce**
+  indipendenti del 100k (`origin.txt`, percorso, login nei log);
+- `VistoPiccolo` promosso a criterio di selezione **dove restringe**;
+- 🟢 **fallisce in SICUREZZA**: se `origin.txt` manca e i log non nominano
+  nessuno, **non cambia niente** rispetto a prima.
+
+**Provato**: `Parser::ParseFile` **0 errori** (5.924 token) e **6 casi su 6
+verdi** (reale con e senza `\` finale, minuscolo, banco, **il piccolo che DEVE
+passare**, `origin.txt` vuoto).
+
+🔴 **Conseguenza da non perdere:** marcatore -> **`..._RACCOLTA_v2`** e pin del
+BLOCCO 3 -> **`e86deb5a367ca19da918c5a16248d35b4307143a`**. **I BLOCCHI 1-2
+restano al pin vecchio** (l'EA non e' stato toccato): **la pagina ha due pin,
+apposta**, e §2 lo dice. 🚦 **Il pin nuovo non e' ancora verificato via `raw`**
+(il commit e' di oggi): va fatto prima dell'invio.
 
 ### ⏳ E I GIORNI CI SONO — oggi e' il giorno giusto
 `HANDOFF.md` §06/09: *"lanciare `RIGA_SPREADLOGGER_RACCOLTA.ps1` dopo **5
@@ -299,15 +416,22 @@ La corsa forex e' **una riga di parametri**, con `-PuntiPerIndice 10.0` e
 -Simboli "GBPUSD,EURUSD,USDJPY,AUDUSD,EURAUD,GBPJPY,CHFJPY" -PuntiPerIndice 10.0
 ```
 
-🔴 **IL PRESUPPOSTO CHE NON HO POTUTO VERIFICARE, e non lo assumo:** che i
-**tick reali forex siano sul disco del banco**. Gli indici li avevano
+🔴 **IL PRESUPPOSTO RESTA `[NON MISURATO]`, E IN TUTTI E DUE I SENSI.** Che i
+**tick reali forex siano sul disco del banco** non lo so. Gli indici li avevano
 (2024.09.26 -> 2026.06.30, 252 milioni di tick). Per il forex la sonda del
-17/08 dice `da scaricare (parziale)` — ma **quella colonna riguarda le BARRE
-H1, non i tick**. `ABTG_HistoryDownloader.mq5` ha `InpScaricaTick = true`
-(r.23), quindi i tick forex **potrebbero** esserci. 👉 **Va accertato prima**,
-e costa poco: se i tick mancano, `MisuraSimbolo` scrive un **CSV vuoto** —
-che il motore tratta bene (*"un CSV vuoto e' un fatto, non un errore taciuto"*,
-r.104-105), ma la corsa non produce la misura.
+17/08 dice `da scaricare (parziale)` — ma **quella colonna sta in coda alle
+colonne delle BARRE** (`BarreTF`/`BarreD1`, H1 e D1): 🔴 **nessuna colonna della
+sonda riguarda i tick**, quindi la sonda **non dice niente sui tick — ne' che
+ci sono, ne' che mancano**. Il mio *"potrebbero esserci"* basato su
+`InpScaricaTick = true` (`ABTG_HistoryDownloader.mq5` r.23) e' un
+**ragionamento**, non una misura, e **non vale come presupposto**.
+👉 **Si chiude con una MISURA, e va fatta prima della Strada B1.** Se i tick
+mancano, `MisuraSimbolo` scrive un **CSV vuoto** — che il motore tratta bene
+(*"un CSV vuoto e' un fatto, non un errore taciuto"*, r.104-105), ma la corsa
+**non produce la misura**.
+🟡 *Di contorno, e utile saperlo:* `BarreTF` vale **100.000 / 100.008** su
+EURUSD/GBPUSD/USDJPY — cioe' **il tetto delle ~100.000 barre del tester, gia'
+saturo**. Non riguarda i tick, ma riguarda ogni corsa futura su quelle coppie.
 ⚠️ E se i tick partono dal 2024.09.26, la finestra e' **~21 mesi**: buona per
 la mediana, ma e' **un solo regime**, e va dichiarato.
 
@@ -342,7 +466,8 @@ Va ripetuto ogni volta che si cita un suo numero.
 | **l'esecuzione della PROP vera** | e' il feed **BCM**. Un broker prop puo' avere spread e regole diverse |
 | **lo spread al MINUTO** | il grano e' l'**ORA**. Su un'apertura di sessione la direzione dell'errore e' **nota e sfavorevole** |
 | **gli stop M30 forex** | 🔴 **[NON MISURATO]**, §3.4. Senza, il rapporto `stop/all-in` su M30 **non si chiude** |
-| **il cambio del CHF** | 🔴 non e' fra gli otto misurati -> **CHFJPY resta senza commissione calcolabile** |
+| ~~il cambio del CHF~~ | 🟢 **BUCO CHIUSO**: il CHF e' sul disco dal 17/08 (`USDCHF`/`EURCHF`). **CHFJPY = 0,7872 pip.** La v1 lo dichiarava `[NON CALCOLABILE]`: era falso |
+| **i cambi sono di UNA data** | 17/08 17:34. Fra 17/08 e 10/09 `USD/EUR` deriva dello **0,9%**. Sui **rapporti** si cancella (§3.1-bis), ma un uso futuro a valuta singola va ri-ancorato |
 
 ---
 
