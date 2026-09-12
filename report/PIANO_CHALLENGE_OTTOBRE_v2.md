@@ -52,7 +52,33 @@ posizioni** (§0-bis, punto 5: classe **226**, aperta oggi).
 E la scoperta piu' grossa di questo giro e' che **la sedia meglio misurata del
 parco non e' nella squadra della challenge**:
 
-> ### 🚄 `ABTG_EMA200` **771531** (U30USD H1) e' l'UNICA del progetto con una partizione IS/OOS vera, a **tick reali**, con **tutte e due** le finestre sopra la soglia contata in POSIZIONI — e gira sul **piccolo 50503392 all'1,0%**, non sul conto della challenge.
+> ### 🚄 `ABTG_EMA200` **771531** (U30USD H1) e' l'UNICA del progetto con una partizione IS/OOS vera, a **tick reali**
+>
+> 🔴 **ERRATA 12/09/2026.** Qui c'era scritto anche *"con **tutte e due** le
+> finestre sopra la soglia contata in POSIZIONI"*. **NON E' VERO, ed e' stato
+> misurato:**
+> - **OOS: 257 posizioni, MISURATE** (517 deal / 257 `position_id` distinti nel
+>   per-trade `pertrade_00_metro_763400.csv`, riprodotto identico dal gemello
+>   `763401`). ✅ **Sopra il pavimento dei 150.**
+> - 🔴 **IS: `[NON MISURATO]`, e le due stime indipendenti stanno SOTTO** —
+>   **118** (237 uscite / 2,0117, il fattore della stessa cella e dello stesso
+>   banco) e **122** (per la via del banco da 10k). Cioe' **-21% e -19%** dal
+>   pavimento.
+> - **Perche' non e' misurato, e non e' una dimenticanza**: l'EA costruisce il
+>   nome del per-trade con EA + simbolo + magic **e nient'altro**, senza
+>   marcatore di finestra, e il driver corre IS poi OOS nella stessa chiamata
+>   con lo stesso magic -> **la seconda gamba sovrascrive la prima**. Verificato:
+>   tutte le `close_time` del per-trade stanno fra 2025.06.12 e 2026.06.26,
+>   cioe' **dentro l'OOS**.
+> - **Perche' l'IS arrivasse a 150** il suo tasso di parziale dovrebbe crollare
+>   del **19-21%** rispetto all'OOS della stessa cella. Possibile, **non
+>   dimostrato**.
+> 👉 Alla lettera del certificato di morte: **la 771531 non ha due finestre sopra
+> il pavimento. Ne ha UNA.** Si chiude con **~45 secondi di tester** (una sola
+> gamba IS, tick, 100k, con l'export per-trade): misura, non congettura.
+> Verbale: `report/A3_IL_DD_DELLA_771531_2026-09-12.md`
+>
+> *(il resto della scheda, invariato:)* a **tick reali**, con la finestra OOS sopra la soglia — e gira sul **piccolo 50503392 all'1,0%**, non sul conto della challenge.
 > `R112`, 26/08, modello 4 (tick reali), `G0-B` riprodotto **al centesimo** su
 > tutte e 7 le colonne in **due corse indipendenti**:
 > **OOS 517 deal = 257 POSIZIONI · PF 1,52365 · DD 7,8323% · peggior giornata

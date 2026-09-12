@@ -11,53 +11,66 @@
 
 ---
 
-## 1. 🔍 QUALE VERSIONE GIRA — identificata, e con che forza
+## 1. ✏️ CORREZIONE DI QUESTO STESSO REFERTO — "il campo" non e' UNO
 
-Storia delle righe di `mql5/Experts/ABTG_Guardian.mq5`:
+🔴 **La prima stesura di questo file, di poche ore fa, diceva "il Guardian in
+campo ha 414 righe" e lo trattava come UNA versione.** E' falso: i terminali
+sono quattro e le versioni **tre**. Ed era gia' scritto nel log del runner
+dell'11/09 (`CODA_06`), che porta la **`#property version`** — cioe'
+**l'identificatore giusto** — mentre io avevo identificato la versione
+**contando le righe**.
 
-| commit | data | righe |
-|---|---|---:|
-| `a21d0c0` | 08/09 | **899** ← il repo di oggi |
-| `cdb2037` | 07/09 | 705 |
-| `1b6a095` | 06/09 | 512 |
-| `d884f7e` | 06/09 | 498 |
-| `1f4c92b` | 19/08 | 467 |
-| **`a53820e`** | **18/08** | **413** ← 👈 **il campo ne ha 414** |
-| `6b9b8c3` | 31/07 | 208 |
+📌 **E' la classe del 10/09, un'altra volta: il file che aveva la risposta era
+gia' li' e non l'ho aperto.** Il conteggio di righe non e' un identificatore;
+la versione dichiarata lo e'.
 
-👉 **Nessun'altra versione e' vicina a 414.** La piu' prossima e' `a53820e`
-(18/08) a **una riga di distanza**.
+### La mappa vera, con DUE segnali indipendenti che concordano
 
-⚠️ **E qui dichiaro la forza della prova, che non e' massima.** L'ho
-identificata **per CONTEGGIO DI RIGHE**, non confrontando i byte: il file del
-campo non e' nel repo. Un conteggio di righe **non e' un'impronta**. In piu'
-il referto di ieri riporta la compilazione al **09/08**, che con un sorgente
-del **18/08** non torna — probabilmente l'`.ex5` e' piu' vecchio del `.mq5`
-copiato accanto (si copia senza ricompilare), ma **non l'ho misurato**.
-🔴 **Quindi: candidata forte, non certezza.** La certezza costa una riga di
-sola lettura sul VPS (impronta SHA del file in campo contro i blob di git), e
-va chiesta.
+| cartella dati | `#property version` | righe in campo | commit del repo | data | righe nel commit |
+|---|---|---:|---|---|---:|
+| tre terminali | **1.10** | **414** | `a53820e` | 18/08 | 413 |
+| **il 100k 50504263** | **1.11** | **468** | `1f4c92b` | 19/08 | 467 |
+| un terminale | **1.12** | **513** | `1b6a095` | 06/09 | 512 |
+| *il repo di oggi* | *1.14* | *899* | `a21d0c0` | 08/09 | 899 |
 
-🟢 **Ma la parte utile del verdetto NON dipende da quale delle due sia**: fra
-`a53820e` (413) e `1f4c92b` (467) **le quattro manopole qui sotto mancano in
-tutte e due**. L'elenco regge per qualunque versione di agosto.
+🟢 **Versione e righe concordano in tutti e tre i casi**, con uno scarto
+**costante di +1 riga** (la copia in campo ha una riga in piu': coerente con
+una copia, non con un file diverso). 👉 **Due segnali indipendenti che
+convergono: questa non e' piu' una candidata, e' un'identificazione.** La
+prima stesura si fermava a uno, e lo dichiarava come tale.
+
+### 🚨 E una cosa che la versione fa vedere e le righe no
+Sui tre terminali a **1.10**, l'`.ex5` (il binario che gira davvero) e' datato
+**09/08**, ma il sorgente accanto e' del **18/08**. 👉 **Il sorgente e' stato
+copiato SENZA ricompilare: quello che gira e' ancora piu' vecchio di quello che
+si legge nella cartella.** Due dei tre non hanno nemmeno un `.ex5`.
+🔴 Quindi **leggere il `.mq5` in campo non dice che codice gira.** Lo dice la
+data dell'`.ex5`, e per due terminali non c'e' affatto.
 
 ---
 
-## 2. 🔴 LE QUATTRO PROTEZIONI CHE IL CAMPO NON HA
+## 2. 🔴 LE PROTEZIONI CHE MANCANO — e la risposta e' la STESSA per ogni terminale
 
-Confronto degli `input` dichiarati: **campo 15, repo 19**. Le quattro che
-mancano, **per nome**:
+Confronto degli `input` dichiarati, versione per versione contro la 1.14 del
+repo (**19 input**):
 
-| manopola | che cos'e' |
-|---|---|
-| 🚨 **`InpMaxClusterRiskPct`** | **il CAP C2: tetto di rischio aperto per CLUSTER/valuta, firmato il 07/09 al 3,0%** |
-| **`InpClusterMappa`** | la mappa dei cluster su cui quel tetto si applica |
-| **`InpDailyBaseline`** | la linea di base giornaliera (serve ai muri sul DD del giorno) |
-| **`InpAutotest`** | l'autotest del Guardian |
+| versione in campo | input | manca |
+|---|---:|---|
+| **1.10** (tre terminali) | 15 | `InpMaxClusterRiskPct` · `InpClusterMappa` · `InpDailyBaseline` · `InpAutotest` |
+| **1.11** (il 100k) | 16 | `InpMaxClusterRiskPct` · `InpClusterMappa` · `InpDailyBaseline` |
+| **1.12** | 16 | `InpMaxClusterRiskPct` · `InpClusterMappa` · `InpDailyBaseline` |
 
-🟢 **E nessuna regressione al contrario**: non c'e' **nessuna** manopola che il
-campo ha e il repo no. Il campo e' un sottoinsieme, non un ramo diverso.
+> ## 🔴 **In TUTTE E TRE mancano gli STESSI TRE.** Quindi il verdetto non dipende da quale terminale si guarda: **nessun Guardian in campo puo' accettare il tetto per cluster, e nessuno puo' accettare `InpDailyBaseline`.**
+
+👉 **Il 3,0% firmato il 07/09 non ha nemmeno l'input dove scriverlo.** Non e'
+"spento": **non c'e' il posto**. E `InpDailyBaseline` e' un campo che la firma
+del cap C2 richiede: **oggi il binario non lo accetterebbe.**
+
+🟢 E nessuna regressione al contrario: nessuna manopola che il campo ha e il
+repo no. Il campo e' un **sottoinsieme**, in tutte e tre le versioni.
+
+📌 `InpAutotest` manca **solo** nella 1.10 — quindi la mia prima stesura, che
+elencava **quattro** manopole, descriveva **il piccolo**, non "il campo".
 
 ---
 
