@@ -102,6 +102,25 @@ ribassista) e dal confronto con l'amico che crea EA.
       Studio dati: Scripts/ABTG_Apertura_Study.mq5 misura LONG vs SHORT e filtro H4
       con slippage realistico -> capire DOVE sta l'edge prima di ri-ottimizzare.
 
+## 7. 🤝 Tavolo di confronto Claude Code ⇄ ChatGPT — ✅ PRONTO
+**Obiettivo:** avere il parere di una SECONDA IA sui parametri degli EA
+(sono ottimizzati al massimo o c'e' margine?), con i dati veri del repo.
+
+- [x] `confronto_ia/dossier.py` → costruisce il dossier di un EA: parametri attuali
+      (dal .mq5), griglia di ottimizzazione (ea_config.json), risultati del tester
+      (% combinazioni positive + analisi parametro per parametro = plateau vs picco),
+      note forward. Dove il dato manca scrive "DATO NON DISPONIBILE".
+- [x] `confronto_ia/tavolo.py` → le sessioni di confronto (turni numerati su file) +
+      ponte API verso ChatGPT; funziona anche in modalita' MANUALE (copia/incolla,
+      nessun costo API).
+- [x] `confronto_ia/PROTOCOLLO.md` → regole del confronto + formato di risposta con
+      blocco JSON (verdetto, robustezza 0-10, criticita', proposte, test da lanciare).
+- [x] Agente `confronto-ia` + comando `/confronto <EA>` in Claude Code.
+- [ ] **TU:** compila i limiti della sfida prop in `confronto_ia/contesto/contesto_base.md`
+      (perdita giornaliera, max drawdown, target). Senza quelli il parere e' monco.
+- Regola: nessuna proposta di ChatGPT entra in produzione senza backtest a tick reali
+  + forward in demo che la confermi.
+
 ## (?) Punto rimasto in sospeso
 Un messaggio si era interrotto su "...ottimizzazione con agente e ___".
 Se c'era un altro filone, da completare.
