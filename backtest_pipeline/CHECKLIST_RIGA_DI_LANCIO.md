@@ -17144,3 +17144,87 @@ conteggio si fa con `python3`.
 ### 🔑 La regola in una riga
 *Uno strumento di riparazione che può distruggere il file che sta riparando è più pericoloso del
 difetto che corregge. Codifica prima, `os.replace` dopo, e rileggi i byte.*
+
+
+---
+
+## 294. 🚨🏴 LA GUARDIA CHE «SALTA LA GIORNATA» CON `return(true)` ARMA LO STESSO — e con il **buffer a ZERO**: una manopola di PROTEZIONE che, accesa, rende la sedia **piu' aggressiva** (12/09/2026)
+
+**Il caso reale**: `LE_QUATTRO_FIRME_01_maxspread_ini.txt` metteva `InpMaxSpread` ad asse su
+**770101** (`ABTG_DAX_Apertura_EU`, D30EUR M5), che gira **sul conto REALE 10105439**. Il file
+dichiarava, citando il sorgente: *«il tetto gatta la DECISIONE DI ARMARE»*. **Falso**, e la catena si
+legge in quattro righe che stanno in **due punti lontani del file** (per questo il grep non la vede):
+
+| # | riga | che cosa fa |
+|---|---|---|
+| 1 | `ArmRetest()` r.1432 | `ComputeLevels(gRangeHigh, gRangeLow)` -> i livelli sono **gia' calcolati** |
+| 2 | `ArmRetest()` r.1441 | `if(!SpreadOK()) { ABTGLog(...); return(true); }` -> esce **PRIMA** di r.1443 `gBuffer = EffectiveBuffer()` e r.1444 `gBias = TrendBias()` |
+| 3 | dispatch r.718 | `if(ArmRetest()) gPhase = PH_ARMED;` -> `true` = **ARMATO** |
+| 4 | switch r.749-751 | `case PH_ARMED: ... else MonitorRetest();` -> il monitor **gira lo stesso**, a ogni tick |
+
+E `ResetDay()` (r.948) azzera `gBuffer` a **0** ogni mattina. Quindi in `MonitorRetest()` r.1471:
+```
+double buyTrig = NormalizePrice(gRangeHigh + gBuffer);   // gBuffer = 0
+```
+🔴 **Il grilletto non e' `range_high + 5,00 punti indice` (InpBufferPoints=500, `EffectiveBuffer()`
+r.2075-2080 = `max(500, stops_level) * _Point`, sempre > 0): e' `range_high + 0,00`.** Sulla giornata a
+spread alto la sedia **non salta il trade: lo prende con la soglia di rottura abbassata di 5,00 punti
+indice**, e per giunta con `gBias = 0` (= tutti e due i lati liberi, filtro di tendenza scavalcato).
+
+### 🔬 PERCHE' E' DORMIENTE IN CAMPO, e perche' la firma lo SVEGLIA
+In campo `770101` porta `InpMaxSpread=0`, `InpMinRangePts=0`, `InpMaxRangePts=0`: **tutte e tre** le
+guardie a `return(true)` di `ArmRetest()` sono **spente**, quindi il ramo non e' mai stato percorso.
+🔴 **Il round serviva a far firmare a Claudio `InpMaxSpread = 272`: la firma avrebbe ACCESO il
+difetto su soldi veri**, vendendolo come protezione.
+
+### 🧪 E DEMOLISCE ANCHE LA MISURA, non solo la sedia
+- il **canarino duro** (cella 68 = 0,68 idx, atteso **0 posizioni**) **non puo' dare 0**: le giornate
+  bloccate non spariscono, entrano con buffer 0 -> il file avrebbe letto il proprio canarino come
+  *«`SYMBOL_SPREAD` non funziona nel tester»*. **Diagnosi sbagliata sul sintomo giusto**;
+- la **monotonia** `n(68) <= n(136) <= ... <= n(base)` puo' **invertirsi** (buffer 0 = piu' rotture),
+  e il file l'avrebbe chiamata *«difetto del banco»*: non lo e', e' l'EA;
+- il **test S/P dei criteri congelati** (PF del tagliato contro PF del tenuto) si calcola per
+  **differenza** dalla base: valido solo se il tenuto e' un **sottoinsieme** della base. Qui non lo e'.
+🔴 **Ogni cella diversa da 0 e' contaminata: il round non puo' rispondere alla sua domanda.**
+
+### ✅ COSA SI FA
+1. 🔴 **Il difetto NON si tappa nel file prova**: sta nella macchina a stati dell'EA. Un EA che
+   gira su **10105439** = **[FIRMA DI CLAUDIO]**, si segnala e non si tocca.
+2. La toppa da proporre e' una riga: sul rifiuto di `SpreadOK()` la giornata va chiusa
+   (`gPhase = PH_DONE`), **non** armata. Vale per **tutte e tre** le guardie e per **tutte e due** le
+   modalita' che finiscono in `PH_ARMED`: **RETEST** (r.718) e **OPENCONFIRM** (r.730, stesso schema a
+   r.1355 -> `gBuffer` a r.1357).
+3. Finche' non e' tappata: **`InpMaxSpread` su questo EA resta `0`**, e il round M1 non si mette in coda.
+
+### 🔑 La regola in una riga
+*Prima di mettere ad asse una manopola, non basta leggere la funzione che la legge: si segue il
+**valore di ritorno** fino alla macchina a stati. `return(true)` dentro una funzione che si chiama
+`Arm...` vuol dire **ARMATO**, non «salta la giornata» — e lo stato che la funzione non ha fatto in
+tempo a riempire vale **ZERO**, che e' il valore piu' permissivo che esista.*
+
+---
+
+## 295. 📏❄️ L'ASSE DEL FILE PROVA NON E' LA SCALA CONGELATA NEI CRITERI, e il file non lo dichiara (12/09/2026)
+
+**Il caso reale**: `LE_QUATTRO_FIRME_CRITERI.md` (commit `be0e019`, congelato **prima** dei numeri)
+chiudeva la sezione M1 con *«Scala dei tetti da provare: **170 / 200 / 270 / 340 punti MT5**»*. Il file
+prova nato dopo porta **`InpMaxSpread=0||0||68||340||Y`** = **0 / 68 / 136 / 204 / 272 / 340**: il
+gradino **170** (la mediana) **sparisce**, 200 diventa **204**, 270 diventa **272**.
+
+🟢 **La ragione e' buona e meccanica**: l'asse del driver e' `valore||inizio||passo||fine`, cioe'
+una **progressione aritmetica**. Con inizio 0 non esiste un passo che tocchi 170, 200 e 270; il passo 68
+li approssima e regala **due canarini** (68 e 136) a costo zero. 🔴 **Ma il file non lo scrive da
+nessuna parte** — e chi legge il referto fra tre mesi vede due elenchi diversi e non sa quale comanda.
+
+### ✅ COSA SI FA
+- Si controlla che **nessuna SOGLIA DI ESITO** sia cambiata (qui: `<= 2,0%` firmabile / `2,0-10,0%`
+  fragile / `> 10,0%` bocciato / test S/P: **tutte invariate** ✅). **Se si e' mossa una soglia, il
+  verdetto vale zero** ed e' la regola madre di casa.
+- La **scala** puo' cambiare, ma il file prova deve portare **una riga esplicita**: *«la scala congelata
+  era X, l'asse e' Y, cambia PERCHE' il passo aritmetico non tocca X, e nessuna soglia si e' mossa»*.
+- 📌 Distinzione che regge: **le soglie sono il giudizio, la scala e' lo strumento**. Cambiare lo
+  strumento dopo il congelamento e' lecito **solo dichiarandolo**; cambiare il giudizio non lo e' mai.
+
+### 🔑 La regola in una riga
+*Un file prova che si discosta dai criteri congelati senza dirlo obbliga chi lo legge a rifare il
+`git log`. Una riga nel file costa nulla e sostituisce un'indagine.*
