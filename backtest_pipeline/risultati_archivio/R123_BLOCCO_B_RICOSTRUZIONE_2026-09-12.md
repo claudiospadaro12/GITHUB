@@ -48,7 +48,13 @@ due passi: **PASSO 1** da OHLC a tick (banda misurata su 8 coppie, +0,054 a
 dichiarato il proprio punto debole:
 
 > *"Questo rapporto e' misurato su **UNA cella sola**. E' **l'anello debole
-> della catena** e va detto."*
+> della catena** e va detto**: se le altre celle hanno un'asimmetria IS/OOS
+> diversa, la stima sbaglia**."*
+
+🎯 **E la meta' che avevo troncato nella prima stesura e' esattamente quella che
+i numeri di oggi dimostrano**: la tabella `0,859 - 1,223` piu' sotto **e'** la
+misura di quell'asimmetria diversa cella per cella. La profezia, citata per
+intero, vale il doppio del troncone.
 
 | StMult | PF OOS **atteso** | **misurato** | scarto | anelli usati |
 |---|---|---|---|---|
@@ -159,7 +165,14 @@ sorpresa da spiegare: e' cio' che il 1,040 richiede.**
 🔎 **E il contro-esempio, costruito apposta perche' questa conclusione sbagli:**
 trasponendo l'unico scarto di binario misurato (+0,065), l'IS vecchio di `3,0`
 sarebbe **~1,019** — ancora verde, ma con un margine **quattro volte piu'
-sottile** di come l'avevo presentato. E soprattutto: **l'unione calcolata dai
+sottile** di come l'avevo presentato.
+
+> 🔎 **E qui il contro-esempio morde davvero, piu' di quanto avessi visto**:
+> **1,019 sta SOTTO 1,040**. Nella trasposizione la condizione della mediante
+> **non regge nemmeno**, e la mediante pretenderebbe un OOS **sopra** 1,040 —
+> l'opposto di quello che serve. 🔴 **Le due letture del 1,040 sono
+> incompatibili fra loro**: e' questo, piu' di tutto il resto, che rende la sua
+> scomposizione **[NON RECUPERABILE]**, non solo non misurata. E soprattutto: **l'unione calcolata dai
 numeri di OGGI vale 0,99619, non 1,040**. Lo scarto di binario **non e'
 uniforme fra le celle** — motivo in piu' per chiudere con **[NON MISURATA]**,
 non con *"verde"*.

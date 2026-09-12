@@ -15792,6 +15792,29 @@ che aveva gia' letto gli stessi dati.
 >    del blocco C (**784120** invece di **784130**) proprio dentro il
 >    paragrafo che serviva a dimostrare di non toccare le sedie vive.
 
+> ### 🔧 EMENDAMENTO ALLA REGOLA 1 (12/09/2026, sera) — **la ricerca in due cartelle ha un buco STRUTTURALE, e si sarebbe ripetuto a OGNI round**
+> **Il caso**: la ricostruzione del blocco B ha censito i lettori dei CSV
+> `..._{IS,OOS}_R123BSTMULT.csv` e ne ha trovati **tre**. Erano **CINQUE**, e il
+> mancante era il **piu' diretto**:
+> `backtest_pipeline/risultati_prove/r123/REFERTO_ROUND_R123BSTMULT.txt` — il
+> **referto automatico del driver**, che stampa **tutti e 40 i numeri** del round.
+>
+> 🔴 **E non e' un caso sfortunato: e' permanente.** Quel referto il driver lo
+> scrive **a ogni round**, sempre in `risultati_prove/`. Cercando solo in
+> `report/` e `risultati_archivio/`, la regola 1 **si sarebbe mancata da sola su
+> ogni round futuro**.
+>
+> 👉 **La ricerca si fa sul NOME BASE del CSV in TUTTO il repo**
+> (`grep -rl NOME --exclude-dir=.git .`), non in due cartelle. Le tre famiglie di
+> lettori misurate: **referti** (`report/`, `risultati_archivio/`), **referto
+> automatico del driver** (`risultati_prove/`), **log di coda**
+> (`coda/referti/CODA_*.log`).
+>
+> 🟢 **E la meta' buona, che va detta**: il referto del driver **non ruba merito
+> a nessuno** — non giudica, lo dichiara lui stesso — ed e' la **conferma
+> indipendente** dei numeri rifatti a mano. Chi ricostruisce da zero dovrebbe
+> aprirlo **per primo**, non trovarlo per ultimo.
+
 ## 270. 👻 L'`.ex5` STANTIO CHE RENDE MUTO UN FALLIMENTO DI COMPILAZIONE — «il fallimento e' rumoroso e innocuo» e' vero SOLO su un'installazione vergine (12/09/2026)
 
 **Il fatto.** Il referto `report/IL_WIP_E_DIAGNOSTICA_2026-09-12.md` §6 punto 2
