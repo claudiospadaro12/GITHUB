@@ -1,0 +1,94 @@
+; =====================================================================
+;  PRESET DELLA SEDIA VIVA 771531 -- ABTG_EMA200 su U30USD H1, DUE LATI
+;  Scritto il 12/09/2026. NON esisteva: la sedia girava SENZA preset su file.
+;
+;  FONTE DEI VALORI: la foto del profilo del terminale 50503392
+;  (CODA_08_preset_dai_chr del 12/09 03:31), cioe' CIO' CHE GIRA -- non cio'
+;  che uno studio proponeva. R112_CRITERI r.199 dice esplicitamente
+;  "Nessun deploy esce da qui. La sedia 771531 non si tocca": quello era
+;  uno studio sui lati, non la fonte dei parametri.
+;
+;  >>> DUE VALORI DIFFERISCONO DAL CAMPO, ED E' VOLUTO. LEGGERE PRIMA. <<<
+;
+;  1. InpUsaGuardian=true  --  NEL CAMPO QUESTO INPUT NON ESISTE.
+;     Il binario in campo e' 344a11b del 04/08: 486 righe, ZERO occorrenze
+;     di InpUsaGuardian. Il sorgente a HEAD ne ha 690, con l'input a r.42 e
+;     la chiamata ABTG_GuardiaIngresso a r.381.
+;     PROVA INDIPENDENTE, da una fonte diversa: nella foto del profilo
+;     mancano ESATTAMENTE due input su 44, e uno e' InpUsaGuardian. Il
+;     grafico non l'ha salvato perche' l'EA che l'ha scritto non ce l'aveva.
+;     => FINCHE' NON SI RICOMPILA, QUESTA RIGA NON HA EFFETTO.
+;
+;  2. InpRiskPercent=0.65  --  NEL CAMPO E' 1.0.   [DECISIONE DI CLAUDIO]
+;     Il collaudo prop del 12/09 misura che lo 0,65% e' la CONDIZIONE DI
+;     SOPRAVVIVENZA del portafoglio a due sedie: Monte Carlo appaiato sui
+;     giorni veri (una riga per giorno, righe mescolate intere, quindi la
+;     correlazione same-day e' conservata) -> p99 12,17% a taglia 1,00%,
+;     che SFONDA il muro d'emergenza del 9,9%; p99 8,24% a 0,65%.
+;     Claudio ha confermato lo 0,65 il 12/09 -- ma parlando di 770101.
+;     >>> CARICARE QUESTO PRESET ABBASSA LA TAGLIA DI 771531 DA 1,0 A 0,65.
+;     >>> E' UNA DECISIONE, NON UN RIPRISTINO. Se non la vuoi, cambia questa
+;     >>> riga PRIMA di premere OK.
+;
+;  E I DEFAULT DELL'EA SONO UNA TRAPPOLA -- e' per questo che il preset serve:
+;     InpTF          default PERIOD_H4   ma la sedia e' H1    -> CAMBIA TF
+;     InpRiskPercent default 1.0         contro 0,65 firmato  -> +54% taglia
+;     InpMagic       default 771501      ma la sedia e' 771531 -> ALTRA IDENTITA'
+;  Un click su "Ripristina" senza questo preset cambia TF, taglia E identita'.
+;
+;  LA CELLA CHE QUESTI VALORI RIPRODUCONO:
+;     PF OOS 1,52365 - DD OOS 7,8323% - 517 deal / 257 posizioni
+;     30/30 PASS a walk-forward tick (R112, pin f33f374,
+;     finestra 2024.09.26 -> 2026.06.30, modello 4 = tick reali)
+;     E' la cella a DUE LATI. Il long puro vale PF 1,24103 (R110/R112):
+;     InpAllowLong=true E InpAllowShort=true NON si toccano.
+;
+;  UN'AMBIGUITA' DICHIARATA: nella foto InpVerbose compare DUE volte (true
+;  e false) perche' sul grafico c'e' anche un indicatore con un input dallo
+;  stesso nome. Qui e' messo a true (il valore del primo blocco, quello
+;  dell'EA). Tocca solo la quantita' di log: nessun effetto operativo.
+; =====================================================================
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=0.65
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpComment=EMA200 DOW
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=771531
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=true
