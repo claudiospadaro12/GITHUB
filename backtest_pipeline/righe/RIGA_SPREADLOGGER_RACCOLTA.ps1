@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3
+#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v4
 #  RIGA_SPREADLOGGER_RACCOLTA.ps1 -- RACCOGLIE e LEGGE i dati accumulati
 #  da ABTG_SpreadLogger sul terminale del conto PICCOLO 50503392.
 #
@@ -126,10 +126,33 @@ function Descrivi([string]$path){
   $i = Get-Item -LiteralPath $path
   return ("" + $i.Length + " byte, sha256 " + (Hash16 $path) + ", " + $i.LastWriteTime.ToString("yyyy-MM-dd HH:mm:ss",$INV))
 }
+# 12/09/2026, REGRESSIONE SULLA CLASSE 163 (pagata l'08/09, non nuova).
+# Qui c'era [System.IO.File]::ReadAllBytes($path), che su un file APERTO
+# dal terminale vivo lancia "The process cannot access the file ...
+# because it is being used by another process". E il giornale di OGGI e'
+# SEMPRE aperto da MT5, che ci sta scrivendo: quindi questa riga NON
+# POTEVA FUNZIONARE con MT5 acceso, che e' lo stato normale.
+# Misurato sul campo il 12/09 alle 20:24 sul VPS VMI3047753: la raccolta
+# e' morta sul PRIMO file che ha aperto (logs\20260912.log) e ha prodotto
+# un referto vuoto, "cartella dati: NON SCELTA".
+# La soluzione esisteva GIA', scritta e commentata, in due script gemelli
+# nella stessa cartella: RIGA_CENSIMENTO_MT5_MACCHINA.ps1 r.84-97 e
+# CODA_09_giornale_operativo.ps1 r.40-53. Non l'avevo aperta -- ed e' la
+# lezione del 10/09 alla lettera: i numeri veri stavano in un file nella
+# stessa cartella che non avevo guardato.
+# Ora si apre con FileShare::ReadWrite, che chiede il permesso di leggere
+# MENTRE un altro scrive. L'euristica di codifica resta la stessa di
+# prima (BOM UTF-16LE, BOM UTF-8, ripiego UTF-8): quella non era rotta.
 function LeggiTesto([string]$path){
   if(-not (Test-Path -LiteralPath $path)){ return @() }
-  $b = [System.IO.File]::ReadAllBytes($path)
-  if($b.Length -eq 0){ return @() }
+  $b = $null
+  try{
+    $fs = [IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite)
+    $b  = New-Object byte[] $fs.Length
+    [void]$fs.Read($b,0,$b.Length)
+    $fs.Close()
+  } catch { return @() }
+  if($null -eq $b -or $b.Length -eq 0){ return @() }
   $txt = ""
   if($b.Length -ge 2 -and $b[0] -eq 255 -and $b[1] -eq 254){ $txt = [System.Text.Encoding]::Unicode.GetString($b,2,$b.Length-2) }
   elseif($b.Length -ge 3 -and $b[0] -eq 239 -and $b[1] -eq 187 -and $b[2] -eq 191){ $txt = [System.Text.Encoding]::UTF8.GetString($b,3,$b.Length-3) }
