@@ -207,7 +207,7 @@ l'ultimo commit **non-WIP** che tocca quel file:
 | `ABTG_PTE` | **`26a1856`** | 19/08 | 1.01 | 649 | #8 sizing ✅ |
 | `ABTG_EMA200` | **`26a1856`** | 19/08 | 1.00 | 552 | #8 ✅ |
 | `ABTG_EMA200_Ottimizzato` | **`65de32c`** | 11/09 | 1.00 | 606 | #8 ✅ + il fix dell'**errore di compilazione** di `6ee2ec0` |
-| `ABTG_Nasdaq_Apertura_US` | **`d83c196`** | 19/08 | 1.02 | 2360 | **#3 guardia A4** ✅ — 🔴 **ma con `DEF_RISK 2.0`**: serve prima la firma §3 |
+| `ABTG_Nasdaq_Apertura_US` | **`d83c196`** | 19/08 | 1.02 | **2382** | **#3 guardia A4** ✅ — 🔴 **ma con `DEF_RISK 2.0`**: serve prima la firma §3 |
 | `ABTG_CostToCost` · `ABTG_GapContinuation` | `26a1856` | 19/08 | — | — | nessuna money (arancione) |
 | `ABTG_ORB_Ottimizzato` · `ABTG_DAX_Apertura_EU` · `ABTG_Dow_Apertura_US` · `ABTG_MaxMinNotte` · `ABTG_Guardian` | **HEAD** | — | — | — | 🟢 **non toccati da nessun WIP** |
 
