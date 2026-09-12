@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: ascii -*-
 # =====================================================================
-#  MARCATORE_CALCOLA_PEDAGGIO_FOREX_v2
+#  MARCATORE_CALCOLA_PEDAGGIO_FOREX_v3
 #  calcola_pedaggio_forex.py -- IL PEDAGGIO ALL-IN DEL FOREX, per coppia,
 #  contro i pavimenti di casa 13,3x e 40x.
 #
@@ -37,9 +37,21 @@
 #  NON ~0,47 come su EURUSD.
 #
 #  AUTOTEST (--autotest), in cinque blocchi che provano a ROMPERE:
-#   1. l'UNICA ancora genuina: EURUSD -> 0,47 pip, atteso scritto da
-#      un'altra sessione (CANCELLO_COSTO_FLOTTA "~0,5", CACCIA_SABATO
-#      "0,47"). E' genuina perche' il conto non passa dall'atteso.
+#   1. l'UNICA ancora genuina: EURUSD. L'atteso NON e' il "0,47" di
+#      CACCIA_SABATO 2.3 -- quel numero e' LA STESSA DERIVAZIONE fatta in
+#      un'altra sessione ("su EURUSD la mia derivazione da' 0,47 pip",
+#      r.130): citarlo come secondo riscontro sarebbe contare due volte
+#      un numero circolare, cioe' l'errore che la v1 ha fatto su USDJPY.
+#      L'atteso indipendente e' quello di CANCELLO_COSTO_FLOTTA 10/09:
+#      all-in EURUSD **0,86 pip**, scritto da quella sessione partendo
+#      dalle commissioni MISURATE (-4,0000 EUR esatti, n=84, varianza
+#      zero) -- ingressi DIVERSI dai nostri (TickValue sul disco).
+#      Con lo spread della sonda (SpreadPt=4 -> 0,4 pip) quell'all-in
+#      implica una commissione di 0,46: la nostra derivazione da' 0,4636.
+#      [RESIDUO DICHIARATO] non e' escluso che il 10/09 il 4,0 EUR sia
+#      stato diviso per il valore del pip con la stessa LEGGE: la legge
+#      e' la stessa, gli INGRESSI no. L'indipendenza e' sui dati, non
+#      sulla formula, e va detta cosi' invece di promettere di piu'.
 #   2. USDJPY NON e' un'ancora: nella v1 lo era, ed era un'IDENTITA'
 #      (vedi sopra). Qui si verifica che non ricada piu' sullo 0,600.
 #   3. controprove interne della tabella dei cambi (la stessa valuta
@@ -88,7 +100,7 @@ LOTTO = 100000.0
 #  come (USD/EUR)/150,0 con il 150,0 ASSUNTO. Su USDJPY la base E' USD,
 #  quindi USD/EUR si cancellava e restava comm = 4,0 x 150/1000 = 0,600
 #  PER COSTRUZIONE: un'identita', non una misura. Il disco dice
-#  USD/JPY = 0,86287/0,0054147 = 159,35, e la commissione vera e'
+#  USD/JPY = 0,86287/0,0054147 = 159,36, e la commissione vera e'
 #  0,637 -- NON 0,600.
 CAMBIO_VS_EUR = {
     "EUR": 1.0,
@@ -174,10 +186,22 @@ def commissione_pip(coppia, tabella=None):
     return comm_in_quota / valore_pip_quota, "ok"
 
 
+def data_tabella(tabella):
+    """La data della tabella EFFETTIVAMENTE usata.
+
+    Con --cambi 10-09 la v2 stampava comunque la data del 17/08: i numeri
+    uscivano etichettati con la provenienza SBAGLIATA. Su un pacchetto che
+    nasce proprio dall'aver mescolato due date, quella era una ricaduta.
+    """
+    if tabella is CAMBIO_VS_EUR_1009:
+        return DATA_CAMBI_1009
+    return DATA_CAMBI
+
+
 def autotest(tabella=None):
     """Prova a ROMPERE la derivazione, non a confermarla."""
     print("AUTOTEST -- si prova a ROMPERE la derivazione, non a confermarla")
-    print("  cambi: %s" % DATA_CAMBI)
+    print("  cambi USATI per i verdetti: %s" % data_tabella(tabella))
     print("")
     rossi = 0
 
@@ -190,11 +214,23 @@ def autotest(tabella=None):
         print("     ROSSO  EURUSD non calcolabile (%s)" % nota)
         rossi += 1
     else:
-        ok = abs(got - 0.47) <= 0.02
-        print("     %s EURUSD : derivato %.4f pip, atteso 0,47 (+-0,02)"
-              % ("VERDE " if ok else "ROSSO ", got))
-        print("            fonte dell'atteso: CANCELLO_COSTO_FLOTTA 10/09")
-        print("            '~0,5' + CACCIA_SABATO 2.3 '0,47'")
+        # ATTESO DICHIARATO PRIMA DEL NUMERO: 0,86 (all-in scritto dal
+        # referto del 10/09) - 0,40 (spread della sonda, SpreadPt=4) =
+        # 0,46. Tolleranza 0,02, cioe' il grano con cui il 10/09 ha
+        # scritto "0,86".
+        ALLIN_1009 = 0.86
+        SPREAD_SONDA = 0.40
+        atteso = ALLIN_1009 - SPREAD_SONDA
+        ok = abs(got - atteso) <= 0.02
+        print("     %s EURUSD : derivato %.4f pip, atteso %.2f (+-0,02)"
+              % ("VERDE " if ok else "ROSSO ", got, atteso))
+        print("            atteso = all-in 0,86 scritto da CANCELLO_COSTO_")
+        print("            FLOTTA 10/09, MENO lo spread 0,4 della sonda")
+        print("            (SpreadPt=4). Ingressi indipendenti dai nostri.")
+        print("            NON si conta il '0,47' di CACCIA_SABATO 2.3:")
+        print("            quello e' la STESSA derivazione, non un")
+        print("            riscontro. Contarlo sarebbe l'errore che la v1")
+        print("            ha fatto su USDJPY.")
         if not ok:
             rossi += 1
 
@@ -263,15 +299,54 @@ def autotest(tabella=None):
     print("  4) IL RITROVAMENTO NON DEVE DIPENDERE DALLA DATA DEI CAMBI")
     print("     (se dipendesse, sarebbe fragile: si confronta con i")
     print("      cambi INDIPENDENTI del 10/09)")
-    for coppia in ("GBPUSD", "EURUSD", "AUDUSD"):
+    #  ATTESA DICHIARATA PRIMA DEI NUMERI, e NON e' la stessa per tutte:
+    #  la commissione e' un RAPPORTO base/quota, quindi la deriva comune
+    #  si cancella SOLO se nessuna delle due gambe e' l'EUR, che qui e' il
+    #  numerario. Su GBPUSD e AUDUSD (base e quota entrambe non-EUR) la
+    #  deriva DEVE cancellarsi: soglia 1%. Su EURUSD la base E' l'EUR,
+    #  quindi il rapporto e' 1/(USD/EUR) e la deriva del dollaro passa
+    #  TUTTA: li' un ~0,9% e' ATTESO, non un difetto, e contarlo come
+    #  rosso vorrebbe dire bocciare lo strumento per un fatto di mercato.
+    #  I numeri strategici (73,1% - 37,7x - soglia 0,158 - vantaggio
+    #  0,258 di AUDUSD) poggiano TUTTI su GBPUSD e AUDUSD: e' per questo
+    #  che il ritrovamento e' date-robusto, non perche' lo sia ogni riga.
+    DERIVA_SI_CANCELLA = ("GBPUSD", "AUDUSD")
+    for coppia in ("GBPUSD", "AUDUSD", "EURUSD"):
         a, _ = commissione_pip(coppia, CAMBIO_VS_EUR)
         b, _ = commissione_pip(coppia, CAMBIO_VS_EUR_1009)
         if a is None or b is None:
             continue
         scarto = 100.0 * abs(a - b) / a
-        ok = scarto <= 1.0
-        print("     %s %s: 17/08 %.4f vs 10/09 %.4f -> scarto %.3f%%"
-              % ("VERDE " if ok else "ROSSO ", coppia, a, b, scarto))
+        base = COPPIE[coppia][0]
+        if coppia in DERIVA_SI_CANCELLA:
+            ok = scarto <= 1.0
+            print("     %s %s: 17/08 %.4f vs 10/09 %.4f -> scarto %.3f%%"
+                  " (atteso <=1%%: ne' base ne' quota sono EUR)"
+                  % ("VERDE " if ok else "ROSSO ", coppia, a, b, scarto))
+            if not ok:
+                rossi += 1
+        else:
+            print("     ----- %s: 17/08 %.4f vs 10/09 %.4f -> scarto %.3f%%"
+                  % (coppia, a, b, scarto))
+            print("            NON conta come rosso: base %s = il"
+                  " numerario," % base)
+            print("            quindi la deriva del cambio passa TUTTA."
+                  " Dichiarato.")
+    # E il CONTRO-ESEMPIO del blocco: se la deriva NON si cancellasse sui
+    # rapporti, il vantaggio strutturale di AUDUSD su GBPUSD -- che e' IL
+    # numero strategico -- si muoverebbe. Si verifica che non si muova.
+    g17, _ = commissione_pip("GBPUSD", CAMBIO_VS_EUR)
+    a17, _ = commissione_pip("AUDUSD", CAMBIO_VS_EUR)
+    g09, _ = commissione_pip("GBPUSD", CAMBIO_VS_EUR_1009)
+    a09, _ = commissione_pip("AUDUSD", CAMBIO_VS_EUR_1009)
+    if None not in (g17, a17, g09, a09):
+        v17 = g17 - a17
+        v09 = g09 - a09
+        sc = 100.0 * abs(v17 - v09) / v17
+        ok = sc <= 1.0
+        print("     %s vantaggio AUDUSD su GBPUSD: 17/08 %.4f vs 10/09"
+              " %.4f -> %.3f%%" % ("VERDE " if ok else "ROSSO ",
+                                   v17, v09, sc))
         if not ok:
             rossi += 1
 
@@ -340,12 +415,12 @@ def riga_pedaggio(coppia, spread_pip, stop_pip, tabella=None):
     return out
 
 
-def stampa(righe):
+def stampa(righe, tabella=None):
     print("")
     print("PEDAGGIO ALL-IN, coppia per coppia")
     print("  commissione = 0,004% del nozionale in valuta BASE, giro")
     print("  completo (= 4,0 unita' base per lotto).")
-    print("  cambi: %s" % DATA_CAMBI)
+    print("  cambi: %s" % data_tabella(tabella))
     print("")
     cap = ("coppia", "spread", "comm", "all-in", "stop", "x", "40x chiede")
     print("  %-8s %8s %8s %8s %8s %8s %11s  verdetto" % cap)
@@ -530,7 +605,7 @@ def main():
     coppie = sorted(set(list(spread.keys()) + list(stop.keys())))
     righe = [riga_pedaggio(c, spread.get(c), stop.get(c), tabella)
              for c in coppie]
-    stampa(righe)
+    stampa(righe, tabella)
     print("COSA QUESTO CONTO NON COPRE: slippage, requote, rifiuti, swap,")
     print("e l'esecuzione della prop vera. Copre spread + commissione.")
     return 0
