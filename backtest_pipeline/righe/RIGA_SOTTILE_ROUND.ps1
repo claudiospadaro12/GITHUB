@@ -177,7 +177,28 @@ $BancoBT = 'C:\MT5_Backtest'
 #   nella riga $PIN, non quello citato in un commento: un commento che
 #   nomina un pin invecchia, il codice no. Segnalato dal cancello.)
 # ---------------------------------------------------------------------
-$PIN = '9cba7a1000b97b346c8028cf43e3c3e1c8529dc2'
+#  OTTAVO GIRO (12/09/2026) -- PIN SPOSTATO IN AVANTI, E DI NUOVO NON
+#  PERCHE' IL CODICE SIA CAMBIATO. Al pin precedente 9cba7a10 i due file
+#  inchiodati qui sotto ci sono gia' e sono IDENTICI AL BYTE: VERIFICATO,
+#  non creduto -- le due impronte $SHA_ROUND e $SHA_WALK sono state
+#  RICALCOLATE sui blob del pin nuovo e coincidono con quelle scritte
+#  qui, quindi non sono state toccate.
+#  Quello che manca a 9cba7a10 sono I QUATTRO FILE PROVA DI r136:
+#      prove\R136a_slatr_U30USD.txt          -- NON ESISTE a 9cba7a10
+#      prove\R136b_primobersaglio_U30USD.txt -- NON ESISTE a 9cba7a10
+#      prove\R136c_parziale_U30USD.txt       -- NON ESISTE a 9cba7a10
+#      prove\R136d_trailing_U30USD.txt       -- NON ESISTE a 9cba7a10
+#  Il driver prende il file prova DALLO STESSO $PIN (-Pin qui sotto):
+#  col pin vecchio i quattro round r136 morirebbero sullo scarico del
+#  file prova, con un 404 che manda a cercare il guasto nella rete.
+#  Il pin nuovo e' 63e10ba9, dove ci sono tutti e quattro (verificato
+#  anche via HTTP: 200 su tutti e quattro).
+#  >>> E I SEI FILE PROVA R132/R133 CI SONO ANCORA: 63e10ba9 e'
+#      DISCENDENTE di 9cba7a10, non un ramo diverso. Le quattro righe di
+#      stanotte NON sono toccate comunque, perche' la coda le pinna a
+#      8027068f, cioe' a una COPIA CONGELATA di questo file che porta
+#      dentro il pin vecchio.
+$PIN = '63e10ba94e89ba63821fd1071b842faf39b506c4'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
