@@ -56,7 +56,7 @@
 #    (risultati_archivio/APERTURE_TRAILING_DAX_NASDAQ.md r.40,
 #     REFERTO_HISTDATA_FATTIBILITA.md r.1132,
 #     ANALISI_CANCELLO_ZERO_EXT_2026-08-25.md r.79, DOW_MOTORE.md).
-#    🔴 NON HO TROVATO LA SUA TABELLA PER SIMBOLO nel repo, e quindi
+#    ATTENZIONE: NON HO TROVATO LA SUA TABELLA PER SIMBOLO nel repo, e quindi
 #    NON SO se F40EUR abbia gia' un'aspettativa misurata li' dentro.
 #    DOW_MOTORE.md riporta di seconda mano 'FASE A: DAX -0,043, CAC
 #    -0,053, IBEX -0,081' -- ma quei numeri sono l'effetto del FILTRO
@@ -119,7 +119,7 @@
 #    F4  COSTO. Lo spread di F40EUR e' [NON MISURATO]:
 #        risultati_archivio/spread_flotta/ ha 3 file su 13 simboli
 #        (D30EUR, NASUSD, U30USD) e F40EUR non c'e'. Quindi R5 su F40EUR
-#        e' ⚪ NON ANCORA MISURATO, non 🟢 e non 🔴.
+#        e' NON ANCORA MISURATO -- ne' verde ne' rosso, e va scritto cosi'.
 #        >>> NESSUNA SEDIA SU F40EUR SI ACCENDE PRIMA CHE QUEL NUMERO
 #            ESISTA. La via piu' corta: ABTG_SpreadOrario su F40EUR con
 #            -PuntiPerIndice 100 (il fattore degli indici, verificato in

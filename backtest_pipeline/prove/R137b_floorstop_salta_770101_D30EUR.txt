@@ -13,7 +13,7 @@
 #    `770101` ABTG_DAX_Apertura_EU D30EUR M5 LONG e' la prima classificata
 #    al SECONDO seggio. I numeri, tutti MISURATI e tutti ricontati da me
 #    sui file grezzi:
-#      n in POSIZIONI: OOS 193 · IS 132  -- CONTATE, non derivate
+#      n in POSIZIONI: OOS 193  -  IS 132  -- CONTATE, non derivate
 #        (risultati_prove/aperture_r47/abtg_trades_ABTG_DAX_Apertura_EU_
 #         D30EUR_772501.csv -> 270 deal = 193 position_id, rapporto
 #         1,3990 ; ..._772503.csv -> 193 deal = 193 position_id, 1,0000)
@@ -42,7 +42,7 @@
 #         data/statements/trades_auto.csv, 7 gambe 23/07->14/08)
 #      stop sulla GEOMETRIA VIVA: 56,1 idx (stesso referto, r.541)
 #      spread D30EUR all'ora modale 08 (19 gambe su 34):
-#        mediana 1,70 idx · p95 2,70 idx · max 12,0
+#        mediana 1,70 idx  -  p95 2,70 idx  -  max 12,0
 #        MISURATO su 30.974.789 tick --
 #        risultati_archivio/spread_flotta/spread_orario_D30EUR.csv r.10
 #      => 71,9/1,70 = 42,3x   56,1/1,70 = 33,0x   71,9/2,70 = 26,6x

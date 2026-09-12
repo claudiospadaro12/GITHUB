@@ -12,11 +12,11 @@
 #    al SECONDO seggio, `770101` ABTG_DAX_Apertura_EU D30EUR M5 LONG e'
 #    l'unico che porta insieme queste quattro cose, tutte MISURATE:
 #      (a) n in POSIZIONI sopra il pavimento dei 150 in OOS:
-#          OOS 193 POSIZIONI  ·  IS 132 POSIZIONI
+#          OOS 193 POSIZIONI   -   IS 132 POSIZIONI
 #          e NON sono derivate da un rapporto: sono CONTATE nei per-trade
 #          risultati_prove/aperture_r47/abtg_trades_ABTG_DAX_Apertura_EU_
 #          D30EUR_{772501,772503}.csv  (270 deal = 193 position_id
-#          distinti, rapporto 1,3990 · 193 deal = 193 position_id,
+#          distinti, rapporto 1,3990  -  193 deal = 193 position_id,
 #          rapporto 1,0000: due configurazioni che differiscono per UNA
 #          manopola, stesse entrate, stesse 193 posizioni)
 #      (b) R1 PIENO E VERIFICATO MANOPOLA PER MANOPOLA: la cella di R47a
@@ -47,7 +47,7 @@
 #  I DUE REQUISITI CHE LE MANCANO, per nome e col numero
 #    R3 FREQUENZA: 0,72-0,73 POSIZIONI/giorno feriale (193/265 in OOS e
 #       132/183 in IS: due finestre indipendenti, stesso numero) contro
-#       un pavimento di 1,00 PER FAMIGLIA (firma 07/09). 🔴 Il '0,97 op/g'
+#       un pavimento di 1,00 PER FAMIGLIA (firma 07/09). ATTENZIONE: Il '0,97 op/g'
 #       del piano v2 conta i DEAL (270/276), non le posizioni.
 #       NON si chiude con questo round: si chiude allargando la FAMIGLIA
 #       a un secondo simbolo europeo (proposta R138, vedi dossier).
