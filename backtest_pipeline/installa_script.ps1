@@ -11,10 +11,38 @@ $RepoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 Write-Host "=== INSTALLO GLI SCRIPT ABTG ===" -ForegroundColor Cyan
 
 # rileva terminale BCM + cartella dati
-$allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
-$cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
-if (-not $cand) { Write-Host "Terminale BCM non trovato." -ForegroundColor Red; exit 1 }
+# ---------------------------------------------------------------------
+#  IL BERSAGLIO (riscritto il 12/09/2026)
+#  Questo script COPIA e RICOMPILA dentro la cartella dati del terminale
+#  che scegli qui. Il bersaglio giusto E' il piccolo 50503392 -- e' il
+#  mandato di questo script: installare nel terminale che Claudio usa a
+#  mano. Quello NON si cambia.
+#  Si cambiano le DUE scorciatoie che stavano qui, e sono difetti veri:
+#   1. il RIPIEGO "*BCM Markets*" ALLARGAVA il bersaglio e prendeva
+#      anche il 100k -V3 (50504263). Un ripiego che allarga il bersaglio
+#      di uno script che RICOMPILA non e' un ripiego: e' un incidente
+#      rimandato. Tolto: se il piccolo non c'e', si muore.
+#   2. "-First 1" SENZA ordinamento vuol dire "quello che il filesystem
+#      ha restituito per primo". Su un insieme trovato per RICERCA non e'
+#      una scelta: e' un SORTEGGIO. Adesso, se ne trova piu' di uno, si
+#      ferma e li stampa -- il modello e' RIGA_R96_APERTURA_USA.ps1:417.
+# ---------------------------------------------------------------------
+$allTerm = @(Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue)
+$candidati = @($allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" })
+if ($candidati.Count -eq 0) {
+  Write-Host "Terminale del piccolo (50503392) non trovato." -ForegroundColor Red
+  Write-Host "  cercato: una cartella *BCM Markets MT5 Terminal* che NON sia *-V3*." -ForegroundColor Red
+  Write-Host "  NON allargo la ricerca a *BCM Markets*: li' dentro c'e' anche il 100k" -ForegroundColor Red
+  Write-Host "  50504263, e questo script COMPILA nel terminale che sceglie." -ForegroundColor Red
+  exit 1
+}
+if ($candidati.Count -gt 1) {
+  Write-Host "AMBIGUO: trovati $($candidati.Count) terminali che corrispondono. Mi fermo." -ForegroundColor Red
+  foreach ($c in $candidati) { Write-Host ("  " + $c.DirectoryName) -ForegroundColor Red }
+  Write-Host "  Un '-First 1' qui sarebbe un sorteggio, e questo script RICOMPILA." -ForegroundColor Red
+  exit 1
+}
+$cand = $candidati[0]
 $MetaEditor = Join-Path $cand.DirectoryName "metaeditor64.exe"
 $instDir = $cand.DirectoryName
 $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"

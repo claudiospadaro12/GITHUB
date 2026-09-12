@@ -19,8 +19,8 @@
 #  con una gestione che affossa anche il motore che funziona.
 #
 #  Qui si rifa' con la GESTIONE BUONA, quella validata sul Dow:
-#     TP 1,5R · niente parziale · niente breakeven · trailing a base
-#     candela M5 · rischio 1% · stop floor 500 punti
+#     TP 1,5R  niente parziale  niente breakeven  trailing a base
+#     candela M5  rischio 1%  stop floor 500 punti
 #  identica a quella di aperture_trailing.ps1, cosi' i numeri sono
 #  CONFRONTABILI con il riferimento gia' in archivio.
 #
@@ -36,12 +36,12 @@
 #
 #  48 pass a tick reali (36 con -SoloLive, che salta il Dow).
 #
-#  ⚠️ Il Dow serve da CONTROLLO: e' l'unico mercato dove il breakout
+#   Il Dow serve da CONTROLLO: e' l'unico mercato dove il breakout
 #     funziona davvero (PF 1,371 validato in walk-forward). Se RETEST o
 #     FADE battono il breakout anche li', vuol dire molto di piu' che
 #     batterlo dove il breakout gia' non va da nessuna parte.
 #
-#  ⚠️ NOTA sul FADE, importante: il suo stop NON usa InpSLMode. Usa
+#   NOTA sul FADE, importante: il suo stop NON usa InpSLMode. Usa
 #     AtrValue()*InpAtrSlMult (qui 1,5) con floor a InpMinStopPts.
 #     E AtrValue() legge l'ATR sul **TIMEFRAME DEL GRAFICO**:
 #         gAtrH = iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt);
@@ -96,7 +96,21 @@ if(-not $Terminal){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
   else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
-  if(-not $c){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*"}|Select -First 1}
+  # 12/09/2026: TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO.
+  # Qui c'era: se il selettore stretto non ha trovato niente, cerca
+  # "*BCM Markets*" e prendi il PRIMO. Due difetti in una riga sola:
+  #  - "*BCM Markets*" comprende anche il 100k -V3 (50504263);
+  #  - "-First 1" su un insieme trovato per RICERCA non e' una scelta,
+  #    e' un SORTEGGIO: nessun ordinamento, cioe' "quello che il
+  #    filesystem ha restituito per primo".
+  # E questo script SCRIVE e RICOMPILA dentro il terminale che sceglie.
+  # Il bersaglio non si allarga mai da solo: si muore.
+  if(-not $c){
+    Write-Host "Terminale non trovato col selettore stretto, e NON allargo la ricerca." -ForegroundColor Red
+    Write-Host "  Il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263)," -ForegroundColor Red
+    Write-Host "  e questo script scrive e compila dentro il terminale che sceglie." -ForegroundColor Red
+    exit 1
+  }
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
 if($Terminal -and -not $DataFolder){

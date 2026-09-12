@@ -20,7 +20,21 @@ if(-not $Terminal){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
   else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
-  if(-not $c){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*"}|Select -First 1}
+  # 12/09/2026: TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO.
+  # Qui c'era: se il selettore stretto non ha trovato niente, cerca
+  # "*BCM Markets*" e prendi il PRIMO. Due difetti in una riga sola:
+  #  - "*BCM Markets*" comprende anche il 100k -V3 (50504263);
+  #  - "-First 1" su un insieme trovato per RICERCA non e' una scelta,
+  #    e' un SORTEGGIO: nessun ordinamento, cioe' "quello che il
+  #    filesystem ha restituito per primo".
+  # E questo script SCRIVE e RICOMPILA dentro il terminale che sceglie.
+  # Il bersaglio non si allarga mai da solo: si muore.
+  if(-not $c){
+    Write-Host "Terminale non trovato col selettore stretto, e NON allargo la ricerca." -ForegroundColor Red
+    Write-Host "  Il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263)," -ForegroundColor Red
+    Write-Host "  e questo script scrive e compila dentro il terminale che sceglie." -ForegroundColor Red
+    exit 1
+  }
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
 if($Terminal -and -not $DataFolder){

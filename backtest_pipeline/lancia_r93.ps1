@@ -321,7 +321,23 @@ if (Test-Path $sostaAnt) { Remove-Item -LiteralPath $sostaAnt -Recurse -Force -E
 # =====================================================================
 $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
 $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-if (-not $cand) { $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+# 12/09/2026: TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO.
+# Qui c'era: se il selettore stretto non trova niente, cerca "*BCM Markets*"
+# e prendi il PRIMO. Due difetti in una riga:
+#  - "*BCM Markets*" comprende anche il 100k -V3 (50504263);
+#  - "-First 1" su un insieme trovato per RICERCA non e' una scelta, e' un
+#    SORTEGGIO (nessun ordinamento: "quello che il filesystem ha dato per
+#    primo").
+# E questo script COMPILA dentro il terminale che sceglie. Adesso, se il
+# selettore stretto non trova niente, si MUORE: il bersaglio non si allarga
+# mai da solo.
+if (-not $cand) {
+  Write-Host "Terminale non trovato col selettore stretto, e NON allargo la ricerca." -ForegroundColor Red
+  Write-Host "  Il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263)," -ForegroundColor Red
+  Write-Host "  e questo script compila dentro il terminale che sceglie." -ForegroundColor Red
+  Write-Host "  Nomina il terminale a mano, oppure passa il banco C:\MT5_Backtest." -ForegroundColor Red
+  exit 1
+}
 if (-not $cand) { Muori "terminale BCM non trovato." }
 $instDir = $cand.DirectoryName
 $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"

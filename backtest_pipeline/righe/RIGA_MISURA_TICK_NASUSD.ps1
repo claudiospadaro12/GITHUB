@@ -174,7 +174,22 @@ Titolo "F3 - trova il CSV prodotto"
 function TrovaCsvDati(){
   $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*" } | Select-Object -First 1
-  if(-not $cand){ $cand = $allTerm | Where-Object { $_.DirectoryName -like "*BCM Markets*" } | Select-Object -First 1 }
+  # 12/09/2026: TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO.
+  # Qui c'era: se il selettore stretto non ha trovato niente, cerca
+  # "*BCM Markets*" e prendi il PRIMO. Due difetti in una riga sola:
+  #  - "*BCM Markets*" comprende anche il 100k -V3 (50504263);
+  #  - "-First 1" su un insieme trovato per RICERCA non e' una scelta, e'
+  #    un SORTEGGIO: nessun ordinamento, cioe' "quello che il filesystem ha
+  #    restituito per primo".
+  # E questo script SCRIVE e RICOMPILA dentro il terminale che sceglie.
+  # Adesso il bersaglio non si allarga mai da solo: si muore.
+  if (-not $cand) {
+    Write-Host "Terminale non trovato col selettore stretto, e NON allargo la ricerca." -ForegroundColor Red
+    Write-Host "  Il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263)," -ForegroundColor Red
+    Write-Host "  e questo script scrive e compila dentro il terminale che sceglie." -ForegroundColor Red
+    Write-Host "  Nomina il terminale a mano, oppure passa il banco C:\MT5_Backtest." -ForegroundColor Red
+    exit 1
+  }
   if(-not $cand){ return $null }
   $instDir = $cand.DirectoryName
   $termRoot = Join-Path $env:APPDATA "MetaQuotes\Terminal"

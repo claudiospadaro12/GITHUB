@@ -2,11 +2,11 @@
 #  walkforward_aperture.ps1  --  il passaggio che separa un edge dal caso
 #
 #  Il 05/08 sono uscite tre piste. Una e' gia' caduta:
-#    ❌ OPENCONFIRM   una cella positiva su otto, cambia segno con
+#     OPENCONFIRM   una cella positiva su otto, cambia segno con
 #                     timeframe, volumi e mercato. Bocciato.
-#    🟡 RANGE 35 min  gradiente monotono su 5 valori, 4/4 in utile su
+#     RANGE 35 min  gradiente monotono su 5 valori, 4/4 in utile su
 #                     entrambi i mercati, campione pieno (420 trade)
-#    🟡 DELAYED+vol   PF 1,197 e 1,200 su due mercati, ma 120 e 99 trade
+#     DELAYED+vol   PF 1,197 e 1,200 su due mercati, ma 120 e 99 trade
 #
 #  Le due superstiti hanno lo stesso identico difetto: sono **il migliore
 #  di N combinazioni sullo stesso periodo**. E' esattamente il modo in cui
@@ -18,7 +18,7 @@
 #     IS   2024.09.26 -> 2025.06.30   (9,1 mesi: qui si sceglie - BCM non ha nulla prima)
 #     OOS  2025.07.01 -> 2026.06.30   (12 mesi: qui si verifica)
 #
-#  ⚠️ LA REGOLA, e vale piu' del test: **l'OOS non si guarda per
+#   LA REGOLA, e vale piu' del test: **l'OOS non si guarda per
 #     scegliere.** Si sceglie sull'IS, poi si va a vedere se quella
 #     scelta regge. Se si sceglie guardando l'OOS, l'OOS diventa un
 #     secondo IS e il test non vale piu' niente.
@@ -40,7 +40,7 @@
 #           ESATTO del livello: su un breakout e' ottimista per
 #           costruzione, perche' nella realta' si entra peggio.
 #           InpSlippagePts peggiora l'entry di N punti.
-#           ⚠️ Funziona SOLO sul breakout: DELAYED e OPENCONFIRM entrano
+#            Funziona SOLO sul breakout: DELAYED e OPENCONFIRM entrano
 #           a mercato (gTrade.Buy), pagano gia' ask/bid e quindi il tester
 #           li simula onestamente - uno slippage extra su un market order
 #           non e' nemmeno riproducibile dall'EA. Ma va bene cosi': e' il
@@ -87,8 +87,8 @@
 #           16 pass x 2 finestre x 2 mercati = 64 pass
 #
 #  388 pass a tick reali in tutto. E' roba da notte piena, una fase alla volta.
-#  (-SoloGeometria 80 · -SoloMotore 48 · -SoloSlippage 40 · -SoloRetest 80 ·
-#   -SoloRiempimento 40 · -SoloGestione 36 · -SoloDrawdown 64)
+#  (-SoloGeometria 80  -SoloMotore 48  -SoloSlippage 40  -SoloRetest 80 
+#   -SoloRiempimento 40  -SoloGestione 36  -SoloDrawdown 64)
 #
 #  Gestione delle fasi A-E: TP 1,5R, trailing base candela M5, niente
 #  parziale ne' BE, rischio 1%. NON e' quella accesa in forward - vedi
@@ -187,7 +187,7 @@ $Fasi=@(
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpRangeMinutes=15||5||10||45||Y`nInpBufferPoints=300||100||200||700||Y" },
   # FASE E - IL RIEMPIMENTO REALISTICO DEL RETEST (C11, 06/08).
   #
-  # ⚠️ NON e' un test di slippage, ed e' importante capire perche'.
+  #  NON e' un test di slippage, ed e' importante capire perche'.
   # InpSlippagePts esiste solo dentro TryPlaceBreakout (righe 709 e 733):
   # sul retest non ha NESSUN effetto. E ha senso: un ordine LIMIT non puo'
   # essere riempito peggio del suo prezzo. Lo slippage e' un problema dello
@@ -204,7 +204,7 @@ $Fasi=@(
   # Offset piu' grande = si pretende un ritorno piu' profondo = MENO
   # riempimenti ma a prezzo migliore. E' esattamente il compromesso vero.
   #
-  # ⚠️ Da tenere presente leggendo i risultati: l'offset non e' un puro
+  #  Da tenere presente leggendo i risultati: l'offset non e' un puro
   # costo. Cambiando l'entry cambia la distanza dallo stop, quindi cambiano
   # il lotto e la distanza del TP. Non ci si aspetta un degrado monotono
   # come sul breakout: qui esiste un ottimo, e la domanda e' se l'altopiano
@@ -227,7 +227,7 @@ $Fasi=@(
   # Portati ai valori ACCESI anche MinStopPts (0, non 500) e SkipIfTight
   # (true, non false): sono due delle sei divergenze dell'audit.
   #
-  # ⚠️ PREVISIONE DA VERIFICARE PRIMA DI LEGGERE I PROFITTI. Alla riga 1518
+  #  PREVISIONE DA VERIFICARE PRIMA DI LEGGERE I PROFITTI. Alla riga 1518
   # il blocco della parziale gira solo se InpTP1_ClosePct > 0, e il
   # breakeven sta DENTRO quel blocco. Quindi con parziale a 0 il flag BE
   # non puo' fare niente, e queste DUE coppie devono venire identiche:
@@ -252,7 +252,7 @@ $Fasi=@(
   # largo lo stop. Rischio fisso 1%: il rischio e' un moltiplicatore lineare
   # (FASE G: profitto x2.03, DD x1.95) e non insegna niente sul DD.
   #
-  # ⚠️ Da leggere nelle colonne NUOVE, non nel profitto: 'Peggior Giornata %'
+  #  Da leggere nelle colonne NUOVE, non nel profitto: 'Peggior Giornata %'
   # e' la metrica che chiude un conto prop, e prima di oggi non esisteva.
   @{ Tag="H_drawdown";  Pass=16; Win=$WF
      Sweep="InpEntryMode=2||2||0||2||N`nInpUseVolumeFilter=0||0||0||0||N`nInpSlippagePts=0||0||0||0||N`nInpBufferPoints=500||500||0||500||N`nInpRangeMinutes=35||35||0||35||N`nInpRiskPercent=1.0||1.0||0||1.0||N`nInpMinStopPts=0||0||0||0||N`nInpSkipIfTight=1||1||0||1||N`nInpTP1_R=1.0||1.0||0||1.0||N`nInpTP1_ClosePct=50||50||0||50||N`nInpBreakevenAtTP1=1||1||0||1||N`nInpSLMode=1||1||0||1||N`nInpAtrSlMult=1.0||1.0||0.5||2.5||Y`nInpRetestOffsetPts=0||0||100||300||Y" },
@@ -277,7 +277,7 @@ $Fasi=@(
   # InpTrailTF e' un ENUM_TIMEFRAMES. Sugli enum MT5 ignora start||step||stop e
   # spazzola TUTTI i valori -- MA SOLO SE LA RIGA E' NON DEGENERE.
   #
-  # ⚠️ 07/08, sbagliato al primo colpo: avevo scritto "5||5||0||5||Y", cioe'
+  #  07/08, sbagliato al primo colpo: avevo scritto "5||5||0||5||Y", cioe'
   # start=stop e step=0. MT5 non ha prodotto NESSUN pass e i quattro CSV sono
   # usciti vuoti. La forma che funziona e' quella della FASE B
   # ("InpEntryMode=0||0||5||5||Y"): due estremi diversi e step != 0.
@@ -318,7 +318,7 @@ $Fasi=@(
   # ================================================================
   # FASE M - IL LATO DEL MERCATO, E SE IL 35 E' UN ALTOPIANO.  07/08/2026.
   #
-  # ⚠️ IPOTESI E CRITERI SCRITTI PRIMA DI GUARDARE I NUMERI.
+  #  IPOTESI E CRITERI SCRITTI PRIMA DI GUARDARE I NUMERI.
   #
   # Contesto: sull'apertura Nasdaq abbiamo gia' fatto SEI test e falliti tutti
   # e sei. Continuare a provare configurazioni finche' una non "passa" e'
@@ -378,7 +378,21 @@ if(-not $Terminal){
   $allTerm=Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
   if($UseSpare){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*" -and $_.DirectoryName -like "*-V3*"}|Select -First 1}
   else{$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets MT5 Terminal*" -and $_.DirectoryName -notlike "*-V3*"}|Select -First 1}
-  if(-not $c){$c=$allTerm|?{$_.DirectoryName -like "*BCM Markets*"}|Select -First 1}
+  # 12/09/2026: TOLTO IL RIPIEGO CHE ALLARGAVA IL BERSAGLIO.
+  # Qui c'era: se il selettore stretto non ha trovato niente, cerca
+  # "*BCM Markets*" e prendi il PRIMO. Due difetti in una riga sola:
+  #  - "*BCM Markets*" comprende anche il 100k -V3 (50504263);
+  #  - "-First 1" su un insieme trovato per RICERCA non e' una scelta,
+  #    e' un SORTEGGIO: nessun ordinamento, cioe' "quello che il
+  #    filesystem ha restituito per primo".
+  # E questo script SCRIVE e RICOMPILA dentro il terminale che sceglie.
+  # Il bersaglio non si allarga mai da solo: si muore.
+  if(-not $c){
+    Write-Host "Terminale non trovato col selettore stretto, e NON allargo la ricerca." -ForegroundColor Red
+    Write-Host "  Il ripiego '*BCM Markets*' comprendeva anche il 100k -V3 (50504263)," -ForegroundColor Red
+    Write-Host "  e questo script scrive e compila dentro il terminale che sceglie." -ForegroundColor Red
+    exit 1
+  }
   if($c){$Terminal=$c.FullName; $MetaEditor=Join-Path $c.DirectoryName "metaeditor64.exe"}
 }
 if($Terminal -and -not $DataFolder){

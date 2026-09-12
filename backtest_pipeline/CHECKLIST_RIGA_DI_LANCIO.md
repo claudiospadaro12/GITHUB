@@ -14286,3 +14286,48 @@ peggio di non averlo*, perche' trasforma un'opinione in una misura. Prima di
 consegnare un audit, la domanda e' **"se cercassi la forma invece del senso,
 cosa mi sfuggirebbe?"** — ed e' la domanda che quello strumento era nato per
 fare.
+
+---
+
+## 🛑 CLASSE 246-bis (12/09/2026) — IL RIPIEGO CHE **ALLARGA** IL BERSAGLIO
+
+**Il fatto.** 84 script che **scrivono e RICOMPILANO** dentro la cartella dati
+del terminale scelto portavano questa riga:
+
+    if(-not $c){ $c = $allTerm | ?{ $_.DirectoryName -like "*BCM Markets*" } | Select -First 1 }
+
+Due difetti in **una riga sola**:
+1. 🔴 `"*BCM Markets*"` **comprende anche il 100k `-V3` (50504263)**: un ripiego
+   che **allarga** il bersaglio di uno script che ricompila non e' un ripiego,
+   e' **un incidente rimandato**;
+2. 🔴 `-First 1` **senza ordinamento** vuol dire *"quello che il filesystem ha
+   restituito per primo"*. 👉 **Su un insieme trovato per RICERCA non e' una
+   scelta: e' un SORTEGGIO.**
+
+✅ **Riparati tutti e 84**: se il selettore stretto non trova niente, **si
+muore**. Il bersaglio non si allarga mai da solo. Su `aggiorna_ea.ps1` e
+`installa_script.ps1` (che puntano al piccolo **per mandato**) e' stato tolto
+anche il `-First 1`: se i candidati sono piu' di uno **si ferma e li stampa** —
+il modello e' `RIGA_R96_APERTURA_USA.ps1:417`.
+
+⚠️ **La riga `-UseSpare` NON e' stata toccata**: nomina `*-V3*`
+**esplicitamente**, quindi e' una **richiesta** di chi ha scritto la riga, non
+un ripiego. Scegliere io al posto suo sarebbe lo stesso difetto visto
+dall'altra parte.
+
+### 🔎 E LA LEZIONE, che e' di nuovo la 244 — QUATTRO volte in due giorni
+Il rilevatore l'ho dovuto riscrivere **tre volte**, e ogni volta perche'
+misuravo **la forma**:
+1. ancorato a `$cand` → **ha perso** i file che usano `$c` (nome diverso);
+2. con `Where-Object`/`Select-Object` per esteso → **ha perso 35 file** che
+   usano gli **alias** `?{}` e `Select`;
+3. e la prima misura, "40 restanti", era un **falso positivo**: contava la riga
+   di `-UseSpare`, che e' legittima.
+
+📌 **La regola:** un rilevatore di sicurezza si prova **contro le varianti che
+il repo usa davvero** — nomi di variabile diversi, alias dei cmdlet, spaziatura
+diversa — **non contro la forma che ho in testa**. E un numero che cala
+(84 → 40 → 0) va spiegato: se non so **perche'** e' calato, non e' una misura.
+
+**Collaudo: 84 file, parser PowerShell vero, 0 errori di sintassi, 0 byte
+non-ASCII.** Misura finale del ripiego che allarga: **0 file**.
