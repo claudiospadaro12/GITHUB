@@ -449,4 +449,83 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #  Referto: report/EMA200_IS_IN_CODA_2026-09-12.md
 # =====================================================================
 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_02_pertrade_IS.txt -Etichetta cemad02 -Modello 4 -Deposito 100000
+# =====================================================================
+#  SETTE ROUND NUOVI -- 12/09/2026, pin 0c38419f (QUATTORDICESIMO GIRO)
+# ---------------------------------------------------------------------
+#  STANNO QUI, PRIMA DI CODA_12, E IL MOTIVO E' MISURATO.
+#  CODA_12 conta i per-trade che trova in Common\Files, e li conta di
+#  TUTTI i round girati PRIMA di lei -- lo dice anche la testata qui
+#  sopra: "Messa ultima, CODA_12 vede i per-trade di TUTTI i round".
+#  Messi prima, questi sette si portano a casa GRATIS il conteggio in
+#  POSIZIONI, che e' l'unita' dei cancelli di casa (classe 226: la
+#  colonna 'Trades' conta i DEAL di uscita, non le posizioni). Messi
+#  dopo, CODA_12 non li vede e quel numero costa un'altra notte.
+#  Il beneficio dell'ordine PER LA LETTURA resta ZERO (classe 274).
+#
+#  QUANTO VALE DAVVERO, ROUND PER ROUND -- e NON e' uguale per tutti.
+#  Lo dice il sorgente (ABTG_DAX_Apertura_EU.mq5 r.2237-2239): "in
+#  ottimizzazione ogni pass sovrascrive il file del proprio magic:
+#  usarlo su run singoli / magic-sweep, non sulle griglie larghe".
+#    r138a  ASSE = InpMagic, cioe' ESATTAMENTE il magic-sweep: DUE file
+#           distinti, quindi CODA_12 fa il confronto dei GEMELLI (il suo
+#           cancello) E da' il conteggio in POSIZIONI di F40EUR, che e'
+#           il criterio F1 del round e che il file prova dichiarava
+#           [NON MISURATO] "anche dopo la corsa". Qui si chiude GRATIS.
+#    r139c  primo per-trade in assoluto di ABTG_FiboH4_Multi: misura il
+#           fattore deal/posizione che il file prova dichiara [INFERITO]
+#           a ~2. Oggi quel numero non esiste da nessuna parte.
+#    r139a/b  fattore deal/posizione di EMA200 sul FOREX H4. Il 2,0117
+#           e' misurato SOLO sul Dow: questa e' un'altra coppia.
+#    r137a/b/c  asse a magic FISSO: i 14 pass si sovrascrivono e resta
+#           l'ULTIMO. Valore LIMITATO, e va detto: NON e' il conteggio
+#           della cella viva.
+#  E LA GAMBA CHE SOPRAVVIVE E' L'OOS, non l'IS: walkforward_generico
+#  r.922-924 costruisce $WF = (IS, OOS) e r.1621 cicla in quell'ordine,
+#  quindi l'ultima scrittura e' quella dell'OOS. Per r138a e' la gamba
+#  GIUSTA (F1 e' un criterio OOS). Chi legge non deve dedurlo: sta qui.
+#
+#  L'ORDINE FRA I SETTE: r137c PER PRIMO, perche' e' IL CANCELLO di
+#  riproduzione del gruppo. La sua cella InpTP1_ClosePct=50 e' la cella
+#  VIVA di 770101 e deve tornare 175/1,12634/5,4362 in IS e
+#  270/1,39709/7,2328 in OOS. Se r137c NON riproduce, r137a e r137b NON
+#  SI LEGGONO: vorrebbe dire che il binario di oggi non e' quello di
+#  R47, e quello va in cima al referto. Costa 4 pass su 58.
+#  I tre a finestra LUNGA (r139a/b su 16,5 anni, r139c su 27,5) stanno
+#  ULTIMI di proposito: la stima T = 0,6 + 0,077 x 58 = 5,07 min e'
+#  calibrata su pass di INDICI a 21 mesi, e su 27 anni di H4 con modello
+#  OHLC M1 quel 0,077 e' [NON MISURATO]. Se la notte finisce presto si
+#  perde lo SCREENING, non il cancello della seconda sedia.
+#  IL PREZZO DICHIARATO: la catena del runner non ha NESSUN timeout. Se
+#  r139c si piantasse, CODA_12 non girerebbe. Accettato, perche' CODA_12
+#  e' SOLA LETTURA e si rilancia quando si vuole, mentre un round perso
+#  costa una notte intera.
+#
+#  MODELLO -- classe 273, pagata TRE volte il 12/09. Il -Modello NON sta
+#  nel file prova: arriva DA QUESTA RIGA. Verificato uno per uno che
+#  combaci col BANCO dichiarato DENTRO ogni file:
+#    r137a/b/c, r138a -> -Modello 4 (TICK REALI)  -Deposito 100000
+#    r139a/b, r139c   -> -Modello 1 (OHLC M1)     -Deposito 10000
+#  I tre a Modello 1 NON sono una scorciatoia: il pavimento del TICK sul
+#  forex BCM e' 2024.07.05 MISURATO, e su 16-27 anni i tick NON
+#  ESISTONO. Sono SCREENING dichiarato, e nessuno dei tre promuove
+#  niente -- lo scrivono da soli nelle loro soglie (S6 / S7 / F6).
+#
+#  FINESTRE, RICAVATE ESEGUENDO IL DRIVER SCARICATO DA raw CON
+#  -SoloControllo (non leggendo i commenti) -- classe 278:
+#    r137a/b/c, r138a  IS 2024.09.26-2025.06.09  OOS 2025.06.10-2026.06.30
+#    r139a/b           IS 2010.01.01-2016.08.06  OOS 2016.08.07-2026.06.30
+#    r139c             IS 1999.01.04-2010.01.01  OOS 2010.01.02-2026.06.30
+#  Tutte e sette con FrazioneIS 0.40 (default del driver: nessuno dei
+#  sette porta '@FRAZIONEIS', che stanotte e' ancora sotto canarino).
+#
+#  COME SI LEGGE DOMATTINA: report/SETTE_IN_CODA_2026-09-12.md
+# =====================================================================
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137c_parziale_770101_D30EUR.txt -Etichetta r137c -Modello 4 -Deposito 100000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137a_floorstop_allarga_770101_D30EUR.txt -Etichetta r137a -Modello 4 -Deposito 100000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137b_floorstop_salta_770101_D30EUR.txt -Etichetta r137b -Modello 4 -Deposito 100000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R138a_gemello_F40EUR_770101.txt -Etichetta r138a -Modello 4 -Deposito 100000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139a_EMA200_AUDJPY_H4_LS.txt -Etichetta r139a -Modello 1 -Deposito 10000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139b_EMA200_GBPUSD_H4_LS.txt -Etichetta r139b -Modello 1 -Deposito 10000
+0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
+
 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
