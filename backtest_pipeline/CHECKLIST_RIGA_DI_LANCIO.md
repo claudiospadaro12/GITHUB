@@ -15245,3 +15245,188 @@ stesso insieme **perche' hanno lo stesso numero**.
 >    tesi regge; **era il numero a essere gonfiato del 27%** — e un numero
 >    gonfiato in una riga che va a Claudio costa la fiducia negli altri
 >    numeri della stessa pagina, che erano giusti.
+
+---
+
+## 262. 🐤 IL CANARINO CHE SBLOCCA UN BLOCCO **MISURANDO UN'ALTRA VARIABILE**: la manopola dell'EA al posto della riga dell'`.ini` (12/09/2026)
+
+**Il caso vero**, preso dal cancello di giudizio sul pacchetto `EMA200` Dow.
+
+In casa c'e' un blocco dichiarato, e il driver se lo scrive da solo
+(`walkforward_generico.ps1` r.180-193, parametro `-Spread`):
+
+> _"ATTENZIONE, NON MISURATO: a Modello 4 (tick reali) MT5 prende bid/ask dai
+> tick e non e' detto che onori questa riga. Prima di leggere una scala di
+> stress serve il canarino: **stesso EA con uno spread ASSURDO deve dare numeri
+> DIVERSI**. Se sono identici, la riga e' ignorata e la scala a tick reali NON
+> E' ESEGUIBILE."_
+
+Il file `prove/COLLAUDO_EMADOW_00_canarino_spread.txt` si chiama canarino, e il
+referto lo mette come **cancello della PROVA A** (*"la prova 01 si lancia SOLO
+se il canarino dice SI"*). 🔴 **Ma il suo unico asse e' `InpMaxSpread`**, cioe'
+il **filtro interno dell'EA** che legge `SymbolInfoInteger(SYMBOL_SPREAD)`
+(`ABTG_EMA200.mq5` r.507, chiamato al r.325). E gira **senza `-Spread`**, cioe'
+con la riga `Spread` dell'`.ini` **non scritta affatto**.
+
+**Le due domande sono diverse, e nessun ramo del file risponde a quella giusta:**
+
+| domanda | chi la pone | cosa varia | il file 00 la misura? |
+|---|---|---|---|
+| il tester fa vedere all'EA uno spread **variabile**? | nessuno | `InpMaxSpread` | ✅ si |
+| MT5 **onora** `Spread=NNN` dell'`.ini` a Modello 4? | il blocco R118 + il driver | la riga `Spread=` | 🔴 **no, mai toccata** |
+
+E i due esiti scritti nel file concludono entrambi sulla domanda sbagliata:
+- ramo **(A)** *"n si muove ⇒ IL TESTER PORTA LO SPREAD VERO ⇒ la PROVA A si
+  puo' fare"*: **non segue**. Che lo spread dei tick vari non dice niente su
+  cosa faccia un `Spread=238` scritto sopra.
+- ramo **(B)** *"n non si muove ⇒ la PROVA A a Modello 4 e' MORTA"*: **puo'
+  voler dire l'esatto contrario**. Uno spread costante e' proprio la firma di
+  una riga `Spread=` **onorata**: in quel caso la PROVA A e' **viva**.
+
+🧨 **Perche' e' peggio di un canarino vacuo (classe 179) e di una banda che non
+discrimina (classe 178):** qui il discriminante e' **nitido** — i due rami
+danno numeri clamorosamente diversi e falsificabili. Discrimina benissimo. 🔴
+**Discrimina la cosa sbagliata.** E un canarino che discrimina bene ha
+esattamente l'aspetto di un canarino buono: nessun controllo di plausibilita'
+lo ferma, e il suo PASS **autorizza** la scala che doveva proteggere.
+
+> ### 🔴 LA REGOLA
+> 1. **Un canarino si scrive citando la VARIABILE del blocco, non l'argomento
+>    del blocco.** Si copia la frase che descrive il blocco e si sottolinea il
+>    soggetto: se il blocco dice *"non sappiamo se MT5 onori **la riga
+>    `Spread=` dell'`.ini`**"*, l'asse del canarino **e'** quella riga. Se
+>    l'asse e' un'altra cosa, il file non e' il canarino di quel blocco —
+>    qualunque cosa misuri.
+> 2. **Test di appartenenza, da fare a matita prima di scrivere il file**:
+>    *"se il canarino esce (A), il blocco si puo' cancellare? se esce (B), il
+>    blocco diventa un verdetto?"* Se la risposta a una delle due e' **"non lo
+>    so"**, il canarino non e' collegato al blocco.
+> 3. **L'incaglio non si aggira con una variabile piu' comoda da muovere.**
+>    `InpMaxSpread` era comoda (l'EA ce l'ha gia', 0 righe di codice); la riga
+>    `Spread=` richiede `-Spread`, quattro corse e la lettura della cifra. La
+>    comodita' e' il segnale: **il canarino si scrive sulla variabile
+>    scomoda.**
+> 4. ✅ **E la misura sbagliata non si butta: si RINOMINA.** L'asse
+>    `InpMaxSpread` e' una misura utile e sua — e' la **riparazione candidata**
+>    del cancello del costo. Va tenuta con il suo nome vero e **staccata dal
+>    ruolo di cancello**.
+
+---
+
+## 263. 📐 IL GATE DI IDENTITA' DICHIARATO CON UNA COPERTURA **PIU' ALTA DELL'UNIVERSO**: `46 chiavi su 46` dove le chiavi sono **42** (12/09/2026)
+
+**Il caso vero.** Il collaudo `EMA200` Dow apre con il suo gate piu' importante
+— quello che dice *"si sta collaudando la cella che gira DAVVERO"*:
+
+> _"il `.set` in campo e `R112_00_metro.txt` coincidono su **46 chiavi su 46**;
+> l'unico delta e' `InpMagic`."_
+
+La frase e' ripetuta **in testa a tutti e sette i file prova** (`G0-A`), nei
+criteri congelati e nel referto (che altrove scrive *"le altre **45** chiavi
+copiate identiche"*).
+
+🔴 **Misurato a macchina, sui tre artefatti:**
+
+| artefatto | chiavi |
+|---|---:|
+| `input` dichiarati in `mql5/Experts/ABTG_EMA200.mq5` | **44** |
+| `Inp*` nel `.set` vivo `sedia_ABTG_EMA200_771531.set` | **42** |
+| `Inp*` in `prove/R112_00_metro.txt` | **43** |
+| intersezione `.set` ∩ prova | **42** — identiche **41**, delta **solo `InpMagic`** |
+| non coperte dal `.set` (prendono il default compilato) | `InpUsaGuardian` · `InpLogImbuto` |
+
+👉 **Non esiste nessun conteggio che faccia 46**: 46 e' piu' grande
+dell'universo (44). 🟢 **E la conclusione del gate e' comunque VERA** — l'ho
+riverificata da zero: 41 identiche su 42 comuni, unico delta `InpMagic`. Era il
+**numero** a essere gonfiato, non la tesi.
+
+🧨 **Perche' e' una classe e non una svista.** Un numero **sopra l'universo** e'
+la firma di un conteggio **mai eseguito**: chi conta davvero non puo' arrivare a
+46, perche' finisce le chiavi a 44. Quindi `46/46` non e' un conto sbagliato, e'
+un conto **assente** travestito da conto fatto — e la forma `N su N` e'
+proprio quella che **spegne il sospetto**, perche' un numero uguale a se stesso
+sembra una tautologia verificata. Il costo e' asimmetrico: il gate G0-A e'
+l'unica cosa che collega il collaudo alla sedia viva, e sette file prova lo
+citano come **fatto verificato**.
+
+> ### 🔴 LA REGOLA
+> 1. **Ogni copertura si scrive come frazione di un universo NOMINATO e
+>    CONTATO**: *"41 identiche su 42 chiavi comuni; l'EA ha 44 input; 2 non
+>    coperti e prendono il default"*. Mai `N su N` con un solo numero.
+> 2. 🔢 **Controllo di capienza, prima di consegnare**: il numeratore e il
+>    denominatore devono essere **<= al conteggio dell'oggetto piu' grande
+>    citato**. Se la copertura supera l'universo, **il conteggio non e' stato
+>    fatto**: non si corregge, si rifa'.
+> 3. **Le chiavi NON coperte si elencano PER NOME**, con il valore di default
+>    che prendono (regola dell'insieme per nome, classe 180). *"46 su 46"* dice
+>    implicitamente *"zero scoperte"*, che qui e' falso: sono due.
+> 4. 📌 **Parente di 259 e 261** (numero giusto sull'oggetto sbagliato / numero
+>    dell'insieme largo per l'azione stretta). Qui e' il grado successivo: il
+>    numero **non e' di nessun oggetto**.
+
+---
+
+## 264. 🧮 `CELLE x 2 GEMELLI` DOVE IL GEMELLO NON C'E': la formula sbagliata che **torna giusta per caso** perche' anche le GAMBE sono due (12/09/2026)
+
+**Il caso vero.** I sette file prova del collaudo `EMA200` Dow chiudono ognuno
+con una riga di costo. Quattro di loro (`00`, `03`, `04`, `05`) hanno
+`InpMagic` **fisso** — nessun gemello — e scrivono comunque:
+
+```
+#  QUANTO COSTA: 5 celle x 2 gemelli = 10 passate per gamba (IS + OOS).
+#  QUANTO COSTA: 7 celle x 2 gemelli = 14 passate per gamba (IS + OOS).
+```
+
+🟢 **E il numero finale e' GIUSTO**: 5 celle × 2 **gambe** = 10, 7 × 2 = 14. Il
+`2` c'e' e vale 2 — ma e' il 2 delle **gambe IS+OOS**, non quello dei
+**gemelli**. Due errori che si annullano (gemello inesistente contato + gamba
+reale non contata), e un numero verde in fondo.
+
+🔴 **Poi arriva il file dove i due `2` esistono entrambi.** In `01` e `06`
+`InpMagic=766610||766610||1||766611||Y` — il gemello **c'e'** — e sopra ci sono
+**4 corse del driver** (`-Spread 0/238/285/380`, `-Ritardo 0/50/100/500`). Il
+file scrive *"1 cella × 2 gemelli × 4 valori = **8 passate per gamba**"*, che e'
+corretto, e il referto riporta **8** nella colonna del totale. 👉 **Sono 16**:
+8 per gamba × 2 gambe. **Ogni file con gemello E' contato per metà.**
+
+**L'effetto sul numero che decide**, ricontato file per file
+(celle × gemelli × gambe):
+
+| voce | referto | ricontato |
+|---|---:|---:|
+| `00` canarino (5 celle, 0 gemelli, 2 gambe) | 10 | **10** ✅ |
+| `01` scala spread (1 × 2 × 4 corse × 2 gambe) | 8 | **16** |
+| `02` per-trade IS (1 × 2 × **1 gamba**) | 2 | **2** ✅ |
+| `05` TF (7 celle, 0 gemelli, 2 gambe) | 14 | **14** ✅ |
+| `06` latenza (1 × 2 × 4 gradini × 2 gambe) | 8 | **16** |
+| `LATI` A1/A2 + `r136` (di altri) | 48 | 48 |
+| **TOTALE** | **76** (e la somma delle righe fa **90**) | **106** |
+
+E in testa allo stesso referto il totale e' **64** — il numero di **prima**
+della sostituzione dei due file ritirati. 🔴 **Tre totali diversi nello stesso
+documento** (64 · 76 · 90), e nessuno uguale al ricontato (106).
+
+🧨 **Perche' e' una classe.** La formula sbagliata e' **auto-mimetizzante**:
+funziona proprio nei file **semplici**, dove uno la verificherebbe a occhio, e
+sbaglia solo nei file **composti**, dove nessuno rifa' il conto. E il totale
+delle passate non e' un dettaglio contabile: e' **la frase che decide se una
+sedia e' schierabile** (*"tutto quello che manca costa meno di un'ora"*). 🟢
+Qui la tesi regge anche col numero vero (106 × 22 s ≈ 39 minuti, sempre sotto
+l'ora) — **ma la tesi ha resistito per fortuna, non per conto.**
+
+> ### 🔴 LA REGOLA
+> 1. **La passata si conta con QUATTRO fattori, scritti tutti e quattro**:
+>    `celle × gemelli × corse-del-driver × gambe`. Un fattore assente si scrive
+>    **`× 1`** con il motivo (`gemelli × 1: InpMagic fisso` · `gambe × 1:
+>    -FrazioneIS 1.0`). Mai un `2` senza il suo nome accanto.
+> 2. 🚩 **`x 2 gemelli` va verificato contro il file**: il gemello esiste solo
+>    se `InpMagic` ha un asse (`||Y` con due valori). Un `2` che non trova il
+>    suo asse e' un `2` inventato — **anche quando il totale torna.**
+> 3. **Il totale di testa si RICALCOLA dopo ogni modifica alla tabella.** Un
+>    totale che sopravvive alla sostituzione di una voce e' un numero orfano
+>    (parente della classe 241). E la somma delle righe e il totale stampato
+>    **si confrontano sempre**: qui divergevano di 14, cioe' esattamente la
+>    riga del TF — l'unica che chiude un requisito dichiarato mancante.
+> 4. 💡 **Il controllo che li prende tutti costa una riga**: si stampa la
+>    colonna delle passate e si somma **a macchina**. Verificare "quello che
+>    sembra sospetto" trova solo cio' che si sospettava (regola del 10/09).
