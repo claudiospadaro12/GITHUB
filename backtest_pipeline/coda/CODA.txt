@@ -131,3 +131,18 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 #  d) R133c -- InpMinBoxPts: 18 gruppi su 18 identici, la scala era fuori
 #     range di 10 volte. 18 passate.
 8027068f97c0e35dce6970fe15d958c410678725 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
+
+# --- 11. I CANALI CHE ENTRANO IN QUESTA MACCHINA (classe 251, 12/09/2026).
+#     Il censimento del 12/09 ha trovato che i canali sono QUATTRO e i
+#     cancelli ne guardavano DUE: la coda (G1-G4) e le righe incollate a
+#     mano. Le ATTIVITA' PIANIFICATE nessuno. E dentro il canale che
+#     crediamo protetto: il runner vaglia la coda, NESSUNO VAGLIA IL
+#     RUNNER INSTALLATO -- la sua impronta si confrontava col pin una
+#     volta sola, all'installazione.
+#     Questa riga FOTOGRAFA: le 5 attivita' col comando che eseguono, e
+#     l'impronta SHA-256 del runner in C:\ABTG. Il giudizio e' il diff
+#     con la foto di ieri.
+#     Non usa schtasks (e' fra i divieti, e un divieto non si aggira):
+#     Get-ScheduledTask legge e basta. Collaudata eseguendo VagliaScript
+#     vero del runner: ok=True, corsia=LETTURA.
+bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canali_e_attivita.ps1
