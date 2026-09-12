@@ -198,7 +198,20 @@ $BancoBT = 'C:\MT5_Backtest'
 #      stanotte NON sono toccate comunque, perche' la coda le pinna a
 #      8027068f, cioe' a una COPIA CONGELATA di questo file che porta
 #      dentro il pin vecchio.
-$PIN = '63e10ba94e89ba63821fd1071b842faf39b506c4'
+#  NONO GIRO (12/09/2026) -- E QUESTA VOLTA IL MOTIVO E' UN MIO ERRORE,
+#  non un file nuovo. I quattro file prova di r136 al pin 63e10ba9
+#  contengono un NUMERO SBAGLIATO: dicevano "60 file letti" su un
+#  censimento di colonna che in realta' era tagliato a 'head -60' (i file
+#  veri sono 257, e i valori in archivio non sono solo {'1'}). La
+#  conclusione non cambia -- la manopola non e' mai stata un ASSE in 0
+#  file su 257 -- ma un numero sbagliato dentro un file prova e' un
+#  numero sbagliato, e il driver scarica il file prova DA QUESTO PIN.
+#  Col pin vecchio girerebbe la versione con l'errata dentro.
+#  Il pin nuovo e' fb9b4731, dove i quattro file portano i numeri veri
+#  (verificato scaricandolo: la riga corretta c'e').
+#  Le due impronte qui sotto sono state RICALCOLATE anche a questo pin e
+#  sono identiche: non sono state toccate.
+$PIN = 'fb9b4731391c221b6229409f8e9fd7ca44bc2514'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
