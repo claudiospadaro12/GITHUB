@@ -17446,3 +17446,52 @@ scattare anche l'ipotesi vera.
 *Prima di scrivere "se X cambia e' catena rotta", si verifica sul codice che X non
 possa cambiare per il motivo GIUSTO -- altrimenti si e' costruito un cancello che boccia
 la verita'.*
+
+---
+
+## 301. ♻️🪞 LA FRASE SOPRAVVISSUTA ALLA RISCRITTURA: la v2 aggiunge la sezione che dimostra X, e il paragrafo della v1 che dice NON-X resta li' -- e finisce nel CERTIFICATO DI MORTE (13/09/2026)
+
+**Il caso reale**: `prove/R142{a,b,c}` sono stati riscritti in v2 per riparare due bloccanti
+(classi 299 e 300). La riscrittura ha **aggiunto** una sezione nuova, corretta e provata:
+> *"IL TF DEL GRAFICO E' INERTE PER QUESTO EA... il range nasce da barre M1, il trailing da
+> `InpTrailTF`, i filtri sono spenti; l'unica via e' `gAtrH = iATR(_Symbol, PERIOD_CURRENT, ...)`
+> (r.296) -> `InitialSL` -> `profR` -> `trailArmato`, che con `InpTrailStartR=0` e' vero comunque."*
+
+🔴 **Ma il paragrafo "COSA NON MISURA" della v1 non e' stato toccato, e dice il contrario:**
+```
+#  3. NON cambia il TF del grafico (voce 5) e non puo': InpTimeframe !=
+#     M5 da' zero trade in silenzio.
+```
+Due errori in due righe, **nello stesso file che li smentisce 60 righe sotto**:
+- **`InpTimeframe` NON ESISTE.** Gli input di `ABTG_Nasdaq_Live5m.mq5` sono r.171-247:
+  nessun input di timeframe. Verificato con `grep`: **1 sola occorrenza nel repo, e sta in
+  quel commento**.
+- **"zero trade in silenzio" e "il TF e' INERTE" non possono essere vere insieme.** Se il TF
+  del grafico non entra nei numeri, cambiarlo da' gli **STESSI** trade, non zero.
+
+🔴 **E il danno non e' la contraddizione: e' DOVE finisce.** Quella riga e' la
+**motivazione della voce 5 del CERTIFICATO DI MORTE**, cioe' la frase che verra' copiata in
+`REGISTRO_TEST.md` per dire perche' il TF resta non provato. Un certificato con la ragione
+sbagliata e' esattamente il *"morto senza certificato"* di Claudio, travestito da certificato.
+E la ragione giusta e' **piu' forte, non piu' debole**: la voce 5 non si chiude col TF del
+grafico **perche' quel TF non e' una variabile del motore**; si chiuderebbe solo cambiando il
+TF che definisce l'**INGRESSO** (`InpPrevWindowMin` / `InpLevelTF`) -- che e' **firma di
+Claudio**. Cioe': la frase falsa faceva sembrare chiusa una porta che va invece **portata a
+Claudio**.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Quando si riscrive un file per riparare un difetto, si rilegge il file INTERO, non
+   solo il pezzo riparato.** Le sezioni nuove sono scritte con attenzione; quelle vecchie
+   vengono **ereditate senza essere rilette**, ed e' li' che si annidano le contraddizioni.
+2. Dopo ogni riscrittura, si cerca la **stessa parola chiave in tutto il file**
+   (`grep -n "TF del grafico" file`) e si guarda se le occorrenze **dicono la stessa cosa**.
+   Costa dieci secondi.
+3. **Ogni nome di input citato in un commento si verifica che ESISTA** (`grep` sul `.mq5`).
+   Un input inventato in un commento e' una spiegazione che nessuno potra' mai controllare.
+4. 🔴 **Le frasi che motivano una voce del CERTIFICATO DI MORTE si trattano come numeri**:
+   si verificano alla fonte prima di scriverle, perche' vengono copiate altrove e
+   sopravvivono al file che le conteneva.
+
+### 🔑 La regola in una riga
+*Una v2 non e' "la v1 piu' le correzioni": e' un file nuovo, e va riletto tutto -- perche' il
+paragrafo che nessuno ha toccato e' quello che adesso mente.*
