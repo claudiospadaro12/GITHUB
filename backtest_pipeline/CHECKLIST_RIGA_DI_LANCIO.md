@@ -14231,3 +14231,58 @@ ambiguo, mi fermo"*).
 `CloseMainWindow`, poi i 97 restanti. **Nessuno dei 107 puo' entrare in coda**
 (G1 del runner li rifiuta: non hanno marcatore) — verificato — quindi la coda
 di stanotte non e' esposta.
+
+---
+
+## 🪤 CLASSE 245-bis (12/09/2026) — L'ULTIMO BUCO DELL'AUDIT, e la 244 per la TERZA volta
+
+Lo strumento nato per non ripetere la **244** (misurare la forma invece del
+senso) **la ripeteva dentro di se'**. Il cancello di giudizio gli ha tirato 15
+casi avversari: **4 menzogne e 5 invisibilita'**, e una delle cecita'
+**nascondeva un kill nudo VERO e VIVO** (`prepara_broker_esterno.ps1:130`).
+👉 **Il mio `NUDO=0` era falso: era 1.**
+
+Le quattro menzogne avevano **una causa sola**: `nudo()` dichiarava
+*"filtrato"* appena la **stringa** `$_.Path` compariva sulla riga.
+
+| riga | verita' | lo strumento diceva |
+|---|---|---|
+| `Where { $_.Path }` (= "ha un percorso leggibile") | **ammazza tutti** | FILTRATO 🔴 |
+| `Where { -not ($_.Path -like $d) }` | **ammazza esattamente quelli da SALVARE** | FILTRATO 🔴 |
+| `Where { $_.Path -like "*" }` | **ammazza tutti** | FILTRATO 🔴 |
+| `$b = @($r \| Where {...}); $r \| Stop-Process` | **ammazza tutti** | FILTRATO 🔴 |
+| `foreach($p in Get-Process){ Stop-Process -Id $p.Id }` | ammazza tutti | **invisibile** |
+
+### 🔴 E poi ne ho trovato uno IO, nella versione "corretta"
+La correzione proposta portava le menzogne da 4 a **1**, non a 0: su
+`$b = @($r | Where …)` seguito da `$r | Stop-Process` diceva ancora FILTRATO.
+**Causa: il corpo dell'assegnazione si mangiava le 3 righe successive** — *"le
+prossime tre righe"* e' di nuovo **la forma** (tre righe vicine) invece del
+**senso** (*questa riga continua quella di prima?*). Riparato: si continua
+**solo se la riga precedente e' rimasta aperta** (finisce con `|` `,` `` ` ``
+`(` `{` o un operatore).
+
+### ✅ LE REGOLE
+1. **Un `continue` in un audit e' un'AFFERMAZIONE, non una comodita'.** Ogni
+   riga saltata dice *"questa non puo' essere il difetto"*, e va **dimostrata**.
+   Il mio `continue` su `"Stop-Process -Id"` diceva *"e' un PID preciso"*: vero
+   per un `-Id` che viene da `Start-Process`, **falso** per un `-Id` dentro un
+   `foreach` su una lista intera. Quel salto nascondeva l'arma vera.
+2. **Su `Path` serve un CONFRONTO, e l'operando si GIUDICA**: `"*"` non e' un
+   filtro. E sotto `-not` il confronto seleziona **i risparmiati**: non e' un
+   filtro, e' il suo **opposto**.
+3. **Se non si decide si scrive `DA_LEGGERE`.** Meglio due casi dichiarati che
+   un "FILTRATO" falso.
+
+### 🧪 COLLAUDO (e i casi avversari ora stanno DENTRO l'autotest, per sempre)
+**16 casi su 16**, fra cui **tutti e cinque** quelli che l'avevano ingannato,
+piu' una continuazione VERA che deve restare riconosciuta.
+**Misura sul repo: 239 file, 27 chiusure, `NUDO = 0`, `DA_LEGGERE = 2`** — e i
+due dichiarati li ho **letti a mano**: filtrano davvero (`$berPri` e `$Miei`),
+ma lo strumento non lo dimostra e quindi **non lo afferma**.
+
+🔑 **La lezione, che vale piu' dello strumento:** *uno strumento che mente e'
+peggio di non averlo*, perche' trasforma un'opinione in una misura. Prima di
+consegnare un audit, la domanda e' **"se cercassi la forma invece del senso,
+cosa mi sfuggirebbe?"** — ed e' la domanda che quello strumento era nato per
+fare.

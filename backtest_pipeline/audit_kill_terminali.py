@@ -41,11 +41,35 @@ RADICE = os.path.dirname(os.path.abspath(__file__))
 # una collezione e' "filtrata" se la sua costruzione guarda il PERCORSO del
 # processo: e' l'unico modo di dire QUALE terminale, e un cancello testuale
 # da solo non lo sa (per questo il runner vieta Stop-Process in corsia ROUND)
-SEGNI_FILTRO = [r"\$_\.Path", r"-EsePath", r"Bersagli", r"\.Bersagli"]
+SEGNI_FILTRO = [r"-EsePath", r"Bersagli", r"\.Bersagli"]
+
+# un CONFRONTO vero sul percorso: $_.Path <op> qualcosa che non sia il jolly "*"
+CONFRONTO_PATH = re.compile(r"\$_\.Path\s*-(?:like|ieq|eq|match)\s*([^\s)}]+)")
+
+def filtro_vero(riga):
+    """la riga contiene un filtro sul percorso che RESTRINGE davvero?"""
+    if any(re.search(s, riga) for s in SEGNI_FILTRO):
+        return True
+    m = CONFRONTO_PATH.search(riga)
+    if not m:
+        return False
+    # un jolly che prende tutto NON e' un filtro: "-like \"*\"" ammazza tutto
+    if m.group(1).strip('"\'') in ("*", ""):
+        return False
+    # il confronto sotto -not seleziona i RISPARMIATI: usarlo per uccidere
+    # ammazza esattamente quelli da salvare. Non e' un filtro: e' il suo opposto.
+    if re.search(r"-not\s*\(\s*\$_\.Path", riga):
+        return False
+    return True
 
 def nudo(riga):
     """la riga pipa dentro Stop-Process qualcosa di gia' filtrato?"""
-    return not any(re.search(s, riga) for s in SEGNI_FILTRO)
+    # se cio' che si pipa e' una VARIABILE, decide la variabile, non la riga:
+    # "$b = @($r | Where { $_.Path -like $d }); $r | Stop-Process" ammazza tutto
+    # pur avendo un $_.Path sulla riga.
+    if re.search(r"(\$[A-Za-z_][A-Za-z0-9_]*)\s*\|\s*Stop-Process", riga):
+        return True
+    return not filtro_vero(riga)
 
 def sorgente(riga):
     """chi viene pipato dentro Stop-Process: una variabile o un Get-Process?"""
@@ -71,15 +95,67 @@ def filtrata_a_monte(righe, i, var):
         if not m:
             continue
         corpo = m.group(1)
-        # l'assegnazione puo' continuare sulla riga dopo
-        for k in range(j, min(j + 3, len(righe))):
+        # L'assegnazione puo' continuare sulla riga dopo -- MA SOLO SE LA RIGA
+        # E' DAVVERO UNA CONTINUAZIONE.
+        # 12/09/2026: qui c'era "prendi le prossime 3 righe e basta", e quello
+        # era l'ULTIMO buco dello strumento. Su
+        #     $r = Get-Process -Name "terminal64"
+        #     $b = @($r | Where-Object {$_.Path -like $d})
+        #     $r | Stop-Process -Force              <- AMMAZZA TUTTI
+        # il corpo di $r si mangiava la riga di $b, ci trovava "$_.Path -like"
+        # e dichiarava FILTRATO un kill che ammazza tutto. Cioe' la classe 244
+        # per la TERZA volta: la forma (tre righe vicine) invece del senso
+        # (questa riga continua quella di prima?).
+        # Una riga continua la precedente solo se la precedente e' rimasta
+        # aperta: finisce con | , ` ( { oppure un operatore.
+        k = j
+        while k + 1 < len(righe) and k - j < 6:
+            aperta = re.search(r"(?:\||,|`|\(|\{|-and|-or|\+)\s*$", righe[k].rstrip())
+            if not aperta:
+                break
+            k += 1
             corpo += " " + righe[k]
-        if any(re.search(s, corpo) for s in SEGNI_FILTRO):
+        if filtro_vero(corpo):
             return True
         if re.search(r"Get-Process", corpo):
             return False          # presa la lista intera, senza filtro
         return None               # assegnata da qualcos'altro: non decido
     return None
+
+def _cerca_indietro(righe, i, var):
+    """l'ultima riga, prima di i, che LEGA var a qualcosa"""
+    pat_ass = re.compile(r"^\s*\$" + re.escape(var) + r"\s*=(.*)$")
+    pat_for = re.compile(r"foreach\s*\(\s*\$" + re.escape(var) + r"\s+in\s+(.*)$", re.I)
+    for j in range(i, -1, -1):
+        m = pat_for.search(righe[j])
+        if m:
+            return m.group(1)
+        m = pat_ass.match(righe[j])
+        if m:
+            return m.group(1)
+    return None
+
+def _pid_da_lista_intera(righe, i, var):
+    """il PID viene da un foreach/assegnazione su TUTTI i processi?"""
+    c = _cerca_indietro(righe, i, var)
+    if c is None:
+        return False
+    return ("Get-Process" in c) and not filtro_vero(c)
+
+def _pid_filtrato(righe, i, var):
+    """il PID viene da un processo avviato da noi o da una lista filtrata?"""
+    c = _cerca_indietro(righe, i, var)
+    if c is None:
+        return False
+    if "Start-Process" in c:
+        return True
+    if filtro_vero(c):
+        return True
+    # foreach su una variabile: decide quella variabile
+    m = re.match(r"\s*\$([A-Za-z_][A-Za-z0-9_]*)", c)
+    if m and "Get-Process" not in c:
+        return filtrata_a_monte(righe, i, "$" + m.group(1)) is True
+    return False
 
 def esamina(path):
     esiti = []
@@ -88,13 +164,28 @@ def esamina(path):
     except Exception:
         return esiti
     for i, riga in enumerate(righe):
-        if "Stop-Process" not in riga:
+        if not re.search(r"\bStop-Process\b", riga) and not re.search(r"\|\s*(kill|spps)\b", riga):
+            continue
+        if re.search(r"\|\s*(kill|spps)\b", riga) and "Stop-Process" not in riga:
+            esiti.append(("NUDO" if not filtro_vero(riga) else "FILTRATO", i + 1, riga.strip()))
             continue
         if re.match(r"^\s*#", riga):
             continue                       # commento
-        if "Stop-Process -Id" in riga:
-            continue                       # un PID preciso: e' il contrario di un kill cieco
-        if "@{ p='Stop-Process'" in riga or "-match 'Stop-Process'" in riga or "txt=" in riga:
+        mid = re.search(r"Stop-Process\s+-Id\s+\$([A-Za-z_][A-Za-z0-9_]*)(\.Id)?", riga)
+        if mid:
+            # un PID preciso E' il contrario di un kill cieco -- MA SOLO se quel
+            # PID viene da un processo che lo script ha avviato o ha filtrato.
+            # "foreach($p in (Get-Process terminal64)){ Stop-Process -Id $p.Id }"
+            # ammazza TUTTI: e' il caso vivo di prepara_broker_esterno.ps1:129.
+            var = mid.group(1)
+            if _pid_da_lista_intera(righe, i, var):
+                esiti.append(("NUDO", i + 1, riga.strip()))
+            elif _pid_filtrato(righe, i, var):
+                esiti.append(("FILTRATO", i + 1, riga.strip()))
+            else:
+                esiti.append(("DA_LEGGERE", i + 1, riga.strip()))
+            continue
+        if "@{ p='Stop-Process'" in riga or "-match 'Stop-Process'" in riga or re.search(r"@\{\s*nome=.*txt=", riga):
             continue                       # divieti e casi di prova del runner: devono restare
         if not nudo(riga):
             esiti.append(("FILTRATO", i + 1, riga.strip()))
@@ -128,6 +219,20 @@ def autotest():
         ('$b = Bersagli $tutti\n$b | Stop-Process -Force', "FILTRATO"),
         ('$r = @($sel.Bersagli)\n$r | Stop-Process -Force', "FILTRATO"),
         ('$x = QualcosAltro\n$x | Stop-Process -Force', "DA_LEGGERE"),
+        # --- I CASI AVVERSARI del 12/09/2026. Questi cinque, sullo strumento
+        #     della PRIMA versione, tornavano tutti "FILTRATO" o INVISIBILE:
+        #     quattro menzogne e una cecita'. E la cecita' nascondeva un kill
+        #     nudo VERO e VIVO (prepara_broker_esterno.ps1:130).
+        #     Nessuno di loro puo' piu' tornare FILTRATO.
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { -not ($_.Path -like $d) } | Stop-Process -Force', "DA_LEGGERE"),
+        ('$r = Get-Process -Name "terminal64"\n$b = @($r | Where-Object {$_.Path -like $d})\n$r | Stop-Process -Force', "NUDO"),
+        ('$r = Get-Process -Name "terminal64"\n$r | Where-Object { $_.Path -like "*" } | Stop-Process -Force', "DA_LEGGERE"),
+        ('foreach($p in @(Get-Process -Name "terminal64")){ Stop-Process -Id $p.Id -Force }', "NUDO"),
+        ('Get-Process terminal64 | kill -Force', "NUDO"),
+        # e la continuazione VERA deve restare riconosciuta: qui $b continua
+        # sulla riga dopo perche' la prima finisce con una pipe aperta
+        ('$b = @($tutti |\n  Where-Object { $_.Path -like ($d + "\\*") })\n$b | Stop-Process -Force', "FILTRATO"),
     ]
     import tempfile
     giusti = 0

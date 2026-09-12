@@ -107,26 +107,52 @@ param(
 #  Adesso si chiede prima la chiusura educata, e si ammazza solo se non
 #  obbedisce.
 function Chiudi-MT5-Pulito([int]$Secondi = 60) {
-  $procs = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
-  if ($procs.Count -eq 0) { return }
+  # ===================================================================
+  #  RIPARATA IL 12/09/2026 -- prima chiedeva la chiusura a OGNI
+  #  terminale della macchina, senza filtro e SENZA bisogno di nessun
+  #  interruttore. Per un terminale che opera, "chiuditi per favore" e'
+  #  fatale quanto un kill: il REALE 10105439 restava senza sorveglianza
+  #  con le posizioni aperte.
+  #  E nessun audit dei kill lo vedeva, perche' la parola Stop-Process
+  #  non c'era: e' la stessa arma con un ALTRO VERBO.
+  #  Adesso il bersaglio e' UNO: il terminale che questo script ha
+  #  scelto ($Terminal). Se non c'e', NON si chiude niente e si muore.
+  # ===================================================================
+  if ([string]::IsNullOrWhiteSpace($Terminal)) {
+    Write-Host "" 
+    Write-Host "STOP: non so quale terminale chiudere (`$Terminal e' vuoto)." -ForegroundColor Red
+    Write-Host "  NON chiudo tutti: fra i terminali aperti c'e' il conto REALE 10105439." -ForegroundColor Red
+    exit 1
+  }
+  $tuttiT = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)
+  $procs  = @($tuttiT | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) })
+  $salvi  = @($tuttiT | Where-Object { -not ($_.Path -and ($_.Path -ieq $Terminal)) })
+  if ($salvi.Count -gt 0) {
+    Write-Host "  LASCIATI VIVI (forward e CONTO REALE: NON li tocco):" -ForegroundColor Green
+    foreach ($s in $salvi) { Write-Host ("    PID " + $s.Id + "   " + $(if ($s.Path) { $s.Path } else { "percorso non leggibile" })) -ForegroundColor Green }
+  }
+  if ($procs.Count -eq 0) { Write-Host ("  nessun terminale aperto da " + $Terminal + ": non chiudo niente.") -ForegroundColor DarkGray; return }
+  Write-Host ("  chiedo la chiusura SOLO a " + $Terminal) -ForegroundColor Yellow
   foreach ($p in $procs) {
     try { [void]$p.CloseMainWindow() } catch { }
   }
   $scade = (Get-Date).AddSeconds($Secondi)
   while ((Get-Date) -lt $scade) {
     Start-Sleep -Seconds 2
-    if (@(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue).Count -eq 0) {
+    $vivi = @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) })
+    if ($vivi.Count -eq 0) {
       Write-Host "  MT5 chiuso in modo pulito (simboli personalizzati salvati)." -ForegroundColor Green
       return
     }
   }
   Write-Host "  MT5 non si e' chiuso da solo entro $Secondi s: lo forzo." -ForegroundColor Yellow
   Write-Host "  ATTENZIONE: i simboli personalizzati creati adesso potrebbero non essere salvati." -ForegroundColor Yellow
-  # NOTA (15/08/2026): qui prima c'era una chiamata a Chiudi-MT5-Pulito,
-  # cioe' la funzione richiamava SE STESSA: se MT5 non si chiudeva entro
-  # i 60 s la ricorsione non finiva piu' e lo script restava appeso per
-  # sempre. Adesso si forza davvero.
-  foreach ($p in @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue)) {
+  # NOTA (15/08/2026): qui prima la funzione richiamava SE STESSA -- se MT5
+  # non si chiudeva entro i 60 s la ricorsione non finiva piu' e lo script
+  # restava appeso per sempre. La riparazione era stata fatta in UNA delle
+  # tre copie e mai ricopiata nelle altre due: chiuse tutte e tre il
+  # 12/09/2026. Adesso si forza davvero, e SOLO sul bersaglio.
+  foreach ($p in @(Get-Process -Name "terminal64" -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -ieq $Terminal) })) {
     try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch { }
   }
   Start-Sleep -Seconds 2

@@ -519,7 +519,15 @@ if ($TerminaleBacktest) {
          "    ha posizioni aperte -- e il 10/09 e' successo davvero.`n" +
          "    Se leggi questo messaggio, qualcuno ha tolto il ripiego sul banco:`n" +
          "    rimettilo, oppure passa -TerminaleBacktest a mano.")
-  $running = @()
+  # 12/09/2026 (cancello): qui c'era "$running = @()", e faceva l'OPPOSTO di
+  # quello che credevo. Siccome Muori esce, e' codice morto -- innocuo OGGI.
+  # Ma domani, se qualcuno togliesse il Muori (che e' ESATTAMENTE lo scenario
+  # che il messaggio qui sopra dichiara di temere), un array vuoto renderebbe
+  # FALSO l'if ($running) due righe sotto e lo script tirerebbe avanti CON
+  # TUTTI I TERMINALI APERTI, senza nessun controllo. Avevo scaricato l'arma
+  # e insieme DISINNESCATO la guardia che la sorveglia.
+  # Con $tuttiTerm, se il Muori sparisce la guardia MORDE invece di tacere.
+  $running = $tuttiTerm
   if ($running) {
     Write-Host "`nMT5 e' APERTO. In automatico non si puo': un secondo avvio" -ForegroundColor Red
     Write-Host "sulla stessa cartella dati non esegue lo script." -ForegroundColor Red
