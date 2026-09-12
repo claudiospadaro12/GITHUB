@@ -24,6 +24,17 @@ dell'11/09 (`CODA_06`), che porta la **`#property version`** — cioe'
 gia' li' e non l'ho aperto.** Il conteggio di righe non e' un identificatore;
 la versione dichiarata lo e'.
 
+> ✏️ **CORRETTO IL 12/09 STESSO — questa frase era MEZZA VERA.** Misurato
+> poche ore dopo su tutte e 51 le sedie: **nemmeno la versione basta.**
+> `ABTG_DAX_Apertura_EU` sul 100k e' **v1.01 come il repo** ma ha **2361
+> righe contro 2367** e porta `ABTG_DEF_RISK 2.0` invece di `1.0`. E al
+> contrario il `Guardian` del reale ha **386 righe di scarto** e
+> comportamento **identico**.
+> 👉 **Versione + righe INSIEME identificano il commit; ma per sapere se la
+> differenza MORDE serve il DIFF.** E non e' la sua dimensione a decidere:
+> `872dba8` e' **+11/-2 righe** e **raddoppia il lotto**.
+> Misura: `report/IL_CAMPO_SEDIA_PER_SEDIA_2026-09-12.md`.
+
 ### La mappa vera, con DUE segnali indipendenti che concordano
 
 | cartella dati | `#property version` | righe in campo | commit del repo | data | righe nel commit |
