@@ -15430,3 +15430,76 @@ l'ora) — **ma la tesi ha resistito per fortuna, non per conto.**
 > 4. 💡 **Il controllo che li prende tutti costa una riga**: si stampa la
 >    colonna delle passate e si somma **a macchina**. Verificare "quello che
 >    sembra sospetto" trova solo cio' che si sospettava (regola del 10/09).
+
+---
+
+## 265. 🪆 IL PIN DELLA CODA NE CONTIENE UN ALTRO: una riga verde che scarica il file prova **SBAGLIATO** (o nessuno) — 12/09/2026
+
+**Trovato dal cancello di giudizio** mentre valutava due righe di coda proposte
+per `COLLAUDO_EMADOW_02` e `COLLAUDO_EMADOW_05`, copiate nel formato delle tre
+righe `R132/R133` gia' in coda.
+
+🔴 **Il pin di una riga di coda NON e' il pin dei file prova.** Sono DUE, in
+cascata, e solo il primo si vede nella riga:
+
+```
+<PIN DI CODA> | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Prova FILE.txt
+       |                         |
+       |                         +--> dentro quella copia:  $PIN = '<PIN INTERNO>'
+       +--> dice QUALE COPIA della riga sottile si scarica        |
+                                                                  +--> da QUI
+                                                                       viene il
+                                                                       file prova
+```
+
+**Il caso reale, misurato.** Le righe proposte portavano il pin di coda
+`8027068f` (lo stesso delle tre righe di stanotte, apparentemente "collaudato").
+Ma quella copia ha dentro `$PIN = '9cba7a10'`, e:
+
+```
+git cat-file -e 9cba7a10:backtest_pipeline/prove/COLLAUDO_EMADOW_02_pertrade_IS.txt -> ASSENTE
+git cat-file -e 9cba7a10:backtest_pipeline/prove/COLLAUDO_EMADOW_05_tf_U30USD.txt   -> ASSENTE
+```
+
+I due file sono nati **dopo** (`5fbbac4`, 12/09). Esito: **HTTP 404 sul file
+prova, round morto**, e la riga di coda era formalmente perfetta — pin di 40 hex
+minuscole, commit vero, marcatore presente, argomenti tutti dentro la lista
+bianca. **Nessun cancello meccanico la prende.**
+
+🔴 **E il secondo modo e' PEGGIORE del 404, perche' non fa rumore.** L'altro pin
+disponibile (`0c7d98af`, quello dei `R136`) ha dentro `$PIN = 'fb9b4731'`, e li'
+i due file **ESISTONO** — ma:
+
+```
+git merge-base --is-ancestor 92c9621 fb9b4731  ->  NON e' antenato
+```
+
+cioe' `fb9b4731` porta la versione **prima** di `92c9621` = *"applicati 5
+bloccanti + 4 gravi del cancello di giudizio"*. La riga sarebbe partita, avrebbe
+girato, avrebbe prodotto CSV **con i nove difetti dentro**, e il referto del
+mattino sarebbe stato verde. 👉 Un 404 si vede. Un file prova vecchio no.
+
+### Il controllo, e costa tre comandi
+Per OGNI riga di coda nuova, prima di incollarla:
+1. **estrarre il pin interno**, non fidarsi di quello della riga:
+   `git cat-file -p <PIN_CODA>:backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | grep '^$PIN'`
+2. **il file prova esiste a QUEL pin?**
+   `git cat-file -e <PIN_INTERNO>:backtest_pipeline/prove/<FILE> && echo OK`
+3. 🔴 **e' la versione CORRETTA?** Non basta che esista:
+   `git log --format='%h %s' -- backtest_pipeline/prove/<FILE>` → prendere
+   l'ultimo commit `C`, poi `git merge-base --is-ancestor C <PIN_INTERNO>`.
+   Se risponde falso, **il pin porta una versione superata**: si ripinna, non
+   si lancia.
+
+📌 **Regola pratica**: un file prova **corretto dopo** l'ultimo giro di pin
+**obbliga** a un giro di pin nuovo — sempre, anche se "il file c'e' gia'".
+E' la stessa lezione che il §6 di `report/CODA_NOTTE_2_2026-09-12.md` aveva
+imparato sui propri file (*"il pin precedente `63e10ba9` porta i file con il
+numero sbagliato: non si usa"*), ma li' era scritta per un pacchetto solo:
+qui diventa il controllo da fare su **ogni riga di coda**, comprese quelle
+copiate da una riga che ha girato bene.
+
+🟢 **Nota di merito**, perche' un elenco di soli difetti descrive male la
+realta': la cascata a due pin NON e' un difetto del progetto, e' quello che
+rende il file prova **immutabile** dopo il lancio. Il difetto e' averla
+lasciata **implicita nella riga di coda**, dove si legge un pin solo.
