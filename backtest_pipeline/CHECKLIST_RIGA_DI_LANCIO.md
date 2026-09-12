@@ -14331,3 +14331,142 @@ diversa — **non contro la forma che ho in testa**. E un numero che cala
 
 **Collaudo: 84 file, parser PowerShell vero, 0 errori di sintassi, 0 byte
 non-ASCII.** Misura finale del ripiego che allarga: **0 file**.
+
+---
+
+## 247. 🎭 LA NEGAZIONE E IL JOLLY RICONOSCIUTI IN UNA SOLA GRAFIA (12/09/2026)
+
+**Il caso.** `audit_kill_terminali.py`, dopo la riparazione della classe 245
+(autotest 16/16, sul repo `NUDO=0`), e' stato riattaccato con 9 casi nuovi.
+**Ne ha sbagliati 6, tutti nella direzione peggiore: `FILTRATO` su un kill che
+ammazza TUTTO.**
+
+| forma | verita' | diceva |
+|---|---|---|
+| `Where { !($_.Path -like $d) }` | ammazza i **RISPARMIATI** | `FILTRATO` |
+| `Where { ($_.Path -like $d) -eq $false }` | ammazza i **RISPARMIATI** | `FILTRATO` |
+| `Where { $_.Path -like "C:\*" }` | tutto il disco | `FILTRATO` |
+| `Where { $_.Path -match "." }` | qualunque cosa | `FILTRATO` |
+| `Where { $_.Path -like ($env:SystemDrive + "\*") }` | tutto il disco | `FILTRATO` |
+| `Where { $_.Path -like "*terminal64.exe" }` | tutti i terminali | `FILTRATO` |
+
+🔴 **Causa unica, e per la QUINTA volta in due giorni e' la 244.** La guardia
+riparata cercava:
+- la negazione **in una sola grafia**: `-not\s*\(` — e `!( … )`, `-eq $false`,
+  `-ne $true`, `-notlike` sono **la stessa cosa** scritta in altro modo;
+- il jolly **come stringa esatta**: `operando == "*"` — mentre `"C:\*"`,
+  `"*terminal64.exe"`, `"."` sotto `-match` e `($env:SystemDrive + "\*")`
+  combaciano con tutto **senza essere `*`**.
+
+**La regola.** 👉 **Quando si giudica un predicato, la domanda non e' "com'e'
+scritto" ma "QUANTI elementi puo' selezionare".** Un filtro vale solo se
+**RESTRINGE**, e va dimostrato: uguaglianza esatta, oppure prefisso di cartella
+**ancorato** (non `*...`, non una radice di disco). Tutto il resto e'
+`DA_LEGGERE`.
+📌 **Le grafie di una negazione si elencano per NOME, tutte** (`-not`, `!`,
+`-eq $false`, `-ne $true`, `-notlike`, `-notmatch`, `-ne`) — e' la classe 180
+applicata a un operatore: mai "tutto cio' che non e' `-not`".
+🚫 **E `-match` non si giudica affatto:** una regex universale (`.`) e una
+ancorata sono indistinguibili senza interpretarla, e **un audit non interpreta:
+dichiara.**
+
+✅ **Provato:** `report/audit_kill_terminali_CORRETTO_v3_2026-09-12.py` — **0
+menzogne su 9+15 = 24 casi avversari**, **16/16** sull'autotest di casa, e sul
+repo la misura **non cambia** (239 file, `NUDO=0`, `DA_LEGGERE=2`,
+`FILTRATO=25`). 5 delle 6 forme **non esistono** nel repo oggi: la misura era
+vera, lo **strumento** no.
+
+🕳️ **E il limite che resta, dichiarato.** Se l'operando e' un'**espressione**
+(`($instDir + "\*")`), uno strumento statico **non sa** a cosa si espande: la
+v3 la accetta come ancorata dopo aver escluso le radici di disco note, e
+**quella e' un'assunzione dichiarata, non una prova.** Le 25 righe `FILTRATO`
+del repo sono tutte di questa forma.
+
+---
+
+## 248. 🗡️ IL QUINTO VERBO, E L'ARMA CHE SCRIVE INVECE DI UCCIDERE (12/09/2026)
+
+Cercati i kill (`Stop-Process`) e le chiusure educate (`CloseMainWindow`), la
+domanda giusta era: **quali ALTRI verbi fanno la stessa cosa?** Censiti tutti:
+
+| verbo | nel repo | esito |
+|---|---:|---|
+| `taskkill` | **0** | ✅ assente |
+| `Invoke-Expression` / `iex` | 1 | ✅ solo nella tabella dei DIVIETI del runner |
+| `[IO.File]::Delete/Move/Copy`, `[IO.Directory]::Delete` | **0** | ✅ assente |
+| `Remove-Item -Recurse` su cartelle di terminale | **0** | ✅ assente |
+| `Get-CimInstance Win32_Process` / WMI | **0** | ✅ assente |
+| **`.Kill()` su un oggetto Process** | **1** | 🟡 `verifica_autotest_guardian.ps1:211` |
+| **`[IO.File]::WriteAllText` su un `.chr`** | **1** | 🔴 `abbassa_rischio.ps1:95` |
+
+### 🟡 Il quinto verbo: `.Kill()`
+`verifica_autotest_guardian.ps1:211` fa `$proc.Kill()`, e **e' corretto**:
+`$proc` viene da `Start-Process -PassThru` a r.207, cioe' e' il PID che lo
+script stesso ha avviato. Ma `.Kill()` **non lo cerca nessuno**: un domani
+`Get-Process terminal64 | ForEach-Object { $_.Kill() }` sarebbe **invisibile**
+all'audit dei kill, alla scansione dei `CloseMainWindow` e a `taskkill`.
+
+### 🔴 L'arma che non uccide: SCRIVE nella cartella di OGNI terminale
+`abbassa_rischio.ps1` riscrive i **`.chr`**, cioe' **i parametri delle SEDIE
+VIVE** (sul 100k le taglie 0,65 e 0,30 vivono **solo** li'). E il bersaglio e':
+```
+$root = Join-Path $env:APPDATA "MetaQuotes\Terminal"
+$dirs = Get-ChildItem $root -Directory | Where-Object { Test-Path (Join-Path $_.FullName "MQL5\Experts") }
+foreach($d in $dirs){ ... [System.IO.File]::WriteAllText($chr.FullName, $txt2, $enc) }
+```
+👉 **TUTTE le cartelle dati della macchina, quella del REALE 10105439
+compresa.** Nessun filtro su QUALE conto. Il restringimento c'e' ma e' su altre
+dimensioni: **magic** nell'elenco e **rischio esattamente uguale** a `-Da`,
+piu' una copia `.prima_rischio`. Se un magic dell'elenco vive anche sul REALE,
+gli si riscrive la taglia.
+⚠️ La sua unica guardia e' `Get-Process terminal64` **non filtrato** -> "MT5 e'
+aperto, chiudilo": sul VPS e' sempre vero, quindi **rifiuta di partire per
+effetto collaterale**. E quella guardia protegge la *coerenza del file*, non
+*quale conto*: a MT5 chiuso (VPS riavviato) l'arma e' carica.
+
+**La regola.** 👉 **Un censimento di armi si fa sui VERBI E SUGLI OGGETTI:
+chi TERMINA (`Stop-Process`, `CloseMainWindow`, `.Kill()`, `taskkill`, WMI) e
+chi SCRIVE/CANCELLA dentro la cartella di un terminale (`Copy-Item`,
+`Set-Content`, `Out-File`, `Remove-Item`, `[IO.File]::WriteAll*`, `/compile:`).**
+Per ognuno, una domanda sola: **su QUALE terminale, e come l'ha scelto?**
+📌 **E "tutte le cartelle dati" e' un bersaglio, non l'assenza di un
+bersaglio**: e' il caso che sfugge a ogni ricerca di "selettore sbagliato",
+perche' non c'e' nessun selettore da sbagliare.
+
+---
+
+## 249. 🧾 `exit 1` AL POSTO DI `throw`: LA RACCOLTA CHE NON PARTE PIU' (12/09/2026)
+
+**Il caso.** Chiudendo il ripiego che allargava il bersaglio (classe 246b) in
+**84 script**, il blocco nuovo finisce con `exit 1`. In **30 di quegli 84** il
+punto di inserimento sta **dentro un `try{`** il cui `catch{` mette il motivo
+in `$Fatale` e **prosegue** verso il referto e `Compress-Archive`.
+
+Misurato su `RIGA_BREAKIN.ps1` (`try` r.196, `catch` r.634, zip r.742),
+`RIGA_SONDA_OROLOGIO.ps1` (654 / 1259 / 1697) e `RIGA_PREOPEN_DAX.ps1`
+(798 / 1364 / 1827) — **3 su 3 letti a mano, 30 dal rilevatore.**
+
+🔴 **Con `exit 1` il processo muore sul posto: niente `catch`, niente referto,
+niente zip.** Prima, un terminale non trovato produceva *"FERMATO: …"* e **uno
+zip da mandare**; adesso produce quattro righe rosse in console e nulla da
+consegnare. E' la **regola delle righe di lancio, punto 2** (la raccolta e'
+obbligatoria) annullata **proprio nel caso in cui serve di piu'**: lo script si
+e' fermato e nessuno sa dire cosa mandare.
+📌 Il segno che lo rivela in un colpo d'occhio: subito sotto il blocco nuovo e'
+rimasto l'`if(-not $cand){ throw … }` **originale**, ora **irraggiungibile**.
+Un gestore d'errore morto sotto un gestore nuovo = **il percorso d'errore e'
+cambiato senza che nessuno lo abbia deciso.**
+
+**La regola.** 👉 **Prima di scrivere `exit` in uno script, si guarda se si sta
+scrivendo DENTRO un `try`.** In uno script che chiude con una raccolta,
+l'uscita d'errore e' `throw`, non `exit`: `throw` passa dal `catch` e **la
+raccolta parte**. `exit` e' legittimo **solo** nel pre-volo, prima che esista
+qualcosa da raccogliere.
+📌 E una riparazione **in massa** si valida su **tre campioni letti a mano** in
+punti diversi del file, non sul fatto che il parser non protesti: qui i
+parser erano contenti su 84 file su 84.
+
+✅ **Correzione, una parola per file:** `exit 1` -> `throw "Terminale non
+trovato col selettore stretto, e NON allargo la ricerca: …"`. Il `catch`
+esistente lo raccoglie, il referto lo scrive, lo zip parte, e l'`if(-not
+$cand){ throw }` sotto torna coerente invece che morto.
