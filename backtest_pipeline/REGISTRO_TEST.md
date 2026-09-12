@@ -2252,3 +2252,96 @@ scaricati e letti riga per riga e archiviati in `biblioteca/sorgenti/`.
   lo segnalano **sette cacce di fila**. Se GBPUSD nella fascia di lavoro fosse
   0,5 invece di 0,2, la soglia del 40x passerebbe da 26,8 a **38,8 pip** e il
   bersaglio M30 sparirebbe.
+
+---
+
+## 12/09/2026 — SCARTI CON IL NUMERO su `ABTG_EMA200` (dossier `report/EMA200_I_DUE_REQUISITI_2026-09-12.md`)
+
+Scavo di sola lettura sull'archivio, **nessun backtest lanciato**. Qui vanno solo
+le righe che **scartano** qualcosa: il resto (e le due CORREZIONI al referto del
+mattino) sta nel dossier.
+
+### 🪦 TF esclusi PER COSTO su U30USD — frontiera `stop >= 40 x spread`, pavimento duro 13,3x
+Spread MISURATO su 64.711.285 tick (`risultati_archivio/spread_flotta/spread_orario_U30USD.csv`):
+mediana di sessione (ore 14-21 server) **1,8-2,0** punti indice; commissione sugli
+indici **0,0000 MISURATA** (n=302 deal, `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md`
+r.181-183, riconfermata oggi su 21/21 posizioni della sedia 771531) => **il pedaggio
+all-in sul Dow e' lo SPREAD e basta**. Stop della gamba debole = `InpSLatr x ATR`
+= **1,0 x ATR**, con ATR(14) H1 **MISURATO 78,0-88,2** punti indice (backtest R112
+mediana 88,2 su 33 coppie; statement dal vivo 65,5/73,6/78,0 su 3 coppie, rapporto
+gamba1/gamba2 = 1,4992-1,5000). Legge di scala DICHIARATA `ATR(T)=ATR(H1)*sqrt(T/60)`,
+ancorata al misurato, margine +-20%.
+
+| TF | gamba 2 / spread sessione | verdetto |
+|---|---|---|
+| **M5** | **11,5 - 13,1x** | SCARTATO: **sfonda il pavimento DURO 13,3x**. Piu': 21 mesi a M5 = ~132.000 barre, sopra il tetto ~100.000 del tester |
+| **M15** | **20,0 - 22,6x** | SCARTATO per costo (50-57% della frontiera). Sopra il duro |
+| **M20** | **23,1 - 26,1x** | SCARTATO per costo |
+| **M30** | **28,3 - 32,0x** | SCARTATO per costo sulla gamba 2 (71-80%). La gamba 1 (42,5-48,0x) passerebbe |
+| H1 (la sedia) | 33,6 - 45,2x | NON scartato: la soglia 40x cade DENTRO la banda misurata => **C3 FRAGILE** |
+| H2 / H3 / H4 | 56,6-64,0x / 69,3-78,3x / 80,0-90,5x | passano il costo |
+
+> **Conseguenza, e va scritta perche' cambia come si legge la sedia: su U30USD H1
+> non e' una scelta, e' il PAVIMENTO.** Sotto H1 nessun TF tiene il costo sulla
+> gamba debole; sopra H1 nessun TF tiene la frequenza. La cella viva sta
+> nell'unica casella che soddisfa entrambi i cancelli.
+> **E le celle M15/M20/M30 della prova `COLLAUDO_EMADOW_05_tf_U30USD.txt` sono
+> quindi INFORMATIVE E NON PROMUOVIBILI**: qualunque numero diano, sono escluse
+> per costo in anticipo. Le celle che decidono sono H1 (sentinella) / H2 / H3 / H4.
+
+### 🪦 `U30USD` a H4 — scartato per FREQUENZA, NON per edge
+`risultati_archivio/EMA200/H4_OHLC/scan_ABTG_EMA200_H4_U30USD.csv`: **77 celle
+positive su 85 vive**, best PF **3,0247**, DD 2,59%. **Ma Trades 15-82 su tutta la
+finestra** = ~8-41 POSIZIONI al rapporto misurato ~2,0 => **molto sotto il
+pavimento dei 150**. Scartato per frequenza, e l'edge resta agli atti.
+(Verdetto d'epoca, `risultati_archivio/EMA200/ANALISI_EMA200.md` r.60-73: *"EMA200
+e' un motore da H4, NON da H1"* -- vero sul PF, **falso sul calendario di ottobre**.)
+
+### 🪦 `E50EUR` (EuroStoxx) — scartato su tutti e due i TF, col numero
+- H1 OHLC: **0 celle positive su 88 vive**, best PF **0,7403**
+- H4 OHLC: **0 celle positive su 81 vive**, best PF **0,9535**
+**L'unico dei sette gemelli azionari che resta morto anche a H4.** Scartato.
+
+### 🪦 `NASUSD` a H1 — scartato col numero
+H1 OHLC **1/85** celle positive (best PF 1,0197); scan H1 di `risultati_prove/`
+**2/83** (best PF 1,0285). Scartato a H1.
+**BUCO DICHIARATO, NON SCARTATO: `NASUSD` a H4 non e' mai stato misurato** -- il
+file `scan_ABTG_EMA200_H4_NASUSD.csv` **non esiste**, mentre i suoi due vicini
+(`SPXUSD` 75/86, `U30USD` 77/85) a H4 girano. E' l'unico buco della matrice dei
+gemelli di questo motore. **Non e' un morto: e' un non misurato.**
+
+### 🪦 `771511`-`771515` (i cinque gemelli H4 in forward dal 01/08) — NON scartati, ma muti
+**0 posizioni** in tutto lo statement 30/03 -> 11/09/2026 (`data/statements/trades_auto.csv`,
+verificato oggi; concorda con `report/CENSIMENTO_FREQUENZA_FLOTTA_2026-08-22.md`
+r.176-180) e **assenti dal censimento `.chr` del 12/09**. Verdetto:
+**[NON ANCORA MISURATO IN FORWARD]**, non "morti". Domanda aperta a Claudio: sono
+ancora attaccati?
+
+### 🔴 E UN CRITERIO FIRMATO CHE E' SCATTATO (non uno scarto: una revisione dovuta)
+Corsia **MERITO** del 18/08 (*"famiglia a 20+ operazioni totali in perdita ->
+revisione di tutte le sedie"*). Misurato oggi su `trades_auto.csv`, unita'
+**(magic, simbolo)** e **POSIZIONI**, finestra 30/03 -> 11/09/2026:
+`771531` U30USD **21 pos / -19,39** · `771501` D30EUR **6 / -77,31** · `771501`
+XAUUSD **3 / +24,80** · `971501` XAUUSD **9 / -54,37** => **famiglia 39 posizioni,
+netto -126,27. SCATTATO.**
+- Tasso di vincita di campo **10/21 = 47,6%** contro **156/257 = 60,7%** del
+  backtest: scarto **1,2 sigma** => **il campione NON da' un verdetto sul merito**
+  (Emendamento B del 16/08).
+- **RISCHIO: dentro.** DD forward sui chiusi **5,44 R = 2,72% del saldo** (R = 0,5%
+  per gamba, `ABTG_EMA200.mq5` r.361) contro **7,21-7,83%** promessi; peggior
+  giornata forward **-2,36 R = -1,18%** contro **-2,448%** del backtest.
+  **Nessuna revisione di rischio.**
+
+### ✅ COSE CHE NON SI RIPAGANO PIU' (misurate oggi, da file gia' in casa)
+- **swap su U30USD = 0,00** su 21 posizioni, di cui **4 tenute oltre la mezzanotte**
+  (una attraverso il weekend 14->16/08). Era `[NON MISURABILE]`.
+- **commissione su U30USD = 0,00** su 21/21 della sedia stessa.
+- **valore del punto = 0,8569-0,8628** unita'/punto/lotto, n=8, da `|P/L|/(dist x lotti)`:
+  **0,861 confermato, 8,61 escluso** (chiude il conflitto `CONTRACT_SIZE` di R114).
+- **max posizioni contemporanee = 2** e **rischio aperto massimo = 1,00% del saldo**,
+  per COSTRUZIONE (`ABTG_EMA200.mq5` r.322 `if(HasPosition() || HasPending()) return;`
+  + r.361 `riskPct = InpRiskPercent/nOrders`), confermato sul campo su n=39 posizioni.
+  **Chiude il "buco strutturale del flottante" e riduce il buco B6 a <= 1,00% per
+  questa sedia.**
+- **la classe 226 NON tocca il PF**: 1,52365 per deal contro **1,52370** per
+  posizione. Decide `n`, la frequenza e i cancelli di campione; **non** PF ne' DD.
