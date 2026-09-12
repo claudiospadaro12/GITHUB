@@ -659,8 +659,8 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 
 # =====================================================================
 #  DICIASSETTESIMO GIRO -- LE TRE RIGHE R142: GLI ASSI D'USCITA SULLA
-#  PRE-APERTURA DEL NASDAQ. Pinnate a 2ca1fb2, che porta $PIN=0230e8f5 (file prova VERSIONE 3, dopo la
-#  terza passata del cancello -- classe 301).
+#  PRE-APERTURA DEL NASDAQ. Pinnate a dbe86ac, che porta $PIN=d6809008 (file prova VERSIONE 4, dopo la
+#  terza passata del cancello -- classi 299, 300, 301 e la sua ricaduta).
 #
 #  NASCONO DA UN FAIL DEL CANCELLO, NON DA UN'IDEA.
 #  Il 12/09 avevo archiviato ABTG_Nasdaq_Live5m (770203) come SCARTATO.
@@ -746,6 +746,6 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  >>> SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo un
 #      PASS del secondo strato. Se il cancello dice FAIL, si cancellano.
 # =====================================================================
-#DISARMATA# 2ca1fb2649ed4b4317d1538641b1aafbb406f5b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
-#DISARMATA# 2ca1fb2649ed4b4317d1538641b1aafbb406f5b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
-#DISARMATA# 2ca1fb2649ed4b4317d1538641b1aafbb406f5b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+#DISARMATA# dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
