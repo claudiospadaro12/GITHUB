@@ -485,10 +485,29 @@ script gia' indurito oggi.
 
 ```
 python3 backtest_pipeline/calcola_pedaggio_forex.py --autotest
+python3 backtest_pipeline/calcola_pedaggio_forex.py --cambi 10-09 --autotest
 python3 backtest_pipeline/calcola_pedaggio_forex.py \
     --csv ABTG_SpreadLogger_orario.csv --ore 7,8,9,13,14 \
     --contro-esempio GBPUSD=28
 ```
+
+## 🚦 I CANCELLI, coi codici di uscita (lanciati DA SOLI, senza pipe)
+
+| invocazione | uscita |
+|---|---|
+| `controlla_riga.py --oggetto md --md report/MISURA_SPREAD_FOREX_2026-09-12.md` | 🟢 **0** |
+| `controlla_riga.py --riga <BLOCCO 3 estratto> --ps1 ...RACCOLTA.ps1` | 🟢 **0** ⬅️ *l'invocazione giusta del punto 10* |
+| `controlla_riga.py --ps1 ...RACCOLTA.ps1` (indurito) | 🟢 **0** |
+| `controlla_riga.py --riga <il .md intero> --ps1 ...RACCOLTA.ps1` | 🔴 **1**, 9 bloccanti — **tutti falsi positivi**, §4 |
+| `controlla_prova.py` | ⚪ **2** = *"arguments are required: prove"* -> **non applicabile**: nessun file prova, perche' **nessuna delle due strade usa il tester** |
+| `pwsh Parser::ParseFile` su `...RACCOLTA.ps1` | 🟢 **0 errori**, 5.924 token |
+| `calcola_pedaggio_forex.py --autotest` (e `--cambi 10-09`) | 🟢 **0**, tutto VERDE |
+
+🧪 **E due difetti li ho trovati provando a rompere la MIA correzione**, non
+aspettando il cancello: `--cambi 10-09` esplodeva con `KeyError: 'JPY'` (quella
+tabella non copre il JPY), e il blocco delle controprove dava **ROSSO** su una
+tabella di un'altra data **mentre stava verificando la derivazione della
+sonda**. Riparati tutti e due.
 
 ⏳ **E quando lo zip torna, il verdetto si da' contro le soglie di §3.2, che
 sono congelate QUI, prima dei numeri.**
