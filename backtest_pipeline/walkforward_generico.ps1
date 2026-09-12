@@ -161,6 +161,14 @@
 #  promette (il parametro -Ritardo, cioe' ExecutionMode nell'.ini) e cio'
 #  che promette il v4 (il parametro -TerminaleBacktest) qui sono
 #  invariati: le promesse sono ancora vere, quindi le stringhe restano.
+#
+#  12/09/2026 -- v6_FRAZIONEIS AGGIUNTO, NIENTE TOLTO. I MARCATORI SONO
+#  ADDITIVI: il v6 promette che questo driver LEGGE la direttiva
+#  '@FRAZIONEIS' dal file prova (blocco dopo @FINOA). Il v5_INCLUDE
+#  RESTA: righe\RIGA_SOTTILE_ROUND.ps1 lo cerca con Select-String
+#  -SimpleMatch e MORIREBBE dicendo "driver vecchio" davanti a un driver
+#  PIU' NUOVO se lo togliessimo. Chi aggiunge un v7 fa la stessa cosa:
+#  aggiunge una riga, non rinomina quelle di sopra.
 # =====================================================================
 param(
   [Parameter(Mandatory=$true,Position=0)][string]$Expert,   # nome del .mq5 senza estensione
@@ -175,6 +183,10 @@ param(
                                      #   Serve a chi misura APPOSTA una finestra diversa da quella
                                      #   del file prova (unico caso in casa: RIGA_DIAG_GBPUSD.ps1
                                      #   -Passo C, che misura un TEMPO, non un orologio).
+  [switch]$FrazioneDallaRiga,        # 12/09/2026: dichiara che -FrazioneIS VINCE su '@FRAZIONEIS'.
+                                     #   Senza, i due tagli che si contraddicono fanno MORIRE la corsa.
+                                     #   Stessa ragione di -FinoDallaRiga: il taglio IS/OOS fa parte
+                                     #   dell'IDENTITA' della cella, non e' un default comodo.
   [int]$Deposito     = 10000,        # deposito del tester. 100000 = taglia prop: serve dove il lotto minimo schiaccia il rischio
   [string]$Etichetta = "",           # suffisso nei nomi dei CSV: un round nuovo NON sovrascrive il precedente
   [int]$Spread       = -1,           # 19/08/2026 (R84-bis, stress spread). -1 = NON scrive la riga
@@ -245,6 +257,7 @@ function Muori($t){ Write-Host ""; Write-Host "!!! $t" -ForegroundColor Red; exi
 
 Write-Host "=== WALK-FORWARD GENERICO - $Expert ===" -ForegroundColor Cyan
 Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE" -ForegroundColor DarkGray
+Write-Host "    MARCATORE_WALKFORWARD_GENERICO_v6_FRAZIONEIS" -ForegroundColor DarkGray
 
 # =====================================================================
 #  0. SU QUALE BROKER SI STA GIRANDO
@@ -571,6 +584,156 @@ if($Direttive.ContainsKey("FINOA")){
     Write-Host ("    finestra di fine presa da '@FINOA' nel file prova: " + $Fino) -ForegroundColor Yellow
   }
 }
+
+# ---------------------------------------------------------------------
+#  @FRAZIONEIS -- APERTA IL 12/09/2026. E NON E' UNA COMODITA':
+#  E' L'ULTIMO PEZZO DELL'IDENTITA' DELLA CELLA CHE NON AVEVA UN CANALE.
+#
+#  IL PROBLEMA, MISURATO. Venti file prova (R128b/c/d/e, R129a/b/c,
+#  R130a..e, R131a..h) dichiarano nei propri criteri -- congelati PRIMA
+#  dei numeri, in prove\R128_USCITA_CRITERI.md r.236-271 -- un taglio
+#  IS/OOS a 0.50, e ciascuno porta il conto scritto: sui 325 ingressi
+#  misurati da R120 sulla finestra 2024.09.26-2026.06.30, a 0.50 l'IS
+#  vale ~163 operazioni e l'OOS ~162 (SOPRA il pavimento 150
+#  dell'Emendamento A), mentre a 0.40 l'IS scende a ~130, cioe' SOTTO.
+#  Ma la corsia ROUND (righe\RIGA_ROUND_VPS.ps1 r.646-650 e
+#  righe\RIGA_SOTTILE_ROUND.ps1) NON PASSA -FrazioneIS: passa solo
+#  -Expert -Prova -Etichetta -Modello -Deposito. Cioe' su quella corsia
+#  le direttive del file prova sono l'UNICO canale esistente per
+#  l'identita' della finestra -- ed erano quattro (@SIMBOLO, @PERIODO,
+#  @DAQUANDO, @FINOA) su cinque. Il taglio IS/OOS era il buco.
+#  Senza questa direttiva quei venti round girano a 0.40 (il default di
+#  fabbrica qui sopra) con l'etichetta dei criteri a 0.50: IS che finisce
+#  il 2025.06.09 invece del 2025.08.13, cioe' 65 giorni di calendario,
+#  47 feriali, ~33 operazioni di differenza -- IN SILENZIO.
+#
+#  >>> PERCHE' QUESTO BLOCCO COPIA @FINOA E **NON** @SIMBOLO. <<<
+#  E' LA TRAPPOLA, ED E' STATA MISURATA CON POWERSHELL VERO, NON
+#  RAGIONATA. La riga "ovvia", per analogia con r.493-495, sarebbe:
+#      if(-not $FrazioneIS -and $Direttive.ContainsKey("FRAZIONEIS")){ ... }
+#  e NON FUNZIONA MAI. In PowerShell (-not 0.40) vale False: un [double]
+#  con default 0.40 e' sempre "vero", quindi la condizione e' sempre
+#  falsa e la direttiva NON VIENE MAI LETTA. I venti file girerebbero a
+#  0.40, cioe' ESATTAMENTE il guasto che la direttiva ripara, travestito
+#  da riparazione, e senza una riga di avviso a schermo.
+#  E peggio: (-not 0.0) vale True, quindi con -FrazioneIS 0 la logica si
+#  INVERTE e la direttiva scatta proprio dove non deve.
+#  Lo schema di @SIMBOLO funziona SOLO perche' quei tre sono [string] con
+#  default "" -- cioe' "falso" quando non passati. Su un numero no.
+#  Qui la guardia interroga $PSBoundParameters.ContainsKey("FrazioneIS"),
+#  che risponde a "l'argomento e' stato PASSATO?", non a "il suo valore
+#  e' VERO?". E' la stessa chiave usata da @FINOA (r.559).
+#
+#  >>> E PERCHE' LA COLLISIONE MUORE INVECE DI SCEGLIERE. <<<
+#  35 script dedicati passano -FrazioneIS SEMPRE ed esplicitamente. Due
+#  lo passano a 1.0 (righe\RIGA_NYRETEST_TAR.ps1 r.307 e
+#  righe\RIGA_SONDALONDONFX.ps1 r.604) e SCRIVONO NEL PROPRIO REFERTO
+#  "UNA TRANCHE, FrazioneIS 1.0" e "il CSV *_OOS NON esiste MAI qui".
+#  Se la regola fosse "vince il file" e un giorno il loro file prova
+#  prendesse @FRAZIONEIS 0.50, il driver girerebbe un walk-forward 50/50
+#  mentre il referto continua a dichiarare 1.0 e a chiamare i CSV _OOS
+#  "reperti da non leggere" -- e invece sarebbero l'unico numero vero.
+#  Referto e numeri direbbero due cose diverse, e nessuno lo vedrebbe.
+#  Quindi: contraddizione = si MUORE. Chi la vuole apposta la DICHIARA
+#  con -FrazioneDallaRiga, e si becca il riquadro magenta.
+#
+#  DUE MESSAGGI DISTINTI SULLA VALIDAZIONE, ed e' un difetto corretto,
+#  non un vezzo: la prima stesura faceva morire '@FRAZIONEIS 1.5' con
+#  "non e' un numero decimale" -- e 1.5 E' un numero decimale, e' solo
+#  fuori campo. Un messaggio falso manda a cercare il guasto dalla parte
+#  sbagliata. Adesso il FORMATO e il CAMPO dicono cose diverse.
+#
+#  [double]::Parse con InvariantCulture, NON [double]$testo: su un VPS
+#  con locale italiana il cast sulla cultura corrente puo' leggere "0.50"
+#  come 50. Il cancello controlla_riga.py ha una regola apposta.
+#
+#  ZERO REGRESSIONE, e non e' un'opinione: chi non scrive @FRAZIONEIS
+#  non cambia comportamento di una virgola, e il 12/09 la direttiva non
+#  compariva in NESSUNO dei file prova del repo (verificato col grep).
+# ---------------------------------------------------------------------
+#  >>> LA DIRETTIVA SCRITTA SENZA VALORE: UN BUCO TROVATO PROVANDO A
+#      ROMPERE QUESTA STESSA TOPPA, IL 12/09/2026. <<<
+#  Il parser generico di r.493 accetta solo '^@(\w+)\s+(.+)$': una riga
+#  '@FRAZIONEIS' SENZA valore NON matcha, quindi non entra in $Direttive
+#  e il blocco qui sotto non scatta nemmeno. Risultato: il file CREDE di
+#  aver dichiarato un taglio, il driver gira col default 0.40, e NON DICE
+#  NIENTE. E' lo stesso guasto silenzioso che questa direttiva ripara,
+#  entrato dalla porta di servizio.
+#  MISURATO che il buco NON e' mio ma del parser, ed e' CONDIVISO: con
+#  '@FINOA' scritta da sola, oggi, il driver tira dritto sulla data di
+#  fabbrica senza una riga di avviso (provato, exit 0). Su @SIMBOLO,
+#  @PERIODO e @DAQUANDO il silenzio lo intercetta il cancello di r.574-579
+#  ('if(-not $Simbolo){ Muori ... }'): quei tre hanno default "" e muoiono
+#  dopo. @FINOA e @FRAZIONEIS hanno un default VALIDO, quindi no.
+#  QUI chiudo SOLO il mio: la riparazione giusta sta nel parser e vale per
+#  tutte e cinque le direttive, ma il parser e' inchiodato al byte da un
+#  pin e lo toccherebbe per 1969 righe '@' su 675 file prova -- fra cui
+#  CINQUE che portano un '@DAQUANDO' senza valore (ABTG_BandFade,
+#  ABTG_CanaleLento, ABTG_RangeBudget, ABTG_TurnaroundTuesday,
+#  SESSIONREOPEN_ORO_BOZZA). Quelli oggi muoiono comunque sul cancello di
+#  r.574-579, ma una riga di lancio che passi -DaQuando a mano li fa
+#  girare: cambiare il parser cambierebbe il comportamento di quei cinque,
+#  e va misurato in un lavoro suo. Dichiarato, non fatto di nascosto.
+#  QUESTA guardia invece e' un NO-OP DIMOSTRATO: il 12/09 nessuno dei 675
+#  file prova contiene '@FRAZIONEIS', figuriamoci senza valore.
+foreach($rp in $righeProva){
+  if($rp.Trim() -match '^@FRAZIONEIS\s*$'){
+    Muori ("nel file prova c'e' una riga '@FRAZIONEIS' SENZA VALORE.`n" +
+           "    Cosi' com'e' il parser la BUTTA VIA e il driver gira col taglio di`n" +
+           "    fabbrica (0.40) senza dirlo a nessuno: il file crede di aver`n" +
+           "    dichiarato una cosa, i CSV ne raccontano un'altra.`n" +
+           "    Si scrive col valore attaccato: '@FRAZIONEIS 0.50'.")
+  }
+}
+if($Direttive.ContainsKey("FRAZIONEIS")){
+  $frzTesto = $Direttive["FRAZIONEIS"]
+  if($frzTesto -notmatch '^[0-9]*\.?[0-9]+$'){
+    Muori ("la direttiva '@FRAZIONEIS " + $frzTesto + "' non e' un numero decimale con il PUNTO.`n" +
+           "    Si scrive come lo vuole il driver: '@FRAZIONEIS 0.50'. Niente virgola,`n" +
+           "    niente percentuale, niente frazione con la barra.")
+  }
+  $frzNum = [double]::Parse($frzTesto, [Globalization.CultureInfo]::InvariantCulture)
+  if($frzNum -le 0.0 -or $frzNum -gt 1.0){
+    Muori ("la direttiva '@FRAZIONEIS " + $frzTesto + "' e' fuori campo: ammesso 0 < f <= 1.`n" +
+           "    1.0 = UNA SOLA TRANCHE (gamba OOS degenere, si dichiara).")
+  }
+  if($PSBoundParameters.ContainsKey("FrazioneIS")){
+    if([math]::Abs($FrazioneIS - $frzNum) -gt 0.000001){
+      if($FrazioneDallaRiga){
+        # DIVERGENZA DICHIARATA. Non e' un'eccezione comoda: e' una firma.
+        # Chi lancia ha scritto -FrazioneDallaRiga, cioe' "lo so, lo sto
+        # cambiando apposta". E siccome un avviso dentro mille righe di log
+        # non lo legge nessuno, esce a banda larga: riquadro pieno, magenta,
+        # con i DUE tagli accanto. Esce UNA volta sola.
+        Write-Host ""
+        Write-Host "*********************************************************************" -ForegroundColor Magenta
+        Write-Host "  ATTENZIONE: IL TAGLIO IS/OOS NON E' QUELLO DEL FILE PROVA." -ForegroundColor Magenta
+        Write-Host ("    '@FRAZIONEIS' nel file   : " + $frzNum) -ForegroundColor Magenta
+        Write-Host ("    -FrazioneIS usato DAVVERO: " + $FrazioneIS) -ForegroundColor Magenta
+        Write-Host "  Vince la riga di lancio perche' e' stato passato -FrazioneDallaRiga." -ForegroundColor Magenta
+        Write-Host "  I numeri che escono NON descrivono la cella del file prova." -ForegroundColor Magenta
+        Write-Host "*********************************************************************" -ForegroundColor Magenta
+        Write-Host ""
+      } else {
+        Muori ("DUE TAGLI IS/OOS, DIVERSI, E NON SCELGO IO.`n" +
+               "    -FrazioneIS passato a mano : " + $FrazioneIS + "`n" +
+               "    '@FRAZIONEIS' nel file     : " + $frzNum + "`n" +
+               "    Il file prova dice che il campione si taglia in un punto, la riga`n" +
+               "    di lancio ne dice un altro. Le due finestre IS/OOS che ne escono`n" +
+               "    sono DIVERSE, e le soglie sono firmate su UNA delle due: una delle`n" +
+               "    due e' sbagliata, si guarda QUALE.`n" +
+               "    Se la differenza e' VOLUTA, si dichiara: aggiungi -FrazioneDallaRiga.")
+      }
+    }
+  } else {
+    $FrazioneIS = $frzNum
+    Write-Host ("    taglio IS/OOS preso da '@FRAZIONEIS' nel file prova: " + $FrazioneIS) -ForegroundColor Yellow
+    if($FrazioneIS -ge 1.0){
+      Write-Host "    ATTENZIONE: FrazioneIS 1.0 = UNA SOLA TRANCHE. La gamba OOS e' DEGENERE" -ForegroundColor Yellow
+      Write-Host "    (finestra vuota): il CSV _OOS non descrive niente. Dichiaralo nel referto." -ForegroundColor Yellow
+    }
+  }
+}
 if(-not $Simbolo){ Muori "manca il simbolo. Passalo con -Simbolo NASUSD, o scrivi '@SIMBOLO NASUSD' nel file della prova." }
 if(-not $DaQuando){ Muori ("manca la data di inizio storico.`n" +
     "    NON metterla a caso: misurala prima con`n" +
@@ -761,6 +924,13 @@ $WF=@(
   @{ Tag="OOS"; Da=$Meta.AddDays(1).ToString("yyyy.MM.dd");   A=$FineDt.ToString("yyyy.MM.dd") }
 )
 Write-Host ""
+# 12/09/2026: la FRAZIONE finisce nel log ACCANTO alle due finestre. Prima il
+# driver stampava le finestre ma NON il taglio che le ha prodotte: il log che il
+# runner pubblica sul repo non bastava a ricostruire dove era stato tagliato il
+# campione (e con @FRAZIONEIS il taglio puo' venire dal file prova, non dalla
+# riga di lancio). Una riga di log, e il dubbio "la direttiva e' stata letta o
+# ignorata in silenzio?" non esiste piu'.
+Write-Host ("    taglio IS/OOS: FrazioneIS " + $FrazioneIS) -ForegroundColor Gray
 Write-Host "    IS  $($WF[0].Da) - $($WF[0].A)   (qui si sceglie)" -ForegroundColor Gray
 Write-Host "    OOS $($WF[1].Da) - $($WF[1].A)   (qui si verifica, e NON si guarda per scegliere)" -ForegroundColor Gray
 Write-Host ""
