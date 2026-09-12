@@ -15746,3 +15746,48 @@ git log -1 --format="%h %ad" --date=format:'%d/%m %H:%M' -- mql5/Experts/<NOME>.
 git log -1 --format="%h %ad" --date=format:'%d/%m %H:%M' -- <il CSV dell'ancora>
 ```
 Se la prima data e' **dopo** la seconda, l'ancora e' un confronto, non un cancello.
+
+## 269. 📚 IL REFERTO CHE RI-SCOPRE UN FATTO GIA' PUBBLICATO **DAGLI STESSI IDENTICI CSV** — e lascia cadere il confondimento che il round precedente aveva reso VINCOLANTE
+
+**Il fatto, 12/09/2026.** Il referto del blocco D di R123 dichiarava ⭐
+*"manopola MAI toccata"* e *"un fatto nuovo che nessuno aveva mai misurato"*.
+Ma `report/R132_PAVIMENTO_SUPREV_2026-09-11.md` §4.1, **scritto il giorno
+prima e citato nelle Fonti dello stesso referto**, aveva gia' letto **i
+medesimi due file CSV** e scritto **la stessa identica frase**: *"manopola
+INERTE sopra 1,25, MISURATA"* (r.259), con tanto di `← clone di 1,25` in
+tabella (r.247).
+
+⚠️ **E c'e' la meta' piu' cara**: `R132` §1 aveva dichiarato **prima dei
+numeri**, con l'obbligo esplicito *"questa frase resta nel referto finale,
+**qualunque numero esca**"*:
+
+> `InpNearAtr` **cambia due cose insieme**: alzarlo allarga lo stop **e**
+> rende il setup meno selettivo. **Se una cella migliora, da quale dei due
+> viene NON e' distinguibile.**
+
+Quella frase nel referto nuovo **non c'era**. E non e' un dettaglio di
+cortesia: senza di essa il referto **raccomandava quattro corse di prova di
+regime per chiudere una domanda che quattro corse non chiudono** — perche'
+anche se il regime confermasse il risultato, resterebbe indistinguibile se
+venga dallo stop piu' largo o dalla minore selettivita'.
+
+🪞 **E' la classe 258 a un gradino piu' avanti**: li' mancava il **file
+prova**; qui il file prova era stato aperto, e mancava il **referto gemello**
+che aveva gia' letto gli stessi dati.
+
+> ### 🔴 LA REGOLA
+> 1. **Prima di scrivere "mai misurato" si cerca CHI HA GIA' LETTO QUEL FILE.**
+>    Due comandi: `grep -rl` il nome del CSV in `report/` e in
+>    `risultati_archivio/`. Chi l'ha gia' letto lo **cita**.
+> 2. **Ogni `grep` usata come PROVA si riesegue OGGI**, mai fidandosi della
+>    data in cui fu scritta. Nel caso reale, la grep del file prova diceva
+>    *"0 righe"* ed era vera il **09/09**; rifatta il **12/09** dava **5 righe
+>    in 4 file**. L'affermazione vera era un'altra e piu' forte: *"mai
+>    MISURATA — zero CSV"*.
+> 3. **Un confondimento dichiarato VINCOLANTE da un round precedente si
+>    TRASCRIVE**, non si riscopre. Se un file prova dice "questa frase resta
+>    nel referto finale", quella frase e' parte del referto quanto i numeri.
+> 4. ⚠️ **E il magic del perimetro si RILEGGE DAL CSV**, non si copia dal
+>    referto precedente: nella prima stesura il blocco D dichiarava il magic
+>    del blocco C (**784120** invece di **784130**) proprio dentro il
+>    paragrafo che serviva a dimostrare di non toccare le sedie vive.
