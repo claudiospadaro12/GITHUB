@@ -609,3 +609,50 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_HVAncora -Prova R141d_hvancora_stopatr_M30_U30USD.txt -Etichetta r141d -Modello 4 -Deposito 100000
 ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141a_momentum_NASUSD_r12.txt -Etichetta r141a -Modello 4 -Deposito 100000
 ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141b_momentum_U30USD_gemello.txt -Etichetta r141b -Modello 4 -Deposito 100000
+# =====================================================================
+#  IL BREAKEVEN DEL REGALO -- l'unica delle quattro firme che sopravvive
+#  Aggiunta il 12/09/2026 sera, dopo PASS dei DUE strati del cancello.
+#
+#  PERCHE': InpTP1_ClosePct 50->0 da' PF 1,39709 -> 1,49140 e DD 7,2328%
+#  -> 6,2719% a parita' di 193 posizioni. Ma nel sorgente c'e' una crepa:
+#  il breakeven al 1o obiettivo (r.1931) e' ANNIDATO dentro
+#  r.1899 if(!partialDone && InpTP1_ClosePct > 0 && ...) -> con ClosePct=0
+#  NON SCATTA MAI. Il BE indipendente invece sta a r.1945, al livello
+#  superiore di ManageOneTicket, con la sua condizione su InpBEatR.
+#  Quindi mettendo 0 si guadagna il PF e si perde il breakeven: questo
+#  round misura di quanto, e senza la misura la firma sarebbe
+#  un'intuizione su una sedia che muove soldi VERI.
+#
+#  L'ASSE APRE DAVVERO UN RAMO (verificato nel sorgente): le quattro
+#  celle NON sono identiche, non e' una passata sprecata x4.
+#  ESITO NEGATIVO RAGGIUNGIBILE, e il verso e' dichiarato PRIMA: il BE
+#  deve far scendere il profitto E salire la peggior giornata INSIEME.
+#  Se una cella migliorasse entrambi, e' SELEZIONE e non gestione, e va
+#  letta come tale (sentinella: Trades +/-5%).
+#
+#  CALIBRATA CONTRO UN NUMERO DI QUALCUN ALTRO (regola del 10/09): la
+#  cella 0,0 deve riprodurre R47b, archiviato in
+#  CENSIMENTO_PF_TUTTI_2026-09-09.csv r.90 -> PF 1,4914 · 193 posizioni
+#  · DD 6,2719% . Se non lo riproduce, il banco non e' quello e il round
+#  non si legge.
+#  E la soglia di decisione (0,05 punti percentuali) sta 39 VOLTE sopra
+#  il rumore di arrotondamento del lotto (0,00128).
+#
+#  >>> E LA SUA GEMELLA NON C'E', ED E' LA NOTIZIA PIU' GROSSA. <<<
+#  LE_QUATTRO_FIRME_01 (il tetto di spread) e' BOCCIATA: il cancello ha
+#  trovato la CLASSE 294 leggendo l'EA. In ArmRetest() la guardia dello
+#  spread fa return(TRUE) a r.1441, PRIMA di r.1443 gBuffer =
+#  EffectiveBuffer(); il dispatch r.718 legge true come PH_ARMED, e
+#  r.751 fa girare MonitorRetest lo stesso -- con gBuffer azzerato da
+#  ResetDay (r.948). Quindi nella giornata bloccata per spread il
+#  grilletto (r.1471) e' range_high + 0,00 invece di range_high + 5,00
+#  punti indice: la sedia NON salta il trade, lo prende con la soglia di
+#  rottura ABBASSATA, e senza filtro di tendenza (gBias resta 0).
+#  Accendere InpMaxSpread oggi NON protegge: rende la sedia PIU'
+#  AGGRESSIVA proprio nelle giornate a spread alto. E' dormiente solo
+#  perche' in campo InpMaxSpread=0: la FIRMA lo avrebbe svegliato, su
+#  una sedia che gira sul conto REALE.
+#  La toppa e' dentro l'EA (gPhase = PH_DONE sul rifiuto) = FIRMA DI
+#  CLAUDIO: si segnala e non si tocca.
+# =====================================================================
+ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
