@@ -293,7 +293,43 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+# =====================================================================
+#  >>> cemad05 DISATTIVATA IL 12/09/2026, E IL MOTIVO E' UN NUMERO. <<<
+#  Trovata ricontrollando la coda al centesimo su richiesta di Claudio.
+#
+#  IL FATTO: COLLAUDO_EMADOW_05_tf_U30USD.txt r.126 porta
+#      InpTF=16385||15||1||16388||Y
+#  cioe' 'da 15 a 16388 con passo 1' su un input ENUM. L'aritmetica:
+#      16388 - 15 + 1 = 16374 CELLE
+#  ed e' esattamente il numero che conta controlla_prova.py. Le altre 27
+#  righe insieme fanno 129 celle: questa sola ne fa 16.374, cioe' il
+#  99,2 per cento di tutta la coda, e 32.748 passate su 33.006.
+#
+#  PERCHE' E' BLOCCANTE E NON SOLO LENTA: nella catena NON C'E' NESSUN
+#  TIMEOUT (Start-Process -Wait senza -TimeoutSec: 0 occorrenze in
+#  runner_abtg.ps1 e in RIGA_SOTTILE_ROUND.ps1). Stava in posizione 24
+#  su 40, quindi avrebbe tenuto in ostaggio le UNDICI righe dopo di lei:
+#  r120e00, il canarino canfrz, cemad02, i sette round nuovi
+#  (r137a/b/c, r138a, r139a/b/c) e CODA_12. Cioe' TUTTO il lavoro di
+#  oggi, dietro un round che non finisce.
+#
+#  NON MISURATO, e va detto: non so se MT5 filtri gli enum ai valori
+#  dichiarati (7 TF validi) oppure iteri tutti i 16.374 interi. Il
+#  nostro cancello conta 16.374. Con undici righe in ostaggio e zero
+#  timeout, l'asimmetria decide: si spegne e si misura domani.
+#
+#  E IL COSTO DI SPEGNERLA E' ZERO: cemad05 serviva al requisito 5 del
+#  CERTIFICATO (il TF cambiato almeno una volta) di ABTG_EMA200, che
+#  risulta GIA' CHIUSO dal 01/08 -- risultati_archivio/EMA200/
+#  ANALISI_EMA200.md r.59-73 confronta H4 contro H1 su OTTO simboli.
+#  E' il round meno necessario dei 28.
+#
+#  COME SI RIMETTE: l'asse va scritto con i valori ENUM ESPLICITI dei
+#  soli TF voluti, non come intervallo con passo 1. Poi giro di pin
+#  (il file prova sta dentro il pin) e la riga torna in coda.
+# ---------------------------------------------------------------------
+# 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+# =====================================================================
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
