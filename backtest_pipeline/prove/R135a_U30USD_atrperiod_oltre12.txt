@@ -1,4 +1,19 @@
 # ======================================================================
+#  RITIRATO IL 12/09/2026 -- NON METTERE IN CODA, NON LANCIARE
+#
+#  Motivo: il verdetto congelato del blocco C e' A6, "non c'e' una
+#  configurazione robusta su questo asse" (criteri A1/A3/A4/A6 scritti PRIMA
+#  dei numeri in report/ROUND_ALTOPIANO_SUPREV_2026-09-09.md r.109).
+#  Estendere LO STESSO asse da 13 a 20 dopo un A6 e' cio' che il limite del
+#  19/08 vieta: si allarga su motori, meccanismi, simboli, TF e gestione
+#  dell'uscita, MAI sui parametri di un asse gia' dichiarato non robusto.
+#  Ogni allargamento si paga con una prova fuori campione o di regime.
+#
+#  Resta sul disco come memoria del ragionamento sbagliato.
+#  Errata: backtest_pipeline/risultati_archivio/R123_BLOCCO_C_LETTURA_2026-09-12.md
+#  Referto valido: backtest_pipeline/risultati_archivio/R123_BLOCCO_C_2026-09-12.md
+# ======================================================================
+# ======================================================================
 #  EA: ABTG_SupRev_DOW_H1_Ottimizzato
 #  R123c -- ALTOPIANO SupRev DOW H1 / cella 02_atrperiod
 #  U30USD H1 FISSO. Asse: InpStAtrPeriod. StMult 3.5 e NearAtr 1.0 PINNATI.
