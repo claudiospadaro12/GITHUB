@@ -1,0 +1,381 @@
+# =====================================================================
+#  EA: ABTG_AtrExhaustVol
+#  R141c -- ATR EXHAUSTION + VOLUME SPIKE, NASUSD M30. PASSO 0.
+#           Asse unico: InpProxMode -- e serve a smascherare una
+#           MANOPOLA INERTE che ho trovato LEGGENDO, prima di girare.
+# ---------------------------------------------------------------------
+#  DOSSIER:  report/I_QUATTRO_INVISIBILI_2026-09-12.md
+#  FONTE:    Pine "ATR Exhaustion & Volume Spike Strategy" di
+#            MyStrategyHub (TradingView 8ltrS3Yg, 2026-04-07, nessuna
+#            licenza dichiarata). Copia in casa:
+#            caccia_strategie/biblioteca/sorgenti/
+#            AtrExhaustionVolumeSpike_MyStrategyHub_tv8ltrS3Yg_2026-08-25.pine
+#            Scheda P2 (9/10): caccia_strategie/CACCIA_M5M15_INDICI_2026-08-25.md
+#
+#  ###  PERCHE' QUESTO FILE ESISTE OGGI  ###
+#  ABTG_AtrExhaustVol.mq5 e' stato scritto il 25/08/2026. Il 12/09:
+#    righe in REGISTRO_TEST.md ...... 0
+#    CSV di risultati in archivio ... 0
+#    file prova ..................... NESSUNO
+#    round in coda .................. 0
+#  Diciotto giorni fermo, ne' vivo ne' morto. Questo e' il suo primo
+#  file prova in assoluto.
+#
+# ---------------------------------------------------------------------
+#  IL MOTORE IN CINQUE RIGHE (letto nel sorgente)
+# ---------------------------------------------------------------------
+#  1. PIVOT: si tiene l'ultimo massimo e l'ultimo minimo confermati a
+#     (InpPivotLeft=5, InpPivotRight=5) barre. La barra candidata e' la
+#     [1+InpPivotRight]: nessuna barra in formazione entra nel calcolo
+#     -> niente ridipintura, per costruzione (r.523-528).
+#  2. PROSSIMITA': il minimo (long) della barra di segnale [1] deve
+#     stare dentro una tolleranza dal pivot BASSO (r.492-493).
+#  3. ESAURIMENTO: la strada percorsa DAL PIVOT OPPOSTO deve superare
+#     InpAtrExhaustMult(2,0) x ATR(14) del TF del grafico.
+#  4. VOLUME: il volume della barra di segnale > InpVolSpikeMult(1,5) x
+#     la media a 20 barre. E' COSTITUTIVO: nessun input lo spegne, e a
+#     dati mancanti il segnale NON passa (r.488).
+#  5. Piu' un grilletto di price action (modo AUTORE: close>open oppure
+#     close>high[1], specchiato per lo short). Decide SOLO a barra
+#     chiusa; l'ingresso parte all'apertura della barra nuova.
+#
+# ---------------------------------------------------------------------
+#  ###  ANCORA UNICA?  S I  ###  -- con file:riga
+# ---------------------------------------------------------------------
+#     STOP   -> ABTG_AtrExhaustVol.mq5 r.500 (long) e r.514 (short):
+#               slStrut = MathMin(gLastPL, l1) - InpSLBufferPts*_Point
+#               cioe' il piu' PROTETTIVO fra il pivot e il minimo della
+#               barra di segnale, meno il buffer. Poi il pavimento
+#               (r.638, PavimentoSL_Calc con InpMinSLPts).
+#     TARGET -> r.647-649:
+#               if(InpTP_RR>0) tp = entry + R*InpTP_RR
+#               dove R = distSL, cioe' LO STOP STESSO (r.638-645).
+#
+#  >>> IL TARGET E' ESPRESSO IN UNITA' DELLO STOP. Quindi, come
+#      `ABTG_DAX_Apertura_EU` r.1070 (tp = entry + dist*TpTotalR()),
+#      l'E in R e' INVARIANTE al variare dell'ampiezza dello stop:
+#      allargare lo stop NON diluisce l'edge in R, perche' il target
+#      si allarga con lui.
+#  >>> CONSEGUENZA OPERATIVA, ED E' LA RAGIONE PER CUI QUESTO MOTORE
+#      MERITA DI GIRARE: la frontiera del costo `stop >= 40 x spread`
+#      SI PUO' COMPRARE, allargando lo stop, SENZA pagare in edge.
+#      Sugli altri tre motori invisibili questo NON e' vero.
+#  >>> LIMITE DICHIARATO: l'invarianza in R e' ASSUNTA (auto-similarita'
+#      del processo dei prezzi), NON misurata su QUESTO motore. La via
+#      per misurarla e' un asse su InpSLBufferPts, che e' un round
+#      successivo, non questo. Lo scrivo perche' e' il pezzo debole.
+#  >>> E UN FATTO CHE LA RAFFORZA: questo EA NON ha un flat di fine
+#      seduta (l'unica chiusura d'orologio e' InpFridayClose). Quindi
+#      nessun orologio "ruba" il target: il TP a 2R e' raggiungibile
+#      su piu' giorni e resta il vero meccanismo d'uscita. Sull'altro
+#      candidato ad ancora unica (HVAncora) il flat delle 21:00 rompe
+#      l'invarianza in cima alla scala: qui no.
+#
+# ---------------------------------------------------------------------
+#  ###  BARRE O CALENDARIO?  B A R R E , tutto  ###
+# ---------------------------------------------------------------------
+#    - i pivot sono a 5 barre a sinistra e 5 a destra DEL GRAFICO;
+#    - l'esaurimento e' in ATR(14) DEL GRAFICO (r.484, AtrVal());
+#    - la media del volume e' su 20 BARRE del grafico;
+#    - lo stop e' l'estremo di una barra del grafico.
+#  Nessun oggetto di calendario: nessun InpOneTradePerDay, nessun box
+#  notturno, nessuna candela D1, nessun gap, nessun pip fisso.
+#  >>> E' l'UNICO dei quattro motori invisibili di CLASSE S PIENA:
+#      scendendo di TF lo stop si stringe E i segnali crescono.
+#      Guadagno atteso per gradino: x1,97 (mediana MISURATA su 58 serie,
+#      report/LA_BANDA_BASSA_2026-09-12.md par. 2.2).
+#  >>> E' quindi l'unico dei quattro a cui la domanda di Claudio
+#      ("M5, M15 e M30 per le prop") si applica alla lettera. Il TF
+#      di questo round e' M30 perche' a M15 e a M5 la frontiera del
+#      costo non regge -- col numero, qui sotto.
+#
+# ---------------------------------------------------------------------
+#  ###  LA FRONTIERA DEL COSTO, COL NUMERO E PER TIMEFRAME  ###
+# ---------------------------------------------------------------------
+#  Pedaggio all-in sugli indici = SPREAD E BASTA (commissione 0,0000
+#  MISURATA su n=302 deal, CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181).
+#  1 punto indice = 100 punti MT5 su NASUSD (MISURATO, stesso referto
+#  r.290).
+#
+#  SPREAD NASUSD, MISURATO su 156.146.398 tick (spread_flotta):
+#    ore 14-20 SERVER: mediana 1,60 - 1,80  |  p95 1,80 - 2,70  |  max 8,20
+#    ore  0-13 SERVER: mediana 2,30 - 2,60  |  p95 2,70         |  max 8,20
+#  >>> Fuori dalla cassa USA lo spread e' il 28-62% PIU' ALTO. E' il
+#      primo motivo del filtro orario pinnato qui sotto.
+#
+#  stop NATURALE = ~1 range di barra (l'estremo della barra di segnale)
+#  + InpSLBufferPts. Range di barra [DERIVATO]: range giornaliero
+#  MISURATO 313,8 idx su 24 giorni (ROUND_ORB_ATR_PS5 r.234) x
+#  sqrt(t/1440):
+#     M5   18,5 idx  ->  /1,70 =  10,9x   SFONDA il pavimento DURO 13,3x
+#     M15  32,0 idx  ->  /1,70 =  18,8x   sopra il duro, sotto il 40x
+#     M30  45,3 idx  ->  /1,70 =  26,6x   sopra il duro, sotto il 40x
+#     H1   64,1 idx  ->  /1,70 =  37,7x   a un soffio dal 40x
+#  >>> M5 E' ESCLUSO PER COSTO, COL NUMERO: 10,9x contro un pavimento
+#      duro di 13,3x. Non e' "M5 e' basso": e' un conto.
+#  >>> E NESSUN TF nudo passa il 40x. Ma qui l'ANCORA E' UNICA, quindi
+#      la si compra:
+#
+#     InpSLBufferPts = 3000 punti MT5 = 30,0 punti indice
+#     InpMinSLPts    = 7200 punti MT5 = 72,0 punti indice (PAVIMENTO)
+#
+#     stop tipico M30 = 45,3 + 30,0 = 75,3 idx  ->  /1,80 = 41,8x
+#     stop MINIMO GARANTITO dal pavimento = 72,0 idx
+#         /1,80 (mediana peggiore della banda 14-20) = 40,0x  PASSA
+#         /1,70 (mediana tipica della banda)         = 42,4x  PASSA
+#  >>> IL PAVIMENTO R109 FA DA CANCELLO DI COSTO. Non e' un trucco:
+#      e' lo stesso numero che serve a non lasciare lo stop scoperto.
+#      E ripara un difetto vero del sorgente: InpMinSLPts parte a 0,
+#      cioe' PAVIMENTO SPENTO, contro la lezione R109. Con il pavimento
+#      a 0 e la tolleranza dell'autore lo stop puo' essere di pochi
+#      punti: il lotto esploderebbe e il rischio con lui.
+#
+#  >>> LA FRAZIONE SOTTO I PAVIMENTI, perche' la frontiera e' una
+#      DISTRIBUZIONE e non una mediana:
+#        sotto il pavimento di LAVORO 40x: serve spread > 1,80 idx.
+#          Nella banda 14-20 il p95 e' 1,80 alle ore 16-20 e 2,60-2,70
+#          alle ore 14-15. -> [DERIVATO] fra il 5% e il 10% delle
+#          occorrenze, concentrate nella PRIMA ORA di cassa.
+#        sotto il pavimento DURO 13,3x: serve spread > 5,41 idx.
+#          Il p95 della banda e' 1,80-2,70 e il max 8,20:
+#          -> oltre il p95 e sotto il max. FRAZIONE [NON MISURATA],
+#          ma limitata alla coda, non alla mediana.
+#      >>> NON invento la frazione esatta: l'istogramma di casa e'
+#          ORARIO, non al minuto (buco #3 di LA_BANDA_BASSA).
+#
+# ---------------------------------------------------------------------
+#  ###  L'ASSE: UNA MANOPOLA CHE NON MORDE, TROVATA LEGGENDO  ###
+# ---------------------------------------------------------------------
+#  ABTG_AtrExhaustVol.mq5 r.557-561:
+#     double Tolleranza(livello, atr)
+#       { if(InpProxMode==EX_PROX_ATR) return(atr*InpProxAtrMult);
+#         return(livello*InpProxPercent/100.0); }
+#
+#  Col modo dell'autore (EX_PROX_PERC, InpProxPercent = 0,5):
+#     tolleranza = 0,5% del PREZZO DEL PIVOT.
+#     NASUSD, prezzo mediano MISURATO 29.001 (ROUND_ORB_ATR_PS5 r.234)
+#     -> tolleranza = 145,0 punti indice
+#     -> contro un range di barra M30 di 45,3 idx: 3,2 BARRE INTERE.
+#  >>> UNA CONDIZIONE COSTITUTIVA DEL MOTORE E' INERTE. La prossimita'
+#      al pivot non filtra niente: 145 punti di tolleranza su un indice
+#      a 29.000 lasciano passare qualunque barra. L'autore ha tarato lo
+#      0,5% su uno strumento dove 0,5% e' dell'ordine della barra; su un
+#      indice a cinque cifre non lo e'.
+#  >>> E' esattamente la classe di difetto del censimento del 09/09:
+#      874 CSV su 1.960 con esiti IDENTICI = manopole girate senza che
+#      mordessero. "L'abbiamo provato" a volte vuol dire "l'abbiamo
+#      girato senza che cambiasse niente". Qui la manopola non e'
+#      ancora stata girata, e la si trova inerte PRIMA di spenderci
+#      una notte.
+#
+#  Col modo ATR (EX_PROX_ATR, InpProxAtrMult = 0,5):
+#     tolleranza = 0,5 x ATR(14) = ~22,6 idx a M30 = MEZZA barra.
+#     Questa morde.
+#
+#  >>> L'ASSE E' QUINDI InpProxMode, 0 contro 1. Una variabile sola,
+#      due celle, e sono le due sole che esistono (ENUM a due membri:
+#      r.119 enum ENUM_EX_PROX { EX_PROX_PERC=0, EX_PROX_ATR=1 }).
+#      Pinnato coi VALORI ESPLICITI 0 e 1, mai come intervallo largo su
+#      un ENUM (classe nuova del 12/09: un asse a passo 1 su un ENUM
+#      ha generato 16.374 celle in coda).
+#
+#  >>> E LA CELLA 0 E' IL CONTROLLO INTERNO DI QUESTO ROUND, al posto
+#      del cancello G1: e' la configurazione PIU' LARGA possibile del
+#      motore (prossimita' praticamente disattivata). Se la cella 0 da'
+#      ZERO operazioni, allora il motore da' zero operazioni col filtro
+#      piu' permissivo che ha, e il tappo sta altrove (esaurimento o
+#      volume): e' una RISPOSTA, non una catena rotta. Se invece le due
+#      celle danno lo STESSO numero al centesimo, allora la manopola
+#      non e' arrivata all'EA, e QUELLA e' la catena rotta.
+#      >>> G1 (determinismo con due magic gemelli) resta
+#          [NON MISURATO] per questo EA, e sta scritto qui.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- TRE USCITE (classe 278)
+# ---------------------------------------------------------------------
+#  Sedute nella finestra 2024.09.26 - 2026.06.30: ~443.
+#  Barre di decisione nella banda 14-20 SERVER a M30: 14 al giorno.
+#  Tetto: InpMaxTradesPerDay = 3.
+#  FREQUENZA ATTESA: [NON MISURATA] -- non la invento. Banda dichiarata
+#  dal numero di condizioni in AND (prossimita' + esaurimento > 2 ATR +
+#  volume > 1,5x media + grilletto):
+#     cella 1 (ATR, il filtro che morde):  0,10 - 0,50 op/giorno
+#        -> n totale 44 - 220  ->  IS 18-88  |  OOS 26-132
+#     cella 0 (PERC, prossimita' inerte):  0,30 - 1,20 op/giorno
+#        -> n totale 130 - 530  ->  IS 52-212 |  OOS 78-318
+#  >>> DICO SUBITO LA PARTE SCOMODA: la META' BASSA di entrambe le
+#      bande sta SOTTO il pavimento dei 150 per finestra. Questo round
+#      e' un PASSO 0 (un conteggio), NON un verdetto di merito, e non
+#      pretendo il contrario.
+#  PF atteso: [NON MISURATO]. Nessun PF di questo motore esiste, su
+#      nessun simbolo, su nessun TF. E' la ragione per cui gira.
+#  DD atteso: [NON MISURATO]. Con stop >= 72 idx a rischio 0,65% e un
+#      tetto di 3 al giorno, la peggior giornata teorica e' ~1,95%.
+#      La colonna DD e' un cancello di RISCHIO e si legge a QUALUNQUE n
+#      (Emendamento B, 16/08).
+#
+#  LE TRE USCITE:
+#   (a) NUMERO BUONO: almeno una cella con n >= 150 in entrambe le
+#       finestre E PF >= 1,10 in entrambe -> primo motore di casa a
+#       CLASSE S PIENA con un numero su M30. Si apre il round vero:
+#       due lati separati (25/08), gemelli U30USD e D30EUR, asse su
+#       InpAtrExhaustMult e InpVolSpikeMult, cella al CENTRO
+#       DELL'ALTOPIANO e MAI il picco.
+#   (b) NUMERO BRUTTO: n >= 150 in una finestra e PF < 1,10 in quella
+#       finestra -> cancello C0, CERTIFICATO scritto con PF/n/DD, e il
+#       motore si chiude con un numero. Buon esito.
+#       Oppure n < 150: MERITO SOSPESO (valvola R59), RISCHIO leggibile,
+#       e la riga in REGISTRO_TEST dice "frequenza misurata X op/giorno,
+#       la famiglia a tre indici fa 3X: il pavimento del 07/09 si
+#       applica alla FAMIGLIA". Non e' un morto, e non lo chiamo morto.
+#   (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: le due celle IDENTICHE
+#       al centesimo (InpProxMode non e' arrivato), oppure Trades = 0
+#       in ENTRAMBE con anche il volume a zero (il feed non espone il
+#       tick volume nel tester). NON si cambia nessun parametro: si
+#       leggono le righe [ATREXH][AUTOTEST] del log.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65%
+#    non giudica il merito se n < 150
+#
+# ---------------------------------------------------------------------
+#  ###  I LIMITI DI QUESTO MOTORE, scritti prima e non dopo  ###
+# ---------------------------------------------------------------------
+#  1. IL VOLUME E' TICK VOLUME, non volume scambiato. Sui CFD indici
+#     BCM il volume vero non esiste nel feed. Il motore ha il VOLUME
+#     COME MOTORE, non come filtro: e' lo scostamento numero 1, ed e'
+#     dichiarato dal sorgente stesso (r.54-62). Un PF buono su tick
+#     volume NON e' un PF sul volume dell'autore.
+#  2. UN SOLO REGIME. 21 mesi di tick BCM sugli indici = un solo
+#     regime, rialzista. La regola C dell'Emendamento della Finestra
+#     (prova di regime) NON e' soddisfatta e non lo sara' entro il
+#     30/09. Nessuna cella di questo round e' promuovibile senza.
+#  3. IL FILTRO ORARIO 14-20 E' NOSTRO, non dell'autore, ed e' una
+#     restrizione DI COSTO e di SENSO: fuori dalla cassa USA lo spread
+#     sale del 28-62% E la media del volume a 20 barre mischierebbe
+#     barre notturne sottili con barre di cassa, rendendo la soglia
+#     "1,5 x media" un numero senza significato. Dichiarato.
+#  4. InpFridayClose = true e' NOSTRO. Il sorgente parte a false, cioe'
+#     tiene le posizioni nel fine settimana: su un CFD indice quello
+#     misurerebbe il GAP DEL WEEKEND, non il motore. E' una
+#     restrizione di RISCHIO, piu' prudente del default, e va
+#     segnalata a Claudio perche' rischio e taglie sono SUOI.
+#  5. NIENTE FLAT DI SEDUTA: le posizioni restano aperte da un giorno
+#     all'altro. E' voluto (e' cio' che tiene in piedi l'ancora unica,
+#     vedi sopra) ma va scritto: questo NON e' un motore intraday.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING,
+#     mai un verdetto (classe 273, e qui il commento non e' invertito).
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#     Niente e' richiesto prima -> NON e' screening: e' un verdetto.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpHourStart=14,
+#     InpHourEnd=20. Un CSV con InpHourStart=15 e' in ora ITALIANA:
+#     SI CESTINA.
+#  TETTO BARRE: M30 su NASUSD, 21 mesi = ~21.100 barre [DERIVATO:
+#     46 barre/giorno x ~459 feriali], sotto il tetto delle ~100.000.
+#     A M5 sarebbero ~126.700: SFONDA -- secondo motivo per cui M5
+#     non e' qui (il primo e' il costo, 10,9x).
+#  ENUM: InpProxMode e InpTrigMode sono ENUM di due membri ciascuno,
+#     pinnati/spazzolati coi VALORI ESPLICITI. Mai come intervallo.
+#  MAGIC 784103: grep -rl repo-wide il 12/09/2026, .git escluso ->
+#     ZERO occorrenze.
+#  ETICHETTA blocco r141: zero collisioni con le 29 in coda (r139c e'
+#     la piu' alta).
+#  PER-TRADE: le due celle condividono il magic -> la seconda
+#     sovrascrive la prima. I numeri si leggono nell'OPTFRAME.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment, InpNewsFile e InpNewsCurrencies
+#     restano al default compilato (InpNewsCurrencies e' "" nel
+#     sorgente: pinnarlo vuoto sarebbe la classe che costo' FiboH4).
+#
+#  COSTO: 2 celle x 2 finestre = 4 passate -> T = 0,6 + 0,077 x 4 =
+#         0,91 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#     SECONDO strato, l'agente controllo-preventivo, NON POSSO
+#     invocarlo io: lo lancia il coordinatore. DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN spento nello screening (edge RAW). Nel tester la guardia
+#     e' fail-open comunque: il pin togli l'ambiguita', non cambia il numero.
+InpUsaGuardian=false||false||0||false||N
+
+# --- MOTORE: i valori dell'autore, tranne InpProxMode che e' l'asse
+InpPivotLeft=5||5||0||5||N
+InpPivotRight=5||5||0||5||N
+InpProxPercent=0.5||0.5||0||0.5||N
+InpProxAtrMult=0.5||0.5||0||0.5||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrExhaustMult=2.0||2.0||0||2.0||N
+InpVolSmaBars=20||20||0||20||N
+InpVolSpikeMult=1.5||1.5||0||1.5||N
+
+# --- GRILLETTO: modo AUTORE. ENUM a due membri, pinnato col valore 0.
+InpTrigMode=0||0||0||0||N
+InpTrigClosePct=70.0||70.0||0||70.0||N
+
+# --- DUE LATI INSIEME (regola di casa 25/08). Si separano dopo.
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- STOP: buffer 3000 punti MT5 = 30,0 punti indice e PAVIMENTO R109
+#     a 7200 punti MT5 = 72,0 punti indice = 40,0x la mediana peggiore
+#     dello spread nella banda 14-20 (1,80). Il sorgente parte con
+#     InpMinSLPts = 0, cioe' PAVIMENTO SPENTO: qui si ripara.
+InpSLBufferPts=3000||3000||0||3000||N
+InpMinSLPts=7200||7200||0||7200||N
+
+# --- TARGET: 2R, il valore dell'autore. E' il pezzo che rende l'ancora
+#     unica: tp = entry + R x InpTP_RR con R = lo stop (r.647-649).
+InpTP_RR=2.0||2.0||0||2.0||N
+
+# --- PARZIALE SPENTO = come l'autore. InpBreakeven resta inerte.
+InpTP1_RR=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=true||true||0||true||N
+
+# --- TRAILING SPENTO (opt-in dell'autore): una manopola alla volta
+InpUseTrailAtr=false||false||0||false||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- GESTIONE: tetto giornaliero obbligatorio (criterio C6), un livello
+#     puo' essere riusato (come l'autore), filtro orario NOSTRO acceso
+#     sulla cassa USA in ORA SERVER, venerdi' chiuso (rischio, NOSTRO)
+InpMaxTradesPerDay=3||3||0||3||N
+InpOneTradePerLevel=false||false||0||false||N
+InpUseHourFilter=true||true||0||true||N
+InpHourStart=14||14||0||14||N
+InpHourEnd=20||20||0||20||N
+InpFridayClose=true||true||0||true||N
+InpFridayCloseHour=20||20||0||20||N
+
+# --- RISCHIO: il contratto di casa 0,65 (il sorgente parte a 1,0).
+#     Taglie e rischio sono di CLAUDIO: qui si MISURA, non si decide.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO NOTIZIE SPENTO (il CSV non esiste nel tester)
+InpUseNewsFilter=false||false||0||false||N
+
+# --- GENERALI. Nessun pin di stringa.
+InpMagic=784103||784103||0||784103||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: DA DOVE NASCE LA TOLLERANZA DI PROSSIMITA'.
+#     0 = EX_PROX_PERC, 0,5% del prezzo del pivot = 145,0 punti indice
+#         su NASUSD = 3,2 range di barra M30: MANOPOLA INERTE, ed e' il
+#         valore DELL'AUTORE. E' anche il CONTROLLO INTERNO del round
+#         (configurazione piu' larga possibile).
+#     1 = EX_PROX_ATR, 0,5 x ATR(14) = ~22,6 punti indice = mezza barra:
+#         questa morde.
+InpProxMode=0||0||1||1||Y

@@ -1,0 +1,374 @@
+# =====================================================================
+#  EA: ABTG_HVAncora
+#  R141d -- L'ANCORA DI VOLATILITA', U30USD M30.
+#           Asse unico: InpStopAtr -- LA SCALA DELLA FRONTIERA DEL COSTO.
+# ---------------------------------------------------------------------
+#  DOSSIER:       report/I_QUATTRO_INVISIBILI_2026-09-12.md
+#  FILE DEL 08/09: prove/ABTG_HVAncora_00_conta.txt  --  NON TOCCATO.
+#  FONTE: Pine "HV Spike Strategy" di kostastrovas (TradingView
+#         1oZNa7Oq, 26/10/2025, nessuna licenza dichiarata). Copia in
+#         caccia_strategie/biblioteca/sorgenti/
+#         HvSpikeOrBreakoutReversal_kostastrovas-NOLICENSE_tv1oZNa7Oq_2026-09-08.pine
+#         Referto: report/CACCIA_M30_INDICI_2026-09-08.md (P3, 8/10).
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' ESISTE UN SECONDO FILE, E COSA C'E' DI SBAGLIATO NEL
+#  ###  PRIMO. Ed e' un difetto di ARITMETICA, non di stile.
+# ---------------------------------------------------------------------
+#  prove/ABTG_HVAncora_00_conta.txt (08/09/2026) e' un documento di
+#  criteri eccellente, passa controlla_prova.py (2 celle, gemelli sul
+#  magic, cancello G1) e NON E' MAI STATO LANCIATO. Ma dichiara:
+#      "ATTESA CENTRALE: 130-350 ANCORE e 50-200 OPERAZIONI nei 21
+#       mesi su U30USD, cioe' 0,11-0,45 op/giorno di seduta"
+#  e pinna InpStopAtr = 1.0 (il valore della fonte).
+#
+#  ###  QUELL'ATTESA NON E' RAGGIUNGIBILE. CLASSE 278.  ###
+#  ABTG_HVAncora.mq5 porta il cancello di costo di casa DENTRO l'EA:
+#      r.239  input double InpMaxSpreadPctOfStop = 2.5;
+#      r.935  if(spreadPrezzo > (InpMaxSpreadPctOfStop/100.0)*slDist)
+#                -> IL TRADE SI SALTA
+#  2,5% dello stop = "spread <= 1/40 dello stop" = il pavimento di
+#  LAVORO `stop >= 40 x spread`, applicato tick per tick dall'EA.
+#
+#  Ora i numeri MISURATI, non ricordati:
+#    spread U30USD, mediana per ora SERVER, su 64.711.285 tick
+#    (risultati_archivio/spread_flotta/spread_orario_U30USD.csv):
+#        ore 08-13  2,60  (1.676.013 tick alla sola ora 08)
+#        ore 14-20  1,90 - 2,00  (4.931.660 tick alla sola ora 14)
+#    range giornaliero U30USD MISURATO 314,5 punti indice su 24 giorni
+#    (report/ROUND_ORB_ATR_PS5_2026-09-10.md r.233)
+#    -> range di barra M30 [DERIVATO] = 314,5 x sqrt(30/1440) = 45,4 idx
+#    -> con InpStopAtr = 1,0 lo stop tipico e' 45,4 punti indice
+#    -> spread / stop = 2,00 / 45,4 = 4,41%  (ore 14-20)
+#                     = 2,60 / 45,4 = 5,73%  (ore 08-13)
+#    -> IL CANCELLO CHIEDE <= 2,50%.
+#
+#  >>> CONCLUSIONE: col pin del 08/09 l'EA RIFIUTA il trade a OGNI ora
+#      della finestra, e la corsa tornerebbe con ~ZERO OPERAZIONI.
+#      Le 50-200 operazioni attese sono impossibili PER COSTRUZIONE.
+#      E il danno peggiore non e' la corsa buttata: e' che uno zero
+#      letto come "niente segnali" avrebbe SEPOLTO un motore che
+#      invece non era nemmeno stato interrogato.
+#      >>> "Una misura che non puo' dare una risposta positiva non e'
+#          una misura." Questo file ne fa una che puo'.
+#  >>> Il file del 08/09 NON L'HO MODIFICATO (stessa scelta fatta oggi
+#      su prove/ABTG_ImpulsoApertura.txt in LA_BANDA_BASSA par. 5.1):
+#      resta come reperto, e la sua riga di difetto sta in
+#      REGISTRO_TEST.md.
+#
+# ---------------------------------------------------------------------
+#  IL MOTORE IN CINQUE RIGHE
+# ---------------------------------------------------------------------
+#  1. ANCORA: la barra in cui la volatilita' storica (stdev dei
+#     log-rendimenti a InpHvLen=30 barre) ATTRAVERSA VERSO L'ALTO il
+#     proprio percentile InpHvSoglia=50 su InpHvLookback=252 barre.
+#     Il suo massimo e il suo minimo diventano il livello; il suo range
+#     diventa il metro.
+#  2. CONTINUAZIONE: il prezzo chiude oltre il 100% del range
+#     dell'ancora -> si entra NEL VERSO.
+#  3. ESAURIMENTO: il prezzo aveva esteso del 100% e RIENTRA dentro il
+#     range dell'ancora -> si entra CONTRO.
+#  4. Il LATO non e' un input: lo decide l'ancora. L'ancora vive
+#     InpAncoraBarre=20 barre valutate e muore col cambio di giorno.
+#  5. Non c'e' nessun orario nel motore: il MOTORE NON SA CHE ORA E'.
+#     La finestra 08:00-20:30 SERVER e il flat 21:00 sono gestione DI
+#     CASA, non della fonte.
+#
+# ---------------------------------------------------------------------
+#  ###  ANCORA UNICA?  S I  (ma con una crepa in cima alla scala)  ###
+# ---------------------------------------------------------------------
+#     STOP   -> ABTG_HVAncora.mq5 r.927:
+#               slGrezzo = entry -+ InpStopAtr * atr
+#               con atr = iATR(_Symbol, gTF, InpAtrLen) e
+#               gTF = PERIOD_CURRENT (r.255, r.657).
+#     TARGET -> ABTG_HVAncora.mq5 r.945:
+#               tp = entry +- InpRR * slDist
+#               dove slDist E' LO STOP.
+#
+#  >>> IL TARGET E' IN UNITA' DELLO STOP: come
+#      ABTG_DAX_Apertura_EU r.1070, l'E in R e' INVARIANTE
+#      all'ampiezza dello stop. Quindi la frontiera del costo si
+#      compra allargando InpStopAtr, e in teoria si compra GRATIS.
+#  >>> LA CREPA, E LA SCRIVO PRIMA DI VEDERE I NUMERI: esiste anche un
+#      FLAT DI SEDUTA alle 21:00 SERVER (r.223-225,
+#      InpUsaFlatSeduta=true). Un flat e' un'ancora di CALENDARIO. Se
+#      il TP sta troppo lontano per essere raggiunto entro la
+#      campanella, l'uscita effettiva diventa l'OROLOGIO e l'ancora
+#      unica SI ROMPE.
+#      Col range giornaliero MISURATO di 314,5 idx, il TP a InpRR=2,0
+#      sta a:
+#          k=1,0  TP  90,8 idx  =  29% del range del giorno   raggiungibile
+#          k=1,5  TP 136,2 idx  =  43%                        raggiungibile
+#          k=2,0  TP 181,6 idx  =  58%                        marginale
+#          k=2,5  TP 227,0 idx  =  72%                        quasi mai
+#      >>> QUINDI QUESTO ROUND MISURA DUE COSE INSIEME, e sono la
+#          stessa cosa guardata da due lati: dove cade il muro del
+#          COSTO (in basso) e dove cade il muro del CALENDARIO (in
+#          alto). Se esiste una cella al centro che passa entrambi,
+#          quella cella e' il motore. Se non esiste, il motore e'
+#          schiacciato fra il suo pedaggio e la sua campanella -- e
+#          quello e' un verdetto, non un fallimento della corsa.
+#
+# ---------------------------------------------------------------------
+#  ###  BARRE O CALENDARIO?  B A R R E per il segnale e per lo stop,
+#  ###  CALENDARIO per l'uscita di riserva.  --> MISTO
+# ---------------------------------------------------------------------
+#    - HV = stdev a 30 BARRE, percentile su 252 BARRE;
+#    - vita dell'ancora = 20 BARRE valutate;
+#    - stop = InpStopAtr x ATR(InpAtrLen) del GRAFICO;
+#    -> segnale e stop scalano col TF: CLASSE S.
+#    - MA: InpAncoraSoloOggi=true (l'ancora muore col giorno server) e
+#      InpUsaFlatSeduta=true (flat 21:00) sono CALENDARIO.
+#  >>> Guadagno di frequenza scendendo di TF: ATTESO x1,97 per gradino
+#      (mediana MISURATA su 58 serie, LA_BANDA_BASSA par. 2.2), MA
+#      TAGLIATO da InpAncoraSoloOggi: un'ancora per giorno vale meno
+#      barre disponibili. Il guadagno vero e' [NON MISURATO].
+#  >>> E la lettura (3) del sorgente (r.101-110) dice una cosa che
+#      cambia l'attesa: "252 barre su M30 non sono un anno, sono ~5-6
+#      sedute". Il percentile non misura la volatilita' rara
+#      dell'anno: misura quella dell'ultima settimana. L'attivazione
+#      e' MOLTO meno rara di quanto il nome "HV Spike" suggerisca.
+#
+# ---------------------------------------------------------------------
+#  ###  LA FRONTIERA DEL COSTO, PER TIMEFRAME E PER CELLA  ###
+# ---------------------------------------------------------------------
+#  Pedaggio all-in sugli indici = SPREAD E BASTA (commissione 0,0000
+#  MISURATA, n=302 deal). 1 punto indice = 100 punti MT5 su U30USD
+#  (MISURATO, CANCELLO_COSTO_FLOTTA_2026-09-10.md r.290).
+#
+#  A) stop/spread con InpStopAtr = 1,0 (il valore della fonte), per TF
+#     [range di barra DERIVATO da 314,5 idx MISURATI x sqrt(t/1440)]:
+#       M5   18,5 idx -> /2,00 =  9,3x  |  /2,60 =  7,1x   SFONDA il duro 13,3x
+#       M15  32,1 idx -> /2,00 = 16,0x  |  /2,60 = 12,3x   sfonda il duro al mattino
+#       M30  45,4 idx -> /2,00 = 22,7x  |  /2,60 = 17,5x   sopra il duro, sotto 40x
+#       H1   64,2 idx -> /2,00 = 32,1x  |  /2,60 = 24,7x   sotto 40x
+#     >>> M5 E' ESCLUSO PER COSTO, COL NUMERO (9,3x e 7,1x contro un
+#         pavimento duro di 13,3x). M15 e' escluso per costo nelle ore
+#         08-13 (12,3x). Nessun TF passa il 40x a InpStopAtr = 1,0.
+#     >>> M30 e' il TF piu' BASSO che sta sopra il duro a TUTTE le ore
+#         della finestra. Per questo il round e' a M30 e non a M15.
+#
+#  B) LA SCALA DI QUESTO ROUND, a M30, col cancello dentro l'EA
+#     (soglia 2,50% dello spread sullo stop):
+#       k = 1,0  stop  45,4 idx  spread/stop 4,41% (14-20) 5,73% (08-13)  RIFIUTA sempre
+#       k = 1,5  stop  68,1 idx  spread/stop 2,94% (14-20) 3,82% (08-13)  RIFIUTA sempre
+#       k = 2,0  stop  90,8 idx  spread/stop 2,20% (14-20) 2,86% (08-13)  PASSA il pomeriggio
+#       k = 2,5  stop 113,5 idx  spread/stop 1,76% (14-20) 2,29% (08-13)  PASSA a tutte le ore
+#     in rapporti: 22,7x / 34,1x / 45,4x / 56,7x (ore 14-20)
+#                  17,5x / 26,2x / 34,9x / 43,7x (ore 08-13)
+#     >>> L'ESITO POSITIVO E' RAGGIUNGIBILE (classe 278): le celle 2,0
+#         e 2,5 stanno SOPRA il pavimento di lavoro, e la 2,5 ci sta a
+#         tutte le ore della finestra. Se il limite superiore della
+#         scala fosse stato sotto 40x, questo file NON andava scritto:
+#         si andava a H1 o a H2.
+#     >>> LA FRAZIONE SOTTO I PAVIMENTI, perche' la frontiera e' una
+#         DISTRIBUZIONE:
+#           celle k=1,0 e k=1,5: il 100% delle occorrenze sta sotto il
+#             pavimento di lavoro, e l'EA le RIFIUTA tutte. Atteso
+#             Trades = 0. NON e' un baco: e' il cancello che funziona.
+#           cella k=2,0: rifiutate le ore 08-13 (2,86% > 2,50%) =
+#             [DERIVATO] ~12 delle ~26 barre di finestra, cioe' ~46%
+#             delle occasioni.
+#           cella k=2,5: passa la mediana a tutte le ore. Al p95 dello
+#             spread (3,00 idx, MISURATO alle ore 08-13) il rapporto
+#             scende a 37,8x = 2,64% > 2,50% -> RIFIUTATA. Quindi
+#             anche la cella migliore perde la coda alta dello spread:
+#             [DERIVATO] ~5% delle occasioni al mattino.
+#           sotto il pavimento DURO 13,3x (spread > 8,53 idx a k=2,5):
+#             il max MISURATO su U30USD e' 101,0 idx (ora 13) e 47,0
+#             (ora 14). FRAZIONE [NON MISURATA], confinata alla coda
+#             oltre il p95 -- e l'EA la rifiuta comunque.
+#     >>> ATTENZIONE, IL SEGNO DELL'ERRORE: la legge di scala ancorata
+#         all'ADR SOTTOSTIMA lo stop del 18-27% (MISURATO in
+#         report/EMA200_I_DUE_REQUISITI_2026-09-12.md r.182). Quindi i
+#         rapporti qui sopra sono un PAVIMENTO e il muro dei rifiuti
+#         cadra' probabilmente una cella PIU' IN BASSO di dove lo
+#         prevedo. E' una previsione FALSIFICABILE: vedi le tre uscite.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- TRE USCITE (classe 278)
+# ---------------------------------------------------------------------
+#  Sedute nella finestra 2024.09.26 - 2026.06.30: ~443.
+#  L'attesa sulle ANCORE la prendo dal file del 08/09 e NON la rifaccio
+#  (e' il lavoro di quel file, ed e' buono): 130-350 ancore nei 21 mesi,
+#  conversione ancora->occasione 25-40%.
+#
+#  LA MIA PREVISIONE, cella per cella (e' la cosa che questo round
+#  falsifica):
+#    k = 1,0   Trades ATTESI 0 - 5     (rifiuto per costo ~100%)
+#    k = 1,5   Trades ATTESI 0 - 20    (rifiuto per costo ~100%)
+#    k = 2,0   Trades ATTESI 20 - 110  (passa solo il pomeriggio)
+#    k = 2,5   Trades ATTESI 40 - 200  (passa a tutte le ore)
+#  >>> MONOTONA E CRESCENTE. Se NON e' monotona, o il volume delle
+#      occasioni non e' quello che credo, o il cancello non morde.
+#  >>> E QUESTO ROUND MISURA UNA COSA CHE NON ABBIAMO: l'ATR(M30) VERO
+#      di U30USD. Il k a cui compaiono le prime operazioni lo dice:
+#      se compaiono gia' a k=1,5, allora ATR(M30) >= 80,0/1,5 = 53,3
+#      idx, cioe' la mia derivazione da ADR sottostima di almeno il
+#      17% -- che e' ESATTAMENTE la sottostima del 18-27% gia'
+#      misurata in casa su un altro motore. Due strade indipendenti.
+#      Se invece non compaiono nemmeno a k=2,5, la derivazione
+#      SOVRASTIMA e va rifatta.
+#
+#  PF atteso: [NON MISURATO]. Nessun PF di questo motore esiste, su
+#      nessun simbolo e nessun TF. Con n sotto 150 per finestra
+#      (probabile), il MERITO E' SOSPESO per la valvola R59: questo
+#      round e' un PASSO 0 di costo e frequenza, NON un verdetto.
+#  DD atteso: [NON MISURATO]. Rischio 0,65% per operazione,
+#      InpMaxTradesPerDay = 0 (illimitato, come la fonte): la colonna
+#      "Peggior Giornata %" e' il cancello di RISCHIO di questo round,
+#      e si legge a QUALUNQUE n (Emendamento B, 16/08).
+#
+#  LE TRE USCITE:
+#   (a) NUMERO BUONO: almeno una cella con Trades >= 40 e PF >= 1,10 in
+#       entrambe le finestre -> si apre il round vero (gemelli D30EUR e
+#       NASUSD, rami separati con InpUsaRamoContinuazione, due lati
+#       separati, e cella al CENTRO DELL'ALTOPIANO mai il picco).
+#       >>> E se il PF fosse PIATTO sulle celle che operano, quella e'
+#           la CONFERMA dell'invarianza in R dell'ancora unica: sarebbe
+#           la prima misura di casa su questa legge. Vale da sola.
+#   (b) NUMERO BRUTTO: tutte le celle che operano con PF < 1,10 ->
+#       certificato con PF/n/DD per cella, e la riga in REGISTRO_TEST
+#       dice anche QUANTE occasioni sono state rifiutate per costo.
+#       Oppure: monotona ma con Trades troppo pochi (< 30 sulla cella
+#       migliore) -> BOCCIATO PER FREQUENZA, e allora si scrive che il
+#       pavimento del 07/09 si applica alla FAMIGLIA (tre indici) e la
+#       riga va in coda all'imbuto, non nel cimitero.
+#   (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: TUTTE E QUATTRO le celle
+#       a Trades = 0 (allora il tappo non e' il costo: e' l'ancora o il
+#       grilletto, e si leggono i contatori di diagnostica dell'EA),
+#       oppure le quattro celle IDENTICHE al centesimo (InpStopAtr non
+#       e' arrivato all'EA), oppure Trades NON monotono su k senza una
+#       ragione leggibile nei log. In nessuno di questi casi si cambia
+#       un parametro: si riapre il baco.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65%
+#    scarta per frequenza se  la cella migliore fa < 30 operazioni in
+#           21 mesi (stessa soglia del file del 08/09, che la prende da
+#           ABTG_OpeningReversalB dell'08/09)
+#    non giudica il merito se n < 150
+#
+#  REGOLA DI SELEZIONE, dichiarata INSIEME al numero: se piu' celle
+#  operano, si prende il CENTRO DELL'ALTOPIANO, MAI IL PICCO. Su una
+#  scala di sole 4 celle un altopiano non e' nemmeno leggibile: quindi
+#  questo round NON promuove nessuna cella, qualunque numero esca.
+#  Sceglie solo DOVE mettere l'altopiano nel round dopo.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING, mai
+#     un verdetto (classe 273; il commento non e' invertito).
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#     Nulla e' richiesto prima -> NON e' screening.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpOraInizio=8,
+#     InpOraFine=20 InpMinFine=30, InpOraFlat=21. Un CSV con
+#     InpOraInizio=9 e' in ora ITALIANA: SI CESTINA.
+#  TETTO BARRE: M30 su U30USD, 21 mesi = ~21.100 barre [DERIVATO],
+#     sotto il tetto delle ~100.000. A M5 sarebbero ~126.700: SFONDA,
+#     ed e' il secondo motivo per cui M5 non e' qui (il primo e' il
+#     costo, 9,3x contro un duro di 13,3x).
+#  InpMinStopPts = 25 punti indice: pavimento R109, OnInit RIFIUTA lo
+#     zero (r.632-633). E' INERTE su questa scala (il piu' piccolo
+#     stop della scala e' 45,4 idx): dichiarato, cosi' nessuno lo
+#     legge come un vincolo attivo.
+#  InpMT5PerPuntoIndice = 100: MISURATO su U30USD (CANCELLO_COSTO_
+#     FLOTTA r.290), non assunto.
+#  MAGIC 784104: grep -rl repo-wide il 12/09/2026, .git escluso ->
+#     ZERO occorrenze. (Il magic 776900/776950 del file del 08/09 NON
+#     e' riusato qui: due round diversi, due magic diversi.)
+#  ETICHETTA blocco r141: zero collisioni con le 29 in coda (r139c).
+#  PER-TRADE: le quattro celle condividono il magic -> l'ultima
+#     sovrascrive le altre. I numeri delle celle si leggono
+#     nell'OPTFRAME, che ha una riga per passata. Dichiarato.
+#  G1 (determinismo): [NON MISURATO] in questo round -- l'asse e' uno
+#     solo e serve alla scala del costo. Il controllo interno qui e'
+#     la MONOTONIA di Trades su k.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment resta al default compilato.
+#  ENUM: questo EA non ha input di tipo ENUM. Nessun asse su enum,
+#     nessun intervallo con passo su enum (classe nuova del 12/09).
+#
+#  COSTO: 4 celle x 2 finestre = 8 passate -> T = 0,6 + 0,077 x 8 =
+#         1,22 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#     SECONDO strato, l'agente controllo-preventivo, NON POSSO
+#     invocarlo io: lo lancia il coordinatore. DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN spento nello screening (edge RAW). Nel tester la guardia
+#     e' fail-open comunque: il pin toglie l'ambiguita'.
+InpUsaGuardian=false||false||0||false||N
+
+# --- ATTIVAZIONE: i valori della fonte, tutti pinnati
+InpModoAttivazione=0||0||0||0||N
+InpHvLen=30||30||0||30||N
+InpHvLookback=252||252||0||252||N
+InpHvSoglia=50.0||50.0||0||50.0||N
+InpAncoraBarre=20||20||0||20||N
+InpAncoraSoloOggi=true||true||0||true||N
+
+# --- I DUE RAMI accesi insieme (fedelta' alla gerarchia della fonte:
+#     la continuazione arriva prima, quindi gli INGRESSI di esaurimento
+#     saranno ~0 PER COSTRUZIONE -- vedi la lettura (2) del sorgente).
+#     I rami si separano nel round dopo, non qui.
+InpUsaRamoContinuazione=true||true||0||true||N
+InpUsaRamoEsaurimento=true||true||0||true||N
+
+# --- DUE LATI INSIEME (regola di casa 25/08)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- SESSIONE E FLAT: ORA SERVER BCM. Finestra 08:00-20:30, flat 21:00.
+#     E' la finestra del file del 08/09 e NON la cambio: due regimi di
+#     spread dentro la finestra (2,60 al mattino, 1,90-2,00 al
+#     pomeriggio) rendono la scala del costo PIU' informativa, non meno.
+InpOraInizio=8||8||0||8||N
+InpMinInizio=0||0||0||0||N
+InpOraFine=20||20||0||20||N
+InpMinFine=30||30||0||30||N
+InpUsaFlatSeduta=true||true||0||true||N
+InpOraFlat=21||21||0||21||N
+InpMinFlat=0||0||0||0||N
+
+# --- STOP: InpAtrLen e il pavimento. InpStopAtr e' L'ASSE, in fondo.
+InpAtrLen=14||14||0||14||N
+InpMinStopPts=25||25||0||25||N
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- USCITA: 2R come la fonte, breakeven spento come la fonte
+InpRR=2.0||2.0||0||2.0||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- RISCHIO E CANCELLO DI COSTO DENTRO L'EA.
+#     InpMaxSpreadPctOfStop = 2,5 NON SI TOCCA: e' il pavimento di
+#     lavoro `stop >= 40 x spread` applicato tick per tick, ed e'
+#     PROPRIO IL CANCELLO CHE QUESTO ROUND STA SCALANDO. Abbassarlo
+#     per far passare la cella k=1,0 sarebbe abbassare l'asticella,
+#     non insistere.
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpMaxSpreadPctOfStop=2.5||2.5||0||2.5||N
+InpMaxTradesPerDay=0||0||0||0||N
+
+# --- GENERALI. Nessun pin di stringa.
+InpMagic=784104||784104||0||784104||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: L'AMPIEZZA DELLO STOP IN ATR.
+#     4 celle: 1,0 (la fonte) / 1,5 / 2,0 / 2,5.
+#     E' la SCALA DELLA FRONTIERA DEL COSTO: il cancello dentro l'EA
+#     (2,5% dello stop) rifiuta le prime due per costruzione e passa
+#     le ultime due. Dove cade il muro dei rifiuti misura l'ATR(M30)
+#     vero di U30USD, che oggi e' [DERIVATO] e non misurato.
+#     Ed e' legittimo allargarlo GRATIS solo perche' l'ANCORA E' UNICA
+#     (tp = entry + InpRR x slDist, r.945): su un motore ad ancore
+#     diverse questo asse sarebbe curve fitting sul costo.
+InpStopAtr=1.0||1.0||0.5||2.5||Y

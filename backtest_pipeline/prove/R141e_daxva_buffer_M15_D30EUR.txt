@@ -1,0 +1,437 @@
+# =====================================================================
+#  EA: ABTG_DaxValueArea
+#  R141e -- VALUE AREA DAX, D30EUR M15.
+#           Asse unico: InpSlBufferPts -- LA SCALA DELLA FRONTIERA DEL
+#           COSTO, e insieme il CONTRO-ESEMPIO alla regola dell'ancora
+#           unica su un motore ad ancore DIVERSE.
+# ---------------------------------------------------------------------
+#  DOSSIER:        report/I_QUATTRO_INVISIBILI_2026-09-12.md
+#  FILE DEL 30/08: prove/ABTG_DaxValueArea.txt  --  NON TOCCATO.
+#  FONTE DEL METODO: metodo volumetrico DAX V5 di CLAUDIO.
+#     docs/metodi/PROMPT_Volumetrico_apertura_DAX_20260625.docx
+#     docs/metodi/ANALISI_METODO_VOLUMETRICO_DAX_V5.md
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' ESISTE UN SECONDO FILE. IL PRIMO NON E' LANCIABILE,
+#  ###  E NON DI POCO: HA QUATTRO DIFETTI BLOCCANTI.
+# ---------------------------------------------------------------------
+#  prove/ABTG_DaxValueArea.txt (30/08/2026), verificato riga per riga
+#  il 12/09/2026:
+#   1. TRE ASSI Y (InpVaPercent, InpAcceptBars, InpSide). Un file prova
+#      misura UNA variabile alla volta: controlla_prova.py FALLISCE.
+#   2. LE DIRETTIVE @ SONO COMMENTATE. Nel file stanno scritte come
+#      "# @SIMBOLO  D30EUR", "# @PERIODO  M5", "# @DAQUANDO ...".
+#      walkforward_generico.ps1 r.495-501 salta le righe che iniziano
+#      con '#' PRIMA di guardare la '@' -> il driver NON vede nessuna
+#      direttiva e MUORE su r.737 ("manca il simbolo").
+#      >>> E il cancello deterministico NON lo vede: controlla_prova.py
+#          cerca la sottostringa "@DAQUANDO" nel testo e la trova
+#          DENTRO il commento. E' un punto cieco del cancello, e lo
+#          scrivo perche' e' una classe nuova, non un caso.
+#   3. NESSUNA RIGA "#  EA: <nome>" nell'intestazione -> il cancello
+#      stampa "EA NON TROVATO -> non misurabile" e non controlla niente.
+#   4. @PERIODO M5 su D30EUR per 21 mesi = ~126.700 barre [DERIVATO:
+#      276 barre/giorno x ~459 feriali], SOPRA il tetto delle ~100.000
+#      del tester. La finestra vera sarebbe piu' corta di quella
+#      dichiarata, in silenzio.
+#  >>> Il file del 30/08 NON L'HO MODIFICATO: resta come reperto dei
+#      criteri (che sono buoni), e la sua riga di difetto sta in
+#      REGISTRO_TEST.md.
+#
+# ---------------------------------------------------------------------
+#  IL MOTORE IN CINQUE RIGHE
+# ---------------------------------------------------------------------
+#  1. Alla fine di ogni seduta cash DAX si costruisce il VOLUME PROFILE
+#     della seduta: ogni barra distribuisce il suo TICK-VOLUME in modo
+#     UNIFORME sui bin che il suo range attraversa (r.286-312).
+#  2. Dal POC (bin piu' pesante) si espande al vicino piu' pesante
+#     finche' si copre InpVaPercent=70% del volume: si ottengono VAL e
+#     VAH, i bordi della VALUE AREA (r.323-350).
+#  3. L'APERTURA DI DOMANI rispetto a quella VA seleziona il motore
+#     (FASE 5 del metodo, r.359-365): dentro -> BALANCE (rotazione),
+#     sopra VAH -> DIREZIONALE rialzista, sotto VAL -> ribassista.
+#  4. BALANCE: fade del bordo verso il POC (tocca VAL e rientra ->
+#     LONG; tocca VAH e rientra -> SHORT) (r.377-385).
+#     DIREZIONALE: InpAcceptBars=2 barre che CHIUDONO fuori dalla VA =
+#     l'ACCETTAZIONE, che e' la conferma, non la rottura nuda (r.395-407).
+#  5. Flat a fine cassa DAX, 16:30 ORA SERVER. Zero overnight.
+#
+# ---------------------------------------------------------------------
+#  ###  ANCORA UNICA?  N O  ###  -- e su questo motore e' il problema
+#  ###  centrale, non un dettaglio. Con file:riga.
+# ---------------------------------------------------------------------
+#     STOP   -> ABTG_DaxValueArea.mq5 r.415-421 (SlValueArea_Calc):
+#               BALANCE  long: VAL - buffer   short: VAH + buffer
+#               DIREZION long: VAH - buffer   short: VAL + buffer
+#               piu' il pavimento r.812 (PavimentoSL_Calc, InpMinStopPts).
+#               L'ingresso e' al MERCATO sulla barra dopo il segnale
+#               (r.795-799), quindi la distanza vera dello stop e'
+#               (escursione della barra di segnale) + buffer.
+#     TARGET -> r.432-446 (Targets_Calc):
+#               BALANCE  tp1 = POC ; finalTP = bordo OPPOSTO (VAH/VAL)
+#               DIREZION finalTP = bordo +- InpExtVaMult x LARGHEZZA VA
+#
+#  >>> DUE ANCORE DIVERSE, E SI VEDE A OCCHIO NUDO:
+#        lo stop nasce da (escursione di una BARRA) + (un BUFFER FISSO)
+#        il target nasce dalla LARGHEZZA DELLA VALUE AREA
+#      Nessuna delle due sa niente dell'altra.
+#  >>> CONSEGUENZA ARITMETICA, con la formula del 12/09:
+#          E_netta(R) = (edge_punti - costo_punti) / stop_punti
+#      Il target e' FISSO in punti (la larghezza della VA), il costo e'
+#      FISSO in punti (lo spread). Quindi ALLARGARE LO STOP DIVIDE
+#      L'EDGE IN R, esattamente come sul cono di rumore (misurato il
+#      12/09: `stop/spread` 52,4x e informazione direzionale +0,0012 R,
+#      cioe' ZERO) e sul salto statistico M31 (misurato il 05/09).
+#  >>> QUINDI: su questo motore `stop/spread` E' UN NUMERO COSMETICO, e
+#      comprare la frontiera del costo allargando il buffer COSTA EDGE.
+#      Non e' un'opinione: e' la ragione per cui questo file e' un
+#      round di MISURA DI UNA LEGGE e non un round da cui aspettarsi
+#      una sedia.
+#
+# ---------------------------------------------------------------------
+#  ###  BARRE O CALENDARIO?  C A L E N D A R I O per il segnale,
+#  ###  B A R R E per lo stop.  --> IL PEGGIORE DEI QUATTRO ABBINAMENTI
+# ---------------------------------------------------------------------
+#    CALENDARIO (il segnale):
+#      - UNA Value Area al giorno, dalla seduta PRECEDENTE (r.690-695);
+#      - la finestra e' la cassa DAX 08:00-16:30 ORA SERVER (r.110-113);
+#      - InpMaxTradesPerDay = 2 (tetto per giorno, r.130);
+#      - flat a fine cassa (r.125).
+#      -> scendendo di TF il numero di SETUP NON CRESCE: il tetto e' 2
+#         al giorno a QUALUNQUE TF.
+#      >>> GUADAGNO DI FREQUENZA SCENDENDO DI TF: 0,00 op/giorno oltre
+#          il tetto, MISURATO DAL CODICE.
+#    BARRE (lo stop):
+#      - la distanza dello stop contiene l'escursione di UNA BARRA del
+#        grafico -> scendendo di TF LO STOP SI STRINGE.
+#  >>> E' ESATTAMENTE IL CASO DI ABTG_ImpulsoApertura descritto in
+#      LA_BANDA_BASSA par. 4: scendere di TF COSTA DUE VOLTE (stop piu'
+#      stretto E nessuna operazione in piu'). Non rompe la legge
+#      dell'ancoraggio: la peggiora.
+#
+#  >>> E C'E' UNA TERZA TENSIONE, CHE NON STA IN NESSUNA REGOLA DI CASA
+#  ###  E CHE HO TROVATO LEGGENDO IL COSTRUTTORE DEL PROFILO  ###
+#      Il profilo si costruisce con le barre DEL GRAFICO (r.585, r.641:
+#      CopyRates(_Symbol, gTF, ...)) e ogni barra spalma il suo volume
+#      UNIFORMEMENTE sui bin del suo range (r.286-312).
+#      Seduta cash DAX = 510 minuti. Bin = InpVaBinPts = 5 punti indice.
+#      Range di seduta [DERIVATO da 186,5 idx MISURATI]: 111,0 idx
+#      = ~22 bin.
+#         TF    barre/seduta   bin coperti da una barra   quota del profilo
+#         M5      102              2,2                        10%
+#         M15      34              3,8                        18%
+#         M30      17              5,4                        25%
+#      >>> A M30 ogni singola barra sporca un quarto del profilo: il
+#          POC tende al centro del range e la VA tende al range x 0,7.
+#          IL PROFILO VOLUMETRICO DEGENERA IN UNA STATISTICA
+#          GEOMETRICA DI RANGE -- cioe' il motore diventa un ORB con un
+#          altro nome, e l'ORB in casa e' chiuso con ~210 celle a tick
+#          (R45 0/48, R12 48/48 negative OOS).
+#      >>> A M5 il profilo e' il migliore MA la corsa sfonda il tetto
+#          delle ~100.000 barre (126.700).
+#      >>> M15 E' L'UNICO TF CHE STA DENTRO TUTTI E TRE I VINCOLI:
+#          profilo campionato (34 barre, 18% per barra), tetto delle
+#          barre rispettato (42.200), e frontiera del costo
+#          RAGGIUNGIBILE con il buffer (qui sotto). La scelta del TF e'
+#          un CONTO, non una preferenza.
+#
+# ---------------------------------------------------------------------
+#  ###  LA FRONTIERA DEL COSTO, COL NUMERO E PER TIMEFRAME  ###
+# ---------------------------------------------------------------------
+#  Pedaggio all-in sugli indici = SPREAD E BASTA (commissione 0,0000
+#  MISURATA, n=302 deal, CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181).
+#  1 punto indice = 100 punti MT5 su D30EUR (MISURATO, stesso referto
+#  r.290: due decimali, _Point = 0,01). >>> Questo CHIUDE la domanda
+#  aperta nel sorgente a r.133 ("DAX DA VERIFICARE - PASSO-0").
+#
+#  SPREAD D30EUR, MISURATO su 30.974.789 tick (spread_flotta):
+#    ora 08 (apertura cassa)  mediana 1,70  p95 2,70  max 12,00
+#                             su 1.847.049 tick a quella sola ora
+#    ore 09-16 (resto cassa)  mediana 1,60 - 1,70  p95 1,90 - 2,90
+#    ore 17-20 (fuori cassa)  mediana 2,60 - 2,70
+#  Uso 1,70 = la mediana PEGGIORE dentro la finestra di cassa.
+#  Pavimento DURO 13,3x -> stop >= 22,6 punti indice
+#  Pavimento di LAVORO 40x -> stop >= 68,0 punti indice
+#
+#  A) stop NATURALE col buffer della fonte (300 punti MT5 = 3,0 idx),
+#     per TF. Range di barra [DERIVATO da 186,5 idx MISURATI x
+#     sqrt(t/1440)], escursione della barra di segnale stimata al
+#     60% del range (STIMA DICHIARATA, non misurata):
+#       M5   range 11,0  -> stop ~ 9,6 idx  ->  5,6x   SFONDA il duro 13,3x
+#       M15  range 19,0  -> stop ~14,4 idx  ->  8,5x   SFONDA il duro
+#       M30  range 26,9  -> stop ~19,2 idx  -> 11,3x   SFONDA il duro
+#       H1   range 38,1  -> stop ~25,8 idx  -> 15,2x   sopra il duro, sotto 40x
+#     >>> CON IL BUFFER DELLA FONTE IL MOTORE SFONDA IL PAVIMENTO DURO
+#         A M5, M15 E M30. Non e' salvabile scendendo di TF: peggiora.
+#     >>> E il pavimento InpMinStopPts = 500 punti MT5 = 5,0 punti
+#         indice = 2,9x NON PROTEGGE NIENTE: e' un pavimento nominale,
+#         12 volte sotto il pavimento duro di casa. E' un difetto vero
+#         del sorgente, e va scritto.
+#
+#  B) LA SCALA DI QUESTO ROUND, a M15. Il buffer e' un PAVIMENTO
+#     GEOMETRICO: lo stop e' sempre >= buffer, perche' l'ingresso sta
+#     dalla parte opposta del bordo rispetto allo stop. Quindi il
+#     rapporto qui sotto e' GARANTITO, non stimato:
+#       buffer  800 punti MT5 =  8,0 idx  ->  stop >=  8,0  ->  4,7x   SFONDA il duro
+#       buffer 2800 punti MT5 = 28,0 idx  ->  stop >= 28,0  -> 16,5x   sopra il duro
+#       buffer 4800 punti MT5 = 48,0 idx  ->  stop >= 48,0  -> 28,2x   sopra il duro
+#       buffer 6800 punti MT5 = 68,0 idx  ->  stop >= 68,0  -> 40,0x   PASSA IL LAVORO
+#     >>> L'ESITO POSITIVO E' RAGGIUNGIBILE (classe 278): la cella 6800
+#         e' a 40,0x ESATTI al peggior spread mediano della finestra di
+#         cassa, e a 42,5x alla mediana tipica (1,60). Se la cima della
+#         scala fosse stata sotto 40x, questo file NON andava scritto.
+#     >>> LA FRAZIONE SOTTO I PAVIMENTI, perche' la frontiera e' una
+#         DISTRIBUZIONE e non una mediana:
+#           cella  800: il 100% delle operazioni sta sotto il pavimento
+#             DURO (8,0 idx richiede spread <= 0,60, e la mediana e'
+#             1,60-1,70). CELLA NON PROMUOVIBILE PER COSTO, DICHIARATO
+#             IN ANTICIPO, qualunque PF dia. Gira come CONTROLLO della
+#             legge dell'ancora unica, non come candidata.
+#           cella 2800 (16,5x): sopra il duro alla mediana; al p95
+#             dell'ora 08 (2,70) scende a 10,4x -> SOTTO IL DURO.
+#             [DERIVATO] ~5% delle occorrenze dell'ora d'apertura.
+#           cella 4800 (28,2x): al p95 dell'ora 08 fa 17,8x, sopra il
+#             duro. Sotto il duro solo oltre il p95.
+#           cella 6800 (40,0x): al p95 dell'ora 08 (2,70) fa 25,2x,
+#             sotto il pavimento di lavoro ma sopra il duro.
+#             [DERIVATO] ~5% delle occorrenze dell'ora d'apertura
+#             scendono sotto il 40x anche nella cella migliore.
+#           al max MISURATO dell'ora 08 (12,00 idx) la cella 6800 fa
+#             5,7x: sotto il duro. FRAZIONE [NON MISURATA] -- coda.
+#         >>> Non invento la frazione esatta: l'istogramma di casa e'
+#             ORARIO, non al minuto, e l'ora 08 CONTIENE la campanella
+#             (buco #3 di LA_BANDA_BASSA). Tutti i rapporti dell'ora
+#             d'apertura sono OTTIMISTI PER COSTRUZIONE.
+#
+#  C) ###  E IL PREZZO DI QUEL BUFFER, che e' il cuore del round  ###
+#     Il target NON si allarga col buffer (ancora unica = NO). Quindi
+#     il rapporto rischio/rendimento CROLLA salendo la scala.
+#     Larghezza della VA [DERIVATA]: range di seduta 111,0 idx; la VA
+#     al 70% del volume copre [STIMA DICHIARATA] il 60-75% del range =
+#     67 - 83 punti indice. Meta' VA (da un bordo al POC) = 33 - 42.
+#       cella  800 (stop >=  8,0): RR al POC 4,1-5,2  RR a VAH 8,4-10,4
+#       cella 2800 (stop >= 28,0): RR al POC 1,2-1,5  RR a VAH 2,4-3,0
+#       cella 4800 (stop >= 48,0): RR al POC 0,7-0,9  RR a VAH 1,4-1,7
+#       cella 6800 (stop >= 68,0): RR al POC 0,5-0,6  RR a VAH 1,0-1,2
+#     >>> LA CELLA CHE PAGA IL PEDAGGIO HA RR ~1,0 SUL TARGET FINALE E
+#         RR ~0,5 SUL PRIMO. La cella con un RR buono sta a 4,7x, cioe'
+#         TRE VOLTE sotto il pavimento duro.
+#     >>> QUESTA E' LA DOPPIA MORSA, SCRITTA COL NUMERO PRIMA DELLA
+#         CORSA. E' il motivo per cui l'esito che mi aspetto e' (b).
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- TRE USCITE (classe 278)
+# ---------------------------------------------------------------------
+#  Sedute cash DAX nella finestra 2024.09.26 - 2026.06.30: ~443
+#  (~459 feriali meno le feste di Francoforte). Tetto 2 al giorno.
+#  FREQUENZA ATTESA: [NON MISURATA]. Banda dichiarata: il BALANCE
+#  scatta solo nei giorni con apertura DENTRO la VA (~40-60% dei
+#  giorni) e il DIREZIONALE solo con accettazione confermata fuori
+#  (~15-30%): 0,4 - 1,2 op/giorno -> n totale 180 - 530.
+#  Taglio IS/OOS del driver (FrazioneIS 0,40): IS 72-212 | OOS 108-318.
+#  >>> LA META' BASSA STA SOTTO IL PAVIMENTO DEI 150 PER FINESTRA e lo
+#      dico prima: se ci finisce, il MERITO E' SOSPESO (valvola R59) e
+#      il RISCHIO resta leggibile (Emendamento B, 16/08).
+#
+#  LA MIA PREVISIONE, ed e' la parte falsificabile:
+#    Trades: quasi COSTANTE sulle quattro celle. Il buffer cambia la
+#      GEOMETRIA, non il segnale. Se Trades varia di piu' del 15% fra
+#      le celle, allora il buffer sta facendo saltare dei trade (stop
+#      dal lato sbagliato, r.816 "geometria SL non valida") e quello
+#      va letto nei log, non nel PF.
+#    PF: DECRESCENTE salendo la scala del buffer. E' la previsione
+#      della regola dell'ancora unica su un motore ad ancore diverse.
+#    >>> SE IL PF SALE COL BUFFER, LA MIA LEGGE E' FALSIFICATA SU
+#        QUESTO MOTORE, e quello e' il risultato piu' importante che
+#        questo round puo' dare. Lo scrivo adesso perche' altrimenti
+#        dopo lo spiegherei via.
+#
+#  PF atteso in valore: [NON MISURATO]. Nessun PF di questo motore
+#      esiste, su nessun simbolo e nessun TF.
+#  DD atteso: [NON MISURATO]. Rischio 0,65% per operazione, tetto 2 al
+#      giorno -> peggior giornata teorica ~1,30%.
+#
+#  LE TRE USCITE:
+#   (a) NUMERO BUONO: la cella 6800 (la sola sopra il pavimento di
+#       lavoro) con n >= 150 in entrambe le finestre E PF >= 1,10 in
+#       entrambe -> il metodo volumetrico di Claudio ha il suo primo
+#       numero, e la regola dell'ancora unica ha il suo primo
+#       contro-esempio misurato. Si apre il round vero: rami separati
+#       (InpUseBalance / InpUseDirezion), due lati separati (25/08),
+#       asse su InpAcceptBars, cella al CENTRO DELL'ALTOPIANO.
+#   (b) NUMERO BRUTTO, E ME L'ASPETTO IL PIU' PROBABILE: PF
+#       decrescente col buffer, con la cella 6800 sotto 1,10 ->
+#       CERTIFICATO con PF/n/DD per cella, e la riga dice la cosa
+#       utile: "il motore ha edge SOLO dove non puo' pagare il
+#       pedaggio". Chiude un capitolo con un numero, e conferma la
+#       legge su un secondo motore indipendente.
+#   (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: le quattro celle
+#       IDENTICHE al centesimo (InpSlBufferPts non e' arrivato),
+#       oppure Trades = 0 su tutte (la Value Area non si costruisce:
+#       si leggono le righe [DAXVA][AUTOTEST] del log, che l'EA
+#       stampa in avvio con InpAutoTest=true), oppure Trades che
+#       crolla a zero solo sulle celle alte (stop dal lato sbagliato).
+#       In nessuno dei tre casi si cambia un parametro.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65%
+#    NON promuovibili PER COSTO, dichiarato in anticipo: le celle 800 e
+#           2800 (4,7x e 16,5x, sotto il pavimento di lavoro 40x; la
+#           prima anche sotto il duro 13,3x). Qualunque numero diano,
+#           sono INFORMATIVE, non candidate. Stesso trattamento che
+#           REGISTRO_TEST.md ha gia' dato alle celle M5/M15/M20/M30 di
+#           EMA200 su U30USD.
+#    non giudica il merito se n < 150
+#
+#  REGOLA DI SELEZIONE, dichiarata INSIEME al numero: CENTRO
+#  DELL'ALTOPIANO, MAI IL PICCO. Su quattro celle di cui due
+#  pre-escluse per costo un altopiano non e' leggibile: questo round
+#  NON PROMUOVE NESSUNA CELLA. Misura la pendenza.
+#
+# ---------------------------------------------------------------------
+#  ###  I LIMITI, scritti prima  ###
+# ---------------------------------------------------------------------
+#  1. IL MURO DEL VOLUME, ed e' l'avvertenza n.1 del metodo di Claudio:
+#     sui CFD indici BCM il volume e' TICK-VOLUME, non volume
+#     scambiato. POC, VAH e VAL sono un PROXY. Qui si legge la FORMA di
+#     un edge di valore-accettato, mai il libro ordini.
+#  2. UN SOLO REGIME. 21 mesi di tick BCM sugli indici = un regime,
+#     rialzista. La regola C dell'Emendamento della Finestra (prova di
+#     regime) NON e' soddisfatta e non lo sara' entro il 30/09.
+#  3. DUE MOTORI IN UNA CELLA. InpUseBalance e InpUseDirezion sono
+#     entrambi accesi: il PF di cella e' una MEDIA di due geometrie
+#     diverse (un fade e una continuazione). Separarli e' l'asse del
+#     round successivo, non di questo. Dichiarato, perche' un PF medio
+#     di due motori puo' nascondere un motore buono e uno cattivo.
+#  4. PARZIALE SPENTO (InpTP1_ClosePct = 0) CONTRO IL DEFAULT 50.
+#     Motivo MISURATO, non stilistico: col parziale acceso la colonna
+#     Trades del CSV conta DEAL, non POSIZIONI. E' la trappola che in
+#     archivio ha fatto leggere "n = 257 / 427" su una cella M30 di
+#     SupertrendReversal quando in posizioni erano ~128 / 212 -- e
+#     l'IS scendeva SOTTO il pavimento dei 150 (LA_BANDA_BASSA, buco
+#     #6). Con il parziale spento n = posizioni e il pavimento dei 150
+#     si legge per quello che e'. InpBreakevenAfterTP1 resta INERTE.
+#  5. LA STIMA DEL 60% (escursione della barra di segnale sul range) e
+#     quella del 60-75% (VA sul range di seduta) sono STIME MIE,
+#     dichiarate come tali. NON entrano nella scala del punto B, che
+#     e' GARANTITA dal buffer e non dipende da nessuna stima.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING, mai
+#     un verdetto (classe 273; il commento non e' invertito).
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#     Nulla e' richiesto prima -> NON e' screening: e' un verdetto.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour = 8, NON
+#     9. La cassa DAX apre alle 09:00 IT = 08:00 SERVER, e chiude alle
+#     17:30 IT = 16:30 SERVER.
+#     >>> UN CSV CON InpSessionHour = 9 E' IN ORA ITALIANA: SI CESTINA.
+#         E' il controllo lampo scritto in CLAUDE.md.
+#  TETTO BARRE: M15 su D30EUR, 21 mesi = ~42.200 barre [DERIVATO:
+#     92 barre/giorno x ~459 feriali], sotto il tetto delle ~100.000.
+#     A M5 sarebbero ~126.700: SFONDA -- ed e' il difetto n.4 del file
+#     del 30/08.
+#     >>> Il VALORE VERO di "Max barre nel grafico" sul terminale di
+#         backtest 50504400 (C:\MT5_Backtest) e' [NON MISURATO] (buco
+#         #8 di LA_BANDA_BASSA): si legge in MT5 -> Strumenti ->
+#         Opzioni -> Grafici, ZERO passate. Fino ad allora il margine
+#         42.200 su ~100.000 e' un margine su un tetto PRESUNTO.
+#  MAGIC 784105: grep -rl repo-wide il 12/09/2026, .git escluso ->
+#     ZERO occorrenze. (Il 769600 del sorgente NON e' riusato qui.)
+#  ETICHETTA blocco r141: zero collisioni con le 29 in coda (r139c).
+#  PER-TRADE: le quattro celle condividono il magic -> l'ultima
+#     sovrascrive le altre. I numeri delle celle si leggono
+#     nell'OPTFRAME, che ha una riga per passata. Dichiarato.
+#  G1 (determinismo): [NON MISURATO] in questo round -- l'asse e' uno
+#     solo e serve alla scala del costo. Il controllo interno qui e' la
+#     COSTANZA di Trades sulle quattro celle (il buffer non tocca il
+#     segnale).
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment resta al default compilato.
+#  ENUM: questo EA non ha input di tipo ENUM. Nessun intervallo con
+#     passo su un enum (classe nuova del 12/09).
+#  InpUsaGuardian = false: l'EA include ABTG_PausaGuardian.mqh, quindi
+#     la riga di lancio DEVE installare l'include (pattern INVES).
+#
+#  COSTO: 4 celle x 2 finestre = 8 passate -> T = 0,6 + 0,077 x 8 =
+#         1,22 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#     SECONDO strato, l'agente controllo-preventivo, NON POSSO
+#     invocarlo io: lo lancia il coordinatore. DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN spento nello screening (edge RAW, come i candidati
+#     fratelli). Al deploy si riaccende.
+InpUsaGuardian=false||false||0||false||N
+
+# --- VALUE AREA: lo standard del metodo
+InpVaPercent=70.0||70.0||0||70.0||N
+InpVaBinPts=5.0||5.0||0||5.0||N
+
+# --- I DUE MOTORI accesi insieme (si separano nel round dopo)
+InpUseBalance=true||true||0||true||N
+InpUseDirezion=true||true||0||true||N
+InpAcceptBars=2||2||0||2||N
+InpVaTouchTolPts=200||200||0||200||N
+
+# --- SESSIONE CASH DAX IN ORA SERVER BCM: 08:00 - 16:30.
+#     NON 09:00 e NON 17:30: quelle sono ore ITALIANE.
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpCloseHour=16||16||0||16||N
+InpCloseMin=30||30||0||30||N
+
+# --- PAVIMENTO SL (R109). 500 punti MT5 = 5,0 punti indice = 2,9x lo
+#     spread: e' un pavimento NOMINALE, 12 volte sotto il pavimento
+#     duro di casa. Resta al valore del sorgente perche' su questa
+#     scala e' INERTE (il buffer minimo e' 800 = 8,0 idx), e per non
+#     confondere due variabili in un round. Il difetto e' dichiarato.
+InpMinStopPts=500||500||0||500||N
+
+# --- GESTIONE: PARZIALE SPENTO, cosi' Trades = POSIZIONI e non DEAL
+#     (vedi il limite n.4 in testa al file). InpBreakevenAfterTP1
+#     diventa INERTE.
+InpTP1_ClosePct=0||0||0||0||N
+InpBreakevenAfterTP1=true||true||0||true||N
+InpExtVaMult=1.0||1.0||0||1.0||N
+
+# --- USCITA: flat a fine cassa DAX (ora server). Zero overnight.
+InpCloseAtEnd=true||true||0||true||N
+
+# --- RISCHIO, LATI E TETTO. Taglie e rischio sono di CLAUDIO: qui si
+#     MISURA a 0,65, non si decide niente.
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpSide=2||2||0||2||N
+InpMaxTradesPerDay=2||2||0||2||N
+
+# --- CONVERSIONE PUNTI INDICE: 100 su D30EUR. MISURATO
+#     (CANCELLO_COSTO_FLOTTA_2026-09-10.md r.290), non assunto: chiude
+#     la domanda aperta a r.133 del sorgente.
+InpMT5PerPuntoIndice=100||100||0||100||N
+
+# --- GENERALI. Nessun pin di stringa.
+InpMagic=784105||784105||0||784105||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL BUFFER DELLO STOP OLTRE IL BORDO, in punti MT5.
+#     4 celle: 800 / 2800 / 4800 / 6800 = 8,0 / 28,0 / 48,0 / 68,0
+#     punti indice. Il buffer e' un PAVIMENTO GEOMETRICO: lo stop e'
+#     sempre >= buffer, quindi i rapporti 4,7x / 16,5x / 28,2x / 40,0x
+#     sono GARANTITI, non stimati.
+#     Serve a DUE cose insieme: trovare dove il motore passa la
+#     frontiera del costo, e MISURARE se il PF scende salendo la scala
+#     -- che e' la previsione della regola dell'ancora unica su un
+#     motore in cui stop e target nascono da DUE POSTI DIVERSI.
+#     Le celle 800 e 2800 sono PRE-ESCLUSE PER COSTO: informative, non
+#     promuovibili, e sta scritto sopra prima di vedere i numeri.
+InpSlBufferPts=300||800||2000||6800||Y
