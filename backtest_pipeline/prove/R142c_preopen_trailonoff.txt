@@ -50,7 +50,10 @@
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
 #  n atteso: cella 1 = 116 / 175 esatti (cancello DURO). Cella 0 =
-#     MAGGIORE. Quanto: [NON MISURATO].
+#     MAGGIORE O UGUALE (>=), perche' il teorema qui sotto e' n(0)>=n(1):
+#     se il trailing non chiudesse MAI sotto 1R, le due celle darebbero
+#     lo stesso n, e sarebbe un risultato, non un difetto.
+#     Quanto: [NON MISURATO].
 #  PF atteso: [NON MISURATO]. NON dichiaro un verso: non ho una misura di
 #     questo motore senza trailing, su nessun ingresso. Dichiarare "senza
 #     trailing va meglio" sarebbe raccontare l'ipotesi come misura, che
@@ -82,8 +85,13 @@
 #  ###  COSA NON MISURA  ###
 # ---------------------------------------------------------------------
 #  Come R142a e R142b: NON la larghezza della finestra (serve la firma di
-#  Claudio PRIMA), NON i gemelli, NON il TF del grafico (non e'
-#  cambiabile), e resta UN SOLO REGIME.
+#  Claudio PRIMA), NON i gemelli, e resta UN SOLO REGIME.
+#  NON il TF del grafico (voce 5): NON ENTRA NEI NUMERI -- cambiarlo
+#  darebbe gli STESSI numeri, non zero trade (unica occorrenza di
+#  PERIOD_CURRENT a r.296, ramo morto con InpTrailStartR=0). La voce 5 si
+#  chiude solo toccando il TF dell'INGRESSO = firma di Claudio. Vedi
+#  R142a: la frase "InpTimeframe != M5 da' zero trade" era dell'EA
+#  ESTERNO, non di questo (classe 301).
 #
 # ---------------------------------------------------------------------
 #  ###  IL CONTRO-ESEMPIO INCORPORATO -- E IL SUO LIMITE, NOMINATO  ###

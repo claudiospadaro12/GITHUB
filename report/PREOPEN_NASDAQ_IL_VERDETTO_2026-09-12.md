@@ -254,7 +254,7 @@ in **nessuno** dei due assi — un limite superiore su A, B, C non dice niente s
 
 | # | misura | passate | **T** |
 |---|---|---:|---:|
-| 1 | 🔴 **Asse USCITA su QUESTO ingresso** (`RangeMode=1, PrevWin=5, 1700/4000`): `InpTP1_R` × `InpTP1_ClosePct` × `InpBreakevenAtTP1` (8) + `InpTrailTF` (5), × 2 finestre | **26** | **2,60 min** |
+| 1 | 🔴 **Asse USCITA su QUESTO ingresso** (`RangeMode=1, PrevWin=5, 1700/4000`) — ✅ **REALIZZATO nella notte del 13/09 come `R142a/b/c`**, e la forma e' cambiata dopo tre passate del cancello: `InpTP1_ClosePct` 0/25/50/75 (4) + `InpTrailTF` M1..M5 (5) + `InpUseTrailing` 0/1 (2) = **11 celle**, × 2 finestre. _(`InpTP1_R` e `InpBreakevenAtTP1` sono usciti dall'asse: sono **inerti** nella cella 0, r.977.)_ | **22** | **3,50 min** |
 | 2 | 🔴 **Asse LARGHEZZA controllato**: `InpPrevWindowMin` = 5·10·15·20·30·60 **a parita' di tutto il resto**, × 2 finestre | **12** | **1,52 min** |
 | 3 | 🟠 **Gemelli VERI**: D30EUR **col cancello 1700/4000 ACCESO** + U30USD + SPXUSD, × 2 finestre | **6** | **1,06 min** |
 | 4 | 🟢 **Range M5 pre-open diretto**: `anatomia_aperture.py --minuti-pre 5` | **0** | ~0,5 min, **zero tester** |

@@ -112,9 +112,18 @@
 #           Servirebbe anche una rigirata a 0,65 per il DD E per il PF.
 #           E quattro punti non sono un altopiano: la cella si sceglie AL
 #           CENTRO, mai il picco.
-#   (b) TUTTE SOTTO 1,10 in OOS -> voce 3 chiusa COL NUMERO, e il
-#       certificato diventa compilabile su 3 voci su 5. Si archivia CON
-#       il numero: l'unico modo consentito. BUON ESITO.
+#   (b) TUTTE SOTTO 1,10 in OOS -> la voce 3 e' chiusa COL NUMERO, e il
+#       certificato passa da 2 a 3 voci su 5. BUON ESITO.
+#       >>> MA IL VERDETTO RESTA [NON ANCORA MISURATO], E LA RIGA L2 DI
+#           REGISTRO_TEST.md NON SI TOCCA. A 3 voci su 5 non si archivia:
+#           CLAUDE.md dice "non si archivia come MORTO se manca anche UNA
+#           SOLA delle cinque", e qui ne mancano DUE -- la 4 (gemelli) e
+#           la 5 (TF dell'INGRESSO), che vogliono tutt'e due la firma di
+#           Claudio.
+#           "BUON ESITO" vuol dire UNA VOCE IN MENO DA CHIUDERE, non
+#           un'archiviazione. E' esattamente il ribaltamento che il primo
+#           FAIL del cancello ha bloccato, e che il 09/09 ci e' costato
+#           quattro candidati di classe A1: non lo si riapre da qui.
 #   (c) LA CELLA 50 NON RIPRODUCE L'n -> CATENA ROTTA. Non si legge
 #       nessuna altra cella e non si cambia nessun parametro.
 #
