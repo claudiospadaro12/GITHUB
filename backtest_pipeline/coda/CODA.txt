@@ -563,3 +563,49 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
 
 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
+# =====================================================================
+#  I QUATTRO EA MAI GIRATI -- quattro righe, NON cinque
+#  Aggiunte il 12/09/2026 sera, dopo PASS dei DUE strati del cancello.
+#
+#  PERCHE': quattro motori scritti fra il 22/08 e l'08/09 non erano mai
+#  stati interrogati nemmeno una volta, e nessuno aveva una riga in
+#  REGISTRO_TEST.md. Stanotte hanno il loro PRIMO numero in assoluto.
+#
+#  L'ORDINE, e non e' estetico -- e' il valore atteso della misura:
+#   1. r141c  il piu' solido dei cinque, ANCORA UNICA = SI, unico di
+#             CLASSE S piena. Misura una manopola INERTE verificata nel
+#             sorgente: la tolleranza in modo PERC vale 145,0 punti
+#             indice = 2-3 range di barra M30, ed e' PIU' LARGA della
+#             condizione di esaurimento (2xATR = 90-116), quindi non
+#             localizza niente. Se una sola cosa deve girare, e' questa.
+#   2. r141d  la riparazione della CLASSE 289: il file dell'08/09 aveva
+#             un'attesa IRRAGGIUNGIBILE, perche' ABTG_HVAncora ha un
+#             cancello di costo DENTRO l'EA (r.239 InpMaxSpreadPctOfStop
+#             = 2,5 = stop >= 40 x spread, applicato a r.935) che a
+#             k=1,0 rifiuta a ogni ora della finestra su TUTTE E TRE le
+#             derivazioni dello stop. La griglia k=1,0/1,5/2,0/2,5
+#             STRADDLA il muro (cade fra 1,0 e 1,5 con l'ATR ancorato
+#             all'H1 MISURATO), quindi l'esito positivo E' raggiungibile.
+#   3. r141a  primo numero di un motore fermo 21 giorni. n >= 150 in
+#             entrambe le finestre e' aritmetica di calendario, non
+#             speranza. ATTENZIONE: la cella A sta sul BORDO della
+#             soglia (PF atteso 1,03-1,11 contro un cancello a 1,10):
+#             e' una MISURA, non una candidata. La candidata e' la B.
+#   4. r141b  casella 4 del CERTIFICATO (i simboli gemelli). Senza,
+#             qualunque numero di r141a resta non archiviabile.
+#
+#  FUORI: r141e (daxva), e il motivo e' un numero. Il suo falsificatore
+#  NON falsifica: a edge ZERO il PF SALE monotono del 18% per sola
+#  geometria e pedaggio, quindi "il PF sale col buffer" non distingue la
+#  legge dell'ancora unica dal costo. Rientra domani con la toppa.
+#
+#  IL BENEFICIO DELL'ORDINE PER LA LETTURA E' ZERO (classe 274): W()
+#  accumula in memoria, il referto nasce dopo la fine del ciclo. Vanno
+#  in fondo. Il pin e' il commit che contiene la riga sottile col
+#  $PIN = 55f0eb1b, dove i quattro file prova ESISTONO (verificato con
+#  git cat-file: a e6c0d70e, 69e252b3 e 23314d61 NON esistono).
+# =====================================================================
+ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_AtrExhaustVol -Prova R141c_atrexh_M30_NASUSD.txt -Etichetta r141c -Modello 4 -Deposito 100000
+ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_HVAncora -Prova R141d_hvancora_stopatr_M30_U30USD.txt -Etichetta r141d -Modello 4 -Deposito 100000
+ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141a_momentum_NASUSD_r12.txt -Etichetta r141a -Modello 4 -Deposito 100000
+ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141b_momentum_U30USD_gemello.txt -Etichetta r141b -Modello 4 -Deposito 100000
