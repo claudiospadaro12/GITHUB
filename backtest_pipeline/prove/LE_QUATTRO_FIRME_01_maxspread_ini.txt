@@ -1,0 +1,231 @@
+# ==========================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  LE QUATTRO FIRME -- MISURA M1: QUANTO COSTA IL TETTO DI SPREAD
+#  cella viva D30EUR M5 LONG (sedia 770101 sul terminale 50504263).
+#  File LE_QUATTRO_FIRME_01_maxspread_ini.txt.
+#
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/LE_QUATTRO_FIRME_CRITERI.md
+#    (commit be0e019, 12/09/2026 -- committato PRIMA di questo file)
+#
+#  LA DOMANDA, in una riga
+#    In campo InpMaxSpread = 0, cioe' NESSUN LIMITE: la sedia entra a
+#    qualunque spread. Quanto costa in OPERAZIONI metterci un tetto?
+#    Non "e' meglio": QUANTE OPERAZIONI SI PERDONO. La frequenza e' il
+#    requisito principale (CLAUDE.md, 08/09), quindi il costo viene prima
+#    del beneficio.
+#
+#  PERCHE' SERVE UNA CORSA E NON BASTA IL POST-PROCESSING
+#    I per-trade di R47 NON contengono lo spread: dal CSV non si puo'
+#    sapere quale giornata sarebbe stata saltata. E le due fonti di spread
+#    che abbiamo DISCORDANO su questa domanda:
+#      - VIVO (ABTG_SpreadLogger, 5 s, 04-11/09, ora SERVER 08):
+#        istogramma D30EUR ora 08 = 150:919  160:1752  170:925 punti MT5.
+#        MASSIMO 170. Sopra 1,70 idx: ZERO campioni su 3596.
+#      - TICK STORICO (lo stesso feed su cui R47 ha girato, finestra
+#        2024.09.26-2026.06.30, 1.847.049 tick all'ora 08):
+#        mediana 1,700  p95 2,700  MAX 12,000 punti indice.
+#    Il vivo dice "nessuna coda", il tick storico dice "p95 a 2,70 e una
+#    punta a 12,0". Il primo pesa il TEMPO (campione uniforme ogni 5 s),
+#    il secondo pesa i TICK (e i tick si infittiscono proprio quando lo
+#    spread si allarga). Sono due grandezze diverse, e per questa domanda
+#    la banda che ne esce e' 0,0% - 50,0%: inutilizzabile.
+#    >>> Questa corsa e' l'unico modo di avere IL numero invece della banda.
+#
+# ##########################################################################
+# ##  DUE CANARINI, E SONO DENTRO L'ASSE: NON COSTANO UN ROUND IN PIU'
+# ##
+# ##  NON E' MISURATO che SymbolInfoInteger(SYMBOL_SPREAD) -- che e' cio'
+# ##  che SpreadOK() legge, ABTG_DAX_Apertura_EU.mq5 r.2133-2139 -- torni
+# ##  lo spread VERO dentro lo Strategy Tester. Se tornasse 0, la
+# ##  condizione 'spread <= InpMaxSpread' sarebbe SEMPRE vera e tutti i
+# ##  gradini uscirebbero identici alla base: e "identico alla base" NON
+# ##  vuol dire "tetto inerte", vuol dire MANOPOLA IGNORATA.
+# ##
+# ##  CANARINO DURO      cella  68 punti MT5 = 0,68 punti indice.
+# ##    0,68 idx sta SOTTO il minimo mai misurato su D30EUR (1,50 idx, bin
+# ##    piu' basso dell'istogramma vivo all'ora 08). Quindi:
+# ##      >>> DEVE dare ZERO posizioni. Se ne da' 193, la prova e' MORTA e
+# ##          si scrive "NON MISURABILE", mai "tetto inerte".
+# ##
+# ##  CANARINO MORBIDO   cella 136 punti MT5 = 1,36 punti indice.
+# ##    Sta SOTTO la mediana (1,60 vivo / 1,70 tick) ma SOPRA zero:
+# ##      >>> DEVE dare un numero di posizioni MOLTO minore della base e
+# ##          MAGGIORE di zero. Se esce uguale a uno dei due estremi, la
+# ##          manopola non sta filtrando con continuita' e il round va
+# ##          riletto prima di qualunque verdetto.
+# ##
+# ##  I due canarini insieme provano la MONOTONIA: 0 <= n(68) <= n(136)
+# ##  <= n(204) <= n(272) <= n(340) <= n(0=base). Una violazione della
+# ##  monotonia e' un difetto del banco, non un risultato.
+# ##########################################################################
+#
+#  L'ASSE, e da dove escono i numeri
+#    InpMaxSpread in PUNTI MT5. Conversione DICHIARATA per D30EUR:
+#    1 punto indice = 100 punti MT5 (2 decimali, referto dello spread
+#    vivo r. 'SYM,D30EUR,2,0.01000000,100.0').
+#    Griglia 0 -> 340 a passo 68, cioe' SEI celle:
+#      0    base, nessun limite (deve tornare la base di R47: 193 pos OOS)
+#      68   0,68 idx  -- CANARINO DURO       (atteso: 0 posizioni)
+#      136  1,36 idx  -- CANARINO MORBIDO    (atteso: 0 < n << 193)
+#      204  2,04 idx  -- il tetto basso utile
+#      272  2,72 idx  -- IL TETTO PROPOSTO dal pannello del 12/09
+#      340  3,40 idx  -- tetto larghissimo (atteso: ~193, quasi inerte)
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI, e qui e' una BANDA per onesta'
+#    Per le celle 204/272/340 il tick storico dell'ora 08 da' soltanto un
+#    LIMITE SUPERIORE: p95 = 2,700 idx significa che al massimo il 5% dei
+#    tick sta sopra 2,70. Quindi:
+#      cella 340  ->  posizioni attese fra 183 e 193  (perdita 0-5%)
+#      cella 272  ->  posizioni attese fra 183 e 193  (perdita 0-5%)
+#      cella 204  ->  posizioni attese fra  96 e 193  (perdita 0-50%)
+#      cella 136  ->  posizioni attese fra   1 e 192
+#      cella 68   ->  posizioni attese ESATTAMENTE 0
+#    >>> IL CONTRO-ESEMPIO DEL FILE: se la cella 272 perdesse PIU' del 10%
+#        delle posizioni, il tetto proposto dal pannello del 12/09 e'
+#        BOCCIATO PER FREQUENZA e va scritto cosi', non addolcito. E se la
+#        cella 204 ne perdesse meno del 5%, allora e' il TICK STORICO a
+#        sovrastimare la coda all'ora 08, e va scritto ANCHE questo --
+#        perche' lo stesso istogramma e' la base di tutti i gradini di
+#        spread del collaudo prop.
+#
+#  IL LIMITE STRUTTURALE DELLA MANOPOLA, misurato nel sorgente e da dire
+#    In modalita' RETEST la chiamata a SpreadOK() e' UNA SOLA: r.1441
+#    dentro ArmRetest(), cioe' a FINE RANGE (08:35 SERVER), una volta al
+#    giorno. Quindi il tetto gatta la DECISIONE DI ARMARE, e NON:
+#      - il RIEMPIMENTO del BUY LIMIT (che avviene minuti dopo);
+#      - l'USCITA (stop e trailing sono ordini a mercato).
+#    >>> InpMaxSpread e' una protezione PARZIALE PER COSTRUZIONE, e il
+#        referto deve dirlo ogni volta che la cita.
+#
+#  QUANTO COSTA
+#    6 celle x 1 gemello x 1 corsa x 2 gambe (IS+OOS) = 12 passate, 1 round
+#    Metro di casa T = 0,6 + 0,077 x passate, PER ROUND:
+#      1 round x (0,6 + 0,077 x 12) = 1,524 minuti
+#
+#  BANCO: identico a COLLAUDO_DAX101_01 e a R47a/R47b, e non si cambia
+#    dentro una misura: Modello 4 (TICK REALI), deposito 100000, rischio
+#    PINNATO 1,0, finestra 2024.09.26 -> default del driver 2026.06.30,
+#    FrazioneIS 0,40.  IS 2024.09.26-2025.06.09   OOS 2025.06.10-2026.06.30
+#    -Spread 0 (spread dei tick registrati): qui lo spread NON si forza,
+#    perche' la grandezza in esame e' il TETTO, non il costo.
+#
+#  MAGIC: 788101, VERGINE -- verificato repo-wide il 12/09/2026
+#    (grep -rE "\b788[12][0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#    VIETATI: 770101 (sedia viva), 7725xx (R47), 787101 (COLLAUDO_DAX101),
+#    7862xx (R137).
+#
+#  BUCHI DICHIARATI
+#    - PROVA DI REGIME: assente. 21 mesi di D30EUR, UN SOLO regime (toro).
+#    - SPREAD AL MINUTO dentro l'ora 08: l'ora 08 contiene l'apertura
+#      europea, che e' il minuto peggiore. Il tetto viene valutato alle
+#      08:35, non alle 08:00: quindi questo round e' PESSIMISTA sul costo
+#      del tetto, e va letto come tale.
+#    - LATO SHORT: la sedia e' LONG-ONLY (InpAllowShort=false nel preset).
+#      Qui si misura la SEDIA, non il motore.
+#    - PROP VERA: il feed e i costi sono BCM. Il tetto che serve su una
+#      prop e' [NON MISURATO] e lo resta.
+#
+#  A10  IL ROUND NON PROMUOVE E NON CAMBIA NIENTE. Nessun preset, nessuna
+#       sedia, nessun forward. InpMaxSpread e' un parametro di RISCHIO:
+#       [FIRMA DI CLAUDIO], sempre.
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     e riverificata contro risultati_prove/aperture_r47/
+#     ABTG_DAX_Apertura_EU_D30EUR_OOS_r47a.csv (80 input su 80: solo
+#     InpRiskPercent e InpMagic differiscono, e qui il rischio e' 1,0
+#     come nel CSV).
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpBreakevenAtTP1=true
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpVerbose=true
+##
+# --- PINNATO: la cella VIVA in campo (InpTP1_ClosePct=50)
+InpTP1_ClosePct=50
+InpMagic=788101
+#
+# --- L'UNICO ASSE: il tetto di spread in PUNTI MT5 (0 -> 340, passo 68)
+#     0=base  68=canarino duro  136=canarino morbido  204/272/340=i gradini
+InpMaxSpread=0||0||68||340||Y
+# ==========================================================================

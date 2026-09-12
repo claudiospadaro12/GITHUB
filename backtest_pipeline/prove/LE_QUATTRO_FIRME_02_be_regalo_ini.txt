@@ -1,0 +1,188 @@
+# ==========================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  LE QUATTRO FIRME -- MISURA M4b: IL BREAKEVEN CHE IL REGALO PERDE
+#  cella REGALO D30EUR M5 LONG (InpTP1_ClosePct=0), sedia 770101.
+#  File LE_QUATTRO_FIRME_02_be_regalo_ini.txt.
+#
+#  CRITERI CONGELATI PRIMA DEI NUMERI:
+#    backtest_pipeline/prove/LE_QUATTRO_FIRME_CRITERI.md
+#    (commit be0e019, 12/09/2026 -- committato PRIMA di questo file)
+#
+#  IL FATTO DI CODICE CHE FA NASCERE QUESTA MISURA, e non e' un'opinione
+#    Il blocco del breakeven al 1o obiettivo sta DENTRO il ramo della
+#    parziale: ABTG_DAX_Apertura_EU.mq5 r.1899
+#        if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+#    e il breakeven e' a r.1931, ANNIDATO in quel ramo.
+#    >>> Con InpTP1_ClosePct = 0 quel ramo NON VIENE MAI ESEGUITO: la
+#        cella REGALO non sposta MAI lo stop a pari al 1o obiettivo.
+#    Il breakeven indipendente (r.1947) c'e', ma e' spento: InpBEatR = 0.
+#    L'unica protezione sopra l'entrata resta il trailing sul minimo della
+#    candela M5 precedente (r.2003-2004), che agisce solo quando quel
+#    minimo e' GIA' sopra il prezzo d'ingresso.
+#
+#  E IL COSTO DI QUESTO BUCO E' MISURATO SUI PER-TRADE DI R47
+#    Sulle 77 posizioni (su 193) che hanno toccato il 1o obiettivo, il
+#    regalo fa PEGGIO della cella viva in 51 casi (66,2%), e il caso
+#    peggiore e' il 25/02/2026: la viva chiude a +0,493 R, il regalo a
+#    -0,989 R. Delta -1,482 R in una giornata sola. Il regalo vince
+#    comunque nel totale (+55,70 R contro +50,87 R su quelle 77), quindi
+#    NON e' un difetto che lo boccia: e' un buco che si puo' tappare.
+#
+#  LA DOMANDA, in una riga
+#    Rimettere il breakeven al REGALO (InpBEatR > 0, che non richiede la
+#    parziale) migliora la peggior giornata SENZA mangiarsi il vantaggio?
+#
+#  L'ASSE
+#    InpBEatR in multipli di R, griglia 0,0 -> 1,5 a passo 0,5:
+#      0,0  = il REGALO d'archivio, nessun breakeven  (riferimento: deve
+#             riprodurre R47b al centesimo: +23607,28 | PF 1,49140 |
+#             DD equity 6,2719% | peggior giornata -1,0793% | 193 pos OOS)
+#      0,5  = breakeven a mezzo R
+#      1,0  = breakeven a 1 R, cioe' esattamente dove la cella VIVA
+#             chiudeva la parziale (InpTP1_R = 1,0)
+#      1,5  = breakeven a 1,5 R
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e il verso conta piu' del valore
+#    Il breakeven ha un costo NOTO e va dichiarato prima: trasforma alcuni
+#    vincenti in pareggi, quindi il PROFITTO deve SCENDERE e la PEGGIOR
+#    GIORNATA deve MIGLIORARE. Le due cose insieme.
+#    >>> IL CONTRO-ESEMPIO DEL FILE: se una cella con InpBEatR > 0 avesse
+#        SIA piu' profitto SIA una peggior giornata migliore della cella
+#        0,0, il numero NON va festeggiato: vuol dire che sta cambiando
+#        anche il CONTEGGIO delle posizioni (uno stop a pari piu' vicino
+#        cambia l'ora di uscita e puo' cambiare la giornata successiva).
+#        Sentinella esplicita, come in COLLAUDO_DAX101_01:
+#        >>> se 'Trades' cambia piu' del 5% fra una cella e la cella 0,0,
+#            la cella misura la SELEZIONE e non la GESTIONE, e va
+#            dichiarata cosi' prima di qualunque verdetto.
+#    >>> E la soglia che decide, congelata adesso: una cella con
+#        InpBEatR > 0 si RACCOMANDA solo se la peggior giornata di equity
+#        migliora di almeno 0,05 punti percentuali E il PF resta >= 1,40.
+#        Sotto quelle due, il buco resta aperto e si scrive che resta
+#        aperto.
+#
+#  QUANTO COSTA
+#    4 celle x 1 gemello x 1 corsa x 2 gambe (IS+OOS) = 8 passate, 1 round
+#    Metro di casa T = 0,6 + 0,077 x passate, PER ROUND:
+#      1 round x (0,6 + 0,077 x 8) = 1,216 minuti
+#
+#  BANCO: identico a COLLAUDO_DAX101_01 e a R47a/R47b: Modello 4 (TICK
+#    REALI), deposito 100000, rischio PINNATO 1,0, finestra 2024.09.26 ->
+#    default del driver 2026.06.30, FrazioneIS 0,40, -Spread 0.
+#    IS 2024.09.26-2025.06.09   OOS 2025.06.10-2026.06.30
+#
+#  MAGIC: 788201, VERGINE -- verificato repo-wide il 12/09/2026
+#    (grep -rE "\b788[12][0-9][0-9]\b" --exclude-dir=.git . -> 0).
+#    VIETATI: 770101 (sedia viva), 7725xx (R47), 787101 (COLLAUDO_DAX101),
+#    788101 (LE_QUATTRO_FIRME_01), 7862xx (R137).
+#
+#  BUCHI DICHIARATI
+#    - PROVA DI REGIME: assente. 21 mesi di D30EUR, UN SOLO regime (toro).
+#    - Questo round NON misura il tetto di spread (quello e' il file 01) e
+#      NON misura il floor di stop (che il post-processing ha gia' bocciato
+#      al livello dei per-trade).
+#    - LATO SHORT: la sedia e' LONG-ONLY. Qui si misura la SEDIA.
+#
+#  A10  IL ROUND NON PROMUOVE E NON CAMBIA NIENTE. InpTP1_ClosePct e
+#       InpBEatR sono manopole di GESTIONE su una sedia viva:
+#       [FIRMA DI CLAUDIO], sempre.
+# ==========================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+#
+# --- LA CELLA VIVA, copiata campo per campo da
+#     mql5/Presets/ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#     e riverificata contro risultati_prove/aperture_r47/
+#     ABTG_DAX_Apertura_EU_D30EUR_OOS_r47a.csv (80 input su 80: solo
+#     InpRiskPercent e InpMagic differiscono, e qui il rischio e' 1,0
+#     come nel CSV).
+InpUsaGuardian=true
+InpSessionHour=8
+InpSessionMin=0
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=500.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=false
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=200.0
+InpFadeOffsetPts=0.0
+InpAllowReverse=false
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=false
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpBreakevenAtTP1=true
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies  NON pinnato: il default compilato e' gia' la stringa vuota.
+#   Un pin di stringa VUOTA viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=0.0
+InpSkipIfTight=true
+InpUseVolumeFilter=false
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpVerbose=true
+##
+# --- PINNATO: la cella REGALO (InpTP1_ClosePct=0) e nessun tetto di spread
+InpTP1_ClosePct=0
+InpMaxSpread=0
+InpMagic=788201
+#
+# --- L'UNICO ASSE: il breakeven indipendente, in multipli di R
+#     0,0 = il regalo d'archivio (riferimento)  0,5 / 1,0 / 1,5 = i gradini
+InpBEatR=0.0||0.0||0.5||1.5||Y
+# ==========================================================================
