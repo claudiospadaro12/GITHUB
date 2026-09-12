@@ -55,16 +55,43 @@ $NOTI = @{
 }
 
 $Desktop = [Environment]::GetFolderPath('Desktop')
+if (-not $Desktop) { $Desktop = Join-Path $env:USERPROFILE 'Desktop' }
 $cart    = Join-Path $Desktop ('CENSIMENTO_MT5_' + $t0.ToString('yyyyMMdd_HHmm', $INV))
 $refPath = Join-Path $cart 'REFERTO_CENSIMENTO_MT5.txt'
 $righe   = New-Object System.Collections.Generic.List[string]
 
+# New-Item resta -Path: in PS 5.1 New-Item NON ha -LiteralPath.
+New-Item -ItemType Directory -Force -Path $cart | Out-Null
+
 function Nota([string]$s, [string]$col = 'Gray') {
   Write-Host $s -ForegroundColor $col
   $righe.Add($s) | Out-Null
+  # SCRIVE SUBITO (classe 94-bis): se la corsa muore a meta', il referto
+  # esiste comunque con tutto cio' che si e' misurato fino a quel punto.
+  # Dentro un & { } un errore terminante ammazza anche la raccolta della
+  # riga di lancio (classe 153-ter): senza questo, Claudio resta con niente.
+  try { Add-Content -LiteralPath $script:refPath -Value $s -Encoding ASCII -ErrorAction SilentlyContinue } catch { }
 }
 
-New-Item -ItemType Directory -Force -Path $cart | Out-Null
+# ---- IL LETTORE DI CASA, preso VERBATIM da CODA_09_giornale_operativo.ps1
+#      r.40-53 (classe 163, pagata l'08/09): i giornali del giorno e i .chr
+#      sono APERTI dal terminale vivo, e Get-Content/Select-String possono
+#      fallire in silenzio. FileShare::ReadWrite + euristica UTF-16.
+function Leggi-Condiviso($path){
+  $b = $null
+  try{
+    $fs = [IO.File]::Open($path,[IO.FileMode]::Open,[IO.FileAccess]::Read,[IO.FileShare]::ReadWrite)
+    $b  = New-Object byte[] $fs.Length
+    [void]$fs.Read($b,0,$b.Length)
+    $fs.Close()
+  } catch { return "" }
+  if($null -eq $b -or $b.Count -lt 2){ return "" }
+  if($b[0] -eq 0xFF -and $b[1] -eq 0xFE){ return [Text.Encoding]::Unicode.GetString($b) }
+  $zeri = 0; $n = [math]::Min(400,$b.Count)
+  for($i=1; $i -lt $n; $i+=2){ if($b[$i] -eq 0){ $zeri++ } }
+  if($zeri -gt ($n/4)){ return [Text.Encoding]::Unicode.GetString($b) }
+  return [Text.Encoding]::UTF8.GetString($b)
+}
 
 Nota '======================================================================'
 Nota '  CENSIMENTO MT5 DELLA MACCHINA -- SOLA LETTURA'
@@ -80,16 +107,36 @@ Nota '=== 1. CHE MACCHINA E'' QUESTA ===' 'Cyan'
 Nota ('    nome computer   : ' + $env:COMPUTERNAME)
 Nota ('    utente          : ' + $env:USERNAME)
 
+# Il NOME del VPS non si indovina: e' MISURATO, ed era gia' scritto da
+# qualcun altro -- CODA_04_capacita_macchina_20260912_033002.log r.3
+# ("nome macchina: VMI3047753   utente: Administrator").
+$VPS_NOTO = 'VMI3047753'
+
 $sess = $env:SESSIONNAME
 if (-not $sess) { $sess = '[non impostato]' }
 $viaRdp = ($sess -like 'RDP*')
-Nota ('    sessione        : ' + $sess + $(if ($viaRdp) { '   -> sei collegato via DESKTOP REMOTO: questa finestra gira sulla macchina REMOTA (il VPS)' } else { '   -> sessione CONSOLE: questa finestra gira sulla macchina che hai davanti' }))
+if ($viaRdp) {
+  Nota ('    sessione        : ' + $sess + '   -> c''e'' un DESKTOP REMOTO di mezzo: tutto quello che segue descrive la macchina che si chiama ' + $env:COMPUTERNAME + ', NON quella che hai fisicamente davanti')
+} else {
+  Nota ('    sessione        : ' + $sess + '   -> NON e'' una sessione RDP-Tcp, e questo NON dimostra che sei davanti alla macchina: mstsc /admin, VNC, AnyDesk e la console web del fornitore lasciano SESSIONNAME=Console. Tutto quello che segue descrive comunque la macchina che si chiama ' + $env:COMPUTERNAME)
+}
+if ($env:COMPUTERNAME -ieq $VPS_NOTO) {
+  Nota ('    VERDETTO        : QUESTA E'' LA MACCHINA DEL VPS (' + $VPS_NOTO + ', nome misurato il 12/09/2026 da CODA_04).') 'Green'
+} else {
+  Nota ('    VERDETTO        : QUESTA NON E'' IL VPS. Il VPS si chiama ' + $VPS_NOTO + ', questa si chiama ' + $env:COMPUTERNAME + ' -> e'' un''ALTRA macchina, ed e'' la prima volta che la censiamo.') 'Yellow'
+}
+Nota '    Il NOME e'' la prova. Sessione, batteria e modello sono indizi, non verdetti.' 'Cyan'
 
 try {
   $cs = Get-CimInstance Win32_ComputerSystem -ErrorAction Stop
   Nota ('    marca/modello   : ' + $cs.Manufacturer + ' / ' + $cs.Model)
   Nota ('    processori      : ' + $cs.NumberOfLogicalProcessors + ' logici')
   Nota ('    RAM             : ' + [math]::Round($cs.TotalPhysicalMemory / 1GB, 1) + ' GB')
+  # Il discriminante fisica/virtuale SERIO e' il modello, non la batteria.
+  $segni = @('VMware','VirtualBox','QEMU','KVM','Xen','Virtual Machine','Hyper-V','Bochs','Parallels','OpenStack','Amazon EC2','Google Compute','Alibaba')
+  $eVm = $false
+  foreach ($s in $segni) { if (($cs.Manufacturer + ' ' + $cs.Model) -like ('*' + $s + '*')) { $eVm = $true } }
+  Nota ('    tipo            : ' + $(if ($eVm) { 'VIRTUALE (marca/modello di macchina virtuale)' } else { 'FISICA, oppure VM non riconoscibile dal modello' }))
 } catch {
   Nota ('    marca/modello   : [non leggibile: ' + $_.Exception.Message + ']') 'Yellow'
 }
@@ -97,9 +144,9 @@ try {
 try {
   $bat = @(Get-CimInstance Win32_Battery -ErrorAction SilentlyContinue)
   if ($bat.Count -gt 0) {
-    Nota ('    batteria        : SI (' + $bat.Count + ') -> e'' un PORTATILE, non un VPS') 'Yellow'
+    Nota ('    batteria        : SI (' + $bat.Count + ') -> compatibile con un PORTATILE (ma anche un fisso con UPS espone una batteria). NON e'' il verdetto.') 'Yellow'
   } else {
-    Nota '    batteria        : NESSUNA -> coerente con un VPS o un desktop fisso'
+    Nota '    batteria        : NESSUNA -> compatibile con un VPS o un desktop fisso. Nemmeno questo e'' un verdetto.'
   }
 } catch {
   Nota '    batteria        : [non leggibile]' 'Yellow'
@@ -112,27 +159,50 @@ try {
 } catch { }
 
 Nota ''
-Nota '    LO DICO CHIARO: se "sessione" dice RDP sei DENTRO il VPS e stai' 'Yellow'
-Nota '    censendo il VPS. Se dice Console stai censendo la macchina che hai' 'Yellow'
-Nota '    davanti. Per sapere tutto servono DUE corse, una per macchina.' 'Yellow'
+Nota '    LO DICO CHIARO: questo referto descrive UNA macchina sola, quella il cui' 'Yellow'
+Nota ('    nome e'' stampato qui sopra (' + $env:COMPUTERNAME + '). Per sapere com''e'' fatta') 'Yellow'
+Nota '    l''ALTRA, la riga va lanciata SULL''ALTRA: servono DUE corse, e i due nomi' 'Yellow'
+Nota '    si CONFRONTANO. Quale delle due sia "il VPS" lo dice il NOME, non la sessione.' 'Yellow'
 
 # ======================================================================
 #  2. TUTTI I terminal64.exe SUL DISCO (non dal Pannello di controllo)
 # ======================================================================
 Nota ''
-Nota '=== 2. TUTTI I terminal64.exe TROVATI SUL DISCO ===' 'Cyan'
+Nota '=== 2. I terminal64.exe TROVATI NEI RAMI ELENCATI QUI SOTTO ===' 'Cyan'
 Nota '    (il Pannello di controllo non vede le copie e i portable:'
 Nota '     mostra UN BCM, e noi ne abbiamo misurati QUATTRO)'
+Nota '    NON e'' "tutto il disco": i rami cercati e la profondita'' sono stampati,' 'Yellow'
+Nota '    e cio'' che sta FUORI da questo elenco NON e'' stato guardato.' 'Yellow'
 
-$radici = @(
-  'C:\',
-  $env:ProgramFiles,
-  ${env:ProgramFiles(x86)},
-  $env:LOCALAPPDATA,
-  $env:USERPROFILE
-) | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -Unique
+# Tutte le unita' FISSE, non solo C: (sul VPS c'e' solo C:, ma la seconda
+# corsa e' su un'altra macchina, che puo' avere un D:). E si salta Windows:
+# nessun MT5 ci sta, e -Depth 3 da C:\ entra nel contenuto di ogni pacchetto
+# di WinSxS -- minuti buttati.
+$ESCLUDI = @('Windows', '$Recycle.Bin', 'System Volume Information', '$WinREAgent', 'Recovery', 'PerfLogs', 'Config.Msi', 'OneDriveTemp')
+$radici  = New-Object System.Collections.Generic.List[string]
+$piatte  = New-Object System.Collections.Generic.List[string]
+foreach ($dl in @(Get-CimInstance Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction SilentlyContinue)) {
+  $rd = $dl.DeviceID + '\'
+  $piatte.Add($rd) | Out-Null
+  foreach ($c in @(Get-ChildItem -LiteralPath $rd -Directory -ErrorAction SilentlyContinue)) {
+    if ($ESCLUDI -notcontains $c.Name) { $radici.Add($c.FullName) | Out-Null }
+  }
+}
+if ($piatte.Count -eq 0) { $piatte.Add('C:\') | Out-Null; $radici.Add('C:\') | Out-Null }
+foreach ($p in @($env:ProgramFiles, ${env:ProgramFiles(x86)}, $env:LOCALAPPDATA, $env:USERPROFILE)) {
+  if ($p) { $radici.Add($p) | Out-Null }
+}
+$radici = @($radici | Where-Object { $_ -and (Test-Path -LiteralPath $_) } | Select-Object -Unique)
+Nota ('    unita'' FISSE viste: ' + ($piatte -join '  '))
+Nota ('    rami ESCLUSI per nome: ' + ($ESCLUDI -join ', ')) 'DarkGray'
 
 $exe = New-Object System.Collections.Generic.List[string]
+# la radice di ogni unita', piatta: un terminal64.exe messo in C:\ diretto
+foreach ($r in $piatte) {
+  foreach ($f in @(Get-ChildItem -LiteralPath $r -Filter 'terminal64.exe' -File -ErrorAction SilentlyContinue)) {
+    if (-not $exe.Contains($f.FullName)) { $exe.Add($f.FullName) | Out-Null }
+  }
+}
 foreach ($r in $radici) {
   Nota ('    cerco sotto: ' + $r + '  (profondita'' ' + $Profondita + ')') 'DarkGray'
   $trovati = @(Get-ChildItem -LiteralPath $r -Filter 'terminal64.exe' -File -Recurse -Depth $Profondita -ErrorAction SilentlyContinue)
@@ -141,10 +211,21 @@ foreach ($r in $radici) {
   }
 }
 
+# Get-Process serve SOLO a leggere Id e Path: non si tocca nessun processo.
+# E se .Path tira (processo di un ALTRO utente) il terminale finirebbe
+# stampato "spento" pur essendo ACCESO: quei casi si CONTANO e si dicono.
+$proc = @(Get-Process terminal64 -ErrorAction SilentlyContinue)
 $vivi = @{}
-foreach ($pr in @(Get-Process terminal64 -ErrorAction SilentlyContinue)) {
-  try { if ($pr.Path) { $vivi[$pr.Path] = $pr.Id } } catch { }
+$procMuti = 0
+foreach ($pr in $proc) {
+  $pp = $null
+  try { $pp = $pr.Path } catch { $pp = $null }
+  if ($pp) { $vivi[$pp] = $pr.Id } else { $procMuti++ }
 }
+Nota ''
+Nota ('    processi terminal64 VIVI ADESSO: ' + $proc.Count + '   (percorso leggibile ' + $vivi.Count + ', NON leggibile ' + $procMuti + ')') $(if ($procMuti -gt 0) { 'Yellow' } else { 'Gray' })
+if ($procMuti -gt 0) { Nota '    ATTENZIONE: un processo col percorso NON leggibile gira sotto un ALTRO utente:' 'Yellow' }
+if ($procMuti -gt 0) { Nota '    qui sotto puo'' comparire come "spento" pur essendo ACCESO.' 'Yellow' }
 
 Nota ''
 Nota ('    TROVATI ' + $exe.Count + ' terminal64.exe') 'Green'
