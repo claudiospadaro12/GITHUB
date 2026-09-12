@@ -16730,3 +16730,103 @@ e mediana **77,8**. Il difetto non e' nei conti: e' nell'**accostamento**.
 🔑 **La regola in una riga**: *una mediana e una coda messe nella stessa riga
 promettono di descrivere la stessa distribuzione. Se non e' vero, la riga e'
 un'inferenza, non una misura.*
+
+---
+
+## 287. 🔢🎭 IL CONTEGGIO **ARITMETICO** DI UN ASSE **ENUM**: il cancello stampa `celle=16374` dove le celle vere sono **7**, e su quel numero si spegne un round SANO (12/09/2026)
+
+### 🔴 IL FATTO, E VA RACCONTATO NELL'ORDINE IN CUI E' ACCADUTO
+`COLLAUDO_EMADOW_05_tf_U30USD.txt` r.126 porta:
+```
+InpTF=16385||15||1||16388||Y
+```
+`controlla_prova.py` stampava **`celle=16374`** (`(16388-15)/1+1`) e chiudeva
+con **`OK, problemi 0`**. Su quel numero la riga `cemad05` e' stata **spenta**
+dalla coda del 12/09 (commit `43e4e30`), motivandola cosi': *"99,2% della
+coda, 33.006 passate contro 258, FATTORE 128, teneva in ostaggio undici
+righe"*.
+
+🔴 **Il numero era sbagliato, e con lui tutta la motivazione.**
+`InpTF` e' dichiarato **`ENUM_TIMEFRAMES`** (`ABTG_EMA200.mq5` r.49). Su un
+input enum **MT5 IGNORA IL PASSO** e spazzola i **MEMBRI** compresi fra start e
+stop. Fra 15 e 16388 i membri sono **sette**: M15 M20 M30 H1 H2 H3 H4.
+- celle vere: **7**, non 16.374 → **14 passate**, non 32.748;
+- peso vero nella coda: **7 su 136 = 5,1%**, non 99,2%;
+- fattore vero: **136/129 = 1,05x**, non 128x.
+
+### 🔴 E IL DETTAGLIO CHE FA MALE: IL FILE LO AVEVA GIA' SCRITTO
+Lo stesso file prova, r.64-69, avvisava **prima**:
+> *"ATTENZIONE A UN NUMERO CHE MENTE... `controlla_prova.py` conta questo asse
+> ARITMETICAMENTE e stampa `celle=16374`. E' sbagliato per costruzione... Le
+> celle vere sono SETTE, e il driver le conta bene."*
+
+E il **driver** lo implementa cosi' **apposta**, da mesi:
+`walkforward_generico.ps1` r.784-790 —
+```
+if($EnumMembri.ContainsKey($tipoP)){
+  # ENUM: MT5 IGNORA LO STEP e spazzola i membri fra start e stop.
+  $celle=@($EnumMembri[$tipoP] | Where-Object { $_ -ge $lo -and $_ -le $hi }).Count
+```
+👉 Quindi **due strumenti della stessa casa contavano la stessa cosa in due
+modi diversi**, il file prova diceva quale dei due credere, e la decisione e'
+stata presa sul numero del cancello **senza aprire il file che lo smentiva**.
+E' la classe 276 (due cancelli, verdetti opposti) applicata a un **numero**
+invece che a un verdetto.
+
+### 🔴 QUANTO ERA DIFFUSO — misurato su tutti i 689 file prova
+Contando come conta il driver invece che aritmeticamente:
+- celle totali d'archivio: **33.472 → 719** (il conto aritmetico gonfiava di
+  **46,5x**);
+- file con un asse su tipo enum: **11**, piu' **17** legacy `ABTG_*.txt` con
+  `InpTF=16388||15||1||16408||Y` (che il cancello scarta gia' per altra via:
+  non hanno la riga `# EA:`);
+- e la **corroborazione indipendente**: `R128a_trailingTF_D30EUR.txt` r.265-268
+  riporta dall'archivio che `InpTF=16385||15||1||16408||Y` produsse **11 RIGHE**
+  (40+ CSV in `risultati_prove\`) — e il conto corretto su quegli estremi da'
+  **esattamente 11**.
+
+### ✅ CHE COSA SI FA — e si e' fatto lo stesso giorno
+1. **`controlla_prova.py` conta ora come il driver**: se l'asse e' su un input
+   `ENUM_*`, le celle sono i **membri** fra start e stop, il passo e' ignorato.
+   Le tabelle sono **copiate** dal driver (r.385-413), non inventate, e il
+   doppione e' **dichiarato** nel commento: se il driver cambia, va rifatto.
+2. Quando i due conti differiscono, il cancello **stampa tutti e due** e
+   scrive `[il conto aritmetico direbbe N: NON guardarlo]`. 🔴 Un numero
+   sbagliato che **non compare piu'** e' meglio di un numero sbagliato
+   spiegato; ma se qualcuno lo ricalcola a mano, deve trovare la smentita
+   scritta accanto.
+3. **Asse enum con ZERO membri nell'intervallo → PROBLEMA**, non `celle=0` in
+   silenzio: il driver non produrrebbe nemmeno una passata.
+4. **Un TETTO sulle celle** (`--tetto`, default **64**) — perche' il difetto
+   non era solo il conto: era che **il numero veniva STAMPATO e non GUARDATO**.
+   La soglia e' scelta sulla **distribuzione vera**, dichiarata prima dei
+   numeri: su **217** file mono-asse con EA risolvibile il massimo **mai
+   scritto** e' **24 celle** (`R129a`/`R129b`), p99 = **10**, p50 = **2**,
+   **zero** file sopra 24. Default 64 = **2,67x** il massimo storico.
+   🔴 **Misurato che non produce nemmeno un falso FAIL sui 689 file**
+   (e i problemi restano **476 prima e 476 dopo**: nessuna regressione).
+   Se una griglia grossa serve **davvero**, si alza con `--tetto` e **si
+   dichiara nel referto**.
+5. **Un AVVISO DI QUOTA** (`--quota`, default **50%**): se un file da solo pesa
+   piu' di tutti gli altri insieme, lo dice. **Avvisa, non boccia** — perche'
+   dominare una coda puo' essere legittimo.
+
+### 🧪 IL CONTRO-ESEMPIO, perche' un tetto e' pericoloso quanto un buco
+Un **falso FAIL costa quanto un falso PASS**. Quindi il tetto e' stato provato
+in tutte e due le direzioni, **non solo in quella che conferma**:
+- **non boccia** nessuno dei 689 file in archivio (misurato: 0 occorrenze);
+- **boccia** una griglia da 601 celle costruita a posta (`0.4..1.6` passo
+  `0.002`);
+- **non** fa scattare la quota sulla coda vera + `cemad05` (7 su 136 = 5,1%),
+  e **la fa scattare** su un gruppo dove un file vale il 98,8%.
+
+🔑 **La regola in una riga**: *un conteggio si fa con la regola del motore che
+esegue, non con l'aritmetica che sembra ovvia — e quando due strumenti di casa
+contano la stessa cosa in modi diversi, si apre il file che spiega perche',
+prima di spegnere qualcosa.*
+
+⚠️ **E il corollario operativo, che vale oltre gli enum**: `cemad05` e' stata
+spenta per un numero **mai verificato contro la sua fonte**. Prima di togliere
+una riga da una coda, il costo che le si attribuisce si **misura col
+`-SoloControllo` del driver** — che e' l'unico che conta come conta MT5 — o
+almeno si legge il **file prova**, che qui la risposta ce l'aveva scritta.

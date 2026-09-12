@@ -1,0 +1,168 @@
+# =====================================================================
+#  EA: ABTG_IntradayMomentum
+#  R141b -- IL GEMELLO SU U30USD. Stesso asse: InpUseSecondSignal.
+# ---------------------------------------------------------------------
+#  DOSSIER:      report/I_QUATTRO_INVISIBILI_2026-09-12.md
+#  FILE MADRE:   prove/R141a_momentum_NASUSD_r12.txt
+#
+#  E' il file madre con DUE COSE CAMBIATE e nient'altro:
+#     @SIMBOLO   NASUSD -> U30USD
+#     InpMagic   784101 -> 784102
+#  ABLAZIONE A STELLA: ogni altra riga e' identica carattere per
+#  carattere, orari compresi (Dow e Nasdaq aprono e chiudono la cassa
+#  alla STESSA ora server: 14:30 e 21:00). L'IPOTESI, l'ANCORA UNICA,
+#  la classificazione BARRE/CALENDARIO, le TRE USCITE e le SOGLIE
+#  stanno in testa al file madre e NON si riscrivono qui.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' ESISTE -- e' la casella 4 del CERTIFICATO, non un raddoppio
+# ---------------------------------------------------------------------
+#  Regola del 09/09: un candidato NON si archivia come morto se mancano
+#  i SIMBOLI GEMELLI. Senza questo file, qualunque numero esca da R141a
+#  non e' archiviabile: resta "non ancora misurato" per sempre.
+#  E c'e' una ragione di merito, non solo di procedura: il paper e' su
+#  SPY (S&P 500). Il Dow e il Nasdaq sono i due indici USA che abbiamo,
+#  e sono DIVERSI fra loro (30 titoli industriali contro 100 tecnologici).
+#  Se il momentum di fine seduta e' un fatto della CAMPANELLA USA deve
+#  vedersi su entrambi; se si vede solo su uno, e' un fatto del
+#  sottostante e va scritto cosi'.
+#
+# ---------------------------------------------------------------------
+#  LA FRONTIERA DEL COSTO SU QUESTO SIMBOLO -- ED E' PEGGIORE
+# ---------------------------------------------------------------------
+#  SPREAD U30USD, MISURATO ora per ora su 64.711.285 tick
+#  (risultati_archivio/spread_flotta/spread_orario_U30USD.csv):
+#    ora 14 (misura di r1)  mediana 2,00  p95 3,00  max 47,0
+#    ora 20 (INGRESSO)      mediana 1,90  p95 2,00  max 46,0  <-- 5.311.323 tick
+#    ora 21 (USCITA)        mediana 1,80  p95 2,50  max 34,0
+#  Commissione sugli indici: 0,0000 MISURATA (n=302 deal) -> pedaggio
+#  all-in = spread e basta.
+#
+#  1) stop/spread (cosmetico su questo motore, vedi il file madre):
+#     ATR(M30) U30USD [DERIVATO]: range giornaliero MISURATO 314,5 idx
+#     su 24 giorni (ROUND_ORB_ATR_PS5_2026-09-10.md r.233) x
+#     sqrt(30/1440) = 45,4 idx.
+#     stop = 2,0 x 45,4 = 90,8 idx  ->  90,8 / 1,90 = 47,8x   PASSA 40x
+#     allo spread p95 2,00           ->  45,4x                PASSA 40x
+#     >>> MA LA DISTRIBUZIONE MORDE QUI, E VA DETTA:
+#         giorno al p25 del range (172,0 idx MISURATO, ed e' MOLTO piu'
+#         basso del p25 di NASUSD che vale 239,4): ATR(M30) 24,8 ->
+#         stop 49,7 -> 26,1x.  NON PASSA il 40x, PASSA il duro 13,3x.
+#         Per scendere sotto il DURO servirebbe un range giornaliero
+#         < 102 idx, contro un p25 misurato di 172,0.
+#         >>> FRAZIONE DELLE OPERAZIONI SOTTO IL PAVIMENTO DI LAVORO
+#             40x: almeno il 25%, [DERIVATO dal p25 del range].
+#             Sotto il DURO 13,3x: [NON MISURATO], e serve un giorno
+#             1,7 volte piu' quieto del p25.
+#     >>> QUESTO E' IL MOTIVO PER CUI NASUSD VA PRIMO E U30USD SECONDO,
+#         e non e' una preferenza: su NASUSD anche il giorno al p25 sta
+#         a 40,6x, su U30USD scende a 26,1x. E' l'unico numero che
+#         separa i due simboli.
+#
+#  2) edge contro costo (il cancello che decide):
+#     costo andata+ritorno = 1,90 (ora 20) + 1,80 (ora 21) = 3,70 punti
+#     indice per operazione. MISURATO.
+#     >>> 8,8% PIU' CARO di NASUSD (3,40). Con un edge atteso di
+#         1,98-3,96 punti col solo r1 (conto del file madre, scalato
+#         sul range 314,5 quasi identico a 313,8), il rapporto
+#         edge/costo scende a 0,53-1,07: la meta' alta della banda e'
+#         appena sopra il pareggio.
+#
+# ---------------------------------------------------------------------
+#  ATTESA E TRE USCITE
+# ---------------------------------------------------------------------
+#  Sedute: identiche al file madre (la cassa USA e' la stessa).
+#    CELLA A (r12 spento): n atteso IS 160-180 | OOS 240-270.
+#    CELLA B (r12 acceso): n [NON MISURATO], banda IS 60-130 / OOS 90-200.
+#  PF atteso: 0,92 - 1,12. La banda e' CENTRATA SUL PEDAGGIO e sta un
+#  gradino SOTTO quella di NASUSD, perche' il pedaggio e' l'8,8% piu'
+#  alto e il p25 del range e' il 28% piu' basso.
+#
+#   (a) NUMERO BUONO: PF >= 1,10 con n >= 150 su ENTRAMBI i simboli ->
+#       il momentum di fine seduta e' un fatto della campanella USA e
+#       non del sottostante. E' il caso migliore possibile.
+#   (b) NUMERO BRUTTO, PIU' PROBABILE: PF < 1,10 con n >= 150 ->
+#       certificato scritto su DUE mercati invece che su uno, e il
+#       motore si chiude con un numero solido.
+#       >>> E IL CASO INTERESSANTE, che va letto e non buttato: se
+#           NASUSD passa e U30USD no, NON si promuove la famiglia. Si
+#           scrive "il fatto e' del Nasdaq" e si misura il terzo indice
+#           (D30EUR, campanella 16:30 server) prima di qualunque sedia.
+#   (c) CATENA ROTTA: Trades = 0, oppure le due celle identiche al
+#       centesimo, oppure n molto diverso da ~440 sull'insieme delle
+#       due finestre. NON e' una risposta: si leggono le righe
+#       [A1][AUTOTEST] e si riapre il baco.
+#
+# ---------------------------------------------------------------------
+#  IGIENE (le stesse verifiche del file madre, rifatte su questo file)
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING
+#     (classe 273: commento e numero dicono la stessa cosa).
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#     Nessuna richiesta prima di quella data -> NON e' screening.
+#  ORE IN ORA SERVER BCM: 14:30 / 20:30 / 21:00. Un CSV con
+#     InpEntryHour=21 e' in ora ITALIANA: SI CESTINA.
+#  TETTO BARRE: M30 su U30USD, 21 mesi = ~21.100 barre [DERIVATO],
+#     sotto il tetto delle ~100.000. Le barre M1 che l'EA legge
+#     (r.494) servono solo per la giornata corrente: il tetto non morde.
+#  ENUM: InpAtrTF pinnato col valore ESPLICITO 30 (= PERIOD_M30), mai
+#     come intervallo con passo (classe nuova del 12/09).
+#  MAGIC 784102: grep -rl repo-wide il 12/09/2026, .git escluso ->
+#     ZERO occorrenze.
+#  ETICHETTA blocco r141: zero collisioni con le 29 in coda (arrivano
+#     a r139c).
+#  PER-TRADE: le due celle condividono il magic -> la seconda
+#     sovrascrive la prima. I numeri si leggono nell'OPTFRAME.
+#  G1 (determinismo): [NON MISURATO] in questo round.
+#  NESSUN PIN DI STRINGA (InpComment, InpNewsFile, InpNewsCurrencies).
+#
+#  COSTO: 2 celle x 2 finestre = 4 passate -> T = 0,6 + 0,077 x 4 =
+#         0,91 minuti. Con R141a: 8 passate, 1,22 minuti in tutto.
+#
+#  CANCELLO: primo strato lanciato da me. Il SECONDO (agente
+#     controllo-preventivo) lo lancia il coordinatore: DICHIARATO.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+InpSignalStartHour=14||14||0||14||N
+InpSignalStartMin=30||30||0||30||N
+InpSignalMinutes=30||30||0||30||N
+
+InpUseOvernightInR1=true||true||0||true||N
+InpMaxGiorniIndietro=5||5||0||5||N
+
+InpMinAbsR1Pct=0.0||0.0||0||0.0||N
+
+InpEntryHour=20||20||0||20||N
+InpEntryMin=30||30||0||30||N
+InpEntryWindowMin=5||5||0||5||N
+InpExitHour=21||21||0||21||N
+InpExitMin=0||0||0||0||N
+InpExitSafetyMin=1||1||0||1||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseStopLoss=true||true||0||true||N
+InpAtrTF=30||30||0||30||N
+InpAtrPeriod=14||14||0||14||N
+InpSLatr=2.0||2.0||0||2.0||N
+
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+InpUseNewsFilter=false||false||0||false||N
+
+InpMagic=784102||784102||0||784102||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+InpSlippagePts=0||0||0||0||N
+
+# --- L'UNICO ASSE: IL SECONDO PREDITTORE r12 (identico al file madre)
+InpUseSecondSignal=0||0||1||1||Y

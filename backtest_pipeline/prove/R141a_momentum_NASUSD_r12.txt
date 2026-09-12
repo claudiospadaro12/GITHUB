@@ -1,0 +1,321 @@
+# =====================================================================
+#  EA: ABTG_IntradayMomentum
+#  R141a -- MARKET INTRADAY MOMENTUM, NASUSD. IL PRIMO NUMERO IN ASSOLUTO.
+#           Asse unico: InpUseSecondSignal (il secondo predittore r12).
+# ---------------------------------------------------------------------
+#  DOSSIER:  report/I_QUATTRO_INVISIBILI_2026-09-12.md
+#  FONTE:    Gao-Han-Li-Zhou, "Market Intraday Momentum" (JFE).
+#            Scheda di casa: report/SWEEP_MECCANISMI_LIBERI_2026-08-22.md
+#            par. A1 (9/10). Bozza criteri:
+#            backtest_pipeline/risultati_archivio/R98_CRITERI_BOZZA.md
+#
+#  ###  PERCHE' QUESTO FILE ESISTE OGGI  ###
+#  ABTG_IntradayMomentum.mq5 e' stato scritto il 22/08/2026. Il 12/09:
+#    righe in REGISTRO_TEST.md ...... 0
+#    CSV di risultati in archivio ... 0
+#    file prova ..................... NESSUNO
+#    round in coda .................. 0
+#  Ventuno giorni fermo, ne' vivo ne' morto: INVISIBILE. E' esattamente
+#  il caso che il 09/09 Claudio ha chiamato "NON E' ACCETTABILE".
+#  Questo file e' il suo PRIMO numero.
+#
+# ---------------------------------------------------------------------
+#  IL MOTORE IN CINQUE RIGHE (letto nel sorgente, non nel titolo)
+# ---------------------------------------------------------------------
+#  1. r1 = rendimento della PRIMA mezz'ora di cassa USA, 14:30-15:00
+#     ORA SERVER BCM (misurato su barre PERIOD_M1, r.494).
+#  2. Con InpUseOvernightInR1=true (definizione del paper) dentro r1
+#     c'e' anche il gap notturno: si parte dalla chiusura di cassa di
+#     ieri (r.113-114, ricerca fino a 5 giorni indietro).
+#  3. All'inizio dell'ULTIMA mezz'ora (20:30 SERVER) si apre NEL VERSO
+#     di r1: r1>0 -> LONG, r1<0 -> SHORT. Soglia InpMinAbsR1Pct=0 =
+#     si opera SEMPRE (fedele al paper: conta il SEGNO).
+#  4. Si chiude entro la chiusura di cassa, 21:00 SERVER. Sempre.
+#     Zero overnight per costruzione: non c'e' un input per spegnerlo.
+#  5. Esposizione: TRENTA MINUTI AL GIORNO. Una operazione al giorno.
+#
+# ---------------------------------------------------------------------
+#  ###  ANCORA UNICA?  N O  ###  -- e va detto PRIMA della griglia
+# ---------------------------------------------------------------------
+#  Regola dell'ancora unica (misurata il 12/09):
+#     E_netta(R) = (edge_punti - costo_punti) / stop_punti
+#  Il costo e' fisso, quindi allargare lo stop DIVIDE l'edge in R.
+#  Lo stop e' gratis SOLO se il TARGET nasce dalla STESSA struttura.
+#
+#    STOP   -> ABTG_IntradayMomentum.mq5 r.157-160:
+#              InpUseStopLoss=true, stop = InpSLatr(2.0) x ATR(InpAtrTF)
+#              con InpAtrTF = PERIOD_M30 (input SEPARATO dal grafico).
+#    TARGET -> NON ESISTE. L'uscita e' la CAMPANELLA: r.136-137
+#              InpExitHour=21 / InpExitMin=0 (ora server), meno
+#              InpExitSafetyMin.
+#
+#  >>> DUE ANCORE DIVERSE: lo stop da un ATR, l'uscita da un OROLOGIO.
+#      Quindi `stop/spread` su questo motore e' un numero COSMETICO, e
+#      lo scrivo lo stesso solo perche' e' il cancello di casa -- ma il
+#      numero che DECIDE qui e' un altro, ed e':
+#             edge_in_punti  contro  costo_in_punti
+#      cioe' quanto si muove il prezzo in quella mezz'ora contro quanto
+#      costa entrarci e uscirne. E' calcolato piu' sotto.
+#
+#  >>> CONSEGUENZA CHE NON NASCONDO: per la regola dell'ancora unica
+#      questo motore parte in SVANTAGGIO. Non lo scarto per questo,
+#      perche' lo stop qui NON E' il meccanismo d'uscita (e' un
+#      guardrail nostro, "NON FA PARTE DEL PAPER", r.146): il P/L lo
+#      fa la campanella. Ma la regola dice che non ci si compra niente
+#      allargando lo stop, e questo file non ci prova.
+#
+# ---------------------------------------------------------------------
+#  ###  BARRE O CALENDARIO?  C A L E N D A R I O  al 100%  ###
+# ---------------------------------------------------------------------
+#  Legge dell'ancoraggio (12/09): un motore guadagna operazioni
+#  scendendo di TF SE E SOLO SE il suo stop si stringe scendendo di TF.
+#    - il segnale e' la prima mezz'ora di CASSA (orologio);
+#    - l'ingresso e' 20:30 SERVER (orologio, finestra 5 minuti);
+#    - l'uscita e' 21:00 SERVER (orologio);
+#    - lo stop e' ATR(InpAtrTF), e InpAtrTF e' un INPUT SEPARATO dal
+#      grafico: il TF del grafico non lo tocca.
+#  >>> r.57-60 del sorgente lo dice a parole sue: "IL TF DEL GRAFICO
+#      NON CONTA: le misure si fanno su barre M1".
+#  >>> GUADAGNO DI FREQUENZA SCENDENDO DI TF: 0,00 op/giorno,
+#      MISURATO DAL CODICE. E' classe G piena.
+#  >>> E QUESTO NON E' UN DIFETTO QUI: il motore NON CHIEDE di scendere
+#      di TF. Fa 1 operazione al giorno di per se', su 3 indici fa 3
+#      op/giorno di FAMIGLIA, cioe' TRE VOLTE il pavimento firmato il
+#      07/09. La banda bassa non gli serve: ha gia' la frequenza.
+#      >>> Ed e' M30 in un senso che nessun altro nostro motore e':
+#          la POSIZIONE dura trenta minuti. Il grafico e' un dettaglio.
+#
+# ---------------------------------------------------------------------
+#  ###  LA FRONTIERA DEL COSTO, COL NUMERO  ###  (e' una DISTRIBUZIONE)
+# ---------------------------------------------------------------------
+#  Pedaggio all-in sugli indici = SPREAD E BASTA: commissione 0,0000
+#  MISURATA su n=302 deal (report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#  r.181-183).
+#
+#  SPREAD NASUSD, MISURATO ora per ora su 156.146.398 tick
+#  (risultati_archivio/spread_flotta/spread_orario_NASUSD.csv):
+#    ora 14 (misura di r1)  mediana 1,80  p95 2,70  max 8,20
+#    ora 20 (INGRESSO)      mediana 1,70  p95 1,80  max 6,10   <-- 11.182.176 tick
+#    ora 21 (USCITA)        mediana 1,70  p95 2,70  max 8,10
+#  >>> L'ora 20 e' la PIU' ECONOMICA della giornata su NASUSD. Non e'
+#      una coincidenza fortunata: e' l'ora di massima liquidita' di
+#      cassa USA. Il motore entra nel punto piu' economico del feed.
+#
+#  1) IL CANCELLO DI CASA (stop/spread), che qui e' cosmetico:
+#     ATR(M30) NASUSD [DERIVATO]: range giornaliero MISURATO 313,8 idx
+#     su 24 giorni (report/ROUND_ORB_ATR_PS5_2026-09-10.md r.234) x
+#     sqrt(30/1440) = 45,3 idx.
+#     stop = 2,0 x 45,3 = 90,6 idx  ->  90,6 / 1,70 = 53,3x   PASSA 40x
+#     allo spread p95 1,80           ->  50,3x                PASSA 40x
+#     >>> E LA CODA DELLA DISTRIBUZIONE, che e' la parte che conta:
+#         giorno al p25 del range (239,4 idx MIS): ATR(M30) 34,6 ->
+#         stop 69,1 -> 40,6x. PASSA ANCORA, di misura.
+#         Per scendere sotto il pavimento DURO 13,3x servirebbe un
+#         range giornaliero < 91 idx, contro un p25 misurato di 239,4.
+#         FRAZIONE DELLE OPERAZIONI SOTTO IL DURO: [NON MISURATO],
+#         ma richiede un giorno 2,6 volte piu' quieto del p25.
+#     >>> ATTENZIONE: la legge di scala ancorata all'ADR SOTTOSTIMA del
+#         18-27% (misurato in report/EMA200_I_DUE_REQUISITI_2026-09-12.md
+#         r.182). L'errore va nella direzione PRUDENTE: lo stop vero e'
+#         PIU' LARGO, quindi i rapporti qui sopra sono un PAVIMENTO.
+#
+#  2) IL CANCELLO CHE DECIDE DAVVERO (edge contro costo):
+#     costo ANDATA+RITORNO = 1,70 (ingresso ora 20) + 1,70 (uscita ora
+#     21) = 3,40 punti indice per operazione. MISURATO, non stimato.
+#     Movimento disponibile nella mezz'ora finale:
+#       range 30' [DERIVATO] = 45,3 idx; il movimento medio ASSOLUTO e'
+#       una FRAZIONE del range, e la frazione e' [NON MISURATA]:
+#       la dichiaro come BANDA 0,5-1,0 del range = 22,7 - 45,3 idx.
+#     Col success rate DEL PAPER (54,37% col solo r1, su SPY 1993-2013
+#     -- [DICHIARATO NEL PAPER, NON MISURATO DA NOI]):
+#       edge = (2 x 0,5437 - 1) x [22,7..45,3] = 1,98 - 3,96 punti idx
+#       edge / costo = 0,58 - 1,16
+#     >>> LEGGERE QUESTA RIGA PRIMA DI SPERARE: col SOLO r1, e usando
+#         il numero DEL PAPER, questo motore sta FRA 0,58 e 1,16 VOLTE
+#         il suo pedaggio sul nostro feed. Cioe' e' sul filo, e la
+#         meta' bassa della banda e' in perdita PRIMA di cominciare.
+#     Col doppio predittore (77,05% dichiarato dal paper):
+#       edge = 0,541 x [22,7..45,3] = 12,3 - 24,5 punti idx
+#       edge / costo = 3,6 - 7,2                    <-- ha margine
+#     >>> E' ESATTAMENTE PERCHE' L'ASSE DI QUESTO ROUND E' r12.
+#         Non e' una taratura: e' l'unica cosa che, in aritmetica,
+#         separa un motore che paga il pedaggio da uno che non lo paga.
+#     >>> CONTRADDIZIONE CHE NON RIESCO A SCIOGLIERE E CHE DICHIARO:
+#         il paper da' al doppio predittore un rendimento ANNUO PIU'
+#         BASSO (2,10% contro 6,67%) con un edge per operazione 6,2
+#         volte piu' grande. Le due cose insieme implicano un numero di
+#         operazioni che non riesco a ricostruire (sarebbe ~5% dei
+#         giorni). Quindi il NUMERO DI OPERAZIONI della cella r12 e'
+#         [NON MISURATO] e lo misura questa corsa. Non lo indovino.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- CON TRE USCITE (cl. 278)
+# ---------------------------------------------------------------------
+#  Sedute di cassa USA nella finestra 2024.09.26 - 2026.06.30:
+#    643 giorni di calendario -> ~459 feriali -> ~443 sedute (meno le
+#    ~16 feste USA). Taglio IS/OOS del driver: FrazioneIS 0,40.
+#    -> IS ~177 sedute, OOS ~266 sedute.
+#  Il motore opera 1 volta per seduta (InpMinAbsR1Pct=0).
+#
+#  CELLA A (InpUseSecondSignal = 0, il paper nudo):
+#    n atteso  IS 160-180  |  OOS 240-270
+#    >>> E' L'UNICA CELLA DEI QUATTRO MOTORI INVISIBILI CHE ARRIVA A
+#        n >= 150 IN TUTTE E DUE LE FINESTRE. Il campione non e' una
+#        speranza: e' aritmetica del calendario.
+#    PF atteso: 0,95 - 1,15. La banda e' CENTRATA SUL PEDAGGIO, non
+#    sull'ottimismo: il conto (2) qui sopra da' edge/costo 0,58-1,16.
+#    DD atteso: [NON MISURATO]. Con stop 2 x ATR(M30) a rischio 0,65%
+#    per operazione e 1 operazione/giorno, una striscia di 8 stop di
+#    fila costa ~5,2%. La colonna DD e' un cancello di RISCHIO e si
+#    legge a QUALUNQUE n (Emendamento B, 16/08).
+#
+#  CELLA B (InpUseSecondSignal = 1, il filtro del paper):
+#    n atteso: [NON MISURATO] -- vedi la contraddizione qui sopra.
+#    Banda larga dichiarata: IS 60-130, OOS 90-200.
+#    >>> Se n IS < 150 la cella B ha il MERITO SOSPESO (valvola R59) e
+#        il RISCHIO leggibile. Non e' promuovibile, e' un'ablazione.
+#
+#  LE TRE USCITE, congelate adesso:
+#   (a) NUMERO BUONO: cella A con n >= 150 in entrambe E PF >= 1,10 in
+#       entrambe -> e' il primo motore di casa che paga il pedaggio con
+#       1 op/giorno e campione pieno. Si apre il round vero: due lati
+#       separati (regola 25/08), gemelli D30EUR e 225JPY, e la scelta
+#       di cella al CENTRO DELL'ALTOPIANO, mai il picco.
+#   (b) NUMERO BRUTTO, E ME L'ASPETTO PIU' PROBABILE: cella A con
+#       n >= 150 e PF < 1,10 -> cancello C0. Si scrive il CERTIFICATO
+#       con PF/n/DD e il motore si chiude CON UN NUMERO. E' un buon
+#       esito: chiude un candidato di classe A1 fermo da 21 giorni.
+#       >>> E SE la cella B (r12) passasse mentre la A no, il verdetto
+#           NON e' "promosso": e' "il filtro morde, e va misurato su un
+#           campione suo". Una cella su due con n sotto 150 non e' una
+#           sedia, e non la chiamo cosi'.
+#   (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: Trades = 0, oppure le
+#       due celle IDENTICHE al centesimo (il filtro non e' arrivato),
+#       oppure n molto diverso da ~440 per l'insieme delle due
+#       finestre (= le barre M1 non sono arrivate all'EA nel tester).
+#       In questo caso NON si cambia nessun parametro: si leggono le
+#       righe [A1][AUTOTEST] del log e si riapre il BACO.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65% per operazione
+#    non giudica se  n < 150 (merito sospeso, rischio no)
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO (i cancelli non la controllano)
+# ---------------------------------------------------------------------
+#  MODELLO: questo file va girato a TICK REALI = -Modello 4.
+#           -Modello 1 e' OHLC M1 = SOLO SCREENING, mai un verdetto
+#           (classe 273: il commento e il numero devono dire la stessa
+#           cosa, e qui la dicono). Il default del driver e' 4
+#           (walkforward_generico.ps1 r.180).
+#  PAVIMENTO TICK: @DAQUANDO 2024.09.26 = inizio MISURATO dei tick
+#           reali BCM sugli indici. Il file NON chiede niente prima,
+#           quindi NON e' screening: e' un verdetto.
+#  ORE: TUTTE IN ORA SERVER BCM (= ora italiana - 1).
+#       14:30 server = 15:30 IT (apertura cassa USA)
+#       20:30 server = 21:30 IT (ingresso)
+#       21:00 server = 22:00 IT (chiusura cassa)
+#       >>> Un CSV con InpSignalStartHour=15 o InpEntryHour=21 e'
+#           in ora ITALIANA: SI CESTINA.
+#  TETTO DELLE BARRE: @PERIODO M30 su NASUSD, 21 mesi = ~21.100 barre
+#       [DERIVATO: 46 barre/giorno x ~459 feriali], molto sotto il
+#       tetto delle ~100.000. A M1 sarebbero ~633.000: SFONDA, ed e' il
+#       motivo per cui il grafico NON e' M1.
+#       >>> E LE BARRE M1 CHE L'EA LEGGE (r.494) NON SONO UN PROBLEMA:
+#           gli servono solo le M1 di OGGI (e al massimo di 5 giorni
+#           indietro, InpMaxGiorniIndietro=5) = <= 6.900 barre M1.
+#           La profondita' richiesta e' INTRAGIORNALIERA: il tetto non
+#           morde. Questo l'ho verificato leggendo r.494 e r.519-521,
+#           non assumendolo.
+#  ENUM: InpAtrTF e' un ENUM_TIMEFRAMES. E' pinnato col VALORE
+#       ESPLICITO 30 (= PERIOD_M30). MAI come intervallo con passo:
+#       un asse a passo 1 su un ENUM genera migliaia di celle morte
+#       (classe nuova del 12/09, costata 16.374 celle in coda).
+#  MAGIC: 784101 -- cercato in tutto il repo il 12/09/2026 con
+#       grep -rl, .git escluso: ZERO occorrenze.
+#  ETICHETTA: blocco r141 -- le 29 etichette in coda stanotte arrivano
+#       a r139c (piu' canfrz, cemad02, cemad05). ZERO collisioni.
+#  PER-TRADE: le due celle hanno lo STESSO magic, quindi scrivono lo
+#       STESSO file per-trade e la seconda SOVRASCRIVE la prima. I
+#       numeri delle due celle si leggono nell'OPTFRAME, che ha una
+#       riga per passata. Dichiarato, non scoperto dopo.
+#  G1 (determinismo): NON misurato in questo round -- l'asse e' uno
+#       solo e serve a r12. Per questo EA il determinismo resta
+#       [NON MISURATO], e sta scritto qui.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment, InpNewsFile e InpNewsCurrencies
+#       restano al default compilato. Un pin di stringa VUOTA MT5 lo
+#       ignora in silenzio -- e' la classe che costo' il round FiboH4.
+#
+#  COSTO, col metro di casa T(min) = 0,6 + 0,077 x passate:
+#    2 celle x 2 finestre = 4 passate  ->  T = 0,91 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me.
+#    Il SECONDO strato, l'agente controllo-preventivo, NON POSSO
+#    invocarlo io: lo lancia il coordinatore. Lo DICHIARO e non lo
+#    aggiro. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN: spento nello screening per misurare l'edge RAW. Nel
+#     tester la guardia e' fail-open comunque (le GlobalVariable del
+#     Guardian non esistono, r.88-91 del sorgente): il pin serve a
+#     togliere l'ambiguita', non a cambiare il numero.
+InpUsaGuardian=false||false||0||false||N
+
+# --- SEGNALE: la prima mezz'ora di cassa USA, ORA SERVER BCM
+InpSignalStartHour=14||14||0||14||N
+InpSignalStartMin=30||30||0||30||N
+InpSignalMinutes=30||30||0||30||N
+
+# --- r1 COME LO DEFINISCE IL PAPER: dalla chiusura di ieri (col gap)
+InpUseOvernightInR1=true||true||0||true||N
+InpMaxGiorniIndietro=5||5||0||5||N
+
+# --- SOGLIA ZERO = fedele al paper (conta il SEGNO, non la taglia)
+InpMinAbsR1Pct=0.0||0.0||0||0.0||N
+
+# --- INGRESSO E USCITA: l'ultima mezz'ora, ORA SERVER BCM
+InpEntryHour=20||20||0||20||N
+InpEntryMin=30||30||0||30||N
+InpEntryWindowMin=5||5||0||5||N
+InpExitHour=21||21||0||21||N
+InpExitMin=0||0||0||0||N
+InpExitSafetyMin=1||1||0||1||N
+
+# --- DUE LATI INSIEME (regola di casa 25/08). Si separano dopo.
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- GUARDRAIL DI STOP (NOSTRO, non del paper). InpAtrTF e' un ENUM:
+#     pinnato col VALORE ESPLICITO 30 = PERIOD_M30.
+InpUseStopLoss=true||true||0||true||N
+InpAtrTF=30||30||0||30||N
+InpAtrPeriod=14||14||0||14||N
+InpSLatr=2.0||2.0||0||2.0||N
+
+# --- RISCHIO: il contratto di casa. Taglie e rischio sono di CLAUDIO:
+#     qui si MISURA a 0,65, non si decide niente.
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- FILTRO NOTIZIE SPENTO (il CSV non esiste nel tester)
+InpUseNewsFilter=false||false||0||false||N
+
+# --- GENERALI. Nessun pin di stringa.
+InpMagic=784101||784101||0||784101||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+InpSlippagePts=0||0||0||0||N
+
+# --- L'UNICO ASSE: IL SECONDO PREDITTORE r12.
+#     0 = il paper nudo (solo r1). 1 = si opera solo se r1 e r12
+#     concordano. E' l'unica variabile che, in aritmetica, separa un
+#     motore che paga il pedaggio (edge/costo 3,6-7,2) da uno che sta
+#     sul filo (0,58-1,16). Vedi il conto (2) in testa al file.
+InpUseSecondSignal=0||0||1||1||Y
