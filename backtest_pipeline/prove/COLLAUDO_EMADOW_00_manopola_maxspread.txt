@@ -1,6 +1,7 @@
 # ==========================================================================
 #  EA: ABTG_EMA200
-#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_00_canarino_spread.txt.
+#  COLLAUDO PROP -- cella viva U30USD H1 (sedia 771531). File COLLAUDO_EMADOW_00_manopola_maxspread.txt
+#  (rinominato il 12/09/2026: si chiamava _00_canarino_spread e NON e' un canarino -- classe 262).
 #  CRITERI CONGELATI PRIMA DEI NUMERI:
 #    backtest_pipeline/prove/COLLAUDO_EMA200_DOW_CRITERI.md  (commit caaf5d1,
 #    12/09/2026 -- committato PRIMA di questo file, e prima di ogni numero)
@@ -9,7 +10,12 @@
 #         R112/R110. Non si cambia il banco dentro un collaudo.
 #  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
 #         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
-#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#         41 chiavi identiche su 42 comuni; unico delta InpMagic. L'EA ha
+#         44 input, il .set 42, questo file 43: due input NON sono coperti
+#         dal .set e prendono il default compilato -- InpUsaGuardian=true
+#         e InpLogImbuto=true, quest'ultimo solo log. Il numero "46 su 46"
+#         della prima stesura era SOPRA L'UNIVERSO: corretto il 12/09/2026
+#         dal cancello di giudizio, classe 263).
 #  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
 #  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
 #         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
@@ -17,15 +23,44 @@
 #         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
 # ==========================================================================
 #
-#  LA DOMANDA, e non e' "conviene filtrare lo spread?"
-#    E' IL CANARINO. Prima di qualunque scala di spread bisogna sapere
-#    UNA cosa: il tester, a Modello 4, fa arrivare all'EA uno spread VERO
-#    E VARIABILE, o un numero costante? Finche' non si sa, ogni gradino
-#    di spread e' una figura retorica. In casa la domanda e' aperta e
+# ##########################################################################
+# ##  RUOLO CORRETTO IL 12/09/2026 DAL CANCELLO DI GIUDIZIO -- CLASSE 262.
+# ##  QUESTO FILE NON E' IL CANARINO, E NON PUO' ESSERLO.
+# ##
+# ##  Nella prima stesura questo file si chiamava "canarino spread" e gli
+# ##  era dato il compito di sbloccare la scala di spread. E' SBAGLIATO, e
+# ##  il difetto e' logico, non di forma: qui l'unico asse e'
+# ##  InpMaxSpread, che e' il filtro INTERNO dell'EA, e la corsa gira
+# ##  SENZA -Spread, cioe' con la riga Spread= dell'.ini mai scritta.
+# ##  Sono DUE variabili diverse, e nessuno dei due rami conclude:
+# ##  se n NON si muove puo' voler dire l'ESATTO CONTRARIO di quello che
+# ##  avevo scritto -- uno spread costante e' proprio la firma di una riga
+# ##  Spread= ONORATA. Un canarino che ammette due letture opposte non e'
+# ##  un canarino.
+# ##
+# ##  >>> IL CANARINO VERO non vuole un file nuovo: e'
+# ##      COLLAUDO_EMADOW_01_spread_scala_ini.txt girato DUE VOLTE sulla
+# ##      stessa cella, SOLO GAMBA OOS, con -Spread 0 contro -Spread 99999.
+# ##      Identici => la riga e' ignorata, PROVA A morta e DICHIARATA.
+# ##      Diversi  => la riga e' onorata, la scala si legge.
+# ##      4 passate, ~1,5 minuti.
+# ##
+# ##  >>> COSA MISURA DAVVERO QUESTO FILE, ed e' utile per conto suo:
+# ##      LA MANOPOLA InpMaxSpread -- la RIPARAZIONE CANDIDATA del
+# ##      cancello C3, che taglia le ore larghe senza toccare la
+# ##      geometria dello stop (dove R118 ha misurato che il costo
+# ##      dell'edge non e' riproducibile: OOS 29/56 = una monetina).
+# ##      Non sblocca niente: propone una riparazione, e va letto cosi'.
+# ##########################################################################
+#
+#  LA DOMANDA: QUANTO COSTA, E QUANTO SERVE, FILTRARE LO SPREAD?
+#    In casa la domanda sulla riga Spread= dell'.ini resta aperta e
 #    scritta: "La riga Spread dell'.ini a Modello 4 e' [NON MISURATO]:
-#    non sappiamo se MT5 la onori. Chi volesse aggiungerlo deve prima
-#    passare il CANARINO" (prove/R118_PAVIMENTO_STOP_CRITERI.md par.4.3;
-#    REFERTO_R118_PAVIMENTO_STOP.md par.8.2 punto 6).
+#    non sappiamo se MT5 la onori" (prove/R118_PAVIMENTO_STOP_CRITERI.md
+#    par.4.3; REFERTO_R118_PAVIMENTO_STOP.md par.8.2 punto 6). A QUELLA
+#    domanda risponde il canarino sulla prova 01, NON questo file.
+#    Qui si chiede una cosa diversa e piu' concreta: se accendo il filtro
+#    che l'EA HA GIA', quanto edge perdo e quante ore larghe taglio?
 #
 #  COME LO CHIEDE, senza toccare una riga di codice
 #    L'EA ha GIA' la manopola: SpreadOK() al r.507 del .mq5 confronta
@@ -57,22 +92,24 @@
 #        n(200) perde una fetta grossa (le ore 0-13 e 23 hanno mediana
 #        2.6-2.8 = 260-280 > 200), n(300) quasi un no-op (p95 = 3.0),
 #        n(400) identico alla base. ==> IL TESTER PORTA LO SPREAD VERO.
-#        Conseguenze: la PROVA A (scala di spread nell'.ini) si puo'
-#        fare, e questo file ha gia' prodotto GRATIS la manopola di
-#        irrobustimento che serve al cancello C3 (tagliare le ore
-#        larghe senza toccare InpSLatr, che R118 ha misurato costoso e
-#        NON riproducibile: OOS 29/56 = una monetina).
-#    (B) NON SI MUOVE: cinque celle identiche alla cifra. ==> l'EA vede
-#        uno spread che non varia. La PROVA A a Modello 4 e' MORTA e va
-#        dichiarata tale; lo stress di costo resta la PROVA B
-#        (post-processing sui per-trade) e il C3 resta un conto
-#        d'archivio. Non e' un fallimento del collaudo: e' la risposta.
+#        Conseguenze: il filtro FUNZIONA nel tester, e si legge quanto
+#        costa. ATTENZIONE: questo NON dice niente sulla riga Spread=
+#        dell'.ini (classe 262) -- quella la decide il canarino sulla 01.
+#    (B) NON SI MUOVE: cinque celle identiche alla cifra. ==> DUE LETTURE
+#        OPPOSTE, e nessuna si puo' scegliere da qui: o l'EA vede uno
+#        spread costante (e allora anche la riga Spread= dell'.ini
+#        potrebbe essere onorata e costante), o SYMBOL_SPREAD nel tester
+#        non e' quello dei tick. E' precisamente il motivo per cui questo
+#        file NON e' un cancello. Lo scioglie il canarino sulla 01.
 #    (C) SI MUOVE ALL'INCONTRARIO o a salti non monotoni (es. n(100) >
 #        n(300)). ==> CANARINO FALLITO: non si conclude NIENTE, la scala
 #        resta bloccata e si apre un difetto di banco. Un canarino che
 #        non conferma e non smentisce non e' un risultato: e' un guasto.
 #
-#  QUANTO COSTA: 5 celle x 2 gemelli = 10 passate per gamba (IS + OOS).
+#  QUANTO COSTA: 5 celle x 1 x 1 corsa x 2 gambe (IS + OOS) = 10 passate.
+#  (magic FISSO in questo file: la coppia gemella la fa il driver, e se
+#  la si vuole il conto raddoppia a 20. Conteggio nel formato di casa
+#  celle x gemelli x corse x gambe -- classe 264.)
 #  L'UNICO DELTA sull'antenato: InpMaxSpread (l'asse) e InpMagic.
 #
 @SIMBOLO  U30USD
@@ -120,7 +157,7 @@ InpNewsShiftMinutes=0||0||0||0||N
 # stringa a valore vuoto MT5 lo IGNORA e usa il default
 # compilato (controlla_prova.py, controllo 3 -- difetto
 # ereditato dall antenato R112_00_metro.txt r.96). Default = "".
-InpComment=COLLAUDO EMADOW canarino spread
+InpComment=COLLAUDO EMADOW maxspread
 InpFridayClose=false||false||0||false||N
 InpFridayCloseHour=20||20||0||20||N
 InpVerbose=true||true||0||true||N

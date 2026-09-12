@@ -9,7 +9,12 @@
 #         R112/R110. Non si cambia il banco dentro un collaudo.
 #  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
 #         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
-#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#         41 chiavi identiche su 42 comuni; unico delta InpMagic. L'EA ha
+#         44 input, il .set 42, questo file 43: due input NON sono coperti
+#         dal .set e prendono il default compilato -- InpUsaGuardian=true
+#         e InpLogImbuto=true, quest'ultimo solo log. Il numero "46 su 46"
+#         della prima stesura era SOPRA L'UNIVERSO: corretto il 12/09/2026
+#         dal cancello di giudizio, classe 263).
 #  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
 #  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
 #         (grep -rE "\b7666[0-9][0-9]\b" --exclude-dir=.git . -> 0).
@@ -17,12 +22,42 @@
 #         76340x-76343x (R112), 7636xx (R114), 764102/764103 (LATI).
 # ==========================================================================
 #
-#  LA PROVA A -- LA SCALA DI SPREAD. E PARTE SOLO SE IL CANARINO DICE (A).
-#    Questo file NON si lancia prima di COLLAUDO_EMADOW_00_canarino_spread.
-#    Se il canarino esce (B) o (C), questo file va ARCHIVIATO NON LANCIATO
-#    e il referto lo scrive. Lanciarlo comunque produrrebbe quattro
-#    colonne identiche e un verdetto falso -- il tipo di numero che costa
-#    una challenge.
+#  LA PROVA A -- LA SCALA DI SPREAD. E IL CANARINO E' QUESTO FILE STESSO.
+#
+# ##########################################################################
+# ##  CORRETTO IL 12/09/2026 DAL CANCELLO DI GIUDIZIO -- CLASSE 262.
+# ##  La prima stesura diceva "parte solo se il canarino (file 00) dice
+# ##  SI". Sbagliato: il file 00 mette ad asse InpMaxSpread, che e' il
+# ##  filtro INTERNO dell'EA, e gira SENZA -Spread. Non puo' dire niente
+# ##  sulla riga Spread= dell'.ini, e se i suoi numeri non si muovessero
+# ##  la lettura sarebbe AMBIGUA (uno spread costante e' anche la firma di
+# ##  una riga Spread= onorata).
+# ##
+# ##  >>> IL CANARINO E' QUESTO STESSO FILE, GIRATO DUE VOLTE, su UNA SOLA
+# ##      TRANCHE che copre la finestra OOS
+# ##      (-DaQuando 2025.06.10 -Fino 2026.06.30 -FrazioneIS 1.0):
+# ##        corsa K1:  -Spread 0       -Etichetta CAN_S0
+# ##        corsa K2:  -Spread 99999   -Etichetta CAN_S99999
+# ##      NB: con -FrazioneIS 1.0 la tranche unica esce etichettata '_IS'
+# ##      nei nomi dei CSV anche se copre l'OOS (come i file LATI_A2 del
+# ##      09/09). Va dichiarato nel referto: l'etichetta CAN_* serve a
+# ##      questo. E -DaQuando/-Fino qui si POSSONO passare perche' questo
+# ##      file non ha '@FINOA' (la 02 si', e la' -Fino e' vietato).
+# ##      (99999 punti MT5 = 999,99 punti indice: uno spread ASSURDO, dieci
+# ##       volte il massimo mai misurato su U30USD, che e' 101 all'ora 13.
+# ##       Serve assurdo di proposito: se un numero cosi' non sposta niente,
+# ##       la riga e' ignorata, e non c'e' un'altra spiegazione.)
+# ##      2 celle x 2 corse x 1 gamba = 4 passate, ~1,5 minuti.
+# ##
+# ##      K1 == K2 alla cifra  =>  la riga Spread= e' IGNORATA a Modello 4.
+# ##                               La PROVA A e' MORTA. Si DICHIARA, e lo
+# ##                               stress di costo resta la PROVA B
+# ##                               (post-processing sui per-trade).
+# ##                               >>> E NON SI SCRIVE "robusta allo
+# ##                                   spread": si scrive "non misurabile".
+# ##      K1 != K2             =>  la riga e' onorata. SOLO ALLORA si
+# ##                               lanciano i quattro gradini qui sotto.
+# ##########################################################################
 #
 #  IL GRADINO NON STA IN QUESTO FILE, E NON E' UNA DIMENTICANZA
 #    Lo spread e' un PARAMETRO DI BANCO: sta nella riga Spread= dell'.ini,
@@ -58,8 +93,12 @@
 #    PASS = a +50%: netto > 0 E PF >= 1.10 E DD <= 10.0% E peggior
 #    giornata chiusi > -3.50%. Niente di questo si rilegge dopo.
 #
-#  QUANTO COSTA: 1 cella x 2 gemelli x 4 valori di spread = 8 passate
-#  per gamba. L'UNICO DELTA sull'antenato: InpMagic.
+#  QUANTO COSTA, nel formato di casa celle x gemelli x corse x gambe
+#  (classe 264 -- la prima stesura scriveva "8 passate per gamba" e poi
+#  le riportava come 8: erano 16):
+#    CANARINO   2 celle x 1 x 2 corse x 1 gamba (OOS) =  4 passate
+#    SCALA      2 celle x 1 x 4 corse x 2 gambe       = 16 passate
+#  L'UNICO DELTA sull'antenato: InpMagic.
 #
 @SIMBOLO  U30USD
 @PERIODO  H1

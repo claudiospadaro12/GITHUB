@@ -31,7 +31,12 @@ TESTA = """# ===================================================================
 #         R112/R110. Non si cambia il banco dentro un collaudo.
 #  G0-A (gate di casa): il corpo di questo file e' la COPIA RIGA PER RIGA
 #         dell'ANTENATO prove/R112_00_metro.txt (= il preset vivo, verificato
-#         46 chiavi su 46). Delta ammessi e dichiarati per nome qui sotto.
+#         41 chiavi identiche su 42 comuni; unico delta InpMagic. L'EA ha
+#         44 input, il .set 42, questo file 43: due input NON sono coperti
+#         dal .set e prendono il default compilato -- InpUsaGuardian=true
+#         e InpLogImbuto=true, quest'ultimo solo log. Il numero "46 su 46"
+#         della prima stesura era SOPRA L'UNIVERSO: corretto il 12/09/2026
+#         dal cancello di giudizio, classe 263).
 #  G5: nessun deploy. Questo file non tocca VPS, preset, ne' sedie vive.
 #  MAGIC: blocco 7666xx, VERGINE -- verificato repo-wide il 12/09/2026
 #         (grep -rE "\\b7666[0-9][0-9]\\b" --exclude-dir=.git . -> 0).

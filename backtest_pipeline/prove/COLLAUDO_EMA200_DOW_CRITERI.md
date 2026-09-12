@@ -21,10 +21,14 @@
 | numeri della base (IS, tick) | **PF 1,20110 · DD 5,7325% · 237 deal** (posizioni **[NON MISURATO]**, stima 102-118) | `..._U30USD_IS_r31.csv` |
 
 **Identita' preset vivo / cella collaudata -- VERIFICATA MECCANICAMENTE oggi:**
-il `.set` in campo e `R112_00_metro.txt` coincidono su **46 chiavi su 46**;
-l'unico delta e' `InpMagic` (771531 vs 763400), e `InpUsaGuardian` sta solo nel
-file prova. Due input del sorgente non sono coperti dal preset e prendono il
-default compilato: `InpUsaGuardian=true`, `InpLogImbuto=true` (solo log).
+**41 chiavi identiche su 42 comuni; unico delta `InpMagic`** (771531 vs 763400).
+L'EA ha **44** `input`, il `.set` **42**, `R112_00_metro.txt` **43**: due input
+non sono coperti dal `.set` e prendono il default compilato —
+`InpUsaGuardian=true` e `InpLogImbuto=true` (quest'ultimo **solo log**).
+⚠️ **ERRATA del 12/09**: la prima stesura diceva *"46 chiavi su 46"*, che e'
+**sopra l'universo** (l'EA non ha 46 input). Numero corretto dal cancello di
+giudizio, **classe 263**. 🟢 **La tesi non cambia** — la cella collaudata e'
+quella che gira — cambiava solo il numero, ed era gonfiato.
 => **si sta collaudando la cella che gira davvero.** Questo controllo esiste
 perche' il progetto ha gia' pagato due volte `InpTP1_ATRmult=0` contro 0,5.
 
@@ -59,10 +63,23 @@ CANARINO (stesso EA con spread assurdo -> numeri DIVERSI)"*
 `REFERTO_R118_PAVIMENTO_STOP.md` §8.2 punto 6).
 
 => **La PROVA A non parte finche' il CANARINO non ha risposto.**
-- **CANARINO PASS** (numeri diversi con `Spread=9999`): la scala A gira a
+
+⚠️ **ERRATA del 12/09, classe 262 — e cambia QUALE prova e' il canarino.**
+La prima stesura dava il ruolo a `COLLAUDO_EMADOW_00`, che mette ad asse
+**`InpMaxSpread`** (il filtro **interno dell'EA**) e gira **senza `-Spread`**:
+sono **due variabili diverse**, e se i suoi numeri non si muovessero la lettura
+sarebbe **ambigua** — uno spread costante e' anche la firma di una riga
+`Spread=` **onorata**. 👉 **Il canarino e' la prova `01` girata due volte sulla
+stessa cella, SOLO gamba OOS: `-Spread 0` contro `-Spread 99999`** (2 celle x 2
+corse x 1 gamba = **4 passate**). La `00` resta utile per conto suo — misura la
+**manopola `InpMaxSpread`**, cioe' la **riparazione candidata del C3** — ma
+**non e' un cancello**.
+
+- **CANARINO PASS** (numeri diversi con `Spread=99999`): la scala A gira a
   Modello 4, ed e' il gradino che decide (R57).
 - **CANARINO FAIL** (numeri identici alla cifra): la scala A a Modello 4
-  **non esiste**. Allora, e solo allora, si ripiega su:
+  **non esiste**. 🔴 **E si scrive «non misurabile», non «robusta allo
+  spread».** Allora, e solo allora, si ripiega su:
   (a) **PROVA B** come stress principale (il costo di spread in piu' e'
       aritmeticamente lo stesso di uno slippage all'ingresso, e si dichiara);
   (b) la scala di spread a **Modello 1/2** come **solo screening**, mai come
