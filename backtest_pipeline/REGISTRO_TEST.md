@@ -2499,3 +2499,123 @@ Unita' del campione: **POSIZIONI** (`position_id` distinti), non deal (classe 22
   **0,91 min**, il cancello del gruppo) · `R137a_floorstop_allarga_770101_D30EUR.txt` (14, **1,68 min**) ·
   `R137b_floorstop_salta_770101_D30EUR.txt` (14, **1,68 min**) · `R138a_gemello_F40EUR_770101.txt` (4,
   **0,91 min**). **Totale 36 passate = 5,17 min** col metro `T = 0,6 + 0,077 x passate` per round.
+
+---
+
+## 12/09/2026 — GLI SCARTI CHE NON AVEVANO IL NUMERO, ADESSO CE L'HANNO (dossier `report/I_BOCCIATI_HANNO_UN_CERTIFICATO_2026-09-12.md`)
+
+Censimento **voce per voce** di tutti i verdetti negativi di questo registro contro il
+**CERTIFICATO DI MORTE** (09/09). **Sola lettura d'archivio, nessun backtest lanciato,
+nessun EA / preset / sedia / `CODA.txt` toccati.** Qui vanno solo le righe che **aggiungono
+un numero** o **correggono** una riga esistente: il resto sta nel dossier.
+
+### 🔢 IL CONTO, prima di tutto — e falsifica un'ipotesi comoda
+Contando per **RIGA** (i cinque termini `senza edge|bocciat|scartat|MORTO|archiviat`) questo
+file da' **89 righe negative, di cui 12 con "PF"** — riprodotto al numero esatto. Ma una
+**riga** non e' una **voce**: contando per VOCE (motore x simbolo x TF) sono **72**, e
+**52 su 72 hanno un PF** (registro **o** archivio). 🔴 **Quindi "77 bocciati senza PF" e'
+FALSO: i senza-PF sono 20.** Il PF non stava sulla riga accanto: stava **nel CSV accanto**.
+🔴 **Il buco vero e' un altro: 47 voci su 72 non hanno il certificato completo, e in 38 casi
+su 47 la voce che manca e' la 3 — LA GESTIONE DELL'USCITA.**
+
+### 🪦 DIECI SCARTI COL NUMERO, ricalcolato oggi dai CSV grezzi (costo: zero passate)
+
+| scarto | PF | DD | n (deal) | cancello | file |
+|---|---:|---:|---:|---|---|
+| `MaxMinNotte` **100GBP** | best **0,6717** | **16,03%** | 82 | **0/54 celle positive** + DD oltre il muro | `risultati_archivio/MaxMinNotte/efe054b5-valid_MaxMin_100GBP.csv` |
+| `MaxMinNotte` **E50EUR** | best **0,8398** | **13,90%** | 80 | **0/54** + DD | `.../8eefb007-valid_MaxMin_E50EUR.csv` |
+| `MaxMinNotte` **F40EUR** | best **0,9985** | **10,12%** | 112 | **0/54** + DD al muro | `.../4528c79b-valid_MaxMin_F40EUR.csv` |
+| `SupRev` **100GBP H1** | best **0,8822** | **4,55%** | 160 | **0/27 celle positive** | `.../SupRev_nuovi_indici/c016704b-valid_SupRevScr_100GBP_H1.csv` |
+| `SupRev` 100GBP H4 | best 1,2891 | 2,04% | 48 | 5/27 positive, n 48 -> merito sospeso, e la gamba H1 e' 0/27 | `.../2ab6d7d9-...` |
+| `SupRev` 225JPY H1 | best 2,1574 | 0,22% | 75 | 🔴 **scartato per TAGLIA DEL CONTRATTO**, non per edge (profitto ~50 EUR, lotto JPY minuscolo) | `.../9d856486-...` |
+| `SupRev` 225JPY H4 | best 2,1626 | 0,12% | 27 | idem | `.../cfe6ccec-...` |
+| `EMA200` **E50EUR H1** | best 0,7403 | **7,12%** | 210 (max 467) | **0/88 celle positive** | `.../EMA200/H1_OHLC/scan_..._E50EUR.csv` |
+| `EMA200` **E50EUR H4** | best 0,9535 | **4,64%** | 81 (max 150) | **0/81 celle positive** | `.../EMA200/H4_OHLC/scan_..._E50EUR.csv` |
+| `EMA200` **NASUSD H1** | best 1,0197 | **5,74%** | 255 (max 594) | **1/85 celle positive** | `.../EMA200/H1_OHLC/scan_..._NASUSD.csv` |
+| `Live5m_v2` D30EUR | best **1,0430** | **9,10%** | 239 | 8/32 positive; e M5 sugli indici e' **escluso PER COSTO** (11,5-13,1x contro il duro 13,3x) | `.../Live5m/valid_DAX_Live5m_v2_D30EUR_realtick.csv` |
+
+> 🟢 **Quattro di questi RIPRODUCONO al centesimo numeri scritti da un'altra sessione** (SupRev
+> 100GBP H4, SupRev 225JPY H1 e H4, Live5m_v2): e' il controllo chiesto dalla regola del
+> 10/09 — verificare contro i numeri veri di qualcun altro, non contro valori che tornano.
+> ⚠️ **E i tre `EMA200`/`SupRev` a zero celle positive sono OHLC = SCREENING.** Qui la
+> direzione dell'errore aiuta: **l'OHLC e' OTTIMISTA**, e un modello ottimista che da' **0
+> celle positive su 169 letture** (E50EUR H1+H4) non sta nascondendo un edge. **E' l'unico
+> caso in cui uno zero OHLC vale come chiusura, ed e' un'eccezione, non la regola.**
+
+### ✏️ DUE ERRATA a righe di questo registro
+
+1. **r.2296 (`EMA200 U30USD H4`) accoppia due celle diverse.** Dice *"best PF 3,0247,
+   DD 2,59%"*. Sul CSV la cella a **PF 3,02473** ha **DD 2,4575** e **32 deal**; il **2,5927**
+   e' della cella **successiva** (PF 2,81599, 34 deal). Non sposta il verdetto, ma e' la stessa
+   classe del *"PF senza l'aggettivo davanti"*: due numeri di due celle su una riga sola.
+2. **r.459 (`MaxMinNotte` CAC) dice "max ~1.0".** Il numero esatto e' **0,9985**, cioe'
+   **sotto** 1, non "a pari". Con DD **10,12%** sulla cella migliore.
+
+### 🔴 E UNA RI-ETICHETTATURA CHE CAMBIA COSA SI DEVE FARE — `EMA200 U30USD H4`
+La r.2292 dice *"scartato per FREQUENZA, NON per edge"* e motiva con *"Trades 15-82 = ~8-41
+posizioni => molto sotto il pavimento dei 150"*. 🛑 **Quello non e' il pavimento di frequenza:
+e' la regola del CAMPIONE** (Emendamento A). Lo dice
+`report/RIPESCAGGIO_FREQUENZA_2026-09-08.md` §0 regola 4: *"un candidato bocciato perche' il
+campione IS non arriva a 150 operazioni NON e' un caso di questo referto"*.
+👉 **La differenza conta perche' cambia la cura:** il pavimento di **FREQUENZA** si chiude
+**aggiungendo SIMBOLI** (firma 07/09); la regola del **CAMPIONE** si chiude **SOLO aggiungendo
+STORICO**. Sul Dow lo storico e' **21 mesi**: quella porta resta chiusa, e nessun simbolo in
+piu' la apre. ✅ Numeri ricontati oggi: **77 celle positive su 85**, bestPF **3,02473**,
+DD **2,4575%**, **32 deal** (82 il massimo del file) = **16-41 posizioni** al fattore
+misurato 2,0117. **L'edge c'e', il campione no.**
+➡️ **E il conto vero degli scarti "per sola frequenza" in questo registro e' 1, non 47**: le
+altre 46 righe che citano la frequenza sono titoli di dossier, descrizioni di cancelli e
+conteggi di segnali. (`M0PB` era gia' declassato il 09/09; su `IBRetest` la frequenza e' il
+**secondo** motivo, e il primo — **C0**, PF famiglia 0,7798 su n=209 OOS a campione pieno —
+regge da solo.)
+
+### 🔥 IL BUCO PIU' GROSSO TROVATO OGGI — `ABTG_EMA200` a H4 non ha MAI VISTO UN FUORI CAMPIONE
+Non e' uno scarto: e' un motore **mai portato a termine**, e per questo va scritto qui.
+Le 135 celle per simbolo di `risultati_archivio/EMA200/realtick_H4/` (8 simboli, **tick
+reali**, banco `ini/ABTG_EMA200.ini`: Model=4, 2024.01.01 -> 2026.06.30) vengono da **UNA
+FINESTRA SOLA, ottimizzata intera**. **Nel repo non esiste nessuna lettura IS/OOS di questo
+motore a H4, su nessuno degli otto simboli.** E quello che c'e' non e' poco:
+
+| simbolo | celle a DUE LATI | positive | PF min-max | DD min-max | deal (~posizioni) |
+|---|---:|---:|---|---|---|
+| **AUDJPY** | 28 | **28 / 28** | 1,076 - 1,845 | 2,889 - 9,464% | 255-347 (~128-174) |
+| **GBPUSD** | 24 | **24 / 24** | 1,147 - 1,348 | 5,783 - 9,223% | 274-380 (~137-190) |
+
+🔴 **CLASSE 226, nel verso sfavorevole: ne abbiamo MENO di quante sembrava.** Al fattore
+**misurato 2,0117** quei "255-347 trade" sono **128-174 POSIZIONI** su UNA finestra, cioe'
+sotto i 150 anche senza split. **Ed e' questo, non il PF, il motivo per cui cinque sedie
+(`771511`-`771515`) stanno in campo senza un verdetto. Il numero non era mai stato scritto.**
+🔬 **Contro-esempio costruito prima di consegnare** (ipotesi alternativa: *"e' la deriva del
+carry, non il motore"*): su AUDJPY il lato SHORT fa **16 positive su 32, PF mediano 0,991** —
+**centrato sullo zero, non rosso** (se fosse deriva sarebbe rosso come `SuperWave DOW short`
+PF OOS 0,429). E su **GBPUSD il lato forte e' lo SHORT** (best PF 2,066) mentre su AUDJPY e'
+il **LONG**: stesso motore, lato opposto. **La deriva non e' esclusa ma non e' dimostrata**, e
+il discriminante sono le celle a **due lati**, che una deriva monodirezionale non puo'
+raccogliere. Falsificatore pre-dichiarato nei file prova.
+🚨 **E un fatto di campo che si chiude a mano in due minuti:** le cinque sedie H4 hanno
+**ZERO posizioni** dal 01/08 (`data/statements/trades_auto.csv`), contro un'attesa aggregata
+di **~20** (celle dei preset, 2,8-3,6 posizioni/mese l'una). Con lambda ~20 la probabilita' di
+vedere zero e' **~2 x 10⁻⁹**: **non e' sfortuna.** Domanda aperta a Claudio, terminale MT5
+**50503392** (`BCM Markets MT5 Terminal`), grafici AUDJPY/GBPJPY/GBPUSD/200AUD/SPXUSD a H4:
+**quei cinque EA sono ancora attaccati?**
+⚠️ Rilievo tecnico: il preset `mql5/Presets/ABTG_EMA200_FW_AUDJPY_H4.set` gira
+`InpOrder2Atr=0,35`, un valore che **NON esiste** fra quelli dell'asse d'archivio (0,2 / 0,3 /
+0,4 / 0,5 / 0,6). **E' un'interpolazione, non una cella con un numero.**
+
+### 🗂️ FiboH4_Multi — il "0/8" RICONTATO: 96 righe su 96 sul basket
+Estensione della rettifica del 21/08, con il conteggio completo: la colonna `InpSymbols` vale
+`GBPUSD;USDJPY;EURUSD` in **96 righe su 96** dei 16 CSV. L'ottavo file (XAUUSD) differisce
+(IS -536,71 / OOS +299,89, n 67/70) **solo per la cadenza delle barre del grafico**: `OnTick`
+e' guidato dal simbolo del grafico, il basket e' lo stesso (sorgente r.278-287, ripiego su
+`_Symbol` solo a lista VUOTA). Certificato: **2 voci su 5** (PF 0,594-0,697 IS / 0,783-1,281
+OOS; n 63-83 deal; DD 3,12-7,55%). Mancano **3 (uscita: tutti i parametri d'uscita pinnati in
+96 righe su 96), 4 (ZERO simboli singoli, mai) e 5 (InpTF=16388 in 96 righe su 96)**.
+➡️ **Verdetto: NON ANCORA MISURATO.** File prova pronto: `prove/R139c_FIBOH4_GBPUSD_unsimbolo.txt`.
+
+### 📦 TRE FILE PROVA NUOVI, cancello deterministico PASSATO (`controlla_prova.py`, exit 0)
+`prove/R139a_EMA200_AUDJPY_H4_LS.txt` (4 celle) · `prove/R139b_EMA200_GBPUSD_H4_LS.txt`
+(4 celle) · `prove/R139c_FIBOH4_GBPUSD_unsimbolo.txt` (3 celle). **11 celle, 22 passate,
+T = 0,6 + 0,077 x 22 = 2,29 min.** Magic vergini 771560 / 771561 / 772060. ASCII puro
+verificato con `python3`. 🚨 **Tutti e tre a `-Modello 1` = OHLC M1** (NON tick), e il motivo
+e' misurato: il pavimento **tick** del forex e' **2024.07.05**, quindi su 16,5-27,5 anni i
+tick **non esistono** — classe 273. **Nessuno dei tre e' in `CODA.txt`: non e' stata toccata.**
