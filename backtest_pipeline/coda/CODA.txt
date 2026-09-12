@@ -19,7 +19,15 @@
 #
 #  OGNI SCRIPT DEVE:
 #    - contenere la riga "# RUNNER_SOLA_LETTURA"  (cancello G1)
-#    - non contenere nessuno dei 24 divieti        (cancello G2)
+#    - non contenere nessuno dei 33 divieti        (cancello G2)
+#      (CORRETTO IL 12/09/2026: qui c'era scritto "24". Sono 33 per una
+#       riga in corsia ROUND, e il conteggio e' MISURATO sul sorgente di
+#       runner_abtg.ps1, non ricordato: $DIVIETI ha 29 voci di cui 21
+#       valide in corsia ROUND, piu' le 12 di $DIVIETI_SOLO_ROUND.
+#       21 + 12 = 33. In corsia di SOLA LETTURA sono 29 + 0 = 29.
+#       Non cambia nessun verdetto -- nessuno conta i divieti a mano, li
+#       applica il codice -- ma chi legge questo file di notte per
+#       controllarli si fidava di un numero sbagliato.)
 #    - stare in backtest_pipeline/righe/ e finire in .ps1
 #    - STAMPARE, non scrivere file: il runner cattura lo standard
 #      output, lo salva come log e lo pubblica lui sul repo.
@@ -92,6 +100,71 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_prese
 #     riga li porta fuori dal terminale. Distingue "ledger vuoto" da "ledger
 #     pieno di zeri": sono due cose diverse.
 d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
+
+# =====================================================================
+#  0. IL CANARINO DI '@FRAZIONEIS' -- E' IL PRIMO ROUND DI PROPOSITO.
+#     Aggiunto il 12/09/2026 (sabato), per il runner di domenica 03:30.
+# ---------------------------------------------------------------------
+#  COSTO: ~ZERO. Gira con -SoloControllo, che ferma il driver PRIMA di
+#  aprire MT5: zero passate di tester, zero CSV, nessun terminale MT5
+#  toccato. Non sottrae niente ai 19 round qui sotto.
+#
+#  NON PRODUCE NESSUN VERDETTO DI MERCATO. Non si legge nessun PF, nessun
+#  DD, nessun n. Risponde a UNA domanda sola, che era l'unico NON COPERTO
+#  del cancello sulla toppa '@FRAZIONEIS': la CATENA VERA (scarico da raw
+#  -> controllo d'impronta -> driver) ONORA la direttiva, o tira dritto
+#  sul taglio di fabbrica senza dirlo a nessuno?
+#
+#  L'ATTESA E' DICHIARATA PRIMA, E SONO DUE USCITE DIVERSE. Nel referto
+#  del mattino si cerca UNA riga sola, nella sezione della riga 'canfrz':
+#     ONORATA   -> "IS  2024.09.26 - 2025.08.13"   (e la riga
+#                  "taglio IS/OOS preso da '@FRAZIONEIS' ...: 0.5")
+#                  >>> SI APRE la coda dei ~20 round a taglio 0.50.
+#     IGNORATA  -> "IS  2024.09.26 - 2025.06.09"   (e NESSUNA riga
+#                  "preso da '@FRAZIONEIS'")
+#                  >>> SI FERMA TUTTO: un round che gira a 0.40 credendo
+#                      di girare a 0.50 fa numeri che nessuno puo' usare.
+#     MORTA     -> "scarico fallito" / impronta che non torna / RIFIUTATO
+#                  >>> ne' l'una ne' l'altra: catena rotta A MONTE, si
+#                      ripara quella. NON si conta come risposta.
+#  65 giorni separano le due date: NON sono confondibili, ed e' questo che
+#  rende il canarino una MISURA e non una conferma. E non sono date
+#  inventate: le dichiara la sezione dei criteri di R128b da giorni.
+#  CONTROLLO DI APPOGGIO, gratis: la stessa uscita deve portare
+#  "celle per finestra : 7 -> 14 pass". Se il numero e' diverso, il file
+#  prova scaricato NON e' questo e nessuna delle tre righe sopra vale.
+#
+#  PERCHE' STA PRIMA DEI ROUND, e non e' un'intuizione: nel runner ogni
+#  via di fallimento e' un 'continue'; nel ciclo della coda non c'e'
+#  nessun break, nessun exit e nessun throw (misurato su runner_abtg.ps1
+#  il 12/09/2026, corpo del ciclo); e non esiste nessun tetto di righe ne'
+#  di tempo -- $nRound e' un contatore per il riepilogo, non un cancello.
+#  Quindi se il canarino muore NON ferma i 19 round, e metterlo in testa
+#  fa trovare la risposta all'INIZIO del referto invece che in fondo.
+#  Se il runner fermasse la coda su una riga morta, questa riga andrebbe
+#  IN FONDO -- 19 round valgono piu' di una risposta anticipata -- ma non
+#  la ferma.
+#
+#  PERCHE' ENTRA SENZA UNA FIRMA NUOVA: usa la corsia ROUND sul banco
+#  50504400 firmata l'11/09, e '-SoloControllo' e' uno dei SEI argomenti
+#  di quella firma. Verificato sul param() della riga sottile, e il
+#  cancello lo ristampa da solo: param block RICONOSCIUTO (Expert, Prova,
+#  Etichetta, Modello, Deposito, SoloControllo). Nessun perimetro
+#  allargato, nessun argomento nuovo.
+#
+#  IL PIN DI QUESTA RIGA E' DIVERSO DA QUELLO DELLE 19, ED E' VOLUTO.
+#  8499939 e' il DODICESIMO giro: la sua RIGA_SOTTILE_ROUND.ps1 porta
+#  $PIN = b7979d8 e $SHA_WALK = 15DE7D5F..., cioe' il driver di HEAD E il
+#  file prova del canarino. Le 19 righe qui sotto restano a 1445abf8 e
+#  NON sono toccate: pin, argomenti e ordine invariati.
+#  >>> E IL MOTIVO PER CUI IL GIRO DI PIN ERA OBBLIGATORIO: da $PIN non
+#      viene solo il driver, VIENE ANCHE IL FILE PROVA. Il canarino al pin
+#      precedente (115254dc) dava HTTP 404, mentre R128b allo stesso pin
+#      dava 200 -- quindi a mancare era il PIN, non la rete. Chi aggiunge
+#      un file prova NUOVO deve fare un giro di pin. Sempre.
+#  Referto: report/CANARINO_FRAZIONEIS_2026-09-12.md
+# =====================================================================
+84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
 
 # =====================================================================
 #  ROUND DI STANOTTE (12/09/2026) -- 4 righe, 52 passate, ~4-5 minuti
