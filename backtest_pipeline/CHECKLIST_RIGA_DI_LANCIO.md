@@ -15069,3 +15069,53 @@ GIUDICATI*.
 >    con nomi diversi in posti diversi (file prova, piano, log della coda, CSV):
 >    una query su una sola di quelle forme trova il vuoto e lo scambia per
 >    assenza. _(Parente stretta della classe 180.)_
+
+---
+
+## 259. 🔢 IL NUMERO DI UN **ALTRO FILE ALLO STESSO COMMIT** USATO COME GATE DI IDENTITÀ (12/09/2026)
+
+**Il caso vero**, trovato mentre scrivevo `RIGA_COLLAUDO_RICOMPILA.ps1` (il
+collaudo di ricompilazione degli 11 bersagli non-WIP del campo).
+
+La riga ha un **gate di identità** per ogni sorgente scaricato: *"al commit
+bersaglio questo file deve avere versione X e Y righe; se non torna, FERMO"*.
+È un gate buono — serve a non compilare un oggetto sbagliato e chiamarlo
+misura. 🔴 **Ma nella riga del Nasdaq avevo scritto `Righe=2360`, che è il
+conteggio del `ABTG_DAX_Apertura_EU` allo stesso commit `d83c196`.** Il vero è
+**2382**.
+
+**Perché è una classe e non una distrazione:** `d83c196` è la *"Migrazione
+Guardian (pezzo 7): la famiglia Apertura — 8 EA"*. Quando un commit tocca
+**otto file**, i loro numeri **stanno tutti sullo stesso schermo**, hanno la
+**stessa data**, la **stessa versione** e lo **stesso titolo di commit** — e
+quindi si travasano da una riga all'altra senza nessun campanello. Il commit
+non è una proprietà del file: **è una proprietà comune a otto file diversi.**
+
+🧨 **E il danno sarebbe stato del tipo peggiore: un FALLIMENTO FALSO.** La
+corsa si sarebbe fermata su un gate che diceva *"il blob scaricato NON è il
+bersaglio dichiarato"* — cioè avrebbe accusato **GitHub, la rete o il pin** di
+un difetto che stava nella **mia trascrizione**. Un fallimento falso costa più
+di un errore, perché manda a cercare nel posto sbagliato.
+
+✅ **Come l'ho preso**: non rileggendo la mia tabella (dove era coerente con se
+stessa), ma **rileggendo il blob, file per file**, con lo stesso comando per
+tutti e undici. Dieci tornavano, uno no.
+
+> ### 🔴 LA REGOLA
+> 1. **Un gate di identità si compila dal BLOB di QUEL file, uno per uno.**
+>    Mai da una tabella, mai da un referto, mai dalla riga sopra — **nemmeno se
+>    il commit è lo stesso**, e specialmente se è lo stesso.
+> 2. **Un commit che tocca N file produce N numeri diversi, e la vicinanza
+>    visiva è il pericolo**, non la comodità. Se una tabella mette due file
+>    dello stesso commit su righe adiacenti, quelle due righe vanno verificate
+>    **separate**.
+> 3. **Il controllo si fa a macchina e sull'INSIEME**: un solo comando che
+>    stampa (file, commit, versione, righe) per **tutti** i bersagli, e si
+>    confronta colonna per colonna. Verificare "quello che sembra sospetto"
+>    trova solo ciò che già si sospettava — che è conferma, non verifica
+>    (regola del 10/09).
+> 4. 📌 **Parente della classe 254** (*il campo preso dall'ultima riga che
+>    combacia invece che dall'ultima riga che contiene il dato*): in tutti e
+>    due i casi il numero **esiste, è vero, ed è di un altro oggetto.** Un
+>    numero giusto sull'oggetto sbagliato è il difetto più difficile da vedere,
+>    perché **supera qualunque controllo di plausibilità.**
