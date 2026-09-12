@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v2
+#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3
 #  RIGA_SPREADLOGGER_RACCOLTA.ps1 -- RACCOGLIE e LEGGE i dati accumulati
 #  da ABTG_SpreadLogger sul terminale del conto PICCOLO 50503392.
 #
@@ -59,10 +59,28 @@ $CONTO_GRANDE  = "50504263"
 # un incidente per tre fortune (la riga non scrive, la discriminante
 # finale e' il file di stato del logger, e sull'ambiguita' si ferma):
 # qui si chiude il buco invece di appoggiarsi alle fortune.
+#
+# INDURIMENTO_GRAFIE_v1 (12/09/2026, dal cancello di giudizio): la v2
+# rifiutava il REALE e il BANCO con l'UGUAGLIANZA ESATTA del contenuto di
+# origin.txt, e NON guardava il PERCORSO. Misurato ESEGUENDO: su 8 grafie,
+# 6 PASSAVANO il gate -- reale in modo PORTABILE (nessun origin.txt e
+# nessun login recente nei log), "C:/BCM_Reale" con lo slash, il nome 8.3
+# "C:\BCM_RE~1", la fuga "C:\BCM_Reale\..\BCM_Reale", lo spazio in coda.
+# Passavano solo perche' la stringa non era IDENTICA. E' la stessa classe
+# del 10/09 (tre gemelli di una guardia analoga passavano tutti).
+# Qui il confronto e' su TRE tracce come il -V3: origin.txt NORMALIZZATO,
+# PERCORSO normalizzato, login nei log -- piu' i SEGNI 8.3.
 $CONTO_REALE   = "10105439"
 $CONTO_BANCO   = "50504400"
 $PERC_REALE    = "C:\BCM_Reale"
 $PERC_BANCO    = "C:\MT5_Backtest"
+# segni cercati come SOTTOSTRINGA (case-insensitive) nel percorso E in
+# origin.txt, dopo normalizzazione. Il secondo di ogni coppia e' la forma
+# 8.3, che su Windows esiste sempre e che l'uguaglianza esatta non vede.
+$SEGNI_REALE   = @("BCM_Reale", "BCM_RE~")
+$SEGNI_BANCO   = @("MT5_Backtest", "MT5_BA~")
+# il piccolo, per la PROVA POSITIVA sulla manopola -CartellaDati
+$SEGNO_PICCOLO = "BCM Markets MT5 Terminal"
 $BASE_BCM      = "BCMMarkets-Server"
 $MAXBIN        = 10001
 
@@ -118,6 +136,34 @@ function LeggiTesto([string]$path){
   else{ $txt = [System.Text.Encoding]::UTF8.GetString($b) }
   return @($txt -split "`r`n|`n|`r")
 }
+# NORMALIZZA un percorso scritto a mano o letto da origin.txt, perche' il
+# confronto fra percorsi NON e' un confronto fra stringhe: "/" vale "\",
+# "..\" si scioglie, il nome 8.3 e' un ALIAS della stessa cartella, e gli
+# spazi/apici in coda sono invisibili a occhio. Senza questo, una guardia
+# per uguaglianza esatta e' fail-OPEN: basta un'altra grafia per passarle
+# davanti (misurato: 6 grafie su 8, 12/09/2026).
+function NormalizzaPercorso([string]$p){
+  if([string]::IsNullOrEmpty($p)){ return "" }
+  $q = $p.Trim()
+  $q = $q.Trim([char]34)
+  $q = $q.Trim()
+  if($q -eq ""){ return "" }
+  $q = $q.Replace("/", "\")
+  # 8.3 e ..\ si sciolgono solo se la cartella ESISTE: si prova, e se non
+  # esiste si tiene almeno la forma risolta da GetFullPath (che scioglie
+  # comunque ..\ e i separatori doppi). Se anche quella lancia, si tiene
+  # la stringa pulita: i SEGNI a sottostringa restano come seconda cintura.
+  try{ $q = (Get-Item -LiteralPath $q -ErrorAction Stop).FullName }
+  catch{
+    try{ $q = [System.IO.Path]::GetFullPath($q) }catch{}
+  }
+  return $q.TrimEnd("\").Trim()
+}
+function ContieneUnSegno([string]$testo, $segni){
+  if([string]::IsNullOrEmpty($testo)){ return $false }
+  foreach($s in $segni){ if($testo -like ("*" + $s + "*")){ return $true } }
+  return $false
+}
 function AggiungiCandidata([string]$percorso,[string]$origine){
   if([string]::IsNullOrEmpty($percorso)){ return }
   $full = $percorso
@@ -134,6 +180,7 @@ function AggiungiCandidata([string]$percorso,[string]$origine){
     Percorso=$full; Origine=$origine; HaMql=$mq; Origin=""; BaseBcm=$false
     VistoPiccolo=$false; VistoGrande=$false; TracciaV3=""; Eleggibile=$false
     VistoReale=$false; VistoBanco=$false; TracciaAltro=""
+    OriginNorm=""; PercNorm=""
     Profilo=$false; Scarto=""; HaStato=$false
   })
 }
@@ -245,10 +292,18 @@ try{
     # indipendenti (origin.txt, percorso, login nei log). Fallisce in
     # SICUREZZA: se origin.txt manca e i log non nominano nessuno, non
     # cambia niente rispetto a prima.
+    $c.OriginNorm = NormalizzaPercorso $c.Origin
+    $c.PercNorm   = NormalizzaPercorso $c.Percorso
     $ta = New-Object System.Collections.ArrayList
-    if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_REALE){ [void]$ta.Add("origin.txt = " + $PERC_REALE) }
-    if($c.Origin -and $c.Origin.TrimEnd("\") -ieq $PERC_BANCO){ [void]$ta.Add("origin.txt = " + $PERC_BANCO) }
+    # --- REALE 10105439: tre tracce, tutte tolleranti alla GRAFIA
+    if($c.OriginNorm -ne "" -and $c.OriginNorm -ieq $PERC_REALE){ [void]$ta.Add("origin.txt (normalizzato) = " + $PERC_REALE) }
+    if(ContieneUnSegno $c.OriginNorm $SEGNI_REALE){ [void]$ta.Add("origin.txt porta un segno del REALE") }
+    if(ContieneUnSegno $c.PercNorm   $SEGNI_REALE){ [void]$ta.Add("il PERCORSO porta un segno del REALE") }
     if($c.VistoReale){ [void]$ta.Add("login " + $CONTO_REALE + " (REALE) nei log") }
+    # --- BANCO 50504400: le stesse tre tracce
+    if($c.OriginNorm -ne "" -and $c.OriginNorm -ieq $PERC_BANCO){ [void]$ta.Add("origin.txt (normalizzato) = " + $PERC_BANCO) }
+    if(ContieneUnSegno $c.OriginNorm $SEGNI_BANCO){ [void]$ta.Add("origin.txt porta un segno del banco") }
+    if(ContieneUnSegno $c.PercNorm   $SEGNI_BANCO){ [void]$ta.Add("il PERCORSO porta un segno del banco") }
     if($c.VistoBanco){ [void]$ta.Add("login " + $CONTO_BANCO + " (banco) nei log") }
     $c.TracciaAltro = (@($ta) -join "; ")
     if($env:APPDATA){ $c.Profilo = $c.Percorso.StartsWith(($env:APPDATA.TrimEnd("\")), [System.StringComparison]::OrdinalIgnoreCase) }
@@ -290,7 +345,23 @@ try{
     $imp = @($Cand | Where-Object { $_.Origine -like "*IMPOSTA A MANO*" })
     if($imp.Count -eq 0){ throw ("-CartellaDati '" + $CartellaDati + "' non esiste o non sembra una cartella dati MT5.") }
     if(-not $imp[0].Eleggibile){ throw ("-CartellaDati '" + $CartellaDati + "' NON passa i gate: " + $imp[0].Scarto) }
-    $scelto = $imp[0]; $Criterio = "IMPOSTA A MANO con -CartellaDati (gate passati)"
+    # FAIL-CLOSED SULLA MANOPOLA (12/09/2026, dal cancello di giudizio).
+    # "Rifiuta cio' che riconosco" e' fail-OPEN per costruzione: una grafia
+    # nuova, o un terminale in modo PORTABILE senza origin.txt e senza
+    # login recente nei log, passa davanti alla guardia. La scelta
+    # AUTOMATICA e' protetta a monte dal filtro sul profilo utente
+    # (%APPDATA%), ma la manopola -CartellaDati accetta QUALUNQUE percorso:
+    # e' li' che si incolla a mano, ed e' li' che si sbaglia. Quindi qui si
+    # pretende un FATTO POSITIVO che quella cartella sia del piccolo.
+    $pos = New-Object System.Collections.ArrayList
+    if($imp[0].HaStato){ [void]$pos.Add("contiene il file di stato del logger") }
+    if($imp[0].VistoPiccolo){ [void]$pos.Add("il login " + $CONTO_PICCOLO + " compare nei suoi log") }
+    if(($imp[0].OriginNorm -like ("*" + $SEGNO_PICCOLO + "*")) -and ($imp[0].OriginNorm -notlike "*-V3*")){ [void]$pos.Add("origin.txt punta a '" + $SEGNO_PICCOLO + "' senza -V3") }
+    if(($imp[0].PercNorm   -like ("*" + $SEGNO_PICCOLO + "*")) -and ($imp[0].PercNorm   -notlike "*-V3*")){ [void]$pos.Add("il percorso contiene '" + $SEGNO_PICCOLO + "' senza -V3") }
+    if($pos.Count -eq 0){
+      throw ("-CartellaDati '" + $CartellaDati + "' non e' RICONOSCIUTA come cartella del piccolo " + $CONTO_PICCOLO + ". Non basta che non sia riconosciuta come un'altra: la manopola pretende un fatto POSITIVO, e nessuno dei quattro c'e' -- niente file di stato " + $Prefisso + "_stato.csv, nessun login " + $CONTO_PICCOLO + " nei log degli ultimi 45 giorni, e ne' origin.txt ne' il percorso nominano '" + $SEGNO_PICCOLO + "'. Mandami la riga CARTELLE GUARDATE qui sopra invece di forzare: se la cartella e' giusta ma muta, il dato da raccogliere non c'e' comunque.")
+    }
+    $scelto = $imp[0]; $Criterio = "IMPOSTA A MANO con -CartellaDati (gate passati + prova positiva: " + (@($pos) -join "; ") + ")"
   }
   elseif($conStato.Count -eq 1){ $scelto = $conStato[0]; $Criterio = "FATTO: unica cartella eleggibile sotto questo profilo che contiene gia' il file di stato del logger" }
   elseif($vpConStato.Count -eq 1){ $scelto = $vpConStato[0]; $Criterio = "FATTO: unica cartella col file di stato del logger E col login " + $CONTO_PICCOLO + " nei propri log" }
