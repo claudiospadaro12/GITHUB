@@ -14930,3 +14930,101 @@ gratis: basta far girare la stessa funzione delle `CODA_*`, che su quel
 formato ha gia' pagato quattro difetti.)
 
 ---
+
+## 🆕 AGGIUNTE DEL 12/09/2026 — trovate dal **controllo preventivo** su `RIGA_CENSIMENTO_MT5_MACCHINA.ps1` (pin `05b8075a`), lo script nato dallo screenshot di Claudio *"PEPPERSTONE E' INSTALLATO SUL DESKTOP, TICKMILL NON LO VEDO"*. 🟢 **Prima cosa: quello che ha RETTO, ed e' la parte che contava di piu'.** Perimetro di scrittura **dimostrato chiuso** (le sole cinque scritture sono righe 67 · 296 · 299 · 302 · 307, tutte sotto `Desktop\CENSIMENTO_MT5_<cifre>_<cifre>`, e il `Remove-Item` e' `-LiteralPath` su `$cart + '.zip'`, dove `$cart` e' prefisso letterale + timestamp `yyyyMMdd_HHmm` a **cultura invariante**: niente jolly, niente risalita); **nessun terminale puo' partire** (0 occorrenze di `Start-Process`, `Invoke-Item`, `saps`, operatore `&` su un exe, `Stop-Process`, `CloseMainWindow`, `Kill`, `msiexec`, `reg`, `Uninstall`, e `Get-Process terminal64` legge **solo** `.Id` e `.Path`) — e questo era il vincolo vero, perche' su Tickmill risultano **due sedie attaccate**; **ASCII puro** (0 byte non-ASCII); nessuna credenziale nel referto (il filtro dei `.ini` prende `Login|Server|Company|Name`, **mai** `Password`); le due stringhe promesse dalla riga (`sessione`, `di cui ESTERNI`) esistono **letteralmente** nell'output; `-Depth 3` da `C:\` **raggiunge davvero** `C:\BCM_Reale\terminal64.exe` (1 livello) e `C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe` (2 livelli). Le tre voci qui sotto sono **nuove**.
+
+## 257. 🧰 IL LETTORE DI CASA C'ERA **NELLA STESSA CARTELLA**, E LO SCRIPT NUOVO SE L'E' RIFATTO A MANO — cosi' la classe **163** si ripaga da sola
+
+**Il fatto (12/09/2026).** `RIGA_CENSIMENTO_MT5_MACCHINA.ps1` legge i giornali MT5
+con `Select-String -LiteralPath ... -ErrorAction SilentlyContinue` (r.215) e i
+`.chr` con `Get-Content -Raw -ErrorAction SilentlyContinue` (r.255). La funzione
+`Leggi-Condiviso` — `[IO.File]::Open(...,[IO.FileShare]::ReadWrite)` + euristica
+UTF-16 — esiste **da giorni** e sta in **TRE file della stessa cartella**
+(`backtest_pipeline/righe/CODA_09_giornale_operativo.ps1` r.40-53,
+`CODA_10_slippage.ps1` r.42, `CODA_05_foto_fresca.ps1` r.73), scritta proprio
+perche' *"il log del giorno corrente e' APERTO dal terminale vivo: ReadAllBytes e
+Get-Content falliscono"* (classe **163**, pagata l'08/09) e perche' CODA_05 legge
+i `.chr` **con quella** e non con `Get-Content`.
+
+🔴 **Perche' e' bloccante e non stilistico.** Il difetto non fa rumore: con
+`-ErrorAction SilentlyContinue` la lettura che fallisce non stampa niente e il
+referto scrive `[NON TROVATO nei giornali]` e `SEDIE agganciate: 0`. Cioe'
+**proprio sui terminali ACCESI — i soli che contano — il censimento stampa gli
+zero rassicuranti della classe 177**, e qui quello zero serviva a decidere se
+DISINSTALLARE un terminale su cui risultano due sedie vive.
+
+> ### ✅ LA REGOLA
+> **Uno script nuovo che rilegge file che un altro script di casa gia' rilegge
+> deve riusare il LETTORE di casa, non riscriverlo.** Prima di scrivere una
+> lettura di file MT5 si cerca la funzione (`grep -rn "Leggi-Condiviso"`): e' la
+> regola del 10/09 (*"prima si cerca il file che ha gia' la risposta"*) applicata
+> al **codice** e non solo ai numeri. E ogni `-ErrorAction SilentlyContinue` su
+> una lettura va accompagnato dal **conteggio dei file che non si sono potuti
+> leggere**: una lettura muta e uno zero vero non possono stampare la stessa riga.
+
+---
+
+## 253. 🚪 IL **CANALE** DI ACCESSO SPACCIATO PER **IDENTITA'** DELLA MACCHINA — `SESSIONNAME` e la batteria non sanno dove sei
+
+**Il fatto (12/09/2026).** Per rispondere alla domanda piu' semplice del mondo
+(*"lo screenshot e' del VPS o del portatile?"*) lo script deduceva la macchina dal
+canale: `$viaRdp = ($sess -like 'RDP*')`, e poi stampava
+*"sessione CONSOLE: questa finestra gira sulla macchina che hai davanti"* oppure
+*"sei collegato via DESKTOP REMOTO: questa finestra gira sulla macchina REMOTA
+(il VPS)"*. Piu' la batteria: *"batteria: SI -> e' un PORTATILE, non un VPS"*.
+
+🔬 **I contro-esempi, tutti ordinari, non di laboratorio:**
+1. `mstsc /admin` (sessione console via RDP): `SESSIONNAME` resta **Console** →
+   lo script dice *"la macchina che hai davanti"* **mentre sei dentro il VPS**.
+2. Console **web del fornitore**, VNC, AnyDesk, TeamViewer: `SESSIONNAME`
+   **Console** → stessa bugia, ed e' il modo piu' comune di entrare in un VPS
+   quando l'RDP non va.
+3. RDP **verso qualunque altra cosa** (il PC di backtest, il portatile verso se
+   stesso): `RDP-Tcp#7` → lo script afferma *"il VPS"*, che non e' misurato:
+   nella variabile c'e' scritto **RDP**, non **VPS**.
+4. Contesto non interattivo (attivita' pianificata): `SESSIONNAME` vuoto →
+   `-like 'RDP*'` e' falso → ancora *"la macchina che hai davanti"*.
+5. Batteria: un **fisso con UPS** espone un `Win32_Battery`. E un portatile che
+   fa da server non e' un portatile "invece di" un VPS: sono due assi diversi.
+
+> ### ✅ LA REGOLA
+> **La domanda "quale macchina e' questa" si risponde col NOME (`COMPUTERNAME`),
+> e il nome si stampa come VERDETTO; tutto il resto e' contesto e va scritto come
+> "compatibile con", mai come "e'".** Il canale (`SESSIONNAME`) dice **al
+> massimo** *"c'e' un RDP di mezzo"* — e solo in un verso: `RDP*` dimostra la
+> sessione remota, `Console` **non dimostra niente**. Il discriminante
+> fisico/virtuale serio, se serve, e' **marca/modello** (`Win32_ComputerSystem`:
+> QEMU, VMware, Virtual Machine, Xen...), che e' un fatto stampato; batteria e
+> sessione sono indizi. 📌 E' la stessa forma della classe 178: un'attesa che
+> l'**ipotesi alternativa** soddisfa allo stesso modo non misura niente.
+
+---
+
+## 254. 🎯 IL CAMPO PRESO DALL'**ULTIMA RIGA CHE COMBACIA** INVECE CHE DALL'ULTIMA RIGA CHE **CONTIENE IL DATO**
+
+**Il fatto (12/09/2026), riprodotto.** Il conto e il server venivano estratti
+dalla **stessa** riga: `$ult = $m[$m.Count-1]` (ultima riga che combacia col
+regex del conto) e poi il server cercato **dentro `$ult.Line`**. Ma nel giornale
+MT5 la sequenza normale di un accesso e':
+
+    '50503392': authorized on BCM-Demo through Access Point EU-Central (ping: 12.34 ms)
+    '50503392': previous successful authorization performed from 5.6.7.8 on 2026.09.11 09:12:33
+
+L'**ultima** riga che combacia e' la seconda — che contiene il **conto** ma
+**non contiene il server**. Risultato misurato: nel caso piu' comune di tutti il
+referto stampa il conto e **lascia vuoto il broker**, cioe' esattamente il campo
+per cui il censimento era stato scritto (*"di che broker e' questa cartella
+dati?"*). E sulla riga buona il regex `(?:authorized on|to)\s+([A-Za-z0-9_\-\. ]+)`
+— con lo **spazio** dentro la classe di caratteri — cattura
+`BCM-Demo through Access Point EU-Central`, e l'alternativa nuda `to` puo'
+agganciare un IP (`connecting to 185.66.1.2` → server = `185.66.1.2`).
+
+> ### ✅ LA REGOLA
+> **Un campo si cerca nell'ultima riga che LO CONTIENE, non nell'ultima riga che
+> combacia con l'altro campo.** In pratica: una scansione per ogni campo, ognuna
+> col suo regex ancorato alla parola che lo introduce (`authorized on\s+(\S+)`),
+> e **mai** una classe di caratteri che include lo **spazio** quando il valore e'
+> un token senza spazi. 📌 Il collaudo si fa sulle **righe vere** del formato
+> (incollate da un giornale), non su una riga inventata che torna.
+
+---
