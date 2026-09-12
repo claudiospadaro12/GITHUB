@@ -24,17 +24,50 @@
 #      rigenerasse rimetterebbe in circolo un costo sbagliato su un file
 #      che gira.
 #
-#  COME SI USA, ADESSO: si lancia, si tiene SOLO il file che si voleva
-#  rifare, e si riporta indietro tutto il resto
-#  (git checkout -- <gli altri>, e si cancella l'orfano 00_canarino_*).
-#  Verifica obbligatoria dopo: "git status --porcelain
-#  backtest_pipeline/prove/" deve nominare SOLO il file voluto.
+#  >>> E DA QUI IN AVANTI IL BANNER NON E' L'UNICA DIFESA. Fino al
+#      12/09/2026 questo file si proteggeva con un COMMENTO, e un file
+#      che fa danno se lanciato per abitudine e' protetto male da un
+#      commento: "python3 COLLAUDO_EMADOW_GENERA.py" scriveva SETTE file
+#      su BASE, senza chiedere niente e senza un if che potesse dire no.
+#      Adesso serve il flag esplicito --scrivi, e senza flag il
+#      programma MUORE PRIMA di aprire qualunque file in scrittura.
+#      Con --scrivi si puo' (e conviene) restringere il bersaglio:
+#        python3 COLLAUDO_EMADOW_GENERA.py                 -> non scrive niente
+#        python3 COLLAUDO_EMADOW_GENERA.py --scrivi 02     -> solo il 02
+#        python3 COLLAUDO_EMADOW_GENERA.py --scrivi        -> tutti e sette
+#        python3 COLLAUDO_EMADOW_GENERA.py --dove <cart>   -> scrive ALTROVE
+#      Verifica obbligatoria dopo: "git status --porcelain
+#      backtest_pipeline/prove/" deve nominare SOLO il file voluto.
 #  Chi vuole rimetterlo in pari deve RIPORTARE QUI le correzioni dei
 #  cinque .txt, non il contrario: i .txt sono la verita', questo file no.
 # ##########################################################################
-import os, io
+import os, io, sys
 BASE='/home/user/GITHUB/backtest_pipeline/prove/'
-src=[l.rstrip('\n') for l in open(BASE+'R112_00_metro.txt')]
+
+# ---------------------------------------------------------------------
+#  IL CANCELLO DI SCRITTURA. Fail-CLOSED: senza --scrivi non si apre
+#  NESSUN file in scrittura, e il programma esce con 2 (non con 0, cosi'
+#  chi lo mette in una catena se ne accorge).
+# ---------------------------------------------------------------------
+_argv = sys.argv[1:]
+if '--dove' in _argv:
+    _i = _argv.index('--dove')
+    BASE = os.path.join(os.path.abspath(_argv[_i+1]), '')
+    del _argv[_i:_i+2]
+SCRIVI = '--scrivi' in _argv
+SOLO = [a for a in _argv if not a.startswith('--')]
+if not SCRIVI:
+    sys.stderr.write(
+        "FERMO: questo generatore e' VECCHIO e senza --scrivi non tocca niente.\n"
+        "  Rilanciarlo alla cieca riporta indietro 104 righe su cinque file prova\n"
+        "  (01: 50, 03: 30, 04: 18, 06: 4, 05: 2) e crea l'orfano\n"
+        "  COLLAUDO_EMADOW_00_canarino_spread.txt. Il 05 e' IN CODA (cemad05).\n"
+        "  Leggi il banner in testa. Poi:  --scrivi [02] [--dove <cartella>]\n")
+    sys.exit(2)
+# l'ANTENATO si legge SEMPRE dal repo, anche con --dove: il bersaglio della
+# scrittura si sposta, la sorgente della verita' no.
+SRCBASE='/home/user/GITHUB/backtest_pipeline/prove/'
+src=[l.rstrip('\n') for l in open(SRCBASE+'R112_00_metro.txt')]
 corpo=[l for l in src if l.startswith('Inp')]
 def body(skip, magic_axis, comment):
     out=[]
@@ -85,6 +118,11 @@ TESTA = """# ===================================================================
 #  e cambiarla avrebbe riscritto anche gli altri sei, che oggi non sono
 #  miei. Fra comodo e stretto, stretto.
 def scrivi(nome, testa_extra, skip, magic, comment, asse, coda='', testa=None, dirs=None):
+    # il secondo cancello: con "--scrivi 02" si tocca SOLO il 02. Senza
+    # elenco si scrive tutto, ma solo perche' --scrivi e' stato chiesto.
+    if SOLO and not any(('_'+s+'_') in nome or nome.startswith('COLLAUDO_EMADOW_'+s) for s in SOLO):
+        print('saltato (non chiesto): '+nome)
+        return
     f=io.open(BASE+nome,'w',newline='\n')
     f.write(TESTA % nome if testa is None else testa)
     f.write(testa_extra)
@@ -242,8 +280,14 @@ TESTA_02 = r"""# ===============================================================
 # ==========================================================================
 #
 # ##########################################################################
-# ##  FERMO. QUESTO FILE NON SI METTE IN backtest_pipeline/coda/CODA.txt   ##
-# ##  FINCHE' LA CORSIA ROUND NON HA UN CANALE PER IL PER-TRADE.           ##
+# ##  IL BLOCCO E' STATO TOLTO IL 12/09/2026 DAL CANCELLO DI GIUDIZIO.     ##
+# ##  QUESTO FILE VA IN backtest_pipeline/coda/CODA.txt SOLO SE LA RIGA    ##
+# ##  IMMEDIATAMENTE SUCCESSIVA E' righe/CODA_12_pertrade_posizioni.ps1.   ##
+# ##  DA SOLO, IL SUO DELIVERABLE NON ARRIVA A CASA: il buco misurato qui  ##
+# ##  sotto e' ancora tutto li', e la corsia ROUND non raccoglie niente.   ##
+# ##  >>> E QUESTE RIGHE VIAGGIANO: RIGA_ROUND_VPS.ps1 copia il file prova ##
+# ##      nello zip della mattina, quindi chi lo legge domani deve trovare ##
+# ##      scritta la CONDIZIONE, non un divieto scaduto.                   ##
 # ##########################################################################
 #  MISURATO il 12/09/2026, contando le occorrenze nella catena che gira:
 #    runner_abtg.ps1                 abtg_trades -> 0

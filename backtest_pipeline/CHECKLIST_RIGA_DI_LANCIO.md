@@ -16154,3 +16154,279 @@ ferma**, con la sua regressione sui file prova esistenti — non la sera prima.
 (0 byte >127, verificati con `python3`), e **ricontrollati con tutti e due i
 cancelli**: `controlla_prova.py` → *celle 18, passate 36, 0 problemi*;
 `controlla_riga.py --oggetto prova` → *`OK file prova ASCII puro`*, exit 0.
+
+### 📐 L'AMPIEZZA DEL BUCO, misurata dal cancello di giudizio il 12/09/2026 — perche' un difetto gonfiato costa quanto uno taciuto
+Censiti **tutti** i 680 file prova di `backtest_pipeline/prove/`, contando i
+byte >127 con `python3` e guardando **su che tipo di riga** stanno:
+```console
+file prova con byte >127                                 : 104 su 680
+  di cui con byte >127 su una riga di COMMENTO ('#')     : 104
+  di cui con byte >127 su una '@DIRETTIVA'               :   0
+  di cui con byte >127 su una riga di DATI ('Inp...=')    :   0
+```
+🟢 **Quindi oggi nessun file prova in repo e' STORPIATO in un dato**: i 104 sono
+tutti e soli commenti, e il driver li uccide a `walkforward_generico.ps1` r.497
+(`if($t.StartsWith("#")){ continue }`) **prima** di qualunque parsing.
+🔴 **Ma questo NON assolve `controlla_prova.py`**, e il contro-esempio lo dice:
+sporcando lo stesso file prova una volta in un **commento** e una volta su una
+**`@direttiva`**, `controlla_prova.py` da' `ESITO: OK` **exit 0 in tutti e due i
+casi**, mentre `controlla_riga.py --oggetto prova` da' `FAIL` exit 1 in tutti e
+due. Il cancello semantico e' cieco **anche sul caso che rompe un dato**.
+👉 **Conseguenza pratica, e sono due cose diverse:**
+1. 🔴 **sui file prova NUOVI si lanciano SEMPRE tutti e due i cancelli** — il
+   rilievo `[225]` di `controlla_riga.py` lo dice gia' a schermo, e va letto;
+2. 🟢 **i 104 file esistenti NON si "ripuliscono" in massa**: sarebbero 104
+   diff su file gia' girati e gia' agli atti, per un difetto che li' **non
+   morde**. Si ripuliscono **quando si tocca il file per altro**, e si
+   pretende ASCII puro **da subito** su tutto quello che nasce oggi.
+
+---
+
+## 277. 🧟 IL GENERATORE **VECCHIO** CHE RIPORTA INDIETRO LE CORREZIONI FATTE A MANO — e uno dei file che riscrive **e' in coda stanotte** (12/09/2026)
+
+**Il caso reale.** `backtest_pipeline/prove/COLLAUDO_EMADOW_GENERA.py` genera
+sette file prova `COLLAUDO_EMADOW_*`. Il commit `92c9621` ha applicato **a mano**
+ai `.txt` cinque bloccanti e quattro gravi del cancello di giudizio, e **non ha
+toccato il generatore**. Da quel momento i due sono divergenti, e il generatore
+e' diventato una macchina del tempo puntata al passato.
+
+### 🔬 IL DANNO, MISURATO girandolo in una cartella di prova (non stimato)
+```console
+$ python3 COLLAUDO_EMADOW_GENERA.py --dove <sandbox>   e poi diff contro il repo
+  COLLAUDO_EMADOW_01_spread_scala_ini.txt    50 righe diverse
+  COLLAUDO_EMADOW_03_uscita_TP1PCT.txt       30 righe diverse
+  COLLAUDO_EMADOW_04_uscita_TRAILING.txt     18 righe diverse
+  COLLAUDO_EMADOW_06_latenza.txt              4 righe diverse
+  COLLAUDO_EMADOW_05_tf_U30USD.txt            2 righe diverse   <<< E' IN CODA
+  COLLAUDO_EMADOW_00_canarino_spread.txt     NOME DIVERSO -> file ORFANO, e
+     quello vero (00_manopola_maxspread.txt) resta in piedi, non aggiornato
+  TOTALE 104 righe
+```
+🔴 **Il `05` sta in `coda/CODA.txt` (etichetta `cemad05`) e le sue 2 righe
+diverse sono la riga del COSTO** (*"14 passate PER GAMBA"* invece di *"14
+passate"* in tutto). Chi rigenerasse rimetterebbe in circolo un costo sbagliato
+**su un file che gira**.
+
+### 🔴 E IL DIFETTO PIU' GRANDE NON ERA LA DIVERGENZA: ERA LA **PROTEZIONE**
+La prima riparazione (12/09) e' stata un **banner** in testa al `.py`, con i
+numeri veri e la procedura. Il banner **diceva il vero** — verificato — ma
+`python3 COLLAUDO_EMADOW_GENERA.py` continuava a scrivere **sette file** su
+`BASE`, senza chiedere niente, perche' le chiamate a `scrivi()` stanno a livello
+di modulo e non c'era **nessun `if` che potesse dire no**.
+👉 **Un file che fa danno se lanciato per abitudine e' protetto MALE da un
+commento.** Un commento si legge se lo si cerca; un `sys.exit(2)` no.
+
+### ✅ LA FORMA DELLA RIPARAZIONE, e vale per qualunque generatore di casa
+1. **fail-CLOSED**: senza `--scrivi` il programma **muore prima di aprire
+   qualunque file in scrittura**, e esce con **2** (non con 0: uno 0 in una
+   catena passa inosservato);
+2. **bersaglio restringibile**: `--scrivi 02` tocca **solo** il `02`, e stampa
+   `saltato (non chiesto)` per gli altri sei — cosi' il default non e' "tutto";
+3. **`--dove <cartella>`** per generare **altrove**, con la sorgente della
+   verita' (`R112_00_metro.txt`) letta **sempre dal repo**: si sposta il
+   bersaglio della scrittura, non l'antenato;
+4. **la verifica dopo, obbligatoria**: `git status --porcelain
+   backtest_pipeline/prove/` deve nominare **solo** il file voluto.
+
+### 📌 LA REGOLA, in una riga
+🔑 **Quando un generatore e la sua uscita divergono, la verita' e' l'USCITA** —
+i `.txt` sono passati dai cancelli, il generatore no. E chi tocca uno dei due
+**misura l'altro nello stesso commit**. 🔴 Un generatore che puo' sovrascrivere
+file che stanno in coda **non si documenta: si disarma**.
+
+---
+
+## 278. 🎯🚫 LA MISURA CHE **NON PUO' DARE UNA RISPOSTA POSITIVA**: quattro ipotesi, quattro volte "sotto soglia" — anche quando la verita' e' PASS (12/09/2026)
+
+**Parente della 178** (*"una banda che non discrimina non misura"*) e della
+**262** (*"il canarino che misura un'altra variabile"*), ma e' peggio di
+entrambe, perche' qui il numero **esce, e' plausibile, e conferma la
+conclusione che ci si aspettava**.
+
+**Il caso reale.** `COLLAUDO_EMADOW_02_pertrade_IS.txt` esiste per rispondere a
+**una** domanda: *quante POSIZIONI ha l'IS della cella viva `EMA200` U30USD?* La
+soglia e' l'Emendamento A: **>= 150**. Il file, nella stesura di partenza,
+dichiarava *"tranche unica, `FrazioneIS 1.0` dalla riga di lancio"* — ma la
+corsia ROUND (`RIGA_SOTTILE_ROUND.ps1`) passa **sei** argomenti e `-FrazioneIS`
+**non e' fra quelli**, quindi il driver avrebbe usato il **default 0,40**.
+
+### 🔬 GIRATO, non ragionato: driver vero scaricato da `raw`, `-SoloControllo`
+```console
+########## il file COM'ERA ##########
+  taglio IS/OOS: FrazioneIS 0.4              <<< il DEFAULT, e NESSUNA riga
+  IS  2024.09.26 - 2025.01.06                     "preso da '@FRAZIONEIS'"
+  OOS 2025.01.07 - 2025.06.10   <<< la gamba che SOPRAVVIVE, e quindi il
+                                    per-trade che si sarebbe contato
+########## il file CORRETTO (@FINOA 2025.06.09 + @FRAZIONEIS 0.002) ##########
+  taglio IS/OOS preso da '@FRAZIONEIS' nel file prova: 0.002
+  IS  2024.09.26 - 2024.09.26   (si butta, e gira PRIMA)
+  OOS 2024.09.27 - 2025.06.09   (e' la finestra voluta, e gira DOPO)
+```
+La finestra sbagliata ha **111 giorni feriali** contro i **183** dell'IS di
+R112: **60,66%**. Quindi il conteggio sarebbe stato il 60,66% del vero,
+**qualunque fosse il vero**:
+
+| se l'IS vero fosse | la finestra sbagliata darebbe | letto contro la soglia 150 |
+|---:|---:|:---|
+| 102 | **62** | sotto |
+| 118 | **72** | sotto |
+| 150 | **91** | sotto |
+| 165 | **100** | sotto |
+
+🔴 **Quattro ipotesi su quattro dicono "sotto 150" — compresi i due casi in cui
+la sedia PASSA.** Non e' *"un numero un po' basso"*: e' uno strumento che **non
+ha nessuno stato di uscita che significhi SI'**. E la sedia in ballo e'
+`EMA200` sul Dow, **l'unica delle 41 vive** che passa i cancelli alla lettera.
+
+### 🔬 E IL VERSO CONTA, perche' l'altro difetto dello stesso file mentiva AL CONTRARIO
+Lo stesso file rischiava anche la **classe 226** (`Trades` = deal di USCITA, non
+posizioni; fattore misurato **2,0117** su questa sedia):
+```
+POSIZIONI vere se Trades = 237      ->  237 / 2,0117 = 117,8  ->  SOTTO 150 (FAIL)
+'Trades' letto come "operazioni"    ->  237                   ->  SOPRA 150 (PASS)
+```
+👉 **La finestra sbagliata sbaglia verso il FALSO NEGATIVO; il token sbagliato
+verso il FALSO POSITIVO.** Un difetto uccide una sedia buona, l'altro promuove
+una cattiva. 🔴 **E se capitano insieme si mascherano**: `237 x 0,6066 = 143,8`,
+cioe' *quasi* la soglia, cioe' il numero piu' credibile e piu' inutile di tutti.
+
+### ✅ IL CONTROLLO CHE NE ESCE, e va fatto PRIMA di mandare la riga
+**Si elencano le ipotesi plausibili sul valore vero e si calcola cosa
+leggerebbe lo strumento in OGNUNA.**
+- se **tutte** le righe della colonna "cosa si legge" danno lo **stesso
+  verdetto**, lo strumento **non e' una misura**: e' una conferma, e va
+  riparato prima di girare;
+- e il conto si fa **sull'unita' giusta** (posizioni, non deal) **e sulla
+  finestra giusta**, dichiarando **quale delle due gambe sopravvive**;
+- 📌 il difetto **non si vede dal numero**: si vede solo dalla riga di log che
+  dice quale finestra e' stata girata. Quella riga va **pretesa nel referto**,
+  non sperata.
+
+---
+
+## 279. 🚪 IL PRIMO `param()` NELLA CORSIA DI **SOLA LETTURA**: in lettura il cancello G4 **non ha nessuna lista bianca sui percorsi**, e quello che la riga stampa finisce su un repo **PUBBLICO** (12/09/2026)
+
+**Il caso reale.** `righe/CODA_12_pertrade_posizioni.ps1`, riga di sola lettura
+nuova, nasceva con `param([string]$Cartella = "")` — un percorso libero, messo
+li' in buona fede *"solo per potersi collaudare fuori dal VPS"*.
+
+### 🔬 LE TRE MISURE CHE LO RENDONO UN DIFETTO E NON UNA PIGNOLERIA
+```console
+(1) param() delle 12 righe CODA_* della coda
+      CODA_01 .. CODA_11  ->  NESSUN param(), zero argomenti, tutte e undici
+      CODA_12             ->  param([string]$Cartella = "")   <<< l'UNICA
+(2) runner_abtg.ps1, function VagliaArgomenti: la lista bianca sui percorsi
+      ("si passa solo roba sotto C:\MT5_Backtest") sta dentro
+      un   if($corsia -eq "ROUND")   ->  in corsia LETTURA NON ESISTE.
+      L'unica difesa resta la lista dei DIVIETI TESTUALI.
+(3) e quella lista e' fail-OPEN (classe 272). Provate le OTTO grafie del
+    percorso del conto REALE passate come argomento, in corsia LETTURA:
+      C:\BCM_Reale\...            BOCCIATA      C:\MT5_Backtest\..\BCM_Reale\...  BOCCIATA
+      C:/BCM_Reale/...            BOCCIATA      C:\BCM_Reale\... (spazio in coda) BOCCIATA
+      c:\bcm_reale\...            BOCCIATA      ...\E23E1504A8D0...\MQL5\Files    BOCCIATA
+      \\?\C:\BCM_Reale\...        BOCCIATA      C:\BCM_RE~1\...  (nome 8.3)  🔴 PASSA
+```
+🔴 **Sette su otto bocciate, e una che passa.** In corsia **ROUND** le stesse
+otto vengono bocciate **tutte** — perche' li' la lista bianca c'e'. Cioe' **la
+corsia che sembra innocua e' quella meno difesa**, ed e' esattamente dove
+qualcuno mette una riga "che tanto legge e basta".
+
+### 🔴 E IL MOLTIPLICATORE: QUELLO CHE LA RIGA STAMPA **VIENE PUBBLICATO**
+`runner_abtg.ps1` non lascia l'uscita sul VPS: dopo il ciclo carica sul repo
+**il referto E ogni `.log` della corsa** (`PubblicaFile`, cartella
+`backtest_pipeline/coda/referti/`). 🔴 **Il repository e' PUBBLICO.** Quindi una
+riga di sola lettura puntata dove non deve non fa un danno *operativo*: fa un
+danno *pubblico*, e lo fa in silenzio.
+🟢 **Assoluzione del meccanismo, misurata e detta**: `abtg_trades_*.csv` in
+`Common\Files` li scrive **solo il tester**. Verificato su **tutti** gli EA che
+li producono: `ExportTrades()` e' chiamata **esclusivamente da `OnTester()`**,
+che in MT5 gira solo nello Strategy Tester — **zero** chiamate da `OnDeinit` /
+`OnTick` / `OnTimer`. Nessun conto vivo scrive li'. E `CODA_12` legge **solo**
+le colonne `position_id` e `close_time`: la colonna `net_profit` esiste nel CSV
+e **non viene ne' letta ne' stampata**. Il buco era **la porta**, non la stanza.
+
+### ✅ LA RIPARAZIONE, e la forma e' la parte che si riusa
+🔴 **Non si e' aggiunta una guardia: si e' togliato il parametro.** Una guardia
+scritta come *"rifiuto i percorsi che riconosco"* e' la classe 272 da capo.
+```
+prima:  param([string]$Cartella = "")          e la cartella si poteva nominare
+adesso: nessun param(), la cartella e' UNA e cablata, e se APPDATA non e'
+        valorizzato la riga SI FERMA invece di leggere un percorso relativo
+```
+🔑 **E il collaudo fuori dal VPS si fa spostando `APPDATA`, non la cartella**:
+```
+APPDATA=<radice finta> pwsh -File CODA_12_pertrade_posizioni.ps1
+```
+👉 Cosi' il collaudo esercita **lo stesso ramo di codice che gira in coda**,
+invece di un ramo che esiste **solo** per il collaudo — che e' il modo in cui un
+parametro di comodo diventa un buco di perimetro. **Verificato dopo la
+modifica**: i cinque esiti (517/257/2,0117 · gemelli coerenti · gemelli
+divergenti · sola intestazione · intestazione senza `position_id`) escono
+**identici**, e `-Cartella` passato a mano **non e' piu' onorato**.
+
+### 📌 LA REGOLA
+🔴 **Una riga di sola lettura che entra in coda non prende argomenti.** Se
+sembra che le servano, il bersaglio si **cabla** e il collaudo si fa muovendo
+l'**ambiente**. E prima di scrivere *"tanto legge e basta"* si guarda **dove
+finisce quello che stampa**.
+
+---
+
+## 280. 🕳️ LA CORSIA `ROUND` DEL RUNNER NON HA **NESSUN CANALE PER IL PER-TRADE**: un round che lo chiede come deliverable esce **VERDE** e non consegna niente (12/09/2026)
+
+**Il caso reale.** `COLLAUDO_EMADOW_02_pertrade_IS.txt` esiste per contare i
+`position_id` **distinti** nel per-trade che l'EA esporta a fine test. L'EA lo
+scrive davvero, in `Common\Files`. **Nessuno lo porta a casa.**
+
+### 🔬 IL CONTEGGIO, e il CONTRO-ESEMPIO che lo rende una misura
+```console
+occorrenze di 'abtg_trades' nella catena che gira DAVVERO
+  backtest_pipeline/runner_abtg.ps1                 0
+  backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1    0
+  backtest_pipeline/righe/RIGA_ROUND_VPS.ps1        0   (e "Common" la SALTA di proposito)
+  backtest_pipeline/walkforward_generico.ps1        2   ma sono due Write-Host di CONSIGLIO
+e la raccolta e' scritta in chiaro: RIGA_ROUND_VPS copia SOLO $csvIS, $csvOOS,
+il referto e il file prova. Nient'altro.
+
+CONTRO-ESEMPIO (un grep a zero da solo non dimostra niente: nome sbagliato? refuso?)
+  script in righe/RIGA_*.ps1 che NOMINANO abtg_trades e lo raccolgono :  36
+  script in righe/RIGA_*.ps1 in tutto                                 :  98
+  le 11 righe CODA_* preesistenti                                     : 0 su 11
+```
+👉 **Il token esiste e 36 corsie dedicate lo raccolgono: e' la corsia ROUND che
+non ce l'ha.** Nessuno se n'era accorto perche' finora **nessun round della coda
+aveva il per-trade come deliverable**.
+
+### 🔴 PERCHE' E' PEGGIO DI UN ERRORE: IL GUASTO E' **INVISIBILE**
+Il round gira, esce **verde**, lo zip della mattina ha **due CSV** e un referto.
+L'unico conteggio leggibile dentro e' la colonna `Trades`, che conta i **deal di
+USCITA** (classe 226): su questa sedia il fattore misurato e' **2,0117**, quindi
+sul CSV uscirebbe **circa 237** dove le posizioni sono **118**. 👉 **Un numero
+plausibile, vicino alla stima, e falso del doppio** — e nella direzione che
+PROMUOVE (vedi classe 278). **La domanda resta aperta e nessuno lo vede.**
+
+### 🔴 E LA REGOLA DI CASA LO CHIEDEVA GIA', da prima
+`CHECKLIST_RIGA_DI_LANCIO.md`, **regola tripla**, punto **2**: *"Gli artefatti
+si **RICONTANO**, non si `Test-Path` ... **va NEL REFERTO**, non lasciato a chi
+apre il CSV. Tre esiti **diversi**: file assente / file a sola intestazione / N
+operazioni."* 🔴 **La checklist lo chiedeva, la corsia non lo faceva.**
+
+### ✅ IL RIMEDIO, e perche' si sceglie quello
+Due strade, e **non** sono equivalenti:
+| | come | costo |
+|---|---|---|
+| ✅ **(a)** | una riga di **SOLA LETTURA** in coda, **dopo** il round, che conta i `position_id` distinti e mette **deal / POSIZIONI / rapporto** nel referto | **non tocca nessuno script della catena pinnata**, zero passate di tester |
+| ⚠️ **(b)** | la raccolta dentro `RIGA_ROUND_VPS.ps1` | cambia `$SHA_ROUND` → **giro di pin completo**, e mette mano a uno script da cui dipendono **tutti** i round in coda |
+Si sceglie la **(a)** — `righe/CODA_12_pertrade_posizioni.ps1` — per la ragione
+di sempre: **la toppa non deve passare dove passano i round di stanotte.**
+
+### 🔴 LA CODA DELLA CLASSE, ed e' la parte che si dimentica
+Quando un file prova porta dentro di se' un **divieto** (*"FERMO, questo file non
+si mette in coda finche' X"*), e poi **X viene fatto**, quel divieto va toccato
+**nello stesso commit** che lo sblocca. Motivo: `RIGA_ROUND_VPS.ps1` **copia il
+file prova nello zip della mattina**, quindi quelle righe **viaggiano** e chi le
+legge domani trova un `FERMO` su un file che **e' girato**.
+🔑 **Un divieto scaduto dentro un artefatto che viaggia non e' documentazione
+vecchia: e' una contraddizione firmata.** Si sostituisce con la **CONDIZIONE**
+(*"va in coda SOLO se la riga successiva e' CODA_12"*), che resta vera anche
+dopo.

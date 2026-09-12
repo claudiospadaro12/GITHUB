@@ -24,8 +24,14 @@
 # ==========================================================================
 #
 # ##########################################################################
-# ##  FERMO. QUESTO FILE NON SI METTE IN backtest_pipeline/coda/CODA.txt   ##
-# ##  FINCHE' LA CORSIA ROUND NON HA UN CANALE PER IL PER-TRADE.           ##
+# ##  IL BLOCCO E' STATO TOLTO IL 12/09/2026 DAL CANCELLO DI GIUDIZIO.     ##
+# ##  QUESTO FILE VA IN backtest_pipeline/coda/CODA.txt SOLO SE LA RIGA    ##
+# ##  IMMEDIATAMENTE SUCCESSIVA E' righe/CODA_12_pertrade_posizioni.ps1.   ##
+# ##  DA SOLO, IL SUO DELIVERABLE NON ARRIVA A CASA: il buco misurato qui  ##
+# ##  sotto e' ancora tutto li', e la corsia ROUND non raccoglie niente.   ##
+# ##  >>> E QUESTE RIGHE VIAGGIANO: RIGA_ROUND_VPS.ps1 copia il file prova ##
+# ##      nello zip della mattina, quindi chi lo legge domani deve trovare ##
+# ##      scritta la CONDIZIONE, non un divieto scaduto.                   ##
 # ##########################################################################
 #  MISURATO il 12/09/2026, contando le occorrenze nella catena che gira:
 #    runner_abtg.ps1                 abtg_trades -> 0

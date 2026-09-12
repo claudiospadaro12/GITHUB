@@ -72,12 +72,32 @@
 #      leggono per intero, e la riga lo dice invece di fingere. Serve a
 #      non piantare una catena che non ha timeout.
 #
-#  PARAMETRO: -Cartella, opzionale. Serve SOLO a poter collaudare questa
-#  riga fuori dal VPS, su una cartella finta con dei per-trade noti
-#  (fatto il 12/09/2026: 517 deal / 257 posizioni riprodotti). In coda
-#  non si passa nessun argomento e vale il default, cioe' Common\Files.
+#  NESSUN PARAMETRO, E NON E' UNA SEMPLIFICAZIONE: E' IL PERIMETRO.
+#  La prima stesura aveva un '-Cartella' libero, per potersi collaudare
+#  fuori dal VPS. Il cancello di giudizio l'ha tolto il 12/09/2026, e il
+#  motivo e' MISURATO, non prudenziale:
+#    1. delle 12 righe di sola lettura della coda, questa era l'UNICA con
+#       un param(): le altre 11 (CODA_01..CODA_11) non prendono niente.
+#    2. in corsia LETTURA il cancello G4 del runner NON ha nessuna lista
+#       bianca sui percorsi. La riga "si passa solo roba sotto
+#       C:\MT5_Backtest" sta dentro un   if(corsia -eq ROUND)  , quindi
+#       in lettura l'unica difesa sarebbe la lista dei divieti TESTUALI.
+#    3. e quella lista e' fail-OPEN per costruzione (classe 272): provate
+#       le otto grafie del percorso del conto REALE passate come
+#       argomento, SETTE vengono bocciate e la grafia 8.3 'BCM_RE~1'
+#       PASSA. Una sola che passa basta.
+#    4. e quello che questa riga stampa NON resta sul VPS: il runner
+#       PUBBLICA referto e log su GitHub, e il repository e' PUBBLICO.
+#  Quindi la guardia non e' scritta come "rifiuto cio' che riconosco"
+#  (che e' il difetto della classe 272): la cartella non si puo'
+#  nominare affatto. E' UNA SOLA, cablata qui sotto.
+#  COME SI COLLAUDA FUORI DAL VPS, senza riaprire il buco: si sposta
+#  APPDATA, non la cartella. Cosi' il collaudo esercita ESATTAMENTE il
+#  ramo di codice che gira in coda, invece di un ramo che esiste solo
+#  per il collaudo:
+#    APPDATA=<radice finta> pwsh -File CODA_12_pertrade_posizioni.ps1
+#    (con dentro <radice finta>\MetaQuotes\Terminal\Common\Files)
 # =====================================================================
-param([string]$Cartella = "")
 
 $ErrorActionPreference = "Continue"
 
@@ -90,12 +110,20 @@ Write-Host ("#  ora locale di questa macchina: " + (Get-Date).ToString("yyyy-MM-
 Write-Host "#  SOLA LETTURA: apre file e stampa numeri.                          #"
 Write-Host "#####################################################################"
 
-$cart = $Cartella
-if([string]::IsNullOrWhiteSpace($cart)){
-  $cart = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
+if([string]::IsNullOrWhiteSpace($env:APPDATA)){
+  Write-Host ""
+  Write-Host "ESITO: APPDATA non e' valorizzato, quindi la cartella comune NON si sa" -ForegroundColor Yellow
+  Write-Host "       calcolare. Mi fermo invece di leggere un percorso relativo: un"
+  Write-Host "       percorso relativo dipende dalla cartella di lavoro di chi mi ha"
+  Write-Host "       lanciato, e questa riga ha UN SOLO bersaglio ammesso."
+  return
 }
+$cart = Join-Path $env:APPDATA "MetaQuotes\Terminal\Common\Files"
 Write-Host ""
 Write-Host ("cartella letta : " + $cart)
+Write-Host  "               (unico bersaglio ammesso: Common\Files di questo utente."
+Write-Host  "                Non e' la cartella dati di NESSUN terminale, e non si puo'"
+Write-Host  "                cambiare da riga di comando: questa riga non ha parametri.)"
 
 if(-not (Test-Path -LiteralPath $cart)){
   Write-Host "ESITO: la cartella NON ESISTE. Nessun per-trade da contare." -ForegroundColor Yellow
