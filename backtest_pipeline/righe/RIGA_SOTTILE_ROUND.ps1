@@ -272,7 +272,70 @@ $BancoBT = 'C:\MT5_Backtest'
 #      il falso positivo silenzioso e' ancora possibile, e che il
 #      rilevatore di riserva sono le loro ancore (r132c deve riprodurre 5
 #      celle di R123D, r136a la cella viva 237 / 1,20110 / 5,7325%).
-$PIN = 'e6c0d70ef3bf61efd110ab4c9e7ee46e6ad40e7b'
+# ---------------------------------------------------------------------
+#  UNDICESIMO GIRO (12/09/2026) -- IL PIN SI MUOVE PERCHE' IL DRIVER HA
+#  UNA DIRETTIVA NUOVA: '@FRAZIONEIS'. Non e' un file prova nuovo.
+#
+#  IL BUCO CHE CHIUDE. Su QUESTA corsia il driver NON riceve
+#  -Simbolo, -Periodo, -DaQuando, -Fino, -FrazioneIS: guarda la riga $arg
+#  piu' sotto, e la stessa cosa vale per RIGA_ROUND_VPS.ps1 r.646-650.
+#  Cioe': le direttive del file prova sono l'UNICO canale esistente per
+#  l'identita' della finestra, e fino a ieri erano QUATTRO su cinque --
+#  @SIMBOLO, @PERIODO, @DAQUANDO, @FINOA. Il taglio IS/OOS era il buco.
+#  Costo misurato del buco: ~20 file prova (R128b/c/d/e, R129a/b/c,
+#  R130a..e, R131a..h) dichiarano nei propri criteri -- congelati PRIMA
+#  dei numeri, in prove\R128_USCITA_CRITERI.md r.236-271 -- un taglio a
+#  0.50, e su questa corsia sarebbero girati a 0.40 (il default di
+#  fabbrica) con l'etichetta dei criteri a 0.50: IS che finisce il
+#  2025.06.09 invece del 2025.08.13, cioe' 65 giorni di calendario, 47
+#  feriali, ~33 operazioni di differenza, IN SILENZIO.
+#  Adesso il driver legge '@FRAZIONEIS' dal file prova, e se la riga di
+#  lancio ne passa un altro MUORE invece di scegliere.
+#
+#  >>> L'IMPRONTA DEL DRIVER CAMBIA, ed e' giusto cosi':
+#      $SHA_WALK passa da 62A53763...F7CBB7BC a BF53EC27...FAF59875.
+#      Se leggete ancora la vecchia, il pin punta a un driver SENZA la
+#      direttiva e lo scarico muore sull'impronta: il fallimento giusto.
+#      $SHA_ROUND invece NON e' stata toccata -- ed e' stata RICALCOLATA
+#      sul blob del pin nuovo per dirlo, non assunta: 348ED533... a
+#      115254dc e' identica a 348ED533... a e6c0d70e.
+#
+#  IL PIN NUOVO E' 115254dc, E LE VERIFICHE SONO STATE FATTE VIA raw,
+#  non solo su git (il runner scarica da raw, non da git):
+#      driver @115254dc            -> HTTP 200, 102.955 byte
+#      sha256 di cio' che ARRIVA   -> BF53EC27...FAF59875  == $SHA_WALK
+#      sha256 del blob git al pin  -> BF53EC27...FAF59875  (combaciano)
+#      MARCATORE_..._v5_INCLUDE nel file SCARICATO -> presente (x2)
+#      i file prova @115254dc      -> HTTP 200
+#  E IL CONTRO-ESEMPIO, altrimenti quei "combacia" non valgono niente:
+#  al pin PRECEDENTE e6c0d70e la stringa 'FRAZIONEIS' compare ZERO volte
+#  nel driver e il suo sha e' 62A53763..., diverso. Il controllo
+#  distingue i due casi, quindi il suo "uguale" dice qualcosa.
+#
+#  >>> IL MARCATORE CHE QUESTA CORSIA CONTROLLA NON E' CAMBIATO. <<<
+#  $MARC_WALK resta MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE: nel driver
+#  e' stato AGGIUNTO un v6_FRAZIONEIS ACCANTO, non al posto del v5. I
+#  marcatori sono additivi (dottrina scritta nel driver r.153-171): il v5
+#  promette gli #include, e quella promessa e' ancora vera.
+#
+#  >>> E LE 19 RIGHE IN CODA NON SONO TOCCATE, ED E' VOLUTO. <<<
+#  CODA.txt pinna questa riga sottile a 1445abf8, cioe' a una COPIA
+#  CONGELATA che porta $PIN = e6c0d70e: i 19 round di stanotte scaricano
+#  il driver SENZA '@FRAZIONEIS' e girano identici a come sono stati
+#  collaudati. Non e' una dimenticanza: NESSUNO dei 19 file prova
+#  dichiara '@FRAZIONEIS' (verificato col grep: zero su 675 file prova
+#  dell'intero repo), quindi portarceli dentro non porterebbe NIENTE e
+#  rischierebbe 19 round che girano bene cosi'.
+#  Chi un giorno vorra' portare '@FRAZIONEIS' in coda faccia l'ordine
+#  giusto, e si sbaglia una volta sola:
+#      1. PRIMA questa riga sottile ($PIN + $SHA_WALK), commit, push
+#      2. POI la colonna dei pin in CODA.txt, sul commit che contiene
+#         la riga nuova
+#  Mai il contrario: al contrario le righe muoiono su $SHA_WALK -- che e'
+#  il modo GIUSTO di rompersi, ma resta un round perso e una notte buttata.
+#  Referto: report\FRAZIONEIS_APPLICATA_2026-09-12.md
+# ---------------------------------------------------------------------
+$PIN = '115254dc64b2c7ac9493a33b8f5bbc09f814ea1b'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
@@ -302,7 +365,20 @@ $SHA_ROUND = '348ED5330C18DCD41D736B0709B880A8EC9BF8A4B700B044999BC7099D0A315B'
 #    un '@FINOA' poteva essere ignorato in silenzio.
 #    Per i sei file prova R132/R133 non cambia NIENTE: dichiarano tutti
 #    @FINOA 2026.06.30, identica al default del driver.
-$SHA_WALK  = '62A53763A186195DBE3FB3DAEE01B45A53B80F09BDC831B68046BD50F7CBB7BC'
+#    UNDICESIMO GIRO (12/09/2026): RICALCOLATA. Prima era
+#    62A53763...F7CBB7BC (decimo giro: la toppa classe 270, l'.ex5
+#    stantio cancellato prima di compilare), e prima ancora
+#    02E2FE8F...9ECF3FEA. E' cambiata perche' il driver ha una direttiva
+#    NUOVA, '@FRAZIONEIS', che porta il taglio IS/OOS dentro l'identita'
+#    della cella: era l'ultimo pezzo di quell'identita' che su questa
+#    corsia non aveva un canale, perche' -FrazioneIS qui non si passa.
+#    La toppa 270 resta dentro: il pin nuovo 115254dc e' DISCENDENTE del
+#    decimo giro, non un ramo diverso (verificato:
+#    git merge-base --is-ancestor 124db40 115254dc -> 0, e nel driver
+#    scaricato da raw la riga Remove-Item dell'.ex5 compare 1 volta).
+#    Per le 19 righe in coda non cambia NIENTE: sono pinnate a 1445abf8,
+#    che porta il $PIN vecchio -- vedi il blocco dell'undicesimo giro.
+$SHA_WALK  = 'BF53EC27C98316A8F648009BC2B73B9A9ED6A298C02CBB04E62E3530FAF59875'
 
 # I marcatori attesi dentro i due file: l'impronta dice "sono i byte
 # giusti", il marcatore dice "e' la versione giusta". Si controllano tutti
