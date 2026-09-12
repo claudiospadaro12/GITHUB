@@ -182,6 +182,35 @@ ALTO di quella forbice.
   implementato *e* acceso in tutti e due i preset. 👉 Da oggi la frase giusta
   e' *"va valorizzato e portato in campo"*, non *"va implementato"*.
   Misura: `report/IL_GUARDIAN_IN_CAMPO_2026-09-12.md`.
+  ✏️ **EMENDATO LA SERA DEL 12/09/2026, e l'emendamento capovolge la priorita'.**
+  🔴 I modi in cui il C2 e' spento sono **QUATTRO, non tre**: il quarto e' che
+  **NESSUN EA LO LEGGE** — 100 punti di chiamata di `ABTG_GuardiaIngresso` in
+  **70 EA**, e **zero** passano `cluster_mappa`. Anche con Guardian a 19 input,
+  preset valorizzato e mappa incollata, **nessun ingresso verrebbe rifiutato**:
+  sarebbe un log, non una rete. Portarlo in campo sono **due ricompilazioni**.
+  🟢 **MA la notizia vera e' che il C2 NON SERVE, ed e' provato in quattro modi:**
+  **(a) algebrico** — `rischio_cluster <= rischio_totale` e' un'identita', e il
+  cluster `AZIONARIO` proposto a **3,5%** e' **piu' largo del C1 a 3,25% gia'
+  acceso**: se il cluster arriva a 3,5, il C1 ha gia' bloccato. Protezione
+  aggiuntiva: **0,00 punti**; **(b) aritmetico** — in unita' da 0,65% i due
+  scattano alla **stessa quinta sedia**; **(c) strutturale** — le due sedie
+  fanno max 1 e 2 posizioni da codice = **1,30%** contro tetti 3,0-3,5%, e con
+  `InpRiskMode=0` il numero si misura ingresso->SL, quindi **nessun crollo puo'
+  alzarlo**; **(d) empirico** — 57 ingressi veri, picco `AZIONARIO` **1,300%**,
+  **zero** superamenti e **zero** rifiuti.
+  👉 **Quindi la frase giusta oggi non e' piu' "va valorizzato e portato in
+  campo": e' "non serve adesso, diventa una rete alla QUARTA sedia sullo stesso
+  cluster — e allora `AZIONARIO` va portato SOTTO 3,25%".**
+
+  🔴 **E IL DIFETTO VERO E' UN ALTRO, E COSTA DAVVERO: `ABTG_EMA200` — LA PRIMA
+  SEDIA (`771531`) — NON LEGGE IL GUARDIAN PER NIENTE.** Misurato: il sorgente a
+  HEAD ce l'ha (r.42 `InpUsaGuardian`, r.381 `ABTG_GuardiaIngresso`, **690
+  righe**), ma il binario **in campo** e' `344a11b` del **04/08**: **486 righe** e
+  **ZERO occorrenze** di `InpUsaGuardian`. Niente pausa B1, niente cap C1. E gira
+  sul **piccolo 50503392, dove nessun Guardian gira** (giornale 11 e 12/09:
+  *"GUARDIAN: nessuna riga"*). **Due fail-open sulla stessa sedia**, quella che
+  abbiamo validato tutto il giorno. Misura:
+  `report/IL_GUARDIAN_CHE_SCHIEREREMO_2026-09-12.md`.
 
 ## 🚦 IL CANCELLO PRIMA DI OGNI PASSAGGIO (firmato da Claudio, 09/09/2026)
 Nato da due sue frasi dello stesso giorno, e da un fatto:
