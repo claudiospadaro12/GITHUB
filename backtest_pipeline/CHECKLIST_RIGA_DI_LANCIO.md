@@ -15596,3 +15596,41 @@ corsa è in atto, e quel nome non ha bisogno di nessuna `CommandLine`.
 📌 Generalizzazione: vale per ogni filtro su `CommandLine`, `Path`,
 `MainWindowTitle`, `.Description` — campi che **Windows può negare senza errore**.
 Il `-EA SilentlyContinue` accanto li rende silenziosi due volte.
+
+## 267. 🗓️ L'ORA LETTA SENZA IL GIORNO: un cancello che blocca su un mercato CHIUSO (12/09/2026)
+
+**Il caso, ed e' di oggi.** Il cancello di giudizio ha **bocciato** la riga che
+fa partire la coda in anticipo, con questo bloccante:
+
+> *"Sono le 09:57 italiane = 08:57 server. **Il DAX e' aperto dalle 08:00
+> server.** Le 03:30 non sono un orario di comodo: sono la finestra in cui
+> nessuna sedia puo' essere affamata di CPU."*
+
+Il ragionamento e' ottimo e l'ora e' **giusta**. Ma **oggi e' SABATO**, e di
+sabato il DAX **non apre**. Misurato: `date -u` -> `Saturday 12 September
+2026`, `%u` = **6**. La premessa del bloccante e' **falsa**, e con essa cade la
+forza del blocco: a mercati chiusi non esiste nessuna sedia che possa perdere
+un tick perche' il tester le mangia la CPU.
+
+🔴 **LA CLASSE**: *un'ora, da sola, non dice se il mercato e' aperto.* Prima di
+usare l'orologio come **cancello**, si stabilisce **il giorno della settimana**
+— e, dove serve, il calendario delle feste. E' la stessa famiglia della regola
+di casa *"prima di dire che un EA e' in ritardo, stabilire in quale ora e'
+scritto il numero"* (06/08): li' mancava il **fuso**, qui manca il **giorno**.
+
+🟢 **E il resto di quel FAIL resta valido e va tenuto**, perche' il cancello
+aveva ragione su tutto il resto: la guardia anti-doppia-corsa **falliva aperta**
+se `CommandLine` non era leggibile (ora ha un **terzo esito** e un **secondo
+segnale indipendente**, `metatester64`, che non dipende da `CommandLine`); la
+raccolta stava su **un ramo solo** (ora `try/finally`); i
+`REFERTO_ROUND_<etichetta>.txt` **non venivano raccolti** (stanno in
+`Desktop\ROUND_<etichetta>\`, che non era fra le cartelle lette); e la durata
+era **sottostimata** (le passate non contano compilazioni, avvii e caricamento
+dei tick).
+
+📌 **E la cosa che il cancello ha trovato e che vale piu' del blocco**: *"nessun
+round e' MAI girato dal runner"* — i quattro di stanotte sono `RIFIUTATO -- G1`
+dalla v2. Quindi non e' una ripetizione anticipata: e' **la prima volta in
+assoluto**. Quello resta vero **anche di sabato**, e per questo la riga corretta
+tiene la **foto PRIMA/DOPO** di PID e RAM e il `Read-Host 'SI'`: il rischio
+diventa **dichiarato e fotografato**, non eliminato.
