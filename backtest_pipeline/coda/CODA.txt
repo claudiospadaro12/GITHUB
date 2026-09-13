@@ -857,5 +857,13 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  rumorosamente invece di girare un binario vecchio in silenzio.
 #  Questi due round sono anche il collaudo di compilazione dell'EA.
 # =====================================================================
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
+#  >>> ARMATE il 13/09/2026, DOPO IL PASS DEL SECONDO STRATO (controllo-
+#  preventivo, rieseguito da zero sulla versione corretta, non ereditato
+#  dal giro precedente). Il difetto D1 trovato al primo giudizio (classe
+#  308 punto 1: l'occupazione del posto con una posizione alla volta
+#  rende le celle dell'asse InpKStop non comparabili, effetto non
+#  dichiarato) e' stato corretto nei due file prova (punto 8/(C), punto
+#  4 riscritto, soglia di lettura congelata al 10% su "Segnali Grezzi"
+#  PRIMA di guardare i CSV) e verificato di nuovo: PASS.
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
