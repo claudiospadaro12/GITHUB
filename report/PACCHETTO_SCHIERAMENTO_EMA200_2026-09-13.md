@@ -196,8 +196,8 @@ nessun contatore entra in un `if`, l'ordine dei filtri e' identico.** Anche le
 due quadrature (`rifiuti + armate == valutate`, `rifiuti + piazzati ==
 tentati`) tornano sugli indici.
 
-🔴 **E LO SCHIERIAMO LO STESSO? NO. E le ragioni sono tre, tutte indipendenti
-dalla mia lettura:**
+🔴 **E LO SCHIERIAMO LO STESSO? NO. E le ragioni sono QUATTRO, tutte indipendenti
+dalla mia lettura** (le prime tre bastano da sole; la quarta e' un rinforzo)**:**
 1. **Non e' mai stato compilato da nessuno.** 154 righe nuove che non hanno mai
    visto un F7 possono non compilare affatto. **Io non posso compilare**: non
    ho MetaEditor. Metterle su una sedia viva stanotte sarebbe una scommessa.
