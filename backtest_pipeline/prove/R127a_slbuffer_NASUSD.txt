@@ -9,12 +9,85 @@
 #    -Expert ABTG_SupRev_NAS_H1_Ottimizzato
 #    -Prova prove\R127a_slbuffer_NASUSD.txt
 #    -Simbolo NASUSD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
-#    -Deposito 10000 -Etichetta r127a -Modello 1
+#    -Deposito 10000 -Etichetta r127a -Modello 4
 #    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.
 #   Se ne stampa un numero diverso, ci si ferma.)
-#  -Modello 1 = TICK REALI: su questo simbolo e questa finestra i tick BCM
-#  ci sono (il muro e' 2024.09.26, che e' l'inizio della finestra).
+#  -Modello 4 = TICK REALI. Citazione alla lettera, walkforward_generico.ps1
+#  r.180: "4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai
+#  verdetti". Su questo simbolo e questa finestra i tick BCM ci sono (il
+#  muro e' 2024.09.26, che e' l'inizio della finestra).
+#  >>> CORRETTO IL 13/09/2026 -- IL NUMERO DEL MODELLO ERA INVERTITO,
+#      ED E' BLOCCANTE. Qui c'era scritto "-Modello 1" con accanto
+#      "= TICK REALI". E' il contrario. E' la CLASSE 273, la stessa gia'
+#      pagata due volte in questa casa: il commit 1764a0e (11/09 sera) l'ha
+#      corretta su R132a/b/c -- e R132a e' lo STESSO EA, lo STESSO simbolo
+#      e la STESSA finestra di questo file -- e il commit e6c0d70 (12/09)
+#      l'ha corretta su R127b/R127c. Quel secondo commit ha toccato i DUE
+#      fratelli e ha SALTATO questo file, rimasto a 4a62c2a dell'11/09.
+#      L'INTENTO DI QUESTO FILE NON CAMBIA -- girare a TICK REALI, come ha
+#      sempre scritto in lettere e come dicono i criteri congelati PRIMA
+#      dei numeri (R127_USCITE_CRITERI.md par. 7, riga R127a: "modello =
+#      tick reali"; par. 6: "R127a e' tick reali e la sua ancora e' la
+#      STESSA corsa dell'archivio -> deve tornare al centesimo").
+#      Cambia il NUMERO che lo realizza: 4, non 1.
+#
+#      >>> E QUI R127a NON E' COME R127b/R127c, ED E' IL PUNTO. <<<
+#      I due fratelli sono stati corretti nella direzione OPPOSTA (4 -> 1)
+#      perche' li' l'OHLC e' VOLUTO: l'ancora di r127c (R103) e' essa
+#      stessa OHLC M1, e r127b gira XAUUSD dal 2004, dove i tick reali non
+#      esistono. Qui le due condizioni sono ENTRAMBE rovesciate, e sono
+#      misure, non ricordi:
+#        1. L'ANCORA DI QUESTO FILE E' A TICK REALI. I numeri congelati
+#           qui sotto (IS PF 1,34237 DD 0,9670% n 69 profit +118,82 / OOS
+#           PF 1,68815 DD 0,8567% n 86 profit +300,61) stanno riga per
+#           riga, alla quinta cifra, nei CSV SENZA suffisso:
+#           risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\
+#             ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_{IS,OOS}.csv, riga
+#           InpTF=16385. E il suffisso e' la firma del modello: il driver
+#           appende "_ohlc" quando -Modello non e' 4
+#           (walkforward_generico.ps1 r.1616, "un OHLC non deve MAI
+#           sovrascrivere un tick reale"), e quel suffisso non e' lettera
+#           morta -- nel repo ci sono 288 CSV "_ohlc".
+#        2. I TICK REALI DI NASUSD COPRONO TUTTA LA FINESTRA. Misurato,
+#           non assunto: risultati_archivio\misura_tick\
+#           REFERTO_MISURA_TICK_NASUSD.txt (30/08/2026, scarica_storico.ps1
+#           pinnato a 2f2437cb) -> "I TICK REALI DI NASUSD PARTONO DAL
+#           2024.09.26 (166509474 tick)", cioe' ESATTAMENTE il @DAQUANDO di
+#           questo file. Lo stesso referto scrive la regola di lettura:
+#           "se i tick partono dal 2024.09.26 (come U30USD): la finestra
+#           2024.09.26 -> 2026 e' coperta da tick VERI". Conferma
+#           indipendente, da un'altra corsa e un altro EA: i due .htm di
+#           NASUSD in report\MISURA_SLIPPAGE_2026-09-05.md r.112-113
+#           dichiarano 61,0 M tick reali su 2024.09.26 -> 2025.06.09 e
+#           94,4 M su 2025.06.10 -> 2026.06.30 -- le due meta' di QUESTA
+#           finestra, gia' girate a tick da qualcun altro.
+#
+#      IL FALSIFICATORE, ED E' UNA MISURA IN ARCHIVIO, NON UNA LETTURA:
+#      la cella ancora esiste anche in OHLC, nella stessa cartella, e NON
+#      da' lo stesso numero. Riga InpTF=16385 di ..._NASUSD_OOS_ohlc.csv:
+#      PF 1,85106, profit +349,01 (contro 1,68815 e +300,61 a tick).
+#      Scarto sul PF +9,65%, cioe' DICIANNOVE VOLTE la tolleranza congelata
+#      di +/-0,5%. In IS lo scarto e' anche piu' largo: 1,48924 contro
+#      1,34237 = +10,94%, ventun volte la tolleranza.
+#      COSTO DELL'ERRORE, SE FOSSE PARTITO COSI': a -Modello 1 il round non
+#      avrebbe potuto riprodurre la PROPRIA ANCORA PER COSTRUZIONE. Il file
+#      dichiara due righe piu' sotto che fuori tolleranza "il banco e'
+#      sporco e il round si ferma prima di qualunque altro numero": 18
+#      passate spese per un arresto garantito, con la colpa data al binario
+#      invece che al numero del modello.
+#
+#      COSTO IN TEMPO MACCHINA: i criteri firmati dichiarano gia' "tick
+#      reali" per R127a (par. 7), quindi il numero di passate -- 18 -- e il
+#      modello dichiarato NON CAMBIANO con questa correzione. Cambia la
+#      stima onesta del tempo, perche' la riga eseguita finora prometteva
+#      un OHLC: [STIMA, NON MISURA] ~4 minuti, banda 2-6. Calibrazione:
+#      R88a ha fatto 96 passate a tick su U30USD, M5, stessa finestra di 21
+#      mesi, in 8,0 minuti (r88_csv\REFERTO_R88.txt) = ~5,0 s/passata; qui
+#      le passate sono 18, ma NASUSD ha 166,5 M tick contro i 67,6 M di
+#      U30USD misurati dallo stesso script (misura_tick\*.csv), cioe' 2,46
+#      volte il flusso. 18 x 5,0 s x 2,46 = ~3,7 min. A -Modello 1 sarebbe
+#      stato molto meno: e' il prezzo della verita', ed e' dichiarato.
 # ---------------------------------------------------------------------
 #  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
 #
