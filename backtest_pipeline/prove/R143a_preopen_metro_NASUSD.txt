@@ -1,0 +1,258 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
+#  R143a -- IL METRO. Misura DOVE STANNO 17 e 40 nella distribuzione
+#           dell'ampiezza della candela M5 pre-apertura del NASDAQ.
+#           NASUSD, ingresso PRE-APERTURA, pavimento del cancello ad asse.
+# ---------------------------------------------------------------------
+#  DOSSIER: report/PREOPEN_GEMELLI_LA_SCALA_2026-09-13.md
+#  GEMELLI DI ROUND: R143b (D30EUR) e R143c (U30USD).
+#  PADRE: R142a/b/c (asse USCITA, stessa notte) e
+#         report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md (v2).
+#
+#  ###  PERCHE' QUESTO FILE ESISTE, ED E' UN PREREQUISITO  ###
+#  Il certificato di morte del meccanismo 770203 ha la VOCE 4 (gemelli)
+#  scoperta. Per provare i gemelli serve portare il cancello di ampiezza
+#  17-40 punti indice sugli altri indici. E QUEL CANCELLO NON SI COPIA
+#  NUDO: 17-40 idx e' un numero ASSOLUTO, e su un indice con un altro
+#  livello di prezzo vuol dire un'altra cosa.
+#
+#  >>> E IL FATTORE DI SCALA NON E' IN ARCHIVIO. MISURATO STANOTTE:
+#      le due ancore disponibili DANNO DUE RISPOSTE DIVERSE.
+#        ancora PREZZO (mediana delle operazioni vere, apr-set 2026,
+#          data/statements/trades_auto.csv): D30EUR/NASUSD = 0,8749;
+#          U30USD/NASUSD = 1,8399
+#        ancora VOLATILITA' (mediana dell'ampiezza dei primi 15 minuti
+#          dopo l'apertura, stessa finestra e stesso modello per tutti,
+#          risultati_archivio/studio_apertura/Studio_*.csv):
+#          D30EUR/NASUSD = 0,7258; U30USD/NASUSD = 1,5903
+#      Divergenza sul pavimento: D30EUR +20,5%, U30USD +15,7%.
+#      >>> SCEGLIERNE UNA SAREBBE INVENTARE UN NUMERO. Non si fa.
+#
+#  >>> LA VIA CHE NON INVENTA NIENTE: si smette di DERIVARE il cancello
+#      e si MISURA la distribuzione che il cancello taglia. Il codice lo
+#      permette senza toccare una riga: ABTG_Nasdaq_Live5m.mq5 r.639
+#        if(InpMinRangePts > 0 && rangePts < InpMinRangePts) ... return
+#      Il filtro sta PRIMA di SpreadOK() e di TrendBias() (r.644 e r.649),
+#      e tutti gli altri filtri sono pinnati spenti qui sotto. Quindi
+#      n(soglia) e' una FUNZIONE DI SOPRAVVIVENZA PURA dell'ampiezza
+#      della candela pre-apertura: quante giornate hanno ampiezza >= x.
+#      >>> Con la stessa curva misurata su tre simboli, il cancello del
+#          gemello non si DERIVA piu': si prende la soglia che taglia LA
+#          STESSA FRAZIONE DI GIORNATE che 17 taglia sul Nasdaq. Quella
+#          e' una misura, non un fattore di scala pescato.
+#
+#  ###  E IL TETTO RESTA FUORI, di proposito  ###
+#  InpMaxRangePts e' PINNATO A 0 (spento) in tutti e tre i file del
+#  round. Motivo: pavimento e tetto agiscono in VERSI OPPOSTI sullo
+#  stesso n, e con il tetto acceso n(x) NON E' PIU' una curva di
+#  sopravvivenza -- i tre simboli non si confronterebbero.
+#  >>> CONSEGUENZA DICHIARATA: NESSUNA cella di questo round e' il
+#      meccanismo 770203 com'e' in archivio (che ha il tetto a 4000).
+#      Il tetto e' un round SEPARATO (R144), col pavimento pinnato, e si
+#      scrive DOPO, coi numeri di questo.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO INCORPORATO -- E' UNA DISUGUAGLIANZA  ###
+# ---------------------------------------------------------------------
+#  L'archivio ha la cella (MinRange 1700, MaxRange 4000) a tick reali:
+#      IS   PF 1.01621   n 116   DD 11.5160   Profit  +98.96
+#      OOS  PF 0.96265   n 175   DD 19.4006   Profit -326.54
+#  (risultati_prove/ABTG_Nasdaq_Live5m/ABTG_Nasdaq_Live5m_NASUSD_*.csv)
+#
+#  Qui il tetto e' spento, quindi NON e' una riproduzione: e' un
+#  CANCELLO DI VERSO, che e' falsificabile lo stesso.
+#     >>> n(1700, tetto SPENTO) >= 175 in OOS  e  >= 116 in IS.
+#         TOGLIERE un filtro puo' solo AGGIUNGERE giornate. Se esce un
+#         numero PIU' PICCOLO, la catena e' rotta (finestra sbagliata,
+#         taglio IS/OOS sbagliato, simbolo sbagliato, binario diverso) e
+#         NON SI LEGGE NESSUN ALTRO NUMERO del round, nemmeno di R143b
+#         e R143c.
+#     >>> E la differenza n(1700, spento) - 175 E' IL NUMERO CHE OGGI
+#         NON ABBIAMO: quante giornate OOS hanno la candela pre-apertura
+#         SOPRA i 40 punti indice. Esce gratis.
+#     >>> MONOTONIA: n(0) >= n(850) >= n(1700) >= n(2550) >= n(3400),
+#         in TUTTE E DUE le finestre. E' vero per COSTRUZIONE (r.639).
+#         Se si rompe, il CSV non descrive questo asse.
+#
+#  >>> HO PROVATO A ROMPERE IL CANCELLO, e resiste a tutto tranne una
+#      cosa, che percio' si dichiara: un cambio di BINARIO che sposti la
+#      logica d'INGRESSO. I CSV archiviati sono al commit 400a462 e non
+#      hanno la colonna InpUsaGuardian (verificato: la colonna NON c'e'
+#      in nessuno dei quattro CSV), quindi il binario di allora precede
+#      d83c196 (19/08, Guardian). Dopo c'e' anche 3af47ed (08/08, fix
+#      del sizing): quello tocca il LOTTO, non le giornate, quindi NON
+#      puo' far scendere n sotto 175 -- se non attraverso il clamp di
+#      r.1151 (if(v < mn) v = 0), che toglie il deal della PARZIALE e si
+#      legge nel log a r.1017. Fuori da quella via la disuguaglianza e'
+#      dura.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n: in CALO MONOTONO. Punti duri: n(1700) >= 116 IS e >= 175 OOS.
+#     n(0) = il numero pieno, MAI misurato su NASUSD (l'archivio ha solo
+#     il cancello acceso): e' il dato nuovo principale.
+#     STIMA, dichiarata come stima: la finestra OOS e' 10/06/2025 ->
+#     30/06/2026 = ~270 sedute USA. Con una posizione al giorno al
+#     massimo (InpOneTradePerDay) e la parziale accesa, n(0) OOS dovrebbe
+#     stare fra 300 e 500 DEAL. Se esce sotto 200, o il cancello a 17 non
+#     tagliava quasi niente, oppure qualcosa non torna.
+#     >>> CANARINO DI MANOPOLA INERTE, scritto prima: se DUE celle
+#         consecutive danno lo STESSO n al deal, la manopola non ha morso
+#         fra quei due valori e i loro PF non si citano come punti
+#         distinti. E' la lezione dei 874 CSV a esito identico del
+#         censimento 09/09.
+#  PF: [NON MISURATO] su questa variante (tetto spento). Banda dichiarata
+#     dall'unico asse confrontabile in archivio (NASDAQ_I, span 0,192)
+#     centrata sullo 0,96265 della cella col tetto: ~0,80 - ~1,15.
+#     Non invento un punto centrale.
+#  DD: [NON MISURATO]. Riferimento: 11,52% IS e 19,40% OOS a rischio 2%
+#     per la cella col tetto. Con il tetto spento entrano le giornate di
+#     candela larga, cioe' gli stop piu' larghi: attesa DD >= quei valori.
+#
+#  LE TRE USCITE:
+#   (a) LA DISUGUAGLIANZA NON REGGE (n(1700) < 175 OOS o < 116 IS) ->
+#       CATENA ROTTA. Non si legge nessun numero, ne' qui ne' in R143b /
+#       R143c, e si cerca il binario prima di rilanciare.
+#   (b) LA CURVA ESCE -> il METRO e' fatto. Si scrive la frazione di
+#       giornate che 17 e 40 tagliano sul Nasdaq, e R143b/R143c si
+#       leggono per QUANTILE invece che per fattore di scala.
+#       >>> NON SI PROMUOVE NIENTE DA QUI, e il motivo e' un numero:
+#           per arrivare al pavimento di lavoro (stop >= 40 x spread) su
+#           NASUSD serve stop >= 72,0 idx = range >= 65,0 idx col buffer
+#           nudo, cioe' FUORI SCALA rispetto a una candela di 5 minuti.
+#           Spread NASUSD ora 14 SERVER, MISURATO sui tick BCM nella
+#           finestra esatta: mediana 1,800 idx su 10.455.143 tick
+#           (risultati_archivio/spread_flotta/spread_orario_NASUSD.csv).
+#   (c) UNA CELLA CON PF OOS >= 1,10 E n >= 150 -> si SCRIVE, non si
+#       promuove: resta sotto il pavimento di costo, e una cella sola
+#       non e' un altopiano. Il centro dell'altopiano, mai il picco.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    catena rotta se n(1700) < 175 in OOS oppure < 116 in IS
+#    catena rotta se la monotonia di n si rompe in una delle due finestre
+#    scarta la CELLA se PF OOS < 1,10 con n >= 150
+#    non giudica il MERITO se n < 150 (valvola R59, Emendamento A)
+#    il RISCHIO (DD) si legge a qualunque n (Emendamento B, 16/08)
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA, scritto prima  ###
+# ---------------------------------------------------------------------
+#  1. NON misura il TETTO (InpMaxRangePts pinnato a 0). Round separato.
+#  2. NON misura la LARGHEZZA della finestra (InpPrevWindowMin resta 5):
+#     quella vuole la FIRMA DI CLAUDIO prima, ed e' la voce 5 del
+#     certificato.
+#  3. NON chiude la voce 4 (gemelli) DA SOLO: e' il metro con cui si
+#     leggono R143b e R143c. Da solo non e' un gemello.
+#  4. NON misura l'AMPIEZZA in punti indice giornata per giornata. La
+#     via diretta esiste ed e' piu' corta -- r.640 stampa
+#     "candela %.0f pt < min %.0f" per OGNI giornata scartata, quindi
+#     UNA passata con InpMinRangePts enorme e InpVerbose=true stamperebbe
+#     l'INTERA distribuzione -- ma walkforward_generico.ps1 raccoglie
+#     SOLO il log del COMPILATORE (r.1578-1584), non il giornale del
+#     tester. Serve una modifica al driver: dichiarata, non fatta.
+#  5. UN SOLO REGIME (21 mesi di tick BCM sugli indici). Nessuna cella e'
+#     promuovibile senza la prova di regime (Emendamento, regola C).
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver (r.179). La prova che e' il taglio giusto sta scritta da
+#     qualcun altro: risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7 --
+#     "IS 26/09/2024->09/06/2025 - OOS 10/06/2025->30/06/2026".
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#  RISCHIO 2%: e' il valore della corsa archiviata, non una scelta. Il DD
+#     che ne esce NON si legge contro i cancelli prop scritti per l'1% /
+#     0,65%, e nemmeno il PF si trasferisce (CalcLotByRisk dimensiona su
+#     ACCOUNT_BALANCE, r.863-864: capitale composto).
+#  DEPOSITO 10000 = default del driver = quello della corsa archiviata.
+#  MAGIC 770203: il magic di casa dell'EA, gia' in archivio.
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I numeri
+#     si leggono nell'OPTFRAME.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale.
+#  CONVERSIONE MISURATA, con due fonti indipendenti: 1 punto indice = 100
+#     punti MT5 su NASUSD (spread_flotta/REFERTO_SPREAD_FLOTTA.txt,
+#     "conversione : 1 pto indice = 100 pti MT5; point=0.01000", e
+#     data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt, intestazione
+#     NASUSD). Quindi l'asse qui sotto e' in PUNTI MT5: 850 = 8,5 idx.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, DA SOLO,
+#     mai in pipe; il secondo strato lo lancia il coordinatore.
+#
+#  COSTO: 5 celle x 2 finestre = 10 passate -> T = 0,6 + 0,077 x 10 =
+#         1,37 minuti.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+# --- INGRESSO: LA PRE-APERTURA. Identita' del round, non si tocca.
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+
+# --- IL TETTO: SPENTO. Dichiarato sopra: senza questo, n(x) non e' una
+#     curva di sopravvivenza e i tre simboli non si confrontano.
+InpMaxRangePts=0||0||0||0||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+# --- GESTIONE: pinnata alla cella archiviata. E' l'asse di R142a/b/c,
+#     non di questo round.
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770203||770203||0||770203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL PAVIMENTO DEL CANCELLO DI AMPIEZZA, in punti MT5.
+#       0    = cancello SPENTO. Numero MAI misurato su NASUSD: n(0) e' la
+#              popolazione piena delle giornate pre-apertura.
+#     850    =  8,5 punti indice
+#    1700    = 17,0 punti indice = IL VALORE LIVE, quello che definisce
+#              il meccanismo. CANCELLO DI VERSO: n(1700) >= 116 IS e
+#              >= 175 OOS, altrimenti catena rotta.
+#    2550    = 25,5 punti indice
+#    3400    = 34,0 punti indice
+#     Passo 850 pt = 8,5 idx: scelto perche' 1700 CADE ESATTAMENTE sulla
+#     griglia (4 x 425 non serve: 2 x 850 = 1700). Cinque celle.
+InpMinRangePts=1700||0||850||3400||Y

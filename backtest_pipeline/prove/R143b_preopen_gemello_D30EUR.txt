@@ -1,0 +1,338 @@
+# =====================================================================
+#  EA: ABTG_DAX_Live5m         (magic di casa 770103)
+#  R143b -- GEMELLO 1: D30EUR. Voce 4 del certificato di morte del
+#           meccanismo pre-apertura. Pavimento del cancello ad asse.
+# ---------------------------------------------------------------------
+#  DOSSIER: report/PREOPEN_GEMELLI_LA_SCALA_2026-09-13.md
+#  METRO:   R143a (NASUSD) -- si legge INSIEME a questo, non da solo.
+#  GEMELLO: R143c (U30USD).
+#
+#  ###  L'EA E' "DIVERSO" SOLO SULL'ETICHETTA, ED E' VERIFICATO  ###
+#  ABTG_DAX_Live5m.mq5 e ABTG_Nasdaq_Live5m.mq5 sono lo STESSO motore
+#  (ABTG_ApertureCore incluso in entrambi, versione tutto-in-uno).
+#  Verificato a mano stanotte con un diff riga per riga saltando il
+#  blocco delle #define: le UNICHE due differenze in tutto il corpo sono
+#  a r.619 e r.686, dove cambia la STRINGA passata a
+#  ABTG_GuardiaIngresso ("ABTG_DAX_Live5m" invece di
+#  "ABTG_Nasdaq_Live5m"). Gli input sono gli STESSI, nello STESSO ordINE,
+#  con gli STESSI nomi. Tutto il resto e' nelle #define dei default:
+#      MAGIC 770103 (invece di 770203)
+#      SESSION_HOUR 8 / MIN 0   (apertura DAX 09:00 IT = 08:00 SERVER)
+#      MINRANGE 0 / MAXRANGE 0  (cancello di ampiezza SPENTO)
+#      CLOSE_HOUR 17 / MIN 30
+#  >>> Quindi ogni input pinnato qui sotto MORDE ESATTAMENTE come sul
+#      Nasdaq, e la differenza fra i due round e' il SIMBOLO e l'ORA.
+#      Non e' un'assunzione: e' il diff.
+#
+#  ###  L'ORA E' 08:00 SERVER, E NON E' 9  ###
+#  Il DAX apre alle 09:00 ITALIANE = 08:00 SERVER BCM (server = IT - 1).
+#  La candela pre-apertura e' quindi 07:55-08:00 SERVER = 08:55-09:00 IT.
+#  >>> UN CSV CON InpSessionHour=9 E' IN ORA ITALIANA: SI CESTINA.
+#  Doppia conferma indipendente, entrambe in archivio:
+#    - studio_apertura.ps1 r.35: D30EUR SH=8 ("apertura 09:00 IT = 08:00
+#      server"), e il RIEPILOGO archiviato porta "apertura;08:00";
+#    - la corsa archiviata di QUESTO EA ha InpSessionHour=8 nel CSV.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CANCELLO 17-40 NON SI COPIA NUDO -- E LE ANCORE LITIGANO  ###
+# ---------------------------------------------------------------------
+#  17-40 punti indice e' un numero ASSOLUTO. Sul DAX vuol dire un'altra
+#  cosa che sul Nasdaq. Le due ancore misurabili in archivio DIVERGONO:
+#    ancora PREZZO      (mediana operazioni vere apr-set 2026,
+#      data/statements/trades_auto.csv: D30EUR 25.422,7 su 163 operazioni
+#      e 50 giornate; NASUSD 29.059,3 su 59 e 25) -> rapporto 0,8749
+#      -> cancello scalato 14,9 - 35,0 idx
+#    ancora VOLATILITA' (mediana dell'ampiezza dei primi 15 minuti DOPO
+#      l'apertura, stesso EA / stessa finestra / stesso modello per tutti
+#      e quattro gli indici, risultati_archivio/studio_apertura/
+#      Studio_D30EUR.csv n=440 e Studio_NASUSD.csv n=447: 54,65 idx
+#      contro 75,30) -> rapporto 0,7258 -> cancello scalato 12,3 - 29,0
+#    >>> DIVERGENZA SUL PAVIMENTO: +20,5%. Sceglierne una a piacere
+#        sarebbe inventare un numero, e un numero inventato che fa
+#        partire un round e' peggio del round non fatto.
+#  ancora ATR: [NON MISURATO] su questa finestra e su questi simboli.
+#  ampiezza VERA della candela M5 pre-apertura: [NON MISURATO], su TUTTI
+#    e quattro i simboli. L'unica misura di pre-apertura in archivio e'
+#    ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, che pero' misura 60 MINUTI
+#    (anatomia_aperture.py r.125: DEF_MINUTI_PRE = 60; la colonna
+#    barre_pre della corsa archiviata vale 49-60) e SOLO sul Nasdaq.
+#    Il flag --minuti-pre ESISTE (r.1650) e accetterebbe 5, ma la corsa a
+#    5 minuti non e' mai stata fatta, e il file M1 del DAX sul PC di
+#    backtest arriva solo al 2018 (report/STORICO_INDICI_SCARICATO_
+#    2026-09-10.md: D30EUR 2010.11.15 -> 2018.12.28).
+#
+#  >>> ALLORA NON SI DERIVA: SI MISURA. L'asse qui sotto spazzola il
+#      pavimento da 0 a 30 punti indice a passi di 5, e n(x) e' la
+#      FUNZIONE DI SOPRAVVIVENZA dell'ampiezza della candela pre-apertura
+#      del DAX (il filtro di r.639 sta PRIMA di ogni altro, e ogni altro
+#      filtro e' pinnato spento). Con la stessa curva su NASUSD (R143a)
+#      il cancello del gemello si prende per QUANTILE: la soglia che
+#      taglia la STESSA FRAZIONE di giornate che 17 taglia sul Nasdaq.
+#      Quella e' una misura, non un fattore di scala pescato.
+#      >>> E la griglia COPRE tutte e tre le risposte: 1000 e 1500
+#          racchiudono l'ancora VOLATILITA' (1234), 1500 e' l'ancora
+#          PREZZO (1487, arrotondata) ed e' anche il valore gia' girato
+#          dal motore v2, 1500-2000 racchiudono la COPIA NUDA (1700).
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO INCORPORATO -- QUESTO E' UNA RIPRODUZIONE ESATTA
+# ---------------------------------------------------------------------
+#  La cella 0 di questo asse (pavimento 0, tetto 0) E' ESATTAMENTE la
+#  corsa gia' in archivio: stesso EA, stessi default, stesso rischio 2%,
+#  stessa finestra. Verificato colonna per colonna sul CSV
+#  (risultati_prove/ABTG_DAX_Live5m/ABTG_DAX_Live5m_D30EUR_*.csv,
+#  riga InpMagic=770103): SessionHour 8, SessionMin 0, RangeMode 1,
+#  PrevWindowMin 5, BufferPoints 700, MinRangePts 0, MaxRangePts 0,
+#  CloseHour 17, CloseMin 30, RiskPercent 2, SLMode 0, TP1_R 1,
+#  TP1_ClosePct 50, BreakevenAtTP1 1, UseTrailing 1, TrailStartR 0,
+#  TrailMode 1, TrailTF 1, tutti i filtri a 0.
+#
+#      IS   PF 0.93488   n 225   DD 26.0653   Profit  -626.33
+#      OOS  PF 0.85701   n 342   DD 39.7440   Profit -2218.56
+#
+#  >>> CANCELLO DURO: l'n. 225 IS e 342 OOS, ESATTI. Se l'n non torna,
+#      CATENA ROTTA e non si legge nessun PF, ne' qui ne' in R143a /
+#      R143c: e' l'UNICA riproduzione esatta di tutto il round, e le
+#      altre due la ereditano (stesso driver, stessa notte, stesso
+#      terminale). Questo va detto: R143a e R143c NON hanno un'ancora
+#      propria, hanno la sua.
+#  >>> UNICA ECCEZIONE DICHIARATA, e si sa per nome: dopo il commit dei
+#      CSV archiviati l'EA e' stato toccato da 3af47ed (08/08, "fix
+#      sizing: OrderCalcProfit al posto del tick value nudo"). Tocca il
+#      LOTTO, non le giornate; puo' toccare l'n solo attraverso il clamp
+#      di r.1151 (if(v < mn) v = 0), che toglie il DEAL della parziale, e
+#      si diagnostica nel log (r.1017, "parziale impossibile al lotto X").
+#      Il Guardian e' ASSOLTO: i CSV archiviati NON hanno la colonna
+#      InpUsaGuardian (verificato su tutti e quattro), quindi il binario
+#      precede d83c196; e il pin a false e' comunque un no-op puro
+#      (ABTG_PausaGuardian.mqh r.1600: if(!attiva) return(true)).
+#  >>> MONOTONIA: n(0) >= n(500) >= ... >= n(3000), in tutte e due le
+#      finestre. Vero per costruzione (r.639). Se si rompe, il CSV non
+#      descrive questo asse.
+#
+#  ###  E LA VOCE 4 NON ERA VUOTA: UNA CORREZIONE AL DOSSIER DEL 12/09
+#  Il verdetto v2 scrive che il gemello DAX ha girato col cancello
+#  SPENTO. E' VERO per ABTG_DAX_Live5m (MinRange 0 / MaxRange 0) e per la
+#  griglia a 32 celle (risultati_archivio/Live5m/
+#  valid_DAX_Live5m_v2_D30EUR_realtick.csv: InpMinRangePts=0 su TUTTE e
+#  32 le righe). >>> MA E' FALSO PER LA CORSA WALKFORWARD DEL MOTORE v2:
+#  risultati_prove/ABTG_DAX_Live5m_v2/ porta InpMinRangePts=1500,
+#  InpMaxRangePts=4000, RangeMode 1, PrevWin 5, SessionHour 8, buffer 700
+#  -- IL CANCELLO ERA ACCESO, a 15-40 punti indice:
+#      IS   PF 1.00564   n  80   DD  4.7022   Profit  +11.10
+#      OOS  PF 0.92490   n 202   DD 14.1590   Profit -393.74
+#  a RISCHIO 1% (ABTG_DAX_Live5m_v2.mq5 r.37: ABTG_DEF_RISK 1.0).
+#  >>> E LA GESTIONE E' IDENTICA alla cella Nasdaq, verificata sul CSV:
+#      TP1_R 1, ClosePct 50, BE 1, Trailing 1, TrailStartR 0, TrailMode 1,
+#      TrailTF M1, SLMode 0, EntryMode 0, LevelTF 16385, PendingExpiry 120.
+#  >>> I CONFONDIMENTI, NOMINATI TUTTI E TRE: (1) rischio 1% contro 2% --
+#      e il PF NON si trasferisce fra taglie, perche' CalcLotByRisk
+#      dimensiona su ACCOUNT_BALANCE (capitale composto); (2) il motore v2
+#      ha 114 righe in piu' e paga InpSlippagePts=100, cioe' UN PUNTO
+#      INDICE di slippage che la corsa Nasdaq NON paga; (3) CloseHour
+#      17:30 contro 20:45.
+#  >>> PERCHE' IL NUMERO CONTA LO STESSO: accendere il cancello sul DAX
+#      ha portato il PF OOS da 0,85701 a 0,92490 e ha tagliato l'n da 342
+#      a 202 (-41%). IL CANCELLO MORDE, e morde nel verso giusto. Non e'
+#      abbastanza per 1,10, ma dice che l'asse qui sotto NON sara' piatto.
+#  >>> E DUE MANOPOLE INERTI TROVATE LEGGENDO, non girando: nella griglia
+#      a 32 celle InpMinStopPts (200/400) e InpSkipIfTight (0/1) danno
+#      32 passate e OTTO esiti distinti -- quattro repliche identiche al
+#      quinto decimale per ogni cella vera. E il motivo sta nel codice
+#      (ABTG_DAX_Live5m_v2.mq5 r.678): il floor di 200 punti MT5 = 2 punti
+#      indice non puo' MAI mordere, perche' lo stop e' almeno il buffer,
+#      che vale 500 o 700 punti. Quelle due manopole sono caselle LIBERE
+#      per costruzione, non caselle provate.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n: in CALO MONOTONO. Punto duro: n(0) = 225 IS / 342 OOS, ESATTO.
+#     Attesa su n(1500) OOS: fra 202 e 342. Il 202 viene dalla corsa v2,
+#     che pero' aveva ANCHE il tetto a 4000 (che taglia le giornate di
+#     candela larga) -- quindi senza tetto n deve stare SOPRA 202. Se
+#     esce sotto, o il tetto non tagliava niente, o c'e' un confondimento
+#     non nominato. Il 342 e' il tetto superiore per monotonia.
+#     >>> CANARINO DI MANOPOLA INERTE: se due celle consecutive danno lo
+#         stesso n al deal, la manopola non ha morso fra quei due valori
+#         e i loro PF non si citano come punti distinti.
+#  PF: [NON MISURATO] su questa variante. Banda dichiarata dai DUE punti
+#     misurati su D30EUR (0,85701 col cancello spento a rischio 2%;
+#     0,92490 col cancello 1500/4000 a rischio 1% col motore v2):
+#     ~0,80 - ~1,10. Non invento un punto centrale.
+#  DD: n(0) deve riprodurre 26,0653 IS / 39,7440 OOS. Le altre celle:
+#     [NON MISURATO], attesa in CALO al crescere della soglia (il
+#     pavimento toglie le candele piccole, cioe' gli stop stretti e i
+#     whipsaw: dovrebbe migliorare il DD, non peggiorarlo).
+#     >>> E IL 39,74% E' GIA' UN FATTO, NON UNA STIMA, e si legge a
+#         qualunque n (Emendamento B, 16/08): il gemello DAX col cancello
+#         spento ha un drawdown OOS del 39,74% a rischio 2%. E' PEGGIO
+#         del 19,40% del Nasdaq. Questo numero non ha bisogno di questo
+#         round per essere vero.
+#
+#  LE TRE USCITE:
+#   (a) LA CELLA 0 NON RIPRODUCE (n diverso da 225 / 342) -> CATENA
+#       ROTTA. Non si legge nessun numero del round, nemmeno di R143a e
+#       R143c, che ereditano questa verifica.
+#   (b) LA CURVA ESCE E TUTTE LE CELLE SONO SOTTO 1,10 in OOS con
+#       n >= 150 -> LA VOCE 4 SI CHIUDE SU D30EUR, COL NUMERO. Il
+#       certificato passa da 2 voci mancanti a 1 (resta la 5, il TF
+#       dell'INGRESSO, che vuole la firma di Claudio).
+#       >>> BUON ESITO, E NON E' UN'ARCHIVIAZIONE. A 4 voci su 5 non si
+#           archivia: CLAUDE.md dice "non si archivia come MORTO se manca
+#           anche UNA SOLA delle cinque".
+#   (c) UNA CELLA CON PF OOS >= 1,10 E n >= 150 -> si SCRIVE e si guarda
+#       se le vicine la accompagnano. Se sporge da sola, il risultato e'
+#       "non c'e' una configurazione robusta", e si scrive cosi'.
+#       >>> E NON SI PROMUOVE COMUNQUE, per un numero: per arrivare al
+#           pavimento di lavoro (stop >= 40 x spread) sul DAX serve
+#           stop >= 68,0 idx = range >= 61,0 idx col buffer nudo, cioe'
+#           FUORI SCALA per una candela di 5 minuti. Spread D30EUR ora 08
+#           SERVER, MISURATO sui tick BCM nella finestra esatta: mediana
+#           1,700 idx su 1.847.049 tick (risultati_archivio/spread_flotta/
+#           spread_orario_D30EUR.csv). Alla cella 1500 lo stop e' 22,0 idx
+#           = 12,94x, cioe' SOTTO anche il pavimento DURO di 13,3x.
+#       >>> E C'E' UN COSTO IN PIU' CHE IL NASDAQ NON HA, e va detto:
+#           la candela di trigger del DAX sta nell'ORA 07 SERVER, dove lo
+#           spread mediano MISURATO e' 2,800 idx -- il 65% piu' largo che
+#           all'ora 08. L'ordine pendente viene piazzato la' dentro. Il
+#           rapporto stop/spread letto sull'ora 07 e' 7,86x.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    catena rotta se n(0) != 225 in IS oppure != 342 in OOS
+#    catena rotta se la monotonia di n si rompe in una delle due finestre
+#    scarta la CELLA se PF OOS < 1,10 con n >= 150
+#    non giudica il MERITO se n < 150 (valvola R59, Emendamento A)
+#    il RISCHIO (DD) si legge a qualunque n (Emendamento B, 16/08)
+#    selezione: CENTRO DELL'ALTOPIANO, MAI IL PICCO
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA, scritto prima  ###
+# ---------------------------------------------------------------------
+#  1. NON misura il TETTO (InpMaxRangePts pinnato a 0). Round separato:
+#     pavimento e tetto agiscono in versi opposti sullo stesso n, e con
+#     il tetto acceso n(x) non e' una curva di sopravvivenza.
+#  2. NON misura il BUFFER. Resta 700 punti MT5 = 7 punti indice, cioe'
+#     il valore NUDO del Nasdaq, NON scalato. Scalarlo sarebbe una
+#     SECONDA variabile. >>> Conseguenza dichiarata: lo stop di ogni
+#     cella e' (soglia + 7 idx), non (soglia + 6,1 idx) come vorrebbe
+#     l'ancora prezzo. La differenza sul rapporto stop/spread e' meno
+#     del 5% e non sposta nessun verdetto di costo, ma sta scritta.
+#  3. NON misura la LARGHEZZA della finestra (InpPrevWindowMin resta 5).
+#     Voce 5 del certificato: FIRMA DI CLAUDIO.
+#  4. NON misura il lato LONG e il lato SHORT separatamente: girano
+#     insieme, come nella corsa archiviata. La regola dei due lati del
+#     25/08 chiede di misurarli tutti e due, e qui lo sono -- ma
+#     INSIEME, non separati. Dichiarato.
+#  5. UN SOLO REGIME (21 mesi di tick BCM sugli indici). Nessuna cella e'
+#     promuovibile senza la prova di regime (Emendamento, regola C).
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening: e' un verdetto.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver (r.179). La prova sta scritta da qualcun altro:
+#     risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7 -- "IS
+#     26/09/2024->09/06/2025 - OOS 10/06/2025->30/06/2026". La corsa
+#     archiviata di QUESTO EA e' dentro quel weekend.
+#  ORE IN ORA SERVER BCM: InpSessionHour=8, InpSessionMin=0 (09:00 IT).
+#     InpCloseHour=17, InpCloseMin=30. Un CSV con InpSessionHour=9 si
+#     CESTINA.
+#  RISCHIO 2%: e' il valore della corsa archiviata di QUESTO EA, non una
+#     scelta. Il DD che ne esce NON si legge contro i cancelli prop
+#     scritti per l'1% / 0,65%, e nemmeno il PF si trasferisce.
+#  DEPOSITO 10000 = default del driver = quello della corsa archiviata.
+#  MAGIC 770103: il magic di casa dell'EA, gia' in archivio.
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I numeri
+#     si leggono nell'OPTFRAME.
+#  TETTO BARRE: non e' un problema. Il driver gira DUE finestre separate:
+#     IS 257 giorni = ~71.000 barre M5, OOS 385 = ~106.000. Le ~124.000
+#     non esistono in nessuna passata.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale.
+#  CONVERSIONE MISURATA, due fonti indipendenti: 1 punto indice = 100
+#     punti MT5 su D30EUR (spread_flotta/REFERTO_SPREAD_FLOTTA.txt e
+#     data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt, intestazione
+#     "D30EUR (vivo, 2 decimali, 1 punti indice = 100 punti MT5)").
+#     Quindi l'asse qui sotto e' in PUNTI MT5: 500 = 5,0 idx.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, DA SOLO,
+#     mai in pipe; il secondo strato lo lancia il coordinatore.
+#
+#  COSTO: 7 celle x 2 finestre = 14 passate -> T = 0,6 + 0,077 x 14 =
+#         1,68 minuti.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+# --- ORA SERVER BCM: il DAX apre 09:00 IT = 08:00 SERVER.
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+# --- INGRESSO: LA PRE-APERTURA (07:55-08:00 SERVER). Identita' del
+#     round, non si tocca.
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+
+# --- IL TETTO: SPENTO. Serve perche' n(x) sia una curva di
+#     sopravvivenza confrontabile con R143a.
+InpMaxRangePts=0||0||0||0||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+# --- GESTIONE: pinnata ai default della corsa archiviata.
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770103||770103||0||770103||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL PAVIMENTO DEL CANCELLO DI AMPIEZZA, in punti MT5.
+#       0 = cancello SPENTO. E' LA RIPRODUZIONE ESATTA della corsa in
+#           archivio: cancello DURO n = 225 IS / 342 OOS.
+#     500 =  5,0 punti indice
+#    1000 = 10,0 punti indice  } racchiudono l'ancora VOLATILITA' (12,3)
+#    1500 = 15,0 punti indice  } = ancora PREZZO (14,9) E il valore gia'
+#                                 girato dal motore v2 (PF OOS 0,92490)
+#    2000 = 20,0 punti indice  } racchiudono la COPIA NUDA del Nasdaq
+#                                 (17,0) insieme a 1500
+#    2500 = 25,0 punti indice
+#    3000 = 30,0 punti indice
+#     Sette celle, passo 500 pt = 5,0 idx. La griglia COPRE tutte e tre
+#     le risposte che i dati danno, e nessuna di esse e' stata scelta a
+#     scapito delle altre.
+InpMinRangePts=1500||0||500||3000||Y

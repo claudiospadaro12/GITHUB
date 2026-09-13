@@ -1,0 +1,320 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (usato su U30USD -- vedi nota sul NOME)
+#  R143c -- GEMELLO 2: U30USD (Dow). Voce 4 del certificato di morte del
+#           meccanismo pre-apertura. Pavimento del cancello ad asse.
+# ---------------------------------------------------------------------
+#  DOSSIER: report/PREOPEN_GEMELLI_LA_SCALA_2026-09-13.md
+#  METRO:   R143a (NASUSD) -- si legge INSIEME a questo, non da solo.
+#  GEMELLO: R143b (D30EUR), che porta l'UNICA riproduzione esatta del
+#           round: se quella non torna, QUESTO FILE NON SI LEGGE.
+#
+#  ###  PERCHE' L'EA SI CHIAMA "NASDAQ" E GIRA SUL DOW  ###
+#  Non esiste un ABTG_Dow_Live5m. E non serve: ABTG_Nasdaq_Live5m e'
+#  SIMBOLO-AGNOSTICO (usa _Symbol e _Point ovunque), e ogni input che
+#  definisce il meccanismo e' PINNATO qui sotto, quindi nessun default
+#  "nasdaq" sopravvive. L'unica cosa che resta del nome e' ABTG_DEF_NAME,
+#  che finisce SOLO nella stringa di log (r.284: Print("[", ABTG_DEF_NAME
+#  ...)) e nella stringa passata al Guardian (r.619, r.686) -- che qui e'
+#  spento. Cosmetico, dichiarato.
+#  >>> PROVA CHE E' LO STESSO MOTORE: diff riga per riga saltando il
+#      blocco delle #define fra ABTG_Nasdaq_Live5m.mq5 e
+#      ABTG_DAX_Live5m.mq5 -> DUE sole differenze in tutto il corpo
+#      (r.619 e r.686, la stringa del Guardian). Stessi input, stesso
+#      ordine, stessi nomi.
+#
+#  ###  L'ORA E' LA STESSA DEL NASDAQ, E NON E' UNA COMODITA'  ###
+#  Il Dow e' un indice cash USA: apre 09:30 New York = 15:30 ITALIANE =
+#  14:30 SERVER BCM, la STESSA campana del Nasdaq. Doppia conferma in
+#  archivio: studio_apertura.ps1 r.40-41 mette U30USD e NASUSD nello
+#  stesso secchio (SH=14, SM=30), e i RIEPILOGHI archiviati portano
+#  "apertura;14:30" per tutti e due.
+#  >>> Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#
+# ---------------------------------------------------------------------
+#  ###  IL COSTO: E' QUESTO IL SIMBOLO IN CUI LA NOTIZIA E' BUONA  ###
+# ---------------------------------------------------------------------
+#  Tutto MISURATO sui tick BCM nella finestra ESATTA di questo round
+#  (2024.09.26 -> 2026.06.30), all'ora SERVER giusta, da
+#  risultati_archivio/spread_flotta/spread_orario_*.csv:
+#      U30USD ora 14: mediana 2,000 idx  (4.931.660 tick)
+#      NASUSD ora 14: mediana 1,800 idx (10.455.143 tick)
+#      D30EUR ora 08: mediana 1,700 idx  (1.847.049 tick)
+#  Prezzo mediano dalle operazioni VERE (data/statements/trades_auto.csv,
+#  apr-set 2026): U30USD 53.465,1 (74 operazioni, 24 giornate);
+#  NASUSD 29.059,3 (59, 25); D30EUR 25.422,7 (163, 50).
+#
+#  >>> LO SPREAD DEL DOW COSTA IL 39,6% IN MENO, IN RELATIVO:
+#          U30USD  2,000 / 53.465,1 = 0,00374% del prezzo
+#          NASUSD  1,800 / 29.059,3 = 0,00619% del prezzo
+#          D30EUR  1,700 / 25.422,7 = 0,00669% del prezzo
+#      E la conseguenza e' la sola cosa che conta per il cancello del
+#      costo, perche' stop/spread e' ADIMENSIONALE: a parita' di stop
+#      ESPRESSO IN % DEL PREZZO, il Dow sta a 1,66x il rapporto
+#      stop/spread del Nasdaq. Il 13,33x del Nasdaq diventa 22,1x.
+#  >>> E DETTO AL CONTRARIO, che e' il modo in cui morde: per pagare il
+#      pavimento di lavoro (stop >= 40 x spread mediano) serve
+#          U30USD  stop >= 80,0 idx = 0,1496% del prezzo
+#          NASUSD  stop >= 72,0 idx = 0,2478% del prezzo
+#          D30EUR  stop >= 68,0 idx = 0,2675% del prezzo
+#      IL DOW CHIEDE UN MOVIMENTO IL 40% PIU' PICCOLO, IN RELATIVO, PER
+#      PAGARE LO STESSO COSTO. E' il primo simbolo della famiglia in cui
+#      il costo non e' automaticamente la condanna.
+#
+#  >>> E ADESSO IL LIMITE, PERCHE' MI SONO COSTRUITO IL CONTRO-ESEMPIO
+#      E NON LO NASCONDO. In QUESTO round il buffer resta NUDO (700
+#      punti MT5 = 7 punti indice), perche' scalarlo sarebbe una SECONDA
+#      variabile. Quindi lo stop della cella x vale (x + 7) idx, e:
+#          cella 1700 (17 idx): stop 24,0 idx / 2,000 = 12,00x
+#          cella 4000 (40 idx): stop 47,0 idx / 2,000 = 23,50x
+#      >>> NESSUNA CELLA DI QUESTO ROUND ARRIVA A 40x. Il 43,2x che si
+#          ottiene scalando ANCHE il buffer (a 12,88 idx) e il cancello
+#          (a 31,3-73,6 idx) e' un ROUND DIVERSO, con due variabili, e
+#          NON e' questo. Chi cita "il Dow passa il pavimento di lavoro"
+#          leggendo questo file sta citando un numero che questo file non
+#          produce.
+#      >>> LA FRASE VERA E' PIU' STRETTA E REGGE DA SOLA: il rapporto
+#          spread/prezzo del Dow e' MISURATO come il 39,6% piu' basso di
+#          quello del Nasdaq, e questo e' un fatto indipendente da
+#          qualunque cella. E' la ragione per cui il gemello Dow merita
+#          le 18 passate, mentre il gemello SPXUSD non le merita
+#          ancora (spread [NON MISURATO]: non e' ne' in spread_flotta
+#          ne' in data/spread_vivo).
+#
+# ---------------------------------------------------------------------
+#  ###  IL CANCELLO 17-40 NON SI COPIA NUDO -- E QUI DIVERGE DI PIU'  ###
+# ---------------------------------------------------------------------
+#    ancora PREZZO      U30USD/NASUSD = 53.465,1 / 29.059,3 = 1,8399
+#       -> cancello scalato 31,3 - 73,6 punti indice
+#    ancora VOLATILITA' (mediana dell'ampiezza dei primi 15 minuti DOPO
+#       l'apertura, stesso EA / stessa finestra / stesso modello per tutti
+#       e quattro gli indici: risultati_archivio/studio_apertura/
+#       Studio_U30USD.csv n=446 -> 119,75 idx, Studio_NASUSD.csv n=447 ->
+#       75,30 idx) = 1,5903
+#       -> cancello scalato 27,0 - 63,6 punti indice
+#    >>> DIVERGENZA SUL PAVIMENTO: +15,7%. Sceglierne una a piacere
+#        sarebbe inventare un numero.
+#  ancora ATR: [NON MISURATO] su questa finestra e su questi simboli.
+#  ampiezza VERA della candela M5 pre-apertura: [NON MISURATO], su tutti
+#    e quattro i simboli. E sul Dow non e' nemmeno raggiungibile con
+#    anatomia_aperture.py: HistData NON HA IL DOW (report/
+#    STORICO_INDICI_SCARICATO_2026-09-10.md: "U30USD (Dow) e 225JPY NON
+#    sono stati scaricati... HistData non ha il Dow").
+#
+#  >>> ALLORA NON SI DERIVA: SI MISURA. L'asse qui sotto spazzola il
+#      pavimento da 0 a 40 punti indice a passi di 5, e n(x) e' la
+#      FUNZIONE DI SOPRAVVIVENZA dell'ampiezza della candela pre-apertura
+#      del Dow: il filtro di r.639 sta PRIMA di SpreadOK() (r.644) e di
+#      TrendBias() (r.649), e ogni altro filtro e' pinnato spento.
+#      Insieme alla stessa curva su NASUSD (R143a), il cancello del
+#      gemello si prende per QUANTILE -- la soglia che taglia la STESSA
+#      FRAZIONE di giornate che 17 taglia sul Nasdaq -- invece che per
+#      fattore di scala.
+#      >>> E la griglia COPRE tutte e tre le risposte: 1500-2000
+#          racchiudono la COPIA NUDA (17,0), 2500-3000 racchiudono
+#          l'ancora VOLATILITA' (27,0), 3000 e' l'ancora PREZZO (31,3)
+#          a meno del 4%.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO: QUESTO FILE NON NE HA UNO PROPRIO  ###
+# ---------------------------------------------------------------------
+#  >>> DICHIARATO SUBITO, perche' e' la debolezza di questo file:
+#      SU U30USD NON ESISTE NESSUNA CORSA DI QUESTO MECCANISMO IN
+#      ARCHIVIO. Verificato: risultati_prove/ non ha nessuna cartella
+#      Live5m per U30USD, e il censimento non porta nessuna riga.
+#      Quindi OGNI numero che esce di qui e' NUOVO, e nessuno di essi
+#      verifica la catena.
+#  >>> LA CATENA LA VERIFICA R143b, che gira la stessa notte, con lo
+#      stesso driver, sullo stesso terminale: la sua cella 0 DEVE dare
+#      n 225 IS / 342 OOS al deal. Se non li da', QUESTO FILE NON SI
+#      LEGGE. Non e' una formalita': senza quella riproduzione un n
+#      sbagliato qui sarebbe indistinguibile da un n vero.
+#  >>> L'UNICO controllo interno che questo file ha e' la MONOTONIA:
+#      n(0) >= n(500) >= ... >= n(4000), in tutte e due le finestre.
+#      E' vera per costruzione (r.639). Se si rompe, il CSV non descrive
+#      questo asse.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n: in CALO MONOTONO. Nessun punto duro (vedi sopra).
+#     STIMA dichiarata come stima: la finestra OOS e' 10/06/2025 ->
+#     30/06/2026 = ~270 sedute USA; il gemello DAX a cancello spento fa
+#     342 deal OOS su ~385 sedute europee. Attesa n(0) OOS fra 250 e 450
+#     DEAL (non posizioni: con la parziale al 50% un fattore fra 1,0 e
+#     2,0 separa le due cose, classe 226).
+#     >>> CANARINO DI MANOPOLA INERTE: se due celle consecutive danno lo
+#         stesso n al deal, la manopola non ha morso fra quei due valori
+#         e i loro PF non si citano come punti distinti.
+#     >>> E UN SECONDO CANARINO, PIU' UTILE: se n(4000) e' vicino a n(0),
+#         la candela pre-apertura del Dow e' quasi sempre sopra 40 punti
+#         indice, cioe' il cancello nudo del Nasdaq sul Dow NON TAGLIA
+#         NIENTE -- e sarebbe la prova diretta che copiarlo nudo era
+#         sbagliato. Esce gratis.
+#  PF: [NON MISURATO]. Banda dichiarata dai TRE punti misurati della
+#     famiglia (NASUSD 0,96265 col cancello; D30EUR 0,85701 senza e
+#     0,92490 col cancello a rischio 1%): ~0,80 - ~1,10. Non invento un
+#     punto centrale, e non uso la notizia buona sul costo per alzare
+#     l'attesa: il costo dice che il Dow e' MENO PENALIZZATO, non che
+#     abbia un edge.
+#  DD: [NON MISURATO]. Riferimenti di famiglia a rischio 2%: 19,40% OOS
+#     su NASUSD col cancello, 39,74% OOS su D30EUR senza. Attesa in
+#     quella forbice. >>> E il DD si legge a qualunque n (Emendamento B).
+#
+#  LE TRE USCITE:
+#   (a) R143b NON RIPRODUCE -> questo file NON SI LEGGE. Punto.
+#   (b) LA CURVA ESCE E TUTTE LE CELLE SONO SOTTO 1,10 in OOS con
+#       n >= 150 -> LA VOCE 4 SI CHIUDE SU U30USD, COL NUMERO. Insieme a
+#       R143b il certificato passa da 2 voci mancanti a 1 (resta la 5).
+#       >>> BUON ESITO, E NON E' UN'ARCHIVIAZIONE: a 4 voci su 5 non si
+#           archivia. CLAUDE.md dice "non si archivia come MORTO se manca
+#           anche UNA SOLA delle cinque".
+#   (c) UNA CELLA CON PF OOS >= 1,10 E n >= 150 -> e' il primo risultato
+#       positivo della famiglia, e si guarda SUBITO se le vicine la
+#       accompagnano. Se sporge da sola, il risultato e' "non c'e' una
+#       configurazione robusta", e si scrive cosi'. Se c'e' un altopiano,
+#       si prende IL CENTRO, mai il picco, e si porta a Claudio con il
+#       numero del costo accanto (12,00x - 23,50x, sotto i 40x) e con la
+#       richiesta di una rigirata a 0,65% -- il PF a 2% non si trasferisce
+#       a 0,65% (CalcLotByRisk dimensiona su ACCOUNT_BALANCE, r.863-864).
+#
+#  SOGLIE CONGELATE PRIMA:
+#    non si legge NIENTE se R143b non riproduce n 225 IS / 342 OOS
+#    catena rotta se la monotonia di n si rompe in una delle due finestre
+#    scarta la CELLA se PF OOS < 1,10 con n >= 150
+#    non giudica il MERITO se n < 150 (valvola R59, Emendamento A)
+#    il RISCHIO (DD) si legge a qualunque n (Emendamento B, 16/08)
+#    selezione: CENTRO DELL'ALTOPIANO, MAI IL PICCO
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA, scritto prima  ###
+# ---------------------------------------------------------------------
+#  1. NON misura il TETTO (InpMaxRangePts pinnato a 0). Round separato.
+#  2. NON misura il BUFFER (resta 700 = 7 idx, NUDO, non scalato).
+#     Conseguenza gia' scritta sopra: nessuna cella arriva a 40x.
+#  3. NON misura la LARGHEZZA della finestra (InpPrevWindowMin resta 5).
+#     Voce 5 del certificato: FIRMA DI CLAUDIO.
+#  4. NON misura SPXUSD, e il motivo e' un buco, non una scelta: lo
+#     spread di SPXUSD e' [NON MISURATO] -- il simbolo non c'e' in
+#     risultati_archivio/spread_flotta/ (che copre solo
+#     NASUSD,U30USD,D30EUR) e non c'e' in data/spread_vivo/ (il logger
+#     gira su "D30EUR,U30USD,NASUSD,225JPY,EURUSD,GBPUSD,USDJPY",
+#     ABTG_SpreadLogger.mq5 r.134). Senza spread il costo non si calcola,
+#     e il cancello scalato su SPXUSD varrebbe 2,9-10,1 punti indice --
+#     una scala in cui uno spread non misurato puo' essere un terzo dello
+#     stop. La via piu' corta al numero sta nel dossier.
+#  5. UN SOLO REGIME (21 mesi di tick BCM sugli indici). Nessuna cella e'
+#     promuovibile senza la prova di regime (Emendamento, regola C).
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening: e' un verdetto.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine delle corse archiviate di famiglia.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver (r.179). La prova sta scritta da qualcun altro:
+#     risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7 -- "IS
+#     26/09/2024->09/06/2025 - OOS 10/06/2025->30/06/2026".
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#  RISCHIO 2%: e' il valore delle corse archiviate di famiglia, tenuto
+#     costante perche' e' l'unico modo di leggere un asse a una variabile
+#     alla volta. Il DD che ne esce NON si legge contro i cancelli prop
+#     scritti per l'1% / 0,65%, e nemmeno il PF si trasferisce.
+#  DEPOSITO 10000 = default del driver = quello delle corse archiviate.
+#  MAGIC 770205: NUOVO, e il motivo e' pratico -- tenere distinti i CSV
+#     e i per-trade da quelli di R143a (770203), che gira la stessa notte
+#     con lo stesso EA. Che il magic sia INERTE per la logica non e'
+#     un'assunzione: e' MISURATO in archivio, dove lo sweep 770203 vs
+#     770204 e 770103 vs 770104 da' numeri IDENTICI al centesimo su tutti
+#     e otto i CSV (REFERTO_WEEKEND_FASE0.md: "8 su 8 al centesimo").
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I numeri
+#     si leggono nell'OPTFRAME.
+#  TETTO BARRE: non e' un problema. Il driver gira DUE finestre separate:
+#     IS 257 giorni = ~71.000 barre M5, OOS 385 = ~106.000.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale.
+#  CONVERSIONE MISURATA, due fonti indipendenti: 1 punto indice = 100
+#     punti MT5 su U30USD (spread_flotta/REFERTO_SPREAD_FLOTTA.txt,
+#     "conversione : 1 pto indice = 100 pti MT5; point=0.01000", e
+#     data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt, intestazione
+#     "U30USD (vivo, 2 decimali, 1 punti indice = 100 punti MT5)").
+#     Quindi l'asse qui sotto e' in PUNTI MT5: 500 = 5,0 idx.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, DA SOLO,
+#     mai in pipe; il secondo strato lo lancia il coordinatore.
+#
+#  COSTO: 9 celle x 2 finestre = 18 passate -> T = 0,6 + 0,077 x 18 =
+#         1,99 minuti.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+# --- ORA SERVER BCM: il Dow apre 15:30 IT = 14:30 SERVER, come il Nasdaq.
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+# --- INGRESSO: LA PRE-APERTURA (14:25-14:30 SERVER). Identita' del
+#     round, non si tocca.
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+
+# --- IL TETTO: SPENTO. Serve perche' n(x) sia una curva di
+#     sopravvivenza confrontabile con R143a e R143b.
+InpMaxRangePts=0||0||0||0||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+# --- GESTIONE: pinnata alla cella archiviata del Nasdaq, per poter
+#     leggere il gemello a parita' di uscita.
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770205||770205||0||770205||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL PAVIMENTO DEL CANCELLO DI AMPIEZZA, in punti MT5.
+#       0 = cancello SPENTO: la popolazione piena delle giornate.
+#     500 =  5,0 punti indice
+#    1000 = 10,0 punti indice
+#    1500 = 15,0 punti indice  } racchiudono la COPIA NUDA (17,0)
+#    2000 = 20,0 punti indice  }
+#    2500 = 25,0 punti indice  } racchiudono l'ancora VOLATILITA' (27,0)
+#    3000 = 30,0 punti indice  } e 3000 e' l'ancora PREZZO (31,3) a -4%
+#    3500 = 35,0 punti indice
+#    4000 = 40,0 punti indice
+#     Nove celle, passo 500 pt = 5,0 idx. La griglia COPRE tutte e tre le
+#     risposte che i dati danno, e nessuna di esse e' stata scelta a
+#     scapito delle altre.
+InpMinRangePts=1700||0||500||4000||Y
