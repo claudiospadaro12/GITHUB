@@ -13,7 +13,7 @@
 #     Sulla macchina ci sono TRE terminali MT5 e uno ha le SEDIE VIVE.
 #     La cartella si NOMINA A MANO, col numero di conto in chiaro accanto
 #     (es. "C:\MT5_Backtest" = VPS, demo 50504400, zero EA attaccati).
-#  (-SoloControllo deve stampare 5 celle per finestra.)
+#  (-SoloControllo deve stampare 4 celle per finestra.)
 #  CRITERI: prove\R125_ORB_COSTO_CRITERI.md
 # ---------------------------------------------------------------------
 #  IL BUCO, MISURATO NELL'ARCHIVIO (10/09/2026)
@@ -65,7 +65,7 @@
 #        cancello del costo lo passa. Due domande diverse, due file.
 # ---------------------------------------------------------------------
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
-#    - n: INVARIANTE (IS 71, OOS 119) su tutte e 5 le celle. Il parziale
+#    - n: INVARIANTE (IS 71, OOS 119) su tutte e 4 le celle. Il parziale
 #      cambia COME si esce, non SE si entra. Se n si muove, ci si ferma.
 #    - InpTP1Pct=0 deve riprodurre AL CENTESIMO la cella viva a 100k:
 #      +41.057,00 - PF 1,6742 - DD 9,7623% - n 119. E' l'ANCORA.
@@ -76,8 +76,36 @@
 #      su questo motore i target ambiziosi PAGANO (OOS monotono
 #      +4.003 -> +6.585 da 1,5x a 3,0x l'ampiezza); tagliare l'80%
 #      presto va nella direzione opposta. Attesa 1,40 - 1,70.
-#    - InpTP1Pct=100 chiude tutto al primo bersaglio: e' il caso
-#      degenere, serve come estremo dell'altopiano, non come candidato.
+#  --- 100 NON E' NELL'ASSE, ED E' UNA CORREZIONE, NON UNA DIMENTICANZA
+#      (13/09/2026, FAIL del secondo strato del cancello -> classe 310).
+#      QUI, FINO AL 13/09, C'ERA SCRITTO IL FALSO: "InpTP1Pct=100 chiude
+#      tutto al primo bersaglio: e' il caso degenere, estremo
+#      dell'altopiano". A 100 NON SI CHIUDE NIENTE. Il fatto di codice,
+#      letto e non dedotto dal nome del parametro, sta in
+#      ABTG_ORB_Ottimizzato.mq5, funzione ManageTP1(), e sono DUE guardie
+#      indipendenti che si chiudono sullo STESSO bordo per vie diverse:
+#        r.656   if(InpTP1Pct<=0)   { ...avviso statico...; return; }
+#        r.667   if(gPart1 || InpTP1Pct>=100) return;
+#      Tutte e due escono PRIMA del parziale E PRIMA del breakeven (che
+#      su questo EA vive dentro ManageTP1, dopo il parziale). Quindi la
+#      cella 100 sarebbe la cella 0 MISURATA DUE VOLTE: due passate
+#      buttate e -- molto peggio -- un finto altopiano, perche' la stessa
+#      configurazione entrerebbe due volte nei blocchi massimali (P2/P3)
+#      e nel baricentro (P7) della procedura dei criteri.
+#      >>> LO SCHEMA E' GIA' IN CASA, ed e' il motivo per cui questo
+#          difetto brucia: R136c_parziale_U30USD.txt (12/09, UN GIORNO
+#          PRIMA di questa correzione) tratta la STESSA manopola su un
+#          ALTRO EA (ABTG_EMA200.mq5 r.410, guardia
+#          "InpTP1Pct>0 && InpTP1Pct<100") e scrive gia' "100 E' ESCLUSO
+#          DI PROPOSITO... sarebbe la cella 0 misurata due volte".
+#          La lezione c'era: non era tornata indietro su questo file.
+#      >>> CONSEGUENZA SUI CRITERI, e non la nascondo: il bordo ALTO
+#          dell'asse non e' piu' 100 "LIMITE FISICO" ma 75, che e' un
+#          bordo di FINE GRIGLIA (l'ho scelto io). La riga corrispondente
+#          di R125_ORB_COSTO_CRITERI.md (par. 3-bis) e' stata corretta
+#          con la stessa data e la stessa motivazione. E' la correzione
+#          di un FATTO FALSO, non l'ammorbidimento di un criterio: la
+#          griglia si accorcia, i cancelli restano quelli firmati.
 #  FALSIFICAZIONE / cosa mi farebbe cambiare idea: se il PF OOS SALE col
 #  parziale, la tesi "questo motore vuole target lunghi" (R44) e' falsa
 #  su questa geometria e va riscritta. Sarebbe il risultato piu' utile
@@ -152,6 +180,9 @@ InpMaxSpread=0
 InpVerbose=0
 InpMagic=779810
 
-# --- L'ASSE, UNO SOLO: 0 / 25 / 50 / 75 / 100 = 5 celle.
-#     0 e 50 sono le uniche due mai misurate (R15). 25/75/100 sono nuove.
-InpTP1Pct=0||0||25||100||Y
+# --- L'ASSE, UNO SOLO: 0 / 25 / 50 / 75 = 4 celle (x 2 finestre = 8 passate).
+#     0 e 50 sono le uniche due mai misurate (R15). 25 e 75 sono nuove.
+#     100 e' ESCLUSO DI PROPOSITO (vedi il blocco in testa al file):
+#     ManageTP1 esce a r.667 su InpTP1Pct>=100 esattamente come a r.656 su
+#     InpTP1Pct<=0, quindi sarebbe la cella 0 misurata due volte.
+InpTP1Pct=0||0||25||75||Y

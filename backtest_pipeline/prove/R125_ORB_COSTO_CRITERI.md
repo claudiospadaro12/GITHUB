@@ -12,6 +12,10 @@
 > criteri nuovi, firmati anch'essi prima.
 >
 > 📜 **Cosa la firma autorizza:** 6 file prova, 33 celle, **66 passate**,
+> _(⚠️ **13/09/2026**: dopo la correzione del bordo alto di `InpTP1Pct`
+> — par. 3-bis, classe 310 — R125b scende da 5 a 4 celle e il pacchetto
+> misura **32 celle / 64 passate**. Si toglie una cella **degenere**, non
+> se ne aggiunge nessuna: sotto il tetto firmato, firma invariata.)_
 > **~7 minuti** di macchina sul **terminale di BACKTEST** (mai su quelli con le
 > sedie vive). 🚫 **Non autorizza** nessuna modifica a EA, preset, parametri o
 > sedie in forward, e **non tocca il conto reale**.
@@ -107,7 +111,7 @@ Operativamente, e senza margini di interpretazione:
    | asse del round | bordo BASSO | tipo | bordo ALTO | tipo |
    |---|---|---|---|---|
    | `InpSLBufferPts` (R125a/c/f) | **0** | 🧱 **LIMITE FISICO** (un buffer negativo non esiste) | **3000** | ✂️ **FINE GRIGLIA** (l'ho scelto io) |
-   | `InpTP1Pct` (R125b) | **0** | 🧱 **LIMITE FISICO** (nessun parziale) | **100** | 🧱 **LIMITE FISICO** (tutta la posizione a TP1) |
+   | `InpTP1Pct` (R125b) | **0** | 🧱 **LIMITE FISICO** (nessun parziale) | 🆕 **75** | ✂️ **FINE GRIGLIA** (l'ho scelto io) — ⚠️ **corretto il 13/09**, prima diceva "**100**, 🧱 LIMITE FISICO": vedi la nota qui sotto |
    | `InpMinRangePct` (R125e) | **0** | 🧱 **LIMITE FISICO** (nessun filtro) | **0,20** | ✂️ **FINE GRIGLIA** |
    | 🆕 `InpMagic` (**R125d**) | — | ⚙️ **ASSE TECNICO** | — | ⚙️ **ASSE TECNICO** |
 
@@ -130,6 +134,55 @@ Operativamente, e senza margini di interpretazione:
    > round si ferma **prima** di qualunque altro numero — e **solo dopo** il
    > lato short si giudica coi cancelli `R125-G0..G4`.
    > **Non e' un buco: e' un file che risponde a un'altra domanda.**
+
+   > 🆕 🔴 **CORREZIONE DEL 13/09/2026 SUL BORDO ALTO DI `InpTP1Pct` — classe
+   > 310. E' la correzione di un FATTO FALSO, non l'ammorbidimento di un
+   > criterio.** Questo documento e' **firmato da Claudio il 10/09**, quindi il
+   > cambio si scrive, non si fa in silenzio: **cosa cambia, perche', e con
+   > quale prova.**
+   >
+   > **Cosa diceva**: bordo alto `InpTP1Pct` = **100**, tipo 🧱 **LIMITE
+   > FISICO** *("tutta la posizione a TP1")*.
+   > **Perche' e' falso**: a 100 **non si chiude niente**. In
+   > `mql5/Experts/ABTG_ORB_Ottimizzato.mq5`, `ManageTP1()`, ci sono **DUE**
+   > guardie indipendenti sulla stessa manopola, e **tutte e due escono prima
+   > del parziale E prima del breakeven**:
+   > **r.656** `if(InpTP1Pct<=0){ ...; return; }` · **r.667**
+   > `if(gPart1 || InpTP1Pct>=100) return;`.
+   > 👉 Quindi **`InpTP1Pct=100` e `InpTP1Pct=0` sono la STESSA cella per
+   > costruzione**: non due estremi opposti, lo **stesso** bordo raggiunto per
+   > due strade. Il bordo alto dichiarato "LIMITE FISICO" era un **doppione
+   > della cella 0**.
+   >
+   > **Perche' NON era innocuo** (ed e' il motivo per cui vale un paragrafo):
+   > al punto 3 qui sotto una cella di bordo "LIMITE FISICO" **resta dentro il
+   > blocco e conta** (P5). Con il doppione, la **stessa** configurazione
+   > sarebbe entrata **due volte** nei blocchi massimali (**P2/P3**) e nel
+   > **baricentro** (**P7**): un altopiano piu' lungo e un centro spostato,
+   > prodotti da una passata ripetuta. Non un numero brutto: un numero
+   > **inventato dalla griglia**.
+   >
+   > **Cosa dice adesso**: `InpTP1Pct` gira su **0 / 25 / 50 / 75** (4 celle).
+   > Il bordo alto e' **75**, ed e' ✂️ **FINE GRIGLIA** — *l'ho scelto io*, non
+   > e' un muro del codice: sopra il 75 la misura **manca**, e per il punto 4
+   > qui sotto quel lato dell'altopiano resta **APERTO**. **100 e' TOLTO
+   > dall'insieme delle celle** perche' degenere con 0, e **non va rimesso**:
+   > rimetterlo non allunga l'asse, lo **duplica**.
+   >
+   > 📉 **Conseguenza sul conto della firma, dichiarata**: R125b passa da
+   > **5 a 4 celle**, quindi la famiglia passa da **33 celle / 66 passate** a
+   > **32 celle / 64 passate**. La firma del 10/09 autorizzava **fino a**
+   > 33/66 e **una cella in meno non la sfora**: qui si **toglie** una misura
+   > (ed era una misura **ripetuta**), non se ne aggiunge nessuna.
+   >
+   > 🏠 **E lo schema era gia' in casa**: `R136c_parziale_U30USD.txt` (12/09,
+   > **un giorno prima**) tratta la stessa manopola su `ABTG_EMA200.mq5`
+   > (guardia r.410 `InpTP1Pct>0 && InpTP1Pct<100`) e scrive gia' *"100 e'
+   > ESCLUSO DI PROPOSITO... sarebbe la cella 0 misurata due volte"*.
+   > 🔑 **La regola generale che ne esce** (classe 310): un estremo si dichiara
+   > "LIMITE FISICO" solo dopo aver letto **OGNI** guardia che nomina quella
+   > manopola nel sorgente — un `<=` e un `>=` scritti in punti diversi
+   > possono far collassare i due bordi sulla stessa cella.
 
 3. 🧱 **Bordo che e' un LIMITE FISICO**: dall'altra parte non c'e' una misura
    che manca, c'e' **un valore che non esiste**. L'altopiano e' **CHIUSO** da
