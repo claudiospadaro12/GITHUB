@@ -103,8 +103,13 @@
 #    Quindi ATR(14) M30 NASUSD sta nella banda 45-58 idx [DERIVATO],
 #    e il centro che uso per i conti qui sotto e' 50 idx.
 #    >>> L'ATR VERO E' [NON MISURATO] e non lo invento. Il round lo
-#        MISURA di fatto: la colonna "Segnali Grezzi" e il per-trade
-#        dicono quanto era largo lo stop davvero.
+#        MISURA di fatto: e' IL PER-TRADE a dire quanto era largo lo stop
+#        davvero (distanza ingresso-SL, operazione per operazione).
+#        >>> LA COLONNA "Segnali Grezzi" NON DICE NIENTE SULL'AMPIEZZA
+#            DELLO STOP, e qui non va citata per quello: conta le
+#            rotture, e serve a un'ALTRA cosa. Che cosa conti esattamente
+#            -- e perche' e' il falsificatore piu' importante di questo
+#            round -- sta al punto (8) del contro-esempio.
 #
 #  LO STOP PER CELLA, E DOVE CADE LA FRONTIERA DEL COSTO
 #    (pedaggio all-in sugli indici = SPREAD E BASTA: commissione 0,0000
@@ -137,6 +142,29 @@
 #      (c) NESSUNA MONOTONIA (su e giu' senza ordine) ==> il campione e'
 #          rumore, e il verdetto e' "NON ANCORA MISURATO", non "morto".
 #
+#  >>> IL CANCELLO CHE VIENE PRIMA DI (a), (b) E (c), E CHE PUO'
+#      ANNULLARLI TUTTI E TRE. Si legge PER PRIMO, sulla colonna
+#      "Segnali Grezzi" dell'OPTFRAME, e la soglia e' congelata QUI,
+#      prima di qualunque CSV:
+#      (pre) SE LA COLONNA "Segnali Grezzi" DIFFERISCE DI PIU' DEL 10%
+#          FRA LA CELLA InpKStop=1,0 E LA CELLA InpKStop=2,5, le celle
+#          NON campionano lo stesso insieme di segnali: qualunque
+#          differenza di Expected Payoff fra quelle celle NON e'
+#          attribuibile allo stop, e il verdetto su quel confronto e'
+#          "NON ANCORA MISURATO", non un risultato.
+#      >>> PERCHE' PROPRIO IL 10%, dichiarato ora e non dopo: una
+#          differenza di campione NON si traduce in R con un conto
+#          diretto (sono segnali diversi, non operazioni diverse), quindi
+#          la soglia non e' derivata -- e' SCELTA, e il criterio della
+#          scelta e' l'ORDINE DI GRANDEZZA: l'effetto che il round deve
+#          misurare vale 0,024 R su un edge dell'ordine di 0,15 R, cioe'
+#          il 16%. Una selezione del campione del 10% e' gia' la stessa
+#          taglia della cosa da misurare, e sopra quella taglia il
+#          confronto non si legge piu'.
+#      >>> IL MOTIVO PER CUI QUESTO CANCELLO ESISTE STA AL PUNTO (8) DEL
+#          CONTRO-ESEMPIO: e' l'OCCUPAZIONE DEL POSTO, ed e' l'unico
+#          difetto di questo round che NON e' stato tolto.
+#
 #  >>> COME SI LEGGE E_netta IN R DAL CSV, senza inventarsi conti:
 #      il rischio per operazione e' COSTANTE (InpRiskPercent=0,65) su
 #      tutte e quattro le celle, perche' il lotto si adatta allo stop.
@@ -147,8 +175,14 @@
 #
 # =====================================================================
 #  ###  IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND  ###
-#  ###  -- e come e' stato tolto, uno per uno                 ###
+#  ###  -- SETTE TOLTI, UNO NO: il (8) e' DICHIARATO e MISURATO  ###
 # =====================================================================
+#  >>> SI LEGGONO OTTO PUNTI, E IL PIU' IMPORTANTE E' L'ULTIMO. I punti
+#      da (1) a (7) sono difetti CHIUSI (pin, deposito, cancelli spenti).
+#      Il punto (8) -- L'OCCUPAZIONE DEL POSTO -- e' ANCORA DENTRO il
+#      round: non si puo' togliere senza cambiare il motore, quindi si
+#      dichiara, si misura con una colonna dell'OptFrame e si congela
+#      prima la soglia oltre la quale il round non si legge.
 #
 #  (1) [!] IL PAVIMENTO DELLO STOP CHE FONDE DUE CELLE IN UNA.
 #      Se InpMinSLPts valesse 7200 punti MT5 (= 72 idx, il valore che
@@ -232,8 +266,21 @@
 #      grande, perche' quelle posizioni vivono piu' a lungo: sarebbe un
 #      calo asimmetrico proprio sull'asse che si misura. E' il difetto
 #      che rompe l'invarianza su ABTG_HVAncora (flat delle 21:00).
-#      >>> TOLTO PER COSTRUZIONE: questo EA NON HA un flat di seduta, e
-#          InpFridayClose e' pinnato a false.
+#      >>> TOLTO PER COSTRUZIONE, MA SOLO QUESTO: il "TOLTO" di questa
+#          riga copre ESCLUSIVAMENTE LA CHIUSURA A ORARIO -- questo EA
+#          NON HA un flat di seduta e InpFridayClose e' pinnato a false.
+#      >>> E NON COPRE L'ALTRA META' DELLO STESSO FENOMENO, che sopravvive
+#          INTATTA. La radice comune e' "le posizioni con kStop grande
+#          vivono piu' a lungo": da quella radice escono DUE difetti
+#          diversi, e solo il primo e' tolto.
+#            - la chiusura a orario TRONCA il trade aperto  -> TOLTO qui;
+#            - la posizione aperta OCCUPA IL POSTO e fa scartare i
+#              segnali che arrivano nel frattempo -> NON TOLTO, ed e' il
+#              punto (8).
+#          Scriverle come una cosa sola, come faceva la prima stesura di
+#          questo file, dichiara "tolto" qualcosa che e' ancora dentro --
+#          ed e' peggio che non dirlo, perche' chi legge smette di
+#          cercarlo.
 #      >>> IL COSTO DELLA SCELTA, DICHIARATO E SCOMODO: le posizioni
 #          restano aperte sul weekend, quindi il DD misurato INCLUDE il
 #          gap del lunedi'. E' una lettura PESSIMISTA del rischio, e
@@ -269,6 +316,92 @@
 #      come chiede il dossier. Quindi questa cella NON e' il Pine
 #      tradotto alla lettera: e' il Pine SENZA i suoi due filtri, ed e'
 #      dichiarato. Accenderli e' un round dedicato.
+#
+#  (8) [!] L'OCCUPAZIONE DEL POSTO -- IL SOLO DIFETTO DI QUESTO ROUND
+#      CHE **NON E' TOLTO**. E' l'altra meta' del punto (4), e va letto
+#      attaccato a quello.
+#      IN OnNewBar I PRIMI DUE CANCELLI SONO QUESTI, copiati dal
+#      sorgente (ABTG_VolExpBreak.mq5):
+#          if(CountPositions()>0) return;
+#          if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+#      cioe' UN SEGNALE CHE ARRIVA MENTRE IL POSTO E' OCCUPATO VIENE
+#      SCARTATO PRIMA ANCORA DI ESSERE CALCOLATO.
+#      E ADESSO IL CONTO CHE FA MALE. SL e TP si allargano INSIEME con
+#      InpKStop (e' l'ancora unica, ed e' il pregio del motore): la
+#      posizione deve percorrere una distanza kStop volte piu' grande
+#      per chiudersi, e in un cammino aleatorio il TEMPO cresce come il
+#      QUADRATO della distanza. Fra la cella 1,0 e la cella 2,5 il
+#      fattore di durata attesa e' dell'ordine di 2,5^2 = 6,25
+#      [DERIVATO -- cammino aleatorio senza deriva: e' un ORDINE DI
+#      GRANDEZZA, non un numero da riportare in un referto].
+#      Su M30 questo vuol dire che la cella 2,5 tiene il posto occupato
+#      MOLTO piu' a lungo della cella 1,0, e quindi LE QUATTRO CELLE
+#      NON VEDONO LO STESSO INSIEME DI SEGNALI.
+#      >>> E' UNA SELEZIONE MONOTONA LUNGO L'ASSE, cioe' esattamente la
+#          forma della CLASSE 308 punto 1, e cade sulla STESSA domanda
+#          che il round deve misurare (0,024 R). AMPIEZZA: [NON MISURATA].
+#      >>> PERCHE' NON SI TOGLIE: togliere il limite di una posizione per
+#          volta vorrebbe dire cambiare il motore, cioe' misurare un
+#          ALTRO EA. Quindi non si toglie: SI DICHIARA E SI MISURA.
+#
+#      >>> E SI MISURA DAVVERO, CON UN FALSIFICATORE CHE ESISTE GIA' NEL
+#          CODICE E NON VA TOCCATO. gCntSegnali (ABTG_VolExpBreak.mq5,
+#          r.537 al 13/09/2026) e' incrementato DOPO i tre return di
+#          occupazione / tetto giornaliero / orario, e PRIMA dei filtri
+#          dell'autore. Quindi, alla lettera:
+#          >>> "Segnali Grezzi" NON E' IL DENOMINATORE GREZZO ASSOLUTO.
+#              Sono LE ROTTURE VISTE MENTRE L'EA ERA PIATTO, SOTTO IL
+#              TETTO GIORNALIERO E DENTRO L'ORARIO AMMESSO.
+#              (Il commento a fianco di quella riga DICEVA "il
+#              denominatore, prima di ogni filtro", ed era SBAGLIATO:
+#              vale per i filtri dell'autore, non per i tre cancelli
+#              operativi. E' STATO CORRETTO nello stesso giro di questo
+#              file -- SOLO IL COMMENTO. La riga gCntSegnali++ NON e'
+#              stata spostata di un carattere, e resta la r.537:
+#              spostarla cambierebbe cosa misura, ed e' l'unica cosa
+#              che qui NON si tocca.)
+#      >>> ED E' PROPRIO QUESTO CHE LA RENDE UNA MISURA: InpKStop NON
+#          entra in NESSUN calcolo a monte del segnale -- il canale
+#          (iHighest/iLowest su InpLookback dallo shift 2), InpKBreak e
+#          l'ATR sono IDENTICI nelle quattro celle, e il tetto
+#          giornaliero e l'orario sono pinnati uguali. L'UNICA cosa che
+#          puo' far differire "Segnali Grezzi" fra le celle e' per quanto
+#          tempo il posto e' stato occupato.
+#          >>> SE "Segnali Grezzi" DIFFERISCE FRA LE CELLE, QUELLA
+#              DIFFERENZA **E'** L'EFFETTO DI OCCUPAZIONE, MISURATO.
+#          Il tetto di 3 trade al giorno spinge nello STESSO verso (la
+#          cella 1,0 fa piu' trade e lo tocca piu' spesso) e da qui non
+#          si separa: dichiarato, e non cambia il verdetto, perche' i due
+#          meccanismi producono lo stesso sintomo e il sintomo blocca
+#          la lettura lo stesso.
+#      >>> LA SOGLIA E' CONGELATA PRIMA, ed e' la regola (pre) scritta
+#          sopra: oltre il 10% di scarto fra la cella 1,0 e la cella 2,5
+#          il confronto fra quelle due celle NON SI LEGGE.
+#      >>> IL CONTRO-ESEMPIO DELLA SOGLIA, perche' un cancello che non
+#          puo' NON scattare non e' un cancello: se le quattro celle
+#          uscissero con "Segnali Grezzi" entro il 10%, vorrebbe dire che
+#          le posizioni chiudono in fretta rispetto alla frequenza dei
+#          segnali (rotture rade, durata corta) e l'asse e' pulito. Le
+#          due uscite sono DISTINGUIBILI guardando UNA colonna sola, e
+#          quella colonna e' gia' nell'OptFrame -- non va aggiunta niente
+#          al codice per rispondere.
+#      >>> E SE SCATTA, LA VIA AL NUMERO -- col contro-esempio davanti,
+#          perche' la strada che viene in mente per prima NON FUNZIONA.
+#          "Si rifa' l'asse su un TF piu' alto" NON toglie il difetto: il
+#          fattore di durata e' kStop^2 in unita' di ATR, e salendo di TF
+#          crescono INSIEME la durata delle posizioni e la distanza fra i
+#          segnali. Il rapporto fra le due, che e' la cosa che conta,
+#          resta lo stesso. Cambiare TF sposta n, non l'occupazione.
+#          >>> LA STRADA VERA E' UN LAVORO SUL CODICE, ed e' un round
+#              suo: un input sul numero di posizioni contemporanee per
+#              magic (oggi fisso a 1). Con quel limite alzato abbastanza,
+#              nessun segnale viene scartato per occupazione e le celle
+#              tornano a campionare lo stesso insieme. >>> ALZA IL
+#              RISCHIO APERTO, quindi NON si fa qui e NON lo decido io:
+#              taglie e rischio sono di CLAUDIO (cap C1 3,25%). Si
+#              propone, non si applica.
+#          Nessuna delle due strade e' un criterio piu' morbido: si
+#          cerca una misura in piu', mai un'asticella piu' bassa.
 #
 # ---------------------------------------------------------------------
 #  ###  FREQUENZA: LA COSA CHE PUO' FAR FINIRE IL ROUND IN NULLA  ###
@@ -330,6 +463,13 @@
 #  5. L'ATR M30 sul FOREX e' [NON MISURATO] (dossier par. 9.6): questo
 #     motore NON si propone su GBPUSD/EURUSD e questo round e' solo
 #     indici. Dichiarato per non doverlo riscoprire.
+#  6. L'OCCUPAZIONE DEL POSTO NON E' TOLTA -- punto (8) del
+#     contro-esempio. Le quattro celle possono NON campionare lo stesso
+#     insieme di segnali, di un'ampiezza [NON MISURATA] che questo round
+#     misura sulla colonna "Segnali Grezzi". Se lo scarto fra la cella
+#     1,0 e la cella 2,5 supera il 10%, il confronto fra quelle due celle
+#     NON si legge e il verdetto e' "NON ANCORA MISURATO": e' l'unico
+#     limite di questa lista che puo' annullare la risposta del round.
 #
 # ---------------------------------------------------------------------
 #  IGIENE, VERIFICATA A MANO

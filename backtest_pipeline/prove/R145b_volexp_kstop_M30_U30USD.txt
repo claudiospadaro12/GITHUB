@@ -93,9 +93,11 @@
 # ---------------------------------------------------------------------
 #  ###  IL CONTRO-ESEMPIO, NELLA VERSIONE DEL DOW  ###
 # ---------------------------------------------------------------------
-#  I sei punti della madre valgono identici (pavimento SL spento,
-#  gestione spenta, orologi spenti, filtri dell'autore spenti). Qui
-#  cambiano DUE cose, e vanno dette:
+#  GLI OTTO PUNTI della madre valgono identici (pavimento SL spento,
+#  gestione spenta, orologi spenti, filtri dell'autore spenti) -- E
+#  COMPRESO IL PUNTO (8), CHE E' L'UNICO **NON TOLTO** e che qui vale
+#  alla lettera perche' e' una proprieta' del CODICE, non del simbolo.
+#  Qui cambiano TRE cose, e vanno dette:
 #
 #  (A) [!] IL PAVIMENTO DEL LOTTO MORDE DI PIU' SUL DOW.
 #      lossPerLot = R(idx) x 0,87 EUR. Con ATR 70 idx (centro della
@@ -150,12 +152,88 @@
 #          misurerebbe il cancello. Il 2,5% e' l'asse di un round
 #          SUCCESSIVO. Una variabile alla volta.
 #
+#  (C) [!] L'OCCUPAZIONE DEL POSTO -- E' IL PUNTO (8) DELLA MADRE, L'UNICO
+#      CONTRO-ESEMPIO **NON TOLTO**, e qui non cambia niente perche' non
+#      dipende dal simbolo: e' una proprieta' del CODICE. Va ripetuto per
+#      intero e non citato, perche' chi legge solo il gemello deve
+#      trovarlo.
+#      In OnNewBar (ABTG_VolExpBreak.mq5) i primi due cancelli sono:
+#          if(CountPositions()>0) return;
+#          if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+#      cioe' UN SEGNALE CHE ARRIVA MENTRE IL POSTO E' OCCUPATO VIENE
+#      SCARTATO PRIMA ANCORA DI ESSERE CALCOLATO. Ma SL e TP si allargano
+#      INSIEME con InpKStop (e' l'ancora unica): la posizione deve
+#      percorrere una distanza kStop volte piu' grande per chiudersi, e in
+#      un cammino aleatorio il TEMPO cresce come il QUADRATO della
+#      distanza. Fra la cella 1,0 e la cella 2,5 il fattore di durata
+#      attesa e' dell'ordine di 2,5^2 = 6,25 [DERIVATO -- ordine di
+#      grandezza, non un numero da mettere in un referto].
+#      >>> QUINDI LE QUATTRO CELLE POSSONO NON VEDERE LO STESSO INSIEME
+#          DI SEGNALI: e' una SELEZIONE MONOTONA lungo l'asse (classe 308
+#          punto 1), proprio sulla domanda che il round misura
+#          (0,015-0,025 R attesi sul Dow). AMPIEZZA: [NON MISURATA].
+#      >>> NON E' TOLTA e non si puo' togliere senza cambiare il motore,
+#          cioe' senza misurare un ALTRO EA: si DICHIARA e SI MISURA.
+#      >>> IL FALSIFICATORE ESISTE GIA' NEL CODICE E NON VA TOCCATO:
+#          gCntSegnali (r.537 al 13/09/2026) e' incrementato DOPO i tre
+#          return di occupazione / tetto giornaliero / orario e PRIMA dei
+#          filtri dell'autore. Quindi, alla lettera:
+#          >>> "Segnali Grezzi" NON E' IL DENOMINATORE GREZZO ASSOLUTO.
+#              Sono LE ROTTURE VISTE MENTRE L'EA ERA PIATTO, SOTTO IL
+#              TETTO GIORNALIERO E DENTRO L'ORARIO AMMESSO.
+#              (Il commento a fianco di quella riga DICEVA "il
+#              denominatore, prima di ogni filtro", ed era SBAGLIATO:
+#              vale per i filtri dell'autore, non per i tre cancelli
+#              operativi. E' STATO CORRETTO nello stesso giro di questo
+#              file -- SOLO IL COMMENTO. La riga gCntSegnali++ NON e'
+#              stata spostata di un carattere e resta la r.537.)
+#      >>> ED E' PROPRIO QUESTO CHE LA RENDE UNA MISURA: InpKStop non
+#          entra in NESSUN calcolo a monte del segnale -- canale
+#          (iHighest/iLowest su InpLookback dallo shift 2), InpKBreak e
+#          ATR sono IDENTICI nelle quattro celle, tetto giornaliero e
+#          orario sono pinnati uguali. Se "Segnali Grezzi" differisce fra
+#          le celle, QUELLA DIFFERENZA **E'** L'EFFETTO DI OCCUPAZIONE,
+#          MISURATO.
+#      >>> UNA COSA IN PIU' CHE VALE SOLO SUL DOW, e va detta qui perche'
+#          sul gemello il cancello di spread MORDE (punto B): i suoi
+#          rifiuti stanno A VALLE di gCntSegnali (il cancello e' dentro
+#          Enter, r.627; il contatore e' in OnNewBar, r.537), quindi NON
+#          sporcano questa colonna. Le due letture restano separate:
+#          "Spread Gate Rifiuti" dice quanto ha tolto il cancello di
+#          costo, "Segnali Grezzi" dice quanto ha tolto l'occupazione.
+#      >>> LA SOGLIA E' CONGELATA PRIMA ed e' la stessa della madre: 10%.
+#          Sta nella regola di lettura qui sotto.
+#
 # ---------------------------------------------------------------------
 #  ###  REGOLA DI LETTURA DEL GEMELLO, congelata prima  ###
 # ---------------------------------------------------------------------
 #  Si legge l'EXPECTED PAYOFF, non il PF (lo dice il dossier, par. 10).
 #  Con -Deposito 100000 e InpRiskPercent 0,65:  1 R = 650 EUR,
 #  quindi  E in R = Expected Payoff / 650.  Nessun'altra conversione.
+#
+#  >>> MA PRIMA DI (a), (b), (c) E (d) SI LEGGE UN'ALTRA COLONNA, E PUO'
+#      ANNULLARLE TUTTE. Soglia congelata QUI, prima di qualunque CSV,
+#      identica a quella della madre:
+#   (pre) SE LA COLONNA "Segnali Grezzi" DELL'OPTFRAME DIFFERISCE DI PIU'
+#       DEL 10% FRA LA CELLA InpKStop=1,0 E LA CELLA InpKStop=2,5, le
+#       celle NON campionano lo stesso insieme di segnali: qualunque
+#       differenza di Expected Payoff fra quelle celle NON e'
+#       attribuibile allo stop, e il verdetto su quel confronto e' "NON
+#       ANCORA MISURATO", non un risultato.
+#       >>> PERCHE' IL 10%, dichiarato ora: una differenza di CAMPIONE
+#           non si traduce in R con un conto diretto (sono segnali
+#           diversi, non operazioni diverse), quindi la soglia non e'
+#           derivata -- e' SCELTA, sull'ORDINE DI GRANDEZZA. L'effetto da
+#           misurare qui vale 0,015-0,025 R su un edge dell'ordine di
+#           0,15 R, cioe' il 10-17%: una selezione del campione del 10%
+#           e' gia' la taglia della cosa da misurare.
+#       >>> E vale anche FRA I DUE SIMBOLI: se lo scarto supera il 10% su
+#           UNO solo dei due, il confronto delle PENDENZE -- che e' il
+#           motivo per cui il gemello esiste -- non si fa. Due curve di
+#           cui una e' sporca non si confrontano: si dichiara "NON ANCORA
+#           MISURATO" e si dice QUALE delle due lo e'.
+#       >>> IL MOTIVO STA AL PUNTO (C) QUI SOPRA: l'occupazione del
+#           posto, l'unico contro-esempio non tolto.
 #
 #   (a) DUE CURVE CON LA STESSA PENDENZA (salita di 0,015-0,030 R da
 #       kStop 1,0 a 2,5, monotona, appiattita sopra 2,0), su TUTTI E DUE
@@ -203,6 +281,12 @@
 #     frontiera di questo file sono percio' piu' deboli di quelli della
 #     madre. La misura che li chiuderebbe e' una sonda ATR sui simboli,
 #     che il dossier stesso elenca come buco aperto (par. 9.5).
+#  5. L'OCCUPAZIONE DEL POSTO NON E' TOLTA -- punto (C) qui sopra, che e'
+#     il punto (8) della madre. Le quattro celle possono NON campionare
+#     lo stesso insieme di segnali, di un'ampiezza [NON MISURATA] che
+#     questo round misura sulla colonna "Segnali Grezzi". Oltre il 10% di
+#     scarto fra la cella 1,0 e la cella 2,5 il confronto NON si legge:
+#     e' l'unico limite di questa lista che puo' annullare la risposta.
 #
 # ---------------------------------------------------------------------
 #  IGIENE, VERIFICATA A MANO
