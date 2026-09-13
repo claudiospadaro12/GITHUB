@@ -133,6 +133,54 @@ quarta. E' il contrario del burocrate che non finisce mai. 💪
 
 ---
 
+## 4-ter. 🚨 E POI E' SUCCESSA LA COSA PIU' GROSSA DELLA NOTTE
+
+Claudio, ieri sera mi hai chiesto: **"RICOMPILA EMA200 COL GUARDIAN E FAMMI IL
+PRESET"**. Il preset l'ho fatto. Poi ho chiesto a un agente il pacchetto per la
+ricompilazione, con una sola consegna: **prima di scrivere qualunque cosa,
+elenca TUTTE le differenze** fra il codice in campo e quello che schiereremmo.
+
+🔴 **E il modo NATURALE di eseguire la tua richiesta — aprire MetaEditor e
+premere F7 — avrebbe schierato codice NON VERIFICATO su una sedia viva.**
+
+Ecco i numeri, e li ho **controllati io, uno per uno, coi comandi** — non mi sono
+fidato del riassunto:
+
+| versione | righe | cos'e' |
+|---|---:|---|
+| `344a11b` (04/08) | **486** | 🟡 il binario **IN CAMPO** oggi |
+| `26a1856` (19/08) | **552** | 🟢 **il codice che ha prodotto PF 1,52365** |
+| `f33f374` (pin di R112) | **552** | 🟢 identico al precedente: e' la sedia promossa |
+| `b45dd00` (11/09) | **690** | 🔴 **"IN CORSO D'OPERA -- NON COMPILARE"** |
+| `HEAD` | **690** | 🔴 = `b45dd00`. **E' questo che F7 avrebbe preso.** |
+
+E il messaggio del commit `b45dd00` dice **testualmente**:
+> _"questi file NON sono verificati, NON sono passati dal cancello... **NESSUNO DI
+> QUESTI EA VA COMPILATO O CARICATO** finche' non c'e' un PASS."_
+
+👉 Quindi il pacchetto schierera' **`26a1856`**, che e' **esattamente il sorgente
+misurato**, non l'ultima versione. Sembra un dettaglio da archivista: e' la
+differenza fra schierare la sedia da **PF 1,52** e schierarne **un'altra con lo
+stesso nome**.
+
+🟢 **E una notizia buona che ne esce di rimbalzo**: il fix del dimensionamento
+del lotto (`3af47ed`, 08/08) era **gia' dentro la versione misurata**. Cioe' finora
+era **il CAMPO a essere disallineato dalla misura** — ricompilando, quello scarto
+si **chiude**.
+
+🔴 **E la cosa che NON ti racconto come vittoria**: questo giro chiude **UN
+SOLO** fail-open dei due. Il secondo — che sul piccolo **50503392** non gira
+nessun Guardian — resta aperto, e la guardia e' **fail-open e muta**: nel Giornale
+**non comparira' nessuna riga GUARDIAN, ed e' il risultato atteso**. In una riga:
+**non abbiamo protetto la sedia, abbiamo reso possibile proteggerla.** Chiuderlo
+davvero vuole soglie e cap, cioe' **firme tue**.
+
+⏳ Il pacchetto e' scritto ma **e' in mano al cancello**: non te lo mando finche'
+non torna un PASS. Quando torna, e' un copia-incolla con il ritorno indietro
+incluso.
+
+---
+
 ## 5. ✍️ DUE COSE CHE ASPETTANO LA TUA FIRMA (non le ho toccate)
 
 ### 🔴 A. La toppa dentro `ABTG_DAX_Apertura_EU` — **e questa e' urgente**
