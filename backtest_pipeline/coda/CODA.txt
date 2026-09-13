@@ -870,7 +870,10 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 
 # =====================================================================
 #  R125 a-f -- ORB DENTRO LA FRONTIERA DEL COSTO. 13/09/2026.
-#  SEI righe, 66 passate, ~6,7 minuti col metro misurato (0,101 min/pass).
+#  SEI righe, 64 passate, ~6,5 minuti col metro misurato (0,101 min/pass).
+#  >>> ERA 66. Il 13/09 r125b e' sceso da 5 a 4 celle (classe 310: la
+#      cella InpTP1Pct=100 era la cella 0 misurata due volte). La
+#      correzione e il giro di pin che ne segue sono in fondo al blocco.
 #  EA: ABTG_ORB_Ottimizzato.  Simboli: U30USD, D30EUR, NASUSD.
 # ---------------------------------------------------------------------
 #  DA DOVE VENGONO, ED E' UNA DIAGNOSI SCRITTA DUE GIORNI FA.
@@ -890,6 +893,15 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  finestre. Il conto torna al numero della testata dei criteri e a quello
 #  di IL_TAPPO ("R125 | 66 | ~7 min"), e non e' una coincidenza cercata:
 #  e' lo stesso round, semplicemente mai lanciato.
+#  >>> CORRETTO IL 13/09 (classe 310): il conto vero e' 32 celle
+#      (7+4+7+2+5+7) x 2 = 64 passate. La cella tolta e' InpTP1Pct=100 in
+#      r125b, che per due guardie indipendenti in ManageTP1()
+#      (ABTG_ORB_Ottimizzato.mq5 r.656 e r.667) e' LA STESSA CELLA di
+#      InpTP1Pct=0: sarebbe stata una passata ripetuta, e un doppione
+#      dentro i blocchi massimali (P2/P3) e il baricentro (P7).
+#      La firma del 10/09 autorizzava FINO A 33/66: qui si TOGLIE una
+#      misura ripetuta, non se ne aggiunge nessuna. Firma invariata, e la
+#      testata dei criteri porta la stessa nota.
 #
 #  I CRITERI SONO CONGELATI E FIRMATI DA CLAUDIO, A NUMERI NON VISTI:
 #  backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md (testata del 10/09,
@@ -934,7 +946,9 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #             InpTP1Pct=0 deve dare +41.057,00 / PF 1,6742 / DD 9,7623% /
 #             n 119. E' anche l'unico file che misura una manopola
 #             d'USCITA mai spazzolata (InpTP1Pct: 1 file prova su 153,
-#             due soli valori, sette settimane fa). 10 passate.
+#             due soli valori, sette settimane fa). 8 passate
+#             (erano 10 prima della correzione del 13/09: 4 celle
+#             0/25/50/75, il 100 tolto perche' degenere con lo 0).
 #             >>> DICHIARA DA SOLO che NON puo' produrre una sedia: la
 #                 sua cella sta SOTTO il pavimento di lavoro 40x. Misura
 #                 se quella sedia lascia soldi per terra, non una sedia.
@@ -972,6 +986,12 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #         (il conteggio e' STAMPATO dallo strumento riga per riga --
 #          14/10/14/4/10/14 -- non sommato a memoria: la prima stesura di
 #          questo blocco diceva "60", e 60 era un errore di addizione mio)
+#         >>> RIFATTO SU r125b DOPO LA CORREZIONE DEL 13/09 (classe 310):
+#             controlla_riga.py --oggetto prova -> nessun difetto
+#             meccanico, ASCII puro; controlla_prova.py -> OK, celle 4,
+#             passate 8, 0 problemi. Quindi a 7 / b 4 / c 7 / d 2 / e 5 /
+#             f 7 = 32 celle = 64 passate. Gli altri cinque file NON sono
+#             stati toccati e il loro conteggio resta quello di sopra.
 #    EA ANCORA ATTUALE, verificato e non assunto: i 51 input pinnati di
 #         ognuno esistono TUTTI nel sorgente di oggi. I 3 input NON
 #         pinnati sono InpNewsFile, InpNewsCurrencies e InpComment --
@@ -991,6 +1011,18 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Verificato anche: da4344b8 e' ANTENATO di HEAD, e la toppa della
 #  classe 270 (124db40, l'.ex5 stantio che passava per compilato) e'
 #  DENTRO d5a24eeb. Le righe r145 e r142 gia' in coda non sono toccate.
+#  >>> VALEVA PER CINQUE FILE SU SEI, E IL 13/09 E' DECADUTO PER r125b.
+#      Appena R125b_parziale_U30USD.txt e' stato CORRETTO (classe 310),
+#      la frase qui sopra e' diventata falsa per quel file: al pin
+#      d5a24eeb esiste ancora la versione col difetto -- MISURATO al pin,
+#      non dedotto dalla data: 'InpTP1Pct=0||0||25||100||Y', 1 occorrenza.
+#      E' esattamente il modo SILENZIOSO della 265 (nessun 404, gira il
+#      file sbagliato). Fatto il VENTIDUESIMO GIRO DI PIN:
+#      d5a24eeb -> 77fc717d, copia congelata al commit bfd6cbf9, ed e' il
+#      pin che la sola riga r125b porta qui sotto.
+#      Le CINQUE righe armate (a/c/d/e/f) restano a da4344b8 e NON si
+#      toccano: i loro cinque file prova non sono cambiati, e al loro pin
+#      sono ancora presenti e identici al byte.
 #
 #  >>> LE SEI RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
 #  Portano il prefisso '#DISARMATA# ', quindi non iniziano con 40 cifre
@@ -1041,8 +1073,49 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  r125b resta DISARMATA finche' non e' corretta e ripinnata.
 #  La firma di Claudio del 10/09 copriva "6 file, 33 celle, 66 passate":
 #  il pacchetto che parte stanotte e' 5 file, 28 celle, 56 passate.
+#
+#  >>> r125b CORRETTA E RIPINNATA il 13/09 -- MA RESTA #DISARMATA#. <<<
+#  Le due meta' della condizione qui sopra sono FATTE, e si elencano per
+#  nome perche' "corretta" da solo non e' verificabile:
+#    1. CORRETTA. prove\R125b_parziale_U30USD.txt: asse
+#       'InpTP1Pct=0||0||25||75||Y' = 4 celle (0/25/50/75), 8 passate.
+#       Il 100 e' TOLTO dall'insieme delle celle, e il file lo DICHIARA
+#       col fatto di codice invece che con un aggettivo:
+#       ABTG_ORB_Ottimizzato.mq5, ManageTP1(), r.656 'InpTP1Pct<=0' e
+#       r.667 'InpTP1Pct>=100' escono TUTTE E DUE senza toccare parziale
+#       ne' breakeven -> 0 e 100 sono la STESSA cella per costruzione.
+#       Riscritto il blocco che chiamava 100 "caso degenere, estremo
+#       dell'altopiano" (era falso: a 100 non si chiude niente), con lo
+#       stesso schema gia' usato in R136c_parziale_U30USD.txt il 12/09.
+#       Commit 77fc717d.
+#    2. CRITERI FIRMATI CORRETTI, non in silenzio.
+#       prove\R125_ORB_COSTO_CRITERI.md par. 3-bis: il bordo alto di
+#       InpTP1Pct non e' piu' "100 = LIMITE FISICO" ma "75 = FINE
+#       GRIGLIA", con una nota che dice COSA cambia, PERCHE' e con quale
+#       prova. E' la correzione di un FATTO FALSO, non l'ammorbidimento
+#       di un criterio: cancelli R125-G0..G5 e passi P1..P8 intatti.
+#       Senza questa correzione il doppione contava due volte in P2/P3
+#       (blocchi massimali) e in P7 (baricentro).
+#    3. RIPINNATA. Ventiduesimo giro di pin (classe 265, modo
+#       silenzioso): $PIN d5a24eeb -> 77fc717d dentro la riga sottile,
+#       commit bfd6cbf9. $SHA_ROUND e $SHA_WALK RICALCOLATE al pin nuovo
+#       e INVARIATE (348ED533...9D0A315B / 15DE7D5F...6828F1C6), metodo
+#       validato contro i numeri del decimo e undicesimo giro.
+#       La riga qui sotto pinna bfd6cbf9, non piu' da4344b8.
+#    4. CANCELLO DETERMINISTICO rifatto sulla versione corretta:
+#       controlla_riga.py --oggetto prova -> nessun difetto meccanico,
+#       ASCII puro; controlla_prova.py -> OK, celle 4, passate 8, 0
+#       problemi; controlla_riga.py --oggetto ps1 sulla riga sottile ->
+#       nessun difetto meccanico (6 PASS).
+#  >>> IL PREFISSO '#DISARMATA# ' NON SI TOGLIE QUI. <<<
+#  Il PASS che manca e' quello del SECONDO STRATO (agente
+#  'controllo-preventivo'), ed e' lui che ha respinto questa riga: il
+#  giudizio su una correzione non lo da' chi l'ha scritta. Regola di
+#  Claudio del 09/09: "ED ALLORA SOCIO, DEVI ASPETTARE".
+#  Col PASS, il pacchetto R125 torna completo a 6 file, 32 celle,
+#  64 passate (era 33/66: una cella tolta perche' ripetuta).
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
+#DISARMATA# bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
