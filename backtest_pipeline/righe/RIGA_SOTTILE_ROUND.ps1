@@ -690,7 +690,75 @@ $BancoBT = 'C:\MT5_Backtest'
 #      di QUESTO giro -- e restano #DISARMATA# finche' non c'e' il PASS
 #      del secondo strato.
 # ---------------------------------------------------------------------
-$PIN = 'd5a24eebd2c0b722f734367efbd4507909df00af'
+#
+#  VENTIDUESIMO GIRO (13/09/2026). $PIN d5a24eeb -> 77fc717d.
+#  IL CODICE NON E' CAMBIATO, PER LA TERZA VOLTA DI FILA. Si muove per la
+#  CLASSE 265 nel suo secondo modo, quello che NON FA RUMORE: il file
+#  prova R125b a d5a24eeb ESISTE (niente 404), ma e' la versione col
+#  DIFETTO. Col pin vecchio girerebbe quella, in silenzio.
+#  MISURATO, non presunto: al pin vecchio d5a24eeb il file porta ancora
+#  'InpTP1Pct=0||0||25||100||Y' (1 occorrenza). Non e' un'inferenza dal
+#  nome del commit: e' la riga, letta al pin.
+#
+#  IL DIFETTO CHE IL FILE ADESSO DICHIARA -- classe 310, FAIL del secondo
+#  strato del cancello (13/09), e vale piu' del giro:
+#  in ABTG_ORB_Ottimizzato.mq5, ManageTP1(), ci sono DUE guardie
+#  indipendenti sulla STESSA manopola, e tutte e due escono PRIMA del
+#  parziale E PRIMA del breakeven:
+#      r.656   if(InpTP1Pct<=0)            { ...avviso...; return; }
+#      r.667   if(gPart1 || InpTP1Pct>=100) return;
+#  Quindi InpTP1Pct=100 e InpTP1Pct=0 sono LA STESSA CELLA per
+#  costruzione. Il file prova le trattava come due estremi opposti
+#  ("100 chiude tutto al primo bersaglio: caso degenere, estremo
+#  dell'altopiano"): FALSO, a 100 non si chiude niente. E non era
+#  innocuo: la stessa configurazione sarebbe entrata DUE VOLTE nei
+#  blocchi massimali (P2/P3) e nel baricentro (P7) della procedura
+#  firmata, allungando un altopiano e spostandone il centro con una
+#  passata RIPETUTA. Un numero non brutto: un numero inventato dalla
+#  griglia.
+#  Adesso l'asse e' 'InpTP1Pct=0||0||25||75||Y' -- 4 celle (0/25/50/75),
+#  8 passate -- e il bordo alto e' 75, dichiarato FINE GRIGLIA e non
+#  LIMITE FISICO. Corretto con la stessa data anche il documento FIRMATO
+#  da Claudio il 10/09 (prove\R125_ORB_COSTO_CRITERI.md, par. 3-bis):
+#  e' la correzione di un FATTO FALSO, non l'ammorbidimento di un
+#  criterio -- nessun cancello R125-G0..G5 e nessun passo P1..P8 e'
+#  toccato. La famiglia passa da 33 celle/66 passate a 32/64: si TOGLIE
+#  una misura ripetuta, non se ne aggiunge nessuna, quindi si resta
+#  sotto il tetto firmato.
+#  >>> LA LEZIONE ERA GIA' IN CASA, ed e' il motivo per cui brucia:
+#      prove\R136c_parziale_U30USD.txt (12/09, UN GIORNO PRIMA) tratta la
+#      stessa manopola su ABTG_EMA200.mq5 (guardia r.410) e scrive gia'
+#      "100 E' ESCLUSO DI PROPOSITO... sarebbe la cella 0 misurata due
+#      volte". Non era tornata indietro su un file del 10/09.
+#
+#  MISURATO al pin nuovo 77fc717d, non assunto:
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      marcatori RIGA_ROUND_VPS_v1 e v5_INCLUDE   presenti (2 e 2)
+#      i SEI file prova R125 a-f                  presenti, e IDENTICI AL
+#          BYTE alla copia locale (git show | diff -q: nessuna differenza
+#          su 6 su 6). "Esiste" non basta, deve essere QUELLO.
+#      i due file prova r145                      presenti ANCORA
+#      i tre file prova R142                      presenti ANCORA
+#      d5a24eeb e' ANTENATO di 77fc717d           (git merge-base, exit 0)
+#      da4344b8 e' ANTENATO di 77fc717d           (git merge-base, exit 0)
+#      la toppa 270 (124db40) e' DENTRO 77fc717d  (git merge-base, exit 0)
+#  E IL METODO DELLE IMPRONTE E' VALIDATO CONTRO NUMERI SCRITTI DA ALTRI,
+#  altrimenti un "invariata" e' solo il numero che mi aspettavo: lo stesso
+#  comando sul driver a e6c0d70e torna 62A53763...F7CBB7BC (decimo giro) e
+#  a 115254dc BF53EC27...FAF59875 (undicesimo), esattamente come li aveva
+#  inchiodati chi c'era prima. Rifatto oggi, tutti e due tornano.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: le CINQUE righe R125 ARMATE
+#      (a, c, d, e, f) pinnano da4344b8, cioe' una COPIA CONGELATA di
+#      questo file col $PIN vecchio dentro, e continuano a scaricare i
+#      LORO file prova dal LORO pin -- che per loro e' giusto, perche' i
+#      loro cinque file non sono cambiati. Solo la riga r125b pinnera' il
+#      commit di QUESTO giro, e resta #DISARMATA# finche' non c'e' il
+#      PASS del secondo strato (non e' mio: arriva dall'agente
+#      'controllo-preventivo' nella sessione principale).
+# ---------------------------------------------------------------------
+$PIN = '77fc717d96d3b8a719edeab1a640b08e8c1adc79'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
