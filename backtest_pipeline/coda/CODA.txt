@@ -1115,7 +1115,13 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Col PASS, il pacchetto R125 torna completo a 6 file, 32 celle,
 #  64 passate (era 33/66: una cella tolta perche' ripetuta).
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
-#DISARMATA# bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
+#  >>> ARMATA il 13/09/2026 DOPO IL SECONDO PASS (rifatto da zero, non
+#  ereditato): asse corretto verificato 4 celle/8 passate, correzione
+#  dei criteri firmati controllata come non-silenziosa, giro di pin
+#  confermato necessario col contro-esempio (al pin vecchio il file
+#  porta ancora la versione con 100 nell'asse). Pacchetto R125 completo:
+#  6 file, 32 celle, 64 passate.
+bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
