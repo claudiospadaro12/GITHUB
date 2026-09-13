@@ -758,7 +758,71 @@ $BancoBT = 'C:\MT5_Backtest'
 #      PASS del secondo strato (non e' mio: arriva dall'agente
 #      'controllo-preventivo' nella sessione principale).
 # ---------------------------------------------------------------------
-$PIN = '77fc717d96d3b8a719edeab1a640b08e8c1adc79'
+#
+#  VENTITREESIMO GIRO (13/09/2026). $PIN 77fc717d -> 388f341f.
+#  IL CODICE NON E' CAMBIATO, PER LA QUARTA VOLTA DI FILA. Si muove per la
+#  CLASSE 265 nel suo modo silenzioso: il file prova
+#  prove\R127a_slbuffer_NASUSD.txt a 77fc717d ESISTE (niente 404), ma e' la
+#  versione col DIFETTO. Col pin vecchio girerebbe quella, senza rumore.
+#  MISURATO al pin vecchio, non presunto: la' il file porta "-Modello 1"
+#  (2 occorrenze, r.12 l'ordine e r.16 l'etichetta); al pin nuovo la riga
+#  d'ordine dice "-Modello 4".
+#
+#  IL DIFETTO CHE IL FILE ADESSO DICHIARA -- CLASSE 273, e non e' nuova:
+#  e' la TERZA volta che si paga. Il file ordinava "-Modello 1" e ci
+#  scriveva accanto "= TICK REALI"; il driver dice il contrario
+#  (walkforward_generico.ps1 r.180: "4 = tick reali (verita'). 1 = OHLC M1:
+#  SOLO screening, mai verdetti"). Il commit 1764a0e (11/09) aveva gia'
+#  corretto la stessa cosa su R132a/b/c -- e R132a e' lo STESSO EA, lo
+#  STESSO simbolo e la STESSA finestra -- e e6c0d70 (12/09) su R127b/R127c.
+#  Quel commit ha toccato i due fratelli e ha SALTATO R127a.
+#  >>> E QUI LA DIREZIONE E' OPPOSTA AI FRATELLI, ED E' IL PUNTO: R127b e
+#      R127c sono stati portati 4 -> 1 perche' li' l'OHLC e' VOLUTO
+#      (l'ancora di r127c e' essa stessa OHLC M1; r127b gira XAUUSD dal
+#      2004, dove i tick reali non esistono). R127a va 1 -> 4 perche'
+#      tutte e due le condizioni sono rovesciate, e sono MISURE:
+#        - la sua ancora e' a TICK REALI (IS PF 1,34237 n 69 / OOS PF
+#          1,68815 n 86 stanno alla quinta cifra nei CSV SENZA suffisso
+#          ..._NASUSD_{IS,OOS}.csv, e il suffisso "_ohlc" e' la firma del
+#          modello: driver r.1616, 288 CSV "_ohlc" in repo);
+#        - i tick reali di NASUSD partono dal 2024.09.26, che e' l'inizio
+#          esatto della finestra (misura_tick\REFERTO_MISURA_TICK_NASUSD.txt,
+#          166.509.474 tick; conferma indipendente in
+#          report\MISURA_SLIPPAGE_2026-09-05.md r.112-113, 61,0 M + 94,4 M
+#          tick reali sulle due meta' di questa stessa finestra).
+#  E NON ERA INNOCUO: la stessa cella in ..._NASUSD_OOS_ohlc.csv fa PF
+#  1,85106 contro 1,68815, cioe' +9,65% = DICIANNOVE VOLTE la tolleranza
+#  congelata di +/-0,5% (in IS +10,94%, ventun volte). A -Modello 1 il
+#  round non poteva riprodurre la PROPRIA ANCORA per costruzione, e il file
+#  dichiara che fuori tolleranza "il banco e' sporco e il round si ferma":
+#  18 passate per un arresto garantito, con la colpa data al binario.
+#
+#  MISURATO al pin nuovo 388f341f, non assunto:
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      marcatori RIGA_ROUND_VPS_v1 e v5_INCLUDE   presenti (2 e 2)
+#      i SEI file prova R125 a-f, i TRE R127 a-c, i tre R142 e i due r145
+#          presenti e IDENTICI AL BYTE alla copia locale (14 su 14,
+#          git show | diff -q: nessuna differenza). "Esiste" non basta,
+#          deve essere QUELLO.
+#      77fc717d, d5a24eeb, da4344b8, 1445abf8, e6c0d70e sono ANTENATI
+#          di 388f341f  (git merge-base, exit 0 su tutti)
+#      la toppa 270 (124db40) e' DENTRO 388f341f  (git merge-base, exit 0)
+#  E IL METODO DELLE IMPRONTE E' VALIDATO CONTRO NUMERI SCRITTI DA ALTRI,
+#  altrimenti un "invariata" e' solo il numero che mi aspettavo: lo stesso
+#  comando sul driver a e6c0d70e torna 62A53763...F7CBB7BC (decimo giro) e
+#  a 115254dc BF53EC27...FAF59875 (undicesimo), esattamente come li aveva
+#  inchiodati chi c'era prima. Rifatto oggi, tutti e due tornano.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: le cinque R125 armate
+#      (a/c/d/e/f) restano a da4344b8, r125b resta a bfd6cbf9, le righe
+#      R127b/R127c restano a 1445abf8. I loro file prova non sono
+#      cambiati, quindi i loro pin per loro sono ancora giusti. Solo la
+#      riga r127a portera' il commit di QUESTO giro, e nasce
+#      #DISARMATA#: il PASS del secondo strato non e' mio, arriva
+#      dall'agente 'controllo-preventivo' nella sessione principale.
+# ---------------------------------------------------------------------
+$PIN = '388f341f4947df3c6a5a34c5754b7686705cd939'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
