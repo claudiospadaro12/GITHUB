@@ -867,3 +867,165 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  PRIMA di guardare i CSV) e verificato di nuovo: PASS.
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  R125 a-f -- ORB DENTRO LA FRONTIERA DEL COSTO. 13/09/2026.
+#  SEI righe, 60 passate, ~6,1 minuti col metro misurato (0,101 min/pass).
+#  EA: ABTG_ORB_Ottimizzato.  Simboli: U30USD, D30EUR, NASUSD.
+# ---------------------------------------------------------------------
+#  DA DOVE VENGONO, ED E' UNA DIAGNOSI SCRITTA DUE GIORNI FA.
+#  report/IL_TAPPO_2026-09-11.md, tabella "IL FATTO": R125 risulta
+#  "FIRMATO il 10/09", 2 file prova pronti, ZERO CSV di risultato, stato
+#  "mai girato". Non per un difetto e non per un verdetto: per un motivo
+#  puramente ORGANIZZATIVO -- nessuno lo aveva armato in coda, e il
+#  perimetro del runner era ancora SOLA LETTURA. Quel referto chiudeva
+#  chiedendo esattamente questo, come proposta prudente:
+#    "Un solo round, una sola notte, come collaudo: R125, che e' GIA'
+#     FIRMATO e costa 7 minuti."
+#  Il perimetro ROUND e' stato poi firmato l'11/09 (report/FIRME_2026-09-11.md)
+#  e collaudato: da allora sono girate 45+ righe su questa corsia. Il
+#  tappo non e' piu' il perimetro: era la coda. Questo blocco lo toglie.
+#  Nel frattempo i file prova sono diventati SEI (a,b + c,d,e,f), quindi
+#  66 passate firmate; 60 entrano qui, 6 restano fuori -- vedi in fondo.
+#
+#  I CRITERI SONO CONGELATI E FIRMATI DA CLAUDIO, A NUMERI NON VISTI:
+#  backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md (testata del 10/09,
+#  "firma i criteri R125"), sei giri di cancello prima della firma.
+#  Cancelli R125-G0..G5 e la procedura di selezione della cella P1..P8
+#  stanno LI' DENTRO: nessuna cella si legge senza quella pagina davanti.
+#  La firma autorizza MISURE sul banco, non EA, preset o sedie.
+#
+#  PERCHE' ENTRANO SENZA UNA FIRMA NUOVA: corsia ROUND sul banco
+#  C:\MT5_Backtest (demo 50504400), firmata l'11/09, e solo argomenti
+#  della lista bianca (-Expert -Prova -Etichetta -Modello -Deposito).
+#  Nessun perimetro allargato. Nessun terminale in forward toccato.
+#
+#  -Deposito 100000 e -Modello 4 NON sono scelte di questa riga: sono
+#  scritti dentro ogni file prova (r.8 di tutti e sei) e verificati uno
+#  per uno. Classe 273: il -Modello arriva DA QUESTA RIGA, non dal file,
+#  quindi si controlla che combaci col banco dichiarato DENTRO il file.
+#  4 = TICK REALI (walkforward_generico.ps1 r.180). Il 100k non e' un
+#  dettaglio: e' il deposito con cui e' girata la cella di riferimento
+#  R88 e la cella VIVA che R125b deve riprodurre (+41.057,00).
+#
+#  FINESTRA: @DAQUANDO 2024.09.26 (muro dei tick BCM, MISURATO su tutti
+#  e tre i simboli) in ogni file; nessuno dichiara @FINOA ne'
+#  @FRAZIONEIS, quindi valgono i default del driver -- Fino 2026.06.30
+#  (r.177) e FrazioneIS 0.40 (r.179). VERIFICATO che sia GIUSTO, non
+#  assunto: R88, che fornisce le tre ANCORE di R125a, e' girato con
+#  "-FrazioneIS 0.40 e -Fino 2026.06.30 (default)" -- lo scrive
+#  R88a_stoplargo_U30USD.txt r.138. A un taglio diverso le ancore
+#  NON tornerebbero per costruzione, e il round si fermerebbe su se stesso.
+#
+#  L'ORDINE -- il beneficio PER LA LETTURA e' ZERO (classe 274: W()
+#  accumula in memoria, il referto nasce dopo il ciclo). Conta solo per
+#  le DIPENDENZE e per cosa sopravvive se la notte si accorcia:
+#   1. r125a  E' IL CANCELLO DI TUTTO IL ROUND. Porta TRE ancore gratis:
+#             le celle buffer 0 / 500 / 1000 devono riprodurre AL
+#             CENTESIMO le tre righe di R88 (1.06124/4.4336/71 e
+#             1.76162/4.2025/119 ; 1.06346/4.7839/71 e 1.83850/3.8395/119 ;
+#             1.00555/4.5695/71 e 1.64542/4.4027/119). Se anche UNA non
+#             riproduce, ci si ferma PRIMA di guardare le quattro celle
+#             nuove: il sospetto e' il BINARIO, non i parametri.
+#   2. r125b  ANCORA sulla cella che gira sul CONTO REALE (770611):
+#             InpTP1Pct=0 deve dare +41.057,00 / PF 1,6742 / DD 9,7623% /
+#             n 119. E' anche l'unico file che misura una manopola
+#             d'USCITA mai spazzolata (InpTP1Pct: 1 file prova su 153,
+#             due soli valori, sette settimane fa). 10 passate.
+#             >>> DICHIARA DA SOLO che NON puo' produrre una sedia: la
+#                 sua cella sta SOTTO il pavimento di lavoro 40x. Misura
+#                 se quella sedia lascia soldi per terra, non una sedia.
+#   3. r125d  4 passate, ed e' il cancello G1 di DETERMINISMO del lato
+#             DAX: asse TECNICO su InpMagic (779860/779870), DUE CELLE
+#             IDENTICHE PER COSTRUZIONE. Se non escono identiche al
+#             centesimo il banco e' sporco e il DAX non si legge.
+#             Costa 0,4 minuti e vale come collaudo del banco.
+#   4. r125c  il buffer sullo stop sul DAX, apertura di Francoforte
+#             08:00-08:15 SERVER (= 09:00-09:15 IT: ora SERVER, regola
+#             di casa del fuso BCM, verificata nel file).
+#   5. r125e  DOPO r125c di proposito: pinna InpSLBufferPts=2000, che e'
+#             il valore che in r125c passa il cancello del costo con
+#             margine (+16%). Misura l'ampiezza minima DENTRO la
+#             frontiera, non fuori.
+#   6. r125f  la finestra del Dow portata sul Nasdaq (14:30-14:45 SERVER),
+#             mai fatto in 8 corse d'archivio.
+#
+#  COSA QUESTO ROUND NON PUO' DARE, e lo dichiarano i file stessi PRIMA
+#  dei numeri: su U30USD l'n e' INVARIANTE a 71 IS / 119 OOS, cioe'
+#  SOTTO i 150 dell'Emendamento A -> il MERITO resta SOSPESO e r125a/b
+#  NON possono produrre una sedia schierabile sul Dow, qualunque PF esca.
+#  Su D30EUR e NASUSD l'attesa di n sta A CAVALLO dei 150 (90-190 e
+#  100-220): puo' finire sotto, e in quel caso non si schiera nemmeno li'.
+#  Chi firma questi criteri compra una MISURA, non una sedia promessa.
+#
+#  PRIMO STRATO DEL CANCELLO, ESEGUITO SU TUTTI E SEI (13/09):
+#    controlla_riga.py --oggetto prova  -> nessun difetto meccanico (x6),
+#         ASCII puro su tutti e sei (nessun byte non-ASCII: e' il modo
+#         silenzioso in cui la classe 265 ha morso r145)
+#    controlla_prova.py                 -> OK, 0 problemi (x6).
+#         Un asse Y solo per file, nessun input SCONOSCIUTO all'EA,
+#         nessun pin vuoto, nessun parametro doppio.
+#         celle: 7 / 5 / 7 / 2 / 5 / 7  =  60 passate in tutto
+#    EA ANCORA ATTUALE, verificato e non assunto: i 51 input pinnati di
+#         ognuno esistono TUTTI nel sorgente di oggi. I 3 input NON
+#         pinnati sono InpNewsFile, InpNewsCurrencies e InpComment --
+#         due stringhe del filtro news, che tutti e sei pinnano SPENTO
+#         (InpUseNewsFilter=0), e un commento. Nessuna esposizione a un
+#         default cambiato. E ABTG_ORB_Ottimizzato.mq5 non e' toccato dal
+#         03/09 (19312c8), cioe' da PRIMA che i file prova nascessero.
+#
+#  >>> PIN: da4344b8 = la copia della riga sottile del VENTUNESIMO GIRO,
+#  che porta dentro $PIN = d5a24eeb. IL GIRO DOPPIO DELLA CLASSE 265 E'
+#  STATO MISURATO, NON PRESUNTO, FILE PER FILE: tutti e sei i file prova
+#  ESISTONO al pin INTERNO d5a24eeb (git cat-file -e) E SONO IDENTICI AL
+#  BYTE alla copia locale (git show | diff -q: nessuna differenza su
+#  6 file su 6). "Esiste" non basta: deve essere QUELLO -- e' il modo
+#  silenzioso della 265, quello che un 404 non fa vedere.
+#  QUINDI NESSUN GIRO DI PIN NUOVO E' NECESSARIO per questo blocco.
+#  Verificato anche: da4344b8 e' ANTENATO di HEAD, e la toppa della
+#  classe 270 (124db40, l'.ex5 stantio che passava per compilato) e'
+#  DENTRO d5a24eeb. Le righe r145 e r142 gia' in coda non sono toccate.
+#
+#  >>> LE SEI RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
+#  Portano il prefisso '#DISARMATA# ', quindi non iniziano con 40 cifre
+#  esadecimali e il runner le salta come commento. Non gira niente sul
+#  VPS finche' il prefisso c'e'.
+#  SI ARMANO togliendo il prefisso, e SOLO dopo il PASS del SECONDO
+#  STRATO (agente 'controllo-preventivo'). Regola di Claudio del 09/09:
+#  "ED ALLORA SOCIO, DEVI ASPETTARE".
+#
+#  >>> R127a NON E' IN QUESTO BLOCCO, ED E' UN DIFETTO MISURATO. <<<
+#  backtest_pipeline/prove/R127a_slbuffer_NASUSD.txt r.12 ordina
+#  "-Modello 1" e r.16 scrive accanto "-Modello 1 = TICK REALI". Il
+#  driver dice il contrario (walkforward_generico.ps1 r.180: "4 = tick
+#  reali (verita'). 1 = OHLC M1"). E' la CLASSE 273, identica a quella
+#  gia' pagata su R132 (commit 1764a0e) e su R127b/R127c (commit
+#  e6c0d70, 12/09): quel commit ha corretto i DUE fratelli e ha SALTATO
+#  R127a, che e' rimasto a 4a62c2a dell'11/09.
+#  E NON E' UN CAVILLO DI COMMENTO: il file congela l'ancora
+#      OOS  PF 1,68815  DD 0,8567%  n 86  profit +300,61
+#  con tolleranza "n IDENTICO, PF entro +/- 0,5%", e dichiara che fuori
+#  di li' "il banco e' sporco e il round si ferma prima di qualunque
+#  altro numero". Quella riga sta in
+#  risultati_prove/ABTG_SupRev_NAS_H1_Ottimizzato/..._NASUSD_OOS.csv
+#  (senza suffisso = tick reali, driver r.1616). IL CONTRO-ESEMPIO ESISTE
+#  NELLA STESSA CARTELLA ed e' stato letto, non immaginato: la stessa
+#  cella InpTF=16385 in ..._NASUSD_OOS_ohlc.csv fa PF 1,85106 e profit
+#  +349,01. Scarto sul PF: +9,65%, cioe' DICIANNOVE VOLTE la tolleranza
+#  congelata di 0,5%. A -Modello 1 il round NON PUO' riprodurre la
+#  propria ancora PER COSTRUZIONE: 18 passate spese per un fallimento
+#  garantito, con la colpa data al binario invece che al numero.
+#  E i criteri del round, congelati prima dei numeri, dicono TICK REALI:
+#  R127_USCITE_CRITERI.md r.192 ("modello: tick reali") e r.180.
+#  LA RIPARAZIONE E' PICCOLA E NON LA FACCIO DA SOLO: due righe nel file
+#  prova (Modello 1 -> 4, e la frase che lo spiega) PIU' un giro di pin
+#  nuovo, perche' il driver scarica il file prova da $PIN (classe 265).
+#  Finche' non e' fatta, R127a NON entra in coda: una riga formalmente
+#  perfetta che gira il modello sbagliato e' peggio di una riga assente.
+# =====================================================================
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
