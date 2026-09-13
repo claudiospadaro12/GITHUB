@@ -757,3 +757,60 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
 dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
 dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+
+# =====================================================================
+#  R145a / R145b -- ABTG_VolExpBreak (magic 775301), 13/09/2026
+#  VOLATILITY EXPANSION BREAKOUT su M30. Asse unico: InpKStop
+#  (1,0 / 1,5 / 2,0 / 2,5). r145a = NASUSD, r145b = U30USD (gemelli).
+#  LA DOMANDA: allargando SOLO lo stop su un motore con ancora UNICA,
+#  l'edge NETTO in R resta piatto lungo kStop, o si diluisce?
+#  COSTO: 4 celle x 2 finestre = 8 passate per riga.
+#
+#  >>> -Deposito 100000 E' OBBLIGATORIO, non un dettaglio (classe 308).
+#      A 10.000 la quantizzazione del lotto al passo di 0,10 morde in
+#      modo CRESCENTE lungo l'asse (lotto inversamente proporzionale
+#      allo stop), il rischio vero scende in modo sistematico e l'asse
+#      misurato diventa FINTO: risponderebbe "diluito" per aritmetica,
+#      cioe' esattamente una delle due uscite del round. Il motivo per
+#      esteso e' in testa ai due file prova.
+#
+#  >>> LE DUE RIGHE QUI SOTTO SONO **DISARMATE**, ED E' VOLUTO. <<<
+#  Portano il prefisso '#DISARMATA# ', quindi non iniziano con 40 cifre
+#  esadecimali e il runner le salta come commento (r.730). Non gira
+#  niente sul VPS finche' il prefisso c'e'.
+#  SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo il PASS
+#  del SECONDO STRATO (agente 'controllo-preventivo'). Il primo strato
+#  e' gia' passato, ed e' misurato:
+#    controlla_prova.py            OK, 8 celle, 16 passate, 0 problemi
+#    controlla_riga.py --oggetto prova   nessun difetto meccanico (x2)
+#         (prima era FAIL: 9 byte non-ASCII nei commenti, corretti in
+#          7bce56dc -- il cancello semantico non li vedeva)
+#    controlla_riga.py --oggetto ps1 sulla riga sottile   6 PASSATI
+#    VagliaScript/VagliaArgomenti del runner, ESEGUITI sui due record:
+#         G0 pin 40hex OK, G0 percorso OK, corsia=ROUND, G4 passato,
+#         e tre contro-esempi ('10105439', 'BCM_Reale', 'EseguiDavvero')
+#         correttamente RESPINTI: il cancello discrimina.
+#  NB: 'controlla_riga.py --oggetto riga' su CODA.txt NON si usa ed e'
+#  la classe 275: '--oggetto coda' non esiste, e il FAIL a 3 bloccanti
+#  e' IDENTICO sulla coda non toccata (verificato oggi).
+#
+#  >>> PIN: 1b7b743d = VENTESIMO GIRO DI PIN, ed era OBBLIGATORIO.
+#  Classe 265: il pin della coda ne contiene un altro. La copia al pin
+#  dei tre r142 (dbe86ac3) porta dentro $PIN = d6809008, e a d6809008 i
+#  due file prova r145 NON ESISTONO -> 404 sul file prova, round morto.
+#  Il pin interno nuovo e' 7bce56dc (non 6f92e7d, dove i file esistono
+#  ma con i 9 byte non-ASCII dentro). Le due impronte inchiodate
+#  ($SHA_ROUND, $SHA_WALK) sono RICALCOLATE e INVARIATE: i blob dei due
+#  script sono identici a quelli del pin vecchio.
+#  Le righe r142 gia' in coda NON sono toccate: pinnano alla loro copia
+#  congelata, col loro $PIN.
+#
+#  >>> L'EA NON E' MAI STATO COMPILATO. E' normale e non e' un difetto:
+#  qui non c'e' MetaEditor. Il driver compila da HEAD del branch
+#  'lavoro' e, dalla toppa classe 270 in poi, cancella l'.ex5 PRIMA di
+#  compilare -- quindi se la compilazione fallisce il round MUORE
+#  rumorosamente invece di girare un binario vecchio in silenzio.
+#  Questi due round sono anche il collaudo di compilazione dell'EA.
+# =====================================================================
+#DISARMATA# 1b7b743d3bd86cee4b080a83350f9a4809bf4138 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
+#DISARMATA# 1b7b743d3bd86cee4b080a83350f9a4809bf4138 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
