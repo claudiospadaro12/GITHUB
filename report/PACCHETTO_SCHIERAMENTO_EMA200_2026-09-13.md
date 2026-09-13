@@ -41,12 +41,15 @@ dall'alto, si incolla, si verifica, e se qualcosa storce si torna indietro.
 5. 🔴 **CARICARE IL PRESET ABBASSA LA TAGLIA: `InpRiskPercent` da 1,0 a 0,65.**
    E' una **DECISIONE DI CLAUDIO**, non un ripristino. 👉 §4.0, riquadro rosso.
 6. 🟡 **IL LOTTO CAMBIERA', ED E' ATTESO.** Col preset le gambe attese sono
-   **`0.10` e `0.20`** (**−50%** e **−33%** rispetto a quelle di oggi), **non**
-   un difetto: e' il passo del volume, che e' `0,10`. ⚠️ **Dipende da bilancio e
+   **`0.10` e `0.20`** (**−50%** e **−33%** rispetto a oggi), **non** un
+   difetto: e' il passo del volume, che e' `0,10`. ⚠️ **Dipende da bilancio e
    ATR**: al confine possono restare `0,20 / 0,30`, ed e' ugualmente corretto.
-   👉 §5.2 — dove c'e' anche il rischio reale, che e' una **banda 0,38-0,46% che
-   al confine arriva a 0,641%**, cioe' praticamente il nominale: **non e'
-   sempre piu' prudente del dichiarato.**
+   🔴 **E il rischio reale NON ha un massimo di 0,641%:** nell'intervallo ATR
+   misurato sta fra **0,38% e 0,46%** (confine 0,641%), **ma appena il lotto
+   voluto scende sotto il minimo `0,10` il pavimento ALZA e il rischio SFORA il
+   nominale** — 0,834% ad ATR 200, 1,251% ad ATR 300, **senza tetto verso
+   l'alto**. E' la **classe 228**, gia' misurata su questa stessa sedia.
+   👉 §5.2.
 7. ⏰ **Il momento giusto e' ADESSO, domenica a mercato chiuso.** A mercato
    aperto lo stesso giro va fatto solo con la sedia **piatta** (§3.1).
 
@@ -476,7 +479,7 @@ differenza fra il binario del 04/08 e quello nuovo e' **l'esistenza di quell'inp
 Nella scheda **Esperti** (Strumenti → Esperti) deve comparire una riga di
 inizializzazione di `ABTG_EMA200` **con l'ora di adesso**.
 
-## 5.2 🟡 Il primo ordine: i lotti ATTESI sono `0.10` e `0.20`
+## 5.2 🟡 Il primo ordine: lotti attesi `0.10` / `0.20` — ma dipende da ATR e bilancio
 
 > 🔴 **Due stesure sbagliate di fila su questo numero, e la seconda e' colpa di
 > un dato che era GIA' IN CASA.** La prima diceva *«circa −35%»* (senza la
@@ -521,32 +524,81 @@ sulle **proprieta'** e non sul valore atteso. Non cambiarla:
 - 🟢 **Normale**: lotti **multipli di 0,10**, **non piu' grandi** di quelli di
   oggi (0,20 / 0,30). `0,10 / 0,20` e' l'attesa piu' probabile; `0,20 / 0,30`
   succede al confine ed e' **ugualmente corretto**.
-- 🔴 **Fermati e dimmelo solo se**: il lotto **non e' multiplo di 0,10**, oppure
+- 🔴 **Fermati e dimmelo se**: il lotto **non e' multiplo di 0,10**, oppure
   e' **piu' grande** di quelli di oggi.
+- 🔴 **E fermati anche se vedi `0,10 / 0,10` su tutt'e due le gambe.** E' la
+  **firma del pavimento che morde** (§ qui sotto): in quel caso il rischio reale
+  **non e' piu' garantito sotto il dichiarato** e va ricalcolato sulle distanze
+  di stop vere. ⚠️ **Questo caso la regola dei «multipli di 0,10» lo
+  classificherebbe come normale**: `0,10/0,10` e' multiplo del passo ed e' piu'
+  piccolo di oggi. E' l'unico buco della regola, e si chiude guardando
+  **esplicitamente** quella coppia.
 - ✋ **Il numero che regge tutto** e' `VOLUME_STEP`: in MT5, `U30USD` → tasto
   destro nel Market Watch → **Specifica** → *Volume minimo* e *Passo del
   volume*. Se **non** sono `0,10`, le tabelle qui sopra vanno rifatte.
 
-### 🔴 IL RISCHIO REALE: una BANDA, e NON e' sempre piu' prudente del dichiarato
+### 🔴 IL RISCHIO REALE: una BANDA — e il PAVIMENTO puo' farlo SFORARE
 
-> 🔴 **Qui la stesura precedente ha messo sotto la tua firma una frase falsa:**
-> *«~0,42% effettivo — e' piu' PRUDENTE del dichiarato»*. **Sbagliata, e nella
-> direzione peggiore in cui sbagliare un numero che qualcuno firma.**
+> 🔴 **Terza stesura sbagliata su questo riquadro, e la piu' grave.** La prima
+> diceva *«~0,42% effettivo, piu' PRUDENTE del dichiarato»*. La seconda ha
+> corretto il numero ma ha scritto che il passo *«rende il rischio piu' basso o
+> uguale al dichiarato, **mai piu' alto**»*. 🔴 **Falso** — e la smentita stava
+> **due paragrafi sopra, scritta da me**: *«e non scende mai sotto 0,10»*.
+> **Quel pavimento ALZA.**
+
+**Il meccanismo, da `ABTG_EMA200.mq5` r.356-357 — il file che spediamo:**
 
 ```
-caso tipico   : 0,38% - 0,46%   (le due gambe a 0,10 e 0,20)
-caso di CONFINE: 0,641%          (le due gambe salgono a 0,20 e 0,30)
-nominale       : 0,650%
+   lot=MathFloor(lot/st)*st;
+   return(MathMax(mn,MathMin(mx,lot)));
 ```
 
-👉 **Nel caso di confine il rischio reale e' praticamente il nominale.** La
-frase giusta e': *il passo del volume rende il rischio **piu' basso o uguale**
-al dichiarato, **mai piu' alto** — ma «piu' basso» **non e' garantito**, e nel
-caso di confine il margine e' **quasi zero**.*
-⚖️ E resta vero che **a questa taglia la manopola del rischio ha grana grossa**:
-fra un gradino e l'altro il rischio effettivo salta di oltre due decimi di
-punto. E' un fatto da tenere presente **prima** di decidere la taglia — ma la
-taglia e' **tua**, e io non la propongo.
+`MathMax(mn, ...)` e' applicato **incondizionatamente e DOPO** l'arrotondamento.
+Finche' il lotto voluto sta **sopra** il minimo, il passo puo' solo **abbassare**
+→ rischio **minore o uguale**. 🔴 **Ma quando il lotto voluto finisce SOTTO il
+minimo `0,10`, il pavimento lo ALZA, e il rischio reale SUPERA il nominale.**
+
+| bilancio | ATR | voluti | messi | rischio REALE | contro 0,650% nominale |
+|---:|---:|---|---|---:|---|
+| 5.160 | 78,0 | 0,1665 / 0,2497 | 0,10 / 0,20 | 0,456% | 🟢 sotto |
+| 5.160 | **156** | 0,0832 / 0,1249 | 0,10 / 0,10 | **0,651%** | 🔴 **pari** |
+| 5.160 | **200** | 0,0649 / 0,0974 | 0,10 / 0,10 | **0,834%** | 🔴 **+28%** |
+| 5.160 | **300** | 0,0433 / 0,0649 | 0,10 / 0,10 | **1,251%** | 🔴 **+92%** |
+| **2.100** | 65,5 | 0,0807 / 0,1210 | 0,10 / 0,10 | **0,671%** | 🔴 **sopra** |
+
+**Le due soglie, calcolate:** a bilancio 5.160 il rischio reale raggiunge il
+nominale da **ATR ≈ 156**; ad ATR 65,5 lo raggiunge con un bilancio sotto
+**≈ 2.170**. 👉 **E verso l'alto non c'e' un tetto**: piu' sale l'ATR, piu'
+sfora.
+
+✅ **Nell'intervallo ATR misurato (65,5 / 73,6 / 78,0) NON succede**: li' la
+banda `0,38-0,46%` e il confine `0,641%` restano corretti.
+⚠️ **Ma ATR(14) H1 = 156 su `U30USD` a ~45.000 e' un'ora con ~0,35% di range:
+una settimana brutta, non un cigno nero.** E **niente lo ferma a monte**:
+`InpMaxSpread=0` → `SpreadOK()` ritorna sempre `true`; `InpMinDistAtr` /
+`InpMaxDistAtr` sono **moltiplicati per l'ATR**, quindi **scale-free**: non
+mordono quando la volatilita' cresce. **Nessuna rete.**
+
+### 📕 QUESTA E' LA CLASSE 228, E L'AVEVAMO GIA' PAGATA
+`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md` **r.13309** — *«Il PAVIMENTO DEL
+LOTTO che alza in silenzio»*, **11/09/2026**, cioe' **due giorni fa**, sullo
+**stesso EA** (`EMA200`) e sullo **stesso conto** (`50503392`): su XAUUSD i lotti
+`0,0049` e `0,0082` venivano alzati a `0,01`, **rischio vero 1,62% contro
+1,00% dichiarato**. La classe dice testualmente che e' *«la forma generale, che
+vale per OGNI EA con `InpRiskPercent`»*, e che **un backtest a 100k non lo
+mostrera' MAI** perche' il pavimento morde solo sui conti piccoli.
+
+🔴 **E io ho scritto l'opposto.** Non e' una classe nuova: e' una classe **non
+riletta**. 👉 La cito qui col numero e la riga **perche' il prossimo che scrive
+un pacchetto con `InpRiskPercent` dentro la trovi**. La checklist e' la memoria:
+se una classe c'e' e nessuno la rilegge, non e' servita a niente.
+
+⚖️ **La frase giusta, finalmente:** *il passo del volume rende il rischio **piu'
+basso o uguale** al dichiarato **finche' tutt'e due le gambe restano SOPRA il
+lotto minimo**. Sotto quel confine il pavimento **alza** e il rischio reale
+**supera** il nominale, senza tetto verso l'alto.* E resta vero che **a questa
+taglia la manopola del rischio ha grana grossa**. La taglia e' **tua**, e io non
+la propongo — ma questo numero, prima di firmarla, va saputo.
 
 ## 5.3 🔴 IL GUARDIAN NON SCRIVERA' NIENTE — ED E' GIUSTO COSI'
 
@@ -790,12 +842,29 @@ toppa precedente.** Anche questi riparati e lasciati scritti:
 §5.2**, perche' e' scritta sulle **proprieta'** (multiplo di 0,10, non piu'
 grande di prima) e non sul valore atteso.
 
+🔴 **QUARTO GIRO: un bloccante solo, e non era una classe nuova — era la
+CLASSE 228 NON RILETTA.** Avevo scritto che il passo del volume rende il rischio
+*«mai piu' alto»* del dichiarato. **Falso**: `MathMax(mn,...)` (r.357) **alza**
+il lotto quando il voluto scende sotto il minimo, e il rischio **sfora** —
+0,651% ad ATR 156, **0,834% a 200**, **1,251% a 300**, e ad ATR 65,5 con
+bilancio sotto ~2.170. 🔴 **E la classe stava in checklist da due giorni
+(r.13309), sullo stesso EA e sullo stesso conto**, con scritto *«vale per OGNI
+EA con `InpRiskPercent`»*.
+🔴 **Peggio: la mia regola d'arresto dava il VERDE proprio nel caso che sfora**
+(`0,10/0,10` e' multiplo di 0,10 e piu' piccolo di prima). Aggiunta la terza
+riga che chiude quel buco.
+📕 **E la toppa non e' il paragrafo: e' la CITAZIONE.** La 228 ora e' citata nel
+§5.2 col numero e la riga, cosi' che il prossimo che scrive un pacchetto con
+`InpRiskPercent` dentro la trovi. **Nessuna classe nuova**: aggiungerne una per
+«qualcuno non ha riletto la 228» sarebbe il frullatore.
+
 🎯 **E la disciplina che ne esce, applicata prima di consegnare:** ogni numero
 di riga citato in questo foglio e' stato **verificato col comando contro il
 file che il pacchetto SPEDISCE** (`f33f374` per l'include, `26a1856` per l'EA),
 non contro quello che avevo aperto. Verificati: r.1007, r.1027, 20 righe, 2
 cancelli, 0 `cluster_mappa`, 8 parametri; r.30, r.42, r.239, r.243 dell'EA;
-r.187-188 del dossier.
+r.187-188 del dossier; e per questo giro **r.356-357** dell'EA (il pavimento) e
+**r.13309** della checklist (la classe 228).
 
 **Esito dei controlli deterministici** (`controlla_riga.py`, sui due file
 **separatamente**, mai in pipe — classe 254):
