@@ -1060,6 +1060,12 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  nuovo, perche' il driver scarica il file prova da $PIN (classe 265).
 #  Finche' non e' fatta, R127a NON entra in coda: una riga formalmente
 #  perfetta che gira il modello sbagliato e' peggio di una riga assente.
+#  >>> FATTA IL 13/09/2026. La riga r127a sta IN FONDO A QUESTO FILE, ed
+#      e' #DISARMATA#. Il blocco qui sopra resta scritto com'era perche'
+#      e' la diagnosi che l'ha prodotta, non un errore da cancellare:
+#      quello che NON vale piu' e' solo l'ultima frase ("R127a non entra
+#      in coda"). Correzione: commit 388f341f (file prova, Modello 1 -> 4)
+#      + fefc7f34 (ventitreesimo giro di pin). Dettagli in fondo.
 # =====================================================================
 #  >>> ARMATE il 13/09/2026, DOPO IL PASS DEL SECONDO STRATO -- CINQUE SU
 #  SEI. Il secondo giudizio ha respinto SOLO r125b: InpTP1Pct=0 e =100
@@ -1126,3 +1132,77 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
 da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  >>> R127a -- LA RIGA CHE MANCAVA, CORRETTA IL 13/09/2026 (classe 273).
+#  Il blocco di diagnosi sta piu' su in questo file: qui c'e' la riga e
+#  il perche' del NUMERO che porta.
+#
+#  COSA E' CAMBIATO, in una riga: prove\R127a_slbuffer_NASUSD.txt
+#  ordinava "-Modello 1" scrivendoci accanto "= TICK REALI". Il driver
+#  dice il contrario (walkforward_generico.ps1 r.180: "4 = tick reali
+#  (verita'). 1 = OHLC M1: SOLO screening, mai verdetti"). Adesso ordina
+#  "-Modello 4" e la frase accanto lo dice con le parole del driver.
+#  Commit del file prova: 388f341f. Giro di pin: fefc7f34 (23o giro,
+#  $SHA_ROUND e $SHA_WALK RICALCOLATE e INVARIATE).
+#
+#  >>> PERCHE' R127a VA A 4 MENTRE R127b E R127c SONO STATI PORTATI A 1
+#      IL 12/09 (commit e6c0d70). NON e' un ripensamento: e' che i tre
+#      file non hanno la stessa ancora. <<<
+#    - r127c e' il CANARINO della notte e la sua ancora (R103) e' ESSA
+#      STESSA OHLC M1 -> a tick sarebbe morto per costruzione.
+#    - r127b gira XAUUSD dal 2004: i tick reali su 22 anni NON ESISTONO.
+#    - r127a ha le due condizioni ROVESCIATE, e sono misure, non ricordi:
+#        1. la sua ancora e' a TICK REALI. IS PF 1,34237 DD 0,9670% n 69
+#           +118,82 e OOS PF 1,68815 DD 0,8567% n 86 +300,61 stanno alla
+#           quinta cifra nella riga InpTF=16385 dei CSV SENZA suffisso
+#           risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\
+#             ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_{IS,OOS}.csv.
+#           Il suffisso e' la firma del modello: il driver appende
+#           "_ohlc" quando -Modello non e' 4 (r.1616), e non e' lettera
+#           morta -- 288 CSV "_ohlc" nel repo.
+#        2. i TICK REALI DI NASUSD COPRONO LA FINESTRA. Misurato:
+#           risultati_archivio\misura_tick\REFERTO_MISURA_TICK_NASUSD.txt
+#           (30/08/2026) -> "I TICK REALI DI NASUSD PARTONO DAL
+#           2024.09.26 (166509474 tick)", cioe' ESATTAMENTE il @DAQUANDO
+#           del file. Conferma indipendente, altro EA e altra corsa:
+#           report\MISURA_SLIPPAGE_2026-09-05.md r.112-113, 61,0 M tick
+#           reali su 2024.09.26->2025.06.09 e 94,4 M su
+#           2025.06.10->2026.06.30 = le due meta' di QUESTA finestra.
+#
+#  IL FALSIFICATORE, che e' il motivo per cui la correzione e' BLOCCANTE
+#  e non cosmetica: la stessa cella ancora esiste anche in OHLC, nella
+#  stessa cartella, e NON da' lo stesso numero. Riga InpTF=16385 di
+#  ..._NASUSD_OOS_ohlc.csv: PF 1,85106 e profit +349,01, contro 1,68815 e
+#  +300,61 a tick. Scarto +9,65% = DICIANNOVE VOLTE la tolleranza
+#  congelata di +/-0,5%. In IS e' anche piu' largo: 1,48924 contro
+#  1,34237 = +10,94%, ventun volte. A -Modello 1 il round NON POTEVA
+#  riprodurre la propria ancora PER COSTRUZIONE, e il file dichiara che
+#  fuori tolleranza "il banco e' sporco e il round si ferma prima di
+#  qualunque altro numero": 18 passate per un arresto garantito, con la
+#  colpa data al binario invece che al numero del modello.
+#
+#  COSTO: 9 celle x 2 finestre = 18 passate (controlla_prova.py, non
+#  contate a mano). Il modello dichiarato nei criteri firmati non cambia
+#  -- R127_USCITE_CRITERI.md par. 7 diceva gia' "tick reali" per R127a.
+#  Cambia la stima del tempo, perche' la riga prometteva un OHLC:
+#  [STIMA, NON MISURA] ~4 min, banda 2-6. Calibrata su R88a (96 passate a
+#  tick su U30USD, M5, stessa finestra di 21 mesi, 8,0 min = ~5,0
+#  s/passata) e corretta per il flusso: NASUSD 166,5 M tick contro U30USD
+#  67,6 M dallo stesso script = 2,46x. 18 x 5,0 s x 2,46 = ~3,7 min.
+#
+#  CANCELLO DETERMINISTICO, rifatto sulla versione corretta:
+#    controlla_riga.py --oggetto prova  -> nessun difetto meccanico,
+#      ASCII puro
+#    controlla_prova.py                 -> OK, 9 celle, 18 passate,
+#      0 problemi, EA ABTG_SupRev_NAS_H1_Ottimizzato.mq5, 41 pin
+#    controlla_riga.py --oggetto ps1 (riga sottile) -> 6 PASS
+#
+#  >>> IL PREFISSO '#DISARMATA# ' NON SI TOGLIE QUI. <<<
+#  Manca il PASS del SECONDO STRATO (agente 'controllo-preventivo'), e
+#  non lo da' chi ha scritto la correzione. Regola di Claudio del 09/09:
+#  "ED ALLORA SOCIO, DEVI ASPETTARE".
+#  Nota: le righe R127b e R127c restano pinnate a 1445abf8 con
+#  "-Modello 1", ed e' GIUSTO -- vedi sopra: la' l'OHLC e' voluto.
+# =====================================================================
+#DISARMATA# fefc7f34793905823c2bdde14782265bf3541029 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
