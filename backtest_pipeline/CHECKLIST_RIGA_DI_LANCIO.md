@@ -17510,7 +17510,7 @@ prima volta che non si e' fatto e' costata una quarta passata del cancello.
 
 ---
 
-## 292. 🧩🔬 IL BINARIO SI COMPILA DA **PIU' FILE**: appuntare il solo sorgente principale **NON appunta il binario** (13/09/2026)
+## 302. 🧩🔬 IL BINARIO SI COMPILA DA **PIU' FILE**: appuntare il solo sorgente principale **NON appunta il binario** (13/09/2026)
 
 Trovata dal **controllo preventivo** su `report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md` +
 `backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` (pin `caf5ed6`/`ad2952f`), pacchetto che
@@ -17574,3 +17574,164 @@ disponibile allo stesso costo.
 ### 🔑 La regola in una riga
 *Appuntare il `.mq5` e non l'`.mqh` e' come firmare un contratto e allegare la fotocopia di
 un'altra pagina: il binario che gira e' la SOMMA, e la somma va appuntata tutta.*
+
+📌 **NOTA DI NUMERAZIONE (13/09/2026, seconda passata).** Questa classe era stata scritta come
+**292**, ma il **292 era gia' occupato** dal 12/09 (*«il falsificatore che l'ipotesi nulla soddisfa
+da sola»*, r.17064), e il numero libero era il **302**. Rinumerata. 👉 Chi cita *«classe 292»*
+parlando di **unita' di compilazione** sta citando il numero sbagliato: e' la **302**. E la regola
+che se ne ricava e' la prima riga della 303 qui sotto: **il numero nuovo si cerca col `grep`, non
+si conta a memoria** — `grep -nE "^## [0-9]+\." CHECKLIST_RIGA_DI_LANCIO.md | tail -3`.
+
+---
+
+## 303. 🎚️🔁 L'ATTESA CALCOLATA RI-SCALANDO UN VALORE **GIA' QUANTIZZATO**: il passo viene applicato DUE VOLTE, e l'attesa esce sbagliata (13/09/2026)
+
+Trovata dal **controllo preventivo** alla **seconda** passata su
+`report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md` (pin `0306950`) +
+`backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` (pin `9514cb1`) — pacchetto che ricompila **una
+sedia VIVA** (`ABTG_EMA200` U30USD H1, magic `771531`, conto `50503392`).
+
+🟢 **Prima quello che ha retto**, perche' un elenco di soli difetti descrive male la realta':
+le **sei impronte** SHA256 (LF *e* CRLF per tre file) tornano **tutte e sei** ricalcolate dai blob;
+il re-pin dell'include a `f33f374` **non rompe la compilazione** (verificato: l'EA a `26a1856`
+usa **un solo** simbolo dell'include, `ABTG_GuardiaIngresso`, e i 23 simboli che esistono solo a
+`HEAD` — `ABTG_ClusterSaturo`, `ABTG_TettoSimboloLato_Calc`, ... — **nessuno** e' referenziato);
+zero collisioni di nome fra EA e include; l'include **non dichiara nessun `input`**, quindi il
+conto **43/43** e' esatto (43 `input` veri + 9 `input group`, e il preset ha **44** chiavi di cui
+`InpLogImbuto` e' l'extra dichiarata); i **cinque** blocchi eseguibili sono ri-pinnati a `0306950`
+col marcatore `_v2`; i due cancelli deterministici girano **separati** e sono verdi.
+
+### 🔴 IL DIFETTO
+§5.2 costruisce l'attesa sul lotto **ri-scalando il lotto OSSERVATO in campo**:
+
+```
+gamba 1:  0,20 (in campo a 1,0%)  x 0,65  =  0,130   ->  passo 0,10  ->  atteso 0,10
+gamba 2:  0,30 (in campo a 1,0%)  x 0,65  =  0,195   ->  passo 0,10  ->  atteso 0,10
+```
+
+Ma **`0,20` e `0,30` sono gia' il risultato di `MathFloor`**: i lotti *calcolati* a 1,0% erano
+**`0,2546` e `0,3819`** — e il numero **stava gia' scritto in casa**, in
+`report/DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md` r.187, nella tabella *«LO STEP MORDE»*.
+Ri-scalare il valore arrotondato **applica il passo due volte** e schiaccia l'attesa verso il basso.
+
+**Il conto giusto** (`0,861 EUR/punto/lotto`, validato contro tre P/L veri: `117,0 x 0,861 x 0,20
+= 20,15 EUR` contro `-20,15 EUR` riportati il 04/09; geometria `slDist1 = 1,50 x ATR`,
+`slDist2 = 1,00 x ATR`, quindi **il rapporto fra le due gambe e' sempre 1,5**):
+
+| bilancio | ATR | gamba 1 voluta | **messa** | gamba 2 voluta | **messa** | rischio REALE |
+|---|---:|---:|---:|---:|---:|---:|
+| 5.160 | 65,5 | 0,1982 | **0,10** | 0,2974 | **0,20** | 0,383% |
+| 5.160 | 73,6 | 0,1764 | **0,10** | 0,2646 | **0,20** | 0,430% |
+| 5.160 | 78,0 | 0,1665 | **0,10** | 0,2497 | **0,20** | 0,456% |
+| 5.276 | 65,5 | 0,2027 | **0,20** | 0,3040 | **0,30** | **0,641%** |
+
+👉 **L'attesa vera e' `0,10` e `0,20`** (cioe' **-50% e -33%**), non `0,10` e `0,10` (-50% e -67%).
+La gamba 2 scende a `0,10` **solo con ATR > 98,1 punti**, fuori dall'intervallo misurato in campo
+(65,5 / 73,6 / 78,0).
+🧪 **Controprova che chiude il conto**: lo stesso modello, girato a **1,0%**, riproduce **esattamente**
+i lotti del campo (`0,20` e `0,30` ad ATR 78,0). Se riproduce il campo, descrive la macchina.
+
+### 🔴 E LA META' CHE COSTA DAVVERO: il numero di RISCHIO era **sotto**stimato
+Il pacchetto mette a verbale, sotto la firma di Claudio, *«la sedia girerebbe a **~0,42%**
+effettivo, non a 0,65%»*, con la chiosa *«e' piu' PRUDENTE del dichiarato»*.
+Il rischio reale e' una **banda 0,38%-0,46%**, che nel caso di confine (ATR basso + bilancio alto,
+dove **tutte e due** le gambe salgono di un gradino) arriva a **0,641%**, cioe' **il nominale**.
+👉 *«E' piu' prudente del dichiarato»* e' **falso in quel caso**, ed e' la direzione sbagliata in cui
+sbagliare un numero che qualcuno **firma**.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Un'attesa non si ri-scala mai da un valore osservato se fra il calcolo e l'osservazione c'e'
+   una QUANTIZZAZIONE** (`MathFloor`/`MathRound` sul passo, lotto minimo, tick di prezzo, arrotondamento
+   a N decimali). Si risale al **valore pre-arrotondamento** e si applica il passo **una volta sola**.
+2. 🔎 **E il valore pre-arrotondamento si CERCA prima di ricalcolarlo**: qui stava in un report della
+   stessa cartella. E' la regola del contro-esempio (CLAUDE.md 10/09): *«prima si cerca il file che ha
+   gia' la risposta»*. Costa un `grep`.
+3. 📐 **Un'attesa quantizzata non e' un numero, e' una BANDA**: si dichiara **da cosa dipende**
+   (qui: ATR e bilancio) e **dove sono i confini** (qui: ATR 98,1 e ATR 65,4). Un singolo numero su
+   una grandezza discreta e' una promessa che il passo dopo smentisce.
+4. ⚖️ **Un numero di RISCHIO si consegna col suo caso PEGGIORE**, non col suo caso tipico — a maggior
+   ragione se finisce sotto una firma. `0,38%-0,64%` e' una frase onesta; `~0,42%` non lo e'.
+5. 🛡️ **Nota di merito, che va detta**: la *regola di arresto* scritta accanto (*«fermati solo se il
+   lotto non e' multiplo di `0,10` oppure e' piu' GRANDE di prima»*) **regge lo stesso**, perche' `0,20`
+   non e' piu' grande di `0,30` ed e' multiplo del passo. 👉 Una rete costruita sulle **proprieta'**
+   invece che sul **valore atteso** sopravvive a un valore atteso sbagliato: e' il modo giusto di
+   scriverle.
+
+---
+
+## 304. ⏪📄 IL RE-PIN A UN COMMIT **PIU' VECCHIO** INVALIDA LA PROSA SCRITTA CONTRO `HEAD`: numeri di riga, conteggi di parametri e «date di scadenza» diventano falsi in silenzio (13/09/2026)
+
+Trovata sullo **stesso** pacchetto, ed e' il **danno collaterale della toppa della classe 302**:
+per riparare *«il binario si compila da piu' file»* l'include e' stato ri-appuntato da `HEAD`
+(2461 righe) a **`f33f374`** (1461 righe). La toppa e' **giusta e non rompe la compilazione**
+(verificato simbolo per simbolo). 🔴 **Ma le due sezioni che SPIEGANO perche' la guardia tace sono
+rimaste scritte contro `HEAD`**, e ora descrivono un file che **non viene piu' spedito**:
+
+| quello che il pacchetto dice | vero a `HEAD` | vero a **`f33f374`** (quello spedito) |
+|---|---|---|
+| `ABTG_GuardiaIngresso` sta a **r.1587** | ✅ | ❌ **r.1007** |
+| il fail-open `ABTG_CanaleEsiste()` sta a **r.1719** | ✅ | ❌ **r.1027** |
+| *«in mezzo ci sono **132 righe** e **quattro cancelli**»* (S1, P1, P0, C2) | ✅ | ❌ **20 righe** e **DUE** cancelli (S1, P1) |
+| *«**7 parametri**, default dal secondo in poi»* | ❌ (13) | ❌ **8** (la conclusione — default dal 2o in poi — **regge**) |
+| *«scade quando qualcuno gli cabla `cluster_mappa`»* | ✅ | ❌ **`cluster_mappa` NON ESISTE** (0 occorrenze) |
+
+🔴 **E l'ultima riga e' quella che fa danno**, perche' e' un'istruzione per **chi verra' dopo**:
+il pacchetto avverte che *«nel momento in cui qualcuno cabla `cluster_mappa` questa sedia comincia a
+poter rifiutare e stampare»*. Contro l'include spedito, cablare `cluster_mappa` **non cambia il
+comportamento: non compila proprio**. La scadenza vera e' un'altra e piu' larga — *«quando qualcuno
+ricompila questa sedia contro un include **piu' nuovo** E cabla il parametro»* — e cosi' com'e'
+scritta **la scadenza vera resta non documentata**.
+
+🔴 **Secondo sintomo, nello stesso file**: la v2 ha corretto la ragione in §5.3 (*«la conclusione
+regge, la ragione no»*) **ma ha lasciato in piedi §1.2 C**, che ripete la frase che §5.3 dichiara
+**falsa** (*«Seconda riga della funzione (r.1719)»*). E' la **classe 301** (*la frase sopravvissuta
+alla riscrittura*) applicata a un documento invece che a un file prova.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Quando si cambia un PIN, si rileggono tutte le frasi che parlano di quel file** — e si parte
+   dai **numeri di riga**, che sono la cosa che marcisce per prima e in silenzio:
+   `grep -nE "r\.[0-9]{3,}" DOCUMENTO.md` e si verifica **ognuno** contro `git show PIN:file | sed -n 'Np'`.
+2. 🔴 **Un conteggio (parametri, cancelli, righe) e' un numero di riga travestito**: vale per **una**
+   versione del file. Si scrive sempre **accanto al pin** (*«8 parametri **a `f33f374`**»*), mai nudo.
+3. ⏳ **Una «data di scadenza» di una garanzia va verificata contro il file SPEDITO, non contro `HEAD`.**
+   Se il meccanismo che farebbe scadere la garanzia **non esiste** nella versione spedita, la scadenza
+   e' scritta male e la scadenza **vera** e' ancora da trovare.
+4. 🟢 **E si dice quando la conclusione regge**: qui la guardia tace **piu'** di quanto il pacchetto
+   prometta (due cancelli invece di quattro, fail-open dopo 20 righe invece di 132). La conclusione
+   era giusta, la ragione no — che e' esattamente la lezione del 12/09, e **cambia cosa si deve fare**.
+
+---
+
+## 305. 🤖🗓️ FALSO POSITIVO DEL CANCELLO: `.ToString('yyyy-MM-dd HH:mm:ss')` letto come il **cmdlet `yyyy-MM`** con parametro `-dd` (13/09/2026)
+
+Non e' un difetto di una riga: e' un difetto **del cancello**, e va scritto qui perche' fa **cambiare
+codice che funziona**. Verificato riproducendolo sul pin precedente del pacchetto EMA200:
+
+```
+X [173] [blocco r.236] [il cmdlet 'yyyy-MM' non e' fra quelli di una raccolta] ...
+        cmdlet 'yyyy-MM' non e' nella lista bianca di sola lettura
+```
+
+Il blocco incriminato era **sola lettura** e conteneva
+`$i.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss')`. L'estrattore di cmdlet della **classe 173**
+spezza la stringa di formato sul trattino e prende `yyyy-MM` per un comando e `-dd` per un parametro.
+🔴 **Conseguenza pratica: un FAIL bloccante su un blocco sano**, e la regola di casa (*se il cancello
+dice FAIL, il verdetto e' FAIL*) obbliga a toccare il codice.
+
+**Come si e' aggirato, e perche' l'aggiramento e' accettabile**: invece di formattare la data a mano,
+il blocco emette l'oggetto `DateTime` nudo (`ex5_data=$i.LastWriteTime`) e lascia stampare
+`Format-List`. 🟢 **La leggibilita' NON peggiora** — anzi: su un VPS in locale italiana PowerShell
+stampa `13/09/2026 02:14:33`, che e' il formato che Claudio legge tutti i giorni, invece dell'ISO.
+🟡 **Il solo neo**: dove prima usciva la scritta `-- non presente --`, ora esce un campo **vuoto**.
+Se il file puo' mancare, il «manca» va detto con una parola, non con uno spazio bianco.
+
+### ✅ CHE COSA SI FA
+1. 🔧 **La toppa vera sta nel cancello, non nelle righe**: l'estrattore della classe 173 deve
+   **cancellare le stringhe quotate** prima di cercare i cmdlet. Finche' non e' fatto, questa nota
+   evita che il prossimo perda mezz'ora a capire perche' una data e' diventata un comando.
+2. 🚫 **E la regola non si ammorbidisce**: davanti a un FAIL **non si tira dritto** dicendo *«tanto e'
+   un falso positivo»*. Si **riproduce** il falso positivo (qui: rigirando il cancello sul commit
+   vecchio), lo si **scrive**, e solo allora si cambia il codice — che e' quello che e' successo.
+3. 📏 **Un aggiramento si giudica anche sulla LEGGIBILITA' di cio' che resta**: una toppa che fa
+   passare il cancello ma rende il referto meno leggibile a chi lo deve usare **non e' una toppa,
+   e' un secondo difetto**.
