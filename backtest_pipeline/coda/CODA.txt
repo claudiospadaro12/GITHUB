@@ -1301,3 +1301,32 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  perche' l'ancora congelata e' calcolata proprio a -Deposito 10000).
 #  Il round resta APERTO per costruzione: e' onesto, non incompleto.
 3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
+
+# =====================================================================
+#  R146a/b/c -- LA SECONDA FASCIA DELLE USCITE MAI PROVATE (13/09/2026
+#  sera), preparate dal cercatore-parametri dopo il 🥇🥈🥉 del censimento
+#  dell'11/09 (R127a/b/c, gia' sopra). 236 coppie sedia x manopola mai
+#  mosse e vive nel censimento: queste tre sono la fascia successiva per
+#  valore/costo, non le prossime della lista per numero.
+#  - r146a: InpSLBufferATR su 772361 CostToCost EURJPY H4 (9 celle) --
+#    unica manopola d'uscita viva e mai mossa su quella sedia, che sta a
+#    25,6x contro il pavimento 40x col pedaggio all-in.
+#  - r146c: stesso asse su 772362 CostToCost GBPCAD H4 (9 celle), ma
+#    InpExitMode=1 (il buffer muove ANCHE il bersaglio, non solo lo
+#    stop) -- contro-esempio deliberato contro r146a.
+#  - r146b: InpFridayClose su 771531 EMA200 U30USD H1 (2 celle) -- la
+#    sedia che passa il weekend aperta contro un muro prop statico, in
+#    213 CSV su 213 quell'interruttore e' false.
+#  Scartate con motivo (non file prova): InpTP_R su 772361 (inerte,
+#  InpExitMode=2 non esegue mai quel ramo), InpFridayCloseHour su 771531
+#  (inerte finche' InpFridayClose=false), InpBreakeven su 771531 (NON
+#  isolabile: tocca tre meccanismi insieme, serve un round dedicato),
+#  770901/770924 225JPY (DD 0,12-0,17%: si misurerebbe il pavimento del
+#  lotto) e 772342/772234 (sotto i cancelli di merito/frequenza).
+#  Pin: 25° giro (4858ef6). controlla_prova.py: 3 file, 20 celle,
+#  40 passate, 0 problemi. Restano #DISARMATA# finche' non arriva il
+#  secondo giudizio.
+# =====================================================================
+#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
+#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
+#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
