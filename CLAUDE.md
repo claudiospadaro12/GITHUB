@@ -362,6 +362,41 @@ servono **solo** perche' senza di loro le sedie nascono sbagliate — non sono i
 lavoro, sono il ponteggio. 🔴 **Una giornata che produce solo ponteggio va
 dichiarata come tale**, non raccontata come progresso.
 
+## 🕵️ LO SVILUPPATORE E L'AGENTE DEI CONTROLLI (richiesta di Claudio, 13/09/2026)
+In vista della challenge del 1° ottobre, Claudio ha chiesto un protocollo di
+"zero errori" con un'immagine precisa:
+> _"Pensa a te stesso come diviso in due entità: lo Sviluppatore e l'Agente dei
+> Controlli... Se l'Agente dei Controlli rileva un errore, devi correggerlo
+> autonomamente PRIMA di mostrarmi l'output. Non consegnarmi mai un lavoro
+> dicendo 'ops, c'era un errore, ecco la correzione'."_
+
+🔴 **NON è una regola nuova: è il NOME per IL CANCELLO del 09/09 (qui sopra) e
+per IL CONTRO-ESEMPIO del 10/09.** Da oggi si chiama così, e resta la stessa
+disciplina — un nome nuovo non deve far pensare a un processo parallelo.
+
+- **Lo Sviluppatore** produce (misura, scrive, prepara). **L'Agente dei
+  Controlli** è lo strato 1 (`controlla_riga.py`/`controlla_prova.py`,
+  deterministico) + lo strato 2 (l'agente `controllo-preventivo`, di
+  giudizio) + un'autoverifica PRIMA di invocarli entrambi: errori di
+  sintassi/logica? coerente coi vincoli della challenge (rischio, taglie,
+  conto reale, cancelli di costo)? compatibile con quello già scritto nel
+  repo?
+- 🔴 **Se un errore emerge, si corregge PRIMA di consegnare — mai un "ops,
+  ecco la correzione" in chat.** Le correzioni della notte del 12/13-09 (il
+  verdetto PreOpen Nasdaq riscritto, il pacchetto `EMA200` corretto in
+  quattro passate, la tabella di diagnosi della coda rifatta tre volte)
+  sono successe TUTTE prima che arrivassero a Claudio: è la prova che il
+  metodo funziona, non un elenco di errori da nascondere.
+- ✅ **E la misura della notte che vale come esempio**: un rischio segnalato
+  come "trovato stanotte, decidi subito" (`770611`/`770202` sul 100k) è
+  stato ridimensionato in poche ore a "non emergenza" — non perché si è
+  ammorbidito un criterio, ma perché si è ANDATI A MISURARE
+  (`report/ORB_DOW_100K_COMPRESENZA_2026-09-13.md`) invece di argomentare.
+  Questo è "ricerca prima di agire", applicato.
+- 📌 **Output**: chirurgico. Modifiche mirate, non riscritture intere di file
+  se non serve; si mostra cosa è stato controllato e l'esito, non tutto il
+  ragionamento.
+
 ## 🔁 REGOLA DELLA SECONDA CACCIA (richiesta di Claudio, 19/08)
 **Quando un round dichiara un motore SENZA EDGE, gli agenti partono DA SOLI
 a cercare soluzioni sul web** (Code Base, TradingView, GitHub, paper, forum)
