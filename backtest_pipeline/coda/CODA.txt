@@ -1293,4 +1293,11 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Nota: le righe R127b e R127c restano pinnate a 1445abf8 con
 #  "-Modello 1", ed e' GIUSTO -- vedi sopra: la' l'OHLC e' voluto.
 # =====================================================================
-#DISARMATA# 3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
+#  >>> ARMATA il 13/09/2026 DOPO IL TERZO GIUDIZIO (rifatto da zero, non
+#  ereditato). Due FAIL prima di questo: classe 273 (-Modello invertito,
+#  corretto) e classe 308 (occupazione del posto + un secondo meccanismo
+#  sul parziale ancorato al rischio + quantizzazione + clamp asimmetrica,
+#  tutti DICHIARATI nel file invece di eliminati cambiando il deposito,
+#  perche' l'ancora congelata e' calcolata proprio a -Deposito 10000).
+#  Il round resta APERTO per costruzione: e' onesto, non incompleto.
+3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
