@@ -1,0 +1,558 @@
+#####################################################################
+#  CODA_12 -- PER-TRADE: DEAL, POSIZIONI, RAPPORTO                  #
+#  MARCATORE_CODA_12_PERTRADE_POSIZIONI_v1                           #
+#  ora locale di questa macchina: 2026-09-13 08:08:27
+#  SOLA LETTURA: apre file e stampa numeri.                          #
+#####################################################################
+
+cartella letta : C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\Common\Files
+               (unico bersaglio ammesso: Common\Files di questo utente.
+                Non e' la cartella dati di NESSUN terminale, e non si puo'
+                cambiare da riga di comando: questa riga non ha parametri.)
+
+=== I PER-TRADE PRESENTI, dal piu' fresco al piu' vecchio ===
+file abtg_trades_*.csv trovati: 59
+
+  abtg_trades_ABTG_FiboH4_Multi_GBPUSD_772060.csv
+     data file  : 2026-09-13 08:08:17   dimensione: 50.3 KB
+     deal uscita: 737
+     POSIZIONI  : 643   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.1462   (deal per posizione)
+     close_time : dal 2010.01.11 06:24:40  al  2026.06.26 10:48:40
+
+  abtg_trades_ABTG_EMA200_GBPUSD_771561.csv
+     data file  : 2026-09-13 08:00:38   dimensione: 77.8 KB
+     deal uscita: 1316
+     POSIZIONI  : 718   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.8329   (deal per posizione)
+     close_time : dal 2016.08.24 15:05:40  al  2026.06.17 07:00:40
+
+  abtg_trades_ABTG_EMA200_AUDJPY_771560.csv
+     data file  : 2026-09-13 07:54:13   dimensione: 78.3 KB
+     deal uscita: 1345
+     POSIZIONI  : 730   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.8425   (deal per posizione)
+     close_time : dal 2016.08.10 01:13:40  al  2026.06.22 15:09:40
+
+  abtg_trades_ABTG_DAX_Apertura_EU_F40EUR_786205.csv
+     data file  : 2026-09-13 07:46:59   dimensione: 11.8 KB
+     deal uscita: 195
+     POSIZIONI  : 152   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.2829   (deal per posizione)
+     close_time : dal 2025.06.10 09:47:13  al  2026.06.29 17:30:00
+
+  abtg_trades_ABTG_DAX_Apertura_EU_F40EUR_786204.csv
+     data file  : 2026-09-13 07:46:59   dimensione: 11.8 KB
+     deal uscita: 195
+     POSIZIONI  : 152   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.2829   (deal per posizione)
+     close_time : dal 2025.06.10 09:47:13  al  2026.06.29 17:30:00
+
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786203.csv
+     data file  : 2026-09-13 07:45:52   dimensione: 2.1 KB
+     deal uscita: 35
+     POSIZIONI  : 24   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.4583   (deal per posizione)
+     close_time : dal 2025.06.17 13:30:02  al  2026.06.09 09:25:01
+
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786202.csv
+     data file  : 2026-09-13 07:44:16   dimensione: 16.5 KB
+     deal uscita: 274
+     POSIZIONI  : 193   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.4197   (deal per posizione)
+     close_time : dal 2025.06.11 10:23:12  al  2026.06.25 09:19:38
+
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786201.csv
+     data file  : 2026-09-13 07:42:42   dimensione: 16.5 KB
+     deal uscita: 270
+     POSIZIONI  : 193   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.399   (deal per posizione)
+     close_time : dal 2025.06.11 10:23:12  al  2026.06.25 09:19:38
+
+  abtg_trades_ABTG_EMA200_U30USD_766620.csv
+     data file  : 2026-09-13 07:41:44   dimensione: 14.3 KB
+     deal uscita: 237
+     POSIZIONI  : 132   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.7955   (deal per posizione)
+     close_time : dal 2024.10.22 10:22:06  al  2025.06.06 01:02:36
+
+  abtg_trades_ABTG_EMA200_U30USD_766621.csv
+     data file  : 2026-09-13 07:41:44   dimensione: 14.3 KB
+     deal uscita: 237
+     POSIZIONI  : 132   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.7955   (deal per posizione)
+     close_time : dal 2024.10.22 10:22:06  al  2025.06.06 01:02:36
+
+  ABTG_Trades_100k.csv
+     data file  : 2026-09-13 07:41:15   dimensione: 4.4 KB
+     ESITO      : NON CONTATO -- intestazione senza colonna position_id: [pid;symbol;side;volume;open_time;open_price;close_time;close_price;commission;swap;profit;strategy;magic;close_reason;session_high;session_low]
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783510.csv
+     data file  : 2026-09-13 07:40:18   dimensione: 7.9 KB
+     deal uscita: 130
+     POSIZIONI  : 82   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5854   (deal per posizione)
+     close_time : dal 2025.06.19 08:56:37  al  2026.06.17 15:24:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783511.csv
+     data file  : 2026-09-13 07:40:17   dimensione: 7.9 KB
+     deal uscita: 130
+     POSIZIONI  : 82   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5854   (deal per posizione)
+     close_time : dal 2025.06.19 08:56:37  al  2026.06.17 15:24:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783501.csv
+     data file  : 2026-09-13 07:38:04   dimensione: 11.1 KB
+     deal uscita: 184
+     POSIZIONI  : 116   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5862   (deal per posizione)
+     close_time : dal 2025.06.15 23:05:00  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783500.csv
+     data file  : 2026-09-13 07:38:03   dimensione: 11.1 KB
+     deal uscita: 184
+     POSIZIONI  : 116   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5862   (deal per posizione)
+     close_time : dal 2025.06.15 23:05:00  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783221.csv
+     data file  : 2026-09-13 07:30:10   dimensione: 7.8 KB
+     deal uscita: 131
+     POSIZIONI  : 108   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.213   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783220.csv
+     data file  : 2026-09-13 07:30:10   dimensione: 7.8 KB
+     deal uscita: 131
+     POSIZIONI  : 108   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.213   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783211.csv
+     data file  : 2026-09-13 07:22:02   dimensione: 7.5 KB
+     deal uscita: 125
+     POSIZIONI  : 107   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.1682   (deal per posizione)
+     close_time : dal 2025.06.16 15:00:00  al  2026.06.12 15:00:00
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783210.csv
+     data file  : 2026-09-13 07:22:00   dimensione: 7.5 KB
+     deal uscita: 125
+     POSIZIONI  : 107   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.1682   (deal per posizione)
+     close_time : dal 2025.06.16 15:00:00  al  2026.06.12 15:00:00
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783230.csv
+     data file  : 2026-09-13 07:19:52   dimensione: 5.4 KB
+     deal uscita: 90
+     POSIZIONI  : 75   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.2   (deal per posizione)
+     close_time : dal 2025.06.20 14:21:07  al  2026.06.17 15:24:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783231.csv
+     data file  : 2026-09-13 07:19:52   dimensione: 5.4 KB
+     deal uscita: 90
+     POSIZIONI  : 75   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.2   (deal per posizione)
+     close_time : dal 2025.06.20 14:21:07  al  2026.06.17 15:24:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783200.csv
+     data file  : 2026-09-13 07:17:43   dimensione: 7.8 KB
+     deal uscita: 131
+     POSIZIONI  : 108   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.213   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783201.csv
+     data file  : 2026-09-13 07:17:41   dimensione: 7.8 KB
+     deal uscita: 131
+     POSIZIONI  : 108   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.213   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_EMA200_U30USD_766650.csv
+     data file  : 2026-09-13 07:09:50   dimensione: 7 KB
+     deal uscita: 116
+     POSIZIONI  : 64   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.8125   (deal per posizione)
+     close_time : dal 2025.06.16 12:47:13  al  2026.06.11 18:29:07
+
+  abtg_trades_ABTG_SuperWave_NASUSD_779340.csv
+     data file  : 2026-09-13 07:04:18   dimensione: 3.5 KB
+     deal uscita: 58
+     POSIZIONI  : 58   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.13 14:32:17  al  2026.06.23 14:53:34
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779310.csv
+     data file  : 2026-09-13 05:46:04   dimensione: 6.9 KB
+     deal uscita: 115
+     POSIZIONI  : 101   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.1386   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779300.csv
+     data file  : 2026-09-13 04:57:47   dimensione: 6.9 KB
+     deal uscita: 115
+     POSIZIONI  : 102   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.1275   (deal per posizione)
+     close_time : dal 2025.06.16 08:01:49  al  2026.06.12 14:40:44
+
+  abtg_trades_ABTG_CostToCost_EURJPY_779430.csv
+     data file  : 2026-09-13 04:22:48   dimensione: 14.7 KB
+     deal uscita: 242
+     POSIZIONI  : 242   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2022.08.10 08:00:00  al  2026.06.29 23:59:59
+
+  abtg_trades_ABTG_EMA200_U30USD_786400.csv
+     data file  : 2026-09-13 04:21:11   dimensione: 25.7 KB
+     deal uscita: 427
+     POSIZIONI  : 215   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.986   (deal per posizione)
+     close_time : dal 2025.06.12 13:44:51  al  2026.06.26 16:30:02
+
+  abtg_trades_ABTG_EMA200_U30USD_786300.csv
+     data file  : 2026-09-13 04:18:51   dimensione: 36.3 KB
+     deal uscita: 602
+     POSIZIONI  : 257   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 2.3424   (deal per posizione)
+     close_time : dal 2025.06.12 13:44:51  al  2026.06.26 15:07:28
+
+  abtg_trades_ABTG_EMA200_U30USD_786200.csv
+     data file  : 2026-09-13 04:15:17   dimensione: 20.4 KB
+     deal uscita: 336
+     POSIZIONI  : 212   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5849   (deal per posizione)
+     close_time : dal 2025.06.12 13:40:00  al  2026.06.26 15:07:28
+
+  abtg_trades_ABTG_EMA200_U30USD_786100.csv
+     data file  : 2026-09-13 04:09:45   dimensione: 31.7 KB
+     deal uscita: 527
+     POSIZIONI  : 250   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 2.108   (deal per posizione)
+     close_time : dal 2025.06.12 13:44:51  al  2026.06.26 15:07:28
+
+  abtg_trades_ABTG_MaxMinNotte_D30EUR_779670.csv
+     data file  : 2026-09-13 04:04:14   dimensione: 1.1 KB
+     deal uscita: 17
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.2143   (deal per posizione)
+     close_time : dal 2025.06.10 08:20:27  al  2026.06.12 08:55:08
+
+  abtg_trades_ABTG_ORB_Ottimizzato_U30USD_779660.csv
+     data file  : 2026-09-13 04:02:27   dimensione: 8.5 KB
+     deal uscita: 136
+     POSIZIONI  : 136   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.10 21:00:00  al  2026.06.25 15:33:11
+
+  abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD_770201.csv
+     data file  : 2026-09-09 10:47:27   dimensione: 23 KB
+     deal uscita: 388
+     POSIZIONI  : 371   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.0458   (deal per posizione)
+     close_time : dal 2024.10.01 14:31:57  al  2026.06.29 14:30:03
+
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770101.csv
+     data file  : 2026-09-09 09:54:21   dimensione: 19.5 KB
+     deal uscita: 330
+     POSIZIONI  : 325   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.0154   (deal per posizione)
+     close_time : dal 2024.10.01 13:17:59  al  2026.06.25 09:19:14
+
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770151.csv
+     data file  : 2026-09-09 09:54:19   dimensione: 19.5 KB
+     deal uscita: 330
+     POSIZIONI  : 325   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.0154   (deal per posizione)
+     close_time : dal 2024.10.01 13:17:59  al  2026.06.25 09:19:14
+
+  abtg_trades_ABTG_IBRetest_NASUSD_772900.csv
+     data file  : 2026-09-09 08:48:57   dimensione: 3.2 KB
+     deal uscita: 49
+     POSIZIONI  : 49   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 19:15:34  al  2026.06.25 21:00:00
+
+  abtg_trades_ABTG_IBRetest_NASUSD_772950.csv
+     data file  : 2026-09-09 08:48:57   dimensione: 3.2 KB
+     deal uscita: 49
+     POSIZIONI  : 49   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 19:15:34  al  2026.06.25 21:00:00
+
+  abtg_trades_ABTG_IBRetest_D30EUR_772900.csv
+     data file  : 2026-09-09 08:43:42   dimensione: 7 KB
+     deal uscita: 107
+     POSIZIONI  : 107   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 21:00:00  al  2026.06.25 21:00:00
+
+  abtg_trades_ABTG_IBRetest_D30EUR_772950.csv
+     data file  : 2026-09-09 08:43:42   dimensione: 7 KB
+     deal uscita: 107
+     POSIZIONI  : 107   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 21:00:00  al  2026.06.25 21:00:00
+
+  abtg_trades_ABTG_IBRetest_U30USD_772950.csv
+     data file  : 2026-09-09 08:25:58   dimensione: 3.5 KB
+     deal uscita: 53
+     POSIZIONI  : 53   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 12:16:38  al  2026.06.12 21:00:00
+
+  abtg_trades_ABTG_IBRetest_U30USD_772900.csv
+     data file  : 2026-09-09 08:25:58   dimensione: 3.5 KB
+     deal uscita: 53
+     POSIZIONI  : 53   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 12:16:38  al  2026.06.12 21:00:00
+
+  abtg_trades_ABTG_LVNArbitro_U30USD_769950.csv
+     data file  : 2026-09-08 22:44:28   dimensione: 43.3 KB
+     deal uscita: 618
+     POSIZIONI  : 618   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.10 14:33:13  al  2026.06.29 21:00:00
+
+  abtg_trades_ABTG_LVNArbitro_U30USD_769900.csv
+     data file  : 2026-09-08 22:44:28   dimensione: 43.3 KB
+     deal uscita: 618
+     POSIZIONI  : 618   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.10 14:33:13  al  2026.06.29 21:00:00
+
+  abtg_trades_ABTG_OpeningReversalB_U30USD_769400.csv
+     data file  : 2026-09-08 18:58:30   dimensione: 0.1 KB
+     ESITO      : SOLA INTESTAZIONE (zero deal di uscita).
+                  Sono DUE cose diverse e non si confondono: la passata
+                  ha girato e non ha chiuso niente, OPPURE una gamba
+                  successiva ha troncato il file di quella buona.
+
+  abtg_trades_ABTG_OpeningReversalB_U30USD_769450.csv
+     data file  : 2026-09-08 18:22:48   dimensione: 0.1 KB
+     ESITO      : SOLA INTESTAZIONE (zero deal di uscita).
+                  Sono DUE cose diverse e non si confondono: la passata
+                  ha girato e non ha chiuso niente, OPPURE una gamba
+                  successiva ha troncato il file di quella buona.
+
+  abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770661.csv
+     data file  : 2026-09-08 17:55:21   dimensione: 7.2 KB
+     deal uscita: 119
+     POSIZIONI  : 119   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 15:04:45  al  2026.06.29 14:59:08
+
+  abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770611.csv
+     data file  : 2026-09-08 17:55:20   dimensione: 7.2 KB
+     deal uscita: 119
+     POSIZIONI  : 119   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.06.11 15:04:45  al  2026.06.29 14:59:08
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778151.csv
+     data file  : 2026-08-18 14:05:03   dimensione: 1 KB
+     deal uscita: 15
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.0714   (deal per posizione)
+     close_time : dal 2025.08.19 08:33:27  al  2026.06.24 08:03:05
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778150.csv
+     data file  : 2026-08-18 14:05:02   dimensione: 1 KB
+     deal uscita: 15
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.0714   (deal per posizione)
+     close_time : dal 2025.08.19 08:33:27  al  2026.06.24 08:03:05
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778141.csv
+     data file  : 2026-08-18 14:03:09   dimensione: 1.3 KB
+     deal uscita: 21
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 16:27:19
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778140.csv
+     data file  : 2026-08-18 14:03:09   dimensione: 1.3 KB
+     deal uscita: 21
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 16:27:19
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778131.csv
+     data file  : 2026-08-18 14:01:20   dimensione: 1.4 KB
+     deal uscita: 22
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5714   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 17:30:01
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778130.csv
+     data file  : 2026-08-18 14:01:20   dimensione: 1.4 KB
+     deal uscita: 22
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5714   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 17:30:01
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778121.csv
+     data file  : 2026-08-18 13:59:18   dimensione: 0.9 KB
+     deal uscita: 14
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 17:30:01
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778120.csv
+     data file  : 2026-08-18 13:59:18   dimensione: 0.9 KB
+     deal uscita: 14
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 17:30:01
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778111.csv
+     data file  : 2026-08-18 13:57:22   dimensione: 1.3 KB
+     deal uscita: 21
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 08:47:07
+
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778110.csv
+     data file  : 2026-08-18 13:57:22   dimensione: 1.3 KB
+     deal uscita: 21
+     POSIZIONI  : 14   <<< e' questa l'unita' dell'Emendamento A
+     rapporto   : 1.5   (deal per posizione)
+     close_time : dal 2025.08.19 09:31:57  al  2026.06.24 08:47:07
+
+=== IL CONFRONTO DEI GEMELLI (regola tripla, punto 3) ===
+Due celle identiche tranne il magic DEVONO dare gli stessi conti.
+Se non li danno, il banco non e' deterministico e la misura NON si legge.
+  abtg_trades_ABTG_CostToCost_EURJPY : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR : 5 celle, GEMELLI DIVERGENTI -- deal 35/270/274/330 e posizioni 24/193/325
+        abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786203.csv  35 deal  24 posizioni  (2026-09-13 07:45:52)
+        abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786202.csv  274 deal  193 posizioni  (2026-09-13 07:44:16)
+        abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786201.csv  270 deal  193 posizioni  (2026-09-13 07:42:42)
+        abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770101.csv  330 deal  325 posizioni  (2026-09-09 09:54:21)
+        abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770151.csv  330 deal  325 posizioni  (2026-09-09 09:54:19)
+  abtg_trades_ABTG_DAX_Apertura_EU_F40EUR : 2 celle, TUTTE a 195 deal / 152 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_EMA200_AUDJPY : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_EMA200_GBPUSD : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_EMA200_U30USD : 7 celle, GEMELLI DIVERGENTI -- deal 116/237/336/427/527/602 e posizioni 64/132/212/215/250/257
+        abtg_trades_ABTG_EMA200_U30USD_766620.csv  237 deal  132 posizioni  (2026-09-13 07:41:44)
+        abtg_trades_ABTG_EMA200_U30USD_766621.csv  237 deal  132 posizioni  (2026-09-13 07:41:44)
+        abtg_trades_ABTG_EMA200_U30USD_766650.csv  116 deal  64 posizioni  (2026-09-13 07:09:50)
+        abtg_trades_ABTG_EMA200_U30USD_786400.csv  427 deal  215 posizioni  (2026-09-13 04:21:11)
+        abtg_trades_ABTG_EMA200_U30USD_786300.csv  602 deal  257 posizioni  (2026-09-13 04:18:51)
+        abtg_trades_ABTG_EMA200_U30USD_786200.csv  336 deal  212 posizioni  (2026-09-13 04:15:17)
+        abtg_trades_ABTG_EMA200_U30USD_786100.csv  527 deal  250 posizioni  (2026-09-13 04:09:45)
+  abtg_trades_ABTG_FiboH4_Multi_GBPUSD : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_IBRetest_D30EUR : 2 celle, TUTTE a 107 deal / 107 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_IBRetest_NASUSD : 2 celle, TUTTE a 49 deal / 49 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_IBRetest_U30USD : 2 celle, TUTTE a 53 deal / 53 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_LVNArbitro_U30USD : 2 celle, TUTTE a 618 deal / 618 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_MaxMinNotte_D30EUR : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR : 10 celle, GEMELLI DIVERGENTI -- deal 14/15/21/22 e posizioni 14
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778151.csv  15 deal  14 posizioni  (2026-08-18 14:05:03)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778150.csv  15 deal  14 posizioni  (2026-08-18 14:05:02)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778141.csv  21 deal  14 posizioni  (2026-08-18 14:03:09)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778140.csv  21 deal  14 posizioni  (2026-08-18 14:03:09)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778131.csv  22 deal  14 posizioni  (2026-08-18 14:01:20)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778130.csv  22 deal  14 posizioni  (2026-08-18 14:01:20)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778121.csv  14 deal  14 posizioni  (2026-08-18 13:59:18)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778120.csv  14 deal  14 posizioni  (2026-08-18 13:59:18)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778111.csv  21 deal  14 posizioni  (2026-08-18 13:57:22)
+        abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778110.csv  21 deal  14 posizioni  (2026-08-18 13:57:22)
+  abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD : una sola cella, nessun gemello da confrontare.
+  abtg_trades_ABTG_OpeningReversalB_U30USD : 2 celle, TUTTE a 0 deal / 0 posizioni -- GEMELLI COERENTI
+  abtg_trades_ABTG_ORB_Ottimizzato_U30USD : 3 celle, GEMELLI DIVERGENTI -- deal 119/136 e posizioni 119/136
+        abtg_trades_ABTG_ORB_Ottimizzato_U30USD_779660.csv  136 deal  136 posizioni  (2026-09-13 04:02:27)
+        abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770661.csv  119 deal  119 posizioni  (2026-09-08 17:55:21)
+        abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770611.csv  119 deal  119 posizioni  (2026-09-08 17:55:20)
+  abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD : 14 celle, GEMELLI DIVERGENTI -- deal 90/115/125/130/131/184 e posizioni 75/82/101/102/107/108/116
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783510.csv  130 deal  82 posizioni  (2026-09-13 07:40:18)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783511.csv  130 deal  82 posizioni  (2026-09-13 07:40:17)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783501.csv  184 deal  116 posizioni  (2026-09-13 07:38:04)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783500.csv  184 deal  116 posizioni  (2026-09-13 07:38:03)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783221.csv  131 deal  108 posizioni  (2026-09-13 07:30:10)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783220.csv  131 deal  108 posizioni  (2026-09-13 07:30:10)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783211.csv  125 deal  107 posizioni  (2026-09-13 07:22:02)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783210.csv  125 deal  107 posizioni  (2026-09-13 07:22:00)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783230.csv  90 deal  75 posizioni  (2026-09-13 07:19:52)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783231.csv  90 deal  75 posizioni  (2026-09-13 07:19:52)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783200.csv  131 deal  108 posizioni  (2026-09-13 07:17:43)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783201.csv  131 deal  108 posizioni  (2026-09-13 07:17:41)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779310.csv  115 deal  101 posizioni  (2026-09-13 05:46:04)
+        abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779300.csv  115 deal  102 posizioni  (2026-09-13 04:57:47)
+  abtg_trades_ABTG_SuperWave_NASUSD : una sola cella, nessun gemello da confrontare.
+
+=== RIEPILOGO IN UNA TABELLA SOLA ===
+nome                                                        deal  posizioni  rapporto  data file
+ABTG_Trades_100k.csv                                           -          -         -  2026-09-13 07:41:15
+abtg_trades_ABTG_CostToCost_EURJPY_779430.csv                242        242         1  2026-09-13 04:22:48
+abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770101.csv           330        325    1.0154  2026-09-09 09:54:21
+abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770151.csv           330        325    1.0154  2026-09-09 09:54:19
+abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786201.csv           270        193     1.399  2026-09-13 07:42:42
+abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786202.csv           274        193    1.4197  2026-09-13 07:44:16
+abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_786203.csv            35         24    1.4583  2026-09-13 07:45:52
+abtg_trades_ABTG_DAX_Apertura_EU_F40EUR_786204.csv           195        152    1.2829  2026-09-13 07:46:59
+abtg_trades_ABTG_DAX_Apertura_EU_F40EUR_786205.csv           195        152    1.2829  2026-09-13 07:46:59
+abtg_trades_ABTG_EMA200_AUDJPY_771560.csv                   1345        730    1.8425  2026-09-13 07:54:13
+abtg_trades_ABTG_EMA200_GBPUSD_771561.csv                   1316        718    1.8329  2026-09-13 08:00:38
+abtg_trades_ABTG_EMA200_U30USD_766620.csv                    237        132    1.7955  2026-09-13 07:41:44
+abtg_trades_ABTG_EMA200_U30USD_766621.csv                    237        132    1.7955  2026-09-13 07:41:44
+abtg_trades_ABTG_EMA200_U30USD_766650.csv                    116         64    1.8125  2026-09-13 07:09:50
+abtg_trades_ABTG_EMA200_U30USD_786100.csv                    527        250     2.108  2026-09-13 04:09:45
+abtg_trades_ABTG_EMA200_U30USD_786200.csv                    336        212    1.5849  2026-09-13 04:15:17
+abtg_trades_ABTG_EMA200_U30USD_786300.csv                    602        257    2.3424  2026-09-13 04:18:51
+abtg_trades_ABTG_EMA200_U30USD_786400.csv                    427        215     1.986  2026-09-13 04:21:11
+abtg_trades_ABTG_FiboH4_Multi_GBPUSD_772060.csv              737        643    1.1462  2026-09-13 08:08:17
+abtg_trades_ABTG_IBRetest_D30EUR_772900.csv                  107        107         1  2026-09-09 08:43:42
+abtg_trades_ABTG_IBRetest_D30EUR_772950.csv                  107        107         1  2026-09-09 08:43:42
+abtg_trades_ABTG_IBRetest_NASUSD_772900.csv                   49         49         1  2026-09-09 08:48:57
+abtg_trades_ABTG_IBRetest_NASUSD_772950.csv                   49         49         1  2026-09-09 08:48:57
+abtg_trades_ABTG_IBRetest_U30USD_772900.csv                   53         53         1  2026-09-09 08:25:58
+abtg_trades_ABTG_IBRetest_U30USD_772950.csv                   53         53         1  2026-09-09 08:25:58
+abtg_trades_ABTG_LVNArbitro_U30USD_769900.csv                618        618         1  2026-09-08 22:44:28
+abtg_trades_ABTG_LVNArbitro_U30USD_769950.csv                618        618         1  2026-09-08 22:44:28
+abtg_trades_ABTG_MaxMinNotte_D30EUR_779670.csv                17         14    1.2143  2026-09-13 04:04:14
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778110.csv    21         14       1.5  2026-08-18 13:57:22
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778111.csv    21         14       1.5  2026-08-18 13:57:22
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778120.csv    14         14         1  2026-08-18 13:59:18
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778121.csv    14         14         1  2026-08-18 13:59:18
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778130.csv    22         14    1.5714  2026-08-18 14:01:20
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778131.csv    22         14    1.5714  2026-08-18 14:01:20
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778140.csv    21         14       1.5  2026-08-18 14:03:09
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778141.csv    21         14       1.5  2026-08-18 14:03:09
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778150.csv    15         14    1.0714  2026-08-18 14:05:02
+abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_778151.csv    15         14    1.0714  2026-08-18 14:05:03
+abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD_770201.csv        388        371    1.0458  2026-09-09 10:47:27
+abtg_trades_ABTG_OpeningReversalB_U30USD_769400.csv            0          0         0  2026-09-08 18:58:30
+abtg_trades_ABTG_OpeningReversalB_U30USD_769450.csv            0          0         0  2026-09-08 18:22:48
+abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770611.csv           119        119         1  2026-09-08 17:55:20
+abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770661.csv           119        119         1  2026-09-08 17:55:21
+abtg_trades_ABTG_ORB_Ottimizzato_U30USD_779660.csv           136        136         1  2026-09-13 04:02:27
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779300.csv   115        102    1.1275  2026-09-13 04:57:47
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_779310.csv   115        101    1.1386  2026-09-13 05:46:04
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783200.csv   131        108     1.213  2026-09-13 07:17:43
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783201.csv   131        108     1.213  2026-09-13 07:17:41
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783210.csv   125        107    1.1682  2026-09-13 07:22:00
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783211.csv   125        107    1.1682  2026-09-13 07:22:02
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783220.csv   131        108     1.213  2026-09-13 07:30:10
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783221.csv   131        108     1.213  2026-09-13 07:30:10
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783230.csv    90         75       1.2  2026-09-13 07:19:52
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783231.csv    90         75       1.2  2026-09-13 07:19:52
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783500.csv   184        116    1.5862  2026-09-13 07:38:03
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783501.csv   184        116    1.5862  2026-09-13 07:38:04
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783510.csv   130         82    1.5854  2026-09-13 07:40:18
+abtg_trades_ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_783511.csv   130         82    1.5854  2026-09-13 07:40:17
+abtg_trades_ABTG_SuperWave_NASUSD_779340.csv                  58         58         1  2026-09-13 07:04:18
+
+per-trade contati: 58 su 59   gruppi di gemelli divergenti: 5
+
+COME SI LEGGE: la colonna POSIZIONI e' l'unita' dei cancelli di casa
+(Emendamento A del 16/08: >= 150 OPERAZIONI per parte). La colonna deal
+e' quella che i CSV di riepilogo chiamano Trades, e NON e' la stessa cosa:
+il rapporto stampato qui accanto dice di quanto sbaglierebbe chi le
+confondesse. Il nome del file NON dice la FINESTRA: per sapere quale
+finestra descrive, si guarda la gamba che ha girato PER ULTIMA.
+
+Questa riga HA SOLO LETTO E STAMPATO.
