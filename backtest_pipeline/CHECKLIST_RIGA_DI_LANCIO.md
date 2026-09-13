@@ -17789,3 +17789,25 @@ cercare nel posto sbagliato **con la sicurezza di chi ha un metodo**.
    giusto cosi' — ma «scritta prima» non vuol dire «esatta». **Una tabella scritta prima va rotta
    apposta prima**, cercando la combinazione che le fa dire la cosa sbagliata. Se non si trova il
    contro-esempio, non si e' capita la misura abbastanza da consegnarla.
+
+## 306. Pulizia per DATA DI MODIFICA scambia un collegamento con un file morto (13/09/2026)
+
+**Il caso**: riga di "alleggerimento Desktop" (VPS) che archivia e cancella ogni
+file con `LastWriteTime` antecedente a oggi. Ha zippato e rimosso, insieme ai
+referti vecchi, **i collegamenti `.lnk` dei terminali MT5 sul Desktop di
+Claudio** — recuperati poi dallo zip, nessuna perdita reale, ma il difetto
+c'era ed è arrivato in produzione.
+
+**La causa**: un collegamento (`.lnk`) non cambia mai `LastWriteTime` dopo la
+creazione, anche se viene usato ogni giorno. Un filtro "vecchio = inutile"
+basato solo sulla data di modifica confonde **"non è stato toccato di
+recente"** con **"non serve più"** — falso per qualunque scorciatoia, non solo
+per i collegamenti MT5.
+
+**La regola**: ogni riga che pulisce/archivia file per età deve **escludere per
+estensione** ciò che non invecchia per uso (`*.lnk` prima di tutto; valgono lo
+stesso principio i file `.url`, i `.ini` di configurazione mai riscritti, le
+cartelle). Si scrive `-Exclude "*.lnk"` (o equivalente) nella riga stessa, non
+si scopre dopo dal buco lasciato. E la rete di sicurezza resta comunque
+obbligatoria (zippare **prima** di cancellare): è quella che ha reso questo
+caso recuperabile in un minuto invece che una perdita vera.
