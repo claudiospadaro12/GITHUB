@@ -143,11 +143,29 @@
 # ---------------------------------------------------------------------
 #  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
 #
-#  - n: quasi COSTANTE lungo l'asse. Il buffer non tocca l'ingresso (il
-#    segnale e' il Supertrend + confluenza EMA), tocca solo dove muore il
-#    trade. Attesa: n OOS fra 80 e 95 su tutte e 9 le celle. Se n crolla
-#    sotto 60 o esplode sopra 120, il buffer sta cambiando qualcosa che
-#    non capisco e il round si ferma per capire cosa.
+#  - n: >>> QUI C'ERA UNA FRASE FALSA, ED E' STATA TOLTA IL 13/09/2026.
+#    Diceva: "n: quasi COSTANTE lungo l'asse. Il buffer non tocca
+#    l'ingresso (il segnale e' il Supertrend + confluenza EMA), tocca solo
+#    dove muore il trade."
+#    LA PRIMA META' E' VERA E RESTA: il buffer NON tocca il SEGNALE
+#    GREZZO. In OnNewBar tutto cio' che decide -- Supertrend (dir/line),
+#    ATR, tocco su [2], conferma su [1], confluenza EMA -- e' calcolato
+#    PRIMA di Enter(), e InpSLBufferPips compare per la prima volta a
+#    r.247, cioe' DENTRO Enter(). Verificato riga per riga.
+#    LA SECONDA META' E' FALSA, E LA CONCLUSIONE CON LEI: il buffer non
+#    tocca il segnale, ma tocca QUALI SEGNALI VENGONO VALUTATI (r.179 e
+#    r.181: con una posizione o un pendente vivo il segnale nuovo e'
+#    scartato prima di essere calcolato) e QUANTI DEAL produce ogni
+#    posizione (il parziale a 1R, r.326, si allontana col buffer). Sono
+#    DUE meccanismi diversi, tutti e due monotoni lungo l'asse: stanno
+#    scritti per intero nella sezione CLASSE 308 qui sotto, insieme alla
+#    SOGLIA DI LETTURA congelata PRIMA dei CSV.
+#    ATTESA, che resta quella e non si ammorbidisce: n OOS fra 80 e 95 su
+#    tutte e 9 le celle. Se n crolla sotto 60 o esplode sopra 120, il
+#    buffer sta cambiando qualcosa che non capisco e il round si ferma per
+#    capire cosa. >>> MA ADESSO SO CHE COSA ANDARE A GUARDARE, e la soglia
+#    che decide se il confronto FRA CELLE si legge e' la (pre) qui sotto,
+#    non questa banda.
 #  - PF: attesa 1,3 - 1,9 in OOS. NON mi aspetto una salita monotona:
 #    uno stop piu' largo compra win rate e vende payoff (misurato in R47
 #    sul parziale, stesso meccanismo economico).
@@ -163,6 +181,382 @@
 #    ammazzare il PF. Se la cella oltre 2035 ha PF sotto 1,00, la risposta
 #    onesta e' "dentro la frontiera del costo questa sedia non ha merito",
 #    e si scrive cosi'.
+# ---------------------------------------------------------------------
+#  ###  CLASSE 308 -- I TRE DIFETTI CHE RESTANO DENTRO QUESTO ROUND  ###
+#  ###  Dichiarati il 13/09/2026, dopo il SECONDO FAIL del cancello  ###
+# ---------------------------------------------------------------------
+#  LA CLASSE 308 (backtest_pipeline\CHECKLIST_RIGA_DI_LANCIO.md) in una
+#  riga: un parametro messo ad asse che finisce anche AL DENOMINATORE di
+#  un costo, di una quantizzazione o di una durata fabbrica DA SOLO una
+#  pendenza lungo l'asse, e quella pendenza si legge come RISULTATO. E'
+#  la stessa famiglia gia' dichiarata oggi su
+#  prove\R145a_volexp_kstop_M30_NASUSD.txt (punto 8 del contro-esempio),
+#  che qui vale da modello di scrittura -- NON da modello di contenuto:
+#  quell'EA ha un contatore che questo NON HA (vedi D1).
+#
+#  >>> LA CATENA, COPIATA DAL SORGENTE E NON RIASSUNTA
+#      (ABTG_SupRev_NAS_H1_Ottimizzato.mq5, 652 righe al 13/09/2026):
+#      r.179  return;                  // con posizione aperta non cerco
+#      r.181  if(HasPending()) return; //   nuovi ingressi
+#      r.247  double buf=InpSLBufferPips*pip;
+#      r.248  double sl = isLong ? MathMin(stLine,ext)-buf
+#                                : MathMax(stLine,ext)+buf;
+#      r.251  double risk=isLong?(entry-sl):(sl-entry);  <<< risk CONTIENE buf
+#      r.252  double minDist=MathMax(buf,
+#                 (double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point);
+#      r.253  if(risk<minDist){ Log("SL troppo vicino: skip."); return; }
+#      r.255  double tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR;
+#      r.258  double totLot=LotByRisk(risk);
+#      r.326  double tgt=isLong?openP+risk*InpTP1_R:openP-risk*InpTP1_R;
+#      r.428  lot=MathFloor(lot/st)*st;         <<< quantizzazione al passo
+#  Cioe': InpSLBufferPips NON sta solo dove lo sto mettendo. Entra in
+#  'risk', e 'risk' comanda IL TARGET (r.255), IL LOTTO (r.258) e IL
+#  BERSAGLIO DEL PARZIALE (r.326). Nessuno dei tre difetti che ne escono
+#  si toglie senza cambiare il MOTORE o la TAGLIA del banco -- e la taglia
+#  qui NON si tocca (par. 6 dei criteri congelati: l'ancora e' a
+#  -Deposito 10000, vedi la nota in fondo a questa sezione). Quindi si
+#  DICHIARANO, e si congela PRIMA dei CSV la soglia oltre la quale il
+#  confronto fra celle non si legge.
+#
+# ---------------------------------------------------------------------
+#  D1 [!] L'OCCUPAZIONE DEL POSTO -- IL DIFETTO PRINCIPALE, E NON E' TOLTO
+# ---------------------------------------------------------------------
+#  IL FATTO: SL e TP si allargano INSIEME col buffer. Lo SL perche' il
+#  buffer e' sottratto/sommato alla linea (r.248); il TP perche' e'
+#  ancorato a 'risk', che contiene il buffer (r.255). Quindi la posizione
+#  deve percorrere una distanza PIU' GRANDE per chiudersi, in tutte e due
+#  le direzioni.
+#  IL NUMERO, sullo stop mediano MISURATO di 51,65 punti indice
+#  (CANCELLO_COSTO_FLOTTA_2026-09-10.md, n=4 gambe in stop):
+#      cella    3  ->  stop 51,68 idx  (indice 0, l'ANCORA)
+#      cella 3003  ->  stop 81,68 idx  =  +58,1%
+#  e il TP a 3R scala dello stesso fattore, per aritmetica.
+#  In un cammino aleatorio senza deriva il TEMPO cresce come il QUADRATO
+#  della distanza: (81,68/51,68)^2 = 2,50x di durata attesa fra la cella
+#  ancora e la cella di fondo griglia. [DERIVATO -- e' un ORDINE DI
+#  GRANDEZZA, non un numero da riportare in un referto.]
+#  CONSEGUENZA: con r.179 e r.181 un segnale che arriva mentre il posto e'
+#  occupato viene SCARTATO PRIMA DI ESSERE CALCOLATO. Le 9 celle NON
+#  vedono lo stesso insieme di segnali, ed e' una selezione MONOTONA lungo
+#  l'asse -- la forma esatta della classe 308 punto 1.
+#
+#  >>> IL CONTRO-ESEMPIO, E RIDUCE IL DIFETTO SENZA TOGLIERLO. Va scritto
+#      qui perche' e' la cosa che potrebbe far sbagliare in ECCESSO la
+#      taglia di D1: quel 2,50x e' un TETTO, non una stima.
+#      InpExitOnFlip e' PINNATO ACCESO (come in campo) e r.176-177
+#      chiudono TUTTE le posizioni del magic al flip del Supertrend, a
+#      QUALUNQUE distanza dal prezzo. Il momento del flip NON dipende dal
+#      buffer: dipende solo da InpStMult/InpStAtrPeriod, identici su tutte
+#      e 9 le celle. Quindi la durata vera e' min(tempo a SL/TP, tempo al
+#      flip) -- CENSURATA verso l'alto da una variabile uguale per tutti.
+#      Man mano che il buffer cresce, la durata SATURA sulla distribuzione
+#      del flip e l'effetto di selezione SMETTE di crescere.
+#      >>> DI QUANTO SATURA: [NON MISURATO]. Serve la frazione di
+#          posizioni che escono per flip invece che per SL/TP, cella per
+#          cella, e questo round NON la produce (vedi sotto).
+#
+#  >>> E ADESSO LA COSA SCOMODA, DETTA PER PRIMA PERCHE' E' LA PIU'
+#      IMPORTANTE: QUESTO EA NON HA UN CONTATORE DI SEGNALI GREZZI.
+#      Verificato nel sorgente, non assunto: OnTester (r.605-618) esporta
+#      SETTE statistiche e basta, e l'intestazione del CSV e' scritta a
+#      r.638 alla lettera:
+#        "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
+#         Sharpe Ratio,Equity DD %,Trades"
+#      Zero contatori di segnale, zero contatori di rifiuto, zero colonne
+#      di diagnosi. Il falsificatore che R145a usa -- la colonna "Segnali
+#      Grezzi" di gCntSegnali -- QUI NON ESISTE, e NON LO INVENTO.
+#      >>> Quindi l'AMPIEZZA di D1 e' [NON MISURATA] e questo round NON
+#          PUO' MISURARLA DIRETTAMENTE. Si misura solo di RIFLESSO, sulla
+#          colonna 'Trades', con la soglia (pre) qui sotto -- che e' una
+#          misura PIU' DEBOLE, e va detto invece che spacciarla per la
+#          stessa cosa.
+#      >>> LA VIA AL NUMERO, col suo costo, perche' "non si molla" vuol
+#          dire trovare una misura in piu' e mai un'asticella piu' bassa:
+#          un contatore di segnali nell'EA (incrementato DOPO r.181 e
+#          PRIMA di Enter(), cioe' nello stesso punto in cui sta quello di
+#          ABTG_VolExpBreak) e' UNA RIGA di codice piu' una colonna in
+#          OnTester. Ma e' una MODIFICA ALL'EA, e questo file misura UNA
+#          variabile: si propone per un round successivo, NON si fa qui.
+#          Finche' non c'e', il limite resta dichiarato.
+#
+# ---------------------------------------------------------------------
+#  D1-bis [!] IL SECONDO MECCANISMO CHE MUOVE n, ED E' PURE MONOTONO
+# ---------------------------------------------------------------------
+#  E' DIVERSO DA D1 E VA LETTO A PARTE, altrimenti un calo di n viene
+#  attribuito tutto all'occupazione del posto quando puo' non esserlo.
+#  La colonna 'Trades' del CSV conta i DEAL DI USCITA, non le posizioni
+#  (classe 226). Questo EA apre DUE gambe per segnale (1/3 a mercato,
+#  r.276-277; 2/3 su pendente, r.289-290) e il PARZIALE a 1R (r.324-337)
+#  produce un deal di uscita IN PIU' ogni volta che scatta.
+#  >>> E il bersaglio del parziale e' openP +/- risk*InpTP1_R, con 'risk'
+#      preso dallo SL VERO della posizione (r.323), che CONTIENE il
+#      buffer. Con un buffer piu' largo 1R e' PIU' LONTANO, il parziale
+#      scatta MENO SPESSO, e la colonna 'Trades' SCENDE -- a parita'
+#      esatta di segnali e di posizioni.
+#  >>> QUINDI: un calo di n lungo l'asse ha ALMENO TRE cause diverse
+#      (occupazione D1, parziale che scatta meno D1-bis, clamp minDist
+#      D3), e la colonna 'Trades' da sola NON LE SEPARA. Questo round non
+#      puo' dire quale delle tre ha morso. Dichiarato.
+#      Il per-trade (ExportTrades, r.605) porta i deal con DEAL_TYPE e
+#      DEAL_POSITION_ID: chi volesse separarle ha li' la strada -- ma le
+#      9 celle condividono il magic e ogni passata SOVRASCRIVE il
+#      per-trade della precedente, quindi la separazione NON e'
+#      disponibile in questo round senza una corsa dedicata cella per
+#      cella. Dichiarato anche questo.
+#
+# ---------------------------------------------------------------------
+#  (pre) LA SOGLIA DI LETTURA, CONGELATA QUI, PRIMA DI QUALUNQUE CSV
+# ---------------------------------------------------------------------
+#  SI LEGGE PER PRIMA, sulla colonna 'Trades', e PUO' ANNULLARE il
+#  confronto fra celle anche se tutti gli altri numeri sono belli.
+#
+#  IL PUNTO DI PARTENZA, che qui e' piu' forte che in R145a: il generatore
+#  di segnale e' IDENTICO su tutte e 9 le celle PER COSTRUZIONE (il buffer
+#  compare la prima volta a r.247, dentro Enter(); il tetto giornaliero e'
+#  pinnato a 0 = spento; la finestra oraria e' spenta; le news sono
+#  spente). Quindi, in assenza di D1, D1-bis e D3, n sarebbe IDENTICO
+#  cella per cella -- non "simile": IDENTICO. Ogni differenza di n E'
+#  l'artefatto, ed e' per questo che si legge n e non altro.
+#
+#    (pre-A) n IDENTICO su tutte e 9 le celle
+#            ==> nessuna delle tre selezioni ha morso. L'asse e' pulito e
+#                le celle si confrontano fra loro senza riserve.
+#    (pre-B) scarto di n fra la cella ancora (3) e una qualunque altra
+#            cella  >0  e  <=10%
+#            ==> il confronto SI LEGGE, ma la differenza di PF va
+#                dichiarata INSIEME allo scarto di n, e ogni differenza di
+#                PF piu' piccola del limite calcolato qui sotto NON e'
+#                attribuibile al buffer.
+#    (pre-C) scarto di n  >10%  fra la cella 3 e la cella 3003
+#            ==> le celle non campionano lo stesso insieme di operazioni:
+#                qualunque differenza di PF fra quelle celle NON e'
+#                attribuibile al buffer, e il verdetto su quel confronto
+#                e' "NON ANCORA MISURATO", non un risultato. NON e' un
+#                morto: e' un numero che manca, e il modo di prenderlo e'
+#                scritto in D1 (il contatore di segnali).
+#
+#  >>> PERCHE' PROPRIO IL 10%, dichiarato ADESSO e non dopo aver visto i
+#      numeri. NON e' copiato da R145a per simmetria: li' vale un altro
+#      conto (0,024 R su un edge di 0,15 R). Qui il conto e' questo, e si
+#      fa sull'ancora OOS, che e' l'unica distribuzione che conosco:
+#        PF OOS ancora = 1,68815 su n = 86.
+#        Con InpTP_RR = 3,0, un modello a due esiti (+3R / -1R) da'
+#        PF = 3W/(1-W) -> W = 1,68815/4,68815 = 0,360
+#        cioe' ~31 vincenti e ~55 perdenti [DERIVATO -- idealizzato: il
+#        parziale a 1R e il trailing sul Supertrend spezzano i due esiti,
+#        quindi e' un ORDINE DI GRANDEZZA, non la distribuzione vera].
+#        Il 10% di 86 sono ~9 operazioni. Nel caso peggiore quelle 9
+#        cadono tutte dallo stesso lato:
+#            9 perdenti in meno  ->  PF = 93/46 = 2,02   (+0,34)
+#            9 vincenti in meno  ->  PF = 66/55 = 1,20   (-0,49)
+#      >>> CIOE' UNO SCARTO DI n DEL 10% PUO' SPOSTARE IL PF DI -0,49 /
+#          +0,34, CHE E' PIU' LARGO DELL'INTERA BANDA ATTESA DEL ROUND
+#          (1,3 - 1,9). A quel punto il confronto fra le due celle non
+#          contiene piu' nessuna informazione sul buffer: e' il punto in
+#          cui la lettura e' CERTAMENTE morta, e per questo e' il tetto.
+#      >>> E LA FORMULA PER LA (pre-B), cosi' non si stima a occhio.
+#          Con V vincenti e L perdenti nella cella ancora (OOS: V ~ 31,
+#          L ~ 55) e uno scarto di k operazioni, i due casi peggiori sono
+#              PF_max = PF_ancora * L / (L-k)     (mancano k PERDENTI)
+#              PF_min = PF_ancora * (V-k) / V     (mancano k VINCENTI)
+#          Verifica sui numeri gia' scritti sopra: k=9 -> 1,68815*55/46 =
+#          2,02 e 1,68815*22/31 = 1,20, gli stessi due valori.
+#          In pratica bastano k=3 (il 3,5% di n) per muovere il PF fra
+#          +0,10 e -0,16 nel caso peggiore. Sotto quella taglia una
+#          differenza di PF fra celle non si commenta: si scrive e basta.
+#  >>> IL CONTRO-ESEMPIO DELLA SOGLIA, perche' un cancello che non puo'
+#      NON scattare non e' un cancello: le 9 celle POSSONO benissimo
+#      uscire con n identico. Il motore e' H1 su 21 mesi con ~155
+#      operazioni totali, cioe' una ogni ~3 giorni feriali: se le
+#      posizioni chiudono in fretta rispetto alla distanza fra i segnali,
+#      il posto e' quasi sempre libero e l'occupazione non morde. Le due
+#      uscite sono DISTINGUIBILI guardando UNA colonna sola, e quella
+#      colonna c'e' gia' -- non serve toccare il codice per rispondere.
+#      (Se invece n esce identico ma il PARZIALE ha smesso di scattare,
+#      D1-bis dovrebbe farlo SCENDERE: quindi n identico su tutte e 9 e'
+#      gia' di per se' un fatto che chiede una spiegazione, e va scritta.)
+#
+# ---------------------------------------------------------------------
+#  D2 [!] LA QUANTIZZAZIONE DEL LOTTO A -Deposito 10000 -- QUANTIFICATA
+# ---------------------------------------------------------------------
+#  Il lotto e' inversamente proporzionale a 'risk' (r.258 -> LotByRisk),
+#  e a r.428 viene TRONCATO al passo del volume (MathFloor, non round).
+#  Quindi il RISCHIO VERO di ogni cella non e' l'1,00% dichiarato: e'
+#  l'1,00% meno quello che il troncamento porta via, e quel "quanto"
+#  cambia da cella a cella.
+#  IL CONTO, rifatto qui cella per cella (rischio 100 EUR su deposito
+#  10.000, valore punto 0,855 EUR/punto indice/lotto [MISURATO,
+#  ANALISI_TAGLIA_FASE1_2026-08-27.md r.37], passo volume 0,10
+#  [MISURATO indirettamente su tutto il CSV storico dei trade -- DIARIO
+#  17/08/2026: "su U30USD/NASUSD lo step del volume e' 0,10, verificato
+#  su tutto il CSV storico: solo multipli di 0,10, mentre EURAUD ha
+#  0,02/0,13/0,15/0,42"], stop mediano 51,65 idx):
+#
+#    cella  stop idx  lotto voluto  lotto vero  rischio reale
+#        3     51,68       2,263       2,20        97,21%
+#      378     55,43       2,110       2,10        99,52%
+#      753     59,18       1,976       1,90        96,14%
+#     1128     62,93       1,859       1,80        96,85%
+#     1503     66,68       1,754       1,70        96,92%
+#     1878     70,43       1,661       1,60        96,35%
+#     2253     74,18       1,577       1,50        95,14%
+#     2628     77,93       1,501       1,50        99,95%
+#     3003     81,68       1,432       1,40        97,77%
+#
+#  >>> AMPIEZZA: 95,14% (cella 2253) - 99,95% (cella 2628) = 4,81 PUNTI
+#      PERCENTUALI di rischio reale lungo l'asse.
+#  >>> E LA FORMA CONTA PIU' DELL'AMPIEZZA, ed e' la differenza con
+#      R145a: li' la quantizzazione fabbricava una RAMPA MONOTONA (3,3%
+#      -> 8,2%), cioe' esattamente la forma di una delle due risposte.
+#      QUI NO: e' una DENTELLATURA (su e giu': 97,2 / 99,5 / 96,1 / 96,9 /
+#      96,9 / 96,4 / 95,1 / 99,95 / 97,8), e il massimo cade all'OTTAVA
+#      cella, non alla prima. Quindi NON puo' fabbricare da sola una
+#      salita o una discesa lungo l'asse: aggiunge RUMORE di +/-2,4 punti
+#      percentuali sul rischio, non una pendenza.
+#  >>> DOVE MORDE E DOVE NO, perche' non e' uguale su tutte le colonne:
+#      - Profit, Expected Payoff, Equity DD %  -> scalano col lotto,
+#        quindi portano dentro tutto il 4,81%;
+#      - Profit Factor -> e' un RAPPORTO di somme, e un fattore di scala
+#        comune a tutte le operazioni della cella SI SEMPLIFICA. Il PF e'
+#        quindi quasi immune. "Quasi" e non "del tutto": dentro la stessa
+#        cella ogni operazione ha il SUO stop e quindi il SUO
+#        troncamento, e la dispersione per-trade di quel residuo e'
+#        [NON MISURATA] -- il 4,81% qui sopra e' calcolato sullo stop
+#        MEDIANO, cioe' su una cella sola per ogni riga.
+#      >>> Conseguenza pratica, e va usata: LA RISPOSTA DI QUESTO ROUND SI
+#          LEGGE SUL PF, che e' la colonna su cui D2 morde di meno. Profit
+#          ed Expected Payoff si leggono, ma con il +/-2,4% appiccicato.
+#  >>> LA GAMBA 1/3 + 2/3 NON AGGIUNGE NIENTE, ed e' algebra non fortuna:
+#      lotMkt = NormVol(totLot*0,3333) e lotPend = NormVol(totLot-lotMkt)
+#      (r.261 e r.272). totLot e lotMkt sono gia' multipli del passo,
+#      quindi la loro differenza lo e' per costruzione e il secondo
+#      NormVol non tronca niente. Verificato cella per cella: lotMkt +
+#      lotPend = totLot su tutte e 9. (Vale finche' lotMkt>0; il ripiego
+#      di r.271 al VOLUME_MIN e' un ALTRO difetto -- vedi sotto.)
+#  >>> IL PAVIMENTO DEL LOTTO (classe 228) NON MORDE QUI, e il perche' e'
+#      un numero: i lotti voluti stanno fra 1,43 e 2,26 e le gambe piu'
+#      piccole fra 0,40 e 0,70, cioe' 4-7 volte sopra un VOLUME_MIN di
+#      0,10. Il ripiego di r.271 e il MathMax(mn,...) di r.429 non si
+#      attivano.
+#      >>> CON UN BUCO DICHIARATO: SYMBOL_VOLUME_MIN e SYMBOL_VOLUME_STEP
+#          DI NASUSD NON SONO MAI STATI MISURATI DIRETTAMENTE. R114
+#          (risultati_archivio\R114_CORSA_20260827\REFERTO_R114.txt) copre
+#          U30USD, D30EUR e XAUUSD e NON NASUSD -- il buco e' gia' agli
+#          atti in report\PACCHETTO_R4_DA_FIRMARE_2026-09-11.md r.134 e
+#          r.542 (riga M1: sonda da fare, costo "minuti"). Lo 0,10 usato
+#          qui e' MISURATO DI RIFLESSO, sui volumi dei trade veri, ed e'
+#          la stessa fonte che R145a usa: e' una misura, ma indiretta.
+#      >>> IL CONTRO-ESEMPIO CHE DICE QUANTO CONTA IL BUCO: se il passo
+#          vero fosse 0,01 invece di 0,10, tutta l'ampiezza di D2
+#          crollerebbe da 4,81 a ~0,5 punti percentuali e il difetto
+#          sparirebbe. Cioe' lo 0,10 e' l'ipotesi CONSERVATIVA: se e'
+#          sbagliato, e' sbagliato dalla parte giusta. Nessun passo
+#          plausibile lo PEGGIORA (servirebbe uno step >0,10, che sul CSV
+#          storico non compare mai).
+#  >>> PERCHE' NON SI TOGLIE CAMBIANDO IL DEPOSITO -- ED E' LA COSA CHE
+#      DISTINGUE QUESTO ROUND DA R145a. In R145a il difetto si e' tolto
+#      lanciando a -Deposito 100000 (classe 229). QUI NON SI PUO':
+#      l'ANCORA di questo file (IS PF 1,34237 n 69 profit +118,82 / OOS PF
+#      1,68815 n 86 profit +300,61) e' stata calcolata a -Deposito 10000,
+#      e il profitto assoluto lo dimostra -- a 100.000 sarebbe ~10 volte
+#      piu' alto. Cambiare taglia romperebbe la riproduzione dell'ancora,
+#      che i criteri congelati PRIMA dei numeri pretendono AL CENTESIMO
+#      (R127_USCITE_CRITERI.md par. 6: "n IDENTICO; PF entro +/-0,5%.
+#      Fuori: banco sporco, il round si ferma").
+#      >>> Fra "un round che parte con un banco sporco per costruzione" e
+#          "un round che parte con un rumore di +/-2,4% sul rischio,
+#          scritto qui", si sceglie il secondo. E si sceglie A VOCE ALTA:
+#          -Deposito 10000 NON e' un dettaglio di igiene, e' una
+#          CONDIZIONE DI VALIDITA' dell'ancora, ed e' il motivo per cui D2
+#          resta dentro.
+#      >>> LA STRADA PULITA, per chi verra' dopo: si rifa' l'asse a
+#          -Deposito 100000 in un round SEPARATO, che NON prova a
+#          riprodurre questa ancora e lo dichiara. Costo: altre 18
+#          passate. NON si fa qui.
+#
+# ---------------------------------------------------------------------
+#  D3 [!] LA CLAMP minDist CHE MORDE SOLO NELLE CELLE BASSE
+# ---------------------------------------------------------------------
+#  r.252-253:
+#      double minDist=MathMax(buf,STOPS_LEVEL*_Point);
+#      if(risk<minDist){ Log("SL troppo vicino: skip."); return; }
+#  L'ASIMMETRIA E' ALGEBRICA, non empirica, e si dimostra in due righe:
+#  a r.248 lo SL e' costruito SOTTRAENDO buf al livello (long), quindi
+#      risk = (entry - MathMin(stLine,ext)) + buf = baseStop + buf
+#  con baseStop >= 0 in ogni ingresso normale (la linea Supertrend in
+#  trend rialzista e il minimo delle ultime 5 barre stanno SOTTO l'ask).
+#  Quindi risk >= buf SEMPRE, e il ramo 'MathMax(buf, ...)' della clamp
+#  NON PUO' MAI SCATTARE. Resta solo il ramo STOPS_LEVEL, che chiede
+#      baseStop + buf < STOPS_LEVEL*_Point
+#  cioe' una condizione che DIVENTA IMPOSSIBILE non appena
+#      buf >= STOPS_LEVEL*_Point.
+#  Su NASUSD (Digits=2 -> PipSize()=_Point=0,01) buf in punti MT5 vale
+#  ESATTAMENTE InpSLBufferPips. Quindi:
+#      cella    3 -> la clamp puo' scattare se STOPS_LEVEL >    3 punti
+#      cella  378 -> ... solo se STOPS_LEVEL >  378 punti (= 3,78 idx)
+#      cella 3003 -> ... solo se STOPS_LEVEL > 3003 punti (= 30,0 idx)
+#  >>> LA CELLA PIU' ESPOSTA E' LA CELLA ANCORA (buffer 3), ED E' LA
+#      PEGGIORE CHE POTESSE CAPITARE: e' la cella che deve riprodurre
+#      l'ancora e che fa da metro a tutte le altre. Se la clamp scarta
+#      trade, li scarta li' e (quasi) solo li'. Un n piu' basso nella
+#      cella 3 rispetto alle altre NON sarebbe "il buffer che fa entrare
+#      di piu'": sarebbe la clamp.
+#  >>> IL VALORE DI SYMBOL_TRADE_STOPS_LEVEL DI NASUSD E' [NON MISURATO].
+#      Verificato oggi, non assunto: nel repo non esiste nessuna riga
+#      GSPEC per NASUSD, e il referto R114 (l'unica sonda di specifiche
+#      che abbiamo) non riporta STOPS_LEVEL per NESSUN simbolo.
+#  >>> MA SI PUO' LIMITARE DALL'ALTO, E DUE LIMITI CI SONO:
+#      1. le 4 gambe in stop misurate su questa sedia hanno stop fra 9,70
+#         e 51,65 punti indice (970-5165 punti MT5)
+#         [report\PIANO_CHALLENGE_OTTOBRE_v2.md, riga 6: "minimo 9,70 idx
+#         = 5,4x"]. Se STOPS_LEVEL fosse maggiore di 970 punti, quella
+#         gamba da 9,70 idx non sarebbe potuta esistere. Campione n=4:
+#         limite DEBOLE, ma e' un fatto accaduto.
+#      2. l'ancora ha prodotto 69+86 = 155 operazioni con QUESTA
+#         configurazione: se la clamp fosse rimasta chiusa spesso, quel
+#         numero sarebbe piu' basso. E' un limite ancora piu' debole,
+#         perche' non so quante volte si e' chiusa.
+#  >>> IL CONTATORE DI RIFIUTO NON ESISTE, E NON LO INVENTO. La clamp
+#      lascia UNA SOLA traccia: il Log("SL troppo vicino: skip.") di
+#      r.253. E' un Print gestito da Log() (r.119), che stampa solo se
+#      InpVerbose e' true -- e in questo file InpVerbose e' PINNATO A
+#      false. Quindi in questo round la clamp e' MUTA, e nessuna colonna
+#      del CSV la conta (vedi D1: l'OptFrame ha 7 statistiche e zero
+#      contatori).
+#      >>> LA VIA AL NUMERO, dichiarata col suo costo: (a) misurare
+#          STOPS_LEVEL di NASUSD con la sonda gia' prevista al punto M1 di
+#          PACCHETTO_R4_DA_FIRMARE_2026-09-11.md (minuti, non tocca
+#          niente), oppure (b) un round di diagnosi con InpVerbose=true e
+#          la conta delle righe "SL troppo vicino" nel Giornale. Nessuna
+#          delle due si fa QUI: la (b) cambierebbe un pin di questo file e
+#          la regola di casa e' una variabile alla volta.
+#  >>> E LA COSA CHE RENDE D3 SOPPORTABILE, detta per ultima perche' non
+#      cancella il difetto: qualunque cosa faccia la clamp nella cella
+#      ancora, la FACEVA GIA' nella corsa d'archivio dell'08/08, che e'
+#      la stessa configurazione. Se l'ancora torna dentro tolleranza (n
+#      IDENTICO, PF entro +/-0,5%), allora il comportamento della clamp in
+#      quella cella e' RIPRODOTTO, non nuovo. Quello che resta aperto e'
+#      il CONFRONTO fra la cella 3 e le altre otto -- ed e' esattamente
+#      la cosa che la soglia (pre) sopra sorveglia.
+#
+# ---------------------------------------------------------------------
+#  RIASSUNTO ONESTO DI QUESTA SEZIONE, in quattro righe
+# ---------------------------------------------------------------------
+#  D1 + D1-bis: le 9 celle possono non campionare lo stesso insieme di
+#     segnali e di deal. Ampiezza [NON MISURATA], tetto teorico 2,50x di
+#     durata, ridotto di un ammontare ignoto dall'uscita al flip. Si
+#     sorveglia sulla colonna 'Trades' con la soglia (pre).
+#  D2: rumore di +/-2,4 punti percentuali sul rischio reale (ampiezza
+#     4,81), NON monotono, quasi tutto fuori dal PF. QUANTIFICATO, e non
+#     si toglie perche' il deposito e' vincolato dall'ancora.
+#  D3: la clamp puo' scartare trade SOLO nella cella ancora. Asimmetria
+#     ALGEBRICA, ampiezza [NON MISURATA], STOPS_LEVEL di NASUSD da
+#     misurare.
+#  >>> NESSUNO DEI TRE SI TOGLIE DENTRO QUESTO ROUND. Tutti e tre sono
+#      DICHIARATI PRIMA DEI NUMERI, e uno solo -- la (pre) -- puo'
+#      annullare la risposta del round. Un difetto scritto prima e' un
+#      limite; scoperto dopo, sarebbe un risultato sbagliato.
+#
 # ---------------------------------------------------------------------
 #  MAGIC VERGINE 779410 (verificato per ricerca su tutto il repo,
 #  11/09/2026: zero occorrenze).
