@@ -41,8 +41,26 @@ secondi** (avvio 03:30:02, pubblicazione 03:31): non aveva round veri. Oggi ne h
    credenziali scadute);
 2. e' partita ed e' **morta a meta'** (e allora non pubblica niente, per come e'
    scritta);
-3. e' **ancora in corso** — improbabile a 80 minuti su 46 attesi, ma non escluso
-   se una singola passata si e' impuntata.
+3. e' **ancora in corso**, impuntata su una riga.
+
+🔴 **CORREZIONE DEL 13/09, 05:30 — e sposta la terza ipotesi da "improbabile"
+a PIU' PROBABILE.** Avevo scritto che una corsa viva a 80 minuti era improbabile.
+Poi ho aperto il modo in cui il runner esegue una riga, **r.773-775**:
+```
+$p = Start-Process -FilePath "powershell.exe" -ArgumentList $argv -NoNewWindow -PassThru -Wait `
+      -RedirectStandardOutput $log -RedirectStandardError ($log + ".err")
+```
+👉 **`-Wait` SENZA NESSUN TETTO DI TEMPO.** Non c'e' un `-Timeout`, non c'e' un
+`WaitForExit(ms)`, non c'e' nessun controllo di durata da nessuna parte del file.
+**Una singola riga che si impunta blocca l'intera corsa per SEMPRE**, e il runner
+non se ne accorge, non la uccide e non va avanti.
+🔴 Quindi a **3 ore** dall'avvio la spiegazione *"e' ancora li', ferma su una
+riga"* non e' la meno probabile: **e' quella che il codice rende piu' facile**. E
+ha una conseguenza pratica: e' la sola ipotesi in cui **le misure non sono perse**,
+perche' i round gia' fatti hanno gia' scritto i loro CSV sul banco.
+👉 **Per questo la riga 0 della tabella di verita' (`State = Running`) sta in
+CIMA e si legge per prima.** E vale piu' che mai: 🔴 **NON si chiude niente di
+propria iniziativa** — un `terminal64` sul VPS puo' essere una sedia in forward.
 
 ---
 
