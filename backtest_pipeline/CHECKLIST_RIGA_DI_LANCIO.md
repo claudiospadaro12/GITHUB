@@ -17981,3 +17981,46 @@ testo**: l'esito nel referto per-round porta il **numero** di rilievi —
 identifica la causa**: identifica un INSIEME di cause. Dire "questo codice significa X"
 e' legittimo solo se la condizione ha **un solo** ramo — altrimenti si deve andare a
 leggere quale ramo ha scattato, o dichiarare che non lo si sa.*
+
+---
+
+## 310. 🔀 UN BORDO CHE E' LA STESSA CELLA DEL SUO OPPOSTO, CLASSIFICATO "LIMITE FISICO" NEI CRITERI FIRMATI (13/09/2026)
+
+**Il caso**: `R125b_parziale_U30USD.txt` mette ad asse `InpTP1Pct` su
+`ABTG_ORB_Ottimizzato`. In `ManageTP1()` la guardia e' `if(InpTP1Pct<=0){...return;}`
+(r.656) e `if(gPart1 || InpTP1Pct>=100){...return;}` (r.667): **sia 0 sia 100 escono
+senza toccare parziale ne' breakeven.** Sono la STESSA cella per costruzione.
+
+Il file prova (r.79-81) descrive 100 come *"chiude tutto al primo bersaglio: caso
+degenere, estremo dell'altopiano"* — **falso**, a 100 non si chiude niente. E
+`R125_ORB_COSTO_CRITERI.md` r.110 (§3-bis, **firmato da Claudio**) classifica 0 e 100
+come due bordi **LIMITE FISICO distinti**, che per la stessa procedura **contano
+dentro i blocchi massimali** (P2/P3) e nel **baricentro** (P7). Un doppione non
+dichiarato entra quindi due volte nell'altopiano misurato.
+
+**E non era la prima volta che si incontrava questa manopola**: `R136c_parziale_
+U30USD.txt` (12/09, un giorno prima) tratta la STESSA guardia su un ALTRO EA
+(`ABTG_EMA200.mq5:410`) correttamente — *"100 e' ESCLUSO DI PROPOSITO... sarebbe la
+cella 0 misurata due volte"*. La lezione c'era gia' in casa: non era tornata indietro
+su un file scritto il giorno prima.
+
+**La regola, in generale**: un limite `<=` e un limite `>=` sulla STESSA manopola,
+scritti in punti diversi del codice, possono chiudersi sullo stesso bordo per vie
+diverse. Prima di dichiarare un estremo "LIMITE FISICO" o "FINE GRIGLIA" nei criteri
+firmati, si legge OGNI guardia che nomina quella manopola (non solo quella piu'
+vicina al valore), e si verifica che l'estremo alto e l'estremo basso non collassino
+sulla stessa configurazione.
+
+### ✅ CHE COSA SI FA
+1. Per ogni manopola messa ad asse: si cercano **tutte** le occorrenze nel sorgente
+   (`grep -n NomeManopola EA.mq5`), non solo il punto piu' ovvio.
+2. Si verifica che i DUE bordi dichiarati come estremi distinti producano davvero
+   comportamenti diversi (anche solo leggendo il codice, senza girare il round).
+3. Se un bordo e' un doppione tecnico di un altro valore, si dichiara come tale
+   (schema gia' in casa: `R125d`, cancello di determinismo dei gemelli) e si esclude
+   dai blocchi massimali/baricentro, invece di lasciarlo passare per un estremo vero.
+
+### 🔑 La regola in una riga
+*Un limite fisico va dimostrato leggendo IL CODICE, non dedotto dal nome del
+parametro: "0" e "100" sembrano estremi opposti, ma due guardie indipendenti possono
+farli collassare sulla stessa cella.*

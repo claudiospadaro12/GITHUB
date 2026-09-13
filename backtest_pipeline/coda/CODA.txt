@@ -1029,9 +1029,21 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Finche' non e' fatta, R127a NON entra in coda: una riga formalmente
 #  perfetta che gira il modello sbagliato e' peggio di una riga assente.
 # =====================================================================
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
+#  >>> ARMATE il 13/09/2026, DOPO IL PASS DEL SECONDO STRATO -- CINQUE SU
+#  SEI. Il secondo giudizio ha respinto SOLO r125b: InpTP1Pct=0 e =100
+#  sono la STESSA cella per costruzione in ABTG_ORB_Ottimizzato.mq5
+#  (r.656 e r.667 escono entrambe senza toccare parziale ne' breakeven),
+#  ma il file prova (r.79-81) e i criteri firmati da Claudio il 10/09
+#  (R125_ORB_COSTO_CRITERI.md r.110) classificano 100 come "LIMITE
+#  FISICO" distinto -- falso, e lo farebbe contare due volte negli
+#  altopiani P2/P3/P7. Stessa manopola gia' vista giusta in R136c
+#  (12/09): la lezione non era tornata indietro su un file del 10/09.
+#  r125b resta DISARMATA finche' non e' corretta e ripinnata.
+#  La firma di Claudio del 10/09 copriva "6 file, 33 celle, 66 passate":
+#  il pacchetto che parte stanotte e' 5 file, 28 celle, 56 passate.
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
 #DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
-#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
+da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
