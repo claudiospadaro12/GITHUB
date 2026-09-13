@@ -1,0 +1,440 @@
+# =====================================================================
+#  EA: ABTG_CostToCost
+#  R146c -- LO STESSO BUFFER, L'ALTRO REGIME D'USCITA
+#           GBPCAD H4 -- asse InpSLBufferATR, 9 celle
+#  Scritto il 13/09/2026. Criteri congelati PRIMA dei numeri, qui dentro.
+#  SI LEGGE INSIEME A R146a, MAI DA SOLO: vedi il paragrafo LA COPPIA.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_CostToCost
+#    -Prova prove\R146c_slbufferatr_GBPCAD.txt
+#    -Simbolo GBPCAD -Periodo H4 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Etichetta r146c -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.)
+#
+#  -Modello 4 = TICK REALI, per le STESSE due ragioni misurate di R146a:
+#    1. l'ancora di questo file e' la corsa r41 del 13/08/2026, i cui CSV
+#       (risultati_prove\ABTG_CostToCost\r41\
+#        ABTG_CostToCost_GBPCAD_{IS,OOS}_r41.csv) NON hanno il suffisso
+#       "_ohlc", e quella convenzione esiste dal commit 5d46832 del
+#       07/08/2026, cioe' SEI GIORNI PRIMA di r41 (git log -S'_ohlc');
+#    2. risultati_archivio\REFERTO_ROUND41_COST_PORTAFOGLIO.md r.35
+#       ("E35EUR di nuovo fuori per mancanza tick") dice che r41 e' un
+#       round a tick, e GBPCAD dentro r41 ha prodotto 44+62 = 106
+#       operazioni: i tick di GBPCAD su 2024.09.26 -> 2026.06.30 CI SONO.
+# ---------------------------------------------------------------------
+#  LA COPPIA -- perche' questo file esiste, ed e' la cosa piu' utile
+#  che porta
+#
+#  R146a e R146c mettono ad asse LA STESSA MANOPOLA, DELLO STESSO
+#  MOTORE, sullo STESSO banco (tick, dep. 100.000, 2024.09.26 ->
+#  2026.06.30, split 40/60) -- ma in DUE REGIMI D'USCITA DIVERSI, e la
+#  differenza e' nel codice, non nell'interpretazione:
+#
+#    ABTG_CostToCost.mq5 r.830-831:
+#      if(InpExitMode==0) tp=gSigTarget;
+#      else if(InpExitMode==1) tp = isLong ? (entry+InpTP_R*riskDist)
+#                                          : (entry-InpTP_R*riskDist);
+#
+#    772361 EURJPY -> InpExitMode = 2 (FLIP DI STRUTTURA)
+#       'tp' resta 0.0: l'ordine parte SENZA take profit.
+#       >>> il buffer muove SOLO lo stop e il lotto.
+#    772362 GBPCAD -> InpExitMode = 1 (R-BASED)
+#       tp = entry +/- InpTP_R * riskDist, e riskDist CONTIENE il buffer.
+#       >>> il buffer muove lo stop, il lotto E IL BERSAGLIO.
+#    (Fonte dei due InpExitMode: prove\R103_ABTG_CostToCost_*_77236{1,2}
+#     .txt, che li leggono da deploy_vivaio_cost.ps1, preset
+#     VIVAIO_COST_EURJPY "exit 2 = flip" e VIVAIO_COST_GBPCAD "exit 1 =
+#     R-based". Confermati dalle colonne InpExitMode dei CSV di r41.)
+#
+#  >>> QUINDI LA COPPIA E' UNA MACCHINA DA CONTRO-ESEMPIO, e la domanda
+#      che risponde nessuno dei due file risponde da solo:
+#      se allargare il buffer migliora i numeri in TUTTI E DUE i regimi,
+#      l'effetto e' della GEOMETRIA DELLO STOP;
+#      se migliora SOLO su GBPCAD (dove il TP scala insieme allo stop),
+#      allora non e' lo stop: e' il BERSAGLIO che si allontana, cioe' un
+#      altro parametro travestito;
+#      se migliora SOLO su EURJPY, e' l'interazione con il flip di
+#      struttura, e va detto cosi'.
+#  >>> E' anche la casella "SIMBOLI GEMELLI PROVATI" del CERTIFICATO DI
+#      MORTE, che su questo motore e' vuota da luglio.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA, e perche' NON e' "infittire la griglia di un
+#  motore morto" -- che e' l'obiezione giusta da farsi, e va fatta prima
+#
+#  L'OBIEZIONE: report\CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md par.
+#  4.3 scrive che 772362 ha "PF 0,92 su n=382 -> motore senza edge su
+#  quel simbolo, e la regola del 19/08 vieta di infittire". Se fosse
+#  tutta la storia, questo file non andrebbe scritto.
+#
+#  >>> NON E' TUTTA LA STORIA, E IL NUMERO CHE MANCA E' IN ARCHIVIO.
+#      Quel PF 0,92 / DD 41,5% e' la lettura a 6,5 anni in OHLC
+#      (R103_REFERTO_FINALE.md posizione 25, -14.978). Sul banco di
+#      QUESTO file -- 21 mesi, TICK REALI, deposito 100.000 -- la stessa
+#      cella fa:
+#         IS  PF 1,29824 . DD 5,1098% . n 44 . +7.343,23
+#         OOS PF 1,44312 . DD 6,1856% . n 62 . +15.446,36
+#      Due finestre positive su due, PF sopra 1,29 in tutte e due.
+#      >>> Il "senza edge" e' vero sulla finestra LUNGA e OHLC, ed e'
+#          FALSO su quella RECENTE a tick. Non e' una contraddizione:
+#          sono due epoche diverse, ed e' esattamente il caso che
+#          l'Emendamento della Finestra (16/08) descrive -- "non si
+#          boccia un motore perche' non guadagnava nel 2021".
+#      >>> E IL VERSO DELL'ERRORE E' DICHIARATO: il DD 41,5% del banco
+#          lungo resta un FATTO ACCADUTO, e resta il DD promesso piu'
+#          alto della flotta. Per questo la sedia gira allo 0,25%
+#          (CENSIMENTO_CONTRATTI.md r.259) e per questo A6 qui sotto e'
+#          piu' severo che altrove.
+#  >>> E COMUNQUE QUESTO NON E' UN ROUND DI MERITO. Vedi A0: il
+#      campione di questa finestra e' 106 operazioni, sotto il pavimento
+#      dei 150. Questo round misura il RISCHIO e la FORMA, e serve da
+#      CONTROLLO a R146a. Non cerca una cella migliore da promuovere,
+#      e se una cella "vincesse" non promuoverebbe niente lo stesso (A8).
+#
+#  E LA SEDIA E' SOTTO IL PAVIMENTO DEL COSTO, con la riparazione
+#  scritta da qualcun altro e indicata proprio in questa manopola:
+#    report\CANCELLO_COSTO_FLOTTA_2026-09-10.md r.508:
+#      772362 CostToCost GBPCAD H4, stop 38,9 pip MISURATO n=2
+#      (27,4/50,5, da trades_auto.csv), spread A 1,2 -> 32,4x
+#      "NO (81%)"; spread B 2,0 -> 19,4x "NO (49%)".
+#      GBPCAD e' il simbolo col piu' largo spread del nostro forex.
+#    e r.648, la riga della lista corta:
+#      "772362 CostToCost GBPCAD H4 | 32,4x (81%) | SI |
+#       InpSLBufferATR: 0,2 -> 0,45 (r.156). GBPCAD e' il simbolo col
+#       spread piu' largo del nostro forex (1,2 pip): e' l'unico dove il
+#       buffer morde davvero"
+#  >>> Cioe' la manopola di questo file e' LETTERALMENTE la riparazione
+#      che il cancello del costo ha gia' scritto, e nessuno l'ha mai
+#      girata: nei ~110 CSV di ABTG_CostToCost del repo InpSLBufferATR
+#      vale 0.2 in TUTTI, zero file con due valori (verificato il
+#      13/09/2026 su lettura completa, non su un head).
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#
+#  La cella InpSLBufferATR = 0.2 E' LA CELLA VIVA, ed e' la STESSA
+#  configurazione della corsa r41 del 13/08/2026:
+#    IS  : PF 1,29824 . DD 5,1098% . n 44 . profit  +7343,23
+#          Expected Payoff 166,89159 . Recovery 1,40882 . Sharpe 2,16665
+#          Peggior Giornata -1,8885% . Serie Perdente Peggiore -5041,19
+#    OOS : PF 1,44312 . DD 6,1856% . n 62 . profit +15446,36
+#          Expected Payoff 249,13484 . Recovery 2,18440 . Sharpe 2,25071
+#          Peggior Giornata -1,9102% . Serie Perdente Peggiore -4529,98
+#  Fonte primaria, righe intere di:
+#    backtest_pipeline\risultati_prove\ABTG_CostToCost\r41\
+#      ABTG_CostToCost_GBPCAD_IS_r41.csv   (Pass 0 e Pass 1)
+#      ABTG_CostToCost_GBPCAD_OOS_r41.csv  (Pass 0 e Pass 1)
+#  >>> E ANCHE QUI L'ANCORA E' GIA' UN CANCELLO G1 SUPERATO: le due
+#      righe di ogni file sono i GEMELLI 772353 e 772354 (asse tecnico
+#      sul magic, prove\R41b_cost_gbpcad.txt), IDENTICHE su tutte e
+#      undici le colonne alla quinta cifra.
+#  TOLLERANZA CONGELATA: n IDENTICO (44 e 62), PF entro +/- 0,5%.
+#  Fuori da li' il banco e' sporco e il round si ferma prima di
+#  qualunque altro numero.
+#
+#  ALTRI PUNTI D'ARCHIVIO SULLA STESSA CELLA, dichiarati perche' NON
+#  sono riprodotti da questo round:
+#    r40\..._GBPCAD_{IS,OOS}_r40.csv -- stessa cella a DEPOSITO 10.000.
+#    R103_REFERTO_FINALE.md posizione 25 -- 6,5 anni OHLC, dep. 100.000:
+#      PF 0,92 . DD 41,5% . n 382 . 4 anni negativi su 7.
+#      >>> QUESTO NUMERO NON SI RIPRODUCE QUI ED E' GIUSTO COSI': altra
+#          finestra, altro modello. Sta scritto per non confonderlo con
+#          l'ancora, e perche' e' il fatto di rischio che governa A6.
+# ---------------------------------------------------------------------
+#  IL COSTO, CELLA PER CELLA -- e il numero dipende da un ATR che non
+#  ho misurato, quindi porto la CONDIZIONE, non un numero inventato.
+#
+#  Geometria (r.808-812):  riskDist = base + b*ATR, base = |entry-punta|
+#  Dallo stop MISURATO (38,9 pip alla cella b = 0,20):
+#      base = 38,9 - 0,20*ATR        [pip]
+#      stop(b) = 38,9 + (b - 0,20)*ATR
+#  Il pavimento 40x allo spread MISURATO 1,2 pip chiede stop >= 48,0
+#  pip, cioe':   b* = 0,20 + 9,1/ATR
+#
+#  >>> ATR(14) H4 DI GBPCAD E' [NON MISURATO]. Cercato nel repo il
+#      13/09/2026: nessun referto lo riporta, nessuna colonna dei CSV lo
+#      porta. NON LO INVENTO.
+#  >>> LIMITE SUPERIORE DERIVATO DALLA MIA STESSA MISURA: base > 0
+#      impone ATR < 194,5 pip, da cui b* > 0,2468.
+#      >>> LA FRONTIERA E' CERTAMENTE SOPRA LA CELLA 0,20 (cioe' sopra
+#          la cella viva), e cade DENTRO l'asse per ogni ATR >= 15,2
+#          pip -- una condizione che su GBPCAD H4 e' praticamente
+#          impossibile da violare, ma resta una CONDIZIONE e non un
+#          fatto, e va verificata leggendo il CSV.
+#            ATR  40 pip -> b* = 0,428
+#            ATR  60 pip -> b* = 0,352
+#            ATR  80 pip -> b* = 0,314
+#            ATR 100 pip -> b* = 0,291
+#  >>> CONSEGUENZA CONGELATA ORA: la cella 0,00, la 0,10 e la 0,20 sono
+#      ESCLUSE PER COSTO qualunque numero producano (stop(b) < 48,0 pip
+#      per b <= 0,20 con qualunque ATR > 0). Se una di loro "vincesse"
+#      il round, il verdetto e' "vince una cella FUORI COSTO", non
+#      "abbiamo trovato di meglio". Lo scrivo adesso.
+#  >>> E ALLO SPREAD B (2,0 pip, l'angolo pessimista del cancello) il
+#      pavimento chiede stop >= 80,0 pip, cioe' b* = 0,20 + 41,1/ATR:
+#      con ATR 60 pip servirebbe b = 0,885, FUORI dall'asse. Quindi:
+#      all'angolo pessimista questo asse PUO' NON BASTARE, ed e'
+#      dichiarato prima.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n: in CALO al crescere del buffer, e QUI PIU' CHE SU EURJPY.
+#    Motivo (D1): una posizione alla volta, e su GBPCAD il buffer
+#    allontana ANCHE il take profit (ExitMode 1), quindi la durata
+#    cresce da due lati invece che da uno. Banda attesa: OOS fra 40 e
+#    70, IS fra 30 e 50.
+#  - PF: attesa 0,9 - 1,8 in OOS.
+#    >>> E L'ASIMMETRIA ATTESA FRA I DUE FILE E' LA PREVISIONE VERA DI
+#        QUESTA COPPIA, scritta prima: mi aspetto che su GBPCAD il PF
+#        salga PIU' che su EURJPY al crescere del buffer, perche' con
+#        TP = 1,5 x riskDist un buffer piu' largo alza il payoff
+#        nominale di ogni vincita. Se succede, NON e' una scoperta sullo
+#        stop: e' aritmetica del bersaglio, e va scritta cosi'.
+#        Se invece i due file si muovono UGUALE, allora l'effetto e'
+#        davvero la geometria dello stop -- e quella si' che e' una
+#        notizia.
+#  - DD: attesa 4% - 12%. Ipotesi: il DD scende allargando il buffer
+#    (rischio per operazione costante, meno uscite in stop su rumore).
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': un asse quasi piatto fino a
+#    0,40 e un degrado sopra. In quel caso la risposta e' "il default va
+#    bene", ed e' un risultato.
+# ---------------------------------------------------------------------
+#  ###  CLASSE 308 -- I DIFETTI CHE RESTANO DENTRO QUESTO ROUND      ###
+# ---------------------------------------------------------------------
+#  Tutto quello che R146a dichiara in D1 / D2 / D3 vale qui IDENTICO
+#  (stesso EA, stessa catena di codice, stesso banco), con UNA
+#  DIFFERENZA E UN NUMERO DIVERSO:
+#
+#  D0 [!] QUI IL BUFFER TOCCA ANCHE IL BERSAGLIO, E SU EURJPY NO.
+#     r.831: tp = entry +/- InpTP_R * riskDist, con InpTP_R = 1,5 e
+#     riskDist = base + b*ATR. Quindi SL e TP si allargano INSIEME, e la
+#     posizione deve percorrere una distanza piu' grande in tutte e due
+#     le direzioni. In un cammino aleatorio senza deriva il tempo cresce
+#     come il QUADRATO della distanza: [DERIVATO -- ordine di grandezza,
+#     non un numero da referto]. E' la stessa forma del D1 di R127a.
+#     >>> E' IL DIFETTO PRINCIPALE DI QUESTO FILE, ed e' anche la
+#         ragione per cui questo file esiste: e' la variabile che
+#         DISTINGUE i due membri della coppia.
+#
+#  D1 [!] OCCUPAZIONE DEL POSTO. r.706 e r.771: CountPositions()>0
+#     scarta la conferma PRIMA che diventi un ordine. Una posizione alla
+#     volta. Stop piu' largo + TP piu' lontano = posizioni piu' lunghe =
+#     piu' conferme scartate. n SCENDE, e non perche' il motore
+#     peggiori.
+#     >>> LA CENSURA CHE RIDUCE IL DIFETTO SENZA TOGLIERLO: il TIME-STOP
+#         a 100 barre H4 (r.916-921) e' un tetto duro alla durata,
+#         uguale su tutte e 9 le celle e indipendente dal buffer.
+#         >>> MA QUI NON C'E' IL FLIP: con InpExitMode = 1 il ramo
+#             r.902-912 (chiusura al flip di struttura) NON viene
+#             eseguito. Su EURJPY le censure sono DUE (flip + orologio),
+#             qui e' UNA SOLA (orologio). Quindi D1 e' PIU' GRANDE su
+#             GBPCAD che su EURJPY, ed e' un'altra ragione per non
+#             leggere i due file come se fossero lo stesso esperimento.
+#     >>> Ampiezza [NON MISURATA]: i contatori cE_sl / cE_tpR / cX_time
+#         esistono e PrintFunnel() li stampa (r.1152-1155), ma l'OptFrame
+#         esporta undici colonne e nessuna e' un contatore (r.1195).
+#         Si sorveglia di riflesso sulla colonna 'Trades', soglia (pre).
+#
+#  D2 [!] QUANTIZZAZIONE DEL LOTTO: uguale a R146a, e NON MORDE per la
+#     stessa ragione misurata -- deposito 100.000, passo del volume
+#     forex 0,01 [MISURATO di riflesso, DIARIO 17/08/2026], lotti
+#     dell'ordine di 3-5. Ampiezza <= 0,3 punti percentuali di rischio.
+#     >>> E il deposito NON si cambia comunque: l'ancora e' r41, che e'
+#         a 100.000.
+#
+#  D3 [!] CLAMP slOk (r.811) + CLAMP tpOk (r.833-845). QUI SONO DUE.
+#     Su EURJPY il blocco tpOk non viene mai eseguito (tp resta 0).
+#     Qui viene eseguito, e chiede tp > entry+minDist: con un buffer
+#     piu' largo il TP e' PIU' LONTANO, quindi anche questa clamp e'
+#     piu' facile da superare man mano che b cresce. Tutte e due le
+#     clamp mordono SOLO nelle celle basse, e la piu' esposta e' la
+#     0,00. La cella ancora (0,20) non e' al bordo.
+#     >>> SYMBOL_TRADE_STOPS_LEVEL di GBPCAD: [NON MISURATO]. Limite
+#         dall'alto: le 2 gambe in stop misurate stanno a 27,4 e 50,5
+#         pip; se STOPS_LEVEL fosse sopra 27,4 pip quella gamba non
+#         sarebbe potuta esistere. Campione n=2: limite DEBOLE.
+#
+# ---------------------------------------------------------------------
+#  (pre) LA SOGLIA DI LETTURA, CONGELATA QUI, PRIMA DI QUALUNQUE CSV
+# ---------------------------------------------------------------------
+#  Stesso impianto di R146a, con il conto rifatto sui numeri di QUESTA
+#  ancora (non copiato: la soglia di R146a nasce da PF 1,74 su n=64,
+#  qui l'ancora e' PF 1,44312 su n=62).
+#
+#  La colonna 'Trades' di questo EA sono POSIZIONI, non deal: nessun
+#  parziale, nessun breakeven, nessun trailing. La classe 226 non morde.
+#  In assenza di D0/D1/D3 n sarebbe IDENTICO cella per cella -- non
+#  "simile": IDENTICO, perche' il buffer compare per la prima volta a
+#  r.808, dentro TryEnter(), e punta/target/ATR sono congelati alla
+#  conferma (r.743-750).
+#
+#    (pre-A) n IDENTICO su tutte e 9 le celle -> asse pulito.
+#    (pre-B) scarto fra la cella ancora (0,20) e un'altra cella
+#            >0 e <= 8% -> il confronto si legge, ma la differenza di PF
+#            va dichiarata INSIEME allo scarto di n.
+#    (pre-C) scarto > 8% -> le celle non campionano lo stesso insieme:
+#            il confronto e' "NON ANCORA MISURATO", non un risultato.
+#
+#  >>> IL CONTO CHE FISSA L'8%, sull'ancora OOS (PF 1,44312, n 62), col
+#      caso peggiore a parita' di n (V = L = 31, il piu' sfavorevole
+#      perche' massimizza l'effetto relativo di k su entrambi i lati):
+#        k = 8% di 62 = 4,96 -> 5 operazioni
+#        5 perdenti in meno  -> PF = 1,44312 * 31/26 = 1,721 (+0,28)
+#        5 vincenti in meno  -> PF = 1,44312 * 26/31 = 1,210 (-0,23)
+#      cioe' -0,23 / +0,28, che e' un quarto della banda attesa (0,9 -
+#      1,8). Oltre quello scarto il confronto non contiene piu'
+#      informazione sul buffer.
+#      Con k = 2 (il 3,2% di n) il PF si muove fra +0,10 e -0,09: sotto
+#      quella taglia una differenza fra celle non si commenta.
+#  >>> IL CONTRO-ESEMPIO DELLA SOGLIA: le 9 celle POSSONO uscire con n
+#      identico. 106 operazioni su 21 mesi H4 = una ogni ~4 giorni
+#      feriali, e il time-stop a 100 barre H4 (~16,7 giorni di
+#      calendario) e' un tetto duro uguale per tutti. Se le posizioni
+#      chiudono al TP ben prima dell'orologio, il posto e' quasi sempre
+#      libero. Le due uscite si distinguono guardando UNA colonna sola.
+#
+# ---------------------------------------------------------------------
+#  S1 / S2 -- LE DUE SENTINELLE
+# ---------------------------------------------------------------------
+#  S1  RIPRODUZIONE, BLOCCANTE. La cella 0,20 deve ridare i numeri
+#      dell'ancora (n IDENTICO 44/62, PF entro +/-0,5%). Se non li
+#      ridiventa, non si legge nient'altro.
+#      >>> E vale lo stesso rilievo di R146a: l'ABTG_CostToCost di oggi
+#          NON e' il binario di r41. Diff letto, non assunto:
+#          9b1c611 -> 26a1856 = il cancello del Guardian
+#          (ABTG_GuardiaIngresso, FAIL-OPEN nel tester);
+#          26a1856 -> b45dd00 = SOLO l'imbuto diagnostico (contatori,
+#          ImbutoStampa/Giro, InpLogImbuto), nessuna condizione
+#          cambiata.
+#          >>> S1 e' quindi anche il collaudo che quelle due patch sono
+#              neutre. E S1 di R146a e S1 di R146c sono DUE collaudi
+#              indipendenti dello stesso fatto, su due simboli: se
+#              fallisce uno solo dei due, la causa e' nel simbolo o nei
+#              dati, non nel binario.
+#  S2  CONTEGGIO DELLE CELLE. 9 valori distinti di InpSLBufferATR nel
+#      CSV. Se sono 8 (passo 0,10 in virgola mobile), si dichiara QUALE
+#      manca: e' un buco, non un risultato.
+#
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  A0  IL MERITO E' SOSPESO SU TUTTE LE CELLE. L'ancora ha 44 + 62 =
+#      106 POSIZIONI, sotto il pavimento dei 150 (Emendamento A del
+#      16/08). Questo e' un round di RISCHIO, di FORMA e di CONTROLLO.
+#      Il rischio si legge lo stesso a qualunque n (Emendamento B):
+#      DD, Peggior Giornata % e Serie Perdente Peggiore sono tre colonne
+#      che questo EA esporta davvero (r.1195).
+#  A1  ALTOPIANO (forma). >= 3 CELLE CONTIGUE con, CIASCUNA:
+#      PF OOS >= 1,25 E DD OOS <= 6,50% E scarto di n dentro la (pre-B)
+#      E la cella viva DENTRO la terna.
+#      PF 1,25: sotto il 1,44312 in essere, apposta, perche' altrimenti
+#      un altopiano non potrebbe contenere le celle vicine.
+#      DD 6,50%: il DD dell'ancora e' 6,1856% (OOS) e 5,1098% (IS).
+#      Non si lascia peggiorare il contratto in essere per un PF.
+#  A2  ANTI-ALTOPIANO-FINTO. Due celle contigue con n IDENTICO e PF
+#      uguale alla quarta cifra sono UNA cella misurata due volte: un
+#      tratto di asse INERTE, non conta per A1.
+#  A3  ASSE INERTE. Se tutte le celle cadono sotto A2 -> "manopola
+#      INERTE, MISURATA". E' un risultato, e chiude la casella.
+#  A4  PICCO -> annulla il verdetto di altopiano.
+#  A5  SELEZIONE: CENTRO del tratto contiguo, MAI IL PICCO.
+#  A6  RISCHIO, ED E' PIU' SEVERO QUI CHE SU EURJPY, con la ragione
+#      scritta: questa sedia porta il DD promesso piu' alto della flotta
+#      sulla finestra lunga (41,5% a rischio 1%, R103) e per questo in
+#      campo gira allo 0,25%. Quindi: ogni cella con DD IS o DD OOS
+#      > 8,0% e' cella di RISCHIO e non entra in un altopiano, anche se
+#      il PF e' bello. Idem ogni cella con Peggior Giornata % peggiore
+#      di -3,0% (l'ancora sta a -1,89 / -1,91: un raddoppio e' un fatto
+#      che va segnalato).
+#  A7  BANDA DI RUMORE. Rumore di macchina ZERO MISURATO (gemelli
+#      772353/772354 identici alla quinta cifra). Resta il rumore di
+#      campione: un vantaggio di PF < 0,10 su una sola cella NON e' un
+#      vantaggio.
+#  A8  IL ROUND NON PROMUOVE NIENTE, e su questa sedia meno che mai.
+#      Taglie, riaccensioni e rischio sono [FIRMA DI CLAUDIO].
+#  A9  IL VERDETTO DELLA COPPIA, e si scrive solo dopo aver letto TUTTI
+#      E DUE i file: si confronta la PENDENZA di PF lungo l'asse fra
+#      R146a (TP assente) e R146c (TP che scala col buffer). Se le due
+#      pendenze hanno lo stesso segno e taglia simile -> l'effetto e'
+#      della geometria dello stop. Se GBPCAD sale molto di piu' ->
+#      l'effetto e' il bersaglio, e va attribuito a InpTP_R, non a
+#      InpSLBufferATR. Se i segni sono opposti -> nessuna conclusione
+#      generale, e si scrive "sedia per sedia".
+#
+# ---------------------------------------------------------------------
+#  BANCO E FINESTRA
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver). 2024.09.26 -> 2026.06.30 = 642 giorni,
+#    floor(642*0,40) = 256 -> Meta 2025.06.09:
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Le stesse di r41 (default -Fino 2026.06.30, nel driver dal commit
+#    a0b4c12 del 07/08/2026 e mai cambiato -- verificato con git log -S).
+#    LE STESSE DI R146a, dichiaratamente: e' cio' che rende leggibile la
+#    COPPIA.
+#    REGIME: 21 mesi, un solo pezzo di storia. Emendamento della
+#    Finestra regola C: NON soddisfatta. Buco dichiarato.
+#
+#  BUCHI DICHIARATI
+#    - ATR(14) H4 di GBPCAD: [NON MISURATO] -> il costo porta una
+#      CONDIZIONE, non un numero.
+#    - SYMBOL_TRADE_STOPS_LEVEL di GBPCAD: [NON MISURATO] (D3).
+#    - Spread orario vero di GBPCAD: il cancello usa 1,2 pip da UNA
+#      lettura; l'angolo pessimista 2,0 e' un'ipotesi. Si chiude con lo
+#      SpreadLogger, non con un round.
+#    - Frazione di uscite per SL / TP / time-stop cella per cella:
+#      [NON MISURATA], non misurabile in questo round (D1).
+#    - Il per-trade (ExportTrades) viene SOVRASCRITTO a ogni passata.
+#    - LATO SHORT: la sedia viva e' SOLO LONG (artefatto del preset
+#      VIVAIO_COST_GBPCAD). Qui resta come in campo.
+#    - InpLogImbuto pinnato a FALSE: spegne SOLO la stampa, i contatori
+#      girano (il flag e' letto solo in ImbutoStampa e ImbutoGiro, mai
+#      in una condizione d'ingresso o d'uscita).
+#
+#  MAGIC VERGINE 779480 (verificato per ricerca su tutto il repo,
+#  13/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: R146a e' il gemello di questo file e va lanciato
+#  con lui. R127c (InpMaxBarsHold su 772361, in coda stanotte) sta su un
+#  ALTRO banco: i suoi numeri NON si confrontano con questi.
+# =====================================================================
+
+@SIMBOLO  GBPCAD
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- LA CELLA, campo per campo, copiata da
+#     prove\R41b_cost_gbpcad.txt e riverificata contro le colonne Inp*
+#     dei due CSV di r41. L'unica differenza con R146a e' InpExitMode
+#     (1 qui, 2 la'), ed e' la variabile che distingue la coppia.
+InpUsaGuardian=true
+InpTF=16388
+InpExitMode=1
+InpTP_R=1.5
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpComment=R146C SLBUFATR
+InpMagic=779480
+InpVerbose=false
+InpLogImbuto=false
+
+# --- L'ASSE, UNO SOLO: InpSLBufferATR da 0,00 a 0,80, passo 0,10
+#     9 celle: 0,00 . 0,10 . 0,20 . 0,30 . 0,40 . 0,50 . 0,60 . 0,70 . 0,80
+#     IDENTICO a quello di R146a, e non e' pigrizia: due assi diversi
+#     renderebbero la coppia illeggibile.
+#     La cella 0,20 e' il valore vivo, indice 2: e' l'ANCORA.
+#     Bordo BASSO 0,00 = LIMITE FISICO (sotto sarebbe buffer negativo,
+#     cioe' stop DENTRO lo swing; e OnInit r.376-377 lo rifiuterebbe).
+#     Bordo ALTO 0,80 = FINE GRIGLIA, scelto da me.
+#     Le celle 0,00 / 0,10 / 0,20 sono ESCLUSE PER COSTO per
+#     costruzione (vedi la tabella del COSTO): restano sei celle
+#     candidate, e la frontiera dei 40x cade fra 0,25 e 0,43 per ogni
+#     ATR(14) H4 >= 40 pip.
+InpSLBufferATR=0.2||0.0||0.10||0.80||Y

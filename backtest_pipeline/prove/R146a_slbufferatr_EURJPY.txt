@@ -1,0 +1,642 @@
+# =====================================================================
+#  EA: ABTG_CostToCost
+#  R146a -- IL BUFFER DELLO STOP DELLA SEDIA CHE HA IL CAMPIONE
+#           EURJPY H4 -- asse InpSLBufferATR, 9 celle
+#  Scritto il 13/09/2026. Criteri congelati PRIMA dei numeri, dentro
+#  questo file (paragrafi ANCORA / ATTESA / SOGLIE).
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_CostToCost
+#    -Prova prove\R146a_slbufferatr_EURJPY.txt
+#    -Simbolo EURJPY -Periodo H4 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Etichetta r146a -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma -- vedi S2.)
+#
+#  -Modello 4 = TICK REALI. Citazione alla lettera, walkforward_generico.ps1
+#  r.180: "4 = tick reali (verita'). 1 = OHLC M1: SOLO screening, mai
+#  verdetti".
+#  >>> PERCHE' TICK E NON OHLC, ED E' UNA SCELTA MISURATA, NON UN GUSTO.
+#      QUESTO FILE NON E' COME R127c, che gira sulla STESSA SEDIA a
+#      -Modello 1: li' l'OHLC e' OBBLIGATO perche' l'ancora di quel file
+#      (R103, 6,5 anni) e' essa stessa OHLC. Qui l'ancora e' un'ALTRA,
+#      ed e' a TICK: r41 (13/08/2026). Le due condizioni sono:
+#        1. L'ANCORA DI QUESTO FILE E' A TICK REALI. I numeri congelati
+#           piu' sotto stanno riga per riga, alla QUINTA cifra, in
+#           risultati_prove\ABTG_CostToCost\r41\
+#             ABTG_CostToCost_EURJPY_{IS,OOS}_r41.csv
+#           e quei due CSV NON hanno il suffisso "_ohlc". Il suffisso e'
+#           la firma del modello: il driver lo appende quando -Modello
+#           non e' 4, e la convenzione esiste dal commit 5d46832 del
+#           07/08/2026 -- cioe' SEI GIORNI PRIMA di r41 (13/08/2026).
+#           Verificato con git log -S'_ohlc', non ricordato.
+#        2. CONFERMA INDIPENDENTE, da un altro documento e da un'altra
+#           mano: risultati_archivio\REFERTO_ROUND41_COST_PORTAFOGLIO.md
+#           r.35 scrive "E35EUR di nuovo fuori per mancanza tick". Un
+#           round che ESCLUDE un simbolo per mancanza di tick e' un round
+#           a tick. E EURJPY dentro quel round ha prodotto 48+64 = 112
+#           operazioni: i tick di EURJPY su 2024.09.26 -> 2026.06.30
+#           CI SONO, ed e' un fatto accaduto, non una stima.
+#      >>> IL FALSIFICATORE: se questo file girasse a -Modello 1, il
+#          driver scriverebbe CSV "_ohlc" e l'ancora NON potrebbe
+#          riprodursi per costruzione -- 18 passate spese per un arresto
+#          garantito. E' la classe 273, gia' pagata due volte in questa
+#          casa (commit 1764a0e e e6c0d70). Qui il numero e' 4 e la
+#          lettera dice TICK: coincidono.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
+#
+#  1) NON E' MAI STATA MOSSA, E IL CONTO E' RIFATTO OGGI DA CAPO.
+#     Verificato il 13/09/2026 su TUTTI i CSV del repo che hanno la
+#     colonna InpSLBufferATR (lettura completa, non un head):
+#       - ~110 file di ABTG_CostToCost -> valore 0.2 in TUTTI
+#       - ~60 file di ABTG_PunteLarry  -> valore 0.1 in TUTTI
+#       - file con PIU' DI UN valore dentro: ZERO su tutti
+#       - valori distinti fra corse dello STESSO EA: UNO solo
+#     Cioe' la colonna non e' MAI stata un ASSE, da nessuna parte, e su
+#     ABTG_CostToCost non ha mai preso due valori nemmeno fra corse
+#     diverse. Il censimento dell'11/09 la classifica "MAI-altroEA"
+#     proprio perche' il valore 0.1 esiste -- ma quel 0.1 e' di un ALTRO
+#     motore (PunteLarry), ed e' anch'esso costante. La trappola A del
+#     censimento (provata a file separati) qui e' FALSA, verificata.
+#     Sui file prova: zero occorrenze di InpSLBufferATR come asse
+#     (grep "InpSLBufferATR=.*||Y" backtest_pipeline\prove\ -> 0 righe).
+#
+#  2) DOPO R127c, E' L'UNICA MANOPOLA D'USCITA VIVA E MAI MOSSA CHE
+#     RESTA SU QUESTA SEDIA. Il censimento ne elenca tre: InpMaxBarsHold
+#     (che e' l'asse di R127c, in coda stanotte), InpSLBufferATR (questa)
+#     e InpTP_R.
+#     >>> E InpTP_R E' INERTE PER COSTRUZIONE SU QUESTA SEDIA. Letto nel
+#         sorgente, non dedotto: ABTG_CostToCost.mq5 r.830-831
+#           if(InpExitMode==0) tp=gSigTarget;
+#           else if(InpExitMode==1) tp = ... InpTP_R ...
+#         La cella viva ha InpExitMode = 2 (FLIP DI STRUTTURA, fonte:
+#         prove\R103_ABTG_CostToCost_EURJPY_772361.txt, "deploy_vivaio_
+#         cost.ps1, preset VIVAIO_COST_EURJPY, exit 2 = flip"), quindi
+#         'tp' resta 0.0 e InpTP_R non e' letto da nessuna parte tranne
+#         la validazione di OnInit (r.374, che lo guarda solo se
+#         InpExitMode==1) e una riga di log. Girarlo costerebbe 10
+#         passate e misurerebbe ZERO.
+#         >>> Questo e' un falso positivo del censimento dell'11/09, ed
+#             e' della stessa famiglia delle 27 gia' dichiarate al
+#             suo par. 2.3. Va scritto li'.
+#     Quindi: chiuso questo asse, la casella 3 del CERTIFICATO DI MORTE
+#     ("la gestione dell'uscita e' stata messa ad asse?") su 772361 e'
+#     PIENA, non piu' vuota.
+#
+#  3) E' UNA MANOPOLA CHE ALLARGA LO STOP, cioe' la seconda categoria
+#     dell'ordine di valore dichiarato dal censimento dell'11/09 par. 4
+#     ("manopole che allargano lo stop -- leva misurata tre volte in
+#     casa: R55, R88, R118").
+#
+#  4) LA SEDIA E' SOTTO IL PAVIMENTO DEL COSTO, E LA RIPARAZIONE E'
+#     PROPRIO QUESTA MANOPOLA -- scritta da qualcun altro, non da me.
+#     report\CANCELLO_COSTO_FLOTTA_2026-09-10.md r.507:
+#       772361 CostToCost EURJPY H4, stop 29,2 pip MISURATO n=3
+#       (26,4-30,5, da trades_auto.csv), spread A 0,4 -> 73,0x VERDE;
+#       pedaggio all-in B 1,0 -> 29,2x ROSSO, "NO (73%)".
+#     E l'ERRATA dello stesso referto (r.201), col pedaggio all-in VERO
+#     di EURJPY: "772361 CostToCost EURJPY (73,0x -> 25,6x)".
+#     >>> Prendo il numero PEGGIORE dei due, 25,6x, perche' e' quello
+#         calcolato col pedaggio misurato e non con l'1,0 pip di comodo.
+#         25,6x su un pavimento di 40x = 64% del pavimento.
+#         Pedaggio implicito: 29,2 / 25,6 = 1,1406 pip.
+#
+#  5) ED E' UNA SEDIA CHE VALE LA PENA SALVARE, non un motore morto.
+#     Due letture, tutte e due misurate, e si contraddicono in parte:
+#       - 6,5 anni OHLC (R103_REFERTO_FINALE.md posizione 2):
+#         PF 1,41 . DD 12,3% . n 394 . 1 anno negativo su 7
+#         n = 394 e' MOLTO sopra le 150: li' il MERITO SI LEGGE.
+#       - 21 mesi a TICK (r41, la finestra di QUESTO file):
+#         IS PF 1,01642 n 48 . OOS PF 1,74084 n 64
+#     La regola del 19/08 vieta di infittire la griglia di un motore
+#     SENZA EDGE: con PF 1,41 su 394 operazioni questo non lo e'.
+#     >>> MA IL CAMPIONE DI QUESTA FINESTRA NO: 48+64 = 112 operazioni,
+#         cioe' SOTTO il pavimento dei 150 (Emendamento A). Vedi SOGLIE.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#
+#  La cella InpSLBufferATR = 0.2 E' LA CELLA VIVA, ed e' la STESSA
+#  configurazione della corsa r41 del 13/08/2026 (tick reali, deposito
+#  100.000, stesso simbolo, stesso TF, stessa finestra, stesso split):
+#    IS  : PF 1,01642 . DD 9,9258% . n 48 . profit   +362,80
+#          Expected Payoff 7,55833 . Recovery 0,03310 . Sharpe 0,06664
+#          Peggior Giornata -3,7426% . Serie Perdente Peggiore -5384,77
+#    OOS : PF 1,74084 . DD 9,4547% . n 64 . profit +22252,20
+#          Expected Payoff 347,69063 . Recovery 1,82309 . Sharpe 1,84881
+#          Peggior Giornata -4,0041% . Serie Perdente Peggiore -5315,43
+#  Fonte primaria, righe intere di:
+#    backtest_pipeline\risultati_prove\ABTG_CostToCost\r41\
+#      ABTG_CostToCost_EURJPY_IS_r41.csv   (Pass 0 e Pass 1)
+#      ABTG_CostToCost_EURJPY_OOS_r41.csv  (Pass 0 e Pass 1)
+#  >>> E QUELL'ANCORA E' GIA' UN CANCELLO G1 SUPERATO: le due righe di
+#      ogni file sono i GEMELLI 772351 e 772352 (asse tecnico sul magic,
+#      prove\R41a_cost_eurjpy.txt), e sono IDENTICHE su tutte e undici
+#      le colonne, alla quinta cifra. Il determinismo su QUESTA cella
+#      e' un fatto misurato, non una speranza.
+#  TOLLERANZA CONGELATA: n IDENTICO (48 e 64), PF entro +/- 0,5%.
+#  Fuori da li' il banco e' sporco e il round si ferma prima di
+#  qualunque altro numero.
+#
+#  DUE ALTRI PUNTI D'ARCHIVIO SULLA STESSA CELLA, dichiarati perche'
+#  NON sono riprodotti da questo round e non vanno confusi con l'ancora:
+#    (a) risultati_prove\ABTG_CostToCost\r40\..._{IS,OOS}_r40.csv --
+#        stessa cella a DEPOSITO 10.000: IS PF 1,02553 DD 9,7931% n 48
+#        profit +55,33 ; OOS PF 1,74020 DD 9,3345% n 64 profit +2196,82.
+#        >>> n IDENTICO, PF che si muove alla TERZA cifra, DD che si
+#            muove: e' l'EFFETTO DEPOSITO sul troncamento del lotto,
+#            misurato qui a costo zero. E' la ragione per cui il
+#            deposito di questo file e' 100.000 e NON si tocca.
+#    (b) risultati_prove\ABTG_CostToCost\scan_h4\
+#        scan_ABTG_CostToCost_H4_EURJPY.csv, Pass 5 (ExitMode 2, solo
+#        long): PF 1,54592 DD 12,0482% n 155 profit +4195,14 --
+#        finestra 2024.01.01 -> 2026.06.30, deposito 10.000, OHLC
+#        (scan_market.ps1 r.72-73 e r.500/506). ALTRO BANCO: serve solo
+#        a verificare l'IDENTITA' della cella campo per campo.
+# ---------------------------------------------------------------------
+#  IL COSTO, CELLA PER CELLA -- e qui il numero NON si puo' scrivere,
+#  e il perche' e' piu' utile di un numero inventato.
+#
+#  La geometria, letta nel sorgente (r.808-812):
+#      sl       = punta -/+ InpSLBufferATR * ATR(InpAtrPeriod, InpTF)
+#      riskDist = |entry - sl| = base + b*ATR      con base = |entry-punta|
+#  Dallo stop MISURATO (29,2 pip alla cella b = 0,20):
+#      base = 29,2 - 0,20*ATR        [pip]
+#      stop(b) = 29,2 + (b - 0,20)*ATR
+#  Il pavimento 40x col pedaggio all-in 1,1406 pip chiede stop >= 45,62
+#  pip, cioe':
+#      b* = 0,20 + 16,42/ATR
+#
+#  >>> ATR(14) H4 DI EURJPY E' [NON MISURATO]. Cercato nel repo il
+#      13/09/2026: nessun referto lo riporta, e nessuna colonna dei CSV
+#      d'archivio lo porta (l'OptFrame di questo EA ha 11 colonne e
+#      nessuna e' l'ATR). NON LO INVENTO.
+#  >>> MA UN LIMITE SUPERIORE ESISTE, ED E' DERIVATO DALLA MIA STESSA
+#      MISURA, non da un'opinione: base > 0 (lo stop sta OLTRE la punta,
+#      dalla parte giusta) impone 0,20*ATR < 29,2, cioe' ATR < 146 pip.
+#      Da li':  b* > 0,20 + 16,42/146 = 0,3124.
+#      >>> LA FRONTIERA DEL COSTO E' CERTAMENTE SOPRA LA CELLA 0,30.
+#          Dove esattamente, dipende da ATR:
+#            ATR 30 pip -> b* = 0,747     (dentro l'asse)
+#            ATR 40 pip -> b* = 0,611     (dentro l'asse)
+#            ATR 60 pip -> b* = 0,474     (dentro l'asse)
+#            ATR 80 pip -> b* = 0,405     (dentro l'asse)
+#            ATR 27,4   -> b* = 0,799     (l'ULTIMA cella)
+#          >>> QUINDI: la frontiera cade DENTRO l'asse per ogni ATR(14)
+#              H4 >= 27,4 pip. Sotto quel valore l'asse NON la raggiunge.
+#          >>> CONSEGUENZA CONGELATA ORA: se il round finisce e nessuna
+#              cella arriva a 40x, il verdetto su R5 e' "NON RAGGIUNTO
+#              DENTRO QUESTO ASSE" -- non "la sedia non e' riparabile".
+#              La via al numero e' un asse piu' largo (altre 18 passate)
+#              oppure la misura diretta dell'ATR (minuti). Lo scrivo
+#              adesso per non poterlo dimenticare dopo.
+#  >>> E LA CELLA 0,00 E' FUORI COSTO PER COSTRUZIONE, qualunque numero
+#      produca: stop(0,00) = 29,2 - 0,20*ATR < 29,2, cioe' meno di
+#      25,6x. Se vincesse lei, il verdetto e' "vince una cella FUORI
+#      COSTO", non "abbiamo trovato di meglio".
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#
+#  - n: in CALO al crescere del buffer, e il meccanismo e' scritto in D1
+#    qui sotto. Banda attesa: OOS fra 45 e 70 su tutte e 9 le celle,
+#    IS fra 35 e 55. Se n esce da li', c'e' un meccanismo che non ho
+#    capito e il round si ferma per capire quale.
+#    >>> E la colonna 'Trades' di QUESTO EA sono POSIZIONI, non deal:
+#        ABTG_CostToCost non ha parziale, non ha breakeven, non ha
+#        trailing (verificato nel sorgente: ManageAll non esiste, c'e'
+#        solo ManagePosition con flip e time-stop). Un ingresso = una
+#        posizione = un deal di uscita. La classe 226 QUI NON MORDE, ed
+#        e' il motivo per cui la soglia (pre) si legge direttamente.
+#  - PF: attesa 0,9 - 2,0 in OOS. NON mi aspetto una salita monotona:
+#    uno stop piu' largo compra win rate e vende payoff. E qui NON vende
+#    payoff come altrove -- vedi il punto seguente, che e' la cosa
+#    interessante di questo round.
+#  - DD: attesa 6% - 14%. L'IPOTESI DEL ROUND e' che il DD SCENDA
+#    allargando il buffer, perche' il rischio in denaro per operazione e'
+#    COSTANTE (rischio % fisso, lotto inversamente proporzionale allo
+#    stop) e uno stop piu' largo toglie le uscite in stop su rumore.
+#    E' la cosa che puo' essere smentita, ed e' per questo che e' scritta
+#    qui prima.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': un altopiano quasi PIATTO fra
+#    0,10 e 0,40 e un degrado sopra. In quel caso la risposta e' "il
+#    default va bene" -- ed e' un RISULTATO, non un fallimento.
+#  - E VA DETTO SUBITO CHE PROBABILMENTE COSTA: arrivare a 40x vuol dire
+#    quasi raddoppiare lo stop. Se la cella oltre la frontiera ha PF
+#    sotto 1,00, la risposta onesta e' "dentro la frontiera del costo
+#    questa sedia non ha merito", e si scrive cosi'.
+# ---------------------------------------------------------------------
+#  ###  CLASSE 308 -- I DIFETTI CHE RESTANO DENTRO QUESTO ROUND      ###
+#  ###  Dichiarati PRIMA dei numeri, non dopo                        ###
+# ---------------------------------------------------------------------
+#  LA CLASSE 308 in una riga: un parametro messo ad asse che finisce
+#  anche AL DENOMINATORE di un costo, di una quantizzazione o di una
+#  durata fabbrica DA SOLO una pendenza lungo l'asse, e quella pendenza
+#  si legge come RISULTATO.
+#
+#  >>> LA CATENA, COPIATA DAL SORGENTE E NON RIASSUNTA
+#      (mql5\Experts\ABTG_CostToCost.mq5, 1210 righe al 13/09/2026):
+#      r.706  { cF_busy++; ... return; }   // conferma valida ma posizione
+#                                          //   gia' aperta: niente ingresso
+#      r.771  if(CountPositions()>0) { cF_busy++; cT_busy++; ... return; }
+#      r.808  double sl = isLong ? (gSigPunta - InpSLBufferATR*gSigAtr)
+#      r.809                     : (gSigPunta + InpSLBufferATR*gSigAtr);
+#      r.811  bool slOk = isLong ? (sl < entry-minDist) : (sl > entry+minDist);
+#      r.820  double riskDist = isLong ? (entry-sl) : (sl-entry);
+#      r.830  if(InpExitMode==0) tp=gSigTarget;
+#      r.831  else if(InpExitMode==1) tp = ... ;   <<< con ExitMode 2: tp=0
+#      r.849  double lot=LotByRisk(riskDist);
+#      r.1035 lot=MathFloor(lot/st)*st;            <<< quantizzazione
+#      r.1039 return(MathMax(mn,MathMin(mx,lot))); <<< pavimento del lotto
+#
+#  >>> E LA NOTIZIA BUONA, DETTA PER PRIMA PERCHE' E' UNA DIFFERENZA
+#      VERA CON R127a: QUI IL BUFFER NON TOCCA IL TARGET.
+#      Con InpExitMode = 2 (la cella viva) il ramo del TP non viene MAI
+#      eseguito e 'tp' resta 0.0: l'ordine parte SENZA take profit.
+#      Quindi InpSLBufferATR entra in DUE posti soltanto -- la distanza
+#      di stop e il lotto -- e NON in un terzo (il bersaglio), come
+#      invece succede su R127a (r.255) e sulla gemella GBPCAD di R146c
+#      (che ha ExitMode 1). Un difetto in meno, ed e' algebrico.
+#
+# ---------------------------------------------------------------------
+#  D1 [!] L'OCCUPAZIONE DEL POSTO -- il difetto principale, NON tolto
+# ---------------------------------------------------------------------
+#  IL FATTO: questo EA tiene UNA posizione alla volta (r.706 e r.771:
+#  con CountPositions()>0 la conferma e' scartata PRIMA di diventare un
+#  ordine). Uno stop piu' largo viene toccato MENO spesso, quindi le
+#  posizioni vivono PIU' A LUNGO, quindi piu' conferme trovano il posto
+#  occupato. n SCENDE al crescere del buffer, e non perche' il motore
+#  peggiori. E' una selezione MONOTONA lungo l'asse: la forma esatta
+#  della classe 308.
+#
+#  >>> IL CONTRO-ESEMPIO, E RIDUCE IL DIFETTO SENZA TOGLIERLO. Va
+#      scritto qui perche' e' la cosa che potrebbe far sbagliare in
+#      ECCESSO la taglia di D1.
+#      Con InpExitMode = 2 la posizione ha TRE uscite possibili, e SOLO
+#      UNA dipende dal buffer:
+#        (i)   lo STOP            -> dipende dal buffer;
+#        (ii)  il FLIP DI STRUTTURA (r.902-912) -> dipende da gImDir,
+#              cioe' dal trend intermedio, che NON contiene il buffer;
+#        (iii) il TIME-STOP a 100 barre H4 (r.916-921) -> e' un TETTO
+#              DURO, uguale su tutte e 9 le celle, e NON contiene il
+#              buffer.
+#      La durata vera e' min(tempo a SL, tempo al flip, 100 barre):
+#      CENSURATA verso l'alto da DUE variabili identiche su tutte le
+#      celle. Man mano che il buffer cresce la durata SATURA e
+#      l'effetto di selezione SMETTE di crescere.
+#      >>> DI QUANTO SATURA: [NON MISURATO]. Servirebbe la frazione di
+#          posizioni che escono per flip / time-stop invece che per SL,
+#          cella per cella.
+#  >>> E QUESTO EA QUEL NUMERO CE L'HA, MA NON NEL CSV. Verificato nel
+#      sorgente: i contatori cE_sl / cX_flip / cX_time esistono e
+#      PrintFunnel() li stampa (r.1152-1155), ma l'OptFrame esporta
+#      undici colonne e NESSUNA e' un contatore (r.1195). In
+#      ottimizzazione il Giornale e' per-passata e non si legge.
+#      >>> Quindi l'AMPIEZZA di D1 resta [NON MISURATA] in questo round,
+#          e si sorveglia di RIFLESSO sulla colonna 'Trades' con la
+#          soglia (pre) qui sotto -- che e' una misura PIU' DEBOLE, e va
+#          detto invece che spacciarla per la stessa cosa.
+#      >>> LA VIA AL NUMERO, col suo costo: portare cE_sl / cX_flip /
+#          cX_time dentro stats[] di OnTester sono TRE righe di codice
+#          piu' tre colonne. E' una MODIFICA ALL'EA, e questo file
+#          misura UNA variabile: si propone per un round successivo,
+#          NON si fa qui.
+#
+# ---------------------------------------------------------------------
+#  (pre) LA SOGLIA DI LETTURA, CONGELATA QUI, PRIMA DI QUALUNQUE CSV
+# ---------------------------------------------------------------------
+#  SI LEGGE PER PRIMA, sulla colonna 'Trades', e PUO' ANNULLARE il
+#  confronto fra celle anche se tutti gli altri numeri sono belli.
+#
+#  IL PUNTO DI PARTENZA: il generatore di segnale e' IDENTICO su tutte e
+#  9 le celle PER COSTRUZIONE. InpSLBufferATR compare per la prima volta
+#  a r.808, cioe' DENTRO TryEnter(), mentre punta / target / ATR / trend
+#  intermedio sono congelati alla conferma (r.743-750). Quindi, in
+#  assenza di D1 e D3, n sarebbe IDENTICO cella per cella -- non
+#  "simile": IDENTICO. Ogni differenza di n E' l'artefatto.
+#
+#    (pre-A) n IDENTICO su tutte e 9 le celle
+#            ==> nessuna selezione ha morso. L'asse e' pulito e le celle
+#                si confrontano fra loro senza riserve.
+#    (pre-B) scarto di n fra la cella ancora (0,20) e un'altra cella
+#            >0 e <= 8%
+#            ==> il confronto SI LEGGE, ma la differenza di PF va
+#                dichiarata INSIEME allo scarto di n, e ogni differenza
+#                di PF piu' piccola del limite calcolato qui sotto NON
+#                e' attribuibile al buffer.
+#    (pre-C) scarto di n > 8% fra la cella 0,20 e una qualunque altra
+#            ==> le celle non campionano lo stesso insieme di
+#                operazioni: qualunque differenza di PF fra quelle celle
+#                NON e' attribuibile al buffer, e il verdetto su quel
+#                confronto e' "NON ANCORA MISURATO", non un risultato.
+#
+#  >>> PERCHE' PROPRIO L'8%, dichiarato ADESSO e non dopo aver visto i
+#      numeri. NON e' copiato da R127a (li' vale il 10%, su n=86 e
+#      TP_RR 3,0: un altro conto). Qui il conto e' questo, e si fa
+#      sull'ancora OOS, che e' l'unica distribuzione che conosco:
+#        PF OOS ancora = 1,74084 su n = 64 POSIZIONI.
+#        Con PF = somma(vinte)/somma(perse) e un modello a due esiti,
+#        il payoff medio non e' noto (non c'e' TP: l'uscita e' il flip).
+#        Quindi uso la formula del caso peggiore, che non ha bisogno del
+#        payoff:
+#            PF_max = PF_ancora * L/(L-k)   (mancano k PERDENTI)
+#            PF_min = PF_ancora * (V-k)/V   (mancano k VINCENTI)
+#        con V vincenti e L perdenti. Non conosco V e L su questa sedia:
+#        [NON MISURATO], il CSV non li porta. Uso allora il caso piu'
+#        SFAVOREVOLE possibile a parita' di n, cioe' L = V = 32:
+#            k = 8% di 64 = 5,12 -> 5 operazioni
+#            5 perdenti in meno  -> PF = 1,74084 * 32/27 = 2,063 (+0,32)
+#            5 vincenti in meno  -> PF = 1,74084 * 27/32 = 1,469 (-0,27)
+#      >>> CIOE' UNO SCARTO DI n DELL'8% PUO' SPOSTARE IL PF DI -0,27 /
+#          +0,32, che e' piu' della META' dell'intera banda attesa del
+#          round (0,9 - 2,0 e' larga 1,1). A quel punto il confronto fra
+#          le due celle contiene poca informazione sul buffer: e' il
+#          punto in cui la lettura e' compromessa, e per questo e' il
+#          tetto.
+#      >>> E LA FORMULA RESTA SCRITTA QUI, cosi' non si stima a occhio:
+#          basta k=2 (il 3,1% di n) per muovere il PF fra +0,12 e -0,11
+#          nel caso peggiore. Sotto quella taglia una differenza di PF
+#          fra celle non si commenta: si scrive e basta.
+#  >>> IL CONTRO-ESEMPIO DELLA SOGLIA, perche' un cancello che non puo'
+#      NON scattare non e' un cancello: le 9 celle POSSONO benissimo
+#      uscire con n identico. Il motore e' H4 su 21 mesi con 112
+#      operazioni, cioe' una ogni ~4 giorni feriali, e il time-stop a
+#      100 barre H4 (circa 16,7 giorni di calendario) e' un tetto duro
+#      alla durata uguale per tutti. Se le posizioni chiudono per flip
+#      ben prima dello stop, il posto e' quasi sempre libero e D1 non
+#      morde. Le due uscite sono DISTINGUIBILI guardando UNA colonna
+#      sola, e quella colonna c'e' gia': non serve toccare il codice per
+#      rispondere.
+#
+# ---------------------------------------------------------------------
+#  D2 [!] LA QUANTIZZAZIONE DEL LOTTO -- QUANTIFICATA, E QUI NON MORDE
+# ---------------------------------------------------------------------
+#  Il lotto e' inversamente proporzionale a riskDist (r.849 ->
+#  LotByRisk) e a r.1035 viene TRONCATO al passo del volume (MathFloor,
+#  non round). Quindi il rischio vero di ogni cella non e' l'1,00%
+#  dichiarato: e' l'1,00% meno quello che il troncamento porta via.
+#  IL CONTO, a -Deposito 100000:
+#    rischio per operazione = 1.000 EUR
+#    perdita per lotto alla cella ancora = 29,2 pip di EURJPY. Il valore
+#      del pip di EURJPY su conto EUR e' [NON MISURATO in casa] -- non
+#      lo invento. Ma il LOTTO non serve saperlo esattamente: serve
+#      sapere quanti PASSI di volume ci stanno dentro, e quello si
+#      ricava dall'ancora stessa.
+#    >>> LA VIA INDIRETTA, ED E' UNA MISURA: l'OOS dell'ancora fa
+#        +22.252,20 EUR su 64 operazioni con PF 1,74084 a rischio
+#        1.000 EUR/operazione. Expected Payoff 347,69 EUR = 0,348 R.
+#        Un motore che muove 347 EUR medi per operazione con un rischio
+#        di 1.000 EUR sta usando lotti dell'ordine di 5 (1.000 EUR di
+#        rischio / ~180 EUR di perdita per lotto a 29 pip).
+#    >>> IL PASSO DEL VOLUME SUL FOREX E' 0,01 [MISURATO DI RIFLESSO,
+#        sui volumi dei trade veri -- DIARIO 17/08/2026: "su
+#        U30USD/NASUSD lo step del volume e' 0,10, mentre EURAUD ha
+#        0,02/0,13/0,15/0,42", cioe' su forex il passo e' 0,01].
+#        Con lotto ~5 e passo 0,01 il troncamento porta via al massimo
+#        0,01/5 = 0,2% del rischio. AMPIEZZA DI D2: <= 0,2 punti
+#        percentuali, contro i 4,81 di R127a.
+#  >>> IL PAVIMENTO DEL LOTTO (r.1039, MathMax(mn,...)) NON MORDE: con
+#      lotto ~5 e VOLUME_MIN forex 0,01 il margine e' ~500 volte. Anche
+#      alla cella piu' larga (stop circa il doppio -> lotto ~2,5) il
+#      margine resta ~250 volte.
+#  >>> E QUESTA E' LA PROVA CHE IL DEPOSITO GIUSTO E' 100.000 E NON
+#      10.000, ed e' MISURATA e non argomentata: le stesse 112
+#      operazioni girate a 10.000 (r40) danno PF 1,02553 / 1,74020 e DD
+#      9,7931% / 9,3345%, contro 1,01642 / 1,74084 e 9,9258% / 9,4547%
+#      a 100.000. n IDENTICO, numeri che si muovono: quella differenza
+#      E' la quantizzazione, e a 100.000 e' piu' piccola.
+#      >>> E il deposito NON si potrebbe cambiare comunque: l'ancora di
+#          questo file e' r41, che e' a 100.000. Cambiarlo romperebbe la
+#          riproduzione. Le due ragioni concordano, ed e' un caso
+#          fortunato che va detto, non nascosto.
+#
+# ---------------------------------------------------------------------
+#  D3 [!] LA CLAMP slOk CHE MORDE SOLO NELLE CELLE BASSE
+# ---------------------------------------------------------------------
+#  r.811-819:
+#      bool slOk = isLong ? (sl < entry-minDist) : (sl > entry+minDist);
+#      if(!slOk) { cO_failLevel++; ... DisarmaSegnale(); return; }
+#  con minDist = StopsMinDist() = max(STOPS_LEVEL*_Point, spread*_Point)
+#  (r.993-998).
+#  L'ASIMMETRIA E' ALGEBRICA, non empirica: riskDist = base + b*ATR
+#  cresce con b, quindi la condizione slOk DIVENTA PIU' FACILE man mano
+#  che il buffer si allarga. La clamp puo' scartare ingressi SOLO nelle
+#  celle basse, e la cella piu' esposta e' la 0,00 (dove riskDist =
+#  base, cioe' la distanza nuda dalla punta).
+#  >>> LA CELLA ANCORA (0,20) NON E' LA PIU' ESPOSTA, ed e' la
+#      differenza con R127a, dove invece lo era. Qui la cella che fa da
+#      metro sta gia' due gradini sopra il bordo.
+#  >>> IL VALORE DI SYMBOL_TRADE_STOPS_LEVEL DI EURJPY E' [NON
+#      MISURATO]. Verificato oggi: nel repo non esiste nessuna riga GSPEC
+#      per EURJPY e il referto R114 (l'unica sonda di specifiche) copre
+#      U30USD, D30EUR e XAUUSD, non EURJPY.
+#  >>> MA SI PUO' LIMITARE DALL'ALTO: le 3 gambe in stop misurate su
+#      questa sedia stanno fra 26,4 e 30,5 pip. Se STOPS_LEVEL fosse
+#      sopra 26,4 pip, quella gamba non sarebbe potuta esistere.
+#      Campione n=3: limite DEBOLE, ma e' un fatto accaduto.
+#  >>> COME SI RICONOSCE SE HA MORSO: se n della cella 0,00 (ed
+#      eventualmente della 0,10) e' PIU' BASSO delle altre mentre il
+#      resto dell'asse ha n che scende monotono, allora c'e' una GOBBA
+#      al bordo basso e quella gobba e' la clamp, non il buffer. Va
+#      scritto cosi'.
+#
+# ---------------------------------------------------------------------
+#  S1 / S2 -- LE DUE SENTINELLE
+# ---------------------------------------------------------------------
+#  S1  RIPRODUZIONE, ED E' BLOCCANTE. La cella 0,20 deve ridare i sei
+#      numeri dell'ancora (n IDENTICO, PF entro +/-0,5%, DD dichiarato
+#      accanto). Se non li ridiventa, NON si legge nient'altro.
+#      >>> E S1 HA UN MOTIVO IN PIU' PER ESISTERE, ed e' un rilievo che
+#          questo file porta e che vale anche se il round non
+#          interessa: L'ABTG_CostToCost DI OGGI NON E' IL BINARIO DI
+#          r41. Il diff e' stato LETTO, non assunto:
+#            9b1c611 (13/08, il binario di r41) -> 26a1856 (19/08):
+#              +#include <ABTG_PausaGuardian.mqh>
+#              +input bool InpUsaGuardian = true;
+#              +if(!ABTG_GuardiaIngresso(...)) return;
+#              cioe' UN CANCELLO NUOVO sul percorso d'ingresso.
+#            26a1856 -> b45dd00 (11/09, la testa):
+#              SOLO l'imbuto di mortalita': contatori, ImbutoRaccogli /
+#              ImbutoStampa / ImbutoGiro, l'input InpLogImbuto, e
+#              "cXX++;" dentro condizioni GIA' ESISTENTI. Nessuna
+#              condizione cambiata, nessuna soglia, nessun lotto.
+#          >>> Il cancello del Guardian e' FAIL-OPEN nel tester (le sue
+#              GlobalVariable non esistono), quindi l'attesa e' che S1
+#              PASSI. Se passa, questo round e' anche il collaudo che
+#              DUE patch dichiarate neutre lo sono davvero, su una
+#              sedia con 112 operazioni misurate.
+#          >>> Se S1 NON passa, il verdetto non e' "il round e'
+#              sbagliato": e' "UNA PATCH DICHIARATA NEUTRA HA MOSSO I
+#              NUMERI", e quella notizia va in cima al referto.
+#  S2  CONTEGGIO DELLE CELLE. 9 valori distinti di InpSLBufferATR nel
+#      CSV. Il passo 0,10 in virgola mobile puo' far fermare MT5 a 8:
+#      se sono 8, si dichiara QUALE manca, e non e' un risultato, e' un
+#      buco.
+#
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  A0  IL MERITO E' SOSPESO SU TUTTE LE CELLE, E VA DETTO SUBITO.
+#      L'ancora ha 48 + 64 = 112 POSIZIONI, cioe' sotto il pavimento dei
+#      150 (Emendamento A del 16/08). Nessuna cella di questo round puo'
+#      quindi produrre un verdetto di MERITO, per quanto bello sia il
+#      PF. Questo e' un round di RISCHIO e di FORMA.
+#      >>> E il RISCHIO si legge lo stesso, a qualunque n (Emendamento
+#          B del 16/08): DD, Peggior Giornata % e Serie Perdente
+#          Peggiore sono tre colonne che questo EA esporta DAVVERO
+#          (r.1195), e sono fatti accaduti.
+#      >>> LA VIA AL MERITO, dichiarata col suo costo perche' "non si
+#          molla" vuol dire trovare una misura in piu': lo STESSO asse
+#          sul banco di R127c (EURJPY H4, 2020.01.01 -> 2026.06.30,
+#          -Deposito 100000, -Modello 1) ha n = 394 e il merito si
+#          legge. Costo: altre 18 passate. NON si fa qui, perche' quel
+#          banco e' OHLC e un numero OHLC non e' mai un verdetto: i due
+#          round rispondono a due domande diverse e servono tutti e due.
+#  A1  ALTOPIANO (forma). Servono >= 3 CELLE CONTIGUE con, CIASCUNA:
+#      PF OOS >= 1,50 E DD OOS <= 9,50% E scarto di n dentro la (pre-B),
+#      E la cella viva DENTRO la terna.
+#      PF 1,50 e non 1,10: qui non si cerca l'ammissione di un
+#      candidato, si cerca se una manopola BATTE un 1,74084 gia'
+#      misurato -- e con una soglia sotto il valore in essere si
+#      premierebbe un peggioramento. 1,50 e' sotto 1,74 apposta: serve
+#      a lasciare entrare nella terna anche le celle vicine, altrimenti
+#      un altopiano non puo' esistere per costruzione.
+#      DD 9,50%: il DD dell'ancora e' 9,4547% (OOS) e 9,9258% (IS). Il
+#      muro prop e' 10% TOTALE e STATICO. 9,50% non consente a una cella
+#      di peggiorare il contratto in essere per comprarsi un PF.
+#  A2  ANTI-ALTOPIANO-FINTO. Due celle contigue con n IDENTICO e PF
+#      identico alla quarta cifra NON sono due celle: sono una cella
+#      misurata due volte, cioe' un tratto di asse INERTE. Non contano
+#      per A1. (Censimento 09/09: 874 CSV su 1.960 con passate a esito
+#      identico.)
+#  A3  ASSE INERTE. Se TUTTE le celle cadono sotto A2, si scrive
+#      "manopola INERTE, MISURATA". E' un risultato: chiude la casella 3
+#      del certificato di morte lo stesso, e chiude la casella per
+#      sempre.
+#  A4  PICCO. Se la cella viva fa PF OOS >= 1,50 e ENTRAMBE le vicine
+#      immediate fanno PF OOS < 1,20, l'asse dichiara PICCO. Un asse che
+#      dichiara PICCO annulla il verdetto di altopiano.
+#  A5  LA REGOLA DI SELEZIONE, dichiarata INSIEME al numero: si porta
+#      avanti il CENTRO del tratto contiguo, MAI IL PICCO. Se il centro
+#      coincide con la cella viva, la cella viva e' confermata e non si
+#      tocca niente.
+#  A6  RISCHIO, a qualunque n. Ogni cella con DD IS o DD OOS > 10,0%
+#      (il muro prop) e' cella di RISCHIO, non entra in un altopiano, e
+#      va segnalata anche se il PF e' bello. Idem ogni cella con
+#      Peggior Giornata % peggiore di -5,0% (il muro giornaliero).
+#  A7  BANDA DI RUMORE. Il rumore di macchina su questa cella e' ZERO
+#      MISURATO (i gemelli 772351/772352 sono identici alla quinta
+#      cifra). Resta il rumore di CAMPIONE, e la soglia pratica e'
+#      quella della (pre): un vantaggio di PF < 0,12 su una sola cella
+#      NON e' un vantaggio.
+#  A8  IL ROUND NON PROMUOVE NIENTE. Anche un altopiano perfetto qui
+#      dentro non cambia un preset, non accende una sedia e non tocca il
+#      forward. Riaccensioni, taglie e rischio sono [FIRMA DI CLAUDIO].
+#
+# ---------------------------------------------------------------------
+#  BANCO E FINESTRA -- verificati col conto, non ricordati
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver). Il calcolo (walkforward_generico.ps1 r.758):
+#      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#      2024.09.26 -> 2026.06.30 = 642 giorni, floor(642*0,40) = 256,
+#      Meta = 2025.06.09. Quindi:
+#        IS  2024.09.26 - 2025.06.09
+#        OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di r41 (che girava col default -Fino
+#    2026.06.30: quel default e' nel driver dal commit a0b4c12 del
+#    07/08/2026 e NON HA MAI AVUTO UN ALTRO VALORE -- verificato con
+#    git log -S, non ricordato).
+#    Se la riga di lancio cambia FrazioneIS, deposito o @FINOA, S1
+#    decade e questo file va riscritto.
+#    REGIME: 21 mesi. Su EURJPY sono lo yen debole e poi il rimbalzo:
+#    NON sono quattro regimi. Emendamento della Finestra regola C:
+#    NON soddisfatta, e non lo sara' alla fine di questo round.
+#    Dichiarato come buco, non come dettaglio.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - ATR(14) H4 di EURJPY: [NON MISURATO]. Per questo la tabella del
+#      costo porta una CONDIZIONE (ATR >= 27,4 pip) e non un numero.
+#    - SYMBOL_TRADE_STOPS_LEVEL di EURJPY: [NON MISURATO] (D3).
+#    - Valore del pip di EURJPY su conto EUR: [NON MISURATO in casa]
+#      (D2). Il conto del lotto e' fatto per via indiretta e dichiarato
+#      come tale.
+#    - Frazione di uscite per SL / flip / time-stop cella per cella:
+#      [NON MISURATA] e non misurabile in questo round (D1).
+#    - PROVA DI REGIME: assente. Niente di quello che esce di qui e'
+#      promuovibile.
+#    - LATO SHORT: la sedia viva e' SOLO LONG (InpAllowShort=false,
+#      artefatto del preset VIVAIO_COST_EURJPY). Qui resta come in
+#      campo. La regola dei due lati del 25/08 vale sugli INDICI; su
+#      questo simbolo il lato corto e' gia' stato misurato in R40 (OOS
+#      -3.007 contro +2.197 del long) ed e' la ragione del pin.
+#    - Il per-trade (ExportTrades, r.1096) viene SOVRASCRITTO a ogni
+#      passata in ottimizzazione: sopravvive solo l'ultima cella.
+#    - InpLogImbuto e' pinnato a FALSE, e non e' il default. Motivo: in
+#      ottimizzazione il Giornale e' per-passata e non si legge, quindi
+#      tre righe di imbuto al giorno per 18 passate sono rumore e tempo
+#      macchina. I contatori girano lo stesso (sono fuori dal flag):
+#      l'unica cosa spenta e' la stampa. Verificato: il flag e' letto
+#      solo in ImbutoStampa() e ImbutoGiro(), mai in una condizione
+#      d'ingresso o d'uscita.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester
+#      le sue GlobalVariable non esistono e la guardia lascia passare
+#      tutto (fail-open dichiarato nel sorgente). Vedi S1.
+#
+#  MAGIC VERGINE 779470 (verificato per ricerca su tutto il repo,
+#  13/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: R127c (InpMaxBarsHold sulla STESSA sedia) e' in
+#  coda per stanotte, su un ALTRO banco (6,5 anni, OHLC, dep. 100.000).
+#  Qui il time-stop e' PINNATO a 100, il valore vivo: questo file NON
+#  rimette in discussione quello. R146c e' la gemella GBPCAD di questo
+#  file, sullo stesso asse e sullo stesso banco: si leggono INSIEME.
+# =====================================================================
+
+@SIMBOLO  EURJPY
+@PERIODO  H4
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- LA CELLA, campo per campo, copiata da
+#     prove\R41a_cost_eurjpy.txt (l'artefatto che ha prodotto l'ancora)
+#     e riverificata contro le colonne Inp* dei due CSV di r41.
+#     Le tre righe che r41 NON aveva (InpUsaGuardian, InpLogImbuto,
+#     InpComment/InpVerbose) sono aggiunte perche' l'EA di oggi le ha:
+#     la loro neutralita' e' argomentata in S1 e nei BUCHI.
+InpUsaGuardian=true
+InpTF=16388
+InpExitMode=2
+InpTP_R=1.5
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpComment=R146A SLBUFATR
+InpMagic=779470
+InpVerbose=false
+InpLogImbuto=false
+
+# --- L'ASSE, UNO SOLO: InpSLBufferATR da 0,00 a 0,80, passo 0,10
+#     9 celle: 0,00 . 0,10 . 0,20 . 0,30 . 0,40 . 0,50 . 0,60 . 0,70 . 0,80
+#     in frazioni di ATR(14) del TF operativo (H4).
+#
+#     La cella 0,20 e' ESATTAMENTE il valore vivo e sta all'indice 2:
+#     e' l'ANCORA.
+#     Il bordo BASSO 0,00 e' un LIMITE FISICO, non una scelta: sotto ci
+#     sarebbe un buffer NEGATIVO, cioe' lo stop DENTRO lo swing = un'altra
+#     geometria, non un valore piu' piccolo della stessa. (E OnInit lo
+#     rifiuterebbe comunque: r.376-377, "InpSLBufferATR non puo' essere
+#     negativo".)
+#     Il bordo ALTO 0,80 e' FINE GRIGLIA: l'ho scelto io, e la ragione e'
+#     scritta nella tabella del COSTO -- serve a contenere la frontiera
+#     dei 40x per ogni ATR(14) H4 >= 27,4 pip.
+#     L'asse NON e' centrato sulla cella viva (2 celle sotto, 6 sopra):
+#     e' deliberato, perche' la domanda di questo round e' asimmetrica
+#     (il cancello del costo sta SOPRA) e sotto c'e' un limite fisico a
+#     due gradini. Restano comunque celle da TUTTE E DUE le parti della
+#     cella viva, quindi un altopiano che la contiene PUO' esistere.
+InpSLBufferATR=0.2||0.0||0.10||0.80||Y

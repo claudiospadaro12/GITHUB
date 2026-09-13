@@ -1,0 +1,458 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R146b -- LA SEDIA MIGLIORE DELLA FLOTTA PASSA IL WEEKEND APERTA,
+#           E NESSUNO HA MAI MISURATO QUANTO COSTA
+#           U30USD H1 -- asse InpFridayClose (interruttore, 2 celle)
+#  Scritto il 13/09/2026. Criteri congelati PRIMA dei numeri, qui dentro.
+#  Il banco, i pin e le sentinelle sono gli STESSI del gruppo r136
+#  (prove\R136a_slatr_U30USD.txt): questo file ne e' il quinto membro
+#  per costruzione, e la sentinella S1 e' LA STESSA.
+# ======================================================================
+#
+#  Si lancia con:
+#    -Expert ABTG_EMA200
+#    -Prova prove\R146b_venerdi_U30USD.txt
+#    -Simbolo U30USD -Periodo H1 -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Etichetta r146b -Modello 4
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma.)
+#  -Modello 4 = TICK REALI (walkforward_generico.ps1 r.180: "4 = tick
+#  reali (verita'). 1 = OHLC M1: SOLO screening, mai verdetti").
+#  E' lo stesso modello dell'ancora R112, che e' a tick: i suoi CSV
+#  (R112_CORSA_20260826\ABTG_EMA200_U30USD_{IS,OOS}_00_metro.csv) non
+#  hanno il suffisso "_ohlc", e il REFERTO_R112.txt r.10 lo dichiara a
+#  lettere: "modello 4 (tick reali) deposito 100000".
+#
+# ----------------------------------------------------------------------
+#  LA DOMANDA, in una riga
+#    Questa sedia entra nel fine settimana con la posizione aperta. Il
+#    muro di una prop e' STATICO (10% totale, 5% giornaliero) e un gap
+#    del lunedi' e' il modo classico di mangiarselo. In 213 CSV
+#    d'archivio quell'interruttore e' stato false 213 volte su 213.
+#    Questo round lo accende UNA volta, e misura la differenza.
+#
+# ----------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- la bussola, coi numeri
+#    report\PIANO_CHALLENGE_OTTOBRE_v2.md par. 2, tabella delle 8
+#    candidate, riga 8: la 771531 (ABTG_EMA200 U30USD H1) e' l'UNICA che
+#    porta R1, R3, R4 e R5 tutti verdi:
+#      R1 cella promossa : R29 walk-forward 30/30 PASS, cella CENTRO,
+#                          riprodotta al centesimo da R112
+#      R3 frequenza      : 1,55 uscite/g -- l'UNICA sopra il pavimento
+#                          di 1,00 op/g DA SOLA
+#      R4 rischio vero   : 1,00x MISURATO
+#      R5 costo all-in   : 54,9x (stop 104,30 idx / spread 1,90) >= 40x
+#    L'unico requisito rotto e' R2: tre misure di DD nostre che non
+#    coincidono (6,48% R103 OHLC, 7,21% R29, 7,8323% R112 tick).
+#    >>> E R2 E' UN REQUISITO DI RISCHIO. Questo round non lo chiude --
+#        quello si chiude leggendo i tre CSV che esistono gia' -- ma
+#        misura una COMPONENTE del rischio che nessuna delle tre letture
+#        separa: quanto del drawdown arriva dal fine settimana.
+#
+# ----------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, e non e' un'opinione
+#
+#  1) NON E' MAI STATA MOSSA, E IL CONTO E' RIFATTO OGGI DA CAPO su
+#     TUTTI i CSV del repo che hanno la colonna InpFridayClose (lettura
+#     completa, non un head):
+#       213 file di ABTG_EMA200        -> valore 0 in TUTTI E 213
+#        46 file della famiglia SupRev -> valore 0 in tutti
+#        86 file di altri EA           -> 0 in 66, 1 in 20
+#       file con PIU' DI UN valore dentro: ZERO su 345
+#     >>> E I VENTI FILE CON "1" NON SONO UNA MISURA, sono un DEFAULT
+#         DIVERSO di un altro motore: 16 sono ABTG_FiboH4_Multi e 4 sono
+#         ABTG_PostNews, che hanno InpFridayClose = true nel sorgente.
+#         Cioe' la colonna non e' MAI stata un ASSE in nessuno dei 2.087
+#         CSV del repo, su nessun EA. Non e' "provata a corse separate":
+#         e' la trappola A del censimento dell'11/09, e qui e' FALSA.
+#     Sui file prova: zero occorrenze di InpFridayClose come asse
+#     (grep "InpFridayClose=.*||Y" backtest_pipeline\prove\ -> 0 righe).
+#
+#  2) E' UNA DELLE TRE MANOPOLE D'USCITA MAI MOSSE CHE RESTANO SU QUESTA
+#     SEDIA dopo il gruppo r136. Il censimento dell'11/09 (riga 771531)
+#     ne elenca SETTE: InpSLatr, InpTP1_ATRmult, InpTP1Pct,
+#     InpUseTrailing, InpBreakeven, InpFridayClose, InpFridayCloseHour.
+#     Le prime quattro sono gli assi di R136a/b/c/d, scritti il 12/09.
+#     Restano queste tre, e delle tre:
+#     >>> InpFridayCloseHour E' INERTE PER COSTRUZIONE nella
+#         configurazione VIVA. Letto nel sorgente, non dedotto:
+#         ABTG_EMA200.mq5 r.279  if(!InpFridayClose) return(false);
+#         Con l'interruttore a false, l'ora non viene mai raggiunta dal
+#         codice. Girarla costerebbe 10 passate e misurerebbe ZERO.
+#         >>> Ha senso SOLO DOPO questo round, e solo se questo round
+#             dice che l'interruttore morde. E' un falso positivo del
+#             censimento, della stessa famiglia delle 27 gia'
+#             dichiarate al suo par. 2.3, e va scritto li'.
+#     >>> InpBreakeven NON E' UN ASSE PULITO SU QUESTA SEDIA, e per
+#         questo NON gli scrivo un file. Letto nel sorgente,
+#         ManageAll() r.408-442:
+#           r.408  bool beDone = isLong ? (sl>=openP) : (sl<=openP && sl>0);
+#           r.410  if(!beDone && InpTP1Pct>0 && InpTP1Pct<100) { ... }
+#           r.429     if(InpBreakeven) gTrade.PositionModify(tk,openP,tp);
+#           r.436  if(InpUseTrailing && beDone && e14>0) { ... }
+#         Con InpBreakeven = false lo stop non va MAI in pari, quindi
+#         beDone resta false per sempre, quindi (a) il blocco del
+#         parziale a r.410 puo' RIENTRARE a ogni barra in cui il prezzo
+#         e' oltre la EMA14, chiudendo un altro 50% ogni volta, e (b) il
+#         trailing di r.436 non parte MAI.
+#         >>> Spegnere UN input cambierebbe TRE meccanismi. Non e' una
+#             variabile sola, e un file prova ne misura una. Va
+#             misurato, ma con un round costruito apposta (per esempio
+#             con un contatore di chiusure parziali), non travestito da
+#             interruttore. Dichiarato qui perche' altrimenti qualcuno
+#             lo scrivera' domani.
+#
+#  3) COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#     ABTG_EMA200.mq5, FridayCloseCheck() r.277-285 e OnTick r.288-291:
+#       r.279  if(!InpFridayClose) return(false);
+#       r.281  if(_t.day_of_week!=5 || _t.hour<InpFridayCloseHour) return(false);
+#       r.282  ... OrderDelete su tutti i pendenti del magic
+#       r.283  ... PositionClose su tutte le posizioni del magic
+#       r.290  if(FridayCloseCheck()) return;   // e NON riapre
+#     >>> QUINDI L'INTERRUTTORE HA DUE CONSEGUENZE, NON UNA, e vanno
+#         dette tutte e due prima:
+#         (a) CHIUDE cio' che e' aperto il venerdi' oltre l'ora;
+#         (b) IMPEDISCE qualunque nuovo ingresso per il resto del
+#             venerdi' -- perche' il return di r.290 salta ManageAll(),
+#             CutoffCheck() e tutto il blocco della barra nuova.
+#         Sono due effetti fisici diversi di UN solo input, e la
+#         domanda a cui rispondono e' una sola ("si va nel fine
+#         settimana aperti?"): per questo resta un file a una variabile.
+#         Ma se n scende, non si puo' dire QUALE dei due l'ha fatto
+#         scendere, e questo round non lo separa. Dichiarato.
+#     >>> L'ORA E' ORA SERVER. r.103 del sorgente lo scrive: "Ora SERVER
+#         del venerdi' oltre cui chiudo (20 server = 21 IT)". Regola di
+#         casa: server BCM = ora italiana - 1.
+#         >>> A che ora chiude davvero U30USD il venerdi' su BCM:
+#             [NON MISURATO] in questo repo. Se la sessione finisse
+#             PRIMA delle 20 server, la conseguenza (a) sarebbe vuota e
+#             resterebbe solo la (b) -- e l'interruttore misurerebbe
+#             solo "niente ingressi il venerdi' sera". Il round lo
+#             distingue da solo: vedi il CONTRO-ESEMPIO.
+#
+# ----------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#
+#  La cella InpFridayClose = false E' LA CELLA VIVA ed e' la cella
+#  00_metro di R110/R112, con la stessa finestra, lo stesso split
+#  (40/60), lo stesso modello (4), lo stesso deposito (100.000) e lo
+#  stesso rischio (1,0%). DEVE tornare, al centesimo:
+#    IS  : PF 1,20110 . DD 5,7325% . n 237 . profit  +4585,40
+#          Expected Payoff 19,34768 . Recovery 0,78806 . Sharpe 3,77377
+#    OOS : PF 1,52365 . DD 7,8323% . n 517 . profit +23321,47
+#          Expected Payoff 45,10923 . Recovery 2,53681 . Sharpe 8,16765
+#  Fonte primaria, righe intere di:
+#    backtest_pipeline\risultati_archivio\R112_CORSA_20260826\
+#      ABTG_EMA200_U30USD_IS_00_metro.csv   (Pass 0 e Pass 1)
+#      ABTG_EMA200_U30USD_OOS_00_metro.csv  (Pass 0 e Pass 1)
+#  e le colonne InpFridayClose / InpFridayCloseHour di quelle righe
+#  valgono 0 e 20: la cella viva e' esattamente il pin di questo file.
+#  >>> E QUELL'ANCORA E' GIA' UN CANCELLO G1 SUPERATO: le due righe di
+#      ogni file sono i GEMELLI 763400 e 763401 (asse tecnico sul
+#      magic), IDENTICHE su tutte e otto le colonne alla quinta cifra.
+#      Il determinismo su QUESTA cella e' un fatto misurato.
+#  TOLLERANZA CONGELATA: n IDENTICO (237 e 517), PF entro +/- 0,5%.
+#  Fuori da li' il banco e' sporco e il round si ferma prima di
+#  qualunque altro numero.
+#
+#  >>> E IL CAMPIONE, contato in POSIZIONI e non in deal (classe 226):
+#      OOS = 517 deal / 257 POSIZIONI MISURATE (position_id distinti nel
+#      per-trade pertrade_00_metro_763400.csv) -> SOPRA il pavimento dei
+#      150, il MERITO SI LEGGE.
+#      IS  = 237 deal / 2,0117 = 117,8 posizioni [INFERITO] -> SOTTO il
+#      pavimento: l'IS serve al SEGNO e al RISCHIO (Emendamento B), non
+#      al merito. Dichiarato adesso.
+#
+# ----------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+#
+#  - n: in CALO nella cella accesa, per la conseguenza (b) del punto 3
+#    (niente ingressi il venerdi' oltre le 20 server) e per la (a) (le
+#    posizioni vengono chiuse prima, quindi il posto si libera prima --
+#    che spinge n nella direzione OPPOSTA). I due effetti si oppongono.
+#    >>> ATTESA DICHIARATA: n OOS fra 470 e 530 (cioe' entro il +/-6%
+#        dal 517 dell'ancora). Il conto: su 12,5 mesi di OOS ci sono
+#        circa 54 venerdi'; se la sedia fa 1,55 uscite/giorno, un
+#        venerdi' sera vale a occhio meno di un'uscita, e le ore tolte
+#        sono 2 su 24 in UN giorno su 5 -> l'ordine di grandezza
+#        dell'effetto (b) e' pochi punti percentuali. [STIMATO, non
+#        misurato: e' un ordine di grandezza, non un numero da referto.]
+#        Se n esce da quella banda, c'e' un meccanismo che non ho
+#        capito e il round si ferma per capire quale.
+#  - PF: attesa 1,35 - 1,65 in OOS. NON mi aspetto un miglioramento:
+#    chiudere il venerdi' sera vende anche i movimenti favorevoli del
+#    lunedi'.
+#  - DD: attesa 6,5% - 8,5% in OOS. L'IPOTESI DEL ROUND e' che il DD
+#    CALI accendendo l'interruttore. E' la cosa che puo' essere
+#    smentita, ed e' per questo che e' scritta qui prima.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': che l'interruttore tolga un
+#    po' di profitto e un po' di DD, senza spostare il PF. In quel caso
+#    la risposta e' "il default va bene, e il weekend non e' il problema
+#    di questa sedia" -- ed e' un RISULTATO, non un fallimento: chiude
+#    una casella del certificato che oggi e' vuota, sulla sedia che
+#    andrebbe in campo per prima.
+#  - E IL RISULTATO CHE CAMBIEREBBE QUALCOSA, dichiarato prima: se il DD
+#    OOS scendesse sotto il 7,0% (cioe' -0,83 punti dal 7,8323%) a
+#    parita' di PF dentro il rumore, allora il fine settimana costa
+#    circa un punto di drawdown, e su un muro STATICO del 10% un punto
+#    e' il 10% del margine. Quello sarebbe un numero da portare a
+#    Claudio, non da archiviare.
+#
+# ----------------------------------------------------------------------
+#  ###  IL LIMITE PRINCIPALE DI QUESTO ROUND, DETTO PER PRIMO       ###
+# ----------------------------------------------------------------------
+#  >>> LA COLONNA CHE RISPONDEREBBE MEGLIO ALLA DOMANDA NON ESISTE SU
+#      QUESTO EA, E NON LA INVENTO.
+#      Verificato nel sorgente, non assunto: OnTester() di ABTG_EMA200
+#      (r.643-657) esporta SETTE statistiche, e l'intestazione del CSV
+#      e' quella:
+#        Pass, Profit, Expected Payoff, Profit Factor, Recovery Factor,
+#        Sharpe Ratio, Equity DD %, Trades
+#      Niente "Peggior Giornata %", niente "Perdite Consecutive Max",
+#      niente "Serie Perdente Peggiore".
+#      >>> Un gap del lunedi' e' per definizione un evento di UNA
+#          GIORNATA, e la colonna che lo vedrebbe e' proprio la Peggior
+#          Giornata. Qui si legge solo il DD complessivo, che e' un
+#          PROXY PIU' DEBOLE, e va detto invece che spacciarlo per la
+#          stessa cosa.
+#      >>> IL CONTRO-ESEMPIO CHE MOSTRA CHE NON E' UN CAPRICCIO: un
+#          altro EA di casa quelle tre colonne LE HA gia'
+#          (ABTG_CostToCost.mq5 r.1195 le scrive nell'intestazione), e
+#          l'ancora R112 di questa sedia porta un numero di peggior
+#          giornata (-2,45%) che viene da un'ALTRA misura, non dal CSV.
+#      >>> LA VIA AL NUMERO, col suo costo, perche' "non si molla" vuol
+#          dire trovare una misura in piu' e mai un'asticella piu'
+#          bassa: portare le tre colonne prop dentro stats[] di
+#          ABTG_EMA200 sono TRE righe di codice, copiate da un EA di
+#          casa che le ha gia'. E' una MODIFICA ALL'EA, e questo file
+#          misura UNA variabile: si propone per un round successivo,
+#          NON si fa qui. Finche' non c'e', il limite resta dichiarato.
+#  >>> E IL PER-TRADE NON LO SOSTITUISCE: ExportTrades() (r.645) scrive
+#      un file il cui nome contiene EA + simbolo + magic e NIENT'ALTRO,
+#      quindi in ottimizzazione ogni passata SOVRASCRIVE la precedente e
+#      sopravvive solo l'ultima cella. Con due celle e due finestre
+#      resta un file solo. Dichiarato.
+#
+# ----------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#
+#  >>> COME QUESTO ROUND POTREBBE NON MISURARE NIENTE: se nessuna
+#      posizione fosse mai aperta il venerdi' oltre le 20 server E
+#      nessun ingresso cadesse mai in quella fascia, l'interruttore
+#      sarebbe INERTE DI FATTO e le due celle uscirebbero IDENTICHE.
+#      >>> E SI RICONOSCE SUBITO, senza ambiguita': due celle con n
+#          IDENTICO e Profit IDENTICO AL CENTESIMO su TUTTE E DUE le
+#          finestre = manopola INERTE, MISURATA. Non e' un round
+#          buttato: e' la risposta, e chiude la casella per sempre.
+#          (Censimento 09/09: 874 CSV su 1.960 hanno passate a esito
+#          identico. Questo e' il modo di riconoscerne una PRIMA di
+#          chiamarla risultato.)
+#      >>> E SE FOSSE INERTE, LA CONSEGUENZA E' UTILE LO STESSO: vorrebbe
+#          dire che questa sedia NON passa il fine settimana aperta, e
+#          allora il rischio di gap del lunedi' -- che oggi e' una
+#          preoccupazione non misurata -- e' ZERO, scritto con un
+#          numero. Su una sedia che deve andare in campo il 1o ottobre
+#          e' esattamente il genere di cosa che serve sapere.
+#
+#  >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO: la cella
+#      accesa torna DD 6,5% e PF 1,55, e sembra una scoperta.
+#      Sarebbero due artefatti possibili, prevedibili adesso:
+#      (i)  CAMPIONE. Se n scende sotto ~300 uscite (= ~150 posizioni
+#           col fattore 2,0117 MISURATO su questa sedia), il merito e'
+#           SOSPESO e un PF alto non e' un merito: e' un numero senza
+#           campione.
+#      (ii) REGIME. 21 mesi di tick BCM sugli indici sono UN SOLO
+#           regime (toro). In un toro, chiudere il venerdi' sera toglie
+#           quasi solo gap FAVOREVOLI: il verso dell'errore e' CONTRO
+#           l'interruttore, cioe' un miglioramento misurato qui sarebbe
+#           semmai SOTTOSTIMATO. Va detto in tutti e due i versi.
+#  >>> COME LO DISTINGUO DA UN EFFETTO VERO, con misure che ho:
+#      1. IL SEGNO DELL'IS. Se il DD cala in OOS e sale in IS, non e'
+#         il weekend: e' la finestra.
+#      2. PROFITTO PER POSIZIONE, non solo PF: profit / (Trades/2,0117).
+#         Se il PF sale mentre il profitto per posizione resta piatto,
+#         sto solo contando meno operazioni.
+#      3. LA TAGLIA DELL'EFFETTO CONTRO LA TAGLIA DEL CAMPIONE: con due
+#         celle sole non c'e' altopiano da leggere. Una differenza di PF
+#         sotto 0,10 NON e' una differenza (A5).
+#
+# ----------------------------------------------------------------------
+#  S1 / S2 -- LE DUE SENTINELLE
+#    S1  RIPRODUZIONE, ED E' LA STESSA DI TUTTO IL GRUPPO r136. La cella
+#        InpFridayClose = false deve ridare i sei numeri dell'ancora
+#        (IS n 237 PF 1,20110 DD 5,7325% / OOS n 517 PF 1,52365 DD
+#        7,8323%). Se non li ridiventa, NON si legge nient'altro.
+#        >>> E vale il rilievo gia' scritto in R136a: l'ABTG_EMA200 sul
+#            branch 'lavoro' NON E' PIU' IL BINARIO DI R112. Il diff fra
+#            il pin di R112 (f33f374) e la testa (b45dd00, 11/09) e'
+#            stato LETTO da R136a, non assunto: +154/-16 righe, TUTTE
+#            l'imbuto di mortalita' (contatori, ImbutoRaccogli /
+#            ImbutoStampa / ImbutoGiro, l'input InpLogImbuto) piu'
+#            "cXX++;" dentro condizioni GIA' ESISTENTI. Nessuna
+#            condizione cambiata, nessuna soglia, nessun lotto.
+#        >>> Quindi l'attesa e' che S1 PASSI. Se passa, questo round e'
+#            anche una quinta riproduzione indipendente della stessa
+#            cella. Se S1 NON passa, il verdetto non e' "il round e'
+#            sbagliato": e' "UNA PATCH DICHIARATA DIAGNOSTICA HA MOSSO I
+#            NUMERI", e quella notizia vale piu' di tutto il round, va
+#            in cima al referto in grassetto, e le quattro r136 NON si
+#            leggono finche' non e' spiegata.
+#    S2  CONTEGGIO DELLE CELLE. 2 valori distinti di InpFridayClose nel
+#        CSV (0 e 1). Se ne esce uno solo, il driver non ha applicato
+#        l'asse e il round non esiste: ci si ferma.
+#
+# ----------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  QUESTO ROUND NON CERCA UN ALTOPIANO, E NON PUO'. Due celle non
+#        fanno una superficie. La regola "centro dell'altopiano, mai il
+#        picco" qui NON si applica perche' non c'e' niente da
+#        selezionare: si legge una DIFFERENZA fra due configurazioni,
+#        una delle quali e' quella in campo.
+#    B2  RISCHIO, a qualunque n (Emendamento B). Se la cella ACCESA fa
+#        DD OOS o DD IS > 7,8323% (il DD dell'ancora), l'interruttore
+#        PEGGIORA il rischio e si scrive cosi', anche se il PF sale.
+#    B3  MERITO. Il confronto di PF si legge solo se le posizioni OOS di
+#        ENTRAMBE le celle stanno sopra 150 (cioe' Trades/2,0117 >= 150,
+#        Trades >= 302). Sotto, il PF si scrive ma non si commenta.
+#    B4  ANTI-INERZIA. n identico E Profit identico al centesimo su
+#        entrambe le finestre = manopola INERTE, MISURATA (vedi il
+#        contro-esempio). E' un risultato e chiude la casella.
+#    B5  BANDA DI RUMORE. Il rumore di macchina su questa cella e' ZERO
+#        MISURATO (i gemelli 763400/763401 sono identici alla quinta
+#        cifra, e R112 ha riprodotto R110 al centesimo su 7 colonne).
+#        Resta il rumore di campione: una differenza di PF < 0,10 NON e'
+#        una differenza, e una differenza di DD < 0,30 punti percentuali
+#        non si commenta.
+#    B6  IL ROUND NON PROMUOVE NIENTE, e non e' una formalita'. Anche un
+#        risultato netto qui dentro non cambia un preset, non accende
+#        una sedia e non tocca il forward. Riaccensioni, taglie, rischio
+#        e conto reale 10105439 sono [FIRMA DI CLAUDIO].
+#
+# ----------------------------------------------------------------------
+#  IL COSTO IN TEMPO MACCHINA
+#    2 celle x 2 finestre = 4 PASSATE, a tick reali su U30USD H1, 21
+#    mesi. Calibrazione dall'archivio: R88a ha fatto 96 passate a tick
+#    su U30USD M5 sulla stessa finestra di 21 mesi in 8,0 minuti
+#    (r88_csv\REFERTO_R88.txt) = ~5,0 s/passata su M5. H1 e' piu'
+#    leggero di M5 in barre ma il modello a tick lavora sui TICK, non
+#    sulle barre, quindi il tempo per passata e' dello stesso ordine.
+#    >>> [STIMA, NON MISURA]: ~20-40 secondi in tutto. E' il round piu'
+#        economico del dossier, e questa e' meta' della ragione per cui
+#        e' scritto.
+#
+#  BANCO E FINESTRA -- verificati col conto, non ricordati
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver, walkforward_generico.ps1 r.179). Il calcolo (r.758):
+#      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#      2024.09.26 -> 2026.06.30 = 642 giorni, floor(642*0,40) = 256,
+#      Meta = 2025.06.09. Quindi:
+#        IS  2024.09.26 - 2025.06.09
+#        OOS 2025.06.10 - 2026.06.30
+#      Sono ESATTAMENTE le finestre stampate nel referto di R112
+#      (REFERTO_R112.txt r.10-13). Se la riga di lancio cambia
+#      FrazioneIS, deposito o @FINOA, S1 decade e questo file va
+#      riscritto, non "letto con prudenza".
+#    REGIME: 21 mesi di tick BCM sugli indici = UN SOLO REGIME (toro).
+#      Emendamento della Finestra regola C: NON soddisfatta, e non lo
+#      sara' alla fine di questo round. Dichiarato come buco.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - PEGGIOR GIORNATA per cella: [NON MISURATA] e NON misurabile qui
+#      (l'OptFrame di questo EA ha 7 statistiche). E' il limite
+#      principale, scritto per esteso sopra.
+#    - Ora di chiusura vera di U30USD il venerdi' su BCM: [NON
+#      MISURATO]. Decide se l'effetto (a) e' vuoto o no.
+#    - Separazione fra l'effetto (a) "chiudo" e l'effetto (b) "non
+#      riapro": [NON MISURABILE] con questo asse.
+#    - PROVA DI REGIME: assente (un solo toro, 21 mesi).
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva; il lato separato esiste gia' su questa sedia (R112 celle
+#      01/02/03_short) ma NON incrociato con InpFridayClose.
+#    - InpNewsCurrencies NON e' pinnato di proposito: il pin di una
+#      stringa a valore VUOTO viene IGNORATO da MT5 (classe FiboH4,
+#      controllo 3 di controlla_prova.py). Il default compilato e' gia'
+#      la stringa vuota che serve. Aggiungerla "per completezza" fa
+#      fallire il cancello.
+#    - InpLogImbuto e' pinnato a FALSE, e non e' il default. Spegne SOLO
+#      la stampa: i contatori girano lo stesso (il flag e' letto solo in
+#      ImbutoStampa() e ImbutoGiro(), mai in una condizione d'ingresso o
+#      d'uscita). Con 4 passate il Giornale non si legge comunque.
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester
+#      le sue GlobalVariable non esistono e la guardia lascia passare
+#      tutto (fail-open dichiarato nel sorgente). I numeri restano
+#      confrontabili con quelli di R112, che girava allo stesso modo.
+#
+#  MAGIC FISSO E VERGINE 786210 (verificato per ricerca su tutto il
+#  repo, 13/09/2026: zero occorrenze).
+#  ORDINE DEI ROUND: R136a/b/c/d toccano questa stessa sedia su altri
+#  quattro assi d'uscita. Qui quei quattro sono PINNATI ai valori vivi
+#  (InpSLatr 1,0 / InpTP1_ATRmult 0,0 / InpTP1Pct 50 / InpUseTrailing
+#  true): questo file NON rimette in discussione quelli, e si legge
+#  insieme a loro perche' condivide banco, cella e sentinella S1.
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: copiata campo per campo da
+#     prove\R136a_slatr_U30USD.txt (che a sua volta la copia
+#     dall'antenato R110_EMADOW_00_metro) e riverificata contro le
+#     colonne Inp* della riga del CSV d'archivio
+#     R112_CORSA_20260826\ABTG_EMA200_U30USD_OOS_00_metro.csv
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R146B
+# InpFridayClose -> E' L'ASSE, in fondo al file.
+# InpFridayCloseHour resta al DEFAULT 20 (ora SERVER = 21 italiane), che
+# e' anche il valore di tutte e 213 le corse d'archivio: e' INERTE nella
+# cella spenta (r.279) e attivo solo nella cella accesa. Non e' una
+# seconda variabile: e' la costante che rende confrontabili le due celle.
+InpFridayCloseHour=20
+InpMagic=786210
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = false = LA CELLA VIVA, ed e' l'ANCORA (indice 0)
+#     1 = true  = si chiude tutto il venerdi' oltre le 20 server
+#     Due celle sono TUTTO l'asse possibile: e' un bool, non una
+#     grandezza. Non c'e' un bordo "scelto da me" da dichiarare, e non
+#     c'e' nessun arrotondamento possibile.
+InpFridayClose=0||0||1||1||Y
