@@ -292,7 +292,7 @@ int    gDayEqStamp     = -1;
 
 //--- CONTATORI DIAGNOSTICI. Escono come colonne dell'OptFrame: servono a
 //    capire se l'asse ha davvero morso o se il round ha misurato un tappo.
-long gCntSegnali       = 0;   // rotture grezze viste (il denominatore)
+long gCntSegnali       = 0;   // rotture viste MENTRE il posto era libero (vedi OnNewBar)
 long gCntPavimentoSL   = 0;   // volte in cui InpMinSLPts ha allargato lo stop
 long gCntLottoAlzato   = 0;   // volte in cui il pavimento del LOTTO ha alzato il rischio (classe 228)
 long gCntLottoTagliato = 0;   // volte in cui la quantizzazione ha tagliato il lotto oltre il 5%
@@ -534,7 +534,7 @@ void OnNewBar()
    bool segShort = RotturaShort_Calc(c1, canaleBasso, atr, InpKBreak);
    if(!segLong && !segShort) return;
 
-   gCntSegnali++;                                       // il denominatore, prima di ogni filtro
+   gCntSegnali++;                                       // rotture viste col POSTO LIBERO, sotto il tetto e in orario -- NON e' il denominatore assoluto (sta dopo i tre return qui sopra, prima dei filtri dell'autore)
 
    //--- i due filtri dell'autore, SPENTI di default. Un filtro senza dati
    //    NON inventa un veto (al contrario del motore, che senza dati non
@@ -1033,7 +1033,7 @@ void AutoTestVolExpBreak()
 //    stats[11] Lotto Alzato 228      -> rischio VERO sopra il detto //
 //    stats[12] Lotto Tagliato 5pct   -> rischio VERO sotto il detto //
 //    stats[13] Spread Gate Rifiuti   -> il cancello R55 sta filtrando//
-//    stats[14] Segnali Grezzi        -> il denominatore di tutto    //
+//    stats[14] Segnali Grezzi        -> rotture col posto LIBERO    //
 //    stats[15] Guardian Rifiuti      -> nel tester dev'essere 0     //
 //  HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto. //
 //==================================================================//
