@@ -254,9 +254,10 @@ riga si ferma, si ferma **prima** di aver toccato qualcosa.
       if($orig -notlike '*BCM Markets MT5 Terminal*'){ return }
       if($orig -like '*-V3*'){ return }
       $ex = Join-Path $_.FullName 'MQL5\Experts\ABTG_EMA200.ex5'
-      $info = '-- non presente --'
-      if(Test-Path $ex){ $i = Get-Item $ex; $info = $i.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss') + '   ' + $i.Length + ' byte' }
-      [pscustomobject]@{ CartellaDati=$_.Name; Programma=$orig; ABTG_EMA200_ex5=$info }
+      $quando = $null
+      $quanto = $null
+      if(Test-Path $ex){ $i = Get-Item $ex; $quando = $i.LastWriteTime; $quanto = $i.Length }
+      [pscustomobject]@{ CartellaDati=$_.Name; Programma=$orig; ex5_data=$quando; ex5_byte=$quanto }
     })
   $trovate | Format-List
   Write-Host ("CANDIDATE TROVATE: " + $trovate.Count + "   (ne serve ESATTAMENTE UNA)")
@@ -332,7 +333,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo backup;
@@ -382,7 +383,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo compila;
@@ -566,7 +567,7 @@ per il piccolo. **Per il 50503392 il preset non esiste ancora.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo raccolta;
@@ -612,7 +613,7 @@ Poi, **mettendo al posto di `<BACKUP>` il percorso stampato in §3.3**:
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo ritorno -Backup '<BACKUP>';
@@ -635,7 +636,7 @@ I parametri del grafico stanno nei `.chr` di `MQL5\Profiles\Charts`, che MT5
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo profili -Backup '<BACKUP>';
