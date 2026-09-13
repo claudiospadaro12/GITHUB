@@ -18024,3 +18024,44 @@ sulla stessa configurazione.
 *Un limite fisico va dimostrato leggendo IL CODICE, non dedotto dal nome del
 parametro: "0" e "100" sembrano estremi opposti, ma due guardie indipendenti possono
 farli collassare sulla stessa cella.*
+
+---
+
+## 311. L'UPLOAD DI MASSA SU UN ALBERO GIA' CURATO: `sha` PRESENTE = SOVRASCRITTURA SILENZIOSA (13/09/2026)
+
+**Il caso**: script preparato per caricare su GitHub i CSV dei round gia' girati sul
+VPS (`%USERPROFILE%\abtg_round\risultati_prove\`), mai pubblicati dal runner (classe
+307). Riusava `PubblicaFile` da `runner_abtg.ps1`, scrivendo al percorso
+`backtest_pipeline/risultati_prove/<percorso relativo>` — LO STESSO ALBERO gia'
+tracciato nel repo, **1.439 CSV curati**, con la STESSA convenzione di nome che il VPS
+produce (`<EA>\<EA>_<SIM>_IS[_ohlc][_tag].csv`, `RIGA_ROUND_VPS.ps1` r.622).
+
+🔴 **`PubblicaFile` legge lo `sha` esistente e, se c'e', AGGIORNA invece di creare.**
+Con un CSV omonimo gia' nel repo (macchina diversa, run diversa, contenuto diverso),
+l'upload lo **sovrascrive in silenzio**: nessun errore, nessun avviso, la console
+stampa `OK`. Sono proprio le fonti citate a numero di riga in `REGISTRO_TEST.md` e
+hard-coded in `censimento_uscite.py`.
+
+**Trovato dal secondo giudizio PRIMA che la stringa arrivasse a Claudio** (regola del
+09/09: niente esce senza il doppio cancello, nemmeno una stringa mia). Il cancello
+deterministico era verde: non vede collisioni di percorso, solo difetti meccanici.
+
+### ✅ CHE COSA SI FA
+Un import di massa scrive in un **sottoalbero dedicato alla sua origine**
+(`risultati_prove/dal_vps/`, come gia' fatto a mano il 09/09 con `r123_dal_vps/`),
+mai al percorso "naturale" che un'altra fonte gia' usa. E la console **distingue
+sempre NUOVO da AGGIORNATO** (classe 256: il numero stampato e' quello fatto, non
+quello trovato) — se compare un AGGIORNATO dove ci si aspettava solo NUOVI, e' il
+segnale che qualcosa gia' esisteva con quel nome.
+
+Trovati nello stesso giro, stessa consegna, difetti minori ma reali: `exit`/`param()`
+in uno script pensato anche per essere incollato in console (chiude la finestra
+invece di terminare lo script), nessun tetto/pausa fra centinaia di chiamate API
+(rate limit garantito), `$ErrorActionPreference="Stop"` globale che resta appiccicato
+alla sessione dopo un `iex`, percorsi non URL-encodati.
+
+### 🔑 La regola in una riga
+*Prima di riusare una funzione di pubblicazione su un percorso nuovo, si controlla se
+quel percorso e' gia' popolato da un'ALTRA fonte: `sha` presente vuol dire "aggiorna",
+e un aggiornamento silenzioso su una fonte curata e' una perdita di dati travestita
+da successo.*
