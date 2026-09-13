@@ -779,8 +779,39 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  esadecimali e il runner le salta come commento (r.730). Non gira
 #  niente sul VPS finche' il prefisso c'e'.
 #  SI ARMANO togliendo il prefisso '#DISARMATA# ', e SOLO dopo il PASS
-#  del SECONDO STRATO (agente 'controllo-preventivo'). Il primo strato
-#  e' gia' passato, ed e' misurato:
+#  del SECONDO STRATO (agente 'controllo-preventivo').
+#
+#  >>> 13/09, IL SECONDO STRATO HA DATO **FAIL**, E AVEVA RAGIONE. <<<
+#  DIFETTO D1 (classe 308 punto 1), non dichiarato nella prima stesura:
+#  in OnNewBar i primi due cancelli sono
+#      if(CountPositions()>0) return;
+#      if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+#  e siccome SL e TP si allargano INSIEME con InpKStop (ancora unica), il
+#  tempo in mercato cresce ~kStop^2: la cella 2,5 tiene il posto occupato
+#  molto piu' a lungo della cella 1,0, e i segnali che arrivano nel
+#  frattempo sono SCARTATI PRIMA DI ESSERE CALCOLATI. Le quattro celle
+#  NON campionano lo stesso insieme di segnali: selezione MONOTONA lungo
+#  l'asse, sulla domanda stessa del round (0,024 R attesi).
+#  Il "TOLTO PER COSTRUZIONE" che i file scrivevano al punto (4) copriva
+#  solo il FLAT DI FINE SEDUTA (che davvero non c'e'): l'occupazione del
+#  posto sopravviveva intatta. Dichiarare "tolto" cio' che e' dentro e'
+#  peggio che non dirlo -- chi legge smette di cercarlo.
+#  CORRETTO in d5a24eeb, e la correzione e' una MISURA, non una scusa:
+#    - punto (8) sulla madre / punto (C) sul gemello, ampiezza [NON
+#      MISURATA], e il perche' non si puo' togliere senza cambiare EA;
+#    - SOGLIA CONGELATA PRIMA DEI CSV: se la colonna "Segnali Grezzi"
+#      differisce di piu' del 10% fra la cella InpKStop=1,0 e la 2,5, le
+#      celle non campionano lo stesso insieme -> nessuna differenza di
+#      Expected Payoff e' attribuibile allo stop e il verdetto e' "NON
+#      ANCORA MISURATO", non un risultato;
+#    - "Segnali Grezzi" DEFINITA alla lettera: NON e' il denominatore
+#      grezzo assoluto, sono le rotture viste col POSTO LIBERO, sotto il
+#      tetto giornaliero e dentro l'orario ammesso (gCntSegnali sta dopo
+#      quei tre return). Il commento sbagliato accanto a quella riga e'
+#      corretto in 5cb41a0 -- SOLO IL COMMENTO: la riga NON si sposta,
+#      perche' li' fa da falsificatore all'asse.
+#
+#  Il primo strato e' passato di nuovo SUI FILE CORRETTI, ed e' misurato:
 #    controlla_prova.py            OK, 8 celle, 16 passate, 0 problemi
 #    controlla_riga.py --oggetto prova   nessun difetto meccanico (x2)
 #         (prima era FAIL: 9 byte non-ASCII nei commenti, corretti in
@@ -794,14 +825,28 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  la classe 275: '--oggetto coda' non esiste, e il FAIL a 3 bloccanti
 #  e' IDENTICO sulla coda non toccata (verificato oggi).
 #
-#  >>> PIN: 1b7b743d = VENTESIMO GIRO DI PIN, ed era OBBLIGATORIO.
-#  Classe 265: il pin della coda ne contiene un altro. La copia al pin
-#  dei tre r142 (dbe86ac3) porta dentro $PIN = d6809008, e a d6809008 i
-#  due file prova r145 NON ESISTONO -> 404 sul file prova, round morto.
-#  Il pin interno nuovo e' 7bce56dc (non 6f92e7d, dove i file esistono
-#  ma con i 9 byte non-ASCII dentro). Le due impronte inchiodate
-#  ($SHA_ROUND, $SHA_WALK) sono RICALCOLATE e INVARIATE: i blob dei due
-#  script sono identici a quelli del pin vecchio.
+#  >>> PIN: da4344b8 = la copia della riga sottile del VENTUNESIMO GIRO
+#  DI PIN, che porta dentro $PIN = d5a24eeb. IL GIRO DOPPIO DELLA CLASSE
+#  265, fatto per intero, perche' il pin della coda ne contiene un altro:
+#    - il pin ESTERNO (questa colonna) sceglie quale copia della riga
+#      sottile gira;  - il pin INTERNO ($PIN dentro quella copia) sceglie
+#      da dove il driver scarica IL FILE PROVA.
+#  Sbagliarne uno fa girare la versione SENZA la correzione, in silenzio.
+#  Storia dei due giri, per non rifarli a memoria:
+#    20o giro (1b7b743d -> $PIN 7bce56dc): a d6809008 i due file prova
+#      NON ESISTEVANO (404, round morto). Non era 6f92e7d perche' li'
+#      esistono ma con 9 byte non-ASCII dentro.
+#    21o giro (da4344b8 -> $PIN d5a24eeb): a 7bce56dc i file ESISTONO ma
+#      sono la versione SENZA la correzione del difetto D1. E' il modo
+#      SILENZIOSO della 265: un 404 si vede, un file prova sbagliato no.
+#  VERIFICATO, non assunto, al pin nuovo d5a24eeb:
+#      i due file prova r145 presenti E IDENTICI AL BYTE alla copia
+#          corretta (git show | diff -q: nessuna differenza)
+#      RIGA_ROUND_VPS.ps1  348ED533...9D0A315B  = $SHA_ROUND, INVARIATA
+#      walkforward_gen.ps1 15DE7D5F...6828F1C6  = $SHA_WALK,  INVARIATA
+#      7bce56dc ANTENATO di d5a24eeb; toppa 270 (124db40) dentro
+#      metodo delle impronte validato contro due numeri scritti da altri
+#          (driver a e6c0d70e = 62A53763..., a 115254dc = BF53EC27...)
 #  Le righe r142 gia' in coda NON sono toccate: pinnano alla loro copia
 #  congelata, col loro $PIN.
 #
@@ -812,5 +857,5 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  rumorosamente invece di girare un binario vecchio in silenzio.
 #  Questi due round sono anche il collaudo di compilazione dell'EA.
 # =====================================================================
-#DISARMATA# 1b7b743d3bd86cee4b080a83350f9a4809bf4138 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
-#DISARMATA# 1b7b743d3bd86cee4b080a83350f9a4809bf4138 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
+#DISARMATA# da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
