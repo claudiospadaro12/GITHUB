@@ -628,7 +628,69 @@ $BancoBT = 'C:\MT5_Backtest'
 #      dentro il $PIN vecchio d6809008. Continuano a scaricare i LORO
 #      file prova dal LORO pin, e questo giro non li sfiora.
 # ---------------------------------------------------------------------
-$PIN = '7bce56dc2e19b5d9f39400ad01b123b8264807be'
+#
+#  VENTUNESIMO GIRO (13/09/2026). $PIN 7bce56dc -> d5a24eeb.
+#  IL CODICE NON E' CAMBIATO, DI NUOVO. Si muove per la CLASSE 265 nel
+#  suo secondo modo, quello che NON FA RUMORE: i due file prova r145 a
+#  7bce56dc ESISTONO (niente 404), ma sono la versione SENZA la
+#  correzione del difetto D1. Col pin vecchio girerebbe la versione
+#  sbagliata, in silenzio, e nessuno se ne accorgerebbe leggendo i CSV.
+#
+#  IL DIFETTO CHE I DUE FILE ADESSO DICHIARANO, ed e' il motivo del giro
+#  (FAIL del secondo strato del cancello, 13/09): i file prova scrivevano
+#  "TOLTO PER COSTRUZIONE" su un contro-esempio che era tolto A META'.
+#  In ABTG_VolExpBreak.mq5, OnNewBar, i primi due cancelli sono
+#      if(CountPositions()>0) return;
+#      if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+#  e siccome SL e TP si allargano INSIEME con InpKStop (ancora unica) il
+#  tempo in mercato cresce ~kStop^2: la cella 2,5 tiene il posto occupato
+#  molto piu' a lungo della cella 1,0, e i segnali che arrivano nel
+#  frattempo sono scartati prima di essere calcolati. Le quattro celle
+#  NON campionano lo stesso insieme di segnali -- una selezione MONOTONA
+#  lungo l'asse, sulla stessa domanda che il round misura (0,024 R).
+#  Il "TOLTO" vecchio copriva solo il flat di fine seduta (che davvero
+#  non c'e'), non l'occupazione del posto.
+#  Adesso i due file portano: il punto (8) / punto (C) che lo dichiara
+#  con ampiezza [NON MISURATA], la soglia CONGELATA PRIMA dei CSV (oltre
+#  il 10% di scarto sulla colonna "Segnali Grezzi" fra la cella 1,0 e la
+#  2,5 il confronto NON si legge e il verdetto e' NON ANCORA MISURATO), e
+#  la definizione esatta di quella colonna (rotture viste col posto
+#  LIBERO, sotto il tetto giornaliero e dentro l'orario ammesso).
+#
+#  MISURATO al pin nuovo d5a24eeb, non assunto:
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      marcatori RIGA_ROUND_VPS_v1 e v5_INCLUDE   presenti (2 e 2)
+#      i due file prova r145                      presenti, e IDENTICI AL
+#          BYTE alla copia corretta (git show | diff -q: nessuna
+#          differenza). E' il controllo che manca sempre quando la 265
+#          morde nel modo silenzioso: "esiste" non basta, deve essere
+#          QUELLO.
+#      i tre file prova R142                      presenti ANCORA
+#      7bce56dc e' ANTENATO di d5a24eeb           (git merge-base, exit 0)
+#      la toppa 270 (124db40) e' DENTRO d5a24eeb  (git merge-base, exit 0)
+#  E IL METODO DELLE IMPRONTE E' VALIDATO CONTRO NUMERI SCRITTI DA ALTRI,
+#  altrimenti un "invariata" non prova niente: lo stesso comando sul
+#  driver a e6c0d70e torna 62A53763...F7CBB7BC (decimo giro) e a 115254dc
+#  BF53EC27...FAF59875 (undicesimo), esattamente come li aveva inchiodati
+#  chi c'era prima. Un metodo che ricalcola solo il numero che si aspetta
+#  non distingue i due casi.
+#
+#  >>> E L'EA E' CAMBIATO, MA IL PIN NON C'ENTRA, e va detto perche' non
+#      lo si cerchi qui: il commit 5cb41a0 corregge TRE COMMENTI in
+#      ABTG_VolExpBreak.mq5 (zero righe di codice, conteggio righe
+#      invariato a 1148, r.537 invariata). Il driver compila l'EA dalla
+#      TESTA del branch 'lavoro', non da $PIN -- e' l'avvertenza gia'
+#      stampata a schermo da questo script. La riga gCntSegnali++ NON e'
+#      stata spostata: sta dove serve per fare da falsificatore all'asse.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: i tre r142 pinnano a
+#      dbe86ac3 e le altre al proprio commit congelato, ognuna col
+#      PROPRIO $PIN dentro. Solo le due righe r145 pinneranno il commit
+#      di QUESTO giro -- e restano #DISARMATA# finche' non c'e' il PASS
+#      del secondo strato.
+# ---------------------------------------------------------------------
+$PIN = 'd5a24eebd2c0b722f734367efbd4507909df00af'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
