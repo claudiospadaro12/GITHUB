@@ -17894,7 +17894,11 @@ va calcolata e dichiarata PRIMA, altrimenti la si legge come risultato.*
 
 ---
 
-## 309. 🚨 CODICE D'USCITA 3 NON VUOL DIRE "IL ROUND E' FALLITO": VUOL DIRE "UN TERMINALE NON BERSAGLIO E' SPARITO" (13/09/2026)
+## 309. 🚨 CODICE D'USCITA 3 NON VUOL DIRE "IL ROUND E' FALLITO": VUOL DIRE "ROUND GIRATO **CON RILIEVI**" — E I RILIEVI SONO TRE COSE DIVERSE (13/09/2026)
+> ✏️ **Titolo corretto la sera stessa.** La prima stesura diceva *"vuol dire: un terminale
+> non bersaglio e' sparito"*: e' **una** delle tre cause, non il significato. Vedi la
+> **CORREZIONE** in fondo alla classe — e la stesura originale e' lasciata sotto apposta,
+> perche' e' il caso reale da cui la classe e' nata.
 
 **Il caso**: il referto della notte 12/13-09 (`REFERTO_RUNNER_20260913_033003.txt`) segnava
 **6 falliti** su 42 righe — letto ieri come "6 round da diagnosticare, dati persi per il
@@ -17945,3 +17949,35 @@ guardando il Giornale/Esperti del terminale REALE in quelle due finestre, non as
 *Un codice d'uscita non e' un'etichetta: e' un puntatore a una riga di codice, e va
 letto LI' prima di dire cosa significa — "fallito" per due cause diverse (dati mancanti,
 terminale sparito) e' gia' un errore di misura.*
+
+### ✏️ CORREZIONE DELLA STESSA GIORNATA (13/09/2026) — **la classe aveva ragione sulla regola e torto sul contenuto**
+
+🔴 **La parola *"esclusivamente"* nel paragrafo qui sopra e' FALSA, e la classe si
+autoapplica**: il codice 3 e' stato etichettato senza leggere la riga che lo produce
+fino in fondo. La riga vera e' **r.745**:
+
+```
+elseif($persi.Count -gt 0 -or $RILIEVI.Count -gt 0){ $esitoFinale = "ROUND GIRATO CON RILIEVI (" + $RILIEVI.Count + ")" }
+```
+
+👉 **L'uscita 3 scatta su QUALUNQUE rilievo**, e i punti che ne generano uno sono **TRE**:
+- **r.408** — `if($Modello -ne 4)`: *"round girato a Modello N (non tick reali): screening,
+  non verdetto"*. **Scatta per costruzione su OGNI round OHLC.**
+- **r.572** — tetto barre (`MaxBars`) non verificabile dal codice.
+- **r.725** — PID non bersaglio spariti (quello descritto sopra).
+
+🟢 **E la misura che decide, sulle 36 righe ROUND della notte 12/13-09** (incrocio
+`-Modello` × codice d'uscita): **`(4,0)=30` · `(1,3)=5` · `(4,2)=1`**.
+**I 5 round a uscita 3 sono ESATTAMENTE i 5 lanciati a `-Modello 1`; nessuno dei 31 a
+tick reali esce 3.** La spiegazione parsimoniosa e' r.408, non un terminale caduto.
+
+⚖️ **Resta aperto, e va detto**: i due rilievi possono essere scattati insieme e il log
+per-round e' sovrascritto (**classe 307**). La chiusura costa **la lettura di 5 file di
+testo**: l'esito nel referto per-round porta il **numero** di rilievi —
+**`(1)` = era solo il modello · `(2)` = c'e' anche un PID sparito.**
+
+### 🔑 La regola corretta, in una riga
+*Quando un codice d'uscita e' prodotto da una condizione con un `-or`, il codice **non
+identifica la causa**: identifica un INSIEME di cause. Dire "questo codice significa X"
+e' legittimo solo se la condizione ha **un solo** ramo — altrimenti si deve andare a
+leggere quale ramo ha scattato, o dichiarare che non lo si sa.*

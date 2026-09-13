@@ -1,5 +1,37 @@
 # 🚨 RILIEVO — 5 round della notte 12/13-09 segnalano un terminale NON bersaglio sparito
 
+> ## ✏️ ERRATA DEL 13/09/2026 (architetto-prop, stesso giorno) — **LA CAUSA SCRITTA QUI SOTTO NON E' L'UNICA POSSIBILE, E PROBABILMENTE NON E' QUELLA**
+>
+> 🔴 **Cosa non regge**: qui (e nella **classe 309**) c'e' scritto che l'uscita 3
+> significa *"esclusivamente"* un PID non bersaglio sparito. **Falsificato
+> leggendo il codice**: `RIGA_ROUND_VPS.ps1` **r.745** e'
+> `elseif($persi.Count -gt 0 **-or** $RILIEVI.Count -gt 0)` — l'uscita 3 scatta su
+> **QUALUNQUE** rilievo, e i punti che ne generano uno sono **TRE**: **r.408**
+> (`-Modello` diverso da 4: *"screening, non verdetto"*), **r.572** (tetto barre
+> non verificabile), **r.725** (PID spariti).
+>
+> 🟢 **E la misura che sceglie fra le due spiegazioni**: incrociando `-Modello` e
+> codice d'uscita sulle 36 righe ROUND del referto esce
+> **`(Modello 4, uscita 0) = 30` · `(Modello 1, uscita 3) = 5` · `(Modello 4,
+> uscita 2) = 1`**. 👉 **I 5 round a uscita 3 sono ESATTAMENTE i 5 lanciati a
+> `-Modello 1`, e nessuno dei 31 a tick reali esce 3.** Il rilievo di r.408
+> scatta **per costruzione** su ogni round OHLC: **non serve nessun terminale
+> sparito per spiegare i cinque eventi.**
+>
+> ⚖️ **Cosa NON dimostra l'errata** (contro-esempio contro l'errata stessa): i due
+> rilievi **possono essere scattati insieme**, e il log per-round e' stato
+> sovrascritto (classe 307). Quindi **il rilievo resta APERTO** — ma l'ipotesi
+> alternativa chiede **cinque** sparizioni-e-rientri, ognuna **esattamente**
+> durante un round OHLC e **mai** durante i 31 a tick reali, con `r126a`
+> (uscita **0**) proprio **in mezzo** fra `r127c` e `r127b`.
+>
+> ✅ **Quindi il punto 1 di "COSA SERVE PER CHIUDERE" qui sotto NON e' piu' la
+> prima mossa.** La prima mossa e' il **punto 2**, e la domanda e' cambiata: nel
+> referto dentro ogni zip l'esito e' `ROUND GIRATO CON RILIEVI (N)` (r.746).
+> **N=1 → era solo il modello, il rilievo si chiude. N=2 → allora si', e allora
+> si guarda il Giornale del reale `10105439`.** Dettaglio: `report/PIANO_PROP.md`
+> **AREA K, riga K2** · buco **M42**.
+
 **Turno continuo del 13/09, 09:11.** Verificato alla FONTE (codice, non riassunto):
 il referto di stanotte (`REFERTO_RUNNER_20260913_033003.txt`) segnava **6 falliti** su
 42 righe. Ieri erano stati letti come "6 round da diagnosticare, dati persi per il log
