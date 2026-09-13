@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_EMA200_v1
+#  MARCATORE_SCHIERA_EMA200_v2
 #
 #  SCHIERAMENTO DI ABTG_EMA200 su U30USD H1, magic 771531.
 #  Ricompila la sedia con il Guardian, partendo dal SORGENTE PINNATO
@@ -24,6 +24,13 @@
 #    -Passo ritorno    rimette i file salvati da -Passo backup
 #    -Passo profili    rimette i .chr salvati (TERMINALE CHIUSO)
 #
+#  E UNA COSA CHE FA E CHE VA DETTA: sovrascrive
+#  MQL5\Include\ABTG_PausaGuardian.mqh, che in questo repo e' incluso da 72 EA.
+#  NON cambia nessun .ex5 gia' compilato (un binario non rilegge il suo
+#  include), quindi NESSUN EA in campo cambia comportamento; ma cambia il
+#  SORGENTE comune, percio' il prossimo che ricompilera' un altro EA su questo
+#  terminale si portera' dietro questa versione. Il backup lo salva.
+#
 #  QUELLO CHE NON FA, dichiarato:
 #    - NON apre e NON chiude nessun terminale MetaTrader;
 #    - NON attacca e NON stacca nessun EA da nessun grafico;
@@ -42,8 +49,20 @@ $ErrorActionPreference = 'Stop'
 
 #  Il commit del SORGENTE dell'EA: e' la versione MISURATA a R112.
 #  Non e' un branch e non e' HEAD: e' un commit, e non si cambia.
+#  IL .ex5 SI COMPILA DA DUE UNITA', E TUTTE E DUE VANNO APPUNTATE.
+#  Appuntare solo il .mq5 era la stessa trappola di HEAD applicata all'altro
+#  file: fra l'include di R112 e quello di HEAD ci sono +1000 righe e DUE
+#  commit intitolati "LAVORO IN CORSO" (8c0a1db, cdb2037).
+#    $PIN_EA  -> il .mq5  (26a1856, blob identico a f33f374)
+#    $PIN_MQH -> l'include a f33f374, cioe' il pin di R112: 1461 righe.
+#                La firma di ABTG_GuardiaIngresso li' ha 7 parametri con
+#                default dal secondo in poi, quindi la chiamata a DUE
+#                argomenti dell'EA compila senza toccare niente.
+#    $PIN_SET -> il preset. A f33f374 NON ESISTE (e' nato il 12/09), quindi
+#                resta a 077afd0: dichiarato, non subito.
 $PIN_EA    = '26a185661c120de6fa0a33b79279595740e264e8'
-$PIN_RESTO = '077afd0671d1634d6232631b0c05214a43089cb6'
+$PIN_MQH   = 'f33f37426068a48068d82137cb43c5bf74c7de61'
+$PIN_SET   = '077afd0671d1634d6232631b0c05214a43089cb6'
 $BASE      = 'https://raw.githubusercontent.com/claudiospadaro12/GITHUB'
 
 # =====================================================================
@@ -72,6 +91,37 @@ function Trova-CartellaDati {
   return $cand[0].FullName
 }
 
+# =====================================================================
+#  LE ALTRE DUE TRACCE (12/09: su 14 casi una traccia sola non basta).
+#  Qui la traccia 1 (origin.txt) SCEGLIE ed e' fail-closed; queste due
+#  CONFERMANO. La differenza col censimento del 12/09 e' che quella riga
+#  leggeva e basta, questa SCRIVE: percio' una conferma che trova il
+#  conto SBAGLIATO non e' un rilievo, e' un ARRESTO.
+#    traccia 2: il numero di conto nel giornale del terminale
+#    traccia 3: ABTG_EMA200.ex5 presente dove ci aspettiamo la sedia
+# =====================================================================
+function Conferma-Bersaglio($cartella){
+  $atteso  = '50503392'
+  $trovato = $false
+  $giornali = @(Get-ChildItem (Join-Path $cartella 'Logs') -Filter '*.log' -ErrorAction SilentlyContinue |
+                Sort-Object LastWriteTime -Descending | Select-Object -First 3)
+  foreach($g in $giornali){
+    $t = Get-Content $g.FullName -Raw -ErrorAction SilentlyContinue
+    if($null -eq $t){ continue }
+    if($t -match '50504263|10105439'){
+      throw ("VIETATO proseguire: nel giornale " + $g.Name + " compare un conto che NON e' il bersaglio. Mi fermo senza scrivere niente.")
+    }
+    if($t -match $atteso){ $trovato = $true }
+  }
+  if($trovato){ Write-Host ("  TRACCIA 2 OK : il conto " + $atteso + " compare nel giornale di questa cartella") -ForegroundColor Green }
+  else { Write-Host ("  TRACCIA 2 -- : il conto " + $atteso + " non l'ho trovato nei giornali recenti (possono essere ruotati). NON blocco: la traccia 1 e' gia' fail-closed.") -ForegroundColor DarkYellow }
+  if(Test-Path (Join-Path $cartella 'MQL5\Experts\ABTG_EMA200.ex5')){
+    Write-Host "  TRACCIA 3 OK : ABTG_EMA200.ex5 e' presente in questa cartella" -ForegroundColor Green
+  } else {
+    Write-Host "  TRACCIA 3 -- : ABTG_EMA200.ex5 non c'e' ancora in questa cartella." -ForegroundColor DarkYellow
+  }
+}
+
 function Scrivi-Titolo($t){
   Write-Host ""
   Write-Host ("==== " + $t + " ====") -ForegroundColor Cyan
@@ -82,7 +132,13 @@ $prog = (Get-Content (Join-Path $D 'origin.txt') -Raw).Trim()
 Scrivi-Titolo ("PASSO: " + $Passo)
 Write-Host ("CARTELLA PROGRAMMA : " + $prog)
 Write-Host ("CARTELLA DATI      : " + $D)
+if([string]::IsNullOrWhiteSpace($Pin)){
+  Write-Host "PIN DELLA RIGA     : non passato (la riga di lancio dovrebbe passarlo con -Pin)" -ForegroundColor DarkYellow
+} else {
+  Write-Host ("PIN DELLA RIGA     : " + $Pin)
+}
 Write-Host  "NON tocco nessun altro profilo dati, nessun altro terminale, nessun grafico."
+Conferma-Bersaglio $D
 
 $EX5 = Join-Path $D 'MQL5\Experts\ABTG_EMA200.ex5'
 $MQ5 = Join-Path $D 'MQL5\Experts\ABTG_EMA200.mq5'
@@ -105,6 +161,17 @@ if($Passo -eq 'backup'){
     } else {
       Write-Host ("  ASSENTE  " + (Split-Path $f -Leaf) + "   (annotato: al ritorno NON va inventato)") -ForegroundColor DarkYellow
     }
+  }
+  #  IL PRESET: va salvato come gli altri, ma soprattutto va registrato SE
+  #  ESISTEVA PRIMA. Senza questo, il ritorno indietro lascerebbe sul disco un
+  #  file che prima non c'era -- e "esattamente com'era" sarebbe una bugia.
+  if(Test-Path $SET){
+    Copy-Item $SET (Join-Path $bk 'ABTG_EMA200_U30USD_H1_771531_VIVA.set') -Force
+    'si' | Out-File (Join-Path $bk 'SET_ESISTEVA.txt') -Encoding ASCII
+    Write-Host "  SALVATO  ABTG_EMA200_U30USD_H1_771531_VIVA.set   (c'era gia')" -ForegroundColor Green
+  } else {
+    'no' | Out-File (Join-Path $bk 'SET_ESISTEVA.txt') -Encoding ASCII
+    Write-Host "  ASSENTE  il preset non c'e' ancora: al ritorno verra' TOLTO, non lasciato li'." -ForegroundColor DarkYellow
   }
   $prof = Join-Path $D 'MQL5\Profiles\Charts'
   if(Test-Path $prof){
@@ -144,11 +211,11 @@ if($Passo -eq 'compila'){
        lf='29cb8955dd11215c60cdbb11879c909780d049bb740783e6d62dbddbf698c202';
        cr='85d7c6be02bcf62bb89f2bc5ba23fe7a4dd0599c35faa1c3b83a1136716213b3';
        dest=(Join-Path $D 'MQL5\Experts') },
-    @{ n='ABTG_PausaGuardian.mqh'; u=($BASE + '/' + $PIN_RESTO + '/mql5/Include/ABTG_PausaGuardian.mqh');
-       lf='3ec971152e85e0082488cc4243ff45ae09948c191d52ab96050b48f94641a737';
-       cr='932d05789c33fc543f1cb1242578ebfbbcece74c121702774ca7c340c84cb595';
+    @{ n='ABTG_PausaGuardian.mqh'; u=($BASE + '/' + $PIN_MQH + '/mql5/Include/ABTG_PausaGuardian.mqh');
+       lf='a953a0171ef45931f316af11dcbbfc3a310608858702b17ebfb2322fad14864a';
+       cr='9d5be4788338db5c451980f79a17a7932da7d82c29d1b13a949ec5e4fd4ad503';
        dest=(Join-Path $D 'MQL5\Include') },
-    @{ n='ABTG_EMA200_U30USD_H1_771531_VIVA.set'; u=($BASE + '/' + $PIN_RESTO + '/mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set');
+    @{ n='ABTG_EMA200_U30USD_H1_771531_VIVA.set'; u=($BASE + '/' + $PIN_SET + '/mql5/Presets/ABTG_EMA200_U30USD_H1_771531_VIVA.set');
        lf='206cc0a6700779ffc33bf0474e34351c162291e2f543c076c272785b14eb4e7f';
        cr='d77ed5c7354e58932ce295c3421447bb7bb66d850b6a5632625e2793b6ea02ae';
        dest=(Join-Path $D 'MQL5\Presets') }
@@ -201,6 +268,13 @@ if($Passo -eq 'compila'){
 
   $nerr = -1
   if($testo -match '(\d+)\s+error'){ $nerr = [int]$Matches[1] }
+  #  L'ExitCode NON e' il verdetto (le versioni di MetaEditor non concordano su
+  #  cosa ci mettono), ma non va nemmeno stampato e buttato: se il log non si e'
+  #  lasciato leggere, e' l'unico segnale rimasto, e allora COMANDA lui.
+  if($nerr -lt 0){
+    Write-Host "  il log non e' leggibile: uso il codice di uscita come unico segnale." -ForegroundColor DarkYellow
+    if($pr.ExitCode -ne 0){ throw ("VIETATO dichiarare fatto: log illeggibile E codice di uscita " + $pr.ExitCode + " diverso da zero. Non do per buona una compilazione che non so leggere.") }
+  }
 
   if(-not (Test-Path $EX5)){ throw "VIETATO dichiarare fatto: NESSUN .ex5 PRODOTTO. La compilazione e' fallita: leggi il log qui sopra." }
   $i = Get-Item $EX5
@@ -292,6 +366,23 @@ if($Passo -eq 'ritorno'){
     } else {
       Write-Host ("  NON C'ERA nel backup: " + (Split-Path $c.src -Leaf) + " -> lo lascio com'e', non lo invento.") -ForegroundColor DarkYellow
     }
+  }
+  #  IL PRESET: se prima NON c'era, lasciarlo sarebbe un ritorno finto.
+  $segnaSet = Join-Path $Backup 'SET_ESISTEVA.txt'
+  if(Test-Path $segnaSet){
+    $cera = (Get-Content $segnaSet -Raw).Trim()
+    $vecchioSet = Join-Path $Backup 'ABTG_EMA200_U30USD_H1_771531_VIVA.set'
+    if(($cera -eq 'si') -and (Test-Path $vecchioSet)){
+      Copy-Item $vecchioSet $SET -Force
+      Write-Host "  RIMESSO   il preset nella versione che c'era prima" -ForegroundColor Green
+    } elseif($cera -eq 'no'){
+      if(Test-Path $SET){
+        Remove-Item $SET -Force
+        Write-Host "  TOLTO     il preset: prima non c'era, e adesso di nuovo non c'e'" -ForegroundColor Green
+      }
+    }
+  } else {
+    Write-Host "  IL PRESET NON LO TOCCO: nel backup manca SET_ESISTEVA.txt, quindi non so se c'era. Non tiro a indovinare." -ForegroundColor DarkYellow
   }
   if(Test-Path $EX5){
     $i = Get-Item $EX5

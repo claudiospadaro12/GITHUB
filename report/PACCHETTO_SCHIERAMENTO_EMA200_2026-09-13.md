@@ -13,7 +13,7 @@ dall'alto, si incolla, si verifica, e se qualcosa storce si torna indietro.
 
 ---
 
-# 0. 🥇 IL VERDETTO IN SEI RIGHE
+# 0. 🥇 IL VERDETTO IN SETTE RIGHE
 
 1. 🟢 **IL PACCHETTO E' PRONTO.** Nessuna delle modifiche fra il binario in
    campo e la versione da schierare **tocca il SEGNALE**. La sedia che
@@ -27,18 +27,24 @@ dall'alto, si incolla, si verifica, e se qualcosa storce si torna indietro.
    MetaEditor e premere F7 sulla copia di lavoro **schiererebbe quel codice**.
    Il pacchetto qui sotto scarica il sorgente **pinnato a `26a1856`** e ne
    verifica lo SHA256 **prima** di compilare. 👉 §1.3.
-3. 🔴 **E LA RICOMPILAZIONE DA SOLA NON PROTEGGE NIENTE.** I fail-open erano
+3. 🔴 **E LA TRAPPOLA AVEVA UN GEMELLO, che il cancello ha preso a me.** Il
+   `.ex5` si compila da **DUE** unita', e io ne avevo appuntata **una**: il
+   `.mq5` a `26a1856` e **l'include a `HEAD`**, che ha **+1000 righe** rispetto
+   a quello di R112 e **due commit intitolati «LAVORO IN CORSO»**. Corretto:
+   l'include e' appuntato a **`f33f374`**, il pin di R112. 👉 §1.1-bis.
+4. 🔴 **E LA RICOMPILAZIONE DA SOLA NON PROTEGGE NIENTE.** I fail-open erano
    **due**. Questo giro chiude **solo il primo** (il binario senza
    `InpUsaGuardian`). Il secondo — **nessun Guardian gira sul 50503392** —
    resta aperto, e la guardia e' **fail-open e MUTA**: non scrivera' **nessuna
    riga** nel Giornale. 👉 §5.3: **«nessuna riga GUARDIAN» e' il risultato
    ATTESO, non un difetto — e non e' una protezione.**
-4. 🔴 **CARICARE IL PRESET ABBASSA LA TAGLIA: `InpRiskPercent` da 1,0 a 0,65.**
+5. 🔴 **CARICARE IL PRESET ABBASSA LA TAGLIA: `InpRiskPercent` da 1,0 a 0,65.**
    E' una **DECISIONE DI CLAUDIO**, non un ripristino. 👉 §4.0, riquadro rosso.
-5. 🟡 **Un effetto collaterale da guardare al primo ordine:** la ricompilazione
-   porta in campo anche il **fix del sizing** dell'08/08. Non tocca il segnale,
-   ma **cambia il modo in cui si calcola il lotto**. 👉 §1.2, punto B.
-6. ⏰ **Il momento giusto e' ADESSO, domenica a mercato chiuso.** A mercato
+6. 🟡 **IL LOTTO CAMBIERA', ED E' ATTESO.** Col preset le due gambe
+   scendono a **`0.10` e `0.10`** (−50% e −67% rispetto a quelle di oggi), e
+   **non e' un difetto**: e' il passo del volume. Chi non lo sa ferma uno
+   schieramento giusto. 👉 §5.2, dove c'e' anche il rischio **reale** (~0,42%).
+7. ⏰ **Il momento giusto e' ADESSO, domenica a mercato chiuso.** A mercato
    aperto lo stesso giro va fatto solo con la sedia **piatta** (§3.1).
 
 ---
@@ -53,6 +59,9 @@ dall'alto, si incolla, si verifica, e se qualcosa storce si torna indietro.
 | 🎯 **MISURATO a R112 = DA SCHIERARE** | **`26a1856`** (19/08) | **552** | `1.00` | **`29cb8955...698c202`** |
 | ⛔ `HEAD` — **NON COMPILARE** | `077afd0` | 690 | `1.00` | `228bb295...2f7a0c` |
 
+📌 **E questi sono solo i `.mq5`: la seconda unita' di compilazione — l'include
+— ha un suo pin, e all'inizio l'avevo sbagliato. Vedi §1.1-bis.**
+
 🔴 **`#property version` e' `1.00` in tutti e tre.** Quindi **la versione NON
 distingue i binari**: chi cerca di capire quale EA gira guardando il numero di
 versione non lo scoprira' mai. L'unico segno leggibile a runtime e' la
@@ -63,6 +72,32 @@ il pin di R112 e' `f33f374` (26/08); il `.mq5` a quel pin ha **552 righe**;
 l'ultimo commit che tocca l'EA prima di `f33f374` e' **`26a1856`**. 👉 Il
 sorgente di R112 **e' identico** a quello di `26a1856`, blob
 `7be282e5c8fcb4a1216bbe446055390ea5a43ce1`.
+
+## 1.1-bis 🔴 IL `.ex5` SI COMPILA DA **DUE** UNITA', E ALL'INIZIO NE AVEVO APPUNTATA UNA
+
+**Difetto mio, trovato dal cancello, e va scritto perche' e' istruttivo:** avevo
+appuntato il `.mq5` a `26a1856` e **l'include a `HEAD`**. Cioe' avevo rifiutato
+`HEAD` per un file e l'avevo accettato per l'altro — **la stessa trappola del §0
+punto 2, applicata all'altro pezzo**.
+
+| unita' di compilazione | pin corretto | righe |
+|---|---|---|
+| `ABTG_EMA200.mq5` | `26a1856` (blob identico a `f33f374`) | 552 |
+| 🔴 `ABTG_PausaGuardian.mqh` | **`f33f374`** = il pin di R112 | **1461** |
+
+**Quanto pesava l'errore:** l'include a `HEAD` ha **2461** righe, cioe'
+**+1000 righe** rispetto a quello con cui R112 ha misurato. E fra quei commit
+**due si intitolano testualmente «LAVORO IN CORSO»**:
+- `8c0a1db` — *«tetto cluster: le funzioni di calcolo, NON ancora collegate»*
+- `cdb2037` — *«tetto cluster C2 collegato, SPENTO di default»*
+
+✅ **Perche' `f33f374` compila lo stesso:** li' (r.1007)
+`ABTG_GuardiaIngresso` ha **7 parametri, con default dal secondo in poi**, e
+l'EA la chiama con **due argomenti**. Verificato leggendo la firma a quel pin.
+
+📌 **Il preset fa eccezione, ed e' dichiarato:** a `f33f374` **non esiste**
+(e' nato il 12/09), quindi resta appuntato a `077afd0`. Non e' una svista:
+e' l'unico file dei tre che non puo' avere il pin di R112.
 
 ## 1.2 I tre commit fra il campo e la versione misurata — uno per uno
 
@@ -77,15 +112,30 @@ esiste in live**: gira unicamente a fine backtest. In campo questa funzione e'
 Dentro `LotByRisk()` la perdita-per-lotto ora la calcola `OrderCalcProfit()`
 (che converte in valuta conto); il vecchio `SYMBOL_TRADE_TICK_VALUE` resta
 **come ripiego** se il calcolo fallisce.
-- **Non tocca il segnale**: non entra in nessuna condizione d'ingresso, non
-  cambia ne' quando ne' dove si entra. La **frequenza non cambia**.
-- 🟡 **Tocca quanto si compra.** Sui simboli sani i due calcoli **coincidono**
-  (il bug si vedeva su `225JPY`, dove il tick value arrivava non convertito).
-  Su `U30USD` **ci aspettiamo che coincidano**, ma **io non posso verificarlo
-  senza terminale**: va **letto sul primo ordine** (§5.2).
-- 🟢 **E comunque non invalida il numero**: questo fix e' **dentro** la versione
-  misurata a R112. 👉 Fino a oggi era il **campo** a essere disallineato dalla
-  misura. Questa ricompilazione **chiude quello scarto**, non ne apre uno.
+
+🔴 **Qui la prima stesura diceva una cosa FALSA** — *«non entra in nessuna
+condizione d'ingresso»* — e il cancello l'ha presa. E' falso: `PlaceLimit()`
+r.239 fa `if(lot<=0){ ... return; }`, quindi **il lotto E' un cancello
+d'ingresso**. Un lotto che esce 0 **annulla l'ordine**.
+
+✅ **E la frase giusta e' piu' forte di quella sbagliata.** Guardando il codice:
+il nuovo `LotByRisk` restituisce 0 **solo se** fallisce il ramo
+`OrderCalcProfit` **e poi** fallisce anche il vecchio calcolo col tick value
+(che e' il ripiego). Quindi:
+
+> **{casi in cui il NUOVO restituisce 0} e' un SOTTOINSIEME di {casi in cui il
+> VECCHIO restituiva 0}.**
+
+👉 **Il nuovo codice non puo' MAI bloccare un ingresso che il vecchio
+permetteva.** Puo' solo permetterne **qualcuno in piu'** (dove il tick value
+mentiva). Sulla frequenza degli ingressi il cambiamento e' **a senso unico**,
+e su `U30USD` — dove il tick value non mente — **e' zero**.
+
+- 🟡 **Su quanto si compra, invece, cambia**: il lotto puo' uscire diverso.
+  Va **letto sul primo ordine**, e il §5.2 dice **esattamente quale numero
+  aspettarsi**.
+- 🟢 **E non invalida il numero**: questo fix e' **dentro** la versione misurata
+  a R112. Fino a oggi era il **campo** a essere disallineato dalla misura.
 
 ### C. `26a1856` (19/08) — «Migrazione Guardian (pezzo 5)» → 🟡 **TOCCA L'INGRESSO, MA E' FAIL-OPEN**
 Aggiunge `#include <ABTG_PausaGuardian.mqh>` (r.30), l'input `InpUsaGuardian`
@@ -164,7 +214,7 @@ e per il ritorno `-Passo ritorno` / `-Passo profili`.
 Ogni riga fa sempre queste tre cose, **prima** di fare il suo lavoro:
 1. **riscarica lo script** `RIGA_SCHIERA_EMA200.ps1` da GitHub **appuntato a un
    commit** (mai a un branch: un branch si muove, un commit no);
-2. **controlla il marcatore** `MARCATORE_SCHIERA_EMA200_v1` e **si ferma** se
+2. **controlla il marcatore** `MARCATORE_SCHIERA_EMA200_v2` e **si ferma** se
    trova una copia vecchia in cache;
 3. **sceglie il terminale da `origin.txt`**, non a occhio, e **muore** se le
    candidate non sono esattamente una.
@@ -189,21 +239,31 @@ riga si ferma, si ferma **prima** di aver toccato qualcosa.
   Get-Process terminal64,metaeditor64 -EA SilentlyContinue |
     Select-Object Id, ProcessName, MainWindowTitle, Path | Format-List
   Write-Host "=== 2. CARTELLE DATI -> CARTELLA PROGRAMMA (letta da origin.txt) ===" -ForegroundColor Cyan
-  Write-Host "    Selettore POSITIVO: elenca SOLO le cartelle dati dei terminali BCM"
-  Write-Host "    di Program Files. Gli altri profili del VPS non vengono nemmeno letti."
-  Get-ChildItem "$env:APPDATA\MetaQuotes\Terminal" -Directory -EA SilentlyContinue |
+  Write-Host "    Selettore POSITIVO e IDENTICO a quello dello script: origin.txt deve"
+  Write-Host "    contenere 'BCM Markets MT5 Terminal' e NON contenere '-V3'."
+  Write-Host "    Quello che vedi qui e' esattamente l'insieme su cui agira' la macchina."
+  $trovate = @(Get-ChildItem "$env:APPDATA\MetaQuotes\Terminal" -Directory -EA SilentlyContinue |
     ForEach-Object {
       $o = Join-Path $_.FullName 'origin.txt'
       if(-not (Test-Path $o)){ return }
       $orig = (Get-Content $o -Raw -EA SilentlyContinue)
       if($null -eq $orig){ return }
       $orig = $orig.Trim()
-      if($orig -notlike '*Program Files*BCM Markets*'){ return }
+      # STESSO PREDICATO DELLO SCRIPT, parola per parola: altrimenti Claudio
+      # controlla una lista e la macchina ne sceglie un'altra.
+      if($orig -notlike '*BCM Markets MT5 Terminal*'){ return }
+      if($orig -like '*-V3*'){ return }
       $ex = Join-Path $_.FullName 'MQL5\Experts\ABTG_EMA200.ex5'
       $info = '-- non presente --'
       if(Test-Path $ex){ $i = Get-Item $ex; $info = $i.LastWriteTime.ToString('yyyy-MM-dd HH:mm:ss') + '   ' + $i.Length + ' byte' }
       [pscustomobject]@{ CartellaDati=$_.Name; Programma=$orig; ABTG_EMA200_ex5=$info }
-    } | Format-List
+    })
+  $trovate | Format-List
+  Write-Host ("CANDIDATE TROVATE: " + $trovate.Count + "   (ne serve ESATTAMENTE UNA)")
+  if($trovate.Count -ne 1){
+    throw "VIETATO proseguire: le candidate non sono esattamente una. Non si tira a indovinare: mandami questo elenco e fermati qui."
+  }
+  Write-Host "UNA SOLA CANDIDATA: e' quella su cui agiranno i passi successivi." -ForegroundColor Green
 }
 ```
 
@@ -211,9 +271,17 @@ riga si ferma, si ferma **prima** di aver toccato qualcosa.
 - Nel blocco 1, i terminali vivi con **PID + titolo + cartella**. Il nostro e'
   quello con `Path` che contiene **`BCM Markets MT5 Terminal`** e **NON**
   contiene `-V3`. 🪟 **conto `50503392`**.
-- Nel blocco 2, **una sola** riga deve avere `Programma` che finisce in
-  `BCM Markets MT5 Terminal` senza `-V3`: quella e' la cartella dati che
-  toccheremo. **Se ce ne sono due, FERMATI e dimmelo: non si tira a indovinare.**
+- Nel blocco 2 deve uscire **una riga sola**: quella e' la cartella dati che
+  toccheremo. **Se ne escono due, FERMATI e dimmelo: non si tira a indovinare.**
+  ✅ **Il predicato di questa lista e' lo STESSO, parola per parola, che usa lo
+  script** (`origin.txt` contiene `BCM Markets MT5 Terminal` e **non** contiene
+  `-V3`). 👉 Cosi' quello che controlli tu **e'** l'insieme su cui agisce la
+  macchina: se qui ne vedi una, la macchina non puo' sceglierne un'altra.
+- 🛡️ **E lo script aggiunge due CONFERME** (il conto nel giornale, la presenza
+  di `ABTG_EMA200.ex5`). ⚠️ Se in quei giornali trova **un conto diverso dal
+  bersaglio**, **si ferma** invece di scrivere. Se un giorno quel terminale
+  avesse ospitato un altro login, lo script rifiutera' di partire: **e' voluto**
+  — meglio fermo che sulla cartella sbagliata.
 - Se `metaeditor64` compare fra i processi vivi → **chiudilo prima di §3**
   (MetaEditor e' single-instance: con una copia gia' aperta il nostro
   `/compile` **torna subito senza aver compilato**, checklist 39).
@@ -266,7 +334,7 @@ parametri riparte (§4). Nessuna sorpresa.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo backup;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -293,10 +361,11 @@ parametri riparte (§4). Nessuna sorpresa.
 
 1. Si ferma se **MetaEditor e' aperto** (altrimenti `/compile` torna subito
    senza compilare e dichiarerebbe un falso successo).
-2. Scarica **tre file pinnati** da GitHub:
-   - `ABTG_EMA200.mq5` **pinnato a `26a1856`** ← 🎯 la versione misurata a R112
-   - `ABTG_PausaGuardian.mqh` pinnato a `077afd0`
-   - il preset pinnato a `077afd0`
+2. Scarica **tre file pinnati** da GitHub — e **i pin sono tre, diversi**:
+   - `ABTG_EMA200.mq5` → **`26a1856`** ← 🎯 la versione misurata a R112
+   - `ABTG_PausaGuardian.mqh` → **`f33f374`** ← 🎯 **il pin di R112** (1461
+     righe). ⚠️ *Qui avevo sbagliato: era appuntato a `HEAD`. Vedi §1.1-bis.*
+   - il preset → `077afd0`, **perche' a `f33f374` non esiste** (dichiarato)
 3. **Verifica lo SHA256 di ognuno** e si ferma se non torna. Accetta sia la
    versione LF sia quella CRLF (e **dichiara quale ha trovato**).
 4. Copia i file nella cartella dati del **50503392** e compila.
@@ -315,7 +384,7 @@ parametri riparte (§4). Nessuna sorpresa.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo compila;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -398,24 +467,81 @@ differenza fra il binario del 04/08 e quello nuovo e' **l'esistenza di quell'inp
 Nella scheda **Esperti** (Strumenti → Esperti) deve comparire una riga di
 inizializzazione di `ABTG_EMA200` **con l'ora di adesso**.
 
-## 5.2 🟡 Il primo ordine: guarda il lotto
+## 5.2 🟡 Il primo ordine: il lotto ATTESO e' `0.10`, e non e' un errore
 
-Al **primo ordine limite** piazzato dopo la riapertura dei mercati, confronta il
-**volume** con quelli delle settimane scorse, **tenendo conto che hai cambiato
-anche il rischio** (1,0 → 0,65: a parita' di tutto il resto il lotto dovrebbe
-scendere di circa **il 35%**).
-- 🟢 Se il rapporto e' quello → il fix del sizing (§1.2 B) **coincide** col
-  vecchio calcolo su `U30USD`, come ci aspettavamo.
-- 🔴 Se il lotto e' **molto** diverso da cosi' → **fermati e dimmelo**: vuol
-  dire che su `U30USD` i due calcoli **non** coincidevano, ed e' un numero che
-  va messo a verbale prima di lasciar correre la sedia.
+> 🔴 **Qui la prima stesura sarebbe costata uno schieramento buono.** Diceva
+> *«il lotto dovrebbe scendere di circa il 35%; se e' molto diverso, fermati»*.
+> Ma il **35% e' il conto senza la quantizzazione**, e su `U30USD`
+> `VOLUME_MIN = VOLUME_STEP = 0,10`. Claudio avrebbe visto **−50% e −67%**,
+> letto *«molto diverso»*, e **fermato uno schieramento corretto.**
+
+**Il conto vero.** `PlaceOrders()` divide il rischio fra le due gambe
+(`riskPct = InpRiskPercent/nOrders`), e `LotByRisk()` chiude con
+`lot = MathFloor(lot/st)*st` e poi `MathMax(mn, ...)`: **arrotonda per DIFETTO
+al passo 0,10, e non scende mai sotto 0,10.**
+
+| gamba | lotto in campo (a 1,0%) | lotto voluto a 0,65% | **lotto vero dopo il passo** | come apparira' a Claudio |
+|---|---|---|---|---|
+| 1 | 0,20 | 0,20 × 0,65 = **0,130** | **0,10** | **−50%** |
+| 2 | 0,30 | 0,30 × 0,65 = **0,195** | **0,10** | **−67%** |
+
+### ✅ Quindi la verifica giusta e' questa
+- 🟢 **Attesi `0.10` e `0.10`.** Due gambe uguali: **e' normale**, e' il
+  pavimento del passo, non un difetto.
+- 🔴 **Fermati e dimmelo solo se** il lotto **non e' un multiplo di 0,10**,
+  oppure e' **piu' grande** di quello che vedevi prima (0,20 / 0,30).
+- ✋ **Il numero che regge tutto il conto** e' `VOLUME_STEP`: si legge in MT5 su
+  `U30USD` → tasto destro nel Market Watch → **Specifica** → *Volume minimo* e
+  *Passo del volume*. Se **non** sono `0,10`, la tabella qui sopra va rifatta:
+  dimmelo prima di attaccare.
+
+### 🔴 E dentro c'e' un fatto di RISCHIO, che va a verbale perche' e' firma tua
+Sul pavimento del passo **il rischio che corri davvero non e' 0,65%**:
+
+```
+gamba 1: 0,325% x (0,10 / 0,130) = 0,250%
+gamba 2: 0,325% x (0,10 / 0,195) = 0,167%
+                                   -------
+rischio NOMINALE 0,650%   ->   rischio REALE circa 0,42%
+```
+
+⚖️ **Non e' pericoloso — e' piu' PRUDENTE del dichiarato.** Ma e' **attaccato a
+una tua firma**, quindi lo scrivo invece di lasciartelo scoprire: la sedia
+girerebbe a **~0,42% effettivo**, non a 0,65%. E la stessa quantizzazione dice
+un'altra cosa che vale per il futuro: **a questa taglia la manopola del rischio
+ha grana grossa**, perche' fra 0,10 e 0,20 di lotto non c'e' niente.
 
 ## 5.3 🔴 IL GUARDIAN NON SCRIVERA' NIENTE — ED E' GIUSTO COSI'
 
 **Non cercare una riga `[GUARDIAN]` o `[GUARDIA]` nel Giornale: non arrivera'.**
-La guardia, seconda riga, fa:
-`if(!ABTG_CanaleEsiste()) return(true);` → **se nessun Guardian gira su questo
-conto, lascia passare tutto e non stampa nulla.**
+
+> 🔴 **La prima stesura dava la ragione SBAGLIATA**, e il cancello l'ha presa.
+> Diceva *«la guardia, seconda riga, fa `if(!ABTG_CanaleEsiste()) return(true)`»*.
+> **Falso:** la funzione comincia a r.1587 e quel fail-open sta a **r.1719** —
+> in mezzo ci sono **132 righe e quattro cancelli** che possono rifiutare **e
+> stampare**. Il commento `// 2.` indica il **passo** 2, non la riga 2.
+> ✅ La conclusione regge, **la ragione no** — ed e' esattamente la lezione del
+> 12/09: *la conclusione era giusta, la ragione no, e cambia cosa si deve fare.*
+
+**La ragione VERA, che e' un'altra cosa:** i quattro cancelli intermedi (STOP
+S1, freno P1, tetto simbolo+lato P0, tetto cluster C2) sono **tutti opt-in**, e
+si accendono **solo** se chi chiama passa gli argomenti giusti. Qui il call site
+e' `PlaceLimit()` e passa **DUE argomenti**:
+
+```
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200")) return;
+```
+
+👉 **Tutti gli altri parametri restano ai default (`0` e stringhe vuote), quindi
+quei quattro cancelli sono no-op.** Si arriva al fail-open sul canale, e la
+guardia tace.
+
+🔴 **E questa sicurezza ha una data di scadenza precisa:** vale **finche' il
+call site passa due argomenti**. Nel momento in cui qualcuno gli cabla
+`cluster_mappa` — che e' **proprio il lavoro in coda sul C2** — questa sedia
+comincia a poter **rifiutare e stampare**. 👉 Chi tocchera' quel call site deve
+sapere che **sta cambiando il comportamento di `771531`**, non solo aggiungendo
+un log.
 
 👉 **Quindi dopo questo giro la situazione e' esattamente questa:**
 - 🟢 **Fail-open n.1 CHIUSO**: il binario ora **sa** leggere il Guardian.
@@ -442,7 +568,7 @@ per il piccolo. **Per il 50503392 il preset non esiste ancora.**
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo raccolta;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -457,6 +583,19 @@ attaccare niente e torna al §4.1.**
 
 **Questa sezione non e' opzionale.** Vale in tre casi: compilazione con errori,
 `InpUsaGuardian` che non compare, comportamento strano alla riapertura.
+
+📋 **Che cosa il ritorno rimette davvero, dichiarato riga per riga** (la prima
+stesura diceva *«esattamente com'era»* e **non era vero**: il preset non era ne'
+salvato ne' tolto, e sarebbe rimasto sul disco un file che prima non c'era):
+
+| cosa | §6.1 lo rimette? |
+|---|---|
+| `ABTG_EMA200.ex5` (il binario del 04/08) | ✅ si, dal backup |
+| `ABTG_EMA200.mq5` | ✅ si, dal backup |
+| `ABTG_PausaGuardian.mqh` (l'include condiviso dai 72 EA) | ✅ si, dal backup |
+| il preset `.set` | ✅ si: se **c'era** lo rimette com'era, se **non c'era** lo **TOGLIE** |
+| i **parametri** del grafico (`.chr`) | ❌ **no** → serve il §6.2 (terminale chiuso) o la tabella §6.3 |
+| l'EA **attaccato** al grafico | ❌ **no**: lo riattacchi tu a mano |
 
 ## 6.1 Ritorno RAPIDO (non chiude nessun terminale)
 
@@ -475,7 +614,7 @@ Poi, **mettendo al posto di `<BACKUP>` il percorso stampato in §3.3**:
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo ritorno -Backup '<BACKUP>';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -498,7 +637,7 @@ I parametri del grafico stanno nei `.chr` di `MQL5\Profiles\Charts`, che MT5
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo profili -Backup '<BACKUP>';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -540,6 +679,13 @@ stanotte** (fonte: foto del profilo del terminale `50503392`, CODA_08 del 12/09)
   quelli di R112. Questo foglio sposta un binario, **non produce un numero**.
 - ❌ **Non tocca il conto reale 10105439**, escluso da ogni selettore.
 - ❌ **Non tocca `50504263`, `50504400`, Pepperstone, Tickmill.**
+- 🟡 **MA una cosa la tocca, e va detta invece che nascosta: sovrascrive
+  `MQL5\Include\ABTG_PausaGuardian.mqh`, che in questo repo e' incluso da 72
+  EA.** 🟢 **Nessun EA in campo cambia comportamento**: un `.ex5` gia' compilato
+  **non rilegge** il suo include. 🔴 **Ma cambia il SORGENTE comune** di quel
+  terminale: il prossimo che ricompilera' **un altro** EA li' si portera' dietro
+  questa versione (`f33f374`, 1461 righe). Il backup del §3.3 la salva, e il
+  ritorno del §6.1 la rimette.
 
 # 8. 🚦 IL CANCELLO SU QUESTO PACCHETTO
 
@@ -548,7 +694,7 @@ Il pacchetto sono **due file**, e vanno letti insieme:
 | file | cosa e' |
 |---|---|
 | `report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md` | questo foglio: il giro, le verifiche, il ritorno indietro |
-| `backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` | lo script che fa il lavoro, marcatore `MARCATORE_SCHIERA_EMA200_v1` |
+| `backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` | lo script che fa il lavoro, marcatore `MARCATORE_SCHIERA_EMA200_v2` |
 
 📌 **Perche' lo script sta in un `.ps1` del repo e non dentro il foglio.**
 La prima stesura aveva i comandi **incollati qui dentro**, ed e' stata
@@ -560,7 +706,22 @@ ogni riga di lancio e' **riproducibile e verificabile**.
 🧾 *Detto com'e': e' un difetto che ho fatto io e che il cancello ha preso.
 Il cancello ha funzionato.*
 
-**Esito dei controlli deterministici** (`controlla_riga.py`):
+🔴 **SECONDO GIRO: il cancello ha bocciato anche la v1 — 3 bloccanti.** Tutti e
+tre veri, tutti e tre riparati, e li lascio scritti perche' un difetto
+cancellato non insegna niente:
+1. **L'include appuntato a `HEAD`** invece che a `f33f374` (§1.1-bis) — la mia
+   stessa trappola, sull'altro file.
+2. **L'attesa sul lotto era sbagliata** e avrebbe **fermato uno schieramento
+   corretto** (§5.2): mancava la quantizzazione al passo 0,10.
+3. **«seconda riga della funzione» era falso** (§5.3): la conclusione reggeva,
+   **la ragione no**.
+🟢 E quello che ha retto: i sei SHA256, `26a1856` blob-identico a `f33f374`,
+`ExportTrades()` codice morto in live, sei funzioni di segnale identiche byte
+per byte, il conto reale non raggiungibile, nessuna soglia di rischio infilata
+di nascosto.
+
+**Esito dei controlli deterministici** (`controlla_riga.py`, sui due file
+**separatamente**, mai in pipe — classe 254):
 - ✅ `--oggetto ps1` sullo script → **nessun difetto meccanico** (ASCII puro,
   0 errori dal parser PowerShell vero, niente costrutti pwsh-7).
 - ✅ `--oggetto md` su questo foglio → **PASS**, con i rilievi non bloccanti
