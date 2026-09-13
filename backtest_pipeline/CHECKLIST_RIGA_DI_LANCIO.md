@@ -18065,3 +18065,32 @@ alla sessione dopo un `iex`, percorsi non URL-encodati.
 quel percorso e' gia' popolato da un'ALTRA fonte: `sha` presente vuol dire "aggiorna",
 e un aggiornamento silenzioso su una fonte curata e' una perdita di dati travestita
 da successo.*
+
+---
+
+## 312. IL SENTINELLA GENERICO "CSV VUOTO = NON MISURATO" NON CONOSCE `@FRAZIONEIS` (13/09/2026)
+
+**Il caso**: il referto della notte 12/13-09 segnava `cemad02` (EMA200, collaudo
+per-trade IS) con **codice 2 = NON MISURATO** (`RIGA_ROUND_VPS.ps1`: CSV mancanti o
+vuoti). Letto il CSV vero: l'IS e' **vuoto per costruzione**, dichiarato tre volte
+nel file prova (`COLLAUDO_EMADOW_02_pertrade_IS.txt`, `@FRAZIONEIS 0.002` — la
+finestra IS e' un giorno solo, si butta apposta) e l'OOS **riproduce esattamente**
+l'IS di R112 (+4.585,40 / PF 1,20110 / DD 5,7325% / 237 deal). **Round riuscito,
+non fallito.**
+
+Il sentinella del driver (`$mancanti`/`$zero` in `RIGA_ROUND_VPS.ps1`) applica la
+stessa regola a TUTTI i round: "CSV vuoto o Trades=0 → NON MISURATO". Non legge
+`@FRAZIONEIS`, quindi non sa distinguere *"vuoto perche' e' rotto"* da *"vuoto
+perche' il file prova lo ha voluto cosi'"*. Un round buono, con un design
+deliberato (una finestra volutamente piccola/vuota su un lato), viene archiviato
+come rotto.
+
+### ✅ CHE COSA SI FA
+Prima di leggere un codice 2 come "non misurato", si controlla se il file prova
+dichiara esplicitamente una finestra degenere (`@FRAZIONEIS` vicino a 0 o 1, o una
+nota che dice "il CSV che conta e' solo l'IS/OOS"). Se sì, il codice 2 e' atteso e
+si legge il CSV che conta davvero, non si archivia il round.
+
+### 🔑 La regola in una riga
+*Un sentinella generico non conosce le intenzioni scritte nel file prova: prima di
+leggere "vuoto" come "rotto", si controlla se il file prova lo aveva previsto.*
