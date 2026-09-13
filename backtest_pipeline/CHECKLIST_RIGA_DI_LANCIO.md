@@ -17891,3 +17891,57 @@ ed e' esattamente la forma di una delle due risposte che il round doveva sceglie
 *Prima di mettere un parametro ad asse si guarda dove quel parametro finisce **al
 denominatore**: ogni 1/x nascosto e' una pendenza che il round regalera' a se stesso, e
 va calcolata e dichiarata PRIMA, altrimenti la si legge come risultato.*
+
+---
+
+## 309. 🚨 CODICE D'USCITA 3 NON VUOL DIRE "IL ROUND E' FALLITO": VUOL DIRE "UN TERMINALE NON BERSAGLIO E' SPARITO" (13/09/2026)
+
+**Il caso**: il referto della notte 12/13-09 (`REFERTO_RUNNER_20260913_033003.txt`) segnava
+**6 falliti** su 42 righe — letto ieri come "6 round da diagnosticare, dati persi per il
+difetto del log condiviso (classe 307)". **Era un errore di lettura, non solo un buco di
+dati**: 5 di quei 6 (`r127c`, `r127b`, `r139a`, `r139b`, `r139c`) escono con **codice 3**, e
+il codice 3 in `RIGA_ROUND_VPS.ps1` (r.837, per esclusione da r.739-750) significa
+**esclusivamente** *"un PID non-bersaglio vivo PRIMA della corsa non e' piu' vivo DOPO"*
+(r.717 `$persi`) — e i "non-bersaglio" sono **proprio i terminali in forward, REALE
+10105439 compreso** (r.725: *"CONTROLLA SUBITO IL CONTO REALE 10105439"*). Non ha NIENTE a
+che fare col merito del backtest: i CSV possono essere usciti perfetti lo stesso (il gate
+sull'esito e' su `$mancanti`/`$zero`, **prima** del controllo dei PID, r.739-747).
+
+🔴 **E il codice 2 e' un'altra cosa ancora**: `cemad02` (unico coi 6) esce **2**, che vuol
+dire `NON MISURATO -- CSV mancanti/vuoti o Trades=0` — quello si', un problema del round,
+ma di tutt'altra natura (dati, non sicurezza).
+
+**Perche' conta**: leggere "6 falliti, causa sconosciuta" come un blocco unico ha
+nascosto che **5 di quei 6 sono un possibile evento sul parco terminali**, mentre 1 solo
+e' un problema di misura. Il referto del runner (`REFERTO_RUNNER_*.txt`) **non riporta i
+PID**: quelli stanno SOLO nel log per-round (`RIGA_SOTTILE_ROUND_*.log`), che il difetto
+307 sovrascrive a ogni riga — quindi oggi **non si puo' sapere QUALE PID sia sparito** in
+nessuno dei 5 casi senza lo zip del round dal VPS.
+
+**Finestre orarie ricostruite** (ora locale VPS, somma esatta delle durate nel referto,
+partenza corsa 03:30:03, ricalcolo verificato con script): `r127c` **04:21:07-04:22:46**
+· `r127b` **04:57:48-05:17:35** · `r139a` **07:46:44-07:53:58** · `r139b`
+**07:53:58-08:00:23** · `r139c` **08:00:23-08:07:59**.
+⚠️ **Non prova un guasto**: per costruzione, appena un round successivo trova di nuovo
+tutti i PID presenti, quell'assenza puo' essere gia' rientrata (un riavvio, una finestra
+di manutenzione Windows, o davvero un terminale caduto e poi rialzato a mano). Il primo
+round DOPO le due finestre (`r126a`, iniziato circa alle 04:23, e i round dopo le 08:08)
+esce **0** — quindi qualunque cosa fosse sparita, al giro dopo i PID risultavano di nuovo
+tutti presenti. **Non e' una prova che vada tutto bene**: e' un fatto che va verificato
+guardando il Giornale/Esperti del terminale REALE in quelle due finestre, non assunto.
+
+### ✅ CHE COSA SI FA
+1. Un codice 2/3 dal runner **non si liquida come "fallito, punto"**: si legge la
+   riga `esitoFinale`/il codice in `RIGA_ROUND_VPS.ps1` PRIMA di scrivere qualunque
+   verdetto in chat — 2 e 3 sono avvisi di natura diversa, non sinonimi di "non girato".
+2. Un codice **3** va segnalato **subito e per nome** come possibile evento sul parco
+   terminali (reale compreso), anche se il round stesso ha prodotto CSV validi.
+3. Finche' il difetto 307 (log condiviso sovrascritto) non e' corretto in
+   `runner_abtg.ps1`, l'unico modo di sapere QUALE PID e' sparito in un evento passato
+   e' recuperare lo zip del round dal VPS (`Desktop\ROUND_<etichetta>.zip`, contiene il
+   `REFERTO_ROUND_<etichetta>.txt` con la riga "MANCANO ALL'APPELLO").
+
+### 🔑 La regola in una riga
+*Un codice d'uscita non e' un'etichetta: e' un puntatore a una riga di codice, e va
+letto LI' prima di dire cosa significa — "fallito" per due cause diverse (dati mancanti,
+terminale sparito) e' gia' un errore di misura.*
