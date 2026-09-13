@@ -1327,6 +1327,16 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  40 passate, 0 problemi. Restano #DISARMATA# finche' non arriva il
 #  secondo giudizio.
 # =====================================================================
-#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
-#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
-#DISARMATA# 4858ef67e7fb72734316b2f39f78551b7cdcb5b9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
+#  >>> CORREZIONE MIA (13/09 sera, subito dopo averle scritte): la
+#  colonna 1 portava 4858ef67 -- il commit che HA CREATO i tre file
+#  prova -- invece di 30224fd, il commit CHE AGGIORNA $PIN dentro
+#  RIGA_SOTTILE_ROUND.ps1 a 4858ef67 (regola scritta nella riga
+#  sottile stessa, r.507: prima la riga sottile+push, POI la colonna
+#  di CODA su QUEL commit). Classe 265 alla lettera. Il secondo
+#  giudizio l'ha trovato: contenuto dei tre file gia' validato PASS,
+#  bloccava solo il pin. $SHA_ROUND/$SHA_WALK verificate identiche a
+#  tutti e quattro i commit di mezzo (19434520/4858ef6/30224fd/772b39d).
+#  ARMATE con la colonna corretta.
+30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
+30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
+30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
