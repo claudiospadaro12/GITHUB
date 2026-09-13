@@ -40,10 +40,13 @@ dall'alto, si incolla, si verifica, e se qualcosa storce si torna indietro.
    ATTESO, non un difetto — e non e' una protezione.**
 5. 🔴 **CARICARE IL PRESET ABBASSA LA TAGLIA: `InpRiskPercent` da 1,0 a 0,65.**
    E' una **DECISIONE DI CLAUDIO**, non un ripristino. 👉 §4.0, riquadro rosso.
-6. 🟡 **IL LOTTO CAMBIERA', ED E' ATTESO.** Col preset le due gambe
-   scendono a **`0.10` e `0.10`** (−50% e −67% rispetto a quelle di oggi), e
-   **non e' un difetto**: e' il passo del volume. Chi non lo sa ferma uno
-   schieramento giusto. 👉 §5.2, dove c'e' anche il rischio **reale** (~0,42%).
+6. 🟡 **IL LOTTO CAMBIERA', ED E' ATTESO.** Col preset le gambe attese sono
+   **`0.10` e `0.20`** (**−50%** e **−33%** rispetto a quelle di oggi), **non**
+   un difetto: e' il passo del volume, che e' `0,10`. ⚠️ **Dipende da bilancio e
+   ATR**: al confine possono restare `0,20 / 0,30`, ed e' ugualmente corretto.
+   👉 §5.2 — dove c'e' anche il rischio reale, che e' una **banda 0,38-0,46% che
+   al confine arriva a 0,641%**, cioe' praticamente il nominale: **non e'
+   sempre piu' prudente del dichiarato.**
 7. ⏰ **Il momento giusto e' ADESSO, domenica a mercato chiuso.** A mercato
    aperto lo stesso giro va fatto solo con la sedia **piatta** (§3.1).
 
@@ -75,6 +78,10 @@ sorgente di R112 **e' identico** a quello di `26a1856`, blob
 
 ## 1.1-bis 🔴 IL `.ex5` SI COMPILA DA **DUE** UNITA', E ALL'INIZIO NE AVEVO APPUNTATA UNA
 
+📌 **Classe 302 della checklist** (*il binario si compila da PIU' file:
+appuntare il solo `.mq5` non appunta l'`.ex5`*). ⚠️ Nata come «292», che era
+**gia' occupata** dal 12/09: il numero buono e' **302**.
+
 **Difetto mio, trovato dal cancello, e va scritto perche' e' istruttivo:** avevo
 appuntato il `.mq5` a `26a1856` e **l'include a `HEAD`**. Cioe' avevo rifiutato
 `HEAD` per un file e l'avevo accettato per l'altro — **la stessa trappola del §0
@@ -92,7 +99,7 @@ punto 2, applicata all'altro pezzo**.
 - `cdb2037` — *«tetto cluster C2 collegato, SPENTO di default»*
 
 ✅ **Perche' `f33f374` compila lo stesso:** li' (r.1007)
-`ABTG_GuardiaIngresso` ha **7 parametri, con default dal secondo in poi**, e
+`ABTG_GuardiaIngresso` ha **8 parametri, con default dal secondo in poi**, e
 l'EA la chiama con **due argomenti**. Verificato leggendo la firma a quel pin.
 
 📌 **Il preset fa eccezione, ed e' dichiarato:** a `f33f374` **non esiste**
@@ -149,10 +156,10 @@ Aggiunge `#include <ABTG_PausaGuardian.mqh>` (r.30), l'input `InpUsaGuardian`
   dell'invio e **dopo** il calcolo del lotto: puo' solo **impedire** un nuovo
   ingresso, **mai** aprirne uno, **mai** toccare posizioni gia' aperte,
   trailing, breakeven o uscite.
-- 🟢 **E oggi non impedisce niente**, per costruzione. Seconda riga della
-  funzione (`ABTG_PausaGuardian.mqh` r.1719):
-  `if(!ABTG_CanaleEsiste()) return(true);   // nessun guardiano su questo conto`
-  Senza Guardian che scrive le GlobalVariable, **lascia passare tutto**.
+- 🟢 **E oggi non impedisce niente.** Il perche' — con i numeri presi
+  **dall'include che spediamo davvero** — sta in **§5.3**, e qui non lo
+  ripeto: la prima stesura lo diceva in due posti, con numeri di riga di **due
+  file diversi**, e il documento **contraddiceva se stesso** su una sedia viva.
 - 🟢 **Ed e' dentro la versione misurata**: R112 ha girato con questa riga gia'
   presente (nel tester il canale non esiste → stesso fail-open).
 
@@ -214,7 +221,7 @@ e per il ritorno `-Passo ritorno` / `-Passo profili`.
 Ogni riga fa sempre queste tre cose, **prima** di fare il suo lavoro:
 1. **riscarica lo script** `RIGA_SCHIERA_EMA200.ps1` da GitHub **appuntato a un
    commit** (mai a un branch: un branch si muove, un commit no);
-2. **controlla il marcatore** `MARCATORE_SCHIERA_EMA200_v2` e **si ferma** se
+2. **controlla il marcatore** `MARCATORE_SCHIERA_EMA200_v3` e **si ferma** se
    trova una copia vecchia in cache;
 3. **sceglie il terminale da `origin.txt`**, non a occhio, e **muore** se le
    candidate non sono esattamente una.
@@ -254,8 +261,9 @@ riga si ferma, si ferma **prima** di aver toccato qualcosa.
       if($orig -notlike '*BCM Markets MT5 Terminal*'){ return }
       if($orig -like '*-V3*'){ return }
       $ex = Join-Path $_.FullName 'MQL5\Experts\ABTG_EMA200.ex5'
-      $quando = $null
-      $quanto = $null
+      # un campo VUOTO non dice niente: il "manca" si scrive con una parola.
+      $quando = 'ASSENTE'
+      $quanto = 'ASSENTE'
       if(Test-Path $ex){ $i = Get-Item $ex; $quando = $i.LastWriteTime; $quanto = $i.Length }
       [pscustomobject]@{ CartellaDati=$_.Name; Programma=$orig; ex5_data=$quando; ex5_byte=$quanto }
     })
@@ -335,7 +343,7 @@ parametri riparte (§4). Nessuna sorpresa.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo backup;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -385,7 +393,7 @@ parametri riparte (§4). Nessuna sorpresa.
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo compila;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -468,86 +476,125 @@ differenza fra il binario del 04/08 e quello nuovo e' **l'esistenza di quell'inp
 Nella scheda **Esperti** (Strumenti → Esperti) deve comparire una riga di
 inizializzazione di `ABTG_EMA200` **con l'ora di adesso**.
 
-## 5.2 🟡 Il primo ordine: il lotto ATTESO e' `0.10`, e non e' un errore
+## 5.2 🟡 Il primo ordine: i lotti ATTESI sono `0.10` e `0.20`
 
-> 🔴 **Qui la prima stesura sarebbe costata uno schieramento buono.** Diceva
-> *«il lotto dovrebbe scendere di circa il 35%; se e' molto diverso, fermati»*.
-> Ma il **35% e' il conto senza la quantizzazione**, e su `U30USD`
-> `VOLUME_MIN = VOLUME_STEP = 0,10`. Claudio avrebbe visto **−50% e −67%**,
-> letto *«molto diverso»*, e **fermato uno schieramento corretto.**
+> 🔴 **Due stesure sbagliate di fila su questo numero, e la seconda e' colpa di
+> un dato che era GIA' IN CASA.** La prima diceva *«circa −35%»* (senza la
+> quantizzazione). La seconda l'ho ricavata **ri-scalando `0,20` e `0,30`** —
+> ma **quelli sono gia' il risultato di `MathFloor`**, quindi ho applicato il
+> passo **due volte** e mi e' uscito `0,10 / 0,10`.
+> 👉 I lotti **calcolati** stanno scritti in
+> `report/DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md` **r.187-188**
+> (tabella *«LO STEP MORDE»*): **`0,2546` e `0,3819`** a rischio 1,0%.
+> **Il file che aveva la risposta era nella stessa cartella, e non l'avevo
+> aperto.**
 
-**Il conto vero.** `PlaceOrders()` divide il rischio fra le due gambe
-(`riskPct = InpRiskPercent/nOrders`), e `LotByRisk()` chiude con
-`lot = MathFloor(lot/st)*st` e poi `MathMax(mn, ...)`: **arrotonda per DIFETTO
-al passo 0,10, e non scende mai sotto 0,10.**
+**Il conto, partendo dai lotti VERI.** `PlaceOrders()` divide il rischio fra le
+due gambe (`riskPct = InpRiskPercent/nOrders` → 0,325% ciascuna), e
+`LotByRisk()` chiude con `lot = MathFloor(lot/st)*st` e `MathMax(mn, ...)`:
+**arrotonda per DIFETTO al passo 0,10 e non scende mai sotto 0,10.**
 
-| gamba | lotto in campo (a 1,0%) | lotto voluto a 0,65% | **lotto vero dopo il passo** | come apparira' a Claudio |
-|---|---|---|---|---|
-| 1 | 0,20 | 0,20 × 0,65 = **0,130** | **0,10** | **−50%** |
-| 2 | 0,30 | 0,30 × 0,65 = **0,195** | **0,10** | **−67%** |
+| gamba | calcolato a 1,0% (dossier r.187-188) | × 0,65 | **messo** | in campo oggi | differenza che vedrai |
+|---|---:|---:|---:|---:|---:|
+| 1 | 0,2546 | 0,1655 | **0,10** | 0,20 | **−50%** |
+| 2 | 0,3819 | 0,2482 | **0,20** | 0,30 | **−33%** |
 
-### ✅ Quindi la verifica giusta e' questa
-- 🟢 **Attesi `0.10` e `0.10`.** Due gambe uguali: **e' normale**, e' il
-  pavimento del passo, non un difetto.
-- 🔴 **Fermati e dimmelo solo se** il lotto **non e' un multiplo di 0,10**,
-  oppure e' **piu' grande** di quello che vedevi prima (0,20 / 0,30).
-- ✋ **Il numero che regge tutto il conto** e' `VOLUME_STEP`: si legge in MT5 su
-  `U30USD` → tasto destro nel Market Watch → **Specifica** → *Volume minimo* e
-  *Passo del volume*. Se **non** sono `0,10`, la tabella qui sopra va rifatta:
-  dimmelo prima di attaccare.
+### 🔴 E NON E' UN NUMERO FISSO: dipende da BILANCIO e ATR
+Il lotto e' `rischio / (stop × valore punto)`, e lo stop e' in ATR: **basta
+poco per cambiare gradino.** Le tre celle misurate:
 
-### 🔴 E dentro c'e' un fatto di RISCHIO, che va a verbale perche' e' firma tua
-Sul pavimento del passo **il rischio che corri davvero non e' 0,65%**:
+| bilancio | ATR | g1 voluta → messa | g2 voluta → messa | rischio REALE |
+|---:|---:|---|---|---:|
+| 5.160 | 65,5 | 0,1982 → **0,10** | 0,2974 → **0,20** | 0,383% |
+| 5.160 | 78,0 | 0,1665 → **0,10** | 0,2497 → **0,20** | 0,456% |
+| 5.276 | 65,5 | 0,2027 → **0,20** | 0,3040 → **0,30** | **0,641%** |
+
+- La gamba 2 scende a **`0,10`** solo con **ATR oltre ~97** — **fuori**
+  dall'intervallo misurato (65,5 / 73,6 / 78,0). 👉 **`0,10 / 0,10` non e' lo
+  scenario atteso**, era il mio errore di conto.
+- La gamba 1 sale a **`0,20`** appena il bilancio cresce un po' (terza riga):
+  **il confine e' vicino**, non teorico.
+
+### ✅ La verifica giusta — ed e' l'unica cosa che non e' cambiata
+🛡️ **La regola di arresto regge a tutte e tre le stesure**, perche' e' scritta
+sulle **proprieta'** e non sul valore atteso. Non cambiarla:
+- 🟢 **Normale**: lotti **multipli di 0,10**, **non piu' grandi** di quelli di
+  oggi (0,20 / 0,30). `0,10 / 0,20` e' l'attesa piu' probabile; `0,20 / 0,30`
+  succede al confine ed e' **ugualmente corretto**.
+- 🔴 **Fermati e dimmelo solo se**: il lotto **non e' multiplo di 0,10**, oppure
+  e' **piu' grande** di quelli di oggi.
+- ✋ **Il numero che regge tutto** e' `VOLUME_STEP`: in MT5, `U30USD` → tasto
+  destro nel Market Watch → **Specifica** → *Volume minimo* e *Passo del
+  volume*. Se **non** sono `0,10`, le tabelle qui sopra vanno rifatte.
+
+### 🔴 IL RISCHIO REALE: una BANDA, e NON e' sempre piu' prudente del dichiarato
+
+> 🔴 **Qui la stesura precedente ha messo sotto la tua firma una frase falsa:**
+> *«~0,42% effettivo — e' piu' PRUDENTE del dichiarato»*. **Sbagliata, e nella
+> direzione peggiore in cui sbagliare un numero che qualcuno firma.**
 
 ```
-gamba 1: 0,325% x (0,10 / 0,130) = 0,250%
-gamba 2: 0,325% x (0,10 / 0,195) = 0,167%
-                                   -------
-rischio NOMINALE 0,650%   ->   rischio REALE circa 0,42%
+caso tipico   : 0,38% - 0,46%   (le due gambe a 0,10 e 0,20)
+caso di CONFINE: 0,641%          (le due gambe salgono a 0,20 e 0,30)
+nominale       : 0,650%
 ```
 
-⚖️ **Non e' pericoloso — e' piu' PRUDENTE del dichiarato.** Ma e' **attaccato a
-una tua firma**, quindi lo scrivo invece di lasciartelo scoprire: la sedia
-girerebbe a **~0,42% effettivo**, non a 0,65%. E la stessa quantizzazione dice
-un'altra cosa che vale per il futuro: **a questa taglia la manopola del rischio
-ha grana grossa**, perche' fra 0,10 e 0,20 di lotto non c'e' niente.
+👉 **Nel caso di confine il rischio reale e' praticamente il nominale.** La
+frase giusta e': *il passo del volume rende il rischio **piu' basso o uguale**
+al dichiarato, **mai piu' alto** — ma «piu' basso» **non e' garantito**, e nel
+caso di confine il margine e' **quasi zero**.*
+⚖️ E resta vero che **a questa taglia la manopola del rischio ha grana grossa**:
+fra un gradino e l'altro il rischio effettivo salta di oltre due decimi di
+punto. E' un fatto da tenere presente **prima** di decidere la taglia — ma la
+taglia e' **tua**, e io non la propongo.
 
 ## 5.3 🔴 IL GUARDIAN NON SCRIVERA' NIENTE — ED E' GIUSTO COSI'
 
 **Non cercare una riga `[GUARDIAN]` o `[GUARDIA]` nel Giornale: non arrivera'.**
 
-> 🔴 **La prima stesura dava la ragione SBAGLIATA**, e il cancello l'ha presa.
-> Diceva *«la guardia, seconda riga, fa `if(!ABTG_CanaleEsiste()) return(true)`»*.
-> **Falso:** la funzione comincia a r.1587 e quel fail-open sta a **r.1719** —
-> in mezzo ci sono **132 righe e quattro cancelli** che possono rifiutare **e
-> stampare**. Il commento `// 2.` indica il **passo** 2, non la riga 2.
-> ✅ La conclusione regge, **la ragione no** — ed e' esattamente la lezione del
-> 12/09: *la conclusione era giusta, la ragione no, e cambia cosa si deve fare.*
+> 🔴 **La prima stesura dava la ragione sbagliata DUE VOLTE, e la seconda volta
+> e' peggio della prima.** Diceva *«la guardia, seconda riga, fa
+> `if(!ABTG_CanaleEsiste()) return(true)`»* (falso: `// 2.` e' il **passo**, non
+> la riga). Poi, corretta, citava **r.1587 / r.1719, 132 righe, quattro
+> cancelli**: numeri veri… **di `HEAD`**, cioe' di un file che **questo
+> pacchetto non spedisce piu'** da quando l'include e' appuntato a `f33f374`.
+> 👉 **La lezione, ed e' quella che ci e' costata tre volte stanotte: il file
+> CITATO e il file SPEDITO devono essere lo stesso, e si verifica col comando.**
 
-**La ragione VERA, che e' un'altra cosa:** i quattro cancelli intermedi (STOP
-S1, freno P1, tetto simbolo+lato P0, tetto cluster C2) sono **tutti opt-in**, e
-si accendono **solo** se chi chiama passa gli argomenti giusti. Qui il call site
-e' `PlaceLimit()` e passa **DUE argomenti**:
+**I numeri veri, misurati su `f33f374` — l'include che il pacchetto installa:**
 
-```
-   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200")) return;
-```
+| | `f33f374` (SPEDITO) | `HEAD` (non spedito) |
+|---|---|---|
+| inizio di `ABTG_GuardiaIngresso` | **r.1007** | r.1587 |
+| fail-open `ABTG_CanaleEsiste` | **r.1027** | r.1719 |
+| righe in mezzo | **20** | 132 |
+| cancelli in mezzo | **DUE**: STOP S1, freno P1 | quattro (S1, P1, P0, C2) |
+| occorrenze di `cluster_mappa` | **ZERO** | 6 |
 
-👉 **Tutti gli altri parametri restano ai default (`0` e stringhe vuote), quindi
-quei quattro cancelli sono no-op.** Si arriva al fail-open sul canale, e la
-guardia tace.
+**La ragione, adesso corretta:** i due cancelli intermedi di `f33f374` sono
+**opt-in** e si accendono solo se chi chiama passa gli argomenti giusti. Il call
+site e' `PlaceLimit()` e passa **DUE argomenti**, quindi `obiettivo_pct` e
+`soglia_perdite_consecutive` restano a `0` → **no-op**. Si arriva al fail-open
+sul canale, e la guardia tace.
 
-🔴 **E questa sicurezza ha una data di scadenza precisa:** vale **finche' il
-call site passa due argomenti**. Nel momento in cui qualcuno gli cabla
-`cluster_mappa` — che e' **proprio il lavoro in coda sul C2** — questa sedia
-comincia a poter **rifiutare e stampare**. 👉 Chi tocchera' quel call site deve
-sapere che **sta cambiando il comportamento di `771531`**, non solo aggiungendo
-un log.
+🟢 **E cosi' la conclusione e' PIU' forte di prima**: sull'include che
+spediamo la guardia tace **di piu'** — due cancelli invece di quattro, e il
+fail-open arriva dopo **20** righe invece di 132.
 
-👉 **Quindi dopo questo giro la situazione e' esattamente questa:**
-- 🟢 **Fail-open n.1 CHIUSO**: il binario ora **sa** leggere il Guardian.
-- 🔴 **Fail-open n.2 APERTO**: sul **50503392 nessun Guardian gira**, quindi
-  **non c'e' ancora nessuna pausa B1 e nessun cap C1 su questa sedia.**
+🔴 **E LA SCADENZA VERA, che la stesura precedente aveva sbagliato di netto.**
+Avevo scritto *«la sicurezza si perde quando qualcuno cabla `cluster_mappa`»*:
+**contro `f33f374` quel parametro NON ESISTE** (zero occorrenze), quindi
+cablarlo **non compilerebbe nemmeno**. 👉 La condizione vera ha **due** pezzi, e
+servono **tutti e due**:
+
+> **(1)** qualcuno **ricompila questa sedia contro un include piu' NUOVO** (dove
+> i parametri esistono), **e (2)** ne **cabla** uno nel call site di
+> `PlaceLimit()`.
+
+Con l'include spedito oggi, **nessuno dei due pezzi e' possibile da solo**: chi
+fa solo (2) non compila, chi fa solo (1) lascia i default e la guardia continua
+a tacere. 👉 Chi un domani fara' tutti e due **sta cambiando il comportamento di
+`771531`**, non aggiungendo un log.
 
 ⚖️ **Detto senza giri di parole: stanotte non abbiamo protetto la sedia,
 abbiamo reso POSSIBILE proteggerla.** Il passo che protegge davvero e'
@@ -569,7 +616,7 @@ per il piccolo. **Per il 50503392 il preset non esiste ancora.**
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo raccolta;
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -615,7 +662,7 @@ Poi, **mettendo al posto di `<BACKUP>` il percorso stampato in §3.3**:
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo ritorno -Backup '<BACKUP>';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -638,7 +685,7 @@ I parametri del grafico stanno nei `.chr` di `MQL5\Profiles\Charts`, che MT5
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     $pin='030695014741aca1a5fda1260a2af6a11f918c77'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v2' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo profili -Backup '<BACKUP>';
     if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: FERMO - leggi il messaggio qui sopra' -ForegroundColor Red } }
 ```
@@ -695,7 +742,7 @@ Il pacchetto sono **due file**, e vanno letti insieme:
 | file | cosa e' |
 |---|---|
 | `report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md` | questo foglio: il giro, le verifiche, il ritorno indietro |
-| `backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` | lo script che fa il lavoro, marcatore `MARCATORE_SCHIERA_EMA200_v2` |
+| `backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` | lo script che fa il lavoro, marcatore `MARCATORE_SCHIERA_EMA200_v3` |
 
 📌 **Perche' lo script sta in un `.ps1` del repo e non dentro il foglio.**
 La prima stesura aveva i comandi **incollati qui dentro**, ed e' stata
@@ -721,6 +768,35 @@ cancellato non insegna niente:
 per byte, il conto reale non raggiungibile, nessuna soglia di rischio infilata
 di nascosto.
 
+🔴 **TERZO GIRO: altri DUE bloccanti, e uno era il danno collaterale della
+toppa precedente.** Anche questi riparati e lasciati scritti:
+1. **Classe 304 — le sezioni sul silenzio del Guardian descrivevano `HEAD`**,
+   cioe' **un file che il pacchetto non spedisce piu'** da quando l'include e'
+   appuntato a `f33f374`. Numeri di riga di un altro pin, **quattro** cancelli
+   invece di **due**, e soprattutto una **scadenza inventata**: dicevo *«si
+   perde quando qualcuno cabla `cluster_mappa`»*, ma **in `f33f374` quel
+   parametro non esiste** (zero occorrenze) e cablarlo **non compilerebbe**.
+   E §1.2 C **ripeteva** la frase che §5.3 dichiarava falsa: il documento
+   **contraddiceva se stesso**. 👉 §5.3 riscritta sul file spedito, ripetizione
+   tolta.
+2. **Classe 303 — il passo del volume applicato DUE volte.** Avevo ri-scalato
+   `0,20`/`0,30`, che sono **gia'** il risultato di `MathFloor`. I lotti
+   **calcolati** erano scritti da giorni in
+   `DOSSIER_SCHIERAMENTO_EMA200_DOW_2026-09-09.md` r.187-188. Attesa corretta:
+   **`0,10` e `0,20`**. E la frase *«piu' prudente del dichiarato»* era
+   **falsa al confine** (0,641% contro 0,650% nominale) — sotto una firma di
+   Claudio, nella direzione peggiore.
+🛡️ **Cos'e' sopravvissuto a tutte e tre le stesure: la regola di arresto del
+§5.2**, perche' e' scritta sulle **proprieta'** (multiplo di 0,10, non piu'
+grande di prima) e non sul valore atteso.
+
+🎯 **E la disciplina che ne esce, applicata prima di consegnare:** ogni numero
+di riga citato in questo foglio e' stato **verificato col comando contro il
+file che il pacchetto SPEDISCE** (`f33f374` per l'include, `26a1856` per l'EA),
+non contro quello che avevo aperto. Verificati: r.1007, r.1027, 20 righe, 2
+cancelli, 0 `cluster_mappa`, 8 parametri; r.30, r.42, r.239, r.243 dell'EA;
+r.187-188 del dossier.
+
 **Esito dei controlli deterministici** (`controlla_riga.py`, sui due file
 **separatamente**, mai in pipe — classe 254):
 - ✅ `--oggetto ps1` sullo script → **nessun difetto meccanico** (ASCII puro,
@@ -732,7 +808,7 @@ di nascosto.
   righe di lancio. ✅ **Non e' un difetto qui**: la raccolta e' un **passo suo**
   (`-Passo raccolta`, §5.4) e produce cartella sul Desktop **+ zip**. Metterla
   dentro ogni riga vorrebbe dire zippare quattro volte la stessa cosa.
-- `[225]` — la prosa nomina terminali e conti "vietati" in 22 righe. ✅
+- `[225]` — la prosa nomina terminali e conti "vietati" in 23 righe. ✅
   **Voluto**: e' un documento che spiega **cosa NON si tocca**, e senza
   nominarli non potrebbe dirlo. Nel **codice** non compaiono: il selettore e'
   **positivo** (`origin.txt`), quindi non puo' raggiungere il conto reale.

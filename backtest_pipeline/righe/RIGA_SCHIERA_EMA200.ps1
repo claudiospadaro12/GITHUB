@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_EMA200_v2
+#  MARCATORE_SCHIERA_EMA200_v3
 #
 #  SCHIERAMENTO DI ABTG_EMA200 su U30USD H1, magic 771531.
 #  Ricompila la sedia con il Guardian, partendo dal SORGENTE PINNATO
@@ -55,7 +55,7 @@ $ErrorActionPreference = 'Stop'
 #  commit intitolati "LAVORO IN CORSO" (8c0a1db, cdb2037).
 #    $PIN_EA  -> il .mq5  (26a1856, blob identico a f33f374)
 #    $PIN_MQH -> l'include a f33f374, cioe' il pin di R112: 1461 righe.
-#                La firma di ABTG_GuardiaIngresso li' ha 7 parametri con
+#                La firma di ABTG_GuardiaIngresso li' ha 8 parametri con
 #                default dal secondo in poi, quindi la chiamata a DUE
 #                argomenti dell'EA compila senza toccare niente.
 #    $PIN_SET -> il preset. A f33f374 NON ESISTE (e' nato il 12/09), quindi
