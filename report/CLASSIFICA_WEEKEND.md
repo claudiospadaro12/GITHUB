@@ -1,5 +1,20 @@
 # 🏆 CLASSIFICA DEL WEEKEND — chi va verso la prop, chi resta su MT5
 
+> ⚠️ **NOTA DEL 13/09/2026 — LEGGERE PRIMA DI USARE QUESTA CLASSIFICA.**
+> La **coda del weekend e' FERMA**: nessun CSV nuovo da `coda_weekend.ps1` dal 01/09,
+> e questo file e' invariato dal 10/08. **Ma il 13/09 sono arrivati 98 CSV da un'ALTRA
+> sorgente** (il runner notturno del VPS, corsa delle 03:30): 35 coppie IS/OOS nuove su
+> `ABTG_EMA200`, `ABTG_DAX_Apertura_EU`, `ABTG_SuperWave`, `ABTG_SupRev`, `ABTG_ORB`,
+> `ABTG_Nasdaq_Live5m`, `ABTG_IntradayMomentum` e altri.
+> 🔴 **Quei round NON sono stati inseriti nelle tabelle qui sotto, di proposito**: hanno
+> criteri **congelati nei loro file prova** (`PF OOS ≥ 1,40`, `posizioni ≥ 150`,
+> `DD ≤ 8,0/8,5%`, costo `≥ 40x`) che sono **piu' severi** di quelli dichiarati qui il
+> 07-08/08 (`PF ≥ 1,10`, `n ≥ 30`, `DD < 10%`). Mescolarli darebbe una classifica in cui
+> due righe vicine non vogliono dire la stessa cosa — e i criteri si cambiano **prima**
+> dei numeri, non dopo.
+> 👉 Referto con i verdetti, ciascuno coi criteri del proprio round:
+> `backtest_pipeline/risultati_archivio/R136_R137_LA_NOTTE_CHE_I_CSV_SONO_ARRIVATI_2026-09-13.md`
+
 > **AGGIORNAMENTO 10/08 — SESTO CANDIDATO: ORO NOTTURNO (MaxMinNotte@XAUUSD, cella 250/H2).** R17 walk-forward: 16/20 celle verdi, OOS 20/20 positivo (PF 1,46–2,27), cella candidata OOS +1.023 · PF 1,91 · DD 5,3% · ~33 posizioni. Asterischi: OOS>IS (regime volatile), n al pelo, storico 16 mesi. Referto: `REFERTO_ROUND17_ORO_NOTTE.md`. Prossimo: per-trade R19 + vivaio.
 
 
