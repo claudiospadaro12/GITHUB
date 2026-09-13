@@ -17832,3 +17832,62 @@ del referto del runner che conferma solo l'esecuzione. E la toppa vera
 (proposta, non applicata: tocca `runner_abtg.ps1`) è far pubblicare anche i CSV
 di `risultati_prove\` insieme al referto — stessa `PubblicaFile`, stesso
 percorso `coda/referti/` o uno nuovo dedicato, nessuna corsia nuova aperta.
+
+---
+
+## 308. 🎚️➗ L'ASSE SU UN PARAMETRO CHE STA ANCHE AL **DENOMINATORE** DI UN COSTO O DI UNA QUANTIZZAZIONE: il round misura una **pendenza che si e' fabbricato da solo** (13/09/2026)
+
+**Il caso, trovato scrivendo** `prove/R145a_volexp_kstop_M30_NASUSD.txt` — un asse su
+`InpKStop` (1,0 / 1,5 / 2,0 / 2,5) che deve rispondere a *"l'edge netto in R resta
+invariante al variare dell'ampiezza dello stop, o si diluisce?"*.
+
+🔴 **Il problema e' che `kStop` non compare solo dove lo si sta mettendo ad asse.**
+Lo stop finisce **al denominatore** di tre cose diverse, e tutte e tre producono una
+pendenza lungo l'asse **senza che il mercato c'entri niente**:
+
+| dove finisce lo stop | effetto sulla cella | verso |
+|---|---|---|
+| **lotto** = rischio / (stop × valore punto) | il lotto e' ∝ 1/kStop, quindi la **quantizzazione al passo del volume** (0,10 su NASUSD/U30USD, [MISURATO] DIARIO 17/08) lo taglia di piu' dove lo stop e' largo | 📉 fabbrica un **calo** a kStop alto |
+| **costo di spread in R** = spread / stop | e' ∝ 1/kStop: la cella stretta paga di piu' | 📉 fabbrica un **calo** a kStop basso |
+| **soglie fisse che tagliano lo stop** (`InpMinSLPts`, `InpMaxSpreadPctOfStop`) | mordono **solo** nelle celle basse | 🔗 **fonde** le celle basse o le svuota |
+
+**I numeri veri del caso** (deposito 10.000, rischio 0,65% = 65 EUR, NASUSD, valore punto
+0,855 EUR [MISURATO `ANALISI_TAGLIA_FASE1`], passo volume 0,10):
+- `kStop 1,0` → lotto voluto **1,52** → perdita media da quantizzazione 0,05/1,52 = **3,3%**
+- `kStop 2,5` → lotto voluto **0,61** → 0,05/0,61 = **8,2%**
+- 👉 differenza **sistematica** lungo l'asse = **4,9% del rischio** ≈ **0,007 R** con E=0,15R,
+  cioe' il **30%** dell'effetto vero da misurare (0,024 R). Su U30USD, dove lo stop in
+  punti indice e' piu' grande, sale al **42%**.
+- A **deposito 100.000** gli stessi conti danno 0,33% e 0,82% → **0,0007 R = il 3%**. Sparisce.
+
+🔴 **E il difetto e' PIU' PERICOLOSO della classe 299** (due celle che sono la stessa
+configurazione). La 299 produce una **degenerazione**, che si vede: due celle identiche.
+Questa produce una **curva monotona plausibile**, che si legge come **un risultato** —
+ed e' esattamente la forma di una delle due risposte che il round doveva scegliere.
+👉 Un round cosi' non da' un numero sbagliato: **da' la risposta sbagliata alla domanda giusta.**
+
+### ✅ CHE COSA SI FA, prima di scrivere l'asse
+1. 📝 **Si elenca ogni quantita' che dipende dal parametro messo ad asse** — non solo quelle
+   che lo nominano nel codice: **lotto**, **costo in R**, **durata media della posizione**,
+   **numero di operazioni** (con una posizione per volta, uno stop largo tiene occupato il
+   posto piu' a lungo e **riduce n da solo**).
+2. 🧮 **Si CALCOLA la pendenza finta** e la si scrive nel file prova **come ipotesi nulla**:
+   *"se l'edge fosse perfettamente piatto, il CSV mostrerebbe comunque una salita di
+   0,024 R: e' quello il metro, non lo zero."* Un'attesa che non contiene la pendenza
+   fabbricata **non e' falsificabile**.
+3. 🔓 **Si aprono le clamp**: le soglie fisse che dipendono dallo stop (pavimento SL, gate di
+   spread in % dello stop) si pinnano **LARGHE** per il round dell'asse, e si **verifica col
+   contatore** che non abbiano morso. Il gate "giusto" (es. 2,5% = la frontiera dei 40x) e' un
+   **round successivo**: se lo si pinna qui, il round misura il gate.
+4. 💰 **Si sceglie la TAGLIA del banco che annulla la quantizzazione** (qui: `-Deposito 100000`),
+   e la si dichiara **come condizione di validita' del round**, non come dettaglio di igiene.
+   E' la classe **229** applicata a una **pendenza** invece che a un livello.
+5. 🔢 **L'EA esporta i contatori che smentiscono la nota**: quante volte il pavimento SL ha
+   morso, quante volte il lotto e' stato alzato (228) o tagliato, quanti rifiuti del gate di
+   spread. Se una colonna **cresce lungo l'asse**, il calo dell'Expected Payoff **non e' edge**.
+   👉 *Un contro-esempio che non esce nel CSV non e' un contro-esempio: e' una promessa.*
+
+### 🔑 La regola in una riga
+*Prima di mettere un parametro ad asse si guarda dove quel parametro finisce **al
+denominatore**: ogni 1/x nascosto e' una pendenza che il round regalera' a se stesso, e
+va calcolata e dichiarata PRIMA, altrimenti la si legge come risultato.*

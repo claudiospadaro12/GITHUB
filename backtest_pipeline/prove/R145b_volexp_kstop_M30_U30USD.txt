@@ -1,0 +1,304 @@
+# =====================================================================
+#  EA: ABTG_VolExpBreak
+#  R145b -- VOLATILITY EXPANSION BREAKOUT, U30USD M30. PASSO 0.
+#           GEMELLO di R145a (NASUSD). Stesso asse: InpKStop
+#           (1,0 / 1,5 / 2,0 / 2,5), stessa finestra, stessi pin.
+# ---------------------------------------------------------------------
+#  MADRE:    prove/R145a_volexp_kstop_M30_NASUSD.txt
+#            >>> TUTTO IL RAGIONAMENTO STA LI'. Qui si scrive SOLO
+#                quello che CAMBIA sul Dow, e cambia meno di quanto
+#                sembra: i numeri dello spread e il fatto che l'ATR M30
+#                del Dow NON e' misurato in casa.
+#  DOSSIER:  report/CACCIA_STOP_STRUTTURALE_2026-09-13.md (par. 8 e 10)
+#  FONTE:    Pine "Volatility Momentum Breakout Strategy" di
+#            cryptechcapital (TradingView dJe0bGvQ, NESSUNA licenza
+#            dichiarata [INCERTO]). Copia fedele in casa:
+#            caccia_strategie/biblioteca/sorgenti/
+#            VolatilityMomentumBreakout_cryptechcapital-NOLICENSE_
+#            tvdJe0bGvQ_2026-09-13.pine
+#
+#  ###  PERCHE' IL GEMELLO ESISTE, E PERCHE' NON E' UN DOPPIONE  ###
+#  La domanda del round e' se l'edge NETTO in R e' invariante al variare
+#  di kStop. Se lo e' su un simbolo solo, e' un aneddoto: la stessa forma
+#  aritmetica (target ancorato allo stop) deve produrre la stessa forma
+#  di risposta su un secondo indice, altrimenti la spiegazione non e'
+#  l'ancora unica -- e' qualcosa di NASUSD.
+#  >>> IL CONFRONTO SI FA SULLA FORMA DELLA CURVA, non sul livello: due
+#      simboli con edge diverso ma STESSA PENDENZA lungo kStop
+#      confermano l'invarianza; stessa pendenza sbagliata su tutti e due
+#      la smentiscono; pendenze OPPOSTE dicono che stiamo guardando
+#      rumore, e il verdetto e' "NON ANCORA MISURATO".
+#
+#  U30USD e NASUSD sono i due simboli dove il dossier apre la frontiera
+#  del costo a M30. D30EUR NON e' in questo round (il dossier lo esclude
+#  esplicitamente da M15 e non ha un conto di costo a M30 in casa):
+#  e' un gemello da scrivere DOPO, coi numeri di questi due.
+#
+# ---------------------------------------------------------------------
+#  ###  COSA CAMBIA SUL DOW -- I NUMERI, UNO PER UNO  ###
+# ---------------------------------------------------------------------
+#  1 punto indice U30USD = 100 punti MT5 [MISURATO,
+#    R118_PAVIMENTO_STOP_CRITERI.md par. 4.4: 2000 punti MT5 = 20 idx]
+#  valore punto = 0,86-0,88 EUR/punto/lotto = ~1 USD/punto
+#    [MISURATO trades_auto, ANALISI_TAGLIA_FASE1_2026-08-27.md r.36]
+#  passo del volume = 0,10, come NASUSD [MISURATO su tutto il CSV
+#    storico, DIARIO 17/08/2026]
+#  prezzo di riferimento 53.519 (26/08) [MISURATO trades_auto]
+#
+#  SPREAD U30USD [MISURATO su 64.711.285 tick, 0 tick solo-bid,
+#    spread_flotta/spread_orario_U30USD.csv -- mediana per fascia,
+#    ORA SERVER BCM]:
+#      ore 16-21 : 1,8-1,9 idx
+#      ore 14-15 : 2,0
+#      ore  0-13 : 2,6-2,8
+#      ora   23  : 2,8  |  p95 7,0  |  MAX 101   <<< il rollover
+#  >>> LA CODA DELLE 23 E' UN'ALTRA BESTIA rispetto a NASUSD (max 8,20).
+#      101 punti indice di spread non sono un'operazione: sono un
+#      incidente. Qui il cancello di costo SERVE davvero, e non e' un
+#      no-op come sulla madre.
+#
+# ---------------------------------------------------------------------
+#  ###  L'ATR M30 DEL DOW E' [NON MISURATO] -- e non lo invento  ###
+# ---------------------------------------------------------------------
+#  Sulla madre l'ATR M30 si deriva da un range giornaliero MISURATO
+#  (313,8 idx, ROUND_ORB_ATR_PS5 r.234). Per U30USD quel numero IN CASA
+#  NON C'E'. Quindi:
+#  >>> LA TABELLA "stop per cella in multipli di spread" NON SI PUO'
+#      SCRIVERE PER IL DOW, e infatti non la scrivo. Chi la volesse
+#      leggere qui leggerebbe un numero inventato.
+#
+#  Quello che si puo' fare, e che basta, e' scrivere l'attesa in forma
+#  PARAMETRICA, perche' la domanda del round e' su una DIFFERENZA:
+#      costo in R = spread / (kStop x ATR)
+#      differenza fra le celle estreme
+#        = spread x (1/1,0 - 1/2,5) / ATR = spread x 0,6 / ATR
+#  Con lo spread mediano mescolato del Dow (2,2 idx):
+#        differenza attesa = 1,32 / ATR(idx)
+#
+#  E UNA BANDA PER ATR, con l'assunzione DICHIARATA (non nascosta):
+#    NASUSD: ATR M30 ~50 idx su un prezzo di 30.080 = 0,166% del prezzo.
+#    Il Dow ha volatilita' PERCENTUALE non superiore a quella del
+#    Nasdaq [ASSUNZIONE, non misurata in casa]. Con un prezzo di 53.519
+#    e una volatilita' percentuale fra 0,10% e 0,166%:
+#        ATR M30 U30USD nella banda 53-89 idx  [DERIVATO]
+#    -> differenza attesa = 1,32 / (53..89) = 0,015 - 0,025 R
+#  >>> COINCIDE con lo 0,024 R atteso sulla madre. E' questo che rende
+#      il gemello leggibile: le due curve devono avere pendenza dello
+#      STESSO ordine, anche se il livello dell'edge e' diverso.
+#  >>> E SE L'ASSUNZIONE FOSSE SBAGLIATA (Dow piu' volatile del Nasdaq
+#      in percentuale), l'ATR sarebbe piu' GRANDE e la differenza attesa
+#      ancora PIU' PICCOLA: l'errore va nella direzione che rende il
+#      test piu' severo, non piu' facile. Dichiarato.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO, NELLA VERSIONE DEL DOW  ###
+# ---------------------------------------------------------------------
+#  I sei punti della madre valgono identici (pavimento SL spento,
+#  gestione spenta, orologi spenti, filtri dell'autore spenti). Qui
+#  cambiano DUE cose, e vanno dette:
+#
+#  (A) 🔴 IL PAVIMENTO DEL LOTTO MORDE DI PIU' SUL DOW.
+#      lossPerLot = R(idx) x 0,87 EUR. Con ATR 70 idx (centro della
+#      banda) e passo del volume 0,10:
+#        deposito 10.000 (rischio 65 EUR):
+#          kStop 1,0 -> R 70 idx  -> lotto voluto 1,07 -> perdita media
+#                       per quantizzazione 0,05/1,07 = 4,7%
+#          kStop 2,5 -> R 175 idx -> lotto voluto 0,43 -> 0,05/0,43 = 11,6%
+#          differenza SISTEMATICA lungo l'asse = 6,9% del rischio.
+#          Con E = 0,15 R sono 0,010 R: il 42% dell'effetto vero
+#          (0,024 R). PEGGIO della madre (30%). INACCETTABILE.
+#        deposito 100.000 (rischio 650 EUR):
+#          kStop 1,0 -> lotto 10,67 -> 0,47%
+#          kStop 2,5 -> lotto  4,27 -> 1,17%
+#          differenza 0,7% -> ~0,001 R = il 4% dell'effetto. OK.
+#      >>> QUINDI ANCHE QUI:  -Deposito 100000  E' OBBLIGATORIO, e sul
+#          Dow lo e' di piu'. Non e' un'opzione: e' una condizione di
+#          validita' del round (classe 228 + classe 229).
+#          >>> E classe 308, aperta scrivendo la madre: un asse su un
+#              parametro che sta anche al DENOMINATORE fabbrica da solo
+#              una pendenza monotona, che si legge come risultato.
+#      >>> VERIFICA NEL CSV: "Lotto Alzato 228" e "Lotto Tagliato 5pct"
+#          devono valere 0 (o quasi) in tutte e quattro le celle. Se
+#          "Lotto Tagliato 5pct" CRESCE lungo l'asse, il calo
+#          dell'Expected Payoff e' aritmetica del broker, non edge.
+#      >>> TETTO DI VOLUME SYMBOL_VOLUME_MAX = 100 [MISURATO R109]: il
+#          lotto piu' grande di questo round e' 10,67. Non lo tocca.
+#
+#  (B) 🔴 IL CANCELLO DI SPREAD QUI *MORDE*, E VA DETTO PRIMA.
+#      Sulla madre InpMaxSpreadPctOfStop = 20,0 e' un no-op (soglia piu'
+#      stretta 9,0 idx contro un max misurato di 8,20). Sul Dow NO:
+#        kStop 1,0 -> stop 53-89 idx -> soglia 10,6-17,8 idx
+#        kStop 2,5 -> stop 133-223 idx -> soglia 26,6-44,5 idx
+#      Il p95 delle 23 (7,0) passa in tutte le celle; il MAX (101) viene
+#      RIFIUTATO in tutte le celle. Il rifiuto e' quindi SIMMETRICO
+#      sull'asse per i due estremi noti della distribuzione.
+#      >>> LA ZONA GRIGIA, dichiarata: gli spread fra ~11 e ~45 idx
+#          verrebbero rifiutati SOLO nelle celle basse. Quella fascia
+#          sta fra il p95 (7,0) e il max (101), cioe' nella coda:
+#          FRAZIONE [NON MISURATA] (l'istogramma di casa e' ORARIO, non
+#          al minuto).
+#      >>> VERIFICA NEL CSV: la colonna "Spread Gate Rifiuti" NON sara'
+#          0 su questo simbolo (al contrario della madre). Si legge
+#          cosi': se e' piccola e circa UGUALE nelle quattro celle, il
+#          cancello ha tolto solo il rollover e l'asse e' pulito; se
+#          CRESCE andando verso kStop basso, ha filtrato in modo
+#          asimmetrico e la cella 1,0 va riletta con questo in mano.
+#      >>> PERCHE' NON SI ABBASSA LA SOGLIA A 2,5 (la frontiera dei
+#          40x): per lo stesso motivo della madre. A kStop 1,0 la soglia
+#          varrebbe 1,3-2,2 idx contro una mediana MISURATA di 1,8-2,8:
+#          la cella verrebbe rifiutata quasi sempre e il round
+#          misurerebbe il cancello. Il 2,5% e' l'asse di un round
+#          SUCCESSIVO. Una variabile alla volta.
+#
+# ---------------------------------------------------------------------
+#  ###  REGOLA DI LETTURA DEL GEMELLO, congelata prima  ###
+# ---------------------------------------------------------------------
+#  Si legge l'EXPECTED PAYOFF, non il PF (lo dice il dossier, par. 10).
+#  Con -Deposito 100000 e InpRiskPercent 0,65:  1 R = 650 EUR,
+#  quindi  E in R = Expected Payoff / 650.  Nessun'altra conversione.
+#
+#   (a) DUE CURVE CON LA STESSA PENDENZA (salita di 0,015-0,030 R da
+#       kStop 1,0 a 2,5, monotona, appiattita sopra 2,0), su TUTTI E DUE
+#       i simboli ==> l'ancora unica regge, la frontiera del costo si
+#       compra allargando lo stop, e quattro cacce di frontiera si
+#       riaprono. E' l'esito che il dossier chiama "edge piatto".
+#   (b) DUE CURVE CHE CROLLANO verso kStop basso molto piu' dell'attesa
+#       (oltre 0,08 R) ==> non e' lo spread, e' il meccanismo: lo stop
+#       strutturale NON e' una scorciatoia. Verdetto col numero, e il
+#       certificato si scrive con PF, n e DD di tutte e otto le celle.
+#   (c) PENDENZE DISCORDI fra i due simboli ==> rumore. "NON ANCORA
+#       MISURATO", e la via piu' corta al numero e' allungare il
+#       campione (asse su InpKBreak, che alza n) -- non stringere i
+#       criteri e non pescare la cella verde.
+#   (d) n < 20 IN TUTTE LE CELLE DI TUTTI E DUE I SIMBOLI ==> il tappo
+#       e' InpKBreak (1,5 ATR oltre il massimo di 20 barre e' una
+#       condizione rara), NON InpKStop. Round successivo: asse su
+#       InpKBreak (0,0 / 0,5 / 1,0 / 1,5, con 0,0 = Donchian puro, gia'
+#       ammesso da RotturaLong_Calc e verificato nell'autotest).
+#       InpKStop NON SI TOCCA finche' non c'e' un n leggibile, e NON si
+#       archivia niente: e' un "non ancora misurato" col motivo scritto.
+#
+#  SOGLIE CONGELATE PRIMA (identiche alla madre):
+#    non giudica il MERITO se n < 150 per finestra (valvola R59)
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65%
+#
+# ---------------------------------------------------------------------
+#  ###  I LIMITI, gli stessi della madre piu' uno  ###
+# ---------------------------------------------------------------------
+#  1. UN SOLO REGIME (21 mesi di tick BCM sugli indici, rialzista): la
+#     regola C dell'Emendamento della Finestra NON e' soddisfatta.
+#     Nessuna cella e' promuovibile senza.
+#  2. I DUE LATI NON SONO SEPARABILI: la direzione e' costitutiva (lo
+#     chiede la SPEC), quindi la REGOLA DEI DUE LATI del 25/08 non e'
+#     applicabile con questo EA. Tensione dichiarata fra due regole di
+#     casa: il primo lavoro sul codice, se il motore sopravvive, e'
+#     aggiungere l'input di lato.
+#  3. L'EA NON E' MAI STATO COMPILATO: chi lo ha scritto non ha
+#     MetaEditor ne' Strategy Tester. Il primo esito possibile del round
+#     e' un errore di compilazione.
+#  4. NUOVO QUI: l'ATR M30 di U30USD e' [NON MISURATO] e la banda 53-89
+#     idx poggia su un'ASSUNZIONE dichiarata (volatilita' percentuale
+#     del Dow non superiore a quella del Nasdaq). Tutti i numeri di
+#     frontiera di questo file sono percio' piu' deboli di quelli della
+#     madre. La misura che li chiuderebbe e' una sonda ATR sui simboli,
+#     che il dossier stesso elenca come buco aperto (par. 9.5).
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING.
+#  -Deposito 100000 = OBBLIGATORIO (punto A sopra). Sul Dow di piu'.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1). Filtro orario SPENTO in
+#     questo round; i pin 14/20 restano in ora SERVER per i round futuri.
+#  TETTO BARRE: M30, 21 mesi = ~21.100 barre [DERIVATO], sotto le
+#     ~100.000. A M5 sarebbero ~126.700: SFONDA.
+#  NESSUN ENUM sull'asse: InpKStop e' un double, celle = 4 per aritmetica.
+#  MAGIC 775301: lo STESSO della madre, ed e' voluto -- le corse girano
+#     su simboli diversi e non si incrociano. VERGINE: grep repo-wide il
+#     13/09/2026, .git escluso -> ZERO occorrenze di 7753xx.
+#  ETICHETTA R145b: R142/R143 gia' in prove/, R144 RISERVATA al round
+#     del tetto di ABTG_ImpulsoApertura. R145 libera (grep repo-wide).
+#  PER-TRADE: le quattro celle condividono il magic -> ogni passata
+#     sovrascrive quella prima. I numeri per cella stanno nell'OPTFRAME.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment resta al default compilato.
+#  GUARDIAN pinnato false: nel tester e' fail-open comunque. La colonna
+#     "Guardian Rifiuti" deve valere 0.
+#
+#  COSTO: 4 celle x 2 finestre = 8 passate -> T = 0,6 + 0,077 x 8 =
+#         1,22 minuti. Con la madre (R145a): 16 passate, 2,44 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, da solo e
+#     mai in pipe. Il SECONDO strato, l'agente controllo-preventivo, lo
+#     lancia il coordinatore. DICHIARATO.
+#  QUESTO FILE NON E' IN CODA. CODA.txt non e' stato toccato.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN spento nello screening (edge RAW). Fail-open comunque.
+InpUsaGuardian=false||false||0||false||N
+
+# --- MOTORE: i valori dell'AUTORE, identici alla madre.
+InpKBreak=1.5||1.5||0||1.5||N
+InpLookback=20||20||0||20||N
+InpAtrPeriod=14||14||0||14||N
+
+# --- ANCORA UNICA. InpMinSLPts = 0 (pavimento SPENTO): a 7200 punti MT5
+#     fonderebbe le due celle basse in una e ucciderebbe meta' dell'asse.
+#     Va RIACCESO prima di qualunque forward.
+InpTP_RR=2.0||2.0||0||2.0||N
+InpMinSLPts=0||0||0||0||N
+
+# --- GESTIONE NOSTRA: SPENTA = come l'autore. InpTP1_RR e InpBE_R sono
+#     inerti finche' InpTP1Pct=0 e InpBreakeven=false.
+InpTP1_RR=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=false||false||0||false||N
+InpBE_R=1.0||1.0||0||1.0||N
+
+# --- FILTRI DELL'AUTORE: SPENTI, come chiede il dossier.
+InpUseEmaFilter=false||false||0||false||N
+InpEmaPeriod=50||50||0||50||N
+InpUseRsiFilter=false||false||0||false||N
+InpRsiPeriod=14||14||0||14||N
+InpRsiLevel=50.0||50.0||0||50.0||N
+
+# --- COSTO (R55): 20,0% = stop >= 5x lo spread. Sul Dow questo cancello
+#     MORDE (max misurato 101 idx all'ora 23): e' voluto, e la colonna
+#     "Spread Gate Rifiuti" del CSV dira' quanto. Non si scende a 2,5
+#     (la frontiera dei 40x) perche' a kStop 1,0 rifiuterebbe quasi
+#     tutto e il round misurerebbe il cancello: e' un round successivo.
+InpMaxSpreadPctOfStop=20.0||20.0||0||20.0||N
+
+# --- OPERATIVO: tetto giornaliero obbligatorio (C6), filtro orario
+#     SPENTO, venerdi' NON chiuso (l'orologio romperebbe l'invarianza
+#     in R proprio in cima alla scala di kStop).
+InpMaxTradesPerDay=3||3||0||3||N
+InpUseHourFilter=false||false||0||false||N
+InpHourStart=14||14||0||14||N
+InpHourEnd=20||20||0||20||N
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+
+# --- RISCHIO: il contratto di casa 0,65. Taglie e rischio sono di
+#     CLAUDIO: qui si MISURA, non si decide.
+#     >>> Va letto insieme a -Deposito 100000: a 10.000 la
+#         quantizzazione del lotto falsa l'asse del 42% (punto A).
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- GENERALI. Nessun pin di stringa.
+InpMagic=775301||775301||0||775301||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: L'AMPIEZZA DELLO STOP IN ATR.
+#     1,0 = il valore DELL'AUTORE (atrStopMult del Pine, r.47).
+#     2,5 = il valore che il dossier indica come soglia per M15.
+#     4 celle: |2,5 - 1,0| / 0,5 + 1 = 4.
+InpKStop=1.0||1.0||0.5||2.5||Y

@@ -1,0 +1,455 @@
+# =====================================================================
+#  EA: ABTG_VolExpBreak
+#  R145a -- VOLATILITY EXPANSION BREAKOUT, NASUSD M30. PASSO 0.
+#           Asse unico: InpKStop (1,0 / 1,5 / 2,0 / 2,5).
+#           E' IL ROUND CHE IL DOSSIER CHIEDE ALLA LETTERA.
+# ---------------------------------------------------------------------
+#  DOSSIER:  report/CACCIA_STOP_STRUTTURALE_2026-09-13.md (par. 8 e 10)
+#  FONTE:    Pine "Volatility Momentum Breakout Strategy" di
+#            cryptechcapital (TradingView dJe0bGvQ, NESSUNA licenza
+#            dichiarata [INCERTO]). Copia fedele in casa:
+#            caccia_strategie/biblioteca/sorgenti/
+#            VolatilityMomentumBreakout_cryptechcapital-NOLICENSE_
+#            tvdJe0bGvQ_2026-09-13.pine
+#  GEMELLO:  prove/R145b_volexp_kstop_M30_U30USD.txt (stesso asse, Dow)
+#
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+#  ABTG_VolExpBreak.mq5 e' stato scritto il 13/09/2026 dalla SPEC del
+#  dossier. Non ha mai girato: zero righe in REGISTRO_TEST.md, zero CSV
+#  in archivio, zero round in coda. Questo e' il suo primo file prova.
+#  MAGIC 775301 -- blocco 7753xx VERGINE, grep repo-wide (.git escluso)
+#  il 13/09/2026: ZERO occorrenze di qualunque 7753xx.
+#
+# ---------------------------------------------------------------------
+#  LA DOMANDA DEL ROUND, COPIATA DAL DOSSIER (par. 10)
+# ---------------------------------------------------------------------
+#  >>> "Allargando SOLO lo stop (kStop 1,0 -> 2,5) su un motore la cui
+#       ancora e' UNICA, l'edge NETTO in R resta lo stesso -- oppure si
+#       diluisce come si e' diluito sul cono di rumore?"
+#
+#  E il dossier dice anche come NON si risponde: "non si risponde con un
+#  PF. Si risponde con quattro celle sullo stesso asse, guardando se la E
+#  netta in R e' piatta lungo kStop. Il PF viene dopo, e solo se la
+#  risposta e' piatta."
+#
+#  LE DUE USCITE, dichiarate dal dossier e riportate qui alla lettera:
+#    edge PIATTO    -> M15 e M30 sugli indici SI COMPRANO, e quattro
+#                      cacce di frontiera si riaprono.
+#    edge DILUITO   -> lo stop strutturale NON e' una scorciatoia, e la
+#                      frontiera del costo resta un muro come lo era per
+#                      gli stop a punti fissi.
+#
+# ---------------------------------------------------------------------
+#  IL MOTORE IN QUATTRO RIGHE (letto nel sorgente, non nel titolo)
+# ---------------------------------------------------------------------
+#  1. CANALE: massimo/minimo delle InpLookback=20 barre che PRECEDONO la
+#     barra di segnale (shift 2..21). La barra [1] non entra nel proprio
+#     canale ("ta.highest(high[1],20)" dell'autore) e la barra [0], in
+#     formazione, non e' nemmeno guardata -> niente ridipintura, per
+#     costruzione (ABTG_VolExpBreak.mq5, OnNewBar).
+#  2. ROTTURA: close[1] > canaleAlto + InpKBreak x ATR(14)  (specchiato
+#     per lo short). Confronto STRETTO come l'autore.
+#  3. DIREZIONE COSTITUTIVA: non esiste nessun input di lato. I due lati
+#     girano sempre insieme e non sono separabili in questo EA.
+#  4. Decide SOLO a barra chiusa; l'ingresso parte all'apertura della
+#     barra nuova.
+#
+# ---------------------------------------------------------------------
+#  ###  ANCORA UNICA?  S I  ###  -- e' il motivo per cui il round esiste
+# ---------------------------------------------------------------------
+#     STOP   -> entry -/+ InpKStop x ATR(14), poi il pavimento R109
+#               (PavimentoSL_Calc), poi lo STOPS_LEVEL del broker.
+#     TARGET -> TargetDaR_Calc: entry +/- R x InpTP_RR, con R = LA
+#               DISTANZA VERA DELLO STOP (quella dopo il pavimento).
+#
+#  >>> IL TARGET E' ESPRESSO IN UNITA' DELLO STOP: se lo stop si allarga,
+#      il target si allarga con lui e il rapporto rischio/rendimento non
+#      cambia PER ARITMETICA. E' la stessa forma di ABTG_AtrExhaustVol
+#      (r.647-649) e di ABTG_DAX_Apertura_EU (r.1070).
+#  >>> SCOSTAMENTO DALLA SPEC, DICHIARATO: la SPEC scrive "TARGET =
+#      entry +/- (kStop x ATR) x InpTP_RR", cioe' ancorato allo stop
+#      GREZZO. L'EA lo ancora allo stop VERO. Con InpMinSLPts=0 (pinnato
+#      qui sotto) le due formule COINCIDONO ALLA CIFRA, quindi in QUESTO
+#      round lo scostamento e' inerte. Conta solo se un round futuro
+#      accende il pavimento.
+#  >>> E L'INVARIANZA E' VERIFICATA A TAVOLINO, non promessa: l'autotest
+#      dell'EA calcola il target su DUE R diversi (10 e 25) e confronta
+#      il rapporto (target-entry)/R. Se i due numeri non coincidono al
+#      milionesimo l'autotest stampa DIVERGE e il round non si legge.
+#      Riga [VOLEXP][AUTOTEST] "ancora unica".
+#
+# =====================================================================
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- CON UN NUMERO  ###
+# =====================================================================
+#  "Edge piatto" NON vuol dire "quattro celle identiche": vuol dire che
+#  il calo lungo l'asse e' quello e SOLO quello che lo SPREAD impone.
+#  Il conto si fa prima, cosi' il round e' falsificabile.
+#
+#  I NUMERI MISURATI CHE CI ENTRANO
+#    1 punto indice NASUSD = 100 punti MT5 [MISURATO R97]
+#    valore punto = 0,84-0,87 EUR/punto/lotto = ~1 USD/punto
+#      [MISURATO trades_auto, ANALISI_TAGLIA_FASE1_2026-08-27.md r.37]
+#    passo del volume NASUSD = 0,10 [MISURATO su tutto il CSV storico,
+#      DIARIO 17/08/2026: "solo multipli di 0,10"]
+#    spread NASUSD [MISURATO su 156.146.398 tick, spread_flotta]:
+#      ore 14-20 server: mediana 1,60-1,80 | p95 1,80-2,70 | max 8,20
+#      ore  0-13 server: mediana 2,30-2,60 | p95 2,70      | max 8,20
+#    range giornaliero 313,8 idx su 24 giorni [MISURATO,
+#      ROUND_ORB_ATR_PS5 r.234]
+#
+#  L'ATR M30, ED E' L'ANELLO DEBOLE, DICHIARATO
+#    313,8 x sqrt(30/1440) = 45,3 idx [DERIVATO]. Il dossier dichiara
+#    (par. 9.5) che questa formula SOTTOSTIMA l'ATR vero del 18-27%.
+#    Quindi ATR(14) M30 NASUSD sta nella banda 45-58 idx [DERIVATO],
+#    e il centro che uso per i conti qui sotto e' 50 idx.
+#    >>> L'ATR VERO E' [NON MISURATO] e non lo invento. Il round lo
+#        MISURA di fatto: la colonna "Segnali Grezzi" e il per-trade
+#        dicono quanto era largo lo stop davvero.
+#
+#  LO STOP PER CELLA, E DOVE CADE LA FRONTIERA DEL COSTO
+#    (pedaggio all-in sugli indici = SPREAD E BASTA: commissione 0,0000
+#     MISURATA su n=302 deal, CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181)
+#      kStop 1,0 -> stop  45-58 idx -> /1,80 =  25-32x   SOTTO il 40x
+#      kStop 1,5 -> stop  68-87 idx -> /1,80 =  38-48x   A CAVALLO
+#      kStop 2,0 -> stop  90-116 idx -> /1,80 =  50-64x  SOPRA
+#      kStop 2,5 -> stop 113-145 idx -> /1,80 =  63-81x  SOPRA
+#    >>> L'ASSE ATTRAVERSA LA FRONTIERA. Non e' un caso: e' esattamente
+#        quello che il dossier chiede ("misura DOVE cade la frontiera").
+#
+#  E ADESSO IL NUMERO DELL'ATTESA
+#    costo in R di una operazione = spread / (kStop x ATR)
+#    con spread 2,0 idx (mediana mescolata giorno+notte) e ATR 50 idx:
+#      kStop 1,0 -> 0,040 R      kStop 2,0 -> 0,020 R
+#      kStop 1,5 -> 0,027 R      kStop 2,5 -> 0,016 R
+#    Se l'edge LORDO in R e' invariante (= E0), allora
+#      E_netta(kStop) = E0 - spread/(kStop x ATR)
+#    e la DIFFERENZA FRA LE DUE CELLE ESTREME vale
+#      0,040 - 0,016 = 0,024 R    <<< QUESTA E' L'ATTESA
+#
+#  >>> LA REGOLA DI LETTURA, CONGELATA PRIMA:
+#      (a) EDGE PIATTO: E_netta sale da kStop 1,0 a 2,5 di circa
+#          0,02-0,03 R, MONOTONA, e sopra 2,0 si appiattisce.
+#          ==> l'ancora unica regge, la frontiera si compra.
+#      (b) EDGE DILUITO: il calo verso kStop basso e' MOLTO piu' grande
+#          dell'attesa (indicativamente oltre 0,08 R = oltre il TRIPLO
+#          del costo di spread). ==> non e' lo spread: e' il meccanismo,
+#          e lo stop strutturale NON basta.
+#      (c) NESSUNA MONOTONIA (su e giu' senza ordine) ==> il campione e'
+#          rumore, e il verdetto e' "NON ANCORA MISURATO", non "morto".
+#
+#  >>> COME SI LEGGE E_netta IN R DAL CSV, senza inventarsi conti:
+#      il rischio per operazione e' COSTANTE (InpRiskPercent=0,65) su
+#      tutte e quattro le celle, perche' il lotto si adatta allo stop.
+#      Quindi la colonna "Expected Payoff" in EUR E' l'edge in R, a meno
+#      del fattore (0,65% x saldo). Con deposito 100.000:
+#          1 R = 650 EUR   ->   E in R = Expected Payoff / 650
+#      Non serve nessun'altra conversione, e non se ne fanno.
+#
+# =====================================================================
+#  ###  IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND  ###
+#  ###  -- e come e' stato tolto, uno per uno                 ###
+# =====================================================================
+#
+#  (1) 🔴 IL PAVIMENTO DELLO STOP CHE FONDE DUE CELLE IN UNA.
+#      Se InpMinSLPts valesse 7200 punti MT5 (= 72 idx, il valore che
+#      R141c usa su ABTG_AtrExhaustVol), morderebbe a kStop 1,0 (45-58
+#      idx) E a kStop 1,5 (68-87 idx): le due celle basse diventerebbero
+#      LA STESSA CELLA, l'asse perderebbe meta' della sua corsa e il
+#      round risponderebbe "piatto in basso" per pura aritmetica.
+#      >>> TOLTO: InpMinSLPts = 0 (pavimento SPENTO) in questo round.
+#      >>> E VERIFICATO, non promesso: la colonna "Pavimento SL Morso"
+#          del CSV deve valere 0 in tutte e quattro le celle. Se non e'
+#          0, questa nota e' sbagliata e il round va riletto.
+#      >>> IL COSTO DELLA SCELTA, DICHIARATO: senza pavimento, su una
+#          barra con ATR schiacciato lo stop puo' nascere stretto e il
+#          lotto sale. Il cancello di spread (punto 3) e il tetto
+#          giornaliero restano come reti. E' una scelta di MISURA, e il
+#          pavimento va RIACCESO prima di qualunque forward.
+#
+#  (2) 🔴 IL PAVIMENTO DEL LOTTO (CLASSE 228) CHE INVERTE LA RISPOSTA.
+#      Questo e' il difetto piu' insidioso del round, perche' spinge
+#      ESATTAMENTE nella direzione di una delle due risposte.
+#      Il lotto e' inversamente proporzionale allo stop: piu' kStop e'
+#      grande, piu' il lotto e' piccolo, piu' la QUANTIZZAZIONE al passo
+#      di 0,10 lo taglia in percentuale. Il rischio vero scende in modo
+#      SISTEMATICO e CRESCENTE lungo l'asse, e l'Expected Payoff scende
+#      con lui: il round direbbe "l'edge si diluisce quando lo stop si
+#      allarga" per un motivo puramente aritmetico.
+#      IL CONTO, con lossPerLot = R(idx) x 0,855 EUR:
+#        deposito 10.000 (rischio 65 EUR):
+#          kStop 1,0 -> lotto voluto 1,52 -> perdita media per
+#                       quantizzazione (mezzo passo) 0,05/1,52 = 3,3%
+#          kStop 2,5 -> lotto voluto 0,61 -> 0,05/0,61 = 8,2%
+#          differenza SISTEMATICA lungo l'asse = 4,9% del rischio.
+#          Con E = 0,15 R, sono 0,007 R: il 30% dell'effetto vero
+#          (0,024 R) che il round deve misurare. INACCETTABILE.
+#        deposito 100.000 (rischio 650 EUR):
+#          kStop 1,0 -> lotto 15,19 -> 0,33%
+#          kStop 2,5 -> lotto  6,08 -> 0,82%
+#          differenza = 0,5% -> 0,0007 R = il 3% dell'effetto. OK.
+#      >>> TOLTO COSI':  IL ROUND VA LANCIATO CON  -Deposito 100000.
+#          NON e' un'opzione, e' una condizione di validita'. Il
+#          deposito NON si scrive nel file prova (e' un parametro del
+#          driver): va scritto nella riga di lancio, e va CONTROLLATO
+#          nel referto.
+#      >>> ED E' LA CLASSE 229 ALLA LETTERA: un difetto che dipende
+#          dalla TAGLIA non si toglie misurando meglio, si toglie
+#          misurando alla taglia giusta.
+#      >>> CLASSE NUOVA APERTA SCRIVENDO QUESTO FILE: la 308
+#          (CHECKLIST_RIGA_DI_LANCIO.md) -- un asse su un parametro
+#          che sta anche al DENOMINATORE di un costo o di una
+#          quantizzazione fabbrica da solo una pendenza monotona, e
+#          quella pendenza si legge come RISULTATO. E' peggio della
+#          299: la 299 produce celle identiche, che si vedono; questa
+#          produce una curva plausibile, che convince.
+#      >>> E VERIFICATO: le colonne "Lotto Alzato 228" e "Lotto Tagliato
+#          5pct" devono valere 0 (o quasi) in tutte e quattro le celle.
+#          Se "Lotto Tagliato 5pct" cresce lungo l'asse, il calo
+#          dell'Expected Payoff NON e' edge: e' aritmetica del broker.
+#      >>> TETTO DI VOLUME: SYMBOL_VOLUME_MAX = 100 [MISURATO, R109].
+#          Il lotto piu' grande di questo round e' 15,19: non lo tocca.
+#
+#  (3) 🔴 IL CANCELLO DI SPREAD CHE MISURA SE STESSO.
+#      InpMaxSpreadPctOfStop = 2,5 e' la frontiera dei 40x, ed e' il
+#      DEFAULT dell'EA. Pinnarlo qui ucciderebbe il round: a kStop 1,0
+#      la soglia varrebbe 2,5% x 50 idx = 1,25 idx, contro una mediana
+#      MISURATA di 1,60-1,80 -> la cella verrebbe rifiutata quasi
+#      SEMPRE, e il round misurerebbe il cancello, non l'edge.
+#      >>> TOLTO: pinnato a 20,0 (= lo stop dev'essere almeno 5x lo
+#          spread). A kStop 1,0 la soglia vale 20% x 45 idx = 9,0 idx,
+#          contro un MASSIMO misurato di 8,20: il cancello NON morde su
+#          nessuna cella, e lo spread resta pagato dentro il P/L -- che
+#          e' esattamente quello che serve per misurare l'edge NETTO.
+#      >>> E VERIFICATO: la colonna "Spread Gate Rifiuti" deve valere 0
+#          in tutte e quattro le celle. Se non lo e', il cancello ha
+#          filtrato in modo asimmetrico e va riletto.
+#      >>> Il cancello a 2,5% (= la frontiera vera) e' l'asse di un
+#          ROUND SUCCESSIVO, non di questo. Una variabile alla volta.
+#
+#  (4) 🔴 L'OROLOGIO CHE RUBA I TARGET LONTANI.
+#      Qualunque chiusura a orario (flat di seduta, venerdi') chiude a
+#      un multiplo di R qualunque e colpisce di PIU' le celle con kStop
+#      grande, perche' quelle posizioni vivono piu' a lungo: sarebbe un
+#      calo asimmetrico proprio sull'asse che si misura. E' il difetto
+#      che rompe l'invarianza su ABTG_HVAncora (flat delle 21:00).
+#      >>> TOLTO PER COSTRUZIONE: questo EA NON HA un flat di seduta, e
+#          InpFridayClose e' pinnato a false.
+#      >>> IL COSTO DELLA SCELTA, DICHIARATO E SCOMODO: le posizioni
+#          restano aperte sul weekend, quindi il DD misurato INCLUDE il
+#          gap del lunedi'. E' una lettura PESSIMISTA del rischio, e
+#          questo la rende accettabile: un numero di rischio pessimista
+#          si puo' usare, un numero di merito confuso no. Se il motore
+#          arrivasse a una sedia, InpFridayClose va RIMISURATO acceso.
+#
+#  (5) 🔴 IL FILTRO ORARIO CHE CAMBIA IL COSTO SOTTO L'ASSE.
+#      Acceso su 14-20, taglierebbe il 70% delle barre di decisione (14
+#      su 46 al giorno) proprio su un motore di cui NON conosciamo la
+#      frequenza. Spento, il round vede anche le ore 0-13, dove la
+#      mediana dello spread e' il 28-62% PIU' ALTA.
+#      >>> SCELTA: SPENTO. Il PASSO 0 vuole il massimo n possibile, e il
+#          costo piu' alto rende la lettura CONSERVATIVA.
+#      >>> CONSEGUENZA DICHIARATA: l'edge netto misurato qui e' un
+#          PAVIMENTO. Se esce piatto, con il filtro orario acceso puo'
+#          solo migliorare. Se esce diluito, il filtro orario e' il
+#          primo asse da provare PRIMA di archiviare (motto del 09/09).
+#
+#  (6) 🔴 IL PARZIALE E IL BREAKEVEN CHE MISURANO SE STESSI.
+#      La SPEC chiede la gestione di casa (parziale a 1R, breakeven,
+#      runner a 2R) e l'EA CE L'HA, con i due blocchi INDIPENDENTI (la
+#      lezione del 07/08: il breakeven annidato dentro la parziale si
+#      disarma col lotto minimo). Ma in QUESTO round sono SPENTI:
+#      il parziale e' l'unico pezzo della gestione che dipende dal passo
+#      del volume, e quindi da kStop -- rientrerebbe dalla finestra il
+#      difetto del punto (2).
+#      >>> Con InpTP1Pct=0 e InpBreakeven=false la cella e' il Pine puro:
+#          SL, TP a 2R, e nient'altro. La gestione di casa e' un round
+#          suo, e si scrive DOPO, coi numeri di questo.
+#
+#  (7) 🔴 I FILTRI DELL'AUTORE (EMA50, RSI50) sono PORTATI ma SPENTI,
+#      come chiede il dossier. Quindi questa cella NON e' il Pine
+#      tradotto alla lettera: e' il Pine SENZA i suoi due filtri, ed e'
+#      dichiarato. Accenderli e' un round dedicato.
+#
+# ---------------------------------------------------------------------
+#  ###  FREQUENZA: LA COSA CHE PUO' FAR FINIRE IL ROUND IN NULLA  ###
+# ---------------------------------------------------------------------
+#  FREQUENZA ATTESA: [NON MISURATA] -- il dossier lo dichiara al par.
+#  9.7 ("nessuno dei tre candidati dichiara un numero di operazioni che
+#  io possa verificare, e i numeri degli autori non sono un criterio").
+#  Non la invento.
+#  Il rischio vero e' questo: con InpKBreak = 1,5 (valore DELL'AUTORE)
+#  la barra di segnale deve chiudere oltre il massimo di 20 barre di
+#  1,5 ATR -- un'escursione grossa dentro una barra sola. Se succede
+#  quasi mai, tutte e quattro le celle escono con n vicino a zero.
+#  >>> ED E' UNA RISPOSTA, NON UNA CATENA ROTTA, ma e' una risposta a
+#      un'ALTRA domanda. La regola congelata qui:
+#      (d) SE n < 20 IN TUTTE E QUATTRO LE CELLE: il tappo e' InpKBreak,
+#          NON InpKStop. Il round successivo e' un asse su InpKBreak
+#          (0,0 / 0,5 / 1,0 / 1,5, dove 0,0 = Donchian puro), e
+#          InpKStop NON SI TOCCA finche' non c'e' un n leggibile.
+#          >>> NON si archivia niente in questo caso: e' un
+#              "NON ANCORA MISURATO" col motivo scritto, non un morto.
+#  >>> LA CELLA DI CONTROLLO ESISTE GIA' NEL CODICE: RotturaLong_Calc
+#      accetta k = 0 (rottura Donchian pura) e l'autotest lo verifica.
+#      La strada per il round (d) e' gia' aperta, non va scritta ora.
+#
+#  PF atteso: [NON MISURATO]. Nessun PF di questo motore esiste, su
+#      nessun simbolo, su nessun TF. E' la ragione per cui gira.
+#  DD atteso: [NON MISURATO]. Con rischio 0,65%, una posizione per volta
+#      e un tetto di 3 al giorno, la peggior giornata teorica e' ~1,95%
+#      -- senza contare il gap del weekend, che qui e' dentro (punto 4).
+#      La colonna DD e' un cancello di RISCHIO e si legge a QUALUNQUE n
+#      (Emendamento B, 16/08).
+#
+#  SOGLIE CONGELATE PRIMA:
+#    non giudica il MERITO se n < 150 per finestra (valvola R59)
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    scarta se  DD > 10% in una finestra a rischio 0,65%
+#    e la risposta alla domanda del round si legge sull'EXPECTED PAYOFF,
+#    non sul PF (lo dice il dossier, par. 10).
+#
+# ---------------------------------------------------------------------
+#  ###  I LIMITI DI QUESTO ROUND, scritti prima e non dopo  ###
+# ---------------------------------------------------------------------
+#  1. UN SOLO REGIME. 21 mesi di tick BCM sugli indici = un solo regime,
+#     rialzista. La regola C dell'Emendamento della Finestra (prova di
+#     regime) NON e' soddisfatta e non lo sara' entro il 30/09. Nessuna
+#     cella di questo round e' promuovibile senza.
+#  2. I DUE LATI NON SONO SEPARABILI. La direzione e' costitutiva (lo
+#     chiede la SPEC) e non esiste nessun input di lato: la REGOLA DEI
+#     DUE LATI del 25/08, che chiede di misurarli SEPARATI, con questo
+#     EA non e' applicabile. E' una TENSIONE VERA fra due regole di
+#     casa, ed e' dichiarata: se il motore sopravvive a questo round,
+#     il primo lavoro sul codice e' aggiungere l'input di lato.
+#  3. L'EA NON E' MAI STATO COMPILATO. Chi lo ha scritto non ha
+#     MetaEditor ne' Strategy Tester: nessuna riga di questo file dice
+#     che il .mq5 compila. Il primo esito possibile del round e' un
+#     errore di compilazione, e va messo in conto.
+#  4. L'ATR M30 di NASUSD e' [DERIVATO], non misurato (vedi sopra).
+#     Tutti i numeri della frontiera poggiano su quella banda.
+#  5. L'ATR M30 sul FOREX e' [NON MISURATO] (dossier par. 9.6): questo
+#     motore NON si propone su GBPUSD/EURUSD e questo round e' solo
+#     indici. Dichiarato per non doverlo riscoprire.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. -Modello 1 = OHLC M1 = SOLO SCREENING, mai
+#     un verdetto (classe 273).
+#  -Deposito 100000 = OBBLIGATORIO in questo round (punto 2 sopra).
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#     Niente e' richiesto prima -> NON e' screening: e' un verdetto.
+#  ORE IN ORA SERVER BCM (= ora italiana - 1). Il filtro orario e'
+#     SPENTO in questo round, ma InpHourStart/End restano pinnati in ora
+#     SERVER (14/20) perche' un pin in ora italiana su un round futuro
+#     si cestina.
+#  TETTO BARRE: M30 su NASUSD, 21 mesi = ~21.100 barre [DERIVATO: 46
+#     barre/giorno x ~459 feriali], sotto il tetto delle ~100.000.
+#     A M5 sarebbero ~126.700: SFONDA. Secondo motivo, dopo il costo,
+#     per cui M5 non e' qui.
+#  NESSUN ENUM sull'asse: InpKStop e' un double, il conto delle celle e'
+#     aritmetico e vale 4 (classe 287 non si applica).
+#  MAGIC 775301: grep -rn repo-wide il 13/09/2026, .git escluso -> ZERO
+#     occorrenze di 7753xx. VERGINE.
+#  ETICHETTA R145a: R142/R143 sono gia' in prove/, R144 e' RISERVATA al
+#     round del tetto di ABTG_ImpulsoApertura (dichiarata in
+#     R143a_preopen_metro_NASUSD.txt r.51). R145 e' libera: grep -rn
+#     "R145" repo-wide -> zero occorrenze.
+#  PER-TRADE: le quattro celle condividono il magic -> ogni passata
+#     SOVRASCRIVE il file per-trade della precedente. I numeri per cella
+#     si leggono nell'OPTFRAME, non nel per-trade.
+#  UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#  NESSUN PIN DI STRINGA: InpComment resta al default compilato.
+#  GUARDIAN: pinnato false. Nel tester la guardia e' fail-open comunque
+#     (le sue GlobalVariable non esistono): il pin toglie l'ambiguita',
+#     non cambia il numero. La colonna "Guardian Rifiuti" deve valere 0.
+#
+#  COSTO: 4 celle x 2 finestre = 8 passate -> T = 0,6 + 0,077 x 8 =
+#         1,22 minuti. Col gemello U30USD (R145b): 16 passate,
+#         2,44 minuti in tutto.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, da solo e
+#     mai in pipe. Il SECONDO strato, l'agente controllo-preventivo, NON
+#     POSSO invocarlo io: lo lancia il coordinatore. DICHIARATO.
+#  QUESTO FILE NON E' IN CODA. E' lavoro di preparazione: CODA.txt non
+#     e' stato toccato.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- GUARDIAN spento nello screening (edge RAW). Fail-open comunque nel
+#     tester: il pin toglie l'ambiguita', non cambia il numero.
+InpUsaGuardian=false||false||0||false||N
+
+# --- MOTORE: i valori dell'AUTORE, nessuno toccato.
+#     InpKBreak = 1,5 e' il "atrMultiplier" del Pine (r.36).
+#     InpLookback = 20 e' il "lookback" del Pine (r.38).
+InpKBreak=1.5||1.5||0||1.5||N
+InpLookback=20||20||0||20||N
+InpAtrPeriod=14||14||0||14||N
+
+# --- ANCORA UNICA.
+#     InpTP_RR = 2,0 e' il "riskReward" del Pine (r.46).
+#     InpMinSLPts = 0 e' il PAVIMENTO SPENTO, ed e' una scelta di MISURA
+#     motivata al punto (1) del contro-esempio: a 7200 punti MT5 fonde
+#     le due celle basse in una. Va RIACCESO prima di qualunque forward.
+InpTP_RR=2.0||2.0||0||2.0||N
+InpMinSLPts=0||0||0||0||N
+
+# --- GESTIONE NOSTRA: SPENTA = come l'autore (punto 6 del contro-esempio).
+#     InpTP1_RR e InpBE_R restano pinnati ai valori di casa ma sono
+#     inerti finche' InpTP1Pct=0 e InpBreakeven=false.
+InpTP1_RR=1.0||1.0||0||1.0||N
+InpTP1Pct=0||0||0||0||N
+InpBreakeven=false||false||0||false||N
+InpBE_R=1.0||1.0||0||1.0||N
+
+# --- FILTRI DELL'AUTORE: SPENTI, come chiede il dossier. Questa cella
+#     NON e' il Pine alla lettera, ed e' dichiarato.
+InpUseEmaFilter=false||false||0||false||N
+InpEmaPeriod=50||50||0||50||N
+InpUseRsiFilter=false||false||0||false||N
+InpRsiPeriod=14||14||0||14||N
+InpRsiLevel=50.0||50.0||0||50.0||N
+
+# --- COSTO (R55): 20,0% = lo stop dev'essere almeno 5x lo spread.
+#     NON 2,5 (la frontiera dei 40x): a kStop 1,0 quel valore darebbe una
+#     soglia di 1,25 idx contro una mediana MISURATA di 1,60-1,80, e la
+#     cella verrebbe rifiutata quasi sempre -- il round misurerebbe il
+#     cancello. A 20,0 la soglia piu' stretta vale 9,0 idx contro un MAX
+#     misurato di 8,20: non morde su nessuna cella. Punto (3).
+InpMaxSpreadPctOfStop=20.0||20.0||0||20.0||N
+
+# --- OPERATIVO: tetto giornaliero obbligatorio (criterio C6), filtro
+#     orario SPENTO (punto 5), venerdi' NON chiuso (punto 4).
+#     Le ore restano in ORA SERVER anche se il filtro e' spento.
+InpMaxTradesPerDay=3||3||0||3||N
+InpUseHourFilter=false||false||0||false||N
+InpHourStart=14||14||0||14||N
+InpHourEnd=20||20||0||20||N
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+
+# --- RISCHIO: il contratto di casa 0,65. Taglie e rischio sono di
+#     CLAUDIO: qui si MISURA, non si decide.
+#     >>> E VA LETTO INSIEME A -Deposito 100000: a 10.000 la
+#         quantizzazione del lotto falsa l'asse (punto 2).
+InpRiskPercent=0.65||0.65||0||0.65||N
+
+# --- GENERALI. Nessun pin di stringa (InpComment resta al default).
+InpMagic=775301||775301||0||775301||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
+
+# --- L'UNICO ASSE: L'AMPIEZZA DELLO STOP IN ATR.
+#     1,0 = il valore DELL'AUTORE (atrStopMult del Pine, r.47) ed e' la
+#           cella SOTTO la frontiera del costo (25-32x lo spread).
+#     1,5 = a cavallo della frontiera (38-48x).
+#     2,0 = sopra (50-64x).
+#     2,5 = sopra con margine (63-81x), ed e' il valore che il dossier
+#           indica come soglia per scendere a M15.
+#     4 celle: |2,5 - 1,0| / 0,5 + 1 = 4.
+InpKStop=1.0||1.0||0.5||2.5||Y
