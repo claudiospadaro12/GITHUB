@@ -17735,3 +17735,57 @@ Se il file puo' mancare, il «manca» va detto con una parola, non con uno spazi
 3. 📏 **Un aggiramento si giudica anche sulla LEGGIBILITA' di cio' che resta**: una toppa che fa
    passare il cancello ma rende il referto meno leggibile a chi lo deve usare **non e' una toppa,
    e' un secondo difetto**.
+
+---
+
+## 255. 🔀 UNA **TABELLA DI VERITA'** DI DIAGNOSI SI PROVA SULLA MATRICE COMPLETA, E I CODICI DI USCITA SI LEGGONO **DAL SORGENTE** — non si indovinano
+
+**Caso reale: 13/09/2026, `report/LA_CODA_NON_HA_PUBBLICATO_2026-09-13.md`.** La coda delle 03:30
+non aveva pubblicato niente. Il referto — per il resto onesto, col bersaglio dichiarato e l'errore
+di aritmetica dell'autore ammesso in prima pagina — proponeva una riga di sola lettura **piu' una
+tabella a quattro righe** che mappava `(stato attivita', file di lavoro) -> causa`. La riga era
+pulita. **La tabella no**, e una tabella sbagliata e' peggio di nessuna tabella: manda chi legge a
+cercare nel posto sbagliato **con la sicurezza di chi ha un metodo**.
+
+### 🔴 I TRE DIFETTI, che sono tre forme dello stesso errore
+1. **Un codice di uscita interpretato senza aver aperto il programma che lo produce.** La riga
+   *«`LastTaskResult` diverso da 0 -> **MORTA A META'**, c'e' un log parziale e li' dentro c'e'
+   l'errore»* e' **falsa per almeno due codici**: `runner_abtg.ps1` r.806 fa `exit 4` quando **non
+   trova il token** — corsa **COMPLETA**, referto scritto, semplicemente non pubblicato — e il Task
+   Scheduler usa `267009` (`0x41301`) per **«in esecuzione adesso»**. Due non-zero che non sono
+   morti, e uno dei due (`4`) e' fra le cause **piu' probabili** proprio del sintomo osservato
+   («zero commit»). 👉 **I codici di uscita si tirano fuori con un `grep -n "exit "` sul sorgente
+   PRIMA di scrivere la riga della tabella.**
+2. **Un `OR` con un contatore CUMULATIVO.** La prima riga diceva *«`LastRunTime` non e' di oggi
+   **oppure** `NumberOfMissedRuns` maggiore di 0 -> MAI PARTITA»*. `NumberOfMissedRuns` conta le
+   partenze mancate **da quando esiste l'attivita'**: parla del **passato**, non di oggi. Basta una
+   notte di VPS spento la settimana scorsa perche' quel numero resti positivo **per sempre** e la
+   tabella dichiari «MAI PARTITA» una corsa **partita regolarmente stamattina**. 👉 **Un indicatore
+   storico non entra mai in `OR` con un indicatore di oggi: si degrada a nota.**
+3. **Una combinazione non coperta, e non era esotica.** Mancava
+   `LastRunTime` = oggi **+** risultato `0` **+** **nessun** file di oggi. Lettura piu' probabile:
+   **si sta guardando la cartella di lavoro di un ALTRO profilo utente** (il runner scrive in
+   `$env:USERPROFILE\abtg_runner`, r.704; l'attivita' e' registrata da `schtasks` **senza `/RU`**,
+   quindi gira con l'utente che l'ha creata). Cioe' la combinazione mancante era quella che dice
+   *«la tua misura sta guardando nel posto sbagliato»*: l'unica che, se non prevista, fa concludere
+   **il contrario del vero**.
+
+### ✅ CHE COSA SI FA
+1. 📐 **La matrice si scrive tutta.** Con `k` segnali binari si elencano le `2^k` combinazioni e
+   ognuna ha una casella; se un segnale non e' binario (un **codice di uscita**), si elencano i
+   valori **davvero prodotti dal codice**, piu' la casella `altro`. Una tabella con quattro righe
+   su tre segnali **sta nascondendo quattro casi**.
+2. 🥇 **Si preferisce l'ARTEFATTO al CODICE DI USCITA** — e' lo stesso principio della **classe
+   154**, applicato alla diagnosi invece che al lancio. Qui il discriminante buono non era
+   `LastTaskResult`: era *«esiste `REFERTO_RUNNER_<oggi>*.txt`?»*, perche' quel file si scrive alla
+   riga 793, cioe' **dopo** l'ultimo round e **prima** della pubblicazione. La sua presenza separa
+   «morta a meta'» da «arrivata in fondo e non pubblicata» **senza dipendere da nessun numero
+   interpretato**.
+3. 🧭 **Se una misura dipende da un percorso derivato dall'ambiente** (`$env:USERPROFILE`,
+   `$PSScriptRoot`, la cartella corrente), la riga guarda in **tutti** i posti plausibili e li
+   **stampa per nome**, invece di guardare in uno solo e restituire un vuoto che sembra una
+   risposta.
+4. 🚫 **E la regola di casa non cambia**: la tabella si scrive **prima** di vedere i numeri — e'
+   giusto cosi' — ma «scritta prima» non vuol dire «esatta». **Una tabella scritta prima va rotta
+   apposta prima**, cercando la combinazione che le fa dire la cosa sbagliata. Se non si trova il
+   contro-esempio, non si e' capita la misura abbastanza da consegnarla.
