@@ -585,7 +585,50 @@ $BancoBT = 'C:\MT5_Backtest'
 #      i tre file prova                           presenti
 #      0230e8f5 e' ANTENATO di d6809008           (git merge-base, exit 0)
 # ---------------------------------------------------------------------
-$PIN = 'd68090083d170a4689ac943cef1930c55f1eb26b'
+#
+#  VENTESIMO GIRO (13/09/2026). $PIN d6809008 -> 7bce56dc.
+#  IL CODICE NON E' CAMBIATO. Si muove per la CLASSE 265, alla lettera:
+#  "un file prova corretto dopo l'ultimo giro di pin OBBLIGA a un giro di
+#  pin nuovo -- sempre, anche se il file c'e' gia'". Qui il file non
+#  c'era nemmeno.
+#
+#  QUELLO CHE MANCA A d6809008 sono I DUE FILE PROVA DI r145:
+#      prove\R145a_volexp_kstop_M30_NASUSD.txt -- NON ESISTE a d6809008
+#      prove\R145b_volexp_kstop_M30_U30USD.txt -- NON ESISTE a d6809008
+#  Sono nati dopo (6f92e7d, 13/09), e il driver prende il file prova DA
+#  QUESTO $PIN: col pin vecchio i due round r145 morirebbero sullo
+#  scarico del file prova, con un 404 che manda a cercare il guasto
+#  nella rete invece che qui.
+#
+#  E IL PIN NUOVO NON E' 6f92e7d, ED E' IL PUNTO: a 6f92e7d i due file
+#  prova ESISTONO ma sono la versione con NOVE BYTE NON-ASCII dentro
+#  (sette in R145a, due in R145b: la 'pallina rossa' U+1F534 usata come
+#  marcatore di voce). Il file prova lo legge Windows PowerShell 5.1, che
+#  legge ANSI e non UTF-8, e finisce dentro un .ini del tester. 7bce56dc
+#  e' il commit che li riporta in ASCII puro. E' il secondo modo della
+#  classe 265, quello che NON fa rumore: un 404 si vede, un file prova
+#  sbagliato che gira no.
+#
+#  MISURATO al pin nuovo 7bce56dc, non assunto:
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      i due file prova r145                      presenti, 0 byte non-ASCII
+#      i tre file prova R142                      presenti ANCORA
+#      d6809008 e' ANTENATO di 7bce56dc           (git merge-base, exit 0)
+#      la toppa 270 (124db40) e' DENTRO 7bce56dc  (git merge-base, exit 0)
+#  Le due impronte NON sono state assunte invariate: sono state
+#  RICALCOLATE sui blob del pin nuovo, e il METODO e' stato validato
+#  contro due numeri scritti da altri -- il driver a e6c0d70e torna
+#  62A53763...F7CBB7BC (decimo giro) e a 115254dc BF53EC27...FAF59875
+#  (undicesimo), esattamente come li aveva inchiodati chi c'era prima.
+#  Un metodo che ricalcola solo il numero che si aspetta non prova niente.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: i tre r142 pinnano a
+#      dbe86ac3, cioe' a una COPIA CONGELATA di questo file che porta
+#      dentro il $PIN vecchio d6809008. Continuano a scaricare i LORO
+#      file prova dal LORO pin, e questo giro non li sfiora.
+# ---------------------------------------------------------------------
+$PIN = '7bce56dc2e19b5d9f39400ad01b123b8264807be'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
