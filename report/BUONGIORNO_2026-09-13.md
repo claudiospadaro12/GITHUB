@@ -7,6 +7,54 @@
 
 ---
 
+## 0. 🚨 CLAUDIO, LEGGI QUESTO PRIMA DI TUTTO — **UNA SEDIA DEL CONTO CHALLENGE PUO' CHIUDERE LE POSIZIONI DI UN'ALTRA**
+
+Non e' una teoria, ed e' l'unica cosa di stanotte su cui ti chiedo di decidere
+appena sveglio. **L'ho verificata io, comando per comando.**
+
+### La catena, tutta misurata
+1. Il **03/09** e' entrato in repo il commit `19312c8`: *"FIX v1.04 ORB Ottimizzato:
+   selezione **HEDGE-SAFE** per simbolo+magic, chiusure per **TICKET**"*.
+   Ripara un difetto preciso: su un conto **HEDGING**, `PositionSelect(_Symbol)`
+   seleziona la posizione col **ticket piu' basso di quel simbolo, QUALUNQUE SIA
+   IL MAGIC**. Il codice vecchio chiudeva e modificava con
+   `PositionClose(_Symbol)` e `PositionModify(_Symbol, ...)`: cioe' **sulla
+   posizione di chiunque**.
+2. Quel fix e' in campo **su tutti i terminali... tranne uno**. Dal censimento del
+   codice (`CODA_06`, colonna **"COMPILATO IL"** = la data dell'`.ex5`):
+
+| terminale | `ABTG_ORB_Ottimizzato` | compilato il |
+|---|---|---|
+| `C:\MT5_Backtest` (banco) | v1.04 - 1464 righe | 08/09 OK |
+| `BCM Markets MT5 Terminal` (piccolo `50503392`) | v1.04 - 1464 righe | 03/09 OK |
+| `C:\BCM_Reale` | v1.04 - 1464 righe | 06/09 OK |
+| 🔴 **`... MT5 Terminal -V3` (100k `50504263`)** | 🔴 **v1.02 - 823 righe** | 🔴 **22/08** |
+
+3. E sullo **stesso** terminale `-V3`, sullo **stesso simbolo U30USD**, ci sono
+   **due** sedie: `ABTG_ORB_Ottimizzato` **`770611`** e `ABTG_Dow_Apertura_US`
+   **`770202`** (foto dei profili del 12/09, `chart06` e `chart02`).
+
+> ## 🔴 Sul conto della challenge la sedia `770611` gira col codice che puo' chiudere o spostare lo stop della sedia `770202`. Il fix esiste da **dieci giorni** ed e' schierato **ovunque tranne la'**.
+
+📐 E non e' un caso di coda: l'audit di casa
+(`report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md`) ha misurato che nel
+**16,5%** delle coppie l'ordine per ticket e' **invertito** rispetto all'attesa.
+
+### ✍️ COSA TI CHIEDO — e' una decisione tua, non la prendo io
+La toppa e' **ricompilare `770611` sul solo terminale `-V3`** portandolo a v1.04.
+🔴 **Non l'ho preparata da solo, e ti dico perche'**: fra i commit che quel
+binario si e' perso **ce ne sono che cambiano le TAGLIE**, e le taglie sono tue.
+Ti serve un pacchetto come quello di `EMA200` — pin giusto, ritorno indietro,
+cancello — **e la tua firma su quali commit portare in campo**. Dimmi se lo
+preparo e parte stamattina.
+
+⚠️ **Il limite di questa misura, dichiarato**: la lettura del codice in cartella
+e' del **10/09**. Se nel frattempo qualcuno ha ricompilato, il quadro cambia — ma
+la sedia risulta ancora attaccata nella foto del **12/09**, e nessun commit del
+repo dice che sia stata toccata.
+
+---
+
 ## 1. 🪦 LA COSA PIU' IMPORTANTE: MI SONO CORRETTO
 
 Ieri sera ti ho consegnato un verdetto sul `Nasdaq_PreOpen_Breakout_EA.mq5` che
