@@ -822,7 +822,92 @@ $BancoBT = 'C:\MT5_Backtest'
 #      #DISARMATA#: il PASS del secondo strato non e' mio, arriva
 #      dall'agente 'controllo-preventivo' nella sessione principale.
 # ---------------------------------------------------------------------
-$PIN = '388f341f4947df3c6a5a34c5754b7686705cd939'
+#
+#  VENTIQUATTRESIMO GIRO (13/09/2026). $PIN 388f341f -> 19434520.
+#  IL CODICE NON E' CAMBIATO, PER LA QUINTA VOLTA DI FILA. Si muove per la
+#  CLASSE 265 nel suo modo silenzioso, ed e' lo STESSO FILE del ventitreesimo
+#  giro: prove\R127a_slbuffer_NASUSD.txt a 388f341f ESISTE (niente 404), ma
+#  e' la versione con un ALTRO difetto dentro. Col pin vecchio girerebbe
+#  quella, senza rumore.
+#  MISURATO al pin vecchio, non presunto: la' il file ha 249 righe e la
+#  stringa 'CLASSE 308' compare ZERO volte; al pin nuovo ha 643 righe e la
+#  stringa compare 3 volte. E la correzione del giro PRECEDENTE (classe
+#  273) e' dentro TUTTI E DUE: '-Modello 4' compare 2 volte anche a
+#  388f341f, quindi questo giro NON la disfa e non la rifa'.
+#
+#  IL DIFETTO CHE IL FILE ADESSO DICHIARA -- CLASSE 308, secondo FAIL del
+#  secondo strato del cancello sullo stesso file. La 308 in una riga: un
+#  parametro messo ad asse che finisce anche AL DENOMINATORE di un costo,
+#  di una quantizzazione o di una DURATA fabbrica da solo una pendenza
+#  lungo l'asse, e quella pendenza si legge come RISULTATO.
+#  In ABTG_SupRev_NAS_H1_Ottimizzato.mq5 InpSLBufferPips entra in 'risk'
+#  (r.251), e 'risk' comanda IL TARGET (r.255), IL LOTTO (r.258) e IL
+#  BERSAGLIO DEL PARZIALE (r.326). Ne escono tre difetti:
+#    D1  OCCUPAZIONE DEL POSTO. SL e TP si allargano INSIEME col buffer:
+#        stop mediano 51,68 -> 81,68 idx (+58,1%), durata attesa ~2,50x
+#        [DERIVATO]. Con r.179/r.181 (una posizione o un pendente per
+#        volta) le 9 celle NON vedono lo stesso insieme di segnali.
+#        Il file scriveva L'OPPOSTO ("n quasi COSTANTE... il buffer non
+#        tocca l'ingresso"): la frase e' stata tolta, e la meta' VERA --
+#        il buffer non tocca il SEGNALE GREZZO, perche' compare la prima
+#        volta a r.247 dentro Enter() -- e' rimasta, perche' e' quella che
+#        rende la soglia una misura.
+#    D1-bis LA COLONNA 'Trades' CONTA DEAL (classe 226) e il parziale a 1R
+#        ha il bersaglio ancorato a 'risk': buffer piu' largo -> parziale
+#        scatta meno -> n scende a parita' esatta di segnali. SECONDO
+#        meccanismo monotono, e la colonna da sola non li separa.
+#    D2  QUANTIZZAZIONE DEL LOTTO a -Deposito 10000: rischio reale fra
+#        95,14% e 99,95% lungo le 9 celle = 4,81 punti percentuali. NON
+#        una rampa monotona come nel caso kStop di R145a: una
+#        DENTELLATURA, quindi rumore e non pendenza.
+#    D3  LA CLAMP minDist (r.252-253) MORDE SOLO NELLE CELLE BASSE: siccome
+#        risk = baseStop + buf, il ramo MathMax(buf,...) non puo' mai
+#        scattare e quello STOPS_LEVEL diventa impossibile appena
+#        buf >= STOPS_LEVEL*_Point. Asimmetria ALGEBRICA, e la cella
+#        esposta e' proprio la CELLA ANCORA.
+#  E il file porta adesso la SOGLIA DI LETTURA congelata PRIMA dei CSV
+#  (oltre il 10% di scarto di n fra la cella 3 e la cella 3003 il confronto
+#  NON si legge e il verdetto e' NON ANCORA MISURATO), con il 10%
+#  CALCOLATO sull'ancora OOS e non copiato da R145a.
+#
+#  >>> E UNA COSA NON E' STATA FATTA, DI PROPOSITO, PERCHE' SAREBBE STATA
+#      LA STRADA COMODA: il deposito NON e' stato portato a 100000. In
+#      R145a la 308 si e' tolta cosi' (classe 229), qui NO -- l'ancora di
+#      R127a (IS PF 1,34237 n 69 profit +118,82 / OOS PF 1,68815 n 86
+#      profit +300,61) e' stata calcolata a 10.000, e i criteri congelati
+#      PRIMA dei numeri la pretendono al centesimo
+#      (prove\R127_USCITE_CRITERI.md par. 6). Cambiare taglia avrebbe tolto
+#      D2 e rotto l'ancora: si e' scelto di DICHIARARE il difetto, non di
+#      eliminarlo cambiando banco. La riga di lancio resta
+#      '-Modello 4 -Deposito 10000', identica.
+#
+#  MISURATO al pin nuovo 19434520, non assunto:
+#      RIGA_ROUND_VPS sha256 348ED533...9D0A315B  (= $SHA_ROUND, INVARIATA)
+#      driver         sha256 15DE7D5F...6828F1C6  (= $SHA_WALK, INVARIATA)
+#      marcatori RIGA_ROUND_VPS_v1 e v5_INCLUDE   presenti (2 e 2)
+#      i file prova R127 a-c, i tre R142, i due r145 e R125b
+#          presenti e IDENTICI AL BYTE alla copia locale (git show |
+#          diff -q: nessuna differenza). "Esiste" non basta, deve essere
+#          QUELLO -- ed e' il controllo che manca sempre quando la 265
+#          morde nel modo silenzioso.
+#      388f341f, 77fc717d, d5a24eeb, da4344b8, 1445abf8, e6c0d70e sono
+#          ANTENATI di 19434520  (git merge-base, exit 0 su tutti)
+#      la toppa 270 (124db40) e' DENTRO 19434520  (git merge-base, exit 0)
+#  E IL METODO DELLE IMPRONTE E' VALIDATO CONTRO NUMERI SCRITTI DA ALTRI,
+#  altrimenti un "invariata" e' solo il numero che mi aspettavo: lo stesso
+#  comando sul driver a e6c0d70e torna 62A53763...F7CBB7BC (decimo giro) e
+#  a 115254dc BF53EC27...FAF59875 (undicesimo), esattamente come li aveva
+#  inchiodati chi c'era prima. Rifatto oggi, tutti e due tornano.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SONO TOCCATE: le cinque R125 armate
+#      (a/c/d/e/f) restano a da4344b8, r125b a bfd6cbf9, R127b/R127c a
+#      1445abf8, i tre r142 a dbe86ac3. I loro file prova non sono
+#      cambiati, quindi i loro pin per loro sono ancora giusti. Solo la
+#      riga r127a portera' il commit di QUESTO giro, e resta #DISARMATA#:
+#      il PASS del secondo strato non e' mio, arriva dall'agente
+#      'controllo-preventivo' nella sessione principale.
+# ---------------------------------------------------------------------
+$PIN = '1943452068a282565fc38e279f1ea86afec15db0'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
