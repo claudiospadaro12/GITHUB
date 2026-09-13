@@ -1,0 +1,79 @@
+; =====================================================================
+;  IL GUARDIAN DEL CONTO CHALLENGE -- COM'E' IN CAMPO, magic 779001
+;  Terminale: BCM Markets MT5 Terminal -V3   (conto 100k 50504263)
+;  Grafico: AUDNZD.   Scritto il 13/09/2026.
+;
+;  >>> NON ESISTEVA. La rete di sicurezza dell'INTERO conto della
+;      challenge viveva solo dentro un file chart*.chr. Un click su
+;      "Ripristina", o un riattacco dell'EA, e i valori qui sotto
+;      sparivano senza che nessuno se ne accorgesse.
+;
+;  FONTE: la foto dei profili del 12/09
+;  (backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20260912_033002.log,
+;  sezione "C:\Program Files\BCM Markets MT5 Terminal -V3").
+;  E' CIO' CHE GIRA, letto, non cio' che uno studio proponeva.
+;
+; ---------------------------------------------------------------------
+;  >>> IL BINARIO IN CAMPO E' PIU' VECCHIO DEL SORGENTE, ED E' MISURATO
+; ---------------------------------------------------------------------
+;  Sorgente ABTG_Guardian.mq5 a HEAD .... 19 input dichiarati
+;  Presenti nella foto del grafico ...... 16
+;  MANCANTI, e sono esattamente questi TRE:
+;      InpDailyBaseline
+;      InpMaxClusterRiskPct      <-- il tetto per CLUSTER (C2)
+;      InpClusterMappa           <-- la mappa dei cluster
+;
+;  >>> Quindi il binario attaccato al grafico NON HA NEMMENO LA MANOPOLA
+;      del tetto per cluster: non e' "spenta", e' ASSENTE dal compilato.
+;      E' una conferma INDIPENDENTE (fonte diversa, metodo diverso) della
+;      misura del 12/09 in report/IL_GUARDIAN_IN_CAMPO_2026-09-12.md.
+;      ATTENZIONE, discrepanza dichiarata: quel referto contava "15 input
+;      contro 19", questa foto ne conta 16. I due conti NON tornano al
+;      numero, e non li appiano: concordano sulla cosa che conta (le tre
+;      manopole del cluster NON ci sono), divergono su quante ne restano.
+;      Chi rilegge: il numero da fidarsi e' quello che si ricava
+;      rileggendo il binario, non nessuno dei due riassunti.
+;
+;  >>> MA IL C2 NON SERVE ADESSO, ed e' provato in quattro modi
+;      (report/IL_GUARDIAN_IN_CAMPO_2026-09-12.md ed emendamento serale):
+;      il cluster AZIONARIO proposto a 3,5% e' PIU' LARGO del C1 a 3,25%
+;      gia' acceso, quindi protezione aggiuntiva 0,00 punti; in unita' da
+;      0,65% i due scattano alla stessa quinta sedia; le sedie fanno al
+;      massimo 1,30% da codice contro tetti 3,0-3,5%; e su 57 ingressi
+;      veri il picco AZIONARIO e' stato 1,300%, zero superamenti.
+;      Diventa una rete alla QUARTA sedia sullo stesso cluster -- e
+;      allora AZIONARIO va portato SOTTO 3,25%.
+;
+;  >>> QUELLO CHE INVECE E' VIVO E ACCESO: InpMaxOpenRiskPct=3.25,
+;      il cap C1 firmato da Claudio il 18/08 (= 5 SL vivi da 0,65%).
+;      E la pausa B1 a 4,0 con le emergenze a 4,9 e 9,9, reset alle 23.
+;      Tutti e quattro i numeri qui sotto sono FIRME DI CLAUDIO del
+;      18/08: NON si toccano senza di lui.
+;
+; ---------------------------------------------------------------------
+;  COSA FA QUESTO FILE E COSA NON FA
+;   FA: rende ripetibile la configurazione viva. Caricandolo su un
+;       Guardian ATTACCATO si riottengono esattamente questi valori.
+;   NON FA: non porta in campo le tre manopole mancanti. Per quelle
+;       serve una RICOMPILAZIONE, che tocca la rete di sicurezza del
+;       conto challenge e quindi vuole la mano di Claudio e il cancello.
+;   NON TOCCA: il piccolo 50503392, il REALE 10105439, Pepperstone,
+;       Tickmill. Questo file descrive UN SOLO grafico su UN SOLO
+;       terminale.
+; =====================================================================
+InpStartBalance=100000
+InpDailyLossPct=4.9
+InpTotalDDPct=9.9
+InpDDMode=0
+InpDailyResetHour=23
+InpDailyPausePct=4.0
+InpMaxOpenRiskPct=3.25
+InpRiskMode=0
+InpWarnNoSL=true
+InpAction=0
+InpCloseAllMagics=true
+InpShowPanel=true
+InpMagic=779001
+InpComment=GUARDIAN FTMO 2STEP
+InpVerbose=true
+InpAutotest=false
