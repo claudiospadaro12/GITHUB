@@ -45,12 +45,10 @@ secondi** (avvio 03:30:02, pubblicazione 03:31): non aveva round veri. Oggi ne h
 
 🔴 **CORREZIONE DEL 13/09, 05:30 — e sposta la terza ipotesi da "improbabile"
 a PIU' PROBABILE.** Avevo scritto che una corsa viva a 80 minuti era improbabile.
-Poi ho aperto il modo in cui il runner esegue una riga, **r.773-775**:
-```
-$p = Start-Process -FilePath "powershell.exe" -ArgumentList $argv -NoNewWindow -PassThru -Wait `
-      -RedirectStandardOutput $log -RedirectStandardError ($log + ".err")
-```
-👉 **`-Wait` SENZA NESSUN TETTO DI TEMPO.** Non c'e' un `-Timeout`, non c'e' un
+Poi ho aperto il modo in cui il runner esegue una riga, **`runner_abtg.ps1`
+r.773-775**: avvia `powershell.exe` in un processo figlio e lo **attende con
+`-Wait`**, ridirigendo uscita ed errori nei due file di log.
+👉 **E quell'attesa NON HA NESSUN TETTO DI TEMPO.** Non c'e' un `-Timeout`, non c'e' un
 `WaitForExit(ms)`, non c'e' nessun controllo di durata da nessuna parte del file.
 **Una singola riga che si impunta blocca l'intera corsa per SEMPRE**, e il runner
 non se ne accorge, non la uccide e non va avanti.
