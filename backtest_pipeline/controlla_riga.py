@@ -450,7 +450,7 @@ def controlla_terminali(path, testo, dove, stretta=False):
 LETTURA_AMMESSI = set(x.lower() for x in [
     "Get-Process", "Get-Service", "Get-Date", "Get-ChildItem", "Get-Item",
     "Get-Content", "Get-ItemProperty", "Get-CimInstance", "Get-WmiObject",
-    "Get-ScheduledTask", "Get-ComputerInfo", "Get-Volume", "Get-PSDrive",
+    "Get-ScheduledTask", "Get-ScheduledTaskInfo", "Get-ComputerInfo", "Get-Volume", "Get-PSDrive",
     "Get-Location", "Get-Command", "Get-Member", "Get-Host", "Get-Random",
     "Select-Object", "Sort-Object", "Where-Object", "ForEach-Object",
     "Group-Object", "Measure-Object", "Compare-Object", "Format-Table",
