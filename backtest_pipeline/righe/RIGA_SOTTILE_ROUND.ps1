@@ -907,7 +907,13 @@ $BancoBT = 'C:\MT5_Backtest'
 #      il PASS del secondo strato non e' mio, arriva dall'agente
 #      'controllo-preventivo' nella sessione principale.
 # ---------------------------------------------------------------------
-$PIN = '1943452068a282565fc38e279f1ea86afec15db0'
+#  >>> VENTICINQUESIMO GIRO DI PIN (13/09/2026 sera): 19434520 -> 4858ef6.
+#  Serviva per i tre file prova nuovi (R146a/b/c, seconda fascia delle
+#  uscite mai provate) -- al pin vecchio non esistevano ancora (classe
+#  265). RIGA_SOTTILE_ROUND.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra i due commit (diff vuoto, verificato), quindi $SHA_ROUND
+#  e $SHA_WALK restano quelle di sempre: solo $PIN si muove.
+$PIN = '4858ef67e7fb72734316b2f39f78551b7cdcb5b9'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
