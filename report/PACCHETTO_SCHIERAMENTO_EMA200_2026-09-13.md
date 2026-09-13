@@ -344,7 +344,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='9dd19a8182c561e92d0c6c85cce68aba8969920b'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7044f3ba57312e0dd24314d47cf9b604edd5a8f6'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo backup;
@@ -394,7 +394,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='9dd19a8182c561e92d0c6c85cce68aba8969920b'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7044f3ba57312e0dd24314d47cf9b604edd5a8f6'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo compila;
@@ -666,7 +666,7 @@ per il piccolo. **Per il 50503392 il preset non esiste ancora.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='9dd19a8182c561e92d0c6c85cce68aba8969920b'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7044f3ba57312e0dd24314d47cf9b604edd5a8f6'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo raccolta;
@@ -712,7 +712,7 @@ Poi, **mettendo al posto di `<BACKUP>` il percorso stampato in §3.3**:
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='9dd19a8182c561e92d0c6c85cce68aba8969920b'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7044f3ba57312e0dd24314d47cf9b604edd5a8f6'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo ritorno -Backup '<BACKUP>';
@@ -735,7 +735,7 @@ I parametri del grafico stanno nei `.chr` di `MQL5\Profiles\Charts`, che MT5
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='9dd19a8182c561e92d0c6c85cce68aba8969920b'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='7044f3ba57312e0dd24314d47cf9b604edd5a8f6'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v3' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo profili -Backup '<BACKUP>';
