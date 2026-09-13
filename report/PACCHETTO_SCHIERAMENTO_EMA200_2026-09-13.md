@@ -264,7 +264,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo backup;
@@ -313,7 +313,7 @@ parametri riparte (§4). Nessuna sorpresa.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo compila;
@@ -440,7 +440,7 @@ per il piccolo. **Per il 50503392 il preset non esiste ancora.**
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo raccolta;
@@ -473,7 +473,7 @@ Poi, **mettendo al posto di `<BACKUP>` il percorso stampato in §3.3**:
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo ritorno -Backup '<BACKUP>';
@@ -496,7 +496,7 @@ I parametri del grafico stanno nei `.chr` di `MQL5\Profiles\Charts`, che MT5
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='caf5ed644e3cd384ad6b182832e3b57ea0cad692'; $p="$env:USERPROFILE\RIGA_SCHIERA_EMA200.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_EMA200_v1' -Quiet)){ throw 'SCRIPT VECCHIO: mi fermo.' };
     $global:LASTEXITCODE=0; & $p -Pin $pin -Passo profili -Backup '<BACKUP>';
@@ -565,6 +565,16 @@ Il cancello ha funzionato.*
   0 errori dal parser PowerShell vero, niente costrutti pwsh-7).
 - ✅ `--oggetto md` su questo foglio → **PASS**, con i rilievi non bloccanti
   elencati nella consegna al coordinatore.
+**I rilievi non bloccanti, dichiarati invece che nascosti:**
+- `[RACCOLTA] x5` — il cancello non vede un `Compress-Archive` **dentro** le
+  righe di lancio. ✅ **Non e' un difetto qui**: la raccolta e' un **passo suo**
+  (`-Passo raccolta`, §5.4) e produce cartella sul Desktop **+ zip**. Metterla
+  dentro ogni riga vorrebbe dire zippare quattro volte la stessa cosa.
+- `[225]` — la prosa nomina terminali e conti "vietati" in 22 righe. ✅
+  **Voluto**: e' un documento che spiega **cosa NON si tocca**, e senza
+  nominarli non potrebbe dirlo. Nel **codice** non compaiono: il selettore e'
+  **positivo** (`origin.txt`), quindi non puo' raggiungere il conto reale.
+
 - ⏳ **Agente `controllo-preventivo`: lo lancia il coordinatore, non io.** Fino
   a quel PASS **questo pacchetto non va mandato a Claudio.**
 
