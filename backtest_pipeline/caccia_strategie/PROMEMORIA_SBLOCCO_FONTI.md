@@ -47,6 +47,47 @@ giorni scorsi); SSRN e Forex Factory **403**; Quantpedia **308**.
 
 ---
 
+## 🔓 AGGIORNAMENTO 13/09/2026 — **TRADINGVIEW NON E' PIU' MURATA: IL PINE SI LEGGE E LA RICERCA FUNZIONA**
+
+⚠️ **Quanto segue MISURA il canale oggi e NON cancella le righe sopra**: il
+verdetto del 06/09 (*"200 ma il Pine NON e' nell'HTML -> non setacciabile"*) e'
+**giusto sull'HTML** ed e' agli atti cosi'. **La FONTE, pero', sta altrove.**
+
+| passo | URL | esito misurato (13/09) |
+|---|---|---|
+| **ricerca per parola chiave** | `tradingview.com/pubscripts-suggest-json/?search=<parole>` | **200** · JSON con `scriptName`, `author.username`, `agreeCount`, `scriptIdPart` (`PUB;<hash>`), `extra.kind` (strategy/study), `access` (1 = open) · **50 risultati per query** |
+| 🥇 **SORGENTE Pine** | `pine-facade.tradingview.com/pine-facade/get/PUB%3B<hash>/last` | **200** · campo **`source`** = **il Pine in chiaro** · campo `scriptAccess` (`open_no_auth`) e `created` |
+| pagina HTML | `tradingview.com/script/<slug>/` | 200 **ma 0 occorrenze di `strategy(`** — confermato, la pagina non serve |
+
+**Controllo positivo usato:** `ATR Exhaustion & Volume Spike Strategy`
+(`PUB;5f9ed16f6bea446580a189b21a3ae635`) -> **3.550 byte di Pine v5**, cioe'
+**lo stesso script che in casa e' gia' `ABTG_AtrExhaustVol.mq5`**. Bersaglio di
+cui conoscevamo la risposta: passato.
+
+👉 **Conseguenze operative:**
+1. **Il setaccio §4 e' applicabile a TradingView senza intermediari** (prima si
+   poteva solo leggere titolo e descrizione).
+2. **La ricerca per MECCANISMO, impossibile sul Code Base** (`?s=` e `?sort=` in
+   JS, verificato il 06/09), **su TradingView funziona**.
+3. Il 13/09 sono state girate **50 query** -> **992 script unici**, di cui **314
+   strategie open source**, **314 sorgenti scaricati e setacciati**.
+
+⚠️ **DUE LIMITI, dichiarati:**
+- e' un **suggeritore**, non un motore di ricerca completo: **le query lunghe
+  rendono ZERO** (`"opening range breakout atr"` -> 0 risultati;
+  `"opening range breakout"` -> 50). **Si cerca con 1-3 parole corte.**
+- `access` 2 e 3 (protetto / a invito) **non** restituiscono il sorgente: su 992
+  script indicizzati, **229 sono chiusi**. Quelli restano fuori dal setaccio.
+
+**Stessa sera, le altre fonti (misurate, non ricordate):** GitHub `raw` **200**
+(README letto) ma API repo/ricerca **403** e nessun elenco file -> **sorgente non
+raggiungibile senza il percorso esatto**; **Quantpedia 200** (641 KB) **ma 0 link
+`/strategies/<slug>/` nell'HTML** -> raggiunta e **non setacciabile**; **SSRN
+403**; **Forex Factory 403**; **arXiv 429, 429, poi timeout a 40 s** con attesa
+crescente -> **non raggiunta, e 429 non e' 404**.
+
+---
+
 ## 1. 🧱 IL PROBLEMA, misurato
 
 L'ambiente in cui giro ha una **allowlist di domini**. Le fonti utili

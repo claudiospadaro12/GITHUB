@@ -3112,3 +3112,139 @@ calendario -> ~459 feriali -> ~443 sedute** (meno le feste). Taglio del driver
 posizioni nel fine settimana: su un CFD indice quello misurerebbe il **gap del
 weekend**, non il motore). E' una restrizione **piu' prudente** del default, ma
 **rischio e taglie sono di Claudio** e va segnalata, non decisa.
+
+## CACCIA ALLO STOP STRUTTURALE (13/09/2026) — 1.221 sorgenti setacciati, 3 promossi IN CODA, 0 file prova, 1 FONTE SBLOCCATA
+
+Dossier completo: `report/CACCIA_STOP_STRUTTURALE_2026-09-13.md`. Il resto sta li',
+non si duplica. **Zero EA toccati, zero preset, zero `CODA.txt`, zero backtest,
+zero terminali.** File nuovi: il dossier + 4 sorgenti esterni in
+`biblioteca/sorgenti/`.
+
+- 🔓 **SBLOCCO DI FONTE, e vale piu' dei candidati: TradingView e' leggibile E
+  cercabile.** `PROMEMORIA_SBLOCCO_FONTI.md` la da' per chiusa (*"il Pine NON e'
+  nell'HTML -> non setacciabile"*) e la caccia del mattino la dichiara **buco
+  aperto**. Misurato il 13/09: **(a)** `tradingview.com/pubscripts-suggest-json/?search=<parole>`
+  -> **200**, JSON con nome, autore, `agreeCount`, `scriptIdPart`, `kind`,
+  `access`, **50 risultati per query**; **(b)** `pine-facade.tradingview.com/pine-facade/get/PUB%3B<hash>/last`
+  -> **200**, campo **`source`** = **il Pine in chiaro**. Controllo positivo:
+  `ATR Exhaustion & Volume Spike` (3.550 byte) = lo script che in casa e' gia'
+  `ABTG_AtrExhaustVol`. 👉 **Il §4 e' applicabile a TradingView senza intermediari,
+  e la ricerca per MECCANISMO — impossibile sul Code Base (`?s=` in JS) — li' funziona.**
+  ⚠️ Limite dichiarato: e' un **suggeritore**, le query lunghe rendono 0
+  (`"opening range breakout atr"` -> 0, `"opening range breakout"` -> 50).
+
+- 📊 **IL NUMERO CHE GIUSTIFICA IL MANDATO.** Su **907 sorgenti `.mq5`** scaricati
+  oggi dal Code Base (25 pagine, 999 titoli), decodificati UTF-16 e setacciati:
+  **stop strutturale (ATR o livello) senza martingala = 50, cioe' il 5,5%**;
+  **stop come costante numerica in un `input` = 187 (20,6%)**; griglia 177;
+  martingala 44. Su TradingView la quota di stop strutturale e' **98 su 314
+  strategie open-source (31,2%)**. 🔴 **Lo stop strutturale e' il 5,5% del Code
+  Base: chi non mette quel filtro in TESTA butta 19 sorgenti su 20.** *(conteggi
+  [DERIVATI] da regex, residuo di falsi positivi dichiarato)*
+
+- 🏅 **TRE PROMOSSI, TUTTI `IN CODA`, NESSUNO `PROVA SUBITO`** — e il motivo e'
+  strutturale, non di merito: sono Pine, quindi la voce *"testabile senza
+  riscritture"* vale **0** per costruzione.
+  **C1 `Volatility Momentum Breakout Strategy`** (cryptechcapital, TV `dJe0bGvQ`,
+  2025-02-05, 111 righe, 10 input, licenza [INCERTO], 27 agree) — **6/10**.
+  🥇 **L'unico dei 1.221 in cui SOGLIA D'INGRESSO, STOP e TARGET scalano tutti
+  con lo stesso ATR**: ingresso `close > Highest(high,20)[1] + 1,5 x ATR`, stop
+  `entry - k x ATR`, target `entry + (entry-stop) x RR` = **ancora unica
+  ESPLICITA**. **Simmetrico L/S per costruzione** (nessun input di lato) = buco
+  SHORT. 🔴 Difetto: `riskPercent` (r.45) **definito e mai usato** -> la taglia e'
+  5% dell'equity (r.33), verificato a grep (le entry r.72/74 non passano `qty`).
+  **C2 `[KL] Mean Reversion (ATR) Strategy`** (DojiEmoji, TV `vUm2xj05`,
+  2021-10-31, 108 righe, 8 input, **MPL 2.0**, 146 agree) — **7/10, il piu' alto**.
+  Segnale = **ATR fuori di 1 sigma dalla sua media** + deriva lognormale > 0
+  (volatilita', NON prezzo); stop `low - 2 x ATR` che trascina; **uscita a
+  1R/2R/3R a scaglioni con R = 2 x ATR**: la gestione **e' gia' la nostra**.
+  🔴 Long-only, taglia = 5% di allocazione. 🐛 latch
+  `_signal_diverted_ATR := not s and X or Y` da riscrivere esplicito.
+  **C3 `Donchian Breakout with ATR Trailing Stop`** (raven_suurineru, TV
+  `NeEiwmDq`, 2026-07-07, 146 righe, Pine v6) — **5/10**. 🟢 Il **sizing piu'
+  pulito della giornata** (`qty = equity x riskPct / (ATR x mult)`), niente
+  look-ahead. 🔴 **Doppione**: `ABTG_CanaleLento` **E'** Donchian 55/20 e la EMA200
+  e' la nostra sedia migliore.
+
+- 🎯 **LA FRONTIERA DEL COSTO, E IL RISULTATO CHE RIAPRE M15 SUGLI INDICI.**
+  Spread **MISURATI** (`data/spread_vivo/...2026-09-12`, n~79-85 mila, GG 5-6):
+  D30EUR **1,70** · NASUSD **1,80** · U30USD **2,00** idx; commissione indici
+  **0,0000** (n=302 deal). ATR da ADR **MISURATI** (186,5 / 313,8 / 314,5).
+  `stop/spread` di C1 al variare di `kStop`:
+
+  | | k=1,0 | k=1,5 | k=2,0 | k=2,5 |
+  |---|---:|---:|---:|---:|
+  | D30EUR M15 | 🔴 **11,2x** | 16,8x | 22,4x | 28,0x |
+  | D30EUR M30 | 15,8x | 23,8x | 31,7x | 🟢 39,6x |
+  | NASUSD M15 | 17,8x | 26,7x | 35,6x | 🟢 **44,5x** |
+  | NASUSD M30 | 25,2x | 🟢 37,7x | 🟢 50,3x | 62,9x |
+  | U30USD M15 | 16,0x | 24,1x | 32,1x | 🟢 **40,1x** |
+  | U30USD M30 | 22,7x | 34,0x | 🟢 45,4x | 56,7x |
+
+  > 🟢 **Con uno stop STRUTTURALE, M15 su NASUSD e U30USD supera il pavimento di
+  > lavoro 40x a k=2,5.** Nelle quattro cacce precedenti M15 sfondava perche' lo
+  > stop era una costante e **non poteva crescere**. 🔴 **D30EUR M15 a k=1,0 fa
+  > 11,2x: SFONDA IL PAVIMENTO DURO 13,3x** — sul DAX il TF basso resta chiuso.
+  > ⚠️ La legge `ADR x sqrt(t/1440)` **sottostima del 18-27%** (MIS): sono
+  > **pavimenti**, non stime centrate.
+  > 🔴 **E l'invarianza in R e' ASSUNTA, NON misurata su questo motore** (stessa
+  > onesta' di `R141c` r.60-66). Sul cono di rumore, misurata, **crollava**
+  > (+0,054 R -> +0,012 R). **Il primo round deve essere l'asse su `kStop`.**
+
+- 🪦 **SCARTI COL NUMERO.**
+  **`AdaptiveTrader Pro EA`** (Code Base **52152**, sasan31, 2024.09.15, 388
+  righe, 20 input, **mai setacciato prima**): 🔴 **si ottimizza da solo a
+  runtime** — `BacktestWithParameters(...)` (r.250) girato ogni
+  `OptimizationInterval = 3600` s su tre cicli annidati (r.265-272) per scegliere
+  i parametri "migliori" sui dati appena passati -> **non riproducibile**; e
+  `iATR(symbol, PERIOD_M5, 14)` (r.105) **inchioda l'ATR a M5**. 🟢 Stop
+  strutturale (r.223) e rischio in % (r.10): l'idraulica e' buona, la misura no.
+  **`Dow Theory Trend Strategy`** (TV, Salaryman_G, 139 agree): 🔴 **ZERO stop** —
+  due `strategy.entry`, **nessun** `strategy.exit`. **Ed e' il contro-esempio che
+  dimostra che il filtro automatico non e' un verdetto**: l'euristica lo aveva
+  marcato *"stop strutturale"* per via dei `lastPivotLow`. **Classe 289 in piena
+  regola, e si trova solo leggendo.**
+  **`Volatility Breakout System [Fixed Risk]`** (TV, debdaspt85, 212 agree): 🔴
+  **ancora MISTA** — stop `entry - 4 x ATR` ma breakeven e trailing in
+  **percentuale del prezzo** -> allargando lo stop l'edge in R si diluisce; piu'
+  `lookahead=barmerge.lookahead_on` nel file e 4 filtri a interruttore.
+  **Pagine 11-25 del Code Base (597 sorgenti, 2010-2013): POZZO SECCO, misurato** —
+  20 con stop strutturale (3,3%), **127 con parole di griglia**, e i sopravvissuti
+  hanno 27-71 input (`MacdPatternTraderAll`, `Flat Channel`, `jMaster RSI`,
+  `Freeman`). **Non si riapre senza una ragione nuova.**
+  **Famiglie intere scartate per doppione**: ~18 Supertrend TV (in casa 9 EA +
+  blocco B/C chiuso il 12/09), ~14 ORB TV (porta chiusa, ~210 celle), ~8 VWAP TV
+  (`ABTG_VwapRevert` falsificato il 03/09), ~30 incroci di indicatori con ATR
+  SL/TP appiccicato (§5C: nessuna tesi).
+
+- 🔧 **«MERITO MA STOP FISSO» — una sola vale la riscrittura.**
+  **`Keltner bounce from border. No repaint. V2`** (TV `mQKGzLMD`, zelibobla,
+  **2.000 agree**): fade **simmetrico** dell'estremo (rottura della banda di
+  Keltner a **8 ATR** dalla media a 200, uscita sul ritorno alla media) = **tesi
+  di LATERALE/CROLLO**, e in casa **`grep -i keltner` sui 115 EA da ZERO**:
+  famiglia **VERGINE**. 🔴 Blocco: `SL = input(defval=50, "Stop loss in ticks")`
+  e `tradeSize = 1` fisso. 🟢 **Riscrittura ~3 ore**: la banda **e' gia'**
+  `EMA ± k x ATR`, quindi ancorare lo stop alla banda rende **l'ancora unica per
+  costruzione** (anche il target, la media, scala con la stessa ATR).
+  🐛 Reperto: nel ramo `enterOnBorderTouchFromInside` l'ordine "SELL" e' aperto
+  come `strategy.long` — **bug dell'autore, da non portare**.
+
+- 🔴 **ZERO FILE PROVA, E LO ZERO HA UNA PROVA.** Un file prova esiste solo se
+  esiste l'`.mq5`: `controlla_prova.py` su un file con `# EA: ABTG_NonEsiste`
+  risponde **"EA NON TROVATO -> non misurabile"**, `problemi: 1`, `exit 1`
+  (provato oggi). I tre promossi sono Pine: l'`.mq5` va **scritto**, e scrivere
+  EA e' **fuori dal perimetro di questa caccia**. Al suo posto il dossier
+  consegna la **SPEC di C1 pronta da codificare** (9 input, primo asse
+  `kStop = 1,0 || 1,5 || 2,0 || 2,5`, 4 celle x 2 finestre = ~1 minuto macchina).
+
+- 🕳️ **BUCHI DICHIARATI:** **arXiv 429 x2 + timeout a 40 s** (e 429 ≠ 404: non
+  cancella niente, si riprova) · **SSRN 403** · **Forex Factory 403** ·
+  **Quantpedia 200 ma 0 link di strategia nell'HTML** (contenuto in JS: raggiunta,
+  **non setacciabile**) · **GitHub: `raw` legge (README 200) ma l'elenco dei file
+  e' 403 e i 4 percorsi tentati danno 404 -> ZERO sorgenti GitHub letti oggi**
+  (buco piu' grosso della giornata) · popolarita' Code Base **[NON MISURATA]**
+  (contatori in JS) · **ATR reale dei simboli [NON MISURATO]** (tutto poggia su
+  `ADR x sqrt`) · **ATR M30 sul FOREX [NON MISURATO]** -> C1 **non** e' proposto
+  sul forex, perche' li' il conto di costo non esiste.
+
+---
