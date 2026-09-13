@@ -232,9 +232,14 @@ allora la tua regola del 19/08 la **vieta**. La distinzione e' sottile e **decid
 
 **19 giorni** alla challenge. 🎯
 
-- 🟢 La coda delle 03:30 e' armata: **48 righe**, le 45 di sempre piu' le 3 di
-  R142. Verificate sugli URL veri che scarichera' il runner. Gli esiti dei round
-  arrivano in un referto a parte.
+- 🔴 **LA CODA DELLE 03:30 NON HA PUBBLICATO NIENTE.** A 80 minuti dall'avvio,
+  contro ~46 attesi, su GitHub non c'e' un solo referto del runner. 🔴 **E dal
+  repo non si capisce perche'**: il runner pubblica **solo alla fine** e non ha
+  marcatore d'avvio, quindi una corsa **morta a meta'** e una **mai partita** sono
+  **indistinguibili**. Non ho indovinato quale: c'e' una **riga di sola lettura**
+  pronta che te lo dice, con la tabella per leggerla →
+  `report/LA_CODA_NON_HA_PUBBLICATO_2026-09-13.md`. 🟢 **Le 48 righe sono ancora
+  armate e nessuna e' stata consumata: la coda riparte identica.**
 - 🟢 Abbiamo **650.484 campioni veri di spread** raccolti da te ieri: da oggi la
   frontiera del costo non e' piu' una stima, e' un **numero misurato**.
 - 🟢 Il preset della sedia viva `771531` **esiste** — non era mai esistito.

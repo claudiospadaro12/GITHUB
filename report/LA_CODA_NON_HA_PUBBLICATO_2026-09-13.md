@@ -51,58 +51,94 @@ secondi** (avvio 03:30:02, pubblicazione 03:31): non aveva round veri. Oggi ne h
 > ### 🖥️ BERSAGLIO: **finestra PowerShell sul VPS** (`VMI3047753`)
 > 🔴 **NON tocca NESSUN terminale MT5.** Sul VPS convivono **sei** cartelle dati
 > (`50503392` piccolo · `50504263` 100k · **`10105439` REALE** · `50504400` banco ·
-> Pepperstone · Tickmill): questa riga **non ne apre, non ne chiude e non ne
-> modifica nessuna**. Legge tre cose e stampa. Nessun ordine, nessun file scritto,
-> nessun EA toccato.
+> Pepperstone · Tickmill): questa riga **non ne apre, non ne chiude, non ne
+> modifica nessuna**. Legge e stampa.
+> 🔴 **E SE ESCE FUORI UN `terminal64` VIVO: NON SI CHIUDE NIENTE.** Sul VPS un
+> `terminal64` puo' essere **una sedia in forward**, non il tester. La
+> `CommandLine` dice quale e', e la decisione e' **di Claudio**.
 
 ```
-$T='ABTG_Runner'; $L=Join-Path $env:USERPROFILE 'abtg_runner'
+$T='ABTG_Runner'; $OGGI=(Get-Date).Date; $TAG=(Get-Date -Format 'yyyyMMdd')
+$CART=@((Join-Path $env:USERPROFILE 'abtg_runner'),'C:\Users\Administrator\abtg_runner') | Select-Object -Unique
 Write-Host "=== 1. ATTIVITA' PIANIFICATA ==="
-Get-ScheduledTask -TaskName $T -ErrorAction SilentlyContinue | Format-Table TaskName, State -AutoSize
-Get-ScheduledTask -TaskName $T -ErrorAction SilentlyContinue | Get-ScheduledTaskInfo | Format-List TaskName, LastRunTime, LastTaskResult, NextRunTime, NumberOfMissedRuns
+$tk = Get-ScheduledTask -TaskName $T -ErrorAction SilentlyContinue
+if($tk){ $tk | Format-Table TaskName, State -AutoSize
+  $inf = $tk | Get-ScheduledTaskInfo
+  $inf | Format-List TaskName, LastRunTime, LastTaskResult, NextRunTime, NumberOfMissedRuns
+  $partita = ($inf.LastRunTime -ne $null) -and ($inf.LastRunTime.Date -eq $OGGI)
+  Write-Host ("  RISPOSTA: PARTITA OGGI (LastRunTime)? " + $(if($partita){"SI"}else{"NO"})) }
+else { Write-Host "  RISPOSTA: ATTIVITA' 'ABTG_Runner' NON TROVATA per questo utente" }
 Write-Host ""
-Write-Host "=== 2. FILE DI LAVORO DI OGGI in $L ==="
-if(Test-Path $L){ Get-ChildItem $L | Where-Object { $_.LastWriteTime -ge (Get-Date).Date } | Sort-Object LastWriteTime | Format-Table Name, Length, LastWriteTime -AutoSize } else { Write-Host "  la cartella NON esiste" }
-Write-Host "=== e i piu' recenti in assoluto, per confronto ==="
-if(Test-Path $L){ Get-ChildItem $L | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | Format-Table Name, Length, LastWriteTime -AutoSize }
+Write-Host "=== 2. FILE DI LAVORO DI OGGI ==="
+foreach($L in $CART){ Write-Host ("--- cartella: " + $L)
+  if(Test-Path $L){
+    $og = @(Get-ChildItem $L -ErrorAction SilentlyContinue | Where-Object { $_.LastWriteTime -ge $OGGI })
+    if($og.Count -eq 0){ Write-Host "    NESSUN file di oggi" } else { $og | Sort-Object LastWriteTime | Format-Table Name, Length, LastWriteTime -AutoSize }
+    $rf = @(Get-ChildItem $L -Filter ("REFERTO_RUNNER_" + $TAG + "*.txt") -ErrorAction SilentlyContinue)
+    Write-Host ("    RISPOSTA: REFERTO DI OGGI: " + $(if($rf.Count -ge 1){"SI -- " + $rf[0].Name + "  (la corsa E' ARRIVATA IN FONDO)"}else{"NO  (la corsa NON e' arrivata in fondo, oppure e' ancora in corso)"}))
+    Write-Host "    ultimi 5 in assoluto, per confronto:"
+    Get-ChildItem $L -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 5 | Format-Table Name, Length, LastWriteTime -AutoSize
+  } else { Write-Host "    la cartella NON esiste" } }
 Write-Host ""
-Write-Host "=== 3. C'E' UN TESTER ANCORA VIVO? (solo lettura) ==="
-Get-Process terminal64 -ErrorAction SilentlyContinue | Format-Table Id, StartTime, @{n='CPU_min';e={[math]::Round($_.CPU/60,1)}}, Path -AutoSize
-Write-Host ""
-Write-Host "=== 4. LA CARTELLA DELLO SCRIPT ==="
+Write-Host "=== 3. LA CARTELLA DELLO SCRIPT ==="
 if(Test-Path 'C:\ABTG'){ Get-ChildItem 'C:\ABTG' | Format-Table Name, Length, LastWriteTime -AutoSize } else { Write-Host "  C:\ABTG ASSENTE" }
+Write-Host ""
+Write-Host "=== 4. C'E' UN TESTER ANCORA VIVO? SOLA LETTURA: qui non si chiude niente ==="
+Write-Host ("    processi terminal64 attivi: " + @(Get-Process terminal64 -ErrorAction SilentlyContinue).Count)
+Get-WmiObject Win32_Process -Filter "Name='terminal64.exe'" -ErrorAction SilentlyContinue | Select-Object ProcessId, CreationDate, @{n='CPU_min';e={[math]::Round(($_.UserModeTime + $_.KernelModeTime)/600000000,1)}}, CommandLine | Format-List
 ```
 
-📌 **Due cose dichiarate sulla riga, prima che le chieda il cancello:**
-- **Niente `schtasks`**, ed e' una scelta: `schtasks` e' un comando **nativo** che
-  puo' anche **creare o cancellare** attivita', e sta nei DIVIETI del runner
-  stesso. Qui si usano `Get-ScheduledTask` e `Get-ScheduledTaskInfo`, che sono di
-  sola lettura **per costruzione** e danno gli stessi quattro numeri
-  (`State`, `LastRunTime`, `LastTaskResult`, `NextRunTime`) piu' uno in regalo:
-  **`NumberOfMissedRuns`**, che dice da solo se l'attivita' e' stata SALTATA.
-- **Nessun pin e nessun marcatore**, ed e' corretto: la riga **non scarica niente**
-  e **non esegue nessuno script** — sono quattro letture locali e una stampa. Il
-  pin serve a inchiodare un file scaricato; qui non c'e' file.
-  _(Nota tecnica: il blocco non nomina piu' il file `runner` per nome perche' il
-  cancello deterministico legge quel letterale come "questa riga esegue uno
-  script" e pretende il pin. Elencare la cartella da' la stessa informazione senza
-  la falsa allerta.)_
-- **Nessuna raccolta sul Desktop** (regola 11/08), ed e' voluto: l'uscita e' una
-  ventina di righe che Claudio **legge a schermo e incolla in chat**. La raccolta
-  serve per i risultati da archiviare, non per una diagnosi da leggere. Se
-  l'uscita fosse lunga, la regola tornerebbe a valere.
+📌 **Due cose dichiarate sulla riga:**
+- **Niente `schtasks`**: e' un comando **nativo** che puo' anche **creare o
+  cancellare** attivita', e sta nei DIVIETI del runner stesso. `Get-ScheduledTask`
+  e `Get-ScheduledTaskInfo` sono di sola lettura **per costruzione**.
+- **Nessun pin, nessun marcatore, nessuna raccolta**, ed e' corretto: la riga **non
+  scarica niente** e **non esegue nessuno script**; l'uscita e' una ventina di
+  righe che Claudio **legge a schermo e incolla in chat**.
 
-### 🔎 COME SI LEGGE — la tabella di verita', scritta PRIMA di vedere i numeri
-| blocco 1 dice | blocco 2 dice | → **la causa e'** |
-|---|---|---|
-| `LastRunTime` **non e' di oggi** (o `NumberOfMissedRuns` > 0) | nessun file di oggi | 🔴 **MAI PARTITA**: attivita' non eseguita (VPS spento all'ora, o attivita' disabilitata) |
-| `LastRunTime` **di oggi**, `LastTaskResult` **≠ 0** | file di oggi presenti | 🔴 **MORTA A META'**: c'e' un log parziale, e li' dentro c'e' la riga dell'errore |
-| `LastRunTime` di oggi, `LastTaskResult` **0** | file di oggi presenti | 🟡 **girata e pubblicazione FALLITA**: i risultati sono sul VPS ma non sono saliti (token?) |
-| `State` = **Running** | file di oggi che crescono | 🟡 **ANCORA IN CORSO**: una passata impuntata. Il blocco 3 lo conferma (un `terminal64` con CPU alta) |
+### 🔎 LA TABELLA DI VERITA' — si legge dall'alto, ci si ferma alla PRIMA che combacia
+🔴 **Questa e' la versione 2. La 1 aveva TRE difetti, e uno mandava Claudio
+nel posto sbagliato con la sicurezza di chi ha un metodo** — vedi §3-bis.
 
-🔴 **E se la causa e' la quarta, NON si ammazza niente di propria iniziativa**: un
-`terminal64` sul VPS puo' essere **una sedia viva**, non il tester. Il `Path` nel
-blocco 3 dice quale e', e la decisione e' di Claudio.
+| # | blocco 1 | blocco 2 | → **la causa e'** |
+|---|---|---|---|
+| 0 | `State` = **Running** | — | 🟡 **ANCORA IN CORSO**. Il blocco 4 conferma (`CPU_min` che sale). 🔴 **Non si chiude niente.** |
+| 1 | attivita' **NON TROVATA** | — | 🔴 **NON ESISTE per questo utente**: cancellata, o la shell e' di un altro profilo |
+| 2 | `PARTITA OGGI?` **NO** | nessun file di oggi in **nessuna** delle due cartelle | 🔴 **MAI PARTITA**: VPS spento alle 03:30, attivita' disabilitata, o utente non connesso (`schtasks` senza `/RU` gira **solo a utente connesso**) |
+| 3 | `PARTITA OGGI?` **SI** | **nessun** file di oggi | 🟠 **CARTELLA SBAGLIATA** (altro profilo utente) **oppure** morta prima del primo round. Il blocco 3 discrimina |
+| 4 | `PARTITA OGGI?` **SI** | file di oggi **SI**, `REFERTO DI OGGI` **NO** | 🔴 **MORTA A META'**: guarda `RIGA_SOTTILE_ROUND_*.log`. ⚠️ dice **l'ultimo** round tentato, non quanti ne ha fatti |
+| 5 | `PARTITA OGGI?` **SI**, `LastTaskResult` = **4** | `REFERTO DI OGGI` **SI** | 🟡 **CORSA COMPLETA, TOKEN NON TROVATO** (r.806). Referto **integro sul VPS**: si recupera a mano. 🟢 **Nessuna misura persa** |
+| 6 | `PARTITA OGGI?` **SI**, `LastTaskResult` = **0** | `REFERTO DI OGGI` **SI** | 🟡 **CORSA COMPLETA, PUBBLICAZIONE FALLITA** (token scaduto / API): `PubblicaFile` fallisce e il runner esce **0** lo stesso (r.836). 🟢 Referto **integro sul VPS** |
+| 7 | qualunque altra combinazione | | ❓ **non prevista**: si incolla l'uscita intera e si ragiona, **non si indovina** |
+
+📌 **`NumberOfMissedRuns` e' una NOTA, non un criterio**: e' **cumulativo** dalla
+creazione dell'attivita' e parla del **passato**, non di stanotte.
+
+---
+
+## 3-bis. 🚨 LA MIA PRIMA TABELLA ERA SBAGLIATA — e in un modo che costava
+
+Il cancello l'ha rotta in tre punti, e li ho verificati tutti nel sorgente:
+
+| il difetto | la prova |
+|---|---|
+| 🔴 ~~`LastTaskResult != 0` = "morta a meta'"~~ | **FALSO.** `runner_abtg.ps1` **r.806**: `if(-not $tok){ ...; exit 4 }` → **`exit 4` e' una corsa COMPLETA**, referto scritto, solo **non pubblicata**. La mia tabella mandava Claudio a cercare *"la riga dell'errore"* in un log che dice che e' **andato tutto bene** — ed e' fra le cause **piu' probabili** del sintomo |
+| 🔴 ~~`NumberOfMissedRuns > 0` in OR con LastRunTime~~ | E' **cumulativo**. Basta **una notte di VPS spento la settimana scorsa** perche' resti positivo, e la tabella dichiarava *"MAI PARTITA"* una corsa **partita regolarmente** |
+| 🔴 **una combinazione MANCANTE** | `LastRunTime` oggi **+** `LastTaskResult` 0 **+** **nessun file di oggi** non era in tabella. E' il caso *"stai guardando la cartella di un ALTRO profilo"* — e senza quella riga si conclude **MAI PARTITA**, cioe' **il contrario del vero** |
+
+### 🥇 E il discriminante buono ce l'avevo in mano e non l'avevo usato
+**Non e' il codice di uscita: e' l'ARTEFATTO.** `REFERTO_RUNNER_<oggi>*.txt` si
+scrive a **r.793**, cioe' **dopo l'ultimo round e PRIMA della pubblicazione**. La
+sua sola presenza separa *"morta a meta'"* da *"arrivata in fondo e non
+pubblicata"* **senza interpretare nessun numero**. E' la **classe 154** di casa
+(*il verdetto sta sull'artefatto, non sul codice di uscita*) — scritta per i lanci,
+e che non avevo applicato alla diagnosi.
+
+🔴 **E un difetto del runner trovato per strada**: `$nome` viene dal **nome dello
+script** (r.767), e tutte e 36 le righe round puntano allo stesso
+`RIGA_SOTTILE_ROUND.ps1`. Quindi **i 36 round si sovrascrivono lo stesso log**, e
+anche in una corsa riuscita ne resta **uno solo**. Il log dice *l'ultimo* round
+tentato, e **non si potra' sapere a quale dei 36 era arrivata.**
 
 ---
 
