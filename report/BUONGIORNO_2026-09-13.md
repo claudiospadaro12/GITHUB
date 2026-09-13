@@ -175,9 +175,31 @@ nessun Guardian — resta aperto, e la guardia e' **fail-open e muta**: nel Gior
 **non abbiamo protetto la sedia, abbiamo reso possibile proteggerla.** Chiuderlo
 davvero vuole soglie e cap, cioe' **firme tue**.
 
-⏳ Il pacchetto e' scritto ma **e' in mano al cancello**: non te lo mando finche'
-non torna un PASS. Quando torna, e' un copia-incolla con il ritorno indietro
-incluso.
+## ✅ E IL PACCHETTO ADESSO E' PRONTO -- dopo **QUATTRO** passate del cancello
+
+`report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md`. Copia-incolla, col ritorno
+indietro incluso. Verificato end-to-end sull'URL vero: lo script che scarichera'
+ha **l'impronta esatta** che pretende.
+
+E il cancello, in quattro passate, ha fermato **sei** difetti. Questi tre te li
+devo raccontare, perche' erano tutti roba che avrebbe toccato la TUA sedia:
+
+| difetto | cosa sarebbe successo |
+|---|---|
+| 🔴 **L'`.ex5` si compila da DUE file, e ne avevamo appuntato UNO** | Il `.mq5` era inchiodato alla versione misurata, ma l'**include** pescava da `HEAD` -- **+1000 righe**, con dentro due commit intitolati *"LAVORO IN CORSO"*. **La stessa trappola, sull'altro file.** |
+| 🔴 **L'attesa del lotto ti avrebbe fatto fermare una cosa GIUSTA** | Diceva *"il lotto scende del 35%, se e' molto diverso fermati"*. Ma il passo del volume su U30USD e' **0,10**: il lotto scende a **0,10/0,20**, cioe' −50% e −33%. Avresti letto "molto diverso" e ti sarei fermato tu, correttamente, su uno schieramento corretto |
+| 🔴 **Il foglio garantiva un rischio che il codice non garantisce** | Diceva *"il rischio non e' mai piu' alto del dichiarato"*. 🔴 **Falso**: `LotByRisk` r.357 fa `MathMax(mn, ...)`, cioe' quando il lotto voluto scende sotto 0,10 il pavimento **ALZA**, e il rischio reale **supera** il nominale -- 0,834% ad ATR 200, **1,251% ad ATR 300**. Ed era gia' agli atti: **classe 228**, 11/09, *stesso EA, stesso conto*, XAUUSD a 1,62% contro 1,00% |
+
+🟢 **La terza e' quella che vale il tuo tempo**, perche' non e' un errore di
+scrittura: e' una proprieta' del codice che vale per **OGNI** nostro EA con
+`InpRiskPercent`. Nell'intervallo di volatilita' misurato (ATR 65-78) non morde e
+il rischio sta fra 0,38% e 0,46%. Ma **sopra ATR ~156 sfonda il dichiarato**, e la
+regola d'arresto che avevamo scritto dava il **verde** proprio in quel caso.
+Adesso il foglio ti dice: **se vedi `0,10 / 0,10` su tutte e due le gambe,
+fermati** -- e' la firma del pavimento che morde.
+
+✍️ **E resta tua la decisione sullo 0,65**: caricare il preset ABBASSA la taglia
+di `771531` da 1,0 a 0,65. Sta scritto quattro volte nel foglio, in rosso.
 
 ---
 
