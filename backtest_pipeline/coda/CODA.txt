@@ -870,7 +870,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 
 # =====================================================================
 #  R125 a-f -- ORB DENTRO LA FRONTIERA DEL COSTO. 13/09/2026.
-#  SEI righe, 60 passate, ~6,1 minuti col metro misurato (0,101 min/pass).
+#  SEI righe, 66 passate, ~6,7 minuti col metro misurato (0,101 min/pass).
 #  EA: ABTG_ORB_Ottimizzato.  Simboli: U30USD, D30EUR, NASUSD.
 # ---------------------------------------------------------------------
 #  DA DOVE VENGONO, ED E' UNA DIAGNOSI SCRITTA DUE GIORNI FA.
@@ -886,7 +886,10 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  e collaudato: da allora sono girate 45+ righe su questa corsia. Il
 #  tappo non e' piu' il perimetro: era la coda. Questo blocco lo toglie.
 #  Nel frattempo i file prova sono diventati SEI (a,b + c,d,e,f), quindi
-#  66 passate firmate; 60 entrano qui, 6 restano fuori -- vedi in fondo.
+#  66 passate firmate, ed entrano TUTTE E 66: 33 celle (7+5+7+2+5+7) x 2
+#  finestre. Il conto torna al numero della testata dei criteri e a quello
+#  di IL_TAPPO ("R125 | 66 | ~7 min"), e non e' una coincidenza cercata:
+#  e' lo stesso round, semplicemente mai lanciato.
 #
 #  I CRITERI SONO CONGELATI E FIRMATI DA CLAUDIO, A NUMERI NON VISTI:
 #  backtest_pipeline/prove/R125_ORB_COSTO_CRITERI.md (testata del 10/09,
@@ -965,7 +968,10 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #    controlla_prova.py                 -> OK, 0 problemi (x6).
 #         Un asse Y solo per file, nessun input SCONOSCIUTO all'EA,
 #         nessun pin vuoto, nessun parametro doppio.
-#         celle: 7 / 5 / 7 / 2 / 5 / 7  =  60 passate in tutto
+#         celle: a 7 / b 5 / c 7 / d 2 / e 5 / f 7 = 33 celle = 66 passate
+#         (il conteggio e' STAMPATO dallo strumento riga per riga --
+#          14/10/14/4/10/14 -- non sommato a memoria: la prima stesura di
+#          questo blocco diceva "60", e 60 era un errore di addizione mio)
 #    EA ANCORA ATTUALE, verificato e non assunto: i 51 input pinnati di
 #         ognuno esistono TUTTI nel sorgente di oggi. I 3 input NON
 #         pinnati sono InpNewsFile, InpNewsCurrencies e InpComment --
