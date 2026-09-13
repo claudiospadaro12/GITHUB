@@ -17811,3 +17811,24 @@ cartelle). Si scrive `-Exclude "*.lnk"` (o equivalente) nella riga stessa, non
 si scopre dopo dal buco lasciato. E la rete di sicurezza resta comunque
 obbligatoria (zippare **prima** di cancellare): è quella che ha reso questo
 caso recuperabile in un minuto invece che una perdita vera.
+
+## 307. Il runner pubblica il referto, MAI i CSV dei round (13/09/2026)
+
+**Il caso**: la coda delle 03:30 è girata (dopo 5 ore di ritardo), 36 round
+eseguiti, tutti passati dal cancello G1-G4. Ma nessun CSV di risultato è
+arrivato nel repo: `runner_abtg.ps1` (`PubblicaFile`, r.811-832) carica **solo**
+`REFERTO_RUNNER_*.txt` e i `*.log` da `$Lavoro` — mai i CSV in
+`risultati_prove\`, che restano sul VPS zippati per round su
+`Desktop\ROUND_<etichetta>.zip` (la "riga di raccolta" della regola del 10/08).
+
+**Conseguenza pratica**: dopo ogni corsa notturna, i NUMERI VERI (PF, DD, n)
+non sono leggibili dal repo finché qualcuno non carica manualmente gli zip dal
+Desktop del VPS. Il referto dice "ESEGUITO in Ns, uscita 0" — che prova solo
+che il tester ha girato, non porta il risultato.
+
+**La regola**: prima di dire "i round di stanotte dicono X", verificare che il
+CSV sia **davvero nel repo** (`git log -- risultati_prove/...`), non fidarsi
+del referto del runner che conferma solo l'esecuzione. E la toppa vera
+(proposta, non applicata: tocca `runner_abtg.ps1`) è far pubblicare anche i CSV
+di `risultati_prove\` insieme al referto — stessa `PubblicaFile`, stesso
+percorso `coda/referti/` o uno nuovo dedicato, nessuna corsia nuova aperta.
