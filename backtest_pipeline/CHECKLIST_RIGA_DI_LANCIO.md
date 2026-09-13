@@ -17507,3 +17507,70 @@ dimenticato e' l'unico che qualcuno leggera' da solo.
 famiglia in un colpo** (`grep -n "TF del grafico" prove/R142*.txt`), e si conta che le
 occorrenze **dicano la stessa cosa in ogni file**. Costa gli stessi dieci secondi, e la
 prima volta che non si e' fatto e' costata una quarta passata del cancello.
+
+---
+
+## 292. 🧩🔬 IL BINARIO SI COMPILA DA **PIU' FILE**: appuntare il solo sorgente principale **NON appunta il binario** (13/09/2026)
+
+Trovata dal **controllo preventivo** su `report/PACCHETTO_SCHIERAMENTO_EMA200_2026-09-13.md` +
+`backtest_pipeline/righe/RIGA_SCHIERA_EMA200.ps1` (pin `caf5ed6`/`ad2952f`), pacchetto che
+ricompila **una sedia VIVA** (`ABTG_EMA200` U30USD H1, magic `771531`, conto `50503392`).
+
+🟢 **Prima quello che ha retto**, perche' un elenco di soli difetti descrive male la realta':
+il `.mq5` e' appuntato a un **commit** (`26a1856`) e non a un branch; i **sei SHA256** dichiarati
+nello script (LF *e* CRLF per tre file) tornano **tutti e sei** ricalcolati dai blob; il blob
+del `.mq5` a `26a1856` e' **identico** a quello del pin di R112 `f33f374`
+(`7be282e5c8fcb4a1216bbe446055390ea5a43ce1`); le funzioni di segnale `OnTick`/`OnNewBar`/
+`PlaceOrders`/`ManageAll`/`CutoffCheck`/`FridayCloseCheck` sono **byte per byte identiche**
+al binario in campo; `ExportTrades()` e' chiamata **da `OnTester()` e basta** (unica occorrenza,
+r.507); il preset copre **43 input su 43** e riproduce la cella promossa
+(`InpOrder1Atr=0.2` / `InpOrder2Atr=0.3`, che e' la cella R112 e **non** il default compilato
+0,10/0,35); e il selettore del terminale e' **positivo** e **muore sull'ambiguita'**.
+
+### 🔴 IL DIFETTO
+Il pacchetto appunta il `.mq5` al commit **misurato** (`26a1856` = R112) — e appunta l'**include**
+`ABTG_PausaGuardian.mqh` a **`HEAD`** (`077afd0`). Ma un `.ex5` si compila da **tutte** le sue
+unita', e quelle due non sono la stessa versione:
+
+| file | pin scelto | righe | = quello di R112? |
+|---|---|---|---|
+| `ABTG_EMA200.mq5` | `26a1856` | 552 | ✅ **si** (blob identico a `f33f374`) |
+| `ABTG_PausaGuardian.mqh` | `077afd0` (HEAD) | **2461** | ❌ **no** — a `f33f374` ne ha **1461** |
+
+**+2065 righe** rispetto alla versione con cui il numero e' stato misurato, e fra i commit che le
+portano ce ne sono **due intitolati testualmente «LAVORO IN CORSO»** (`8c0a1db`, `cdb2037`).
+🔴 **E' esattamente la regola che il pacchetto stesso enuncia** — la sua §1.3 rifiuta `HEAD` per il
+`.mq5` perche' `b45dd00` dice *«IN CORSO D'OPERA -- NON COMPILARE»* — **applicata a un file su due**.
+Per di piu' l'include ha **154 righe** di WIP nel caso rifiutato e **2065** nel caso accettato.
+
+Conseguenza sulla frase che regge tutto il pacchetto (*«la sedia che schieriamo e' esattamente
+quella con PF 1,52365»*): **non e' dimostrata dalle prove portate**, perche' l'unica impronta
+verificata e' quella del `.mq5`. Il binario prodotto **non e' il binario di R112**.
+
+### ⚖️ E LA PARTE ONESTA: il danno **misurato** e' zero, ma non e' il punto
+Verificato leggendo: l'EA chiama `ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_EMA200")` — **due
+argomenti**. Nella versione HEAD i blocchi aggiunti (`1-ante` S1, `1-bis` P1, `1-ter` P0,
+`1-quater` C2) sono **tutti opt-in** e gated su parametri che valgono di default
+`0` / `""` / `ABTG_LATO_NULLO`: nessuno di essi puo' mordere, e l'include **non dichiara nessun
+`input`** (0 in tutte e tre le versioni), quindi il conto 43/43 non cambia.
+👉 **Ma "si comporta uguale" non e' "e' lo stesso binario"**, e la differenza e' proprio quella che
+il pin doveva eliminare: si sta compilando su una sedia viva codice che **nessuno ha mai
+compilato**, per **zero** beneficio, quando la versione **gia' compilata e gia' misurata** e'
+disponibile allo stesso costo.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Si elencano le unita' di compilazione PRIMA di appuntare**: `grep -n '#include' EA.mq5`,
+   e **ognuna** prende un pin. Un `.ex5` e' riproducibile solo se lo sono **tutti** i suoi ingressi.
+2. 🔴 **Il pin di default e' quello della MISURA, non `HEAD`.** `HEAD` si usa solo per i file che
+   alla misura **non esistevano** (qui: il `.set`, scritto il 12/09), e lo si **dichiara**.
+3. 🧪 **Contro-esempio obbligatorio**: *«se l'include fosse un'altra versione, la mia verifica se ne
+   accorgerebbe?»* Se la risposta e' no perche' si controlla solo l'impronta del sorgente
+   principale, la verifica **non misura quello che dice di misurare**.
+4. 📌 Vale anche al contrario: un include **condiviso** (qui `ABTG_PausaGuardian.mqh`, incluso da
+   **72 EA** del repo) sovrascritto nella cartella dati **cambia il sorgente di tutti gli altri EA
+   di quel terminale** — inerte finche' nessuno li ricompila, ma va **dichiarato** fra le cose che
+   il pacchetto tocca, e **salvato nel backup**.
+
+### 🔑 La regola in una riga
+*Appuntare il `.mq5` e non l'`.mqh` e' come firmare un contratto e allegare la fotocopia di
+un'altra pagina: il binario che gira e' la SOMMA, e la somma va appuntata tutta.*
