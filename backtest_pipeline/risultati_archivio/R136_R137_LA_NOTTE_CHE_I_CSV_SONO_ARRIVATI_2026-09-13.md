@@ -15,12 +15,30 @@ Stamattina la classe **307** (`CHECKLIST_RIGA_DI_LANCIO.md` r.17815) diceva, mis
 **Stasera i CSV ci sono.** 98 file, entrati nel repo oggi (verificato con
 `git log --diff-filter=A` su tutti e 98: **98 su 98 datati 2026-09-13**).
 
-🔴 **MA IL MECCANISMO NON L'HO VERIFICATO, e non lo spaccio per verificato.**
-Non so se `runner_abtg.ps1` sia stato toppato o se qualcuno abbia caricato a mano gli
-zip `ROUND_<etichetta>.zip` dal Desktop del VPS. Sono due cose diverse: la prima
-significa *"da stanotte in poi i numeri arrivano da soli"*, la seconda *"stavolta
-sono arrivati"*. **Chi legge questo referto non deve dedurre la prima.**
-👉 Da misurare: `PubblicaFile` in `runner_abtg.ps1` a HEAD.
+🟢 **E IL MECCANISMO SI SA, senza lanciare niente — sono tre letture.**
+*(La prima stesura di questo paragrafo diceva "non lo so". Era un'ignoranza **finta**: la
+risposta stava gia' nel repo, nei file che non avevo aperto. E' lo stesso difetto del
+10/09 — la formula "verificata" mentre i numeri veri erano in un file nella stessa
+cartella.)*
+1. **`runner_abtg.ps1` a HEAD (r.828-833)** chiama `PubblicaFile` **solo** su `$ref`
+   (`REFERTO_RUNNER_*.txt`) e sui `*.log`, verso `backtest_pipeline/coda/referti/`:
+   **zero CSV, e mai il percorso `risultati_prove/dal_vps/`. Il runner NON e' stato toppato.**
+2. I 98 file sono entrati con **98 commit distinti, UN file ciascuno**, messaggio
+   `"Risultati dal VPS: <file> (timestamp)"` — stringa che **nel repo non esiste**
+   (`grep` su `.ps1`/`.py` → **0**), verso un percorso che **nessuno script committato
+   scrive** (`grep -rln "dal_vps" --include=*.ps1` → **0**).
+3. La **classe 311** (`CHECKLIST_RIGA_DI_LANCIO.md` r.18030, scritta oggi stesso) descrive
+   per nome lo strumento: un **import di massa** dei CSV gia' girati sul VPS
+   (`%USERPROFILE%\abtg_round\risultati_prove\`), *"mai pubblicati dal runner (classe
+   307)"*.
+
+🔴 **Quindi la risposta e' NO: da stanotte i numeri NON arrivano da soli.** Il runner non
+pubblica CSV, e lo strumento che li ha portati **non e' versionato**.
+👉 **Cosa resta da FARE, non da sapere**: committare quello script, oppure toppare
+`PubblicaFile`. E attenzione alla classe 311 stessa: `PubblicaFile` legge lo `sha`
+esistente e, se c'e', **aggiorna invece di creare** — un omonimo si sovrascrive in
+silenzio. (Qui il sottoalbero `dal_vps/` e' separato, quindi non e' successo; ma va
+verificato con un `git log` per percorso su tutto `risultati_prove/` — **non l'ho fatto**.)
 
 ### 0-bis. I 98 file non sono 98 misure
 Confronto md5 di tutti i CSV di `risultati_prove/` (1.537 file):
@@ -33,7 +51,7 @@ Confronto md5 di tutti i CSV di `risultati_prove/` (1.537 file):
 
 ---
 
-## 1. ✅ LE SENTINELLE DI RIPRODUZIONE: **13 su 13**, alla quinta cifra
+## 1. ✅ LE SENTINELLE DI RIPRODUZIONE: **14 su 14**, alla quinta cifra
 
 Questo e' il risultato che viene prima di tutti gli altri, perche' se cadeva lui non si
 poteva leggere nient'altro.
@@ -53,6 +71,17 @@ Atteso, da R112 (tick, dep. 100.000, rischio 1,0%, stessa finestra):
 **Dieci riproduzioni indipendenti su dieci**, in cinque corse separate, alla quinta
 cifra decimale. Il banco riproduce.
 
+### 🎯 E `cemad02`, che al primo giro avevo archiviato come ROTTO — ed e' un SUCCESSO
+*(Corretto dopo un rilievo di un'altra sessione, verificato da me alla fonte.)*
+Il referto del runner segna `cemad02` con **uscita 2 = NON MISURATO (CSV vuoto)**, e io
+avevo copiato quel codice come se fosse un verdetto. **Falso.** Il file prova
+`COLLAUDO_EMADOW_02_pertrade_IS.txt` porta **`@FRAZIONEIS 0.002`** (r.211): la finestra IS
+e' **un giorno solo, buttata apposta**. L'IS vuoto e' **il progetto del round**, non un
+guasto — e l'OOS riproduce **l'IS di R112 al centesimo**:
+**237 deal · PF 1,20110 · DD 5,7325% · +4.585,40**. ✅ **Round riuscito.**
+🔑 Il sentinella del driver (`$mancanti`/`$zero`) **non legge `@FRAZIONEIS`**, quindi non
+sa distinguere *"vuoto perche' rotto"* da *"vuoto perche' voluto"* (classe **312**).
+
 ### S1 del gruppo r137 (`R137c`, la cella viva della 770101)
 Atteso da R47a: `IS 175 / 1,12634 / 5,4362` · `OOS 270 / 1,39709 / 7,2328`
 → misurato in `r137c` cella `InpTP1_ClosePct=50`: **175 / 1,12634 / 5,4362** e
@@ -69,15 +98,30 @@ DD 7,2328%`, identica a R47a. Il floor a 800 e' **inerte, MISURATO**: nessuna ga
 di questa sedia ha mai avuto uno stop geometrico sotto 8 idx.
 👉 **Niente notizia sul rischio.** La domanda era giusta, la risposta e' tranquilla.
 
-🔴 **MA C'E' UN LIMITE DELLA SENTINELLA CHE VA DETTO.** Il file `R136a` sperava che S1
-facesse anche da collaudo alla patch diagnostica dell'11/09 (*"se S1 passa, questo round
-e' anche il COLLAUDO che la patch dell'11/09 e' neutra sul trading"*). **Quel collaudo io
-non posso dichiararlo**, perche' non so quale binario sia stato compilato: il log
-per-round (`RIGA_SOTTILE_ROUND_*.log`) e' **sovrascritto a ogni round** (difetto 307) e
-quello sopravvissuto parla di `ABTG_Nasdaq_Live5m`, non di `ABTG_EMA200`. Quindi:
-**S1 PASSA** (fatto) · **la neutralita' della patch resta [NON VERIFICATA]** (deduzione
-che richiede un dato che non ho). I numeri sono *compatibili* con la neutralita', e
-compatibile non e' dimostrato.
+🟢 **E IL COLLAUDO DELLA PATCH DELL'11/09 SI PUO' DICHIARARE — la catena c'e', ed e' tutta
+in repo.** *(Anche qui la prima stesura si era fermata a "non so quale binario sia stato
+compilato". Il log per-round **e' davvero** sovrascritto — classe 307 verificata, il
+superstite parla di `ABTG_Nasdaq_Live5m` — ma la risposta si ricava da tre fatti
+versionati, e buttava via un risultato.)*
+1. **`RIGA_SOTTILE_ROUND.ps1` r.54-60**: *"il driver scarica l'EA `.mq5` e gli include
+   **NON dal pin, ma dalla TESTA del branch `lavoro`**… il codice MQL5 che viene compilato
+   e' quello di `lavoro` al momento della corsa"*.
+2. **`git log -- mql5/Experts/ABTG_EMA200.mq5`**: l'ultimo commit e' **b45dd009, 11/09
+   09:12** — la patch dell'imbuto — **e non c'e' niente dopo**. Alle 03:30 del 13/09 la
+   testa **era necessariamente quella**: 690 righe, e `git diff b45dd009 HEAD` sul file e'
+   **vuoto**.
+3. **La toppa della classe 270** (dichiarata in `RIGA_SOTTILE_ROUND.ps1` r.217-229) fa
+   **cancellare l'`.ex5` prima di compilare**, quindi un binario stantio non puo' piu'
+   passare per compilato. E `REFERTO_RUNNER_20260913_033003.txt` segna i cinque round
+   `ABTG_EMA200` a **uscita 0**.
+
+👉 **Quindi: S1 riprodotta DIECI VOLTE SU DIECI sul binario POST-PATCH ⇒ la patch
+diagnostica dell'11/09 e' NEUTRA SUL TRADING sulla sedia migliore della flotta.**
+E' il risultato che `R136a` sperava e che *"oggi non ha nessuno"*.
+
+⚖️ **Il residuo, dichiarato**: manca la **stampa del compilatore** per quei round. La
+catena e' `git` + comportamento dichiarato del driver — **un'inferenza forte, non una riga
+di log**. Se qualcuno recupera `Desktop\ROUND_r136a.zip` dal VPS, diventa un fatto stampato.
 
 ---
 
@@ -106,10 +150,12 @@ Posizioni = `Trades / 2,0117` (fattore misurato su questa sedia, classe 226).
 - **A3 anti-clone**: nessuna coppia contigua con `n` e PF identici. Altopiano vero.
 - **A4 PICCO: NON scatta.** La viva fa 1,524 ≥ 1,40 ma le due vicine fanno 1,612 e 1,462,
   **entrambe ≥ 1,25**. Nessun picco: l'asse e' un altopiano.
-- **A8 — il centro.** Due letture, e le porto tutte e due perche' danno lo stesso esito:
-  - altopiano A1 (0,8…1,6, cinque celle) → centro **1,2**, PF OOS 1,462 = **−0,062** contro la viva;
-  - altopiano di solo MERITO (0,6…1,6, sei celle: la 0,6 cade **per costo**, non per numeri)
-    → centro = la coppia **1,0/1,2**, cioe' **la cella viva dentro il centro**.
+- **A8 — il centro.** L'altopiano A1 (0,8…1,6, cinque celle) ha centro **1,2**,
+  PF OOS 1,462 = **−0,062** contro la viva: il centro **non** batte il default.
+  *(Seconda lettura, portata solo per trasparenza e **NON prevista dai criteri congelati**
+  — A1 include il costo per definizione, un "altopiano di solo merito" nei criteri non
+  esiste: con 0,6…1,6, sei celle, il centro sarebbe la coppia 1,0/1,2, cioe' la cella
+  viva dentro il centro. Stesso esito, ma non e' una lettura a norma.)*
 - **A6/A9 → VERDETTO: 🟢 «IL DEFAULT VA BENE».** Nessuna cella batte `1,52365` di ≥ 0,10.
   Il massimo dell'asse (0,8 → 1,612) vale **+0,088**: **sotto la banda di rumore dichiarata
   prima**, e per A8 non si sceglie comunque il picco.
@@ -139,9 +185,18 @@ prova e' sbagliato su questo motore, e va corretto prima di riusarlo.
 | 1,25 | 0,837 | 7,14 | 1,540 | 363 | 180,4 | 9,46 | ❌ DD |
 | 1,50 | 0,762 | 8,90 | 1,587 | 336 | 167,0 | 9,87 | ❌ DD (e DD IS) |
 
-- **A1 passa** su quattro celle contigue (0,00…0,75) con la viva dentro.
-- **A6/A9 → «IL DEFAULT VA BENE» sul MERITO**: il vantaggio della 0,25 e' **+0,066**,
-  sotto la banda di rumore di 0,10.
+- **A1 [R136a] + A1-bis [R136b] — PASSA, e la terna e' `0,25-0,50-0,75`.** `A1-bis`
+  (r.165-169 del file prova) **esclude la cella viva (0,00) dalla terna**: *"non e' un
+  punto della stessa scala"*. Le tre passano tutte (PF 1,590 / 1,409 / 1,436 · pos
+  246,1 / 225,2 / 209,8 · DD OOS 2,10 / 3,21 / 7,52 · DD IS 3,08 / 3,14 / 4,91 · costo
+  54,9x per **A1-ter**, invariato su questo asse). La 1,00 cade su **A7** (DD OOS 8,63).
+- **A8 — IL CENTRO, ed e' il numero che conta**: centro della terna = **0,50**,
+  PF OOS **1,40862** contro **1,52365** della viva = **−0,115**.
+  **Il centro dell'altopiano PEGGIORA il valore in essere.**
+- **A6 → «IL DEFAULT VA BENE»**, e per la ragione forte: non *"il rivale non stacca
+  abbastanza"*, ma **il centro dell'altopiano e' peggiore della cella viva**.
+  (Il `+0,066` della 0,25 resta sotto A9, ma per A8 il picco non si sceglie comunque:
+  in R70 i confronti fatti col picco si sono ribaltati.)
 - 🟡 **MA SUL RISCHIO la cella 0,25 dice una cosa che va scritta**, perche' il requisito
   rotto di questa sedia e' **proprio R2, il DD**: `DD OOS 2,10%` contro `7,83%` e
   `DD IS 3,08%` contro `5,73%`, **a PF piu' alto** (1,590) e con 246 posizioni.
@@ -171,13 +226,47 @@ sopra 150 fino a un fattore di **2,81**. **Nessuna cella cambia lato per questo.
 | **50 (viva)** | 1,201 | 5,73 | 1,524 | 517 | 7,83 |
 | 75 | 1,200 | 5,73 | 1,526 | 471 | 7,82 |
 
-- **La TAGLIA del parziale e' inerte sul PF fra 25 e 75**: 1,518 / 1,524 / 1,526, cioe'
-  **8 millesimi** di escursione. (Non e' un clone A3: `n` cambia di 131 deal.)
+- **A1 [R136a] + A1-bis [R136c] — PASSA** sull'unica terna contigua possibile, **25-50-75**,
+  con posizioni (**A2-bis**: fattore 2,0117) **299,2 / 257,0 / 234,1**, tutte sopra 150.
+  La cella 0 resta **fuori dall'altopiano per costruzione** (`A1-bis`: meccanismo diverso,
+  tre uscite spente; fattore **1,000**, quindi 165 uscite = **165 posizioni**, non 82).
+- **A8 — IL CENTRO DELL'ALTOPIANO E' LA 50, CIOE' LA CELLA VIVA.** Per A8 *"la cella viva
+  e' confermata e non si tocca niente"*. 🟢 **E' la conferma piu' forte che questa notte
+  produce sulla sedia di punta**, ed e' una conferma **a norma di regola di selezione**,
+  non un'impressione. Il file prova l'aveva previsto testualmente (r.163-164):
+  *"Se l'altopiano e' quello E il suo centro e' la 50, la risposta e' «IL DEFAULT VA BENE»
+  — ed e' un risultato pieno, non un fallimento."*
+- **La TAGLIA del parziale e' inerte sul PF fra 25 e 75**: 1,51843 / 1,52365 / 1,52560,
+  cioe' **7 millesimi** di escursione. (Non e' un clone A3: `n` cambia di 131 deal.)
 - **L'ESISTENZA del parziale invece morde, e morde sul RISCHIO**: spegnerlo porta il
   `DD OOS` da 7,8% a **13,94%** — oltre il muro prop del 10%. **Cella di rischio, A7.**
-- Nota di unita': a `TP1Pct=0` non ci sono parziali, quindi **uscite = posizioni**
-  (165, non 82): la cella resta bocciata, ma **per PF e DD, non per campione**.
-- 🟢 **VERDETTO: il parziale si tiene acceso; la sua taglia e' una manopola MISURATA e INERTE.**
+- 🟢 **VERDETTO: il parziale si tiene acceso; la sua taglia e' una manopola MISURATA e
+  INERTE; e la taglia viva sta al CENTRO del suo altopiano.**
+
+### 2.3-bis 🧪 IL CONTROLLO DEL TERZETTO (R136d punto 5) — fatto, e la condizione SCATTA
+
+`R136d_trailing_U30USD.txt` lo chiama *"il controllo piu' potente che questa notte
+produce"*: *"l'effetto misurato qui deve stare DENTRO l'effetto totale misurato da R136c.
+Se l'effetto del solo trailing fosse PIU' GRANDE dell'effetto di tutti e tre i meccanismi
+insieme, uno dei due round sta misurando qualcos'altro, **e va capito PRIMA di scrivere un
+verdetto**."*
+
+| | Δ PF OOS | Δ P/L | Δ DD | n |
+|---|---:|---:|---:|---:|
+| **solo trailing OFF** (`r136d` cella 0) | **+0,24715** | +4.928,47 | −0,42 pt | 517→427 |
+| **tutti e tre OFF** (`r136c` cella 0) | **−0,24221** | −8.102,60 | **+6,10 pt** | 517→165 |
+
+Magnitudine quasi identica, **segno opposto**: la condizione **scatta**.
+🟢 **La spiegazione, e va scritta perche' e' la ragione per cui il controllo non annulla i
+due round**: le due celle **non misurano la stessa quantita'**. La cella 0 di `r136c`
+**toglie anche l'uscita parziale**, quindi cambia l'unita' di conto (fattore **1,000**
+invece di 2,0117: 165 uscite = 165 posizioni contro 257) e il campione (**−68%**), e porta
+il DD a 13,94%. I tre meccanismi **non sono additivi**, e il "terzetto" non si legge come
+una somma.
+🔴 **Conseguenza sui verdetti**: l'effetto attribuito al **solo trailing** in `r136d`
+resta **NON ATTRIBUITO** finche' non esiste una cella che spenga il trailing **lasciando
+acceso il parziale, su un asse a piu' di due celle**. Si legge il TERZETTO, non il singolo
+(buco gia' dichiarato in `R136b`: parziale, pari e trailing sono agganciati a `beDone`).
 
 ### 2.4 `r136d` — asse `InpUseTrailing`: **il numero piu' interessante della notte**
 
@@ -188,12 +277,18 @@ sopra 150 fino a un fattore di **2,81**. **Nessuna cella cambia lato per questo.
 
 - Spegnere il trailing: **PF OOS +0,247** (sopra la banda di rumore A9), **DD OOS piu' basso**,
   **+4.928,47 di profitto**, 212 posizioni.
-- 🔴 **E NON SI PROMUOVE, per una ragione strutturale, non per prudenza**: l'asse ha
-  **DUE celle**. A1 chiede **≥3 celle contigue**: su una manopola booleana un altopiano
-  **non puo' esistere per costruzione**. Quindi il verdetto formale e'
-  **«non c'e' una configurazione robusta su questo asse»**, e non potrebbe essere altro.
-- E l'IS dice il contrario (1,107 contro 1,201): guadagno **solo in OOS** con IS che
-  peggiora = la firma di **regime**, non di gestione (B4 punto 2).
+- 🔴 **E NON SI PROMUOVE, per una ragione strutturale scritta NEL FILE, non per prudenza
+  mia**: `A1-bis [R136d]` ammette **solo tre verdetti** su un asse booleano — *"il default
+  va bene"* · *"manopola inerte, MISURATA"* · *"c'e' un CANDIDATO a spegnere il trailing"*.
+  Con due celle un altopiano **non puo' esistere per costruzione**.
+- 🔴 **E IL PUNTO 1 DEL FILE DECIDE QUALE DEI TRE**: *"se il segno si inverte fra IS e OOS
+  il verdetto e' «NON MISURABILE»"*. Ed e' il caso: **OOS +0,247, IS −0,094**.
+  👉 **VERDETTO: «NON MISURABILE» — e la forma ammessa e' «c'e' un CANDIDATO a spegnere il
+  trailing»**, che per diventare altro deve passare da una **finestra nuova** o da una
+  **prova di regime**.
+- ⚠️ **E il §2.3-bis toglie a questo numero anche l'attribuzione**: l'effetto non e'
+  attribuibile al **solo** trailing finche' non esiste una cella che lo spenga lasciando
+  acceso il parziale, su un asse a piu' di due celle.
 - 👉 **La via corta al numero** (Motto, *"se potrebbe passare, si insiste"*): questo
   candidato non si archivia e non si promuove — **si porta a una finestra NUOVA o a una
   prova di REGIME**, che e' esattamente quello che A6 punto 5 prescrive. Costo:
@@ -223,13 +318,20 @@ risponde ai criteri di `R136a`. Ha i suoi, congelati prima, in
 
 - 🔴 **IL PICCO NON SCATTA, MA L'ALTOPIANO NON C'E'.** H1 **non e' l'unico TF positivo**
   (positivi in OOS anche **H2 +4.095** e **H4 +4.604**), quindi il caso *"verde per caso"*
-  descritto nel file **non si verifica**. Ma i positivi stanno **tutti SOPRA H1**: sotto
-  (M30, M20, M15) sono **tre TF su tre in perdita**, con `DD OOS` fra **15,9% e 30,7%** —
-  celle di rischio a qualunque n (Emendamento B). E i due vicini positivi hanno **266 e
-  116 deal**, cioe' **sotto il pavimento del campione**.
-  👉 **Lettura onesta: H1 sta al BORDO di un tratto positivo, non al centro di un
-  altopiano.** Il requisito 5 del certificato si chiude come *"TF cambiato e MISURATO"*;
-  **non** si chiude come *"H1 confermato da un altopiano"*, e la differenza va detta.
+  descritto nel file **non si verifica**. Ma sopra H1 il segno **ALTERNA**
+  (H2 **+**, **H3 −1.519**, H4 **+**): il tratto positivo contiguo e' lungo **due celle**,
+  H1-H2, e poi si rompe — e i due vicini positivi hanno **266 e 116 deal**, sotto il
+  pavimento del campione. Sotto H1 (M30, M20, M15) sono **tre TF su tre in perdita**, con
+  `DD OOS` fra **15,9% e 30,7%** — celle di rischio a qualunque n (Emendamento B).
+  👉 **Lettura onesta: H1 sta al BORDO di un tratto positivo di due celle, non al centro
+  di un altopiano.**
+- 🔴 **E LA REGOLA CONGELATA NON COPRE IL CASO MISURATO.** `COLLAUDO_EMADOW_05` prevede
+  **due rami soli** — *"H1 dentro un altopiano"* oppure *"H1 unico positivo = picco"* — e
+  il misurato **non cade in nessuno dei due**. **Il file va emendato prima di riusarlo**
+  (stesso trattamento dato al modello meccanico sbagliato di `R136a`, §2.1).
+  La **casella 5** del certificato si chiude comunque, ma **per la regola del 09/09**
+  (*"il TF e' stato cambiato almeno una volta?"* → si', sette TF, uscita 0), **non** per
+  la regola del file. La differenza va detta.
 - **M15/M20**: il file prometteva di MISURARE il costo invece di assumerlo. Non serve
   arrivarci: **sono fuori prima, per merito e per rischio** (PF OOS 0,954 e 0,833, DD
   26,3% e 30,7%).
@@ -279,6 +381,8 @@ numero producano.
   **prima** della corsa. Per la regola scritta nel file, il verdetto in quel caso e'
   *"vince una cella fuori costo"*, **non** *"abbiamo trovato una configurazione migliore"*.
   E' la trappola che il round aveva previsto, ed e' scattata puntuale.
+- **A4 PICCO — valutato, e NON scatta**: l'unica cella in A1 e' la 6800, e le sue due
+  vicine fanno **1,49624** e **1,38128**, **entrambe ≥ 1,30**. Nessun picco.
 - **B4 punto 4 — MONOTONIA**: da 4800 in poi PF scende **monotono**
   (1,496 → 1,420 → 1,381 → 1,288 → 1,284) **e l'IS scende con lui**
   (1,317 → 1,233 → 1,038 → 0,966 → 0,846). Le due finestre **concordano**: non e' un
@@ -304,27 +408,93 @@ profitto fuori campione, ed e' un baratto — non una riparazione».**
 EDGE"*) e' **confermata**, col prezzo attaccato.
 
 ### `r137b` — lo stesso floor ma **saltando** i giorni stretti: non misurabile in costo
-`n IS` crolla 175 → 84 → 43 → 27 → 15 al crescere del floor: qui la manopola tocca la
-**selezione**, non solo lo stop. Le celle in costo (6800…12800) hanno **117 / 69 / 46 /
-25 posizioni OOS**, cioe' **tutte sotto il pavimento dei 150**: per A2 **non possono
-contare a favore**. Possono contare **contro**, come fatto di forma — e la forma e'
-netta: PF OOS 1,271 → 1,185 → **0,976** → **0,876**.
+Criteri: `prove/R137b_floorstop_salta_770101_D30EUR.txt` (A1..A10 verbatim identiche a
+quelle di `R137a` — confrontate riga per riga, nessuna conseguenza sui numeri).
+`n IS` crolla sulla **serie intera**, tutte e sette le celle: **175 → 162 → 126 → 84 →
+43 → 27 → 15**. Qui la manopola tocca la **selezione**, non solo lo stop.
+Le celle in costo (6800…12800) hanno **117,2 / 69,3 / 46,5 / 25,0 posizioni OOS**, cioe'
+**tutte sotto il pavimento dei 150**: per A2 **non possono contare a favore**. Possono
+contare **contro**, come fatto di forma — e la forma e' netta: PF OOS
+**1,271 → 1,185 → 0,976 → 0,876**.
 🟢 **Saltare i giorni compressi distrugge l'edge.** Verdetto: *"non c'e' una
 configurazione robusta su questo asse"*, con la pendenza dichiarata.
 
-### `r137c` — il parziale del DAX
-`TP1_ClosePct=0` (parziale spento) → PF OOS **1,491**, n 193, DD 6,27%, **+23.607,28**;
-`=50` (viva) → 1,397, n 270, DD 7,23%, +18.029,58.
-⚠️ **Asse a due celle: A1 non puo' passare per costruzione** (stessa ragione di `r136d`).
-E vale l'avvertimento scritto nel file prova, B4 punto (iii): **questo 1,491 non va
-confrontato con le celle di `r137a`**, o si confrontano due manopole mosse insieme —
-l'errore che l'11/09 e' costato mezza giornata.
+### `r137c` — il parziale del DAX: **C1 PASSA su tutti e quattro gli esiti**
+Criteri congelati: `prove/R137c_parziale_770101_D30EUR.txt`, **C1..C4**.
+🔴 **Qui le «A» NON esistono**: `A1` e' di `R137a/b` e a questo round **non si applica**.
+- **C1 RIPRODUZIONE** (il cancello di tutto il gruppo): cella 50 → IS **175 / 1,12634 /
+  5,4362**, OOS **270 / 1,39709 / 7,2328**; cella 0 → IS **132 / 1,18323 / 4,9576**, OOS
+  **193 / 1,49140 / 6,2719**. ✅ **Quattro esiti su quattro, tolleranza zero sui Trades.**
+- **C3 RISCHIO**: entrambe le celle sotto 8,0% in tutte e due le finestre. ✅
+- ⚠️ **E L'UNITA', perche' qui la cifra inganna**: 193 contro 270 **non** sono meno
+  operazioni. Il rapporto uscite/posizioni e' **1,3990 col parziale** e **1,0000 senza**:
+  **193 posizioni contro 193 posizioni, identiche.**
+- **C2 SELEZIONE**: la cella dichiarata **prima** e' `InpTP1_ClosePct=0`, e i numeri la
+  confermano: **+0,09431 di PF OOS e −0,96 punti di DD, a parita' di posizioni**.
+  🔴 **Quello che manca non e' una misura: e' una FIRMA** — [FIRMA DI CLAUDIO] (C4/A10).
+- E vale B4(iii): **questo 1,49140 non si confronta con le celle di `r137a`**, o si
+  muovono due manopole insieme — l'errore che l'11/09 e' costato mezza giornata.
 
-### `q770be` — il breakeven del DAX: **manopola quasi inerte**
-`BEatR` 0,0 / 1,0 / 1,5 danno **IS identico** (1,183 / 132 / 4,96%) e OOS
-1,491 / 1,457 / **1,491**: le celle 0,0 e 1,5 sono **identiche fra loro** (A3: un solo
-punto misurato due volte). Solo 0,5 si stacca, in peggio (1,446).
-🟢 **Il breakeven su questa sedia e' MISURATO e sostanzialmente inerte.**
+### `q770be` — il breakeven del DAX: **misurato, e il buco RESTA APERTO**
+Criteri congelati in `prove/LE_QUATTRO_FIRME_02_be_regalo_ini.txt`.
+🔴 **La variabile che decide NON e' il PF: e' la PEGGIOR GIORNATA DI EQUITY** — soglia
+r.59-60: *"si RACCOMANDA solo se la peggior giornata di equity **migliora di almeno 0,05
+punti percentuali** E il PF resta >= 1,40"*. **E' una colonna del CSV** (`Peggior
+Giornata %`, colonna 9): io al primo giro non l'avevo nemmeno aperta.
+
+| `InpBEatR` | peggior giornata OOS | PF OOS | P/L OOS | peggior giornata IS | PF IS | Trades |
+|---:|---:|---:|---:|---:|---:|---:|
+| **0,0 (il «regalo» d'archivio)** | **−1,0793%** | 1,49140 | +23.607,28 | −1,0183% | 1,18323 | 193 / 132 |
+| 0,5 | **−1,0793%** | 1,44637 | +19.161,41 | −1,0179% | 1,15177 | 193 / 132 |
+| 1,0 | **−1,0793%** | 1,45723 | +21.163,84 | −1,0183% | 1,18323 | 193 / 132 |
+| 1,5 | **−1,0793%** | 1,49140 | +23.607,28 | −1,0183% | 1,18323 | 193 / 132 |
+
+- **SENTINELLA del file** (*"se `Trades` cambia piu' del 5% la cella misura la SELEZIONE,
+  non la GESTIONE"*): **0% di variazione**, 193/193 OOS e 132/132 IS. ✅ Misura la gestione.
+- 🔴 **SOGLIA CONGELATA: NESSUNA CELLA LA PASSA.** La peggior giornata OOS **non si muove
+  di un millesimo** su tutte e quattro le celle; in IS il massimo e' **0,0004 punti**
+  (cella 0,5), **un centoventicinquesimo della soglia** — e su una cella che peggiora il PF.
+- 🔴 **VERDETTO, alla lettera del file: «IL BUCO DEL BREAKEVEN SULLA CELLA REGALO RESTA
+  APERTO, e si scrive che resta aperto».** Il breakeven indipendente **non tappa** il buco
+  di `ABTG_DAX_Apertura_EU.mq5` (a `InpTP1_ClosePct=0` il ramo del pari non viene mai
+  eseguito). **Non e' "manopola inerte": e' una protezione che questa manopola non puo'
+  comprare** — e le due frasi portano ad azioni diverse ("non fare niente" contro "c'e' un
+  lavoro"), su una sedia candidata.
+
+---
+
+## 3-bis. 🇫🇷 `r138a` — IL GEMELLO CAC40: **BOCCIATO PER RISCHIO (F3), e il MERITO resta NON MISURATO**
+
+Criteri congelati: `prove/R138a_gemello_F40EUR_770101.txt`, **F1..F6**. Unico cambio
+rispetto alla sedia DAX viva: `@SIMBOLO` (e il magic). Nessun cambio di trading.
+
+| finestra | PF | DD | n (deal) | P/L | peggior giornata |
+|---|---:|---:|---:|---:|---:|
+| **IS** | **1,44028** | 7,3578% | 130 | **+7.126,12** | −1,0259% |
+| **OOS** | **0,76965** | **11,8210%** 🔴 | 195 | **−7.266,30** | −1,0640% |
+
+- **F6 G1 determinismo**: i due magic gemelli (786204/786205) danno righe **identiche al
+  centesimo** su tutte le colonne, IS e OOS. ✅ I numeri si leggono.
+- 🔴 **F3 RISCHIO, a qualunque n**: `DD OOS` **11,82% > 10,0%** → **F40EUR e' BOCCIATO PER
+  RISCHIO e non entra nella famiglia, qualunque frequenza abbia.** E' il criterio
+  congelato, ed e' un fatto accaduto.
+- **F1 FREQUENZA**: **195 deal**; il rapporto deal/posizioni su F40EUR e' **[NON
+  MISURATO]**, quindi il file impone la **banda** `n/1,40 … n/1,00` = **139,3 – 195,0
+  posizioni**, dentro l'atteso 130-230. Il numero esatto costa **una corsa a cella
+  singola con l'export per-trade attivo**.
+- **F4 COSTO**: lo spread di F40EUR non e' in `spread_flotta/`. **R5 su F40EUR e' NON
+  ANCORA MISURATO — ne' verde ne' rosso.** Via piu' corta: `ABTG_SpreadOrario` su F40EUR,
+  **zero passate di tester**.
+- 🔴 **E IL NUMERO CHE CAMBIA LA DIAGNOSI, e che al primo giro NON avevo scritto: l'IS e'
+  POSITIVO.** `PF 1,44028 · DD 7,3578% · +7.126,12` contro un OOS a `0,76965 / 11,82% /
+  −7.266,30`. **Il segno si ribalta fra le due finestre.** Non e' *"la ricetta non si
+  trasferisce"*: e' la firma **regime / sovradattamento**, ed e' una diagnosi diversa con
+  un rimedio diverso.
+- 🪦 **CERTIFICATO**: su F40EUR con questo motore sono chiuse **PF, n e DD** (caselle 1-2).
+  **Gestione dell'uscita: mai messa ad asse. Gemelli di F40EUR: nessuno. TF: mai cambiato.**
+  👉 Quindi il verdetto e' **«BOCCIATO PER RISCHIO (F3) — MERITO NON ANCORA MISURATO»**, e
+  va scritto cosi' in `REGISTRO_TEST.md` con l'elenco di cosa manca.
+  **Un morto senza certificato non e' un morto.**
 
 ---
 
@@ -335,14 +505,16 @@ punto misurato due volte). Solo 0,5 si stacca, in peggio (1,446).
 Le righe `R123*` e `P0*` qui sotto **non fanno parte delle 24**: sono fra i **28 file
 ricaricati byte-identici**, li porto solo perche' stanotte sono ricomparsi nel repo.
 
-🔴 **Questa sezione NON contiene verdetti.** Ognuno di questi round ha il suo file prova
-con criteri congelati che **non ho letto uno per uno stanotte**: leggerli e applicarli
-e' lavoro dichiarato **aperto**. Qui c'e' la fotografia dei numeri, per non perderli.
+🔴 **Questa sezione NON contiene verdetti**, e stavolta e' vero anche per le righe che
+sembrano gridarlo. Ognuno di questi round ha il suo file prova con criteri congelati che
+**non ho letto uno per uno stanotte**: leggerli e applicarli e' lavoro dichiarato
+**aperto**. Qui c'e' la fotografia dei numeri, per non perderli. Dove c'e' un **fatto di
+RISCHIO** lo scrivo come tale (Emendamento B: il rischio si giudica a qualunque n) — e un
+fatto di rischio **non e' un verdetto di merito**.
 E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di casa).
 
 | round | EA | simbolo | asse | celle | migliore cella OOS | PF OOS | n OOS | DD OOS | P/L OOS |
 |---|---|---|---|---:|---|---:|---:|---:|---:|
-| `cemad02` | ABTG_EMA200 | U30USD | — | IS **vuoto** | 🔴 **NON MISURATO** (uscita codice 2) | | | | |
 | `ohlc_r127b` | SupertrendReversal_Ott | XAUUSD | SLLookback | 7 | SLLookback=5 | 1,125 | 427 | 5,91% | +3.967 |
 | `ohlc_r127c` | CostToCost | EURJPY | MaxBarsHold | 8 | MaxBarsHold=50 | 1,524 | 242 | **12,26%** 🔴 | +71.354 |
 | `ohlc_r139a` | EMA200 | AUDJPY | TP_RR | 4 | TP_RR=1.5 | 1,008 | 1322 | **16,89%** 🔴 | +89 |
@@ -357,7 +529,6 @@ E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di cas
 | `r132c` | SupRev_DOW_Ott | U30USD | NearAtr | 8 | =1,00 | 1,389 | 152 | 5,91% | +622 |
 | `r133b` | ORB_Ottimizzato | U30USD | UseCloseConfirm | 2 | **=0** | **1,674** | 119 | 9,76% | **+41.057** |
 | `r133c` | MaxMinNotte | D30EUR | MinBoxPts | 9 | =4500 | 1,062 | 59 | 8,21% | +130 |
-| `r138a` | DAX_Apertura_EU | **F40EUR** | *(cella unica, gemello)* | 1 | — | **0,770** | 195 | **11,82%** 🔴 | **−7.266** |
 | `r141a` | IntradayMomentum | NASUSD | UseSecondSignal | 2 | =1 | 1,486 | 133 | 1,37% | +3.562 |
 | `r141b` | IntradayMomentum | U30USD | UseSecondSignal | 2 | =1 | 1,250 | 130 | 1,79% | +2.283 |
 | `r141c` | AtrExhaustVol | NASUSD | ProxMode | 2 | =1 | 1,229 | 96 | 4,14% | +8.461 |
@@ -367,25 +538,36 @@ E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di cas
 | `r142c` | Nasdaq_Live5m | NASUSD | UseTrailing | 2 | =0 | 0,999 | 195 | **33,62%** 🔴 | −8 |
 | `P0*` (9 etichette, *ricarica*) | OpeningReversalB / IBRetest / LVNArbitro / Nightly | vari | conteggio | 1 | *(vedi sotto)* | | | | |
 
-### Le tre cose che in questa tabella **non** sono un dettaglio
-1. 🔴 **`r138a` — il gemello CAC40 del DAX e' NEGATIVO, e non di poco.** Stessa ricetta,
-   unico cambio `@SIMBOLO`: `PF OOS 0,770`, `P/L −7.266`, e soprattutto **DD OOS 11,82%,
-   cioe' OLTRE il muro prop del 10%**. Il DD e' un fatto accaduto e si giudica a
-   qualunque n (Emendamento B). **La ricetta DAX non si trasferisce al CAC.** La
-   frequenza invece era in banda (195 deal ≈ 139 posizioni, atteso 130-230): il round
-   ha risposto alla sua domanda, e la risposta e' no.
-2. 🔴 **`ABTG_Nasdaq_Live5m` ha un problema di RISCHIO su tutte e tre le corse**:
-   DD OOS fra **17,6% e 33,6%** su ogni cella di `r142b/c`, con PF che non arriva a 1,08.
-   Non e' una manopola da tarare: e' una sedia con un DD fuori scala prop.
-3. 🔴 **`ABTG_OpeningReversalB` non spara**: 2-3 operazioni in IS e **ZERO in OOS** su
+### Le quattro cose che in questa tabella **non** sono un dettaglio
+1. 🔴 **UN FATTO DI MACCHINA, E VA IN QUESTA PAGINA (classe 309).** Nel referto del runner
+   (`REFERTO_RUNNER_20260913_033003.txt`) i round escono **42 a uscita 0 · 1 a uscita 2
+   (`cemad02`, **atteso**: vedi §1) · 5 a uscita 3**, e i cinque sono **esattamente** `r127b`, `r127c`,
+   `r139a`, `r139b`, `r139c` — cioe' **tutti e cinque gli `ohlc_*`**. Uscita 3 =
+   *"ROUND GIRATO CON RILIEVI"*.
+   🟢 La spiegazione parsimoniosa e' il **Modello 1**: verificato che **tutti e cinque
+   girano a Modello 1** e che **nessuno dei 31 round a Modello 4 esce 3**.
+   ⚠️ **Ma il codice 3 ha un `-or`**: puo' essere scattato **anche** per *"un PID
+   non-bersaglio sparito"* — e i non-bersaglio sono **i terminali in forward, REALE
+   `10105439` compreso**. Il log che lo direbbe e' **sovrascritto** (difetto 307).
+   👉 **La chiusura costa la lettura di 5 file**: il `REFERTO_ROUND_<etichetta>.txt`
+   dentro `Desktop\ROUND_*.zip` sul VPS. **Finche' non e' letto, non e' escluso** —
+   solo improbabile.
+2. 🔴 **`ABTG_Nasdaq_Live5m`: FATTO DI RISCHIO su tutte e tre le corse.** DD OOS fra
+   **17,6% e 33,6%** su ogni cella di `r142b/c`, con PF che non arriva a 1,08.
+   E' un fatto di rischio a qualunque n (Emendamento B). 🔴 **Nessun verdetto di merito**:
+   `R142a/b/c` non sono stati aperti.
+3. 🔴 **`ABTG_OpeningReversalB` non spara**: **1-3** operazioni in IS e **ZERO in OOS** su
    tutti e quattro i round `P0*`. Non e' "un motore che perde": e' **NON MISURATO**, e
    va scritto cosi' (un morto senza certificato non e' un morto).
    Stessa famiglia di fatto: `IBRetest` gira ma fa `PF OOS 0,593 / 0,697 / 0,965` su
    49-107 deal nei tre simboli.
-4. 🟡 **`r133b` merita una riga sua**: spegnere `UseCloseConfirm` porta l'ORB da
-   `PF OOS 1,122` a **1,674** con **+41.057** — ma su **119 deal** e con `DD 9,76%`, a
-   un soffio dal muro. Asse a due celle ⇒ A1 non applicabile. **Da portare a una
-   finestra nuova, non da promuovere.**
+4. 🟡 **`r133b` merita una riga sua.** Spegnere `UseCloseConfirm` porta l'ORB da
+   `PF OOS 1,122` a **1,674** con **+41.057** — ma su **119 deal** e con `DD 9,76%`, a un
+   soffio dal muro. Asse a due celle. 🔴 **Criteri NON applicati**:
+   `R133b_filtrovolumi_U30USD.txt` non e' stato aperto stanotte, quindi qui **non si cita
+   nessuna sigla** — e' fotografia, non verdetto.
+   🔴 **E c'e' un fatto di RISCHIO che va detto a qualunque n**: la cella **VIVA** (`=1`)
+   in **IS** fa `PF 0,523` e **`DD 27,21%`**, con **−24.193**.
 
 ---
 
@@ -408,15 +590,45 @@ E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di cas
    verdetto si ribalta. Se non l'avessi fatto, la colonna "posizioni" sarebbe stata una
    misura finta.
 5. **La riproduzione S1 poteva farmi dire una cosa piu' grossa di quella che ho.**
-   S1 che passa dimostra **che il banco riproduce**; non dimostra **quale binario abbia
-   compilato**. Il log che lo direbbe e' sovrascritto (difetto 307). Fermato li'.
+   S1 che passa dimostra **che il banco riproduce**; il binario compilato e' un fatto
+   **separato**, e l'ho ricostruito con una catena dichiarata (§1), non dato per scontato.
+
+### 🔴 E I CINQUE CONTRO-ESEMPI CHE **NON** AVEVO FATTO, trovati dal cancello
+Li scrivo qui perche' quattro di loro hanno **cambiato un verdetto**, e uno ha ribaltato
+due «non lo so» in due risultati. Se il cancello non fosse passato, questo referto sarebbe
+uscito con quattro verdetti sbagliati.
+- **(A) LA COERENZA DEL TERZETTO** — `R136d` la chiama *"il controllo piu' potente che
+  questa notte produce"*, e io non l'avevo fatta. **Fatta ora (§2.3-bis): la condizione
+  SCATTA**, e toglie a `r136d` l'attribuzione dell'effetto.
+- **(B) L'ASSE DI `r136b` MUOVE TRE COSE INSIEME** (parziale, pari e inizio trailing sono
+  agganciati a `beDone`): quindi il **DD 2,10%** della cella 0,25 **non e' attribuibile al
+  primo bersaglio**. Avevo scritto il numero senza la sua attribuzione.
+- **(C) L'UNITA' DI `r137c` e `q770be`**: 193 contro 270 **sembra** meno operazioni, in
+  POSIZIONI e' **193 contro 193**. Avevo letto due unita' diverse come se fossero una.
+- **(D) IL MECCANISMO DI PUBBLICAZIONE** (§0): non era un'ignoranza, era un file non aperto.
+- **(E) IL SEGNO DELL'IS DI `r138a`** (§3-bis): **+7.126,12 e PF 1,44** in IS, che
+  **avevo omesso**, e che cambia la diagnosi da *"non si trasferisce"* a *"regime"*.
+- **(F) LA VARIABILE DI `q770be`** era la **peggior giornata**, non il PF — ed e' una
+  **colonna del CSV** che non avevo aperto.
 
 ---
 
 ## 6. 📋 COSA RESTA APERTO (elencato per nome, mai «tutto il resto»)
 
-- ⬜ **Meccanismo di pubblicazione dei CSV**: `PubblicaFile` in `runner_abtg.ps1` a HEAD —
-  toppata o caricamento a mano? Cambia se domani i numeri arrivano da soli.
+- ⬜ **Versionare lo strumento di import di massa** (o toppare `PubblicaFile` perche'
+  pubblichi anche i CSV): oggi **i numeri NON arrivano da soli** (§0, misurato).
+- ⬜ **`git log` per percorso su tutto `risultati_prove/`**: verificare che l'import non
+  abbia **sovrascritto in silenzio** nessun CSV preesistente (classe 311). Non fatto.
+- 🔴 ⬜ **I CINQUE `ohlc_*` a uscita 3**: leggere `REFERTO_ROUND_<etichetta>.txt` dentro
+  `Desktop\ROUND_*.zip` sul VPS per **escludere che sia sparito un PID** (REALE
+  `10105439` compreso). **Costa la lettura di 5 file, ed e' la cosa piu' urgente
+  dell'elenco.**
+- ⬜ **Emendare `COLLAUDO_EMADOW_05`**: la sua regola di selezione ha due rami e il
+  misurato non cade in nessuno dei due (§2.5).
+- ⬜ **Emendare il modello meccanico di `R136a`**: prevedeva `n` in calo, il misurato sale.
+- ⬜ **`r138a` in `REGISTRO_TEST.md`**: «BOCCIATO PER RISCHIO (F3) — MERITO NON ANCORA
+  MISURATO», con le tre caselle mancanti. E **F4**: spread di F40EUR con
+  `ABTG_SpreadOrario`, zero passate di tester.
 - ⬜ **Referti per 24 coppie, elencate per nome** (mai «tutto il resto»): `r120b00`,
   `r120b01`, `r120b10`, `r120b11`, `r120e00`, `r120e11`, `r126a`, `r126b`, `r126d`,
   `r132c`, `r133b`, `r133c`, `r141a`, `r141b`, `r141c`, `r141d`, `r142a`, `r142b`,
@@ -424,13 +636,18 @@ E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di cas
   Ognuna ha il suo file prova con criteri congelati: **vanno applicati quelli, non
   quelli di r136/r137.** (Le 9 etichette `P0*` **non** sono in questa lista: hanno gia' il loro
   `REFERTO_ROUND_P0*.txt` in repo.)
-- ⬜ **`cemad02`**: uscita codice 2 = CSV IS vuoto. **NON MISURATO**, da rilanciare.
 - ⬜ **Prova di REGIME** per tutto il gruppo r136/r137: assente (21 mesi di solo toro).
 - ⬜ **`r136d` (trailing spento) e `r133b` (close-confirm spento)**: due assi booleani con
-  un vantaggio sopra la banda di rumore. Non promuovibili per costruzione: **finestra
-  nuova o prova di regime**. Costo stimato: una corsa ciascuno.
-- ⬜ **`r136b` cella 0,25**: DD OOS 2,10% contro 7,83% a PF piu' alto. Round suo, con il
-  sospetto di regime dichiarato (IS sotto la pari).
+  un vantaggio sopra la banda di rumore, **entrambi «NON MISURABILI»** (segno che si
+  inverte fra IS e OOS). Non promuovibili per costruzione: **finestra nuova o prova di
+  regime**. Costo stimato: una corsa ciascuno.
+- ⬜ **UN ASSE CHE SPENGA IL TRAILING LASCIANDO ACCESO IL PARZIALE**, a piu' di due celle:
+  senza quello l'effetto di `r136d` resta **non attribuito** (§2.3-bis).
+- ⬜ **`r136b` cella 0,25**: DD OOS 2,10% contro 7,83% a PF piu' alto. Round suo — ma
+  l'effetto **non e' attribuibile al primo bersaglio** finche' parziale/pari/trailing
+  restano agganciati a `beDone`.
+- ⬜ **Il buco del breakeven sulla cella regalo del DAX RESTA APERTO** (`q770be`): non lo
+  tappa questa manopola. Serve un meccanismo diverso.
 - ⬜ **Casella 4 del certificato (gemelli) per EMA200**: stanotte AUDJPY e GBPUSD sono
   stati misurati **in OHLC**. A tick reali: non fatta.
 
@@ -440,8 +657,24 @@ E per i round marcati `ohlc_`: **OHLC = screening, mai verdetti** (regola di cas
 
 La sedia migliore della flotta (**`ABTG_EMA200` U30USD H1**) stanotte ha chiuso **due
 caselle del certificato di morte** (uscita e TF) e ha retto **dieci riproduzioni su
-dieci**: la sua cella viva **non e' un picco**, sta dentro un **altopiano di cinque
-celle**, e **nessuna manopola dell'uscita la batte oltre il rumore**. Sul DAX ora
-sappiamo **quanto costa chiudere R5**: meta' del profitto fuori campione.
+dieci** — su un binario **post-patch**, quindi la patch dell'11/09 e' **neutra sul
+trading**. La sua cella viva **non e' un picco**, sta dentro un **altopiano di cinque
+celle** sullo stop, e su `r136c` **e' esattamente il CENTRO del suo altopiano**: la
+conferma piu' forte che questa notte produce, e a norma di regola di selezione.
+**Nessuna delle quattro manopole dell'uscita la batte**: su due il centro dell'altopiano
+e' **peggiore** della cella viva, su una il centro **e'** la cella viva, e la quarta
+(trailing) e' **«NON MISURABILE»** — il segno si inverte fra IS e OOS.
+Sul DAX ora sappiamo **quanto costa chiudere R5**: meta' del profitto fuori campione.
+E sul CAC sappiamo che il gemello e' **bocciato per rischio** (DD OOS 11,82%), con il
+**merito ancora non misurato**.
 🔴 **Nessuna sedia e' stata accesa, nessun preset toccato, nessun parametro in forward
-cambiato** — e il conto reale `10105439` non e' stato nominato da nessuna di queste righe.
+cambiato, e nessuna riga di questo referto tocca il conto reale.**
+
+🚦 **CANCELLO**: strato 1 (`controlla_riga.py --md`) PASS; strato 2 (`controllo-preventivo`)
+**FAIL alla prima stesura, con 9 difetti bloccanti** — tutti verificati alla fonte da me e
+tutti corretti **prima** che i verdetti uscissero dalla sessione. Quattro verdetti su
+undici erano sbagliati: `r136b`, `r136c`, `r137c` e `q770be` giudicati con criteri
+importati da un file che non li copriva, e `r138a` senza il suo IS.
+➕ E un quinto, trovato da un'altra sessione e verificato da me: **`cemad02` non era un
+round rotto, era un round riuscito** (classe 312) — avevo copiato il codice d'uscita del
+driver come se fosse un verdetto.

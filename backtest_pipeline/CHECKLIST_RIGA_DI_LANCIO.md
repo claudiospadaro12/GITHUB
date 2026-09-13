@@ -18094,3 +18094,158 @@ si legge il CSV che conta davvero, non si archivia il round.
 ### 🔑 La regola in una riga
 *Un sentinella generico non conosce le intenzioni scritte nel file prova: prima di
 leggere "vuoto" come "rotto", si controlla se il file prova lo aveva previsto.*
+
+---
+
+## 315. 📐 IL FILE FIGLIO CHE **EREDITA** LE SOGLIE DEL PADRE HA QUASI SEMPRE UN `A1-bis`, E L'`A1-bis` ROVESCIA LA LETTURA (13/09/2026)
+
+**Il caso**: `R136b_primobersaglio_U30USD.txt` r.163-168 scrive *"valgono le A1..A10
+congelate in R136a_slatr_U30USD.txt, **con UNA modifica dichiarata qui e solo per questo
+file**: **A1-bis** l'altopiano si cerca fra le SEI celle FISSE (0,25..1,50) e **la cella
+viva (0) NON deve stare nella terna**"*. Il referto della notte 12/13-09 ha letto la riga
+"valgono le A1..A10 di R136a", **non ha aperto il figlio**, e ha scritto:
+*«A1 passa su quattro celle contigue (0,00…0,75) con la viva dentro»* — cioe'
+**esattamente la configurazione che l'`A1-bis` vieta**.
+
+🟢 **Il verdetto finale non e' cambiato** (rifatto a norma: la terna e' `0,25-0,50-0,75`,
+il CENTRO per A8 e' `0,50`, PF OOS **1,40862** contro **1,52365** della viva = **−0,115**,
+quindi "il default va bene" a maggior ragione). 🔴 **Ma il numero portato era un altro**
+(il referto citava `+0,066` della 0,25, "sotto la banda di rumore"): stessa conclusione,
+ragionamento diverso — e la regola di casa dice che *la regola di selezione va dichiarata
+INSIEME al numero, altrimenti il numero non vuol dire niente*.
+
+**Trovato nello stesso giro, sui fratelli**: `R136c` ha **A1-bis** (*"l'unica terna
+contigua possibile e' 25-50-75, la cella 0 NON puo' farne parte"*) **e A2-bis** (*"la
+conversione in posizioni usa DUE fattori diversi, 1,000 per la cella 0 e 2,0117 per le
+altre tre, **e va scritta accanto a ogni numero**"*) — nessuno dei due citato, e la
+colonna "posizioni" su `r136c` **non e' stata scritta affatto**. Costo reale: applicando
+`A1-bis`+`A1-ter` di `R136c` la terna **25-50-75 PASSA A1** e **il suo centro E' la cella
+viva** — cioe' **A8: "la cella viva e' confermata e non si tocca niente"**, la conferma
+piu' forte disponibile per la sedia di punta, **non scritta da nessuna parte nel referto**.
+
+🔴 **E la faccia opposta dello stesso difetto, nello stesso documento**: criteri
+**importati** in round che non ne sono coperti — *"Asse a due celle: **A1** non puo'
+passare"* scritto su `r137c` (il cui file congela **C1..C4**, e `A1` li' **non esiste**)
+e su `r133b` (`ABTG_ORB_Ottimizzato`, file prova `R133b_filtrovolumi_U30USD.txt`, **mai
+aperto quella notte** — e il referto stesso, due paragrafi dopo, scrive la regola giusta:
+*"Ognuna ha il suo file prova con criteri congelati: vanno applicati quelli, non quelli
+di r136/r137"*).
+
+### ✅ CHE COSA SI FA
+1. **"Valgono le soglie del file X" non chiude la lettura: la apre.** Si apre il figlio e
+   si cerca il blocco `SOGLIE`, e si legge fino in fondo la frase che segue "**con**".
+   `A1-bis`, `A1-ter`, `A2-bis` sono la norma, non l'eccezione.
+2. Nel referto, **ogni sigla citata porta accanto il file che la congela**
+   (`A1 [R136a] · A1-bis [R136b]`). Una sigla senza file e' una sigla importata.
+3. Se un round non ha un file prova aperto, **non si scrive nessuna sigla**: si scrive
+   "criteri non applicati, fotografia dei numeri".
+
+### 🔑 La regola in una riga
+*Le soglie ereditate si leggono nel file che le EREDITA, non in quello che le scrive: la
+riga che conta e' quella dopo la parola «con», e un verdetto giusto ottenuto con la
+regola sbagliata resta un verdetto da rifare.*
+
+---
+
+## 316. 🎯 IL ROUND GIUDICATO SU UNA VARIABILE CHE NON E' LA SUA: il breakeven letto sul PF quando il file misurava la PEGGIOR GIORNATA (13/09/2026)
+
+**Il caso**: `q770be` (`prove/LE_QUATTRO_FIRME_02_be_regalo_ini.txt`). Il file congela,
+prima dei numeri, **la variabile e la soglia**:
+> *"una cella con `InpBEatR` > 0 si RACCOMANDA solo se la **peggior giornata di equity
+> migliora di almeno 0,05 punti percentuali** E il PF resta >= 1,40. Sotto quelle due, il
+> buco resta aperto **e si scrive che resta aperto**."*
+
+Il referto ha riportato **PF, `n` e DD**, ha concluso *"il breakeven su questa sedia e'
+MISURATO e sostanzialmente inerte"* con la spunta verde — e **non ha mai nominato la
+peggior giornata**, che e' la colonna **presente nel CSV** (`Peggior Giornata %`) e
+l'unica per cui il round esisteva.
+
+🔴 **Il dato, misurato**: OOS **−1,0793% in TUTTE E QUATTRO** le celle (0,0 / 0,5 / 1,0 /
+1,5) — miglioramento **0,0000 punti**; IS −1,0183 / −1,0179 / −1,0183 / −1,0183, cioe'
+**0,0004 punti** sulla sola 0,5, che e' anche la peggiore di PF. Contro una soglia di
+**0,05**. 👉 Il verdetto congelato e' quindi: **nessuna cella si raccomanda, e IL BUCO DEL
+BREAKEVEN SULLA CELLA «REGALO» RESTA APERTO** — cioe' l'opposto del tono rassicurante
+della spunta verde. (La sentinella del file — *"se `Trades` cambia piu' del 5% la cella
+misura la SELEZIONE, non la GESTIONE"* — **passa**: 193/193 OOS e 132/132 IS, 0%.
+Anche questo non scritto.)
+
+**Danno**: un buco di protezione su una sedia candidata (`770101`) esce dal referto
+**come "manopola inerte"** invece che **come "buco che resta aperto"**. Le due frasi
+portano a due azioni diverse, e una delle due e' non fare niente.
+
+### ✅ CHE COSA SI FA
+Prima di scrivere il verdetto di un round si rilegge **la riga del file prova che dice
+QUALE variabile decide**, e la si mette **in tabella** — anche quando la colonna e' noiosa
+e piatta. Un round si giudica sulla variabile che ha dichiarato di misurare: se si
+giudica su un'altra, non e' un verdetto piu' debole, **e' il verdetto di un altro round**.
+
+### 🔑 La regola in una riga
+*Il referto deve contenere la colonna su cui il file prova ha congelato la soglia. Se
+quella colonna non c'e' nella tabella, il verdetto non e' stato dato: e' stato sostituito.*
+
+---
+
+## 317. 🕳️ L'IGNORANZA DICHIARATA CHE E' GIA' SCRITTA NEL REPO: «[NON VERIFICATO]» costa quanto un'affermazione falsa (13/09/2026)
+
+**Il caso**: il referto della notte 12/13-09 apre con due buchi dichiarati in buona fede.
+**Tutti e due erano chiudibili con file gia' versionati**, ed e' il difetto del 10/09
+(*"prima si cerca il file che ha gia' la risposta"*) applicato a un'ignoranza invece che
+a una formula.
+
+**(a)** *"Non so se `runner_abtg.ps1` sia stato toppato o se qualcuno abbia caricato a
+mano gli zip"* → **deciso da tre letture, zero corse**:
+- `runner_abtg.ps1` r.828-833 a HEAD chiama `PubblicaFile` **solo** su `$ref`
+  (`REFERTO_RUNNER_*.txt`) e sui `*.log`, verso `backtest_pipeline/coda/referti/`:
+  **zero CSV**, e **mai** il percorso `risultati_prove/dal_vps/`. Il runner **non e'
+  stato toppato**;
+- i 98 CSV sono entrati con **98 commit distinti, UN file ciascuno**, messaggio
+  `"Risultati dal VPS: <file> (timestamp)"` — una stringa che **nel repo non esiste**
+  (`grep -rn "Risultati dal VPS" --include=*.ps1` → 0) verso un percorso che **nessuno
+  script committato scrive** (`grep -rln "dal_vps" --include=*.ps1` → 0);
+- e la **classe 311**, scritta **lo stesso giorno in questo stesso file**, descrive per
+  nome lo strumento: un **import di massa** che legge
+  `%USERPROFILE%\abtg_round\risultati_prove\` sul VPS e — dopo la correzione del
+  cancello — scrive nel sottoalbero dedicato **`risultati_prove/dal_vps/`**.
+👉 **Conclusione che si poteva scrivere ieri sera**: *"no, da stanotte i numeri NON
+arrivano da soli: il runner non pubblica CSV e lo strumento che li ha portati non e'
+versionato"* — che e' una **cosa da fare**, non un'incertezza.
+
+**(b)** *"Non posso dichiarare il collaudo della patch dell'11/09 perche' non so quale
+binario sia stato compilato"* → il log per-round **e' davvero** sovrascritto (classe 307,
+e il superstite parla di `ABTG_Nasdaq_Live5m`: **vero**). Ma la catena c'e' lo stesso:
+- `RIGA_SOTTILE_ROUND.ps1` r.55-58 dichiara che **il driver scarica il `.mq5` e gli
+  include NON dal pin, ma dalla testa del branch**, quindi *"il binario compilato e'
+  quello di `lavoro` al momento della corsa"*;
+- `git log -- mql5/Experts/ABTG_EMA200.mq5` → l'ultimo commit e' **b45dd00 dell'11/09
+  09:12** (la patch dell'imbuto) e **non c'e' niente dopo**: alle 03:30 del 13/09 la testa
+  del branch **era necessariamente** quella. `git diff <pin> HEAD -- ABTG_EMA200.mq5` e'
+  **vuoto**; il sorgente ha **690 righe** e **10 occorrenze** dell'imbuto;
+- la **toppa della classe 270** (commit `124db40`, 12/09) fa **morire** il driver su una
+  compilazione fallita invece di riusare un `.ex5` stantio — e
+  `REFERTO_RUNNER_20260913_033003.txt` (**in repo, non sovrascritto**) segna i cinque
+  round `ABTG_EMA200` **ESEGUITO … uscita 0**.
+👉 **Il collaudo si poteva dichiarare**: S1 riprodotta **dieci volte su dieci** sul
+binario **post-patch** = la patch diagnostica dell'11/09 e' **neutra sul trading** sulla
+sedia migliore della flotta — *"un risultato che oggi non ha nessuno"*, parole del file
+prova, buttato via per prudenza. Residuo onesto da scrivere accanto: **manca la stampa
+del compilatore per quei round**; la catena e' git + comportamento del driver, cioe'
+un'inferenza forte, non una riga di log.
+
+⚖️ **Perche' e' una classe e non uno scrupolo**: un `[NON VERIFICATO]` di troppo **non e'
+il lato prudente**. Costa un risultato acquisito (b) e lascia aperta un'azione necessaria
+(a) — e soprattutto **abitua a scrivere "non so" senza aver pagato i due minuti di
+`grep`**, che e' il modo esatto in cui il 09/09 sono rimasti fermi sei candidati senza
+un PF misurato.
+
+### ✅ CHE COSA SI FA
+Prima di scrivere `[NON VERIFICATO]` / `[NON MISURATO]` su un fatto di **macchina** (chi
+ha pubblicato, quale binario, quale pin, quale esito), si fanno **tre mosse, sempre le
+stesse**: `grep` della stringa nel repo · `git log` del file sospetto · lettura del
+**referto del runner**, che e' per-round e **non** viene sovrascritto. Se dopo le tre il
+fatto resta ignoto, allora il buco e' vero **e si scrive anche quali tre mosse sono state
+fatte**.
+
+### 🔑 La regola in una riga
+*«Non lo so» e' un'affermazione, e come tutte le altre va misurata prima di scriverla:
+un'ignoranza dichiarata senza aver aperto i file che stanno nella stessa cartella non e'
+prudenza, e' un'altra cosa non verificata.*
