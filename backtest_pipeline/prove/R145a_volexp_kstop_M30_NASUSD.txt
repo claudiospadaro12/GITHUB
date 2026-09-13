@@ -150,7 +150,7 @@
 #  ###  -- e come e' stato tolto, uno per uno                 ###
 # =====================================================================
 #
-#  (1) 🔴 IL PAVIMENTO DELLO STOP CHE FONDE DUE CELLE IN UNA.
+#  (1) [!] IL PAVIMENTO DELLO STOP CHE FONDE DUE CELLE IN UNA.
 #      Se InpMinSLPts valesse 7200 punti MT5 (= 72 idx, il valore che
 #      R141c usa su ABTG_AtrExhaustVol), morderebbe a kStop 1,0 (45-58
 #      idx) E a kStop 1,5 (68-87 idx): le due celle basse diventerebbero
@@ -166,7 +166,7 @@
 #          giornaliero restano come reti. E' una scelta di MISURA, e il
 #          pavimento va RIACCESO prima di qualunque forward.
 #
-#  (2) 🔴 IL PAVIMENTO DEL LOTTO (CLASSE 228) CHE INVERTE LA RISPOSTA.
+#  (2) [!] IL PAVIMENTO DEL LOTTO (CLASSE 228) CHE INVERTE LA RISPOSTA.
 #      Questo e' il difetto piu' insidioso del round, perche' spinge
 #      ESATTAMENTE nella direzione di una delle due risposte.
 #      Il lotto e' inversamente proporzionale allo stop: piu' kStop e'
@@ -209,7 +209,7 @@
 #      >>> TETTO DI VOLUME: SYMBOL_VOLUME_MAX = 100 [MISURATO, R109].
 #          Il lotto piu' grande di questo round e' 15,19: non lo tocca.
 #
-#  (3) 🔴 IL CANCELLO DI SPREAD CHE MISURA SE STESSO.
+#  (3) [!] IL CANCELLO DI SPREAD CHE MISURA SE STESSO.
 #      InpMaxSpreadPctOfStop = 2,5 e' la frontiera dei 40x, ed e' il
 #      DEFAULT dell'EA. Pinnarlo qui ucciderebbe il round: a kStop 1,0
 #      la soglia varrebbe 2,5% x 50 idx = 1,25 idx, contro una mediana
@@ -226,7 +226,7 @@
 #      >>> Il cancello a 2,5% (= la frontiera vera) e' l'asse di un
 #          ROUND SUCCESSIVO, non di questo. Una variabile alla volta.
 #
-#  (4) 🔴 L'OROLOGIO CHE RUBA I TARGET LONTANI.
+#  (4) [!] L'OROLOGIO CHE RUBA I TARGET LONTANI.
 #      Qualunque chiusura a orario (flat di seduta, venerdi') chiude a
 #      un multiplo di R qualunque e colpisce di PIU' le celle con kStop
 #      grande, perche' quelle posizioni vivono piu' a lungo: sarebbe un
@@ -241,7 +241,7 @@
 #          si puo' usare, un numero di merito confuso no. Se il motore
 #          arrivasse a una sedia, InpFridayClose va RIMISURATO acceso.
 #
-#  (5) 🔴 IL FILTRO ORARIO CHE CAMBIA IL COSTO SOTTO L'ASSE.
+#  (5) [!] IL FILTRO ORARIO CHE CAMBIA IL COSTO SOTTO L'ASSE.
 #      Acceso su 14-20, taglierebbe il 70% delle barre di decisione (14
 #      su 46 al giorno) proprio su un motore di cui NON conosciamo la
 #      frequenza. Spento, il round vede anche le ore 0-13, dove la
@@ -253,7 +253,7 @@
 #          solo migliorare. Se esce diluito, il filtro orario e' il
 #          primo asse da provare PRIMA di archiviare (motto del 09/09).
 #
-#  (6) 🔴 IL PARZIALE E IL BREAKEVEN CHE MISURANO SE STESSI.
+#  (6) [!] IL PARZIALE E IL BREAKEVEN CHE MISURANO SE STESSI.
 #      La SPEC chiede la gestione di casa (parziale a 1R, breakeven,
 #      runner a 2R) e l'EA CE L'HA, con i due blocchi INDIPENDENTI (la
 #      lezione del 07/08: il breakeven annidato dentro la parziale si
@@ -265,7 +265,7 @@
 #          SL, TP a 2R, e nient'altro. La gestione di casa e' un round
 #          suo, e si scrive DOPO, coi numeri di questo.
 #
-#  (7) 🔴 I FILTRI DELL'AUTORE (EMA50, RSI50) sono PORTATI ma SPENTI,
+#  (7) [!] I FILTRI DELL'AUTORE (EMA50, RSI50) sono PORTATI ma SPENTI,
 #      come chiede il dossier. Quindi questa cella NON e' il Pine
 #      tradotto alla lettera: e' il Pine SENZA i suoi due filtri, ed e'
 #      dichiarato. Accenderli e' un round dedicato.

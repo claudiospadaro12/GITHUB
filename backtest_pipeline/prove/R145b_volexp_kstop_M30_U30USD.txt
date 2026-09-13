@@ -97,7 +97,7 @@
 #  gestione spenta, orologi spenti, filtri dell'autore spenti). Qui
 #  cambiano DUE cose, e vanno dette:
 #
-#  (A) 🔴 IL PAVIMENTO DEL LOTTO MORDE DI PIU' SUL DOW.
+#  (A) [!] IL PAVIMENTO DEL LOTTO MORDE DI PIU' SUL DOW.
 #      lossPerLot = R(idx) x 0,87 EUR. Con ATR 70 idx (centro della
 #      banda) e passo del volume 0,10:
 #        deposito 10.000 (rischio 65 EUR):
@@ -124,7 +124,7 @@
 #      >>> TETTO DI VOLUME SYMBOL_VOLUME_MAX = 100 [MISURATO R109]: il
 #          lotto piu' grande di questo round e' 10,67. Non lo tocca.
 #
-#  (B) 🔴 IL CANCELLO DI SPREAD QUI *MORDE*, E VA DETTO PRIMA.
+#  (B) [!] IL CANCELLO DI SPREAD QUI *MORDE*, E VA DETTO PRIMA.
 #      Sulla madre InpMaxSpreadPctOfStop = 20,0 e' un no-op (soglia piu'
 #      stretta 9,0 idx contro un max misurato di 8,20). Sul Dow NO:
 #        kStop 1,0 -> stop 53-89 idx -> soglia 10,6-17,8 idx
