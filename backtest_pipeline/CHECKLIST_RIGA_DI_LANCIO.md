@@ -19277,3 +19277,85 @@ che le due sedie CONDIVIDONO, mentre l'EA e il TF (la vera firma) divergono.
    `770511` (e' provata, dal 2020 in poi in archivio, non dal 12/09). Nessun
    round di questo compito tocca `InpTP_RR` su nessuna delle due: resta
    materiale per un prossimo giro, dichiarato qui perche' trovato qui.
+
+## 337. 🧮📄 UN REFERTO PUO' CITARE LA DICHIARAZIONE **DEFAULT** DEL SORGENTE INVECE DEL **PRESET VIVO**, E IL DIFETTO PUO' PRECEDERE IL REFERTO STESSO (14/09/2026)
+
+**Caso reale.** Verificando R151a (controllo-preventivo) ho riletto
+`report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.457, riga `770402`
+(`ABTG_MaxMinNotte` XAUUSD): descriveva la geometria dello stop come
+`MM_SL_ATR, 1,5×ATR(14) M15 — r.145/148`. Letto il sorgente
+(`mql5/Experts/ABTG_MaxMinNotte.mq5`): r.145/148 sono la DICHIARAZIONE
+`input` col valore DEFAULT compilato (`InpSLMode = MM_SL_ATR`, `InpMgmtTF =
+PERIOD_M15`) — non il preset che gira davvero. Il preset VIVO
+(`mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set`) ha
+`InpSLMode=0` (= `MM_SL_OPPOSITE`, enum r.112, usato in `SLforLong`/
+`SLforShort` r.377/385) e `InpMgmtTF=16386` (H2) — e li ha **dal commit
+`9d0ff00` del 19/08/2026, TRE SETTIMANE prima** che il referto del 10/09
+fosse scritto. Il difetto non e' nato con la lettura del 10/09: era gia'
+vero quando il referto e' stato scritto.
+
+### 🔴 LA REGOLA
+1. **Quando un referto descrive "la geometria dello stop" (o qualunque
+   comportamento governato da un `input`), la citazione deve puntare al
+   PRESET VIVO (il `.set` schierato) e non alla riga `input ... = DEFAULT`
+   nel sorgente.** Le due possono differire, e qui differivano da tre
+   settimane prima che il referto nascesse — non e' un caso limite raro.
+2. **Il numero MISURATO (dai deal veri) non e' automaticamente inquinato
+   dalla formula sbagliata attribuita.** Qui i 32,94 $ [MIS n=2] e il
+   126,5x restavano corretti (vengono da `trades_auto.csv`, non da un
+   calcolo derivato dalla geometria) — ma la RIGA che spiega "perche'" era
+   falsa, ed e' esattamente il tipo di riga che un round successivo (qui
+   R151a, punto "l'asse non tocca l'ingresso") avrebbe potuto citare senza
+   controllo, propagando l'errore.
+3. **Prima di scrivere "geometria dello stop: X — r.NNN", si apre il file
+   `.set` VIVO e si legge il campo, non solo l'`input` nel `.mq5`.** Se il
+   `.set` ha un override, l'override e' la verita' operativa; il default
+   compilato conta solo per i preset che NON toccano quel campo.
+4. **Conseguenza**: `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.457
+   corretto (colonna geometria e colonna TF). Nessun verdetto 40x/13,3x
+   cambia su nessuna riga della tabella ORO.
+
+## 338. 🗂️⏳ "IL PRESET VIVO" NON E' UNO STATO FERMO: SE UN'ANCORA E' PRECEDENTE A UN COMMIT SUL `.SET`, IL CONFRONTO GIUSTO E' CON QUELLO CHE L'ANCORA HA USATO, NON CON LA LETTURA DI OGGI (14/09/2026)
+
+**Caso reale.** R151a (`prove/R151a_trailingatr_XAUUSD.txt`) dichiarava la
+propria cella "identica riga per riga alla cella di R103 (F23), che a sua
+volta e' il preset vivo... verificata campo per campo il 13/09/2026".
+Confronto fatto DAVVERO oggi (`diff` fra il blocco `Inp*` del file prova e
+`mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set` letto ora): **due
+campi non coincidono**, ed erano passati inosservati:
+- `InpMaxSpread`: file prova `0`, `.set` di oggi `150`. Il `.set` ha preso
+  150 col commit `999fee6` del 28/08/2026 (filtro anti-spread-largo
+  acceso); R103 (l'ancora) ha girato il 24/08, **prima** di quel commit —
+  quindi R103 ha davvero usato 0, e il file prova riproduce R103
+  correttamente. E' il `.set` di OGGI che si e' mosso DOPO l'ancora.
+- `InpRiskPercent`: file prova `0.5` (= la "taglia viva" dichiarata dalla
+  REVISIONE R100, firma 23/08/2026, citata in R103/CENSIMENTO_CONTRATTI).
+  Il `.set` committato mostra ANCORA `1.0`: risale al commit `9d0ff00` del
+  19/08 e **nessun commit successivo lo ha aggiornato** al taglio del
+  23/08 (`git log -p` sul file, verificato — solo due commit tocca(no) il
+  file, 19/08 e 28/08, nessuno tocca `InpRiskPercent` dopo 19/08). Qui il
+  file prova usa il numero giusto (0.5, coerente con tre fonti indipendenti
+  citate in R103), ma il `.set` **artefatto-repo** e' stale e non riflette
+  il rischio realmente in vigore da tre settimane.
+
+### 🔴 LA REGOLA
+1. **"Preset vivo" e' un file che cambia nel tempo. Quando si verifica che
+   una cella "riproduce l'ancora X", il confronto corretto e' con CIO' CHE
+   X HA USATO alla sua data di corsa — non con la lettura di oggi del
+   `.set`**, che puo' essere piu' recente (nuovo campo aggiunto) o piu'
+   vecchio (un taglio di rischio non ancora ricommittato) dell'ancora.
+2. **Un file prova che copia l'ancora ha ragione di differire dal `.set`
+   di oggi su ESATTAMENTE i campi che sono cambiati fra la data
+   dell'ancora e oggi.** Non e' un difetto del file prova: e' un difetto
+   di FRASE, se il file prova non lo dichiara. La frase "identico campo
+   per campo al preset vivo" e' diventata falsa senza che nessuno la
+   riscrivesse quando il `.set` e' cambiato dopo.
+3. **`InpRiskPercent=1.0` nel `.set` committato e' un disallineamento reale
+   fra repo e rischio in vigore (0.5%, dal 23/08) e va segnalato a
+   Claudio** — aggiornare quel campo e' una decisione di rischio/taglia
+   ([FIRMA DI CLAUDIO]), non qualcosa che un round o un cancello di
+   giudizio corregge da solo.
+4. **Conseguenza**: `prove/R151a_trailingatr_XAUUSD.txt` corretto (la frase
+   "identica riga per riga" e' stata sostituita con la dichiarazione
+   esplicita dei due campi divergenti e del perche'). Nessun numero del
+   round cambia: S1 si confronta ancora con l'ancora R103, non col `.set`.

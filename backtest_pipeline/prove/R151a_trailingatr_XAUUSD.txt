@@ -352,6 +352,22 @@
 #      cancello di costo non misura (l'ampiezza dello stop-uscita, non
 #      dello stop-ingresso). Il 126,5x resta 126,5x su tutte le 7
 #      celle, per costruzione.
+#      (citazione di riga corretta dal cancello di giudizio, 14/09/2026:
+#      InpSLMode=0=MM_SL_OPPOSITE e' l'enum a r.112, usato in SLforLong/
+#      SLforShort a r.377/385 -- non "r.31" come scritto qui prima, che
+#      e' testo di changelog, non la definizione. La lettura non cambia:
+#      InpSLMode e' davvero indipendente da InpTrailAtrMult, confermato.)
+#      >>> CORREZIONE DEL CANCELLO DI GIUDIZIO (14/09/2026, verifica R151a):
+#          `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.457 (riga 770402)
+#          descriveva la geometria come "MM_SL_ATR, 1,5xATR(14) M15", citando
+#          la DICHIARAZIONE DEFAULT del sorgente (r.145 `InpSLMode=MM_SL_ATR`,
+#          r.146 `InpMgmtTF=PERIOD_M15`), non il preset VIVO -- che ha
+#          InpSLMode=0 (box opposto) e InpMgmtTF=16386 (H2) fin dal commit
+#          9d0ff00 del 19/08/2026, TRE SETTIMANE prima che quel referto fosse
+#          scritto. Corretto direttamente nel referto (r.457). NON cambia il
+#          numero: i 32,94 $ [MIS n=2] e il 126,5x sono MISURATI dai deal
+#          veri (`trades_auto.csv`), non derivati dalla formula -- restano
+#          quelli che erano. Nuova classe in CHECKLIST_RIGA_DI_LANCIO.md.
 #
 # ----------------------------------------------------------------------
 #  BANCO E FINESTRA -- col conto, non a memoria
@@ -409,10 +425,33 @@
 @DAQUANDO 2020.01.01
 @FINOA    2026.06.30
 #
-# --- LA CELLA: identica riga per riga alla cella di R103 (F23), che a
-#     sua volta e' il preset vivo mql5/Presets/sedie_piccolo/
-#     sedia_MAXMIN_ORO_770402.set, verificata campo per campo il
-#     13/09/2026 (MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md).
+# --- LA CELLA: replica la cella di R103 (F23). CORRETTO dal cancello di
+#     giudizio il 14/09/2026: NON e' identica campo-per-campo al file
+#     mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set letto OGGI
+#     (diff fatto riga per riga, non a memoria) -- due campi divergono, e
+#     nessuno dei due e' un errore, ma ENTRAMBI vanno dichiarati:
+#       InpMaxSpread: qui 0 (filtro spento). Il .set VIVO oggi porta 150
+#         (filtro anti-spread-largo acceso dal commit 999fee6, 28/08/2026).
+#         R103 ha girato il 24/08, PRIMA di quel commit: a quella data il
+#         .set non aveva ancora il filtro, quindi 0 e' cio' che R103 ha
+#         davvero usato -- e' il preset vivo di OGGI che si e' mosso DOPO
+#         l'ancora, non questo file che sbaglia. Sotto Modello 1 (OHLC)
+#         lo spread e' comunque tipicamente sotto 150 punti, quindi il
+#         filtro e' [ATTESO INERTE anche a 150] ma [NON MISURATO qui].
+#       InpRiskPercent: qui 0.5, come R103 e come la "taglia viva"
+#         dichiarata ovunque (REVISIONE R100, firma 23/08/2026). Il file
+#         .set committato in repo mostra ANCORA 1.0: risale al commit
+#         9d0ff00 del 19/08 e non e' mai stato aggiornato dopo il taglio
+#         del 23/08 (verificato: nessun commit successivo lo tocca). E'
+#         un disallineamento fra l'ARTEFATTO REPO e il rischio realmente
+#         in vigore -- 0.5 e' il numero giusto da usare qui (coerente con
+#         R103/CENSIMENTO_CONTRATTI/CLAUDE.md), ma il file .set stesso
+#         andrebbe risincronizzato: SEGNALATO A CLAUDIO, non toccato da
+#         questo round (rischio e taglie sono [FIRMA DI CLAUDIO], A10).
+#     Nuova classe in CHECKLIST_RIGA_DI_LANCIO.md (338): "preset vivo" non
+#     e' un singolo stato fermo, e' un file che cambia nel tempo -- il
+#     confronto giusto e' con CIO' CHE L'ANCORA HA USATO, non con la
+#     lettura di oggi del file .set.
 InpUsaGuardian=true
 InpBoxStartHour=23
 InpBoxStartMin=0

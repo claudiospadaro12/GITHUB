@@ -454,7 +454,7 @@ Costo usato: **0,2603 $** = spread 0,22 (S2) + commissione MISURATA 0,0403
 
 | sedia | EA | simb | TF | conto | geometria dello stop | stop | fonte | spread+comm | **stop/spr** | **40x?** | **13,3x?** |
 |---|---|---|---|---|---|---:|---|---:|---:|:---:|:---:|
-| **770402** | MaxMinNotte | XAUUSD | M15 | 🔵 | `MM_SL_ATR`, `1,5 × ATR(14)` M15 — r.145/148 | **32,94 $** [MIS] n=2 | `trades_auto.csv` (25,23 / 40,64); opera tutte e 9 le volte all'**ora 07** | **0,2603** | **126,5x** | 🟢 **SI** | 🟢 SI |
+| **770402** | MaxMinNotte | XAUUSD | H2 | 🔵 | `MM_SL_OPPOSITE` (estremo opposto del box) — enum r.112, `InpSLMode=0` nel preset vivo dal 19/08 (`9d0ff00`), usato in `SLforLong`/`SLforShort` r.377/385 | **32,94 $** [MIS] n=2 | `trades_auto.csv` (25,23 / 40,64); opera tutte e 9 le volte all'**ora 07** | **0,2603** | **126,5x** | 🟢 **SI** | 🟢 SI |
 | **971501** | EMA200_Ottimizzato | XAUUSD | H4 | 🔵 | `1,0 × ATR(14)` oltre il 2° ordine (`Order2Atr 0.60`) — r.69/74 | **42,28 $** [MIS] n=4 | `trades_auto.csv` (25,21-70,90) | 0,2603 | **162,4x** | 🟢 **SI** | 🟢 SI |
 | **970901** | SupertrendReversal_Ott | XAUUSD | H4 | 🔵 | swing 5 barre H4 + 3 "pip" (0,03 $), `StAtrPeriod 7` | **~35,31 $** [INF] | **gemello `770901` XAUUSD**, n=3, stesso motore con `StAtrPeriod 10`; **0 gambe in stop per 970901** | 0,2603 | **~135,7x** | 🟢 SI | 🟢 SI |
 | **772343** | PunteLarry | XAUUSD | H1 | 🔵 | oltre l'estremo + `0,1 × ATR(D1)` | **61,48 $** [MIS] n=1 | `trades_auto.csv`, 1 gamba | 0,2603 | **236,2x** | 🟢 SI | 🟢 SI |
@@ -464,6 +464,16 @@ Costo usato: **0,2603 $** = spread 0,22 (S2) + commissione MISURATA 0,0403
 ⚠️ **`250604` gira su TICKMILL, non su BCM**: lo spread di Tickmill è
 **[NON MISURATO]** in casa. I due numeri sopra dicono solo *"su BCM sarebbe al
 confine"*. Verdetto: **NON ANCORA MISURATO**.
+
+✏️ **CORREZIONE DEL 14/09/2026 (cancello di giudizio, verifica R151a)**: la
+riga **770402** diceva `MM_SL_ATR, 1,5×ATR(14) M15 — r.145/148`, citando la
+dichiarazione DEFAULT del sorgente invece del preset VIVO. Il preset vivo ha
+`InpSLMode=0` (= `MM_SL_OPPOSITE`) e `InpMgmtTF=16386` (H2) dal commit
+`9d0ff00` del 19/08/2026 — **tre settimane prima** che questo referto fosse
+scritto (10/09). Corretta la colonna "geometria dello stop" e la colonna
+"TF". **Non cambia nessun numero**: i 32,94 $ [MIS n=2] e il 126,5x sono
+misurati dai deal veri (`trades_auto.csv`), non derivati dalla formula — il
+verdetto 🟢 SI resta 🟢 SI. Nuova classe: `CHECKLIST_RIGA_DI_LANCIO.md` 337.
 
 ## 5.3 🇯🇵 NIKKEI — le due sedie che il cancello mette peggio, e il perché è lo SPREAD
 
