@@ -1340,3 +1340,29 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
+
+# =====================================================================
+#  R147a/b/c -- LA TERZA FASCIA DELLE USCITE MAI PROVATE (14/09/2026
+#  notte), sulle tre sedie che pesano di piu' sul 1' ottobre (771531,
+#  770611, 770101 -- le prime due sul conto reale). Preparate dal
+#  cercatore-parametri col censimento riaggiornato (14/09: 2.184 CSV,
+#  224 coppie mai mosse e vive) e con le lezioni di stanotte incorporate
+#  (classi 315/316/317 di un'altra sessione: si apre il file figlio per
+#  intero, si giudica sulla colonna che il file dichiara di misurare).
+#  - r147a: InpBreakeven su 771531 EMA200 U30USD H1 -- l'ultima manopola
+#    d'uscita viva mai mossa su quella sedia (1 occorrenza in 21.237
+#    righe/224 CSV). Eredita A1..A10 da R136a CON eccezioni dichiarate
+#    (A1-bis/A2-bis/A7-bis), discriminante sulla colonna Trades.
+#  - r147b: InpCloseAtEnd su 770611 ORB U30USD M5 -- UNICA manopola viva
+#    mai mossa (1 in 800 righe/59 CSV). -Deposito 10000 e' voluto (la
+#    stessa taglia di R119, non 100000): cambiarlo romperebbe l'ancora.
+#  - r147c: InpCloseAtEnd su 770101 DAX_Apertura D30EUR M5 -- ultima
+#    viva mai mossa (1 in 2.817 righe/84 CSV). Discriminante sulla
+#    colonna Peggior Giornata % (classe 316).
+#  Pin: 26 giro (b3603c7). controlla_prova.py: 3 file, 6 celle,
+#  12 passate, 0 problemi. Restano #DISARMATA# finche' non arriva il
+#  secondo giudizio.
+# =====================================================================
+#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
+#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
+#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
