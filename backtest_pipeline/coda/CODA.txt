@@ -1454,3 +1454,29 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati.
 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bL_lato_long_NASUSD.txt -Etichetta r148bl -Modello 4 -Deposito 100000
 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bS_lato_short_NASUSD.txt -Etichetta r148bs -Modello 4 -Deposito 100000
+# =====================================================================
+#  R150a -- L'ULTIMA MANOPOLA D'USCITA DI 770203 (ABTG_Nasdaq_Live5m),
+#  InpTrailStartR, MAI PRIMA MESSA AD ASSE. 7 celle (0/0,5/1,0/1,5/2,0/
+#  2,5/3,0), 14 passate.
+#
+#  Consegnata (bdfb7b9): FAIL al secondo giudizio -- classe 331 NUOVA
+#  (il cancello duro del file era un teorema FALSO: assumeva che la
+#  soglia "1R" del parziale fosse costante fra celle, ma InitialSL()/
+#  riskDist dell'EA ricade su ATR(14)*1,5 appena il trailing supera
+#  l'entry, quindi "1R" NON e' comparabile fra celle con InpTrailStartR
+#  diverso -- STESSA classe di difetto di una classe 300 gia' pagata su
+#  QUESTO STESSO EA). Corretto PRIMA di riconsegnare (non dopo):
+#  declassato da cancello duro a sentinella unica (S1: x=0 deve
+#  riprodurre BIT PER BIT R142c, PF OOS 0,99949 / DD 33,6209 / n=195 /
+#  InpUseTrailing=0 -- verificato indipendentemente sul CSV) + due
+#  attese dichiarate come tali (non garantite): n(x) non-decrescente, e
+#  x>=3,0 strutturalmente uguale a "trailing spento". Due correzioni
+#  minori (un hash di commit citato sbagliato, la conclusione restava
+#  vera; un multiplo di costo ricalcolato da 12,63x a 8,89x -- il
+#  13,33x mediano richiesto resta confermato).
+#  Contenuto corretto: 02f2835. Pin: giro di pin 502487b (31mo,
+#  bb654a9 -> 02f2835). $SHA_ROUND e $SHA_WALK invariati (diff vuoto).
+#  Bersaglio: banco C:\MT5_Backtest (demo 50504400). Nessuna sedia viva
+#  toccata, nessun parametro di rischio.
+# =====================================================================
+502487b175d2b9e5fbf7931477ed2fa3df49bd4f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R150a_uscita_nasdaqlive5m.txt -Etichetta r150a -Modello 4 -Deposito 10000
