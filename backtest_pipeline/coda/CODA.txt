@@ -1369,5 +1369,21 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  dove i tre file R147 non esistevano -> 404 garantito. Trovato dal
 #  secondo giudizio.
 07e7bb5c1f812f73aedbbc63117ade10d7e4b73f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
-#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
-#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
+#  >>> r147b/r147c: RISCRITTI il 14/09 per la CLASSE 318 (il verso di n
+#  era dichiarato al contrario: la posizione riportata alla notte TOGLIE
+#  la giornata dopo, non la raddoppia -- HandleOCO r.341/1029 sull'ORB,
+#  guardia anti-duplicato r.594-602 sul DAX). Contenuto corretto in
+#  96d91bd (X), giro di pin in 82794a3 (Y).
+#  Il pin di coda qui sotto e' Y, cioe' il commit DEL GIRO DI PIN, non
+#  quello del contenuto (classe 265, gia' pagata su queste due righe il
+#  14/09): dentro Y lo script porta $PIN = 96d91bd, e a 96d91bd i due
+#  file prova esistono e sono byte-identici alla copia locale
+#  (verificato con git cat-file -e e git show | diff -q).
+#  $SHA_ROUND e $SHA_WALK NON cambiano fra b3603c7 e 96d91bd (diff vuoto
+#  sui due percorsi): nessun round in coda muore sull'impronta.
+#  controlla_riga.py --oggetto prova e controlla_prova.py: OK su tutti e
+#  due (2 celle, 4 passate, 0 problemi). Restano #DISARMATA#: il PASS del
+#  secondo strato lo da' 'controllo-preventivo' nella sessione
+#  principale, non chi ha scritto la correzione.
+#DISARMATA# 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
+#DISARMATA# 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
