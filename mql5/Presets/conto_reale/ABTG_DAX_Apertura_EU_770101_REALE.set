@@ -62,7 +62,7 @@ InpSLMode=0
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
 InpTP1_R=1.0
-InpTP1_ClosePct=50.0
+InpTP1_ClosePct=0.0
 InpBreakevenAtTP1=true
 InpBEatR=0.0
 InpUseTrailing=true
@@ -101,6 +101,21 @@ InpMagic=770101
 InpMaxSpread=0
 InpVerbose=true
 
+; --------------------------------------------------------------
+; 14/09: FIRMA r137c (Claudio). InpTP1_ClosePct 50 -> 0: PF OOS
+;        1,39709 -> 1,49140, DD OOS 7,2328% -> 6,2719%, a parita'
+;        di 193 posizioni (report/RISPOSTA_A_MARCO_DOSSIER... no,
+;        vedi backtest_pipeline/prove/R137c_parziale_770101_D30EUR.txt
+;        e report/PIANO_PROP.md riga L1). NOTA sul meccanismo: a
+;        ClosePct=0 il blocco parziale (riga ~1899 dell'EA) non
+;        entra MAI, e InpBreakevenAtTP1 e' annidato dentro quel
+;        blocco -> anche il breakeven al 1o obiettivo smette di
+;        scattare (non solo la chiusura parziale). Il trailing
+;        (InpTrailStartR=0, arma da subito, 410 punti fissi) resta
+;        attivo indipendentemente e copre la posizione da riga 1,
+;        ma non e' un breakeven istantaneo a 1R. I CSV di r137c
+;        misurano ESATTAMENTE questo comportamento (non un'ipotesi):
+;        il DD OOS scende comunque, 7,2328% -> 6,2719%.
 ; --------------------------------------------------------------
 ; 06/09: input dell EA che il preset NON copriva. Il valore qui
 ;        scritto e IDENTICO al default compilato, quindi il
