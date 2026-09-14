@@ -18284,3 +18284,87 @@ il riarmo invece di permettere un doppione.
 *Un meccanismo dichiarato senza aver letto le prime righe di `OnTick()` e' una
 supposizione: il verso di un effetto sul numero di operazioni si legge nel codice che
 gira per primo, non nella guardia piu' vicina al parametro che si sta studiando.*
+
+---
+
+## 319. 🎚️💤 LA MANOPOLA CITATA COME ATTIVA E' INERTE: il valore c'e' nel preset, ma il SELETTORE di modalita' lo esclude (14/09/2026)
+
+**Il caso**: la firma della cella `r137c` sul **conto REALE 10105439**
+(`mql5/Presets/conto_reale/ABTG_DAX_Apertura_EU_770101_REALE.set`, magic `770101`,
+`InpTP1_ClosePct` 50 -> 0) portava un commento che spiegava il meccanismo cosi':
+> *"Il trailing (InpTrailStartR=0, arma da subito, **410 punti fissi**) resta attivo
+> indipendentemente e **copre la posizione da riga 1**"*
+
+🔴 **Tutti e due i pezzi in grassetto sono falsi, e il preset stesso lo dimostra
+otto righe piu' sotto**:
+- `InpTrailFixedPts=410.0` c'e' davvero, ma `InpTrailMode=1` = `ABTG_TRAIL_PREVBAR`
+  (`ABTG_DAX_Apertura_EU.mq5` r.240-244). I 410 punti si applicano **solo** con
+  `InpTrailMode=2` = `ABTG_TRAIL_FIXED` (r.2005-2006). Nella cella firmata il trailing
+  e' alla **base della candela M5 precedente**, non a distanza fissa. Il numero era
+  **scritto nel file che si stava firmando**: bastava leggere la riga accanto.
+- `trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR)` (r.1980) rende il
+  trailing **ARMATO** dal primo tick, vero. Ma lo stop si **sposta** solo se
+  `newSL > sl && newSL > openP` (r.1986): finche' il minimo della candela precedente
+  non sta **sopra l'ingresso**, la posizione resta allo **stop iniziale pieno**.
+  **Armato != coperto**, e la differenza e' tutto il rischio della prima fase del trade.
+
+⚠️ **Perche' e' una classe e non un refuso**: il commento serviva proprio a spiegare
+**che cosa protegge la posizione** dopo che la stessa firma aveva spento il breakeven a
+1R (`InpBreakevenAtTP1` e' annidato dentro il blocco `InpTP1_ClosePct > 0`, r.1899 e
+r.1931: a `ClosePct=0` non scatta piu'). Cioe': l'unica frase che descriveva la rete di
+sicurezza rimasta **descriveva una rete che non c'e' in quella forma**, su un file
+destinato al **conto reale**.
+
+### ✅ CHE COSA SI FA
+Quando un commento, un referto o un file prova cita il **valore** di una manopola come
+spiegazione di un comportamento, si controlla **prima** il suo **selettore di modalita'**
+(`...Mode`, `...Type`, un `enum`, un `bool` di abilitazione): un valore presente in un
+preset **non e' un valore usato**. La verifica e' `grep` del nome dell'input nel sorgente
+e lettura del `if` che lo racchiude — su `ABTG_DAX_Apertura_EU` erano **due righe**
+(r.2005 e r.2018).
+
+E la stessa lettura vale per l'inverso: le manopole che restano scritte nel preset ma
+diventano **inerti** per effetto della firma (qui `InpBreakevenAtTP1=true` e
+`InpTrailFixedPts=410`) si **dichiarano inerti nel commento**, altrimenti il prossimo
+che legge il file crede che siano attive. Lasciarle scritte e' giusto (il preset deve
+restare **identico byte per byte alla cella misurata**): va dichiarato che non mordono.
+
+### 🔑 La regola in una riga
+*Un valore in un preset non e' un comportamento: prima di spiegare un meccanismo col
+valore di una manopola, si legge il selettore che decide se quella manopola viene
+guardata — e se e' inerte, lo si scrive accanto.*
+
+---
+
+## 320. ✂️🧟 IL FRAMMENTO DI AUTO-CORREZIONE LASCIATO DENTRO IL FILE CONSEGNATO (14/09/2026)
+
+**Il caso**: lo stesso preset del conto reale della classe 319 conteneva, in chiaro,
+questa riga di commento:
+```
+;        di 193 posizioni (report/RISPOSTA_A_MARCO_DOSSIER... no,
+;        vedi backtest_pipeline/prove/R137c_parziale_770101_D30EUR.txt
+```
+Il `... no,` e' il residuo di un ripensamento mentre si scriveva: una fonte sbagliata
+iniziata, abbandonata a meta' e **non cancellata**. Il file era gia' **committato e
+pushato** (`40488a2` su `origin/lavoro`) e stava per andare a Claudio per l'applicazione
+**manuale sul conto reale 10105439**.
+
+🔴 Non e' estetica: il file che accompagna una firma sul conto reale e' l'unico posto
+dove, fra sei mesi, si leggera' **perche'** quella manopola e' a `0`. Una fonte
+inventata a meta' dentro quella spiegazione e' esattamente il *"DD del 42,9% fantasma"*
+del 09/09, in scala piu' piccola.
+
+### ✅ CHE COSA SI FA
+Prima di consegnare **qualunque** file scritto a mano (preset, file prova, referto),
+si rilegge il testo aggiunto cercando i **marcatori di ripensamento**: `... no`, `oppure`,
+`cioe' no`, `TODO`, `XXX`, `???`, un percorso troncato da `...`. E **ogni percorso citato
+in un commento si apre**: se il file non esiste o non contiene quello che gli si
+attribuisce, la citazione si toglie. Qui `report/PIANO_PROP.md` riga L1 esisteva ed era
+corretta; `report/RISPOSTA_A_MARCO_DOSSIER_2026-09-14.md` **esiste ma non c'entra nulla**
+— e' la risposta al terzo documento di Marco, **zero occorrenze** di `r137c` e di
+`InpTP1_ClosePct`. Cioe' il caso peggiore: una citazione che **supera** il controllo
+"il file esiste?" e fallisce quello vero, *"il file dice questa cosa?"*.
+
+### 🔑 La regola in una riga
+*Un commento consegnato si rilegge come se lo avesse scritto un altro: i frammenti di
+ripensamento e i percorsi troncati sono bugie che invecchiano bene.*

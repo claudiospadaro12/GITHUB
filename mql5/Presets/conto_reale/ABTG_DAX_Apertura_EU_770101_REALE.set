@@ -102,20 +102,54 @@ InpMaxSpread=0
 InpVerbose=true
 
 ; --------------------------------------------------------------
-; 14/09: FIRMA r137c (Claudio). InpTP1_ClosePct 50 -> 0: PF OOS
-;        1,39709 -> 1,49140, DD OOS 7,2328% -> 6,2719%, a parita'
-;        di 193 posizioni (report/RISPOSTA_A_MARCO_DOSSIER... no,
-;        vedi backtest_pipeline/prove/R137c_parziale_770101_D30EUR.txt
-;        e report/PIANO_PROP.md riga L1). NOTA sul meccanismo: a
-;        ClosePct=0 il blocco parziale (riga ~1899 dell'EA) non
-;        entra MAI, e InpBreakevenAtTP1 e' annidato dentro quel
-;        blocco -> anche il breakeven al 1o obiettivo smette di
-;        scattare (non solo la chiusura parziale). Il trailing
-;        (InpTrailStartR=0, arma da subito, 410 punti fissi) resta
-;        attivo indipendentemente e copre la posizione da riga 1,
-;        ma non e' un breakeven istantaneo a 1R. I CSV di r137c
-;        misurano ESATTAMENTE questo comportamento (non un'ipotesi):
-;        il DD OOS scende comunque, 7,2328% -> 6,2719%.
+; 14/09: FIRMA r137c (Claudio). InpTP1_ClosePct 50 -> 0.
+;   LA MISURA
+;        PF  OOS 1,39709 -> 1,49140   DD OOS 7,2328% -> 6,2719%
+;        PF  IS  1,12634 -> 1,18323   DD IS  5,4362% -> 4,9576%
+;        A PARITA' DI POSIZIONI: 193 in OOS e 132 in IS nelle due
+;        celle. ATTENZIONE leggendo i CSV: la colonna "Trades"
+;        conta i DEAL, quindi mostra 270 -> 193 (OOS) e 175 -> 132
+;        (IS). Non e' una perdita di operazioni: la parziale
+;        spezzava una posizione in due deal. Il conteggio per
+;        POSIZIONE e' fatto sui per-trade (position_id distinti).
+;   LE FONTI
+;        backtest_pipeline/prove/R137c_parziale_770101_D30EUR.txt
+;        risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/
+;          ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r137c.csv
+;        report/PIANO_PROP.md riga L1.
+;        Questo preset e' la cella misurata su 82 input su 82: le
+;        uniche due differenze sono InpRiskPercent 1,0 -> 0,65
+;        (taglia del conto reale) e InpMagic 786201 -> 770101.
+;   IL MECCANISMO -- letto sul sorgente, non dedotto
+;        a) a ClosePct=0 il blocco della parziale (r.1899 di
+;           ABTG_DAX_Apertura_EU.mq5: if(!partialDone &&
+;           InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)) non
+;           entra MAI;
+;        b) InpBreakevenAtTP1 (r.1931) e' ANNIDATO dentro quel
+;           blocco: quindi smette di scattare anche il breakeven
+;           al 1o obiettivo, non solo la chiusura parziale.
+;           InpBreakevenAtTP1=true qui sotto resta scritto perche'
+;           e' identico alla cella misurata, ma e' INERTE;
+;        c) InpBEatR=0 lascia spento anche il breakeven
+;           INDIPENDENTE (r.1945, attivo solo se > 0), in tutte e
+;           due le celle: nessun altro breakeven sostituisce
+;           quello perso;
+;        d) resta il TRAILING (r.1981), che e' FUORI da quel
+;           blocco e con InpTrailStartR=0 e' ARMATO dal primo
+;           tick. MA "armato" NON vuol dire "coperto": con
+;           InpTrailMode=1 (= PREVBAR) lo stop si sposta solo
+;           quando il MINIMO della candela M5 precedente sta
+;           SOPRA il prezzo d'ingresso (r.1986: newSL > sl &&
+;           newSL > openP). Fino a quel momento la posizione
+;           resta allo STOP INIZIALE PIENO.
+;           InpTrailFixedPts=410 NON si applica: vale solo con
+;           InpTrailMode=2 (FIXED). E' scritto sotto perche' e'
+;           nella cella misurata, ma qui e' inerte.
+;   IN UNA RIGA: si scambia il breakeven a 1R con il trailing di
+;        struttura. Nella prima fase del trade il rischio per
+;        operazione e' PIU' ALTO, e i CSV hanno misurato lo stesso
+;        un DD piu' BASSO in tutte e due le finestre. Il numero
+;        vince sull'intuizione, ma il meccanismo va saputo.
 ; --------------------------------------------------------------
 ; 06/09: input dell EA che il preset NON copriva. Il valore qui
 ;        scritto e IDENTICO al default compilato, quindi il
