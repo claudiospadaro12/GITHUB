@@ -18558,3 +18558,62 @@ Per ogni misura citata a sostegno di un'attesa:
 ### 🔑 La regola in una riga
 *Una finestra si presta fra simboli, un **regime** no: il calendario e' della
 Terra, il toro e' di chi sale.*
+
+---
+
+## 324. 🔐🤝 LO SCRIPT CHE PARLA CON `api.github.com` SENZA LA RIGA DEL TLS 1.2: non carica NIENTE, e la colpa sembra del token (14/09/2026)
+
+**Il caso reale**: ricostruzione di `carica_risultati.ps1` (lo strumento non
+versionato che il 13/09 ha portato nel repo i **98 CSV** di
+`risultati_prove/dal_vps/`, classe 307 + 311). Cancello deterministico **verde**
+(ASCII puro, 0 errori dal parser vero, nessun costrutto di pwsh 7), percorso di
+destinazione **isolato** come vuole la 311 — e **nessuna** riga di TLS.
+
+🔴 Windows PowerShell 5.1 usa il default di `ServicePointManager`: su una macchina
+senza `SchUseStrongCrypto` si presenta in **TLS 1.0**, che GitHub rifiuta dal 2018.
+Esito: `Could not create SSL/TLS secure channel` su **ogni** chiamata, **0 file
+caricati**, e un elenco di FALLITI che somiglia a un problema di token o di rete.
+Peggio: **dipende dalla macchina**, quindi puo' funzionare in prova e morire sul VPS.
+
+**La misura che lo dimostra senza girare**: nel repo **tutti** gli script che
+toccano l'API hanno quella riga — `runner_abtg.ps1` r.104, `pubblica_trades.ps1`
+r.57, `pubblica_risultati.ps1`, `coda_weekend.ps1`, `scarica_pagella.ps1` r.24,
+`RIGA_ROUND_VPS.ps1` r.101. Uno che non ce l'ha **e' fuori convenzione**, e la
+convenzione qui e' stata pagata.
+
+### 🔑 La regola in una riga
+*Se in uno script compare `api.github.com` o `raw.githubusercontent.com`, la riga
+`[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12`
+deve stare sopra la prima chiamata: si controlla con un grep, non con la fiducia.*
+
+---
+
+## 325. 📋🚪 LO SCRIPT «DA INCOLLARE IN CONSOLE»: la guardia con `return` NON ferma le righe dopo, e una riga VUOTA dentro un blocco lo spezza (14/09/2026)
+
+**Il caso reale**: stesso `carica_risultati.ps1`. La 311 aveva gia' tolto `exit` e
+`param()` (chiudono la finestra / non si legano in console). Restavano due cose,
+e sono **diverse** da quelle:
+
+1. 🔴 **`if (-not $tok) { ...; return }` a livello TOP.** Eseguito come FILE ferma
+   tutto. **Incollato**, no: la console esegue ogni statement top-level per conto
+   suo, il `return` chiude solo quel blocco e **le righe dopo partono lo stesso**.
+   Senza token si arrivava al ciclo con l'header vuoto: fino a **2 chiamate non
+   autenticate per file** (limite per IP: 60/ora), tutte 401, e un referto pieno
+   di FALLITI che non dice la causa vera.
+   ✅ **Si toglie la dipendenza dal `return`**: la guardia non "esce", **non
+   riempie la lista**. Lista vuota = ciclo che non parte, in tutti e due i modi.
+   Controllo meccanico: *nessun `return` a profondita' di graffe 0* (i `return`
+   stanno solo dentro le funzioni).
+2. 🔴 **Righe VUOTE dentro un blocco multiriga.** Nel console host 5.1 una riga
+   vuota al prompt di continuazione `>>` **chiude l'input**: se il blocco non e'
+   finito, il pezzo incollato muore con *"manca la parentesi graffa di chiusura"*.
+   ✅ Dentro i blocchi i separatori sono **righe di commento**, mai vuote. Fra gli
+   statement top-level le righe vuote restano (li' sono innocue).
+
+📌 **E il banco che lo prova esiste**: `Invoke-RestMethod` e `Start-Sleep` stubbati,
+stato finto del repo, quattro casi (normale / senza token / senza sorgente / con i
+filtri). ⚠️ Trappola trovata **scrivendo il banco**: chiamare `$global:REPO` la
+mappa finta la fa **schiacciare dallo `$Repo = "github"` dello script** — i nomi di
+variabile in PowerShell sono **insensibili al maiuscolo**, e il banco certificava
+"tutto NUOVO" mentre il ramo IDENTICO non era mai stato eseguito. Un banco che non
+si rompe mai non e' un banco.
