@@ -18922,3 +18922,74 @@ n(x) = (giornate con canale >= x) x (tasso di innesco a quella larghezza) x (op/
 4. **Il fattore confondente si isola con una misura, non con una frase**: qui
    `n(0)` fra le due larghezze, dove il cancello non morde e la differenza e'
    **tutta** tasso di innesco.
+
+---
+
+## 331. 🧮🔀 IL TEOREMA SU `n` COSTRUITO SU UNA GRANDEZZA CHE L'EA **RICALCOLA A RUNTIME**: `riskDist` non e' "1R", e il cancello duro scattava sul sano (14/09/2026)
+
+**Caso reale.** `backtest_pipeline/prove/R150a_uscita_nasdaqlive5m.txt` (commit
+`bdfb7b9`), asse `InpTrailStartR` su `ABTG_Nasdaq_Live5m`. Il file congelava
+**tre soglie di CATENA ROTTA**, e due erano dedotte da un teorema:
+
+> *"una parziale avviene se la posizione tocca 1R; fino a 1R alzare
+> `InpTrailStartR` puo' solo TOGLIERE modifiche allo stop; quindi l'insieme
+> delle posizioni che toccano 1R **cresce** con x"* → `n(x)` non-decrescente,
+> **cancello duro**, con la clausola *"se salta non si legge NESSUN PF"*.
+
+🔴 **Il passaggio falso e' "il livello 1R e' lo stesso in tutte le celle".**
+Letto nel codice, `ABTG_Nasdaq_Live5m.mq5`:
+
+```
+r.985   target   = openP + dirSign*riskDist*InpTP1_R     <- il "1R" della parziale
+r.973   riskDist = openP - InitialSL(openP, sl, type)
+r.974   if(riskDist <= 0) riskDist = AtrValue()*InpAtrSlMult
+r.1088  InitialSL: se gPartialDone o curSL==0 -> ATR*mult, altrimenti lo SL CORRENTE
+```
+
+`riskDist` e' **ricalcolato a ogni tick** e **non e' lo stop iniziale**: e'
+*lo stop corrente*. E il trailing sposta lo stop **sopra l'ingresso**
+(r.1046/1052 pretendono `newSL > openP`), quindi `openP - curSL` diventa
+**negativo** e scatta il ripiego di r.974: da quel tick il metro di R e'
+`ATR(14) x 1,5`, non l'ampiezza del range.
+
+👉 **Conseguenza**: la cella `x=0` (trailing che arma al primo tick) passa al
+metro ATR **prima** delle celle `x>0`. Se `ATR x 1,5` e' piu' corto della
+distanza vera (31-54 idx su questo EA: ampiezza 17-40 + 2x7 di buffer), la
+cella `x=0` ha un **"1R" piu' vicino** e la parziale le scatta su un movimento
+**piu' piccolo**. `n(0) > n(0,5)` e' un esito **possibile su binario SANO** →
+il cancello duro avrebbe cestinato il round buono. **E' la classe 300 di nuovo**
+(falsificatore che scatta sull'ipotesi vera), pagata sullo **stesso EA**.
+
+**Secondo danno, stesso difetto.** Il file vendeva l'asse come *"interpolazione
+fra due celle gia' misurate"*, con `x>=3,0` = *"trailing spento per
+costruzione, perche' il TP sta a 3R"*. Ma il TP usa `dist` **dell'ordine**
+(r.663-665, fissata al piazzamento), mentre l'armamento usa `profR` con
+`riskDist` **mutevole**: **due metri diversi**. `profR` puo' toccare 3,0 molto
+prima che il prezzo arrivi al TP. L'unica caveat dichiarata era *"gap o
+slippage a 3R"* — cioe' la ragione **piccola e sbagliata** al posto di quella
+grande.
+
+### 🔴 LA REGOLA
+1. **Un simbolo nel codice non e' la grandezza che il suo nome promette.** Prima
+   di costruire un teorema su `R`, `rischio`, `stop iniziale`, `entry`, si
+   **apre la funzione che lo produce** e si guarda se e' **stato** o **costante**.
+   Qui bastava leggere `InitialSL()`: si chiama "stop iniziale" e **restituisce
+   quello corrente**.
+2. **Se la grandezza e' ricalcolata a runtime, il teorema di contenimento non si
+   trasferisce** — e' la stessa frattura della classe 330 (insieme filtrato vs
+   evento a valle), qui per **mutazione del riferimento** invece che per
+   selezione.
+3. **Sopravvive solo il cancello che e' una RIPRODUZIONE**: `n(x=0)` deve dare il
+   numero gia' misurato. Non dipende da nessuna deduzione, solo dall'identita' del
+   binario. Tutto il resto si declassa ad **attesa dichiarata**, con scritto
+   **prima** quale lettura applicare se salta.
+4. **Due "3R" nello stesso EA vanno confrontati per DENOMINATORE, non per nome.**
+   Se il TP e la soglia di gestione non dividono per la stessa distanza, non
+   coincidono, e nessuna cella e' "l'estremo per costruzione".
+
+### 🟢 E LA PARTE CHE ANDAVA BENE, perche' un elenco di soli difetti descrive male
+Il round era **sano nella sostanza** e ha girato: asse reale e non inerte, 7 celle,
+ancoraggio `x=0` esatto (a zero il test e' un corto circuito e il codice e' bit per
+bit quello di R142c), deposito coerente con l'archivio, sedia non viva, attesa e
+smentita dichiarate **prima** dei numeri. **Il difetto non era il round: erano i
+cancelli.** Corretto in `1da59d3`, senza toccare una sola cella della griglia.
