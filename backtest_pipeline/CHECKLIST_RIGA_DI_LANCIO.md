@@ -18249,3 +18249,38 @@ fatte**.
 *«Non lo so» e' un'affermazione, e come tutte le altre va misurata prima di scriverla:
 un'ignoranza dichiarata senza aver aperto i file che stanno nella stessa cartella non e'
 prudenza, e' un'altra cosa non verificata.*
+
+---
+
+## 318. LA POSIZIONE RIPORTATA ALLA NOTTE NON AGGIUNGE INGRESSI, LI TOGLIE (14/09/2026)
+
+**Il caso**: due file prova (`R147b_flatfineseduta_U30USD.txt` su `ABTG_ORB_Ottimizzato`,
+`R147c_flatfineseduta_D30EUR.txt` su `ABTG_DAX_Apertura_EU`) mettevano ad asse una
+manopola di chiusura a fine seduta, dichiarando come "il fatto piu' importante di tutto
+il file" che senza quella chiusura *"il giorno dopo l'EA si riarma lo stesso, e puo'
+aprire una SECONDA posizione sopra la prima"* — quindi `n` atteso in **salita**.
+
+🔴 **Il codice fa il contrario, in due modi indipendenti**:
+- **ORB**: `HandleOCO()` (chiamata in cima a `OnTick()`) cancella TUTTI i pendenti se
+  trova una posizione aperta (`if(SelPos()) CancelPendings();`). Con una posizione
+  riportata dalla notte, il pendente del nuovo giorno viene cancellato al tick
+  successivo a quello in cui e' stato piazzato: **giornata persa, non raddoppiata**.
+- **DAX_Apertura_EU**: la guardia anti-duplicato forza `gPhase=PH_PLACED` non appena
+  trova una posizione aperta, **prima** che il range della nuova seduta si costruisca:
+  **zero ingressi** quel giorno.
+
+Il file citava solo la guardia "un trade al giorno" e `InpMaxPosSimbolo=0` (vero, ma
+non basta): non aveva letto le **prime righe di `OnTick()`**, dove sta il vero
+meccanismo.
+
+### ✅ CHE COSA SI FA
+Prima di dichiarare il verso di un effetto su `n` legato a "una posizione che resta
+aperta da un giorno all'altro", si leggono le righe che girano **a ogni tick, prima**
+di qualunque guardia specifica della manopola (`HandleOCO`, gestori OCO, guardie
+anti-duplicato): su un EA a pendenti o a fase, una posizione aperta spesso **blocca**
+il riarmo invece di permettere un doppione.
+
+### 🔑 La regola in una riga
+*Un meccanismo dichiarato senza aver letto le prime righe di `OnTick()` e' una
+supposizione: il verso di un effetto sul numero di operazioni si legge nel codice che
+gira per primo, non nella guardia piu' vicina al parametro che si sta studiando.*
