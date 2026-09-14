@@ -1427,4 +1427,8 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  spread orario e profondita' tick XAUUSD), non escluso.
 #  Pin: giro di pin 9c2e09e (28mo, 96d91bd -> e373c0b). $SHA_ROUND e
 #  $SHA_WALK invariati (verificato col path corretto).
-9c2e09ed2175faa09752b5347fba8fe3f706fef1 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
+#  >>> RIPINNATA il 14/09 (29mo giro, 9c2e09e -> 1268b33): corretta la
+#  banda di frequenza IS/OOS dichiarata (leggeva giorni di calendario
+#  come feriali -- trovato dall'agente che scriveva R148b). Non cambia
+#  nessun verdetto, cambia il numero che il CSV deve confermare.
+44fc20e81fea55d120178e1fb5919eff9d4ab2d5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
