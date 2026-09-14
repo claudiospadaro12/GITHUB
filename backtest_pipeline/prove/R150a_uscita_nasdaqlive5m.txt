@@ -120,15 +120,21 @@
 #
 #  >>> PERCHE' NON E' PESCA (regola del 19/08: niente griglie nuove su
 #      un motore senza edge). Questo asse NON aggiunge un parametro
-#      libero: INTERPOLA FRA DUE PUNTI GIA' MISURATI.
-#        x = 0      -> e' la cella R142c "trailing ACCESO"  (misurata)
-#        x >= 3,0   -> il TP dell'ordine sta a 3R (r.763-769: TpTotalR =
-#                      InpTP1_R*3 = 3,0; r.665/682: tp = entry +-
-#                      dist*TpTotalR), quindi il trailing non arma mai
-#                      prima che il TP chiuda: e' la cella R142c
-#                      "trailing SPENTO"                   (misurata)
-#      Il round misura la FORMA della curva fra due estremi noti, non
-#      cerca un picco in un campo aperto. E la domanda e' una sola:
+#      libero: PARTE DA UN PUNTO GIA' MISURATO e cammina verso un
+#      secondo punto misurato.
+#        x = 0      -> e' la cella R142c "trailing ACCESO"  (misurata).
+#                      ANCORAGGIO ESATTO, e non per convenzione: a r.1040
+#                      il test e' (InpTrailStartR <= 0) || ..., cioe' a
+#                      zero la condizione e' un corto circuito e il
+#                      codice eseguito e' BIT PER BIT quello di R142c.
+#        x >= 3,0   -> ATTESO vicino alla cella R142c "trailing SPENTO",
+#                      NON identico per costruzione. Il perche' sta piu'
+#                      sotto (### IL DENOMINATORE CHE CAMBIA ###) e va
+#                      letto PRIMA dei numeri: il TP e la soglia di
+#                      armamento NON sono misurati sulla stessa unita'.
+#      Il round misura la FORMA della curva fra un estremo ancorato e un
+#      estremo atteso, non cerca un picco in un campo aperto. E la
+#      domanda e' una sola:
 #      >>> ESISTE UN RITARDO CHE PRENDE IL PF DEL TRAILING SPENTO SENZA
 #          PRENDERNE IL DRAWDOWN?
 #
@@ -155,37 +161,78 @@
 #       R142b aveva congelato "l'n deve restare IDENTICO fra le celle",
 #       un falsificatore che scattava sull'ipotesi VERA.)
 #
-#  (C) PERCIO' n(x) E' NON-DECRESCENTE IN x, E NON E' UNA STIMA.
-#      Una parziale avviene se la posizione tocca 1R (r.977-999).
-#      Fino a 1R, alzare InpTrailStartR puo' SOLO TOGLIERE modifiche
-#      allo stop (r.1040): lo stop resta quello iniziale invece di
-#      salire sotto il prezzo. Una posizione che con x=0 arriva a 1R ci
-#      arriva anche con x maggiore (stessa sequenza di tick, un vincolo
-#      di uscita in meno); una che con x=0 veniva tagliata prima puo'
-#      arrivarci. L'insieme delle posizioni che toccano 1R CRESCE con x.
-#      >>> E' contenimento di insiemi, come il teorema di R149a: non e'
-#          un'attesa, e' una proprieta' del codice.
+#  (C) ATTESO n(x) NON-DECRESCENTE IN x -- MA E' UN'ATTESA, NON UN
+#      TEOREMA, E LA DIFFERENZA E' STATA PAGATA IN CASA.
+#      Il ragionamento ingenuo suona cosi': una parziale avviene se la
+#      posizione tocca 1R (r.977-999); fino a 1R, alzare InpTrailStartR
+#      puo' solo TOGLIERE modifiche allo stop (r.1040); quindi una
+#      posizione che con x=0 arriva a 1R ci arriva anche con x maggiore,
+#      e l'insieme cresce con x.
+#      >>> HO PROVATO A ROMPERLO E SI ROMPE. Il passaggio falso e'
+#          "il livello 1R e' lo stesso in tutte le celle". NON LO E'.
+#          La catena, letta riga per riga:
+#            r.985   target = openP + dirSign*riskDist*InpTP1_R
+#            r.973   riskDist = openP - InitialSL(openP, sl, type)
+#            r.974   if(riskDist <= 0) riskDist = AtrValue()*InpAtrSlMult
+#            r.1088  InitialSL: se gPartialDone o curSL==0 -> ATR*mult,
+#                    altrimenti lo SL CORRENTE (non quello iniziale)
+#          Il trailing sposta lo SL SOPRA l'ingresso (r.1046 e r.1052
+#          chiedono newSL > openP / < openP): da quel tick in poi
+#          openP - curSL diventa NEGATIVO e scatta il ripiego r.974.
+#          >>> CIOE': il DENOMINATORE DI R CAMBIA, e cambia PRIMA nelle
+#              celle in cui il trailing arma prima. Con x=0 arma al
+#              primo tick, quindi la cella x=0 passa a riskDist =
+#              ATR(14) su M5 x 1,5 mentre le celle x>0 stanno ancora sul
+#              vero R (ampiezza 17-40 idx + 2 x 7 idx di buffer = 31-54
+#              idx di stop). Se ATR x 1,5 < quella distanza -- ed e' il
+#              caso normale all'apertura -- la cella x=0 ha un "1R" PIU'
+#              VICINO, e la parziale le scatta su un movimento PIU'
+#              PICCOLO.
+#      >>> CONSEGUENZA OPERATIVA, SCRITTA PRIMA DEI NUMERI: n(0) > n(0,5)
+#          e' un esito POSSIBILE SU UN BINARIO SANO. Se lo mettessi come
+#          cancello, sarebbe un falsificatore che scatta sull'ipotesi
+#          VERA -- ed e' ESATTAMENTE la classe 300 gia' pagata su questo
+#          stesso EA (coda/CODA.txt r.685-691), dove la v1 di R142b
+#          aveva congelato "l'n deve restare IDENTICO fra le celle".
+#          Non la ripago due volte.
 #
-#  (D) E HA UN TETTO ESATTO, gia' misurato: il valore a trailing spento.
-#          OOS  n <= 195      IS  n <= 127     (R142c)
-#      Perche' a trailing spento l'insieme delle posizioni che toccano
-#      1R e' il massimo possibile.
+#  (D) E IL TETTO 195/127 SEGUE LA STESSA SORTE: ATTESO, NON GARANTITO.
+#          OOS  n ~<= 195      IS  n ~<= 127     (R142c, trailing spento)
+#      A trailing spento lo SL non sale mai sopra l'ingresso, quindi
+#      riskDist resta il vero R per tutta la vita della posizione e
+#      l'insieme che tocca 1R e' il piu' largo MISURATO. Ma per la
+#      stessa ragione di (C) non posso escludere che una cella
+#      intermedia, con un denominatore accorciato, tocchi il suo "1R"
+#      piu' spesso. Empiricamente x=0 fa 175 < 195, quindi il verso
+#      misurato conferma l'attesa: la dichiaro come attesa e basta.
 #
-#  >>> HO PROVATO A ROMPERLO, e cede in un punto solo, che percio' si
-#      dichiara: se il 50% del volume arrotonda SOTTO il lotto minimo,
+#  >>> E C'E' UNA SECONDA CREPA, gia' nota e minore, che si dichiara lo
+#      stesso: se il 50% del volume arrotonda SOTTO il lotto minimo,
 #      NormalizeVolume (r.1145-1153) torna 0, la parziale non parte e il
 #      deal non c'e' (il breakeven scatta lo stesso, r.1002-1018). E'
 #      una proprieta' della SINGOLA posizione, indipendente da x, e puo'
-#      solo aggiungere ZERO invece di UNO: la monotonia regge, il tetto
-#      pure. A rischio 2% su 10000 il caso e' raro (44 parziali su 44
-#      occasioni in OOS), ma la dimostrazione non ne ha bisogno.
+#      solo aggiungere ZERO invece di UNO. A rischio 2% su 10000 il caso
+#      e' raro (44 parziali su 44 occasioni in OOS).
 #
-#  ### LE SOGLIE DI CATENA ROTTA, CONGELATE PRIMA DEI NUMERI ###
+#  ### LA SOGLIA DI CATENA ROTTA -- UNA SOLA, E NON DIPENDE DA NESSUN
+#  ### TEOREMA: E' UNA RIPRODUZIONE.
 #    1. n(0) DEVE valere ESATTAMENTE 175 in OOS e 116 in IS.
-#    2. n(x) non-decrescente lungo l'asse, in TUTTE E DUE le finestre.
-#    3. n(x) <= 195 in OOS e <= 127 in IS, in ogni cella.
-#  Se una delle tre salta, NON SI LEGGE NESSUN PF di questo round e si
-#  cerca il binario prima di rilanciare.
+#       Se non torna, il binario NON e' quello di R142 e NON SI LEGGE
+#       NESSUN PF di questo round: si cerca il binario prima di
+#       rilanciare.
+#
+#  ### E LE DUE ATTESE SU n, CHE SI LEGGONO E SI DICHIARANO, NON
+#  ### BOCCIANO (motivo in (C) e (D), scritto prima dei numeri) ###
+#    2. n(x) atteso non-decrescente lungo l'asse, in tutte e due le
+#       finestre.
+#    3. n(x) atteso <= 195 in OOS e <= 127 in IS.
+#    Se 2 o 3 non tornano, PRIMA di gridare al guasto si verifica se lo
+#    scarto e' spiegato dalla sostituzione di riskDist descritta in (C)
+#    -- si controlla cioe' se le celle "fuori riga" sono quelle in cui
+#    il trailing arma presto. Se lo e', NON e' un guasto: e' una
+#    proprieta' del codice, e va scritta nel referto come misura nuova
+#    (il denominatore di R di questo EA non e' stabile). Un guasto vero
+#    resta solo la soglia 1.
 #
 # ---------------------------------------------------------------------
 #  ###  IL SENTINELLA -- E IL MANDATO VA CORRETTO, CON I NUMERI  ###
@@ -228,26 +275,55 @@
 #       con quella di agosto: 0,95624 / 22,4729 / -447,69 in OOS e
 #       1,01472 / 12,2759 / +97,65 in IS.
 #       Tolleranza: IDENTITA' AL CENTESIMO. Il binario non e' cambiato
-#       -- verificato con git: l'ultima modifica a
-#       mql5/Experts/ABTG_Nasdaq_Live5m.mq5 e a
-#       mql5/Include/ABTG_PausaGuardian.mqh e' d83c196 (19/08), cioe'
-#       PRIMA del pin dbe86ac usato da R142; da dbe86ac a HEAD (c8c9651)
-#       quei due file hanno ZERO commit. Se il PF di x=0 NON coincide
+#       -- verificato con git, e la ragione va scritta GIUSTA perche' la
+#       prima stesura di questo file la sbagliava:
+#         `git log dbe86ac..HEAD -- mql5/Experts/ABTG_Nasdaq_Live5m.mq5
+#          mql5/Include/ABTG_PausaGuardian.mqh`  ->  VUOTO.
+#       ZERO commit sui due file da dbe86ac a HEAD: QUESTA e' la prova,
+#       ed e' vera. NON e' vero invece, come c'era scritto qui, che
+#       "l'ultima modifica a tutti e due e' d83c196 (19/08)": d83c196 e'
+#       l'ultima sull'EA, ma l'ultima sull'include e' cdb2037
+#       (07/09/2026, tetto cluster C2), che pero' e' ANTENATO di dbe86ac
+#       (`git merge-base --is-ancestor cdb2037 dbe86ac` -> vero), quindi
+#       la conclusione regge. (E qui l'include e' comunque neutro:
+#       InpUsaGuardian=false.) Se il PF di x=0 NON coincide
 #       con R142, e' cambiato qualcosa che non so, e il round va fermato
 #       anche col sentinella duro verde.
 #
 #  ### E IL SECONDO SENTINELLA, ALL'ALTRO CAPO DELL'ASSE ###
-#    La cella x = 3,0 deve CONVERGERE alla cella "trailing spento" di
+#    La cella x = 3,0 e' ATTESA vicina alla cella "trailing spento" di
 #    R142c: OOS 0,99949 / n 195 / DD 33,6209 | IS 1,32199 / n 127 /
-#    DD 12,9494. Motivo strutturale gia' spiegato: il TP sta a 3R.
-#    >>> MA E' UN'ATTESA, NON UN CANCELLO, e la ragione va scritta
-#        prima: a 3R il TP dell'ordine e la condizione di armamento
-#        scattano sullo STESSO prezzo, e in un gap o con slippage il
-#        tick puo' superare 3R prima che il TP chiuda -> il trailing
-#        potrebbe armare per un istante. Se x=3,0 non coincide al
-#        centesimo con la cella spenta, e' questo, non un guasto: si
-#        scrive e basta. Se invece n(3,0) < n(2,5) la monotonia (C) e'
-#        rotta e quello SI' e' un guasto.
+#    DD 12,9494.
+#
+#    ### IL DENOMINATORE CHE CAMBIA -- PERCHE' NON E' UN'IDENTITA' ###
+#    L'argomento comodo sarebbe: "il TP dell'ordine sta a 3R (r.763-769:
+#    TpTotalR = InpTP1_R*3 = 3,0; r.665/682: tp = entry +- dist *
+#    TpTotalR), quindi a x=3,0 il trailing non arma mai prima che il TP
+#    chiuda". >>> E' COMODO E NON REGGE, e si dice PRIMA di vedere i
+#    numeri, non dopo.
+#    I due "3R" NON sono misurati sulla stessa unita':
+#      - il TP usa `dist` = distanza di rischio DELL'ORDINE (r.663: per
+#        un BUY, buyPx - sellPx, cioe' ampiezza + 2 buffer), fissata una
+#        volta al piazzamento e mai piu' toccata;
+#      - l'armamento usa `profR` = (bid-openP)/riskDist (r.1038-1040), e
+#        `riskDist` e' RICALCOLATO A OGNI TICK e diventa
+#        ATR(14) M5 x InpAtrSlMult (=1,5) appena gPartialDone e' vero o
+#        appena lo SL e' sopra l'ingresso (r.974 + r.1088-1093).
+#    Dopo la parziale a 1R, quindi, profR e' misurato su un metro PIU'
+#    CORTO del metro del TP: profR puo' toccare 3,0 MOLTO prima che il
+#    prezzo arrivi al TP, e il trailing puo' armare lo stesso.
+#    >>> PERCIO': x=3,0 NON E' "trailing spento per costruzione". E'
+#        l'estremo in cui il trailing arma il piu' tardi possibile su
+#        questo asse. Se converge alla cella spenta, e' una MISURA che
+#        dice che l'ATR era largo abbastanza; se NON converge, non e' un
+#        guasto e non e' gap/slippage: e' il denominatore, ed e' gia'
+#        scritto qui sopra.
+#    >>> E QUESTO E' IL CONTRO-ESEMPIO CHE HO COSTRUITO CONTRO IL MIO
+#        STESSO ROUND: l'ipotesi alternativa a "il ritardo aiuta" non e'
+#        il nulla, e' "il ritardo non morde perche' oltre 1R la soglia e'
+#        in unita' ATR e viene superata comunque". Quella ipotesi produce
+#        celle x>=1,5 tutte APPIATTITE sul valore di x=1,0. Se le vedo
+#        cosi', la lettura giusta e' quella, NON "l'altopiano".
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
@@ -348,11 +424,19 @@
 #     OOS 10/06/2025->30/06/2026". E' lo stesso taglio di R142: senza,
 #     i sentinella non varrebbero niente.
 #  @PERIODO M5: il TF del grafico, identico a R142 e alla corsa
-#     archiviata. (Nota gia' corretta il 13/09 in REGISTRO_TEST r.36: il
-#     TF del GRAFICO non entra nei numeri di questo EA -- unica
-#     occorrenza di PERIOD_CURRENT a r.296, l'ATR, ramo morto con
-#     SLMode=0 e TrailMode=1. Qui lo si pinna per identita' con R142,
-#     non perche' conti.)
+#     archiviata. >>> E QUI VA CORRETTA UNA RIGA CHE GIRAVA DA IERI: in
+#     REGISTRO_TEST r.36 (13/09) sta scritto che "il TF del GRAFICO non
+#     entra nei numeri di questo EA -- unica occorrenza di PERIOD_CURRENT
+#     a r.296, l'ATR, ramo morto con SLMode=0 e TrailMode=1". >>> FALSO,
+#     verificato leggendo il codice: r.296 crea gAtrH su PERIOD_CURRENT,
+#     e quell'ATR NON e' un ramo morto anche con SLMode=0 e TrailMode=1,
+#     perche' e' il RIPIEGO di riskDist a r.974 e r.1091 -- cioe' entra
+#     nel calcolo di 1R (target della parziale, r.985) e di profR
+#     (soglia di QUESTO asse, r.1038-1040) ogni volta che lo SL e' stato
+#     spostato sopra l'ingresso o la parziale e' gia' avvenuta.
+#     >>> Conseguenza pratica: il TF del grafico CONTA, e va pinnato a M5
+#         per identita' con R142 non per abitudine. Con un altro TF i
+#         sentinella non varrebbero niente.
 #  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
 #     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
 #     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
