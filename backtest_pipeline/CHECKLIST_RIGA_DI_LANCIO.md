@@ -18832,3 +18832,93 @@ avrebbe sostituito un buco dichiarato con un fix indovinato**, che e' peggio.
 3. **I quattro numeri da NON riusare finche' non sono sciolti**: 5, 26 (x2),
    101 (x3), 255 (x2). Il prossimo numero libero resta il piu' alto scritto
    in fondo al file (oggi: dopo questa voce, 329).
+
+---
+
+## 329. 🏷️♻️ IL NUMERO DI ROUND RIUSATO SU UN FILE PROVA NUOVO: `R146a` esisteva gia', ed era gia' ARMATO IN CODA (14/09/2026)
+
+**Il caso**: un file prova nuovo (il canale di 15 minuti del PDF ABTG su
+NASUSD) e' nato come `backtest_pipeline/prove/R146a_canale15_preapertura_NASUSD.txt`.
+Ma `R146a` **era gia' occupato**:
+
+```
+backtest_pipeline/prove/R146a_slbufferatr_EURJPY.txt        <- esiste dal 13/09
+backtest_pipeline/coda/CODA.txt r.1340  ... -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a
+```
+
+E il driver lo dice di suo, in chiaro, in `righe/RIGA_SOTTILE_ROUND.ps1` r.1042:
+
+> `-Etichetta non passa la lista bianca ... E' il suffisso dei CSV: senza, un round nuovo sovrascrive il precedente.`
+
+🔴 **Il guaio non e' il nome del file: e' l'etichetta che il nome SUGGERISCE.**
+Chi arma il round legge `R146a_...` e scrive `-Etichetta r146a`, che e' esattamente
+l'etichetta di un round **gia' girato di un altro EA su un altro simbolo**
+(`ABTG_CostToCost` EURJPY). I CSV finiscono con lo stesso suffisso: nel caso buono
+si mescolano due round, nel caso cattivo si sovrascrive quello vecchio. E i due
+strati deterministici **non lo vedono**: `controlla_prova.py` guarda i pin contro il
+sorgente, `controlla_riga.py` guarda i byte — nessuno dei due sa che numeri di round
+sono gia' spesi.
+
+### 🔴 LA REGOLA
+**Prima di battezzare un file prova, il numero di round si cerca, non si sceglie:**
+
+```
+ls backtest_pipeline/prove/ | grep -i "^R149"        # deve essere vuoto
+grep -rn "R149\|r149" backtest_pipeline/ report/     # deve essere vuoto
+```
+
+Vale per il **file**, per l'**etichetta** (`-Etichetta`) e per la **cartella dei
+risultati**. E' la classe 194 (*"il rename fatto senza cercare il nuovo nome nel
+repo"*) applicata al battesimo invece che al rename, ed e' la stessa disciplina
+gia' usata sui **magic vergini**: il numero e' un'identita', non una decorazione.
+📌 Nel caso reale il file e' stato rinominato **R149a** (`R149` vergine in tutto il
+repo) dal controllo preventivo, prima che toccasse la coda.
+
+---
+
+## 330. 📉🎣 LA «CURVA DI SOPRAVVIVENZA» CHE NON LO E': il CSV conta `Trades`, e il filtro che fai variare sposta anche la probabilita' di INNESCO (14/09/2026)
+
+**Il caso**: un file prova misurava la distribuzione dell'ampiezza del canale
+pre-apertura alzando `InpMinRangePts` su otto celle, e dichiarava:
+
+> _"n(x) = quante giornate hanno il canale >= x e' una FUNZIONE DI SOPRAVVIVENZA
+> PURA dell'ampiezza, non un risultato di strategia"_
+
+🔴 **Falso, e per una ragione che si vede solo leggendo il motore.** La colonna che
+il round legge si chiama **`Trades`** (intestazione dei CSV in
+`risultati_prove/.../*_OOS.csv`): sono **operazioni**, non giornate. E fra
+"la giornata passa il cancello di ampiezza" e "la giornata produce un'operazione"
+c'e' un **breakout con ordini pendenti a bordo +/- buffer** e una **scadenza a 120
+minuti**: piu' il canale e' largo, **piu' lontani** stanno i pendenti, **meno**
+innescano. Cioe':
+
+```
+n(x) = (giornate con canale >= x) x (tasso di innesco a quella larghezza) x (op/giornata)
+        ^ sopravvivenza pura        ^ DIPENDE DALLO STESSO ASSE
+```
+
+**Due conseguenze, e la seconda poteva buttare via il round:**
+1. la frazione titolo `n(soglia_alta)/n(0)`, venduta come *"frazione di GIORNATE
+   dentro il pavimento"*, e' in realta' **pesata sulle operazioni** e
+   **SOTTOSTIMA** la frazione in giornate (le giornate larghe innescano meno).
+   Quindi un valore **basso non conclude niente** (due spiegazioni in piedi) e solo
+   un valore **alto** conclude — perche' la distorsione spinge in giu';
+2. il file aveva congelato *"catena rotta se n(1300) < 175"* deducendolo da un
+   **contenimento di insiemi** che vale sulle **giornate**. Sulle **operazioni** non
+   vale: un numero piu' basso sarebbe stato il **risultato** (meno inneschi a canale
+   largo), e sarebbe stato letto come **guasto**, con la clausola *"non si legge
+   nessun altro numero del round"*. 🔴 **Un contro-esempio tarato male non e' solo
+   inutile: cestina il round buono.**
+
+### 🔴 LA REGOLA
+1. **Prima di chiamare "sopravvivenza" una curva, si chiede: la colonna che leggo
+   conta l'INSIEME che sto filtrando, o conta un EVENTO A VALLE del filtro?**
+   Giornate vs operazioni, ordini vs riempimenti, segnali vs ingressi.
+2. **Se conta un evento a valle, il teorema sull'insieme NON si trasferisce.** Si
+   conserva la sola proprieta' che sopravvive (qui la **monotonia**: alzare la
+   soglia toglie giornate intere, e ogni giornata contribuisce >= 0 operazioni).
+3. **La distorsione si dichiara col VERSO**, e si dice quale delle due letture
+   resta possibile a numero basso e quale a numero alto (classe 178).
+4. **Il fattore confondente si isola con una misura, non con una frase**: qui
+   `n(0)` fra le due larghezze, dove il cancello non morde e la differenza e'
+   **tutta** tasso di innesco.

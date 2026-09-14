@@ -1,8 +1,15 @@
 # =====================================================================
 #  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
-#  R146a -- IL CANALE DI 15 MINUTI DEL PDF ABTG, MISURATO CONTRO IL
+#  R149a -- IL CANALE DI 15 MINUTI DEL PDF ABTG, MISURATO CONTRO IL
 #           CANCELLO DEL COSTO. NASUSD, ingresso PRE-APERTURA,
 #           finestra pre-apertura portata da 5 a 15 MINUTI.
+#  >>> NUMERO DI ROUND CORRETTO DAL CONTROLLO PREVENTIVO (14/09/2026):
+#      nasceva come "R146a", ma R146a E' GIA' OCCUPATO
+#      (prove/R146a_slbufferatr_EURJPY.txt, armato in coda/CODA.txt
+#      r.1340 con -Etichetta r146a). L'etichetta e' il SUFFISSO DEI CSV
+#      (RIGA_SOTTILE_ROUND.ps1 r.1042: "senza, un round nuovo
+#      sovrascrive il precedente"). R149 e' vergine in tutto il repo.
+#      L'ETICHETTA DA USARE IL GIORNO DELLA FIRMA E' 'r149a'. Classe 329.
 # ---------------------------------------------------------------------
 #  DOSSIER: questo round nasce dall'analisi del PDF "Piano di trading
 #     NASDAQ" (Alfio Bardolla Training Group) caricato da Claudio il
@@ -56,16 +63,21 @@
 #      1 punto indice = 100 punti MT5   (point = 0.01)
 #
 #  I DUE PAVIMENTI DI CASA, applicati a quella mediana:
-#      pavimento DI LAVORO  40,0 x 1,800 = 72,0 punti indice di stop
-#      pavimento DURO       13,3 x 1,800 = 23,9 punti indice di stop
+#      pavimento DI LAVORO  40,0 x 1,800 = 72,00 punti indice di stop
+#      pavimento DURO       13,3 x 1,800 = 23,94 punti indice di stop
 #  (criteri congelati in prove/R125_ORB_COSTO_CRITERI.md par.2, firmati
 #   da Claudio il 10/09/2026 A NUMERI NON VISTI.)
 #
 #  Con il buffer nudo del piano (7 punti indice) lo stop vale
 #  "ampiezza + 7", quindi i due pavimenti si traducono in AMPIEZZA DEL
 #  CANALE:
-#      per il pavimento DI LAVORO  ->  ampiezza >= 65,0 idx = 6500 pt
-#      per il pavimento DURO       ->  ampiezza >= 16,9 idx = 1690 pt
+#      per il pavimento DI LAVORO  ->  ampiezza >= 65,00 idx = 6500 pt
+#      per il pavimento DURO       ->  ampiezza >= 16,94 idx = 1694 pt
+#  (23,94 - 7 = 16,94, lo stesso numero scritto in AUDIT_NASDAQ_PREOPEN
+#   par.4. Sull'asse qui sotto la cella e' 1690 pt, cioe' 4 pt = 0,04
+#   idx SOTTO il pavimento duro: n(1690) e' quindi una sovrastima di
+#   n(1694) per le sole giornate che cadono in quei 4 punti. La cella
+#   2600 lo stringe da sopra.)
 #
 #  >>> ED E' QUESTA LA DOMANDA DEL ROUND, in una riga:
 #      SU CHE FRAZIONE DI GIORNATE il canale di 15 minuti del PDF e'
@@ -79,11 +91,34 @@
 #  Stesso trucco di R143a, che non chiede una riga di codice nuova.
 #  ABTG_Nasdaq_Live5m.mq5 r.639:
 #      if(InpMinRangePts > 0 && rangePts < InpMinRangePts) ... return
-#  Il filtro sta PRIMA di SpreadOK() (r.644) e di TrendBias() (r.649), e
-#  tutti gli altri filtri sono pinnati spenti qui sotto. Quindi
-#      n(x) = quante giornate hanno il canale pre-apertura >= x
-#  e' una FUNZIONE DI SOPRAVVIVENZA PURA dell'ampiezza, non un
-#  risultato di strategia.
+#  Il filtro sta PRIMA di SpreadOK() (r.644, inerte: InpMaxSpread=0 ->
+#  r.1187 "return true") e di TrendBias() (r.650, che con tutti i filtri
+#  spenti torna 0 = nessun vincolo), e tutti gli altri filtri sono
+#  pinnati spenti qui sotto.
+#
+#  >>> MA n(x) NON E' UNA CURVA DI SOPRAVVIVENZA PURA, E VA DETTO PRIMA.
+#      CORREZIONE DEL CONTROLLO PREVENTIVO (14/09/2026), classe 330.
+#      La colonna che il round legge si chiama 'Trades' (verificato
+#      nell'intestazione di risultati_prove/ABTG_Nasdaq_Live5m/
+#      ABTG_Nasdaq_Live5m_NASUSD_OOS.csv): sono OPERAZIONI, non giornate.
+#      Fra "la giornata passa il cancello di ampiezza" e "la giornata
+#      produce un'operazione" ci sono DUE passaggi che dipendono
+#      dall'ampiezza stessa:
+#        (i) i pendenti stanno a bordo+7 / bordo-7: un canale piu' LARGO
+#            li mette piu' LONTANI dal prezzo, quindi la probabilita' di
+#            innesco SCENDE al crescere di x;
+#       (ii) InpPendingExpiryMin=120 li cancella dopo due ore.
+#      Quindi:
+#        n(x) = (giornate con canale >= x) x (tasso di innesco a quella
+#               larghezza) x (operazioni per giornata innescata)
+#      Il PRIMO fattore e' una sopravvivenza pura, il PRODOTTO no.
+#  >>> COSA RESTA VERO LO STESSO: la MONOTONIA. Alzare x toglie giornate
+#      INTERE, e ogni giornata contribuisce un numero di operazioni >= 0,
+#      quindi n(x) e' non-crescente anche contata in operazioni. Il
+#      contro-esempio (1) qui sotto regge.
+#  >>> COSA NON RESTA VERO: il confronto FRA FINESTRE a occhi chiusi, e
+#      il significato della frazione n(6500)/n(0). Vedi contro-esempio
+#      (2) e la sezione dell'attesa: sono stati riscritti per questo.
 #  La differenza con R143a e' UNA SOLA: li' la finestra era 5 minuti,
 #  qui e' 15. Stesso metro, canale diverso.
 #
@@ -130,14 +165,35 @@
 #      Allargare la finestra da 5 a 15 minuti puo' solo ALLARGARE il
 #      canale (il massimo di 15 minuti e' >= il massimo dei 5 minuti
 #      finali, e il minimo e' <=: e' contenimento di insiemi, non una
-#      stima). Quindi:
-#          >>> n(1700 circa) a finestra 15 DEVE essere >= n(1700) a
-#              finestra 5, a parita' di tetto.
-#      Sulla griglia di qui il valore piu' vicino e' 1300 e 2600, che lo
-#      stringono: si legge n(1300) >= n(1700 a finestra 5).
-#      >>> Se esce PIU' PICCOLO, la catena e' rotta (finestra sbagliata,
-#          taglio IS/OOS diverso, binario diverso) e NON SI LEGGE
-#          NESSUN ALTRO NUMERO del round.
+#      stima). Quindi, SULLE GIORNATE:
+#          giornate(finestra 15, soglia 1300) CONTIENE
+#          giornate(finestra 5,  soglia 1700, tetto 4000)
+#      su tutti e tre gli assi (canale piu' largo, soglia piu' bassa,
+#      tetto tolto). Questo e' un TEOREMA, non una stima.
+#
+#  >>> MA IL CONTEGGIO E' IN OPERAZIONI, NON IN GIORNATE, E IL
+#      TEOREMA NON SI TRASFERISCE. Correzione del controllo preventivo
+#      (14/09/2026), classe 330. Un canale piu' largo mette i pendenti
+#      piu' lontani: le giornate in piu' entrano nell'insieme ma possono
+#      NON innescare entro i 120 minuti. Percio':
+#          n(1300) a finestra 15 e' ATTESO >= 175 in OOS e >= 116 in IS,
+#          ma un valore piu' basso NON dimostra da solo che la catena e'
+#          rotta: la spiegazione alternativa (meno INNESCHI a canale
+#          largo) e' un RISULTATO del round, non un guasto.
+#      >>> COME SI DISTINGUONO, e va deciso PRIMA:
+#          - se n(1300) < 175 in OOS MA la monotonia regge e n(0) sta
+#            nella banda 300-500 attesa, la lettura e' "meno inneschi",
+#            si SCRIVE cosi' e il round si legge lo stesso;
+#          - se n(1300) < 175 E n(0) e' fuori banda (sotto 200), oppure
+#            la monotonia si rompe, allora SI', la catena e' rotta
+#            (finestra sbagliata, taglio IS/OOS diverso, binario
+#            diverso) e NON SI LEGGE NESSUN ALTRO NUMERO del round.
+#      >>> E la via piu' corta per chiudere l'ambiguita' senza un round
+#          nuovo: n(0) a finestra 15 contro n(0) a finestra 5 (R143a,
+#          stessa igiene, stesso tetto spento). A soglia ZERO il
+#          cancello di ampiezza non morde in nessuna delle due, quindi
+#          qualunque differenza li' e' TUTTA tasso di innesco. E' la
+#          misura del fattore che qui sopra confonde la lettura.
 #
 #  >>> HO PROVATO A ROMPERE IL CONTENIMENTO DI INSIEMI, e cede in UN
 #      punto solo, che percio' si dichiara: ComputeRangeWindow (r.599-
@@ -153,8 +209,11 @@
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
-#  n: in CALO MONOTONO. Punto duro: n(1300) >= 175 in OOS e >= 116 in
-#     IS (vedi contro-esempio 2).
+#  n: in CALO MONOTONO (questo e' il punto duro vero: e' vero per
+#     costruzione anche contando le operazioni).
+#     n(1300) >= 175 in OOS e >= 116 in IS e' un'ATTESA, non un punto
+#     duro: vale sulle GIORNATE per teorema, sulle OPERAZIONI solo se il
+#     tasso di innesco non cala troppo (contro-esempio 2, classe 330).
 #     n(0) = popolazione piena delle giornate, con la finestra a 15
 #     minuti: MAI misurata. E' il dato nuovo principale insieme a
 #     n(6500).
@@ -163,13 +222,44 @@
 #     accesa, n(0) OOS dovrebbe stare fra 300 e 500 DEAL. Sotto 200,
 #     qualcosa non torna.
 #
-#  n(6500) / n(0) = LA FRAZIONE DI GIORNATE DENTRO IL PAVIMENTO DI
-#     LAVORO. E' il numero per cui questo file esiste.
+#  n(6500) / n(0) = LA FRAZIONE DI OPERAZIONI CHE NASCE DA GIORNATE
+#     DENTRO IL PAVIMENTO DI LAVORO. E' il numero per cui questo file
+#     esiste -- ma si legge per quello che e', non per quello che
+#     vorrei che fosse (correzione del controllo preventivo, classe 330).
+#     >>> NON E' la frazione di GIORNATE: e' pesata sulle operazioni, e
+#         il peso e' CORRELATO ALL'ASSE. Le giornate a canale largo
+#         hanno i pendenti piu' lontani, quindi innescano MENO: la
+#         frazione in operazioni SOTTOSTIMA la frazione in giornate.
+#     >>> IL VERSO DELLA DISTORSIONE E' NOTO, e decide cosa si puo'
+#         concludere:
+#           - se esce BASSA, le due spiegazioni restano tutte e due in
+#             piedi ("poche giornate larghe" oppure "le giornate larghe
+#             non innescano"): NON si conclude, si scrive il numero e si
+#             dichiara che l'ambiguita' resta aperta;
+#           - se esce ALTA, la conclusione e' SOLIDA: la distorsione
+#             spinge verso il basso, quindi un numero alto vuol dire che
+#             la frazione vera in giornate e' ALMENO quella.
+#         E' per questo che la soglia di smentita qui sotto (>35%) e'
+#         l'unica delle due bande che chiude davvero una porta.
 #     ATTESA, dichiarata prima e con la sua base: sul canale di CINQUE
 #     minuti il cancello di casa e' 17-40 idx "come da live", cioe' la
 #     massa della distribuzione sta sotto 40; se il canale di 15 minuti
 #     scalasse con la radice del tempo (x1,73) la massa starebbe sotto
 #     ~70 idx, e 65 cadrebbe nella CODA ALTA.
+#     >>> E IL NUMERO MISURATO PIU' VICINO CHE ESISTE GIA' IN ARCHIVIO,
+#         trovato dal controllo preventivo e messo qui perche' "prima si
+#         cerca il file che ha gia' la risposta":
+#         risultati_archivio/studio_apertura/Studio_NASUSD.csv, n = 447
+#         giornate, colonna 'ampiezza_pt' -> mediana 75,3 idx, e
+#         58,4% delle giornate >= 65,0 idx (96,4% >= 16,9 idx).
+#         ATTENZIONE, E' UN'ALTRA FINESTRA: quella sono i 15 minuti DOPO
+#         l'apertura (studio_apertura.ps1 r.131 InpRangeMinutes=15,
+#         Model=1 OHLC M1, 2024.01.01->2026.06.30), cioe' il tratto
+#         PIU' volatile della giornata. Vale come TETTO di ordine di
+#         grandezza per i 15 minuti PRE-apertura, non come previsione:
+#         se n(6500)/n(0) uscisse SOPRA il 58% la lettura sarebbe da
+#         rifare comunque, perche' la pre-apertura non puo' essere piu'
+#         larga della cassa. Non tocca la banda dichiarata qui sotto.
 #     >>> Percio' mi aspetto n(6500)/n(0) BASSO: dichiaro la banda
 #         5% - 25% PRIMA di vedere il numero.
 #     >>> E dichiaro anche cosa mi SMENTISCE: se n(6500)/n(0) esce
@@ -213,8 +303,10 @@
 #       promuove. Il centro dell'altopiano, mai il picco.
 #
 #  SOGLIE CONGELATE PRIMA:
-#    catena rotta se n(1300) < 175 in OOS oppure < 116 in IS
 #    catena rotta se la monotonia di n si rompe in una delle finestre
+#    catena rotta se n(1300) < 175 in OOS (o < 116 in IS) E INSIEME
+#      n(0) OOS < 200: le due cose insieme sono un guasto. n(1300) basso
+#      col n(0) in banda NON e' un guasto: e' meno inneschi, e si scrive
 #    scarta la CELLA se PF OOS < 1,10 con n >= 150
 #    non giudica il MERITO se n < 150 (valvola R59, Emendamento A)
 #    il RISCHIO (DD) si legge a qualunque n (Emendamento B, 16/08)
@@ -228,11 +320,33 @@
 #     e il pavimento di lavoro di un fattore 14,4. Non e' una cella da
 #     provare: e' una geometria fuori dal perimetro di casa, e il
 #     cancello si applica PRIMA della griglia, non dopo.
+#     >>> E LO STESSO STOP E' BOCCIATO DA UNA SECONDA MISURA, INDI-
+#         PENDENTE DAL CANCELLO (rifatta a mano dal controllo preven-
+#         tivo il 14/09/2026 sul file, non citata a memoria):
+#         risultati_archivio/studio_apertura/Studio_NASUSD.csv, n = 447
+#         breakout, colonne MAE_pt e risultato_R ->
+#           MAE mediano delle 169 operazioni VINCENTI = 2010 pt =
+#             20,1 idx, cioe' 4,0 volte i 5 idx del PDF;
+#           uno stop a 500 pt avrebbe colpito il 91,3% di TUTTE le
+#             operazioni e il 76,9% di quelle poi finite VINCENTI.
+#         CAVEAT dichiarati: quel file misura i 15 minuti DOPO
+#         l'apertura (altra geometria) ed e' Model=1 (OHLC M1), che
+#         SOTTOSTIMA l'escursione dentro la barra -> il MAE vero e'
+#         semmai piu' grande. La distorsione va nello stesso verso
+#         della conclusione, quindi non la salva.
 #  2. NON misura il FILTRO OSTACOLI del PDF (medie mobili, Supertrend,
 #     pivot, S/R entro 10-15 punti). Tutti i filtri sono pinnati
-#     SPENTI qui: una variabile alla volta. Il filtro S/R esiste gia'
-#     nel motore di casa (InpUseSRFilter, InpSRProximityPts = 1500 pt
-#     = 15 punti indice) ed e' un round separato.
+#     SPENTI qui: una variabile alla volta.
+#     >>> CORREZIONE DEL CONTROLLO PREVENTIVO (14/09/2026): la prima
+#         stesura diceva che il filtro S/R "esiste gia' nel motore di
+#         casa (InpUseSRFilter, InpSRProximityPts=1500)". FALSO PER
+#         QUESTO EA: in ABTG_Nasdaq_Live5m.mq5 quei due input NON
+#         ESISTONO (elenco 'input' letto per intero). Stanno in
+#         ABTG_Apertura_3Ingressi.mq5 (r.381) e in
+#         ABTG_Nasdaq_Apertura_US.mq5, che sono ALTRI motori.
+#         Conseguenza che cambia il piano: un round S/R su 770203 NON
+#         e' "zero righe di codice", e' una MODIFICA ALL'EA. Va detto
+#         prima di prometterlo.
 #  3. NON misura l'ampiezza del canale in punti indice giornata per
 #     giornata: la curva n(x) da' la distribuzione per quantili, non i
 #     valori. La via diretta (r.640 stampa l'ampiezza di ogni giornata
