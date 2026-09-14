@@ -5,11 +5,16 @@
 //|  della candela in corso, su piu' timeframe insieme, in un        |
 //|  pannello sul grafico.                                           |
 //|                                                                  |
-//|  SI PUO' SPOSTARE: tieni il tasto sinistro sul pannello e         |
-//|  trascinalo dove vuoi. La posizione si ricorda (GlobalVariable    |
-//|  del terminale) anche se stacchi e riattacchi l'indicatore o      |
-//|  riavvii MT5. Metti InpBloccato=true per fissarla e non           |
-//|  spostarla per sbaglio.                                          |
+//|  SI PUO' SPOSTARE: seleziona il pannello e trascinalo dove vuoi.  |
+//|  La posizione si ricorda (GlobalVariable del terminale) anche se  |
+//|  stacchi e riattacchi l'indicatore o riavvii MT5. Metti           |
+//|  InpBloccato=true per fissarla e non spostarla per sbaglio.       |
+//|  NOTA PRATICA: in MT5 un oggetto si trascina solo DOPO averlo     |
+//|  selezionato. Se il primo clic non basta, o fai doppio clic sul   |
+//|  pannello, oppure accendi Strumenti > Opzioni > Grafici >         |
+//|  "Seleziona oggetto con un solo clic". Finche' e' trascinabile il |
+//|  solo sfondo compare anche nella lista oggetti (Ctrl+B): e' la    |
+//|  via di recupero se il pannello finisce in un angolo scomodo.     |
 //|                                                                  |
 //|  SI PERSONALIZZA: i timeframe da mostrare (InpTimeframes), i      |
 //|  colori, la dimensione del testo, la soglia di avviso (quando     |
@@ -19,9 +24,37 @@
 //|  nessun account, non scrive file, non apre rete. Gli unici        |
 //|  effetti sono i SUOI oggetti grafici e due GlobalVariable per     |
 //|  ricordare la posizione dopo un trascinamento.                    |
+//|                                                                  |
+//|  v1.01 - correzioni dal controllo preventivo (14/09/2026):        |
+//|  (1) le due COLONNE erano calcolate come se X crescesse sempre    |
+//|      verso destra: con InpAngolo su un angolo DESTRO la colonna   |
+//|      dei tempi finiva FUORI dal pannello (X, sugli angoli destri, |
+//|      si misura dal bordo destro e cresce verso sinistra). Ora la  |
+//|      X passa da Xgrafico(), gemella di Ygrafico(), e gli anchor   |
+//|      sono espliciti (nomi TF a sinistra, tempi a destra).         |
+//|  (2) la geometria era scritta DUE volte (BuildPanel e             |
+//|      riposizionamento dopo il trascinamento): due copie della     |
+//|      stessa aritmetica sono una divergenza che aspetta. Ora c'e'  |
+//|      una sola funzione Disponi(crea), usata da tutte e due.       |
+//|  (3) FormattaResiduo passava dei long a "%02d": in casa il long   |
+//|      si stampa con %I64d (vedi ABTG_Guardian/ABTG_Canarino), e    |
+//|      un formato sbagliato stampa numeri sbagliati. Ora i tre      |
+//|      campi sono int, che e' cio' che "%02d" si aspetta.           |
+//|  (4) su MN1 il residuo usava PeriodSeconds(PERIOD_MN1), che vale  |
+//|      30 giorni FISSI: a gennaio avrebbe mentito di un giorno.     |
+//|      Ora la fine del mese si calcola col calendario.              |
+//|  (5) posizione ripresa dalle GlobalVariable: ora e' tenuta DENTRO |
+//|      il grafico (una posizione salvata su un monitor grande e     |
+//|      riaperta su una finestra piccola dava un pannello invisibile |
+//|      e non piu' afferrabile: rompersi senza errori e' il modo     |
+//|      peggiore di rompersi), e la memoria e' per ANGOLO, cosi'     |
+//|      cambiare InpAngolo non fa saltare il pannello altrove.       |
+//|  (6) TFDaCodice non usa piu' un parametro enum per riferimento    |
+//|      (nessun precedente gia' compilato nel repo): torna un int,   |
+//|      -1 se il codice non e' riconosciuto.                         |
 //+------------------------------------------------------------------+
 #property copyright "Progetto ABTG"
-#property version   "1.00"
+#property version   "1.01"
 #property strict
 #property description "Conto alla rovescia multi-timeframe: tempo alla chiusura della candela."
 #property description "Si sposta col mouse (posizione ricordata), si personalizza dagli input."
@@ -59,8 +92,8 @@ string          gEtichetta[];
 int             gNRighe = 0;
 
 string P        = "ABTG_Rovescia_1_";
-int    gAnchor  = ANCHOR_LEFT_UPPER;
 bool   gBasso   = false;
+bool   gDestra  = false;
 int    gFont    = 16;
 int    gRigaH   = 24;
 int    gLblH    = 14;
@@ -78,24 +111,17 @@ int OnInit()
    IndicatorSetString(INDICATOR_SHORTNAME, "ABTG Conto alla rovescia");
 
    P     = "ABTG_Rovescia_" + (string)InpIdIstanza + "_";
-   gVarX = "ABTG_Rovescia_X_" + (string)InpIdIstanza;
-   gVarY = "ABTG_Rovescia_Y_" + (string)InpIdIstanza;
+   //--- la posizione si ricorda PER ANGOLO: una X salvata partendo da
+   //    sinistra non vuol dire niente se poi l'angolo scelto e' a destra.
+   gVarX = "ABTG_Rovescia_X_" + (string)InpIdIstanza + "_" + (string)((int)InpAngolo);
+   gVarY = "ABTG_Rovescia_Y_" + (string)InpIdIstanza + "_" + (string)((int)InpAngolo);
 
    gFont = InpFontSize;
    if(gFont < 6)  gFont = 6;
    if(gFont > 48) gFont = 48;
 
-   gAnchor = AnchorFromCorner((int)InpAngolo);
    gBasso  = CornerInBasso((int)InpAngolo);
-
-   //--- posizione: riparte da dove l'avevi lasciata (GlobalVariable), se esiste
-   gPosX = InpX;
-   gPosY = InpY;
-   if(GlobalVariableCheck(gVarX) && GlobalVariableCheck(gVarY))
-     {
-      gPosX = (int)GlobalVariableGet(gVarX);
-      gPosY = (int)GlobalVariableGet(gVarY);
-     }
+   gDestra = CornerADestra((int)InpAngolo);
 
    ParseTimeframes();
    if(gNRighe == 0)
@@ -105,10 +131,39 @@ int OnInit()
      }
 
    CalcolaLayout();
+
+   //--- posizione: riparte da dove l'avevi lasciata (GlobalVariable), se
+   //    esiste; altrimenti dagli input. La guardia subito dopo la tiene
+   //    dentro il grafico.
+   gPosX = InpX;
+   gPosY = InpY;
+   if(GlobalVariableCheck(gVarX) && GlobalVariableCheck(gVarY))
+     {
+      gPosX = (int)GlobalVariableGet(gVarX);
+      gPosY = (int)GlobalVariableGet(gVarY);
+     }
+   TieniDentroIlGrafico();
+
    BuildPanel();
    Aggiorna();
    EventSetTimer(1);
    return(INIT_SUCCEEDED);
+  }
+//+------------------------------------------------------------------+
+//| Una posizione salvata puo' arrivare da una finestra piu' grande   |
+//| (altro monitor, grafico a tutto schermo): senza questa guardia il |
+//| pannello nascerebbe fuori dallo schermo, invisibile e non piu'    |
+//| afferrabile col mouse. Si lascia sempre un lembo di 40 px dentro. |
+//+------------------------------------------------------------------+
+void TieniDentroIlGrafico()
+  {
+   int larg = (int)ChartGetInteger(0, CHART_WIDTH_IN_PIXELS, 0);
+   int alt  = (int)ChartGetInteger(0, CHART_HEIGHT_IN_PIXELS, 0);
+
+   if(gPosX < 0) gPosX = 0;
+   if(gPosY < 0) gPosY = 0;
+   if(larg > 40 && gPosX > larg - 40) gPosX = larg - 40;
+   if(alt  > 40 && gPosY > alt  - 40) gPosY = alt  - 40;
   }
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
@@ -141,6 +196,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,const datetime &
 void OnChartEvent(const int id,const long &lparam,const double &dparam,const string &sparam)
   {
    if(id != CHARTEVENT_OBJECT_DRAG) return;
+   if(InpBloccato) return;
+   if(gNRighe == 0) return;
    if(sparam != P+"bg") return;
 
    gPosX = (int)ObjectGetInteger(0, P+"bg", OBJPROP_XDISTANCE);
@@ -172,8 +229,8 @@ void ParseTimeframes()
       if(StringLen(s) == 0) continue;
       string sUp = s;
       StringToUpper(sUp);
-      ENUM_TIMEFRAMES tf;
-      if(!TFDaCodice(sUp, tf))
+      int codice = TFDaCodice(sUp);
+      if(codice < 0)
         {
          Print("[ABTG_ContoAllaRovescia] timeframe non riconosciuto, saltato: '", s, "'");
          continue;
@@ -181,49 +238,48 @@ void ParseTimeframes()
       if(gNRighe >= 20) { Print("[ABTG_ContoAllaRovescia] limite di 20 righe raggiunto, il resto e' ignorato."); break; }
       ArrayResize(gTF, gNRighe+1);
       ArrayResize(gEtichetta, gNRighe+1);
-      gTF[gNRighe]        = tf;
+      gTF[gNRighe]        = (ENUM_TIMEFRAMES)codice;
       gEtichetta[gNRighe] = sUp;
       gNRighe++;
      }
   }
 //+------------------------------------------------------------------+
-bool TFDaCodice(string s, ENUM_TIMEFRAMES &tf)
-  {
-   if(s=="M1")  { tf=PERIOD_M1;  return true; }
-   if(s=="M2")  { tf=PERIOD_M2;  return true; }
-   if(s=="M3")  { tf=PERIOD_M3;  return true; }
-   if(s=="M4")  { tf=PERIOD_M4;  return true; }
-   if(s=="M5")  { tf=PERIOD_M5;  return true; }
-   if(s=="M6")  { tf=PERIOD_M6;  return true; }
-   if(s=="M10") { tf=PERIOD_M10; return true; }
-   if(s=="M12") { tf=PERIOD_M12; return true; }
-   if(s=="M15") { tf=PERIOD_M15; return true; }
-   if(s=="M20") { tf=PERIOD_M20; return true; }
-   if(s=="M30") { tf=PERIOD_M30; return true; }
-   if(s=="H1")  { tf=PERIOD_H1;  return true; }
-   if(s=="H2")  { tf=PERIOD_H2;  return true; }
-   if(s=="H3")  { tf=PERIOD_H3;  return true; }
-   if(s=="H4")  { tf=PERIOD_H4;  return true; }
-   if(s=="H6")  { tf=PERIOD_H6;  return true; }
-   if(s=="H8")  { tf=PERIOD_H8;  return true; }
-   if(s=="H12") { tf=PERIOD_H12; return true; }
-   if(s=="D1")  { tf=PERIOD_D1;  return true; }
-   if(s=="W1")  { tf=PERIOD_W1;  return true; }
-   if(s=="MN1" || s=="MN") { tf=PERIOD_MN1; return true; }
-   return false;
-  }
+//| Torna il codice del timeframe, oppure -1 se non e' riconosciuto.  |
 //+------------------------------------------------------------------+
-int AnchorFromCorner(int corner)
+int TFDaCodice(string s)
   {
-   if(corner==CORNER_RIGHT_UPPER) return(ANCHOR_RIGHT_UPPER);
-   if(corner==CORNER_LEFT_LOWER)  return(ANCHOR_LEFT_LOWER);
-   if(corner==CORNER_RIGHT_LOWER) return(ANCHOR_RIGHT_LOWER);
-   return(ANCHOR_LEFT_UPPER);
+   if(s=="M1")  return((int)PERIOD_M1);
+   if(s=="M2")  return((int)PERIOD_M2);
+   if(s=="M3")  return((int)PERIOD_M3);
+   if(s=="M4")  return((int)PERIOD_M4);
+   if(s=="M5")  return((int)PERIOD_M5);
+   if(s=="M6")  return((int)PERIOD_M6);
+   if(s=="M10") return((int)PERIOD_M10);
+   if(s=="M12") return((int)PERIOD_M12);
+   if(s=="M15") return((int)PERIOD_M15);
+   if(s=="M20") return((int)PERIOD_M20);
+   if(s=="M30") return((int)PERIOD_M30);
+   if(s=="H1")  return((int)PERIOD_H1);
+   if(s=="H2")  return((int)PERIOD_H2);
+   if(s=="H3")  return((int)PERIOD_H3);
+   if(s=="H4")  return((int)PERIOD_H4);
+   if(s=="H6")  return((int)PERIOD_H6);
+   if(s=="H8")  return((int)PERIOD_H8);
+   if(s=="H12") return((int)PERIOD_H12);
+   if(s=="D1")  return((int)PERIOD_D1);
+   if(s=="W1")  return((int)PERIOD_W1);
+   if(s=="MN1" || s=="MN") return((int)PERIOD_MN1);
+   return(-1);
   }
 //+------------------------------------------------------------------+
 bool CornerInBasso(int corner)
   {
    return(corner==CORNER_LEFT_LOWER || corner==CORNER_RIGHT_LOWER);
+  }
+//+------------------------------------------------------------------+
+bool CornerADestra(int corner)
+  {
+   return(corner==CORNER_RIGHT_UPPER || corner==CORNER_RIGHT_LOWER);
   }
 //+------------------------------------------------------------------+
 //| Altezze e larghezza RICAVATE dal font (in PUNTI), non numeri      |
@@ -240,9 +296,10 @@ void CalcolaLayout()
    gPanelH = gPad + gTitH + gNRighe*gRigaH + gPad;
 
    //--- larghezza: colonna timeframe (max 3 caratteri, "MN1"/"H12") +
-   //    colonna tempo ("168:00:00" = 9 caratteri nel caso piu' lungo,
-   //    settimanale). ~0,9 px per punto e' il margine gia' verificato
-   //    sull'orologio laterale.
+   //    colonna tempo. Il caso piu' lungo NON e' il settimanale ma il
+   //    mensile: 31 giorni = 744 ore -> "744:00:00", 9 caratteri (il
+   //    settimanale si ferma a "168:00:00", sempre 9). ~0,9 px per punto
+   //    e' il margine gia' verificato sull'orologio laterale.
    int wTF     = 3*gFont*9/10 + 14;
    int wTempo  = 9*gFont*9/10;
    gPanelW = gPad + wTF + wTempo + gPad;
@@ -251,71 +308,104 @@ void CalcolaLayout()
    if(gPanelW < 150) gPanelW = 150;
   }
 //+------------------------------------------------------------------+
+//| Converte una y misurata dal bordo SUPERIORE del pannello nella    |
+//| YDISTANCE da dare a MT5 (sugli angoli in basso si misura dal      |
+//| bordo inferiore, quindi le righe vanno ribaltate).                |
+//+------------------------------------------------------------------+
 int Ygrafico(int yDalTop,int hRiga)
   {
    if(gBasso) return(gPosY + gPanelH - yDalTop - hRiga);
    return(gPosY + yDalTop);
   }
 //+------------------------------------------------------------------+
-void BuildPanel()
+//| Gemella di Ygrafico per la X: converte una x misurata dal bordo   |
+//| SINISTRO del pannello nella XDISTANCE da dare a MT5. Sugli angoli |
+//| DESTRI la X si misura dal bordo destro del grafico e cresce verso |
+//| sinistra: senza questo ribaltamento le due colonne si invertono e |
+//| quella dei tempi finisce FUORI dal pannello (difetto della v1.00).|
+//+------------------------------------------------------------------+
+int Xgrafico(int xDaSinistra)
   {
-   ObjectsDeleteAll(0, P);
-
-   Rect(P+"bg", gPosX, gPosY, gPanelW, gPanelH, !InpBloccato);
-
-   int y = gPad;
-   if(gTitH > 0)
-     {
-      Lbl(P+"tit", gPosX+gPad, Ygrafico(y,gLblH), InpTitolo, InpColoreEtich, 9);
-      y += gTitH;
-     }
-   for(int i=0; i<gNRighe; i++)
-     {
-      Lbl(P+"tf_"+(string)i,  gPosX+gPad,          Ygrafico(y,gRigaH), gEtichetta[i], InpColoreEtich, gFont);
-      Lbl(P+"tm_"+(string)i,  gPosX+gPanelW-gPad,   Ygrafico(y,gRigaH), "--:--",       InpColoreNormale, gFont);
-      ObjectSetInteger(0, P+"tm_"+(string)i, OBJPROP_ANCHOR, DestraDaAngolo());
-      y += gRigaH;
-     }
+   if(gDestra) return(gPosX + gPanelW - xDaSinistra);
+   return(gPosX + xDaSinistra);
   }
 //+------------------------------------------------------------------+
-//| La colonna del tempo e' allineata a destra del pannello: serve un |
-//| anchor "a destra" indipendente dall'angolo (sopra/sotto) scelto.  |
+//| Gli anchor del TESTO non dipendono dall'angolo ma dalla colonna:  |
+//| i nomi dei timeframe sono allineati a sinistra, i tempi a destra. |
+//| Dell'angolo resta solo il sopra/sotto.                            |
+//+------------------------------------------------------------------+
+int SinistraDaAngolo()
+  {
+   return(gBasso ? ANCHOR_LEFT_LOWER : ANCHOR_LEFT_UPPER);
+  }
 //+------------------------------------------------------------------+
 int DestraDaAngolo()
   {
    return(gBasso ? ANCHOR_RIGHT_LOWER : ANCHOR_RIGHT_UPPER);
   }
 //+------------------------------------------------------------------+
-//| Dopo un trascinamento: stessa geometria di BuildPanel, ma senza   |
-//| ri-creare gli oggetti (solo XDISTANCE/YDISTANCE) -- piu' leggero  |
-//| e nessun lampeggio mentre si sposta il pannello col mouse.        |
+void BuildPanel()
+  {
+   ObjectsDeleteAll(0, P);
+   Disponi(true);
+  }
+//+------------------------------------------------------------------+
+//| Dopo un trascinamento: stessa geometria, senza ri-creare gli      |
+//| oggetti (solo XDISTANCE/YDISTANCE) -- piu' leggero e senza        |
+//| lampeggio. E' LA STESSA funzione di BuildPanel apposta: due copie |
+//| della stessa aritmetica sono una divergenza che aspetta soltanto. |
 //+------------------------------------------------------------------+
 void RiposizionaEtichette()
   {
-   ObjectSetInteger(0, P+"bg", OBJPROP_XSIZE, gPanelW);
-   ObjectSetInteger(0, P+"bg", OBJPROP_YSIZE, gPanelH);
+   Disponi(false);
+  }
+//+------------------------------------------------------------------+
+//| UNICO punto in cui si decide DOVE sta ogni cosa.                  |
+//| crea=true  -> crea gli oggetti e ci scrive dentro il segnaposto;  |
+//| crea=false -> li sposta soltanto (il testo del conto alla rovescia|
+//|               NON va toccato, altrimenti si azzererebbe ad ogni   |
+//|               trascinamento).                                     |
+//+------------------------------------------------------------------+
+void Disponi(bool crea)
+  {
+   if(crea)
+      Rect(P+"bg", gPosX, gPosY, gPanelW, gPanelH, !InpBloccato);
+   else
+     {
+      ObjectSetInteger(0, P+"bg", OBJPROP_XSIZE, gPanelW);
+      ObjectSetInteger(0, P+"bg", OBJPROP_YSIZE, gPanelH);
+     }
 
    int y = gPad;
    if(gTitH > 0)
      {
-      ObjectSetInteger(0, P+"tit", OBJPROP_XDISTANCE, gPosX+gPad);
-      ObjectSetInteger(0, P+"tit", OBJPROP_YDISTANCE, Ygrafico(y,gLblH));
+      Posa(P+"tit", crea, Xgrafico(gPad), Ygrafico(y,gLblH), InpTitolo, InpColoreEtich, 9, SinistraDaAngolo());
       y += gTitH;
      }
    for(int i=0; i<gNRighe; i++)
      {
-      ObjectSetInteger(0, P+"tf_"+(string)i, OBJPROP_XDISTANCE, gPosX+gPad);
-      ObjectSetInteger(0, P+"tf_"+(string)i, OBJPROP_YDISTANCE, Ygrafico(y,gRigaH));
-      ObjectSetInteger(0, P+"tm_"+(string)i, OBJPROP_XDISTANCE, gPosX+gPanelW-gPad);
-      ObjectSetInteger(0, P+"tm_"+(string)i, OBJPROP_YDISTANCE, Ygrafico(y,gRigaH));
+      Posa(P+"tf_"+(string)i, crea, Xgrafico(gPad),          Ygrafico(y,gRigaH), gEtichetta[i], InpColoreEtich,   gFont, SinistraDaAngolo());
+      Posa(P+"tm_"+(string)i, crea, Xgrafico(gPanelW-gPad),  Ygrafico(y,gRigaH), "--:--",       InpColoreNormale, gFont, DestraDaAngolo());
       y += gRigaH;
      }
+  }
+//+------------------------------------------------------------------+
+void Posa(string name,bool crea,int x,int y,string text,color col,int size,int anchor)
+  {
+   if(crea)
+     {
+      Lbl(name, x, y, text, col, size, anchor);
+      return;
+     }
+   ObjectSetInteger(0, name, OBJPROP_XDISTANCE, x);
+   ObjectSetInteger(0, name, OBJPROP_YDISTANCE, y);
   }
 //+------------------------------------------------------------------+
 //| TimeTradeServer(), non TimeCurrent(): TimeCurrent() e' l'ora      |
 //| dell'ultimo tick, quindi si congelerebbe di notte/nel weekend/su  |
 //| un simbolo fermo. TimeTradeServer() avanza sempre (stessa lezione |
-//| di ABTG_OrologioLaterale).                                        |
+//| di ABTG_OrologioLaterale). Tutti i tempi qui sono ORA SERVER: la  |
+//| candela chiude in ora server, non in ora italiana.                |
 //+------------------------------------------------------------------+
 void Aggiorna()
   {
@@ -323,30 +413,65 @@ void Aggiorna()
    for(int i=0; i<gNRighe; i++)
      {
       datetime apertura = iTime(_Symbol, gTF[i], 0);
-      string   nome      = P+"tm_"+(string)i;
+      string   nome     = P+"tm_"+(string)i;
+      //--- iTime()==0 = storico di QUEL timeframe non ancora pronto (il
+      //    terminale lo sta scaricando): si dichiara, non si inventa.
+      //    Al prossimo secondo si riprova da solo.
       if(apertura == 0)
         {
          ObjectSetString(0, nome, OBJPROP_TEXT, "--:--");
          ObjectSetInteger(0, nome, OBJPROP_COLOR, InpColoreEtich);
          continue;
         }
-      int    durata  = PeriodSeconds(gTF[i]);
-      long   residuo = (long)(apertura + durata - ora);
-      if(residuo < 0) residuo = 0;
+      datetime fine    = FineCandela(gTF[i], apertura);
+      long     durata  = (long)fine - (long)apertura;
+      long     residuo = (long)fine - (long)ora;
+      if(residuo < 0)      residuo = 0;        // candela gia' chiusa, tick non ancora arrivato
+      if(residuo > durata) residuo = durata;   // guardia: mai piu' del periodo intero
       double pctResiduo = (durata > 0) ? (100.0*residuo/durata) : 100.0;
 
       ObjectSetString(0, nome, OBJPROP_TEXT, FormattaResiduo(residuo));
+      //--- avviso quando manca POCO: meno tempo resta, piu' bassa e' la
+      //    percentuale, quindi il confronto e' <=.
       ObjectSetInteger(0, nome, OBJPROP_COLOR,
          (pctResiduo <= InpSogliaAvvisoPct) ? InpColoreAvviso : InpColoreNormale);
      }
    ChartRedraw();
   }
 //+------------------------------------------------------------------+
+//| Fine della candela in corso. Per tutti i timeframe e' apertura +  |
+//| durata del periodo; per il MENSILE no: PeriodSeconds(PERIOD_MN1)  |
+//| vale 30 giorni FISSI, quindi a gennaio (31) direbbe una bugia di  |
+//| un giorno intero. Per MN1 si usa il calendario: inizio del mese   |
+//| successivo, ora server.                                           |
+//+------------------------------------------------------------------+
+datetime FineCandela(ENUM_TIMEFRAMES tf,datetime apertura)
+  {
+   if(tf != PERIOD_MN1)
+      return((datetime)((long)apertura + (long)PeriodSeconds(tf)));
+
+   MqlDateTime t;
+   TimeToStruct(apertura, t);
+   t.mon++;
+   if(t.mon > 12) { t.mon = 1; t.year++; }
+   t.day  = 1;
+   t.hour = 0;
+   t.min  = 0;
+   t.sec  = 0;
+   return(StructToTime(t));
+  }
+//+------------------------------------------------------------------+
+//| Formato H:MM:SS quando manca piu' di un'ora, MM:SS sotto l'ora.   |
+//| I tre campi sono INT apposta: "%02d" vuole un int, e in casa il   |
+//| long si stampa con "%I64d" (ABTG_Guardian, ABTG_CanarinoGuardian).|
+//| Il massimo possibile e' il mensile, 744 ore -> 9 caratteri, che e'|
+//| esattamente la larghezza prevista in CalcolaLayout.               |
+//+------------------------------------------------------------------+
 string FormattaResiduo(long secondi)
   {
-   long h = secondi/3600;
-   long m = (secondi%3600)/60;
-   long s = secondi%60;
+   int h = (int)(secondi/3600);
+   int m = (int)((secondi%3600)/60);
+   int s = (int)(secondi%60);
    if(h > 0) return StringFormat("%02d:%02d:%02d", h, m, s);
    return StringFormat("%02d:%02d", m, s);
   }
@@ -367,15 +492,17 @@ void Rect(string name,int x,int y,int w,int h,bool selezionabile)
    ObjectSetInteger(0,name,OBJPROP_BACK,false);
    ObjectSetInteger(0,name,OBJPROP_SELECTABLE,selezionabile);
    ObjectSetInteger(0,name,OBJPROP_SELECTED,false);
-   ObjectSetInteger(0,name,OBJPROP_HIDDEN,true);
+   //--- se e' trascinabile lo si lascia NELLA lista oggetti (Ctrl+B):
+   //    e' la via di recupero se col mouse non si riesce ad afferrarlo.
+   ObjectSetInteger(0,name,OBJPROP_HIDDEN,!selezionabile);
    ObjectSetInteger(0,name,OBJPROP_ZORDER,0);
   }
 //+------------------------------------------------------------------+
-void Lbl(string name,int x,int y,string text,color col,int size)
+void Lbl(string name,int x,int y,string text,color col,int size,int anchor)
   {
    if(ObjectFind(0,name)<0) ObjectCreate(0,name,OBJ_LABEL,0,0,0);
    ObjectSetInteger(0,name,OBJPROP_CORNER,(int)InpAngolo);
-   ObjectSetInteger(0,name,OBJPROP_ANCHOR,gAnchor);
+   ObjectSetInteger(0,name,OBJPROP_ANCHOR,anchor);
    ObjectSetInteger(0,name,OBJPROP_XDISTANCE,x);
    ObjectSetInteger(0,name,OBJPROP_YDISTANCE,y);
    ObjectSetString (0,name,OBJPROP_TEXT,text);

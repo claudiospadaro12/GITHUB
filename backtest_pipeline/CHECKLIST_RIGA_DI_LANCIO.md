@@ -18690,3 +18690,92 @@ Si scrivono, perche' un elenco di soli difetti descrive male la realta':
   dell'**ultimo tick conosciuto** del simbolo, quindi di notte, nel weekend o su un
   simbolo fermo un orologio costruito su di essa **si congela**.
   `TimeTradeServer()` e' l'ora server **calcolata** e avanza comunque.
+
+---
+
+## 327. 🖼️↔️ PANNELLO MQL5 A **DUE COLONNE**: sugli angoli **DESTRI** la X si misura dal bordo destro e **cresce verso sinistra** — la colonna allineata a destra finisce FUORI dal riquadro (14/09/2026)
+
+**Il caso reale**: `ABTG_ContoAllaRovescia.mq5` v1.00 (conto alla rovescia
+multi-timeframe, pannello trascinabile), fermato dal cancello **prima** di andare
+a Claudio per la compilazione. E' il **gemello sull'asse X** della meta' "angoli
+bassi" della classe 326: li' era `YDISTANCE` a ribaltarsi, qui e' `XDISTANCE`.
+
+🔴 Il file aveva **gia'** la conversione sulla Y (`Ygrafico()`, presa
+dall'orologio) ma sulla X calcolava le due colonne **come se X crescesse sempre
+verso destra**:
+```
+Lbl(tf_i, gPosX + gPad,            ...)   // nome del timeframe
+Lbl(tm_i, gPosX + gPanelW - gPad,  ...)   // tempo, anchor a DESTRA
+```
+Con `OBJPROP_CORNER` su un angolo destro, `XDISTANCE` si misura **dal bordo
+destro del grafico**: `gPosX + gPanelW - gPad` non e' piu' "dentro, a destra" ma
+**oltre il bordo SINISTRO** del pannello. Simulato fuori da MT5 (chart 1200 px,
+pannello 202 px a `gPosX=200`, font 16):
+
+| angolo | pannello | colonna TF | colonna TEMPO | esito |
+|---|---|---|---|---|
+| ALTO_SX | [200,402] | [208,251] | [265,394] | OK |
+| **ALTO_DX** | **[798,1000]** | [949,992] | **[677,806]** | **121 px FUORI, colonne invertite** |
+| BASSO_SX | [200,402] | [208,251] | [265,394] | OK |
+| **BASSO_DX** | **[798,1000]** | [949,992] | **[677,806]** | **121 px FUORI, colonne invertite** |
+
+Cioe': **2 dei 4 valori dell'input erano rotti**, e il numero che l'indicatore
+esiste per mostrare (il conto alla rovescia) galleggiava **sul grafico nudo**.
+
+🔴 **Perche' l'orologio (classe 326, gia' PASS) non lo aveva**: li' la colonna e'
+**UNA sola**, e con anchor `ANCHOR_RIGHT_*` il testo a `X+gPad` resta comunque
+dentro il riquadro. 👉 **Il difetto nasce dalla SECONDA colonna**: e' il momento
+in cui "x misurata dal bordo sinistro del pannello" smette di coincidere con
+"XDISTANCE".
+
+### 🔑 La regola in una riga
+> **Ogni coordinata di un pannello a oggetti si scrive nel sistema del PANNELLO
+> (x dal suo bordo sinistro, y dal suo bordo alto) e si converte in `XDISTANCE`/
+> `YDISTANCE` in UN SOLO punto** — `Xgrafico()` accanto a `Ygrafico()`:
+> `x_out = (angolo a destra) ? X + W - x_dal_sx : X + x_dal_sx`. **E l'anchor del
+> testo dipende dalla COLONNA, non dall'angolo**: `ANCHOR_LEFT_*` per le etichette
+> a sinistra, `ANCHOR_RIGHT_*` per i numeri allineati a destra; dell'angolo resta
+> solo il sopra/sotto.
+
+### 🔎 COME SI RICONOSCE IN TRENTA SECONDI
+1. Cerca `+ gPanelW` o `+ larghezza` dentro una coordinata X: se **non** passa da
+   una funzione di conversione, il file e' gia' rotto per gli angoli destri.
+2. Se il pannello e' **trascinabile**, controlla che la geometria sia scritta **una
+   volta sola**: BuildPanel e il riposizionamento post-`CHARTEVENT_OBJECT_DRAG`
+   che ripetono la stessa aritmetica sono **due copie destinate a divergere** (qui
+   erano gia' due, ancora identiche per fortuna: unificate in `Disponi(crea)`).
+3. Simula i **quattro angoli** con dieci righe di Python: contenimento e ordine
+   delle colonne. Il default (alto a sinistra) e' proprio quello che NON sbaglia.
+4. Precedente gia' compilato in casa che conferma la semantica:
+   `ABTG_SuperWave_Dashboard.mq5`, `RectR`/`LblR` (`CORNER_RIGHT_UPPER` con
+   etichette a `RM+6` e `ANCHOR_RIGHT_UPPER`): la X cresce **verso sinistra**.
+
+### ⚠️ E LE TRE COSE MINORI DELLO STESSO GIRO (tutte vere, nessuna bloccante)
+- **`long` dato in pasto a `"%02d"`**: `StringFormat("%02d:%02d:%02d", h,m,s)` con
+  `h/m/s` di tipo `long`. In casa il 64 bit si stampa con **`%I64d`**
+  (`ABTG_Guardian` r.544-555, `ABTG_CanarinoGuardian` r.260): un formato che non
+  corrisponde al tipo **stampa numeri sbagliati**, non un errore di compilazione.
+  Corretto con tre `(int)`, che e' cio' che `%02d` si aspetta;
+- **`PeriodSeconds(PERIOD_MN1)` vale 30 giorni FISSI**: usato come durata della
+  candela mensile mentiva di **un giorno intero a gennaio** (e di due a febbraio).
+  La fine del mese si calcola col **calendario** (`TimeToStruct` -> mese+1, giorno
+  1, 00:00 -> `StructToTime`). `W1` invece va bene con `PeriodSeconds`: 604800 s
+  cadono esattamente sullo stesso giorno della settimana;
+- **posizione salvata in `GlobalVariable` e ripresa senza guardia**: una posizione
+  presa su un monitor grande, riaperta su una finestra piccola, genera un pannello
+  **fuori schermo, invisibile e non piu' afferrabile col mouse**. Serve un clamp
+  su `CHART_WIDTH_IN_PIXELS`/`CHART_HEIGHT_IN_PIXELS` (qui: sempre 40 px dentro) e
+  la memoria va tenuta **per angolo**, altrimenti cambiare `InpAngolo` reinterpreta
+  una X "da sinistra" come "da destra".
+
+### 🟢 E LE QUATTRO COSE CHE ERANO GIA' GIUSTE
+Si scrivono, perche' un elenco di soli difetti descrive male la realta':
+- **`Ygrafico()` con `gPosX/gPosY` e non con `InpX/InpY`**: su un pannello che si
+  MUOVE, usare l'input al posto della posizione corrente e' il salto garantito al
+  primo trascinamento. Qui era gia' fatto bene;
+- **un solo oggetto `SELECTABLE` (lo sfondo) e tutte le etichette a `false`**: e'
+  la struttura giusta, altrimenti si trascina via una riga per volta;
+- **il pezzo non riconosciuto di `InpTimeframes` viene SEGNALATO con `Print` e
+  saltato**, non trasformato in un default silenzioso (un refuso deve vedersi);
+- **`iTime()==0` gestito** (storico di quel TF non ancora scaricato): si scrive
+  `--:--`, non si inventa un residuo.
