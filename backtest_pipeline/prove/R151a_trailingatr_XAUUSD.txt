@@ -107,34 +107,61 @@
 #      livello di protezione, non lo stesso interruttore.
 #
 #  >>> SECONDO PUNTO, ED E' LA CLASSE 308 (IL PARAMETRO CHE STA ANCHE
-#      AL DENOMINATORE) APPLICATA QUI, PRIMA DEI NUMERI:
+#      AL DENOMINATORE) APPLICATA QUI, PRIMA DEI NUMERI -- CORRETTO IL
+#      14/09/2026 DAL CANCELLO DI GIUDIZIO, PERCHE' LA PRIMA STESURA
+#      ATTRIBUIVA IL TRIGGER SOLO AL TRAILING E NON REGGE ALLA LETTURA:
 #      `risk` (r.407) e' RICALCOLATO A OGNI CHIAMATA dallo STOP CORRENTE
 #      (`sl = PositionGetDouble(POSITION_SL)`, letto in TESTA alla
-#      funzione), NON dallo stop d'ingresso salvato. Il trailing (in
-#      fondo alla STESSA funzione) SPOSTA quello stop. Quindi, tick dopo
-#      tick:
-#        - se il trailing ha gia' spinto lo stop OLTRE l'apertura (long:
-#          sl > openP), allora risk = openP-sl e' NEGATIVO -> r.408
-#          SOSTITUISCE `risk` con `AtrVal()*InpAtrSLmult` (1,5x ATR,
-#          FISSO, indipendente da InpTrailAtrMult) -- e quel numero,
-#          non piu' il rischio vero d'ingresso, e' la base su cui si
-#          calcola il bersaglio del 2o parziale (r.439, `InpTP2_R`).
-#        - QUANDO questo accade dipende da InpTrailAtrMult: una cella
-#          STRETTA (0,8x ATR) spinge lo stop oltre l'apertura con MENO
-#          escursione favorevole di una cella LARGA (3,2x ATR) -- quindi
-#          nella cella stretta la sostituzione avviene PRIMA nella vita
-#          del trade, e per PIU' operazioni il bersaglio del TP2 e'
-#          calcolato sul fallback fisso invece che sul rischio vero.
-#      >>> CONSEGUENZA CONGELATA: le celle di questo asse NON misurano
-#          "solo" quanto stringe il trailing. Misurano ANCHE quanto
-#          spesso il bersaglio del secondo parziale smette di essere in
-#          unita' di rischio vero. Non e' un artefatto da correggere
-#          qui (e' il comportamento REALE del codice in campo): e' un
-#          secondo canale, e va scritto se il PF/DD del round si
-#          commentano solo col primo (il trailing che stringe/allarga).
-#          Il numero del quanto e' [NON MISURATO]: servirebbe l'export
-#          per-trade (stessa limitazione 308-4 di R147a), proposto non
-#          fatto qui.
+#      funzione), NON dallo stop d'ingresso salvato. Quindi, tick dopo
+#      tick, se sl e' >= openP (long) risk diventa <=0 e r.408
+#      SOSTITUISCE `risk` con `AtrVal()*InpAtrSLmult` (1,5x ATR, FISSO,
+#      indipendente da InpTrailAtrMult) -- e quel numero, non piu' il
+#      rischio vero d'ingresso, e' la base su cui si calcola il
+#      bersaglio del 2o parziale (r.439, `InpTP2_R`).
+#      >>> MA sl puo' arrivare a openP per DUE vie indipendenti, non una
+#          sola, e la prima stesura ne aveva letta solo una:
+#          (i) il TRAILING (r.464/465), che dipende da InpTrailAtrMult;
+#          (ii) il BREAKEVEN a TP1 (r.424/428-430): `bePari=openP`,
+#              `beFatto` scatta se `InpBreakeven` E' true e lo stop
+#              MIGLIORA -- e questa condizione NON E' GATATA da
+#              `parzOK`/`gPart1` (r.428, letto riga per riga: e' un `if`
+#              separato, non annidato in `if(parzOK)`). Con
+#              `InpBreakeven=true` (PINNED su tutte le 7 celle, non e'
+#              l'asse) e con `slPrec` sempre peggiore di `openP` per
+#              costruzione (lo stop pre-TP1 e' l'estremo opposto del
+#              box), `beFatto` e' vero SOSTANZIALMENTE OGNI VOLTA che
+#              TP1 scatta -- indipendentemente da InpTrailAtrMult.
+#      >>> CONSEGUENZA, RIVISTA: sul path che davvero arriva a TP2 (cioe'
+#          `gPart1==true`, che richiede TP1 gia' scattato con parziale
+#          riuscita), lo stop e' quasi sempre GIA' a `openP` per via (ii)
+#          fin dalla chiamata successiva al colpo di TP1 -- PRIMA che il
+#          trailing abbia avuto il tempo di superare l'apertura, perche'
+#          1R (TP1, sul rischio d'ingresso vero, cioe' l'ampiezza del
+#          box) e' tipicamente un'escursione piu' piccola di
+#          `a*InpTrailAtrMult` per le celle centrali e larghe. Il
+#          fallback ATR sul bersaglio del TP2 e' quindi presente su
+#          QUASI TUTTI i trade con parziale riuscita, SU TUTTE E SETTE
+#          LE CELLE -- non solo sulle celle stringenti come la prima
+#          stesura implicava.
+#      >>> DOVE InpTrailAtrMult PUO' ANCORA CONTARE: solo nei trade dove
+#          `a*InpTrailAtrMult < rischio d'ingresso` (celle STRETTE, 0,8/
+#          1,2, quando il box e' largo rispetto all'ATR) -- li' il
+#          trailing (via (i)) PUO' superare l'apertura PRIMA che il
+#          prezzo raggiunga 1R, anticipando un evento che (ii) avrebbe
+#          comunque prodotto poco dopo. L'EFFETTO SUL NUMERO usato per
+#          il bersaglio del TP2 e' NULLO in ogni caso (e' la STESSA
+#          formula fissa `AtrVal()*InpAtrSLmult`, chiunque dei due la
+#          inneschi prima): cambia solo QUANDO, non COSA. Quindi la
+#          "seconda canale" non e' quasi per niente sensibile all'asse
+#          di questo round -- e' quasi costante su tutte le 7 celle,
+#          dominato da (ii), che e' fisso. Non va piu' letto come "le
+#          celle stringenti sporcano di piu' il bersaglio del TP2":
+#          lo sporcano quasi tutte allo stesso modo.
+#      Il numero del quanto resta [NON MISURATO] (servirebbe l'export
+#      per-trade, stessa limitazione 308-4 di R147a, proposto non fatto
+#      qui) -- ma la DIREZIONE dichiarata sopra ("dipende dalla cella")
+#      era la parte sbagliata, e questa correzione la sostituisce prima
+#      che il round venga letto.
 #
 #  >>> TERZO PUNTO, ED E' IL CONTRO-ESEMPIO CHE FAREBBE CADERE L'INTERO
 #      ROUND SE FOSSE VERO -- COSTRUITO ORA, PRIMA DI CONSEGNARE:
