@@ -1112,13 +1112,24 @@ void AutoTestCycle()
                (int)o1,(int)o2,(int)o3,(int)o4);
    if(!(o1 && !o2 && o3 && o4)) falliti++;
 
-   //--- 9) IL CICLO SUI DATI VERI, e vale come SANITY sul mercato:
-   //    su qualunque serie il ciclo e' I meno la sua media, quindi deve
-   //    essere un numero PICCOLO rispetto ai 0-100 di I. Se uscisse 80
-   //    vorrebbe dire che la sottrazione non e' avvenuta.
+   //--- 9) IL CICLO SUI DATI VERI, e vale come SANITY sul mercato.
+   //    >>> IL FALSIFICATORE GIUSTO E' IL SEGNO, NON LA TAGLIA.
+   //        I sta fra 0 e 100 e NON E' MAI NEGATIVO: quindi un valore
+   //        NEGATIVO del ciclo prova, da solo, che la sottrazione della
+   //        SMA e' avvenuta. Se invece il numero stesse stabilmente
+   //        intorno a 50 e non scendesse mai sotto zero, si starebbe
+   //        leggendo I al posto del ciclo.
+   //    >>> E LA TAGLIA NON E' "DELL'ORDINE DELLE UNITA'": e' MISURATA
+   //        fuori da MT5 (12 semi x 4.000 barre, random walk / random
+   //        walk con deriva / serie a onde):
+   //           |ciclo| mediana 6,8 - 9,7 | p95 19,4 - 23,7 | max 38,7
+   //        Cioe' un [1] = -25 e' NORMALE e non e' un difetto. Questa
+   //        riga prima diceva "numeri piccoli, dell'ordine delle
+   //        unita'": era un'attesa SBAGLIATA, e avrebbe fatto sospettare
+   //        un bug davanti a un valore sano (14/09/2026).
    double cyc[];
    if(CycleSeries(gTF,2,cyc))
-      PrintFormat("[CYCLE][AUTOTEST] ciclo sui dati veri: [1]=%.4f [2]=%.4f (devono essere numeri PICCOLI, dell'ordine delle unita': I sta fra 0 e 100 e qui si legge I meno la sua media)",
+      PrintFormat("[CYCLE][AUTOTEST] ciclo sui dati veri: [1]=%.4f [2]=%.4f (DEVE poter essere NEGATIVO: I sta fra 0 e 100 e non e' mai negativo, quindi il segno meno prova la sottrazione. Banda MISURATA fuori MT5: |ciclo| mediana 6,8-9,7, p95 19,4-23,7, max 38,7 -- un -25 e' NORMALE. Se stesse fermo intorno a +50 si starebbe leggendo I, non il ciclo.)",
                   cyc[1], cyc[2]);
    else
       Print("[CYCLE][AUTOTEST] ciclo sui dati veri: storia ancora insufficiente in OnInit. NON e' un errore: si ricalcola alla prima barra utile.");

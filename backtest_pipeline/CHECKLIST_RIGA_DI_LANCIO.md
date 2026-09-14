@@ -18368,3 +18368,72 @@ corretta; `report/RISPOSTA_A_MARCO_DOSSIER_2026-09-14.md` **esiste ma non c'entr
 ### 🔑 La regola in una riga
 *Un commento consegnato si rilegge come se lo avesse scritto un altro: i frammenti di
 ripensamento e i percorsi troncati sono bugie che invecchiano bene.*
+
+---
+
+## 321. 📈💰 LA SOGLIA IN **R** LETTA CON UN «1 R» COSTANTE MENTRE IL LOTTO NASCE DAL **SALDO**: il compounding gonfia la cella che guadagna e schiaccia quella che perde, cioe' spinge **verso l'ipotesi** (14/09/2026)
+
+**Caso reale**: `backtest_pipeline/prove/R148a_cycle_verso_NASUSD.txt`, primo
+round del motore `ABTG_Cycle`. Criteri congelati prima dei numeri, e la
+conversione scritta cosi' (formula ereditata da `R145a` r.171-174):
+
+```text
+Con InpRiskPercent = 0,65 costante e deposito 100.000: 1 R = 650 EUR,
+quindi E in R = Expected Payoff / 650. Nessun'altra conversione.
+```
+
+🔴 **Ma `1 R` non e' costante.** Il lotto lo calcola l'EA cosi'
+(`ABTG_Cycle.mq5`, `LotByRisk`):
+
+```cpp
+double risk = AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0;
+```
+
+cioe' **0,65% del saldo DEL MOMENTO**, e nel tester il saldo **compone**.
+`1 R` vale 650 EUR **solo alla prima operazione**.
+
+### 📐 PERCHE' QUI MORDE E IN `R145a` NO — e' una questione di **n**
+La distorsione cresce con il numero di operazioni. `R145a` gira un motore lento
+(poche centinaia di trade): lo scarto e' rumore. `R148a` ne dichiara
+**2.400-3.800**, e allora:
+
+| se l'edge vero e' | dopo 2.500 trade il saldo | saldo MEDIO della corsa | `Expected Payoff / 650` legge |
+|---|---:|---:|---:|
+| **+0,03 R** | 100.000 × e^(0,0065·75) = **162.800** | **1,288×** | **0,0386 R** (+29%) |
+| **−0,02 R** | 100.000 × e^(−0,0065·50) = **72.300** | **0,854×** | **−0,0171 R** (−15% in modulo) |
+
+🔴 **E il verso e' quello cattivo**: la soglia del file era *«una cella a
+E ≥ +0,03 R, l'altra sotto −0,02 R»* = **"c'e' segnale"**. Il compounding
+**alza** la prima e **avvicina a zero** la seconda: rende piu' facile l'esito
+che conferma l'ipotesi dell'autore e piu' difficile quello che la smentisce.
+Non e' un arrotondamento: e' un **pollice sulla bilancia**, messo da una
+formula copiata da un round dove era innocua.
+
+### ✅ LA CORREZIONE, E COSTA ZERO DATI NUOVI
+A frazione costante ogni operazione moltiplica il saldo per `(1 + f·r)` con
+`f = 0,0065`, quindi `ln(saldo_fin/saldo_ini) = f · Σr` ed **esatto al secondo
+ordine**:
+
+```text
+E in R  =  ln(1 + Profit / Deposito)  /  (f x Trades)          f = InpRiskPercent/100
+```
+
+`Profit`, `Trades` e il deposito sono **gia' colonne/costanti del CSV
+dell'OptFrame**. Verifica contro il caso costruito a mano: `ln(1,628) = 0,4875`;
+`0,4875 / (0,0065 × 2.500) = 0,0300 R` — **ridA' il numero vero**, dove
+`Expected Payoff/650` dava `0,0386`.
+
+### 🔎 COME SI RICONOSCE IN TRENTA SECONDI, PRIMA DI CONGELARE UNA SOGLIA
+1. Il file prova converte EUR → R con **un divisore fisso**?
+2. L'EA dimensiona su `ACCOUNT_BALANCE` / `ACCOUNT_EQUITY` (e non su una cifra
+   fissa)?
+3. Il file **dichiara piu' di ~300 operazioni attese**?
+
+👉 Se le tre risposte sono **SI**, il divisore fisso e' sbagliato e va sostituito
+con la formula logaritmica. Sotto le ~300 operazioni si puo' tenere il divisore
+fisso, ma **va scritto che e' un'approssimazione e in che verso sbaglia**.
+
+### 🔑 La regola in una riga
+*Una soglia espressa in R si legge con l'R **che la corsa ha davvero
+rischiato**: se il lotto segue il saldo, il divisore non e' un numero, e'
+una curva.*

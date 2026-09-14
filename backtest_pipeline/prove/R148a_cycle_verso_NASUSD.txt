@@ -146,7 +146,8 @@
 #          questo round non e' sull'oro: vedi piu' sotto.
 #    ADR NASUSD 313,8 punti indice [MISURATO su 24 giorni,
 #      ROUND_ORB_ATR_PS5_2026-09-10.md r.234]
-#    1 punto indice NASUSD = 100 punti MT5 [MISURATO, InfoBroker r.62:
+#    1 punto indice NASUSD = 100 punti MT5 [MISURATO, InfoBroker r.69
+#      (NON r.62: numero di riga corretto il 14/09/2026):
 #      Digits 2, Point 0,01]
 #    valore punto NASUSD ~0,87 EUR/punto/lotto [MISURATO, trades_auto]
 #
@@ -330,11 +331,49 @@
 #    >>> PEDAGGIO ATTESO: 0,016 - 0,020 R per operazione. Chiamiamolo
 #        0,02 R, che e' il bordo sfavorevole.
 #
+#  ###  COME SI CONVERTE IN R -- E QUI LA REGOLA DI CASA NON BASTA  ###
+#  La formula di casa (R145a r.171-174) e':
+#      1 R = 650 EUR  ->  E in R = Expected Payoff / 650
+#  perche' con InpRiskPercent 0,65 e deposito 100.000 un R vale 650 EUR.
+#  >>> SU QUESTO ROUND QUELLA FORMULA E' DISTORTA, E LA DISTORSIONE VA
+#      NELLA DIREZIONE CHE MI FA COMODO. Va detta prima dei numeri.
+#      Il lotto nasce da ACCOUNT_BALANCE (ABTG_Cycle.mq5, LotByRisk:
+#      "AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0"), quindi
+#      1 R NON e' 650 EUR fisso: e' 0,65% del saldo DEL MOMENTO, e il
+#      saldo COMPONE dentro la corsa. In R145a non morde (motore lento,
+#      poche centinaia di operazioni); qui il motore ne attende
+#      2.400-3.800, e allora morde.
+#      IL CONTO, col numero: 2.500 operazioni a +0,03 R portano il saldo
+#      a 100.000 x exp(0,0065 x 75) = 162.800. Il saldo MEDIO della
+#      corsa vale 1,288 volte quello iniziale, quindi
+#      "Expected Payoff / 650" leggerebbe 0,0386 R dove il vero e'
+#      0,0300: +29%, cioe' GONFIA una cella che guadagna e SCHIACCIA in
+#      modulo una cella che perde. Applicato alle soglie qui sotto,
+#      rende piu' facile l'esito (a) "C'E' SEGNALE" e piu' difficile
+#      l'esito (b): esattamente il verso sbagliato.
+#
+#  >>> QUINDI LE SOGLIE SI LEGGONO SU QUESTO, CHE E' ESATTO AL SECONDO
+#      ORDINE E NON HA IL PROBLEMA (scommessa a frazione costante:
+#      ogni operazione moltiplica il saldo per (1 + 0,0065 x r), quindi
+#      ln(saldo finale/iniziale) = 0,0065 x SOMMA(r)):
+#
+#          E in R  =  ln(1 + Profit / Deposito)  /  (0,0065 x Trades)
+#
+#      Profit, Trades e il Deposito (100.000) sono GIA' tre colonne /
+#      costanti di questo stesso CSV: non serve nessun dato nuovo.
+#      VERIFICA DELLA FORMULA sul caso di sopra: Profit 62.800 su
+#      100.000 -> ln(1,628) = 0,4875 ; 0,4875 / (0,0065 x 2.500) =
+#      0,0300 R. RidA' il numero vero, mentre Expected Payoff/650 dA'
+#      0,0386. E' il controllo che la formula nuova sia giusta, fatto
+#      contro un numero costruito a mano e non contro se stessa.
+#
+#  >>> "Expected Payoff / 650" SI SCRIVE LO STESSO NEL REFERTO, accanto,
+#      come CONTROLLO: le due letture devono stare dalla stessa parte
+#      dello zero. Se non ci stanno, il round non si legge e il motivo
+#      va cercato prima di commentare qualunque PF.
+#
 #  E ADESSO LE TRE USCITE, CONGELATE QUI, PRIMA DI QUALUNQUE CSV.
-#  Si leggono sull'EXPECTED PAYOFF convertito in R, non sul PF.
-#  (Con InpRiskPercent = 0,65 costante e deposito 100.000: 1 R = 650 EUR,
-#   quindi E in R = Expected Payoff / 650. Nessun'altra conversione, e
-#   non se ne fanno.)
+#  Si leggono sull'E in R della formula qui sopra, non sul PF.
 #
 #    (a) C'E' SEGNALE. Una delle due celle sta a E >= +0,03 R in
 #        TUTTE E DUE le finestre e con lo STESSO segno, e l'altra sta
@@ -499,6 +538,30 @@
 #      MetaEditor ne' Strategy Tester: nessuna riga di questo file dice
 #      che il .mq5 compila. Il primo esito possibile del round e' un
 #      errore di compilazione, e va messo in conto.
+#  (9) [!] QUESTO MOTORE STA SEMPRE DENTRO IL MERCATO, E IL FILE NON LO
+#      DICEVA (aggiunto dal controllo preventivo, 14/09/2026).
+#      Gli incroci dello zero si ALTERNANO per costruzione (in
+#      CrossCiclo_Calc un +1 pretende cyc[2] < 0 e cyc[1] >= 0: la barra
+#      dopo non puo' dare un altro +1). Quindi ogni incrocio CHIUDE la
+#      posizione e ne APRE una opposta sulla STESSA barra: e' uno
+#      STOP-AND-REVERSE, non un motore che entra ogni tanto. Piatto lo
+#      si e' solo fra uno stop preso e l'incrocio successivo.
+#      >>> CONSEGUENZE DA LEGGERE COSI', non scoprirle sul CSV:
+#          - l'esposizione e' ~100% del tempo, notte compresa;
+#          - InpFridayClose = false, quindi si TIENE ANCHE NEL FINE
+#            SETTIMANA: un gap del lunedi' su NASUSD puo' SALTARE lo
+#            stop di 2,0 ATR, e quella singola operazione puo' costare
+#            PIU' dello 0,65% dichiarato;
+#          - a -Modello 4 il gap c'e' davvero nei tick, quindi quel
+#            costo FINISCE dentro "Equity DD %" e "Peggior Giornata %":
+#            e' MISURATO, non stimato. Non serve una correzione, serve
+#            che chi legge sappia che quei due numeri contengono anche
+#            questo, e che non sono confrontabili con quelli di una
+#            sedia che il venerdi' chiude.
+#      >>> E il venerdi' e' il PRIMO asse di igiene da provare dopo
+#          questo round (l'input InpFridayClose esiste gia'), non una
+#          manopola da accendere di nascosto adesso: una variabile alla
+#          volta.
 #
 # ----------------------------------------------------------------------
 #  BANCO E FINESTRA -- col conto, non a memoria
@@ -510,7 +573,29 @@
 #    Sono le stesse finestre di R145a e di R147a: i round di casa si
 #    confrontano fra loro solo se il banco e' lo stesso.
 #    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM su
-#    NASUSD, MISURATO (InfoBroker r.62, stato COMPLETO).
+#    NASUSD, MISURATO -- e la fonte e' una SONDA DI TICK, non una sonda
+#    di barre (CLASSE 282: uno stato "COMPLETO" in InfoBroker misura le
+#    BARRE H1 e NON autorizza -Modello 4; questa riga citava proprio
+#    quello, ed e' stata corretta il 14/09/2026 dal controllo
+#    preventivo):
+#      risultati_archivio\misura_tick\REFERTO_MISURA_TICK_NASUSD.txt
+#      (corsa del 30/08/2026, scarica_storico.ps1 pinnato a 2f2437c)
+#        "I TICK REALI DI NASUSD PARTONO DAL 2024.09.26
+#         (166.509.474 tick, verdetto: TICK REALI PARZIALI)"
+#        M1 660.018 barre, prima data server 2024.09.26
+#        "IL BROKER NON HA PIU' STORICO"
+#    >>> QUINDI -Modello 4 e' AUTORIZZATO su questa finestra, e lo e'
+#        nella stessa unita' in cui la corsa consuma i dati.
+#    >>> E IL "PARZIALI" VA LETTO, non nascosto: vuol dire che i tick
+#        cominciano LI' e non prima, non che dentro la finestra ci siano
+#        buchi noti. La contromisura costa zero ed e' gia' di casa: il
+#        driver stampa la PRIMA e l'ULTIMA operazione. Se non coprono
+#        2024.09.26 -> 2026.06.30, la FREQUENZA di questo round non si
+#        legge come un fatto sul mercato (classe 282, punto 2).
+#    (La profondita' in BARRE, che qui NON e' la misura che decide, sta
+#     in risultati_archivio\sonda_storico_17-08\215D85D7_ABTG_InfoBroker
+#     .csv r.69 -- non r.62 come diceva la stesura precedente:
+#     NASUSD, Digits 2, Point 0,01, H1 10.861 barre dal 2024.09.26.)
 #    >>> DEPOSITO 100000: qui la quantizzazione del lotto NON sporca
 #        l'asse (308-1), ma il deposito resta a 100.000 per confrontare
 #        questo round con R145a/R146/R147, che sono tutti su quel banco.
