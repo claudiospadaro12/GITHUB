@@ -1385,5 +1385,12 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  due (2 celle, 4 passate, 0 problemi). Restano #DISARMATA#: il PASS del
 #  secondo strato lo da' 'controllo-preventivo' nella sessione
 #  principale, non chi ha scritto la correzione.
-#DISARMATA# 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
-#DISARMATA# 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
+#  >>> ARMATE il 14/09 DOPO IL TERZO GIUDIZIO (rifatto da zero, non
+#  ereditato). Due FAIL prima di queste: classe 265 (pin sul contenuto
+#  invece che sul giro di pin, corretto) + classe 318 (il verso di n
+#  era invertito, corretto). Bonus trovato riscrivendo r147c: il
+#  trailing NON e' cieco di notte come diceva il file -- gira, ma solo
+#  sulle vincenti (selezione avversa, rinforza la scelta della colonna
+#  Peggior Giornata % come discriminante).
+82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
+82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
