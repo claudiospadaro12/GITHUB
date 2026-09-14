@@ -124,12 +124,19 @@
 //|    >>> E IL FALSIFICATORE E' LO STESSO DI SEMPRE: InpVerso, che    |
 //|        non cambia forma (VuoleLong_Calc legge +1/-1 da qualunque  |
 //|        rilevatore, incrocio o estremo).                           |
-//|    >>> COSTO ATTESO, DICHIARATO PRIMA DEI NUMERI: un minimo locale |
-//|        a 3 barre scatta PIU' SPESSO di un incrocio dello zero (il  |
-//|        ciclo oscilla intorno al suo stesso rumore ad ogni barra:  |
-//|        su rumore puro un minimo/massimo locale a 3 punti capita in |
-//|        media 1 barra su 3, contro 1 incrocio ogni 5,6-8,8 barre    |
-//|        misurato in R148a). Vedi il contro-esempio nel file prova. |
+//|    >>> COSTO ATTESO, MISURATO CON LO STESSO METODO DI R148a (12    |
+//|        semi x 4.000 barre, random walk / random walk con deriva /  |
+//|        serie a onde, fuori da MT5): il minimo/massimo locale a 3   |
+//|        barre scatta 1 volta ogni 2,1-3,4 barre, CONTRO 1 incrocio   |
+//|        ogni 5,9-7,8 barre sulla STESSA simulazione (che riconferma  |
+//|        la banda 5,6-8,8 di R148a: verifica incrociata, non solo    |
+//|        conferma di se stesso). E' 2-3 volte PIU' FREQUENTE, ed e'   |
+//|        anche STRUTTURALMENTE diverso: l'incrocio ALTERNA sempre di |
+//|        segno (S1 di R148a), l'estremo locale NO -- due minimi di   |
+//|        fila sono possibili sul rumore. Quindi il "posto occupato"  |
+//|        che R148a dichiara NON mordere per costruzione (308-3) PUO'  |
+//|        mordere qui: NON e' la stessa garanzia, va riletta per       |
+//|        questo modo. Vedi il contro-esempio nel file prova.         |
 //|                                                                  |
 //|  TERZO PEZZO -- USCITA A TEMPO (N barre, NO trailing), AGGIUNTA   |
 //|  DOPO IL DATO OPERATIVO DI CLAUDIO (14/09/2026)                   |
