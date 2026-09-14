@@ -291,9 +291,19 @@
 #    NASUSD M30 = ~46 barre/giorno x ~459 giorni feriali = ~21.100 barre
 #      (sotto il tetto delle ~100.000 del tester)
 #    incroci attesi      : 2.400 - 3.800 in tutta la finestra
-#    incroci attesi IS   : ~1.300 - 2.100   (256 giorni)
-#    incroci attesi OOS  : ~2.000 - 3.100   (386 giorni)
+#    incroci attesi IS   : ~960 - 1.500    (256 giorni DI CALENDARIO,
+#                          ~183 feriali: 256*5/7)
+#    incroci attesi OOS  : ~1.440 - 2.265  (386 giorni DI CALENDARIO,
+#                          ~276 feriali: 386*5/7)
 #    ingressi al giorno  : 5,2 - 8,2
+#  >>> ERRATA 14/09: la prima stesura diceva IS ~1.300-2.100 e OOS
+#      ~2.000-3.100 -- moltiplicava i 256/386 giorni DI CALENDARIO per le
+#      46 barre/giorno come se fossero GIA' feriali (256*46/8,8=1.338,
+#      386*46/5,6=3.171: sono esattamente i numeri sbagliati). Trovato
+#      dall'agente che scriveva R148b, verificando l'additivita' IS+OOS
+#      contro il totale. NON cambia nessun verdetto (il pavimento resta
+#      150, qui si resta 3,2-7,5 volte sopra), cambia solo il numero
+#      dichiarato che il CSV deve confermare.
 #  >>> QUESTO E' UN MOTORE VELOCE, ed e' la sua qualita' piu' preziosa
 #      rispetto al 1 ottobre: un campione sopra i 150 trade per finestra
 #      lo produce IN UNA CORSA SOLA, non in sei mesi di forward.
