@@ -187,8 +187,24 @@ def autotest(mc=MC_DEF, seed=SEED_DEF):
     print(f"\n[2] ENUMERAZIONE ESATTA -- {len(esatti)} permutazioni di 7 giorni")
     ok2 = True
     mcres = monte_carlo(toy, [[x] for x in toy], dep, mc, seed)["S-g"]
+    #  CLASSE 333 (14/09): a mc=2000 (lo stesso "mc" dell'identita' con
+    #  dd_portafoglio, sotto) la mediana VERA di questa serie cade in una
+    #  fascia (4,8309) larga solo 136/5040 permutazioni, il cui bordo
+    #  inferiore sta a frazione 0,49524 -- a MENO di mezza deviazione
+    #  standard campionaria da 0,50000 (sigma ~0,0112 a n=2000). Non e' un
+    #  bug di indicizzazione (pctile() e' la STESSA funzione sui due lati,
+    #  niente numpy in questo file): e' rumore Monte Carlo puro su un salto
+    #  discreto della CDF proprio a cavallo del 50-esimo percentile, e MORDE
+    #  ~1 volta su 3 (misurato su 200 seed, non solo 42). Il confronto con
+    #  l'esatto e' un test STATISTICO sul CODICE, non la produzione reale
+    #  (che resta a mc=2000/seed 42, criteri congelati): qui, e SOLO qui,
+    #  si ricampiona la stessa popolazione con potenza sufficiente a
+    #  distinguere 0,49524 da 0,50000 (mc_precisione), lasciando "mcres" a
+    #  mc invariato per il confronto di identita' [1] piu' sotto.
+    mc_precisione = max(mc, 200_000)
+    mcres_precisione = monte_carlo(toy, [[x] for x in toy], dep, mc_precisione, seed)["S-g"]
     for p in (50, 95, 99):
-        e, m = pctile(esatti, p), pctile(mcres, p)
+        e, m = pctile(esatti, p), pctile(mcres_precisione, p)
         buono = abs(e - m) <= 0.25
         ok2 &= buono
         print(f"     p{p}: esatto {e:6.4f}  monte carlo {m:6.4f}  "

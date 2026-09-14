@@ -19045,6 +19045,89 @@ il comportamento giusto), ma è una lettura diversa dello stesso numero.
    globale), il posto occupato torna a essere un cancello vero, e la colonna
    "denominatore" smette di poter leggersi come "quasi = ingressi".
 
+## 333. 🎲📏 UN AUTOTEST PUO' FALLIRE PER RUMORE CAMPIONARIO, NON PER UN BUG: IL CONFRONTO CON L'ENUMERAZIONE ESATTA MORDEVA 1 VOLTA SU 3 SUL p50, E NON ERA UN ERRORE DI INDICIZZAZIONE (14/09/2026)
+
+**Caso reale.** `backtest_pipeline/mc_dd_cella.py` (scritto la mattina del
+14/09, commit `de8de84` "WIP", rimasto invisibile per ore, segnalato come
+anomalia nel resoconto delle 21:00) falliva il proprio `--autotest`: nel
+blocco `[2] ENUMERAZIONE ESATTA` (5.040 permutazioni di 7 giorni) il **p50**
+usciva fuori tolleranza (esatto 4,8309 contro Monte Carlo 4,5000, scarto
+0,3309 contro una soglia di 0,25), mentre **p95 e p99 tornavano esatti al
+centesimo**. L'ipotesi di partenza, plausibile, era un errore classico di
+percentile: `numpy.percentile` con un metodo di interpolazione diverso da
+quello dell'enumerazione esatta, o un off-by-one nell'ordinamento.
+
+**Era falsa, e si verifica in trenta secondi.** Il file non importa `numpy`
+da nessuna parte, e la funzione `pctile()` (nearest-rank, un solo `int()`)
+e' **la stessa, identica chiamata**, usata sia sull'enumerazione esatta sia
+sul campione Monte Carlo (`mc_dd_cella.py` r.190-195 prima della riparazione).
+Un mismatch di convenzione fra due formule diverse e' escluso per
+costruzione quando la formula e' UNA SOLA applicata due volte.
+
+**La causa vera, misurata isolando il calcolo**: sulla serie giocattolo, la
+frazione di permutazioni con DD <= 4,5000 e' 2496/5040 = 0,49524 — a MENO
+di mezza deviazione standard campionaria da 0,50000 (sigma ~ 0,0112 a
+n=2000, lo stesso `mc` usato in produzione). Il vero p50 (a frazione esatta
+0,5) cade appena oltre quel bordo, nella fascia successiva (4,8309, larga
+136/5040 permutazioni) — ma a n=2000 basta un pelo di rumore per far cadere
+la mediana campionaria sul lato sbagliato del salto. Misurato su 200 seed
+diversi (non solo il 42 di default): **71/200 (35,5%) fallivano** a
+mc=2000; **18/200 (9%)** a mc=20.000; **0/50** a mc=100.000. La convergenza
+all'aumentare di `mc` e' la prova che il motore (shuffle, `dd_statico`,
+`pctile`) e' CORRETTO — un vero bug non sarebbe scomparso aumentando il
+campione, sarebbe rimasto (o sarebbe *emerso* più netto).
+
+**Contro-esempio prima della consegna** (casa, 10/09): un fix che aumenta
+solo la potenza statistica potrebbe anche nascondere un bug vero sotto una
+tolleranza più comoda. Verificato che non e' cosi': iniettata una riparazione-
+bug deliberata nel motore Monte Carlo (campionamento CON ripetizione —
+bootstrap — invece di una permutazione via `rng.shuffle`), il blocco `[2]`
+riparato lo cattura ancora, e con margine enorme (scarto fino a 7,0 contro
+tolleranza 0,25, su tutte le metriche p50/p95/p99). Il fix aggiunge potenza,
+non tolleranza: un bug vero morde lo stesso, anzi meglio.
+
+### 🔴 LA REGOLA
+1. **Prima di leggere "scarto fuori tolleranza su un solo percentile" come un
+   bug di indicizzazione/interpolazione, controllare se le due percentili
+   confrontate vengono dalla STESSA funzione applicata due volte.** Se sì,
+   un mismatch di convenzione (nearest-rank vs interpolazione lineare, o un
+   off-by-one) è escluso per costruzione: la causa va cercata nella potenza
+   statistica del confronto, non nella formula.
+2. **Un salto discreto della CDF (una fascia di valori identici) vicino al
+   percentile che si sta verificando rende il confronto "un colpo di
+   moneta" a basso `n`, indipendentemente dal seed**: misurare la frazione
+   di popolazione su entrambi i lati del salto e la distanza in deviazioni
+   standard campionarie dal percentile bersaglio, PRIMA di dichiarare un
+   bug. Qui bastava contare quante permutazioni stanno sotto/sopra la
+   soglia (`Counter` su `esatti`) per vedere il salto da 0,49524 a 0,52222.
+   Aumentare `mc` (fino a convergenza misurata, non a caso) e' la prova
+   diretta: se lo scarto sparisce all'aumentare del campione, era rumore;
+   se resta o cresce, era un bug.
+3. **Un autotest che confronta Monte Carlo con un riferimento esatto usa,
+   per QUEL confronto, tante iterazioni quante ne servono a distinguere
+   frazioni vicine — non necessariamente lo stesso `mc` della produzione.**
+   `mc_dd_cella.py` resta a 2000 iterazioni/seed 42 per le celle vere e per
+   il test di identita' con `dd_portafoglio.py` (criteri congelati in
+   `MC_DD_CELLA_CRITERI.md`): solo il blocco `[2]` (verifica interna del
+   CODICE, non un'analisi reale) usa `mc_precisione = max(mc, 200_000)`,
+   una popolazione RICAMPIONATA più a fondo della STESSA distribuzione, non
+   una tolleranza più larga.
+4. **Il contro-esempio di un fix "aggiungo potenza statistica" è iniettare
+   un bug vero nel meccanismo di campionamento (qui: bootstrap con
+   ripetizione al posto di una permutazione) e verificare che il test
+   riparato lo cattura ancora.** Se il fix lo lascia passare, non era un
+   aumento di potenza: era un abbassamento dell'asticella con un nome
+   migliore.
+
+**Limite dichiarato, non nascosto**: la soglia 0,25 e la scelta
+`mc_precisione = 200.000` restano calibrate su serie giocattolo di 6-8
+giorni (verificato: 0/30 seed falliti su n=6 e n=8, oltre a n=7). Una serie
+giocattolo futura con un salto di CDF ANCORA più stretto attorno a un
+percentile (frazioni a meno di un centesimo di deviazione standard da
+0,50/0,95/0,99) potrebbe richiedere una potenza ancora maggiore: il numero
+200.000 non è un teorema, è una misura su queste serie. Se si cambia la
+serie giocattolo, si RIMISURA la potenza necessaria, non si assume che basti.
+
 ## 334. 🧟🔓 LA NOTA DI RIPARAZIONE IN PROSA DESCRIVE UN COMMIT, IL PIN NEL BLOCCO DI LANCIO NE CITA UN ALTRO — E IL MARCATORE NON LO SCOPRE PERCHE' NON CAMBIA (14/09/2026)
 
 **Numero riservato a 334, non 333: al momento di scrivere questa voce
