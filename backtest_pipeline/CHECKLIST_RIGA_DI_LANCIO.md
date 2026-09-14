@@ -18779,3 +18779,56 @@ Si scrivono, perche' un elenco di soli difetti descrive male la realta':
   saltato**, non trasformato in un default silenzioso (un refuso deve vedersi);
 - **`iTime()==0` gestito** (storico di quel TF non ancora scaricato): si scrive
   `--:--`, non si inventa un residuo.
+
+---
+
+## 328. 🔢🔁 QUESTA STESSA CHECKLIST HA NUMERI DOPPI — la classe 194 applicata a se' stessa (14/09/2026)
+
+**Il caso**: un giro di controllo (turno continuo, non su una consegna
+specifica) ha contato le intestazioni `## N.` di questo file:
+
+```
+grep -oE "^## [0-9]+\." CHECKLIST_RIGA_DI_LANCIO.md | grep -oE "[0-9]+" | sort -n | uniq -c | awk '$1>1'
+      2 5
+      2 26
+      3 101
+      2 255
+```
+
+🔴 **QUATTRO numeri sono usati da DUE O TRE classi diverse**, con contenuti
+completamente diversi ognuna (es. `26` e' sia *"il collaudo che puo' fare
+danno mentre misura"* r.636 sia *"due chiamate nello stesso blocco, una sola
+raccolta"* r.674; `101` ha addirittura **tre** classi diverse, r.5168/5270/9162).
+E' **esattamente** la classe 194 (*"il rename fatto senza cercare il nuovo
+nome nel repo"*), qui applicata al numero di se' stessa: chi ha aggiunto la
+seconda (o terza) voce non ha fatto `grep "^## 26\."` prima di scriverla.
+
+🔴 **E peggiora**: almeno due punti del file citano questi numeri **nel testo**
+(r.7930 *"classe 101 (il cartello..."*, r.10961 *"la classe 26 e' gia'
+disinnescata"*), e con due-tre candidati sotto lo stesso numero **non e'
+piu' automatico capire quale classe la citazione intendesse** senza rileggere
+il contesto di entrambe.
+
+### 🔴 PERCHE' NON L'HO RINUMERATA IO STESSO, ORA
+Rinominare in sicurezza vuol dire, per la regola 194: (1) trovare TUTTE le
+citazioni nel repo di ogni numero coinvolto, (2) leggere il contesto di
+ciascuna per capire A QUALE delle classi doppie si riferisce davvero, (3)
+assegnare i numeri nuovi (liberi da 328 in su) SOLO alle occorrenze
+successive alla prima, (4) aggiornare ogni citazione che punta alla versione
+rinumerata. I punti (2) su `26` e `101` non sono stati fatti in questo giro
+(il contesto di r.10961 — *"-Etichetta nel nome"* — non combacia in modo
+ovvio con nessuna delle due classi 26 lette): **rinumerare senza quel passo
+avrebbe sostituito un buco dichiarato con un fix indovinato**, che e' peggio.
+
+### 🔴 LA REGOLA
+1. **Prima di scrivere `## N.` in questo file, si cerca**:
+   `grep -c "^## N\."` deve dare **0**, non "il numero che pensavo fosse
+   libero". La classe 194 lo diceva per i nomi dentro un round; vale identico
+   per i numeri di questo stesso file.
+2. **Se il conflitto e' gia' successo** (come qui): non si rinumera a
+   sensazione. Si documenta il conflitto (questa voce), e la rinumerazione
+   vera si fa in un giro dedicato che legga ogni citazione esterna prima di
+   spostare il numero.
+3. **I quattro numeri da NON riusare finche' non sono sciolti**: 5, 26 (x2),
+   101 (x3), 255 (x2). Il prossimo numero libero resta il piu' alto scritto
+   in fondo al file (oggi: dopo questa voce, 329).
