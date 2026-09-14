@@ -1432,3 +1432,25 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  come feriali -- trovato dall'agente che scriveva R148b). Non cambia
 #  nessun verdetto, cambia il numero che il CSV deve confermare.
 44fc20e81fea55d120178e1fb5919eff9d4ab2d5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
+#  >>> R148bL/R148bS -- I DUE LATI, in DUE file a un asse solo (il vecchio
+#  file a due assi falliva il cancello, classe recente). MESSE QUI, DOPO
+#  r148a: girano sullo STESSO .ex5, e la sentinella S5 (riproduzione di
+#  R148a alla cifra) resta dichiarata SOSPESA finche' r148a non ha
+#  girato -- NON e' ancora girato stanotte, l'EA ABTG_Cycle non e' mai
+#  stato compilato (classe 322: un referto letto per un'altra riga era
+#  stato scambiato per prova che avesse girato -- corretto PRIMA di
+#  armare, non dopo).
+#  Secondo giudizio: FAIL corretto PRIMA di riconsegnare -- classe 322
+#  (il "gia' girato" era falso) + classe 323 NUOVA (l'attesa A1 citava
+#  il regime "toro" da un file su D30EUR/DAX, non su NASUSD -- il
+#  calendario si trasferisce fra simboli, il regime no; corretto in
+#  [NON MISURATO] con la via piu' corta al numero gia' scritta nel file).
+#  Verificato indipendentemente: nessuna inversione long/short (34 pin
+#  confrontati a macchina, identici salvo l'asse dichiarato), etichette
+#  di round distinte (r148bl/r148bs, mai r148a), @FRAZIONEIS 0.40
+#  identica nei due gemelli, sentinelle S1-S8 tutte alla riga giusta nel
+#  sorgente, algebra del beta rifatta a mano (torna).
+#  Pin: giro di pin 281af63 (30mo, 1268b33 -> bb654a9). $SHA_ROUND e
+#  $SHA_WALK invariati.
+281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bL_lato_long_NASUSD.txt -Etichetta r148bl -Modello 4 -Deposito 100000
+281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bS_lato_short_NASUSD.txt -Etichetta r148bs -Modello 4 -Deposito 100000
