@@ -89,7 +89,47 @@
 //|    >>> E L'ASIMMETRIA VA DICHIARATA, perche' NON e' a mio        |
 //|        favore: lo stop TRONCA i perdenti, quindi la cella        |
 //|        "contro" e' sistematicamente MEGLIO del semplice opposto  |
-//|        della cella "con". Chi legge il round deve saperlo prima. |
+//|        della cella "con". Chi legge il round gia' con questo.    |
+//|                                                                  |
+//|  SECONDO MODO D'INGRESSO -- AGGIUNTO IL 14/09/2026, ADDITIVO      |
+//|    Claudio ha mostrato uno screenshot TradingView di XAUUSD 1m   |
+//|    con questo stesso indicatore, disegnando a mano il minimo     |
+//|    LOCALE del Ciclo (una V, es. intorno a -11/-12) come punto     |
+//|    d'ingresso -- POTENZIALMENTE PRIMA che il ciclo attraversi lo  |
+//|    zero. E' un evento diverso: l'incrocio dello zero e' il punto  |
+//|    in cui I (il composito) forma il suo estremo; il minimo/       |
+//|    massimo LOCALE del CICLO stesso e' un estremo di UN LIVELLO DI |
+//|    DERIVAZIONE IN PIU' (l'estremo della velocita', non della      |
+//|    posizione), e in una salita tipica precede lo zero-cross.      |
+//|                                                                   |
+//|    InpModoIngresso seleziona il modo, DI FABBRICA = INCROCIO_ZERO |
+//|    (0): con questo default il motore e' IDENTICO, bit per bit,    |
+//|    a com'era prima di questa modifica -- R148a/R148b RESTANO      |
+//|    RIPRODUCIBILI perche' i loro file prova non toccano questo     |
+//|    input e MT5 gli applica il default.                            |
+//|                                                                   |
+//|    MODO_MINIMO_LOCALE (1): minimo/massimo locale a 3 barre        |
+//|    CHIUSE del CICLO, ZERO PARAMETRI LIBERI come l'incrocio:        |
+//|      LONG  se Ciclo(t-2) > Ciclo(t-1) E Ciclo(t-1) < Ciclo(t)      |
+//|      SHORT se Ciclo(t-2) < Ciclo(t-1) E Ciclo(t-1) > Ciclo(t)      |
+//|    (t = barra chiusa piu' recente = indice [1]). Nessuna soglia di |
+//|    profondita': un minimo a -0,3 conta come un minimo a -20. E'   |
+//|    la stessa disciplina della regola di casa: il PATTERN non si   |
+//|    tara, altrimenti e' un posto dove pescare (lezione 19/08).     |
+//|    >>> SE servisse una soglia di profondita' (es. "conta solo se  |
+//|        |Ciclo|>=X"), quella e' un ASSE DEL ROUND SUCCESSIVO, da   |
+//|        DICHIARARE e misurare -- non un numero da inventare qui.   |
+//|        Vedi backtest_pipeline/prove/R148g_cycle_minimo_locale_    |
+//|        verso_NASUSD.txt, sezione "GEMELLI PROPOSTI".              |
+//|    >>> E IL FALSIFICATORE E' LO STESSO DI SEMPRE: InpVerso, che    |
+//|        non cambia forma (VuoleLong_Calc legge +1/-1 da qualunque  |
+//|        rilevatore, incrocio o estremo).                           |
+//|    >>> COSTO ATTESO, DICHIARATO PRIMA DEI NUMERI: un minimo locale |
+//|        a 3 barre scatta PIU' SPESSO di un incrocio dello zero (il  |
+//|        ciclo oscilla intorno al suo stesso rumore ad ogni barra:  |
+//|        su rumore puro un minimo/massimo locale a 3 punti capita in |
+//|        media 1 barra su 3, contro 1 incrocio ogni 5,6-8,8 barre    |
+//|        misurato in R148a). Vedi il contro-esempio nel file prova. |
 //|                                                                  |
 //|  DECIDE SOLO A BARRA CHIUSA. Il ciclo si legge agli indici [1] e |
 //|  [2] (le due ultime barre CHIUSE): la barra [0], in formazione,  |
@@ -196,8 +236,20 @@ input int    InpMmLen  = 9;    // MM: la media mobile che viene sottratta (fonte
 //  fare 11.6, altrimenti l'indicatore non e' piu' normalizzato 0-100),
 //  e si toccano solo con un round dedicato che li dichiari prima.
 
+//--- I DUE MODI D'INGRESSO. Aggiunto 14/09/2026, ADDITIVO: il default
+//    (0) e' il comportamento di sempre, bit per bit (vedi la nota nel
+//    blocco di intestazione). NON e' un asse di questo file: ogni round
+//    fissa UN modo solo, non li mescola in griglia (una variabile alla
+//    volta -- lezione del 19/08 applicata anche qui).
+enum ENUM_ABTG_CYCLE_MODO
+  {
+   MODO_INCROCIO_ZERO = 0,   // di fabbrica: entra sull'incrocio dello zero, esce sull'incrocio opposto (R148a/R148b)
+   MODO_MINIMO_LOCALE = 1    // nuovo 14/09: entra sul minimo/massimo LOCALE del ciclo a 3 barre, zero soglie
+  };
+
 input group "=== INGRESSO: l'incrocio dello zero, e il suo falsificatore ==="
-input int    InpVerso    = 0;     // 0 = CON l'incrocio (su = long). 1 = CONTRO (su = short). E' l'asse del primo round
+input ENUM_ABTG_CYCLE_MODO InpModoIngresso = MODO_INCROCIO_ZERO; // Rilevatore del segnale. Default preserva R148a/b bit-per-bit
+input int    InpVerso    = 0;     // 0 = CON il segnale (su = long). 1 = CONTRO (su = short). E' l'asse del primo round, in QUALUNQUE modo
 input bool   InpAllowLong  = true;  // Abilita il lato LONG  (regola dei due lati, 25/08)
 input bool   InpAllowShort = true;  // Abilita il lato SHORT (regola dei due lati, 25/08)
 
@@ -353,6 +405,33 @@ int CrossCiclo_Calc(const double cyc1, const double cyc2)
   {
    if(cyc2 <  0.0 && cyc1 >= 0.0) return(+1);
    if(cyc2 >= 0.0 && cyc1 <  0.0) return(-1);
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| IL MINIMO/MASSIMO LOCALE DEL CICLO, su 3 barre CHIUSE.            |
+//| AGGIUNTA 14/09/2026 (screenshot XAUUSD di Claudio, V a mano       |
+//| sull'oscillatore). ZERO PARAMETRI LIBERI, come CrossCiclo_Calc:   |
+//| nessuna soglia di profondita', il pattern e' puramente ordinale. |
+//|   cyc1 = barra [1] (l'ultima chiusa, "t")                         |
+//|   cyc2 = barra [2] ("t-1", il centro del pattern)                  |
+//|   cyc3 = barra [3] ("t-2")                                        |
+//| Ritorna:                                                          |
+//|   +1  MINIMO locale in cyc2 (cyc3>cyc2 E cyc2<cyc1) = potenziale  |
+//|       LONG, simmetrico a "incrocio verso l'alto"                  |
+//|   -1  MASSIMO locale in cyc2 (cyc3<cyc2 E cyc2>cyc1) = potenziale |
+//|       SHORT                                                       |
+//|    0  nessun estremo (compresa qualunque parita': un plateau non  |
+//|       produce un segnale ripetuto, stessa logica dello zero       |
+//|       esatto in CrossCiclo_Calc)                                  |
+//| >>> IL VALORE DI RITORNO E' NELLA STESSA CONVENZIONE DI           |
+//|     CrossCiclo_Calc (+1 = "su" = long col verso 0): VuoleLong_Calc |
+//|     si riusa IDENTICO, senza toccarlo.                             |
+//+------------------------------------------------------------------+
+int EstremoCiclo_Calc(const double cyc1, const double cyc2, const double cyc3)
+  {
+   if(cyc3 > cyc2 && cyc2 < cyc1) return(+1);
+   if(cyc3 < cyc2 && cyc2 > cyc1) return(-1);
    return(0);
   }
 
@@ -515,6 +594,8 @@ int OnInit()
      { Print("ERRORE: InpMmLen deve essere >= 1: senza la media sottratta il CICLO non esiste."); return(INIT_FAILED); }
    if(InpVerso!=0 && InpVerso!=1)
      { Print("ERRORE: InpVerso vale 0 (con l'incrocio) oppure 1 (contro)."); return(INIT_FAILED); }
+   if(InpModoIngresso!=MODO_INCROCIO_ZERO && InpModoIngresso!=MODO_MINIMO_LOCALE)
+     { Print("ERRORE: InpModoIngresso vale 0 (incrocio zero) oppure 1 (minimo/massimo locale)."); return(INIT_FAILED); }
    if(!InpAllowLong && !InpAllowShort)
      { Print("ERRORE: tutti e due i lati spenti: non c'e' niente da misurare."); return(INIT_FAILED); }
    if(InpAtrPeriod<1)
@@ -555,8 +636,8 @@ int OnInit()
 
    if(InpAutoTest) AutoTestCycle();
 
-   Log(StringFormat("avviato su %s %s. Stoch %d/%d %d/%d %d/%d %d/%d, MM %d, verso %d, uscita su incrocio %s, SL %.2f x ATR(%d) + pavimento %.0f pti MT5, TP %.2f R, spread <= %.2f%% dello stop, rischio %.2f%%, cap %d/giorno, magic %I64d.",
-       _Symbol, EnumToString((ENUM_TIMEFRAMES)Period()),
+   Log(StringFormat("avviato su %s %s. Modo %s, Stoch %d/%d %d/%d %d/%d %d/%d, MM %d, verso %d, uscita su segnale opposto %s, SL %.2f x ATR(%d) + pavimento %.0f pti MT5, TP %.2f R, spread <= %.2f%% dello stop, rischio %.2f%%, cap %d/giorno, magic %I64d.",
+       _Symbol, EnumToString((ENUM_TIMEFRAMES)Period()), EnumToString(InpModoIngresso),
        InpK1Len,InpK1Smo, InpK2Len,InpK2Smo, InpK3Len,InpK3Smo, InpK4Len,InpK4Smo,
        InpMmLen, InpVerso, (InpEsciSuCrossOpposto?"SI":"NO"),
        InpKStop, InpAtrPeriod, InpMinSLPts, InpTP_RR,
@@ -630,15 +711,23 @@ bool IsNewBar()
 //+------------------------------------------------------------------+
 void OnNewBar()
   {
+   //--- il MODO decide quante barre di ciclo servono: l'incrocio guarda
+   //    2 barre chiuse, il minimo/massimo locale ne guarda 3. Con
+   //    InpModoIngresso al suo DEFAULT (0) questo resta need=2, IDENTICO
+   //    a prima della modifica del 14/09 -- R148a/R148b non cambiano.
    double cyc[];
-   if(!CycleSeries(gTF, 2, cyc)) return;        // storia insufficiente: si riprova alla prossima barra
+   int need = (InpModoIngresso==MODO_MINIMO_LOCALE) ? 3 : 2;
+   if(!CycleSeries(gTF, need, cyc)) return;     // storia insufficiente: si riprova alla prossima barra
 
-   int cross = CrossCiclo_Calc(cyc[1], cyc[2]);
-   if(cross==0) return;
+   int segnale = (InpModoIngresso==MODO_MINIMO_LOCALE)
+                 ? EstremoCiclo_Calc(cyc[1], cyc[2], cyc[3])
+                 : CrossCiclo_Calc(cyc[1], cyc[2]);
+   if(segnale==0) return;
 
    gCntIncroci++;                               // IL DENOMINATORE VERO: sta prima di ogni cancello
+                                                 // (in MODO_MINIMO_LOCALE conta gli ESTREMI locali, non gli incroci: stesso ruolo, nome storico)
 
-   bool vuoleLong = VuoleLong_Calc(cross, InpVerso);
+   bool vuoleLong = VuoleLong_Calc(segnale, InpVerso);
 
    //--- 2) USCITA: l'incrocio opposto chiude quello che ho in mano.
    //    Gira PRIMA dei cancelli d'ingresso, e senza filtro orario.
@@ -1134,8 +1223,20 @@ void AutoTestCycle()
    else
       Print("[CYCLE][AUTOTEST] ciclo sui dati veri: storia ancora insufficiente in OnInit. NON e' un errore: si ricalcola alla prima barra utile.");
 
+   //--- 10) IL MINIMO/MASSIMO LOCALE (MODO_MINIMO_LOCALE, aggiunto 14/09).
+   //    Stessa idea del blocco 3: pattern puramente ordinale, zero soglie.
+   int e1 = EstremoCiclo_Calc( 5.0, 2.0, 4.0);    // scende poi risale: minimo in cyc2 -> +1
+   int e2 = EstremoCiclo_Calc( 2.0, 5.0, 4.0);    // sale poi scende: massimo in cyc2  -> -1
+   int e3 = EstremoCiclo_Calc( 6.0, 5.0, 4.0);    // monotona crescente (indietro nel tempo) -> 0
+   int e4 = EstremoCiclo_Calc( 4.0, 5.0, 6.0);    // monotona nell'altro verso -> 0
+   int e5 = EstremoCiclo_Calc( 3.0, 3.0, 5.0);    // plateau su un lato -> 0 (niente segnale ripetuto)
+   int e6 = EstremoCiclo_Calc(-4.0,-12.0,-3.0);   // minimo NEGATIVO (il caso di Claudio, es. -11/-12) -> +1
+   PrintFormat("[CYCLE][AUTOTEST] estremo locale: minimo=%d (atteso 1) | massimo=%d (atteso -1) | monot.su=%d (atteso 0) | monot.giu=%d (atteso 0) | plateau=%d (atteso 0) | minimo negativo (-12)=%d (atteso 1)",
+               e1,e2,e3,e4,e5,e6);
+   if(!(e1==1 && e2==-1 && e3==0 && e4==0 && e5==0 && e6==1)) falliti++;
+
    Print("[CYCLE][AUTOTEST] esito motore: ", (falliti==0
-         ? "OTTO BLOCCHI SU OTTO, la regola ragiona come la formula."
+         ? "NOVE BLOCCHI SU NOVE, la regola ragiona come la formula."
          : "DIVERGE: non usare i risultati, c'e' da guardare il codice."));
 
    //--- e la guardia del conto, col suo autotest gia' pronto nell'include
