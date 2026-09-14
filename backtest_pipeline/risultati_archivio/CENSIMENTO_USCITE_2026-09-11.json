@@ -1,5 +1,5 @@
 {
- "csv_con_inp": 2087,
+ "csv_con_inp": 2184,
  "righe": [
   {
    "magic": "770101",
@@ -227,6 +227,24 @@
    "motivo": "",
    "celle": 5,
    "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_IS_q770be.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_q770be.csv",
+     [
+      "0.0",
+      "0.5",
+      "1.0",
+      "1.5"
+     ]
+    ],
     [
      "backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv",
      [
@@ -2096,12 +2114,37 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 78,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 7,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r126b.csv",
+     [
+      "1",
+      "11",
+      "13",
+      "3",
+      "5",
+      "7",
+      "9"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r126b.csv",
+     [
+      "1",
+      "11",
+      "13",
+      "3",
+      "5",
+      "7",
+      "9"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770511",
@@ -2128,12 +2171,41 @@
    "cat": "stop:buffer",
    "default": "0",
    "riga": 80,
-   "stato": "MAI-assente",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 9,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r126a.csv",
+     [
+      "0.000",
+      "0.125",
+      "0.250",
+      "0.375",
+      "0.500",
+      "0.625",
+      "0.750",
+      "0.875",
+      "1.000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_OOS_r126a.csv",
+     [
+      "0.000",
+      "0.125",
+      "0.250",
+      "0.375",
+      "0.500",
+      "0.625",
+      "0.750",
+      "0.875",
+      "1.000"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770511",
@@ -2208,8 +2280,8 @@
    "cat": "trailing",
    "default": "true",
    "riga": 85,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "CORSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 2,
@@ -2224,8 +2296,8 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 86,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "CORSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 2,
@@ -2272,7 +2344,7 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 78,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -2304,12 +2376,41 @@
    "cat": "stop:buffer",
    "default": "0",
    "riga": 80,
-   "stato": "MAI-assente",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 9,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave/ABTG_SuperWave_NASUSD_IS_r126d.csv",
+     [
+      "0.000",
+      "0.125",
+      "0.250",
+      "0.375",
+      "0.500",
+      "0.625",
+      "0.750",
+      "0.875",
+      "1.000"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave/ABTG_SuperWave_NASUSD_OOS_r126d.csv",
+     [
+      "0.000",
+      "0.125",
+      "0.250",
+      "0.375",
+      "0.500",
+      "0.625",
+      "0.750",
+      "0.875",
+      "1.000"
+     ]
+    ]
+   ]
   },
   {
    "magic": "770531",
@@ -2417,7 +2518,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 85,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -2433,7 +2534,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 86,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -2966,7 +3067,7 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 76,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3095,7 +3196,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 82,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3111,7 +3212,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 83,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3191,7 +3292,7 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 76,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3320,7 +3421,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 82,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3336,7 +3437,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 83,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -4390,12 +4491,37 @@
    "cat": "stop:misura",
    "default": "1.0",
    "riga": 74,
-   "stato": "MAI-altroEA",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 5,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136a.csv",
+     [
+      "0.4",
+      "0.6",
+      "0.8",
+      "1.0",
+      "1.2",
+      "1.4",
+      "1.6"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136a.csv",
+     [
+      "0.4",
+      "0.6",
+      "0.8",
+      "1.0",
+      "1.2",
+      "1.4",
+      "1.6"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771531",
@@ -4459,12 +4585,37 @@
    "cat": "parziale",
    "default": "0.0",
    "riga": 77,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 5,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136b.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00",
+      "1.25",
+      "1.50"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136b.csv",
+     [
+      "0.00",
+      "0.25",
+      "0.50",
+      "0.75",
+      "1.00",
+      "1.25",
+      "1.50"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771531",
@@ -4475,12 +4626,31 @@
    "cat": "parziale",
    "default": "50",
    "riga": 78,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 5,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136c.csv",
+     [
+      "0",
+      "25",
+      "50",
+      "75"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136c.csv",
+     [
+      "0",
+      "25",
+      "50",
+      "75"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771531",
@@ -4507,12 +4677,27 @@
    "cat": "trailing",
    "default": "true",
    "riga": 80,
-   "stato": "MAI-gemello",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 5,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_IS_r136d.csv",
+     [
+      "0",
+      "1"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_EMA200/ABTG_EMA200_U30USD_OOS_r136d.csv",
+     [
+      "0",
+      "1"
+     ]
+    ]
+   ]
   },
   {
    "magic": "771531",
@@ -6042,12 +6227,39 @@
    "cat": "uscita:orario",
    "default": "100",
    "riga": 163,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 8,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_CostToCost/ABTG_CostToCost_EURJPY_IS_ohlc_r127c.csv",
+     [
+      "100",
+      "125",
+      "150",
+      "175",
+      "200",
+      "25",
+      "50",
+      "75"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_CostToCost/ABTG_CostToCost_EURJPY_OOS_ohlc_r127c.csv",
+     [
+      "100",
+      "125",
+      "150",
+      "175",
+      "200",
+      "25",
+      "50",
+      "75"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772362",
@@ -6139,12 +6351,39 @@
    "cat": "uscita:orario",
    "default": "100",
    "riga": 163,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 8,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_CostToCost/ABTG_CostToCost_EURJPY_IS_ohlc_r127c.csv",
+     [
+      "100",
+      "125",
+      "150",
+      "175",
+      "200",
+      "25",
+      "50",
+      "75"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_CostToCost/ABTG_CostToCost_EURJPY_OOS_ohlc_r127c.csv",
+     [
+      "100",
+      "125",
+      "150",
+      "175",
+      "200",
+      "25",
+      "50",
+      "75"
+     ]
+    ]
+   ]
   },
   {
    "magic": "772421",
@@ -6420,12 +6659,37 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 76,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 7,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SupertrendReversal_Ottimizzato/ABTG_SupertrendReversal_Ottimizzato_XAUUSD_IS_ohlc_r127b.csv",
+     [
+      "1",
+      "11",
+      "13",
+      "3",
+      "5",
+      "7",
+      "9"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/dal_vps/ABTG_SupertrendReversal_Ottimizzato/ABTG_SupertrendReversal_Ottimizzato_XAUUSD_OOS_ohlc_r127b.csv",
+     [
+      "1",
+      "11",
+      "13",
+      "3",
+      "5",
+      "7",
+      "9"
+     ]
+    ]
+   ]
   },
   {
    "magic": "970901",
@@ -6516,7 +6780,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 82,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6532,7 +6796,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 83,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6580,7 +6844,7 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 77,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6676,7 +6940,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 83,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6692,7 +6956,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 84,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6740,7 +7004,7 @@
    "cat": "stop:misura",
    "default": "5",
    "riga": 77,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6836,7 +7100,7 @@
    "cat": "trailing",
    "default": "true",
    "riga": 83,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6852,7 +7116,7 @@
    "cat": "uscita:segnale",
    "default": "true",
    "riga": 84,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-altroEA",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6884,7 +7148,7 @@
    "cat": "stop:misura",
    "default": "1.0",
    "riga": 74,
-   "stato": "MAI-altroEA",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",

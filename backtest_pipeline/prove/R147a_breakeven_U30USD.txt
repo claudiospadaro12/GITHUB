@@ -1,0 +1,465 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R147a -- L'ULTIMA MANOPOLA D'USCITA MAI MOSSA DELLA SEDIA MIGLIORE
+#           U30USD H1 FISSO. Asse: InpBreakeven (interruttore, 2 celle).
+#  Scritto il 14/09/2026. Criteri congelati PRIMA dei numeri.
+#  E' IL SESTO FILE DELLA FAMIGLIA r136 (dopo r136a/b/c/d e R146b):
+#  stesso banco, stessa finestra, stesso deposito, stessa cella di
+#  partenza. Si legge INSIEME a R136c (parziale) e R136d (trailing):
+#  da solo dice meta' della cosa.
+#  MAGIC gia' usati dalla famiglia, per non collidere: 786400 (r136d),
+#  786210 (R146b), 786201 (r137c). Questo file usa 786500.
+# ======================================================================
+#
+#  SI LANCIA CON:
+#    -Expert ABTG_EMA200
+#    -Prova prove\R147a_breakeven_U30USD.txt
+#    -Simbolo U30USD -Periodo H1
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 4 -Etichetta r147a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma -- vedi S2.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati. Gli altri MT5 della casa hanno
+#     le sedie VIVE, incluso il conto REALE 10105439.
+#  !! -Deposito 100000 e -Modello 4 NON sono opzionali: sono il banco
+#     dell'ANCORA (vedi ANCORA e S1). Con 10.000 o con OHLC S1 decade e
+#     questo file va riscritto, non "letto con prudenza".
+#
+# ----------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, E PERCHE' PROPRIO ADESSO
+# ----------------------------------------------------------------------
+#  1) E' L'ULTIMA CASELLA APERTA DEL CERTIFICATO DI MORTE SULLA 771531.
+#     report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md elencava SETTE
+#     manopole d'uscita mai mosse su questa sedia. Il censimento
+#     rilanciato oggi 14/09/2026 (2.184 CSV con colonne Inp*, 97 in piu'
+#     di allora) ne lascia TRE:
+#        InpBreakeven        <-- l'asse di questo file
+#        InpFridayClose      <-- asse di R146b, gia' in coda
+#        InpFridayCloseHour  <-- INERTE PER COSTRUZIONE, vedi punto 3
+#     Le altre quattro (InpSLatr, InpTP1_ATRmult, InpTP1Pct,
+#     InpUseTrailing) le ha chiuse la notte del 12/13-09 con r136a/b/c/d.
+#     >>> Chiuso questo asse e letto R146b, la casella 3 del CERTIFICATO
+#         DI MORTE ("la gestione dell'uscita e' stata messa ad asse?")
+#         sulla sedia che il piano di ottobre indica come PRIMO SEGGIO
+#         e' PIENA. Oggi non lo e'.
+#
+#  2) IL CONTO E' RIFATTO OGGI DA CAPO, NON CITATO.
+#     Lettura completa di tutti i CSV del repo, attribuiti all'EA con le
+#     tre vie di censimento_uscite.py (percorso, InpMagic, firma delle
+#     colonne, tutte e tre sotto lo stesso veto):
+#        CSV attribuiti ad ABTG_EMA200 che portano la colonna
+#        InpBreakeven: 224.  Righe totali: 21.237.
+#        Valore trovato: 1 in TUTTE E 21.237 LE RIGHE.
+#        File con piu' di un valore dentro: ZERO.
+#        Valori distinti fra corse diverse dello stesso EA: UNO.
+#     E nei file prova del repo:
+#        grep "^InpBreakeven=.*||Y" backtest_pipeline\prove\*.txt -> 0 file.
+#     Cioe' su questo motore quella colonna non e' MAI stata un asse, ne'
+#     dentro una griglia ne' fra corse, ne' in un file prova scritto e
+#     mai girato (trappola C del censimento).
+#
+#  3) E LA SORELLA InpFridayCloseHour NON PRENDE UN FILE, APPOSTA.
+#     Letto nel sorgente, non dedotto -- ABTG_EMA200.mq5 r.279:
+#         if(!InpFridayClose) return(false);
+#     Con InpFridayClose = false (il valore della cella viva e di tutte
+#     e 224 le corse d'archivio) InpFridayCloseHour non e' letto da
+#     nessuna parte. Metterlo ad asse costerebbe passate e misurerebbe
+#     ZERO: e' un falso positivo del censimento, della stessa famiglia
+#     delle 27 gia' dichiarate al suo par. 2.3, e va scritto li'.
+#
+# ----------------------------------------------------------------------
+#  ###  QUELLO CHE QUESTA MANOPOLA FA DAVVERO -- LEGGERE PRIMA      ###
+#  ###  DELL'ATTESA, PERCHE' NON E' QUELLO CHE IL NOME PROMETTE     ###
+# ----------------------------------------------------------------------
+#  IL NOME DICE "stop in pari". IL CODICE DICE TRE COSE.
+#  mql5\Experts\ABTG_EMA200.mq5, ManageAll(), r.408-442, COPIATO:
+#
+#      r.408  bool beDone = isLong ? (sl>=openP) : (sl<=openP && sl>0);
+#      r.410  if(!beDone && InpTP1Pct>0 && InpTP1Pct<100)
+#      r.413     if(InpTP1_ATRmult>0 && atr>0) tgt=...; else if(e14>0) tgt=e14;
+#      r.418     bool hit = isLong?(bid>=tgt):(ask<=tgt);
+#      r.421       double cv=NormVol(vol*InpTP1Pct/100.0);
+#      r.428       bool parz = (cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv));
+#      r.429       if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(openP),tp);
+#      r.436  if(InpUseTrailing && beDone && e14>0) { ... trailing su EMA14 ... }
+#
+#  >>> IL PUNTO CHE CAMBIA TUTTO: `beDone` NON E' UN FLAG. E' DEDOTTO
+#      DALLA POSIZIONE DELLO STOP (r.408). L'unica riga di tutto l'EA
+#      che porta lo stop a `openP` e' la r.429, ed e' DIETRO
+#      `if(InpBreakeven)`.
+#      Quindi con InpBreakeven = false:
+#        (a) lo stop non arriva MAI a openP -> `beDone` resta FALSO PER
+#            SEMPRE;
+#        (b) il TRAILING (r.436) chiede `beDone`: NON SI ACCENDE MAI.
+#            InpUseTrailing resta true e non fa niente;
+#        (c) il blocco del PARZIALE (r.410) chiede `!beDone`: resta
+#            APERTO PER SEMPRE. Ogni tick in cui il prezzo sta oltre la
+#            EMA14 chiude un altro InpTP1Pct% del RESIDUO.
+#
+#  >>> QUINDI LA CELLA 0 DI QUESTO ASSE NON E' "IL BREAKEVEN SPENTO".
+#      E' "USCITA A SCALARE RIPETUTA AL PRIMO BERSAGLIO, SENZA STOP IN
+#      PARI E SENZA TRAILING". Tre meccanismi cambiati con un
+#      interruttore. Va scritto qui, prima dei numeri, perche' un
+#      referto che scrivesse "il breakeven e' inerte" leggendo questo
+#      CSV commetterebbe la CLASSE 316 (il round giudicato su una
+#      variabile che non e' la sua).
+#
+#  >>> LA CATENA SI FERMA DA SOLA, ED E' ARITMETICA. NormVol() r.498-505:
+#          v = MathFloor(v/step)*step;  return (v < VOLUME_MIN ? 0 : v);
+#      Il dimezzamento si arresta quando meta' del residuo scende sotto
+#      il lotto minimo (cv = 0 -> `parz` false e nessuna altra riga
+#      eseguita). Su U30USD il passo del volume e' 0,10 [MISURATO,
+#      DIARIO 17/08/2026].
+#      Stima del numero di dimezzamenti, DICHIARATA COME STIMA:
+#        rischio 1% di 100.000 = 1.000 EUR; stop = 1,0 x ATR(14) H1 che
+#        su questa sedia vale 104,30 punti indice MISURATI
+#        (CANCELLO_COSTO_FLOTTA_2026-09-10.md r.246); valore punto
+#        U30USD 0,855 EUR [MISURATO, ANALISI_TAGLIA_FASE1] ->
+#        perdita per lotto ~89,2 EUR -> lotto ~11,2.
+#        11,2 -> 5,6 -> 2,8 -> 1,4 -> 0,7 -> 0,3 -> 0,1 -> 0 (stop).
+#        SETTE dimezzamenti, cioe' ~8 uscite per posizione invece di 2.
+#      >>> QUESTO NUMERO E' UNA STIMA E NON UN'ANCORA. Serve solo a
+#          dire quale ORDINE DI GRANDEZZA aspettarsi sulla colonna
+#          Trades -- ed e' proprio quella colonna a dire se ho letto
+#          bene il codice. Vedi S3.
+#
+# ----------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+# ----------------------------------------------------------------------
+#  La cella InpBreakeven = true E' LA CELLA VIVA della sedia 771531, ed
+#  e' gia' stata misurata QUATTRO VOLTE sullo stesso banco. I due punti
+#  piu' recenti sono della notte del 12/13-09, cioe' sullo STESSO
+#  BINARIO che girera' questo file:
+#
+#    IS  : PF 1,20110 . DD 5,7325% . n 237 . profit +4.585,40
+#          Expected Payoff 19,34768 . Recovery 0,78806 . Sharpe 3,77377
+#    OOS : PF 1,52365 . DD 7,8323% . n 517 . profit +23.321,47
+#          Expected Payoff 45,10923 . Recovery 2,53681 . Sharpe 8,16765
+#
+#  Fonti primarie, righe intere, TRE file indipendenti che danno gli
+#  STESSI OTTO NUMERI alla quinta cifra (verificato aprendoli oggi, non
+#  ricordato):
+#    risultati_prove\dal_vps\ABTG_EMA200\
+#      ABTG_EMA200_U30USD_{IS,OOS}_r136a.csv   (riga InpSLatr = 1.0)
+#      ABTG_EMA200_U30USD_{IS,OOS}_r136c.csv   (riga InpTP1Pct = 50)
+#      ABTG_EMA200_U30USD_{IS,OOS}_r136d.csv   (riga InpUseTrailing = 1)
+#  E a monte, sullo stesso banco ma su binario di agosto: R31 = R110 =
+#  R112 (riprodotto tre volte al centesimo, PIANO_PROP.md voce J2).
+#  TOLLERANZA CONGELATA: n IDENTICO (237 e 517), PF entro +/- 0,5%.
+#  Fuori da li' il banco e' sporco e il round si ferma PRIMA di
+#  qualunque altro numero.
+#
+#  >>> E C'E' UNA SECONDA ANCORA, GRATIS, SULLA CELLA 0 -- ed e' la cosa
+#      piu' utile di questo file. Se la catena dei dimezzamenti NON
+#      partisse (cioe' se meta' del lotto fosse gia' sotto il minimo al
+#      primo colpo), allora con InpBreakeven=false NON succederebbe
+#      NIENTE al primo bersaglio: niente parziale, niente pari, niente
+#      trailing. Quella configurazione e' gia' misurata, ed e' la cella
+#      InpTP1Pct = 0 di R136c:
+#        IS  : PF 0,93483 . DD 7,2521%  . n  81 . profit  -1.766,02
+#        OOS : PF 1,28144 . DD 13,9367% . n 165 . profit +15.218,87
+#      (risultati_prove\dal_vps\ABTG_EMA200\..._{IS,OOS}_r136c.csv)
+#      >>> Quindi la cella 0 di questo round ha DUE esiti previsti e
+#          MUTUAMENTE ESCLUSIVI, ed e' la colonna Trades a dire quale.
+#          Nessuno dei due e' "una sorpresa": l'unico esito che mi
+#          smentirebbe e' un terzo.
+#
+# ----------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+# ----------------------------------------------------------------------
+#  CELLA 1 (viva): i sei numeri dell'ancora, identici. Non e' una
+#    previsione, e' un cancello (S1).
+#  CELLA 0: DUE rami, dichiarati adesso col loro discriminante.
+#    RAMO A -- LA CATENA PARTE (quello che mi aspetto, p. ~alta):
+#      Trades OOS > 900 (contro 517), Trades IS > 400 (contro 237).
+#      Il motore chiude di fatto TUTTA la posizione alla prima toccata
+#      della EMA14, in un pugno di tick. Attesa sul resto:
+#        PF OOS: 1,1 - 1,6. Uscire tutto al primo bersaglio compra un
+#          win rate altissimo e vende ogni coda positiva; il TP a 2R
+#          non viene quasi mai raggiunto.
+#        DD OOS: 5% - 9%. Piu' BASSO o uguale alla cella viva, perche'
+#          la seconda meta' non resta mai esposta.
+#        Expected Payoff: CROLLA (il denominatore e' il numero di
+#          uscite, e le uscite si moltiplicano). NON e' un
+#          peggioramento del motore: e' un cambio di unita'. Va detto
+#          accanto al numero o il numero inganna.
+#    RAMO B -- LA CATENA NON PARTE:
+#      Trades OOS = 165 e DD OOS = 13,9367%, IDENTICI alla cella
+#      InpTP1Pct=0 di R136c, alla quinta cifra. In quel caso questo
+#      round e' una RIPRODUZIONE di quella cella per un'altra strada, e
+#      vale come collaudo incrociato del banco.
+#    >>> QUALUNQUE TERZO ESITO (per esempio Trades OOS ~517 con numeri
+#        diversi) vuol dire CHE HO LETTO MALE IL CODICE. In quel caso il
+#        verdetto NON e' sul breakeven: e' "la lettura di ManageAll()
+#        nel file prova e' sbagliata", va in cima al referto, e il resto
+#        dei numeri non si commenta.
+#  IL RISULTATO CHE MI ASPETTO DI PIU', DETTO SENZA GIRARCI INTORNO:
+#    che la cella viva VINCA, e di parecchio, e che il verdetto sia
+#    "il default va bene" -- che e' un RISULTATO e non un fallimento.
+#    Questo round non serve a trovare di meglio: serve a mettere un
+#    NUMERO dove oggi c'e' una casella vuota, e a scrivere agli atti che
+#    su questo EA InpBreakeven non e' un interruttore di breakeven.
+#
+# ----------------------------------------------------------------------
+#  ###  CLASSE 308 -- IL PARAMETRO CHE STA ANCHE AL DENOMINATORE     ###
+#  ###  Dichiarata PRIMA dei numeri, non dopo                        ###
+# ----------------------------------------------------------------------
+#  LA CLASSE 308 in una riga: un parametro messo ad asse che finisce
+#  anche al DENOMINATORE di un costo, di una quantizzazione o di una
+#  durata fabbrica DA SOLO una pendenza, e quella pendenza si legge
+#  come risultato. Qui si applica il controllo voce per voce.
+#
+#  308-1  LOTTO E QUANTIZZAZIONE: NON MORDE, ED E' ALGEBRICO.
+#         InpBreakeven non compare in PlaceOrders() (r.354-368) ne' in
+#         LotByRisk: lo stop D'INGRESSO e' 1,0 x ATR in TUTTE E DUE le
+#         celle, quindi il lotto iniziale e la sua quantizzazione sono
+#         IDENTICI. La differenza fra le celle non puo' nascere di li'.
+#         >>> Il lotto dei parziali SUCCESSIVI si': NormVol tronca ogni
+#             dimezzamento. Ma quello e' l'OGGETTO della misura (ramo
+#             A), non un artefatto che la sporca.
+#  308-2  COSTO IN R: NON CAMBIA. Lo stop d'ingresso e' lo stesso, quindi
+#         le due celle stanno entrambe a 104,30 idx / 1,90 di spread
+#         mediano = 54,9x (CANCELLO_COSTO_FLOTTA_2026-09-10.md r.246 e
+#         r.325). Nessuna cella esclusa PER COSTO su questo asse.
+#         >>> MA il pedaggio di USCITA si': nel ramo A ogni posizione
+#             paga lo spread 8 volte invece di 2. Il conto in EUR e'
+#             [NON MISURATO] -- l'ora delle uscite non e' misurata su
+#             nessuna sedia della flotta (limite dichiarato in cima al
+#             referto del cancello del costo) -- ma il VERSO e' certo:
+#             la cella 0 paga PIU' pedaggio, e il tester glielo addebita
+#             (Modello 4, tick reali, spread vero). Quindi un eventuale
+#             vantaggio della cella 0 sarebbe AL NETTO del pedaggio, non
+#             al lordo: e' il verso buono e va detto.
+#  308-3  OCCUPAZIONE DEL POSTO: MORDE, E VA LETTA SUL NUMERO DI
+#         POSIZIONI, NON DI USCITE. Questo EA tiene UNA posizione alla
+#         volta (HasPosition(), r.509). Una posizione che dura meno
+#         libera il posto prima e lascia entrare piu' segnali.
+#         Misurato sull'archivio, non ipotizzato: la cella "senza
+#         gestione" di R136c fa 165 POSIZIONI OOS contro le
+#         517/2,0117 = 257 POSIZIONI della cella viva -- cioe' togliere
+#         la gestione ha tolto 92 posizioni. Nel ramo A l'effetto va
+#         nella direzione OPPOSTA (uscite prestissimo -> posto libero
+#         prima -> piu' posizioni).
+#         >>> CONSEGUENZA CONGELATA: il confronto fra le due celle NON
+#             e' a parita' di campione, per costruzione. Il PF delle due
+#             celle NON descrive le stesse operazioni. Ogni frase del
+#             tipo "il PF sale di X" deve portare accanto il numero di
+#             POSIZIONI di tutte e due le celle, o non si scrive.
+#  308-4  IL FATTORE USCITE/POSIZIONI NON E' LO STESSO SULLE DUE CELLE,
+#         e questa e' la classe 226 applicata qui. Sulla cella viva vale
+#         2,0117 [MISURATO sui per-trade di R112: 517 uscite = 257
+#         posizioni]. Sulla cella 0 e' [NON MISURATO] e NON e'
+#         deducibile dal CSV: in ottimizzazione l'export per-trade viene
+#         sovrascritto a ogni passata.
+#         >>> QUINDI: le POSIZIONI della cella 0 di questo round NON si
+#             possono calcolare. Si dichiara il numero di USCITE e si
+#             scrive "[NON MISURATO] le posizioni". NON si divide per
+#             2,0117: sarebbe un numero inventato.
+#         >>> LA VIA AL NUMERO, col suo costo: una corsa SINGOLA (non in
+#             ottimizzazione) della sola cella 0, che lascia
+#             sopravvivere l'export per-trade. Una passata. Si propone,
+#             non si fa qui: questo file misura UNA variabile.
+#
+# ----------------------------------------------------------------------
+#  S1 / S2 / S3 -- LE TRE SENTINELLE
+# ----------------------------------------------------------------------
+#  S1  RIPRODUZIONE, ED E' BLOCCANTE. La cella 1 deve ridare gli otto
+#      numeri dell'ancora (n IDENTICO, PF entro +/-0,5%, DD dichiarato
+#      accanto). Se non li ridiventa, NON si legge nient'altro: il
+#      verdetto diventa "il binario di oggi non e' quello di r136", e
+#      va in cima al referto in grassetto.
+#      >>> E' la quinta riproduzione indipendente della stessa cella.
+#          Se passa, e' anche il collaudo che fra il 13/09 e oggi
+#          ABTG_EMA200.mq5 non e' cambiato in modo che tocchi il
+#          trading.
+#  S2  CONTEGGIO DELLE CELLE. 2 valori distinti di InpBreakeven nel CSV
+#      (0 e 1). Se ne stampa uno solo, l'asse non e' partito: e' un
+#      buco, non un risultato.
+#  S3  IL DISCRIMINANTE DEI DUE RAMI, E DECIDE COME SI LEGGE IL ROUND.
+#      Si guarda la colonna Trades della cella 0, PRIMA del PF:
+#         Trades OOS > 900            -> RAMO A (catena dei dimezzamenti)
+#         Trades OOS = 165 esatte     -> RAMO B (catena mai partita)
+#         qualunque altro valore      -> LETTURA DEL CODICE SBAGLIATA,
+#                                        il round non si commenta.
+#      >>> Questa e' la CLASSE 316 applicata in anticipo: la variabile
+#          che decide come si legge questo round e' `Trades`, non il PF.
+#          Il referto DEVE portare quella colonna in tabella, anche se
+#          il suo valore fosse noioso.
+#
+# ----------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+# ----------------------------------------------------------------------
+#  Valgono le A1..A10 congelate in R136a_slatr_U30USD.txt r.272-333,
+#  CON TRE MODIFICHE dichiarate qui e SOLO per questo file. Ogni sigla
+#  citata in un referto futuro va scritta col file che la congela
+#  (A1 [R136a] . A1-bis [R147a]), altrimenti e' una sigla importata --
+#  classe 315, pagata il 13/09 su R136b/R136c.
+#
+#   A1-bis  A1 (altopiano di >= 3 celle contigue) E' INAPPLICABILE: le
+#           celle sono DUE, perche' l'input e' un bool. Il round NON
+#           puo' concludere "c'e' una configurazione robusta". Puo'
+#           concludere una di queste tre, e nessun'altra:
+#             - "il default va bene" (differenza sotto A9);
+#             - "manopola inerte, MISURATA" (A5, differenza ~0);
+#             - "c'e' un CANDIDATO", che per diventare altro deve
+#               passare da una finestra nuova o da una prova di regime.
+#           Il controllo che sostituisce l'altopiano e' la CONCORDANZA
+#           IS/OOS: il vantaggio deve esserci in tutte e due le
+#           finestre, con lo stesso segno. Se il segno si inverte, il
+#           verdetto e' "non misurabile", non "meta' buono".
+#   A2-bis  IL PAVIMENTO DEI 150 SI LEGGE IN POSIZIONI, e sulla cella 0
+#           le posizioni sono [NON MISURATE] (308-4). Quindi la cella 0
+#           NON PUO' PRODURRE UN VERDETTO DI MERITO in nessun caso, per
+#           quanto bello sia il PF. Puo' produrre un verdetto di
+#           RISCHIO (Emendamento B del 16/08: DD ed equity sono fatti
+#           accaduti a qualunque n) e un verdetto di FORMA.
+#           >>> E l'IS e' sospeso per costruzione anche sulla cella
+#               viva: 237/2,0117 = 117,8 posizioni [INFERITO], sotto
+#               150. Dichiarato adesso, come in R136a.
+#   A7-bis  RISCHIO. Resta la soglia A7 (DD > 8,5% = cella di rischio,
+#           contro il DD promesso 7,8323% e il muro prop del 10%), e si
+#           aggiunge il caso gia' visto in archivio: la cella "senza
+#           gestione" di R136c fa DD OOS 13,9367%, cioe' SFONDA IL MURO
+#           PROP. Se la cella 0 di questo round atterra li', la riga da
+#           scrivere e' "cella di RISCHIO, fuori dal muro", e vale anche
+#           se il PF fosse alto.
+#
+#  E LA VARIABILE SU CUI QUESTO ROUND E' GIUDICATO, congelata qui
+#  (classe 316): il verdetto si scrive su `Trades` (S3, che decide come
+#  si legge tutto il resto) e su `Equity DD %` (A7/A7-bis). Il PF entra
+#  SOLO dopo che S3 ha detto quale ramo si sta leggendo.
+#  >>> `Peggior Giornata %` NON e' disponibile su questo EA: l'OptFrame
+#      di ABTG_EMA200 esporta OTTO colonne (Pass, Profit, Expected
+#      Payoff, Profit Factor, Recovery Factor, Sharpe Ratio, Equity DD %,
+#      Trades) e nessuna e' la peggior giornata -- verificato aprendo
+#      l'intestazione di ..._OOS_r136d.csv, non ricordato. E' un BUCO
+#      DICHIARATO, e la via al numero e' una modifica all'EA (tre righe
+#      in OnTester), cioe' un round successivo.
+#
+# ----------------------------------------------------------------------
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver, walkforward_generico.ps1 r.179). Il calcolo (r.758):
+#      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di r136a/b/c/d e di R112. Se la riga di
+#    lancio cambia FrazioneIS, deposito, modello o @FINOA, S1 decade.
+#    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM su
+#    U30USD, MISURATO (REFERTO_SONDA_STORICO_17-08.md, stato COMPLETO).
+#    REGIME: 21 mesi, UN SOLO regime (Dow al rialzo). Regola C
+#    dell'Emendamento della Finestra: NON soddisfatta, e non lo sara'
+#    alla fine di questo round. Dichiarato come buco, non come
+#    dettaglio.
+#
+#  COSTO IN TEMPO MACCHINA -- MISURATO, non stimato.
+#    2 celle x 2 finestre = 4 PASSATE.
+#    Il gemello esatto esiste ed e' della notte del 12/13-09: r136d,
+#    STESSO EA, STESSO simbolo, STESSO TF, STESSA finestra, STESSO
+#    deposito, STESSO modello, e anche lui 2 celle x 2 finestre:
+#    "ESEGUITO in 139s, uscita 0"
+#    (coda\referti\REFERTO_RUNNER_20260913_033003.txt r.116-121).
+#    >>> ATTESA: ~139 secondi, tempi fissi di avvio compresi.
+#    >>> ATTENZIONE, ED E' UN'AVVERTENZA DI TEMPO, NON DI MERITO: nel
+#        RAMO A la cella 0 esegue molte piu' operazioni della cella
+#        viva, e una passata con ~8 volte le uscite puo' costare
+#        sensibilmente di piu' di una passata normale. I 139s di r136d
+#        valgono quindi per il RAMO B; per il RAMO A il tempo e'
+#        [NON MISURATO]. Non e' un motivo per non farla: e' un motivo
+#        per non spaventarsi se la riga impiega qualche minuto.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - DUE CELLE: nessun altopiano possibile per costruzione (A1-bis).
+#    - POSIZIONI della cella 0: [NON MISURATE] (308-4). Il fattore
+#      2,0117 vale per la cella VIVA e NON si trasporta.
+#    - PEGGIOR GIORNATA: [NON MISURATA], colonna assente in questo EA.
+#    - Pedaggio di uscita in EUR nel ramo A: [NON MISURATO] (308-2).
+#      Il VERSO e' certo, il numero no.
+#    - PROVA DI REGIME: assente. Niente di quello che esce di qui e'
+#      promuovibile.
+#    - LATO SHORT DA SOLO: [NON MISURATO] qui. Gira L+S come la sedia
+#      viva (InpAllowLong e InpAllowShort entrambi true nell'ancora).
+#    - GUARDIAN: InpUsaGuardian=true come nella cella viva. Nel tester
+#      le sue GlobalVariable non esistono e la guardia e' fail-open
+#      (dichiarato nel sorgente). Come in R112 e in r136: confrontabile.
+#    - InpNewsCurrencies NON pinnato di proposito: il default compilato
+#      e' la stringa VUOTA (ABTG_EMA200.mq5 r.98) e un pin di stringa
+#      vuota viene IGNORATO da MT5 (controllo 3 di controlla_prova.py).
+#    - InpLogImbuto pinnato a false: in ottimizzazione il Giornale e'
+#      per-passata e non si legge. I contatori girano lo stesso (sono
+#      fuori dal flag): l'unica cosa spenta e' la stampa.
+#    - IL ROUND NON PROMUOVE NIENTE (A10). Non cambia un preset, non
+#      accende una sedia, non tocca il forward. Riaccensioni, taglie,
+#      rischio e il conto REALE 10105439 sono [FIRMA DI CLAUDIO].
+#
+#  MAGIC VERGINE 786500 (verificato per ricerca su tutto il repo il
+#  14/09/2026, esclusa .git: ZERO occorrenze).
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica riga per riga a R136d_trailing_U30USD.txt, che
+#     a sua volta e' l'antenato R110_EMADOW_00_metro riverificato contro
+#     R112_CORSA_20260826\ABTG_EMA200_U30USD_OOS_00_metro.csv.
+#     Riverificata oggi anche contro le colonne Inp* di
+#     dal_vps\ABTG_EMA200\ABTG_EMA200_U30USD_OOS_r136d.csv, campo per
+#     campo: coincidono tutte tranne InpComment e InpMagic.
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+# InpBreakeven -> E' L'ASSE, in fondo al file.
+InpUseTrailing=true
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R147A
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMagic=786500
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = stop in pari spento (e con lui, per costruzione, il trailing;
+#         e il parziale diventa ripetuto -- vedi il blocco "QUELLO CHE
+#         QUESTA MANOPOLA FA DAVVERO")
+#     1 = la cella VIVA della sedia 771531.
+#     Bool: si scrive in 0/1, non in true/false, perche' l'asse deve
+#     essere numerico (controllo 4 di controlla_prova.py).
+InpBreakeven=1||0||1||1||Y
+# ======================================================================
