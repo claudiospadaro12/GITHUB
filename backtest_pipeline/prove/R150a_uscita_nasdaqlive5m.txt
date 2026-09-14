@@ -1,0 +1,477 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
+#  R150a -- LA QUARTA MANOPOLA D'USCITA DELLA PRE-APERTURA NASDAQ:
+#           *QUANDO* ARMA IL TRAILING (InpTrailStartR), non quanto e'
+#           largo. NASUSD M5, RangeMode=1 / PrevWindowMin=5.
+#
+#  >>> NUMERO DI ROUND VERIFICATO, NON RICORDATO (classe 329, 14/09/2026)
+#      'R150' non compare da NESSUNA parte: prove/ (153 file),
+#      coda/CODA.txt, REGISTRO_TEST.md, report/, i .md di radice,
+#      risultati_prove/ e risultati_prove/dal_vps/. Il massimo occupato
+#      oggi e' R149a (prove/R149a_canale15_preapertura_NASUSD.txt).
+#      L'ETICHETTA DA USARE IL GIORNO DELLA FIRMA E' 'r150a' -- e' il
+#      SUFFISSO DEI CSV (RIGA_SOTTILE_ROUND.ps1 r.1042: senza, un round
+#      nuovo sovrascrive il precedente). Verificato libero: nessun file
+#      *r150* in tutto il repo.
+#
+# ---------------------------------------------------------------------
+#  PADRI:  report/AUDIT_NASDAQ_PREOPEN_2026-09-12.md (voce 3 del
+#          certificato di morte, par.2/par.9)
+#          backtest_pipeline/prove/R142a_preopen_parziale.txt
+#          backtest_pipeline/prove/R142b_preopen_trailing.txt
+#          backtest_pipeline/prove/R142c_preopen_trailonoff.txt
+#          coda/CODA.txt r.661-760 (diciassettesimo giro: classi 299,
+#          300, 301 -- i falsificatori gia' pagati su questo asse)
+#
+# ---------------------------------------------------------------------
+#  ###  CORREZIONE AL MANDATO, PRIMA DI TUTTO IL RESTO  ###
+#  ###  LA VOCE 3 NON E' PIU' "NESSUN ASSE": E' GIRATA IL 13/09  ###
+# ---------------------------------------------------------------------
+#  Il mandato di questo file cita AUDIT_NASDAQ_PREOPEN r.380 ("il CSV ha
+#  2 passate e 1 esito distinto: e' una cella singola girata due volte,
+#  nessun asse") e REGISTRO_TEST.md r.36 (L2). Quelle due righe sono del
+#  12/09 e sono VERE PER IL LORO GIORNO -- ma sono SCADUTE.
+#
+#  >>> FATTO, verificato sui file e non a memoria: le tre righe R142
+#      sono state armate alle 01:30 del 13/09 (coda/CODA.txt r.757-759,
+#      pin dbe86ac) e HANNO GIRATO. I sei CSV stanno su disco:
+#        risultati_prove/dal_vps/ABTG_Nasdaq_Live5m/
+#          ABTG_Nasdaq_Live5m_NASUSD_{IS,OOS}_r142{a,b,c}.csv
+#      Quindi la gestione dell'uscita su QUESTA cella e' messa ad asse
+#      su TRE manopole, non zero. Chi legge questo round dopo deve
+#      leggere quei numeri, non la riga r.380.
+#
+#  >>> E LA RIGA r.380 DELL'AUDIT, PRESA ALLA LETTERA, E' COMUNQUE VERA
+#      SU UN ALTRO FILE: risultati_prove/ABTG_Nasdaq_Live5m/
+#      ABTG_Nasdaq_Live5m_NASUSD_OOS.csv (agosto) ha davvero 2 passate e
+#      1 esito, e l'ho aperto: il suo "asse" e' InpMagic (770203 e
+#      770204), cioe' un asse DEGENERE che non cambia niente nel
+#      mercato. Due righe identiche al centesimo. E' quello il "girata
+#      due volte" dell'audit.
+#
+#  ECCO COSA HANNO MISURATO LE TRE RIGHE R142 (tick reali, stessa
+#  finestra di qui, rischio 2%, deposito 10000):
+#
+#   R142a -- LA PARZIALE (InpTP1_ClosePct 0/25/50/75)
+#     OOS: 0,96409 (n131) | 0,97001 (n175) | 0,95624 (n175) | 0,94458 (n175)
+#     IS : 1,05441 (n 86) | 1,04495 (n116) | 1,01472 (n116) | 0,98776 (n116)
+#     >>> NESSUNA cella sopra 1 in OOS. La parziale non salva niente.
+#
+#   R142b -- LA LARGHEZZA DEL TRAILING (InpTrailTF M1..M5)
+#     OOS: M1 0,95624 (n175, DD 22,47) | M2 1,07031 (n185, DD 17,62)
+#          M3 1,00971 (n188, DD 25,78) | M4 1,00096 (n190, DD 27,88)
+#          M5 1,04705 (n194, DD 27,07)
+#     IS : M1 1,01472 | M2 1,23757 | M3 1,26238 | M4 1,21401 | M5 1,23143
+#     >>> QUATTRO CELLE SU CINQUE SOPRA 1 IN OOS. E' l'UNICO asse di
+#         questo motore che abbia mai passato l'1 fuori campione.
+#
+#   R142c -- IL TRAILING ESISTE O NO (InpUseTrailing 0/1)
+#     OOS: acceso 0,95624 (n175, DD 22,47) | SPENTO 0,99949 (n195, DD 33,62)
+#     IS : acceso 1,01472 (n116, DD 12,2759) | SPENTO 1,32199 (n127, DD 12,9494)
+#     >>> Spegnerlo migliora il PF e PEGGIORA IL RISCHIO: il DD OOS
+#         passa da 22,47% a 33,62%. Il trailing un lavoro lo fa.
+#
+#  >>> LA LETTURA ONESTA DI QUEI TRE ROUND, in una riga: il difetto di
+#      questa gestione NON e' la parziale, e' IL TRAILING TROPPO
+#      STRETTO. Due manopole diverse (allargare la candela, spegnerlo)
+#      spostano il PF OOS nello STESSO verso. Due misure indipendenti
+#      che indicano la stessa cosa non sono una coincidenza.
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' QUESTO ROUND ESISTE LO STESSO: RESTA UNA MANOPOLA  ###
+# ---------------------------------------------------------------------
+#  Il trailing di questo EA ha DUE gradi di liberta', e R142 ne ha
+#  toccato UNO solo:
+#    (1) QUANTO E' LARGO   -> InpTrailTF / InpTrailMode   [R142b: FATTO]
+#    (2) QUANDO ARMA       -> InpTrailStartR              [MAI TOCCATO]
+#
+#  InpTrailStartR e' PINNATO A 0 in TUTTI i file prova di questo EA che
+#  esistono (R142a r.362, R142b r.321, R142c r.285, R143a r.237, R149a
+#  r.458) e in TUTTI i CSV in archivio (colonna InpTrailStartR = 0 in
+#  ogni riga dei sei CSV r142 e dei quattro di agosto). Zero misure.
+#
+#  E NON E' UNA MANOPOLA QUALUNQUE: e' nata APPOSTA per questo difetto.
+#  ABTG_Nasdaq_Live5m.mq5 r.1022-1036, commento del 07/08/2026 scritto
+#  da chi la aggiunse, citato alla lettera:
+#      "Prima non c'era: l'unica condizione era che la candela
+#       precedente fosse gia' oltre il prezzo d'ingresso. Su M5, dentro
+#       un movimento veloce, quel livello puo' stare due punti indice
+#       sopra l'entrata -- e la posizione e' finita. Il 07/08 tre trade
+#       d'apertura sono usciti dal trailing a +0,043R (17 secondi),
+#       +0,077R (32 min) e +0,027R (79 secondi): tre 'vincenti' che
+#       insieme valevano 0,15R."
+#  e, due righe sotto: "DEFAULT 0 = COMPORTAMENTO IDENTICO A PRIMA.
+#  Adesso e' una LEVA MISURABILE, non una correzione applicata a
+#  occhio". >>> La leva e' li' da cinque settimane e non l'ha mai
+#  tirata nessuno. Questo round la tira.
+#
+#  IL MECCANISMO, letto nel codice (non ipotizzato):
+#    r.1037-1041  profR = (bid-openP)/riskDist ; trailArmato =
+#                 (InpTrailStartR <= 0) || (profR >= InpTrailStartR)
+#    r.1041-1055  se armato, lo stop va alla base della candela
+#                 precedente (r.1063-1064), con il solo vincolo
+#                 newSL > sl && newSL > openP
+#  Con InpTrailStartR=0 il trailing e' ATTIVO DAL PRIMO TICK: basta che
+#  il minimo della candela M1 precedente superi l'ingresso di un tick e
+#  la posizione e' chiusa a +0,0xR. La parziale (r.977) e il breakeven
+#  (r.1009) stanno a 1R e non fanno in tempo a vedere il trade.
+#  >>> E' esattamente la patologia "R:R invertito da gestione troppo
+#      stretta" gia' pagata in casa sull'EA oro.
+#
+#  >>> PERCHE' NON E' PESCA (regola del 19/08: niente griglie nuove su
+#      un motore senza edge). Questo asse NON aggiunge un parametro
+#      libero: INTERPOLA FRA DUE PUNTI GIA' MISURATI.
+#        x = 0      -> e' la cella R142c "trailing ACCESO"  (misurata)
+#        x >= 3,0   -> il TP dell'ordine sta a 3R (r.763-769: TpTotalR =
+#                      InpTP1_R*3 = 3,0; r.665/682: tp = entry +-
+#                      dist*TpTotalR), quindi il trailing non arma mai
+#                      prima che il TP chiuda: e' la cella R142c
+#                      "trailing SPENTO"                   (misurata)
+#      Il round misura la FORMA della curva fra due estremi noti, non
+#      cerca un picco in un campo aperto. E la domanda e' una sola:
+#      >>> ESISTE UN RITARDO CHE PRENDE IL PF DEL TRAILING SPENTO SENZA
+#          PRENDERNE IL DRAWDOWN?
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO INCORPORATO -- E' UN TEOREMA SU n  ###
+# ---------------------------------------------------------------------
+#  Serve una presa che dica "la catena e' intera" PRIMA di leggere
+#  qualunque PF. Qui e' un conteggio, e si dimostra.
+#
+#  (A) LE POSIZIONI SONO UN NUMERO FISSO, l'asse non le tocca.
+#      L'ingresso e' deciso da TryPlaceBreakout (r.632-692) e da
+#      InpOneTradePerDay + HaGiaOperatoOggi (r.531-548): nessuno dei due
+#      legge una manopola d'uscita. Quindi il numero di POSIZIONI e'
+#      identico in tutte le celle. Il numero MISURATO sta in R142a, dove
+#      la cella InpTP1_ClosePct=0 (nessuna parziale => un deal di
+#      chiusura per posizione) da' n = 131 OOS e n = 86 IS.
+#
+#  (B) 'Trades' NEL CSV = DEAL DI CHIUSURA, cioe'
+#          n = posizioni + parziali riuscite
+#      Verificato aritmeticamente sui numeri di R142a: OOS 131 -> 175
+#      accendendo la parziale = 44 parziali; IS 86 -> 116 = 30 parziali.
+#      E si ripete su R142c: OOS 195 col trailing spento = 131 + 64.
+#      (E' la classe 300 della coda, gia' pagata: chi scrisse la v1 di
+#       R142b aveva congelato "l'n deve restare IDENTICO fra le celle",
+#       un falsificatore che scattava sull'ipotesi VERA.)
+#
+#  (C) PERCIO' n(x) E' NON-DECRESCENTE IN x, E NON E' UNA STIMA.
+#      Una parziale avviene se la posizione tocca 1R (r.977-999).
+#      Fino a 1R, alzare InpTrailStartR puo' SOLO TOGLIERE modifiche
+#      allo stop (r.1040): lo stop resta quello iniziale invece di
+#      salire sotto il prezzo. Una posizione che con x=0 arriva a 1R ci
+#      arriva anche con x maggiore (stessa sequenza di tick, un vincolo
+#      di uscita in meno); una che con x=0 veniva tagliata prima puo'
+#      arrivarci. L'insieme delle posizioni che toccano 1R CRESCE con x.
+#      >>> E' contenimento di insiemi, come il teorema di R149a: non e'
+#          un'attesa, e' una proprieta' del codice.
+#
+#  (D) E HA UN TETTO ESATTO, gia' misurato: il valore a trailing spento.
+#          OOS  n <= 195      IS  n <= 127     (R142c)
+#      Perche' a trailing spento l'insieme delle posizioni che toccano
+#      1R e' il massimo possibile.
+#
+#  >>> HO PROVATO A ROMPERLO, e cede in un punto solo, che percio' si
+#      dichiara: se il 50% del volume arrotonda SOTTO il lotto minimo,
+#      NormalizeVolume (r.1145-1153) torna 0, la parziale non parte e il
+#      deal non c'e' (il breakeven scatta lo stesso, r.1002-1018). E'
+#      una proprieta' della SINGOLA posizione, indipendente da x, e puo'
+#      solo aggiungere ZERO invece di UNO: la monotonia regge, il tetto
+#      pure. A rischio 2% su 10000 il caso e' raro (44 parziali su 44
+#      occasioni in OOS), ma la dimostrazione non ne ha bisogno.
+#
+#  ### LE SOGLIE DI CATENA ROTTA, CONGELATE PRIMA DEI NUMERI ###
+#    1. n(0) DEVE valere ESATTAMENTE 175 in OOS e 116 in IS.
+#    2. n(x) non-decrescente lungo l'asse, in TUTTE E DUE le finestre.
+#    3. n(x) <= 195 in OOS e <= 127 in IS, in ogni cella.
+#  Se una delle tre salta, NON SI LEGGE NESSUN PF di questo round e si
+#  cerca il binario prima di rilanciare.
+#
+# ---------------------------------------------------------------------
+#  ###  IL SENTINELLA -- E IL MANDATO VA CORRETTO, CON I NUMERI  ###
+# ---------------------------------------------------------------------
+#  Il mandato chiede: "la cella al valore attuale della manopola DEVE
+#  riprodurre PF 0,96265 / DD 19,40% / n=175".
+#  ATTENZIONE: PRESO ALLA LETTERA, QUEL SENTINELLA FALLISCE SU UN BINARIO SANO E
+#     DICHIARA "CATENA ROTTA" QUANDO NON C'E' NIENTE DI ROTTO.
+#  E non e' un'ipotesi: quella stessa cella e' GIA' STATA RIGIRATA il
+#  13/09 dal round R142 e il CSV sta su disco. Ecco i due numeri
+#  affiancati, letti dai file:
+#
+#    cella: RangeMode=1 | PrevWin=5 | MinRange 1700 | MaxRange 4000  ~ 
+#           TP1 1R | parziale 50% | BE on | trailing on M1 | rischio 2%
+#
+#                      ARCHIVIO (ago., binario 400a462)   R142 (13/09)
+#      OOS  PF              0,96265                          0,95624
+#      OOS  n                   175                              175
+#      OOS  DD %            19,4006                          22,4729
+#      OOS  Profit          -326,54                          -447,69
+#      IS   PF              1,01621                          1,01472
+#      IS   n                   116                              116
+#      IS   DD %            11,5160                          12,2759
+#      IS   Profit           +98,96                           +97,65
+#
+#  >>> L'n RIPRODUCE AL DEAL in tutte e due le finestre. PF e DD NO, e
+#      il motivo era gia' scritto PRIMA che i numeri uscissero
+#      (coda/CODA.txt r.685-691): fra i due binari c'e' 3af47ed, il fix
+#      di sizing (OrderCalcProfit al posto del tick value nudo), che
+#      cambia il LOTTO e quindi il DD e il PF, non le decisioni.
+#      Il sospetto dichiarato in anticipo e' stato confermato dai fatti:
+#      stesse 175 decisioni, soldi diversi.
+#
+#  ### PERCIO' IL SENTINELLA DI QUESTO ROUND E' A DUE LIVELLI ###
+#    DURO   (catena rotta se non torna):
+#       n(x=0) = 175 OOS e 116 IS. E' la misura che NON dipende dal
+#       sizing: e' il conteggio delle decisioni.
+#    MORBIDO (si legge e si dichiara, non boccia):
+#       PF/DD/Profit di x=0 devono coincidere con la colonna R142, non
+#       con quella di agosto: 0,95624 / 22,4729 / -447,69 in OOS e
+#       1,01472 / 12,2759 / +97,65 in IS.
+#       Tolleranza: IDENTITA' AL CENTESIMO. Il binario non e' cambiato
+#       -- verificato con git: l'ultima modifica a
+#       mql5/Experts/ABTG_Nasdaq_Live5m.mq5 e a
+#       mql5/Include/ABTG_PausaGuardian.mqh e' d83c196 (19/08), cioe'
+#       PRIMA del pin dbe86ac usato da R142; da dbe86ac a HEAD (c8c9651)
+#       quei due file hanno ZERO commit. Se il PF di x=0 NON coincide
+#       con R142, e' cambiato qualcosa che non so, e il round va fermato
+#       anche col sentinella duro verde.
+#
+#  ### E IL SECONDO SENTINELLA, ALL'ALTRO CAPO DELL'ASSE ###
+#    La cella x = 3,0 deve CONVERGERE alla cella "trailing spento" di
+#    R142c: OOS 0,99949 / n 195 / DD 33,6209 | IS 1,32199 / n 127 /
+#    DD 12,9494. Motivo strutturale gia' spiegato: il TP sta a 3R.
+#    >>> MA E' UN'ATTESA, NON UN CANCELLO, e la ragione va scritta
+#        prima: a 3R il TP dell'ordine e la condizione di armamento
+#        scattano sullo STESSO prezzo, e in un gap o con slippage il
+#        tick puo' superare 3R prima che il TP chiuda -> il trailing
+#        potrebbe armare per un istante. Se x=3,0 non coincide al
+#        centesimo con la cella spenta, e' questo, non un guasto: si
+#        scrive e basta. Se invece n(3,0) < n(2,5) la monotonia (C) e'
+#        rotta e quello SI' e' un guasto.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n: NON-DECRESCENTE da 175 (OOS) / 116 (IS) fino al tetto 195 / 127.
+#     Attesa la salita piu' ripida fra x=0 e x=1,0 (sotto 1R sta la
+#     patologia documentata: le uscite a +0,03R).
+#
+#  PF OOS: mi aspetto che SALGA sopra 0,95624 gia' alla prima cella
+#     x>0, perche' le uscite premature misurate stanno tutte sotto
+#     0,1R. Base dell'attesa, dichiarata: i due estremi misurati valgono
+#     0,95624 (arma subito) e 0,99949 (non arma mai).
+#     >>> BANDA DICHIARATA PRIMA: mi aspetto che la CELLA MIGLIORE in
+#         OOS cada fra 0,99 e 1,08. Sopra 1,08 sarei sorpreso; sotto
+#         0,99 la mia ipotesi sul TEMPO e' sbagliata (vedi smentita).
+#     >>> E DICHIARO COSA MI SMENTISCE, in un numero solo:
+#         se il MASSIMO dei PF OOS sulle celle x>0 e' <= 0,99949 (cioe'
+#         nessun ritardo batte il semplice spegnimento), allora
+#         L'IPOTESI E' SBAGLIATA: di questo trailing non conta QUANDO
+#         arma, conta solo che ci sia o no -- e la manopola giusta
+#         resta la LARGHEZZA (R142b, che fa 1,07031 a M2). Si scrive
+#         cosi', a chiare lettere, e la voce 3 si chiude lo stesso.
+#
+#  DD OOS: atteso IN SALITA con x, verso il 33,62% del trailing spento.
+#     E' il verso, non il numero. Se il DD NON sale, vuol dire che il
+#     trailing stretto non stava proteggendo un bel niente e la sua
+#     unica funzione era tagliare i vincenti: sarebbe una notizia forte
+#     e va scritta.
+#
+#  ### IL CRITERIO DI "MIGLIORAMENTO", CONGELATO PRIMA (dominanza) ###
+#     Una cella conta come miglioramento SOLO se batte TUTTI E DUE gli
+#     estremi gia' misurati, ciascuno sul suo terreno:
+#         PF OOS > 0,99949   E   DD OOS <= 22,4729
+#     cioe' il PF del trailing spento col drawdown del trailing acceso.
+#     Una cella che alza il PF portandosi dietro un DD del 30% NON e'
+#     un miglioramento: e' lo scambio che R142c ha gia' fatto.
+#     >>> Se NESSUNA cella domina, il round dice "nessun ritardo paga il
+#         suo drawdown" e lo scrive. E' un risultato, non un fallimento.
+#
+#  ### CANARINO DI MANOPOLA INERTE, scritto prima ###
+#     Se due celle consecutive danno n IDENTICO **e** PF identico alla
+#     quinta cifra, la manopola non ha morso fra quei due valori: i due
+#     PF NON si citano come punti distinti. (Lezione degli 874 CSV a
+#     esito identico del censimento del 09/09.)
+#
+#  ### LE TRE USCITE ###
+#   (a) CATENA ROTTA (sentinella duro o monotonia) -> non si legge
+#       niente, si cerca il binario.
+#   (b) LA CURVA ESCE -> la voce 3 del certificato passa da "tre assi"
+#       a "QUATTRO assi, cioe' TUTTE le manopole d'uscita che l'EA ha".
+#       Il numero va in REGISTRO_TEST.md r.36 (L2) insieme a quelli di
+#       R142, che ancora non ci sono.
+#   (c) UNA CELLA DOMINA (PF OOS > 0,99949 e DD <= 22,4729) e ha
+#       n >= 150 -> si SCRIVE, non si promuove. Centro dell'altopiano,
+#       mai il picco.
+#
+# ---------------------------------------------------------------------
+#  ###  COSA QUESTO ROUND NON FA -- E SI DICE PRIMA, NON DOPO  ###
+# ---------------------------------------------------------------------
+#  1. NON RESUSCITA IL MOTORE, e non e' modestia: e' aritmetica gia'
+#     fatta. Il verdetto del 12/09 boccia questo meccanismo
+#     sull'INGRESSO e sul COSTO: stop minimo 24 idx / spread mediano
+#     misurato 1,80 = 13,33x, contro un pavimento DI LAVORO di 40x
+#     (12,63x al P95). Il rapporto stop/spread e' una proprieta'
+#     dell'INGRESSO: NESSUNA manopola d'uscita lo sposta di un decimo.
+#     >>> Quindi anche una cella con PF OOS 1,30 NON promuove niente e
+#         NON crea una sedia. Si spende per CHIUDERE LA VOCE 3 COL
+#         NUMERO. Senza, il verdetto resta "NON ANCORA MISURATO" per
+#         sempre -- ed e' il difetto che il 09/09 e' costato quattro
+#         candidati di classe A1.
+#  2. NON tocca la LARGHEZZA del trailing (InpTrailTF/InpTrailMode):
+#     e' R142b, gia' girato. Una variabile alla volta.
+#  3. NON tocca la parziale ne' il breakeven: R142a, gia' girato.
+#     InpBreakevenAtTP1 resta l'unica manopola booleana mai messa ad
+#     asse su questo EA, e resta un round separato (nota: con la
+#     parziale accesa il BE e' quasi sempre gia' superato dal trailing;
+#     e' per questo che non e' il candidato migliore oggi).
+#  4. NON tocca la larghezza della finestra pre-apertura
+#     (InpPrevWindowMin): e' la VOCE 5, chiede la FIRMA DI CLAUDIO
+#     (R149a, gia' scritto e in attesa). Qui e' PINNATA A 5.
+#  5. UN SOLO REGIME: 21 mesi di tick BCM. Nessuna cella e' promuovibile
+#     senza la prova di regime (Emendamento del 16/08, regola C).
+#  6. NON misura il LATO separatamente: long e short accesi entrambi,
+#     come la cella archiviata. La regola dei due lati (25/08) chiede
+#     una misura per lato: e' un round separato.
+#  7. NON misura i GEMELLI (D30EUR/U30USD): R143b/R143c.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata e di R142.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver (walkforward_generico.ps1 r.179). La prova che e' il taglio
+#     giusto sta scritta da qualcun altro: risultati_archivio/
+#     REFERTO_WEEKEND_FASE0.md r.7 -- "IS 26/09/2024->09/06/2025 -
+#     OOS 10/06/2025->30/06/2026". E' lo stesso taglio di R142: senza,
+#     i sentinella non varrebbero niente.
+#  @PERIODO M5: il TF del grafico, identico a R142 e alla corsa
+#     archiviata. (Nota gia' corretta il 13/09 in REGISTRO_TEST r.36: il
+#     TF del GRAFICO non entra nei numeri di questo EA -- unica
+#     occorrenza di PERIOD_CURRENT a r.296, l'ATR, ramo morto con
+#     SLMode=0 e TrailMode=1. Qui lo si pinna per identita' con R142,
+#     non perche' conti.)
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#  RISCHIO 2%: e' il valore della corsa archiviata E di R142, quindi e'
+#     la RIPRODUZIONE, non una scelta di merito. Due conseguenze,
+#     dichiarate: (a) il DD che ne esce NON si legge contro i cancelli
+#     prop scritti per l'1% / 0,65% e si cita SEMPRE come "DD x% @
+#     rischio 2%"; (b) il PF non si trasferisce fra taglie
+#     (CalcLotByRisk dimensiona su ACCOUNT_BALANCE, r.890-927:
+#     capitale composto).
+#     >>> IL 2% NON E' LA TAGLIA DI CASA: lo standard e' 0,65%. Qui e'
+#         un PARAMETRO DI MISURA scelto per confrontabilita' con
+#         l'archivio, non una proposta di rischio.
+#  DEPOSITO 10000 = quello della corsa archiviata e di R142 (la riga
+#     R142 porta -Deposito 10000). Va ripetuto nella riga di lancio: con
+#     100000 i sentinella non tornano.
+#  NESSUNA SEDIA VIVA E' TOCCATA -- verificato, non assunto: 770203 non
+#     compare in report/CENSIMENTO_CAMPO_VS_MISURATO_2026-09-13.md fra
+#     gli EA in campo (li' il magic della famiglia che gira e' 770202,
+#     Dow). 770203 esiste solo in archivio. Nessun conto reale, nessun
+#     forward, nessuna taglia di rischio toccata.
+#  MAGIC 770203: il magic di casa dell'EA. Questo file NON introduce un
+#     magic nuovo e NON crea una sedia.
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I
+#     numeri si leggono nell'OPTFRAME.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale.
+#  TERMINALE: PC di BACKTEST. Mai su un terminale con sedie vive.
+#  NON ARMATO IN CODA.txt da chi lo scrive: la riga la arma il
+#     coordinatore dopo il secondo strato del cancello.
+#
+#  COSTO: 7 celle x 2 finestre = 14 passate -> T = 0,6 + 0,077 x 14 =
+#         1,68 minuti.
+#
+#  CANCELLO: primo strato (controlla_prova.py + controlla_riga.py
+#     --oggetto prova) lanciato da me, DA SOLO, mai in pipe; il secondo
+#     strato lo lancia il coordinatore.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+InpPrevWindowMin=5||5||0||5||N
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+
+# --- IL CANCELLO DI AMPIEZZA RESTA ACCESO AI VALORI DELLA LIVE
+#     (17-40 punti indice). E' il meccanismo archiviato: spegnerlo qui
+#     romperebbe i due sentinella, che sono l'unica presa del round.
+InpMinRangePts=1700||1700||0||1700||N
+InpMaxRangePts=4000||4000||0||4000||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+# --- LA GESTIONE D'USCITA RESTA QUELLA ARCHIVIATA, PEZZO PER PEZZO:
+#     primo obiettivo a 1R, meta' posizione, stop a pari, trailing
+#     acceso sulla candela M1 precedente. Sono i valori delle celle di
+#     riproduzione di R142a/b/c: se se ne muove uno, i sentinella non
+#     valgono piu'.
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770203||770203||0||770203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: DOPO QUANTI R IL TRAILING PUO' ARMARE.
+#     r.1040 dell'EA: trailArmato = (InpTrailStartR <= 0) ||
+#                                   (profR >= InpTrailStartR)
+#     Non e' una griglia di parametri in campo aperto: e'
+#     l'INTERPOLAZIONE FRA DUE CELLE GIA' MISURATE DA R142c.
+#        0,0  = il trailing arma dal primo tick.
+#               >>> SENTINELLA DURO: deve dare n 175 (OOS) / 116 (IS),
+#                   e PF 0,95624 / 1,01472 sul binario di oggi.
+#        0,5  = primo ritardo vero. Le uscite premature documentate nel
+#               codice stanno tutte sotto 0,1R: qui sono gia' tutte
+#               dentro il filtro.
+#        1,0  = il trailing non arma prima del primo obiettivo: da 1R in
+#               poi la posizione e' gia' dimezzata e in pari.
+#        1,5 / 2,0 / 2,5 = il "lascia correre" progressivo sulla meta'
+#               che resta.
+#        3,0  = il TP dell'ordine sta a 3R (r.767): il trailing non fa
+#               in tempo ad armare.
+#               >>> SECONDO SENTINELLA (atteso, non cancello): deve
+#                   convergere alla cella "trailing SPENTO" di R142c,
+#                   OOS 0,99949 / n 195 / DD 33,6209.
+#     Passo 0,5: sette celle. NON piu' fitto di proposito -- la
+#     patologia misurata sta tutta sotto 0,1R e un passo piu' fine
+#     cercherebbe un picco, non una forma (regola del 19/08). Se esce un
+#     altopiano, infittirlo e' un round separato con la sua ragione
+#     scritta.
+InpTrailStartR=0||0.0||0.5||3.0||Y
