@@ -93,16 +93,29 @@
 #  ###  QUELLO CHE QUESTA MANOPOLA FA DAVVERO -- LETTO NEL SORGENTE  ###
 #  ###  (mql5\Experts\ABTG_DAX_Apertura_EU.mq5, HEAD del 14/09/2026) ###
 # ----------------------------------------------------------------------
+#      r.589  ManagePosition();      <<< GIRA PER PRIMA, A OGNI TICK
+#      r.590  HandleOCO();
+#      r.594  if(gPhase==PH_WAIT_OPEN || gPhase==PH_BUILDING)
+#      r.602     { if(_hasOrd || SelectMyPosition()) gPhase=PH_PLACED; }
+#      r.608  if(now.day_of_year != gDayStamp){ ... ResetDay(); }
+#      r.628  if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year
+#               && (gPhase==PH_WAIT_OPEN || gPhase==PH_BUILDING)) { ...
+#               CicliOggi() legge lo STORICO DEAL DEL GIORNO ... }
 #      r.673  if(TimeInMinutes(now) >= InpCloseHour*60 + InpCloseMin)
 #      r.675    { EndOfSession(); return; }
+#      r.683  switch(gPhase) -- PH_WAIT_OPEN -> PH_BUILDING (r.687-688),
+#               il range e i piazzamenti stanno nel case PH_BUILDING
+#               (r.691-745)
+#      r.755  case PH_PLACED: MonitorReverse();   // r.890: con
+#               InpAllowReverse=false esce alla prima riga, NON FA NIENTE
+#      r.941  void ResetDay(){ gPhase = PH_WAIT_OPEN; ... }
+#      r.1884 void ManageOneTicket(...)  // parziale, BE, trailing:
+#               NESSUNA guardia di orario dentro
 #      r.2098 void EndOfSession()
 #      r.2101   CancelMyPendings();
 #      r.2103   if(InpCloseAtEnd && SelectMyPosition())
 #      r.2105      gTrade.PositionClose(_Symbol);
 #      r.2109   gPhase = PH_DONE;
-#      r.628  if(InpOneTradePerDay && gGuardiaGiorno != now.day_of_year
-#               && (gPhase==PH_WAIT_OPEN || gPhase==PH_BUILDING)) { ...
-#               CicliOggi() legge lo STORICO DEAL DEL GIORNO ... }
 #
 #  TRE CONSEGUENZE, e nessuna e' "la posizione dura un po' di piu'".
 #
@@ -110,28 +123,77 @@
 #      fuori dall'if). L'asse NON tocca gli ingressi del giorno stesso:
 #      tocca solo che cosa succede alla posizione GIA' APERTA.
 #
-#  (b) DOPO LE 17:30 SERVER LA POSIZIONE PORTATA AVANTI E' CIECA.
-#      La r.675 fa `return` PRIMA di tutta la macchina di gestione:
-#      nella cella 0, dalle 17:30 a mezzanotte il trailing (InpTrailMode
-#      1 = base candela precedente, InpTrailFixedPts 410) non gira. La
-#      posizione resta appesa al suo SL e al suo TP.
-#      >>> E QUESTO E' IL PUNTO CHE PUO' RIBALTARE L'ATTESA: sulla cella
-#          viva il trailing ha chiuso 10 volte su 10 IN UTILE (punto 3).
-#          Toglierlo di mezzo per mezza giornata non e' neutro.
+#  (b) DOPO LE 17:30 SERVER LA POSIZIONE PORTATA AVANTI RESTA GESTITA,
+#      E QUESTA E' UNA CORREZIONE DEL 14/09/2026, non una sfumatura.
+#      Qui c'era scritto che "dalle 17:30 a mezzanotte il trailing non
+#      gira", perche' la r.675 fa `return`. E' FALSO: ManagePosition()
+#      e' chiamata a r.589, cioe' IN CIMA a OnTick() e PRIMA di quel
+#      return, e ManageOneTicket() (r.1884-1996) non ha nessuna guardia
+#      di orario. Nella cella 0 il trailing (InpTrailMode=1, base della
+#      candela precedente su M5, r.2003-2004) CONTINUA a girare tutta la
+#      notte. Stessa causa della classe 318: la riga che comanda sta
+#      PRIMA di quella che avevo letto.
+#      >>> E LA CONSEGUENZA E' UNA SELEZIONE AVVERSA, che va detta
+#          perche' e' il cuore del rischio di questa cella: il trailing
+#          muove lo stop SOLO in utile (r.1986 `newSL > openP` per i
+#          long, r.1992 `newSL < openP` per i corti). Le posizioni gia'
+#          in profitto alle 17:30 vengono quindi tirate fuori presto
+#          dalla notte; quelle IN PERDITA non hanno nessun trailing e
+#          attraversano la notte INTERE, col loro SL iniziale. A
+#          prendersi il gap sono soprattutto le PERDENTI -- ed e'
+#          esattamente il motivo per cui la colonna che decide e'
+#          `Peggior Giornata %` (B0).
 #
-#  (c) IL GIORNO DOPO L'EA SI RIARMA LO STESSO, E PUO' APRIRE UNA
-#      SECONDA POSIZIONE SOPRA LA PRIMA. La guardia A4 (r.628) e'
-#      PER GIORNO: chiede allo storico se OGGI ha gia' aperto, non se
-#      una posizione e' ancora viva. E InpMaxPosSimbolo e' pinnato a 0,
-#      cioe' NESSUN TETTO di posizioni sul simbolo. Il conto e' HEDGING.
-#      >>> Quindi nella cella 0 il RISCHIO APERTO CONTEMPORANEO puo'
-#          essere PIU' ALTO che nella cella 1. E' il fatto piu'
-#          importante del file, ed e' il motivo per cui il verdetto si
-#          scrive sul rischio e non sul PF (vedi SOGLIE, B0).
-#      >>> E c'e' un dettaglio che peggiora il quadro, letto nel codice:
-#          la chiusura a r.2105 e' `PositionClose(_Symbol)`, cioe' PER
-#          SIMBOLO e non per ticket. Con due nostre posizioni aperte
-#          insieme, un'eventuale chiusura ne prende UNA.
+#  (c) IL GIORNO DOPO L'EA NON SI RIARMA AFFATTO: ZERO INGRESSI.
+#      >>> CORREZIONE DEL 14/09/2026 -- CLASSE 318, E VA LETTA PRIMA DEL
+#          RESTO. La prima stesura scriveva l'ESATTO CONTRARIO ("puo'
+#          aprire una SECONDA posizione sopra la prima") e ne faceva "il
+#          fatto piu' importante del file". Era una supposizione:
+#          citava la guardia A4 (r.628, vera ma non pertinente) e
+#          InpMaxPosSimbolo=0, e NON aveva letto le PRIME RIGHE di
+#          ABTG_OnTick(), che girano prima di tutto il resto. Trovato
+#          dal secondo giudizio. Resta scritto qui invece di essere
+#          cancellato perche' il verso sbagliato aveva tarato TRE
+#          paragrafi (ATTESA, 308-3, S3).
+#      IL MECCANISMO, RIGA PER RIGA, con una posizione ancora aperta a
+#      mezzanotte:
+#        1. la sera prima EndOfSession() ha messo gPhase=PH_DONE
+#           (r.2109) e non ha chiuso niente (InpCloseAtEnd=0).
+#        2. primo tick del giorno nuovo: la guardia anti-duplicato di
+#           r.594 NON entra (gPhase e' PH_DONE), poi r.608-611 chiama
+#           ResetDay(), che rimette gPhase=PH_WAIT_OPEN (r.941). Fin qui
+#           la giornata sembra viva.
+#        3. AL TICK SUCCESSIVO r.594 entra (gPhase==PH_WAIT_OPEN),
+#           SelectMyPosition() e' vero perche' la posizione della notte
+#           c'e' ancora, e r.602 forza gPhase=PH_PLACED. Siamo ancora in
+#           piena notte: la seduta nuova (InpSessionHour=8 server) non e'
+#           nemmeno cominciata e il range NON e' stato costruito.
+#        4. da li' in poi la macchina a stati e' ferma per tutta la
+#           giornata: PH_BUILDING non si raggiunge mai, quindi il blocco
+#           r.691-745 (range + piazzamenti) non gira; la guardia A4 di
+#           r.628 e' saltata (vuole PH_WAIT_OPEN o PH_BUILDING); il case
+#           PH_PLACED (r.755-762) chiama MonitorReverse(), che con
+#           InpAllowReverse=false esce alla prima riga (r.890).
+#           GIORNATA A ZERO INGRESSI.
+#        5. e non serve che la posizione si chiuda in mattinata: da
+#           PH_PLACED NON si torna a PH_BUILDING dentro la stessa
+#           giornata. Anche una posizione stoppata alle 08:05 lascia la
+#           seduta spenta.
+#      >>> QUINDI n E' ATTESO IN DISCESA, non in salita (vedi ATTESA e
+#          S3). E' il fatto piu' importante del file, ed e' l'opposto di
+#          quello che c'era scritto ieri.
+#      >>> E QUI NON C'E' NEMMENO LA FINESTRA DI UN TICK del gemello
+#          R147b: il giorno dopo non viene piazzato NESSUN pendente,
+#          quindi due nostre posizioni insieme sono IMPOSSIBILI. La
+#          vecchia nota sul `PositionClose(_Symbol)` "che con due
+#          posizioni ne prende una" era una conseguenza del meccanismo
+#          letto al contrario, e sparisce con lui.
+#      >>> IL RISCHIO DELLA CELLA 0 RESTA REALE, ed e' il GAP: la
+#          posizione -- spesso una PERDENTE, per la selezione avversa
+#          del punto (b) -- attraversa la notte e il giorno dopo apre
+#          sul gap, dove uno stop puo' essere saltato e riempito
+#          peggio. E' rischio GIORNALIERO, e si legge su
+#          `Peggior Giornata %` (B0).
 #      >>> IN CAMPO QUESTO NON PUO' SUCCEDERE: il preset vivo ha
 #          InpCloseAtEnd = true. La cella 0 esiste solo nel tester.
 #
@@ -178,30 +240,54 @@
 #  CELLA 1 (viva): i numeri dell'ancora, identici. Non e' una
 #    previsione, e' un cancello (S1).
 #  CELLA 0 (nessun flat di fine seduta):
-#    - n (uscite): ATTESO IN SALITA o UGUALE, mai in discesa, e il
-#      meccanismo e' il (c) qui sopra: le posizioni portate avanti non
-#      impediscono l'ingresso del giorno dopo. Banda attesa: IS 175-205,
-#      OOS 270-315.
-#      >>> E' LA PREVISIONE PIU' FALSIFICABILE DEL FILE. Se n SCENDESSE,
-#          c'e' un meccanismo che non ho trovato nel codice, e il round
-#          si ferma per capire quale PRIMA di leggere il PF.
+#    - n (uscite): ATTESO IN DISCESA (al limite UGUALE), MAI IN SALITA,
+#      e il meccanismo e' il (c) qui sopra: ogni notte portata a spasso
+#      costa la SEDUTA DOPO, perche' la guardia anti-duplicato di
+#      r.594-602 forza gPhase=PH_PLACED prima ancora che il range della
+#      seduta nuova cominci a costruirsi. Nel caso limite in cui alle
+#      17:30 non ci sia MAI niente di aperto, le due celle sono
+#      IDENTICHE (asse inerte, B4).
+#      Banda attesa: IS 85-175, OOS 135-270 -- cioe' "fra la meta' e
+#      l'identico".
+#      >>> IL LIMITE BASSO E' UNA STIMA, e si legge cosi': la sedia fa
+#          al massimo UN ciclo al giorno (InpOneTradePerDay=true,
+#          InpAllowReverse=false), quindi una notte portata costa al
+#          massimo UNA seduta; se OGNI posizione sopravvivesse alle
+#          17:30 si perderebbe circa una seduta su due. Se le posizioni
+#          sopravvivono PIU' di una notte il conteggio puo' scendere
+#          ANCHE SOTTO. La banda NON e' un cancello: il cancello e' IL
+#          VERSO (S3).
+#      >>> E' LA PREVISIONE PIU' FALSIFICABILE DEL FILE. Se n SALISSE,
+#          vuol dire che la guardia di r.594-602 non fa quello che ho
+#          letto, e il round si ferma per capire perche' PRIMA di
+#          leggere il PF.
 #    - PEGGIOR GIORNATA %: ATTESA IN PEGGIORAMENTO. E' l'ipotesi del
 #      round, ed e' la cosa che puo' essere smentita: una posizione che
 #      attraversa la notte prende il gap d'apertura in pieno, e un gap
 #      sul DAX e' il modo classico di fabbricare una giornata brutta.
 #      Banda attesa: OOS fra -1,08% e -2,5%.
+#      >>> E il verso di n corretto NON indebolisce questa attesa, la
+#          RAFFORZA: per la selezione avversa del punto (b), a passare
+#          la notte sono soprattutto le posizioni IN PERDITA, cioe'
+#          proprio quelle che un gap contrario puo' peggiorare.
 #      >>> E la soglia B0 qui sotto e' su QUESTA colonna, non sul PF.
-#    - DD: atteso in salita. Banda OOS 7,2% - 12%.
-#    - PF: attesa 1,15 - 1,60 in OOS. NON prevedo il segno. Togliere il
-#      flat lascia correre i vincitori MA lascia correre anche i
-#      perdenti, e questa sedia e' LONG-ONLY su un indice che nella
-#      finestra sale: i due effetti tirano dalla stessa parte, e questo
-#      e' proprio il motivo per cui un PF piu' alto QUI non vorrebbe
-#      dire granche' (vedi il contro-esempio).
-#  IL RISULTATO CHE MI ASPETTO DI PIU': PF quasi fermo, peggior giornata
-#    peggiore, DD piu' alto. In quel caso la risposta e' "il default va
-#    bene, e il flat si paga in rischio risparmiato" -- ed e' un
-#    RISULTATO, non un fallimento.
+#    - DD: atteso in salita, ma con MENO sicurezza di quanta ne
+#      dichiarava la prima stesura, e la ragione e' il verso di n: due
+#      effetti tirano in senso OPPOSTO. Tira SU il DD il gap notturno
+#      preso dalle perdenti; tira GIU' il fatto che la cella 0 OPERA DI
+#      MENO. Banda attesa larga e dichiarata tale: OOS 5,0% - 12%.
+#    - PF: attesa 1,15 - 1,60 in OOS. NON prevedo il segno, e adesso c'e'
+#      una ragione IN PIU' per non leggerlo: col verso di n corretto il
+#      confronto NON E' APPAIATO. La cella 0 non aggiunge o toglie
+#      uscite alle STESSE sedute: toglie SEDUTE INTERE. Due PF calcolati
+#      su insiemi di giornate diversi non si sottraggono. Resta vero
+#      anche il motivo di prima: togliere il flat lascia correre i
+#      vincitori MA anche i perdenti, e questa sedia e' LONG-ONLY su un
+#      indice che nella finestra sale (vedi il contro-esempio).
+#  IL RISULTATO CHE MI ASPETTO DI PIU': n piu' basso, PF quasi fermo,
+#    peggior giornata peggiore. In quel caso la risposta e' "il default
+#    va bene, e il flat si paga in rischio risparmiato E in sedute
+#    operative" -- ed e' un RISULTATO, non un fallimento.
 #
 #  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
 #    >>> COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
@@ -219,12 +305,21 @@
 #        (iii) IL VERSO DEL RISCHIO. Se il PF sale e il DD sale, e' una
 #              LEVA: lo stesso effetto si compra con la taglia, ed e'
 #              una decisione di Claudio, non un'ottimizzazione.
+#        (iv)  IL CAMPIONE NON E' LO STESSO, ed e' la ragione trovata il
+#              14/09 con la classe 318: la cella 0 non gioca le stesse
+#              sedute della cella 1, ne gioca DI MENO (punto (c)). Un PF
+#              piu' alto su meno sedute puo' essere solo la somma di
+#              quali giornate sono saltate -- e quali saltano lo decide
+#              il caso, non una regola.
 #    >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO:
 #        1. concordanza IS/OOS obbligatoria, stesso segno;
 #        2. la PEGGIOR GIORNATA non deve peggiorare oltre B2;
 #        3. margine >= 0,10 di PF (B5), sotto e' rumore di campione;
 #        4. e anche cosi' il verdetto massimo e' "CANDIDATO", perche'
-#           manca la prova di regime (B6).
+#           manca la prova di regime (B6);
+#        5. e se n della cella 0 e' molto piu' basso (S3), il PF NON si
+#           confronta affatto: si dichiara che le due celle hanno girato
+#           su insiemi di sedute diversi, e si legge solo il rischio.
 #
 # ----------------------------------------------------------------------
 #  ###  CLASSE 308 -- IL PARAMETRO CHE STA ANCHE AL DENOMINATORE     ###
@@ -250,11 +345,16 @@
 #         pavimento di lavoro in tutte e due. Questo round non parla del
 #         cancello del costo e non va fatto parlare.
 #  308-3  DURATA E OCCUPAZIONE DEL POSTO: MORDE, ED E' L'OGGETTO DELLA
-#         MISURA. Ma qui l'occupazione NON riduce n: lo AUMENTA, perche'
-#         l'EA non guarda le posizioni aperte prima di riarmarsi (punto
-#         (c)). Direzione OPPOSTA alla forma classica della 308, e va
-#         detto: un lettore che applicasse a memoria "piu' tempo in
-#         mercato -> meno trade" leggerebbe il verso sbagliato.
+#         MISURA. L'occupazione RIDUCE n, ed e' la forma CLASSICA della
+#         308: una posizione ancora viva a mezzanotte manda la macchina
+#         a stati in PH_PLACED prima che la seduta nuova cominci (punto
+#         (c)), e quella seduta non produce nessun ingresso.
+#         >>> CORRETTO IL 14/09/2026 (classe 318): qui c'era scritto che
+#             l'occupazione AUMENTA n, "direzione opposta alla forma
+#             classica". Era la conseguenza del meccanismo letto al
+#             contrario. Il verso vero e' quello classico: un lettore
+#             che applicasse a memoria "piu' tempo in mercato -> meno
+#             trade" avrebbe avuto ragione LUI e torto il file.
 #  308-4  IL FATTORE USCITE/POSIZIONI, che su questa sedia NON e' 1 e
 #         NON e' lo stesso sulle due celle (classe 226). Sulla cella
 #         viva vale 270/193 = 1,3990 [MISURATO, contato sui per-trade
@@ -273,8 +373,26 @@
 #             ottimizzazione) della sola cella 0, che lascia
 #             sopravvivere l'export per-trade. Una passata. Si propone,
 #             non si fa qui.
-#  308-5  RISCHIO APERTO CONTEMPORANEO: [NON MISURATO] e non misurabile
-#         qui. Il CSV di questo EA porta UNDICI colonne (Pass, Profit,
+#         >>> E C'E' UN SECONDO MECCANISMO MONOTONO SULLA STESSA
+#             COLONNA, aggiunto il 14/09 col verso di n corretto: il
+#             fattore 1,3990 nasce dal parziale a 1R, e le posizioni che
+#             attraversano la notte sono per lo piu' quelle che a 1R non
+#             ci sono mai arrivate (selezione avversa, punto (b)).
+#             Quindi nella cella 0 il fattore uscite/posizioni e' atteso
+#             PIU' BASSO, e la colonna Trades scende sia perche' si
+#             gioca meno sedute sia perche' ogni posizione produce meno
+#             deal. La colonna da sola NON separa i due meccanismi, e
+#             questo e' un motivo in piu' per non leggerci dentro un
+#             verdetto di merito (B1).
+#  308-5  RISCHIO APERTO CONTEMPORANEO: NON E' IL MECCANISMO DI QUESTA
+#         CELLA. Due nostre posizioni insieme sono IMPOSSIBILI per
+#         costruzione (punto (c)): il giorno dopo una notte portata non
+#         viene piazzato nessun pendente. Quello che resta [NON
+#         MISURATO] e' la DURATA dell'esposizione notturna -- quante
+#         notti una posizione attraversa e con quale escursione -- e le
+#         SEDUTE SALTATE, di cui nel CSV si vede solo l'ombra (la
+#         differenza di n fra le due celle).
+#         Il CSV di questo EA porta UNDICI colonne (Pass, Profit,
 #         Expected Payoff, Profit Factor, Recovery Factor, Sharpe Ratio,
 #         Equity DD %, Trades, Peggior Giornata %, Perdite Consecutive
 #         Max, Serie Perdente Peggiore) -- verificato aprendo
@@ -299,10 +417,18 @@
 #      buco, non un risultato.
 #  S3  IL VERSO DI n. Si guarda la colonna Trades della cella 0 PRIMA
 #      del PF:
-#        n(cella 0) >= n(cella 1)  -> coerente con la lettura del codice;
-#        n(cella 0) <  n(cella 1)  -> c'e' un meccanismo che non ho
+#        n(cella 0) <= n(cella 1)  -> coerente con la lettura del codice
+#                                     (punto (c): la notte portata costa
+#                                     la seduta dopo);
+#        n(cella 0) >  n(cella 1)  -> c'e' un meccanismo che non ho
 #                                     capito. Il round si ferma per
 #                                     capirlo, e il PF non si commenta.
+#      >>> IL VERSO DI QUESTA SENTINELLA E' STATO INVERTITO IL
+#          14/09/2026 (classe 318). Prima diceva l'opposto, e col
+#          meccanismo vero avrebbe fermato il round nel caso NORMALE
+#          lasciando passare quello impossibile. Una sentinella tarata
+#          al contrario e' peggio di nessuna sentinella: da' un PASS
+#          dove serviva un fermo.
 #
 # ----------------------------------------------------------------------
 #  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
@@ -314,8 +440,17 @@
 # ----------------------------------------------------------------------
 #  B0  LA VARIABILE CHE DECIDE E' `Peggior Giornata %`, NON IL PF.
 #      Congelata adesso, ed e' il punto del round: questo asse non
-#      promette merito, promette RISCHIO GIORNALIERO -- ed e' l'unico
-#      round della fascia che puo' misurarlo davvero, perche' questo EA
+#      promette merito, promette RISCHIO GIORNALIERO. LA MOTIVAZIONE,
+#      riscritta il 14/09 insieme al verso di n (classe 318), e' oggi
+#      PIU' forte di prima: il rischio della cella 0 non e' avere due
+#      posizioni insieme (impossibile, 308-5) ma tenerne UNA aperta
+#      attraverso la notte, e per selezione avversa quella UNA e' di
+#      solito una PERDENTE (punto (b)), cioe' proprio il caso in cui un
+#      gap contrario fabbrica la giornata brutta. E il PF, che gia' non
+#      decideva, e' anche calcolato su un insieme di SEDUTE diverso
+#      fra le due celle: non e' un confronto appaiato.
+#      ED E' L'UNICO round della fascia che puo' misurare davvero il
+#      rischio giornaliero, perche' questo EA
 #      esporta quella colonna (l'ABTG_ORB_Ottimizzato e l'ABTG_EMA200
 #      no). Il referto DEVE portare `Peggior Giornata %` in tabella per
 #      tutte e quattro le passate, anche se il valore fosse noioso e
@@ -352,8 +487,10 @@
 #      casella 3 del certificato lo stesso, e la chiude per sempre.
 #      >>> E l'esito INERTE e' PLAUSIBILE, non remoto: se il trailing
 #          chiude quasi sempre prima delle 17:30 server, il flat non
-#          trova quasi mai niente da chiudere. In campo lo ha trovato
-#          UNA volta su 11. Questo e' il contro-esempio della soglia: un
+#          trova quasi mai niente da chiudere -- e allora non c'e'
+#          nessuna notte da attraversare, nessuna seduta persa e anche n
+#          resta IDENTICO. In campo il flat ha trovato qualcosa UNA
+#          volta su 11. Questo e' il contro-esempio della soglia: un
 #          cancello che non puo' NON scattare non e' un cancello.
 #  B5  BANDA DI RUMORE. Il rumore di MACCHINA su questa cella e' ZERO
 #      MISURATO (r137c ha riprodotto R47a su PF, DD e Trades). Resta il
@@ -403,12 +540,19 @@
 #  BUCHI DICHIARATI DI QUESTO ROUND
 #    - POSIZIONI della cella 0: [NON MISURATE] (308-4). Il fattore
 #      1,3990 vale per la cella VIVA e NON si trasporta.
-#    - POSIZIONI CONTEMPORANEE nella cella 0: [NON MISURATE] (308-5).
+#    - POSIZIONI CONTEMPORANEE nella cella 0: non sono un buco, sono
+#      IMPOSSIBILI per costruzione (308-5, punto (c)).
+#    - SEDUTE SALTATE nella cella 0 (la macchina a stati parte gia' in
+#      PH_PLACED): [NON MISURATE]. Nel CSV se ne vede solo l'ombra, cioe'
+#      la differenza di n fra le due celle.
+#    - NOTTI ATTRAVERSATE e DURATA MASSIMA di una posizione nella cella
+#      0: [NON MISURATE] (308-5).
 #    - QUOTA DI CHIUSURE 'expert' (flat di fine sessione) sulla cella
 #      viva NEL TESTER: [NON MISURATA]. In campo e' 1 su 11 (n=11 non
 #      dimostra niente). E' il numero che direbbe in anticipo se l'asse
-#      puo' mordere (B4). Via al numero: una corsa singola della cella 1
-#      con l'export per-trade vivo. Una passata.
+#      puo' mordere (B4) e QUANTO scende n nella cella 0 (una notte
+#      portata = una seduta persa). Via al numero: una corsa singola
+#      della cella 1 con l'export per-trade vivo. Una passata.
 #    - PROVA DI REGIME: assente, e non ottenibile su questo storico.
 #    - LATO SHORT: non c'e', e non e' una dimenticanza. La sedia viva e'
 #      LONG-ONLY (InpAllowShort=false nel preset). La regola dei due
@@ -537,7 +681,11 @@ InpVerbose=true
 # --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
 #     0 = nessun flat di fine seduta: la posizione resta aperta oltre le
 #         17:30 server e puo' attraversare la notte e il gap del giorno
-#         dopo (i PENDENTI vengono cancellati lo stesso, r.2101)
+#         dopo (i PENDENTI vengono cancellati lo stesso, r.2101). E la
+#         seduta DOPO non produce nessun ingresso: la guardia
+#         anti-duplicato (r.594-602) manda la macchina a stati in
+#         PH_PLACED prima che il range si costruisca -- punto (c), ed e'
+#         il motivo per cui n e' atteso IN DISCESA.
 #     1 = la cella VIVA della sedia 770101.
 #     Bool: si scrive in 0/1, non in true/false, perche' l'asse deve
 #     essere numerico (controllo 4 di controlla_prova.py).
