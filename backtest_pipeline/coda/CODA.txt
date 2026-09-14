@@ -1394,3 +1394,37 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Peggior Giornata % come discriminante).
 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
+#  >>> R148a -- IL CYCLE DI EMILIANO, PRIMO GIRO. EA nuovo (ABTG_Cycle,
+#  magic 775701 vergine), motore mai girato. La formula (media pesata di
+#  4 stocastici meno la sua SMA9) era gia' in casa dall'11/08
+#  (prove/alta_velocita_ciclo.pine) e la sua traduzione MQL5 da
+#  ABTG_AltaVelocita.mq5 (CycleSeries r.535) -- copiata, non riscritta.
+#  Ipotesi dichiarata PRIMA dei numeri: cycle e' un passa-alto su I,
+#  quindi la VELOCITA' dentro il range, non la posizione -- si entra
+#  sull'incrocio dello zero a barra chiusa, si esce sull'incrocio
+#  opposto (zero parametri liberi, e' la lettura scritta dall'autore
+#  della formula). Cancello di costo verificato coi dati di spread gia'
+#  misurati: M1/M5 ESCLUSI PER COSTO su NASUSD/U30USD/D30EUR/XAUUSD (M1
+#  non arriva nemmeno al pavimento duro 13,3x), M30 primo TF che passa
+#  con margine su tutti e quattro -- coerente con la banda gia'
+#  congelata. Asse unico InpVerso (2 celle: con l'incrocio / contro),
+#  con dentro il proprio controllo sperimentale (sentinella S1: Incroci
+#  Visti deve essere identico nelle due celle).
+#  >>> SECONDO GIUDIZIO: PASS dopo 3 correzioni (tutte sul file prova,
+#  MAI sul motore -- il codice del ciclo e' risultato esatto, verificato
+#  numericamente contro il Pine originale, diff 7e-15). Classe 282
+#  (profondita' tick giustificata citando una sonda di BARRE, non tick
+#  -- sostituita con la sonda vera). Classe 321 NUOVA (il compounding
+#  del lotto-da-saldo spingeva "E in R" verso l'ipotesi su migliaia di
+#  operazioni -- sostituita con una formula esatta, ln(1+Profit/
+#  Deposito)/(0,0065*Trades)). Autotest: banda "numeri piccoli" era
+#  falsa, corretta con la banda misurata e il vero falsificatore (il
+#  segno).
+#  >>> BUCHI DICHIARATI: l'EA non e' mai stato compilato (nessun
+#  MetaEditor disponibile in sessione) -- il primo esito possibile e' un
+#  errore di compilazione. Un solo regime (21 mesi, Nasdaq al rialzo):
+#  niente di promuovibile da questo round da solo. Oro rinviato (mancano
+#  spread orario e profondita' tick XAUUSD), non escluso.
+#  Pin: giro di pin 9c2e09e (28mo, 96d91bd -> e373c0b). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato col path corretto).
+9c2e09ed2175faa09752b5347fba8fe3f706fef1 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
