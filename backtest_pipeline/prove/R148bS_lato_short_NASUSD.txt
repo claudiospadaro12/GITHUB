@@ -273,11 +273,31 @@
 #         migliore che il round possa dare.
 #
 #  ### E ADESSO L'ATTESA VERA, IN QUATTRO RIGHE ###
-#   A1. E_beta > 0, E GRANDE. La finestra e' un toro dichiarato (R148a
-#       punto 7; SONDA_OROLOGIO_11 "UN SOLO REGIME, toro pieno"). Se
-#       E_beta uscisse <= 0, non e' il motore a essere strano: e' il BANCO
-#       o la decomposizione. E' il PRIMO numero da guardare, ed e'
-#       un'attesa falsificabile sul banco, non sul segnale.
+#   A1. E_beta > 0, E GRANDE. E' il PRIMO numero da guardare, ed e'
+#       un'attesa falsificabile sul BANCO, non sul segnale.
+#       >>> MA VA DETTO SU CHE COSA SI APPOGGIA "LA FINESTRA E' UN TORO",
+#           perche' NON e' una misura su NASUSD (corretto il 14/09/2026
+#           dal controllo preventivo, prima di armare):
+#           - R148a punto 7 dice "21 mesi di tick BCM SUGLI INDICI sono
+#             UN SOLO regime, rialzista": e' un'AFFERMAZIONE, non un
+#             numero misurato;
+#           - SONDA_OROLOGIO_11 ("UN SOLO REGIME, toro pieno") e' un file
+#             su D30EUR, NON su NASUSD. Di quel file qui si prende SOLO
+#             il 459 (giorni feriali), che e' una proprieta' del
+#             CALENDARIO e vale per qualunque simbolo. IL REGIME NO:
+#             quello e' un fatto sul DAX, e trasferirlo al Nasdaq
+#             sarebbe confermare se stessi (classe del 10/09).
+#       >>> QUINDI il toro su NASUSD in QUESTA finestra e' [NON MISURATO]
+#           in casa. Se E_beta uscisse <= 0 NON si conclude "e' il banco":
+#           si chiude il buco, e la via e' gia' scritta al punto (3) del
+#           contro-esempio (prezzo iniziale e finale di NASUSD dal
+#           grafico del terminale di backtest, diviso lo stop medio).
+#           E' un conto da due minuti e si fa PRIMA di leggere il round,
+#           non dopo aver visto un numero che non piace.
+#       >>> E su QUESTO file la correzione morde il doppio: la cella
+#           SHORT-ONLY e' quella che il toro PENALIZZA. Se il toro non
+#           fosse tale, il suo numero brutto atteso non sarebbe piu'
+#           atteso, e (C) smetterebbe di essere una sorpresa.
 #   A2. Di conseguenza il lato LONG (il gemello) sopra il lato SHORT
 #       (questo file). Se uscisse il contrario -> esito (C) qui sotto, e
 #       prima di esultare si guarda l'asimmetria di volatilita'.

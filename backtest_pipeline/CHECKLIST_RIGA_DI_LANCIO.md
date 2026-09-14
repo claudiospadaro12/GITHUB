@@ -18437,3 +18437,124 @@ fisso, ma **va scritto che e' un'approssimazione e in che verso sbaglia**.
 *Una soglia espressa in R si legge con l'R **che la corsa ha davvero
 rischiato**: se il lotto segue il saldo, il divisore non e' un numero, e'
 una curva.*
+
+---
+
+## 322. 🕰️🧟 «E' GIA' GIRATO STANOTTE» DETTO DI UN ROUND ARMATO **DOPO** CHE IL RUNNER ERA PARTITO: il referto che si cita non lo contiene (14/09/2026)
+
+**Caso reale.** Il controllo preventivo riceve, come **contesto dato per
+acquisito**, questa frase su `R148a` (motore nuovo `ABTG_Cycle`):
+
+> *"e' GIA' armato ed e' GIA' girato stanotte (referto
+> `REFERTO_RUNNER_20260914_033004.txt`, riga con `-Etichetta r148a`: uscita 0,
+> nessun rilievo — quindi l'EA COMPILA, e' un fatto misurato adesso, non piu'
+> un'incognita)."*
+
+🔴 **Falso, e si smonta con due comandi.**
+
+```text
+grep -c "148" backtest_pipeline/coda/referti/REFERTO_RUNNER_20260914_033004.txt   -> 0
+git log --format="%H %ad %s" --date=iso -S "R148a_cycle_verso_NASUSD.txt" -- backtest_pipeline/coda/CODA.txt
+  a6b138f  2026-09-14 07:05:03  CODA: r148a ARMATA
+referto: 2026-09-14 03:30:04
+```
+
+👉 **La riga e' stata armata alle 07:05. Il runner era partito alle 03:30.**
+`r148a` non compare in **nessun** referto, di **nessuna** notte. L'EA
+`ABTG_Cycle` **non e' mai stato compilato**, e il primo esito possibile resta
+un **errore di compilazione**.
+
+### 🩸 QUANTO COSTAVA CREDERCI
+Sui due file prova gemelli in esame (`R148bL`/`R148bS`) poggiavano **tre** cose:
+1. la sentinella **S5** ("la cella (1,1) riproduce R148a alla cifra") si dichiara
+   **SOSPESA finche' R148a non ha girato**: con la premessa falsa sarebbe stata
+   letta come **attiva**, cioe' si sarebbe cercato un confronto con un CSV
+   inesistente;
+2. il punto **(10)** del contro-esempio ("l'EA non e' mai stato compilato") e'
+   **ancora vero**: "correggerlo" perche' sembrava superato avrebbe **cancellato
+   un avviso giusto**;
+3. la riga *"QUESTO FILE NON PARTE PRIMA DI R148a"* sembrava gia' soddisfatta,
+   mentre e' ancora un **vincolo di ordinamento vivo** dentro `CODA.txt`.
+
+### 🔎 COME SI RICONOSCE IN TRENTA SECONDI
+Prima di scrivere che un round **ha girato**, si aprono **due orologi** e si
+confrontano fra loro:
+
+| cosa | dove si legge |
+|---|---|
+| ora di **PARTENZA del runner** | il nome del referto: `REFERTO_RUNNER_<AAAAMMGG>_<HHMMSS>.txt` |
+| ora di **ARMAMENTO della riga** | `git log --date=iso -S "<nome file prova>" -- backtest_pipeline/coda/CODA.txt` |
+
+👉 Se l'armamento e' **posteriore**, la riga **non puo'** essere in quel referto,
+qualunque cosa dica la memoria di chi lo racconta. E la prova positiva e' una
+sola: **l'etichetta si trova dentro il referto con `grep`**. Un `uscita 0` letto
+accanto a un'ALTRA riga non dice niente della tua.
+
+### 🔑 La regola in una riga
+*«Ha girato» non e' un ricordo ne' una deduzione dall'ora: e' una **stringa
+dentro un referto**. Se `grep` non la trova, non ha girato — e un EA mai
+compilato resta un EA mai compilato, anche se la notte e' passata.*
+
+---
+
+## 323. 🐂🔀 IL **REGIME** PRESO IN PRESTITO DA UN ALTRO SIMBOLO: dello stesso file il CALENDARIO si trasferisce, il MERCATO no (14/09/2026)
+
+**Caso reale.** `R148bL`/`R148bS` (NASUSD M30, finestra 2024.09.26-2026.06.30)
+dichiaravano l'attesa **A1** cosi':
+
+```text
+A1. E_beta > 0, E GRANDE. La finestra e' un toro dichiarato (R148a punto 7;
+    SONDA_OROLOGIO_11 "UN SOLO REGIME, toro pieno"). Se E_beta uscisse <= 0,
+    non e' il motore a essere strano: e' il BANCO o la decomposizione.
+```
+
+🔴 **Le due fonti citate non misurano NASUSD.**
+- `R148a` punto 7 dice *"21 mesi di tick BCM **sugli indici** sono un solo
+  regime, rialzista"*: e' un'**affermazione**, senza un numero accanto;
+- `backtest_pipeline/prove/SONDA_OROLOGIO_11_D30EUR_LONG.txt` e' un file su
+  **`@SIMBOLO D30EUR`** — il **DAX**. La frase *"UN SOLO REGIME (toro pieno)"*
+  sta li' dentro, ed e' un fatto **sul DAX**.
+
+### ⚖️ E LA DISTINZIONE CHE SALVA LA CITAZIONE A META'
+Dallo **stesso file** il round prendeva **due** numeri, e **uno dei due e'
+legittimo**:
+
+| numero preso | e' una proprieta' di… | si trasferisce a NASUSD? |
+|---|---|---|
+| **459 giorni feriali** nella finestra | del **CALENDARIO** (stesso `@DAQUANDO`/`@FINOA`) | ✅ **SI**, vale per qualunque simbolo |
+| **"toro pieno, un solo regime"** | del **MERCATO** di quel simbolo | ❌ **NO**, e' il DAX |
+
+👉 Che due fonti stiano nello stesso file **non le rende dello stesso tipo**.
+
+### 🩸 PERCHE' NON E' PEDANTERIA: il verso dell'errore
+A1 concludeva *"se `E_beta <= 0`, **e' il banco**"*. Cioe': l'unico esito che
+avrebbe **falsificato la premessa non misurata** veniva **preassegnato a un
+guasto del banco**. E' la classe del 10/09 (**contro-esempio prima della
+consegna**) in forma pulita: si era controllato che la risposta fosse
+**coerente con l'attesa**, non si era provato a **romperla**.
+
+### ✅ LA CORREZIONE, E COSTA DUE MINUTI DI GRAFICO
+Il buco si dichiara **e si chiude**, perche' la via era gia' scritta nello
+stesso file (contro-esempio punto (3)):
+
+```text
+M_atteso ~ (prezzo finale - prezzo iniziale) / stop medio
+           stop medio = 2,0 x ATR(M30) = 90,6 - 116 punti indice
+```
+
+I due prezzi si leggono sul grafico NASUSD del terminale di **backtest**
+(`C:\MT5_Backtest`, demo **50504400**). Fatto **prima** del round, `E_beta`
+diventa un'attesa falsificabile per davvero.
+
+### 🔎 COME SI RICONOSCE IN TRENTA SECONDI
+Per ogni misura citata a sostegno di un'attesa:
+1. **apri il file citato** e leggi il suo `@SIMBOLO`, il suo `@PERIODO` e la sua
+   finestra — non fidarti del nome del file;
+2. chiediti se la quantita' presa e' del **calendario/banco** (trasferibile) o
+   del **mercato di quel simbolo** (non trasferibile);
+3. se non e' trasferibile, l'attesa si marca **`[NON MISURATO su <SIMBOLO>]`** e
+   si scrive **la via piu' corta al numero**, non si toglie l'attesa.
+
+### 🔑 La regola in una riga
+*Una finestra si presta fra simboli, un **regime** no: il calendario e' della
+Terra, il toro e' di chi sale.*
