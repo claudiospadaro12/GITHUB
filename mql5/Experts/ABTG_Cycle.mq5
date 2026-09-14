@@ -131,6 +131,30 @@
 //|        media 1 barra su 3, contro 1 incrocio ogni 5,6-8,8 barre    |
 //|        misurato in R148a). Vedi il contro-esempio nel file prova. |
 //|                                                                  |
+//|  TERZO PEZZO -- USCITA A TEMPO (N barre, NO trailing), AGGIUNTA   |
+//|  DOPO IL DATO OPERATIVO DI CLAUDIO (14/09/2026)                   |
+//|    Claudio ha riportato che nel SUO trading MANUALE su M1, con    |
+//|    questo stesso pattern (minimo locale), NON ha mai usato un     |
+//|    trailing stop: le operazioni duravano 5-10 minuti (= 5-10      |
+//|    barre M1) e le chiudeva A MANO quando il movimento si          |
+//|    esauriva. >>> NON E' UN'IPOTESI NOSTRA: e' un dato di partenza |
+//|    da RIPRODURRE e misurare, non da inventare. Un timer fisso di  |
+//|    N barre e' la traduzione automatica piu' onesta di "chiudo     |
+//|    quando il movimento finisce", ed E' A ZERO PARAMETRI LIBERI    |
+//|    SE N si dichiara PRIMA e si prende dal dato riportato (5 e 10), |
+//|    non se si tara a posteriori sul risultato.                    |
+//|    InpEsciDopoNBarre (0 = spento, comportamento IDENTICO a prima  |
+//|    di questa aggiunta) chiude la posizione alla barra chiusa in   |
+//|    cui sono passate ALMENO N barre dall'apertura, indipendente-   |
+//|    mente da InpEsciSuCrossOpposto/SL/TP (blocco INDIPENDENTE,     |
+//|    stessa disciplina di parziale/breakeven: lezione 07/08).       |
+//|    >>> E' UN CANDIDATO D'USCITA, NON L'UNICO: incrocio/estremo    |
+//|        opposto (gia' in InpEsciSuCrossOpposto, e per MODO_        |
+//|        MINIMO_LOCALE e' automaticamente "l'estremo simmetrico")   |
+//|        resta misurabile in parallelo per confronto. La MATRICE    |
+//|        completa dei candidati d'uscita e degli altri assi sta nel |
+//|        file prova, sezione "LA MATRICE COMPLETA DEGLI ASSI".      |
+//|                                                                  |
 //|  DECIDE SOLO A BARRA CHIUSA. Il ciclo si legge agli indici [1] e |
 //|  [2] (le due ultime barre CHIUSE): la barra [0], in formazione,  |
 //|  non entra in nessun calcolo. Niente ridipintura, per            |
@@ -254,7 +278,12 @@ input bool   InpAllowLong  = true;  // Abilita il lato LONG  (regola dei due lat
 input bool   InpAllowShort = true;  // Abilita il lato SHORT (regola dei due lati, 25/08)
 
 input group "=== USCITA ==="
-input bool   InpEsciSuCrossOpposto = true; // true = si esce all'incrocio opposto (l'uscita dell'indicatore). false = solo SL/TP
+input bool   InpEsciSuCrossOpposto = true; // true = si esce al segnale opposto (incrocio o estremo, secondo InpModoIngresso). false = solo SL/TP
+//--- USCITA A TEMPO, aggiunta 14/09/2026: dato OPERATIVO di Claudio (trading
+//    manuale su M1 con questo pattern, 5-10 minuti a mano, MAI trailing).
+//    0 = SPENTA (comportamento identico a prima). BLOCCO INDIPENDENTE dal
+//    resto dell'uscita (stessa disciplina di parziale/breakeven).
+input int    InpEsciDopoNBarre = 0; // Chiude dopo N barre dall'apertura, NESSUN trailing. 0=spento. Dato riportato: 5-10 su M1
 
 input group "=== STOP E TARGET ==="
 //  Il motore NON ha uno stop strutturale: un oscillatore non ha livelli.
@@ -313,6 +342,12 @@ ulong    gPosTicket    = 0;
 double   gPosR         = 0.0;
 bool     gPosParzFatta = false;
 
+//--- USCITA A TEMPO (14/09): ticket e barre trascorse, tracciati a parte
+//    da gPosTicket/gPosR (che servono solo a parziale/breakeven) per non
+//    accoppiare due blocchi che devono restare indipendenti.
+ulong    gPosTicketT   = 0;
+int      gPosBarreT    = 0;
+
 //--- METRICHE DA PROP. L'Equity DD dice se il conto sopravvive; una prop
 //    invece ti chiude per il LIMITE GIORNALIERO, che e' un'altra cosa.
 double gDayStartEquity = 0.0;
@@ -330,7 +365,8 @@ long gCntLottoTagliato = 0;   // volte in cui la quantizzazione ha tagliato il l
 long gCntSpreadGate    = 0;   // rifiuti del cancello di spread (R55)
 long gCntGuardian      = 0;   // rifiuti del Guardian
 long gCntIngressi      = 0;   // ingressi andati a buon fine
-long gCntUscitaCross   = 0;   // chiusure fatte DA ME sull'incrocio opposto
+long gCntUscitaCross   = 0;   // chiusure fatte DA ME sul segnale opposto (incrocio o estremo)
+long gCntUscitaTempo   = 0;   // chiusure fatte DA ME dall'uscita a tempo (InpEsciDopoNBarre)
 long gBarreTenute      = 0;   // barre chiuse passate con una posizione aperta
 long gMaxIngressiGiorno = 0;  // il massimo di ingressi visto in una giornata
 
@@ -620,8 +656,10 @@ int OnInit()
      { Print("ERRORE: InpFridayCloseHour deve stare fra 0 e 23."); return(INIT_FAILED); }
    if(InpRiskPercent<=0)
      { Print("ERRORE: InpRiskPercent deve essere > 0."); return(INIT_FAILED); }
-   if(!InpEsciSuCrossOpposto && InpTP_RR<=0)
-     Print("[CYCLE] ATTENZIONE: uscita sull'incrocio SPENTA e nessun TP: l'unica uscita e' lo STOP. E' una configurazione lecita ma va voluta.");
+   if(InpEsciDopoNBarre<0)
+     { Print("ERRORE: InpEsciDopoNBarre non puo' essere negativo (0 = spenta)."); return(INIT_FAILED); }
+   if(!InpEsciSuCrossOpposto && InpTP_RR<=0 && InpEsciDopoNBarre<=0)
+     Print("[CYCLE] ATTENZIONE: uscita sul segnale SPENTA, nessun TP e nessuna uscita a tempo: l'unica uscita e' lo STOP. E' una configurazione lecita ma va voluta.");
 
    hAtr = iATR(_Symbol, gTF, InpAtrPeriod);
    if(hAtr==INVALID_HANDLE)
@@ -636,10 +674,10 @@ int OnInit()
 
    if(InpAutoTest) AutoTestCycle();
 
-   Log(StringFormat("avviato su %s %s. Modo %s, Stoch %d/%d %d/%d %d/%d %d/%d, MM %d, verso %d, uscita su segnale opposto %s, SL %.2f x ATR(%d) + pavimento %.0f pti MT5, TP %.2f R, spread <= %.2f%% dello stop, rischio %.2f%%, cap %d/giorno, magic %I64d.",
+   Log(StringFormat("avviato su %s %s. Modo %s, Stoch %d/%d %d/%d %d/%d %d/%d, MM %d, verso %d, uscita su segnale opposto %s, uscita a tempo %d barre, SL %.2f x ATR(%d) + pavimento %.0f pti MT5, TP %.2f R, spread <= %.2f%% dello stop, rischio %.2f%%, cap %d/giorno, magic %I64d.",
        _Symbol, EnumToString((ENUM_TIMEFRAMES)Period()), EnumToString(InpModoIngresso),
        InpK1Len,InpK1Smo, InpK2Len,InpK2Smo, InpK3Len,InpK3Smo, InpK4Len,InpK4Smo,
-       InpMmLen, InpVerso, (InpEsciSuCrossOpposto?"SI":"NO"),
+       InpMmLen, InpVerso, (InpEsciSuCrossOpposto?"SI":"NO"), InpEsciDopoNBarre,
        InpKStop, InpAtrPeriod, InpMinSLPts, InpTP_RR,
        InpMaxSpreadPctOfStop, InpRiskPercent, InpMaxTradesPerDay, InpMagic));
    return(INIT_SUCCEEDED);
@@ -652,8 +690,8 @@ void OnDeinit(const int reason)
    //--- il riepilogo dei contatori: nel test SINGOLO si legge qui, in
    //    ottimizzazione si legge nelle colonne dell'OptFrame.
    double barreMedie = (gCntIngressi>0) ? (double)gBarreTenute/(double)gCntIngressi : 0.0;
-   PrintFormat("[CYCLE][CONTATORI] incroci %I64d | ingressi %I64d | uscite su incrocio %I64d | barre tenute %I64d (media %.2f per ingresso) | max ingressi in un giorno %I64d | pavimento SL morso %I64d | lotto ALZATO (228) %I64d | lotto tagliato oltre 5%% %I64d | spread gate %I64d | guardian %I64d",
-               gCntIncroci, gCntIngressi, gCntUscitaCross, gBarreTenute, barreMedie,
+   PrintFormat("[CYCLE][CONTATORI] incroci %I64d | ingressi %I64d | uscite su segnale opposto %I64d | uscite A TEMPO %I64d | barre tenute %I64d (media %.2f per ingresso) | max ingressi in un giorno %I64d | pavimento SL morso %I64d | lotto ALZATO (228) %I64d | lotto tagliato oltre 5%% %I64d | spread gate %I64d | guardian %I64d",
+               gCntIncroci, gCntIngressi, gCntUscitaCross, gCntUscitaTempo, gBarreTenute, barreMedie,
                gMaxIngressiGiorno, gCntPavimentoSL, gCntLottoAlzato,
                gCntLottoTagliato, gCntSpreadGate, gCntGuardian);
   }
@@ -711,6 +749,13 @@ bool IsNewBar()
 //+------------------------------------------------------------------+
 void OnNewBar()
   {
+   //--- USCITA A TEMPO (14/09): gira PRIMA di tutto il resto e
+   //    INDIPENDENTEMENTE dal segnale di questa barra, perche' e' un
+   //    orologio sulla posizione, non una lettura del ciclo. Con
+   //    InpEsciDopoNBarre=0 (default) la funzione esce subito e non
+   //    cambia niente rispetto a prima di questa aggiunta.
+   GestisciUscitaATempo();
+
    //--- il MODO decide quante barre di ciclo servono: l'incrocio guarda
    //    2 barre chiuse, il minimo/massimo locale ne guarda 3. Con
    //    InpModoIngresso al suo DEFAULT (0) questo resta need=2, IDENTICO
@@ -1097,6 +1142,68 @@ int CountPositions()
    return(n);
   }
 
+//+------------------------------------------------------------------+
+//| Il ticket della NOSTRA posizione su questo simbolo/magic, o 0.    |
+//| Un solo slot per costruzione (CountPositions>0 blocca l'ingresso),|
+//| quindi il primo trovato e' quello giusto.                         |
+//+------------------------------------------------------------------+
+ulong TicketPosizioneAperta()
+  {
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(tk);
+     }
+   return(0);
+  }
+
+//+------------------------------------------------------------------+
+//| USCITA A TEMPO -- aggiunta 14/09/2026, dato OPERATIVO di Claudio  |
+//| (trading manuale su M1 con questo pattern: 5-10 minuti, MAI       |
+//| trailing). Chiude la posizione alla prima barra CHIUSA in cui     |
+//| sono passate ALMENO InpEsciDopoNBarre barre dall'apertura.        |
+//| BLOCCO INDIPENDENTE da InpEsciSuCrossOpposto/SL/TP (stessa         |
+//| disciplina di parziale/breakeven, lezione 07/08).                  |
+//| InpEsciDopoNBarre<=0 -> esce subito, NON FA NIENTE: e' lo stato    |
+//| di prima di questa aggiunta.                                       |
+//| Traccia il ticket A PARTE da gPosTicket (quello di ManageAll): i   |
+//| due blocchi non devono accoppiarsi, ognuno adotta la posizione a   |
+//| modo suo. Conta le barre a partire da QUANDO QUESTA FUNZIONE la    |
+//| vede la prima volta (non da OnInit): se l'EA riparte a meta' di    |
+//| una posizione gia' aperta, il conteggio riparte da zero -- e'      |
+//| dichiarato, non e' un bug: nel tester la posizione nasce sempre    |
+//| dentro la stessa run.                                              |
+//+------------------------------------------------------------------+
+void GestisciUscitaATempo()
+  {
+   if(InpEsciDopoNBarre<=0) return;
+
+   ulong tk = TicketPosizioneAperta();
+   if(tk==0){ gPosTicketT=0; gPosBarreT=0; return; }
+
+   if(tk!=gPosTicketT)
+     {
+      gPosTicketT = tk;
+      gPosBarreT  = 0;                      // barra di apertura: 0 barre CHIUSE ancora passate
+      return;
+     }
+
+   gPosBarreT++;
+   if(gPosBarreT < InpEsciDopoNBarre) return;
+
+   if(gTrade.PositionClose(tk))
+     {
+      gCntUscitaTempo++;
+      Log(StringFormat("uscita A TEMPO: chiusa la posizione %I64u dopo %d barre (soglia %d), NESSUN trailing.",
+          tk, gPosBarreT, InpEsciDopoNBarre));
+      gPosTicketT = 0; gPosBarreT = 0;
+     }
+   else
+      Log(StringFormat("uscita A TEMPO: chiusura FALLITA su %I64u dopo %d barre: %s (retcode %d). Riprovo alla prossima barra.",
+          tk, gPosBarreT, gTrade.ResultRetcodeDescription(), (int)gTrade.ResultRetcode()));
+  }
+
 //==================================================================
 //  AUTOTEST -- stampa in OnInit, quindi lo si legge SOLO ESEGUENDO
 //  (test singolo nello Strategy Tester): F7 compila e basta, non
@@ -1250,8 +1357,9 @@ void AutoTestCycle()
 //  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv.                  //
 //  In live/backtest singolo e' inerte (gira solo in ottimizzazione).//
 //                                                                   //
-//  QUI LE COLONNE SONO 20: le dieci in piu' sono i CONTATORI        //
-//  DIAGNOSTICI, e su un motore nuovo dicono piu' del PF.            //
+//  QUI LE COLONNE SONO 21 (20 + 1 aggiunta 14/09): le undici in piu'  //
+//  rispetto alle nove base sono i CONTATORI DIAGNOSTICI, e su un      //
+//  motore nuovo dicono piu' del PF.                                   //
 //    stats[10] Pavimento SL Morso   -> lo stop misurava il pavimento?//
 //    stats[11] Lotto Alzato 228     -> rischio VERO sopra il detto  //
 //    stats[12] Lotto Tagliato 5pct  -> rischio VERO sotto il detto  //
@@ -1262,6 +1370,8 @@ void AutoTestCycle()
 //    stats[17] Barre Tenute         -> / Ingressi = durata media     //
 //    stats[18] Max Ingressi Giorno  -> a quanto tarare il tetto C6   //
 //    stats[19] Ingressi             -> Incroci - Ingressi = i persi  //
+//    stats[20] Uscite A Tempo       -> chiusure di InpEsciDopoNBarre //
+//                                       (14/09, dato operativo Claudio)//
 //  HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto. //
 //==================================================================//
 #define OPTFRAME_NAME "OptFrame"
@@ -1308,7 +1418,7 @@ void ExportTrades()
 double OnTester()
   {
    ExportTrades();
-   double stats[20];
+   double stats[21];
    stats[0] = TesterStatistics(STAT_PROFIT);
    stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
    stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
@@ -1331,6 +1441,7 @@ double OnTester()
    stats[17] = (double)gBarreTenute;
    stats[18] = (double)gMaxIngressiGiorno;
    stats[19] = (double)gCntIngressi;
+   stats[20] = (double)gCntUscitaTempo;
    double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
    FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
    return(criterion);
@@ -1354,7 +1465,7 @@ void OnTesterDeinit()
       if(!header_scritto)
         {
          //--- HEADER E RIGA SI TOCCANO INSIEME, o le colonne scalano di posto.
-         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Pavimento SL Morso,Lotto Alzato 228,Lotto Tagliato 5pct,Spread Gate Rifiuti,Incroci Visti,Guardian Rifiuti,Uscite Su Incrocio,Barre Tenute,Max Ingressi Giorno,Ingressi";
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades,Peggior Giornata %,Perdite Consecutive Max,Serie Perdente Peggiore,Pavimento SL Morso,Lotto Alzato 228,Lotto Tagliato 5pct,Spread Gate Rifiuti,Incroci Visti,Guardian Rifiuti,Uscite Su Incrocio,Barre Tenute,Max Ingressi Giorno,Ingressi,Uscite A Tempo";
          for(uint i = 0; i < pcount; i++)
            { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
          FileWrite(h, head); header_scritto = true;
@@ -1362,7 +1473,7 @@ void OnTesterDeinit()
       //--- la guardia su ArraySize non e' cosmetica: -1 dice "questa passata
       //    NON ha prodotto il contatore" ed e' diverso da 0, che dice "il
       //    contatore ha girato e non ha contato niente".
-      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f,%.4f,%.0f,%.2f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f,%.0f",
                                 (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6],
                                 (ArraySize(data)> 7?data[ 7]: 0.0), (ArraySize(data)> 8?data[ 8]: 0.0),
                                 (ArraySize(data)> 9?data[ 9]: 0.0), (ArraySize(data)>10?data[10]:-1.0),
@@ -1370,7 +1481,7 @@ void OnTesterDeinit()
                                 (ArraySize(data)>13?data[13]:-1.0), (ArraySize(data)>14?data[14]:-1.0),
                                 (ArraySize(data)>15?data[15]:-1.0), (ArraySize(data)>16?data[16]:-1.0),
                                 (ArraySize(data)>17?data[17]:-1.0), (ArraySize(data)>18?data[18]:-1.0),
-                                (ArraySize(data)>19?data[19]:-1.0));
+                                (ArraySize(data)>19?data[19]:-1.0), (ArraySize(data)>20?data[20]:-1.0));
       for(uint i = 0; i < pcount; i++)
         { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
       FileWrite(h, row); righe++;
