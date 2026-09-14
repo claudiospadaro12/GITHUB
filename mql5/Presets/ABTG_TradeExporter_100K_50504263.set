@@ -1,0 +1,179 @@
+; ==========================================================================
+; ABTG_TradeExporter -- CONTO DELLA CHALLENGE, DEMO 100k 50504263
+; Cartella programma: "C:\Program Files\BCM Markets MT5 Terminal -V3"
+; Profilo ATTIVO: "SQUADRA 100K" . grafico: EURUSD H1 . chart05.chr
+; NON il piccolo 50503392 (cartella SENZA -V3). NON il reale 10105439
+; (C:\BCM_Reale). NON il banco di backtest 50504400 (C:\MT5_Backtest).
+; Scritto il 14/09/2026. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; CHE COS'E' QUESTO FILE, in una riga:
+;   E' la FOTOGRAFIA dei 4 input che GIRANO OGGI su quel grafico. Nessun
+;   valore e' stato scelto da me: sono tutti COPIATI da una foto del .chr
+;   vivo, e ognuno ha DUE fonti indipendenti che concordano (par. 2).
+;
+; PERCHE' ESISTE (era l'ultimo buco di A2):
+;   report/A2_I_PRESET_DEL_CONTO_CHALLENGE_2026-09-13.md, tabella del par. 1,
+;   marca questa riga "utilita' senza magic: non serve". Ha ragione sul
+;   RISCHIO -- questo EA non fa trading -- ma non sulla CONTABILITA':
+;   l'unico input che conta qui, InpFile, e' gia' dichiarato CRITICO
+;   dall'intestazione del preset gemello del reale
+;   (mql5/Presets/ABTG_TradeExporter_REALE.set, righe 14-18):
+;     "Common\Files e' UNA SOLA cartella condivisa da tutti i terminali MT5
+;      dello stesso utente Windows. Tre terminali con lo stesso InpFile =
+;      i tre conti si sovrascrivono a vicenda e la pagella legge un
+;      miscuglio."
+;   Il conto REALE ha il suo preset dall'08/09. Il conto della CHALLENGE no:
+;   un click su "Ripristina" qui riporta InpFile al default compilato
+;   ("ABTG_Trades.csv", sorgente riga 25), che e' ESATTAMENTE il nome usato
+;   dal PICCOLO 50503392 -- e i due conti iniziano a sovrascriversi SENZA
+;   un errore a video. Non e' un'ipotesi: il default e' misurato uguale al
+;   nome vivo dell'altro conto (par. 2, tabella).
+;
+; --------------------------------------------------------------------------
+; 1) CHE COSA FA QUESTO EA -- e perche' NON tocca il rischio
+; --------------------------------------------------------------------------
+;   mql5/Experts/ABTG_TradeExporter.mq5 (#property version "1.00", 4 input,
+;   righe 25-28) LEGGE lo storico dei trade CHIUSI e lo scrive in un CSV
+;   dentro Common\Files. NON invia ordini, NON modifica ordini, NON chiude
+;   posizioni: nel sorgente non esiste nessuna chiamata di trading (ne'
+;   OrderSend, ne' CTrade, ne' PositionClose/Modify). Le uniche scritture
+;   sono FileWrite (riga 177 intestazione, riga 188 dati).
+;   [RIVERIFICATO OGGI sul sorgente, non ripreso di fiducia dal preset del
+;    reale: grep OrderSend|CTrade|PositionClose|PositionModify -> ZERO
+;    occorrenze; grep FileWrite -> esattamente quelle due righe.]
+;   -> Caricare questo file NON puo' cambiare una taglia, un magic o un
+;      rischio: non ne ha. Percio' NON e' una decisione di Claudio.
+;   -> Ma il CSV che produce e' la fonte di misure gia' USATE nel piano:
+;      PIANO_CHALLENGE_OTTOBRE_v2.md r.332 legge l'ora modale di 770202 in
+;      "trades_auto.csv" e r.333 quella di 771531. Se i conti si mescolano,
+;      si mescolano quelle misure.
+;
+; --------------------------------------------------------------------------
+; 2) DA DOVE VIENE OGNI RIGA -- due fonti indipendenti, dichiarate
+; --------------------------------------------------------------------------
+;   FONTE A [MISURATO, foto del campo]:
+;     backtest_pipeline/coda/referti/
+;       CODA_08_preset_dai_chr_20260914_033004.log, righe 3561-3569:
+;       "--- SEDIA: ABTG_TradeExporter su EURUSD magic - [chart05.chr] ---"
+;       "; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "; profilo: SQUADRA 100K"
+;       "InpFile=ABTG_Trades_100k.csv"
+;     Il log e' una LETTURA del file ...\Terminal\
+;     BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts\
+;     SQUADRA 100K\chart05.chr -- nessuna scrittura, nessun terminale toccato.
+;
+;   FONTE B [SCRITTA DA UN ALTRO, sei giorni prima, senza vedere la foto]:
+;     mql5/Presets/ABTG_TradeExporter_REALE.set, righe 19-21, che elenca la
+;     mappa dei tre nomi decisa l'08/09:
+;       piccolo 50503392 -> ABTG_Trades.csv
+;       100k    50504263 -> ABTG_Trades_100k.csv   <-- QUESTO CONTO
+;       REALE   10105439 -> ABTG_Trades_Reale.csv
+;
+;   QUALE CONTO STA IN QUELLA CARTELLA [letto dai GIORNALI, non da una tabella]:
+;     CODA_03_conti_dei_terminali_20260914_033004.log, righe 34-39 -- sono
+;     tre righe distinte, le riporto come stanno e non accorpate:
+;       "=== CARTELLA BCA8AD18563BF5B64A433C2662D0A104"
+;       "    programma : C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "    CONTO 50504263"        (+ "modo di margine: HEDGING")
+;
+;   | input            | default sorgente  | FONTE A (campo) | FONTE B (mappa) |
+;   | InpFile          | ABTG_Trades.csv   | ABTG_Trades_100k.csv | ABTG_Trades_100k.csv |
+;   | InpFromYear      | 2024              | 2024            | 2024 (reale)    |
+;   | InpExportMinutes | 30                | 30              | 30 (reale)      |
+;   | InpUseCommon     | true              | true            | true (reale)    |
+;   -> LE DUE FONTI CONCORDANO SU TUTTE E QUATTRO LE RIGHE. E la riga che
+;      conta e' la prima: e' l'UNICA che diverge dal default compilato.
+;
+; --------------------------------------------------------------------------
+; 3) *** IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI SCRIVERE ***
+; --------------------------------------------------------------------------
+; DOMANDA: "il .chr contiene 36 input, qui ce ne sono 4. Ne hai persi 32."
+;   -> I 32 (InpMostraEma, InpMostraBollinger, InpEma1..InpEma4, InpBbPeriodo,
+;      InpMostraMaxIeri..., InpCol*, InpStile*, InpSpes*, InpMostraEtichette,
+;      InpFontSize e un SECONDO InpVerbose) NON SONO DELL'EA: sono gli input
+;      degli INDICATORI appesi allo stesso grafico (mql5/Indicators/
+;      ABTG_Look.mq5 e ABTG_LivelliChiave.mq5), che lo strumento CODA_08
+;      accorpa al blocco <expert>. E' il difetto R4 gia' dichiarato nel
+;      preset di 770202 e misurato di nuovo in A2 (par. 1 del referto 13/09).
+;      LA PROVA MECCANICA, rifatta oggi su QUESTO blocco: ABTG_Look.mq5
+;      dichiara InpEma1=9 / InpEma2=21 / InpEma3=50 (righe 99-101) e
+;      InpVerbose=false (riga 143), e sono esattamente i valori di troppo.
+;      Un EA con DUE input dello stesso nome in MQL5 non compila: la
+;      duplicazione e' la firma dell'accorpamento.
+;   -> ABTG_TradeExporter.mq5 ha QUATTRO input in tutto. Quattro sono, e
+;      quattro ce ne sono qui. Scriverne 36 sarebbe scrivere il falso.
+;
+; DOMANDA: "InpFromYear=2024 e' il default: allora e' una riga inutile."
+;   -> NO, ed e' il punto del file. Un preset che omette i default e' un
+;      preset che, caricato su un binario diverso o dopo un "Ripristina",
+;      lascia quei campi a cio' che c'era prima. Qui sono dichiarati TUTTI
+;      E QUATTRO, come chiede lo stile dei preset del conto reale.
+;
+; --------------------------------------------------------------------------
+; 4) *** LA DATA DELLA FOTO -- e quanto vecchia e', al giorno ***
+; --------------------------------------------------------------------------
+; Il log lo dichiara: "; .chr modificato il: 2026-09-06 08:01".
+; CODA_05_foto_fresca_20260914_033004.log righe 47-53 lo conferma per TUTTI
+; e 8 i .chr di questo profilo: piu' recente e piu' vecchio hanno la STESSA
+; marca, "vecchia di 187.5 ore" -> *** LA FOTO HA 7,8 GIORNI ***.
+; [!!] Un .chr si riscrive quando il profilo viene SALVATO (o alla chiusura
+;   del terminale), non a ogni tick: se qualcuno avesse cambiato un input
+;   fra il 7 e il 14/09 SENZA salvare il profilo, QUESTO FILE NON LO SAPREBBE.
+;   L'unica conferma indipendente possibile e' leggere la finestra "Dati in
+;   ingresso" dell'EA sul terminale 50504263 (-V3): e' un gesto sul campo e
+;   NON e' nel perimetro di chi scrive (sola lettura).
+;
+; --------------------------------------------------------------------------
+; 5) COME SI CARICA -- e su QUALE terminale
+; --------------------------------------------------------------------------
+; [TERMINALE] MT5 *** 50504263 ***, cartella "C:\Program Files\BCM Markets
+;   MT5 Terminal -V3", profilo "SQUADRA 100K", grafico EURUSD H1 (chart05).
+;   NON sul piccolo 50503392, NON sul reale 10105439, NON su C:\MT5_Backtest.
+;   Prima di toccare la finestra, la stringa che stampa PID + titolo +
+;   cartella (regola dei terminali multipli, 06/09):
+;     Get-Process terminal64 | select Id, MainWindowTitle, Path
+; Poi: finestra dell'EA -> scheda "Dati in ingresso" -> "Carica" -> questo
+; file -> OK.
+; ==========================================================================
+
+InpFile=ABTG_Trades_100k.csv
+InpFromYear=2024
+InpExportMinutes=30
+InpUseCommon=true
+
+; ==========================================================================
+; 6) RILIEVI -- cose che NON ho corretto, e che vanno lette
+; ==========================================================================
+; R1 [!!] IL PICCOLO 50503392 RESTA SENZA PRESET PER QUESTO EA. Misurato
+;    oggi: CODA_08_*_20260914 riga 27 lo trova su NZDCAD, profilo "ORO",
+;    chart01.chr, con InpFile=ABTG_Trades.csv -- che e' ANCHE il default
+;    compilato. Li' un "Ripristina" non rompe niente PER COINCIDENZA, non
+;    per protezione. Il file manca lo stesso, e il suo valore e' gia'
+;    misurato: chi lo scrive non deve indovinare niente.
+;    NON l'ho scritto qui: il mandato di oggi e' il conto della challenge.
+;
+; R2 [!] LA DIREZIONE DEL DANNO E' ASIMMETRICA, e va detta: il rischio non
+;    e' "perdere il CSV del 100k", e' che 100k e piccolo scrivano SULLO
+;    STESSO FILE. In quel caso il CSV non da' errore: da' un miscuglio di
+;    due conti con le stesse famiglie di magic (770101, 770202, 770411,
+;    770611, 770901 esistono su TUTTI E DUE i conti -- rilievo R1 del
+;    preset di 770202, "stesso magic, due conti, due taglie"). Un conteggio
+;    che filtri per magic senza filtrare il conto sommerebbe sedie a 0,65%
+;    con sedie a 1,0%.
+;
+; R3 [--] InpUseCommon=true NON e' neutro: e' cio' che mette il CSV nella
+;    cartella CONDIVISA, ed e' quindi la precondizione del rilievo R2.
+;    Resta true perche' questo file FOTOGRAFA cio' che gira, e perche' la
+;    pagella legge da li'. Non e' una proposta di cambiarlo.
+;
+; R4 [--] IL GRAFICO E' EURUSD H1, un simbolo che NON e' operato da nessuna
+;    sedia del conto. E' corretto: l'EA legge lo storico del CONTO, non del
+;    simbolo, quindi il grafico e' solo un supporto. Scritto qui perche'
+;    chi rilegge non lo scambi per una sedia forex dimenticata accesa.
+;
+; R5 [!] I PRESET NON PASSANO DA NESSUN CANCELLO DETERMINISTICO: oggi
+;    controlla_riga.py ha gli oggetti riga/ps1/prova/md e nessuno e' un
+;    .set (buco dichiarato in A2, par. 3). Questo file e' stato verificato
+;    a mano contro le due fonti del par. 2. Il buco resta aperto.
+; ==========================================================================
