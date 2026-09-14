@@ -1,0 +1,173 @@
+=== RIGA SOTTILE -- UN ROUND SUL SOLO TERMINALE DA BACKTEST ===
+    MARCATORE_RIGA_SOTTILE_ROUND_v1
+data     : 2026-09-14 11:32:30   (ora locale del VPS)
+banco    : C:\MT5_Backtest   (conto 50504400, demo solo-tester)
+pin fisso: 96d91bd7a026036f5f5776d5f821d3bec6cff8cb
+round    : EA ABTG_DAX_Apertura_EU . prova R147c_flatfineseduta_D30EUR.txt . etichetta r147c
+          modello 4 . deposito 100000
+
+AVVERTENZA DICHIARATA: il driver prende l'EA .mq5 e gli include dalla
+TESTA del branch 'lavoro', NON da questo pin. Il pin inchioda i due .ps1,
+non il codice MQL5 compilato. Se stanotte qualcuno ha toccato l'EA sul
+branch, il round gira su QUELLA versione.
+
+    banco trovato: C:\MT5_Backtest\terminal64.exe
+
+--- IL CODICE CHE STA PER GIRARE, INCHIODATO AL BYTE -----------------
+    backtest_pipeline/righe/RIGA_ROUND_VPS.ps1
+        impronta SHA-256 verificata . marcatore MARCATORE_RIGA_ROUND_VPS_v1 presente
+    backtest_pipeline/walkforward_generico.ps1
+        impronta SHA-256 verificata . marcatore MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE presente
+  (il secondo file lo riscarichera' il driver dallo STESSO pin: qui e'
+   scaricato solo per provare, PRIMA di partire, che a quel pin ci sono
+   i byte giusti. Un commit git non cambia: se l'impronta torna adesso,
+   tornera' anche fra due minuti.)
+---------------------------------------------------------------------
+
+--- CORSA ------------------------------------------------------------
+=== ROUND SUL TERMINALE DA BACKTEST ===
+    MARCATORE_RIGA_ROUND_VPS_v1
+data: 2026-09-14 11:32:33
+pin : 96d91bd7a026036f5f5776d5f821d3bec6cff8cb
+term: C:\MT5_Backtest
+    bersaglio AMMESSO dalla guardia positiva: C:\MT5_Backtest   (conto 50504400)
+
+--- TERMINALI MT5 VISTI ADESSO (PRIMA) ------------------------------
+  BERSAGLIO (terminale da backtest): nessuno vivo. Bene.
+  LASCIATI VIVI (forward e CONTO REALE: NON li tocco):
+    PID 7188    C:\MT5_MANUALE\terminal64.exe
+    PID 7824    C:\BCM_Reale\terminal64.exe
+    PID 8664    C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe
+    PID 9780    C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+---------------------------------------------------------------------
+
+    tetto barre: MaxBars=10000000 -- sufficiente.
+
+    driver: scaricato e marcatore v5 verificato.
+    file prova: R147c_flatfineseduta_D30EUR.txt (38723 byte) dal pin 96d91bd7a026036f5f5776d5f821d3bec6cff8cb
+    prova: simbolo D30EUR . periodo M5 . da 2024.09.26
+
+--- ABTG_DAX_Apertura_EU D30EUR   etichetta r147c   modello 4   deposito 100000 ---
+=== WALK-FORWARD GENERICO - ABTG_DAX_Apertura_EU ===
+    MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+    MARCATORE_WALKFORWARD_GENERICO_v6_FRAZIONEIS
+    sorgente: 2368 righe
+    include nostri pronti: 3 su 3
+    input trovati: 82   (blindati al default: 82)
+    finestra di fine presa da '@FINOA' nel file prova: 2026.06.30
+
+    !! Questo EA usa PERIOD_CURRENT e non ha un input InpTF.
+       Il timeframe operativo E' il Period del tester: adesso e' M5.
+       Se non e' quello su cui gira in forward, la misura non c'entra niente
+       con l'EA vero. Si cambia con -Periodo M15 o con '@PERIODO M15'.
+
+--- controlli ---
+
+    parametri in [TesterInputs] : 81
+    spazzolati                  : 1
+        InpCloseAtEnd              2 celle
+    celle per finestra          : 2   ->  4 pass a tick reali in tutto
+    controlli passati.
+
+    taglio IS/OOS: FrazioneIS 0.4
+    IS  2024.09.26 - 2025.06.09   (qui si sceglie)
+    OOS 2025.06.10 - 2026.06.30   (qui si verifica, e NON si guarda per scegliere)
+
+    Lo storico di D30EUR parte DAVVERO dal 2024.09.26 ? Se non l'hai MISURATO,
+    fermati: sugli indici diceva 2024.01.01 e partiva dal 26/09/2024.
+
+    (nessuna riga Spread nell'.ini: MT5 usa il valore che ha in memoria.
+     E' il comportamento di sempre, ma e' STATO NASCOSTO: per metterlo agli
+     atti passa -Spread 0.)
+
+    ExecutionMode=0  ->  esecuzione normale, zero ritardo (come TUTTI i round).
+     Per stressare l'esecuzione: -Ritardo 100 (ms) oppure -Ritardo -1 (casuale).
+
+--- TERMINALE SCELTO ------------------------------------------------
+    terminal64 : C:\MT5_Backtest\terminal64.exe
+    cartella   : C:\MT5_Backtest
+    via        : parametro esplicito -TerminaleBacktest
+---------------------------------------------------------------------
+
+--- INCLUDE NOSTRI PORTATI SUL TERMINALE -----------------------------
+    destinazione : C:\Users\Administrator\AppData\Roaming\MetaQuotes\Terminal\04C7A32B575E40027B4FF8724D14D702\MQL5\Include
+    ABTG_PausaGuardian.mqh         139333 byte   (69 EA lo includono (ORB e DAX dell'ancora compresi))
+    ABTG\ABTG_ApertureCore.mqh     46028 byte   (nel repo, oggi nessun #include)
+    OptFrame.mqh                   5413 byte   (nel repo, oggi nessun #include)
+    (di SISTEMA, NON copiati perche' MT5 li ha gia': Trade\Trade.mqh,
+     Trade\PositionInfo.mqh, Trade\SymbolInfo.mqh, Trade\AccountInfo.mqh)
+---------------------------------------------------------------------
+    compilato ABTG_DAX_Apertura_EU
+
+--- ABTG_DAX_Apertura_EU_D30EUR_IS_r147c   (2024.09.26 -> 2025.06.09)   2 celle ---
+    avvio 2 pass (tick reali)...
+    OK -> ABTG_DAX_Apertura_EU_D30EUR_IS_r147c.csv   (2 righe)
+
+--- ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c   (2025.06.10 -> 2026.06.30)   2 celle ---
+    avvio 2 pass (tick reali)...
+    OK -> ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c.csv   (2 righe)
+
+=== FINITO ===
+    CSV attesi: 2   presenti: 2   MANCANTI: 0
+    Tutti e due prodotti, sono qui:
+      C:\Users\Administrator\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU
+
+    I criteri di accettazione sono scritti in cima a prove\ABTG_DAX_Apertura_EU.txt.
+    Si leggono PRIMA di guardare la tabella, e non si spostano dopo.
+    rc del driver: 0   (informativo: il verdetto sta sui CSV, non qui)
+
+--- I NUMERI, COSI' COME SONO USCITI --------------------------------
+  --- IS  (dentro campione) ---
+    file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_IS_r147c.csv
+    righe : 2
+      Pass 0    Profit 4082.9       PF 1.13669    Equity DD % 5.4362     Trades 176
+      Pass 1    Profit 3789.36      PF 1.12634    Equity DD % 5.4362     Trades 175
+    ESITO : LETTO -- 2 righe, tutte con Trades > 0
+  
+  --- OOS (fuori campione) ---
+    file  : C:\Users\Administrator\abtg_round\risultati_prove\ABTG_DAX_Apertura_EU\ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c.csv
+    righe : 2
+      Pass 1    Profit 18029.58     PF 1.39709    Equity DD % 7.2328     Trades 270
+      Pass 0    Profit 18889.38     PF 1.41716    Equity DD % 7.2609     Trades 272
+    ESITO : LETTO -- 2 righe, tutte con Trades > 0
+---------------------------------------------------------------------
+
+--- TERMINALI MT5 (DOPO) --------------------------------------------
+  PID vivi PRIMA (non bersaglio): 7188 . 7824 . 8664 . 9780
+  PID vivi DOPO  (non bersaglio): 7188 . 7824 . 8664 . 9780
+  STESSI PID: forward e conto reale NON sono stati toccati.
+---------------------------------------------------------------------
+
+RACCOLTA: C:\Users\Administrator\Desktop\ROUND_r147c
+CSV di QUESTA corsa copiati: 2   (attesi 2: IS + OOS)
+ZIP PRONTO DA MANDARE: C:\Users\Administrator\Desktop\ROUND_r147c.zip
+FILE ATTESI NELLO ZIP:
+   REFERTO_ROUND_r147c.txt
+   ABTG_DAX_Apertura_EU_D30EUR_IS_r147c.csv
+   ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c.csv
+   R147c_flatfineseduta_D30EUR.txt
+
+Name                                      Length LastWriteTime      
+----                                      ------ -------------      
+ABTG_DAX_Apertura_EU_D30EUR_IS_r147c.csv    2003 14/09/2026 11:33:12
+ABTG_DAX_Apertura_EU_D30EUR_OOS_r147c.csv   2007 14/09/2026 11:33:42
+R147c_flatfineseduta_D30EUR.txt            38723 14/09/2026 11:32:34
+REFERTO_ROUND_r147c.txt                     1800 14/09/2026 11:33:49
+
+
+
+ESITO: ROUND GIRATO
+Nel referto la riga 'data:' dice 2026-09-14 11:32:33: e' quella da leggere per sapere se il file e' di oggi.
+---------------------------------------------------------------------
+
+DURATA: 79s   CODICE D'USCITA DEL ROUND: 0
+  0 = ROUND GIRATO: i CSV ci sono, freschi, con operazioni.
+
+COSA GUARDARE LA MATTINA, in quest'ordine:
+  1. la riga 'PID vivi PRIMA' e 'PID vivi DOPO' qui sopra: devono essere
+     GLI STESSI. Se manca un numero, il referto lo grida e va controllato
+     subito il terminale in forward corrispondente.
+  2. il codice d'uscita qui sopra.
+  3. i CSV: Desktop\ROUND_<etichetta>\ e la cartella risultati_prove.
+
+ESITO RIGA SOTTILE: uscita 0
