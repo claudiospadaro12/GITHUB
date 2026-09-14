@@ -1,0 +1,450 @@
+# ======================================================================
+#  EA: ABTG_MaxMinNotte
+#  R151a -- IL TRAILING SULL'ORO CHE E' ACCESO DA SEMPRE E MAI TARATO
+#           XAUUSD H2 (sedia 770402, cap 3,7% al muro prop).
+#           Asse: InpTrailAtrMult (default/vivo 2.0, 7 celle).
+#  Scritto il 14/09/2026. Criteri congelati PRIMA dei numeri, in questo
+#  stesso file (niente file CRITERI separato: e' UN asse, UNA sedia).
+# ----------------------------------------------------------------------
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R151a_trailingatr_XAUUSD.txt
+#    -Simbolo XAUUSD -Periodo H2
+#    -DaQuando 2020.01.01 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 1 -Etichetta r151a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma -- vedi S2.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati. Il piccolo 50503392 ha QUESTA
+#     STESSA sedia VIVA (770402, conto DEMO ma con ordini veri) -- non
+#     si tocca.
+#  !! -Modello 1 (OHLC M1), NON 4. E' l'INVERSO della regola letta su
+#     R127a/R136a (dove 4 = verita'), e va detto perche' e' facile
+#     sbagliarla per abitudine (classe 273 pagata due volte su questa
+#     stessa famiglia di righe): sull'oro i TICK REALI BCM iniziano
+#     2024.07.05 [MISURATO, citato in R100_REFERTO.md e in questo stesso
+#     file piu' sotto], e la finestra di questo round parte 2020.01.01
+#     -- 4,5 anni PRIMA del muro dei tick. Un giro a Modello 4 su questa
+#     finestra non gira silenzioso: gira SBAGLIATO (tick sintetici prima
+#     del muro) o si ferma. R100 e R103, sulla STESSA sedia e sulla
+#     STESSA ampiezza di finestra, hanno girato a Modello 1 per lo
+#     stesso motivo -- non e' una scelta nuova, e' l'unica disponibile.
+#  !! -Deposito 100000: NON e' il default del driver (10.000). E' il
+#     deposito che R103 (fonte dell'ancora, vedi sotto) dichiara nel suo
+#     stesso referto header ("deposito 100000 EUR"). Con 10.000 il
+#     lotto-al-minimo (vedi piu' sotto) morde su una frazione diversa
+#     delle 693 operazioni e S1 decade.
+#
+# ----------------------------------------------------------------------
+#  PERCHE' QUESTA MANOPOLA, E PERCHE' PROPRIO ADESSO
+# ----------------------------------------------------------------------
+#  1) VERIFICATO CONTRO IL REPO VERO, NON A MEMORIA DEL CENSIMENTO DEL
+#     09/11 (che ha 3 giorni). Scansionati oggi TUTTI i CSV del repo con
+#     colonna InpTrailAtrMult (python, csv.DictReader, non grep a
+#     occhio): la colonna esiste in 42 file. Raggruppati per InpMagic:
+#       - magic 778110-778161 (ABTG_MaxMinNotte_DAX_Short_Ottimizzato,
+#         sedia 770411, round "r81"): il valore VARIA fra corse diverse
+#         -- 1 / 2 / 3,5 -- e per questo il censimento del 09/11 non la
+#         segna "mai mossa" su quella sedia (riga 770411, corretto).
+#       - magic 770401-770406 / 770402 / 779670 (TUTTI i CSV di
+#         ABTG_MaxMinNotte SUL SIMBOLO XAUUSD e su D30EUR con questo EA,
+#         13 file distinti, fino a R133c del 12/09): valore SEMPRE "2",
+#         MAI un secondo valore, ne' dentro un file ne' fra corse.
+#     >>> SU 770402 QUESTA MANOPOLA NON E' STATA MOSSA UNA VOLTA. Il
+#         censimento del 09/11 lo diceva; questo round lo CONFERMA oggi
+#         con una scansione indipendente, non lo eredita.
+#     E nei round di oggi (14/09, R136-R150): nessuno tocca ABTG_MaxMinNotte
+#     o il simbolo XAUUSD (verificato leggendo l'header `EA:`/`@SIMBOLO`
+#     di ogni file prove/R13[6-9]*.txt, R14*.txt, R15*.txt). Nessuna
+#     collisione con l'EMA200 Dow, l'ORB o il DAX Apertura coperti oggi:
+#     questo round allarga la copertura su una QUARTA sedia, non
+#     infittisce le tre di stanotte.
+#
+#  2) LA SEDIA E' QUELLA CHE STA PIU' VICINA AL MURO DI TUTTA LA FLOTTA
+#     ORO, E NESSUNA DELLE SUE MANOPOLE DI GESTIONE E' MAI STATA TARATA.
+#     `report/R100_REFERTO.md`: DD 22 anni 19,72% a 1% di rischio ->
+#     10,0% A 0,5% (LIMITE INFERIORE OHLC, MAI un permesso -- lo dice lo
+#     stesso file). Il rischio vivo e' stato TAGLIATO da 1,0% a 0,5% il
+#     23/08 SOLO per restare sotto il 10% -- e' la sedia della flotta
+#     con MENO margine dichiarato rispetto al proprio muro (report
+#     CENSIMENTO_CONTRATTI.md riga 770402). Delle 11 manopole d'uscita
+#     di questo EA (censimento 09/11, riga 770402: 11 mai mosse su 15
+#     esistenti), NESSUNA e' mai stata provata proprio per RIDURRE quel
+#     DD -- questo round e' la prima.
+#
+#  3) LA DIAGNOSI DI IERI (13/09) LASCIA UNA DOMANDA APERTA CON QUESTO
+#     NOME ESATTO, E QUESTO ROUND E' LA VIA PIU' CORTA AL NUMERO.
+#     `report/MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md`, punto
+#     [NON MISURATO] (3): *"quanto della [...] funzione [del breakeven]
+#     sia gia' coperto dal trailing (dipende da 2*ATR(H2) contro 1R)".*
+#     Quella diagnosi era SOLA LETTURA, zero backtest. Questo round e'
+#     il backtest che le manca: muovere InpTrailAtrMult e' l'UNICO modo
+#     di scoprire se il trailing protegge, se e' ridondante col
+#     breakeven, o se e' troppo largo per intervenire mai.
+#
+# ----------------------------------------------------------------------
+#  ###  QUELLO CHE QUESTA MANOPOLA FA DAVVERO -- LETTO NEL SORGENTE   ###
+# ----------------------------------------------------------------------
+#  mql5/Experts/ABTG_MaxMinNotte.mq5, ManagePos(), r.394-468, COPIATO:
+#
+#    r.407  double risk=isLong?(openP-sl):(sl-openP);
+#    r.408  if(risk<=0){ double a=AtrVal(); if(a>0) risk=a*InpAtrSLmult; }
+#    r.411  if(!gPart1 && InpTP1_R>0 && ...) { ... TP1 + breakeven ... }
+#    r.437  if(gPart1 && !gPart2 && InpTP2_R>0 && ...) {
+#    r.439     tgt = isLong? openP+risk*InpTP2_R : openP-risk*InpTP2_R;  ...
+#    r.459  if(InpUseTrailing) {
+#    r.464     if(isLong){ n=bid-a*InpTrailAtrMult; if(n>sl && n>openP) PositionModify(...,n,tp); }
+#    r.465     else      { n=ask+a*InpTrailAtrMult; if((n<sl||sl==0)&&n<openP) PositionModify(...,n,tp); }
+#
+#  >>> PRIMO PUNTO, LEGGIBILE SUBITO: IL TRAILING E' INDIPENDENTE DAL
+#      BREAKEVEN (a differenza di ABTG_EMA200 e ABTG_SuperWave_DOW_H1,
+#      dove il trailing e' DIETRO `beDone`/gPart1). Qui la condizione
+#      di riga 464/465 e' `n>sl && n>openP`: il trailing puo' scattare
+#      ANCHE se il breakeven non e' mai stato tentato (parziale
+#      impossibile al lotto minimo, vedi punto 4). E' un secondo
+#      livello di protezione, non lo stesso interruttore.
+#
+#  >>> SECONDO PUNTO, ED E' LA CLASSE 308 (IL PARAMETRO CHE STA ANCHE
+#      AL DENOMINATORE) APPLICATA QUI, PRIMA DEI NUMERI:
+#      `risk` (r.407) e' RICALCOLATO A OGNI CHIAMATA dallo STOP CORRENTE
+#      (`sl = PositionGetDouble(POSITION_SL)`, letto in TESTA alla
+#      funzione), NON dallo stop d'ingresso salvato. Il trailing (in
+#      fondo alla STESSA funzione) SPOSTA quello stop. Quindi, tick dopo
+#      tick:
+#        - se il trailing ha gia' spinto lo stop OLTRE l'apertura (long:
+#          sl > openP), allora risk = openP-sl e' NEGATIVO -> r.408
+#          SOSTITUISCE `risk` con `AtrVal()*InpAtrSLmult` (1,5x ATR,
+#          FISSO, indipendente da InpTrailAtrMult) -- e quel numero,
+#          non piu' il rischio vero d'ingresso, e' la base su cui si
+#          calcola il bersaglio del 2o parziale (r.439, `InpTP2_R`).
+#        - QUANDO questo accade dipende da InpTrailAtrMult: una cella
+#          STRETTA (0,8x ATR) spinge lo stop oltre l'apertura con MENO
+#          escursione favorevole di una cella LARGA (3,2x ATR) -- quindi
+#          nella cella stretta la sostituzione avviene PRIMA nella vita
+#          del trade, e per PIU' operazioni il bersaglio del TP2 e'
+#          calcolato sul fallback fisso invece che sul rischio vero.
+#      >>> CONSEGUENZA CONGELATA: le celle di questo asse NON misurano
+#          "solo" quanto stringe il trailing. Misurano ANCHE quanto
+#          spesso il bersaglio del secondo parziale smette di essere in
+#          unita' di rischio vero. Non e' un artefatto da correggere
+#          qui (e' il comportamento REALE del codice in campo): e' un
+#          secondo canale, e va scritto se il PF/DD del round si
+#          commentano solo col primo (il trailing che stringe/allarga).
+#          Il numero del quanto e' [NON MISURATO]: servirebbe l'export
+#          per-trade (stessa limitazione 308-4 di R147a), proposto non
+#          fatto qui.
+#
+#  >>> TERZO PUNTO, ED E' IL CONTRO-ESEMPIO CHE FAREBBE CADERE L'INTERO
+#      ROUND SE FOSSE VERO -- COSTRUITO ORA, PRIMA DI CONSEGNARE:
+#      l'ipotesi alternativa e' che il trailing NON DECIDA MAI L'USCITA
+#      su questa sedia, perche' la posizione chiude sempre prima per
+#      un'altra via (TP1 1R parziale, TP2 2,5R parziale, bersaglio
+#      EMA200, o TPfinal a 4R sull'ordine) -- nel qual caso muovere
+#      InpTrailAtrMult da 0,8 a 3,2 non cambierebbe NIENTE, e il round
+#      "misurerebbe" una manopola morta senza saperlo.
+#      >>> COME SI RICONOSCE, DICHIARATO ORA: se e' vero, le 7 celle
+#          tornano PF, DD, n IDENTICI ALLA QUARTA CIFRA (nessuna cella
+#          e' toccata da un cambiamento che non morde mai). Questo NON
+#          e' un fallimento del round: e' un risultato -- "il trailing
+#          e' vivo nel codice ma inerte nei fatti su questa sedia,
+#          MISURATO" -- ed e' esattamente il tipo di riga che il
+#          certificato di morte chiede (A5 sotto). Se invece anche UNA
+#          sola cella si muove in modo leggibile, l'ipotesi alternativa
+#          e' respinta e si legge il resto del round.
+#
+#  4) IL LOTTO MINIMO (0,3-4,1x il pavimento su ogni trade, per
+#     costruzione dell'oro con SL 25-41 $/oz): stesso difetto GIA'
+#     DICHIARATO ieri (`MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md`
+#     par. 1, `d4da7d7`) sul binario in campo -- qui e' irrilevante alla
+#     LETTURA perche' e' UGUALE su tutte e 7 le celle (non e' l'asse),
+#     ma va citato perche' spiega perche' il parziale/breakeven possano
+#     non innescarsi su una frazione delle 693 operazioni indipendente
+#     da InpTrailAtrMult.
+#
+# ----------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altro numero
+# ----------------------------------------------------------------------
+#  Fonte primaria, STESSA cella (stesso preset vivo, stessa finestra,
+#  stesso deposito, stesso modello): R103, corsa F23 su questo EA/sedia.
+#    `backtest_pipeline/risultati_archivio/R103_REFERTO_DRIVER_FOREX_METALLI_20260824_1922.txt`
+#    (riga F23 + blocco dedicato "F23 ABTG_MaxMinNotte XAUUSD H2 [FOREX]"):
+#      finestra 2020.01.01 -> 2026.06.30, modello 1, deposito 100000,
+#      InpRiskPercent 0,5 (taglia viva), magic gemelle 760240/760241
+#      (VERGINE all'epoca, blocco 76xxxx).
+#    NUMERI (window intera, nessuno split IS/OOS -- R103 e' una CORSA
+#    singola, non un walkforward):
+#      PF 1,308 . DD taglia viva 5,32% . DD normalizzato 1% 10,64% .
+#      n 693 . Peggior giornata -0,50% . anni negativi/operati 2/7 .
+#      Profit taglia viva +24.736 EUR . Profit normalizzato 1% +49.473 EUR
+#    Riconfermato in un SECONDO file indipendente (`R103_REFERTO_FINALE.md`
+#    r.16, stessa riga alla seconda cifra: PF 1,31 . DD 10,6% . n 693) e
+#    in un TERZO (`CENSIMENTO_CONTRATTI.md` r.220, stesso 19,72%->10,0%
+#    di R100 e n=693/R103 citati insieme): tre fonti indipendenti,
+#    stessi numeri.
+#
+#  >>> BUCO DICHIARATO SULL'ANCORA, E LA VIA PIU' CORTA CHE RESTA: R103
+#      ha girato la finestra INTERA in un colpo, senza taglio IS/OOS.
+#      Questo file (come ogni round walkforward di casa) la spezza in
+#      due automaticamente (FrazioneIS 0,40 del driver). NON esiste in
+#      archivio uno split IS/OOS pre-esistente di QUESTA cella per un
+#      confronto punto-per-punto sulle due sottofinestre. La sentinella
+#      S1 (sotto) si scrive quindi sul TOTALE (IS+OOS), non su ciascuna
+#      meta' separatamente -- piu' debole di un confronto a doppia
+#      finestra, ma e' l'unico controllo disponibile senza rilanciare
+#      R103 da capo (proposto, non fatto qui: sarebbe UN'ALTRA passata
+#      sola, la cella 2,0 isolata a Modello 1 con l'export walkforward).
+#
+# ----------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# ----------------------------------------------------------------------
+#  CELLA VIVA (2,0): deve riprodurre l'ancora (S1).
+#  LE SEI CELLE FUORI DALLA VIVA -- DUE RAMI DICHIARATI ORA:
+#    RAMO A -- IL TRAILING E' INERTE NEI FATTI (punto 3 sopra):
+#      le 7 celle tornano PF/DD/n indistinguibili (entro il rumore A9).
+#      Verdetto: "manopola viva nel codice, MISURATA inerte in pratica
+#      su questa sedia" (A5). Chiude la casella 3 del certificato di
+#      morte lo stesso -- un "inerte misurato" e' un risultato, non un
+#      buco.
+#    RAMO B -- IL TRAILING MORDE, E IL VERSO ATTESO E':
+#      celle STRETTE (0,8 / 1,2) -> DD OOS piu' basso della viva (taglio
+#      prima le codate perdenti), ma PF probabilmente piu' basso o pari
+#      (tagliano anche le vincenti prima che corrano fino a TP2/EMA200/
+#      TPfinal -- stesso compromesso gia' misurato su EMA200 R147a e su
+#      SuperWave: stringere l'uscita scambia coda per frequenza di
+#      vittoria, non e' gratis).
+#      celle LARGHE (2,4 / 2,8 / 3,2) -> DD OOS uguale o leggermente
+#      piu' alto della viva, PF verso quello di "trailing quasi spento".
+#    >>> IL DISCRIMINANTE fra i due rami e' la DISPERSIONE del DD OOS
+#        sulle 7 celle: se il DD OOS varia di meno di 0,3 punti totali
+#        da 0,8 a 3,2, e' il RAMO A. Se varia di piu', e' il RAMO B e si
+#        legge la direzione.
+#    RISULTATO PIU' UTILE, DETTO SENZA GIRARCI INTORNO: che una cella
+#    PIU' STRETTA della viva tagli il DD sotto il 10,64% normalizzato
+#    SENZA smontare il PF sotto 1,20 -- perche' e' la sedia con MENO
+#    margine dal muro di tutta la flotta, ed e' l'unico round mai fatto
+#    che provi a stringerlo apposta.
+#
+# ----------------------------------------------------------------------
+#  S1 / S2 / S3 -- LE TRE SENTINELLE
+# ----------------------------------------------------------------------
+#  S1  RIPRODUZIONE, BLOCCANTE, SUL TOTALE (buco dichiarato sopra). La
+#      cella 2,0 (IS+OOS insieme: n totale, PF pesato sulle uscite,
+#      profitto IS+OOS) deve avvicinarsi a n=693 (tolleranza +/-5, il
+#      taglio IS/OOS puo' spostare un trade a cavallo della data di
+#      confine) e PF=1,308 (tolleranza +/-0,03, la precisione delle tre
+#      fonti concordanti non va oltre la terza cifra). Fuori da li', il
+#      banco di oggi non e' quello di R103 e il round si ferma prima di
+#      leggere le altre celle.
+#  S2  CONTEGGIO DELLE CELLE. 7 valori distinti di InpTrailAtrMult nel
+#      CSV (0,8/1,2/1,6/2,0/2,4/2,8/3,2). Se ne stampa un numero diverso,
+#      l'asse non e' partito com'era scritto.
+#  S3  IL LOTTO AL MINIMO NON DEVE VARIARE FRA CELLE. Sul lotto-al-
+#      minimo (par. 4) la percentuale di operazioni chiuse ESATTAMENTE a
+#      0,01 deve restare STABILE (+/-3 punti percentuali) su tutte le 7
+#      celle: se una cella la sposta di piu', InpTrailAtrMult sta
+#      interagendo col dimensionamento del lotto per una via non
+#      letta qui, e il round si ferma a dichiararlo.
+#
+# ----------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA (adattate da R136a, stessa numerazione A1-A10)
+# ----------------------------------------------------------------------
+#  A1  ALTOPIANO: servono >=3 celle contigue con, ciascuna: DD OOS
+#      normalizzato-1% <= 10,64% (la cella viva, MAI peggiorare il
+#      contratto in essere) E n OOS >= 150 E la cella viva DENTRO la
+#      terna o adiacente ad essa.
+#  A2  IL PAVIMENTO DEI 150 IN POSIZIONI, ASIMMETRICO come in R136a.
+#      >>> ARITMETICA DEL PAVIMENTO, FATTA ORA (obbligo del compito):
+#          finestra 2020.01.01->2026.06.30 = 2.372 giorni totali
+#          [calcolo civile, verificato]. FrazioneIS 0,40 (default
+#          driver) -> Meta = 2020.01.01 + floor(2.372*0,40) giorni =
+#          2020.01.01 + 948 = 2022.08.06. IS = 948 giorni, OOS = 1.424
+#          giorni. Frequenza dell'EA su questa sedia, MISURATA (R103,
+#          n=693 su 2.372 giorni): 693/2.372 = 0,2922 trade/giorno =
+#          106,7 trade/anno. Proiezione lineare (dichiarata STIMA, non
+#          garanzia -- la frequenza vera per sottoperiodo puo' variare
+#          per regime, es. il crollo covid dentro la finestra):
+#            IS stimato  : 948  * 0,2922 = ~277 trade
+#            OOS stimato : 1.424 * 0,2922 = ~416 trade
+#          ENTRAMBE >> 150. Il pavimento passa con ampio margine anche
+#          se la frequenza reale in una meta' fosse la meta' di quella
+#          media nell'altra.
+#  A3  ANTI-ALTOPIANO-FINTO. Due celle contigue con n IDENTICO e PF
+#      identico alla quarta cifra sono una cella misurata due volte:
+#      non contano per A1 (e sono anche la prova diretta del RAMO A,
+#      vedi l'attesa sopra).
+#  A4  PICCO. Se la cella viva fa DD OOS <= 10,64% e le due vicine
+#      immediate (1,6 e 2,4) fanno DD OOS > 12% (sopra il muro
+#      normalizzato), l'asse dichiara PICCO e annulla l'altopiano.
+#  A5  ASSE INERTE. Se tutte le celle cadono sotto A3 (RAMO A), l'asse
+#      esce dal denominatore e si scrive "manopola viva nel codice,
+#      MISURATA inerte in pratica". Chiude la casella 3 del certificato
+#      di morte lo stesso.
+#  A6  VERDETTO: "c'e' una configurazione migliore del default" si
+#      scrive solo se A1 passa E il centro dell'altopiano e' diverso
+#      dalla viva (2,0) E il vantaggio sul DD supera 0,5 punti
+#      percentuali normalizzati (A9) senza perdere piu' di 0,10 di PF.
+#  A7  RISCHIO, a qualunque n (Emendamento B, 16/08). Ogni cella con DD
+#      normalizzato > 10,64% E' cella di rischio rispetto al contratto
+#      in essere e va segnalata anche se il PF fosse bello -- su questa
+#      sedia, a differenza delle altre, il muro e' GIA' la soglia
+#      contrattuale, non un margine di comodo.
+#  A8  SELEZIONE: si porta avanti il CENTRO del tratto contiguo, MAI il
+#      picco. Se il centro coincide con la viva, la viva e' confermata.
+#  A9  BANDA DI RUMORE: senza un secondo campione OHLC indipendente su
+#      questa identica finestra, il rumore di campionamento qui non e'
+#      il rumore di macchina (quello e' zero, come sempre su OHLC
+#      deterministico). Soglia pratica: un vantaggio di DD normalizzato
+#      < 0,5 punti O di PF < 0,10 su una sola cella non e' un vantaggio.
+#  A10 IL ROUND NON PROMUOVE NIENTE. Nessun preset cambia, nessuna
+#      sedia si accende o si spegne, il conto reale 10105439 e il
+#      piccolo 50503392 (dove questa sedia gira VIVA) non si toccano.
+#      Rischio e taglie sono [FIRMA DI CLAUDIO].
+#
+# ----------------------------------------------------------------------
+#  CANCELLO DI COSTO -- VERIFICATO, E DICHIARATO CHE NON RIGUARDA
+#  QUESTO ASSE
+# ----------------------------------------------------------------------
+#  Fonte: `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.457 -- riga
+#  770402 GIA' MISURATA: stop 32,94 $ [MISURATO n=2] / spread 0,2603 $
+#  (BCM, generico -- lo spread ORARIO di XAUUSD e' [NON MISURATO],
+#  buco GIA' dichiarato in quello stesso referto r.688, non nuovo qui:
+#  `backtest_pipeline/risultati_archivio/spread_flotta/` ha 3 simboli
+#  su 13, XAUUSD non tra questi). Multiplo: 126,5x contro il pavimento
+#  40x -- **passa con largo margine** (oltre 3x il minimo).
+#  >>> E QUESTO ASSE NON PUO' PEGGIORARLO: InpTrailAtrMult non tocca
+#      l'ingresso. Lo stop d'INGRESSO su questa sedia e' l'estremo
+#      opposto del box (InpSLMode=0=MM_SL_OPPOSITE, letto nel sorgente
+#      r.31 e confermato nel preset vivo -- ENTRAMBI InpAtrSLmult E
+#      InpSLFixedPts sono INERTI PER COSTRUZIONE su questa sedia,
+#      chiude il buco dichiarato dal censimento 09/11 par. 5: "una fra le
+#      due e' inerte, ma quale [NON MISURATO]" -- ORA E' MISURATO:
+#      sono INERTI ENTRAMBE, ne' l'una ne' l'altra e' quella attiva).
+#      Il trailing agisce SOLO dopo l'ingresso, su un fronte che il
+#      cancello di costo non misura (l'ampiezza dello stop-uscita, non
+#      dello stop-ingresso). Il 126,5x resta 126,5x su tutte le 7
+#      celle, per costruzione.
+#
+# ----------------------------------------------------------------------
+#  BANCO E FINESTRA -- col conto, non a memoria
+# ----------------------------------------------------------------------
+#    Modello 1 (OHLC M1, screening -- vedi sopra). Deposito 100000.
+#    FrazioneIS 0.40 (default driver walkforward_generico.ps1 r.179).
+#    @DAQUANDO 2020.01.01 -> @FINOA 2026.06.30: STESSA finestra di R103
+#    (non e' prudenza, e' l'unica finestra con un'ancora misurata su
+#    questa esatta cella). REGIME: 6,5 anni, "col crollo covid dentro"
+#    (R103, citato alla lettera) -- quindi PIU' di un regime, a
+#    differenza di R136a-d/R147a sull'EMA200 Dow (21 mesi, un regime
+#    solo): questa e' una prova PIU' vicina alla Regola C dell'
+#    Emendamento della finestra, non lontana da essa.
+#
+#  COSTO IN TEMPO MACCHINA -- STIMATO, non misurato (nessun gemello
+#  OHLC su questo EA e questa ampiezza di finestra in archivio con
+#  tempo dichiarato). 7 celle x 2 finestre = 14 passate, OHLC M1 su 6,5
+#  anni: piu' lento di un tick reale su 21 mesi (R136d: 139s) ma piu'
+#  veloce di un tick reale su 6,5 anni (che qui non esiste, l'oro non
+#  ha i tick). [NON MISURATO], si scopre al primo giro -- non e' un
+#  motivo per non farlo.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - S1 e' sul TOTALE IS+OOS, non su ciascuna finestra separata
+#      (nessuno split IS/OOS pre-esistente di questa cella in archivio).
+#    - Il canale classe-308 (quanto spesso il TP2 usa il fallback ATR
+#      fisso invece del rischio vero) e' [NON MISURATO]: servirebbe
+#      l'export per-trade, proposto non fatto qui.
+#    - Modello OHLC M1: PF/DD sono un LIMITE, non un permesso (dichiarato
+#      identico da R100/R103 sulla stessa sedia).
+#    - Il difetto del lotto al minimo (par. 4, gia' censito il 13/09 sul
+#      binario in campo) e' presente anche in questo backtest (stesso
+#      sorgente, stessa aritmetica NormVol) e taglia una frazione delle
+#      693 operazioni fuori dal parziale/breakeven -- UGUALE su tutte
+#      le celle (controllato da S3), quindi non sporca il CONFRONTO fra
+#      celle, ma sporca la lettura assoluta del PF.
+#    - PROVA DI REGIME PER SOTTO-FINESTRA (toro/orso/laterale/crollo,
+#      Emendamento par. C): non fatta qui, la finestra e' contigua.
+#      Il round misura MERITO+RISCHIO sui 6,5 anni intero, non le 4
+#      finestre di regime separate.
+#    - LATO SHORT DA SOLO: [NON MISURATO], gira L+S come la sedia viva.
+#    - GUARDIAN: InpUsaGuardian=true come la cella viva; nel tester le
+#      sue GlobalVariable non esistono, fail-open dichiarato nel
+#      sorgente (stesso comportamento di R100/R103 sullo stesso EA).
+#
+#  MAGIC VERGINE 788600 (verificato per ricerca su tutto il repo,
+#  esclusa .git, il 14/09/2026: ZERO occorrenze). Etichetta r151a
+#  verificata libera in backtest_pipeline/coda/CODA.txt e in
+#  backtest_pipeline/prove/ lo stesso giorno (nessun R151 precedente;
+#  la serie di oggi arriva a R150a, controllati anche eventuali R149/
+#  R150 aggiuntivi: nessuno).
+# ======================================================================
+@SIMBOLO  XAUUSD
+@PERIODO  H2
+@DAQUANDO 2020.01.01
+@FINOA    2026.06.30
+#
+# --- LA CELLA: identica riga per riga alla cella di R103 (F23), che a
+#     sua volta e' il preset vivo mql5/Presets/sedie_piccolo/
+#     sedia_MAXMIN_ORO_770402.set, verificata campo per campo il
+#     13/09/2026 (MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md).
+InpUsaGuardian=true
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+InpMinBoxPts=0
+InpMaxBoxPts=0
+InpPlaceHour=7
+InpPlaceMin=0
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=250
+InpAllowLong=true
+InpAllowShort=true
+InpSLMode=0
+InpMgmtTF=16386
+InpAtrPeriod=14
+InpAtrSLmult=1.5
+InpSLFixedPts=3000
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_R=2.5
+InpTP2Pct=50
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+# InpTrailAtrMult -> E' L'ASSE, in fondo al file.
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=0.5
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato di proposito (come in R136a/R147a): il
+# default compilato e' la stringa vuota (ABTG_MaxMinNotte.mq5 r.180) e
+# un pin di stringa vuota viene IGNORATO da MT5 (controllo 3 di
+# controlla_prova.py) -- omettere la riga e lasciare il default fa lo
+# stesso effetto senza far scattare il controllo.
+InpNewsFlatten=true
+InpComment=MAXMINR151A
+InpMagic=788600
+InpMaxSpread=0
+InpVerbose=true
+#
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     0,8 / 1,2 / 1,6 / 2,0 (VIVA) / 2,4 / 2,8 / 3,2 -- centrato sulla
+#     viva, stesso passo (0,4) e stesso stile di R136a.
+InpTrailAtrMult=2.0||0.8||0.4||3.2||Y
+# ======================================================================

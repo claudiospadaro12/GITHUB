@@ -19182,3 +19182,98 @@ ancora", è "il pin è il commit giusto per la garanzia che la prosa promette".
    `RIGA_SPREAD_FLOTTA.ps1`, verificato con `git cat-file` per marcatore
    identico, parametri CLI invariati, e la chiusura finale filtrata per
    `.Path`).
+
+## 335. 🕳️🚪 UNA MANOPOLA "MAI MOSSA E VIVA" PUO' ESSERE INERTE PER COSTRUZIONE SENZA STARE NELLA LISTA DELLE INERTI: `InpEndHour`/`InpStartHour` SU TUTTA LA FAMIGLIA SUPERWAVE/SUPERTRENDREVERSAL (14/09/2026)
+
+**Caso reale.** Preparando R151a (`report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md`,
+righe `770511`/`770531`/`770901`/`770924`/`970901`/`970912`/`970913`) ho letto il
+sorgente prima di scegliere la manopola successiva. Le sette sedie elencano
+`InpEndHour` fra le manopole d'uscita **"mai mosse E VIVE"** — nessuna delle
+27 voci della §2.3 del censimento la cita. **E' falso per costruzione, su
+tutte e sette.**
+
+`ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` r.315: `if(InpUseTimeWindow &&
+(now.hour<InpStartHour || now.hour>=InpEndHour)){ ...; return; }` — il
+confronto sull'ora **non gira mai** se `InpUseTimeWindow` e' falso. Verificato
+sui preset VIVI delle sette sedie, uno per uno (`grep -n
+"InpUseTimeWindow\|InpEndHour"` su ciascun `.set`): **tutti e sette** hanno
+`InpUseTimeWindow=false` / `InpEndHour=24`. Uno di essi
+(`ABTG_SupertrendReversal_225JPY_H2_770901_100K.set` r.127) lo dichiara GIA'
+in un commento (*"InpUseTimeWindow=false -> InpStartHour/InpEndHour sono
+INERTI"*) — quindi il fatto era scritto in casa, ma non era arrivato al
+censimento delle uscite.
+
+### 🔴 LA REGOLA
+1. **"Mai mossa E VIVE" nel censimento significa "la colonna non varia nei
+   CSV E non e' nella lista delle 27 inerti dichiarate a mano"** — NON
+   significa "verificata viva nel codice". La lista delle inerti e' scritta
+   a mano, voce per voce, e puo' avere buchi: non e' un teorema, e' un
+   censimento fatto una volta.
+2. **Prima di mettere ad asse una manopola "mai mossa E viva", si legge la
+   riga del sorgente che la USA**, non solo si controlla che non sia gia'
+   nella lista. Qui bastava una riga (`grep -n "InpEndHour" <EA>.mq5`) per
+   scoprire il guardiano `InpUseTimeWindow &&` PRIMA di scrivere un file
+   prova che l'avrebbe sprecato.
+3. **Un pattern di guardia visto su un EA (qui: "filtro con interruttore
+   generale spento nel preset vivo") va cercato per NOME su tutta la
+   famiglia che condivide il codice**, non solo sulla sedia che si stava
+   guardando: le sette sedie citate condividono la stessa riga (copiata fra
+   `ABTG_SuperWave*` e `ABTG_SupertrendReversal*`), quindi condividono anche
+   il difetto di censimento.
+4. **Conseguenza per il censimento del 09/11**: `InpEndHour`/`InpStartHour`
+   vanno tolte dal conto "mai mosse E vive" delle sette sedie sopra e
+   aggiunte alla lista delle inerti (§2.3), portandola da 27 a 29 voci (le
+   altre due, `InpAtrSLmult`/`InpSLFixedPts` su `770402`, sono la classe
+   336 qui sotto). Non cambia nessun verdetto di merito o rischio gia'
+   preso: cambia solo quali caselle del certificato di morte restano
+   davvero da riempire.
+
+## 336. 🔀📎 UNA CSV ATTRIBUITA A UNA SEDIA PER SIMBOLO+CARTELLA PUO' ESSERE DI UN'ALTRA SEDIA GEMELLA: L'ANCORA NUMERICA (NON IL NOME DEL FILE) E' LA PROVA (14/09/2026)
+
+**Caso reale.** Il censimento del 09/11 (§3-ter, riga `770531` SuperWave Dow)
+scrive: *"`InpTP_RR` | MAI -> ASSE | `risultati_archivio/SuperWave/
+valid_SuperWaveRT_U30USD_H1_realtick.csv`... 9 Profit distinti su 9 righe, a
+tick reali su U30USD"*, e sottrae quella manopola dalle "mai mosse" della
+sedia `770531` (`ABTG_SuperWave`, **H2**, U30USD).
+
+**E' la sedia sbagliata.** Aperto il CSV: colonna `InpTF` = `16385` in tutte
+le 9 righe — che e' `PERIOD_H1`, non H2 (`PERIOD_H2` = `16386`). E la cella a
+`InpTP_RR=3.0` (riga con `InpStMult=2.5`) da' **PF 1,52140 / DD 4,0151% /
+n 227**, che sono gli STESSI OTTO NUMERI alla quinta cifra dell'ancora di
+`770511` (`ABTG_SuperWave_DOW_H1_Ottimizzato`, **H1**) citata in
+`prove/R126a_costo_bufferatr_U30USD.txt`. Il CSV testa `770511`, non `770531`
+— probabilmente attribuito per cartella (`SuperWave/`) e simbolo (`U30USD`),
+che le due sedie CONDIVIDONO, mentre l'EA e il TF (la vera firma) divergono.
+
+**Effetto sul censimento, misurato:**
+- `770531` (H2): `InpTP_RR` torna **MAI MOSSA** (il censimento la marcava
+  gia' provata: falso).
+- `770511` (H1): `InpTP_RR` **E' GIA' MOSSA** da questo stesso CSV (2,0 / 2,5
+  / 3,0), e il censimento la elencava come una delle 11 "mai mosse" della
+  riga `770511` (falso anche li', nel verso opposto).
+
+### 🔴 LA REGOLA
+1. **Quando un CSV va attribuito a una sedia gemella (stesso EA-famiglia,
+   stesso simbolo, TF diverso), il nome del file e la cartella NON bastano**:
+   vanno letti i campi che DISTINGUONO le gemelle (qui `InpTF`, altrove
+   `InpMagic` o un input esclusivo di una delle due varianti) prima di
+   scrivere la riga nella tabella.
+2. **Il controllo piu' economico e piu' forte e' l'ANCORA NUMERICA**: se la
+   sedia candidata ha gia' un round con gli "otto numeri" (PF, DD, n, profit,
+   ...) misurati altrove, e il CSV in questione riproduce quegli otto numeri
+   alla quinta cifra su UNA riga della sua griglia, il CSV appartiene a
+   QUELLA sedia — non a un'omonima per simbolo. E' lo stesso principio della
+   sentinella S1 (riproduzione) usato qui in senso INVERSO, come strumento
+   di attribuzione.
+3. **Questa classe di errore va in ENTRAMBE le direzioni sulla stessa
+   tabella**: la sedia che riceve il CSV per errore perde una riga "mai
+   mossa" che invece lo e' ancora; la sedia a cui il CSV appartiene davvero
+   resta segnata "mai mossa" quando non lo e' piu'. Un controllo che
+   verificasse solo una delle due righe (quella che si stava leggendo)
+   avrebbe corretto meta' dell'errore.
+4. **Conseguenza per il censimento del 09/11**: `770531` `InpTP_RR` torna fra
+   le mai-mosse (verificato scoperto, non ancora coperto da nessun round
+   fino al 14/09); `770511` `InpTP_RR` esce dalle mai-mosse della riga
+   `770511` (e' provata, dal 2020 in poi in archivio, non dal 12/09). Nessun
+   round di questo compito tocca `InpTP_RR` su nessuna delle due: resta
+   materiale per un prossimo giro, dichiarato qui perche' trovato qui.
