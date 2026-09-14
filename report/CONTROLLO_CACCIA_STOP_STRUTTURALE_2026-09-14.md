@@ -235,3 +235,45 @@ correzioni piccole (conteggio input) e una vera da tenere a mente quando si
 deciderà se e come portare C3 in codice (il file di partenza è cripto, non
 indici — la meccanica resta buona, il "grezzo" è un po' più grezzo di quanto
 la scheda lasciasse credere).
+
+---
+
+## 🔒 CHIUSURA DELLA CACCIA (14/09/2026, richiesta di Claudio)
+
+**Il buco del TF su C2, chiuso.** Nessuno dei due documenti (dossier originale
+e questo audit) dichiarava il timeframe su cui l'autore ha testato
+`[KL] Mean Reversion (ATR) Strategy`. Verificato ora con **due fetch
+indipendenti** della pagina pubblica, il secondo chiedendo la citazione
+verbatim per non fidarmi di un riassunto:
+
+> *"Results from backtesting against **VOO (1H timeframe)**: approx 46% win
+> rate over 491 trades, on average holding for 20 hours per trade... price
+> at the beginning of backtest (Jan. 2015) was $187.52... this strategy
+> gained ~159%, exceeding ~120% HPR of HODL'ing"*
+
+🔴 **E il TF non è la sola cosa nuova**: l'autore l'ha testato su **VOO**, un
+ETF azionario sull'S&P 500 — non un forex, non un indice CFD, non uno dei
+nostri simboli. 491 trade in ~10 anni (2015-2025) su un ETF **daily-like** a
+1H sono coerenti con un motore che tiene la posizione ~20 ore: è un motore
+di **swing/posizionamento**, non di scalping. Il "costo di porting" del
+dossier andrebbe scritto anche con questo in conto, non solo col latch da
+riscrivere.
+
+**Il TF di C3 resta genuinamente NON DICHIARATO** (verificato: il sorgente
+archiviato non ha nessuna chiamata a `request.security()` né un input di
+resolution — `backtest_timeframe_start` è una DATA, non un periodo grafico:
+falso amico nel nome). Combinato con l'omissione Bitcoin/capital.com già
+trovata, C3 resta il candidato meno pronto dei tre.
+
+### Verdetto di chiusura
+
+| candidato | TF | stato | prossimo passo |
+|---|---|---|---|
+| **C1** `VolExpBreak` | **M30 indici** (dichiarato, coerente con la banda di costo di casa) | 🟢 unico con una SPEC pronta da codificare | passa a `mql5-ea-developer` quando c'è spazio in coda |
+| **C2** mean reversion volatilità | **1H, testato su VOO** (equity ETF — non un nostro simbolo) | 🟡 IN CODA (7/10) — la gestione è "già la nostra", ma va riprovata sui NOSTRI simboli/TF, non assunta dal test dell'autore | resta in coda, nessuna azione fino a un round vero |
+| **C3** Donchian/EMA200 | **NON DICHIARATO** (e probabilmente cripto-specifico) | 🔴 IN CODA (5/10) — doppione + branding Bitcoin + TF ignoto | resta in coda, priorità più bassa dei tre |
+
+**Questa caccia è chiusa.** Zero PROVA SUBITO confermato anche a chiusura:
+nessuno dei tre passa a un file prova oggi. L'unico lavoro concreto che
+resta è la spec di C1, già scritta nel dossier originale — il resto è
+materiale per l'imbuto, non un'azione.
