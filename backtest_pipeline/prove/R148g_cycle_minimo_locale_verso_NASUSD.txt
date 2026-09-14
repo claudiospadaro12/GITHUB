@@ -1,0 +1,485 @@
+# ======================================================================
+#  EA: ABTG_Cycle
+#  R148g -- IL MINIMO/MASSIMO LOCALE DEL CICLO, VISTO A MANO DA CLAUDIO
+#           SU XAUUSD 1m E TRADOTTO IN REGOLA A ZERO PARAMETRI LIBERI.
+#           NASUSD M30. Asse unico: InpVerso (2 celle). SORELLA di
+#           R148a, STESSO banco, STESSO costo, MODO diverso.
+#  Scritto il 14/09/2026, DOPO due aggiornamenti di Claudio arrivati a
+#  meta' lavoro (uscita a tempo M1 + matrice orario/regime per l'oro):
+#  integrati nella MATRICE DEGLI ASSI qui sotto, NON in questo file, che
+#  resta mirato a UNA variabile (disciplina di casa, lezione 19/08).
+#  MAGIC 775701 -- STESSO EA di R148a (ABTG_Cycle.mq5), MODIFICA
+#  ADDITIVA (vedi "PERCHE' NON UN EA GEMELLO" sotto).
+#  ETICHETTA R148g: grep repo-wide -> ZERO occorrenze. Era libera.
+# ======================================================================
+#
+#  SI LANCIA CON:
+#    -Expert ABTG_Cycle
+#    -Prova prove\R148g_cycle_minimo_locale_verso_NASUSD.txt
+#    -Simbolo NASUSD -Periodo M30
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 4 -Etichetta r148g
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati. Gli altri MT5 della casa hanno
+#     le sedie VIVE, incluso il conto REALE 10105439.
+#  !! -Modello 4 (TICK REALI) NON e' opzionale, per lo stesso motivo di
+#     R148a: motore ad alta frequenza, pedaggio = meta' della risposta.
+#  !! QUESTO FILE NON E' IN CODA. CODA.txt non e' stato toccato.
+#  !! NON GIRA AL POSTO DI R148a: Claudio ha riportato che "il Cycle non
+#     ha ancora un solo numero misurato" (R148a non e' mai girato finora).
+#     Questo file NON dipende dal verdetto di R148a e non lo sostituisce:
+#     e' un MECCANISMO diverso sulla stessa formula (regola della seconda
+#     caccia, 19/08), misurabile IN PARALLELO. Il doppio cancello decide
+#     l'ordine reale di lancio, non questo file.
+#
+# ----------------------------------------------------------------------
+#  DA DOVE VIENE, E COSA E' DIVERSO DA R148a
+# ----------------------------------------------------------------------
+#  Claudio ha mostrato uno screenshot TradingView di XAUUSD 1m con questo
+#  stesso indicatore ("Cycle - Ciclo"), disegnando A MANO due V sopra
+#  l'oscillatore: nei punti dove il Ciclo tocca un MINIMO LOCALE (es.
+#  intorno a -11/-12) e poi risale, segnando quello come il momento in
+#  cui entrerebbe LONG.
+#
+#  >>> NON E' LO STESSO EVENTO DI R148a. R148a entra sull'INCROCIO DELLO
+#      ZERO del Ciclo: quell'incrocio e' il punto in cui il COMPOSITO I
+#      (la posizione nel range) forma il suo estremo -- un livello di
+#      derivazione. Il minimo/massimo LOCALE del Ciclo STESSO e' un
+#      estremo di UN LIVELLO IN PIU' (l'estremo della VELOCITA', non
+#      della posizione), e in una salita tipica PRECEDE lo zero-cross:
+#      Claudio entrerebbe PRIMA, quando il Ciclo e' ancora negativo ma
+#      ha appena smesso di scendere.
+#
+#  LA REGOLA, TRADOTTA A ZERO PARAMETRI LIBERI (disciplina di casa contro
+#  il curve-fitting, lezione 19/08 -- una soglia di profondita' sarebbe
+#  un parametro da pescare prima di sapere se il pattern esiste):
+#    LONG  se Ciclo(t-2) > Ciclo(t-1) E Ciclo(t-1) < Ciclo(t)
+#    SHORT se Ciclo(t-2) < Ciclo(t-1) E Ciclo(t-1) > Ciclo(t)
+#  (t = barra CHIUSA piu' recente). Nessuna soglia: un minimo a -0,3
+#  conta come un minimo a -20. Implementato in ABTG_Cycle.mq5,
+#  EstremoCiclo_Calc() (nuova funzione, autotest blocco 10).
+#
+#  PERCHE' NON UN EA GEMELLO, MA UNA MODIFICA ADDITIVA DI ABTG_Cycle.mq5:
+#  un secondo file da 1.281 righe che copia CycleSeries() una seconda
+#  volta sarebbe esattamente il rischio di refuso che l'attribuzione in
+#  testa a ABTG_Cycle.mq5 dice di voler evitare copiando da
+#  ABTG_AltaVelocita invece di riscrivere. La modifica e' un nuovo input
+#  ENUM (InpModoIngresso, default MODO_INCROCIO_ZERO=0) che seleziona il
+#  rilevatore: con MT5 che applica il default a chi non lo nomina,
+#  R148a/R148bL/R148bS restano IDENTICI, bit per bit, ai file gia'
+#  scritti -- i loro .txt non toccano questo input (verificato: grep
+#  "InpModoIngresso" sui tre file, ZERO occorrenze).
+#
+# ----------------------------------------------------------------------
+#  FREQUENZA -- MISURATA con LO STESSO METODO di R148a, e VERIFICATA
+#  CONTRO IL SUO NUMERO (non solo contro se stessa: e' il contro-esempio
+#  richiesto da CLAUDE.md prima di consegnare una misura)
+# ----------------------------------------------------------------------
+#  [DERIVATO DA SIMULAZIONE fuori da MT5, stesso disegno di R148a: 12
+#  semi x 4.000 barre, tre tipi di serie sintetica (random walk / random
+#  walk con deriva / serie a onde), STESSA formula (4 stocastici pesati
+#  4.1/2.5/1.0/4.0 su 11.6, meno SMA9), contati SIA gli incroci dello
+#  zero SIA i minimi/massimi locali a 3 barre SULLA STESSA SERIE, per un
+#  confronto diretto):
+#
+#    tipo di serie      bars/incrocio   bars/estremo-locale
+#    ----------------------------------------------------------
+#    random walk             5,93              3,35
+#    random walk+deriva      5,86              3,32
+#    serie a onde            7,75              2,14
+#
+#  >>> VERIFICA CONTRO UN NUMERO GIA' SCRITTO: la colonna "bars/incrocio"
+#      ridA' 5,9-7,8, dentro la banda 5,6-8,8 DICHIARATA da R148a su una
+#      simulazione INDIPENDENTE (semi diversi). Le due misure si
+#      confermano a vicenda: non e' la stessa corsa letta due volte.
+#  >>> IL NUMERO NUOVO: il minimo/massimo locale scatta 1 volta ogni
+#      2,1-3,4 barre, cioe' 2-3 VOLTE PIU' SPESSO dell'incrocio. Banda
+#      dichiarata: 1 estremo ogni 2,1-3,4 barre.
+#
+#  CONSEGUENZE ARITMETICHE su NASUSD M30 (~46 barre/giorno, stesso numero
+#  di R148a):
+#    estremi al giorno         : 46/3,4 - 46/2,1 = 13,5 - 21,9 (RAW, PRIMA
+#                                di ogni cancello -- e' gCntIncroci)
+#    estremi attesi IS  (~183 feriali) : ~2.470 - 4.010
+#    estremi attesi OOS (~276 feriali) : ~3.730 - 6.040
+#  >>> Il pavimento di 150 operazioni per finestra si supera con largo
+#      margine (16-27 volte), ESATTAMENTE come R148a. Questo NON e' un
+#      pregio automatico: e' anche il cuore del contro-esempio qui sotto.
+#
+#  >>> IL CONTRO-ESEMPIO CHE ROMPEREBBE QUESTA MISURA, COSTRUITO PRIMA DI
+#      CONSEGNARE (CLAUDE.md, "IL CONTRO-ESEMPIO PRIMA DELLA CONSEGNA"):
+#      "e se il minimo locale a 3 barre scattasse troppo spesso,
+#      catturando solo rumore, e non superasse il pavimento?"
+#      La seconda meta' della domanda si rompe SUBITO col numero sopra:
+#      13,5-21,9 al giorno sommerge il pavimento di 150, non lo manca.
+#      >>> MA LA PRIMA META' NON SI ROMPE, E VA DETTA COSI': un pattern
+#          a 3 punti su rumore PURO iid scatterebbe 2 volte su 3 (calcolo
+#          combinatorio: P(il valore centrale di 3 iid e' il minimo O il
+#          massimo dei tre) = 1/3+1/3 = 2/3, cioe' 1 ogni 1,5 barre). La
+#          simulazione misura 2,1-3,4, PIU' RADO del limite iid perche' i
+#          quattro stocastici lisciati (fino a SMA 20) danno al Ciclo
+#          un'autocorrelazione che il rumore puro non ha -- ma resta
+#          MOLTO vicino al regime "quasi ogni oscillazione conta come
+#          segnale". >>> QUINDI L'ALTA FREQUENZA NON E' UNA GARANZIA DI
+#          CAMPIONE PULITO: e' un campione GRANDE fatto per lo piu' di
+#          rumore strutturale del sensore, non di eventi rari e
+#          informativi. Il verdetto NON puo' appoggiarsi sul numero di
+#          trade (che passa facile): deve appoggiarsi SOLO sulla
+#          separazione fra le due celle InpVerso (S1/S2 sotto), che e'
+#          l'unica cosa che il rumore, per costruzione, non produce in
+#          media.
+#
+#  >>> E UN SECONDO EFFETTO STRUTTURALE, NUOVO RISPETTO A R148a, VA
+#      DICHIARATO PRIMA DEI NUMERI: L'INCROCIO ALTERNA SEMPRE DI SEGNO
+#      (ogni +1 e' seguito da un tratto di ciclo positivo prima del
+#      prossimo -1: e' cosi' che CrossCiclo_Calc e' costruito). IL
+#      MINIMO/MASSIMO LOCALE NO: due minimi di fila sono possibili su
+#      una serie rumorosa (es. giu'-su-giu'-su-giu'-su produce minimi
+#      ripetuti senza un massimo enorme in mezzo). QUINDI:
+#        - la sentinella 308-3 di R148a ("il posto occupato NON MORDE,
+#          per costruzione, perche' l'uscita e' lo stesso evento che
+#          apre l'altra") NON SI TRASFERISCE A QUESTO MODO. Qui il
+#          "posto occupato" PUO' mordere: un secondo minimo mentre la
+#          posizione LONG della prima e' ancora aperta non apre un
+#          secondo LONG (CountPositions()>0 blocca, correttamente), e
+#          NON chiude niente (ChiudiSeContraria chiude solo posizioni
+#          CONTRARIE al segnale: due minimi di fila sono lo STESSO verso,
+#          quindi la posizione resta, giustamente, invariata).
+#        - QUESTO E' CORRETTO come comportamento (nessun bug: verificato
+#          leggendo OnNewBar/ChiudiSeContraria), ma vuol dire che
+#          "Incroci Visti" (gCntIncroci, qui il conteggio di ESTREMI)
+#          NON e' piu' uguale a "Ingressi" nemmeno nella cella pulita:
+#          la differenza fra i due conta ANCHE il "posto occupato", non
+#          solo i cancelli di spread/guardian come in R148a.
+#      >>> CLASSE NUOVA IN CHECKLIST_RIGA_DI_LANCIO.md (332): una
+#          sentinella provata vera per un rilevatore non si eredita
+#          automaticamente da un rilevatore-gemello aggiunto dopo. Va
+#          riverificata ogni volta, non assunta additiva col "modo".
+#
+# ----------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO -- RIUSATO IDENTICO DA R148a (stesso EA, stesso
+#  stop InpKStop x ATR: il MODO d'ingresso non tocca la geometria dello
+#  stop, quindi il cancello non si rifa' da zero)
+# ----------------------------------------------------------------------
+#   NASUSD M30, InpKStop 2.0 -> 50,3x lo spread mediano MISURATO (1,80).
+#   Margine +26% sul pavimento di lavoro dei 40x. Stessa fonte di R148a:
+#   risultati_archivio\spread_flotta\spread_orario_NASUSD.csv,
+#   report\CANCELLO_COSTO_FLOTTA_2026-09-10.md,
+#   report\CACCIA_STOP_STRUTTURALE_2026-09-13.md par.4.
+#   M1 e M5 restano ESCLUSI PER COSTO su NASUSD (e su ogni altro simbolo
+#   della flotta, oro compreso): la geometria non cambia cambiando
+#   rilevatore, perche' lo stop e' lo stesso ATR x InpKStop. Vedi la
+#   MATRICE sotto per dove questo pesa sull'uscita a tempo di Claudio.
+#
+# ----------------------------------------------------------------------
+#  ###  IL DATO OPERATIVO DI CLAUDIO SULL'USCITA -- ARRIVATO A META'
+#  ###  LAVORO, E PERCHE' QUESTO FILE NON LO USA (ma il codice si')  ###
+# ----------------------------------------------------------------------
+#  Claudio ha riportato che nel SUO trading MANUALE su M1, con questo
+#  stesso pattern (minimo locale), NON ha mai usato un trailing stop: le
+#  operazioni duravano 5-10 MINUTI (= 5-10 barre M1) e le chiudeva a mano
+#  quando il movimento si esauriva.
+#  >>> NON E' UN'IPOTESI NOSTRA: e' un dato di partenza da RIPRODURRE e
+#      misurare, non da inventare. E' stato aggiunto in ABTG_Cycle.mq5
+#      come blocco INDIPENDENTE (InpEsciDopoNBarre, 0=spento di default,
+#      autotest non applicabile per essere uno stato-macchina su
+#      posizione live -- stessa eccezione di ManageAll/parziale).
+#
+#  >>> E QUESTO FILE NON LO ACCENDE, PER UNA RAGIONE DI COSTO, NON DI
+#      VOLONTA': il dato di Claudio e' su M1, e M1 e' ESCLUSO PER COSTO
+#      su NASUSD (tabella sopra, e tabella di R148a) E su XAUUSD con i
+#      numeri MISURATI OGGI (R148a: XAUUSD M1 ATR~1,067$, pedaggio
+#      PRUDENTE 0,26$, serve k=9,8 per il 40x -- una geometria che non
+#      esiste, non una taratura da trovare). L'uscita a tempo non cambia
+#      questo conto: il COSTO dipende dallo STOP (InpKStop x ATR), che
+#      resta lo stesso indipendentemente da quando si esce. Riprodurre
+#      il dato di Claudio ALLA LETTERA (M1) resta bloccato dal costo
+#      finche' non si misura uno spread ORARIO dell'oro che apra una
+#      finestra piu' stretta (vedi MATRICE, riga "filtro orario oro").
+#  >>> QUINDI L'USCITA A TEMPO E' PRONTA NEL CODICE (0 rischio per questo
+#      file: pinnata a 0/spenta) e PROPOSTA come round gemello su
+#      XAUUSD M1, DOPO le due sonde di Parte 2 di questo stesso lavoro
+#      (spread orario + profondita' tick), non prima: senza quei numeri
+#      il cancello di costo su M1 oro non si puo' giudicare, solo
+#      stimare con la lettura PRUDENTE di R148a. Le due sonde sono
+#      PRONTE, NON ancora lanciate (nessun codice nuovo: entrambi gli
+#      script sotto sono gia' generici per simbolo, cambia solo
+#      l'argomento):
+#        backtest_pipeline\righe\RIGA_MISURA_TICK_XAUUSD_DA_MANDARE.md
+#        backtest_pipeline\righe\RIGA_SPREAD_FLOTTA_XAUUSD_DA_MANDARE.md
+#      Ordine: tick PRIMA (trova dove comincia lo storico vero
+#      dell'oro), spread DOPO (usa quella finestra, non quella di
+#      NASUSD presa a prestito).
+#
+# ----------------------------------------------------------------------
+#  ###  LA MATRICE COMPLETA DEGLI ASSI LEGITTIMI (dichiarata per        ###
+#  ###  intero, come richiesto -- NON tutti implementati in QUESTO     ###
+#  ###  file, che resta mirato a UNA variabile per volta)              ###
+# ----------------------------------------------------------------------
+#  La regola di casa (CLAUDE.md, "IL LIMITE, che e' parte dello stesso
+#  motto") permette di allargare su MOTORI/MECCANISMI/SIMBOLI/TF/
+#  GESTIONE DELL'USCITA, mai su una griglia fitta di parametri dentro un
+#  motore ancora senza edge dimostrato. Ecco gli assi, con lo stato:
+#
+#   ASSE                          STATO IN QUESTO FILE      GEMELLO
+#   ------------------------------------------------------------------
+#   Modo d'ingresso (incrocio/    FISSATO: MINIMO_LOCALE     R148a = incrocio
+#     minimo locale)                                          (stessa formula)
+#   Verso (InpVerso, con/contro)  ASSE DI QUESTO FILE (2)     --
+#   Simbolo (NASUSD/U30USD/       FISSATO: NASUSD             R148h U30USD,
+#     D30EUR/XAUUSD)                                          R148i D30EUR,
+#                                                              R148j XAUUSD
+#                                                              (dopo Parte 2)
+#   TF (M30/M15/...)              FISSATO: M30 (cost-safe)    R148k M15 se
+#                                                              il cancello lo
+#                                                              lascia passare
+#   Uscita: segnale opposto vs    FISSATO: segnale opposto    R148l tempo N=5,
+#     A TEMPO N barre                (InpEsciSuCrossOpposto)    R148m tempo N=10
+#                                                              (SU M1 ORO,
+#                                                              dopo Parte 2:
+#                                                              e' il dato di
+#                                                              Claudio, PRIO-
+#                                                              RITARIO ma
+#                                                              bloccato dal
+#                                                              costo oggi)
+#   Uscita: "cambio candela"      NON DEFINITO -- Claudio non  da chiedere:
+#     (colore della candela)        ha precisato la regola     quale evento
+#                                    esatta. NON si inventa      esatto?
+#                                    una definizione qui.
+#   Soglia di profondita' del     SPENTA (0 = qualunque        round dedicato,
+#     minimo locale                 estremo conta)              SOLO se questo
+#                                                                round non
+#                                                                basta (lezione
+#                                                                19/08: non si
+#                                                                tara un motore
+#                                                                senza edge)
+#   Filtro di trend/regime di     NON IMPLEMENTATO. Ipotesi:   round dedicato,
+#     fondo (EMA200 H4/D1 SI/NO     un minimo locale e' un      DOPO la base-
+#     -- domanda di Claudio)        segnale di ESAURIMENTO/     line di questo
+#                                    mean-reversion: in un       file (altri-
+#                                    mercato IN RANGE dovrebbe   menti si mi-
+#                                    funzionare meglio (il       sura il fil-
+#                                    rimbalzo resta dentro il    tro, non il
+#                                    range); in un TREND FORTE   motore).
+#                                    il minimo locale puo' es-
+#                                    sere solo una pausa prima
+#                                    che il trend continui (un
+#                                    fade perdente).
+#   >>> ATTENZIONE, dichiarato apposta perche' arrivato in due messaggi
+#       separati e potrebbe leggersi come due assi: IL FILTRO DI TREND E
+#       IL FILTRO DI REGIME RANGE-VS-TREND SONO LA STESSA VARIABILE,
+#       vista da DUE PROXY diversi (EMA200 H4 in pendenza = trend; ADX
+#       basso o ampiezza Bollinger stretta = range), NON due assi
+#       INDIPENDENTI da moltiplicare in griglia. Farne due assi
+#       separati farebbe esplodere le celle senza una seconda domanda
+#       reale: la domanda e' UNA SOLA ("il mercato e' direzionale o
+#       laterale ADESSO?"), letta con lo strumento piu' comodo.
+#   Filtro orario per l'oro       NON IMPLEMENTATO, e non e'   round dedicato,
+#     (Asia/Londra/NY --           misurabile finche' la        SOLO DOPO la
+#     domanda di Claudio)          sonda spread orario di       sonda spread
+#                                  Parte 2 non gira. Ipotesi     orario di
+#                                  dichiarata PRIMA del nu-      Parte 2 (sotto)
+#                                  mero: Londra/NY (sessione
+#                                  cassa, piu' movimento dire-
+#                                  zionale) piu' probabile che
+#                                  Asia (range) per un motore
+#                                  che insegue un rimbalzo.
+#                                  >>> E questo asse e' anche
+#                                  quello che potrebbe RIAPRIRE
+#                                  M1 sull'oro: se lo spread e'
+#                                  molto piu' basso in una
+#                                  fascia oraria precisa, il
+#                                  cancello di costo su QUELLA
+#                                  fascia potrebbe passare anche
+#                                  se la mediana giornaliera no.
+#                                  Da MISURARE, non da assumere.
+#
+#  >>> PERCHE' LA GRIGLIA DI QUESTO FILE RESTA A 2 CELLE E NON A 2^N:
+#      ogni riga della tabella sopra E' UN ASSE LEGITTIMO (nessuno e'
+#      vietato dalla regola della seconda caccia), ma il motore non ha
+#      ancora un solo numero misurato (R148a non e' mai girato). Aprire
+#      tutti gli assi insieme oggi sarebbe ESATTAMENTE la griglia fitta
+#      su un motore senza edge che la lezione del 19/08 vieta: si
+#      allarga su MECCANISMO (fatto: R148a incrocio, R148g minimo
+#      locale), non su tutto insieme. L'ordine dei gemelli e' quello
+#      della tabella, e ognuno si paga con la propria prova.
+#
+# ----------------------------------------------------------------------
+#  ###  S1 / S2 / S3 -- LE TRE SENTINELLE (aggiornate per il MODO)  ###
+# ----------------------------------------------------------------------
+#  S1  IDENTICA A R148a NELLA FORMA, con la correzione dichiarata sopra:
+#      InpVerso non entra in EstremoCiclo_Calc() (entra solo in
+#      VuoleLong_Calc() DOPO il conteggio). La colonna "Incroci Visti"
+#      (che qui conta ESTREMI, nome storico) DEVE ESSERE IDENTICA nelle
+#      due celle. Se non lo e', il round non si legge.
+#      >>> MA "Ingressi" NON deve piu' essere quasi = "Incroci Visti"
+#          meno i soli cancelli espliciti (spread/guardian): qui la
+#          differenza include ANCHE il posto occupato da segnali dello
+#          STESSO verso (vedi sopra). Non e' un difetto, e' la fisica
+#          del pattern: va solo letto, non confuso con un bug.
+#  S2  CONTEGGIO DELLE CELLE: 2 valori distinti di InpVerso (0 e 1). Se
+#      ne stampa uno solo, l'asse non e' partito.
+#  S3  L'AUTOTEST DELL'EA deve dire "NOVE BLOCCHI SU NOVE" (non piu'
+#      "OTTO": il blocco 10, EstremoCiclo_Calc, e' nuovo e SI CONTA come
+#      assertivo -- il blocco 9, ciclo sui dati veri, resta un sanity
+#      check senza assert, come in R148a). Se dice "DIVERGE", i numeri di
+#      questo round non si commentano.
+#
+# ----------------------------------------------------------------------
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- STESSA METRICA E STESSE SOGLIE
+#  DI R148a (E in R = ln(1+Profit/Deposito)/(0,0065 x Trades), soglie
+#  invariate: (a) segnale se una cella >= +0,03 R e l'altra <= -0,02 R in
+#  ENTRAMBE le finestre con lo stesso segno; (b) niente segnale se
+#  entrambe cadono in [-0,05; 0,00] R; (c) tutte e due positive = si e'
+#  misurato lo STOP, non il segnale; (d) segni discordi fra IS/OOS = non
+#  misurabile). Il pavimento n>=150 per finestra e il cancello DD>10%/
+#  Peggior Giornata<-4,0% restano gli stessi, a QUALUNQUE n.
+#
+#  PF atteso: [NON MISURATO]. DD atteso: [NON MISURATO] (stessa lettura
+#  pessimista di R148a: tetto giornaliero e filtro orario SPENTI qui
+#  sotto, per lo stesso motivo aritmetico - vedi FREQUENZA).
+#
+# ----------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, PUNTO PER PUNTO (eredita quelli di R148a che non
+#  cambiano col MODO -- spread gate self-misurante, pavimento SL, tetto
+#  giornaliero, filtro orario, gestione nostra spenta, un solo regime,
+#  EA mai compilato -- e aggiunge SOLO quelli nuovi):
+# ----------------------------------------------------------------------
+#  (1)-(8) IDENTICI a R148a punti (1)-(8): stessa geometria di stop,
+#      stesso spread gate pinnato a 20,0 (non 2,5, per lo stesso motivo:
+#      a 2,5 il cancello morderebbe nelle ore 0-13 e misurerebbe se
+#      stesso), stesso pavimento SL spento, stesso tetto giornaliero
+#      spento (motivato dalla frequenza ANCORA PIU' alta qui: vedi sotto
+#      il costo aggravato), stesso filtro orario spento, stessa gestione
+#      nostra spenta, stesso rischio "un solo regime" (Emendamento della
+#      Finestra, regola C), stesso EA mai compilato da chi scrive.
+#  (9) LO STOP-AND-REVERSE DI R148a NON VALE QUI TALE E QUALE: sta
+#      dentro il mercato quasi sempre, ma NON e' un reverse ad ogni
+#      segnale (vedi il punto sopra sul "posto occupato"). L'esposizione
+#      resta alta (~90%+ del tempo, stimata: con un segnale ogni 2,1-3,4
+#      barre e una posizione che si chiude solo su segnale OPPOSTO, il
+#      tempo piatto e' quello fra un'uscita e il prossimo estremo
+#      contrario) ma non e' garantita ~100% come in R148a. NUMERO VERO:
+#      "Barre Tenute"/"Ingressi" del CSV.
+#  (10) [!] IL TETTO GIORNALIERO SPENTO PESA PIU' CHE IN R148a. Col
+#      calcolo di R148a (6 stop di fila = -3,9%, sopra la pausa B1 di
+#      4,0), la frequenza raw qui e' 2-3 volte piu' alta: SEI ingressi
+#      REALIZZATI in un giorno sono piu' facili da raggiungere, non
+#      meno (anche se il posto occupato ne filtra una parte). Il DD e la
+#      "Peggior Giornata %" restano una lettura PESSIMISTA (il Guardian
+#      e' fail-open nel tester), e IL TETTO VA RIACCESO PRIMA DI
+#      QUALUNQUE FORWARD -- ancora piu' urgente qui che in R148a. A
+#      quanto, lo dice "Max Ingressi Giorno" di questo CSV.
+#  (11) [!] LA SOGLIA DI PROFONDITA' NON ESISTE IN QUESTO FILE (pinnata
+#      implicitamente: EstremoCiclo_Calc non ne accetta una). Se questo
+#      round non basta a separare le due celle, l'asse successivo e'
+#      UNA soglia di profondita' -- dichiarata come round dedicato, non
+#      un numero da inventare adesso (vedi MATRICE).
+#  (12) [!] classe 332 (nuova, in CHECKLIST_RIGA_DI_LANCIO.md): la
+#      sentinella 308-3 di R148a ("posto occupato non morde per
+#      costruzione") NON e' ereditata da questo modo. Dichiarato sopra
+#      per intero, ripetuto qui perche' e' un punto del contro-esempio,
+#      non solo una nota di frequenza.
+#
+# ----------------------------------------------------------------------
+#  BANCO E FINESTRA -- IDENTICI A R148a (stesso EA, stesso simbolo,
+#  stesso TF, si confrontano solo se il banco e' lo stesso)
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40:
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    @DAQUANDO 2024.09.26 = il muro dei tick di BCM su NASUSD, MISURATO
+#    (risultati_archivio\misura_tick\REFERTO_MISURA_TICK_NASUSD.txt).
+#
+#  COSTO IN TEMPO MACCHINA: 2 celle x 2 finestre = 4 PASSATE. Stesso
+#    ordine di grandezza di R148a (stessa funzione CycleSeries, stesso
+#    numero di barre): minuti, non ore.
+#
+#  IGIENE, VERIFICATA A MANO
+#    ORE IN ORA SERVER BCM. TETTO BARRE: ~21.100 su M30, sotto le
+#      ~100.000 del tester. NESSUN ENUM SULL'ASSE: l'asse e' InpVerso
+#      (int), non InpModoIngresso (che e' un ENUM ma e' FISSO in questo
+#      file, non sull'asse: classe 287 non si applica). NESSUN PIN DI
+#      STRINGA VUOTO. GUARDIAN: pinnato true, fail-open nel tester.
+#      PER-TRADE: sovrascritto ogni passata (stesso magic di R148a: le
+#      due celle di R148g e le due di R148a NON si mescolano perche' le
+#      due corse sono lanci separati, ma condividono il magic 775701 --
+#      chi lancia legga l'OPTFRAME, non il per-trade, come in R148a).
+#    UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#    IL ROUND NON PROMUOVE NIENTE: sedie, rischio, taglie e il conto
+#      REALE 10105439 restano [FIRMA DI CLAUDIO].
+# ======================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- L'INDICATORE: i nove numeri della FONTE, identici a R148a.
+InpK1Len=5
+InpK1Smo=3
+InpK2Len=14
+InpK2Smo=3
+InpK3Len=45
+InpK3Smo=14
+InpK4Len=75
+InpK4Smo=20
+InpMmLen=9
+#
+# --- IL MODO: FISSO su MINIMO_LOCALE (1). NON e' l'asse di questo file.
+InpModoIngresso=1
+#
+# --- LATI: tutti e due accesi, come R148a. La separazione per lato e'
+#     un gemello successivo (stessa disciplina di R148bL/R148bS).
+InpAllowLong=true
+InpAllowShort=true
+#
+# --- USCITA: segnale opposto (qui: l'estremo simmetrico). L'uscita a
+#     tempo (dato di Claudio) resta SPENTA in questo file -- vedi la
+#     sezione dedicata sopra sul perche' (costo su M1, non volonta').
+InpEsciSuCrossOpposto=true
+InpEsciDopoNBarre=0
+#
+# --- STOP: identico a R148a. 2,0 x ATR(14) = 50,3x lo spread mediano.
+InpKStop=2.0
+InpAtrPeriod=14
+InpTP_RR=0.0
+InpMinSLPts=0
+#
+# --- GESTIONE NOSTRA: SPENTA, come R148a.
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=false
+InpBE_R=1.0
+#
+# --- COSTO (R55): 20,0%, stesso motivo di R148a (a 2,5 il cancello
+#     morderebbe nelle ore 0-13 e misurerebbe se stesso).
+InpMaxSpreadPctOfStop=20.0
+#
+# --- OPERATIVO: tetto giornaliero SPENTO (deroga a C6, ANCORA PIU'
+#     motivata qui dalla frequenza piu' alta -- vedi contro-esempio
+#     punto 10), filtro orario SPENTO, venerdi' non chiuso.
+InpMaxTradesPerDay=0
+InpUseHourFilter=false
+InpHourStart=14
+InpHourEnd=20
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- RISCHIO: il contratto di casa 0,65.
+InpRiskPercent=0.65
+#
+# --- GENERALI.
+InpUsaGuardian=true
+InpComment=CYCLER148G
+InpMagic=775701
+InpVerbose=true
+InpAutoTest=true
+#
+# --- L'UNICO ASSE: IL VERSO, identico a R148a (2 celle x 2 finestre).
+#     0 = si trada CON l'estremo (minimo -> LONG)   <- l'ipotesi
+#     1 = si trada CONTRO l'estremo                 <- il controllo
+InpVerso=0||0||1||1||Y
+# ======================================================================

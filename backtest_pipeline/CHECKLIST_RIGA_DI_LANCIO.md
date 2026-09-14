@@ -18993,3 +18993,54 @@ ancoraggio `x=0` esatto (a zero il test e' un corto circuito e il codice e' bit 
 bit quello di R142c), deposito coerente con l'archivio, sedia non viva, attesa e
 smentita dichiarate **prima** dei numeri. **Il difetto non era il round: erano i
 cancelli.** Corretto in `1da59d3`, senza toccare una sola cella della griglia.
+
+---
+
+## 332. 🔁🚪 UNA SENTINELLA PROVATA VERA PER UN RILEVATORE NON SI EREDITA DA UN RILEVATORE-GEMELLO AGGIUNTO DOPO: "posto occupato non morde" smette di valere sul minimo locale (14/09/2026)
+
+**Caso reale.** `mql5/Experts/ABTG_Cycle.mq5` (R148a, incrocio dello zero)
+dichiara la sentinella 308-3: *"OCCUPAZIONE DEL POSTO: NON MORDE, per
+costruzione. [...] qui la posizione viene CHIUSA dallo stesso incrocio che apre
+l'altra, quindi il posto e' libero a ogni incrocio in tutte e due le celle."*
+E' vera: `CrossCiclo_Calc()` **alterna sempre di segno** (un `+1` esige
+`cyc[2]<0`, quindi il tratto successivo e' positivo prima del prossimo `-1`) —
+entrata e uscita sono LO STESSO evento, mai due volte di fila lo stesso verso.
+
+Aggiungendo un secondo rilevatore additivo sullo stesso EA (`InpModoIngresso`,
+R148g, minimo/massimo locale a 3 barre — `EstremoCiclo_Calc()`), la stessa
+frase e' stata **quasi copiata come vera per il nuovo modo**, prima di essere
+controllata riga per riga. **E' falsa lì:** un pattern a 3 punti su una serie
+rumorosa PUO' segnalare lo stesso verso su barre consecutive (giu'-su-giu'-su-
+giu'-su produce minimi ripetuti, senza un massimo enorme in mezzo che libererebbe
+il posto). Simulato fuori da MT5 (stesso metodo di R148a, 12 semi x 4.000
+barre): il minimo/massimo locale scatta 1 volta ogni 2,1-3,4 barre, 2-3 volte
+più spesso dell'incrocio — e la ragione per cui e' più frequente è *anche* la
+ragione per cui non alterna: e' un pattern locale a finestra corta, non un
+evento di soglia globale come un cambio di segno.
+
+**Cosa sarebbe successo leggendo la sentinella vecchia come ancora valida:**
+`gCntIncroci` (il denominatore, contato PRIMA di ogni cancello) avrebbe
+continuato a leggersi come "quasi = Ingressi, a meno dei cancelli espliciti
+(spread/guardian)" — mentre qui la differenza include ANCHE i segnali bloccati
+dal posto occupato con lo STESSO verso, un canale in più e silenzioso. Non è
+un bug (`ChiudiSeContraria` chiude solo posizioni CONTRARIE al segnale, che è
+il comportamento giusto), ma è una lettura diversa dello stesso numero.
+
+### 🔴 LA REGOLA
+1. **Un file di note che descrive UN rilevatore non descrive automaticamente
+   il rilevatore-gemello che arriva dopo**, anche se vive nello stesso EA,
+   nello stesso blocco di codice, e serve la stessa formula sottostante. Il
+   "modo" e' un parametro come un altro: cambia il codice che gira, quindi
+   ogni proprietà strutturale dichiarata per il modo vecchio va **riletta**,
+   non **eredita**.
+2. **La proprietà da controllare per prima è quella che rendeva vera la
+   sentinella originale**: qui era "l'evento di apertura e l'evento di
+   chiusura sono lo stesso evento, quindi alternano". Se il nuovo rilevatore
+   non garantisce quella proprietà (un pattern locale non alterna come un
+   cambio di segno), la sentinella cade, e va dichiarato PRIMA dei numeri —
+   non scoperto sul CSV.
+3. **Il test più economico è chiedersi: "questo nuovo evento PUÒ ripetersi
+   con lo stesso segno due volte di fila?"** Se sì (ed è il caso di qualunque
+   pattern a finestra corta, a differenza di un incrocio su una soglia
+   globale), il posto occupato torna a essere un cancello vero, e la colonna
+   "denominatore" smette di poter leggersi come "quasi = ingressi".
