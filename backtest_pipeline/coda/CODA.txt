@@ -1480,3 +1480,44 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  toccata, nessun parametro di rischio.
 # =====================================================================
 502487b175d2b9e5fbf7931477ed2fa3df49bd4f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R150a_uscita_nasdaqlive5m.txt -Etichetta r150a -Modello 4 -Deposito 10000
+# =====================================================================
+#  R151a -- IL TRAILING SULL'ORO (770402, ABTG_MaxMinNotte XAUUSD H2)
+#  MAI TARATO. Asse InpTrailAtrMult, 7 celle (0,8->3,2 passo 0,4,
+#  centrate sulla viva 2,0), 14 passate. Quarta sedia coperta oggi
+#  (dopo EMA200 Dow, ORB, DAX_Apertura), non un'infittitura delle tre.
+#
+#  PERCHE': sedia con MENO margine dal muro prop di tutta la flotta
+#  (DD normalizzato 10,64%, rischio gia' tagliato 1,0->0,5 il 23/08).
+#  Nessuna manopola d'uscita mai mossa. Chiude la domanda [NON
+#  MISURATO] della diagnosi del 13/09 (quanto il trailing sia
+#  ridondante col breakeven).
+#
+#  Secondo giudizio: PASS dopo 3 correzioni (nessuna bloccante, nessun
+#  numero del round cambia). Il container e' stato riavviato a meta'
+#  lavoro: una correzione (classe non ancora numerata: il "secondo
+#  canale" del TP2 e' dominato dal breakeven a TP1, indipendente
+#  dall'asse, non solo dal trailing) e' stata recuperata su disco e
+#  VERIFICATA DI PERSONA sul sorgente (ManagePos() r.390-462) prima di
+#  fidarmene. Poi classe 337 (un referto di 3 settimane fa citava la
+#  geometria DEFAULT del sorgente invece del preset vivo -- i numeri
+#  32,94\$/126,5x non cambiano) e classe 338 (la frase "identica al
+#  preset vivo" era vera per l'ancora R103 alla SUA data, falsa contro
+#  il .set di oggi, che si e' mosso dopo su 2 campi -- corretta con la
+#  divergenza dichiarata esplicitamente).
+#
+#  Ancora su R103 (PF 1,308/DD 10,64%/n=693, tre fonti indipendenti,
+#  verificate). Pavimento IS~277/OOS~416 (ricalcolato in Python,
+#  torna). Cancello di costo 126,5x, indipendente dall'asse (InpSLMode
+#  =0=MM_SL_OPPOSITE, verificato nel sorgente). Magic vergine 788600,
+#  etichetta libera (grep). -TerminaleBacktest "C:\MT5_Backtest" NON
+#  opzionale: il piccolo 50503392 ha la sedia gemella VIVA (770402).
+#
+#  Segnalazione per Claudio (NON toccata, e' la sua firma): il .set
+#  committato di 770402 mostra ancora InpRiskPercent=1.0 -- il taglio
+#  a 0,5% del 23/08 non e' mai stato ricommittato sul file. Disallineamento
+#  reale fra repo e rischio in vigore, da guardare quando sveglio.
+#
+#  Pin: giro di pin 966ccf4 (32mo, 02f2835 -> d1a158b). $SHA_ROUND e
+#  $SHA_WALK invariati.
+# =====================================================================
+966ccf4988a628c1be91a52c46f8f12174388a4c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R151a_trailingatr_XAUUSD.txt -Etichetta r151a -Modello 1 -Deposito 100000
