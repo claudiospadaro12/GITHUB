@@ -18617,3 +18617,76 @@ mappa finta la fa **schiacciare dallo `$Repo = "github"` dello script** — i no
 variabile in PowerShell sono **insensibili al maiuscolo**, e il banco certificava
 "tutto NUOVO" mentre il ramo IDENTICO non era mai stato eseguito. Un banco che non
 si rompe mai non e' un banco.
+
+---
+
+## 326. 🖼️📏 PANNELLO MQL5: `OBJPROP_FONTSIZE` e' in **PUNTI**, il riquadro e' in **PIXEL** — e se l'altezza e' un numero fisso, il testo esce (14/09/2026)
+
+**Il caso reale**: `ABTG_OrologioLaterale.mq5` v1.00, indicatore nuovo scritto per
+mostrare ora SERVER e ora ITALIA affiancate (nasce dalla regola FUSO ORARIO BCM).
+Fermato dal cancello **prima** di andare a Claudio per la compilazione. Sintassi
+perfetta, zero API pericolose, ASCII puro: **compilava**. E a schermo era rotto.
+
+🔴 `gPanelH` era un **numero fisso** (`InpMostraData ? 92 : 70`) mentre le righe
+erano posizionate con `InpY+22+InpFontSize+10`, cioe' usando `InpFontSize` **come
+se fosse un'altezza in pixel**. Non lo e': `OBJPROP_FONTSIZE` e' in **punti**, e a
+96 DPI **1 pt = 1,33 px** (piu' l'interlinea). Coi valori di default
+(`InpY=4`, `InpFontSize=20`):
+- l'ora ITALIA occupava `70..97`, il fondo del riquadro stava a `96` -> **fuori**;
+- la riga della data (`InpY+gPanelH-16` = `80..92`) cadeva **SOPRA** l'ora ITALIA;
+- con `InpMostraData=false` il riquadro era alto 70 e l'ora ITALIA sbordava di
+  **23 px sul grafico nudo**.
+Simulato: **rotto in 6 casi su 6** (font 14/20/28 x data si/no). E peggiorava
+**alzando il font**, cioe' proprio la manopola per cui l'indicatore esiste
+("grande, leggibile da lontano").
+
+🔴 **Secondo difetto, stesso file, stessa famiglia**: con `OBJPROP_CORNER` in uno
+dei due angoli **BASSI** l'anchor diventa `ANCHOR_*_LOWER` e `OBJPROP_YDISTANCE`
+si misura **dal bordo inferiore del grafico**. Le y crescenti impilavano quindi le
+righe **verso l'alto**: a schermo l'ordine usciva **capovolto** (data in cima,
+SERVER in fondo). Il rettangolo di sfondo invece si estende sempre verso l'interno
+-> testo e sfondo **divergevano**. Due dei quattro valori dell'input erano rotti.
+
+### 🔑 La regola in una riga
+> **In un pannello a oggetti MQL5 nessuna dimensione si scrive a mano: altezza e
+> larghezza del riquadro si RICAVANO dal font** (`px ~ pt * 4/3`, piu'
+> interlinea), **e ogni y si converte esplicitamente quando l'angolo e' in basso**
+> (`y_out = Y + H - y_dal_top - h_riga`).
+
+### 🔎 COME SI RICONOSCE IN TRENTA SECONDI
+1. Cerca nel sorgente un'**altezza o larghezza costante** (`= 92`, `= 200`) accanto
+   a un `InpFontSize` usato in una somma di coordinate: se il pannello non si
+   ridimensiona col font, e' gia' rotto per qualche valore del font.
+2. **Simula il layout fuori da MT5** (dieci righe di Python): per ogni riga la
+   banda `[y, y+h]` con `h = ceil(pt*4/3)`; verifica **contenimento** nel riquadro
+   e **zero sovrapposizioni**, su tutta la gamma del font e su **tutti e quattro**
+   gli angoli. E' il contro-esempio del 10/09 applicato alla grafica: non basta che
+   il default "sembri giusto".
+3. Guarda gli **estremi dell'input**: `InpFontSize = 0` o negativo rende il
+   pannello invisibile **senza nessun errore**. Ci vuole una guardia (qui 6..72).
+
+### ⚠️ E LE TRE COSE MINORI DELLO STESSO GIRO (tutte vere, nessuna bloccante)
+- **segno stampato a mano**: `"+" + (string)InpOffsetOre` stampa **`+-1h`** se
+  l'offset e' negativo — e l'offset e' proprio la manopola che il file invita a
+  cambiare al cambio ora legale/solare. Il segno si **calcola**;
+- **niente identificativo di istanza** nei nomi oggetto: due copie sullo stesso
+  grafico si cancellano a vicenda, perche' `OnDeinit` fa `ObjectsDeleteAll` **per
+  prefisso**;
+- **`BuildPanel` senza pulizia iniziale**: un oggetto rimasto da una configurazione
+  precedente (la riga data, con `InpMostraData` ora a `false`) resta a schermo
+  **congelato** e non viene piu' aggiornato. Un orologio fermo che sembra acceso.
+
+### 🟢 E LE DUE COSE CHE SEMBRAVANO DUBBIE E INVECE ERANO GIUSTE
+Si scrivono, perche' un elenco di soli difetti descrive male la realta':
+- **`#property indicator_buffers 0` senza mai chiamare `SetIndexBuffer` e' valido**
+  — precedente in casa gia' compilato e installato: `ABTG_LivelliChiave.mq5`
+  (righe 29-30, zero `SetIndexBuffer`), lo stesso file della classe 27;
+- **un `enum` custom che prende come valori le costanti `ENUM_BASE_CORNER`**
+  (`ABTG_ALTO_SX = CORNER_LEFT_UPPER`) **e' sintassi valida**, e `(int)` su quel
+  tipo si passa a `OBJPROP_CORNER` senza tabelle di conversione. Precedente
+  esterno gia' compilato: `RealCostSpreadP95Logger` (CodeBase 74148, righe 16-22),
+  in `backtest_pipeline/caccia_strategie/biblioteca/sorgenti/`.
+- **`TimeTradeServer()` e non `TimeCurrent()`**: `TimeCurrent()` e' l'ora
+  dell'**ultimo tick conosciuto** del simbolo, quindi di notte, nel weekend o su un
+  simbolo fermo un orologio costruito su di essa **si congela**.
+  `TimeTradeServer()` e' l'ora server **calcolata** e avanza comunque.
