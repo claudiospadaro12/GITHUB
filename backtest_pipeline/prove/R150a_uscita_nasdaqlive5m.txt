@@ -328,9 +328,11 @@
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
-#  n: NON-DECRESCENTE da 175 (OOS) / 116 (IS) fino al tetto 195 / 127.
-#     Attesa la salita piu' ripida fra x=0 e x=1,0 (sotto 1R sta la
-#     patologia documentata: le uscite a +0,03R).
+#  n: atteso NON-DECRESCENTE da 175 (OOS) / 116 (IS) verso il valore a
+#     trailing spento 195 / 127 -- ATTESA, non cancello, per la ragione
+#     del blocco (C) (il denominatore di R non e' stabile). Attesa la
+#     salita piu' ripida fra x=0 e x=1,0 (sotto 1R sta la patologia
+#     documentata: le uscite a +0,03R).
 #
 #  PF OOS: mi aspetto che SALGA sopra 0,95624 gia' alla prima cella
 #     x>0, perche' le uscite premature misurate stanno tutte sotto
@@ -370,8 +372,10 @@
 #     esito identico del censimento del 09/09.)
 #
 #  ### LE TRE USCITE ###
-#   (a) CATENA ROTTA (sentinella duro o monotonia) -> non si legge
-#       niente, si cerca il binario.
+#   (a) CATENA ROTTA -- e adesso vuol dire UNA COSA SOLA: n(x=0) diverso
+#       da 175 (OOS) / 116 (IS). Allora non si legge niente e si cerca il
+#       binario. La monotonia NON e' piu' qui dentro: se salta, si
+#       applica la lettura di (C) e si SCRIVE, non si boccia.
 #   (b) LA CURVA ESCE -> la voce 3 del certificato passa da "tre assi"
 #       a "QUATTRO assi, cioe' TUTTE le manopole d'uscita che l'EA ha".
 #       Il numero va in REGISTRO_TEST.md r.36 (L2) insieme a quelli di
@@ -386,8 +390,16 @@
 #  1. NON RESUSCITA IL MOTORE, e non e' modestia: e' aritmetica gia'
 #     fatta. Il verdetto del 12/09 boccia questo meccanismo
 #     sull'INGRESSO e sul COSTO: stop minimo 24 idx / spread mediano
-#     misurato 1,80 = 13,33x, contro un pavimento DI LAVORO di 40x
-#     (12,63x al P95). Il rapporto stop/spread e' una proprieta'
+#     misurato 1,800 = 13,33x, contro un pavimento DI LAVORO di 40x.
+#     (Il mediano 1,8000 e' quello misurato all'ora 14 SERVER su
+#     10.455.143 tick, risultati_archivio/spread_flotta/
+#     spread_orario_NASUSD.csv riga "14" -- lo stesso usato oggi da
+#     R149a. >>> CORREZIONE: la prima stesura di questo file riportava
+#     "12,63x al P95", ereditato dall'AUDIT del 12/09 che usava P95 =
+#     1,90. Il CSV misurato dice P95 = 2,7000, quindi il numero giusto e'
+#     24/2,700 = 8,89x, non 12,63x. Il verso non cambia -- sotto il
+#     pavimento di lavoro e sotto il duro 13,3x -- ma il numero si scrive
+#     giusto.) Il rapporto stop/spread e' una proprieta'
 #     dell'INGRESSO: NESSUNA manopola d'uscita lo sposta di un decimo.
 #     >>> Quindi anche una cella con PF OOS 1,30 NON promuove niente e
 #         NON crea una sedia. Si spende per CHIUDERE LA VOCE 3 COL
@@ -536,23 +548,37 @@ InpVerbose=true||true||0||true||N
 # --- L'UNICO ASSE: DOPO QUANTI R IL TRAILING PUO' ARMARE.
 #     r.1040 dell'EA: trailArmato = (InpTrailStartR <= 0) ||
 #                                   (profR >= InpTrailStartR)
-#     Non e' una griglia di parametri in campo aperto: e'
-#     l'INTERPOLAZIONE FRA DUE CELLE GIA' MISURATE DA R142c.
-#        0,0  = il trailing arma dal primo tick.
-#               >>> SENTINELLA DURO: deve dare n 175 (OOS) / 116 (IS),
-#                   e PF 0,95624 / 1,01472 sul binario di oggi.
+#     Non e' una griglia di parametri in campo aperto: parte ANCORATA a
+#     una cella gia' misurata da R142c e cammina verso una seconda.
+#        0,0  = il trailing arma dal primo tick. Ancoraggio ESATTO: a
+#               zero il test e' un corto circuito e il codice eseguito e'
+#               quello di R142c.
+#               >>> SENTINELLA DURO (solo l'n): deve dare n 175 (OOS) /
+#                   116 (IS),
+#                   e -- questo SOLO come lettura, non come cancello --
+#                   PF 0,95624 / 1,01472 sul binario di oggi.
 #        0,5  = primo ritardo vero. Le uscite premature documentate nel
 #               codice stanno tutte sotto 0,1R: qui sono gia' tutte
-#               dentro il filtro.
+#               dentro il filtro. Sotto 1R il denominatore di R e' ancora
+#               quello vero, quindi qui "0,5R" vuol dire davvero 0,5R.
 #        1,0  = il trailing non arma prima del primo obiettivo: da 1R in
 #               poi la posizione e' gia' dimezzata e in pari.
+#               >>> DA QUI IN SU IL METRO CAMBIA: dopo la parziale
+#                   riskDist diventa ATR(14) M5 x 1,5 (r.974 + r.1091),
+#                   quindi le celle 1,5-3,0 NON sono "1,5R-3R" veri ma
+#                   multipli di ATR. E' scritto qui perche' si legge
+#                   PRIMA dei numeri, non dopo averli visti.
 #        1,5 / 2,0 / 2,5 = il "lascia correre" progressivo sulla meta'
-#               che resta.
-#        3,0  = il TP dell'ordine sta a 3R (r.767): il trailing non fa
-#               in tempo ad armare.
-#               >>> SECONDO SENTINELLA (atteso, non cancello): deve
-#                   convergere alla cella "trailing SPENTO" di R142c,
-#                   OOS 0,99949 / n 195 / DD 33,6209.
+#               che resta, in unita' ATR (vedi sopra).
+#        3,0  = il ritardo massimo dell'asse. Il TP dell'ordine sta a 3
+#               volte la distanza di rischio DELL'ORDINE (r.665/682 con
+#               TpTotalR a r.763-769), che NON e' lo stesso metro di
+#               profR: percio' NON e' garantito che il trailing non armi.
+#               >>> SECONDA ATTESA (non cancello, e non sentinella):
+#                   VICINA alla cella "trailing SPENTO" di R142c,
+#                   OOS 0,99949 / n 195 / DD 33,6209. Se non converge,
+#                   la spiegazione gia' scritta e' il denominatore, non
+#                   un guasto.
 #     Passo 0,5: sette celle. NON piu' fitto di proposito -- la
 #     patologia misurata sta tutta sotto 0,1R e un passo piu' fine
 #     cercherebbe un picco, non una forma (regola del 19/08). Se esce un
