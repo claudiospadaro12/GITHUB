@@ -1,0 +1,371 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Live5m      (magic di casa 770203)
+#  R146a -- IL CANALE DI 15 MINUTI DEL PDF ABTG, MISURATO CONTRO IL
+#           CANCELLO DEL COSTO. NASUSD, ingresso PRE-APERTURA,
+#           finestra pre-apertura portata da 5 a 15 MINUTI.
+# ---------------------------------------------------------------------
+#  DOSSIER: questo round nasce dall'analisi del PDF "Piano di trading
+#     NASDAQ" (Alfio Bardolla Training Group) caricato da Claudio il
+#     14/09/2026.
+#  PADRI: report/PREOPEN_NASDAQ_IL_VERDETTO_2026-09-12.md (v2, il
+#         certificato di morte del meccanismo 770203)
+#         report/PREOPEN_GEMELLI_LA_SCALA_2026-09-13.md
+#         backtest_pipeline/prove/R143a_preopen_metro_NASUSD.txt
+#         (stesso metro, stessa igiene, finestra pinnata a 5 minuti)
+#
+# ---------------------------------------------------------------------
+#  ###  RICHIEDE LA FIRMA DI CLAUDIO PRIMA DI GIRARE  ###
+# ---------------------------------------------------------------------
+#  R143a dichiara, testualmente, che la LARGHEZZA della finestra
+#  pre-apertura e' la VOCE 5 del certificato di morte e che "quella
+#  vuole la FIRMA DI CLAUDIO prima". Questo file MUOVE ESATTAMENTE
+#  QUELL'ASSE (InpPrevWindowMin 5 -> 15).
+#  >>> Percio' NON e' armato in CODA.txt da chi lo scrive, e non lo
+#      sara' finche' Claudio non firma. E' un file pronto, non un
+#      round partito.
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' ESISTE: IL PDF NON PORTA UN MOTORE, PORTA UN NUMERO  ###
+# ---------------------------------------------------------------------
+#  Il PDF ABTG descrive lo stesso meccanismo che in casa e' gia'
+#  codificato e gia' misurato (canale pre-apertura, ordini pendenti a
+#  +7/+10 punti oltre gli estremi, parziale, stop a pari, trailing).
+#  Sei ingredienti su nove sono IDENTICI a 770203: verificati riga per
+#  riga in report/AUDIT_NASDAQ_PREOPEN_2026-09-12.md par.2.
+#  >>> Quindi il PDF NON apre un motore nuovo. Porta UNA differenza
+#      geometrica che in casa non e' mai stata misurata: il canale e'
+#      di 15 MINUTI (15:15-15:30 CET), non di 5.
+#
+#  E quella differenza tocca l'unico asse che conta per il cancello del
+#  costo, perche' con InpSLMode=0 (SL_RANGE) lo stop E' il canale:
+#      stop = ampiezza del canale + buffer
+#  Un canale piu' largo = uno stop piu' largo = un rapporto
+#  stop/spread migliore. E' l'unica via per cui questa famiglia puo'
+#  avvicinarsi al pavimento di lavoro.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CANCELLO DEL COSTO, RICHIAMATO CON I NUMERI MISURATI  ###
+# ---------------------------------------------------------------------
+#  Spread NASUSD all'ora 14 SERVER (= 15:00-15:59 italiane, cioe' la
+#  fascia che contiene sia il canale sia l'apertura), MISURATO sui tick
+#  BCM nella finestra 2024.09.26 -> 2026.06.30, n = 10.455.143 tick:
+#      mediana 1,800 idx   P95 2,700 idx   massimo 8,200 idx
+#  Fonte: risultati_archivio/spread_flotta/spread_orario_NASUSD.csv
+#         (riga "14"), + REFERTO_SPREAD_FLOTTA.txt per la conversione.
+#  Conversione MISURATA da due fonti indipendenti: su NASUSD
+#      1 punto indice = 100 punti MT5   (point = 0.01)
+#
+#  I DUE PAVIMENTI DI CASA, applicati a quella mediana:
+#      pavimento DI LAVORO  40,0 x 1,800 = 72,0 punti indice di stop
+#      pavimento DURO       13,3 x 1,800 = 23,9 punti indice di stop
+#  (criteri congelati in prove/R125_ORB_COSTO_CRITERI.md par.2, firmati
+#   da Claudio il 10/09/2026 A NUMERI NON VISTI.)
+#
+#  Con il buffer nudo del piano (7 punti indice) lo stop vale
+#  "ampiezza + 7", quindi i due pavimenti si traducono in AMPIEZZA DEL
+#  CANALE:
+#      per il pavimento DI LAVORO  ->  ampiezza >= 65,0 idx = 6500 pt
+#      per il pavimento DURO       ->  ampiezza >= 16,9 idx = 1690 pt
+#
+#  >>> ED E' QUESTA LA DOMANDA DEL ROUND, in una riga:
+#      SU CHE FRAZIONE DI GIORNATE il canale di 15 minuti del PDF e'
+#      largo almeno 65,0 punti indice, cioe' su che frazione di
+#      giornate questa geometria sta DENTRO il pavimento di lavoro?
+#      Oggi quel numero e' [NON MISURATO] e nessuno lo ha mai misurato.
+#
+# ---------------------------------------------------------------------
+#  ###  COSA MISURA, e come -- E' UNA CURVA DI SOPRAVVIVENZA  ###
+# ---------------------------------------------------------------------
+#  Stesso trucco di R143a, che non chiede una riga di codice nuova.
+#  ABTG_Nasdaq_Live5m.mq5 r.639:
+#      if(InpMinRangePts > 0 && rangePts < InpMinRangePts) ... return
+#  Il filtro sta PRIMA di SpreadOK() (r.644) e di TrendBias() (r.649), e
+#  tutti gli altri filtri sono pinnati spenti qui sotto. Quindi
+#      n(x) = quante giornate hanno il canale pre-apertura >= x
+#  e' una FUNZIONE DI SOPRAVVIVENZA PURA dell'ampiezza, non un
+#  risultato di strategia.
+#  La differenza con R143a e' UNA SOLA: li' la finestra era 5 minuti,
+#  qui e' 15. Stesso metro, canale diverso.
+#
+#  L'ASSE E' TARATO SUL CANCELLO, non su numeri tondi:
+#      1690 pt = 16,9 idx = il pavimento DURO   (13,3 x spread)
+#      6500 pt = 65,0 idx = il pavimento DI LAVORO (40 x spread)
+#  Il passo 1300 e' scelto perche' 6500 CADE ESATTAMENTE sulla griglia
+#  (5 x 1300) e perche' 1300/2600 la stringono attorno a 1690.
+#
+# ---------------------------------------------------------------------
+#  ###  IL TRAPPOLONE CHE QUESTO FILE EVITA, dichiarato  ###
+# ---------------------------------------------------------------------
+#  InpMaxRangePts (il TETTO a 4000 pt = 40 idx) e' tarato su una candela
+#  di CINQUE minuti. Su una finestra di QUINDICI minuti il canale e'
+#  sistematicamente piu' largo: lasciare il tetto acceso a 4000
+#  taglierebbe una quota crescente di giornate e, al limite, porterebbe
+#  n a ZERO -- e si leggerebbe come "la finestra larga non funziona",
+#  che sarebbe una conclusione sul TETTO, non sulla FINESTRA.
+#  >>> PERCIO' IL TETTO E' PINNATO A 0 (spento), esattamente come in
+#      R143a e per la stessa ragione: con pavimento e tetto accesi
+#      insieme n(x) NON e' piu' una curva di sopravvivenza.
+#  >>> CONSEGUENZA DICHIARATA: NESSUNA cella di questo round e' il
+#      meccanismo 770203 com'e' in archivio (che ha il tetto a 4000).
+#      Nessuna cella di qui e' promuovibile a "la strategia del PDF".
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO INCORPORATO -- E' UNA DISUGUAGLIANZA  ###
+# ---------------------------------------------------------------------
+#  Serve una presa che dica "la catena e' intera" PRIMA di leggere
+#  qualunque numero nuovo. Qui ce ne sono due, e sono indipendenti.
+#
+#  (1) MONOTONIA. n(0) >= n(1300) >= n(2600) >= ... >= n(9100), in
+#      TUTTE E DUE le finestre. E' vero PER COSTRUZIONE (r.639: alzare
+#      una soglia puo' solo togliere giornate). Se si rompe, il CSV non
+#      descrive questo asse e non si legge nient'altro.
+#
+#  (2) IL VERSO DELLA FINESTRA. L'archivio ha la stessa cella a
+#      finestra 5 minuti e tetto SPENTO in R143a; se R143a non fosse
+#      ancora girato, il confronto duro resta quello con la cella
+#      archiviata a tick reali (MinRange 1700, MaxRange 4000):
+#          IS   PF 1.01621   n 116   DD 11.5160
+#          OOS  PF 0.96265   n 175   DD 19.4006
+#      (risultati_prove/ABTG_Nasdaq_Live5m/*.csv, rischio 2%)
+#      Allargare la finestra da 5 a 15 minuti puo' solo ALLARGARE il
+#      canale (il massimo di 15 minuti e' >= il massimo dei 5 minuti
+#      finali, e il minimo e' <=: e' contenimento di insiemi, non una
+#      stima). Quindi:
+#          >>> n(1700 circa) a finestra 15 DEVE essere >= n(1700) a
+#              finestra 5, a parita' di tetto.
+#      Sulla griglia di qui il valore piu' vicino e' 1300 e 2600, che lo
+#      stringono: si legge n(1300) >= n(1700 a finestra 5).
+#      >>> Se esce PIU' PICCOLO, la catena e' rotta (finestra sbagliata,
+#          taglio IS/OOS diverso, binario diverso) e NON SI LEGGE
+#          NESSUN ALTRO NUMERO del round.
+#
+#  >>> HO PROVATO A ROMPERE IL CONTENIMENTO DI INSIEMI, e cede in UN
+#      punto solo, che percio' si dichiara: ComputeRangeWindow (r.599-
+#      625) usa iBarShift(..., exact=false) e count = |start-end| + 1,
+#      quindi la finestra di casa INGLOBA la barra M1 delle 14:30 in
+#      TUTTI i casi. E' un +1 barra COSTANTE su ogni larghezza, quindi
+#      non rompe il confronto fra 5 e 15 -- ma vuol dire che la
+#      finestra di casa NON e' il canale del PDF alla lettera: il PDF
+#      chiude il canale alle 15:30, casa ci mette dentro anche il primo
+#      minuto di cassa USA. Gia' notato in AUDIT_NASDAQ_PREOPEN
+#      par. "D-A". Il livello di casa e' quindi >= a quello del PDF.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n: in CALO MONOTONO. Punto duro: n(1300) >= 175 in OOS e >= 116 in
+#     IS (vedi contro-esempio 2).
+#     n(0) = popolazione piena delle giornate, con la finestra a 15
+#     minuti: MAI misurata. E' il dato nuovo principale insieme a
+#     n(6500).
+#     STIMA, dichiarata come stima: la finestra OOS e' 10/06/2025 ->
+#     30/06/2026 = ~270 sedute USA; con InpOneTradePerDay e la parziale
+#     accesa, n(0) OOS dovrebbe stare fra 300 e 500 DEAL. Sotto 200,
+#     qualcosa non torna.
+#
+#  n(6500) / n(0) = LA FRAZIONE DI GIORNATE DENTRO IL PAVIMENTO DI
+#     LAVORO. E' il numero per cui questo file esiste.
+#     ATTESA, dichiarata prima e con la sua base: sul canale di CINQUE
+#     minuti il cancello di casa e' 17-40 idx "come da live", cioe' la
+#     massa della distribuzione sta sotto 40; se il canale di 15 minuti
+#     scalasse con la radice del tempo (x1,73) la massa starebbe sotto
+#     ~70 idx, e 65 cadrebbe nella CODA ALTA.
+#     >>> Percio' mi aspetto n(6500)/n(0) BASSO: dichiaro la banda
+#         5% - 25% PRIMA di vedere il numero.
+#     >>> E dichiaro anche cosa mi SMENTISCE: se n(6500)/n(0) esce
+#         SOPRA il 35%, la mia lettura del cancello su questa famiglia
+#         e' sbagliata e il canale di 15 minuti e' una geometria
+#         sostenibile molto piu' spesso di quanto ho scritto. Sarebbe
+#         una notizia BUONA e va scritta come tale, non nascosta.
+#     ATTENZIONE: la scala x1,73 e' una STIMA [DERIVATO], non una
+#     misura. Il canale pre-apertura NON e' un moto browniano e la
+#     pre-apertura non e' stazionaria. Serve proprio perche' il numero
+#     vero non esiste in archivio: e' l'attesa, non il risultato.
+#
+#  PF: [NON MISURATO] su questa variante. Nessuna banda citata come
+#     previsione: l'unico asse confrontabile (NASDAQ_I, span 0,192) sta
+#     su un ALTRO ingresso (RangeMode=0) e trasferirlo sarebbe la
+#     classe 297. Si legge quello che esce.
+#
+#  DD: [NON MISURATO]. Riferimento 11,52% IS e 19,40% OOS a rischio 2%
+#     per la cella a finestra 5 col tetto. ATTESA IN CALO al crescere
+#     di x: uno stop piu' largo a rischio fisso = lotto piu' piccolo.
+#     E' la lezione R118 par.3.3 ("non e' un picco: e' un piano
+#     inclinato"), misurata su un altro motore e qui usata SOLO come
+#     verso atteso, non come numero.
+#
+#  CANARINO DI MANOPOLA INERTE, scritto prima: se DUE celle consecutive
+#     danno lo STESSO n al deal, la soglia non ha morso fra quei due
+#     valori e i loro PF NON si citano come punti distinti. E' la
+#     lezione degli 874 CSV a esito identico del censimento 09/09.
+#
+#  LE TRE USCITE:
+#   (a) LA DISUGUAGLIANZA NON REGGE -> CATENA ROTTA. Non si legge
+#       nessun numero e si cerca il binario prima di rilanciare.
+#   (b) LA CURVA ESCE -> il canale di 15 minuti del PDF e' MISURATO
+#       contro il cancello del costo, e la frazione n(6500)/n(0) si
+#       scrive in chiaro nel registro.
+#       >>> NON SI PROMUOVE NIENTE DA QUI, e per tre motivi gia' noti:
+#           il tetto e' spento (nessuna cella e' il meccanismo vivo),
+#           il regime e' UNO SOLO (21 mesi di tick BCM), e il rischio
+#           e' al 2% (vedi IGIENE).
+#   (c) UNA CELLA CON PF OOS >= 1,10 E n >= 150 -> si SCRIVE, non si
+#       promuove. Il centro dell'altopiano, mai il picco.
+#
+#  SOGLIE CONGELATE PRIMA:
+#    catena rotta se n(1300) < 175 in OOS oppure < 116 in IS
+#    catena rotta se la monotonia di n si rompe in una delle finestre
+#    scarta la CELLA se PF OOS < 1,10 con n >= 150
+#    non giudica il MERITO se n < 150 (valvola R59, Emendamento A)
+#    il RISCHIO (DD) si legge a qualunque n (Emendamento B, 16/08)
+#
+# ---------------------------------------------------------------------
+#  ###  COSA NON MISURA, scritto prima  ###
+# ---------------------------------------------------------------------
+#  1. NON misura lo STOP DI 5 PUNTI del PDF, e non per dimenticanza:
+#     5 punti indice / 1,800 di spread mediano = 2,78x, contro un
+#     pavimento DURO di 13,3x. Fallisce il cancello di un fattore 4,8,
+#     e il pavimento di lavoro di un fattore 14,4. Non e' una cella da
+#     provare: e' una geometria fuori dal perimetro di casa, e il
+#     cancello si applica PRIMA della griglia, non dopo.
+#  2. NON misura il FILTRO OSTACOLI del PDF (medie mobili, Supertrend,
+#     pivot, S/R entro 10-15 punti). Tutti i filtri sono pinnati
+#     SPENTI qui: una variabile alla volta. Il filtro S/R esiste gia'
+#     nel motore di casa (InpUseSRFilter, InpSRProximityPts = 1500 pt
+#     = 15 punti indice) ed e' un round separato.
+#  3. NON misura l'ampiezza del canale in punti indice giornata per
+#     giornata: la curva n(x) da' la distribuzione per quantili, non i
+#     valori. La via diretta (r.640 stampa l'ampiezza di ogni giornata
+#     scartata) resta chiusa perche' walkforward_generico.ps1 raccoglie
+#     solo il log del COMPILATORE, non il giornale del tester.
+#     Dichiarata, non fatta.
+#  4. NON chiude la VOCE 5 del certificato da sola: muove la larghezza
+#     su UN valore (15). L'asse completo 5/10/20/30/60 resta aperto.
+#  5. UN SOLO REGIME (21 mesi di tick BCM sugli indici). Nessuna cella
+#     e' promuovibile senza la prova di regime (Emendamento, regola C).
+#  6. NON misura il LATO separatamente: long e short sono entrambi
+#     accesi, come nella cella archiviata. La regola dei due lati
+#     (25/08) chiede una misura per lato: e' un round separato.
+#
+# ---------------------------------------------------------------------
+#  IGIENE, VERIFICATA A MANO
+# ---------------------------------------------------------------------
+#  -Modello 4 = TICK REALI. Qui non e' screening.
+#  @DAQUANDO 2024.09.26 = pavimento MISURATO dei tick BCM sugli indici.
+#  @FINOA 2026.06.30 = la stessa fine della corsa archiviata.
+#  TAGLIO IS/OOS: NON si scrive @FRAZIONEIS, si usa il default 0,40 del
+#     driver. La prova che e' il taglio giusto sta scritta da qualcun
+#     altro: risultati_archivio/REFERTO_WEEKEND_FASE0.md r.7 --
+#     "IS 26/09/2024->09/06/2025 - OOS 10/06/2025->30/06/2026".
+#  ORE IN ORA SERVER BCM (= ora italiana - 1): InpSessionHour=14,
+#     InpSessionMin=30 (15:30 IT). InpCloseHour=20, InpCloseMin=45.
+#     Un CSV con InpSessionHour=15 e' in ora ITALIANA: SI CESTINA.
+#     >>> E il canale del PDF: 15:15-15:30 CET = 14:15-14:30 SERVER.
+#         Con InpSessionHour/Min = 14:30 e InpPrevWindowMin = 15 il
+#         motore costruisce esattamente [14:15, 14:30] (r.591:
+#         fromMin = openMin - InpPrevWindowMin). Il fuso e' gestito
+#         dall'ora di sessione, non da un offset cablato.
+#  RISCHIO 2%: e' il valore della corsa archiviata, non una scelta di
+#     merito, e serve la comparabilita'. DUE conseguenze, dichiarate:
+#     (a) il DD che ne esce NON si legge contro i cancelli prop scritti
+#         per l'1% / 0,65%, e si cita SEMPRE come "DD x% @ rischio 2%";
+#     (b) il PF non si trasferisce fra taglie (CalcLotByRisk dimensiona
+#         su ACCOUNT_BALANCE, r.863-864: capitale composto).
+#     >>> E il 2% NON e' il rischio di casa: lo standard e' 0,65%. Il
+#         PDF chiede 2% per operazione, cioe' 3,08 volte lo standard.
+#         Qui il 2% e' un parametro di MISURA, non una proposta di
+#         taglia. Nessuna sedia viva viene toccata da questo file.
+#  DEPOSITO 10000 = default del driver = quello della corsa archiviata.
+#  MAGIC 770203: il magic di casa dell'EA, gia' in archivio. Questo
+#     file NON introduce un magic nuovo e NON crea una sedia.
+#  PER-TRADE: le celle condividono il magic -> si sovrascrivono. I
+#     numeri si leggono nell'OPTFRAME.
+#  NESSUN PIN DI STRINGA. UN SOLO AGENTE locale.
+#  TERMINALE: PC di BACKTEST. Mai su un terminale con sedie vive.
+#  CONVERSIONE MISURATA, due fonti indipendenti: 1 punto indice = 100
+#     punti MT5 su NASUSD (spread_flotta/REFERTO_SPREAD_FLOTTA.txt e
+#     data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt). Quindi
+#     l'asse qui sotto e' in PUNTI MT5: 6500 = 65,0 idx.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me, DA SOLO,
+#     mai in pipe; il secondo strato lo lancia il coordinatore.
+#
+#  COSTO: 8 celle x 2 finestre = 16 passate -> T = 0,6 + 0,077 x 16 =
+#         1,83 minuti.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+
+InpEntryMode=0||0||0||0||N
+InpRangeMode=1||1||0||1||N
+
+# --- LA DIFFERENZA DEL PDF, ED E' L'UNICA: il canale e' di 15 minuti.
+#     14:30 - 15 = 14:15 server = 15:15 italiane. Il PDF dice
+#     "15:15-15:30 CET". In casa fin qui e' sempre stato 5.
+InpPrevWindowMin=15||15||0||15||N
+
+InpRangeMinutes=15||15||0||15||N
+InpLevelTF=16385||16385||0||16385||N
+InpBufferPoints=700||700||0||700||N
+InpPendingExpiryMin=120||120||0||120||N
+
+# --- TETTO SPENTO, di proposito: e' tarato su una candela di 5 minuti
+#     e su una di 15 falserebbe la curva. Vedi "IL TRAPPOLONE".
+InpMaxRangePts=0||0||0||0||N
+
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+InpUseGapFill=false||false||0||false||N
+InpUseEmaFilter=false||false||0||false||N
+InpUseSupertrend=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpUseRoundLevels=false||false||0||false||N
+InpUseNewsFilter=false||false||0||false||N
+
+InpSLMode=0||0||0||0||N
+
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50||50||0||50||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0||0||0||0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=1||1||0||1||N
+
+InpRiskPercent=2||2||0||2||N
+
+InpMagic=770203||770203||0||770203||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE: IL PAVIMENTO DEL CANCELLO DI AMPIEZZA, in punti
+#     MT5, sul canale di 15 MINUTI. Non e' una griglia di parametri:
+#     e' una CURVA DI SOPRAVVIVENZA, e la sua forma e' nota per
+#     costruzione (monotona in calo). Serve la POSIZIONE dei due
+#     pavimenti del costo dentro la distribuzione.
+#        0    = cancello SPENTO. Popolazione piena delle giornate con
+#               il canale a 15 minuti: numero MAI misurato.
+#     1300    = 13,0 idx
+#     2600    = 26,0 idx   <- stringe il pavimento DURO (1690 = 16,9)
+#     3900    = 39,0 idx
+#     5200    = 52,0 idx
+#     6500    = 65,0 idx   <- IL PAVIMENTO DI LAVORO (40 x spread):
+#                             ampiezza 65,0 + buffer 7,0 = stop 72,0
+#     7800    = 78,0 idx
+#     9100    = 91,0 idx
+#     Passo 1300 scelto perche' 6500 cade ESATTAMENTE sulla griglia
+#     (5 x 1300) e perche' 1300/2600 stringono 1690. Otto celle.
+InpMinRangePts=1300||0||1300||9100||Y
