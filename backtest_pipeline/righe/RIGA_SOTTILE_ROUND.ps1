@@ -912,7 +912,56 @@ $BancoBT = 'C:\MT5_Backtest'
 #  uscite mai provate). RIGA_SOTTILE_ROUND.ps1 e walkforward_generico.ps1
 #  NON sono cambiati fra i due commit (diff vuoto, verificato), quindi
 #  $SHA_ROUND e $SHA_WALK restano quelle di sempre: solo $PIN si muove.
-$PIN = 'b3603c74031705d10310b79133446e7f677de1d4'
+# ---------------------------------------------------------------------
+#  >>> VENTISETTESIMO GIRO DI PIN (14/09/2026 notte): b3603c7 -> 96d91bd.
+#  IL CODICE NON E' CAMBIATO. Si muove per la CLASSE 265 nel suo modo
+#  SILENZIOSO, quello che non da' un 404 e quindi non si vede: a b3603c7
+#  i due file prova R147b e R147c ESISTONO, ma sono la versione col
+#  difetto dentro. Col pin vecchio il round girerebbe QUELLA, senza
+#  rumore e con un referto verde.
+#
+#  IL DIFETTO CORRETTO -- CLASSE 318, secondo FAIL del secondo strato su
+#  questi due file. In una riga: i due file dichiaravano che senza il
+#  flat di fine seduta "il giorno dopo l'EA si riarma lo stesso e puo'
+#  aprire una SECONDA posizione sopra la prima", quindi n atteso IN
+#  SALITA. Il codice fa il CONTRARIO, in due modi indipendenti:
+#    ABTG_ORB_Ottimizzato -> HandleOCO() (r.341 -> r.1029) cancella TUTTI
+#      i pendenti simbolo+magic quando SelPos() e' vero. Col riporto
+#      notturno i pendenti delle 14:45 muoiono al tick dopo e gPhase
+#      resta ORB_PLACED: GIORNATA A ZERO INGRESSI.
+#    ABTG_DAX_Apertura_EU -> la guardia anti-duplicato (r.594-602) forza
+#      gPhase=PH_PLACED appena vede una posizione, in piena notte, prima
+#      che il range della seduta si costruisca: SEDUTA A ZERO INGRESSI.
+#  Riscritti in tutti e due: meccanismo, ATTESA (n IN DISCESA, bande
+#  ritarate), 308-3, 308-4/308-5 e la sentinella S3 -- che era tarata al
+#  contrario e avrebbe dato un PASS dove serviva un fermo.
+#  MISURATO ai DUE pin, non presunto, e sulla riga che decide davvero --
+#  la sentinella S3, perche' e' quella che avrebbe fermato o lasciato
+#  passare il round:
+#      'n(cella 0) >= n(cella 1)'  -> b3603c7: 1 volta per file
+#                                     96d91bd: 0 volte
+#      'n(cella 0) <= n(cella 1)'  -> b3603c7: 0 volte
+#                                     96d91bd: 1 volta per file
+#      'ATTESO IN DISCESA'         -> b3603c7: 0 . 96d91bd: 2 per file
+#      'classe 318' (no maiuscole) -> b3603c7: 0 . 96d91bd: 4 (R147b) e
+#                                     6 (R147c)
+#  R147a NON e' toccato: il suo file prova e' IDENTICO ai due pin (git
+#  diff vuoto) e la sua riga di coda resta a 07e7bb5.
+#
+#  >>> UN SOLO VALORE CAMBIA: $PIN. <<<
+#  MISURATO PRIMA di spostarlo, sul blob git ai DUE commit:
+#      RIGA_ROUND_VPS.ps1        -> 348ED533...9D0A315B  (= $SHA_ROUND)
+#      walkforward_generico.ps1  -> 15DE7D5F...6828F1C6  (= $SHA_WALK)
+#  identiche a b3603c7 e a 96d91bd (git diff sui due percorsi: VUOTO).
+#  Se una delle due non combaciasse, 'function Prendi' chiamerebbe Muori
+#  e OGNI round morirebbe sull'impronta, compresi quelli gia' in coda.
+#
+#  >>> LE RIGHE GIA' IN CODA NON SI TOCCANO: r147a resta a 07e7bb5, e
+#      tutte le altre ai loro pin. Solo r147b e r147c porteranno il
+#      commit di QUESTO giro, e restano #DISARMATA#: il PASS del secondo
+#      strato non e' mio, arriva dall'agente 'controllo-preventivo'
+#      nella sessione principale.
+$PIN = '96d91bd7a026036f5f5776d5f821d3bec6cff8cb'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
