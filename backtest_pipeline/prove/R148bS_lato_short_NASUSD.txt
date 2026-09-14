@@ -1,24 +1,47 @@
 # ======================================================================
 #  EA: ABTG_Cycle
-#  R148b -- I DUE LATI, SEPARATI. NASUSD M30.
-#           Asse unico: IL LATO (long-only / short-only).
-#           Stesso banco, stessa finestra, stessi pin di R148a: questo
-#           file cambia UNA cosa sola rispetto a quello, ed e' il lato.
+#  R148bS -- IL LATO SHORT, DA SOLO. NASUSD M30.
+#            ASSE UNICO: InpAllowLong (0/1). InpAllowShort PINNATO a true.
+#            Stesso banco, stessa finestra, stessi pin di R148a: questo
+#            file cambia UNA cosa sola rispetto a quello.
 #  Scritto il 14/09/2026. Criteri congelati PRIMA dei numeri.
 #  MAGIC 775701 -- lo STESSO di R148a, ed e' voluto (vedi S5).
-#  ETICHETTA r148b: grep repo-wide 14/09/2026 -> ZERO occorrenze.
+#  ETICHETTA r148bs: grep repo-wide 14/09/2026 -> ZERO occorrenze.
 # ======================================================================
+#
+#  >>> IL NOME DICE LA CELLA DI MERITO, NON L'ASSE. E va letto adesso,
+#      perche' e' l'errore piu' facile di tutto il round:
+#        il file si chiama "lato_short" perche' la cella che MISURA e'
+#        SHORT-ONLY; l'asse pero' e' InpAllowLONG, perche' il modo di
+#        spegnere il lato long e' muovere il suo input.
+#      Chi legge "asse = InpAllowLong" e conclude "quindi qui si misura
+#      il long" ha invertito il round. La tabella delle celle e' qui:
+#        (InpAllowLong=0, InpAllowShort=1) = SHORT-ONLY  <- CELLA DI MERITO
+#        (InpAllowLong=1, InpAllowShort=1) = TUTTI E DUE <- = R148a, S5
+#      Il LONG-ONLY sta nel file gemello R148bL_lato_long_NASUSD.txt.
+#
+#  >>> QUESTO FILE DA SOLO NON PRODUCE IL NUMERO DEL BETA. I due file
+#      sono UNA COPPIA: si lanciano tutti e due, o non si legge il round.
+#      Il perche' non e' burocrazia, sta nella sezione "PERCHE' DUE FILE
+#      E NON UNO" qui sotto ed e' la ragione piu' importante del round.
 #
 #  SI LANCIA CON:
 #    -Expert ABTG_Cycle
-#    -Prova prove\R148b_cycle_lati_NASUSD.txt
+#    -Prova prove\R148bS_lato_short_NASUSD.txt
 #    -Simbolo NASUSD -Periodo M30
 #    -DaQuando 2024.09.26 -Fino 2026.06.30
-#    -Deposito 100000 -Modello 4 -Etichetta r148b
+#    -Deposito 100000 -Modello 4 -Etichetta r148bs
 #    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare
-#   "celle per finestra: 4" e DEVE attendersi 3 RIGHE nel CSV, non 4.
-#   Il perche' del 4-diventa-3 sta in S6: non e' un difetto.)
+#   "celle per finestra: 2" e attendersi 2 RIGHE nel CSV. Qui il conto
+#   e' liscio: nessuna cella muta, nessun 4-che-diventa-3 da spiegare.)
+#
+#  >>> L'ETICHETTA r148bs NON E' INTERCAMBIABILE CON r148bl. Il nome del
+#      CSV lo compone il driver come
+#      <EA>_<SIMBOLO>_<IS|OOS>_<etichetta> (walkforward_generico.ps1
+#      r.1617): con la STESSA etichetta il secondo file dei due
+#      spingerebbe il CSV del primo in 'vecchi\' e l'additivita' S2/S3/S4
+#      andrebbe a leggere una tabella che non c'e' piu'.
 #
 #  DALLA CODA la riga e' piu' corta, come quella di R148a: simbolo,
 #  periodo e finestra NON si passano, li leggono le direttive @ in fondo
@@ -30,22 +53,53 @@
 #     le sedie VIVE, incluso il conto REALE 10105439.
 #  !! -Modello 4 (TICK REALI) NON e' opzionale: stesso motivo di R148a
 #     (motore ad alta frequenza, il pedaggio e' meta' della risposta) e
-#     in piu' uno NUOVO di questo round: qui si CONFRONTANO fra loro tre
-#     celle, e un modello che sbaglia il riempimento sbaglia in modo
-#     DIVERSO su un long e su uno short. A OHLC M1 la differenza fra i
-#     due lati sarebbe in parte un artefatto del modello.
+#     in piu' uno NUOVO di questo round: qui si CONFRONTANO fra loro
+#     celle di lati diversi, e un modello che sbaglia il riempimento
+#     sbaglia in modo DIVERSO su un long e su uno short. A OHLC M1 la
+#     differenza fra i due lati sarebbe in parte un artefatto del modello.
 #  !! QUESTO FILE NON E' IN CODA. CODA.txt non e' stato toccato.
 #  !! QUESTO FILE NON PARTE PRIMA DI R148a. Stesso .ex5: se R148a non
 #     compila, questo non compila. E la sentinella S5 (riproduzione) ha
 #     bisogno del CSV di R148a per esistere.
 #
 # ----------------------------------------------------------------------
+#  ###  DA DOVE VIENE QUESTO FILE -- E COSA E' STATO CORRETTO  ###
+# ----------------------------------------------------------------------
+#  Il 14/09/2026 e' stato scritto un file unico,
+#  R148b_cycle_lati_NASUSD.txt, che spazzolava TUTTI E DUE i booleani
+#  come assi per ottenere in una corsa long-only, short-only e la cella
+#  con tutti e due. E' stato BOCCIATO dal cancello deterministico:
+#     python3 backtest_pipeline/controlla_prova.py ...
+#       - 2 assi Y: un file prova misura UNA variabile alla volta
+#         (InpAllowLong, InpAllowShort)
+#     ESITO: FALLITO
+#  La regola di casa (controlla_prova.py r.168-174) e' che UN FILE PROVA
+#  MISURA UNA VARIABILE ALLA VOLTA, e non ammette deroghe per obiettivi
+#  simpatici. Quel file e' stato SOSTITUITO da questa coppia:
+#     R148bL_lato_long_NASUSD.txt   (gemello) asse InpAllowShort
+#     R148bS_lato_short_NASUSD.txt  (questo)  asse InpAllowLong
+#  Tutto il contenuto analitico del file bocciato e' stato conservato:
+#  l'algebra del beta, le attese A1-A4, le sentinelle, i contro-esempi
+#  misurati in casa. Non e' stato tagliato niente per accorciare.
+#
+#  >>> E VA CORRETTA ANCHE UNA RIGA DI R148a, CHE PROPONEVA QUESTO ROUND
+#      COME "InpAllowShort come asse, 2 celle" (r.537 e r.643).
+#      Cosi' com'e' scritta NON basta, e il difetto e' aritmetico: con
+#      InpAllowLong pinnato a true e InpAllowShort spazzolato 0-1 le due
+#      celle sono LONG-ONLY e TUTTI-E-DUE. Il lato SHORT-ONLY -- cioe' la
+#      cella di merito DI QUESTO FILE -- NON CI SAREBBE. La regola dei
+#      due lati non sarebbe soddisfatta, e soprattutto non si potrebbe
+#      fare la sottrazione del BETA (punto (2) qui sotto).
+#      NON tocco R148a: e' armato, e i criteri si cambiano prima dei
+#      numeri, non dopo.
+#
+# ----------------------------------------------------------------------
 #  ###  PERCHE' QUESTO ROUND ESISTE -- ED E' ALGEBRA, NON UN RITO  ###
 # ----------------------------------------------------------------------
 #  La REGOLA DEI DUE LATI (25/08, CLAUDE.md) impone che su Nasdaq, DAX e
 #  Dow long e short si misurino SEMPRE separati. R148a li fa girare
-#  INSIEME e lo dichiara come buco al suo punto (6). Questo file chiude
-#  quel buco.
+#  INSIEME e lo dichiara come buco al suo punto (6). Questa coppia di
+#  file chiude quel buco.
 #  Ma "chiudere un buco di regolamento" sarebbe una ragione debole. La
 #  ragione forte e' che questo asse MISURA UN NUMERO CHE R148a NON PUO'
 #  PRODURRE, e il numero e' IL BETA DI MERCATO. Qui sotto c'e' il conto,
@@ -69,13 +123,21 @@
 #    n_L, n_S, N = numero di operazioni del lato long, del lato short e
 #          della cella con tutti e due (N = n_L + n_S).
 #
-#  E ADESSO LE QUATTRO CELLE, SCRITTE NELLA STESSA NOTAZIONE:
-#    cella LONG-ONLY  (questo file):  R_tot = +M/2 + s - n_L*c
-#    cella SHORT-ONLY (questo file):  R_tot = -M/2 + s - n_S*c
+#  E ADESSO LE CELLE, SCRITTE NELLA STESSA NOTAZIONE:
+#    cella SHORT-ONLY (QUESTO file):  R_tot = -M/2 + s - n_S*c
+#    cella LONG-ONLY  (file gemello): R_tot = +M/2 + s - n_L*c
 #    cella (1,1) verso 0 (= R148a):   R_tot =        2s - N*c
 #    cella (1,1) verso 1 (= R148a):   R_tot =       -2s - N*c
 #
-#  >>> DA CUI LE DUE COSE CHE CONTANO, E SONO SOTTRAZIONI, NON OPINIONI:
+#  >>> GUARDA BENE LA PRIMA RIGA, PERCHE' E' TUTTO IL SENSO DI QUESTO
+#      FILE: nella cella SHORT-ONLY l'abilita' s entra COL SEGNO PIU',
+#      esattamente come nel lato long. Quello che cambia di segno e' il
+#      MERCATO (-M/2). Cioe': il lato short di un motore stop-and-reverse
+#      NON e' "il lato che deve perdere in un toro": e' il lato in cui
+#      l'abilita' si legge SENZA il regalo della deriva, anzi CONTRO di
+#      lei. E' la cella piu' brutta del round e la piu' informativa.
+#
+#  >>> DA CUI LE COSE CHE CONTANO, E SONO SOTTRAZIONI, NON OPINIONI:
 #
 #   (1) R148a MISURA GIA' s, PURGATO DAL BETA. E va detto subito, perche'
 #       la tentazione era vendere questo round come "quello che toglie il
@@ -92,6 +154,8 @@
 #       nessuna parte in casa per NASUSD in questa finestra, e senza di
 #       lui non si puo' rispondere alla sola domanda che conta il 1o
 #       ottobre: "questo motore batte lo stare dentro e basta?".
+#       >>> E la sottrazione ha DUE termini: uno lo produce questo file,
+#           l'altro il gemello. Da soli, nessuno dei due la fa.
 #
 #   (3) E LA TRAPPOLA CHE IL ROUND DISINNESCA, che e' il vero motivo per
 #       cui lo scrivo ADESSO e non dopo: se R148a esce POSITIVO, la mossa
@@ -102,45 +166,49 @@
 #       montagna, e puo' rendere bellissimo un lato long anche con s = 0.
 #       Promuovere il lato long guardando il suo PF sarebbe promuovere un
 #       ETF caro, e la prima finestra d'orso lo direbbe a spese nostre.
-#       >>> QUESTO ROUND E' L'UNICA MISURA CHE SEPARA M/2 DA s. Nient'altro
-#           in questo EA lo fa.
+#       >>> QUESTA COPPIA DI FILE E' L'UNICA MISURA CHE SEPARA M/2 DA s.
+#           Nient'altro in questo EA lo fa.
+#       >>> E LA CELLA DI QUESTO FILE E' QUELLA CHE SMASCHERA LA TRAPPOLA:
+#           se lo short in un toro non crolla, s esiste. Se crolla
+#           esattamente di -M/2, s non esiste e il long del gemello era
+#           solo mercato.
 #
 #   (4) E UN REGALO ALGEBRICO, DICHIARATO PRIMA: M NON DIPENDE DAL VERSO.
 #       A InpVerso=1 i due lati diventano
 #            long:  R_tot = M/2 - s - n*c   ;  short: R_tot = -M/2 - s - n*c
 #       e la loro differenza e' ANCORA M. Quindi il numero del BETA che
-#       esce da questo file resta valido anche se R148a dicesse che il
+#       esce da questa coppia resta valido anche se R148a dicesse che il
 #       verso buono e' il "contro". Cambierebbero le celle di MERITO (e
-#       allora servirebbe il gemello a verso 1), non la riga del beta.
+#       allora servirebbero i gemelli a verso 1), non la riga del beta.
 #
 # ----------------------------------------------------------------------
-#  ###  CORREZIONE A QUELLO CHE R148a PROPONEVA -- e va letta  ###
+#  ###  PERCHE' DUE FILE E NON UNO -- e non e' (solo) il cancello  ###
 # ----------------------------------------------------------------------
-#  R148a (r.527 e r.633) propone questo round come "InpAllowShort come
-#  asse, 2 celle". >>> COSI' COM'E' SCRITTO NON FUNZIONA, e il difetto
-#  e' aritmetico: con InpAllowLong pinnato a true e InpAllowShort
-#  spazzolato 0-1 le due celle sono
-#        (long=1, short=0) = LONG-ONLY      e      (long=1, short=1) = R148a
-#  cioe' il lato SHORT-ONLY NON C'E'. La regola dei due lati non sarebbe
-#  soddisfatta, e soprattutto NON si potrebbe fare la sottrazione del
-#  punto (2): senza la cella short non c'e' nessun M.
-#  >>> QUINDI QUI SI SPAZZOLANO TUTTI E DUE I BOOLEANI. MT5 non sa
-#      accoppiare due input (non esiste "muovili in senso opposto"), e
-#      allora chiede 4 combinazioni:
-#        (1,0) LONG-ONLY    <- cella d'asse n.1
-#        (0,1) SHORT-ONLY   <- cella d'asse n.2
-#        (1,1) TUTTI E DUE  <- NON e' una cella nuova: e' esattamente la
-#                              cella InpVerso=0 di R148a. Torna GRATIS e
-#                              fa da sentinella (S5). Su di lei non si
-#                              sceglie e non si seleziona NIENTE.
-#        (0,0) NESSUN LATO  <- non esiste: l'EA rifiuta di partire
-#                              (ABTG_Cycle.mq5 r.518-519, INIT_FAILED).
-#      >>> L'ASSE RESTA A DUE CELLE. Le altre due righe sono un controllo
-#          e un buco strutturale, non due gradi di liberta' in piu'. Non
-#          si sta pescando: non c'e' NIENTE da scegliere in questo round.
+#  La ragione formale la da' controlla_prova.py: un asse per file. Ma la
+#  ragione VERA e' una misura, e va detta perche' cambia cosa si puo'
+#  concludere:
+#
+#   >>> CON UN FILE SOLO, IL LATO CHE MANCA SI PUO' SOLO DEDURRE
+#       ASSUMENDO L'ADDITIVITA':  R_tot(S) = R_tot(1,1) - R_tot(L).
+#       E l'additivita' e' ESATTAMENTE la cosa che la sentinella S4 deve
+#       CONTROLLARE. Dedurre un numero dall'ipotesi che si vuole
+#       verificare non e' una misura: e' confermare se stessi -- la
+#       classe di errore del 10/09 (CONTRO-ESEMPIO PRIMA DELLA CONSEGNA).
+#   >>> E NON E' UN TIMORE TEORICO: IN CASA L'ADDITIVITA' E' GIA' FALLITA
+#       UNA VOLTA. R40 (ABTG_CostToCost, GBPCAD H4, stesso schema di
+#       celle): 44 long + 44 short contro 64 della cella con tutti e due.
+#       88 != 64. Li' i due lati si rubavano il posto.
+#       backtest_pipeline\risultati_prove\ABTG_CostToCost\r40\
+#       ABTG_CostToCost_GBPCAD_IS_r40.csv
+#   >>> QUINDI: due file = due lati MISURATI. E in regalo, DUE
+#       riproduzioni indipendenti della cella (1,1) di R148a invece di
+#       una (sentinella S8). Il conto del costo sta in fondo, sezione
+#       COSTO IN TEMPO MACCHINA: sono 2 passate in piu' del file bocciato,
+#       ed e' il prezzo piu' basso a cui si compra un controllo in piu'.
 #
 # ----------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+#  ###  (le quantita' si leggono sulla COPPIA, non su questo file) ###
 # ----------------------------------------------------------------------
 #  PRIMA LE DUE QUANTITA' CHE SI LEGGONO, e la formula per ricavarle da
 #  colonne che il CSV GIA' HA (Profit, Trades; Deposito 100.000):
@@ -153,6 +221,17 @@
 #      E_beta   = [ R_tot(L) - R_tot(S) ] / [ Trades(L) + Trades(S) ]
 #                 = M/N          -> IL MERCATO, per operazione
 #      M        = R_tot(L) - R_tot(S)    -> il buy-and-hold della finestra
+#
+#  dove R_tot(S) viene dalla cella SHORT-ONLY di QUESTO file e R_tot(L)
+#  dalla cella LONG-ONLY del gemello, finestra per finestra (IS con IS,
+#  OOS con OOS: mescolarle sarebbe un altro numero).
+#
+#  >>> ATTENZIONE AL SEGNO NELLA FORMULA DI R_tot: se una cella perde
+#      molto, Profit e' negativo e l'argomento del logaritmo scende sotto
+#      1 (resta positivo finche' la perdita e' sotto il 100%). E' la
+#      cella di QUESTO file la candidata naturale a quel caso. Se
+#      l'argomento arrivasse a <= 0 il conto non esiste: vorrebbe dire
+#      conto azzerato, e allora si legge il DD, non il PF.
 #
 #  (La formula in ln() e' quella congelata in R148a e NON e' "Expected
 #   Payoff / 650": il lotto nasce da ACCOUNT_BALANCE, ABTG_Cycle.mq5
@@ -183,11 +262,15 @@
 #       E_nondir = (60 + 0)/2000 = +0,0300 R    <- sulla soglia (A)
 #       E_beta   = (60 - 0)/2000 = +0,0300 R
 #     >>> E QUI STA LA LEZIONE, DICHIARATA ADESSO PERCHE' DOPO SAREBBE UNA
-#         SCUSA: in questo caso il lato SHORT chiude a ZERO (PF ~1,00) e il
-#         lato LONG a +60 R. Chi guardasse i SEGNI direbbe "funziona solo
-#         il long". E' SBAGLIATO: meta' di quel +60 e' mercato, e uno short
-#         a ZERO in un toro e' gia' la prova che il segnale c'e' -- senza
-#         segnale avrebbe fatto -50 R.
+#         SCUSA, ED E' LA LEZIONE DI QUESTO FILE: in questo caso il lato
+#         SHORT chiude a ZERO (PF ~1,00) e il lato LONG a +60 R. Chi
+#         guardasse i SEGNI direbbe "funziona solo il long". E' SBAGLIATO:
+#         meta' di quel +60 e' mercato, e uno short a ZERO in un toro e'
+#         gia' la prova che il segnale c'e' -- senza segnale avrebbe fatto
+#         -50 R.
+#     >>> Tradotto per chi leggera' il CSV di QUESTO file: un PF intorno a
+#         1,00 su questa cella NON e' una cella morta. E' la notizia
+#         migliore che il round possa dare.
 #
 #  ### E ADESSO L'ATTESA VERA, IN QUATTRO RIGHE ###
 #   A1. E_beta > 0, E GRANDE. La finestra e' un toro dichiarato (R148a
@@ -195,14 +278,19 @@
 #       E_beta uscisse <= 0, non e' il motore a essere strano: e' il BANCO
 #       o la decomposizione. E' il PRIMO numero da guardare, ed e'
 #       un'attesa falsificabile sul banco, non sul segnale.
-#   A2. Di conseguenza il lato LONG sopra il lato SHORT. Se uscisse il
-#       contrario -> esito (C) qui sotto, e prima di esultare si guarda
-#       l'asimmetria di volatilita'.
+#   A2. Di conseguenza il lato LONG (il gemello) sopra il lato SHORT
+#       (questo file). Se uscisse il contrario -> esito (C) qui sotto, e
+#       prima di esultare si guarda l'asimmetria di volatilita'.
 #   A3. SUL MERITO NON DICHIARO UN'ATTESA DI SEGNO, E LO DICO APPOSTA.
 #       E_nondir e' la stessa quantita' che misura R148a, e di quel numero
 #       non esiste NESSUNA misura, su nessun simbolo, su nessun TF
-#       ([NON MISURATO]: e' la ragione per cui i due round girano).
+#       ([NON MISURATO]: e' la ragione per cui i round girano).
 #       Dichiarare qui un segno atteso sarebbe inventare.
+#       >>> E IN PARTICOLARE NON DICHIARO CHE QUESTA CELLA DEBBA PERDERE.
+#           Sarebbe comodo (in un toro lo short "deve" perdere) e sarebbe
+#           un'attesa non falsificabile: qualunque numero la
+#           confermerebbe. Quello che si misura e' DI QUANTO perde
+#           rispetto a -M/2.
 #   A4. MA DICHIARO UN'ATTESA DI RELAZIONE, ed e' quella che il round
 #       controlla:
 #         - se il vantaggio del lato long fosse SOLO mercato, i due lati
@@ -222,7 +310,8 @@
 # ----------------------------------------------------------------------
 #  ###  LE USCITE, CONGELATE QUI, PRIMA DI QUALUNQUE CSV  ###
 # ----------------------------------------------------------------------
-#  Si leggono su E_nondir ed E_beta, non sul PF delle singole celle.
+#  Si leggono su E_nondir ed E_beta (quindi sulla COPPIA), non sul PF
+#  della singola cella di questo file.
 #
 #   (A) C'E' ABILITA'. E_nondir >= +0,03 R in TUTTE E DUE le finestre e
 #       con lo STESSO segno. ==> il ciclo porta informazione che NON e'
@@ -257,11 +346,13 @@
 #       misurabile", mai "meta' buono".
 #
 #  SOGLIE CONGELATE (le stesse di casa, nessuna ammorbidita) -- E CON UNA
-#  PRECISAZIONE SU DOVE SI APPLICANO, perche' qui le celle NON sono due
-#  candidate sedie ma le due meta' di una sottrazione:
+#  PRECISAZIONE SU DOVE SI APPLICANO, perche' le celle di merito dei due
+#  file NON sono due candidate sedie ma le due meta' di una sottrazione:
 #    * PER LEGGERE IL MECCANISMO (E_nondir, E_beta): non si scarta niente,
 #      si legge la decomposizione. Un lato in perdita NON e' una bocciatura
-#      del motore (CASO 2 qui sopra).
+#      del motore (CASO 2 qui sopra). >>> E' LA REGOLA CHE SALVA QUESTO
+#      FILE DAL CESTINO: la sua cella e' quella che, in un toro, ha tutte
+#      le ragioni algebriche per uscire in rosso.
 #    * PER CANDIDARE UN LATO COME SEDIA (solo se l'esito e' (A) o (C) e
 #      solo dopo): valgono in pieno e senza sconti
 #        non giudica il MERITO se n < 150 in una finestra (valvola R59)
@@ -272,19 +363,29 @@
 #        Peggior Giornata % < -4,0%    -> cella di RISCHIO
 #        (4,0 non e' scelto da me: e' la pausa B1 firmata il 18/08)
 #
-#  >>> E UN AVVERTIMENTO SUL RISCHIO CHE VALE PIU' DELLE SOGLIE: un DD
-#      BASSO sul lato LONG in questa finestra NON PROVA NIENTE. E' il DD
-#      di stare long in un toro. Il DD che conta per quel lato e' quello
-#      di una finestra d'orso, che questo banco NON CONTIENE.
+#  >>> E UN AVVERTIMENTO SUL RISCHIO CHE VALE PIU' DELLE SOGLIE, ED E' IL
+#      SIMMETRICO DI QUELLO SCRITTO NEL GEMELLO: un DD ALTO su questa
+#      cella in QUESTA finestra non e' la stessa cosa di un DD alto in una
+#      finestra neutra. E' il DD di stare short contro un toro. Va letto,
+#      va scritto, e NON va usato per dire "il lato short e' pericoloso"
+#      in generale: la finestra che risponderebbe a quella domanda (un
+#      orso) questo banco NON LA CONTIENE.
+#      >>> Il che NON sospende il criterio di RISCHIO: il DD si misura e
+#          si scrive lo stesso, a qualunque n. Sospendere il MERITO non
+#          vuol dire sospendere il rischio (valvola R59, Emendamento B).
 #
-#  PF atteso: [NON MISURATO], su nessuna delle tre celle.
+#  PF atteso: [NON MISURATO], su nessuna delle due celle.
 #  DD atteso: [NON MISURATO].
 #
 # ----------------------------------------------------------------------
-#  ###  LE SENTINELLE -- S1 e' quella chiesta dall'asse  ###
+#  ###  LE SENTINELLE  ###
+#  ###  S1 e S5 si leggono su QUESTO file da solo.                 ###
+#  ###  S2, S3, S4, S8 hanno bisogno ANCHE del gemello: se il      ###
+#  ###  gemello non ha girato, sono SOSPESE -- non "passate".      ###
 # ----------------------------------------------------------------------
-#  S1  "INCROCI VISTI" DEVE ESSERE LO STESSO NUMERO INTERO NELLE TRE
-#      CELLE -- E LO STESSO DELLE DUE CELLE DI R148a.
+#  S1  "INCROCI VISTI" DEVE ESSERE LO STESSO NUMERO INTERO NELLE DUE
+#      CELLE DI QUESTO FILE -- e nelle due del gemello, e nelle due di
+#      R148a: SEI celle, un solo numero per finestra.
 #      E' il controllo che il lato non tocca il segnale: gCntIncroci++ sta
 #      a r.639, PRIMA di ogni cancello; InpAllowLong e InpAllowShort
 #      entrano solo a r.648-649, DOPO; e nessuno dei due compare in
@@ -295,12 +396,14 @@
 #          dipende dal lato, e allora la lettura del codice scritta qui e'
 #          sbagliata.
 #
-#  S2  ADDITIVITA' DEGLI INGRESSI -- e NON e' banale, ha un contro-esempio
-#      MISURATO in casa.
+#  S2  ADDITIVITA' DEGLI INGRESSI -- CROCE FRA I DUE FILE, e NON e'
+#      banale: ha un contro-esempio MISURATO in casa.
 #      Gli incroci si ALTERNANO per costruzione (R148a punto 9) e nella
 #      cella (1,1) ogni incrocio libera il posto e ne apre uno nuovo.
 #      Quindi:
-#          Ingressi(L) + Ingressi(S) = Ingressi(1,1) = Incroci Visti
+#          Ingressi(SHORT-ONLY, questo file)
+#        + Ingressi(LONG-ONLY, gemello)
+#        = Ingressi(1,1) = Incroci Visti
 #      e in piu'  |Ingressi(L) - Ingressi(S)| <= 1 + rifiuti.
 #      (rifiuti = "Spread Gate Rifiuti", che deve valere ~0, piu' i salti
 #       per ATR o lotto nulli, che NON hanno una colonna e si cercano nel
@@ -316,17 +419,18 @@
 #      >>> QUINDI se qui uscisse un 88-contro-64, vorrebbe dire che il
 #          posto NON si libera all'incrocio, e allora l'affermazione 308-3
 #          di R148a ("il posto e' libero a ogni incrocio, per costruzione")
-#          sarebbe FALSA e tutte e due i round andrebbero riletti. Questa
+#          sarebbe FALSA e tutti i round andrebbero riletti. Questa
 #          colonna e' il controllo di una frase gia' scritta, non cosmesi.
 #
-#  S3  ADDITIVITA' DELLE BARRE TENUTE -- ESATTA, e senza rumore.
+#  S3  ADDITIVITA' DELLE BARRE TENUTE -- ESATTA, e senza rumore. Croce
+#      fra i due file.
 #          Barre Tenute(L) + Barre Tenute(S) = Barre Tenute(1,1)
 #      Perche' e' esatta: "if(CountPositions()>0) gBarreTenute++" sta a
 #      r.596, cioe' PRIMA che OnNewBar() lavori l'incrocio di quella
 #      barra. Su una barra qualunque il lato L e' dentro solo negli
 #      intervalli U, il lato S solo in quelli D, e la cella (1,1) e'
 #      dentro esattamente quando lo e' uno dei due -- mai tutti e due
-#      insieme. Anche dopo uno STOP i tre calendari restano allineati,
+#      insieme. Anche dopo uno STOP i calendari restano allineati,
 #      perche' gli ingressi avvengono agli stessi istanti e agli stessi
 #      prezzi (cambia il LOTTO, non il prezzo dello stop).
 #      >>> Attesa quantitativa: ciascun lato intorno alla META' della
@@ -334,10 +438,11 @@
 #          risposta: vuol dire che gli intervalli U e D non durano uguale.
 #          Va riportato in tabella, non nascosto.
 #
-#  S4  ADDITIVITA' DEL P/L IN R -- la sentinella quantitativa.
+#  S4  ADDITIVITA' DEL P/L IN R -- la sentinella quantitativa. Croce fra
+#      i due file.
 #          | R_tot(1,1) - R_tot(L) - R_tot(S) |  /  Trades(1,1)  <= 0,01 R
 #      Perche' deve valere: sotto la scommessa a frazione costante il
-#      LOGARITMO del saldo e' la SOMMA dei contributi, e le tre celle
+#      LOGARITMO del saldo e' la SOMMA dei contributi, e le celle
 #      contengono lo stesso insieme di operazioni (la (1,1) e' l'unione
 #      delle altre due, agli stessi istanti e agli stessi prezzi).
 #      Perche' la tolleranza e' 0,01 e non 0: la quantizzazione del lotto
@@ -346,17 +451,20 @@
 #      decisione (0,03 R): se lo scarto la supera, sposta un verdetto, e
 #      allora il round NON si legge.
 #      >>> E se lo scarto e' grande MA le colonne "Lotto Alzato 228" e
-#          "Lotto Tagliato 5pct" valgono 0 in tutte e tre le celle, allora
+#          "Lotto Tagliato 5pct" valgono 0 in tutte le celle, allora
 #          NON e' la quantizzazione: e' qualcosa che non ho capito, e si
 #          guarda prima di commentare qualunque PF.
+#      >>> R_tot(1,1) QUI si prende dalla cella (1,1) DI QUESTO FILE. Il
+#          gemello ne ha una sua: se le due non coincidono (S8), S4 va
+#          fatta con tutte e due e la differenza va scritta.
 #
 #  S5  LA CELLA (1,1) DEVE RIPRODURRE R148a ALLA CIFRA.
 #      Profit, Trades, Profit Factor, Equity DD %, Incroci Visti,
 #      Ingressi, Barre Tenute della riga (InpAllowLong=1, InpAllowShort=1)
 #      devono coincidere con la riga InpVerso=0 di R148a, finestra per
 #      finestra. Tutti i pin sono gli stessi, magic compreso: l'UNICA
-#      differenza e' InpComment (CYCLER148A -> CYCLER148B), che entra solo
-#      nella stringa di commento dell'ordine (ABTG_Cycle.mq5 r.771:
+#      differenza e' InpComment (CYCLER148A -> CYCLER148BS), che entra
+#      solo nella stringa di commento dell'ordine (ABTG_Cycle.mq5 r.771:
 #      cm = InpComment + " L"/" S") e in nessun calcolo e in nessun
 #      cancello.
 #      >>> E I TRE MODI IN CUI QUESTA SENTINELLA NON VALE, detti prima:
@@ -374,28 +482,46 @@
 #              (se DIFFERISCE, qualcosa e' cambiato) e NON come prova di
 #              determinismo. La prova vera vorrebbe la cache cancellata, e
 #              non e' il compito di questo round.
+#              >>> ESISTE un argomento contrario (InpComment e' DIVERSO
+#                  nei tre round, e la cache e' indicizzata sugli input:
+#                  allora non potrebbe servire una riga vecchia), MA NON
+#                  L'HO VERIFICATO ne' sulla documentazione ne' in casa.
+#                  Finche' non e' verificato resta una congettura, e S5
+#                  resta un ALLARME. Non si promuove un'ipotesi a prova
+#                  perche' fa comodo.
 #
-#  S6  CONTEGGIO DELLE CELLE: 4 COMBINAZIONI CHIESTE, 3 RIGHE ATTESE.
-#      La combinazione (0,0) non esiste: ABTG_Cycle.mq5 r.518-519 ritorna
-#      INIT_FAILED ("tutti e due i lati spenti: non c'e' niente da
-#      misurare"). Il driver lo sa gia' e scala la quota da solo
-#      (walkforward_generico.ps1 r.858-870: con InpAllowLong E
-#      InpAllowShort tutti e due sull'asse, NMute = 1).
-#      >>> E CHE L'OTTIMIZZAZIONE NON ABORTISCA SU QUELL'INIT_FAILED NON
-#          E' UN'INFERENZA, E' MISURATO IN CASA: ABTG_CostToCost ha lo
-#          STESSO controllo (r.386-387) e in R40 ha girato con le stesse
-#          due righe d'asse producendo CSV da 3 righe, Pass numerati
-#          1, 2, 3. File citato in S2.
-#      >>> Se il CSV avesse 4 righe (la (0,0) ha operato: impossibile) o
-#          meno di 3, il round non si legge.
+#  S6  CONTEGGIO DELLE CELLE: 2 CHIESTE, 2 RIGHE ATTESE. Liscio.
+#      >>> E' un GUADAGNO della ristrutturazione, e va detto: il file
+#          bocciato chiedeva 4 combinazioni e ne produceva 3, perche' la
+#          (0,0) muore in OnInit (ABTG_Cycle.mq5 r.518-519, INIT_FAILED,
+#          "tutti e due i lati spenti: non c'e' niente da misurare") e il
+#          driver le scala da solo (walkforward_generico.ps1 r.858-870).
+#          Qui InpAllowShort e' PINNATO a true: la combinazione (0,0) non
+#          e' nemmeno raggiungibile, NMute = 0, e il CSV si legge senza
+#          dover spiegare un buco.
+#      >>> Se il CSV avesse un numero di righe diverso da 2, il round non
+#          si legge.
 #
-#  S7  LE COLONNE DI IGIENE, UGUALI A R148a e in tutte e tre le celle:
+#  S7  LE COLONNE DI IGIENE, UGUALI A R148a e in tutte e due le celle:
 #      "Guardian Rifiuti" = 0 (nel tester la guardia e' fail-open),
 #      "Pavimento SL Morso" = 0 (InpMinSLPts = 0, spento),
 #      "Spread Gate Rifiuti" = 0 o quasi (il cancello e' pinnato a 20,0%
 #      = 18,1 punti indice contro un massimo MISURATO di 8,20).
 #      Se "Spread Gate Rifiuti" cresce, e se cresce in modo DIVERSO fra i
-#      due lati, il confronto fra i lati va riletto prima di leggerlo.
+#      due file, il confronto fra i lati va riletto prima di leggerlo.
+#
+#  S8  LE DUE COPIE DELLA CELLA (1,1) DEVONO COINCIDERE FRA I DUE FILE.
+#      NUOVA, e nasce dalla ristrutturazione: la cella (1,1) c'e' QUI e
+#      c'e' nel gemello, con gli stessi identici pin tranne InpComment
+#      (CYCLER148BS contro CYCLER148BL, r.771, nessun calcolo).
+#      >>> Profit, Trades, Profit Factor, Equity DD %, Incroci Visti,
+#          Ingressi e Barre Tenute devono coincidere ALLA CIFRA, finestra
+#          per finestra. Con R148a fanno TRE misure della stessa cella.
+#      >>> Se le due copie differiscono, NON si sceglie la piu' bella:
+#          il round non si legge, e la cosa da guardare e' il
+#          determinismo del motore (o un .ex5 cambiato in mezzo).
+#      >>> Costa 2 passate (vedi COSTO IN TEMPO MACCHINA) ed e' l'unico
+#          controllo del round che non dipende da nessun'altra ipotesi.
 #
 # ----------------------------------------------------------------------
 #  ###  CLASSE 308 -- IL PARAMETRO CHE STA ANCHE AL DENOMINATORE  ###
@@ -403,18 +529,27 @@
 # ----------------------------------------------------------------------
 #  308-1  LOTTO E QUANTIZZAZIONE: QUI MORDE UN FILO, e va detto.
 #         Il lato non compare in LotByRisk() e non tocca lo stop (2,0 x
-#         ATR in tutte e tre le celle). MA il lotto nasce da
-#         ACCOUNT_BALANCE (r.962) e le tre celle hanno TRE PERCORSI DI
-#         EQUITY DIVERSI: una cella che perde molto lavora con un saldo
-#         piu' basso, quindi con lotti piu' piccoli, quindi piu' vicini al
-#         minimo del broker (dove il PAVIMENTO DEL LOTTO alza il rischio
-#         VERO sopra lo 0,65%); una cella che guadagna molto lavora con
-#         lotti grandi, dove puo' mordere VOLUME_MAX (e allora il rischio
-#         VERO scende sotto lo 0,65%).
-#         >>> VERIFICA: "Lotto Alzato 228" e "Lotto Tagliato 5pct" devono
-#             valere 0 in tutte e tre le celle. Se una cella ne ha, il suo
-#             P/L NON e' confrontabile alla lettera con le altre e la
-#             tolleranza di S4 salta.
+#         ATR in tutte le celle). MA il lotto nasce da ACCOUNT_BALANCE
+#         (r.962) e le celle hanno PERCORSI DI EQUITY DIVERSI: una cella
+#         che perde molto lavora con un saldo piu' basso, quindi con
+#         lotti piu' piccoli, quindi piu' vicini al minimo del broker
+#         (dove il PAVIMENTO DEL LOTTO alza il rischio VERO sopra lo
+#         0,65%); una cella che guadagna molto lavora con lotti grandi,
+#         dove puo' mordere VOLUME_MAX (e allora il rischio VERO scende
+#         sotto lo 0,65%).
+#         >>> E QUI MORDE DA QUESTA PARTE, ed e' il difetto piu'
+#             pericoloso di tutto il round: la cella SHORT-ONLY in un toro
+#             e' la candidata naturale a SCENDERE fino al PAVIMENTO DEL
+#             LOTTO. Se ci arriva, il suo rischio vero per operazione
+#             smette di essere 0,65% e sale, e allora il suo R_tot NON e'
+#             piu' nelle stesse unita' del gemello: la sottrazione del
+#             beta si sporca, e si sporca IN MODO DA FAR SEMBRARE LO
+#             SHORT PEGGIORE DI QUELLO CHE E'.
+#         >>> VERIFICA, ED E' LA PRIMA COSA DA GUARDARE SU QUESTO CSV:
+#             "Lotto Alzato 228" e "Lotto Tagliato 5pct" devono valere 0
+#             in tutte le celle dei due file. Se questa cella ne ha, il
+#             suo P/L NON e' confrontabile alla lettera e la tolleranza
+#             di S4 salta.
 #         >>> ORDINE DI GRANDEZZA DEL LOTTO [DERIVATO, non misurato]:
 #             rischio 650 EUR / (90,6 punti indice x ~0,87 EUR/punto/
 #             lotto) = ~8 lotti all'inizio. VOLUME_MAX e VOLUME_MIN di
@@ -428,17 +563,18 @@
 #             divergono. Non tocco quel file (e' armato): lo segnalo qui
 #             perche' la stessa verifica sulle due colonne serve anche a
 #             lui.
-#  308-2  COSTO IN R: IDENTICO nelle tre celle (stesso stop, stesso
+#  308-2  COSTO IN R: IDENTICO nelle due celle (stesso stop, stesso
 #         simbolo, stesse ore, stesso cancello di spread). Nessuna cella
 #         esclusa PER COSTO sull'asse.
 #         >>> In EUR invece NO: la cella (1,1) fa il DOPPIO delle
-#             operazioni, quindi paga il DOPPIO del pedaggio totale. E' un
-#             altro motivo per leggere questo round in R e non in EUR.
+#             operazioni della cella SHORT-ONLY, quindi paga il DOPPIO del
+#             pedaggio totale. E' un altro motivo per leggere questo
+#             round in R e non in EUR.
 #  308-3  OCCUPAZIONE DEL POSTO: QUI E' IL CUORE DELL'ASSE, NON UN
-#         DIFETTO. Le celle a un lato solo stanno dentro il mercato ~META'
-#         del tempo; la (1,1) ~sempre. L'ESPOSIZIONE NON E' LA STESSA, e
+#         DIFETTO. La cella SHORT-ONLY sta dentro il mercato ~META' del
+#         tempo; la (1,1) ~sempre. L'ESPOSIZIONE NON E' LA STESSA, e
 #         quindi Equity DD %, Peggior Giornata % e il rischio di gap del
-#         lunedi' NON sono confrontabili fra una cella a un lato e la
+#         lunedi' NON sono confrontabili fra la cella a un lato e la
 #         (1,1). Confrontarli sarebbe leggere due cose diverse con lo
 #         stesso metro. La colonna che lo misura e' "Barre Tenute" (S3).
 #  308-4  DURATA: i due lati possono avere durate medie DIVERSE
@@ -446,23 +582,36 @@
 #         DELLA RISPOSTA -- se lo short dura sistematicamente meno del
 #         long, e' la firma dell'asimmetria di volatilita' dell'indice
 #         (le discese sono piu' rapide e lo stop a 2,0 ATR morde prima).
-#         Va riportato in tabella accanto al PF.
+#         Va riportato in tabella accanto al PF, confrontando questo file
+#         col gemello. >>> E' la colonna che l'esito (C) va a leggere per
+#         primo: e' il modo di distinguere "lo short funziona" da "lo
+#         short viene stoppato prima".
 #
 # ----------------------------------------------------------------------
 #  ###  IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND  ###
 # ----------------------------------------------------------------------
-#  (1) [!] LEGGERE I SEGNI INVECE DEL PUNTO MEDIO. E' l'errore piu'
-#      probabile e sta tutto nel CASO 2 qui sopra: con M grande, un lato
-#      short a ZERO e' gia' una buona notizia, e un lato long bellissimo
-#      puo' non valere niente. La soglia di decisione e' su E_nondir, non
-#      sui due segni. Dichiarato PRIMA apposta.
+#  (0) [!] LEGGERE QUESTO FILE DA SOLO. E' il contro-esempio NUOVO, nato
+#      dalla ristrutturazione in due file, ed e' il piu' probabile di
+#      tutti: il CSV di questo file, da solo, contiene uno short in un
+#      toro. Sara' il numero piu' brutto del round, e NON MISURA NIENTE
+#      finche' non gli si affianca il gemello. Chi lo leggesse da solo
+#      scriverebbe "il lato short e' morto": e' esattamente l'errore del
+#      CASO 2, dove uno short a zero era la PROVA che il segnale c'e'.
+#      Se il gemello non ha girato, il verdetto e' "NON ANCORA MISURATO".
+#  (1) [!] LEGGERE I SEGNI INVECE DEL PUNTO MEDIO. Sta tutto nel CASO 2
+#      qui sopra: con M grande, un lato short a ZERO e' gia' una buona
+#      notizia, e un lato long bellissimo puo' non valere niente. La
+#      soglia di decisione e' su E_nondir, non sui due segni. Dichiarato
+#      PRIMA apposta.
 #  (2) [!] UN SOLO REGIME, e su questo asse morde in modo particolare.
 #      21 mesi di tick BCM sugli indici sono UN SOLO regime, rialzista: la
 #      regola C dell'Emendamento della Finestra (prova di regime) NON e'
 #      soddisfatta e non lo sara' entro il 30/09. NESSUNA cella di questo
-#      round e' promuovibile. E la cella LONG e' quella che ne beneficia
-#      di piu': il suo numero e' il piu' bello e il meno affidabile del
-#      CSV.
+#      round e' promuovibile. E su questo file il regime morde AL
+#      CONTRARIO del gemello: la cella SHORT-ONLY e' quella PENALIZZATA
+#      dal regime, quindi il suo numero e' il piu' brutto e il piu'
+#      PESSIMISTICO del CSV. Non e' piu' affidabile per questo: e'
+#      sbilanciato quanto l'altro, dall'altra parte.
 #  (3) [!] E_beta NON E' IL BUY-AND-HOLD PULITO. E' una RICOSTRUZIONE dal
 #      P/L dei due lati, quindi ha dentro lo stop (che tronca), il
 #      pedaggio, e i buchi in cui il motore resta piatto dopo uno stop.
@@ -486,12 +635,14 @@
 #      uno short con lo stesso stop in ATR NON hanno la stessa
 #      probabilita' di essere stoppati. Quella asimmetria finisce DENTRO
 #      E_beta insieme alla deriva, e questo round NON le separa.
-#      Dichiarata, non corretta.
-#  (6) [!] LA TERZA RIGA NON E' UNA CELLA DA SCEGLIERE. Sulla (1,1) non si
-#      seleziona niente: e' una sentinella. Se qualcuno la usasse per dire
-#      "la configurazione migliore delle tre e' ...", starebbe facendo una
-#      selezione su tre celle di cui una e' un controllo -- cioe' pescando.
-#      In questo round NON C'E' NIENTE DA SCEGLIERE.
+#      Dichiarata, non corretta. >>> E' il difetto che tocca piu' da
+#      vicino la cella di QUESTO file.
+#  (6) [!] LA CELLA (1,1) NON E' UNA CELLA DA SCEGLIERE. E' una
+#      sentinella (S5, S8). Se qualcuno la usasse per dire "la
+#      configurazione migliore delle due e' ...", starebbe facendo una
+#      selezione su due celle di cui una e' un controllo -- cioe'
+#      pescando. IN QUESTO ROUND NON C'E' NIENTE DA SCEGLIERE: l'asse ha
+#      una sola cella di merito, e la si LEGGE, non la si sceglie.
 #  (7) [!] TETTO GIORNALIERO E FILTRO ORARIO RESTANO SPENTI, identici a
 #      R148a, PER COMPARABILITA'. La deroga al criterio C6 e il suo costo
 #      (una giornata con 6 stop di fila vale -3,9%, sopra la pausa B1 del
@@ -504,8 +655,10 @@
 #  (8) [!] InpFridayClose = false anche qui: si tiene nel fine settimana.
 #      Ma un lato solo ci sta dentro ~META' dei fine settimana, e
 #      asimmetricamente. Quindi il contributo dei gap del lunedi' al DD e'
-#      DIVERSO fra le tre celle: un'altra ragione per non confrontare i DD
-#      fra celle con esposizione diversa (308-3).
+#      DIVERSO fra le celle: un'altra ragione per non confrontare i DD
+#      fra celle con esposizione diversa (308-3). >>> E su un lato SHORT
+#      in un toro il gap del lunedi' e' sistematicamente CONTRO: il suo
+#      DD contiene un pezzo che non e' il segnale.
 #  (9) [!] IL PAVIMENTO DELLO STOP E' SPENTO (InpMinSLPts = 0), come in
 #      R148a: la cella dev'essere l'indicatore puro. Le reti che restano
 #      sono il cancello di spread al 20% (= un pavimento implicito di 5x
@@ -534,34 +687,35 @@
 #    INCROCI ATTESI:  IS   960 - 1.500      OOS  1.440 - 2.270
 #    PER LATO (gli incroci si alternano, quindi meta' per parte):
 #                     IS   480 -   750      OOS    720 - 1.135
+#  >>> La cella SHORT-ONLY di questo file e' una cella "per lato": le due
+#      cifre che la riguardano sono quelle dell'ultima riga. La cella
+#      (1,1) sta sulla riga sopra.
 #  >>> TUTTE E QUATTRO LE CIFRE STANNO LARGHISSIME SOPRA IL PAVIMENTO DEI
 #      150 (valvola R59). Il pavimento salterebbe solo se il mercato vero
 #      desse un incrocio ogni ~28 barre o piu' raramente, cioe' 3,2-5,0
 #      volte piu' raro del modello. E' l'attesa falsificabile: la colonna
 #      "Incroci Visti" la verifica in una corsa.
 #
-#  >>> E QUI VA DETTA UNA COSA SCOMODA SU R148a, PERCHE' I DUE FILE DEVONO
-#      ESSERE CONFRONTABILI: la sua sezione FREQUENZA scrive "incroci
+#  >>> E QUI VA DETTA UNA COSA SCOMODA SU R148a, PERCHE' I FILE DEVONO
+#      ESSERE CONFRONTABILI: la sua sezione FREQUENZA scriveva "incroci
 #      attesi IS ~1.300-2.100" e "OOS ~2.000-3.100". Quei due numeri NON
 #      tornano con il suo stesso totale (2.400-3.800): 1.300+2.000 = 3.300
 #      e 2.100+3.100 = 5.200. Ricostruita, l'origine e' che i 256 e i 386
 #      GIORNI DI CALENDARIO del taglio IS/OOS sono stati moltiplicati per
 #      46 barre come se fossero giorni FERIALI (256*46/8,8 = 1.338 e
 #      386*46/5,6 = 3.171: ridanno esattamente le sue bande).
-#      >>> NON TOCCO R148a: e' armato, e i criteri si cambiano prima dei
-#          numeri, non dopo.
+#      >>> L'errata e' gia' stata accolta in R148a (r.299-306): il file
+#          armato la riporta senza toccare nessun criterio.
 #      >>> E LA CORREZIONE NON SPOSTA NESSUN VERDETTO, ne' li' ne' qui:
 #          con la lettura giusta i campioni restano da 3,2 a 7,5 volte
 #          sopra il pavimento dei 150 in ogni finestra e per ogni lato (il
-#          caso peggiore e' l'IS al bordo basso: 478 per lato). La
+#          caso peggiore e' l'IS al bordo basso: 480 per lato). La
 #          differenza e' fra "molto sopra" e "moltissimo sopra".
-#      >>> Chi legge i due referti affiancati deve sapere che la banda
-#          giusta e' quella di QUESTO file.
 #
 # ----------------------------------------------------------------------
-#  BANCO E FINESTRA -- IDENTICI A R148a, ed e' la condizione perche' i
-#  due round si possano confrontare (i round di casa si confrontano fra
-#  loro solo se il banco e' lo stesso).
+#  BANCO E FINESTRA -- IDENTICI A R148a e al file gemello, ed e' la
+#  condizione perche' i round si possano confrontare (i round di casa si
+#  confrontano fra loro solo se il banco e' lo stesso).
 #    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40.
 #      IS  2024.09.26 - 2025.06.09
 #      OOS 2025.06.10 - 2026.06.30
@@ -596,9 +750,20 @@
 #          letto il blocco '@FRAZIONEIS' (r.679-731) e il conteggio delle
 #          celle mute (r.858-870). Se un giorno $SHA_WALK cambia, questi
 #          due appoggi vanno riletti PRIMA di rilanciare.
+#      >>> E VALE ANCHE FRA I DUE GEMELLI: se i due file tagliassero
+#          l'IS in punti diversi, l'additivita' S2/S3/S4 confronterebbe
+#          finestre diverse e "fallirebbe" per un motivo che non c'entra
+#          niente col motore. La direttiva e' identica nei due file.
 #
-#  COSTO IN TEMPO MACCHINA: 4 celle chieste x 2 finestre = 8 passate
-#    NOMINALI, 6 VERE (le due (0,0) muoiono in OnInit e costano zero).
+#  COSTO IN TEMPO MACCHINA: 2 celle x 2 finestre = 4 passate per questo
+#    file, 4 per il gemello = 8 IN TUTTO, tutte VERE.
+#    >>> CONFRONTO ONESTO COL FILE BOCCIATO: quello chiedeva 8 passate
+#        nominali e ne faceva 6 vere (le due (0,0) morivano in OnInit e
+#        costavano zero). Quindi la ristrutturazione COSTA 2 PASSATE IN
+#        PIU'. Non si nasconde dietro il cancello: si compra con quelle
+#        due passate la seconda riproduzione indipendente della cella
+#        (1,1) (sentinella S8), che il file unico NON aveva. E' il
+#        controllo piu' economico del round.
 #    Il tempo per passata e' [NON MISURATO]: questo EA ricalcola quattro
 #    stocastici a forza bruta a ogni barra nuova. Le celle a un lato solo
 #    NON sono piu' veloci: il calcolo del ciclo gira comunque a ogni
@@ -609,37 +774,41 @@
 #  IGIENE, VERIFICATA A MANO
 #    ORE IN ORA SERVER BCM (= ora italiana - 1).
 #    TETTO BARRE: ~21.100 barre, sotto le ~100.000.
-#    NESSUN ENUM sull'asse: InpAllowLong e InpAllowShort sono bool
-#      spazzolati come interi 0/1, il conto delle celle e' aritmetico
-#      (floor(|1-0|/1)+1 = 2 ciascuno -> 4 combinazioni). La classe 287
-#      non si applica. La forma 1||0||1||1||Y su un input bool e' quella
-#      MISURATA in casa (R40, LATI_A1/A2/B0/B1/B2) e il driver la risolve
-#      (walkforward_generico.ps1, funzione Risolvi: true->1, false->0).
+#    UN SOLO ASSE Y: InpAllowLong. InpAllowShort e' un PIN (true).
+#      Verificato con backtest_pipeline/controlla_prova.py.
+#    NESSUN ENUM sull'asse: InpAllowLong e' bool spazzolato come intero
+#      0/1, il conto delle celle e' aritmetico (|1-0|/1+1 = 2). La classe
+#      287 non si applica. La forma 1||0||1||1||Y su un input bool e'
+#      quella MISURATA in casa (R40, LATI_A1/A2/B0/B1/B2) e il driver la
+#      risolve (walkforward_generico.ps1, funzione Risolvi: true->1,
+#      false->0).
 #    NESSUN PIN DI STRINGA VUOTO: InpComment e' pinnato a un valore vero.
 #    GUARDIAN: pinnato true come nasce l'EA. Nel tester la guardia e'
 #      fail-open: "Guardian Rifiuti" deve valere 0.
-#    PER-TRADE: le tre celle condividono il magic -> ogni passata
-#      SOVRASCRIVE il file per-trade della precedente. I numeri per cella
-#      si leggono nell'OPTFRAME, MAI nel per-trade. (Il magic resta 775701
-#      apposta: cambiarlo romperebbe S5 come confronto "tutti i pin
-#      uguali".)
+#    PER-TRADE: le due celle condividono il magic -> ogni passata
+#      SOVRASCRIVE il file per-trade della precedente, e il gemello
+#      sovrascrive questo. I numeri per cella si leggono nell'OPTFRAME,
+#      MAI nel per-trade. (Il magic resta 775701 apposta: cambiarlo
+#      romperebbe S5 e S8 come confronto "tutti i pin uguali".)
 #    UN SOLO AGENTE locale nel Strategy Tester (classe 129).
 #    IL ROUND NON PROMUOVE NIENTE: non cambia un preset, non accende una
 #      sedia, non tocca il forward. Riaccensioni, taglie, rischio e il
 #      conto REALE 10105439 sono [FIRMA DI CLAUDIO].
 #
-#  I GEMELLI GIA' PRONTI, PROPOSTI E NON SCRITTI (una cosa alla volta):
+#  I GEMELLI E I ROUND PROPOSTI, NON SCRITTI (una cosa alla volta):
+#    R148bL il LONG-ONLY -- E' GIA' SCRITTO, ed e' la meta' obbligatoria
+#           di questo: prove\R148bL_lato_long_NASUSD.txt
 #    R148g  LA RIGA DEL BETA -- InpVerso come asse (0 e 1) con
 #           InpAllowShort=false: due celle che stanno LONG su intervalli
 #           complementari, quindi la loro SOMMA e' ~"long sempre" = il
 #           buy-and-hold della finestra COL PEDAGGIO DENTRO, e la loro
 #           DIFFERENZA e' l'abilita' sul solo lato long. E' il benchmark
 #           pulito che manca al punto (3) del contro-esempio, e costa 4
-#           passate.
-#    R148b2 lo STESSO asse dei lati ma con InpVerso=1, SE R148a dicesse
-#           che il verso buono e' il "contro" (il beta non cambia -- vedi
-#           il punto (4) della sezione algebra -- ma le celle di MERITO
-#           sarebbero quelle sbagliate).
+#           passate. Asse unico: InpVerso. Passa il cancello.
+#    R148bLv1 / R148bSv1  la STESSA coppia di lati ma con InpVerso=1, SE
+#           R148a dicesse che il verso buono e' il "contro" (il beta non
+#           cambia -- vedi il punto (4) della sezione algebra -- ma le
+#           celle di MERITO sarebbero quelle sbagliate).
 #    R148c  gemello U30USD M30, asse del verso (k=2,0 -> 45,4x)
 #    R148d  gemello D30EUR M30, InpKStop 3,0 (-> 47,5x)
 #    R148e  NASUSD M15, InpKStop 2,5 (-> 44,5x)
@@ -654,7 +823,7 @@
 @FRAZIONEIS 0.40
 #
 # --- L'INDICATORE: i nove numeri della FONTE, nessuno toccato, identici
-#     a R148a. Qui NON sono manopole.
+#     a R148a e al gemello. Qui NON sono manopole.
 InpK1Len=5
 InpK1Smo=3
 InpK2Len=14
@@ -670,26 +839,26 @@ InpMmLen=9
 InpVerso=0
 #
 # ======================================================================
-# --- L'UNICO ASSE: IL LATO. 2 celle di MERITO + 1 di CONTROLLO.
-#     MT5 non sa muovere due input in senso opposto, quindi chiede 4
-#     combinazioni e ne produce 3:
-#       (1,0) LONG-ONLY   <- cella d'asse
-#       (0,1) SHORT-ONLY  <- cella d'asse
-#       (1,1) TUTTI E DUE <- = la cella InpVerso=0 di R148a. SENTINELLA
-#                             S5. Su di lei non si sceglie niente.
-#       (0,0) -> INIT_FAILED (r.518-519): nessuna riga nel CSV. Il driver
-#               lo sa (r.858-870) e si aspetta 3 righe. Precedente
-#               MISURATO: R40 su ABTG_CostToCost, Pass 1/2/3.
-#     bool spazzolati come interi: celle = |1-0|/1 + 1 = 2 ciascuno.
+# --- IL LATO SHORT: PINNATO ACCESO. NON E' L'ASSE.
+#     Questo pin e' quello che rende la cella di merito uno SHORT-ONLY,
+#     ed e' anche quello che rende impossibile la combinazione (0,0)
+#     (INIT_FAILED, r.518-519): con lui fermo a true, il CSV e' liscio.
+InpAllowShort=true
+#
+# --- L'UNICO ASSE: InpAllowLong. 1 cella di MERITO + 1 di CONTROLLO.
+#       InpAllowLong=0 -> (long=0, short=1) = SHORT-ONLY  <- MERITO
+#       InpAllowLong=1 -> (long=1, short=1) = TUTTI E DUE <- = la cella
+#                          InpVerso=0 di R148a. SENTINELLE S5 e S8.
+#                          Su di lei non si sceglie niente.
+#     bool spazzolato come intero: celle = |1-0|/1 + 1 = 2.
 InpAllowLong=1||0||1||1||Y
-InpAllowShort=1||0||1||1||Y
 # ======================================================================
 #
 # --- USCITA: l'incrocio opposto. E' l'uscita dell'INDICATORE.
 #     NOTA CHE TIENE IN PIEDI LE SENTINELLE S2/S3: ChiudiSeContraria()
-#     gira a r.645, PRIMA dei cancelli sul lato (r.648-649). Quindi in
-#     una cella a un lato solo l'incrocio opposto CHIUDE lo stesso, anche
-#     se poi non apre niente. Se cosi' non fosse, i tre calendari non
+#     gira a r.645, PRIMA dei cancelli sul lato (r.648-649). Quindi nella
+#     cella SHORT-ONLY l'incrocio opposto CHIUDE lo stesso, anche se poi
+#     non apre niente. Se cosi' non fosse, i calendari delle celle non
 #     sarebbero allineati e l'additivita' non varrebbe.
 InpEsciSuCrossOpposto=true
 #
@@ -729,11 +898,12 @@ InpFridayCloseHour=20
 #     CLAUDIO: qui si MISURA, non si decide.
 InpRiskPercent=0.65
 #
-# --- GENERALI. Magic IDENTICO a R148a (serve a S5). L'unica differenza
-#     di pin fra i due file, a parte l'asse, e' il commento -- che entra
-#     solo nella stringa dell'ordine (r.771) e in nessun calcolo.
+# --- GENERALI. Magic IDENTICO a R148a e al gemello (serve a S5 e S8).
+#     L'unica differenza di pin fra i tre file, a parte l'asse, e' il
+#     commento -- che entra solo nella stringa dell'ordine (r.771) e in
+#     nessun calcolo.
 InpUsaGuardian=true
-InpComment=CYCLER148B
+InpComment=CYCLER148BS
 InpMagic=775701
 InpVerbose=true
 InpAutoTest=true
