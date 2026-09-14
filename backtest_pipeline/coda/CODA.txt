@@ -1363,6 +1363,11 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  12 passate, 0 problemi. Restano #DISARMATA# finche' non arriva il
 #  secondo giudizio.
 # =====================================================================
-#DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
+#  >>> r147a: CORRETTO classe 265 -- il pin di coda deve essere il commit
+#  DEL GIRO DI PIN (07e7bb5, "26mo giro: 4858ef6 -> b3603c7"), non quello
+#  del contenuto (b3603c7): a b3603c7 lo script porta ancora $PIN=4858ef6,
+#  dove i tre file R147 non esistevano -> 404 garantito. Trovato dal
+#  secondo giudizio.
+07e7bb5c1f812f73aedbbc63117ade10d7e4b73f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
 #DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
 #DISARMATA# b3603c74031705d10310b79133446e7f677de1d4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
