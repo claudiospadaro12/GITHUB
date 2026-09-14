@@ -1,0 +1,642 @@
+# ======================================================================
+#  EA: ABTG_Cycle
+#  R148a -- L'INDICATORE "CYCLE" DEL COLLEGA DI CLAUDIO, MESSO ALLA
+#           PROVA PER LA PRIMA VOLTA COME MOTORE.
+#           NASUSD M30. Asse unico: InpVerso (2 celle).
+#           E' un PASSO 0: serve a vedere SE l'incrocio dello zero porta
+#           informazione, NON a tararlo.
+#  Scritto il 14/09/2026. Criteri congelati PRIMA dei numeri.
+#  MAGIC 775701 -- blocco 7757xx VERGINE (grep repo-wide, .git escluso,
+#  14/09/2026: ZERO occorrenze di qualunque 7757xx).
+#  ETICHETTA R148: grep repo-wide -> ZERO occorrenze. R148 era libera.
+# ======================================================================
+#
+#  SI LANCIA CON:
+#    -Expert ABTG_Cycle
+#    -Prova prove\R148a_cycle_verso_NASUSD.txt
+#    -Simbolo NASUSD -Periodo M30
+#    -DaQuando 2024.09.26 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 4 -Etichetta r148a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.)
+#
+#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati. Gli altri MT5 della casa hanno
+#     le sedie VIVE, incluso il conto REALE 10105439.
+#  !! -Modello 4 (TICK REALI) NON e' opzionale: questo round misura un
+#     motore AD ALTA FREQUENZA, e su un motore ad alta frequenza il
+#     pedaggio e' la meta' della risposta. -Modello 1 (OHLC M1) qui non
+#     e' screening prudente: e' un numero che mente (classe 273).
+#  !! QUESTO FILE NON E' IN CODA. CODA.txt non e' stato toccato.
+#
+# ----------------------------------------------------------------------
+#  DA DOVE VIENE, E COSA NON E'
+# ----------------------------------------------------------------------
+#  Claudio ha consegnato il 14/09/2026 un indicatore Pine v5 di un
+#  collega (Emiliano), usato sulla price action del DAX, chiedendo:
+#  "IPOTIZZA TU CON GLI AGENTI LE ENTRATE E LE USCITE IN BASE
+#   ALL'INDICATORE".
+#
+#  >>> PRIMA COSA MISURATA, E CAMBIA IL ROUND: QUELLA FORMULA E' GIA'
+#      IN CASA DALL'11/08/2026.
+#      backtest_pipeline\prove\alta_velocita_ciclo.pine -- identica alla
+#      cifra (stessi 5/14/45/75, stesse lisciature 3/3/14/20, stessi pesi
+#      4.1/2.5/1.0/4.0, stesso divisore 11.6, stessa SMA9). La sua
+#      intestazione dice: "formula ORIGINALE da Ciclo_TW1.odt di Claudio,
+#      11/08/2026". E la traduzione MQL5 gira gia' dentro
+#      mql5\Experts\ABTG_AltaVelocita.mq5, funzione CycleSeries() r.535.
+#      >>> Quindi ABTG_Cycle.mq5 NON ha riscritto il calcolo: lo ha
+#          COPIATO da li'. Riscriverlo da capo avrebbe ricomprato lo
+#          stesso rischio di refuso a costo zero di guadagno.
+#
+#  >>> SECONDA COSA MISURATA, E VA LETTA PRIMA DI TUTTO IL RESTO:
+#      ABTG_AltaVelocita E' BOCCIATO.
+#      risultati_archivio\REFERTO_ALTA_VELOCITA_V1.md (11/08/2026):
+#        v1 a TICK REALI  : 8/8 celle negative (PF 0,54-0,82, DD fino 37%)
+#        v1.1 OHLC OOS    : 4/4 celle negative (PF 0,57-0,76)
+#      su GBPUSD, ciclo H4, ingresso M5.
+#      >>> E QUESTO ROUND NON LO CONTRADDICE, PERCHE' NON E' LO STESSO
+#          MOTORE. Li' il CICLO non decideva niente: era il SEGMENTATORE
+#          che contava le punte dell'RSI dentro una sequenza
+#          Supertrend + RSI + Williams di 1.422 righe. Il verdetto e' su
+#          QUELLA macchina, su UN simbolo FOREX, su UN TF.
+#          Qui il ciclo E' il motore, da solo, su un INDICE, su M30.
+#          E' un MECCANISMO diverso sulla stessa inefficienza, che e'
+#          quello che la REGOLA DELLA SECONDA CACCIA (19/08) ammette --
+#          e NON e' "un'altra griglia di parametri su un motore morto",
+#          che la stessa regola vieta.
+#      >>> DICHIARATO COMUNQUE COME RISCHIO: se questo round esce piatto,
+#          la lettura onesta e' che due meccanismi diversi costruiti sullo
+#          stesso oscillatore non hanno trovato niente, e la voce in
+#          REGISTRO_TEST.md deve dirlo.
+#
+# ----------------------------------------------------------------------
+#  ###  L'IPOTESI, DICHIARATA PRIMA DEI NUMERI  ###
+#  ###  e derivata dalla FORMA DEL CALCOLO, non da un'impressione  ###
+# ----------------------------------------------------------------------
+#  Ogni %K sta fra 0 e 100 e dice DOVE STA LA CHIUSURA DENTRO IL RANGE
+#  delle ultime n barre. Quindi I = media pesata dei quattro %K e' "la
+#  posizione nel range, guardata a quattro orizzonti insieme": un numero
+#  fra 0 e 100, non un prezzo.
+#
+#  E CICLO = I - SMA(I,9) e' un FILTRO PASSA-ALTO su I. Per una I
+#  abbastanza liscia, x - SMA_n(x) e' proporzionale alla DERIVATA di x.
+#    >>> CICLO NON E' "QUANTO SIAMO IN ALTO DENTRO IL RANGE".
+#        CICLO E' "QUANTO IN FRETTA CI STIAMO MUOVENDO DENTRO IL RANGE".
+#  Non e' un'opinione: e' la forma della formula.
+#
+#  DA LI' L'IPOTESI, ED E' UNA SOLA:
+#    >>> SI ENTRA SULL'INCROCIO DELLO ZERO DEL CICLO, SU BARRA CHIUSA,
+#        E SI ESCE SULL'INCROCIO OPPOSTO. <<<
+#  Se il CICLO e' la velocita', il suo cambio di segno e' il punto in cui
+#  la velocita' si azzera e riparte dall'altra parte: cioe' il minimo o
+#  il massimo del ciclo, appena FORMATO.
+#  E non e' una lettura mia. E' scritta dall'autore della formula in casa
+#  nostra, verbatim da prove\alta_velocita_ciclo.pine r.12-13:
+#    "Cambio di segno del CICLO = fine ciclo (positivo->negativo =
+#     massimo di ciclo formato; negativo->positivo = minimo di ciclo
+#     formato)."
+#
+#  PERCHE' L'INCROCIO DELLO ZERO E NON UN ESTREMO CON SOGLIA, che era
+#  l'altra ipotesi possibile: perche' l'incrocio dello zero NON HA UN
+#  PARAMETRO LIBERO. "Entra sotto -8" ne aggiunge uno, e su un motore di
+#  cui non e' dimostrato nessun edge un parametro libero e' soltanto un
+#  posto dove pescare (lezione del 19/08: su un motore senza edge una
+#  griglia piu' fitta trova solo picchi di rumore). Il SEGNO di un numero
+#  non si tara. La soglia e' un round successivo, e solo se questo passa.
+#
+# ----------------------------------------------------------------------
+#  ###  IL FALSIFICATORE STA DENTRO IL MOTORE: E' L'ASSE DEL ROUND  ###
+# ----------------------------------------------------------------------
+#  InpVerso = 0 -> si trada CON l'incrocio   (incrocio in su = LONG)
+#  InpVerso = 1 -> si trada CONTRO l'incrocio (incrocio in su = SHORT)
+#
+#  Siccome anche l'USCITA e' un incrocio, le due celle coprono GLI STESSI
+#  INTERVALLI DI TEMPO col segno rovesciato. Senza stop e senza pedaggio
+#  i due P/L sarebbero ESATTAMENTE opposti: P/L(1) = -P/L(0).
+#  >>> Quindi questo asse non e' una griglia: e' un ESPERIMENTO CON IL
+#      SUO CONTROLLO DENTRO. Se l'incrocio non porta informazione, non
+#      c'e' nessun modo di leggere "un risultato" nella cella 0: si
+#      guarda la cella 1 e si vede che il numero e' il suo specchio.
+#
+#  >>> E L'ASIMMETRIA VA DICHIARATA ADESSO, PERCHE' NON MI FA COMODO:
+#      lo STOP tronca i perdenti, e tronca in tutte e due le celle.
+#      Quindi la somma P/L(0) + P/L(1) NON fa zero: fa
+#        (effetto dello stop, che alza tutte e due)
+#        - (pedaggio, che abbassa tutte e due)
+#      Un lettore che si aspettasse una somma nulla leggerebbe male.
+#      Il NUMERO del pedaggio sta qui sotto, cosi' il conto e' chiuso.
+#
+# ----------------------------------------------------------------------
+#  ###  IL CANCELLO DEL COSTO -- SI GUARDA PRIMA DEL TF, NON DOPO  ###
+#  ###  (Claudio ha chiesto M1: la risposta e' un conto, con il    ###
+#  ###   numero accanto, non una preferenza)                       ###
+# ----------------------------------------------------------------------
+#  I NUMERI MISURATI CHE CI ENTRANO, uno per uno con la fonte:
+#    spread NASUSD [MISURATO su 156.146.398 tick, finestra
+#      2024.09.26-2026.06.30, risultati_archivio\spread_flotta\
+#      spread_orario_NASUSD.csv, "% solo-bid 0,000%"]:
+#        ore 14-20 SERVER (cassa USA): mediana 1,60-1,80  p95 1,80-2,70
+#        ore  0-13 SERVER            : mediana 2,30-2,60  p95 2,70
+#        riga TUTTO                  : mediana 1,80  p95 2,70  max 8,20
+#    commissione sugli indici: 0,0000 [MISURATO, n=302 deal,
+#      CANCELLO_COSTO_FLOTTA_2026-09-10.md r.181]
+#      >>> sugli indici il pedaggio E' LO SPREAD E BASTA. Sull'oro NO
+#          (3,48 EUR/lotto MISURATI), ed e' uno dei motivi per cui
+#          questo round non e' sull'oro: vedi piu' sotto.
+#    ADR NASUSD 313,8 punti indice [MISURATO su 24 giorni,
+#      ROUND_ORB_ATR_PS5_2026-09-10.md r.234]
+#    1 punto indice NASUSD = 100 punti MT5 [MISURATO, InfoBroker r.62:
+#      Digits 2, Point 0,01]
+#    valore punto NASUSD ~0,87 EUR/punto/lotto [MISURATO, trades_auto]
+#
+#  L'ATR PER TF, ED E' L'ANELLO DEBOLE, DICHIARATO:
+#    ATR(t) = ADR x sqrt(minuti/1440)  [DERIVATO]
+#    La casa ha MISURATO che questa legge SOTTOSTIMA l'ATR vero del
+#    18-27% (EMA200_I_DUE_REQUISITI_2026-09-12.md r.182).
+#    >>> QUINDI OGNI RAPPORTO QUI SOTTO E' UN PAVIMENTO, non una stima
+#        centrata: il numero vero e' UGUALE O MIGLIORE.
+#    >>> E il conto l'ho RIFATTO contro numeri gia' scritti da altri,
+#        non contro me stesso: la tabella di
+#        CACCIA_STOP_STRUTTURALE_2026-09-13.md par.4 da'
+#        NASUSD M15 k=1,0 -> 17,8x, M30 k=1,5 -> 37,7x, M30 k=2,0 ->
+#        50,3x, e D30EUR M15 k=1,0 -> 11,2x. La mia aritmetica ridA'
+#        quelle quattro cifre esatte. Se non le ridesse, questa sezione
+#        sarebbe da buttare.
+#
+#  PRIMO CANCELLO -- stop >= 40 x spread (lavoro) / 13,3 x (duro).
+#  Stop di questo motore = InpKStop x ATR: un oscillatore NON ha livelli
+#  strutturali, quindi non esiste nessun altro stop possibile.
+#
+#   NASUSD    ATR~     k=1,0    k=2,0    k=2,5    k SERVITO PER IL 40x
+#   ------------------------------------------------------------------
+#   M1        8,27      4,6x     9,2x    11,5x    >>> k = 8,7
+#   M5       18,49     10,3x    20,5x    25,7x    >>> k = 3,9
+#   M15      32,03     17,8x    35,6x    44,5x        k = 2,25
+#   M30      45,29     25,2x    50,3x    62,9x        k = 1,59
+#   H1       64,05     35,6x    71,2x    88,9x        k = 1,12
+#   (divisore: spread mediano 1,80 della riga TUTTO)
+#
+#   D30EUR (ADR 186,5 MIS, 49 giorni, spread 1,70 ora 08):
+#   M1        4,91      2,9x     5,8x     7,2x    >>> k = 13,8
+#   M5       10,99      6,5x    12,9x    16,2x    >>> k = 6,2
+#   M15      19,03     11,2x    22,4x    28,0x    >>> k = 3,6
+#   M30      26,92     15,8x    31,7x    39,6x        k = 2,53
+#   H1       38,07     22,4x    44,8x    56,0x        k = 1,79
+#
+#   U30USD (ADR 314,5 MIS, 24 giorni, spread 2,00):
+#   M1        8,29      4,1x     8,3x    10,4x    >>> k = 9,7
+#   M5       18,53      9,3x    18,5x    23,2x    >>> k = 4,3
+#   M15      32,10     16,1x    32,1x    40,1x        k = 2,49
+#   M30      45,39     22,7x    45,4x    56,7x        k = 1,76
+#
+#   XAUUSD (ADR 40,50 $ MIS su 60 giorni, ORO_1530 par.4.2; pedaggio
+#   all-in PRUDENTE 0,2603 $ = spread 0,22 + commissione MISURATA 0,0403):
+#   M1     1,067 $      4,1x     8,2x    10,2x    >>> k = 9,8
+#   M5     2,386 $      9,2x    18,3x    22,9x    >>> k = 4,4
+#   M15    4,134 $     15,9x    31,8x    39,7x    >>> k = 2,52 (a soffio)
+#   M30    5,846 $     22,5x    44,9x    56,2x        k = 1,78
+#
+#  >>> LA RISPOSTA A "M1", COL NUMERO:
+#      M1 E' ESCLUSO PER COSTO SU TUTTI E QUATTRO I SIMBOLI, e non per
+#      un soffio. Per arrivare al pavimento di LAVORO servirebbe uno
+#      stop di 8,7 ATR su NASUSD, 9,7 su U30USD, 9,8 sull'oro e 13,8
+#      sul DAX. Uno stop di 9 ATR di M1 e' -- alla lettera, perche'
+#      sqrt(60) = 7,75 -- LO STOP DI UN GRAFICO H1 APPESO A UN SEGNALE
+#      DI M1: il segnale ha finito di dire quello che aveva da dire
+#      molto prima che lo stop sia in gioco. Non e' una taratura da
+#      trovare: e' una geometria che non esiste.
+#      E NON BASTA NEMMENO IL PAVIMENTO DURO 13,3x: servirebbe k = 2,9
+#      (NASUSD), 3,2 (U30USD), 3,2 (oro), 4,6 (DAX).
+#  >>> M5 E' ESCLUSO PER COSTO SU TUTTI E QUATTRO: nessuna cella a un k
+#      sensato raggiunge il 40x (servono k fra 3,9 e 6,2). Sul DAX M5
+#      k=1,0 fa 6,5x, cioe' SFONDA anche il pavimento DURO.
+#      >>> E c'e' un SECONDO motivo, indipendente dal costo: NASUSD M5
+#          su 21 mesi fa ~126.700 barre e SFONDA il tetto delle ~100.000
+#          barre del tester. Due cancelli diversi, stessa risposta.
+#  >>> M15 PASSA SOLO SU NASUSD (k=2,5 -> 44,5x) e U30USD (k=2,5 ->
+#      40,1x, +0,3% di margine: cioe' NON passa davvero). Sul DAX serve
+#      k=3,6. Sull'oro k=2,5 fa 39,7x = il 99,3% della soglia: NON passa
+#      col pedaggio prudente.
+#  >>> M30 E' IL PRIMO TF CHE PASSA CON MARGINE, e passa su tutti e
+#      quattro. E' anche la banda che la casa ha gia' dichiarato buona
+#      sugli indici (CLAUDE.md: "la banda buona sugli indici e' M30/H1").
+#
+#  SECONDO CANCELLO -- IL MOVIMENTO CATTURATO CONTRO IL PEDAGGIO.
+#  E' un cancello DIVERSO dal primo e non si somma (ORO_CONTRO_INDICI
+#  par. 4): il primo giudica lo STOP, questo giudica QUANTO SI MUOVE il
+#  prezzo dentro l'operazione. Sull'oro a M1 e' quello che ha ucciso il
+#  metodo del collega: 22 vinte su 33 e -785,99 EUR veri, perche' il
+#  pedaggio valeva il 14,2% del movimento contro un budget del 2,5%.
+#    Durata attesa di un'operazione di questo motore: [DERIVATO da
+#    simulazione, vedi la sezione FREQUENZA] 5,6 - 8,8 barre.
+#    Su M30 sono 168-264 minuti -> movimento tipico
+#    313,8 x sqrt(200/1440) ~ 117 punti indice -> /1,80 = 65x il
+#    pedaggio, cioe' il pedaggio vale l'1,5% del movimento (budget 2,5%).
+#    >>> PASSA, e con margine.
+#    Lo stesso conto su M1: 6 barre M1 = 6 minuti -> 20,3 punti ->
+#    11,3x, SOTTO il pavimento duro. M1 sfonda TUTTI E DUE i cancelli.
+#
+#  >>> QUINDI LA COMBINAZIONE DI QUESTO FILE E' NASUSD M30, InpKStop 2,0
+#      = 50,3x lo spread mediano (margine +26% sul pavimento di lavoro),
+#      e il conto regge anche al bordo basso della banda dell'ATR.
+#      >>> E DICHIARO DOVE NON REGGE, perche' il filtro orario e' SPENTO
+#          (vedi il punto 5 del contro-esempio): sulle ore 0-13 SERVER lo
+#          spread mediano MISURATO e' 2,30-2,60, e li' lo stesso stop fa
+#          34,8-39,3x, cioe' STA SOTTO il pavimento di lavoro (resta
+#          lontanissimo dal DURO 13,3x). La conseguenza e' che il numero
+#          che esce da questo round e' un PAVIMENTO: col filtro orario
+#          acceso puo' solo migliorare. Se esce piatto, il filtro orario
+#          e' il PRIMO asse da provare prima di archiviare (motto 09/09).
+#
+#  >>> E PERCHE' NON L'ORO, CHE E' QUELLO CHE CLAUDIO HA CHIESTO.
+#      Non per il costo: XAUUSD M30 a k=2,0 fa 44,9x e PASSEREBBE.
+#      Per due misure che MANCANO, e che la casa ha gia' dichiarato
+#      bloccanti (ORO_1530_CANCELLO_COSTO par. 8 e par. 9):
+#        (1) lo spread dell'oro ORA PER ORA e' [NON MISURATO]: esistono
+#            DUE letture in tutto (0,16 $ del 17/08 17:34 srv e 0,22 $
+#            del 27/08 ~08:5x srv), e nessun file orario;
+#        (2) la profondita' a TICK di XAUUSD e' [NON MISURATO]
+#            (risultati_archivio\misura_tick\ contiene SOLO D30EUR,
+#            NASUSD, U30USD). Finche' quella sonda non gira, sull'oro si
+#            puo' fare SCREENING a OHLC, MAI un verdetto.
+#      >>> Cioe' l'oro non e' escluso: e' RINVIATO di due sonde, e tutte
+#          e due sono gia' scritte e costano quasi niente (aggiungere
+#          ",XAUUSD" ad ABTG_SpreadLogger sul DEMO 50503392; la sonda
+#          tick sul PC di backtest, MAI sul VPS -- vedi
+#          report\SONDA_TICK_ORO_ATTENZIONE.md).
+#          Sono da proporre a Claudio, non da lanciare qui.
+#
+# ----------------------------------------------------------------------
+#  ###  FREQUENZA: il numero si dichiara PRIMA, e si dice come  ###
+# ----------------------------------------------------------------------
+#  Su un motore a incroci la frequenza NON e' un dettaglio: decide se il
+#  round produce un campione leggibile e se la sedia raggiungerebbe mai
+#  il pavimento di 1,00 operazione/giorno per FAMIGLIA (firma 07/09).
+#
+#  MISURA [DERIVATA DA SIMULAZIONE, e il modello e' dichiarato]: il
+#  filtro I - SMA(I,9) e' stato fatto girare su serie sintetiche (12
+#  semi, 4.000 barre l'una) di tre tipi diversi:
+#      random walk puro        -> 1 incrocio ogni 5,7 barre
+#      random walk con deriva  -> 1 incrocio ogni 5,6 barre
+#      serie a onde            -> 1 incrocio ogni 8,8 barre
+#  >>> BANDA DICHIARATA: 1 incrocio ogni 5,6 - 8,8 barre.
+#  >>> E' UN MODELLO, NON IL MERCATO, e lo dico prima: un mercato piu'
+#      mean-reverting di un random walk darebbe PIU' incroci, uno piu'
+#      persistente MENO. Il numero vero lo misura questo round, ed e'
+#      la colonna "Incroci Visti".
+#
+#  CONSEGUENZE ARITMETICHE, tutte da verificare sul CSV:
+#    NASUSD M30 = ~46 barre/giorno x ~459 giorni feriali = ~21.100 barre
+#      (sotto il tetto delle ~100.000 del tester)
+#    incroci attesi      : 2.400 - 3.800 in tutta la finestra
+#    incroci attesi IS   : ~1.300 - 2.100   (256 giorni)
+#    incroci attesi OOS  : ~2.000 - 3.100   (386 giorni)
+#    ingressi al giorno  : 5,2 - 8,2
+#  >>> QUESTO E' UN MOTORE VELOCE, ed e' la sua qualita' piu' preziosa
+#      rispetto al 1 ottobre: un campione sopra i 150 trade per finestra
+#      lo produce IN UNA CORSA SOLA, non in sei mesi di forward.
+#
+#  >>> ED E' ANCHE IL MOTIVO PER CUI IL TETTO GIORNALIERO E' SPENTO IN
+#      QUESTO ROUND, e va dichiarato come uno scostamento vero dal
+#      criterio C6 (tetto obbligatorio):
+#      con 5-8 ingressi attesi al giorno, InpMaxTradesPerDay = 3 (o
+#      anche 6) taglierebbe DAL 25% AL 60% dei segnali, e il round
+#      misurerebbe IL TETTO, non l'incrocio.
+#      >>> SCELTA: InpMaxTradesPerDay = 0 (illimitato).
+#      >>> IL COSTO DELLA SCELTA, DICHIARATO E SCOMODO: a rischio 0,65%
+#          per operazione e senza tetto, una giornata con 6 stop presi
+#          di fila vale -3,9%, cioe' SOPRA la pausa B1 del Guardian (4,0)
+#          e vicinissima al limite giornaliero tipico di una prop (5%).
+#          Nel tester il Guardian e' fail-open (le sue GlobalVariable non
+#          esistono), quindi quella rete NON c'e'.
+#          >>> QUINDI: il DD e la "Peggior Giornata %" di questo round
+#              sono una lettura PESSIMISTA del rischio. Va bene cosi':
+#              un numero di rischio pessimista si puo' usare, un numero
+#              di merito confuso no.
+#          >>> E IL TETTO VA RIACCESO PRIMA DI QUALUNQUE FORWARD. A
+#              quanto, lo dice la colonna "Max Ingressi Giorno" di questo
+#              stesso CSV: e' una misura, non una scelta a tavolino.
+#
+# ----------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI -- CON UN NUMERO  ###
+# ----------------------------------------------------------------------
+#  IL PEDAGGIO IN R, che e' il metro con cui si legge tutto il resto:
+#    costo di una operazione = spread / stop
+#    stop = 2,0 x ATR(M30) = 2,0 x 45,3 = 90,6 punti indice [PAVIMENTO:
+#      con l'ATR vero, 18-27% piu' alto, lo stop sta fra 90,6 e 116]
+#    spread mediano 1,80 -> 1,80/90,6  = 0,0199 R
+#                        -> 1,80/116   = 0,0155 R
+#    >>> PEDAGGIO ATTESO: 0,016 - 0,020 R per operazione. Chiamiamolo
+#        0,02 R, che e' il bordo sfavorevole.
+#
+#  E ADESSO LE TRE USCITE, CONGELATE QUI, PRIMA DI QUALUNQUE CSV.
+#  Si leggono sull'EXPECTED PAYOFF convertito in R, non sul PF.
+#  (Con InpRiskPercent = 0,65 costante e deposito 100.000: 1 R = 650 EUR,
+#   quindi E in R = Expected Payoff / 650. Nessun'altra conversione, e
+#   non se ne fanno.)
+#
+#    (a) C'E' SEGNALE. Una delle due celle sta a E >= +0,03 R in
+#        TUTTE E DUE le finestre e con lo STESSO segno, e l'altra sta
+#        sotto -0,02 R. ==> l'incrocio dello zero porta informazione
+#        direzionale su NASUSD M30, e il motore passa a un round
+#        dedicato (lato separato, poi uscita, poi TF, poi gemelli).
+#        NON e' una promozione: e' un candidato.
+#    (b) NIENTE SEGNALE. Tutte e due le celle cadono nella banda
+#        [-0,05 ; 0,00] R, all'incirca simmetriche. ==> l'incrocio non
+#        porta informazione direzionale QUI. Il verdetto NON e' "morto":
+#        il certificato di morte chiede anche il TF cambiato, i simboli
+#        gemelli e la gestione dell'uscita messa ad asse, e nessuna delle
+#        tre e' fatta. La riga in REGISTRO_TEST.md deve dire COSA MANCA.
+#    (c) TUTTE E DUE POSITIVE. Non puo' venire dall'incrocio, perche' le
+#        due celle coprono gli stessi intervalli col segno rovesciato:
+#        verrebbe dallo STOP, che tronca i perdenti in tutte e due.
+#        ==> il round ha misurato LO STOP, non il segnale, e il verdetto
+#        e' "NON ANCORA MISURATO". Il round successivo e' un asse su
+#        InpKStop, non un'altra idea.
+#    (d) SEGNI DISCORDI FRA IS E OOS sulla stessa cella ==> "non
+#        misurabile", mai "meta' buono".
+#
+#  SOGLIE CONGELATE (le stesse di casa, nessuna ammorbidita):
+#    non giudica il MERITO se n < 150 in una finestra (valvola R59)
+#    scarta se n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    RISCHIO, e si legge a QUALUNQUE n (Emendamento B, 16/08):
+#      DD > 10% in una finestra           -> cella di RISCHIO
+#      Peggior Giornata % < -4,0%         -> cella di RISCHIO
+#      (4,0 non e' scelto da me: e' la pausa B1 gia' firmata il 18/08)
+#
+#  PF atteso: [NON MISURATO]. Nessun PF di questo motore esiste, su
+#    nessun simbolo, su nessun TF. E' la ragione per cui gira.
+#  DD atteso: [NON MISURATO], e per la ragione scritta sopra la lettura
+#    sara' pessimista.
+#
+# ----------------------------------------------------------------------
+#  ###  S1 / S2 / S3 -- LE TRE SENTINELLE  ###
+# ----------------------------------------------------------------------
+#  S1  IL CONTROLLO PIU' FORTE DI QUESTO ROUND, ED E' GRATIS.
+#      InpVerso NON ENTRA nel calcolo del ciclo: non compare in
+#      CycleSeries(), non compare in CrossCiclo_Calc(), entra solo in
+#      VuoleLong_Calc() DOPO che l'incrocio e' stato contato
+#      (ABTG_Cycle.mq5, OnNewBar: gCntIncroci++ sta PRIMA di ogni
+#      cancello, apposta).
+#      >>> QUINDI LA COLONNA "Incroci Visti" DEVE ESSERE IDENTICA NELLE
+#          DUE CELLE, allo stesso numero intero.
+#      >>> SE NON LO E', il round NON SI LEGGE: vuol dire che qualcosa
+#          che non e' l'incrocio dipende dal verso, e la lettura del
+#          codice in questo file e' sbagliata. Va in cima al referto.
+#      >>> E' anche il motivo per cui questo asse NON ha il difetto
+#          dell'OCCUPAZIONE DEL POSTO che R145a ha dovuto dichiarare e
+#          non togliere: qui la posizione viene CHIUSA dallo stesso
+#          incrocio che apre l'altra, quindi il posto e' libero a ogni
+#          incrocio in tutte e due le celle, per costruzione.
+#  S2  CONTEGGIO DELLE CELLE: 2 valori distinti di InpVerso (0 e 1).
+#      Se ne stampa uno solo, l'asse non e' partito: e' un buco, non un
+#      risultato.
+#  S3  L'AUTOTEST DELL'EA, che si legge nel Giornale della PRIMA passata
+#      (stampa in OnInit, quindi si vede ESEGUENDO, non compilando).
+#      Deve dire "OTTO BLOCCHI SU OTTO". Se dice "DIVERGE", i numeri di
+#      questo round non si commentano.
+#      >>> E il blocco che conta di piu' e' il primo, i PESI: un refuso
+#          su un peso non si vede in nessun altro modo, perche'
+#          l'indicatore continua a disegnare una linea plausibile.
+#          Il falsificatore e' aritmetico: con tutti i K uguali a 50 il
+#          composito DEVE fare esattamente 50,0000. Con 4,0 al posto di
+#          4,1 farebbe 49,5690. L'autotest stampa quel numero.
+#      >>> E la traduzione del calcolo e' gia' stata verificata FUORI da
+#          MT5, contro una riscrittura indipendente della versione Pine
+#          (tempo in avanti) su 400 barre sintetiche: scarto massimo
+#          7,1e-15, cioe' la precisione della macchina. Su una serie
+#          PIATTA il ciclo esce esattamente 0,0 (nessun NaN dalla
+#          divisione per un range nullo).
+#
+# ----------------------------------------------------------------------
+#  ###  CLASSE 308 -- IL PARAMETRO CHE STA ANCHE AL DENOMINATORE  ###
+#  ###  Controllata voce per voce, PRIMA dei numeri               ###
+# ----------------------------------------------------------------------
+#  308-1  LOTTO E QUANTIZZAZIONE: NON MORDE, ED E' ALGEBRICO.
+#         InpVerso non compare in LotByRisk() e non tocca lo stop: lo
+#         stop e' 2,0 x ATR in tutte e due le celle, quindi il lotto e la
+#         sua quantizzazione hanno la STESSA distribuzione. Nessuna
+#         pendenza puo' nascere di li'.
+#         >>> VERIFICA: "Lotto Alzato 228" e "Lotto Tagliato 5pct"
+#             devono essere ~uguali nelle due celle. Se una cella ne ha
+#             molte piu' dell'altra, questa nota e' sbagliata.
+#  308-2  COSTO IN R: IDENTICO nelle due celle (stesso stop, stesso
+#         simbolo, stessi orari). Nessuna cella esclusa PER COSTO
+#         sull'asse.
+#  308-3  OCCUPAZIONE DEL POSTO: NON MORDE, per costruzione. Vedi S1.
+#         >>> E' l'unico punto in cui questo round e' PIU' PULITO di
+#             R145a, e va detto, perche' li' quel difetto era l'unico
+#             non tolto.
+#  308-4  DURATA: le due celle possono avere durate medie DIVERSE (se
+#         l'incrocio ha informazione, la cella giusta viene stoppata meno
+#         spesso e quindi arriva piu' spesso fino all'incrocio opposto).
+#         >>> Questo NON sporca l'asse: e' UN SINTOMO DELLA RISPOSTA, e
+#             si legge sulla colonna "Barre Tenute" divisa per
+#             "Ingressi". Va riportato in tabella accanto al PF.
+#
+# ----------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND  ###
+# ----------------------------------------------------------------------
+#  (1) [!] IL CANCELLO DI SPREAD CHE MISURA SE STESSO.
+#      InpMaxSpreadPctOfStop = 2,5 e' il DEFAULT dell'EA ed e' la
+#      frontiera dei 40x. Pinnarlo a 2,5 qui ucciderebbe il round: la
+#      soglia varrebbe 2,5% x 90,6 = 2,27 punti indice, contro una
+#      mediana MISURATA di 2,30-2,60 nelle ore 0-13. Meta' della
+#      giornata verrebbe rifiutata, e il round misurerebbe il cancello.
+#      >>> TOLTO: pinnato a 20,0 (= lo stop dev'essere almeno 5x lo
+#          spread). La soglia vale 20% x 90,6 = 18,1 punti contro un
+#          MASSIMO misurato di 8,20: non morde.
+#      >>> E VERIFICATO: "Spread Gate Rifiuti" deve valere 0 (o quasi:
+#          su una barra con ATR schiacciato la soglia puo' scendere).
+#          Se cresce, e se cresce in modo DIVERSO fra le due celle, il
+#          confronto va riletto.
+#      >>> Il cancello a 2,5% e' l'asse di un ROUND SUCCESSIVO, non di
+#          questo. Una variabile alla volta.
+#  (2) [!] IL PAVIMENTO DELLO STOP. InpMinSLPts = 0, cioe' SPENTO: la
+#      cella dev'essere l'indicatore puro. Con un ATR schiacciato lo
+#      stop puo' nascere stretto e il lotto sale.
+#      >>> LE RETI CHE RESTANO: il cancello di spread al 20% (che e'
+#          un pavimento implicito di 5x lo spread) e lo STOPS_LEVEL del
+#          broker. "Pavimento SL Morso" deve valere 0 in tutte e due le
+#          celle, per costruzione.
+#      >>> VA RIACCESO PRIMA DI QUALUNQUE FORWARD. E' una scelta di
+#          MISURA, non una configurazione schierabile.
+#  (3) [!] IL TETTO GIORNALIERO SPENTO. Gia' trattato sopra: e' la
+#      deroga al criterio C6, col suo numero e il suo costo.
+#  (4) [!] IL FILTRO ORARIO SPENTO. Gia' trattato sopra: il round vede
+#      anche le ore 0-13, dove lo spread e' il 28-62% piu' alto e il
+#      rapporto scende a 34,8-39,3x. Lettura CONSERVATIVA, dichiarata.
+#      Le ore restano pinnate in ORA SERVER anche se il filtro e' spento
+#      (un pin in ora italiana su un round futuro si cestina).
+#  (5) [!] LA GESTIONE NOSTRA (parziale, breakeven) E' SPENTA, e il TP
+#      NON C'E' (InpTP_RR = 0). E' voluto: la cella e' "incrocio dentro,
+#      incrocio fuori, con uno stop di sicurezza", cioe' l'indicatore e
+#      basta. Parziale, breakeven e TP sono tre round loro, e si
+#      scrivono DOPO, coi numeri di questo.
+#      >>> CONSEGUENZA DA DIRE: senza TP il motore NON ha un'ANCORA
+#          UNICA (il target non e' un multiplo dello stop). Quindi
+#          questo round NON puo' rispondere alla domanda "l'edge in R e'
+#          invariante allo stop": non e' la sua domanda, e non va letto
+#          cosi'.
+#  (6) [!] I DUE LATI GIRANO INSIEME. InpAllowLong e InpAllowShort sono
+#      tutti e due true, quindi la REGOLA DEI DUE LATI del 25/08 e'
+#      soddisfatta nella sostanza (tutti e due misurati) ma NON nella
+#      forma stretta (misurati SEPARATI).
+#      >>> A differenza di ABTG_VolExpBreak, qui la separazione SI PUO'
+#          fare: i due input esistono. Il file che la chiude e'
+#          R148b (InpAllowShort come asse, 2 celle), e si scrive DOPO
+#          questo, non insieme: una variabile alla volta.
+#  (7) [!] UN SOLO REGIME. 21 mesi di tick BCM sugli indici sono UN SOLO
+#      regime, rialzista. La regola C dell'Emendamento della Finestra
+#      (prova di regime) NON e' soddisfatta e non lo sara' entro il
+#      30/09. NESSUNA cella di questo round e' promuovibile senza.
+#      >>> E su questo asse il regime morde in modo particolare: in un
+#          mercato in salita la cella che fa piu' long parte avvantaggiata
+#          a prescindere dall'incrocio. E' il motivo per cui R148b (lato
+#          separato) non e' un lusso: e' il controllo del regime.
+#  (8) [!] L'EA NON E' MAI STATO COMPILATO. Chi lo ha scritto non ha
+#      MetaEditor ne' Strategy Tester: nessuna riga di questo file dice
+#      che il .mq5 compila. Il primo esito possibile del round e' un
+#      errore di compilazione, e va messo in conto.
+#
+# ----------------------------------------------------------------------
+#  BANCO E FINESTRA -- col conto, non a memoria
+#    Modello 4 (TICK REALI). Deposito 100000. FrazioneIS 0.40 (default
+#    del driver, walkforward_generico.ps1 r.179):
+#      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Sono le stesse finestre di R145a e di R147a: i round di casa si
+#    confrontano fra loro solo se il banco e' lo stesso.
+#    @DAQUANDO 2024.09.26 non e' prudenza: e' il MURO DEI TICK di BCM su
+#    NASUSD, MISURATO (InfoBroker r.62, stato COMPLETO).
+#    >>> DEPOSITO 100000: qui la quantizzazione del lotto NON sporca
+#        l'asse (308-1), ma il deposito resta a 100.000 per confrontare
+#        questo round con R145a/R146/R147, che sono tutti su quel banco.
+#
+#  COSTO IN TEMPO MACCHINA: 2 celle x 2 finestre = 4 PASSATE.
+#    >>> [NON MISURATO], e dico perche' NON copio i tempi di R145a:
+#        quell'EA legge tre buffer di indicatore, questo RICALCOLA
+#        QUATTRO STOCASTICI A FORZA BRUTA a ogni barra nuova (~6.100
+#        operazioni per barra x ~21.100 barre per passata). E' piu'
+#        lento per barra, di un fattore che non conosco.
+#        Ordine di grandezza atteso: minuti, non ore. Se una passata
+#        superasse i 15 minuti, la cosa da guardare e' CycleSeries(),
+#        non i risultati.
+#
+#  IGIENE, VERIFICATA A MANO
+#    ORE IN ORA SERVER BCM (= ora italiana - 1).
+#    TETTO BARRE: M30 su NASUSD, 21 mesi = ~21.100 barre, sotto le
+#      ~100.000. A M5 sarebbero ~126.700: SFONDA (secondo motivo, dopo
+#      il costo, per cui M5 non e' qui).
+#    NESSUN ENUM sull'asse: InpVerso e' un int, il conto delle celle e'
+#      aritmetico e vale 2 (classe 287 non si applica).
+#    NESSUN PIN DI STRINGA VUOTO: InpComment e' pinnato a un valore vero.
+#    GUARDIAN: pinnato true come nasce l'EA. Nel tester la guardia e'
+#      fail-open (le sue GlobalVariable non esistono): la colonna
+#      "Guardian Rifiuti" deve valere 0.
+#    PER-TRADE: le due celle condividono il magic -> ogni passata
+#      SOVRASCRIVE il file per-trade della precedente. I numeri per
+#      cella si leggono nell'OPTFRAME, non nel per-trade.
+#    UN SOLO AGENTE locale nel Strategy Tester (classe 129).
+#    IL ROUND NON PROMUOVE NIENTE: non cambia un preset, non accende una
+#      sedia, non tocca il forward. Riaccensioni, taglie, rischio e il
+#      conto REALE 10105439 sono [FIRMA DI CLAUDIO].
+#
+#  I GEMELLI GIA' PRONTI, PROPOSTI E NON SCRITTI (una cosa alla volta):
+#    R148b  lato separato (InpAllowShort asse), NASUSD M30 -- chiude la
+#           regola dei due lati e controlla il regime
+#    R148c  gemello U30USD M30, stesso asse di R148a (k=2,0 -> 45,4x)
+#    R148d  gemello D30EUR M30, con InpKStop 3,0 (-> 47,5x: sul DAX k=2,0
+#           fa 31,7x e NON passa)
+#    R148e  NASUSD M15 con InpKStop 2,5 (-> 44,5x) -- il TF piu' basso
+#           che il cancello lascia passare su questo simbolo
+#    R148f  XAUUSD M30 -- SOLO DOPO le due sonde sull'oro (spread orario
+#           e profondita' a tick). Prima di quelle e' screening, non
+#           verdetto.
+# ======================================================================
+@SIMBOLO  NASUSD
+@PERIODO  M30
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+#
+# --- L'INDICATORE: i nove numeri della FONTE, nessuno toccato.
+#     Sono il Pine del collega, che e' anche il .pine gia' in casa
+#     dall'11/08 (prove\alta_velocita_ciclo.pine). Qui NON sono manopole:
+#     tararli prima di sapere se il segnale esiste sarebbe pesca.
+InpK1Len=5
+InpK1Smo=3
+InpK2Len=14
+InpK2Smo=3
+InpK3Len=45
+InpK3Smo=14
+InpK4Len=75
+InpK4Smo=20
+InpMmLen=9
+#
+# --- LATI: tutti e due accesi. La SEPARAZIONE e' R148b (punto 6 del
+#     contro-esempio), non questo file.
+InpAllowLong=true
+InpAllowShort=true
+#
+# --- USCITA: l'incrocio opposto. E' l'uscita dell'INDICATORE, ed e' la
+#     meta' dell'ipotesi dichiarata in cima.
+InpEsciSuCrossOpposto=true
+#
+# --- STOP: 2,0 x ATR(14) su NASUSD M30 = ~90,6 punti indice = 50,3x lo
+#     spread mediano MISURATO (1,80). Margine +26% sul pavimento di
+#     lavoro dei 40x. NON e' il valore piu' bello: e' il primo valore
+#     sopra la frontiera con margine, scelto dal cancello del costo e
+#     non da un backtest.
+#     NESSUN TP: il target non esiste, esce l'indicatore. Conseguenza
+#     dichiarata al punto (5) del contro-esempio.
+InpKStop=2.0
+InpAtrPeriod=14
+InpTP_RR=0.0
+InpMinSLPts=0
+#
+# --- GESTIONE NOSTRA: SPENTA (punto 5 del contro-esempio). InpTP1_RR e
+#     InpBE_R restano pinnati ma sono INERTI finche' InpTP1Pct=0 e
+#     InpBreakeven=false.
+InpTP1_RR=1.0
+InpTP1Pct=0
+InpBreakeven=false
+InpBE_R=1.0
+#
+# --- COSTO (R55): 20,0% = lo stop dev'essere almeno 5x lo spread.
+#     NON 2,5 (la frontiera dei 40x): a 2,5 la soglia varrebbe 2,27
+#     punti indice contro una mediana MISURATA di 2,30-2,60 nelle ore
+#     0-13, e il round misurerebbe il cancello. Punto (1).
+InpMaxSpreadPctOfStop=20.0
+#
+# --- OPERATIVO: tetto giornaliero SPENTO (deroga a C6, dichiarata e
+#     motivata col numero nella sezione FREQUENZA), filtro orario
+#     SPENTO (punto 4), venerdi' NON chiuso.
+#     Le ore restano in ORA SERVER anche se il filtro e' spento.
+InpMaxTradesPerDay=0
+InpUseHourFilter=false
+InpHourStart=14
+InpHourEnd=20
+InpFridayClose=false
+InpFridayCloseHour=20
+#
+# --- RISCHIO: il contratto di casa 0,65. Taglie e rischio sono di
+#     CLAUDIO: qui si MISURA, non si decide.
+InpRiskPercent=0.65
+#
+# --- GENERALI. Nessun pin di stringa vuoto.
+InpUsaGuardian=true
+InpComment=CYCLER148A
+InpMagic=775701
+InpVerbose=true
+InpAutoTest=true
+#
+# --- L'UNICO ASSE: IL VERSO. 2 celle x 2 finestre = 4 passate.
+#     0 = si trada CON l'incrocio  (incrocio in su = LONG)  <- l'ipotesi
+#     1 = si trada CONTRO l'incrocio                        <- il controllo
+#     Le due celle coprono GLI STESSI intervalli col segno rovesciato:
+#     e' un esperimento col suo controllo dentro, non una griglia.
+#     Int, non enum: celle = |1 - 0| / 1 + 1 = 2.
+InpVerso=0||0||1||1||Y
+# ======================================================================
