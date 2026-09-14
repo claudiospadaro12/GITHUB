@@ -19044,3 +19044,58 @@ il comportamento giusto), ma è una lettura diversa dello stesso numero.
    pattern a finestra corta, a differenza di un incrocio su una soglia
    globale), il posto occupato torna a essere un cancello vero, e la colonna
    "denominatore" smette di poter leggersi come "quasi = ingressi".
+
+## 334. 🧟🔓 LA NOTA DI RIPARAZIONE IN PROSA DESCRIVE UN COMMIT, IL PIN NEL BLOCCO DI LANCIO NE CITA UN ALTRO — E IL MARCATORE NON LO SCOPRE PERCHE' NON CAMBIA (14/09/2026)
+
+**Numero riservato a 334, non 333: al momento di scrivere questa voce
+`backtest_pipeline/mc_dd_cella.py` (modifica non committata, presumibilmente
+di un'altra sessione in corso sullo stesso albero di lavoro) aveva GIA'
+riservato "CLASSE 333" in un commento per un difetto diverso (precisione
+Monte Carlo nell'autotest). Verificato con `grep -rn "CLASSE 333"` PRIMA di
+scrivere, come vuole la regola di casa -- non dopo.**
+
+**Caso reale.** `backtest_pipeline/righe/RIGA_SPREAD_FLOTTA_DA_MANDARE.md` porta,
+dal 12/09, un riquadro "AGGIORNATO IL 12/09/2026" che descrive **giusto** la
+riparazione di `RIGA_SPREAD_FLOTTA.ps1` (bersaglio = banco `C:\MT5_Backtest`,
+chiusura finale filtrata per `.Path` = chirurgica, invece del vecchio
+`Get-Process terminal64 | Stop-Process -Force` senza filtro, che spegneva
+ANCHE il conto REALE 10105439). **Ma il blocco `powershell` sotto, quello che
+si copia-incolla, portava ancora `$pin='e1c81430c...'` — il commit del 03/09,
+**PRIMA** della riparazione.** La stessa svista si è propagata per copia in
+`RIGA_SPREAD_FLOTTA_TRANCHE_DA_MANDARE.md` (5 blocchi) e nel foglio nuovo
+`RIGA_SPREAD_FLOTTA_XAUUSD_DA_MANDARE.md` (che l'ha ERTA solo perché citava
+esplicitamente "chiusura chirurgica" per un pin che non l'aveva). Trovato dal
+controllo preventivo sulla consegna R148g del 14/09, leggendo `git cat-file`
+sul pin citato — non fidandosi della prosa.
+
+🔴 **PERCHE' IL MARCATORE NON BASTA A PRENDERLO.** La guardia
+`Select-String -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3'` protegge da un pin
+di una versione MAGGIORE diversa (v2 -> v3), non da una riparazione INTERNA
+alla stessa v3: la stringa marcatore non cambia fra `e1c81430c` e `50d2f7b`,
+quindi lo script "vecchio" passa il cancello del marcatore a pieni voti pur
+essendo quello pre-riparazione. Il cancello che serve non è "il marcatore c'è
+ancora", è "il pin è il commit giusto per la garanzia che la prosa promette".
+
+### 🔴 LA REGOLA
+1. **Quando una nota di riparazione descrive un comportamento nuovo di uno
+   script, il PRIMO posto da controllare è il valore letterale `$pin=` nei
+   blocchi copiabili dello stesso documento** — non il marcatore, non la
+   prosa introduttiva: il pin è l'unica cosa che decide DAVVERO quale codice
+   gira. `grep "pin='" file.md` e confronto a mano coi commit citati nella
+   nota, ogni volta che si legge o si tocca un file "DA MANDARE" che parla di
+   una riparazione di sicurezza.
+2. **Una riparazione di sicurezza in un file condiviso da più script/righe
+   (stesso `.ps1` pilotato da più foglietti `_DA_MANDARE`) va cercata in
+   OGNI foglietto che lo pilota**, non solo in quello dove è stata notata per
+   primo: `grep -rn "<pin vecchio>"` su tutta `backtest_pipeline/righe/`,
+   non solo sul file che si stava scrivendo.
+3. **Un file che dice "verificato: byte per byte identico a HEAD" a una
+   certa data smette di essere vero alla prima modifica successiva di HEAD**:
+   quella frase è una FOTOGRAFIA, non una garanzia permanente. Se lo script
+   pilotato riceve una riparazione dopo, ogni pagina che cita il pin vecchio
+   con quella frase mente per omissione, anche se non è stata toccata.
+4. **Correzione applicata**: i tre file sopra ora pinnano
+   `50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b` (l'ultimo commit che tocca
+   `RIGA_SPREAD_FLOTTA.ps1`, verificato con `git cat-file` per marcatore
+   identico, parametri CLI invariati, e la chiusura finale filtrata per
+   `.Path`).

@@ -4,8 +4,20 @@
 (`RIGA_SPREAD_FLOTTA_DA_MANDARE.md`, 03/09), ORA ESTESA all'oro. **ZERO codice
 nuovo**: `RIGA_SPREAD_FLOTTA.ps1` (motore `ABTG_SpreadOrario.mq5` v2) è già
 **multi-simbolo generico** — `InpSimboli` è una lista separata da virgole, senza
-nessun simbolo vietato — e il PIN già verificato `e1c81430c…` funziona così
-com'è: **cambia solo l'argomento `-Simboli`.**
+nessun simbolo vietato. **Cambia solo l'argomento `-Simboli`.**
+
+🔴 **CORRETTO IL 14/09 dal cancello di giudizio: il pin NON è più `e1c81430c…`.**
+Quel pin (03/09) è lo script **PRIMA** della riparazione di sicurezza — a
+quel pin la scoperta del terminale ignora `C:\MT5_Backtest` (prende il primo
+`*BCM Markets MT5 Terminal*` sotto Program Files, cioè **il piccolo 50503392
+con le sedie VIVE**, se lo trova prima del banco) e la chiusura a fine corsa è
+`Get-Process terminal64 | Stop-Process -Force` **SENZA NESSUN FILTRO**: ammazza
+OGNI terminale della macchina, conto REALE compreso. Il pin giusto è
+`50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b` (11/09, l'ULTIMO commit che tocca
+questo file), che ha ricevuto la riparazione vera e propria descritta qui
+sotto. Verificato con `git cat-file` sui due commit: stesso marcatore, stessi
+parametri CLI (`-Pin`/`-Simboli` invariati), cambia SOLO la logica interna di
+scelta/chiusura del terminale.
 
 **Perché esiste.** `backtest_pipeline/prove/R148a_cycle_verso_NASUSD.txt`
 (sezione "BUCHI DICHIARATI") e `report/ORO_1530_CANCELLO_COSTO_2026-09-10.md`
@@ -22,11 +34,15 @@ foglio gemello `RIGA_MISURA_TICK_XAUUSD_DA_MANDARE.md`).
 ## 🛑🛑🛑 SI LANCIA **SOLO SUL PC DI BACKTEST — MAI SUL VPS** 🛑🛑🛑
 
 > Identico al foglio NASUSD/U30USD/D30EUR: la riga **apre e chiude MT5 da sola**
-> (`AllowLiveTrading=false`). Dalla riparazione del 12/09 il bersaglio è il
-> **banco `C:\MT5_Backtest`** (demo **50504400**, zero EA attaccati) e la
-> chiusura finale è **chirurgica** (muore solo il processo sotto quella
-> cartella) — letto riga per riga in `RIGA_SPREAD_FLOTTA.ps1` F4/F6 il 14/09.
-> **Con MT5 e MetaEditor CHIUSI prima di lanciare.**
+> (`AllowLiveTrading=false`). **SOLO AL PIN `50d2f7b…` qui sotto** (non a
+> `e1c81430c…`, tolto: vedi il correttivo sopra) il bersaglio è il **banco
+> `C:\MT5_Backtest`** (demo **50504400**, zero EA attaccati, NESSUN ripiego se
+> manca: lo script muore) e la chiusura finale è **chirurgica** (muore solo il
+> processo il cui `.Path` sta sotto quella cartella) — letto riga per riga in
+> `RIGA_SPREAD_FLOTTA.ps1` F1/F4 e nella riga di chiusura prima di F6, il
+> 14/09, sul commit `50d2f7b` (non sul pin vecchio, che non ce l'ha).
+> **Con MT5 e MetaEditor CHIUSI prima di lanciare, comunque: e' la rete in
+> piu', non quella su cui contare.**
 
 ---
 
@@ -47,15 +63,17 @@ PROVVISORIO fino alla conferma della finestra.**
 
 ## ▶️ LA CORSA (blocco intero, un comando solo)
 
-Riusa il **PIN GIÀ VERIFICATO** del 03/09 (`e1c81430c…`, driver v3 + motore v2):
-**nessun nuovo commit serve per questa sonda**, perché il motore è già
-multi-simbolo generico e non ha nessun simbolo vietato. Cambia **solo**
-`-Simboli` rispetto al blocco NASUSD/U30USD/D30EUR.
+Riusa l'**ULTIMO commit che tocca lo script** (`50d2f7b…`, 11/09: driver v3 +
+motore v2 + la riparazione della chiusura chirurgica — NON il pin del 03/09,
+scorretto e tolto, vedi sopra): **nessun nuovo commit serve per questa
+sonda**, perché il motore è già multi-simbolo generico e non ha nessun
+simbolo vietato. Cambia **solo** `-Simboli` rispetto al blocco
+NASUSD/U30USD/D30EUR.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli 'XAUUSD'; $rc=$LASTEXITCODE;

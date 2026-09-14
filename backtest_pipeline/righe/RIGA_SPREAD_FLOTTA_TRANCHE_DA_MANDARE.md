@@ -12,11 +12,17 @@ riscrittura**: lo strumento e' gia' multi-simbolo (`ABTG_SpreadOrario.mq5`
 r.54 `input string InpSimboli`) e la riga accetta gia' `-Simboli` e
 `-PuntiPerIndice` nel suo `param()`.
 
-> ✅ **Verificato prima di scrivere questa pagina**: `RIGA_SPREAD_FLOTTA.ps1` e
-> `ABTG_SpreadOrario.mq5` al pin `e1c81430...` sono **byte per byte identici a
-> HEAD** (`git diff` vuoto su tutti e due). Si riusa **lo stesso pin gia'
-> collaudato il 03/09** — quindi nessun codice nuovo passa dal cancello, e non
-> c'e' nessun `.ps1` da riscrivere (nessun rischio emoji/ANSI).
+> 🔴 **CORRETTO IL 14/09 dal cancello di giudizio: quella verifica era vera
+> quando scritta, e NON LO E' PIU'.** `e1c81430...` (03/09) NON e' piu' identico
+> a HEAD: il 12/09 (commit `b2e8f7d` + `50d2f7b`) `RIGA_SPREAD_FLOTTA.ps1` e'
+> stato riparato, perche' a quel pin la scelta del terminale ignora
+> `C:\MT5_Backtest` (prende il primo `*BCM Markets MT5 Terminal*`, cioe' **il
+> piccolo 50503392 con le sedie VIVE**, se lo trova prima del banco) e la
+> chiusura a fine corsa e' `Get-Process terminal64 | Stop-Process -Force`
+> **SENZA FILTRO** — ammazza OGNI terminale della macchina, conto REALE
+> compreso. **Il pin giusto oggi e' `50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b`**
+> (11/09, l'ultimo commit che tocca lo script): stesso marcatore, stessi
+> parametri CLI, e la chiusura finale e' filtrata per `.Path` (chirurgica).
 > ✅ E il pin **copre anche il motore**: la riga scarica `ABTG_SpreadOrario.mq5`
 > da `$RawPin` (r.291) e ne verifica il marcatore prima di compilare — quindi
 > **non c'e' la classe 24** (pin che non copre il pezzo importante).
@@ -78,7 +84,7 @@ con `ABTG_HistoryDownloader` prima di rifare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "225JPY" -PuntiPerIndice 1 -TimeoutMin 240; $rc=$LASTEXITCODE;
@@ -96,7 +102,7 @@ con `ABTG_HistoryDownloader` prima di rifare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "EURUSD,GBPUSD,USDJPY" -PuntiPerIndice 10 -TimeoutMin 600; $rc=$LASTEXITCODE;
@@ -114,7 +120,7 @@ con `ABTG_HistoryDownloader` prima di rifare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "EURJPY,GBPJPY,CHFJPY" -PuntiPerIndice 10 -TimeoutMin 600; $rc=$LASTEXITCODE;
@@ -132,7 +138,7 @@ con `ABTG_HistoryDownloader` prima di rifare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "EURCAD,GBPCAD,AUDUSD,EURAUD" -PuntiPerIndice 10 -TimeoutMin 600; $rc=$LASTEXITCODE;
@@ -150,7 +156,7 @@ con `ABTG_HistoryDownloader` prima di rifare.
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
     if(Get-Process terminal64,metaeditor64 -EA SilentlyContinue){ throw 'MT5 O METAEDITOR APERTO: chiudili e rilancia (questa riga apre MT5 da sola).' };
-    $pin='e1c81430c8ba1b4f835cbeb7927f400d54501da1'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
+    $pin='50d2f7b66c9b135a04fb19ac2a39bccb00bc1b8b'; $t0=Get-Date; $p="$env:USERPROFILE\RIGA_SPREAD_FLOTTA.ps1"; Remove-Item $p -Force -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_SPREAD_FLOTTA.ps1" -OutFile $p -EA Stop;
     if(-not (Select-String -LiteralPath $p -SimpleMatch -Pattern 'MARCATORE_RIGA_SPREAD_FLOTTA_v3' -Quiet)){ throw 'SCRIPT VECCHIO: non lancio niente' };
     $global:LASTEXITCODE=$null; & $p -Pin $pin -Simboli "XAUUSD" -PuntiPerIndice 100 -TimeoutMin 480; $rc=$LASTEXITCODE;
