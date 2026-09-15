@@ -198,14 +198,20 @@
 #     dal 2004, DOPO quel pavimento, quindi l'accorciamento non dovrebbe
 #     mordere -- ma se mordesse, NON sposta il confine IS/OOS: il taglio
 #     e' calcolato sulle date DICHIARATE (r.921), non sui dati presenti.
-#     L'unico effetto sarebbe un IS piu' corto e un n piu' basso, che la
-#     sentinella S2 legge e dichiara.
+#     L'unico effetto sarebbe un IS piu' corto e un n piu' basso -- MA
+#     S2 NON BASTA A VEDERLO, e lo scrivo perche' la prima stesura di
+#     questo file diceva di si'. S2 chiede solo IS>=150: uno storico che
+#     partisse davvero dal 2012 darebbe 8 anni x 33,2 = ~266 posizioni,
+#     che PASSA S2 e passa anche il contro-esempio della meta' frequenza
+#     (~258). La banda non separa "il motore opera meno" da "la storia
+#     non c'e'" (classe 178). Serve la sentinella S4 qui sotto.
 # ---------------------------------------------------------------------
 #  L'ASSE E IL PASSO -- 1 / 3 / 5(vivo) / 7 / 9 / 11 / 13
 #    7 celle, passo 2, centrato sulla cella viva 5 -- IDENTICO a R156a
 #    sulla sesta sedia della stessa famiglia, e per la stessa ragione
 #    strutturale: il driver spazzola solo start/passo/stop aritmetico
-#    (walkforward_generico.ps1 r.771), non un elenco di valori.
+#    (walkforward_generico.ps1 r.775-776 parse, r.792 aritmetica), non
+#    un elenco di valori.
 #    Bordo BASSO 1 = il piu' stretto possibile: flat al primo cambio di
 #    giornata D1 dopo l'apertura, se non ha gia' chiuso da solo.
 #    Bordo ALTO 13 = ~2,5 volte il valore vivo (due settimane e mezzo di
@@ -278,6 +284,29 @@
 #  S3 -- LE CELLE. Nel CSV devono comparire 7 valori distinti di
 #    InpMaxDaysHold (1,3,5,7,9,11,13) su DUE file (_IS e _OOS). Se sono
 #    6 o 8, si dichiara quale manca prima di leggere il resto.
+#  S4 -- LA FINESTRA EFFETTIVA, e non e' un sospetto teorico: la STESSA
+#    riga di sonda che mi da' 2004.06.16 porta anche `59792` barre H1 e
+#    lo stato `da scaricare (parziale)`. A ~6.240 barre H1/anno sono
+#    ~9,6 anni di cache, non 22. Il tester scarica dal server a
+#    run-time (R100 ha girato 22 anni sull'oro con la cache a 100.000
+#    barre), MA questo driver non ha nessun gate di densita':
+#    `walkforward_generico.ps1` non contiene ne' "FINESTRA ACCORCIATA"
+#    ne' "DENSITA'" (verificato: zero occorrenze), mentre il driver di
+#    R102 ce l'aveva ed e' proprio quello che ha MISURATO il difetto
+#    (R102_REFERTO_DRIVER_BLOCCO2 r.523/525/527, GATE 4: su GapFill
+#    GBPUSD "finestra NOMINALE 34 anni, EFFETTIVAMENTE OPERATA 10"; su
+#    EURUSD 56 contro 6).
+#    QUINDI SI VERIFICA A MANO, sul report MT5 della gamba IS della
+#    CELLA VIVA (5):
+#      - DATA DELLA PRIMA OPERAZIONE entro 12 mesi da 2004.06.16
+#        -> FINESTRA PIENA: l'IS si puo' chiamare "15,54 anni".
+#      - oltre -> FINESTRA ACCORCIATA: si scrive la data vera e gli anni
+#        VERI ACCANTO A OGNI NUMERO di questo round, e l'IS NON si
+#        chiama piu' "15,54 anni".
+#      - DENSITA': se anni solari interi dentro l'IS non hanno NESSUNA
+#        operazione, il numero da dire e' quello degli anni OPERATI, non
+#        quello della finestra dichiarata.
+#    S4 non ferma la corsa: la corsa PROSEGUE e la riga si scrive.
 # ---------------------------------------------------------------------
 #  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
 #    B1  MERITO -- AMMESSO QUI (unica sedia della famiglia insieme a
@@ -332,7 +361,22 @@
 #       leggere il PF.
 #    4. IL COSTO NON DECIDE: e' dimostrato dal codice che lo stop non
 #       cambia lungo l'asse, quindi nessuna differenza fra celle puo'
-#       essere un artefatto di spread (la trappola classe 292/347).
+#       essere un artefatto di spread PER TRADE (la trappola classe
+#       292/347).
+#       >>> MA L'ARTEFATTO AGGREGATO RESTA APERTO, e lo scrivo prima dei
+#           numeri invece di scoprirlo dopo: lo spread di OGGI applicato
+#           al 1999-2008 sotto-carica il costo di una quantita' [NON
+#           MISURATA] che e' PROPORZIONALE A n -- e n e' proprio cio'
+#           che questo asse muove (r.408). Le celle BASSE (n piu' alto)
+#           ricevono il sussidio PIU' GRANDE, sempre nello stesso verso.
+#           Un altopiano che comparisse sul lato BASSO dell'asse in IS e'
+#           quindi indistinguibile da questo bias, e B5 lo prenderebbe
+#           senza accorgersene.
+#           COME SI DISINNESCA, con cio' che questo round produce gia':
+#           un vantaggio del lato basso vale SOLO se compare ANCHE in
+#           OOS (2020-2026), dove lo spread applicato e' quello giusto.
+#           Un vantaggio del lato basso presente solo in IS si dichiara
+#           [SOSPETTO COSTO], non "forma".
 #    5. E ANCHE SE PASSANO TUTTI E QUATTRO, il round NON promuove (B4):
 #       una cella scelta qui va a una finestra di REGIME o al forward,
 #       non in campo.

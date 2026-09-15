@@ -18,10 +18,10 @@
 #   "passate" dira' 14 anche qui -- celle x 2 finestre -- ma con
 #   @FRAZIONEIS 1.0 la gamba OOS e' DEGENERE e le passate vere sono 7:
 #   difetto di conteggio noto e non bloccante, classe 345, gia'
-#   documentato da R156a/R157a/R158a. Nessun CSV *_OOS esistera' per
-#   questo round: e' voluto, non un file mancante.)
+#   documentato da R156a/R157a/R158a. Il CSV *_OOS sara' vuoto / sola
+#   intestazione: e' voluto, non un file mancante.)
 #  -Modello 1 = OHLC M1 DICHIARATO: i tick BCM sui metalli partono dal
-#  2024.07.05 (R100, riga 53 del suo file prova), su 22 anni non
+#  2024.07.05 (R100, riga 52 del suo file prova), su 22 anni non
 #  esistono. DD = LIMITE INFERIORE del rischio, profitto = STIMA DEL
 #  LORDO (spread corrente, zero slippage), mai un guadagno.
 #  -Deposito 100000 = il deposito dell'ANCORA (R100,
@@ -213,8 +213,21 @@
 #       leggere il DD.
 #    3. IL COSTO NON DECIDE: lo stop non cambia lungo l'asse
 #       (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687, tutti
-#       in Enter(), all'apertura): nessun artefatto di spread (trappola
-#       classe 292/347).
+#       in Enter(), all'apertura): nessun artefatto di spread PER TRADE
+#       (trappola classe 292/347).
+#       >>> MA L'ARTEFATTO AGGREGATO RESTA APERTO: lo spread di OGGI
+#           applicato al 2004-2019 sotto-carica il costo di una quantita'
+#           [NON MISURATA] PROPORZIONALE A n -- e n e' cio' che questo
+#           asse muove (r.408). Le celle BASSE (n piu' alto) ricevono il
+#           sussidio PIU' GRANDE, sempre nello stesso verso: un altopiano
+#           sul lato basso sarebbe indistinguibile da questo bias.
+#           QUI PERO' NON C'E' UNA GAMBA OOS A SPREAD CORRETTO (tranche
+#           unica, punto sopra): il disinnesco usato su R160a-d (vale
+#           solo se compare anche in OOS) NON e' disponibile. Quindi un
+#           vantaggio del lato basso qui si dichiara [SOSPETTO COSTO] e,
+#           non esistendo qui una gamba a spread corretto, NON si
+#           conclude niente sul lato basso dell'asse: serve una finestra
+#           di regime recente.
 #    4. NIENTE GAMBA DI VERIFICA: qualunque cella "migliore" qui e'
 #       un'IPOTESI da riverificare su una finestra di regime (le quattro
 #       di casa esistono gia', R50/R56/R59), MAI un verdetto. Va scritto

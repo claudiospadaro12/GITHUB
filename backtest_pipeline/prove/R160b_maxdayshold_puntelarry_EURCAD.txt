@@ -74,15 +74,20 @@
 #     Nota: cade DOPO il pavimento di gennaio 1999 che R102 ha misurato
 #     sul banco (R102_REFERTO_DRIVER_BLOCCO1 r.530-532: su TRE simboli
 #     forex la prima operazione e' del gennaio 1999 anche dove il broker
-#     dichiara il 1993/1971), quindi qui l'accorciamento non dovrebbe
-#     mordere. Se mordesse, non sposterebbe il confine IS/OOS: il taglio
-#     si calcola sulle date DICHIARATE (walkforward_generico.ps1 r.921).
+#     dichiara il 1993/1971). Se mordesse, non sposterebbe il confine
+#     IS/OOS (il taglio si calcola sulle date DICHIARATE,
+#     walkforward_generico.ps1 r.921) -- ma sposterebbe il SIGNIFICATO
+#     dell'IS, e S2 NON lo vedrebbe: con IS>=150 come unica soglia, uno
+#     storico che partisse davvero dal 2008 darebbe 12 anni x 23,7 =
+#     ~284 posizioni, che passa S2 E passa il contro-esempio della meta'
+#     frequenza (~242). Classe 178. Serve S4 (sotto).
 #  b) IL TAGLIO E' SCELTO PERCHE' L'OOS COINCIDA CON LA FINESTRA R103:
 #       giorni totali 1999.08.01 -> 2026.06.30 ............ 9830
 #       giorni 1999.08.01 -> 2019.12.31 (confine) ......... 7457
 #       frazione 7457/9830 = 0,758596...  -> scritta 0.7586
 #       verifica: floor(9830 * 0.7586) = floor(7457,038) = 7457
-#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.919-920)
+#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.921 per
+#                    Meta, r.924 per l'OOS)
 #     >>> IS  1999.08.01 -> 2019.12.31  (20,42 anni)
 #     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
 #     REGIMI DICHIARATI: IS = euro giovane, crollo 2008, crisi euro
@@ -145,6 +150,23 @@
 #    SOSPESO (regola B) e si legge solo RISCHIO e FORMA.
 #  S3 -- CELLE: 7 valori distinti di InpMaxDaysHold su due file (_IS e
 #    _OOS). Se sono 6 o 8 si dichiara quale manca prima di leggere.
+#  S4 -- LA FINESTRA EFFETTIVA. La stessa riga di sonda che mi da'
+#    1999.08.01 porta `55640` barre H1 e stato `da scaricare
+#    (parziale)`: a ~6.240 barre/anno sono ~8,9 anni di cache, non 27.
+#    Il tester scarica a run-time, ma QUESTO driver non ha gate di
+#    densita' (`walkforward_generico.ps1`: zero occorrenze di "FINESTRA
+#    ACCORCIATA" e "DENSITA'"), mentre quello di R102 ce l'aveva e ha
+#    MISURATO il difetto (R102_REFERTO_DRIVER_BLOCCO2 r.523/525/527,
+#    GATE 4: 34 anni nominali contro 10 operati su GapFill GBPUSD; 56
+#    contro 6 su EURUSD).
+#    SI VERIFICA A MANO sul report MT5 della gamba IS, cella viva (5):
+#      - prima operazione entro 12 mesi da 1999.08.01 -> FINESTRA PIENA,
+#        l'IS si chiama "20,42 anni";
+#      - oltre -> FINESTRA ACCORCIATA: data vera e anni VERI accanto a
+#        OGNI numero, e l'IS non si chiama piu' "20,42 anni";
+#      - DENSITA': anni solari interi senza NESSUNA operazione dentro
+#        l'IS -> il numero da dire e' quello degli anni OPERATI.
+#    S4 non ferma la corsa: la riga si scrive.
 # ---------------------------------------------------------------------
 #  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
 #    B1  MERITO -- ammesso SE S2 passa in tutte e due le gambe, e solo
@@ -189,7 +211,22 @@
 #       lotto (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687,
 #       tutti in Enter(), all'apertura), quindi la geometria dello stop
 #       e' INVARIANTE lungo l'asse e nessuna differenza fra celle puo'
-#       essere un artefatto di spread (trappola classe 292/347).
+#       essere un artefatto di spread PER TRADE (trappola classe
+#       292/347).
+#       >>> MA L'ARTEFATTO AGGREGATO RESTA APERTO, e lo scrivo prima dei
+#           numeri invece di scoprirlo dopo: lo spread di OGGI applicato
+#           al 1999-2008 sotto-carica il costo di una quantita' [NON
+#           MISURATA] che e' PROPORZIONALE A n -- e n e' proprio cio'
+#           che questo asse muove (r.408). Le celle BASSE (n piu' alto)
+#           ricevono il sussidio PIU' GRANDE, sempre nello stesso verso.
+#           Un altopiano che comparisse sul lato BASSO dell'asse in IS e'
+#           quindi indistinguibile da questo bias, e B5 lo prenderebbe
+#           senza accorgersene.
+#           COME SI DISINNESCA, con cio' che questo round produce gia':
+#           un vantaggio del lato basso vale SOLO se compare ANCHE in
+#           OOS (2020-2026), dove lo spread applicato e' quello giusto.
+#           Un vantaggio del lato basso presente solo in IS si dichiara
+#           [SOSPETTO COSTO], non "forma".
 #    5. E ANCHE SE PASSANO TUTTI, il round NON promuove (B4).
 # ---------------------------------------------------------------------
 #  BUCHI DICHIARATI

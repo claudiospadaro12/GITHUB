@@ -75,7 +75,7 @@
 #       giorni 1999.01.01 -> 2019.12.31 (confine) ........  7669
 #       frazione 7669/10042 = 0,7636924...  -> scritta 0.7637
 #       verifica: floor(10042 * 0.7637) = floor(7669,0754) = 7669
-#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.919-921)
+#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.921 per Meta, r.924 per l'OOS)
 #     >>> IS  1999.01.01 -> 2019.12.31  (21,00 anni)
 #     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
 #     REGIMI DICHIARATI: IS = yen forte post-crisi asiatica, carry trade
@@ -198,7 +198,21 @@
 #       lotto (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687,
 #       tutti in Enter(), all'apertura): la geometria dello stop e'
 #       INVARIANTE lungo l'asse, quindi nessuna differenza fra celle e'
-#       un artefatto di spread (trappola classe 292/347).
+#       un artefatto di spread PER TRADE (trappola classe 292/347).
+#       >>> MA L'ARTEFATTO AGGREGATO RESTA APERTO, e lo scrivo prima dei
+#           numeri invece di scoprirlo dopo: lo spread di OGGI applicato
+#           al 1999-2008 sotto-carica il costo di una quantita' [NON
+#           MISURATA] che e' PROPORZIONALE A n -- e n e' proprio cio'
+#           che questo asse muove (r.408). Le celle BASSE (n piu' alto)
+#           ricevono il sussidio PIU' GRANDE, sempre nello stesso verso.
+#           Un altopiano che comparisse sul lato BASSO dell'asse in IS e'
+#           quindi indistinguibile da questo bias, e B5 lo prenderebbe
+#           senza accorgersene.
+#           COME SI DISINNESCA, con cio' che questo round produce gia':
+#           un vantaggio del lato basso vale SOLO se compare ANCHE in
+#           OOS (2020-2026), dove lo spread applicato e' quello giusto.
+#           Un vantaggio del lato basso presente solo in IS si dichiara
+#           [SOSPETTO COSTO], non "forma".
 #    5. UN SOLO CROSS, DUE REGIMI: qualunque cosa esca qui vale per
 #       GBPJPY, non per la famiglia.
 # ---------------------------------------------------------------------
