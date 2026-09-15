@@ -43,7 +43,12 @@
 #       in archivio). E U30USD ha il muro dei tick/OHLC a 2024.09.26
 #       (misurato, sonda 17/08): non si puo' allungare la finestra come
 #       per PTE GBPUSD. Con la sola finestra disponibile (21 mesi) il
-#       contratto la segna n=40 SOSPESO (CENSIMENTO_CONTRATTI.md r.221).
+#       contratto la segna 40 chiusure -> 23 POSIZIONI [MISURATO]
+#       (CENSIMENTO_CONTRATTI_v2.md r.303, non v1/r.221 -- CORRETTO DAL
+#       CANCELLO, 15/09/2026, stessa disciplina della classe 343: citare
+#       v2, non v1, nelle stesse unita' -- posizioni -- usate per 770531
+#       due righe sotto): SOSPESO in entrambe le versioni, la conclusione
+#       non cambia.
 #     - `772362` CostToCost GBPCAD H4 (InpTP_R, l'ultima manopola viva
 #       della famiglia CostToCost: letto nel sorgente,
 #       mql5/Experts/ABTG_CostToCost.mq5 r.152-153, InpTP_R conta SOLO
@@ -87,7 +92,10 @@
 #     indicato nel mandato): `InpFirstFraction` e' classificato "uscita:parziale"
 #     dal regex di censimento_uscite.py (r.97, pattern `FirstFraction`)
 #     ma NEL SORGENTE (mql5/Experts/ABTG_SuperWave*.mq5 e
-#     ABTG_SupertrendReversal*.mq5, 5 file, verificato uno per uno) e'
+#     ABTG_SupertrendReversal*.mq5, 6 file [CORRETTO DAL CANCELLO,
+#     15/09/2026, classe 346: la classe 344 e la prosa qui dicevano
+#     "5"/"cinque" ma elencavano sei nomi di file -- riverificato uno
+#     per uno, sono 6], verificato uno per uno) e'
 #     una manopola di INGRESSO (quota mercato/pendente all'apertura,
 #     r.381: `lotMkt=NormVol(totLot*InpFirstFraction)`), MAI di uscita:
 #     per questo NON e' l'asse di questo file, anche se il censimento
@@ -307,12 +315,36 @@
 #        configurazione esattamente viva di 770531. Non c'e' un S1
 #        (nessun numero di confronto): il sostituto e' un controllo
 #        DIVERSO, dichiarato qui: la cella InpSLLookback=5 di QUESTO
-#        round deve avere Trades nella banda 70-100 (coerente col
-#        pavimento aritmetico sopra, +/-20% su 84,5) e Equity DD% nella
-#        banda 3,0-8,0% (coerente con la gemella 970901: DD 5,7-9,0%
-#        su meccanismo di stop affine). Se la cella viva cade FUORI da
-#        entrambe le bande, il banco e' sporco e il round si ferma
-#        prima di leggere le altre sei celle.
+#        round deve avere Trades nella banda 119-178 e Equity DD% nella
+#        banda 2,0-9,0%. Se la cella viva cade FUORI anche da UNA SOLA
+#        delle due bande, il banco e' sporco e il round si ferma prima
+#        di leggere le altre sei celle.
+#        >>> CORRETTO DAL CANCELLO (controllo-preventivo, 15/09/2026),
+#        classe 346: la prima stesura scriveva "Trades 70-100" e "DD
+#        3,0-8,0%, coerente con 970901 DD 5,7-9,0%" -- ENTRAMBE SBAGLIATE.
+#        - TRADES: "70-100" era 84,5 POSIZIONI attese (giusto, paragrafo
+#          sopra) scambiate per "Trades" del CSV -- ma il CSV di questa
+#          famiglia conta le CHIUSURE, non le posizioni: la stessa sedia
+#          770531 a deposito 100.000 (uguale a questo round) fa "88
+#          chiusure da 50 posizioni" (fattore 1,76, le posizioni si
+#          chiudono in TRE TRANCHE parziali -- REFERTO_ROUND23_PERTRADE.md
+#          r.14-16) e la stessa distinzione e' quella usata due paragrafi
+#          sopra per il pavimento. 84,5 posizioni x 1,76 = 148,7 chiusure
+#          attese; +/-20% = 119-178, non 70-100. Se il banco fosse rimasto
+#          a 70-100 il round si sarebbe fermato da solo su un numero
+#          giusto, scambiandolo per un errore.
+#        - DD: "5,7-9,0%" mescolava due fonti incompatibili -- il 9,0% e'
+#          il contratto PIENO di 970901 (R99, 22 anni OHLC sulla cella di
+#          DEFAULT, non sull'asse InpSLLookback: report/CONTRATTI_SEDIE.md
+#          par. CONTRATTO PARZIALE), il 5,7% non risulta in nessuna fonte
+#          -- il CSV vero di R127b (stesso asse, N=5, dal_vps/
+#          ABTG_SupertrendReversal_Ottimizzato_XAUUSD_*_ohlc_r127b.csv) da'
+#          DD 5,9113% (OOS) / 6,5765% (IS), non 5,7%. E la banda 3,0-8,0%
+#          aveva il pavimento SOPRA il DD gia' misurato di 770531 stessa
+#          (2,96%, CENSIMENTO_CONTRATTI_v2.md r.306, stessa cella viva, 12,5
+#          mesi): un banco che boccia il proprio precedente noto non e' un
+#          banco pulito. Rifatta con margine sotto 2,96% e sopra il
+#          contratto pieno del gemello: 2,0-9,0%.
 #  S2  CONTEGGIO DELLE CELLE. 7 valori distinti di InpSLLookback nel
 #      CSV. Se sono 6 o 8, si dichiara quale manca prima di leggere il
 #      resto.

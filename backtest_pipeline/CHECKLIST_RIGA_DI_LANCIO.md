@@ -19697,7 +19697,9 @@ in uso nello stesso paragrafo, due righe sopra.
    ma la certezza dichiarata nella motivazione era piu' forte di quella
    che i numeri permettevano.
 
-## 344. 🏷️🔀 UN REGEX PER NOME DI PARAMETRO CATEGORIZZA UNA MANOPOLA DI INGRESSO COME "USCITA": `InpFirstFraction` SU TUTTA LA FAMIGLIA SUPERWAVE/SUPERTRENDREVERSAL (5 EA) (15/09/2026)
+## 344. 🏷️🔀 UN REGEX PER NOME DI PARAMETRO CATEGORIZZA UNA MANOPOLA DI INGRESSO COME "USCITA": `InpFirstFraction` SU TUTTA LA FAMIGLIA SUPERWAVE/SUPERTRENDREVERSAL (6 EA) (15/09/2026)
+<!-- CORRETTO DAL CANCELLO (controllo-preventivo, 15/09/2026), classe 346: era "5 EA"/"TUTTI E CINQUE", ma il paragrafo sotto elenca SEI nomi di file (`ABTG_SuperWave.mq5`, `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`, `ABTG_SupertrendReversal.mq5`, `ABTG_SupertrendReversal_Ottimizzato.mq5`, `ABTG_SupRev_DAX_H4_Ottimizzato.mq5`, `ABTG_SupRev_NAS_H1_Ottimizzato.mq5`) -- riverificato uno per uno (grep `InpFirstFraction` su ciascuno): sono 6, non 5. Il contenuto e le righe citate restano corrette, solo il conteggio era sbagliato. -->
+
 
 **Caso reale.** Preparando R154a (mappatura delle uscite mai provate, sedia
 `770531` `ABTG_SuperWave`) il censimento (`backtest_pipeline/censimento_uscite.py`
@@ -19707,7 +19709,7 @@ Parziale|FirstFraction|TP2_|TP3_|Scale|Runner)` — il nome del parametro
 contiene "Fraction", stesso campo semantico di "Partial"/"Scale", e il
 matcher non guarda oltre il nome.
 
-**Letto il sorgente, non il nome**: in TUTTI E CINQUE i file della famiglia
+**Letto il sorgente, non il nome**: in TUTTI E SEI i file della famiglia
 (`ABTG_SuperWave.mq5` r.71/381, `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`
 r.71/381, `ABTG_SupertrendReversal.mq5` r.70/402,
 `ABTG_SupertrendReversal_Ottimizzato.mq5` r.70/388,
@@ -19787,3 +19789,64 @@ round di un fattore 2.
    `walkforward_generico.ps1`). Aggiunta la direttiva PRIMA di committare;
    la mancanza di un conteggio-passate aggiornato in `controlla_prova.py` e'
    stata scoperta SUBITO DOPO, come effetto collaterale della verifica.
+
+## 346. 📊🔀 UNA "BANDA DI PLAUSIBILITA'" COSTRUITA IN UNITA' SBAGLIATA PASSA IL PROPRIO CONTRO-ESEMPIO SOLO SE QUALCUNO PROVA A ROMPERLA CON NUMERI VERI (controllo-preventivo, 15/09/2026)
+
+**Caso reale.** `R154a_sllookback_SuperWave_U30USD.txt` (770531,
+`ABTG_SuperWave`, asse `InpSLLookback`) non ha un S1 (nessun CSV d'archivio
+alla cella esatta): il sostituto dichiarato erano due bande di plausibilita'
+sulla cella viva -- **Trades 70-100** e **Equity DD% 3,0-8,0%** -- con la
+regola che uscire da esse ferma il round prima di leggere le altre sei
+celle. Verificando da zero (non fidandosi della prosa) sono risultate
+**entrambe sbagliate**, in due modi diversi:
+
+1. **TRADES, unita' sbagliata.** "70-100" veniva da 84,5 POSIZIONI attese
+   sulla finestra (aritmetica corretta, paragrafo del pavimento) applicate
+   pari pari alla colonna `Trades` del CSV -- ma quella colonna, per
+   QUESTA famiglia (`InpTP1Pct` parziale + deposito 100.000), conta le
+   CHIUSURE, non le posizioni: e' lo stesso identico numero che
+   `report/CENSIMENTO_CONTRATTI_v2.md` (riga 770531) e
+   `REFERTO_ROUND23_PERTRADE.md` (r.14-16, "le posizioni si chiudono in
+   TRE TRANCHE parziali") avevano gia' dovuto CONVERTIRE con un fattore
+   1,76 (88 chiusure = 50 posizioni) per la stessa sedia, allo stesso
+   deposito. Il file usava il fattore giusto due paragrafi sopra (per il
+   pavimento IS>=150) e lo dimenticava due paragrafi sotto (per la banda):
+   la stessa conversione, applicata in un punto e non nell'altro dello
+   stesso file.
+2. **DD, fonti mescolate.** "3,0-8,0%, coerente con la gemella 970901: DD
+   5,7-9,0%" citava un numero (9,0%) che e' il contratto PIENO di 970901
+   su una finestra e cella COMPLETAMENTE DIVERSE (R99, 22 anni OHLC, cella
+   di default) e un numero (5,7%) che non risulta in NESSUNA fonte -- il
+   CSV vero dello stesso asse sulla stessa gemella (R127b, cella N=5) da'
+   5,9113% (OOS) / 6,5765% (IS). E il pavimento della banda (3,0%) stava
+   SOPRA il DD gia' misurato della sedia stessa in esame (2,96%,
+   `CENSIMENTO_CONTRATTI_v2.md` r.306): un banco che avrebbe bocciato il
+   proprio precedente noto.
+
+**L'effetto pratico**: se non corrette, ENTRAMBE le bande avrebbero quasi
+certamente fatto fermare il round da solo sulla cella viva -- non perche'
+qualcosa fosse rotto, ma perche' il metro di misura era tarato male. E'
+l'esatto contrario del punto della sentinella (distinguere "banco sporco"
+da "tutto giusto"): una banda mal tarata puo' bocciare un risultato
+corretto tanto quanto puo' promuoverne uno sbagliato.
+
+### 🔴 LA REGOLA
+1. **Una banda di plausibilita' e' un numero come un altro: si verifica
+   con la stessa disciplina del contro-esempio del 10/09**, non si scrive
+   "a occhio, sembra ragionevole". In particolare: **quando il file usa
+   gia' una conversione di unita' altrove (qui posizioni -> chiusure), la
+   stessa conversione va riapplicata OVUNQUE la stessa colonna compaia**,
+   non solo dove ci si e' pensato la prima volta.
+2. **Un riferimento a una "sedia gemella" per un numero di plausibilita'
+   va preso da UNA fonte, misurata sulla STESSA manopola e sullo STESSO
+   asse** -- non da due fonti diverse (contratto pieno su un asse, CSV di
+   round su un altro) impastate in una singola banda.
+3. **Se la sedia in esame ha gia' un numero misurato per la STESSA cella
+   viva (anche su una finestra diversa, come qui il 2,96% dei 12,5 mesi),
+   quel numero e' il primo controllo di sanita' della banda**: se il
+   pavimento della banda sta sopra il precedente noto, la banda e' rotta
+   prima ancora di girare il round.
+4. **Vale anche per le bande "morbide" (sentinella, non un gate B1-B5
+   duro)**: una banda che ferma il round per errore costa lo stesso tempo
+   macchina di una che promuove un errore -- il costo e' asimmetrico solo
+   nel danno finale, non nello spreco.
