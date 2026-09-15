@@ -12,9 +12,12 @@
 #    -Prova prove\R158a_atrexit_PTE_U30USD.txt
 #    -Etichetta r158a -Modello 4 -Deposito 100000
 #    -TerminaleBacktest "C:\MT5_Backtest"
-#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle, 7 passate
-#   totali -- @FRAZIONEIS 1.0, vedi sotto, quindi NON 14. Se stampa un
-#   numero diverso, ci si ferma prima di lanciare qualunque altra cosa.)
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 CELLE. Se le celle
+#   sono 6 o 8, ci si ferma prima di lanciare qualunque altra cosa.
+#   IL CONTEGGIO DELLE "PASSATE" NON SI LEGGE: sia controlla_prova.py
+#   sia walkforward_generico.ps1 (r.880/890) stampano celle x 2 = 14
+#   CABLATO, senza leggere @FRAZIONEIS -- le passate vere sono 7.
+#   Classe 345 della checklist, estesa al driver il 15/09.)
 #  -Modello 4 = TICK REALI: U30USD ha tick BCM dal 2024.09.26 (muro
 #  misurato dalla sonda 17/08, stessa frontiera gia' usata da R154a/
 #  R155a/R156a/R157a sulla stessa coppia simbolo/gruppo indici) --
@@ -78,7 +81,7 @@
 #     770250/771332: e' GIA' MISURATO, non stimato --
 #     `report/CENSIMENTO_CONTRATTI_v2.md` r.303/384: **40 uscite -> 23
 #     POSIZIONI, fattore 1,74**, contato sui `position_id` distinti di
-#     `risultati_prove/trades_candidati_r23/` (non e' la forbice 2,0-2,3
+#     `backtest_pipeline/risultati_prove/trades_candidati_r23/` (non e' la forbice 2,0-2,3
 #     di altre sedie della stessa famiglia: e' un numero contato).
 #
 #  3) LA MANOPOLA E' LA STESSA DI R153a (oggi, GBPUSD), MAI MOSSA SU
@@ -176,7 +179,7 @@
 #    rischio/stop, quindi le celle BASSE (ATR corto -> stop piccolo)
 #    spingono il lotto in ALTO, non in basso. Numero vero: all'ancora
 #    R23 la sedia apre gia' 8,5 lotti con ATR(14) a 100k/1%
-#    (`risultati_prove/trades_candidati_r23/
+#    (`backtest_pipeline/risultati_prove/trades_candidati_r23/
 #    abtg_trades_ABTG_PTE_U30USD_771311.csv`, position_id 2: 4,20+4,30).
 #    Se su una gamba l'ATR(2) fosse 3-5 volte piu' stretto, il lotto
 #    chiesto salirebbe a 25-40. SYMBOL_VOLUME_MAX di U30USD e' [NON
@@ -243,12 +246,17 @@
 #            lotto compensa 1:1 -- un "SI" al cancello NON e' un segnale
 #            di qualita', e' solo uno stop piu' largo;
 #        (c) ATR(2) e ATR(26) sono medie della STESSA serie di True
-#            Range su finestre diverse: sulla stessa finestra di 21 mesi
-#            le medie campionarie tendono allo stesso valore. Per andare
-#            da 32,5x a 40x servirebbe +23,1% di ATR medio. ATTESA
-#            PRE-REGISTRATA: NESSUNA cella arriva a 40x; se una ci
-#            arrivasse, la prima ipotesi da scartare e' un errore di
-#            lettura, non un edge.
+#            Range su finestre diverse: la loro media NON CONDIZIONATA
+#            sulla stessa finestra di 21 mesi tende allo stesso valore,
+#            e per andare da 32,5x a 40x servirebbe +23,1% di ATR medio.
+#            MA NON E' UN'ATTESA PRE-REGISTRATA DI QUESTO ROUND, ed e'
+#            meglio scriverlo: (i) il round non produce nessun x per
+#            cella (B4); (ii) l'ATR che conta non e' quello medio, e'
+#            quello AGLI ISTANTI D'INGRESSO, e gli ingressi sono
+#            selezionati su un'espansione di volatilita' (bande TMA),
+#            quindi il campione CONDIZIONATO puo' non avere la stessa
+#            media di quello non condizionato. E' un argomento per la
+#            misura SEPARATA dell'ATR, non una sentinella di qui.
 #        (d) l'unico pezzo NON omotetico del motore e' il trailing
 #            sull'EMA14 (r.556-561): e' da li', non dall'ATR, che un PF
 #            puo' davvero cambiare fra le celle -- ed e' quello che
@@ -286,14 +294,14 @@
 #  - PF: NESSUNA attesa forte (n atteso troppo piccolo, 55-85, per
 #    distinguere rumore di campione da edge -- vedi il pavimento IS>=150
 #    sotto: qui il MERITO e' comunque sospeso).
-#  - IL RISULTATO CHE MI ASPETTO DI PIU': n quasi stabile (banda sopra),
-#    stop che si muove ma resta nell'ordine di grandezza gia' inferito,
-#    cancello di costo che resta vicino al bordo NO/SI senza un salto
-#    netto. Se e' cosi', la risposta onesta e' "il default va bene, il
-#    cancello di costo su questa sedia non si sposta con questa
-#    manopola" -- chiude comunque la casella 3 del certificato di morte
-#    (gestione dell'uscita messa ad asse) su questa sedia, come R153a
-#    l'ha chiusa sulla gemella GBPUSD.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n quasi stabile (banda sopra)
+#    e DD dentro 1,5%-6,0% su tutte e sette le celle, senza una
+#    direzione netta. Se e' cosi', la risposta onesta e' "il default va
+#    bene: su questa sedia il periodo dell'ATR non cambia il rischio ne'
+#    la cadenza" -- e chiude comunque la casella 3 del certificato di
+#    morte (gestione dell'uscita messa ad asse), come R153a l'ha chiusa
+#    sulla gemella GBPUSD. SUL CANCELLO DI COSTO NON MI ASPETTO NIENTE:
+#    questo round non lo produce (B4).
 #  - IL RISULTATO CHE MI FAREBBE FERMARE: se n cambiasse piu' del 30%
 #    fra le celle estreme (2 e 26). MA prima di chiamarla "lettura
 #    sbagliata" vanno scartate DUE cause di CODICE, gia' individuate:
@@ -313,7 +321,7 @@
 #  misura, e si mostra perche' non succede -- o si dichiara che potrebbe)
 #
 #  COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
-#    con n atteso 55-85 uscite (~30-49 posizioni stimate, fattore 1,74)
+#    con n atteso 55-85 uscite (31-49 posizioni stimate, fattore 1,74)
 #    su UN SOLO regime (21 mesi, Dow prevalentemente al rialzo 2024.09-
 #    2026.06), una cella con un periodo ATR piu' lungo potrebbe
 #    "vincere" solo perche' seleziona un sottoinsieme di posizioni piu'
@@ -321,7 +329,7 @@
 #    meccanismo che R153a ha gia' isolato su GBPUSD, punto 4 della
 #    lettura del codice: InpMaxPositions=1 fa si' che una posizione piu'
 #    lunga occupi lo slot e ne rifiuti altre, non che il motore trovi
-#    meno occasioni). Su un campione di ~30-49 posizioni, bastano 2-3
+#    meno occasioni). Su un campione di 31-49 posizioni, bastano 2-3
 #    trade diversi per spostare il PF in modo vistoso.
 #  COME LO DISTINGUO DA UN EDGE VERO O DA UN CANCELLO CHE PASSA PER
 #  CASO, con le misure che questo file produce:
@@ -359,7 +367,7 @@
 #    fattore e' GIA' MISURATO (non stimato con la forbice 2,0-2,3 di
 #    altre sedie della famiglia): 40 uscite -> 23 posizioni = **1,74**
 #    (`report/CENSIMENTO_CONTRATTI_v2.md` r.303/384, contato sui
-#    `position_id` di `risultati_prove/trades_candidati_r23/`).
+#    `position_id` di `backtest_pipeline/risultati_prove/trades_candidati_r23/`).
 #    Frequenza NOTA sulla finestra di questo round (R103, stessa
 #    finestra 2024.09.26->2026.06.30, 643 giorni, OHLC M1): n=68 uscite
 #    (`backtest_pipeline/risultati_archivio/R103_REFERTO_BLOCCO1_INDICI.md`
@@ -386,16 +394,19 @@
 #          (classe 345 della checklist, gia' documentato da R156a/R157a).
 #        - gira UNA finestra intera, UN solo regime (21 mesi, Dow
 #          prevalentemente al rialzo -- stessa diagnosi di R153a-157a);
-#        - e' scopato AL RISCHIO, alla FORMA e al CANCELLO DI COSTO
-#          (si legge se il DD si muove e se lo stop supera 40x), MAI al
-#          MERITO: "il default va bene" o "un'altra cella e' piu' larga
-#          e passa il cancello" sono le uniche risposte legittime, MAI
-#          "questa cella e' meglio" in senso di PF (Regola B, 16/08).
+#        - e' scopato AL RISCHIO e alla FORMA (si legge se il DD si
+#          muove e se n resta stabile), MAI al MERITO e MAI al CANCELLO
+#          DI COSTO, che nessun artefatto di questo round contiene
+#          (sezione "IL COSTO", B4): "il default va bene" oppure "una
+#          cella diversa ha un DD piu' basso a n invariato" sono le
+#          uniche risposte legittime, MAI "questa cella e' meglio" in
+#          senso di PF (Regola B, 16/08) e MAI "questa cella passa il
+#          cancello di costo".
 # ---------------------------------------------------------------------
 #  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
 #    B1  QUESTO ROUND NON HA UN A0/A1 DI MERITO (IS<150 per costruzione,
-#        pavimento sopra) -- SOLO SOGLIE DI RISCHIO, DI FORMA E DI
-#        CANCELLO DI COSTO (Regola B, 16/08).
+#        pavimento sopra) -- SOLO SOGLIE DI RISCHIO E DI FORMA (il
+#        cancello di costo NON e' una soglia di questo round: B4).
 #    B2  RISCHIO. Nessuna cella deve avere Equity DD% > 8,0% (sopra il
 #        bordo alto della banda DD di 2,0 punti pieni, ben sotto il muro
 #        prop 10%). Se una cella lo rompe, si scrive SUBITO, prima di
@@ -413,13 +424,13 @@
 #        verdetto SI/NO di costo: se lo scrive, ha inventato il numero.
 #        La via per chiuderlo e' una misura separata dell'ATR(N) H1 di
 #        U30USD, da armare come lavoro a se'.
-#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (una o piu'
-#        celle sopra 40x, DD sotto muro) non cambia un preset, non
+#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (DD sotto
+#        muro su tutte e sette le celle) non cambia un preset, non
 #        accende/spegne la sedia e non tocca il forward. Taglie,
 #        riaccensioni e rischio restano [FIRMA DI CLAUDIO]. Un solo
 #        regime (21 mesi, un solo rialzo Dow) non e' un verdetto di
-#        merito, e' un check di rischio, di forma e di cancello di costo
-#        (dichiarato in testa al file).
+#        merito, e' un check di rischio e di forma (dichiarato in testa
+#        al file).
 #    B6  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
 #        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3,
 #        MAI il picco isolato (R70, ripreso da R136a/R146c/R153a-157a).

@@ -20149,3 +20149,19 @@ diventa [NON MISURABILE DA QUESTO ROUND] PRIMA di girare, non dopo.
 Parente della classe 22 (istruzioni vere per un artefatto mai nato) e della
 330 (la colonna conta un'altra cosa), ma distinta: qui la colonna non esiste
 proprio.
+
+## 354. UNA REGOLA DI ARRESTO AGGANCIATA A UN CONTEGGIO CHE LO STRUMENTO STAMPA CABLATO (controllo-preventivo, 15/09/2026)
+
+Estensione della classe 345 dalla sola controlla_prova.py al DRIVER
+(walkforward_generico.ps1 r.880/890): la riga stampata dopo -SoloControllo
+e' "celle per finestra : $NCelle -> ($NCelle*2) pass a tick reali in
+tutto" -- il *2 e' CABLATO e non legge mai @FRAZIONEIS. Aggravante nuova
+trovata su R158a: il file aveva trasformato quel numero noto-sbagliato in
+un "ci si ferma prima di lanciare qualunque altra cosa" -- cioe' un
+ARRESTO che scatta su un banco SANO, perche' il conteggio vero (14) non
+coincide mai col conteggio dichiarato (7) su un file @FRAZIONEIS 1.0.
+
+### REGOLA
+Per i file con @FRAZIONEIS 1.0 si controlla il numero di CELLE, mai
+quello di PASSATE -- e nessuna sentinella d'arresto si aggancia al
+conteggio delle passate.
