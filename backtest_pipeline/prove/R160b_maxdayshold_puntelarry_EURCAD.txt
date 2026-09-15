@@ -1,0 +1,257 @@
+# =====================================================================
+#  EA: ABTG_PunteLarry
+#  R160b -- IL TIME-STOP IN GIORNI SUI CINQUE GEMELLI MAI TOCCATI --
+#           sedia EURCAD H1, magic vivo 772346 -- asse InpMaxDaysHold,
+#           7 celle, finestra LUNGA 27 anni con taglio IS/OOS VERO
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+#  Secondo dei CINQUE gemelli R160a-R160e. La MOTIVAZIONE GENERALE
+#  (perche' la manopola, perche' la famiglia, come funziona il codice)
+#  e' scritta per esteso in R160a_maxdayshold_puntelarry_EURAUD.txt ed
+#  e' PRESA PER RIFERIMENTO, non riscritta: qui sotto c'e' solo cio' che
+#  su QUESTA sedia e' DIVERSO, piu' i numeri che sono suoi.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_PunteLarry
+#    -Prova prove\R160b_maxdayshold_puntelarry_EURCAD.txt
+#    -Etichetta r160b -Modello 1 -Deposito 100000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: 7 celle, 14 passate. Se il numero
+#   e' diverso ci si ferma prima di lanciare altro.)
+#  -Modello 1 = OHLC M1 DICHIARATO: i tick BCM partono dal 2024.09.26,
+#  su 27 anni non esistono. DD = LIMITE INFERIORE del rischio, profitto
+#  = STIMA DEL LORDO (spread corrente, zero slippage), mai un guadagno.
+#  -Deposito 100000 = il deposito dell'ANCORA (R103,
+#  RIGA_R103_CLASSIFICA_FLOTTA.ps1 r.177).
+# ---------------------------------------------------------------------
+#  1) LA MANOPOLA E' VERGINE SU QUESTA SEDIA -- contato, non citato:
+#     94 CSV d'archivio portano la colonna `InpMaxDaysHold` e in tutti e
+#     94 c'e' un solo valore (5). L'unico file prova che la mette ad asse
+#     e' R156a (oggi, sedia 772341 U30USD). EURCAD non e' mai stata
+#     toccata su questo asse, ne' da R156a ne' da nessun altro.
+#
+#  2) IL RISCHIO DI QUESTA SEDIA E' PULITO -- stesso controllo VERO vs
+#     DICHIARATO fatto oggi su 970913/770411:
+#     report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md r.149:
+#       `PunteLarry EURCAD 772346 | gira 1,00 | gamba 1,00 | n 1 |
+#        EVENTO 1,00% | xRes 1,00 | meccanismo "una posizione"`
+#     rapporto VERO/DICHIARATO = 1,00x. Nessun bug di taglia, nessuna
+#     tranche col pavimento del lotto, nessun doppio pendente opposto.
+#     Verificato anche nel sorgente (r.408, guardia UN SETUP ALLA VOLTA).
+#     NESSUNA delle cinque sedie della famiglia e' stata scartata per
+#     rischio: tutte e cinque stanno a 1,00x.
+#
+#  3) UNITA': `Trades` del CSV = POSIZIONI. `ABTG_PunteLarry.mq5` non ha
+#     NESSUN parziale (grep "Partial|TP1|ClosePartial|InpTP1Pct": zero
+#     occorrenze; la lista input e' r.135-178). Fattore di conversione
+#     1,00 MISURATO SUL SORGENTE, non stimato (classe 226/346 chiusa).
+#
+#  4) LA DIFFERENZA VERA DI QUESTA SEDIA RISPETTO A R160a: QUI L'USCITA
+#     E' LA FIRST PROFITABLE OPEN, NON IL TARGET IN R.
+#     Cella viva: InpExitMode = 0 (R103_ABTG_PunteLarry_EURCAD_772346.txt
+#     e R39f_larry_eurcad.txt, letti campo per campo). E il sorgente dice
+#     (r.669-671, commento nel codice, verificato): "TAKE PROFIT: esiste
+#     SOLO nel modo R-based. Con la first profitable open il TP non c'e'
+#     per costruzione" -- il ramo che calcola il TP e' r.673
+#     `if(InpExitMode==1)`, che qui NON si attiva.
+#     >>> CONSEGUENZA SUL ROUND, scritta prima dei numeri: senza TP, le
+#         uscite possibili sono TRE: la first profitable open (r.371),
+#         lo stop, e IL TIME-STOP DI QUESTO ASSE (r.374). Il time-stop e'
+#         quindi l'UNICO tetto alla durata di un trade che non va in
+#         stop e non trova un'apertura in profitto. Attesa: su questa
+#         sedia la manopola MORDE DI PIU' che sulle gemelle a exit
+#         R-based (R160a EURAUD, R160c GBPJPY, R160e XAUUSD).
+#     >>> E LA CELLA 1 E' UN CAMBIO DI NATURA, non di taratura: a
+#         InpMaxDaysHold=1 la first profitable open di Williams diventa
+#         un trade di UN GIORNO (al primo cambio di giornata D1: se
+#         l'apertura e' in profitto chiude la FPO, altrimenti chiude il
+#         time-stop). Va letta come tale, non come "la stessa strategia
+#         un po' piu' stretta".
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL TAGLIO IS/OOS
+#  a) DATA D'INIZIO MISURATA: sonda del 17/08,
+#     risultati_archivio/sonda_storico_17-08/215D85D7_ABTG_InfoBroker.csv,
+#     riga EURCAD: PrimaDataTF su H1 = **1999.08.01** (letta nel CSV).
+#     Nota: cade DOPO il pavimento di gennaio 1999 che R102 ha misurato
+#     sul banco (R102_REFERTO_DRIVER_BLOCCO1 r.530-532: su TRE simboli
+#     forex la prima operazione e' del gennaio 1999 anche dove il broker
+#     dichiara il 1993/1971), quindi qui l'accorciamento non dovrebbe
+#     mordere. Se mordesse, non sposterebbe il confine IS/OOS: il taglio
+#     si calcola sulle date DICHIARATE (walkforward_generico.ps1 r.921).
+#  b) IL TAGLIO E' SCELTO PERCHE' L'OOS COINCIDA CON LA FINESTRA R103:
+#       giorni totali 1999.08.01 -> 2026.06.30 ............ 9830
+#       giorni 1999.08.01 -> 2019.12.31 (confine) ......... 7457
+#       frazione 7457/9830 = 0,758596...  -> scritta 0.7586
+#       verifica: floor(9830 * 0.7586) = floor(7457,038) = 7457
+#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.919-920)
+#     >>> IS  1999.08.01 -> 2019.12.31  (20,42 anni)
+#     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
+#     REGIMI DICHIARATI: IS = euro giovane, crollo 2008, crisi euro
+#     2011-2012, crollo del petrolio 2014-2016 (che muove il CAD),
+#     laterale 2017-2019. OOS = covid, reflazione, stretta 2022, ultimi
+#     due anni.
+#  c) PAVIMENTO IS>=150 (regola A, 16/08), CONTATO PRIMA:
+#     frequenza NOTA da R103: 154 posizioni in 6,50 anni = 23,7/anno.
+#       IS atteso  : 23,7 x 20,42 = ~484 posizioni  (>=150: SI, 3,2x)
+#       OOS atteso : 154 posizioni GIA' MISURATE    (>=150: SI, ma per
+#                    SOLI 4 TRADE -- margine sottilissimo, dichiarato)
+#     >>> CONTRO-ESEMPIO: se il motore nel 1999-2019 operasse a META'
+#         della frequenza recente, l'IS farebbe ~242, ancora sopra 150.
+#         Il pavimento dell'IS e' robusto; quello dell'OOS NO: 154 e'
+#         sopra 150 di quattro operazioni, e QUALUNQUE scostamento in
+#         meno lo fa cadere sotto. Per questo la sentinella S2 vale in
+#         tutte e due le direzioni: se l'OOS non riproduce 154, il
+#         MERITO su questa sedia torna SOSPESO.
+# ---------------------------------------------------------------------
+#  L'ASSE -- 1 / 3 / 5(vivo) / 7 / 9 / 11 / 13, passo 2, centrato sul
+#  valore vivo. Identico a R156a e agli altri quattro gemelli: l'asse
+#  dev'essere lo stesso, altrimenti le cinque sedie non si confrontano.
+#  InpMaxDaysHold=0 (time-stop spento) resta FUORI: e' un regime
+#  qualitativo diverso, non un punto della stessa retta. Dichiarato.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n: in CALO al crescere di InpMaxDaysHold (canale "un solo slot",
+#    r.408), e con un morso ATTESO PIU' FORTE che su R160a per il punto
+#    4 (niente TP). E' la previsione piu' impegnativa dei cinque file:
+#    se qui n scendesse MENO che su EURAUD, la lettura del codice e'
+#    sbagliata e va corretta prima di leggere qualunque altra colonna.
+#  - DD: NESSUNA direzione dichiarata (i due effetti -- tagliare prima
+#    un trade che poteva recuperare, liberare prima lo slot -- tirano in
+#    verso opposto).
+#  - PF: leggibile su IS (~484 atteso) e, SE l'OOS riproduce 154, anche
+#    in OOS. Solo come ALTOPIANO (B5), mai picco.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n in discesa monotona o quasi,
+#    DD senza direzione chiara. Chiude comunque la casella 3 del
+#    certificato di morte su questa sedia.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE -- PRIMA DI QUALUNQUE ALTRO NUMERO
+#  S1 -- ANCORA (coincidenza VOLUTA di finestra, non banda): la gamba
+#    OOS della CELLA VIVA (5) gira esattamente finestra, modello,
+#    deposito e cella di R103. Deve riprodurre
+#    (risultati_archivio/R103_REFERTO_FINALE.md r.19, posizione 6):
+#      Trades 154 | PF 1,34 | Equity DD% 7,0 | profitto +14.779
+#    TOLLERANZA: Trades IDENTICO (154); PF e DD entro +/-2% relativo.
+#    Il margine non e' zero per una differenza di banco VERIFICATA: R103
+#    scriveva `Spread=0` nel suo .ini (r.178/1315 del suo script), mentre
+#    RIGA_SOTTILE_ROUND.ps1 non passa -Spread (r.1175-1177) e la riga
+#    nell'.ini non c'e'. Sugli INGRESSI non dovrebbe cambiare niente (il
+#    filtro InpMaxSpreadPts=300 = 30 pip su EURCAD non morde), sul P/L
+#    puo' cambiare di poco.
+#    IL BINARIO E' LO STESSO DI R103, verificato: `git log --oneline --
+#    mql5/Experts/ABTG_PunteLarry.mq5` ha due soli commit, l'ultimo
+#    `5fc0bc3` del 19/08; R103 e' girato il 24/08.
+#    >>> Se Trades OOS non e' 154, il banco e' diverso: CI SI FERMA.
+#  S2 -- PAVIMENTO: Trades IS >= 150 (atteso ~484) E Trades OOS >= 150
+#    (atteso 154, margine 4). Se uno dei due cade sotto, il MERITO e'
+#    SOSPESO (regola B) e si legge solo RISCHIO e FORMA.
+#  S3 -- CELLE: 7 valori distinti di InpMaxDaysHold su due file (_IS e
+#    _OOS). Se sono 6 o 8 si dichiara quale manca prima di leggere.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  MERITO -- ammesso SE S2 passa in tutte e due le gambe, e solo
+#        come ALTOPIANO di >=3 celle contigue. L'OOS si guarda per
+#        VERIFICARE, mai per scegliere.
+#    B2  RISCHIO -- il round gira alla taglia VIVA (1,0%: censimento
+#        rischio r.149), quindi i DD si leggono senza conversione.
+#          B2.1  cella sopra 10,0% (muro prop) -> si scrive SUBITO,
+#                prima del Profit Factor.
+#          B2.2  regola meccanica firmata (corsia RISCHIO 18/08, gia'
+#                applicata da R100): DD lungo > 2x il promesso ->
+#                REVISIONE. Promesso 4,8% (report/CONTRATTI_SEDIE.md
+#                r.149) -> soglia 9,6%. Per riferimento: R103 su 6,5
+#                anni misura 7,0% = 1,46x, sotto soglia. Se i 20 anni
+#                la superano, e' una riga per Claudio, non una
+#                bocciatura automatica: la firma resta sua.
+#    B3  FORMA -- si registra se n scende in modo monotono o quasi (al
+#        massimo UNA inversione fra celle adiacenti) da 1 a 13, e se il
+#        morso e' PIU' FORTE che su R160a (previsione del punto 4).
+#    B4  IL ROUND NON PROMUOVE NIENTE: nessun preset, nessuna sedia
+#        accesa o spenta, forward intatto. Taglie e rischio restano
+#        [FIRMA DI CLAUDIO].
+#    B5  SELEZIONE: sempre il CENTRO di un tratto contiguo che passa
+#        B2+B3, MAI il picco isolato (R70, R136a/R146c/R153a-R158a).
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  COME POTREBBE SEMBRARE VERDE PER CASO: 7 celle sono 7 estrazioni; e
+#  un time-stop diverso cambia il SOTTOINSIEME di trade (chi occupa lo
+#  slot decide chi entra dopo), quindi due celle vicine possono pescare
+#  popolazioni diverse e dare PF diversi per SELEZIONE, non per
+#  geometria. Su una sedia a PF 1,34 con n 154 in OOS, due o tre trade
+#  spostano il PF in modo vistoso.
+#  COME LO DISTINGUO, con le misure di QUESTO file:
+#    1. ALTOPIANO, mai picco (B5).
+#    2. DUE FINESTRE INDIPENDENTI e tutte e due sopra il pavimento (se
+#       S2 passa): la stessa cella deve andare nello stesso verso nel
+#       1999-2019 e nel 2020-2026. Un vantaggio che c'e' solo in una
+#       delle due e' regime o rumore.
+#    3. n IN DISCESA e' PREVISTO DAL CODICE (r.408): se non scende, il
+#       meccanismo letto non e' quello vero e ci si ferma.
+#    4. IL COSTO NON DECIDE: InpMaxDaysHold non tocca stop, target ne'
+#       lotto (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687,
+#       tutti in Enter(), all'apertura), quindi la geometria dello stop
+#       e' INVARIANTE lungo l'asse e nessuna differenza fra celle puo'
+#       essere un artefatto di spread (trappola classe 292/347).
+#    5. E ANCHE SE PASSANO TUTTI, il round NON promuove (B4).
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#    - MODELLO OHLC M1 su 27 anni: DD limite inferiore, profitto stima
+#      del lordo. Nessun tick esiste prima del 2024.
+#    - SPREAD: quello corrente applicato al 1999. Il profitto dell'IS e'
+#      OTTIMISTICO di una quantita' [NON MISURATA].
+#    - CANCELLO DI COSTO: `[NON MISURATO]` su questa sedia
+#      (report/CENSIMENTO_CONTRATTI_v2.md r.341), e questo round NON lo
+#      sposta: lo stop e' invariante lungo l'asse (punto 4 del
+#      contro-esempio). `risultati_archivio/spread_flotta/` ha solo
+#      D30EUR/NASUSD/U30USD: per EURCAD lo spread d'archivio non esiste.
+#    - InpMaxDaysHold = 0 (time-stop mai): fuori griglia, dichiarato.
+#    - LATO SEPARATO: [NON MISURATO qui]. Gira SOLO LONG, come la cella
+#      viva (InpAllowShort=false in R103/R39f).
+#    - GUARDIAN: InpUsaGuardian=true (valore R103 e default sorgente
+#      r.135), fail-open nel tester senza GlobalVariable.
+#    - InpAtrSlMult: INERTE per costruzione con InpSLMode=0 (il ramo che
+#      la usa e' r.653, l'else di SLMode==1). Pinnata al valore vivo:
+#      essendo inerte non tocca nessun numero.
+#    - TEMPO MACCHINA: [STIMATO] ~25-30 minuti (scala da R102 blocco 1:
+#      6 passate su ~27 anni H1 OHLC in 19 minuti; e da R103: 25 sedie
+#      su 6,5 anni in 36 minuti). Da verificare al primo giro.
+#
+#  MAGIC VERGINE 779808 (grep su tutto il repo, 15/09/2026: i 7798xx
+#  usati sono 779800-779806, 779807 (R160a di oggi) e 779810/779820/.../
+#  779899; 779808 non compare prima di questo file).
+#  ORDINE DEI ROUND: nessun altro file prova mette InpMaxDaysHold ad
+#  asse su EURCAD. Nessun doppione in coda.
+# =====================================================================
+
+@SIMBOLO  EURCAD
+@PERIODO  H1
+@DAQUANDO 1999.08.01
+@FINOA    2026.06.30
+@FRAZIONEIS 0.7586
+
+# --- IL MOTORE, pinnato sulla cella viva (R103_ABTG_PunteLarry_EURCAD_
+#     772346.txt, letto campo per campo; incrociato con R39f_larry_
+#     eurcad.txt -- "punta / FPO / solo L")
+InpUsaGuardian=true
+InpTF=16385
+InpPatternMode=1
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+# InpMaxDaysHold -> E' L'ASSE, in fondo al file.
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=779808
+InpComment=R160B MAXDAYSHOLD
+InpVerbose=true
+
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     1 / 3 / 5(vivo) / 7 / 9 / 11 / 13 -- centrato sulla viva 5
+InpMaxDaysHold=5||1||2||13||Y
+# =====================================================================
