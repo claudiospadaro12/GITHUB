@@ -1583,3 +1583,31 @@ e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  dal muro dei tick BCM.
 # =====================================================================
 d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R153a_atrexit_GBPUSD.txt -Etichetta r153a -Modello 1 -Deposito 100000
+# =====================================================================
+#  R154a -- InpSLLookback SU ABTG_SuperWave, U30USD H4/H2 (sedia 770531).
+#  Ottava sedia coperta oggi. Primo round esplicitamente scoperto al
+#  solo RISCHIO (pavimento IS>=150 non raggiungibile con lo storico BCM
+#  disponibile: 643 giorni contro i 6,25 anni serviti -- Regola B del
+#  16/08, il campione sottile sospende il merito, mai il rischio).
+#  Nessuna ancora esistente per questa esatta cella: sostituita con
+#  bande di plausibilita' dichiarate prima dei numeri.
+#
+#  Secondo giudizio: PASS dopo un contro-esempio che ha trovato un
+#  difetto vero (classe 346): le bande sentinel mescolavano Trades
+#  (chiusure) con Posizioni attese e citavano un DD da una fonte
+#  inesistente. Con la banda sbagliata (Trades 70-100) il round si
+#  sarebbe fermato da solo su un risultato CORRETTO -- corretto a
+#  119-178 (fattore chiusure/posizioni 1,76, CENSIMENTO_CONTRATTI_v2.md)
+#  e DD 2,0-9,0%.
+#
+#  Dimostrato dal codice (non stimato) che il cancello di costo non
+#  puo' peggiorare lungo l'asse: sl = MIN/MAX fra linea Supertrend ed
+#  estremo a N barre, quindi lo stop e' sempre il piu' largo dei due --
+#  verificato anche che iLowest/iHighest a start=1 fisso genera finestre
+#  annidate (l'estremo e' monotono non-crescente in N per costruzione).
+#
+#  Pin: giro di pin a2abbdf (35mo, 1ac3cec -> 9df14b7). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  @FRAZIONEIS 1.0 (una tranche sola, nessun CSV _OOS -- voluto).
+# =====================================================================
+a2abbdfc10c02275da85dcb80a49cbd6e316546b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R154a_sllookback_SuperWave_U30USD.txt -Etichetta r154a -Modello 4 -Deposito 100000
