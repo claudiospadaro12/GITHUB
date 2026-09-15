@@ -195,7 +195,12 @@ InpMagic=770208||770208||1||770209||Y
 InpMaxSpread=0||0||0||0||N
 InpVerbose=true||true||0||true||N
 #
-# NOTE sui due campi omessi rispetto alle 81 righe del .set:
+# NOTA sul campo omesso rispetto alle 81 righe del .set (>>> CORRETTO dal
+# controllo-preventivo del 15/09: diceva "due campi omessi" ma ne discuteva
+# uno solo -- verificato campo per campo contro le 81 righe del .set: e'
+# UN solo omesso, InpNewsCurrencies; tutti gli altri 80 sono presenti e
+# identici, incluso InpCorrSymbol=SPXUSD che e' una stringa nuda come nel
+# .set, non un refuso):
 #   - InpNewsCurrencies: nel .set vivo e' una riga vuota
 #     ("InpNewsCurrencies="). Come in R136a/R147a/R151a, un pin di
 #     stringa vuota viene IGNORATO da MT5 (controllo 3 di
@@ -264,14 +269,21 @@ InpVerbose=true||true||0||true||N
 #      2024.09.26->2026.06.30) deve avere un CONTEGGIO POSIZIONI
 #      (position_id distinti, non righe/deal -- classe 226: n=deal non
 #      e' n=posizioni, fattore misurato 2,01 altrove) nell'intorno
-#      dell'ancora dichiarata da CENSIMENTO_CONTRATTI.md r.197: OOS
-#      130 DEAL (56-130 posizioni, forbice dichiarata li' per lo stesso
-#      motivo, classe non ancora chiusa su QUESTA cella). Qui si
-#      chiude: il CSV nuovo da' il numero vero, deal E posizioni,
-#      niente piu' forbice. Tolleranza: se il conteggio deal OOS cade
-#      fuori 100-160, la cella non e' la stessa dell'ancora e il round
-#      si ferma prima di leggere il resto (finestra o filtro diversi
-#      da quanto dichiarato).
+#      dell'ancora dichiarata da CENSIMENTO_CONTRATTI_v2.md r.260
+#      (>>> CORRETTO dal controllo-preventivo del 15/09: la prima stesura
+#      citava CENSIMENTO_CONTRATTI.md r.197, che e' il v1 del 07/09 -- il
+#      file stesso si dichiara "NON E' PIU' IL DOCUMENTO VIVO" in
+#      intestazione. Il numero non cambia (v2 conferma OOS 130 deal,
+#      forbice 56-130 -- anzi v2 r.260/382 etichetta questo stesso n
+#      "[NON MISURATO]" in attesa proprio di un per-trade come questo):
+#      la citazione era alla fonte sbagliata, non al numero sbagliato --
+#      classe 341.) OOS 130 DEAL (56-130 posizioni, forbice dichiarata
+#      li' per lo stesso motivo, classe non ancora chiusa su QUESTA
+#      cella). Qui si chiude: il CSV nuovo da' il numero vero, deal E
+#      posizioni, niente piu' forbice. Tolleranza: se il conteggio deal
+#      OOS cade fuori 100-160, la cella non e' la stessa dell'ancora e il
+#      round si ferma prima di leggere il resto (finestra o filtro
+#      diversi da quanto dichiarato).
 #  S2  COERENZA DELLA COPPIA GEMELLA. Le due passate (770208/770209)
 #      sono la STESSA cella: devono uscire con profitto, PF e n
 #      IDENTICI al centesimo (stesso controllo di igiene di R16c/R54a/

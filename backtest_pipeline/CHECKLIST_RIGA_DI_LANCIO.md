@@ -19558,3 +19558,42 @@ accetta come un round normale.
 4. **Conseguenza**: nessun numero del round cambia (il magic non e' la
    cella), ma la riga di lancio si semplifica: via `-PermettiCellaSingola`
    dal comando, resta solo l'invocazione normale del driver.
+
+---
+
+## 341. 📄🕰️ CITARE UN NUMERO GIUSTO DA UN DOCUMENTO SBAGLIATO: LA v1 SUPERATA HA IL NUMERO CORRETTO, MA SI DICHIARA "NON USARE QUESTA PAGINA PER FAR SCATTARE NIENTE" (15/09/2026)
+
+**Caso reale.** `prove/R152a_pertrade_DowApertura_770202.txt` (controllo-
+preventivo, S1) citava `CENSIMENTO_CONTRATTI.md r.197` come fonte
+dell'ancora "OOS 130 deal, forbice 56-130 posizioni". Il numero e' giusto
+(verificato: r.197 dice davvero `130`, dep. 100.000, OOS 2025.06.10-
+>2026.06.30) — **ma quel file e' il v1 del 07/09**, e la SUA STESSA
+intestazione dice, in maiuscolo: *"QUESTO FILE E' IL v1 (07/09) E NON E'
+PIU' IL DOCUMENTO VIVO... NON USARE QUESTA PAGINA PER FAR SCATTARE
+NIENTE"*. Il documento che comanda e' `CENSIMENTO_CONTRATTI_v2.md`
+(11/09/2026), che alla riga 260 (tabella) e riga 382 (riepilogo) dice la
+STESSA cosa e in piu' etichetta esplicitamente questo `n` come
+**"[NON MISURATO]"** in attesa di un per-trade come quello che R152a
+produce — il che rafforza, non indebolisce, la ragione del round.
+
+**Perche' e' successo**: il numero citato (130, forbice 56-130) e'
+davvero presente e corretto anche nel v1, perche' v2 lo eredita senza
+cambiarlo (solo l'ETICHETTA di stato cambia, da "MISURATO" a "NON
+MISURATO"). Un controllo che si fermasse al "il numero torna" non
+avrebbe trovato niente: bisognava aprire il file e leggere l'intestazione,
+non solo la riga citata.
+
+### 🔴 LA REGOLA
+1. **Prima di citare una riga di un file `CENSIMENTO_CONTRATTI*.md` (o di
+   qualunque documento con un fratello v2/v3), si legge l'intestazione
+   del file per intero**, non solo la riga bersaglio: un'intestazione puo'
+   dichiarare l'intero file superato senza che il numero citato sia
+   cambiato.
+2. **"Il numero torna" non e' la stessa verifica di "la fonte e' quella
+   giusta".** Un numero corretto preso dal documento sbagliato e' comunque
+   un difetto di citazione: se il documento sbagliato viene aggiornato in
+   futuro senza che il giusto lo sia (o viceversa), la prossima lettura
+   diverge silenziosamente.
+3. **Conseguenza**: citazione corretta in `CENSIMENTO_CONTRATTI_v2.md`
+   r.260; nessun numero del round cambia (v2 conferma 130/56-130), ma la
+   fonte ora e' quella che comanda davvero.
