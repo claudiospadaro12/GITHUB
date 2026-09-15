@@ -41,15 +41,20 @@
 #     par. 0-quater) NON E' STATO PRESO A MEMORIA -- e' stato VERIFICATO, e
 #     su due punti era impreciso:
 #       a) diceva "nessun file Rxxx_*gapfill* nel repo": FALSO in senso
-#          stretto -- esistono `R102_ABTG_GapFill_*.txt` e
-#          `R103_ABTG_GapFill_*.txt` per tutti e 5 i gemelli. MA sono
+#          stretto -- esistono `R103_ABTG_GapFill_*.txt` per TUTTI E 5 i
+#          gemelli (GBPUSD/EURUSD/AUDUSD/225JPY/U30USD, verificato per
+#          `find`), e `R102_ABTG_GapFill_*.txt` per SOLO 3 dei 5
+#          (GBPUSD/EURUSD/AUDUSD -- i tre forex del blocco 2; U30USD e
+#          225JPY non hanno un R102, controllo-preventivo 15/09,
+#          verificato per `find`: la prima stesura generalizzava "tutti e
+#          5" da un controllo fatto solo su una parte). MA sono comunque
 #          round di CLASSIFICA (profitto/DD/PF sulla cella viva, "non
 #          promuove e non boccia per merito" -- header di entrambi),
 #          non un asse su `InpSLGapMult`. Il censimento_uscite.py
 #          rigirato ORA conferma che `InpSLGapMult` e' comunque
 #          "MAI-ovunque" su tutti e 5 i gemelli (mai mossa come asse in
-#          nessun CSV d'archivio). La correzione non cambia la scelta,
-#          cambia solo la frase.
+#          nessun CSV d'archivio, R102 o R103 che sia). La correzione non
+#          cambia la scelta, cambia solo la frase.
 #       b) le 5 sedie gemelle GapFill coprono 3 simboli forex (GBPUSD,
 #          EURUSD, AUDUSD) + 1 indice Nikkei (225JPY) + 1 indice Dow
 #          (U30USD) -- e **SOLO U30USD ha uno spread reale d'archivio**:

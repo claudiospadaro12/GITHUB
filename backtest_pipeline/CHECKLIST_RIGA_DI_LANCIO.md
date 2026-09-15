@@ -20093,3 +20093,39 @@ coda) che il file non ha verificato e non ha dichiarato.
 prosa e' un errore anche quando il numero e' quello giusto e il verso e' quello
 prudente — la classe 346 lo aveva gia' insegnato sull'unita', qui e' lo stesso
 insegnamento sulla statistica.*
+
+---
+
+## 352. 🔢🙅 "PER TUTTI E N GEMELLI" VERIFICATO SU UN SOTTOINSIEME, GENERALIZZATO ALL'INTERO SENZA RICONTARE (controllo-preventivo, 15/09/2026)
+
+**Il caso reale.** `prove/R157a_slgapmult_gapfill_U30USD.txt` (par. 1a)
+correggeva il piano ("nessun file Rxxx_*gapfill* nel repo": falso) scrivendo
+*"esistono `R102_ABTG_GapFill_*.txt` e `R103_ABTG_GapFill_*.txt` per TUTTI E 5
+i gemelli"*. Vero per `R103` (`find` conferma 5/5: GBPUSD/EURUSD/AUDUSD/
+225JPY/U30USD). **Falso per `R102`: esistono solo 3 file** (GBPUSD, EURUSD,
+AUDUSD — i tre forex del Blocco 2; U30USD e 225JPY, gli indici, non hanno un
+`R102_ABTG_GapFill_*`). Chi ha scritto la frase aveva verificato **uno solo**
+dei due prefissi con `find` e ha esteso la conclusione all'altro per
+simmetria di frase, non per un secondo `find`.
+
+### 🧠 PERCHE' MORDE
+Non cambiava il verdetto del round (la frase load-bearing e' un'altra: il
+censimento_uscite.py conferma `InpSLGapMult` "MAI-ovunque" su tutti e 5 i
+gemelli, ed e' quella che regge la scelta della manopola) — ma e' comunque
+una citazione falsa lasciata scritta in un file che dichiara "verificato
+contro il repo VERO oggi, non a memoria". Una frase con due predicati paralleli
+("esistono X e Y per tutti e N") non e' UNA verifica: sono DUE, e va contata
+una `find` per ciascuna, non una sola per entrambe.
+
+### ✅ COSA SI FA
+1. 🔢 **Ogni predicato quantificato ("tutti e N", "nessuno dei N", "3 su N")
+   ha bisogno del SUO conteggio**, anche quando appare nella stessa frase di
+   un altro predicato gia' contato — la congiunzione grammaticale non e'
+   una congiunzione di prove.
+2. 🔎 Quando si trova la divergenza, si corregge il numero vero (quanti, quali
+   nomi) e non solo l'aggettivo ("tutti" -> "3 su 5"), altrimenti il difetto
+   si sposta invece di sparire (stesso principio della classe 351, punto 2).
+
+### 🔑 La regola in una riga
+*"Esistono X e Y per tutti e N" e' una frase con DUE claim quantificati: un
+`find` che ne conta uno non certifica l'altro.*
