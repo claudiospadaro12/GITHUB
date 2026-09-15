@@ -1521,3 +1521,36 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati.
 # =====================================================================
 966ccf4988a628c1be91a52c46f8f12174388a4c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R151a_trailingatr_XAUUSD.txt -Etichetta r151a -Modello 1 -Deposito 100000
+# =====================================================================
+#  R152a -- EXPORT PER-TRADE DELLA CELLA VIVA 770202 (ABTG_Dow_Apertura_US,
+#  U30USD M5), per dare finalmente a mc_dd_cella.py un CSV vero da
+#  masticare. Non e' un'ottimizzazione: magic-sweep gemello 770208/770209
+#  (vergine), 2 passate, cella congelata identica al preset vivo.
+#
+#  PERCHE': nessuna delle tre sedie del "terzetto" (770611-OPPRANGE,
+#  770202, 771531) aveva un CSV per-trade sulla cella di oggi --
+#  mc_dd_cella.py (riparato stanotte, autotest 4/4) restava uno
+#  strumento sano ma senza input. Scelta 770202 fra le tre: 770611 ha
+#  la geometria del giorno 1 sotto firma di Claudio dovuta oggi 15/09;
+#  771531 ha il binario in movimento proprio ora (Blocco 1 chiuso
+#  stanotte). 770202 e' la ferma delle tre.
+#
+#  Secondo giudizio: PASS dopo 2 correzioni di citazione (nessun
+#  numero cambia). Classe 341: il file citava CENSIMENTO_CONTRATTI.md
+#  v1 (superato) invece di v2 -- il numero citato (130 deal OOS,
+#  forbice 56-130) era comunque corretto. Contro-esempio sul pavimento
+#  lotto costruito e superato: morderebbe solo con uno stop 74x piu'
+#  largo di quello inferito.
+#
+#  Preset fotocopiato dal .set vivo (verificato campo per campo, zero
+#  differenze salvo InpNewsCurrencies omesso di proposito). Rischio
+#  0,65% (taglia vera oggi, non 1,0% dell'ancora): n/PF restano
+#  confrontabili con l'ancora (invarianti a scaling lineare), DD%/EUR
+#  no (dichiarato). ExportTrades() verificata incondizionata nel
+#  sorgente, formato CSV combaciante con mc_dd_cella.py.
+#
+#  Pin: giro di pin e80758e (33mo, d1a158b -> 027b921). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  770202 vivo su 100k -V3 e piccolo 50503392: nessuno dei due toccato.
+# =====================================================================
+e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R152a_pertrade_DowApertura_770202.txt -Etichetta r152a -Modello 4 -Deposito 100000
