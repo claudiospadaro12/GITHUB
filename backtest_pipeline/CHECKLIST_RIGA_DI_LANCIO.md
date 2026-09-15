@@ -19495,3 +19495,66 @@ non solo il cmdlet e il bersaglio. Lo strato 2 (`controllo-preventivo`) resta
 comunque la difesa di giudizio per quello che nessun pattern testuale puo'
 prendere (es. un payload costruito a runtime da variabili, mai scritto come
 stringa letterale).
+
+---
+
+## 340. 🧊🔀 UN ROUND A CELLA CONGELATA (ZERO VARIANTI VERE) NON PASSA `controlla_prova.py` CON `-PermettiCellaSingola`: QUELL'INTERRUTTORE E' SOLO DEL DRIVER PS1, LO STRATO 1 PYTHON NON LO CONOSCE — LA FORMA DI CASA E' IL MAGIC-SWEEP GEMELLO (15/09/2026)
+
+**Caso reale.** Preparando `prove/R152a_pertrade_DowApertura_770202.txt`
+(export per-trade della cella viva 770202, per `mc_dd_cella.py`), prima
+stesura: 81 righe `InpXxx=valore` senza `||`, un solo `InpMagic=770208`,
+e nel commento di lancio `-PermettiCellaSingola` (l'interruttore che
+`walkforward_generico.ps1` r.243/816 offre apposta per i round a cella
+congelata, "non e' un'ottimizzazione, e' UN export").
+
+`python3 backtest_pipeline/controlla_prova.py` (strato 1, quello che gira
+QUI, prima di svegliare MT5) l'ha bocciata comunque:
+```
+- nessun asse Y: sarebbe un backtest singolo, il driver rifiuta di lanciare
+ESITO: FALLITO
+```
+**Perche': `controlla_prova.py` non ha nessuna opzione `--permetti-cella-
+singola`.** E' un controllo Python indipendente dal driver PS1 (nato per
+girare a costo zero PRIMA di mandare la riga, vedi intestazione del file),
+e la sua regola 4 (`# 4. esattamente UN asse Y, e non degenere`) e'
+incondizionata: guarda solo se esiste una riga che finisce in `||Y` con
+`start != stop`. Non legge le intenzioni del round, non sa che esiste un
+interruttore di deroga nel driver a valle. **I due strati hanno regole
+DIVERSE per lo stesso caso, e nessuno dei due lo dichiara finche' non lo
+si prova.**
+
+**Il fix, che e' anche la forma di casa gia' in uso**: `prove/
+R103_ABTG_Dow_Apertura_US_U30USD_770202.txt` (la classifica della flotta,
+STESSA sedia, gia' PASS del cancello) e `R16c_pertrade_Dow.txt`/
+`R54a_lato_DOW_apertura.txt` risolvono lo stesso problema COSI':
+1. **ogni campo fisso** si scrive `valore||valore||0||valore||N` (sweep
+   degenere dichiarato N, non un pin nudo) — non cambia nessun numero,
+   soddisfa comunque il parser che cerca `||`;
+2. **il MAGIC diventa l'asse Y**, con una coppia VERGINE gemella
+   (`770208||770208||1||770209||Y`): due passate che DEVONO uscire
+   identiche al centesimo (coerenza, gia' il controllo di igiene di
+   R16c/R54a/R103). Il magic non tocca la strategia: tocca solo
+   l'etichetta della passata e il nome del CSV in uscita.
+Risultato dopo il fix: `pin=80 celle=2 OK` — **niente
+`-PermettiCellaSingola`**, l'asse e' vero (non degenere), il driver PS1 lo
+accetta come un round normale.
+
+### 🔴 LA REGOLA
+1. **`-PermettiCellaSingola` e' un'opzione SOLO del driver `walkforward_
+   generico.ps1`.** Non presumere che uno strato di controllo diverso
+   (`controlla_prova.py`, o un futuro terzo strato) la conosca solo
+   perche' esiste nel driver: ogni strato ha le SUE regole, e vanno
+   provate separatamente, non dedotte per analogia.
+2. **Per un round a cella congelata, la forma di casa e' il
+   magic-sweep gemello** (`InpMagic=A||A||1||B||Y`, A/B VERGINI), non
+   l'interruttore di deroga. Fa doppio lavoro: soddisfa il parser DEL
+   controllo E aggiunge un controllo di coerenza vero (le due passate
+   devono combaciare), che `-PermettiCellaSingola` da solo non da'.
+3. **Prima di scrivere un round "a zero assi", si cerca un precedente
+   sulla STESSA sedia o sullo STESSO EA** (qui bastava aprire
+   `R103_ABTG_Dow_Apertura_US_U30USD_770202.txt`, gia' nel repo): la
+   forma giusta era gia' scritta, copiarla costa meno che scoprire il
+   FAIL a mano.
+4. **Conseguenza**: nessun numero del round cambia (il magic non e' la
+   cella), ma la riga di lancio si semplifica: via `-PermettiCellaSingola`
+   dal comando, resta solo l'invocazione normale del driver.

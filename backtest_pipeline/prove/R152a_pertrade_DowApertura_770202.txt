@@ -1,0 +1,325 @@
+# =====================================================================
+#  EA: ABTG_Dow_Apertura_US
+#  R152a -- EXPORT PER-TRADE DELLA CELLA VIVA 770202, PER mc_dd_cella.py
+#           U30USD M5 (sedia 770202, conto challenge 100k 50504263).
+#  Scritto il 15/09/2026.
+# ----------------------------------------------------------------------
+#  SI LANCIA CON (CELLA CONGELATA, ASSE = SOLO IL MAGIC -- vedi S2):
+#    -Expert ABTG_Dow_Apertura_US
+#    -Prova prove\R152a_pertrade_DowApertura_770202.txt
+#    -Simbolo U30USD -Periodo M5
+#    -DaQuando 2024.09.26
+#    -Deposito 100000 -Etichetta r152a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE -SoloControllo: deve stampare ESATTAMENTE 2 passate,
+#   770208 e 770209, stessa cella. Se ne stampa un numero diverso, ci
+#   si ferma.)
+#
+#  !! -TerminaleBacktest NON e' opzionale (classe 204). C:\MT5_Backtest
+#     = demo 50504400, zero EA attaccati -- e' il BANCO_PERC dichiarato
+#     nel driver. Questa stessa sedia (770202) gira VIVA su DUE conti
+#     (100k 50504263 -V3 E il piccolo 50503392, risk diverso, vedi sez.2
+#     del preset): nessuno dei due si tocca. E MAI -TerminaleBacktest
+#     'C:\BCM_Reale' (controlla_riga.py r.412): non e' un bersaglio
+#     ammesso per un round di macchina.
+#  !! -Fino NON e' scritto qui: eredita il default del driver
+#     (2026.06.30, walkforward_generico.ps1 r.177) -- e' la STESSA fine
+#     finestra dell'ancora R16c/R54a e di CENSIMENTO_CONTRATTI.md r.197
+#     (OOS 2025.06.10->2026.06.30). Scriverlo a mano sarebbe ridondante,
+#     ometterlo e' quello che i due round-ancora hanno gia' fatto.
+#  !! -Modello NON e' scritto: eredita il default 4 = tick reali
+#     ("verita'", walkforward_generico.ps1 r.180). E' lo STESSO modello
+#     con cui e' stato misurato il 4,22%/2,74% di riga 197 del
+#     censimento ("dep. 100.000, tick, n 130") -- qui non e' una scelta
+#     nuova, e' l'ancora.
+#  !! NIENTE -PermettiCellaSingola: l'asse Y qui e' vero (770208 !=
+#     770209, non degenere), come in R103/R16c/R54a. Non serve
+#     l'interruttore di deroga: il driver vede un asse normale.
+#
+# ----------------------------------------------------------------------
+#  PERCHE' QUESTO ROUND, E PERCHE' PROPRIO ADESSO
+# ----------------------------------------------------------------------
+#  mc_dd_cella.py (Monte Carlo del max DD di UNA cella, autotest 4/4
+#  PASS, classi 333/337/338/339 chiuse stanotte) e' SANO ma non
+#  eseguibile su nessuna delle tre sedie del terzetto che porta il
+#  piano da 15,5-25,3 a 3,9-6,3 mesi (PIANO_CHALLENGE_OTTOBRE_v2.md
+#  sez.4, riga tabella par.0-ter n.5): manca il CSV per-trade
+#  (abtg_trades_*.csv) sulla cella ESATTA che gira oggi. Gli unici
+#  per-trade committati per questa famiglia sono del round R16 (09/08,
+#  magic 770206/770207) e R54a (11/09, magic 772601/772602): PRECEDENTI
+#  a nulla di rotto su questa sedia in particolare (nessun fix
+#  InpAllowShort/OPPRANGE/r137c la riguarda -- quelli sono di 770611 e
+#  771531), ma comunque NON in archivio come file (cercati con `find`,
+#  zero risultati per quei magic: backtest_pipeline/risultati_prove/
+#  e /risultati_archivio/ non li hanno mai avuti o non sono sopravvissuti).
+#  Serve una corsa nuova, sulla cella VIVA di oggi, che scriva il CSV.
+#
+#  PERCHE' 770202 E NON LE ALTRE DUE DEL TERZETTO (SCELTA DICHIARATA)
+#    - `770611` (ORB): la geometria del giorno 1 (OPPRANGE vs HALFRANGE)
+#      e' sotto FIRMA di Claudio, dovuta oggi 15/09
+#      (PIANO_CHALLENGE_OTTOBRE_v2.md r.417, tabella par.7) -- LA CELLA
+#      NON E' ANCORA STABILIZZATA. E il binario sul 100k -V3 e' fermo a
+#      v1.02/22-08 (PRE-hedge-safe, commit 9030e67 di stanotte): due
+#      cose in movimento sotto i piedi nello stesso giorno.
+#    - `771531` (EMA200): il Blocco 1 del runbook si e' chiuso STANOTTE
+#      stessa (0cc7bd9), e questo e' ESATTAMENTE cio' che sblocca la
+#      ricompilazione del suo binario (fermo da 4 giorni su b45dd00) --
+#      la cella cambia binario proprio oggi/domani, e' la meno ferma
+#      delle tre in questo preciso momento.
+#    - `770202` (Dow Apertura): preset scritto una volta (11/09,
+#      d4fd83a) e RIVERIFICATO indipendentemente tre giorni dopo (A2
+#      richiusa, 25d76d0, 14/09) contro la foto piu' fresca del .chr
+#      vivo -- 328 input condivisi, ZERO differenze. Nessuna firma
+#      pendente, nessun binario in coda per ricompilazione noto su
+#      questa sedia specifica. E' quella FERMA delle tre, oggi.
+#
+# ----------------------------------------------------------------------
+#  LA CELLA -- letta dal .set VIVO, non dalla memoria di un round vecchio
+# ----------------------------------------------------------------------
+#  Fonte: mql5/Presets/ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set
+#  (11/09, riverificato 14/09 in 25d76d0 -- 0 differenze contro il .chr
+#  del 14/09). Le 81 righe sotto sono la fotocopia ESATTA di quel file,
+#  campo per campo (stesso ordine): NON sono "i default + un pin", sono
+#  l'intero blocco copiato, cosi' non resta nessun campo implicito. Nove
+#  campi divergono dal default compilato del sorgente (dichiarato nel
+#  .set stesso, sez.6): InpEntryMode=2, InpRangeMinutes=35,
+#  InpBufferPoints=1000, InpRetestOffsetPts=400, InpTP1_R=1.0,
+#  InpTP1_ClosePct=50, InpBreakevenAtTP1=true, InpAllowShort=false,
+#  InpRiskPercent=0.65 -- OTTO di questi NOVE sono FISSATI IDENTICI
+#  dall'ancora R16c/R54a (prove/R16c_pertrade_Dow.txt,
+#  prove/R54a_lato_DOW_apertura.txt): la cella che gira E' la cella di
+#  R16, alla taglia oggi in vigore sul 100k. Il nono (InpRiskPercent)
+#  e' la DIFFERENZA DICHIARATA di questo round rispetto all'ancora --
+#  vedi sotto.
+#
+#  >>> SCELTA DICHIARATA SU InpRiskPercent, PRIMA DEI NUMERI: qui si usa
+#      0.65 (la taglia VERA sul 100k oggi), NON 1.0 (la taglia con cui
+#      R16/R54 hanno girato). Il preset stesso lo dichiara alla lettera
+#      (sez.8, punto finale): "il DD a 0,65% e' un APPROSSIMATO
+#      LINEARE, convenzione di casa, non una misura". Lo scopo di
+#      QUESTO round e' proprio smettere di approssimare: un export alla
+#      taglia vera evita la scala a posteriori e da' a mc_dd_cella.py
+#      la serie di P&L REALE della sedia di oggi, non quella scalata.
+#      CONSEGUENZA per il confronto con l'ancora (S1 sotto): n
+#      (posizioni) e PF sono invarianti a uno scaling lineare del
+#      rischio (stesse entrate/uscite, stesso segno, stesso rapporto
+#      vincita/perdita) e restano confrontabili alla lettera col
+#      censimento. Il DD% e il profitto in EUR NON lo sono esattamente
+#      (l'approssimazione lineare del preset stesso lo dichiara), e qui
+#      NON si forza un secondo giro a 1.0% solo per l'S1: si accetta
+#      che l'ancora sul DD resti un confronto di ORDINE DI GRANDEZZA,
+#      non una terza cifra.
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=false||false||0||false||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=770208||770208||1||770209||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+#
+# NOTE sui due campi omessi rispetto alle 81 righe del .set:
+#   - InpNewsCurrencies: nel .set vivo e' una riga vuota
+#     ("InpNewsCurrencies="). Come in R136a/R147a/R151a, un pin di
+#     stringa vuota viene IGNORATO da MT5 (controllo 3 di
+#     controlla_prova.py) -- omettere la riga e lasciare il default
+#     (anch'esso stringa vuota, ABTG_Dow_Apertura_US.mq5) fa lo stesso
+#     effetto senza far scattare il controllo. Non e' un campo perso:
+#     e' lo stesso valore, scritto nel modo che il controllo capisce.
+#
+# LA FORMA DEGLI ASSI (v||v||0||v||N + un solo campo ||Y): e' la STESSA
+# di R103_ABTG_Dow_Apertura_US_U30USD_770202.txt (la "classifica della
+# flotta", stessa sedia, gia' PASS del cancello) e di R16c/R54a/R54b:
+# il driver walkforward_generico.ps1 (controlla_prova.py incluso) esige
+# ESATTAMENTE un asse Y non degenere anche per un round a cella
+# congelata -- non e' un'ottimizzazione travestita, e' la SINTASSI che
+# il driver capisce per "una passata sola". L'asse qui e' il MAGIC
+# (770208||770208||1||770209||Y): due passate GEMELLE, stessa cella,
+# che devono uscire IDENTICHE al centesimo (coerenza, S2 sotto) -- il
+# magic non tocca la strategia, tocca solo l'etichetta della passata e
+# il nome del CSV.
+#   - InpMagic: 770208/770209 (coppia VERGINE, verificata per grep su
+#     tutto il repo il 15/09/2026: zero occorrenze di entrambi prima di
+#     questo file), non 770202. Il tester ha una cache per magic:
+#     770202 e' stato usato da corse precedenti (compreso il forward
+#     vero) e una cella gia' calcolata non viene rieseguita, quindi
+#     ExportTrades() non scriverebbe un file nuovo. E' la STESSA
+#     ragione per cui R16c ha usato 770206/770207 e R103 ha usato
+#     760280/760281 invece di 770202 -- non e' una sedia diversa, e' un
+#     tester che non ricalcola cio' che ha gia' in cache. Con la coppia
+#     escono DUE CSV (770208 e 770209): mc_dd_cella.py va lanciato su
+#     UNO dei due (sono la stessa serie, per costruzione).
+#
+# ----------------------------------------------------------------------
+#  QUELLO CHE PRODUCE -- letto nel sorgente, non assunto
+# ----------------------------------------------------------------------
+#  mql5/Experts/ABTG_Dow_Apertura_US.mq5:
+#    r.2067 void ExportTrades() -- scrive
+#      "abtg_trades_"+PROGRAM_NAME+"_"+_Symbol+"_"+InpMagic+".csv"
+#      nella cartella COMUNE (FILE_COMMON), separatore ';', colonne
+#      close_time;symbol;magic;position_id;deal_type;volume;price;net_profit
+#      -- ESATTAMENTE il formato che mc_dd_cella.py si aspetta (col.0
+#      close_time, col.7 net_profit, parser leggi_trades()).
+#    r.2094 double OnTester() { ExportTrades(); ... } -- la chiamata NON
+#      e' dietro nessun if, nessun flag: OGNI passata del tester la
+#      esegue a fine corsa, comprese le due di questo round. File
+#      attesi: abtg_trades_ABTG_Dow_Apertura_US_U30USD_770208.csv e
+#      ..._770209.csv (identici al centesimo, S2).
+#
+# ----------------------------------------------------------------------
+#  IL CANCELLO DEL COSTO -- gia' misurato, dichiarato qui e non spostato
+# ----------------------------------------------------------------------
+#  PIANO_CHALLENGE_OTTOBRE_v2.md riga tabella (770202): 51,0x il
+#  pavimento (40x) -- PASSA, ma con lo stop a ~102 punti indice
+#  [INFERITO, 0 gambe in stop mai misurate su questa sedia]; banda
+#  44,5x-53,5x. Questo round NON tocca l'ingresso ne' lo stop: e' un
+#  export a cella congelata, il cancello di costo non cambia per
+#  costruzione (stessa ragione di R151a, sezione "cancello di costo" sull'oro).
+#  InpMaxSpread=0 (filtro spento, sez.8 rilievo R2 del .set): la sedia
+#  entra alle 14:30 server, nel minuto di apertura cash USA, dove lo
+#  spread e' il piu' largo della giornata -- rischio GIA' dichiarato,
+#  NON corretto qui (non e' nel perimetro di un export).
+#
+# ----------------------------------------------------------------------
+#  S1 / S2 / S3 -- LE SENTINELLE
+# ----------------------------------------------------------------------
+#  S1  ANCORA SU n. Il CSV combinato (IS+OOS, tutta la finestra
+#      2024.09.26->2026.06.30) deve avere un CONTEGGIO POSIZIONI
+#      (position_id distinti, non righe/deal -- classe 226: n=deal non
+#      e' n=posizioni, fattore misurato 2,01 altrove) nell'intorno
+#      dell'ancora dichiarata da CENSIMENTO_CONTRATTI.md r.197: OOS
+#      130 DEAL (56-130 posizioni, forbice dichiarata li' per lo stesso
+#      motivo, classe non ancora chiusa su QUESTA cella). Qui si
+#      chiude: il CSV nuovo da' il numero vero, deal E posizioni,
+#      niente piu' forbice. Tolleranza: se il conteggio deal OOS cade
+#      fuori 100-160, la cella non e' la stessa dell'ancora e il round
+#      si ferma prima di leggere il resto (finestra o filtro diversi
+#      da quanto dichiarato).
+#  S2  COERENZA DELLA COPPIA GEMELLA. Le due passate (770208/770209)
+#      sono la STESSA cella: devono uscire con profitto, PF e n
+#      IDENTICI al centesimo (stesso controllo di igiene di R16c/R54a/
+#      R103). Se divergono, un campo non e' davvero pinnato com'e'
+#      scritto (es. un pin di stringa vuota ignorato da MT5, controllo
+#      3 di controlla_prova.py) e il round si ferma prima di leggere
+#      il CSV. Se -SoloControllo stampa un numero di passate diverso da
+#      2, l'asse non e' quello scritto.
+#  S3  IL PAVIMENTO DEL LOTTO NON MORDE. Rilievo R3 del .set: a
+#      deposito 100.000 e rischio 0,65%, il pavimento morderebbe solo
+#      sotto ~1.350 EUR di saldo (calcolo li' dentro, su U30USD
+#      VOLUME_MIN 0,10 e ~0,861 EUR/punto/lotto). Qui il deposito e'
+#      100.000: il rischio dichiarato (0,65%) e' anche il rischio
+#      vero, senza bisogno di verificarlo sul CSV. Se pero' il CSV
+#      mostrasse una quota anomala di posizioni chiuse esattamente a
+#      0,01 lotti, il calcolo andrebbe rifatto (non atteso, dichiarato
+#      per onesta').
+#
+# ----------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+# ----------------------------------------------------------------------
+#    - Confronto DD/profitto contro l'ancora resta APPROSSIMATO
+#      (paragrafo sopra): la taglia e' diversa (0,65% qui, 1,0%
+#      nell'ancora) per scelta dichiarata, non per errore.
+#    - Il CSV copre TUTTA la finestra (IS+OOS insieme, come lo
+#      esporta ExportTrades() -- HistorySelect(0, TimeCurrent())).
+#      mc_dd_cella.py va lanciato UNA VOLTA su tutto il file (soglia
+#      IS, 9,00%) e, se si vuole isolare la sola fetta OOS
+#      (2025.06.10->2026.06.30) per confrontarla al 7,00%, serve un
+#      filtro a valle sul CSV per data -- non fatto qui, proposto per
+#      chi esegue mc_dd_cella.py dopo l'export (un filtro a una riga
+#      su close_time, nessun secondo round di macchina).
+#    - R2 del .set (InpMaxSpread=0, filtro spento) non e' corretto qui:
+#      rischio dichiarato, non nel perimetro di un export a cella
+#      congelata.
+#    - Modello 4 (tick reali): [NON MISURATO] se U30USD abbia tick
+#      reali BCM per l'intera finestra 2024.09.26->2026.06.30 (a
+#      differenza dell'oro, dove il muro dei tick e' misurato al
+#      2024.07.05 -- R151a). Se il tester si ferma prima per mancanza
+#      di tick, si scopre al primo -SoloControllo/lancio, non e' un
+#      motivo per non provarci: e' la STESSA finestra su cui R16c/R54a
+#      hanno gia' girato (nessun errore riportato in quei round).
+#
+#  QUESTO ROUND NON PROMUOVE NIENTE. Nessun preset cambia, nessuna
+#  sedia si accende o si spegne, nessun conto si tocca (SOLA LETTURA +
+#  un CSV nuovo su un backtest, nessun terminale vivo). Rischio e
+#  taglie restano [FIRMA DI CLAUDIO]. Il verdetto VERDE/GIALLA/ROSSA di
+#  mc_dd_cella.py su questo CSV, quando gira, e' una MISURA in piu' per
+#  il cancello RISCHIO gia' firmato (18/08): non abbassa ne' alza
+#  nessuna soglia.
+# =====================================================================
