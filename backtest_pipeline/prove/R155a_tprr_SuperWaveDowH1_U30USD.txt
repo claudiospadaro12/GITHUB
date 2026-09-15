@@ -1,0 +1,424 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R155a -- IL TARGET FINALE, MAI TOCCATO SU QUESTA SEDIA
+#           U30USD H1, sedia 770511 -- asse InpTP_RR, 5 celle
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1: la finestra e l'asse arrivano
+#  TUTTI dalle direttive di questo file, non dalla riga di comando):
+#    -Expert ABTG_SuperWave_DOW_H1_Ottimizzato
+#    -Prova prove\R155a_tprr_SuperWaveDowH1_U30USD.txt
+#    -Simbolo U30USD -Periodo H1
+#    -Etichetta r155a -Modello 4 -Deposito 10000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 5 celle. Se ne
+#   stampa un numero diverso, ci si ferma prima di lanciare altro.)
+#  -Modello 4 = TICK REALI: stessa scelta di R126a/R126b su QUESTA
+#  sedia (U30USD ha tick BCM dal 2024.09.26, dentro la finestra).
+#  -Deposito 10000 = il default del driver, e il valore con cui
+#  l'ancora di R126a (sotto) e' confrontabile: si scrive lo stesso,
+#  uno stato implicito non e' uno stato dichiarato (nota di R126a r.24-26).
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E QUESTA MANOPOLA -- coi numeri, non a sensazione
+#
+#  0) VERIFICATO CONTRO IL REPO VERO, NON CONTRO IL CENSIMENTO DEL
+#     11/09 (istruzione esplicita di questo round). Rigirato oggi
+#     `python3 backtest_pipeline/censimento_uscite.py` da zero: 2184
+#     CSV, 333 coppie sedia x manopola, 224 mai-mosse-e-vive (era 236
+#     l'11/09 -- 12 in meno: il lavoro di oggi, R141e/R148/R151a/R152a/
+#     R153a/R154a incluso, le ha gia' spostate). Filtrate le 13 sedie
+#     del Blocco 3 del runbook di stanotte (report/RUNBOOK_
+#     RICOMPILAZIONE_PICCOLO_2026-09-14.md, "S1 CHIUSO", bersaglio =
+#     HEAD di oggi per tutte e 13) ed escluse le NOVE gia' coperte
+#     oggi (EMA200 Dow 771531, ORB 770611, DAX_Apertura 770101,
+#     MaxMinNotte XAUUSD 770402, Dow_Apertura 770202/R152a, PTE GBPUSD
+#     771332/R153a, SuperWave U30USD 770531/R154a, Cycle NASUSD
+#     770250-family R148, DaxValueArea D30EUR 784105/R141e).
+#
+#  1) DELLE 13 DEL BLOCCO 3, 770511 E' LA SCELTA MISURATA, NON LA
+#     PRIMA GUARDATA -- gli altri candidati con manopole mai-mosse-e-
+#     vive sono stati scartati con un motivo scritto:
+#     - `771321` PTE U30USD H1 (stesso asse InpAtrExitPeriod di R153a):
+#       nessuna ancora a finestra lunga per QUESTA sedia (a differenza
+#       di 771332/GBPUSD che ha R78, 26 anni), e U30USD ha il muro
+#       tick/OHLC a 2024.09.26: sotto pavimento IS>=150 senza rimedio.
+#       SCARTATO oggi anche da R154a per lo stesso motivo -- non lo
+#       riscopro, lo eredito.
+#     - `770924` SupertrendReversal 225JPY H2: cancello di costo
+#       **13,6x = 34% del pavimento** (report/CANCELLO_COSTO_FLOTTA_
+#       2026-09-10.md r.482, "il peggiore misurabile"), lo stesso
+#       livello di 774101 che R154a ha gia' scartato per costo. Qui
+#       InpSLBufferPips e' un buffer VERO su 225JPY (_Point=1,00,
+#       r.5 del censimento par. 5), ma anche azzerandolo a 30 punti lo
+#       stop passa da 477 a ~507 idx: per arrivare a 40x (1.403 idx)
+#       servirebbe quasi TRIPLICARE lo stop. Il costo non si compra da
+#       li'. Stessa dottrina "prima il costo" di R154a.
+#     - `971501` EMA200_Ottimizzato XAUUSD H4: DD 45,91% @1%, firmato
+#       il 23/08 "prop: NO a nessuna taglia" (censimento par. 4.3). Il
+#       merito di una manopola non cambia un verdetto gia' chiuso.
+#     - `970901` SupertrendReversal_Ott XAUUSD H4 (DD 9,02%, il muro a
+#       0,98 punti -- l'argento del censimento dell'11/09): SCARTATO
+#       QUI perche' `risultati_archivio/spread_flotta/` (la fonte di
+#       spread che questo mandato chiede di usare) NON HA UN FILE PER
+#       XAUUSD (solo D30EUR/NASUSD/U30USD esistono; la riga per l'oro
+#       e' preparata e mai mandata: backtest_pipeline/righe/RIGA_
+#       SPREAD_FLOTTA_XAUUSD_DA_MANDARE.md). Il cancello di costo per
+#       970901 nel referto esistente e' marcato **[INF]** (inferito
+#       da un gemello, non misurato): verificarlo "coi dati di spread
+#       gia' in archivio" come chiede questo mandato non e' possibile
+#       OGGI su quella sedia. 770511, invece, ha U30USD in archivio.
+#
+#  2) `770511` HA UNA STORIA DI COSTO GIA' SCRITTA, E VA CITATA PRIMA
+#     DI SCEGLIERE LA MANOPOLA, NON DOPO: R126a (scritto il 10/09,
+#     CORRETTO DAL CANCELLO -- git log verificato ora, 15/09: commit
+#     ea6b9f5, "il 38,5x non e' un numero, e' una forbice") ha GIA'
+#     riverificato il cancello
+#     di 770511 coi dati veri di spread_orario_U30USD.csv e ha trovato
+#     un numero PIU' PRECISO del referto del 10/09 (38,5x/96%): stop
+#     forbice [77,1 ; 171,3] idx, spread rifatto a 2,65 (non 2,00, la
+#     riga TUTTO pesata sui tick sballa perche' questa sedia non opera
+#     nelle ore di punta -- R126a paragrafo COSTO). All'angolo
+#     pessimista (77,1/2,65) = **29,1x (73% del pavimento)**; all'
+#     angolo ottimista (171,3/2,65) = **64,6x (passa)**. Il cancello
+#     resta APERTO alla cella viva -- e QUESTO ROUND NON LO CHIUDE:
+#     vedi punto 4.
+#
+#  3) LA MANOPOLA -- InpSLBufferAtr (R126a) e InpSLLookback (R126b,
+#     "sedia gemella" citata anche da R154a) SONO GIA' STATE MOSSE:
+#     verificato oggi col censimento rigirato, entrambe risultano
+#     ASSE per 770511 (non piu' "mai mosse"). Sono le DUE manopole che
+#     allargano lo stop -- gia' coperte. Delle manopole ancora "mai
+#     mosse e vive" per 770511 (InpSLBufferPips, InpTP1_R, InpTP1Pct,
+#     InpBreakeven, InpTP_RR, InpEndHour -- InpFirstFraction ESCLUSA,
+#     e' ingresso non uscita, classe 344/346 della checklist), ho
+#     scelto **InpTP_RR** perche':
+#       a) e' un asse CONTINUO (5 celle leggibili, non un booleano a 2
+#          valori come InpBreakeven) -- coerente con lo stile di casa
+#          (R153a/R154a/R127b) e permette di leggere un eventuale
+#          altopiano, non solo un prima/dopo;
+#       b) NON TOCCA LO STOP, verificato nel codice, non supposto:
+#          mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5
+#            r.365-368  ext/buf/sl calcolati QUI (SLLookback+buffer)
+#            r.371      risk = |entry - sl|   <- GIA' FISSATO
+#            r.375      tp = entry +/- risk*InpTP_RR   <- DOPO
+#            r.379      lotMkt = LotByRisk(risk)  <- usa risk, non tp
+#          Quindi InpTP_RR NON cambia risk, NON cambia il lotto, NON
+#          cambia il cancello di costo del punto 2: e' un asse
+#          ORTOGONALE al problema di costo, verificato dal codice, non
+#          un'ipotesi. E' anche il motivo per cui questo round NON
+#          duplica R126a/R126b: quelli muovono lo STOP, questo muove
+#          SOLO il bersaglio.
+#       c) InpSLBufferPips (l'altra candidata) vale 3 "pip" = 0,03
+#          punti indice su U30USD (_Point=0,01, Digits=2) -- contro
+#          uno stop mediano di 77,1 idx e' lo 0,04% dello stop: anche
+#          un asse 0..30 pip muoverebbe lo stop di 0,00-0,30 idx,
+#          rumore puro sul cancello di costo E sul risultato. Non vale
+#          il round. Lo stesso ragionamento del censimento par. 5 (righe
+#          420-424 del referto dell'11/09).
+#
+#  4) QUESTO ROUND NON PROVA A CHIUDERE IL CANCELLO DI COSTO -- e va
+#     detto in modo che non sembri un'omissione. Il cancello resta
+#     APERTO alla cella viva (angolo pessimista 73%, punto 2). Ma NON
+#     e' il caso della dottrina "prima il costo, poi l'uscita" che
+#     R154a ha applicato a 772362/774101 (SCARTARE una sedia perche'
+#     il costo fallisce E nessun round lo affronta): su 770511 il
+#     costo E' GIA' AFFRONTATO -- DUE round dedicati (R126a, R126b)
+#     esistono, sono passati dal cancello e aspettano solo la firma
+#     (par. 4.0 del censimento dell'11/09: "la cosa piu' economica che
+#     esista in questo dossier e' una firma"). Questo round aggiunge
+#     copertura su una manopola ORTOGONALA della STESSA sedia, non la
+#     sottrae al lavoro sul costo.
+# ---------------------------------------------------------------------
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#    mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5:
+#      r.81   input double InpTP_RR = 3.0;  // OTT SuperWave real-tick
+#      r.375  tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR
+#      r.415  tpP (stessa formula, per la gamba PENDENTE)
+#      r.359-363 (ManageAll): il parziale a 1R e il breakeven sono in
+#                 unita' di R, quindi INVARIANTI lungo questo asse.
+#      r.434-477 (ManageAll): trailing sul Supertrend ed exit-on-flip
+#                 sono PREZZO ASSOLUTO, indipendenti da InpTP_RR: un
+#                 target piu' lontano non impedisce a trailing/flip di
+#                 chiudere la posizione PRIMA di arrivarci.
+#    >>> IL PUNTO CHIAVE: un TP_RR piu' grande allunga SOLO il traguardo
+#        finale. Le uscite anticipate (parziale a 1R, breakeven,
+#        trailing sul Supertrend, flip) restano tutte accese e
+#        identiche lungo l'asse. Quindi l'effetto atteso e' sulla CODA
+#        dei trade (quanti arrivano fino in fondo), non sulla massa.
+# ---------------------------------------------------------------------
+#  IL COSTO -- EREDITATO DA R126a, NON RIMISURATO (perche' non serve:
+#  punto 3b sopra dimostra che InpTP_RR non tocca lo stop)
+#    Fonte: risultati_archivio/spread_flotta/spread_orario_U30USD.csv
+#    (64.711.285 tick), riletto da R126a alle ORE VERE in cui 770511
+#    opera (3,4,5,6,8,11,17,20 server): mediana 2,65 $ (il piu'
+#    sfavorevole dei due stimatori concordi -- ore vere vs ore
+#    uniformi -- R126a par. COSTO, non la riga TUTTO che sballa perche'
+#    pesata sui tick e questa sedia non opera nelle ore di punta).
+#    Stop MISURATO in campo (`trades_auto.csv`, 4 gambe): forbice
+#    [77,1 ; 171,3] idx (limite inferiore: 4 gambe chiuse IN STOP, il
+#    trailing/breakeven possono solo stringere, mai allargare oltre
+#    l'iniziale).
+#      angolo pessimista: 77,1 / 2,65 = 29,1x (73% del pavimento 40x)
+#      angolo ottimista:  171,3 / 2,65 = 64,6x (passa, +61%)
+#    >>> INVARIANTE lungo QUESTO asse (punto 3b): ogni cella di
+#        InpTP_RR eredita ESATTAMENTE lo stesso numero. Il cancello
+#        resta dove R126a l'ha lasciato: aperto alla cella viva,
+#        gia' indirizzato da due round dedicati (punto 4).
+# ---------------------------------------------------------------------
+#  IL PAVIMENTO IS>=150 -- VERIFICATO ARITMETICAMENTE, EREDITATO DA
+#  R126a (stessa sedia, stesso ancoraggio) E RICONTROLLATO QUI, NON
+#  RIPRESO A MEMORIA. LA RISPOSTA E' "NON RAGGIUNGIBILE" -- si scrive
+#  lo stesso, per la Regola B (16/08): il campione sottile sospende il
+#  MERITO, mai il RISCHIO.
+#    n misurato sulla finestra INTERA disponibile (tick, 2024.09.26-
+#    2026.06.30, valid_SuperWaveRT_U30USD_H1_realtick.csv Pass 6, la
+#    cella viva StMult 2,5/TP_RR 3,0): **227 chiusure**.
+#    UNITA': "227" e' `Trades` del CSV = CHIUSURE, non posizioni --
+#    InpTP1Pct=50 e InpUsePending=1 sono entrambi attivi sulla cella
+#    viva (ogni posizione puo' generare 2 righe di chiusura: il
+#    parziale a 1R + la chiusura finale, oltre alla gamba pendente che
+#    puo' non riempirsi mai). CENSIMENTO_CONTRATTI_v2.md r.317 lo
+#    marca esplicitamente `[NON MIS.]`, forbice posizioni **98-227**.
+#    >>> Gia' misurato da R126a (stessa sedia, scritto il 10/09, citato
+#        non riscoperto): spezzata IS/OOS la STESSA corsa fa **84 (IS)
+#        e 143 (OOS)** chiusure (R126a r.301-306, e coincide con
+#        CENSIMENTO_CONTRATTI_v2.md r.317 "spezzata fa 84 e 143").
+#        84+143=227, torna.
+#    Per IS>=150 E OOS>=150 servono >=300 CHIUSURE totali (ipotizzando
+#    uno split 50/50): 227 << 300. Mancano 73 chiusure, che a questa
+#    frequenza (~0,50-0,62 posizioni/giorno misurate, censimento r.317)
+#    servirebbero altri 5-6 mesi di storico che il broker non ha
+#    (muro tick 2024.09.26, non un limite di questo round).
+#    >>> E SE SI USA LA UNITA' GIUSTA (posizioni, non chiusure) IL
+#        BUCO E' PEGGIORE, non migliore: anche la lettura piu'
+#        ottimista (227 posizioni, cioe' nessun doppio conteggio) non
+#        arriva a 300; quella misurata (98-227 forbice) e' anche piu'
+#        sotto. Non c'e' un'unita' in cui il pavimento si raggiunge su
+#        questa finestra.
+#    >>> CONCLUSIONE, SCRITTA PRIMA DI QUALUNQUE NUMERO DI QUESTO
+#        ROUND: IS>=150 NON E' RAGGIUNGIBILE su questa sedia coi dati
+#        BCM oggi disponibili. Questo round quindi:
+#        - NON fa uno split IS/OOS -- DICHIARATO CON '@FRAZIONEIS 1.0'
+#          (sotto, dopo @FINOA): senza di essa il driver userebbe il
+#          default 0,40 e produrrebbe COMUNQUE un IS/OOS striminzito
+#          (~91/136 chiusure, peggio di R126a), in SILENZIO. Nessun
+#          CSV *_OOS esiste per questo round: e' voluto;
+#        - gira UNA finestra intera, UN solo regime (21 mesi, Dow
+#          prevalentemente al rialzo 2024.09-2026.06), dichiarato come
+#          tale -- stessa diagnosi di R126a r.298-300;
+#        - e' scopato al RISCHIO (il DD si muove e come, lungo un asse
+#          che NON tocca lo stop), MAI al merito: "il default va bene"
+#          o "un'altra cella ha DD piu' basso" sono le uniche risposte
+#          legittime, MAI "questa cella e' meglio" in senso di PF.
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- 2,0 / 2,5 / 3,0(vivo) / 3,5 / 4,0 -- 5 celle,
+#  passo 0,5, centrato sulla viva (indice 2 di 5: non e' un bordo).
+#    Bordo BASSO 2,0: sotto 2,0 il rapporto rischio/rinuncia si
+#    avvicina troppo a InpTP1_R=1,0 (il primo target), rendendo il
+#    secondo target quasi ridondante col primo -- confondimento che
+#    voglio evitare (misurerebbe "il secondo target esiste?" non
+#    "quanto lontano conviene metterlo").
+#    Bordo ALTO 4,0: raddoppio della cella viva, stessa ampiezza
+#    relativa usata da R127a (InpSLBufferPips 3->infinito) e da R99
+#    per l'asse StMult (r.205-211 di R126a: 1,5-3,5, ampiezza +/-40%
+#    circa) -- scelta io, nessun limite strutturale nel codice oltre
+#    TP_RR>0.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n (chiusure): atteso in LIEVE CALO al crescere di TP_RR. Un
+#    target piu' lontano tiene occupato lo slot (r.181-stile: "con
+#    posizione aperta non cerco nuovi ingressi" -- stessa logica letta
+#    da R126a su questo EA) piu' a lungo SE il trade arriva fino in
+#    fondo; ma trailing/flip continuano a chiudere la maggioranza dei
+#    trade PRIMA del target (sono le uscite dominanti su questo
+#    motore, non il TP finale). Attesa: n fra 200 e 240 su tutte e 5
+#    le celle (banda +/-15% sulla cella viva 227). Se n esce da li',
+#    il TP_RR sta cambiando qualcosa che non capisco (es. la gamba
+#    pendente si comporta diversamente) e il round si ferma a capire.
+#  - DD: attesa PIATTA o in LIEVE SALITA al crescere di TP_RR (posizioni
+#    che restano aperte piu' a lungo in attesa di un target lontano
+#    sono esposte piu' a lungo a un ritracciamento prima che
+#    trailing/flip le chiuda). Nessuna direzione forte dichiarata:
+#    l'effetto e' di SECONDO ORDINE (trailing/flip dominano), quindi
+#    l'attesa e' "poco o niente", non "molto".
+#  - PF: NESSUNA attesa forte (Regola del contro-esempio, sotto): con
+#    n~200-240 (< 150 pavimento comunque sospeso su base IS/OOS) un PF
+#    migliore o peggiore fra celle e' rumore di campione finche' non
+#    e' un ALTOPIANO di >=3 celle contigue con n stabile.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': un asse quasi piatto su
+#    DD e n (trailing/flip dominano le uscite, il TP finale e' raro),
+#    con un PF che eventualmente sale un po' alle celle alte (i pochi
+#    trade che arrivano al target portano piu' R a parita' di rischio)
+#    -- e se e' cosi', la risposta onesta e' "il TP finale conta poco,
+#    le uscite vere sono trailing e flip", che chiude la casella
+#    "gestione dell'uscita messa ad asse" anche se il verdetto e'
+#    "quasi inerte in pratica".
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: se n cambiasse di piu' del
+#    25% GIA' fra le celle 2,5 e 3,5 (dove per il codice non dovrebbe
+#    quasi muoversi, essendo entrambe vicine alla viva): vorrebbe dire
+#    che ho letto male il sorgente, e va capito prima di leggere il
+#    resto.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  (regola del 10/09: si costruisce il caso che romperebbe la propria
+#  misura, e si mostra perche' non succede -- o si dichiara che potrebbe)
+#
+#  COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#    con n~200-240 su UN SOLO regime (Dow prevalentemente al rialzo,
+#    21 mesi), bastano 3-4 trade diversi per spostare il PF in modo
+#    vistoso -- soprattutto perche' il meccanismo atteso (trailing/flip
+#    dominanti) rende RARI i trade che arrivano fino al TP finale: la
+#    coda che questo asse muove davvero e' piccola, quindi PIU'
+#    sensibile al rumore di un singolo trade fortunato/sfortunato, non
+#    meno. Una cella potrebbe "vincere" solo perche' un singolo trade
+#    lungo ha chiuso in TP invece che in trailing per un tick.
+#  COME LO DISTINGUO DA UN EDGE VERO, con le misure che questo file
+#  produce:
+#    1. ALTOPIANO, non picco: servono >=3 celle CONTIGUE con DD <=
+#       quella della cella viva (o migliore) E n entro +/-15% l'una
+#       dall'altra. Una sola cella isolata non conta, MAI il picco
+#       (Regola di casa, R70/R136a/R146c/R153a/R154a).
+#    2. n QUASI INVARIANTE lungo l'asse (atteso dal codice, punto
+#       sopra): se INVECE n si muove parecchio, il meccanismo che
+#       immagino non e' quello vero e il contro-esempio ha gia' fatto
+#       il suo lavoro (fermare la lettura prima del PF).
+#    3. UN SOLO REGIME: qualunque "vincitore" qui e' un'ipotesi da
+#       verificare su una finestra diversa o di regime, MAI un
+#       verdetto -- va scritto cosi' in qualunque referto che legga
+#       questi numeri.
+#    4. IL COSTO non decide qui: e' invariante lungo l'asse (dimostrato
+#       dal codice, punto 3b), quindi qualunque differenza fra celle
+#       e' merito/rumore, non un artefatto di spread.
+# ---------------------------------------------------------------------
+#  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  La cella InpTP_RR=3,0 E' LA CELLA VIVA e riproduce
+#  valid_SuperWaveRT_U30USD_H1_realtick.csv Pass 6 (citata anche da
+#  R126a come la propria ancora):
+#      PF 1,52140  -  DD 4,0151%  -  n 227 (chiusure)
+#  TOLLERANZA CONGELATA: n entro +/-5% (11 chiusure), DD entro +/-0,20
+#  punti, PF entro +/-0,03. Fuori da li' NON si prosegue in silenzio:
+#  si DICHIARA la differenza e ci si ferma -- Modello e finestra sono
+#  identici all'ancora (tick, stessa @DAQUANDO/@FINOA), quindi una
+#  differenza qui indicherebbe un pin sbagliato, non rumore di rounding.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  QUESTO ROUND NON HA UN A0/A1 DI MERITO (IS<150 per
+#        costruzione, pavimento sopra) -- SOLO SOGLIE DI RISCHIO E DI
+#        FORMA (Regola B, 16/08).
+#    B2  RISCHIO. Nessuna cella deve avere Equity DD% > 8,0% (il
+#        doppio abbondante della DD viva 4,0151%, e ben sotto il muro
+#        prop 10% -- non e' la stessa sedia della R127b/R154a a ridosso
+#        del muro, ma un salto cosi' su un asse che il codice dice
+#        "non tocca lo stop" sarebbe comunque un allarme). Se una
+#        cella lo rompe, si scrive SUBITO, prima di guardare il PF.
+#    B3  FORMA (non merito). Si registra se le celle 2,5-3,0-3,5 hanno
+#        n entro +/-15% l'una dall'altra (verifica diretta del
+#        ragionamento "trailing/flip dominano" del sorgente) e se il
+#        DD resta piatto o sale poco verso le celle alte. Un esito
+#        diverso non e' un fallimento: e' un'informazione sul sorgente
+#        che ho letto male, e va corretta la lettura, non il risultato.
+#    B4  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito non cambia
+#        un preset, non accende/spegne una sedia e non tocca il
+#        forward. Taglie, riaccensioni e rischio restano [FIRMA DI
+#        CLAUDIO]. E in ogni caso: un solo regime (21 mesi, un solo
+#        rialzo Dow) non e' un verdetto di merito, e' un check di
+#        rischio e di geometria (dichiarato in testa al file). E
+#        QUESTO ROUND NON TOCCA IL CANCELLO DI COSTO (punto 4 sopra):
+#        resta aperto, indirizzato da R126a/R126b, in attesa di firma.
+#    B5  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
+#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3,
+#        MAI il picco isolato (R70, ripreso da R136a/R146c/R153a/R154a).
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - MERITO: [NON MISURABILE qui] per costruzione (pavimento sopra).
+#      Se U30USD accumula piu' storico, questo stesso asse andrebbe
+#      rifatto con uno split IS/OOS vero.
+#    - REGIME: 21 mesi, un solo regime (Dow prevalentemente al rialzo
+#      2024.09-2026.06). NON e' una prova di regime (Emendamento della
+#      Finestra, regola C, 16/08). Dichiarato, non nascosto.
+#    - CANCELLO DI COSTO: NON toccato da questo round (punto 4), resta
+#      aperto alla cella viva (73% al pavimento, angolo pessimista),
+#      indirizzato da R126a/R126b, [FIRMA DI CLAUDIO].
+#    - LATO SEPARATO (long/short): [NON MISURATO qui]. Gira L+S come
+#      la cella viva (InpAllowLong=true, InpAllowShort=true nel preset
+#      sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato
+#      _770511.set).
+#    - GUARDIAN: InpUsaGuardian=true (default sorgente e preset vivo),
+#      fail-open nel tester senza GlobalVariable (stesso comportamento
+#      di ogni altro round di questa classe, verificato nel sorgente
+#      r.395, non assunto).
+#    - InpFirstFraction: NON e' l'asse di questo file (e' ingresso, non
+#      uscita, classe 344/346 della checklist). Pinnato al valore vivo
+#      (0.3333), invariato.
+#    - InpSLBufferPips: NON e' l'asse (punto 3c: magnitudine 0,03 idx,
+#      rumore puro sul cancello di costo). Pinnato al valore vivo (3).
+#
+#  MAGIC VERGINE 779803 (verificato per grep su tutto il repo,
+#  15/09/2026: zero occorrenze prima di questo file).
+#  ORDINE DEI ROUND: R126a (InpSLBufferAtr) e R126b (InpSLLookback)
+#  sono GIA' ASSE su questa sedia (censimento rigirato oggi). Questo
+#  file non li tocca e non li duplica: e' una manopola ORTOGONALA
+#  (bersaglio, non stop) sulla STESSA sedia -- punto 4.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+# --- IL MOTORE, pinnato sulla cella viva (preset mql5/Presets/
+#     sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_
+#     770511.set, letto campo per campo, e sulla cella di R126a --
+#     StMult 2,5 / AtrPeriod 10 / TF H1 -- non a memoria)
+InpUsaGuardian=true
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20
+InpPendingAtr=0
+InpPendingExpiryBars=3
+InpSLLookback=5
+InpSLBufferPips=3
+InpSLBufferAtr=0
+InpTP1_R=1.0
+InpTP1Pct=50
+InpBreakeven=true
+# InpTP_RR -> E' L'ASSE, in fondo al file.
+InpTrailOnST=true
+InpExitOnFlip=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies NON pinnato DI PROPOSITO: il pin di una stringa a
+# valore vuoto MT5 lo IGNORA e usa il default compilato (avviso gia'
+# documentato in controlla_prova.py e usato da R154a).
+InpComment=R155A TPRR
+InpMagic=779803
+InpMaxSpread=0
+InpVerbose=true
+
+# --- L'UNICO ASSE (5 celle, una sola finestra: 5 passate totali)
+#     2,0 / 2,5 / 3,0(vivo) / 3,5 / 4,0 -- centrato sulla viva
+InpTP_RR=3.0||2.0||0.5||4.0||Y
+# =====================================================================
