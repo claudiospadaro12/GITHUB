@@ -19850,3 +19850,46 @@ corretto tanto quanto puo' promuoverne uno sbagliato.
    duro)**: una banda che ferma il round per errore costa lo stesso tempo
    macchina di una che promuove un errore -- il costo e' asimmetrico solo
    nel danno finale, non nello spreco.
+
+## 347. 🩹📖 SPIEGARE IL DIFETTO NELLA PROSA NON E' RIPARARLO: LA SEZIONE CHE SPIEGA E LA SEZIONE CHE DECIDE SONO DUE POSTI DIVERSI, E SOLO UNA DELLE DUE E' STATA CORRETTA (15/09/2026)
+
+**Il caso reale.** `prove/R141e_daxva_buffer_M15_D30EUR.txt` era **FUORI CODA da 3 giorni** con la
+nota *"il suo falsificatore NON falsifica ... rientra domani con la toppa"* (classe 292, 12/09). Alla
+rilettura la "toppa" **c'era gia'**: un blocco intero (righe 249-296 della versione del 12/09) spiega
+correttamente che a edge ZERO il PF sale comunque del 18% per sola geometria+pedaggio, con la tabella
+del PF nullo per cella e la regola di lettura (i)/(ii)/(iii). **Ma tre sezioni piu' sotto, "LE TRE
+USCITE" e "SOGLIE CONGELATE" -- il testo che chi legge i risultati usa DAVVERO per decidere -- non
+erano state toccate**: continuavano a scrivere *"cella 6800 con PF >= 1,10 in entrambe le finestre"*,
+cioe' esattamente il test a punto singolo che il blocco sopra aveva appena dimostrato insufficiente
+(1,10 e' solo ~1 errore standard sopra il PF nullo di quella cella a n=150 -- calcolato in questa
+riparazione, non misurato prima). Risultato: **un round con la diagnosi giusta e la decisione
+sbagliata**, indistinguibile dall'esterno da un round mai corretto -- ed e' rimasto fermo perche'
+nessuno aveva verificato che le due sezioni dicessero la stessa cosa.
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+Un file prova di casa ha SEMPRE due livelli: la **narrazione** (perche' l'asse e' quello, cosa NON
+falsifica) e la **decisione operativa** (le soglie/USCITE che chi legge il CSV applica). Un cancello
+che aggiunge un blocco di correzione alla narrazione **si sente riparato** -- il testo nuovo e'
+corretto, e' li', spiega tutto -- ma se le soglie operative non vengono riscritte **il file si
+comporta ancora come prima**. E' la stessa famiglia della classe 342 (un parametro descritto in
+prosa come "pinnato" ma mai scritto nel blocco `Inp*=`: il tester usa il default in silenzio) --
+qui non e' un parametro dell'EA, e' la SOGLIA DI LETTURA del round, ma il meccanismo del difetto e'
+identico: **prosa aggiornata, struttura operativa no**.
+
+### ✅ COSA SI FA
+1. 🔴 **Quando una correzione dichiara "il falsificatore era sbagliato, ecco la regola giusta", si
+   fa SUBITO un secondo passaggio su "LE TRE USCITE" / "SOGLIE CONGELATE" (o l'equivalente per quel
+   file) e si verifica che citino la STESSA soglia della correzione** -- non un numero vecchio
+   lasciato tre paragrafi sotto. Un `grep` del vecchio criterio ("PF >= 1,10" da solo, senza il resto
+   del test) nel file DOPO la correzione e' il modo piu' rapido di trovare il buco.
+2. 📏 **Un test a punto singolo (una cella, una soglia assoluta) su un asse che misura una legge
+   contro un'ipotesi nulla NON e' significativo senza l'errore standard accanto** (classe 298,
+   applicata qui): a n=150 (il pavimento di casa), lo scarto fra il PF nullo piu' alto (0,93) e la
+   soglia di merito (1,10) e' solo ~1 errore standard -- un punto sopra soglia da solo puo' essere
+   rumore. Serve un **altopiano** (>=2 celle adiacenti) con l'IC 95% dell'eccesso sopra zero in
+   ENTRAMBE le finestre, non un singolo numero.
+3. 🧪 **E il contro-esempio si fa anche sulla propria riparazione**: un IC 95% protegge dal rumore
+   campionario, non da un bias nella FORMULA del modello nullo stesso (qui: l'assunzione di
+   passeggiata senza deriva alla gambler's-ruin, mai verificata contro un PF nullo misurato su tick
+   veri di quel simbolo/TF). Se non si riesce a chiudere questo buco, si dichiara come LIMITE
+   esplicito, non si nasconde dentro un test che sembra piu' rigoroso di quanto sia.

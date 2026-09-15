@@ -294,42 +294,139 @@
 #      su ancore DIVERSE il gradiente nullo vale SEI VOLTE tanto e va
 #      sottratto prima di guardare il segno.
 #
+#  ###################################################################
+#  ###  RIPARATO IL 15/09/2026 -- LA TOPPA CHE MANCAVA. CLASSE 292.
+#  ###  (i)/(ii)/(iii) QUI SOPRA DICONO COSA LEGGERE. QUESTO BLOCCO
+#  ###  DICE COME MISURARLO, PERCHE' "SALE/SCENDE" A OCCHIO E' ANCORA
+#  ###  UN GIUDIZIO, NON UNA MISURA -- ED E' IL MOTIVO VERO PER CUI
+#  ###  IL FILE E' RIMASTO FUORI CODA 3 GIORNI: LA CORREZIONE SOPRA
+#  ###  SPIEGAVA IL DIFETTO MA "LE TRE USCITE" SOTTO NON L'AVEVANO
+#  ###  ANCORA RECEPITA (controllavano PF>=1,10 sulla sola cella 6800,
+#  ###  che NON distingue un eccesso vero da un punto isolato di
+#  ###  rumore -- ed e' esattamente il buco descritto dalla classe 298,
+#  ###  scritta 4 giorni prima su un altro round: "un gradiente si
+#  ###  dichiara con l'errore standard accanto, altrimenti e' un
+#  ###  ordinamento, non una tendenza").
+#  ###################################################################
+#  IL TEST VERO, cella per cella, PER FINESTRA (IS e OOS separate):
+#    Eccesso_i = PF_misurato_i - PF_nullo_i   (PF_nullo: tabella sopra,
+#                0,79 / 0,90 / 0,92 / 0,93)
+#    err.std di PF_misurato_i SI CALCOLA DAI TRADE VERI di quella cella
+#    (media e deviazione standard degli R-multiple, /sqrt(n) -- stesso
+#    metodo della classe 298, tre righe di `statistics`, MAI un punto
+#    nudo), e da li' l'IC 95% di Eccesso_i.
+#
+#  LEGGE FALSIFICATA (esito iii) SOLO SE, in ENTRAMBE le finestre:
+#    - il limite INFERIORE dell'IC 95% di Eccesso_i sta SOPRA ZERO
+#      (non il punto: l'intervallo intero, come la classe 298 pretende);
+#    - questo vale su ALMENO DUE CELLE ADIACENTI (altopiano, MAI un
+#      picco isolato su una sola cella -- stessa regola di selezione
+#      di casa, qui applicata al VERDETTO stesso e non solo alla cella
+#      da promuovere) con n>=150 in ciascuna;
+#    - almeno una di quelle celle ha PF assoluto >= 1,10 (soglia di
+#      merito di casa, che resta come pavimento economico SOPRA il
+#      test statistico, non al posto suo).
+#    Se una sola di queste tre condizioni manca, il verdetto e' "PF
+#    sale ma il gradiente non e' significativo" (classe 298), NON
+#    "legge falsificata" -- e NON conta come seconda misura
+#    indipendente della classe 292 su questo motore.
+#
+#  LEGGE CONFERMATA/NON FALSIFICATA (esiti i/ii): Eccesso_i <= 0, o il
+#    suo IC 95% include lo zero, su tutte le celle leggibili (n>=150).
+#    Se Eccesso_i <= 0 ovunque, la legge e' confermata PIU' forte
+#    (ha vinto contro un gradiente nullo che tirava nel verso opposto).
+#    Se l'IC include lo zero senza mai scendere sotto, e' "nessun edge
+#    misurabile con questa geometria": non falsifica, non conferma con
+#    forza, e' un pareggio col pedaggio.
+#
+#  >>> IL CONTRO-ESEMPIO CHE HO PROVATO A COSTRUIRE IO STESSO CONTRO
+#      QUESTO TEST (regola del 10/09), E CHE NON SONO RIUSCITO A
+#      CHIUDERE DEL TUTTO: l'IC 95% protegge dal RUMORE CAMPIONARIO
+#      (n finito), non da un ERRORE nella FORMULA di PF_nullo stessa.
+#      PF_nullo assume una passeggiata senza deriva alla gambler's-ruin
+#      (Brownian puro, p=s/(s+d)); i 15 minuti veri del DAX possono
+#      avere autocorrelazione (momentum o mean-reversion di seduta) che
+#      questa formula non cattura, e quella distorsione NON si riduce
+#      aumentando n -- e' un bias, non varianza. Se il bias fosse
+#      positivo e quasi costante fra due celle adiacenti, potrebbe
+#      imitare un altopiano SENZA edge vero: il test qui sopra non lo
+#      distingue.
+#      >>> LA MITIGAZIONE CHE C'E' GIA' NEL ROUND, dichiarata per quello
+#          che vale e non di piu': R141d (l'ancora UNICA, stesso pedaggio
+#          BCM indici, formula-null diversa ma stessa ipotesi di
+#          passeggiata senza deriva) e' il controllo empirico del
+#          modello -- se il suo PF misurato restera' vicino al suo PF
+#          nullo quasi piatto (0,95/0,97/0,975/0,98), l'assunzione
+#          "senza deriva" regge su dati BCM veri. MA R141d gira su
+#          U30USD M30, NON su D30EUR M15: e' una verifica del MODELLO,
+#          non del SIMBOLO/TF di questo file. [NON MISURATO] su D30EUR
+#          M15 specificamente, e lo dichiaro come LIMITE (vedi sotto),
+#          non come difetto bloccante -- perche' questo round non
+#          promuove nessuna cella (vedi REGOLA DI SELEZIONE), misura
+#          solo la legge. Un futuro round che VOLESSE promuovere la
+#          cella 6800 dovrebbe chiudere questo buco prima, non dopo.
+#
 #  PF atteso in valore: [NON MISURATO]. Nessun PF di questo motore
 #      esiste, su nessun simbolo e nessun TF.
 #  DD atteso: [NON MISURATO]. Rischio 0,65% per operazione, tetto 2 al
 #      giorno -> peggior giornata teorica ~1,30%.
 #
-#  LE TRE USCITE:
-#   (a) NUMERO BUONO: la cella 6800 (la sola sopra il pavimento di
-#       lavoro) con n >= 150 in entrambe le finestre E PF >= 1,10 in
-#       entrambe -> il metodo volumetrico di Claudio ha il suo primo
-#       numero, e la regola dell'ancora unica ha il suo primo
-#       contro-esempio misurato. Si apre il round vero: rami separati
+#  LE TRE USCITE (riscritte il 15/09 sul TEST Eccesso+IC95%+altopiano
+#  qui sopra, non piu' sul segno grezzo di "PF sale/scende"):
+#   (a) LEGGE FALSIFICATA (il numero grosso del round): ALMENO DUE
+#       celle adiacenti (fra cui 6800, l'unica sopra il pavimento di
+#       lavoro -- ma 4800 PUO' entrare nell'altopiano come seconda
+#       cella anche se resta "non promuovibile per costo" da sola)
+#       superano TUTTE E TRE le condizioni del test qui sopra in
+#       ENTRAMBE le finestre (IC 95% di Eccesso sopra zero, n >= 150,
+#       almeno una delle due con PF assoluto >= 1,10) -> il metodo
+#       volumetrico di Claudio ha il suo primo numero, e la regola
+#       dell'ancora unica ha il suo primo contro-esempio MISURATO (non
+#       solo un punto isolato). Si apre il round vero: rami separati
 #       (InpUseBalance / InpUseDirezion), due lati separati (25/08),
-#       asse su InpAcceptBars, cella al CENTRO DELL'ALTOPIANO.
-#   (b) NUMERO BRUTTO, E ME L'ASPETTO IL PIU' PROBABILE: PF
-#       decrescente col buffer, con la cella 6800 sotto 1,10 ->
-#       CERTIFICATO con PF/n/DD per cella, e la riga dice la cosa
-#       utile: "il motore ha edge SOLO dove non puo' pagare il
-#       pedaggio". Chiude un capitolo con un numero, e conferma la
-#       legge su un secondo motore indipendente.
+#       asse su InpAcceptBars, cella al CENTRO DELL'ALTOPIANO -- e SI
+#       misura prima il buco del contro-esempio (R141d su D30EUR M15,
+#       non solo su U30USD M30), perche' quella cella diventerebbe una
+#       candidata vera.
+#   (b) NUMERO BRUTTO, E ME L'ASPETTO IL PIU' PROBABILE: o Eccesso_i
+#       <= 0 (PF misurato <= PF nullo) su tutte le celle leggibili --
+#       legge CONFERMATA piu' forte -- oppure l'IC 95% di Eccesso_i
+#       include lo zero ovunque (PF puo' anche essere salito in valore
+#       assoluto, ma e' il pedaggio allo specchio, classe 298: un
+#       ordinamento, non una tendenza) -- legge NON falsificata, nessun
+#       edge misurabile con questa geometria. In ENTRAMBI i casi:
+#       CERTIFICATO con PF/n/DD/Eccesso/IC95% per cella, e la riga dice
+#       la cosa utile: "il motore non paga il pedaggio dove potrebbe
+#       operare col costo giusto". Chiude un capitolo con un numero, e
+#       conferma (o non falsifica) la legge su un secondo motore
+#       indipendente -- MAI si conta un gradiente con IC che include lo
+#       zero come una misura indipendente della classe 292 (e' la
+#       stessa trappola della classe 298: "due rumori concordi restano
+#       zero misure").
 #   (c) CATENA ROTTA, CHE NON E' UNA RISPOSTA: le quattro celle
 #       IDENTICHE al centesimo (InpSlBufferPts non e' arrivato),
 #       oppure Trades = 0 su tutte (la Value Area non si costruisce:
 #       si leggono le righe [DAXVA][AUTOTEST] del log, che l'EA
 #       stampa in avvio con InpAutoTest=true), oppure Trades che
-#       crolla a zero solo sulle celle alte (stop dal lato sbagliato).
-#       In nessuno dei tre casi si cambia un parametro.
+#       crolla a zero solo sulle celle alte (stop dal lato sbagliato),
+#       oppure n troppo piccolo in troppe celle per calcolare un IC 95%
+#       che dica qualcosa (allora il verdetto e' [NON MISURATO], non
+#       (a) ne' (b)). In nessuno dei quattro casi si cambia un parametro.
 #
 #  SOGLIE CONGELATE PRIMA:
 #    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
 #    scarta se  DD > 10% in una finestra a rischio 0,65%
+#    "legge falsificata" richiede IN PIU' (classe 292 riparata, 15/09):
+#           IC 95% di Eccesso sopra zero su >= 2 celle adiacenti in
+#           ENTRAMBE le finestre -- un punto sopra 1,10 senza altopiano
+#           e senza IC non basta piu' da solo (vedi LE TRE USCITE sopra)
 #    NON promuovibili PER COSTO, dichiarato in anticipo: le celle 800 e
 #           2800 (4,7x e 16,5x, sotto il pavimento di lavoro 40x; la
 #           prima anche sotto il duro 13,3x). Qualunque numero diano,
-#           sono INFORMATIVE, non candidate. Stesso trattamento che
-#           REGISTRO_TEST.md ha gia' dato alle celle M5/M15/M20/M30 di
-#           EMA200 su U30USD.
+#           sono INFORMATIVE, non candidate (possono pero' entrare nel
+#           calcolo della PENDENZA/altopiano come dati, non come
+#           celle promuovibili). Stesso trattamento che REGISTRO_TEST.md
+#           ha gia' dato alle celle M5/M15/M20/M30 di EMA200 su U30USD.
 #    non giudica il merito se n < 150
 #
 #  REGOLA DI SELEZIONE, dichiarata INSIEME al numero: CENTRO
@@ -364,6 +461,21 @@
 #     quella del 60-75% (VA sul range di seduta) sono STIME MIE,
 #     dichiarate come tali. NON entrano nella scala del punto B, che
 #     e' GARANTITA dal buffer e non dipende da nessuna stima.
+#  6. IL MODELLO NULLO E' UNA FORMULA, NON UN NUMERO MISURATO (aggiunto
+#     15/09 col contro-esempio della riparazione della classe 292).
+#     PF_nullo assume una passeggiata senza deriva alla gambler's-ruin
+#     (p=s/(s+d)): e' l'ipotesi standard, ma NON e' stata verificata
+#     contro un PF nullo MISURATO su tick veri di D30EUR M15 (non
+#     esiste in repo). Un IC 95% protegge dal rumore campionario, non
+#     da un bias nella formula stessa. R141d (stesso pedaggio BCM
+#     indici, stessa ipotesi "senza deriva") e' il controllo piu'
+#     vicino che il progetto ha, ma gira su U30USD M30, non su D30EUR
+#     M15: la verifica e' del MODELLO, non del SIMBOLO/TF di questo
+#     file. [NON MISURATO] specificamente qui. Non blocca QUESTO round
+#     (non promuove nessuna cella), ma un round futuro che volesse
+#     promuovere la cella 6800 di R141e deve chiudere questo buco
+#     prima -- per esempio con un PF nullo stimato per permutazione
+#     (shuffle dei trade veri, non della formula) sugli stessi dati.
 #
 # ---------------------------------------------------------------------
 #  IGIENE, VERIFICATA A MANO
