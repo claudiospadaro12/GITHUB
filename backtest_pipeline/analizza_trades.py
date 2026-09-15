@@ -252,6 +252,11 @@ def valori_punto(righe):
 # SOLO a far fallire rumorosamente lo stimatore se un giorno smette di
 # riprodurli (il contro-esempio, non la conferma).
 CONTROLLO_VALORI_PUNTO = {"D30EUR": 1.0000, "U30USD": 0.8607}
+# ⚠️ E la tolleranza del 2% qui sotto e' larga QUANTO IL RUMORE FISIOLOGICO, non
+#    di piu': 0,8607 non e' una costante, dipende da EUR/USD, e sui 35 perdenti
+#    di U30USD il rapporto oscilla fra 0,8558 e 0,8819 (+-1,5%). Prima o poi
+#    questo controllo gridera' per un movimento dell'euro, non per uno
+#    stimatore rotto. Quando succede, si guarda il cambio prima del codice.
 
 
 def frazione_catturata(r, vpunto=None):
@@ -329,7 +334,18 @@ def main():
     # riprodurli, la stima e' rotta e le frazioni non vanno lette.
     for sym, atteso in CONTROLLO_VALORI_PUNTO.items():
         v = vpunto.get(sym)
-        if v is not None and abs(v - atteso) / atteso > 0.02:
+        if v is None:
+            # 🔴 IL CASO PIU' PROBABILE, e la prima stesura lo lasciava passare MUTO.
+            # Bastano i perdenti sotto 4, un IQR che sfonda, o il broker che
+            # rinomina D30EUR in GER40, e l'intera colonna di quel simbolo
+            # diventa '—' senza una riga di avvertimento. E' lo stesso difetto
+            # che freschezza() descrive 200 righe piu' su: il fallimento
+            # silenzioso, nella direzione che rassicura.
+            print("ATTENZIONE: il valore punto di %s NON E' PIU' STIMABILE (meno di 4 "
+                  "perdenti, IQR oltre il 10%%, o simbolo rinominato dal broker). Le "
+                  "frazioni catturate di quel simbolo spariscono senza altro avviso."
+                  % sym, file=sys.stderr)
+        elif abs(v - atteso) / atteso > 0.02:
             print("ATTENZIONE: il valore punto stimato di %s (%.5f) non riproduce "
                   "quello misurato (%.4f). Le frazioni catturate NON sono affidabili."
                   % (sym, v, atteso), file=sys.stderr)
@@ -508,8 +524,10 @@ def main():
 
     if ereditate:
         out += ["> ⚠️ %d posizion%s apert%s in giorni precedenti e chius%s oggi "
-                "(%s). Per quelle la durata media e la frazione catturata non "
-                "sono indicative." %
+                "(%s). Per quelle la durata media non e' indicativa; la frazione "
+                "catturata, dal 15/09, per quelle non viene proprio calcolata "
+                "(la banda session_high/low si chiude alle 23:59 del giorno "
+                "d'INGRESSO, quindi non e' il loro MFE)." %
                 (len(ereditate), "i" if len(ereditate) > 1 else "e",
                  "e" if len(ereditate) > 1 else "a",
                  "e" if len(ereditate) > 1 else "a",

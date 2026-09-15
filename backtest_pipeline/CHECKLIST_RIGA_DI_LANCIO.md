@@ -20274,3 +20274,171 @@ posizioni nate e morte nello stesso giorno**.
 *Quando un campo cumulativo (`profit`) e un campo puntuale (`close_price`) finiscono nella
 stessa formula, l'errore non ha un verso fisso: prima di scrivere "per costruzione", si
 cerca il caso che va dall'altra parte.*
+
+---
+
+## 359. 🗣️❌ UNA FRASE CHE ATTRIBUISCE A UNA POSIZIONE I NUMERI DELLA SUA GEMELLA — e la citazione la propaga intatta (controllo-preventivo, 15/09/2026; **emendata lo stesso giorno**)
+
+> ✏️ **EMENDAMENTO, e cambia il capo d'accusa.** La prima stesura di questa classe (qui
+> sotto) diceva che la citazione era **RICUCITA** e che *"quella frase non esiste"*.
+> 🔴 **E' FALSO, ed e' un errore del cancello**: la frase sta **verbatim in
+> `report/DIARIO.md`**, riga del 17/08 — il referto diceva *"il diario"*, e il diario e'
+> `DIARIO.md`, non `giornata_2026-08-17.md`, che il cancello ha aperto al suo posto.
+> Verificato con `grep` sul file: la stringa c'e' tutta, dalla prima all'ultima parola.
+> 🟢 **Ma la meta' che conta REGGE, ed e' stata verificata sul CSV**: quella frase — che
+> **esiste davvero** — attribuisce a `S 2/3` l'ingresso **53.648,50**, che e' della
+> gemella `S 1/3`. Quindi la classe resta, cambiando il nome: non e' *"una citazione
+> inventata"*, e' *"una frase vera che mescola due posizioni gemelle"*.
+> 📌 E la lezione doppia: **il cancello aveva l'argomento piu' forte e il file sbagliato.**
+> Un argomento piu' FORTE non e' un argomento MISURATO — nemmeno quando arriva dal
+> controllo. Il primo gesto resta aprire il file **che la fonte nomina**.
+
+---
+
+### La prima stesura, lasciata per intero perche' l'errore si legga
+
+**Il caso, misurato.** `report/RILETTURA_FRAZIONE_2026-09-15.md` §4 apre con
+`> *"Frazione catturata: SUPERWAVE S 2/3 0% con 2,19 R disponibili (entrata 53.648,50,
+minimo di sessione 53.400,50, uscita al prezzo di ingresso: il trailing sul Supertrend H1
+non ha stretto una volta)."*` — presentata come frase del diario del 17/08.
+🔴 ~~**Quella frase in `report/giornata_2026-08-17.md` NON ESISTE.** E' il cucito di
+quattro pezzi lontani fra loro: il titolo di r.103, la riga di tabella r.109, la prosa
+r.72-75 e la conclusione r.111-113.~~ ⬅️ **SMENTITO dall'emendamento qui sopra**: la frase
+e' verbatim in `report/DIARIO.md`. Il file giusto non era quello aperto dal cancello.
+
+**E il cucito sposta i numeri da una posizione all'altra.** `entrata 53.648,50` e
+`uscita al prezzo di ingresso` sono di **`SUPERWAVE DOW H1 S 1/3`** (pid 3171488, ingresso
+53648.50, `profit 0.00`), non di **`S 2/3`** (pid 3171490, ingresso 53648**.30**,
+`profit +9,64`). Conseguenza pesante: per `S 1/3` lo **0% e' VERO** — ha chiuso al prezzo
+d'ingresso con profitto zero e **non e' mai entrato nella colonna** (che prende solo i
+vincenti). Quindi il referto scrive *«0% e' falso»* citando l'unica frase del diario in cui
+lo 0% era **giusto**. La correzione vera riguarda **solo la cella di tabella di `S 2/3`**
+(0% -> 15,1%).
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+Il documento e' un'**ERRATA**: e' il posto dove si va a controllare quale numero pubblicato
+non vale piu'. Una citazione ricucita in un'errata non e' un difetto di stile, e' una
+seconda falsificazione dello stesso record — e stavolta senza nessuna colonna rotta da
+incolpare, perche' l'ha scritta una persona.
+
+### ✅ CHE COSA SI FA
+1. Una frase fra `> *"..."*` si **incolla**, non si riassume: `grep` della stringa esatta
+   nel file citato **prima** di consegnare. Se il grep non la trova, non e' una citazione.
+2. Se serve mettere insieme piu' punti, si scrive *"il diario del GG/MM dice, in tre punti
+   diversi (r.103, r.109, r.72-75): ..."* con i numeri di riga.
+3. 🔴 **Quando i soggetti sono due istanze quasi omonime** (`S 1/3` / `S 2/3`, `L1` / `L2`,
+   gemelli di simbolo), ogni numero citato si riaggancia al suo **pid** prima di scriverlo.
+   Due tranche della stessa famiglia hanno prezzi d'ingresso diversi alla seconda cifra: e'
+   esattamente la distanza che un occhio non vede e un `grep` sul CSV si'.
+
+### 🔑 La regola in una riga
+*Le virgolette sono una promessa di byte identici: se la frase e' stata ricucita da righe
+diverse, le virgolette vanno tolte — e se la ricucitura cambia il soggetto, il difetto non
+e' la citazione, e' il verdetto.*
+
+---
+
+## 360. 🏷️⚖️ LA STESSA ETICHETTA CON DUE DEFINIZIONI DENTRO LO STESSO DOCUMENTO: "falso allarme" come *"il numero era sbagliato"* e come *"la soglia e' stata attraversata"* (controllo-preventivo, 15/09/2026)
+
+**Il caso, misurato.** In `RILETTURA_FRAZIONE_2026-09-15.md` la tabella di conteggio
+definisce **falso allarme = "stampava <30%, il vero e' >=30%"** (5 casi). Ma la tabella
+riga-per-riga sopra marca *"falso allarme"* anche **quattro righe che il 30% non lo
+attraversano**: 17/08 `SUPERWAVE DOW H1 S 2/3` 0% -> **15,1%**, 18/08 `MAXMIN DAX SHORT`
+0% -> **26,5%**, 19/08 `PTE USDJPY L` 0% -> **26,9%**, 25/08 `SUPERWAVE DOW H1 L 2/3`
+0% -> **15,7%**. Su tutte e quattro l'avviso `📉` scattava **prima** e scatta **anche
+adesso**: nessun allarme era falso.
+🔴 E su una delle quattro il documento **contraddice se stesso a una pagina di distanza**:
+il §4 conclude *"il 15% resta sotto il 30%: la gestione tagliava davvero"*.
+
+### 🧠 PERCHE' MORDE
+Le due letture portano a due azioni **opposte**: *"falso allarme"* dice **archivia, l'EA
+stava bene**; il fatto dice **la gestione taglia, guardala**. Ed e' scritto in un'errata,
+cioe' nel documento che qualcuno leggera' al posto della pagella sbagliata — quindi
+l'etichetta sopravvive al numero.
+
+### ✅ CHE COSA SI FA
+- Un'etichetta che compare in una **tabella di conteggio** con una definizione esplicita
+  non si riusa altrove con senso colloquiale: nelle righe si scrive **che cosa e'
+  cambiato** (`+15 pt, resta sotto il 30%`), non un giudizio.
+- Prima di consegnare: per ogni riga etichettata, si rifa' il **test della soglia**
+  (`vecchio < S <= nuovo`?). E' una riga di codice, e qui ne sbagliava quattro su undici.
+- Se un'etichetta e' comoda ma non e' quella della definizione, se ne conia una seconda
+  (*"zero falso"* accanto a *"falso allarme"*) e la si definisce anche lei.
+
+### 🔑 La regola in una riga
+*Se in un documento un'etichetta ha una definizione scritta, quella e' l'unica che puo'
+avere: la seconda volta che la si usa "in senso lato" e' gia' un'altra misura.*
+
+---
+
+## 361. 🚨🕳️ LA SENTINELLA DEL CONTRO-ESEMPIO CHE NON SCATTA QUANDO IL VALORE DA CONTROLLARE **SPARISCE** (fail-open su `if v is not None`) (controllo-preventivo, 15/09/2026)
+
+**Il caso.** `analizza_trades.py` r.330-335 protegge lo stimatore del valore punto con
+`CONTROLLO_VALORI_PUNTO`:
+```python
+v = vpunto.get(sym)
+if v is not None and abs(v - atteso) / atteso > 0.02:
+    print("ATTENZIONE: ...", file=sys.stderr)
+```
+Il controllo prende il caso *"il valore e' cambiato"* e **lascia passare in silenzio** il
+caso *"il valore non c'e' piu'"* — che e' il piu' probabile dei due: basta che i perdenti
+di `D30EUR` scendano sotto 4, che l'IQR sfondi, o che il broker rinomini il simbolo
+(`D30EUR` -> `GER40`), e la sentinella **non stampa niente** mentre l'intera colonna del
+DAX diventa `—`.
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+E' lo stesso difetto che questo file gia' descrive per `freschezza()` — *"falso VERDE, il
+fallimento peggiore possibile, quello silenzioso e nella direzione che rassicura"* — e
+quella spiegazione sta **nello stesso script, 200 righe piu' su**. Una protezione copiata
+senza il suo ramo `else` e' una protezione che copre meta' dei casi e ne dichiara uno.
+
+### ✅ CHE COSA SI FA
+Ogni sentinella che confronta un valore con un atteso ha **due** rami, e il secondo e'
+quello che manca sempre:
+```python
+if v is None:
+    print("ATTENZIONE: il valore punto di %s non e' piu' stimabile ... " % sym, file=sys.stderr)
+elif abs(v - atteso) / atteso > 0.02:
+    ...
+```
+E la tolleranza si taratura sul **rumore misurato**, non a occhio: qui il `0,8607` di
+`U30USD` non e' una costante ma dipende da EUR/USD, e sui 35 perdenti oscilla fra 0,8558 e
+0,8819 (**+-1,5%**) — con una banda del 2% la sentinella e' destinata a gridare per un
+movimento dell'euro, non per uno stimatore rotto.
+
+### 🔑 La regola in una riga
+*Un controllo scritto come `if valore_c_e AND valore_sbagliato` non controlla il caso in
+cui il valore non c'e': si scrive prima il ramo dell'assenza, poi quello dello scarto.*
+
+---
+
+## 362. ⬆️🗑️ SOPPRIMERE UN NUMERO ROTTO BUTTA VIA ANCHE IL SUO **LIMITE SUPERIORE** — che su un cancello a UNA SOLA CODA e' ancora una misura valida (controllo-preventivo, 15/09/2026)
+
+**Il caso, misurato.** La riparazione del 15/09 sopprime la frazione catturata su tutte le
+posizioni **multi-giorno** (108 su 385), perche' `session_high/low` si fermano alle 23:59
+del giorno d'ingresso e quindi non sono l'MFE della posizione. Giusto come diagnosi.
+🔴 **Ma la banda del primo giorno e' un SOTTOINSIEME della vita della posizione**, quindi
+il denominatore e' troppo piccolo e la frazione calcolata e' un **LIMITE SUPERIORE** di
+quella vera: `frazione_vera <= frazione_calcolata`, sempre, per costruzione.
+Conseguenza: le righe il cui **limite superiore e' gia' sotto la soglia** sono un allarme
+**certo**, non un dubbio. Misurate: **24 su 108** (22 `BULGE_MULTI_SIGNAL` di aprile-giugno,
+`LARRY GBPUSD S` del 19/08 a **9,1%**, `COST EURJPY L` del 26/08 a **28,3%**), di cui due
+dentro pagelle gia' scritte. Oggi finiscono tutte a `—`.
+
+### 🧠 PERCHE' MORDE
+E' il fosso opposto a quello che la riparazione stava chiudendo, e nel progetto costa piu'
+caro: il difetto che il motto di casa vieta e' **archiviare per mancanza di misura**. Un
+numero unilaterale non e' un numero mancante: e' un numero con un verso.
+
+### ✅ CHE COSA SI FA
+Prima di sopprimere una grandezza rotta, si chiede **in che verso** e' rotta:
+- rotta **nei due versi** (segno non determinato) -> si sopprime, punto;
+- rotta in **un verso solo** -> **non si sopprime: si stampa con il segno di
+  disuguaglianza** (`<= 9%`) e si lascia scattare la soglia dal lato in cui il limite la
+  decide. La cella diventa `—` **solo** dal lato in cui il limite non decide niente.
+E il referto che annuncia la soppressione deve **contare** quante righe erano decidibili
+lo stesso: qui erano 24, e nel documento non comparivano.
+
+### 🔑 La regola in una riga
+*Un limite superiore sotto la soglia decide quanto un valore esatto: sopprimerlo e'
+buttare via una misura, non un errore.*
