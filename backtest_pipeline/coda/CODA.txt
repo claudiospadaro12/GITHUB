@@ -1729,4 +1729,11 @@ f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 58448f4 (39mo, 0b4733c -> 1573c8b). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-58448f434e087863e3c4a961b03b71478f9283b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
+#DISARMATA# 58448f434e087863e3c4a961b03b71478f9283b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
+#  >>> DISARMATA il 15/09 18:xx: il secondo cancello (controllo-preventivo)
+#      su R158a (stesso schema B4) ha trovato che "stop medio misurato"
+#      NON compare in NESSUN artefatto che questa corsia produce
+#      (RIGA_ROUND_VPS.ps1 copia solo il CSV di ottimizzazione, colonne
+#      fissate da OnTesterDeinit, nessuna e' lo stop; ExportTrades non
+#      esporta SL/entry). R157a congela lo stesso B4 = difetto identico.
+#      Si riarma dopo la stessa correzione applicata a R158a + PASS.

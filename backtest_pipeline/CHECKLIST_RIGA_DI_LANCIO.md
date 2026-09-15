@@ -20129,3 +20129,23 @@ una `find` per ciascuna, non una sola per entrambe.
 ### 🔑 La regola in una riga
 *"Esistono X e Y per tutti e N" e' una frase con DUE claim quantificati: un
 `find` che ne conta uno non certifica l'altro.*
+
+## 353. UNA SOGLIA CONGELATA SU UNA GRANDEZZA CHE NESSUN ARTEFATTO DEL ROUND CONTIENE: "stop medio misurato" quando il CSV ha 11 colonne e nessuna e' lo stop (controllo-preventivo, 15/09/2026)
+
+Il caso: R158a_atrexit_PTE_U30USD.txt congelava B4 = stop medio misurato /
+2,00 e lo chiamava "la ragione vera del round". Ma la corsia ROUND raccoglie
+SOLO il CSV di ottimizzazione (RIGA_ROUND_VPS.ps1 r.798-803), le cui colonne
+sono fissate da OnTesterDeinit e non includono lo stop; il per-trade
+(ExportTrades) esporta solo i deal di USCITA senza SL ne' prezzo d'ingresso,
+condivide il nome file fra tutte le passate quando il magic e' pinnato, e su
+questa corsia non viene copiato affatto. Lo stesso difetto era gia' armato
+in CODA.txt su R157a (stesso schema B4 su ABTG_GapFill, stessa corsia).
+
+### REGOLA
+Prima di congelare una soglia si scrive IL NOME DEL FILE e IL NOME DELLA
+COLONNA da cui uscira' il numero. Se la colonna non esiste, la soglia
+diventa [NON MISURABILE DA QUESTO ROUND] PRIMA di girare, non dopo.
+
+Parente della classe 22 (istruzioni vere per un artefatto mai nato) e della
+330 (la colonna conta un'altra cosa), ma distinta: qui la colonna non esiste
+proprio.

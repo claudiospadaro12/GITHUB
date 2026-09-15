@@ -90,13 +90,15 @@
 #  3) LA RAGIONE VERA PER CUI VALE LA SPESA OGGI, non solo "manopola
 #     mai mossa": lo stesso referto (riga 657) scrive gia' la ricetta
 #     per provare a spostare 772234 da NO a SI: *"InpSLGapMult: 1,0 ->
-#     1,5 ... n=1: misurare prima"*. Questo round e' esattamente quella
-#     misura, fatta bene (7 celle, non un singolo salto, con la banda
-#     di plausibilita' sotto). Se una cella piu' larga porta lo stop
-#     sopra 40x SENZA rompere B2/B3 (sotto), e' lo stesso meccanismo
-#     che ha gia' aperto una sedia oggi (OPPRANGE su 770611, tabella 3
-#     del piano) -- un valore genuino oltre alla casella "mai mossa"
-#     del certificato di morte.
+#     1,5 ... n=1: misurare prima"*.
+#     >>> CORRETTO IL 15/09 (controllo-preventivo): questo round NON
+#     puo' essere quella misura DIRETTA -- nessun artefatto che produce
+#     contiene lo stop per cella (dettaglio in "IL COSTO"). Quello che
+#     chiude davvero e' la casella 3 del certificato di morte (gestione
+#     dell'uscita messa ad asse) su 772234, con 7 celle di n/DD/PF/
+#     peggior giornata, piu' rischio e forma. Il cancello di costo resta
+#     [NON MISURABILE DA QUESTO ROUND]; la via per chiuderlo davvero e'
+#     una misura per-trade dedicata (SL/entry esportati), separata.
 #
 #  4) NESSUN PROBLEMA DI UNITA' Trades/Posizioni (classe 226/346):
 #     `ABTG_GapFill.mq5` NON HA NESSUN parziale nel sorgente (grep
@@ -229,17 +231,18 @@
 #    filtrate da InpMaxSpreadPts=300 in scenari limite (uno stop molto
 #    stretto puo' cambiare di quale lato del filtro spread un trade
 #    marginale cade), ma NON una tendenza forte in nessuna direzione.
-#  - STOP MISURATO (idx): atteso in salita QUASI LINEARE con
-#    InpSLGapMult (punto sopra) -- banda attesa: cella 0,4 -> ~39 idx,
-#    cella 1,0(vivo) -> ~98 idx (il punto MISURATO), cella 2,2 -> ~216
-#    idx. Se la relazione non e' almeno monotona crescente, la lettura
-#    del codice (SL lineare nel moltiplicatore) e' sbagliata e va
-#    corretta prima di leggere il resto.
-#  - CANCELLO DI COSTO (stop/spread mediana ora 1 = 2,80): atteso
-#    superare 40x da qualche parte fra le celle 1,0 (35,0x, misurato,
-#    NO) e 1,6 (atteso ~168/2,80 = 60,0x, SI) -- il punto preciso di
-#    incrocio e' quello che questo round misura, non lo anticipo oltre
-#    la banda.
+#  - STOP MISURATO (idx) e CANCELLO DI COSTO: [NON MISURABILI DA
+#    QUESTO ROUND -- vedi sezione "IL COSTO" corretta oggi, controllo-
+#    preventivo 15/09]. Nessuna colonna del CSV di ottimizzazione
+#    contiene lo stop, e il per-trade non viene raccolto da questa
+#    corsia. La SOLA previsione che il codice permette (non una banda
+#    da confrontare con un numero che il round produce): con TP che non
+#    legge InpSLGapMult (r.454) e SL che scala circa linearmente col
+#    moltiplicatore, ATTESA PER ARITMETICA -- non per misura -- cella
+#    0,4 -> ~39 idx, cella 1,0(vivo) -> 98,0 idx (l'ancora reale, n=1),
+#    cella 2,2 -> ~216 idx. Se qualcuno la verificasse con un numero
+#    "misurato" da questo round, quel numero e' inventato (nessun
+#    artefatto lo contiene).
 #  - DD: NESSUNA direzione forte dichiarata (Regola del contro-esempio,
 #    sotto): uno stop piu' largo riduce il lotto (rischio % costante),
 #    quindi il DD in % NON e' garantito ne' salire ne' scendere solo
@@ -281,13 +284,16 @@
 #       CONTIGUE con DD <= quella della cella viva (o migliore). Una
 #       sola cella isolata non conta, MAI il picco (Regola di casa,
 #       R70/R136a/R146c/R153a/R154a/R155a/R156a).
-#    2. IL CANCELLO DI COSTO SI LEGGE SULLO STOP MEDIO DI CELLA, non su
-#       una gamba sola: questo round misura ~30 gambe per cella (contro
-#       l'unica gamba di riferimento del 10/09), quindi il verdetto SI/
-#       NO su ciascuna cella e' gia' piu' solido di quello che ha
-#       aperto il round. Se lo stop medio di una cella "SI" e'
-#       trascinato in alto da 1-2 outlier, lo dichiaro leggendo anche
-#       la mediana della colonna, non solo la media.
+#    2. IL CANCELLO DI COSTO NON E' LEGGIBILE QUI, E NON VA LETTO LO
+#       STESSO: verificato a fonte (RIGA_ROUND_VPS.ps1 r.798-803 copia
+#       solo il CSV di ottimizzazione; ExportTrades di ABTG_GapFill,
+#       r.698-723, non esporta SL/entry/open_time e comunque il canale
+#       per-trade non viene copiato da questa corsia) che NESSUN
+#       artefatto di questo round contiene lo stop per cella. Se in un
+#       referto comparisse un "stop medio di cella", quel numero e'
+#       INVENTATO e il referto va fermato. Resta valida solo la
+#       previsione per aritmetica scritta sopra (SL ~ lineare col
+#       moltiplicatore), NON una misura di questo round.
 #    3. n QUASI COSTANTE e' previsto dal codice (sezione sopra): se
 #       INVECE n si muove parecchio, il meccanismo che immagino non e'
 #       quello vero, e il contro-esempio ha gia' fatto il suo lavoro
@@ -321,12 +327,11 @@
 #    S2 -- DD (cella 1,0, vivo): banda 1,5%-6,5% (margine largo, stessa
 #      ragione di S1 piu' la differenza fisiologica fra un DD misurato
 #      su barre M1 e uno su tick).
-#    S3 -- STOP MEDIO IN IDX (cella 1,0, vivo): banda 70-130 idx (98,0
-#      +-33%, il numero di riferimento del cancello di costo ha n=1: il
-#      margine e' largo apposta). Se lo stop medio della cella viva
-#      cade fuori da questa banda, il cancello di costo del 10/09 era
-#      basato su una gamba non rappresentativa: da riscrivere, non da
-#      ignorare.
+#    S3 -- STOP MEDIO IN IDX: [NON VERIFICABILE DA QUESTO ROUND].
+#      Nessun artefatto della corsia lo contiene (sezione "IL COSTO").
+#      Non e' una sentinella di questo round: resta l'ancora a n=1 del
+#      10/09 (98,0 idx), da riverificare solo con una misura dedicata
+#      (per-trade a parte, con esportazione di SL/entry).
 #    S4 -- CONTEGGIO DELLE CELLE. 7 valori distinti di InpSLGapMult nel
 #      CSV. Se sono 6 o 8, si dichiara quale manca prima di leggere il
 #      resto.
@@ -344,24 +349,33 @@
 #        volta a settimana, time-stop 48h" del punto sopra. Un esito
 #        diverso non e' un fallimento: e' un'informazione sul sorgente
 #        che ho letto male, e va corretta la lettura, non il risultato.
-#    B4  CANCELLO DI COSTO (R5, la ragione vera del round). Per ogni
-#        cella: stop medio misurato / 2,80 (mediana U30USD ora 1,
-#        archivio spread_flotta). >=40x = SI; 13,3x-40x = NO ma sopra
-#        il pavimento duro; <13,3x = NO sotto il pavimento duro. Si
-#        registra la prima cella (dal basso) che passa a SI, se esiste.
-#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (una o
-#        piu' celle sopra 40x, DD sotto muro) non cambia un preset, non
-#        accende/spegne la sedia e non tocca il forward. Taglie,
-#        riaccensioni e rischio restano [FIRMA DI CLAUDIO]. Un solo
-#        regime (21 mesi, un solo rialzo Dow) non e' un verdetto di
-#        merito, e' un check di rischio, di cadenza e di cancello di
-#        costo (dichiarato in testa al file).
+#    B4  CANCELLO DI COSTO: [NON MISURABILE DA QUESTO ROUND]. Ragione
+#        per intero nella sezione "IL COSTO" (nessuna colonna degli
+#        artefatti contiene lo stop in idx per cella; classe 353 della
+#        checklist, controllo-preventivo 15/09). Resta l'ancora 35,0x
+#        [NO, al pelo] su n=1 del 10/09. Nessun referto di questo round
+#        puo' scrivere un verdetto SI/NO di costo per cella: se lo
+#        scrive, ha inventato il numero. La via per chiuderlo e' una
+#        misura per-trade dedicata (SL/entry esportati), da armare come
+#        lavoro a se'.
+#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (DD sotto
+#        muro) non cambia un preset, non accende/spegne la sedia e non
+#        tocca il forward. Taglie, riaccensioni e rischio restano
+#        [FIRMA DI CLAUDIO]. Un solo regime (21 mesi, un solo rialzo
+#        Dow) non e' un verdetto di merito, e' un check di rischio e di
+#        cadenza (dichiarato in testa al file).
 #    B6  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
-#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3+B4,
+#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3,
 #        MAI il picco isolato (R70, ripreso da R136a/R146c/R153a/
 #        R154a/R155a/R156a).
 # ---------------------------------------------------------------------
 #  BUCHI DICHIARATI DI QUESTO ROUND
+#    - STOP PER CELLA (idx): [NON MISURABILE DA QUESTO ROUND, aggiunto
+#      dal controllo-preventivo il 15/09]. Nessuna colonna del CSV di
+#      ottimizzazione lo contiene, e il per-trade non viene raccolto da
+#      questa corsia (dettaglio in "IL COSTO"). Resta l'ancora a n=1 del
+#      10/09 (98,0 idx): questo round NON la riverifica, ne' cella per
+#      cella ne' sulla cella viva.
 #    - MERITO: [NON MISURABILE qui] per costruzione (pavimento sopra).
 #      Se U30USD accumula piu' storico, questo stesso asse andrebbe
 #      rifatto con uno split IS/OOS vero.

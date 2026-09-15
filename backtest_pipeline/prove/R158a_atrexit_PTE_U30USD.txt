@@ -101,11 +101,18 @@
 #     `ABTG_PTE.mq5` non ha) E quella giusta, implicita nel codice letto
 #     al punto 5: il vero regolatore dello stop su questa sedia non e'
 #     il buffer, e' proprio `InpAtrExitPeriod` (il periodo dell'ATR),
-#     che nessuno ha mai mosso. Questo round trasforma quel numero da
-#     [INF] a [MIS] su 7 celle, e verifica se un periodo diverso porta
-#     il cancello di costo da NO a SI -- lo stesso valore che ha aperto
-#     R157a su GapFill oggi (un [INF]/[NO] al pelo con una via scritta
-#     per romperlo).
+#     che nessuno ha mai mosso.
+#     MA IL PERIMETRO VERO DEL ROUND E' PIU' STRETTO, ED E' MEGLIO
+#     SCRIVERLO ORA CHE SCOPRIRLO IN LETTURA: questo round NON puo'
+#     trasformare quel [INF] in [MIS]. Lo stop in idx non compare in
+#     nessun artefatto che il round produce -- verificato a fonte prima
+#     di scrivere queste righe, dettaglio nella sezione "IL COSTO".
+#     Quello che il round chiude DAVVERO e' la casella 3 del certificato
+#     di morte (gestione dell'uscita messa ad asse almeno una volta)
+#     sulla sedia 771321, con 7 celle di n / DD / PF / peggior giornata,
+#     piu' la risposta alla domanda di RISCHIO e di FORMA. Il cancello
+#     di costo resta aperto, e la via piu' corta per chiuderlo e'
+#     scritta nella stessa sezione.
 #
 #  5) PERCHE' NON GBPUSD (dove la manopola e' stata appena mossa da
 #     R153a): GBPUSD NON ha spread reale d'archivio (vincolo di oggi:
@@ -143,8 +150,9 @@
 #           che allunga la durata media occupa lo slot piu' a lungo,
 #           non e' un edge. Stesso CONTRO-ESEMPIO da guardare qui sotto.
 #    >>> LA SOLA DIFFERENZA CON R153a: qui `InpSLbufferPips=5` (contro
-#        25 su GBPUSD, R103_ABTG_PTE_U30USD_771321.txt riga 130, cella
-#        viva), che sull'indice vale **0,05 idx** (`report/
+#        25 su GBPUSD -- qui 5.0: R103_ABTG_PTE_U30USD_771321.txt riga
+#        130; contro i 25 di GBPUSD: R153a_atrexit_GBPUSD.txt riga 511,
+#        cella viva), che sull'indice vale **0,05 idx** (`report/
 #        CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.405: "InpSLbufferPips 5
 #        = 0,05 idx"): qui il buffer NON domina lo stop come su GBPUSD
 #        (dove 25 pip erano la parte grande). Su questa sedia lo stop e'
@@ -163,29 +171,88 @@
 #    sotto misura DD 3,26% con lo stesso rischio, quindi lotti ben sopra
 #    il minimo su tutte le celle attese). Il pavimento del lotto non e'
 #    la leva di questo round.
+#    >>> E IL LATO CHE CONTA SU QUESTO ASSE NON E' IL PAVIMENTO, E' IL
+#    TETTO -- r.605, `MathMax(mn, MathMin(mx, lot))`. Il lotto e'
+#    rischio/stop, quindi le celle BASSE (ATR corto -> stop piccolo)
+#    spingono il lotto in ALTO, non in basso. Numero vero: all'ancora
+#    R23 la sedia apre gia' 8,5 lotti con ATR(14) a 100k/1%
+#    (`risultati_prove/trades_candidati_r23/
+#    abtg_trades_ABTG_PTE_U30USD_771311.csv`, position_id 2: 4,20+4,30).
+#    Se su una gamba l'ATR(2) fosse 3-5 volte piu' stretto, il lotto
+#    chiesto salirebbe a 25-40. SYMBOL_VOLUME_MAX di U30USD e' [NON
+#    MISURATO]: se il tetto mordesse, il rischio VERO di quella gamba
+#    sarebbe INFERIORE all'1% dichiarato (il tetto taglia, non gonfia) e
+#    il DD della cella 2 sarebbe ottimista per un motivo di BROKER, non
+#    di strategia. Da guardare in lettura prima di confrontare i DD.
 # ---------------------------------------------------------------------
-#  IL COSTO -- IL CANCELLO DI 40x, VERIFICATO CON DATI REALI D'ARCHIVIO
-#    Fonte: backtest_pipeline/risultati_archivio/spread_flotta/
-#    spread_orario_U30USD.csv. La sedia non ha un orario fisso (nessuna
-#    finestra InpUseTimeWindow, gira su tutte le 24h del grafico H1): si
-#    usa la mediana "TUTTO" della giornata come riferimento prudente
-#    (2,00, riga TUTTO del CSV, IDENTICA alla citazione del referto del
-#    10/09 -- riverificata oggi, non citata a memoria).
+#  IL COSTO -- IL CANCELLO DI 40x: PERCHE' QUESTO ROUND NON LO PUO'
+#  MISURARE, DICHIARATO PRIMA DI GIRARE
+#    Fonte spread: backtest_pipeline/risultati_archivio/spread_flotta/
+#    spread_orario_U30USD.csv. La sedia non ha orario fisso (in
+#    ABTG_PTE.mq5 non esiste NESSUN input di sessione -- verificato a
+#    fonte, non dedotto dal preset): il riferimento e' la mediana
+#    "TUTTO" della giornata, 2,00 idx (riga TUTTO, colonna mediana_idx,
+#    riverificata oggi sul CSV e identica alla citazione del 10/09).
 #      pavimento 40x @ spread 2,00: stop >= 80,0 idx.
-#    Lo stop OGGI e' [INF] (~65 idx, `report/CANCELLO_COSTO_FLOTTA_
-#    2026-09-10.md` r.405, scala 314,5 x sqrt(60/1440) -- una stima
-#    incrociata fra simboli/TF, NON una misura su questa sedia): rapporto
-#    ~32,5x, NO all'81% del pavimento. QUESTO ROUND MISURA IL VERO STOP
-#    ALLA CELLA VIVA (periodo 14) PER LA PRIMA VOLTA, e poi lo segue
-#    sulle altre sei celle. Se il periodo piu' lungo (26) allarga l'ATR
-#    a sufficienza, il cancello puo' passare a SI; se il periodo piu'
-#    corto (2) lo restringe, il cancello resta o peggiora NO -- NESSUNA
-#    delle due direzioni e' garantita dal codice (ATR non e' un
-#    moltiplicatore lineare di N come InpSLGapMult su R157a: e' una
-#    media della stessa grandezza fisica, la sua risposta al periodo
-#    dipende dal regime di volatilita' recente, non da una formula
-#    fissa) -- e' esattamente cio' che questo round misura, non lo
-#    anticipo con un numero.
+#    Stop di riferimento OGGI: ~65 idx [INF] (`report/CANCELLO_COSTO_
+#    FLOTTA_2026-09-10.md` r.405, scala 314,5 x sqrt(60/1440); 0 gambe
+#    in stop sul demo) -> 32,5x, NO all'81% del pavimento.
+#
+#    >>> E QUI IL ROUND SI FERMA: LO STOP IN IDX NON COMPARE IN
+#        NESSUN ARTEFATTO CHE QUESTO ROUND PRODUCE. Quattro vie, tutte
+#        chiuse, verificate a fonte:
+#        1. l'UNICO file raccolto e' il CSV di ottimizzazione --
+#           `RIGA_ROUND_VPS.ps1` r.798-803 copia solo $csvIS/$csvOOS
+#           piu' il file prova. Le colonne sono fissate da
+#           `ABTG_PTE.mq5` r.761: Pass, Profit, Expected Payoff, Profit
+#           Factor, Recovery Factor, Sharpe Ratio, Equity DD %, Trades,
+#           Peggior Giornata %, Perdite Consecutive Max, Serie Perdente
+#           Peggiore, piu' una colonna per input. NESSUNA contiene lo
+#           stop ne' una grandezza da cui ricavarlo.
+#        2. il per-trade non basterebbe e non viene raccolto:
+#           `ExportTrades` (r.696-722) scrive SOLO i deal di uscita e
+#           solo close_time, symbol, magic, position_id, deal_type,
+#           volume, price, net_profit -- NIENTE SL, NIENTE prezzo
+#           d'ingresso, NIENTE open_time. E comunque (a) il nome del
+#           file dipende da EA+simbolo+MAGIC, e il magic qui e' PINNATO:
+#           tutte e sette le passate scriverebbero lo STESSO file,
+#           sovrascrivendosi; (b) 'abtg_trades' ha ZERO occorrenze in
+#           `RIGA_ROUND_VPS.ps1`: su questa corsia il canale per-trade
+#           non esiste.
+#        3. il Giornale ha la riga con l'SL (r.500-501) ma e'
+#           PER-PASSATA e non viene raccolto -- lo dice gia' questo
+#           file nella nota su InpLogImbuto.
+#        4. non c'e' via indiretta in EURO: il lotto e' rischio/stop
+#           (r.600), quindi la perdita a stop pieno in EUR e' COSTANTE
+#           per costruzione e non porta informazione sullo stop in idx.
+#    >>> CONSEGUENZA CONGELATA PRIMA DEI NUMERI: il cancello di costo di
+#        771321 resta [NON MISURATO] anche DOPO questo round. Non e' un
+#        fallimento: e' il perimetro vero, scritto prima invece che
+#        scoperto dopo. La via piu' corta per chiuderlo e' una misura
+#        SEPARATA dell'ATR(N) H1 su U30USD, da armare come lavoro a se'
+#        col suo cancello -- MAI dedotta da questi sette CSV.
+#
+#    >>> E IL CONTO CHE VALE ANCHE QUANDO QUELL'ATR SARA' MISURATO:
+#        con InpSLfromDoji=false lo stop e' ATR(N) + 0,05 idx, TP1 =
+#        0,5 x ATR(N), TP2 = 2 x ATR(N), lotto = rischio/stop. Il
+#        buffer vale lo 0,08% di uno stop da ~65 idx: la geometria del
+#        trade e' OMOTETICA in ATR(N) a meno di un millesimo. Quindi:
+#        (a) il rapporto del cancello e' ATR(N)/2,00, cioe' misurerebbe
+#            SOLO l'ATR, non una proprieta' della strategia;
+#        (b) passare 40x NON COSTA NIENTE in rischio, perche' il
+#            lotto compensa 1:1 -- un "SI" al cancello NON e' un segnale
+#            di qualita', e' solo uno stop piu' largo;
+#        (c) ATR(2) e ATR(26) sono medie della STESSA serie di True
+#            Range su finestre diverse: sulla stessa finestra di 21 mesi
+#            le medie campionarie tendono allo stesso valore. Per andare
+#            da 32,5x a 40x servirebbe +23,1% di ATR medio. ATTESA
+#            PRE-REGISTRATA: NESSUNA cella arriva a 40x; se una ci
+#            arrivasse, la prima ipotesi da scartare e' un errore di
+#            lettura, non un edge.
+#        (d) l'unico pezzo NON omotetico del motore e' il trailing
+#            sull'EMA14 (r.556-561): e' da li', non dall'ATR, che un PF
+#            puo' davvero cambiare fra le celle -- ed e' quello che
+#            questo round misura per davvero.
 # ---------------------------------------------------------------------
 #  L'ASSE E IL PASSO -- IDENTICO a R153a (stessa manopola, stesso
 #  motore, stessa logica di scelta): 2 .. 26 con passo 4, centrato su 14
@@ -206,21 +273,11 @@
 #    +/-20% dall'ancora R103 di 68, piu' larga di R153a perche' qui il
 #    modello cambia, OHLC->tick, in aggiunta al normale rumore di
 #    campione).
-#  - STOP MISURATO (idx): NESSUNA direzione forte dichiarata come
-#    certezza (a differenza di R157a, dove il codice impone una
-#    scalatura lineare): l'attesa e' che la cella viva (14) riproduca
-#    l'ordine di grandezza gia' inferito (~65 idx, banda 45-90, +/-35%,
-#    ampia perche' il numero di riferimento e' [INF] non [MIS]). Fra le
-#    celle, l'unica cosa che mi aspetto e' che periodi molto diversi (2
-#    contro 26) NON diano lo stesso numero al centesimo (se lo dessero,
-#    l'ATR non sta rispondendo al periodo e la lettura del codice e'
-#    incompleta).
-#  - CANCELLO DI COSTO (stop/2,00): atteso passare da NO a un valore PIU'
-#    alto (magari ancora NO) alle celle basse (2, ATR piu' reattivo, di
-#    solito piu' PICCOLO in un regime che non spikka spesso) e restare
-#    vicino o sopra all'attuale ~32,5x alle celle alte (26). Il punto
-#    preciso, se esiste un incrocio con 40x, e' cio' che questo round
-#    misura -- non lo anticipo oltre la banda qui sopra.
+#  - STOP MISURATO (idx) e CANCELLO DI COSTO: [NON MISURABILI DA QUESTO
+#    ROUND]. Nessuna colonna degli artefatti li contiene (sezione "IL
+#    COSTO", verificata a fonte). Non dichiaro nessuna attesa su numeri
+#    che il round non produce: una banda scritta qui sarebbe un invito
+#    a inventare il numero in fase di lettura.
 #  - DD: attesa 1,5%-6,0% su tutte le celle (l'ancora OHLC/R103 e'
 #    3,26% @1%; banda larga per il cambio di modello OHLC->tick, stessa
 #    ragione di R157a S2). NESSUNA direzione a priori dichiarata fra le
@@ -238,10 +295,18 @@
 #    (gestione dell'uscita messa ad asse) su questa sedia, come R153a
 #    l'ha chiusa sulla gemella GBPUSD.
 #  - IL RISULTATO CHE MI FAREBBE FERMARE: se n cambiasse piu' del 30%
-#    fra le celle estreme (2 e 26), o se lo stop misurato alla cella
-#    viva cadesse FUORI dalla banda 45-90 idx -- in entrambi i casi la
-#    lettura del codice o la stima [INF] di partenza sono sbagliate, e
-#    vanno corrette prima di leggere il resto come un risultato.
+#    fra le celle estreme (2 e 26). MA prima di chiamarla "lettura
+#    sbagliata" vanno scartate DUE cause di CODICE, gia' individuate:
+#    (a) r.474-475 `if(risk<=minDist){ cO_sl++; return; }` -- alle celle
+#        BASSE l'ATR corto puo' mettere lo stop dentro lo stops level
+#        del broker e l'ingresso viene SALTATO. Lo stops level di U30USD
+#        e' [NON MISURATO]: se e' > 0, un calo di n alla cella 2 e' il
+#        RISULTATO, non un guasto;
+#    (b) r.399 `CountPositions()>=InpMaxPositions` -- lo slot occupato
+#        piu' a lungo dalle celle alte.
+#    Solo se nessuna delle due spiega il movimento, la lettura del
+#    codice e' incompleta. (La sentinella sullo stop alla cella viva e'
+#    stata TOLTA: era un arresto su un numero che il round non produce.)
 # ---------------------------------------------------------------------
 #  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
 #  (regola del 10/09: si costruisce il caso che romperebbe la propria
@@ -268,10 +333,17 @@
 #       lungo) sta mordendo forte, e un PF migliore alle celle alte va
 #       letto come selezione di durata, non come geometria migliore --
 #       esattamente la lettura che R153a ha gia' fatto sulla sorella.
-#    3. IL CANCELLO SI LEGGE SULLO STOP MEDIO DI CELLA (7 celle, non su
-#       una gamba sola come il 32,5x di oggi, che e' un [INF] su ZERO
-#       gambe reali): se una cella "SI" e' trascinata da 1-2 outlier, lo
-#       dichiaro leggendo anche la mediana, non solo la media.
+#    3. IL CANCELLO DI COSTO NON E' LEGGIBILE QUI, E NON VA LETTO LO
+#       STESSO: nessun artefatto di questo round contiene lo stop
+#       (sezione "IL COSTO"). Se in un referto comparisse un numero
+#       "stop medio di cella", quel numero e' INVENTATO e il referto va
+#       fermato. E anche quando l'ATR sara' misurato a parte, un "SI" a
+#       40x non e' un merito: la geometria e' omotetica in ATR(N) e il
+#       lotto compensa, quindi allargare lo stop paga il cancello a
+#       rischio invariato. L'unico pezzo NON omotetico del motore e' il
+#       trailing sull'EMA14 (r.556-561): e' da li', non dall'ATR, che un
+#       PF puo' davvero cambiare fra le celle -- ed e' quello che questo
+#       round misura per davvero.
 #    4. UN SOLO REGIME: qualunque "vincitore" qui (per costo o per PF)
 #       e' un'ipotesi da riverificare su una finestra diversa o di
 #       regime, quando U30USD avra' piu' storico, MAI un verdetto --
@@ -290,10 +362,13 @@
 #    `position_id` di `risultati_prove/trades_candidati_r23/`).
 #    Frequenza NOTA sulla finestra di questo round (R103, stessa
 #    finestra 2024.09.26->2026.06.30, 643 giorni, OHLC M1): n=68 uscite
-#    (`R103_REFERTO_BLOCCO1_INDICI.md` r.13) -> **~39 posizioni STIMATE**
-#    (68 / 1,74; e' un fattore di conversione misurato su UN'ALTRA
-#    finestra della stessa sedia, dichiarato come inferenza, non come
-#    conteggio diretto su questi 68).
+#    (`backtest_pipeline/risultati_archivio/R103_REFERTO_BLOCCO1_INDICI.md`
+#    r.24, posizione 13 in classifica) -> **~39 posizioni STIMATE**
+#    (68 / 1,74; fattore contato su `abtg_trades_ABTG_PTE_U30USD_771311.csv`,
+#    magic del round R23a, configurazione verificata identica al preset
+#    vivo di 771321 campo per campo -- e' un fattore di conversione
+#    misurato su UN'ALTRA finestra della stessa sedia, dichiarato come
+#    inferenza, non come conteggio diretto su questi 68).
 #    Frequenza: 39 posizioni / 643 giorni = 0,0607 posizioni/giorno.
 #    Per IS>=150 E OOS>=150 servono >=300 posizioni totali: alla stessa
 #    frequenza servirebbero 300 / 0,0607 = 4.943 giorni = **13,5 ANNI**.
@@ -331,13 +406,13 @@
 #        finestra: solo l'ancora OHLC di R103). Un esito diverso non e'
 #        un fallimento: e' un'informazione sul meccanismo letto male
 #        (punto 4 sopra), e va corretta la lettura, non il risultato.
-#    B4  CANCELLO DI COSTO (la ragione vera del round). Per ogni cella:
-#        stop medio misurato / 2,00 (mediana U30USD "TUTTO", archivio
-#        spread_flotta). >=40x = SI; 13,3x-40x = NO ma sopra il
-#        pavimento duro; <13,3x = NO sotto il pavimento duro. Si
-#        registra la prima cella (dal basso o dall'alto) che passa a SI,
-#        se esiste, e si legge anche sulla MEDIANA per cella, non solo
-#        sulla media (contro-esempio punto 3).
+#    B4  CANCELLO DI COSTO: [NON MISURABILE DA QUESTO ROUND]. Ragione
+#        per intero nella sezione "IL COSTO" (nessuna colonna degli
+#        artefatti contiene lo stop in idx). Resta a 32,5x [INF] come il
+#        10/09. Nessun referto di questo round puo' scrivere un
+#        verdetto SI/NO di costo: se lo scrive, ha inventato il numero.
+#        La via per chiuderlo e' una misura separata dell'ATR(N) H1 di
+#        U30USD, da armare come lavoro a se'.
 #    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (una o piu'
 #        celle sopra 40x, DD sotto muro) non cambia un preset, non
 #        accende/spegne la sedia e non tocca il forward. Taglie,
@@ -346,7 +421,7 @@
 #        merito, e' un check di rischio, di forma e di cancello di costo
 #        (dichiarato in testa al file).
 #    B6  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
-#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3+B4,
+#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3,
 #        MAI il picco isolato (R70, ripreso da R136a/R146c/R153a-157a).
 # ---------------------------------------------------------------------
 #  BUCHI DICHIARATI DI QUESTO ROUND
@@ -357,8 +432,13 @@
 #      2024.09-2026.06). NON e' una prova di regime (Emendamento della
 #      Finestra, regola C, 16/08). Dichiarato, non nascosto.
 #    - ATR(qualunque periodo) H1 di U30USD: [NON MISURATO in nessun
-#      referto del repo prima di questo round] -- e' esattamente il
-#      buco che questo round chiude, cella per cella.
+#      referto del repo, E QUESTO ROUND NON LO MISURA] -- gli artefatti
+#      non contengono lo stop (sezione "IL COSTO"). Resta il buco aperto
+#      numero uno di questa sedia, da chiudere con una misura dedicata.
+#    - SYMBOL_TRADE_STOPS_LEVEL e SYMBOL_VOLUME_MAX di U30USD: [NON
+#      MISURATI]. Il primo puo' togliere ingressi alle celle basse
+#      (r.474-475), il secondo puo' tagliare il lotto alle stesse celle
+#      (r.605). Nessuno dei due gonfia il rischio: entrambi lo riducono.
 #    - Tick value esatto di U30USD in EUR/punto/lotto: [NON MISURATO],
 #      usato solo per l'ordine di grandezza del pavimento del lotto
 #      sopra (che non morde comunque a nessuna cella plausibile).
