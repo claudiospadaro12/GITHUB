@@ -961,7 +961,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #      commit di QUESTO giro, e restano #DISARMATA#: il PASS del secondo
 #      strato non e' mio, arriva dall'agente 'controllo-preventivo'
 #      nella sessione principale.
-$PIN = '0b4733cf9dccf5f2940f642687215bc1e0bfce46'
+$PIN = '1573c8ba036ea390059b7ae8a8af76e39f53701d'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
