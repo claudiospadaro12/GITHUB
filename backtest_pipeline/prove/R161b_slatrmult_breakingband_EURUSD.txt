@@ -1,0 +1,497 @@
+# =====================================================================
+#  EA: ABTG_BreakingBand
+#  R161b -- "SL = 3 x ATR, REGOLA FISSA DELLA GUIDA": LA GEMELLA EURUSD
+#           -- sedia EURUSD H1, magic 772162 -- asse InpSL_ATRmult,
+#           7 celle, UNA SOLA TRANCHE (@FRAZIONEIS 1.0)
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+# ---------------------------------------------------------------------
+#  QUESTO FILE E' IL GEMELLO DI `R161a_slatrmult_breakingband_GBPUSD
+#  .txt`, scritto in parallelo oggi. Tutto cio' che riguarda LA
+#  MANOPOLA -- come e' stata verificata "mai mossa", che cosa fa nel
+#  sorgente, le quattro catene C1-C4 per cui tocca anche lotto,
+#  breakeven e numero di operazioni, perche' il cancello di costo NON
+#  e' misurabile da questa corsia, perche' l'asse ha quei bordi -- e'
+#  scritto PER ESTESO in R161a e NON si ripete qui. Qui si scrive solo
+#  cio' che su EURUSD e' DIVERSO, e le differenze sono QUATTRO:
+#  il pattern, la finestra (una tranche invece del walk-forward),
+#  le ancore, e l'unica ancora di costo che tutta la famiglia possiede.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1 -> RIGA_ROUND_VPS.ps1 ->
+#  walkforward_generico.ps1: simbolo, periodo, finestra, taglio e asse
+#  arrivano TUTTI dalle direttive di questo file):
+#    -Expert ABTG_BreakingBand
+#    -Prova R161b_slatrmult_breakingband_EURUSD.txt
+#    -Etichetta r161b -Modello 1 -Deposito 100000
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 CELLE per finestra.
+#   SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DELLE PASSATE: il "x2" del
+#   driver e' CABLATO e su un file @FRAZIONEIS 1.0 e' il DOPPIO del vero
+#   -- 7 passate, non 14. Classe 354/345.)
+#
+#  >>> AVVISO OPERATIVO CHE VA LETTO PRIMA DI LANCIARE, ED E' NUOVO
+#      RISPETTO A R161a: con `@FRAZIONEIS 1.0` la gamba OOS e' DEGENERE
+#      (il driver lo stampa da se', walkforward_generico.ps1 r.731-733:
+#      "FrazioneIS 1.0 = UNA SOLA TRANCHE. La gamba OOS e' DEGENERE
+#      (finestra vuota)"). Conseguenza a valle, tracciata riga per riga:
+#      il CSV `*_OOS_*.csv` NON verra' prodotto, quindi
+#      `RIGA_ROUND_VPS.ps1` (r.733-740) lo conta fra i MANCANTI e chiude
+#      con **ESITO: NON MISURATO -- CSV mancanti o vuoti: OOS** e
+#      **codice d'uscita 2**; il runner segna "fallito" tutto cio' che
+#      non e' 0.
+#      **QUESTO ESITO E' ATTESO E NON E' UN FALLIMENTO.** L'artefatto di
+#      questo round e' il CSV **IS** -- quello e' l'unica finestra che
+#      esiste. Se il CSV IS c'e', e' fresco e ha 7 righe con Trades > 0,
+#      il round E' GIRATO. Va scritto cosi' nel referto, non "fallito".
+#      (Stessa situazione, stessa dichiarazione, di R154a/R156a/R157a/
+#      R158a/R159a: non e' una novita' di questo file, e' una
+#      conseguenza nota della direttiva.)
+#
+#  -Modello 1 = OHLC M1, LIMITE DICHIARATO: la finestra parte dal 1999 e
+#  i tick reali di BCM non esistono la'. Un numero OHLC e' SCREENING,
+#  mai un verdetto. E l'anteprima di -SoloControllo dira' comunque
+#  "Model=4" perche' quel campo e' CABLATO nel driver (r.1000 contro
+#  r.1654): classe 356, dichiarata qui prima e non scoperta dopo.
+#  -Deposito 100000 = il deposito con cui l'ancora R102 e' stata
+#  misurata ("OHLC M1, deposito 100.000, taglia viva 1,0%",
+#  R102_REFERTO_BLOCCO1.md r.5-6).
+# ---------------------------------------------------------------------
+#  DIFFERENZA 1 -- IL PATTERN. QUESTA SEDIA NON GIRA LO STESSO MOTORE
+#  DI GBPUSD, E NON E' UN DETTAGLIO.
+#    `InpPatternMode` = **0 = SOLO CONTINUAZIONE** (In-Bulge), contro
+#    il 2 = ENTRAMBI di GBPUSD e l'1 = SOLO INVERSIONE di AUDUSD.
+#    Fonte MISURATA, non assunta: `R103_ABTG_BreakingBand_EURUSD
+#    _772162.txt` r.61 ("InpPatternMode 0  CELLA VIVA (artefatto della
+#    sedia)") e r.138 del pin; a monte
+#    `risultati_archivio/R102_CRITERI.md` r.198, che la fa risalire al
+#    preset vivo `deploy_vivaio_bb.ps1 / VIVAIO_BB_EURUSD`.
+#    >>> PERCHE' CONTA PER QUESTO ROUND: i tre file R161a/b/c non sono
+#        tre repliche dello stesso esperimento su tre feed. Sono lo
+#        STESSO asse su TRE motori diversi (CONT+INV, CONT, INV).
+#        Se l'asse rispondesse in modo simile su tutti e tre, quella
+#        SAREBBE un'informazione forte (la risposta e' del meccanismo
+#        dello stop, non del pattern); se rispondesse in modo opposto
+#        su CONT e INV, la media di GBPUSD sarebbe illeggibile e
+#        andrebbe rifatta a pattern separato.
+#        >>> MA VA DETTO SUBITO CHE E' UN CONFRONTO **SPORCO**: i tre
+#            girano anche su TRE SIMBOLI diversi. Un accordo fra i tre
+#            non separa "e' il meccanismo" da "e' il forex in generale",
+#            e un disaccordo non separa "e' il pattern" da "e' il
+#            simbolo". La misura PULITA e' un altro round: stesso
+#            simbolo, InpPatternMode 0 contro 1, stesso asse. Non e'
+#            questo file. [DICHIARATO, non chiuso]
+# ---------------------------------------------------------------------
+#  DIFFERENZA 2 -- LA FINESTRA: UNA TRANCHE, E IL PERCHE' E' ARITMETICO
+#    L'unita' e' la POSIZIONE e coincide col `Trades` del CSV (fattore
+#    1,00 col pin `InpTPMode=0`; la catena e la sua CONDIZIONALITA' sono
+#    scritte per esteso in R161a, sezione UNITA' DI MISURA -- qui vale
+#    identica, e' lo stesso EA e lo stesso pin).
+#    Frequenza NOTA, dall'unico round archiviato su questa esatta
+#    configurazione: `R102_REFERTO_BLOCCO1.md` r.40 -> n = **276**
+#    posizioni sulla finestra lunga.
+#      1999.01.04 -> 2026.06.30 = **10.039 giorni**
+#      276 / 10.039 = **0,02749 posizioni/giorno**
+#    Per un walk-forward vero servono IS >= 150 **E** OOS >= 150, cioe'
+#    almeno 300 posizioni con uno split 50/50. Qui ce ne sono 276:
+#      split 0,50 -> ~138 + ~138, **ENTRAMBE sotto il pavimento**.
+#      Per portare l'IS a 150 servirebbe FrazioneIS ~0,545, che
+#      lascerebbe un OOS di ~126: sotto il pavimento lo stesso.
+#    >>> CONCLUSIONE, SCRITTA PRIMA DI QUALUNQUE NUMERO: su questa sedia
+#        lo split NON si fa, perche' produrrebbe due meta' entrambe
+#        sotto soglia -- un peggioramento, non un rimedio. Si dichiara
+#        con `@FRAZIONEIS 1.0`: senza quella riga il driver userebbe il
+#        suo default 0,40 e produrrebbe COMUNQUE un IS/OOS striminzito,
+#        **in silenzio**.
+#    >>> E LA DISTINZIONE CHE NON VA PERSA, perche' e' diversa da quella
+#        di R154a-R159a: qui il campione **non e' sottile**. 276
+#        operazioni sono quasi il doppio del pavimento. Quello che manca
+#        non e' il CAMPIONE, e' il **FUORI CAMPIONE**. Quindi:
+#          - il RISCHIO si legge, e con peso (n=276);
+#          - la FORMA della risposta all'asse si legge, e con peso;
+#          - il MERITO resta SOSPESO, ma per **assenza di OOS**, non per
+#            campione insufficiente. Sono due ragioni diverse e vanno
+#            scritte con la ragione giusta.
+#    >>> QUALE REGIME CONTIENE, come vuole la Regola A del 16/08: la
+#        finestra e' UNA sola e le contiene tutte -- l'erosione
+#        1999-2007, la crisi 2008, l'altalena 2011-2021, il covid 2020,
+#        la risalita 2022-2025 (spina dorsale in R102_REFERTO_BLOCCO1
+#        par.1, che pero' la scrive per GBPUSD: per EURUSD la
+#        distribuzione anno per anno resta [NON LETTA] in questo file).
+# ---------------------------------------------------------------------
+#  DIFFERENZA 3 -- LE ANCORE, E QUI SONO PIU' FORTI CHE IN R161a
+#    Questo round gira lo STESSO EA, simbolo, TF, modello, deposito,
+#    taglia e finestra effettiva dell'ancora, e **su UNA SOLA FINESTRA**:
+#    quindi la cella viva 3,0 non e' solo confrontabile con l'ancora,
+#    dovrebbe **RIPRODURLA quasi alla cifra** (il walk-forward di R161a
+#    spezzava la corsa e perdeva quella proprieta').
+#    A) `R102_REFERTO_BLOCCO1.md` r.40, finestra LUNGA:
+#         "C02 EURUSD | +2.347 (COMUNE 2009->2026, n 159) |
+#          **+4.129 EUR . PF 1,075 . n 276** (27,4 anni) | DD **8,24%**"
+#       OHLC M1, deposito 100.000, taglia 1,0%.
+#       >>> Attenzione a una differenza di finestra NOMINALE che NON
+#           sposta i numeri: R102 partiva dallo storico dichiarato dal
+#           broker (EURUSD 1971.01.03) e questo file parte dal
+#           1999.01.04. Fra le due date il motore NON opera -- prima
+#           operazione EURUSD **1999.01.18** (R102_REFERTO_BLOCCO1
+#           par.4) -- quindi la finestra EFFETTIVAMENTE operata e' la
+#           stessa.
+#    B) `R103_REFERTO_FINALE.md` r.23 (finestra corta 2020-2026, altro
+#       round, citata solo per contesto): "+8.271 | PF 1,94 | DD 2,5% |
+#       n 59 | 1/7 anni negativi". **NON e' l'ancora di questo file**:
+#       finestra diversa. Serve a ricordare che su sei anni recenti
+#       questa sedia e' la migliore delle tre, e su ventisette e' la
+#       mediana. Le due cose non si confondono.
+#    C) IL CONTRATTO DEL DD: promesso **1,2%**
+#       (`report/CENSIMENTO_CONTRATTI.md` r.245), misurato sulla
+#       finestra lunga **8,24%** -> **6,9x il promesso**, rilievo gia'
+#       alzato da R102_REFERTO_BLOCCO1 par.2 (riga "C02 EURUSD | 1,20% |
+#       2,40% | 8,24% (6,9x) | REVISIONE"). Questo round non lo ripara e
+#       non lo riscrive: lo usa come metro.
+#    >>> UN'AVVERTENZA CHE VALE COME CONTRO-ESEMPIO, e riguarda proprio
+#        il campione di questa sedia: lo stesso R102 (par.3) segnala che
+#        i PF stratosferici di EURUSD nelle finestre di regime (163,96
+#        nel CROLLO, 174,50 nella CRISI2008) sono **artefatti di
+#        campione minuscolo** -- n=1 e n=6. Su questa sedia i numeri
+#        belli su pochi trade ci sono gia' stati e hanno gia' ingannato
+#        una volta: qualunque cella di questo asse che brillasse va
+#        guardata prima di tutto sul suo Trades.
+# ---------------------------------------------------------------------
+#  DIFFERENZA 4 -- IL COSTO: QUESTA E' L'UNICA DELLE TRE CON UN'ANCORA
+#  DI STOP, E NONOSTANTE QUESTO IL CANCELLO RESTA [NON MISURATO]
+#    Le tre ragioni strutturali per cui questa corsia non produce
+#    nessun numero di costo (una sola colonna di artefatto, nessuna
+#    colonna dello stop ne' dell'ATR, per-trade non esportato e non
+#    raccolto) sono scritte per esteso in R161a, sezione IL COSTO, e
+#    valgono identiche: stesso EA, stesso driver, stessa corsia.
+#    Qui si aggiunge solo cio' che EURUSD ha e le gemelle no.
+#    `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.519, colonne
+#    nominate leggendo la testata di r.512 e non a memoria
+#    (testata: sedia | EA | simb | TF | conto | geometria dello stop |
+#     stop (pip) | fonte | spr A | x (A) | 40x?(A) | spr B | x (B) |
+#     40x?(B) | 13,3x?):
+#      772162 | BreakingBand | EURUSD | H1 |
+#      geometria "InpSL_ATRmult 3.0 x ATR(14) -- r.328, stop largo per
+#      disegno" | **stop 22,1 pip [MIS] n=1** | fonte `trades_auto.csv` |
+#      spr A **0,4** | **55,2x** | SI | spr B **1,0** | **22,1x** |
+#      NO (55%) | 13,3x SI
+#    >>> E' l'UNICA riga BreakingBand del referto con uno stop misurato:
+#        772161 (r.520) e 772163 (r.521) portano entrambe **[NM]**,
+#        "0 gambe in stop".
+#    >>> MA LE DUE COLONNE DI SPREAD DANNO DUE VERDETTI OPPOSTI SULLA
+#        STESSA CELLA VIVA (55,2x SI contro 22,1x NO), e il referto
+#        stesso spiega perche': il suo par.5.4 si intitola "FOREX --
+#        nessun file di spread orario esiste. Ogni riga e' scritta DUE
+#        VOLTE". Verificato oggi alla fonte con un `ls`:
+#        `backtest_pipeline/risultati_archivio/spread_flotta/` contiene
+#        ESATTAMENTE tre CSV orari -- NASUSD, U30USD, D30EUR -- e
+#        nessuno dei tre simboli BreakingBand e' li'.
+#        La colonna "spr A" e' una **sonda istantanea** (17/08 17:34
+#        srv), non una distribuzione; la "spr B" e' una dichiarazione
+#        prudente, non una misura.
+#    >>> QUINDI IL CANCELLO E' [NON MISURATO] **PER MANCANZA DI SPREAD**,
+#        non per mancanza di stop -- ed e' la differenza da dichiarare
+#        rispetto a R159a, dove mancava lo stop. E resta [NON
+#        MISURABILE DA QUESTO ROUND] comunque, perche' nessuna colonna
+#        del CSV raccolto contiene lo stop (classe 353).
+#    >>> LA PROIEZIONE, SOLO PER ORIENTAMENTO E ETICHETTATA [INF]:
+#        22,1 pip a multiplo 3,0 -> ~7,4 pip di ATR per unita' di
+#        multiplo. Con spr A = 0,4 servirebbe un multiplo ~2,2 per stare
+#        sopra i 40x (celle 2,5-4,5 dentro, 1,5 e 2,0 fuori); con
+#        spr B = 1,0 servirebbe ~5,4 (**nessuna** cella dentro). Due
+#        colonne, due risposte: e' proprio questo che rende il numero
+#        inutilizzabile come soglia. **Nessuna sentinella e nessuna
+#        soglia B di questo file si aggancia a un numero di costo.**
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- IDENTICO A R161a, di proposito
+#    1,5 / 2,0 / 2,5 / 3,0(vivo) / 3,5 / 4,0 / 4,5 -- 7 celle, passo
+#    0,5, tre per parte, escursione relativa -50% / +50%.
+#    I due bordi e le ragioni per cui non si va oltre (a multiplo 1,0 lo
+#    stop coinciderebbe col grilletto della riduzione del rischio
+#    `InpBEatATR=1.0`, cioe' un'ALTRA gestione; sopra il +50% l'asse
+#    smette di essere una sensibilita' locale attorno alla regola della
+#    guida) sono argomentate per esteso in R161a, sezione L'ASSE E IL
+#    PASSO. Restano identiche qui: e' lo stesso codice e lo stesso TF.
+#    >>> E l'asse e' tenuto IDENTICO sui tre gemelli APPOSTA: tre assi
+#        diversi renderebbero i tre file non confrontabili, e la
+#        confrontabilita' fra gemelli e' meta' del valore della campagna
+#        (criterio di uscita "per FAMIGLIA", firma del 18/08).
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n (POSIZIONI = Trades): atteso **DIVERSO fra le celle** (catena C3
+#    di R161a: con `InpMaxPositions=1` uno stop piu' largo occupa la
+#    macchina piu' a lungo e respinge setup successivi). Direzione
+#    qualitativa: non crescente al crescere del multiplo. **NON e' una
+#    sentinella d'arresto**: l'accoppiamento non e' deterministico.
+#    Livello atteso sulla cella viva: **276**, e qui l'attesa e' forte
+#    perche' la corsa e' a finestra intera come l'ancora.
+#  - STOP PER CELLA, RAPPORTO STOP/SPREAD, CANCELLO 40x: [NON
+#    MISURABILI DA QUESTO ROUND].
+#  - CONTATORI DEL FUNNEL (cO_failSL e compagni): [NON RACCOLTI DA
+#    QUESTA CORSIA] -- escono solo come Print nel log dell'agente, che
+#    il driver non copia (il sorgente lo dichiara da se' a r.243 e
+#    r.1760).
+#  - PROFITTO / PF / DD: NESSUNA direzione dichiarata a priori.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: S1 fuori banda. Allora il
+#    banco non sta girando la storia che credo e nessun altro numero di
+#    questo round significa niente.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO
+#  I contro-esempi T1 (celle che divergono e fabbricano una curva bella),
+#  T3 (il mondo in cui la manopola e' inerte -- classe 357), T4 (il
+#  mondo in cui lo storico non c'e' -- classe 355), T5 (la cache del
+#  tester) e T6 (il tetto del lotto) sono costruiti per esteso in R161a
+#  e valgono identici qui. Le difese sono le stesse: S6 per T3, il magic
+#  vergine per T5, S1 per T4, la regola di selezione B6 per T1.
+#  Quello che su EURUSD e' DIVERSO, e va scritto:
+#
+#  (E1) QUI NON C'E' L'OOS, QUINDI T1 NON HA LA SUA DIFESA MIGLIORE.
+#    In R161a la divergenza fra celle si controlla leggendo IS e OOS
+#    separatamente: se la cella migliore dell'IS non sta nell'altopiano
+#    dell'OOS, e' rumore di percorso. **Qui quella difesa NON esiste**:
+#    c'e' una finestra sola. Resta solo B6 (centro dell'altopiano, mai
+#    il picco), che e' piu' debole.
+#    >>> CONSEGUENZA DICHIARATA: da questo file NON deve uscire nessuna
+#        frase che nomini una cella come "migliore". Puo' uscire una
+#        FORMA ("l'asse e' piatto sul profitto e inclinato sul DD",
+#        oppure "non e' piatto"), e puo' uscire un confronto con la
+#        forma di R161a e R161c. Una cella preferita, no.
+#
+#  (E2) IL CONFRONTO FRA I TRE GEMELLI E' SPORCO. Tre simboli e tre
+#    pattern cambiano insieme (DIFFERENZA 1): un accordo fra i tre non
+#    separa "e' il meccanismo dello stop" da "e' il forex"; un
+#    disaccordo non separa "e' il pattern" da "e' il simbolo".
+#    >>> COME LO DICHIARO: il confronto fra R161a/b/c si scrive come
+#        CONCORDE o DISCORDE, mai come spiegazione. La misura che
+#        separerebbe le due cause e' un round a simbolo fisso con
+#        InpPatternMode 0 contro 1. Non e' questo file.
+#
+#  (E3) IL 1999 DI EURUSD NON E' LA STESSA PROVA CHE SU GBPUSD, E VA
+#    DETTO PERCHE' INDEBOLISCE UN'ARGOMENTAZIONE DI CASA. R102
+#    par.4 usa "tutte e tre partono nella stessa settimana del gennaio
+#    1999" per concludere che il pavimento e' una proprieta' del FEED.
+#    Per EURUSD quella conclusione e' **sovradeterminata**: l'euro esiste
+#    dal 1999.01.04, quindi prima di quella data una prima operazione su
+#    EURUSD non potrebbe esistere comunque, feed o non feed. Cioe':
+#    EURUSD **non e' una conferma indipendente** della tesi del feed --
+#    le conferme indipendenti sono GBPUSD e AUDUSD, che nel 1993-1998
+#    esistevano eccome e tacciono lo stesso.
+#    >>> Sul presente file questo non cambia NIENTE (il pavimento
+#        1999.01.04 resta quello giusto per EURUSD, per entrambe le
+#        ragioni). Va scritto perche' la tesi di casa non vada citata
+#        con una prova in piu' di quelle che ha.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE (si leggono PRIMA di qualunque P/L)
+#    S1 -- LA CELLA VIVA RIPRODUCE L'ANCORA (n). Trades della cella 3,0
+#      dentro **250-300** (ancora R102: 276). E' la sentinella piu'
+#      forte del file: corsa a finestra intera, stesso EA/simbolo/TF/
+#      modello/deposito/cella, quindi l'attesa non e' "vicino", e'
+#      "quasi uguale".
+#      >>> DUE LIVELLI, e la differenza e' voluta: uno scostamento di
+#          piu' di ~5 operazioni e' gia' UN'INFORMAZIONE (il feed del
+#          banco non e' bit-a-bit quello di R102) e va SCRITTA; oltre la
+#          banda 250-300 il round si FERMA.
+#      >>> POTERE DISCRIMINANTE CONTRO T4, dichiarato col numero: alla
+#          densita' 0,02749 op/giorno un anno di storico mancante vale
+#          ~10 operazioni. La banda separa un troncamento di **3 anni o
+#          piu'** (-30 -> 246, fuori); uno di 1-2 anni (-10/-20 -> 266/
+#          256) resta DENTRO la banda e **NON e' escluso da questo
+#          round**. Dichiarato, non chiuso.
+#    S1bis -- LA CELLA VIVA RIPRODUCE L'ANCORA (DD). Equity DD % della
+#      cella 3,0 dentro **5,0% - 12,0%** (ancora R102: 8,24%). Banda
+#      larga perche' il DD e' un percorso e basta un trade diverso per
+#      spostarlo; se cade fuori, si scrive, ma non ferma il round da
+#      sola -- ferma S1.
+#    S2 -- IL CAMPIONE: Trades della cella viva >= **150**. Atteso
+#      largamente (276). Se cadesse sotto, anche la lettura di FORMA
+#      perde peso e va dichiarata come sospesa (Regola B, 16/08).
+#    S3 -- IL CONTEGGIO DELLE RIGHE: **7 righe** nel CSV **IS**. Il CSV
+#      OOS non esiste ed e' voluto (avviso operativo in testa).
+#    S4 -- SETTE VALORI DISTINTI di InpSL_ATRmult nella colonna del CSV
+#      (1.5 / 2.0 / 2.5 / 3.0 / 3.5 / 4.0 / 4.5). Dice che l'asse e'
+#      stato spazzolato, NON che ha avuto effetto: per quello serve S6
+#      (classe 357).
+#    S5 -- LA PORTA DELLO STOP MINIMO NON SI E' CHIUSA (catena C4 di
+#      R161a): Trades della cella **1,5** non deve crollare rispetto
+#      alla 2,0 oltre il **-40%**. Un crollo maggiore e' il sintomo che
+#      lo stop e' finito sotto la distanza minima del broker (r.1310) e
+#      che quella cella misura il broker, non la strategia: si dichiara
+#      NON LEGGIBILE e si legge l'asse da 2,0 in su.
+#    S6 -- ALMENO UNA COPPIA CONTIGUA DIVERSA. Fra le SEI coppie di
+#      celle contigue, almeno una deve avere Profit, Equity DD % o
+#      Trades diversi fino all'ultima cifra STAMPATA. Se coincidono
+#      tutte e sei, il round e' un NULLO DICHIARATO e S3/S4 vanno
+#      scritte come VACUE, non come PASS.
+#    S7 -- IL RISCHIO NON E' ESPLOSO: nessuna cella con Equity DD % >
+#      **16,5%** (~2,0 x l'ancora 8,24% della corsa lunga). Se una
+#      cella lo rompe, si scrive SUBITO, prima di ogni Profit Factor.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  QUESTO ROUND NON HA UN A0/A1 DI MERITO. Non perche' il campione
+#        sia sottile (276 operazioni, quasi il doppio del pavimento) ma
+#        perche' **non esiste un fuori-campione** (DIFFERENZA 2). Solo
+#        soglie di RISCHIO, di FORMA e di STRUTTURA.
+#    B2  RISCHIO. Nessuna cella con Equity DD % > **16,5%** (S7). E in
+#        testa al referto, PRIMA di ogni PF, va scritto **quante celle
+#        su sette stanno sopra il 10,0%** -- il muro prop. Nota: il
+#        rischio per trade e' costante lungo l'asse (catena C1 di
+#        R161a), quindi un DD che si muove viene dalla sequenza delle
+#        uscite, non dalla taglia.
+#    B3  FORMA / STRUTTURA: S3 **e** S4 **e** S6, come blocco unico.
+#        Sette righe tutte numericamente uguali sono un PASS VACUO, non
+#        un PASS. Lo STOP non entra in B3: non e' in nessun artefatto
+#        (classe 353).
+#    B4  IL TEST DI IDENTITA' FRA CELLE CONTIGUE. Per ognuna delle SEI
+#        coppie si registra se Profit (%.2f), Equity DD % (%.4f) e
+#        Trades (%.0f) coincidono fino all'ultima cifra STAMPATA, e si
+#        CONTA quante coppie risultano DIVERSE. Qui `Trades` PUO'
+#        cambiare davvero (catena C3), quindi e' una terza informazione
+#        genuina e non un doppione di `Profit` -- ma le tre colonne
+#        restano correlate fra loro, e "tre colonne concordi" si scrive
+#        come UNA conferma, non come tre.
+#    B5  IL ROUND NON PROMUOVE NIENTE, e su questo file in piu': **non
+#        nomina nemmeno una cella preferita** (E1). Taglie,
+#        riaccensioni e rischio restano [FIRMA DI CLAUDIO].
+#    B6  LA REGOLA DI SELEZIONE, se mai si arrivasse a scriverne una in
+#        un round successivo: SEMPRE il CENTRO di un tratto contiguo di
+#        celle DISTINTE (B4), MAI il picco isolato (R70).
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - FUORI CAMPIONE: **assente per costruzione** (una tranche). E'
+#      il buco principale, ed e' una scelta dichiarata, non una
+#      dimenticanza.
+#    - MODELLO: OHLC M1. Il DD e' un LIMITE INFERIORE e il profitto una
+#      stima del LORDO. E su un asse che muove lo stop c'e' un difetto
+#      SUO: dentro una barra M1 il tester non sa se il prezzo ha toccato
+#      prima lo stop o prima il TP, e piu' lo stop e' stretto piu' spesso
+#      quell'ambiguita' si presenta. **Le celle basse sono le piu'
+#      esposte all'ottimismo del modello.** Se vincessero, una parte del
+#      vantaggio potrebbe essere del modello. Si chiude coi tick, che su
+#      questa finestra non esistono.
+#    - PROFONDITA' DELLO STORICO: troncamenti di 1-2 anni NON esclusi
+#      (S1, classe 355).
+#    - REGIME: una finestra sola che li contiene tutti, ma la
+#      distribuzione anno per anno di EURUSD non e' letta in questo file.
+#      Non e' la prova di regime della regola C del 16/08.
+#    - LATO SEPARATO (long/short): [NON MISURABILE qui]. L'EA non ha
+#      manopole di lato e il CSV non separa i lati.
+#    - CANCELLO DI COSTO: [NON MISURABILE DA QUESTO ROUND] e [NON
+#      MISURATO nel repo per mancanza di spread orario su EURUSD]
+#      (DIFFERENZA 4).
+#    - CONTATORI DEL FUNNEL: [NON RACCOLTI DA QUESTA CORSIA].
+#    - IL CONTO PICCOLO (10.000 EUR): il conto sul pavimento del lotto
+#      e' fatto a 100.000 (R161a, sezione PAVIMENTO DEL LOTTO). A 10.000
+#      il lotto e' dieci volte piu' piccolo e il pavimento 0,01 torna a
+#      essere un'ipotesi da verificare. Questo round non gira a 10.000 e
+#      non risponde.
+#    - `InpTPMode` / `InpTP1Pct` / `InpBEatATR` / `InpBEMode` /
+#      `InpTPRefreshBars` / `InpMinTPatATR`: le altre SEI manopole
+#      d'uscita mai mosse di questa stessa sedia (`report/
+#      CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md` r.181: sette in
+#      tutto, cinque mai in nessun CSV). NON sono l'asse: pinnate al
+#      valore vivo di R103, invariate. Ognuna e' un round suo.
+#    - GUARDIAN: `InpUsaGuardian=true`, pinnato, fail-open nel tester.
+#    - `InpNewsCurrencies`: NON pinnato di proposito (pin a valore vuoto
+#      = MT5 lo ignora e `controlla_prova.py` lo boccia). Il filtro news
+#      e' comunque spento. Stessa scelta di `R111_EURUSD_00_metroH1.txt`.
+#
+#  MAGIC VERGINE **779822** (`grep -rn "779822" .` su tutto il repo,
+#  15/09/2026: ZERO occorrenze prima di questo file). Blocco dei tre
+#  gemelli di oggi: 779821 (R161a) / 779822 (R161b) / 779823 (R161c),
+#  tutti e tre verificati a zero nello stesso giro. Il magic vergine e'
+#  anche la difesa contro la cache del tester (T5 di R161a).
+#  ETICHETTA **R161** VERGINE (`grep -rn "R161" .` prima di oggi: ZERO
+#  occorrenze; l'ultima usata e' R160e). I soli file R161 attesi sono
+#  R161a, R161b e R161c.
+#  ORDINE DEI ROUND: `InpSL_ATRmult` e' pinnata a 3.0 in **22 file
+#  prova** e messa ad asse in **zero** (verifica per grep in R161a,
+#  punto 1b). Questo file non duplica niente.
+# =====================================================================
+
+@SIMBOLO  EURUSD
+@PERIODO  H1
+@DAQUANDO 1999.01.04
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+# --- IL MOTORE, pinnato sulla CELLA VIVA. Copiato riga per riga da
+#     R103_ABTG_BreakingBand_EURUSD_772162.txt (la cella viva misurata
+#     in R103). Le uniche righe toccate sono: InpSL_ATRmult (che qui e'
+#     L'ASSE), InpComment, InpMagic.
+#     >>> InpPatternMode = 0 (SOLO CONTINUAZIONE): e' l'artefatto della
+#         sedia, NON il default del sorgente (che e' 2). Vedi
+#         DIFFERENZA 1.
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpBBPeriod=20||20||0||20||N
+InpBBDev=2.0||2.0||0||2.0||N
+InpStdPeriod=20||20||0||20||N
+InpStdSmaPeriod=50||50||0||50||N
+InpAtrPeriod=14||14||0||14||N
+InpPatternMode=0||0||0||0||N
+InpBulgeWidthMult=1.35||1.35||0||1.35||N
+InpBulgeRefBars=20||20||0||20||N
+InpBulgeMinBars=3||3||0||3||N
+InpBulgeMaxBars=20||20||0||20||N
+InpBulgeMinImpBars=1||1||0||1||N
+InpBulgeCandleMaxATR=0.0||0.0||0||0.0||N
+InpBulgeNetMoveATR=1.0||1.0||0||1.0||N
+InpBulgeMedianDistPct=0.75||0.75||0||0.75||N
+InpBulgeEndMode=1||1||0||1||N
+InpBulgeDirMode=1||1||0||1||N
+InpImpulseATR=1.5||1.5||0||1.5||N
+InpRientroMaxATR=1.5||1.5||0||1.5||N
+InpInvViolentBars=3||3||0||3||N
+InpZigZagATR=1.5||1.5||0||1.5||N
+InpDeepSpikeATR=1.5||1.5||0||1.5||N
+InpPostATRRef=1||1||0||1||N
+InpBandRidingMaxBars=20||20||0||20||N
+InpPostBulgeMaxBars=30||30||0||30||N
+InpReinflateTolPct=1.05||1.05||0||1.05||N
+InpUseShadowFilter=false||false||0||false||N
+InpShadowBodyMult=1.5||1.5||0||1.5||N
+InpUseRangeReduction=false||false||0||false||N
+InpRangeReductionPct=30.0||30.0||0||30.0||N
+InpContNoImpulseBandReturn=false||false||0||false||N
+InpNarrowBars=2||2||0||2||N
+InpStdDownMode=0||0||0||0||N
+InpFlatSlopeATR=0.05||0.05||0||0.05||N
+InpSlopeSource=0||0||0||0||N
+InpRetestBufferATR=0.15||0.15||0||0.15||N
+InpContRequireNarrow=true||true||0||true||N
+InpContRequireStdDown=true||true||0||true||N
+InpUseReversalCandle=false||false||0||false||N
+InpRevBodyMaxPct=33.0||33.0||0||33.0||N
+InpRevShadowMinPct=50.0||50.0||0||50.0||N
+InpMinSolidita=0.0||0.0||0||0.0||N
+# InpSL_ATRmult -> E' L'ASSE, in fondo al file.
+InpTPMode=0||0||0||0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpTPRefreshBars=1||1||0||1||N
+InpBEatATR=1.0||1.0||0||1.0||N
+InpBEMode=0||0||0||0||N
+InpMinTPatATR=0.0||0.0||0||0.0||N
+InpMinRR=0.0||0.0||0||0.0||N
+InpUseCongestionFilter=false||false||0||false||N
+InpCongBars=15||15||0||15||N
+InpCongCSMin=4||4||0||4||N
+InpCongCDAStdBars=10||10||0||10||N
+InpCongWidthDropPct=15.0||15.0||0||15.0||N
+InpCongLateralATR=1.0||1.0||0||1.0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxPositions=1||1||0||1||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=R161B SLATR EURUSD
+InpMagic=779822||779822||0||779822||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- L'UNICO ASSE (7 celle, UNA sola finestra: 7 passate totali)
+#     1,5 / 2,0 / 2,5 / 3,0(vivo) / 3,5 / 4,0 / 4,5 x ATR(14) H1
+#     identico a R161a e R161c: i gemelli si confrontano solo se
+#     l'asse e' lo stesso
+InpSL_ATRmult=3.0||1.5||0.5||4.5||Y
+# =====================================================================
