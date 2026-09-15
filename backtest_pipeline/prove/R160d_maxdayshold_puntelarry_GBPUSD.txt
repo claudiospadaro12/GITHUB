@@ -1,0 +1,268 @@
+# =====================================================================
+#  EA: ABTG_PunteLarry
+#  R160d -- IL TIME-STOP IN GIORNI SUI CINQUE GEMELLI MAI TOCCATI --
+#           sedia GBPUSD H1, magic vivo 772345 -- asse InpMaxDaysHold,
+#           7 celle, finestra LUNGA 27,5 anni con taglio IS/OOS
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+#  Quarto dei CINQUE gemelli R160a-R160e. La motivazione generale sta
+#  per esteso in R160a_maxdayshold_puntelarry_EURAUD.txt ed e' PRESA PER
+#  RIFERIMENTO: qui c'e' solo cio' che su QUESTA sedia e' diverso.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_PunteLarry
+#    -Prova prove\R160d_maxdayshold_puntelarry_GBPUSD.txt
+#    -Etichetta r160d -Modello 1 -Deposito 100000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: 7 celle, 14 passate.)
+#  -Modello 1 = OHLC M1 DICHIARATO (i tick BCM partono dal 2024.09.26).
+#  DD = LIMITE INFERIORE del rischio, profitto = STIMA DEL LORDO.
+#  -Deposito 100000 = deposito dell'ANCORA R103.
+# ---------------------------------------------------------------------
+#  1) MANOPOLA VERGINE SU QUESTA SEDIA -- contato: 94 CSV d'archivio
+#     hanno la colonna `InpMaxDaysHold`, tutti con un solo valore (5).
+#     L'unico file prova che la mette ad asse e' R156a (oggi, U30USD).
+#
+#  2) RISCHIO PULITO -- stesso controllo VERO vs DICHIARATO fatto oggi su
+#     970913/770411: report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md r.147:
+#       `PunteLarry GBPUSD 772345 | gira 1,00 | gamba 1,00 | n 1 |
+#        EVENTO 1,00% | xRes 1,00 | "una posizione"`
+#     rapporto VERO/DICHIARATO = 1,00x, nessun bug di taglia. Verificato
+#     anche nel sorgente (r.408). Nessuna delle cinque sedie della
+#     famiglia e' stata scartata per rischio: tutte a 1,00x.
+#
+#  3) UNITA': `Trades` = POSIZIONI. Nessun parziale nel sorgente (grep
+#     "Partial|TP1|ClosePartial|InpTP1Pct": zero occorrenze). Fattore
+#     1,00 MISURATO SUL SORGENTE (classe 226/346 chiusa).
+#
+#  4) LE DUE COSE CHE SU QUESTA SEDIA SONO DIVERSE DALLE ALTRE QUATTRO:
+#     a) E' L'UNICA SEDIA SOLO-SHORT della famiglia (InpAllowLong=false,
+#        InpAllowShort=true: R103_ABTG_PunteLarry_GBPUSD_772345.txt e
+#        R39e_larry_gbpusd.txt, "libro / FPO / solo S"). Il pattern e'
+#        il modo 0 (SMASH del libro), non la "punta".
+#     b) L'USCITA E' LA FIRST PROFITABLE OPEN, NON IL TARGET IN R
+#        (InpExitMode=0). Il sorgente lo dice nel codice (r.669-671):
+#        "TAKE PROFIT: esiste SOLO nel modo R-based. Con la first
+#        profitable open il TP non c'e' per costruzione" -- il ramo del
+#        TP e' r.673 `if(InpExitMode==1)`, qui inattivo.
+#        >>> CONSEGUENZA SUL ROUND: senza TP restano TRE uscite --
+#            first profitable open (r.371), stop, e IL TIME-STOP DI
+#            QUESTO ASSE (r.374). Il time-stop e' l'unico tetto alla
+#            durata di un trade che non va in stop e non trova
+#            un'apertura in profitto: morso atteso PIU' FORTE che sulle
+#            sedie a exit R-based (R160a EURAUD, R160c GBPJPY, R160e
+#            XAUUSD), come su R160b EURCAD.
+#        >>> E la cella 1 e' un cambio di NATURA, non di taratura: a
+#            InpMaxDaysHold=1 la FPO di Williams diventa un trade di un
+#            giorno.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL TAGLIO IS/OOS -- E UNA SCELTA DI DATA DICHIARATA
+#  a) LA SONDA DICE 1993, IL BANCO HA MISURATO 1999 SU QUESTO STESSO
+#     SIMBOLO, E IO SCRIVO 1999.
+#     - sonda 17/08 (risultati_archivio/sonda_storico_17-08/
+#       215D85D7_ABTG_InfoBroker.csv, riga GBPUSD): PrimaDataTF su H1 =
+#       1993.05.11 (letta da me nel CSV).
+#     - MA su QUESTO SIMBOLO il banco e' gia' stato misurato, e non per
+#       analogia: R102_REFERTO_DRIVER_BLOCCO1 r.530 (sedia C01, GBPUSD)
+#       scrive "FINESTRA ACCORCIATA: la prima operazione e' del
+#       1999.01.14, cioe' 68 mesi dopo l'inizio dichiarato (1993.05.11)
+#       ... gli anni misurati sono 27.5, non quelli della finestra
+#       dichiarata". Lo stesso e' successo su EURUSD (1999.01.18) e
+#       AUDUSD (1999.01.07). La causa la stessa fonte la dichiara
+#       AMBIGUA ("o lo storico M1 non arriva davvero li', o il motore
+#       non aveva le condizioni per operare"): la riporto, non la
+#       risolvo -- e nota che per GBPUSD lo scarico M1 era dichiarato
+#       COMPLETO (R102_REFERTO_BLOCCO1 par.0: "GBPUSD 9.863.886 barre dal
+#       1993.05.11"), il che rende la prima spiegazione meno probabile
+#       ma non la esclude.
+#     - SCELTA: @DAQUANDO 1999.01.01, la data che il banco produce
+#       DAVVERO su questo simbolo. Con il 1993 la frazione IS/OOS si
+#       calcolerebbe su ~5,7 anni di giorni senza nessuna operazione,
+#       cioe' su un pezzo di finestra FINTO. Cambio DICHIARATO rispetto
+#       alla convenzione di R102 (che usa la data della sonda).
+#  b) IL TAGLIO E' SCELTO PERCHE' L'OOS COINCIDA CON LA FINESTRA R103:
+#       giorni totali 1999.01.01 -> 2026.06.30 ........... 10042
+#       giorni 1999.01.01 -> 2019.12.31 (confine) ........  7669
+#       frazione 7669/10042 = 0,7636924...  -> scritta 0.7637
+#       verifica: floor(10042 * 0.7637) = floor(7669,0754) = 7669
+#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.919-921)
+#     >>> IS  1999.01.01 -> 2019.12.31  (21,00 anni)
+#     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
+#     REGIMI DICHIARATI: IS = sterlina forte 2003-2007, crollo 2008
+#     (2,10 -> 1,35), QE, referendum Brexit del 2016 (il salto piu'
+#     grande della storia recente del cambio), laterale 2017-2019.
+#     OOS = covid, mini-budget Truss del 2022 (minimo storico a 1,03),
+#     risalita 2023-2026.
+#     >>> E' anche il CROSS su cui R102 ha gia' mostrato che la finestra
+#         lunga puo' RIBALTARE il segno di un motore (BreakingBand
+#         GBPUSD: +5.838 sul 2009-2026, -11.574 sui 27 anni). Non e' un
+#         pronostico su PunteLarry: e' il motivo per cui la finestra
+#         lunga su questo simbolo vale la spesa.
+#  c) PAVIMENTO IS>=150 (regola A, 16/08), CONTATO PRIMA:
+#     frequenza NOTA da R103: 121 posizioni in 6,50 anni = 18,6/anno.
+#       IS atteso  : 18,6 x 21,00 = ~391 posizioni (>=150: SI, 2,6x)
+#       OOS        : 121 posizioni GIA' MISURATE   (>=150: NO, mancano
+#                    ventinove operazioni)
+#     >>> QUINDI, DETTO PRIMA DEI NUMERI: il MERITO RESTA SOSPESO sulla
+#         gamba di verifica (regola B, 16/08). Il round si legge al
+#         RISCHIO e alla FORMA.
+#     >>> LA VIA PER CHIUDERE ANCHE IL MERITO, scritta perche' non si
+#         perda: un secondo round con taglio a calendario (FrazioneIS
+#         0.40) darebbe OOS 2015-2026 = ~11,5 anni x 18,6 = ~214
+#         posizioni, sopra il pavimento. Prezzo: si PERDE L'ANCORA
+#         ESATTA. Si fa DOPO, non al posto di questo round.
+#     >>> CONTRO-ESEMPIO sull'IS: anche a META' della frequenza recente
+#         l'IS farebbe ~196, sopra 150. Il pavimento dell'IS regge.
+# ---------------------------------------------------------------------
+#  L'ASSE -- 1 / 3 / 5(vivo) / 7 / 9 / 11 / 13, passo 2, centrato sulla
+#  cella viva: identico a R156a e agli altri quattro gemelli.
+#  InpMaxDaysHold=0 resta FUORI (regime qualitativo diverso).
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n: in CALO al crescere di InpMaxDaysHold (canale "un solo slot",
+#    r.408), con morso atteso FORTE per l'assenza di TP (punto 4b).
+#  - DD: nessuna direzione dichiarata.
+#  - PF: [MERITO SOSPESO] (OOS 121 < 150). Si registra, non si conclude.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n in discesa quasi monotona,
+#    DD dell'IS non necessariamente peggiore del recente (il lato SHORT
+#    di GBPUSD ha avuto vent'anni buoni e vent'anni cattivi: il numero
+#    non lo anticipo).
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: n che non scende affatto fra
+#    cella 1 e cella 13 (meno del 10%) -- su una sedia SENZA TP sarebbe
+#    ancora piu' strano che sulle altre, e vorrebbe dire che ho letto
+#    male il codice.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE -- PRIMA DI QUALUNQUE ALTRO NUMERO
+#  S1 -- ANCORA: la gamba OOS della CELLA VIVA (5) gira esattamente
+#    finestra, modello, deposito e cella di R103. Deve riprodurre
+#    (R103_REFERTO_FINALE.md r.34, posizione 21):
+#      Trades 121 | PF 1,05 | Equity DD% 8,5 | profitto +1.612
+#    TOLLERANZA: Trades IDENTICO (121); PF e DD entro +/-2% relativo
+#    (margine non nullo per la differenza di banco VERIFICATA: R103
+#    scriveva `Spread=0` nell'.ini, r.178/1315 del suo script;
+#    RIGA_SOTTILE_ROUND.ps1 non passa -Spread, r.1175-1177). Il filtro
+#    InpMaxSpreadPts=300 su GBPUSD vale 30 pip: non morde.
+#    IL BINARIO E' LO STESSO DI R103: due soli commit sul sorgente,
+#    l'ultimo `5fc0bc3` del 19/08; R103 e' girato il 24/08.
+#    >>> Se Trades OOS non e' 121, il banco e' diverso: CI SI FERMA.
+#  S2 -- PAVIMENTO: Trades IS >= 150 (atteso ~391). L'OOS e' gia'
+#    dichiarato sotto (121): merito sospeso comunque.
+#  S3 -- CELLE: 7 valori distinti su due file (_IS e _OOS).
+#  S4 -- FINESTRA: se il CSV IS mostrasse n molto sotto l'atteso
+#    (diciamo sotto 220), il sospetto e' che l'accorciamento misurato da
+#    R102 morda anche oltre il 1999: si dichiara, e l'IS non si legge
+#    come "21 anni".
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  MERITO: [NON AMMESSO qui] -- pavimento OOS 121 < 150. Solo
+#        RISCHIO e FORMA (regola B, 16/08).
+#    B2  RISCHIO -- il round gira alla taglia VIVA (1,0%, censimento
+#        rischio r.147): i DD si leggono senza conversione.
+#          B2.1  cella sopra 10,0% (muro prop) -> si scrive SUBITO,
+#                prima del Profit Factor.
+#          B2.2  regola meccanica firmata (corsia RISCHIO 18/08, gia'
+#                applicata da R100): DD lungo > 2x il promesso ->
+#                REVISIONE. Promesso 5,1% (report/CONTRATTI_SEDIE.md
+#                r.148) -> soglia 10,2%. Riferimento: R103 sui 6,5 anni
+#                misura 8,5% = 1,67x, sotto soglia. Se i 21 anni la
+#                superano e' una riga per Claudio, non una bocciatura:
+#                la firma resta sua.
+#    B3  FORMA -- si registra se n scende in modo monotono o quasi (al
+#        massimo UNA inversione fra celle adiacenti), e se il morso e'
+#        PIU' FORTE che sulle sedie con TP (previsione del punto 4b).
+#    B4  IL ROUND NON PROMUOVE NIENTE: nessun preset, nessuna sedia
+#        accesa o spenta, forward intatto.
+#    B5  SELEZIONE: sempre il CENTRO di un tratto contiguo che passa
+#        B2+B3, MAI il picco isolato (R70, R136a/R146c/R153a-R158a).
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  COME POTREBBE SEMBRARE VERDE PER CASO: OOS a 121 operazioni, 7 celle:
+#  la migliore delle sette e' quasi sempre sopra la media anche se
+#  l'asse non conta niente. E un time-stop diverso cambia il
+#  SOTTOINSIEME di trade (chi occupa lo slot decide chi entra dopo).
+#  COME LO DISTINGUO:
+#    1. QUI IL MERITO NON SI LEGGE (B1): il contro-esempio e' disinnescato
+#       alla radice.
+#    2. ALTOPIANO, mai picco, anche per il DD (B5).
+#    3. n IN DISCESA e' PREVISTO DAL CODICE (r.408): se non scende, la
+#       lettura del meccanismo e' sbagliata e ci si ferma.
+#    4. IL COSTO NON DECIDE: InpMaxDaysHold non tocca stop, target ne'
+#       lotto (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687,
+#       tutti in Enter()): geometria dello stop INVARIANTE lungo l'asse,
+#       nessun artefatto di spread (trappola classe 292/347).
+#    5. UN SOLO SIMBOLO E UN SOLO LATO (short): quello che esce qui vale
+#       per questa sedia, non per la famiglia e nemmeno per il long di
+#       GBPUSD, che questa sedia non opera.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#    - MODELLO OHLC M1 su 27,5 anni: DD limite inferiore, profitto stima
+#      del lordo.
+#    - SPREAD corrente applicato al 1999-2008: allora era molto piu'
+#      largo. Profitto dell'IS OTTIMISTICO di una quantita' [NON
+#      MISURATA].
+#    - DATA D'INIZIO: 1999.01.01 e' una scelta DICHIARATA (punto a), non
+#      la data della sonda (1993.05.11).
+#    - CANCELLO DI COSTO: `[NON MISURATO]` su questa sedia
+#      (report/CENSIMENTO_CONTRATTI_v2.md r.340); questo round non lo
+#      sposta (stop invariante lungo l'asse).
+#    - InpMaxDaysHold = 0 (time-stop mai): fuori griglia, dichiarato.
+#    - LATO SEPARATO: gira SOLO SHORT come la cella viva. Il lato long
+#      di questo motore su GBPUSD resta [NON MISURATO qui] -- e la
+#      regola dei due lati (25/08) vale per gli INDICI, ma la lacuna va
+#      scritta lo stesso.
+#    - GUARDIAN: InpUsaGuardian=true (valore R103, default sorgente
+#      r.135), fail-open nel tester senza GlobalVariable.
+#    - InpTP_R: pinnato a 1.5 ma INERTE con InpExitMode=0 (il TP esiste
+#      solo nel ramo r.673): dichiarato perche' non si scambi la sua
+#      presenza nel file per un parametro attivo.
+#    - InpAtrSlMult: INERTE con InpSLMode=0 (ramo r.653). Pinnata al
+#      valore vivo, non tocca nessun numero.
+#    - TEMPO MACCHINA: [STIMATO] ~25-30 minuti (scala da R102 blocco 1:
+#      6 passate su ~27 anni H1 OHLC in 19 minuti; e da R103).
+#
+#  MAGIC VERGINE 779817. Il blocco dei cinque gemelli e' 779813 /
+#  779814 / 779815 / 779817 / 779818 (R160a-e): salta 779816 perche' la
+#  stringa compare dentro un numero decimale di un XML d'archivio
+#  (risultati_ottimizzazione/SupertrendReversal_Multi_XAUUSD_H4.xml
+#  r.2310) e un grep futuro la troverebbe; e parte da 779813 perche'
+#  779807-779812 confinano con `R159a_maxhours_gapfill_U30USD.txt`
+#  (r.629, scritto in parallelo oggi, pinna 779807). Dettaglio per
+#  esteso in R160a. 779817 non compare prima di questo file --
+#  riverificato.
+#  ORDINE DEI ROUND: nessun altro file prova mette InpMaxDaysHold ad
+#  asse su GBPUSD. Nessun doppione in coda.
+# =====================================================================
+
+@SIMBOLO  GBPUSD
+@PERIODO  H1
+@DAQUANDO 1999.01.01
+@FINOA    2026.06.30
+@FRAZIONEIS 0.7637
+
+# --- IL MOTORE, pinnato sulla cella viva (R103_ABTG_PunteLarry_GBPUSD_
+#     772345.txt, letto campo per campo; incrociato con R39e_larry_
+#     gbpusd.txt -- "libro / FPO / solo S")
+InpUsaGuardian=true
+InpTF=16385
+InpPatternMode=0
+InpExitMode=0
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+# InpMaxDaysHold -> E' L'ASSE, in fondo al file.
+InpAllowLong=false
+InpAllowShort=true
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=779817
+InpComment=R160D MAXDAYSHOLD
+InpVerbose=true
+
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     1 / 3 / 5(vivo) / 7 / 9 / 11 / 13 -- centrato sulla viva 5
+InpMaxDaysHold=5||1||2||13||Y
+# =====================================================================

@@ -1,0 +1,271 @@
+# =====================================================================
+#  EA: ABTG_PunteLarry
+#  R160c -- IL TIME-STOP IN GIORNI SUI CINQUE GEMELLI MAI TOCCATI --
+#           sedia GBPJPY H1, magic vivo 772344 -- asse InpMaxDaysHold,
+#           7 celle, finestra LUNGA 27,5 anni con taglio IS/OOS
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+#  Terzo dei CINQUE gemelli R160a-R160e. La motivazione generale (perche'
+#  la manopola, perche' la famiglia, come funziona il codice) sta per
+#  esteso in R160a_maxdayshold_puntelarry_EURAUD.txt ed e' PRESA PER
+#  RIFERIMENTO: qui c'e' solo cio' che su QUESTA sedia e' diverso.
+# ---------------------------------------------------------------------
+#  Si lancia con:
+#    -Expert ABTG_PunteLarry
+#    -Prova prove\R160c_maxdayshold_puntelarry_GBPJPY.txt
+#    -Etichetta r160c -Modello 1 -Deposito 100000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: 7 celle, 14 passate.)
+#  -Modello 1 = OHLC M1 DICHIARATO (tick BCM dal 2024.09.26: su 27 anni
+#  non esistono). DD = LIMITE INFERIORE, profitto = STIMA DEL LORDO.
+#  -Deposito 100000 = deposito dell'ANCORA R103.
+# ---------------------------------------------------------------------
+#  1) MANOPOLA VERGINE SU QUESTA SEDIA -- contato, non citato: 94 CSV
+#     d'archivio hanno la colonna `InpMaxDaysHold`, tutti e 94 con un
+#     solo valore (5). L'unico file prova che la mette ad asse e' R156a
+#     (oggi, U30USD). GBPJPY mai toccata su questo asse.
+#
+#  2) RISCHIO PULITO -- stesso controllo VERO vs DICHIARATO fatto oggi su
+#     970913/770411: report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md r.148:
+#       `PunteLarry GBPJPY 772344 | gira 1,00 | gamba 1,00 | n 1 |
+#        EVENTO 1,00% | xRes 1,00 | "una posizione"`
+#     rapporto VERO/DICHIARATO = 1,00x, nessun bug di taglia. Verificato
+#     anche nel sorgente (r.408, guardia UN SETUP ALLA VOLTA). Nessuna
+#     delle cinque sedie della famiglia e' stata scartata per rischio.
+#
+#  3) UNITA': `Trades` = POSIZIONI. Nessun parziale nel sorgente (grep
+#     "Partial|TP1|ClosePartial|InpTP1Pct": zero occorrenze; input a
+#     r.135-178). Fattore 1,00 MISURATO SUL SORGENTE (classe 226/346).
+#
+#  4) LA COSA CHE SU QUESTA SEDIA VA DETTA PRIMA DI TUTTO IL RESTO --
+#     LA CORSIA RISCHIO E' GIA' APERTA, E NON DA QUESTO ROUND:
+#     il contratto promette DD 2,7% (report/CONTRATTI_SEDIE.md r.147,
+#     dalla finestra corta R38/R39), ma R103 su 6,5 anni ha MISURATO
+#     9,0% alla stessa taglia -- e il referto lo scrive gia' a chiare
+#     lettere (risultati_archivio/R103_REFERTO_FINALE.md r.73: "PunteLarry
+#     GBPJPY 3,3x il promesso"). La regola meccanica firmata il 18/08
+#     (DD lungo > 2x il promesso -> REVISIONE) e' quindi GIA' SCATTATA
+#     su questa sedia PRIMA di questo file: questo round non la apre e
+#     non la chiude, aggiunge il numero dei 21 anni precedenti. Va
+#     scritto accanto a qualunque conclusione, altrimenti sembra che il
+#     rilievo nasca qui.
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL TAGLIO IS/OOS -- E UNA SCELTA DI DATA DICHIARATA
+#  a) LA SONDA DICE 1993, IL BANCO DICE 1999, E IO SCRIVO 1999.
+#     - sonda 17/08 (risultati_archivio/sonda_storico_17-08/
+#       215D85D7_ABTG_InfoBroker.csv, riga GBPJPY): PrimaDataTF su H1 =
+#       1993.04.18 (letta da me nel CSV).
+#     - MA il banco e' stato MISURATO: R102_REFERTO_DRIVER_BLOCCO1
+#       r.530-532 riporta TRE simboli forex con "FINESTRA ACCORCIATA" e
+#       la prima operazione a gennaio 1999 (GBPUSD 1999.01.14, EURUSD
+#       1999.01.18, AUDUSD 1999.01.07) anche dove il broker dichiarava
+#       1993 e perfino 1971. Lo stesso referto dichiara la causa
+#       AMBIGUA ("o lo storico M1 non arriva davvero li', o il motore
+#       non aveva le condizioni per operare"): la ambiguita' la riporto,
+#       non la risolvo.
+#     - SCELTA: @DAQUANDO 1999.01.01, cioe' la data che il banco produce
+#       DAVVERO, non quella che il broker dichiara. Motivo: con il 1993
+#       la frazione IS/OOS si calcolerebbe su ~5,7 anni di giorni che
+#       non producono nessuna operazione, cioe' su un pezzo di finestra
+#       FINTO, e il round nascerebbe con un rilievo "FINESTRA
+#       ACCORCIATA" gia' scritto. Questo e' un cambio DICHIARATO
+#       rispetto alla convenzione di R102 (che usa la data della sonda):
+#       chi confronta i due round deve saperlo.
+#  b) IL TAGLIO E' SCELTO PERCHE' L'OOS COINCIDA CON LA FINESTRA R103:
+#       giorni totali 1999.01.01 -> 2026.06.30 ........... 10042
+#       giorni 1999.01.01 -> 2019.12.31 (confine) ........  7669
+#       frazione 7669/10042 = 0,7636924...  -> scritta 0.7637
+#       verifica: floor(10042 * 0.7637) = floor(7669,0754) = 7669
+#                 -> Meta = 2019.12.31, OOS = 2020.01.01 (r.919-921)
+#     >>> IS  1999.01.01 -> 2019.12.31  (21,00 anni)
+#     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
+#     REGIMI DICHIARATI: IS = yen forte post-crisi asiatica, carry trade
+#     2005-2007, crollo 2008 (GBPJPY da 250 a 120: il movimento piu'
+#     violento che questo cross abbia mai fatto), Abenomics 2013-2015,
+#     flash crash del gennaio 2019. OOS = covid, 2022 yen debole,
+#     interventi BoJ, ultimi due anni.
+#     >>> NOTA ONESTA: l'IS di questa sedia contiene il 2008 di GBPJPY,
+#         che e' il regime piu' duro disponibile su questo cross. E' un
+#         pregio per la lettura del RISCHIO (regola B: il vecchio
+#         giudica il rischio) e un avviso per quella del merito.
+#  c) PAVIMENTO IS>=150 (regola A, 16/08), CONTATO PRIMA:
+#     frequenza NOTA da R103: 139 posizioni in 6,50 anni = 21,4/anno.
+#       IS atteso  : 21,4 x 21,00 = ~449 posizioni (>=150: SI, 3,0x)
+#       OOS        : 139 posizioni GIA' MISURATE   (>=150: NO, mancano
+#                    UNDICI operazioni)
+#     >>> QUINDI, DETTO PRIMA DEI NUMERI: su questa sedia il MERITO
+#         RESTA SOSPESO sulla gamba di verifica (regola B, 16/08). Il
+#         round si legge al RISCHIO e alla FORMA. "Il default va bene"
+#         oppure "un'altra cella ha DD piu' basso" sono le uniche
+#         risposte legittime; "questa cella e' meglio" in senso di PF NO.
+#     >>> E LA VIA PER CHIUDERE ANCHE IL MERITO, scritta qui perche' non
+#         si perda: basta un secondo round con taglio a calendario
+#         (FrazioneIS 0.40 sulla stessa finestra), che darebbe OOS
+#         2010-2026 = ~16,5 anni x 21,4 = ~353 posizioni, ben sopra il
+#         pavimento. Il prezzo e' PERDERE L'ANCORA ESATTA (l'OOS non
+#         coinciderebbe piu' con R103 e il banco sporco non sarebbe piu'
+#         rilevabile). Per questo si fa DOPO questo round, non al posto
+#         suo: prima si verifica che il banco riproduca R103, poi si
+#         allarga.
+#     >>> CONTRO-ESEMPIO sull'IS: anche a META' della frequenza recente
+#         l'IS farebbe ~225, sopra 150. Il pavimento dell'IS regge.
+# ---------------------------------------------------------------------
+#  L'ASSE -- 1 / 3 / 5(vivo) / 7 / 9 / 11 / 13, passo 2, centrato sulla
+#  cella viva. Identico a R156a e agli altri quattro gemelli (le cinque
+#  sedie devono essere confrontabili). InpMaxDaysHold=0 resta FUORI: e'
+#  un regime qualitativo diverso, non un punto della stessa retta.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - n: in CALO al crescere di InpMaxDaysHold (canale "un solo slot",
+#    r.408). Qui l'uscita e' R-based (InpExitMode=1, TP a 1,5R) come su
+#    R160a: morso atteso PIU' DEBOLE che sulle due sedie a first
+#    profitable open (R160b EURCAD, R160d GBPUSD).
+#  - DD: nessuna direzione dichiarata. Ma e' LA colonna di questo file
+#    (punto 4): il numero che interessa davvero e' quanto DD fa la cella
+#    viva sui 21 anni che contengono il 2008.
+#  - PF: [MERITO SOSPESO] per il pavimento OOS (139 < 150). Si registra,
+#    non si conclude.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n in discesa quasi monotona,
+#    DD dell'IS PIU' ALTO del 9,0% misurato da R103 sui 6,5 anni (perche'
+#    l'IS contiene il crollo 2008 di questo cross). Se invece l'IS
+#    facesse un DD PIU' BASSO del recente, e' una sorpresa che va
+#    spiegata prima di leggere altro.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: n che non scende affatto fra
+#    cella 1 e cella 13 (meno del 10%): vorrebbe dire che il meccanismo
+#    letto nel codice non e' quello dominante.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE -- PRIMA DI QUALUNQUE ALTRO NUMERO
+#  S1 -- ANCORA: la gamba OOS della CELLA VIVA (5) gira esattamente
+#    finestra, modello, deposito e cella di R103. Deve riprodurre
+#    (R103_REFERTO_FINALE.md r.17, posizione 4):
+#      Trades 139 | PF 1,29 | Equity DD% 9,0 | profitto +17.221
+#    TOLLERANZA: Trades IDENTICO (139); PF e DD entro +/-2% relativo
+#    (margine non nullo per una differenza di banco VERIFICATA: R103
+#    scriveva `Spread=0` nell'.ini, r.178/1315 del suo script, mentre
+#    RIGA_SOTTILE_ROUND.ps1 non passa -Spread, r.1175-1177). Il filtro
+#    InpMaxSpreadPts=300 su GBPJPY vale 30 pip (simbolo a 3 decimali,
+#    point 0,001): non morde a nessuno spread plausibile, quindi il
+#    conteggio degli ingressi non dovrebbe cambiare.
+#    IL BINARIO E' LO STESSO DI R103: `git log --oneline -- mql5/Experts/
+#    ABTG_PunteLarry.mq5` ha due soli commit, l'ultimo `5fc0bc3` del
+#    19/08; R103 e' girato il 24/08.
+#    >>> Se Trades OOS non e' 139, il banco e' diverso: CI SI FERMA.
+#  S2 -- PAVIMENTO: Trades IS >= 150 (atteso ~449). L'OOS e' GIA'
+#    DICHIARATO SOTTO (139): il merito resta sospeso comunque.
+#  S3 -- CELLE: 7 valori distinti su due file (_IS e _OOS).
+#  S4 -- FINESTRA: se il CSV IS mostrasse un n molto piu' basso
+#    dell'atteso (diciamo sotto 250), il sospetto e' che l'accorciamento
+#    misurato da R102 morda anche oltre il 1999: si dichiara e non si
+#    legge l'IS come "21 anni".
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  MERITO: [NON AMMESSO qui] -- pavimento OOS 139 < 150. Solo
+#        RISCHIO e FORMA (regola B, 16/08).
+#    B2  RISCHIO -- il round gira alla taglia VIVA (1,0%, censimento
+#        rischio r.148): i DD si leggono senza conversione.
+#          B2.1  cella sopra 10,0% (muro prop) -> si scrive SUBITO,
+#                prima del Profit Factor. ATTENZIONE: R103 misura gia'
+#                9,0% sulla cella viva nei soli 6,5 anni recenti. Che
+#                l'IS di 21 anni superi il 10% e' plausibile, non
+#                straordinario: e' il numero che questo round va a
+#                cercare, e va riportato com'e'.
+#          B2.2  la corsia REVISIONE e' GIA' APERTA da R103 (3,3x il
+#                promesso di 2,7%, punto 4): questo round AGGIORNA quel
+#                fascicolo, non lo apre. Soglia di riferimento 2 x 2,7%
+#                = 5,4%.
+#    B3  FORMA -- si registra se n scende in modo monotono o quasi (al
+#        massimo UNA inversione fra celle adiacenti).
+#    B4  IL ROUND NON PROMUOVE NIENTE e non spegne niente: nessun
+#        preset, nessuna sedia, forward intatto. Anche un DD brutto
+#        sull'IS non spegne la sedia da solo -- produce una riga per
+#        Claudio, che firma lui.
+#    B5  SELEZIONE: sempre il CENTRO di un tratto contiguo che passa
+#        B2+B3, MAI il picco isolato (R70, R136a/R146c/R153a-R158a).
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  COME POTREBBE SEMBRARE VERDE PER CASO: con OOS a 139 operazioni e 7
+#  celle, la cella "migliore" delle sette e' quasi sempre sopra la media
+#  anche se l'asse non conta niente; e un time-stop diverso cambia il
+#  SOTTOINSIEME di trade (chi occupa lo slot decide chi entra dopo),
+#  quindi due celle vicine possono pescare popolazioni diverse.
+#  COME LO DISTINGUO:
+#    1. QUI IL MERITO NON SI LEGGE PROPRIO (B1): il contro-esempio e'
+#       gia' disinnescato alla radice, perche' nessuna conclusione di PF
+#       e' ammessa.
+#    2. ALTOPIANO, mai picco, anche per il DD (B5).
+#    3. n IN DISCESA e' PREVISTO DAL CODICE (r.408): se non scende, la
+#       lettura del meccanismo e' sbagliata e ci si ferma.
+#    4. IL COSTO NON DECIDE: InpMaxDaysHold non tocca stop, target ne'
+#       lotto (SL r.637-653, riskDist r.665, TP r.672-676, lotto r.687,
+#       tutti in Enter(), all'apertura): la geometria dello stop e'
+#       INVARIANTE lungo l'asse, quindi nessuna differenza fra celle e'
+#       un artefatto di spread (trappola classe 292/347).
+#    5. UN SOLO CROSS, DUE REGIMI: qualunque cosa esca qui vale per
+#       GBPJPY, non per la famiglia.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI
+#    - MODELLO OHLC M1 su 27,5 anni: DD limite inferiore, profitto stima
+#      del lordo.
+#    - SPREAD corrente applicato al 1999-2008: su GBPJPY di allora era
+#      molto piu' largo. Il profitto dell'IS e' OTTIMISTICO di una
+#      quantita' [NON MISURATA].
+#    - DATA D'INIZIO: 1999.01.01 e' una scelta DICHIARATA (punto a), non
+#      la data della sonda (1993.04.18).
+#    - CANCELLO DI COSTO: `<=68,8x` [CONDIZIONATO: spread illeggibile]
+#      (report/CENSIMENTO_CONTRATTI_v2.md r.339) -- e questo round non lo
+#      sposta (stop invariante lungo l'asse). `spread_flotta/` non ha un
+#      file per GBPJPY: solo D30EUR/NASUSD/U30USD.
+#    - InpMaxDaysHold = 0 (time-stop mai): fuori griglia, dichiarato.
+#    - LATO SEPARATO: [NON MISURATO qui]. Gira SOLO LONG come la cella
+#      viva (InpAllowShort=false in R103/R39d).
+#    - GUARDIAN: InpUsaGuardian=true (valore R103, default sorgente
+#      r.135), fail-open nel tester senza GlobalVariable.
+#    - InpAtrSlMult: INERTE con InpSLMode=0 (il ramo che la usa e'
+#      r.653). Pinnata al valore vivo, non tocca nessun numero.
+#    - TEMPO MACCHINA: [STIMATO] ~25-30 minuti (scala da R102 blocco 1,
+#      6 passate su ~27 anni H1 OHLC in 19 minuti, e da R103).
+#
+#  MAGIC VERGINE 779815. Il blocco dei cinque gemelli e' 779813 /
+#  779814 / 779815 / 779817 / 779818 (R160a-e): la scelta e il perche'
+#  dei due salti (779807 gia' preso da `R159a_maxhours_gapfill_U30USD.txt`
+#  r.629, scritto in parallelo oggi; 779816 escluso perche' la stringa
+#  compare dentro un numero decimale di un XML d'archivio) sono scritti
+#  per esteso in R160a. 779815 non compare da nessuna parte prima di
+#  questo file -- riverificato.
+#  ORDINE DEI ROUND: nessun altro file prova mette InpMaxDaysHold ad
+#  asse su GBPJPY. Nessun doppione in coda.
+# =====================================================================
+
+@SIMBOLO  GBPJPY
+@PERIODO  H1
+@DAQUANDO 1999.01.01
+@FINOA    2026.06.30
+@FRAZIONEIS 0.7637
+
+# --- IL MOTORE, pinnato sulla cella viva (R103_ABTG_PunteLarry_GBPJPY_
+#     772344.txt, letto campo per campo; incrociato con R39d_larry_
+#     gbpjpy.txt -- "punta / exit R / solo L")
+InpUsaGuardian=true
+InpTF=16385
+InpPatternMode=1
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+InpSLBufferATR=0.1
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+# InpMaxDaysHold -> E' L'ASSE, in fondo al file.
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=779815
+InpComment=R160C MAXDAYSHOLD
+InpVerbose=true
+
+# --- L'UNICO ASSE (7 celle x 2 finestre = 14 passate)
+#     1 / 3 / 5(vivo) / 7 / 9 / 11 / 13 -- centrato sulla viva 5
+InpMaxDaysHold=5||1||2||13||Y
+# =====================================================================

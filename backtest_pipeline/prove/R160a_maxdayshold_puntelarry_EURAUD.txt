@@ -369,9 +369,26 @@
 #      lunghe + 7 OOS corte. Non e' una misura: e' un ordine di
 #      grandezza da verificare al primo giro.
 #
-#  MAGIC VERGINE 779807 (grep su tutto il repo, 15/09/2026: i 7798xx
-#  gia' usati sono 779800-779806 e 779810/779820/.../779899; 779807 non
-#  compare da nessuna parte prima di questo file).
+#  MAGIC VERGINE 779813, e il blocco dei cinque gemelli e'
+#  779813 / 779814 / 779815 / 779817 / 779818 (R160a-e).
+#  >>> PERCHE' NON 779807-779811, che era la scelta iniziale: il primo
+#      giro di grep dava liberi 779807+, ma il CONTROLLO RIFATTO PRIMA
+#      DI CONSEGNARE ha trovato 779807 gia' pinnato da
+#      `R159a_maxhours_gapfill_U30USD.txt` (r.629), file scritto IN
+#      PARALLELO oggi stesso da un altro round e comparso nel repo dopo
+#      il mio primo grep. Collisione evitata spostando tutta la serie
+#      R160 piu' avanti: un magic condiviso fra due round e' esattamente
+#      il difetto gia' pagato con `770901` (CENSIMENTO_CONTRATTI_v2.md
+#      r.265-271) e non si ripete per fretta.
+#  >>> PERCHE' IL BLOCCO SALTA 779816: la stringa "779816" compare una
+#      volta nel repo, dentro un numero decimale di
+#      risultati_ottimizzazione/SupertrendReversal_Multi_XAUUSD_H4.xml
+#      (r.2310). NON e' un magic, ma un grep futuro la troverebbe e
+#      costerebbe a qualcuno dieci minuti di verifica: si salta.
+#  I 7798xx occupati prima di questo file: 779800-779806, 779807
+#  (R159a di oggi), 779810 (R125b) e 779820/.../779899 (R125c e
+#  seguenti). 779813-779815 e 779817-779818 non compaiono da nessuna
+#  parte -- riverificato dopo la correzione.
 #  ORDINE DEI ROUND: nessun altro file prova mette InpMaxDaysHold ad
 #  asse su EURAUD (l'unico che la muove e' R156a, su U30USD). Questo
 #  file non duplica niente in coda.
@@ -403,7 +420,7 @@ InpAllowShort=true
 InpMaxSpreadPts=300
 InpEntryWindowBars=3
 InpRiskPercent=1.0
-InpMagic=779807
+InpMagic=779813
 InpComment=R160A MAXDAYSHOLD
 InpVerbose=true
 

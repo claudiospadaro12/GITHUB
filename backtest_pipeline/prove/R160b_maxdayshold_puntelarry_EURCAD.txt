@@ -214,9 +214,13 @@
 #      6 passate su ~27 anni H1 OHLC in 19 minuti; e da R103: 25 sedie
 #      su 6,5 anni in 36 minuti). Da verificare al primo giro.
 #
-#  MAGIC VERGINE 779808 (grep su tutto il repo, 15/09/2026: i 7798xx
-#  usati sono 779800-779806, 779807 (R160a di oggi) e 779810/779820/.../
-#  779899; 779808 non compare prima di questo file).
+#  MAGIC VERGINE 779814. Il blocco dei cinque gemelli e' 779813 /
+#  779814 / 779815 / 779817 / 779818 (R160a-e): la scelta e il perche'
+#  dei due salti (779807 gia' preso da `R159a_maxhours_gapfill_U30USD.txt`
+#  r.629, scritto in parallelo oggi; 779816 escluso perche' la stringa
+#  compare dentro un numero decimale di un XML d'archivio e un grep
+#  futuro la troverebbe) sono scritti per esteso in R160a. 779814 non
+#  compare da nessuna parte prima di questo file -- riverificato.
 #  ORDINE DEI ROUND: nessun altro file prova mette InpMaxDaysHold ad
 #  asse su EURCAD. Nessun doppione in coda.
 # =====================================================================
@@ -247,7 +251,7 @@ InpAllowShort=false
 InpMaxSpreadPts=300
 InpEntryWindowBars=3
 InpRiskPercent=1.0
-InpMagic=779808
+InpMagic=779814
 InpComment=R160B MAXDAYSHOLD
 InpVerbose=true
 
