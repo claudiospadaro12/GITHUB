@@ -1698,3 +1698,35 @@ a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
 f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R156a_maxdayshold_puntelarry_U30USD.txt -Etichetta r156a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R157a -- InpSLGapMult SU ABTG_GapFill, U30USD H1 (sedia 772234).
+#  Dodicesima sedia coperta oggi, dal Blocco 2 (nessun candidato
+#  genuino restava nel Blocco 3, esaurito da R156a).
+#
+#  Cancello di costo gia' misurato il 10/09: 35,0x = 88% del pavimento
+#  40x, NO ma FRAGILE (sopra il pavimento duro 13,3x). Questo round
+#  misura se muovere la geometria intera dello stop (sl = weekOpen +
+#  gap x InpSLGapMult, verificato nel sorgente) puo' spostare il
+#  verdetto da NO a SI -- e' la ricetta gia' suggerita dallo stesso
+#  referto del 10/09.
+#
+#  Meccanismo garantito dal codice (non un'osservazione): WeekId() e'
+#  su costante fissa a 7 giorni (non calendario), il time-stop a 48h
+#  chiude sempre entro ~51h dall'apertura -- quindi n atteso QUASI
+#  INVARIANTE lungo l'asse, a differenza di R156a dove il time-stop
+#  governava la cadenza.
+#
+#  Secondo giudizio: PASS dopo classe 352 (una citazione falsa non
+#  bloccante, corretta). Verificato ESPLICITAMENTE che l'asse non
+#  cade nella trappola classe 292/347 (artefatto di costo scambiato
+#  per merito): il file non fa NESSUN claim di merito da questo asse,
+#  solo il cancello di costo geometrico -- nessuna conclusione di
+#  merito che l'artefatto potrebbe falsamente sostenere.
+#
+#  Pavimento IS>=150 non raggiungibile (n=30, servirebbero 17,6 anni):
+#  @FRAZIONEIS 1.0, scopato al solo RISCHIO.
+#
+#  Pin: giro di pin 58448f4 (39mo, 0b4733c -> 1573c8b). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+58448f434e087863e3c4a961b03b71478f9283b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
