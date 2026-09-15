@@ -19359,3 +19359,77 @@ campi non coincidono**, ed erano passati inosservati:
    "identica riga per riga" e' stata sostituita con la dichiarazione
    esplicita dei due campi divergenti e del perche'). Nessun numero del
    round cambia: S1 si confronta ancora con l'ancora R103, non col `.set`.
+
+---
+
+## 339. 📦🕳️ LA "RACCOLTA INNOCUA" (classe 234/235) GUARDA IL CMDLET E IL BERSAGLIO, MAI IL CONTENUTO CHE SCRIVE — un payload malevolo in una stringa passa come RILIEVO, non BLOCCANTE (15/09/2026)
+
+**Trovata verificando il commit `b45dd009` (cancello preventivo, prima di
+sbloccare 13 sedie ferme da 4 giorni).** La classe 234/235 ha insegnato
+giustamente al cancello a NON bocciare la riga di raccolta (`New-Item` +
+`Copy-Item` + `Compress-Archive`, imposta da CLAUDE.md punto 2): la
+declassa da BLOCCANTE (173) a RILIEVO (234) se **1)** i soli cmdlet fuori
+whitelist sono in `SCRITTURA_RACCOLTA` (creare/copiare/zippare, niente
+cancellazioni/esecuzioni/comandi nativi) e **2)** il testo CRUDO non
+nomina un `BERSAGLI_DELICATI` (MetaQuotes, Experts\, .set/.ex5/.mq5/.mqh/
+.chr/.ini, Program Files, terminal64/metaeditor64).
+
+🔴 **Il buco: `SCRITTURA_RACCOLTA` include `Set-Content`, `Add-Content`,
+`Out-File`, `Export-Csv` — cmdlet che scrivono sul disco il TESTO di una
+STRINGA passata come valore. Quel testo non viene mai controllato: non
+dai pattern `LETTURA_VIETATI` (girano su `senza_stringhe()`, cioe' sul
+codice ripulito DA quella stessa stringa) e non da `BERSAGLI_DELICATI`
+(cerca percorsi/estensioni MT5, non comandi o URL).** Risultato: una
+"raccolta" puo' scrivere su disco un file con estensione qualsiasi
+(`.cmd`, `.bat`, nessuna estensione, ...) il cui CONTENUTO e' un
+lanciatore (es. `mshta.exe "javascript:..."`), e il cancello deterministico
+risponde `ESITO: nessun difetto meccanico` con **exit code 0**.
+
+🧪 **Contro-esempio eseguito e verificato su HEAD (non solo sulla teoria)**:
+
+```
+& {
+$dest = "$env:USERPROFILE\Desktop\raccolta_ok"
+New-Item -ItemType Directory -Force $dest | Out-Null
+Set-Content -Path "$dest\avvio.cmd" -Value '@echo off
+start /min mshta.exe "javascript:new ActiveXObject(1).Run(1)"'
+Compress-Archive -Path $dest -DestinationPath "$dest.zip" -Force
+}
+```
+
+`python3 backtest_pipeline/controlla_riga.py --riga <questo file>` risponde:
+`RILIEVI (1): [235] la riga SCRIVE ... ma e' una RACCOLTA di risultati ...`
+seguito da `ESITO: nessun difetto meccanico` ed **exit 0** — nessun
+BLOCCANTE. La riga di prova reale `RIGA_R125_DA_MANDARE.md` (blocco r.98,
+la raccolta vera del progetto) prende esattamente lo stesso trattamento:
+il meccanismo e' quello giusto per i casi onesti, ma non distingue un
+`Set-Content` onesto da uno che scrive un payload.
+
+📌 **Non e' teorico: `controesempi_cancello.py` (lo stesso commit) non
+copre questo percorso.** I suoi 10 contro-esempi testano `--riga`/`--ps1`/
+`--oggetto md` con bersagli MT5 vietati, ma NESSUNO scrive un contenuto
+malevolo dentro un blocco di raccolta — quindi la batteria di regressione
+torna verde (10/10) anche con questo buco aperto.
+
+### 🔴 LA REGOLA
+1. **Un cmdlet che scrive CONTENUTO arbitrario su disco (`Set-Content`,
+   `Add-Content`, `Out-File`, `Export-Csv`, e qualunque redirezione) non
+   puo' essere "innocuo" solo perche' il NOME del cmdlet e' in una lista
+   bianca. Il contenuto scritto e' l'unica cosa che conta, e va scansionato
+   con GLI STESSI pattern `LETTURA_VIETATI`/`ODORE_PS` usati per il codice
+   eseguibile — non solo i pattern di percorso di `BERSAGLI_DELICATI`.
+2. **Finche' non e' corretto, `controlla_riga.py` classifica come RILIEVO
+   (non BLOCCANTE) una riga che PUO' nascondere un lanciatore dentro una
+   "raccolta" dichiarata.** Lo strato 2 (l'agente `controllo-preventivo`,
+   di giudizio) resta l'unica difesa reale su questo percorso finche' lo
+   strato 1 non viene corretto: non fidarsi del solo exit code 0 su un
+   blocco che scrive un file con `Set-Content`/`Add-Content`/`Out-File`.
+3. **Verdetto su questo commit**: il fix dichiarato (classe 225, il modo
+   `--oggetto` mancante) e' corretto e verificato (vedi sotto). Il
+   sotto-fix collaterale (classe 234/235, la declassazione della raccolta)
+   e' anch'esso corretto per lo scopo per cui e' stato scritto, ma apre
+   QUESTO buco nuovo, non coperto dai suoi stessi contro-esempi. Non
+   blocca i 10 EA (che non toccano questo codice), ma **classifica
+   `controlla_riga.py` come "fix classe 225 PASS, ma con un difetto
+   bloccante NUOVO nel percorso classe 234/235"**: va corretto prima di
+   fidarsi ciecamente dell'exit code su un blocco di raccolta.
