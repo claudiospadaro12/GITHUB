@@ -1644,3 +1644,29 @@ a2abbdfc10c02275da85dcb80a49cbd6e316546b | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
 a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DaxValueArea -Prova R141e_daxva_buffer_M15_D30EUR.txt -Etichetta r141e -Modello 4 -Deposito 100000
+# =====================================================================
+#  R155a -- InpTP_RR SU ABTG_SuperWave_DOW_H1_Ottimizzato, U30USD H1
+#  (sedia 770511). Decima sedia coperta oggi. InpSLBufferAtr e
+#  InpSLLookback (le due leve dello stop) sono gia' asse su questa
+#  sedia (R126a/R126b, in attesa di firma) -- InpTP_RR e' ortogonale,
+#  verificato nel sorgente che risk e' calcolato PRIMA che TP_RR entri
+#  in gioco.
+#
+#  Secondo giudizio: PASS dopo classe 349 (il file citava '84 IS/143
+#  OOS' come gia' misurato da R126a -- erano numeri D'ARCHIVIO
+#  dell'08/08, non la corsa vera di R126a (13/09, freschi: 72/131,
+#  classificata GRADO C dallo stesso R126a). Corretto: la conclusione
+#  non cambia, anzi si rafforza -- 72 e' ancora piu' sotto il
+#  pavimento 150 di 84).
+#
+#  Pavimento IS>=150 non raggiungibile (n=227 sull'intera finestra):
+#  @FRAZIONEIS 1.0, una tranche, scopato al solo RISCHIO (Regola B,
+#  16/08). Scartate 771321 (nessuna ancora lunga), 770924 (cancello
+#  di costo 13,6x, il peggiore della flotta), 971501 (DD 45,91%, gia'
+#  firmato NO taglia), 970901 (nessun file di spread archiviato per
+#  XAUUSD -- non verificabile oggi).
+#
+#  Pin: giro di pin 9d22f99 (37mo, 42903d2 -> 45ed226). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+9d22f998fffb154e6bdf881c292fddfd627b8193 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 100000
