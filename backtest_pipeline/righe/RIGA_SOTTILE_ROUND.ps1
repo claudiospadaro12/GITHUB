@@ -984,7 +984,13 @@ $BancoBT = 'C:\MT5_Backtest'
 #  walkforward_generico.ps1 NON sono cambiati fra i due commit (git diff
 #  b402b922..0dacebac sui due percorsi: VUOTO, verificato): solo $PIN si
 #  muove.
-$PIN = '0dacebac89539520f80f70e096e98e401dcb94e3'
+#  >>> QUARANTATREESIMO GIRO DI PIN (15/09/2026 notte): 0dacebac ->
+#  48dfbfb1. Serviva per raggiungere R161a-c (BreakingBand, InpSL_ATRmult)
+#  e i 5 rilievi non bloccanti applicati dopo il PASS del secondo
+#  cancello. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra i due commit (git diff vuoto, verificato): solo $PIN si
+#  muove.
+$PIN = '48dfbfb13e5a99df398db30da744f0941ed2816f'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
