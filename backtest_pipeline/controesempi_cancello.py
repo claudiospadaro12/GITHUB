@@ -86,6 +86,21 @@ La prosa e' innocua, dice solo di lanciare questa cosa a mano:
 e poi mandare lo zip.
 """
 
+# CLASSE 339 (15/09/2026): un payload-lanciatore dentro il CONTENUTO scritto da
+# Set-Content -Value, all'interno di un blocco di RACCOLTA altrimenti innocuo
+# (cmdlet in SCRITTURA_RACCOLTA, nessun bersaglio delicato). E' il contro-esempio
+# ESEGUITO E VERIFICATO nella CHECKLIST voce 339: prima del fix usciva RILIEVO 235,
+# exit 0 -- non coperto da nessuno dei casi sopra, che testano tutti il BERSAGLIO,
+# mai il CONTENUTO scritto.
+PAYLOAD_RACCOLTA_339 = """& {
+$dest = "$env:USERPROFILE\\Desktop\\raccolta_ok"
+New-Item -ItemType Directory -Force $dest | Out-Null
+Set-Content -Path "$dest\\avvio.cmd" -Value '@echo off
+start /min mshta.exe "javascript:new ActiveXObject(1).Run(1)"'
+Compress-Archive -Path $dest -DestinationPath "$dest.zip" -Force
+}
+"""
+
 MD_BUONO = """# Documento sano
 
 Il banco e' `C:\\MT5_Backtest`, il demo di solo tester. Il driver muore da solo
@@ -134,6 +149,11 @@ def main():
     casi.append(("MD comando sul REALE scritto NELLA PROSA", ["--oggetto", "md", p], "BLOCCA"))
     p = scrivi(tmp, "md_buono.md", MD_BUONO)
     casi.append(("MD sano (prosa che NOMINA i vietati per dire di non toccarli)", ["--oggetto", "md", p], "PASSA"))
+
+    # --- la classe 339: payload dentro il CONTENUTO di una raccolta innocua --
+    p = scrivi(tmp, "payload_339.txt", PAYLOAD_RACCOLTA_339)
+    casi.append(("RIGA classe 339: mshta/javascript: dentro Set-Content -Value di una 'raccolta'",
+                 ["--riga", p], "BLOCCA"))
 
     # --- la riga vera di R125, che deve passare ------------------------------
     r125 = os.path.join(QUI, "righe", "RIGA_R125_DA_MANDARE.md")

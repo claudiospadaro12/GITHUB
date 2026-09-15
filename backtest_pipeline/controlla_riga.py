@@ -510,6 +510,77 @@ BERSAGLI_DELICATI = [
     (r"terminal64|metaeditor64", "un eseguibile di MetaTrader"),
 ]
 
+# CLASSE 339 (15/09/2026) -- LA "RACCOLTA INNOCUA" NON GUARDAVA MAI IL CONTENUTO
+# CHE UN Set-Content/Add-Content/Out-File/Export-Csv SCRIVE SU DISCO. senza_stringhe()
+# toglie APPOSTA il testo fra apici dal controllo del CODICE (per non gridare al
+# lupo sui log in italiano dentro un Write-Host) -- ma quello stesso testo tolto
+# e' ESATTAMENTE il VALORE che uno di quei cmdlet scrive su un file, e nessuno lo
+# controllava. Contro-esempio VERIFICATO DAL VIVO (CHECKLIST voce 339): un
+#     Set-Content -Path "...\avvio.cmd" -Value '@echo off / start /min mshta.exe
+#     "javascript:new ActiveXObject(1).Run(1)"'
+# dentro un blocco di raccolta passava come RILIEVO 235, exit 0.
+#
+# Il fix: quando raccolta_innocua() ha gia' escluso i pattern pericolosi nel
+# CODICE (sporche_pattern) e i cmdlet fuori whitelist (sporche_cmdlet), guarda
+# ANCHE il contenuto di OGNI stringa del blocco -- con GLI STESSI pattern
+# pericolosi gia' usati per il codice eseguibile (LETTURA_VIETATI: comandi
+# nativi, New-Object, System.IO, chiamate a metodi che scrivono/eseguono; ODORE_PS:
+# gli indicatori di download) PIU' le firme di lanciatore che il contro-esempio
+# nomina alla lettera (mshta/wscript/cscript/rundll32/regsvr32 -- eseguibili
+# Windows noti come LOLBin, non parole; javascript:/vbscript:/ActiveXObject --
+# protocolli/oggetti COM, non parole; Invoke-Expression/iex/-EncodedCommand --
+# comandi PowerShell, non parole).
+#
+# NON si riusa la lista ALIAS di LETTURA_VIETATI cosi' com'e' (rm, cp, mi, sp,
+# si, ac, ii, rp, md, echo, start, ...): sono 2-3 lettere che collidono con
+# parole italiane comuni nei referti che la raccolta stessa scrive ("si",
+# "l'avvio", "l'accesso" ...). Verificato PRIMA di consegnare (contro-esempio
+# inverso, regola del 10/09) sui 5 file di raccolta onesti del repo: nessuna
+# delle loro stringhe contiene un comando nativo, un LOLBin, New-Object,
+# System.IO, javascript:/vbscript:, ActiveXObject, Invoke-Expression/iex o un
+# indicatore di download, quindi restano pulite con questi pattern.
+CONTENUTO_PERICOLOSO = [
+    (r"\b(taskkill|schtasks|net|reg|attrib|xcopy|robocopy|wmic|sc|mshta|wscript|cscript|rundll32|regsvr32|msiexec|certutil|bitsadmin)\b",
+     "un comando nativo o un eseguibile Windows (LOLBin) noto per lanciare payload"),
+    # "cmd" da solo prende anche il file ".cmd" che la RIGA STESSA sta creando come
+    # PERCORSO (falso positivo misurato scrivendo il contro-esempio: la prima
+    # stesura citava "$dest\avvio.cmd" come prova, non il payload vero). Qui si
+    # vuole l'INVOCAZIONE dell'interprete, non l'estensione del file.
+    (r"\bcmd(?:\.exe)?\s*(?:/c|/k)\b|\bcmd\.exe\b",
+     "l'invocazione dell'interprete comandi cmd.exe"),
+    (r"\.(Kill|Close|CloseMainWindow|Stop|Delete|Remove|Save|WriteAllText|WriteAllLines|AppendText|Create)\s*\(",
+     "una chiamata a un METODO che modifica lo stato (es. .Kill())"),
+    (r"\bNew-Object\b", "New-Object: puo' costruire un WebClient, un oggetto COM o uno scrittore di file"),
+    (r"\[\s*System\.IO\.", "accesso diretto a System.IO"),
+    (r"(?i)\b(javascript|vbscript):", "un protocollo di scripting (javascript:/vbscript:), tipico dei lanciatori HTA/mshta"),
+    (r"(?i)ActiveXObject", "la creazione di un oggetto COM via ActiveXObject"),
+    (r"(?i)\b(Invoke-Expression|iex)\b", "Invoke-Expression/iex: esegue del testo come codice"),
+    (r"(?i)-Enc(odedCommand)?\b", "-EncodedCommand: codice PowerShell offuscato in base64"),
+    (r"(?i)\b(irm|iwr|curl|wget|Invoke-RestMethod|Invoke-WebRequest|DownloadString|DownloadFile)\b",
+     "un comando di download (ODORE_PS)"),
+]
+
+def contenuto_stringhe(testo):
+    """I contenuti letterali fra apici singoli o doppi -- lo STESSO testo che
+    senza_stringhe() toglie dal controllo del codice. Qui e' l'esatto contrario:
+    e' l'unica cosa che conta, perche' e' quello che un Set-Content/Add-Content/
+    Out-File/Export-Csv scrive davvero su disco. Stessa approssimazione
+    dichiarata di senza_stringhe(): non gestisce l'escape con backtick.
+    """
+    return re.findall(r'"([^"]*)"', testo, re.S) + re.findall(r"'([^']*)'", testo, re.S)
+
+def contenuto_scritto_pericoloso(crudo):
+    """(True, motivo) se una delle STRINGHE del blocco contiene un pattern da
+    codice eseguibile: il caso della CLASSE 339, un payload-lanciatore nascosto
+    dentro il VALORE che un cmdlet di scrittura mette su disco."""
+    for stringa in contenuto_stringhe(crudo):
+        for pat, perche in CONTENUTO_PERICOLOSO:
+            if re.search(pat, stringa):
+                frammento = stringa.strip().replace("\n", " ")[:70]
+                return True, ("il CONTENUTO scritto su disco contiene " + perche
+                               + " (dentro una stringa: '" + frammento + "')")
+    return False, ""
+
 def raccolta_innocua(crudo, sporche_cmdlet, sporche_pattern):
     """(True, "") se questo blocco e' una raccolta di risultati e nient'altro.
 
@@ -531,6 +602,11 @@ def raccolta_innocua(crudo, sporche_cmdlet, sporche_pattern):
     for pat, che in BERSAGLI_DELICATI:
         if re.search(pat, crudo, re.I):
             return False, "nomina " + che + ": una raccolta copia risultati, non tocca il campo"
+    # CLASSE 339: il cmdlet e' innocuo e il bersaglio e' innocuo, ma il
+    # CONTENUTO che scrive su disco puo' non esserlo -- vedi sopra.
+    pericoloso, motivo = contenuto_scritto_pericoloso(crudo)
+    if pericoloso:
+        return False, "CLASSE339: " + motivo
     return True, ""
 
 def esegue_uno_script(riga):
@@ -596,11 +672,23 @@ def controlla_riga_lancio(riga):
             # classe 235: e' la riga di raccolta, che la regola di casa IMPONE.
             rileva("235", "la riga SCRIVE (" + ", ".join(sorted(set(sporche_cmdlet)))
                    + ") ma e' una RACCOLTA di risultati: nessun terminale, nessun preset,"
-                   + " nessun sorgente, nessuna cancellazione. Non e' pinnata perche' non"
-                   + " scarica niente. Va comunque letto a mano DOVE copia")
+                   + " nessun sorgente, nessuna cancellazione, nessun lanciatore nel CONTENUTO"
+                   + " scritto (classe 339). Non e' pinnata perche' non scarica niente. Va"
+                   + " comunque letto a mano DOVE copia")
         elif sporche:
-            blocca("173", "[" + raccolta_innocua(riga, sporche_cmdlet, sporche_pattern)[1]
-                   + "] la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
+            ok, motivo = raccolta_innocua(riga, sporche_cmdlet, sporche_pattern)
+            if motivo.startswith("CLASSE339:"):
+                # CLASSE 339: il cmdlet e IL bersaglio sono innocui (altrimenti si
+                # sarebbe fermato sopra), ma il CONTENUTO che scrive su disco NO --
+                # e questo, a differenza del RILIEVO 235, resta BLOCCANTE: il nome
+                # del cmdlet non basta piu' a salvare la riga.
+                blocca("339", "la riga SCRIVE (" + ", ".join(sorted(set(sporche_cmdlet)))
+                       + ") con cmdlet e bersaglio innocui, ma " + motivo[len("CLASSE339:"):]
+                       + " -- un payload dentro il contenuto di una 'raccolta' dichiarata"
+                       + " NON si declassa a rilievo")
+            else:
+                blocca("173", "[" + motivo
+                       + "] la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
         else:
             passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
 
