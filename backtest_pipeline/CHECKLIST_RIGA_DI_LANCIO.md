@@ -20165,3 +20165,45 @@ non coincide mai con quello VERO (7) su un file @FRAZIONEIS 1.0.
 Per i file con @FRAZIONEIS 1.0 si controlla il numero di CELLE, mai
 quello di PASSATE -- e nessuna sentinella d'arresto si aggancia al
 conteggio delle passate.
+
+## 355. UN BUCO DI STORICO INSTRADATO A UNA SENTINELLA DI SOGLIA SU n: LE DUE IPOTESI CADONO NELLA STESSA BANDA (controllo-preventivo, 15/09/2026, estensione della classe 178)
+
+Il caso: R160a/R160b (PunteLarry EURAUD/EURCAD) dichiaravano che un
+accorciamento di storico "non dovrebbe mordere" e che se mordesse la
+sentinella S2 (IS>=150) lo avrebbe comunque letto e dichiarato. Falso:
+S2 chiede solo una soglia sul conteggio, e un accorciamento realistico
+(EURAUD dal 2012 invece che dal 2004, EURCAD dal 2008 invece che dal
+1999) produce COMUNQUE un n sopra 150 -- l'ipotesi alternativa cade
+DENTRO la banda (stessa diagnosi della classe 178: se la banda non
+distingue l'ipotesi alternativa, non misura niente).
+
+La prova che il buco e' reale, non teorico: la stessa riga di sonda che
+da' la PRIMA data (`PrimaDataTF`) porta anche il conteggio di barre e
+lo stato "da scaricare (parziale)" sulla stessa riga -- ignorata perche'
+non e' la colonna che si stava cercando. E un driver gemello (quello di
+R102) ha gia' MISURATO che una finestra nominale di 34 anni puo' essere
+operata per soli 10 (GATE 4, densita').
+
+### REGOLA
+Una sentinella di sola SOGLIA su un conteggio (n>=X) non separa "il
+motore opera meno" da "la storia non c'e' davvero" quando l'ipotesi
+alternativa realistica produce comunque un numero sopra la soglia.
+Serve una sentinella SEPARATA che verifichi la finestra EFFETTIVA (data
+della prima operazione + densita' per anno), non solo il totale.
+
+## 356. L'ANTEPRIMA DI -SoloControllo DICHIARA UN MODELLO OPPOSTO A QUELLO DELLA CORSA VERA (controllo-preventivo, 15/09/2026)
+
+`backtest_pipeline/walkforward_generico.ps1` scrive `Model=4` CABLATO
+nell'anteprima `-SoloControllo` (r.1000), mentre la corsa vera usa
+`Model=$Modello` (r.1654) -- il valore che il file prova ha davvero
+dichiarato (es. Model=1 OHLC M1 su una finestra dove i tick non
+esistono). Il driver stesso invita ad aprire quell'anteprima ("l'ini
+che lancerei e' qui, guardalo") e la mette negli appunti. Su una
+famiglia dove il file dichiara "Modello 1 = LIMITE INFERIORE del
+rischio", leggere "Model=4 = TICK REALI" nell'anteprima e' l'esatto
+contrario del limite dichiarato in testa al file.
+
+### REGOLA
+Un'anteprima che il driver invita a leggere deve riflettere lo stesso
+valore della corsa vera, campo per campo -- mai un placeholder cablato
+su un campo che cambia significato (OHLC vs tick).

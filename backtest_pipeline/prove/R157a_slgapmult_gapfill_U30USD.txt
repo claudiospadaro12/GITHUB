@@ -302,8 +302,8 @@
 #    riverifica (B4). Non e'
 #    una prova di regime (Emendamento della Finestra, regola C, 16/08)
 #    e non lo diventa qui.
-#  COME LO DISTINGUO DA UN EDGE VERO O DA UN CANCELLO CHE PASSA PER
-#  CASO, con le misure che questo file produce:
+#  COME LO DISTINGUO DA UN EDGE VERO, con le misure che questo file
+#  produce (il cancello di costo NON e' fra queste -- punto 2 sopra):
 #    1. ALTOPIANO, non picco, per il MERITO: servono >=3 celle
 #       CONTIGUE con DD <= quella della cella viva (o migliore). Una
 #       sola cella isolata non conta, MAI il picco (Regola di casa,

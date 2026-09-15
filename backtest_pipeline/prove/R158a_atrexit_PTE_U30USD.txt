@@ -1,8 +1,10 @@
 # =====================================================================
 #  EA: ABTG_PTE
 #  R158a -- IL PERIODO DELL'ATR CHE DECIDE STOP E TARGET, MAI TOCCATO
-#           SU QUESTA SEDIA -- il gemello VERIFICABILE di R153a (oggi,
-#           stessa manopola su GBPUSD, non verificabile a costo)
+#           SU QUESTA SEDIA -- il gemello di R153a (oggi, stessa
+#           manopola su GBPUSD) sulla sedia che ha lo SPREAD REALE
+#           d'archivio; il cancello di costo resta pero' [NON
+#           MISURABILE DA QUESTO ROUND] anche qui (B4)
 #           U30USD H1, sedia 771321 -- asse InpAtrExitPeriod, 7 celle
 #  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
 # ---------------------------------------------------------------------
@@ -336,11 +338,13 @@
 #    lunga occupi lo slot e ne rifiuti altre, non che il motore trovi
 #    meno occasioni). Su un campione di 31-49 posizioni, bastano 2-3
 #    trade diversi per spostare il PF in modo vistoso.
-#  COME LO DISTINGUO DA UN EDGE VERO O DA UN CANCELLO CHE PASSA PER
-#  CASO, con le misure che questo file produce:
-#    1. ALTOPIANO, non picco: servono >=3 celle CONTIGUE con lo stesso
-#       verdetto di costo (o DD <= quella viva), MAI il picco isolato
-#       (Regola di casa, R70 e ripresa da R136a/R146c/R153a/R154a-157a).
+#  COME LO DISTINGUO DA UN EDGE VERO, con le misure che questo file
+#  produce (il cancello di costo NON e' fra queste -- punto 3 sotto):
+#    1. ALTOPIANO, non picco: servono >=3 celle CONTIGUE con DD <=
+#       quella della cella viva, MAI il picco isolato (Regola di casa,
+#       R70 e ripresa da R136a/R146c/R153a/R154a-157a). Un "verdetto di
+#       costo per cella" NON e' fra i criteri: questo round non lo
+#       produce (B4).
 #    2. n QUASI STABILE (banda 55-85 sopra): se n si muove parecchio fra
 #       celle vicine, il meccanismo del punto 4 (slot occupato piu' a
 #       lungo) sta mordendo forte, e un PF migliore alle celle alte va
