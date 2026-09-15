@@ -1,0 +1,459 @@
+# =====================================================================
+#  EA: ABTG_PTE
+#  R158a -- IL PERIODO DELL'ATR CHE DECIDE STOP E TARGET, MAI TOCCATO
+#           SU QUESTA SEDIA -- il gemello VERIFICABILE di R153a (oggi,
+#           stessa manopola su GBPUSD, non verificabile a costo)
+#           U30USD H1, sedia 771321 -- asse InpAtrExitPeriod, 7 celle
+#  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1: la finestra e l'asse arrivano
+#  TUTTI dalle direttive di questo file, non dalla riga di comando):
+#    -Expert ABTG_PTE
+#    -Prova prove\R158a_atrexit_PTE_U30USD.txt
+#    -Etichetta r158a -Modello 4 -Deposito 100000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 celle, 7 passate
+#   totali -- @FRAZIONEIS 1.0, vedi sotto, quindi NON 14. Se stampa un
+#   numero diverso, ci si ferma prima di lanciare qualunque altra cosa.)
+#  -Modello 4 = TICK REALI: U30USD ha tick BCM dal 2024.09.26 (muro
+#  misurato dalla sonda 17/08, stessa frontiera gia' usata da R154a/
+#  R155a/R156a/R157a sulla stessa coppia simbolo/gruppo indici) --
+#  DIVERSO da R153a (GBPUSD), che ha usato Modello 1 OHLC perche' la sua
+#  finestra parte dal 2000 e il tick non esiste su 26 anni. Qui la
+#  finestra e' quella degli indici (21 mesi) e il tick c'e' per intero:
+#  si usa il modello migliore disponibile, non lo stesso di R153a per
+#  automatismo.
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- coi numeri, non a sensazione,
+#  verificato contro il repo vero oggi (non a memoria di un censimento
+#  vecchio o di un piano scritto da altri)
+#
+#  0) Rigirato oggi `python3 backtest_pipeline/censimento_uscite.py` da
+#     zero (2184 CSV, 333 coppie sedia x manopola) e
+#     `grep -n -- "-Expert <EA>\b" backtest_pipeline/coda/CODA.txt` per
+#     ciascun candidato NASUSD/U30USD/D30EUR (i tre simboli con spread
+#     reale d'archivio -- vincolo di oggi). Scartate le 12 sedie gia'
+#     coperte oggi (EMA200 Dow 771531, ORB 770611, DAX_Apertura 770101,
+#     MaxMinNotte XAUUSD 770402, Dow_Apertura 770202, PTE GBPUSD 771332,
+#     SuperWave U30USD 770531, Cycle NASUSD 4 file, DaxValueArea D30EUR
+#     784105, SuperWave_DOW_H1_Ott U30USD 770511, PunteLarry U30USD
+#     772341, GapFill U30USD 772234): NESSUNA di queste e' su questo
+#     motore o su questa sedia, verificato per grep sui 12 nomi.
+#
+#  1) FRA I RESIDUI SU NASUSD/U30USD/D30EUR, 4 sedie erano genuinamente
+#     "mai mosse e vive" (censimento MAI + non inerte) e non toccate
+#     oggi: `970913` SupRev_NAS_H1_Ott NASUSD (InpSLLookback),
+#     `770411` MaxMinNotte_DAX_Short_Ott D30EUR (InpAtrSLmult),
+#     `770250` Nasdaq_Apertura_US NASUSD (InpRunnerTP_R/InpCloseAtEnd),
+#     `771321` PTE U30USD (InpAtrExitPeriod, questa sedia).
+#     >>> LE ALTRE TRE SONO STATE SCARTATE PER OGGI, COL MOTIVO SCRITTO:
+#       - `970913`: porta un difetto di RISCHIO APERTO e NON MIO da
+#         chiudere qui -- `report/PIANO_CHALLENGE_OTTOBRE.md` r.97: bug
+#         tranche `:261-263` (pavimento del lotto prima di `lotPend`),
+#         **rischio VERO 2,00x il dichiarato**, fix scritto ma NON
+#         applicato/ricompilato, firma pendente di Claudio (voce A2).
+#         Scrivere un asse sull'uscita su una sedia con un bug di
+#         rischio aperto e non mio sposterebbe l'attenzione dal bug
+#         vero: si aspetta quella firma prima di mettere altro sopra.
+#       - `770411`: STESSA CLASSE di problema -- riga 4 della tabella
+#         `report/PIANO_CHALLENGE_OTTOBRE.md`: "2,00x (due pendenti
+#         opposti, :253/:265)". E in piu' lo stop e' [NM] per
+#         costruzione (0 gambe in stop su 5 trade, ATR M15 del DAX mai
+#         misurato): due buchi sommati, non uno.
+#       - `770250`: nessun bug di rischio, ma la sedia ha TROPPE domande
+#         aperte per oggi, verificate nei referti: deposito del round
+#         MAI DICHIARATO, ZERO operazioni dal deploy (30/08), e la
+#         domanda M-C9 ancora aperta ("e' attaccata a 771332, o e' solo
+#         muta?" -- `report/CENSIMENTO_CONTRATTI_v2.md` par.8). Un asse
+#         scritto oggi su una sedia con l'identita' del conto ancora da
+#         confermare rischierebbe di misurare la cosa sbagliata.
+#     `771321` non ha NESSUNO di questi tre difetti (punto 2 sotto):
+#     e' la scelta che resta pulita.
+#
+#  2) VERIFICATO CONTRO IL REPO VERO, IL RISCHIO DI 771321 E' GIA'
+#     PULITO: `report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md` r.150:
+#     `InpMaxPositions 1`, rapporto rischio dichiarato/vero **1,00x**
+#     (nessun bug di taglia o di doppio pendente su questa sedia). E il
+#     conteggio deal/posizioni NON e' un buco aperto come su 971501/
+#     770250/771332: e' GIA' MISURATO, non stimato --
+#     `report/CENSIMENTO_CONTRATTI_v2.md` r.303/384: **40 uscite -> 23
+#     POSIZIONI, fattore 1,74**, contato sui `position_id` distinti di
+#     `risultati_prove/trades_candidati_r23/` (non e' la forbice 2,0-2,3
+#     di altre sedie della stessa famiglia: e' un numero contato).
+#
+#  3) LA MANOPOLA E' LA STESSA DI R153a (oggi, GBPUSD), MAI MOSSA SU
+#     QUESTA SEDIA -- verificato con lo stesso metodo di R153a (non
+#     fidandosi del censimento di 4 giorni fa): `InpAtrExitPeriod`
+#     compare in 178 file CSV con un SOLO valore ovunque (14), e
+#     `grep -rl "InpAtrExitPeriod=.*||Y" prove/*.txt` prima di scrivere
+#     questo file trova SOLO R153a (oggi stesso, su GBPUSD): zero righe
+#     su U30USD. Non e' un doppione: R153a e questo file sono LO STESSO
+#     asse su DUE sedie diverse dello stesso motore, esattamente come
+#     R154a/R155a hanno fatto assi diversi su due sedie SuperWave.
+#
+#  4) E LA RAGIONE PER CUI VALE LA SPESA OGGI E NON SOLO "MAI MOSSA":
+#     `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.405/666 -- 771321
+#     ha il cancello di costo a **32,5x [INF]** (NO, all'81% del
+#     pavimento 40x), stop **MAI MISURATO** (0 gambe in stop sul demo,
+#     numero solo INFERITO da una formula di scala fra simboli). La
+#     stessa riga scrive gia' la ricetta sbagliata (buffer 5->25 pip e'
+#     INERTE sul Dow, vale 0,25 idx su ~65: serve un buffer in ATR, che
+#     `ABTG_PTE.mq5` non ha) E quella giusta, implicita nel codice letto
+#     al punto 5: il vero regolatore dello stop su questa sedia non e'
+#     il buffer, e' proprio `InpAtrExitPeriod` (il periodo dell'ATR),
+#     che nessuno ha mai mosso. Questo round trasforma quel numero da
+#     [INF] a [MIS] su 7 celle, e verifica se un periodo diverso porta
+#     il cancello di costo da NO a SI -- lo stesso valore che ha aperto
+#     R157a su GapFill oggi (un [INF]/[NO] al pelo con una via scritta
+#     per romperlo).
+#
+#  5) PERCHE' NON GBPUSD (dove la manopola e' stata appena mossa da
+#     R153a): GBPUSD NON ha spread reale d'archivio (vincolo di oggi:
+#     `backtest_pipeline/risultati_archivio/spread_flotta/` ha SOLO
+#     NASUSD/U30USD/D30EUR). Il cancello di costo di R153a resta quindi
+#     [NON MISURATO] per costruzione su quella sedia (dichiarato nel suo
+#     stesso file, sezione "IL COSTO"): "GBPUSD H1 ha tipicamente ATR
+#     15-35 pip" e' un ordine di grandezza, non una misura. Su 771321 il
+#     cancello si misura con NUMERI VERI (spread_orario_U30USD.csv), non
+#     con un ordine di grandezza.
+# ---------------------------------------------------------------------
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria) --
+#  IDENTICO codice di R153a (stesso file .mq5, stessa sedia GEMELLA):
+#    mql5/Experts/ABTG_PTE.mq5:
+#      r.81  input int InpAtrExitPeriod = 14;   // ATR per SL/target
+#      r.296 hAtrExit=iATR(_Symbol,InpTF,InpAtrExitPeriod);
+#      r.469-470 sl = entry -/+ (atr + InpSLbufferPips*pip)
+#      r.478      tp = entry +/- atr*InpTP2_ATRmult      (target finale)
+#      r.532      tgt = openP +/- atr*InpTP1_ATRmult     (1o target, qui
+#                 vivo: InpTP1_ATRmult=0,5)
+#      r.556-561  il TRAILING dopo il breakeven usa l'EMA14, NON l'ATR:
+#                 InpAtrExitPeriod non tocca il trailing.
+#    >>> LE STESSE QUATTRO PROPRIETA' GIA' VERIFICATE DA R153a VALGONO
+#        QUI, STESSO CODICE:
+#        1. hAtrExit e' un handle SEPARATO dall'ingresso (hAtrSlow/
+#           hAtrFast restano fissi): i segnali nascono agli stessi
+#           istanti su tutte e sette le celle.
+#        2. NESSUNA GUARDIA lo disattiva (usato incondizionatamente,
+#           InpTP1_ATRmult=0,5>0 qui come su R153a).
+#        3. RISCHIO IN EURO PER TRADE COSTANTE per costruzione (r.580
+#           LotByRisk): un periodo diverso cambia il LOTTO, non l'euro
+#           rischiato.
+#        4. n PUO' SCENDERE per lo stesso motivo MECCANICO gia' scritto
+#           da R153a: `InpMaxPositions=1` (r.399) -- un ATR piu' lungo
+#           che allunga la durata media occupa lo slot piu' a lungo,
+#           non e' un edge. Stesso CONTRO-ESEMPIO da guardare qui sotto.
+#    >>> LA SOLA DIFFERENZA CON R153a: qui `InpSLbufferPips=5` (contro
+#        25 su GBPUSD, R103_ABTG_PTE_U30USD_771321.txt riga 130, cella
+#        viva), che sull'indice vale **0,05 idx** (`report/
+#        CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.405: "InpSLbufferPips 5
+#        = 0,05 idx"): qui il buffer NON domina lo stop come su GBPUSD
+#        (dove 25 pip erano la parte grande). Su questa sedia lo stop e'
+#        quasi TUTTO ATR: e' la sedia giusta per leggere l'effetto
+#        dell'ATR puro, non annacquato da un buffer fisso grande.
+# ---------------------------------------------------------------------
+#  IL PAVIMENTO DEL LOTTO NON MORDE -- ordine di grandezza
+#    Deposito 100.000 EUR, rischio 1% (taglia di questa corsa, = taglia
+#    viva del preset `sedia_PTE_DOW_771321.set`). Risk/trade = 1.000
+#    EUR. 1 punto indice U30USD = 100 punti MT5, valore per lotto standard
+#    dell'ordine di 1-10 EUR/punto sui CFD indice a questo broker (nessun
+#    referto misura il tick value esatto di U30USD -- [NON MISURATO],
+#    dichiarato). Anche a 1 EUR/punto, per scendere sotto VOLUME_MIN
+#    (0,01) lo stop dovrebbe superare 1.000/(0,01*1) = 100.000 punti
+#    indice: fuori da qualunque regime plausibile del Dow (l'ancora piu'
+#    sotto misura DD 3,26% con lo stesso rischio, quindi lotti ben sopra
+#    il minimo su tutte le celle attese). Il pavimento del lotto non e'
+#    la leva di questo round.
+# ---------------------------------------------------------------------
+#  IL COSTO -- IL CANCELLO DI 40x, VERIFICATO CON DATI REALI D'ARCHIVIO
+#    Fonte: backtest_pipeline/risultati_archivio/spread_flotta/
+#    spread_orario_U30USD.csv. La sedia non ha un orario fisso (nessuna
+#    finestra InpUseTimeWindow, gira su tutte le 24h del grafico H1): si
+#    usa la mediana "TUTTO" della giornata come riferimento prudente
+#    (2,00, riga TUTTO del CSV, IDENTICA alla citazione del referto del
+#    10/09 -- riverificata oggi, non citata a memoria).
+#      pavimento 40x @ spread 2,00: stop >= 80,0 idx.
+#    Lo stop OGGI e' [INF] (~65 idx, `report/CANCELLO_COSTO_FLOTTA_
+#    2026-09-10.md` r.405, scala 314,5 x sqrt(60/1440) -- una stima
+#    incrociata fra simboli/TF, NON una misura su questa sedia): rapporto
+#    ~32,5x, NO all'81% del pavimento. QUESTO ROUND MISURA IL VERO STOP
+#    ALLA CELLA VIVA (periodo 14) PER LA PRIMA VOLTA, e poi lo segue
+#    sulle altre sei celle. Se il periodo piu' lungo (26) allarga l'ATR
+#    a sufficienza, il cancello puo' passare a SI; se il periodo piu'
+#    corto (2) lo restringe, il cancello resta o peggiora NO -- NESSUNA
+#    delle due direzioni e' garantita dal codice (ATR non e' un
+#    moltiplicatore lineare di N come InpSLGapMult su R157a: e' una
+#    media della stessa grandezza fisica, la sua risposta al periodo
+#    dipende dal regime di volatilita' recente, non da una formula
+#    fissa) -- e' esattamente cio' che questo round misura, non lo
+#    anticipo con un numero.
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- IDENTICO a R153a (stessa manopola, stesso
+#  motore, stessa logica di scelta): 2 .. 26 con passo 4, centrato su 14
+#    7 celle, TRE PER PARTE attorno alla cella viva: 2, 6, 10, 14, 18,
+#    22, 26. Bordo BASSO 2 = fine griglia (un ATR a 1 barra sarebbe un
+#    range grezzo, geometria diversa, come gia' escluso da R153a).
+#    Bordo ALTO 26 = fine griglia (quasi il doppio del periodo vivo,
+#    oltre il quale l'ATR diventa una media di oltre un mese di barre H1
+#    e perde la risposta al regime corrente). Passo 4 = un terzo del
+#    valore vivo, stessa proporzione di R153a.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - n (USCITE, Trades del CSV): atteso in CALO LEGGERO al crescere del
+#    periodo, banda LARGA (a differenza di R153a, qui non c'e' un'ancora
+#    diretta sulla STESSA finestra a tick -- solo l'ancora OHLC di R103,
+#    sotto). Attesa: 55-85 uscite su tutte e sette le celle (banda
+#    +/-20% dall'ancora R103 di 68, piu' larga di R153a perche' qui il
+#    modello cambia, OHLC->tick, in aggiunta al normale rumore di
+#    campione).
+#  - STOP MISURATO (idx): NESSUNA direzione forte dichiarata come
+#    certezza (a differenza di R157a, dove il codice impone una
+#    scalatura lineare): l'attesa e' che la cella viva (14) riproduca
+#    l'ordine di grandezza gia' inferito (~65 idx, banda 45-90, +/-35%,
+#    ampia perche' il numero di riferimento e' [INF] non [MIS]). Fra le
+#    celle, l'unica cosa che mi aspetto e' che periodi molto diversi (2
+#    contro 26) NON diano lo stesso numero al centesimo (se lo dessero,
+#    l'ATR non sta rispondendo al periodo e la lettura del codice e'
+#    incompleta).
+#  - CANCELLO DI COSTO (stop/2,00): atteso passare da NO a un valore PIU'
+#    alto (magari ancora NO) alle celle basse (2, ATR piu' reattivo, di
+#    solito piu' PICCOLO in un regime che non spikka spesso) e restare
+#    vicino o sopra all'attuale ~32,5x alle celle alte (26). Il punto
+#    preciso, se esiste un incrocio con 40x, e' cio' che questo round
+#    misura -- non lo anticipo oltre la banda qui sopra.
+#  - DD: attesa 1,5%-6,0% su tutte le celle (l'ancora OHLC/R103 e'
+#    3,26% @1%; banda larga per il cambio di modello OHLC->tick, stessa
+#    ragione di R157a S2). NESSUNA direzione a priori dichiarata fra le
+#    celle (stesso caveat di R153a: potrebbe essere a "U" con minimo
+#    vicino alla cella viva, o monotona -- il round lo misura).
+#  - PF: NESSUNA attesa forte (n atteso troppo piccolo, 55-85, per
+#    distinguere rumore di campione da edge -- vedi il pavimento IS>=150
+#    sotto: qui il MERITO e' comunque sospeso).
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n quasi stabile (banda sopra),
+#    stop che si muove ma resta nell'ordine di grandezza gia' inferito,
+#    cancello di costo che resta vicino al bordo NO/SI senza un salto
+#    netto. Se e' cosi', la risposta onesta e' "il default va bene, il
+#    cancello di costo su questa sedia non si sposta con questa
+#    manopola" -- chiude comunque la casella 3 del certificato di morte
+#    (gestione dell'uscita messa ad asse) su questa sedia, come R153a
+#    l'ha chiusa sulla gemella GBPUSD.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: se n cambiasse piu' del 30%
+#    fra le celle estreme (2 e 26), o se lo stop misurato alla cella
+#    viva cadesse FUORI dalla banda 45-90 idx -- in entrambi i casi la
+#    lettura del codice o la stima [INF] di partenza sono sbagliate, e
+#    vanno corrette prima di leggere il resto come un risultato.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  (regola del 10/09: si costruisce il caso che romperebbe la propria
+#  misura, e si mostra perche' non succede -- o si dichiara che potrebbe)
+#
+#  COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
+#    con n atteso 55-85 uscite (~30-49 posizioni stimate, fattore 1,74)
+#    su UN SOLO regime (21 mesi, Dow prevalentemente al rialzo 2024.09-
+#    2026.06), una cella con un periodo ATR piu' lungo potrebbe
+#    "vincere" solo perche' seleziona un sottoinsieme di posizioni piu'
+#    lunghe in un trend che e' durato tutta la finestra (stesso
+#    meccanismo che R153a ha gia' isolato su GBPUSD, punto 4 della
+#    lettura del codice: InpMaxPositions=1 fa si' che una posizione piu'
+#    lunga occupi lo slot e ne rifiuti altre, non che il motore trovi
+#    meno occasioni). Su un campione di ~30-49 posizioni, bastano 2-3
+#    trade diversi per spostare il PF in modo vistoso.
+#  COME LO DISTINGUO DA UN EDGE VERO O DA UN CANCELLO CHE PASSA PER
+#  CASO, con le misure che questo file produce:
+#    1. ALTOPIANO, non picco: servono >=3 celle CONTIGUE con lo stesso
+#       verdetto di costo (o DD <= quella viva), MAI il picco isolato
+#       (Regola di casa, R70 e ripresa da R136a/R146c/R153a/R154a-157a).
+#    2. n QUASI STABILE (banda 55-85 sopra): se n si muove parecchio fra
+#       celle vicine, il meccanismo del punto 4 (slot occupato piu' a
+#       lungo) sta mordendo forte, e un PF migliore alle celle alte va
+#       letto come selezione di durata, non come geometria migliore --
+#       esattamente la lettura che R153a ha gia' fatto sulla sorella.
+#    3. IL CANCELLO SI LEGGE SULLO STOP MEDIO DI CELLA (7 celle, non su
+#       una gamba sola come il 32,5x di oggi, che e' un [INF] su ZERO
+#       gambe reali): se una cella "SI" e' trascinata da 1-2 outlier, lo
+#       dichiaro leggendo anche la mediana, non solo la media.
+#    4. UN SOLO REGIME: qualunque "vincitore" qui (per costo o per PF)
+#       e' un'ipotesi da riverificare su una finestra diversa o di
+#       regime, quando U30USD avra' piu' storico, MAI un verdetto --
+#       stessa etichetta di R154a-157a sullo stesso periodo.
+# ---------------------------------------------------------------------
+#  IL PAVIMENTO IS>=150 -- VERIFICATO ARITMETICAMENTE PRIMA DI
+#  SCRIVERE QUALUNQUE SENTINELLA, E LA RISPOSTA E' "NON RAGGIUNGIBILE
+#  CON I DATI OGGI DISPONIBILI" -- si scrive lo stesso, per la Regola B
+#  (16/08): il campione sottile sospende il MERITO, mai il RISCHIO.
+#    L'UNITA' E' LA POSIZIONE, NON LA RIGA "Trades" DEL CSV (classe 226
+#    della checklist: `ABTG_PTE` ha `InpTP1Pct=50` vivo -- ogni posizione
+#    con parziale scattato produce 2 righe nel CSV). Per 771321 il
+#    fattore e' GIA' MISURATO (non stimato con la forbice 2,0-2,3 di
+#    altre sedie della famiglia): 40 uscite -> 23 posizioni = **1,74**
+#    (`report/CENSIMENTO_CONTRATTI_v2.md` r.303/384, contato sui
+#    `position_id` di `risultati_prove/trades_candidati_r23/`).
+#    Frequenza NOTA sulla finestra di questo round (R103, stessa
+#    finestra 2024.09.26->2026.06.30, 643 giorni, OHLC M1): n=68 uscite
+#    (`R103_REFERTO_BLOCCO1_INDICI.md` r.13) -> **~39 posizioni STIMATE**
+#    (68 / 1,74; e' un fattore di conversione misurato su UN'ALTRA
+#    finestra della stessa sedia, dichiarato come inferenza, non come
+#    conteggio diretto su questi 68).
+#    Frequenza: 39 posizioni / 643 giorni = 0,0607 posizioni/giorno.
+#    Per IS>=150 E OOS>=150 servono >=300 posizioni totali: alla stessa
+#    frequenza servirebbero 300 / 0,0607 = 4.943 giorni = **13,5 ANNI**.
+#    Contro i 643 giorni (1,76 anni) davvero disponibili in tick per
+#    U30USD (muro dati, sonda 17/08): mancano quasi 12 anni di storico
+#    che il broker non ha.
+#    >>> CONCLUSIONE, SCRITTA PRIMA DI QUALUNQUE NUMERO DI QUESTO ROUND:
+#        IS>=150 NON E' RAGGIUNGIBILE su questa sedia coi dati BCM oggi
+#        disponibili -- stessa diagnosi gia' scritta oggi da R154a/R155a/
+#        R156a/R157a per lo stesso gruppo indici. Questo round quindi:
+#        - NON fa uno split IS/OOS -- DICHIARATO CON '@FRAZIONEIS 1.0'
+#          (sotto, dopo @FINOA): senza di essa il driver userebbe il
+#          default 0,40 e produrrebbe COMUNQUE un IS/OOS striminzito, in
+#          SILENZIO. Nessun CSV *_OOS esiste per questo round: e' voluto
+#          (classe 345 della checklist, gia' documentato da R156a/R157a).
+#        - gira UNA finestra intera, UN solo regime (21 mesi, Dow
+#          prevalentemente al rialzo -- stessa diagnosi di R153a-157a);
+#        - e' scopato AL RISCHIO, alla FORMA e al CANCELLO DI COSTO
+#          (si legge se il DD si muove e se lo stop supera 40x), MAI al
+#          MERITO: "il default va bene" o "un'altra cella e' piu' larga
+#          e passa il cancello" sono le uniche risposte legittime, MAI
+#          "questa cella e' meglio" in senso di PF (Regola B, 16/08).
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  QUESTO ROUND NON HA UN A0/A1 DI MERITO (IS<150 per costruzione,
+#        pavimento sopra) -- SOLO SOGLIE DI RISCHIO, DI FORMA E DI
+#        CANCELLO DI COSTO (Regola B, 16/08).
+#    B2  RISCHIO. Nessuna cella deve avere Equity DD% > 8,0% (sopra il
+#        bordo alto della banda DD di 2,0 punti pieni, ben sotto il muro
+#        prop 10%). Se una cella lo rompe, si scrive SUBITO, prima di
+#        guardare il Profit Factor.
+#    B3  FORMA (non merito). Si registra se n (uscite) resta entro
+#        +/-30% della cella viva lungo tutto l'asse (banda piu' larga di
+#        R153a perche' qui non c'e' un'ancora a tick sulla stessa
+#        finestra: solo l'ancora OHLC di R103). Un esito diverso non e'
+#        un fallimento: e' un'informazione sul meccanismo letto male
+#        (punto 4 sopra), e va corretta la lettura, non il risultato.
+#    B4  CANCELLO DI COSTO (la ragione vera del round). Per ogni cella:
+#        stop medio misurato / 2,00 (mediana U30USD "TUTTO", archivio
+#        spread_flotta). >=40x = SI; 13,3x-40x = NO ma sopra il
+#        pavimento duro; <13,3x = NO sotto il pavimento duro. Si
+#        registra la prima cella (dal basso o dall'alto) che passa a SI,
+#        se esiste, e si legge anche sulla MEDIANA per cella, non solo
+#        sulla media (contro-esempio punto 3).
+#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito (una o piu'
+#        celle sopra 40x, DD sotto muro) non cambia un preset, non
+#        accende/spegne la sedia e non tocca il forward. Taglie,
+#        riaccensioni e rischio restano [FIRMA DI CLAUDIO]. Un solo
+#        regime (21 mesi, un solo rialzo Dow) non e' un verdetto di
+#        merito, e' un check di rischio, di forma e di cancello di costo
+#        (dichiarato in testa al file).
+#    B6  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
+#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3+B4,
+#        MAI il picco isolato (R70, ripreso da R136a/R146c/R153a-157a).
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - MERITO: [NON MISURABILE qui] per costruzione (pavimento sopra).
+#      Se U30USD accumula piu' storico, questo stesso asse andrebbe
+#      rifatto con uno split IS/OOS vero.
+#    - REGIME: 21 mesi, un solo regime (Dow prevalentemente al rialzo
+#      2024.09-2026.06). NON e' una prova di regime (Emendamento della
+#      Finestra, regola C, 16/08). Dichiarato, non nascosto.
+#    - ATR(qualunque periodo) H1 di U30USD: [NON MISURATO in nessun
+#      referto del repo prima di questo round] -- e' esattamente il
+#      buco che questo round chiude, cella per cella.
+#    - Tick value esatto di U30USD in EUR/punto/lotto: [NON MISURATO],
+#      usato solo per l'ordine di grandezza del pavimento del lotto
+#      sopra (che non morde comunque a nessuna cella plausibile).
+#    - LATO SEPARATO (long/short): [NON MISURATO qui]. Gira L+S come la
+#      sedia viva (InpAllowLong=true, InpAllowShort=true nel preset).
+#    - Il fattore uscite->posizioni 1,74 e' MISURATO su 771321, ma su
+#      una finestra DIVERSA da quella di questo round (R23, non R103):
+#      applicarlo al 68 di R103 e' un'INFERENZA, dichiarata come tale,
+#      non un conteggio diretto sui trade di questo round.
+#    - InpSLbufferPips / InpTP1_ATRmult / InpTP2_ATRmult / InpTP1Pct /
+#      InpBreakeven / InpUseTrailing / tutto il blocco ingresso (TMA/
+#      Doji/EMA/WPR): NON sono l'asse di questo file. Pinnati al valore
+#      vivo del preset `sedia_PTE_DOW_771321.set` (= cella R103),
+#      invariati.
+#    - GUARDIAN: InpUsaGuardian=true (default sorgente e valore vivo),
+#      pinnato per completezza, fail-open nel tester senza
+#      GlobalVariable (stesso comportamento di ogni altro round di
+#      questa classe, incluso R153a oggi).
+#
+#  MAGIC VERGINE 779806 (verificato per grep su tutto il repo,
+#  15/09/2026: zero occorrenze prima di questo file -- gia' usati oggi
+#  779801/R153a, 779802/R154a, 779803/R155a, 779804/R156a, 779805/R157a
+#  nella stessa serie).
+#  ORDINE DEI ROUND: nessun altro round tocca InpAtrExitPeriod su
+#  U30USD (mai-ovunque su questa sedia, punto 3): questo file non
+#  duplica R153a (sedia diversa, GBPUSD) e non duplica niente in coda.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+# --- IL MOTORE, pinnato sulla cella viva (mql5/Presets/sedie_piccolo/
+#     .../sedia_PTE_DOW_771321.set, letto campo per campo, identico a
+#     R103_ABTG_PTE_U30USD_771321.txt -- non a memoria)
+InpUsaGuardian=true
+InpTF=16385
+InpTmaSlow=56
+InpAtrSlow=100
+InpMultSlow=2.0
+InpTmaFast=14
+InpAtrFast=30
+InpMultFast=2.0
+InpDojiBodyMaxPct=10.0
+InpUseHeikinAshi=true
+InpRequireOutSlow=false
+InpRequireColorFlip=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseEma200Bias=false
+InpEma200Period=200
+InpEma14Period=14
+InpUseWPR=false
+InpWprPeriod=14
+InpWprOB=-20.0
+InpWprOS=-80.0
+# InpAtrExitPeriod -> E' L'ASSE, in fondo al file.
+InpSLbufferPips=5.0
+InpSLfromDoji=false
+InpTP1_ATRmult=0.5
+InpTP1Pct=50
+InpBreakeven=true
+InpTP2_ATRmult=2.0
+InpUseTrailing=true
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpMaxPositions=1
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+# InpNewsCurrencies: NON pinnato -- un pin a stringa vuota viene
+# IGNORATO da MT5 (classe scoperta da controlla_prova.py, gia' costata
+# un round su ABTG_FiboH4_Multi): il default compilato e' comunque ''
+# (nessun filtro valuta), identico al valore vivo del preset. Omesso
+# per lo stesso motivo di R153a/R154a-157a (nessuno di quei file lo
+# pinna).
+InpComment=R158A ATREXIT
+InpMagic=779806
+InpMaxSpread=0
+InpVerbose=true
+InpSlippagePts=0
+# InpLogImbuto: presente nel sorgente di oggi (arrivato con b45dd00,
+# dopo la cella di riferimento R103). Pinnato FALSE come su R153a:
+# spegne solo la stampa diagnostica per-giorno, i contatori girano lo
+# stesso; in ottimizzazione (7 passate) il Giornale e' per-passata e
+# non si legge.
+InpLogImbuto=false
+
+# --- L'UNICO ASSE (7 celle, una sola finestra: 7 passate totali) --
+#     IDENTICO a R153a (stessa manopola, stesso motore):
+#     2 / 6 / 10 / 14(vivo) / 18 / 22 / 26 -- centrato sulla viva 14
+InpAtrExitPeriod=14||2||4||26||Y
+# =====================================================================
