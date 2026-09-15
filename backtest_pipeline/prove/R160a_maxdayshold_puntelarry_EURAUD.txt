@@ -20,7 +20,7 @@
 #
 #  -Modello 1 = OHLC M1, ED E' UN LIMITE DICHIARATO, non una comodita':
 #  i tick reali BCM partono dal 2024.09.26 (2024.07.05 sui metalli, R100
-#  r.53 del suo file prova). Su 22 anni NON ESISTONO. Conseguenze da
+#  r.52 del suo file prova). Su 22 anni NON ESISTONO. Conseguenze da
 #  scrivere accanto a OGNI numero di questo round: il DD che esce e' un
 #  LIMITE INFERIORE del rischio (l'OHLC non vede dentro la barra) e il
 #  profitto e' una STIMA DEL LORDO (spread corrente, zero slippage,
@@ -158,7 +158,7 @@
 #       verifica del driver (walkforward_generico.ps1 r.921,
 #         Meta = Inizio.AddDays(floor(totale * FrazioneIS))):
 #         floor(8049 * 0.7052) = floor(5676,1548) = 5676  ->
-#         Meta = 2019.12.31, OOS = Meta+1 = 2020.01.01 (r.919-920)
+#         Meta = 2019.12.31, OOS = Meta+1 = 2020.01.01 (r.921 per Meta, r.924 per l'OOS)
 #     >>> IS  2004.06.16 -> 2019.12.31  (15,54 anni)
 #     >>> OOS 2020.01.01 -> 2026.06.30  ( 6,50 anni) = FINESTRA R103
 #
