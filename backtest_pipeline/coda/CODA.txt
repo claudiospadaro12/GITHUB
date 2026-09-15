@@ -1554,3 +1554,32 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  770202 vivo su 100k -V3 e piccolo 50503392: nessuno dei due toccato.
 # =====================================================================
 e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R152a_pertrade_DowApertura_770202.txt -Etichetta r152a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R153a -- InpAtrExitPeriod SU ABTG_PTE, GBPUSD H1 (sedia 771332).
+#  Sesta sedia coperta oggi. ABTG_PTE non aveva MAI avuto un file prova
+#  d'uscita armato su nessuna delle sue 3 sedie (grep su CODA.txt:
+#  zero righe). Sbloccata stanotte dal Blocco 1 (b45dd00 PASS).
+#
+#  Secondo giudizio: PASS dopo 1 difetto BLOCCANTE + 2 correzioni di
+#  motivazione (nessuno cambia il verdetto del round). Classe 342:
+#  InpSLbufferPips=25 era citato in prosa ma mancava dal blocco
+#  eseguibile -- avrebbe usato il default compilato (5.0, 5x piu'
+#  piccolo), rompendo S1 su una corsa OHLC da 26 anni. Corretto.
+#  Classe 343: la motivazione citava CENSIMENTO_CONTRATTI.md v1
+#  (superata) per la sedia scelta -- la v2 dice che 771332 ha zero
+#  operazioni in campo e lo stesso difetto di conteggio di 971501
+#  (forbice 206-477, non un n pulito). Il pavimento regge comunque
+#  anche al capo basso (206>150): il verdetto non cambia.
+#
+#  Handle ATR separato dall'ingresso, nessuna guardia lo disattiva,
+#  rischio in denaro costante per costruzione -- verificato nel
+#  sorgente. Ancora R78 (OOS PF 1,09468/DD 9,8654%/n=477) verificata
+#  cifra per cifra sui due CSV. Anche primo collaudo che b45dd00 e'
+#  neutro sul trading di PTE specificamente.
+#
+#  Pin: giro di pin d5f1495 (34mo, 027b921 -> 1ac3cec). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Modello 1 (OHLC M1): screening dichiarato, finestra 2000-2026 fuori
+#  dal muro dei tick BCM.
+# =====================================================================
+d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R153a_atrexit_GBPUSD.txt -Etichetta r153a -Modello 1 -Deposito 100000
