@@ -311,10 +311,23 @@
 #  IL TEST VERO, cella per cella, PER FINESTRA (IS e OOS separate):
 #    Eccesso_i = PF_misurato_i - PF_nullo_i   (PF_nullo: tabella sopra,
 #                0,79 / 0,90 / 0,92 / 0,93)
-#    err.std di PF_misurato_i SI CALCOLA DAI TRADE VERI di quella cella
-#    (media e deviazione standard degli R-multiple, /sqrt(n) -- stesso
-#    metodo della classe 298, tre righe di `statistics`, MAI un punto
-#    nudo), e da li' l'IC 95% di Eccesso_i.
+#    err.std di PF_misurato_i NON si ottiene copiando la ricetta della
+#    classe 298 (media/stdev degli R-multiple /sqrt(n)): quella e' la SE
+#    di una MEDIA/DIFFERENZA di medie (Q1-Q4). PF_misurato_i = W_i/L_i e'
+#    un RAPPORTO fra la somma dei vincenti e la somma dei perdenti, e le
+#    due varianze NON coincidono -- VERIFICATO in questo controllo:
+#    Var(R) = Var(w)+Var(l)+2*W_i*L_i (w,l = contributo positivo/negativo
+#    per trade, mutuamente esclusivi), mentre Var(PF) dal metodo delta e'
+#    (1/L_i^2)*Var(w)/n + (W_i^2/L_i^4)*Var(l)/n - 2*(W_i/L_i^3)*Cov(w,l)/n
+#    -- formule diverse. "Stesso metodo della classe 298" applicato alla
+#    lettera a un RAPPORTO e' un errore di propagazione, non un'estensione
+#    (classe 348, controllo-preventivo 15/09).
+#    METODO CORRETTO, scelto perche' non richiede la derivata delta a mano
+#    su dati non gaussiani a n~150-300: BOOTSTRAP SUI TRADE VERI della
+#    cella (ricampionamento con reinserimento, B>=2000 repliche, PF
+#    ricalcolato ad ogni replica), IC 95% PERCENTILE sulla distribuzione
+#    di Eccesso_i = PF_bootstrap_i - PF_nullo_i. E' lo standard per l'IC
+#    di un Profit Factor (statistica-rapporto) e usa solo i trade veri.
 #
 #  LEGGE FALSIFICATA (esito iii) SOLO SE, in ENTRAMBE le finestre:
 #    - il limite INFERIORE dell'IC 95% di Eccesso_i sta SOPRA ZERO

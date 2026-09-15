@@ -3107,6 +3107,16 @@ calendario -> ~459 feriali -> ~443 sedute** (meno le feste). Taglio del driver
 | 🥉 **3** | `R141d` — `HVAncora` U30USD M30 | Ripara un'**attesa impossibile** e **misura l'ATR(M30) vero di U30USD**, che non abbiamo. Ma l'attesa di frequenza del file del 08/09 **non arriva a 150 in nessuna finestra**: e' un **PASSO 0 di costo**, non un candidato a sedia |
 | 🔴 **4 — NON stanotte** | `R141e` — `DaxValueArea` D30EUR M15 | 🔴 **ANCORA UNICA = NO** + **CALENDARIO per il segnale e BARRE per lo stop** + il profilo che **degenera in un ORB** salendo di TF + il **tetto delle barre** che chiude M5. La cella che paga il pedaggio (40,0x) ha **RR ~1,0 sul target finale e ~0,5 sul primo**; la cella con RR buono (4,1-5,2) sta a **4,7x**, tre volte sotto il duro. 👉 **DOPPIA MORSA, scritta col numero prima della corsa.** Gira come **misura di una legge**, non come candidato: se il PF **sale** col buffer, la regola dell'ancora unica e' **falsificata** su questo motore — e quello e' il risultato piu' importante che il round puo' dare |
 
+> ✏️ **CORRETTO IL 15/09/2026 (controllo-preventivo).** La riga sopra (13/09) usa il criterio
+> a PUNTO SINGOLO "se il PF sale, la legge e' falsificata": **e' quello che la classe 292 (12/09)
+> ha dimostrato insufficiente** — a edge zero il PF sale COMUNQUE del 18% per sola geometria+pedaggio
+> (tabella del PF nullo per cella: 0,79/0,90/0,92/0,93). Il criterio VIVO da qui in poi e' quello
+> riparato il 15/09 (classe 292 riparata, classe 347): "legge falsificata" richiede l'IC 95%
+> dell'Eccesso (PF misurato - PF nullo) sopra zero su >=2 celle adiacenti, in ENTRAMBE le finestre
+> IS/OOS, n>=150 ciascuna, piu' il pavimento PF>=1,10 su almeno una cella — vedi
+> `prove/R141e_daxva_buffer_M15_D30EUR.txt`. Questa riga resta come reperto storico di cosa si
+> pensava il 13/09, non come istruzione per leggere i risultati.
+
 🙋 **E UNA COSA CHE CHIEDE UNA FIRMA, NON UN ROUND:** in `R141c` il pin
 `InpFridayClose = true` e' **NOSTRO** (il sorgente parte a `false`, cioe' tiene le
 posizioni nel fine settimana: su un CFD indice quello misurerebbe il **gap del

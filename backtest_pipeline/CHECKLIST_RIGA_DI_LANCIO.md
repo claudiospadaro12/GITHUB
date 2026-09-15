@@ -19893,3 +19893,49 @@ identico: **prosa aggiornata, struttura operativa no**.
    passeggiata senza deriva alla gambler's-ruin, mai verificata contro un PF nullo misurato su tick
    veri di quel simbolo/TF). Se non si riesce a chiudere questo buco, si dichiara come LIMITE
    esplicito, non si nasconde dentro un test che sembra piu' rigoroso di quanto sia.
+
+---
+
+## 348. 📐➗ "STESSO METODO DELLA CLASSE X" APPLICATO A UNA STATISTICA DIVERSA (SE DI UNA MEDIA COPIATA SU UN RAPPORTO) E' UN ERRORE DI PROPAGAZIONE, NON UN'ESTENSIONE (controllo-preventivo, 15/09/2026)
+
+**Il caso reale.** Nella riparazione della classe 292 dentro `R141e_daxva_buffer_M15_D30EUR.txt`
+(righe 311-317, versione del 15/09), la formula dell'errore standard di `Eccesso_i = PF_misurato_i -
+PF_nullo_i` era dichiarata come *"media e deviazione standard degli R-multiple, /sqrt(n) -- stesso
+metodo della classe 298"*. **La classe 298 aveva calcolato la SE di una DIFFERENZA di medie (Q1-Q4,
+in R).** Qui la statistica non e' una media: `PF = W/L`, il rapporto fra la somma dei vincenti (`W`)
+e la somma dei perdenti (`L`) sullo stesso set di trade, mutuamente esclusivi (`w_i*l_i=0` per ogni
+trade). **Le due varianze non coincidono**, verificato algebricamente in questo controllo:
+`Var(R) = Var(w)+Var(l)+2*W*L` (R = w-l, il singolo R-multiple) contro
+`Var(PF) ~= (1/L^2)*Var(w)/n + (W^2/L^4)*Var(l)/n - 2*(W/L^3)*Cov(w,l)/n` dal metodo delta -- due
+formule diverse, non la stessa a un fattore di scala. Applicare `stdev(R)/sqrt(n)` come se fosse la
+SE del PF avrebbe prodotto un IC 95% di `Eccesso_i` **calcolato con la varianza sbagliata**, proprio
+nel test che la riparazione del 15/09 introduceva per correggere la classe 292 -- un difetto dentro
+la toppa del difetto precedente.
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+Citare "stesso metodo di una classe gia' chiusa" da' l'impressione di riuso disciplinato (la lezione
+di casa: non reinventare l'errore standard ogni volta). Ma un metodo di stima e' legato alla
+STATISTICA che stima, non al file da cui e' stato copiato: la SE di una media (classe 298) e la SE
+di un rapporto fra due somme correlate (qui) sono oggetti matematici diversi, e la formula giusta per
+l'una non e' quella giusta per l'altra solo perche' entrambe finiscono divise per `sqrt(n)`. E'
+l'errore opposto e complementare alla classe 298 stessa: la' si leggeva un ordinamento come se fosse
+una tendenza (mancava del tutto l'errore standard); qui si prende un errore standard vero ma
+CALCOLATO PER UN'ALTRA STATISTICA.
+
+### ✅ COSA SI FA
+- 🔴 Prima di scrivere "stesso metodo della classe X", si verifica che la statistica bersaglio sia
+  della STESSA FAMIGLIA (media vs. media, rapporto vs. rapporto) di quella per cui il metodo citato
+  era stato derivato. Una media e un rapporto di due somme correlate NON sono intercambiabili anche
+  se "hanno lo stesso `/sqrt(n)` alla fine".
+- ✅ Per l'IC di un Profit Factor (o di qualunque rapporto fra somme su trade mutuamente esclusivi),
+  il metodo di casa e' il **BOOTSTRAP sui trade veri** (ricampionamento con reinserimento, B>=2000
+  repliche, IC 95% percentile sulla distribuzione della statistica ricalcolata ad ogni replica): non
+  richiede la derivata delta a mano, non assume normalita' a n piccolo, e usa solo i dati osservati.
+- 🔎 Fix applicato in `R141e_daxva_buffer_M15_D30EUR.txt` (righe 311+): la ricetta media/stdev/sqrt(n)
+  e' stata sostituita con la prescrizione del bootstrap, con la verifica algebrica delle due varianze
+  lasciata nel commento per chi rilegge.
+
+### 🔑 La regola in una riga
+*"Stesso metodo" vuol dire stessa statistica, non stesso `/sqrt(n)` finale: la SE di una media e la
+SE di un rapporto fra due somme correlate sono formule diverse, e vanno derivate (o bootstrap-ate)
+per l'oggetto che si sta davvero misurando.*
