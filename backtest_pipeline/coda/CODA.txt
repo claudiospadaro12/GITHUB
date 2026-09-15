@@ -1905,3 +1905,70 @@ f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 b02d434173c92764f8631764581f13a5503b4d88 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R159a_maxhours_gapfill_U30USD.txt -Etichetta r159a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R161a -- InpSL_ATRmult SU ABTG_BreakingBand, GBPUSD H1 (sedia 772161).
+#  Sedicesima famiglia con manopola d'uscita mai mossa. Qui la manopola
+#  TOCCA davvero lo stop (SL = N x ATR, invece che essere ortogonale
+#  come su GapFill/PunteLarry): il motore di questo round e' bit-per-
+#  bit quello dell'ancora R102 (pin diffati campo per campo). Walk-
+#  forward VERO (@FRAZIONEIS 0.50): unica sedia della famiglia con IS e
+#  OOS entrambi attesi sopra il pavimento 150 (261+261 su 522 posizioni
+#  R102, margine 74%).
+#
+#  Rischio VERO=DICHIARATO 1,00x (CENSIMENTO_RISCHIO_VERO r.154).
+#  Trades=Posizioni condizionato al pin InpTPMode=0 (verificato: il
+#  parziale esiste nel sorgente ma e' dietro quel gate). Cancello di
+#  costo [NON MISURATO]: nessuno dei tre simboli forex ha spread reale
+#  d'archivio, e comunque nessun artefatto della corsia esporta lo
+#  stop per cella (classe 353, verificato a fonte).
+#
+#  ATTENZIONE MERITO: l'ancora sulla finestra lunga (27,5 anni) mostra
+#  gia' un DD 23,43% -- OLTRE il muro prop 10%. Il round misura se lo
+#  stop e' una delle leve per rientrarci, MAI una promozione (B5 lo
+#  vieta esplicitamente).
+#
+#  PASS al primo giro del secondo cancello (5 rilievi non bloccanti
+#  applicati: citazioni di riga, termine mancante nel conto ~55x,
+#  attribuzione di causa non fatta su S5, titolo attesa vs fatto).
+#
+#  Pin: giro di pin 0516350e (43mo, 0dacebac -> 48dfbfb1). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161a_slatrmult_breakingband_GBPUSD.txt -Etichetta r161a -Modello 1 -Deposito 100000
+# =====================================================================
+#  R161b -- InpSL_ATRmult SU ABTG_BreakingBand, EURUSD H1 (sedia 772162).
+#  Secondo dei tre gemelli. @FRAZIONEIS 1.0 (276 posizioni attese su
+#  R102, sopra il pavimento IS ma senza margine per uno split IS/OOS
+#  vero): MERITO SOSPESO per assenza di fuori-campione, non per
+#  campione sottile -- distinzione dichiarata nel file.
+#
+#  Stessa struttura di R161a: rischio 1,00x, Trades=Posizioni
+#  condizionato, cancello di costo [NON MISURATO] (nessuno spread
+#  d'archivio sui tre forex). Su EURUSD esiste l'unica ancora di stop
+#  della famiglia (22,1 pip [MIS] n=1, CANCELLO_COSTO_FLOTTA r.519).
+#
+#  PASS al primo giro del secondo cancello.
+#
+#  Pin: giro di pin 0516350e (43mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161b_slatrmult_breakingband_EURUSD.txt -Etichetta r161b -Modello 1 -Deposito 100000
+# =====================================================================
+#  R161c -- InpSL_ATRmult SU ABTG_BreakingBand, AUDUSD H1 (sedia 772163).
+#  Terzo e ultimo dei tre gemelli. @FRAZIONEIS 1.0 (239 posizioni attese
+#  su R102): MERITO SOSPESO per assenza di fuori-campione. Cancello di
+#  costo [NON MISURATO] e "cieco due volte" su AUDUSD (spread orario
+#  d'archivio assente E la sonda istantanea esce a zero/inutilizzabile).
+#
+#  Stessa struttura dei gemelli: rischio 1,00x, Trades=Posizioni
+#  condizionato. Confronto fra i tre gemelli dichiarato SPORCO per
+#  costruzione (cambiano insieme simbolo E pattern d'ingresso): non
+#  letto come causale, la misura pulita (InpPatternMode a simbolo
+#  fisso) resta lavoro futuro, dichiarato non fatto.
+#
+#  PASS al primo giro del secondo cancello.
+#
+#  Pin: giro di pin 0516350e (43mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161c_slatrmult_breakingband_AUDUSD.txt -Etichetta r161c -Modello 1 -Deposito 100000
+# =====================================================================
