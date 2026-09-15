@@ -1728,12 +1728,48 @@ f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_
 #
 #  Pin: giro di pin 58448f4 (39mo, 0b4733c -> 1573c8b). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#
+#  >>> DISARMATA il 15/09 pomeriggio: il secondo cancello (controllo-
+#      preventivo) ha trovato che B4 ("stop medio misurato / 2,80")
+#      congelava un numero che NESSUN artefatto di questa corsia
+#      produce (RIGA_ROUND_VPS.ps1 copia solo il CSV di ottimizzazione,
+#      colonne fissate da OnTesterDeinit, nessuna e' lo stop;
+#      ExportTrades non esporta SL/entry). QUATTRO giri di cancello
+#      dopo (classe 353, poi i residui nascosti nelle sezioni di
+#      giustificazione/buchi, poi nel titolo del file gemello R158a):
+#      RIARMATA, PASS confermato dal quarto giro sul file corretto.
+#      Pin aggiornato al 40mo giro (a9915cf raggiungibile), verificato
+#      diff vuoto su RIGA_ROUND_VPS.ps1/walkforward_generico.ps1 e
+#      200 su raw.githubusercontent.com per lo script e il file prova.
 # =====================================================================
-#DISARMATA# 58448f434e087863e3c4a961b03b71478f9283b3 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
-#  >>> DISARMATA il 15/09 18:xx: il secondo cancello (controllo-preventivo)
-#      su R158a (stesso schema B4) ha trovato che "stop medio misurato"
-#      NON compare in NESSUN artefatto che questa corsia produce
-#      (RIGA_ROUND_VPS.ps1 copia solo il CSV di ottimizzazione, colonne
-#      fissate da OnTesterDeinit, nessuna e' lo stop; ExportTrades non
-#      esporta SL/entry). R157a congela lo stesso B4 = difetto identico.
-#      Si riarma dopo la stessa correzione applicata a R158a + PASS.
+342f6fdb9acf407a52bad58cde91d22da2fa1cdb | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R158a -- InpAtrExitPeriod SU ABTG_PTE, U30USD H1 (sedia 771321).
+#  Tredicesima sedia coperta oggi (esce dalla stessa caccia di R157a:
+#  manopole d'uscita mai mosse sui tre simboli con spread reale
+#  d'archivio). Gemello di R153a (stessa manopola su GBPUSD), ma qui
+#  il cancello di costo ha lo spread reale (GBPUSD non ce l'ha).
+#
+#  Rischio VERO=DICHIARATO 1,00x (CENSIMENTO_RISCHIO_VERO r.150,
+#  InpMaxPositions=1). Fattore uscite->posizioni 1,74 GIA' MISURATO
+#  su questa sedia (40->23, CENSIMENTO_CONTRATTI_v2 r.303/384).
+#
+#  QUATTRO giri di cancello (classe 353 e i suoi residui, trovati uno
+#  alla volta nelle sezioni via via piu' nascoste: B4/S3 diretti, poi
+#  la prosa dell'attesa, poi le sezioni di giustificazione e i buchi
+#  dichiarati, infine il TITOLO del file stesso e il criterio 1 del
+#  contro-esempio). PASS confermato dal quarto giro. Il cancello di
+#  costo resta [NON MISURABILE DA QUESTO ROUND] -- il round chiude
+#  comunque la casella 3 del certificato di morte (gestione d'uscita
+#  messa ad asse) e produce il contro-esempio algebrico sull'omotetia
+#  ATR (passare 40x non costa nulla in rischio, il lotto compensa 1:1).
+#
+#  Pavimento IS>=150 non raggiungibile (n=68 su R103, ~39 posizioni
+#  stimate, servirebbero 13,5 anni contro 1,76 disponibili):
+#  @FRAZIONEIS 1.0, scopato a RISCHIO e FORMA (MAI merito, MAI costo).
+#
+#  Pin: giro di pin 342f6fdb (40mo, 1573c8b -> a9915cf). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+342f6fdb9acf407a52bad58cde91d22da2fa1cdb | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R158a_atrexit_PTE_U30USD.txt -Etichetta r158a -Modello 4 -Deposito 100000
+# =====================================================================
