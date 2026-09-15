@@ -20442,3 +20442,73 @@ lo stesso: qui erano 24, e nel documento non comparivano.
 ### 🔑 La regola in una riga
 *Un limite superiore sotto la soglia decide quanto un valore esatto: sopprimerlo e'
 buttare via una misura, non un errore.*
+
+---
+
+# CLASSE 359 — 15/09/2026 — LA MACCHINA DICHIARATA IN TESTA NON E' QUELLA CHE LO SCRIPT PRETENDE
+
+> Trovata dal **verificatore di stringhe** sulle due sonde XAUUSD (profondita'
+> tick, pin `e9b47a9d`, e spread orario, pin `50d2f7b6`). Le righe erano per il
+> resto **pulite**: ASCII puro, pin veri e presenti su `origin/lavoro`,
+> `git diff <pin> HEAD` **vuoto** su tutti e tre gli script bersaglio, marcatore
+> controllato prima di eseguire, apici giusti su `-Timeframes 'M1,M5'` (classe
+> 65 disinnescata), chiusura processi **chirurgica** verificata riga per riga,
+> cancello deterministico **pulito**. Il difetto non stava in nessuno di questi.
+
+### 🧨 IL FATTO
+Le due righe portavano in testa **"PC DI BACKTEST"**. Ma gli script pinnati, dopo
+la riparazione di sicurezza del 12/09 (`RIPIEGO_BANCO_v1`), **pretendono
+`C:\MT5_Backtest` e si RIFIUTANO di ripiegare altrove**:
+- `scarica_storico.ps1` r.218-236: se il banco non c'e', `exit 1`;
+- `RIGA_SPREAD_FLOTTA.ps1` r.265-274: se il banco non c'e', `exit 1`.
+
+E il repo documenta `C:\MT5_Backtest` **sul VPS**
+(`report/COME_ALLUNGARE_STORICO_INDICI_2026-09-09.md` r.509 · ERRATA in
+`report/EMA200_DOW_COSA_MANCA_2026-09-12.md` r.287), mentre **"sul PC di
+backtest esiste `C:\MT5_Backtest`?" e' una domanda APERTA E MAI RISPOSTA**
+(`report/RESOCONTO_2026-09-11.md` r.101).
+
+Peggio: nessuno dei due wrapper espone un modo per nominare un altro terminale.
+`RIGA_MISURA_TICK_NASUSD.ps1` **non ha `-TerminaleBacktest`** nel suo `param`
+(r.54-60) e non lo inoltra (r.154-155); `RIGA_SPREAD_FLOTTA.ps1` ha
+`$BANCO_PERC` **cablato** (r.265). Se il banco non e' su quella macchina, le
+righe **non sono lanciabili li'**, punto — e la riparazione va fatta allo
+script, con commit e pin nuovo.
+
+### ⚠️ E LA CONTRADDIZIONE CHE CHIUDE IL CERCHIO
+`RIGA_SPREAD_FLOTTA.ps1` **rifiuta se gira QUALUNQUE `terminal64`** (r.394), non
+solo quello del banco. Sul VPS la flotta e il conto REALE sono accesi per
+definizione: quindi quella sonda **non puo' girare sul VPS**, e insieme
+**pretende una cartella che il repo colloca sul VPS**. Le due condizioni si
+escludono a vicenda: la riga non e' lanciabile da nessuna parte finche' non si
+misura dove sta il banco. (La sonda tick invece **e'** compatibile col VPS,
+perche' `scarica_storico.ps1` guarda solo i processi del banco, r.485-507.)
+
+### 🧠 PERCHE' MORDE
+Non e' un rischio: e' un **giro a vuoto certo**. Le due righe sarebbero morte a
+`exit 1` in pochi secondi, e la sera sarebbe finita a chiedersi se era la rete,
+il pin o il marcatore. E' la stessa lacuna che il 12/09 aveva gia' prodotto
+l'ERRATA "due macchine nominate per la stessa corsa".
+
+### ✅ CHE COSA SI FA
+1. Prima di dichiarare un bersaglio, si **elenca ogni percorso CABLATO** che lo
+   script pretende (`Test-Path` + `exit`/`Muori`) e si verifica che esista **su
+   quella macchina** — non su "una macchina di backtest" in astratto.
+2. Se la risposta e' ignota, la prima cosa che parte **non e' la corsa: e' una
+   riga di SOLA LETTURA** che stampa macchina, Desktop risolto, presenza del
+   banco, `terminal64` accesi (PID + titolo + Path) e installazioni trovate.
+   Costa 5 secondi e trasforma il bersaglio da inferenza in **fatto stampato**
+   (CLAUDE.md, regola dei terminali multipli, punto 2).
+3. La one-liner porta comunque una **precondizione esplicita**:
+   `if(-not (Test-Path 'C:\MT5_Backtest\terminal64.exe')){ throw 'BANCO ASSENTE...' }`
+   — cosi' l'esito e' una frase leggibile, non un `exit 1` da interpretare.
+4. **Corollario sul Desktop** (stesso giro): se la one-liner raccoglie con
+   `$env:USERPROFILE\Desktop\...` ma lo script scrive con
+   `[Environment]::GetFolderPath("Desktop")` (r.131), con un Desktop
+   reindirizzato (OneDrive) la riga annuncia **"NESSUN REFERTO"** su una corsa
+   **riuscita**. Le due risoluzioni del Desktop devono essere **la stessa**.
+
+### 🔑 La regola in una riga
+*Il bersaglio non e' quello che scrivo in testa alla riga: e' l'unica macchina
+che soddisfa TUTTI i percorsi cablati dello script. Se non l'ho misurata, la
+prima riga che parte e' quella che la misura.*
