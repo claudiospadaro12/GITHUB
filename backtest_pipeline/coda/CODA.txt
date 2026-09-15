@@ -1611,3 +1611,36 @@ d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_
 #  @FRAZIONEIS 1.0 (una tranche sola, nessun CSV _OOS -- voluto).
 # =====================================================================
 a2abbdfc10c02275da85dcb80a49cbd6e316546b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R154a_sllookback_SuperWave_U30USD.txt -Etichetta r154a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R141e -- IL BUFFER DELLO STOP SU ABTG_DaxValueArea, D30EUR M15
+#  (magic 784105). RIENTRA DOPO 3 GIORNI FUORI CODA: il 12/09 (classe
+#  292) era stato dimostrato che il falsificatore originale non
+#  falsifica (a edge ZERO il PF sale comunque il 18% per pura
+#  geometria/pedaggio), ma la correzione si era fermata alla diagnosi
+#  -- le sezioni che decidono il verdetto non erano mai state
+#  aggiornate. Riparato oggi (classe 347).
+#
+#  Il nuovo falsificatore: Eccesso_i = PF_misurato_i - PF_nullo_i per
+#  cella (PF_nullo da gambler's ruin, verificato a mano: 0,787/0,900/
+#  0,922/0,931 per le 4 celle). "Legge falsificata" richiede IC 95%
+#  sopra zero su >=2 celle ADIACENTI in ENTRAMBE le finestre (altopiano,
+#  mai un picco isolato), n>=150 ciascuna, piu' il vecchio pavimento
+#  economico (PF>=1,10 su almeno una cella) SOPRA il test, non al suo
+#  posto.
+#
+#  Secondo giudizio: PASS dopo classe 348 (l'errore standard prescritto
+#  per Eccesso_i era il metodo sbagliato -- PF e' un RAPPORTO fra somme
+#  correlate sullo stesso set di trade, non una differenza di medie:
+#  corretto con bootstrap sui trade veri, B>=2000, IC 95% percentile).
+#
+#  Limite dichiarato, non chiuso: il PF nullo e' un modello (gambler's
+#  ruin) mai verificato contro un PF nullo misurato su tick veri D30EUR
+#  M15 -- un bias da autocorrelazione di seduta potrebbe imitare un
+#  altopiano senza edge vero. Non blocca QUESTO round (non promuove
+#  nessuna cella), ma un futuro round che promuova la cella 6800 deve
+#  chiuderlo prima.
+#
+#  Pin: giro di pin a10f345 (36mo, 9df14b7 -> 42903d2). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DaxValueArea -Prova R141e_daxva_buffer_M15_D30EUR.txt -Etichetta r141e -Modello 4 -Deposito 100000
