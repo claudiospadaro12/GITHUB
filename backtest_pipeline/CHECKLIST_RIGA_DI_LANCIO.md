@@ -20229,3 +20229,48 @@ a una sentinella che verifica che la manopola ABBIA AGITO almeno una
 volta (almeno una coppia contigua DIVERSA). Senza quella seconda, un PASS
 va scritto come VACUO. E il conteggio delle celle spazzolate (S5) non
 basta: dice che le celle esistono, non che sono diverse.
+
+---
+
+## 358. 🔼🔽 LA "FRAZIONE CATTURATA" CALCOLATA SULL'ULTIMO DEAL SBAGLIA NEI **DUE** VERSI — e il verso pericoloso e' quello che RASSICURA (15/09/2026)
+
+**Il caso**: la pagella del 15/09 ha stampato due frazioni, e **tutte e due erano sbagliate,
+in direzioni opposte, nello stesso giorno**:
+- `DAX Apertura EU RETEST BUY`: stampato **23%**, vero **29,9%** (sottostima);
+- `STREV NAS H1 S 1/3`: stampato **77%**, vero **45,5%** (**sovrastima di 31,7 punti**).
+
+🔴 **E questo CORREGGE una frase gia' scritta nel diario.** Il **04/09** la stessa colonna
+era stata diagnosticata rotta, ma la conclusione scritta quel giorno era:
+*"e' **sottostimata per costruzione** su ogni posizione col parziale"*. **La meta' «per
+costruzione» e' FALSA**, ed e' stata smentita da una singola giornata.
+
+**Perche' succede**: `analizza_trades.py` calcola la frazione da `close_price`, che nel CSV
+e' il prezzo dell'**ULTIMO deal** della posizione, mentre il `profit` e' **cumulativo** su
+tutti i deal. Con un parziale i due campi descrivono cose diverse.
+
+### 📐 La regola, col segno
+Il verso dell'errore e' **il segno di `(prezzo ultimo deal − prezzo del parziale)`**,
+misurato nella direzione del trade:
+- parziale incassato **meglio** dell'ultimo deal → la colonna **SOTTOSTIMA** (falso
+  allarme: *"ha preso solo il 23%"* mentre ha preso il 29,9%);
+- parziale incassato **peggio** dell'ultimo deal → la colonna **SOVRASTIMA** (falso
+  rassicurante: *"ha preso il 77%"* mentre ha preso il 45,5%).
+
+🔴 **Il secondo caso e' il piu' costoso, e non e' simmetrico al primo**: un falso allarme
+si guarda e si scarta in due minuti; un falso *"tutto bene"* **non si guarda affatto**, e
+nasconde proprio le operazioni in cui il runner ha corso e il parziale ha tagliato — cioe'
+esattamente il difetto che il progetto sta inseguendo da R46 (14/08).
+
+### ✅ CHE COSA SI FA
+La frazione si calcola **sui soldi, non sui prezzi**:
+`profit / (disponibile_in_punti x lotti x valore_punto)` — dove `disponibile` viene da
+`session_high/low` e il valore punto e' quello misurato (`D30EUR` 1,0000 · `U30USD` e
+`NASUSD` 0,8607 EUR/punto/lotto). Cosi' numeratore e denominatore parlano della **stessa
+posizione intera**, parziale compreso.
+⚠️ E resta il vincolo gia' noto: `session_high/low` valgono come MFE/MAE **solo per le
+posizioni nate e morte nello stesso giorno**.
+
+### 🔑 La regola in una riga
+*Quando un campo cumulativo (`profit`) e un campo puntuale (`close_price`) finiscono nella
+stessa formula, l'errore non ha un verso fisso: prima di scrivere "per costruzione", si
+cerca il caso che va dall'altra parte.*
