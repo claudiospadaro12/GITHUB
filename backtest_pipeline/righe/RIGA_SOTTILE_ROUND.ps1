@@ -971,7 +971,14 @@ $BancoBT = 'C:\MT5_Backtest'
 #  due commit (git diff 1573c8b..a9915cf sui due percorsi: VUOTO,
 #  verificato), quindi $SHA_ROUND e $SHA_WALK restano quelle di sempre:
 #  solo $PIN si muove.
-$PIN = 'a9915cfd6c49eaf4fe3041aa2e3e032491c84e8b'
+#  >>> QUARANTUNESIMO GIRO DI PIN (15/09/2026 sera): a9915cf -> b402b92.
+#  Serviva per raggiungere gli ultimi 2 nit di citazione su R160a
+#  (r.919-920->r.921/r.924, r.53->r.52, dentro commenti, zero impatto su
+#  direttive o numeri) e il PASS del secondo cancello su tutti e 5 i
+#  file R160a-e. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra i due commit (git diff 342f6fdb..b402b922 sui due
+#  percorsi: VUOTO, verificato): solo $PIN si muove.
+$PIN = 'b402b922fff064aa9978b22980e64aea3a57afb8'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
