@@ -52,13 +52,19 @@
 #        dichiarata apposta: classe 350 della checklist.
 #     b) Controprova diretta sui file prova, senza passare dal
 #        censimento: `grep -rn "InpMaxHours" backtest_pipeline/prove/
-#        *.txt` trova SOLO pin a valore unico --
+#        *.txt` trova SOLO pin a valore unico, in QUATTORDICI file --
 #        `InpMaxHours=48||48||0||48||N` in R102_ABTG_GapFill_{GBPUSD,
-#        EURUSD,AUDUSD} e in R103_ABTG_GapFill_{GBPUSD,EURUSD,AUDUSD,
-#        U30USD,225JPY} -- piu' la riga di cella fissa in
-#        CELLE_REGIME.txt e le due note di R157a che la dichiarano
-#        "pinnata, NON l'asse". ZERO righe con `||...||Y` su questa
-#        manopola. Non e' mai stata un asse.
+#        EURUSD,AUDUSD}, in R103_ABTG_GapFill_{GBPUSD,EURUSD,AUDUSD,
+#        U30USD,225JPY} e in R36_gapfill_walkforward.txt (r.52);
+#        `InpMaxHours=48` nudo in R37a/R37b/R37c/R37d/R37e (r.19) e in
+#        R157a (r.465) -- piu' la riga di cella fissa in
+#        CELLE_REGIME.txt (r.10-11) e le due note di R157a che la
+#        dichiarano "pinnata, NON l'asse" (r.163, r.427). ZERO righe
+#        con `||...||Y` su questa manopola. Non e' mai stata un asse.
+#        (Elenco RIFATTO per intero il 15/09: la prima stesura ne
+#        nominava otto su quattordici presentandosi come esaustiva --
+#        classe 352, precisione dell'enumerazione. La conclusione non
+#        cambia: i sei file in piu' la pinnano tutti a 48.)
 #     >>> NOTA DI PRECISIONE (classe 352, nata oggi proprio su R157a):
 #         i file R102 per questa famiglia sono TRE, non cinque (solo i
 #         tre forex del Blocco 2); i file R103 sono cinque. Verificato
@@ -209,9 +215,18 @@
 #             168 ore esatte. L'ingresso avviene entro
 #             `InpEntryWindowBars=3` barre H1 dall'apertura della
 #             settimana (r.421), cioe' entro ~3h dall'apertura; la
-#             gamba reale misurata sul demo e' partita all'01:00 del
-#             lunedi' 31/08 (`report/DIAGNOSI_SEDIE_MUTE_2026-09-05.md`
-#             riga 94).
+#             gamba reale sul demo e' entrata alla TERZA barra della
+#             settimana, non alla prima --
+#             `report/DIAGNOSI_SEDIE_MUTE_2026-09-05.md` riga 94
+#             riporta il log del 31/08: alle 01:00 "spread 1000 sopra
+#             il limite 300: rinvio (barra 2 di 3)", alle 02:00
+#             "GAP-FILL BUY ... barra 3 della settimana", uscita alle
+#             14:30. (Il referto intesta la riga "01:00->14:30", che e'
+#             l'inizio della FINESTRA, non l'ingresso; e quelle ore
+#             sono ora LOCALE del log, non ora server -- regola di casa
+#             del 06/08. Nulla di cio' sposta l'aritmetica qui sotto:
+#             il margine e' di ~34 ore, un'ora in piu' o in meno non
+#             lo tocca.)
 #             Da li': la CHIUSURA settimanale del mercato (venerdi'
 #             sera, ~23:00 server) dista ~118 ore dall'ingresso; il
 #             successivo `StartWeek` (dove r.366 leggerebbe
@@ -287,13 +302,31 @@
 #        proprio la geometria dello stop) e, se R157a non bastasse, di
 #        `InpSLMode: 0 -> 1` (stimato ~470 idx dal referto del 10/09,
 #        riga 657).
-#    >>> Qui il 35,0x serve come SENTINELLA: siccome il numero non deve
-#        muoversi, se lo stop medio misurato cambia da cella a cella il
-#        banco e' sporco o la lettura del codice e' sbagliata (S3).
-#        E ha un valore aggiuntivo che il 10/09 non aveva: il 98,0 idx
-#        del referto e' misurato su **UNA SOLA GAMBA** (n=1); questo
-#        round produce ~30 gambe per cella, quindi da' per la prima
-#        volta uno stop medio E una mediana veri per questa sedia.
+#    >>> E IL 35,0x NON E' UNA SENTINELLA DI QUESTO ROUND: E' UN'ANCORA
+#        FERMA. Verificato a fonte il 15/09, non assunto: la corsia
+#        raccoglie UN SOLO artefatto, OptResults_ABTG_GapFill_U30USD
+#        .csv (walkforward_generico.ps1 r.1673 lo nomina, r.1689 lo
+#        copia e cancella l'originale; nient'altro viene copiato). Le
+#        sue colonne sono cablate in OnTesterDeinit (ABTG_GapFill.mq5
+#        r.790): Pass, Profit, Expected Payoff, Profit Factor, Recovery
+#        Factor, Sharpe Ratio, Equity DD %, Trades, Peggior Giornata %,
+#        Perdite Consecutive Max, Serie Perdente Peggiore, piu' i nomi
+#        degli input della passata (r.791-792). NESSUNA e' lo stop.
+#        E il canale per-trade non salva: ExportTrades (r.698-723)
+#        scrive close_time/symbol/magic/position_id/deal_type/volume/
+#        price/net_profit -- niente SL, niente prezzo d'ingresso,
+#        niente open_time -- compone il nome file con InpMagic (r.701),
+#        che qui e' PINNATO, quindi tutte e sette le passate
+#        scriverebbero sullo STESSO file, e comunque questa corsia non
+#        lo copia affatto.
+#        >>> QUINDI: "stop medio misurato per cella" e' un numero che
+#            questo round NON PRODUCE. Se in un referto comparisse, e'
+#            INVENTATO e il referto va fermato. Resta l'ancora a n=1
+#            del 10/09 (98,0 idx, 35,0x, NO all'88%), che questo round
+#            NON riverifica -- ne' cella per cella ne' sulla viva.
+#            (Classe 353 della checklist, gia' pagata su R157a/R158a
+#            il 15/09: una soglia non si congela su una grandezza che
+#            nessun artefatto contiene.)
 # ---------------------------------------------------------------------
 #  L'ASSE E IL PASSO -- 12 / 24 / 36 / 48(vivo) / 60 / 72 / 84 ore
 #    7 celle, passo 12, TRE PER PARTE attorno alla cella viva 48
@@ -359,38 +392,57 @@
 #    (proprieta' 1-3 sopra). Livello atteso: 22-38 (l'ancora OHLC e'
 #    30, banda +-25% per il cambio di modello OHLC->tick). L'attesa
 #    forte non e' il livello, e' l'UGUAGLIANZA fra celle.
-#  - STOP MEDIO MISURATO (idx): atteso IDENTICO fra celle (lo stop non
-#    e' funzione di questa manopola) e intorno a 98,0 idx, banda
-#    70-130 (+-33%: il numero di riferimento ha n=1).
-#  - CANCELLO DI COSTO: atteso FERMO a ~35x su tutte e sette. Se una
-#    cella dice un numero diverso, e' un difetto del banco o della
-#    lettura, non un risultato.
-#  - USCITE PER TIME-STOP (il conteggio che questo round produce per la
-#    prima volta): atteso in CALO al crescere della cella. Banda,
-#    dichiarata larga perche' poggia sull'ancora B che ha n~1:
-#      cella 12h -> fra 8 e 25 posizioni su ~30 chiuse dal time-stop;
-#      cella 48h (viva) -> fra 0 e 8;
-#      celle 60/72/84h -> attese vicine a 0.
-#    >>> QUESTA E' LA PREDIZIONE FALSIFICABILE DEL ROUND, ed e' anche
-#        la sua difesa contro se stesso (vedi contro-esempio 1).
+#  - STOP MEDIO PER CELLA (idx): [NON MISURABILE DA QUESTO ROUND].
+#    Nessuna colonna dell'unico artefatto raccolto lo contiene
+#    (sezione "IL COSTO"). Non e' un'attesa e non e' una sentinella:
+#    per ARITMETICA lo stop e' identico fra le celle (proprieta' 2,
+#    InpMaxHours non compare in nessuna delle tre formule), e nessun
+#    numero di questo round potra' confermarlo ne' smentirlo.
+#  - CANCELLO DI COSTO: [NON MISURABILE DA QUESTO ROUND], stessa
+#    ragione. Resta l'ancora 35,0x / NO all'88% su n=1 del 10/09.
+#    Nessuna cella "dice" un numero di costo: la colonna non esiste.
+#  - USCITE PER TIME-STOP: [NON MISURABILE DA QUESTA CORSIA, e va
+#    detto PRIMA di girare]. Il contatore ESISTE nel sorgente
+#    (cO_timestop, incrementato a r.531 e stampato da PrintFunnel
+#    r.747-749), ma esce SOLO come Print nel log dell'agente di
+#    ottimizzazione -- che questa corsia non copia (copia solo
+#    OptResults_*.csv, r.1689). Il sorgente lo dichiara pure:
+#    "Nessun impatto sul CSV (che nasce da FrameAdd/OnTesterDeinit)"
+#    (r.732). Quindi NESSUNA banda si congela su questo conteggio.
+#  - CIO' CHE QUESTO ROUND PRODUCE DAVVERO SULLA MORDITURA DEL TIME-
+#    STOP, ed e' l'unica misura legittima: il TEST DI IDENTITA' FRA
+#    CELLE CONTIGUE sul CSV (B4). Se Profit (%.2f), Equity DD %
+#    (%.4f) e Trades (%.0f) di due celle contigue coincidono fino
+#    all'ultima cifra STAMPATA, il time-stop non ha morso fra le due;
+#    se differiscono, ha morso. E' un BINARIO per coppia, non un
+#    conteggio di posizioni -- e va scritto cosi', mai tradotto in
+#    "N posizioni chiuse dal time-stop".
+#    >>> LA PREDIZIONE FALSIFICABILE DEL ROUND E' QUESTA, riscritta
+#        sulla grandezza che esiste: attese ALMENO DUE coppie
+#        contigue DIVERSE nella meta' bassa dell'asse (12-24-36-48) e
+#        coppie IDENTICHE nella meta' alta (60-72-84). Se anche le
+#        coppie basse risultassero identiche, vedi contro-esempio T4.
 #  - PROFITTO / PF / DD: NESSUNA direzione dichiarata a priori. Un
 #    time-stop piu' stretto tronca sia i vincenti sia i perdenti prima
 #    di TP/SL, e quale dei due effetti domini dipende da quanto spesso
 #    il riallineamento arriva tardi ma arriva -- che e' esattamente
 #    cio' che non e' mai stato misurato. Chi scrivesse qui una
 #    direzione starebbe indovinando.
-#  - IL RISULTATO CHE MI ASPETTO DI PIU': n identico ovunque, stop
-#    identico ovunque, uscite per time-stop che scendono verso zero
-#    gia' alla cella 36-48, e celle alte (60/72/84) con P/L IDENTICO
-#    fra loro al centesimo. Se e' cosi', la risposta onesta e' "il
-#    time-stop a 48 ore e' gia' di fatto SPENTO su questa sedia: la
-#    manopola non e' un regolatore, e' un paracadute che non si apre
-#    quasi mai" -- ed e' comunque un'informazione che nessuno aveva, e
-#    chiude la casella 3 del certificato di morte su questo asse.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': n identico ovunque, coppie
+#    contigue DIVERSE in basso (il time-stop morde a 12/24h) e
+#    IDENTICHE in alto, con le celle 60/72/84 uguali fra loro al
+#    centesimo. Se e' cosi', la risposta onesta e' "il time-stop a 48
+#    ore e' gia' di fatto SPENTO su questa sedia: la manopola non e'
+#    un regolatore, e' un paracadute che non si apre quasi mai" -- ed
+#    e' comunque un'informazione che nessuno aveva, e chiude la
+#    casella 3 del certificato di morte su questo asse.
 #  - IL RISULTATO CHE MI FAREBBE FERMARE (prima di leggere qualunque
-#    P/L): se n NON fosse identico fra le celle, o se lo stop medio si
-#    muovesse fra le celle. In tutti e due i casi la lettura del codice
-#    sopra e' sbagliata -- e va corretta la lettura, non il risultato.
+#    P/L): se n NON fosse identico fra le celle. Allora la lettura del
+#    codice sopra e' sbagliata -- e va corretta la lettura, non il
+#    risultato. (LA SENTINELLA D'ARRESTO SULLO STOP MEDIO E' STATA
+#    TOLTA il 15/09: era un arresto agganciato a un numero che questo
+#    round non produce -- stessa correzione gia' fatta su R157a lo
+#    stesso giorno, classe 353.)
 # ---------------------------------------------------------------------
 #  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
 #  (regola del 10/09: si costruisce il caso che romperebbe la propria
@@ -408,18 +460,19 @@
 #    raccontando DIVERSE VISTE DI CINQUE TRADE -- e una "curva
 #    monotona bella" su sette punti sarebbe un artefatto della
 #    struttura annidata, NON sette conferme.
-#    >>> COME LO ROMPO, con le misure che questo file produce: si legge
-#        PRIMA il conteggio delle uscite per time-stop cella per cella
-#        (previsto sopra come banda). Se quel conteggio e' 0 su una
-#        cella, quella cella e' NUMERICAMENTE IDENTICA alla cella
-#        superiore, e va dichiarata come tale -- non contata come una
-#        cella d'altopiano. **Un altopiano fatto di celle identiche non
-#        e' un altopiano: e' un solo numero scritto tre volte.** E' la
-#        forma piu' severa della regola R70 applicata a questo asse.
-#    >>> ED E' VERIFICABILE A OCCHIO NEL CSV: se due celle contigue
-#        hanno Profit, DD e Trades uguali fino all'ultima cifra, il
-#        time-stop non ha morso in mezzo. Non serve fidarsi di nessuna
-#        lettura del codice per accorgersene.
+#    >>> COME LO ROMPO, con l'UNICA misura che questo file produce
+#        davvero (NON col conteggio delle uscite, che questa corsia
+#        non raccoglie -- sezione ATTESA): il TEST DI IDENTITA' sul
+#        CSV. Se due celle contigue hanno Profit, DD e Trades uguali
+#        fino all'ultima cifra stampata, il time-stop non ha morso in
+#        mezzo e le due celle sono UNA SOLA osservazione, da dichiarare
+#        come tale -- non due celle d'altopiano. **Un altopiano fatto
+#        di celle identiche non e' un altopiano: e' un solo numero
+#        scritto tre volte.** E' la forma piu' severa della regola R70
+#        applicata a questo asse.
+#    >>> ED E' A PROVA DI LETTURA DEL CODICE: sta tutto in tre colonne
+#        del CSV raccolto, non serve fidarsi di nessuna mia lettura del
+#        sorgente per accorgersene.
 #
 #  (T2) L'ARTEFATTO DI REGIME, che qui ha una direzione PRECISA e
 #    prevedibile: la finestra e' un Dow prevalentemente al rialzo
@@ -448,6 +501,40 @@
 #    toccata dal time-stop: bastano 1-2 trade diversi per spostare il
 #    PF in modo vistoso. Il MERITO e' comunque sospeso per il pavimento
 #    IS>=150 (sotto): nessuna frase di merito uscira' da questo round.
+#
+#  (T4) IL CASO IN CUI S1 E B3 DICONO "PASS" AVENDO MISURATO ZERO --
+#    ed e' il contro-esempio che questo file non aveva costruito
+#    (aggiunto dal controllo-preventivo il 15/09, classe 178).
+#    S1 chiede "n IDENTICO fra le sette celle" e lo presenta come la
+#    prova che l'aritmetica delle 84 ore regge (nessuna posizione
+#    sopravvive al prossimo StartWeek). MA ESISTE UN SECONDO MONDO,
+#    completamente diverso, che produce ESATTAMENTE la stessa lettura:
+#    **il time-stop non scatta MAI, in nessuna delle sette celle**
+#    (ogni posizione chiude a TP o a SL entro 12 ore). In quel mondo n
+#    e' identico, e lo sono anche Profit e DD, in TUTTE E SETTE le
+#    celle -- e S1 "passa" senza aver messo alla prova ne' le 84 ore
+#    ne' la manopola. L'ipotesi alternativa cade DENTRO la banda:
+#    quindi S1, da sola, NON misura quello che dichiara di misurare.
+#    Non e' teorico: l'unica durata misurata su questa sedia (13,5 h)
+#    sta appena SOPRA la cella 12h, cioe' la mordidura e' al pelo.
+#    >>> COME LO ROMPO, e si rompe solo cosi': con il test di identita'
+#        di B4. Se ALMENO UNA coppia contigua e' DIVERSA, il time-stop
+#        ha morso almeno una volta e S1 ha contenuto. Se TUTTE E SEI
+#        le coppie sono identiche, il verdetto onesto e':
+#        **"su questa sedia e su questa finestra InpMaxHours e' INERTE
+#        fra 12 e 84 ore; l'aritmetica delle 84 ore resta NON
+#        VERIFICATA da questo round"** -- e S1/B3 vanno scritti come
+#        VACUI, non come PASS. Resta comunque un risultato (la casella
+#        3 del certificato di morte si chiude lo stesso: l'asse e'
+#        stato girato e misurato), ma NON e' una conferma della
+#        lettura del codice e non va raccontata come tale.
+#    >>> E il controllo che separa i due mondi in modo indipendente
+#        esiste ed e' gratis: S5 (7 valori DISTINTI di InpMaxHours nel
+#        CSV -- la colonna c'e' davvero, OnTesterDeinit r.791-792 e
+#        r.798-799 accodano nomi e valori degli input) esclude il TERZO
+#        mondo, quello in cui l'asse non e' stato spazzolato affatto.
+#        S5 e B4 vanno letti INSIEME: S5 dice "le sette celle sono
+#        davvero sette", B4 dice "quante sono davvero DIVERSE".
 # ---------------------------------------------------------------------
 #  LE SENTINELLE (si leggono PRIMA di qualunque P/L)
 #    S1 -- n IDENTICO FRA LE SETTE CELLE. E' la sentinella piu' forte
@@ -462,10 +549,16 @@
 #      +-25% per OHLC->tick). Se la cella viva cade fuori, il banco e'
 #      sporco (dati diversi da R103 o un pin sbagliato) e il round si
 #      ferma prima di leggere le altre sei.
-#    S3 -- STOP MEDIO IN IDX: banda 70-130 sulla cella viva (98,0
-#      +-33%, il riferimento ha n=1), e IDENTICO fra le sette celle.
-#      Se lo stop si muove lungo l'asse, la proprieta' 2 e' falsa e
-#      tutto il ragionamento va rifatto.
+#    S3 -- STOP MEDIO IN IDX: [NON VERIFICABILE DA QUESTO ROUND].
+#      Nessun artefatto della corsia lo contiene (sezione "IL COSTO",
+#      classe 353). NON e' una sentinella di questo file: resta
+#      l'ancora a n=1 del 10/09 (98,0 idx), da riverificare solo con
+#      una misura dedicata (per-trade con SL/entry esportati).
+#    S3bis -- COPPIE CONTIGUE DIVERSE (la sentinella che SOSTITUISCE
+#      la vecchia S3, ed e' misurabile sul CSV raccolto): fra le SEI
+#      coppie contigue, almeno UNA deve avere Profit/DD/Trades diversi.
+#      Se sono identiche tutte e sei, il round e' un NULLO dichiarato
+#      e S1/B3 vanno scritti come VACUI (contro-esempio T4).
 #    S4 -- DD (cella viva): banda 1,5%-6,5% (ancora 3,21% @1%, margine
 #      largo per il cambio di modello, stessa ragione di R157a S2).
 #    S5 -- CONTEGGIO DELLE CELLE: 7 valori distinti di InpMaxHours nel
@@ -528,10 +621,13 @@
 #        e' costante lungo l'asse (proprieta' 4), quindi un DD che si
 #        muove viene dalla SEQUENZA delle uscite, non dalla taglia.
 #    B3  FORMA / STRUTTURA (non merito), ed e' BINARIA qui, non una
-#        banda: n deve essere IDENTICO sulle sette celle (S1), e lo
-#        stop medio pure (S3). Un esito diverso non e' un fallimento
-#        del motore: e' la prova che ho letto male il sorgente, e si
-#        corregge la lettura prima di leggere qualunque altro numero.
+#        banda: n deve essere IDENTICO sulle sette celle (S1). LO STOP
+#        NON ENTRA IN B3: non e' in nessun artefatto (S3, classe 353).
+#        Un n diverso non e' un fallimento del motore: e' la prova che
+#        ho letto male il sorgente, e si corregge la lettura prima di
+#        leggere qualunque altro numero. E B3 si legge SEMPRE insieme
+#        a S3bis: n identico su sette celle tutte numericamente uguali
+#        e' un PASS VACUO (T4), non un PASS.
 #    B4  IL CONTEGGIO DELLE CELLE GEMELLE (la difesa contro T1). Per
 #        ogni coppia di celle contigue si registra se Profit/DD/Trades
 #        coincidono fino all'ultima cifra: se coincidono, le due celle
@@ -562,13 +658,26 @@
 #      nessun `InpAllowLong`/`InpAllowShort` nel sorgente). E' il buco
 #      che indebolisce T2, ed e' il primo da chiudere in un round
 #      successivo (servirebbero i trade per-deal, non la griglia).
-#    - CANCELLO DI COSTO: [NON SPOSTABILE da questo asse] -- resta
-#      35,0x, NO all'88%. Lo spostamento e' il mestiere di R157a
-#      (InpSLGapMult) e, se non basta, di `InpSLMode: 0 -> 1`.
+#    - CANCELLO DI COSTO: [NON MISURABILE E NON SPOSTABILE da questo
+#      round] -- resta l'ancora 35,0x / NO all'88% su n=1 del 10/09,
+#      che questo round NON riverifica (nessuna colonna dello stop:
+#      sezione "IL COSTO", classe 353). Lo spostamento e' il mestiere
+#      di R157a (InpSLGapMult) e, se non basta, di `InpSLMode: 0 -> 1`.
+#    - STOP PER CELLA (idx): [NON MISURABILE DA QUESTO ROUND].
+#    - CONTEGGIO DELLE USCITE PER TIME-STOP: [NON MISURABILE DA QUESTA
+#      CORSIA]. Il contatore esiste (cO_timestop) ma esce solo come
+#      Print nel log dell'agente, che il driver non copia. Questo round
+#      da' il BINARIO "ha morso / non ha morso" per coppia contigua
+#      (B4), non un conteggio. Per avere il conteggio servirebbe
+#      accodare cO_timestop all'array di FrameAdd (r.756-769): e' una
+#      MODIFICA ALL'EA, fuori dal perimetro di questo file, e va armata
+#      come lavoro a se'.
 #    - DURATA TIPICA DELLE POSIZIONI: l'unico numero esistente (13,51 h)
 #      e' [MIS su n ~ 1] e viene dalla stessa singola gamba del 31/08
-#      che da' anche il 98,0 idx. E' il buco che questo round chiude,
-#      cella per cella, su ~30 gambe.
+#      che da' anche il 98,0 idx. **QUESTO ROUND NON LO CHIUDE**: la
+#      durata per posizione non e' nel CSV, ExportTrades non esporta
+#      l'open_time (r.713-721) e comunque non viene raccolto. Resta un
+#      buco aperto, da chiudere con una misura per-trade dedicata.
 #    - `InpMaxHours = 0` (time-stop spento): FUORI ASSE per scelta
 #      dichiarata (regime diverso, sezione ASSE sopra).
 #    - `InpSLMode` / `InpAtrSlMult`: NON sono l'asse.

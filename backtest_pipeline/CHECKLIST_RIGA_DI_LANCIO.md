@@ -20207,3 +20207,25 @@ contrario del limite dichiarato in testa al file.
 Un'anteprima che il driver invita a leggere deve riflettere lo stesso
 valore della corsa vera, campo per campo -- mai un placeholder cablato
 su un campo che cambia significato (OHLC vs tick).
+
+## 357. UNA SENTINELLA DI IDENTITA' CHE L'IPOTESI "LA MANOPOLA E' INERTE" SODDISFA GRATIS (controllo-preventivo, 15/09/2026, estensione della classe 178)
+
+Il caso: R159a (InpMaxHours su ABTG_GapFill U30USD) faceva di S1 -- "n
+IDENTICO fra le sette celle" -- la prova che l'aritmetica del bordo alto
+(84 ore contro il confine di settimana a 168 ore) reggeva. Ma il mondo in
+cui il time-stop NON SCATTA MAI produce la stessa identica lettura, e in
+piu' rende identici anche Profit e DD: S1 "passa" senza aver esercitato
+ne' la manopola ne' il bordo che pretende di validare.
+
+Differenza dalla 178 classica: li' la banda non separava due ipotesi; qui
+la sentinella e' un'UGUAGLIANZA, e l'ipotesi nulla ("la manopola non fa
+niente") la soddisfa in modo PERFETTO, non approssimato -- quindi sembra
+la conferma piu' forte possibile proprio quando non e' stato misurato
+nulla.
+
+### REGOLA
+Una sentinella che chiede "X IDENTICO fra le celle" va sempre accoppiata
+a una sentinella che verifica che la manopola ABBIA AGITO almeno una
+volta (almeno una coppia contigua DIVERSA). Senza quella seconda, un PASS
+va scritto come VACUO. E il conteggio delle celle spazzolate (S5) non
+basta: dice che le celle esistono, non che sono diverse.
