@@ -978,7 +978,13 @@ $BancoBT = 'C:\MT5_Backtest'
 #  file R160a-e. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
 #  cambiati fra i due commit (git diff 342f6fdb..b402b922 sui due
 #  percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = 'b402b922fff064aa9978b22980e64aea3a57afb8'
+#  >>> QUARANTADUESIMO GIRO DI PIN (15/09/2026 sera): b402b92 -> 0dacebac.
+#  Serviva per raggiungere i tre giri di correzioni sulla classe 353 (e
+#  la nuova classe 357) applicati oggi a R159a. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra i due commit (git diff
+#  b402b922..0dacebac sui due percorsi: VUOTO, verificato): solo $PIN si
+#  muove.
+$PIN = '0dacebac89539520f80f70e096e98e401dcb94e3'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
