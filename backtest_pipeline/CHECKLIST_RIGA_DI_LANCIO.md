@@ -19990,3 +19990,106 @@ l'esecuzione invecchia in silenzio esattamente come un preset non aggiornato (cl
 *"Citato dal file prova" non e' "verificato sull'esito": un file prova descrive un'attesa PRIMA di
 girare, e se il round e' gia' stato eseguito il numero che conta e' quello del CSV vero — che puo'
 avere gia' bocciato l'attesa che si sta per ereditare.*
+
+---
+
+## 350. 🏷️🧩 "MAI MOSSA E VIVA" E "MAI MOSSA MA INERTE" SONO DUE STATI DIVERSI DELLO STESSO CENSIMENTO: IMPASTARLI IN UN'UNICA LISTA CONTA GIUSTO IL TOTALE E SBAGLIA I NOMI (controllo-preventivo, 15/09/2026)
+
+**Caso reale.** `R156a_maxdayshold_puntelarry_U30USD.txt` (772341, `ABTG_PunteLarry`)
+scrive, al punto 3: *"delle 4 'mai mosse e vive' per 772341 (InpTP_R, InpSLMode,
+InpAtrSlMult, InpSLBufferATR, InpMaxDaysHold — letto dal censimento rigirato
+oggi)"* — cinque nomi per un "4". Rigirando `censimento_uscite.py` da zero (non
+fidandosi della prosa) sul magic 772341 si leggono SEI righe, non cinque:
+`InpExitMode` (gia' un ASSE, non "mai mossa"), `InpTP_R`/`InpSLMode`/
+`InpSLBufferATR`/`InpMaxDaysHold` (stato `MAI-gemello`/`MAI-altroEA`/`MAI-ovunque`,
+`inerte: False` — le vere 4 "vive") e `InpAtrSlMult` (stato `MAI-gemello` ma
+`inerte: True`, cioe' **INERTE PER COSTRUZIONE**, la stessa categoria delle 24
+coppie "MAI MOSSE" che il censimento stesso conta separatamente dalle 224 "MAI
+MOSSE E VIVE" nel proprio totale di riepilogo). Il file aveva il numero giusto
+("4") e la lista sbagliata (5 nomi, uno dei quali di un'altra categoria) — lo
+stesso identico impasto ripetuto una seconda volta nella sezione "BUCHI
+DICHIARATI" ("le altre quattro manopole 'mai mosse e vive'", ancora con
+`InpAtrSlMult` dentro invece delle sole 3 rimaste dopo aver tolto l'asse scelto).
+
+### 🧠 PERCHE' MORDE
+Il censimento produce DUE bit indipendenti per ogni coppia sedia x manopola:
+`mai` (mai toccata in nessun round) e `inerte` (il parametro non ha effetto per
+costruzione — es. gated da un altro flag, o dentro un ramo di codice mai
+raggiunto dalla cella viva). "MAI MOSSA E VIVA" e' l'intersezione `mai=True,
+inerte=False`; "INERTE PER COSTRUZIONE" e' `mai=True, inerte=True`. Sono due
+motivi DIVERSI per cui una manopola resta pinnata invariata: una perche' nessuno
+l'ha ancora messa ad asse (candidata futura), l'altra perche' muoverla non
+cambierebbe niente (non e' una candidata, e non lo sara' mai su questa
+costruzione). Scriverle nella stessa lista con la stessa etichetta cancella
+quella differenza per chi rilegge, anche se — come qui — il numero totale
+("4") capita per caso di restare quello giusto e nessun gate del round cambia
+(pinnare un parametro inerte a un valore o a un altro e', per definizione, privo
+di effetto).
+
+### ✅ COSA SI FA
+1. 🔴 **Quando si cita "N manopole mai mosse e vive" da un censimento che
+   distingue `mai`/`inerte`, si filtra ESPLICITAMENTE `inerte=False`** prima di
+   contare e di elencare i nomi — non si copia la lista grezza delle righe "mai"
+   della sedia.
+2. 🔎 **Una manopola INERTE PER COSTRUZIONE, se pinnata, si dichiara con
+   l'etichetta sua propria** ("pinnata, inerte: qualunque valore non cambia il
+   risultato"), mai sotto l'etichetta "vive" — sono avvertimenti diversi per chi
+   userebbe quella manopola come prossimo asse: una "viva" e' un candidato
+   pronto, una "inerte" non lo e' mai.
+3. 🟢 **Se l'impasto non cambia nessun numero del round (come qui: la manopola
+   e' comunque pinnata, in un caso o nell'altro), si corregge lo stesso** — il
+   costo di lasciarlo e' lo stesso della classe 347: chi rilegge la prosa la
+   prende per il censimento vero.
+
+### 🔑 La regola in una riga
+*Un censimento con due bit (`mai`, `inerte`) descrive due categorie diverse anche
+quando il totale numerico non se ne accorge: la prosa che le fonde e' un
+riassunto sbagliato anche se il conto finale torna.*
+
+---
+
+## 351. 📐🔀 UNA COLONNA CSV CHIAMATA "MEDIA" NELLA TESTATA E "MEDIANA" NELLA PROSA: STESSA TRAPPOLA DELLA CLASSE 346, SUL NOME DELLA STATISTICA INVECE CHE SULL'UNITA' (controllo-preventivo, 15/09/2026)
+
+**Caso reale.** `R156a_maxdayshold_puntelarry_U30USD.txt`, cancello di costo,
+contro-esempio "e se l'ora 7 non fosse rappresentativa?": legge la riga `TUTTO`
+di `spread_orario_U30USD.csv` e scrive *"mediana 2,1046"*. La testata del CSV
+e' `...,media_idx,mediana_idx,p95_idx,...`: sulla riga `TUTTO` **`media_idx` =
+2,1046** e **`mediana_idx` = 2,0000** — due colonne distinte, e il file cita il
+valore della prima chiamandolo col nome della seconda. Il numero usato nel
+calcolo (2,1046) e' quello scritto nel CSV, non inventato — solo mal
+etichettato: e siccome 2,1046 > 2,0000 (media sopra mediana, distribuzione con
+coda a destra, coerente con uno spread che ogni tanto allarga parecchio), usare
+"media" al posto di "mediana" e' — qui — la lettura PIU' pessimista delle due,
+non quella comoda: il margine finale (53,7x) resta corretto e anzi piu'
+prudente della mediana vera (che avrebbe dato 56,6x).
+
+### 🧠 PERCHE' MORDE (e perche' non e' la stessa classe 346, anche se e' vicina)
+La classe 346 era un'unita' di misura sbagliata (posizioni scambiate per
+chiusure) che CAMBIAVA il verdetto. Qui la statistica sbagliata (media al posto
+di mediana) NON cambia il verdetto — per fortuna del verso in cui la
+distribuzione e' sbilanciata, non per merito del controllo. Se la coda fosse
+stata a sinistra (mediana sopra la media) lo stesso errore di etichetta
+avrebbe reso il "contro-esempio pessimista" in realta' PIU' comodo della
+mediana vera, cioe' avrebbe indebolito silenziosamente la sentinella che
+dichiara di rinforzare. **Un'etichetta sbagliata che oggi e' innocua e' comunque
+un difetto**, perche' la sua innocuita' dipende da un fatto (la forma della
+coda) che il file non ha verificato e non ha dichiarato.
+
+### ✅ COSA SI FA
+1. 🔴 **Si legge la TESTATA del CSV prima di nominare una colonna in prosa** —
+   `media_idx` e `mediana_idx` sono nomi diversi nella stessa riga, e "la
+   colonna aggregata" non basta come indirizzo.
+2. 🔎 **Se il numero usato e quello della statistica nominata divergono
+   (come qui: 2,1046 citato come "mediana" mentre `mediana_idx` vale 2,0000),
+   si dichiara ESPLICITAMENTE quale delle due si sta usando e perche'** — non
+   si corregge solo l'etichetta lasciando ambiguo il resto.
+3. 🟢 **Si controlla la direzione dell'errore**, non solo la sua esistenza: un
+   nome sbagliato che rende la lettura piu' prudente e' un difetto di forma; lo
+   stesso nome sbagliato con la coda dalla parte opposta sarebbe un difetto di
+   sostanza, e i due non si trattano allo stesso modo in fretta.
+
+### 🔑 La regola in una riga
+*Una colonna CSV ha un nome scritto in testata: citarla con un nome diverso in
+prosa e' un errore anche quando il numero e' quello giusto e il verso e' quello
+prudente — la classe 346 lo aveva gia' insegnato sull'unita', qui e' lo stesso
+insegnamento sulla statistica.*

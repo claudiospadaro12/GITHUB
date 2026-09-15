@@ -117,9 +117,12 @@
 #            angolo migliore: 435,2 / 2,60 = 167,4x
 #          Contro-esempio costruito PRIMA di fidarmi: e se l'ora 7 non
 #          fosse rappresentativa? Con la riga aggregata "TUTTO" dello
-#          stesso CSV (mediana 2,1046, la meno favorevole delle due
-#          possibili letture orarie e' quella con spread PIU' alto, non
-#          quello aggregato -- controllo nel verso pessimista):
+#          stesso CSV (colonna media_idx = 2,1046 -- NON la mediana:
+#          corretto dal cancello del 15/09, checklist classe 351, la
+#          colonna mediana_idx di quella riga vale 2,0000, ANCORA piu'
+#          favorevole; uso comunque il valore piu' alto delle due,
+#          2,1046, perche' e' il piu' pessimista fra i due letti sulla
+#          riga aggregata -- controllo nel verso pessimista):
 #            113,1 / 2,1046 = 53,7x -- ANCORA sopra 40x.
 #          E al P95 aggregato (2,8000, la lettura piu' prudente di
 #          tutte): 113,1 / 2,8000 = 40,4x -- 101% del pavimento: PASSA
@@ -148,8 +151,10 @@
 #          nessun fattore di correzione da indovinare.
 #
 #  3) LA MANOPOLA -- delle 4 "mai mosse e vive" per 772341 (InpTP_R,
-#     InpSLMode, InpAtrSlMult, InpSLBufferATR, InpMaxDaysHold -- letto
-#     dal censimento rigirato oggi), ho scelto **InpMaxDaysHold**
+#     InpSLMode, InpSLBufferATR, InpMaxDaysHold -- letto dal censimento
+#     rigirato oggi; NON InpAtrSlMult, che lo stesso censimento marca
+#     INERTE PER COSTRUZIONE, non "viva" -- corretto dal cancello del
+#     15/09, checklist classe 350), ho scelto **InpMaxDaysHold**
 #     perche':
 #       a) e' l'UNICA delle cinque marcata "MAI-ovunque" (mai mossa per
 #          NESSUN EA di tutto l'archivio, non solo per questa sedia --
@@ -414,10 +419,15 @@
 #      pinnato in R39a ma presente nel sorgente -- pinnato qui per
 #      completezza), fail-open nel tester senza GlobalVariable (stesso
 #      comportamento di ogni altro round di questa classe).
-#    - InpTP_R / InpSLMode / InpAtrSlMult / InpSLBufferATR: NON sono
-#      l'asse di questo file (sono le altre quattro manopole "mai mosse
-#      e vive" di 772341, punto 3). Pinnate al valore vivo di R39a/
-#      R103, invariate.
+#    - InpTP_R / InpSLMode / InpSLBufferATR: NON sono l'asse di questo
+#      file (sono le altre tre manopole "mai mosse e vive" di 772341,
+#      punto 3). Pinnate al valore vivo di R39a/R103, invariate.
+#    - InpAtrSlMult: NON e' l'asse, e NON e' una delle "vive" (il
+#      censimento la marca INERTE PER COSTRUZIONE su questa sedia, non
+#      "MAI mossa e viva" -- corretto dal cancello del 15/09, classe
+#      350). Pinnata comunque al valore di R39a/R103: essendo inerte,
+#      qualunque valore non cambia il risultato, quindi l'errore di
+#      categoria non tocca nessun numero di questo round.
 #    - InpSizeMinATR / InpSizeMaxATR = 0.0 nel sorgente e in R39a: filtro
 #      di ampiezza SPENTO nella cella viva -- non e' l'asse, pinnato
 #      cosi'.
