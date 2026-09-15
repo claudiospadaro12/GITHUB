@@ -51,17 +51,37 @@
 #     1340-1342 di CODA.txt). Riproporli sarebbe infittire; PTE e'
 #     ancora vergine su tutta la linea.
 #
-#  3) LA SEDIA HA IL CAMPIONE PER PARLARE, PULITO E NON CONTESO.
+#  3) LA SEDIA HA IL CAMPIONE PER PARLARE, PULITO SUL CONTRATTO DEL DD,
+#     MA NON MUTA SUL RESTO -- e va detto con la fonte giusta.
 #     Magic 771332, GBPUSD H1, candidata R78 (buffer 25 / TP2 3,0):
 #       OOS 13 anni (2013.04.01->2026.06.30): PF 1,09468  DD 9,8654%
 #                                              n 477       profit +4.322,93
-#     E' PIENO (verde) nel censimento contratti (report/CENSIMENTO_CONTRATTI.md
-#     r.223): a differenza delle sue sorelle 771321 (n=40, SOSPESO) e
-#     771322 (n=49, SOSPESO + contratto CONTESO), 771332 non ha nessun
-#     buco di merito aperto. Non e' la sedia piu' a rischio della
-#     flotta (quella e' 971501, gia' notata e scartata per questo round:
-#     vedi punto 5), ma e' quella dove ABTG_PTE puo' essere misurato
-#     senza inciampare in un contratto gia' conteso.
+#     >>> CORREZIONE 15/09 (controllo di secondo strato): la prima stesura
+#     citava "PIENO (verde), report/CENSIMENTO_CONTRATTI.md r.223" -- ED
+#     E' LA VERSIONE VECCHIA (v1, superata dal commit 88cfb33 "Censimenti
+#     corretti"). Riletto sulla v2, che e' quella giusta e che questo
+#     stesso file usa correttamente al punto 5 per 971501:
+#     report/CENSIMENTO_CONTRATTI_v2.md r.305 dice tutt'altro: n "477 ->
+#     [NON MIS.]" (corretto sopra, A0), e soprattutto **"gira?" = NO**,
+#     con una nota nuova (r.452/522-523, "M-C9"): **ZERO operazioni in
+#     TUTTO lo storico del file trades (30/03->10/09)**, e la domanda
+#     aperta e' "e' staccata, o e' MUTA?" -- non risolta.
+#     >>> QUINDI IL CONFRONTO CON LE SORELLE VA RISCRITTO: sul contratto
+#         del DD, 771332 resta effettivamente piu' pulita di 771321
+#         (n conteso 40->23) e 771322 (DD CONTESO 2,64/13,1/17,68%) --
+#         quella parte regge. MA sul fronte "sta girando in campo?"
+#         771332 ha il dubbio PIU' GRAVE delle tre (le sorelle hanno
+#         almeno delle operazioni registrate; 771332 ne ha ZERO). Questo
+#         round misura solo il BACKTEST (OHLC 2000-2026, screening,
+#         dichiarato in testa): non cambia niente sul merito qui dentro,
+#         perche' A8 gia' dichiara che il round non promuove/accende
+#         nessuna sedia. Ma l'affermazione "771332 non ha nessun buco di
+#         merito aperto" era troppo forte ed e' stata tolta: ha un buco
+#         DIVERSO (presenza in campo, M-C9), non un buco di contratto.
+#     Non e' la sedia piu' a rischio della flotta (quella e' 971501, gia'
+#     notata e scartata per questo round: vedi punto 5), ma resta quella
+#     dove ABTG_PTE puo' essere misurato senza inciampare in un DD gia'
+#     conteso -- con questo caveat dichiarato, non nascosto.
 #
 #  4) LA MANOPOLA E' MAI STATA MOSSA -- VERIFICATO OGGI, NON CITATO DAL
 #     CENSIMENTO DELL'11/09. Rifatta la misura da zero il 15/09/2026 su
@@ -91,10 +111,29 @@
 #     (nessun OOS)" per costruzione (r.389 dello stesso referto): un
 #     round di UNA variabile su un pavimento IS/OOS che oggi non si
 #     riesce nemmeno a dichiarare con un numero solo sarebbe un secondo
-#     problema sommato al primo, non una misura. 771332 non ha nessuno
-#     di questi due difetti: il suo n e' un conteggio diretto dal CSV
-#     (Trades, nessun parziale/BE ambiguo da dividere in due: vedi punto
-#     8), e la sua finestra IS/OOS e' quella che R78 ha gia' certificato.
+#     problema sommato al primo, non una misura. 771332 non ha il difetto
+#     di finestra (la sua IS/OOS e' quella che R78 ha gia' certificato),
+#     MA CORREZIONE 15/09 (controllo di secondo strato, contro il file
+#     invece che a memoria): la prima stesura di questo punto diceva "il
+#     suo n e' un conteggio diretto dal CSV, nessun parziale/BE ambiguo da
+#     dividere in due" -- ED E' FALSO, verificato riletto lo stesso
+#     referto citato sopra: report/CENSIMENTO_CONTRATTI_v2.md r.305 marca
+#     ESATTAMENTE 771332 con lo STESSO difetto di 971501, un rigo sopra:
+#     "477 -> [NON MIS.]", forbice 206-477, nello stesso elenco (r.383)
+#     delle 13 sedie il cui n "non e' mai stato diviso per due" -- e
+#     771332 e' pinnata a InpTP1Pct=50 (parziale al 1o target) esattamente
+#     come le sorelle 771321/771322, dove il fattore uscite->posizioni
+#     misurato e' 1,74/1,81. Quindi 771332 CONDIVIDE il difetto di
+#     971501 su questo fronte (conteggio deal/posizione non risolto),
+#     non ne e' esente. Non cambia la scelta della sedia (971501 resta
+#     esclusa anche per la finestra piena, che 771332 non ha), ma
+#     l'affermazione "nessuna ambiguita'" era sbagliata ed e' stata
+#     tolta. Effetto sul pavimento A0: anche al capo BASSO della forbice
+#     (206 posizioni) l'OOS resta sopra 150 -- il gate non si rompe --
+#     ma il margine dichiarato piu' sotto ("puo' scendere il 60% e resta
+#     sopra 150") descrive un margine sull'uscita CONTATA (477), non
+#     sulle posizioni vere, che potrebbero gia' essere piu' vicine a 206
+#     prima ancora che l'asse InpAtrExitPeriod muova niente.
 #     770924/774101 (le altre due candidate piu' vicine ai magic delle
 #     13) sono state scartate per lo stesso motivo opposto: campione
 #     troppo sottile (770924 STREV Nikkei n=21 su 21 mesi; 774101
@@ -298,7 +337,18 @@
 #      binario di ABTG_PTE che gira oggi da HEAD 'lavoro' NON E' quello
 #      di R78. Diff letto (git log --oneline -- mql5/Experts/
 #      ABTG_PTE.mq5), non assunto:
-#        344a11b (04/08, precede R78) -> 2687f13 -> a5d36d8 -> 4c424e2
+#        344a11b (04/08) -> 2687f13 (07/08) -> 3af47ed (08/08, "fix
+#           sizing su 41 EA: OrderCalcProfit al posto del tick value
+#           nudo" -- CORREZIONE 15/09: la prima stesura di questo elenco
+#           saltava questo commit, e va detto perche' tocca proprio
+#           LotByRisk, la funzione del rischio costante di questo round.
+#           Ma e' INNOCUO per il confronto: precede il pin di R78 di
+#           nove giorni, quindi e' GIA' DENTRO l'ancora, non nel delta)
+#        -> a5d36d8 (11/08) -> 4c424e2 (15/08, ULTIMO COMMIT PRIMA DI
+#           R78 -- R78 gira il 17/08: 4c424e2 e' il pin vero dell'ancora,
+#           verificato `git diff --stat 4c424e2 b45dd00 -- mql5/Experts/
+#           ABTG_PTE.mq5` -> 161 inserzioni/19 cancellazioni, tutte nei
+#           due commit sotto)
 #        -> 26a1856 (19/08, Migrazione Guardian: 16 EA a imbuto singolo
 #           leggono le bandiere -- aggiunge InpUsaGuardian, FAIL-OPEN
 #           nel tester senza GlobalVariable, come su tutti gli altri EA
@@ -308,6 +358,10 @@
 #           runbook di stanotte ha PASSATO al cancello -- "PASS 10/10
 #           EA... nessuna riga tocca OrderSend/PositionModify/lotto/
 #           rischio/stop/target/ingresso-uscita", CHECKLIST classe 339).
+#        >>> QUINDI IL VERO DELTA fra R78 e oggi sono SOLO 26a1856 e
+#            b45dd00 (le due patch post-17/08): i tre commit prima
+#            (2687f13/3af47ed/a5d36d8/4c424e2) sono storia dell'ancora
+#            stessa, non differenza.
 #      >>> Quindi l'attesa e' che S1 PASSI. Se passa, questo round e'
 #          anche IL PRIMO COLLAUDO che quelle due patch sono neutre sul
 #          trading di ABTG_PTE specificamente -- nessuno l'aveva ancora
@@ -329,6 +383,15 @@
 #        3,2 volte. NESSUNA delle sette celle attese puo' cadere sotto
 #        150 nemmeno se n scendesse del 60% rispetto all'ancora --
 #        margine ampio, non un pelo.
+#        >>> CORREZIONE 15/09: questo margine e' calcolato sulle USCITE
+#        (477), non sulle POSIZIONI. Per InpTP1Pct=50 il conteggio
+#        deal/posizione di 771332 NON e' risolto (CENSIMENTO_CONTRATTI_v2
+#        r.305, forbice 206-477, stesso difetto di 971501 -- vedi punto 5
+#        sopra, corretto lo stesso giorno). Anche al capo BASSO della
+#        forbice (206 posizioni vere) il pavimento dei 150 REGGE ancora
+#        (206 > 150, 1,37x), quindi il gate A0 non si rompe -- ma il
+#        margine "puo' scendere il 60%" e' piu' sottile di quanto scritto:
+#        parte gia' da un numero che potrebbe essere 206, non 477.
 #    A1  ALTOPIANO (merito). Servono >= 3 CELLE CONTIGUE sullo stesso
 #        asse con, CIASCUNA: PF OOS >= 1,00  E  n OOS >= 150  E
 #        DD OOS <= 11,0%  E  costo dentro banda (vedi sopra) E la cella
@@ -445,6 +508,7 @@ InpWprPeriod=14
 InpWprOB=-20.0
 InpWprOS=-80.0
 # InpAtrExitPeriod -> E' L'ASSE, in fondo al file.
+InpSLbufferPips=25
 InpSLfromDoji=false
 InpTP1_ATRmult=0.5
 InpTP1Pct=50

@@ -19597,3 +19597,102 @@ non solo la riga citata.
 3. **Conseguenza**: citazione corretta in `CENSIMENTO_CONTRATTI_v2.md`
    r.260; nessun numero del round cambia (v2 conferma 130/56-130), ma la
    fonte ora e' quella che comanda davvero.
+
+---
+
+## 342. 🕳️📌 UN PARAMETRO DESCRITTO IN PROSA COME "PINNATO DALL'ANCORA" MA MAI SCRITTO NEL BLOCCO `Inp*=`: IL TESTER USA IL DEFAULT COMPILATO IN SILENZIO, E ROMPE PROPRIO S1 (15/09/2026)
+
+**Caso reale.** `prove/R153a_atrexit_GBPUSD.txt` (controllo-preventivo, prima
+dell'armamento) dichiarava in due punti diversi della prosa che lo stop e'
+"ATR(period) + `InpSLbufferPips`(25 pip FISSI)", copiato "campo per campo
+dalle colonne Inp* del CSV d'archivio" di R78 (dove la colonna vale davvero
+25, verificato). **Ma `InpSLbufferPips=25` non compariva da nessuna parte
+nel blocco eseguibile `Inp*=` del file.** Il generatore dell'.ini
+(`walkforward_generico.ps1`, la fase che legge `$RigheProvaUtili` e scrive
+`[TesterInputs]`) scrive SOLO le righe `Nome=valore` che trova nel file
+prova: un parametro assente semplicemente non entra in `[TesterInputs]`, e
+MT5 usa il DEFAULT compilato nel sorgente per quell'input --
+`input double InpSLbufferPips = 5.0;` (`ABTG_PTE.mq5` r.82), **cinque volte
+piu' piccolo dei 25 dichiarati**. La corsa sarebbe partita, avrebbe generato
+14 passate valide (`controlla_prova.py` non lo vede: controlla la GRIGLIA
+delle celle, non se un valore pinnato manca), e S1 (la riproduzione
+dell'ancora R78) sarebbe FALLITO senza che il motivo vero fosse ovvio --
+col rischio concreto di essere letto come "il banco e' sporco" (la
+diagnosi che lo stesso file prevede per un fallimento di S1) invece che
+"manca un pin", bruciando una corsa intera su 26 anni OHLC per un errore
+di battitura di preparazione.
+
+**Perche' e' successo**: la prosa del round (motivazione, sezione costo,
+sezione ancora) cita `InpSLbufferPips` per NOME quattro volte, dando
+l'impressione a una lettura veloce che il parametro sia "coperto". Il
+controllo di secondo strato lo ha trovato solo confrontando **riga per
+riga** l'elenco `Inp*=` eseguibile del file prova contro TUTTE le colonne
+`Inp*` del CSV ancora (42 colonne comprese in `csv_R78/..._OOS_...csv`,
+non solo quelle citate in prosa) -- un controllo per sottrazione d'insieme,
+non per campionamento a occhio delle righe che "sembrano" pinnate.
+
+### 🔴 LA REGOLA
+1. **Una prosa che dice "pinnato dall'ancora" non e' una prova che il pin
+   esista**: si verifica leggendo il blocco `Inp*=` ESEGUIBILE del file,
+   non le frasi che lo descrivono.
+2. **Il controllo giusto e' un confronto INSIEME CONTRO INSIEME**: si
+   elencano TUTTE le colonne `Inp*` del CSV ancora e TUTTE le righe
+   `Inp*=` del file prova, e si cerca la differenza fra i due insiemi --
+   non si legge il file prova dall'alto in basso sperando di notare un
+   buco.
+3. **Un parametro omesso non e' un errore che il cancello deterministico
+   vede**: `controlla_prova.py` conta celle e passate, non se un valore
+   citato in prosa manca dal blocco eseguibile. Questo resta compito del
+   controllo di giudizio (strato 2).
+4. **Conseguenza**: aggiunta `InpSLbufferPips=25` al blocco `Inp*=` di
+   `R153a_atrexit_GBPUSD.txt` (`controlla_prova.py` ripassato: ancora 0
+   problemi, pin passato da 43 a 44 parametri). Nessun altro numero del
+   round cambia; senza il fix S1 sarebbe stato irriproducibile.
+
+---
+
+## 343. 🎯↔️ LA VERIFICA CONTRO LA FONTE CORRETTA APPLICATA SOLO AL CANDIDATO SCARTATO, MAI A QUELLO SCELTO: STESSA FONTE, STESSA RIGA SOTTO, LETTA A META' (15/09/2026)
+
+**Caso reale.** `prove/R153a_atrexit_GBPUSD.txt` motivava la scelta della
+sedia 771332 confrontandola con la candidata esclusa 971501: per 971501
+citava correttamente `CENSIMENTO_CONTRATTI_v2.md` r.313 ("n 610 ->
+[NON MIS.], forbice 264-610" e "finestra piena") per giustificare
+l'esclusione. **Ma per la sedia SCELTA, la stessa identica riga (r.305,
+la riga SOPRA quella di 971501 nella stessa tabella) diceva la STESSA
+cosa** -- "477 -> [NON MIS.]", forbice 206-477, causa identica
+(`InpTP1Pct`≠0, per-trade assente, elencata insieme a 971501 nello stesso
+elenco di 13 sedie mai divise per due, r.383) -- **e il round citava
+invece la v1 superata (`CENSIMENTO_CONTRATTI.md` r.223, "PIENO/verde"),
+non v2, per la sedia che stava scegliendo.** In piu' la v2 (r.452/522-523,
+"M-C9") segnalava per 771332 uno ZERO operazioni in tutto lo storico di
+campo e un "gira?" = NO, un buco piu' grave di quello delle sorelle
+scartate. Il round conteneva anche un rimando interno rotto ("vedi punto
+8") verso una sezione che nel file non esiste.
+
+**Perche' e' successo**: la stessa fonte (v2) e' stata aperta e letta
+correttamente per il candidato che si voleva ESCLUDERE (dove confermava la
+decisione gia' presa), ma non per quello che si voleva TENERE (dove
+l'avrebbe complicata). E' la stessa asimmetria della regola del
+contro-esempio del 10/09 -- "ho controllato che la risposta fosse coerente
+con l'attesa, non ho provato a romperla" -- applicata stavolta non a una
+formula ma alla SCELTA DELLA FONTE: la fonte giusta era gia' nota e gia'
+in uso nello stesso paragrafo, due righe sopra.
+
+### 🔴 LA REGOLA
+1. **Quando due candidati si confrontano con la stessa classe di fonte
+   (censimento, referto, CSV), la fonte usata per l'uno si usa
+   IDENTICA per l'altro** -- non la versione che conviene di piu' a
+   ciascuno. Se la v2 e' quella giusta per il candidato scartato, e' quella
+   giusta anche per il candidato scelto.
+2. **Un rimando interno ("vedi punto X") si verifica che il punto X esista
+   nel file PRIMA di consegnare** -- un rimando rotto e' un segnale che
+   quella frase non e' mai stata riletta contro la fonte che dice di citare.
+3. **Conseguenza**: corrette le sezioni 3 e 5 di `R153a_atrexit_GBPUSD.txt`
+   per citare `CENSIMENTO_CONTRATTI_v2.md` (non v1) su 771332, dichiarato
+   il buco M-C9 (presenza in campo incerta) al posto della falsa certezza
+   "nessun buco di merito aperto", tolta l'affermazione "n senza ambiguita'
+   di parziale" (falsa: stesso difetto di 971501, forbice 206-477) e il
+   rimando rotto. Il pavimento A0 (n>=150) REGGE comunque anche al capo
+   basso della forbice (206), quindi il verdetto del round non cambia --
+   ma la certezza dichiarata nella motivazione era piu' forte di quella
+   che i numeri permettevano.
