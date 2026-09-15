@@ -152,6 +152,112 @@ fermo finche' B1 non si chiude.
 
 ---
 
+# 0-quater. 🔎 AGGIORNAMENTO 15/09/2026 (metà giornata) — il Blocco 3 è esaurito, la prossima mossa è nel Blocco 2
+
+_Scritto dall'**architetto-prop**, sintesi di sola lettura sulla giornata del
+15/09 dopo la §0-ter di stamattina. **Ogni numero sotto è stato riletto ORA sul
+repo vero** (`git log`, `CODA.txt`, `backtest_pipeline/prove/`,
+`report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md`, `RUNBOOK_2026-09-14.md`),
+non copiato dal testo di stamattina._
+
+## 📦 Cosa è uscito oggi dalla §0-ter — **undici sedie coperte, tutte passate dal doppio cancello**
+
+| round | manopola | sedia (magic) | dove |
+|---|---|---|---|
+| R150a | `InpTrailStartR` | 770203 `Nasdaq_Live5m` | armata ieri sera, confermata viva oggi |
+| R148a / R148bL / R148bS | verso + lato, `ABTG_Cycle` | NASUSD (nuovo EA) | **primo collaudo di compilazione mai fatto** — non ancora rientrato (vedi sotto) |
+| R151a | trailing | 770402 `MaxMinNotte` XAUUSD | |
+| R152a | export per-trade | 770202 `Dow_Apertura_US` | preparatorio per `mc_dd_cella.py` |
+| R153a | `InpAtrExitPeriod` | 771332 `PTE` GBPUSD | |
+| R154a | `InpSLLookback` | 770531 `SuperWave` U30USD | |
+| R141e | buffer dello stop | 784105 `DaxValueArea` D30EUR | **riparato dopo 3 giorni fuori coda** (falsificatore corretto, classe 347/348) |
+| R155a | `InpTP_RR` | 770511 `SuperWave_DOW_H1` U30USD | |
+| R156a | `InpMaxDaysHold` | 772341 `PunteLarry` U30USD | ultima del giro, classi 350/351 |
+
+**Contato sul repo, non a sensazione**: `CODA.txt` porta **74 righe armate**
+contro le **63** dichiarate dall'ultimo `REFERTO_RUNNER_20260914_033004.txt` →
+**+11**, esattamente le undici sopra. Nessuna riga `#DISARMATA#`: tutte vive
+in coda.
+
+## 🛑 Il Blocco 3 (13 sedie sbloccate stamattina) è dichiarato ESAURITO — ed è una buona notizia
+
+Il commento di `R156a` in `CODA.txt` lo scrive nero su bianco: *"Blocco 3
+esaurito per oggi (le 7 residue mai-mosse-e-vive scartate: sei da R155a,
+770250 per cancello di costo 93%=NO, 970901 per un secondo motivo indipendente
+— il gemello usato per inferirne il costo è un magic CONTESO Nikkei/XAUUSD).
+Scelta dal Blocco 2 (HEAD già sicuro)."* — cioè oggi il round `R156a` **è già
+la prima misura presa dal Blocco 2**, non dal Blocco 3.
+
+🟢 **Perché è una buona notizia, non uno stallo**: vuol dire che nessuna
+manopola del Blocco 3 è stata forzata solo per riempire la coda — le 7 residue
+sono state scartate con un motivo scritto (cancello di costo, campione,
+conflitto di magic), non ignorate. Coerente col motto del 09/09 ("non si
+abbassa l'asticella per sembrare produttivi").
+
+## 🔴 Verificato: NESSUN `REFERTO_RUNNER_20260915_*` è arrivato
+
+`backtest_pipeline/coda/referti/` porta come ultimo file
+`REFERTO_RUNNER_20260914_033004.txt` (2026-09-14, 03:30 locale VPS). Non c'è
+niente datato 20260915. Il collaudo di compilazione del Cycle (`R148a/bL/bS`,
+il primo mai fatto) e le altre 10 righe di oggi **non sono ancora state
+eseguite dal runner** — restano in coda per il prossimo giro (atteso stanotte,
+03:30 del 16/09). Coerente con `report/NOTTE_2026-09-15.md` (scritto stamattina,
+stessa conclusione).
+
+## ⚪ [NON VERIFICABILE da qui] — la ricompilazione del piccolo 50503392
+
+`RUNBOOK_RICOMPILAZIONE_PICCOLO_2026-09-14.md` conferma **S1 chiuso il
+15/09/2026** (`b45dd00` PASS 10/10 EA, `b5d904a` PASS — riga 230 del runbook),
+e riporta che Claudio "sta ricompilando lui stesso, partendo da `771531` come
+consigliato". **Ma la compilazione vera (F7 sul terminale) è un gesto sul VPS
+che nessun agente in questa sessione può leggere**: `git log -1 --format=%H --
+mql5/Experts/ABTG_EMA200.mq5` torna ancora `b45dd00` (il sorgente, non il
+binario compilato — il sorgente non cambia quando Claudio preme F7). **Stato
+della ricompilazione: [NON VERIFICABILE da qui], come dichiarato nel mandato.**
+
+## 🎯 LA SINGOLA AZIONE PROPOSTA PER LA PROSSIMA ONDATA — **continuare l'exit-management sul Blocco 2, non aspettare fermi**
+
+> ## 👉 **Aprire round di exit-management su famiglie del Blocco 2 ancora vergini — in parallelo all'attesa del referto di stanotte, non al posto di essa.**
+
+**Il conto, candidato per candidato (rifatto ORA su
+`CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md` §4.2 + un grep del repo per
+verificare cosa è GIÀ stato girato dall'11/09 a oggi):**
+
+| candidato | sedie | manopola | stato oggi 15/09 | perché ha valore residuo |
+|---|---|---|---|---|
+| **PunteLarry, i 5 gemelli rimasti** | 772342 EURAUD · 772343 XAUUSD · 772344 GBPJPY · 772345 GBPUSD · 772346 EURCAD | `InpMaxDaysHold` | 🔴 **NON girato**: `R156a` di oggi ha coperto **solo 772341** (Dow). Nessun file `R1xx_*` per 772342-346 esiste in `backtest_pipeline/prove/` (verificato con `find`) | `772342` è **MERITO PIENO** (n=216, censito 11/09) — l'unico gemello con campione sopra soglia. Gli altri 4 sono SOSPESI ma stesso motore, stesso file prova replicabile "in un colpo" (§4.2 originale) |
+| **GapFill, quintetto** | 772231-772235 | `InpSLGapMult` (+ `InpMaxHours`) | 🔴 **MAI girato** — nessun file `Rxxx_*gapfill*` o `*slgapmult*` nel repo | `772234` è all'**88% del pavimento di costo** (censito 11/09): è l'unica famiglia della panchina vicina a un cancello che non è ancora stata toccata |
+| **BreakingBand, trio** | 772161-772163 | `InpSL_ATRmult` | 🔴 **MAI girato** (R146a/c hanno usato EURJPY/GBPCAD, sedie diverse — verificato nei file prova) | la regola fissa "SL = 3×ATR" non è mai stata messa in discussione, n=11-26 per sedia |
+| **GapContinuation** | 774101 | `InpPartialTargetR`+`InpPartialClosePercent` | 🔴 **MAI girato** | parziale 40%/1,0R mai mosso; vincolo di codice noto (`INIT_FAILED` fuori range), va rispettato nel file prova |
+| **`InpCloseAtEnd` residue** | 770250, 770402, 770411 | `InpCloseAtEnd` | 🟡 **PARZIALE**: `R147b/c` hanno coperto 770202(Dow)/770101(DAX) — mancano ancora 3 sedie della lista originale (770611 resta esclusa: conto REALE, "si misura non si tocca" già rispettato) | flat di fine seduta mai acceso/spento su queste 3, decide il P&L intraday |
+
+**Perché questa è la prima scelta e non le altre due:**
+
+| opzione | costo | perché NON è la prima scelta oggi |
+|---|---|---|
+| (b) **Aspettare il referto di stanotte fermi** | zero, ma **zero anche il progresso** | il referto arriva comunque stanotte da solo; restare fermi nel frattempo contraddice "si lavora in background in continuazione" (motto 09/09) — e il Blocco 2 **non dipende** dalla ricompilazione del piccolo (`R156a` lo dimostra: è già stato preso da lì oggi, a HEAD sicuro) |
+| (d) **Il buco B2 del runbook** (procedura di checkout selettivo per compilare un commit pre-WIP, strada S2) | 🟢 costerebbe una riga nuova da far passare al cancello | 🔴 **non più rilevante ora**: il runbook stesso lo dichiara (riga 184-186) — *"il bersaglio giusto oggi è HEAD, non pre-WIP"*, e Claudio ha scelto S1 (già chiuso) stamattina, non S2. B2 resta un buco dichiarato **solo come piano di riserva** se S1 desse un problema in ricompilazione — non un'azione da aprire ora senza un segnale che S1 sia in difficoltà |
+| **IL_TAPPO_2026-09-11.md / resto del censimento 11/09** | — | riletto oggi: i tre round "in cima" del censimento (R126, R127, R125) sono **tutti già girati e giudicati** nei giorni successivi (`R125a-f`, `R127a-c` in coda; `R126a/b/d` in coda). Non resta niente di "in cima" non ancora aperto — la panchina (§4.2) è l'unico strato che ha ancora candidati vergini, ed è la tabella sopra |
+
+**Il numero che decide**: la panchina di `CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md`
+§4.2 elencava **6 famiglie mai girate**; **5 di quelle 6 restano intatte** oggi
+(GapFill, BreakingBand, GapContinuation, 5/6 gemelli PunteLarry, 3/6 sedie
+CloseAtEnd) — **13 sedie potenziali di misura**, zero delle quali bloccate dal
+WIP `b45dd00` o dalla ricompilazione in corso. È lavoro pronto, a costo
+macchina noto (i file analoghi del giorno — `R127a-c` — hanno girato 24 celle
+in circa 8 minuti tick), che non aspetta nessun gesto di Claudio sul VPS.
+
+⚠️ **Conflitto segnalato esplicitamente**: `report/NOTTE_2026-09-15.md` (punto
+3 della coda) scrive *"seguire la ricompilazione del piccolo quando Claudio la
+fa girare — non serve altro lavoro mio prima che lui agisca"*, il che si legge
+come "aspettare". **Questa sezione lo corregge**: aspettare vale per la
+*verifica post-ricompilazione* (§4 del runbook, che davvero non si può
+anticipare), non per il lavoro di exit-management sul Blocco 2, che è
+indipendente e ha candidati pronti — coerente con `R156a` che infatti quel
+lavoro l'ha già fatto oggi stesso, in parallelo.
+
+---
+
 # 1. 🚦 I CINQUE REQUISITI — dichiarati PRIMA della tabella
 
 | # | requisito | dove si legge | perche' e' un requisito |
@@ -493,6 +599,7 @@ prop misura**. → **B5.**
 
 | data | versione | cosa cambia | perche' |
 |---|---|---|---|
+| **15/09/2026 (metà giornata)** | **v2.3** *(aggiornamento mirato — §0-quater nuova)* | 🔎 **Verificato contro il repo vero che oggi sono state coperte 11 sedie** (R150a, R148a/bL/bS, R151a, R152a, R153a, R154a, R141e, R155a, R156a — `CODA.txt` **63→74 righe armate**, combacia esattamente) e che il **Blocco 3 è dichiarato esaurito** dallo stesso `R156a` ("scelta dal Blocco 2, HEAD già sicuro"). 🔴 **Confermato**: nessun `REFERTO_RUNNER_20260915_*` è arrivato (ultimo resta `..._20260914_033004.txt`) — il collaudo di compilazione del Cycle non è ancora rientrato. ⚪ **[NON VERIFICABILE da qui]**: se Claudio ha già ricompilato `771531` sul piccolo (gesto sul terminale vivo, S1 chiuso ma F7 non leggibile da un agente). 🎯 **Proposta**: continuare l'exit-management sul **Blocco 2** (5 famiglie vergini della panchina censita l'11/09 — 13 sedie potenziali: 5/6 gemelli PunteLarry, GapFill, BreakingBand, GapContinuation, 3/6 CloseAtEnd) **in parallelo** all'attesa del referto di stanotte, non al posto di essa — corretta un'ambiguità di `NOTTE_2026-09-15.md` che si leggeva come "restare fermi" | Senza questa riga il rischio era di leggere "Blocco 3 esaurito" come "oggi non c'è altro da fare" — falso: il Blocco 2 ha ancora lavoro pronto, a costo macchina noto, indipendente dalla ricompilazione |
 | **15/09/2026** | **v2.2** *(aggiornamento mirato — §0-ter nuova)* | 🔎 **Riverificati contro il repo vero i cinque punti aperti da `RUNBOOK_RICOMPILAZIONE_PICCOLO_2026-09-14.md` e `RESOCONTO_2026-09-14.md`**: (1) `771531` resta bloccata dal WIP `b45dd00` — **4° giorno**, mentre le sue misure di uscita (`R136a-d`, `R147a`) hanno gia' girato due notti pulite; (2) `r137c` e' firmata e nel repo (`InpTP1_ClosePct=0.0`), ma se sia gia' sul terminale reale resta **[NON VERIFICABILE da qui]**; (3) il disallineamento `InpRiskPercent` di `sedia_MAXMIN_ORO_770402.set` e' confermato ma **gia' in coda** (classe 338, non un buco nuovo); (4) `ABTG_Cycle` R148a/bL/bS sono armate ma il primo collaudo vero e' **stanotte, non ancora girato**; (5) `mc_dd_cella.py` e' sano (autotest 4/4 PASS) ma **non eseguibile oggi** su nessuna delle tre sedie del terzetto: manca il CSV per-trade sulla cella ESATTA, e i soli per-trade in repo per quelle famiglie sono del round R16 (09/08), **precedenti** ai fix che contano. 🎯 **Proposta per la prossima ondata**: chiudere il cancello sul WIP `b45dd00` (zero macchina, sblocca 13 sedie incluso il pilastro del terzetto) prima di aprire un quinto round o inseguire una Monte Carlo che non ha ancora l'input giusto | Il piano al 13/09 non sapeva che il binario di `771531` e' fermo da 4 giorni mentre le sue misure corrono; senza questa riga il prossimo passo rischiava di essere un round nuovo invece del vero collo di bottiglia (il codice mai revisionato) |
 | **08/09/2026** | **v1** | prima stesura, costruita all'indietro dal 1° ottobre. 4 requisiti, 8 candidate, *"ne passa UNO"*, *"realistico per COMPRARE"* | c'era una data, e una data cambia l'ordine delle cose |
 | **13/09/2026** | **v2.1** *(aggiornamento mirato, non una riscrittura)* | 🧊 **A5-bis nuova**: `Compilazione R4` era scritta come *"15 sorgenti"*, ma in campo sul piccolo **50503392** sono **42 su 42** disallineati (compilati 5-18/08), **Guardian compreso** (**414** righe contro **899**) → *"le protezioni firmate sono attive"* e' **[NON MISURATO]**. Priorita' proposta **≥ qualunque round nuovo**, **ma con l'ordine del referto** (Guardian → inventario → una sedia per volta), perche' *"ricompila tutto"* porterebbe in campo un mese di modifiche mai girate, **taglie comprese**. 🟢 **B4 aggiornata e B4-bis nuova**: il perimetro del runner **e' stato allargato** e la notte 12/13-09 ha prodotto **34 round con CSV validi** — **`R125` no**, e **i CSV non sono nel repo** (classe 307). 📮 **Tre richieste nuove** nel §8, fra cui quella che **ridimensiona l'allarme sui terminali**: non *"controlla il conto reale"*, ma *"leggi `N` in `ROUND GIRATO CON RILIEVI (N)`"* | Il piano descriveva round *"mai girati"* che erano girati, e una compilazione da 15 file che in realta' e' un **riallineamento di 42**. 🔴 La seconda e' **la riga che pesa di piu' sul 1° ottobre**: riguarda le sedie **gia' vive**, non quelle da aggiungere |
