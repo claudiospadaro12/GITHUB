@@ -1670,3 +1670,31 @@ a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
 9d22f998fffb154e6bdf881c292fddfd627b8193 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R156a -- InpMaxDaysHold SU ABTG_PunteLarry, U30USD H1 (sedia 772341).
+#  Undicesima sedia coperta oggi. Blocco 3 esaurito per oggi (le 7
+#  residue mai-mosse-e-vive scartate: sei da R155a, 770250 per
+#  cancello di costo 93%=NO, 970901 per un secondo motivo indipendente
+#  -- il gemello usato per inferirne il costo e' un magic CONTESO
+#  Nikkei/XAUUSD). Scelta dal Blocco 2 (HEAD gia' sicuro).
+#
+#  Nessun parziale nel sorgente (verificato: zero Partial/TP1/
+#  ClosePartial): Trades del CSV sono gia' posizioni, evita la
+#  trappola classe 226/346. ManageTimeStop() ortogonale a SL/TP/lotto
+#  (calcolati in Enter()), ma CountPositions()>0 in StartDay() fa si'
+#  che un time-stop piu' lungo tenga lo slot occupato piu' a lungo.
+#
+#  Secondo giudizio: PASS dopo 2 correzioni minori (classi 350/351,
+#  nessuna cambia i numeri). Ancora R39a/R103 riverificata sui CSV
+#  veri (Trades 16/38, DD 1,78%/3,87%), corroborata indipendentemente
+#  da R103_REFERTO (stessa cella, finestra intera: n=55/DD=3,96%,
+#  dentro le bande S1/S2 dichiarate).
+#
+#  Pavimento IS>=150 non raggiungibile (IS=16/OOS=38, servirebbero
+#  9,78 anni contro 1,76 disponibili): @FRAZIONEIS 1.0, una tranche,
+#  scopato al solo RISCHIO (Regola B, 16/08).
+#
+#  Pin: giro di pin f78dacc (38mo, 45ed226 -> 0b4733c). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R156a_maxdayshold_puntelarry_U30USD.txt -Etichetta r156a -Modello 4 -Deposito 100000
