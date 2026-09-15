@@ -19939,3 +19939,54 @@ CALCOLATO PER UN'ALTRA STATISTICA.
 *"Stesso metodo" vuol dire stessa statistica, non stesso `/sqrt(n)` finale: la SE di una media e la
 SE di un rapporto fra due somme correlate sono formule diverse, e vanno derivate (o bootstrap-ate)
 per l'oggetto che si sta davvero misurando.*
+
+---
+
+## 349. 🧟📉 UN NUMERO "GIA' MISURATO DA UN ROUND PRECEDENTE" PUO' ESSERE QUELLO CHE QUEL ROUND HA GIA' DICHIARATO SUPERATO — SI CONTROLLA IL VERDETTO, NON SOLO LA RIGA CITATA (controllo-preventivo, 15/09/2026)
+
+**Il caso reale.** `prove/R155a_tprr_SuperWaveDowH1_U30USD.txt` (sedia 770511, U30USD H1) scriveva
+*"gia' misurato da R126a (stessa sedia, scritto il 10/09, citato non riscoperto): spezzata IS/OOS la
+STESSA corsa fa 84 (IS) e 143 (OOS) chiusure"* — citando correttamente la riga di `R126a` che
+DICHIARA quell'attesa (r.267 dell'ancora, presa dalla corsa d'archivio dell'08/08, commit `400a462`).
+Quello che mancava: `R126a` **e' gia' stato eseguito**, i suoi CSV veri sono committati il 13/09
+(`..._U30USD_IS_r126a.csv`/`..._OOS_r126a.csv`), e la corsa VERA da' **72 (IS) e 131 (OOS)**, non
+84/143 — uno scarto che il file prova `R126a` stesso, nel suo protocollo GRADO A/B/C dichiarato PRIMA
+dei numeri, classifica come **GRADO C: "il round si ferma e si attribuisce prima di guardare le
+altre otto celle"** (PF IS 1,48166 contro l'atteso 1,84892, Delta 0,367 fuori dalla tolleranza
+dichiarata +/-0,15). Il fallimento e' gia' stato misurato e scritto altrove
+(`report/LETTURA_BACKLOG_NOTTE_2026-09-13.md` r.128/283, **due giorni prima** che `R155a` fosse
+scritto) — ma `R155a` cita solo il file `R126a` (che e' prospettico, scritto PRIMA della corsa, e non
+e' mai stato aggiornato con l'esito) e non il referto che ne misura l'esito vero.
+
+### 🧠 PERCHE' MORDE PROPRIO QUI
+E' la stessa famiglia della classe registrata a r.1700 ("ogni numero di riga citato si riverifica
+sull'artefatto nel commit che si sta per lanciare"), ma un gradino piu' in la': li' il difetto e' un
+**indirizzo** (la riga si e' spostata), qui e' un **verdetto** (il numero e' stato MISURATO E
+BOCCIATO dal proprio round di origine, e la bocciatura vive in un documento diverso da quello
+citato). Citare "il file prova X dice Y" e' necessario ma non basta quando X e' un file prova
+PROSPETTICO: un file prova descrive cosa ci si aspetta PRIMA di girare, non cosa e' successo DOPO.
+Se X e' gia' stato eseguito, il numero che conta e' quello del CSV vero (o del referto che lo legge),
+non quello scritto nel file prova come attesa. **Un file prova che non viene mai riaperto dopo
+l'esecuzione invecchia in silenzio esattamente come un preset non aggiornato (classe 338).**
+
+### ✅ COSA SI FA
+1. 🔴 **Prima di scrivere "gia' misurato da [round]", si controlla se [round] e' gia' stato
+   ESEGUITO** (CSV in `risultati_prove/`, magic committato) e non solo SCRITTO. Se e' stato eseguito,
+   il numero giusto e' quello del CSV/referto d'esito, non quello dichiarato come attesa nel file
+   prova stesso.
+2. 🔎 **Si cerca (grep sul PF/DD/n citati, o sul nome del round) in `report/` un referto POSTERIORE
+   alla data del round citato**, prima di trattare il suo numero come definitivo: un round puo'
+   dichiarare da solo il proprio esito come "fermo" (GRADO C, o equivalente), e quella dichiarazione
+   PUO' vivere in un file diverso da quello con l'ancora.
+3. 🟢 **Se il numero fresco e superato vanno nella stessa direzione della conclusione del round che
+   li usa (qui: 72 e ANCORA piu' sotto 150 di 84), si scrive il numero giusto e si nota che la
+   conclusione non cambia — non si lascia il numero vecchio "perche' tanto non cambia niente":
+   cambia comunque quello che il prossimo lettore trova se ricontrolla.**
+4. 🚫 **E se il numero fresco e quello superato vanno in direzioni diverse, il round che li eredita
+   NON PARTE finche' la divergenza non e' spiegata** — esattamente la stessa disciplina del GRADO C
+   che il round di origine si era gia' dato.
+
+### 🔑 La regola in una riga
+*"Citato dal file prova" non e' "verificato sull'esito": un file prova descrive un'attesa PRIMA di
+girare, e se il round e' gia' stato eseguito il numero che conta e' quello del CSV vero — che puo'
+avere gia' bocciato l'attesa che si sta per ereditare.*

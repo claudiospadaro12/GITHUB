@@ -98,10 +98,14 @@
 #          altopiano, non solo un prima/dopo;
 #       b) NON TOCCA LO STOP, verificato nel codice, non supposto:
 #          mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5
-#            r.365-368  ext/buf/sl calcolati QUI (SLLookback+buffer)
+#            r.365-369  ext/buf/sl calcolati QUI (SLLookback+buffer)
 #            r.371      risk = |entry - sl|   <- GIA' FISSATO
 #            r.375      tp = entry +/- risk*InpTP_RR   <- DOPO
-#            r.379      lotMkt = LotByRisk(risk)  <- usa risk, non tp
+#            r.378      totLot = LotByRisk(risk)  <- usa risk, non tp
+#            (CORRETTO DAL CANCELLO 15/09: era "r.379 lotMkt", la riga
+#             giusta e' 378 e la variabile e' totLot, non lotMkt --
+#             lotMkt = NormVol(totLot*InpFirstFraction) e' un passo
+#             dopo, r.381, e discende comunque da totLot/risk, mai da tp)
 #          Quindi InpTP_RR NON cambia risk, NON cambia il lotto, NON
 #          cambia il cancello di costo del punto 2: e' un asse
 #          ORTOGONALE al problema di costo, verificato dal codice, non
@@ -131,15 +135,24 @@
 # ---------------------------------------------------------------------
 #  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
 #    mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5:
-#      r.81   input double InpTP_RR = 3.0;  // OTT SuperWave real-tick
+#      r.84   input double InpTP_RR = 3.0;  // OTT SuperWave real-tick
 #      r.375  tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR
-#      r.415  tpP (stessa formula, per la gamba PENDENTE)
-#      r.359-363 (ManageAll): il parziale a 1R e il breakeven sono in
+#      r.409  tpP (stessa formula, per la gamba PENDENTE)
+#      r.443-464 (ManageAll): il parziale a 1R e il breakeven sono in
 #                 unita' di R, quindi INVARIANTI lungo questo asse.
-#      r.434-477 (ManageAll): trailing sul Supertrend ed exit-on-flip
-#                 sono PREZZO ASSOLUTO, indipendenti da InpTP_RR: un
-#                 target piu' lontano non impedisce a trailing/flip di
-#                 chiudere la posizione PRIMA di arrivarci.
+#      r.307 (OnNewBar): exit-on-flip e' PREZZO ASSOLUTO (segno del
+#                 Supertrend), indipendente da InpTP_RR.
+#      r.466-472 (ManageAll): trailing sul Supertrend, idem, PREZZO
+#                 ASSOLUTO. Un target piu' lontano non impedisce a
+#                 trailing/flip di chiudere la posizione PRIMA di
+#                 arrivarci.
+#      (CORRETTO DAL CANCELLO 15/09: la stesura precedente citava
+#       r.81/r.415/r.359-363/r.434-477 -- riletto riga per riga sul
+#       sorgente a HEAD, i numeri erano scivolati e "exit-on-flip"
+#       stava in OnNewBar, non in ManageAll. La FRASE era vera, il
+#       NUMERO no -- stessa classe gia' in CHECKLIST_RIGA_DI_LANCIO.md
+#       "ogni numero di riga citato si riverifica sull'artefatto nel
+#       commit che si sta per lanciare".)
 #    >>> IL PUNTO CHIAVE: un TP_RR piu' grande allunga SOLO il traguardo
 #        finale. Le uscite anticipate (parziale a 1R, breakeven,
 #        trailing sul Supertrend, flip) restano tutte accese e
@@ -179,11 +192,26 @@
 #    parziale a 1R + la chiusura finale, oltre alla gamba pendente che
 #    puo' non riempirsi mai). CENSIMENTO_CONTRATTI_v2.md r.317 lo
 #    marca esplicitamente `[NON MIS.]`, forbice posizioni **98-227**.
-#    >>> Gia' misurato da R126a (stessa sedia, scritto il 10/09, citato
-#        non riscoperto): spezzata IS/OOS la STESSA corsa fa **84 (IS)
-#        e 143 (OOS)** chiusure (R126a r.301-306, e coincide con
-#        CENSIMENTO_CONTRATTI_v2.md r.317 "spezzata fa 84 e 143").
-#        84+143=227, torna.
+#    >>> CORRETTO DAL CANCELLO (controllo-preventivo, 15/09/2026): la
+#        prima stesura di questa riga citava "84 (IS) e 143 (OOS)" come
+#        "gia' misurato da R126a" senza dire che e' il numero
+#        D'ARCHIVIO (corsa dell'08/08, commit 400a462) che la corsa
+#        VERA di R126a NON riproduce: risultato fresco (committato
+#        13/09, csv `..._U30USD_IS_r126a.csv`/`..._OOS_r126a.csv`,
+#        deposito 10.000 come qui) e' **72 (IS) e 131 (OOS)**, e
+#        `report/LETTURA_BACKLOG_NOTTE_2026-09-13.md` r.128/283 marca
+#        proprio questa cella **"ANCORA GRADO C -> round fermo"** (PF IS
+#        1,48166 contro l'archivio 1,84892, Delta 0,367 > tolleranza
+#        dichiarata +/-0,15). Causa **NON isolata** (indiziata: il
+#        conteggio su questo EA dipende dal deposito, r120e stesso
+#        referto: 131 a 10k -> 184 a 100k, +40% a parita' di tutto il
+#        resto) -- e' un'INFERENZA, non una misura chiusa.
+#    >>> NON CAMBIA LA CONCLUSIONE DI QUESTO ROUND, LA RINFORZA: **72
+#        e' ANCORA PIU' SOTTO 150 di 84.** Qualunque dei due numeri si
+#        usi (l'archivio 84/143 o il fresco 72/131), il pavimento
+#        IS>=150 resta irraggiungibile su questa finestra -- ma il
+#        numero giusto da citare come "misurato da R126a" e'
+#        **72 (IS) / 131 (OOS)**, non 84/143: quello e' superato.
 #    Per IS>=150 E OOS>=150 servono >=300 CHIUSURE totali (ipotizzando
 #    uno split 50/50): 227 << 300. Mancano 73 chiusure, che a questa
 #    frequenza (~0,50-0,62 posizioni/giorno misurate, censimento r.317)
