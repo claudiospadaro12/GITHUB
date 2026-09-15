@@ -195,8 +195,85 @@ def tempo(s):
     return None
 
 
-def frazione_catturata(r):
-    """Quanta parte del movimento disponibile ha preso il trade.
+def valori_punto(righe):
+    """EUR per punto di prezzo per lotto, STIMATO per simbolo dai dati stessi.
+
+    Serve alla frazione catturata, che dal 15/09/2026 si calcola sui SOLDI
+    e non sui prezzi (classe 358). Il valore punto non e' scritto da
+    nessuna parte nel CSV: lo si ricava da `profit / (delta_prezzo x lotti)`.
+
+    >>> SI USANO SOLO I PERDENTI, ed e' il punto di tutto il metodo.
+        Su una posizione col PARZIALE il `profit` e' cumulativo su piu'
+        deal mentre `close_price` e' il prezzo dell'ULTIMO deal: il
+        rapporto non vale il valore punto, vale un'altra cosa. Ma il
+        parziale scatta in PROFITTO: su un perdente quasi sempre non c'e',
+        e il rapporto torna esatto. E' un campione sporco solo dove non
+        guarda.
+
+    >>> MEDIANA E NON MEDIA, e cancello sull'IQR: fra i perdenti ci sono
+        le operazioni MANUALI di Claudio (colonna `strategy` vuota), che
+        hanno coperture e chiusure a mano e sbandano di 250 volte. Sul
+        campione vero di XAUUSD (207 perdenti) la mediana e' 86,742 con
+        un IQR relativo dell'1,6%, mentre min e max sono 1,37 e 341,47.
+        La mediana non le sente; la media si'.
+
+    >>> IL CONTRO-ESEMPIO, ed e' quello che rende usabile questa stima:
+        due valori punto di questi simboli sono stati misurati PRIMA e per
+        ALTRA VIA (D30EUR 1,0000 su ~140 trade; U30USD/NASUSD 0,8607).
+        Questo stimatore, che non li conosce, restituisce **1,00000** e
+        **0,86071**. Se un domani non li riproducesse piu', la stima e'
+        rotta e va guardata: vedi CONTROLLO_VALORI_PUNTO.
+    """
+    grezzi = defaultdict(list)
+    for r in righe:
+        lot, op, cp = num(r, "volume"), num(r, "open_price"), num(r, "close_price")
+        pr = num(r, "profit")
+        if lot <= 0 or op <= 0 or cp <= 0 or pr >= 0:
+            continue
+        d = (cp - op) if r.get("side", "").lower().startswith("b") else (op - cp)
+        if d >= 0:                      # perdente con delta a favore = dato incoerente
+            continue
+        grezzi[r.get("symbol")].append(pr / (d * lot))
+    out = {}
+    for sym, vs in grezzi.items():
+        vs.sort()
+        n = len(vs)
+        if n < 4:                       # campione troppo sottile per una mediana
+            continue
+        med = vs[n // 2]
+        iqr = vs[(3 * n) // 4] - vs[n // 4]
+        if med <= 0 or iqr / med > 0.10:   # dispersione grossa = non mi fido
+            continue
+        out[sym] = med
+    return out
+
+
+# Valori punto misurati PRIMA e per altra via. Non si usano nel conto: servono
+# SOLO a far fallire rumorosamente lo stimatore se un giorno smette di
+# riprodurli (il contro-esempio, non la conferma).
+CONTROLLO_VALORI_PUNTO = {"D30EUR": 1.0000, "U30USD": 0.8607}
+
+
+def frazione_catturata(r, vpunto=None):
+    """Quanta parte del movimento disponibile ha preso il trade, IN SOLDI.
+
+    🔴 RISCRITTA IL 15/09/2026 (classe 358). La versione precedente faceva
+    `(close_price - open_price) / (session_high - open_price)`, cioe'
+    metteva al numeratore il prezzo dell'**ULTIMO deal**. Ma `profit` e'
+    **cumulativo su tutti i deal**: con un parziale i due campi descrivono
+    cose diverse, e l'errore **non ha un verso fisso**. Misurato il
+    15/09 su due operazioni della stessa giornata:
+        DAX Apertura EU RETEST BUY : stampava 23%  -> vero 29,9%  (sottostima)
+        STREV NAS H1 S 1/3         : stampava 77%  -> vero 45,5%  (SOVRASTIMA)
+    Il verso e' il segno di (prezzo ultimo deal - prezzo del parziale). E il
+    verso che SOVRASTIMA e' il piu' costoso: un falso allarme lo si guarda e
+    lo si scarta, un falso "ha preso il 77%" non lo si guarda affatto — e
+    nasconde proprio i casi in cui il runner ha corso e il parziale ha
+    tagliato, cioe' l'imputato che il progetto insegue da R46 (14/08).
+
+    Ora: numeratore = `profit` (la posizione INTERA, parziale compreso),
+    denominatore = escursione favorevole x lotti x valore punto. Le due
+    grandezze parlano della stessa posizione e sono tutte e due in euro.
 
     ATTENZIONE al denominatore: session_high/low li misura l'EA da
     ingresso fino alle 23:59, cioe' su TUTTA la giornata. Per gli EA di
@@ -205,28 +282,57 @@ def frazione_catturata(r):
     vanno lette come "quanto ha preso di cio' che la giornata offriva",
     non come "quanto ha preso del suo movimento".
 
+    🔴 E VALE SOLO PER LE POSIZIONI NATE E MORTE LO STESSO GIORNO. Su una
+    multi-giorno la finestra di session_high/low si chiude alle 23:59 del
+    giorno d'INGRESSO, quindi quei due numeri NON sono l'MFE/MAE: il 14/09
+    `GAP AUDUSD L` e' morto a un prezzo che stava FUORI dalla sua banda di
+    sessione. Prima era un avviso scritto nel referto; adesso e' un
+    cancello, e la funzione restituisce None.
+
     Si calcola SOLO sui trade in profitto. Su un perdente il
     denominatore e' l'escursione a favore, che puo' essere quasi zero:
     il 04/08 un trade dava -1679%, un numero senza significato.
     """
-    if num(r, "profit") <= 0:
+    profit = num(r, "profit")
+    if profit <= 0:
+        return None
+    if not r.get("_ot") or not r.get("_ct"):
+        return None
+    if r["_ot"].date() != r["_ct"].date():      # multi-giorno: la banda non e' l'MFE
         return None
     hi, lo = num(r, "session_high"), num(r, "session_low")
-    op, cp = num(r, "open_price"), num(r, "close_price")
-    if hi <= 0 or lo <= 0 or op <= 0:
+    op, lot = num(r, "open_price"), num(r, "volume")
+    if hi <= 0 or lo <= 0 or op <= 0 or lot <= 0:
         return None
-    if r.get("side", "").lower().startswith("b"):
-        disponibile, preso = hi - op, cp - op
-    else:
-        disponibile, preso = op - lo, op - cp
+    disponibile = (hi - op) if r.get("side", "").lower().startswith("b") else (op - lo)
     if disponibile <= 0:
         return None
-    f = preso / disponibile
-    return f if -0.5 <= f <= 3.0 else None   # fuori range = dato inaffidabile
+    v = (vpunto or {}).get(r.get("symbol"))
+    if not v:                       # valore punto non stimabile: meglio niente che un numero
+        return None
+    disponibile_eur = disponibile * lot * v
+    if disponibile_eur <= 0:
+        return None
+    f = profit / disponibile_eur
+    # f > 1 e' possibile in piccolo (l'EA campiona session_high a tick, puo'
+    # perdere uno spike), ma molto sopra 1 vuol dire dato rotto, non gestione.
+    return f if 0 < f <= 1.5 else None
 
 
 def main():
     righe = leggi(CSV_IN)
+    # Valore punto per simbolo, stimato dai PERDENTI di tutto lo storico
+    # (serve alla frazione catturata, che dal 15/09 si calcola in EUR).
+    vpunto = valori_punto(righe)
+    # IL CONTRO-ESEMPIO, e deve gridare se cade: lo stimatore non conosce
+    # questi due numeri, misurati prima e per altra via. Se smette di
+    # riprodurli, la stima e' rotta e le frazioni non vanno lette.
+    for sym, atteso in CONTROLLO_VALORI_PUNTO.items():
+        v = vpunto.get(sym)
+        if v is not None and abs(v - atteso) / atteso > 0.02:
+            print("ATTENZIONE: il valore punto stimato di %s (%.5f) non riproduce "
+                  "quello misurato (%.4f). Le frazioni catturate NON sono affidabili."
+                  % (sym, v, atteso), file=sys.stderr)
     # Le opzioni (--forza) non sono una data: senza questo filtro
     # `analizza_trades.py --forza` cercherebbe i trade del giorno "--forza".
     argomenti = [a for a in sys.argv[1:] if not a.startswith("-")]
@@ -424,7 +530,7 @@ def main():
         motivi = defaultdict(int)
         for r in tr:
             motivi[r.get("close_reason") or "?"] += 1
-        fr = [f for f in (frazione_catturata(r) for r in tr) if f is not None]
+        fr = [f for f in (frazione_catturata(r, vpunto) for r in tr) if f is not None]
         frm = ("%.0f%%" % (100 * sum(fr) / len(fr))) if fr else "—"
         out.append("| %s | %d | **%+.2f** | %s | %s | %s |" % (
             ea, len(tr), pnl,
@@ -528,11 +634,12 @@ def main():
                         b.get("side"), dist, coda))
 
     # 2) uscite troppo rapide o frazione bassa
+    #    (la frazione e' in SOLDI dal 15/09: vedi frazione_catturata)
     for r in oggi:
         if not r["_ct"]:
             continue
         d = (r["_ct"] - r["_ot"]).total_seconds()
-        f = frazione_catturata(r)
+        f = frazione_catturata(r, vpunto)
         if num(r, "profit") > 0 and d < DURATA_SOSPETTA:
             avvisi.append("⏱️ **%s** su %s: chiuso in **%.0f s** in profitto (%s) — "
                           "gestione probabilmente troppo stretta" % (
