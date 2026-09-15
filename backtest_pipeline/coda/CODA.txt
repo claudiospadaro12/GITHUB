@@ -1874,3 +1874,34 @@ f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160e_maxdayshold_puntelarry_XAUUSD.txt -Etichetta r160e -Modello 1 -Deposito 100000
 # =====================================================================
+#  R159a -- InpMaxHours SU ABTG_GapFill, U30USD H1 (sedia 772234).
+#  Quindicesima sedia con manopola d'uscita mai mossa (asse 12/24/36/
+#  48-vivo/60/72/84 ore). Stessa famiglia di R157a (InpSLGapMult sulla
+#  stessa sedia), motore compagno: qui la geometria dello stop e' del
+#  tutto INVARIANTE lungo l'asse (InpMaxHours non tocca ne' TP ne' SL
+#  ne' lotto), R157a invece muove proprio lo stop.
+#
+#  TRE giri di cancello, tutti per la classe 353 (e la sua estensione,
+#  classe 357, nata qui): la tesi iniziale del round -- "il conteggio
+#  delle uscite forzate dal time-stop si misura per la prima volta" --
+#  poggiava su un contatore (cO_timestop) che esiste nel sorgente ma
+#  finisce solo in un log dell'agente di ottimizzazione, mai raccolto
+#  dalla corsia. Riscritto attorno all'UNICA misura che il round produce
+#  davvero: il test di identita' fra celle contigue sul CSV (B4), con
+#  soglia esplicita (>=1 coppia diversa) e conseguenza dichiarata (tutte
+#  identiche = NULLO, S1/B3 VACUI, contro-esempio T4). La stessa
+#  promessa si era nascosta tre volte in punti diversi (sezione IL
+#  COSTO, poi la conclusione del pavimento IS, poi la soglia B4 stessa)
+#  prima che il terzo giro desse PASS pulito.
+#
+#  Rischio VERO=DICHIARATO 1,00x, Trades=Posizioni (zero parziali nel
+#  sorgente). Cancello di costo NON misurabile/spostabile da questo
+#  round: resta l'ancora 35,0x/NO all'88% su n=1 del 10/09. Pavimento
+#  IS>=150 non raggiungibile (17,6 anni contro 1,76 disponibili):
+#  @FRAZIONEIS 1.0, scopato a RISCHIO e FORMA.
+#
+#  Pin: giro di pin b02d4341 (42mo, b402b92 -> 0dacebac). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+b02d434173c92764f8631764581f13a5503b4d88 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R159a_maxhours_gapfill_U30USD.txt -Etichetta r159a -Modello 4 -Deposito 100000
+# =====================================================================
