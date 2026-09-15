@@ -1773,3 +1773,104 @@ f78daccf8a44c2e3a2bfb4a012383fbf0fbb9a9f | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 342f6fdb9acf407a52bad58cde91d22da2fa1cdb | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R158a_atrexit_PTE_U30USD.txt -Etichetta r158a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R160a -- InpMaxDaysHold SU ABTG_PunteLarry, EURAUD H1 (sedia 772342).
+#  Primo dei cinque gemelli restanti della famiglia (772341 gia' coperta
+#  da R156a). Finestra LUNGA 22 anni con taglio IS/OOS VERO (@FRAZIONEIS
+#  0.7052): OOS coincide bit-a-bit con la finestra R103 (2020-2026).
+#
+#  Rischio VERO=DICHIARATO 1,00x (CENSIMENTO_RISCHIO_VERO r.160). Zero
+#  parziali nel sorgente: Trades=Posizioni, fattore 1,00 misurato.
+#  IS atteso ~516 (OOS 216 GIA' MISURATO, R103): merito PIENO, unica
+#  della famiglia insieme a R160b.
+#
+#  Due giri di cancello: il primo ha trovato che la sentinella S2 (solo
+#  IS>=150) non separa "il motore opera meno" da "la storia non c'e'"
+#  (classe 178 estesa, classe 355 in checklist) -- aggiunta sentinella
+#  S4 (verifica a mano su MT5). Il secondo ha trovato che "IL COSTO NON
+#  DECIDE" provava solo l'assenza di artefatto PER TRADE, non quello
+#  AGGREGATO (spread di oggi sotto-carica il costo in proporzione a n,
+#  disinnescato solo se il vantaggio compare anche in OOS). PASS dopo
+#  le correzioni, con 2 nit di citazione residui chiusi in un terzo giro.
+#
+#  Pin: giro di pin 95170600 (41mo, a9915cf -> b402b92). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+# =====================================================================
+9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160a_maxdayshold_puntelarry_EURAUD.txt -Etichetta r160a -Modello 1 -Deposito 100000
+# =====================================================================
+#  R160b -- InpMaxDaysHold SU ABTG_PunteLarry, EURCAD H1 (sedia 772346).
+#  Secondo dei cinque gemelli. Finestra 27 anni, @FRAZIONEIS 0.7586, OOS
+#  coincide con R103 (154 posizioni GIA' MISURATE, margine sottile: 4
+#  operazioni sopra il pavimento 150 -- dichiarato, non nascosto).
+#
+#  Rischio VERO=DICHIARATO 1,00x. Zero parziali: Trades=Posizioni.
+#  InpExitMode=0 (first profitable open, NESSUN TP per costruzione):
+#  morso del time-stop atteso PIU' FORTE che sulle sedie R-based.
+#
+#  Stessi due giri di R160a: sentinella S4 aggiunta (classe 355), e
+#  "IL COSTO NON DECIDE" corretto per l'artefatto aggregato. PASS.
+#
+#  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160b_maxdayshold_puntelarry_EURCAD.txt -Etichetta r160b -Modello 1 -Deposito 100000
+# =====================================================================
+#  R160c -- InpMaxDaysHold SU ABTG_PunteLarry, GBPJPY H1 (sedia 772344).
+#  Terzo dei cinque gemelli. Finestra 27,5 anni (@DAQUANDO 1999.01.01,
+#  la data che il banco produce davvero -- R102 misura la "finestra
+#  accorciata" anche dove il broker dichiara il 1993). @FRAZIONEIS
+#  0.7637. OOS 139 posizioni GIA' MISURATE: SOTTO il pavimento 150
+#  (mancano 11), MERITO SOSPESO (Regola B). La corsia RISCHIO e' GIA'
+#  aperta da R103 (DD 9,0% contro 2,7% promesso, 3,3x) e non nasce qui:
+#  va detto accanto a qualunque conclusione.
+#
+#  Rischio VERO=DICHIARATO 1,00x. Zero parziali: Trades=Posizioni.
+#  InpExitMode=1 (R-based, TP a 1,5R): morso atteso piu' debole di
+#  R160b/d. PASS su entrambi i giri di cancello (nessun difetto
+#  bloccante su questo file specifico).
+#
+#  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160c_maxdayshold_puntelarry_GBPJPY.txt -Etichetta r160c -Modello 1 -Deposito 100000
+# =====================================================================
+#  R160d -- InpMaxDaysHold SU ABTG_PunteLarry, GBPUSD H1 (sedia 772345).
+#  Quarto dei cinque gemelli. Finestra 27,5 anni, @DAQUANDO 1999.01.01
+#  (stessa ragione di R160c), @FRAZIONEIS 0.7637. OOS 121 posizioni GIA'
+#  MISURATE: SOTTO il pavimento 150 (mancano 29), MERITO SOSPESO.
+#  Unica sedia solo-SHORT della famiglia. InpExitMode=0 (nessun TP per
+#  costruzione, come R160b): morso del time-stop atteso PIU' FORTE.
+#
+#  Rischio VERO=DICHIARATO 1,00x. Zero parziali: Trades=Posizioni.
+#  PASS su entrambi i giri di cancello.
+#
+#  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160d_maxdayshold_puntelarry_GBPUSD.txt -Etichetta r160d -Modello 1 -Deposito 100000
+# =====================================================================
+#  R160e -- InpMaxDaysHold SU ABTG_PunteLarry, XAUUSD H1 (sedia 772343).
+#  Quinto e ultimo dei cinque gemelli. Finestra 22 anni, UNA TRANCHE
+#  (@FRAZIONEIS 1.0 -- ~203 posizioni attese, servirebbero 300 per uno
+#  split IS/OOS: 32,6 anni contro i 22 disponibili). MERITO SOSPESO per
+#  costruzione (Regola B). Cancello di costo il piu' largo/misurato
+#  della famiglia (236,2x, CENSIMENTO_CONTRATTI_v2 r.338) ma il round
+#  non lo sposta (stop invariante lungo l'asse).
+#
+#  ATTENZIONE TAGLIA: gira a 1,0% (taglia dell'ancora R100), non alla
+#  taglia VIVA 0,30% -- ogni DD va diviso per 3,33 per parlare della
+#  sedia vera (convenzione CONTRATTI_SEDIE.md).
+#
+#  Rischio VERO=DICHIARATO 1,00x (il "3,33x" del censimento e' xRes,
+#  rischio di manovra umana post-Resetta, non un bug -- contro-esempio
+#  costruito nel file). Zero parziali: Trades=Posizioni.
+#
+#  Senza gamba OOS, il disinnesco dell'artefatto di costo aggregato
+#  usato su R160a-d (vale solo se compare anche fuori IS) non e'
+#  disponibile: dichiarato esplicitamente, nessuna conclusione forzata
+#  sul lato basso dell'asse. PASS su entrambi i giri di cancello.
+#
+#  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160e_maxdayshold_puntelarry_XAUUSD.txt -Etichetta r160e -Modello 1 -Deposito 100000
+# =====================================================================
