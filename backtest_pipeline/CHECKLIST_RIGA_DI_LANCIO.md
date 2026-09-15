@@ -19433,3 +19433,65 @@ torna verde (10/10) anche con questo buco aperto.
    `controlla_riga.py` come "fix classe 225 PASS, ma con un difetto
    bloccante NUOVO nel percorso classe 234/235"**: va corretto prima di
    fidarsi ciecamente dell'exit code su un blocco di raccolta.
+
+### ✅ CORRETTO (15/09/2026, stessa giornata)
+
+**Il fix**: `raccolta_innocua()` ora fa un terzo controllo, dopo cmdlet e
+bersaglio -- il **CONTENUTO** di OGNI stringa del blocco (`contenuto_stringhe()`,
+lo stesso testo che `senza_stringhe()` toglie dal controllo del CODICE) viene
+scansionato con `CONTENUTO_PERICOLOSO`: i pattern gia' scritti per il codice
+eseguibile (comandi nativi da `LETTURA_VIETATI`, `New-Object`, `System.IO`,
+chiamate a metodi che scrivono/eseguono, gli indicatori di download di
+`ODORE_PS`) **piu'** le firme di lanciatore che il contro-esempio nomina alla
+lettera -- `mshta`/`wscript`/`cscript`/`rundll32`/`regsvr32` (eseguibili
+Windows noti, non parole), `javascript:`/`vbscript:`/`ActiveXObject`
+(protocolli/oggetti COM, non parole), `Invoke-Expression`/`iex`/
+`-EncodedCommand` (comandi PowerShell, non parole). **Non** si e' riusata la
+lista ALIAS di `LETTURA_VIETATI` cosi' com'e' (`rm`, `cp`, `mi`, `sp`, `si`,
+`ac`, `ii`, `rp`, `md`, `echo`, `start`, ...): sono 2-3 lettere che collidono
+con parole italiane comuni nei referti scritti dalla raccolta stessa -- e'
+esattamente il contro-esempio inverso richiesto dalla regola del 10/09, fatto
+PRIMA di consegnare, non dopo. Se il contenuto scritto contiene uno di questi
+pattern, la riga **non si declassa piu' a RILIEVO 235**: `raccolta_innocua()`
+torna `False` e il chiamante blocca con la classe nuova **339**, distinta dalla
+generica 173 (messaggio dedicato: "cmdlet e bersaglio innocui, ma il CONTENUTO
+...").
+
+**Un bug trovato e corretto PRIMA di consegnare** (lo stesso principio
+Sviluppatore/Agente dei Controlli del 13/09): la prima stesura di
+`CONTENUTO_PERICOLOSO` includeva `cmd` nella lista dei comandi nativi senza
+distinguere l'ESTENSIONE `.cmd` di un file appena creato (`-Path
+"...\avvio.cmd"`, il PERCORSO, non il payload) dall'INVOCAZIONE
+dell'interprete (`cmd.exe`, `cmd /c`). Sul contro-esempio il blocco usciva
+comunque BLOCCANTE (per fortuna: `javascript:`/`mshta` matchavano comunque
+altrove), ma la PROVA citata nel messaggio era quella sbagliata (`avvio.cmd`
+invece del payload vero). Corretto restringendo il pattern a
+`cmd(\.exe)?\s*(/c|/k)\b|cmd\.exe\b`: ora la prova citata e' sempre quella
+vera.
+
+**Test eseguiti, tutti PRIMA di consegnare**:
+1. Il contro-esempio esatto della voce 339 (`Set-Content -Value` con
+   `mshta.exe "javascript:new ActiveXObject(1).Run(1)"`): **BLOCCANTE
+   classe 339**, exit 1 (prima: RILIEVO 235, exit 0).
+2. Variante con `Out-File`/stringa doppia con backtick (`"... mshta.exe
+   \`"javascript:...\`""  | Out-File ...`): **BLOCCANTE**, stessa classe --
+   il fix non dipende dalla forma esatta dell'apice.
+3. Le 5 righe di raccolta ONESTE del repo (`RIGA_R125_DA_MANDARE.md`,
+   `RIGA_MISURA_TICK_XAUUSD_DA_MANDARE.md`, `RIGA_SPREAD_FLOTTA_DA_MANDARE.md`,
+   `RIGA_SPREAD_FLOTTA_TRANCHE_DA_MANDARE.md`,
+   `RIGA_SPREAD_FLOTTA_XAUUSD_DA_MANDARE.md`) via
+   `python3 backtest_pipeline/controlla_riga.py --oggetto md <i 5 file>`:
+   **exit 0, 0 BLOCCANTI, identico a prima del fix** (stesse 9 RILIEVI, incluso
+   il 235 sul blocco r.98 di R125 -- la raccolta vera resta un RILIEVO, non
+   diventa un falso BLOCCANTE).
+4. `controesempi_cancello.py`: aggiunto l'undicesimo caso
+   (`PAYLOAD_RACCOLTA_339`, lo stesso testo del contro-esempio della voce 339,
+   via `--riga`, atteso `BLOCCA`). **11/11 PASS**, i 10 casi precedenti
+   restano verdi (nessuna regressione sulle classi 221/223/225).
+
+**Verdetto**: il buco della voce 339 e' chiuso. Lo strato 1
+(`controlla_riga.py`) ora scansiona il CONTENUTO scritto da una "raccolta",
+non solo il cmdlet e il bersaglio. Lo strato 2 (`controllo-preventivo`) resta
+comunque la difesa di giudizio per quello che nessun pattern testuale puo'
+prendere (es. un payload costruito a runtime da variabili, mai scritto come
+stringa letterale).
