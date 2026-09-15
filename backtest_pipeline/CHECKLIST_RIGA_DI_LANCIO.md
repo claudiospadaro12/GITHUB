@@ -20158,8 +20158,8 @@ e' "celle per finestra : $NCelle -> ($NCelle*2) pass a tick reali in
 tutto" -- il *2 e' CABLATO e non legge mai @FRAZIONEIS. Aggravante nuova
 trovata su R158a: il file aveva trasformato quel numero noto-sbagliato in
 un "ci si ferma prima di lanciare qualunque altra cosa" -- cioe' un
-ARRESTO che scatta su un banco SANO, perche' il conteggio vero (14) non
-coincide mai col conteggio dichiarato (7) su un file @FRAZIONEIS 1.0.
+ARRESTO che scatta su un banco SANO, perche' il conteggio STAMPATO (14)
+non coincide mai con quello VERO (7) su un file @FRAZIONEIS 1.0.
 
 ### REGOLA
 Per i file con @FRAZIONEIS 1.0 si controlla il numero di CELLE, mai

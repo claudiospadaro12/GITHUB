@@ -124,7 +124,13 @@
 #     [NON MISURATO] per costruzione su quella sedia (dichiarato nel suo
 #     stesso file, sezione "IL COSTO"): "GBPUSD H1 ha tipicamente ATR
 #     15-35 pip" e' un ordine di grandezza, non una misura. Su 771321 il
-#     cancello si misura con NUMERI VERI (spread_orario_U30USD.csv), non
+#     cancello e' vero solo a META': il DENOMINATORE (spread 2,00 idx,
+#     mediana d'archivio di spread_orario_U30USD.csv) e' misurato, il
+#     NUMERATORE (lo stop in idx) e' [INF] qui come su GBPUSD -- e
+#     questo round NON lo produce (sezione "IL COSTO", B4). Quindi la
+#     differenza con GBPUSD non e' "qui il cancello si misura": e' che
+#     il giorno in cui l'ATR(N) sara' misurato a parte, su U30USD il
+#     rapporto si chiudera' con uno spread d'archivio REALE, su GBPUSD
 #     con un ordine di grandezza.
 # ---------------------------------------------------------------------
 #  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria) --
@@ -277,10 +283,9 @@
 #  - n (USCITE, Trades del CSV): atteso in CALO LEGGERO al crescere del
 #    periodo, banda LARGA (a differenza di R153a, qui non c'e' un'ancora
 #    diretta sulla STESSA finestra a tick -- solo l'ancora OHLC di R103,
-#    sotto). Attesa: 55-85 uscite su tutte e sette le celle (banda
-#    +/-20% dall'ancora R103 di 68, piu' larga di R153a perche' qui il
-#    modello cambia, OHLC->tick, in aggiunta al normale rumore di
-#    campione).
+#    sotto). Attesa: 55-85 uscite su tutte e sette le celle (-19%/+25%
+#    dall'ancora R103 di 68, piu' larga di R153a perche' qui il modello
+#    cambia, OHLC->tick, in aggiunta al normale rumore di campione).
 #  - STOP MISURATO (idx) e CANCELLO DI COSTO: [NON MISURABILI DA QUESTO
 #    ROUND]. Nessuna colonna degli artefatti li contiene (sezione "IL
 #    COSTO", verificata a fonte). Non dichiaro nessuna attesa su numeri
@@ -352,7 +357,7 @@
 #       trailing sull'EMA14 (r.556-561): e' da li', non dall'ATR, che un
 #       PF puo' davvero cambiare fra le celle -- ed e' quello che questo
 #       round misura per davvero.
-#    4. UN SOLO REGIME: qualunque "vincitore" qui (per costo o per PF)
+#    4. UN SOLO REGIME: qualunque "vincitore" qui (per PF o per DD)
 #       e' un'ipotesi da riverificare su una finestra diversa o di
 #       regime, quando U30USD avra' piu' storico, MAI un verdetto --
 #       stessa etichetta di R154a-157a sullo stesso periodo.

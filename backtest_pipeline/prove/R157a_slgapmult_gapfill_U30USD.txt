@@ -68,8 +68,15 @@
 #          cancello di costo con dati reali d'archivio, come il mandato
 #          chiede -- resterebbe [INF] o [NM], come gia' scritto da
 #          `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` righe 485/522-
-#          524 per queste stesse 4 sedie. Per questo lo scope di questo
-#          file e' SOLO 772234 (U30USD), non il quintetto.
+#          524 per queste stesse 4 sedie. Attenzione a non leggerlo al
+#          contrario: NEMMENO QUESTO ROUND verifica il cancello di costo
+#          (nessun artefatto della corsia contiene lo stop -- "IL
+#          COSTO", S3, B4). La differenza e' che su U30USD lo spread
+#          d'archivio ESISTE, quindi qui esiste l'ancora del 10/09 e qui
+#          una misura per-trade dedicata potra' un giorno chiudere il
+#          cancello con numeri veri; sulle altre quattro mancherebbe
+#          anche il denominatore. Per questo lo scope di questo file e'
+#          SOLO 772234 (U30USD), non il quintetto.
 #
 #  2) IL CANCELLO DI COSTO SU 772234 E' GIA' MISURATO, ED E' UN "NO" AL
 #     PELO -- verificato oggi contro l'archivio vero, non citato a
@@ -232,7 +239,9 @@
 #    215,6 idx = 77,0x, ben sopra il pavimento, per vedere se il
 #    profitto normalizzato regge quando il rischio per trade raddoppia
 #    (lotto piu' piccolo a parita' di rischio %) o se il PF peggiora
-#    abbastanza da annullare il vantaggio del cancello di costo.
+#    abbastanza da annullare il vantaggio ATTESO PER ARITMETICA sul
+#    cancello (2,2 x 98,0 = 215,6 idx = 77,0x), che pero' questo round
+#    non misura (B4).
 # ---------------------------------------------------------------------
 #  L'ATTESA, SCRITTA PRIMA DEI NUMERI
 #  - n (posizioni): atteso QUASI INVARIANTE lungo l'asse (punto sopra,
@@ -248,7 +257,7 @@
 #    contiene lo stop, e il per-trade non viene raccolto da questa
 #    corsia. La SOLA previsione che il codice permette (non una banda
 #    da confrontare con un numero che il round produce): con TP che non
-#    legge InpSLGapMult (r.454) e SL che scala circa linearmente col
+#    legge InpSLGapMult (r.448) e SL che scala circa linearmente col
 #    moltiplicatore, ATTESA PER ARITMETICA -- non per misura -- cella
 #    0,4 -> ~39 idx, cella 1,0(vivo) -> 98,0 idx (l'ancora reale, n=1),
 #    cella 2,2 -> ~216 idx. Se qualcuno la verificasse con un numero
@@ -287,9 +296,10 @@
 #  COME QUESTO ROUND POTREBBE SEMBRARE BUONO PER CASO:
 #    con n atteso ~28-32 per cella su UN SOLO regime (21 mesi,
 #    prevalentemente toro Dow 2024.09-2026.06), bastano 1-2 trade
-#    diversi per spostare il PF in modo vistoso, e il cancello di costo
-#    potrebbe "passare" solo perche' l'UNICA gamba misurata (n=1, punto
-#    2) non e' rappresentativa del vero stop tipico della sedia. Non e'
+#    diversi per spostare il PF in modo vistoso, e l'ancora di costo del
+#    10/09 potrebbe essere ottimista solo perche' l'UNICA gamba misurata
+#    (n=1, punto 2) non e' rappresentativa -- ma questo round non la
+#    riverifica (B4). Non e'
 #    una prova di regime (Emendamento della Finestra, regola C, 16/08)
 #    e non lo diventa qui.
 #  COME LO DISTINGUO DA UN EDGE VERO O DA UN CANCELLO CHE PASSA PER
@@ -313,8 +323,8 @@
 #       quello vero, e il contro-esempio ha gia' fatto il suo lavoro
 #       (fermare la lettura prima del PF, vedi "il risultato che mi
 #       farebbe fermare" sopra).
-#    4. UN SOLO REGIME: qualunque "vincitore" qui (per merito o per
-#       cancello di costo) e' un'ipotesi da verificare su una finestra
+#    4. UN SOLO REGIME: qualunque "vincitore" qui (per merito o per DD)
+#       e' un'ipotesi da verificare su una finestra
 #       diversa o di regime quando U30USD avra' piu' storico, MAI un
 #       verdetto -- e va scritto cosi' in qualunque referto che legga
 #       questi numeri.
@@ -401,16 +411,19 @@
 #      griglia -- e' un regime qualitativamente diverso (un'altra
 #      formula di stop, non un punto sulla stessa retta), gia' segnato
 #      "MAI-gemello" dal censimento (mosso altrove nella famiglia, non
-#      qui). Se questo round mostra che il cancello di costo resta
-#      fragile anche alle celle alte, SLMode=1 (che il referto del
-#      10/09 stima ~470 idx, ben oltre il pavimento) e' il naturale
-#      passo successivo, non fatto qui.
+#      qui). Se la misura per-trade dedicata (SL/entry esportati)
+#      mostrera' che il cancello di costo resta fragile anche alle celle
+#      alte di questo asse, SLMode=1 (che il referto del 10/09 stima
+#      ~470 idx, ben oltre il pavimento) e' il passo successivo -- ma il
+#      giudizio viene da QUELLA misura, non da questo round, che sul
+#      costo non produce niente (B4).
 #    - LE ALTRE 4 SEDIE DEL QUINTETTO (GBPUSD/EURUSD/AUDUSD/225JPY):
-#      [NON TOCCATE qui] -- nessuna ha uno spread reale d'archivio
-#      (punto 1b sopra), quindi nessuna puo' verificare il cancello di
-#      costo con dati misurati oggi. Restano candidate per un round
-#      futuro SOLO se/quando `spread_flotta/` guadagna un CSV per
-#      quei simboli.
+#      [NON TOCCATE qui] -- su di loro mancherebbe anche il DENOMINATORE,
+#      mentre qui manca "solo" il numeratore. Per un verdetto di COSTO
+#      servono DUE cose, e nessun round di questa corsia ne da' una: un
+#      CSV in `spread_flotta/` per quel simbolo E una misura per-trade
+#      dello stop. Come round di ASSE restano candidate da subito; come
+#      verdetto di costo, solo quando esistono tutte e due.
 #    - InpFillPct / InpGapMinATR / InpGapMaxATR / InpMaxHours /
 #      InpEntryWindowBars / InpMaxSpreadPts: NON sono l'asse di questo
 #      file. Pinnati al valore vivo di R103 (`R103_ABTG_GapFill_
