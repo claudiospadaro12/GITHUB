@@ -181,6 +181,46 @@ dopo `b45dd00` riguardano **altri** EA (`CYCLE`, `VolExpBreak`,
 | 32 | `ABTG_SupertrendReversal_Ott` | **970901** | XAUUSD H4 | 1.00 · 576 | `b45dd00` | `872dba8` 08/09 | **1.01 · 614** |
 | 37 | `ABTG_Nasdaq_Apertura_US` | **770250** | NASUSD M15 | 1.00 · 2032 | **`b5d904a`** 29/08 *"WIP FASE 2 DRIVE"* | `d83c196` 19/08 | **1.02 · 2382** |
 
+### ✅ AGGIORNAMENTO 15/09/2026 — S1 CHIUSO, il bersaglio giusto oggi è HEAD, non "pre-WIP"
+
+**Le colonne "bersaglio pre-WIP" qui sopra sono la strada S2 (mai scelta,
+sconsigliata). Con S1 chiuso stanotte (`b45dd00` e `b5d904a` PASS del doppio
+cancello, verificato riga per riga: nessuna riga tocca `OrderSend`/
+`PositionModify`/`PositionClose`/lotto/rischio/stop/target/ingresso-uscita —
+`CHECKLIST_RIGA_DI_LANCIO.md` classi 339), il bersaglio corretto per queste 13
+sedie è **HEAD di oggi**, esattamente come per il Blocco 2. Verificato ORA
+(15/09, `git log -1` su ciascun file — nessun commit successivo a `b45dd00`/
+`b5d904a` li tocca, HEAD è ancora quel commit) che versione e righe (`wc -l`+1,
+stessa convenzione di CODA_06) da leggere DOPO l'F7 sono:**
+
+| # | EA | magic | sym · TF | ➡️ bersaglio **HEAD oggi** | ver · righe attesi |
+|---:|---|---|---|---|---|
+| 2, 22, 23 | `ABTG_PTE` (×3, sedie 771321/771332/771322) | vedi sopra | U30USD/GBPUSD H1 | `b45dd00` | **1.01 · 777** |
+| 17, 18 | `ABTG_CostToCost` (×2, sedie 772361/772362) | vedi sopra | EURJPY/GBPCAD H4 | `b45dd00` | **1.00 · 1211** |
+| 21 | `ABTG_GapContinuation` | **774101** | 225JPY M1 | `b45dd00` | **1.50 · 1655** |
+| 24 | `ABTG_SuperWave` | **770531** | U30USD H4 | `b45dd00` | **1.01 · 767** |
+| 33 | `ABTG_SuperWave_DOW_H1_Ott` | **770511** | U30USD H1 | `b45dd00` | **1.01 · 775** |
+| 29 | 🎯 `ABTG_EMA200` **(priorità)** | **771531** | U30USD H1 | `b45dd00` | **1.00 · 691** |
+| 30 | `ABTG_EMA200_Ottimizzato` | **971501** | XAUUSD H4 | `b45dd00` | **1.00 · 749** |
+| 31 | `ABTG_SupertrendReversal` | **770924** | 225JPY H2 | `b45dd00` | **1.01 · 795** |
+| 32 | `ABTG_SupertrendReversal_Ott` | **970901** | XAUUSD H4 | `b45dd00` | **1.01 · 744** |
+| 37 | `ABTG_Nasdaq_Apertura_US` | **770250** | NASUSD M15 | `b5d904a` | **1.02 · 2567** |
+
+🔴 **Attenzione alla versione**: a differenza dei 6 rossi del Blocco 2 (dove
+`872dba8` alza il `#property version` apposta per il riconoscimento), il commit
+`b45dd00` **NON alza la versione** su nessuno dei 10 file (resta quella di
+campo, es. EMA200 resta `1.00`). **Il discriminante qui è SOLO la scheda
+Input**: cerca l'input `InpLogImbuto` (default `true`) nell'elenco dei
+parametri — se c'è, hai ricompilato da HEAD; se non c'è, sta ancora girando il
+binario vecchio. Le righe restano comunque una prova indipendente via CODA_06
+la notte dopo.
+
+👉 **Ordine consigliato dentro il Blocco 3**: `ABTG_EMA200` (771531) **per
+prima** — è il file più corto del gruppo (buon canarino), zero include
+condivisi con gli altri 9 (verificato: un errore su questa non implica un
+errore sulle altre), ed è la sedia che sblocca il pilastro del piano di
+ottobre. Le altre 12, in qualunque ordine dopo.
+
 ### ❓ COSA MANCA PRIMA DI POTERLE TOCCARE — e chi lo deve chiudere
 
 **Due strade, e sono alternative, non sequenziali:**
