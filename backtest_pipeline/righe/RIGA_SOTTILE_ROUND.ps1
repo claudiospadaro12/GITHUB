@@ -961,7 +961,17 @@ $BancoBT = 'C:\MT5_Backtest'
 #      commit di QUESTO giro, e restano #DISARMATA#: il PASS del secondo
 #      strato non e' mio, arriva dall'agente 'controllo-preventivo'
 #      nella sessione principale.
-$PIN = '1573c8ba036ea390059b7ae8a8af76e39f53701d'
+#  >>> QUARANTESIMO GIRO DI PIN (15/09/2026 sera): 1573c8b -> a9915cf.
+#  Serviva per raggiungere QUATTRO giri di correzioni sul cancello
+#  (classe 353 e residui) su R157a/R158a, la creazione di R159a/R160a-e
+#  e le classi 353-356 aggiunte alla checklist -- nessuno di questi file
+#  era raggiungibile dal pin vecchio (classe 265: un file prova nuovo o
+#  corretto non e' raggiungibile da un pin precedente al suo commit).
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra i
+#  due commit (git diff 1573c8b..a9915cf sui due percorsi: VUOTO,
+#  verificato), quindi $SHA_ROUND e $SHA_WALK restano quelle di sempre:
+#  solo $PIN si muove.
+$PIN = 'a9915cfd6c49eaf4fe3041aa2e3e032491c84e8b'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
