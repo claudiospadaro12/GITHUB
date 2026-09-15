@@ -111,6 +111,47 @@ parco non e' nella squadra della challenge**:
 
 ---
 
+# 0-ter. 🔎 AGGIORNAMENTO 15/09/2026 — verificato contro il repo vero, non contro i referti
+
+_Scritto dall'**architetto-prop**, sintesi di sola lettura sui quattro punti che
+`RUNBOOK_RICOMPILAZIONE_PICCOLO_2026-09-14.md` e `RESOCONTO_2026-09-14.md`
+lasciavano aperti. **Ogni riga sotto e' stata riverificata sul repo (`git log`,
+`.set` letti, `CODA.txt` letto, autotest rilanciato), non copiata dal referto
+della sera prima.**_
+
+| # | punto | 🔎 stato verificato ORA (15/09, mattina) | fonte |
+|---:|---|---|---|
+| 1 | **`771531` EMA200 — bloccata dal WIP `b45dd00`?** | 🔴 **SI', ANCORA.** `git log -1 --format=%H -- mql5/Experts/ABTG_EMA200.mq5` torna **ancora `b45dd00`** (commit dell'**11/09**, oggi e' il quarto giorno). Resta nel **Blocco 3** del runbook: **NON compilabile** finche' non si chiude B1. 🟡 **Ma le sue quattro uscite (`R136a-d`) e il breakeven (`R147a`) hanno GIA' girato due notti di fila** (13/09 e 14/09, `uscita 0` entrambe le volte, verificato riga per riga nei due `REFERTO_RUNNER`) — **sui dati sono avanti**, sul binario in campo **sono fermi da 4 giorni**: il conto reale gira ancora `344a11b` del 04/08 (486 righe, **zero** `InpUsaGuardian`) | `git log`, `REFERTO_RUNNER_20260913/14_033003/4.txt` |
+| 2 | **`r137c` (770101, `InpTP1_ClosePct` 50→0) — firmata e applicata?** | 🟢 **FIRMATA E NEL REPO.** `mql5/Presets/conto_reale/ABTG_DAX_Apertura_EU_770101_REALE.set` porta oggi `InpTP1_ClosePct=0.0` e `InpRiskPercent=0.65` (commit `40488a2` 14/09, ripulito da `9b5dddf`). 🔴 **Ma resta [NON VERIFICATO] se e' gia' sul terminale reale**: `RESOCONTO_2026-09-14.md` lo dichiara esplicitamente come azione di Claudio ancora aperta ("non so se l'hai gia' caricato"). **Nessun modo per un agente di leggerlo da qui**: e' dentro `C:\BCM_Reale`, sola lettura di Claudio | `.set` letto oggi, `RESOCONTO_2026-09-14.md` |
+| 3 | **preset `sedia_MAXMIN_ORO_770402.set` — `InpRiskPercent=1.0` invece di 0,5?** | 🟢 **CONFERMATO, ma GIA' IN CODA — non e' un buco nuovo.** Il file porta ancora `InpRiskPercent=1.0`. **E' gia' scritto**: classe **338** della checklist (14/09) e la stessa riga dentro il commit di `R151a` in `CODA.txt` ("Segnalazione per Claudio, NON toccata"). Un giro veloce sugli altri `.set` della flotta **non ha trovato un secondo caso dello stesso pattern** (taglio firmato mai ricommittato) — ma non e' un'auditing sistematico, solo un grep mirato | `mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set`, `CHECKLIST_RIGA_DI_LANCIO.md` classe 338 |
+| 4 | **`ABTG_Cycle` (R148a/bL/bS) — primo collaudo di compilazione gia' rientrato?** | 🟡 **NON ANCORA — e' la notte prossima, non quella appena passata.** Le tre righe sono **armate in `CODA.txt`** ma il run del 14/09 03:30 **non le conteneva** (verificato nel referto): il primo collaudo vero e' previsto stanotte (03:30 del 15/09), **non ancora eseguito al momento di questa verifica**. `R148g` (modo minimo locale) esiste come file prova + classe 332 chiusa ma **non e' ancora armato** in coda | `CODA.txt` righe 1397-1456, `REFERTO_RUNNER_20260914_033004.txt` |
+| 5 | **`mc_dd_cella.py` — pronto, mai usato: puo' essere usato ORA su una sedia vera a costo zero?** | 🟢 **Lo strumento e' sano** (`--autotest` rilanciato ora: **4/4 PASS**, identico a `dd_portafoglio.py` sulla serie giocattolo). 🔴 **MA non e' eseguibile su nessuna delle tre del terzetto OGGI**: cerca un CSV **per-trade** (`abtg_trades_*.csv`, colonne `close_time;symbol;magic;position_id;...`), e per **nessuna** delle celle promosse (EMA200 G0-B magic 763400/763401, DAX_Apertura post-r137c, ORB OPPRANGE) esiste quel file nel repo — solo i CSV OptFrame aggregati (`Pass,Profit,...,Equity DD %`). Gli unici per-trade committati per queste tre famiglie (`trades_portafoglio/*_770115.csv`, `*_770612.csv`) sono del **round R16, 09/08**, **precedenti** a `InpAllowShort` fix, OPPRANGE e `r137c`: usarli ripeterebbe **esattamente la trappola della classe 338** (ancora vecchia contro preset di oggi). **Serve un round nuovo con export per-trade sulla cella esatta — non e' un'analisi, e' una riga di macchina** | `python3 backtest_pipeline/mc_dd_cella.py --autotest`, `find *.csv` sul repo |
+
+## 🎯 LA SINGOLA AZIONE PROPOSTA PER LA PROSSIMA ONDATA
+
+> ## 👉 **Chiudere il cancello sul WIP `b45dd00` (S1) — non aprire un quinto round di uscite, non inseguire `mc_dd_cella.py` su dati che non esistono ancora.**
+
+**Il conto, non la sensazione:**
+
+| opzione | costo | cosa sblocca | perche' NON e' la prima scelta |
+|---|---|---|---|
+| **(a) Chiudere B1**: far passare `b45dd00` (10 EA + 2 strumenti, ~2.000 righe, **solo logging**, `InpLogImbuto` default `true`) dai due strati del cancello | 🟢 **zero macchina**: e' una revisione di codice, non un round. Il container gira in sessione, non sul VPS | **13 sedie** escono dal Blocco 3, fra cui `771531` — l'UNICA delle 41 che passa i cinque requisiti alla lettera, oggi ferma su un binario di 6 settimane fa senza Guardian. Sblocca anche `770511`, `970913` e le altre candidate "sospese" della tabella §2 | — |
+| (b) Un quinto round di exit-management su una sedia mai toccata | 🟡 ~2.000-5.000s di macchina (media delle 4 di ieri notte) | **+0 sedie schierabili**: nessuna delle candidate non ancora toccate e' nel terzetto del 30/09 | comprerebbe una misura per **dopo**, non per il 1° ottobre |
+| (c) `mc_dd_cella.py` su una sedia promossa | 🔴 **bloccato**: serve prima un round che esporti il per-trade sulla cella ESATTA (vedi punto 5 sopra) — stesso costo macchina di (b), e in piu' rischia la classe 338 se si usa un CSV vecchio | costerebbe machina E rischierebbe un numero sbagliato se non si aspetta l'export giusto |
+
+**Il numero che decide**: `771531` e' l'**unica** sedia della flotta con `771 op/g = 1,55`
+sopra il pavimento **da sola** (tabella §2, riga 8) ed e' il pilastro del terzetto
+`770611`-OPPRANGE + `770202` + `771531` che porta il piano da **15,5-25,3 mesi** a
+**3,9-6,3 mesi** per il +10% (§4). Tenerla bloccata dal Blocco 3 per una feature di
+**solo logging** non ancora rivista e' il collo di bottiglia con il rapporto
+costo/beneficio peggiore di tutto il piano: **il costo di sbloccarla e' una revisione
+di codice, il beneficio e' il pilastro del terzetto.** Nessun round di macchina in
+coda stanotte (R136a-d, R137a-c, R147a-c, R151a, R148a/bL/bS) cambia questo conto:
+sono tutte misure sui **dati**, non sul **binario in campo**, e il binario resta
+fermo finche' B1 non si chiude.
+
+---
+
 # 1. 🚦 I CINQUE REQUISITI — dichiarati PRIMA della tabella
 
 | # | requisito | dove si legge | perche' e' un requisito |
@@ -452,6 +493,7 @@ prop misura**. → **B5.**
 
 | data | versione | cosa cambia | perche' |
 |---|---|---|---|
+| **15/09/2026** | **v2.2** *(aggiornamento mirato — §0-ter nuova)* | 🔎 **Riverificati contro il repo vero i cinque punti aperti da `RUNBOOK_RICOMPILAZIONE_PICCOLO_2026-09-14.md` e `RESOCONTO_2026-09-14.md`**: (1) `771531` resta bloccata dal WIP `b45dd00` — **4° giorno**, mentre le sue misure di uscita (`R136a-d`, `R147a`) hanno gia' girato due notti pulite; (2) `r137c` e' firmata e nel repo (`InpTP1_ClosePct=0.0`), ma se sia gia' sul terminale reale resta **[NON VERIFICABILE da qui]**; (3) il disallineamento `InpRiskPercent` di `sedia_MAXMIN_ORO_770402.set` e' confermato ma **gia' in coda** (classe 338, non un buco nuovo); (4) `ABTG_Cycle` R148a/bL/bS sono armate ma il primo collaudo vero e' **stanotte, non ancora girato**; (5) `mc_dd_cella.py` e' sano (autotest 4/4 PASS) ma **non eseguibile oggi** su nessuna delle tre sedie del terzetto: manca il CSV per-trade sulla cella ESATTA, e i soli per-trade in repo per quelle famiglie sono del round R16 (09/08), **precedenti** ai fix che contano. 🎯 **Proposta per la prossima ondata**: chiudere il cancello sul WIP `b45dd00` (zero macchina, sblocca 13 sedie incluso il pilastro del terzetto) prima di aprire un quinto round o inseguire una Monte Carlo che non ha ancora l'input giusto | Il piano al 13/09 non sapeva che il binario di `771531` e' fermo da 4 giorni mentre le sue misure corrono; senza questa riga il prossimo passo rischiava di essere un round nuovo invece del vero collo di bottiglia (il codice mai revisionato) |
 | **08/09/2026** | **v1** | prima stesura, costruita all'indietro dal 1° ottobre. 4 requisiti, 8 candidate, *"ne passa UNO"*, *"realistico per COMPRARE"* | c'era una data, e una data cambia l'ordine delle cose |
 | **13/09/2026** | **v2.1** *(aggiornamento mirato, non una riscrittura)* | 🧊 **A5-bis nuova**: `Compilazione R4` era scritta come *"15 sorgenti"*, ma in campo sul piccolo **50503392** sono **42 su 42** disallineati (compilati 5-18/08), **Guardian compreso** (**414** righe contro **899**) → *"le protezioni firmate sono attive"* e' **[NON MISURATO]**. Priorita' proposta **≥ qualunque round nuovo**, **ma con l'ordine del referto** (Guardian → inventario → una sedia per volta), perche' *"ricompila tutto"* porterebbe in campo un mese di modifiche mai girate, **taglie comprese**. 🟢 **B4 aggiornata e B4-bis nuova**: il perimetro del runner **e' stato allargato** e la notte 12/13-09 ha prodotto **34 round con CSV validi** — **`R125` no**, e **i CSV non sono nel repo** (classe 307). 📮 **Tre richieste nuove** nel §8, fra cui quella che **ridimensiona l'allarme sui terminali**: non *"controlla il conto reale"*, ma *"leggi `N` in `ROUND GIRATO CON RILIEVI (N)`"* | Il piano descriveva round *"mai girati"* che erano girati, e una compilazione da 15 file che in realta' e' un **riallineamento di 42**. 🔴 La seconda e' **la riga che pesa di piu' sul 1° ottobre**: riguarda le sedie **gia' vive**, non quelle da aggiungere |
 | **11/09/2026** | **v2** *(questo file)* | 🔴 **aggiunto R5, il cancello del costo all-in** → le candidate che passano tutto diventano **ZERO** · 🔴 corrette **due etichette MERITO PIENO false** (classe 224) · 🔴 corretto il **"da 2 a 5"** in **2→2 / 2→4** · 🆕 aperta la **classe 226** (`n` = deal, non posizioni: fattore misurato **2,01**) · 🆕 **`771531` promossa a prima candidata** sui numeri di **R112** (OOS **257 posizioni**, tick, G0-B al centesimo) e dichiarata **fuori dal conto della challenge** · 🆕 **delta sedie per azione**, calcolato **sedia per sedia** · 🆕 il conto **1 sana vs 4 che promettono**, con i numeri · 🆕 la lista di cio' che manchera', **per nome** | 🔴 **la frase "il 1° ottobre e' realistico per COMPRARE" e' CADUTA**: oggi le sedie che passano i criteri di casa sono **zero**. Regge solo **condizionata a tre azioni nominate** — e nessuna delle tre e' un round |
