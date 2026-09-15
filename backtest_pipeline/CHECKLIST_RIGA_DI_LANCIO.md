@@ -19696,3 +19696,94 @@ in uso nello stesso paragrafo, due righe sopra.
    basso della forbice (206), quindi il verdetto del round non cambia --
    ma la certezza dichiarata nella motivazione era piu' forte di quella
    che i numeri permettevano.
+
+## 344. 🏷️🔀 UN REGEX PER NOME DI PARAMETRO CATEGORIZZA UNA MANOPOLA DI INGRESSO COME "USCITA": `InpFirstFraction` SU TUTTA LA FAMIGLIA SUPERWAVE/SUPERTRENDREVERSAL (5 EA) (15/09/2026)
+
+**Caso reale.** Preparando R154a (mappatura delle uscite mai provate, sedia
+`770531` `ABTG_SuperWave`) il censimento (`backtest_pipeline/censimento_uscite.py`
+r.97) classifica `InpFirstFraction` nella categoria `"parziale"` (uscita a
+chiusura frazionata) tramite il pattern regex `(TP1Pct|TP2Pct|TP1_|Partial|
+Parziale|FirstFraction|TP2_|TP3_|Scale|Runner)` — il nome del parametro
+contiene "Fraction", stesso campo semantico di "Partial"/"Scale", e il
+matcher non guarda oltre il nome.
+
+**Letto il sorgente, non il nome**: in TUTTI E CINQUE i file della famiglia
+(`ABTG_SuperWave.mq5` r.71/381, `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`
+r.71/381, `ABTG_SupertrendReversal.mq5` r.70/402,
+`ABTG_SupertrendReversal_Ottimizzato.mq5` r.70/388,
+`ABTG_SupRev_DAX_H4_Ottimizzato.mq5` e `ABTG_SupRev_NAS_H1_Ottimizzato.mq5`
+r.71/261) `InpFirstFraction` e' usata UNA sola volta fuori dalla
+dichiarazione, sempre nella stessa riga di `Enter()`:
+`lotMkt=NormVol(totLot*InpFirstFraction)` — la quota di lotto aperta A
+MERCATO all'INGRESSO (il resto va su un ordine pendente stop, r.404-413).
+Non tocca mai una posizione gia' aperta, non chiude mai un parziale: e'
+sizing d'ingresso, non gestione d'uscita.
+
+**Effetto misurato sul censimento**: le sette sedie della famiglia
+(770511, 770531, 770901, 770924, 970901, 970912, 970913) contano tutte
+`InpFirstFraction` fra le "manopole dell'uscita mai mosse" (celle=3
+ciascuna, 21 celle in tutto) quando non e' una manopola d'uscita affatto.
+
+### 🔴 LA REGOLA
+1. **Un nome che somiglia semanticamente a una categoria (qui "Fraction"
+   ~ "Partial"/"Scale") non e' una prova che il parametro appartenga a
+   quella categoria.** Il regex e' un filtro di comodo per non leggere
+   621 nomi a mano; resta un'euristica, e va riverificata riga per riga
+   PRIMA di scegliere l'asse di un round, esattamente come impone la
+   Regola del contro-esempio del 10/09 applicata ai parametri, non solo
+   ai numeri.
+2. **Un pattern verificato su UN file della famiglia va riletto su OGNI
+   file che condivide il nome del parametro**, non solo su quello che si
+   sta guardando: qui i cinque `.mq5` condividono la riga alla lettera
+   (stessa firma, stesso numero di riga nel blocco `Enter`), quindi
+   condividono anche il difetto di categorizzazione.
+3. **Conseguenza**: `InpFirstFraction` va tolta dalla categoria "uscita:
+   parziale" per le sette sedie sopra (e per qualunque altro EA che la
+   condivida) e riclassificata come ingresso/sizing. Non cambia nessun
+   verdetto di merito o rischio gia' preso — cambia quali caselle del
+   certificato di morte "gestione dell'uscita messa ad asse" restano
+   davvero da riempire su quella famiglia (21 celle di lavoro in meno,
+   non 21 celle di misura in piu'). `censimento_uscite.py` r.97 va
+   corretto togliendo `FirstFraction` dal pattern "parziale" — non fatto
+   qui: e' un buco dichiarato, non riparato in questo round.
+
+---
+
+## 345. 🧮🪟 `controlla_prova.py` NON CONOSCE `@FRAZIONEIS`: IL CONTEGGIO "PASSATE" RESTA CELLE×2 ANCHE PER UNA TRANCHE SOLA (15/09/2026)
+
+**Caso reale.** `R154a_sllookback_SuperWave_U30USD.txt` dichiara
+`@FRAZIONEIS 1.0` (la direttiva del 12/09/2026 che forza UNA TRANCHE, nessun
+CSV `_OOS`) perche' il round e' esplicitamente scoperto al solo RISCHIO
+(pavimento IS>=150 non raggiungibile, Regola B del 16/08). Dopo aver
+aggiunto la direttiva, `controlla_prova.py` continua a stampare
+**"passate (celle x 2 finestre): 14"** per 7 celle — la formula a r.286 e'
+letteralmente `tot_celle * 2`, un conteggio FISSO che non legge mai
+`@FRAZIONEIS` dal file (verificato con `grep -n "FRAZIONEIS" controlla_prova.py`
+— zero occorrenze in tutto lo script).
+
+**Non e' un difetto bloccante**: il conteggio delle CELLE (7, corretto) e'
+quello che decide `ESITO: OK`/`FAIL`, non le "passate" — che sono solo una
+stima informativa del tempo macchina. Ma la stima e' **doppia** del vero per
+qualunque file a `@FRAZIONEIS 1.0` (7 passate vere, non 14): chi legge quel
+numero per pianificare una notte di macchina sovrastima il costo di questi
+round di un fattore 2.
+
+### 🔴 LA REGOLA
+1. **Per i file a `@FRAZIONEIS 1.0` (o comunque diversi dal default 0.40, se
+   mai cambiasse il rapporto celle/passate), il numero "passate" stampato da
+   `controlla_prova.py` NON e' affidabile: si legge il conteggio delle CELLE,
+   non delle passate, per questi file.**
+2. **Il fix vero** (non fatto qui, dichiarato): `controlla_prova.py`
+   dovrebbe leggere `@FRAZIONEIS` come fa `walkforward_generico.ps1` (r.680+)
+   e stampare `celle x 1` quando vale `1.0`, `celle x 2` altrimenti — stessa
+   disciplina del "SI COSTRUISCE IL CONTRO-ESEMPIO" applicata allo strumento
+   di stima, non solo al cancello di validita'.
+3. **Trovato verificando io stesso** (sessione principale) il round R154a
+   prima di committarlo, non da un agente: la prosa del file dichiarava "NON
+   fa uno split IS/OOS" ma il file, come consegnato dall'agente, NON aveva
+   `@FRAZIONEIS 1.0` — senza quella riga il driver avrebbe fatto ESATTAMENTE
+   lo split che la prosa diceva di evitare, in silenzio (nessun `@FRAZIONEIS`
+   = default 0.40, per costruzione del driver, r.589-650 di
+   `walkforward_generico.ps1`). Aggiunta la direttiva PRIMA di committare;
+   la mancanza di un conteggio-passate aggiornato in `controlla_prova.py` e'
+   stata scoperta SUBITO DOPO, come effetto collaterale della verifica.
