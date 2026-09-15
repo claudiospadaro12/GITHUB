@@ -504,8 +504,9 @@
 #            produce. **Non posso escludere T2 con i dati di questo
 #            round: lo dichiaro come limite, non fingo di chiuderlo.**
 #
-#  (T3) IL CAMPIONE. ~30 posizioni per cella, di cui solo una parte
-#    toccata dal time-stop: bastano 1-2 trade diversi per spostare il
+#  (T3) IL CAMPIONE. ~30 posizioni per cella, di cui una parte -- forse
+#    nessuna (T4) -- toccata dal time-stop: bastano 1-2 trade diversi
+#    per spostare il
 #    PF in modo vistoso. Il MERITO e' comunque sospeso per il pavimento
 #    IS>=150 (sotto): nessuna frase di merito uscira' da questo round.
 #
