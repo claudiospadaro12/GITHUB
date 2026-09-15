@@ -148,7 +148,7 @@
 #    per esteso in R161a, sezione IL COSTO, e valgono identiche.
 #    Qui si aggiunge cio' che su AUDUSD e' PEGGIO, e sono due buchi
 #    INDIPENDENTI. `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.521,
-#    colonne nominate leggendo la testata di r.512 (sedia | EA | simb |
+#    colonne nominate leggendo la testata di r.513 (sedia | EA | simb |
 #    TF | conto | geometria dello stop | stop (pip) | fonte | spr A |
 #    x (A) | 40x?(A) | spr B | x (B) | 40x?(B) | 13,3x?):
 #      772163 | BreakingBand | AUDUSD | H1 |

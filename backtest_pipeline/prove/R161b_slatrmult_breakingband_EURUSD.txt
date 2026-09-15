@@ -163,7 +163,7 @@
 #    valgono identiche: stesso EA, stesso driver, stessa corsia.
 #    Qui si aggiunge solo cio' che EURUSD ha e le gemelle no.
 #    `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.519, colonne
-#    nominate leggendo la testata di r.512 e non a memoria
+#    nominate leggendo la testata di r.513 e non a memoria
 #    (testata: sedia | EA | simb | TF | conto | geometria dello stop |
 #     stop (pip) | fonte | spr A | x (A) | 40x?(A) | spr B | x (B) |
 #     40x?(B) | 13,3x?):
@@ -314,6 +314,11 @@
 #      lo stop e' finito sotto la distanza minima del broker (r.1310) e
 #      che quella cella misura il broker, non la strategia: si dichiara
 #      NON LEGGIBILE e si legge l'asse da 2,0 in su.
+#      >>> E LA CAUSA NON SI ATTRIBUISCE: al bordo basso il lotto e' ~3x
+#          quello della cella viva (C1), e un invio rifiutato per
+#          margine (cO_failSend) lascia sulla colonna Trades la STESSA
+#          firma della porta C4. Nessuno dei due contatori e' raccolto:
+#          la cella si dichiara NON LEGGIBILE senza dire perche'.
 #    S6 -- ALMENO UNA COPPIA CONTIGUA DIVERSA. Fra le SEI coppie di
 #      celle contigue, almeno una deve avere Profit, Equity DD % o
 #      Trades diversi fino all'ultima cifra STAMPATA. Se coincidono

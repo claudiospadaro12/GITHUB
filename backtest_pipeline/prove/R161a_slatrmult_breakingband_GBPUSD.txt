@@ -3,7 +3,8 @@
 #  R161a -- "SL = 3 x ATR, REGOLA FISSA DELLA GUIDA": LA MANOPOLA CHE
 #           NESSUNO HA MAI MESSO IN DISCUSSIONE IN 22 FILE PROVA
 #           -- sedia GBPUSD H1, magic 772161 -- asse InpSL_ATRmult,
-#           7 celle, walk-forward VERO (IS e OOS sopra il pavimento 150)
+#           7 celle, walk-forward VERO (IS e OOS ATTESI sopra il
+#           pavimento 150 -- lo verifica S2)
 #  Scritto il 15/09/2026. Criteri congelati PRIMA dei numeri.
 # ---------------------------------------------------------------------
 #  Si lancia con (RIGA_SOTTILE_ROUND.ps1 -> RIGA_ROUND_VPS.ps1 ->
@@ -158,9 +159,10 @@
 #             per il long, bid per lo short (r.1292-1294).
 #    Non c'e' nessun `if` che la disattivi, nessun'altra formula che la
 #    legga, nessun log che la stampi. E' la distanza dello stop, e basta.
-#    Nessuna validazione in `OnInit` la limita (r.473-493: i controlli
-#    ci sono su altri sette input, non su questo) -- l'asse e' libero, e
-#    i bordi li mettiamo noi, con le ragioni scritte sotto.
+#    Nessuna validazione in `OnInit` la limita (r.473-493: nove
+#    controlli su altri undici input, piu' InpTPMode a r.514-515; su
+#    questo, nessuno) -- l'asse e' libero, e i bordi li mettiamo noi,
+#    con le ragioni scritte sotto.
 #
 #    >>> DA QUI IN POI E' LA PARTE CHE CONTA, ED E' L'OPPOSTO DI
 #        R159a/R160a-e: QUESTA MANOPOLA **NON** E' NEUTRA SUL CONTEGGIO
@@ -226,6 +228,13 @@
 #             Margine ~55x. La porta resta chiusa con larghissimo
 #             margine -- ma e' un'INFERENZA su un ATR n=1, non un fatto,
 #             e per questo c'e' la sentinella S5.
+#             >>> E IL TERMINE CHE MANCA AL CONTO: minDist e' il MASSIMO
+#                 fra STOPS_LEVEL e spread, e STOPS_LEVEL su questi
+#                 simboli e' [NON MISURATO] in tutto il repo. Il margine
+#                 ~55x confronta lo stop col solo SPREAD: se STOPS_LEVEL
+#                 fosse maggiore, il margine sarebbe piu' piccolo di
+#                 cosi'. Un'altra ragione per cui la porta si sorveglia
+#                 con S5 e non con questo numero.
 #
 #     >>> E LE COSE CHE QUESTO ASSE **NON** TOCCA, verificate riga per
 #         riga (sono quelle che rendono il confronto fra celle legittimo):
@@ -624,6 +633,11 @@
 #      e si legge l'asse da 2,0 in su. (Il contatore vero, cO_failSL,
 #      non e' raccolto: sezione ATTESA. Questo e' il suo surrogato
 #      sull'unica colonna che esiste, ed e' dichiarato come tale.)
+#      >>> E LA CAUSA NON SI ATTRIBUISCE: al bordo basso il lotto e' ~3x
+#          quello della cella viva (C1), e un invio rifiutato per
+#          margine (cO_failSend) lascia sulla colonna Trades la STESSA
+#          firma della porta C4. Nessuno dei due contatori e' raccolto:
+#          la cella si dichiara NON LEGGIBILE senza dire perche'.
 #    S6 -- ALMENO UNA COPPIA CONTIGUA DIVERSA. Fra le SEI coppie di
 #      celle contigue, almeno una deve avere Profit, Equity DD % o
 #      Trades diversi fino all'ultima cifra STAMPATA. Se coincidono
