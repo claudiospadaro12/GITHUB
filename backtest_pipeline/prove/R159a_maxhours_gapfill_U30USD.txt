@@ -149,9 +149,12 @@
 #     invariante lungo il suo asse PERCHE' "il time-stop InpMaxHours=48
 #     forza flat entro 2 giorni SEMPRE, ben prima che si formi il gap
 #     della settimana successiva". Quella e' una LETTURA DEL CODICE, mai
-#     misurata: nessuno ha mai contato quante posizioni il time-stop
-#     chiude davvero, ne' che cosa succede se lo si stringe o lo si
-#     allarga. Questo file la mette ad asse. E' il compagno naturale di
+#     messa alla prova: nessuno ha mai visto CHE COSA SUCCEDE se il
+#     time-stop lo si stringe o lo si allarga. Questo file mette ad
+#     asse quello -- e solo quello: il CONTEGGIO delle posizioni che il
+#     time-stop chiude resta [NON MISURABILE DA QUESTA CORSIA] (sezione
+#     ATTESA), e cio' che il round produce e' il binario "ha morso / non
+#     ha morso" per coppia contigua (B4). E' il compagno naturale di
 #     R157a, non un suo doppione: l'asse e' un'altra manopola, in un
 #     altro punto della catena (R157a muove DOVE sta lo stop, questo
 #     muove QUANDO si smette di aspettare).
@@ -291,9 +294,9 @@
 #    [NON MISURATO] in tutto il repo, ma il DD 3,21% dell'ancora dice
 #    che i lotti stavano ben sopra il minimo.)
 # ---------------------------------------------------------------------
-#  IL COSTO -- IL CANCELLO DI 40x: COSTANTE LUNGO L'ASSE, E QUI E' UN
-#  CONTROLLO, NON L'OBIETTIVO. Dichiarato in testa per non promettere
-#  cio' che questo round non puo' dare.
+#  IL COSTO -- IL CANCELLO DI 40x: NE' UN CONTROLLO NE' L'OBIETTIVO DI
+#  QUESTO ROUND, MA UN'ANCORA FERMA CHE IL ROUND NON RIVERIFICA.
+#  Dichiarato in testa per non promettere cio' che non puo' dare.
 #    Lo stop non si muove (proprieta' 2): il rapporto resta quello gia'
 #    misurato il 10/09 -- 98,0 idx / 2,80 (mediana ora 1) = **35,0x**,
 #    NO all'88% del pavimento -- su TUTTE E SETTE le celle.
@@ -334,9 +337,12 @@
 #    MAI un elenco esplicito: stessa forma strutturale di R154a-R158a).
 #    Passo 12 = mezza giornata, un quarto del valore vivo.
 #    Bordo BASSO 12h: mezza giornata. E' il bordo che serve davvero,
-#      perche' l'unica durata misurata su questa sedia (13,5h, sotto)
-#      ci cade accanto: a 12 ore il time-stop MORDE su una buona parte
-#      delle posizioni, ed e' l'unico modo per vedere se la tesi del
+#      perche' l'unica durata misurata su questa sedia (13,5h, sotto,
+#      su n~1) ci cade accanto: a 12 ore il time-stop POTREBBE mordere
+#      su una parte delle posizioni -- e' un'IPOTESI da un solo trade,
+#      non un fatto, ed e' proprio cio' che il round va a vedere (se
+#      non morde nemmeno a 12h, e' il NULLO dichiarato di T4). E' l'
+#      unico modo per vedere se la tesi del
 #      motore ("il fill e' rapido o non e'", commento r.508-510) regge
 #      quando la si prende sul serio. Piu' in basso di 12h si
 #      taglierebbe anche la barra d'ingresso: geometria diversa, non un
@@ -366,8 +372,9 @@
 #     >>> NON e' bit-a-bit: quella corsa e' OHLC M1, questa e' TICK.
 #         Il tick e' piu' fine (intrabar reale) e puo' far scattare o
 #         mancare trade marginali sul filtro spread
-#         (`InpMaxSpreadPts=300`). Per questo la banda S1 sotto e'
-#         larga, non un numero secco.
+#         (`InpMaxSpreadPts=300`). Per questo la banda di S2 (il
+#         LIVELLO di n) e' larga, non un numero secco. NON tocca S1,
+#         che e' un'UGUAGLIANZA esatta fra celle e non ha tolleranza.
 #
 #  B) L'ANCORA DI DURATA -- ED E' SOTTILE FINO AL LIMITE, VA DETTO
 #     PRIMA: `report/CHI_VA_CON_CHI_2026-09-11.md` righe 65 e 72
@@ -603,12 +610,17 @@
 #          documentato da R156a/R157a/R158a);
 #        - gira UNA finestra intera, UN solo regime (21 mesi, Dow
 #          prevalentemente al rialzo);
-#        - e' scopato al RISCHIO e alla FORMA (n identico, stop
-#          identico, quante uscite fa davvero il time-stop), MAI al
-#          MERITO: "il default va bene", "il time-stop non morde mai" o
-#          "morde piu' di quanto si credesse" sono le uniche risposte
-#          legittime. MAI "questa cella e' meglio" in senso di PF
-#          (Regola B, 16/08).
+#        - e' scopato al RISCHIO e alla FORMA (n identico fra le celle,
+#          e QUANTE COPPIE CONTIGUE risultano DIVERSE nel CSV), MAI al
+#          MERITO. Lo STOP e il CONTEGGIO delle uscite per time-stop
+#          NON sono nello scopo: non li produce nessun artefatto
+#          (sezione "IL COSTO", S3, classe 353). Le uniche risposte
+#          legittime sono: "il default va bene", "il time-stop non
+#          morde MAI fra 12 e 84 ore" (tutte e sei le coppie identiche
+#          -- e allora e' il NULLO dichiarato di T4) oppure "morde
+#          anche dove non me lo aspettavo" (coppie diverse nella meta'
+#          alta dell'asse). MAI "questa cella e' meglio" in senso di PF
+#          (Regola B, 16/08), e MAI un numero di posizioni troncate.
 # ---------------------------------------------------------------------
 #  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
 #    B1  QUESTO ROUND NON HA UN A0/A1 DI MERITO (IS<150 per
@@ -628,12 +640,28 @@
 #        leggere qualunque altro numero. E B3 si legge SEMPRE insieme
 #        a S3bis: n identico su sette celle tutte numericamente uguali
 #        e' un PASS VACUO (T4), non un PASS.
-#    B4  IL CONTEGGIO DELLE CELLE GEMELLE (la difesa contro T1). Per
-#        ogni coppia di celle contigue si registra se Profit/DD/Trades
-#        coincidono fino all'ultima cifra: se coincidono, le due celle
-#        sono la STESSA corsa e si dichiarano come una sola
-#        osservazione. Nessun "altopiano" puo' essere costruito con
-#        celle numericamente identiche.
+#    B4  IL TEST DI IDENTITA' FRA CELLE CONTIGUE (la difesa contro T1 e
+#        contro T4, ed e' la SOLA misura che questo round produce sulla
+#        mordidura del time-stop). Per ognuna delle SEI coppie di celle
+#        contigue si registra se Profit (%.2f), Equity DD % (%.4f) e
+#        Trades (%.0f) coincidono fino all'ultima cifra STAMPATA nel
+#        CSV, e si CONTA quante coppie risultano DIVERSE.
+#        >>> AVVERTENZA SUL POTERE DISCRIMINANTE, perche' le tre
+#            colonne NON votano in modo indipendente: `Trades` e'
+#            IDENTICO fra tutte e sette le celle PER COSTRUZIONE (e'
+#            esattamente cio' che S1 afferma), quindi su questo test
+#            non discrimina NIENTE. Il peso sta tutto su `Profit`, con
+#            `DD` come conferma. Chi scrivesse "tre colonne concordi"
+#            starebbe contando una misura sola tre volte.
+#        >>> SE UNA COPPIA COINCIDE: le due celle sono la STESSA corsa
+#            e si dichiarano come UNA SOLA osservazione. Nessun
+#            "altopiano" puo' essere costruito con celle identiche.
+#        >>> SE COINCIDONO TUTTE E SEI (il caso T4): il round e' un
+#            NULLO DICHIARATO -- "InpMaxHours e' INERTE fra 12 e 84 ore
+#            su questa sedia e su questa finestra" -- e S1/B3 vanno
+#            scritti come VACUI, NON come PASS. E' questa la soglia che
+#            S3bis legge: servono >= 1 coppie diverse perche' S1 abbia
+#            contenuto.
 #    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito non cambia
 #        un preset, non accende/spegne la sedia, non tocca il forward e
 #        non sposta il cancello di costo (che questo asse non puo'
