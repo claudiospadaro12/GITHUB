@@ -34,3 +34,8 @@ backtest_pipeline/gen_*.ini
 # servono a recuperare una Lettura cancellata per sbaglio, non a essere
 # versionate -- sarebbero un duplicato di ogni giornata_*.md a ogni corsa.
 report/.backup/
+
+# worktree isolate degli agenti in background (16/09/2026): copie di lavoro
+# temporanee create dal tool Agent con isolation:"worktree" -- non sono
+# consegne, sono lo spazio di lavoro dell'agente mentre gira.
+.claude/worktrees/
