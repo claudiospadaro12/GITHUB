@@ -1051,7 +1051,16 @@ $BancoBT = 'C:\MT5_Backtest'
 #  spread 1,9->1,8). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON
 #  sono cambiati fra i due commit (git diff 13599df8..1acb1d52 sui due
 #  percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = '1acb1d522a5fefde94f5bc27b40e5a6343ed915b'
+#  >>> QUARANTANOVESIMO GIRO DI PIN (16/09/2026): 1acb1d52 -> 6693bd47.
+#  Serviva per raggiungere R167a-d (InpSLGapMult) e R168a-d
+#  (InpMaxHours), gli otto gemelli GapFill su GBPUSD/EURUSD/AUDUSD/
+#  225JPY (772231/772232/772233/772235), dopo il PASS dei due secondi
+#  cancelli paralleli (correzioni di citazione + classi nuove 370,
+#  372, 373 -- 371 lasciata libera di proposito, nessun duplicato).
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  i due commit (git diff 1acb1d52..6693bd47 sui due percorsi: VUOTO,
+#  verificato): solo $PIN si muove.
+$PIN = '6693bd478c8d3c0795f791bd65cf09474cef35e2'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
