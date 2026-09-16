@@ -2583,3 +2583,52 @@ cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 78466d01b7193c9c5c626c47a3deea264539673f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
 # =====================================================================
+#  R173a -- InpTP1Pct, sedia 770511 (ABTG_SuperWave_DOW_H1_Ottimizzato,
+#  U30USD H1). Prima sedia della famiglia parziale/breakeven
+#  Supertrend-SuperWave (7 sedie candidate). Asse 0/25/50/75, cella 50
+#  = valore vivo = cella dell'ancora r120e11 (IS PF=1,39744 DD=3,4846%
+#  n=106; OOS PF=1,22034 DD=4,2149% n=184, dai CSV veri, non da un
+#  riassunto). La cella 0 spegne parziale E stop in pari insieme (il
+#  gate condiviso e' InpTP1_R>0 && InpTP1Pct>0 && InpTP1Pct<100, r.446):
+#  mai misurata su questa famiglia (23 file prova esistenti sull'EA,
+#  zero con questo asse). Il trailing NON e' gated su questo asse
+#  (r.467 dipende solo da haveST), quindi l'isolamento parziale/BE
+#  costa un round solo qui, contro due su ABTG_EMA200 (dove il
+#  trailing e' gated su beDone).
+#
+#  Banco -Modello 4 -Deposito 100000 dalla riga di lancio dell'ancora
+#  (CODA.txt r.335). @FRAZIONEIS 0.40 (non 1.0, classe 376).
+#
+#  Sentinella S1 su Trades: UGUAGLIANZA ESATTA (106 IS, 184 OOS), non
+#  una banda +/-2 come sulla serie 770202 -- motivato e verificato due
+#  volte: (1) git diff sul sorgente EA fra il commit dell'ancora e il
+#  pin di armamento e' VUOTO (zero deriva di binario, rifatto da chi
+#  arma, non solo a HEAD); (2) l'ancora stessa porta DUE passate
+#  tecniche (magic 783500/783501) identiche su tutte e sette le
+#  statistiche, prova diretta che il magic e' neutro su questa EA.
+#  Se un futuro giro di pin cambiasse il sorgente, il file impone di
+#  tornare alla banda +/-2, dichiarando quali righe sono cambiate.
+#
+#  Merito sospeso (IS 106 <= 71% del pavimento 150; il pavimento non
+#  e' raggiungibile a tick su questo simbolo: servono >=664 giorni
+#  nella lettura piu' generosa, il broker ne ha 642). Si legge su
+#  rischio e forma. Zero preset cambia, zero forward.
+#
+#  Secondo cancello: PASS dopo 6 correzioni + 1 aggiunta di prova
+#  (commit f966ceb3/1a17794f). **Classe NUOVA 385**: un'incertezza di
+#  banda fabbricata da un riassunto a due decimali (invece dei CSV
+#  veri dell'ancora, nella stessa cartella) allargava la tolleranza
+#  del DD in modo che avrebbe fatto passare un banco sporco -- l'
+#  opposto della classe 380 (li' la banda stretta ferma una corsa
+#  sana; qui la banda larga fa passare quella sbagliata). Corretta
+#  sulla fonte, non sul criterio.
+#
+#  Pin: giro di pin 8e6c1da (56mo, 373a473e -> 1a17794f). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Riverificato al pin di armamento (non solo a HEAD): git
+#  diff 1445abf8 1a17794f sul sorgente EA e' VUOTO -- l'uguaglianza
+#  esatta su Trades regge. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic 779863, vergine a HEAD (grep dalla radice, worktree compresi).
+# =====================================================================
+8e6c1da61af76f2747ea1882d594e412b1a756d8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173a_tp1pct_superwave_U30USD.txt -Etichetta r173a -Modello 4 -Deposito 100000
+# =====================================================================
