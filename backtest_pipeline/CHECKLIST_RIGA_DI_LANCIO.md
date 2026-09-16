@@ -21304,3 +21304,66 @@ sessione che l'ha chiesto.
 `git diff --stat`: un salto di ordine di grandezza nelle righe o nei
 conteggi senza un motivo dichiarato e' il sintomo, non il rumore -- si
 ferma e si capisce PRIMA di mandare, non dopo.
+
+## 379. 🔁🔍 UNA PROVA SCRITTA COME **COMANDO RIESEGUIBILE** CHE, RIESEGUITA, DA' UN ALTRO NUMERO: il `grep` case-sensitive che torna **ZERO** invece di **TRE**, e i **27** CSV attribuiti a un percorso che ne contiene **15** (controllo-preventivo, 16/09/2026)
+
+**Il caso.** I due file prova gemelli `R171a`/`R171b` (asse `InpSLBufferPts`
+su `ABTG_EasyTrend`, sedie `772421`/`772422`) portano le loro verifiche nella
+forma piu' forte che abbiamo: **il comando, e accanto il numero che ha
+prodotto**. E' la forma giusta -- ma due di quei comandi, rieseguiti dal
+cancello alla lettera, danno un numero DIVERSO:
+
+1. **Il grep delle uscite.** I file scrivono: *"grep di
+   `Partial|TP1|Breakeven|Trail` su tutte e 1620 le righe -> TRE sole
+   occorrenze, e sono tutte dentro la parola 'Trailing' di commenti
+   d'intestazione"*. Quel pattern e' **CASE-SENSITIVE** e su
+   `ABTG_EasyTrend.mq5` torna **ZERO righe**. Il TRE esce solo con `grep -i`
+   (r.82, r.170, r.1159), e la glossa e' inesatta due volte: le tre righe
+   agganciano **"trailing" minuscolo**, e **r.1159 non e' un'intestazione**,
+   e' un commento dentro il corpo del codice.
+2. **I 107 CSV.** I file scrivono: *"107 (80 sotto un percorso con
+   'EasyTrend', **27 sotto `risultati_prove/regime_r59/EZ_*`**)"*. Il totale
+   e' esatto (107, riprodotto a macchina), ma i 27 stanno **15 sotto
+   `regime_r59/` e 12 sotto `regime_r50/`**: chi apre la cartella citata ne
+   trova poco piu' della meta'.
+
+🟢 **E la cosa che va detta, perche' e' il motivo per cui questa classe e'
+insidiosa: in tutti e due i casi la CONCLUSIONE era giusta** (zero parziali,
+zero breakeven, zero trailing nel codice eseguibile; colonna costante a 30 in
+tutti e 107 i CSV). Nessun numero del round cambia. **Quello che si rompe e'
+la RIPRODUCIBILITA'**: il lettore di domani riesegue il comando scritto, non
+quello pensato, e trova un altro numero -- e a quel punto non sa piu' se
+sbagliava il file o sbaglia lui.
+
+### 🧠 PERCHE' MORDE PIU' DI UNA CITAZIONE QUALSIASI
+Un numero di riga sbagliato (classe 377) si scopre aprendo il file. Un
+**comando** sbagliato fa di peggio: **sembra gia' verificato**. La forma
+"comando + risultato" e' quella che facciamo di tutto per usare, e proprio
+per questo e' la piu' pericolosa quando il comando viene **ricostruito a
+memoria dopo** invece di essere **incollato da quello che si e' eseguito**.
+I due casi qui sopra sono nati cosi': la ricerca vera e' stata fatta (i
+numeri lo dimostrano), ma il comando e il percorso sono stati riscritti in
+bella copia, e nella bella copia sono cambiati.
+
+### ✅ LA REGOLA
+🔴 **Un comando scritto in un file prova o in un referto si INCOLLA dalla
+console, non si riscrive.** E prima del PASS:
+1. **Ogni comando citato si rilancia** cosi' com'e' scritto. Se il numero
+   non torna, non si aggiusta il numero: **si aggiusta il comando** (e si
+   dice quale dei due era sbagliato).
+2. **Le opzioni che cambiano il risultato fanno parte della citazione**:
+   `-i`, `-E`, `-r`, le esclusioni (`--exclude-dir`), il percorso di
+   partenza. Un `grep` senza `-i` e un `grep` con `-i` sono **due misure
+   diverse**, non due modi di scrivere la stessa.
+3. **Un totale che si spezza in addendi si spezza per NOME**: se si scrive
+   "27 sotto X", si conta X. La somma giusta con gli addendi sbagliati e'
+   comunque una citazione falsa, e mente proprio a chi va a controllare.
+4. **La glossa vale quanto il numero**: *"tutte in commenti
+   d'intestazione"* e' un'affermazione verificabile come le altre, e va
+   verificata riga per riga -- non dedotta dal fatto che il conteggio torna.
+
+📌 Corollario che vale anche per chi corregge: il cancello che ha trovato
+questa classe ha introdotto, mentre la scriveva, **un'emoji dentro un file
+prova** (regola dei `.ps1`/prove in ASCII puro) -- trovata dal suo stesso
+strato deterministico e corretta prima della consegna. **Le due reti servono
+tutte e due, anche a chi le tiene in mano.**
