@@ -2531,3 +2531,55 @@ e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
 # =====================================================================
+#  R172d-e -- InpBEatR (R172d) + InpTP1_R (R172e), sedia 770202
+#  (ABTG_Dow_Apertura_US, U30USD M5). Quarto e quinto file della serie
+#  su questa sedia. Stesso banco/ancora R54a e numerazione B0-B9 dei
+#  tre fratelli precedenti.
+#
+#  R172d, la scoperta che vale la serata: accendere InpBEatR sposta
+#  ANCHE il bersaglio della parziale (asse diverso, InpTP1_R). Catena
+#  verificata riga per riga: il BE indipendente porta lo stop a openP
+#  (r.1775-1789); al tick dopo, con la parziale non ancora scattata,
+#  InitialSL() ritorna quello stop invece del ripiego ATR (r.1859-
+#  1865); riskDist diventa 0 (r.1727), scatena il ripiego ATR e il
+#  target della parziale si ricalcola sull'ATR(14,M5) invece che sul
+#  vero 1R (r.1739). >>> MA la catena regge SOLO perche' InpUseRound
+#  Levels=false nel preset vivo (r.1736-1737 scavalcherebbe tutto se
+#  fosse true) -- e' un pin, non una proprieta' dell'EA, trovato dal
+#  secondo cancello (**classe 384, NUOVA**). In campo e' inerte
+#  (InpBEatR=0): diventa vivo solo se la manopola si accende.
+#
+#  R172e, InpTP1_R: muove TRE cose insieme (target della parziale,
+#  TP finale via TpTotalR()=InpTP1_R*3.0 r.1456, e condivide il
+#  breakeven con InpBEatR). La cella VIVA (TP totale 3,00R) e' FUORI
+#  dal bordo alto di ogni griglia mai girata su questo simbolo (che si
+#  ferma a 2,52R, scoperto rileggendo CSV d'archivio col magic del
+#  predecessore 770201, mai visti dal censimento perche' senza
+#  "Dow_Apertura" nel nome file -- classe 372). In OOS il profitto
+#  medio cresce monotonicamente col TP, in IS il PF crolla: inversione
+#  di rango IS->OOS = -0,357, congelata in ATTESA prima dei numeri.
+#
+#  Fattore uscite/posizioni MISURATO su entrambi (56 posizioni IS,
+#  96 OOS, da R46b). Merito sospeso. Zero preset cambia, zero forward.
+#  Bersaglio sempre C:\MT5_Backtest (demo 50504400); i due terminali
+#  dove 770202 vive (100k 50504263, piccolo 50503392) non si toccano.
+#
+#  Secondo cancello: R172d PASS dopo 4 correzioni (classe 384 nuova,
+#  vedi sopra); R172e PASS dopo 7 correzioni (**classe NUOVA 383**:
+#  un `-TerminaleBacktest` ancora dichiarato come argomento della riga
+#  -- recidiva della stessa classe 268, gia' corretta su R172c e poi
+#  ricomparsa qui, prova che le correzioni di cancello non si
+#  propagano da sole ai fratelli futuri). Emendata anche una citazione
+#  condivisa da R172a/b/c: "r.1325 inoltra -TerminaleBacktest" puntava
+#  a un banner, il vero passaggio e' r.1340 verso RIGA_ROUND_VPS.ps1.
+#
+#  Pin: giro di pin 78466d0 (55mo, 717be501 -> 373a473e). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Bersaglio: banco C:\MT5_Backtest (50504400). Magic
+#  789540/789550, vergini a HEAD (grep dalla radice, worktree
+#  compresi).
+# =====================================================================
+78466d01b7193c9c5c626c47a3deea264539673f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
+# =====================================================================
+78466d01b7193c9c5c626c47a3deea264539673f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
+# =====================================================================
