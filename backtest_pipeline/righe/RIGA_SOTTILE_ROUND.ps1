@@ -1027,7 +1027,19 @@ $BancoBT = 'C:\MT5_Backtest'
 #  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra i
 #  due commit (git diff afeeebdd..b9848b1b sui due percorsi: VUOTO,
 #  verificato): solo $PIN si muove.
-$PIN = 'b9848b1b53512d3a84842405beb50d95c70ddf65'
+#  >>> QUARANTASETTESIMO GIRO DI PIN (16/09/2026): b9848b1b -> 13599df8.
+#  Serviva per raggiungere R166a (InpSLBufferPips, ABTG_SupertrendReversal
+#  225JPY 770901) dopo il PASS del secondo cancello: FAIL alla prima
+#  lettura (classe 365 ripetuta -- il magic 779827 collideva con un
+#  lavoro parallelo, R165a, ancora nel suo albero di lavoro; risolto
+#  con l'arbitro della classe 367: chi e' committato prima resta) piu'
+#  4 correzioni di citazione non bloccanti. Nello stesso arco sono
+#  entrate anche R165a (InpSLBufferPips, SuperWave U30USD 770511, non
+#  armata da questo giro) e le classi 367/368. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra i due commit (git
+#  diff b9848b1b..13599df8 sui due percorsi: VUOTO, verificato): solo
+#  $PIN si muove.
+$PIN = '13599df8fcb0b3fdc857fa297ad58e4d419ac050'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
