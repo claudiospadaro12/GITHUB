@@ -20656,3 +20656,59 @@ dal blocco "Si lancia con" del file prova al momento di armare, non si
 eredita dal deposito usato dagli altri round della stessa serata. Se il file
 dichiara e MOTIVA un deposito diverso dal default, quella motivazione e' la
 fonte di verita' -- copiare il default costa una sentinella che non torna.
+
+## 367. LA CLASSE 365 SI RIPETE LO STESSO GIORNO: SI LASCIA LIBERA L'ETICHETTA PER IL LAVORO PARALLELO E GLI SI PRENDE IL MAGIC — e quando NESSUNO dei due file e' armato, la 365 non ha un arbitro (controllo-preventivo, 16/09/2026)
+
+**Il caso, misurato al cancello.** `R166a_slbufferpips_supertrendrev_225JPY.txt`
+(commit `2d8766eb`) e' il file che **ha scritto** la classe 365 poche ore prima,
+e che si comporta bene su tutto il resto: riverifica l'unicita' del magic
+`779827` **immediatamente prima della consegna**, la scrive **rispetto a un
+commit** (`51e60cde`), e per prudenza **salta l'etichetta R165** perche' c'e' un
+lavoro parallelo in corso (*"bruciare un numero costa meno che collidere"*).
+
+Alla riverifica del cancello, a HEAD `2d8766eb`:
+`grep -rl "779827" --exclude-dir=.git .` **non da' piu' zero**. Da' anche
+`.claude/worktrees/agent-a5616db0c6b18ee6b/backtest_pipeline/prove/R165a_slbufferpips_superwave_U30USD.txt`
+r.1114 `InpMagic=779827||779827||0||779827||N` — cioe' **proprio il lavoro
+parallelo per cui l'etichetta era stata lasciata libera**, che certifica la
+propria unicita' contro **lo stesso identico HEAD `51e60cde`**.
+
+**I due pezzi nuovi, che la 365 non copriva:**
+
+1. 🔴 **Saltare l'ETICHETTA non basta, e da' un falso senso di sicurezza.**
+   Lasciare libero il nome `R165` e poi prendersi **il primo magic libero dopo
+   `779826`** — che e' esattamente quello che il lavoro R165 avrebbe preso — e'
+   meta' cortesia. La collisione che fa danno **non e' sul nome del file**: e'
+   sul magic, perche' e' il magic a comporre il nome del per-trade di
+   `ExportTrades` e a separare le corse nei log del tester. **Chi lascia libera
+   un'etichetta lascia libero anche il magic corrispondente.**
+2. 🔴 **La regola 3 della 365 non arbitra questo caso.** Li' diceva: *"si sposta
+   il file NON armato"* — ma li' uno dei due **era armato in `CODA.txt`**. Qui
+   **nessuno dei due lo e'**, quindi quella regola non decide niente, e due gate
+   che leggono i due file possono spostarli **tutti e due** (o nessuno), e
+   ricollidere su `779828`.
+
+### REGOLA
+1. **ARBITRO DETERMINISTICO, quando nessuno dei due file e' armato: vince chi e'
+   GIA' COMMITTATO su `lavoro`.** L'ordine dei commit e' un **ordine totale**, i
+   due lati lo calcolano **identico senza parlarsi** e non dipende da chi ha
+   guardato per primo. Chi non e' ancora committato si sposta. (Qui: `R166a` e'
+   in `2d8766eb`, `R165a` e' ancora solo nell'albero di lavoro del suo agente ->
+   `779827` resta a `R166a`.) L'ordine di precedenza completo, dal piu' forte:
+   **armato in `CODA.txt` > committato su `lavoro` > solo nell'albero di lavoro**.
+2. **La ricerca di unicita' si fa dalla RADICE del repo e NON esclude
+   `.claude/worktrees/`**: gli agenti paralleli vivono li' dentro, e un
+   `grep` lanciato da `backtest_pipeline/` non li vedrebbe.
+   `grep -rl <valore> --exclude-dir=.git .` dalla radice li vede: e' l'unica
+   forma che vale.
+3. **Prima di armare la riga in coda si ri-grep-pa il magic un'ultima volta**:
+   se il file che aveva perso l'arbitrato e' entrato **senza spostarsi**, le due
+   corse scriverebbero sullo stesso per-trade e sarebbero **indistinguibili**.
+
+🟢 **E la meta' che ha funzionato, perche' un elenco di soli difetti descrive
+male la realta':** l'asserzione **sull'etichetta** (`r166a` vergine) ha **retto**
+alla riverifica a HEAD `2d8766eb`, worktrees compresi. La differenza fra le due
+non e' fortuna: l'etichetta e' un nome che ogni file si sceglie a caso in uno
+spazio largo, il magic e' **il successivo di una sequenza** — e due agenti che
+contano la stessa sequenza dallo stesso punto **arrivano sempre allo stesso
+numero**. 👉 **Le sequenze sono il posto dove la 365 colpisce; i nomi no.**

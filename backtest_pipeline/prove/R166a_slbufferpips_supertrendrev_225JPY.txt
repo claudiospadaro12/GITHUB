@@ -34,9 +34,10 @@
 #
 #  -Modello 4 = TICK REALI, e qui e' il REQUISITO, non un lusso:
 #    1. i tick di 225JPY coprono tutta la finestra, ed e' MISURATO:
-#       risultati_archivio\REFERTO_SONDA_STORICO_17-08.md r.40-46 marca
-#       225JPY `COMPLETO` dal 2024.09.26 ("non manca sul disco -- il
-#       broker NON CE L'HA"), e REFERTO_ROUND65_GAPCONTINUATION.md
+#       risultati_archivio\REFERTO_SONDA_STORICO_17-08.md r.46 marca
+#       225JPY `COMPLETO` dal 2024.09.26, e r.48 lo commenta ("non manca
+#       sul disco -- il broker NON CE L'HA"),
+#       e REFERTO_ROUND65_GAPCONTINUATION.md
 #       r.290-293 lo dice in chiaro: "su 225JPY i tick ci sono dal
 #       2024.09.26, quindi la finestra tick-real coincide con questa".
 #       La @DAQUANDO di questo file e' esattamente quella data.
@@ -98,10 +99,18 @@
 #         scritto per curare, misurato sul binario malato.
 #  4) E IL CAMPO, POST-FIX, DICE UN'ALTRA COSA. data\statements\
 #     trades_auto.csv, magic 770924 (la GEMELLA, stesso EA, stesso
-#     simbolo, stesso TF): due ingressi con volumi DIVERSI, 0,60 il
-#     27/08 e 1,40 l'11/09 -- un fattore 2,3. Nel mondo "lotto
-#     inchiodato al minimo" quei due numeri sarebbero IDENTICI.
-#     [MIS, n=2 ingressi]
+#     simbolo, stesso TF): TRE ingressi in tutto (r.1234, r.1240,
+#     r.1305), con volumi 0,60 (27/08 06:00), 0,50 (27/08 18:00) e
+#     1,40 (11/09 20:00). DUE di quei tre sono DIVERSI fra loro di un
+#     fattore 2,3 e stanno tutti e due SOPRA il pavimento presunto: nel
+#     mondo "lotto inchiodato al minimo" sarebbero IDENTICI.
+#     [MIS, n=3 ingressi, di cui n=2 portanti]
+#     >>> E IL TERZO NON LO NASCONDO, perche' tira nell'altro verso:
+#         0,50 e' ESATTAMENTE il pavimento presunto (VOLUME_MIN <= 0,50,
+#         sezione IL DEPOSITO), quindi quella gamba e' compatibile con
+#         tutti e due i mondi e NON e' una prova di niente. La sospensione
+#         dell'obiezione di CODA poggia sulle altre due, ed e' un altro
+#         motivo per cui e' una SOSPENSIONE e non un ribaltamento.
 #
 #  >>> CONCLUSIONE, E NON E' UNA PROMESSA: l'obiezione di CODA r.1324 e'
 #      SOSPESA, non ribaltata. Questo round non dichiara che il lotto
@@ -146,7 +155,9 @@
 #          InpSLBufferPips = N  ->  buffer = N PUNTI INDICE NIKKEI.
 #      Fonte della tabella delle unita': CANCELLO_COSTO_FLOTTA_2026-09-10
 #      r.292 ("225JPY | 0 | 1,00 | 1 punto indice = 1 punto MT5").
-#      E il censimento dell'11/09 lo scrive a lettere sue (r.409-411):
+#      E il censimento dell'11/09 lo scrive a lettere sue (r.420-423 --
+#      la citazione era sbagliata, r.409-411 in quel file parla d'altro:
+#      corretta al cancello del 16/09):
 #      "InpSLBufferPips=3 e' vivo nel codice ma quasi nullo nei fatti su
 #      indici e oro (_Point=0,01 -> 0,03 punti). Ma NON su 225JPY, dove
 #      _Point=1,00: su 770901/770924 Nikkei quei 3 sono 3 punti indice
@@ -485,7 +496,7 @@
 #       2. FINESTRA DIVERSA: qui @FRAZIONEIS e' 1.0 (una finestra sola
 #          di 642 giorni), li' erano due meta';
 #       3. DEPOSITO NON DICHIARATO: il file prova che ha generato quei
-#          CSV (prove\ABTG_SupertrendReversal.txt, 35 righe in tutto)
+#          CSV (prove\ABTG_SupertrendReversal.txt, 34 righe in tutto)
 #          NON porta ne' @DAQUANDO, ne' @FINOA, ne' un deposito: erano
 #          tutti default del driver, e uno stato implicito non e' uno
 #          stato dichiarato. Non lo ricostruisco a posteriori.
@@ -815,7 +826,8 @@
 #    (b) STORIA CHE NON C'E': i tick di 225JPY partono dal 2024.09.26 e
 #        la sonda del 17/08 marca il simbolo `COMPLETO` -- cioe' non
 #        manca sul disco, il broker NON CE L'HA
-#        (REFERTO_SONDA_STORICO_17-08.md r.40-46). Il muro e' MISURATO,
+#        (REFERTO_SONDA_STORICO_17-08.md r.46 la data, r.48 la frase).
+#        Il muro e' MISURATO,
 #        non assunto, e vale 642 giorni.
 #    >>> LE DUE CAUSE SONO SEPARATE DA NUMERI DIVERSI, non dalla stessa
 #        soglia su n: (a) e' una densita' misurata su una corsa, (b) e'
@@ -942,7 +954,14 @@
 #    - TRADES CONTA DEAL, non posizioni, e due meccanismi monotoni
 #      diversi (T3 e T4) possono muoverlo. Nessuna causa viene
 #      attribuita a un suo movimento.
-#    - REGIME: una sola epoca, e non caratterizzata in casa (T6).
+#    - REGIME: una sola epoca (21,1 mesi). E' CARATTERIZZATA in casa --
+#      "Nikkei prevalentemente in salita", R162a r.552-556, STESSO
+#      simbolo e STESSA finestra (T6) -- ma resta UNA sola, quindi non e'
+#      la prova di regime della Regola C del 16/08, e il lato short e'
+#      misurato su un'epoca che gli e' ostile.
+#      [Qui c'era scritto "e non caratterizzata in casa": era un residuo
+#       di stesura, in contraddizione diretta con T6 che il nome del
+#       regime ce l'ha. Corretto al cancello del 16/09.]
 #    - LATO LONG/SHORT: non separabile. I due lati sono pinnati ENTRAMBI
 #      accesi (come in campo, e come chiede la regola del 25/08) e il
 #      CSV non li separa. Se il buffer giovasse a un lato e nuocesse
@@ -989,6 +1008,38 @@
 #  al commit HEAD di `lavoro` 51e60cde ("Arma R163a (InpSLBufferPips,
 #  ABTG_SupRev_NAS_H1_Ottimizzato, sedia 970913)"), verificato
 #  IMMEDIATAMENTE PRIMA della consegna e non solo alla stesura.
+#
+#  >>> E LA CLASSE 365 SI E' RIPETUTA LO STESSO GIORNO IN CUI E' NATA,
+#      SU QUESTO FILE. Riverifica del cancello di giudizio, 16/09, con
+#      HEAD di `lavoro` = 2d8766eb (questo file gia' dentro):
+#      `grep -rl "779827" --exclude-dir=.git .` NON da' piu' zero. Da'
+#      anche
+#        .claude\worktrees\agent-a5616db0c6b18ee6b\backtest_pipeline\
+#          prove\R165a_slbufferpips_superwave_U30USD.txt   r.1114
+#          InpMagic=779827||779827||0||779827||N
+#      cioe' il lavoro parallelo per cui questo file aveva lasciato
+#      libera l'etichetta R165. Anche quello certifica la propria
+#      unicita' contro LO STESSO HEAD 51e60cde: due file, la stessa
+#      fotografia, lo stesso numero.
+#  >>> L'ARBITRO, E NON E' UNA PREFERENZA: VINCE CHI E' GIA' COMMITTATO
+#      SU `lavoro`. L'ordine dei commit e' un ordine TOTALE, i due lati
+#      lo calcolano identico senza parlarsi, e non dipende da chi ha
+#      guardato per primo. Qui: R166a e' committato (2d8766eb), R165a e'
+#      ancora solo nell'albero di lavoro del suo agente -> 779827 RESTA
+#      A QUESTO FILE e R165a si sposta, che e' esattamente cio' a cui il
+#      suo stesso testo si impegna (r.989: "se qualcuno prende 779827
+#      dopo 51e60cde, questo file va spostato PRIMA di entrare").
+#  >>> COSA VA GUARDATO PRIMA DI METTERE LA RIGA IN CODA, ed e' una
+#      riga di grep: che R165a, quando entra su `lavoro`, NON porti piu'
+#      779827. Se lo portasse, le due corse scriverebbero sullo STESSO
+#      nome di per-trade (r.723, composto con InpMagic) e sarebbero
+#      indistinguibili nei log del tester.
+#  >>> E LA LEZIONE CHE LA 365 NON AVEVA ANCORA, perche' l'ha pagata
+#      questo file: SALTARE L'ETICHETTA NON BASTA. Lasciare libera R165
+#      per il lavoro parallelo e poi prendersi il magic che quel lavoro
+#      avrebbe preso (il primo libero dopo 779826) e' meta' cortesia:
+#      la collisione che fa danno e' sul MAGIC, non sul nome del file.
+#      Chi lascia libera un'etichetta lascia libero anche il suo magic.
 #  Il blocco in uso della serie e' 779821/779822/779823 (R161a/b/c),
 #  779824 (R162a), 779825 (R164a), 779826 (R163a): questo e' il
 #  successivo libero. 779830 e' GIA' PRESO da R130a
@@ -1010,6 +1061,11 @@
 #  ETICHETTA r166a VERGINE: `grep -rn "R166"` e `grep -rn "r166"` su
 #  tutto il repo (CODA.txt e REGISTRO_TEST.md inclusi) -> ZERO
 #  occorrenze prima di questo file, allo stesso HEAD 51e60cde.
+#  >>> RIVERIFICATA AL CANCELLO DEL 16/09 a HEAD 2d8766eb, worktrees
+#      paralleli COMPRESI: ZERO occorrenze fuori da questo file.
+#      L'etichetta ha retto, il magic no -- ed e' la differenza fra una
+#      cosa che si guarda in un repo solo e una che si guarda in tutti
+#      gli alberi di lavoro aperti.
 #  R165 e' saltata di proposito: e' lasciata libera a un lavoro
 #  parallelo in corso, e bruciare un numero costa meno che collidere.
 #  ORDINE DEI ROUND: nessun file prova, in coda o in archivio, mette

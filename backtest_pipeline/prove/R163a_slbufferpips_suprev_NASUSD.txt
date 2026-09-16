@@ -68,18 +68,21 @@
 #       coda\referti\CODA_07_desktop_20260915_033005.log r.3322-3379
 #       ("ESITO: ROUND GIRATO", data 2026-09-14 09:30:48, deposito
 #       10000, modello 4, RILIEVI: 0).
-#   (2) I SUOI NUMERI NON SONO MAI STATI LETTI DA NESSUNO. Verificato
-#       oggi per ricerca su tutto il repo: le stringhe "1.61295" e
-#       "325.72" (la cella ancora di R127a) compaiono in UN SOLO file,
-#       ed e' il log di raccolta qui sopra. Zero referti, zero voci in
-#       REGISTRO_TEST.md, zero righe in CLASSIFICHE.md.
-#   (3) E I DUE CSV NON SONO MAI ENTRATI NEL REPO. In
-#       risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\ ci sono sei
-#       file (IS, OOS, _ohlc, _r3) e NESSUNO porta il suffisso _r127a.
-#       I numeri esistono solo dentro il log di raccolta, riga per riga
-#       (r.3380-3403). Sono leggibili -- lo sono stati, per scrivere
-#       questo file -- ma vanno portati nell'archivio: e' un lavoro a
-#       parte e va armato come tale.
+#   (2) I SUOI NUMERI NON ERANO MAI STATI LETTI DA NESSUNO, PRIMA di
+#       oggi (16/09). Al momento della scrittura di QUESTO file le
+#       stringhe "1.61295" e "325.72" (la cella ancora di R127a)
+#       comparivano in UN SOLO file, il log di raccolta qui sopra: zero
+#       referti, zero voci in REGISTRO_TEST.md, zero righe in
+#       CLASSIFICHE.md. >>> CORRETTO PIU' TARDI LO STESSO GIORNO: i due
+#       CSV sono stati recuperati dal log e archiviati in
+#       risultati_prove\r127a\ (commit eb281b53), quindi ORA sono anche
+#       li', non solo nel log. Non cambia nessun numero o verdetto di
+#       questo file: cambia solo DOVE si trovano oggi.
+#   (3) I DUE CSV NON ERANO ANCORA ENTRATI NEL REPO quando questo file
+#       e' stato scritto. In risultati_prove\ABTG_SupRev_NAS_H1_
+#       Ottimizzato\ ci sono sei file (IS, OOS, _ohlc, _r3) e NESSUNO
+#       portava il suffisso _r127a. Vedi la correzione al punto (2):
+#       ora sono in risultati_prove\r127a\.
 #
 #   >>> QUINDI QUESTO FILE NON APRE LA MANOPOLA: LA CONTINUA. E il
 #       titolo onesto del suo predecessore, oggi, e' "girato e non
@@ -925,9 +928,10 @@
 #      ripara e non la usa. Ripararla (riprodurre la cella viva sul
 #      binario di oggi e riscrivere il contratto PF/DD/n) e' il lavoro
 #      che vale di piu' su questa sedia, e va armato a parte.
-#    - I DUE CSV DI R127a NON SONO NEL REPO, solo dentro il log di
-#      raccolta. Le tre celle in comune di S1 sono state lette da li',
-#      riga per riga. Portarli in risultati_prove\ e' un lavoro a parte.
+#    - I DUE CSV DI R127a non erano nel repo quando questo file e'
+#      stato scritto (le tre celle in comune di S1 sono state lette dal
+#      log di raccolta, riga per riga). >>> CORRETTO PIU' TARDI: ora
+#      sono anche in risultati_prove\r127a\ (commit eb281b53).
 # =====================================================================
 #  IL COSTO IN TEMPO MACCHINA -- E QUI NON E' UNA STIMA, E' DERIVATO DA
 #  UNA MISURA (ed e' il motivo per cui vale la pena scriverlo)
