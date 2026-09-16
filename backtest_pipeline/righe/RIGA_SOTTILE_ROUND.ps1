@@ -1217,7 +1217,24 @@ $BancoBT = 'C:\MT5_Backtest'
 #  Il sorgente EA (ABTG_Dow_Apertura_US.mq5) fra l'ancora 8b922147 e
 #  c8220094 e' sempre le stesse 27 righe/una sola input (Guardian,
 #  fail-open nel Tester): l'uguaglianza dichiarata dai file regge.
-$PIN = 'c82200941c0cc20021e13092234dd5e76c15eca3'
+#  >>> SESSANTUNESIMO GIRO DI PIN (16/09/2026): c8220094 -> e66a31f8.
+#  Serviva per portare un'emendazione su R172a GIA' ARMATO: un audit
+#  di un agente controllo-preventivo ha trovato che S3 aveva lo stesso
+#  punto cieco direzionale della classe 387 (nata oggi su R172f), ma
+#  qui il calo di `Trades` e' MISURATO sui CSV di R46b e supera la
+#  tolleranza (130 -> 123 OOS, -7, fuori da una banda +/-2 su un claim
+#  direzionale) -- avrebbe fermato la lettura del PF su una gamba OOS
+#  sana. Riscritta S3 a limite aritmetico (pavimento 56/96, tetto
+#  112/192 sulle posizioni misurate, non 148/260 sull'ancora).
+#  R172b verificato innocuo (nessuna delle 4 occorrenze di
+#  InpCloseHour tocca la catena riskDist/InitialSL/bersaglio parziale).
+#  Verificato TUTTO indipendentemente dalla sessione principale, non
+#  solo dall'agente: CSV riletti a macchina, grep di InpCloseHour
+#  rifatto dalla radice. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1
+#  NON sono cambiati fra 17a985cf e e66a31f8 (git diff sui due
+#  percorsi: VUOTO, verificato). Il sorgente EA fra 8b922147 e
+#  e66a31f8 e' sempre le stesse 27 righe/una sola input.
+$PIN = 'e66a31f81dbb8bf293ba0d81a0e520c92288387e'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
