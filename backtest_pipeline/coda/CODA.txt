@@ -2063,3 +2063,44 @@ cb15836e890eb32b96ff957478f9c8285e9a8144 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R164a_atrexit_PTE_GBPUSD_771322.txt -Etichetta r164a -Modello 1 -Deposito 100000
 # =====================================================================
+#  R163a -- InpSLBufferPips SU ABTG_SupRev_NAS_H1_Ottimizzato, NASUSD
+#  H1 (sedia 970913). Priorita' #1 del censimento dell'11/09 ("le tre
+#  che valgono il round"). NON e' la prima misura su questa manopola:
+#  R127a (stessa sedia, stesso asse basso) e' armato dal 13/09 e
+#  GIRATO il 14/09, ma i suoi risultati non erano mai stati letti (vedi
+#  commit "Recupera i CSV di R127a dal log" e
+#  report/R127A_BINARIO_NON_RIPRODOTTO_2026-09-16.md) -- e la sua
+#  ancora congelata NON e' tornata quando riprodotta (scarto PF
+#  -3,34%/-4,45%, causa: due binari diversi dell'EA, uno con
+#  InpUsaGuardian uno senza).
+#
+#  R163a e' il round SEPARATO che R127a stesso prescriveva per uscire
+#  dall'artefatto di troncatura del lotto a deposito basso (a 10.000 la
+#  troncatura MathFloor arriva al 17% sulle celle alte e cresce lungo
+#  l'asse, fabbricando da sola una pendenza; a 100.000 scende
+#  all'1,7%). Asse 2253->4503 passo 375 (identico a R127a: 3 celle in
+#  comune 2253/2628/3003, 4 nuove), bordo alto 4503 = prima cella che
+#  supera la soglia dei 40x nella lettura piu' severa (stop 27,10 x
+#  spread 1,80 = 4490).
+#
+#  Merito SOSPESO (IS 69-71 / OOS 84-87 contro il pavimento 150,
+#  46-58%): muro storico tick 642 giorni dal 2024.09.26, pavimento non
+#  raggiungibile a tick su questa sedia. Cancello di costo: la
+#  risposta va da 7/7 a 0/7 celle secondo quale dei due riferimenti di
+#  spread/stop si usa (dichiarato, non chiuso), ma NESSUNA sentinella
+#  del file si aggancia al cancello -- il round si legge lo stesso.
+#
+#  Secondo cancello: FAIL alla prima lettura (classe 365, NUOVA: il
+#  magic 779825 dichiarato "vergine" era stato preso 12 minuti prima da
+#  R164a, armato nel frattempo -- corretto a 779826) + 7 correzioni non
+#  bloccanti (segno di n su una misura unilaterale, la tabella delle
+#  quattro combinazioni costo/riferimento, un residuo di classe 353 su
+#  una sentinella di densita' vacua per algebra, tre citazioni di riga
+#  del sorgente). PASS dopo le correzioni.
+#
+#  Pin: giro di pin b61a570 (46mo, afeeebdd -> b9848b1b). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic vergine 779826, non tocca 970913 vivo.
+# =====================================================================
+b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R163a_slbufferpips_suprev_NASUSD.txt -Etichetta r163a -Modello 4 -Deposito 100000
+# =====================================================================
