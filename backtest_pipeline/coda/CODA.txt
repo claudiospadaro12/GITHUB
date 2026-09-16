@@ -1972,3 +1972,50 @@ b02d434173c92764f8631764581f13a5503b4d88 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161c_slatrmult_breakingband_AUDUSD.txt -Etichetta r161c -Modello 1 -Deposito 100000
 # =====================================================================
+#  R162a -- InpPartialTargetR SU ABTG_GapContinuation, 225JPY M1
+#  (sedia 774101). "IL PARZIALE A 1R": la prima delle sei manopole
+#  d'uscita mai mosse su questa sedia. Asse 0,50->2,50 passo 0,25, 9
+#  celle, @FRAZIONEIS 1.0 (una tranche, niente split IS/OOS). TICK
+#  REALI su tutto lo storico BCM (dal 2024.09.26, sonda 17/08 marca
+#  COMPLETO): qui non e' un lusso, e' il requisito, perche' l'asse
+#  decide l'istante DENTRO la barra in cui scatta il parziale e sposta
+#  lo stop a pareggio -- in OHLC M1 quell'istante sarebbe ambiguo
+#  esattamente sulla grandezza misurata. -Modello 4 = -SoloControllo e
+#  corsa vera coincidono (classe 356 non morde qui, a differenza di
+#  R161a).
+#
+#  Due correzioni bloccanti nei primi due giri del secondo cancello:
+#  classe 363 (riferimento LOCALE vs riferimento medio globale sul
+#  danno di troncamento VOLUME_MAX -- il riferimento giusto e'
+#  algebricamente indipendente dalla curva del saldo, quello globale
+#  no) e classe 362 (spread di 225JPY va scritto come limite
+#  superiore <= 11,0 punti indice [MIS, n=47, una coda], non taciuto).
+#  Terzo giro: PASS pieno, con un solo residuo non bloccante -- un
+#  numero che avevo dettato IO nella correzione precedente ("~4-6
+#  centesimi" per il danno del riferimento globale) era impreciso: il
+#  vero range e' 4-8 (delta di 4, 8, 7 e 4 centesimi sui quattro
+#  troncamenti). Corretto nello stesso commit del giro di pin, nel
+#  file prova e nella voce classe 363 della checklist.
+#
+#  Rischio VERO=DICHIARATO 1,00x. Cancello di costo [NON DECIDIBILE]:
+#  manca lo spread di sessione di 225JPY, ma lo stop e' misurato
+#  (mediana 347 punti indice) e lo spread ha il limite superiore
+#  <= 11,0 punti indice -- il cancello si decide dentro una forbice di
+#  2,3 punti, dichiarata, non chiusa da questo round.
+#
+#  Fuori perimetro, segnalato non risolto: (a) troncamento silenzioso
+#  di VOLUME_MAX su 4/47 operazioni (sotto-rischio, mai sopra-rischio,
+#  ma un difetto di contratto di taglia da correggere a parte); (b) il
+#  lettore CODA_01 del rischio vivo cerca InpMagic/InpRiskPercent
+#  mentre questa EA usa InpMagicNumber/InpBuyRiskPercent -- rischio
+#  vivo illeggibile per questa sedia; (c) lo spread reale di sessione
+#  di 225JPY resta genuinamente non misurato (serve uno SpreadLogger
+#  dedicato in sessione Tokyo, 01:00-07:30 server).
+#
+#  Pin: giro di pin cb15836e (44mo, 48dfbfb1 -> b5d65c87). $SHA_ROUND e
+#  $SHA_WALK invariati (git diff vuoto su RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1). Bersaglio: banco C:\MT5_Backtest
+#  (50504400).
+# =====================================================================
+cb15836e890eb32b96ff957478f9c8285e9a8144 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapContinuation -Prova R162a_partialtargetr_gapcont_225JPY.txt -Etichetta r162a -Modello 4 -Deposito 100000
+# =====================================================================
