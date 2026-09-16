@@ -2292,3 +2292,55 @@ b9b180fbda4a17183073aa8c56dd8b908bfe99b4 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 b9b180fbda4a17183073aa8c56dd8b908bfe99b4 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168d_maxhours_gapfill_225JPY.txt -Etichetta r168d -Modello 4 -Deposito 100000
 # =====================================================================
+#  R169a-f -- InpSLBufferATR SU ABTG_PunteLarry, sui 6 gemelli U30USD
+#  (772341) / EURAUD (772342) / XAUUSD (772343) / GBPJPY (772344) /
+#  GBPUSD (772345) / EURCAD (772346). Ventitreesima famiglia. Diversa
+#  dai gemelli InpMaxDaysHold di stanotte: qui la manopola E' la
+#  geometria dello stop (r.638-651 vs r.653: attiva solo con
+#  InpSLMode=0, verificato pin vivo su tutte e sei le sedie via i file
+#  prova R39a/R103/R100, nessun .set esiste per questo EA), muove
+#  stop, rischio, TP (ExitMode=1 su 4 sedie) e lotto in cascata --
+#  quindi il DD scende quasi per costruzione lungo l'asse e non prova
+#  nulla da solo: si legge DD insieme a PF/Profit.
+#
+#  Non e' "mai mossa OVUNQUE": la stessa manopola e' gia' un asse due
+#  volte su ABTG_CostToCost (R146a/R146c), ma con metro diverso
+#  (ATR(H4) invece di ATR(D1)) -- assi non confrontabili, dichiarato.
+#
+#  Cancello di costo misurato dove possibile (verificato su
+#  spread_flotta/spread_orario_U30USD.csv, ora 07: mediana 2,60):
+#  U30USD 105,4x (passa) · XAUUSD 236,2x · EURAUD 35,6x (sotto 40x,
+#  spread ASSUNTO su cross senza archivio) · GBPJPY 58,6x (condizionato
+#  a spread <=1,47 pip) · GBPUSD/EURCAD [NON MISURATO]. Merito pieno
+#  solo su EURAUD e EURCAD (fragile, +4 operazioni sopra il pavimento
+#  150 -- se S1 non riproduce 154, il merito decade a NON AMMESSO senza
+#  discussione, gia' scritto nel file). Sospeso su U30USD/XAUUSD/
+#  GBPJPY/GBPUSD.
+#
+#  Secondo cancello: FAIL su 3 dei 6 -- R169a (classe 375, NUOVA:
+#  l'ancora dichiarata "gira ESATTAMENTE" quando il round fratello
+#  sulla stessa ancora, R156a, aveva gia' misurato che non e'
+#  bit-a-bit -- il caveat era stato declassato invece di riusato) e
+#  R169e/f (classe 347 ripetuta: la testa dichiarava il TP mobile su
+#  due sedie con InpExitMode=0, dove il ramo del TP non esiste per
+#  codice). Piu' classe 374, NUOVA (il bordo della griglia in virgola
+#  mobile fa sparire una cella secondo il contatore usato: risolto
+#  scrivendo 0.31 invece di 0.30, verificato su tutti e tre i modi di
+#  contare: 7/7/7). PASS dopo le correzioni.
+#
+#  Pin: giro di pin d5096f8 (50mo, 6693bd47 -> c713ac92). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic 779871-779876.
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169a_slbufferatr_puntelarry_U30USD.txt -Etichetta r169a -Modello 4 -Deposito 100000
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169b_slbufferatr_puntelarry_EURAUD.txt -Etichetta r169b -Modello 1 -Deposito 100000
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169c_slbufferatr_puntelarry_XAUUSD.txt -Etichetta r169c -Modello 1 -Deposito 100000
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169d_slbufferatr_puntelarry_GBPJPY.txt -Etichetta r169d -Modello 1 -Deposito 100000
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169e_slbufferatr_puntelarry_GBPUSD.txt -Etichetta r169e -Modello 1 -Deposito 100000
+# =====================================================================
+d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169f_slbufferatr_puntelarry_EURCAD.txt -Etichetta r169f -Modello 1 -Deposito 100000
+# =====================================================================
