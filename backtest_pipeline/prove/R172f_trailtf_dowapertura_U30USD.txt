@@ -211,12 +211,19 @@
 #           >>> IL PATTERN E' "M5 batte M1" E NON "3882", ED E' UNA
 #               CORREZIONE CHE MI SONO FATTO DA SOLO: la prima stesura
 #               citava `grep -rn "3882\|M5 batte M1" ...`, e quel
-#               comando rieseguito torna SETTANTAQUATTRO percorsi --
-#               "3882" e' una SOTTOSTRINGA che compare dentro numeri
-#               come `-3882.08` e `2.23882` in decine di CSV di altri
-#               motori. Un comando che promette un numero e ne produce
-#               un altro e' la classe 379 esatta: l'ho tolto invece di
-#               lasciarlo.
+#               comando rieseguito torna DECINE di percorsi invece di
+#               due -- "3882" e' una SOTTOSTRINGA che compare dentro
+#               numeri come `-3882.08` e `2.23882` in decine di CSV di
+#               altri motori. Un comando che promette un numero e ne
+#               produce un altro e' la classe 379 esatta: l'ho tolto
+#               invece di lasciarlo.
+#               >>> E IL CONTEGGIO ESATTO NON LO SCRIVO APPOSTA: alla
+#                   stesura erano 74 percorsi, alla riverifica del
+#                   cancello 73, e continuera' a ballare perche' fra i
+#                   match ci sono i `data/snapshots/*.json` rigenerati
+#                   ogni notte. Un numero che cambia da solo non si
+#                   pinna: si pinna l'ordine di grandezza (decine
+#                   contro due), che e' cio' che regge la conclusione.
 #       (2) grep -c "1,371\|1\.371\|PREVBAR" \
 #             backtest_pipeline/risultati_archivio/Dow_Apertura/DOW_MOTORE.md
 #           ->  OTTO righe (176, 191, 232, 233, 241, 248, 268, 276).
