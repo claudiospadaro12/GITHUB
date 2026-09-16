@@ -22086,3 +22086,234 @@ trailing spento 17 parziali IS, PREVBAR M5 18, ATR x2 27 — la configurazione
 piu' stretta e' quella con MENO parziali), e S3 e' diventata *"i LIMITI
 ARITMETICI di `Trades`"* con il verso declassato a cosa da **registrare**.
 Nessun numero e' stato toccato.
+
+---
+
+## 388. 📌🕰️ IL FILE DICHIARA UN `HEAD` CHE **NON È IL COMMIT CHE LO CONTIENE**: ogni citazione "riletta OGGI a HEAD" nasce già scaduta, e il lettore che riesegue il `grep` trova numeri diversi da quelli scritti (controllo-preventivo, 16/09/2026)
+
+**Il caso.** I tre file `R172h` / `R172i` / `R172j` (sedia `770202`) dichiarano
+in testa *"la catena l'ho percorsa **OGGI** riga per riga, a **HEAD
+b9d7f8de**"* e citano `RIGA_SOTTILE_ROUND.ps1 r.1433` (più `$argv` r.1426-1433,
+più il `grep` che *"OGGI torna SEI righe: 142, 1120, 1134, 1231, 1235, 1433"*) e
+le sette righe armate dei fratelli in `CODA.txt` a `r.2515/2517/2553/2607/2609/
+2755/2757`.
+
+🟢 **Tutte quelle righe erano ESATTE a `b9d7f8de`** — verificato, non dedotto:
+`git show b9d7f8de:...RIGA_SOTTILE_ROUND.ps1 | grep -n TerminaleBacktest` torna
+proprio `142,1120,1134,1231,1235,1433`.
+
+🔴 **Ma `b9d7f8de` non è il commit che contiene i tre file.** Fra `b9d7f8de` e
+`8209aefb` (*"Scrive R172h-j"*) sono entrati `62169380` e `566ab27b` — il giro
+di pin 61 — che hanno fatto crescere il driver di **+17 righe** e `CODA.txt` di
+**+8**. Al commit, i numeri veri sono:
+
+| citato nel file | vero al commit `8209aefb` |
+|---|---|
+| `RIGA_SOTTILE_ROUND.ps1` r.1433 | **r.1450** |
+| `$argv` r.1426-1433 | **r.1443-1450** |
+| grep: 142,1120,1134,**1231,1235,1433** | 142,1120,1134,**1248,1252,1450** |
+| `CODA.txt` 2515/2517/2553/2607/2609/2755/2757 | **2523/2525/2561/2615/2617/2763/2765** (tutte **+8**) |
+
+### 📐 PERCHÉ NON È LA 369 PUNTO 4, ED È UNA CLASSE NUOVA
+La **369 pt.4** dice che *"le citazioni per numero di riga **SCADONO DA
+SOLE**"*, cioè che diventano false **col tempo** — ed è un difetto che si
+subisce. Qui è diverso e peggio: **la citazione è falsa dal primo istante in cui
+esiste**, perché l'autore ha verificato a un commit e ha consegnato a un altro.
+E l'aggravante è il cortocircuito: **gli stessi tre file spendono tre paragrafi
+a spiegare la 369 pt.4** (*"il modo stabile di ritrovarla è il `grep`"*) e poi
+**incollano il risultato del `grep` invece di rieseguirlo**, che è esattamente
+ciò contro cui la 382 esiste.
+
+### 🧠 PERCHÉ COSTA
+Chi arma legge *"deve tornare SEI righe: …1433"*, riesegue, ottiene `1450`, e ha
+davanti due letture opposte: *"il driver è cambiato sotto di me, mi fermo"*
+(falso allarme, il file **ordina** di fermarsi quando il controllo non torna) o
+*"vabbè, i numeri di riga ballano"* (e allora la prossima volta non guarderà un
+difetto vero). Le due sono entrambe un danno, e la seconda è quella che uccide
+i cancelli.
+
+### 🔴 LA REGOLA
+1. **Il pin che un file dichiara deve essere il commit in cui il file ENTRA, non
+   quello in cui l'autore ha aperto il terminale.** Se non lo si può sapere in
+   anticipo (è quasi sempre così), **non si scrive un SHA: si scrive il
+   comando**, e il numero accanto va marcato *"valore alla stesura"*.
+2. **Tutti i `grep`/`sed -n` su file del repo si RIESEGUONO nell'ultimo passaggio
+   prima del commit**, non alla stesura (estensione naturale della **382**: là
+   era il file stesso a falsificare il comando, qui è **un commit di terzi
+   entrato in mezzo**).
+3. 📌 **Corollario per le SERIE scritte nella stessa serata**: un "giro di pin"
+   che arma dei fratelli **muove `CODA.txt` e le righe di lancio**. Se fra la
+   stesura e il commit è passato un giro di pin, **ogni numero di riga del file
+   va rifatto**, non riletto.
+4. **Il cancello lo verifica a macchina**: per ogni `r.NNNN` citato su un file
+   del repo, si apre quella riga **al commit corrente** e si confronta col testo
+   citato accanto. Costa secondi e non ha falsi positivi.
+
+**Riparato prima dell'armamento**: i tre file ora portano i numeri del commit
+`8209aefb`, un riquadro **CORREZIONE DEL CANCELLO** che spiega da dove veniva lo
+scarto, e — per `CODA.txt` — il comando stabile
+`grep -n "R172._.*-Etichetta r172" backtest_pipeline/coda/CODA.txt` al posto del
+numero. **Nessuna conclusione è cambiata**: il banco resta cablato e
+`-TerminaleBacktest` resta da non passare a mano.
+
+---
+
+## 389. 🧯🔌 UN MECCANISMO DI **FALLIMENTO** DICHIARATO NEL FILE CHE **UN PIN DELLO STESSO FILE SPEGNE**: lo specchio della 383 — là un `if` teneva VIVA la riga citata, qui un `if` rende IMPOSSIBILE la conseguenza annunciata (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `backtest_pipeline/prove/R172h_slmode_dowapertura_U30USD.txt` (asse
+`InpSLMode`, sedia `770202`) dimostra nella proprietà **(B)** che il numero di
+posizioni *"può solo SCENDERE, mai salire"*, e nomina **una sola strada**:
+
+> _"sulla cella 1 `dist = 1,5 x AtrValue()` e `AtrValue()` **TORNA 0** se il
+> buffer dell'indicatore non è pronto (r.1615). **In quel caso l'ordine NON
+> viene piazzato.**"_
+
+La catena letta è giusta fin dove arriva: con `AtrValue()=0` si ha `sl = entry`
+e `dist = 0`, e il cancello dell'ordine è `r.1331 if(!skip && lot > 0 && dist >
+0)`.
+
+🔴 **Ma fra `dist = 0` (r.1322) e il cancello (r.1331) c'è `r.1324`**, e quel
+ramo **questo stesso file lo accende con due pin propri**:
+`InpMinStopPts = 500` e `InpSkipIfTight = false` (valori di campo, scritti riga
+per riga in fondo al file).
+
+```
+r.1324  if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)   // 0 < 5,00 -> VERO
+r.1327     else { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
+                                                               // dist = 5,00 punti indice
+```
+
+👉 **Il floor RACCOGLIE il caso ATR-non-pronto invece di lasciarlo cadere:
+`dist` diventa strettamente positiva e l'ordine VIENE piazzato.** Il meccanismo
+di perdita annunciato **non esiste**, e la conclusione giusta è più forte di
+quella scritta: dentro il codice dell'EA le posizioni delle due celle sono
+**UGUALI** (56 IS / 96 OOS), non *"<= "*.
+
+### 📐 PERCHÉ È UNA CLASSE NUOVA, e non la 383
+- La **383** è: *"la riga citata vive solo perché un input pinnato tiene chiuso
+  l'altro ramo"* — il pin **sostiene** la conclusione, e il difetto è
+  **non dichiararlo** (la conclusione vale meno di come è scritta).
+- La **389** è il **contrario esatto**: il pin **distrugge** la conseguenza
+  annunciata, e il difetto è **non essersene accorti** (la conclusione vale
+  **più** di come è scritta, ma la *ragione* scritta è **falsa**).
+- E il danno è di segno opposto: la 383 gonfia una conclusione, la 389
+  **indebolisce una sentinella** — qui S3 rinunciava a un pavimento **esatto**
+  (`Trades >= 56/96`) sulla base di un meccanismo che non può accadere.
+
+### 🧠 PERCHÉ È INSIDIOSA
+La 383 si trova guardando **IN SU** dalla riga citata. La 389 **non si trova
+così**: la riga `r.1615` è citata correttamente, il ramo sopra di lei è
+correttamente descritto altrove nel file, e il difetto sta **fra la riga citata
+e la sua conseguenza**, cioè in un pezzo di codice che il paragrafo **salta**.
+Si trova in un modo solo: **simulare a mano il valore limite** (`AtrValue()=0`)
+**attraverso tutto il blocco fino al cancello dell'ordine**, con i pin del file
+sotto gli occhi.
+
+### 🔴 LA REGOLA
+1. **Ogni volta che un file dice "in quel caso l'ordine/la posizione NON viene
+   …", si percorre il codice DAL punto dove nasce il valore limite FINO al
+   cancello**, applicando **i pin di quel file**. Non basta che la riga citata
+   sia giusta: deve essere giusta la **traiettoria**.
+2. **Se un pin del file stesso neutralizza il caso, la conclusione si RISCRIVE
+   più forte** (da `<=` a `=`) — e si va a cercare il meccanismo residuo VERO,
+   che di solito **sta fuori dall'EA**.
+3. 🔴 **E il meccanismo residuo non si promuove a cancello se è [NON MISURATO].**
+   Qui il residuo è il **rifiuto d'ordine per `SYMBOL_TRADE_STOPS_LEVEL`** (uno
+   stop portato dal floor a 500 punti MT5 è l'unico della serie abbastanza
+   vicino da porre la domanda), e `stopsLvl` di `U30USD` **non è nella sonda del
+   17/08**. Quindi: pavimento di S3 **prudenziale**, ma con scritto **cosa
+   significherebbe scendere sotto** — un ordine rifiutato, da contare nel
+   giornale (`ABTGLog` r.1339 *"BUY LIMIT (retest) fallito: …"*), **non** un
+   risultato della manopola.
+
+**Riparato prima dell'armamento**: la proprietà (B) di `R172h` ora porta la
+correzione per esteso, l'uguaglianza `56/96` come **attesa esatta**, il
+meccanismo residuo nominato e marcato `[NON MISURATO]`, e S3 dice al lettore di
+**aprire il giornale** prima di scrivere *"la cella 1 opera di meno"*.
+
+---
+
+## 390. 🔬🪜 UNA MISURA RICAVATA **INVERTENDO UNA FORMULA CHE CONTIENE UNA QUANTIZZAZIONE**, consegnata con la precisione piena: il numero non è un valore, è un **LIMITE SUPERIORE** (controllo-preventivo, 16/09/2026)
+
+**Il caso.** I tre file `R172h/i/j` portano, come **scoperta nuova**, la
+distribuzione vera dello stop della sedia `770202`, ricavata invertendo la
+formula del lotto su un per-trade già in repo
+(`risultati_prove/aperture_r47/abtg_trades_…_772507.csv`, 96 posizioni OOS):
+
+```
+dist (punti indice) = (saldo x 1%) / lotto
+    -> minimo 25,45 . MEDIANA 138,29 . media 145,81 . massimo 433,99
+```
+
+🟢 **La derivazione è giusta**, ed è stata riprodotta dal cancello al centesimo
+(saldo finale ricostruito `107.342,99` = `Profit` del CSV di round; lotto
+massimo `43,70`, che è il numero su cui poggia il contro-esempio del file).
+
+🔴 **Ma la formula invertita contiene una TRONCATURA**: `r.1656 lot =
+MathFloor(lot/lotStep)*lotStep`. Il per-trade registra il lotto **dopo** il
+troncamento, quindi `riskMoney / lot_troncato` è **≥** della `dist` vera:
+
+```
+dist_vera  ∈  [ riskMoney/(lot + lotStep) , riskMoney/lot ]
+```
+
+e su questo simbolo `lotStep` **misurato** è `0,10` (tutti e 96 i volumi sono
+multipli di 0,10, nessuno di 1,00). Le bande vere:
+
+| | limite basso | scritto nel file |
+|---|---:|---:|
+| minimo | 25,40 | **25,45** |
+| mediana | 136,46 | **138,29** |
+| media | 142,97 | **145,81** |
+| massimo | 415,91 | **433,99** |
+
+La banda è **stretta dove il lotto è grande** (stop stretti: 0,2 %) e **larga
+dove il lotto è piccolo** (stop larghi: **fino al 4 %**). Scrivere `433,99` su
+un numero che può valere `415,91` sono **due cifre significative regalate**.
+
+### 🟢 E IL CONTRO-ESEMPIO CHE SALVA IL ROUND, che è la parte che conta
+Il difetto sarebbe **bloccante** se toccasse i numeri che decidono. **Non li
+tocca, ed è stato MISURATO invece che sperato**: la tabella *"posizioni toccate
+dal pavimento"* (22 righe, quella che sceglie start/passo/stop dell'asse di
+`R172i` e il pin `8000` di `R172j`) è stata **rifatta con TUTTE E DUE le
+estremità della banda**. **20 righe su 22 danno lo stesso conteggio**, e le tre
+che reggono i round sono tutte nel gruppo robusto:
+
+| floor | posizioni | esito |
+|---:|---:|---|
+| 3000 | 3 | 🟢 robusta (la *prima differenza*) |
+| 8000 | **31** | 🟢 robusta (il pin di `R172j`, il suo **denominatore**) |
+| 10500 | 39 | 🟢 robusta (l'estremo dell'asse) |
+| 7000 | 27 **o** 29 | 🟠 ambigua |
+| 8500 | 34 **o** 35 | 🟠 ambigua |
+
+👉 **Cambia quante cifre hanno diritto di stare accanto alla mediana, non quali
+celle decidono.**
+
+### 📐 PERCHÉ NON È LA 385, ED È UNA CLASSE NUOVA
+La **385** è *"incertezza FABBRICATA da un riassunto"*: una banda **allargata**
+per l'arrotondamento di stampa di un `.md`, mentre il dato pieno era nel CSV
+accanto. Qui è l'**opposto speculare**: una banda **cancellata** su un dato che
+una **quantizzazione del codice** rende intrinsecamente imprecisa. Là il
+rimedio era *"apri il CSV grezzo"*; qui il CSV grezzo **non basta**, perché
+l'imprecisione è nel **meccanismo**, non nella stampa.
+
+### 🔴 LA REGOLA
+1. **Prima di consegnare una misura ottenuta invertendo una formula del codice,
+   si elencano gli operatori NON INVERTIBILI della formula** — `MathFloor`,
+   `MathRound`, `NormalizeDouble`, `NormalizePrice`, i clamp `MathMax/MathMin` —
+   **e si dichiara di quale VERSO è il bias** (qui: sempre **verso l'alto**).
+2. **Il numero si scrive come BANDA**, e la banda si ricava dallo step **letto
+   nel dato**, non assunto (qui: i 96 volumi sono tutti multipli di `0,10` →
+   `lotStep = 0,10`, **misurato**).
+3. 🔴 **E poi si rifà OGNI conteggio che poggia sulla misura con TUTTE E DUE le
+   estremità della banda**, si dichiara quante righe sono robuste e **si nominano
+   per nome quelle ambigue**. Se le righe che decidono sono robuste, la misura si
+   consegna **con la banda accanto**; se no, **non si consegna**.
+4. 📌 **Corollario**: anche il **metodo dei percentili** va dichiarato. Qui `p5`
+   vale `35,89` a rango più vicino e `37,34` a interpolazione lineare: **due
+   metodi, due numeri**, e senza dire quale il numero non vuol dire niente.
+
+**Riparato prima dell'armamento**: i tre file portano ora la banda, il metodo dei
+percentili, e il ricalcolo della tabella su entrambe le estremità con le due
+righe ambigue nominate. **Nessun numero decisivo è cambiato.**

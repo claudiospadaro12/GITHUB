@@ -19,12 +19,17 @@
 #                           ROUND: vedi il paragrafo L'ORDINE)
 #  >>> LO STATO DEI SETTE FRATELLI R172a-g NON E' RICORDATO: letto oggi
 #      in backtest_pipeline/coda/CODA.txt, dove le sette righe armate
-#      stanno a r.2515 (r172a), r.2517 (r172b), r.2553 (r172c), r.2607
-#      (r172d), r.2609 (r172e), r.2755 (r172f) e r.2757 (r172g). Tutti e
-#      sette ARMATI al momento in cui scrivo. Lo scrivo con la data
-#      perche' la classe 386 (16/09) nasce da un'affermazione su un file
-#      FRATELLO vera alla stesura e falsa due minuti dopo: chi arma
-#      RIAPRE il file, non si fida di questa riga.
+#      stanno a r.2523 (r172a), r.2525 (r172b), r.2561 (r172c), r.2615
+#      (r172d), r.2617 (r172e), r.2763 (r172f) e r.2765 (r172g) -- numeri
+#      RIVERIFICATI DAL CANCELLO al commit 8209aefb. La stesura scriveva
+#      gli stessi sette SPOSTATI DI 8 (2515/2517/2553/2607/2609/2755/
+#      2757): erano i numeri di b9d7f8de, e CODA.txt e' cresciuto di 8
+#      righe con `566ab27b` prima del commit. Classe 388.
+#      Tutti e sette ARMATI al momento in cui scrivo. Lo scrivo con la
+#      data perche' la classe 386 (16/09) nasce da un'affermazione su un
+#      file FRATELLO vera alla stesura e falsa due minuti dopo: chi arma
+#      RIAPRE il file, non si fida di questa riga. Modo stabile:
+#        grep -n "R172._.*-Etichetta r172" backtest_pipeline/coda/CODA.txt
 #  >>> E SU R172h E R172j NON DICHIARO NESSUNO STATO: sono stati scritti
 #      nella stessa ora di questo e NON erano armati quando ho scritto
 #      questa riga. Chi arma verifichi.
@@ -65,23 +70,31 @@
 #     -- `-Expert -Prova -Etichetta -Modello -Deposito -SoloControllo`
 #     (r.99-106, riletto oggi) -- e `-TerminaleBacktest` NON e' fra
 #     quelle. Passarglielo a mano farebbe FALLIRE il lancio (classe 268).
-#     >>> IL BANCO E' CABLATO, e la catena l'ho percorsa OGGI, a HEAD
-#         b9d7f8de:
+#     >>> IL BANCO E' CABLATO, e la catena e' questa (numeri di riga
+#         RIVERIFICATI DAL CANCELLO al commit che contiene questo file,
+#         8209aefb):
 #           RIGA_SOTTILE_ROUND.ps1 r.131  $BancoBT = 'C:\MT5_Backtest'
-#           RIGA_SOTTILE_ROUND.ps1 r.1433 "-TerminaleBacktest",$BancoBT
-#                                         (dentro $argv, r.1426-1433)
+#           RIGA_SOTTILE_ROUND.ps1 r.1450 "-TerminaleBacktest",$BancoBT
+#                                         (dentro $argv, r.1443-1450)
 #           RIGA_ROUND_VPS.ps1     r.92   il param, default
 #                                         "C:\MT5_Backtest"
 #           RIGA_ROUND_VPS.ps1     r.649  lo inoltra al driver
-#     >>> I NUMERI DI RIGA SONO QUELLI DI OGGI: i fratelli R172f/g
-#         citano `r.1395`, ed ERA GIUSTO AL LORO PIN (verificato:
-#         `git show 43934665:...RIGA_SOTTILE_ROUND.ps1 | sed -n '1395p'`
-#         torna proprio quella riga). Il file e' cresciuto di 38 righe da
-#         allora. E' la classe 369 punto 4: le citazioni per numero di
-#         riga scadono da sole. Il modo stabile di ritrovarla e'
+#     >>> !! CORREZIONE DEL CANCELLO (16/09, classe 388 -- NUOVA). La
+#         stesura dichiarava `HEAD b9d7f8de` e citava r.1433 / $argv
+#         r.1426-1433: ESATTI A b9d7f8de, ma b9d7f8de NON e' il commit che
+#         contiene questo file -- fra i due sono entrati `62169380` e
+#         `566ab27b` (giro di pin 61), +17 righe sul driver e +8 su
+#         CODA.txt. Le citazioni erano scadute GIA' AL COMMIT, non "dopo".
+#         La conclusione non cambia (il banco resta cablato); cambiano i
+#         numeri, corretti sopra.
+#     >>> LE CITAZIONI PER NUMERO DI RIGA SCADONO DA SOLE (classe 369
+#         punto 4): i fratelli R172f/g citano `r.1395`, ed ERA GIUSTO AL
+#         LORO PIN (verificato: `git show
+#         43934665:...RIGA_SOTTILE_ROUND.ps1 | sed -n '1395p'` torna
+#         proprio quella riga). Il modo stabile di ritrovarla e'
 #           grep -n "TerminaleBacktest" backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1
-#         che OGGI torna SEI righe (142, 1120, 1134, 1231, 1235, 1433) e
-#         l'unica che PASSA l'argomento e' la 1433.
+#         che al commit 8209aefb torna SEI righe (142, 1120, 1134, 1248,
+#         1252, 1450) e l'unica che PASSA l'argomento e' la 1450.
 #     C:\MT5_Backtest = demo 50504400, zero EA attaccati. La sedia
 #     770202 VIVE su ALTRI DUE terminali e NON si tocca nessuno dei due.
 #
@@ -235,7 +248,12 @@
 #               >>> E QUI IL CRITERIO VA DETTO, NON IL SUPERLATIVO
 #                   (classe 364/373): con la banda B5 di questo file
 #                   (0,10 PUNTI PIENI di PF) l'IS PASSEREBBE e l'OOS NO,
-#                   per OTTO MILLESIMI. Scrivere "il gemello guadagna
+#                   per 0,00085 -- cioe' OTTO DECIMILLESIMI E MEZZO, non
+#                   "otto millesimi" come diceva la stesura (corretto dal
+#                   cancello il 16/09: 0,10000 - 0,09915 = 0,00085, un
+#                   fattore DIECI di differenza, e in un conto che decide
+#                   da che parte di un criterio cade un numero non e' un
+#                   dettaglio). Scrivere "il gemello guadagna
 #                   0,1 di PF" senza dire da che parte del criterio cade
 #                   sarebbe esattamente il difetto che la classe 364
 #                   esiste per impedire.
@@ -369,12 +387,29 @@
 #        dist (punti indice) = (saldo x 1%) / lotto
 #    e il saldo si ricostruisce sommando `net_profit` riga per riga a
 #    partire da 100.000 (compounding, r.1625 ACCOUNT_BALANCE).
+#  >>> !! PRECISAZIONE DEL CANCELLO (16/09, classe 383 applicata alla
+#      derivazione stessa di questo file): r.1645 NON E' IL RAMO
+#      PRINCIPALE DI `CalcLotByRisk`, E' IL RIPIEGO. Il principale e'
+#      r.1634-1638 (`OrderCalcProfit`), e r.1645 gira SOLO dentro
+#      `if(lossPerLot <= 0)` (r.1640) -- il commento dell'EA lo dice:
+#      "OrderCalcProfit converte correttamente; il tick value resta come
+#      ripiego". E i due rami NON coincidono qui: con `ContractSize
+#      10,00` (sonda r.71) `OrderCalcProfit` darebbe 10,00 EUR per punto
+#      indice per lotto, il ripiego 1,00. QUINDI la derivazione non e'
+#      "letta nel codice", e' SCELTA DAL DATO: quale ramo sia girato lo
+#      decide il contro-esempio qui sotto. Inferenza con una prova, non
+#      citazione.
 #
-#  >>> IL CONTROLLO CHE LA MISURA E' GIUSTA, fatto PRIMA di usarla
-#      (regola del CONTRO-ESEMPIO, 10/09): il saldo finale che la
-#      ricostruzione produce e' 107.342,99 contro un `Profit` di
-#      +7.342,99 dichiarato nel CSV di round. Coincide AL CENTESIMO, ed
-#      e' un numero scritto da qualcun altro.
+#  >>> IL CONTROLLO CHE LA RICOSTRUZIONE DEL SALDO E' GIUSTA -- E NON
+#      VALIDA DA SOLO LA FORMULA, e la stesura lo etichettava "IL
+#      CONTROLLO CHE LA MISURA E' GIUSTA", che era troppo (correzione del
+#      cancello, 16/09). Il saldo finale che la ricostruzione produce e'
+#      107.342,99 contro un `Profit` di +7.342,99 dichiarato nel CSV di
+#      round: coincide AL CENTESIMO, ed e' un numero scritto da qualcun
+#      altro. Questo prova DUE cose -- che il per-trade e' davvero quella
+#      corsa, e che la serie dei saldi (il numeratore di `riskMoney`) e'
+#      ricostruita bene -- e NON prova la conversione punto-indice/EUR.
+#      Quella la prova SOLO il contro-esempio qui sotto.
 #  >>> E IL CONTRO-ESEMPIO CHE UCCIDE L'IPOTESI ALTERNATIVA, perche'
 #      "torna un numero plausibile" NON e' una verifica: "e se un punto
 #      indice valesse 10,00 EUR per lotto (ContractSize 10,00) invece di
@@ -385,10 +420,40 @@
 #      file c'e' un lotto da 43,7. L'ipotesi alternativa si contraddice
 #      da sola; resta la prima.
 #
-#  I NUMERI (96 posizioni, gamba OOS, punti INDICE):
+#  I NUMERI (96 posizioni, gamba OOS, punti INDICE). Percentili a RANGO
+#  PIU' VICINO (p5 = il 5o valore ordinato su 96); il metodo si dichiara
+#  perche' con l'interpolazione lineare p5 sarebbe 37,34 e p90 245,24.
 #      minimo    25,45      p5     35,89      p10   39,81
 #      MEDIANA  138,29      media 145,81
 #      p90      246,26      massimo 433,99
+#
+#  >>> !! CAVEAT DI PRECISIONE AGGIUNTO DAL CANCELLO (16/09, classe 390
+#      -- NUOVA). QUEI NUMERI SONO LIMITI SUPERIORI, NON VALORI PUNTUALI,
+#      e la stesura li scriveva a due decimali senza banda. Il motivo sta
+#      in una riga che il file gia' cita ma non usa nella derivazione:
+#      r.1656 `lot = MathFloor(lot/lotStep)*lotStep` TRONCA il lotto allo
+#      step, e sui 96 volumi del per-trade lo step MISURATO e' 0,10
+#      (tutti e 96 multipli di 0,10, nessuno di 1,00). Invertendo si
+#      recupera `riskMoney/lot_troncato`, che e' >= della `dist` vera:
+#         dist_vera in [ riskMoney/(lot+0,10) , riskMoney/lot ]
+#      Bande RICALCOLATE sulle stesse 96 righe:
+#         minimo  [ 25,40 ; 25,45 ]    mediana [ 136,46 ; 138,29 ]
+#         media   [142,97 ; 145,81 ]   massimo [415,91 ; 433,99 ]
+#  >>> E IL CONTROLLO CHE CONTA, PERCHE' SU QUESTO FILE LA TABELLA E'
+#      L'ASSE: le 22 righe di "posizioni toccate" sono state RIFATTE con
+#      TUTTE E DUE le estremita' della banda. VENTI su 22 danno lo STESSO
+#      conteggio con l'uno o l'altro limite, e i TRE estremi che decidono
+#      l'asse sono tutti nel gruppo robusto:
+#         3000 -> 3 posizioni  (la PRIMA DIFFERENZA)      ROBUSTA
+#         8000 -> 31 posizioni (la FRONTIERA, pin R172j)  ROBUSTA
+#        10500 -> 39 posizioni (lo STOP dell'asse)        ROBUSTA
+#      Le DUE righe AMBIGUE, nominate invece che taciute:
+#         7000 -> 27 o 29 posizioni
+#         8500 -> 34 o 35 posizioni
+#      Quindi la scelta di start/passo/stop NON cambia; cambia quante
+#      cifre hanno diritto di stare accanto alla mediana, e cambia che le
+#      due righe sopra vanno lette con "+/- 2 posizioni" quando il CSV
+#      tornera'.
 #
 #  >>> E LA TABELLA CHE DECIDE L'ASSE DI QUESTO ROUND: quante posizioni
 #      il pavimento TOCCA, cella per cella. (Una posizione e' "toccata"
@@ -1005,8 +1070,11 @@
 #      OOS. Le due righe devono essere IDENTICHE FINO ALL'ULTIMA CIFRA in
 #      tutte e cinque le colonne. Il motivo e' MISURATO (nessuna delle 96
 #      posizioni OOS ha uno stop sotto 5 punti indice) e ARITMETICO (lo
-#      stop e' `range + buffer - offset` >= 600 punti MT5: la
-#      dimostrazione per esteso e' nel gemello R172j). In IS e' un'ATTESA
+#      stop e' `range + buffer - offset` >= 610 punti MT5, non 600 come
+#      scriveva la stesura: i prezzi sono multipli del tick 0,10 = 10
+#      punti MT5, quindi `hi > lo` implica `range >= 10`, e
+#      10 + 1000 - 400 = 610; la dimostrazione per esteso e' nel gemello
+#      R172j e il cancello l'ha rifatta). In IS e' un'ATTESA
 #      e non un cancello, perche' li' la distribuzione non e' misurata.
 #      >>> SE DIFFERISCONO IN OOS, la diagnosi si apre PRIMA di leggere
 #          il resto e ha tre rami: (a) il pin non e' arrivato -> lo

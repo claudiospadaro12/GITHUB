@@ -27,10 +27,15 @@
 #    R172j  InpSkipIfTight (questo)
 #  >>> LO STATO DEI SETTE FRATELLI R172a-g NON E' RICORDATO: letto oggi
 #      in backtest_pipeline/coda/CODA.txt, dove le sette righe armate
-#      stanno a r.2515 (r172a), r.2517 (r172b), r.2553 (r172c), r.2607
-#      (r172d), r.2609 (r172e), r.2755 (r172f) e r.2757 (r172g). Tutti e
-#      sette ARMATI al momento in cui scrivo -- e chi arma RIAPRE il
-#      file invece di fidarsi di questa riga (classe 386).
+#      stanno a r.2523 (r172a), r.2525 (r172b), r.2561 (r172c), r.2615
+#      (r172d), r.2617 (r172e), r.2763 (r172f) e r.2765 (r172g) -- numeri
+#      RIVERIFICATI DAL CANCELLO al commit 8209aefb. La stesura scriveva
+#      gli stessi sette SPOSTATI DI 8 (i numeri di b9d7f8de: CODA.txt e'
+#      cresciuto di 8 righe con `566ab27b` prima del commit). Classe 388.
+#      Tutti e sette ARMATI al momento in cui scrivo -- e chi arma RIAPRE
+#      il file invece di fidarsi di questa riga (classe 386). Modo
+#      stabile:
+#        grep -n "R172._.*-Etichetta r172" backtest_pipeline/coda/CODA.txt
 #  >>> E SU R172h E R172i NON DICHIARO NESSUNO STATO: scritti nella
 #      stessa ora di questo e NON armati quando ho scritto questa riga.
 # ---------------------------------------------------------------------
@@ -51,23 +56,30 @@
 #     -Prova -Etichetta -Modello -Deposito -SoloControllo` (r.99-106,
 #     riletto oggi) -- e quell'argomento NON e' fra quelle. Passarglielo
 #     a mano farebbe FALLIRE il lancio.
-#     >>> IL BANCO E' CABLATO, e la catena l'ho percorsa OGGI, a HEAD
-#         b9d7f8de:
+#     >>> IL BANCO E' CABLATO, e la catena e' questa (numeri di riga
+#         RIVERIFICATI DAL CANCELLO al commit che contiene questo file,
+#         8209aefb):
 #           RIGA_SOTTILE_ROUND.ps1 r.131  $BancoBT = 'C:\MT5_Backtest'
-#           RIGA_SOTTILE_ROUND.ps1 r.1433 "-TerminaleBacktest",$BancoBT
-#                                         (dentro $argv, r.1426-1433)
+#           RIGA_SOTTILE_ROUND.ps1 r.1450 "-TerminaleBacktest",$BancoBT
+#                                         (dentro $argv, r.1443-1450)
 #           RIGA_ROUND_VPS.ps1     r.92   il param, default
 #                                         "C:\MT5_Backtest"
 #           RIGA_ROUND_VPS.ps1     r.649  lo inoltra al driver
-#     >>> I NUMERI DI RIGA SONO QUELLI DI OGGI: i fratelli R172f/g
-#         citano `r.1395` ed ERA GIUSTO AL LORO PIN (verificato con
-#         `git show 43934665:...RIGA_SOTTILE_ROUND.ps1 | sed -n '1395p'`).
-#         Il file e' cresciuto di 38 righe da allora: e' la classe 369
-#         punto 4, le citazioni per numero di riga scadono da sole. Il
-#         modo stabile e'
+#     >>> !! CORREZIONE DEL CANCELLO (16/09, classe 388 -- NUOVA). La
+#         stesura dichiarava `HEAD b9d7f8de` e citava r.1433 / $argv
+#         r.1426-1433: ESATTI A b9d7f8de, ma b9d7f8de NON e' il commit che
+#         contiene questo file -- fra i due sono entrati `62169380` e
+#         `566ab27b` (giro di pin 61), +17 righe sul driver e +8 su
+#         CODA.txt. Scadute GIA' AL COMMIT, non "dopo". La conclusione non
+#         cambia; i numeri sono corretti sopra.
+#     >>> LE CITAZIONI PER NUMERO DI RIGA SCADONO DA SOLE (classe 369
+#         punto 4): i fratelli R172f/g citano `r.1395` ed ERA GIUSTO AL
+#         LORO PIN (verificato con `git show
+#         43934665:...RIGA_SOTTILE_ROUND.ps1 | sed -n '1395p'`). Il modo
+#         stabile e'
 #           grep -n "TerminaleBacktest" backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1
-#         che OGGI torna SEI righe (142, 1120, 1134, 1231, 1235, 1433) e
-#         l'unica che PASSA l'argomento e' la 1433.
+#         che al commit 8209aefb torna SEI righe (142, 1120, 1134, 1248,
+#         1252, 1450) e l'unica che PASSA l'argomento e' la 1450.
 #     C:\MT5_Backtest = demo 50504400, zero EA attaccati. La sedia
 #     770202 VIVE su ALTRI DUE terminali e NON si tocca nessuno dei due.
 #
@@ -367,10 +379,22 @@
 #        dist (punti indice) = (saldo x 1%) / lotto
 #    e il saldo si ricostruisce sommando `net_profit` riga per riga da
 #    100.000 (compounding, r.1625).
-#  >>> IL CONTROLLO CHE LA MISURA E' GIUSTA (regola del CONTRO-ESEMPIO,
-#      10/09): il saldo finale della ricostruzione e' 107.342,99 contro
-#      un `Profit` di +7.342,99 scritto nel CSV di round. Coincide AL
-#      CENTESIMO, ed e' un numero scritto da qualcun altro.
+#  >>> !! PRECISAZIONE DEL CANCELLO (16/09, classe 383 applicata alla
+#      derivazione stessa di questo file): r.1645 NON E' IL RAMO
+#      PRINCIPALE DI `CalcLotByRisk`, E' IL RIPIEGO -- il principale e'
+#      r.1634-1638 (`OrderCalcProfit`) e r.1645 gira SOLO dentro
+#      `if(lossPerLot <= 0)` (r.1640). I due rami NON coincidono qui: con
+#      `ContractSize 10,00` (sonda r.71) `OrderCalcProfit` darebbe 10,00
+#      EUR per punto indice per lotto, il ripiego 1,00. Quale sia girato
+#      lo decide il CONTRO-ESEMPIO, non la lettura del sorgente.
+#  >>> IL CONTROLLO CHE LA RICOSTRUZIONE DEL SALDO E' GIUSTA (e NON
+#      valida da solo la formula -- la stesura lo chiamava "IL CONTROLLO
+#      CHE LA MISURA E' GIUSTA", che era troppo): il saldo finale della
+#      ricostruzione e' 107.342,99 contro un `Profit` di +7.342,99
+#      scritto nel CSV di round. Coincide AL CENTESIMO, ed e' un numero
+#      scritto da qualcun altro. Prova che il per-trade e' quella corsa e
+#      che la serie dei saldi e' giusta; la conversione punto-indice/EUR
+#      la prova solo il contro-esempio qui sotto.
 #  >>> E IL CONTRO-ESEMPIO CHE UCCIDE L'IPOTESI ALTERNATIVA: "e se un
 #      punto indice valesse 10,00 EUR per lotto (ContractSize 10,00)?".
 #      Allora tutti gli stop sarebbero dieci volte piu' stretti, il piu'
@@ -378,9 +402,28 @@
 #      quindi il floor lo avrebbe allargato a 5 e il lotto sarebbe stato
 #      al massimo 1000/(5x10) = 20 lotti. Ma nel file c'e' un lotto da
 #      43,7. L'ipotesi alternativa si contraddice da sola.
-#  I NUMERI (96 posizioni, gamba OOS, punti INDICE):
+#  I NUMERI (96 posizioni, gamba OOS, punti INDICE). Percentili a RANGO
+#  PIU' VICINO (p5 = il 5o valore ordinato su 96); dichiarato perche' con
+#  l'interpolazione lineare p5 sarebbe 37,34 e p90 245,24.
 #      minimo 25,45 . p5 35,89 . p10 39,81 . MEDIANA 138,29 .
 #      media 145,81 . p90 246,26 . massimo 433,99
+#  >>> !! CAVEAT DI PRECISIONE AGGIUNTO DAL CANCELLO (16/09, classe 390
+#      -- NUOVA). SONO LIMITI SUPERIORI, NON VALORI PUNTUALI: r.1656
+#      `lot = MathFloor(lot/lotStep)*lotStep` TRONCA il lotto allo step
+#      (MISURATO 0,10: tutti e 96 i volumi sono multipli di 0,10), quindi
+#      `riskMoney/lot_troncato` e' >= della `dist` vera e
+#         dist_vera in [ riskMoney/(lot+0,10) , riskMoney/lot ].
+#      Bande: minimo [25,40 ; 25,45] . mediana [136,46 ; 138,29] .
+#      media [142,97 ; 145,81] . massimo [415,91 ; 433,99].
+#  >>> E I DUE NUMERI CHE QUESTO FILE USA SONO STATI RIFATTI CON TUTTE E
+#      DUE LE ESTREMITA' DELLA BANDA, e REGGONO tutti e due:
+#        - ZERO posizioni sotto 5,00 punti indice: robusto (il minimo
+#          resta 25,40 anche al limite basso, CINQUE volte il pavimento);
+#        - 31 posizioni su 96 sotto 80,00 punti indice: robusto (31 con
+#          l'uno e con l'altro limite). Il DENOMINATORE del round non si
+#          muove.
+#      (Le sole righe ambigue della tabella di R172i sono 7000 -> 27 o 29
+#       e 8500 -> 34 o 35: nessuna delle due entra in questo file.)
 #  >>> DUE RIGHE DI QUESTA DISTRIBUZIONE DECIDONO IL FILE:
 #      (1) ZERO posizioni sotto 5 punti indice -> il pavimento VIVO non
 #          morde mai (la dimostrazione aritmetica di sopra, confermata);
@@ -1072,8 +1115,12 @@
 #      IL PAVIMENTO DI CASA: stop >= 40 x spread. Lo spread di questa
 #      sedia all'ora operativa e' misurato in
 #      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.323 (riga aperta
-#      oggi): "770202 U30USD | 15 (4 su 4) | n 4 | 2,00 | 2,60", cioe'
-#      mediana 2,00 punti indice e P95 2,60, su QUATTRO soli trade.
+#      oggi), VERBATIM: "| 770202 U30USD | **15** (4 su 4) | 4 | **2,00**
+#      | 2,60 |" -- cioe' mediana 2,00 punti indice e P95 2,60, e la
+#      colonna `n` vale 4: QUATTRO soli trade. (La stesura citava dentro
+#      le virgolette "n 4" al posto del "4" che c'e' davvero; corretto dal
+#      cancello il 16/09 -- dentro le virgolette ci va quello che c'e'
+#      scritto, la glossa fuori.)
 #         40 x 2,00 = 80 punti indice = 8000 punti MT5   <- IL PIN
 #         40 x 2,60 = 104 punti indice = 10400            (il P95)
 #      >>> CON IL PIN A 8000, TUTTE E DUE LE CELLE RISPETTANO IL

@@ -21,12 +21,19 @@
 #    R172h  InpSLMode          (questo)
 #  >>> LO STATO DEI SETTE FRATELLI NON E' RICORDATO: letto oggi in
 #      backtest_pipeline/coda/CODA.txt, dove le sette righe armate stanno
-#      a r.2515 (r172a), r.2517 (r172b), r.2553 (r172c),
-#      r.2607 (r172d), r.2609 (r172e), r.2755 (r172f) e r.2757 (r172g).
+#      a r.2523 (r172a), r.2525 (r172b), r.2561 (r172c),
+#      r.2615 (r172d), r.2617 (r172e), r.2763 (r172f) e r.2765 (r172g)
+#      -- numeri RIVERIFICATI DAL CANCELLO al commit 8209aefb. La stesura
+#      scriveva 2515/2517/2553/2607/2609/2755/2757, cioe' gli stessi
+#      sette SPOSTATI DI 8: erano i numeri di b9d7f8de, e fra b9d7f8de e
+#      il commit di questo file CODA.txt e' cresciuto di 8 righe
+#      (`566ab27b`, riarmo di R172a). Classe 388.
 #      Tutti e sette ARMATI al momento in cui scrivo. Lo scrivo con la
 #      data perche' la classe 386 (16/09) nasce da un'affermazione su un
 #      file FRATELLO vera alla stesura e falsa due minuti dopo: chi arma
-#      RIAPRE il file, non si fida di questa riga.
+#      RIAPRE il file, non si fida di questa riga. E il modo stabile di
+#      ritrovarle non e' il numero di riga ma
+#        grep -n "R172._.*-Etichetta r172" backtest_pipeline/coda/CODA.txt
 #  >>> NON SONO GEMELLI NEL SENSO DELLA CLASSE 377 (stesso asse su due
 #      sedie): sono OTTO ASSI DIVERSI SULLA STESSA SEDIA. Quello che gli
 #      otto file condividono e' il BANCO e l'ANCORA, e quei fatti li ho
@@ -60,13 +67,27 @@
 #     fratelli in CODA.txt infatti NON lo portano.
 #     >>> E LA GARANZIA E' PIU' FORTE, NON PIU' DEBOLE: il banco su
 #         questa corsia e' CABLATO, non chiesto all'operatore. La catena
-#         l'ho percorsa OGGI riga per riga, a HEAD b9d7f8de:
+#         (numeri di riga RIVERIFICATI DAL CANCELLO al commit che contiene
+#         questo file, 8209aefb -- vedi il riquadro CORREZIONE DEL
+#         CANCELLO subito sotto):
 #           RIGA_SOTTILE_ROUND.ps1 r.131  $BancoBT = 'C:\MT5_Backtest'
-#           RIGA_SOTTILE_ROUND.ps1 r.1433 "-TerminaleBacktest",$BancoBT
-#                                         (dentro $argv, r.1426-1433)
+#           RIGA_SOTTILE_ROUND.ps1 r.1450 "-TerminaleBacktest",$BancoBT
+#                                         (dentro $argv, r.1443-1450)
 #           RIGA_ROUND_VPS.ps1     r.92   [string]$TerminaleBacktest =
 #                                         "C:\MT5_Backtest"  (il param)
 #           RIGA_ROUND_VPS.ps1     r.649  lo inoltra al driver
+#     >>> !! CORREZIONE DEL CANCELLO (16/09, classe 388 -- NUOVA).
+#         LA STESURA DICHIARAVA `HEAD b9d7f8de` E CITAVA r.1433 / $argv
+#         r.1426-1433. Quelle righe erano ESATTE A b9d7f8de (verificato:
+#         `git show b9d7f8de:...RIGA_SOTTILE_ROUND.ps1 | grep -n
+#         TerminaleBacktest` torna 142,1120,1134,1231,1235,1433), MA
+#         b9d7f8de NON E' IL COMMIT CHE CONTIENE QUESTO FILE: fra i due
+#         sono entrati `62169380` e `566ab27b` (giro di pin 61), che hanno
+#         fatto crescere il driver di 17 righe e CODA.txt di 8. Cioe' le
+#         citazioni erano gia' SCADUTE NEL MOMENTO DEL COMMIT, non "dopo".
+#         La CONCLUSIONE non cambia di una virgola (il banco resta cablato
+#         e `-TerminaleBacktest` non si passa a mano); cambiano i numeri,
+#         e li ho corretti sopra invece di lasciarli scaduti.
 #     >>> !! E QUI C'E' UN FATTO CHE VA DETTO, PERCHE' RIGUARDA I
 #         FRATELLI E NON E' UN'ACCUSA (classe 386): i file R172f e R172g
 #         citano quella riga come `r.1395`. ERA GIUSTO QUANDO L'HANNO
@@ -80,10 +101,12 @@
 #         CITAZIONI PER NUMERO DI RIGA SCADONO DA SOLE -- e il modo
 #         stabile di ritrovarla e':
 #           grep -n "TerminaleBacktest" backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1
-#         che OGGI torna SEI righe (142, 1120, 1134, 1231, 1235, 1433) e
-#         l'unica che PASSA l'argomento e' la 1433; le altre cinque sono
-#         commenti. (Anche i fratelli ne contavano sei, ma erano 142,
-#         1120, 1134, 1193, 1197, 1395.)
+#         che al commit 8209aefb torna SEI righe (142, 1120, 1134, 1248,
+#         1252, 1450) e l'unica che PASSA l'argomento e' la 1450; le altre
+#         cinque sono commenti. (A b9d7f8de erano 142, 1120, 1134, 1231,
+#         1235, 1433; ai fratelli R172f/g erano 142, 1120, 1134, 1193,
+#         1197, 1395. TRE stati diversi in due giorni: si esegue il grep,
+#         non si copia il numero -- classe 388.)
 #     C:\MT5_Backtest = demo 50504400, zero EA attaccati. La sedia
 #     770202 VIVE su ALTRI DUE terminali e NON si tocca nessuno dei due
 #     (vedi il paragrafo DUE ISTANZE, sotto).
@@ -396,6 +419,11 @@
 #
 #    (B) IL NUMERO DI POSIZIONI PUO' SOLO SCENDERE, MAI SALIRE -- e la
 #        strada e' UNA SOLA, l'ho cercata e la nomino.
+#        >>> !! LEGGERE FINO IN FONDO AL PARAGRAFO: la strada nominata
+#            qui sotto e' SBAGLIATA, e la correzione (classe 389, nuova)
+#            sta tre righe piu' giu'. La lascio scritta invece di
+#            cancellarla perche' la classe 389 nasce da questa riga, e
+#            un difetto cancellato non insegna niente.
 #        L'ingresso (entry, r.1319) NON legge `InpSLMode`: il BUY LIMIT
 #        sta allo stesso prezzo in tutte e due le celle, quindi si
 #        riempie negli stessi giorni. L'unico cancello che puo' togliere
@@ -410,15 +438,41 @@
 #            offset` e' strutturalmente positivo (vedi R172j, dove la
 #            disuguaglianza e' scritta per esteso); sulla cella 1
 #            `dist = 1,5 x AtrValue()` e AtrValue() TORNA 0 se il buffer
-#            dell'indicatore non e' pronto (r.1615). In quel caso
-#            l'ordine NON viene piazzato.
-#        >>> QUINDI: posizioni(cella 1) <= posizioni(cella 0) = 56 IS /
-#            96 OOS. E' una previsione falsificabile e la congelo.
-#            Quanto sia il calo e' [NON MISURATO]: dovrebbe riguardare
-#            solo i primissimi giorni della finestra (14 barre M5 di
-#            riscaldamento), ma il tester ricostruisce gli indicatori
-#            dall'inizio della storia disponibile, non della finestra,
-#            e questo round non lo verifica.
+#            dell'indicatore non e' pronto (r.1615).
+#        >>> !!! CORREZIONE DEL CANCELLO (16/09, classe 389 -- NUOVA, ed
+#            e' l'errore piu' sostanziale trovato su questi tre file).
+#            LA STESURA CHIUDEVA QUEL TERZO PUNTO CON "In quel caso
+#            l'ordine NON viene piazzato". E' FALSO, E LO SPEGNE UN PIN DI
+#            QUESTO STESSO FILE. Con `AtrValue()=0` si ha `sl = entry`,
+#            `dist = 0`; ma r.1324 e' `if(InpMinStopPts > 0 && dist <
+#            InpMinStopPts*_Point)`, e QUESTO FILE PINNA
+#            `InpMinStopPts=500` e `InpSkipIfTight=false` (valori di
+#            campo, riga per riga in fondo). Quindi si entra nel ramo
+#            r.1327 -- `sl = NormalizePrice(entry - 500*_Point)` -- e
+#            `dist` diventa 5,00 PUNTI INDICE, cioe' STRETTAMENTE
+#            POSITIVA. Il floor RACCOGLIE il caso ATR-non-pronto invece di
+#            lasciarlo cadere: l'ordine VIENE piazzato.
+#        >>> QUINDI, RISCRITTO GIUSTO: dentro il codice dell'EA
+#            `dist > 0` e `lot > 0` sono GARANTITI su TUTTE E DUE le
+#            celle, e l'aritmetica dice
+#              posizioni(cella 1) = posizioni(cella 0) = 56 IS / 96 OOS.
+#        >>> MA L'UGUAGLIANZA NON SI PROMUOVE A SENTINELLA BLOCCANTE, e
+#            il motivo e' un secondo meccanismo che NON sta nell'EA e che
+#            resta [NON MISURATO]: `gTrade.BuyLimit` (r.1335) puo' essere
+#            RIFIUTATO dal terminale se lo stop cade dentro
+#            `SYMBOL_TRADE_STOPS_LEVEL`. Sulla cella 0 non succede mai
+#            (`dist >= 6,10` punti indice per la disuguaglianza di R172j);
+#            sulla cella 1 uno stop portato dal floor a 5,00 punti indice
+#            = 500 punti MT5 e' l'unico posto della serie dove quella
+#            domanda si pone davvero, e il valore di `stopsLvl` su U30USD
+#            NON e' nella sonda del 17/08 (r.71 non porta quella colonna).
+#            >>> CONSEGUENZA DI LETTURA, congelata adesso: l'ATTESA su
+#                `Trades` della cella 1 e' il PAVIMENTO 56/96 ESATTO; un
+#                valore PIU' BASSO non e' rumore e non e' "la manopola che
+#                toglie ingressi" -- e' un ORDINE RIFIUTATO, si conta nel
+#                giornale del tester e SI SCRIVE. S3 resta scritta col
+#                pavimento prudenziale, ma questa riga dice cosa
+#                significherebbe scendere sotto.
 #
 #    (C) !! LA GEOMETRIA DELLE DUE CELLE, E QUI HO UN NUMERO CHE NESSUN
 #        FRATELLO AVEVA: LA DISTRIBUZIONE VERA DELLO STOP DI QUESTA
@@ -442,11 +496,33 @@
 #             dist (punti indice) = (saldo x 1%) / lotto
 #          Il saldo si ricostruisce sommando `net_profit` riga per riga
 #          a partire da 100.000 (compounding, r.1625 ACCOUNT_BALANCE).
-#        >>> IL CONTROLLO CHE LA MISURA E' GIUSTA, fatto PRIMA di usarla
-#            (regola del CONTRO-ESEMPIO, 10/09): il saldo finale che la
-#            ricostruzione produce e' 107.342,99 contro un `Profit` di
-#            +7.342,99 dichiarato nel CSV di round. Coincide AL
-#            CENTESIMO, ed e' un numero scritto da qualcun altro.
+#        >>> !! PRECISAZIONE DEL CANCELLO (16/09, classe 383 applicata
+#            alla derivazione stessa di questo file): r.1645 NON E' IL
+#            RAMO PRINCIPALE DI `CalcLotByRisk`, E' IL RIPIEGO. Il ramo
+#            principale e' r.1634-1638, `OrderCalcProfit(ORDER_TYPE_BUY,
+#            ...)`, e r.1645 gira SOLO dentro `if(lossPerLot <= 0)`
+#            (r.1640). Il commento dell'EA lo dice: "OrderCalcProfit
+#            converte correttamente; il tick value resta come ripiego".
+#            I due rami NON danno lo stesso numero su questo simbolo:
+#            con `ContractSize 10,00` (sonda r.71) `OrderCalcProfit`
+#            darebbe 10,00 EUR per punto indice per lotto, il ripiego
+#            1,00.
+#        >>> QUINDI LA DERIVAZIONE NON E' "LETTA NEL CODICE", E' SCELTA
+#            DAL DATO: quale dei due rami sia girato nel tester lo decide
+#            il CONTRO-ESEMPIO qui sotto, non la lettura del sorgente. E'
+#            un'inferenza con una prova, non una citazione -- e va detto
+#            cosi', altrimenti si cita come certa una riga che vive
+#            dentro un `if`.
+#        >>> IL CONTROLLO CHE LA RICOSTRUZIONE DEL SALDO E' GIUSTA, fatto
+#            PRIMA di usarla -- E NON VALIDA DA SOLO LA FORMULA (la
+#            stesura lo chiamava "il controllo che LA MISURA e' giusta",
+#            che era troppo: correzione del cancello, 16/09). Il saldo
+#            finale che la ricostruzione produce e' 107.342,99 contro un
+#            `Profit` di +7.342,99 dichiarato nel CSV di round. Coincide
+#            AL CENTESIMO, ed e' un numero scritto da qualcun altro:
+#            prova che il per-trade e' davvero quella corsa e che la
+#            serie dei saldi e' ricostruita bene. La conversione
+#            punto-indice/EUR la prova SOLO il contro-esempio qui sotto.
 #        >>> E IL CONTRO-ESEMPIO CHE UCCIDE L'IPOTESI ALTERNATIVA, che
 #            e' la parte che conta: "e se un punto indice valesse 10,00
 #            EUR per lotto (ContractSize 10) invece di 1,00?". In quel
@@ -457,7 +533,11 @@
 #            1000/(5x10) = 20 lotti. Ma nel file c'e' un lotto da 43,7.
 #            L'ipotesi alternativa si contraddice da sola. Resta la
 #            prima.
-#        I NUMERI (96 posizioni, gamba OOS):
+#        I NUMERI (96 posizioni, gamba OOS). I percentili sono a RANGO
+#        PIU' VICINO (p5 = il 5o valore ordinato su 96), e il metodo si
+#        dichiara perche' con l'interpolazione lineare p5 uscirebbe 37,34
+#        e p90 245,24: due metodi, due numeri, e senza dire quale non
+#        vuol dire niente.
 #            minimo    25,45 punti indice
 #            p5        35,89
 #            p10       39,81
@@ -465,6 +545,32 @@
 #            media    145,81
 #            p90      246,26
 #            massimo  433,99
+#        >>> !! CAVEAT DI PRECISIONE AGGIUNTO DAL CANCELLO (16/09, classe
+#            390 -- NUOVA). QUEI NUMERI SONO LIMITI SUPERIORI, NON VALORI
+#            PUNTUALI, e la stesura li scriveva a due decimali senza
+#            banda. Il motivo sta in una riga che il file gia' cita ma
+#            non usa nella derivazione: r.1656 `lot =
+#            MathFloor(lot/lotStep)*lotStep` TRONCA il lotto allo step.
+#            Sui 96 volumi del per-trade lo step MISURATO e' 0,10 (tutti
+#            e 96 sono multipli di 0,10, nessuno di 1,00). Invertendo si
+#            recupera `riskMoney/lot_troncato`, che e' >= della `dist`
+#            vera:
+#              dist_vera in [ riskMoney/(lot+0,10) , riskMoney/lot ]
+#            Le bande, RICALCOLATE sulle stesse 96 righe:
+#              minimo  [ 25,40 ; 25,45 ]   mediana [ 136,46 ; 138,29 ]
+#              media   [142,97 ; 145,81 ]  massimo [415,91 ; 433,99 ]
+#            Stretta dove il lotto e' grande (stop stretti: 0,2%), larga
+#            dove il lotto e' piccolo (stop larghi: fino al 4%).
+#        >>> E IL CONTROLLO CHE CONTA -- LA TABELLA DELLE POSIZIONI
+#            TOCCATE (quella di R172i) REGGE: rifatta con TUTTE E DUE le
+#            estremita' della banda, 20 righe su 22 danno lo STESSO
+#            conteggio, e le tre righe su cui poggiano questi round sono
+#            tutte nel gruppo robusto -- 3000 (3 posizioni, la prima
+#            differenza), 8000 (31, il pin di R172j), 10500 (39,
+#            l'estremo dell'asse). Le due AMBIGUE, nominate invece che
+#            taciute: 7000 (27 o 29) e 8500 (34 o 35).
+#            Cambia quante CIFRE ha diritto di stare accanto alla
+#            mediana, non quali celle decidono.
 #        >>> COSA CAMBIA RISPETTO A QUELLO CHE I FRATELLI SCRIVEVANO.
 #            R172a (r.1158-1160, riaperte oggi -- e NON r.1087-1095,
 #            che e' la citazione che i fratelli R172f/g si passano e che
@@ -1069,11 +1175,20 @@
 #          cioe' 2 x le posizioni MISURATE, perche' le posizioni non
 #          possono salire (proprieta' B) e ogni posizione fa al massimo
 #          due uscite (308-4).
-#        - SULLA CELLA 1 IL PAVIMENTO NON E' 56/96 e non lo scrivo come
-#          se lo fosse: le posizioni possono SCENDERE (proprieta' B).
-#          Un `Trades` molto sotto 56 (IS) va letto come "molti ordini
-#          non sono stati piazzati", e la verifica e' nel giornale del
-#          tester, non in questo CSV.
+#        - SULLA CELLA 1 IL PAVIMENTO RESTA SCRITTO IN FORMA PRUDENZIALE
+#          (nessun pavimento duro), MA L'ATTESA E' 56/96 ESATTE, ed e'
+#          cambiata con la CORREZIONE della proprieta' (B): dentro l'EA
+#          `dist > 0` e `lot > 0` sono garantiti anche sulla cella 1,
+#          perche' il floor pinnato a 500 raccoglie il caso `AtrValue()=0`
+#          (r.1324/1327). L'unico modo di perdere posizioni e' un ORDINE
+#          RIFIUTATO dal terminale per `SYMBOL_TRADE_STOPS_LEVEL`, che e'
+#          [NON MISURATO] su U30USD.
+#          >>> QUINDI: `Trades` della cella 1 sotto 56 (IS) o sotto 96
+#              (OOS) NON e' un risultato della manopola -- e' un rifiuto
+#              d'ordine, si CONTA nel giornale del tester (`ABTGLog` di
+#              r.1339 "BUY LIMIT (retest) fallito: ...") e SI SCRIVE nel
+#              referto con il numero. Non si scrive "la cella 1 opera di
+#              meno" senza aver guardato il giornale.
 #      >>> E SE UNA DIREZIONE SI VEDE, SI REGISTRA E SI NOMINA IL
 #          MECCANISMO (classe 387 regola 3): "Trades sale" -> ha
 #          prevalso il bersaglio piu' vicino; "Trades scende" -> ha
