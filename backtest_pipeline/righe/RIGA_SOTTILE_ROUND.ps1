@@ -1070,7 +1070,18 @@ $BancoBT = 'C:\MT5_Backtest'
 #  mobile). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
 #  cambiati fra i due commit (git diff 6693bd47..c713ac92 sui due
 #  percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = 'c713ac92f040e7d70d6d26525ce1f62d21ccd5c4'
+#  >>> CINQUANTUNESIMO GIRO DI PIN (16/09/2026): c713ac92 -> eb4a498d.
+#  Serviva per raggiungere R170a-c (InpCloseAtEnd, ultima famiglia
+#  scoperta della lista: 770250 Nasdaq, 770402 MaxMinNotte oro, 770411
+#  MaxMinNotte DAX short) dopo il PASS del secondo cancello: 9 correzioni
+#  su otto difetti, sette per la stessa causa (prosa copiata dal
+#  gemello senza rileggere la fonte -- classe 315 x5, righe citate
+#  sbagliate x4, un file mai esistito, un HEAD stantio x3) + classe 377
+#  nuova (i gemelli scritti nella stessa ora si copiano le citazioni a
+#  vicenda). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra i due commit (git diff c713ac92..eb4a498d sui due
+#  percorsi: VUOTO, verificato): solo $PIN si muove.
+$PIN = 'eb4a498d396d13c5ad399351f3c505a4a06d7ddc'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
