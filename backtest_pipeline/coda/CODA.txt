@@ -2211,8 +2211,21 @@ b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin c2aeb91 (48mo, 13599df8 -> 1acb1d52). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic 779828, non tocca 770511 (piccolo 50503392).
+#
+#  >>> RIPIN ATO IL 16/09/2026 (giro 57, 72dcf8a3): due difetti non
+#  bloccanti trovati sulla stessa famiglia, su un fratello scritto
+#  dopo (R173a). Classe 385 ricorsa: S1 leggeva il DD dell'ancora da
+#  un riassunto a due decimali invece che dai CSV veri di r120e11
+#  (stessa cartella), bande DD corrette a 3,4671-3,5021 (IS) e
+#  4,1937-4,2361 (OOS) -- la banda vecchia era piu' larga in basso,
+#  il verso che fa passare un banco sporco su una sentinella
+#  bloccante. Classe 372: dichiarava falsamente "i CSV di r126a/r126b
+#  non sono nel repo" -- c'erano dal 13/09, il round non se ne appoggia
+#  comunque. Riverificato che l'uguaglianza esatta su Trades regge
+#  ancora al nuovo pin (git diff 1445abf8 72dcf8a3 sul sorgente EA e'
+#  VUOTO). Nessun valore dell'asse o del banco toccato.
 # =====================================================================
-c2aeb917a7cec0697d500ae7d02f1f332fbc27a9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
+72dcf8a3ef69fd6656d56f37ccf48ceff4ca1336 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R167a-d -- InpSLGapMult SU ABTG_GapFill, sui 4 gemelli GBPUSD
 #  (772231) / EURUSD (772232) / AUDUSD (772233) / 225JPY (772235).
