@@ -36,7 +36,7 @@
 #     argomento (`param()` r.99-105: solo Expert/Prova/Etichetta/
 #     Modello/Deposito/SoloControllo) -- passarlo farebbe FALLIRE il
 #     lancio. Il banco NON e' opzionale, ma e' CABLATO nello script
-#     (r.131 `$BancoBT = 'C:\MT5_Backtest'`, inoltrato a r.1325), quindi
+#     (r.131 `$BancoBT = 'C:\MT5_Backtest'`, inoltrato a r.1340 (dentro $argv, r.1333-1340)), quindi
 #     la garanzia e' PIU' forte di come suonava, non piu' debole: nessun
 #     argomento puo' cambiarlo per errore. C:\MT5_Backtest = demo
 #     50504400, zero EA attaccati. La sedia 770202 VIVE su ALTRI DUE
