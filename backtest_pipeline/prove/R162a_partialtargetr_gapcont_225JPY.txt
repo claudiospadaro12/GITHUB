@@ -364,8 +364,10 @@
 #          >>> E QUI STA LA TRAPPOLA, che segnalo perche' ci ero cascato:
 #              **tutti e quattro i troncamenti cadono nel tratto BASSO
 #              della curva** (30/06, 24/07, 11/08 e 29/10 del 2025). Un
-#              riferimento medio unico gonfia il danno di ~4-6 centesimi
-#              di punto su ognuno dei quattro.
+#              riferimento medio unico gonfia il danno di **4, 8, 7 e 4
+#              centesimi di punto** sui quattro (era 0,58/0,72/0,83/0,85
+#              contro 0,63/0,80/0,90/0,89): sempre nello stesso verso,
+#              cioe' fa sembrare il troncamento peggiore di com'e'.
 #          Contro il riferimento LOCALE (interpolato fra i non troncati
 #          adiacenti, saldo letto nella tabella "Affari" dell'xlsx):
 #            2025.06.30  R=137  prod 13.700 / rif 17.167 -> **0,80%**

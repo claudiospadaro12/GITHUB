@@ -20523,8 +20523,8 @@ Due errori sovrapposti, e il secondo e' quello che morde:
  (2) il riferimento non e' una costante: algebricamente
      stop x lotto = equity x risk% / valore-punto, quindi e' la CURVA DEL
      SALDO. E tutti e quattro i troncamenti cadono nel tratto BASSO della
-     curva (i primi 5 mesi su 13). Il rapporto esce sottostimato di 4-6
-     centesimi di punto su tutti e quattro, sempre nello stesso verso.
+     curva (i primi 5 mesi su 13). Il rapporto esce sottostimato di 4, 8,
+     7 e 4 centesimi di punto sui quattro, sempre nello stesso verso.
 Il numero era destinato al CONTRATTO della sedia: si sarebbe propagato.
 
 ### REGOLA
