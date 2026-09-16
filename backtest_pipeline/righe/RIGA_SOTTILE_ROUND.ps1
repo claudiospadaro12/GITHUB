@@ -1153,7 +1153,20 @@ $BancoBT = 'C:\MT5_Backtest'
 #  regge. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
 #  cambiati fra 373a473e e 1a17794f (git diff sui due percorsi:
 #  VUOTO, verificato): solo $PIN si muove.
-$PIN = '1a17794f3944a36912eee81c987ef506812ea7c7'
+#  >>> CINQUANTASETTESIMO GIRO DI PIN (16/09/2026): 1a17794f -> 72dcf8a3.
+#  Serviva per: (1) armare R173b (InpTP1_R, sedia 770511, magic
+#  779867, secondo cancello in corso); (2) portare un'emendazione su
+#  R165a GIA' ARMATO (classe 385 ricorsa sulla stessa famiglia: DD
+#  dell'ancora letto da un riassunto a due decimali invece che dai
+#  CSV veri -- bande corrette a 3,4671-3,5021/4,1937-4,2361 -- piu' un
+#  falso "CSV non nel repo", classe 372, i CSV c'erano dal 13/09).
+#  RIVERIFICATO QUI, ORA: git diff 1445abf8 72dcf8a3 -- mql5/Experts/
+#  ABTG_SuperWave_DOW_H1_Ottimizzato.mq5 e' VUOTO -- l'uguaglianza
+#  esatta su Trades regge ancora, per R165a come per R173a/b.
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  1a17794f e 72dcf8a3 (git diff sui due percorsi: VUOTO, verificato):
+#  solo $PIN si muove.
+$PIN = '72dcf8a3ef69fd6656d56f37ccf48ceff4ca1336'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
