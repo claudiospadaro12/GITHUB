@@ -308,11 +308,41 @@
 #        Armare il trailing piu' tardi lascia vivere piu' a lungo le
 #        posizioni in piccolo guadagno, quindi PIU' di esse arrivano a
 #        1R, quindi PIU' parziali, quindi `Trades` PIU' ALTO.
-#        >>> ATTESA CONGELATA: `Trades` NON DECRESCENTE lungo l'asse.
-#            E' la previsione piu' falsificabile di questo file. Se
-#            `Trades` SCENDESSE al crescere della soglia, una delle due
-#            letture qui sopra e' sbagliata e il round si ferma PRIMA
-#            di commentare il PF.
+#
+#    (C) [AGGIUNTA nel giro 61, dopo un audit del secondo cancello che
+#        ha trovato lo stesso punto cieco della classe 387 (nata su
+#        R172f/InpTrailTF, ricorsa qui] MA C'E' UN SECONDO MECCANISMO,
+#        E VA NEL VERSO OPPOSTO. `riskDist` (r.1723-1724) si legge da
+#        `InitialSL()` (r.1859-1865): se `!partialDone` ritorna il `SL`
+#        CORRENTE, non quello d'ingresso. Con `InpTrailStartR` BASSO
+#        (celle 0/0,25/0,50) il trailing puo' portare lo stop SOPRA
+#        l'entrata (r.1817 lo garantisce) PRIMA che la parziale scatti;
+#        al tick dopo, `openP - curSL` diventa NEGATIVO, scatta il
+#        ripiego ATR (r.1727), e il bersaglio della parziale
+#        (r.1739, `target = openP + dirSign*riskDist*InpTP1_R`) si
+#        ricalcola su un `riskDist` PIU' PICCOLO -- quindi PIU' vicino,
+#        quindi raggiunto da PIU' posizioni, quindi `Trades` PIU' ALTO
+#        sulle celle BASSE. E' la stessa catena scoperta da R172d (BE
+#        indipendente) e R172f (TF del trailing), qui innescata da
+#        QUANDO il trailing puo' partire invece che DOVE si sposta lo
+#        stop.
+#        >>> MISURATO, non solo letto: R46b (righe con `ClosePct=50`)
+#            mostra `Trades`=74 IS/130 OOS con trailing ATTIVO da
+#            subito (`InpTrailStartR`=0, la cella viva) contro 73 IS/
+#            123 OOS con trailing OFF -- la stessa direzione della (C):
+#            spegnere il trailing (equivalente a ritardarlo abbastanza
+#            da non toccare mai lo stop prima della parziale, cioe' le
+#            celle >=1,00 di QUESTO asse) ABBASSA `Trades`, non lo alza.
+#        >>> ATTESA DECLASSATA A DEBOLE (era "congelata", ERA SBAGLIATO
+#            -- non ritirato in silenzio, corretto qui): le proprieta'
+#            (B) e (C) tirano in versi OPPOSTI, e quale prevalga lo dice
+#            il round, non la lettura del codice (classe 178: un verso
+#            che non puo' discriminare non si traveste da cancello).
+#            Il verso VERO, misurato: da 0,00R a 1,00R il calo atteso e'
+#            -1 (IS) / -7 (OOS) [74->73 / 130->123], poi PIATTO da 1,00R
+#            in su (il trailing non puo' piu' toccare lo stop prima
+#            della parziale, quindi (C) si spegne e resta solo la parte
+#            di (B) che qui coincide col caso "trailing off").
 #
 # ---------------------------------------------------------------------
 #  UNITA' DI MISURA -- `Trades` NON E' "POSIZIONI", E IL FATTORE E'
@@ -680,10 +710,17 @@
 #  1,00 R (r.1739). Quindi:
 #    - sotto 1,00 R la soglia agisce PRIMA della parziale;
 #    - fra 1,00 e 3,00 R agisce DOPO la parziale e PRIMA del TP finale;
-#    - a 3,00 R o oltre il trailing non armerebbe MAI prima che il TP
-#      chiuda la posizione: sarebbe la cella "trailing spento", che su
-#      questa sedia E' GIA' MISURATA (R46, i CSV r46b con
-#      InpUseTrailing 0/1) e che quindi NON serve rifare qui.
+#    - a 3,00 R o oltre, SE `profR` restasse in unita' di R vero, il
+#      trailing non armerebbe mai prima del TP. [CORRETTO nel giro 61:
+#      questa parte era FALSA per le celle dove il trailing scatta
+#      PRIMA della parziale -- proprio la (C) qui sopra rende `riskDist`
+#      (e quindi `profR`, che e' `guadagno/riskDist`) piu' PICCOLO
+#      dell'R vero, quindi "3,00 R" misurato dal codice puo' arrivare
+#      molto prima del TP nominale. Non cambia le celle scelte (0-1,5),
+#      cambia solo il metro dichiarato per il bordo: la cella "trailing
+#      spento" -- gia' misurata su R46/r46b, come scritto sotto -- resta
+#      l'unico modo pulito per isolare quel caso, non una soglia alta
+#      di questo asse.]
 #  1,50 R e' la meta' esatta della strada fra la parziale e il TP: copre
 #  tutto il tratto "prima della parziale" e mezzo tratto dopo.
 #  >>> E COPRE PER INTERO L'ASSE USATO DAI DUE ROUND GEMELLI DELLA
@@ -909,19 +946,39 @@
 #      >>> SI CONTANO LE CELLE, NON LE PASSATE (classe 354).
 #      Se le celle sono 6 o 8, ci si ferma: l'asse non e' quello che
 #      questo file ha scritto.
-#  S3  IL VERSO DI `Trades`, E VIENE PRIMA DEL PF.
+#  S3  I LIMITI ARITMETICI DI `Trades`, E VENGONO PRIMA DEL PF.
+#      [RISCRITTA nel giro 61: era un claim direzionale ("Trades NON
+#      deve SCENDERE"), e un audit del secondo cancello ha misurato sui
+#      CSV di R46b che il verso VERO scende da 0,00R a 1,00R (proprieta'
+#      C qui sopra) -- una sentinella BLOCCANTE scritta cosi' avrebbe
+#      fermato la lettura del PF sulla gamba OOS di una corsa SANA
+#      (74->73 IS, dentro banda; 130->123 OOS, FUORI dalla banda +/-2
+#      di un claim direzionale). Stessa correzione di classe 387 gia'
+#      fatta su R172f/InpTrailTF, qui ricorsa su un asse diverso.]
 #      COLONNA: `Trades`, in CIASCUNA delle due finestre separatamente
 #               (non sul totale: un verso che si inverte fra IS e OOS e'
 #               proprio la cosa che il totale nasconderebbe).
-#      CRITERIO: `Trades` NON deve SCENDERE passando da 0 a 1,5. Un calo
-#      oltre le 2 operazioni (la stessa semiampiezza di S1) contraddice
-#      la proprieta' (B) letta nel codice, e allora si torna al codice
-#      PRIMA di commentare qualunque altra colonna.
-#      >>> E IL TETTO ARITMETICO: `Trades` non puo' superare il DOPPIO
-#          delle posizioni. Se in una gamba `Trades` superasse 148 (IS)
-#          o 260 (OOS) -- cioe' 2x il valore dell'ancora -- vorrebbe
-#          dire che sono comparsi INGRESSI nuovi, che questo asse non
-#          puo' creare: sarebbe un difetto di banco, non un risultato.
+#      >>> IL VERSO NON E' UN CANCELLO, ED E' DICHIARATO (classe 178).
+#          I due meccanismi (B) e (C) tirano in verso OPPOSTO: si
+#          REGISTRA se `Trades` sale o scende lungo l'asse e si legge
+#          come RISULTATO del round (un calo da 0,00R = prevale C), non
+#          si conclude mai "la lettura del codice e' sbagliata" e non si
+#          ferma la lettura delle altre colonne.
+#      CRITERIO CHE DECIDE: i due limiti aritmetici qui sotto.
+#      >>> E I DUE LIMITI ARITMETICI, che qui sono NUMERI perche' le
+#          posizioni sono MISURATE (56 IS, 96 OOS, vedi UNITA' DI
+#          MISURA piu' sotto):
+#            pavimento  `Trades` >=  56 (IS) e  96 (OOS)
+#            tetto      `Trades` <= 112 (IS) e 192 (OOS)
+#          Sopra il tetto vorrebbe dire che sono comparsi INGRESSI
+#          nuovi, che questo asse non puo' creare; sotto il pavimento,
+#          che sono spariti. In tutti e due i casi e' un difetto di
+#          banco, non un risultato. [Il vecchio tetto, 148/260 = 2x il
+#          valore dell'ANCORA (74/130) invece che 2x le POSIZIONI
+#          misurate (56/96), era troppo largo per lo stesso motivo per
+#          cui R172f l'ha corretto: qui non cambiava l'esito perche' i
+#          CSV restano ben sotto entrambi i tetti, ma il numero giusto
+#          e' quello sopra.]
 #  S4  LA FINESTRA EFFETTIVA. SI VERIFICA A MANO, sul report MT5 della
 #      gamba IS della CELLA VIVA (0):
 #        - DATA DELLA PRIMA OPERAZIONE entro 30 giorni da 2024.09.26
@@ -1112,6 +1169,15 @@
 #      QUANTE celle aveva il tratto, visto che la cella viva e' sul
 #      bordo basso e un tratto che la comprende ha per forza meno
 #      vicini.
+#      >>> [CAUTELA aggiunta nel giro 61, da un audit del secondo
+#          cancello] LE TRE CELLE ALTE (1,00 / 1,25 / 1,50) HANNO
+#          `Trades` UGUALE PER COSTRUZIONE (proprieta' C: il trailing
+#          non tocca mai lo stop prima della parziale su nessuna delle
+#          tre), quindi un "altopiano" letto SOLO su quelle tre celle
+#          rischia di essere un artefatto meccanico di questo asse, non
+#          una forma del mercato. Se il tratto scelto dalla regola sta
+#          li' dentro, la dichiarazione delle celle deve dirlo
+#          esplicitamente (classe 373).
 #  B9  !! IL ROUND NON PROMUOVE NIENTE. Nessun preset cambia, nessuna
 #      sedia si accende o si spegne, il forward non si tocca, CODA.txt e
 #      il pin non si toccano da questo file. Taglie, rischio, accensioni

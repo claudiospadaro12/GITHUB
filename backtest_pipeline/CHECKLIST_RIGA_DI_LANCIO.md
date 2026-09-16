@@ -22011,6 +22011,47 @@ TIRANO IN VERSO OPPOSTO, E QUINDI NON DICHIARO NESSUNA DIREZIONE"*, e S3:
 TRAVESTIRLA DA CANCELLO (classe 178)"*. 👉 **Due pesi nella stessa serie, sulla
 stessa forma di asserzione** — la firma che gia' portavano la 385 e la 386.
 
+---
+
+**RICORSA, e stavolta EMPIRICAMENTE MISURATA, non solo letta nel codice
+(16/09/2026, audit di un agente `controllo-preventivo` su due file GIA'
+ARMATI).** `R172a_trailstartr_dowapertura_U30USD.txt` (asse `InpTrailStartR`,
+stessa sedia 770202) aveva la STESSA forma: proprieta' (B) *"Trades NON
+DECRESCENTE"* promossa a S3 bloccante, senza vedere che `InpTrailStartR`
+comanda **QUANDO** il trailing puo' toccare lo stop — quindi **QUANDO** puo'
+scattare il ripiego ATR che sposta il bersaglio della parziale — piu'
+direttamente di `InpTrailTF`.
+
+🔴 **E qui non e' un rischio teorico: e' un calo MISURATO che supera la
+tolleranza.** I CSV di R46b (`backtest_pipeline/risultati_prove/aperture_r46/`,
+righe `InpTP1_ClosePct=50`) mostrano `Trades`=74 IS/130 OOS con trailing
+armato da subito (`InpTrailStartR=0`, la cella viva) contro 73 IS/**123** OOS
+con trailing spento (equivalente alle celle >=1,00 di questo asse, dove il
+trailing non puo' mai toccare lo stop prima della parziale: la parziale e il
+trailing condividono la stessa soglia `profR>=1,0`). **130 -> 123 = -7 in
+OOS, fuori dalla banda +/-2 che un claim direzionale avrebbe imposto**: la
+sentinella BLOCCANTE, se lasciata cosi', avrebbe fermato la lettura del PF su
+una gamba OOS perfettamente sana. Verificato indipendentemente dalla sessione
+principale (non solo dall'agente): stesso CSV, stessa lettura del codice
+(`InitialSL()` r.1859-1865, il ramo `!partialDone` ritorna `curSL`, e se il
+trailing l'ha gia' spinto sopra `openP` la sottrazione diventa negativa e
+scatta il ripiego di r.1727).
+
+🟢 **Trovato anche un secondo difetto, indipendente dal primo, nella stessa
+sentinella S3**: il "tetto aritmetico" gia' presente nel file usava **2x il
+valore dell'ANCORA** (148 IS / 260 OOS, cioe' 2x 74/130) invece di **2x le
+POSIZIONI misurate** (112 IS / 192 OOS, cioe' 2x 56/96) — lo stesso errore di
+base che la classe 387 aveva gia' corretto su R172f. Non cambiava l'esito
+(nessun CSV si avvicina a nessuno dei due tetti), ma il numero scritto non
+era quello giusto.
+
+👉 **Lezione generale, oltre il singolo file**: quando UNA sentinella di
+questa forma viene corretta su un file di una serie, va VERIFICATA — non solo
+sospettata — sui fratelli GIA' ARMATI della stessa serie che condividono la
+stessa catena di codice (`riskDist`/`InitialSL()`/bersaglio della parziale).
+Un fix locale non si propaga da solo (e' la stessa osservazione della classe
+377/386 applicata a una sentinella invece che a una citazione).
+
 ### 📐 PERCHE' E' UNA CLASSE NUOVA
 - Non e' la **178** nuda (*sentinella che non separa le ipotesi*): qui la
   sentinella separa benissimo — separa il mondo giusto da quello sbagliato **al
