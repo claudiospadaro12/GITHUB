@@ -75,16 +75,28 @@
 #     >>> Cioe': con questo file e col gemello R171a la casella 3 del
 #         CERTIFICATO DI MORTE ("la gestione dell'uscita e' stata messa
 #         ad asse?") si chiude sull'INTERA famiglia EasyTrend, non su
-#         una sedia. E' l'unica famiglia della flotta a cui manchi UNA
-#         SOLA manopola.
+#         una sedia.
+#     >>> CORRETTO DAL CANCELLO (16/09), e la correzione toglie un
+#         superlativo: qui c'era scritto "e' l'unica famiglia della
+#         flotta a cui manchi UNA SOLA manopola". E' FALSO sullo STESSO
+#         artefatto, ricontato riga per riga: le famiglie con UNA SOLA
+#         manopola d'uscita mai mossa e NON inerte sono DUE --
+#         `ABTG_EasyTrend` (InpSLBufferPts) e `ABTG_ORB_Ottimizzato`
+#         (InpCloseAtEnd, stato "MAI-ovunque", r.134 del suo sorgente).
+#         Quello che regge, ed e' un NUMERO e non un aggettivo, e' il
+#         DENOMINATORE: qui la manopola che manca e' UNA SU DUE, sull'ORB
+#         e' una su quindici. Chiudere questa chiude la famiglia intera.
 #
 #  2) MAI MOSSA, E L'HO CONTATO IN TRE MODI INDIPENDENTI (albero
 #     PRINCIPALE, worktree esclusi -- classe 378):
 #     (a) SUI CSV. Scanditi tutti i .csv del repo con la colonna
 #         `InpSLBufferPts`: sono 314. Quelli attribuibili a EasyTrend
 #         per percorso sono 107 (80 sotto un percorso con "EasyTrend",
-#         27 sotto risultati_prove/regime_r59/EZ_*), e in TUTTI E 107 la
-#         colonna ha UN SOLO valore: 30. Fra quei 107 ci sono i quattro
+#         27 col nome `EZ_*`: **15** sotto risultati_prove/regime_r59/ e
+#         **12** sotto risultati_prove/regime_r50/ -- ricontati dal
+#         cancello, la prima stesura metteva tutti e 27 sotto
+#         regime_r59, e il totale era giusto ma il percorso no), e in
+#         TUTTI E 107 la colonna ha UN SOLO valore: 30. Fra quei 107 ci sono i quattro
 #         CSV di R53 su GBPUSD (csv_r53/ABTG_EasyTrend_GBPUSD_{IS,OOS}
 #         _r53.csv) e i due di R49b: nemmeno un round dedicato a questa
 #         sedia l'ha mai girata.
@@ -157,7 +169,13 @@
 #     TUTTE le occorrenze del nome nel sorgente (r.76 e r.145 sono
 #     commenti d'intestazione, r.205 la dichiarazione, r.353-354 la
 #     guardia di OnInit, r.410 e r.1539 due Print, r.931 L'UNICO USO
-#     VERO). Sette occorrenze, contate, non stimate.
+#     VERO): OTTO righe di grep raggruppate in SETTE punti -- la guardia
+#     di OnInit occupa DUE righe (r.353 il test, r.354 il messaggio), e
+#     lo scrivo cosi' perche' chi rilancia `grep -n` legge 8 e non 7
+#     (precisazione del cancello).
+#     E l'assenza degli interruttori e' CERCATA, non supposta:
+#     `grep -n "InpSLMode\|InpExitMode" mql5/Experts/ABTG_EasyTrend.mq5`
+#     torna VUOTO (uscita 1).
 #
 #  6) IL RISCHIO DI QUESTA SEDIA E' PULITO -- vero contro dichiarato,
 #     letto riga per riga in report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md
@@ -258,16 +276,27 @@
 #  UNITA' DI MISURA -- CLASSE 226/346 CHIUSA, E NON PER INFERENZA
 # ---------------------------------------------------------------------
 #  `ABTG_EasyTrend.mq5` NON HA NESSUN parziale, NESSUN breakeven e
-#  NESSUN trailing. Contato sul sorgente: grep di
-#  "Partial|TP1|Breakeven|Trail" su tutte e 1620 le righe -> TRE sole
-#  occorrenze, tutte dentro la parola "Trailing" di commenti
-#  d'intestazione, ZERO dentro codice eseguibile e ZERO fra gli `input`.
+#  NESSUN trailing. Contato sul sorgente, e il comando e' scritto COME
+#  E' STATO ESEGUITO (correzione del cancello: la prima stesura citava
+#  `grep "Partial|TP1|Breakeven|Trail"`, che e' CASE-SENSITIVE e su
+#  questo sorgente torna ZERO righe, non tre -- un lettore che lo
+#  rilanciava non ritrovava il numero):
+#    grep -niE "partial|tp1|breakeven|trail"  su tutte e 1620 le righe
+#    -> TRE righe: r.82, r.170, r.1159. Tutte e tre sono COMMENTI e
+#       tutte e tre agganciate alla parola "trailing"; r.82 e r.170
+#       stanno nell'intestazione, r.1159 e' un commento DENTRO il corpo
+#       del codice (non un'intestazione, come diceva la prima stesura).
+#  ZERO occorrenze dentro codice eseguibile e ZERO fra gli `input`. E le
+#  tre righe dicono alla lettera cio' che serve qui: "NESSUN trailing,
+#  NESSUNA parziale, NESSUN time-stop".
 #  >>> QUINDI la colonna `Trades` del CSV di questo round E' il
 #      conteggio delle POSIZIONI, fattore di conversione 1,00 MISURATO
 #      SUL SORGENTE. E la controprova sta nell'ancora di QUESTA sedia:
 #      R103 scrive "n operazioni 254" dall'OPTFRAME e "n 254" dal report
-#      dei DEAL (r.632 del referto driver per i deal, r.627 e dintorni per
-#      l'OPTFRAME) -- due misure indipendenti, stesso numero.
+#      dei DEAL (r.632 del referto driver per i deal, r.626 per
+#      l'OPTFRAME: righe riaperte dal cancello, la prima stesura
+#      scriveva "r.627 e dintorni") -- due misure indipendenti, stesso
+#      numero.
 #
 # ---------------------------------------------------------------------
 #  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
@@ -475,10 +504,22 @@
 #       OOS : 254 posizioni GIA' MISURATE          >= 150 : SI (1,69x)
 #       IS  : [STIMATO] 254/6,50 = 39,1 op/anno,
 #             x 21,00 anni = ~821 posizioni        >= 150 : SI (5,5x)
-#     >>> QUESTO E' IL FATTO PIU' RARO DEL ROUND, E LO SCRIVO PRIMA DI
-#         VEDERE I NUMERI: insieme al gemello R171a e' il primo file
-#         della serie R162-R171 in cui TUTTE E DUE LE GAMBE stanno sopra
-#         il pavimento. Il MERITO qui NON e' sospeso.
+#     >>> LO SCRIVO PRIMA DI VEDERE I NUMERI: TUTTE E DUE LE GAMBE
+#         stanno sopra il pavimento, quindi il MERITO qui NON e'
+#         sospeso.
+#     >>> CORRETTO DAL CANCELLO (16/09): qui c'era scritto "insieme al
+#         gemello R171a e' il PRIMO file della serie R162-R171 in cui
+#         tutte e due le gambe stanno sopra il pavimento". FALSO, e il
+#         contro-esempio sta nella stessa cartella:
+#         `prove/R164a_atrexit_PTE_GBPUSD_771322.txt` r.536-561 conta IS
+#         207-229 e OOS 223-247 POSIZIONI anche col fattore
+#         uscite/posizioni PEGGIORE (2,00) e congela testualmente "su
+#         questa sedia il MERITO SI LEGGE". Questi due file sono quindi
+#         il SECONDO caso della serie, non il primo. Resta un fatto raro
+#         (gli altri file della serie che ho riaperto -- R162a, R163a,
+#         R165a, R166a, R167a, R168a, R170a -- dichiarano il pavimento
+#         NON raggiunto), ma "raro" non e' "primo": un superlativo senza
+#         il conto e' il difetto che la classe 364 esiste per fermare.
 #     >>> CONTRO-ESEMPIO SULL'IS, costruito contro la stima: anche
 #         tagliando l'IS a un TERZO (7 anni operati invece di 21) la
 #         stima resterebbe ~274, sopra 150; e anche dimezzando la
@@ -786,9 +827,11 @@
 #      sette le celle e tutte e due le finestre, anche se i valori
 #      fossero noiosi e piatti. Se quella colonna non c'e', il verdetto
 #      non e' stato dato: e' stato sostituito (classe 316).
-#  B1  MERITO -- AMMESSO, ED E' LA RARITA' DI QUESTO ROUND.
+#  B1  MERITO -- AMMESSO, ED E' RARO IN QUESTA SERIE.
 #      OOS 254 posizioni MISURATE e IS ~821 [STIMATO]: tutte e due sopra
-#      il pavimento dei 150 (Emendamento regola A).
+#      il pavimento dei 150 (Emendamento regola A). NON e' il primo file
+#      della serie R162-R171 col merito leggibile -- R164a (PTE GBPUSD)
+#      lo era gia': vedi la correzione nel paragrafo del PAVIMENTO.
 #      >>> CONDIZIONE: il merito vale solo se S4 dichiara la finestra IS
 #          PIENA o comunque con almeno 150 posizioni EFFETTIVE. Se S4
 #          dice ACCORCIATA e l'IS scende sotto 150, il merito torna
@@ -876,8 +919,10 @@
 #      ingannevole (il 2% di 1,059 sono 0,021 punti, che su 254
 #      operazioni e' sicuramente rumore), mentre sul DD i punti pieni
 #      sono gia' l'unita' in cui e' scritto il muro prop.
-#  B6  CONCORDANZA IS/OOS, E QUI E' FORTE (a differenza dei gemelli
-#      R170a-c, dove era dichiarata debole su 104 uscite).
+#  B6  CONCORDANZA IS/OOS, E QUI E' FORTE (a differenza dei gemelli di
+#      ieri, dove era dichiarata DEBOLE: 104 uscite su R170a, 20 e 21
+#      operazioni su R170c -- numeri riaperti dal cancello, che il 104
+#      e' di R170a e non di tutti e tre).
 #      Con ~821 e 254 posizioni, il segno della differenza fra una cella
 #      e la cella viva deve essere lo STESSO nelle due finestre su
 #      `Equity DD %`. Se il segno si inverte, il verdetto e' "non
@@ -893,9 +938,14 @@
 #      + b x _Point e' MONOTONO CRESCENTE in b (r.931-932), e il pedaggio
 #      non dipende da b. Quindi il rapporto stop/pedaggio e' MONOTONO
 #      CRESCENTE lungo l'asse.
+#      >>> IL NOME DEL PARAGRAFO E' CORRETTO DAL CANCELLO: la prima
+#          stesura scriveva "par. 0.6", e un paragrafo 0.6 in quel
+#          referto NON ESISTE (le sezioni sono 0, 0-bis, 1, ... 8). Il
+#          numero di riga era giusto, l'etichetta no.
 #      I NUMERI CHE POSSIEDO, dalla riga 772422 di
-#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.515 e dal par. 0.6
-#      r.204 dello stesso referto:
+#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.515 e dal riquadro
+#      della correzione dell'11/09 dello stesso referto (r.193-204, e il
+#      numero di GBPUSD sta a r.203-204):
 #        stop misurato (buffer 30) ..... 35,0 pip   [MIS] su n=1
 #        spread sonda .................. 0,2 pip -> 175,0x  (PASSA)
 #        pedaggio PIENO (spread +
@@ -916,6 +966,28 @@
 #          Cioe': col pedaggio pieno NESSUNA delle sette celle scende
 #          sotto il pavimento di LAVORO di 40x, e la piu' bassa (b=0) ci
 #          sta sopra dell'8%.
+#      >>> IL SECONDO PEDAGGIO, CHE LA STESSA FONTE PUBBLICA E CHE
+#          RIBALTA LA FRASE -- aggiunto dal cancello, perche' un
+#          contro-esempio che sta gia' scritto nella fonte citata non si
+#          puo' lasciare fuori: la tabella del referto 10/09
+#          (intestazione r.513, riga di questa sedia r.515) ha DUE
+#          colonne, A = spread della sonda (0,2 -> 175,0x,
+#          verde) e B = "1,0 pip prudente" delle schede del broker, e
+#          nella colonna B questa sedia e' marcata **35,0x, ROSSO, NO
+#          (88%)**: col pedaggio di 1,0 pip la CELLA VIVA gia' non passa
+#          il pavimento di lavoro, e passerebbe solo b=90 (41,0x),
+#          mentre b=0 starebbe a 32,0x.
+#          >>> PERCHE' USO 0,7415 E NON 1,0, detto col motivo e non per
+#              comodita': la correzione dell'11/09 (riquadro r.193-204)
+#              misura che le schede a 0,8-1,0 pip descrivono il profilo
+#              STANDARD, mentre il nostro conto e' RAW A COMMISSIONE, e
+#              il numero omogeneo al nostro conto e' spread + commissione
+#              (su EURUSD 0,3 + ~0,5 = 0,86 pip all-in). La colonna B e'
+#              quindi un pedaggio di un ALTRO tipo di conto, non una
+#              versione prudente del nostro. !! MA se un giorno si
+#              misurasse che il pedaggio vero all-in di GBPUSD e' >= 0,88
+#              pip (35,0/40), la frase "nessuna cella sfonda" cade tutta
+#              in una volta, cella viva compresa.
 #      >>> IL CONTRO-ESEMPIO CHE ROMPE QUESTA RICOSTRUZIONE, e lo
 #          costruisco io prima di consegnarla: TUTTO POGGIA SU UNO STOP
 #          MISURATO SU UNA SOLA GAMBA. Se lo stop vero fosse 25 pip
@@ -1032,6 +1104,11 @@
 #  questo round, rispetto a HEAD `d439a294` di `lavoro` del 16/09/2026,
 #  riverificato IMMEDIATAMENTE PRIMA DELLA CONSEGNA come prescrive la
 #  regola 1 della classe 365.
+#  >>> RIVERIFICATO UNA SECONDA VOLTA DAL CANCELLO DI GIUDIZIO, e il
+#      punto di riferimento e' scritto col `git rev-parse` del momento
+#      (classe 377, punto 5): a HEAD `f28f348c` del 16/09 -- cioe' DOPO
+#      che il repo si e' mosso -- `788410` e `788420` compaiono SOLO
+#      dentro questi due file prova (8 righe in tutto, nessun'altra).
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO, ed e' una
 #      scelta deliberata: la classe 367 misura che il punto dove due
 #      agenti collidono e' la SEQUENZA, non il nome. Il blocco 7884xx e'
