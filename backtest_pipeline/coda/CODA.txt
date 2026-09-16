@@ -2506,10 +2506,15 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  banco C:\MT5_Backtest (50504400). Magic 789510/789520, vergini a
 #  HEAD (grep dalla radice, 8 worktree paralleli compresi). Entrambi
 #  -Modello 4 -Deposito 100000.
+#  🔁 RIARMATO al giro di pin 60 (17a985cf, 16/09/2026): emendazione
+#  cosmetica della giustificazione della banda Peggior Giornata %
+#  (falsa "granularita' stampata" -> vera "banda assoluta piu' larga
+#  del relativo"), numero della banda invariato. Nessun preset/criterio
+#  numerico tocco.
 # =====================================================================
-e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
+17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
 # =====================================================================
-e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
+17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172c -- InpBreakevenAtTP1, sedia 770202 (ABTG_Dow_Apertura_US,
 #  U30USD M5). Terzo file della serie su 770202. Stesso banco/ancora
@@ -2541,8 +2546,11 @@ e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
 #  VUOTO). Bersaglio: banco C:\MT5_Backtest (50504400). Magic 789530,
 #  vergine a HEAD (grep dalla radice, worktree compresi).
+#  🔁 RIARMATO al giro di pin 60 (17a985cf, 16/09/2026): stessa
+#  emendazione cosmetica della banda Peggior Giornata % di R172a/b/d/e,
+#  numero invariato.
 # =====================================================================
-cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
+17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172d-e -- InpBEatR (R172d) + InpTP1_R (R172e), sedia 770202
 #  (ABTG_Dow_Apertura_US, U30USD M5). Quarto e quinto file della serie
@@ -2591,10 +2599,14 @@ cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  VUOTO). Bersaglio: banco C:\MT5_Backtest (50504400). Magic
 #  789540/789550, vergini a HEAD (grep dalla radice, worktree
 #  compresi).
+#  🔁 RIARMATI al giro di pin 60 (17a985cf, 16/09/2026): stessa
+#  emendazione cosmetica della banda Peggior Giornata % di R172a/b/c,
+#  numero invariato (su R172d la giustificazione mancava del tutto,
+#  qui aggiunta per la prima volta).
 # =====================================================================
-78466d01b7193c9c5c626c47a3deea264539673f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
+17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
 # =====================================================================
-78466d01b7193c9c5c626c47a3deea264539673f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
+17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
 # =====================================================================
 #  R173a -- InpTP1Pct, sedia 770511 (ABTG_SuperWave_DOW_H1_Ottimizzato,
 #  U30USD H1). Prima sedia della famiglia parziale/breakeven
