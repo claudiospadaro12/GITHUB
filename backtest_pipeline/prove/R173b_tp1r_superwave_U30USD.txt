@@ -124,8 +124,8 @@
 #      InpSLBufferAtr ... R126a (girato 13/09) . R126d (NASUSD)
 #      InpSLLookback .... R126b (girato 13/09)
 #      InpTP_RR ......... R155a (armato in CODA.txt)
-#      InpSLBufferPips .. R165a (scritto il 16/09)
-#      InpTP1Pct ........ R173a (scritto il 16/09, committato 3ddc61b3)
+#      InpSLBufferPips .. R165a (ARMATO, CODA.txt r.2215, pin c2aeb917)
+#      InpTP1Pct ........ R173a (ARMATO, CODA.txt r.2633, pin 8e6c1da6)
 #  >>> `InpTP1_R` NON C'E'. Il BERSAGLIO del blocco d'uscita a 1R, su
 #      questa sedia, non e' MAI stato un asse.
 #
@@ -1277,6 +1277,22 @@
 #          ancora e' r120e11 e il suo determinismo e' misurato in A1 sui
 #          CSV dell'ancora stessa): lo scrivo per il file fratello, non
 #          per me.
+#      >>> E IL DIFETTO NON E' BLOCCANTE NEMMENO PER LUI: R165a
+#          dichiara esplicitamente di NON appoggiarsi a quei CSV, e
+#          nessuna sua soglia ci poggia sopra. Ma R165a e' GIA' ARMATO
+#          (CODA.txt r.2215, pin c2aeb917): correggerlo costa un GIRO
+#          DI PIN, quindi la correzione e' una decisione di chi governa
+#          la coda, non un'iniziativa di questo file. Qui si dichiara e
+#          basta.
+#      >>> E LA META' PIU' COSTOSA DELLO STESSO BUCO, che vale la pena
+#          segnalare insieme: la stessa svista ha lasciato R165a a
+#          leggere il DD d'ancora nel REFERTO a due decimali invece che
+#          nei CSV di r120e11, che stanno nella STESSA cartella (e' la
+#          classe 385, aperta sul fratello R173a e li' gia' corretta).
+#          Effetto: le sue bande di DD in S1 sono piu' larghe in basso
+#          di ~0,0096 punti pieni per gamba (il conto per esteso sta in
+#          S1 di questo file). Anche questa e' una segnalazione, non
+#          una modifica.
 # =====================================================================
 #  IL COSTO IN TEMPO MACCHINA -- MISURATO SU QUESTA SEDIA, A QUESTO
 #  DEPOSITO, SU QUESTO BANCO. Non stimato.
