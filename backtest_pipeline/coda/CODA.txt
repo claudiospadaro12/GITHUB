@@ -2117,3 +2117,50 @@ ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R163a_slbufferpips_suprev_NASUSD.txt -Etichetta r163a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R166a -- InpSLBufferPips SU ABTG_SupertrendReversal, 225JPY H2
+#  (sedia 770901). Prima misura su questa sedia e sulla gemella 770924,
+#  mai armate finora: erano SCARTATE (r.1324, non con un file prova)
+#  per "DD 0,12-0,17%". Trovato e confermato al secondo cancello: quel
+#  DD viene da un CSV (commit 400a4624, 2026-08-08 06:54:53) generato
+#  CINQUE ORE PRIMA del fix di un bug del sizing su 225JPY (commit
+#  3af47ed9, 11:48:56 dello stesso giorno, che nomina 225JPY per nome:
+#  "il tick value arriva non convertito... il lotto usciva ~0 e finiva
+#  SEMPRE al minimo"). L'obiezione e' dichiarata SOSPESA, non
+#  ribaltata, e messa alla prova con la sentinella S4 (DD piatto =
+#  mondo sano, DD che cresce 1,9x = mondo pavimento del lotto ancora
+#  attivo) invece di darla per risolta. Questo round non riapre la
+#  sedia, non promuove niente (B5): la RIMETTE in gioco.
+#
+#  Manopola: InpSLBufferPips (il buffer entra FUORI da MathMin/MathMax
+#  sullo stop, su ogni ingresso senza condizioni -- r.388/389).
+#  InpSLLookback e' inerte quando la linea Supertrend batte l'estremo.
+#
+#  Cancello di costo: 225JPY qui NON e' un motore di sessione
+#  (InpUseTimeWindow=false) -- il limite Tokyo <=11,0 di R162a (un
+#  ALTRO EA sullo stesso simbolo) NON si applica senza verifica: 2 dei
+#  3 ingressi veri cadono fuori sessione Tokyo. Tre riferimenti di
+#  spread (35/~21/<=11,0) danno 0/1/7 celle su 40x: nessuna sentinella
+#  si aggancia al cancello. Pavimento duro 13,3x superato da tutte e
+#  sette in tutti e tre i riferimenti.
+#
+#  Merito SOSPESO: <=44 deal (13+31, verificati riga per riga) contro
+#  il pavimento 150, storico tick dal 2024.09.26 (1,76 anni contro i
+#  6,0 servirebbero -- classe 355, due cause separate da misure
+#  diverse).
+#
+#  Secondo cancello: FAIL alla prima lettura -- CLASSE 365 RIPETUTA
+#  sul file che l'ha scritta: il magic 779827 dichiarato "vergine"
+#  collideva con R165a (lavoro parallelo, ancora nel suo albero al
+#  momento della scrittura). Risolto con l'arbitro della CLASSE 367
+#  (nuova): vince chi e' GIA' COMMITTATO su lavoro -- R166a resta a
+#  779827, R165a si e' spostato a 779828. Piu' 4 correzioni di
+#  citazione non bloccanti (nessuna tocca un numero del round). PASS
+#  dopo le correzioni.
+#
+#  Pin: giro di pin 16a60b6 (47mo, b9848b1b -> 13599df8). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic 779827, non tocca 770901 (100k 50504263) ne' 770924 (piccolo
+#  50503392).
+# =====================================================================
+16a60b61d3427032f34297e9cd1c317ea47d67ac | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal -Prova R166a_slbufferpips_supertrendrev_225JPY.txt -Etichetta r166a -Modello 4 -Deposito 100000
+# =====================================================================
