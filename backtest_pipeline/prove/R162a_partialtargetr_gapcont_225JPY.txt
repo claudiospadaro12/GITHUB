@@ -1,0 +1,1005 @@
+# =====================================================================
+#  EA: ABTG_GapContinuation
+#  R162a -- "IL PARZIALE A 1R": QUANDO SI SMETTE DI RISCHIARE.
+#           La prima delle SEI manopole d'uscita mai mosse della sedia
+#           774101 -- asse InpPartialTargetR, 9 celle, UNA TRANCHE
+#           (@FRAZIONEIS 1.0), TICK REALI su tutto lo storico che il
+#           broker ha.
+#  Scritto il 16/09/2026. Criteri congelati PRIMA dei numeri.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1 -> RIGA_ROUND_VPS.ps1 ->
+#  walkforward_generico.ps1: simbolo, periodo, finestra, taglio IS/OOS
+#  e asse arrivano TUTTI dalle direttive di questo file):
+#    -Expert ABTG_GapContinuation
+#    -Prova R162a_partialtargetr_gapcont_225JPY.txt
+#    -Etichetta r162a -Modello 4 -Deposito 100000
+#  (prima SEMPRE con -SoloControllo: deve stampare 9 CELLE per finestra.
+#   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DELLE PASSATE. La riga
+#       "-> N pass a tick reali in tutto" del driver e' un *2 CABLATO
+#       (walkforward_generico.ps1 r.880 e r.890) e con @FRAZIONEIS 1.0
+#       il numero VERO e' 9, non 18. Classe 354 della checklist:
+#       NESSUNA sentinella d'arresto di questo file si aggancia a quel
+#       numero.)
+#
+#  -Modello 4 = TICK REALI, E QUI NON E' UN LUSSO, E' IL REQUISITO.
+#  225JPY su BCM ha storico dal 2024.09.26 e la sonda del 17/08 lo
+#  marca `COMPLETO` (REFERTO_SONDA_STORICO_17-08.md r.46); che li' ci
+#  siano i TICK e non solo le barre e' scritto in
+#  REFERTO_ROUND65_GAPCONTINUATION.md r.292: "su 225JPY i tick ci sono
+#  dal 2024.09.26, quindi la finestra tick-real coincide con questa".
+#  >>> PERCHE' L'OHLC QUI SAREBBE UN ERRORE E NON UN LIMITE: questo asse
+#      decide L'ISTANTE in cui scatta una chiusura parziale DENTRO la
+#      barra, e subito dopo sposta lo stop a pareggio. In OHLC M1 il
+#      tester non sa se dentro la barra e' arrivato prima il livello del
+#      parziale o prima lo stop: l'ambiguita' cadrebbe esattamente sulla
+#      grandezza misurata. R161a poteva dichiarare l'OHLC come "limite"
+#      perche' la' i tick non esistevano; qui esistono, quindi usarli
+#      non e' una scelta, e' il minimo.
+#  >>> E QUINDI LA CLASSE 356 SU QUESTO FILE NON MORDE, e va detto
+#      perche' su R161a mordeva: l'anteprima di -SoloControllo scrive
+#      "Model=4" CABLATO (walkforward_generico.ps1 r.1000) mentre la
+#      corsa vera usa Model=$Modello (r.1654). Con -Modello 4 i due
+#      numeri COINCIDONO. Chi riusasse questo file con -Modello 1
+#      riaprirebbe la classe 356 e, peggio, romperebbe la misura.
+#
+#  -Deposito 100000: e' il deposito con cui TUTTE le ancore di questa
+#  sedia sono state misurate (R65/R66 e il verdetto a tick reali:
+#  ReportTester_GapContinuation_225JPY_OOS_TICKREALI.xlsx, riga
+#  etichettata "Deposito Iniziale:" = 100000.000000). Uno stato
+#  implicito non e' uno stato dichiarato. E conta anche per il rischio: al deposito del
+#  piccolo il conto sul lotto cambia del tutto (sezione IL LOTTO).
+#
+#  COSTO DICHIARATO: 9 passate a tick reali su ~21,2 mesi di 225JPY M1.
+#  L'ancora di R65 gira 12,7 mesi con 366.723 barre e 17.680.280 tick
+#  (xlsx, righe "Barre:" e "Ticks:"); questa finestra e' ~1,67 volte
+#  piu' lunga, quindi ogni passata vale ~29 milioni di tick. E' un lavoro da NOTTE. Se il banco
+#  non regge, l'alternativa dichiarata NON e' togliere celle (si
+#  perderebbe la risoluzione che serve a vedere un altopiano): e'
+#  SPEZZARE L'ASSE IN DUE FILE, 0,50-1,25 e 1,50-2,50, e dichiararlo.
+#  PREREQUISITO, e non e' una formalita': i tick M1 di 225JPY devono
+#  essere GIA' SCARICATI IN LOCALE sul banco per TUTTA la finestra, non
+#  solo per la meta' recente (l'unica su cui R65 ha girato a tick). Si
+#  verifica PRIMA con
+#    powershell -ExecutionPolicy Bypass -File .\scarica_storico.ps1 -Simboli "225JPY" -SoloReferto
+#  Se il verdetto e' "MANCA STORICO LOCALE", il tester misura una
+#  finestra piu' corta IN SILENZIO (stesso avviso gia' scritto in
+#  R85_GapCont_STOP_BUFFER.txt r.96-98).
+# ---------------------------------------------------------------------
+#  UNO O DUE ASSI? LA DOMANDA DEL MANDATO, E LA RISPOSTA E' MISURATA,
+#  NON OPINATA.
+#
+#  Il censimento dell'11/09 nomina la manopola candidata come una coppia
+#  ("`InpPartialTargetR` + `InpPartialClosePercent`",
+#  report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md r.390). Nel codice
+#  sono DUE input distinti e separati:
+#    ABTG_GapContinuation.mq5 r.159  input double InpPartialClosePercent = 40.0;
+#                             r.160  input double InpPartialTargetR      = 1.0;
+#  e nel censimento-macchina sono due righe distinte, tutte e due
+#  "MAI-ovunque", mai=true e **inerte=false** (cioe' VIVE, non inerti per
+#  costruzione: classe 350), celle=5, prove=[]
+#  (risultati_archivio/CENSIMENTO_USCITE_2026-09-11.json, magic 774101).
+#
+#  >>> SI DIVIDONO, E NON E' UNA PREFERENZA: LO IMPONE IL CANCELLO.
+#      `backtest_pipeline/controlla_prova.py` r.167-174 boccia qualunque
+#      file prova con piu' di un asse Y:
+#        "N assi Y: un file prova misura UNA variabile alla volta"
+#      Non esiste un interruttore per superarlo (il --tetto conta le
+#      celle, non gli assi). Un file a due assi NON PASSA lo strato 1,
+#      quindi non esce dalla sessione. La risposta alla domanda del
+#      mandato e' quindi un FATTO del repo, non un giudizio mio.
+#
+#  >>> QUALE DEI DUE VA PER PRIMO, E PERCHE'. `InpPartialTargetR`.
+#      Quattro ragioni, in ordine di forza:
+#      1. E' LA MANOPOLA CHE PUO' RENDERE INERTE L'ALTRA. Il "quanto"
+#         (`InpPartialClosePercent`) esiste solo se il parziale scatta;
+#         il "quando" (`InpPartialTargetR`) decide se scatta. Misurare
+#         prima il "quanto" vorrebbe dire misurarlo condizionato a un
+#         "quando" che nessuno ha mai messo in discussione.
+#      2. E' L'UNICA DELLE DUE CHE TOCCA IL CONTEGGIO DEL CSV in modo
+#         deterministico (sezione MONOTONIA): quindi il round NON puo'
+#         essere vacuo per costruzione, ed e' la differenza con R159a
+#         (classe 357).
+#      3. E' LA MANOPOLA SU CUI IL PROGETTO HA GIA' UNA LEZIONE
+#         SCRITTA: "R:R invertito da gestione troppo stretta -- parziale
+#         PRECOCE + breakeven immediato tappavano i vincenti mentre lo
+#         SL prendeva perdite piene". Qui il parziale sta a 1,0R con un
+#         bersaglio a 3,0R: si de-rischia a un terzo di strada. E' la
+#         forma esatta della lezione, mai misurata su questa sedia.
+#      4. E' LA MANOPOLA CHE PORTA IL VINCOLO DI CODICE (sezione qui
+#         sotto): metterla ad asse e' l'unico modo in cui quel vincolo
+#         viene davvero esercitato e rispettato ai bordi.
+#      >>> `InpPartialClosePercent` resta PINNATO a 40,0 (valore vivo) ed
+#          e' un file SUO, R162b, NON scritto oggi. Va scritto DOPO
+#          questo, e al valore di `InpPartialTargetR` che questo round
+#          lascia in piedi: e' l'ordine giusto, non una scusa.
+# ---------------------------------------------------------------------
+#  IL VINCOLO DI CODICE CHE DA' INIT_FAILED -- VERIFICATO NEL SORGENTE,
+#  NON EREDITATO DAL CENSIMENTO, E IL CENSIMENTO VA CORRETTO SU UN PUNTO
+#
+#  `OnInit()`, ABTG_GapContinuation.mq5 r.1359-1374, blocco unico:
+#      if( ... ||
+#          InpPartialClosePercent<=0.0 || InpPartialClosePercent>=100.0 ||
+#          InpPartialTargetR<=0.0 || InpFinalTargetR<=InpPartialTargetR)
+#        { Print("Invalid signal/risk parameters."); return(INIT_PARAMETERS_INCORRECT); }
+#
+#  >>> IL CODICE DI RITORNO E' `INIT_PARAMETERS_INCORRECT` (r.1373), NON
+#      `INIT_FAILED`. Il censimento dell'11/09 r.390 scrive "altrimenti
+#      INIT_FAILED": nello stesso file `INIT_FAILED` c'e' davvero, ma a
+#      r.1379 e per un'altra causa (`SymbolSelect` fallito). La
+#      conseguenza pratica e' la stessa (la passata non opera), ma il
+#      nome del codice e' un altro e va scritto giusto.
+#  >>> COSA SUCCEDE DAVVERO IN OTTIMIZZAZIONE, ED E' PEGGIO DI UN
+#      ERRORE: una cella con parametri rifiutati da OnInit non arriva a
+#      `OnTester`, quindi non fa `FrameAdd`, quindi **NON PRODUCE UNA
+#      RIGA NEL CSV**. Il sintomo non e' un messaggio: e' un CSV con 8
+#      righe invece di 9. E' esattamente per questo che S2 (conteggio
+#      righe) e' una sentinella e non una formalita'.
+#
+#  I DUE BORDI, tradotti in numeri per QUESTO file:
+#    - bordo basso: InpPartialTargetR deve essere **> 0**;
+#    - bordo alto : InpPartialTargetR deve essere **< InpFinalTargetR**,
+#      che qui e' PINNATO a **3.0** -- e 3.0 NON e' il default compilato
+#      (r.161 dice 2.0): e' il valore della CELLA VIVA scelta da R65 e
+#      confermata da R66, scritto in
+#      mql5/Presets/ABTG_GapContinuation_FORWARD.set r.40.
+#      >>> SE QUALCUNO RIUSASSE QUESTO FILE CON InpFinalTargetR=2.0 (il
+#          default del sorgente), le celle 2,00 / 2,25 / 2,50 di questo
+#          asse morirebbero in OnInit e il CSV uscirebbe con SEI righe.
+#          Il pin di InpFinalTargetR e' quindi parte del vincolo, non un
+#          contorno.
+#    L'asse scritto in fondo (0,50 -> 2,50) sta **0,50R sotto il muro**
+#    e **0,50R sopra lo zero**: due passi interi di margine da ciascun
+#    lato. Il vincolo e' rispettato per costruzione, non per fortuna.
+# ---------------------------------------------------------------------
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+#    `grep -n "InpPartialTargetR" mql5/Experts/ABTG_GapContinuation.mq5`
+#    -> QUATTRO occorrenze in tutto il file:
+#      r.160   la dichiarazione;
+#      r.1279-1280  dentro `ManagePosition`:
+#          partial_target = (BUY ? entry + InpPartialTargetR*g_initial_risk
+#                                : entry - InpPartialTargetR*g_initial_risk)
+#          con `g_initial_risk = |entry - stop|` fissato all'apertura
+#          (`StoreNewPositionState`, r.991);
+#      r.1370  il vincolo di OnInit gia' visto sopra.
+#    Non esiste nessun `if` che la disattivi. Non la legge nessun'altra
+#    formula. Non finisce in nessun log del CSV.
+#
+#    LA CATENA COMPLETA DI CIO' CHE SUCCEDE QUANDO IL LIVELLO E' TOCCATO
+#    (r.1283-1305), perche' questo asse muove TRE cose e non una:
+#     C1. LA CHIUSURA PARZIALE. `PartialCloseVolume` (r.1174-1182) chiude
+#         `volume * InpPartialClosePercent/100` (pinnato 40%), col tetto
+#         `volume - VOLUME_MIN` per non azzerare la posizione. Se il
+#         risultato e' <= 0 il parziale viene SALTATO (r.1286-1294),
+#         `g_partial_done` va a true lo stesso e **il breakeven NON
+#         viene fatto** -- lo dice il funnel stesso (r.1593-1594:
+#         "in quei trade NON c'e' stato il breakeven"). Su questa
+#         finestra non morde: i lotti misurati stanno fra 24,8 e 100,0
+#         (sezione IL LOTTO).
+#     C2. IL BREAKEVEN. `MoveStopToBreakEven` (r.1218-1231) e' chiamato
+#         SOLO dentro `if(ClosePartial(...))` (r.1302-1303), quindi il
+#         BE **eredita il grilletto dell'asse**: spostare il parziale
+#         sposta anche l'istante in cui la posizione smette di
+#         rischiare. Non e' un effetto collaterale: e' meta' di cio' che
+#         si sta misurando, e va detto perche' significa che questo asse
+#         muove DUE meccanismi con una manopola sola.
+#     C3. IL NUMERO DI USCITE, cioe' la colonna `Trades` del CSV. Una
+#         posizione che fa il parziale produce DUE deal di uscita; una
+#         che non lo fa ne produce UNO. Sezione UNITA' e sezione
+#         MONOTONIA.
+#
+#    >>> E LE COSE CHE QUESTO ASSE **NON** TOCCA, verificate riga per
+#        riga (sono quelle che rendono confrontabili le nove celle):
+#        - NON tocca l'INGRESSO. `PrepareSetup` (gap), `UpdateSetupMetrics`
+#          (VWAP e riempimento del 50%), `TryEntry` (rottura del range +
+#          VWAP, filtri spread, volume) non leggono MAI
+#          `InpPartialTargetR`. I setup nascono negli stessi istanti in
+#          tutte e nove le celle.
+#        - NON tocca LO STOP INIZIALE. r.1056 (long) e r.1110 (short):
+#          lo stop e' il minimo/massimo dell'opening range, con
+#          `InpStopBufferPoints` pinnato a 0. Quindi `g_initial_risk` e'
+#          **identico in tutte e nove le celle**, e con esso il LOTTO.
+#          >>> Conseguenza che vale per il RISCHIO: questo round NON
+#              alza il rischio per operazione di nessuna cella sopra
+#              quello della cella viva. Le soglie B2 sono un CONTROLLO,
+#              non una scommessa.
+#        - NON tocca IL BERSAGLIO. Il TP e' `InpFinalTargetR * R`
+#          (r.1069 / r.1123, riaggiustato in `StoreNewPositionState`
+#          r.999-1001), pinnato a 3,0.
+#        - NON tocca IL NUMERO DI POSIZIONI. `OnTick` r.1439-1473 ha TRE
+#          guardie in fila -- posizione nostra aperta (r.1440),
+#          `g_traded_today || HasEnteredToday()` (r.1460),
+#          `HasAnyPositionOnSymbol()` (r.1468) -- e una posizione chiusa
+#          prima NON libera la giornata, perche' `g_traded_today` resta
+#          true fino a `ResetDay`. Una posizione al giorno, sempre.
+#          >>> QUESTA E' LA DIFFERENZA STRUTTURALE CON R161a, dove n
+#              cambiava attraverso `InpMaxPositions`. Qui il numero di
+#              POSIZIONI e' invariante lungo l'asse; a cambiare e' solo
+#              il numero di USCITE. Ed e' cio' che rende possibile la
+#              sentinella S4, che R161a non poteva nemmeno scrivere.
+# ---------------------------------------------------------------------
+#  UNITA' DI MISURA: SU QUESTA SEDIA `Trades` **NON** E' POSIZIONI, ED E'
+#  MISURATO, NON STIMATO (classe 226/346)
+#    La colonna `Trades` del CSV e' `TesterStatistics(STAT_TRADES)`
+#    (ABTG_GapContinuation.mq5 r.1612, scritta in OnTesterDeinit r.1639).
+#    Su MT5 quel contatore conta i DEAL DI USCITA, non le posizioni --
+#    e qui la differenza e' grossa, perche' l'EA fa chiusure parziali.
+#
+#    IL FATTORE E' MISURATO SULL'ARTEFATTO DELL'ANCORA, contando riga per
+#    riga la tabella "Ordini" di
+#    `risultati_archivio/GapContinuation/ReportTester_GapContinuation_225JPY_OOS_TICKREALI.xlsx`
+#    (cella viva, tick reali, OOS 2025.06.10 -> 2026.06.30, 100k, 1%):
+#      INGRESSI (commento "GAPCONT L"/"GAPCONT S") .. **47** (32 L, 15 S)
+#      USCITE ................................... **70**
+#      "Affari Totali" dichiarato dal report ..... 117  (= 47 + 70) OK
+#      "Numero di Operazioni di Trading Totali:" .. **70** (riga
+#         omonima del report,
+#         e la stessa riga lo spezza in "Short 20" + "Long 50" = 70:
+#         cioe' MT5 conta le USCITE, non gli ingressi -- gli ingressi
+#         erano 15 e 32)
+#      >>> FATTORE USCITE / POSIZIONI = **1,4894** [MISURATO, n=47].
+#          Non e' 1,00 e non e' 2,00: e' 1 + (frazione di posizioni che
+#          fanno il parziale).
+#    E LA FRAZIONE, che e' il numero piu' importante di tutto il file:
+#      posizioni con parziale ESEGUITO ... **23 su 47 = 48,9%**
+#      posizioni senza parziale .......... 24 su 47
+#      controprova sulla taglia chiusa: la frazione chiusa al parziale
+#      misurata sui 23 casi sta fra **0,3981 e 0,4000** = il 40%
+#      dichiarato da `InpPartialClosePercent`. La lettura della tabella
+#      e' quindi verificata contro un numero che l'EA dichiara altrove,
+#      non contro se stessa.
+#    >>> QUINDI: OGNI soglia su `Trades` scritta in questo file e' in
+#        USCITE. Il numero di POSIZIONI **non e' una colonna del CSV** e
+#        questo round NON lo misura per cella. Chi scrivesse "n
+#        posizioni = Trades" sbaglierebbe del 49%.
+#    >>> MA C'E' UN GUADAGNO NASCOSTO, ed e' il motivo per cui questa
+#        sezione non e' solo un avvertimento: siccome il numero di
+#        POSIZIONI e' INVARIANTE lungo l'asse (sezione sopra), la
+#        DIFFERENZA di `Trades` fra due celle e' ESATTAMENTE la
+#        differenza nel numero di parziali eseguiti. Il CSV non dice
+#        quanti parziali ci sono stati, ma dice quanti ne ha tolti (o
+#        aggiunti) lo spostamento della manopola. E' l'unica misura
+#        diretta dell'effetto che questo round produce.
+# ---------------------------------------------------------------------
+#  MONOTONIA: L'ARGOMENTO DI ANNIDAMENTO -- LA SENTINELLA PIU' FORTE DEL
+#  FILE, E VA SCRITTA PRIMA PERCHE' E' UN TEOREMA, NON UN'ATTESA
+#
+#  Siano t < L due valori dell'asse. Confrontiamo la stessa posizione
+#  nelle due corse:
+#   (a) fino a quando il prezzo non raggiunge t, le due corse sono
+#       INDISTINGUIBILI: nessun parziale e' scattato, nessun BE e' stato
+#       messo, lo stop e il TP sono gli stessi. Quindi "raggiunge t" ha
+#       lo stesso valore di verita' nelle due corse.
+#   (b) nella corsa L, il parziale scatta solo se il prezzo raggiunge L,
+#       e per raggiungere L deve prima passare da t.
+#   (c) nella corsa t il BE porta lo stop a `entry`, che e' PIU' VICINO
+#       al prezzo dello stop originale: puo' solo troncare la posizione
+#       prima, mai tenerla in vita piu' a lungo.
+#  Da (a)+(b): {posizioni che fanno il parziale a L} e' un
+#  SOTTOINSIEME di {posizioni che fanno il parziale a t}.
+#  E poiche' il numero di POSIZIONI e' invariante e
+#      Trades = posizioni + parziali,
+#  segue:
+#    >>> **Trades(0,50) >= Trades(0,75) >= ... >= Trades(2,50)**,
+#        MONOTONA NON CRESCENTE, in modo ESATTO e non statistico.
+#
+#  L'UNICO BUCO DELL'ARGOMENTO, e lo scrivo io perche' e' il modo in cui
+#  si rompe: il numero di posizioni e' invariante solo finche' il LOTTO
+#  non degenera. `CalculateEntryVolume` r.908 -> `NormalizeVolumeDown`
+#  r.858-859: se il lotto calcolato scende sotto `SYMBOL_VOLUME_MIN` la
+#  funzione torna 0 e `TryEntry` r.1072-1084 **cancella il setup**, cioe'
+#  toglie una posizione. Siccome l'equity evolve in modo diverso fra le
+#  celle, in linea di principio una cella potrebbe perdere un ingresso
+#  che un'altra fa. Il conto che lo esclude sta nella sezione IL LOTTO:
+#  sui 47 ingressi dell'ancora il lotto minimo misurato e' **24,8**, e
+#  per arrivare sotto il minimo del broker servirebbe un crollo
+#  dell'equity di due ordini di grandezza, contro un DD ancorato
+#  all'11,59%.
+#  >>> PERCIO' LA TOLLERANZA SU S4 E' **ZERO**: una sola inversione, di
+#      una sola unita', dice che una delle tre premesse e' falsa, e va
+#      capita PRIMA di guardare qualunque P/L.
+# ---------------------------------------------------------------------
+#  IL RISCHIO VERO CONTRO IL DICHIARATO -- LA VERIFICA CHE IL MANDATO
+#  CHIEDE PER PRIMA. TRE RISPOSTE, E UNA E' UNA CORREZIONE.
+#
+#  (1) NESSUN DOPPIO RISCHIO IN CODICE. VERIFICATO A HEAD.
+#      `report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md` r.400 mette questa
+#      sedia nella tabella "chi somma le gambe" con
+#        "GapContinuation | BUY + SELL | SI, nessuna guardia di
+#         posizione aperta | :987 / :1041"
+#      >>> QUESTA RIGA NON REGGE ALLA LETTURA DEL SORGENTE DI OGGI, e la
+#          correzione va scritta qui perche' cambia il verdetto sulla
+#          misurabilita' della sedia:
+#          - r.1048 `if(g_gap_percent>0.0){ ... } else { ... }`: i due
+#            lati sono rami di un IF/ELSE, mutuamente esclusivi. Un solo
+#            `Trade.Buy` (r.1093) OPPURE un solo `Trade.Sell` (r.1148).
+#            Non ci sono pendenti, non ci sono tranche, non c'e' OCO.
+#          - `OnTick` ha le TRE guardie gia' elencate (r.1440, r.1460,
+#            r.1468). La seconda e' una posizione AL GIORNO, non una per
+#            volta: piu' stretta di `InpMaxPositions=1`.
+#          - le righe 987 e 1041 di oggi stanno dentro
+#            `StoreNewPositionState` e dentro il filtro di spread: non
+#            sono due gambe d'ingresso. La riga del censimento e'
+#            plausibilmente riferita a una numerazione precedente.
+#      >>> RISCHIO VERO = RISCHIO DICHIARATO, fattore **1,00x**, sul
+#          banco. Il round si puo' scrivere.
+#
+#  (2) IL BUCO CHE RESTA E' SUL FORWARD, NON SUL BANCO, E NON E' DI
+#      QUESTO ROUND. Lo stesso censimento, r.170, marca il rischio vivo
+#      di 774101 come **[NON MISURATO]** sul piccolo, e r.185 dice che
+#      per questo "i totali del piccolo sono un LIMITE INFERIORE". La
+#      causa e' scritta a r.420: il lettore CODA_01 cerca `InpMagic` e
+#      `InpRiskPercent`, mentre questo EA usa `InpMagicNumber`,
+#      `InpBuyRiskPercent`, `InpSellRiskPercent`. E' un difetto DEL
+#      LETTORE, non dell'EA -- il `.chr` il preset ce l'ha, e
+#      `DISALLINEAMENTO_CAMPO_v2_2026-09-12.md` r.344 lo ha gia'
+#      derubricato a "falso allarme" avendo aperto il file a mano.
+#      >>> NON BLOCCA QUESTO ROUND (che gira sul banco con i pin scritti
+#          qui sotto). Resta un lavoro aperto sul campo.
+#
+#  (3) >>> QUELLO CHE HO TROVATO IO OGGI, E NON E' IN NESSUN CENSIMENTO:
+#      **IL TETTO DEL LOTTO MORDE DAVVERO SU QUESTA SEDIA, IN SILENZIO.**
+#      Misurato sulla tabella "Ordini" dell'xlsx dell'ancora, 47
+#      ingressi: i volumi vanno da 24,8 a 100,0, e **QUATTRO ingressi
+#      stanno a 100,0 ESATTI**; il piu' grande volume diverso da 100,0 e'
+#      97,8. I quattro a 100,0 sono esattamente i quattro con lo STOP
+#      PIU' STRETTO (R = 110, 137, 157, 162 punti indice) -- cioe' i
+#      quattro dove il lotto richiesto era il piu' grande.
+#      Causa in codice: `NormalizeVolumeDown` r.855
+#        volume = MathMin(volume, SYMBOL_VOLUME_MAX);
+#      cioe' un troncamento SILENZIOSO, senza log e senza contatore.
+#      >>> QUANTO COSTA, in unita' confrontabili: il prodotto
+#          (stop in punti) x (lotto) e' proporzionale al rischio in euro.
+#          Sui trade non troncati vale ~18.600-19.900; sui quattro
+#          troncati vale 11.000 / 13.700 / 15.700 / 16.200, cioe'
+#          **0,58% / 0,72% / 0,83% / 0,85% invece dell'1,00% dichiarato**.
+#      >>> COME SI LEGGE, e la direzione conta: il troncamento va SEMPRE
+#          VERSO IL BASSO. Non e' un bug di rischio (non si rischia mai
+#          piu' del dichiarato) ed e' per questo che il round si puo'
+#          scrivere. E' un difetto di SCALA: l'8,5% dei trade rende meno
+#          di quanto il contratto lasci credere, e la quota cresce se si
+#          alza il deposito o la taglia. Va nel contratto della sedia,
+#          non in questo round.
+#      >>> E PER QUESTO ROUND E' NEUTRO, ed e' dimostrabile: il lotto
+#          d'ingresso non dipende da `InpPartialTargetR` (lo stop
+#          iniziale e' invariante), quindi il troncamento colpisce le
+#          stesse giornate in tutte e nove le celle. Resta la coda di
+#          secondo ordine (l'equity diverge fra le celle, quindi il
+#          lotto diverge, quindi la soglia dei 100 si attraversa in
+#          istanti leggermente diversi): e' dichiarata nel contro-
+#          esempio T5, non nascosta.
+# ---------------------------------------------------------------------
+#  IL LOTTO: PAVIMENTO E TETTO, IL CONTO PER INTERO
+#    `CalculateEntryVolume` r.866-908 + `NormalizeVolumeDown` r.847-861:
+#      raw = EQUITY * risk% / loss_per_lot ;  raw = MathMin(raw, VOLUME_MAX)
+#      raw = floor(raw/step)*step ;  se raw < VOLUME_MIN -> **0 = niente ordine**
+#    - IL TETTO MORDE: misurato, 4 ingressi su 47 (8,5%) -- sezione
+#      sopra. `VOLUME_MAX = 100` e' un'INFERENZA FORTE (quattro volumi a
+#      100,0 esatti, il massimo diverso da 100,0 e' 97,8, e i quattro
+#      sono i quattro con lo stop piu' stretto), non una lettura di
+#      `SymbolInfoDouble`: il valore vero non e' misurato in nessun
+#      artefatto del repo. [INF, n=4/47]
+#    - IL PAVIMENTO NON MORDE, con enorme margine: il lotto piu' piccolo
+#      misurato e' **24,8**. Perche' il pavimento mordesse servirebbe un
+#      lotto sotto `VOLUME_MIN` (che su un CFD indice sta fra 0,01 e 1):
+#      un fattore fra 25 e 2.500. Con un DD ancorato all'11,59% non
+#      succede. E' questo conto a chiudere il buco dell'argomento di
+#      annidamento (sezione MONOTONIA).
+#    - E LA STESSA FUNZIONE E' IL DIFETTO GIA' AGLI ATTI DELLA SEDIA:
+#      `report/PERCHE_ENTRANO_POCO_2026-09-11.md` r.49 e r.321 la
+#      indicano come l'UNICO caso su 39 EA in cui "il lotto sotto il
+#      minimo CANCELLA il setto" e' vero. Lo e' -- ma a 100.000 EUR non
+#      si attiva. **Al deposito del piccolo (~5.300 EUR) i lotti
+#      sarebbero ~19 volte piu' piccoli, cioe' 1,3 - 5,3: la' il
+#      pavimento diventa un'ipotesi da verificare.** Questo round NON
+#      gira a quel deposito e NON risponde. [BUCO DICHIARATO]
+# ---------------------------------------------------------------------
+#  IL COSTO -- IL CANCELLO DEI 40x. QUI E' L'OPPOSTO ESATTO DI R161a, E
+#  VA DETTO SUBITO PERCHE' CAMBIA COSA MANCA.
+#
+#    1. QUESTO ROUND NON LO MISURA E NON LO PUO' MUOVERE. La corsia
+#       raccoglie UN SOLO artefatto: `OptResults_ABTG_GapContinuation_225JPY.csv`
+#       (walkforward_generico.ps1 r.1673 lo nomina, r.1689 lo copia e
+#       cancella l'originale; RIGA_ROUND_VPS.ps1 r.799-803 copia sul
+#       Desktop soltanto i due CSV per nome piu' il file prova). Le sue
+#       colonne sono cablate in `OnTesterDeinit` (r.1639): Pass, Profit,
+#       Expected Payoff, Profit Factor, Recovery Factor, Sharpe Ratio,
+#       Equity DD %, Trades, Peggior Giornata %, Perdite Consecutive
+#       Max, Serie Perdente Peggiore -- piu' i NOMI (r.1640-1641) e i
+#       VALORI (r.1647-1648) degli input. **NESSUNA e' lo stop, NESSUNA
+#       e' lo spread.** Classe 353: qui non si congela nessuna soglia su
+#       quelle grandezze.
+#       E il canale per-trade non serve nemmeno: `ExportTrades`
+#       (r.1529-1555) scrive close_time, symbol, magic, position_id,
+#       deal_type, volume, price, net_profit -- niente SL, niente prezzo
+#       d'ingresso -- e questa corsia non lo copia affatto.
+#       >>> IN PIU', E' STRUTTURALMENTE INUTILE PROVARCI: lo stop
+#           iniziale e' INVARIANTE lungo questo asse (non lo tocca
+#           nessuna cella), quindi il cancello di costo e' **lo stesso
+#           in tutte e nove le celle** e nessuna cella puo' vincerlo o
+#           perderlo meglio di un'altra.
+#
+#    2. LO STOP PERO' E' MISURATO, E LO SCRIVO PERCHE' E' LA META' BUONA
+#       DEL CONTO, con la sua fonte. Ricostruito dai 47 ingressi della
+#       tabella "Ordini" dell'xlsx dell'ancora: per ogni ordine il
+#       report stampa S/L e T/P, e con TP - SL = 4R (stop 1R, bersaglio
+#       3R) si ha R = (TP - SL)/4. Su 225JPY `point = 1,00` e
+#       `digits = 0` (sonda ABTG_InfoBroker del 17/08, citata in
+#       R85_GapCont_STOP_BUFFER.txt r.25-28), quindi un punto MT5 e' un
+#       punto indice e non c'e' la trappola "pip" che ha colpito PTE e
+#       SuperWave.
+#         STOP INIZIALE (punti indice), n=47:
+#           min 110 . p25 275 . **MEDIANA 347** . p75 440 . max 764
+#           media 352 . sotto 200 punti: 5 su 47
+#       Controprova della formula, e non e' un giro su se stessa: sulla
+#       prima posizione del report (SL 40517, TP 41065) la formula da'
+#       entry = 40654; e il deal che chiude il residuo dopo il parziale
+#       porta il commento **"sl 40654"**, cioe' lo stop portato a
+#       pareggio ESATTAMENTE su quel prezzo. Il numero calcolato coincide
+#       con un numero stampato da MT5 in un'altra colonna.
+#
+#    3. QUELLO CHE MANCA E' LO SPREAD, ED E' [NON MISURATO].
+#       `backtest_pipeline/risultati_archivio/spread_flotta/` contiene
+#       tre soli CSV orari -- NASUSD, U30USD, D30EUR -- e **225JPY non
+#       c'e'**. L'unico numero in giro e' il "~80 punti" del dossier del
+#       funnel (sorgente r.1571), e R85 r.36-39 lo ha gia' declassato:
+#       era **misurato a mercato chiuso**, quindi un limite superiore,
+#       non lo spread di sessione.
+#       >>> IL CONTO CHE SI PUO' FARE, e lo scrivo al rovescio per non
+#           spacciare un'inferenza per misura: **il cancello dei 40x
+#           passa alla mediana se e solo se lo spread di sessione sta
+#           sotto 347/40 = 8,7 punti indice**; al primo quartile serve
+#           <= 6,9; sulla posizione con lo stop piu' stretto (110)
+#           servirebbe <= 2,75. Con gli 80 punti di mercato chiuso il
+#           cancello sarebbe sfondato di quasi dieci volte; con uno
+#           spread di sessione di 5 punti passerebbe la maggioranza
+#           delle giornate. Due ipotesi opposte, e NESSUNA misura per
+#           sceglierne una: **cancello di costo = [NON DECIDIBILE], e il
+#           termine mancante e' lo SPREAD, non lo stop.**
+#       >>> E C'E' UN FATTO STRUTTURALE CHE VA SCRITTO LO STESSO, perche'
+#           non dipende da nessuna misura mancante: il filtro di costo
+#           che l'EA ha DENTRO (`InpMaxSpreadToStopPercent = 10.0`,
+#           r.962-979) chiede spread <= 10% dello stop, cioe'
+#           **stop >= 10 x spread**. Il cancello di casa ne chiede 40.
+#           **La sedia si autorizza da sola a tradare a un quarto della
+#           severita' di casa.** Non e' un verdetto -- e' una riga da
+#           portare al round che misurera' lo spread di 225JPY, che e'
+#           un lavoro a se' (uno SpreadLogger sul simbolo) e non questo.
+# ---------------------------------------------------------------------
+#  IL PAVIMENTO IS>=150 -- VERIFICATO PRIMA DI SCRIVERE QUALUNQUE
+#  SENTINELLA, E LA RISPOSTA E' "NON RAGGIUNGIBILE", IN TUTTE E DUE LE
+#  UNITA'. Regola B del 16/08: il campione sottile sospende il MERITO,
+#  mai il RISCHIO.
+#
+#  a) IN POSIZIONI (l'unita' della Regola B). Misurato, non stimato:
+#     meta' OOS (12,7 mesi, tick, xlsx dell'ancora) = **47 posizioni**.
+#     Densita' = 47 / 385 giorni = **0,122 posizioni/giorno**.
+#     Finestra intera 2024.09.26 -> 2026.06.30 = **642 giorni** ->
+#     642 x 0,122 = **~78 posizioni in tutto**.
+#     Per IS>=150 E OOS>=150 servirebbero >= 300 posizioni, cioe'
+#     300 / 0,122 = 2.459 giorni = **6,7 anni**. Ne esistono 1,76.
+#  b) IN USCITE (l'unita' del CSV, ed e' la piu' GENEROSA delle due --
+#     la uso apposta, perche' se fallisce anche questa non c'e' scampo):
+#     archivio, stessa cella viva: IS OHLC **39** + OOS tick **70** =
+#     **109 uscite** su tutta la finestra. **Sotto 150 anche cosi'.**
+#  c) CONTROPROVA INDIPENDENTE, scritta da qualcun altro e prima di me:
+#     `REFERTO_SONDA_STORICO_17-08.md` r.136 mette questa sedia nella
+#     tabella "QUELLE CHE ANCORA NON CE LA FANNO":
+#       ABTG_GapContinuation | 225JPY | 86 trade/anno | storico
+#       2024.09.26 | anni disponibili **1.8** | anni servono **3.5**
+#     (3,5 anni x 86 = ~300 = 150+150: la colonna "servono" e' costruita
+#     esattamente sul pavimento della Regola B).
+#
+#  >>> CONCLUSIONE, CONGELATA PRIMA DEI NUMERI:
+#      - questo round NON fa uno split IS/OOS. Due meta' da ~39 e ~70
+#        uscite sarebbero un peggioramento, non un rimedio. Dichiarato
+#        con **@FRAZIONEIS 1.0**, la direttiva del 12/09 che forza UNA
+#        TRANCHE: senza di essa il driver userebbe il default 0.40 e
+#        produrrebbe COMUNQUE un IS/OOS, IN SILENZIO. Il driver stessa
+#        avvisa che con 1.0 "la gamba OOS e' DEGENERE (finestra vuota)"
+#        (walkforward_generico.ps1 r.731-734): **nessun CSV *_OOS utile
+#        esiste per questo round, ed e' voluto, non un file mancante.**
+#        La riga "CSV di QUESTA corsa copiati: 1 (attesi 2)" di
+#        RIGA_ROUND_VPS.ps1 e' quindi NORMALE qui, non un allarme.
+#      - gira UNA finestra intera e **UN SOLO REGIME** (21,2 mesi,
+#        set-2024 -> giu-2026: Nikkei prevalentemente in salita con lo
+#        scossone di agosto 2024 appena fuori dalla finestra).
+#        Dichiarato come vuole la Regola A ("si DICHIARA quale REGIME
+#        contiene"). Non e' la prova di regime della Regola C.
+#      - il round e' scopato al **RISCHIO** e alla **STRUTTURA**. Le
+#        uniche risposte legittime sono: "il parziale a 1,0R non e'
+#        peggiore/e' peggiore delle alternative sul DD", "l'asse e'
+#        inerte", "l'asse si muove ma il campione non permette di
+#        sceglierne una cella". **MAI** "la cella X e' migliore" in
+#        senso di merito.
+# ---------------------------------------------------------------------
+#  LE ANCORE, E LA LORO FORZA, DICHIARATE PRIMA DEI NUMERI
+#
+#  A) L'ANCORA DEL CONTEGGIO, ed e' quella che regge S1.
+#     IS  : `risultati_archivio/GapContinuation/ABTG_GapContinuation_225JPY_IS_ohlc_gc2.csv`,
+#           riga con InpMinimumBuyGapPercent=1.00 e Sell=1.00 ->
+#           Profit 2437,54 . PF 1,30640 . Equity DD 4,2648 . **Trades 39**
+#           . Peggior Giornata -0,9999 . (2024.09.26 -> 2025.06.09, OHLC)
+#     OOS : stesso file in versione OOS -> Profit 7542,65 . PF 1,36274 .
+#           DD 11,7765 . **Trades 69** (2025.06.10 -> 2026.06.30, OHLC)
+#     OOS a TICK: xlsx dell'ancora -> Profit 8339,62 . PF 1,398110 .
+#           Equity DD Relativa **11,59%** . **70 operazioni** .
+#           qualita' storico "100% ticks reali", 17.680.280 tick.
+#     >>> DUE COSE CHE QUESTA ANCORA PERMETTE E CHE VANNO SEPARATE:
+#         - il passaggio OHLC -> TICK sulla stessa meta' sposta il
+#           conteggio di **69 -> 70, cioe' +1,4%**: e' la misura del
+#           costo di modello su questa sedia, ed e' piccola. Serve a
+#           dimensionare la banda di S1, non a promettere niente.
+#         - Profit e DD delle due meta' **non** si sommano (ogni corsa
+#           riparte da 100.000 e il DD e' un percorso), ma il
+#           CONTEGGIO si', e la ragione e' strutturale: gli ingressi
+#           dipendono da prezzo, gap e VWAP, mai dal saldo. Il saldo
+#           entra solo nel LOTTO, e il lotto non decide quali giornate
+#           producono un setup -- salvo la degenerazione sotto
+#           VOLUME_MIN, esclusa nella sezione IL LOTTO.
+#
+#  B) L'ANCORA DELLA FINESTRA: 225JPY parte dal **2024.09.26** e la
+#     sonda del 17/08 marca lo stato **`COMPLETO`**, cioe' "non manca sul
+#     disco: il broker NON CE L'HA" (REFERTO_SONDA_STORICO_17-08.md
+#     r.46 e il riquadro sotto). Non c'e' niente prima, e non ci sara'
+#     finche' non si importa da un'altra fonte.
+#
+#  C) L'ANCORA DI RISCHIO, ed e' quella che va letta per prima:
+#     `report/CENSIMENTO_CONTRATTI.md` r.262 -> DD promesso **11,59%**,
+#     peggior giornata **-1,10%** a taglia 1%, zero esposizione
+#     overnight, **e tre avvertenze gia' scritte nel contratto**: lo
+#     short perde (-2.182 OOS), le perdite arrivano in GRUPPO (Z -4,03,
+#     sei di fila), e la cella viva e' un **PICCO, non un altopiano**
+#     (R66 par.3).
+#     >>> VA SCRITTO IN CHIARO: **a taglia 1% questa sedia e' GIA' oltre
+#         il muro prop del 10%** (11,59%). Non lo scopre questo round e
+#         questo round non lo ripara. Quello che puo' dire e' se il
+#         momento del parziale e' una delle leve che lo governano.
+#
+#  D) L'ANCORA DELLA GESTIONE, misurata oggi sull'xlsx (n=47, cella viva):
+#       parziale eseguito ............ 23 / 47  (48,9%)
+#       dopo il parziale: chiuse in SL(=pareggio) 6 . in TP a 3,0R 6 .
+#         a fine sessione 11
+#       senza parziale : in SL 19 . a fine sessione 5
+#       posizioni che arrivano al TP a 3,0R ... **6 su 47 = 12,8%**
+#     >>> E' da qui che nasce l'attesa quantitativa sul bordo alto
+#         dell'asse, e serve anche a rompere il contro-esempio T3.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#
+#  - `Trades` (USCITE): atteso **DIVERSO fra le celle** e **NON
+#    CRESCENTE** al crescere di InpPartialTargetR (teorema della sezione
+#    MONOTONIA -- qui e' una sentinella, non una speranza).
+#    Livello atteso sulla cella viva 1,00: **~109** (39 + 70). Banda: S1.
+#    Bordo alto 2,50: i parziali devono stare fra il numero di posizioni
+#    che toccano 3,0R (6 su 47 nell'ancora, cioe' 12,8%) e quelli che
+#    toccano 1,0R (23 su 47, 48,9%). Tradotto sull'intera finestra
+#    (~78 posizioni): **Trades(2,50) atteso fra ~88 e ~116**, contro
+#    ~109 della cella viva. E' un'inferenza, non una sentinella: la
+#    sentinella e' solo l'ordinamento.
+#  - NUMERO DI POSIZIONI per cella: **[NON MISURABILE DA QUESTO ROUND]**,
+#    non e' una colonna. Si misura solo la DIFFERENZA fra celle, che e'
+#    la differenza nel numero di parziali (sezione UNITA').
+#  - CONTATORI DEL FUNNEL (`cntParzialeFatto`, `cntParzialeSaltato`,
+#    `cntVolZero`, `cntSpreadDin` ...): **[NON RACCOLTI DA QUESTA
+#    CORSIA]**. Esistono e `PrintFunnel` li stampa (r.1577-1599, chiamata
+#    da `OnTester` r.1603), ma escono SOLO come Print nel log
+#    dell'agente, che il driver non copia (copia solo OptResults_*.csv,
+#    r.1689). Il sorgente lo dichiara da se' a r.1561-1562: "Nessun
+#    impatto sul CSV". **Sarebbero stati i contatori perfetti per questo
+#    round** -- quanti parziali per cella, riga per riga -- e non ci
+#    sono. Va scritto come il buco che e', e la via per chiuderlo
+#    (portare `cntParzialeFatto` dentro `FrameAdd`) e' una modifica
+#    all'EA, cioe' un lavoro a se'.
+#  - STOP MEDIO / SPREAD / CANCELLO 40x per cella: **[NON MISURABILI E
+#    NON SPOSTABILI]** -- non sono colonne, e per di piu' lo stop e'
+#    invariante lungo l'asse (sezione IL COSTO).
+#  - PEGGIOR GIORNATA %: attesa **~INVARIANTE a ~-1,1%** in tutte e nove
+#    le celle, e la ragione e' strutturale: il parziale non riduce MAI
+#    lo stop INIZIALE, e il breakeven arriva solo DOPO il parziale.
+#    Quindi la giornata peggiore resta "un ingresso, uno stop pieno, 1R"
+#    qualunque sia il grilletto. Ancore: -1,10% [MIS tick, contratto] e
+#    -0,9999 / -1,0008 [MIS OHLC, CSV d'archivio]. Vedi S6: e' una
+#    sentinella di SALUTE, non una misura dell'effetto.
+#  - PROFITTO / PF / DD: **NESSUNA direzione dichiarata a priori.** Un
+#    parziale piu' precoce incassa piu' spesso ma tronca i vincenti e
+#    mette il breakeven presto (piu' pareggi); uno piu' tardo lascia
+#    correre ma rischia l'intero R piu' a lungo. Quale dei due domini su
+#    ~78 posizioni di Nikkei e' precisamente cio' che non e' mai stato
+#    misurato. Chi scrivesse qui una direzione starebbe indovinando.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU' (e lo scrivo per poter essere
+#    smentito): `Trades` che scende in modo leggibile lungo l'asse
+#    (quindi la manopola agisce), un PROFITTO piatto dentro il rumore di
+#    ~78 posizioni, e un **DD che si muove** -- perche' il momento in cui
+#    la posizione smette di rischiare e' proprio la grandezza che
+#    governa la forma delle perdite. Se e' cosi', la risposta onesta e'
+#    "il parziale a 1,0R non costa profitto misurabile, ma il DD e' una
+#    leva mai toccata", e vale per il corridoio RISCHIO.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE, prima di leggere qualunque
+#    P/L: **S1 fuori banda** oppure **S4 violata**. Nel primo caso il
+#    banco non sta girando la storia che credo; nel secondo una delle
+#    tre premesse del teorema e' falsa. In tutti e due i casi nessun
+#    altro numero del round significa niente.
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  (regola del 10/09: si costruisce il caso che romperebbe la propria
+#  misura, e si mostra perche' non succede -- o si dichiara che potrebbe)
+#
+#  (T1) IL MONDO IN CUI LA MANOPOLA NON FA NIENTE -- classe 357, ed e' il
+#    difetto che ha bocciato R159a. Se nessuna posizione toccasse mai il
+#    livello del parziale, tutte e nove le celle darebbero numeri
+#    IDENTICI e chi guarda solo "le celle esistono" (S3) scriverebbe
+#    PASS senza aver misurato niente.
+#    >>> QUANTO E' PLAUSIBILE QUI, COL NUMERO IN MANO: **23 posizioni su
+#        47 fanno il parziale a 1,0R** e solo **6 su 47 arrivano a 3,0R**
+#        [MIS, tick, xlsx dell'ancora]. Fra il bordo basso (0,50R) e il
+#        bordo alto (2,50R) il numero di parziali DEVE cambiare, a meno
+#        che l'ancora non descriva questa sedia -- e l'ancora e' questa
+#        sedia, stessa cella, stesso simbolo, stesso deposito.
+#    >>> MA "implausibile" non e' "escluso", e la regola della classe 357
+#        e' che una sentinella di uguaglianza va SEMPRE accoppiata a una
+#        che verifica che la manopola ABBIA AGITO. Qui sono **S5**
+#        (almeno una coppia contigua con `Trades` STRETTAMENTE diverso) e
+#        **S3** (nove valori distinti dell'asse nel CSV), e non si
+#        sostituiscono: S3 dice che le celle esistono, S5 che sono
+#        diverse. Se S5 cade, il round e' un **NULLO DICHIARATO** e S1,
+#        S2, S3 vanno scritte come **VACUE**, non come PASS.
+#
+#  (T2) LE NOVE CORSE DIVERGONO, E LA DIVERGENZA PUO' FABBRICARE UNA
+#    CURVA BELLA. Le celle non sono annidate sui risultati: un parziale
+#    a 0,50R invece che a 2,00R cambia l'esito della singola posizione e
+#    l'equity, e su ~78 posizioni una differenza di 1.500 EUR fra due
+#    celle puo' essere UNA giornata sola.
+#    >>> COME LO ROMPO, e si rompe solo cosi': **la selezione si fa sul
+#        CENTRO di un tratto contiguo di celle DISTINTE, MAI sul picco**
+#        (regola R70, ripresa da R136a/R146c/R153a/R154a-R161c), e su
+#        questo round **non si fa selezione affatto**: non c'e' fuori
+#        campione (@FRAZIONEIS 1.0) e il merito e' sospeso. La lettura
+#        legittima e' la FORMA della curva, non la sua cima.
+#    >>> E IL PRECEDENTE VA CITATO PERCHE' E' DELLA STESSA SEDIA: su
+#        R66 la cella viva era il PICCO ISOLATO dell'IS (vicini negativi
+#        da tutte e due le parti) e **sedici Spearman IS->OOS su
+#        diciassette erano negativi**. Su questa sedia il picco in
+#        campione ha gia' mentito una volta.
+#
+#  (T3) IL MONDO IN CUI LA STORIA NON C'E' (classe 355). Se sul banco i
+#    TICK di 225JPY non coprissero davvero tutta la finestra, il tester
+#    girerebbe in silenzio su meno mesi e produrrebbe MENO uscite -- e
+#    nessuna colonna del CSV dice la data della prima operazione.
+#    >>> COME LO ROMPO, PARZIALMENTE, E IL "PARZIALMENTE" VA SCRITTO:
+#        S1 confronta `Trades` della cella viva con i 109 dell'ancora,
+#        banda 95-125. Alla densita' misurata (109 uscite / 21,2 mesi =
+#        5,1 uscite al mese) **un mese di storico mancante vale ~5
+#        uscite**: la banda separa un troncamento di **3 mesi o piu'**
+#        (-15 -> 94, fuori), **NON uno di 1-2 mesi** (-5/-10 -> 104/99,
+#        dentro). Un troncamento breve resta NON ESCLUSO. Lo dichiaro,
+#        non fingo di chiuderlo.
+#    >>> QUELLO CHE LO CHIUDE DAVVERO NON E' UNA COLONNA, E' UN PASSO
+#        PRIMA: il referto di `scarica_storico.ps1 -SoloReferto` su
+#        225JPY, da guardare PRIMA di lanciare (sezione in testa). Se
+#        quel referto non e' stato letto, questo round non e' leggibile
+#        sul conteggio -- e va scritto cosi' nel referto finale.
+#    >>> Perche' non stringo la banda: deve tollerare anche il passaggio
+#        OHLC->TICK sulla meta' IS (misurato +1,4% sull'altra meta', ma
+#        misurato UNA volta sola) e il fatto che i 109 nascono da due
+#        corse separate che ripartono ciascuna da 100.000. Un falso FAIL
+#        costa quanto un falso PASS.
+#
+#  (T4) IL MONDO DELLA CACHE DEL TESTER. Il driver avvisa (r.1703-1711)
+#    che MT5 puo' ripescare passate gia' calcolate e NON rieseguirle,
+#    facendo uscire un CSV con meno righe delle celle chieste.
+#    >>> COME LO ROMPO: il magic di questo file e' **VERGINE (779824)**.
+#        Una passata con un magic mai usato non puo' stare in nessuna
+#        cache. Ed e' anche il motivo per cui S2 (9 righe) e' una
+#        sentinella e non una formalita': le altre due cause di riga
+#        mancante sono il vincolo di OnInit (sezione VINCOLO) e una
+#        cella che non opera affatto.
+#
+#  (T5) IL MONDO IN CUI IL TETTO DEL LOTTO CAMBIA IL CONFRONTO FRA LE
+#    CELLE. Il troncamento a VOLUME_MAX e' MISURATO (4 ingressi su 47) e
+#    di primo ordine e' neutro -- colpisce le stesse giornate in tutte
+#    le celle, perche' non dipende dall'asse. Ma di SECONDO ordine no:
+#    l'equity diverge fra le celle, il lotto e' proporzionale
+#    all'equity, quindi la soglia dei 100 lotti viene attraversata in
+#    giornate leggermente diverse. Una cella piu' ricca viene troncata
+#    PIU' spesso, cioe' rischia un po' meno, cioe' **sembra piu' sicura
+#    per un motivo che non c'entra con il parziale**.
+#    >>> COME LO ROMPO: non posso, non con le colonne di questo CSV --
+#        il lotto non c'e'. Quello che posso fare e' dichiarare la FIRMA
+#        che quel mondo lascerebbe: **una cella con Profit piu' alto E
+#        insieme un Equity DD % sproporzionatamente piu' basso delle
+#        vicine**. Se il referto vede quella coppia, non scrive "cella
+#        piu' sicura": scrive "sospetto troncamento a VOLUME_MAX, da
+#        verificare con una misura per-trade". [DICHIARATO, non chiuso]
+#    >>> E l'ordine di grandezza dice che e' piccolo: il troncamento oggi
+#        tocca l'8,5% dei trade e la divergenza di equity fra celle su
+#        21 mesi vale pochi punti percentuali. Ma "piccolo" e' una
+#        stima, non una misura: per questo resta dichiarato.
+#
+#  (T6) IL MONDO IN CUI IL PARZIALE VIENE SALTATO PER LOTTO
+#    INDIVISIBILE. `PartialCloseVolume` torna 0 se
+#    `volume - VOLUME_MIN <= 0` oppure se il 40% del volume scende sotto
+#    lo step: in quel caso il parziale NON si fa **e nemmeno il
+#    breakeven** (r.1286-1294). Sarebbe indistinguibile, sulla colonna
+#    `Trades`, da "il livello non e' stato raggiunto": stessa firma,
+#    causa diversa.
+#    >>> COME LO ROMPO: coi lotti misurati (24,8 - 100,0) il 40% vale
+#        9,9 - 40,0 e il residuo 14,9 - 60,0: due ordini di grandezza
+#        sopra qualunque VOLUME_MIN di un CFD indice. **A 100.000 EUR
+#        non succede.** E siccome il lotto NON dipende dall'asse, se
+#        succedesse succederebbe ugualmente in tutte e nove le celle.
+#    >>> Dove invece succederebbe: al deposito del piccolo. Dichiarato
+#        nella sezione IL LOTTO, e non e' questo round.
+#
+#  (T7) IL MONDO IN CUI IL BERSAGLIO A 3,0R MANGIA IL PARZIALE. Alla
+#    cella 2,50 il parziale scatta 0,50R prima del TP che sta sul
+#    server. A tick reali l'ordine degli eventi e' definito; in OHLC M1
+#    non lo sarebbe, ed e' una delle ragioni per cui questo round gira a
+#    tick (sezione in testa). Il margine di due passi interi dal muro e'
+#    dichiarato nella sezione dell'asse.
+#    >>> Resta comunque vero che le celle alte misurano una gestione
+#        sempre piu' vicina a "nessun parziale": e' un'informazione, non
+#        un difetto -- e' anzi l'unico modo che questo EA offre per
+#        avvicinarsi al caso "parziale spento", visto che il vincolo di
+#        OnInit **rende il parziale OBBLIGATORIO** (non esiste nessun
+#        valore legale di `InpPartialTargetR` che lo disattivi, e
+#        `InpPartialClosePercent` non puo' valere 0). Questo e' un
+#        limite del MOTORE, non del round, e va nel contratto.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE (si leggono PRIMA di qualunque P/L)
+#    S1 -- IL CONTEGGIO DELLA CELLA VIVA RICOSTRUISCE L'ANCORA.
+#      `Trades` della cella **1,00** dentro **95 - 125**
+#      (ancora: 39 IS OHLC + 70 OOS tick = 109). E' la sola difesa contro
+#      T3. **Se cade, il round si ferma qui**: il banco non e' quello di
+#      R65/R66 e nessun altro numero e' leggibile.
+#    S2 -- IL CONTEGGIO DELLE RIGHE: **9 righe** nel CSV IS.
+#      Se sono 8 o meno, PRIMA di leggere il resto si dichiara QUALE
+#      cella manca e si guarda se e' una di quelle ai bordi (vincolo di
+#      OnInit) o una qualunque (cache del tester, T4).
+#      >>> Il CSV *_OOS **non esiste o e' vuoto**, ed e' VOLUTO
+#          (@FRAZIONEIS 1.0, gamba degenere). Non e' un rilievo.
+#    S3 -- NOVE VALORI DISTINTI di `InpPartialTargetR` nella colonna
+#      omonima del CSV (0.5 / 0.75 / 1 / 1.25 / 1.5 / 1.75 / 2 / 2.25 /
+#      2.5). La colonna esiste: `OnTesterDeinit` accoda i NOMI degli
+#      input a r.1640-1641 e i VALORI a r.1647-1648. Dice che l'asse e'
+#      stato spazzolato. **NON dice che ha avuto effetto**: per quello
+#      serve S5 (classe 357).
+#    S4 -- LA MONOTONIA, TOLLERANZA **ZERO**.
+#      `Trades` non crescente lungo l'asse:
+#      Trades(0,50) >= Trades(0,75) >= ... >= Trades(2,50).
+#      E' un teorema (sezione MONOTONIA), non un'attesa. Una sola
+#      inversione dice che una premessa e' falsa -- la piu' probabile
+#      essendo "il numero di posizioni non e' invariante", cioe' un
+#      lotto degenerato. **Si capisce prima di leggere i P/L.**
+#    S5 -- LA MANOPOLA HA AGITO: almeno **UNA** delle OTTO coppie
+#      contigue deve avere `Trades` STRETTAMENTE diverso. Se tutte e
+#      otto coincidono, il round e' un NULLO DICHIARATO (T1) e S1/S2/S3
+#      vanno scritte come VACUE.
+#      >>> E si registra anche, per ognuna delle otto coppie, se Profit
+#          (%.2f) e Equity DD % (%.4f) coincidono fino all'ultima cifra
+#          STAMPATA: due celle identiche su tutte e tre le colonne sono
+#          LA STESSA CORSA e valgono come UNA sola osservazione. Nessun
+#          "tratto contiguo" si costruisce con celle identiche.
+#    S6 -- LA GIORNATA PEGGIORE NON CAMBIA NATURA: nessuna cella con
+#      `Peggior Giornata %` peggiore di **-1,50%**. Attesa ~-1,1%
+#      (ancore: -1,10% tick, -1,0008% / -0,9999% OHLC). E' una
+#      sentinella di SALUTE: se una cella la sfonda, il parziale sta
+#      toccando qualcosa che secondo il codice non tocca, e va capito
+#      prima di ogni PF.
+#    S7 -- IL RISCHIO NON E' ESPLOSO: nessuna cella con
+#      `Equity DD %` > **20,0%** (la stessa soglia gia' usata da R66 su
+#      questa sedia). Se una cella la rompe, si scrive SUBITO, prima di
+#      guardare qualunque Profit Factor.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  MERITO: **SOSPESO**, e non e' una clausola di stile. Il
+#        pavimento IS>=150 non e' raggiungibile in nessuna delle due
+#        unita' (sezione PAVIMENTO) e non c'e' fuori campione. Nessuna
+#        frase del tipo "la cella X guadagna di piu'" puo' uscire da
+#        questo round come proposta operativa.
+#    B2  RISCHIO: e' qui che il round ha voce. Si legge S7 (nessuna
+#        cella oltre 20,0%) e, in TESTA al referto e PRIMA di ogni PF,
+#        si scrive **quante celle su nove stanno sopra il 10,0%** -- il
+#        muro prop -- inclusa la viva, che nell'ancora ci sta gia'
+#        (11,59%). Nota: il rischio per operazione e' identico in tutte
+#        le celle (lo stop iniziale e' invariante), quindi un DD che si
+#        muove viene dalla SEQUENZA delle uscite, non dalla taglia.
+#    B3  FORMA / STRUTTURA: S2 (9 righe) **e** S3 (9 valori distinti)
+#        **e** S4 (monotonia) **e** S5 (almeno una coppia diversa). Si
+#        leggono come un BLOCCO UNICO: nove righe numericamente uguali
+#        sono un PASS VACUO (T1), non un PASS.
+#    B4  IL TEST DI IDENTITA' FRA CELLE CONTIGUE: per ognuna delle OTTO
+#        coppie si registra se Profit (%.2f), Equity DD % (%.4f) e
+#        Trades (%.0f) coincidono fino all'ultima cifra STAMPATA, e si
+#        CONTA quante coppie risultano DIVERSE.
+#        >>> AVVERTENZA SUL POTERE DISCRIMINANTE: `Trades` qui e'
+#            l'informazione PIU' pulita delle tre (e' quasi un
+#            contatore di parziali, sezione UNITA'), mentre Profit e DD
+#            sono correlati fra loro. "Tre colonne concordi" si scrive
+#            come UNA conferma, non come tre.
+#    B5  IL ROUND NON PROMUOVE NIENTE. Nemmeno un esito pulito cambia un
+#        preset, accende o spegne una sedia, tocca il forward, riscrive
+#        il contratto del DD o sposta il cancello di costo (che questo
+#        asse non puo' muovere: dichiarato). Taglie, riaccensioni e
+#        rischio restano **[FIRMA DI CLAUDIO]**.
+#    B6  SE MAI si scrivesse "meglio la cella X": SEMPRE il CENTRO di un
+#        tratto contiguo di celle DISTINTE (B4) che passa S7, MAI il
+#        picco isolato (R70). E su questa sedia con un'avvertenza in
+#        piu', che e' sua: **R66 ha gia' misurato che il picco in
+#        campione mente** (16 Spearman IS->OOS negativi su 17).
+#        Senza fuori campione, qui "meglio" non ha nemmeno il posto dove
+#        essere verificato: la forma corretta resta "il DD si muove /
+#        non si muove lungo l'asse".
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- 0,50 / 0,75 / 1,00(vivo) / 1,25 / 1,50 / 1,75 /
+#                       2,00 / 2,25 / 2,50   (9 celle, passo 0,25)
+#    Il driver spazzola solo start/step/stop aritmetico, mai un elenco
+#    esplicito. Conto delle celle:
+#      floor(|2,50 - 0,50| / 0,25 + 1e-9) + 1 = floor(8) + 1 = **9**
+#    (walkforward_generico.ps1 r.792; e `controlla_prova.py` r.203 fa lo
+#    stesso conto). Tutti i nove valori sono multipli esatti di 0,25,
+#    quindi rappresentabili in binario senza deriva: **nessuna cella
+#    puo' scivolare sopra il muro dei 3,0 per arrotondamento.**
+#
+#    BORDO ALTO 2,50 -- perche' non si sale oltre, e sono DUE ragioni.
+#      (i) IL MURO DI CODICE: `InpFinalTargetR` e' 3,0 e OnInit r.1370
+#          rifiuta qualunque `InpPartialTargetR >= 3,0`. 2,50 lascia
+#          **due passi interi** di margine.
+#      (ii) LA GEOMETRIA: fra 2,50R e 3,00R il parziale e il TP sono
+#          troppo vicini perche' la cella misuri ancora "quando si
+#          de-rischia": misurerebbe il TP. La cella 2,50 e' gia' la
+#          migliore approssimazione disponibile del caso "quasi nessun
+#          parziale" -- che il motore non permette di raggiungere
+#          davvero (T7).
+#    BORDO BASSO 0,50 -- perche' non si scende sotto.
+#      Non c'e' un muro di codice (basta > 0), c'e' una SCELTA
+#      DICHIARATA: 0,50 e' **meta'** del valore vivo, la stessa
+#      escursione relativa (-50%) usata da R161a per il suo bordo basso.
+#      Sotto 0,50R il parziale e il breakeven scatterebbero mentre il
+#      prezzo e' ancora dentro il rumore della rottura dell'opening
+#      range, e si misurerebbe il rumore del primo minuto, non la
+#      gestione. **Se il round mostrasse che il bordo basso e' il
+#      migliore, il passo successivo e' un file SUO che estende l'asse,
+#      non una riga aggiunta a questo.**
+#    ESCLUSI DALL'ASSE E DICHIARATI: qualunque valore <= 0 e qualunque
+#      valore >= InpFinalTargetR. Non sono punti della griglia: sono
+#      `INIT_PARAMETERS_INCORRECT`, cioe' righe che spariscono dal CSV.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - MERITO: sospeso. Campione ~78 posizioni / ~109 uscite su tutta la
+#      finestra, e nessun fuori campione (@FRAZIONEIS 1.0).
+#    - REGIME: **UNO SOLO**, 21,2 mesi (set-2024 -> giu-2026). Non e' la
+#      prova di regime della Regola C del 16/08. E non e' un limite del
+#      round: il broker non ha altro (sonda 17/08, stato `COMPLETO`).
+#    - LATO SEPARATO (long/short): **[NON MISURABILE qui]**. Il CSV non
+#      separa i lati e l'EA non ha manopole di lato -- il lato lo decide
+#      il SEGNO DEL GAP (r.1048). Ed e' un buco che pesa, perche' il
+#      contratto dice gia' che **lo short perde (-2.182 OOS)**: un
+#      parziale diverso potrebbe giovare a un lato e nuocere all'altro,
+#      e questo round vedrebbe la media. Il modo di chiuderlo senza
+#      toccare l'EA esiste (`InpEnableBuyGaps` / `InpEnableSellGaps` a
+#      turno) ed e' un file a se'.
+#    - `InpPartialClosePercent`: **NON e' l'asse di questo file**,
+#      pinnato al valore vivo 40,0. E' il round R162b, da scrivere DOPO
+#      questo (sezione UNO O DUE ASSI).
+#    - LE ALTRE QUATTRO MANOPOLE D'USCITA MAI MOSSE della stessa sedia
+#      (`InpMoveStopToBreakEven`, `InpStopBufferPoints`,
+#      `InpExitMinutesBeforeClose`, `InpSessionCloseHour` -- censimento
+#      11/09 r.198): pinnate al valore vivo, invariate. Ognuna e' un
+#      round suo. (`InpStopBufferPoints` ha gia' un file scritto e mai
+#      girato: R85_GapCont_STOP_BUFFER.txt.)
+#    - CANCELLO DI COSTO: **[NON DECIDIBILE]**, manca lo spread di
+#      sessione di 225JPY. Lo stop invece e' misurato (mediana 347 punti
+#      indice). Sezione IL COSTO.
+#    - CONTATORI DEL FUNNEL: [NON RACCOLTI DA QUESTA CORSIA] -- ed erano
+#      i piu' adatti a questo round.
+#    - NUMERO DI POSIZIONI per cella: non e' una colonna. Si legge solo
+#      la differenza fra celle.
+#    - IL CONTO PICCOLO (~5.300 EUR): il pavimento del lotto non e' stato
+#      calcolato a quel deposito e questo round non lo fa. Chi portasse
+#      una cella di questo asse sul piccolo deve rifare quel conto prima.
+#    - IL BINARIO IN CAMPO NON E' QUESTO SORGENTE: l'inventario del
+#      14/09 (`report/INVENTARIO_CAMPO_PICCOLO_2026-09-14.md` r.133)
+#      misura il `.ex5` vivo a 1551 righe contro le **1654** di HEAD
+#      (+103). Questo round misura **il sorgente a HEAD**. Una cella
+#      eventualmente proposta richiederebbe la ricompilazione gia'
+#      prevista dal runbook del 14/09.
+#    - GUARDIAN: `InpUsaGuardian=true` (default e valore vivo), pinnato
+#      per completezza. Nel tester e' **fail-open totale** perche' le sue
+#      GlobalVariable non esistono: lo dichiara il sorgente stesso a
+#      r.106-112. I numeri restano confrontabili con l'archivio.
+#
+#  MAGIC VERGINE **779824** (cercato su tutto il repo il 16/09/2026:
+#  `grep -rn "779824" .` -> ZERO occorrenze prima di questo file). Si
+#  riparte da 779824 perche' 779821/779822/779823 sono stati consumati
+#  ieri da R161a/R161b/R161c.
+#  >>> IL MAGIC VERGINE NON E' UN VEZZO: e' la difesa contro la cache
+#      del tester (T4), ed e' anche cio' che tiene separato il CSV
+#      per-trade di questa corsa da quello della sedia viva.
+#  ETICHETTA **R162** VERGINE (`grep -rn "R162" .` su tutto il repo,
+#  incluse `backtest_pipeline/coda/CODA.txt` e
+#  `backtest_pipeline/REGISTRO_TEST.md`: ZERO occorrenze PRIMA di questo
+#  file. L'ultima etichetta usata e' R161c).
+#  ORDINE DEI ROUND: nessun altro file prova, in coda o in archivio,
+#  mette `InpPartialTargetR` ad asse -- tre file lo PINNANO a 1.0
+#  (`ABTG_GapContinuation.txt` r.408, `ABTG_GapContinuation_R66.txt`
+#  r.86, `R85_GapCont_STOP_BUFFER.txt` r.135) e
+#  `grep -rn "InpPartialTargetR=.*||Y" backtest_pipeline/prove/` da'
+#  **ZERO righe**. Questo file non duplica niente.
+# =====================================================================
+
+@SIMBOLO  225JPY
+@PERIODO  M1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+# --- IL MOTORE, pinnato sulla CELLA VIVA (R65 + R66), copiato riga per
+#     riga da mql5/Presets/ABTG_GapContinuation_FORWARD.set nella forma
+#     gia' passata dal cancello in ABTG_GapContinuation_R66.txt e in
+#     R85_GapCont_STOP_BUFFER.txt. Le uniche righe toccate sono:
+#     InpPartialTargetR (che qui e' L'ASSE), InpComment, InpMagicNumber,
+#     piu' i due input nati dopo quei file (InpUsaGuardian, InpLogImbuto).
+InpUsaGuardian=true||true||0||true||N
+
+# Fuso: MANUALE, in ORA SERVER BCM. Tokyo 09:00 JST = 01:00 server.
+# Il default del sorgente e' AUTO (JST->Darwinex): su BCM aprirebbe alle
+# 03:00, DUE ORE TARDI. Queste righe non sono cosmetiche.
+InpSessionTimeMode=1||1||0||1||N
+InpSessionOpenHour=1||1||0||1||N
+InpSessionOpenMinute=0||0||0||0||N
+InpSessionCloseHour=7||7||0||7||N
+InpSessionCloseMinute=30||30||0||30||N
+InpOpeningRangeMinutes=15||15||0||15||N
+InpMaxEntryMinutesFromOpen=90||90||0||90||N
+InpExitMinutesBeforeClose=5||5||0||5||N
+
+# Entrambi i lati accesi: la simmetria e' meta' del motivo per cui l'EA
+# esiste, e lo short e' un buco gia' dichiarato del contratto.
+InpEnableBuyGaps=true||true||0||true||N
+InpMinimumBuyGapPercent=1.00||1.00||0||1.00||N
+InpEnableSellGaps=true||true||0||true||N
+InpMinimumSellGapPercent=1.00||1.00||0||1.00||N
+
+InpUseRealVolumeIfAvailable=true||true||0||true||N
+InpMaxSpreadPoints=0.0||0.0||0||0.0||N
+InpMaxSpreadToStopPercent=10.0||10.0||0||10.0||N
+InpStopBufferPoints=0.0||0.0||0||0.0||N
+
+# Asimmetria del rischio SPENTA, i due lati alla stessa taglia 1,0%.
+# I due valori sotto restano inerti finche' il flag e' false: li scrivo
+# lo stesso, per non lasciarli al default compilato.
+InpBuyRiskPercent=1.0||1.0||0||1.0||N
+InpSellRiskPercent=1.0||1.0||0||1.0||N
+InpReduceRiskOnSmallSellGap=false||false||0||false||N
+InpSellFullRiskFromGapPct=1.25||1.25||0||1.25||N
+InpSmallSellRiskPercent=0.25||0.25||0||0.25||N
+
+# Sizing: SEMPRE a rischio %, mai lotto fisso. InpMaxLots=0 lascia il
+# tetto al broker -- ed e' il tetto che MORDE su 4 ingressi su 47
+# (sezione IL LOTTO). Resta 0 perche' e' il valore VIVO: cambiarlo
+# sarebbe un'altra manopola, non questo round.
+InpFixedLots=0.0||0.0||0||0.0||N
+InpMaxLots=0.0||0.0||0||0.0||N
+
+# La gestione. InpFinalTargetR=3.0 NON e' il default del sorgente (2.0):
+# e' la cella viva di R65/R66, ed e' anche IL MURO che limita l'asse.
+InpPartialClosePercent=40.0||40.0||0||40.0||N
+# InpPartialTargetR -> E' L'ASSE, in fondo al file.
+InpFinalTargetR=3.0||3.0||0||3.0||N
+InpMoveStopToBreakEven=true||true||0||true||N
+
+InpMagicNumber=779824||779824||0||779824||N
+InpMaxSlippagePoints=30||30||0||30||N
+# Pannello e diagnostica SPENTI: nove celle per un print al giorno sono
+# log inutilizzabili, e nessuno dei due tocca il CSV.
+InpShowStatusOnChart=false||false||0||false||N
+InpPrintDailyDiagnostics=false||false||0||false||N
+InpLogImbuto=false||false||0||false||N
+InpComment=R162A PARTIALR
+
+# --- L'UNICO ASSE (9 celle, UNA sola finestra: 9 passate vere)
+#     0,50 / 0,75 / 1,00(vivo) / 1,25 / 1,50 / 1,75 / 2,00 / 2,25 / 2,50
+#     multipli di R, con R = |ingresso - stop| fissato all'apertura.
+#     Muro di codice a 3,00 (= InpFinalTargetR): due passi di margine.
+InpPartialTargetR=1.0||0.50||0.25||2.50||Y
+# =====================================================================
