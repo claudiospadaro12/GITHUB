@@ -21611,3 +21611,85 @@ togliere quel dubbio.
    misurando) sta quasi sicuramente mentendo sul proprio conto. Vale per: la
    riga d'asse, il nome dell'EA, il magic, l'etichetta del round, qualunque
    stringa che il file cita alla lettera dalla fonte.
+
+---
+
+## 383. 🔗🚪 UNA CATENA DI CODICE DOCUMENTATA RIGA PER RIGA CHE NON DICHIARA IL RAMO `if` **SOPRA** LA RIGA CITATA: la conclusione vale solo perche' un **INPUT PINNATO** tiene chiuso l'altro ramo (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt`
+(quarto file sulla sedia `770202`, asse `InpBEatR`) e' costruito attorno a una
+scoperta vera e mai documentata prima: **accendere il breakeven anticipato
+sposta anche il bersaglio della PARZIALE**, che e' un altro asse. La catena e'
+scritta come si deve — quattro righe di sorgente, in ordine, tutte verificate
+dal cancello e tutte esatte:
+
+```
+r.1783  be = NormalizePrice(openP)            -> lo stop va a pari
+r.1859  InitialSL(): partialDone==false e curSL!=0  -> torna curSL (= openP)
+r.1727  riskDist = openP - openP = 0          -> scatta il ripiego ATR
+r.1739  target = openP + dirSign*riskDist*InpTP1_R  -> bersaglio ricalcolato
+```
+
+🔴 **Ma `r.1739` e' il ramo `else`.** Due righe sopra c'e':
+
+```
+r.1736  if(InpUseRoundLevels && InpRoundStep > 0)
+r.1737     target = NextRoundLevel(openP, dirSign, InpRoundStep, ...)
+r.1738  else
+r.1739     target = openP + dirSign*riskDist*InpTP1_R
+```
+
+e `NextRoundLevel()` **non legge `riskDist`**: calcola il primo numero tondo
+nella direzione del trade. 👉 **Con `InpUseRoundLevels = true` il side effect
+sulla parziale NON ESISTE**: resta solo lo stop a pari, e il round misurerebbe
+una manopola sola invece di due. La conclusione del file e' giusta **perche' la
+cella viva pinna `InpUseRoundLevels = false`** (`.set` r.226) — cioe' per un
+**PIN**, non per una proprieta' dell'EA. E quel pin non era dichiarato come
+premessa da nessuna parte: stava in fondo al file, in mezzo agli altri 78,
+senza un commento.
+
+### 🧠 PERCHE' MORDE, e perche' nessuno dei due strati la vede
+- Il **cancello deterministico** controlla ASCII, celle, pin, magic, orari: non
+  legge il sorgente e non sa che `r.1739` ha un `if` sopra.
+- Il **cancello di giudizio** riapre ogni `r.NNN` — e le trova **tutte
+  esatte**. La riga citata *e'* quella giusta. Il difetto non e' nella
+  citazione: e' in **quello che la citazione tace**.
+- E' diverso dalla **377** (numero di riga sbagliato) e dalla **379** (comando
+  riscritto a memoria): qui **non c'e' nessun numero sbagliato**. C'e' una
+  catena **vera in questa configurazione** presentata come se fosse una
+  proprieta' del codice.
+
+🔴 **E il danno vero e' DIFFERITO, come nella classe 323.** Una catena scritta
+cosi' e' esattamente il materiale che qualcuno **copia** su una sedia gemella
+sei mesi dopo (`ABTG_DAX_Apertura_EU`, `ABTG_Nasdaq_Apertura_US`: stessa
+famiglia, stesso blocco `ManageOneTicket`). Se quella sedia ha i numeri tondi
+accesi, il lettore conclude il contrario di quello che succede — **e non ha
+niente da cui accorgersene**, perche' tutte le righe citate esistono e dicono
+quello che il file dice.
+
+### 🔴 LA REGOLA
+1. **Quando si documenta una catena di codice, ogni riga citata si guarda
+   anche IN SU**: se sta dentro un `if`/`else`/`switch`, la **condizione** fa
+   parte della catena e si scrive, con il suo numero di riga.
+2. 🔴 **Se la condizione dipende da un INPUT, si dichiara il suo VALORE, la sua
+   FONTE e il fatto che e' un PIN** (qui: `InpUseRoundLevels=false`, `.set`
+   r.226, blindato). Un pin che regge una conclusione **non e' un pin come gli
+   altri**: va commentato nel blocco dei pin, come gia' si fa per i parametri
+   "non inerti" (in `R172d`, `InpAtrSlMult`).
+3. **E si scrive il CONTRO-FATTUALE in una riga**: *"con `X = true` questa
+   catena non esiste"*. E' il contro-esempio della regola del 10/09 applicato a
+   una lettura di codice invece che a una misura — e costa una riga.
+4. 📌 **Il sintomo che la smaschera senza aprire niente**: una catena che cita
+   righe **non contigue** (`1783 -> 1859 -> 1727 -> 1739`) sta saltando dentro
+   e fuori da blocchi condizionali per costruzione. Ogni salto e' un `if` da
+   guardare.
+
+🟢 **La meta' che ha funzionato, e va detta** (un elenco di soli difetti
+descrive male la realta'): nello stesso file **tutte e quattro le righe della
+catena erano esatte**, verificate una per una nel sorgente; la proprieta'
+gemella — il **soffitto semantico a 1,00 R** — era dichiarata **e provata due
+volte**, in prosa (`DOW_MOTORE.md` r.100) e con i **numeri veri** di una
+griglia gia' girata (due celle diverse che stampano `2207,74 / PF 1,29574 /
+DD 6,8866 / 445`, riprodotto dal cancello sul CSV). Il file aveva gia' il
+riflesso giusto: *"la condizione che rende valido il conto, dichiarata invece
+che sottintesa"*. **Gli e' mancata una condizione su due, non il metodo.**
