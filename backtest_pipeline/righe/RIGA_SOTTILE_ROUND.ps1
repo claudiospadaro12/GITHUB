@@ -1234,7 +1234,26 @@ $BancoBT = 'C:\MT5_Backtest'
 #  NON sono cambiati fra 17a985cf e e66a31f8 (git diff sui due
 #  percorsi: VUOTO, verificato). Il sorgente EA fra 8b922147 e
 #  e66a31f8 e' sempre le stesse 27 righe/una sola input.
-$PIN = 'e66a31f81dbb8bf293ba0d81a0e520c92288387e'
+#  >>> SESSANTADUESIMO GIRO DI PIN (16/09/2026): e66a31f8 -> 44edd730.
+#  Serviva per armare R172h (InpSLMode, 2 celle, magic 789590), R172i
+#  (InpMinStopPts, 22 celle, magic 789600) e R172j (InpSkipIfTight, 2
+#  celle, magic 789610), le ULTIME TRE manopole mai provate su 770202:
+#  se girano, questa sedia chiude a 10/10. Secondo cancello PASS su
+#  tutti e tre dopo correzioni, tre classi NUOVE (388: HEAD dichiarato
+#  scaduto gia' al commit; 389: un meccanismo di fallimento che un pin
+#  dello stesso file spegne, specchio della 383; 390: una misura da
+#  formula invertita con quantizzazione e' un limite superiore, non un
+#  valore esatto). Classe 387 verificata PASS sui tre (limiti
+#  aritmetici, non claim direzionali). R172j dipende da R172i (S1
+#  incrociata sulla cella InpMinStopPts=8000): dichiarato in testa a
+#  R172j, non si legge R172j prima di R172i. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra e66a31f8 e 44edd730
+#  (git diff sui due percorsi: VUOTO, verificato). Il sorgente EA fra
+#  8b922147 e 44edd730 e' sempre le stesse 27 righe/una sola input.
+#  Magic 789590/789600/789610 riverificati vergini con grep -rl
+#  "InpMagic=<magic>" dalla radice del repo: una riga ciascuno, nessuna
+#  collisione col blocco vivo 789510-789580 (789560 lasciato libero).
+$PIN = '44edd730a9c45703f696bb85265f65fc4619b38d'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
