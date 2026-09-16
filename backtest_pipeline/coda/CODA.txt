@@ -2400,3 +2400,49 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte_DAX_Short_Ottimizzato -Prova R170c_closeatend_maxminnottedax_D30EUR.txt -Etichetta r170c -Modello 4 -Deposito 100000
 # =====================================================================
+#  R171a-b -- InpSLBufferPts, ABTG_EasyTrend, sedie 772421 (CHFJPY H1)
+#  e 772422 (GBPUSD H1). Chiude l'ultima manopola d'uscita scoperta
+#  sulla famiglia EasyTrend (InpTP_R era gia' ad asse in 60 CSV,
+#  InpSLBufferPts mai mossa in nessuno dei 107 CSV dell'albero, tutti
+#  costanti a 30). Con questi due file la famiglia e' completa sulla
+#  casella 3 del certificato di morte -- una delle due sole famiglie
+#  della flotta a cui manca UNA SOLA manopola (l'altra e' InpCloseAtEnd
+#  su ABTG_ORB_Ottimizzato, gia' chiusa da R147b).
+#
+#  Primo file della serie R162-R171 dove il MERITO non e' sospeso su
+#  entrambe le gambe: ancora R103 misurata (CHFJPY n=265 PF=1.066
+#  DD=21.80% Profit=+9598 PeggiorGiornata=-2.15%; GBPUSD n=254 PF=1.059
+#  DD=15.77% Profit=+8537 PeggiorGiornata=-2.17%), OOS sopra il
+#  pavimento dei 150 su tutte e due. Risponde anche a un rilievo di
+#  rischio aperto dal 24/08 mai chiuso (DD 3,44-3,48x il promesso).
+#
+#  🔴 MA la famiglia fa ~0,31 operazioni/giorno contro il pavimento di
+#  1,00 (0,175+0,134) ed e' GIA' bocciata in portafoglio da R49, sedie
+#  in OSSERVAZIONE. Dichiarato nel contro-esempio di entrambi i file,
+#  NON annacquato: NON e' una sedia per il 1 ottobre. Zero preset
+#  cambia, zero accensione, zero forward.
+#
+#  Secondo cancello: PASS dopo 14 correzioni (oltre a quelle gia' fatte
+#  dall'autoriaudit di chi ha scritto i file). Due superlativi falsi
+#  che gonfiavano il valore del round (l'unica famiglia a una manopola
+#  sono in realta' DUE; il primo file della serie sopra il pavimento
+#  e' in realta' il SECONDO, R164a il primo), cinque sigle B5/B8
+#  sbagliate (recidiva classe 377), sei citazioni/comandi che
+#  rieseguiti danno un altro numero (**classe 379, NUOVA**: un comando
+#  "riproducibile" citato nel file non e' stato davvero rieseguito
+#  prima di consegnare), un contro-esempio mancante in B7 (il referto
+#  citato marca la sedia NO al pedaggio 1,0 pip, non solo fragile).
+#  Verificato: nessuna riga di pin, direttiva @ o valore dell'asse
+#  toccato dalle correzioni (solo la prosa che li descrive).
+#
+#  Pin: giro di pin 35a0854 (52mo, eb4a498d -> 2baac2c2). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff eb4a498d..2baac2c2 su
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 e' VUOTO). Bersaglio:
+#  banco C:\MT5_Backtest (50504400). Magic 788410/788420, vergini a
+#  HEAD (grep dalla radice del repo, worktree compresi). Entrambi
+#  -Modello 1 -Deposito 100000, letti dal banco dell'ancora R103.
+# =====================================================================
+35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171a_slbufferpts_easytrend_CHFJPY.txt -Etichetta r171a -Modello 1 -Deposito 100000
+# =====================================================================
+35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171b_slbufferpts_easytrend_GBPUSD.txt -Etichetta r171b -Modello 1 -Deposito 100000
+# =====================================================================
