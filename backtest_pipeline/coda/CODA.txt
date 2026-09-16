@@ -2511,8 +2511,16 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  (falsa "granularita' stampata" -> vera "banda assoluta piu' larga
 #  del relativo"), numero della banda invariato. Nessun preset/criterio
 #  numerico tocco.
+#  🔁 RIARMATO ANCORA al giro di pin 61 (e66a31f8, 16/09/2026), SOLO
+#  R172a (R172b resta al pin 60, non toccato): un audit ha trovato la
+#  **classe 387 ricorsa**, stavolta MISURATA sui CSV di R46b, non solo
+#  teorica -- S3 avrebbe fermato la lettura del PF su una gamba OOS
+#  sana (130->123 Trades, -7, fuori da una banda direzionale +/-2).
+#  Riscritta a limite aritmetico (pavimento 56/96, tetto 112/192 sulle
+#  posizioni misurate, correggendo anche un tetto scritto male a
+#  148/260). Verificato indipendentemente dalla sessione principale.
 # =====================================================================
-17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
+6216938050d6c280b5b682b108654ee27e24e187 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
 # =====================================================================
 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
 # =====================================================================
