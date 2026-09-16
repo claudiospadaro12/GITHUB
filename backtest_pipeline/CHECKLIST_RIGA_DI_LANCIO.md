@@ -21693,3 +21693,62 @@ griglia gia' girata (due celle diverse che stampano `2207,74 / PF 1,29574 /
 DD 6,8866 / 445`, riprodotto dal cancello sul CSV). Il file aveva gia' il
 riflesso giusto: *"la condizione che rende valido il conto, dichiarata invece
 che sottintesa"*. **Gli e' mancata una condizione su due, non il metodo.**
+
+---
+
+## 384. 🔄👀 IL CANCELLO LEGGE UNA VERSIONE, L'AUTORE NE SALVA UN'ALTRA MENTRE LUI VERIFICA: quattro difetti "trovati" erano gia' stati corretti sotto di lui, e i numeri di riga del verdetto puntavano al file di prima (controllo-preventivo, 16/09/2026)
+
+**Il caso, misurato sui commit della stessa ora.** Il cancello di giudizio ha
+aperto `backtest_pipeline/prove/R172e_tp1r_dowapertura_U30USD.txt` a HEAD
+`12f9d29d` e l'ha letto per intero (1704 righe). Mentre verificava — greps sul
+sorgente, CSV d'ancora riaperti, aritmetica delle bande rifatta — **l'autore ha
+salvato nello STESSO albero di lavoro una revisione da 105 righe** e l'ha
+committata come `01ebf968` (*"Autocorrezione R172e: numeri di riga, classe 382
+propria, buco classe 372"*).
+
+**Cosa sarebbe finito nel verdetto se il cancello avesse scritto da quello che
+aveva letto**, ed e' un elenco preciso, non un timore:
+1. *"il file dichiara R172d NON committato: falso, e' in `717be501`"* — **gia'
+   corretto** dall'autore;
+2. *"`grep -ril r172d` torna quattro percorsi, non uno: classe 382"* — **gia'
+   dichiarato** dall'autore;
+3. *"`grep -rn 'ottimo misurato'` conta anche se stesso e otto worktree"* —
+   **gia' dichiarato**, con l'esclusione `--exclude-dir=.claude` motivata;
+4. *"il magic e' certificato «ZERO file» e il file stesso e' un match"* — **gia'
+   riscritto** nella forma che la classe 382 ammette.
+👉 **Quattro difetti su undici erano fantasmi**, e un verdetto gonfiato costa
+quanto uno taciuto: chi lo legge domani non sa piu' quali difetti fossero veri.
+
+🔴 **E la seconda faccia, che e' peggiore perche' silenziosa: i NUMERI DI RIGA
+del verdetto scadono.** Il blocco `B0` letto a r.1264 era diventato r.1349; la
+tabella della TOLLERANZA a r.682 era r.731. Un verdetto che dice *"correggere la
+riga 1264"* manda chi legge su un'altra frase. (E' la classe 369 punto 4 vista
+dal lato del CANCELLO invece che del file.)
+
+**Non e' la classe 368 e non e' la 365.** La **368** e' l'agente che committa e
+si porta dentro lo **stage** altrui: li' il danno e' la *tracciabilita'*, e
+succede fra `git add` e `git commit`. La **365/367** e' un'asserzione di
+*unicita'* che un altro agente falsifica. Qui **nessuno committa niente di
+altrui e nessuna asserzione e' falsa**: e' il **verdetto del cancello** che
+invecchia fra la lettura e la consegna, in un albero che `CLAUDE.md` prescrive
+**condiviso e parallelo**. E' la condizione **normale**, non la sfortuna.
+
+### ✅ CHE COSA FA IL CANCELLO, e sono quattro cose che costano trenta secondi
+1. 🔴 **Prima di scrivere il verdetto: `git status --porcelain <file>` e
+   `git diff <file>`.** Se il file e' cambiato dalla lettura, **si rilegge la
+   parte che si sta per contestare** e si toglie dall'elenco quello che nel
+   frattempo e' stato chiuso. Un difetto si cita **solo se e' ancora li'**.
+2. 🔴 **I difetti si citano per TESTO, mai per numero di riga** (`grep -n` della
+   frase, non `r.1264`): il testo sopravvive alle correzioni altrui, il numero
+   no. Vale anche per il verdetto che si consegna al chiamante.
+3. 🔴 **I due cancelli deterministici si rilanciano DOPO le proprie correzioni**,
+   non all'inizio: la prima corsa vale come fotografia, l'ultima come verdetto.
+   (Stessa forma della classe 382, spostata dal file allo strumento.)
+4. 📌 **E il merito va scritto**: quando l'autocorrezione dell'autore ha gia'
+   chiuso dei buchi, il verdetto lo dice — *"quattro erano gia' chiusi da
+   `01ebf968`"*. E' la prova che i due strati lavorano, e un elenco di soli
+   difetti descrive male la realta' (regola di casa).
+
+### 🔑 La regola in una riga
+**Un cancello che non ricontrolla il file appena prima di firmare non sta
+verificando un file: sta verificando un RICORDO.**

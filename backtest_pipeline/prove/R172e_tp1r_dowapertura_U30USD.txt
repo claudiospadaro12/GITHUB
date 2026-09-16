@@ -32,7 +32,11 @@
 #       della riga sopra, con la data.)
 #      cioe' un agente parallelo ha GIA' scritto la "d" sull'asse
 #      InpBEatR, e quel file si e' preso PROPRIO il magic 789540
-#      (sua r.1278 `InpMagic=789540||789540||0||789540||N`, letta oggi).
+#      (riga `InpMagic=789540||789540||0||789540||N`, cercata col
+#      `grep -n "^InpMagic=" backtest_pipeline/prove/R172d_*.txt` e non
+#      per numero di riga: al cancello quella riga e' la 1410, alla
+#      stesura era la 1278 -- le citazioni interne per riga scadono
+#      appena qualcuno corregge il file, classe 369 punto 4).
 #      Stato dei due AL MOMENTO DELL'ARBITRATO, misurato e non assunto:
 #        git status --porcelain backtest_pipeline/prove/
 #        -> "?? backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt"
@@ -98,7 +102,6 @@
 #    -Expert ABTG_Dow_Apertura_US
 #    -Prova prove\R172e_tp1r_dowapertura_U30USD.txt
 #    -Etichetta r172e -Modello 4 -Deposito 100000
-#    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 7 CELLE.
 #   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DI PASSATE: il driver
 #       stampa "celle x 2" CABLATO (walkforward_generico.ps1 r.880,
@@ -108,10 +111,30 @@
 #       (7 celle x 2 finestre: il taglio IS/OOS e' VERO, non degenere).
 #   Se le CELLE non sono 7, ci si ferma prima di lanciare altro.)
 #
-#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
-#     = demo 50504400, zero EA attaccati. La sedia 770202 VIVE su ALTRI
-#     DUE terminali e NON si tocca nessuno dei due (vedi il paragrafo
-#     DUE ISTANZE, sotto).
+#  !! IL BERSAGLIO E' C:\MT5_Backtest = demo 50504400, zero EA
+#     attaccati. La sedia 770202 VIVE su ALTRI DUE terminali e NON si
+#     tocca nessuno dei due (vedi il paragrafo DUE ISTANZE, sotto).
+#     >>> !! CORREZIONE DEL CANCELLO (classe 268, QUARTA ricorsa nella
+#         stessa serie -- e la notizia e' BUONA). La prima stesura di
+#         QUESTO file elencava `-TerminaleBacktest "C:\MT5_Backtest"`
+#         fra gli argomenti e scriveva "NON E' OPZIONALE (classe 204)":
+#         lo stampo era la versione PRE-CORREZIONE di R172a/b, cioe'
+#         esattamente il meccanismo della recidiva della classe 380
+#         ("una correzione di cancello non raggiunge il fratello scritto
+#         dopo"), stavolta sulla riga di lancio invece che su una banda.
+#         Verificato aprendo lo script e non ricordato:
+#         `backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1` ha un
+#         `param()` di SEI voci (r.99-105): `-Expert -Prova -Etichetta
+#         -Modello -Deposito -SoloControllo`. `-TerminaleBacktest` NON
+#         c'e': passarglielo a mano farebbe FALLIRE il lancio.
+#         >>> E LA GARANZIA E' PIU' FORTE, non piu' debole: il banco e'
+#             CABLATO nello script (r.131 `$BancoBT = 'C:\MT5_Backtest'`,
+#             riletto oggi) e inoltrato al driver a r.1340
+#             (`"-TerminaleBacktest",$BancoBT`). Nessun argomento della
+#             riga puo' cambiarlo per errore.
+#         >>> I quattro fratelli oggi sono tutti a posto: R172a r.34-43 e
+#             R172b r.43-52 portano la stessa correzione (commit
+#             `a7824f09`), R172c e R172d non l'hanno mai avuto scritto.
 #
 #  !! -Modello 4 e -Deposito 100000 SONO IL BANCO DELL'ANCORA DI QUESTA
 #     SEDIA, letti nella riga di lancio dell'ancora e non copiati dagli
@@ -406,11 +429,22 @@
 #    r.1739              il target della parziale
 #  E il conto della funzione e' un ALTRO comando, con un ALTRO numero
 #  (classe 379: le due misure non si mescolano):
-#  `grep -c "TpTotalR()" ...` torna UNDICI righe = OTTO punti di
-#  chiamata (r.907, r.931, r.989, r.1006, r.1144, r.1251-1252, r.1330,
-#  r.1363 -- r.1251-1252 e' UN SOLO ternario spezzato su due righe, e la
-#  seconda riga NON contiene `InpTP1_R`, che infatti nel grep sopra non
-#  compare) piu' la definizione a r.1452 e il corpo a r.1456.
+#  `grep -c "TpTotalR()" ...` torna UNDICI righe, e la scomposizione e'
+#  questa -- RIFATTA RIGA PER RIGA AL CANCELLO, perche' un totale che si
+#  spezza in addendi si spezza PER NOME (classe 379 regola 3):
+#    - NOVE righe di CHIAMATA su OTTO punti: r.907, r.931, r.989,
+#      r.1006, r.1144, r.1251+r.1252, r.1330, r.1363 -- r.1251-1252 e'
+#      UN SOLO ternario spezzato su due righe, e la seconda riga NON
+#      contiene `InpTP1_R`, che infatti nel grep sopra non compare;
+#    - UNA riga di DEFINIZIONE: r.1452 `double TpTotalR()`;
+#    - UNA riga di COMMENTO: r.285, la dichiarazione dell'input, il cui
+#      commento cita il nome della funzione ("TpTotalR() moltiplica x3").
+#    9 + 1 + 1 = 11.
+#    >>> r.1456 NON E' UN MATCH di questo grep e non va contato qui: il
+#        CORPO della funzione scrive `InpTP1_R*3.0`, non `TpTotalR()`.
+#        (La prima stesura lo contava al posto di r.285: totale giusto,
+#        addendi sbagliati -- proprio la forma che mente a chi va a
+#        controllare.)
 #
 #  La funzione, per intero (r.1452-1458, riletta oggi):
 #      double TpTotalR()
@@ -693,8 +727,9 @@
 #
 #  >>> LE DIFFERENZE FRA I PIN DI QUESTO FILE E LA CELLA VIVA, CONTATE A
 #      MACCHINA E NON A OCCHIO. Il .set ha 81 campi (contati leggendo il
-#      file riga per riga: 324 righe totali, 81 righe `nome=valore`, il
-#      resto commenti `;` e righe vuote). Questo file ne pinna 79 e ne
+#      file riga per riga e ricontate al cancello: 323 righe totali =
+#      81 righe `nome=valore` + 240 commenti `;` + 2 righe vuote, e la
+#      somma torna). Questo file ne pinna 79 e ne
 #      lascia due fuori. Confronto per nome, valore per valore (bool
 #      normalizzati true/1 e false/0, numeri confrontati come numeri):
 #        - 79 nomi in comune -> 77 IDENTICI, 2 DIVERGENTI, e sono:
@@ -1009,8 +1044,13 @@
 #         parziale e' spenta (tabella 1). Le due cose insieme sono la
 #         proprieta' (B) e diventano S3.
 #      4. LA TAGLIA DELLE DIFFERENZE, in punti di PF: in IS l'escursione
-#         lungo l'asse e' 0,190 punti (1,3387 -> 1,1487), in OOS 0,051
-#         (1,4087 - 1,3634 sul minimo). Cioe' in IS questo asse SUPERA
+#         lungo l'asse e' 0,190 punti (max 1,3387 a 0,50 -> min 1,1487 a
+#         0,84), in OOS 0,051 (max 1,4145 a 0,33 -> min 1,3634 a 0,67 --
+#         gli addendi sono questi, ricalcolati al cancello sulle quattro
+#         medie: 1,4087 e' la cella 0,84, che NON e' il massimo OOS).
+#         CRITERIO DICHIARATO (classe 364/373): escursione = massimo
+#         meno minimo delle QUATTRO medie di cella, in PUNTI PIENI di
+#         PF. Cioe' in IS questo asse SUPERA
 #         la banda di rumore B5 (0,10 punti) di quasi due volte, in OOS
 #         resta sotto. E' una manopola con un effetto VERO in almeno una
 #         gamba -- a differenza di `InpBreakevenAtTP1` (fratello R172c),
@@ -1312,9 +1352,11 @@
 # ---------------------------------------------------------------------
 #  B0  LA VARIABILE CHE DECIDE E' `Profit Factor`, LETTO INSIEME A
 #      `Equity DD %`. La domanda aperta non e' il rischio (il DD
-#      dell'ancora, 4,39% OOS sul banco a 1,0%, e' gia' dentro il
-#      promesso di 4,22% a meno di un'incollatura, e alla taglia viva
-#      0,65% vale ~2,86%): e' se il TP a 3R e il primo obiettivo a 1R
+#      dell'ancora, 4,39% OOS sul banco a 1,0%, sta SOPRA il promesso di
+#      4,22% di 0,17 punti -- una incollatura, ma SOPRA, e il verso va
+#      detto giusto: vedi B2.2, dove i due numeri sono dichiarati NON
+#      riconciliati; alla taglia viva 0,65% valgono ~2,86% e ~2,74%):
+#      e' se il TP a 3R e il primo obiettivo a 1R
 #      stiano nel posto giusto -- che e' una domanda sul RENDIMENTO.
 #      >>> E IL CONFRONTO SUL PF QUI E' MENO PULITO CHE IN R172c, e lo
 #          dico invece di lasciarlo intendere: li' le due celle
@@ -1362,8 +1404,21 @@
 #                (classe 178), e qui il risultato e' l'OPPOSTO di quello
 #                del fratello R172c: sull'archivio questo asse muove il
 #                DD dell'IS da 5,52% a 7,76% in media sulle 10 EMA, e su
-#                singole righe arriva a 8,31% (EMA 40, cella 0,84). Cioe'
-#                una variazione di oltre DUE punti, contro i 0,5 punti
+#                singole righe arriva molto piu' su. I due numeri, col
+#                CRITERIO accanto (classe 364: un "arriva a" senza
+#                criterio e' un superlativo nudo), ricalcolati al
+#                cancello su dow_walkforward_IS.csv:
+#                  - sulle DUE EMA che circondano la cella viva (40 e
+#                    60, perche' l'EA gira EMA 50 e in quella griglia il
+#                    reticolo andava di 20 in 20): massimo 8,3134%
+#                    (EMA 40, cella 0,84);
+#                  - su TUTTE E QUARANTA le righe della gamba IS:
+#                    massimo 12,4677% (EMA 20, cella 0,84) -- cioe' il
+#                    DD peggiore della griglia sta sulla cella PIU' ALTA
+#                    dell'asse, ed e' il verso che questo round deve
+#                    guardare.
+#                Cioe' una variazione di oltre DUE punti sulle medie
+#                (e di oltre SETTE sulle righe singole), contro i 0,5 punti
 #                di `InpBreakevenAtTP1`. La soglia 8,44% NON e'
 #                decorativa: e' proprio nella zona in cui questo asse
 #                gia' e' arrivato una volta. E' il cancello che potrebbe
@@ -1628,6 +1683,16 @@
 #  >>> LA RIVERIFICA CHE CONTA LA RIFA' IL CANCELLO, non la riporta
 #      l'autore (classe 365 regola 1): fra questa riga e il momento in
 #      cui la riga finira' in CODA.txt il repo puo' muoversi ancora.
+#      >>> FATTA. Il cancello di giudizio ha rilanciato
+#          `grep -rl "789550" --exclude-dir=.git .` dalla radice, con
+#          OTTO worktree vivi sul disco (`ls .claude/worktrees | wc -l`
+#          -> 8), a HEAD `12f9d29d` di `lavoro` (il commit che porta
+#          questo file): **UN solo percorso, ed e' questo file**.
+#          789550 e' vergine rispetto a quel commit. I magic dei quattro
+#          fratelli, ricontati nello stesso passaggio con
+#          `grep -n "^InpMagic=" backtest_pipeline/prove/R172[a-e]_*.txt`:
+#          789510 / 789520 / 789530 / 789540 / 789550 -- cinque valori
+#          distinti, nessuna collisione.
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO, ed e' una
 #      scelta deliberata: 789550 sta DIECI oltre il 789540 che l'agente
 #      parallelo si e' gia' preso per R172d, non UNO -- e la classe 365
