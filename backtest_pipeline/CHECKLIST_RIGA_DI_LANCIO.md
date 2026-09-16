@@ -20712,3 +20712,43 @@ non e' fortuna: l'etichetta e' un nome che ogni file si sceglie a caso in uno
 spazio largo, il magic e' **il successivo di una sequenza** — e due agenti che
 contano la stessa sequenza dallo stesso punto **arrivano sempre allo stesso
 numero**. 👉 **Le sequenze sono il posto dove la 365 colpisce; i nomi no.**
+
+## 368. DUE AGENTI NELLO STESSO ALBERO DI LAVORO: uno committa "tutto" e si porta dentro i file gia' in STAGE dell'altro, sotto un messaggio che non li descrive (controllo-preventivo, 16/09/2026)
+
+**Il caso, successo mentre si scriveva la classe 367.** Il cancello aveva
+corretto `R166a_slbufferpips_supertrendrev_225JPY.txt` + `CHECKLIST_RIGA_DI_LANCIO.md`
+e li aveva messi in **stage** con `git add` di **percorsi espliciti** (proprio
+per non toccare `R163a_...txt`, che un agente parallelo stava modificando nello
+stesso albero). Fra lo `git add` e lo `git commit` — i secondi che servono a
+scrivere un messaggio lungo — **l'altro agente ha committato**, e il suo commit
+`e30a9270` *("R163a: aggiorno le note sui CSV di R127a")* si e' portato dentro
+**tutti e tre** i file.
+
+**Cosa si perde, ed e' l'unica cosa che si perde:** non il contenuto (il lavoro
+e' salvo, Regola #1 rispettata per caso), ma la **tracciabilita'**. La
+correzione di un verdetto **FAIL** di cancello — con l'elenco dei difetti, le
+classi e il NON COPERTO — finisce sotto un titolo che parla d'altro. Chi un
+giorno cerchera' nella storia *"perche' R166a e' stato corretto"* **non
+trovera' niente**, ed e' esattamente il difetto che il progetto paga da mesi:
+una misura fatta che nessuno ritrova piu'.
+
+**Non e' colpa di nessuno dei due**: e' la condizione normale quando `CLAUDE.md`
+prescrive agenti **in parallelo** e la sandbox da' loro **un solo albero di
+lavoro**. `git add` di percorsi espliciti **non protegge**: lo stage e' unico
+per l'albero, e un `git commit -a` (o un `add -A`) altrui lo assorbe.
+
+### REGOLA
+1. **Fra `git add` e `git commit` non ci va niente di lungo.** Il messaggio si
+   scrive PRIMA (in un file nello scratchpad), poi si fa
+   `git add <percorsi> && git commit -F <file>` come **ultima** cosa.
+2. **Dopo ogni commit si verifica di essere stati NOI**: `git log -1 --format=%s`.
+   Se il titolo non e' il nostro, il contenuto e' comunque salvo ma la
+   tracciabilita' no.
+3. **E allora si rimedia SENZA riscrivere la storia** (altri agenti hanno gia'
+   quel commit): si fa un commit successivo che **porta il messaggio completo** e
+   dice **in quale commit il contenuto e' finito davvero**. Un rimando esplicito
+   costa una riga e ridiventa trovabile; un `rebase` costa a tutti gli altri.
+4. 🔴 **Non si committa MAI con `-a` o con `add -A`/`add .`** in un albero
+   condiviso: si elencano i percorsi, sempre — non perche' protegga lo stage
+   (non protegge), ma perche' impedisce di **assorbire il lavoro altrui** ed
+   e' l'unica meta' del problema che dipende da noi.
