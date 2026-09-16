@@ -1,0 +1,641 @@
+# =====================================================================
+#  EA: ABTG_PunteLarry
+#  R169c -- IL BUFFER DELLO STOP, MAI MOSSO SU NESSUNA DELLE SEI SEDIE
+#           GEMELLE -- sedia XAUUSD H1, magic vivo 772343 -- asse
+#           InpSLBufferATR, 7 celle
+#  Scritto il 16/09/2026. Criteri congelati PRIMA dei numeri.
+#  Terzo dei SEI file gemelli R169a-R169f (U30USD / EURAUD / XAUUSD /
+#  GBPJPY / GBPUSD / EURCAD): stesso asse, stesso motore, sei sedie.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1: finestra, taglio IS/OOS e
+#  asse arrivano TUTTI dalle direttive di questo file, non dalla riga):
+#    -Expert ABTG_PunteLarry
+#    -Prova prove\R169c_slbufferatr_puntelarry_XAUUSD.txt
+#    -Etichetta r169c -Modello 1 -Deposito 100000
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 7 CELLE.
+#   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DI PASSATE: il driver
+#       stampa "celle x 2" CABLATO (walkforward_generico.ps1 r.880/890)
+#       e quel *2 non legge mai @FRAZIONEIS -- classe 354. Qui le
+#       passate vere sono 7 (la gamba OOS e' DEGENERE, @FRAZIONEIS 1.0).
+#   Se le CELLE non sono 7, ci si ferma prima di lanciare altro.)
+#
+#  -Modello 1 = OHLC M1, ED E' UN LIMITE DICHIARATO, non una comodita':
+#  i tick reali BCM partono dal 2024.09.26 (2024.07.05 sui metalli).
+#  Sulla finestra di questo round NON ESISTONO. Conseguenze da scrivere
+#  accanto a OGNI numero: il DD che esce e' un LIMITE INFERIORE del
+#  rischio (l'OHLC non vede dentro la barra) e il profitto e' una STIMA
+#  DEL LORDO (spread corrente, zero slippage, riempimenti ideali), MAI
+#  un guadagno.
+#  -Deposito 100000: NON e' il default del driver (10.000). E' il
+#  deposito con cui l'ANCORA di questo file e' stata misurata davvero
+#  (R100, RIGA_R100_ORO_FLOTTA.ps1 r.200 "$Deposito = 100000"). Uno
+#  stato implicito non e' uno stato dichiarato -- e la classe 366
+#  (16/09) e' nata proprio da una riga armata che contraddiceva il
+#  deposito motivato dal suo file prova: chi arma questa riga legge
+#  QUESTO blocco, non il default della serata.
+# ---------------------------------------------------------------------
+#  !! ATTENZIONE: QUESTO ROUND *NON* E' COME R156a/R160a-e, E LA
+#     DIFFERENZA E' LA COSA PIU' IMPORTANTE DEL FILE
+#
+#  Quei sei round mettevano ad asse InpMaxDaysHold, e potevano
+#  scrivere -- correttamente -- "la geometria dello stop e' INVARIANTE
+#  lungo l'asse, quindi il cancello di costo non entra fra i criteri".
+#  QUI E' ESATTAMENTE IL CONTRARIO. InpSLBufferATR *E'* la geometria
+#  dello stop. Cambiandola cambiano, in cascata e nello stesso ordine
+#  in cui le calcola Enter() (ABTG_PunteLarry.mq5):
+#    r.640  buf = InpSLBufferATR * gAtrRef          <- l'asse
+#    r.650  sl  = gSigLow - buf  (o gSigHigh + buf) <- LO STOP
+#    r.665  riskDist = |px - sl|                    <- LA DISTANZA
+#    r.675  tp  = px +/- InpTP_R * riskDist         <- IL TARGET
+#    r.687  lot = LotByRisk(riskDist)               <- IL LOTTO
+#  QUINDI: il cancello di costo SI MUOVE lungo l'asse, il TP si muove,
+#  il lotto si muove. Tre cose che nei round R160 erano ferme.
+#  Ogni criterio di questo file e' scritto tenendone conto, e dove non
+#  posso misurare l'entita' dichiaro almeno IL VERSO (classe 362: un
+#  limite con il segno decide quanto un valore esatto).
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E QUESTA MANOPOLA -- verificato contro il repo
+#  VERO oggi, non a memoria di un censimento vecchio
+#
+#  1) LA MANOPOLA NON E' MAI STATA MOSSA SU NESSUNA DELLE SEI SEDIE, e
+#     NON lo dico citando il censimento (report/CENSIMENTO_USCITE_MAI_
+#     PROVATE_2026-09-11.md, riga 772341-346): l'ho CONTATO, in due modi
+#     indipendenti.
+#     (a) SUI FILE PROVA: grep di "InpSLBufferATR" su tutto
+#         backtest_pipeline/prove/. Su ABTG_PunteLarry escono R39a-f,
+#         R100, R102 x4, R103 x6, R156a e R160a-e: in TUTTI e' pinnata
+#         a 0.1 (flag N dove il formato lo prevede), cioe' BLINDATA.
+#         Zero file con flag Y su questo EA.
+#     (b) SUI RISULTATI: scanditi tutti i CSV di risultati_prove/ e
+#         risultati_archivio/ che portano la colonna `InpSLBufferATR`.
+#         Sono 224, e in TUTTI E 224 la colonna ha UN SOLO valore
+#         distinto. Zero CSV con due valori: la manopola non e' mai
+#         stata spazzolata in nessun round MAI GIRATO, non solo in
+#         nessun file MAI SCRITTO.
+#
+#     >>> !! MA UNA COSA VA CORRETTA, E LA SCRIVO PERCHE' LA PRIMA
+#         STESURA DI QUESTO FILE DICEVA IL FALSO: NON e' vero che
+#         "InpSLBufferATR non e' mai stata messa ad asse OVUNQUE". Il
+#         NOME e' condiviso fra due EA diversi, e su ABTG_CostToCost e'
+#         GIA' un asse, due volte:
+#           prove/R146a_slbufferatr_EURJPY.txt (EURJPY H4, 9 celle)
+#           prove/R146c_slbufferatr_GBPCAD.txt (GBPCAD H4, 9 celle)
+#         tutti e due con `InpSLBufferATR=0.2||0.0||0.10||0.80||Y`.
+#         Un'affermazione su un insieme vale per l'insieme che si e'
+#         davvero guardato (classe 352/180): qui l'insieme e' "i file
+#         prova di ABTG_PunteLarry", NON "il repo".
+#     >>> E LA CORREZIONE E' UN GUADAGNO, non una pezza: R146a/R146c
+#         sono PRECEDENTI DI CASA sulla stessa identica manopola, e
+#         hanno preso in modo indipendente le stesse tre decisioni di
+#         questo file -- bordo basso a 0.00 come LIMITE FISICO e non
+#         come scelta, asse NON centrato sulla cella viva e dichiarato
+#         tale, cancello del costo collocato SOPRA. Che due round
+#         scritti a giorni di distanza su motori diversi convergano
+#         sulla stessa FORMA di griglia e' una controprova che la forma
+#         la detta il parametro, non il gusto di chi scrive.
+#     >>> DIFFERENZA DA DICHIARARE, perche' i due NON sono la stessa
+#         cosa e il numero ingannerebbe: in ABTG_CostToCost il buffer e'
+#         in frazioni di ATR(14) DEL TF OPERATIVO (H4); qui e' in
+#         frazioni di ATR(D1) (r.157 e r.640). Stesso nome, DUE METRI
+#         DIVERSI, e quello di qui e' MOLTO piu' grande. Quindi i valori
+#         dei due assi non sono confrontabili e il passo di R146a (0,10)
+#         NON e' un argomento per il passo di questo file: e' anzi la
+#         ragione per cui qui il passo e' la meta' (0,05) e il bordo
+#         alto e' 0.30 invece di 0.80.
+#
+#  2) !! LA MANOPOLA E' VIVA QUI, E IL VALORE VIVO NON L'HO LETTO NEL
+#     DEFAULT COMPILATO (classe 369, nata oggi). InpSLBufferATR agisce
+#     SOLO dentro il ramo `if(InpSLMode==0)` (r.638-651): con
+#     InpSLMode=1 sarebbe COMPLETAMENTE IGNORATA (il ramo else, r.653,
+#     usa InpAtrSlMult e non guarda il buffer). Quindi la domanda
+#     "quanto vale InpSLMode in campo?" decide se questo round misura
+#     qualcosa o niente.
+#     >>> LA RISPOSTA, LETTA NELL'ARTEFATTO CHE CONFIGURA LA SEDIA e
+#         non nel default: in mql5/Presets/ NON ESISTE nessun .set di
+#         ABTG_PunteLarry (contate le 70 voci della cartella: zero
+#         corrispondenze). L'artefatto che pinna questa sedia e' il
+#         file prova R100, che ho aperto campo per campo:
+#           prove/R100_ABTG_PunteLarry_772343.txt
+#         dice `InpSLMode=0||0||0||0||N` e `InpSLBufferATR=0.1||0.1||
+#         0||0.1||N`.
+#     >>> E L'HO VERIFICATO SU TUTTE E SEI, non su un campione
+#         generalizzato all'intero (classe 352): i sei file R103
+#         (772341-346) portano TUTTI `InpSLMode=0`. Sei su sei.
+#         Nessuna delle sei ha la manopola inerte.
+#     >>> LE TRE FONTI CONCORDANO, e dichiaro in quale ordine di
+#         autorita' (classe 369 regola 1): (1) il file prova che ha
+#         girato la sedia = FONTE; (2) il default compilato r.152-153
+#         = controprova; (3) i CSV d'archivio con la colonna costante
+#         a 0.1 = controprova. Qui manca il .set, e il motivo e' che
+#         questa famiglia non ne ha uno: lo dichiaro invece di
+#         spacciare una controprova per la fonte.
+#
+#  3) IL RISCHIO DI QUESTA SEDIA E' PULITO -- controllo VERO vs
+#     DICHIARATO, letto riga per riga:
+#     report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md:
+#       PunteLarry XAUUSD 772343 | gira 0,30 | gamba 0,30 |
+#       n 1 | EVENTO 0,30% | rapporto 1,00x | "una posizione"
+#     cioe' rischio VERO = rischio DICHIARATO. Nessun bug di taglia,
+#     e il meccanismo e' nel sorgente non solo nel referto: r.408, la
+#     guardia `if(CountPositions()>0 || CountPendings()>0 ||
+#     GiaOperatoOggi(...))` blocca qualunque nuovo ciclo.
+#     >>> CONTRO-ESEMPIO CHE MI SONO COSTRUITO: sulla stessa riga di
+#         quel referto c'e' anche una colonna "xRes" con valori 2,00x
+#         e 3,33x, identici alla cifra che marca il bug di 970913. NON
+#         E' LA STESSA COLONNA. Il rapporto vero/dichiarato e'
+#         EVENTO/gamba e vale 1,00x; xRes misura di quanto salterebbe
+#         il rischio SE qualcuno premesse "Resetta" e ricaricasse il
+#         default compilato 1.0 al posto della taglia viva. E' un
+#         rischio di MANOVRA UMANA, e non tocca questo round (qui il
+#         rischio e' PINNATO nel file, non ereditato).
+#
+#  4) UNITA' DI MISURA -- CLASSE 226/346 CHIUSA, E NON PER INFERENZA:
+#     ABTG_PunteLarry.mq5 NON HA NESSUN parziale. Grep su tutto il
+#     sorgente per "Partial|TP1|ClosePartial|InpTP1Pct": ZERO
+#     occorrenze (la lista completa degli `input` e' r.135-178 e non ne
+#     contiene nessuno). Quindi la colonna `Trades` del CSV di questo
+#     round E' il conteggio delle POSIZIONI, fattore di conversione
+#     1,00 MISURATO SUL SORGENTE.
+#
+#  5) IL CANCELLO DI COSTO -- !! QUI E' UN CRITERIO VIVO, NON UNA NOTA
+#     LA MISURA CHE POSSIEDO, alla cella VIVA (buffer 0.10):
+#       stop MISURATO in campo  : 61,48 $ [MIS] n=1 gamba
+#                                 report/CANCELLO_COSTO_FLOTTA_
+#                                 2026-09-10.md r.460
+#       spread                  : 0,2603 $ (costo pieno, commissione
+#                                 compresa; il piu' prudente che
+#                                 possediamo -- e le sedie oro operano
+#                                 a ore per cui lo spread e' [NON
+#                                 MISURATO], dichiarato nel referto
+#                                 stesso al suo par. 4.2)
+#       rapporto                : 236,2x  -> PASSA, il margine piu' largo
+#                                 delle sei sedie
+#     >>> QUESTA E' LA SEDIA PIU' PROTETTA DELLE SEI dal lato del costo:
+#         236,2x e' 5,9 volte il pavimento di lavoro. Perche' una cella
+#         di questo asse scenda sotto 40x, lo stop dovrebbe ridursi a
+#         meno di un SESTO. Non e' plausibile con un buffer che alla
+#         cella viva vale 0,1 x ATR(D1): il grosso dello stop e'
+#         l'escursione della candela segnale, non il buffer.
+#         [MA LA QUANTITA' RESTA NON MISURATA -- vedi sotto.]
+#     >>> E QUESTO ROUND LO SPOSTA, a differenza di R156a/R160a-e. Il
+#         verso e' DIMOSTRATO, non stimato: stop(b) = estremo +
+#         b x ATR(D1) e' MONOTONO CRESCENTE in b (r.640/650), e lo
+#         spread non dipende da b. Quindi x(b) = stop(b)/spread e'
+#         MONOTONO CRESCENTE lungo l'asse:
+#           celle 0.00 e 0.05  -> cancello PEGGIORE della cella viva
+#           celle 0.15 ... 0.30 -> cancello MIGLIORE
+#     >>> L'ENTITA' INVECE E' [NON MISURATA], e dico perche' invece di
+#         stimarla: servirebbe ATR(D1) su questo simbolo, e l'ho
+#         CERCATO (classe 372: un'assenza si cerca, non si dichiara) --
+#         grep di "ATR(D1)" su tutto report/*.md da solo descrizioni
+#         di meccanismo e un valore sul Dow, MAI un ATR(D1) misurato
+#         per questi sei simboli. Quindi scrivo il SEGNO, non il
+#         numero. E' esattamente la classe 362: un limite con il verso
+#         decide da un lato, e da quel lato si usa.
+# ---------------------------------------------------------------------
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (riga per riga, oggi)
+#    mql5/Experts/ABTG_PunteLarry.mq5:
+#      r.153    input double InpSLBufferATR = 0.1; // SCELTA NOSTRA
+#               (SLMode 0): buffer oltre l'estremo, in frazioni di
+#               ATR(D1)
+#      r.255-256 OnInit MUORE (INIT_FAILED) se InpSLBufferATR < 0.
+#               L'asse di questo file (0.00 .. 0.30) e' tutto legale,
+#               bordo basso COMPRESO: 0.0 e' ammesso, non e' un
+#               valore che fa fallire l'init.
+#      r.638-651 IL RAMO VIVO (SLMode 0):
+#               r.640  buf = InpSLBufferATR * gAtrRef
+#               r.650  sl  = isLong ? gSigLow-buf : gSigHigh+buf
+#               (r.641-648 e' il ramo OOPS, PatternMode 2: NON usato
+#                da questa sedia, che gira PatternMode 0)
+#      r.653    IL RAMO MORTO QUI (SLMode 1): usa InpAtrSlMult e NON
+#               guarda il buffer. Pinnato SLMode=0, quindi mai preso.
+#      r.788    SyncOopsStop() rilegge il buffer, MA la funzione esce
+#               subito a r.781 `if(InpPatternMode!=2 || InpSLMode!=0)
+#               return;`. Con PatternMode 0 e' un RAMO MORTO su
+#               questa sedia: nessun effetto, e lo dico invece di
+#               lasciarlo come dubbio a chi legge.
+#      r.197/427 gAtrRef e' l'ATR(D1) CONGELATO al rilevamento del
+#               setup, non ricalcolato all'esecuzione: il buffer di un
+#               trade e' deciso una volta sola.
+#
+#    >>> I QUATTRO CANALI PER CUI L'ASSE PUO' MUOVERE I NUMERI,
+#        elencati per nome (mai "tutto il resto", classe 180):
+#      (i)   LA DISTANZA DI STOP, r.665. Buffer piu' grande = stop piu'
+#            lontano = meno stop-out, perdite singole piu' grandi.
+#      (ii)  IL TARGET, r.672-676. Questa sedia gira InpExitMode=
+#            1 -> R-based: il TP esiste (r.673-676) e SCALA col buffer.
+#      (iii) IL LOTTO, r.687 LotByRisk(riskDist). Stop piu' largo =
+#            lotto piu' piccolo, a rischio % costante.
+#            !! MA ATTENZIONE, r.1029-1037: il lotto viene riportato
+#            al MINIMO del simbolo con `MathMax(mn, ...)`. Quando lo
+#            stop e' cosi' largo che il lotto calcolato scende sotto il
+#            minimo, il rischio EFFETTIVO SUPERA InpRiskPercent. E'
+#            scritto nel sorgente come limite di famiglia (r.1033-1036)
+#            e vale in UN SOLO VERSO: puo' gonfiare il DD delle celle
+#            ALTE, mai di quelle basse. Sta nel contro-esempio, sotto.
+#      (iv)  IL NUMERO DI OPERAZIONI, r.656-663. Se lo stop finisce
+#            troppo vicino all'ingresso (`slOk` falso, distanza sotto
+#            StopsMinDist = max(stops_level, spread), r.982-987) la
+#            GIORNATA E' SALTATA e si conta cO_failLevel. Buffer piu'
+#            piccolo = stop piu' vicino = piu' possibilita' di saltare.
+#            Quindi n NON e' necessariamente costante lungo l'asse, e
+#            se si muove il verso atteso e' n(0.00) <= n(0.30).
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL TAGLIO IS/OOS
+#
+#  a) DATA D'INIZIO MISURATA: sonda del 17/08 (riga XAUUSD,
+#     PrimaDataTF H1 = 2004.06.11) -- ed e' la stessa data che R100 ha
+#     girato davvero il 23/08, quindi una finestra GIA' PROVATA su
+#     questo banco, non un'ipotesi.
+#  b) NESSUN TAGLIO IS/OOS, E NON E' PIGRIZIA. Frequenza NOTA: R103
+#     misura 60 posizioni in 6,50 anni = 9,2/anno.
+#       finestra 2004.06.11 -> 2026.06.30 = 8054 giorni = 22,05 anni
+#       n atteso sull'INTERA finestra: 9,2 x 22,05 = ~203 posizioni
+#     Per avere IS>=150 E OOS>=150 servirebbero >=300 posizioni: alla
+#     stessa frequenza, 32,6 ANNI di storico, dieci piu' di quelli che
+#     il broker ha. Tagliare darebbe due gambe da ~81 e ~122: ENTRAMBE
+#     sotto il pavimento -- un peggioramento, non un rimedio.
+#     Quindi UNA SOLA TRANCHE, DICHIARATA con '@FRAZIONEIS 1.0'.
+#  c) CONSEGUENZA SCRITTA PRIMA DEI NUMERI: il MERITO resta SOSPESO
+#     (regola B). Il round e' scopato al RISCHIO e alla FORMA.
+#  d) UN SOLO REGIME? NO, ed e' il pregio di questa finestra: 22 anni
+#     d'oro contengono il toro 2005-2011, il crollo 2013 (-28% in un
+#     anno), il laterale 2014-2018, il toro covid, la corsa 2024-2026.
+#     Non e' la prova di regime formale (le quattro finestre di casa,
+#     regola C), ma non e' nemmeno il "solo toro 21 mesi" di R169a.
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- 0.00 / 0.05 / 0.10(vivo) / 0.15 / 0.20 / 0.25 /
+#  0.30 -- 7 celle, passo 0.05
+#
+#  !! L'ASSE NON E' CENTRATO SULLA CELLA VIVA, E NON PUO' ESSERLO.
+#  Il dominio ha un PAVIMENTO DURO a 0: r.255-256 fa INIT_FAILED su un
+#  buffer negativo. Con la cella viva a 0.10 e passo 0.05 esistono
+#  soltanto DUE celle sotto (0.00 e 0.05) e QUATTRO sopra. Lo dichiaro
+#  invece di chiamarlo "centrato": una griglia asimmetrica dichiarata
+#  e' onesta, una spacciata per simmetrica no.
+#  Conseguenza operativa sulla regola di selezione (B5): un altopiano
+#  che tocchi il bordo BASSO ha meno celle per formarsi. Non e' un
+#  motivo per preferire l'alto: e' un motivo per dire quante celle
+#  aveva a disposizione.
+#
+#  BORDO BASSO 0.00 = lo stop ESATTAMENTE sull'estremo della candela
+#  segnale, senza un tick di margine. Non e' una cella degenere: e' un
+#  regime di pieno diritto ("nessun buffer") e per giunta il piu'
+#  interessante, perche' e' il livello su cui si accumulano gli stop di
+#  tutti. Attesa esplicita: piu' stop-out.
+#  BORDO ALTO 0.30 = tre volte il valore vivo. Oltre, il buffer
+#  comincia a dominare l'escursione della candela e lo stop smette di
+#  essere "oltre l'estremo" per diventare "a caso, lontano": il
+#  meccanismo che si sta misurando non e' piu' quello.
+#
+#  !! PERCHE' IL BORDO SCRITTO E' 0.31 E NON 0.30 -- e non e' un errore
+#     di battitura: e' una MISURA che ho fatto apposta prima di
+#     scrivere la riga, perche' qui i due contatori del progetto
+#     NON DANNO LO STESSO NUMERO.
+#       - il driver conta  floor(|stop-start|/passo + 1e-9) + 1
+#         (walkforward_generico.ps1 r.792, il +1e-9 e' deliberato)
+#       - controlla_prova.py conta  int(|stop-start|/passo) + 1
+#         (r.203) -- SENZA il +1e-9
+#     Con stop 0.30 in virgola mobile 0.30/0.05 vale 5,999999999999999:
+#     il driver arrotonda e fa 7 celle, il cancello tronca e ne dichiara
+#     6. Peggio: un ottimizzatore che generi i valori come start + i*passo
+#     otterrebbe 0.30000000000000004 > 0.30 e SPAZZOLEREBBE SOLO 6 CELLE,
+#     perdendo il bordo alto IN SILENZIO.
+#     Con stop 0.31 (verificato numericamente da me su tutti e tre i
+#     modi di contare) le celle sono 7 in tutti e tre, e l'ultima resta
+#     0.30. Il bordo VERO dell'asse e' 0.30: lo 0.31 e' un margine di
+#     sicurezza contro la virgola mobile, dichiarato qui perche' chi
+#     legge il CSV non si aspetti una cella a 0.31 che non esistera'.
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+#  - DD: atteso in CALO al crescere del buffer, ed e' l'unica direzione
+#    che questo file si sente di dichiarare, perche' e' gia' stata
+#    MISURATA IN CASA TRE VOLTE su altri motori (report/CANCELLO_COSTO_
+#    FLOTTA_2026-09-10.md par. 6.3: R55, R88 3,84% contro 9,76%, R118
+#    piano inclinato monotono su 5 gradini, tutti "la stessa sedia con
+#    se stessa, cambia solo la geometria dello stop"). ATTENZIONE: e'
+#    un'attesa su un ALTRO motore, quindi e' un'IPOTESI da verificare,
+#    non un risultato da confermare.
+#  - n: atteso quasi COSTANTE, con una possibile leggera salita verso
+#    le celle alte (canale iv: meno giornate saltate per stop troppo
+#    vicino). Se n salisse MOLTO, il canale (iv) e' piu' forte di quanto
+#    penso e va riletto prima di guardare il resto.
+#  - PF: NESSUNA direzione dichiarata. Stop piu' largo = meno stop-out
+#    (alza il tasso di vincita) ma perdite piu' grandi (abbassa il
+#    payoff). I due effetti tirano in verso opposto e questo file non
+#    finge di sapere quale vince: si guarda.
+#  - PROFITTO: nessuna direzione dichiarata, per la stessa ragione.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': DD in discesa quasi monotona,
+#    n quasi piatto, PF senza forma chiara. Se e' cosi', la risposta
+#    onesta e' "il buffer governa il RISCHIO, non il merito" -- e chiude
+#    comunque la casella 3 del certificato di morte (gestione
+#    dell'uscita messa ad asse) su questa sedia.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: se le sette celle uscissero
+#    IDENTICHE. Vorrebbe dire che il buffer non e' arrivato all'EA
+#    (pin non applicato, o SLMode diverso da quello che credo): si
+#    ricontrolla il pin PRIMA di leggere qualunque colonna. Vedi S5.
+# ---------------------------------------------------------------------
+#  LE SENTINELLE -- SI CONTROLLANO PRIMA DI QUALUNQUE ALTRO NUMERO
+#
+#  S1 -- L'ANCORA, ed e' la CELLA VIVA SULLA STESSA IDENTICA FINESTRA:
+#    R100 (23/08) ha girato XAUUSD H1, 2004.06.11 -> 2026.06.30, OHLC
+#    M1, deposito 100.000, rischio 1,0%, con la cella IDENTICA a quella
+#    pinnata qui (PatternMode 0, ExitMode 1, TP_R 1.5, SLMode 0, buffer
+#    0.1, MaxDaysHold 5, spread 300, solo LONG) -- verificato campo per
+#    campo da me su prove/R100_ABTG_PunteLarry_772343.txt.
+#      fonte: risultati_archivio/R100_REFERTO.md r.16
+#      attesi: Equity DD% 29,74  |  peggior giorno -3,91%
+#    TOLLERANZA CONGELATA: DD entro +/-2% relativo (29,15 - 30,33),
+#    criterio FRAZIONE DELL'ANCORA (classe 373).
+#    >>> ATTENZIONE, E LO SCRIVO PERCHE' E' UNA TRAPPOLA: R100 e'
+#        l'ancora giusta per QUESTA finestra, ma NON e' la cella viva
+#        della SEDIA. La sedia 772343 gira a rischio 0,30% dal 23/08
+#        (firma REVISIONE R100, report/CONTRATTI_SEDIE.md r.146),
+#        mentre questo round gira a 1,0% come R100. La conversione e'
+#        lineare [APPROSSIMATA]: ogni numero di rischio va MOLTIPLICATO
+#        per 0,30 prima di parlare della sedia vera.
+#    >>> Se il DD della cella viva cade fuori banda: CI SI FERMA.
+#
+#  S2 -- IL PAVIMENTO. Trades della tranche unica: atteso ~203, sopra 150 -- ma senza gamba di verifica il MERITO resta SOSPESO lo stesso (regola B).
+#
+#  S3 -- LE CELLE. Nel CSV devono comparire 7 valori distinti di
+#    InpSLBufferATR (0.00 0.05 0.10 0.15 0.20 0.25 0.30) su UN file.
+#    La colonna si cerca PER NOME, non per posizione: l'intestazione
+#    la costruisce OnTesterDeinit come statistiche cablate + i NOMI
+#    degli input nell'ORDINE DI DICHIARAZIONE, quindi la POSIZIONE
+#    cambia con il binario e un numero d'ordine letto su un CSV
+#    d'archivio sarebbe sbagliato (classe 369 regola 3).
+#    Se le celle sono 6, il sospetto n.1 e' il bordo in virgola
+#    mobile: si confronta col riquadro dello 0.31 qui sopra PRIMA di
+#    dare la colpa al banco.
+#
+#  S4 -- LA FINESTRA EFFETTIVA. Non e' un sospetto teorico ed e' la
+#    sentinella che la classe 355 (nata il 15/09 PROPRIO su questa
+#    famiglia, R160a/R160b) ha reso obbligatoria: una soglia su n NON
+#    separa "il motore opera meno" da "la storia non c'e'", perche
+#    un accorciamento realistico produce comunque un n sopra 150.
+#    QUINDI SI VERIFICA A MANO, sul report MT5 della gamba piu' lunga
+#    della CELLA VIVA (0.10):
+#      - DATA DELLA PRIMA OPERAZIONE entro 12 mesi da 2004.06.11
+#        -> FINESTRA PIENA.
+#      - oltre -> FINESTRA ACCORCIATA: si scrive la data vera e gli
+#        anni VERI ACCANTO A OGNI NUMERO di questo round.
+#      - DENSITA': se anni solari interi dentro la finestra non hanno
+#        NESSUNA operazione, il numero da dire e' quello degli anni
+#        OPERATI, non quello della finestra dichiarata.
+#    Motivo per cui serve: `walkforward_generico.ps1` non ha nessun
+#    gate di densita' (zero occorrenze di "FINESTRA ACCORCIATA" e
+#    "DENSITA'"), mentre il driver di R102 ce l'aveva ed e' proprio
+#    quello che ha MISURATO il difetto (GapFill GBPUSD: finestra
+#    NOMINALE 34 anni, EFFETTIVAMENTE OPERATA 10).
+#    S4 non ferma la corsa: la corsa PROSEGUE e la riga si scrive.
+#
+#  S5 -- !! LA MANOPOLA HA AGITO? (classe 357, e senza questa S3 non
+#    basta). S3 dice che le sette celle ESISTONO; NON dice che sono
+#    DIVERSE. Il mondo in cui il buffer non arriva all'EA produce
+#    sette righe con sette valori di InpSLBufferATR e SETTE RISULTATI
+#    IDENTICI -- e passerebbe S1, S2, S3 e S4 senza una macchia.
+#    CRITERIO: almeno UNA coppia di celle CONTIGUE deve differire in
+#    `Profit`. Se tutte e sette coincidono fino all'ultima cifra
+#    stampata, il PASS di questo round e' VACUO e si va a cercare il
+#    pin, non l'interpretazione.
+#    >>> PERCHE' `Profit` E NON `Trades`: n puo' legittimamente restare
+#        costante (il canale (iv) e' debole), mentre il lotto cambia a
+#        OGNI trade per costruzione (r.665 -> r.687). Un asse che
+#        agisce e lascia il profitto identico non esiste.
+#    >>> E QUESTA SENTINELLA NON HA IL PROBLEMA DELLA CLASSE 370 (il
+#        time-stop che sembra inerte perche' esce al primo tick dopo):
+#        qui non c'e' nessun orologio. Il buffer agisce al PIAZZAMENTO
+#        dell'ordine (r.640, dentro Enter()), non a una scadenza, e
+#        Enter() gira su una barra chiusa. Due celle non possono
+#        coincidere per una pausa di sessione. L'ho verificato prima di
+#        scrivere S5 proprio perche' la 370 e' di oggi.
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  MERITO -- NON AMMESSO. Una sola tranche, nessuna gamba di
+#        verifica: il PF che esce e' IN CAMPIONE per costruzione
+#        (regola B). Si registra, non si promuove.
+#    B2  RISCHIO -- la colonna che conta davvero su questo asse, ed e'
+#        la ragione per cui il round vale la pena. Il DD esce a rischio
+#        1,0%; la taglia VIVA della sedia e' 0,30%, quindi il DD alla
+#        taglia viva e' il numero del CSV moltiplicato per
+#        0.30/1.0 [APPROSSIMATO lineare, convenzione
+#        CONTRATTI_SEDIE.md]. Due soglie:
+#          B2.1  se una cella supera 20,0% a 1% (= 10,0% alla taglia di
+#                riferimento 0,5% = il muro prop) si scrive SUBITO,
+#                prima del PF.
+#          B2.2  regola meccanica firmata (corsia RISCHIO 18/08): DD
+#                lungo > 2x il DD PROMESSO -> REVISIONE. Il promesso e'
+#                9,0% alla taglia viva 0,30% (report/CONTRATTI_SEDIE.md
+#                r.146) = 30,0% a 1%. Soglia di revisione: 60,0% a 1%.
+#                >>> CONTROLLO DI VUOTO FATTO PRIMA: l'ancora R100 misura
+#                    29,74% a 1%, cioe' meta' della soglia. B2.2
+#                    DISCRIMINA. NON e' vacua.
+#                >>> MA IL CONTRATTO DI QUESTA SEDIA E' GIA' IN REVISIONE
+#                    DAL 23/08 (R100: DD 29,74% contro 3,50% promesso =
+#                    8,5x, verdetto REVISIONE, rischio sceso da 1,0 a
+#                    0,3). Il "promesso 9,0%" che uso qui e' il valore
+#                    RISCRITTO da quella firma, non quello vecchio.
+#                    Usare il 3,50% originale renderebbe B2.2 vacua
+#                    (gia' attraversata dall'ancora): e' esattamente il
+#                    controllo che ho fatto prima di scegliere il
+#                    numero.
+#    B3  FORMA -- si registra se il DD scende in modo monotono o quasi
+#        (al massimo UNA inversione fra celle adiacenti) da 0.00 a
+#        0.30, e si registra se n si muove.
+#    B4  !! IL ROUND NON PROMUOVE NIENTE. Nessun preset cambia, nessuna
+#        sedia si accende o si spegne, il forward non si tocca, CODA.txt
+#        e il pin non si toccano da questo file. Taglie e rischio
+#        restano [FIRMA DI CLAUDIO].
+#    B5  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella
+#        X": SEMPRE il CENTRO di un tratto contiguo che passa B2+B3,
+#        MAI il picco isolato (R70, ripresa da R136a/R146c/R153a-R160e).
+#        E si dichiara QUANTE celle aveva il tratto, visto che il bordo
+#        basso e' a due celle dalla viva.
+#    B6  !! CANCELLO DI COSTO -- SOGLIA NUOVA, CHE NEI ROUND R160 NON
+#        C'ERA PERCHE' NON SERVIVA. Una cella che ABBASSA il rapporto
+#        stop/spread sotto il pavimento di lavoro 40x non e'
+#        promuovibile NEMMENO se ha il DD piu' basso: un DD piu' basso
+#        comprato con uno stop sotto il pedaggio e' un numero di
+#        backtest, non un vantaggio reale.
+#        >>> COME SI APPLICA QUI, col numero che possiedo:
+#            la cella viva sta a 236,2x, il margine piu' largo delle
+#            sei. B6 quasi certamente non morde, ma si controlla lo
+#            stesso perche' l'entita' e' [NON MISURATA].
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#
+#  COME QUESTO ROUND POTREBBE SEMBRARE "VERDE PER CASO", e come lo
+#  distinguo con le misure che QUESTO file produce:
+#
+#  T1. "IL DD SCENDE, QUINDI IL BUFFER LARGO E' MEGLIO."
+#      !! E' la trappola principale di questo asse, ed e' ARITMETICA,
+#      non statistica: a rischio % costante uno stop piu' largo prende
+#      un LOTTO piu' piccolo (r.687), quindi il DD in percentuale
+#      scende ANCHE SE IL MOTORE NON E' MIGLIORATO DI NIENTE. Il DD non
+#      e' un giudizio sul merito: e' quasi una funzione del lotto.
+#      COME LO DISTINGUO: guardando PF e Profit INSIEME al DD. Se il DD
+#      scende e il PF resta piatto, non c'e' nessun miglioramento: c'e'
+#      solo una posizione piu' piccola, e la stessa cosa si otterrebbe
+#      abbassando InpRiskPercent senza toccare la geometria. Se invece
+#      il DD scende E il PF sale, la geometria sta facendo qualcosa.
+#
+#  T2. IL PAVIMENTO DEL LOTTO, CHE TIRA NEL VERSO OPPOSTO E LO SCRIVO
+#      PERCHE' MI SMONTEREBBE T1 SE NON LO DICHIARASSI: r.1029-1037,
+#      `MathMax(mn, ...)`. Sulle celle ALTE lo stop e' piu' largo,
+#      quindi il lotto calcolato e' piu' piccolo, quindi e' PIU'
+#      PROBABILE che finisca sotto il minimo del simbolo e venga
+#      riportato su. Quando succede, il rischio effettivo SUPERA
+#      InpRiskPercent e il DD della cella alta e' GONFIATO. Verso
+#      dell'errore, dichiarato: le celle alte possono sembrare PEGGIORI
+#      di quanto sono. Quindi un DD che scende verso l'alto MALGRADO
+#      questo effetto e' una prova PIU' forte, non piu' debole.
+#      [QUANTO SPESSO SCATTI E' NON MISURATO: il CSV non porta il
+#       lotto. Dichiarato come buco, non stimato.]
+#
+#  T3. SELEZIONE DEI TRADE: un buffer diverso cambia CHI viene stoppato
+#      e quindi, tramite la guardia "un setup alla volta" (r.408),
+#      cambia anche CHI entra dopo. Due celle vicine possono pescare
+#      due popolazioni diverse e dare PF diversi per SELEZIONE, non per
+#      geometria.
+#      COME LO DISTINGUO: ALTOPIANO, MAI PICCO (B5). Una cella isolata
+#      non conta. Se tre celle contigue migliorano insieme e' una forma;
+#      se migliora solo la quarta, sono sette estrazioni.
+#
+#  T4. !! QUI NON HO DUE FINESTRE INDIPENDENTI (tranche unica), e questa
+#      e' la debolezza strutturale del file: non posso usare la verifica
+#      fuori campione per separare forma da rumore. Quello che resta e'
+#      il confronto CON LE GEMELLE: se l'altopiano cade nella stessa
+#      zona dell'asse anche su R169b/d/e/f (che le due finestre ce
+#      l'hanno), e' una proprieta' del MOTORE; se cade qui soltanto,
+#      e' questa finestra. Dichiarato come surrogato, non come
+#      equivalente.
+#
+#  T5. IL COSTO DECIDE, ED E' IL CONTRARIO DI R160: li' si poteva
+#      scrivere "nessuna differenza fra celle puo' essere un artefatto
+#      di spread, perche' lo stop non cambia". QUI LO STOP CAMBIA, e lo
+#      spread applicato per trade e' lo STESSO in tutte le celle: allora
+#      il PEDAGGIO IN FRAZIONE DELLO STOP e' piu' PESANTE sulle celle
+#      BASSE, sempre nello stesso verso. Cioe': le celle basse sono
+#      penalizzate da un effetto di COSTO che non ha niente a che fare
+#      col merito del buffer.
+#      COME LO DISINNESCO: e' proprio il motivo per cui B6 esiste. Un
+#      vantaggio delle celle ALTE non si dichiara "merito della
+#      geometria" finche' non si e' detto quanto di quel vantaggio e'
+#      solo pedaggio risparmiato -- e quel quanto e' [NON MISURATO]
+#      finche' il CSV non porta lo stop (classe 353). Quindi la frase
+#      lecita e' "le celle alte fanno meglio, e una parte non misurata
+#      del vantaggio e' costo", non "il buffer largo e' meglio".
+#
+#  T6. E ANCHE SE PASSANO TUTTI, il round NON promuove (B4): una cella
+#      scelta qui va a una finestra di REGIME o al forward, non in campo.
+# ---------------------------------------------------------------------
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - MODELLO: OHLC M1. DD = limite inferiore, profitto = stima del
+#      lordo. Nessun tick esiste su questa finestra (dichiarato in
+#      testa).
+#    - SPREAD: quello corrente applicato a tutta la finestra. Nei primi
+#      anni lo spread vero era piu' largo: il profitto dell'IS e' quindi
+#      OTTIMISTICO di una quantita' [NON MISURATA].
+#    - ATR(D1) DEL SIMBOLO: [NON MISURATO] in archivio (cercato, vedi
+#      punto 5). Senza, il buffer si puo' convertire in pip/punti solo
+#      come SEGNO, non come entita'. E' il buco che rende B6 un
+#      controllo di verso invece che di valore.
+#    - LO STOP PER TRADE NON ESCE DAL ROUND: le colonne del CSV le
+#      cabla OnTesterDeinit e lo stop non c'e'; il per-trade di
+#      ExportTrades non viene copiato su questa corsia (classe 353).
+#      Quindi "di quanto e' cambiato lo stop fra la cella 0.00 e la
+#      0.30" e' [NON RISOLVIBILE DA QUESTO ROUND], detto PRIMA di
+#      girare, non scoperto dopo.
+#    - IL LOTTO NON ESCE DAL ROUND: stessa ragione. Quindi T2 (il
+#      pavimento del lotto) resta un meccanismo dichiarato, non
+#      quantificato.
+#    - InpSLBufferATR = valori sopra 0.30: fuori griglia, dichiarato.
+#    - LATO SEPARATO (long/short): [NON MISURATO qui]. Gira come la
+#      cella viva (InpAllowLong=true / InpAllowShort=false).
+#    - TAGLIA: il round gira a 1,0%, NON alla taglia viva 0,30%.
+#      La conversione e' lineare [APPROSSIMATA].
+#    - GUARDIAN: InpUsaGuardian=true (valore dell'ancora e default del
+#      sorgente r.135), fail-open nel tester senza GlobalVariable --
+#      stesso comportamento di ogni round di questa classe.
+#    - InpTP_R / InpSLMode / InpPatternMode / InpExitMode /
+#      InpMaxDaysHold: NON sono l'asse. Pinnati al valore vivo
+#      dell'ancora R100, invariati. InpAtrSlMult e' INERTE per
+#      costruzione con InpSLMode=0 (r.638-653: il ramo che la usa e'
+#      l'else) e resta pinnato: essendo inerte non tocca nessun numero.
+#    - TEMPO MACCHINA: [STIMATO] ~20-25 minuti (7 passate lunghe su una tranche). Non e' una misura: e' un ordine di grandezza da verificare al primo giro.
+#
+#  MAGIC VERGINE 779873, e il blocco dei sei gemelli e'
+#  779871 / 779872 / 779873 / 779874 / 779875 / 779876 (R169a-f).
+#  >>> VERIFICATO COME PRESCRIVE LA CLASSE 365/367, cioe' RISPETTO A UN
+#      COMMIT e non a un istante: ricerca fatta DALLA RADICE del repo,
+#      `grep -rl <valore> --exclude-dir=.git .`, SENZA escludere
+#      `.claude/worktrees/` (gli agenti paralleli vivono li' dentro, ed
+#      e' esattamente li' che la 367 ha trovato la collisione di ieri).
+#      Esito: ZERO occorrenze per tutti e sei. La prima verifica valeva
+#      a HEAD `ff7524eb`; MA `origin/lavoro` SI E' MOSSO mentre scrivevo
+#      (commit `c779a2c5`, un altro agente su
+#      report/PIANO_CHALLENGE_OTTOBRE_v2.md), quindi la verifica e'
+#      stata RIFATTA -- ed e' questa che vale:
+#        >>> ZERO occorrenze a HEAD di `lavoro` = `c779a2c5`,
+#            riverificato immediatamente prima della consegna, e il
+#            commit nuovo e' stato aperto e controllato uno per uno
+#            (non contiene nessuno dei sei magic, ne' "R169", ne'
+#            "InpSLBufferATR").
+#      E' esattamente la ragione per cui la 365 dice "vale rispetto a un
+#      COMMIT, non a un istante": fra la stesura e la consegna l'istante
+#      era gia' cambiato.
+#  >>> PERCHE' NON 779839 O 779841, CHE SAREBBERO I PRIMI LIBERI: e'
+#      una scelta deliberata contro la classe 367. Il blocco 779800-
+#      779838 e' occupato SENZA BUCHI, quindi "il primo libero dopo il
+#      massimo" e' il numero che QUALUNQUE altro agente calcolerebbe
+#      partendo dallo stesso punto -- ed e' precisamente li' che due
+#      lavori paralleli collidono ("le sequenze sono il posto dove la
+#      365 colpisce; i nomi no"). Ho quindi preso un blocco DENTRO UN
+#      BUCO gia' esistente (fra 779870 e 779880), che nessun contatore
+#      di sequenza produce per caso. Bruciare dei numeri costa meno che
+#      collidere.
+#  >>> ARBITRO, se malgrado tutto qualcuno avesse preso gli stessi
+#      (classe 367 regola 1): vince chi e' GIA' COMMITTATO su `lavoro`;
+#      a parita', vince chi e' ARMATO in CODA.txt. Questo file, al
+#      momento della consegna, NON e' armato e NON e' committato:
+#      quindi in caso di conflitto SI SPOSTA QUESTO, non l'altro.
+#  ORDINE DEI ROUND: nessun altro file prova mette InpSLBufferATR ad
+#  asse su nessuna sedia di ABTG_PunteLarry (verificato per ricerca).
+#  Questo file non duplica niente in coda.
+# =====================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H1
+@DAQUANDO 2004.06.11
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+# --- IL MOTORE, pinnato sulla cella viva (R100, letto campo per campo)
+InpUsaGuardian=true
+InpTF=16385
+InpPatternMode=0
+InpExitMode=1
+InpTP_R=1.5
+InpSLMode=0
+# InpSLBufferATR -> E' L'ASSE, in fondo al file.
+InpAtrSlMult=1.5
+InpAtrPeriodD1=14
+InpSizeMinATR=0.0
+InpSizeMaxATR=0.0
+InpMaxDaysHold=5
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpMagic=779873
+InpComment=R169C SLBUFFERATR
+InpVerbose=true
+
+# --- L'UNICO ASSE (7 celle: 0.00 0.05 0.10(vivo) 0.15 0.20 0.25 0.30)
+#     Il bordo scritto e' 0.31 e NON 0.30: margine di sicurezza contro
+#     la virgola mobile, motivato per esteso nel riquadro dell'asse.
+InpSLBufferATR=0.1||0.0||0.05||0.31||Y
+# =====================================================================
