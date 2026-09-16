@@ -20827,3 +20827,156 @@ esattamente la separazione della classe 347, vista stavolta dal lato buono.
    numero di riga scadono** appena qualcuno corregge il file. Un pin si cerca
    con `^InpMagic=`, non con `r.1182` — e infatti `R166a` r.1038 citava
    `R165a` r.1182, che dopo queste correzioni e' la 1254.
+
+## 370. UN TIME-STOP IN ORE DI OROLOGIO NON SI ESEGUE ALLA SCADENZA, MA AL **PRIMO TICK DOPO** — e su un simbolo con pause di sessione due celle contigue possono uscire IDENTICHE **pur avendo morso tutte e due** (controllo-preventivo, 16/09/2026)
+
+Trovata sotto cancello sui quattro file prova `R168a-d` (`InpMaxHours` su
+`ABTG_GapFill`, i quattro gemelli GBPUSD/EURUSD/AUDUSD/225JPY). I file
+dichiaravano gia' — ed e' merito loro — che il time-stop conta **ore di
+OROLOGIO e non ore di mercato** (contro-esempio T6), e che quante ore al
+giorno BCM quoti 225JPY e' `[NON MISURATO]`. **Mancava il secondo effetto
+della stessa causa**, che non e' un confronto fra file ma una regola di
+LETTURA del round.
+
+**Il meccanismo, letto nel sorgente**: `ManageTimeStop()` e' chiamata dentro
+`OnTick()` (`ABTG_GapFill.mq5` r.300-301) e la condizione e'
+`if((long)TimeCurrent()-(long)opened < limite) continue;` (r.527). `OnTick()`
+**non viene chiamato quando non arrivano tick** — ne' nel tester ne' in
+forward. Quindi la chiusura non cade ALLA scadenza: cade al **primo tick
+dopo**. Se la scadenza casca dentro una pausa di sessione, la posizione esce
+alla **riapertura**: la cella NOMINALE (24h) non e' la cella EFFETTIVA.
+
+**Perche' e' peggio del semplice "ore diverse"**: due celle contigue le cui
+scadenze cadono **nella stessa pausa** escono allo **stesso tick** e
+producono numeri **identici fino all'ultima cifra stampata** — cioe'
+esattamente la firma che il test di identita' fra celle contigue (B4) usa per
+dire "una sola osservazione", e che il contro-esempio T4/classe 357 usa per
+dire "il time-stop e' INERTE". **Sarebbe un time-stop che ha chiuso posizioni,
+dichiarato inerte.**
+
+**Chi tocca e chi no, elencato per nome** (mai "tutto il resto", classe 180):
+- **NON tocca** `R168a`/`R168b`/`R168c` (GBPUSD/EURUSD/AUDUSD): il forex quota
+  in continua dentro la settimana, e l'unica pausa vera — il weekend — sta a
+  `F+168h` mentre la cella piu' alta chiude a `F+87h` (l'aritmetica gia'
+  scritta nei file come proprieta' 3). Il ritardo e' dell'ordine del secondo
+  contro un passo d'asse di 12 ore.
+- **Tocca** `R168d` (225JPY, CFD su indice con pause giornaliere).
+- **Tocca anche `R159a`** (U30USD, stesso asse, gia' armato in `CODA.txt`),
+  che la distinzione ore-orologio/ore-mercato **non la fa affatto**: quando
+  rientrera', il suo nullo va letto con questa regola.
+
+**Non e' arrivato a valle**: nessuno dei cinque round e' ancora girato.
+
+### REGOLA
+1. Un time-stop (o qualunque uscita a tempo) si dichiara **in ore di
+   orologio**, e si dichiara **anche** che si esegue al **primo tick dopo** la
+   scadenza. Le due cose insieme, non la prima soltanto.
+2. Su un simbolo con **pause di sessione**, il nullo di un asse a tempo si
+   scrive **"le N celle non si distinguono"** e **MAI "la manopola e'
+   inerte"**: le due frasi non sono sinonimi, perche' esiste il mondo in cui
+   la manopola ha morso e i numeri coincidono lo stesso. Sui simboli senza
+   pause dentro l'orizzonte dell'asse — e va mostrato con l'aritmetica, non
+   affermato — la seconda formula resta lecita.
+3. Per separare i due mondi serve **l'ora di USCITA per trade**. Nel CSV della
+   corsia non c'e' (colonne cablate in `OnTesterDeinit` r.790); `ExportTrades`
+   ha `close_time` (r.704) ma quel file non viene copiato. Quindi la
+   separazione si dichiara **`[NON RISOLVIBILE DA QUESTO ROUND]` PRIMA di
+   girare** (classe 353), non si scopre leggendo i numeri.
+
+## 370. 🕳️🔍 UN'ASSENZA **DICHIARATA** CHE NON E' STATA **CERCATA**: il file scrive *"l'ancora dello stesso MODELLO non esiste"* e ci costruisce sopra una banda larga — mentre nel repo c'e' la stessa sedia, stessa cella, stesso deposito, **misurata a tick** (controllo-preventivo, 16/09/2026)
+
+Il caso: `backtest_pipeline/prove/R167d_slgapmult_gapfill_225JPY.txt`, round a
+**tick reali** su `ABTG_GapFill` 225JPY (sedia `772235`). La sezione ANCORE
+prendeva come unica ancora `R103_REFERTO_BLOCCO1_INDICI.md` pos. 12 (**OHLC M1**,
+DD 4,66%, n 26) e scriveva, testuale:
+
+> _"quella corsa era **OHLC M1**, questa e' **TICK** ... Per questo le bande
+> sotto sono LARGHE"._
+
+Cioe' **l'assenza di un termine di paragone a tick era la GIUSTIFICAZIONE della
+banda**. Solo che quel termine di paragone **esiste, ed e' piu' vicino di
+quello usato**: `risultati_archivio/REFERTO_ROUND65_GAPCONTINUATION.md`
+par. 4-quater r.235-238 misura **la stessa sedia (772235), la stessa cella
+(fill 75), lo stesso deposito (100.000, dichiarato a r.183), A TICK REALI**:
+**+811,56 · PF 1,144 · n 15 · DD 4,36%** (finestra piu' corta, 2025.06.10 →
+2026.06.30).
+
+🔴 **Il danno non e' la banda, e' il VERSO.** Il file dichiarava anche che *"un
+DD a tick PIU' ALTO dell'ancora e' l'atteso"*, ma dava al bordo alto solo
+**+50%** sull'ancora — **il margine relativo piu' STRETTO dei quattro fratelli**.
+Con l'ancora vera in mano si vede che il salto OHLC→tick su questa sedia e'
+**piccolo e gia' misurato** (4,66% OHLC su 21 mesi contro 4,36% tick su 12,7),
+quindi la banda **va bene lo stesso** — ma per una ragione **opposta** a quella
+scritta. Una sentinella giustificata dall'ignoranza avrebbe sparato sul
+risultato che il file stesso definiva atteso.
+
+🟢 **E la stessa ancora ha chiuso un secondo buco**, che vale come esempio di
+cosa si perde tacendo: il `.set` d'archivio cita *"+76 OOS"* **senza dichiarare
+il deposito**, e quel +76 e' un numero a **10.000 EUR** (`CENSIMENTO_CONTRATTI.md`
+r.251). La corsa R65, stessa cella e stessa finestra **a 100.000**, fa
+**+811,56**: il fattore **10** e' il deposito. Chi confrontasse "+76" coi numeri
+di un round a 100k sbaglierebbe **di un ordine di grandezza** (classe 366, vista
+dal lato della FONTE che tace lo stato invece che della riga che lo contraddice).
+
+### REGOLA
+1. 🔴 **"Non esiste un'ancora X" e' un'AFFERMAZIONE DI RICERCA, non una
+   premessa.** Prima di scriverla si cerca, e si dichiara **COME**: il comando
+   o l'elenco di file aperti. Vale in particolare per *"non esiste una misura
+   a tick / a questo deposito / su questo simbolo"*.
+2. 🔴 **L'ancora si sceglie sulla dimensione che il round CAMBIA.** Un round a
+   tick cerca **prima** un'ancora a tick, anche su una finestra piu' corta; una
+   finestra piu' corta e' un limite **dichiarabile**, un modello diverso e' un
+   limite **non correggibile**. Un'ancora su finestra ridotta non sostituisce
+   quella di portata: **si citano tutte e due, con il ruolo di ciascuna**.
+3. 🔴 **Un numero d'ancora senza DEPOSITO non e' un numero**, e il deposito si
+   cerca nel referto che ha prodotto la corsa, non nel `.set` (che quasi mai lo
+   contiene). Controprova di casa: se due fonti della stessa cella differiscono
+   di **circa 10x** in euro, il sospetto n.1 e' 10.000 contro 100.000, e si
+   verifica prima di scrivere qualunque confronto.
+4. 📌 Corollario: quando una banda e' larga **perche' manca una misura**, la
+   frase va scritta cosi' — *"larga perche' NON HO il numero X"* — proprio
+   perche' e' quella formulazione che, riletta, fa venire in mente di cercarlo.
+
+## 371. 📏⚖️ UN **COMPARATIVO FRA BANDE** SENZA CRITERIO DICHIARATO: *"le bande sono piu' strette"* si ribalta a seconda che si misurino in punti pieni o in frazione dell'ancora (controllo-preventivo, 16/09/2026, estensione della classe 364 dai SUPERLATIVI ai COMPARATIVI)
+
+Il caso: i quattro file `R167a-d_slgapmult_gapfill_*.txt`. Tutti e quattro
+motivavano la fiducia nelle proprie sentinelle con un **confronto di larghezza**,
+e **in tutti e quattro il confronto era sbagliato** — in due direzioni opposte:
+
+| file | S1 | S2 (banda / ancora) | frase scritta | verita' |
+|---|---|---|---|---|
+| R157a (riferimento) | 22-38 = 30 ±25% | 1,5-6,5 / 3,21% = **0,47x-2,02x** | — | — |
+| R167a GBPUSD | 15-27 = 21 ±25% | 2,0-7,0 / 4,02% = **0,50x-1,74x** | "piu' strette di R157a" | ✅ **solo S2**; S1 e' la **stessa regola** |
+| R167b EURUSD | 15-25 = 20 ±25% | 0,8-5,0 / 1,86% = **0,43x-2,69x** | "piu' strette di R157a" | ❌ **PIU' LARGA** |
+| R167c AUDUSD | 18-32 = 25 ±25% | 0,8-5,0 / 1,87% = **0,43x-2,67x** | "piu' strette di R157a" | ❌ **PIU' LARGA** |
+| R167d 225JPY | 19-33 = 26 ±25% | 2,0-7,0 / 4,66% = **0,43x-1,50x** | "piu' larghe dei tre fratelli" | ❌ **la piu' STRETTA in alto dei quattro** |
+
+🔴 **Il meccanismo e' sempre lo stesso, ed e' istruttivo**: in **punti pieni** le
+S2 di R167a e R167d sono larghe **uguale** (5,0 punti) e quelle di R167b/c sono
+le **piu' strette** (4,2); **in frazione dell'ancora** l'ordine si **capovolge**,
+perche' le ancore valgono 1,86% e 4,66%. Due criteri, due classifiche opposte,
+**zero criteri scritti**. Ed e' esattamente la classe 364 (*"il superlativo senza
+criterio"*) spostata dal superlativo al comparativo — con l'aggravante che qui il
+comparativo **serviva a stabilire quanto fidarsi di una sentinella**.
+
+🟢 **Cosa si salvava da solo** (un elenco di soli difetti descrive male la
+realta'): le **bande in se' erano tutte ragionevoli** e nessuna e' stata
+cambiata. Il difetto stava nella **prosa che le giustifica**, non nella **regola
+che decide** — la separazione della classe 347, di nuovo dal lato buono. Ma in
+R167d la prosa sbagliata nascondeva un difetto vero (classe 370).
+
+### REGOLA
+1. 🔴 **Ogni "piu' stretta / piu' larga / piu' severa" fra due bande porta il
+   CRITERIO nella stessa frase**, e i criteri ammessi sono due e vanno nominati:
+   **punti pieni** oppure **frazione dell'ancora**.
+2. 🔴 **Per una sentinella di "banco sporco" il criterio giusto e' la FRAZIONE
+   DELL'ANCORA**, perche' il mestiere della banda e' dire *quanto il numero
+   fresco puo' discostarsi dall'ancora* — e quel "quanto" e' relativo per
+   costruzione. Se si usa l'altro, si dice perche'.
+3. 🔴 **Due bande costruite con la STESSA regola (es. ±25% arrotondato
+   all'esterno) NON sono "piu' strette": sono IDENTICHE.** Scrivere "piu'
+   stretta" su una regola identica e' un difetto, non un'enfasi.
+4. 📌 Corollario che il cancello applica: quando un file dichiara che una banda
+   e' larga/stretta **per una ragione**, si ricalcola il rapporto banda/ancora
+   di **tutti i file fratelli** e si mette in tabella. Se l'ordine non torna,
+   la ragione scritta e' falsa — e spesso, sotto, c'e' dell'altro (qui: 370).

@@ -45,6 +45,19 @@
 #  uno stato dichiarato -- ed e' la classe 366, pagata stamattina su
 #  R155a: il -Deposito si legge dal file prova al momento di armare, non
 #  si eredita dagli altri round della serata.
+#
+#  >>> E LO STESSO VALE PER `-Modello 1`, CHE QUI E' PIU' PERICOLOSO DEL
+#      DEPOSITO: **nemmeno il Modello e' il default del driver**. Il
+#      default e' **4** (RIGA_SOTTILE_ROUND.ps1 r.103,
+#      `[int]$Modello = 4`), quindi chi arma la riga e dimentica
+#      `-Modello 1` NON ottiene un errore: ottiene una corsa a TICK su
+#      27 anni, cioe' **25 anni di spread RICOSTRUITO** che decidono
+#      quali settimane si operano -- e la grandezza che ne esce sporcata
+#      e' proprio n, che e' cio' che S1 e S2 misurano (sezione IL
+#      MODELLO). La classe 366 dice "ogni argomento della riga armata si
+#      legge dal file prova": qui il `-Modello` e' il primo dei due, non
+#      il secondo. Vale per R168a/b/c; su R168d `-Modello 4` coincide
+#      col default e la dimenticanza non fa danno.
 # ---------------------------------------------------------------------
 #  CHE COSA E' COMUNE AI QUATTRO FILE R168a-d, E CHE COSA CAMBIA
 #  (i quattro sono UNA campagna: se le parti comuni divergono, il
@@ -271,8 +284,14 @@
 #    >>> COSA COSTA: OHLC M1 -> il DD che esce e' un LIMITE INFERIORE
 #        del rischio e il profitto e' una STIMA DEL LORDO (spread
 #        corrente, nessuno slippage, riempimenti ideali). MAI un
-#        guadagno. Stesso limite gia' dichiarato da R102 (r.35-39), da
-#        R161a-c (stessi tre simboli, ieri) e da R160a-e.
+#        guadagno. Stesso limite gia' dichiarato dal FILE PROVA di R102
+#        su questa sedia (`prove/R102_ABTG_GapFill_<SIMBOLO>_<MAGIC>.txt`
+#        r.35-39, verbatim: *"Il DD che esce e' un LIMITE INFERIORE del
+#        rischio; il profitto che esce e' una STIMA DEL LORDO"*) -- NON
+#        dal referto `R102_REFERTO_BLOCCO2.md`, che di OHLC parla solo
+#        alla sua r.4 e non porta questa clausola. Stesso limite
+#        dichiarato anche da R161a-c (stessi tre simboli, ieri) e da
+#        R160a-e.
 #    >>> COSA **NON** COSTA, e va detto perche' e' il punto che salva
 #        l'asse: OHLC M1 non "sfoca" il time-stop. `ManageTimeStop()`
 #        gira in `OnTick()` (r.300-301) e in Modello 1 il tester genera
@@ -302,10 +321,15 @@
 #        R102 aveva scritto): perche' la finestra DICHIARATA deve essere
 #        la finestra EFFETTIVA. E' la classe 355: una sentinella di sola
 #        soglia su n non distingue "il motore opera poco" da "la storia
-#        non c'e'". Il referto driver di R102 lo grida gia' da solo
-#        (r.530-532, FINESTRA ACCORCIATA): *"la prima operazione e' del
-#        1999.01.04, cioe' 68 mesi dopo l'inizio dichiarato ... gli anni
-#        misurati sono 27.5, non quelli della finestra dichiarata"*.
+#        non c'e'". Il referto driver di R102 lo grida gia' da solo, e la
+#        riga da citare e' quella di QUESTA sedia -- C14, **r.530**, non
+#        il blocco r.530-532 che contiene anche le gemelle (i numeri di
+#        una gemella non sono i propri, classe 359): *"la prima
+#        operazione e' del 1999.01.04, cioe' **68 mesi** dopo l'inizio
+#        dichiarato (1993.05.11) ... gli anni misurati sono 27.5, non
+#        quelli della finestra dichiarata"*. (Il 68 vale per GBPUSD
+#        r.530 e per AUDUSD r.532; su EURUSD r.531 il numero e' **336**,
+#        perche' quella sedia parte dal 1971.)
 #        Siccome prima del 1999.01.04 non c'e' storico, le operazioni
 #        sono le STESSE e l'ancora resta confrontabile.
 #    >>> PERCHE' NON LA FINESTRA DI R103 (2020.01.01 -> 2026.06.30): li'
@@ -604,6 +628,40 @@
 #        esposizione al mercato". Chi confrontasse la cella 24h di
 #        R168d con la cella 24h di R168a come se fossero la stessa
 #        quantita' di mercato starebbe sbagliando misura, non sfumatura.
+#    >>> E C'E' UN SECONDO EFFETTO DELLA STESSA CAUSA, TROVATO DAL
+#        CANCELLO IL 16/09 E PIU' CATTIVO DEL PRIMO, perche' tocca la
+#        LETTURA di B4 e non solo il confronto fra file: `ManageTimeStop()`
+#        gira dentro `OnTick()` (r.300-301), e **`OnTick()` non viene
+#        chiamato quando non arrivano tick**. Quindi la chiusura non
+#        avviene ALLA scadenza: avviene al **PRIMO TICK DOPO** la
+#        scadenza. Se la scadenza cade dentro una pausa di sessione, la
+#        posizione esce alla RIAPERTURA, cioe' piu' tardi del nominale --
+#        e la cella NOMINALE non e' la cella EFFETTIVA.
+#        >>> SUI TRE FILE FOREX NON MORDE, ed e' dimostrato dalla
+#            proprieta' 3, non sperato: dentro la settimana il forex
+#            quota in continua, e l'unica pausa vera (il weekend) sta a
+#            F+168h mentre la cella piu' alta chiude a F+87h. Il ritardo
+#            e' dell'ordine del secondo contro un passo d'asse di 12 ore.
+#        >>> SU R168d (225JPY) MORDE, e la conseguenza e' precisa: due
+#            celle contigue le cui scadenze cadono NELLA STESSA pausa di
+#            sessione escono allo STESSO tick di riapertura e producono
+#            numeri IDENTICI **pur avendo morso tutte e due**. B4 le
+#            leggerebbe come "una sola osservazione" e, al limite, T4
+#            leggerebbe "time-stop INERTE" un time-stop che invece ha
+#            chiuso posizioni.
+#            >>> REGOLA DI LETTURA CHE NE SEGUE, congelata qui: su R168d
+#                una coppia identica NON autorizza la parola "inerte",
+#                autorizza solo **"le due celle non si distinguono"**.
+#                La parola "inerte" resta legittima soltanto sui tre
+#                file forex, dove la pausa e' esclusa per aritmetica.
+#        >>> COME SI ROMPEREBBE DAVVERO: servirebbe l'ORA di uscita per
+#            trade. Il CSV non ce l'ha (colonne cablate in
+#            OnTesterDeinit r.790); `ExportTrades` ha `close_time`
+#            (r.704) ma questa corsia non copia quel file. **[NON
+#            RISOLVIBILE DA QUESTO ROUND]**, dichiarato PRIMA di girare.
+#            Classe 370 -- e vale ANCHE per R159a (U30USD, indice con
+#            pause, stesso asse, gia' armato), che questa distinzione
+#            non la fa affatto.
 #
 #  (T7) IL LIMITE INFERIORE DELLO STOP CHE **NON** SI PUO' STAMPARE COL
 #    SEGNO -- classe 362 applicata nel verso che dice "sopprimi".
@@ -728,7 +786,11 @@
 #      artefatti di questi round] -- contro-esempio T5. I tre file forex
 #      condividono finestra e valuta al denominatore.
 #    - ORE DI OROLOGIO CONTRO ORE DI MERCATO: [NON MISURATO] --
-#      contro-esempio T6.
+#      contro-esempio T6. E con esso il SECONDO effetto della stessa
+#      causa: il time-stop si esegue al PRIMO TICK DOPO la scadenza, mai
+#      ALLA scadenza (classe 370). Sui tre file forex e' escluso per
+#      aritmetica (proprieta' 3); su R168d NO, e li' cambia la formula
+#      con cui si scrive il nullo.
 #    - CANCELLO DI COSTO: [NON MISURATO e NON SPOSTABILE da questo
 #      round].
 #    - CONTEGGIO DELLE USCITE PER TIME-STOP: [NON MISURABILE DA QUESTA

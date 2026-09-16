@@ -264,7 +264,8 @@
 #    >>> [LIMITE DICHIARATO, e va detto perche' e' vero]: il CONTEGGIO
 #        dei tick di 225JPY non e' mai stato misurato in casa. Lo e'
 #        stato per D30EUR (35,5 M), U30USD (68,6 M) e NASUSD (166,5 M)
-#        -- stessa fonte, r.82-83 -- ma **non per 225JPY**. Quindi
+#        -- stessa fonte, r.81-83 (il 35,5 M di D30EUR sta a r.81, non
+#        dentro r.82-83) -- ma **non per 225JPY**. Quindi
 #        "i tick ci sono" e' una riga di referto, non un conteggio mio.
 #        Se in corsa MT5 dichiarasse una data d'inizio tick diversa, il
 #        round si ferma e si riscrive la finestra.
@@ -524,9 +525,18 @@
 #        delle SEI coppie contigue e' DIVERSA, il time-stop ha morso
 #        almeno una volta e S1 ha contenuto. Se tutte e sei sono
 #        identiche, il verdetto onesto e' **"su questa sedia e su questa
-#        finestra InpMaxHours e' INERTE fra 12 e 84 ore; l'aritmetica
-#        delle 84 ore resta NON VERIFICATA da questo round"**, e S1/B3
-#        vanno scritti come VACUI, non come PASS.
+#        finestra le sette celle NON SI DISTINGUONO; l'aritmetica delle
+#        84 ore resta NON VERIFICATA da questo round"**, e S1/B3 vanno
+#        scritti come VACUI, non come PASS.
+#        >>> ATTENZIONE, E SU QUESTO FILE E' UNA DIFFERENZA DI SOSTANZA:
+#            **"non si distinguono" NON si puo' riscrivere "InpMaxHours
+#            e' INERTE"**, che e' invece la formula legittima su
+#            R168a/b/c. Su 225JPY esiste un terzo mondo -- le scadenze
+#            di due celle che cadono nella STESSA pausa di sessione ed
+#            escono allo stesso tick di riapertura -- in cui il
+#            time-stop HA MORSO e i numeri sono lo stesso identici
+#            (T6, classe 370). Il round non puo' separarlo, quindi la
+#            parola "inerte" non si scrive.
 #    >>> E S5 (7 valori distinti nel CSV) esclude il TERZO mondo, quello
 #        in cui l'asse non e' stato spazzolato affatto. S5 dice "le
 #        sette celle sono davvero sette", B4 dice "quante sono DIVERSE".
@@ -569,6 +579,40 @@
 #        esposizione al mercato". Chi confrontasse la cella 24h di
 #        R168d con la cella 24h di R168a come se fossero la stessa
 #        quantita' di mercato starebbe sbagliando misura, non sfumatura.
+#    >>> E C'E' UN SECONDO EFFETTO DELLA STESSA CAUSA, TROVATO DAL
+#        CANCELLO IL 16/09 E PIU' CATTIVO DEL PRIMO, perche' tocca la
+#        LETTURA di B4 e non solo il confronto fra file: `ManageTimeStop()`
+#        gira dentro `OnTick()` (r.300-301), e **`OnTick()` non viene
+#        chiamato quando non arrivano tick**. Quindi la chiusura non
+#        avviene ALLA scadenza: avviene al **PRIMO TICK DOPO** la
+#        scadenza. Se la scadenza cade dentro una pausa di sessione, la
+#        posizione esce alla RIAPERTURA, cioe' piu' tardi del nominale --
+#        e la cella NOMINALE non e' la cella EFFETTIVA.
+#        >>> SUI TRE FILE FOREX NON MORDE, ed e' dimostrato dalla
+#            proprieta' 3, non sperato: dentro la settimana il forex
+#            quota in continua, e l'unica pausa vera (il weekend) sta a
+#            F+168h mentre la cella piu' alta chiude a F+87h. Il ritardo
+#            e' dell'ordine del secondo contro un passo d'asse di 12 ore.
+#        >>> SU R168d (225JPY) MORDE, e la conseguenza e' precisa: due
+#            celle contigue le cui scadenze cadono NELLA STESSA pausa di
+#            sessione escono allo STESSO tick di riapertura e producono
+#            numeri IDENTICI **pur avendo morso tutte e due**. B4 le
+#            leggerebbe come "una sola osservazione" e, al limite, T4
+#            leggerebbe "time-stop INERTE" un time-stop che invece ha
+#            chiuso posizioni.
+#            >>> REGOLA DI LETTURA CHE NE SEGUE, congelata qui: su R168d
+#                una coppia identica NON autorizza la parola "inerte",
+#                autorizza solo **"le due celle non si distinguono"**.
+#                La parola "inerte" resta legittima soltanto sui tre
+#                file forex, dove la pausa e' esclusa per aritmetica.
+#        >>> COME SI ROMPEREBBE DAVVERO: servirebbe l'ORA di uscita per
+#            trade. Il CSV non ce l'ha (colonne cablate in
+#            OnTesterDeinit r.790); `ExportTrades` ha `close_time`
+#            (r.704) ma questa corsia non copia quel file. **[NON
+#            RISOLVIBILE DA QUESTO ROUND]**, dichiarato PRIMA di girare.
+#            Classe 370 -- e vale ANCHE per R159a (U30USD, indice con
+#            pause, stesso asse, gia' armato), che questa distinzione
+#            non la fa affatto.
 #
 #  (T7) IL LIMITE INFERIORE DELLO STOP CHE **NON** SI PUO' STAMPARE COL
 #    SEGNO -- classe 362 applicata nel verso che dice "sopprimi".
@@ -608,6 +652,11 @@
 #      almeno UNA deve avere Profit / Equity DD % / Peggior Giornata %
 #      diversi. Se sono identiche tutte e sei, il round e' un NULLO
 #      DICHIARATO e S1/B3 vanno scritti come VACUI (classe 357).
+#      >>> E IL NULLO SI SCRIVE "le sette celle non si distinguono",
+#          MAI "InpMaxHours e' inerte": su questo simbolo le pause di
+#          sessione possono rendere identiche due celle che hanno morso
+#          entrambe (T6, classe 370). Sui tre gemelli forex la seconda
+#          formula sarebbe lecita; qui no.
 #    S4 -- DD sulla cella viva 48: banda **2,3%-7,0%**
 #      (ancora 4,66%, OHLC->tick, banda +-50%).
 #    S5 -- CONTEGGIO DELLE CELLE: 7 valori DISTINTI di `InpMaxHours`
@@ -663,7 +712,9 @@
 #            starebbe contando una misura sola cinque volte.
 #        >>> SE UNA COPPIA COINCIDE: le due celle sono la STESSA corsa e
 #            si dichiarano come UNA SOLA osservazione.
-#        >>> SE COINCIDONO TUTTE E SEI: NULLO DICHIARATO (T4).
+#        >>> SE COINCIDONO TUTTE E SEI: NULLO DICHIARATO (T4), nella
+#            forma "le sette celle non si distinguono" e NON nella forma
+#            "InpMaxHours e' inerte" (T6, classe 370).
 #    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito non cambia
 #        un preset, non accende ne' spegne la sedia, non tocca il
 #        forward e non sposta il cancello di costo. Taglie, riaccensioni
@@ -693,7 +744,11 @@
 #      artefatti di questi round] -- contro-esempio T5. I tre file forex
 #      condividono finestra e valuta al denominatore.
 #    - ORE DI OROLOGIO CONTRO ORE DI MERCATO: [NON MISURATO] --
-#      contro-esempio T6.
+#      contro-esempio T6. E con esso il SECONDO effetto della stessa
+#      causa: il time-stop si esegue al PRIMO TICK DOPO la scadenza, mai
+#      ALLA scadenza (classe 370). Sui tre file forex e' escluso per
+#      aritmetica (proprieta' 3); su R168d NO, e li' cambia la formula
+#      con cui si scrive il nullo.
 #    - CANCELLO DI COSTO: [NON MISURATO e NON SPOSTABILE da questo
 #      round].
 #    - CONTEGGIO DELLE USCITE PER TIME-STOP: [NON MISURABILE DA QUESTA
