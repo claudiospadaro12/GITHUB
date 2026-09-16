@@ -1179,7 +1179,32 @@ $BancoBT = 'C:\MT5_Backtest'
 #  esatta su Trades regge. RIGA_ROUND_VPS.ps1 e
 #  walkforward_generico.ps1 NON sono cambiati fra 72dcf8a3 e 2b687789
 #  (git diff sui due percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = '2b687789446560fb3788aabf9f135c8a11b588c8'
+#  >>> CINQUANTANOVESIMO GIRO DI PIN (16/09/2026): 2b687789 -> 43934665.
+#  Serviva per armare R172f (InpTrailTF, ENUM_TIMEFRAMES, 11 celle,
+#  magic 789570) e R172g (InpCloseAtEnd, 2 celle, magic 789580), sedia
+#  770202 (ABTG_Dow_Apertura_US), dopo il PASS del secondo cancello: 10
+#  correzioni totali, **classe NUOVA 387** (una proprieta'/sentinella
+#  S3 dichiarava "Trades non decrescente" su un asse dove la SCOPERTA
+#  DEL FILE STESSO -- il TF del trailing sposta anche il bersaglio
+#  della parziale, stessa catena a cascata del breakeven indipendente
+#  -- spinge lo stesso numero nel senso OPPOSTO: la sentinella avrebbe
+#  potuto sopprimere il miglior risultato vero del round. Riscritta da
+#  claim direzionale a limite aritmetico, piano/soffitto invariati).
+#  IL DIFF DELL'ANCORA (dichiarato nei file stessi, r.741-783 di
+#  R172f): git diff 8b922147 43934665 -- mql5/Experts/
+#  ABTG_Dow_Apertura_US.mq5 torna 27 inserzioni, zero cancellazioni,
+#  UNA sola riga input (`InpUsaGuardian = true`, fail-open nel Tester
+#  perche' le GlobalVariable del guardiano non esistono in Strategy
+#  Tester) -- IDENTICO a quanto i file dichiarano per HEAD=687e6900:
+#  RIVERIFICATO QUI, ORA, DA CHI ARMA, non solo letto. L'uguaglianza
+#  esatta su Trades (S1) regge. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra 2b687789 e 43934665
+#  (git diff sui due percorsi: VUOTO, verificato): solo $PIN si muove.
+#  Magic 789570/789580 riverificati vergini con grep -rl dalla radice
+#  del repo: compaiono SOLO nei due file prova di oggi (789570 e'
+#  anche citato per nome dentro R172g come riferimento incrociato al
+#  fratello, non come proprio magic -- non e' una collisione).
+$PIN = '439346653641e97cdc26981646c40f581b5a2c02'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
