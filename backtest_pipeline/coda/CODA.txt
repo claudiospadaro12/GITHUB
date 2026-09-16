@@ -2645,3 +2645,37 @@ cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 8e6c1da61af76f2747ea1882d594e412b1a756d8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173a_tp1pct_superwave_U30USD.txt -Etichetta r173a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R173b -- InpTP1_R, sedia 770511 (ABTG_SuperWave_DOW_H1_Ottimizzato,
+#  U30USD H1). Secondo file della famiglia parziale/breakeven
+#  Supertrend-SuperWave, fratello di R173a (InpTP1Pct, gia' armato).
+#  Stesso banco/ancora r120e11, stessa numerazione delle soglie.
+#  Asse 0,5/1,0/1,5/2,0, cella 1,0 = valore vivo. InpTP1_R e' il
+#  bersaglio del blocco parziale+pari (r.446/448), non tocca stop/
+#  lotto/ingresso -- verificato: 3 sole occorrenze nel sorgente
+#  (r.81/446/448), mai un asse su questa sedia in 25 file prova.
+#
+#  Sentinella S1 su Trades a uguaglianza esatta (106 IS, 184 OOS),
+#  stessa giustificazione di R173a: git diff sul sorgente EA fra
+#  l'ancora e il pin di armamento e' VUOTO. Bande PF/DD dai CSV veri
+#  di r120e11 (non da un riassunto). Merito sospeso (IS<=106 contro
+#  150, pavimento non raggiungibile a tick su questo simbolo). Zero
+#  preset cambia, zero forward.
+#
+#  Secondo cancello: PASS dopo 5 correzioni (commit 2b687789).
+#  **Classe NUOVA 386**: un rilievo contro un file fratello (R165a),
+#  scritto quando il fratello aveva ancora il difetto, non ritirato
+#  quando il fratello e' stato corretto un minuto dopo (72dcf8a3) --
+#  diversa dalla classe 384 (dove il danno dura solo un verdetto di
+#  cancello): qui il rilievo stantio sarebbe rimasto per mesi in un
+#  file che si arma e si rilegge. Ritirato con la cronologia scritta,
+#  non solo cancellato.
+#
+#  Pin: giro di pin b43753a (58mo, 72dcf8a3 -> 2b687789). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Riverificato al pin di armamento: git diff 1445abf8
+#  2b687789 sul sorgente EA e' VUOTO -- l'uguaglianza esatta regge.
+#  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779867, vergine
+#  a HEAD (grep dalla radice, worktree compresi).
+# =====================================================================
+b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173b_tp1r_superwave_U30USD.txt -Etichetta r173b -Modello 4 -Deposito 100000
+# =====================================================================
