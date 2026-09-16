@@ -20883,7 +20883,16 @@ dichiarato inerte.**
    separazione si dichiara **`[NON RISOLVIBILE DA QUESTO ROUND]` PRIMA di
    girare** (classe 353), non si scopre leggendo i numeri.
 
-## 370. 🕳️🔍 UN'ASSENZA **DICHIARATA** CHE NON E' STATA **CERCATA**: il file scrive *"l'ancora dello stesso MODELLO non esiste"* e ci costruisce sopra una banda larga — mentre nel repo c'e' la stessa sedia, stessa cella, stesso deposito, **misurata a tick** (controllo-preventivo, 16/09/2026)
+## 372. 🕳️🔍 UN'ASSENZA **DICHIARATA** CHE NON E' STATA **CERCATA**: il file scrive *"l'ancora dello stesso MODELLO non esiste"* e ci costruisce sopra una banda larga — mentre nel repo c'e' la stessa sedia, stessa cella, stesso deposito, **misurata a tick** (controllo-preventivo, 16/09/2026)
+
+> 📌 **PERCHE' QUESTA CLASSE E' LA 372 E NON LA 370** — e la nota vale piu' del
+> numero: mentre scrivevo, un **agente parallelo** (campagna R168, stesso albero
+> di lavoro) aveva gia' appeso qui sopra la **sua 370**, non committata. E' la
+> **classe 365/367 che si ripete sui NUMERI DI CLASSE invece che sui magic**:
+> due lavori nella stessa ora prendono la stessa etichetta "libera". Applicata
+> la stessa regola di precedenza (*chi c'e' gia' nel file resta*), ho spostato
+> le mie a **372-373** e ho **lasciato libera la 371** al lavoro parallelo, che
+> ha una seconda misura in corso. Bruciare un numero costa meno che collidere.
 
 Il caso: `backtest_pipeline/prove/R167d_slgapmult_gapfill_225JPY.txt`, round a
 **tick reali** su `ABTG_GapFill` 225JPY (sedia `772235`). La sezione ANCORE
@@ -20937,7 +20946,7 @@ dal lato della FONTE che tace lo stato invece che della riga che lo contraddice)
    frase va scritta cosi' — *"larga perche' NON HO il numero X"* — proprio
    perche' e' quella formulazione che, riletta, fa venire in mente di cercarlo.
 
-## 371. 📏⚖️ UN **COMPARATIVO FRA BANDE** SENZA CRITERIO DICHIARATO: *"le bande sono piu' strette"* si ribalta a seconda che si misurino in punti pieni o in frazione dell'ancora (controllo-preventivo, 16/09/2026, estensione della classe 364 dai SUPERLATIVI ai COMPARATIVI)
+## 373. 📏⚖️ UN **COMPARATIVO FRA BANDE** SENZA CRITERIO DICHIARATO: *"le bande sono piu' strette"* si ribalta a seconda che si misurino in punti pieni o in frazione dell'ancora (controllo-preventivo, 16/09/2026, estensione della classe 364 dai SUPERLATIVI ai COMPARATIVI)
 
 Il caso: i quattro file `R167a-d_slgapmult_gapfill_*.txt`. Tutti e quattro
 motivavano la fiducia nelle proprie sentinelle con un **confronto di larghezza**,
@@ -20979,4 +20988,4 @@ R167d la prosa sbagliata nascondeva un difetto vero (classe 370).
 4. 📌 Corollario che il cancello applica: quando un file dichiara che una banda
    e' larga/stretta **per una ragione**, si ricalcola il rapporto banda/ancora
    di **tutti i file fratelli** e si mette in tabella. Se l'ordine non torna,
-   la ragione scritta e' falsa — e spesso, sotto, c'e' dell'altro (qui: 370).
+   la ragione scritta e' falsa — e spesso, sotto, c'e' dell'altro (qui: 372).

@@ -56,7 +56,7 @@
 #  c) E L'ALTERNATIVA E' STATA CALCOLATA, non scartata a sentimento:
 #     rifare questo asse a tick reali vorrebbe dire la finestra
 #     2024.07.05 -> 2026.06.30 (2,0 anni). Alla frequenza misurata di
-#     questa sedia (20 posizioni in 27,5 anni operati) sarebbero
+#     questa sedia (20 posizioni in 27,5 anni MISURATI) sarebbero
 #     ~1,5 posizioni in tutto, cioe' MENO DI UNA PER CELLA. Non e'
 #     una misura, e' un aneddoto. Fra un aneddoto a tick e uno
 #     screening OHLC su 20 posizioni, si sceglie il secondo E SI
@@ -118,13 +118,19 @@
 #       sezione "IL RAPPORTO CHE L'ASSE MUOVE DAVVERO".
 #    3. LA FINESTRA e IL MODELLO: i tre forex girano sulla finestra
 #       LUNGA di R102 (prima operazione misurata 1999.01.04, 27,5 anni
-#       operati) in OHLC M1, perche' li' i tick non esistono; 225JPY
+#       MISURATI) in OHLC M1, perche' li' i tick non esistono; 225JPY
 #       gira 2024.09.26 -> 2026.06.30 a TICK REALI, perche' li'
 #       esistono. Sono due classi di prova diverse, e vanno citate
 #       diverse.
 #    4. L'ANCORA: R102 Blocco 2 (finestra lunga) per i tre forex,
-#       R103 Blocco 1 Indici per 225JPY. Numeri diversi, referti
-#       diversi, bande diverse.
+#       R103 Blocco 1 Indici per 225JPY -- piu', **SOLO su 225JPY, una
+#       SECONDA ancora a TICK REALI**, che e' il modello con cui R167d
+#       gira davvero: R65 par. 4-quater, stessa sedia (772235), stessa
+#       cella (fill 75), stesso deposito (100k), **DD 4,36% . PF 1,144
+#       . n=15**, su una finestra piu' corta (2025.06.10 -> 2026.06.30).
+#       Sui tre forex quella seconda ancora NON esiste e non puo'
+#       esistere: i tick BCM sul forex partono dal 2024.07.05.
+#       Numeri diversi, referti diversi, bande diverse.
 #    5. IL MARGINE SUL CANCELLO `slOk` NELLE CELLE BASSE, che e'
 #       l'unica cosa che puo' far cambiare `n` lungo l'asse: sul forex
 #       il margine e' ampio, su 225JPY e' di poche volte. Conto per
@@ -523,11 +529,34 @@
 #      e da sola NON separa "il motore ha operato meno" da "la storia
 #      non c'era": limite DICHIARATO, non chiuso (classe 355).
 #  ARITMETICA, fatta qui da zero:
-#      20 posizioni / 27,5 anni operati = 0,73 posizioni/anno.
+#      20 posizioni / 27,5 anni MISURATI = 0,73 posizioni/anno.
+#    >>> LA PAROLA "MISURATI" E' SCELTA, NON CASUALE -- corretta dal
+#        cancello il 16/09, perche' la prima stesura diceva "27,5 anni
+#        OPERATI" e quella parola, in R102, VUOL DIRE UN'ALTRA COSA. Il
+#        referto usa DUE termini distinti per QUESTA stessa sedia:
+#          - "gli anni MISURATI sono 27.5" = lo SPAN di calendario dalla
+#            prima operazione (1999.01.04) alla fine della finestra;
+#          - "quella EFFETTIVAMENTE OPERATA e' 6" = gli anni solari che
+#            contengono ALMENO UNA operazione (GATE 4), e il referto
+#            ordina testualmente: "Ogni volta che si dice 'N anni di
+#            storico' su questa sedia, il numero da dire e' il secondo".
+#        Per la FREQUENZA il denominatore giusto e' il PRIMO (27,5): la
+#        cadenza si misura sul calendario, non sui soli anni non vuoti.
+#        Ma chiamarlo "operati" faceva collidere le due definizioni
+#        DENTRO LO STESSO FILE (che poco piu' sotto scrive, corretto,
+#        "nominali 56 anni, operati 6"): classe 360.
+#        >>> E il conto con l'ALTRO denominatore si scrive lo stesso,
+#            per non nascondere il verso: 20 / 6 = 3,3 posizioni per
+#            anno-operato -> 300 / 3,3 = ~90 anni-operati. Il verdetto
+#            "IS>=150 NON RAGGIUNGIBILE" NON dipende da quale dei due
+#            si usa -- e su questa sedia la distanza resta di oltre
+#            TRE VOLTE la vita del broker anche col denominatore piu'
+#            generoso. E' questo che lo rende un verdetto e non una
+#            convenzione.
 #    Per IS>=150 E OOS>=150 servono >=300 posizioni (minimo, ipotizzando
 #    uno split perfetto 50/50). Alla stessa frequenza:
 #      300 / 20 x 27,5 = **412,5 ANNI**.
-#    Contro i 27,5 anni operati davvero -- e contro i ~27,5 che il
+#    Contro i 27,5 anni MISURATI davvero -- e contro i ~27,5 che il
 #    broker HA (lo storico M1 utilizzabile di BCM comincia il
 #    1999.01.04: `R102_REFERTO_BLOCCO2.md` par. 1, "sei sedie, due
 #    motori indipendenti, un'unica data di partenza"). Mancano oltre
@@ -603,9 +632,36 @@
 #         fresco:
 #           - stesso MODELLO (OHLC M1) e stesso DEPOSITO (100k): due
 #             cose che nei round di ieri sugli indici NON coincidevano
-#             (li' si confrontava OHLC contro tick). Qui coincidono, ed
-#             e' il motivo per cui le bande sotto sono piu' strette di
-#             quelle di R157a;
+#             (li' si confrontava OHLC contro tick). Qui coincidono, e
+#             questo rende il CONFRONTO pulito;
+#             >>> MA LA FRASE SULLA LARGHEZZA DELLE BANDE E' STATA
+#                 CORRETTA DAL CANCELLO IL 16/09, ED ERA FALSA, non
+#                 imprecisa (classe nuova 373, estensione della 364 ai
+#                 COMPARATIVI). Qui c'era scritto "ed e' il motivo per
+#                 cui le bande sotto sono piu' strette di quelle di
+#                 R157a". Col criterio in chiaro -- LARGHEZZA RELATIVA
+#                 ALL'ANCORA, l'unica che conta per una sentinella di
+#                 "banco sporco", perche' il suo mestiere e' dire
+#                 quanto il fresco puo' discostarsi dall'ancora -- i
+#                 numeri dicono il CONTRARIO:
+#                   . S1: R157a e' 30 +-25% arrotondato all'esterno
+#                     (22-38); qui e' 20 +-25% arrotondato all'esterno
+#                     (15-25). E' la STESSA REGOLA: non piu' stretta,
+#                     **IDENTICA**;
+#                   . S2: R157a e' [1,5%-6,5%] su ancora 3,21% =
+#                     [0,47x-2,02x]; qui e' [0,8%-5,0%] su ancora
+#                     1,86% = [0,43x-**2,69x**]. Cioe' **PIU' LARGA di
+#                     R157a**, non piu' stretta -- e di parecchio in
+#                     alto.
+#                 LA RAGIONE E' SANA e va scritta invece che nascosta:
+#                 l'ancora di DD di questa sedia e' **piccola** (1,86%),
+#                 e una banda in punti pieni ragionevole (0,8-5,0, la
+#                 piu' STRETTA dei quattro fratelli in punti: 4,2 contro
+#                 5,0) diventa enorme in frazione. **La banda resta
+#                 quella: cambia la frase che la descrive.**
+#                 Conseguenza operativa, dichiarata: su questa sedia S2
+#                 e' una sentinella **DEBOLE** -- lascia passare quasi
+#                 tre volte l'ancora. Il peso, qui, sta su S4 e su B2;
 #           - binario DIVERSO (pin `fd23d4a` di agosto contro il pin
 #             che questo round usera'): fra i due il sorgente puo'
 #             avere acquisito input, il che NON cambia i calcoli di

@@ -111,13 +111,19 @@
 #       sezione "IL RAPPORTO CHE L'ASSE MUOVE DAVVERO".
 #    3. LA FINESTRA e IL MODELLO: i tre forex girano sulla finestra
 #       LUNGA di R102 (prima operazione misurata 1999.01.04, 27,5 anni
-#       operati) in OHLC M1, perche' li' i tick non esistono; 225JPY
+#       MISURATI) in OHLC M1, perche' li' i tick non esistono; 225JPY
 #       gira 2024.09.26 -> 2026.06.30 a TICK REALI, perche' li'
 #       esistono. Sono due classi di prova diverse, e vanno citate
 #       diverse.
 #    4. L'ANCORA: R102 Blocco 2 (finestra lunga) per i tre forex,
-#       R103 Blocco 1 Indici per 225JPY. Numeri diversi, referti
-#       diversi, bande diverse.
+#       R103 Blocco 1 Indici per 225JPY -- piu', **SOLO su 225JPY, una
+#       SECONDA ancora a TICK REALI**, che e' il modello con cui R167d
+#       gira davvero: R65 par. 4-quater, stessa sedia (772235), stessa
+#       cella (fill 75), stesso deposito (100k), **DD 4,36% . PF 1,144
+#       . n=15**, su una finestra piu' corta (2025.06.10 -> 2026.06.30).
+#       Sui tre forex quella seconda ancora NON esiste e non puo'
+#       esistere: i tick BCM sul forex partono dal 2024.07.05.
+#       Numeri diversi, referti diversi, bande diverse.
 #    5. IL MARGINE SUL CANCELLO `slOk` NELLE CELLE BASSE, che e'
 #       l'unica cosa che puo' far cambiare `n` lungo l'asse: sul forex
 #       il margine e' ampio, su 225JPY e' di poche volte. Conto per
@@ -580,14 +586,62 @@
 #     della classifica: "GapFill 225JPY | 1,0% | +5.399 | +5.399 |
 #     **1,68** | **4,66%** | 4,66% | **26** | 3/7 . campione sottile",
 #     OHLC M1, deposito 100k, finestra 2024.09.26 -> 2026.06.30.
-#     >>> NON E' BIT-A-BIT, e la differenza e' proprio quella che conta
-#         su questo asse: quella corsa era **OHLC M1**, questa e'
+#     >>> NON E' BIT-A-BIT: quella corsa era **OHLC M1**, questa e'
 #         **TICK**. Il tick e' piu' fine (intrabar reale) e su un asse
 #         che sposta lo stop puo' cambiare l'esito di trade marginali
 #         in modo sistematico, non casuale -- e' esattamente la ragione
-#         per cui questo round gira a tick. Per questo le bande sotto
-#         sono LARGHE, e piu' larghe di quelle dei tre fratelli forex
-#         (dove ancora e round condividono il modello).
+#         per cui questo round gira a tick.
+#     >>> E LA FRASE CHE SEGUIVA QUI E' STATA RIMOSSA DAL CANCELLO IL
+#         16/09, PERCHE' ERA FALSA IN TUTTI E DUE I SENSI. Diceva: "Per
+#         questo le bande sotto sono LARGHE, e piu' larghe di quelle
+#         dei tre fratelli forex". Col criterio in chiaro (classe nuova
+#         373 -- un comparativo fra bande senza criterio si ribalta):
+#           . S1 usa la STESSA regola dei tre fratelli (+-25%
+#             dell'ancora, arrotondato all'esterno): non piu' larga,
+#             IDENTICA;
+#           . S2 e' [2,0%-7,0%] su ancora 4,66% = **[0,43x-1,50x]**,
+#             mentre R167a e' [2,0%-7,0%] su 4,02% = [0,50x-1,74x] e
+#             R167b/c sono [0,8%-5,0%] su 1,86/1,87% = [0,43x-2,69x].
+#             In frazione dell'ancora questa e' **la PIU' STRETTA IN
+#             ALTO dei quattro**, non la piu' larga -- l'esatto
+#             contrario di quel che c'era scritto. In punti pieni e'
+#             larga come R167a (5,0) e piu' di R167b/c (4,2).
+#     >>> E LA BANDA RESTA 2,0-7,0 LO STESSO, MA ORA PER UNA RAGIONE
+#         MISURATA invece che per un aggettivo -- ed e' la correzione
+#         che conta davvero, perche' il file dichiarava "non esiste
+#         un'ancora a TICK" SENZA AVERLA CERCATA (classe nuova 372).
+#         **L'ANCORA A TICK ESISTE, e' di questa sedia, di questa cella
+#         e di questo deposito**:
+#           `backtest_pipeline/risultati_archivio/
+#           REFERTO_ROUND65_GAPCONTINUATION.md`, par. 4-quater r.235-238
+#           -- "`ABTG_GapFill` cella promossa R36 (fill 75, spread 300,
+#           minATR 0.3, time-stop 48h, magic 772235) su 225JPY H1,
+#           **tick reali**, stessa finestra OOS. Risultato: **+811,56 .
+#           PF 1,144 . 15 posizioni . DD 4,36%**", e r.183 dichiara per
+#           quella corsa "finestra OOS 2025.06.10 -> 2026.06.30,
+#           **deposito 100.000**, rischio 1%".
+#         >>> COSA DICE, ESATTAMENTE, E COSA NON DICE:
+#             - E' **lo stesso modello di questo round** (tick), **la
+#               stessa sedia** (772235), **la stessa cella** (fill 75 e
+#               `InpSLGapMult` al valore vivo) e **lo stesso deposito**
+#               (100k). E' l'ancora piu' vicina che esista per MODELLO.
+#             - **MA sta su una finestra piu' corta**: 2025.06.10 ->
+#               2026.06.30 (~12,7 mesi) contro i 21 mesi di questo
+#               round. Quindi NON sostituisce l'ancora A e NON diventa
+#               una sentinella: il DD di un sottoinsieme e' un LIMITE
+#               INFERIORE del DD dell'insieme.
+#             - **Il numero che serve e' il CONFRONTO FRA MODELLI**, e
+#               quello si legge: il DD a TICK su 12,7 mesi e' **4,36%**
+#               contro il DD in OHLC su 21 mesi che vale **4,66%**.
+#               Cioe' il salto OHLC->tick su QUESTA sedia **e' piccolo
+#               e gia' misurato**, non un'incognita da coprire con un
+#               aggettivo. Un bordo alto a 7,0% (1,50x l'ancora) lascia
+#               **oltre il 60% di margine sopra il 4,36% misurato a
+#               tick**: e' abbastanza, e ora si sa PERCHE'.
+#             - E il PF a tick (**1,144** su 15) contro il PF in OHLC
+#               (**1,68** su 26) e' la conferma piu' forte della riga
+#               "nessuna frase di merito esce da qui": due finestre
+#               della stessa sedia danno due PF che non si somigliano.
 #     >>> E il "3/7 trimestri negativi . campione sottile" e' parte
 #         dell'ancora, non una nota a margine: su 26 posizioni in 21
 #         mesi, quasi la meta' dei trimestri chiude in rosso. Nessuna
@@ -600,6 +654,25 @@
 #     SOTTOINSIEME della finestra di questo round, con 15 posizioni e
 #     un PF molto piu' basso (1,14 contro 1,68). Serve a ricordare
 #     quanto la stessa sedia cambi faccia cambiando finestra.
+#     >>> E IL "+76" NON SI CITA NUDO -- correzione del cancello del
+#         16/09, classe 366 (il deposito e' uno stato che va
+#         DICHIARATO, mai ereditato). **Quel +76 e' un numero a
+#         DEPOSITO 10.000**, mentre questo round gira a **100.000**:
+#         fonte `report/CENSIMENTO_CONTRATTI.md` riga 251, che per
+#         `772235` scrive in chiaro conto "**10.000 EUR . 1,0%**"
+#         accanto a "R36 (PF 1,14, il piu' tirato)".
+#         E la PROVA che e' proprio un effetto di deposito e non di
+#         mercato sta nel R65: la corsa a tick della **stessa cella,
+#         stessa finestra, a 100.000** (ancora A, sopra) fa **+811,56**
+#         con lo **stesso n=15 e PF 1,144 contro 1,14**. Cioe'
+#         **+76 x 10 = +760 ~ +811**: il fattore 10 e' il deposito, il
+#         resto e' il modello.
+#         >>> CHI CONFRONTASSE "+76" CON I PROFITTI DI QUESTO ROUND
+#             SBAGLIEREBBE DI UN FATTORE 10. Il numero confrontabile
+#             con questo round, di quella finestra, e' **+811,56**, non
+#             +76. Scritto qui perche' il `.set` da cui viene la
+#             citazione **non contiene il deposito**: e' esattamente il
+#             caso in cui una fonte autorevole tace lo stato che serve.
 #
 #  C) L'ANCORA DI COSTO: NON ESISTE su questa sedia (sezione "IL
 #     COSTO"). E' la differenza piu' grossa rispetto a R157a, che su
@@ -742,6 +815,18 @@
 #      Se la cella viva cade fuori, il banco e'
 #      sporco (dati diversi da quelli dell'ancora, o un pin sbagliato) e
 #      il round si ferma PRIMA di leggere le altre sei celle.
+#      >>> CONTROPROVA A TICK, aggiunta dal cancello il 16/09 e NON
+#          usata come seconda soglia (una sentinella sola, classe di
+#          casa): la corsa R65 a tick della stessa cella fa **n=15 in
+#          12,7 mesi** = 1,18 posizioni/mese, contro le **26 in 21
+#          mesi** dell'ancora = 1,24 posizioni/mese. Le due cadenze
+#          coincidono entro il 5%: il passaggio OHLC->tick **NON
+#          cambia il numero di ingressi** su questa sedia -- il che era
+#          l'atteso dal codice (l'asse tocca l'ingresso solo tramite
+#          `slOk`), ed e' la prima volta che lo si legge su un dato
+#          invece che dedurlo. Riscalata ai 21 mesi di questo round, la
+#          cadenza a tick prevede **~24,8 posizioni**: dentro 19-33,
+#          comodamente.
 #      >>> LIMITE DICHIARATO (classe 355): e' una sentinella di SOLA
 #          SOGLIA. Non separa "il motore ha operato meno" da "lo storico
 #          non c'era", perche' la sentinella che lo separerebbe -- data
@@ -749,16 +834,38 @@
 #          nessuna colonna del CSV raccolto. Dichiarato, non chiuso.
 #
 #    S2 -- DD SULLA CELLA VIVA (1,0): banda **2,0%-7,0%**
-#      (ancora 4,66%). Banda larga per DUE ragioni, non
-#      una: (i) l'ancora e' OHLC M1 e questo round e' a TICK, e su un
-#      asse che sposta lo stop la differenza di modello non e' un
-#      dettaglio; (ii) su 26 posizioni il DD e' dominato da uno o due
-#      trade.
+#      (ancora 4,66% in OHLC su 21 mesi). Le ragioni sono DUE, e dal
+#      16/09 la prima e' MISURATA invece che stimata:
+#      (i) IL SALTO DI MODELLO NON E' UN'INCOGNITA, E' UN NUMERO. La
+#          stessa sedia, stessa cella, stesso deposito, **a TICK**, e'
+#          gia' stata misurata: **DD 4,36%** su 12,7 mesi
+#          (`REFERTO_ROUND65_GAPCONTINUATION.md` par. 4-quater,
+#          r.235-238 + r.183; sezione ANCORE A). Fra 4,66% (OHLC, 21
+#          mesi) e 4,36% (tick, 12,7 mesi) c'e' poco -- e i due effetti
+#          tirano in versi OPPOSTI (il tick ALZA, la finestra corta
+#          ABBASSA), quindi il confronto non e' pulito e non si
+#          pretende che lo sia. Ma un salto OHLC->tick di ORDINE DI
+#          GRANDEZZA superiore sarebbe gia' comparso li'. Il bordo alto
+#          a 7,0% lascia **+50% sopra l'ancora OHLC e +61% sopra il DD
+#          a tick misurato**: e' il margine, e ora ha un numero dietro.
+#      (ii) SU 26 POSIZIONI IL DD E' DOMINATO DA UNO O DUE TRADE. Questa
+#          resta la ragione piu' forte per non stringere.
 #      >>> E VA LETTA COL VERSO GIUSTO: un DD misurato su OHLC e' un
 #          LIMITE INFERIORE del rischio (lo dichiara il referto R103
 #          stesso). Quindi un DD a tick PIU' ALTO dell'ancora non e'
 #          una sorpresa: e' l'atteso. Un DD piu' BASSO, invece, va
 #          guardato con sospetto.
+#      >>> CONTRO-ESEMPIO CHE HA FATTO CAMBIARE QUESTA SENTINELLA, e
+#          che vale la pena scrivere perche' e' il motivo per cui il
+#          cancello esiste: la stesura del 16/09 giustificava questa
+#          banda con "non c'e' un'ancora a tick, quindi larga". Se
+#          quella fosse stata l'unica ragione, un DD fresco di 7,5%
+#          avrebbe fatto scrivere "banco sporco" su un esito che il
+#          file stesso definiva ATTESO -- una sentinella che spara sul
+#          risultato previsto. Ora la banda e' ancorata a un numero:
+#          **un DD sopra 7,0% NON e' piu' "il tick che fa il tick",
+#          perche' il tick su questa sedia e' stato misurato a 4,36%.
+#          Sopra 7,0% si guarda l'ASSE, non il modello.**
 #
 #    S3 -- CONTEGGIO DELLE CELLE: **7 valori DISTINTI** di
 #      `InpSLGapMult` nella colonna omonima del CSV (0,4 / 0,7 / 1,0 /

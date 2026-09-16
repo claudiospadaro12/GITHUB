@@ -56,7 +56,7 @@
 #  c) E L'ALTERNATIVA E' STATA CALCOLATA, non scartata a sentimento:
 #     rifare questo asse a tick reali vorrebbe dire la finestra
 #     2024.07.05 -> 2026.06.30 (2,0 anni). Alla frequenza misurata di
-#     questa sedia (21 posizioni in 27,5 anni operati) sarebbero
+#     questa sedia (21 posizioni in 27,5 anni MISURATI) sarebbero
 #     ~1,5 posizioni in tutto, cioe' MENO DI UNA PER CELLA. Non e'
 #     una misura, e' un aneddoto. Fra un aneddoto a tick e uno
 #     screening OHLC su 21 posizioni, si sceglie il secondo E SI
@@ -118,13 +118,19 @@
 #       sezione "IL RAPPORTO CHE L'ASSE MUOVE DAVVERO".
 #    3. LA FINESTRA e IL MODELLO: i tre forex girano sulla finestra
 #       LUNGA di R102 (prima operazione misurata 1999.01.04, 27,5 anni
-#       operati) in OHLC M1, perche' li' i tick non esistono; 225JPY
+#       MISURATI) in OHLC M1, perche' li' i tick non esistono; 225JPY
 #       gira 2024.09.26 -> 2026.06.30 a TICK REALI, perche' li'
 #       esistono. Sono due classi di prova diverse, e vanno citate
 #       diverse.
 #    4. L'ANCORA: R102 Blocco 2 (finestra lunga) per i tre forex,
-#       R103 Blocco 1 Indici per 225JPY. Numeri diversi, referti
-#       diversi, bande diverse.
+#       R103 Blocco 1 Indici per 225JPY -- piu', **SOLO su 225JPY, una
+#       SECONDA ancora a TICK REALI**, che e' il modello con cui R167d
+#       gira davvero: R65 par. 4-quater, stessa sedia (772235), stessa
+#       cella (fill 75), stesso deposito (100k), **DD 4,36% . PF 1,144
+#       . n=15**, su una finestra piu' corta (2025.06.10 -> 2026.06.30).
+#       Sui tre forex quella seconda ancora NON esiste e non puo'
+#       esistere: i tick BCM sul forex partono dal 2024.07.05.
+#       Numeri diversi, referti diversi, bande diverse.
 #    5. IL MARGINE SUL CANCELLO `slOk` NELLE CELLE BASSE, che e'
 #       l'unica cosa che puo' far cambiare `n` lungo l'asse: sul forex
 #       il margine e' ampio, su 225JPY e' di poche volte. Conto per
@@ -523,11 +529,32 @@
 #      e da sola NON separa "il motore ha operato meno" da "la storia
 #      non c'era": limite DICHIARATO, non chiuso (classe 355).
 #  ARITMETICA, fatta qui da zero:
-#      21 posizioni / 27,5 anni operati = 0,76 posizioni/anno.
+#      21 posizioni / 27,5 anni MISURATI = 0,76 posizioni/anno.
+#    >>> LA PAROLA "MISURATI" E' SCELTA, NON CASUALE -- corretta dal
+#        cancello il 16/09, perche' la prima stesura diceva "27,5 anni
+#        OPERATI" e quella parola, in R102, VUOL DIRE UN'ALTRA COSA. Il
+#        referto usa DUE termini distinti per QUESTA stessa sedia:
+#          - "gli anni MISURATI sono 27.5" = lo SPAN di calendario dalla
+#            prima operazione (1999.01.04) alla fine della finestra;
+#          - "quella EFFETTIVAMENTE OPERATA e' 10" = gli anni solari che
+#            contengono ALMENO UNA operazione (GATE 4), e il referto
+#            ordina testualmente: "Ogni volta che si dice 'N anni di
+#            storico' su questa sedia, il numero da dire e' il secondo".
+#        Per la FREQUENZA il denominatore giusto e' il PRIMO (27,5): la
+#        cadenza si misura sul calendario, non sui soli anni non vuoti.
+#        Ma chiamarlo "operati" faceva collidere le due definizioni
+#        DENTRO LO STESSO FILE (che poco piu' sotto scrive, corretto,
+#        "nominali 34 anni, operati 10"): classe 360.
+#        >>> E il conto con l'ALTRO denominatore si scrive lo stesso,
+#            per non nascondere il verso: 21 / 10 = 2,1 posizioni per
+#            anno-operato -> 300 / 2,1 = ~143 anni-operati. Il verdetto
+#            "IS>=150 NON RAGGIUNGIBILE" NON dipende da quale dei due
+#            si usa. E' questo che lo rende un verdetto e non una
+#            convenzione.
 #    Per IS>=150 E OOS>=150 servono >=300 posizioni (minimo, ipotizzando
 #    uno split perfetto 50/50). Alla stessa frequenza:
 #      300 / 21 x 27,5 = **392,9 ANNI**.
-#    Contro i 27,5 anni operati davvero -- e contro i ~27,5 che il
+#    Contro i 27,5 anni MISURATI davvero -- e contro i ~27,5 che il
 #    broker HA (lo storico M1 utilizzabile di BCM comincia il
 #    1999.01.04: `R102_REFERTO_BLOCCO2.md` par. 1, "sei sedie, due
 #    motori indipendenti, un'unica data di partenza"). Mancano oltre
@@ -603,9 +630,33 @@
 #         fresco:
 #           - stesso MODELLO (OHLC M1) e stesso DEPOSITO (100k): due
 #             cose che nei round di ieri sugli indici NON coincidevano
-#             (li' si confrontava OHLC contro tick). Qui coincidono, ed
-#             e' il motivo per cui le bande sotto sono piu' strette di
-#             quelle di R157a;
+#             (li' si confrontava OHLC contro tick). Qui coincidono, e
+#             questo rende il CONFRONTO pulito;
+#             >>> MA LA FRASE SULLA LARGHEZZA DELLE BANDE E' STATA
+#                 CORRETTA DAL CANCELLO IL 16/09, e la correzione e'
+#                 una classe nuova (373, estensione della 364 ai
+#                 COMPARATIVI). Qui c'era scritto "ed e' il motivo per
+#                 cui le bande sotto sono piu' strette di quelle di
+#                 R157a": un comparativo fra bande SENZA CRITERIO si
+#                 ribalta a seconda di come lo si misura (punti pieni
+#                 di DD, oppure frazione dell'ancora). Col criterio in
+#                 chiaro -- LARGHEZZA RELATIVA ALL'ANCORA, l'unica che
+#                 conta per una sentinella di "banco sporco", perche'
+#                 il suo mestiere e' dire quanto il fresco puo'
+#                 discostarsi dall'ancora -- i numeri sono questi:
+#                   . S1: R157a e' 30 +-25% arrotondato all'esterno
+#                     (22-38); qui e' 21 +-25% arrotondato all'esterno
+#                     (15-27). E' la STESSA REGOLA: non piu' stretta,
+#                     **IDENTICA**;
+#                   . S2: R157a e' [1,5%-6,5%] su ancora 3,21% =
+#                     [0,47x-2,02x]; qui e' [2,0%-7,0%] su ancora
+#                     4,02% = [0,50x-1,74x]. **Questa si' e' piu'
+#                     stretta, e soprattutto in alto.**
+#                 Frase giusta, quindi: **solo S2 e' piu' stretta di
+#                 R157a; S1 e' identica.** In punti pieni le due S2
+#                 sono larghe uguale (5,0 punti): e' il rapporto con
+#                 l'ancora a distinguerle, ed e' per questo che il
+#                 criterio va scritto e non sottinteso;
 #           - binario DIVERSO (pin `fd23d4a` di agosto contro il pin
 #             che questo round usera'): fra i due il sorgente puo'
 #             avere acquisito input, il che NON cambia i calcoli di
