@@ -1,4 +1,4 @@
-# 🔍 R127a girato l'11/09, letto solo il 16/09 — e non torna
+# 🔍 R127a girato il 14/09, letto solo il 16/09 — e non torna
 
 **Trovato da**: agente `mql5-ea-developer` lanciato nel turno continuo del 16/09
 per un round che si credeva ancora da scrivere (`InpSLBufferPips` su `970913`,
