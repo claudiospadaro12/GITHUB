@@ -1039,7 +1039,19 @@ $BancoBT = 'C:\MT5_Backtest'
 #  walkforward_generico.ps1 NON sono cambiati fra i due commit (git
 #  diff b9848b1b..13599df8 sui due percorsi: VUOTO, verificato): solo
 #  $PIN si muove.
-$PIN = '13599df8fcb0b3fdc857fa297ad58e4d419ac050'
+#  >>> QUARANTOTTESIMO GIRO DI PIN (16/09/2026): 13599df8 -> 1acb1d52.
+#  Serviva per raggiungere R165a (InpSLBufferPips, SuperWave U30USD
+#  770511) dopo il PASS del secondo cancello: FAIL alla prima lettura
+#  (classe 369, nuova: il valore vivo di InpSLBufferAtr era letto dal
+#  default compilato e dai CSV d'archivio, non dal preset -- che e'
+#  l'unico artefatto che governa la sedia; verificato che il preset
+#  non valorizza InpSLBufferAtr, quindi la conclusione del file era
+#  vera ma la catena di prove no) piu' correzioni minori (colonna del
+#  CSV 27esima->29esima nella prosa, non nella sentinella; un'ora di
+#  spread 1,9->1,8). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON
+#  sono cambiati fra i due commit (git diff 13599df8..1acb1d52 sui due
+#  percorsi: VUOTO, verificato): solo $PIN si muove.
+$PIN = '1acb1d522a5fefde94f5bc27b40e5a6343ed915b'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
