@@ -1109,7 +1109,22 @@ $BancoBT = 'C:\MT5_Backtest'
 #  coda/referti/), non toccano questi due file. RIGA_ROUND_VPS.ps1 e
 #  walkforward_generico.ps1 NON sono cambiati fra 2baac2c2 e HEAD (git
 #  diff sui due percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = '16191264daf2e731c62a85d0ca389716506ebe6c'
+#  >>> CINQUANTAQUATTRESIMO GIRO DI PIN (16/09/2026): 16191264 -> 717be501.
+#  Serviva per raggiungere R172c (InpBreakevenAtTP1, magic 789530,
+#  secondo cancello PASS dopo 9 correzioni: classe NUOVA 382 --
+#  un grep vero alla stesura e falso al commit perche' il file
+#  diventa esso stesso un match -- ed estensione della 380, arbitrato
+#  del bordo: su S1 vince il criterio esatto, non la cella arrotondata
+#  stampata) e per portare tre emendazioni non bloccanti su R172a/b
+#  GIA' ARMATI (fattore uscite/posizioni [DERIVATO]->[MISURATO] a
+#  costo zero, tolta la falsa dichiarazione di -TerminaleBacktest come
+#  argomento della riga -- il driver non lo accetta -- e "DUE tipi di
+#  bande" corretto a "TRE"). Anche R172d (InpBEatR, magic 789540) e'
+#  arrivato in questo HEAD ma NON e' ancora armato: aspetta il suo
+#  secondo cancello. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON
+#  sono cambiati fra 16191264 e 717be501 (git diff sui due percorsi:
+#  VUOTO, verificato): solo $PIN si muove.
+$PIN = '717be5014cc149ed8200b3135a934784c61e16cf'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
