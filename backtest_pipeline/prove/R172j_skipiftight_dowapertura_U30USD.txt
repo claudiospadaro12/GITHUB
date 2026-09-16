@@ -1,0 +1,1414 @@
+# =====================================================================
+#  EA: ABTG_Dow_Apertura_US
+#  R172j -- L'INTERRUTTORE: quando lo stop e' troppo stretto, si ALLARGA
+#           o si SALTA IL TRADE? E' la DECIMA e ultima manopola d'uscita
+#           scoperta della sedia 770202 -- ed e' l'unica della serie che
+#           NON PUO' ESSERE MISURATA AL VALORE DI CAMPO, perche' al
+#           valore di campo le due celle sono IDENTICHE PER ARITMETICA --
+#           U30USD M5, magic vivo 770202 -- asse InpSkipIfTight, 2 celle
+#           con InpMinStopPts PINNATO a 8000 (= la frontiera di costo)
+#  Scritto il 16/09/2026. Criteri congelati PRIMA dei numeri, dentro
+#  questo file (paragrafi ANCORA / ATTESA / CONTRO-ESEMPIO / SENTINELLE
+#  / SOGLIE).
+#
+#  >>> !! NON SI LEGGE PRIMA DI R172i, E NON E' UNA PREFERENZA: il
+#      cancello di riproduzione di questo round e' INCROCIATO con quello
+#      (S1). Vedi il paragrafo L'ORDINE. E' la stessa architettura con
+#      cui la casa ha misurato questa coppia di manopole sul gemello DAX
+#      (R129a/b/c l'11/09, R137a/b/c il 12/09, e i file R137a/R137b
+#      portano in testa la riga "NON SI LEGGE PRIMA DI R137c").
+#
+#  DECIMO FILE DELLA SERIE SULLA STESSA SEDIA 770202:
+#    R172a  InpTrailStartR . R172b  InpCloseHour . R172c InpBreakevenAtTP1
+#    R172d  InpBEatR       . R172e  InpTP1_R     . R172f InpTrailTF
+#    R172g  InpCloseAtEnd  . R172h  InpSLMode (gemello, scritto oggi)
+#    R172i  InpMinStopPts  (gemello, scritto oggi -- E QUESTO ROUND NE
+#                           DIPENDE)
+#    R172j  InpSkipIfTight (questo)
+#  >>> LO STATO DEI SETTE FRATELLI R172a-g NON E' RICORDATO: letto oggi
+#      in backtest_pipeline/coda/CODA.txt, dove le sette righe armate
+#      stanno a r.2515 (r172a), r.2517 (r172b), r.2553 (r172c), r.2607
+#      (r172d), r.2609 (r172e), r.2755 (r172f) e r.2757 (r172g). Tutti e
+#      sette ARMATI al momento in cui scrivo -- e chi arma RIAPRE il
+#      file invece di fidarsi di questa riga (classe 386).
+#  >>> E SU R172h E R172i NON DICHIARO NESSUNO STATO: scritti nella
+#      stessa ora di questo e NON armati quando ho scritto questa riga.
+# ---------------------------------------------------------------------
+#  SI LANCIA CON (RIGA_SOTTILE_ROUND.ps1: finestra, taglio IS/OOS e
+#  asse arrivano TUTTI dalle direttive di questo file, non dalla riga):
+#    -Expert ABTG_Dow_Apertura_US
+#    -Prova prove\R172j_skipiftight_dowapertura_U30USD.txt
+#    -Etichetta r172j -Modello 4 -Deposito 100000
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 CELLE.
+#   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DI PASSATE: il driver
+#       stampa "celle x 2" CABLATO (walkforward_generico.ps1 r.880,
+#       riletta oggi) e quel *2 non legge mai @FRAZIONEIS -- classe 354.
+#       Qui le passate vere sono 4 (2 celle x 2 finestre).
+#   Se le CELLE non sono 2, ci si ferma prima di lanciare altro.)
+#
+#  !! NON SI SCRIVE `-TerminaleBacktest` FRA GLI ARGOMENTI (classe 268):
+#     `RIGA_SOTTILE_ROUND.ps1` ha un `param()` di SEI voci -- `-Expert
+#     -Prova -Etichetta -Modello -Deposito -SoloControllo` (r.99-106,
+#     riletto oggi) -- e quell'argomento NON e' fra quelle. Passarglielo
+#     a mano farebbe FALLIRE il lancio.
+#     >>> IL BANCO E' CABLATO, e la catena l'ho percorsa OGGI, a HEAD
+#         b9d7f8de:
+#           RIGA_SOTTILE_ROUND.ps1 r.131  $BancoBT = 'C:\MT5_Backtest'
+#           RIGA_SOTTILE_ROUND.ps1 r.1433 "-TerminaleBacktest",$BancoBT
+#                                         (dentro $argv, r.1426-1433)
+#           RIGA_ROUND_VPS.ps1     r.92   il param, default
+#                                         "C:\MT5_Backtest"
+#           RIGA_ROUND_VPS.ps1     r.649  lo inoltra al driver
+#     >>> I NUMERI DI RIGA SONO QUELLI DI OGGI: i fratelli R172f/g
+#         citano `r.1395` ed ERA GIUSTO AL LORO PIN (verificato con
+#         `git show 43934665:...RIGA_SOTTILE_ROUND.ps1 | sed -n '1395p'`).
+#         Il file e' cresciuto di 38 righe da allora: e' la classe 369
+#         punto 4, le citazioni per numero di riga scadono da sole. Il
+#         modo stabile e'
+#           grep -n "TerminaleBacktest" backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1
+#         che OGGI torna SEI righe (142, 1120, 1134, 1231, 1235, 1433) e
+#         l'unica che PASSA l'argomento e' la 1433.
+#     C:\MT5_Backtest = demo 50504400, zero EA attaccati. La sedia
+#     770202 VIVE su ALTRI DUE terminali e NON si tocca nessuno dei due.
+#
+#  !! -Modello 4 e -Deposito 100000 SONO IL BANCO DELL'ANCORA DI QUESTA
+#     SEDIA (classe 366), letti nella riga di lancio dell'ancora R54a:
+#     backtest_pipeline\lancia_r54.ps1 r.91 (riga aperta oggi)
+#        "-Prova",$g.Prova,"-Simbolo","U30USD","-Deposito","100000","-Etichetta",$g.Tag
+#     -> deposito 100000 ESPLICITO, nessun -Modello, quindi il default
+#     del driver a quel commit (51922fa4: $Modello 4, $FrazioneIS 0.40,
+#     $Fino "2026.06.30"), letto con `git show` e non ricordato.
+#  -Modello 4 = TICK REALI. Su questo asse serve per una ragione
+#     specifica: la cella 1 TOGLIE giornate, e quali giornate tolga
+#     dipende dal range dei primi 35 minuti, che a tick reali e'
+#     ricostruito com'era.
+#
+# ---------------------------------------------------------------------
+#  ###  L'ORDINE -- QUESTO ROUND DIPENDE DA R172i, E LA DIPENDENZA   ###
+#  ###  E' SCRITTA PRIMA DI TUTTO IL RESTO                           ###
+# ---------------------------------------------------------------------
+#  `InpSkipIfTight` non e' una manopola autonoma: decide COSA SUCCEDE
+#  quando `InpMinStopPts` morde (r.1324-1327). Se il pavimento non morde,
+#  l'interruttore non viene nemmeno letto.
+#
+#  >>> E AL VALORE DI CAMPO IL PAVIMENTO NON MORDE MAI. NON E' UN
+#      SOSPETTO, E' UNA DIMOSTRAZIONE, e la scrivo per esteso perche' e'
+#      il motivo per cui questo file e' fatto diversamente dai suoi nove
+#      fratelli.
+#      Nel ramo RETEST long (l'unico vivo: `InpEntryMode=2`,
+#      `InpAllowShort=false`):
+#         r.1319  entry = NormalizePrice(gRangeHigh - InpRetestOffsetPts*_Point)
+#         r.1303  sellTrig = NormalizePrice(gRangeLow - gBuffer)
+#         r.1305  sellPx = sellTrig
+#         r.1320  sl = sellPx            (con InpSLMode = 0 = SL_RANGE)
+#         r.1322  dist = entry - sl
+#      quindi, sostituendo:
+#         dist = (gRangeHigh - offset) - (gRangeLow - buffer)
+#              = RANGE + buffer - offset
+#      con `offset = InpRetestOffsetPts = 400` punti MT5 e
+#      `buffer = EffectiveBuffer() = MathMax(InpBufferPoints, stopsLvl) *
+#      _Point >= 1000` punti MT5 (r.1906-1911: il buffer puo' solo essere
+#      PIU' GRANDE di 1000, mai piu' piccolo).
+#      E il RANGE e' STRETTAMENTE POSITIVO: `ComputeRangeWindow` termina
+#      con `return(hi > 0 && lo > 0 && hi > lo);` (r.858) e `ArmRetest`
+#      (r.1268-1270) ESCE se quella funzione torna false. Piu': i prezzi
+#      sono multipli del tick (`TickSize 0,10` = 10 punti MT5), quindi
+#      `hi > lo` implica `RANGE >= 10` punti MT5.
+#      >>> DUNQUE, PER OGNI GIORNATA POSSIBILE:
+#             dist >= 10 + 1000 - 400 = 610 punti MT5
+#          e il pavimento vivo e' 500. `dist < 500` e' IMPOSSIBILE, e
+#          quindi la condizione di r.1324 e' SEMPRE FALSA e il ramo
+#          r.1326 -- l'unico posto del codice dove `InpSkipIfTight`
+#          compare -- NON VIENE MAI ESEGUITO.
+#      >>> E LA PROVA EMPIRICA, INDIPENDENTE DALL'ARITMETICA: la
+#          distribuzione MISURATA degli stop di questa sedia (vedi LA
+#          MISURA, sotto) ha come minimo 25,45 punti indice = 2545 punti
+#          MT5 su 96 posizioni OOS, cioe' CINQUE VOLTE il pavimento.
+#          Zero posizioni sotto 500. Due strade, stessa conclusione.
+#  >>> CONSEGUENZA, E LA DICHIARO PRIMA DI QUALUNQUE COSA: un round su
+#      `InpSkipIfTight` col pavimento al valore di campo (500)
+#      produrrebbe DUE CELLE IDENTICHE FINO ALL'ULTIMA CIFRA, E SI SA
+#      GIA' ADESSO. Non misurerebbe la manopola: misurerebbe che il
+#      tester e' deterministico. Sarebbe una casella spuntata senza una
+#      misura dentro -- esattamente il contrario di quello che il
+#      CERTIFICATO DI MORTE del 09/09 chiede.
+#  >>> PERCIO' QUESTO FILE PINNA `InpMinStopPts = 8000` INVECE DI 500.
+#      E' una DEVIAZIONE DELIBERATA dalla convenzione della serie (tutti
+#      i pin al valore di campo) e la dichiaro qui, in cima, e di nuovo
+#      accanto al pin in fondo. Il valore NON e' scelto sui risultati:
+#      e' la FRONTIERA DI COSTO di casa applicata ai numeri di questa
+#      sedia -- 40 x lo spread mediano di 2,00 punti indice = 80 punti
+#      indice = 8000 punti MT5 (vedi B7). E' la stessa REGOLA di scelta
+#      che la casa ha usato su `R129c_costo_interruttore_D30EUR.txt`
+#      (11/09), che pinna 6800 sul DAX dichiarandolo "la soglia esatta":
+#      trasferisco la REGOLA, non il NUMERO (classe 323).
+#  >>> E LA DOMANDA CHE IL ROUND FA DIVENTA, PAROLA PER PAROLA:
+#      "sulle operazioni che nascono con uno stop SOTTO la frontiera di
+#      costo -- MISURATE: 31 su 96 in OOS -- conviene ALLARGARE lo stop
+#      o NON FARE IL TRADE?"
+#      E' una domanda vera, ha un'aritmetica sotto, e non se l'e' mai
+#      posta nessuno su questa sedia.
+#
+#  >>> IL CANCELLO INCROCIATO. Poiche' la cella 0 di questo round
+#      (`InpSkipIfTight=false` con pavimento 8000) e' ESATTAMENTE la
+#      cella "8000" dell'asse di R172i, le due righe devono coincidere.
+#      E' la riproduzione che sostituisce S1, e funziona SOLO se R172i e'
+#      girato prima, sullo stesso terminale e con lo stesso pin. Vedi S1
+#      e S1b.
+#
+# ---------------------------------------------------------------------
+#  PERCHE' QUESTA SEDIA E QUESTA MANOPOLA -- contato oggi sul repo vero
+# ---------------------------------------------------------------------
+#
+#  1) E' LA SEDIA VIVA PIU' SCOPERTA DELLA FLOTTA SULLE USCITE, ED E' UN
+#     NUMERO. L'artefatto
+#     backtest_pipeline/risultati_archivio/CENSIMENTO_USCITE_2026-09-11.json
+#     porta per il magic 770202 DICIASSETTE manopole d'uscita (contate
+#     oggi da me a macchina); DIECI sono `mai=true` e `inerte=false`. Per
+#     nome (mai "tutto il resto", classe 180):
+#        InpCloseHour . InpCloseAtEnd . InpSLMode . InpTP1_R .
+#        InpBreakevenAtTP1 . InpBEatR . InpTrailStartR . InpTrailTF .
+#        InpMinStopPts . InpSkipIfTight
+#     >>> QUESTO FILE CHIUDE LA DECIMA E ULTIMA. Con R172a-j la casella
+#         3 del CERTIFICATO DI MORTE ("la gestione dell'uscita e' stata
+#         messa ad asse almeno una volta?") e' coperta per intero su
+#         questa sedia -- che e' una delle candidate al 1 ottobre.
+#     >>> E LA RIGA DI `InpSkipIfTight` PORTA `stato = "MAI-gemello"`:
+#         l'artefatto stesso dichiara che la manopola e' stata mossa su
+#         una sedia GEMELLA. L'ho cercata e l'ho trovata, coi CSV (punto
+#         4).
+#
+#  2) MAI MOSSA SU QUESTA SEDIA, E L'HO CONTATO IN DUE MODI INDIPENDENTI
+#     (comandi INCOLLATI da quelli eseguiti, classe 379).
+#     (a) SUI FILE PROVA.
+#           grep -rn "^InpSkipIfTight=.*||Y" backtest_pipeline/prove/
+#         -> RIESEGUITO DOPO AVER SALVATO QUESTO FILE (classe 382: il
+#            comando si riesegue DOPO, e il numero si dichiara con e
+#            senza se stessi): torna QUATTRO righe, di cui UNA e' l'asse
+#            in fondo a QUESTO file. Le altre TRE sono TUTTE dell'EA
+#            gemello `ABTG_DAX_Apertura_EU` (sedia 770101, D30EUR), e
+#            portano tutte la STESSA forma `0||0||1||1||Y`:
+#              prove/R118b_pavimento_DAX_STOP_D30EUR.txt:267
+#              prove/R118c_pavimento_DAX_RETEST_D30EUR.txt:243
+#              prove/R129c_costo_interruttore_D30EUR.txt:264
+#            ZERO sul Dow.
+#         >>> IL NUMERO SENZA QUESTO FILE E' TRE.
+#         >>> E C'E' UN QUARTO FILE DEL GEMELLO CHE QUESTO GREP NON
+#             PRENDE, ed e' il piu' importante: `R137b_floorstop_salta_
+#             770101_D30EUR.txt` porta `InpSkipIfTight` come PIN a
+#             `true` (non come asse) e sweepa il PAVIMENTO -- r.397 e'
+#             la sua riga d'asse, ed e' `InpMinStopPts`. E' il ramo
+#             "salta" su tutto l'asse, cioe' il round che propongo come
+#             seguito in fondo a questo file. Lo nomino perche' un grep
+#             sull'asse non lo trova e chi si fermasse al comando
+#             crederebbe che non esista.
+#     (b) SUI CSV. Scanditi a macchina TUTTI i .csv sotto
+#         risultati_prove/ e risultati_archivio/ il cui percorso contiene
+#         "Dow_Apertura" o il cui nome comincia per "dow_", leggendo la
+#         colonna PER NOME: in NESSUNO la colonna `InpSkipIfTight` ha
+#         piu' di un valore, ed e' sempre '0'. I QUINDICI file, per nome:
+#           csv_r54/..._{IS,OOS}_r54a.csv . aperture_r46/..._{IS,OOS}_r46b.csv
+#           aperture_r47/..._{IS,OOS}_{r47c,r47d}.csv . aperture_r35/..._{IS,OOS}_r35.csv
+#           ABTG_Dow_Apertura_US/..._{IS,OOS}_{r6,ptc}.csv
+#           risultati_archivio/Dow_Apertura/: dow_trailing.csv .
+#             dow_trailing2.csv . dow_motore.csv . dow_distanze.csv .
+#             dow_robustezza.csv . dow_walkforward_IS.csv .
+#             dow_walkforward_OOS.csv
+#         >>> E I SETTE `dow_*.csv` SONO IL LAVORO DEL 03-05/08 SU QUESTO
+#             EA (186 righe): nemmeno quando il motore e' stato costruito
+#             l'interruttore e' stato toccato.
+#
+#  3) IL VALORE VIVO NON L'HO LETTO NEL DEFAULT COMPILATO (classe 369).
+#     Ordine di autorita' dichiarato:
+#       1. FONTE = il .set della sedia sul 100k 50504263,
+#          mql5/Presets/ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set
+#          r.239 `InpSkipIfTight=false`;
+#       2. CONTROPROVA DI CORSA = i due CSV di R54a (l'ancora) portano
+#          `InpSkipIfTight = 0` sulla riga della cella viva: letto da me;
+#       3. DEFAULT COMPILATO = r.314 del sorgente, `false`.
+#     Le tre concordano.
+#     >>> E IL COMMENTO DEL DEFAULT, r.314 per intero, dice gia' cosa si
+#         voleva: "// [DOW] non saltare il trade, applica il floor e
+#         basta". E' una DECISIONE dichiarata, senza nessun numero
+#         accanto -- e i CSV del punto 2(b) confermano che quel numero
+#         non e' mai esistito. Questo round e' il numero mancante.
+#
+#  4) !! IL METRO ESTERNO C'E', L'HO CERCATO, L'HO TROVATO E L'HO
+#     APERTO. La classe 372 dice che "non esiste una misura X" e'
+#     un'AFFERMAZIONE DI RICERCA e che si dichiara COME si e' cercato.
+#     Ho cercato cosi':
+#        find backtest_pipeline report -iname "*r129*" -o -iname "*r137*" \
+#          -o -iname "*r118*"
+#     e ho trovato SEI CSV di round sulla sedia gemella DAX 770101
+#     (ABTG_DAX_Apertura_EU, D30EUR M5, geometria RETEST long-only -- la
+#     STESSA del Dow):
+#        risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/
+#          ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r137a.csv  <- ramo ALLARGA
+#          ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r137b.csv  <- ramo SALTA
+#          ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r137c.csv
+#     LI HO APERTI IO. Questi sono i due rami affiancati sulla gamba OOS
+#     (stesso pavimento, riga per riga; `Trades` e PF letti per nome):
+#        floor    ALLARGA (r137a)        SALTA (r137b)
+#                 PF      Trades         PF      Trades
+#          800   1,39709   270          1,39709   270   <- identiche!
+#         2800   1,39585   270          1,29425   264
+#         4800   1,49624   272          1,29362   209
+#         6800   1,42020   272          1,27113   164
+#         8800   1,38128   273          1,18474    97
+#        10800   1,28751   273          0,97614    65
+#        12800   1,28394   274          0,87606    35
+#     >>> QUATTRO COSE CHE QUESTA TABELLA DICE, E VALGONO COME ATTESA
+#         PER IL DOW (classe 323: si trasferisce la FORMA, mai il
+#         numero):
+#         (i)   ALLA PRIMA CELLA I DUE RAMI SONO IDENTICI (1,39709 / 270
+#               contro 1,39709 / 270). E' la conferma EMPIRICA, su
+#               un'altra sedia, della dimostrazione scritta sopra:
+#               quando il pavimento non morde, l'interruttore non
+#               esiste. Non e' una mia inferenza: e' stampato in due
+#               CSV.
+#         (ii)  IL RAMO "SALTA" DISTRUGGE LA FREQUENZA: da 270 a 35
+#               uscite, cioe' -87%. E' un filtro, non una gestione.
+#         (iii) E DISTRUGGE ANCHE IL PF, in modo monotono: 1,397 ->
+#               0,876. Sul DAX, SALTARE E' PEGGIO CHE ALLARGARE su OGNI
+#               cella tranne la prima (dove coincidono).
+#         (iv)  IL CONFRONTO ALLA SOGLIA DI COSTO (sul DAX, 6800):
+#               ALLARGA 1,42020 su 272 uscite, SALTA 1,27113 su 164.
+#               Differenza di PF: 0,14907 punti pieni, cioe' SOPRA la
+#               banda di rumore di questo file (0,10). Sul gemello, a
+#               quella soglia, la risposta e' netta.
+#     >>> E IL VERDETTO CHE LA CASA HA GIA' DATO SU QUEI NUMERI:
+#         backtest_pipeline/risultati_archivio/
+#         R136_R137_LA_NOTTE_CHE_I_CSV_SONO_ARRIVATI_2026-09-13.md
+#         par. 3 intitola il blocco del ramo "salta", VERBATIM:
+#         "`r137b` -- lo stesso floor ma saltando i giorni stretti: non
+#         misurabile in costo". Il round esiste, e' girato, ed e' stato
+#         letto.
+#     >>> LA DIFFERENZA DI FAMIGLIA CHE NESSUNO HA MAI SCRITTO: le due
+#         sedie gemelle girano questa coppia in modo OPPOSTO. Letto nei
+#         due .set:
+#           DAX  770101: InpMinStopPts=0.0   InpSkipIfTight=true
+#                        (ABTG_DAX_Apertura_EU_D30EUR_M5_770101_100K.set
+#                         r.230-231)
+#           DOW  770202: InpMinStopPts=500.0 InpSkipIfTight=false
+#                        (.set r.238-239)
+#         Sul DAX l'interruttore e' su "salta" ma il pavimento e' SPENTO;
+#         sul Dow il pavimento e' acceso ma non morde. Due
+#         configurazioni diverse, stesso effetto: NESSUNO. Ed e' il
+#         motivo per cui il censimento marca la manopola "mai" su tutte e
+#         due.
+#
+#  5) !! LA VERIFICA DOPPIA CHE LA CLASSE 369 IMPONE, e qui l'esito e'
+#     il piu' netto della serie: `InpSkipIfTight` compare in SETTE righe
+#     del sorgente, ma i punti che DECIDONO sono SEI, e CINQUE su sei
+#     sono spenti da un altro input; il sesto e' spento dal VALORE
+#     dell'altra manopola.
+#        r.903   BREAKOUT BUY    <- vivo solo con InpEntryMode=0
+#        r.927   BREAKOUT SELL   <- idem, e InpAllowShort=false
+#        r.1136  DELAYED         <- vivo solo con InpEntryMode=3
+#        r.1244  OPENCONFIRM     <- vivo solo con InpEntryMode=4
+#        r.1326  RETEST BUY      <<< L'UNICO VIVO -- ma solo DENTRO l'if
+#                                    di r.1324
+#        r.1359  RETEST SELL     <- spento da InpAllowShort=false
+#     >>> I DUE PIN CHE REGGONO LA CONCLUSIONE (classe 383 regola 2):
+#         `InpEntryMode = 2` (.set r.178) e `InpAllowShort = false`
+#         (.set r.186), tutti e due pinnati qui.
+#     >>> E IL RAMO SOPRA LA RIGA CITATA, che e' tutto il punto di questo
+#         file: r.1326 sta DENTRO `if(InpMinStopPts > 0 && dist <
+#         InpMinStopPts*_Point)` (r.1324). Guardare solo r.1326 e
+#         concludere "la manopola e' viva" e' esattamente il difetto
+#         della classe 383. Qui il ramo e' stato guardato IN SU, ed e'
+#         per questo che il pin di `InpMinStopPts` e' 8000 e non 500.
+#
+#  6) IL RISCHIO DI QUESTA SEDIA, vero contro dichiarato,
+#     report/CENSIMENTO_RISCHIO_VERO_2026-09-10.md r.144 (riga aperta
+#     oggi):
+#        2,00 | Dow_Apertura_US | U30USD | 770202 | 100k | 0,65 | 0,65 |
+#        2 | 1,30% | 1.0 | 2,00 | 1,54x | "2 pendenti opposti"
+#     >>> MA NON SU QUESTA CELLA: `InpEntryMode=2` e `InpAllowShort=false`
+#         (r.1312 long / r.1345 short, il secondo spento dal pin) piu'
+#         `HandleOCO()` (r.1681). Su QUESTA cella il rischio vero
+#         coincide col dichiarato.
+#
+# ---------------------------------------------------------------------
+#  DUE ISTANZE DELLA STESSA SEDIA -- e nessuna delle due si tocca
+# ---------------------------------------------------------------------
+#  Il magic 770202 gira su DUE conti diversi, con DUE taglie diverse
+#  (fonte: il .set, par. 5 -- confronto meccanico dei due blocchi .chr,
+#  DUE sole differenze su 81 campi):
+#    - 100k 50504263 ("... MT5 Terminal -V3", profilo SQUADRA 100K,
+#      chart02.chr): InpRiskPercent 0,65 e InpUsaGuardian true;
+#    - piccolo 50503392 (cartella SENZA -V3, profilo ORO, chart31.chr):
+#      InpRiskPercent 1,0 e InpUsaGuardian ASSENTE (binario piu' vecchio).
+#  [!!] Rilievo aperto (R1 del .set): un conteggio che filtri per magic
+#       senza filtrare il CONTO mescola due sedie con due taglie.
+#  >>> QUESTO ROUND NON TOCCA NESSUNO DEI DUE: gira su C:\MT5_Backtest
+#      (demo 50504400) con un magic VERGINE.
+#  >>> E il conto REALE 10105439 non c'entra niente con questa sedia e
+#      non viene nemmeno aperto.
+#
+# ---------------------------------------------------------------------
+#  ###  LA MISURA: LA DISTRIBUZIONE VERA DELLO STOP DI QUESTA SEDIA  ###
+#  ###  -- e' quella del gemello R172i, e qui serve a DUE cose:      ###
+#  ###  scegliere il pin e prevedere quante giornate spariscono      ###
+# ---------------------------------------------------------------------
+#  LA FONTE:
+#    backtest_pipeline/risultati_prove/aperture_r47/
+#      abtg_trades_ABTG_Dow_Apertura_US_U30USD_772507.csv
+#    96 righe, una per posizione (`position_id` distinti: 96, contati).
+#    E' la gamba OOS della corsa R47d -- STESSA sedia, STESSA finestra,
+#    STESSO banco, `InpTP1_ClosePct=0` (una riga = una posizione = il
+#    volume PIENO d'ingresso), deposito 100.000 e rischio 1,0%. Che sia
+#    quella corsa lo dicono i suoi totali, che coincidono col CSV di
+#    round aperture_r47/..._OOS_r47d.csv (Profit 7342.99, Trades 96).
+#  IL CONTO, che e' la formula dell'EA letta al contrario:
+#    r.1649 lot = riskMoney/lossPerLot . r.1645 lossPerLot =
+#    (dist/tickSize)*tickValue . con tickSize 0,10 e tickValue 0,10
+#    (sonda r.71) un punto indice vale 1,00 EUR per lotto, quindi
+#        dist (punti indice) = (saldo x 1%) / lotto
+#    e il saldo si ricostruisce sommando `net_profit` riga per riga da
+#    100.000 (compounding, r.1625).
+#  >>> IL CONTROLLO CHE LA MISURA E' GIUSTA (regola del CONTRO-ESEMPIO,
+#      10/09): il saldo finale della ricostruzione e' 107.342,99 contro
+#      un `Profit` di +7.342,99 scritto nel CSV di round. Coincide AL
+#      CENTESIMO, ed e' un numero scritto da qualcun altro.
+#  >>> E IL CONTRO-ESEMPIO CHE UCCIDE L'IPOTESI ALTERNATIVA: "e se un
+#      punto indice valesse 10,00 EUR per lotto (ContractSize 10,00)?".
+#      Allora tutti gli stop sarebbero dieci volte piu' stretti, il piu'
+#      stretto varrebbe 2,5 punti indice -- SOTTO il floor vivo di 5 --
+#      quindi il floor lo avrebbe allargato a 5 e il lotto sarebbe stato
+#      al massimo 1000/(5x10) = 20 lotti. Ma nel file c'e' un lotto da
+#      43,7. L'ipotesi alternativa si contraddice da sola.
+#  I NUMERI (96 posizioni, gamba OOS, punti INDICE):
+#      minimo 25,45 . p5 35,89 . p10 39,81 . MEDIANA 138,29 .
+#      media 145,81 . p90 246,26 . massimo 433,99
+#  >>> DUE RIGHE DI QUESTA DISTRIBUZIONE DECIDONO IL FILE:
+#      (1) ZERO posizioni sotto 5 punti indice -> il pavimento VIVO non
+#          morde mai (la dimostrazione aritmetica di sopra, confermata);
+#      (2) 31 posizioni su 96 (32,3%) sotto 80 punti indice -> col pin a
+#          8000 l'interruttore ha 31 giornate su cui agire. E' il
+#          DENOMINATORE del round, ed e' un numero, non una speranza.
+#  >>> IL CAVEAT, E NON SI DECLASSA (classe 375): la distribuzione e'
+#      misurata sulla SOLA gamba OOS. Il per-trade dell'IS non esiste in
+#      repo, quindi QUANTE giornate l'interruttore tolga in IS e'
+#      [NON MISURATO].
+#
+# ---------------------------------------------------------------------
+#  ###  QUELLO CHE LA MANOPOLA FA DAVVERO -- LETTO NEL SORGENTE      ###
+#  ###  (mql5\Experts\ABTG_Dow_Apertura_US.mq5, HEAD b9d7f8de del    ###
+#  ###   16/09, 2147 righe)                                          ###
+# ---------------------------------------------------------------------
+#  IL BLOCCO CHE DECIDE, r.1322-1331 per intero (ramo RETEST long):
+#     r.1322  dist = entry - sl
+#     r.1323  bool skip = false;
+#     r.1324  if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+#     r.1326    if(InpSkipIfTight) { skip=true; ABTGLog("RETEST BUY
+#                 saltato: stop %.0f pt < floor %.0f pt."); }
+#     r.1327    else { sl = NormalizePrice(entry - InpMinStopPts*_Point);
+#                      dist = entry - sl; }
+#     r.1329  lot = skip ? 0.0 : CalcLotByRisk(dist)
+#     r.1330  tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0
+#     r.1331  if(!skip && lot > 0 && dist > 0) -> BuyLimit (r.1335)
+#
+#  >>> QUATTRO PROPRIETA' DEL CODICE CHE CAMBIANO COME SI LEGGE IL
+#      ROUND, E LE SCRIVO PRIMA DI QUALUNQUE NUMERO.
+#
+#    (A) LA CELLA 1 NON "GESTISCE DIVERSAMENTE": TOGLIE GIORNATE. E'
+#        l'unico asse della serie che agisce sull'INGRESSO e non
+#        sull'uscita, e va detto subito perche' cambia quale colonna
+#        conta. `skip=true` -> `lot = 0` -> la condizione di r.1331 e'
+#        falsa -> NESSUN ORDINE VIENE PIAZZATO quel giorno. E il giorno
+#        e' finito: `gBrokeHigh` e' gia' stato messo a true (r.1314), e
+#        `InpOneTradePerDay=true` (r.226) impedisce un secondo ciclo.
+#        >>> QUINDI posizioni(cella 1) < posizioni(cella 0), STRETTAMENTE
+#            se almeno una giornata viene saltata -- e in OOS sono 31,
+#            MISURATE. Previsione: 96 - 31 = 65 posizioni in OOS. In IS
+#            [NON MISURATO], ma comunque <= 56.
+#    (B) !! E LE USCITE SI CONTANO DI CONSEGUENZA, CON UN LIMITE
+#        ARITMETICO ESATTO -- questa e' la sentinella S3 e vale la pena
+#        derivarla per bene.
+#        Le giornate NON saltate producono ESATTAMENTE gli stessi eventi
+#        nelle due celle: stesso prezzo d'ingresso, stesso stop, stesso
+#        TP, stesso bersaglio della parziale (tutti prezzi, nessuno
+#        dipende dal saldo). Cambia solo il LOTTO, perche' il saldo e'
+#        diverso -- e il lotto non decide QUANTE uscite fa una posizione,
+#        decide quanto valgono.
+#        >>> L'UNICA ECCEZIONE POSSIBILE, e la dichiaro invece di
+#            sottintenderla: se il volume scendesse sotto 0,20 lotti, la
+#            parziale non partirebbe (`NormalizeVolume`, r.1916-1924,
+#            torna 0 sotto VOLUME_MIN 0,10) e quella posizione farebbe
+#            UNA uscita invece di due. MISURATO che non succede: il
+#            lotto piu' piccolo delle 96 posizioni e' 2,3, cioe' undici
+#            volte la soglia, e corrisponde allo stop PIU' LARGO -- che
+#            il pavimento non tocca.
+#        >>> DUNQUE, IN OOS:
+#              Trades(cella 0) - Trades(cella 1) = uscite delle 31
+#              giornate saltate, che sono 1 o 2 per giornata
+#              ->  la differenza sta fra 31 e 62, estremi inclusi.
+#            E' una previsione falsificabile con due numeri, e la
+#            congelo. In IS la stessa forma vale ma il numero di
+#            giornate saltate non e' misurato.
+#    (C) IL RISCHIO PER TRADE NON CAMBIA, IL RISCHIO DI PORTAFOGLIO SI'.
+#        Tutte e due le celle rischiano l'1,0% per operazione (il lotto
+#        si adatta). Ma la cella 1 fa MENO operazioni: a parita' di
+#        rischio unitario, meno esposizione nel tempo e -- se le
+#        operazioni tolte erano mediamente perdenti -- meno drawdown.
+#        >>> E QUESTO E' IL MOTIVO PER CUI IL DD DELLA CELLA 1 PUO'
+#            SCENDERE SENZA CHE SIA UN MIGLIORAMENTO: un conto che opera
+#            di meno perde di meno, e guadagna di meno. Il DD va letto
+#            SEMPRE accanto al Profit e al numero di operazioni, mai da
+#            solo (B0). Sul gemello DAX succede esattamente questo: nel
+#            ramo "salta" il DD OOS scende da 7,23% a 4,68% mentre il
+#            profitto passa da +18.029 a -632.
+#    (D) E IL BERSAGLIO DELLA PARZIALE NON C'ENTRA, per una volta. La
+#        catena `riskDist` (r.1726-1739) che i fratelli R172d/R172f
+#        hanno scoperto qui NON e' toccata dall'asse: sulle giornate non
+#        saltate lo stop e' identico nelle due celle, quindi `riskDist` e
+#        il bersaglio sono identici. Lo scrivo perche' in tutti gli altri
+#        file della serie quella catena e' la sorgente del secondo
+#        meccanismo di segno opposto -- e qui NON c'e'.
+#        >>> CONSEGUENZA (classe 387 regola 1, applicata al contrario):
+#            su questo asse i meccanismi che toccano `Trades` sono DUE,
+#            MA HANNO LO STESSO SEGNO -- meno giornate, meno uscite. Per
+#            questo, ed e' l'unica volta nella serie, una direzione e'
+#            argomentata e non assunta. Resta scritta come LIMITE
+#            ARITMETICO in S3 (la differenza sta fra 31 e 62), non come
+#            claim qualitativo.
+#
+# ---------------------------------------------------------------------
+#  UNITA' DI MISURA -- `Trades` NON E' "POSIZIONI" (classe 226/331)
+# ---------------------------------------------------------------------
+#  `Trades` e' `TesterStatistics(STAT_TRADES)` (r.2104 assegna
+#  `stats[6]`, r.2137 lo stampa): conta i DEAL D'USCITA. Su questa sedia
+#  il fattore uscite/posizioni sta fra 1,00 e 2,00 (una parziale per
+#  ticket, `TkMark` r.1750; nessuna notte scavalcata perche'
+#  `InpCloseAtEnd=true` e' pinnato).
+#  >>> IL NUMERO VERO SULLA CELLA VIVA, LETTO DA ME NEI DUE CSV DI R46b
+#      (risultati_prove/aperture_r46/..._{IS,OOS}_r46b.csv), confrontando
+#      le righe `InpTP1_ClosePct=50` con quelle `=0`:
+#        IS : 74 uscite - 56 = 18 parziali -> 56 POSIZIONI -> 1,3214
+#        OOS: 130 uscite - 96 = 34 parziali -> 96 POSIZIONI -> 1,3542
+#  >>> ATTENZIONE: QUEL FATTORE NON SI TRASPORTA SULLA CELLA 1 DI QUESTO
+#      ROUND, e non lo trasporto. Le giornate che l'interruttore toglie
+#      sono quelle a stop STRETTO, cioe' un sottoinsieme SELEZIONATO: non
+#      c'e' nessun motivo perche' abbiano la stessa proporzione di
+#      parziali delle altre. Per stimare le posizioni della cella 1 si
+#      usa la previsione (A) -- 65 in OOS -- non una divisione per 1,35.
+#  >>> IL PER-TRADE NON ARRIVA DA SOLO (`InpMagic` costante sulle due
+#      celle: r.2070 comporrebbe 4 volte lo stesso nome; e la corsia
+#      ROUND non lo raccoglie). La via al numero esiste e la propongo col
+#      suo costo: una passata singola sulla cella 1 piu'
+#      `righe/CODA_12_pertrade_posizioni.ps1` armato subito dopo -- la
+#      stessa ricetta che ha prodotto il file 772507 da cui esce tutta LA
+#      MISURA di questo file. Costo: due passate. Servirebbe a
+#      trasformare la previsione "65 posizioni" da inferenza a misura.
+#      NON e' compito di questo file armarla (B9).
+#
+# ---------------------------------------------------------------------
+#  L'ANCORA -- E QUI E' DIVERSA DA TUTTI GLI ALTRI NOVE FILE
+# ---------------------------------------------------------------------
+#  NESSUNA delle due celle di questo round e' la cella viva della sedia,
+#  perche' il pin `InpMinStopPts = 8000` non e' il valore di campo. Di
+#  conseguenza la sentinella S1 della serie -- "riproduci R54a" -- QUI
+#  NON E' APPLICABILE, e non la scrivo come se lo fosse (sarebbe la
+#  classe 377 al suo peggio: una sigla ereditata che non misura piu'
+#  niente).
+#
+#  >>> AL SUO POSTO, LA RIPRODUZIONE E' INCROCIATA CON R172i (S1), e la
+#      catena di fiducia e' questa, dichiarata per intero:
+#        R54a (l'ancora della sedia)
+#          -> R172i cella 500  riproduce R54a entro la banda    (S1 di R172i)
+#          -> R172i cella 8000 e' la stessa configurazione di
+#             questo round con SkipIfTight=false
+#          -> R172j cella 0    deve COINCIDERE con R172i cella 8000
+#      Cioe' questo round e' ancorato a R54a TRANSITIVAMENTE, in due
+#      passi. E' piu' debole di un'ancora diretta, e lo dico: se R172i
+#      non e' girato, o e' girato su un altro terminale o a un altro
+#      pin, la catena si spezza.
+#
+#  I NUMERI DI R54a SERVONO LO STESSO, come metro di scala, e li ho letti
+#  IO dai CSV con la precisione piena (classe 385: CSV > file prova >
+#  referto .md):
+#    backtest_pipeline\risultati_archivio\csv_r54\
+#      ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_r54a.csv, riga InpAllowLong=1
+#      e InpAllowShort=0:
+#      IS   Profit +2811.84 . PF 1.22247 . Equity DD % 5.6692 .
+#           Trades 74 . Peggior Giornata % -1.0062
+#      OOS  Profit +6721.93 . PF 1.27013 . Equity DD % 4.3941 .
+#           Trades 130 . Peggior Giornata % -1.0227
+#    >>> E QUELLE RIGHE PORTANO `InpMinStopPts = 500` e
+#        `InpSkipIfTight = 0`: cioe' l'ancora e' la configurazione in cui
+#        QUESTO ASSE NON ESISTE. E' il modo piu' chiaro di dire perche'
+#        il pin e' stato spostato.
+#
+#  >>> IL RUMORE DI MACCHINA SU QUEL BANCO E' ZERO, MISURATO, e l'ho
+#      riverificato io in DUE modi: (1) ogni cella di R54a e' girata con
+#      DUE magic tecnici (772601 e 772602) e le righe Pass 1 e Pass 5
+#      portano gli stessi identici numeri in tutte e cinque le colonne,
+#      in tutti e due i CSV; (2) i due per-trade di R47d (magic 772507 e
+#      772508) sono identici RIGA PER RIGA, volume per volume, centesimo
+#      per centesimo.
+#      >>> QUESTA MISURA SERVE ESATTAMENTE A S1 DI QUESTO FILE: e' cio'
+#          che autorizza a pretendere UGUAGLIANZA e non una banda nel
+#          cancello incrociato, nonostante i due round girino con due
+#          magic diversi (789600 e 789610). Il magic non entra in nessuna
+#          decisione di trading: entra nell'identificazione degli ordini
+#          e nel nome del per-trade.
+#      >>> MA QUELLA MISURA E' DEL PC DI BACKTEST DI ALLORA, e non la
+#          estendo a C:\MT5_Backtest di oggi: resta [NON MISURATO]. Il
+#          caveat non si declassa (classe 375), e infatti S1 ha un ramo
+#          di ripiego (la banda B5) per il caso in cui i due round non
+#          girino nella stessa notte.
+#
+#  >>> IL BINARIO E' QUASI QUELLO DELL'ANCORA, E LA DIFFERENZA L'HO
+#      MISURATA OGGI. L'ancora e' del 14/08 (commit 8b922147):
+#        git diff --stat 8b922147 HEAD -- \
+#          mql5/Experts/ABTG_Dow_Apertura_US.mq5
+#        -> 1 file changed, 27 insertions(+)    [zero cancellazioni]
+#        git diff 8b922147 HEAD -- mql5/Experts/ABTG_Dow_Apertura_US.mq5 \
+#          | grep -E "^[+-]input|^[+-]#define"
+#        -> UNA sola riga: `+input bool InpUsaGuardian = true;`
+#      NESSUN default e' cambiato -- in particolare r.313 (`500`) e r.314
+#      (`false`).
+#      >>> IL `diff` VALE PER `HEAD` = b9d7f8de, NON PER IL PIN CON CUI
+#          LA RIGA GIRERA' (classe 385). CHI ARMA RIFA' IL DIFF contro il
+#          pin di armamento e dichiara le righe cambiate nel referto.
+#      >>> E QUELLE 27 RIGHE SONO INERTI NEL TESTER: `ABTG_GuardiaIngresso`
+#          (mql5/Include/ABTG_PausaGuardian.mqh r.1587) e' chiamata con
+#          DUE argomenti su tredici e la porta r.1719
+#          `if(!ABTG_CanaleEsiste()) return(true);` lascia passare tutto
+#          quando le GlobalVariable non esistono: nel tester nessuno le
+#          scrive, fail-open per costruzione.
+#
+#  >>> LE DIFFERENZE FRA I PIN DI QUESTO FILE E LA CELLA VIVA, CONTATE A
+#      MACCHINA -- E QUI SONO TRE, NON DUE. Il .set ha 81 campi; questo
+#      file ne pinna 79 e ne lascia due fuori. La CONVENZIONE DEL
+#      CONTEGGIO E' DICHIARATA: si contano i PIN, e la riga d'asse in
+#      fondo NON e' un pin.
+#        - 79 nomi in comune -> 76 IDENTICI, 3 DIVERGENTI:
+#            (1) InpRiskPercent: .set 0.65, qui 1.0 (la taglia
+#                dell'ANCORA);
+#            (2) InpMagic: .set 770202 (il magic VIVO), qui 789610;
+#            (3) !! InpMinStopPts: .set 500.0, qui 8000.0 -- ED E' LA
+#                DEVIAZIONE DELIBERATA che rende misurabile questo round.
+#                Motivo per esteso nel paragrafo L'ORDINE; criterio di
+#                scelta del valore in B7. Con 500 le due celle sarebbero
+#                identiche PER DIMOSTRAZIONE.
+#        - 2 nomi NON pinnati, e nessuno e' una dimenticanza:
+#            (1) `InpSkipIfTight`, che e' L'ASSE e sta in fondo;
+#            (2) `InpNewsCurrencies`, il cui valore vivo e' la stringa
+#                VUOTA: un pin vuoto MT5 lo IGNORA e controlla_prova.py
+#                lo boccia apposta (r.162-165). Il default compilato e'
+#                "", stesso valore, zero rumore.
+#      >>> `InpRiskPercent` E' PINNATO A 1.0, CIOE' L'ANCORA, NON A 0,65.
+#          COME SI LEGGONO I NUMERI ALLA TAGLIA DEL 100k: fattore
+#          0,65/1,0 = 0,65 su DD e profitto; PF e numero di operazioni
+#          NON cambiano con la taglia. Il DD scala in modo
+#          APPROSSIMATIVAMENTE lineare (convenzione di casa,
+#          CONTRATTI_SEDIE.md punto 2): approssimazione dichiarata, non
+#          identita'. Tutte le soglie B sono scritte SUL BANCO (1,0%).
+#
+#  METRO DI SCALA (NON e' una tolleranza, e la differenza e' sostanziale:
+#  nessuna cella di questo round deve riprodurre questi numeri):
+#      ancora R54a  IS  PF 1,22247  DD 5,6692%  Trades  74
+#                   OOS PF 1,27013  DD 4,3941%  Trades 130
+#  Serve per dire "quanto lontano" e' finita una cella, non per bocciare
+#  il banco.
+#
+# ---------------------------------------------------------------------
+#  LA FINESTRA E IL TAGLIO IS/OOS
+# ---------------------------------------------------------------------
+#  a) DATA D'INIZIO: 2024.09.26, E NON E' UNA SCELTA: e' il MURO DEL
+#     BROKER. Sonda del 17/08 (risultati_archivio/sonda_storico_17-08/
+#     215D85D7_ABTG_InfoBroker.csv, r.71, riga aperta oggi):
+#       U30USD,Dow Jones Index CFD,Digits 2,Point 0.01000000,
+#       ContractSize 10.00,TickValue 0.10000,TickSize 0.10000000,
+#       SpreadPt 200,TF H1,BarreTF 10859,PrimaDataTF 2024.09.26,
+#       BarreD1 543,PrimaDataD1 2024.09.26,Stato COMPLETO
+#     "COMPLETO" vuol dire che non manca sul disco: IL BROKER NON CE
+#     L'HA.
+#     >>> E QUATTRO NUMERI DI QUELLA RIGA SONO LE FONDAMENTA DI QUESTO
+#         ROUND: `Point 0.01` (il pin 8000 = 80 punti indice); `TickSize
+#         0.10` (i prezzi sono multipli di 10 punti MT5: e' il passo che
+#         rende STRETTA la disuguaglianza della dimostrazione);
+#         `TickValue 0.10` (un punto indice = 1,00 EUR per lotto, la
+#         conversione de LA MISURA); `SpreadPt 200` (= 2,00 punti indice,
+#         il pedaggio da cui nasce la frontiera dei 40x).
+#  b) DATA DI FINE E TAGLIO: 2026.06.30 e 0.40, quelli dell'ancora.
+#     L'aritmetica rifatta a macchina:
+#       giorni 2024.09.26 -> 2026.06.30 .................. 642
+#       floor(642 x 0,40) ................................ 256
+#       Meta = 2024.09.26 + 256 giorni ........... 2025.06.09
+#     (formula: walkforward_generico.ps1 r.921, le due gambe r.923-924.)
+#     >>> IS  2024.09.26 -> 2025.06.09   ( 8,5 mesi)
+#     >>> OOS 2025.06.10 -> 2026.06.30   (12,7 mesi)
+#     e il 2025.06.10 e' lo stesso giorno che CENSIMENTO_CONTRATTI.md
+#     r.197 dichiara come inizio dell'OOS: due strade, stessa data.
+#     REGIMI DICHIARATI (Emendamento della Finestra, regola A):
+#       IS  = autunno-inverno post-elezioni USA 2024, massimo di gennaio
+#             2025, E LA CADUTA DA DAZI DI FEBBRAIO-APRILE 2025 col
+#             rimbalzo di maggio-giugno. L'IS CONTIENE UN CROLLO.
+#       OOS = 2025H2 in salita e 2026H1 piatto.
+#     >>> E SU QUESTO ASSE IL REGIME DECIDE QUANTE GIORNATE SPARISCONO:
+#         l'interruttore taglia le giornate a range STRETTO, cioe' quelle
+#         tranquille, e il 2026H1 piatto ne ha piu' dei mesi dei dazi.
+#         Quindi la cella 1 taglia PIU' operazioni in OOS che in IS, in
+#         proporzione. Se il segno del confronto si invertisse fra le
+#         gambe, questa e' la prima spiegazione da guardare -- e NON e'
+#         un argomento per scegliere una cella (B6).
+#  c) NON SI USA `@FRAZIONEIS 1.0` (classe 376: con 1.0 la gamba OOS esce
+#     con Da > A e il gate della corsia ROUND fa uscire il round come
+#     "NON MISURATO" anche con un IS perfetto). Qui 0,40.
+#  d) PAVIMENTO >= 150 OPERAZIONI: NON RAGGIUNTO, E QUI E' PEGGIO CHE
+#     ALTROVE.
+#       cella 0: 56 POSIZIONI (IS) e 96 (OOS), misurate
+#       cella 1: <= 56 e PREVISTE 65 in OOS (96 - 31)
+#     >>> QUINDI IL MERITO E' SOSPESO SU TUTTE E DUE LE GAMBE E SU TUTTE
+#         E DUE LE CELLE, e sulla cella 1 il campione e' il piu' piccolo
+#         di tutta la serie R172. Nessun numero di questo round promuove
+#         o boccia un motore.
+#     >>> E IL RISCHIO SI LEGGE LO STESSO, A QUALUNQUE n (Emendamento
+#         regola B): un drawdown e' un fatto accaduto, non una stima.
+#
+# ---------------------------------------------------------------------
+#  L'ASSE E IL PASSO -- 0(vivo) / 1 -- 2 celle, e piu' di due non ne
+#  esistono
+# ---------------------------------------------------------------------
+#  `InpSkipIfTight` e' un `input bool` (r.314). Non ha valori intermedi:
+#  le celle POSSIBILI sono due e questo file le prende tutte. Non e' una
+#  griglia "corta", e' la griglia COMPLETA.
+#    cella 0 = IL VALORE DI CAMPO (`false`, .set r.239): quando lo stop
+#              nasce sotto il pavimento, lo stop viene ALLARGATO fino al
+#              pavimento e il trade si fa (r.1327).
+#    cella 1 = `true`: quando lo stop nasce sotto il pavimento, IL TRADE
+#              NON SI FA (r.1326).
+#  >>> E SI RICORDI CHE COL PAVIMENTO DI CAMPO (500) LE DUE CELLE
+#      SAREBBERO IDENTICHE: e' il pin a 8000 che le separa. La cella 0
+#      NON e' la sedia viva -- e' la sedia viva CON IL PAVIMENTO ALZATO.
+#
+#  !! IL CONTEGGIO DELLE CELLE, CONTROLLATO ESEGUENDO LE TRE FORMULE E
+#     NON GUARDANDO LA GRIGLIA (classe 374): start 0, passo 1, stop 1.
+#     Eseguite:
+#       driver    floor(|1-0|/1 + 1e-9) + 1 = 2
+#                 (walkforward_generico.ps1 r.792)
+#       cancello  int(|1-0|/1) + 1          = 2
+#                 (controlla_prova.py r.203)
+#       lista     start + i*passo           = 2 valori  [0.0, 1.0]
+#     I tre numeri coincidono, e qui non potrebbero non farlo: sono
+#     INTERI, esatti in binario. Nessun margine anti-virgola-mobile:
+#     sarebbe rumore.
+#     >>> E `InpSkipIfTight` E' UN `bool`, NON UN ENUM: il ramo ENUM di
+#         controlla_prova.py (r.187-201, che ignora il passo e conta i
+#         MEMBRI) non si attiva, e il conto aritmetico e' quello giusto.
+#         La forma `0||0||1||1||Y` per un bool e' quella che il progetto
+#         usa gia' su QUESTO STESSO ASSE in tutti e tre i file che lo
+#         portano (R118b r.267, R118c r.243, R129c r.264).
+#
+# ---------------------------------------------------------------------
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI (e va scritta anche se sbaglia)
+# ---------------------------------------------------------------------
+#  - `Trades`: ATTESA QUANTITATIVA, ed e' l'unica della serie che sia un
+#    intervallo e non un verso. In OOS:
+#       Trades(cella 1) = Trades(cella 0) - K, con 31 <= K <= 62
+#    (proprieta' B). Se K cade fuori da quell'intervallo, la diagnosi si
+#    apre PRIMA di leggere il PF: o il pin non e' arrivato, o LA MISURA
+#    (la distribuzione degli stop) e' sbagliata. In IS la stessa forma
+#    vale ma il numero di giornate saltate e' [NON MISURATO].
+#  - Profit e PF: ATTESA a favore della CELLA 0 (allargare), e stavolta
+#    l'indizio e' forte e MISURATO, anche se su un'altra sedia: sul
+#    gemello DAX, alla soglia di costo, ALLARGA fa PF 1,42020 su 272
+#    uscite e SALTA fa 1,27113 su 164 -- 0,149 punti pieni di differenza,
+#    sopra la banda B5 di questo file. E su TUTTE le celle del gemello
+#    tranne la prima, saltare e' peggio.
+#    >>> MA RESTA UN'ATTESA E NON UNA SENTINELLA, e il motivo e'
+#        misurabile: il DAX di quel round ha 270 operazioni OOS, il Dow
+#        ne ha 130; il DAX ha un altro spread e un'altra ampiezza di
+#        range; e soprattutto le operazioni che il pavimento tocca sono
+#        il 32,3% qui e una frazione ignota li'. Trasferire il verdetto
+#        sarebbe trasferire il NUMERO invece della FORMA (classe 323).
+#  - Equity DD %: atteso PIU' BASSO sulla cella 1, e NON e' un
+#    miglioramento (proprieta' C): un conto che fa un terzo di
+#    operazioni in meno perde meno e guadagna meno. Il DD di questo round
+#    si legge SOLO accanto al Profit e al numero di operazioni.
+#  - Peggior Giornata %: attesa INVARIATA in ordine di grandezza (un solo
+#    ciclo al giorno, r.226, flat acceso: il tetto strutturale di una
+#    giornata resta UNA perdita piena).
+#  - IL RISULTATO CHE MI ASPETTO DI PIU': cella 1 con meno operazioni,
+#    meno profitto, PF piu' basso e DD piu' basso. Verdetto: "MISURATO --
+#    sulle giornate a stop stretto conviene allargare, non saltare", che
+#    conferma il valore di campo e chiude la DECIMA casella.
+#  - IL RISULTATO CHE SAREBBE UNA NOTIZIA VERA PER IL 1 OTTOBRE: la
+#    cella 1 con PF PIU' ALTO su TUTTE E DUE le gambe oltre la banda B5.
+#    Vorrebbe dire che le operazioni sotto la frontiera di costo sono
+#    perdenti in blocco, e che la sedia puo' stare tutta sopra i 40x
+#    GUADAGNANDOCI. Sarebbe la prima volta in casa (sul DAX e' andata al
+#    contrario) e andrebbe portata a Claudio col suo prezzo: -32% di
+#    frequenza su una sedia gia' sotto il pavimento di 1,00 op/giorno.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE: le due celle IDENTICHE FINO
+#    ALL'ULTIMA CIFRA. Con il pavimento a 8000 quel mondo NON ha una
+#    spiegazione innocente -- 31 giornate su 96 dovrebbero sparire -- e
+#    vuol dire che il pin non e' arrivato (S5).
+#
+# ---------------------------------------------------------------------
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+# ---------------------------------------------------------------------
+#  >>> COME QUESTO ROUND POTREBBE SEMBRARE INTERESSANTE PER CASO:
+#      la cella 1 torna un DD piu' basso e un PF piu' alto e la
+#      tentazione e' scrivere "saltare i trade stretti e' meglio".
+#      Sarebbe un errore per SEI ragioni, tutte prevedibili adesso:
+#      (i)   IL CAMPIONE, E QUI E' IL PIU' PICCOLO DELLA SERIE. La cella
+#            1 decide su 31 operazioni TOLTE (misurate, OOS): il PF che
+#            ne esce e' calcolato su ~65 posizioni. Trentuno operazioni
+#            non fanno un edge, e il loro segno medio puo' ribaltarsi con
+#            due trade.
+#      (ii)  IL DD PIU' BASSO NON E' UN MERITO (proprieta' C): meno
+#            operazioni = meno rischio = meno tutto. Il confronto onesto
+#            e' a parita' di esposizione, e questo round non ce l'ha.
+#      (iii) IL COMPOUNDING (classe 321). Il lotto nasce dal SALDO
+#            (r.1625): la cella che guadagna presto compone. Il confronto
+#            si legge sul PF prima che sul profitto in euro.
+#      (iv)  LA FREQUENZA E' UN COSTO, e su questa sedia e' un costo
+#            GRAVE: CENSIMENTO_CONTRATTI.md r.197 da' ~0,46 op/giorno
+#            contro un pavimento FIRMATO di 1,00 (07/09, che dal 07/09 si
+#            applica alla FAMIGLIA). Togliere il 32% delle operazioni
+#            porta la sedia a ~0,31 op/giorno. Qualunque vantaggio di PF
+#            va scritto ACCANTO a questo numero, mai da solo.
+#      (v)   LO SLIPPAGE ASSENTE. `InpSlippagePts=0`: il tester riempie
+#            al prezzo, e le operazioni a stop stretto -- proprio quelle
+#            che la cella 1 elimina -- sono quelle che in campo soffrono
+#            di piu'. L'errore va nella direzione comoda per la CELLA 0.
+#            Cioe': in campo la cella 1 potrebbe essere MIGLIORE di
+#            quanto il backtest dice. E' l'unico punto di questo file in
+#            cui il verso comodo aiuta la cella non viva, e lo scrivo
+#            perche' tacerlo sarebbe comodo al contrario.
+#      (vi)  IL PIN NON E' IL CAMPO. Qualunque numero di questo round
+#            descrive una sedia col pavimento a 8000, che NON e' la sedia
+#            in campo. Non si puo' concludere niente su "la sedia viva"
+#            da questo CSV: si conclude sull'INTERRUTTORE, che e' la
+#            domanda del round.
+#  >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO:
+#      1. il vantaggio deve esserci nelle DUE gambe con lo STESSO SEGNO
+#         (B6);
+#      2. deve superare la banda di rumore di B5;
+#      3. il DD va confrontato a parita' di operazioni, e siccome non si
+#         puo', si dichiara (B2);
+#      4. e il prezzo in frequenza va scritto accanto al numero (B8);
+#      5. e anche cosi' il verdetto massimo e' "MISURATO", MAI
+#         "CANDIDATO".
+#      (La regola del CENTRO DELL'ALTOPIANO non e' applicabile a due
+#       celle: vedi B8.)
+#
+#  >>> IL CONTRO-ESEMPIO CHE RIGUARDA IL VALORE DEL ROUND, e su questo
+#      file va fatto con piu' onesta' che sugli altri:
+#      (a) LA META' SCOMODA, E SONO DUE. Primo: l'esito piu' probabile e'
+#          "la cella 0 vince", cioe' una conferma. Secondo, e piu'
+#          serio: il round NON misura la sedia in campo, perche' il pin
+#          e' spostato. Chi cerca "cosa succede alla sedia viva se
+#          accendo l'interruttore" NON trova la risposta qui -- la
+#          risposta e' "niente", ed e' gia' dimostrata in cima al file
+#          senza bisogno di girare.
+#      (b) LA META' CHE REGGE, e sono tre cose:
+#          - chiude la DECIMA e ultima casella della sedia, e la chiude
+#            con una MISURA invece che con una casella spuntata;
+#          - risponde all'unica domanda per cui l'interruttore esiste
+#            ("cosa fare delle operazioni sotto la frontiera di costo"),
+#            che e' una domanda del 1 ottobre e non un capriccio;
+#          - costa 4 PASSATE, [CALIBRATE] a ~2,6 minuti.
+#      (c) E LA PROPOSTA CHE APRO INVECE DI ARCHIVIARLA (CLAUDE.md, "se
+#          potrebbe passare, si insiste"): se questo round e R172i
+#          dicessero che saltare NON costa PF, il passo successivo
+#          naturale e' il ramo "salta" su TUTTO l'asse del pavimento --
+#          cioe' l'equivalente Dow di `R137b`, 22 celle, 44 passate,
+#          ~16 minuti. NON lo scrivo come file e NON lo armo: lo lascio
+#          scritto qui col suo costo, perche' un seguito proposto e' una
+#          cosa, un seguito armato da solo e' un'altra (B9).
+#
+# ---------------------------------------------------------------------
+#  ###  CLASSE 308 -- IL PARAMETRO CHE STA ANCHE AL DENOMINATORE     ###
+#  ###  Dichiarata PRIMA dei numeri, non dopo                        ###
+# ---------------------------------------------------------------------
+#  308-1  LOTTO E QUANTIZZAZIONE: l'asse non entra nel calcolo del lotto.
+#         Sulle giornate non saltate `dist` e' identica nelle due celle,
+#         quindi il lotto differisce SOLO per il saldo (compounding). Il
+#         pavimento del lotto (VOLUME_MIN 0,10) non morde: il lotto piu'
+#         piccolo MISURATO e' 2,3.
+#  308-2  COSTO IN R: IDENTICO NELLE DUE CELLE su ogni operazione che
+#         viene fatta. Il pavimento a 8000 garantisce 40,0x su TUTTE e
+#         due -- la cella 0 ci arriva allargando, la cella 1 ci arriva
+#         non entrando. E' la cosa piu' importante di questo paragrafo:
+#         il round confronta due modi di rispettare lo stesso cancello di
+#         costo, non due livelli di costo.
+#  308-3  DURATA E OCCUPAZIONE DEL POSTO: non morde (flat acceso, un
+#         ciclo al giorno).
+#  308-4  IL FATTORE USCITE/POSIZIONI: MISURATO sulla cella viva della
+#         sedia (1,3214 IS / 1,3542 OOS) ma NON TRASPORTABILE alla cella
+#         1, che opera su un sottoinsieme selezionato (vedi UNITA' DI
+#         MISURA). Resta il limite 1,00-2,00 su tutte e due le celle.
+#  308-5  !! RISCHIO APERTO CONTEMPORANEO E FREQUENZA: la cella 1 riduce
+#         il NUMERO di operazioni del ~32% (misurato in OOS). Non tocca
+#         il rischio per trade (sempre 1,0% sul banco) ne' il numero di
+#         posizioni contemporanee (una: RETEST + solo long + HandleOCO
+#         r.1681). Ma la frequenza e' un cancello di casa e questo e'
+#         l'unico round della serie che la sposta di proposito: va in
+#         B8 accanto a qualunque raccomandazione.
+#
+# ---------------------------------------------------------------------
+#  LE SENTINELLE -- SI CONTROLLANO PRIMA DI QUALUNQUE ALTRO NUMERO
+#  (ogni sentinella nomina IL FILE e LA COLONNA da cui esce il numero:
+#   classe 353)
+# ---------------------------------------------------------------------
+#  S1  RIPRODUZIONE INCROCIATA CON R172i, ED E' BLOCCANTE -- ma solo se
+#      R172i e' disponibile.
+#      FILE   : risultati_prove\ABTG_Dow_Apertura_US\
+#               ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_r172j.csv
+#               (riga InpSkipIfTight = 0)
+#               CONTRO
+#               ..._{IS,OOS}_r172i.csv  (riga InpMinStopPts = 8000)
+#      COLONNE: `Trades`, `Profit Factor`, `Equity DD %`, `Profit`,
+#               `Peggior Giornata %`.
+#      Le due righe descrivono LA STESSA CONFIGURAZIONE (pavimento 8000,
+#      interruttore false): l'unica differenza fra i due round e' il
+#      magic (789600 contro 789610), che non entra in nessuna decisione
+#      di trading.
+#      >>> CRITERIO: UGUAGLIANZA FINO ALL'ULTIMA CIFRA, se e solo se i
+#          due round sono girati sullo STESSO terminale e con lo STESSO
+#          pin di sorgente. L'uguaglianza e' pretesa perche' il rumore di
+#          magic e' MISURATO ZERO due volte (R54a e R47d, vedi ANCORA).
+#      >>> RAMO DI RIPIEGO, dichiarato adesso e non inventato dopo: se i
+#          due round sono girati in momenti o a pin diversi, il criterio
+#          scende a "dentro la banda B5" e il referto lo DICE. Non si
+#          promuove il ripiego a criterio principale.
+#      >>> SE R172i NON E' GIRATO: questo round NON HA UN CONTROLLO DI
+#          BANCO. Il confronto interno fra le due celle resta leggibile
+#          (girano nella stessa corsa, sullo stesso terminale), ma il
+#          verdetto DEVE portare scritto "senza controllo di banco". Non
+#          e' la stessa cosa di un round ancorato, e non si scrive come
+#          se lo fosse.
+#  S1b IL METRO DI SCALA CONTRO L'ANCORA (NON bloccante, e lo dichiaro).
+#      Nessuna cella di questo round deve riprodurre R54a: il pavimento
+#      e' alzato. Il confronto coi numeri d'ancora (IS PF 1,22247 / DD
+#      5,6692% / 74 -- OOS PF 1,27013 / DD 4,3941% / 130) serve solo a
+#      dire QUANTO il pavimento a 8000 ha spostato la sedia, ed e' un
+#      RISULTATO di R172i, non un controllo di questo file.
+#  S2  CONTEGGIO DELLE CELLE. Nei DUE CSV devono comparire 2 valori
+#      distinti di `InpSkipIfTight` (0 e 1), E la colonna
+#      `InpMinStopPts` deve valere 8000 su TUTTE le righe. La seconda
+#      meta' e' importante quanto la prima: se il pin del pavimento non
+#      arriva, il round torna nel mondo in cui le due celle sono
+#      identiche per costruzione, e il risultato sarebbe indistinguibile
+#      da "la manopola e' inerte".
+#      Le colonne si cercano PER NOME, non per posizione: l'intestazione
+#      la costruisce OnTesterDeinit (r.2132) come UNDICI colonne cablate
+#      seguite dai NOMI degli input nell'ORDINE DI DICHIARAZIONE, quindi
+#      la POSIZIONE cambia col binario (classe 369).
+#      >>> SI CONTANO LE CELLE, NON LE PASSATE (classe 354).
+#      Se le celle non sono 2, o se `InpMinStopPts` non e' 8000, ci si
+#      ferma.
+#  S3  `Trades` -- LIMITI ARITMETICI, ED E' L'UNICA SENTINELLA DELLA
+#      SERIE CHE PORTA UN INTERVALLO PREVISTO (proprieta' B).
+#      COLONNA: `Trades`, in CIASCUNA delle due finestre separatamente.
+#      LIMITI DURI (valgono comunque):
+#        - cella 0: posizioni ESATTAMENTE 56 (IS) e 96 (OOS) -- il
+#          pavimento con `SkipIfTight=false` allarga e non toglie
+#          (proprieta' A di R172i) -- quindi
+#             56 <= Trades <= 112 (IS)   e   96 <= Trades <= 192 (OOS);
+#        - cella 1: `Trades(1) <= Trades(0)`, perche' le sue posizioni
+#          sono un SOTTOINSIEME di quelle della cella 0 e ogni posizione
+#          sopravvissuta fa lo stesso numero di uscite (proprieta' B, con
+#          la condizione sul lotto minimo dichiarata e misurata).
+#      INTERVALLO PREVISTO (OOS, MISURATO): la differenza
+#      `Trades(0) - Trades(1)` deve stare fra 31 e 62.
+#        >>> E NON E' UN CANCELLO BLOCCANTE, E' UNA PREVISIONE (classe
+#            387 regola 1: le previsioni non si travestono da cancelli).
+#            Se cade fuori, la corsa PROSEGUE e si apre la diagnosi:
+#            (a) il pin non e' arrivato -> lo esclude S2; (b) LA MISURA
+#            (la distribuzione degli stop) e' sbagliata -> e allora va
+#            corretta anche in R172i, che ci poggia sopra; (c) la gamba
+#            OOS del tester non e' la stessa di R47d. Tutti e tre sono
+#            notizie, nessuno e' "un dettaglio".
+#  S4  LA FINESTRA EFFETTIVA. SI VERIFICA A MANO, sul report MT5 della
+#      gamba IS della CELLA 0:
+#        - DATA DELLA PRIMA OPERAZIONE entro 30 giorni da 2024.09.26
+#          -> FINESTRA PIENA. (R103 I02 gate 1 misura la prima operazione
+#          al 2024.09.30 su questa stessa sedia e finestra.)
+#        - oltre -> FINESTRA ACCORCIATA: si scrive la data VERA e i mesi
+#          VERI accanto a OGNI numero IS.
+#      >>> E SULLA CELLA 1 QUESTA VERIFICA NON SI FA: li' la prima
+#          operazione puo' essere legittimamente piu' tardi (la prima
+#          giornata potrebbe essere saltata), e scambiarla per una
+#          finestra accorciata sarebbe un errore di lettura.
+#      Motivo per cui serve: `walkforward_generico.ps1` non ha nessun
+#      gate di densita'. S4 non ferma la corsa.
+#  S5  LA MANOPOLA HA AGITO? (classe 357)
+#      CRITERIO: le due celle devono differire in `Profit` E in `Trades`,
+#      in ciascuna delle due finestre.
+#      SE COINCIDONO FINO ALL'ULTIMA CIFRA, con il pavimento a 8000 non
+#      c'e' nessuna spiegazione innocente -- 31 giornate su 96
+#      dovrebbero sparire in OOS -- e la causa e' UNA:
+#        IL PIN NON E' ARRIVATO. Si esclude con S2 (le colonne
+#        `InpSkipIfTight` e `InpMinStopPts` portano davvero i valori
+#        attesi: le scrive `FrameInputs`, r.2129, cioe' gli input VERI di
+#        quella passata) e col controllo n.1 di controlla_prova.py
+#        (r.153-155, "input SCONOSCIUTO all'EA"), che gira PRIMA di
+#        armare.
+#      >>> E SE S2 PASSA E I NUMERI COINCIDONO LO STESSO, non si scrive
+#          "la manopola e' inerte": si scrive "LE DUE CELLE NON SI
+#          DISTINGUONO" e si apre un rilievo, perche' quel mondo
+#          contraddice una misura (classe 370, regola di lettura).
+#
+# ---------------------------------------------------------------------
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  (congelate QUI e non importate: questo file NON eredita le B dei nove
+#   fratelli. La numerazione e i TITOLI sono deliberatamente gli stessi
+#   della serie -- cosi' nessuna sigla puo' slittare, classe 377 difetto
+#   n.1 -- ma i VALORI sono di questo asse. Una sigla citata in un
+#   referto futuro va scritta col file che la congela: B7 [R172j].)
+# ---------------------------------------------------------------------
+#  B0  LA VARIABILE CHE DECIDE E' `Profit Factor`, LETTO INSIEME AL
+#      NUMERO DI OPERAZIONI -- e su questo file quella coppia e'
+#      inseparabile piu' che altrove, perche' l'asse cambia il
+#      denominatore (proprieta' C).
+#      Il referto DEVE portare in tabella, per tutte e due le celle e
+#      tutte e due le finestre, `Profit Factor`, `Equity DD %`,
+#      `Profit`, `Trades` E `Peggior Giornata %`, piu' la differenza
+#      `Trades(0) - Trades(1)`. Se una di quelle colonne non c'e', il
+#      verdetto non e' stato dato: e' stato sostituito (classe 316).
+#  B1  MERITO -- SOSPESO, E QUI PIU' CHE ALTROVE.
+#      Cella 0: 56 posizioni IS e 96 OOS (MISURATE). Cella 1: <= 56 e
+#      ~65 previste in OOS. Sotto il pavimento dei 150 (Emendamento
+#      regola A) con qualunque convenzione, e il sottoinsieme che l'asse
+#      tocca sono 31 operazioni MISURATE in OOS.
+#      Nessun numero di questo round promuove o boccia un motore.
+#      >>> E IL RISCHIO SI LEGGE LO STESSO, a qualunque n (Emendamento
+#          regola B).
+#  B2  RISCHIO TOTALE -- la soglia col numero.
+#      COLONNA: `Equity DD %`, sul banco a rischio 1,0%.
+#      B2.1  MURO PROP. Taglia viva 0,65% -> il DD alla taglia viva e' il
+#            numero del CSV x 0,65 [APPROSSIMATO lineare]. Il muro prop
+#            TOTALE e' 10% STATICO: una cella sfonda il muro se stampa
+#            piu' di 15,38% sul banco. L'ancora e' a 4,3941% (OOS) e
+#            5,6692% (IS). Ogni cella sopra 15,38% e' CELLA DI RISCHIO e
+#            va segnalata SUBITO.
+#      B2.2  IL PROMESSO. Il contratto promette 4,22% a taglia 1,0%
+#            (CENSIMENTO_CONTRATTI.md r.197, riga VERBATIM, che scrive
+#            anche "4,22% a 1% -> circa 2,74%"). La regola meccanica
+#            della corsia RISCHIO del 18/08 (DD > 2x il promesso ->
+#            revisione) da' soglia 8,44% sul banco.
+#            >>> CONTROLLO DI VUOTO (classe 178): su QUESTO asse la
+#                soglia probabilmente NON mordera' -- la cella 1 opera
+#                MENO e il DD scende, la cella 0 allarga gli stop e
+#                riduce i lotti. Lo dico invece di far finta che sia un
+#                cancello vivo. La soglia si scrive lo stesso: una
+#                soglia dichiarata e non scattata e' una misura.
+#            >>> !! E IL DD DI QUESTO ROUND HA UN CAVEAT CHE GLI ALTRI
+#                NOVE FILE NON HANNO: un DD piu' basso sulla cella 1 NON
+#                e' un miglioramento, e' il prezzo di operare meno
+#                (proprieta' C). Scriverlo come un merito sarebbe la
+#                classe 364 (un superlativo senza il criterio accanto).
+#            >>> E IL CAVEAT DEL PROMESSO NON SI DECLASSA (classe 375):
+#                il 4,22% e' di una corsa (R16/R54) che questo round non
+#                rifa', e CENSIMENTO_CONTRATTI.md r.197 segnala esso
+#                stesso che R54 "riconferma la cella live: 4,39%". Le due
+#                cifre differiscono di 0,17 punti e nessuno le ha
+#                riconciliate: lo dichiaro invece di sceglierne una.
+#  B3  RISCHIO GIORNALIERO -- soglia dichiarata, e qui NON mordera'.
+#      COLONNA: `Peggior Giornata %` (r.2107 `stats[7] = gWorstDayPct;`).
+#      Sul banco a 1,0% l'ancora e' -1,0062% (IS) e -1,0227% (OOS). Il
+#      muro giornaliero prop e' 5,0%, cioe' 7,69% sul banco: servirebbe
+#      un peggioramento di 7,6 volte, e il tetto strutturale di una
+#      giornata e' UNA perdita piena (un ciclo al giorno, r.226, e flat
+#      acceso).
+#      >>> SUL GEMELLO DAX quella colonna si muove fra -0,997 e -1,117 su
+#          tutte e 14 le celle dei due rami: conferma empirica che il
+#          tetto strutturale regge.
+#  B4  FORMA -- NON APPLICABILE, E LO DICHIARO INVECE DI FINGERE.
+#      Con DUE celle non esiste ne' monotonia ne' altopiano: una forma ha
+#      bisogno di almeno tre punti. Al suo posto si registra la sola cosa
+#      che due celle possono dire, la CONCORDANZA fra le due gambe (B6).
+#      >>> E' il LIMITE STRUTTURALE del round, non un difetto della
+#          scrittura: la manopola e' booleana, due celle sono TUTTE le
+#          celle. (La forma, su questa coppia di manopole, la disegna
+#          R172i con le sue 22 celle.)
+#  B5  BANDA DI RUMORE, E IL CRITERIO E' DICHIARATO (classe 373).
+#      Rumore di MACCHINA: ZERO MISURATO sul banco dell'ancora (due magic
+#      tecnici identici al centesimo in R54a; due per-trade identici riga
+#      per riga in R47d). Quella misura e' di QUEL terminale: su
+#      C:\MT5_Backtest resta [NON MISURATO].
+#      Resta il rumore di CAMPIONE, e qui e' PIU' GRANDE che sugli altri
+#      file della serie perche' la cella 1 gira su ~65 posizioni OOS
+#      invece di 96:
+#        - PF  : un vantaggio < 0,10 PUNTI PIENI di PF non e' un
+#                vantaggio, e si scrive e basta.
+#        - DD  : una differenza < 1,0 PUNTI PERCENTUALI PIENI sul banco
+#                non si legge come tendenza.
+#      Criterio dichiarato: PUNTI PIENI per tutte e due, non frazione
+#      dell'ancora (su un PF vicino a 1,25 il 2% sono 0,025 punti, che su
+#      130 uscite e' sicuramente rumore; sul DD i punti pieni sono gia'
+#      l'unita' del muro prop).
+#      >>> SONO LE STESSE DUE SOGLIE DEI NOVE FRATELLI, ed e' voluto
+#          (classe 373 punto 3) -- MA CON UN AVVISO CHE GLI ALTRI NON
+#          HANNO: applicate a un campione piu' piccolo, le stesse soglie
+#          sono PIU' PERMISSIVE. Non le stringo (sarebbe cambiare il
+#          criterio dopo aver visto il campione): lo DICHIARO.
+#      >>> E IL METRO ESTERNO C'E' ED E' UN NUMERO: sul gemello DAX, alla
+#          soglia di costo, la differenza fra i due rami e' 0,14907 punti
+#          di PF -- sopra questa banda. Quindi la banda e' della taglia
+#          giusta per questo asse: abbastanza stretta da poter essere
+#          superata.
+#  B6  CONCORDANZA IS/OOS, E QUI E' DEBOLE PER COSTRUZIONE.
+#      Il segno della differenza fra la cella 1 e la cella 0 deve essere
+#      lo STESSO nelle due finestre perche' se ne possa parlare. Se il
+#      segno si inverte, il verdetto e' "non misurabile", non "meta'
+#      buono".
+#      >>> E SU QUESTO ASSE C'E' UNA RAGIONE IN PIU' PER DIFFIDARE DI UNA
+#          GAMBA SOLA, gia' dichiarata nella FINESTRA: l'interruttore
+#          toglie le giornate a range stretto, che sono piu' frequenti
+#          nell'OOS piatto che nell'IS dei dazi. Le due gambe non
+#          perdono la stessa frazione di operazioni, e quindi non sono
+#          confrontabili in modo ingenuo.
+#      >>> La taglia del vantaggio si legge sull'OOS (compounding, classe
+#          321), il RISCHIO sull'IS, dove c'e' il crollo.
+#  B7  !! CANCELLO DI COSTO -- QUI NON DISCRIMINA FRA LE CELLE, ED E'
+#      ESATTAMENTE IL PUNTO DEL ROUND.
+#      IL PAVIMENTO DI CASA: stop >= 40 x spread. Lo spread di questa
+#      sedia all'ora operativa e' misurato in
+#      report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.323 (riga aperta
+#      oggi): "770202 U30USD | 15 (4 su 4) | n 4 | 2,00 | 2,60", cioe'
+#      mediana 2,00 punti indice e P95 2,60, su QUATTRO soli trade.
+#         40 x 2,00 = 80 punti indice = 8000 punti MT5   <- IL PIN
+#         40 x 2,60 = 104 punti indice = 10400            (il P95)
+#      >>> CON IL PIN A 8000, TUTTE E DUE LE CELLE RISPETTANO IL
+#          CANCELLO: la cella 0 allargando lo stop, la cella 1 non
+#          entrando. Il round confronta DUE MODI DI RISPETTARE LO STESSO
+#          CANCELLO, e per questo -- unico caso della serie -- B7 non
+#          serve a escludere una cella.
+#      >>> LA SCELTA DEL PIN E' UNA REGOLA, NON UN NUMERO PESCATO, e la
+#          congelo qui perche' e' l'unica cosa "libera" di questo file:
+#          8000 = la frontiera di costo alla MEDIANA dello spread. E' la
+#          stessa regola con cui `R129c_costo_interruttore_D30EUR.txt`
+#          pinna 6800 sul DAX. Se qualcuno preferisse il P95 (10500), il
+#          round va RIFATTO con quel pin e dichiarato: non si cambia il
+#          pin dopo aver visto i numeri (classe 380 regola 4).
+#      >>> E DOVE STA LA SEDIA VIVA, che adesso e' MISURATO (LA MISURA):
+#          mediana 138,29 idx = 69,1x . media 145,81 = 72,9x . MA il 10%
+#          piu' stretto sta sotto 39,81 idx = 19,9x, e 31 posizioni su 96
+#          (32,3%) stanno SOTTO la frontiera degli 80 idx.
+#          >>> E' UN RILIEVO CHE APRO E NON CHIUDO, e riguarda tutta la
+#              flotta: il cancello di costo (r.395) da' questa sedia a
+#              "51,0x, VERDE con +28% sul pavimento" e i fratelli
+#              R172a/f/g lo rialzano a ~77,8x con la geometria giusta.
+#              Tutti e due i numeri sono MEDIE. Misurata trade per
+#              trade, la sedia ha UN TERZO delle operazioni sotto la
+#              frontiera. Non cambia il verdetto medio; cambia cosa vuol
+#              dire quel verdetto, e va portato a chi decide del 1
+#              ottobre.
+#      >>> IL CAVEAT DELLO SPREAD, e non si declassa: la mediana 2,00 e'
+#          dedotta da QUATTRO trade (r.323 scrive "n 4"). Su quel numero
+#          poggia il pin di questo round. Se lo spread vero fosse 2,5, il
+#          pin giusto sarebbe 10000 e non 8000. La conclusione va scritta
+#          con lo spread ACCANTO.
+#  B8  REGOLA DI SELEZIONE -- LA REGOLA DI CASA NON E' APPLICABILE, E LO
+#      DICHIARO INSIEME AL NUMERO (regola del 16/08).
+#      "Centro dell'altopiano, mai il picco" ha bisogno di un tratto
+#      contiguo; qui le celle sono DUE e ogni cella e' un bordo. Al suo
+#      posto, e vale solo per questo file:
+#        si raccomanda una cella SOLO SE vince in TUTTE E DUE le gambe
+#        (B6), oltre la banda B5, senza peggiorare B2 -- e la
+#        raccomandazione resta una PROPOSTA (B9).
+#      >>> E SE LA CELLA CHE VINCESSE FOSSE LA 1, LA PROPOSTA VA SCRITTA
+#          ACCANTO AL SUO PREZZO, che qui e' un numero e non una
+#          sfumatura: -32,3% di operazioni (misurato in OOS), cioe' da
+#          ~0,46 a ~0,31 op/giorno su una sedia gia' sotto il pavimento
+#          di 1,00 firmato il 07/09. E il pavimento si misura per
+#          FAMIGLIA, non per sedia: chi valuta deve guardare la famiglia
+#          Apertura intera, non questa riga. Quel giudizio non e' di
+#          questo file.
+#  B9  !! IL ROUND NON PROMUOVE NIENTE, E QUI HA UNA RIGA IN PIU'.
+#      Nessun preset cambia, nessuna sedia si accende o si spegne, il
+#      forward non si tocca, CODA.txt e il pin non si toccano da questo
+#      file. Taglie, rischio, accensioni e il conto REALE 10105439
+#      restano [FIRMA DI CLAUDIO].
+#      >>> E LA RIGA IN PIU': anche se la cella 1 vincesse, NON si
+#          accende `InpSkipIfTight` sulla sedia viva, perche' sulla
+#          sedia viva NON FAREBBE NIENTE (il pavimento e' 500 e non
+#          morde: dimostrato in cima al file). Accenderlo richiederebbe
+#          di alzare ANCHE `InpMinStopPts`, cioe' DUE modifiche insieme
+#          -- ed e' esattamente il genere di pacchetto che il metodo di
+#          casa vieta. Se mai si arrivera' li', si passa da R172i per il
+#          livello e da questo round per il modo, uno alla volta.
+#      Verdetto massimo possibile: "MISURATO".
+#
+# ---------------------------------------------------------------------
+#  BANCO E FINESTRA -- col conto, non a memoria
+# ---------------------------------------------------------------------
+#    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO a 1,0%
+#    (la taglia dell'ANCORA; in campo la sedia gira a 0,65% sul 100k e a
+#    1,0% sul piccolo -- LE TAGLIE RESTANO DI CLAUDIO).
+#    FrazioneIS 0.40, scritta in questo file e verificata a macchina.
+#      IS  2024.09.26 - 2025.06.09
+#      OOS 2025.06.10 - 2026.06.30
+#    Se la riga di lancio cambia frazione, deposito, modello, rischio o
+#    @FINOA, il cancello incrociato S1 decade e questo file va riscritto,
+#    non "letto con prudenza".
+#    E tutte le ore citate sono ORA SERVER BCM (ora italiana = +1).
+#
+#  COSTO IN TEMPO MACCHINA -- [CALIBRATO], e la calibrazione e' una retta
+#  su round veri, non un costo medio a passata.
+#    2 celle x 2 finestre = 4 PASSATE.
+#    IL CAMPIONE: NOVE round su U30USD della STESSA NOTTE, dallo STESSO
+#    referto del runner
+#    (backtest_pipeline/coda/referti/REFERTO_RUNNER_20260916_033005.txt,
+#    la riga "ESEGUITO in NNNs" di ciascuno), incrociati col numero di
+#    passate che `controlla_prova.py` calcola sul rispettivo file prova:
+#      R133b   4 passate  158 s      R136a  14 passate  350 s
+#      R136d   4 passate  161 s      R136b  14 passate  379 s
+#      R141b   4 passate  148 s      R136c   8 passate  233 s
+#      R147b   4 passate  167 s      R125b   8 passate  271 s
+#                                    R145b   8 passate  223 s
+#    Retta ai minimi quadrati su quei nove punti:
+#      costo = 76 s (FISSO per round) + 20,6 s per PASSATA
+#    con scarti fra -18 s e +30 s su tutti e nove.
+#    >>> 76 + 4 x 20,6 = 158 s, cioe' ~2,6 MINUTI. Banda dichiarata
+#        2 - 4 minuti.
+#    >>> E SE GIRA SUBITO DOPO R172i (come dovrebbe, vedi L'ORDINE), la
+#        costruzione della storia a tick e' gia' pagata: stesso simbolo,
+#        stesso TF, stessa finestra, stesso modello.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND
+#    - IL ROUND NON MISURA LA SEDIA IN CAMPO, e non e' un difetto ma va
+#      scritto in cima a qualunque referto: il pin `InpMinStopPts=8000`
+#      non e' il valore di campo (500). Sulla sedia viva questo
+#      interruttore non fa NIENTE, ed e' dimostrato senza bisogno di
+#      girare.
+#    - QUANTE GIORNATE L'INTERRUTTORE TOLGA IN IS E' [NON MISURATO]: il
+#      per-trade in repo e' solo della gamba OOS. La previsione dei 31
+#      giorni vale per l'OOS.
+#    - LO SPREAD DELLA SEDIA E' DEDOTTO DA QUATTRO TRADE
+#      (CANCELLO_COSTO r.323, "n 4"), e su quel numero poggia il pin.
+#    - IL CONFRONTO FRA LE DUE CELLE NON E' A PARITA' DI ESPOSIZIONE: la
+#      cella 1 opera di meno. Nessuna colonna di questo CSV normalizza
+#      per numero di operazioni. Dichiarato PRIMA di girare (classe 353).
+#    - IL CAMPIONE E' SOTTO IL PAVIMENTO SU TUTTE E DUE LE GAMBE E SU
+#      TUTTE E DUE LE CELLE; sulla cella 1 e' il piu' piccolo della
+#      serie R172. Il MERITO e' sospeso.
+#    - UN SOLO CICLO DI MERCATO. 21 mesi, e le quattro finestre di regime
+#      di casa non girano qui.
+#    - IL CANCELLO S1 E' TRANSITIVO (passa da R172i): e' piu' debole di
+#      un'ancora diretta, e se R172i non gira questo round resta senza
+#      controllo di banco.
+#    - IL BINARIO NON E' QUELLO DELL'ANCORA: +27 righe di Guardian fra il
+#      14/08 e oggi, inerti nel tester per costruzione ma non verificate
+#      a runtime da nessuno. E il `diff` va rifatto sul PIN DI
+#      ARMAMENTO, non su HEAD (classe 385).
+#    - LE DUE ISTANZE DELLA SEDIA (0,65% sul 100k, 1,0% sul piccolo)
+#      restano un rilievo aperto che questo round non chiude.
+#    - QUESTO EA NON HA `InpComment` (verificato: zero occorrenze nel
+#      sorgente), quindi le righe nel giornale del tester si riconoscono
+#      SOLO dal magic e dall'etichetta della riga di lancio.
+#      >>> MA SU QUESTO ROUND IL GIORNALE SERVE DAVVERO, ed e' l'unico
+#          della serie: `ABTGLog` stampa "RETEST BUY saltato: stop %.0f
+#          pt < floor %.0f pt." (r.1326) ogni volta che l'interruttore
+#          agisce. Contare quelle righe nel log della passata IS della
+#          cella 1 e' l'UNICO modo, senza una corsa in piu', di sapere
+#          quante giornate sono state tolte in IS. Costa una lettura, non
+#          una passata: vale la pena farlo e scriverlo nel referto.
+#
+#  MAGIC VERGINE 789610. VERIFICATO COME PRESCRIVE LA CLASSE 367:
+#  ricerca dalla RADICE del repo, worktree degli agenti paralleli
+#  COMPRESI (`.claude/worktrees/` NON escluso -- qui la domanda e'
+#  ISTANTANEA sull'unicita' di un valore, quindi i worktree VANNO
+#  inclusi; classe 382 regola 3), escluso solo l'albero interno di git:
+#      grep -rl "789610" --exclude-dir=.git .
+#  Risultato alla STESURA: ZERO file, rispetto a HEAD `b9d7f8de` di
+#  `lavoro` ("Merge branch 'lavoro' of
+#  https://github.com/claudiospadaro12/GITHUB into lavoro"), letto con
+#  `git rev-parse HEAD` nel momento in cui scrivo e non ricordato
+#  (classe 377 punto 5).
+#  >>> DAL COMMIT DI QUESTO FILE QUEL GREP TORNERA' UNO, ed e' QUESTO
+#      file (classe 382). La forma che risponde alla domanda "questo
+#      magic e' assegnato a un altro round" e' l'altra:
+#        grep -rn "^InpMagic=789610" --exclude-dir=.git .
+#      che deve tornare UNA sola riga, il pin di questo file.
+#  >>> LA RIVERIFICA CHE CONTA LA RIFA' CHI ARMA, non la riporta l'autore
+#      (classe 365 regola 1).
+#  >>> E NON E' IL SUCCESSIVO DELLA SEQUENZA, ED E' DELIBERATO. I
+#      fratelli usano 789510-789550 (R172a-e), 789570 (R172f) e 789580
+#      (R172g); 789560 e' stato lasciato LIBERO apposta da R172g e resta
+#      libero. I tre file scritti oggi prendono 789590 (R172h), 789600
+#      (R172i) e 789610 (questo): tre numeri distanti, perche' la classe
+#      367 misura che il punto dove due agenti collidono e' la SEQUENZA,
+#      non il nome. Il blocco 7895xx/7896xx resta lontano da tutte le
+#      sequenze vive della serata (7884xx di R171a-b, 7873xx di R170a-c,
+#      7798xx di R169, 7886xx di R151a).
+# =====================================================================
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+# --- LA CELLA VIVA DELLA SEDIA 770202, campo per campo -- CON UNA
+#     DEVIAZIONE DICHIARATA (InpMinStopPts).
+#     FONTE, e l'ordine di autorita' e' dichiarato (classe 369):
+#       1. il .set della sedia sul 100k 50504263,
+#          mql5\Presets\ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set
+#          (81 campi, contati a macchina);
+#       2. i due CSV di R54a (l'ancora), artefatto di CORSA e non di
+#          configurazione;
+#       3. il default compilato -- che su TRE campi (InpTP1_R,
+#          InpTP1_ClosePct, InpBreakevenAtTP1) DISSENTE dai primi due.
+#          Vince il .set.
+#     CONFRONTO FATTO A MACCHINA, contando i soli PIN (la riga d'asse in
+#     fondo non e' un pin): 79 nomi in comune col .set, 76 identici, 3
+#     divergenti (InpRiskPercent 0.65 -> 1.0, la taglia dell'ANCORA;
+#     InpMagic 770202 -> 789610, vergine; InpMinStopPts 500 -> 8000, LA
+#     DEVIAZIONE che rende misurabile il round).
+#     NON sono pinnati: `InpSkipIfTight` (e' l'ASSE, in fondo) e
+#     `InpNewsCurrencies` (valore vivo = stringa VUOTA; un pin vuoto MT5
+#     lo ignora e controlla_prova.py lo boccia -- il default compilato
+#     e' "", stesso valore, zero rumore).
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+# --- InpRangeMinutes 35: il range dei primi 35 minuti E' cio' che
+#     decide quali giornate l'interruttore taglia (lo stop naturale vale
+#     `range + buffer - offset`). BLINDATO al valore di campo (.set
+#     r.172): muoverlo cambierebbe l'insieme delle giornate tagliate.
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+# --- !! InpOneTradePerDay=true E' IL PIN CHE RENDE DEFINITIVO IL SALTO
+#     (classe 383 regola 2): quando l'interruttore salta il trade, la
+#     giornata e' finita -- `gBrokeHigh` e' gia' true (r.1314) e non c'e'
+#     un secondo ciclo. Con false la lettura del round sarebbe diversa e
+#     andrebbe riscritta. FONTE: .set r.176.
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+# --- !! InpEntryMode=2 (RETEST) E' IL PIN CHE DECIDE QUALE DELLE SEI
+#     OCCORRENZE DI InpSkipIfTight VIENE ESEGUITA (classe 383 regola 2):
+#     con un altro valore questo round misurerebbe r.903 o r.1136 o
+#     r.1244 invece di r.1326. FONTE: .set r.178.
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+# --- InpBufferPoints 1000 (= 10 punti indice) e InpRetestOffsetPts 400
+#     (= 4): da questi due numeri e da `range > 0` nasce la
+#     dimostrazione che il pavimento di campo (500) non puo' mordere --
+#     `dist = range + 600 >= 610` punti MT5. BLINDATI.
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+# --- InpAllowShort=false: spegne r.1359, la seconda occorrenza viva
+#     dell'asse. Senza questo pin il round misurerebbe due rami.
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=400.0||400.0||0||400.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=true||true||0||true||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+# --- InpRiskPercent 1.0 = LA TAGLIA DELL'ANCORA R54a, non la taglia viva
+#     del 100k (0,65). Il rischio muove il lotto, quindi DD e profitto.
+#     Fattore di lettura 0,65.
+InpRiskPercent=1.0||1.0||0||1.0||N
+# --- InpSLMode=0 (SL_RANGE, asse del gemello R172h): e' cio' che rende
+#     lo stop naturale una funzione del RANGE, e quindi cio' che rende
+#     vera la dimostrazione in cima al file e sensata la previsione delle
+#     31 giornate tagliate. Valore di campo, .set r.213.
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+# --- InpSlippagePts=0: il tester riempie al prezzo. E' il caveat (v) del
+#     contro-esempio -- l'errore va nella direzione comoda per la CELLA
+#     0, cioe' per il ramo che tiene le operazioni a stop stretto.
+InpSlippagePts=0.0||0.0||0||0.0||N
+# --- !!!! IL PIN CHE NON E' IL VALORE DI CAMPO, ED E' DELIBERATO.
+#     .set r.238 dice `InpMinStopPts=500.0`. Qui e' 8000.0, e senza
+#     questa deviazione il round NON MISUREREBBE NIENTE: con 500 il
+#     pavimento non morde mai (dimostrazione in cima al file:
+#     `dist = range + buffer - offset >= 610 punti MT5 > 500`, piu' la
+#     conferma empirica -- il piu' stretto dei 96 stop OOS misurati vale
+#     2545 punti MT5), quindi il ramo r.1326, l'unico posto dove
+#     `InpSkipIfTight` compare, non verrebbe MAI eseguito e le due celle
+#     sarebbero identiche fino all'ultima cifra.
+#     IL VALORE 8000 E' UNA REGOLA, NON UN NUMERO PESCATO: e' 40 x lo
+#     spread mediano di 2,00 punti indice (CANCELLO_COSTO r.323), cioe'
+#     la frontiera di costo di casa. Stessa REGOLA con cui R129c pinna
+#     6800 sul DAX (classe 323: si trasferisce la forma, non il numero).
+#     CONSEGUENZA DA TENERE A MENTE LEGGENDO IL CSV: nessuna delle due
+#     celle di questo round e' la sedia in campo, e S1 e' incrociata con
+#     R172i (cella 8000) invece che con l'ancora R54a.
+InpMinStopPts=8000.0||8000.0||0||8000.0||N
+# InpSkipIfTight -> E' L'ASSE, in fondo al file.
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=789610||789610||0||789610||N
+InpMaxSpread=0||0||0||0||N
+# --- InpVerbose=true: su QUESTO round il log serve davvero, ed e'
+#     l'unico della serie. `ABTGLog` stampa "RETEST BUY saltato: stop
+#     %.0f pt < floor %.0f pt." (r.1326) ogni volta che l'interruttore
+#     agisce: contare quelle righe e' l'unico modo, senza una corsa in
+#     piu', di sapere quante giornate sono state tolte in IS.
+InpVerbose=true||true||0||true||N
+#
+# --- L'UNICO ASSE (2 celle x 2 finestre = 4 passate)
+#     0 = VALORE DI CAMPO (.set r.239 `false`): quando lo stop nasce
+#         sotto il pavimento, lo stop viene ALLARGATO fino al pavimento e
+#         il trade si fa (r.1327). Con il pin a 8000 questa cella E'
+#         la cella "8000" dell'asse del gemello R172i: le due righe
+#         devono coincidere (S1).
+#     1 = `true`: quando lo stop nasce sotto il pavimento IL TRADE NON SI
+#         FA (r.1326). MISURATO: in OOS sono 31 giornate su 96.
+#     Sono TUTTE le celle possibili: `InpSkipIfTight` e' un `bool`
+#     (sorgente r.314), non esistono valori intermedi.
+#     La forma 0||0||1||1||Y per un bool e' quella gia' usata in casa su
+#     questo stesso asse (prove/R118b r.267, R118c r.243, R129c r.264).
+#     Conteggio verificato eseguendo le tre formule del progetto: 2/2/2.
+InpSkipIfTight=0||0||1||1||Y
+# =====================================================================
