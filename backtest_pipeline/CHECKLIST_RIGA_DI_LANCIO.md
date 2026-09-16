@@ -21453,6 +21453,44 @@ lo trovava: la tabella *sembra* regolare.
    scorciatoia che trasforma un refuso in un ammorbidimento (`CLAUDE.md`:
    *"la grinta NON tocca i numeri"*).
 
+### ➕ RECIDIVA LO STESSO GIORNO, E IL MECCANISMO E' NUOVO: **UNA CORREZIONE DI CANCELLO NON RAGGIUNGE IL FRATELLO SCRITTO DOPO, PERCHE' LO STAMPO E' LA VERSIONE PRE-CORREZIONE** (controllo-preventivo, 16/09/2026)
+
+**Il fatto, poche ore dopo.** `R172c_breakevenattp1_dowapertura_U30USD.txt` —
+**terzo** file sulla stessa sedia `770202`, stessa ancora `R54a`, stesse bande —
+e' arrivato al cancello con **esattamente la stessa cella sbagliata**:
+`Trades ... 73 - 75 (74)`, cioe' `+/- UNO`, mentre il criterio tre righe sotto
+dice `+/- 2` e il contro-esempio dice *"QUATTRO VOLTE la semiampiezza di +/-2"*.
+I due fratelli erano stati corretti a `72 - 76` nel commit `04230d37`.
+
+🔴 **E l'aggravante e' la frase che ci sta accanto**, che il file scrive in buona
+fede: *"SONO LE STESSE BANDE DEI DUE FRATELLI, ED E' VOLUTO"*. **Falsa esattamente
+sulla cella che decide** — e falsa in un modo che **rassicura**: chi rilegge trova
+la dichiarazione di identita', non va a confrontare, e la cella sbagliata passa.
+👉 E' la stessa forma della 380 madre (la prosa giusta nasconde la regola
+sbagliata), stavolta puntata **sul fratello invece che sul criterio**.
+
+**Perche' succede, ed e' strutturale.** Il terzo file nasce da un **taglia-e-adatta
+del primo**, e la copia viene presa dalla versione **che l'autore aveva sotto
+mano**, non da quella **corretta in repo**. La correzione del cancello vive in un
+commit; lo **stampo** nella testa di chi scrive. 📌 **Quindi le correzioni di
+cancello NON si propagano da sole ai fratelli futuri**: propagarle e' un atto, non
+un effetto.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Quando un file dichiara *"stessi valori del fratello X"*, il cancello
+   fa il `diff` delle due tabelle a macchina** (`diff <(sed -n ...) <(sed -n ...)`,
+   o il confronto cella per cella). Una dichiarazione di identita' e' **un
+   controllo da eseguire**, mai un fatto da accettare — esattamente come un
+   `(vedi sotto)` (classe 375 regola 4).
+2. 🔴 **Chi corregge N gemelli scrive nel referto del cancello quale CELLA e'
+   stata corretta e in quali file**, cosi' che il gemello N+1 abbia dove
+   guardare. La riga in `CODA.txt` del blocco R172a-b lo fa gia' (*"corretto a
+   72-76 su entrambi i file"*): **quella riga e' l'antidoto, se la si legge.**
+3. 📌 **Il sospetto di casa**: se un file e' il **terzo o il quarto** di una
+   serie e la serie ha gia' avuto un FAIL di cancello, si va a leggere **il
+   verdetto precedente PRIMA di leggere il file nuovo**. Costa un minuto e
+   trova le recidive dove nascono.
+
 ---
 
 ## 381. 🧮🗓️ UN **TASSO** RICAVATO DA UN TOTALE DI FINESTRA DIVISO PER LA DURATA DI **UN SOLO** PERIODO: manca il denominatore delle GIORNATE, e il numero esce sbagliato di un fattore pari ai giorni (controllo-preventivo, 16/09/2026)
@@ -21507,3 +21545,69 @@ regge.
    (qui la classe 370): un numero gonfiato che chiude una domanda la chiude
    **per la ragione sbagliata**, e la riapre il giorno in cui qualcuno rifa' il
    conto.
+
+---
+
+## 382. 🪞🔎 IL COMANDO CHE IL FILE **FALSIFICA DA SOLO** APPENA VIENE COMMITTATO: tre `grep` veri alla stesura e falsi al commit, perche' il file stesso e' diventato un match (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `backtest_pipeline/prove/R172c_breakevenattp1_dowapertura_U30USD.txt`
+(terzo file sulla sedia `770202`) porta le sue verifiche nella forma piu' forte
+che abbiamo — **il comando, e accanto il numero che ha prodotto** — e le porta
+**tre volte**. Rieseguite dal cancello a HEAD `66722425`, **tutte e tre danno un
+altro numero**, e la causa e' sempre la stessa: **il match nuovo e' il file che
+scrive il comando**.
+
+| comando citato | numero scritto | numero rieseguito | chi e' il match in piu' |
+|---|---:|---:|---|
+| `grep -rn "^InpBreakevenAtTP1=.*\|\|Y" backtest_pipeline/prove/ \| wc -l` | **0** | **1** | la riga d'asse r.1526 **di quel file** |
+| `grep -rln "Expert ABTG_Dow_Apertura_US\|EA: ABTG_Dow_Apertura_US" backtest_pipeline/prove/` | **3** | **4** | l'intestazione **di quel file** |
+| `grep -rln "confronti puliti" --exclude-dir=.git .` | **3** | **29** | **se stesso** (cita il commento di `r.287` alla lettera) **+ 8 worktree x 3** |
+
+🔴 **PERCHE' NON E' LA CLASSE 379 E NON E' LA 365.** Nella **379** il comando era
+stato **riscritto a memoria in bella copia** e aveva perso un `-i`: un errore di
+trascrizione, evitabile incollando. Nella **365** a falsificare l'asserzione era
+**un ALTRO agente** che committava nello stesso minuto: un evento probabile ma
+non certo. Qui il comando e' **giusto**, e' **incollato**, nessun altro c'entra —
+e la sua risposta cambia **per un fatto deterministico e inevitabile: il file
+viene salvato**. Non e' sfortuna e non e' distrazione: e' **una proprieta' del
+mestiere di scrivere in un repo che si cerca da se'**.
+
+🔴 **E la terza riga porta un secondo difetto sovrapposto, di classe 378.** Il
+`grep` dalla radice **senza `--exclude-dir=.claude`** conta gli **otto worktree
+degli agenti paralleli**, cioe' otto copie intere del repo: il "3" diventa "27"
+per una ragione che **non c'entra col contenuto del repo** e che cambia da un
+minuto all'altro. ⚠️ **E il verso giusto dell'esclusione dipende dalla DOMANDA,
+non dal comando**: *"questo magic e' vergine?"* e' una domanda **istantanea** e i
+worktree **VANNO** inclusi (classe 367 regola 2); *"dove vive questa misura?"* e'
+una domanda sul **contenuto del repo** e i worktree **vanno esclusi**, perche'
+sono duplicati che spariranno. **Lo stesso comando, due domande, due esclusioni
+opposte.**
+
+🟢 **E la cosa che va detta, perche' e' il motivo per cui la classe e' insidiosa:
+in tutti e tre i casi la CONCLUSIONE era giusta** — nessun file prova, prima di
+questo, aveva mai messo `InpBreakevenAtTP1` ad asse; i file prova che dichiarano
+quell'EA erano davvero tre; la misura del *"6 confronti puliti su 8"* sta davvero
+in quei tre documenti. **Non cambia nessun numero del round.** Quello che si
+rompe e' la **RIPRODUCIBILITA'**: chi domani riesegue il comando scritto trova un
+altro numero, e a quel punto non sa piu' se sbagliava il file o sbaglia lui — e
+la forma "comando + risultato" e' proprio quella che usiamo **perche'** dovrebbe
+togliere quel dubbio.
+
+### 🔴 LA REGOLA
+1. **Ogni comando che cerca DENTRO il repo si riesegue DOPO aver salvato il file
+   che lo contiene, non prima.** Se il numero cambia, non e' un caso limite: e'
+   il caso **normale** per ogni ricerca che il file stesso puo' soddisfare.
+2. **Due forme ammesse, e si sceglie una delle due, mai nessuna:**
+   - **escludere se stessi**: `... | grep -v <nome_di_questo_file>`, e scrivere
+     accanto che l'esclusione c'e' **e perche'**;
+   - **contare se stessi**: scrivere *"N, e uno e' questo file"*.
+   🚫 Il numero nudo, senza una delle due, **e' falso dal commit**.
+3. 🔴 **L'esclusione di `.claude/worktrees` si decide sulla DOMANDA** (vedi
+   sopra): **istantanea sull'unicita' di un valore -> INCLUDERE**; **sul
+   contenuto del repo -> ESCLUDERE**, e in quel caso l'esclusione fa parte della
+   citazione esattamente come un `-i` (classe 379 regola 2).
+4. 📌 **Il sintomo che la smaschera senza rieseguire niente**: un file che
+   afferma *"zero occorrenze di X"* e che **contiene X** (perche' lo sta
+   misurando) sta quasi sicuramente mentendo sul proprio conto. Vale per: la
+   riga d'asse, il nome dell'EA, il magic, l'etichetta del round, qualunque
+   stringa che il file cita alla lettera dalla fonte.

@@ -38,7 +38,6 @@
 #    -Expert ABTG_Dow_Apertura_US
 #    -Prova prove\R172c_breakevenattp1_dowapertura_U30USD.txt
 #    -Etichetta r172c -Modello 4 -Deposito 100000
-#    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 2 CELLE.
 #   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DI PASSATE: il driver
 #       stampa "celle x 2" CABLATO (walkforward_generico.ps1 r.880,
@@ -47,10 +46,29 @@
 #       IS/OOS e' VERO, non degenere).
 #   Se le CELLE non sono 2, ci si ferma prima di lanciare altro.)
 #
-#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
-#     = demo 50504400, zero EA attaccati. La sedia 770202 VIVE su ALTRI
-#     DUE terminali e NON si tocca nessuno dei due (vedi il paragrafo
-#     DUE ISTANZE, sotto).
+#  !! IL BERSAGLIO E' C:\MT5_Backtest = demo 50504400, zero EA
+#     attaccati. La sedia 770202 VIVE su ALTRI DUE terminali e NON si
+#     tocca nessuno dei due (vedi il paragrafo DUE ISTANZE, sotto).
+#     >>> !! CORREZIONE DEL CANCELLO (classe 268, recidiva -- e la
+#         notizia e' BUONA). La prima stesura elencava
+#         `-TerminaleBacktest "C:\MT5_Backtest"` fra gli argomenti e
+#         scriveva "NON E' OPZIONALE (classe 204)". Verificato aprendo
+#         lo script: `RIGA_SOTTILE_ROUND.ps1` ha un `param()` di SEI
+#         voci -- `-Expert -Prova -Etichetta -Modello -Deposito
+#         -SoloControllo` -- e `-TerminaleBacktest` NON e' fra quelle.
+#         Passarglielo a mano farebbe fallire il lancio.
+#         >>> E LA GARANZIA E' PIU' FORTE, non piu' debole: il banco su
+#             questa corsia e' CABLATO, non chiesto all'operatore.
+#             `RIGA_SOTTILE_ROUND.ps1` r.131 `$BancoBT = 'C:\MT5_Backtest'`
+#             e r.1325 lo passa SEMPRE a walkforward_generico.ps1 come
+#             `-TerminaleBacktest`. La regola 2 della classe 268 (se il
+#             parametro non c'e', il default del driver deve coincidere
+#             col valore chiesto) e' quindi soddisfatta, e il file e'
+#             RAGGIUNGIBILE.
+#         >>> PERCHE' LA CORREZIONE CONTA LO STESSO: una riga armata in
+#             CODA.txt con quel flag non partirebbe, e le righe dei due
+#             fratelli (gia' armate) infatti NON lo portano. Il file
+#             diceva di scrivere una cosa che la coda non scrive.
 #
 #  !! -Modello 4 e -Deposito 100000 SONO IL BANCO DELL'ANCORA DI QUESTA
 #     SEDIA, letti nella riga di lancio dell'ancora e non copiati dagli
@@ -125,12 +143,17 @@
 #         per il magic 770202 DICIASSETTE manopole d'uscita, contate a
 #         macchina. Di queste, DIECI sono `mai=true` e `inerte=false`;
 #     (b) per NESSUNA delle dieci esiste un file prova che la metta ad
-#         asse su questo EA: i soli tre file prova che dichiarano
-#         `ABTG_Dow_Apertura_US` sono R152a (asse InpMagic), R172a
-#         (InpTrailStartR) e R172b (InpCloseHour) -- elencati col
+#         asse su questo EA: OLTRE A QUESTO, i soli tre file prova che
+#         dichiarano `ABTG_Dow_Apertura_US` sono R152a (asse InpMagic),
+#         R172a (InpTrailStartR) e R172b (InpCloseHour) -- elencati col
 #         comando
 #           grep -rln "Expert ABTG_Dow_Apertura_US\|EA: ABTG_Dow_Apertura_US" \
 #             backtest_pipeline/prove/
+#         che a HEAD 66722425 torna QUATTRO percorsi: i tre sopra piu'
+#         questo file.
+#         >>> "OLTRE A QUESTO" e "QUATTRO" sono la correzione del
+#             cancello (classe 382): la prima stesura diceva "i soli
+#             tre", numero vero alla stesura e falso dal commit.
 #     Le dieci, per nome (mai "tutto il resto", classe 180):
 #        InpCloseHour . InpCloseAtEnd . InpSLMode . InpTP1_R .
 #        InpBreakevenAtTP1 . InpBEatR . InpTrailStartR . InpTrailTF .
@@ -162,11 +185,16 @@
 #            (mql5/Presets/ABTG_Dow_Apertura_US_U30USD_M5_770202_100K.set):
 #              InpBreakevenAtTP1=true
 #          Ed e' una divergenza DICHIARATA dal preset stesso, che tiene
-#          una tabella apposta (r.140-148, "campo | default sorgente |
-#          QUI (cio' che gira)"), dove r.147 e' proprio questa riga.
+#          una tabella apposta (r.140 intestazione, r.141-149 le nove
+#          righe, "campo | default sorgente | QUI (cio' che gira)"),
+#          dove r.147 e' proprio questa riga.
 #          >>> NOTA DI CONTEGGIO, perche' un numero che non torna va
 #              detto anche quando non cambia niente: r.137 introduce la
 #              tabella con "Sette campi", e la tabella ne elenca NOVE.
+#              (Il cancello ha corretto anche l'intervallo: la prima
+#               stesura scriveva "r.140-148", che contiene otto righe --
+#               una scomposizione che non tornava col NOVE scritto due
+#               righe sotto, classe 377.)
 #              La riga che mi serve (r.147) l'ho comunque verificata
 #              contro il campo vero a r.218, che e' quello che MT5 legge.
 #
@@ -176,11 +204,26 @@
 #             fino a -38%"
 #          Tracciato alla fonte (classe 372: un'assenza -- o una
 #          presenza -- dichiarata dev'essere CERCATA):
-#            grep -rln "confronti puliti" --exclude-dir=.git .
+#            grep -rln "confronti puliti" --exclude-dir=.git \
+#              --exclude-dir=.claude . | grep -v R172c_breakevenattp1
 #          -> tre file, e la misura vera sta in
 #            backtest_pipeline/risultati_archivio/Dow_Apertura/DOW_MOTORE.md
 #          (l'altro e' HANDOFF.md r.1773, che la riassume, e il terzo e'
 #           il sorgente stesso).
+#          >>> !! LE DUE ESCLUSIONI SONO LA CORREZIONE DEL CANCELLO, E
+#              HANNO DUE CAUSE DIVERSE (classi 378 e 382). La prima
+#              stesura scriveva il comando NUDO e accanto "tre file".
+#              Rieseguito dal cancello a HEAD 66722425, quel comando
+#              torna VENTINOVE percorsi: (1) `--exclude-dir=.claude`
+#              mancava, e gli OTTO worktree degli agenti paralleli sono
+#              otto copie intere del repo (3 x 8 = 24 percorsi in piu',
+#              che spariranno da soli quando gli agenti finiscono --
+#              classe 378: qui la domanda e' "dove vive questa misura",
+#              non "questo valore e' vergine", quindi i worktree NON
+#              vanno contati); (2) questo file cita il commento di
+#              r.287 alla lettera, quindi matcha se stesso (classe 382).
+#              Con le due esclusioni il comando torna TRE, e i tre sono
+#              quelli nominati qui sopra.
 #          >>> E IL NUMERO NON SI RIPRODUCE, e lo scrivo prima di
 #              usarlo: DOW_MOTORE.md r.139 scrive "Sei casi su otto in
 #              perdita", ma la tabella che sta appena sopra (r.130-137)
@@ -260,9 +303,21 @@
 #     INCOLLATI da quelli che ho eseguito, non riscritti in bella copia
 #     (classe 379), e riportano il numero che hanno prodotto.
 #     (a) SUI FILE PROVA.
-#           grep -rn "^InpBreakevenAtTP1=.*||Y" backtest_pipeline/prove/ | wc -l
+#           grep -rn "^InpBreakevenAtTP1=.*||Y" backtest_pipeline/prove/ \
+#             | grep -v R172c_breakevenattp1 | wc -l
 #         -> 0. Nessun file prova, in tutto l'archivio, mette questa
 #         manopola ad asse: ne' su questo EA ne' su nessun altro.
+#         >>> !! IL `grep -v` NON E' UNA FURBIZIA, E' LA CORREZIONE DEL
+#             CANCELLO (classe 382, scritta oggi da questo caso). La
+#             prima stesura scriveva il comando SENZA l'esclusione e
+#             accanto il numero 0: vero mentre il file veniva scritto,
+#             FALSO dal minuto in cui e' stato committato, perche' la
+#             riga d'asse in fondo a QUESTO file e' l'unica cosa al
+#             mondo che quel grep trova. Un comando che il file stesso
+#             falsifica appena entra in repo non e' riproducibile: o si
+#             esclude il file, o si scrive "1, ed e' questo file".
+#             Riverificato dal cancello a HEAD 66722425: l'unica riga
+#             che matcha e' la r.1526 di questo file.
 #         Ripetuto sugli OTTO worktree degli agenti paralleli:
 #           grep -rn "^InpBreakevenAtTP1=.*||Y" \
 #             .claude/worktrees/*/backtest_pipeline/prove/ | wc -l
@@ -415,9 +470,23 @@
 #            ciascuna gamba. Non "non decrescente" come nei due
 #            fratelli: IDENTICO, tolleranza ZERO.
 #        >>> E NON E' SOLO UNA LETTURA DEL CODICE: sui gemelli e'
-#            MISURATO 6 volte su 6 (i sei confronti della tabella
-#            nell'ATTESA, sotto: 445=445, 483=483, 170=170, 224=224,
-#            230=230, 316=316). Se qui `Trades` differisse anche di UNA
+#            MISURATO 6 volte su 6 -- e sono ESATTAMENTE i sei confronti
+#            della tabella nell'ATTESA, riga per riga:
+#              DAX R120 445=445 . NAS R120 483=483 .
+#              DAX walkfwd IS 224=224 . DAX walkfwd OOS 316=316 .
+#              NAS walkfwd IS 220=220 . NAS walkfwd OOS 301=301.
+#            >>> !! CORREZIONE DEL CANCELLO (classi 377 e 357). La prima
+#                stesura elencava qui "170=170" e "230=230" al posto di
+#                220 e 301. Quei due numeri ESISTONO, ma sono le righe
+#                del walkforward DAX con `InpTP1_ClosePct = 0` -- cioe'
+#                proprio le righe in cui il punto 6 di questo file
+#                DIMOSTRA che l'asse e' INERTE. Un'identita' che
+#                l'ipotesi "la manopola non fa niente" soddisfa GRATIS
+#                non e' una conferma (classe 357): avrebbe ridotto a
+#                QUATTRO le osservazioni utili, e due di quelle citate
+#                sarebbero state vacue. I sei qui sopra sono tutti con
+#                la parziale ACCESA al 50%, come questo round.
+#            Se qui `Trades` differisse anche di UNA
 #            unita', una delle due letture e' sbagliata e il round si
 #            ferma PRIMA di commentare il PF.
 #
@@ -576,7 +645,11 @@
 #      questa manopola.
 #
 #  CONTROPROVA (NON e' l'ancora, e non va confusa con lei) -- R103 I02,
-#  24/08/2026: stessa sedia e stessa finestra, ma OHLC M1, rischio
+#  24/08/2026, e la FONTE si nomina (classe 377 punto 2):
+#  risultati_archivio\R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_1348.txt,
+#  blocco che apre a r.217 -- NON il file prova prove\R103_...txt, che
+#  porta i pin e non i numeri:
+#  stessa sedia e stessa finestra, ma OHLC M1, rischio
 #  0,65%, UNA sola passata senza taglio IS/OOS: PF 1.243, Trades 199,
 #  Equity DD % 3.87, Profit +6430, Peggior Giornata % -0.86 (OPTFRAME).
 #  Serve a dire che la sedia fa ~200 uscite in 21 mesi anche su un altro
@@ -654,7 +727,7 @@
 #               ABTG_Dow_Apertura_US_U30USD_IS_r172c.csv   e  ..._OOS_r172c.csv
 #      riga con InpBreakevenAtTP1 = 1
 #                             IS (atteso)          OOS (atteso)
-#      Trades ..........  73 - 75   (74)       128 - 132   (130)
+#      Trades ..........  72 - 76   (74)       128 - 132   (130)
 #      Profit Factor ...  1,198 - 1,247        1,245 - 1,296
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
@@ -665,14 +738,65 @@
 #    - PF, DD, Profit: FRAZIONE DELL'ANCORA, +/- 2,0%.
 #    - Trades: NUMERO INTERO DI OPERAZIONI, +/- 2 (non una percentuale:
 #      su 74 il 2% sarebbe 1,5 operazioni, che non esiste).
+#      >>> !! CORREZIONE DEL CANCELLO -- CLASSE 380, RECIDIVA DALLO
+#          STESSO PUNTO DEI DUE FRATELLI, e su una sentinella
+#          BLOCCANTE. La prima stesura di QUESTO file scriveva la riga
+#          IS come `73 - 75`, cioe' +/- UNO. I due fratelli R172a/R172b
+#          erano stati corretti a `72 - 76` dal cancello del 16/09
+#          (commit 04230d37, classe 380): questo file ha ricopiato la
+#          versione PRE-correzione. Tre voci contro una dicevano gia'
+#          +/-2: il criterio qui sopra, il contro-esempio sulla banda
+#          ("QUATTRO VOLTE la semiampiezza di +/-2" -- con +/-1 sarebbe
+#          stato NOVE volte) e le tabelle CORRETTE dei due fratelli.
+#          Il refuso era la CELLA, non la regola.
+#          >>> PERCHE' NON ERA COSMETICO: con `73 - 75` un `Trades` IS
+#              di 72 o 76 -- DENTRO la tolleranza che il file stesso
+#              dichiara -- avrebbe fatto scrivere "il banco di oggi non
+#              e' quello di R54a" in cima al referto e avrebbe fermato
+#              una corsa SANA. E il mondo non e' remoto: il binario ha
+#              +27 righe rispetto all'ancora e il terminale e' un altro.
+#          >>> E LA FRASE "SONO LE STESSE BANDE DEI DUE FRATELLI" (sotto)
+#              e' VERA SOLO DOPO questa correzione: prima era falsa
+#              proprio sulla cella che decide.
 #    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
 #      gia' una percentuale e una banda relativa su un numero piccolo
 #      scenderebbe sotto la granularita' stampata dalla fonte.
+#  >>> !! ARBITRATO DEL BORDO, AGGIUNTO DAL CANCELLO -- e chiude il
+#      RESIDUO della classe 380, regola 1 ("ogni banda si ricalcola dal
+#      criterio, cella per cella, a macchina"). Rifatti i dieci conti:
+#        PF     IS  1,19802 - 1,24692     OOS 1,24473 - 1,29553
+#        DD     IS  5,55582 - 5,78258     OOS 4,30622 - 4,48198
+#        Profit IS  2755,60 - 2868,08     OOS 6587,49 - 6856,37
+#      La tabella qui sopra e' quegli stessi numeri arrotondati alla
+#      cifra stampata AL PIU' VICINO, e in CINQUE bordi su dieci
+#      l'arrotondamento cade DENTRO il criterio, non fuori: PF OOS basso
+#      (1,245 contro 1,24473), DD IS basso (5,556 contro 5,55582),
+#      Profit IS basso e alto (2.756 contro 2755,60 . 2.868 contro
+#      2868,08), Profit OOS basso (6.588 contro 6587,49).
+#      >>> LA REGOLA CHE DECIDE, congelata adesso: SU S1 VINCE IL
+#          CRITERIO, NON LA CELLA ARROTONDATA. Un valore che sta dentro
+#          il +/- 2,0% ESATTO passa anche se cade fuori dal numero
+#          stampato. Scarti in gioco: 0,0003 di PF, 0,0002 punti di DD,
+#          0,5 EUR. Non cambiano nessuna lettura -- ma S1 e' BLOCCANTE, e
+#          una banda piu' stretta del criterio ferma una corsa SANA
+#          (classe 380). La tabella resta com'e' perche' e' IDENTICA a
+#          quella dei due fratelli (verificato col diff, non a occhio) e
+#          spezzare quell'identita' varrebbe meno di questa riga.
+#      >>> VALE ANCHE PER R172a E R172b, gia' armati con la stessa
+#          tabella: se una loro corsa atterrasse su un bordo, si applica
+#          questo stesso arbitrato.
 #  >>> SONO LE STESSE BANDE DEI DUE FRATELLI, ED E' VOLUTO: la cella
 #      viva e l'ancora sono le STESSE, la regola che le genera e'
 #      IDENTICA, quindi bande diverse sarebbero un errore e non una
 #      scelta (classe 373 punto 3: due bande costruite con la stessa
 #      regola non sono "piu' strette", sono identiche).
+#      >>> E NON E' PIU' UNA DICHIARAZIONE: il cancello l'ha VERIFICATA
+#          col diff meccanico delle tre tabelle (R172a / R172b / R172c),
+#          e le cinque righe di banda escono IDENTICHE carattere per
+#          carattere. Prima della correzione della cella `Trades` questa
+#          frase era FALSA proprio sulla riga che decide -- ed e' il
+#          motivo per cui una dichiarazione di identita' si esegue, non
+#          si crede (classe 380, estensione del 16/09).
 #  Fuori da una qualunque di queste bande il banco e' sporco e il round
 #  si ferma PRIMA di qualunque altro numero: il verdetto diventa "il
 #  banco di oggi non e' quello di R54a", e va in cima al referto in
@@ -858,8 +982,16 @@
 #         tre righe su sei.
 #      2. LA TAGLIA E' PICCOLA. Il piu' grande scarto di PF e' 0,0265
 #         punti (NAS OOS) -- cioe' UN QUARTO della banda di rumore che
-#         B5 congela a 0,10 punti pieni. Su cinque dei sei confronti sta
-#         sotto 0,02.
+#         B5 congela a 0,10 punti pieni. Su QUATTRO dei sei confronti
+#         sta sotto 0,02; il quinto (NAS walkfwd IS) e' 0,0204 e il
+#         sesto 0,0265.
+#         >>> !! CORREZIONE DEL CANCELLO (classe 377 punto 6: un
+#             conteggio scritto in prosa si riconta a macchina). La
+#             prima stesura scriveva "cinque dei sei". I sei |delta PF|,
+#             ricontati sui CSV: 0,01329 . 0,00497 . 0,00651 . 0,01251 .
+#             0,02040 . 0,02652 -- sotto 0,02 ce ne sono QUATTRO, non
+#             cinque. La conclusione ("la taglia e' piccola") non cambia
+#             di una virgola, il numero che la sostiene si'.
 #      3. `Trades` E' IDENTICO IN SEI CASI SU SEI. E' la sola regolarita'
 #         perfetta della tabella, ed e' anche quella che il codice
 #         impone (proprieta' A). Diventa S3.
@@ -1075,7 +1207,8 @@
 #  S4  LA FINESTRA EFFETTIVA. SI VERIFICA A MANO, sul report MT5 della
 #      gamba IS della CELLA VIVA (1):
 #        - DATA DELLA PRIMA OPERAZIONE entro 30 giorni da 2024.09.26
-#          -> FINESTRA PIENA. (R103 I02 gate 1 misura la prima
+#          -> FINESTRA PIENA. (R103 I02 gate 1 -- stesso referto
+#          BLOCCO1 INDICI, r.304-308 -- misura la prima
 #          operazione al 2024.09.30 su questa stessa sedia e finestra:
 #          se qui uscisse molto piu' tardi, il feed a tick del terminale
 #          di backtest non e' quello.)
@@ -1321,9 +1454,11 @@
 #    2 celle x 2 finestre = 4 PASSATE. E' un QUARTO scarso di quello che
 #    chiede ciascuno dei due fratelli (14 passate l'uno).
 #    Il minutaggio per passata su questa sedia e' [NON MISURATO]:
-#    l'unico numero vicino e' R103 I02 "durata 0.5 min" (r.225) per una
-#    riga che comprendeva DUE passate gemelle piu' una singola, ma in
-#    OHLC M1.
+#    l'unico numero vicino e' R103 I02 "durata 0.5 min"
+#    (risultati_archivio\R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_1348.txt
+#     r.225 -- il file va NOMINATO: r.225 del file PROVA omonimo e'
+#     `InpVerbose`, classe 377 punto 2) per una riga che comprendeva DUE
+#    passate gemelle piu' una singola, ma in OHLC M1.
 #    >>> STIMA DICHIARATA COME TALE: se una passata a tick su 21 mesi M5
 #        costa dell'ordine dei 15-30 secondi, 4 passate costano 1-2
 #        minuti. LA PARTE PIU' INCERTA non e' il calcolo: e' la
@@ -1382,10 +1517,41 @@
 #  >>> LA RIVERIFICA CHE CONTA LA RIFA' IL CANCELLO, non la riporta
 #      l'autore (classe 365 regola 1): fra questa riga e il momento in
 #      cui la riga finira' in CODA.txt il repo puo' muoversi ancora.
+#  >>> RIVERIFICA DEL CANCELLO, FATTA E NON RIPORTATA (classe 365
+#      regola 1 + classe 377 punto 5, HEAD del momento in cui si
+#      consegna e non quello ricordato):
+#        git rev-parse HEAD      ->  66722425
+#        grep -rl "789530" --exclude-dir=.git .
+#        ->  UN SOLO percorso, ed e' QUESTO file.
+#      Cioe' 789530 e' vergine anche a 66722425, worktree degli otto
+#      agenti paralleli compresi.
+#      >>> E IL `bf2a6918` CITATO QUI SOPRA ERA GIA' STANTIO al momento
+#          del commit: fra bf2a6918 e il commit che introduce questo
+#          file (99e8290d) ci sono DICIANNOVE commit, quasi tutti
+#          referti automatici del runner. Il FATTO restava vero (il
+#          magic era ed e' vergine), ma la frase che lo certifica
+#          indicava un punto di riferimento sorpassato -- classe 377
+#          punto 6. Si lascia scritto perche' e' la storia della
+#          verifica; la riga che vale e' quella del cancello.
+#  >>> TERZA E ULTIMA MISURA, PIU' RECENTE DELLE DUE QUI SOPRA, e la
+#      scrivo perche' altrimenti il paragrafo del cancello ("UN SOLO
+#      percorso") si contraddirebbe con quello che chiunque trovera'
+#      rifacendo il grep (classe 377 difetto n.2). Dopo che il cancello
+#      ha misurato, nello stesso albero e' nato il FRATELLO R172d
+#      (asse InpBEatR, magic 789540), che nel suo paragrafo dei magic
+#      cita 789530 IN PROSA. Quindi, sempre a HEAD `66722425`:
+#          grep -rl "789530" --exclude-dir=.git .
+#          ->  DUE percorsi: questo file e R172d
+#          grep -rn "^InpMagic=789530" --exclude-dir=.git .
+#          ->  UNA sola riga, ed e' il pin di QUESTO file
+#      La domanda "il magic e' vergine" si risponde con la SECONDA
+#      forma, non con la prima: un pin si cerca con `^InpMagic=`
+#      (classe 369 punto 4). 789530 resta assegnato a un solo round.
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO, ed e' una
 #      scelta deliberata: la classe 367 misura che il punto dove due
 #      agenti collidono e' la SEQUENZA, non il nome. I fratelli usano
-#      789510 e 789520; questo usa 789530, cioe' DIECI di distanza e non
+#      789510 (R172a), 789520 (R172b) e 789540 (R172d, nato dopo questa
+#      riga); questo usa 789530, cioe' DIECI di distanza e non
 #      UNO -- la classe 365 nasce proprio da due file che si assegnano
 #      magic adiacenti. Il blocco 7895xx resta lontano da tutte le
 #      sequenze vive della serata (7884xx di R171a-b, 7873xx di
