@@ -1000,7 +1000,19 @@ $BancoBT = 'C:\MT5_Backtest'
 #  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra i
 #  due commit (git diff 48dfbfb1..b5d65c87 sui due percorsi: VUOTO,
 #  verificato): solo $PIN si muove.
-$PIN = 'b5d65c87d6bf8ed939fec9a402f9e63662d5d60f'
+#  >>> QUARANTACINQUESIMO GIRO DI PIN (16/09/2026): b5d65c87 -> afeeebdd.
+#  Serviva per raggiungere R164a (InpAtrExitPeriod, ABTG_PTE GBPUSD
+#  771322) dopo il PASS del secondo cancello (2 correzioni di citazione:
+#  classe 364 nuova -- superlativo senza criterio dichiarato -- ed
+#  estensione della classe 359 ai gemelli di SIMBOLO, non solo di
+#  round). Nello stesso arco di commit sono entrati anche il recupero
+#  dei CSV di R127a (mai letti da un round del 13/09, vedi
+#  report/R127A_BINARIO_NON_RIPRODOTTO_2026-09-16.md) e R163a (ancora
+#  senza secondo cancello, non armato da questo giro). RIGA_ROUND_VPS.ps1
+#  e walkforward_generico.ps1 NON sono cambiati fra i due commit (git
+#  diff b5d65c87..afeeebdd sui due percorsi: VUOTO, verificato): solo
+#  $PIN si muove.
+$PIN = 'afeeebdd606acbc62bda77048f354cfc662a858a'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
