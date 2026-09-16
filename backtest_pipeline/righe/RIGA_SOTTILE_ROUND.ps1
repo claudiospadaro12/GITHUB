@@ -1081,7 +1081,22 @@ $BancoBT = 'C:\MT5_Backtest'
 #  vicenda). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
 #  cambiati fra i due commit (git diff c713ac92..eb4a498d sui due
 #  percorsi: VUOTO, verificato): solo $PIN si muove.
-$PIN = 'eb4a498d396d13c5ad399351f3c505a4a06d7ddc'
+#  >>> CINQUANTADUESIMO GIRO DI PIN (16/09/2026): eb4a498d -> 2baac2c2.
+#  Serviva per raggiungere R171a-b (InpSLBufferPts, ABTG_EasyTrend,
+#  sedie 772421/772422 CHFJPY/GBPUSD): chiude l'ultima manopola d'uscita
+#  scoperta sulla famiglia EasyTrend. Primo file della serie R162-R171
+#  dove il merito non e' sospeso (OOS misurato sopra il pavimento dei
+#  150 su entrambe le sedie), ma la famiglia fa ~0,31 op/giorno contro
+#  il pavimento di 1,00: NON e' una sedia per il 1 ottobre, dichiarato
+#  nei file stessi. Secondo cancello: 14 correzioni dopo un autoriaudit
+#  che ne aveva gia' trovate e corrette altre (due superlativi falsi,
+#  cinque sigle B5/B8 -- recidiva classe 377 -- sei citazioni/comandi
+#  che rieseguiti danno un altro numero -- classe 379 nuova -- e un
+#  contro-esempio mancante in B7). RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra i due commit (git
+#  diff eb4a498d..2baac2c2 sui due percorsi: VUOTO, verificato): solo
+#  $PIN si muove.
+$PIN = '2baac2c2f204c108c467143044243d20ffc08c28'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
