@@ -990,7 +990,17 @@ $BancoBT = 'C:\MT5_Backtest'
 #  cancello. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
 #  cambiati fra i due commit (git diff vuoto, verificato): solo $PIN si
 #  muove.
-$PIN = '48dfbfb13e5a99df398db30da744f0941ed2816f'
+#  >>> QUARANTAQUATTRESIMO GIRO DI PIN (16/09/2026): 48dfbfb1 -> b5d65c87.
+#  Serviva per raggiungere R162a (PartialTargetR, GapContinuation 225JPY)
+#  dopo il PASS del terzo giro di controllo-preventivo: le due correzioni
+#  bloccanti (classe 363 riferimento locale vs medio, classe 362 spread
+#  limite superiore) erano gia' nel commit precedente (6558598d), qui si
+#  aggiunge solo la correzione del MIO numero sbagliato ("~4-6" -> "4, 8,
+#  7 e 4 centesimi") nel file prova e nella checklist classe 363.
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra i
+#  due commit (git diff 48dfbfb1..b5d65c87 sui due percorsi: VUOTO,
+#  verificato): solo $PIN si muove.
+$PIN = 'b5d65c87d6bf8ed939fec9a402f9e63662d5d60f'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
