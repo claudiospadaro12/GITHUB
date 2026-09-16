@@ -113,8 +113,9 @@
 #          questo, e al valore di `InpPartialTargetR` che questo round
 #          lascia in piedi: e' l'ordine giusto, non una scusa.
 # ---------------------------------------------------------------------
-#  IL VINCOLO DI CODICE CHE DA' INIT_FAILED -- VERIFICATO NEL SORGENTE,
-#  NON EREDITATO DAL CENSIMENTO, E IL CENSIMENTO VA CORRETTO SU UN PUNTO
+#  IL VINCOLO DI CODICE CHE RIFIUTA I PARAMETRI (INIT_PARAMETERS_INCORRECT,
+#  *NON* INIT_FAILED) -- LETTO NEL SORGENTE, NON EREDITATO DAL CENSIMENTO,
+#  CHE SU QUESTO PUNTO SBAGLIA E VA CORRETTO
 #
 #  `OnInit()`, ABTG_GapContinuation.mq5 r.1359-1374, blocco unico:
 #      if( ... ||
@@ -197,7 +198,11 @@
 #        - NON tocca LO STOP INIZIALE. r.1056 (long) e r.1110 (short):
 #          lo stop e' il minimo/massimo dell'opening range, con
 #          `InpStopBufferPoints` pinnato a 0. Quindi `g_initial_risk` e'
-#          **identico in tutte e nove le celle**, e con esso il LOTTO.
+#          **identico in tutte e nove le celle**, e con esso il RISCHIO
+#          PER OPERAZIONE (1,0% del saldo). **Il LOTTO no**: vale
+#          equity x 1% / loss_per_lot, e l'equity diverge fra le celle.
+#          La divergenza del lotto e' di SECONDO ordine ed e' dichiarata
+#          nel contro-esempio T5 e nel buco della sezione MONOTONIA.
 #          >>> Conseguenza che vale per il RISCHIO: questo round NON
 #              alza il rischio per operazione di nessuna cella sopra
 #              quello della cella viva. Le soglie B2 sono un CONTROLLO,
@@ -347,11 +352,29 @@
 #      Causa in codice: `NormalizeVolumeDown` r.855
 #        volume = MathMin(volume, SYMBOL_VOLUME_MAX);
 #      cioe' un troncamento SILENZIOSO, senza log e senza contatore.
-#      >>> QUANTO COSTA, in unita' confrontabili: il prodotto
-#          (stop in punti) x (lotto) e' proporzionale al rischio in euro.
-#          Sui trade non troncati vale ~18.600-19.900; sui quattro
-#          troncati vale 11.000 / 13.700 / 15.700 / 16.200, cioe'
-#          **0,58% / 0,72% / 0,83% / 0,85% invece dell'1,00% dichiarato**.
+#      >>> QUANTO COSTA, in unita' confrontabili. Il prodotto
+#          (stop in punti) x (lotto) e' proporzionale al rischio in euro,
+#          e NON dipende da R: e' identicamente
+#            R x lotto = equity x 1% / (valore del punto per lotto).
+#          Quindi il riferimento NON e' una costante, e' la CURVA DEL
+#          SALDO -- misurato sui 43 ingressi non troncati va da **17.224
+#          (2025.07.23, saldo ~100k) a 20.072 (2026.02.06)**, in salita
+#          lenta, liscia, e indipendente da R (che nello stesso tratto
+#          va da 190 a 764).
+#          >>> E QUI STA LA TRAPPOLA, che segnalo perche' ci ero cascato:
+#              **tutti e quattro i troncamenti cadono nel tratto BASSO
+#              della curva** (30/06, 24/07, 11/08 e 29/10 del 2025). Un
+#              riferimento medio unico gonfia il danno di ~4-6 centesimi
+#              di punto su ognuno dei quattro.
+#          Contro il riferimento LOCALE (interpolato fra i non troncati
+#          adiacenti, saldo letto nella tabella "Affari" dell'xlsx):
+#            2025.06.30  R=137  prod 13.700 / rif 17.167 -> **0,80%**
+#            2025.07.24  R=157  prod 15.700 / rif 17.488 -> **0,90%**
+#            2025.08.11  R=110  prod 11.000 / rif 17.580 -> **0,63%**
+#            2025.10.29  R=162  prod 16.200 / rif 18.247 -> **0,89%**
+#          cioe' **0,63% - 0,90% invece dell'1,00% dichiarato**.
+#          [MIS, n=4/47, xlsx dell'ancora: tabella "Ordini" per lotto e
+#           SL/TP, tabella "Affari" per il saldo a ogni ingresso]
 #      >>> COME SI LEGGE, e la direzione conta: il troncamento va SEMPRE
 #          VERSO IL BASSO. Non e' un bug di rischio (non si rischia mai
 #          piu' del dichiarato) ed e' per questo che il round si puo'
@@ -440,21 +463,45 @@
 #    3. QUELLO CHE MANCA E' LO SPREAD, ED E' [NON MISURATO].
 #       `backtest_pipeline/risultati_archivio/spread_flotta/` contiene
 #       tre soli CSV orari -- NASUSD, U30USD, D30EUR -- e **225JPY non
-#       c'e'**. L'unico numero in giro e' il "~80 punti" del dossier del
-#       funnel (sorgente r.1571), e R85 r.36-39 lo ha gia' declassato:
-#       era **misurato a mercato chiuso**, quindi un limite superiore,
-#       non lo spread di sessione.
+#       c'e'**. Il numero che gira da sempre e' il "~80 punti" del
+#       dossier del funnel (sorgente r.1571), che R85 r.36-39 ha gia'
+#       declassato a "misurato A MERCATO CHIUSO".
+#       >>> MA UN LIMITE SUPERIORE DI SESSIONE ESISTE, ED E' MISURATO
+#           SULL'ARTEFATTO CHE HO GIA' APERTO (classe 362: un limite a
+#           UNA CODA non si sopprime, si stampa col segno).
+#           `DynamicSpreadIsAcceptable` (r.962-979) rifiuta l'ingresso se
+#           `100*spread/stop > InpMaxSpreadToStopPercent` = 10,0. Quindi
+#           **ogni ingresso ESEGUITO e' la prova che in quell'istante
+#           `spread <= 0,10 x R`**. Sui 47 ingressi dell'ancora il
+#           vincolo piu' stretto e' il long del **2025.08.11 01:41:37,
+#           R = 110 punti indice -> spread <= 11,0 punti indice**, a
+#           mercato APERTO e al secondo dell'ingresso. [MIS, n=47]
+#       >>> CONSEGUENZA: **l'ipotesi "80 punti" e' RIFIUTATA, non
+#           declassata** (80 > 11). Gli 80 punti non descrivono la
+#           sessione, e nessun ragionamento di questo file deve piu'
+#           poggiarci sopra.
 #       >>> IL CONTO CHE SI PUO' FARE, e lo scrivo al rovescio per non
 #           spacciare un'inferenza per misura: **il cancello dei 40x
 #           passa alla mediana se e solo se lo spread di sessione sta
 #           sotto 347/40 = 8,7 punti indice**; al primo quartile serve
 #           <= 6,9; sulla posizione con lo stop piu' stretto (110)
-#           servirebbe <= 2,75. Con gli 80 punti di mercato chiuso il
-#           cancello sarebbe sfondato di quasi dieci volte; con uno
-#           spread di sessione di 5 punti passerebbe la maggioranza
-#           delle giornate. Due ipotesi opposte, e NESSUNA misura per
-#           sceglierne una: **cancello di costo = [NON DECIDIBILE], e il
-#           termine mancante e' lo SPREAD, non lo stop.**
+#           servirebbe <= 2,75.
+#       >>> E IL LIMITE MISURATO NON BASTA A DECIDERE, ed e' per questo
+#           che il verdetto resta sospeso e non diventa un SI: il
+#           cancello chiede <= 8,7 alla mediana, il limite superiore
+#           misurato e' <= 11,0. **11,0 > 8,7**, quindi il limite
+#           esclude lo scenario catastrofico (80 punti) ma NON promuove
+#           e NON boccia. Serve la misura vera dello spread in
+#           sessione.
+#           >>> **CANCELLO DI COSTO = [NON DECIDIBILE], e il termine
+#               mancante e' lo SPREAD, non lo stop.** Quello che si sa:
+#               **spread di sessione <= 11,0 punti indice [MIS, n=47,
+#               limite superiore a una coda]**, cioe' il cancello si
+#               decide dentro una forbice di 2,3 punti indice.
+#       >>> COME SI CHIUDE, ed e' un lavoro a se': uno SpreadLogger su
+#           225JPY in sessione Tokyo (01:00-07:30 server). Se torna
+#           <= 8,7 il cancello passa alla mediana; fra 8,7 e 11,0 il
+#           cancello cade e il motore va rivisto sul costo.
 #       >>> E C'E' UN FATTO STRUTTURALE CHE VA SCRITTO LO STESSO, perche'
 #           non dipende da nessuna misura mancante: il filtro di costo
 #           che l'EA ha DENTRO (`InpMaxSpreadToStopPercent = 10.0`,
@@ -543,10 +590,16 @@
 #     r.46 e il riquadro sotto). Non c'e' niente prima, e non ci sara'
 #     finche' non si importa da un'altra fonte.
 #
-#  C) L'ANCORA DI RISCHIO, ed e' quella che va letta per prima:
-#     `report/CENSIMENTO_CONTRATTI.md` r.262 -> DD promesso **11,59%**,
-#     peggior giornata **-1,10%** a taglia 1%, zero esposizione
-#     overnight, **e tre avvertenze gia' scritte nel contratto**: lo
+#  C) L'ANCORA DI RISCHIO, ed e' quella che va letta per prima, con le
+#     fonti separate perche' NON stanno nello stesso documento:
+#     - DD promesso **11,59%** e **le tre avvertenze**:
+#       `report/CENSIMENTO_CONTRATTI.md` r.262;
+#     - peggior giornata **-1,10%** a taglia 1% e **zero esposizione
+#       overnight**: `report/CONTRATTI_SEDIE.md` r.180, e all'origine
+#       `REFERTO_ROUND65_GAPCONTINUATION.md` r.218 (-1.102,24 su
+#       100.000 = -1,10%, che e' anche la riga "La piu' ampia
+#       operazione di trading in perdita" dell'xlsx) e r.166.
+#     Le tre avvertenze scritte nel contratto: lo
 #     short perde (-2.182 OOS), le perdite arrivano in GRUPPO (Z -4,03,
 #     sei di fila), e la cella viva e' un **PICCO, non un altopiano**
 #     (R66 par.3).
@@ -597,7 +650,7 @@
 #    le celle, e la ragione e' strutturale: il parziale non riduce MAI
 #    lo stop INIZIALE, e il breakeven arriva solo DOPO il parziale.
 #    Quindi la giornata peggiore resta "un ingresso, uno stop pieno, 1R"
-#    qualunque sia il grilletto. Ancore: -1,10% [MIS tick, contratto] e
+#    qualunque sia il grilletto. Ancore: -1,10% [MIS tick, R65 r.218] e
 #    -0,9999 / -1,0008 [MIS OHLC, CSV d'archivio]. Vedi S6: e' una
 #    sentinella di SALUTE, non una misura dell'effetto.
 #  - PROFITTO / PF / DD: **NESSUNA direzione dichiarata a priori.** Un
@@ -786,7 +839,8 @@
 #      toccando qualcosa che secondo il codice non tocca, e va capito
 #      prima di ogni PF.
 #    S7 -- IL RISCHIO NON E' ESPLOSO: nessuna cella con
-#      `Equity DD %` > **20,0%** (la stessa soglia gia' usata da R66 su
+#      `Equity DD %` > **20,0%** (la stessa soglia del criterio 3 di
+#      R65, `REFERTO_ROUND65_GAPCONTINUATION.md` r.74-75, gia' usata su
 #      questa sedia). Se una cella la rompe, si scrive SUBITO, prima di
 #      guardare qualunque Profit Factor.
 # ---------------------------------------------------------------------

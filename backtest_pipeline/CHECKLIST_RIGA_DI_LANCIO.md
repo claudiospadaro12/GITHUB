@@ -20512,3 +20512,29 @@ l'ERRATA "due macchine nominate per la stessa corsa".
 *Il bersaglio non e' quello che scrivo in testa alla riga: e' l'unica macchina
 che soddisfa TUTTI i percorsi cablati dello script. Se non l'ho misurata, la
 prima riga che parte e' quella che la misura.*
+
+## 363. UN RAPPORTO CALCOLATO CONTRO UN RIFERIMENTO MEDIO GLOBALE QUANDO IL FENOMENO E' CONCENTRATO IN UN'EPOCA IN CUI IL RIFERIMENTO VALE UN ALTRO NUMERO (controllo-preventivo, 16/09/2026)
+
+Il caso: R162a_partialtargetr_gapcont_225JPY.txt misura il costo del
+troncamento a VOLUME_MAX confrontando il prodotto (stop x lotto) dei 4
+ingressi troncati con una banda "~18.600-19.900" letta sui non troncati.
+Due errori sovrapposti, e il secondo e' quello che morde:
+ (1) la banda dichiarata NON contiene 20 dei 43 valori veri (17.224-20.072);
+ (2) il riferimento non e' una costante: algebricamente
+     stop x lotto = equity x risk% / valore-punto, quindi e' la CURVA DEL
+     SALDO. E tutti e quattro i troncamenti cadono nel tratto BASSO della
+     curva (i primi 5 mesi su 13). Il rapporto esce sottostimato di 4-6
+     centesimi di punto su tutti e quattro, sempre nello stesso verso.
+Il numero era destinato al CONTRATTO della sedia: si sarebbe propagato.
+
+### REGOLA
+Prima di dividere una grandezza per un riferimento "tipico", si guarda
+DOVE stanno nel tempo le osservazioni al numeratore e se il riferimento e'
+COSTANTE su quel tratto. Se il riferimento e' una funzione del saldo (e
+qualunque cosa proporzionale al rischio % lo e'), il denominatore giusto e'
+LOCALE, non medio -- e la prova che serve e' banale: il riferimento deve
+risultare INDIPENDENTE dalla variabile che sta al numeratore. Qui bastava
+notare che il prodotto non dipende da R mentre R varia da 110 a 764.
+
+Parente della 178 (la banda che non distingue l'ipotesi alternativa), ma
+distinta: qui la banda e' proprio falsa sui dati che dichiara di riassumere.
