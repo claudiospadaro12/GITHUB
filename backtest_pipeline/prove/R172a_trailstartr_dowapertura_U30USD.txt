@@ -23,7 +23,6 @@
 #    -Expert ABTG_Dow_Apertura_US
 #    -Prova prove\R172a_trailstartr_dowapertura_U30USD.txt
 #    -Etichetta r172a -Modello 4 -Deposito 100000
-#    -TerminaleBacktest "C:\MT5_Backtest"
 #  (prima SEMPRE con -SoloControllo: deve stampare 7 CELLE.
 #   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DI PASSATE: il driver
 #       stampa "celle x 2" CABLATO (walkforward_generico.ps1 r.880) e
@@ -32,10 +31,17 @@
 #       non degenere).
 #   Se le CELLE non sono 7, ci si ferma prima di lanciare altro.)
 #
-#  !! -TerminaleBacktest NON E' OPZIONALE (classe 204). C:\MT5_Backtest
-#     = demo 50504400, zero EA attaccati. La sedia 770202 VIVE su ALTRI
-#     DUE terminali e NON si tocca nessuno dei due (vedi il paragrafo
-#     DUE ISTANZE, sotto).
+#  !! CORRETTO DOPO IL CANCELLO (classe 268 ricorsa, esito BUONO):
+#     `RIGA_SOTTILE_ROUND.ps1` NON accetta `-TerminaleBacktest` come
+#     argomento (`param()` r.99-105: solo Expert/Prova/Etichetta/
+#     Modello/Deposito/SoloControllo) -- passarlo farebbe FALLIRE il
+#     lancio. Il banco NON e' opzionale, ma e' CABLATO nello script
+#     (r.131 `$BancoBT = 'C:\MT5_Backtest'`, inoltrato a r.1325), quindi
+#     la garanzia e' PIU' forte di come suonava, non piu' debole: nessun
+#     argomento puo' cambiarlo per errore. C:\MT5_Backtest = demo
+#     50504400, zero EA attaccati. La sedia 770202 VIVE su ALTRI DUE
+#     terminali e NON si tocca nessuno dei due (vedi il paragrafo DUE
+#     ISTANZE, sotto).
 #
 #  !! -Modello 4 e -Deposito 100000 SONO IL BANCO DELL'ANCORA DI QUESTA
 #     SEDIA, letti nella riga di lancio dell'ancora e non copiati dagli
@@ -317,27 +323,34 @@
 #  il codice: la parziale scatta UNA volta per ticket
 #  (`TkMark(ticket,gPartialTk)`, r.1750) e non esiste nessun'altra
 #  chiusura frazionata.
-#  >>> LA STIMA MIGLIORE CHE POSSIEDO E' 1,34, ed e' DERIVATA da
-#      un'altra corsa, non misurata su questo banco. La derivazione,
-#      scritta per intero perche' chi legge possa bocciarla:
-#        R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_1348.txt, blocco
-#        I02 (r.217-322), dichiara "n operazioni 199" (r.231) e, nella
-#        PEGGIOR GIORNATA (r.293), "su 149 giornate operative, 348
-#        deal col netto letto". 149 + 199 = 348, esatto. Con
-#        InpOneTradePerDay=true c'e' al massimo UN ingresso al giorno,
-#        quindi 149 giornate operate = 149 deal d'ingresso, e i restanti
-#        199 sono le uscite: 149 posizioni, 199 uscite, 50 parziali,
-#        fattore 199/149 = 1,3356.
-#      >>> LETTURA ALTERNATIVA CHE LA ROVESCEREBBE, e la scrivo io: se
-#          "348 deal col netto letto" contasse SOLO le uscite, allora
-#          199 e 348 sarebbero due conteggi diversi della stessa cosa e
-#          la coincidenza aritmetica sarebbe un caso. Non so escluderlo
-#          da qui: per questo il fattore e' [DERIVATO], non [MISURATO],
-#          e non entra in NESSUNA soglia.
-#      >>> E QUELLA CORSA NON E' QUESTO BANCO: R103 I02 gira in OHLC M1
-#          a rischio 0,65% su UNA sola passata, questo round gira a TICK
-#          a rischio 1,0% su DUE gambe. Il fattore va riletto sui numeri
-#          di questo round, non trasferito.
+#  >>> !! EMENDATO DOPO LA SCRITTURA: IL FATTORE NON E' PIU' [DERIVATO],
+#      E' [MISURATO] SULLO STESSO BANCO, A COSTO ZERO. Trovato da un
+#      agente parallelo (round R172c) e riverificato qui aprendo io
+#      stesso i due CSV, non copiando il numero:
+#        backtest_pipeline/risultati_prove/aperture_r46/
+#        ABTG_Dow_Apertura_US_U30USD_{IS,OOS}_r46b.csv, righe con
+#        InpTP1_ClosePct=50 (parziale ATTIVA, la cella VIVA) contro
+#        InpTP1_ClosePct=0 (parziale SPENTA), a parita' di tutti gli
+#        altri campi:
+#          IS : ClosePct=50 -> Trades=74 (Pass 7) . ClosePct=0 -> Trades=56
+#               (costante su tutte le righe) => 74-56=18 parziali, 56
+#               posizioni, fattore 74/56 = 1,3214
+#          OOS: ClosePct=50 -> Trades=130 (Pass 7) . ClosePct=0 -> Trades=96
+#               (costante) => 130-96=34 parziali, 96 posizioni,
+#               fattore 130/96 = 1,3542
+#      Concorda con la vecchia stima [DERIVATA] 1,3356 entro 0,02: la
+#      derivazione da R103 I02 (sotto, lasciata per tracciabilita') era
+#      giusta, solo non necessaria -- il banco vero la misura da solo.
+#      >>> LA VECCHIA DERIVAZIONE, lasciata per chi vuole la controprova
+#          indipendente: R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_
+#          1348.txt, blocco I02 (r.217-322), dichiara "n operazioni 199"
+#          (r.231) e, nella PEGGIOR GIORNATA (r.293), "su 149 giornate
+#          operative, 348 deal col netto letto". 149+199=348, esatto.
+#          Con InpOneTradePerDay=true, 149 giornate = 149 posizioni, 199
+#          uscite, fattore 199/149 = 1,3356. Quella corsa NON e' questo
+#          banco (OHLC M1, rischio 0,65%, una sola passata, contro TICK
+#          e rischio 1,0% su due gambe): concorda per coincidenza di
+#          meccanismo, non per identita' di banco.
 #  >>> DOVE IL FATTORE NON SERVE, ed e' la maggior parte del file: tutte
 #      le soglie B sotto sono scritte su `Equity DD %` e su `Profit
 #      Factor`, che NON dipendono da come si contano le righe.
@@ -521,7 +534,7 @@
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
 #      Peggior Giorn. %.  -0,96 / -1,06        -0,97 / -1,08
-#  Criteri delle bande, DICHIARATI perche' sono di DUE tipi diversi
+#  Criteri delle bande, DICHIARATI perche' sono di TRE tipi diversi
 #  apposta (classe 373, che vieta un confronto fra bande senza dire in
 #  che unita' si misura):
 #    - PF, DD, Profit: FRAZIONE DELL'ANCORA, +/- 2,0%.
@@ -546,6 +559,16 @@
 #    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
 #      gia' una percentuale e una banda relativa su un numero piccolo
 #      scenderebbe sotto la granularita' stampata dalla fonte.
+#  >>> !! ARBITRATO DEL BORDO (classe 380, estensione, aggiunto dal
+#      cancello sul fratello R172c e valido anche qui, stessa ancora e
+#      stessa regola): rifatti i dieci conti dal criterio (non dalla
+#      cella arrotondata stampata), PF IS 1,19802-1,24692 OOS
+#      1,24473-1,29553, DD IS 5,55582-5,78258 OOS 4,30622-4,48198,
+#      Profit IS 2755,60-2868,08 OOS 6587,49-6856,37. In cinque bordi su
+#      dieci la cella stampata arrotonda DENTRO il criterio (es. PF OOS
+#      1,245 contro 1,24473): SU S1 VINCE IL CRITERIO, non la cella
+#      arrotondata, perche' S1 e' BLOCCANTE e una banda piu' stretta del
+#      criterio fermerebbe una corsa sana.
 #  Fuori da una qualunque di queste bande il banco e' sporco e il round
 #  si ferma PRIMA di qualunque altro numero: il verdetto diventa "il
 #  banco di oggi non e' quello di R54a", e va in cima al referto in
@@ -613,10 +636,12 @@
 #  d) PAVIMENTO >= 150 OPERAZIONI: NON RAGGIUNTO, E LO SCRIVO PRIMA DEI
 #     NUMERI (Emendamento regola A). E qui la conclusione e' netta
 #     perche' NON dipende dal fattore uscite/posizioni:
-#       IS  : 74 uscite MISURATE -> fra 37 e 74 POSIZIONI
-#       OOS : 130 uscite MISURATE -> fra 65 e 130 POSIZIONI
-#     cioe' anche nel caso piu' generoso possibile (fattore 1,00, ogni
-#     uscita una posizione) TUTTE E DUE le gambe restano sotto 150.
+#       IS  : 74 uscite MISURATE -> 56 POSIZIONI MISURATE (fattore
+#             1,3214, vedi UNITA' DI MISURA)
+#       OOS : 130 uscite MISURATE -> 96 POSIZIONI MISURATE (fattore
+#             1,3542)
+#     cioe' con il fattore vero, non solo nel caso limite, TUTTE E DUE
+#     le gambe restano sotto 150.
 #     >>> QUINDI IL MERITO E' SOSPESO SU TUTTE E DUE LE GAMBE, e non c'e'
 #         nessun modo di ripararlo su questo simbolo: il feed non
 #         arriva prima del 2024 e la sedia fa ~7 posizioni al mese.
@@ -838,8 +863,8 @@
 #         posto a quella dopo. Questa e' la differenza piu' importante
 #         da R171a, dove il posto occupato era un canale vero.
 #  308-4  IL FATTORE USCITE/POSIZIONI: e' l'unico punto in cui questo
-#         asse tocca un conteggio, e vale 1,00-2,00 con stima [DERIVATA]
-#         1,34 (vedi UNITA' DI MISURA). E' la proprieta' (B), e va letta
+#         asse tocca un conteggio, e vale [MISURATO] 1,3214 IS / 1,3542
+#         OOS (vedi UNITA' DI MISURA). E' la proprieta' (B), e va letta
 #         come un RISULTATO del round, non come un disturbo.
 #  308-5  RISCHIO APERTO CONTEMPORANEO: su questa cella UNA posizione
 #         alla volta (RETEST + solo long + HandleOCO r.1681-1685). Non
