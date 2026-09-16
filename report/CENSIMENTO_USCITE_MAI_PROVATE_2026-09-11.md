@@ -486,3 +486,42 @@ raccolti (`RESOCONTO_2026-09-14.md` r.8-17). È la manopola che oggi conta di pi
 visto che l'orologio è dimostrato inerte sul DD: lo SL resta l'unica leva. Costo:
 una riga (`carica_risultati.ps1`), zero minuti di tester — **decisione e gesto di
 Claudio**, non un round da rilanciare.
+
+---
+
+## 🔴🆕 8. CORREZIONE DEL 16/09/2026 (bis) — LA "MEDAGLIA D'ORO" (§1, punto 1) È
+## GIRATA, LETTA PER INTERO, E LA CIFRA "MERITO PIENO" NON STA IN NESSUN CSV
+
+Stesso schema del §7, sulla riga `970913` (`ABTG_SupRev_NAS_H1_Ottimizzato`,
+`InpSLBufferPips`). Un agente ha trovato ed è andato a leggere `R127a` (girato il
+14/09, mai letto per intero — solo la cella viva come canarino). Verificato da me
+sui CSV grezzi (`backtest_pipeline/risultati_prove/r127a/..._{IS,OOS}_r127a.csv`):
+
+- **Il round non riproduce la propria ancora**, e per la propria regola congelata
+  questo lo ferma PRIMA di qualunque altro numero: PF IS **1,29758 contro 1,34237**
+  dell'archivio (**-3,34%**, tolleranza ±0,5%) e PF OOS **1,61295 contro 1,68815**
+  (**-4,45%**), più `Trades` non identico (71/69 IS, 87/86 OOS). Nessuna cella di
+  questo asse è oggi promuovibile.
+- **Il pattern che rendeva questa riga "la medaglia d'oro"** (PF su e DD giù col
+  buffer largo) **è un'illusione IS-only**: in IS il DD scende quasi monotono
+  (0,99%→0,66%), ma in **OOS sale** (1,09%→1,31% al massimo dell'asse). Chi avesse
+  letto solo l'IS avrebbe firmato una cosa falsa.
+- **La cifra citata sopra al §1 ("PF 1,57 · DD 1,17% · n=155, MERITO PIENO") non
+  sta in nessun CSV della sedia.** Risale a `REGISTRO_TEST.md` r.171 (riga S5v),
+  una corsa a **finestra piena separata** (non la partizione IS/OOS di R127a):
+  l'`n` coincide (155 = 69+86), ma profitto e PF no (ricostruito 419,43/1,535
+  contro 479/1,57 dichiarati). `PIANO_CHALLENGE_OTTOBRE_v2.md` r.97 marca già
+  questa sedia "DA RIVERIFICARE" — quel caveat non era arrivato fin qui.
+- **Il binario di R127a non è il binario in campo** su `970913` (`344a11b` del
+  04/08, 4 commit di scarto rispetto a HEAD, due dei quali toccano lotto e tick
+  value — `report/CENSIMENTO_CAMPO_VS_MISURATO_2026-09-13.md` r.154/392).
+
+🟢 **Non si archivia**: dentro l'asse, la cella **2253** (22,53 punti indice di
+buffer) è insieme il centro del vero altopiano (OOS 1,50-1,72 di PF su 5 celle
+contigue) E la prima cella che supera la frontiera di costo dei 40x sulla mediana
+dello stop — a costo di PF quasi nullo (1,640 contro 1,613 dell'ancora). **Prima di
+rigirare un asse**, serve **una sola passata** che riproduca la cella viva sul
+binario di oggi: chiude insieme la domanda dell'ancora, il contratto S5v e la
+domanda del binario in campo. Nessuna riga di armamento proposta: nessun preset si
+tocca senza la firma di Claudio, e questa sedia gira sul piccolo 50503392, mai sul
+conto reale 10105439.
