@@ -1034,6 +1034,14 @@
 #      779827. Se lo portasse, le due corse scriverebbero sullo STESSO
 #      nome di per-trade (r.723, composto con InpMagic) e sarebbero
 #      indistinguibili nei log del tester.
+#      >>> GUARDATO, ED E' CHIUSO: R165a e' entrato su `lavoro` con
+#          34d6cf4e portando `InpMagic=779828` (r.1182), e il suo blocco
+#          magic (r.1035-1054) scrive la stessa identica ragione -- "lui
+#          e' gia' committato, io no, quindi mi sposto io". I due
+#          cancelli, senza parlarsi, hanno calcolato lo STESSO arbitro:
+#          e' la prova che la regola della classe 367 funziona.
+#          A HEAD 651db280 il grep di `779827` da' tre file: questo, la
+#          checklist e R165a (che lo cita come "preso da R166a").
 #  >>> E LA LEZIONE CHE LA 365 NON AVEVA ANCORA, perche' l'ha pagata
 #      questo file: SALTARE L'ETICHETTA NON BASTA. Lasciare libera R165
 #      per il lavoro parallelo e poi prendersi il magic che quel lavoro
