@@ -110,12 +110,14 @@
 #          COLLAUDO_EMADOW_03_uscita_TP1PCT.txt  ABTG_EMA200
 #          COLLAUDO_EMADOW_GENERA.py ......... ABTG_EMA200
 #      NESSUNO sulla famiglia SuperWave / SupertrendReversal.
-#      >>> CLASSE 382, DICHIARATA PRIMA CHE MI FALSIFICHI: appena
-#          QUESTO file viene salvato i match diventano SEI, e il sesto
-#          e' questo. Il "5" qui sopra vale al momento della stesura,
-#          a HEAD 6caac9f8; chi lo riesegue dopo il commit trova 6, e
-#          uno e' la riga d'asse in fondo a questa pagina. Stessa cosa
-#          per il 23 del comando precedente: diventa 24.
+#      >>> CLASSE 382, DICHIARATA PRIMA CHE MI FALSIFICHI, E POI
+#          VERIFICATA INVECE CHE PREVISTA. Il "5" qui sopra vale alla
+#          STESURA, a HEAD `6caac9f8`. Appena questo file e' stato
+#          salvato ho RIESEGUITO lo stesso comando: torna SEI, e il
+#          sesto e' questa pagina (la riga d'asse in fondo). Stessa
+#          cosa per il "23" del comando precedente: rieseguito, torna
+#          VENTIQUATTRO. Non sono numeri previsti: sono numeri
+#          contati due volte, prima e dopo.
 #  >>> E IL CENSIMENTO CONCORDA, ma vale meno del grep e lo dico: la
 #      riga 770511/InpTP1Pct di
 #      risultati_archivio\CENSIMENTO_USCITE_2026-09-11.json dice
@@ -440,9 +442,24 @@
 #         OOS  PF 1,22034   DD% 4,21   Trades 184
 #     Stesso EA, stesso simbolo, stesso TF, stesso banco, stesso
 #     deposito, stesso modello, e la cella 50 e' LA SUA cella (il suo
-#     file prova, R120e_U30USD_11_vivo_TAGLIA.txt r.280-283, pinna
+#     file prova, R120e_U30USD_11_vivo_TAGLIA.txt r.281-284, pinna
 #     InpTP1_R=1.0 / InpTP1Pct=50.0 / InpBreakeven=true / InpTP_RR=3.0:
-#     letto oggi riga per riga, non ricordato).
+#     letto oggi con `grep -n "^InpTP1_R\|^InpTP1Pct\|^InpBreakeven\|
+#     ^InpTP_RR"` su quel file, non ricordato).
+#     >>> E C'E' UNA TERZA CONFERMA, che non passa ne' dal preset ne'
+#         dal file prova dell'ancora: i CSV d'archivio di questa sedia
+#         portano anche le colonne degli INPUT, e su TUTTE le righe di
+#         r126a e r126b -- QUATTRO CSV, 32 righe in tutto, aperte oggi
+#         e contate a macchina -- le colonne che questo round pinna
+#         hanno UN SOLO valore distinto:
+#           InpTP1Pct 50 . InpTP1_R 1 . InpBreakeven 1 . InpTrailOnST 1
+#           InpExitOnFlip 1 . InpTP_RR 3 . InpSLBufferPips 3
+#           InpRiskPercent 1 . InpUsePending 1 . InpFirstFraction
+#           0.3333 . InpUseTimeWindow 0
+#         (InpSLLookback e InpSLBufferAtr variano: sono gli assi di
+#         quei due round.) Tre fonti concordi, e l'ordine di autorita'
+#         resta: preset > file prova dell'ancora > CSV d'archivio
+#         (classe 369).
 #
 #     >>> IL BINARIO E' BYTE-IDENTICO, E L'HO VERIFICATO IO OGGI. r120e
 #         e' armato al pin 1445abf8 (CODA.txt r.335). Comando eseguito:
@@ -478,30 +495,70 @@
 #             dipendere piu' da quella coincidenza: uno stato implicito
 #             non e' uno stato dichiarato.
 #
-#     >>> IL MAGIC DIVERSO NON ROMPE L'ANCORA, ED E' MISURATO, NON
-#         ASSUNTO: r120e aveva il magic come UNICO ASSE (2 celle,
-#         783500/783501, sua r.302), ed e' il controllo G0 "gemelli sul
-#         magic", passato su tutte e sei le etichette r120 (referto
-#         citato, r.290).
+#     >>> IL MAGIC DIVERSO NON ROMPE L'ANCORA, E NON LO PRENDO IN
+#         PRESTITO: LO MISURO. r120e aveva il magic come UNICO ASSE
+#         (2 celle, 783500/783501, sua r.302) e il cancello G0
+#         "gemelli sul magic" e' passato su tutte e sei le etichette
+#         r120 (referto citato, r.290). MA ho una prova diretta, sui
+#         CSV, ed e' quella di B(i) qui sotto: due corse della STESSA
+#         cella con magic 779300 e 779310 danno Profit, PF, DD% e
+#         Trades IDENTICI. Il magic e' l'unica differenza operativa fra
+#         le due, ed e' proprio la differenza che S1 deve tollerare.
 #
-#  B) IL DETERMINISMO DEL BANCO, QUATTRO MISURE, E LE LORO PORTATE.
-#     (i) TRE corse separate della stessa notte (13/09) sulla STESSA
-#         cella di QUESTA EA -- r126a (b=0), r126b (lookback=5) e
-#         r120b11 (cella viva) -- danno "1,24312 / 4,1675 / 131 AL
-#         CENTESIMO" (referto citato, r.287-290). PORTATA: questa EA,
-#         questo banco, deposito 10.000.
-#    (ii) MISURATA DA ME OGGI, e non l'ho trovata scritta da nessuna
-#         parte: r136c cella 50 e r136d cella 1 sono la STESSA cella di
-#         ABTG_EMA200 girata in DUE round separati, a 100.000, sulla
-#         stessa finestra e sullo stesso banco. Aperti i quattro CSV e
-#         confrontate tutte e sette le colonne:
+#  B) IL DETERMINISMO DEL BANCO -- MISURATO DA ME OGGI SUI CSV, NON
+#     LETTO IN UN REFERTO. E LE PORTATE, DICHIARATE.
+#     (i) SU QUESTA EA, deposito 10.000. I quattro CSV di r126a/r126b
+#         sono nel repo (vedi BUCHI: un file fratello li da' per
+#         assenti, e sbaglia cartella). r126a ha una riga con
+#         InpSLBufferAtr=0 e r126b una con InpSLLookback=5: sono LA
+#         STESSA CELLA, girata in DUE ROUND SEPARATI della stessa
+#         notte. Confronto fatto oggi PER NOME DI COLONNA su tutte e
+#         53 le colonne di ciascuna gamba (non per posizione: le due
+#         intestazioni NON hanno lo stesso ordine, vedi S3). Nomi con
+#         valore diverso:
+#           OOS -> TRE: `Pass` (0 vs 2), `InpMagic` (779300 vs 779310),
+#                  `InpSLBufferAtr` ("0.000" vs "0", stesso numero
+#                  scritto in due modi). TUTTE le sette statistiche
+#                  IDENTICHE: 344.12 / 2.62687 / 1.24312 / 0.77764 /
+#                  1.75403 / 4.1675 / 131.
+#           IS  -> QUATTRO: le stesse tre PIU' `Sharpe Ratio`, 3.42914
+#                  contro 3.42915. Le altre sei statistiche identiche:
+#                  488.63 / 6.78653 / 1.48166 / 1.12316 / 4.0393 / 72.
+#         >>> E QUELLA DIFFERENZA DI UN'UNITA' SULL'ULTIMA CIFRA DELLO
+#             SHARPE E' IL CONTRO-ESEMPIO CHE HO CERCATO CONTRO LA MIA
+#             STESSA SENTINELLA, e cambia come si scrive S1. Il
+#             referto della notte riassume questo fatto come "1,24312 /
+#             4,1675 / 131 AL CENTESIMO" (r.287-290): vero per QUELLE
+#             TRE colonne, ma NON per tutte e sette. Quindi
+#             "il banco e' bit-a-bit" sarebbe una frase falsa, e non la
+#             scrivo. Quello che e' misurato e':
+#               IDENTICHE  -> Profit, Expected Payoff, Profit Factor,
+#                             Recovery Factor, Equity DD %, Trades
+#               1 ULP      -> Sharpe Ratio (una gamba su due)
+#             S1 usa SOLO `Profit Factor`, `Equity DD %` e `Trades`,
+#             cioe' tre colonne dell'insieme IDENTICO. Non e' una
+#             coincidenza: e' il motivo per cui sono quelle tre.
+#             >>> E LA LETTURA DELLA DIFFERENZA: Profit, PF, DD e
+#                 Trades identici significano SEQUENZA DI OPERAZIONI
+#                 IDENTICA. Uno Sharpe che balla di 1 sulla quinta
+#                 cifra e' un'accumulazione in virgola mobile, non un
+#                 trade diverso. Ma e' un'INFERENZA, non una misura, e
+#                 come tale la marco.
+#    (ii) SU UN ALTRO EA, deposito 100.000 -- che e' il deposito di
+#         QUESTO round. r136c cella 50 e r136d cella 1 sono la STESSA
+#         cella di ABTG_EMA200 girata in DUE round separati, stessa
+#         finestra e stesso banco. Aperti i quattro CSV oggi e
+#         confrontate tutte e sette le statistiche:
 #           IS   4585.40 / 19.34768 / 1.20110 / 0.78806 / 3.77377 /
-#                5.7325 / 237   -- IDENTICHE
+#                5.7325 / 237   -- IDENTICHE, Sharpe compreso
 #           OOS  23321.47 / 45.10923 / 1.52365 / 2.53681 / 8.16765 /
-#                7.8323 / 517   -- IDENTICHE
-#         PORTATA: un ALTRO EA, ma il deposito GIUSTO (100.000) e round
-#         diversi. Le due misure coprono buchi diversi: la (i) ha l'EA
-#         giusto e il deposito sbagliato, la (ii) il contrario.
+#                7.8323 / 517   -- IDENTICHE, Sharpe compreso
+#    >>> LE DUE MISURE COPRONO BUCHI DIVERSI, e nessuna delle due copre
+#        tutto: la (i) ha l'EA GIUSTO e il deposito SBAGLIATO, la (ii)
+#        il contrario. La cella che S1 controlla -- questa EA a 100.000
+#        -- e' l'incrocio delle due, e non e' stata misurata due volte
+#        da nessuno. Dirlo e' la differenza fra una sentinella e una
+#        speranza.
 #   >>> E' su QUESTE, non su una speranza, che S1 chiede un'UGUAGLIANZA
 #       sui `Trades` invece di una banda.
 #
@@ -639,9 +696,21 @@
 #        una differenza fra 25 e 50 dello stesso ordine del 5%, quella
 #        differenza NON e' leggibile.
 #
-#  (T5) IL TETTO DEL VOLUME. SYMBOL_VOLUME_MAX misurato in casa = 100
-#    (R109; il taglio ha morso su 66 trade su 743 = 8,9% in un round a
-#    100k, PIANO_PROP.md r.1031). A 100.000 e 1%, un'operazione con
+#  (T5) IL TETTO DEL VOLUME. SYMBOL_VOLUME_MAX = 100, e le DUE meta'
+#    di questa citazione vanno separate perche' NON sono lo stesso
+#    fatto ne' lo stesso simbolo -- la fonte e'
+#    report\PIANO_PROP.md r.926 e r.1031, riaperte oggi (NON
+#    `PIANO_PROP.md` alla radice del repo: quel file esiste ma e' piu'
+#    corto e alla r.1031 non ha niente. Due file con lo stesso nome,
+#    uno solo con la riga giusta):
+#      - il VALORE 100 e' dichiarato sul Dow (r.926: "dichiarato sul
+#        Dow nell'analisi dial");
+#      - il TAGLIO che ha morso "66 volte su 743 (8,9%)" e' MISURATO
+#        SU NASUSD SHORT (r.926 e r.1031 lo dicono tutte e due), cioe'
+#        su un ALTRO SIMBOLO. Non e' una percentuale di questa sedia,
+#        e va detto: qui serve solo a dire che il tetto e' un oggetto
+#        che morde davvero, non quanto morda su U30USD.
+#    A 100.000 e 1%, un'operazione con
 #    stop iniziale sotto 1000/(100 x 0,862) = 11,60 punti indice chiede
 #    piu' di 100 lotti e viene tagliata. La gamba minima misurata in
 #    campo e' 12,70 punti indice (n=4), cioe' un margine di 1,10x.
@@ -736,26 +805,54 @@
 #
 #    S3 -- QUATTRO VALORI DISTINTI di `InpTP1Pct` nella colonna
 #      OMONIMA dei CSV: 0 / 25 / 50 / 75.
-#      >>> LA COLONNA SI CERCA PER NOME, MAI PER POSIZIONE. L'intestazione
-#          e' 8 statistiche cablate in OnTesterDeinit piu' i NOMI degli
-#          input NELL'ORDINE DI DICHIARAZIONE del sorgente: la posizione
-#          dipende dal BINARIO, e un CSV d'archivio scritto da un
-#          binario piu' vecchio darebbe un indice sbagliato (classe
-#          369). Le 8 statistiche, quelle si', sono cablate e non
-#          cambiano.
+#      >>> LA COLONNA SI CERCA PER NOME, MAI PER POSIZIONE, ED E' UN
+#          ORDINE, non un consiglio. L'intestazione la scrive
+#          `OnTesterDeinit` (r.760 e r.761-762 del sorgente, lette
+#          oggi): 8 statistiche CABLATE nella stringa
+#          "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,
+#          Sharpe Ratio,Equity DD %,Trades", poi i nomi che
+#          `FrameInputs()` restituisce. Le 8 statistiche sono cablate e
+#          non cambiano mai; l'ordine degli input SI'.
+#      >>> E QUI HO UNA MISURA, non un modello. Ho aperto le
+#          intestazioni vere di TRE CSV d'ottimizzazione e cercato la
+#          posizione della colonna che era l'ASSE di quel round:
+#            r126a  (asse InpSLBufferAtr, questa EA) ... indice 8
+#            r126b  (asse InpSLLookback,  questa EA) ... indice 8
+#            r136c  (asse InpTP1Pct,      ABTG_EMA200) . indice 8
+#          cioe' SUBITO DOPO le 8 statistiche. E le intestazioni di
+#          r126a e r126b, che vengono dallo STESSO binario, NON sono
+#          uguali: differiscono nelle posizioni 8, 28 e 29, e le tre
+#          colonne che si scambiano di posto sono esattamente
+#          InpSLBufferAtr / InpSLLookback / InpSLBufferPips.
+#          >>> LETTURA: `FrameInputs()` mette DAVANTI il parametro
+#              ottimizzato. 3 casi su 3, su due EA diversi.
+#          >>> MA LA CAUSA E' [NON VERIFICATA]: non l'ho letta ne' nel
+#              driver (che costruisce `[TesterInputs]` nell'ordine del
+#              file prova, r.846-851: nel MIO file l'asse e' l'ULTIMA
+#              riga) ne' in una fonte MQL5. E' una regolarita'
+#              misurata, non un teorema.
+#      >>> CONSEGUENZA PRATICA, E BASTA QUESTA: `InpTP1Pct` sara'
+#          PROBABILMENTE la colonna di indice 8, ma S3 la cerca per
+#          NOME e non cambia comportamento se non lo e'. Chi leggesse
+#          per posizione -- fidandosi di un CSV d'archivio con un altro
+#          asse -- prenderebbe una colonna costante e vedrebbe un asse
+#          FERMO: S3 fallirebbe per un difetto di LETTURA, non della
+#          corsa (classe 369).
 #      S3 dice che l'asse e' stato spazzolato. NON dice che ha avuto
 #      effetto: per quello serve S5 (classe 357).
 #
-#    S4 -- IL GATE E' DAVVERO QUELLO CHE DICO. Condizione dichiarata
-#      PRIMA, non lettura sul CSV: se S5 fallisse (quattro celle
-#      identiche), la prima cosa da guardare NON e' il banco ma i due
-#      pin che reggono la catena -- `InpTP1_R` deve valere 1.0 e
-#      `InpBreakeven` true nel .ini generato. Con InpTP1_R <= 0 il gate
-#      di r.446 e' spento su TUTTE le celle e il round misurerebbe
-#      quattro volte la stessa sedia, con S1 che PASSA lo stesso
-#      (perche' la cella 50 resta la cella viva... no: con InpTP1_R=0
-#      anche la cella 50 cambierebbe e S1 CADREBBE). Cioe': S1 protegge
-#      anche da questo, ed e' la ragione per cui e' bloccante.
+#    S4 -- I DUE PIN CHE REGGONO IL GATE. Condizione dichiarata PRIMA,
+#      non lettura sul CSV: se S5 fallisse (quattro celle identiche),
+#      la prima cosa da guardare NON e' il banco, sono i due pin --
+#      `InpTP1_R` deve valere 1.0 e `InpBreakeven` true nel .ini
+#      generato. Con InpTP1_R <= 0 il gate di r.446 e' spento su TUTTE
+#      le celle e il round misurerebbe quattro volte la stessa sedia.
+#      >>> E QUEL MONDO E' GIA' COPERTO DA S1, che e' il motivo per cui
+#          S1 e' bloccante: con InpTP1_R = 0 cambierebbe anche la CELLA
+#          50, che non sarebbe piu' la cella di r120e11, e S1 CADREBBE
+#          prima che qualcuno arrivi a leggere S5. S4 non e' una
+#          seconda rete: e' l'ISTRUZIONE su dove guardare quando la
+#          prima suona.
 #
 #    S5 -- ALMENO UNA COPPIA CONTIGUA DIVERSA. Fra le TRE coppie di
 #      celle contigue (0-25, 25-50, 50-75), almeno una deve avere
@@ -939,10 +1036,23 @@
 #      STESSO sorgente con cui e' girato r120e11 (git diff = 0 righe),
 #      quindi il confronto con l'ancora regge. Ma l'avvertenza resta, e
 #      questo file non la ritira: e' un lavoro di qualcun altro.
-#    - I CSV DI r126a E r126b NON SONO NEL REPO (verificato oggi:
-#      risultati_prove\ABTG_SuperWave_DOW_H1_Ottimizzato\ non ha file
-#      col suffisso _r126a/_r126b). Questo round non si appoggia a
-#      nessuno dei due.
+#    - NESSUN BUCO SUI CSV DI r126a/r126b -- E QUI CORREGGO UN FILE
+#      FRATELLO, PERCHE' TACERLO SAREBBE PROPAGARE UN ERRORE.
+#      R165a (stessa sedia, scritto oggi) elenca fra i propri buchi:
+#      "I NUMERI DI R126a E R126b NON SONO NEL REPO ... verificato
+#      oggi: la cartella ha sei file, nessuno col suffisso
+#      _r126a/_r126b". E' FALSO, ed e' la classe 372 al contrario: la
+#      cartella guardata non e' quella giusta. I quattro CSV ESISTONO,
+#      in risultati_prove\dal_vps\ABTG_SuperWave_DOW_H1_Ottimizzato\
+#      (..._IS_r126a.csv, ..._OOS_r126a.csv, ..._IS_r126b.csv,
+#      ..._OOS_r126b.csv), e il CENSIMENTO_USCITE_2026-09-11.json li
+#      cita per percorso completo nella riga 770511/InpSLLookback.
+#      Comando che li trova:
+#          find backtest_pipeline/risultati_prove -name "*r126a*" \
+#               -o -name "*r126b*"
+#      Questo round SI APPOGGIA a quei CSV, in due punti dichiarati:
+#      la conferma del blocco dei pin (LE ANCORE A) e la misura del
+#      determinismo (LE ANCORE B).
 # =====================================================================
 #  IL COSTO IN TEMPO MACCHINA -- MISURATO SU QUESTA SEDIA, A QUESTO
 #  DEPOSITO, SU QUESTO BANCO. Non stimato.
@@ -975,19 +1085,34 @@
 #  MAGIC VERGINE 779863, E L'ASSERZIONE E' ANCORATA A UN COMMIT, NON A
 #  UN ISTANTE (classe 365)
 # ---------------------------------------------------------------------
-#  Riferimento: HEAD `6caac9f8` di 'lavoro' ("Arma R172d-e ..."), che e'
-#  la punta del branch nel momento in cui questo file viene consegnato.
 #  Comando eseguito, nella forma imposta dalla classe 367 regola 2 --
 #  dalla RADICE del repo, `--exclude-dir=.git` e SENZA escludere
 #  `.claude/worktrees/`, dove vivono gli agenti paralleli (la domanda
 #  "questo valore e' vergine?" e' ISTANTANEA: i worktree VANNO inclusi):
 #      grep -rl "779863" --exclude-dir=.git .
-#  -> ZERO file. Stesso comando su "r173a" e "R173a" (con `grep -rIl`,
-#  per non contare i file binari): ZERO file.
-#  >>> CLASSE 382, DICHIARATA: dal momento in cui questo file e'
-#      salvato, quel grep torna UNO, e l'uno e' questa pagina (la riga
-#      `^InpMagic=` in fondo, piu' le citazioni qui sopra). Il numero
-#      nudo "ZERO" vale SOLO a `6caac9f8` e prima del commit.
+#  Stesso comando su "r173a" e "R173a" con `grep -rIl`, per non contare
+#  i file binari (`mql5\cheatsheet_rottura_vs_ritest.png` aggancia
+#  "r173" come sequenza di byte: e' un falso positivo, e la `-I` lo
+#  toglie -- detto perche' chi rifa' la ricerca senza `-I` lo trovera').
+#
+#  DUE LETTURE, A DUE COMMIT DIVERSI, ED E' IL PUNTO DELLA CLASSE 365:
+#    - alla STESURA, HEAD `6caac9f8` ("Arma R172d-e ..."):
+#        779863 -> ZERO file . r173a/R173a -> ZERO file
+#    - RIVERIFICATO IMMEDIATAMENTE PRIMA DELLA CONSEGNA, HEAD
+#      `3ddc61b3` ("Scrive R173a ..."):
+#        779863 -> UN file . r173a/R173a -> UN file
+#      e l'uno, in tutti e due i casi, e' QUESTA PAGINA.
+#  >>> CLASSE 382 E CLASSE 384 INSIEME, E VANNO DETTE INSIEME: fra le
+#      due letture la punta di 'lavoro' si e' mossa, e si e' mossa
+#      PORTANDOSI DENTRO QUESTO FILE (`3ddc61b3` e' il commit che lo
+#      aggiunge). Cioe' il "UNO" della seconda lettura non e' un
+#      difetto: e' questo file che e' diventato un match di se' stesso,
+#      esattamente come la classe 382 prevede. Nessun altro ha preso
+#      779863 in mezzo: la riserva 779862 resta libera.
+#  >>> E VA DETTO ANCHE QUESTO, perche' e' un fatto e non un dettaglio:
+#      `3ddc61b3` contiene una versione INTERMEDIA di questo file
+#      (1177 righe), scritta PRIMA delle correzioni di autoverifica.
+#      La versione buona e' quella che si legge adesso.
 #  >>> PERCHE' 779863 E NON IL SUCCESSIVO DELLA SEQUENZA, ed e' una
 #      scelta, non un caso. La classe 367 lo dice con una frase che va
 #      presa alla lettera: "le SEQUENZE sono il posto dove la 365
