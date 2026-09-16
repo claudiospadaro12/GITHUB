@@ -2446,3 +2446,55 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171b_slbufferpts_easytrend_GBPUSD.txt -Etichetta r171b -Modello 1 -Deposito 100000
 # =====================================================================
+#  R172a-b -- InpTrailStartR (R172a) + InpCloseHour (R172b), sedia
+#  770202 (ABTG_Dow_Apertura_US, U30USD M5). Primi due file su
+#  770202, la sedia viva PIU' SCOPERTA di tutta la flotta sulle
+#  uscite (10 manopole su 17 mai messe ad asse, verificato per
+#  enumerazione esaustiva) e una delle tre sedie del "terzetto"
+#  candidato al 1 ottobre.
+#
+#  Ancora: R54a (14/08/2026), la piu' forte della serie R162-R172:
+#  IS +2811,84 PF=1,22247 DD=5,6692% n=74 peggior giornata=-1,0062%;
+#  OOS +6721,93 PF=1,27013 DD=4,3941% n=130 peggior giornata=-1,0227%.
+#  Gemelli tecnici 772601/772602 identici al centesimo (rumore
+#  macchina zero), riprodotta indipendentemente da R46 riga 33.
+#  Banco -Modello 4 -Deposito 100000 letto dalla riga di lancio
+#  dell'ancora (lancia_r54.ps1 r.91, zero -Modello -> default del
+#  driver al commit dell'epoca). Finestra @FINOA 2026.06.30
+#  @FRAZIONEIS 0.40, verificata coincidere con
+#  CENSIMENTO_CONTRATTI.md r.197 (OOS 2025.06.10->2026.06.30) per due
+#  strade indipendenti (lettura del driver al commit + conto a mano).
+#  InpRiskPercent pinnato a 1,0 (taglia dell'ancora; la viva sul 100k
+#  e' 0,65 -- fattore di lettura dichiarato).
+#
+#  🔴 MERITO SOSPESO su entrambe le gambe (74 IS / 130 OOS uscite,
+#  sotto i 150 con qualunque fattore uscite/posizioni): si legge SOLO
+#  il rischio (Emendamento B). Zero preset cambia, zero accensione,
+#  zero forward. -TerminaleBacktest sempre C:\MT5_Backtest (demo
+#  50504400): i due terminali dove 770202 vive davvero (100k 50504263
+#  e piccolo 50503392) non si toccano, il reale 10105439 non e' mai
+#  un bersaglio.
+#
+#  Secondo cancello: PASS dopo 6 correzioni (commit 04230d37), due
+#  classi NUOVE: **380** (una banda +/-1 dove il criterio dichiarava
+#  +/-2 su una sentinella S1 BLOCCANTE -- avrebbe fermato una corsa
+#  sana, corretto a 72-76 su entrambi i file) e **381** (un tasso
+#  tick/minuto calcolato senza il denominatore delle giornate,
+#  sbagliato ~7x pur restando la conclusione valida). Piu' recidive
+#  classe 377 (citazione al documento sbagliato, scomposizione che non
+#  sommava, confronto pin non ricontato) e 379 (comando "riproducibile"
+#  che rieseguito dava un commit diverso, sostituito con forma stabile
+#  a istante UTC esplicito).
+#
+#  Pin: giro di pin e651729 (53mo, 2baac2c2 -> 16191264). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff 2baac2c2..16191264 su
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 e' VUOTO -- il merge
+#  nel mezzo porta solo referti automatici del runner). Bersaglio:
+#  banco C:\MT5_Backtest (50504400). Magic 789510/789520, vergini a
+#  HEAD (grep dalla radice, 8 worktree paralleli compresi). Entrambi
+#  -Modello 4 -Deposito 100000.
+# =====================================================================
+e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
+# =====================================================================
+e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
+# =====================================================================
