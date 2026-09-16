@@ -20989,3 +20989,104 @@ R167d la prosa sbagliata nascondeva un difetto vero (classe 370).
    e' larga/stretta **per una ragione**, si ricalcola il rapporto banda/ancora
    di **tutti i file fratelli** e si mette in tabella. Se l'ordine non torna,
    la ragione scritta e' falsa — e spesso, sotto, c'e' dell'altro (qui: 372).
+
+---
+
+## 374. 🔢🕳️ IL BORDO DELLA GRIGLIA IN VIRGOLA MOBILE FA SPARIRE UNA CELLA **SENZA UN AVVISO**, E I TRE CONTATORI DEL PROGETTO DANNO TRE NUMERI DIVERSI SULLO STESSO ASSE (controllo-preventivo, 16/09/2026)
+
+**Il caso reale.** I sei file `R169a-f` (`InpSLBufferATR` su `ABTG_PunteLarry`)
+vogliono **7 celle**: `0.00 0.05 0.10 0.15 0.20 0.25 0.30`. Scritto nel modo
+naturale — `InpSLBufferATR=0.1||0.0||0.05||0.30||Y` — **i tre modi di contare
+del progetto danno tre risposte, e due sono sbagliate**. Verificato eseguendo,
+non ragionando:
+
+| chi conta | formula | dove | celle con stop `0.30` | celle con stop `0.31` |
+|---|---|---|---:|---:|
+| il **driver** | `floor(\|stop-start\|/passo + 1e-9) + 1` | `walkforward_generico.ps1` r.792 | **7** | 7 |
+| il **cancello** | `int(\|stop-start\|/passo) + 1` | `controlla_prova.py` r.203 | 🔴 **6** | 7 |
+| la **generazione lineare** `start + i*passo` | — | qualunque ottimizzatore | 🔴 **6** | 7 |
+
+La causa e' una sola: **`0.30/0.05` in doppia precisione vale
+`5.999999999999999`**, non `6`. Il `+1e-9` del driver (che e' li' **apposta**,
+col commento che lo dice) recupera la cella; `controlla_prova.py` **non ce l'ha**
+e tronca a 5; e una generazione `start + i*passo` produce
+`0.0 + 6*0.05 = 0.30000000000000004`, che e' **maggiore** di `0.30` e quindi
+**esce dalla griglia**.
+
+🔴 **Il danno non e' il conteggio: e' che la cella di BORDO ALTO sparisce IN
+SILENZIO.** Nessuno stampa un errore. `-SoloControllo` direbbe 7, il CSV ne
+porterebbe 6, e chi legge darebbe la colpa al banco. E il bordo alto e'
+**proprio la cella che il file sta cercando di misurare** (qui: il buffer piu'
+largo, quello che dovrebbe abbassare il DD).
+
+### 🔴 LA REGOLA
+1. **Quando `(stop − start)` non e' un multiplo ESATTO del passo in binario
+   — cioe' praticamente sempre con passi tipo `0.05`, `0.1`, `0.3` — lo `stop`
+   si scrive MEZZO PASSO OLTRE l'ultima cella voluta** (qui `0.31` per un asse
+   che finisce a `0.30`). Costa zero e chiude tutti e tre i contatori.
+2. **E si DICHIARA nel file**, accanto alla riga dell'asse, che il bordo vero
+   e' `0.30` e che lo `0.31` e' un margine anti-virgola-mobile — altrimenti
+   chi legge il CSV cerca una cella `0.31` che non esistera' mai (i file
+   R169a-f lo fanno, ed e' il motivo per cui passano).
+3. **Il conteggio si verifica ESEGUENDO le tre formule**, non guardando la
+   griglia: `floor(x+1e-9)+1`, `int(x)+1`, e la lista `start+i*passo`. Se i tre
+   numeri non coincidono, la riga non si arma.
+4. 📌 **Il fix vero, dichiarato e non fatto qui**: `controlla_prova.py` r.203
+   dovrebbe usare lo stesso `+1e-9` del driver. Finche' non lo fa, i due
+   strumenti possono **dissentire sul numero di celle** e il file prova e'
+   l'unico posto dove la contraddizione viene notata.
+
+---
+
+## 375. 🪶⬇️ UN ROUND NUOVO **DECLASSA UN CAVEAT GIA' MISURATO** DA UN ROUND FRATELLO SULLA STESSA ANCORA: *"non e' bit-a-bit"* diventa *"gira ESATTAMENTE"*, e la sentinella smette di dire quello che misura (controllo-preventivo, 16/09/2026)
+
+**Il caso reale.** `R169a` (U30USD, ancora `R39a`) scriveva:
+
+> `S1 -- L'ANCORA. La cella VIVA (0.10) gira ESATTAMENTE finestra, modello,
+> deposito e cella di R39a. Deve riprodurne i numeri.`
+
+**Falso, e verificabile in dieci secondi aprendo l'ancora**:
+`prove/R39a_larry_u30usd.txt` **non ha `@FINOA` e non ha `@FRAZIONEIS`**. Cioe'
+la sua data di fine e' il **default del driver al giorno in cui e' girato**
+(agosto 2026), non `2026.06.30`; ed e' girato **splittato 40/60**, non a
+tranche unica. Il numero atteso, **54**, non e' un numero che R39a abbia mai
+stampato: e' **16 (IS) + 38 (OOS)**, l'unione di due gambe.
+
+🔴 **E la parte che fa di questo una classe**: quella ricostruzione, col suo
+caveat, **era gia' scritta** — in `R156a_maxdayshold_puntelarry_U30USD.txt`,
+lo **stesso motore, la stessa sedia, la stessa ancora**, sotto un titolo che
+non lascia scampo: *"L'ANCORA — ESISTE, MA NON E' BIT-A-BIT ... non da una
+configurazione identica"*. R169a ha **preso il numero e buttato via la misura
+che lo qualifica**, e al suo posto ha messo una motivazione diversa e
+sbagliata (*"non condividono lo stesso `Spread` nell'.ini (vedi sotto)"* — con
+un **"vedi sotto" che non punta a niente**, e con lo spread che in realta' e'
+lo stesso feed a tick in tutte e due le corse). Anche la banda del DD ha perso
+i due numeri che la generano (IS 1,7808% / OOS 3,8711%).
+
+**Perche' e' pericoloso e non cosmetico**: una sentinella dichiarata
+*"identita'"* viene letta come identita'. Se domani i Trades escono 51, chi
+legge conclude *"il banco e' sporco"* quando la spiegazione vera puo' essere
+banalmente **il punto di split diverso** — cioe' la sentinella non separa piu'
+le due ipotesi (stessa malattia della classe 178, arrivata per un'altra
+strada). E la differenza fra le due letture decide se il round prosegue.
+
+### 🔴 LA REGOLA
+1. **Quando si riusa un numero d'ancora che un round precedente ha gia'
+   pubblicato, si riusa anche il suo CAVEAT.** Si apre il file fratello e si
+   copia la qualificazione, non solo la cifra. Un numero senza il suo caveat e'
+   un numero diverso.
+2. 🔴 **"Gira ESATTAMENTE la finestra di X" si verifica APRENDO X e guardando
+   `@DAQUANDO` / `@FINOA` / `@FRAZIONEIS`.** Un file prova **senza `@FINOA`**
+   non ha una finestra riproducibile: la sua fine e' il giorno in cui e'
+   girato. Questo da solo vieta la parola "esattamente".
+3. 🔴 **Ogni banda porta, per NOME, le incognite che deve assorbire**
+   (classe 180). *"Perche' lo spread e' diverso"* e' una motivazione: se e'
+   falsa, la banda e' larga senza ragione e nessuno se ne accorge.
+4. 🔴 **Un `(vedi sotto)` / `(vedi sopra)` e' un CONTROLLO, non una cortesia**:
+   si verifica che il posto puntato esista. In R169a non esisteva.
+5. ✅ **Controprova che assolve il resto del lavoro**: sulle quattro gemelle a
+   finestra lunga (`R169b/d/e/f`) l'ancora e' `R103`, che ha finestra
+   (`2020.01.01 → 2026.06.30`), modello (`1`) e deposito (`100000`) **scritti e
+   verificati**, e li' la parola "ESATTAMENTE" e' **corretta**. La classe
+   colpisce l'UNICA sedia dove l'ancora era di qualita' diversa — che e'
+   esattamente dove un copia-incolla fra gemelli fa danno.

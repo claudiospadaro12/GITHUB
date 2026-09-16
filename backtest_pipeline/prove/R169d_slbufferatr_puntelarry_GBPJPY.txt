@@ -603,11 +603,22 @@
 #      BUCO gia' esistente (fra 779870 e 779880), che nessun contatore
 #      di sequenza produce per caso. Bruciare dei numeri costa meno che
 #      collidere.
+#  >>> RIVERIFICA DEL 16/09/2026 (secondo cancello, controllo-preventivo),
+#      ED E' LA VERIFICA CHE VALE OGGI: ricerca rifatta DALLA RADICE a
+#      HEAD di `lavoro` = `d1ddf1c0`, `grep -rl <valore> --exclude-dir=.git .`,
+#      SENZA escludere `.claude/worktrees/` -- e le uniche occorrenze dei
+#      sei valori 779871-779876 in TUTTO l'albero sono questi sei file
+#      prova e la loro copia nel worktree dell'agente che li ha scritti
+#      (`agent-a0167b1aca746f6f2`, contenuto identico, stesso lavoro).
+#      ZERO occorrenze estranee: i sei magic restano VERGINI.
 #  >>> ARBITRO, se malgrado tutto qualcuno avesse preso gli stessi
 #      (classe 367 regola 1): vince chi e' GIA' COMMITTATO su `lavoro`;
-#      a parita', vince chi e' ARMATO in CODA.txt. Questo file, al
-#      momento della consegna, NON e' armato e NON e' committato:
-#      quindi in caso di conflitto SI SPOSTA QUESTO, non l'altro.
+#      a parita', vince chi e' ARMATO in CODA.txt. AGGIORNATO IL 16/09:
+#      questo file ORA E' COMMITTATO su `lavoro` (commit `d1ddf1c0`),
+#      quindi la regola dell'arbitro gli da' la PRECEDENZA -- la riga
+#      precedente diceva "NON e' committato: si sposta questo", ed era
+#      vera al momento della stesura e FALSA dal commit in poi. Resta
+#      NON ARMATO in CODA.txt.
 #  ORDINE DEI ROUND: nessun altro file prova mette InpSLBufferATR ad
 #  asse su nessuna sedia di ABTG_PunteLarry (verificato per ricerca).
 #  Questo file non duplica niente in coda.

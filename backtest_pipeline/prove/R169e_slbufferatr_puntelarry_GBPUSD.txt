@@ -49,9 +49,24 @@
 #    r.650  sl  = gSigLow - buf  (o gSigHigh + buf) <- LO STOP
 #    r.665  riskDist = |px - sl|                    <- LA DISTANZA
 #    r.675  tp  = px +/- InpTP_R * riskDist         <- IL TARGET
+#                                                      !! NON SU QUESTA
+#                                                      SEDIA, vedi sotto
 #    r.687  lot = LotByRisk(riskDist)               <- IL LOTTO
-#  QUINDI: il cancello di costo SI MUOVE lungo l'asse, il TP si muove,
-#  il lotto si muove. Tre cose che nei round R160 erano ferme.
+#  QUINDI: il cancello di costo SI MUOVE lungo l'asse e il lotto si
+#  muove. DUE cose che nei round R160 erano ferme.
+#  !! E QUI LE COSE SONO DUE, NON TRE, ED E' UNA DIFFERENZA DI QUESTA
+#     SEDIA (e della gemella R169f EURCAD): 772345 gira
+#     `InpExitMode=0` (first profitable open, pin letto in R103), e il
+#     blocco del TP a r.672-685 sta TUTTO dentro `if(InpExitMode==1)`
+#     (r.673). Su questa sedia IL TP NON ESISTE, quindi il buffer NON
+#     puo' muoverlo. Sulle quattro gemelle a ExitMode=1 (R169a/b/c/d)
+#     le cose sono tre davvero.
+#     >>> CONSEGUENZA DA PORTARSI DIETRO LEGGENDO I NUMERI: qui l'asse
+#         agisce per MENO vie, quindi un effetto piu' piccolo NON e'
+#         di per se' una smentita del meccanismo -- e' l'atteso.
+#     >>> E `InpTP_R=1.5` e' quindi INERTE su questa sedia, esattamente
+#         come `InpAtrSlMult`: resta pinnato al valore dell'ancora e
+#         non tocca nessun numero. Dichiarato anche nei BUCHI.
 #  Ogni criterio di questo file e' scritto tenendone conto, e dove non
 #  posso misurare l'entita' dichiaro almeno IL VERSO (classe 362: un
 #  limite con il segno decide quanto un valore esatto).
@@ -222,7 +237,9 @@
 #               setup, non ricalcolato all'esecuzione: il buffer di un
 #               trade e' deciso una volta sola.
 #
-#    >>> I QUATTRO CANALI PER CUI L'ASSE PUO' MUOVERE I NUMERI,
+#    >>> I CANALI PER CUI L'ASSE PUO' MUOVERE I NUMERI -- SONO QUATTRO
+#        NELLA FAMIGLIA, MA QUI NE SONO VIVI TRE: il (ii) e' SPENTO
+#        per costruzione su questa sedia (ExitMode=0, nessun TP),
 #        elencati per nome (mai "tutto il resto", classe 180):
 #      (i)   LA DISTANZA DI STOP, r.665. Buffer piu' grande = stop piu'
 #            lontano = meno stop-out, perdite singole piu' grandi.
@@ -560,9 +577,12 @@
 #      stesso comportamento di ogni round di questa classe.
 #    - InpTP_R / InpSLMode / InpPatternMode / InpExitMode /
 #      InpMaxDaysHold: NON sono l'asse. Pinnati al valore vivo
-#      dell'ancora R103, invariati. InpAtrSlMult e' INERTE per
-#      costruzione con InpSLMode=0 (r.638-653: il ramo che la usa e'
-#      l'else) e resta pinnato: essendo inerte non tocca nessun numero.
+#      dell'ancora R103, invariati. E QUI GLI INERTI SONO DUE, NON UNO,
+#      e li elenco per nome: InpAtrSlMult e' INERTE con InpSLMode=0
+#      (r.638-653: il ramo che la usa e' l'else) E **InpTP_R E' INERTE
+#      con InpExitMode=0** (r.673: il blocco del TP e' tutto dentro
+#      `if(InpExitMode==1)`). Tutti e due restano pinnati al valore
+#      dell'ancora: essendo inerti non toccano nessun numero.
 #    - TEMPO MACCHINA: [STIMATO] ~20-25 minuti (7 passate lunghe + 7 corte). Non e' una misura: e' un ordine di grandezza da verificare al primo giro.
 #
 #  MAGIC VERGINE 779875, e il blocco dei sei gemelli e'
@@ -595,11 +615,22 @@
 #      BUCO gia' esistente (fra 779870 e 779880), che nessun contatore
 #      di sequenza produce per caso. Bruciare dei numeri costa meno che
 #      collidere.
+#  >>> RIVERIFICA DEL 16/09/2026 (secondo cancello, controllo-preventivo),
+#      ED E' LA VERIFICA CHE VALE OGGI: ricerca rifatta DALLA RADICE a
+#      HEAD di `lavoro` = `d1ddf1c0`, `grep -rl <valore> --exclude-dir=.git .`,
+#      SENZA escludere `.claude/worktrees/` -- e le uniche occorrenze dei
+#      sei valori 779871-779876 in TUTTO l'albero sono questi sei file
+#      prova e la loro copia nel worktree dell'agente che li ha scritti
+#      (`agent-a0167b1aca746f6f2`, contenuto identico, stesso lavoro).
+#      ZERO occorrenze estranee: i sei magic restano VERGINI.
 #  >>> ARBITRO, se malgrado tutto qualcuno avesse preso gli stessi
 #      (classe 367 regola 1): vince chi e' GIA' COMMITTATO su `lavoro`;
-#      a parita', vince chi e' ARMATO in CODA.txt. Questo file, al
-#      momento della consegna, NON e' armato e NON e' committato:
-#      quindi in caso di conflitto SI SPOSTA QUESTO, non l'altro.
+#      a parita', vince chi e' ARMATO in CODA.txt. AGGIORNATO IL 16/09:
+#      questo file ORA E' COMMITTATO su `lavoro` (commit `d1ddf1c0`),
+#      quindi la regola dell'arbitro gli da' la PRECEDENZA -- la riga
+#      precedente diceva "NON e' committato: si sposta questo", ed era
+#      vera al momento della stesura e FALSA dal commit in poi. Resta
+#      NON ARMATO in CODA.txt.
 #  ORDINE DEI ROUND: nessun altro file prova mette InpSLBufferATR ad
 #  asse su nessuna sedia di ABTG_PunteLarry (verificato per ricerca).
 #  Questo file non duplica niente in coda.

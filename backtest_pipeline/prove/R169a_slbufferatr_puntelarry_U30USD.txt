@@ -243,8 +243,10 @@
 #     stessa frontiera usata da R154a/R155a/R156a sulla stessa coppia
 #     simbolo/gruppo). La finestra intera di questo round ci sta dentro,
 #     quindi qui si gira a TICK REALI e non a OHLC di screening.
-#  b) NESSUN TAGLIO IS/OOS, E NON E' PIGRIZIA. Frequenza NOTA: l'ancora
-#     R39a misura ~54 posizioni sulla finestra, che dura
+#  b) NESSUN TAGLIO IS/OOS, E NON E' PIGRIZIA. Frequenza NOTA: le due
+#     gambe d'archivio di R39a fanno 16 (IS) + 38 (OOS) = ~54 posizioni
+#     sulla finestra -- numero RICOSTRUITO per unione, non stampato da
+#     una corsa sola: fonte e caveat in S1 e in R156a. La finestra dura
 #       2024.09.26 -> 2026.06.30 = 642 giorni = 1,76 anni
 #     cioe' ~30,7 posizioni/anno (contato da me, non copiato).
 #     Tagliare a meta' darebbe due gambe da ~27 posizioni: ENTRAMBE
@@ -337,20 +339,49 @@
 # ---------------------------------------------------------------------
 #  LE SENTINELLE -- SI CONTROLLANO PRIMA DI QUALUNQUE ALTRO NUMERO
 #
-#  S1 -- L'ANCORA. La cella VIVA (0.10) gira ESATTAMENTE finestra,
-#    modello, deposito e cella di R39a (prove/R39a_larry_u30usd.txt,
-#    header "-Deposito 100000"). Deve riprodurne i numeri.
+#  S1 -- L'ANCORA -- !! ESISTE, MA NON E' BIT-A-BIT, E QUESTA E'
+#    L'UNICA DELLE SEI SEDIE DOVE NON LO E'. Lo scrivo per esteso
+#    perche' la prima stesura di questo file diceva "la cella VIVA
+#    gira ESATTAMENTE finestra, modello, deposito e cella di R39a", e
+#    quella frase e' FALSA: R39a (prove/R39a_larry_u30usd.txt) NON HA
+#    ne' '@FINOA' ne' '@FRAZIONEIS'. Cioe':
+#      - la sua data di FINE e' il default del driver al giorno in cui
+#        e' girato (agosto 2026), NON 2026.06.30;
+#      - e' girato SPLITTATO 40/60, non a tranche unica.
+#    Sulle gemelle a finestra lunga (R169b/d/e/f) l'ancora e' R103, che
+#    ha finestra, modello e deposito SCRITTI e verificabili, e li' la
+#    parola "ESATTAMENTE" e' corretta. Qui no.
+#
+#    >>> DA DOVE VIENE IL 54, visto che R39a non l'ha mai stampato su
+#        una tranche sola: e' l'UNIONE DELLE DUE GAMBE gia' in archivio
+#        -- IS Trades=16 + OOS Trades=38 = 54 -- due sotto-periodi
+#        CONTIGUI E DISGIUNTI che coprono l'intera finestra di questo
+#        round. L'aritmetica non e' mia: e' gia' scritta e motivata in
+#        prove/R156a_maxdayshold_puntelarry_U30USD.txt (blocco
+#        "L'ANCORA -- ESISTE, MA NON E' BIT-A-BIT"), lo stesso round
+#        gemello sulla STESSA sedia e con la STESSA ancora. Citarla
+#        senza il suo caveat sarebbe stato prendere il numero e
+#        buttare via la misura che lo qualifica.
 #      attesi: Trades in banda 49-59 (54 +/-10%)
 #              Equity DD% in banda 1,0% - 6,0%
 #    PERCHE' DUE BANDE E NON DUE NUMERI SECCHI, col criterio scritto
 #    (classe 373: ogni larghezza porta il suo criterio):
 #      - Trades: +/-10% del valore d'ancora, criterio FRAZIONE
-#        DELL'ANCORA. Non e' identico come sulle gemelle a finestra
-#        lunga perche' R39a e questo round non condividono lo stesso
-#        `Spread` nell'.ini (vedi sotto) e su un motore a pendenti la
-#        differenza di spread puo' spostare qualche riempimento.
-#      - DD: banda 1,0%-6,0%, criterio PUNTI PIENI, larga di proposito
-#        perche' il DD di una corsa dipende dall'ordine degli eventi.
+#        DELL'ANCORA. LE DUE INCOGNITE CHE LA BANDA DEVE ASSORBIRE,
+#        elencate per nome (classe 180, mai "eccetera"): (1) se il
+#        punto di split 40/60 usato da R39a cade esattamente dove lo
+#        farebbe cadere questo run, e (2) se il feed a tick del broker
+#        e' bit-identico oggi a quello di allora. NON e' una banda
+#        "per lo spread": lo spread qui e' quello dei tick storici in
+#        tutte e due le corse.
+#      - DD: banda 1,0%-6,0%, criterio PUNTI PIENI. E la larghezza ha
+#        un numero sotto, non un'impressione: R39a misura DD IS
+#        1,7808% e DD OOS 3,8711% su DUE equity curve INDIPENDENTI
+#        (deposito resettato al confine, come in ogni walk-forward).
+#        Una corsa CONTINUA puo' avere un DD diverso da tutte e due --
+#        una perdita a cavallo del confine non e' visibile in nessuna
+#        delle due meta' -- quindi la banda si allarga SOTTO il minimo
+#        delle due (1,78 -> 1,0) e SOPRA il massimo (3,87 -> 6,0).
 #    >>> Se Trades cade fuori dalla banda, il banco e' diverso da
 #        quello di R39a: CI SI FERMA, e non si legge nessuna delle
 #        altre sei celle.
@@ -593,11 +624,22 @@
 #      BUCO gia' esistente (fra 779870 e 779880), che nessun contatore
 #      di sequenza produce per caso. Bruciare dei numeri costa meno che
 #      collidere.
+#  >>> RIVERIFICA DEL 16/09/2026 (secondo cancello, controllo-preventivo),
+#      ED E' LA VERIFICA CHE VALE OGGI: ricerca rifatta DALLA RADICE a
+#      HEAD di `lavoro` = `d1ddf1c0`, `grep -rl <valore> --exclude-dir=.git .`,
+#      SENZA escludere `.claude/worktrees/` -- e le uniche occorrenze dei
+#      sei valori 779871-779876 in TUTTO l'albero sono questi sei file
+#      prova e la loro copia nel worktree dell'agente che li ha scritti
+#      (`agent-a0167b1aca746f6f2`, contenuto identico, stesso lavoro).
+#      ZERO occorrenze estranee: i sei magic restano VERGINI.
 #  >>> ARBITRO, se malgrado tutto qualcuno avesse preso gli stessi
 #      (classe 367 regola 1): vince chi e' GIA' COMMITTATO su `lavoro`;
-#      a parita', vince chi e' ARMATO in CODA.txt. Questo file, al
-#      momento della consegna, NON e' armato e NON e' committato:
-#      quindi in caso di conflitto SI SPOSTA QUESTO, non l'altro.
+#      a parita', vince chi e' ARMATO in CODA.txt. AGGIORNATO IL 16/09:
+#      questo file ORA E' COMMITTATO su `lavoro` (commit `d1ddf1c0`),
+#      quindi la regola dell'arbitro gli da' la PRECEDENZA -- la riga
+#      precedente diceva "NON e' committato: si sposta questo", ed era
+#      vera al momento della stesura e FALSA dal commit in poi. Resta
+#      NON ARMATO in CODA.txt.
 #  ORDINE DEI ROUND: nessun altro file prova mette InpSLBufferATR ad
 #  asse su nessuna sedia di ABTG_PunteLarry (verificato per ricerca).
 #  Questo file non duplica niente in coda.
