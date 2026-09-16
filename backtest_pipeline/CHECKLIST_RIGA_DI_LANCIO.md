@@ -20752,3 +20752,78 @@ per l'albero, e un `git commit -a` (o un `add -A`) altrui lo assorbe.
    condiviso: si elencano i percorsi, sempre — non perche' protegga lo stage
    (non protegge), ma perche' impedisce di **assorbire il lavoro altrui** ed
    e' l'unica meta' del problema che dipende da noi.
+
+## 369. IL "VALORE VIVO" DI UNA MANOPOLA LETTO NEL **DEFAULT COMPILATO** INVECE CHE NEL **PRESET** CHE CONFIGURA LA SEDIA — e la stessa distrazione, un paragrafo piu' sotto, legge la POSIZIONE di una colonna su un CSV scritto da un binario piu' vecchio (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `backtest_pipeline/prove/R165a_slbufferpips_superwave_U30USD.txt`
+(commit `34d6cf4e`) mette ad asse `InpSLBufferPips` sulla sedia `770511`
+(`ABTG_SuperWave_DOW_H1_Ottimizzato`, U30USD H1). La sua **scoperta di merito**,
+quella per cui il round vale la pena, e' che **in campo quella manopola e'
+inerte**: `PipSize()` su uno strumento a 2 decimali torna `_Point`, quindi
+`InpSLBufferPips = 3` vale **0,03 punti indice** su uno stop mediano di 77,10
+(lo 0,04%).
+
+Il file dimostrava il "3" con **due** fonti: il **default compilato** del
+sorgente (r.79) e i **CSV d'archivio** (colonna costante a 3). **Il preset che
+configura davvero la sedia non veniva mai aperto.**
+
+🟢 **La conclusione era VERA** — `mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set`
+r.24 dice `InpSLBufferPips=3.0`. Ma era vera **per fortuna**: un `.set` puo'
+sovrascrivere qualunque default senza dirlo a nessuno, ed e' **l'unico
+artefatto che governa la sedia in campo**. Un CSV d'archivio e un default
+compilato sono **controprove**, non la fonte.
+
+🔴 **E la meta' che faceva davvero danno era l'ALTRA manopola.** Il ramo del
+codice e' un **ternario, non una somma**:
+`buf = (InpSLBufferAtr>0 && atrDist>0) ? InpSLBufferAtr*atrDist : InpSLBufferPips*pip;`
+Con `InpSLBufferAtr > 0` in campo, `InpSLBufferPips` non sarebbe *"quasi
+nullo"*: sarebbe **COMPLETAMENTE IGNORATO**, e il titolo del round
+(*"la manopola che gira da luglio senza fare niente"*) descriverebbe uno stato
+**diverso**, con una causa diversa e una riparazione diversa. Il file pinnava
+`InpSLBufferAtr=0` **per il ROUND** — corretto — ma **non aveva mai verificato
+che valesse 0 anche IN CAMPO**. La verifica vera e' l'**ASSENZA della riga** nel
+`.set` (contate: 50 righe, **zero** occorrenze di `InpSLBufferAtr`), che lascia
+in piedi il default 0.
+👉 E' la **classe 350 spostata di un passo**: li' erano due stati diversi dello
+stesso censimento (*"mai mossa e viva"* vs *"mai mossa ma inerte"*), qui sono
+**"inerte perche' vale 0,03"** e **"ignorata perche' un'altra manopola si
+prende il ramo"**.
+
+🔴 **LA SECONDA FACCIA, STESSA CAUSA: l'artefatto aperto non e' quello che il
+round produrra'.** Lo stesso file scriveva, nella sentinella S3, che
+`InpSLBufferPips` *"e' la 27esima nell'intestazione vera dei CSV di questa
+sedia, aperta oggi"*. **Vero di quel CSV, falso di quelli che questo round
+scrivera'.** L'intestazione la costruisce `OnTesterDeinit` (r.760-763) come
+**8 statistiche cablate + i NOMI degli input nell'ORDINE DI DICHIARAZIONE**: il
+CSV d'archivio e' di un binario **precedente** (non ha `InpUsaGuardian`,
+`InpPendingAtr`, `InpSLBufferAtr`, `InpLogImbuto`), mentre col binario
+**pinnato** gli input dichiarati prima sono **20**, quindi la colonna sara' la
+**29esima**. Chi leggesse la 27esima nel CSV nuovo prenderebbe
+`InpPendingExpiryBars` (costante a 3) e vedrebbe **un asse fermo**: S3
+fallirebbe per un difetto di **lettura**, non della corsa.
+
+🟢 **E la parte che si salvava da sola, perche' un elenco di soli difetti
+descrive male la realta':** S3 e' scritta *"nella colonna omonima"*, cioe' **per
+nome**, quindi nessuna sentinella si sarebbe rotta davvero. Il numero sbagliato
+stava nella **prosa che spiega**, non nella **regola che decide** — ed e'
+esattamente la separazione della classe 347, vista stavolta dal lato buono.
+
+### REGOLA
+1. 🔴 **Il valore VIVO di un input si legge nel `.set` della sedia. Punto.**
+   Default compilato e CSV d'archivio valgono come **controprove concordanti**,
+   mai come fonte. Se le tre concordano si scrive che concordano **e in
+   quale ordine di autorita'**.
+2. 🔴 **Quando un input ne DISATTIVA un altro (ternario, `IGNORA X`, gate
+   `if`), la verifica in campo e' DOPPIA**: il valore della manopola misurata
+   **e** lo stato di quella che potrebbe scavalcarla. E quando l'assenza della
+   riga nel `.set` e' cio' che tiene in piedi il default, **l'assenza si
+   conta** (`grep -c`, numero di righe), non si assume.
+3. 🔴 **Una colonna di CSV si cita per NOME; se si cita anche la posizione, la
+   posizione va calcolata sul BINARIO PINNATO dal round**, non su un CSV
+   d'archivio. Regola pratica: un artefatto d'archivio prova cio' che e'
+   **cablato** (le 8 statistiche di `OnTesterDeinit`), **non** cio' che dipende
+   dalla lista degli input.
+4. 📌 Corollario che vale per tutti i file prova: **le citazioni interne per
+   numero di riga scadono** appena qualcuno corregge il file. Un pin si cerca
+   con `^InpMagic=`, non con `r.1182` — e infatti `R166a` r.1038 citava
+   `R165a` r.1182, che dopo queste correzioni e' la 1254.

@@ -169,6 +169,33 @@
 #      InpSLBufferPips = N  ->  buffer = N/100 punti indice
 #  Il valore VIVO e' 3, cioe' un buffer di 0,03 punti indice su uno
 #  stop mediano misurato di 77,10: lo 0,04%.
+#  >>> E IL "VALORE VIVO" SI LEGGE DOVE LA SEDIA E' DAVVERO
+#      CONFIGURATA, cioe' nel PRESET, non nel default del sorgente.
+#      L'artefatto e' mql5\Presets\sedie_piccolo\recupero2\
+#      sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set, e dice DUE
+#      cose, tutte e due necessarie perche' questo round esista:
+#        r.24  InpSLBufferPips=3.0  -> il buffer in campo vale 0,03
+#              punti indice, ed e' il numero di sopra;
+#        InpSLBufferAtr -> LA RIGA NON C'E'. Il .set non lo nomina
+#              (contate: 50 righe, ZERO occorrenze di
+#              `InpSLBufferAtr`), quindi MT5 tiene il DEFAULT COMPILATO
+#              (sorgente r.80 = 0) e SOLO PER QUESTO il ramo attivo di
+#              r.367 in campo e' quello in pip.
+#      >>> E IL SECONDO PUNTO NON E' UN DETTAGLIO, PERCHE' r.367 E' UN
+#          TERNARIO E NON UNA SOMMA: con InpSLBufferAtr > 0 in campo
+#          InpSLBufferPips non sarebbe "quasi nullo", sarebbe
+#          COMPLETAMENTE IGNORATO. "INERTE perche' vale 0,03 punti" e
+#          "IGNORATO perche' un'altra manopola si prende il ramo" sono
+#          DUE STATI DIVERSI della stessa manopola, e questo file parla
+#          del PRIMO. La prova che e' quello giusto e' l'ASSENZA della
+#          riga nel .set -- non il default del sorgente, che il preset
+#          avrebbe potuto sovrascrivere senza dirlo a nessuno.
+#      (CORREZIONE DEL CANCELLO, 16/09/2026, classe 369 nuova: la
+#       stesura consegnata leggeva il valore vivo dal DEFAULT COMPILATO
+#       (r.79) e dai CSV d'archivio, e il preset non lo apriva mai. La
+#       risposta non cambia -- il .set dice 3.0 e tace su
+#       InpSLBufferAtr -- ma la catena di prove non toccava l'unico
+#       artefatto che governa la sedia in campo.)
 #  >>> E NON LO STO DEDUCENDO IO: il sorgente lo scrive in chiaro, in
 #      un commento dentro Enter(), r.357-358 -- "le distanze 'in pip'
 #      sono INERTI sugli strumenti a 2 decimali. PipSize() torna
@@ -205,6 +232,16 @@
 #     sull'intestazione vera di un CSV di questa sedia
 #     (risultati_prove\ABTG_SuperWave_DOW_H1_Ottimizzato\
 #      ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS.csv, riga 1).
+#     >>> E LA PARTE CHE VALE E' LA PRIMA, non l'intera riga: le OTTO
+#         statistiche sono CABLATE nello StringFormat di OnTesterDeinit
+#         (r.766-767) e non cambiano col binario -- e' li' che si legge
+#         "nessuna colonna e' lo stop", ed e' definitivo. Il BLOCCO
+#         degli input, invece, cambia con la lista degli input: quel CSV
+#         d'archivio e' di un binario piu' vecchio (niente
+#         InpUsaGuardian / InpPendingAtr / InpSLBufferAtr /
+#         InpLogImbuto). Vedi S3 per la conseguenza sulla POSIZIONE
+#         delle colonne, che e' l'unica cosa che l'eta' dell'artefatto
+#         sposta davvero.
 #  2. IL CANALE PER-TRADE NON SERVE E NON VIENE RACCOLTO. ExportTrades
 #     scrive close_time, symbol, magic, position_id, deal_type,
 #     volume, price, net_profit: niente SL, niente prezzo d'ingresso.
@@ -231,7 +268,11 @@
 #  MA la sua riga "TUTTO" (mediana 2,00) e' pesata sui TICK, e i tick
 #  di U30USD stanno per il 69,3% nelle ore 14-21 (44.831.814 su
 #  64.711.285, sommate oggi riga per riga), dove lo spread mediano e'
-#  1,9-2,0. Questa sedia in campo e' entrata SEI volte su OTTO FUORI
+#  1,8-2,0 (ore 14-15 a 2,00, ore 16-20 a 1,90, ora 21 a 1,80: la
+#  stesura precedente scriveva "1,9-2,0" e dimenticava l'ora 21 --
+#  corretto dal cancello, e l'errore andava nel verso che INDEBOLIVA
+#  l'argomento, non che lo gonfiava). Questa sedia in campo e' entrata
+#  SEI volte su OTTO FUORI
 #  da quella fascia. Usare la riga TUTTO vorrebbe dire spiegare un
 #  fenomeno che accade per BARRE con un riferimento guidato dal flusso
 #  dei tick: e' la classe 363 alla lettera.
@@ -461,9 +502,13 @@
 #    aritmetico, MAI un elenco esplicito).
 #
 #    BORDO BASSO 3 -- E NON E' UN PUNTO DELL'ESPERIMENTO, E' L'ANCORA.
-#      E' il valore VIVO della sedia, letto nel sorgente (r.79) e
-#      confermato in tutti i CSV d'archivio (colonna InpSLBufferPips =
-#      3 in ogni riga). Vale 0,03 punti indice, cioe' e' inerte. Sta
+#      E' il valore VIVO della sedia, letto nel PRESET che la configura
+#      (sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set r.24,
+#      `InpSLBufferPips=3.0`), poi confermato nel default compilato
+#      (sorgente r.79) e in tutti i CSV d'archivio (colonna
+#      InpSLBufferPips = 3 in ogni riga). Le tre fonti concordano, e
+#      l'ORDINE conta: il preset e' quello che decide, gli altri due
+#      sono controprove. Vale 0,03 punti indice, cioe' e' inerte. Sta
 #      qui per UNA ragione: e' la stessa identica cella di r120e11, che
 #      e' gia' girata su questo banco a questo deposito, e quindi da'
 #      a S1 un'uguaglianza STRETTA invece di una banda.
@@ -750,11 +795,26 @@
 #      Se sono 5 o 7, si dichiara quale cella manca o avanza PRIMA di
 #      leggere il resto.
 #    S3 -- SEI VALORI DISTINTI di InpSLBufferPips nella colonna
-#      omonima del CSV (3 / 1003 / 2003 / 3003 / 4003 / 5003). La
-#      colonna esiste: e' la 27esima nell'intestazione vera dei CSV di
-#      questa sedia, aperta oggi. S3 dice che l'asse e' stato
-#      spazzolato. NON dice che ha avuto effetto: per quello serve S5
-#      (classe 357).
+#      omonima del CSV (3 / 1003 / 2003 / 3003 / 4003 / 5003).
+#      >>> E LA COLONNA SI CERCA PER NOME, MAI PER POSIZIONE, e il
+#          motivo e' un numero che questo file aveva scritto sbagliato
+#          (corretto dal cancello il 16/09, classe 369): l'intestazione
+#          e' 8 statistiche + i NOMI degli input nell'ORDINE DI
+#          DICHIARAZIONE del sorgente (OnTesterDeinit r.760-763,
+#          FrameInputs). Nel CSV d'archivio aperto oggi
+#          (..._U30USD_IS.csv) InpSLBufferPips e' la 27esima -- ma quel
+#          file e' stato scritto da un BINARIO PIU' VECCHIO, che non
+#          aveva ancora InpUsaGuardian, InpPendingAtr, InpSLBufferAtr e
+#          InpLogImbuto. Col binario PINNATO da questo round (HEAD,
+#          byte-identico a quello di r120e11) gli input dichiarati
+#          prima di InpSLBufferPips sono 20, quindi la colonna sara' la
+#          **29esima**, non la 27esima. Chi leggesse la 27esima nel CSV
+#          NUOVO si porterebbe a casa InpPendingExpiryBars (= 3 in ogni
+#          riga, costante) e vedrebbe un asse FERMO: cioe' S3 fallirebbe
+#          per un difetto di lettura, non per un difetto della corsa.
+#          Si legge l'intestazione.
+#      S3 dice che l'asse e' stato spazzolato. NON dice che ha avuto
+#      effetto: per quello serve S5 (classe 357).
 #    S4 -- LA CLAMP minDist NON E' UNA SPIEGAZIONE ALTERNATIVA, ED E'
 #      ALGEBRICO. r.372: minDist = MathMax(buf, STOPS_LEVEL*_Point);
 #      r.371: risk = baseStop + buf.
@@ -1022,6 +1082,23 @@
 #  consegnato -- verificata con `git fetch` nello stesso minuto, non
 #  all'inizio del lavoro. Cercati su TUTTO l'albero di quel commit:
 #  779828 -> ZERO occorrenze, 779829 -> ZERO occorrenze (riserva).
+#  >>> RIVERIFICATO DAL CANCELLO IL 16/09, a file gia' committato, con
+#      la forma imposta dalla classe 367 r.2 (dalla RADICE del repo,
+#      `--exclude-dir=.git` e SENZA escludere `.claude/worktrees/`, dove
+#      vivono gli agenti paralleli). Alla punta 34d6cf4e:
+#        `InpMagic=779828` -> UNA sola occorrenza operativa, la riga di
+#        pin in fondo a QUESTO file (r.1254 dopo le correzioni del
+#        cancello; era la 1182 alla consegna, ed e' il motivo per cui
+#        una citazione fatta ALTROVE per numero di riga -- R166a r.1038
+#        -- e' gia' stale: il pin si cerca per `^InpMagic=`, non per
+#        indice)
+#        (piu' la copia identica nel worktree del suo
+#        stesso agente, che e' lo stesso file, e due CITAZIONI in prosa
+#        -- R166a r.1038 e la checklist -- che non sono pin);
+#        779829 -> nessun pin, resta la riserva;
+#        etichetta `r165a` -> nessun'altra prova, nessuna cartella in
+#        risultati_prove\, nessuna riga in CODA.txt.
+#      La 365 NON si e' ripetuta una terza volta.
 #  >>> E DURANTE LA SCRITTURA DI QUESTO FILE LA PUNTA SI E' MOSSA DUE
 #      VOLTE (51e60cde -> 2d8766eb -> 02112512). E' il motivo per cui
 #      la verifica si rifa' e non si ricorda.
