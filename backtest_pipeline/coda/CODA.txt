@@ -2679,3 +2679,68 @@ cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173b_tp1r_superwave_U30USD.txt -Etichetta r173b -Modello 4 -Deposito 100000
 # =====================================================================
+#  R172f-g -- InpTrailTF (R172f) + InpCloseAtEnd (R172g), sedia 770202
+#  (ABTG_Dow_Apertura_US, U30USD M5). Sesto e settimo file della serie
+#  su questa sedia (dopo a/b/c/d/e). Stesso banco/ancora R54a, stesso
+#  bersaglio C:\MT5_Backtest (50504400).
+#
+#  R172f, InpTrailTF (ENUM_TIMEFRAMES): asse a 11 celle (membri
+#  dell'enum fra M1 e M30, il conto aritmetico direbbe 30 -- NON e' il
+#  numero giusto, controlla_prova.py lo segnala apposta). Scoperta che
+#  vale la serata, gemella di quella di R172d: un trailing su TF piu'
+#  stretto porta lo stop sopra l'entry prima (stessa catena a cascata
+#  di InitialSL()/riskDist del breakeven indipendente), quindi sposta
+#  ANCHE il bersaglio della parziale -- ma in senso OPPOSTO a quanto
+#  la proprieta' originale (A)/sentinella S3 del file assumeva
+#  ("Trades non decrescente"): la scoperta stessa spinge Trades
+#  nell'altro verso su celle stringenti. Il secondo cancello ha
+#  trovato che una sentinella bloccante scritta come claim direzionale
+#  avrebbe potuto sopprimere il miglior risultato vero del round
+#  (**classe NUOVA 387**) -- riscritta a limite aritmetico (piano/
+#  soffitto sui Trades, numeri invariati), non a monotonia di segno.
+#
+#  R172g, InpCloseAtEnd (2 celle, ON/OFF): chiude la famiglia
+#  InpCloseAtEnd su questa sedia. Verificata la guardia anti-doppia-
+#  chiusura: scatta al tick DOPO il cambio di giorno (non "subito"),
+#  per l'ordine delle chiamate dentro ABTG_OnTick() -- la conclusione
+#  del file non cambia, solo la citazione del meccanismo.
+#
+#  Fattore uscite/posizioni MISURATO su entrambi (56 posizioni IS, 96
+#  OOS, da R46b, come i fratelli a-e). Merito sospeso. Zero preset
+#  cambia, zero forward.
+#
+#  Secondo cancello: PASS dopo 10 correzioni totali (7 su R172f, 3 su
+#  R172g; commit d20e0e0b/43934665), oltre alla classe 387 sopra:
+#  citazione di riga corretta (r.1861/1864 di InitialSL(), non r.1862),
+#  due miscount da classe 382 (grep spostato di un'unita' da un file
+#  fratello entrato nello stesso commit), una falsa giustificazione a
+#  "precisione di stampa" per la banda di Peggior Giornata % (la banda
+#  e' deliberatamente piu' larga in assoluto, non forzata dai decimali
+#  -- numero invariato), un riferimento incrociato "[DERIVATO, vedi
+#  B7]" senza l'aritmetica sotto (aggiunta: 149,5-4+10=155,5, /2,00=
+#  77,8x), un conteggio non riproducibile perche' basato su file
+#  rigenerati ogni notte (sostituito con un ordine di grandezza),
+#  e su R172g una citazione di riga fuori posto (r.564, non r.558-563).
+#  Due rilievi NON bloccanti, lasciati a chi governa CODA.txt per
+#  decisione, non da un cancello (classe 386): la stessa falsa
+#  giustificazione sulla banda Peggior Giornata % e' identica sui
+#  cinque fratelli GIA' ARMATI (a-e); e resta da verificare se le S3 di
+#  R172a/b abbiano lo stesso punto cieco direzionale di R172f (il
+#  cancello si e' rifiutato di accusare senza avere riletto quei file).
+#
+#  Pin: giro di pin 43934665 (59mo, 2b687789 -> 43934665). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Riverificato al pin di armamento, non solo a HEAD al
+#  momento della scrittura: git diff 8b922147 43934665 sul sorgente EA
+#  torna 27 inserzioni/zero cancellazioni, UNA sola riga input
+#  (InpUsaGuardian=true, fail-open nel Tester) -- identico a quanto i
+#  file dichiarano, la banda +/-2 su Trades non si stringe. Bersaglio:
+#  banco C:\MT5_Backtest (50504400). Magic 789570/789580, vergini a
+#  HEAD (grep dalla radice, worktree compresi; 789570 compare anche
+#  citato per nome dentro R172g come riferimento incrociato al
+#  fratello, non come proprio magic -- non e' una collisione).
+# =====================================================================
+439346653641e97cdc26981646c40f581b5a2c02 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
+# =====================================================================
+439346653641e97cdc26981646c40f581b5a2c02 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
+# =====================================================================
