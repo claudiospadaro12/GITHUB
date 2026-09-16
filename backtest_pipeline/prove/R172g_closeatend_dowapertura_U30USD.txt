@@ -132,7 +132,10 @@
 #         punti MT5 = 5 punti indice (Point 0.01, sonda r.71) ed e' un
 #         PAVIMENTO che morde solo se lo stop scende sotto 5 punti
 #         indice (r.1324-1327, ramo RETEST); lo stop di questa cella e'
-#         dell'ordine dei 155 punti indice [DERIVATO, vedi B7].
+#         dell'ordine dei 155 punti indice [DERIVATO: B7 sotto da' 77,8x
+#         su uno spread di 2,00 idx; il conto per esteso -- range 35'
+#         149,5 idx, meno l'offset 4, piu' il buffer 10 = 155,5 -- sta
+#         in R172a r.1087-1095].
 #         `InpSkipIfTight` decide cosa fare QUANDO quel pavimento morde
 #         (r.1326): se non morde mai, non viene nemmeno letto. Sono
 #         [DERIVATE] inerti, NON misurate: chi le prendera' lo dichiari.
@@ -333,7 +336,8 @@
 #    r.539-542  ABTG_OnTick(): la PRIMA istruzione e' ManagePosition()
 #    r.547-555  guardia anti-duplicato: se gPhase e' PH_WAIT_OPEN o
 #               PH_BUILDING e SelectMyPosition() e' vera -> PH_PLACED
-#    r.558-563  cambio di giorno -> ResetDay()
+#    r.558-564  cambio di giorno (il confronto e' r.561, la chiamata a
+#               `ResetDay()` e' r.564)
 #    r.613-616  il flat: se l'orologio ha passato InpCloseHour:InpCloseMin
 #               -> EndOfSession() e `return`
 #    r.695-697  case PH_PLACED: case PH_DONE: break   (non fa niente)
@@ -368,9 +372,9 @@
 #    (B) !! E UNA POSIZIONE CHE SOPRAVVIVE ALLA NOTTE **BLOCCA IL GIORNO
 #        DOPO**. E' la conseguenza che nessuno ha scritto, e si legge in
 #        tre righe: al cambio di giorno `ResetDay()` riporta la fase a
-#        PH_WAIT_OPEN (r.782), ma subito dopo la guardia anti-duplicato
-#        di r.547-555 trova `SelectMyPosition()` vera e rimette
-#        `gPhase = PH_PLACED` (r.555); e lo `switch` di r.695-697
+#        PH_WAIT_OPEN (r.782), ma AL TICK SUCCESSIVO la guardia
+#        anti-duplicato di r.547-555 trova `SelectMyPosition()` vera e
+#        rimette `gPhase = PH_PLACED` (r.555); e lo `switch` di r.695-697
 #        tratta PH_PLACED e PH_DONE con un `break` che non fa niente.
 #        Nessun range viene costruito, nessun ordine viene piazzato.
 #        >>> QUINDI LA CELLA 0 PUO' AVERE **MENO POSIZIONI** DELLA CELLA
@@ -595,9 +599,14 @@
 #          BLOCCANTE questo ferma una corsa SANA. Le dieci celle le ho
 #          RICALCOLATE dal criterio, a macchina, sui valori d'ancora
 #          letti dai CSV.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga.
 #  >>> !! ARBITRATO DEL BORDO (classe 380 regola 1). I dieci conti
 #      ESATTI, che sono quelli che decidono:
 #        PF     IS  1,19802 - 1,24692     OOS 1,24473 - 1,29553

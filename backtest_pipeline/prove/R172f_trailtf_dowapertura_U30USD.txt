@@ -150,12 +150,20 @@
 #             backtest_pipeline/prove/
 #         che a HEAD 687e6900 torna SEI percorsi: R152a (asse InpMagic)
 #         e i cinque fratelli R172a/b/c/d/e.
-#         >>> DAL COMMIT DI QUESTO FILE QUEL COMANDO TORNERA' SETTE, ed
-#             il settimo e' QUESTO file (classe 382: un comando che
-#             cerca dentro il repo si riesegue DOPO aver salvato il file
-#             che lo contiene, e il numero si dichiara con o senza se
-#             stessi). Qui il numero e' dichiarato SENZA questo file:
-#             sei alla stesura, sette dal commit.
+#         >>> DAL COMMIT DI QUESTI FILE QUEL COMANDO TORNA OTTO, e i due
+#             in piu' sono QUESTO file e il fratello R172g, scritto la
+#             stessa ora e committato INSIEME a questo (classe 382: un
+#             comando che cerca dentro il repo si riesegue DOPO aver
+#             salvato i file che lo contengono, e il numero si dichiara
+#             con o senza se stessi). Qui il numero e' dichiarato SENZA
+#             i due file nuovi: SEI alla stesura, OTTO dal commit.
+#             >>> RIESEGUITO AL CANCELLO, a HEAD d6742e34, e sono otto
+#                 per nome: R152a . R172a . R172b . R172c . R172d .
+#                 R172e . R172f . R172g. La prima stesura di questa riga
+#                 diceva "sette, e il settimo e' questo file": contava
+#                 se stessa e NON il gemello che entra nello stesso
+#                 commit. E' la classe 382 vista dal lato del FRATELLO
+#                 invece che da quello di se' stessi.
 #     Le dieci scoperte, per nome (mai "tutto il resto", classe 180):
 #        InpCloseHour . InpCloseAtEnd . InpSLMode . InpTP1_R .
 #        InpBreakevenAtTP1 . InpBEatR . InpTrailStartR . InpTrailTF .
@@ -171,7 +179,10 @@
 #         = 5 punti indice (Point 0.01, sonda r.71), ed e' un PAVIMENTO:
 #         morde solo se lo stop scende sotto 5 punti indice (r.1324-1327
 #         nel ramo RETEST). Lo stop di questa cella e' dell'ordine dei
-#         155 punti indice [DERIVATO, vedi B7]. `InpSkipIfTight` e'
+#         155 punti indice [DERIVATO: B7 sotto da' 77,8x di pedaggio su
+#         uno spread di 2,00 idx; il conto per esteso -- range 35' 149,5
+#         idx, meno l'offset 4, piu' il buffer 10 = 155,5 -- sta in
+#         R172a r.1087-1095]. `InpSkipIfTight` e'
 #         l'interruttore che decide cosa fare QUANDO quel pavimento
 #         morde (r.1326): se il pavimento non morde mai, l'interruttore
 #         non viene nemmeno letto. Sono [DERIVATE] inerti, non misurate:
@@ -478,11 +489,32 @@
 #        cella ha la PARZIALE al 50% accesa: una posizione che raggiunge
 #        il bersaglio produce DUE uscite, una che non ci arriva ne
 #        produce UNA.
-#        >>> ATTESA CONGELATA: `Trades` NON DECRESCENTE lungo l'asse da
-#            M1 a M30. E' la previsione piu' falsificabile di questo
-#            file. Se `Trades` SCENDESSE al crescere del TF di piu'
-#            della semiampiezza di S1, una delle letture qui sotto e'
-#            sbagliata e il round si ferma PRIMA di commentare il PF.
+#        >>> E SU QUESTA COLONNA I MECCANISMI SONO DUE, E TIRANO IN
+#            VERSO OPPOSTO. Li scrivo tutti e due PRIMA di congelare
+#            un'attesa, perche' dichiararne uno solo trasformerebbe una
+#            previsione in un finto cancello:
+#              (1) SOPRAVVIVENZA: un trailing piu' LARGO (TF alto)
+#                  lascia correre la posizione, quindi PIU' posizioni
+#                  arrivano al bersaglio della parziale -> Trades SALE
+#                  col TF;
+#              (2) BERSAGLIO SPOSTATO (proprieta' C, sotto): un trailing
+#                  piu' STRETTO (TF basso) porta lo stop sopra
+#                  l'ingresso PRIMA, e il bersaglio della parziale si
+#                  accorcia al ripiego ATR -> Trades SCENDE col TF.
+#        >>> ATTESA CONGELATA, e la dichiaro DEBOLE: `Trades` NON
+#            DECRESCENTE lungo l'asse da M1 a M30, cioe' (1) prevale su
+#            (2). L'UNICA misura che ho a sostegno e' il triplo di R46b
+#            (proprieta' C): trailing SPENTO 17 parziali IS, PREVBAR M5
+#            18, ATR x2 27 -- cioe' la configurazione piu' STRETTA e'
+#            quella con MENO parziali. Non e' l'asse di questo round
+#            (sono meccanismi diversi, non TF diversi): e' un indizio,
+#            non una dimostrazione.
+#        >>> E QUINDI, SE `Trades` SCENDESSE al crescere del TF, NON si
+#            conclude che la lettura del codice e' sbagliata: si scrive
+#            che PREVALE LA PROPRIETA' (C), che e' un RISULTATO del
+#            round e la cosa piu' interessante che potrebbe dire. Il
+#            cancello vero di questa colonna sono i due limiti
+#            aritmetici qui sotto, non il verso.
 #        >>> E IL TETTO E IL PAVIMENTO ARITMETICI, che adesso sono
 #            NUMERI perche' le posizioni sono MISURATE:
 #              pavimento  `Trades` >=  56 (IS) e  96 (OOS)
@@ -507,8 +539,13 @@
 #        PARZIALE. La catena e' questa, riga per riga, e ogni riga
 #        citata e' stata riaperta:
 #           r.1726  riskDist = openP - InitialSL(openP, sl, type, false)
-#           r.1862  InitialSL con partialDone=false e curSL!=0 -> curSL
-#                   cioe' LO STOP CORRENTE, non quello di partenza
+#           r.1861  InitialSL: `if(partialDone || curSL == 0)` -- con
+#                   partialDone=false e curSL!=0 il ramo NON scatta
+#           r.1864  quindi torna `curSL`, cioe' LO STOP CORRENTE, non
+#                   quello di partenza
+#                   (r.1862-1863 sono l'ALTRO ramo, il ripiego ATR: sono
+#                    le righe che leggono `InpAtrSlMult`, ed e' a quelle
+#                    che rimanda il commento del pin in fondo al file)
 #           r.1817  il trailing ha gia' spostato `curSL`, e lo sposta
 #                   SOLO sopra `openP`
 #           r.1727  quindi `riskDist = openP - curSL` diventa NEGATIVO
@@ -801,9 +838,14 @@
 #          Le dieci celle di questa tabella le ho RICALCOLATE io dal
 #          criterio, a macchina, sui valori d'ancora letti dai CSV --
 #          non copiate dai fratelli.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga.
 #  >>> !! ARBITRATO DEL BORDO, e chiude la regola 1 della classe 380
 #      ("ogni banda si ricalcola dal criterio, cella per cella, a
 #      macchina"). I dieci conti ESATTI, che sono quelli che decidono:
@@ -1048,8 +1090,12 @@
 #  - Equity DD %: atteso in SALITA verso i TF alti (il vecchio sweep
 #    passa da 5,32% a M5 a 8,36% a M15). Il meccanismo e' la proprieta'
 #    (B): non perdite piu' grandi, ma piu' RITORNI.
-#  - Trades: atteso NON DECRESCENTE (proprieta' A). E' la colonna che
-#    falsifica la lettura del codice, non quella che decide.
+#  - Trades: atteso NON DECRESCENTE, e l'attesa e' DEBOLE perche' i due
+#    meccanismi della proprieta' (A) tirano in verso opposto e l'unico
+#    indizio su quale prevalga e' il triplo di R46b (17 / 18 / 27). Se
+#    scende, prevale la proprieta' (C): e' un RISULTATO, non una
+#    falsificazione della lettura del codice. Quello che decide sono i
+#    limiti aritmetici di S3.
 #  - Peggior Giornata %: attesa quasi ferma. Una posizione al giorno,
 #    una perdita piena al giorno al massimo: il TF del trailing cambia
 #    quanto si porta a casa, non quante perdite cadono nello stesso
@@ -1221,14 +1267,20 @@
 #          9), il driver non ha riconosciuto l'enum e si e' fermato al
 #          conto aritmetico. Ci si ferma: l'asse non e' quello che
 #          questo file ha scritto.
-#  S3  IL VERSO DI `Trades`, E VIENE PRIMA DEL PF.
+#  S3  I LIMITI ARITMETICI DI `Trades`, E VENGONO PRIMA DEL PF.
 #      COLONNA: `Trades`, in CIASCUNA delle due finestre separatamente
 #               (non sul totale: un verso che si inverte fra IS e OOS e'
 #               proprio la cosa che il totale nasconderebbe).
-#      CRITERIO: `Trades` NON deve SCENDERE passando da M1 a M30. Un
-#      calo oltre le 2 operazioni (la stessa semiampiezza di S1)
-#      contraddice la proprieta' (A) letta nel codice, e allora si torna
-#      al codice PRIMA di commentare qualunque altra colonna.
+#      >>> IL VERSO NON E' UN CANCELLO, ED E' DICHIARATO (classe 178:
+#          una riga che non puo' discriminare non si traveste da
+#          cancello). I due meccanismi della proprieta' (A) --
+#          sopravvivenza e bersaglio spostato -- tirano in verso
+#          OPPOSTO, e quale prevalga lo dice questo round, non il file.
+#          Quindi: si REGISTRA se `Trades` sale o scende da M1 a M30 e
+#          lo si legge come RISULTATO (un calo = prevale la proprieta'
+#          C); non si conclude mai "la lettura del codice e' sbagliata"
+#          e non si ferma la lettura delle altre colonne.
+#      CRITERIO CHE DECIDE: i due limiti aritmetici qui sotto.
 #      >>> E I DUE LIMITI ARITMETICI, che qui sono NUMERI perche' le
 #          posizioni sono MISURATE (56 IS, 96 OOS):
 #            pavimento  `Trades` >=  56 (IS) e  96 (OOS)
@@ -1649,9 +1701,12 @@
 #      (Verificato oggi che anche 789560 e' libero: si lascia libero
 #       apposta, non perche' sia occupato. E il controllo si fa con
 #       `grep -rn "^InpMagic=789560" --exclude-dir=.git .` -> ZERO
-#       righe, NON con `grep -rl "789560"`, che dal commit di questo
-#       file torna UN percorso ed e' questo file, che lo nomina in
-#       prosa -- classe 382.)
+#       righe, NON con `grep -rl "789560"`, che dal commit torna DUE
+#       percorsi -- questo file e il fratello R172g -- perche' tutti e
+#       due nominano 789560 in prosa per dire che lo lasciano libero
+#       (classe 382, e i due file entrano nello STESSO commit).
+#       Riverificato al cancello a HEAD d6742e34: `-rl` due percorsi,
+#       `^InpMagic=` zero righe.)
 #      Il blocco 7895xx resta lontano da tutte le sequenze vive della
 #      serata (7884xx di R171a-b, 7873xx di R170a-c, 7798xx di R169,
 #      7886xx di R151a).

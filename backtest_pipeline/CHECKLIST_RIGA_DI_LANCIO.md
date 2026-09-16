@@ -21612,6 +21612,41 @@ togliere quel dubbio.
    riga d'asse, il nome dell'EA, il magic, l'etichetta del round, qualunque
    stringa che il file cita alla lettera dalla fonte.
 
+### ➕ ESTENSIONE DELLO STESSO GIORNO: **A FALSIFICARE IL COMANDO NON E' SOLO "SE STESSO", E' IL GEMELLO CHE ENTRA NELLO STESSO COMMIT** (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `R172f_trailtf_dowapertura_U30USD.txt` applica la 382 **bene** su
+due conteggi su tre: dichiara *"dal commit il grep dei file prova con questo
+asse tornera' CINQUE, il quinto e' questo file"* (vero) e, sul proprio magic,
+scrive addirittura *"tornera' DUE: questo file **e il fratello R172g**"* — cioe'
+aveva gia' il riflesso giusto. Ma sugli **altri due** conteggi conta **solo se
+stesso**:
+
+| comando | scritto | rieseguito al cancello (HEAD `d6742e34`) | chi e' il match non previsto |
+|---|---:|---:|---|
+| `grep -rln "Expert ABTG_Dow_Apertura_US\|EA: ABTG_Dow_Apertura_US" backtest_pipeline/prove/` | **7** | **8** | `R172g`, che dichiara lo stesso EA |
+| `grep -rl "789560" --exclude-dir=.git .` | **1** | **2** | `R172g`, che nomina 789560 in prosa per dire che lo lascia libero |
+
+🔴 **Perche' non e' la 365 e non e' la 382 nuda.** Nella **365** a falsificare
+l'asserzione e' **un ALTRO agente** che committa nello stesso minuto: un evento
+probabile ma non certo, e l'arbitro e' l'ordine dei commit. Nella **382** il
+falsificatore e' **il file stesso**: deterministico, e si chiude contandosi.
+Qui il falsificatore e' il **GEMELLO scritto dallo stesso autore nella stessa
+ora e messo nello STESSO commit**: l'ordine dei commit non arbitra niente
+(sono lo stesso commit), e "contarsi" non basta — bisogna contare **tutti i
+file che l'autore sta per committare insieme**.
+
+### ✅ CHE COSA SI FA
+1. 🔴 **Il numero "dal commit" si calcola sull'INSIEME dei file che entrano nel
+   commit, non sul file che si sta scrivendo.** Regola pratica: prima di
+   consegnare N file scritti insieme, ogni comando citato si riesegue **con
+   tutti e N salvati su disco**.
+2. **E il conteggio si dichiara per NOME quando e' piccolo** (*"otto, e sono
+   R152a, R172a..g"*): un elenco non invecchia in silenzio come un numero.
+3. 📌 Il sintomo: un file che dice *"il match in piu' e' QUESTO file"* al
+   **singolare**, mentre sulla scrivania ce n'e' un altro che nomina la stessa
+   stringa. Se un conteggio nello stesso file cita gia' il gemello (qui il
+   magic) e un altro no, **il secondo e' il sospetto**.
+
 ---
 
 ## 383. 🔗🚪 UNA CATENA DI CODICE DOCUMENTATA RIGA PER RIGA CHE NON DICHIARA IL RAMO `if` **SOPRA** LA RIGA CITATA: la conclusione vale solo perche' un **INPUT PINNATO** tiene chiuso l'altro ramo (controllo-preventivo, 16/09/2026)
@@ -21928,3 +21963,85 @@ asserzione** — esattamente come la 385 aveva già annotato su un altro asse.
   **nel fratello** (costano un giro di pin e sono una decisione di chi governa
   la coda) oppure nel referto del cancello, che è un artefatto **effimero** e
   quindi il posto giusto.
+
+---
+
+## 387. 🧭↔️ UNA SENTINELLA DI **VERSO** CONGELATA SU UNA DIREZIONE CHE UNA PROPRIETA' PIU' SOTTO, **NELLO STESSO FILE**, SPINGE DALLA PARTE OPPOSTA — e il fratello scritto la stessa ora fa la cosa giusta (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `backtest_pipeline/prove/R172f_trailtf_dowapertura_U30USD.txt`
+(asse `InpTrailTF`, sedia `770202`) congela nella proprieta' **(A)**:
+
+> _"ATTESA CONGELATA: `Trades` NON DECRESCENTE lungo l'asse da M1 a M30 ... Se
+> `Trades` SCENDESSE al crescere del TF di piu' della semiampiezza di S1, una
+> delle letture qui sotto e' sbagliata e il round si ferma PRIMA di commentare
+> il PF."_
+
+e la promuove a **sentinella S3**, che si legge **prima del PF**.
+
+🔴 **Ma la proprieta' (C) dello stesso file — la sua scoperta, letta riga per
+riga nel sorgente e tutta esatta — descrive un meccanismo che spinge la STESSA
+colonna dall'altra parte.** Con un TF **stretto** il trailing porta lo stop
+sopra l'ingresso **prima** (`r.1817`), `riskDist` diventa negativo (`r.1727`),
+il bersaglio della parziale **si accorcia** al ripiego ATR (`r.1739`) e quindi
+scattano **PIU'** parziali, cioe' **PIU' `Trades` sulle celle BASSE**. I
+meccanismi sono due e di segno opposto:
+
+| meccanismo | dove sta nel file | effetto sul verso |
+|---|---|---|
+| **sopravvivenza**: trailing largo -> la posizione corre -> piu' bersagli raggiunti | implicito in (A) | `Trades` **sale** col TF |
+| **bersaglio spostato**: trailing stretto -> stop sopra l'ingresso prima -> bersaglio piu' vicino | esplicito in **(C)** | `Trades` **scende** col TF |
+
+E la proprieta' (A), letta per quello che dimostra davvero, prova **solo** che
+il numero di POSIZIONI e' costante: **non contiene nessun argomento sul verso.**
+La direzione era, di fatto, **non argomentata**.
+
+🔴 **PERCHE' COSTA.** S3 non e' una nota: e' la riga che si legge **prima** del
+PF. Nel mondo in cui prevale (C) — che questo round esiste per misurare — il
+file ordina al lettore di concludere *"una delle letture e' sbagliata"* e di
+**fermare la lettura delle altre colonne**. E' il danno della **classe 380**
+(*una sentinella troppo stretta ferma una corsa SANA*) che arriva per la strada
+del **VERSO** invece che della **BANDA**, con un'aggravante: il risultato che
+verrebbe soffocato e' **la cosa piu' interessante che il round possa dire**.
+
+🟢 **E la prova che era evitabile sta nel file accanto.** `R172g`, scritto la
+stessa ora, dallo stesso autore, sulla stessa sedia, sulla stessa colonna, fa
+**esattamente la cosa giusta** — proprieta' (D): *"I DUE EFFETTI SU `Trades`
+TIRANO IN VERSO OPPOSTO, E QUINDI NON DICHIARO NESSUNA DIREZIONE"*, e S3:
+*"QUI NON E' UNA SENTINELLA DI VERSO NE' DI IDENTITA', E LO DICHIARO INVECE DI
+TRAVESTIRLA DA CANCELLO (classe 178)"*. 👉 **Due pesi nella stessa serie, sulla
+stessa forma di asserzione** — la firma che gia' portavano la 385 e la 386.
+
+### 📐 PERCHE' E' UNA CLASSE NUOVA
+- Non e' la **178** nuda (*sentinella che non separa le ipotesi*): qui la
+  sentinella separa benissimo — separa il mondo giusto da quello sbagliato **al
+  contrario**.
+- Non e' la **357** (*identita' che l'ipotesi "manopola inerte" soddisfa
+  gratis*): qui non si parla di celle identiche ma di **pendenza**.
+- Non e' la **380**: li' la regola che decide e' piu' stretta del **criterio
+  dichiarato tre righe sotto**, cioe' due scritture della **stessa** grandezza.
+  Qui le due scritture sono **due meccanismi FISICI diversi**, tutti e due veri,
+  e il difetto e' aver promosso a cancello **quello che fa piu' comodo
+  raccontare**.
+
+### 🔴 LA REGOLA
+1. **Prima di congelare un VERSO su una colonna, si elencano TUTTI i meccanismi
+   del file che la toccano, col loro SEGNO.** Se ce ne sono due di segno
+   opposto, il verso e' un'**ATTESA** (dichiarata debole, con l'indizio che si
+   ha), **mai una sentinella**.
+2. **Quello che resta cancello sono i limiti ARITMETICI** (pavimento e tetto
+   ricavati dalle posizioni MISURATE): non dipendono da quale meccanismo vince,
+   e infatti sopravvivono intatti alla correzione.
+3. **L'escalation di un'attesa fallita nomina il MECCANISMO ALTERNATIVO**, non
+   *"la lettura del codice e' sbagliata"*: *"se scende, prevale (C)"* e' un
+   risultato; *"se scende, ho letto male"* e' un vicolo cieco.
+4. 📌 **Corollario per le SERIE**: se un file fratello sulla stessa colonna
+   dichiara *"due meccanismi opposti, nessuna direzione"*, quella e' una
+   **testimonianza** (come i testimoni della 380 regola 3). Il file in
+   minoranza e' il sospetto, e si va a guardare **quello**.
+
+**Riparato prima dell'armamento**: `R172f` ora nomina i due meccanismi, dichiara
+l'attesa **DEBOLE** con l'unico indizio che possiede (il triplo di `R46b`:
+trailing spento 17 parziali IS, PREVBAR M5 18, ATR x2 27 — la configurazione
+piu' stretta e' quella con MENO parziali), e S3 e' diventata *"i LIMITI
+ARITMETICI di `Trades`"* con il verso declassato a cosa da **registrare**.
+Nessun numero e' stato toccato.
