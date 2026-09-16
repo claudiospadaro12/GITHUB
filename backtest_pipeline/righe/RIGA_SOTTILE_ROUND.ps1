@@ -1012,7 +1012,22 @@ $BancoBT = 'C:\MT5_Backtest'
 #  e walkforward_generico.ps1 NON sono cambiati fra i due commit (git
 #  diff b5d65c87..afeeebdd sui due percorsi: VUOTO, verificato): solo
 #  $PIN si muove.
-$PIN = 'afeeebdd606acbc62bda77048f354cfc662a858a'
+#  >>> QUARANTASEIESIMO GIRO DI PIN (16/09/2026): afeeebdd -> b9848b1b.
+#  Serviva per raggiungere R163a (InpSLBufferPips, ABTG_SupRev_NAS_H1
+#  970913) dopo il PASS del secondo cancello: FAIL alla prima lettura
+#  con un difetto BLOCCANTE nuovo (classe 365: il magic 779825
+#  dichiarato "vergine" era stato preso 12 minuti prima da R164a,
+#  armato nel frattempo -- un'asserzione di unicita' vale rispetto a un
+#  COMMIT, non a un momento, con agenti in parallelo) corretto a 779826,
+#  piu' 7 correzioni non bloccanti (classe 362 applicata a meta' sul
+#  segno di n, classe 363 su "l'asse copre tutte e due le soglie" --
+#  falso, va da 7/7 a 0/7 celle secondo il riferimento, letto lo stesso
+#  perche' nessuna sentinella si aggancia al cancello -- e un residuo
+#  di classe 353 sulla sentinella di densita', vacua per algebra).
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra i
+#  due commit (git diff afeeebdd..b9848b1b sui due percorsi: VUOTO,
+#  verificato): solo $PIN si muove.
+$PIN = 'b9848b1b53512d3a84842405beb50d95c70ddf65'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
