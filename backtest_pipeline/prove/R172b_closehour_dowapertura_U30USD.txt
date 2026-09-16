@@ -378,8 +378,44 @@
 #          del CSV le costruisce OnTesterDeinit (r.2132) e sono 11
 #          statistiche piu' i valori degli input -- nessuna e' "numero
 #          di posizioni". L'unico artefatto che lo direbbe e' il
-#          per-trade, e questo EA non lo esporta (zero occorrenze di
-#          ExportTrades nel sorgente).
+#          per-trade -- e quel per-trade ESISTE: vedi il riquadro
+#          qui sotto, che e' una correzione fatta prima della
+#          consegna.
+#  >>> !! CORREZIONE FATTA PRIMA DELLA CONSEGNA, e vale la pena
+#      scriverla perche' cambia cosa e' RAGGIUNGIBILE e cosa no. La
+#      prima stesura di questo paragrafo diceva che "l'EA non esporta il
+#      per-trade, zero occorrenze di ExportTrades nel sorgente".
+#      FALSO, e il grep lo smentisce:
+#        grep -n "ExportTrades" mql5/Experts/ABTG_Dow_Apertura_US.mq5
+#        -> r.2067 (`void ExportTrades()`) e r.2096 (la chiamata dentro
+#           `double OnTester()`, r.2094)
+#      La funzione scrive in Common\Files un CSV con `close_time`,
+#      `position_id`, `deal_type` e `net_profit` (intestazione a r.2073),
+#      cioe' ESATTAMENTE le colonne che mancano: con `position_id` il
+#      fattore uscite/posizioni e' un conteggio, non una derivazione, e
+#      con `close_time` si conta quante posizioni arrivano vive all'ora
+#      del flat.
+#      >>> MA IL NUMERO RESTA [NON RISOLVIBILE DA QUESTO ROUND], per DUE
+#          ragioni diverse, ed e' importante non confonderle:
+#          (1) IL NOME DEL FILE SI COMPONE CON `InpMagic` (r.2070), che
+#              in questo round e' COSTANTE su tutte e sette le celle.
+#              Le 14 passate scrivono lo STESSO nome e si sovrascrivono
+#              a vicenda: sopravvive solo l'ULTIMA, e non si sa quale.
+#          (2) LA CORSIA ROUND NON LO RACCOGLIE. Contato oggi, e il
+#              risultato e' istruttivo:
+#                grep -c "abtg_trades" backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1  -> 1
+#                grep -c "abtg_trades" backtest_pipeline/righe/RIGA_ROUND_VPS.ps1      -> 0
+#                grep -c "abtg_trades" backtest_pipeline/runner_abtg.ps1               -> 0
+#              e l'UNICA occorrenza, RIGA_SOTTILE_ROUND.ps1 r.418, e' il
+#              COMMENTO che dichiara l'assenza. Nessuno dei tre COPIA il
+#              file.
+#      >>> E QUINDI LA VIA AL NUMERO ESISTE, e si propone col suo costo
+#          invece di archiviarla: una passata SINGOLA sulla cella viva
+#          piu' `righe/CODA_12_pertrade_posizioni.ps1` armato SUBITO
+#          DOPO in CODA.txt -- e' la ricetta di casa gia' scritta in
+#          RIGA_SOTTILE_ROUND.ps1 r.443-446 ("1. il round (produce i
+#          per-trade) 2. CODA_12 (li conta)"). Costo: due passate.
+#          NON e' compito di questo file armarla (B9).
 #
 # ---------------------------------------------------------------------
 #  L'ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
@@ -1137,13 +1173,12 @@
 #  BUCHI DICHIARATI DI QUESTO ROUND
 #    - IL NUMERO DI POSIZIONI ANCORA APERTE ALL'ORA DEL FLAT E'
 #      [NON MISURATO], ed e' proprio il numero che direbbe IN ANTICIPO
-#      quanto questo asse puo' muovere. L'EA non esporta il per-trade
-#      (zero occorrenze di ExportTrades nel sorgente) e il CSV ha 11
+#      quanto questo asse puo' muovere. Il CSV della corsia ha 11
 #      colonne cablate (r.2132), nessuna delle quali e' l'ora di uscita.
-#      >>> LA VIA AL NUMERO, col suo costo, si propone e non si fa qui:
-#          una passata singola sulla cella viva con il report .htm
-#          salvato, e si contano le uscite con ora 17:30:00. E' un
-#          lavoro da mezz'ora, non da round.
+#      >>> IL PER-TRADE INVECE CE L'HA (`close_time`, r.2073), e la via
+#          al numero e' scritta per esteso nel riquadro di UNITA' DI
+#          MISURA: una passata SINGOLA sulla cella viva piu' CODA_12
+#          armato dietro. Costo: due passate. Non la fa questo file.
 #    - I DUE CANALI (uscita e ingresso) NON SI SEPARANO con le colonne
 #      di questo CSV. Dichiarato PRIMA di girare (classe 353).
 #    - L'INTERAZIONE CON `InpTrailStartR` NON E' MISURATA: R172a e R172b
@@ -1177,10 +1212,21 @@
 #  COMPRESI (`.claude/worktrees/` NON escluso), escluso solo l'albero
 #  interno di git:
 #      grep -rl "789520" --exclude-dir=.git .
-#  Risultato: ZERO file, rispetto a HEAD `3d2603b6` di `lavoro`
-#  ("Arma R171a-b (InpSLBufferPts, ABTG_EasyTrend, sedie 772421/772422)"),
-#  letto con `git rev-parse HEAD` nel momento in cui scrivo e non
-#  ricordato (classe 377 punto 5).
+#  Risultato alla STESURA: ZERO file, rispetto a HEAD `3d2603b6` di
+#  `lavoro` ("Arma R171a-b (InpSLBufferPts, ABTG_EasyTrend, sedie
+#  772421/772422)"), letto con `git rev-parse HEAD` in quel momento e
+#  non ricordato (classe 377 punto 5).
+#  >>> RIVERIFICATO IMMEDIATAMENTE PRIMA DELLA CONSEGNA (classe 365,
+#      regola 1), e il repo NEL FRATTEMPO SI ERA MOSSO: a HEAD
+#      `c1fcb83b` ("Scrive R172a-b (InpTrailStartR + InpCloseHour,
+#      ABTG_Dow_Apertura_US, sedia 770202)", cioe' il commit che ha
+#      portato in repo proprio questi due file) lo stesso grep da'
+#      DUE file, e sono QUESTO e il suo fratello R172a: nessun
+#      terzo. Scrivo tutti e due i punti di riferimento perche' una
+#      riverifica che cita un HEAD stantio non e' una riverifica.
+#  >>> E LA RIVERIFICA CHE CONTA LA RIFA' IL CANCELLO, non la riporta
+#      l'autore (classe 365 regola 1): fra questa riga e il momento in
+#      cui la riga finira' in CODA.txt il repo puo' muoversi ancora.
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO, ed e' una
 #      scelta deliberata: la classe 367 misura che il punto dove due
 #      agenti collidono e' la SEQUENZA, non il nome. Il blocco 7895xx e'
