@@ -1138,7 +1138,22 @@ $BancoBT = 'C:\MT5_Backtest'
 #  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
 #  717be501 e 373a473e (git diff sui due percorsi: VUOTO, verificato):
 #  solo $PIN si muove.
-$PIN = '373a473e3a4fd90dd1836b9f56563af9a14deb08'
+#  >>> CINQUANTASEIESIMO GIRO DI PIN (16/09/2026): 373a473e -> 1a17794f.
+#  Serviva per raggiungere R173a (InpTP1Pct, ABTG_SuperWave_DOW_H1_
+#  Ottimizzato, sedia 770511, magic 779863) dopo il PASS del secondo
+#  cancello: 6 correzioni, **classe NUOVA 385** (un'incertezza di
+#  banda fabbricata da un riassunto a due decimali invece che dai CSV
+#  veri dell'ancora, gia' nella stessa cartella; e la scoperta che la
+#  sentinella S1 a uguaglianza esatta su Trades poggia su un binario
+#  fotografato a HEAD, non sul binario che girera' al pin vero -- il
+#  file ora obbliga chi arma a rifare `git diff 1445abf8 <questo pin>`
+#  sul sorgente EA prima di fidarsi dell'uguaglianza). RIFATTO QUI,
+#  ORA, DA CHI ARMA: git diff 1445abf8 1a17794f -- mql5/Experts/
+#  ABTG_SuperWave_DOW_H1_Ottimizzato.mq5 e' VUOTO -- l'uguaglianza
+#  regge. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra 373a473e e 1a17794f (git diff sui due percorsi:
+#  VUOTO, verificato): solo $PIN si muove.
+$PIN = '1a17794f3944a36912eee81c987ef506812ea7c7'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
