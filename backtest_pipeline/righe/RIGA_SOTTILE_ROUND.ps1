@@ -1060,7 +1060,17 @@ $BancoBT = 'C:\MT5_Backtest'
 #  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
 #  i due commit (git diff 1acb1d52..6693bd47 sui due percorsi: VUOTO,
 #  verificato): solo $PIN si muove.
-$PIN = '6693bd478c8d3c0795f791bd65cf09474cef35e2'
+#  >>> CINQUANTESIMO GIRO DI PIN (16/09/2026): 6693bd47 -> c713ac92.
+#  Serviva per raggiungere R169a-f (InpSLBufferATR, PunteLarry sui 6
+#  gemelli 772341-346) dopo il PASS del secondo cancello: 3 FAIL
+#  corretti (R169a: ancora dichiarata "esattamente" riproducibile
+#  quando non lo e' -- classe 375, nuova; R169e/f: la testa dichiarava
+#  il TP mobile su sedie con ExitMode=0, dove il TP non esiste --
+#  classe 347) + classe 374 nuova (bordo della griglia in virgola
+#  mobile). RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono
+#  cambiati fra i due commit (git diff 6693bd47..c713ac92 sui due
+#  percorsi: VUOTO, verificato): solo $PIN si muove.
+$PIN = 'c713ac92f040e7d70d6d26525ce1f62d21ccd5c4'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
