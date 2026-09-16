@@ -779,18 +779,38 @@
 #      Sulla cella 3, in tutte e due le finestre, contro r120e11:
 #        Trades IDENTICO      -> IS 106, OOS 184
 #        PF   entro +/- 0,5%  -> IS 1,39744, OOS 1,22034
-#        DD%  entro +/- 0,5%  -> IS 3,48,    OOS 4,21
+#        DD%  entro +/- 0,5%  -> IS 3,4846,  OOS 4,2149
 #      La tolleranza dello 0,5% NON e' prudenza: e' spazio per
 #      l'arrotondamento di stampa. Il determinismo del banco su questa
 #      sedia e' misurato "al centesimo" su tre corse separate (sezione
 #      LE ANCORE A), quindi una banda larga nasconderebbe un guasto
 #      invece di tollerarlo.
+#      >>> !! EMENDATO (classe 385, gia' pagata sul fratello R173a):
+#          il DD dell'ancora era letto da `LETTURA_BACKLOG_NOTTE_2026-
+#          09-13.md` r.136, un riassunto a DUE decimali (3,48 / 4,21).
+#          I CSV VERI dell'ancora (backtest_pipeline/risultati_prove/
+#          dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/..._{IS,OOS}_
+#          r120e11.csv, STESSA cartella di questo round) stampano
+#          3,4846 e 4,2149 a quattro decimali. La banda +/-0,5% ora
+#          parte dal numero vero, non da un arrotondamento che
+#          allargava la tolleranza di ~0,0096 punti pieni per gamba
+#          verso il basso -- su una sentinella BLOCCANTE, il verso
+#          sbagliato e' quello che fa passare un banco sporco.
 #      Se cade, il banco non e' quello del 13/09 e NESSUN numero di
 #      questo round si puo' agganciare ai suoi: il round si ferma qui e
 #      si dichiara cosa e' cambiato, non si legge il P/L "tanto per".
 #      Forza dichiarata: FORTE (due finestre, tre colonne, valori
 #      distinti fra le finestre). Copre il BANCO e, indirettamente, la
 #      FINESTRA. NON copre la manopola (T3).
+#      >>> !! SECONDA META' DELLA CLASSE 385 (l'uguaglianza esatta su
+#          Trades poggia su un binario FOTOGRAFATO, non su quello che
+#          girera' davvero): chi arma questa riga deve rifare
+#          `git diff 1445abf8 <PIN_DI_ARMAMENTO> -- mql5/Experts/
+#          ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` PRIMA di fidarsi
+#          dell'uguaglianza. 0 righe -> S1 come sopra. >0 righe -> si
+#          torna a una banda +/-2 su Trades e si dichiarano le righe
+#          cambiate. "Il sorgente e' cambiato" e' la PRIMA causa da
+#          controllare se S1 cade, non l'ultima.
 #    S2 -- IL CONTEGGIO DELLE RIGHE: 6 righe in ciascuno dei due CSV.
 #      Se sono 5 o 7, si dichiara quale cella manca o avanza PRIMA di
 #      leggere il resto.
@@ -1042,14 +1062,17 @@
 #      AGGIORNAMENTO (T6). Qualunque verdetto negativo va scritto come
 #      "il buffer, CON IL TRAILING ACCESO, non paga", mai come
 #      "allargare lo stop non paga".
-#    - I NUMERI DI R126a E R126b NON SONO NEL REPO: i loro CSV non sono
-#      mai stati portati in risultati_prove\ (verificato oggi: la
-#      cartella ha sei file, nessuno col suffisso _r126a/_r126b) e
-#      quello che si sa di loro passa dal referto della notte del
-#      13/09. Questo round NON si appoggia a nessuno dei due: la sua
-#      ancora e' r120e11, i cui numeri sono scritti per esteso nel
-#      referto citato. Portare quei CSV in archivio resta un lavoro a
-#      parte.
+#    - !! EMENDATO (classe 372: assenza dichiarata ma non cercata bene,
+#      cartella sbagliata). I NUMERI DI R126a E R126b SONO NEL REPO:
+#      backtest_pipeline/risultati_prove/dal_vps/
+#      ABTG_SuperWave_DOW_H1_Ottimizzato/..._{IS,OOS}_r126a.csv e
+#      ..._r126b.csv, dal 13/09 (commit d6322638/f07c6ac6/b88bc3f3/
+#      e856c268, tutti precedenti a questo file). Il buco vero non e'
+#      l'assenza dei CSV: e' che questo round NON si appoggia a
+#      nessuno dei due comunque -- la sua ancora resta r120e11, i cui
+#      numeri sono nello stesso CSV citato in S1. Portare r126a/b
+#      nell'ANCORA (invece che nei BUCHI) resta un lavoro a parte, non
+#      necessario qui.
 # =====================================================================
 #  IL COSTO IN TEMPO MACCHINA -- DERIVATO DA UNA MISURA, NON STIMATO
 # ---------------------------------------------------------------------
