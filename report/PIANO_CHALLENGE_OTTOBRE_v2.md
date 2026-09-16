@@ -258,6 +258,89 @@ lavoro l'ha già fatto oggi stesso, in parallelo.
 
 ---
 
+# 0-quinquies. 🔴 AGGIORNAMENTO 16/09/2026 — FUNDEDNEXT, NON PIÙ FTMO: LE REGOLE VERE, E COSA CAMBIA NEI CONTI
+
+_Scritto su richiesta esplicita di Claudio ("aggiorna il piano con le regole
+vere di FundedNext"). Da qui in avanti **FundedNext Stellar Lite sostituisce
+FTMO 2-Step come metro di riferimento** in questo documento — non perché FTMO
+fosse sbagliata, ma perché Claudio ha comprato Stellar Lite 100k il 15/09
+(FundedNext, $399.99). Tutto quello che nelle sezioni 1-8 sotto cita "FTMO",
+"5% giornaliero", "10% totale" o "STATICI" **resta scritto com'era per
+tracciabilità** (regola di casa: non si cancella, si annota), ma **il numero
+che decide da oggi è quello di questa sezione**._
+
+## ⚠️ IL BUCO CHE VA DETTO PRIMA DI TUTTO IL RESTO
+**Questo file, dalla riga 1, è costruito su dati BCM Markets** (spread, tick,
+sedie, `spread_flotta/`, tutte le ancore R88-R166). **FundedNext NON è BCM**:
+è un broker diverso, con un proprio feed, propri simboli (probabilmente
+`US30`/`SPX500`/`GER30`, non `U30USD`/`D30EUR`), e propria leva. **Nessuna
+misura di spread/costo di questo piano (R5, il cancello dei 40x, tutte le
+tabelle §2/§4) è verificata sul feed di FundedNext.** Se il terzetto gira
+davvero sul conto FundedNext (non su un demo BCM che poi si "trasferisce" a
+mano), **il cancello di costo va rimisurato da zero su quel feed** prima di
+fidarsi di un solo numero qui dentro. 🔴 **Non ho la risposta**: è la stessa
+domanda del punto 7 sotto (quale account gira l'EA).
+
+## 📋 LE REGOLE VERE DI STELLAR LITE (100k, il prodotto comprato), con fonte
+
+| voce | FTMO (vecchio riferimento) | 🆕 **FundedNext Stellar Lite (vero)** | fonte |
+|---|---|---|---|
+| **Perdita massima giornaliera** | 5% (ipotesi, mai confermata da FTMO) | **4%** del saldo iniziale ($4.000 su 100k) | [help.fundednext.com/8019914](https://help.fundednext.com/en/articles/8019914-what-is-the-maximum-daily-loss-limit) · [help.fundednext.com/9094072](https://help.fundednext.com/en/articles/9094072-what-rules-do-i-need-to-follow-in-the-stellar-lite-challenge) |
+| **Su cosa si misura la giornaliera** | [NON VERIFICATO] (era la domanda A1 mai risposta) | 🔴 **EQUITY IN TEMPO REALE** — la violazione scatta nell'istante in cui il floating loss tocca il limite, **anche se il trade poi richiude meglio**. Non è il "muro su saldo" che si sperava | [help.fundednext.com/9941519](https://help.fundednext.com/en/articles/9941519-daily-loss-limit-vs-maximum-loss-limit) |
+| **Perdita massima totale** | 10% (ipotesi) | 🔴 **8%** del saldo iniziale ($8.000 su 100k) — **20% più stretto della vecchia ipotesi** | [help.fundednext.com/9094072](https://help.fundednext.com/en/articles/9094072-what-rules-do-i-need-to-follow-in-the-stellar-lite-challenge) |
+| **Su cosa si misura la totale** | [NON VERIFICATO] (statico o trailing?, era FIRMA G/domanda F) | 🟢 **BALANCE-based, NON trailing** — buona notizia: la paura del §6 punto 10 ("se fosse trailing il p99 sfora") non si applica | [help.fundednext.com — package comparison, "balance-based drawdown"] |
+| **Regola di consistenza (Best Day)** | 50% (FTMO, per l'incasso) | 🟢 **NESSUNA sui conti CFD** (il 40% "guideline" vale solo per i conti Futures, che non usiamo) | [help.fundednext.com — cfd-challenge-terms](https://fundednext.com/cfd-challenge-terms) |
+| **Target di profitto** | +10% (1 fase, FTMO) | **P1 8% + P2 4%** (2 fasi), nessun limite di tempo | [help.fundednext.com/9133001](https://help.fundednext.com/en/articles/9133001-what-is-the-profit-target-in-fundednext-stellar-lite) |
+| **Giorni minimi** | 4/fase (FTMO) | **5 giorni distinti, ≥1 trade/giorno**, per fase | [help.fundednext.com/9094072](https://help.fundednext.com/en/articles/9094072-what-rules-do-i-need-to-follow-in-the-stellar-lite-challenge) |
+| **Leva forex** | — | **1:100**, confermato | [fundednext.com/package-comparison](https://fundednext.com/package-comparison) |
+| **🔴 Leva indici/commodities** | — | **[NON RISOLTO, due fonti in conflitto]**: la risposta scritta ufficiale del 27/08 (`RISPOSTA_FUNDEDNEXT_2026-08-27.md`, ma per lo Stellar **2-Step 200k**, non Lite) dice **1:15 in TUTTE le fasi**; una ricerca oggi (aggregata, non la pagina in prima persona) dice **1:25 in challenge → 1:15 da funded**. **È il numero che decide se il basket C1 sfonda il margine** (misurato nell'ANALISI_TAGLIA a 1:15: 149% del margine ai massimi). 👉 **Va letto a mano dalla pagina "Symbols & Conditions" del TUO account Stellar Lite loggato — nessun agente da qui può vederla** | [fundednext.com/general-rules/cfds/symbols-and-conditions](https://fundednext.com/general-rules/cfds/symbols-and-conditions) — pagina generica, non specifica per tier |
+| **Weekend/overnight** | consentito su Standard | 🟢 **consentito** su Challenge e FundedNext Account | [help.fundednext.com/11982358](https://help.fundednext.com/en/articles/11982358-does-fundednext-allow-holding-trades-over-the-night-weekend) |
+| **Swap 3× (triplo)** | — | 🆕 **Mercoledì per Forex e Commodities** (quindi anche XAUUSD), **Venerdì per Indici, Crypto e Stock** — asimmetria che FTMO non ha in questa forma, va nei preset se si tengono posizioni overnight | [fundednext.com — general rules] |
+| **News trading** | vietato ±2 min (Standard) | 🟢 **nessuna restrizione** trovata sui CFD Stellar | [help.fundednext.com — trading rules] |
+| **Reset giornaliero** | 23 BCM = 00:00 CEST (assunto) | 🔴 **00:00 ora SERVER FundedNext**, che è **GMT+3 in DST / GMT+2 fuori DST** — **NON è la stessa cosa di "00:00 CEST"**, vedi conto sotto | [help.fundednext.com/8394309](https://help.fundednext.com/en/articles/8394309-when-does-the-daily-loss-limit-reset-with-fundednext-cfd) |
+
+## 🧮 IL CONTO CHE CAMBIA DAVVERO — tre numeri, non uno
+
+### 1. 🔴 Il cap C1 (3,25%, firmato) è molto più vicino al muro giornaliero di prima
+Contro il vecchio 5% ipotizzato: margine **1,54×**. Contro il **4% vero**:
+margine **1,23×**. Non sfonda, ma il cuscinetto si è ridotto di un terzo.
+
+### 🔴 2. Il p99 Monte Carlo statico (8,51% a 0,65%, `REFERTO_M1_MC_TRAILING.md`,
+già citato in `PIANO_PROP.md:464`) **era sotto il vecchio muro 10% con 1,49
+punti di margine. Contro il muro VERO (8%) è SOPRA di 0,51 punti — 8,51% >
+8%.** 👉 **Questo non è un ritocco: è il taglio 0,65% che va riverificato su
+FundedNext prima di rischiare un soldo**, non solo il terzetto. Non lo
+ridimensiono io: è rischio e taglia, firma di Claudio.
+
+### 3. 🔴 Il terzetto (§4): la lettura per radice quadratica passa da comoda a stretta
+Somma aritmetica **10,33%** era già sopra il vecchio muro 10%; contro l'8%
+vero è al **129%** del muro. La lettura per radice quadratica (indipendenza)
+**6,30%** aveva margine **1,59×** sul vecchio 10%; sull'8% vero il margine
+scende a **1,27×**. Resta sotto il muro, ma con meno spazio per un errore di
+misura.
+
+## 🕐 IL RESET GIORNALIERO — l'aritmetica, non ancora la misura
+BCM è "Italia − 1 ora" (regola fissa di CLAUDE.md): oggi (DST) BCM = UTC+1.
+FundedNext in DST = UTC+3 (fonte sopra). Differenza: **+2 ore**. Se FundedNext
+azzera alle 00:00 sul SUO orologio, quell'istante sul **server BCM legge
+22:00**, non 23:00. 🔴 **Non lo scrivo come fatto**: è un'aritmetica su due
+fonti scritte (CLAUDE.md + help center), non una misura sul campo — e
+`InpDailyResetHour` è un parametro Guardian, quindi **si cambia solo con la
+firma di Claudio**, mai da un agente. **Verifica proposta, a costo zero**: nel
+momento in cui il countdown sulla dashboard FundedNext (loggata) segna 00:00,
+leggere l'orologio di Windows sul VPS/PC — la differenza in ore, arrotondata,
+è il numero giusto per questo input.
+
+## ❓ LA DOMANDA CHE RESTA APERTA, e non è mia da decidere
+**Questo conto Stellar Lite è quello su cui girerà l'EA fleet, o è il conto
+manuale di Claudio (quello con cui ha già aperto a mano un trade sull'oro il
+15/09)?** Se è lo stesso conto, tutto questo piano deve essere riscritto sul
+feed FundedNext, non su BCM. Se sono due conti diversi, questa sezione serve
+comunque (è la prop scelta) ma il piano BCM-based resta valido per il conto
+EA vero. **Non deciso qui — chiedere a Claudio.**
+
+---
+
 # 1. 🚦 I CINQUE REQUISITI — dichiarati PRIMA della tabella
 
 | # | requisito | dove si legge | perche' e' un requisito |
@@ -507,7 +590,7 @@ prop misura**. → **B5.**
 | 7 | **Lo spread al MINUTO dentro l'ora** | l'istogramma e' **orario**. Su U30USD l'ora 14 ha mediana **2,00** e **massimo 47,0** | le tre PostNews lavorano **sul rilascio della notizia**: i loro 21,9x/28,9x/26,8x sono **ottimisti per costruzione** |
 | 8 | **Requote e rifiuti** | **[NON MISURABILE] dai tick**: il tick storico non contiene ordini rifiutati | — |
 | 9 | **Il tetto per CLUSTER C10 attivo** | firmato 07/09 · implementato v1.13 **spento di default** · **non compilato, non collaudato** | due delle tre del terzetto sono su **`U30USD`**. **E' un'intenzione, non una protezione** |
-| 10 | **La prop SCELTA e il suo regolamento verificato sul sito** | cancello 3 **rosso**. Il dossier `REGOLAMENTI_PROP_2026-09-08.md` e' **`[LETTO-VIA-SEARCH]`**: il proxy blocca i siti delle prop, **nessuna pagina aperta** | il preset Guardian e' tarato **solo su FTMO**. 🔴 **Se il muro totale fosse TRAILING, il p99 a 0,65% e' 12,05% > 10%: la taglia di casa NON reggerebbe**, e sarebbe una scoperta fatta **dopo** aver pagato |
+| 10 | **La prop SCELTA e il suo regolamento verificato sul sito** | cancello 3 **rosso**. Il dossier `REGOLAMENTI_PROP_2026-09-08.md` e' **`[LETTO-VIA-SEARCH]`**: il proxy blocca i siti delle prop, **nessuna pagina aperta** | il preset Guardian e' tarato **solo su FTMO**. 🔴 **Se il muro totale fosse TRAILING, il p99 a 0,65% e' 12,05% > 10%: la taglia di casa NON reggerebbe**, e sarebbe una scoperta fatta **dopo** aver pagato ~~se non lo verifichiamo prima~~ 🔴 **AGGIORNATO 16/09/2026, vedi §0-quinquies: la prop e' SCELTA (FundedNext Stellar Lite), e la meta' buona della paura si e' sciolta -- il muro totale e' CONFERMATO balance-based, non trailing. Ma la meta' cattiva e' PEGGIO di quanto si temeva: il muro vero e' 8%, non 10%, e il p99 statico 8,51% e' SOPRA quell'8%, non sotto. La scoperta fatta prima di pagare non era "trailing sì/no": era "il numero e' 8, non 10".** |
 | 11 | **La prova della TAGLIA sopra i 100k** | mai fatta. R109: il lotto sbatte su `VOLUME_MAX`=100 in **66 trade su 743 = 8,9%** | percentuali **non trasferibili** sopra 100k → **mitigato scegliendo 100k** |
 | 12 | **L'`n` in POSIZIONI di 6 candidate su 8** | classe **226**, aperta oggi: il `n` dell'OPTFRAME conta i **deal di uscita** | ogni etichetta di merito del parco va riletta. **Fattore misurato 2,01 e 2,16 su R112** |
 | 13 | **`InpTP1Pct` di `770511`/`970913` letto in POSIZIONI** | i loro per-trade **non sono in archivio** | il loro campione vero sta **fra ~57 e 227** e **fra ~39 e 155** |
@@ -577,9 +660,20 @@ prop misura**. → **B5.**
 `backtest_pipeline/prove/R126_SUPERWAVE_COSTO_CRITERI.md` (**NON firmato**) ·
 `report/FIRME_2026-08-18.md` · `FIRME_2026-09-02.md` · `FIRME_2026-09-07.md`
 
-**🥉 REGOLE PROP:** `docs/REGOLAMENTO_FTMO_2026-08.md` ·
+**🥉 REGOLE PROP:** `docs/REGOLAMENTO_FTMO_2026-08.md` (riferimento superato, vedi §0-quinquies) ·
 `report/REGOLAMENTI_PROP_2026-09-08.md` 🔴 **`[LETTO-VIA-SEARCH]`, nessuna pagina aperta** ·
-`report/DOMANDE_SUPPORTO_PROP.md` ⏸️ **mai inviate**
+`report/DOMANDE_SUPPORTO_PROP.md` ⏸️ **mai inviate, superate dall'acquisto diretto** ·
+`backtest_pipeline/risultati_archivio/RISPOSTA_FUNDEDNEXT_2026-08-27.md` (risposta scritta, ma per lo Stellar 2-Step 200k) ·
+🆕 **AGGIUNTE DEL 16/09/2026 (§0-quinquies, `[UFFICIALE-VIA-SEARCH]`):**
+[help.fundednext.com/8019914](https://help.fundednext.com/en/articles/8019914-what-is-the-maximum-daily-loss-limit) ·
+[help.fundednext.com/9094072](https://help.fundednext.com/en/articles/9094072-what-rules-do-i-need-to-follow-in-the-stellar-lite-challenge) ·
+[help.fundednext.com/9941519](https://help.fundednext.com/en/articles/9941519-daily-loss-limit-vs-maximum-loss-limit) ·
+[help.fundednext.com/9133001](https://help.fundednext.com/en/articles/9133001-what-is-the-profit-target-in-fundednext-stellar-lite) ·
+[help.fundednext.com/8394309](https://help.fundednext.com/en/articles/8394309-when-does-the-daily-loss-limit-reset-with-fundednext-cfd) ·
+[help.fundednext.com/11982358](https://help.fundednext.com/en/articles/11982358-does-fundednext-allow-holding-trades-over-the-night-weekend) ·
+[fundednext.com/package-comparison](https://fundednext.com/package-comparison) ·
+[fundednext.com/cfd-challenge-terms](https://fundednext.com/cfd-challenge-terms) ·
+[fundednext.com/general-rules/cfds/symbols-and-conditions](https://fundednext.com/general-rules/cfds/symbols-and-conditions)
 
 **🆕 AGGIUNTE DEL 13/09/2026 (🥇, lette per intero):**
 `backtest_pipeline/coda/referti/REFERTO_RUNNER_20260913_033003.txt` (42 eseguite, 36 in corsia ROUND) ·
@@ -599,6 +693,7 @@ prop misura**. → **B5.**
 
 | data | versione | cosa cambia | perche' |
 |---|---|---|---|
+| **16/09/2026** | **v2.4** *(aggiornamento richiesto da Claudio — §0-quinquies nuova)* | 🔴 **FTMO sostituita da FundedNext Stellar Lite come metro di riferimento** (Claudio ha comprato il 15/09). Regole vere, con fonte [UFFICIALE-VIA-SEARCH]: muro giornaliero **4%** (non 5%, su EQUITY in tempo reale) · muro totale **8%** (non 10%, BALANCE-based/non-trailing) · nessuna consistency rule sui CFD · target P1 8%/P2 4% · 5 giorni minimi · swap 3x mercoledì (forex/commodities) o venerdì (indici/crypto/stock). 🔴 **Tre numeri che si stringono**: il cap C1 (3,25%) passa da margine 1,54x a 1,23x sul muro giornaliero vero; il p99 Monte Carlo statico (8,51% a 0,65%) era SOTTO il vecchio muro 10% e ora è SOPRA l'8% vero (8,51%>8%) — il taglio 0,65% va rivisto; il terzetto passa da margine 1,59x a 1,27x sul muro totale. 🟢 **Una paura si sciolge**: il muro è confermato balance-based, non trailing. ⚠️ **Due buchi aperti, non chiusi qui**: la leva su indici/commodities per Stellar Lite specificamente (due fonti in conflitto, 1:15 vs 1:25→1:15) e se questo conto è quello dell'EA fleet o il conto manuale di Claudio — se è il primo, tutto il piano (BCM-based) va rimisurato sul feed FundedNext | Il piano fino a ieri girava su un muro ipotizzato (10%/5%, mai confermato) e nessuna delle sue tabelle di rischio aveva un numero vero da confrontare — oggi ce l'ha, ed è più stretto di quanto si sperasse |
 | **15/09/2026 (metà giornata)** | **v2.3** *(aggiornamento mirato — §0-quater nuova)* | 🔎 **Verificato contro il repo vero che oggi sono state coperte 11 sedie** (R150a, R148a/bL/bS, R151a, R152a, R153a, R154a, R141e, R155a, R156a — `CODA.txt` **63→74 righe armate**, combacia esattamente) e che il **Blocco 3 è dichiarato esaurito** dallo stesso `R156a` ("scelta dal Blocco 2, HEAD già sicuro"). 🔴 **Confermato**: nessun `REFERTO_RUNNER_20260915_*` è arrivato (ultimo resta `..._20260914_033004.txt`) — il collaudo di compilazione del Cycle non è ancora rientrato. ⚪ **[NON VERIFICABILE da qui]**: se Claudio ha già ricompilato `771531` sul piccolo (gesto sul terminale vivo, S1 chiuso ma F7 non leggibile da un agente). 🎯 **Proposta**: continuare l'exit-management sul **Blocco 2** (5 famiglie vergini della panchina censita l'11/09 — 13 sedie potenziali: 5/6 gemelli PunteLarry, GapFill, BreakingBand, GapContinuation, 3/6 CloseAtEnd) **in parallelo** all'attesa del referto di stanotte, non al posto di essa — corretta un'ambiguità di `NOTTE_2026-09-15.md` che si leggeva come "restare fermi" | Senza questa riga il rischio era di leggere "Blocco 3 esaurito" come "oggi non c'è altro da fare" — falso: il Blocco 2 ha ancora lavoro pronto, a costo macchina noto, indipendente dalla ricompilazione |
 | **15/09/2026** | **v2.2** *(aggiornamento mirato — §0-ter nuova)* | 🔎 **Riverificati contro il repo vero i cinque punti aperti da `RUNBOOK_RICOMPILAZIONE_PICCOLO_2026-09-14.md` e `RESOCONTO_2026-09-14.md`**: (1) `771531` resta bloccata dal WIP `b45dd00` — **4° giorno**, mentre le sue misure di uscita (`R136a-d`, `R147a`) hanno gia' girato due notti pulite; (2) `r137c` e' firmata e nel repo (`InpTP1_ClosePct=0.0`), ma se sia gia' sul terminale reale resta **[NON VERIFICABILE da qui]**; (3) il disallineamento `InpRiskPercent` di `sedia_MAXMIN_ORO_770402.set` e' confermato ma **gia' in coda** (classe 338, non un buco nuovo); (4) `ABTG_Cycle` R148a/bL/bS sono armate ma il primo collaudo vero e' **stanotte, non ancora girato**; (5) `mc_dd_cella.py` e' sano (autotest 4/4 PASS) ma **non eseguibile oggi** su nessuna delle tre sedie del terzetto: manca il CSV per-trade sulla cella ESATTA, e i soli per-trade in repo per quelle famiglie sono del round R16 (09/08), **precedenti** ai fix che contano. 🎯 **Proposta per la prossima ondata**: chiudere il cancello sul WIP `b45dd00` (zero macchina, sblocca 13 sedie incluso il pilastro del terzetto) prima di aprire un quinto round o inseguire una Monte Carlo che non ha ancora l'input giusto | Il piano al 13/09 non sapeva che il binario di `771531` e' fermo da 4 giorni mentre le sue misure corrono; senza questa riga il prossimo passo rischiava di essere un round nuovo invece del vero collo di bottiglia (il codice mai revisionato) |
 | **08/09/2026** | **v1** | prima stesura, costruita all'indietro dal 1° ottobre. 4 requisiti, 8 candidate, *"ne passa UNO"*, *"realistico per COMPRARE"* | c'era una data, e una data cambia l'ordine delle cose |
