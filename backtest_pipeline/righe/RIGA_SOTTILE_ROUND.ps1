@@ -1096,7 +1096,20 @@ $BancoBT = 'C:\MT5_Backtest'
 #  walkforward_generico.ps1 NON sono cambiati fra i due commit (git
 #  diff eb4a498d..2baac2c2 sui due percorsi: VUOTO, verificato): solo
 #  $PIN si muove.
-$PIN = '2baac2c2f204c108c467143044243d20ffc08c28'
+#  >>> CINQUANTATREESIMO GIRO DI PIN (16/09/2026): 2baac2c2 -> 16191264.
+#  Serviva per raggiungere R172a-b (InpTrailStartR + InpCloseHour,
+#  ABTG_Dow_Apertura_US, sedia 770202 -- la sedia viva piu' scoperta
+#  della flotta e candidata al terzetto del 1 ottobre). Secondo
+#  cancello: 6 correzioni, due classi nuove (380: una banda +/-1 dove
+#  il criterio dichiarava +/-2 su una sentinella BLOCCANTE -- avrebbe
+#  fermato una corsa sana; 381: un tasso di tick/minuto calcolato senza
+#  il denominatore delle giornate, sbagliato ~7x anche se la
+#  conclusione regge). Il merge che segue porta anche i referti
+#  automatici della corsa runner delle 03:30 di stanotte (14 file in
+#  coda/referti/), non toccano questi due file. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra 2baac2c2 e HEAD (git
+#  diff sui due percorsi: VUOTO, verificato): solo $PIN si muove.
+$PIN = '16191264daf2e731c62a85d0ca389716506ebe6c'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
