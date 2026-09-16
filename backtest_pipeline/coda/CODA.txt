@@ -2498,3 +2498,36 @@ e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 e651729bbfdd268994eea3b258f8785d154b580a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
 # =====================================================================
+#  R172c -- InpBreakevenAtTP1, sedia 770202 (ABTG_Dow_Apertura_US,
+#  U30USD M5). Terzo file della serie su 770202. Stesso banco/ancora
+#  R54a dei fratelli R172a/b. Default compilato = false (commento
+#  "[DOW] niente BE: 6 confronti puliti su 8 in perdita, fino a
+#  -38%"), PRESET VIVO = true: la sedia gira da mesi il contrario di
+#  cio' che il suo sorgente consiglia -- mai isolata su questo EA.
+#  Fattore uscite/posizioni MISURATO (non piu' derivato) da R46b:
+#  IS 56 posizioni (fattore 1,3214), OOS 96 (fattore 1,3542).
+#
+#  Merito sospeso (18 posizioni IS, 34 OOS misurate su questo asse,
+#  sotto il pavimento). Zero preset cambia, zero forward. Bersaglio
+#  sempre C:\MT5_Backtest (demo 50504400).
+#
+#  Secondo cancello: PASS dopo 9 correzioni (commit efcc399e). La piu'
+#  importante e' RECIDIVA della classe 380 sui fratelli: banda Trades
+#  IS ricopiata dallo stampo PRE-correzione (73-75 invece di 72-76) su
+#  una sentinella S1 BLOCCANTE -- avrebbe fermato una corsa sana.
+#  Corretta a 72-76, verificata identica carattere per carattere nei
+#  tre file. **Classe 382, NUOVA**: un grep citato come "torna zero"
+#  era vero alla stesura ma falso al momento del commit, perche' il
+#  file stesso e' diventato un match di se' stesso (il commit lo rende
+#  parte del repo che il grep scansiona). Piu' un residuo della 380:
+#  cinque bordi su dieci arrotondavano DENTRO il criterio esatto --
+#  congelato l'arbitrato "su S1 vince il criterio, non la cella
+#  arrotondata stampata", valido anche per R172a/b (gia' emendati).
+#
+#  Pin: giro di pin cbb5c58 (54mo, 16191264 -> 717be501). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Bersaglio: banco C:\MT5_Backtest (50504400). Magic 789530,
+#  vergine a HEAD (grep dalla radice, worktree compresi).
+# =====================================================================
+cbb5c58a187a5be352cc673c5eeaa1fa9b2589c9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
+# =====================================================================
