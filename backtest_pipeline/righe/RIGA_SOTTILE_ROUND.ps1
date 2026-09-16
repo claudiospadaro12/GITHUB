@@ -1204,7 +1204,20 @@ $BancoBT = 'C:\MT5_Backtest'
 #  del repo: compaiono SOLO nei due file prova di oggi (789570 e'
 #  anche citato per nome dentro R172g come riferimento incrociato al
 #  fratello, non come proprio magic -- non e' una collisione).
-$PIN = '439346653641e97cdc26981646c40f581b5a2c02'
+#  >>> SESSANTESIMO GIRO DI PIN (16/09/2026): 43934665 -> c8220094.
+#  Serviva per portare un'emendazione su R172a-e GIA' ARMATI: la
+#  giustificazione della banda Peggior Giornata % (+/-0,05 punti
+#  percentuali pieni) era falsa ("sotto la granularita' stampata dalla
+#  fonte", trovata falsa dal secondo cancello su R172f/g di oggi) --
+#  corretta al vero motivo (banda deliberatamente ASSOLUTA e PIU'
+#  LARGA del +/-2,0% relativo, perche' la colonna e' il prodotto di
+#  UNA SOLA giornata). NUMERO DELLA BANDA INVARIATO sui cinque file.
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  43934665 e c8220094 (git diff sui due percorsi: VUOTO, verificato).
+#  Il sorgente EA (ABTG_Dow_Apertura_US.mq5) fra l'ancora 8b922147 e
+#  c8220094 e' sempre le stesse 27 righe/una sola input (Guardian,
+#  fail-open nel Tester): l'uguaglianza dichiarata dai file regge.
+$PIN = 'c82200941c0cc20021e13092234dd5e76c15eca3'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
