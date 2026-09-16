@@ -20590,3 +20590,42 @@ Corollario: quando la fonte e' una griglia di ottimizzazione, il criterio
 DI DEFAULT e' quello che quella griglia ha davvero ottimizzato
 (`OptimizationCriterion` nel .ini + il valore restituito da `OnTester`),
 non il profitto -- e va detto lo stesso, perche' quasi nessuno lo assume.
+
+## 365. DUE FILE PROVA SCRITTI NELLA STESSA ORA SI ASSEGNANO LO STESSO MAGIC "VERGINE", E OGNUNO CERTIFICA LA PROPRIA UNICITA' CONTRO UNO STATO DEL REPO CHE L'ALTRO STA GIA' CAMBIANDO (controllo-preventivo, 16/09/2026)
+
+Il caso, misurato sui commit della stessa notte:
+- **03:34** `e21b86ec` aggiunge `R164a_atrexit_PTE_GBPUSD_771322.txt` con
+  `InpMagic=779825` e la frase *"MAGIC VERGINE 779825 (verificato per ricerca su
+  tutto il repo il 16/09/2026: zero occorrenze prima di questo file)"*. **Vera.**
+- **03:46** `afeeebdd` aggiunge `R163a_slbufferpips_suprev_NASUSD.txt` con
+  `InpMagic=779825` e la frase *"MAGIC VERGINE 779825 (verificato per ricerca su
+  tutto il repo, 16/09/2026: zero occorrenze)"*. **Falsa da dodici minuti.**
+
+Nessuna delle due verifiche era inventata: erano **vere quando sono state
+fatte** e una era **falsa quando e' stata committata**. Il cancello
+deterministico non le vede -- `controlla_prova.py` conta i pin e le celle, non
+l'unicita' di un valore **fra file diversi** -- e nemmeno la lettura del file
+la vede, perche' dentro quel file tutto torna.
+
+**E non e' cosmetico**: il magic e' l'unica cosa che separa due round nei log
+del tester, nel nome del per-trade di `ExportTrades` (composto con `InpMagic`)
+e nel censimento delle sedie. Due round con lo stesso magic sono due corse che
+nessuno potra' piu' attribuire.
+
+**Aggravante strutturale**: `CLAUDE.md` prescrive di lanciare gli agenti **in
+parallelo, in continuazione**. Quindi questa non e' una sfortuna: e' la
+condizione **normale** di lavoro. Ogni asserzione di unicita' scritta da un
+agente e' un'asserzione su uno stato del repo che un altro agente sta
+cambiando nello stesso minuto.
+
+### REGOLA
+Un'asserzione di **UNICITA'** (magic vergine, etichetta vergine, numero di
+round libero, nome file nuovo) non vale nel momento in cui si scrive: vale
+rispetto a un **commit**. Quindi:
+1. si **RIVERIFICA al cancello**, non solo alla stesura — e la riverifica la
+   fa il controllo, non la riporta l'autore:
+   `git log --oneline -5` + `grep -rl <valore> --exclude-dir=.git .`
+2. si scrive accanto **rispetto a quale HEAD** vale;
+3. se il valore e' gia' preso, si sposta il file **NON armato**: spostare un
+   file gia' armato in `CODA.txt` con il pin girato costa un altro giro di pin.
+   (Qui: R164a era armato, R163a no -> R163a e' passato a **779826**.)
