@@ -20629,3 +20629,30 @@ rispetto a un **commit**. Quindi:
 3. se il valore e' gia' preso, si sposta il file **NON armato**: spostare un
    file gia' armato in `CODA.txt` con il pin girato costa un altro giro di pin.
    (Qui: R164a era armato, R163a no -> R163a e' passato a **779826**.)
+
+## 366. LA RIGA ARMATA IN CODA.txt CONTRADICE IL `-Deposito` CHE IL FILE PROVA DICHIARA E MOTIVA (mql5-ea-developer, 16/09/2026)
+
+Trovato mentre si scriveva un round su un'altra manopola sulla stessa sedia
+(770511), non sotto cancello: `R155a_tprr_SuperWaveDowH1_U30USD.txt` dichiara
+in testa (r.12) `-Deposito 10000`, e lo motiva per esteso (r.18-20): *"il
+valore con cui l'ancora di R126a (sotto) e' confrontabile: si scrive lo
+stesso, uno stato implicito non e' uno stato dichiarato"*. La riga **ARMATA**
+in `CODA.txt` (r.1672, pin `9d22f99`) porta invece `-Deposito 100000`.
+
+**Non e' cosmetico**: su questa EA il deposito cambia il numero di operazioni
+del **+40%** (131 -> 184 posizioni, misurato su `r120e`) -- la sentinella S1
+del file (il confronto con l'ancora di R126a) non potrebbe tornare, perche' la
+riga la farebbe girare su un banco diverso da quello che il file promette.
+
+**La causa non e' stabilita** (probabile: la riga e' stata armata da un
+template che usa 100000 per default, come la maggioranza dei round di oggi,
+senza rileggere la motivazione specifica di QUESTO file). **Non e' arrivato a
+valle**: nessuna corsa e' girata su questo pin con questo deposito prima della
+scoperta.
+
+### REGOLA
+Il `-Deposito` (e ogni altro argomento della riga armata) si legge SEMPRE
+dal blocco "Si lancia con" del file prova al momento di armare, non si
+eredita dal deposito usato dagli altri round della stessa serata. Se il file
+dichiara e MOTIVA un deposito diverso dal default, quella motivazione e' la
+fonte di verita' -- copiare il default costa una sentinella che non torna.

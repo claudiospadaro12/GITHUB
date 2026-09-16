@@ -1668,8 +1668,21 @@ a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_
 #
 #  Pin: giro di pin 9d22f99 (37mo, 42903d2 -> 45ed226). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#
+#  >>> CORRETTO IL 16/09/2026 (classe 366, NUOVA): la riga qui sotto
+#  portava "-Deposito 100000", ma il file prova dichiara e MOTIVA per
+#  esteso (r.12/18-20) "-Deposito 10000" -- e' il valore con cui la sua
+#  ancora (R126a) e' confrontabile. Trovato da un agente che scriveva
+#  un round diverso sulla stessa sedia (770511), non da un cancello.
+#  Su questa EA il deposito cambia le operazioni del +40% (131->184,
+#  misurato su r120e): con 100000 la sentinella S1 del file non
+#  potrebbe tornare. Nessuna corsa era ancora girata su questo pin con
+#  il deposito sbagliato. Corretto qui sotto: -Deposito 10000. Pin
+#  invariato (il pin punta a RIGA_SOTTILE_ROUND.ps1, che non e'
+#  cambiato: solo l'argomento sulla riga di questo file, non serve un
+#  nuovo giro).
 # =====================================================================
-9d22f998fffb154e6bdf881c292fddfd627b8193 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 100000
+9d22f998fffb154e6bdf881c292fddfd627b8193 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 10000
 # =====================================================================
 #  R156a -- InpMaxDaysHold SU ABTG_PunteLarry, U30USD H1 (sedia 772341).
 #  Undicesima sedia coperta oggi. Blocco 3 esaurito per oggi (le 7
