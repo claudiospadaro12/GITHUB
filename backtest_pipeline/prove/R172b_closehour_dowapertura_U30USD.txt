@@ -653,9 +653,17 @@
 #          >>> IL DIFETTO ERA IDENTICO NEI DUE FILE, ed e' coerente col
 #              fatto che le bande sono condivise di proposito: corretto
 #              in tutti e due nello stesso passaggio.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga. [CORRETTO nel giro 59, PASS
+#      del secondo cancello su R172f: la giustificazione precedente
+#      ("scenderebbe sotto la granularita' stampata dalla fonte") era
+#      falsa -- il numero della banda non cambia.]
 #  >>> SONO LE STESSE BANDE DEL FILE FRATELLO R172a, ed e' voluto: la
 #      cella viva e l'ancora sono le STESSE, quindi bande diverse sui
 #      due file sarebbero un errore, non una scelta. Lo scrivo perche'

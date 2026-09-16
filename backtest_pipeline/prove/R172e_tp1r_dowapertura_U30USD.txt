@@ -774,9 +774,17 @@
 #    - PF, DD, Profit: FRAZIONE DELL'ANCORA, +/- 2,0%.
 #    - Trades: NUMERO INTERO DI OPERAZIONI, +/- 2 (non una percentuale:
 #      su 74 il 2% sarebbe 1,5 operazioni, che non esiste).
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga. [CORRETTO nel giro 59, PASS
+#      del secondo cancello su R172f: la giustificazione precedente
+#      ("scenderebbe sotto la granularita' stampata dalla fonte") era
+#      falsa -- il numero della banda non cambia.]
 #  >>> LE DIECI CELLE DELLA TABELLA SONO STATE RICALCOLATE DAL CRITERIO,
 #      UNA PER UNA, A MACCHINA (classe 380, che e' di stanotte e che i
 #      fratelli hanno gia' pagato due volte):

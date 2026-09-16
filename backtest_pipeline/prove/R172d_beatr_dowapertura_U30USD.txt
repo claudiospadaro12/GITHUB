@@ -601,7 +601,16 @@
 #      tolleranza che il file stesso dichiara -- fermerebbe una corsa
 #      SANA scrivendo "il banco non e' quello di R54a". Qui il numero
 #      e' stato scritto GIA' corretto.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga. [AGGIUNTO nel giro 59, PASS
+#      del secondo cancello su R172f: qui la giustificazione mancava del
+#      tutto -- il numero della banda non cambia.]
 #  >>> SONO LE STESSE BANDE DEI TRE FRATELLI, ED E' VOLUTO: stessa cella
 #      viva, stessa ancora, stessa regola -- bande diverse sarebbero un
 #      errore e non una scelta (classe 373 punto 3).

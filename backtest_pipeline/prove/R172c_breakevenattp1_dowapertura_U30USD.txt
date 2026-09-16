@@ -763,9 +763,17 @@
 #          >>> E LA FRASE "SONO LE STESSE BANDE DEI DUE FRATELLI" (sotto)
 #              e' VERA SOLO DOPO questa correzione: prima era falsa
 #              proprio sulla cella che decide.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga. [CORRETTO nel giro 59, PASS
+#      del secondo cancello su R172f: la giustificazione precedente
+#      ("scenderebbe sotto la granularita' stampata dalla fonte") era
+#      falsa -- il numero della banda non cambia.]
 #  >>> !! ARBITRATO DEL BORDO, AGGIUNTO DAL CANCELLO -- e chiude il
 #      RESIDUO della classe 380, regola 1 ("ogni banda si ricalcola dal
 #      criterio, cella per cella, a macchina"). Rifatti i dieci conti:

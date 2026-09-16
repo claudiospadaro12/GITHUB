@@ -556,9 +556,17 @@
 #              terminale e' un altro: una deriva di una-due uscite su 74
 #              e' esattamente il caso da non confondere con un banco
 #              sporco. La banda ora e' 72 - 76, come il criterio.
-#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
-#      gia' una percentuale e una banda relativa su un numero piccolo
-#      scenderebbe sotto la granularita' stampata dalla fonte.
+#    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05. E' una
+#      banda ASSOLUTA ed e' PIU' LARGA del +/- 2,0% relativo usato sulle
+#      altre righe (che su -1,0062 darebbe -1,0263 / -0,9861): la scelgo
+#      cosi' perche' questa colonna e' il prodotto di UNA SOLA giornata,
+#      quindi un criterio relativo qui non misura la deriva del banco ma
+#      quale sia stata la peggior seduta. E' una SCELTA DICHIARATA, non
+#      un'incertezza misurata (classe 385): chi separa davvero i due
+#      mondi e' `Trades`, non questa riga. [CORRETTO nel giro 59, PASS
+#      del secondo cancello su R172f: la giustificazione precedente
+#      ("scenderebbe sotto la granularita' stampata dalla fonte") era
+#      falsa -- il numero della banda non cambia.]
 #  >>> !! ARBITRATO DEL BORDO (classe 380, estensione, aggiunto dal
 #      cancello sul fratello R172c e valido anche qui, stessa ancora e
 #      stessa regola): rifatti i dieci conti dal criterio (non dalla
