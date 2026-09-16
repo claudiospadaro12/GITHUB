@@ -21090,3 +21090,65 @@ strada). E la differenza fra le due letture decide se il round prosegue.
    verificati**, e li' la parola "ESATTAMENTE" e' **corretta**. La classe
    colpisce l'UNICA sedia dove l'ancora era di qualita' diversa — che e'
    esattamente dove un copia-incolla fra gemelli fa danno.
+
+## 376. 🔴🚦 IL GATE DELLA CORSIA ROUND NON SA CHE `@FRAZIONEIS 1.0` E' VOLUTO: NOVE ROUND ARMATI TORNERANNO "NON MISURATO" (exit 2) NONOSTANTE L'IS SIA PERFETTO (mql5-ea-developer, 16/09/2026)
+
+**Il caso, misurato leggendo i sorgenti, non ragionato.** `walkforward_generico.ps1`
+r.921-924 costruisce le due finestre da `@FRAZIONEIS`:
+```
+$Meta = $Inizio.AddDays([math]::Floor(($FineDt-$Inizio).TotalDays*$FrazioneIS))
+IS  : Da=$Inizio         A=$Meta
+OOS : Da=$Meta.AddDays(1) A=$FineDt
+```
+Con `$FrazioneIS = 1.0`, `$Meta` coincide con `$FineDt` (a meno di arrotondamenti):
+la gamba OOS esce `Da = FineDt+1, A = FineDt`, cioe' **`Da > A`**. Lo script
+stesso lo sa e lo scrive a schermo (r.730-731): *"ATTENZIONE: FrazioneIS 1.0 =
+UNA SOLA TRANCHE. La gamba OOS e' DEGENERE... Dichiaralo nel referto."* -- fin
+qui e' la classe **345**, gia' nota, e riguarda solo la stima "passate" di
+`controlla_prova.py`.
+
+**Quello che NESSUN documento aveva ancora tracciato e' cosa fa il gate della
+corsia ROUND con quella gamba degenere.** `RIGA_ROUND_VPS.ps1` r.734-739:
+```powershell
+if(-not $eOOS.Fresco -or $eOOS.NRighe -eq 0){ $mancanti += "OOS" }
+...
+if($mancanti.Count -gt 0){ $esitoFinale = "NON MISURATO -- CSV mancanti o vuoti: " + ... }
+```
+e r.836: `if($esitoFinale -like "NON MISURATO*"){ exit 2 }`. **Zero righe in
+`RIGA_ROUND_VPS.ps1` menzionano `FRAZIONEIS`**: il gate non distingue "l'OOS
+manca perche' e' rotto" da "l'OOS manca perche' e' degenere per costruzione,
+come la riga stessa vuole". Il verdetto e' **NON MISURATO, exit 2, per l'intero
+round** -- anche se la gamba IS ha prodotto un CSV perfetto con tutte le celle.
+
+**Nove round ARMATI in `CODA.txt` al 16/09/2026 hanno `@FRAZIONEIS 1.0`**
+(verificato col grep sul file prova di ciascuno, non assunto dal nome):
+`R154a` · `R155a` · `R156a` · `R157a` · `R158a` · `R159a` · `R167b` · `R168a` ·
+`R168c`. Tutti e nove torneranno `exit 2` al prossimo giro del runner, con la
+gamba IS illeggibile per chiunque si fermi al codice di uscita.
+
+**E non e' un guasto nella COSTRUZIONE del tentativo di rimediare**: cambiare
+`@FRAZIONEIS` a un valore vicino a 1.0 (es. 0,999) non basta -- darebbe
+un'OOS con `Da<=A` valido ma con **zero trade** su una finestra di 1 giorno,
+che il gate rileva comunque (`$zero`, riga successiva) e marca **ugualmente**
+"NON MISURATO -- Trades = 0 su: OOS", **stesso `exit 2`**. Il problema non e'
+nel file prova: e' nel gate, che non ha un'eccezione per l'intento dichiarato
+"una tranche sola".
+
+### 🔴 LA REGOLA, e la decisione che resta a Claudio
+1. **Il fix vero e' nel gate**: `RIGA_ROUND_VPS.ps1` dovrebbe leggere
+   `@FRAZIONEIS` dal file prova (come gia' fa `walkforward_generico.ps1`) e,
+   quando vale `>= 1.0`, **non contare l'assenza/vuoto dell'OOS come motivo di
+   "NON MISURATO"** -- l'esito si decide sulla sola gamba IS.
+2. **Non e' un fix da fare senza dirlo**: `RIGA_ROUND_VPS.ps1` e'
+   l'infrastruttura del runner automatico, gira su tutti i round futuri, non
+   solo su questi nove -- una modifica qui merita la firma di chi decide sul
+   perimetro del runner, non una riga cambiata di corsa da un agente.
+3. **Fino a quel momento**: chi legge il referto notturno su uno di questi
+   nove round deve aprire il CSV `_IS` diretto (esiste ed e' valido) invece di
+   fermarsi al codice di uscita 2 -- e' la stessa convenzione, piu' vecchia,
+   documentata al punto sul `NySessionRetest` ("il rosso del generico sul CSV
+   OOS e' ATTESO: NON rilanciare"), qui applicata al gate della corsia ROUND
+   invece che al solo per-trade.
+4. **Nessun round e' stato disarmato per questo**: l'IS resta un deliverable
+   vero, il difetto e' nella LETTURA del verdetto complessivo, non nella
+   misura. Segnalato a Claudio, non deciso da un agente.
