@@ -21153,6 +21153,22 @@ nel file prova: e' nel gate, che non ha un'eccezione per l'intento dichiarato
    vero, il difetto e' nella LETTURA del verdetto complessivo, non nella
    misura. Segnalato a Claudio, non deciso da un agente.
 
+### ✅ CONFERMATO EMPIRICAMENTE dal referto della corsa reale (16/09/2026, 03:30)
+`backtest_pipeline/coda/referti/REFERTO_RUNNER_20260916_033005.txt`, non
+un'ipotesi: **10 round su 74 eseguiti sulla corsia ROUND sono tornati exit 2**,
+e il grep su ciascun file prova confirma `@FRAZIONEIS 1.0` su tutti e dieci.
+Sei erano gia' nella lista sopra (`R154a` `R155a` `R156a` `R157a` `R158a`
+`R159a`); **quattro sono NUOVI e vanno aggiunti alla lista**: `R160e`
+(`InpMaxDaysHold`, PunteLarry XAUUSD) · `R161b` (`InpSLAtrMult`,
+BreakingBand EURUSD) · `R161c` (`InpSLAtrMult`, BreakingBand AUDUSD) · `R162a`
+(`InpPartialTargetR`, GapContinuation 225JPY). `R167b`/`R168a`/`R168c` non
+compaiono in questa corsa (non ancora eseguiti dal runner, o oltre l'orizzonte
+delle 86 righe di coda di questa notte) -- **non e' un segno che siano sani**,
+e' un segno che non sono ancora stati provati dal runner vero. La lista
+affidabile e' "@FRAZIONEIS 1.0 nel file prova", non "visto exit 2 finora".
+L'undicesimo exit-2 della stessa corsa (`cemad02`) e' un caso DIVERSO, gia'
+chiuso: classe 312 (IS vuoto voluto, non OOS).
+
 ---
 
 ## 377. 👯📄 I FILE GEMELLI SCRITTI NELLA STESSA ORA SI COPIANO A VICENDA LE **CITAZIONI** E LE ADATTANO A MEMORIA: numeri di riga di un ALTRO sorgente, sigle di soglia di un'ALTRA numerazione, un file che NON ESISTE, e un `HEAD` di quattro commit prima (controllo-preventivo, 16/09/2026)
