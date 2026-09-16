@@ -184,7 +184,7 @@ def indice_csv():
     cost = collections.defaultdict(dict)
     n = 0
     for dp, dn, fn in os.walk(ROOT):
-        if '/.git' in dp:
+        if '/.git' in dp or '/.claude/worktrees' in dp:
             continue
         for f in sorted(fn):
             if not f.lower().endswith('.csv'):

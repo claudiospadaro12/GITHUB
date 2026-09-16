@@ -21264,3 +21264,43 @@ In concreto, prima del PASS:
 **I gemelli non si controllano uno per uno: si controllano PRIMA l'uno contro
 l'altro.** Dove i fratelli si contraddicono, qualcuno ha adattato a memoria — e
 dove hanno tutti la stessa frase, nessuno l'ha riletta.
+
+## 378. 🗂️ UN ARTEFATTO COMMITTATO CHE SI RIGENERA CON `os.walk(ROOT)` SI
+GONFIA DI QUANTI WORKTREE CAPITANO SUL DISCO IN QUEL MOMENTO
+
+_Trovata il 16/09/2026, mentre si committava un file che un agente aveva
+rigenerato durante la caccia della notte._
+
+**Il fatto**: `backtest_pipeline/censimento_uscite.py` scrive un JSON
+committato (`CENSIMENTO_USCITE_2026-09-11.json`, riferimento del referto
+omonimo) con `os.walk(ROOT)`, escludendo solo `/.git`. Rigirato stanotte,
+`csv_con_inp` e' saltato da **2184 a 19670** (quasi 9x) e decine di percorsi
+sono comparsi sotto `.claude/worktrees/agent-*/...`. Causa: **8 worktree
+di agenti paralleli vivi sul disco in quel momento**, ognuno una copia
+INTERA del repo — lo stesso CSV storico viene contato una volta per
+worktree, e il numero varia da un minuto all'altro secondo quanti agenti
+sono in volo, non secondo quanti CSV esistono davvero.
+
+🔴 **E i percorsi non sono nemmeno stabili**: `.claude/worktrees/agent-*`
+viene ripulito quando l'agente finisce. Un lettore futuro di quel JSON
+committato troverebbe percorsi che **non esistono piu'**.
+
+⚠️ **E' diverso dalla ricerca `grep -rl` "worktree compresi"** usata in
+tutt'altro contesto (classe 372, verificare AL MOMENTO se un magic o un
+file e' vergine prima di consegnare): quella e' una domanda ISTANTANEA,
+mai salvata. Qui il problema e' un OUTPUT PERMANENTE, committato, che
+finisce nella storia del repo con un numero che nessuno potra' piu'
+riprodurre (il numero di worktree vivi in quel momento non e' salvato
+da nessuna parte).
+
+**LA REGOLA**: uno script che scrive un artefatto DESTINATO AL COMMIT deve
+escludere `.claude/worktrees` dal proprio `os.walk` (o equivalente),
+esattamente come esclude `.git`. Uno script che invece serve una verifica
+ISTANTANEA e non salvata (classe 372) puo' e deve continuare a includerli.
+La differenza e' se il risultato **finisce in un commit** o resta nella
+sessione che l'ha chiesto.
+
+📌 **Prima di committare un file rigenerato da uno script**, si guarda il
+`git diff --stat`: un salto di ordine di grandezza nelle righe o nei
+conteggi senza un motivo dichiarato e' il sintomo, non il rumore -- si
+ferma e si capisce PRIMA di mandare, non dopo.

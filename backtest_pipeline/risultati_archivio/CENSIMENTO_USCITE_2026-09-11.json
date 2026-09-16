@@ -1,5 +1,5 @@
 {
- "csv_con_inp": 2184,
+ "csv_con_inp": 2186,
  "righe": [
   {
    "magic": "770101",
@@ -2155,7 +2155,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 79,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -2360,7 +2360,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 79,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3083,7 +3083,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 77,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -3308,7 +3308,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 77,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6700,7 +6700,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 77,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -6860,7 +6860,7 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 78,
-   "stato": "MAI-ovunque",
+   "stato": "MAI-gemello",
    "mai": true,
    "inerte": false,
    "motivo": "",
@@ -7020,12 +7020,41 @@
    "cat": "stop:buffer",
    "default": "3",
    "riga": 78,
-   "stato": "MAI-ovunque",
-   "mai": true,
+   "stato": "ASSE",
+   "mai": false,
    "inerte": false,
    "motivo": "",
    "celle": 9,
-   "prove": []
+   "prove": [
+    [
+     "backtest_pipeline/risultati_prove/r127a/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_IS_r127a.csv",
+     [
+      "1128",
+      "1503",
+      "1878",
+      "2253",
+      "2628",
+      "3",
+      "3003",
+      "378",
+      "753"
+     ]
+    ],
+    [
+     "backtest_pipeline/risultati_prove/r127a/ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_OOS_r127a.csv",
+     [
+      "1128",
+      "1503",
+      "1878",
+      "2253",
+      "2628",
+      "3",
+      "3003",
+      "378",
+      "753"
+     ]
+    ]
+   ]
   },
   {
    "magic": "970913",
