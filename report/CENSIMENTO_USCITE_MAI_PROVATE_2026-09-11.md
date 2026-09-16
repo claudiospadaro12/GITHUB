@@ -438,3 +438,51 @@ ma il suo tempo non è scritto in nessun referto. Si misura al primo giro.
 
 🚫 Niente di tutto questo tocca il forward, i preset, i terminali con le sedie vive o il
 conto reale **10105439**. Sono solo file di testo e un terminale di backtest.
+
+---
+
+## 🔴🆕 7. CORREZIONE DEL 16/09/2026 — QUESTO REFERTO NON È PIÙ UNA LISTA DI COSE
+## DA FARE: È UN ARCHIVIO. E DUE RIGHE ERANO SBAGLIATE
+
+Un agente inviato oggi a scrivere un file prova su `InpMaxBarsHold` (sedia `772361`,
+la "medaglia di bronzo" del §1) ha trovato che il round **esiste già**: `R127c`,
+girato e caricato dal 13/09 (vedi `PIANO_PROP.md` M44). Scrivere un file oggi sarebbe
+stato lavoro doppio — la richiesta a Claudio al punto 2 della tabella qui sopra
+("Firmare o bocciare R127") **è risolta da tre giorni**, e lo stesso vale per R125/R126
+citati ai punti 1 e 3 (vedi `PIANO_PROP.md` M43/M44/K1). **Chi legge questo file oggi
+deve trattarlo come cronaca dell'11/09, non come coda di lavoro** — lo stato vero delle
+righe di coda è in `CODA.txt` e nei resoconti più recenti.
+
+**E leggendo i CSV di `R127c` (mai fatto da nessun referto finora, solo la cella viva
+come canarino), sono uscite due correzioni vere sulla riga `772361`:**
+
+- **`InpMaxBarsHold` non è più `[NON MISURATO]`.** Le 8 celle (25→200) mostrano un
+  altopiano IDENTICO al centesimo da 75 a 200 (IS: PF 1,17686/DD 10,9946%/Trades 153
+  su tutte e 6; OOS: PF 1,52341/DD 12,2627%/Trades 242 su tutte e 6 — verificato
+  a macchina sui CSV grezzi, non a occhio). Il time-stop non morde mai al valore
+  vivo (100): l'uscita vera è il flip di struttura, sempre prima delle 75 barre.
+  **L'ipotesi "l'orologio è l'unica protezione" è FALSIFICATA**: il DD è piatto,
+  accorciare il guinzaglio non compra un centesimo di margine (anzi il PF IS
+  peggiora, 1,177→1,148 a 50 barre). Caveat: `R127c` gira a Modello 1 (OHLC),
+  screening non verdetto — ma un'identità al centesimo su 6 celle × 2 finestre
+  regge meglio di un numero di P/L isolato.
+- **`InpTP_R` sulla riga 772361 era marcato "nessuna inerte per costruzione" (colonna
+  vuota, r.194): FALSO.** Con `InpExitMode=2` (il valore vivo di questa sedia)
+  `mql5/Experts/ABTG_CostToCost.mq5` r.829-834 non assegna mai `tp` nei due rami
+  `if`, resta 0.0, e `if(tp>0.0)` non piazza nulla: `InpTP_R` non tocca un prezzo
+  su questa sedia. Sulla riga 772361 non restano manopole d'uscita aperte:
+  `InpMaxBarsHold` misurata (sopra), `InpTP_R` inerte, `InpSLBufferATR` già girata
+  la notte 13-14/09 (**CSV ancora sul VPS, mai raccolti** — vedi sotto) e
+  `InpExitMode` già ad asse in archivio.
+- **Anche la premessa di rischio di questa riga andava corretta**: il 12,3% di DD
+  citato per questa sedia è alla normalizzazione InpRiskPercent=1,0%, non alla
+  taglia viva. A 0,65% (la taglia contrattuale di `CONTRATTI_SEDIE.md` r.150) il DD
+  vero è **8,0%** contro un muro del 10% (`FIRME_2026-08-18.md` r.18) — 2,0 punti
+  di margine, non una sedia già oltre il muro.
+
+📌 **Azione più economica rimasta aperta su questa riga**: `InpSLBufferATR` (R146a,
+tick reali, la stessa sedia) **ha già girato** ma i CSV sono fermi sul VPS, mai
+raccolti (`RESOCONTO_2026-09-14.md` r.8-17). È la manopola che oggi conta di più,
+visto che l'orologio è dimostrato inerte sul DD: lo SL resta l'unica leva. Costo:
+una riga (`carica_risultati.ps1`), zero minuti di tester — **decisione e gesto di
+Claudio**, non un round da rilanciare.
