@@ -1253,7 +1253,27 @@ $BancoBT = 'C:\MT5_Backtest'
 #  Magic 789590/789600/789610 riverificati vergini con grep -rl
 #  "InpMagic=<magic>" dalla radice del repo: una riga ciascuno, nessuna
 #  collisione col blocco vivo 789510-789580 (789560 lasciato libero).
-$PIN = '44edd730a9c45703f696bb85265f65fc4619b38d'
+#  >>> SESSANTATREESIMO GIRO DI PIN (16/09/2026): 44edd730 -> dc069389.
+#  Serviva per armare R173c (InpBreakeven, 2 celle, magic 779869),
+#  TERZA e ultima manopola della famiglia parziale/breakeven su 770511
+#  (ABTG_SuperWave_DOW_H1_Ottimizzato): la famiglia chiude 3/3. Scoperta
+#  centrale (verificata da me e dal secondo cancello, con contro-esempi
+#  costruiti e falliti): con InpBreakeven=false lo stop non va mai in
+#  pari (unico posto che lo sposta e' r.460), il gate del primo target
+#  (r.446) non si richiude mai -> cascata di parziali sul lotto
+#  residuo. Diverso dalla catena riskDist/InitialSL di 770202 (qui non
+#  esiste, verificato: zero occorrenze). Secondo cancello PASS dopo 5
+#  correzioni (commit dc069389), classe NUOVA 391 (un requisito giusto
+#  -Modello 4 motivato con un fatto falso sul motore OHLC: 240 tick
+#  contro 6 gradini, non "tick insufficienti" -- il requisito resta
+#  giusto per il vero motivo, la sequenza O-H-L-C fabbricata). RIGA_
+#  ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  44edd730 e dc069389 (git diff sui due percorsi: VUOTO, verificato).
+#  Il sorgente EA (ABTG_SuperWave_DOW_H1_Ottimizzato.mq5) fra l'ancora
+#  1445abf8 e dc069389 e' VUOTO -- l'uguaglianza esatta su Trades (106
+#  IS/184 OOS) regge. Magic 779869 riverificato vergine (grep -rl dalla
+#  radice, worktree compresi: solo questo file).
+$PIN = 'dc0693899d4ba51186d50ba6c9bdcdfdf578d782'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
