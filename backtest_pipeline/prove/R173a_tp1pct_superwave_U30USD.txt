@@ -844,6 +844,14 @@
 #             3.4846 / 106
 #        OOS  3454.83 / 18.77625 / 1.22034 / 0.77286 / 1.69733 /
 #             4.2149 / 184
+#      >>> E LA PRECISIONE NON E' UN'OSSERVAZIONE SUI FILE: E' NEL
+#          SORGENTE. `OnTesterDeinit` r.765 scrive la riga con
+#          `StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f")`,
+#          cioe' Profit Factor a CINQUE decimali (`%.5f`) ed Equity
+#          DD % a QUATTRO (`%.4f`), sempre, per costruzione. Quindi la
+#          corsa nuova e i CSV dell'ancora hanno ESATTAMENTE la stessa
+#          precisione, e l'unica cosa che arrotondava era il referto.
+#          Letto oggi nel sorgente, non dedotto dai file.
 #      >>> IL DD VERO E' 3,4846 E 4,2149, NON 3,48 E 4,21. Il referto
 #          non mentiva: arrotondava. Ma costruirci sopra un'INCERTEZZA
 #          DI STAMPA di +/- 0,005 significa allargare una sentinella
