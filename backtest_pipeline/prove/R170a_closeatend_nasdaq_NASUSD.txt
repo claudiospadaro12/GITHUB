@@ -506,12 +506,22 @@
 #         (la parziale a 1R e la chiusura finale), quindi la colonna
 #         `Trades` conta USCITE, non posizioni.
 #         >>> IL VALORE DEL FATTORE SU QUESTA SEDIA E' [NON MISURATO], e
-#             l'ho CERCATO (classe 372): l'unico per-trade di questo EA
-#             in repo e' `abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD_EXT_
-#             767120.csv`, che e' dello SCREENING OHLC su NASUSD_EXT --
-#             altro simbolo, altro feed, altra finestra. Per la corsa
-#             CASSA (magic 768300) non c'e' nessun per-trade nel repo
-#             (stessa ricerca dell'ANCORA, 5 file, nessun .csv).
+#             l'ho CERCATO (classe 372). LA RICERCA, in chiaro, rifatta
+#             al cancello del 16/09 perche' la prima stesura di questo
+#             paragrafo citava un file che NON ESISTE (classe 377):
+#               find dalla RADICE del repo, worktree compresi, di
+#               `abtg_trades_ABTG_Nasdaq*` e di qualunque file con
+#               "NASUSD_EXT" nel nome -> ZERO RISULTATI;
+#               `git log --all -- "*abtg_trades_ABTG_Nasdaq*"` -> VUOTO
+#               (non e' un file cancellato: non e' mai esistito);
+#               la stringa "767120" compare in 9 file dell'albero
+#               principale (worktree esclusi) e sono TUTTI .ps1/.md/.txt
+#               (righe di lancio, referti, file prova): ZERO .csv.
+#             >>> QUINDI IL PER-TRADE DI QUESTO EA NON ESISTE AFFATTO IN
+#                 REPO -- ne' per la corsa CASSA (magic 768300, stessa
+#                 ricerca dell'ANCORA: 5 file, nessun .csv) ne' per
+#                 nessun'altra corsa. Il buco e' piu' largo di quanto la
+#                 prima stesura scrivesse, non piu' stretto.
 #         >>> QUINDI NON SI DIVIDE PER NIENTE. Si dichiara il numero di
 #             USCITE e si scrive "[NON MISURATE] le posizioni". L'unica
 #             cosa che si puo' dire con certezza e' il LIMITE: con al
@@ -853,7 +863,10 @@
 #  ricerca dalla RADICE del repo, worktree degli agenti paralleli
 #  COMPRESI (`.claude/worktrees/` NON escluso), escluso solo l'albero
 #  interno di git. Risultato: ZERO occorrenze, rispetto a HEAD
-#  `d1ddf1c0` di `lavoro` del 16/09/2026.
+#  `09775e48` di `lavoro` del 16/09/2026 (RIVERIFICATO al cancello:
+#  la prima stesura scriveva `d1ddf1c0`, che il 16/09 era gia' QUATTRO
+#  commit indietro -- classe 377. Il fatto non cambia, il punto di
+#  riferimento si').
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO, ed e' una
 #      scelta deliberata: la classe 367 misura che il punto dove due
 #      agenti collidono e' la SEQUENZA (779825 -> 779826 -> 779827 in tre
@@ -876,7 +889,9 @@
 #     FONTE, e l'ordine di autorita' e' dichiarato (classe 369):
 #       1. IL PRESET, che e' l'unico artefatto che governa la sedia in
 #          campo: mql5\presets\ABTG_GatedShort_NASUSD_770250_LIVE.set,
-#          letto oggi riga per riga (82 righe);
+#          letto oggi riga per riga (81 righe, 81 campi: il file non ha
+#          ne' intestazione ne' righe di commento -- contato, non
+#          stimato, e coerente con gli "81 campi" del blocco ANCORA);
 #       2. la CONTROPROVA, cioe' il file prova dell'ancora
 #          prove\SHORTGATE_CASSA_00.txt: coincide su TUTTI i campi tranne
 #          i tre dichiarati nel blocco ANCORA;

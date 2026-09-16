@@ -804,7 +804,7 @@
 #    Modello 4 (TICK REALI). Deposito 100000. Rischio PINNATO a 1,0%
 #    (la taglia dell'ANCORA; in campo la sedia gira a 0,65% -- LE TAGLIE
 #    RESTANO DI CLAUDIO). FrazioneIS 0.40 (default del driver,
-#    walkforward_generico.ps1 r.179). Il calcolo (r.758):
+#    walkforward_generico.ps1 r.179). Il calcolo (r.921):
 #      Meta = Inizio + floor((Fine-Inizio).TotalDays * FrazioneIS)
 #      2024.09.26 -> 2026.06.30 = 642 giorni; floor(642*0,40) = 256
 #      IS  2024.09.26 - 2025.06.09
@@ -893,7 +893,10 @@
 #  ricerca dalla RADICE del repo, worktree degli agenti paralleli
 #  COMPRESI (`.claude/worktrees/` NON escluso), escluso solo l'albero
 #  interno di git. Risultato: ZERO occorrenze, rispetto a HEAD
-#  `d1ddf1c0` di `lavoro` del 16/09/2026.
+#  `09775e48` di `lavoro` del 16/09/2026 (RIVERIFICATO al cancello:
+#  la prima stesura scriveva `d1ddf1c0`, che il 16/09 era gia' QUATTRO
+#  commit indietro -- classe 377. Il fatto non cambia, il punto di
+#  riferimento si').
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO: il blocco
 #      7873xx e' lontano dalle sequenze vive (7798xx, 7886xx, 7794xx,
 #      7865xx, 7781xx di R81). La classe 367 misura che il punto dove due

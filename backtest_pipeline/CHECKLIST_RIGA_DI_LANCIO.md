@@ -21152,3 +21152,115 @@ nel file prova: e' nel gate, che non ha un'eccezione per l'intento dichiarato
 4. **Nessun round e' stato disarmato per questo**: l'IS resta un deliverable
    vero, il difetto e' nella LETTURA del verdetto complessivo, non nella
    misura. Segnalato a Claudio, non deciso da un agente.
+
+---
+
+## 377. 👯📄 I FILE GEMELLI SCRITTI NELLA STESSA ORA SI COPIANO A VICENDA LE **CITAZIONI** E LE ADATTANO A MEMORIA: numeri di riga di un ALTRO sorgente, sigle di soglia di un'ALTRA numerazione, un file che NON ESISTE, e un `HEAD` di quattro commit prima (controllo-preventivo, 16/09/2026)
+
+**Il caso.** Tre file prova gemelli — `R170a` (Nasdaq `ABTG_Nasdaq_Apertura_US`),
+`R170b` (oro `ABTG_MaxMinNotte`), `R170c` (DAX `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`)
+— scritti nella stessa ora sullo **stesso asse** (`InpCloseAtEnd`), passati tutti e
+tre dal cancello deterministico (`controlla_prova.py` **OK**, `controlla_riga.py`
+**nessun difetto meccanico**). Il cancello di giudizio ha trovato **otto** difetti,
+e **sette su otto hanno la stessa causa**: la prosa e' stata adattata dal gemello
+invece che riletta alla fonte.
+
+**1) LE SIGLE DELLE SOGLIE SPOSTATE DI UNO — il difetto piu' pericoloso.**
+`R170a` ha una soglia in piu' degli altri (`B3 RISCHIO TOTALE`), quindi la sua
+numerazione e' `B4 = asse inerte · B5 = banda di rumore · B6 = concordanza`.
+`R170b` ha `B3 = asse inerte · B4 = banda di rumore · B5 = concordanza`. Ma
+**cinque riferimenti interni di `R170b` portavano la numerazione di `R170a`**:
+`(asse inerte, B4)`, `CONCORDANZA IS/OOS (B6)`, `finestre (B6)`,
+`margine >= 0,10 di PF (B5)`, `va accoppiata a B4 (classe 357)`.
+🔴 **E il file dichiarava in testa al blocco proprio di NON ereditare le sigle**
+(*"congelate QUI e non importate... si citano come B<n> [R170b]"*, classe 315):
+non ha ereditato le soglie, ha ereditato la **NUMERAZIONE**, che e' peggio
+perche' e' invisibile. Un referto futuro che avesse scritto *"B4 [R170b] non
+scatta"* avrebbe citato **la banda di rumore credendo di citare l'asse inerte**.
+
+**2) UN CONTROLLO DICHIARATO ASSENTE NEL GEMELLO CHE NEL GEMELLO C'E'.**
+`R170b` B5: *"QUESTO CONTROLLO C'E' QUI E NON C'E' IN `R170a`"*. Falso: `R170a`
+ce l'ha (la sua `B6`), dichiarato **debole**, e scrive pure la ragione. I due
+file si contraddicono a pagina aperta: bastava leggerli **insieme**, che e'
+esattamente cio' che i due file chiedono al lettore di fare.
+
+**3) NUMERI DI RIGA GIUSTI PER UN ALTRO SORGENTE.**
+- `R170b` cita `InpComment` "usato come commento dell'ordine (r.352/354)" in
+  `ABTG_MaxMinNotte.mq5`: r.352 e' `{`, r.354 e' `LotByRisk`. Le righe vere sono
+  **355** (`InpComment+" BUY"`) e **367** (`InpComment+" SELL"`). Il gemello
+  `R170c` cita `r.254/266` ed e' **corretto** — per il *suo* EA.
+- `R170b` **e** `R170c` citano la formula `Meta = Inizio + floor(...)` di
+  `walkforward_generico.ps1` a **r.758**, che e' una riga di banner `# ====`.
+  La formula sta a **r.921**. `R170a`, sullo stesso identico fatto, cita
+  **r.921-924** e ha ragione. 👉 **Tre gemelli, tre numeri, due sbagliati.**
+- `R170b` cita la definizione dell'uscita 3 a `RIGA_SOTTILE_ROUND.ps1` **r.1312**
+  (`if($righeErr.Count -gt 0){`): la riga vera e' **1322**.
+
+**4) UN FILE CITATO COME PROVA DI UNA RICERCA CHE NON ESISTE.** `R170a`, dentro
+un paragrafo che invoca la **classe 372** (*"un'assenza dichiarata dev'essere
+un'assenza CERCATA"*), scrive: *"l'unico per-trade di questo EA in repo e'
+`abtg_trades_ABTG_Nasdaq_Apertura_US_NASUSD_EXT_767120.csv`"*. Quel file **non
+esiste**, e `git log --all -- "*abtg_trades_ABTG_Nasdaq*"` torna **vuoto**: non
+e' stato cancellato, **non e' mai esistito**. La classe 372 ha una faccia
+gemella che nessuno aveva scritto: **una PRESENZA dichiarata e mai aperta**.
+🟢 (Qui il verdetto non cambiava — il fattore resta `[NON MISURATO]` — ma il
+buco era *piu' largo* di come il file lo descriveva, non piu' stretto.)
+
+**5) DUE CONTEGGI DELLO STESSO OGGETTO NELLO STESSO FILE.** `R170a` dice
+*"preset... letto oggi riga per riga (**82 righe**)"* in fondo e *"preset vivo
+(**81 campi**)"* nel blocco ANCORA. Il `.set` ha **81 righe, 81 campi, zero
+commenti**. Il confronto campo-per-campo del file e' invece **esatto**
+(81 comuni / 3 divergenti / 78 identici, e 80 pinnati / 3 / 77: riprodotto a
+macchina al cancello): l'unico numero sbagliato era quello **non** prodotto
+dallo script.
+
+**6) IL `HEAD` DI QUATTRO COMMIT PRIMA.** Tutti e tre i file certificano il
+magic vergine *"rispetto a HEAD `d1ddf1c0` di `lavoro`"* e aggiungono
+*"RIVERIFICATO IMMEDIATAMENTE PRIMA DELLA CONSEGNA (classe 365, regola 1)"*.
+`d1ddf1c0` era gia' **quattro commit indietro** quando i file sono stati
+scritti (`c713ac92` → `d5096f8d` → `e533c313` → `8394a0ac`). Il fatto era vero
+(i magic `787310/787320/787330` sono vergini, riverificato al cancello a
+`09775e48`), **ma la frase che lo certifica indicava un punto di riferimento
+falso** — ed e' proprio la frase che la classe 365 esiste per rendere
+affidabile. Una riverifica che cita un `HEAD` stantio **non e' una riverifica**.
+
+### 🧠 PERCHE' MORDE, e perche' il cancello deterministico non lo vede
+I file gemelli sono la forma di lavoro **piu' produttiva** che abbiamo (cinque
+sedie sullo stesso asse in una serata) e per questo la piu' esposta: la
+seconda e la terza copia nascono da un **taglia-e-adatta** della prima, e
+l'adattamento e' fatto **a occhio sulla prosa**, non rieseguendo la lettura.
+Il cancello deterministico controlla **ASCII, celle, pin, magic, orari**: non
+apre i file citati e non confronta i gemelli fra loro. Il difetto vive
+esattamente nello spazio fra i due strati.
+
+### ✅ IL CONTROLLO CHE LI SMASCHERA TUTTI, ed e' uno solo
+🔴 **Quando N file gemelli arrivano insieme, si confrontano PRIMA fra LORO sui
+fatti che DEVONO coincidere, e POI ciascuno contro la fonte.** Le divergenze
+fra gemelli sono un **rilevatore gratuito**: il posto dove i tre dicono tre
+cose diverse sullo stesso fatto (`r.758` / `r.758` / `r.921`) e' il posto dove
+almeno uno sbaglia, e si trova senza aprire niente.
+
+In concreto, prima del PASS:
+1. **Sigle di soglia**: estrarre le definizioni `B0..Bn` di **ogni** file e
+   verificare che **ogni riferimento interno** a `B<n>` punti alla definizione
+   di **quel** file. I gemelli con un numero DIVERSO di soglie sono il caso a
+   rischio: si controlla per **titolo**, non per numero.
+2. **Numeri di riga**: ogni `r.NNN` si riapre **nel sorgente che il file
+   nomina**, non nel sorgente del gemello. Se due gemelli citano numeri diversi
+   per la **stessa riga dello stesso file**, si ferma tutto e si va a guardare.
+3. **File citati**: ogni percorso nominato dev'essere **aperto** (o dichiarato
+   assente con il comando di ricerca **eseguito**). `git log --all -- <path>`
+   distingue "cancellato" da "mai esistito", e la differenza va scritta.
+4. **Affermazioni sul gemello** (*"questo in R170x non c'e'"*): si verificano
+   **nel gemello**, che e' nella stessa cartella. Sono le piu' facili da
+   controllare e le piu' facili da sbagliare.
+5. **`HEAD`**: la riverifica del magic si scrive col `git rev-parse HEAD`
+   **del momento in cui si consegna**, non con quello ricordato.
+6. **Conteggi**: se un numero compare due volte nello stesso file (righe,
+   campi, celle), i due devono coincidere. Il conteggio fatto a macchina vince
+   su quello scritto in prosa — e quello in prosa va corretto, non lasciato.
+
+### 🔑 La regola in una riga
+**I gemelli non si controllano uno per uno: si controllano PRIMA l'uno contro
+l'altro.** Dove i fratelli si contraddicono, qualcuno ha adattato a memoria — e
+dove hanno tutti la stessa frase, nessuno l'ha riletta.

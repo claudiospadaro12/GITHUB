@@ -107,7 +107,7 @@
 #       "ESEGUITO in 143s, uscita 3 -- guarda il log"
 #     Uscita 3 = "GIRATO CON RILIEVI: i numeri ci sono, ma c'e'
 #     qualcosa da leggere nel referto. NON e' un fallimento"
-#     (RIGA_SOTTILE_ROUND.ps1 r.1312).
+#     (RIGA_SOTTILE_ROUND.ps1 r.1322; l'elenco dei codici e' a r.90).
 #     >>> MA IL LOG DI QUELLA CORSA NON C'E' PIU': il file
 #         RIGA_SOTTILE_ROUND_20260915_033005.log in repo contiene SOLO
 #         l'ultimo round della notte (r152a). E nessun CSV *_r151a* e'
@@ -247,6 +247,15 @@
 #    Riconfermato in un SECONDO file indipendente
 #    (`R103_REFERTO_FINALE.md` r.16: PF 1,31 . DD 10,6% . n 693) e in un
 #    TERZO (`CENSIMENTO_CONTRATTI.md` r.220). Tre fonti, stessi numeri.
+#    >>> ATTENZIONE AL -0,50% DI "PEGGIOR GIORNATA": NON E' UNA COLONNA
+#        DELL'OPTFRAME, e questo round NON la riprodurra' (B0: l'EA
+#        esporta SETTE statistiche e quella non c'e'). R103 la calcola
+#        dai DEAL del report -- r.1760-1761: *"LA PEGGIOR GIORNATA ->
+#        -0.50% (il 2020.06.25, su 511 giornate operative, 1204 deal col
+#        netto letto)"*. E' la stessa disambiguazione di classe 360 fatta
+#        qui sotto per il 4,89%: il numero si cita per dare la SCALA, non
+#        come termine di paragone coi numeri di questa corsa, e NON entra
+#        in nessuna soglia B.
 #
 #  >>> LA FINESTRA DELL'ANCORA E' UN NUMERO STAMPATO, NON UN'ASSUNZIONE
 #      -- classe 375 (16/09/2026): *"un file prova SENZA @FINOA non ha
@@ -321,7 +330,8 @@
 #        InpComment     -> etichetta del round, come faceva R151a
 #                          ("MAXMINR151A"). Non entra in nessuna
 #                          decisione di trading: l'EA lo usa solo come
-#                          commento dell'ordine (r.352/354) e come
+#                          commento dell'ordine (r.355 `InpComment+" BUY"`
+#                          e r.367 `InpComment+" SELL"`) e come
 #                          colonna del CSV.
 #        InpMaxSpread   -> SOSTANZIALE, vedi (1) qui sotto.
 #        InpRiskPercent -> SOSTANZIALE, vedi (2) qui sotto.
@@ -404,7 +414,7 @@
 #      e il meccanismo e' il (c) qui sopra: ogni notte portata a spasso
 #      costa la GIORNATA DOPO, e lo fa con due lucchetti indipendenti.
 #      Nel caso limite in cui alle 17:30 non ci sia MAI niente di
-#      aperto, le due celle sono IDENTICHE (asse inerte, B4).
+#      aperto, le due celle sono IDENTICHE (asse inerte, B3).
 #      Banda attesa sul totale: 340-693, cioe' "fra la meta' e
 #      l'identico".
 #      >>> IL LIMITE BASSO E' UNA STIMA, e si legge cosi': la sedia fa al
@@ -454,7 +464,7 @@
 #      errore per QUATTRO ragioni, tutte prevedibili adesso:
 #      (i)   DUE CELLE NON FANNO UN ALTOPIANO, e su un bool non esiste
 #            nemmeno un vicino da guardare. L'unico controllo disponibile
-#            e' la CONCORDANZA IS/OOS (B6).
+#            e' la CONCORDANZA IS/OOS (B5).
 #      (ii)  IL REGIME, e qui morde in un verso preciso. La finestra e'
 #            2020-2026, cioe' SEI ANNI E MEZZO DI ORO IN RIALZO
 #            STRUTTURALE (col crollo covid dentro). La sedia opera L+S,
@@ -479,9 +489,9 @@
 #            e quali saltano lo decide il caso, non una regola.
 #  >>> COME LO DISTINGUO DA UN MIGLIORAMENTO VERO:
 #      1. concordanza IS/OOS obbligatoria, STESSO SEGNO nelle due
-#         finestre (B6);
+#         finestre (B5);
 #      2. il DD non deve superare B2 in NESSUNA delle due finestre;
-#      3. margine >= 0,10 di PF (B5), sotto e' rumore di campione;
+#      3. margine >= 0,10 di PF (B4), sotto e' rumore di campione;
 #      4. e anche cosi' il verdetto massimo e' "CANDIDATO", perche'
 #         manca la prova di regime per sotto-finestra;
 #      5. e se n della cella 0 e' molto piu' basso (S3), il PF NON si
@@ -592,7 +602,7 @@
 #                                     capito. Il round si ferma per
 #                                     capirlo, e il PF non si commenta.
 #      >>> QUESTA SENTINELLA E' UN'UGUAGLIANZA DEBOLE, e va accoppiata a
-#          B4 (classe 357): il mondo in cui "la manopola non fa niente"
+#          B3 (classe 357): il mondo in cui "la manopola non fa niente"
 #          la soddisfa GRATIS e in modo perfetto. Un PASS di S3 con n
 #          IDENTICO non e' una conferma del meccanismo: e' l'ipotesi
 #          nulla, e si scrive come tale.
@@ -694,10 +704,17 @@
 #      SEGNO della differenza fra le due celle: deve essere lo STESSO
 #      nelle due finestre, su `Equity DD %` e su `Trades`. Se il segno si
 #      inverte, il verdetto e' "non misurabile", non "meta' buono".
-#      >>> QUESTO CONTROLLO C'E' QUI E NON C'E' IN R170a, ed e' una
-#          differenza voluta fra i due file: li' l'ancora e' a tranche
-#          unica e con 104 uscite un IS/OOS sarebbe rumore; qui l'ancora
-#          ha 693 uscite e la divisione regge.
+#      >>> QUESTO CONTROLLO C'E' ANCHE IN R170a (la sua B6), MA LI' E'
+#          DICHIARATO DEBOLE E QUI NO, ed e' una differenza voluta fra i
+#          due file: li' l'ancora e' a tranche unica, il taglio 0,40
+#          lascia sotto-campioni da ~42 e ~62 uscite e una concordanza di
+#          segno puo' capitare per caso -- infatti R170a scrive che "non
+#          promuove niente, evita solo di prendere sul serio
+#          un'inversione". Qui l'ancora ha 693 uscite e la divisione
+#          regge, quindi la concordanza e' un'OBBLIGAZIONE e non un
+#          contentino.
+#          (La prima stesura scriveva "NON C'E' IN R170a": era falso, e
+#           il gemello diceva gia' il contrario. Classe 377.)
 #  B6  IL ROUND NON PROMUOVE NIENTE. Nessun preset cambia, nessuna sedia
 #      si accende o si spegne, il conto reale 10105439 e il piccolo
 #      50503392 (dove questa sedia gira VIVA) non si toccano. Il verdetto
@@ -768,7 +785,7 @@
 #    0,5% (la TAGLIA VIVA, firma del 23/08 -- non l'1,0 che il .set
 #    committato mostra ancora, vedi ANCORA differenza (2)). FrazioneIS
 #    0.40 (default del driver, walkforward_generico.ps1 r.179).
-#    Il calcolo (r.758): Meta = Inizio + floor((Fine-Inizio).TotalDays *
+#    Il calcolo (r.921): Meta = Inizio + floor((Fine-Inizio).TotalDays *
 #    FrazioneIS)
 #      2020.01.01 -> 2026.06.30 = 2.372 giorni; floor(2.372*0,40) = 948
 #      IS  2020.01.01 - 2022.08.06   (948 giorni)
@@ -852,7 +869,10 @@
 #  ricerca dalla RADICE del repo, worktree degli agenti paralleli
 #  COMPRESI (`.claude/worktrees/` NON escluso), escluso solo l'albero
 #  interno di git. Risultato: ZERO occorrenze, rispetto a HEAD
-#  `d1ddf1c0` di `lavoro` del 16/09/2026.
+#  `09775e48` di `lavoro` del 16/09/2026 (RIVERIFICATO al cancello:
+#  la prima stesura scriveva `d1ddf1c0`, che il 16/09 era gia' QUATTRO
+#  commit indietro -- classe 377. Il fatto non cambia, il punto di
+#  riferimento si').
 #  >>> E NON E' IL SUCCESSIVO DI NESSUNA SEQUENZA IN CORSO: il blocco
 #      7873xx e' lontano dalle sequenze vive (7798xx, 7886xx, 7794xx,
 #      7865xx). La classe 367 misura che il punto dove due agenti
