@@ -2019,3 +2019,47 @@ b02d434173c92764f8631764581f13a5503b4d88 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 cb15836e890eb32b96ff957478f9c8285e9a8144 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapContinuation -Prova R162a_partialtargetr_gapcont_225JPY.txt -Etichetta r162a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R164a -- InpAtrExitPeriod SU ABTG_PTE, GBPUSD H1 (sedia 771322).
+#  Terza e ultima delle tre sedie PTE con questa manopola messa ad
+#  asse: 771321 (R158a), 771332 (R153a, gia' armata), 771322 (qui).
+#  Sedia gemella per EA e simbolo, NON per contratto: buffer 5,0 / TP2
+#  2,0 (contro 25/3,0 di 771332) -- verificato sul preset vivo
+#  sedie_piccolo/sedia_PTE_GBPUSD_771322.set, combacia col blocco
+#  pinnato riga per riga.
+#
+#  Motivo del round: la cella viva di 771322 (buf 5 / TP2 2) e' la
+#  PEGGIORE delle 14 dell'OOS di R78 -- unica in perdita insieme alla
+#  sua gemella TP2 3, ultima su tutte e quattro le colonne (profit, PF,
+#  RF, DD). InpAtrExitPeriod e' il pezzo VARIABILE dello stesso stop
+#  (stop = ATR(N) + buffer): il buffer e' gia' firma pendente di
+#  Claudio (R71), qui si misura se anche il pezzo variabile e' rotto.
+#
+#  Secondo cancello: PASS dopo 2 correzioni di citazione, nessuna
+#  bloccante, nessuna capace di gonfiare un risultato. Classe 364
+#  (NUOVA): un superlativo ("la migliore fa +4.032,51") citava numeri
+#  esatti ma senza il criterio -- quella cella e' la migliore per
+#  Recovery Factor/DD, non per profit/PF (che e' un'altra cella,
+#  +4.575,77). Estensione classe 359: un numero di R71 (IS 0/28 in tre
+#  finestre) era della sedia USDJPY, non GBPUSD -- sostituito con la
+#  misura LOCALE piu' forte (ancora R78 sulla finestra IS identica: 0
+#  positive su 14).
+#
+#  Pavimento IS>=150 regge sul limite STRUTTURALE (2,00 uscite/
+#  posizione, non il fattore misurato 1,81): IS 414/2=207, OOS
+#  447/2=223,5, entrambi sopra 150. Cancello di costo [NON MISURABILE
+#  DA QUESTO ROUND]: nessun artefatto esporta lo stop per cella
+#  (classe 353), limite inferiore col segno stop>5,0 pip -> x>25,0/5,0
+#  a spread A/B, sotto il pavimento 40, non decide.
+#
+#  Buco dichiarato: il 2,64% di CENSIMENTO_CONTRATTI_v2.md r.304 per
+#  771322 non e' riproducibile in nessun CSV del repo (il secondo
+#  cancello ha enumerato tutti i DD PTE GBPUSD d'archivio: il piu'
+#  vicino e' 2,6093%) -- da riconciliare a parte, non usato da nessuna
+#  soglia di questo file.
+#
+#  Pin: giro di pin ac23bdc (45mo, b5d65c87 -> afeeebdd). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic vergine 779825, non tocca 771322 vivo sul piccolo 50503392.
+# =====================================================================
+ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R164a_atrexit_PTE_GBPUSD_771322.txt -Etichetta r164a -Modello 1 -Deposito 100000
+# =====================================================================
