@@ -2764,3 +2764,72 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 439346653641e97cdc26981646c40f581b5a2c02 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
 # =====================================================================
+#  R172h-j -- InpSLMode (R172h) + InpMinStopPts (R172i) +
+#  InpSkipIfTight (R172j), sedia 770202 (ABTG_Dow_Apertura_US, U30USD
+#  M5). ULTIME TRE manopole mai messe ad asse su questa sedia: se
+#  girano, 770202 chiude a 10/10. Stesso banco/ancora R54a, stesso
+#  bersaglio C:\MT5_Backtest (50504400).
+#
+#  R172h, InpSLMode (enum ENUM_ABTG_SL, 2 celle: RANGE/ATR). Sulla
+#  cella ATR, se AtrValue()=0 il floor InpMinStopPts=500 raccoglie il
+#  caso (r.1324/1327): l'ordine VIENE piazzato lo stesso, dist=500 pt
+#  MT5. Posizioni identiche sulle due celle (56 IS/96 OOS): l'unico
+#  modo di perderne e' un rifiuto per SYMBOL_TRADE_STOPS_LEVEL, fuori
+#  dalla sonda del banco -- [NON MISURATO], dichiarato come tale.
+#
+#  R172i, InpMinStopPts (22 celle, 0-10500). Porta in dote una misura
+#  che 8 file su 8 di questa serie dichiaravano [NON MISURATO]: la
+#  distribuzione VERA dello stop della sedia, ricavata invertendo la
+#  formula del lotto su un CSV per-trade GIA' in repo (96 posizioni
+#  OOS, risultati_prove/aperture_r47/..._772507.csv), senza spendere
+#  una passata. Mediana ~137 punti indice (limite superiore 138,29,
+#  classe 390: la quantizzazione del lotto a 0,10 introduce un margine,
+#  non e' un valore esatto). ~32% delle posizioni sotto la frontiera di
+#  costo dei 40x spread -- segnalato a chi decide del terzetto, non
+#  bloccante per questo round. Gemello DAX 770101 (R137a/b/c)
+#  verificato cifra per cifra come metro esterno.
+#
+#  R172j, InpSkipIfTight (2 celle, ON/OFF). DIMOSTRATO (aritmetica +
+#  prova empirica) che al pin di campo (InpMinStopPts=500) la manopola
+#  e' INERTE: nel ramo RETEST vivo dist >= 610 punti MT5 sempre, contro
+#  un floor di 500 -- la condizione che leggerebbe InpSkipIfTight non
+#  scatta mai. Per essere misurabile, R172j pinna InpMinStopPts=8000
+#  (40x lo spread mediano, la stessa regola di R129c sul DAX) --
+#  TERZA divergenza dal .set, dichiarata esplicitamente. DIPENDE DA
+#  R172i: S1 e' incrociata sulla cella InpMinStopPts=8000 di R172i
+#  (ancoraggio transitivo a R54a) -- NON SI LEGGE R172j PRIMA DI R172i.
+#
+#  Fattore uscite/posizioni MISURATO su tutti e tre (56 IS/96 OOS, da
+#  R46b). Merito sospeso. Zero preset cambia, zero forward.
+#
+#  Secondo cancello: PASS su tutti e tre dopo correzioni (commit
+#  44edd730). Tre classi NUOVE: **388** (HEAD dichiarato b9d7f8de
+#  scaduto GIA' al commit per il giro di pin 61 nel mezzo -- citazioni
+#  di riga rinumerate, nessuna conclusione cambiata); **389** (R172h
+#  assumeva che AtrValue()=0 impedisse l'ordine, ma un pin dello stesso
+#  file -- il floor -- lo raccoglie: specchio della classe 383, dove
+#  invece un pin TIENE VIVA una riga); **390** (la distribuzione degli
+#  stop e' un LIMITE SUPERIORE per la quantizzazione del lotto, non un
+#  valore esatto -- tabella "posizioni toccate" ricalcolata sui due
+#  estremi, 20 righe su 22 identiche). Classe 387 verificata PASS sui
+#  tre (limiti aritmetici su Trades, mai claim direzionali -- su R172j
+#  l'unico caso della serie dove i due meccanismi hanno lo STESSO
+#  segno, e resta comunque scritta come intervallo 31-62, non come
+#  identita').
+#
+#  Pin: giro di pin 44edd730 (62mo, e66a31f8 -> 44edd730). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Riverificato al pin di armamento: git diff 8b922147
+#  44edd730 sul sorgente EA torna sempre le stesse 27 righe/una sola
+#  input (Guardian, fail-open nel Tester) -- la banda su Trades non si
+#  stringe. Bersaglio: banco C:\MT5_Backtest (50504400). Magic
+#  789590/789600/789610, vergini a HEAD (grep -rl "InpMagic=<magic>"
+#  dalla radice, worktree compresi; 789560 lasciato libero come
+#  dichiarato).
+# =====================================================================
+44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
+# =====================================================================
+44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
+# =====================================================================
+44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
+# =====================================================================
