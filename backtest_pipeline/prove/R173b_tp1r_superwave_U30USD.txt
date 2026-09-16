@@ -124,8 +124,16 @@
 #      InpSLBufferAtr ... R126a (girato 13/09) . R126d (NASUSD)
 #      InpSLLookback .... R126b (girato 13/09)
 #      InpTP_RR ......... R155a (armato in CODA.txt)
-#      InpSLBufferPips .. R165a (ARMATO, CODA.txt r.2215, pin c2aeb917)
-#      InpTP1Pct ........ R173a (ARMATO, CODA.txt r.2633, pin 8e6c1da6)
+#      InpSLBufferPips .. R165a (ARMATO, pin 72dcf8a3 -- RIPINNATO il
+#                         16/09 col giro 57, prima era c2aeb917)
+#      InpTP1Pct ........ R173a (ARMATO, pin 8e6c1da6)
+#  >>> LE RIGHE IN CODA.txt SI CERCANO PER ETICHETTA, NON PER NUMERO
+#      DI RIGA (classe 377): CODA.txt cresce e i numeri slittano -- fra
+#      la stesura di questa pagina e il suo cancello R165a e' passato
+#      dalla r.2215 alla r.2228 e R173a dalla r.2633 alla r.2646, per
+#      un ripin avvenuto in mezzo. Il comando che le trova sempre:
+#          grep -n "R165a_slbufferpips\|R173a_tp1pct" \
+#                backtest_pipeline/coda/CODA.txt
 #  >>> `InpTP1_R` NON C'E'. Il BERSAGLIO del blocco d'uscita a 1R, su
 #      questa sedia, non e' MAI stato un asse.
 #
@@ -418,25 +426,60 @@
 #      (M5) e un ALTRO deposito non dichiarato in questo file. Il segno
 #      si guarda, il decimale no.
 #
-#  >>> E IN CASA CI SONO DUE MISURE CHE PUNTANO IN DIREZIONI OPPOSTE SU
+#  >>> E IN CASA CI SONO DUE COSE CHE PUNTANO IN DIREZIONI OPPOSTE SU
 #      QUESTO ASSE -- ed e' il motivo per cui il round non e' una
-#      formalita'.
-#      1. CONTRO le celle basse (cioe' contro il parziale PRECOCE):
-#         CLAUDE.md, lezioni sul campo dell'EA oro, testuale: "R:R
-#         invertito da gestione troppo stretta. Parziale precoce +
-#         breakeven immediato tappavano i vincenti mentre lo SL prendeva
-#         perdite piene." E' la lezione che nomina ESATTAMENTE questa
+#      formalita'. "DUE COSE", non "due misure": una ha i numeri
+#      accanto, l'altra no, e il GRADO va scritto insieme alla
+#      direzione (classe 375, qui nel verso opposto al solito: il
+#      rischio non e' declassare un caveat misurato, e' PROMUOVERE a
+#      "misura" una lezione che non ha un numero).
+#      1. CONTRO le celle basse (cioe' contro il parziale PRECOCE) --
+#         E' UNA LEZIONE A VERBALE, SENZA UN NUMERO ACCANTO.
+#         >>> CORRETTO DAL CANCELLO DI GIUDIZIO (classe 377, gia'
+#             pagata sul fratello R173a e qui RIPETUTA): la prima
+#             stesura di questa riga attribuiva la frase a `CLAUDE.md`.
+#             In CLAUDE.md NON C'E' -- cercata a macchina:
+#                 grep -c "R:R invertito" CLAUDE.md   ->  0
+#             (e nel repo esiste UN SOLO CLAUDE.md: `find . -name
+#             CLAUDE.md` fuori dai worktree da' un percorso solo).
+#             LE FONTI VERE SONO DUE, e portano DUE formulazioni
+#             diverse -- quindi "testuale" va detto di UNA sola:
+#             (a) `.claude/agents/mql5-ea-developer.md` r.125-127,
+#                 sezione "Lezioni apprese sul campo (EA oro)". E'
+#                 QUESTA la fonte da cui veniva la mia formulazione,
+#                 ed e' testuale: "R:R invertito da gestione troppo
+#                 stretta. Parziale precoce + breakeven immediato
+#                 tappavano i vincenti mentre lo SL prendeva perdite
+#                 piene. Soluzione: lasciar correre (parziale off,
+#                 trailing largo, uscita su incrocio opposto)";
+#             (b) `FVG_TESI.md` r.344-346, che e' la fonte scelta dal
+#                 fratello R173a, con parole diverse: "R:R invertito
+#                 da gestione troppo stretta: parziale precoce + pari
+#                 immediato tappano i vincenti mentre lo stop prende
+#                 perdite piene (lezione dell'EA oro, e la ragione per
+#                 cui in casa il parziale parte off)". Ripresa, con la
+#                 stessa attribuzione, in
+#                 report\EA_IMPULSO_APERTURA_2026-09-08.md r.231-232.
+#             >>> E IL GRADO DI (a) VA DETTO, perche' NON e' CLAUDE.md
+#                 e la differenza conta: e' la SCHEDA DI UN AGENTE, un
+#                 promemoria di mestiere, non la memoria firmata del
+#                 progetto. Una frase che sta li' non e' una regola di
+#                 casa congelata da Claudio.
+#         E' comunque la lezione che nomina ESATTAMENTE questa
 #         manopola: non "il parziale", ma il parziale PRECOCE.
-#      2. A FAVORE delle celle basse: report\BUG_BREAKEVEN_lotto_minimo
-#         .md (04/08/2026) -- due short oro in cui lo stop in pari NON
-#         e' scattato hanno girato +79,88 EUR in -32,90 EUR,
-#         oscillazione -112,78 EUR. Prima si mette lo stop a pari, meno
-#         spazio c'e' per quell'oscillazione.
-#      DUE misure di casa, DUE direzioni opposte. La prima dice "il
-#      bersaglio basso tappa i vincenti", la seconda "il bersaglio basso
-#      protegge prima". Questo round e' il posto dove si vede quale
-#      delle due pesa di piu' SU QUESTA SEDIA -- e per questo su PF e
-#      Profit NON dichiaro nessuna direzione (sezione L'ATTESA).
+#      2. A FAVORE delle celle basse -- E QUESTA I NUMERI CE LI HA:
+#         report\BUG_BREAKEVEN_lotto_minimo.md (04/08/2026) -- due
+#         short oro in cui lo stop in pari NON e' scattato hanno girato
+#         +79,88 EUR in -32,90 EUR, oscillazione -112,78 EUR. Prima si
+#         mette lo stop a pari, meno spazio c'e' per quell'oscillazione.
+#         E' anche il difetto che ha prodotto la toppa oggi visibile a
+#         r.453-458 del sorgente.
+#      UNA lezione a verbale e UNA misura coi numeri, DUE direzioni
+#      opposte. La prima dice "il bersaglio basso tappa i vincenti", la
+#      seconda "il bersaglio basso protegge prima". Questo round e' il
+#      posto dove si vede quale delle due pesa di piu' SU QUESTA SEDIA
+#      -- e per questo su PF e Profit NON dichiaro nessuna direzione
+#      (sezione L'ATTESA).
 # =====================================================================
 #  LA QUANTIZZAZIONE DEL LOTTO: ESISTE, MA SU QUESTO ASSE NON E'
 #  ORIENTATA -- e la differenza con R173a va scritta
@@ -545,9 +588,12 @@
 #      banco a questo deposito: da' a S1 un'uguaglianza STRETTA sui
 #      `Trades` invece di una banda. NON entra nella lettura
 #      dell'andamento (B5).
-#    CELLA 0,5 -- IL BERSAGLIO PRECOCE. E' il braccio che la lezione
-#      dell'EA oro in CLAUDE.md accusa per nome ("parziale precoce +
-#      breakeven immediato"). Chiude meta' posizione e mette lo stop a
+#    CELLA 0,5 -- IL BERSAGLIO PRECOCE. E' il braccio che la lezione a
+#      verbale dell'EA oro accusa per nome ("parziale precoce +
+#      breakeven immediato") -- lezione che sta in
+#      `.claude/agents/mql5-ea-developer.md` r.125-127 e, con altre
+#      parole, in `FVG_TESI.md` r.344-346: NON in CLAUDE.md (sezione IL
+#      PRIOR, classe 377). Chiude meta' posizione e mette lo stop a
 #      pari a meta' del rischio iniziale.
 #    CELLE 1,5 e 2,0 -- IL BERSAGLIO TARDIVO. Lasciano correre di piu'
 #      prima di de-rischiare. Sono anche le celle in cui il trailing ha
@@ -741,12 +787,14 @@
 #    SE `DD(0,5) > DD(2,0)`, questa attesa e' smentita e il risultato e'
 #    piu' interessante di quello atteso, non un fallimento.
 #  - PROFIT e PF: NESSUNA DIREZIONE DICHIARATA, E IL MOTIVO E' IL ROUND
-#    STESSO. Le due misure di casa vanno in verso opposto (sezione IL
-#    PRIOR): la lezione dell'EA oro dice che il parziale precoce tappa i
-#    vincenti, il caso del 04/08 dice che il pari tardivo regala i
-#    guadagni. Dichiarare una direzione qui vorrebbe dire scegliere una
-#    delle due prima di misurare. Questo e' esattamente cio' che il
-#    round va a vedere.
+#    STESSO. Le due cose di casa vanno in verso opposto (sezione IL
+#    PRIOR): la lezione A VERBALE dell'EA oro dice che il parziale
+#    precoce tappa i vincenti, la MISURA del 04/08 (che i numeri ce li
+#    ha) dice che il pari tardivo regala i guadagni. Dichiarare una
+#    direzione qui vorrebbe dire scegliere una delle due prima di
+#    misurare. Questo e' esattamente cio' che il round va a vedere.
+#    >>> E NON LE CHIAMO "DUE MISURE": una e' una lezione senza numero,
+#        e chiamarle allo stesso modo la gonfierebbe (classe 375).
 #  - "QUANTI PARZIALI SONO SCATTATI", "QUANTE VOLTE IL TRAILING HA
 #    VINTO LA CORSA", "DISTANZA MEDIA DEL BERSAGLIO AL MOMENTO DELLO
 #    SCATTO": [NON MISURABILI DA QUESTO ROUND] (classe 353). Non sono
@@ -902,10 +950,25 @@
 #          SULLA STESSA ANCORA (R173a e R165a), COL CRITERIO DEL
 #          CONFRONTO DICHIARATO (classe 373): il criterio e' la FRAZIONE
 #          DELL'ANCORA, ed e' LO STESSO +/- 0,5% in tutti e tre i file.
-#          Non ho cambiato il criterio. E le due risposte sono DIVERSE
-#          fra i due fratelli, perche' i due file oggi non sono nello
-#          stesso stato -- verificato aprendoli adesso, a HEAD
-#          `108bf3f7`, non ricordato:
+#          Non ho cambiato il criterio.
+#          >>> RISCRITTO DAL CANCELLO DI GIUDIZIO, E LA RISPOSTA E'
+#              CAMBIATA (classe NUOVA 386, aperta su questo blocco).
+#              Alla stesura, a HEAD `108bf3f7`, questo punto diceva
+#              "le due risposte sono DIVERSE fra i due fratelli" e
+#              accusava R165a di portare ancora le bande a due
+#              decimali. ERA VERO ALLE 16:19 DEL 16/09 E NON LO E'
+#              PIU': R165a e' stato emendato alle 16:21 (commit
+#              `72dcf8a3`, "Emenda R165a (gia' armato): classe 385 +
+#              classe 372 false-negative") e RIPINNATO alle 16:23
+#              (`b2de44e3`, giro 57). DUE MINUTI.
+#              Riverificato adesso, riaprendo R165a a HEAD: la sua S1
+#              (r.780-782) chiede "Trades IDENTICO -> IS 106, OOS 184
+#              / PF entro +/- 0,5% -> IS 1,39744, OOS 1,22034 / DD%
+#              entro +/- 0,5% -> IS 3,4846, OOS 4,2149" e porta sotto
+#              un blocco "!! EMENDATO (classe 385...)" che cita gli
+#              STESSI CSV di r120e11 e lo STESSO scarto (~0,0096 punti
+#              pieni per gamba) che io avevo calcolato contro di lui.
+#              >>> QUINDI OGGI I FRATELLI SONO TUTTI E DUE ALLINEATI:
 #          - CONTRO R173a: LE QUATTRO BANDE SONO IDENTICHE, non "piu'
 #            strette" (classe 373 regola 3: due bande costruite con la
 #            STESSA regola sono IDENTICHE, e scrivere "piu' stretta"
@@ -917,34 +980,41 @@
 #            3,4671..3,5021 / 4,1937..4,2361 -- cioe' gli stessi numeri
 #            che ho ricalcolato io. Due file, due strade, quattro bande
 #            uguali.
-#          - CONTRO R165a: LE BANDE DEL DD DIFFERISCONO, E SOLO DA UN
-#            LATO. R165a e' gia' ARMATO e non e' stato corretto: la sua
-#            S1 chiede "DD% entro +/- 0,5% -> IS 3,48, OOS 4,21", cioe'
-#            parte ancora dal referto a DUE decimali. Il conto,
-#            ricalcolato per tutte e quattro le estremita':
-#              DD IS   R165a 3,4576 .. 3,5025   io 3,4671 .. 3,5021
-#              DD OOS  R165a 4,1839 .. 4,2361   io 4,1937 .. 4,2361
-#            In BASSO la mia e' piu' stretta di 0,0095 (IS) e 0,0098
-#            (OOS) punti pieni; in ALTO e' praticamente la stessa
-#            (0,0004 e 0,0000). NON e' una banda "scalata": e' una banda
-#            SPOSTATA, e lo spostamento ha UNA causa sola --
-#            l'arrotondamento a due decimali TRONCA VERSO IL BASSO in
-#            tutti e due i casi (3,4846 -> 3,48 e 4,2149 -> 4,21) e
-#            trascina giu' l'intervallo "vero" da cui la banda nasce.
+#          - CONTRO R165a: LE BANDE DEL DD **COINCIDONO**, non
+#            differiscono. R165a parte dagli STESSI valori d'ancora a
+#            quattro decimali (3,4846 / 4,2149) e applica lo STESSO
+#            +/- 0,5%: le sue due bande del DD sono dunque le mie,
+#            3,4671..3,5021 e 4,1937..4,2361. L'UNICA differenza che
+#            resta e' che la sua S1 ha TRE colonne (Trades, PF, DD) e
+#            la mia QUATTRO (ci aggiungo `Profit`, vedi sotto).
+#            >>> E IL CONTO CHE AVEVO FATTO CONTRO DI LUI RESTA UTILE,
+#                ma come STORIA e non come rilievo: se si fosse
+#                partiti da 3,48 e 4,21 (il referto a due decimali) le
+#                bande sarebbero state 3,4576..3,5025 e
+#                4,1839..4,2361, cioe' piu' larghe IN BASSO di 0,0095
+#                (IS) e 0,0098 (OOS) punti pieni e praticamente uguali
+#                in alto (0,0004 e 0,0000). Non e' una banda
+#                "scalata": e' una banda SPOSTATA, perche'
+#                l'arrotondamento a due decimali TRONCA VERSO IL BASSO
+#                in tutti e due i casi. E' esattamente lo scarto che
+#                R165a stesso oggi dichiara nel suo blocco EMENDATO.
 #          - `Profit`: non e' confrontabile con nessuno dei due, perche'
 #            nessuno dei due ce l'ha in S1.
 #      >>> IL CONTRO-ESEMPIO CONTRO LA MIA STESSA STRETTA (classe 380:
 #          "una banda troppo stretta ferma una corsa SANA, ed e' il
-#          difetto piu' difficile da diagnosticare dopo"). Esistono DUE
-#          zone -- 3,4576..3,4671 sul DD IS e 4,1839..4,1937 sul DD OOS,
-#          tutte e due SOTTO l'ancora e NESSUNA sopra -- dove R165a
-#          passerebbe e io mi fermerei. Un valore li' dentro dista
-#          dall'ancora fra lo 0,50% e lo 0,77% (IS) e fra lo 0,50% e lo
-#          0,74% (OOS), cioe' e' FUORI dal criterio dichiarato, su un
-#          banco che in A1 e' misurato riprodurre le sette statistiche
-#          FINO ALL'ULTIMA CIFRA. Quella zona non e' "rumore
-#          tollerabile": e' gia' un cambiamento, e fermarsi e' la
-#          risposta giusta. La stretta non e' prudenza persa: e' il
+#          difetto piu' difficile da diagnosticare dopo"). Il
+#          contro-esempio SI COSTRUISCE LO STESSO, e non contro un
+#          fratello ma contro la BANDA LARGA in astratto: esistono DUE
+#          zone -- 3,4576..3,4671 sul DD IS e 4,1839..4,1937 sul DD
+#          OOS, tutte e due SOTTO l'ancora e NESSUNA sopra -- dove una
+#          banda costruita sul referto a due decimali passerebbe e la
+#          mia (e quella di R165a emendato) si fermerebbe. Un valore li'
+#          dentro dista dall'ancora fra lo 0,50% e lo 0,77% (IS) e fra
+#          lo 0,50% e lo 0,74% (OOS), cioe' e' FUORI dal criterio
+#          dichiarato, su un banco che in A1 e' misurato riprodurre le
+#          sette statistiche FINO ALL'ULTIMA CIFRA. Quella zona non e'
+#          "rumore tollerabile": e' gia' un cambiamento, e fermarsi e'
+#          la risposta giusta. La stretta non e' prudenza persa: e' il
 #          criterio applicato al numero giusto -- ed e' la classe 385
 #          alla lettera ("una tolleranza si allarga solo per
 #          un'incertezza MISURATA").
@@ -952,7 +1022,7 @@
 #              avesse un rumore VERO dell'ordine dello 0,6% sul solo DD
 #              -- cosa che A1 esclude su DUE passate ma non garantisce
 #              su una corsa di un'altra notte -- questo file si
-#              fermerebbe dove R165a andrebbe avanti. E' un rischio
+#              fermerebbe, e si fermerebbe anche R165a. E' un rischio
 #              accettato consapevolmente. Il verdetto da scrivere in
 #              quel caso e' "S1 caduta sul solo DD e di poco: guardare
 #              PRIMA `Trades`, `Profit` e `PF`, che sono tre colonne
@@ -1258,41 +1328,51 @@
 #    - LA VERIFICA DEI DEFAULT DEL DRIVER AL PIN 1445abf8 non l'ho
 #      rifatta io (A3): ho verificato HEAD. E' una dipendenza
 #      dichiarata, e cade dentro cio' che S1 rileva.
-#    - NESSUN BUCO SUI CSV DI r126a/r126b, E QUI CORREGGO UN FILE
-#      FRATELLO GIA' ARMATO, PERCHE' TACERLO SAREBBE PROPAGARE UN
-#      ERRORE. R165a (stessa sedia) elenca fra i propri buchi: "I NUMERI
-#      DI R126a E R126b NON SONO NEL REPO ... verificato oggi: la
-#      cartella ha sei file, nessuno col suffisso _r126a/_r126b". E'
-#      FALSO. Comando eseguito oggi:
-#          ls backtest_pipeline/risultati_prove/dal_vps/\
-#             ABTG_SuperWave_DOW_H1_Ottimizzato/
-#      -> SEDICI file, e quattro sono ..._IS_r126a.csv,
-#      ..._OOS_r126a.csv, ..._IS_r126b.csv, ..._OOS_r126b.csv. Ed erano
-#      gia' li' quando R165a e' stato scritto: `git log --diff-filter=A`
-#      su quei quattro percorsi da' quattro commit del 13/09 (d6322638,
-#      f07c6ac6, b88bc3f3, e856c268), contro il 34d6cf4e del 16/09 che
-#      aggiunge R165a. E' la classe 372: un'assenza DICHIARATA che non
-#      e' stata CERCATA -- la cartella guardata non era quella.
-#      >>> QUESTO ROUND NON SI APPOGGIA a quei quattro CSV (la sua
+#    - NESSUN BUCO SUI CSV DI r126a/r126b -- E IL RILIEVO CHE QUI
+#      C'ERA SCRITTO CONTRO UN FILE FRATELLO E' STATO RITIRATO DAL
+#      CANCELLO DI GIUDIZIO, PERCHE' NON E' PIU' VERO (classe NUOVA
+#      386). Lo lascio scritto invece di cancellarlo, perche' il
+#      meccanismo che mi ci ha fatto cadere e' la cosa utile.
+#      IL FATTO, che resta vero e va tenuto: nella cartella
+#          backtest_pipeline/risultati_prove/dal_vps/\
+#            ABTG_SuperWave_DOW_H1_Ottimizzato/
+#      ci sono SEDICI file (ricontati adesso), e quattro sono
+#      ..._IS_r126a.csv, ..._OOS_r126a.csv, ..._IS_r126b.csv,
+#      ..._OOS_r126b.csv. Erano gia' li' il 13/09: `git log
+#      --diff-filter=A` su quei quattro percorsi da' d6322638,
+#      f07c6ac6, b88bc3f3, e856c268 (tutti 13/09), contro il 34d6cf4e
+#      del 16/09 che aggiunge R165a.
+#      >>> QUESTO ROUND NON SI APPOGGIA a quei quattro CSV: la sua
 #          ancora e' r120e11 e il suo determinismo e' misurato in A1 sui
-#          CSV dell'ancora stessa): lo scrivo per il file fratello, non
-#          per me.
-#      >>> E IL DIFETTO NON E' BLOCCANTE NEMMENO PER LUI: R165a
-#          dichiara esplicitamente di NON appoggiarsi a quei CSV, e
-#          nessuna sua soglia ci poggia sopra. Ma R165a e' GIA' ARMATO
-#          (CODA.txt r.2215, pin c2aeb917): correggerlo costa un GIRO
-#          DI PIN, quindi la correzione e' una decisione di chi governa
-#          la coda, non un'iniziativa di questo file. Qui si dichiara e
-#          basta.
-#      >>> E LA META' PIU' COSTOSA DELLO STESSO BUCO, che vale la pena
-#          segnalare insieme: la stessa svista ha lasciato R165a a
-#          leggere il DD d'ancora nel REFERTO a due decimali invece che
-#          nei CSV di r120e11, che stanno nella STESSA cartella (e' la
-#          classe 385, aperta sul fratello R173a e li' gia' corretta).
-#          Effetto: le sue bande di DD in S1 sono piu' larghe in basso
-#          di ~0,0096 punti pieni per gamba (il conto per esteso sta in
-#          S1 di questo file). Anche questa e' una segnalazione, non
-#          una modifica.
+#          CSV dell'ancora stessa.
+#      >>> E IL RILIEVO CONTRO R165a NON ESISTE PIU', RIVERIFICATO
+#          RIAPRENDO IL FILE ADESSO -- non ricordato, non dedotto dal
+#          messaggio di un commit:
+#          (a) la frase "la cartella ha sei file, nessuno col suffisso
+#              _r126a/_r126b" NON C'E' PIU' in R165a: `grep -n "sei
+#              file"` su quel file torna ZERO righe, e r.1068/1073
+#              oggi puntano ai CSV giusti;
+#          (b) la sua S1 non legge piu' il DD dal referto a due
+#              decimali: r.782 porta "IS 3,4846, OOS 4,2149" e r.788
+#              apre un blocco "!! EMENDATO (classe 385...)";
+#          (c) e porta anche la SECONDA META' della 385 (r.805-813),
+#              cioe' l'obbligo di rifare il `git diff` al pin di
+#              armamento -- lo stesso obbligo che ho io.
+#          Le due correzioni sono di `72dcf8a3` (16/09 16:21), e il
+#          ripin e' `b2de44e3` (16/09 16:23, giro 57): la riga di
+#          R165a in CODA.txt oggi e' alla r.2228 col pin 72dcf8a3, non
+#          piu' c2aeb917.
+#      >>> PERCHE' CI SONO CADUTO, ED E' LA CLASSE 386: questa pagina
+#          e' stata salvata alle 16:19 e la correzione del fratello e'
+#          arrivata alle 16:21. DUE MINUTI. Un verdetto di cancello
+#          vive dieci minuti e l'errore muore con lui; un FILE PROVA
+#          viene ARMATO IN CODA.txt e riletto fra MESI, quindi
+#          un'accusa sbagliata scritta qui dentro diventa PERMANENTE.
+#          >>> Regola che ne esce e che vale per chi scrive il
+#          prossimo: un rilievo su un file FRATELLO si riverifica
+#          RIAPRENDO QUEL FILE al momento del cancello, mai al momento
+#          della stesura -- ed e' l'unica cosa in un file prova che va
+#          ricontrollata anche se "l'ho appena guardata".
 # =====================================================================
 #  IL COSTO IN TEMPO MACCHINA -- MISURATO SU QUESTA SEDIA, A QUESTO
 #  DEPOSITO, SU QUESTO BANCO. Non stimato.
@@ -1352,6 +1432,26 @@
 #      Ottimizzato, sedia 770511)"):
 #        779867 -> UN file . 779868 -> UN file . r173b/R173b -> UN file
 #      e l'uno, in tutti e tre i casi, e' QUESTA PAGINA.
+#    - QUARTA LETTURA, FATTA DAL CANCELLO DI GIUDIZIO, a HEAD
+#      `b2de44e3` ("Ripin R165a (giro 57)"), e IL NUMERO E' CAMBIATO --
+#      va scritto perche' e' esattamente il caso che la classe 382
+#      descrive, e chi non lo legge conclude il contrario del vero:
+#        779867 -> DUE file . 779868 -> UN file
+#      Il secondo file NON e' un round che mi ha rubato il magic: e'
+#      `backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1` r.1158, dove
+#      "779867" compare dentro un COMMENTO che parla di QUESTA pagina
+#      ("779867, secondo cancello in corso"). Aperto e letto, non
+#      dedotto dal conteggio.
+#      >>> QUINDI IL MAGIC E' ANCORA VERGINE COME MAGIC: assegnato a un
+#          EA esiste in UN SOLO punto del repo, la riga di pin di
+#          questa pagina. Il comando che separa le due domande -- "il
+#          numero compare da qualche parte" contro "il numero e'
+#          ASSEGNATO a un round" -- e che chi arma deve usare ACCANTO
+#          al `grep -rl` nudo, ancorato a inizio riga per non pescare
+#          se stesso (classe 382):
+#              grep -rn "^InpMagic=779867" --exclude-dir=.git .
+#          -> UNA riga sola, ed e' la riga di pin di questo file.
+#          Stesso comando su 779868 (la riserva): ZERO righe.
 #  >>> LA PUNTA DI 'lavoro' SI E' MOSSA MENTRE SCRIVEVO -- quattro
 #      commit (f966ceb3, 1a17794f, 8e6c1da6, 108bf3f7), tutti sul
 #      fratello R173a e sul suo armamento -- ed e' esattamente il mondo
@@ -1387,8 +1487,9 @@
 #  >>> E NON HO PRESO 779862, CHE PURE E' LIBERO COME VALORE. E' la
 #      RISERVA DICHIARATA di R173a (sua sezione MAGIC: "Se 779863 fosse
 #      stato preso, si passa a 779862"), e R173a e' ORA ARMATO in
-#      CODA.txt r.2633 (pin 8e6c1da6, -Modello 4 -Deposito 100000:
-#      riga riaperta oggi). Cioe' sta al GRADINO PIU' ALTO della
+#      CODA.txt (pin 8e6c1da6, -Modello 4 -Deposito 100000: riga
+#      riaperta al cancello, cercata per ETICHETTA e non per numero di
+#      riga -- vedi la nota in testa). Cioe' sta al GRADINO PIU' ALTO della
 #      precedenza della classe 367 -- "armato in CODA.txt > committato
 #      su 'lavoro' > solo nell'albero di lavoro" -- e questa pagina al
 #      piu' basso. La sua riserva e' parte di quello che e' stato
@@ -1563,8 +1664,10 @@ InpVerbose=true||true||0||true||N
 #     margine anti-virgola-mobile serve qui (classe 374).
 #
 #     CELLA 0,5 = IL BERSAGLIO PRECOCE. Parziale e stop in pari a meta'
-#                 del rischio. E' il braccio che la lezione dell'EA oro
-#                 in CLAUDE.md accusa per nome.
+#                 del rischio. E' il braccio che la lezione A VERBALE
+#                 dell'EA oro accusa per nome (fonte:
+#                 .claude/agents/mql5-ea-developer.md r.125-127 e
+#                 FVG_TESI.md r.344-346 -- NON CLAUDE.md, classe 377).
 #     CELLA 1,0 = IL VALORE VIVO (preset r.25) e L'ANCORA: la stessa
 #                 cella di r120e11. Non e' un punto dell'esperimento.
 #     CELLE 1,5 e 2,0 = IL BERSAGLIO TARDIVO. Sono anche le celle dove

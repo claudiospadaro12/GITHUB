@@ -21857,3 +21857,74 @@ file, sulla stessa forma di asserzione.
 - **La causa "il sorgente è cambiato" va PRIMA nell'elenco del "cosa significa
   se cade"**, non in fondo e non implicita: è la più probabile delle quattro, ed
   è l'unica che si esclude con un comando invece che con un'ispezione del banco.
+
+---
+
+## 386. ⏱️🪦 UN RILIEVO SU UN FILE **FRATELLO** CONGELATO DENTRO UN ARTEFATTO **DUREVOLE**: il fratello viene corretto **due minuti dopo**, e l'accusa sbagliata resta scritta in un file prova che verrà armato e riletto fra mesi (controllo-preventivo, 16/09/2026)
+
+**Il caso, coi minuti veri.** `R173b_tp1r_superwave_U30USD.txt` (asse
+`InpTP1_R`, sedia `770511`) è stato scritto insieme ai fratelli `R173a` e
+`R165a` sulla **stessa ancora** `r120e11`. Nel fare il confronto fra le bande di
+`S1` — cosa giusta e richiesta dalla classe 373 — scrive **due rilievi** contro
+`R165a`, tutti e due veri **al momento della stesura**:
+
+> _"R165a è già ARMATO e **non è stato corretto**: la sua S1 chiede «DD% entro
+> +/- 0,5% -> IS 3,48, OOS 4,21», cioè parte ancora dal referto a DUE
+> decimali"_ · _"R165a elenca fra i propri buchi «la cartella ha **sei file**,
+> nessuno col suffisso _r126a/_r126b». **È FALSO.**"_
+
+E ci costruisce sopra un intero contro-esempio (*"esistono DUE zone dove R165a
+passerebbe e io mi fermerei"*) e un paragrafo nei BUCHI (*"qui correggo un file
+fratello già armato, perché tacerlo sarebbe propagare un errore"*).
+
+🔴 **La cronologia, che è tutta la classe:**
+
+| ora | commit | fatto |
+|---|---|---|
+| 16:19 | `830eb34d` | `R173b` salva i due rilievi contro `R165a` |
+| **16:21** | `72dcf8a3` | **`R165a` viene emendato**: classe 385 *e* classe 372, tutti e due i rilievi chiusi |
+| 16:23 | `b2de44e3` | `R165a` viene **ripinnato** in CODA.txt (giro 57) |
+
+**Due minuti.** Al cancello di giudizio, `R165a` a HEAD porta in `S1` r.782
+`DD% entro +/- 0,5% -> IS 3,4846, OOS 4,2149`, un blocco `!! EMENDATO (classe
+385...)` a r.788-798 con **lo stesso scarto di ~0,0096 punti pieni** che `R173b`
+aveva calcolato *contro* di lui, la **seconda metà** della 385 a r.805-813, e
+**zero** occorrenze di *"sei file"*.
+
+🔴 **Perché non è la classe 384, ed è peggio.** La **384** descrive un
+**cancello** che legge una versione mentre l'autore ne salva un'altra: il danno
+dura quanto il verdetto, cioè dieci minuti, e muore con lui. Qui il rilievo è
+dentro un **FILE PROVA**, cioè un artefatto che viene **armato in `CODA.txt`** e
+riletto **fra mesi** da qualcuno che non c'era. L'accusa sbagliata diventa
+**permanente**, e — aggravante — è scritta in tono di merito (*"qui correggo un
+file fratello"*), quindi il lettore futuro la prenderà per buona invece di
+verificarla.
+
+🔴 **E il file sapeva già come si fa.** Nello stesso documento, sul fratello
+`R173a`, aveva applicato la disciplina **giusta**:
+
+> _"QUINDI NON SCRIVO «CORREGGO IL FRATELLO»: SAREBBE UN DIFETTO FANTASMA
+> (classe 384). Alla consegna R173a NON contiene più quella frase (verificato:
+> `grep -n "misurata due volte da nessuno"` torna ZERO righe)."_
+
+Su `R173a` ha **riaperto il file**. Su `R165a` si è fidato di ciò che aveva
+letto un'ora prima. **Due pesi nello stesso documento, sulla stessa forma di
+asserzione** — esattamente come la 385 aveva già annotato su un altro asse.
+
+### ✅ CHE COSA SI FA
+- 🔁 **Un rilievo su un file FRATELLO si riverifica RIAPRENDO QUEL FILE al
+  momento del CANCELLO, mai al momento della stesura.** È l'unica affermazione
+  di un file prova che va ricontrollata **anche se "l'ho appena guardata"**:
+  tutte le altre (sorgente, CSV, preset) puntano a oggetti che cambiano di rado;
+  un file fratello scritto la stessa ora cambia **nei minuti**.
+- 🔎 **Si riverifica col `grep` della frase accusata, non col messaggio del
+  commit**: `grep -c "<frase>" <file_fratello>` → `0` significa che il rilievo è
+  morto. Un `git log` che "parla d'altro" non è una verifica.
+- 📝 **Se il rilievo è caduto, NON si cancella: si RITIRA per iscritto** con la
+  cronologia. Un blocco cancellato non insegna niente; un blocco ritirato dice
+  al prossimo *perché* è facile caderci.
+- 🚫 **E non si scrive mai "qui correggo un file fratello" in un file prova.**
+  Un file prova misura **una variabile**; le correzioni ai fratelli si fanno
+  **nel fratello** (costano un giro di pin e sono una decisione di chi governa
+  la coda) oppure nel referto del cancello, che è un artefatto **effimero** e
+  quindi il posto giusto.
