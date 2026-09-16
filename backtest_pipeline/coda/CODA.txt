@@ -2833,3 +2833,57 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
 # =====================================================================
+#  R173c -- InpBreakeven, sedia 770511 (ABTG_SuperWave_DOW_H1_
+#  Ottimizzato, U30USD H1). TERZA e ultima manopola della famiglia
+#  parziale/breakeven, fratello di R173a (InpTP1Pct) e R173b
+#  (InpTP1_R), entrambi gia' armati. Chiude la famiglia 3/3.
+#
+#  Scoperta centrale, verificata da me e dal secondo cancello con
+#  contro-esempi costruiti apposta per romperla, nessuno riuscito:
+#  con InpBreakeven=false lo stop non va MAI in pari (`ManageAll()`
+#  r.460 e' l'unico posto che sposta lo stop), quindi `beDone`
+#  (dedotto solo dalla posizione dello stop, r.444) resta falso per
+#  sempre e il gate del primo target (r.446) non si richiude: se il
+#  prezzo resta sopra il bersaglio, il parziale si ripete ad ogni
+#  tick -- CASCATA sul lotto residuo finche' non scende sotto il
+#  minimo (0,10). Simulazione rifatta su un per-trade d'archivio
+#  (770521, altro magic/deposito, dichiarato come proxy non ancora):
+#  38/50 posizioni toccano il bersaglio, profondita' 2-6 gradini, 135
+#  parziali, deal 88->185 (rapporto 2,102). Diverso dalla catena
+#  riskDist/InitialSL di 770202: qui non esiste (zero occorrenze,
+#  verificato). Diverso anche da EMA200 (R147a, stesso asse, mai
+#  girato): li' il trailing dipende da beDone, qui e' incondizionato
+#  -- i due numeri non saranno mai trasferibili l'uno sull'altro.
+#
+#  Sentinella S3 su Trades: NESSUN VERSO congelato (classe 387 non
+#  ripetuta) -- due meccanismi di segno opposto (cascata alza Trades,
+#  posto occupato piu' a lungo lo abbassa), limite aritmetico
+#  dichiarato vacuo per costruzione (<= 11 x ancora = 1166 IS/2024
+#  OOS) invece che un pavimento fabbricato. `Peggior Giornata %` non
+#  esiste su questa EA (8 colonne nell'header, non 11): dichiarato
+#  come buco, non finto.
+#
+#  Sentinella S1 su Trades a uguaglianza esatta (106 IS, 184 OOS),
+#  stessa ancora r120e11 di R173a/b (IS PF=1,39744 DD=3,4846% Profit=
+#  4236,16; OOS PF=1,22034 DD=4,2149% Profit=3454,83, dai CSV veri).
+#  Merito sospeso (IS<=106 contro 150). Zero preset cambia, zero
+#  forward.
+#
+#  Secondo cancello: PASS dopo 5 correzioni (commit dc069389).
+#  **Classe NUOVA 391**: un requisito giusto (-Modello 4 obbligatorio,
+#  non -Modello 1) motivato con un fatto FALSO sul motore OHLC ("non
+#  ci sarebbero abbastanza tick per la cascata" -- il conto vero e'
+#  240 tick/barra H1 contro 6 gradini al tetto, quindi i tick ci
+#  sarebbero eccome). Il requisito resta giusto per il motivo vero: su
+#  OHLC la sequenza O-H-L-C dentro il minuto e' fabbricata, quindi i
+#  gradini cadrebbero su prezzi/ordine sintetici, un'altra macchina.
+#
+#  Pin: giro di pin dc069389 (63mo, 44edd730 -> dc069389). $SHA_ROUND
+#  e $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Sorgente EA fra l'ancora 1445abf8 e dc069389: VUOTO,
+#  riverificato al pin di armamento -- l'uguaglianza esatta su Trades
+#  regge. Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779869,
+#  vergine a HEAD (grep -rl dalla radice, worktree compresi).
+# =====================================================================
+dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
+# =====================================================================
