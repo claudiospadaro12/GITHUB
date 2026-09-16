@@ -297,11 +297,23 @@
 #         +79,88 EUR in -32,90 EUR, oscillazione -112,78 EUR. E' il
 #         difetto che ha prodotto la toppa oggi visibile a r.453-458
 #         del sorgente. Piu' i numeri di r136c/r136d qui sopra.
-#      2. CONTRO la coppia: CLAUDE.md, lezioni sul campo dell'EA oro --
-#         "R:R invertito da gestione troppo stretta. Parziale precoce +
-#         breakeven immediato tappavano i vincenti mentre lo SL
-#         prendeva perdite piene."
-#      DUE misure di casa, DUE direzioni opposte, DUE motori diversi.
+#      2. CONTRO la coppia: FVG_TESI.md r.344-346 -- e NON `CLAUDE.md`,
+#         come diceva la prima stesura di questa riga: quella frase in
+#         CLAUDE.md NON C'E', cercata a macchina (classe 377). Il testo
+#         vero e': "R:R invertito da gestione troppo stretta: parziale
+#         precoce + pari immediato tappano i vincenti mentre lo stop
+#         prende perdite piene (lezione dell'EA oro, e la ragione per
+#         cui in casa il parziale parte off)". Ripresa, con la stessa
+#         attribuzione, in report\EA_IMPULSO_APERTURA_2026-09-08.md
+#         r.231-232.
+#         >>> E IL SUO GRADO VA SCRITTO, perche' cambia quanto pesa:
+#             e' una LEZIONE A VERBALE, SENZA UN NUMERO ACCANTO. Il
+#             punto 1 i numeri ce li ha (+79,88 -> -32,90, oscillazione
+#             -112,78 EUR; piu' le due tabelle di r136c/r136d). Il
+#             punto 2 no. Chiamarle tutte e due "misure" gonfierebbe
+#             la seconda.
+#      UNA misura coi numeri e UNA lezione a verbale, DUE direzioni
+#      opposte, DUE motori diversi.
 #      Questo round e' il terzo motore, ed e' l'unico dei tre in cui la
 #      coppia si accende e si spegne SENZA toccare il trailing.
 # =====================================================================
@@ -323,17 +335,36 @@
 #  >= 77,10 punti indice (n=4, report\CANCELLO_COSTO_FLOTTA_2026-09-10
 #  .md r.399). A 100.000 EUR e rischio 1,0% (risk_money 1.000 EUR):
 #
-#     stop 77,10 idx -> totLot 15,00 -> mercato 4,90 + pendente 10,10
+#     stop 77,10 idx -> totLot 15,00 -> mercato 4,90 + pendente 10,00
 #        cella 25: 4,90 -> nominale 1,2250 -> cv 1,20  (-2,04%)
-#                 10,10 -> nominale 2,5250 -> cv 2,50  (-0,99%)
+#                 10,00 -> nominale 2,5000 -> cv 2,50  ( 0,00%)
 #        cella 50: 4,90 -> nominale 2,4500 -> cv 2,40  (-2,04%)
-#                 10,10 -> nominale 5,0500 -> cv 5,00  (-0,99%)
+#                 10,00 -> nominale 5,0000 -> cv 5,00  ( 0,00%)
 #        cella 75: 4,90 -> nominale 3,6750 -> cv 3,60  (-2,04%)
-#                 10,10 -> nominale 7,5750 -> cv 7,50  (-0,99%)
+#                 10,00 -> nominale 7,5000 -> cv 7,50  ( 0,00%)
 #     stop 98,70 idx (la gamba piu' larga misurata) -> totLot 11,70
 #        cella 25: 3,80 -> nominale 0,9500 -> cv 0,90  (-5,26%)
-#        cella 50: 3,80 -> nominale 1,9000 -> cv 1,90  ( 0,00%)
+#        cella 50: 3,80 -> nominale 1,9000 -> cv 1,80  (-5,26%)
 #        cella 75: 3,80 -> nominale 2,8500 -> cv 2,80  (-1,75%)
+#
+#  >>> LA TABELLA E' CALCOLATA CON L'ARITMETICA CHE USA IL CODICE (IEEE
+#      754), NON IN DECIMALE, E LA DIFFERENZA MORDE SU DUE CELLE. Il
+#      pendente NON e' 10,10: `NormVol(15,00 - 4,90)` fa 10,00, perche'
+#      10,1/0,1 in doppia precisione vale 100,99999999999999 e
+#      MathFloor(r.559) prende 100. Stessa cosa sulla cella 50 a stop
+#      98,70: 1,9/0,1 vale 18,999999999999996 e cv esce 1,80, non 1,90.
+#      Rifatto a macchina riproducendo r.523-551 e r.554-561 riga per
+#      riga. E' lo stesso mestiere della sezione sul CONTEGGIO DELLE
+#      CELLE (dove invece 25 e 75 SONO esatti in binario): li' l'esatto
+#      salva, qui il non-esatto sposta un decimo di lotto.
+#  >>> E IL LIMITE DI QUESTA TABELLA, DICHIARATO: l'ULTIMO DECIMO DI
+#      LOTTO NON E' DETERMINABILE dai dati che ho. Il fattore 0,862 e'
+#      esso stesso una MEDIANA arrotondata a tre decimali su una
+#      forbice del 2,6% (R165a r.404: mediana 0,8617, media 0,8663), e
+#      la quarta cifra sposta totLot di un PASSO INTERO: a 0,8663 lo
+#      stesso conto da' totLot 14,90 invece di 15,00. Quindi di questa
+#      tabella e' portante l'ORDINE DI GRANDEZZA e il VERSO, mai il
+#      singolo cv. Resta [DERIVATO], e ora si sa anche di quanto.
 #
 #  >>> IL LIMITE SUPERIORE DELL'ERRORE E' 0,10 / cv_nominale, E CRESCE
 #      AL CALARE DELLA CELLA: sulla posizione a mercato con stop
@@ -383,11 +414,21 @@
 #      fra due celle. E' la classe 330 alla lettera: il filtro che
 #      faccio variare sposta anche la probabilita' di innesco.
 #  >>> E NON E' NEMMENO UNA MISURA DELLA FREQUENZA: per convertire
-#      servirebbe il rapporto deal/posizione, che in casa vale 1,76
-#      (CENSIMENTO_CONTRATTI_v2.md, ripreso da R154a) MA E' MISURATO
-#      SULLA CELLA VIVA. Nella cella 0 quel rapporto e' 2 deal per
-#      posizione per costruzione, cioe' un NUMERO DIVERSO. Usare 1,76
-#      su tutte e quattro le celle sarebbe un errore di unita'.
+#      servirebbe il rapporto deal/posizione, che in casa vale 1,76 --
+#      e QUEL NUMERO VIAGGIA CON DUE CAVEAT, non uno (classe 375):
+#      (a) E' MISURATO SU UN'ALTRA SEDIA. Fonte:
+#          report\CENSIMENTO_CONTRATTI_v2.md r.306 e r.384, ripresa in
+#          R154a r.188-190 -- "88 chiusure da 50 POSIZIONI [MISURATO]"
+#          e' la sedia `770531`, `ABTG_SuperWave` su U30USD **H2**, non
+#          la 770511 su H1. Stessa famiglia, ALTRO motore e ALTRO TF.
+#      (b) E' MISURATO SULLA CELLA VIVA. Nella cella 0 quel rapporto e'
+#          2 deal per posizione PER COSTRUZIONE, cioe' un numero
+#          diverso.
+#      Usare 1,76 su tutte e quattro le celle sarebbe un errore di
+#      unita'; usarlo come se fosse di QUESTA sedia sarebbe un errore
+#      di trasporto (classe 323). Qui non decide niente: la conclusione
+#      del pavimento regge anche nella lettura piu' generosa, 1 deal =
+#      1 operazione (vedi la sezione PAVIMENTO).
 #  >>> COSA FA `Trades` IN QUESTO FILE: e' l'IMPRONTA del banco (S1,
 #      sulla sola cella 50) e il testimone che le celle non sono la
 #      stessa corsa (S5). Nessuna soglia di merito ci si appoggia.
@@ -434,12 +475,19 @@
 #  LE ANCORE -- CON IL LORO CAVEAT, NON SOLO CON LA LORO CIFRA
 #  (classe 375: un numero senza il suo caveat e' un numero diverso)
 # ---------------------------------------------------------------------
-#  A) L'ANCORA E' r120e11. Fonte:
-#     report\LETTURA_BACKLOG_NOTTE_2026-09-13.md r.136 (riga
-#     "r120e11 | SuperWave_DOW_H1 | U30USD H1 (dep 100k)"), riaperta
-#     oggi:
-#         IS   PF 1,39744   DD% 3,48   Trades 106
-#         OOS  PF 1,22034   DD% 4,21   Trades 184
+#  A) L'ANCORA E' r120e11. FONTE PRIMARIA: I SUOI DUE CSV, NEL REPO
+#     (backtest_pipeline\risultati_prove\dal_vps\
+#      ABTG_SuperWave_DOW_H1_Ottimizzato\..._IS_r120e11.csv e
+#      ..._OOS_r120e11.csv), aperti oggi riga per riga:
+#         IS   PF 1,39744   DD% 3,4846   Trades 106
+#         OOS  PF 1,22034   DD% 4,2149   Trades 184
+#     >>> E IL REFERTO E' LA CONTROPROVA, NON LA FONTE (classe 369
+#         applicata ai NUMERI e non solo alle manopole):
+#         report\LETTURA_BACKLOG_NOTTE_2026-09-13.md r.136 riporta
+#         "1,39744 / 1,22034" e "3,48 / 4,21" -- gli stessi numeri, ma
+#         il DD ARROTONDATO A DUE DECIMALI. Concorda, e vale meno. La
+#         prima stesura di questo file usava il referto come fonte e ci
+#         costruiva sopra un'incertezza di stampa: vedi S1, classe 385.
 #     Stesso EA, stesso simbolo, stesso TF, stesso banco, stesso
 #     deposito, stesso modello, e la cella 50 e' LA SUA cella (il suo
 #     file prova, R120e_U30USD_11_vivo_TAGLIA.txt r.281-284, pinna
@@ -499,14 +547,23 @@
 #         PRESTITO: LO MISURO. r120e aveva il magic come UNICO ASSE
 #         (2 celle, 783500/783501, sua r.302) e il cancello G0
 #         "gemelli sul magic" e' passato su tutte e sei le etichette
-#         r120 (referto citato, r.290). MA ho una prova diretta, sui
-#         CSV, ed e' quella di B(i) qui sotto: due corse della STESSA
-#         cella con magic 779300 e 779310 danno Profit, PF, DD% e
-#         Trades IDENTICI. Il magic e' l'unica differenza operativa fra
-#         le due, ed e' proprio la differenza che S1 deve tollerare.
+#         r120 (referto citato, r.290). MA ho DUE prove dirette sui
+#         CSV, e la seconda e' decisiva:
+#           - B(i): due corse della STESSA cella con magic 779300 e
+#             779310 danno Profit, PF, DD% e Trades IDENTICI (altro
+#             deposito);
+#           - B(iii): i DUE CSV DELL'ANCORA STESSA portano le due
+#             passate 783500 e 783501 della cella 50, a 100.000, e sono
+#             IDENTICHE su tutte e sette le colonne, Sharpe compreso.
+#         Cioe' la differenza che questo round introduce rispetto
+#         all'ancora (magic 779863 invece di 783500) e' ESATTAMENTE la
+#         differenza che l'ancora ha gia' misurato su se' stessa, sulla
+#         stessa cella e sullo stesso deposito. Non e' un prestito: e'
+#         il dato.
 #
-#  B) IL DETERMINISMO DEL BANCO -- MISURATO DA ME OGGI SUI CSV, NON
-#     LETTO IN UN REFERTO. E LE PORTATE, DICHIARATE.
+#  B) IL DETERMINISMO DEL BANCO -- TRE MISURE, FATTE DA ME OGGI SUI
+#     CSV E NON LETTE IN UN REFERTO. E LE PORTATE, DICHIARATE: nessuna
+#     delle tre copre tutto, e si dice quale buco copre ciascuna.
 #     (i) SU QUESTA EA, deposito 10.000. I quattro CSV di r126a/r126b
 #         sono nel repo (vedi BUCHI: un file fratello li da' per
 #         assenti, e sbaglia cartella). r126a ha una riga con
@@ -553,14 +610,41 @@
 #                5.7325 / 237   -- IDENTICHE, Sharpe compreso
 #           OOS  23321.47 / 45.10923 / 1.52365 / 2.53681 / 8.16765 /
 #                7.8323 / 517   -- IDENTICHE, Sharpe compreso
-#    >>> LE DUE MISURE COPRONO BUCHI DIVERSI, e nessuna delle due copre
-#        tutto: la (i) ha l'EA GIUSTO e il deposito SBAGLIATO, la (ii)
-#        il contrario. La cella che S1 controlla -- questa EA a 100.000
-#        -- e' l'incrocio delle due, e non e' stata misurata due volte
-#        da nessuno. Dirlo e' la differenza fra una sentinella e una
-#        speranza.
-#   >>> E' su QUESTE, non su una speranza, che S1 chiede un'UGUAGLIANZA
-#       sui `Trades` invece di una banda.
+#         PORTATA: la (i) ha l'EA GIUSTO e il deposito SBAGLIATO, la
+#         (ii) il contrario. L'INCROCIO -- questa EA a 100.000 -- lo
+#         copre la (iii), che la prima stesura di questo file
+#         dichiarava INESISTENTE.
+#   (iii) SU QUESTA EA, A 100.000, SULLA CELLA ESATTA CHE S1 CONTROLLA.
+#         E' l'ANCORA STESSA: r120e aveva il MAGIC come unico asse, e i
+#         suoi due CSV portano DUE PASSATE della stessa identica cella,
+#         una con magic 783500 e una con 783501. Aperte oggi:
+#           IS   4236.16 / 39.96377 / 1.39744 / 1.14216 / 3.04460 /
+#                3.4846 / 106   -- IDENTICHE, Sharpe compreso
+#           OOS  3454.83 / 18.77625 / 1.22034 / 0.77286 / 1.69733 /
+#                4.2149 / 184   -- IDENTICHE, Sharpe compreso
+#         >>> E' LA MISURA CHE MANCAVA, e sul punto che conta e' piu'
+#             stretta delle altre due: stessa EA, stesso deposito,
+#             stessa cella
+#             -- e l'UNICA differenza fra le due passate e' il MAGIC,
+#             cioe' ESATTAMENTE la differenza che questo round
+#             introduce rispetto all'ancora (779863 contro 783500).
+#             Qui il determinismo e' bit-a-bit su tutte e sette le
+#             colonne, Sharpe incluso: la 1 ULP vista in (i) NON
+#             compare. Portata: due passate della STESSA corsa, non di
+#             due corse diverse -- quindi copre il MAGIC e il motore,
+#             non la ripetibilita' fra notti, che resta coperta da (i)
+#             e (ii). Le tre insieme, non una sola.
+#   >>> E' su QUESTE TRE, non su una speranza, che S1 chiede
+#       un'UGUAGLIANZA sui `Trades` invece di una banda.
+#   >>> CORREZIONE DICHIARATA, perche' nasconderla sarebbe il difetto
+#       peggiore del difetto: la prima stesura scriveva che l'incrocio
+#       "non e' stato misurato due volte da nessuno". FALSO -- e il CSV
+#       che lo smentisce sta nella STESSA CARTELLA da cui questo file
+#       ha appena letto r126a e r126b, due righe piu' su in ordine
+#       alfabetico. E' la classe 372 (un'assenza DICHIARATA che non era
+#       stata CERCATA) e la lezione del 10/09 ("prima si cerca il file
+#       che ha gia' la risposta"), sullo stesso file due volte: una per
+#       i numeri d'ancora (vedi S1), una qui.
 #
 #  C) L'ANCORA D'ARCHIVIO E' DICHIARATA MORTA PER QUESTO ROUND, e lo
 #     scrivo perche' qualcuno la ripeschera'.
@@ -575,8 +659,9 @@
 # =====================================================================
 #  L'ATTESA, SCRITTA PRIMA DEI NUMERI
 # ---------------------------------------------------------------------
-#  - CELLA 50: IS 1,39744 / 3,48 / 106 e OOS 1,22034 / 4,21 / 184,
-#    dentro le bande di S1. Non e' un'attesa: e' un ARRESTO.
+#  - CELLA 50: IS 1,39744 / 3,4846 / 106 e OOS 1,22034 / 4,2149 / 184
+#    (valori d'ancora dai CSV, non dal referto), dentro le bande di
+#    S1. Non e' un'attesa: e' un ARRESTO.
 #  - FORMA DELL'ASSE: mi aspetto che 25, 50 e 75 stiano VICINE e che il
 #    salto stia fra 0 e le altre tre. Motivo: su questa EA lo stop in
 #    pari (r.460) e' IDENTICO su tutte e tre, e l'unica cosa che le
@@ -732,7 +817,7 @@
 #    R50/R56/R59/R113 non coprono questo simbolo su questa epoca).
 #    L'unico fatto misurato sulle due meta' e' interno a r120e11: l'OOS
 #    ha PF piu' BASSO dell'IS (1,22034 contro 1,39744) e DD piu' ALTO
-#    (4,21 contro 3,48). Non lo interpreto: lo dichiaro, perche'
+#    (4,2149 contro 3,4846). Non lo interpreto: lo dichiaro, perche'
 #    significa che in questo round un OOS peggiore dell'IS NON e' un
 #    sintomo di sovra-adattamento, e' il calendario.
 # =====================================================================
@@ -743,13 +828,39 @@
 #      r120e11. Se anche una sola riga non ci cade, NON si legge
 #      nient'altro.
 #
-#      IL CRITERIO, SCRITTO PRIMA DELLA TABELLA:
+#      LA FONTE DEI NUMERI D'ANCORA, E QUI LA PRIMA STESURA SBAGLIAVA
+#      SORGENTE (classe NUOVA 385, aperta da questo caso):
+#      i numeri NON si prendono dal referto `.md` della notte, che e'
+#      un RIASSUNTO e stampa il DD a DUE decimali. Si prendono dai CSV
+#      GREZZI DELL'ANCORA, che sono NEL REPO, nella stessa cartella
+#      dove questo file e' gia' andato a prendere r126a/r126b:
+#        backtest_pipeline\risultati_prove\dal_vps\
+#          ABTG_SuperWave_DOW_H1_Ottimizzato\
+#            ..._U30USD_IS_r120e11.csv
+#            ..._U30USD_OOS_r120e11.csv
+#      Riga per riga, aperte oggi (due passate ciascuna, magic 783500 e
+#      783501, IDENTICHE su tutte e sette le statistiche):
+#        IS   4236.16 / 39.96377 / 1.39744 / 1.14216 / 3.04460 /
+#             3.4846 / 106
+#        OOS  3454.83 / 18.77625 / 1.22034 / 0.77286 / 1.69733 /
+#             4.2149 / 184
+#      >>> IL DD VERO E' 3,4846 E 4,2149, NON 3,48 E 4,21. Il referto
+#          non mentiva: arrotondava. Ma costruirci sopra un'INCERTEZZA
+#          DI STAMPA di +/- 0,005 significa allargare una sentinella
+#          BLOCCANTE per un'ignoranza che il repo NON ha. E' il
+#          rovescio della classe 380: non una banda troppo stretta che
+#          ferma una corsa sana, ma una banda troppo larga che fa
+#          passare un banco sporco (classe 178) -- e la fa passare
+#          proprio nella zona 3,4576-3,4671, dove il criterio
+#          dichiarato direbbe di no.
+#
+#      IL CRITERIO, SCRITTO PRIMA DELLA TABELLA (invariato: si corregge
+#      la FONTE, non la tolleranza -- classe 380 regola 4):
 #        `Trades`  : numero intero, IDENTICO. Nessuna banda.
 #        `Profit Factor` e `Equity DD %` : +/- 0,5% del valore VERO
-#          dell'ancora, dove "vero" e' l'INTERVALLO che la stampa
-#          dell'ancora lascia aperto (PF stampato a 5 decimali ->
-#          +/- 0,000005; DD stampato a 2 decimali -> +/- 0,005).
-#          Arrotondamento VERSO L'ESTERNO.
+#          dell'ancora, dove "vero" e' l'INTERVALLO che la stampa DEL
+#          CSV lascia aperto (PF a 5 decimali -> +/- 0,000005; DD a 4
+#          decimali -> +/- 0,00005). Arrotondamento VERSO L'ESTERNO.
 #
 #      LA TABELLA, RICALCOLATA CELLA PER CELLA DAL CRITERIO QUI SOPRA,
 #      A MACCHINA (classe 380: non si controlla che "sembri coerente",
@@ -761,25 +872,29 @@
 #      PF OOS  1,22034 -> vero in [1,220335 ; 1,220345]
 #              x0,995 = 1,2142333   x1,005 = 1,2264467
 #              BANDA  1,21423 .. 1,22645
-#      DD IS   3,48    -> vero in [3,475 ; 3,485]
-#              x0,995 = 3,4576250   x1,005 = 3,5024250
-#              BANDA  3,4576 .. 3,5025
-#      DD OOS  4,21    -> vero in [4,205 ; 4,215]
-#              x0,995 = 4,1839750   x1,005 = 4,2360750
-#              BANDA  4,1839 .. 4,2361
+#      DD IS   3,4846  -> vero in [3,48455 ; 3,48465]
+#              x0,995 = 3,4671272   x1,005 = 3,5020732
+#              BANDA  3,4671 .. 3,5021
+#      DD OOS  4,2149  -> vero in [4,21485 ; 4,21495]
+#              x0,995 = 4,1937758   x1,005 = 4,2360247
+#              BANDA  4,1937 .. 4,2361
 #      Trades  IS 106 e OOS 184, IDENTICI.
 #
-#      >>> PERCHE' LE DUE BANDE DEL DD SONO PIU' LARGHE DI QUELLE CHE
-#          VERREBBERO APPLICANDO LO 0,5% AL NUMERO STAMPATO COME SE
-#          FOSSE ESATTO (che darebbero 3,4626-3,4974 e 4,1889-4,2311,
-#          calcolate anche quelle): perche' l'ancora e' pubblicata a
-#          DUE decimali e il CSV fresco stampa a QUATTRO. Il criterio
-#          e' lo stesso; quello che si aggiunge e' l'incertezza della
-#          STAMPA dell'ancora, che esiste davvero. Il confronto fra le
-#          due bande e' in PUNTI PIENI, ed e' dichiarato (classe 373).
-#          Su una sentinella BLOCCANTE il verso prudente e' il LARGO:
-#          una banda troppo stretta ferma una corsa SANA, ed e' il
-#          difetto piu' difficile da diagnosticare dopo.
+#      >>> LE DUE BANDE DEL PF NON SI MUOVONO di un millesimo rispetto
+#          alla prima stesura, e il motivo va scritto perche' e' la
+#          prova che il difetto era SOLO di fonte: il PF il referto lo
+#          stampa gia' a CINQUE decimali, come il CSV. A cambiare sono
+#          solo le due bande del DD, che si RESTRINGONO -- di 0,0099
+#          punti in IS (0,0449 -> 0,0350) e di 0,0098 in OOS (0,0522 ->
+#          0,0424), confronto in PUNTI PIENI e dichiarato (classe 373).
+#          >>> E LA DIREZIONE DELLA CORREZIONE VA DETTA, perche' la
+#              regola di casa e' che su una sentinella BLOCCANTE il
+#              verso prudente e' il LARGO: qui si stringe LO STESSO, e
+#              non e' una deroga. La tolleranza (+/- 0,5%) non si
+#              tocca: si toglie un'incertezza FABBRICATA, che veniva
+#              dall'aver letto un riassunto invece della misura. Una
+#              banda non e' prudente se e' larga: e' prudente se dice
+#              quello che misura.
 #      >>> E PERCHE' `Trades` E' UN'UGUAGLIANZA QUI E ERA `+/- 2` SUI
 #          QUATTRO ROUND DELLA SEDIA 770202 (R172a-e): perche' li' il
 #          binario dell'ancora e quello della corsa NON erano lo
@@ -789,12 +904,45 @@
 #          torna 0 righe. Non ho copiato una cella da un fratello: ho
 #          riapplicato il criterio a un caso diverso, e il caso e'
 #          diverso per un fatto verificato.
-#      >>> COSA SIGNIFICA SE CADE: il banco non e' quello del 14/09.
-#          Le cause plausibili, elencate per nome e non "tutto il
-#          resto": storico tick riscaricato nel terminale del banco,
-#          -Deposito diverso da 100000 sulla riga armata (classe 366),
-#          -Modello diverso da 4, finestra diversa. Si dichiara QUALE,
-#          non si legge il P/L "tanto per".
+#      >>> MA QUEL `git diff` E' UNA FOTOGRAFIA, NON UNA GARANZIA, E LA
+#          CONDIZIONE CHE REGGE L'UGUAGLIANZA VA RIVERIFICATA AL
+#          MOMENTO DELL'ARMAMENTO (classe 334 regola 3, qui applicata a
+#          un SORGENTE invece che a uno script, con l'aggravante che la
+#          fotografia TOGLIE una tolleranza a una sentinella
+#          BLOCCANTE). Il motivo e' meccanico, ed e' nel codice:
+#          walkforward_generico.ps1 r.304 scarica
+#          `$RawBase/mql5/Experts/<EA>.mq5`, e `$RawBase` e' costruito
+#          sul PIN della riga (RIGA_ROUND_VPS.ps1 r.105). Quindi il
+#          binario che gira NON e' quello di HEAD: e' quello del PIN DI
+#          ARMAMENTO, che mentre scrivo non esiste ancora. E i pin
+#          girano di routine (nel log recente di 'lavoro' c'e' un
+#          "Giro di pin 55"), mentre il sorgente porta l'avvertenza
+#          "IN CORSO D'OPERA" di b45dd009, cioe' altri agenti ci stanno
+#          lavorando. Non e' un'ipotesi di scuola.
+#      >>> OBBLIGO PER CHI ARMA, nella stessa forma gia' usata qui
+#          sotto per il magic ("un'asserzione non si eredita: si
+#          rifa'"):
+#              git diff 1445abf8 <PIN_DI_ARMAMENTO> -- \
+#                mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5
+#          - 0 righe  -> S1 resta com'e' scritta (uguaglianza esatta);
+#          - >0 righe -> L'UGUAGLIANZA NON E' PIU' GIUSTIFICATA: si
+#            torna a una BANDA sui `Trades` (+/- 2, la semiampiezza
+#            gia' usata sui fratelli 770202 per questa identica
+#            ragione) e SI DICHIARA NEL REFERTO quali righe sono
+#            cambiate. Non si arma con l'uguaglianza "tanto
+#            probabilmente non e' cambiato niente".
+#      >>> COSA SIGNIFICA SE CADE. Le cause plausibili, elencate per
+#          nome e non "tutto il resto", IN ORDINE DI PROBABILITA':
+#          (1) IL SORGENTE DELL'EA E' CAMBIATO fra 1445abf8 e il pin di
+#              armamento -- si guarda per PRIMA, ed e' un `git diff`,
+#              non un'opinione;
+#          (2) -Deposito diverso da 100000 sulla riga armata
+#              (classe 366);
+#          (3) -Modello diverso da 4, o finestra diversa;
+#          (4) storico tick riscaricato nel terminale del banco.
+#          Solo dopo aver escluso le quattro si scrive "il banco non e'
+#          quello del 14/09". Si dichiara QUALE, non si legge il P/L
+#          "tanto per".
 #      Forza dichiarata: FORTE (due finestre, tre colonne, valori
 #      distinti fra le finestre). Copre il BANCO e, indirettamente, la
 #      FINESTRA. NON copre la manopola (T1).
@@ -869,8 +1017,8 @@
 #    S6 -- IL RISCHIO NON E' ESPLOSO: nessuna cella con `Equity DD %`
 #      sopra 8,00% in nessuna delle due finestre. La soglia e' scelta e
 #      dichiarata: e' circa 1,9 volte il DD piu' alto mai misurato su
-#      questa sedia a 100k (4,21% dell'OOS di r120e11) e resta sotto il
-#      muro prop del 10%. Se una cella lo rompe si scrive SUBITO, in
+#      questa sedia a 100k (4,2149% dell'OOS di r120e11) e resta sotto
+#      il muro prop del 10%. Se una cella lo rompe si scrive SUBITO, in
 #      testa al referto, prima di qualunque Profit Factor.
 #      >>> E LA CELLA SOSPETTA E' LA 0, per costruzione: e' quella senza
 #          stop in pari. Su EMA200 la cella omologa ha fatto 13,9367%
@@ -905,8 +1053,11 @@
 #      LO RAGGIUNGE, ed e' misurato.
 #      OOS: <= 184 deal. In OPERAZIONI e' [NON MISURATO]; il fattore di
 #      casa 1,76 deal per posizione da' 184/1,76 = 105, cioe'
-#      plausibilmente sotto 150 anche lui -- e quel fattore vale per la
-#      cella viva, NON per la cella 0 (dove per costruzione e' 2).
+#      plausibilmente sotto 150 anche lui -- ma quel fattore porta i
+#      DUE caveat della sezione UNITA' (e' misurato sulla sedia 770531
+#      U30USD H2, non su questa, e vale per la cella viva, non per la
+#      cella 0). E' un INDIZIO, non la misura: il pavimento non lo
+#      decide lui, lo decide il conto della lettura generosa qui sotto.
 #  >>> CONSEGUENZA, DICHIARATA PRIMA DEI NUMERI: il MERITO e' SOSPESO
 #      in IS (misurato sotto) e NON DIMOSTRATO in OOS (unita'
 #      sbagliata). Regola B del 16/08: il campione sottile sospende il
@@ -960,7 +1111,7 @@
 #    B2  RISCHIO: e' l'unica cosa che si legge come MERITO, perche' un
 #        drawdown e' un fatto accaduto (Regola B del 16/08). In testa
 #        al referto, PRIMA di ogni PF, va scritto quante celle su
-#        quattro superano il 4,21% (il DD piu' alto misurato a 100k su
+#        quattro superano il 4,2149% (il DD piu' alto misurato a 100k su
 #        questa sedia) e quante superano l'8,00% (S6).
 #    B3  FORMA / STRUTTURA: S2 (4 righe) + S3 (4 valori distinti) + S5
 #        (almeno una coppia contigua diversa). Si legge come un blocco

@@ -21752,3 +21752,108 @@ invecchia fra la lettura e la consegna, in un albero che `CLAUDE.md` prescrive
 ### 🔑 La regola in una riga
 **Un cancello che non ricontrolla il file appena prima di firmare non sta
 verificando un file: sta verificando un RICORDO.**
+
+---
+
+## 385. 🌫️📏 L'INCERTEZZA FABBRICATA DA UN RIASSUNTO: una sentinella BLOCCANTE viene ALLARGATA per l'arrotondamento di stampa di un referto `.md`, mentre il CSV grezzo dell'ancora — con la precisione piena — sta nel repo, nella cartella che il file aveva già aperto (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `R173a_tp1pct_superwave_U30USD.txt` (asse `InpTP1Pct`, sedia
+`770511`) costruisce la sentinella **S1 — riproduzione dell'ancora**, dichiarata
+**BLOCCANTE** (*"se anche una sola riga non ci cade, NON si legge nient'altro"*).
+Prende i numeri d'ancora da `report/LETTURA_BACKLOG_NOTTE_2026-09-13.md` r.136 —
+un **riassunto**, che stampa il DD a **DUE decimali**: `3,48` e `4,21`. E poi,
+con onestà e con il conto per esteso, **allarga le bande** per quell'incertezza:
+
+> _"perché l'ancora è pubblicata a DUE decimali e il CSV fresco stampa a
+> QUATTRO. Il criterio è lo stesso; quello che si aggiunge è **l'incertezza
+> della STAMPA dell'ancora, che esiste davvero**."_
+
+🔴 **Non esiste affatto.** I CSV **dell'ancora stessa** sono nel repo:
+`backtest_pipeline/risultati_prove/dal_vps/ABTG_SuperWave_DOW_H1_Ottimizzato/
+..._IS_r120e11.csv` e `..._OOS_r120e11.csv`, e stampano **quattro decimali**:
+il DD vero è **3,4846** e **4,2149**. Le bande giuste sono `3,4671-3,5021` e
+`4,1937-4,2361`, non `3,4576-3,5025` e `4,1839-4,2361`. La banda costruita
+sull'incertezza inventata è **più larga di ~0,0099 punti pieni per gamba**, e la
+larghezza in più sta **tutta in basso**: accetta un DD IS fra 3,4576 e 3,4671
+che **il criterio dichiarato dal file stesso rifiuterebbe**.
+
+🔴 **E l'aggravante che rende la classe utile.** Il file **era già dentro quella
+cartella**: poche righe sopra apre `..._IS_r126a.csv` e `..._IS_r126b.csv` per
+misurare il determinismo del banco. I due CSV dell'ancora sono nello **stesso
+`ls`**, due righe più su in ordine alfabetico. Non è un file introvabile: è un
+file **non guardato perché non cercato** — la lezione del 10/09 (*"prima si
+cerca il file che ha già la risposta"*) e la classe 372, ripetute.
+
+🟢 **E la stessa svista nascondeva una misura MIGLIORE di quella che il file
+diceva di non avere.** `R173a` scriveva: *"La cella che S1 controlla — questa EA
+a 100.000 — è l'incrocio delle due, e **non è stata misurata due volte da
+nessuno**."* Falso: `r120e` aveva il **magic come unico asse**, quindi i suoi due
+CSV portano **DUE passate della cella 50** (magic `783500` e `783501`), a
+100.000, su questa EA — e sono **identiche su tutte e sette le statistiche,
+Sharpe compreso**. Cioè la differenza che il round nuovo introduce rispetto
+all'ancora (un magic diverso) è **esattamente** quella che l'ancora ha già
+misurato su sé stessa. 👉 **Il CSV non cercato non conteneva solo il numero
+giusto: conteneva la prova che mancava.**
+
+### 📐 PERCHÉ È UNA CLASSE NUOVA e non la 380
+La **380** è *la banda che decide è più STRETTA del criterio* → ferma una corsa
+sana. Qui è il **rovescio**: la banda è più **LARGA** del criterio, e lo è per
+una ragione **argomentata bene e falsa** — il che la rende più difficile da
+vedere, perché chi rilegge trova un ragionamento corretto sull'errore di
+arrotondamento e **approva il ragionamento senza controllare la premessa**.
+E non è nemmeno la **178** nuda (*banda larga = banco sporco che passa*): lì la
+larghezza è una scelta, qui è un **artefatto di FONTE**.
+
+### 🔴 LA REGOLA
+1. **I numeri di un'ancora si leggono dal CSV della corsa, MAI dal referto che
+   la riassume.** Il referto è una **controprova**, e vale meno: è la classe 369
+   (*ordine di autorità*) applicata ai **NUMERI** e non solo alle manopole.
+   Ordine: `CSV della corsa` > `file prova dell'ancora` > `referto .md`.
+2. 🔴 **Prima di scrivere "il numero d'ancora è stampato a N decimali" si cerca
+   il CSV**, con un comando, non a memoria:
+   `find backtest_pipeline/risultati_prove -name "*<etichetta>*"`.
+   Se il CSV c'è, l'incertezza di stampa del referto **non esiste** e non entra
+   nella banda.
+3. 🔴 **Una tolleranza si allarga solo per un'incertezza MISURATA.** Allargare
+   per un'incertezza *plausibile* è lo stesso difetto della 380 con il segno
+   cambiato: la banda smette di dire quello che misura. E *"su una sentinella
+   bloccante il verso prudente è il largo"* **non è una licenza**: una banda non
+   è prudente perché è larga, è prudente perché **dice quello che misura**.
+4. 📌 **Quando si apre una cartella di CSV per una misura, si LEGGE L'ELENCO
+   INTERO.** Il file che serve per l'altra metà del ragionamento è spesso lì:
+   costa un `ls`, e qui valeva una sentinella.
+
+### ➕ E LA SECONDA META' DELLO STESSO VERDETTO: **UNA FOTOGRAFIA DEL BINARIO USATA PER TOGLIERE UNA TOLLERANZA** (stesso file, stesso giorno)
+
+Sempre in `R173a`, S1 chiede sui `Trades` un'**uguaglianza esatta** invece della
+banda `+/- 2` usata sui fratelli della sedia `770202`. La giustificazione è
+corretta e misurata: *"lì il binario dell'ancora e quello della corsa non erano
+lo stesso (+27 righe di Guardian); QUI la deriva è ZERO e l'ho misurata:
+`git diff 1445abf8 HEAD` torna 0 righe"*.
+
+🔴 **Ma il binario che gira non è quello di `HEAD`: è quello del PIN DI
+ARMAMENTO.** `walkforward_generico.ps1` r.304 scarica
+`$RawBase/mql5/Experts/<EA>.mq5`, e `$RawBase` è costruito sul `$Pin` della riga
+(`RIGA_ROUND_VPS.ps1` r.105). Fra la stesura e l'armamento c'è **almeno un giro
+di pin** — nel log recente di `lavoro` ce n'è uno (*"Giro di pin 55"*) — e il
+sorgente in questione porta l'avvertenza **"IN CORSO D'OPERA"** di `b45dd009`,
+cioè altri agenti ci stanno lavorando. È la **classe 334 regola 3** (*"verificato
+byte per byte a una certa data" è una FOTOGRAFIA, non una garanzia*) applicata a
+un **sorgente `.mq5`** invece che a uno script, **con l'aggravante che qui la
+fotografia TOGLIE una tolleranza a una sentinella bloccante**: se il sorgente
+cambia, S1 cade e il referto va a cercare la causa nel **banco**, che è innocente.
+
+👉 **Nota interna che rende il difetto evidente**: lo stesso file applica la
+disciplina **giusta** al magic (*"la riverifica va rifatta da chi arma la riga,
+sul commit che sarà la punta di 'lavoro' in QUEL momento. Un'asserzione di
+unicità non si eredita: si rifà"*) e **non** al binario. Due pesi nello stesso
+file, sulla stessa forma di asserzione.
+
+### ✅ CHE COSA SI FA
+- **Chi arma rifà il `diff`, non lo eredita**:
+  `git diff <pin_dell_ancora> <PIN_DI_ARMAMENTO> -- mql5/Experts/<EA>.mq5`.
+  **0 righe** → l'uguaglianza resta. **>0 righe** → si torna alla **banda**
+  (`+/- 2`) e si dichiara nel referto **quali righe** sono cambiate.
+- **La causa "il sorgente è cambiato" va PRIMA nell'elenco del "cosa significa
+  se cade"**, non in fondo e non implicita: è la più probabile delle quattro, ed
+  è l'unica che si esclude con un comando invece che con un'ispezione del banco.
