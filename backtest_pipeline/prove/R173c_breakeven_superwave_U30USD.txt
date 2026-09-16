@@ -105,11 +105,28 @@
 #       cella `false` produce una CASCATA di chiusure parziali che
 #       avanza DI UN GRADINO PER TICK (LA CATENA 1), e la sua
 #       profondita' e' decisa da una CORSA fra la cascata e il trailing
-#       (LA CATENA 2). In OHLC M1 il tester ha quattro prezzi per
-#       minuto: la cascata non avrebbe i tick per svolgersi e la cella
-#       `false` misurerebbe un oggetto diverso da quello che l'EA farebbe
-#       in campo. Su questo asse l'OHLC non e' "meno preciso": e'
-#       SBAGLIATO.
+#       (LA CATENA 2). In OHLC M1 la cella `false` misurerebbe un
+#       OGGETTO DIVERSO da quello che l'EA farebbe in campo.
+#       >>> !! E IL CONTO SI FA, NON SI ASSERISCE (classe NUOVA 391,
+#           trovata dal cancello di giudizio il 16/09). La prima stesura
+#           di questo file scriveva: "in OHLC M1 il tester ha quattro
+#           prezzi per minuto: la cascata non avrebbe i tick per
+#           svolgersi". LA META' ARITMETICA E' FALSA, e la correggo
+#           invece di lasciarla in piedi: quattro prezzi per minuto sono
+#           240 chiamate a OnTick() dentro UNA barra H1, contro i 2-6
+#           gradini (10 al tetto) che la cascata richiede. I TICK CI
+#           SONO, e ce ne sono venti volte troppi.
+#       >>> LA RAGIONE VERA, quella che regge il conto: non e' QUANTI
+#           prezzi, e' QUALI e in QUALE ORDINE. In OHLC M1 la sequenza
+#           dentro il minuto e' O-H-L-C, cioe' un'oscillazione
+#           FABBRICATA dal generatore: i gradini della cascata
+#           cadrebbero su prezzi SINTETICI, in un ordine sintetico, e la
+#           profondita' misurata sarebbe un artefatto del generatore di
+#           tick invece che un fatto del mercato. Su questo asse l'OHLC
+#           non e' "meno preciso": e' UN'ALTRA MACCHINA.
+#       >>> E il motivo 1 basterebbe da solo: l'ancora e' a Modello 4 e
+#           S1 chiede `Trades` IDENTICI. Il punto 3 aggiunge il perche'
+#           NESSUNO deve riusare questo file in OHLC "per fare prima".
 #  >>> E QUINDI LA CLASSE 356 NON MORDE: l'anteprima di -SoloControllo
 #      scrive "Model=4" CABLATO (walkforward_generico.ps1 r.1000, letta
 #      oggi) mentre la corsa vera usa $Modello (r.1654). Con -Modello 4
@@ -269,7 +286,17 @@
 #          grep -n "InpBreakeven" mql5/Experts/ABTG_SuperWave_DOW_H1_Ottimizzato.mq5
 #      -> DUE righe sole: r.83 (dichiarazione) e r.460 (la modifica
 #      dello stop). E BASTA. E' l'input con la superficie piu' PICCOLA
-#      dei tre della famiglia: R173a ne aveva due usi, R173b tre.
+#      dei tre della famiglia, E IL CONFRONTO PORTA IL SUO CRITERIO
+#      (classe 373: due numeri contati con due convenzioni diverse non
+#      sono un confronto). Criterio: RIGHE D'USO, cioe' righe che
+#      nominano l'input ESCLUSA la dichiarazione. Contate col grep:
+#        InpBreakeven ... UNA riga  (r.460)
+#        InpTP1Pct .... DUE righe   (r.446 gate, r.452 cv) -> R173a
+#        InpTP1_R ..... DUE righe   (r.446 gate, r.448 tgt) -> R173b
+#      (In OCCORRENZE TESTUALI sarebbero 1, 3 e 3, perche' r.446 nomina
+#      `InpTP1Pct` due volte e r.448 nomina `InpTP1_R` due volte: la
+#      graduatoria non cambia, il numero si'. La prima stesura scriveva
+#      "due usi e tre" mescolando le due convenzioni.)
 #      QUINDI, e sono tutte affermazioni negative verificate col grep,
 #      non assunte:
 #        - NON tocca il TP (r.375 e r.409, `InpTP_RR`);
@@ -345,8 +372,10 @@
 #                  risk > 0 -> tgt IDENTICO -> hit ANCORA TRUE ->
 #                  SECONDO PARZIALE.
 #      >>> E COSI' VIA, UN GRADINO PER TICK, finche' non si verifica UNA
-#          delle due condizioni d'arresto, che sono ESATTAMENTE DUE e le
-#          elenco per nome:
+#          delle condizioni d'arresto. SONO TRE, e le elenco per NOME
+#          (classe 180: un insieme si elenca, non si chiude a occhio --
+#          la prima stesura ne scriveva "ESATTAMENTE DUE" e la terza
+#          l'aveva dimenticata; trovata dal cancello di giudizio):
 #          (A) IL PAVIMENTO DEL VOLUME. r.554-561:
 #              NormVol(v) = MathFloor(v/step)*step, e torna 0 se sta
 #              sotto VOLUME_MIN. Su U30USD VOLUME_MIN = VOLUME_STEP =
@@ -356,6 +385,22 @@
 #              guardia `cv>0` di r.459 e' falsa e non si chiude piu'
 #              niente. La cascata MUORE SUL LOTTO MINIMO.
 #          (B) IL TRAILING VINCE LA CORSA -> LA CATENA 2.
+#          (C) LA POSIZIONE SI CHIUDE DEL TUTTO, e la cascata finisce
+#              con lei. Tre vie, tutte fuori da questo asse: il TP a 3R
+#              (r.375, `InpTP_RR` pinnato 3.0), lo stop colpito, o
+#              l'uscita su flip del Supertrend (r.307-308). E' l'arresto
+#              che la prima stesura aveva dimenticato.
+#      >>> E C'E' UNA PAUSA CHE NON E' UN ARRESTO, e va distinta: se il
+#          prezzo ricade sotto `tgt`, `hit` (r.449) e' falso e il gradino
+#          salta -- ma il gate resta APERTO e la cascata RIPRENDE appena
+#          il prezzo torna sopra. Pesa sulla PROFONDITA', non
+#          sull'ESISTENZA della cascata.
+#      >>> IL VERSO DI QUESTA CORREZIONE, DICHIARATO: (B), (C) e la pausa
+#          ACCORCIANO tutte e tre la cascata, nessuna la allunga. Quindi
+#          la profondita' misurata qui sotto resta esattamente quello che
+#          gia' dichiara di essere -- un LIMITE SUPERIORE, il caso "non
+#          la ferma niente" -- e NESSUN numero di questo file cambia. Il
+#          difetto era di completezza dell'elenco, non di aritmetica.
 #
 #  >>> QUANTO E' PROFONDA LA CASCATA, MISURATO E NON STIMATO -- ma con
 #      il suo caveat attaccato, che e' grosso (classe 375).
@@ -573,8 +618,8 @@
 #      r.79   input bool InpBreakeven = true;
 #      r.408  bool beDone = isLong ? (sl>=openP) : (sl<=openP && sl>0);
 #      r.410  if(!beDone && InpTP1Pct>0 && InpTP1Pct<100)
-#      r.428  bool parz = (cv>0 && cv<vol && PositionClosePartial(...));
-#      r.429  if(InpBreakeven) gTrade.PositionModify(tk,openP,tp);
+#      r.428  bool parz = (cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv));
+#      r.429  if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(openP),tp);
 #      r.436  if(InpUseTrailing && beDone && e14>0)      <<< LA DIFFERENZA
 #  >>> LI' IL TRAILING E' SUBORDINATO A `beDone`. Quindi, con
 #      `InpBreakeven = false` su ABTG_EMA200, `beDone` non diventa mai
@@ -1200,11 +1245,25 @@
 #          contro-esempio SI COSTRUISCE, e non contro un fratello ma
 #          contro la BANDA LARGA in astratto: una banda costruita sul
 #          referto a DUE decimali (3,48 e 4,21 invece di 3,4846 e
-#          4,2149) darebbe 3,4576..3,5025 e 4,1839..4,2361, cioe' due
-#          zone -- 3,4576..3,4671 e 4,1839..4,1937, tutte e due SOTTO
-#          l'ancora e NESSUNA sopra -- dove quella passerebbe e la mia
-#          si fermerebbe. Un valore li' dentro dista dall'ancora fra lo
-#          0,50% e lo 0,77% (IS) e fra lo 0,50% e lo 0,74% (OOS), cioe'
+#          4,2149) darebbe 3,4576..3,5025 e 4,1839..4,2361, cioe'
+#          QUATTRO zone dove quella passerebbe e la mia si fermerebbe --
+#          e sono quattro, non due (la prima stesura scriveva "due zone,
+#          tutte e due SOTTO e NESSUNA sopra": il cancello di giudizio ha
+#          rifatto i conti e sopra c'e' eccome, solo sottilissimo):
+#            SOTTO, LARGHE:  3,4576..3,4671 (ampiezza 0,0095)
+#                            4,1839..4,1937 (ampiezza 0,0098)
+#            SOPRA, SOTTILI: 3,50208..3,50243 (ampiezza 0,00035)
+#                            4,236025..4,236075 (ampiezza 0,00005)
+#          >>> E L'ASIMMETRIA NON E' UN CASO, ed e' il motivo per cui la
+#              frase sbagliata sembrava vera: il referto a due decimali
+#              arrotonda VERSO IL BASSO tutti e due i valori (3,4846 ->
+#              3,48 e 4,2149 -> 4,21), quindi la banda larga esce
+#              TRASLATA IN BASSO. Con un valore che arrotondasse verso
+#              l'alto la zona grossa starebbe SOPRA.
+#          Un valore nelle zone SOTTO dista dall'ancora fra lo
+#          0,50% e lo 0,77% (IS) e fra lo 0,50% e lo 0,74% (OOS) -- e
+#          nelle due zone SOPRA fra lo 0,50% e lo 0,51% (IS) e lo 0,50%
+#          e lo 0,50% (OOS). In tutte e quattro, cioe', un valore
 #          e' FUORI dal criterio dichiarato, su un banco che in A1 e'
 #          misurato riprodurre le sette statistiche FINO ALL'ULTIMA
 #          CIFRA. Quella zona non e' "rumore tollerabile": e' gia' un
@@ -1378,9 +1437,19 @@
 #
 #  LE OPERAZIONI, MISURATE E NON STIMATE (r120e11, cella `true`, stesso
 #  deposito di questo round, lette nei CSV): IS 106 deal, OOS 184 deal.
-#  >>> E IL SEGNO VA SCRITTO (classe 362): quelli sono DEAL, e un
-#      ingresso vale da 2 a 6 deal (sezione UNITA'). Quindi le
-#      OPERAZIONI sono <= 106 in IS e <= 184 in OOS, mai di piu'. La
+#  >>> E IL SEGNO VA SCRITTO (classe 362): quelli sono DEAL. E il
+#      rapporto deal/ingresso va preso dalla CELLA GIUSTA -- 106 e 184
+#      sono numeri della cella `true`, non della `false` (la prima
+#      stesura scriveva "da 2 a 6 deal", che e' il conto della CASCATA,
+#      cioe' di un'altra cella; corretto dal cancello di giudizio).
+#      NELLA CELLA `true` un ingresso vale DA 1 A 4 deal di chiusura:
+#      al piu' DUE posizioni (mercato 1/3 a r.396-397 e pendente 2/3 a
+#      r.411-412, e il pendente puo' non scattare) per al piu' DUE
+#      chiusure ciascuna (un parziale + la finale, perche' col breakeven
+#      acceso il gate si chiude e non si riapre).
+#      >>> E LA CONCLUSIONE NON CAMBIA, perche' poggia solo su
+#          deal >= operazioni, che vale in tutte e due le celle: le
+#          OPERAZIONI sono <= 106 in IS e <= 184 in OOS, mai di piu'. La
 #      misura e' unilaterale, e il verso INDEBOLISCE il campione: si
 #      scrive col segno, non si arrotonda a "106 operazioni".
 #  >>> IS: <= 106 contro 150, cioe' al piu' il 71% del pavimento. NON LO
@@ -1422,9 +1491,15 @@
 #          e' pigrizia: e' un conto.
 #        - ALLUNGARE IN OHLC: !! QUI E' VIETATO, non solo sconsigliato.
 #          La cella `false` di questo file avanza DI UN GRADINO PER
-#          TICK: in OHLC M1 il tester ha quattro prezzi per minuto e la
-#          cascata non si svolgerebbe. Non e' "screening meno preciso":
-#          e' un'altra macchina.
+#          TICK, e in OHLC M1 i gradini cadrebbero su prezzi SINTETICI
+#          (la sequenza O-H-L-C dentro il minuto) e in un ordine
+#          sintetico: la profondita' misurata sarebbe un artefatto del
+#          generatore.
+#          >>> !! NON perche' "mancherebbero i tick": quattro prezzi per
+#              minuto fanno 240 chiamate a OnTick() in una barra H1,
+#              contro i 2-6 gradini della cascata. Il conto sta nella
+#              sezione del Modello 4, punto 3 (classe 391).
+#          Non e' "screening meno preciso": e' un'altra macchina.
 #        Nessuna delle due si fa qui.
 #  >>> LA SENTINELLA SEPARATA CHE LA 355 CHIEDE: la data della prima e
 #      dell'ultima operazione NON esiste in nessun artefatto della
@@ -1531,6 +1606,25 @@
 #          E' esattamente la macchina che ha prodotto
 #          `trades_candidati_r23`. Lo scrivo come la VIA PIU' CORTA AL
 #          NUMERO mancante, non come un desiderio.
+#    - UN'IPOTESI DI LETTURA CHE IL FILE FA SENZA POTERLA PROVARE, e la
+#      scrivo perche' se cadesse toccherebbe la cella `true`, non la
+#      `false` (trovata dal cancello di giudizio, 16/09). Nella cella
+#      `true`, allo STESSO tick, r.460 scrive lo SL a `openP` e poi r.469
+#      lo RILEGGE con `PositionGetDouble(POSITION_SL)`. Se quella lettura
+#      tornasse il valore VECCHIO (la selezione della posizione e' una
+#      cache, e una PositionModify non la ricarica per contratto), il
+#      trailing di r.470 potrebbe riabbassare lo stop a `stLine < openP`
+#      e RIAPRIRE il gate anche nella cella `true` -- cioe' la cascata
+#      esisterebbe in TUTTE E DUE le celle e questo round misurerebbe
+#      un'altra cosa.
+#      >>> PERCHE' NON LO CREDO, ed e' una MISURA e non un'opinione: nel
+#          per-trade in repo (770521, cella con breakeven acceso) 38
+#          posizioni su 50 hanno ESATTAMENTE DUE chiusure, cioe' UN solo
+#          parziale, e ZERO ne hanno tre o piu'. Se il gate si riaprisse,
+#          quella distribuzione non potrebbe esistere.
+#      >>> IL GRADO: il fatto e' MISURATO, la spiegazione no. Resta un
+#          caveat, e il caveat viaggia col proxy (altro magic, deposito
+#          non dichiarato).
 #    - IL RISCHIO GIORNALIERO NON E' MISURATO: la colonna
 #      `Peggior Giornata %` non esiste nei CSV di questa EA (verificato
 #      sul sorgente r.760 e sui 53 campi dei CSV d'ancora).

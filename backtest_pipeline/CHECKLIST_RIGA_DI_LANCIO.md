@@ -22317,3 +22317,70 @@ l'imprecisione è nel **meccanismo**, non nella stampa.
 **Riparato prima dell'armamento**: i tre file portano ora la banda, il metodo dei
 percentili, e il ricalcolo della tabella su entrambe le estremità con le due
 righe ambigue nominate. **Nessun numero decisivo è cambiato.**
+
+---
+
+## 391. ⏱️🧮 UN REQUISITO GIUSTO MOTIVATO CON UN **FATTO FALSO SUL MOTORE DEL TESTER**: *"in OHLC non ci sarebbero abbastanza tick"* — e il conto è **240 contro 6** (controllo-preventivo, 16/09/2026)
+
+_Caso reale: `backtest_pipeline/prove/R173c_breakeven_superwave_U30USD.txt`
+(asse `InpBreakeven`, sedia `770511`), trovato dal cancello di giudizio **prima
+dell'armamento**. Il file motivava il suo `-Modello 4` (tick reali) con tre
+ragioni; **la terza era sbagliata nella sua metà aritmetica**._
+
+### 🧨 IL FATTO
+Il file scriveva, come premessa di un **divieto**:
+> *"In OHLC M1 il tester ha quattro prezzi per minuto: **la cascata non avrebbe
+> i tick per svolgersi**."*
+
+**La prima metà è vera, la seconda non segue.** Quattro prezzi per minuto sono
+**240 chiamate a `OnTick()` dentro una sola barra H1**, contro i **2-6 gradini**
+(10 al tetto del volume) che il meccanismo descritto richiede. I tick **ci
+sono**, e ce ne sono **venti volte troppi**. Il conto è **due moltiplicazioni**,
+e non era stato fatto.
+
+### 🟢 E IL REQUISITO ERA GIUSTO LO STESSO — è questo che rende la classe insidiosa
+`-Modello 4` resta **obbligatorio** su quel round, per due ragioni che reggono:
+**(1)** l'ancora è girata a Modello 4 e la sentinella chiede `Trades` **identici**;
+**(2)** in OHLC M1 la sequenza dentro il minuto è **O-H-L-C**, cioè
+un'oscillazione **fabbricata dal generatore**: i gradini cadrebbero su **prezzi
+sintetici** e in un **ordine sintetico**, e la profondità misurata sarebbe un
+artefatto del generatore invece che un fatto del mercato.
+👉 **Conclusione giusta, motivazione falsa.** Ed è il caso peggiore: un cancello
+che guarda solo il verdetto (`-Modello 4`? sì) **non la trova mai**.
+
+### 🧠 PERCHÉ COSTA
+Un file prova è **memoria**: viene riletto e **copiato** mesi dopo. Una frase
+come *"in OHLC non ci sarebbero i tick"* è **citabile**, suona tecnica, e chi la
+riusa la applica a un round dove la conclusione **non** regge (un motore che
+agisce una volta per barra, dove OHLC andrebbe benissimo) — oppure la usa al
+contrario per **respingere** un `-Modello 1` legittimo, buttando ore di banco. Il
+danno è **differito e moltiplicato**, come nella 323/383.
+
+### 📐 PERCHÉ NON È LA 281 NÉ LA 282, ED È UNA CLASSE NUOVA
+- La **281** è *"l'anteprima MENTE sul modello"*: un difetto di **strumento**
+  (`Model=4` cablato nel `-SoloControllo`). Qui lo strumento non c'entra.
+- La **282** è *"la profondità **tick** dedotta da una sonda di **barre**"*: una
+  misura **fatta sulla grandezza sbagliata**. Qui non c'è nessuna misura: c'è
+  un'**asserzione sul funzionamento del generatore di tick**, mai contata.
+- La **178** è *"la banda non provata contro l'ipotesi alternativa"*. Parente,
+  ma quella parla di **attese numeriche**; questa di **premesse meccaniche**.
+
+### 🔴 LA REGOLA
+1. **Ogni affermazione sul MOTORE del tester (quanti tick genera un modello, con
+   che ordine, con che granularità) usata come PREMESSA di un requisito va
+   scritta col suo CONTO ACCANTO**, nella forma `N tick disponibili contro M
+   eventi richiesti`. Se il conto non c'è, l'affermazione **non si scrive**.
+2. 🔴 **E quando il conto la falsifica, NON si cancella la riga: si CORREGGE la
+   motivazione e si dichiara che la conclusione sopravvive per un'altra
+   ragione** — altrimenti il prossimo lettore rifà lo stesso errore in buona
+   fede, perché il file non gli dice che è già stato fatto.
+3. 📌 **La domanda giusta su OHLC non è "abbastanza tick?" ma "QUALI prezzi e in
+   QUALE ordine?"**: `O-H-L-C` dentro il minuto è una sequenza **fabbricata**, e
+   qualunque meccanismo che dipenda dall'**ordine** dei prezzi intra-barra
+   (cascate, trailing a gradini, gestioni multi-evento) misura in OHLC un
+   **oggetto diverso**, non lo stesso oggetto con meno precisione.
+
+**Riparato prima dell'armamento**: il file porta ora il conto `240 contro 2-6`,
+la motivazione vera (prezzi e ordine sintetici) e, nel secondo punto dove la
+frase era ripetuta, il rimando esplicito a questa classe. **Il requisito
+`-Modello 4` non è cambiato.**
