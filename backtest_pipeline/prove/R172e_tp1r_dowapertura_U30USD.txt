@@ -10,10 +10,11 @@
 #  / SOGLIE).
 #
 #  QUINTO FILE DELLA SERIE SULLA STESSA SEDIA 770202:
-#    R172a  InpTrailStartR     (fratello, committato)
-#    R172b  InpCloseHour       (fratello, committato)
-#    R172c  InpBreakevenAtTP1  (fratello, committato 99e8290d)
-#    R172d  InpBEatR           (fratello, NON committato -- vedi sotto)
+#    R172a  InpTrailStartR     (fratello, committato . armato in CODA)
+#    R172b  InpCloseHour       (fratello, committato . armato in CODA)
+#    R172c  InpBreakevenAtTP1  (fratello, committato . armato in CODA
+#                               con il pin cbb5c58a)
+#    R172d  InpBEatR           (fratello, committato 717be501 -- v. sotto)
 #    R172e  InpTP1_R           (questo)
 #
 #  >>> PERCHE' QUESTO FILE E' LA "e" E NON LA "d", e non e' un
@@ -22,29 +23,37 @@
 #      QUARTO della serie" e suggeriva il magic 789540. Alla verifica
 #      fatta PRIMA di scrivere una riga:
 #        grep -ril "r172d" --exclude-dir=.git .
-#      -> backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt
+#      -> allora UN file solo:
+#         backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt
+#      (rieseguito DOPO il salvataggio di questo file torna QUATTRO
+#       percorsi, e due dei quattro sono questo file e R172c, che la
+#       sigla la CITANO: classe 382, il file che falsifica il proprio
+#       comando appena viene committato. Il numero che conta e' quello
+#       della riga sopra, con la data.)
 #      cioe' un agente parallelo ha GIA' scritto la "d" sull'asse
 #      InpBEatR, e quel file si e' preso PROPRIO il magic 789540
 #      (sua r.1278 `InpMagic=789540||789540||0||789540||N`, letta oggi).
-#      Stato dei due, misurato e non assunto:
+#      Stato dei due AL MOMENTO DELL'ARBITRATO, misurato e non assunto:
 #        git status --porcelain backtest_pipeline/prove/
 #        -> "?? backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt"
-#      cioe' NON committato, e nemmeno armato in CODA.txt. Nemmeno
-#      questo lo e'.
-#      L'ordine di precedenza della classe 367 (armato > committato >
-#      solo nell'albero di lavoro) NON arbitra un caso in cui nessuno
-#      dei due e' committato -- lo dice la classe stessa, ed e' il
-#      difetto n.2 che la 367 ha aggiunto alla 365. Quindi si applica la
-#      regola di casa che resta: chi c'e' GIA' SUL DISCO resta, e
-#      bruciare un numero costa meno che collidere. R172d tiene la sua
-#      etichetta e il suo magic; questo file passa a R172e e a un magic
-#      DIECI piu' in la' (789550), non UNO -- perche' la 365 nasce
-#      proprio da due file che si assegnano numeri adiacenti.
-#      >>> E SE R172d NON ENTRASSE MAI NEL REPO, questo file resta
-#          R172e lo stesso: un'etichetta bruciata non si recupera, e
-#          rinominare un file gia' passato dal cancello costa un altro
-#          giro. Lo scrivo adesso per non lasciare la domanda aperta a
-#          chi legge fra un mese.
+#      cioe' R172d era sul DISCO ma non ancora committato, e questo file
+#      non esisteva. Ho applicato la regola di casa che vale quando la
+#      precedenza formale non arbitra (classe 367 difetto n.2: la 365
+#      non decide se nessuno dei due e' armato): chi c'e' GIA' resta, e
+#      bruciare un numero costa meno che collidere.
+#      >>> E POCHE ORE DOPO L'ARBITRATO E' DIVENTATO NON AMBIGUO, nel
+#          verso che avevo scelto: R172d e' stato committato su `lavoro`
+#          come `717be501` ("Scrive R172d (InpBEatR, ...)"), quindi oggi
+#          la precedenza della classe 367 regola 1 lo copre alla lettera
+#          (**armato > COMMITTATO > solo nell'albero di lavoro**). La
+#          decisione presa prima e quella che la regola impone dopo
+#          coincidono. Lo scrivo perche' un arbitrato preso "per
+#          prudenza" e poi confermato da una regola e' una cosa diversa
+#          da un arbitrato improvvisato, e la differenza va agli atti.
+#      Quindi: R172d tiene la sua etichetta e il suo magic; questo file
+#      e' R172e e prende un magic DIECI piu' in la' (789550), non UNO --
+#      perche' la 365 nasce proprio da due file che si assegnano numeri
+#      adiacenti.
 #
 #  >>> NON SONO GEMELLI NEL SENSO DELLA CLASSE 377 (stesso asse su due
 #      sedie): sono CINQUE ASSI DIVERSI SULLA STESSA SEDIA. Quello che
@@ -57,18 +66,31 @@
 #      (il difetto n.1 della classe 377) non e' possibile. Le sigle si
 #      citano comunque come B<n> [R172e].
 #
-#  >>> UNA COSA DA SEGNALARE SU UN FRATELLO, verificata nel fratello e
-#      non ricordata (classe 377 punto 4). R172c, riga 657, porta la
-#      banda di `Trades` IS come "73 - 75 (74)", cioe' +/- UNO, mentre
-#      il criterio che la genera -- sua r.667 -- dice "+/- 2", e la sua
-#      r.690-691 ci conta sopra ("QUATTRO VOLTE la semiampiezza di
-#      +/-2"). E' esattamente la classe 380, su una sentinella
-#      BLOCCANTE, e nei fratelli R172a (r.519) e R172b (r.613) la
-#      stessa cella e' gia' corretta a "72 - 76". Questo file usa
-#      72 - 76, cioe' il criterio dichiarato. NON tocco R172c: e'
-#      committato e sotto un altro cancello in questo momento, e due
-#      agenti che scrivono lo stesso file sono la classe 368. Lo
-#      segnalo e basta.
+#  >>> LA CLASSE 380 SU QUESTA SERIE, E COM'E' FINITA -- verificata nei
+#      fratelli e non ricordata (classe 377 punto 4). Quando ho aperto
+#      R172c (al commit 99e8290d) la sua riga 657 portava la banda di
+#      `Trades` IS come "73 - 75 (74)", cioe' +/- UNO, mentre il
+#      criterio che la genera diceva "+/- 2" e un altro punto dello
+#      stesso file ci contava sopra: la classe 380 esatta, su una
+#      sentinella BLOCCANTE. NON ho toccato il file (era committato e
+#      sotto un altro cancello nello stesso momento: due agenti che
+#      scrivono lo stesso file sono la classe 368).
+#      Il suo cancello l'ha corretta -- commit `efcc399e` ("Cancello di
+#      giudizio su R172c: 9 correzioni, classe NUOVA 382 + estensione
+#      della 380"). RIVERIFICATO DA ME ADESSO, su tutti e cinque i file:
+#        grep -n "Trades \.\.\.\.\.\.\.\.\.\." backtest_pipeline/prove/R172*.txt
+#        -> CINQUE righe, e la quinta e' questa (classe 382), tutte con
+#           lo stesso contenuto "72 - 76   (74)       128 - 132   (130)":
+#           R172a r.532 . R172b r.626 . R172c r.730 . R172d r.548
+#           (numeri di riga al 16/09: le citazioni interne per riga
+#            scadono appena qualcuno corregge un file -- classe 369
+#            punto 4 -- ed e' per questo che il controllo e' scritto
+#            come un GREP e non come quattro numeri)
+#           piu' questo file, nella tabella della TOLLERANZA CONGELATA.
+#      Cinque file, una sola banda,
+#      e il criterio dichiarato che la genera. Lo scrivo perche' una
+#      classe pagata tre volte in una notte merita una riga che dica
+#      anche come e' finita.
 #
 # ---------------------------------------------------------------------
 #  SI LANCIA CON (RIGA_SOTTILE_ROUND.ps1: finestra, taglio IS/OOS e
@@ -214,6 +236,19 @@
 #       - dow_distanze.csv       48 righe, InpTP1_R 0,33/0,50/0,67/0,84
 #       - dow_walkforward_IS.csv 40 righe, stesse 4 celle x 10 EMA
 #       - dow_walkforward_OOS.csv 40 righe, idem
+#     >>> E SUI FILE PROVA, invece, il buco c'e' davvero, e l'ho
+#         contato a macchina:
+#           grep -rn "^InpTP1_R=.*||Y" backtest_pipeline/prove/
+#         -> TRE righe, e UNA DELLE TRE E' QUESTO FILE (classe 382:
+#            la riga d'asse mi rende un match appena vengo salvato).
+#            Le altre due sono di un ALTRO simbolo e di un ALTRO EA:
+#              prove/CANARINO_FRAZIONEIS_D30EUR.txt:217
+#              prove/R128b_bersaglio_D30EUR.txt:284
+#            tutte e due `InpTP1_R=1.0||0||0.5||3.0||Y` su D30EUR.
+#         Quindi: nessun file prova ha mai messo questa manopola ad asse
+#         su U30USD. Le tre griglie d'archivio non passano da un file
+#         prova -- nascono da `dow_apertura.ps1`, che si scrive gli
+#         input da solo -- e le due cose non si contraddicono.
 #     >>> E IL PUNTO CHE GIUSTIFICA QUESTO ROUND DA SOLO: quelle celle
 #         corrispondono a un TP TOTALE di 0,99R / 1,50R / 2,01R / 2,52R.
 #         LA CELLA VIVA E' `InpTP1_R = 1.0`, cioe' TP totale **3,00R**:
@@ -238,11 +273,22 @@
 #          misurato"
 #     >>> "L'OTTIMO MISURATO" E' UN SUPERLATIVO SENZA CRITERIO (classe
 #         364), E L'HO TRACCIATO ALLA FONTE:
-#           grep -rn "ottimo misurato" --exclude-dir=.git . | head
-#         -> il sorgente r.285 e
+#           grep -rln "ottimo misurato" --exclude-dir=.git \
+#             --exclude-dir=.claude .
+#         -> TRE file, E UNO DEI TRE E' QUESTO (classe 382: la frase la
+#            cito alla lettera, quindi divento un match appena vengo
+#            salvato). Gli altri due, che sono le fonti vere:
+#            mql5/Experts/ABTG_Dow_Apertura_US.mq5  r.285
 #            risultati_archivio/Dow_Apertura/DOW_MOTORE.md r.266
 #            ("| TP | `InpTP1_R = 0.5` -> **1,5R** | x3 interno;
 #              l'ottimo misurato |")
+#         >>> E `--exclude-dir=.claude` FA PARTE DELLA CITAZIONE, come
+#             un `-i` (classe 379 regola 2 + classe 382 regola 3):
+#             questa e' una domanda sul CONTENUTO del repo, non
+#             sull'unicita' istantanea di un valore, quindi gli otto
+#             worktree degli agenti paralleli vanno ESCLUSI -- senza,
+#             lo stesso comando conta ogni copia e il tre diventa
+#             ventisette senza che nel repo sia cambiato niente.
 #         Riaperta la fonte, il criterio c'e' ma NON e' quello che si
 #         legge:
 #           (a) l'1,5R e' l'ottimo DELL'IN-SAMPLE di quella griglia
@@ -531,10 +577,13 @@
 #          POSIZIONI sono note e costanti (56 e 96), la conversione
 #          giusta e' l'altra: parziali = Trades - 56 (IS), Trades - 96
 #          (OOS).
-#  >>> SEGNALAZIONE AI FRATELLI, gia' fatta da R172c e che confermo
-#      avendola rifatta: R172a e R172b dichiarano il fattore [DERIVATO]
-#      1,34 da R103 e scrivono che misurarlo costa due passate. Non
-#      serve: R46b ce l'ha gia'.
+#  >>> E LA SEGNALAZIONE CHE R172c AVEVA FATTO AI DUE FRATELLI E' GIA'
+#      STATA RACCOLTA: R172a e R172b dichiaravano il fattore [DERIVATO]
+#      1,34 da R103 e scrivevano che misurarlo costava due passate.
+#      Verificato adesso nel fratello e non ricordato (classe 377
+#      punto 4): R172a r.866 oggi scrive "[MISURATO] 1,3214 IS / 1,3542"
+#      (commit `a7824f09`, "Emenda R172a-b: fattore uscite/posizioni
+#      MISURATO..."). Il buco e' chiuso e questo file non lo riapre.
 #  >>> IL PER-TRADE ESISTE (`ExportTrades()`, r.2067, chiamata a r.2096
 #      dentro `OnTester()` r.2094; intestazione a r.2073 con
 #      `close_time`, `position_id`, `deal_type`, `net_profit`) e sarebbe
@@ -1476,22 +1525,41 @@
 #    E tutte le ore citate in questo file sono ORA SERVER BCM (ora
 #    italiana = +1, regola del fuso di CLAUDE.md).
 #
-#  COSTO IN TEMPO MACCHINA -- [STIMATO], e la base della stima e'
-#  dichiarata perche' non e' una misura su questa finestra.
+#  COSTO IN TEMPO MACCHINA -- [MISURATO SU UNA RIGA VICINA], e non e'
+#  piu' una stima a tavolino come nei fratelli.
 #    7 celle x 2 finestre = 14 PASSATE, come i fratelli R172a e R172b.
-#    Il minutaggio per passata su questa sedia e' [NON MISURATO]:
-#    l'unico numero vicino e' R103 I02 "durata 0.5 min" per una riga che
-#    comprendeva DUE passate gemelle piu' una singola, ma in OHLC M1.
-#    >>> STIMA DICHIARATA COME TALE: se una passata a tick su 21 mesi M5
-#        costa dell'ordine dei 15-30 secondi, 14 passate costano 4-7
-#        minuti. LA PARTE PIU' INCERTA non e' il calcolo: e' la
-#        COSTRUZIONE DELLA STORIA A TICK. Se i tick U30USD dal 2024.09
-#        non sono gia' a disco sul terminale di backtest, il primo giro
-#        puo' costare molto di piu' del tempo di calcolo -- ed e' un
-#        costo che si paga UNA volta, non quattordici.
-#    >>> E SE QUESTO ROUND GIRA DOPO UNO DEI QUATTRO FRATELLI, quel
-#        costo una-tantum e' gia' stato pagato da loro: stesso simbolo,
-#        stesso TF, stessa finestra, stesso modello.
+#    >>> LA MISURA, ed e' di stanotte: il runner sul VPS ha girato per
+#        davvero alle 03:30 del 16/09 e il referto e' in repo
+#        (backtest_pipeline/coda/referti/REFERTO_RUNNER_20260916_033005.txt,
+#        r.472-476, aperto oggi). Fra le 86 righe ce n'e' UNA su QUESTO
+#        EA e QUESTO simbolo:
+#          -Expert ABTG_Dow_Apertura_US
+#          -Prova R152a_pertrade_DowApertura_770202.txt
+#          -Etichetta r152a -Modello 4 -Deposito 100000
+#          ESEGUITO in 158s, uscita 0
+#        e quel file prova ha **2 celle** (contate rilanciando
+#        `python3 backtest_pipeline/controlla_prova.py` su di lui:
+#        "celle= 2 ... passate (celle x 2 finestre): 4"), stessa data
+#        d'inizio 2024.09.26 e stesso modello a tick.
+#        >>> IL CONTO, col denominatore giusto (classe 381):
+#            158 s / **4 passate** = 39,5 s a passata -- e quel numero
+#            COMPRENDE l'avvio e la chiusura del terminale, che si
+#            pagano UNA volta per riga e non una per passata. Quindi
+#            39,5 s/passata e' un TETTO, non una media, e il verso
+#            dell'approssimazione e' dichiarato: il costo marginale
+#            vero e' PIU' BASSO.
+#            14 passate <= 14 x 39,5 = 553 s, cioe' **meno di 10
+#            minuti**, e verosimilmente 6-8.
+#    >>> E LA PARTE CHE ERA PIU' INCERTA E' CHIUSA: la COSTRUZIONE DELLA
+#        STORIA A TICK. Se i tick U30USD dal 2024.09 non fossero gia' a
+#        disco su C:\MT5_Backtest, quella riga non sarebbe uscita con
+#        `uscita 0` in 158 s. Il costo una-tantum e' gia' stato pagato,
+#        e lo sara' ancora di piu' se questo round gira dopo uno dei
+#        quattro fratelli (stesso simbolo, TF, finestra e modello).
+#    >>> CAVEAT DICHIARATO: R152a misura un altro asse, quindi le sue
+#        passate non sono identiche alle mie nel lavoro che fanno
+#        (stesso motore e stessa finestra, ma un'altra cella per gamba).
+#        E' un'ancora di TEMPO MACCHINA, non di risultato.
 #
 #  BUCHI DICHIARATI DI QUESTO ROUND
 #    - I TRE CANALI NON SONO SEPARABILI con le colonne di questo CSV.
@@ -1541,10 +1609,22 @@
 #  COMPRESI (`.claude/worktrees/` NON escluso, e ce ne sono OTTO vivi in
 #  questo momento), escluso solo l'albero interno di git:
 #      grep -rl "789550" --exclude-dir=.git .
-#  Risultato alla STESURA: ZERO file, rispetto a HEAD `66722425` di
-#  `lavoro` ("Checklist: classe 376 confermata empiricamente dal referto
-#  runner reale"), letto con `git rev-parse --short HEAD` nel momento in
-#  cui scrivo e non ricordato (classe 377 punto 5).
+#  Risultato alla STESURA, prima che questo file esistesse: ZERO file.
+#  >>> RIESEGUITO DOPO IL SALVATAGGIO (classe 382, che e' di stanotte e
+#      che dice che un comando del genere si rilancia DOPO, non prima):
+#      torna **UN** file, e quel file e' QUESTO. Nessun altro. Scrivo
+#      il numero nella forma che la classe 382 ammette -- "N, e uno e'
+#      questo file" -- perche' un "ZERO" nudo sarebbe falso dal commit.
+#  >>> E VALE RISPETTO A UN COMMIT, non a un istante (classe 365 regola
+#      2): HEAD di `lavoro` e' `12f9d29d`, letto con
+#      `git rev-parse --short HEAD` nel momento in cui scrivo questa
+#      riga e non ricordato (classe 377 punto 5).
+#  >>> E QUI IL `--exclude-dir=.claude` NON CI VA, ed e' il verso
+#      OPPOSTO a quello del grep di "ottimo misurato" qui sopra: questa
+#      e' una domanda ISTANTANEA sull'unicita' di un valore, quindi gli
+#      otto worktree degli agenti paralleli vanno INCLUSI (classe 367
+#      regola 2 + classe 382 regola 3). Lo stesso comando, due domande,
+#      due esclusioni opposte -- e si dichiarano tutte e due.
 #  >>> LA RIVERIFICA CHE CONTA LA RIFA' IL CANCELLO, non la riporta
 #      l'autore (classe 365 regola 1): fra questa riga e il momento in
 #      cui la riga finira' in CODA.txt il repo puo' muoversi ancora.
