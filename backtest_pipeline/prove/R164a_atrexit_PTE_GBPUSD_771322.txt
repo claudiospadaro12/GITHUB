@@ -143,8 +143,17 @@
 #       - Pass 1 (buf **5** / TP2 **2** = QUESTA SEDIA): Profit
 #         **-2.124,62**, PF **0,97164**, DD **17,6756%**, n **447**.
 #       - E' l'UNICA coppia di celle in perdita dell'OOS insieme a
-#         Pass 8 (buf 5 / TP2 3): tutte e 12 le altre sono positive, la
-#         migliore (buf 30 / TP2 3) fa +4.032,51 con DD 8,3683%.
+#         Pass 8 (buf 5 / TP2 3): tutte e 12 le altre sono positive.
+#         >>> E "LA MIGLIORE" SI SCRIVE COL CRITERIO ACCANTO, sempre
+#             (A9, regola di casa), perche' senza sono TRE celle
+#             diverse: per **Recovery Factor** -- che e' il criterio con
+#             cui R78 ha davvero ottimizzato (.ini OptimizationCriterion
+#             =6, e `OnTester` r.739 restituisce `stats[3]` = RF) -- e
+#             per **DD** la migliore e' Pass 13 (buf 30 / TP2 3):
+#             RF 0,44726, profit +4.032,51, DD 8,3683%. Per **profit** e
+#             per **PF** no: quella e' Pass 5 (buf 25 / TP2 2), profit
+#             +4.575,77, PF 1,09997, DD 10,5109%. In tutti e due i casi
+#             la cella viva 14/buf 5 resta l'ultima della griglia.
 #     Cioe': **sulla stessa finestra e con lo stesso motore, il valore
 #     vivo del buffer e' quello che perde e che fa il doppio del
 #     drawdown.** Non e' una sorpresa isolata -- R71 lo aveva gia'
@@ -402,12 +411,26 @@
 #       Se migliora TUTTI E DUE nello stesso verso, e' un'ipotesi
 #       degna di una finestra nuova.
 #       /!\ E il contro-contro-esempio, che va scritto perche' rende il
-#       criterio 2 piu' debole di quanto sembri: **R71 ha gia' misurato
-#       che su questo motore l'IS e' 0/28 e l'OOS 28/28** in tre finestre
-#       IS diverse (par.3: "NON E' IL CALENDARIO, E' IL 2021"). Quindi un
-#       IS negativo su tutte e sette le celle e' l'esito ATTESO e **non
+#       criterio 2 piu' debole di quanto sembri: **su QUESTA finestra IS
+#       l'ancora R78 e' negativa su TUTTE E 14 le celle** -- contate
+#       riga per riga su `csv_R78/ABTG_PTE_GBPUSD_IS_ohlc_pte78gbp.csv`:
+#       profit da -4.354,25 (buf 30 / TP2 3) a -20.151,14 (buf 0 / TP2
+#       2), PF da 0,90937 a 0,74121, **0 positive su 14**. Quindi un IS
+#       negativo su tutte e sette le celle e' l'esito ATTESO e **non
 #       distingue niente**: il criterio 2 ha potere solo sulle
 #       DIFFERENZE fra celle dentro l'IS, mai sul segno assoluto.
+#       >>> E LA CITAZIONE DI R71 VA DETTA PER BENE, invece che
+#           propagata: la prima stesura di questo file scriveva "R71 ha
+#           misurato IS 0/28 e OOS 28/28 in TRE finestre IS diverse".
+#           **Su GBPUSD e' falso**, e l'ho verificato alla fonte:
+#           `risultati_archivio/REFERTO_ROUND71_FINESTRA_CAMPIONE_PIENO
+#           .md` par.3, tabella -- GBPUSD fa "maggioranza positive" su
+#           IS 2010-2016, **3/28** su IS 2019-2022 e **0/28** solo su IS
+#           2016-2021; lo **0/28 su tutte e tre e' di USDJPY**. L'OOS
+#           2021-2026 28/28 su GBPUSD invece e' esatto. Il verso della
+#           conclusione non cambia (l'ancora locale qui sopra e' una
+#           prova piu' forte, e sulla finestra GIUSTA), ma il numero
+#           citato era di un'altra sedia: si corregge, non si eredita.
 #    3. n QUASI STABILE (bande sopra). Se n si muove parecchio fra celle
 #       vicine, il meccanismo (i) sta mordendo forte e un PF migliore
 #       alle celle alte va letto come selezione di durata.

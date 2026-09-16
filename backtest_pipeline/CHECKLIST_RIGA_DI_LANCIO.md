@@ -20336,6 +20336,22 @@ incolpare, perche' l'ha scritta una persona.
 diverse, le virgolette vanno tolte — e se la ricucitura cambia il soggetto, il difetto non
 e' la citazione, e' il verdetto.*
 
+### ➕ ESTENSIONE AI GEMELLI DI **SIMBOLO** (controllo-preventivo, 16/09/2026)
+Stesso difetto, altro asse. `R164a_atrexit_PTE_GBPUSD_771322.txt` citava
+*"R71 ha gia' misurato che su questo motore l'IS e' 0/28 e l'OOS 28/28 in tre finestre IS
+diverse"* per giustificare il contro-contro-esempio del criterio 2. La tabella vera
+(`risultati_archivio/REFERTO_ROUND71_FINESTRA_CAMPIONE_PIENO.md` par.3) dice, **per
+GBPUSD**: 2010-2016 *"maggioranza positive"*, 2019-2022 **3/28**, 2016-2021 **0/28**.
+Lo **0/28 su tutte e tre e' di USDJPY**, la gemella. E il referto stesso aiuta a sbagliare,
+perche' riassume la sua tabella con *"tre finestre IS diverse, due simboli, e il motore
+perde in tutte"* — una frase che la **sua stessa riga 2010-2016 smentisce**.
+👉 Aggravante e attenuante insieme: il numero prestato **rendeva il file piu' prudente**
+(indeboliva il proprio criterio), quindi non poteva gonfiare nessun risultato; ma la prova
+GIUSTA stava nello stesso repo ed era **piu' forte** — l'ancora R78 sulla finestra IS
+*identica* a quella del round e' **0 positive su 14** celle. Quando si cita un gemello
+invece della sedia, spesso e' perche' non si e' cercata la misura LOCALE: la si cerchi
+prima. 🔴 E un riassunto in prosa **non e' una fonte**: la fonte e' la tabella sotto.
+
 ---
 
 ## 360. 🏷️⚖️ LA STESSA ETICHETTA CON DUE DEFINIZIONI DENTRO LO STESSO DOCUMENTO: "falso allarme" come *"il numero era sbagliato"* e come *"la soglia e' stata attraversata"* (controllo-preventivo, 15/09/2026)
@@ -20538,3 +20554,39 @@ notare che il prodotto non dipende da R mentre R varia da 110 a 764.
 
 Parente della 178 (la banda che non distingue l'ipotesi alternativa), ma
 distinta: qui la banda e' proprio falsa sui dati che dichiara di riassumere.
+
+## 364. UN SUPERLATIVO SENZA CRITERIO DICHIARATO ACCANTO A UN NUMERO CHE E' IL MASSIMO SU UN'ALTRA DIMENSIONE: "la migliore fa +4.032,51" quando il massimo di profitto e' un'altra cella (controllo-preventivo, 16/09/2026)
+
+Il caso: R164a_atrexit_PTE_GBPUSD_771322.txt, sezione di motivazione,
+scriveva "tutte e 12 le altre sono positive, la migliore (buf 30 / TP2 3)
+fa +4.032,51 con DD 8,3683%". I tre numeri sono ESATTI e vengono davvero
+da Pass 13 di `csv_R78/ABTG_PTE_GBPUSD_OOS_ohlc_pte78gbp.csv`. Ma "la
+migliore" su quella griglia sono TRE celle diverse:
+ - per **Recovery Factor** (il criterio con cui R78 ha ottimizzato davvero:
+   `.ini OptimizationCriterion=6` e `ABTG_PTE.mq5` r.739
+   `criterion = stats[3]`) -> Pass 13, RF 0,44726;
+ - per **DD** -> Pass 13, 8,3683%;
+ - per **profit** e per **PF** -> Pass 5 (buf 25 / TP2 2), +4.575,77 e
+   1,09997, cioe' **+543 EUR piu' di quello citato**.
+Siccome il superlativo era appiccicato a un numero di PROFITTO, chi legge
+capisce "e' la cella che guadagna di piu'" -- ed e' falso.
+
+Non e' la classe 351 (li' l'etichetta della colonna e la prosa dicevano due
+statistiche diverse) ne' la 360 (li' la stessa etichetta aveva DUE
+definizioni nel documento): qui le definizioni sono ZERO e le risposte
+possibili TRE. E non e' innocuo per costruzione: lo stesso file congela in
+A9 "si porta avanti il CENTRO, MAI IL PICCO", cioe' proprio la disciplina
+di dichiarare la regola di selezione insieme al numero (regola di casa del
+16/08). Un superlativo nudo nella motivazione e' la stessa regola violata
+dove nessuno la controlla.
+
+### REGOLA
+Ogni "il migliore / il peggiore / il primo" scritto accanto a un numero
+porta il CRITERIO in chiaro nella stessa frase, e il criterio e' una
+COLONNA del CSV citato. Se il criterio non e' scritto, il controllo lo
+ricalcola su tutte le colonne plausibili (profit, PF, DD, RF): se il
+vincitore cambia colonna, la frase e' un difetto, non una sfumatura.
+Corollario: quando la fonte e' una griglia di ottimizzazione, il criterio
+DI DEFAULT e' quello che quella griglia ha davvero ottimizzato
+(`OptimizationCriterion` nel .ini + il valore restituito da `OnTester`),
+non il profitto -- e va detto lo stesso, perche' quasi nessuno lo assume.
