@@ -1124,7 +1124,21 @@ $BancoBT = 'C:\MT5_Backtest'
 #  secondo cancello. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON
 #  sono cambiati fra 16191264 e 717be501 (git diff sui due percorsi:
 #  VUOTO, verificato): solo $PIN si muove.
-$PIN = '717be5014cc149ed8200b3135a934784c61e16cf'
+#  >>> CINQUANTACINQUESIMO GIRO DI PIN (16/09/2026): 717be501 -> 373a473e.
+#  Serviva per raggiungere R172d (InpBEatR, magic 789540) e R172e
+#  (InpTP1_R, magic 789550) dopo il PASS dei loro secondi cancelli:
+#  R172d 4 correzioni (classe NUOVA 383: una catena di codice vera solo
+#  per un pin del preset -- InpUseRoundLevels=false -- non per una
+#  proprieta' dell'EA, senza un commento che lo segnalasse); R172e 7
+#  correzioni (classe NUOVA 384). Piu' una correzione condivisa su
+#  R172a/b/c: la citazione "r.1325 inoltra -TerminaleBacktest" puntava
+#  a un banner, il passaggio vero e' r.1340 (dentro $argv) verso
+#  RIGA_ROUND_VPS.ps1 (il suo param() r.92, poi la sua r.649 verso
+#  walkforward_generico.ps1) -- un passaggio in piu' di quanto detto.
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  717be501 e 373a473e (git diff sui due percorsi: VUOTO, verificato):
+#  solo $PIN si muove.
+$PIN = '373a473e3a4fd90dd1836b9f56563af9a14deb08'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
