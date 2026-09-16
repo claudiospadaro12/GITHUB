@@ -1,0 +1,951 @@
+# =====================================================================
+#  EA: ABTG_SupRev_NAS_H1_Ottimizzato
+#  R163a -- "IL BUFFER CHE COMPRA IL CANCELLO DI COSTO": il SECONDO
+#           giro di InpSLBufferPips sulla sedia 970913 (NASUSD H1).
+#           Asse 2253 -> 4503 punti MT5, passo 375, 7 celle, di cui
+#           TRE IN COMUNE con R127a (che e' gia' girato il 14/09/2026)
+#           e QUATTRO nuove. Walk-forward @FRAZIONEIS 0.40, TICK REALI,
+#           -Deposito 100000.
+#  Scritto il 16/09/2026. Criteri congelati PRIMA dei numeri.
+# ---------------------------------------------------------------------
+#  Si lancia con (RIGA_SOTTILE_ROUND.ps1 -> RIGA_ROUND_VPS.ps1 ->
+#  walkforward_generico.ps1: simbolo, periodo, finestra, taglio IS/OOS
+#  e asse arrivano TUTTI dalle direttive di questo file):
+#    -Expert ABTG_SupRev_NAS_H1_Ottimizzato
+#    -Prova R163a_slbufferpips_suprev_NASUSD.txt
+#    -Etichetta r163a -Modello 4 -Deposito 100000
+#
+#  >>> IL BERSAGLIO, SCRITTO PER NOME (classe 359). <<<
+#    MACCHINA: il VPS, dove gira il runner della coda.
+#    TERMINALE: il BANCO DA BACKTEST, cartella C:\MT5_Backtest,
+#      conto 50504400 (il demo solo-tester, zero EA attaccati).
+#      Non e' una scelta di questo file: RIGA_SOTTILE_ROUND.ps1 r.131
+#      lo scrive LETTERALE nel codice ($BancoBT = 'C:\MT5_Backtest') e
+#      nessun argomento puo' spostarlo.
+#    NON SI TOCCA NIENT'ALTRO: sul VPS convivono il piccolo 50503392
+#      (`BCM Markets MT5 Terminal`), il 100k 50504263 (`... -V3`), il
+#      REALE 10105439 (`C:\BCM_Reale`) e i due broker esterni. Il
+#      censimento dei PID prima/dopo finisce nel referto: e' quella la
+#      prova, non questa frase.
+#
+#  -Modello 4 = TICK REALI, e qui e' il REQUISITO, non un lusso:
+#    1. l'unico confronto che questo round puo' fare con R127a e' fra
+#       corse dello STESSO modello, e R127a e' girato a 4 (referto
+#       ROUND_r127a: "modello : 4 (tick reali)");
+#    2. i tick di NASUSD coprono tutta la finestra -- MISURATO:
+#       risultati_archivio\misura_tick\REFERTO_MISURA_TICK_NASUSD.txt
+#       (30/08/2026): "I TICK REALI DI NASUSD PARTONO DAL 2024.09.26
+#       (166509474 tick)", cioe' esattamente la @DAQUANDO di questo file.
+#    3. l'asse muove lo STOP, e in OHLC M1 il tester non sa se dentro la
+#       barra e' arrivato prima lo stop o prima il target: l'ambiguita'
+#       cadrebbe esattamente sulla grandezza misurata.
+#  >>> E QUINDI LA CLASSE 356 NON MORDE: l'anteprima di -SoloControllo
+#      scrive "Model=4" CABLATO (walkforward_generico.ps1 r.1000) mentre
+#      la corsa vera usa Model=$Modello (r.1654). Con -Modello 4 i due
+#      numeri COINCIDONO. Chi riusasse questo file con -Modello 1
+#      riaprirebbe la 356 e romperebbe il confronto con R127a.
+#
+#  >>> PRIMA SEMPRE CON -SoloControllo: deve stampare 7 CELLE per
+#      finestra. SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DELLE PASSATE
+#      (classe 354: la riga "-> N pass" del driver e' un *2 cablato,
+#      r.880/890, e non legge @FRAZIONEIS). Qui @FRAZIONEIS e' 0.40,
+#      quindi le passate VERE sono 14 e il *2 cablato per una volta dice
+#      il numero giusto -- ma resta un numero che NON sorveglio: nessuna
+#      sentinella di questo file si aggancia al conteggio delle passate.
+# =====================================================================
+#  IL FATTO CHE HA FATTO NASCERE QUESTO ROUND, E VA LETTO PER PRIMO
+#  PERCHE' CAMBIA LO STATO DI UNA SEDIA, NON SOLO DI UNA MANOPOLA
+# ---------------------------------------------------------------------
+#  Il censimento delle uscite mai provate
+#  (report\CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md r.362) mette
+#  InpSLBufferPips su 970913 al primo posto assoluto. Quel posto NON e'
+#  piu' vuoto, e chi riaprisse il censimento senza sapere questo
+#  spenderebbe 18 passate per rifare una cosa fatta:
+#
+#   (1) R127a E' GIRATO. backtest_pipeline\coda\CODA.txt r.1303 porta la
+#       riga ARMATA (nessun prefisso '#DISARMATA#'), pin 3a0577fe, e il
+#       runner l'ha eseguita. Il referto sta nel repo:
+#       coda\referti\CODA_07_desktop_20260915_033005.log r.3322-3379
+#       ("ESITO: ROUND GIRATO", data 2026-09-14 09:30:48, deposito
+#       10000, modello 4, RILIEVI: 0).
+#   (2) I SUOI NUMERI NON SONO MAI STATI LETTI DA NESSUNO. Verificato
+#       oggi per ricerca su tutto il repo: le stringhe "1.61295" e
+#       "325.72" (la cella ancora di R127a) compaiono in UN SOLO file,
+#       ed e' il log di raccolta qui sopra. Zero referti, zero voci in
+#       REGISTRO_TEST.md, zero righe in CLASSIFICHE.md.
+#   (3) E I DUE CSV NON SONO MAI ENTRATI NEL REPO. In
+#       risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\ ci sono sei
+#       file (IS, OOS, _ohlc, _r3) e NESSUNO porta il suffisso _r127a.
+#       I numeri esistono solo dentro il log di raccolta, riga per riga
+#       (r.3380-3403). Sono leggibili -- lo sono stati, per scrivere
+#       questo file -- ma vanno portati nell'archivio: e' un lavoro a
+#       parte e va armato come tale.
+#
+#   >>> QUINDI QUESTO FILE NON APRE LA MANOPOLA: LA CONTINUA. E il
+#       titolo onesto del suo predecessore, oggi, e' "girato e non
+#       letto", non "mai provato".
+#
+#  >>> E C'E' UNA SECONDA COSA, PIU' SCOMODA, CHE NESSUN ALTRO ROUND
+#      PUO' PIU' IGNORARE: L'ANCORA DI R127a NON E' TORNATA. <<<
+#  R127a congelava, PRIMA dei numeri, questa regola d'arresto
+#  (R127_USCITE_CRITERI.md par. 6, ripresa nel file prova):
+#  "n IDENTICO; PF entro +/- 0,5%. Fuori: banco sporco, il round si
+#  ferma prima di qualunque altro numero".
+#  I numeri, letti alla quinta cifra, cella InpSLBufferPips=3:
+#
+#    finestra | ancora d'archivio (08/08) | R127a (14/09) | scarto PF
+#    ---------+---------------------------+---------------+----------
+#    IS       | PF 1,34237  n 69          | PF 1,29758 n 71 | -3,34%
+#    OOS      | PF 1,68815  n 86          | PF 1,61295 n 87 | -4,45%
+#
+#  Fonti, aperte tutte e due oggi, non ricordate:
+#    archivio  risultati_prove\ABTG_SupRev_NAS_H1_Ottimizzato\
+#              ABTG_SupRev_NAS_H1_Ottimizzato_NASUSD_{IS,OOS}.csv,
+#              riga InpTF=16385 (49 colonne, InpMagic 970913)
+#    R127a     coda\referti\CODA_07_desktop_20260915_033005.log
+#              r.3380-3403 (50 colonne, InpMagic 779410)
+#  Lo scarto e' 6,7 volte la tolleranza in IS e 8,9 volte in OOS, e
+#  l'n non e' identico in nessuna delle due finestre. Per la sua stessa
+#  regola, R127a si ferma prima di qualunque lettura.
+#
+#  >>> LA CAUSA NON E' STABILITA, E NON LA INVENTO. Ci sono almeno
+#      QUATTRO candidati, e questo file non ne sceglie nessuno:
+#      (a) 3af47ed9 (08/08) "fix sizing su 41 EA: OrderCalcProfit al
+#          posto del tick value nudo" -- tocca LotByRisk, cioe' il
+#          lotto, cioe' il P/L, cioe' il PF. E' l'unico candidato che
+#          cambia un numero per costruzione;
+#      (b) f8ebc321 (19/08) aggiunge InpUsaGuardian: nel tester la
+#          guardia e' fail-open (il sorgente lo dichiara a r.39-42),
+#          quindi NON dovrebbe cambiare niente -- ma la colonna
+#          esiste in R127a e NON esiste nell'archivio, quindi i due
+#          binari sono dimostrabilmente diversi;
+#      (c) la BASE TICK del banco: a Modello 4 i fill vengono dai tick
+#          del terminale che gira, e il banco C:\MT5_Backtest e' una
+#          macchina piu' recente della corsa d'archivio. Non e'
+#          verificabile da dentro il repo;
+#      (d) il pavimento del lotto 872dba82 (08/09). >>> QUESTO LO ESCLUDO
+#          CON UN CONTO, non con un'opinione: il ramo tocca solo
+#          NormVol(totLot*0,3333)==0, cioe' totLot<0,30, cioe' uno stop
+#          oltre ~390 punti indice a -Deposito 10000. Lo stop piu' largo
+#          mai misurato su questa sedia e' 151,9. Il ramo NON puo'
+#          essersi acceso.
+#  >>> CONSEGUENZA OPERATIVA, ED E' IL MOTIVO PER CUI QUESTO ROUND
+#      ESISTE NELLA FORMA CHE HA: siccome la corsa d'archivio NON e'
+#      riproducibile e la causa non e' nota, l'unico riferimento valido
+#      per delle celle NUOVE e' una corsa che RIMISURI, sullo stesso
+#      banco e nella stessa notte, delle celle GIA' NOTE. Per questo
+#      l'asse di R163a non parte da zero: TRE delle sette celle sono le
+#      stesse di R127a e servono da impronta digitale del banco.
+#
+#  >>> E LA COSA CHE QUESTO ROUND NON FA, DICHIARATA SUBITO: non
+#      ripara il contratto della sedia. "PF 1,57 . DD 1,17% . n 155"
+#      (REGISTRO_TEST.md r.171, CENSIMENTO_CONTRATTI.md r.234) viene
+#      dalla corsa d'archivio, cioe' da un binario che non esiste piu'.
+#      Rimetterlo in piedi e' un round SUO (riprodurre la cella viva sul
+#      binario di oggi e riscrivere il contratto), e va armato a parte.
+# =====================================================================
+#  PERCHE' QUESTA MANOPOLA, SU QUESTA SEDIA, CON QUESTO ASSE
+# ---------------------------------------------------------------------
+#  1) LA SEDIA STA SOTTO IL CANCELLO DI COSTO, ED E' L'UNICA MANOPOLA
+#     CHE ALLARGA LO STOP. report\CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#     r.407 e r.655: 970913 NASUSD H1, stop mediano 51,65 punti indice
+#     [MIS, n=4], spread 1,80, rapporto 28,7x contro un pavimento di
+#     lavoro di 40x. L'EA NON ha InpSLBufferAtr (verificato: quell'input
+#     esiste nella famiglia SuperWave, non qui); restano InpSLLookback
+#     (che cambia la GEOMETRIA dello swing, cioe' un'altra cosa) e
+#     questa, che aggiunge una distanza fissa.
+#
+#  2) E IL PEZZO PEGGIO MESSO NON E' LA MEDIANA, E' LA CODA BASSA.
+#     Stesso referto, r.272: "su 970913 NASUSD mediana 51,65 e minimo
+#     9,70 (5,4x)". Cioe' la gamba peggiore della sedia sta sotto il
+#     pavimento DURO 13,3x (r.166), quello sotto il quale si scarta per
+#     aritmetica. Un buffer fisso e' esattamente lo strumento che alza
+#     la CODA: somma la stessa distanza a tutte le gambe, quindi in
+#     percentuale fa piu' bene alla piu' corta. Con le celle di questo
+#     asse la gamba da 9,70 diventa 32,2 -> 54,7 punti indice, cioe'
+#     17,9x -> 30,4x allo spread 1,80: sopra il duro in tutte e sette.
+#     [DERIVATO, non misurato: e' aritmetica sullo stop iniziale, e
+#      questo round non esporta lo stop -- sezione IL COSTO.]
+#
+#  3) R127a HA GIA' MISURATO LA META' BASSA DELL'ASSE, E DICE UNA COSA
+#     CHE VALE LA PENA DI ESTENDERE. Le sue nove celle (buffer 3 ->
+#     3003, cioe' 0,03 -> 30,03 punti indice) danno, sulla colonna PF:
+#       IS  1,29758 (cella 3) -> 1,52283 (cella 2253) -> 1,48271 (3003)
+#       OOS 1,61295 (cella 3) -> 1,72132 (cella 1503) -> 1,63365 (3003)
+#     cioe' in TUTTE E DUE le finestre la cella VIVA (buffer 3) NON e'
+#     la migliore sul PF, e il massimo cade in mezzo all'asse. Il
+#     profitto pero' va nei due versi (IS sale 113 -> 152, OOS scende
+#     325 -> 221): le due finestre NON concordano, ed e' proprio per
+#     questo che non si promuove niente da li'.
+#
+#  4) IL BORDO ALTO DI R127a (3003) NON BASTA A DECIDERE IL CANCELLO.
+#     Il conto e' nella sezione IL COSTO: con la lettura piu' prudente
+#     dello stop di base, il 40x cade a ~4490 punti MT5, cioe' FUORI
+#     dall'asse di R127a. Questo round lo copre e si ferma appena oltre.
+# =====================================================================
+#  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
+# ---------------------------------------------------------------------
+#  mql5\Experts\ABTG_SupRev_NAS_H1_Ottimizzato.mq5, dentro Enter():
+#    r.245  double ext = ... iLowest(...,InpSLLookback,1) ...
+#    r.247  double buf = InpSLBufferPips*pip;
+#    r.248  double sl  = isLong ? MathMin(stLine,ext)-buf
+#                               : MathMax(stLine,ext)+buf;
+#    r.251  double risk = isLong ? (entry-sl) : (sl-entry);
+#    r.252  double minDist = MathMax(buf, STOPS_LEVEL*_Point);
+#    r.253  if(risk<minDist){ Log("SL troppo vicino: skip."); return; }
+#    r.255  double tp = entry +/- risk*InpTP_RR;
+#    r.258  double totLot = LotByRisk(risk);
+#    r.287  il TP del pendente 2/3 e' anch'esso risk*InpTP_RR
+#    r.326  il parziale a 1R usa risk ricalcolato dalla posizione
+#  L'UNITA', e su questo simbolo e' il punto che inganna: PipSize()
+#  (r.122-126) torna _Point quando Digits non e' 3 o 5. NASUSD ha
+#  Digits=2, quindi pip = _Point = 0,01 punti indice e
+#      InpSLBufferPips = N  ->  buffer = N/100 punti indice.
+#  Fonte della tabella delle unita': CANCELLO_COSTO_FLOTTA r.290
+#  ("D30EUR . U30USD . NASUSD | 2 | 0,01 | 1 punto indice = 100 punti
+#  MT5"). E' lo stesso motivo per cui il valore VIVO (3) e' inerte:
+#  vale 0,03 punti indice su uno stop di ~50.
+#
+#  >>> QUINDI IL BUFFER NON MUOVE SOLO LO STOP. Muove, per costruzione:
+#      lo STOP (r.248), il TARGET (r.255, ancorato a risk), il LOTTO
+#      (r.258, inversamente), il TP del PENDENTE (r.287) e il bersaglio
+#      del PARZIALE (r.326). E' un cambio di SCALA della geometria, non
+#      lo spostamento di un solo livello. Tutte le conseguenze di questo
+#      fatto stanno nella sezione IL CONTRO-ESEMPIO.
+#  >>> E NON ALZA IL RISCHIO: a rischio % fisso, uno stop piu' largo
+#      produce un lotto piu' PICCOLO (r.424: lot = risk/lossPerLot).
+#      Le sette celle rischiano tutte l'1,0% nominale; quello che cambia
+#      e' il lotto, verso il basso. Nessuna cella di questo asse puo'
+#      aumentare l'esposizione.
+# =====================================================================
+#  IL DEPOSITO: 100000, E NON E' UN DETTAGLIO DI IGIENE
+# ---------------------------------------------------------------------
+#  R127a e' girato a -Deposito 10000, e lo aveva SCRITTO come condizione
+#  di validita': "l'ANCORA di questo file e' stata calcolata a -Deposito
+#  10000 ... Cambiare taglia romperebbe la riproduzione dell'ancora".
+#  Nello stesso blocco lasciava il lavoro a chi veniva dopo:
+#    "LA STRADA PULITA, per chi verra' dopo: si rifa' l'asse a -Deposito
+#     100000 in un round SEPARATO, che NON prova a riprodurre questa
+#     ancora e lo dichiara."
+#  >>> QUESTO E' QUEL ROUND, E LO DICHIARA: NON prova a riprodurre
+#      l'ancora d'archivio. Non puo': l'ancora non e' tornata nemmeno a
+#      parita' di deposito (sezione IL FATTO).
+#
+#  E ci sono TRE ragioni aritmetiche, non di gusto, per cui su QUESTO
+#  asse il deposito grande non e' un lusso ma la condizione per leggere.
+#  Il conto del lotto usa il fattore di conversione MISURATO in campo
+#  (non assunto): quattro gambe di data\statements\trades_auto.csv con
+#  magic 970913 danno 0,8605 / 0,8635 / 0,8635 / 0,8620 EUR per punto
+#  indice per lotto -> 0,862, scarto 0,3%.
+#
+#   (1) LA TRONCATURA DEL LOTTO E' UNA RAMPA, NON UN RUMORE, E CRESCE
+#       LUNGO L'ASSE. r.424 e r.428: lot = risk/lossPerLot, poi
+#       MathFloor(lot/step)*step, cioe'
+#       si tronca SEMPRE verso il basso. Il danno relativo e' step/lot,
+#       e lot scende quando il buffer sale:
+#         a  10.000:  lot voluto fra 1,57 (cella 2253) e 1,20 (4503)
+#                     -> troncatura fino a 0,10/1,20 = 8,3%
+#         a 100.000:  lot voluto fra 15,7 e 12,0
+#                     -> troncatura fino a 0,10/12,0 = 0,83%
+#       In R127a lo stesso difetto era una DENTELLATURA di 4,81 punti
+#       percentuali (li' dichiarata, non tolta). Qui sarebbe PEGGIO e,
+#       soprattutto, ORIENTATA: le celle alte sono sistematicamente le
+#       piu' sotto-rischiate. Un asse in cui il difetto cresce con la
+#       variabile misurata fabbrica da solo la pendenza che si vorrebbe
+#       leggere (e' la classe 308). A 100.000 scende sotto l'1%.
+#   (2) IL TETTO SYMBOL_VOLUME_MAX NON PUO' MORDERE, E SI DIMOSTRA.
+#       Il tetto misurato in casa e' 100 (R109, taglio misurato proprio
+#       su NASUSD short: PIANO_PROP.md r.1031). Qui il lotto piu' grande
+#       possibile vale ~16 con l'asse di questo file, perche' lo stop
+#       non puo' essere piu' stretto del buffer (r.248: risk = baseStop
+#       + buf >= buf) e il buffer piu' piccolo e' 22,53 punti indice.
+#       Fuori di 6 volte dal tetto. A una taglia piu' grande il conto
+#       andrebbe rifatto: qui no.
+#   (3) IL PAVIMENTO DEL LOTTO (r.271, il difetto 872dba82) RESTA INERTE
+#       PER COSTRUZIONE. Si accende solo se NormVol(totLot*0,3333)==0,
+#       cioe' totLot<0,30: qui totLot sta fra 12 e 16, cioe' da 40 a 53
+#       volte sopra. Vuol dire che questo round e' indifferente al fix
+#       che ha toccato quel ramo -- il che toglie di mezzo uno dei quattro
+#       sospetti della sezione IL FATTO.
+#  >>> E il DD che esce e' letto alla taglia della challenge, che e'
+#      l'unico posto in cui un DD di questa sedia serve a qualcosa.
+#  >>> BUCO DICHIARATO: la valuta del conto del banco NON e' dichiarata
+#      in questo file. Il conto sopra e' in EUR (fattore 0,862 misurato
+#      in campo). Se il banco fosse in USD i lotti sarebbero 10,3-13,5
+#      invece di 12,0-15,7: la troncatura resterebbe sotto l'1% e il
+#      tetto resterebbe lontano 7 volte. Nessuna delle tre conclusioni
+#      cambia, ed e' per questo che il buco e' dichiarato e non chiuso.
+# =====================================================================
+#  UNITA' DI MISURA: `Trades` DEL CSV CONTA DEAL, NON POSIZIONI
+#  (classe 226), E QUI IL PARZIALE E' ACCESO
+# ---------------------------------------------------------------------
+#  OnTesterDeinit (r.623-655) scrive la colonna Trades da
+#  TesterStatistics(STAT_TRADES), che conta i DEAL. In questo file
+#  InpTP1Pct e' PINNATO a 50, cioe' il parziale a 1R e' ACCESO come in
+#  campo: quindi UN INGRESSO puo' valere da 2 a 6 deal: una o due tranche
+#  (mercato 1/3 e pendente 2/3 sono due posizioni distinte in hedging),
+#  ognuna con apertura, eventuale parziale e chiusura.
+#  >>> NON L'HO SPENTO, E LA RAGIONE E' UNA SOLA: il gate del parziale
+#      (r.324) e' `InpTP1Pct>0 && InpTP1Pct<100`, e dentro lo STESSO
+#      blocco c'e' il breakeven (r.338). Mettere InpTP1Pct=0 per avere
+#      "Trades = posizioni" spegnerebbe ANCHE il breakeven, cioe'
+#      cambierebbe la gestione dell'uscita: misurerei il buffer su una
+#      sedia diversa da quella viva. Fra "una colonna piu' facile da
+#      leggere" e "la sedia vera", si tiene la sedia vera e si dichiara
+#      la colonna.
+#  >>> CONSEGUENZA SULLE SENTINELLE: nessuna sentinella di questo file
+#      legge `Trades` come numero di POSIZIONI, e nessuna soglia di
+#      merito ci si appoggia. Serve solo come IMPRONTA (S1) e come
+#      testimone che le celle non sono la stessa corsa (S6).
+#  >>> E IL PARZIALE E' ANCORATO AL RISCHIO (r.326: tgt = openP +/-
+#      risk*InpTP1_R), quindi un buffer piu' largo allontana anche il
+#      primo bersaglio: e' uno dei meccanismi monotoni del contro-
+#      esempio (T2), non un dettaglio contabile.
+# =====================================================================
+#  IL COSTO -- IL CANCELLO DEI 40x. LO STOP SI MUOVE LUNGO L'ASSE, E
+#  PROPRIO PER QUESTO VA DETTO SUBITO CHE IL ROUND NON LO MISURA
+#  (classe 353)
+# ---------------------------------------------------------------------
+#  1. LA COLONNA NON ESISTE. La corsia ROUND raccoglie i due CSV di
+#     ottimizzazione e basta (RIGA_ROUND_VPS.ps1 r.623-625 li nomina).
+#     Le loro colonne sono cablate in OnTesterDeinit (r.638): Pass,
+#     Profit, Expected Payoff, Profit Factor, Recovery Factor, Sharpe
+#     Ratio, Equity DD %, Trades, piu' i NOMI e i VALORI degli input.
+#     NESSUNA e' lo stop.
+#  2. IL CANALE PER-TRADE NON SERVE E NON VIENE RACCOLTO. ExportTrades
+#     (r.578-604, chiamata da OnTester r.607) scrive close_time, symbol,
+#     magic, position_id, deal_type, volume, price, net_profit: niente
+#     SL, niente prezzo d'ingresso. Compone il nome con InpMagic, che
+#     qui e' PINNATO -> tutte e sette le passate scriverebbero sullo
+#     STESSO file, e questa corsia non lo copia comunque.
+#  >>> QUINDI "stop medio per cella", "rapporto stop/spread per cella",
+#      "questa cella passa il 40x" sono numeri che questo round NON
+#      PRODUCE. Se comparissero in un referto sono INVENTATI, e il
+#      referto va fermato.
+#
+#  LA PROIEZIONE ARITMETICA, DATA PERCHE' TACERLA SAREBBE RETICENZA, E
+#  ETICHETTATA. Non e' una misura del round: e' algebra sul sorgente
+#  (r.248/251: risk = baseStop + buf, esatta) applicata a numeri misurati
+#  ALTROVE.
+#
+#  LO SPREAD, E QUI IL RIFERIMENTO E' LOCALE PER COSTRUZIONE (classe
+#  363). Il file orario esiste ed e' grosso:
+#  risultati_archivio\spread_flotta\spread_orario_NASUSD.csv, 156,1
+#  milioni di tick, 0,000% di tick solo-bid. MA la sua riga "TUTTO"
+#  (1,80) e' pesata sui TICK, e i tick di NASUSD stanno per il 61% nelle
+#  ore 14-21 (95,6 M su 156,1 M): usare quella riga vorrebbe dire
+#  spiegare un fenomeno che accade per BARRE con un riferimento guidato
+#  dal flusso dei tick. La prova che il riferimento medio e' il
+#  denominatore sbagliato e' che le mediane orarie vanno da 1,60 (ora
+#  19) a 2,60 (ore 09 e 13): una forbice del 63%.
+#  >>> IL RIFERIMENTO GIUSTO SI MISURA SUGLI INGRESSI VERI DI QUESTA
+#      SEDIA, ed e' stato ricalcolato oggi su data\statements\
+#      trades_auto.csv, magic 970913, n=8 ingressi (il referto del 10/09
+#      ne aveva 6): ore server 00, 09, 15, 15, 15, 16, 18, 19.
+#      Spread mediano di quelle ore, pesato sugli ingressi: 1,80.
+#      Media 1,94. Massimo 2,60 (l'ingresso delle 09).
+#  >>> IL CONTRO-ESEMPIO CHE HO PROVATO A COSTRUIRE CONTRO IL MIO STESSO
+#      RIFERIMENTO, E CHE NON HA ROTTO NIENTE: se invece di pesare sugli
+#      ingressi pesassi le 24 ore UGUALMENTE (che e' il modo giusto per
+#      un motore H1 senza filtro orario -- e questa sedia ce l'ha
+#      spento, InpUseTimeWindow=false), la mediana delle 24 mediane
+#      orarie e' 2,40, non 1,80. Il 33% piu' cara. E' l'ipotesi
+#      alternativa VERA, non "il nulla", e sposta il cancello. Le ho
+#      messe tutte e due nella tabella qui sotto, e la conclusione del
+#      round non dipende da quale si sceglie, perche' l'asse copre
+#      tutte e due le soglie. Se dipendesse, il round non si potrebbe
+#      leggere.
+#
+#  LO STOP DI BASE, E ANCHE QUI CI SONO DUE LETTURE, ENTRAMBE LIMITI
+#  INFERIORI (classe 362: un numero rotto in UN verso si scrive col
+#  segno, non si sopprime):
+#    (A) 51,65 punti indice -- la mediana del referto del 10/09
+#        (r.407), n=4 gambe in stop.
+#    (B) 27,10 punti indice -- la stessa misura RICALCOLATA oggi sullo
+#        stesso file, con le due gambe arrivate dopo (11/09 e 15/09):
+#        le distanze |apertura-chiusura| delle chiusure marcate `sl`
+#        sono 9,70 / 12,80 / 27,10 / 76,20 / 151,90 -> mediana 27,10.
+#        (La sesta chiusura `sl` vale 0,00: e' uno stop gia' portato in
+#        pari, non uno stop iniziale, ed e' esclusa. Includendola la
+#        mediana sarebbe 19,95, cioe' ancora piu' bassa: l'esclusione e'
+#        conservativa nel verso giusto.)
+#    >>> TUTTE E DUE SONO LIMITI INFERIORI dello stop INIZIALE, e il
+#        verso e' dimostrato: il trailing sul Supertrend (r.306, acceso)
+#        e il breakeven muovono lo stop VERSO il prezzo, mai lontano.
+#        Quindi stop_iniziale >= distanza realizzata, sempre.
+#        Conseguenza sulla direzione dell'errore: i "PASSA" del cancello
+#        sono solidi, i "NON PASSA" sono da confermare -- la stessa
+#        avvertenza che il referto del 10/09 si e' scritto da solo
+#        (par. 6.4).
+#    >>> PERCHE' NON SCELGO FRA (A) E (B): sono la stessa grandezza con
+#        n=4 e n=5, e la differenza fra 51,65 e 27,10 e' una mediana che
+#        si sposta di una gamba su un campione minuscolo. Sceglierne una
+#        sarebbe inventare precisione. Le porto tutte e due, ed e'
+#        proprio la loro distanza che ha deciso il bordo alto dell'asse.
+#
+#  LA TABELLA, PER ORIENTAMENTO, [DERIVATA] -- NON E' UN RISULTATO DEL
+#  ROUND, e nessuna sentinella ci si aggancia:
+#
+#   buffer   buffer   stop con (A)   x @1,80   stop con (B)   x @1,80
+#   (MT5)    (idx)    51,65+buf                27,10+buf
+#   -------  ------   ------------   -------   ------------   -------
+#    2253    22,53       74,18        41,2x       49,63        27,6x
+#    2628    26,28       77,93        43,3x       53,38        29,7x
+#    3003    30,03       81,68        45,4x       57,13        31,7x
+#    3378    33,78       85,43        47,5x       60,88        33,8x
+#    3753    37,53       89,18        49,5x       64,63        35,9x
+#    4128    41,28       92,93        51,6x       68,38        38,0x
+#    4503    45,03       96,68        53,7x       72,13        40,1x
+#
+#   Letto con lo spread EQUIPESATO 2,40 invece che 1,80, la colonna (A)
+#   va da 30,9x a 40,3x (solo l'ultima cella passa) e la colonna (B) da
+#   20,7x a 30,1x (nessuna). Con lo spread della coda alta 2,60 (ora 09,
+#   un ingresso vero su otto) nessuna cella arriva a 40x in nessuna
+#   delle due letture: <= 37,2x.
+#   >>> COME SI LEGGE, IN UNA RIGA: questo asse contiene la frontiera
+#       dei 40x sotto TRE delle quattro combinazioni (A/B x 1,80/2,40),
+#       e sotto la quarta la supera per un soffio o non la raggiunge.
+#       Non "il cancello e' passato": "il cancello passa da dentro
+#       questo asse, e da quale parte dipende da due numeri che hanno
+#       n=4, n=5 e n=8". La forbice e' DICHIARATA, non chiusa da qui.
+#   >>> E LA COSA CHE IL ROUND PUO' DAVVERO DIRE: quanto COSTA in PF,
+#       profitto e DD comprare quello stop piu' largo. Quello si', e'
+#       nelle colonne dei CSV.
+# =====================================================================
+#  L'ASSE E IL PASSO -- 2253 / 2628 / 3003 / 3378 / 3753 / 4128 / 4503
+#    7 celle, passo 375 punti MT5 = 3,75 punti indice
+#    (walkforward_generico.ps1 spazzola solo start/step/stop aritmetico,
+#    MAI un elenco esplicito: stessa forma di R127a e di R154a-R162a).
+#
+#    IL PASSO 375 NON E' SCELTO DA ME: e' lo STESSO di R127a. E' la
+#    condizione perche' le celle 2253, 2628 e 3003 siano le STESSE
+#    celle, non celle vicine. Un passo diverso avrebbe reso il confronto
+#    fra i due round un'inferenza invece che un'identita'.
+#
+#    BORDO BASSO 2253 -- perche' si parte da li' e non da 3 o da 3003.
+#      (a) e' la PRIMA cella di R127a che sta oltre la soglia dei 40x
+#          nella lettura (A) del 10/09 (soglia 2035, cade fra 1878 e
+#          2253): sotto quel punto la meta' bassa dell'asse e' gia'
+#          misurata da R127a e rifarla sarebbe spesa doppia;
+#      (b) partendo da 2253 restano TRE celle in comune con R127a, che
+#          e' il minimo per avere un'impronta del banco a piu' di un
+#          numero (S1);
+#      (c) e sopra 2253 il lotto e' abbastanza piccolo da rendere
+#          irrilevante il tetto VOLUME_MAX e abbastanza grande da
+#          rendere irrilevante il pavimento (sezione IL DEPOSITO).
+#    BORDO ALTO 4503 -- e NON e' "fine griglia", e' una FRONTIERA.
+#      Con la lettura prudente (B) dello stop di base, la soglia dei 40x
+#      cade a (72,00-27,10) = 44,90 punti indice = 4490 punti MT5.
+#      4503 e' il primo multiplo del passo che la supera, e la supera di
+#      13 punti MT5 (0,13 punti indice). Non c'e' nessun margine di
+#      comodo: e' il bordo che serve per avere celle da tutte e due le
+#      parti della soglia piu' severa che le nostre misure ammettono.
+#      >>> E SI FERMA LI', NON PIU' IN SU: oltre, il buffer supera lo
+#          stop di base stesso (45 contro 27,1 o 51,65), cioe' la
+#          geometria smette di essere "uno swing con un cuscinetto" e
+#          diventa "un cuscinetto con uno swing dentro". Sarebbe un
+#          altro motore, non un valore piu' alto dello stesso. Se il
+#          round mostrasse che il bordo alto e' il migliore, il passo
+#          dopo e' un file SUO che lo dichiara, non una riga aggiunta
+#          a questo.
+#    ESCLUSO E DICHIARATO: qualunque valore <= 0. Il codice lo
+#      accetterebbe (nessuna validazione a OnInit) e metterebbe lo stop
+#      DENTRO lo swing: non e' un punto della griglia, e' un errore.
+# =====================================================================
+#  LE ANCORE -- E LA LORO FORZA, DICHIARATA PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  A) L'ANCORA VERA E' R127a, NON L'ARCHIVIO. Stesso EA, stesso simbolo,
+#     stesso TF, stessa finestra, stesso taglio, stesso modello, stesso
+#     banco, tre celle in comune. Fonte, riga per riga:
+#     coda\referti\CODA_07_desktop_20260915_033005.log r.3380-3403.
+#       cella   IS: Profit / PF / DD% / Trades      OOS: idem
+#       2253    140,49 / 1,52283 / 0,6648 / 69      236,56 / 1,64011 / 1,2924 / 86
+#       2628    103,78 / 1,40052 / 0,6619 / 69      213,75 / 1,59906 / 1,2686 / 85
+#       3003    120,02 / 1,48271 / 0,6607 / 69      221,50 / 1,63365 / 1,2211 / 84
+#     >>> COSA E' CONFRONTABILE E COSA NO, dichiarato prima:
+#         - Trades: CONFRONTABILE, ed e' il pezzo forte. Il numero di
+#           deal non dipende dal deposito, perche' dipende da quali
+#           segnali vengono eseguiti (prezzo, non equity) e da quante
+#           tranche/parziali riescono -- e a 100.000 i lotti sono 10
+#           volte piu' grandi, quindi tutte le tranche e tutti i
+#           parziali che riuscivano a 10.000 riescono anche qui.
+#           >>> IL VERSO, e per questo S1 e' a UNA CODA: se a 10.000
+#               qualche parziale NON era riuscito (NormVol(vol*0,5)=0),
+#               a 100.000 riesce -> Trades puo' solo SALIRE, mai
+#               scendere. Quindi Trades(r163a) >= Trades(r127a) e' la
+#               forma giusta della sentinella.
+#         - Profit: NON confrontabile cifra per cifra (scala ~10x, e
+#           non esattamente 10x per via della troncatura). Si guarda
+#           solo il RAPPORTO, con banda larga.
+#         - PF e DD%: quasi invarianti di scala, ma non esattamente
+#           (la troncatura del lotto e' diversa alle due taglie). Banda
+#           dichiarata in S2, e sono controlli MORBIDI: non fermano
+#           niente da soli.
+#  B) L'ANCORA D'ARCHIVIO (PF 1,68815 OOS, n 86) E' DICHIARATA MORTA
+#     PER QUESTO ROUND. Non e' riproducibile nemmeno dal round che ci
+#     aveva provato (sezione IL FATTO) e non e' una sentinella qui.
+#     Scriverla come tale sarebbe congelare un arresto garantito.
+#  C) L'ANCORA DI PORTATA: 155 operazioni sulla finestra intera, che e'
+#     la somma 69+86 della corsa d'archivio. Serve solo per il conto del
+#     pavimento (sezione dedicata), non come soglia di merito.
+# =====================================================================
+#  L'ATTESA, SCRITTA PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#  - Trades: atteso 69 (IS) e 84-86 (OOS) sulle tre celle in comune,
+#    con la disuguaglianza di S1. Sulle quattro celle nuove: atteso
+#    DIVERSO fra le celle (catena T2), direzione qualitativa NON
+#    CRESCENTE. La direzione NON e' una sentinella.
+#  - STOP PER CELLA, RAPPORTO STOP/SPREAD, "passa il 40x":
+#    [NON MISURABILI DA QUESTO ROUND] (classe 353). Non sono attese e
+#    non sono sentinelle.
+#  - PF: nessuna direzione dichiarata. R127a mostra un massimo INTERNO
+#    (IS a 2253, OOS a 1503) e due finestre che non concordano: la cosa
+#    onesta e' aspettarsi che l'estensione dica se oltre 3003 il PF
+#    cala, si appiattisce o risale, e non sapere quale.
+#  - PROFITTO: in OOS R127a scende lungo l'asse (325 -> 221 fra la
+#    cella 3 e la 3003, -32%). Se la discesa continua, il prezzo del
+#    cancello di costo si legge come un numero e non come un'opinione.
+#    In IS saliva: se le due finestre continuano a non concordare, il
+#    round NON promuove niente e lo scrive.
+#  - DD%: in R127a IS scende col buffer (0,9942 -> 0,6607) e OOS sale
+#    (1,0869 -> 1,2211). Anche qui nessuna direzione dichiarata.
+#  - IL RISULTATO CHE MI ASPETTO DI PIU' (e lo scrivo per poter essere
+#    smentito): un profitto che continua a calare in OOS e un DD che
+#    NON scende in proporzione, cioe' "il cancello di costo si compra,
+#    e si paga in profitto senza guadagnare in rischio". Se e' cosi', la
+#    risposta onesta alla domanda del censimento e' "la manopola esiste,
+#    funziona, e costa piu' di quanto rende": e sarebbe un risultato,
+#    non un fallimento.
+#  - IL RISULTATO CHE MI FAREBBE FERMARE PRIMA DI QUALUNQUE P/L: S1
+#    fuori banda. Allora il banco non sta girando la stessa storia di
+#    R127a, e nessun numero di questo round si puo' agganciare a quelli.
+# =====================================================================
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DI CONSEGNARE QUALUNQUE NUMERO
+#  (regola del 10/09: si costruisce il caso che romperebbe la propria
+#  misura, e si mostra perche' non succede -- o si dichiara che potrebbe)
+# ---------------------------------------------------------------------
+#  (T1) IL RIFERIMENTO DELLO SPREAD. Gia' costruito e gia' provato nella
+#    sezione IL COSTO: l'ipotesi alternativa (24 ore equipesate, 2,40)
+#    non e' "il nulla", e sposta la soglia del 40x da 2035 a ~4435
+#    nella lettura (A). Il round regge perche' l'asse copre tutte e due,
+#    e perche' NESSUNA sentinella si aggancia al cancello. Se una
+#    sentinella ci si agganciasse, questo contro-esempio la romperebbe.
+#
+#  (T2) L'OCCUPAZIONE DEL POSTO: LE SETTE CELLE NON OPERANO SUGLI STESSI
+#    SEGNALI, E LA DIFFERENZA E' MONOTONA. r.174-181: con una posizione
+#    aperta o un pendente vivo l'EA NON cerca nuovi ingressi. Un buffer
+#    piu' largo allarga insieme stop e target (r.248 e r.255), quindi
+#    allunga la durata attesa della posizione, quindi scarta piu'
+#    segnali successivi. Fra la cella 2253 e la 4503 lo stop cresce del
+#    30% nella lettura (A) e del 45% nella (B): la durata attesa cresce
+#    all'incirca col QUADRATO (tempo di primo passaggio), cioe' fino a
+#    ~1,7x-2,1x [DERIVATO, tetto teorico].
+#    >>> IL FRENO, ED E' MISURABILE NEL SORGENTE: InpExitOnFlip e'
+#        pinnato ACCESO (r.177-178) e chiude tutto al flip del
+#        Supertrend, che NON dipende dal buffer. Quindi la durata non
+#        puo' crescere oltre la distanza media fra due flip: l'effetto
+#        SATURA e il quadrato e' un TETTO, non una stima.
+#    >>> E L'AMPIEZZA VERA RESTA [NON MISURATA], col motivo: questo EA
+#        non ha contatori di segnale. OnTester (r.605-618) esporta 7
+#        statistiche, l'intestazione e' cablata a r.638, ZERO contatori.
+#        Non l'ho inventato.
+#    >>> COME NON MI FA SBAGLIARE: la selezione della cella, se mai si
+#        scrivesse, si fa al CENTRO di un tratto contiguo e su IS e OOS
+#        SEPARATAMENTE (B6). Una differenza fra due celle vicine puo'
+#        essere UNA operazione presa in una e non nell'altra.
+#
+#  (T3) IL SECONDO MECCANISMO MONOTONO, SULLA COLONNA Trades. Il
+#    parziale a 1R ha il bersaglio ancorato a `risk` (r.326): buffer
+#    piu' largo -> 1R piu' lontano -> il parziale scatta meno spesso ->
+#    un deal in meno a parita' ESATTA di segnali. Quindi un Trades che
+#    cala lungo l'asse ha DUE cause possibili (T2 e T3) e la colonna da
+#    sola non le separa.
+#    >>> DICHIARATO, NON RISOLTO: separarle richiederebbe spegnere il
+#        parziale, che spegnerebbe anche il breakeven (sezione UNITA').
+#        Nessuna lettura di questo round attribuisce una causa a un
+#        movimento di Trades.
+#
+#  (T4) IL MONDO IN CUI LA MANOPOLA NON FA NIENTE (classe 357). Se il
+#    buffer fosse inerte, tutte e sette le celle darebbero numeri
+#    identici e chi guarda solo "le celle esistono" (S4) direbbe PASS
+#    senza aver misurato niente.
+#    >>> QUANTO E' PLAUSIBILE QUI, col numero in mano: pochissimo, e non
+#        e' una speranza -- R127a ha gia' misurato che fra la cella 3 e
+#        la 3003 il profitto OOS passa da 325,72 a 221,50 e il DD da
+#        1,0869 a 1,2211. La manopola HA AGITO su questo stesso EA,
+#        questo stesso simbolo, questa stessa finestra.
+#        Ma "quasi impossibile" non e' "escluso", e la regola della 357
+#        e' che una sentinella di uguaglianza va SEMPRE accoppiata a una
+#        che verifica che la manopola abbia agito: e' S6.
+#    >>> E ATTENZIONE AL VERSO DELLA 357 SU S1: S1 chiede
+#        Trades(r163a) >= Trades(r127a) sulle celle in comune, e
+#        l'ipotesi "il banco e' identico" la soddisfa con l'uguaglianza.
+#        La soddisfa anche l'ipotesi "la manopola e' inerte"? NO, e il
+#        motivo e' nei dati: le tre celle in comune hanno in OOS tre
+#        valori DIVERSI (86, 85, 84). Un banco che avesse perso l'asse
+#        produrrebbe tre valori UGUALI. In IS invece i tre valori
+#        coincidono (69, 69, 69): li' S1 e' DEBOLE per costruzione, e va
+#        letta come una conferma, non come una prova. Dichiarato.
+#
+#  (T5) IL CONFRONTO FRA I DUE ROUND PUO' ESSERE ROTTO DAL DEPOSITO, NON
+#    DAL BANCO. Se S1 fallisse, la prima spiegazione da escludere NON e'
+#    "il banco e' cambiato": e' "a 10.000 qualche tranche o parziale non
+#    passava". Il verso pero' e' noto (sezione ANCORE A): quel guasto
+#    puo' solo far SALIRE Trades a 100.000. Quindi:
+#      Trades(r163a) == Trades(r127a)     -> banco identico, forte
+#      Trades(r163a) == +1 o +2           -> spiegabile col deposito,
+#                                            si dichiara e si prosegue
+#      Trades(r163a) < Trades(r127a), o
+#      uno scarto > +3                    -> il banco e' cambiato, e il
+#                                            round si ferma (S1)
+#    >>> Questa e' l'unica ragione per cui S1 e' scritta con un segno di
+#        disuguaglianza e non con un uguale: un uguale avrebbe fermato
+#        il round su un banco SANO (e' l'aggravante della classe 354,
+#        vista su R158a).
+#
+#  (T6) IL REGIME. La finestra e' UNA SOLA epoca: 21,1 mesi, dal
+#    2024.09.26 al 2026.06.30. Non e' la prova di regime della regola C
+#    del 16/08 e non pretende di esserlo.
+#    >>> E IL REGIME NON E' CARATTERIZZATO IN CASA: verificato oggi, nel
+#        repo non esiste nessun documento che descriva il regime di
+#        NASUSD 2024-2026 (le finestre di regime di R113 sono 2022 e
+#        girano su NASUSD_EXT, un altro feed). L'unico fatto misurato
+#        che ho sulle due meta' e' interno ai dati di R127a: l'OOS e'
+#        piu' generoso dell'IS su TUTTE E NOVE le celle (profitto OOS
+#        213-331 contro IS 103-152). Non lo interpreto: lo dichiaro,
+#        perche' significa che un OOS migliore dell'IS in questo round
+#        NON e' una conferma di robustezza, e' il calendario.
+#    >>> Chiuderlo costa una prova di regime dedicata (la macchina
+#        esiste: R50/R56/R59/R113). Non si fa qui.
+# =====================================================================
+#  LE SENTINELLE (si leggono PRIMA di qualunque P/L)
+# ---------------------------------------------------------------------
+#    S1 -- L'IMPRONTA DEL BANCO, ED E' L'UNICO ARRESTO DI QUESTO FILE.
+#      Sulle TRE celle in comune (2253, 2628, 3003), in TUTTE E DUE le
+#      finestre:  Trades(r163a) >= Trades(r127a)  e lo scarto <= +3.
+#      I valori attesi: IS 69/69/69, OOS 86/85/84.
+#      Se cade, il banco non e' quello di R127a e NESSUN numero di
+#      questo round si puo' agganciare ai suoi: il round si ferma qui
+#      e si dichiara cosa e' cambiato, non si legge il P/L "tanto per".
+#      Forza dichiarata: FORTE in OOS (tre valori distinti), DEBOLE in
+#      IS (tre valori uguali) -- T4.
+#    S2 -- I CONTROLLI MORBIDI DELLA SCALA, che NON fermano niente da
+#      soli e servono a capire se lo scostamento e' quello atteso dal
+#      deposito. Sulle tre celle in comune:
+#        Profit(r163a)/Profit(r127a) dentro 8,5 - 11,5 (atteso ~10);
+#        PF(r163a) entro +/- 10% di PF(r127a);
+#        DD%(r163a) entro +/- 20% di DD%(r127a).
+#      Le bande sono larghe APPOSTA: la troncatura del lotto e' diversa
+#      alle due taglie (8,3% contro 0,83%) e una banda stretta sarebbe
+#      un arresto travestito. Se una delle tre esce, si SCRIVE, non si
+#      ferma.
+#    S3 -- IL CONTEGGIO DELLE RIGHE: 7 righe in ciascuno dei due CSV.
+#      Se sono 6 o 8, si dichiara quale cella manca o avanza PRIMA di
+#      leggere il resto.
+#    S4 -- SETTE VALORI DISTINTI di InpSLBufferPips nella colonna
+#      omonima del CSV (2253 / 2628 / 3003 / 3378 / 3753 / 4128 / 4503).
+#      La colonna esiste: OnTesterDeinit accoda i nomi degli input a
+#      r.640 e i valori a r.646, e in R127a la colonna e' la nona.
+#      S4 dice che l'asse e' stato spazzolato. NON dice che ha avuto
+#      effetto: per quello serve S6 (classe 357).
+#    S5 -- LA CLAMP minDist NON PUO' ESSERE LA SPIEGAZIONE, ED E'
+#      ALGEBRICO. r.252-253: minDist = MathMax(buf, STOPS_LEVEL*_Point)
+#      e risk = baseStop + buf >= buf, quindi il ramo `buf` non puo' mai
+#      scattare; resta il ramo STOPS_LEVEL, impossibile appena
+#      buf >= STOPS_LEVEL*_Point. Su NASUSD buf in punti MT5 vale
+#      esattamente InpSLBufferPips, e la cella piu' bassa di questo file
+#      e' 2253: la clamp scatterebbe solo con uno STOPS_LEVEL oltre 2253
+#      punti (22,53 punti indice), cioe' un valore che le gambe vere
+#      della sedia smentiscono (esiste una gamba in stop da 9,70 punti
+#      indice = 970 punti MT5: con STOPS_LEVEL > 970 non sarebbe potuta
+#      esistere).
+#      >>> QUINDI, AL CONTRARIO DI R127a, QUI LA CLAMP NON E' UN
+#          DIFETTO: era esposta solo la cella ancora (buffer 3), che
+#          questo file NON contiene. Il valore vero di
+#          SYMBOL_TRADE_STOPS_LEVEL di NASUSD resta [NON MISURATO]
+#          (nessuna riga GSPEC per NASUSD nel repo; R114 copre U30USD,
+#          D30EUR e XAUUSD), ma non serve a questo round.
+#          S5 non e' una lettura sul CSV: e' una condizione dichiarata
+#          prima, e si verifica solo se S1 fallisse in modo strano.
+#    S6 -- ALMENO UNA COPPIA CONTIGUA DIVERSA. Fra le SEI coppie di
+#      celle contigue, almeno una deve avere Profit, Equity DD % o
+#      Trades diversi fino all'ultima cifra STAMPATA. Se coincidono
+#      tutte e sei, il round e' un NULLO DICHIARATO (T4) e S3/S4 vanno
+#      scritte come VACUE, non come PASS.
+#    S7 -- IL RISCHIO NON E' ESPLOSO: nessuna cella con Equity DD %
+#      sopra 3,00% (circa 2,3 volte il DD piu' alto che R127a ha
+#      misurato su questo EA, 1,3083%). Se una cella lo rompe si scrive
+#      SUBITO, in testa al referto, prima di qualunque Profit Factor.
+#      >>> Nota: il rischio per trade e' costante lungo l'asse (1,0%
+#          nominale, lotto che scende col buffer), quindi un DD che si
+#          muove viene dalla SEQUENZA delle uscite, non dalla taglia.
+# =====================================================================
+#  IL PAVIMENTO IS >= 150 -- VERIFICATO ARITMETICAMENTE PRIMA DI
+#  SCRIVERE QUALUNQUE SENTINELLA, E QUI LA RISPOSTA E' "NO"
+# ---------------------------------------------------------------------
+#  La finestra: 2024.09.26 -> 2026.06.30 = 642 giorni.
+#  Il taglio del driver e' per GIORNI, non per operazioni
+#  (walkforward_generico.ps1 r.921: Meta = Inizio + floor(giorni *
+#  FrazioneIS)). Con @FRAZIONEIS 0.40:
+#    IS  2024.09.26 -> 2025.06.09   (256 giorni)
+#    OOS 2025.06.10 -> 2026.06.30   (386 giorni)
+#  Le due date coincidono, e non e' un caso, con le due meta' gia'
+#  girate a tick da un altro lavoro: report\MISURA_SLIPPAGE_2026-09-05.md
+#  r.112-113 (61,0 M tick su 2024.09.26->2025.06.09 e 94,4 M su
+#  2025.06.10->2026.06.30).
+#
+#  LE OPERAZIONI, MISURATE E NON STIMATE (R127a, nove celle):
+#    IS  fra 69 e 71 deal     OOS fra 84 e 87 deal
+#  >>> NESSUNA DELLE DUE FINESTRE RAGGIUNGE 150. Non e' vicino: l'IS sta
+#      al 46% del pavimento, l'OOS al 57%.
+#  >>> CONSEGUENZA, DICHIARATA PRIMA DEI NUMERI: il MERITO e' SOSPESO
+#      (Regola B del 16/08). Questo round si legge su RISCHIO (il DD e'
+#      un fatto accaduto a qualunque n), su FORMA (la risposta all'asse)
+#      e sul COSTO del cancello. NON promuove una cella, non riscrive un
+#      preset, non tocca il forward.
+#  >>> E VA DETTO ANCHE DELL'ETICHETTA DELLA SEDIA: il "n 155 = MERITO
+#      PIENO" di CENSIMENTO_CONTRATTI.md r.234 e' la SOMMA 69+86 delle
+#      due finestre. Sommare IS e OOS per superare un pavimento che si
+#      applica alla singola finestra non e' la regola di casa. Il dubbio
+#      era gia' agli atti (PIANO_CHALLENGE_OTTOBRE.md r.97, "da
+#      riverificare"): questo file lo chiude con l'aritmetica.
+#
+#  PERCHE' IL PAVIMENTO NON E' RAGGIUNGIBILE, E LA CLASSE 355 CHIEDE DI
+#  SEPARARE LE DUE CAUSE -- QUI CI SONO TUTTE E DUE, E SI MISURANO:
+#    (a) MOTORE RADO: 155 operazioni su 642 giorni = 0,241 op/giorno.
+#        Per fare 150+150 servirebbero 1.244 giorni = 3,4 anni.
+#    (b) STORIA CHE NON C'E': i tick reali di NASUSD partono dal
+#        2024.09.26 (REFERTO_MISURA_TICK_NASUSD.txt), cioe' 642 giorni
+#        fa. Il muro e' MISURATO, non assunto.
+#    >>> Quindi il pavimento non e' raggiungibile A TICK su questo
+#        simbolo, per aritmetica, e nessun allargamento di finestra lo
+#        ripara. Le due vie che restano, col loro costo:
+#          - scendere di TF (piu' operazioni) -- ma M15/M5 su NASUSD
+#            sfondano il cancello di costo, e vanno dichiarate escluse
+#            PER COSTO con il numero accanto, non per pigrizia;
+#          - allungare la finestra in OHLC (dati prima del 2024) -- che
+#            e' screening, mai verdetto, e per un asse che muove lo stop
+#            l'OHLC ha il difetto proprio sulla grandezza misurata.
+#        Nessuna delle due si fa qui.
+#  >>> VERIFICA DELLA FINESTRA EFFETTIVA (la sentinella separata che la
+#      classe 355 chiede, e che una soglia su n non sostituisce): la
+#      densita' per finestra, calcolata sui CSV di questo round, deve
+#      restare 0,27 op/giorno in IS e 0,22 in OOS (i valori di R127a).
+#      Un crollo della densita' con l'n che resta "plausibile" sarebbe
+#      il sintomo di una finestra che non c'e', non di un motore lento.
+#      Si scrive nel referto accanto a n, sempre.
+# =====================================================================
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+# ---------------------------------------------------------------------
+#    B1  MERITO: SOSPESO per campione, in tutte e due le finestre
+#        (sezione PAVIMENTO). Nessuna cella viene proposta come
+#        migliore di un'altra. Se qualcuno scrivesse "la cella X batte
+#        la cella Y", sta leggendo 69 operazioni.
+#    B2  RISCHIO: e' l'unica cosa che si legge come MERITO, perche' un
+#        drawdown e' un fatto accaduto (Regola B del 16/08). In testa al
+#        referto, PRIMA di ogni PF, va scritto quante celle su sette
+#        superano l'1,3083% (il DD piu' alto misurato da R127a) e
+#        quante superano il 3,00% (S7). Il muro prop del 10% non e'
+#        nemmeno in vista su questa sedia, ed e' la sua qualita'
+#        migliore: si dice, non si nasconde.
+#    B3  FORMA / STRUTTURA: S3 (7 righe) e S4 (7 valori distinti) e S6
+#        (almeno una coppia contigua diversa). Si legge come un blocco
+#        unico: sette righe numericamente uguali sono un PASS VACUO.
+#        LO STOP NON ENTRA IN B3: non e' in nessun artefatto (classe
+#        353).
+#    B4  IL TEST DI IDENTITA' FRA CELLE CONTIGUE. Per ognuna delle SEI
+#        coppie si registra se Profit (%.2f), Equity DD % (%.4f) e
+#        Trades (%.0f) coincidono fino all'ultima cifra STAMPATA, e si
+#        CONTA quante coppie risultano DIVERSE. Se una coppia coincide,
+#        le due celle sono la STESSA corsa e valgono UNA osservazione.
+#        >>> Le tre colonne restano correlate fra loro (meno deal tende
+#            a voler dire meno profitto): "tre colonne concordi" si
+#            scrive come UNA conferma, non come tre.
+#    B5  IL ROUND NON PROMUOVE NIENTE. Anche un esito pulito non cambia
+#        un preset, non accende ne' spegne la sedia, non tocca il
+#        forward, non riscrive il contratto del DD e non sposta il
+#        cancello di costo (che questo asse non puo' misurare:
+#        dichiarato). Taglie, riaccensioni e rischio restano
+#        [FIRMA DI CLAUDIO].
+#    B6  LA REGOLA DI SELEZIONE, se mai si scrivesse "meglio la cella X"
+#        in un round futuro con n sufficiente: SEMPRE il CENTRO di un
+#        tratto contiguo di celle DISTINTE (B4), MAI il picco isolato
+#        (R70), e il tratto va verificato su IS e OOS SEPARATAMENTE.
+#    B7  IL COSTO DEL CANCELLO SI SCRIVE COME UNA FORBICE, MAI COME UN
+#        NUMERO. Qualunque frase del referto sul 40x porta accanto le
+#        due letture dello stop di base (n=4 e n=5), le due letture
+#        dello spread (1,80 pesato sugli ingressi, 2,40 equipesato) e
+#        il segno di disuguaglianza dove la misura e' unilaterale.
+# =====================================================================
+#  BUCHI DICHIARATI DI QUESTO ROUND
+# ---------------------------------------------------------------------
+#    - MERITO: sospeso, IS 69 e OOS 84-87 contro un pavimento di 150,
+#      e il pavimento NON e' raggiungibile a tick su questo simbolo.
+#    - IL CANCELLO DI COSTO NON SI MISURA QUI (classe 353): nessuna
+#      colonna contiene lo stop. Tutta la sezione IL COSTO e' algebra su
+#      misure fatte altrove, con n=4, n=5 e n=8.
+#    - LO STOP DI BASE E' UN LIMITE INFERIORE in tutte e due le letture
+#      (trailing e breakeven accorciano la distanza realizzata). I
+#      "PASSA" sono solidi, i "NON PASSA" da confermare.
+#    - SYMBOL_VOLUME_MIN, SYMBOL_VOLUME_STEP e SYMBOL_TRADE_STOPS_LEVEL
+#      di NASUSD NON sono mai stati misurati direttamente (R114 copre
+#      U30USD, D30EUR, XAUUSD). Lo 0,10 usato nei conti e' MISURATO DI
+#      RIFLESSO, sui volumi veri delle otto operazioni in campo (0,10 /
+#      0,20 / 0,60). Se il passo vero fosse 0,01, la troncatura sarebbe
+#      dieci volte piu' piccola: l'ipotesi usata qui e' quella
+#      conservativa.
+#    - TRADES CONTA DEAL, non posizioni, e due meccanismi monotoni
+#      diversi (T2 e T3) possono muoverlo. Nessuna causa viene
+#      attribuita a un suo movimento.
+#    - REGIME: una sola epoca, e non caratterizzata in casa (T6).
+#    - LATO LONG/SHORT: non separabile. I due lati sono pinnati ENTRAMBI
+#      accesi (come in campo) e il CSV non li separa. Se il buffer
+#      giovasse a un lato e nuocesse all'altro, questo round vedrebbe la
+#      media. Il file per separarli esiste gia' come schema
+#      (prove\R110_SUPNAS_0{1,2}*.txt): e' un altro round.
+#    - L'ANCORA D'ARCHIVIO DELLA SEDIA RESTA ROTTA. Questo round non la
+#      ripara e non la usa. Ripararla (riprodurre la cella viva sul
+#      binario di oggi e riscrivere il contratto PF/DD/n) e' il lavoro
+#      che vale di piu' su questa sedia, e va armato a parte.
+#    - I DUE CSV DI R127a NON SONO NEL REPO, solo dentro il log di
+#      raccolta. Le tre celle in comune di S1 sono state lette da li',
+#      riga per riga. Portarli in risultati_prove\ e' un lavoro a parte.
+# =====================================================================
+#  IL COSTO IN TEMPO MACCHINA -- E QUI NON E' UNA STIMA, E' DERIVATO DA
+#  UNA MISURA (ed e' il motivo per cui vale la pena scriverlo)
+# ---------------------------------------------------------------------
+#  R127a dichiarava "[STIMA, NON MISURA] ~4 min, banda 2-6" per 18
+#  passate. Il round e' girato, e i tempi veri stanno nel log di
+#  raccolta (mtime dei file, CODA_07_desktop_20260915_033005.log r.39-43,
+#  piu' l'ora di partenza nel referto):
+#    partenza    2026-09-14 09:30:48
+#    CSV IS      2026-09-14 10:10     -> 9 passate in ~40 min (4,4 min/passata)
+#    CSV OOS     2026-09-14 11:07     -> 9 passate in ~57 min (6,3 min/passata)
+#  Totale reale: ~97 minuti, cioe' VENTISEI volte la stima.
+#  Il rapporto fra le due gambe (57/40 = 1,43) torna col rapporto fra le
+#  finestre (386/256 = 1,51): la misura e' coerente con se stessa.
+#  >>> QUINDI QUESTO ROUND, 7 celle sulle stesse due finestre:
+#      IS 7 x 4,4 = ~31 min, OOS 7 x 6,3 = ~44 min, TOTALE ~75 minuti
+#      [DERIVATO da una misura, banda 60-95 min].
+#      E' un lavoro da NOTTE, e chi mette la riga in coda deve saperlo:
+#      con la stima vecchia sembrava un round da tre minuti.
+#  >>> Se il banco non reggesse, l'alternativa dichiarata NON e' togliere
+#      celle (si perderebbe la risoluzione dell'altopiano e, peggio, le
+#      tre celle in comune che fanno da impronta): e' spezzare l'asse in
+#      due file, 2253-3003 e 3378-4503, e dichiararlo.
+# =====================================================================
+#  MAGIC VERGINE 779825 (verificato per ricerca su tutto il repo,
+#  16/09/2026: zero occorrenze). Il blocco in uso e' 779821/779822/
+#  779823 (R161a/b/c) e 779824 (R162a): questo e' il successivo.
+#  NON e' 970913: un magic diverso tiene separate le corse di round da
+#  qualunque cosa giri in campo, e 779410 e' gia' consumato da R127a.
+#  ETICHETTA r163a VERGINE (ricerca "R163" e "r163" su tutto il repo,
+#  16/09/2026: zero occorrenze prima di questo file).
+#  ORDINE DEI ROUND: R127a (stessa manopola, meta' bassa dell'asse) e'
+#  GIRATO e questo file lo estende. R120a (uscite Supertrend su NASUSD,
+#  scritto e mai girato) tocca trailing e flip: qui sono PINNATI ACCESI,
+#  non sono l'asse. R127b (InpSLLookback) gira su XAUUSD: l'altra
+#  manopola dello stop su NASUSD resta un file da scrivere.
+#  L'INPUT NON PINNATO E' UNO SOLO, InpNewsCurrencies, ed e' voluto: il
+#  suo valore vivo e' la stringa VUOTA, e un pin a valore vuoto MT5 lo
+#  ignora in silenzio usando il default compilato (e' esattamente il
+#  difetto per cui esiste controlla_prova.py). Il default compilato e'
+#  la stessa stringa vuota, e il filtro news e' comunque spento
+#  (InpUseNewsFilter=false): il pin sarebbe rumore, non protezione.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Le due direttive qui sopra sono scritte APPOSTA anche se
+#     coincidono col default del driver (-Fino 2026.06.30, -FrazioneIS
+#     0.40). R127a le lasciava implicite: uno stato implicito non e' uno
+#     stato dichiarato, e il taglio IS/OOS fa parte dell'IDENTITA' della
+#     cella. Verificato che non c'e' conflitto: RIGA_ROUND_VPS.ps1
+#     (r.646-650) NON passa ne' -Fino ne' -FrazioneIS al driver, quindi
+#     vincono queste righe senza far morire la corsa (il driver muore
+#     solo se la riga di lancio ne passa una DIVERSA, r.553-580).
+
+# --- IL MOTORE, pinnato sulla cella viva (StMult 3,0 / AtrP 10 /
+#     TP_RR 3,0). Gli stessi 40 pin di R127a, valore per valore: se uno
+#     solo cambiasse, le tre celle in comune non sarebbero piu' le
+#     stesse celle e S1 non misurerebbe niente.
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpStMult=3.0||3.0||0||3.0||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+
+# --- I DUE LATI, TUTTI E DUE VIVI (regola di casa del 25/08)
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- Confluenza / medie
+InpUseConfluence=true||true||0||true||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+
+# --- Ingresso frazionato: pinnato al valore vivo. InpFirstFraction e'
+#     un'altra manopola mai mossa della famiglia, e resta ferma apposta.
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingExpiryBars=3||3||0||3||N
+
+# --- STOP: il LOOKBACK e' pinnato al valore vivo. E' l'altra manopola
+#     che allarga lo stop su questa sedia, ed e' l'asse di un ALTRO
+#     file (regola di casa: un file prova misura UNA variabile).
+InpSLLookback=5||5||0||5||N
+
+# --- USCITA: tutto pinnato com'e' in campo. Parziale e breakeven sono
+#     ACCESI (e sono legati fra loro dal gate di r.324: vedi UNITA').
+#     Trailing sul Supertrend e uscita al flip sono ACCESI: sono l'asse
+#     di R120a, non di questo file. InpExitOnFlip acceso e' anche il
+#     freno che fa SATURARE il meccanismo di T2.
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+
+# --- Rischio: 1,0% nominale, lo stesso di R127a e della sedia viva.
+#     Lungo l'asse il lotto SCENDE (stop piu' largo, rischio fisso):
+#     nessuna cella di questo file aumenta l'esposizione.
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+
+InpComment=R163A SLBUF2
+InpMagic=779825||779825||0||779825||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=false||false||0||false||N
+
+# --- L'ASSE, UNO SOLO: InpSLBufferPips da 2253 a 4503, passo 375
+#     7 celle:  2253 . 2628 . 3003 . 3378 . 3753 . 4128 . 4503
+#     in punti indice NASUSD (x 0,01):
+#     22,53 . 26,28 . 30,03 . 33,78 . 37,53 . 41,28 . 45,03
+#
+#     LE PRIME TRE SONO LE STESSE CELLE DI R127a (stesso start di
+#     griglia modulo il passo 375, stessi pin): sono l'impronta del
+#     banco di S1, non celle nuove.
+#     LE ULTIME QUATTRO SONO NUOVE e coprono la frontiera dei 40x nella
+#     lettura prudente dello stop di base (soglia 4490, bordo 4503).
+#     Tutti interi: nessun arrotondamento possibile.
+InpSLBufferPips=2253||2253||375||4503||Y
