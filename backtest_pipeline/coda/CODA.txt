@@ -2164,3 +2164,53 @@ b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 16a60b61d3427032f34297e9cd1c317ea47d67ac | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal -Prova R166a_slbufferpips_supertrendrev_225JPY.txt -Etichetta r166a -Modello 4 -Deposito 100000
 # =====================================================================
+#  R165a -- InpSLBufferPips SU ABTG_SuperWave_DOW_H1_Ottimizzato,
+#  U30USD H1 (sedia 770511). Ventiduesima famiglia -- sedia gia'
+#  coperta da R120a-e/R126a-b (girati 13/09, in attesa di firma) e da
+#  R155a (armato oggi, corretto per un deposito sbagliato: classe
+#  366). Manopola diversa da tutte quelle, per evitare un doppione di
+#  R126b: InpSLBufferPips e' additiva ed esatta in punti indice
+#  (r.367/368, risk = baseStop + buf), InpSLLookback e' inerte quando
+#  la linea Supertrend domina.
+#
+#  Scoperta di merito, verificata sul PRESET vivo (non sul default
+#  compilato -- classe 369, nuova, trovata dal secondo cancello): sul
+#  valore vivo (InpSLBufferPips=3, confermato in
+#  sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_
+#  770511.set r.24, zero occorrenze di InpSLBufferAtr nelle 50 righe
+#  del preset) il buffer vale 0,03 punti indice su uno stop di 77,10
+#  = lo 0,04%. La manopola gira dal luglio ed e' INERTE nei fatti.
+#
+#  Ancora la piu' forte finora: la cella 3 e' identica a r120e11
+#  (stesso banco, stesso deposito 100k, git diff sul sorgente EA fra i
+#  due pin = zero righe) -- S1 e' un'uguaglianza stretta, non una
+#  banda. Attesi IS PF 1,39744/DD 3,48/n 106, OOS PF 1,22034/DD
+#  4,21/n 184.
+#
+#  Cancello di costo: 1 a 5 celle su 6 secondo il riferimento di
+#  spread (0-2,00/2,60/2,65/3,00), nessuna sentinella si aggancia.
+#  VOLUME_MAX=100 dichiarato rischio strutturale sulla cella-ancora
+#  (margine 1,10x): se mordesse, sotto-rischierebbe solo le celle
+#  basse e fabbricherebbe un falso "il buffer migliora le cose" -- la
+#  cella 3 resta l'ancora, non un punto dell'altopiano. Merito
+#  SOSPESO: IS<=106 (71% del pavimento 150), storico tick 1,76 anni
+#  contro i 3,2 servirebbero.
+#
+#  Secondo cancello: FAIL alla prima lettura (classe 369) + 2
+#  correzioni minori (colonna del CSV nella prosa, un'ora di spread).
+#  Nessuna tocca un numero del round. PASS dopo le correzioni. Magic
+#  779828 dopo la collisione con R166a (classe 367: R166a era
+#  committato prima, resta a 779827).
+#
+#  >>> ATTENZIONE AL DEPOSITO (lezione della classe 366, appena
+#  pagata su R155a): il default di RIGA_ROUND_VPS.ps1 (r.94) e' 10000,
+#  ma il file dichiara e motiva -Deposito 100000 (comparabilita' con
+#  r120e11). Scritto ESPLICITO sulla riga qui sotto, non lasciato al
+#  default.
+#
+#  Pin: giro di pin c2aeb91 (48mo, 13599df8 -> 1acb1d52). $SHA_ROUND e
+#  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
+#  Magic 779828, non tocca 770511 (piccolo 50503392).
+# =====================================================================
+c2aeb917a7cec0697d500ae7d02f1f332fbc27a9 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
+# =====================================================================
