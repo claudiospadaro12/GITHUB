@@ -53,11 +53,26 @@
 #         -Modello -Deposito -SoloControllo`. `-TerminaleBacktest` NON
 #         c'e': passarglielo a mano farebbe fallire il lancio.
 #         >>> E LA GARANZIA E' PIU' FORTE, non piu' debole: il banco su
-#             questa corsia e' CABLATO. r.131 `$BancoBT = 'C:\MT5_Backtest'`
-#             e r.1325 lo passa SEMPRE a walkforward_generico.ps1 come
-#             `-TerminaleBacktest`. Non dipende da chi scrive la riga.
-#         >>> La stessa correzione e' gia' stata fatta sul fratello
-#             R172c dal cancello; qui e' fatta PRIMA della consegna.
+#             questa corsia e' CABLATO, e la catena e' di TRE anelli, tutti
+#             e tre riletti oggi:
+#               1. r.131  `$BancoBT = 'C:\MT5_Backtest'`, mai riassegnato;
+#               2. r.1340 (dentro il `$argv` costruito a r.1333-1340) lo
+#                  passa come `-TerminaleBacktest` a RIGA_ROUND_VPS.ps1
+#                  (r.1315 `$fileRound = ... RIGA_ROUND_VPS.ps1`);
+#               3. RIGA_ROUND_VPS.ps1 lo riceve nel suo `param()` r.92 e
+#                  lo INOLTRA a walkforward_generico.ps1 alla sua r.649.
+#             Non dipende da chi scrive la riga.
+#             >>> RIGA CORRETTA DAL CANCELLO, e il difetto e' di SERIE.
+#                 La prima stesura diceva "r.1325 lo passa SEMPRE a
+#                 walkforward_generico.ps1": r.1325 e' una riga di banner
+#                 `# ---------`, e il destinatario diretto NON e' il driver
+#                 ma RIGA_ROUND_VPS.ps1. Lo stesso `r.1325` sbagliato sta
+#                 in TUTTI E TRE i fratelli (R172a r.39, R172b r.48,
+#                 R172c r.63): classe 377 punto 3, ereditata col
+#                 taglia-e-adatta come la classe 380 aveva gia' insegnato.
+#         >>> La stessa correzione sul BLOCCO "SI LANCIA CON" e' gia' stata
+#             fatta sul fratello R172c dal cancello; qui e' fatta PRIMA
+#             della consegna.
 #
 #  !! -Modello 4 e -Deposito 100000 SONO IL BANCO DELL'ANCORA DI QUESTA
 #     SEDIA (classe 366). L'ancora e' R54a, lanciata da
@@ -134,11 +149,18 @@
 #         (b) IL BANCO NON E' QUESTA CELLA. Quella griglia gira con
 #             `InpTrailMode` PINNATO A 2 (punti fissi, r.151), TP totali
 #             2,01R e 2,52R, e la "configurazione definitiva" che quel
-#             documento consegna (r.256-268) e' range 15 minuti, buffer
-#             200 punti, BREAKOUT. La cella viva di oggi e' range 35
-#             minuti, buffer 1000 punti, RETEST, trailing a BASE CANDELA
-#             M5, TP 3R. Sono due strategie diverse: classe 323, il
-#             numero non si trasferisce.
+#             documento consegna (r.256-268) e' range 15 minuti (r.261) e
+#             buffer 200 punti (r.262).
+#             >>> E L'INGRESSO E' BREAKOUT, MA IL NUMERO NON STA LI', e lo
+#                 dico invece di appenderlo a una citazione che non lo
+#                 contiene (classe 377 punto 3): la tabella r.256-268 NON
+#                 ha una riga "modalita' d'ingresso". Il BREAKOUT e' il
+#                 DEFAULT COMPILATO con cui quella griglia e' girata --
+#                 sorgente r.230 `input ENUM_ABTG_ENTRY InpEntryMode =
+#                 ABTG_BREAKOUT;` -- e quella e' la sua fonte vera.
+#             La cella viva di oggi e' range 35 minuti, buffer 1000 punti,
+#             RETEST, trailing a BASE CANDELA M5, TP 3R. Sono due
+#             strategie diverse: classe 323, il numero non si trasferisce.
 #     >>> QUINDI LA DOMANDA E' APERTA SULLA CELLA CHE GIRA OGGI, ed e'
 #         una domanda da challenge: un breakeven anticipato ABBASSA il
 #         drawdown (nessuna posizione che ha respirato torna a perdere
@@ -309,6 +331,24 @@
 #          tick 2, subito dopo: il bersaglio della parziale (r.1739)
 #                  non e' piu' openP + R_vero*1,0 ma
 #                     openP + ATR(14,M5)*1,5*1,0
+#        >>> !! LA PREMESSA CHE REGGE TUTTA LA CATENA, DICHIARATA INVECE
+#            CHE SOTTINTESA -- ed e' un PIN, non una proprieta' dell'EA.
+#            r.1739 e' il ramo `else`. Sopra c'e'
+#              r.1736  if(InpUseRoundLevels && InpRoundStep > 0)
+#              r.1737     target = NextRoundLevel(openP, dirSign, ...)
+#            e `NextRoundLevel` NON legge `riskDist`: calcola il primo
+#            numero tondo nella direzione del trade. Cioe' con
+#            `InpUseRoundLevels = true` IL SIDE EFFECT SULLA PARZIALE NON
+#            ESISTEREBBE -- resterebbe solo lo stop a pari, e questo file
+#            misurerebbe una manopola sola.
+#            La catena vale QUI perche' la cella viva pinna
+#            `InpUseRoundLevels = false` (.set r.226; pin di questo file
+#            in fondo, insieme a `InpRoundStep`) e il pin e' BLINDATO.
+#            >>> CONSEGUENZA PER CHI RIUSA QUESTA PAGINA: la catena
+#                r.1783->r.1859->r.1727->r.1739 NON e' trasferibile a una
+#                sedia che abbia i numeri tondi accesi. Si ricontrolla il
+#                pin PRIMA di citarla. E' la CLASSE 383, scritta oggi dal
+#                cancello proprio su questo file.
 #        >>> COSA VUOL DIRE, in una riga: NELLE CELLE CON `InpBEatR > 0`
 #            LA PARZIALE NON SCATTA PIU' A 1R VERO. Scatta a un
 #            bersaglio ricalcolato sull'ATR di M5.
@@ -1200,6 +1240,33 @@
 #      che cita un HEAD stantio non e' una riverifica (classe 377
 #      punto 5) -- e perche' `bf2a6918`, al momento in cui questo file
 #      entra in repo, e' gia' sorpassato.
+#  >>> RIVERIFICA FATTA DAL CANCELLO, ed e' salita da DUE a QUATTRO in
+#      poche ore. A HEAD `01ebf968` ("Autocorrezione R172e: numeri di
+#      riga, classe 382 propria, buco classe 372"), rieseguito alla
+#      lettera:
+#          grep -rl "789540" --exclude-dir=.git .
+#      -> QUATTRO percorsi, e li nomino TUTTI (mai "tutto il resto",
+#         classe 180):
+#           1. questo file;
+#           2. il fratello R172c, che lo cita IN PROSA;
+#           3. il fratello NUOVO R172e, che NON esisteva quando questo
+#              file e' stato scritto: cita 789540 IN PROSA per spiegare
+#              perche' PRENDE 789550 e non questo;
+#           4. backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1, dove il
+#              numero compare in un COMMENTO di verbale, non in codice.
+#         NESSUNO DEI QUATTRO E' UN PIN:
+#          grep -rn "^InpMagic=789540" --exclude-dir=.git .
+#      -> UNA sola riga, ed e' il pin in fondo a questo file.
+#      IL MAGIC E' VERGINE.
+#      >>> E DI PROPOSITO NON SCRIVO I NUMERI DI RIGA DI R172e: quel file
+#          e' IN LAVORAZIONE da un altro agente in questo stesso albero e
+#          le sue righe si sono gia' spostate due volte mentre il cancello
+#          guardava (classe 382 + classe 368). Un numero di riga su un
+#          file che qualcun altro sta scrivendo nasce gia' vecchio: si
+#          cita il FATTO ("in prosa"), non la coordinata.
+#      Il salto 2 -> 4 senza che nessuno USI il magic e' la classe 382 in
+#      azione: e' il motivo per cui un conteggio del genere si scrive
+#      SEMPRE col suo HEAD accanto.
 #  >>> E LA FORMA CHE RISPONDE ALLA DOMANDA GIUSTA, quando un file cita
 #      i magic dei fratelli in prosa (questo lo fa nell'ultimo
 #      capoverso di questo riquadro), e'
@@ -1322,6 +1389,12 @@ InpTrailMode=1||1||0||1||N
 InpTrailTF=5||5||0||5||N
 InpTrailAtrMult=2.0||2.0||0||2.0||N
 InpTrailFixedPts=410.0||410.0||0||410.0||N
+# --- InpUseRoundLevels false NON E' UN PIN QUALSIASI IN QUESTO ROUND:
+#     e' la PREMESSA del side effect (B). Con true, r.1736-1737
+#     calcolerebbero il bersaglio della parziale con NextRoundLevel(), che
+#     NON legge `riskDist`, e il secondo canale del side effect
+#     sparirebbe. Resta BLINDATO al valore di campo (.set r.226).
+#     Classe 383.
 InpUseRoundLevels=false||false||0||false||N
 InpRoundStep=100.0||100.0||0||100.0||N
 InpRoundMinDistPts=50.0||50.0||0||50.0||N
