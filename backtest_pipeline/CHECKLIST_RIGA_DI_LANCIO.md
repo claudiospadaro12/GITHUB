@@ -21367,3 +21367,127 @@ questa classe ha introdotto, mentre la scriveva, **un'emoji dentro un file
 prova** (regola dei `.ps1`/prove in ASCII puro) -- trovata dal suo stesso
 strato deterministico e corretta prima della consegna. **Le due reti servono
 tutte e due, anche a chi le tiene in mano.**
+
+---
+
+## 380. 🎯🔒 LA BANDA CHE **DECIDE** E' PIU' STRETTA DEL CRITERIO DICHIARATO TRE RIGHE SOTTO — e su una sentinella **BLOCCANTE** questo ferma una corsa SANA (controllo-preventivo, 16/09/2026)
+
+> 📌 **E' l'INVERSO della 347/351, non la stessa cosa.** Li' il difetto stava
+> nella **prosa che spiega** mentre la **regola che decide** era giusta, e il
+> commento di casa era *"si salvava da sola"*. Qui e' il contrario: **la regola
+> che decide e' quella sbagliata**, e la prosa ha ragione. Non si salva niente
+> da solo — anzi, la prosa giusta **nasconde** la regola sbagliata, perche' chi
+> rilegge trova il criterio corretto e va avanti.
+
+**Il caso.** `R172a`/`R172b` (assi `InpTrailStartR` e `InpCloseHour` sulla sedia
+`770202`, `ABTG_Dow_Apertura_US`) congelano la sentinella **S1 — riproduzione
+dell'ancora**, dichiarata **BLOCCANTE** (*"Se anche una sola non ci cade, NON si
+legge nient'altro"*). La tabella della tolleranza portava:
+
+```
+Trades ..........  73 - 75   (74)       128 - 132   (130)
+                   ^^^^^^^ = 74 +/- UNO      ^^^^^^^^^ = 130 +/- DUE
+```
+
+e **tre righe sotto**, il criterio che la genera:
+
+> _"Trades: NUMERO INTERO DI OPERAZIONI, **+/- 2** (non una percentuale: su 74
+> il 2% sarebbe 1,5 operazioni, che non esiste)"_
+
+La gamba OOS rispetta il criterio, **la gamba IS no**. E il `+/- 2` non era un
+refuso isolato: **altri due punti del file ci contano sopra** — `S3` (*"un calo
+oltre le 2 operazioni, **la stessa semiampiezza di S1**"*) e il contro-esempio
+sulla banda (*"un mese mancante vale ~9 uscite, cioe' **QUATTRO VOLTE la
+semiampiezza di +/-2**"* — che con `+/-1` sarebbe stato **nove** volte).
+👉 **Tre voci dicono 2, una cella dice 1: il refuso e' la CELLA.** Il criterio
+dichiarato e la prosa che lo riusa sono un **arbitro a maggioranza gratuito**.
+
+🔴 **PERCHE' COSTA DAVVERO, e non e' un arrotondamento.** S1 non e' una nota: e'
+il cancello che decide se il round si legge. Con `73 - 75`, un `Trades` IS di
+**72 o 76** — cioe' **dentro la tolleranza che il file stesso dichiara** — fa
+scrivere in cima al referto *"il banco di oggi non e' quello di R54a"* e ferma
+tutto. E il mondo in cui succede **non e' remoto**: il binario non e' quello
+dell'ancora (**+27 righe** di Guardian fra il 14/08 e oggi) e il terminale e' un
+altro. Una deriva di **una-due uscite su 74** e' esattamente il caso che la
+banda esiste per **assorbire**, non per intercettare.
+
+🟢 **E la meta' che ha funzionato** (un elenco di soli difetti descrive male la
+realta'): tutte le **altre quattro righe** della stessa tabella erano corrette e
+arrotondate **verso l'esterno**, verificate ricalcolandole sui CSV d'ancora
+(`csv_r54`), e la riga OOS di `Trades` portava il `+/-2` giusto. Il difetto era
+**una cella su dieci**, ed e' proprio per questo che nessuna rilettura a occhio
+lo trovava: la tabella *sembra* regolare.
+
+### 🔴 LA REGOLA
+1. **Ogni banda si RICALCOLA dal criterio dichiarato, cella per cella, a
+   macchina.** Non si controlla che la tabella "sembri coerente": si applica la
+   regola scritta ai valori d'ancora e si confrontano i risultati. Dieci celle
+   sono dieci conti, non uno.
+2. 🔴 **Sulle sentinelle BLOCCANTI il controllo e' obbligatorio e viene PRIMA di
+   ogni altra lettura del file.** Una banda troppo LARGA fa passare un banco
+   sporco (classe 178); una banda troppo STRETTA ferma una corsa sana — ed e'
+   il difetto **piu' difficile da diagnosticare dopo**, perche' produce un
+   verdetto *"banco sporco"* plausibile e nessuno va a ricontrollare la banda.
+3. **Quando il file riusa la semiampiezza altrove** (*"la stessa semiampiezza
+   di S1"*, *"quattro volte la semiampiezza"*), quei riusi sono **testimoni**:
+   si mettono in fila e si vede chi e' in minoranza. Il numero in minoranza e'
+   il sospetto, e va **verificato**, non scelto.
+4. 📌 **E si corregge la CELLA, non il criterio** — a meno che il criterio non
+   sia argomentato male. Allargare il criterio per farci stare la cella e' la
+   scorciatoia che trasforma un refuso in un ammorbidimento (`CLAUDE.md`:
+   *"la grinta NON tocca i numeri"*).
+
+---
+
+## 381. 🧮🗓️ UN **TASSO** RICAVATO DA UN TOTALE DI FINESTRA DIVISO PER LA DURATA DI **UN SOLO** PERIODO: manca il denominatore delle GIORNATE, e il numero esce sbagliato di un fattore pari ai giorni (controllo-preventivo, 16/09/2026)
+
+**Il caso.** `R172b` deve escludere la **classe 370** (*un'uscita a orologio si
+esegue al primo tick DOPO la scadenza, quindi due celle contigue possono uscire
+identiche pur avendo morso tutte e due*). Per farlo misura quanto e' fitto il
+flusso di tick nell'ora piu' povera del suo asse, e scriveva:
+
+> _"L'ora piu' povera delle sette ha 2,75 milioni di tick, cioe' in media **piu'
+> di 700 tick al minuto**"_
+
+**Sbagliato di un fattore ~7**, e si vede da dove viene:
+`2.751.382 / 3.600 = 764`, cioe' **il totale di 21 MESI diviso per i secondi di
+UN'ORA SOLA** — e chiamato "al minuto". Il conto giusto porta le **giornate**:
+
+| passo | conto | risultato |
+|---|---|---:|
+| totale ora 21 sulla finestra | `spread_orario_U30USD.csv` | 2.751.382 tick |
+| diviso le **giornate feriali** | `2024.09.26 → 2026.06.30` = **459** | 5.994 tick/giorno |
+| diviso i minuti dell'ora | `/60` | **~100 tick/min** |
+| gap medio fra due tick | `3600 / 5994` | **~0,60 s** |
+
+🔴 **Il sintomo che lo smaschera in dieci secondi, ed e' un controllo di
+plausibilita' interno al file stesso**: l'ora **piu' ricca** dell'asse (la 15)
+fa `7.852.363 / 459 / 60 = ~285 tick/min`. **Se il picco non arriva a 700, la
+valle non puo' farne "piu' di 700".** Il numero vecchio era incoerente con un
+altro numero **della stessa tabella, tre righe sopra**.
+
+🟢 **E la conclusione NON cambiava** — ed e' esattamente il motivo per cui la
+classe e' insidiosa: con un gap medio di **0,60 secondi** contro un passo d'asse
+di **un'ora**, il mondo della classe 370 resta escluso **lo stesso**, con tre
+ordini di grandezza di margine. Il file aveva **ragione sul verdetto e torto sul
+numero che lo sostiene**. Se un giorno qualcuno ricalcolasse quel 700 e lo
+trovasse falso, metterebbe in dubbio **l'esclusione della 370**, che invece
+regge.
+
+### 🔴 LA REGOLA
+1. **Un TASSO porta SEMPRE i suoi due denominatori quando la fonte e' un totale
+   di finestra**: le **unita' di tempo dentro il periodo** *e* il **numero di
+   periodi** (giornate, sedute, mesi). Un totale di finestra diviso per la
+   durata di un periodo solo **non e' un tasso**: e' un numero senza unita'.
+2. **Il numero di giornate si CONTA e si DICHIARA accanto al risultato** (qui:
+   459 giorni feriali fra le due date). Se si usa un conteggio approssimato, si
+   dice **in che verso** approssima: le festivita' abbassano il denominatore,
+   quindi il tasso vero e' **piu' alto** — ed e' il verso prudente per questa
+   conclusione. Un'incertezza di cui si conosce il **segno** non e' un buco.
+3. 🔴 **Prima di scrivere un tasso, lo si confronta col tasso dell'estremo
+   opposto della stessa tabella.** Valle contro picco: se la valle supera il
+   picco, il conto e' rotto. Costa una riga e non richiede nessuna fonte nuova.
+4. 📌 Vale **soprattutto** quando il tasso serve a **escludere** un rischio noto
+   (qui la classe 370): un numero gonfiato che chiude una domanda la chiude
+   **per la ragione sbagliata**, e la riapre il giorno in cui qualcuno rifa' il
+   conto.

@@ -55,12 +55,29 @@
 #     cioe' deposito 100000 ESPLICITO e NESSUN -Modello -> il default
 #     del driver, che a quella data era 4 = TICK REALI. Verificato
 #     APRENDO IL DRIVER AL COMMIT GIUSTO, non ricordato:
-#        git rev-list -1 --before=2026-08-15 lavoro  ->  60fb791c
-#        git show 60fb791c:backtest_pipeline/walkforward_generico.ps1
+#        git rev-list -1 --before="2026-08-15T00:00:00Z" lavoro -> bca63798
+#        git show bca63798:backtest_pipeline/walkforward_generico.ps1
 #          r.62 $Fino = "2026.06.30"   r.64 $FrazioneIS = 0.40
 #          r.65 $Modello = 4           r.66 $Deposito = 10000
 #     (a HEAD le stesse quattro righe sono r.177/179/180/190 e portano
 #      gli stessi valori: il default NON si e' mosso in un mese.)
+#     >>> !! CORREZIONE DEL CANCELLO (classe 379). La prima stesura
+#         scriveva `--before=2026-08-15` (senza ora ne' fuso) e come
+#         risultato `60fb791c`. RIESEGUITO OGGI quel comando torna
+#         `d4049af8`, NON `60fb791c`: una data senza ora la si confronta
+#         col fuso locale della macchina, e la potatura per data di
+#         `rev-list` non e' un ordine totale. Il comando qui sopra e'
+#         quello che HO ESEGUITO, con l'istante in UTC esplicito, e
+#         rilanciato tre volte da' sempre `bca63798`.
+#         >>> E il commit e' anche PIU' GIUSTO di quello di prima:
+#             `bca63798` e' del 2026-08-14 22:22 UTC, cioe' l'ULTIMO
+#             commit del giorno in cui R54a e' girato; `60fb791c` e
+#             `d4049af8` sono tutti e due del 15/08, cioe' del giorno
+#             DOPO la corsa d'ancora.
+#         >>> I VALORI NON CAMBIANO -- verificati a tutti e tre i commit,
+#             stesse righe 62/64/65/66, stessi quattro valori. Cambia la
+#             RIPRODUCIBILITA', che e' esattamente cio' che la classe
+#             379 esiste per difendere.
 #     >>> CONSEGUENZA CHE VALE PIU' DI TUTTO IL RESTO: la finestra e il
 #         taglio dell'ancora NON sono persi. R54a non ha @FINOA ne'
 #         @FRAZIONEIS nel file prova -- il difetto della classe 375 --
@@ -326,10 +343,39 @@
 #          16, 17, 18, 19, 20 e 21, che nel file
 #          spread_orario_U30USD.csv contano rispettivamente 7,85 . 7,55
 #          . 6,04 . 5,33 . 5,07 . 5,31 e 2,75 MILIONI di tick sulla
-#          finestra di questo round. L'ora piu' povera delle sette ha
-#          2,75 milioni di tick, cioe' in media piu' di 700 tick al
-#          minuto: il ritardo del flat e' dell'ordine del secondo su un
-#          passo d'asse di UN'ORA.
+#          finestra di questo round. L'ora piu' povera delle sette e' la
+#          21, con 2.751.382 tick.
+#          >>> !! CORREZIONE DEL CANCELLO, ED E' IL NUMERO CHE CHIUDE LA
+#              CLASSE 370 SU QUESTO ASSE, quindi va scritto giusto. La
+#              prima stesura diceva "in media piu' di 700 tick al
+#              minuto": SBAGLIATO di un fattore 7, e si vede da dove
+#              viene -- 2.751.382 / 3.600 = 764, cioe' il totale della
+#              FINESTRA diviso per i secondi di UN'ORA SOLA, senza mai
+#              dividere per le GIORNATE. Il conto giusto porta il numero
+#              delle giornate, e questo e' quello che ho eseguito:
+#                 2.751.382 tick / 459 giornate feriali della finestra
+#                   (2024.09.26 -> 2026.06.30) = 5.994 tick al giorno
+#                 5.994 / 60 = ~100 TICK AL MINUTO  (1,67 al secondo)
+#                 gap medio fra due tick = ~0,60 secondi
+#              (459 e' il conteggio dei giorni FERIALI: le festivita' lo
+#              abbassano, quindi il tick/minuto vero e' un po' PIU' alto
+#              di 100. E' il verso prudente.)
+#              >>> LA CONCLUSIONE NON CAMBIA, e per questo la correzione
+#                  e' sul numero e non sul verdetto: con un gap medio di
+#                  0,60 secondi il ritardo del flat resta dell'ordine
+#                  del SECONDO contro un passo d'asse di UN'ORA, cioe'
+#                  tremila volte piu' piccolo. Il mondo della classe 370
+#                  (due celle contigue identiche per una pausa) resta
+#                  escluso.
+#              >>> E IL CONTRO-ESEMPIO SULLA MIA STESSA CORREZIONE: se
+#                  anche l'ora 21 fosse quotata solo per una frazione
+#                  dell'ora, il tick/minuto salirebbe -- mai
+#                  scenderebbe. Il verso dell'incertezza e' quello che
+#                  RAFFORZA la conclusione. Controprova nello stesso
+#                  file: l'ora piu' RICCA delle sette, la 15, fa
+#                  7.852.363 / 459 / 60 = ~285 tick al minuto -- cioe'
+#                  nemmeno il picco arriva a 700, che da solo bastava a
+#                  bocciare il numero vecchio.
 #          >>> E LA PAUSA VERA DEL CFD, che esiste, sta FUORI dall'asse:
 #              l'ora 22 crolla a 104.230 tick (26 volte meno della 21).
 #              Nessuna cella di questo file la tocca. Per questo, e solo
@@ -472,9 +518,15 @@
 #        git diff --stat 8b922147 HEAD -- \
 #          mql5/Experts/ABTG_Dow_Apertura_US.mq5
 #        -> 1 file changed, 27 insertions(+)    [zero cancellazioni]
-#      Le 27 righe sono TUTTE il Guardian: 1 `#include`, 12 righe di
-#      commento, 1 `input bool InpUsaGuardian = true` e 7 punti di
-#      chiamata `ABTG_GuardiaIngresso(...)` davanti agli ordini.
+#      Le 27 righe sono TUTTE il Guardian, e la scomposizione TORNA a 27
+#      (ricontata riga per riga dal cancello: la prima stesura diceva
+#      "12 righe di commento" e sommava a 21, non a 27):
+#        1  `#include <ABTG_PausaGuardian.mqh>`
+#       11  righe di commento sopra l'input
+#        1  `input bool InpUsaGuardian = true`
+#        7  righe `//--- firme B1/C1 ...`, una per punto di chiamata
+#        7  punti di chiamata `ABTG_GuardiaIngresso(...)`
+#       --  1 + 11 + 1 + 7 + 7 = 27, zero cancellazioni.
 #      `git diff ... | grep -E "^[+-]input|^[+-]#define"` torna UNA sola
 #      riga, ed e' quell'input: NESSUN default di NESSUNA manopola e'
 #      cambiato fra l'ancora e oggi.
@@ -503,21 +555,34 @@
 #          passate. Lo scrivo adesso per non doverlo inventare dopo.
 #
 #  >>> LE DIFFERENZE FRA I PIN DI QUESTO FILE E QUELLI DELL'ANCORA, E LE
-#      CONTO A MACCHINA E NON A OCCHIO. R54a pinna 32 input su 81 e
-#      lascia gli altri 49 al default compilato; questo file ne pinna 80
-#      (tutti tranne uno, vedi sotto). Il confronto giusto non e'
-#      "quanti pin", e' "quale VALORE ha visto l'EA", e il confronto per
-#      nome fra i 32 pin di R54a e le 80 righe di qui da':
-#        - 32 nomi in comune -> 30 IDENTICI, 2 DIVERGENTI, e sono:
+#      CONTO A MACCHINA E NON A OCCHIO. R54a scrive 33 righe di valore
+#      sulle 81 dell'EA -- e sono 30 PIN piu' TRE ASSI (`InpMagic`,
+#      `InpAllowLong`, `InpAllowShort`) -- e lascia le altre 48 al
+#      default compilato; questo file ne scrive 80 (tutte tranne una,
+#      vedi sotto). Il confronto giusto non e' "quanti pin", e' "quale
+#      VALORE ha visto l'EA SULLA RIGA D'ANCORA" (quella L=1 / S=0), e
+#      il confronto per nome fra le 33 righe di R54a e le 80 di qui da':
+#        - 33 nomi in comune -> 31 IDENTICI, 2 DIVERGENTI, e sono:
 #            (1) InpCloseHour, che e' L'ASSE
 #                (ancora 17||17||0||17||N, qui 17||15||1||21||Y);
 #            (2) InpMagic: ancora 772601/772602, qui 789520.
-#        - 48 nomi in piu' qui: sono i default compilati che R54a
+#          >>> E DUE DEI 31 "IDENTICI" LO SONO SOLO SULLA RIGA SCELTA, e
+#              va detto: `InpAllowLong` e `InpAllowShort` in R54a sono
+#              ASSI (0/1), non pin. Coincidono col nostro true/false
+#              perche' la riga d'ancora e' la cella L=1/S=0 -- che e'
+#              esattamente la riga che S1 legge. Su un'altra delle
+#              quattro celle di R54a non coinciderebbero.
+#        - 47 nomi in piu' qui: sono i default compilati che R54a
 #          lasciava impliciti, riscritti ESPLICITI perche' uno stato
 #          implicito non e' uno stato dichiarato (classe 342). Che
 #          coincidano con quello che R54a ha visto lo garantisce il
 #          `git diff` qui sopra: nessun default e' cambiato dal 14/08.
-#        - 1 nome in MENO: `InpNewsCurrencies`, e NON e' una
+#        - 0 nomi in MENO rispetto a R54a: tutte e 33 le sue righe ci
+#          sono anche qui. L'UNICO nome mancante e' rispetto agli 81
+#          dell'EA (e agli 81 del .set), ed e' `InpNewsCurrencies` --
+#          che in R54a non c'era comunque. Lo scrivo separato perche'
+#          e' un ALTRO confronto: 81 contro 80, non 33 contro 80.
+#        - `InpNewsCurrencies`, dunque, e NON e' una
 #          dimenticanza. Il suo valore vivo e' la stringa VUOTA, e un
 #          pin a valore vuoto MT5 LO IGNORA (e' il difetto per cui
 #          controlla_prova.py esiste: la sua intestazione lo racconta a
@@ -545,7 +610,7 @@
 #               ABTG_Dow_Apertura_US_U30USD_IS_r172b.csv   e  ..._OOS_r172b.csv
 #      riga con InpCloseHour = 17
 #                             IS (atteso)          OOS (atteso)
-#      Trades ..........  73 - 75   (74)       128 - 132   (130)
+#      Trades ..........  72 - 76   (74)       128 - 132   (130)
 #      Profit Factor ...  1,198 - 1,247        1,245 - 1,296
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
@@ -556,6 +621,25 @@
 #    - PF, DD, Profit: FRAZIONE DELL'ANCORA, +/- 2,0%.
 #    - Trades: NUMERO INTERO DI OPERAZIONI, +/- 2 (non una percentuale:
 #      su 74 il 2% sarebbe 1,5 operazioni, che non esiste).
+#      >>> !! CORREZIONE DEL CANCELLO, e mordeva su una sentinella
+#          BLOCCANTE. La prima stesura scriveva la riga IS come
+#          `73 - 75`, cioe' +/- UNO, mentre il criterio qui e gli altri
+#          DUE posti che lo riusano dicono +/- DUE: S3 ("un calo oltre
+#          le 2 operazioni, la stessa semiampiezza di S1") e il
+#          contro-esempio sulla banda ("QUATTRO VOLTE la semiampiezza
+#          di +/-2" -- che con +/-1 sarebbe stato NOVE volte). Tre voci
+#          contro una: il refuso era la CELLA, non la regola.
+#          >>> PERCHE' NON ERA COSMETICO: S1 e' bloccante e ferma tutto
+#              il round. Con `73 - 75` un IS a 72 o a 76 -- dentro la
+#              tolleranza DICHIARATA -- avrebbe fatto scrivere "il banco
+#              di oggi non e' quello di R54a" su una corsa sana. E il
+#              binario NON e' quello dell'ancora (+27 righe) e il
+#              terminale e' un altro: una deriva di una-due uscite su 74
+#              e' esattamente il caso da non confondere con un banco
+#              sporco. La banda ora e' 72 - 76, come il criterio.
+#          >>> IL DIFETTO ERA IDENTICO NEI DUE FILE, ed e' coerente col
+#              fatto che le bande sono condivise di proposito: corretto
+#              in tutti e due nello stesso passaggio.
 #    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
 #      gia' una percentuale e una banda relativa su un numero piccolo
 #      scenderebbe sotto la granularita' stampata dalla fonte.

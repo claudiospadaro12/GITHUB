@@ -46,12 +46,29 @@
 #     cioe' deposito 100000 ESPLICITO e NESSUN -Modello -> il default
 #     del driver, che a quella data era 4 = TICK REALI. Verificato
 #     APRENDO IL DRIVER AL COMMIT GIUSTO, non ricordato:
-#        git rev-list -1 --before=2026-08-15 lavoro  ->  60fb791c
-#        git show 60fb791c:backtest_pipeline/walkforward_generico.ps1
+#        git rev-list -1 --before="2026-08-15T00:00:00Z" lavoro -> bca63798
+#        git show bca63798:backtest_pipeline/walkforward_generico.ps1
 #          r.62 $Fino = "2026.06.30"   r.64 $FrazioneIS = 0.40
 #          r.65 $Modello = 4           r.66 $Deposito = 10000
 #     (a HEAD le stesse quattro righe sono r.177/179/180/190 e portano
 #      gli stessi valori: il default NON si e' mosso in un mese.)
+#     >>> !! CORREZIONE DEL CANCELLO (classe 379). La prima stesura
+#         scriveva `--before=2026-08-15` (senza ora ne' fuso) e come
+#         risultato `60fb791c`. RIESEGUITO OGGI quel comando torna
+#         `d4049af8`, NON `60fb791c`: una data senza ora la si confronta
+#         col fuso locale della macchina, e la potatura per data di
+#         `rev-list` non e' un ordine totale. Il comando qui sopra e'
+#         quello che HO ESEGUITO, con l'istante in UTC esplicito, e
+#         rilanciato tre volte da' sempre `bca63798`.
+#         >>> E il commit e' anche PIU' GIUSTO di quello di prima:
+#             `bca63798` e' del 2026-08-14 22:22 UTC, cioe' l'ULTIMO
+#             commit del giorno in cui R54a e' girato; `60fb791c` e
+#             `d4049af8` sono tutti e due del 15/08, cioe' del giorno
+#             DOPO la corsa d'ancora.
+#         >>> I VALORI NON CAMBIANO -- verificati a tutti e tre i commit,
+#             stesse righe 62/64/65/66, stessi quattro valori. Cambia la
+#             RIPRODUCIBILITA', che e' esattamente cio' che la classe
+#             379 esiste per difendere.
 #     >>> CONSEGUENZA CHE VALE PIU' DI TUTTO IL RESTO: la finestra e il
 #         taglio dell'ancora NON sono persi. R54a non ha @FINOA ne'
 #         @FRAZIONEIS nel file prova -- il difetto della classe 375 --
@@ -415,9 +432,15 @@
 #        git diff --stat 8b922147 HEAD -- \
 #          mql5/Experts/ABTG_Dow_Apertura_US.mq5
 #        -> 1 file changed, 27 insertions(+)    [zero cancellazioni]
-#      Le 27 righe sono TUTTE il Guardian: 1 `#include`, 12 righe di
-#      commento, 1 `input bool InpUsaGuardian = true` e 7 punti di
-#      chiamata `ABTG_GuardiaIngresso(...)` davanti agli ordini.
+#      Le 27 righe sono TUTTE il Guardian, e la scomposizione TORNA a 27
+#      (ricontata riga per riga dal cancello: la prima stesura diceva
+#      "12 righe di commento" e sommava a 21, non a 27):
+#        1  `#include <ABTG_PausaGuardian.mqh>`
+#       11  righe di commento sopra l'input
+#        1  `input bool InpUsaGuardian = true`
+#        7  righe `//--- firme B1/C1 ...`, una per punto di chiamata
+#        7  punti di chiamata `ABTG_GuardiaIngresso(...)`
+#       --  1 + 11 + 1 + 7 + 7 = 27, zero cancellazioni.
 #      `git diff ... | grep -E "^[+-]input|^[+-]#define"` torna UNA sola
 #      riga, ed e' quell'input: NESSUN default di NESSUNA manopola e'
 #      cambiato fra l'ancora e oggi.
@@ -438,21 +461,34 @@
 #          terminale di backtest.
 #
 #  >>> LE DIFFERENZE FRA I PIN DI QUESTO FILE E QUELLI DELL'ANCORA, E LE
-#      CONTO A MACCHINA E NON A OCCHIO. R54a pinna 32 input su 81 e
-#      lascia gli altri 49 al default compilato; questo file ne pinna 80
-#      (tutti tranne uno, vedi sotto). Il confronto giusto non e'
-#      "quanti pin", e' "quale VALORE ha visto l'EA", e il confronto per
-#      nome fra i 32 pin di R54a e le 80 righe di qui da':
-#        - 32 nomi in comune -> 30 IDENTICI, 2 DIVERGENTI, e sono:
+#      CONTO A MACCHINA E NON A OCCHIO. R54a scrive 33 righe di valore
+#      sulle 81 dell'EA -- e sono 30 PIN piu' TRE ASSI (`InpMagic`,
+#      `InpAllowLong`, `InpAllowShort`) -- e lascia le altre 48 al
+#      default compilato; questo file ne scrive 80 (tutte tranne una,
+#      vedi sotto). Il confronto giusto non e' "quanti pin", e' "quale
+#      VALORE ha visto l'EA SULLA RIGA D'ANCORA" (quella L=1 / S=0), e
+#      il confronto per nome fra le 33 righe di R54a e le 80 di qui da':
+#        - 33 nomi in comune -> 31 IDENTICI, 2 DIVERGENTI, e sono:
 #            (1) InpTrailStartR, che e' L'ASSE
 #                (ancora 0||0||0||0||N, qui 0||0||0.25||1.5||Y);
 #            (2) InpMagic: ancora 772601/772602, qui 789510.
-#        - 48 nomi in piu' qui: sono i default compilati che R54a
+#          >>> E DUE DEI 31 "IDENTICI" LO SONO SOLO SULLA RIGA SCELTA, e
+#              va detto: `InpAllowLong` e `InpAllowShort` in R54a sono
+#              ASSI (0/1), non pin. Coincidono col nostro true/false
+#              perche' la riga d'ancora e' la cella L=1/S=0 -- che e'
+#              esattamente la riga che S1 legge. Su un'altra delle
+#              quattro celle di R54a non coinciderebbero.
+#        - 47 nomi in piu' qui: sono i default compilati che R54a
 #          lasciava impliciti, riscritti ESPLICITI perche' uno stato
 #          implicito non e' uno stato dichiarato (classe 342). Che
 #          coincidano con quello che R54a ha visto lo garantisce il
 #          `git diff` qui sopra: nessun default e' cambiato dal 14/08.
-#        - 1 nome in MENO: `InpNewsCurrencies`, e NON e' una
+#        - 0 nomi in MENO rispetto a R54a: tutte e 33 le sue righe ci
+#          sono anche qui. L'UNICO nome mancante e' rispetto agli 81
+#          dell'EA (e agli 81 del .set), ed e' `InpNewsCurrencies` --
+#          che in R54a non c'era comunque. Lo scrivo separato perche'
+#          e' un ALTRO confronto: 81 contro 80, non 33 contro 80.
+#        - `InpNewsCurrencies`, dunque, e NON e' una
 #          dimenticanza. Il suo valore vivo e' la stringa VUOTA, e un
 #          pin a valore vuoto MT5 LO IGNORA (e' il difetto per cui
 #          controlla_prova.py esiste: la sua intestazione lo racconta a
@@ -480,7 +516,7 @@
 #               ABTG_Dow_Apertura_US_U30USD_IS_r172a.csv   e  ..._OOS_r172a.csv
 #      riga con InpTrailStartR = 0
 #                             IS (atteso)          OOS (atteso)
-#      Trades ..........  73 - 75   (74)       128 - 132   (130)
+#      Trades ..........  72 - 76   (74)       128 - 132   (130)
 #      Profit Factor ...  1,198 - 1,247        1,245 - 1,296
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
@@ -491,6 +527,22 @@
 #    - PF, DD, Profit: FRAZIONE DELL'ANCORA, +/- 2,0%.
 #    - Trades: NUMERO INTERO DI OPERAZIONI, +/- 2 (non una percentuale:
 #      su 74 il 2% sarebbe 1,5 operazioni, che non esiste).
+#      >>> !! CORREZIONE DEL CANCELLO, e mordeva su una sentinella
+#          BLOCCANTE. La prima stesura scriveva la riga IS come
+#          `73 - 75`, cioe' +/- UNO, mentre il criterio qui e gli altri
+#          DUE posti che lo riusano dicono +/- DUE: S3 ("un calo oltre
+#          le 2 operazioni, la stessa semiampiezza di S1") e il
+#          contro-esempio sulla banda ("QUATTRO VOLTE la semiampiezza
+#          di +/-2" -- che con +/-1 sarebbe stato NOVE volte). Tre voci
+#          contro una: il refuso era la CELLA, non la regola.
+#          >>> PERCHE' NON ERA COSMETICO: S1 e' bloccante e ferma tutto
+#              il round. Con `73 - 75` un IS a 72 o a 76 -- dentro la
+#              tolleranza DICHIARATA -- avrebbe fatto scrivere "il banco
+#              di oggi non e' quello di R54a" su una corsa sana. E il
+#              binario NON e' quello dell'ancora (+27 righe) e il
+#              terminale e' un altro: una deriva di una-due uscite su 74
+#              e' esattamente il caso da non confondere con un banco
+#              sporco. La banda ora e' 72 - 76, come il criterio.
 #    - Peggior Giornata %: PUNTI PERCENTUALI PIENI, +/- 0,05, perche' e'
 #      gia' una percentuale e una banda relativa su un numero piccolo
 #      scenderebbe sotto la granularita' stampata dalla fonte.
@@ -691,8 +743,22 @@
 #      (ii)  IL RIBALTAMENTO IS->OOS E' DOCUMENTATO SU QUESTO ASSE, ED
 #            E' IL PERICOLO PIU' CONCRETO. Sul DAX, in campione, la
 #            soglia 1,00 era LA MIGLIORE su tutte e cinque le righe TF
-#            e fuori campione LA PEGGIORE su tutte e cinque: Spearman
-#            IS->OOS -0,44 (REFERTO_ROUND24_TRAILING.md r.20-24). Chi
+#            e fuori campione LA PEGGIORE su tutte e cinque -- che e'
+#            scritto alla lettera in Walkforward_Aperture/
+#            REFERTO_TRAILING_SOGLIA.md r.56-57 ("In campione la soglia
+#            1,0 e' la migliore in tutte e cinque le righe. Fuori
+#            campione e' la peggiore in tutte e cinque"), con le due
+#            tabelle per riga a r.36-40 (OOS) e r.48-54 (IS). Lo
+#            Spearman IS->OOS -0,44 sulle 25 celle sta li' (r.57-58) e,
+#            in forma aggregata, in REFERTO_ROUND24_TRAILING.md r.20-24.
+#            >>> LA CITAZIONE E' DOPPIA APPOSTA (correzione del
+#                cancello): la prima stesura appendeva "tutte e cinque
+#                le righe TF" al solo R24 r.20-24, che pero' porta le
+#                MEDIE per soglia, non il dettaglio per riga. Il fatto
+#                e' vero -- ma la fonte che lo dimostra e' l'altra, ed
+#                e' gia' citata dodici righe piu' su in questo stesso
+#                file (classe 377 punto 2: la fonte si nomina dove sta
+#                il dato, non dove sta il discorso). Chi
 #            avesse scelto guardando l'IS avrebbe montato la cella
 #            peggiore. Su QUESTO round la conseguenza operativa e'
 #            congelata adesso: SE l'IS preferisce una soglia alta, quel
