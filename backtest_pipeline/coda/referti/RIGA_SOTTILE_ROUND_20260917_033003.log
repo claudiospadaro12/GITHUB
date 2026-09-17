@@ -1,0 +1,60 @@
+=== RIGA SOTTILE -- UN ROUND SUL SOLO TERMINALE DA BACKTEST ===
+    MARCATORE_RIGA_SOTTILE_ROUND_v1
+data     : 2026-09-17 18:11:16   (ora locale del VPS)
+banco    : C:\MT5_Backtest   (conto 50504400, demo solo-tester)
+pin fisso: 44edd730a9c45703f696bb85265f65fc4619b38d
+round    : EA ABTG_SuperWave_DOW_H1_Ottimizzato . prova R173c_breakeven_superwave_U30USD.txt . etichetta r173c
+          modello 4 . deposito 100000
+
+AVVERTENZA DICHIARATA: il driver prende l'EA .mq5 e gli include dalla
+TESTA del branch 'lavoro', NON da questo pin. Il pin inchioda i due .ps1,
+non il codice MQL5 compilato. Se stanotte qualcuno ha toccato l'EA sul
+branch, il round gira su QUELLA versione.
+
+    banco trovato: C:\MT5_Backtest\terminal64.exe
+
+--- IL CODICE CHE STA PER GIRARE, INCHIODATO AL BYTE -----------------
+    backtest_pipeline/righe/RIGA_ROUND_VPS.ps1
+        impronta SHA-256 verificata . marcatore MARCATORE_RIGA_ROUND_VPS_v1 presente
+    backtest_pipeline/walkforward_generico.ps1
+        impronta SHA-256 verificata . marcatore MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE presente
+  (il secondo file lo riscarichera' il driver dallo STESSO pin: qui e'
+   scaricato solo per provare, PRIMA di partire, che a quel pin ci sono
+   i byte giusti. Un commit git non cambia: se l'impronta torna adesso,
+   tornera' anche fra due minuti.)
+---------------------------------------------------------------------
+
+--- CORSA ------------------------------------------------------------
+=== ROUND SUL TERMINALE DA BACKTEST ===
+    MARCATORE_RIGA_ROUND_VPS_v1
+data: 2026-09-17 18:11:19
+pin : 44edd730a9c45703f696bb85265f65fc4619b38d
+term: C:\MT5_Backtest
+    bersaglio AMMESSO dalla guardia positiva: C:\MT5_Backtest   (conto 50504400)
+
+--- TERMINALI MT5 VISTI ADESSO (PRIMA) ------------------------------
+  BERSAGLIO (terminale da backtest): nessuno vivo. Bene.
+  LASCIATI VIVI (forward e CONTO REALE: NON li tocco):
+    PID 7824    C:\BCM_Reale\terminal64.exe
+    PID 8664    C:\Program Files\BCM Markets MT5 Terminal -V3\terminal64.exe
+    PID 9780    C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+---------------------------------------------------------------------
+
+    tetto barre: MaxBars=10000000 -- sufficiente.
+
+    driver: scaricato e marcatore v5 verificato.
+
+ERRORE: scarico fallito: https://raw.githubusercontent.com/claudiospadaro12/GITHUB/44edd730a9c45703f696bb85265f65fc4619b38d/backtest_pipeline/prove/R173c_breakeven_superwave_U30USD.txt -- Errore del server remoto: (404) Non trovato.
+---------------------------------------------------------------------
+
+DURATA: 3s   CODICE D'USCITA DEL ROUND: 1
+  1 = non e' nemmeno partito: il pre-volo ha fermato la corsa. Il motivo e' stampato qui sopra.
+
+COSA GUARDARE LA MATTINA, in quest'ordine:
+  1. la riga 'PID vivi PRIMA' e 'PID vivi DOPO' qui sopra: devono essere
+     GLI STESSI. Se manca un numero, il referto lo grida e va controllato
+     subito il terminale in forward corrispondente.
+  2. il codice d'uscita qui sopra.
+  3. i CSV: Desktop\ROUND_<etichetta>\ e la cartella risultati_prove.
+
+ESITO RIGA SOTTILE: uscita 1
