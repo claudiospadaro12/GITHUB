@@ -41,9 +41,28 @@
 #      questo round e' il CSV **IS** -- quello e' l'unica finestra che
 #      esiste. Se il CSV IS c'e', e' fresco e ha 7 righe con Trades > 0,
 #      il round E' GIRATO. Va scritto cosi' nel referto, non "fallito".
-#      (Stessa situazione, stessa dichiarazione, di R154a/R156a/R157a/
-#      R158a/R159a: non e' una novita' di questo file, e' una
-#      conseguenza nota della direttiva.)
+#      (Stessa situazione di R154a/R156a/R157a/R158a/R159a e di ogni
+#      altro file a tranche unica: non e' una novita' di questo file,
+#      e' una conseguenza nota della direttiva.
+#      >>> RIGA CORRETTA IL 17/09/2026, ed e' un errore di questo file:
+#          qui c'era scritto che quei cinque portavano "la stessa
+#          dichiarazione". NON ERA VERO -- verificato col grep, nessuno
+#          dei cinque nominava ne' l'ESITO ne' il CODICE D'USCITA della
+#          corsia. Da quella lacuna nasce la CLASSE 395 della checklist,
+#          e la dichiarazione e' stata aggiunta a tutti e cinque lo
+#          stesso giorno: la frase oggi e' vera perche' e' stata RESA
+#          vera, non perche' lo fosse quando e' stata scritta.)
+#      >>> COMPLETATO IL 17/09/2026 coi due punti che la CLASSE 395
+#          aggiunge e che qui mancavano:
+#          (a) **NON SI RILANCIA.** A fine corsa il driver stampa in
+#              ROSSO, a r.1720-1731, "!!! QUESTI NON SONO STATI
+#              PRODOTTI" + "Rilancia lo STESSO comando SENZA -Rifai":
+#              QUELL'ISTRUZIONE, QUI, NON VA SEGUITA -- rifarebbe una
+#              corsa intera per un file che non puo' esistere;
+#          (b) **il verdetto nel referto si scrive A MANO**, mai
+#              copiando la riga automatica: su un round a tranche unica
+#              quella riga e' nota per essere falsa. Il rosso resta VERO
+#              se il CSV IS manca, e' vecchio o ha Trades = 0.
 #
 #  -Modello 1 = OHLC M1, LIMITE DICHIARATO: la finestra parte dal 1999 e
 #  i tick reali di BCM non esistono la'. Un numero OHLC e' SCREENING,

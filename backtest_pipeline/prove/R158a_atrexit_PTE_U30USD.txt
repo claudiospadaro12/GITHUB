@@ -28,6 +28,34 @@
 #  finestra e' quella degli indici (21 mesi) e il tick c'e' per intero:
 #  si usa il modello migliore disponibile, non lo stesso di R153a per
 #  automatismo.
+#
+#  >>> [ATTENZIONE] AVVISO OPERATIVO -- CLASSE 395 DELLA CHECKLIST, DA
+#      LEGGERE PRIMA DI LANCIARE E PRIMA DI SCRIVERE IL REFERTO.
+#      Che con `@FRAZIONEIS 1.0` nessun CSV `*_OOS` esista e' gia' detto
+#      altrove in questo file, ed e' il FATTO. La CONSEGUENZA -- che e'
+#      quella che si perde -- e' un VERDETTO STAMPATO. Tracciata riga per
+#      riga sugli script, non dedotta:
+#        1. `walkforward_generico.ps1` r.731-733 avvisa da se': "FrazioneIS
+#           1.0 = UNA SOLA TRANCHE. La gamba OOS e' DEGENERE (finestra
+#           vuota): il CSV _OOS non descrive niente";
+#        2. lo STESSO driver, a r.1720-1731, attende DUE CSV e chiude in
+#           ROSSO con "!!! QUESTI NON SONO STATI PRODOTTI" + "Rilancia lo
+#           STESSO comando SENZA -Rifai". >>> QUELL'ISTRUZIONE, QUI, NON
+#           VA SEGUITA: rilanciare rifarebbe una corsa intera per produrre
+#           un file che NON PUO' esistere;
+#        3. `RIGA_ROUND_VPS.ps1` r.732-741 conta l'OOS fra i MANCANTI e
+#           scrive nel referto del Desktop **ESITO: NON MISURATO -- CSV
+#           mancanti o vuoti: OOS**, e a r.836 esce con **CODICE D'USCITA
+#           2** (il runner segna "fallito" tutto cio' che non e' 0).
+#      >>> QUESTO ESITO E' ATTESO E NON E' UN FALLIMENTO. L'artefatto di
+#          questo round e' il CSV **IS**, l'unica finestra che esiste: se
+#          il CSV IS c'e', e' FRESCO e porta 7 righe con Trades > 0,
+#          **IL ROUND E' GIRATO**, e va scritto cosi' nel referto. Il
+#          verdetto si scrive A MANO, MAI copiando la riga automatica: su
+#          un round a tranche unica quella riga e' nota per essere falsa.
+#      >>> E IL ROSSO RESTA VERO SE IL CSV **IS** MANCA, E' VECCHIO O HA
+#          Trades = 0: "l'esito rosso e' atteso" vale SOLO per l'OOS, mai
+#          come permesso di ignorare un rosso qualunque.
 # ---------------------------------------------------------------------
 #  PERCHE' QUESTA SEDIA E NON UN'ALTRA -- coi numeri, non a sensazione,
 #  verificato contro il repo vero oggi (non a memoria di un censimento
