@@ -262,10 +262,12 @@ double g_slopeMinPrezzo=0.0, g_atrMinPrezzo=0.0, g_haTollPrezzo=0.0, g_emaSlopeM
 datetime g_ultAlertSeg=0, g_ultAlertRide=0;
 string g_pre="";
 string g_originaUlt="";
+int    g_barOrigUlt=-1;
 
 //--- prototipi
-bool   CalcolaTR(const int rates_total,const double &high[],const double &low[],const double &close[]);
-bool   AtrSerie(const int rates_total,const int periodo,double &out[]);
+bool   CalcolaTR(const int rates_total,const int da,
+                 const double &high[],const double &low[],const double &close[]);
+bool   AtrSerie(const int rates_total,const int periodo,const int da,double &out[]);
 bool   FiltriExtra(const int i,const int verso,const double &close[],const datetime &time[]);
 void   Avvisa(const string testo);
 string EtichettaTF();
@@ -431,6 +433,21 @@ int OnInit()
    //--- il prefisso distingue l'ISTANZA, non solo il grafico: due copie dello
    //    stesso indicatore sullo stesso grafico si sovrascriverebbero il
    //    pannello a ogni tick, e si leggerebbero numeri dell'altro assetto.
+   //--- R-6: la testa dei buffer COPIATI (EMA, BB, Cross) non la pulisce
+   //    nessuno: arriva da CopyBuffer e contiene quello che ci lascia
+   //    l'indicatore di serie. Senza PLOT_DRAW_BEGIN la "EMA 200" si
+   //    disegnerebbe anche dove non e' ancora una EMA 200. E se quella testa
+   //    contenesse EMPTY_VALUE (= DBL_MAX) invece di 0.0 -- [NON MISURATO],
+   //    non c'e' un terminale qui -- con PLOT_EMPTY_VALUE a 0.0 quei valori
+   //    diventerebbero punti REALI e la scala verticale del grafico
+   //    esploderebbe. Queste sei righe chiudono le due cose insieme.
+   PlotIndexSetInteger(1,PLOT_DRAW_BEGIN,InpEmaFast);
+   PlotIndexSetInteger(2,PLOT_DRAW_BEGIN,InpEmaMid);
+   PlotIndexSetInteger(3,PLOT_DRAW_BEGIN,InpEmaSlow);
+   PlotIndexSetInteger(4,PLOT_DRAW_BEGIN,InpEmaFondo);
+   for(int p=5;p<=7;p++) PlotIndexSetInteger(p,PLOT_DRAW_BEGIN,g_bbLen-1);
+   for(int p=8;p<=9;p++) PlotIndexSetInteger(p,PLOT_DRAW_BEGIN,g_crLen-1);
+
    g_pre="ABTGSER_"+IntegerToString(ChartID())+"_"+
          IntegerToString(InpAtrPeriodST)+"x"+DoubleToString(InpMultST,1)+"_"+
          IntegerToString(g_bbLen)+"_"+IntegerToString(InpSlopeBarre)+"_"+
@@ -472,16 +489,32 @@ void OnDeinit(const int reason)
 //| Quindi il True Range si calcola UNA volta e le ATR si smorzano    |
 //| qui, nella convenzione scelta. La RMA ha memoria infinita: si     |
 //| rifa' sempre dal seme, che e' la SMA del primo periodo come       |
-//| ta.rma() del Pine. Costo O(n) per tick, MENO della SMA a finestra |
-//| O(n*P) che c'era prima.                                           |
+//| ta.rma() del Pine.                                                |
+//| COSTO, e il conto va scritto SEPARATO PER RAMO, perche' la prima   |
+//| stesura lo sbagliava di tre ordini di grandezza confrontando il    |
+//| ricalcolo pieno nuovo con la CODA del vecchio:                     |
+//|   - ricalcolo PIENO (prev_calculated==0): 3 passate O(n), contro   |
+//|     O(n*P) della SMA a finestra di prima. Qui il nuovo VINCE.      |
+//|   - per TICK: si ricalcola da 'da' = prev_calculated-1, cioe' le   |
+//|     sole barre nuove. TR[i] e la RMA dipendono solo da i-1, quindi |
+//|     la coda e' ESATTA, non approssimata. Senza questo, a 100.000   |
+//|     barre erano 300.000 iterazioni per tick (~2.700 volte il       |
+//|     vecchio), e su un feed a 20-50 tick/s l'indicatore non sta     |
+//|     dietro al flusso.                                              |
+//| Le due strade in cui gli indici possono TRASLARE sono coperte:     |
+//| MT5 passa prev_calculated==0 quando carica storico a sinistra, e   |
+//| se rates_total cambia scatta comunque ArraySize()!=rates_total.    |
 //+------------------------------------------------------------------+
-bool CalcolaTR(const int rates_total,const double &high[],const double &low[],const double &close[])
+bool CalcolaTR(const int rates_total,const int da,
+               const double &high[],const double &low[],const double &close[])
   {
    if(rates_total<2) return(false);
+   bool tutto=(ArraySize(TRv)!=rates_total || da<1);
    if(ArraySize(TRv)!=rates_total) ArrayResize(TRv,rates_total);
    ArraySetAsSeries(TRv,false);
-   TRv[0]=high[0]-low[0];
-   for(int i=1;i<rates_total;i++)
+   int i0=da;
+   if(tutto){ TRv[0]=high[0]-low[0]; i0=1; }
+   for(int i=i0;i<rates_total;i++)
      {
       double a=high[i]-low[i];
       double b=MathAbs(high[i]-close[i-1]);
@@ -491,25 +524,39 @@ bool CalcolaTR(const int rates_total,const double &high[],const double &low[],co
    return(true);
   }
 
-bool AtrSerie(const int rates_total,const int periodo,double &out[])
+bool AtrSerie(const int rates_total,const int periodo,const int da,double &out[])
   {
    if(periodo<1 || rates_total<periodo) return(false);
+   bool tutto=(ArraySize(out)!=rates_total || da<periodo);
    if(ArraySize(out)!=rates_total) ArrayResize(out,rates_total);
    ArraySetAsSeries(out,false);
-   for(int i=0;i<periodo-1;i++) out[i]=0.0;
-   double sm=0.0;
-   for(int k=0;k<periodo;k++) sm+=TRv[k];
-   out[periodo-1]=sm/(double)periodo;
+   int i0=da;
+   double somma=0.0;
+   if(tutto)
+     {
+      for(int i=0;i<periodo-1;i++) out[i]=0.0;
+      for(int k=0;k<periodo;k++) somma+=TRv[k];
+      out[periodo-1]=somma/(double)periodo;
+      i0=periodo;
+     }
    if(InpAtrModoRma)
      {
+      //--- la RMA e' ricorsiva, ma out[i0-1] della passata prima E' il
+      //    valore definitivo: la coda riprende esatta. i0>=periodo sempre.
       double alfa=1.0/(double)periodo;
-      for(int i=periodo;i<rates_total;i++) out[i]=out[i-1]+alfa*(TRv[i]-out[i-1]);
+      for(int i=i0;i<rates_total;i++) out[i]=out[i-1]+alfa*(TRv[i]-out[i-1]);
+     }
+   else if(tutto)
+     {
+      for(int i=i0;i<rates_total;i++)
+        { somma+=TRv[i]-TRv[i-periodo]; out[i]=somma/(double)periodo; }
      }
    else
      {
-      double somma=sm;
-      for(int i=periodo;i<rates_total;i++)
-        { somma+=TRv[i]-TRv[i-periodo]; out[i]=somma/(double)periodo; }
+      //--- poche barre: la finestra si somma DIRETTA, cosi' la coda non
+      //    riparte da una somma scorrevole gia' arrotondata.
+      for(int i=i0;i<rates_total;i++)
+        { double sm=0.0; for(int k=0;k<periodo;k++) sm+=TRv[i-k]; out[i]=sm/(double)periodo; }
      }
    return(true);
   }
@@ -537,6 +584,21 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    //    E la EMA di FONDO pesa sulla finestra SOLO se filtra davvero:
    //    altrimenti 200 barre di storico si pagano per una linea disegnata, e
    //    l'anti-doppione parte 144 barre piu' tardi del necessario.
+   //
+   //    [NON MISURATO] -- e la prima stesura di questo commento sbagliava.
+   //    Diceva "iMA lascia la testa a 0.0, quindi la pendenza usciva
+   //    EMA-0 = +18.000". Quel meccanismo NON e' verificato: qui non c'e'
+   //    un terminale, e in repo non esiste nessuna misura su come iMA
+   //    riempie la testa con MODE_EMA (cercata: zero risultati). Potrebbe
+   //    essere piu' mite -- una EMA lenta ancora NON CONVERGENTE invece di
+   //    uno zero secco -- e allora il segnale finto e' meno violento di
+   //    come era scritto.
+   //    LA CORREZIONE RESTA, e resta giusta per una ragione che NON dipende
+   //    da quale sia il meccanismo: leggere una media dove non e' ancora
+   //    formata non si fa, qualunque cosa ci sia scritto dentro. E
+   //    diventerebbe indispensabile il giorno in cui una di queste medie
+   //    passasse a MODE_SMA. E' una correzione CONSERVATIVA: era la
+   //    giustificazione a essere troppo sicura di se', non il rimedio.
    int piuLungo=(int)MathMax(InpAtrPeriodST,MathMax(g_bbLen,MathMax(g_crLen,
                 MathMax(InpAtrLen+InpAtrAvgLen,
                 MathMax(InpEmaFast,MathMax(InpEmaMid,InpEmaSlow))))));
@@ -562,9 +624,10 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(start<minimo) start=minimo;
 
    //--- serie di appoggio --------------------------------------------------
-   if(!CalcolaTR(rates_total,high,low,close))      return(prev_calculated);
-   if(!AtrSerie(rates_total,InpAtrPeriodST,AtrST)) return(prev_calculated);
-   if(!AtrSerie(rates_total,InpAtrLen,AtrF))       return(prev_calculated);
+   int daSerie=(prev_calculated>0)?prev_calculated-1:0;
+   if(!CalcolaTR(rates_total,daSerie,high,low,close))       return(prev_calculated);
+   if(!AtrSerie(rates_total,InpAtrPeriodST,daSerie,AtrST))  return(prev_calculated);
+   if(!AtrSerie(rates_total,InpAtrLen,daSerie,AtrF))        return(prev_calculated);
    if(ArraySize(AtrFAvg)!=rates_total) ArrayResize(AtrFAvg,rates_total);
    ArraySetAsSeries(AtrFAvg,false);
    if(CopyBuffer(hE1,0,0,rates_total,BufE1)<rates_total) return(prev_calculated);
@@ -760,7 +823,7 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(segS) BufShort[i]=high[i]+AtrF[i]*0.6;
 
       //--- da dove e' NATO: si legge la maschera della barra del GREZZO
-      if(segL || segS) g_originaUlt=OriginiDa(i);
+      if(segL || segS){ g_originaUlt=OriginiDa(i); g_barOrigUlt=i; }
      }
 
    //=========== AVVISI ==================================================
@@ -792,6 +855,22 @@ int OnCalculate(const int rates_total,const int prev_calculated,
         }
      }
 
+   //--- B2: l'origine MOSTRATA deve appartenere a un segnale ANCORA VIVO.
+   //    La conferma guarda close[i], che si muove DENTRO la barra in
+   //    formazione: un segnale nato a un tick puo' SPARIRE al tick dopo, e
+   //    lascerebbe nel pannello l'origine di un segnale che non c'e' piu'.
+   //    Proprio la misura per cui il pannello esiste: quale delle tre
+   //    origini merita di diventare una sedia.
+   if(g_barOrigUlt<0 || g_barOrigUlt>=rates_total ||
+      (BufLong[g_barOrigUlt]<=0.0 && BufShort[g_barOrigUlt]<=0.0))
+     {
+      g_originaUlt=""; g_barOrigUlt=-1;
+      int lim=(rates_total-1-4000>minimo)?rates_total-1-4000:minimo;
+      for(int i=rates_total-1;i>=lim;i--)
+         if(BufLong[i]>0.0 || BufShort[i]>0.0)
+           { g_originaUlt=OriginiDa(i); g_barOrigUlt=i; break; }
+     }
+
    if(InpPannello) DisegnaPannello(rates_total,close,time);
    return(rates_total);
   }
@@ -802,6 +881,11 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 //+------------------------------------------------------------------+
 string OriginiDa(const int i)
   {
+   //--- R-5: senza questa riga, chiamata su una barra SENZA segnale la
+   //    funzione cadrebbe sul ramo short e restituirebbe la maschera
+   //    sbagliata. Oggi le due chiamate sono protette; questa la rende
+   //    sicura anche per la prossima modifica.
+   if(BufLong[i]<=0.0 && BufShort[i]<=0.0) return("?");
    double v=(BufLong[i]>0.0)?((InpConferma && i>0)?BufRawL[i-1]:BufRawL[i])
                             :((InpConferma && i>0)?BufRawS[i-1]:BufRawS[i]);
    int m=(int)v;
@@ -918,7 +1002,7 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
    double kPip=(_Digits>=4)?0.0001:((_Digits==3 || _Digits==2)?0.01:1.0);
    bool   fxCat2=(g_categoria=="FX" || g_categoria=="FX_JPY");
    bool kSospetto=(sogliaInAtr>5.0 || (sogliaInAtr<0.001 && sogliaInAtr>0.0) ||
-                   (fxCat2 && MathAbs(g_K-kPip)>kPip*0.5));
+                   (fxCat2 && InpKAuto && MathAbs(g_K-kPip)>kPip*0.5));
 
    Riga(0,"ABTG BR+EMA+ST v2.00   "+_Symbol+" "+EtichettaTF(),InpPannelloColore);
    Riga(1,StringFormat("categoria  : %-7s %s   K = %s",
@@ -936,7 +1020,7 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
         (BufDir[i]>0.0?clrLimeGreen:clrRed));
    Riga(4,StringFormat("EMA 9/21/50: %-5s   200: %s",
         (BufE1[i]>BufE2[i] && BufE2[i]>BufE3[i])?"LONG":((BufE1[i]<BufE2[i] && BufE2[i]<BufE3[i])?"SHORT":"MISTO"),
-        (BufE4[i]>0.0?(close[i]>BufE4[i]?"sopra":"sotto"):"n/d")),
+        ((i>=InpEmaFondo && BufE4[i]>0.0)?(close[i]>BufE4[i]?"sopra":"sotto"):"n/d")),
         ((BufE1[i]>BufE2[i] && BufE2[i]>BufE3[i])?clrLimeGreen:
         ((BufE1[i]<BufE2[i] && BufE2[i]<BufE3[i])?clrRed:clrGray)));
    Riga(5,StringFormat("BB %d x %.1f : largh %.0f pt   espans %+.2f%% %s",
@@ -1003,9 +1087,13 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
 //|    bloccherebbero comunque), ma e' una divergenza reale.         |
 //|                                                                  |
 //| F) FILTRI EXTRA che nel v1.2 non esistono: EMA 200, Supertrend   |
-//|    concorde, riding attivo, finestra oraria. Tutti spenti di     |
-//|    default, quindi al default il comportamento e' quello del     |
-//|    v1.2.                                                         |
+//|    concorde, riding attivo, finestra oraria. Tutti e quattro     |
+//|    spenti di default.                                            |
+//|    ATTENZIONE: il default NON e' il v1.2 lo stesso, e la prima   |
+//|    stesura di questa nota diceva il contrario. InpUsaFlipST      |
+//|    nasce ACCESO, quindi al default questo file produce ANCHE i   |
+//|    segnali della TERZA origine, che nel v1.2 non c'e'. Per       |
+//|    riprodurre il v1.2 va spento a mano.                          |
 //|                                                                  |
 //| G) L'ORDINE delle operazioni: il v1.2 conferma le origini        |
 //|    SEPARATAMENTE e poi le mette in OR; qui si mettono in OR i    |
@@ -1037,4 +1125,29 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
 //|    BAND RIDING risulta di fatto spenta. Il pannello lo MOSTRA    |
 //|    (riga ATR, "B:no"): non e' un fallimento silenzioso, ma va    |
 //|    saputo.                                                       |
+//|                                                                  |
+//| K) LA SORGENTE DELLA BB CROSS ha un input suo (InpCrossPrezzo),  |
+//|    dove il v1.2 riusa bbSrc per TUTTE E DUE le bande (r.184-185  |
+//|    del sorgente in repo). Al default -- PRICE_CLOSE su entrambe  |
+//|    -- il comportamento e' identico; appena i due si separano non |
+//|    lo e' piu'. E' la classe 403 chiusa, e va nell'elenco proprio |
+//|    per questo.                                                   |
+//|                                                                  |
+//| L) IL K AUTOMATICO CONOSCE SOLO LO JPY: per ogni FX non-JPY vale |
+//|    0,0001, quindi su USDHUF/EURHUF (3 decimali, pip 0,01) e'     |
+//|    sbagliato di 100 volte. E' lo STESSO limite del v1.2 e si     |
+//|    tiene per FEDELTA', non per distrazione: il pannello lo       |
+//|    SCOPRE (scrive "K SOSPETTO") e la via d'uscita e'             |
+//|    InpKManuale. Il giorno in cui si preferisse la correttezza    |
+//|    alla fedelta', e' una riga -- e diventa una voce in piu' di   |
+//|    questo elenco.                                                |
+//|                                                                  |
+//| M) UN FEED CON PREFISSO cade su INDEX. Il rilevamento di riserva |
+//|    chiede che il ticker COMINCI con base+profitto, quindi        |
+//|    EURUSD.pro / EURUSD-ECN / EURUSDm passano, ma FX_EURUSD /     |
+//|    m.EURUSD / #EURUSD no. E' voluto: stretto sbaglia meno di     |
+//|    largo. E non e' silenzioso: su EURUSD letto come INDEX la     |
+//|    soglia in ATR vale circa 1.000, quindi il pannello scrive     |
+//|    "K SOSPETTO" in rosso, e si ripara con InpForzaCategoria +    |
+//|    InpCategoriaMan.                                              |
 //+------------------------------------------------------------------+

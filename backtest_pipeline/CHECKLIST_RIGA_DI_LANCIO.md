@@ -23248,3 +23248,90 @@ quale sia la fonte. 🟢 Nessuna perdita di dati (la 311 tiene), ma **il conto
 atteso dei `NUOVI` non e' un cancello**: sale anche per i round gia' leggibili
 per un'altra via. Un'attesa che si sposta per costruzione non si usa come
 verdetto — si usa solo lo **zero**.
+
+---
+
+## 🔧📖 CLASSE 406 — IL COMMENTO CHE GIUSTIFICA LA CORREZIONE CON UN COMPORTAMENTO DELLA PIATTAFORMA VERO PER UN'**ALTRA MODALITÀ** DELLA STESSA CHIAMATA (17/09/2026)
+
+> **Difetto vero**, trovato dal terzo giro di cancello su
+> `ABTG_SuperEMA_Riding.mq5`, **prima** della consegna.
+
+Il file correggeva la finestra minima di calcolo (`piuLungo`) e **giustificava**
+la correzione così:
+
+> *"`iMA` la lascia a 0.0, quindi la pendenza usciva `EMA − 0 = +18.000`"*
+
+Il cancello ha letto il sorgente MetaQuotes di riferimento e ha osservato che
+la testa viene azzerata **in `CalculateSimpleMA`**, mentre **`CalculateEMA`
+semina `price[0]`** — e il file crea **tutte** le sue medie con `MODE_EMA`.
+Quindi la giustificazione descriveva il comportamento di una **modalità
+diversa** dello stesso `iMA`.
+
+### ⚖️ E QUI LA REGOLA HA DUE METÀ, non una
+1. 🔴 **La giustificazione era troppo sicura di sé.** Quando un commento cita
+   un comportamento di una funzione di libreria, va detto **per quale valore
+   dell'enum** quel comportamento è stato verificato. `iMA(...,MODE_EMA)` e
+   `iMA(...,MODE_SMA)` sono **la stessa chiamata e due comportamenti**.
+2. 🟢 **Ma la correzione resta, e resta giusta** — per una ragione che **non
+   dipende dal meccanismo**: leggere una media **dove non è ancora formata**
+   non si fa, qualunque cosa ci sia scritto dentro. Una correzione
+   **conservativa** non diventa sbagliata perché la sua spiegazione lo era.
+
+⚠️ **Il corollario che costa**: il rimedio aggiunto *per quel motivo* può
+essere **inerte**. Nel caso reale il ramo `n/d` del pannello era agganciato a
+`BufE4[i] > 0.0`, condizione che sotto `MODE_EMA` **non scatta mai**: mezza
+correzione che non fa niente. Riscritto su `i >= InpEmaFondo`, che è vero
+**indipendentemente** da come la piattaforma riempie la testa.
+
+📌 **E la chiusura onesta di questo caso**: in sessione **non c'è un
+terminale**, e in repo **non esiste nessuna misura** su come `iMA` riempie la
+testa con `MODE_EMA` (grep: zero risultati). Quindi **nessuna delle due
+versioni è una misura**, e nel file sta scritto `[NON MISURATO]` — non la
+versione dell'agente al posto della mia. **Sostituire un'assunzione con
+un'altra assunzione non è verificare.** La via più corta al numero è un
+indicatore usa-e-getta di sei righe sul `50504400` (`C:\MT5_Backtest`): due
+minuti, e chiude l'assunzione per sempre.
+
+---
+
+## ⏱️🧮 CLASSE 407 — UN CONFRONTO DI COSTO FRA DUE IMPLEMENTAZIONI FATTO SUL RAMO DI RICALCOLO PIENO, QUANDO IL COSTO CHE CONTA È **PER TICK** (17/09/2026)
+
+> **Difetto vero**, `ABTG_SuperEMA_Riding.mq5`, **nello stesso commit** che
+> correggeva un'altra misura falsa. Trovato dal cancello prima della consegna.
+
+Il commento diceva:
+
+> *"Costo O(n) per tick, MENO della SMA a finestra O(n·P) che c'era prima."*
+
+**Vero sul ricalcolo pieno. Falso per tick, di ~2.700 volte.** Perché il
+codice **vecchio era incrementale** (ricalcolava da `start − P − 1`, cioè ~11
+barre per tick) e al default non girava nemmeno quel ramo — era una
+`CopyBuffer`. Il codice **nuovo** rifaceva tre passate **da barra 0 a ogni
+tick**:
+
+| barre | prima, per tick | dopo, per tick | rapporto |
+|---|---|---|---|
+| 10.000 | ~110 iterazioni + 1 memcpy | 30.000 | ~270× |
+| **100.000** | ~110 iterazioni + 1 memcpy | **300.000** | **~2.700×** |
+
+A 100.000 barre sono decine di ms per tick: su un feed a 20-50 tick/s
+**l'indicatore non sta dietro al flusso**. E il file **invita** a caricare
+storico con Fine/PgUp, quindi non è una profondità teorica.
+
+### ✅ LA REGOLA
+🔴 **La complessità si scrive SEPARATA PER RAMO, e si confronta ramo con ramo
+omologo.** Per un indicatore MT5 i rami sono due e vanno nominati entrambi:
+- **ricalcolo pieno** (`prev_calculated == 0`): succede al primo avvio, al
+  cambio di un input, e quando la piattaforma trasla gli indici;
+- **coda** (`prev_calculated > 0`): succede **a ogni tick**, ed è quello che
+  determina se lo strumento è usabile.
+
+Un `O(n)` scritto senza dire **quale ramo** non è una misura: è metà di una
+misura, e nel caso reale era la metà che assolveva.
+
+⚠️ **E il rimedio giusto non è "tanto sono pochi tick": è rendere la coda
+incrementale quando si PUÒ.** Qui si poteva in modo **esatto** e non
+approssimato, perché sia il True Range sia la RMA dipendono solo da `i−1`: il
+valore della passata precedente **è** quello definitivo. Le due strade in cui
+gli indici traslano restano coperte (`prev_calculated == 0` e
+`ArraySize() != rates_total`).
