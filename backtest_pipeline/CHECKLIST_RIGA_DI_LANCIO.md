@@ -23149,3 +23149,44 @@ dell'espansione non entrava in `minimo`.
 `minimo`, e la validazione in `OnInit` rifiuta le finestre `< 1` (una finestra
 **negativa** dava `i-(-10) = i+10`, cioè lettura oltre la fine dell'array e
 indicatore fermo — vedi anche la validazione degli input, stessa passata).
+
+---
+
+## 🔑🍝 CLASSE 404 — L'INTESTAZIONE CHE OFFRE **DUE MODI D'USO COME SE FOSSERO EQUIVALENTI**, e uno dei due annulla una garanzia che il file stesso si e' dato (il segreto resta nella sessione) (17/09/2026)
+
+> **Difetto vero**, `backtest_pipeline/carica_risultati.ps1` r.11-18 (commit
+> `53e150e8`, 14/09), trovato dal cancello prima che la riga di lancio
+> arrivasse a Claudio.
+
+Lo script si da' una garanzia esplicita e la ripete due volte — r.45-46
+*"Ritorna il PERCORSO del file token, mai il token: cosi' il token non puo'
+finire per sbaglio in un output, in un oggetto o in un log"* e r.105
+*"(il token non viene MAI stampato ne' scritto)"*. Ed e' **vera**: verificato
+riga per riga, `$tok` non compare in nessun `Write-Host`, non finisce in
+nessun file, va solo in `$headers`.
+
+🔴 **Ma l'intestazione (r.11) dichiara: _"Si puo' ESEGUIRE come file o
+INCOLLARE in console"_ — e i due modi NON sono equivalenti su quella
+garanzia.** Eseguito con `-File`, `$tok` vive nel processo figlio e muore con
+lui. **Incollato**, `$tok` resta una variabile della **sessione interattiva**
+di Claudio: la prende un `Get-Variable`, la prende una foto della console, la
+prende una trascrizione (e in questa casa le trascrizioni si usano). Il token
+e' un PAT con **permesso di scrittura sul repo**.
+
+### 📐 PERCHE' NON E' LA 311
+La 311 ha censito *"`exit`/`param()` in uno script pensato anche per essere
+incollato"*: li' il modo incollato **si rompe** e te ne accorgi. Qui il modo
+incollato **funziona benissimo** e rompe in silenzio un'invariante di
+SICUREZZA che il file rivendica tre righe sopra. Un difetto che non produce
+nessun sintomo non verra' trovato provando.
+
+### ✅ LA REGOLA
+🔴 **Un'intestazione che offre due modi d'uso deve dire quale dei due e' il
+modo BUONO e perche', oppure elencare cosa cambia fra i due.** "Si puo' fare
+in entrambi i modi" e' una dichiarazione di EQUIVALENZA, e va verificata su
+tutte le proprieta' che il file dichiara — non solo su "parte / non parte".
+
+⚠️ **Corollario operativo**: uno script che maneggia un SEGRETO si consegna
+sempre in un processo figlio (`& powershell -NoProfile -ExecutionPolicy Bypass
+-File $d`), mai con `iex` e mai incollato. Il perimetro del segreto e' il
+processo, non il file.
