@@ -2941,6 +2941,70 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 87081012e5c28801b95732fc24eef0742b692047 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
 # =====================================================================
+#  R176a -- InpBEatATR, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
+#  Seconda manopola d'uscita testata su questa sedia, complementare a
+#  R174a: R174a testa DOVE va lo stop (InpBEMode), R176a testa QUANDO
+#  scatta (InpBEatATR, 6 celle: 0.0/0.5/1.0/1.5/2.0/2.5, la cella 0.0 =
+#  meccanismo spento, mai girata in 13 mesi di questo EA).
+#
+#  Scelta dopo aver scartato le altre tre manopole d'uscita rimaste con
+#  un conto aritmetico ciascuna: InpTPMode (fattore uscite/posizioni
+#  FINO a 2,00 -- non un 2,00 secco, dipende dal lotto minimo -- e
+#  tocca anche l'ingresso in tre punti, un asse di motore travestito
+#  da asse di uscita); InpTP1Pct (inerte per costruzione, unica
+#  occorrenza operativa dentro un ramo spento da InpTPMode=0);
+#  InpMinTPatATR (e' un filtro d'INGRESSO, non d'uscita); InpTPRefreshBars
+#  (candidata legittima ma rimandata, spegne la regola centrale della
+#  strategia se azzerata). InpBEatATR ha fattore 1,00 esatto su tutte
+#  e 6 le celle (tre occorrenze nel sorgente, tutte dentro
+#  ManageRiskReduction, che chiama solo PositionModify): S1 additiva
+#  regge.
+#
+#  Stessa ancora di R174a (R102, GBPUSD, PF 0,897, DD 23,43%, n 522,
+#  @FRAZIONEIS 0.50). Bonus verificato: la cella 0 di R174a e la cella
+#  1.0 di questo file sono la STESSA configurazione (pin identici
+#  tranne asse/comment/magic) -- i due numeri dovranno coincidere
+#  quando entrambi saranno girati, ma NON e' una sentinella bloccante
+#  (R174a potrebbe non essere ancora girato quando gira questo).
+#
+#  Secondo cancello: FAIL alla lettura -> PASS dopo 3 correzioni di
+#  GIUDIZIO + 3 citazioni (commit 3aab9ae5). **Classe NUOVA 396**: lo
+#  spread importato da CANCELLO_COSTO_FLOTTA arrivava solo nella
+#  colonna ottimista (sonda 0,2 pip), mai nella prudente (1,0 pip,
+#  fattore 3-5x) -- la cella "0.5" passa da +5,4% (trascurabile) a
+#  +27,0% con la lettura prudente, un quarto del passo dell'asse.
+#  **Classe NUOVA 397**: un'equivalenza "cella identica al meccanismo
+#  spento = il meccanismo non e' mai scattato" era scritta come misura
+#  fisica, ma ha una seconda causa indistinguibile dal CSV (il
+#  meccanismo scatta ma il prezzo va comunque alla mediana senza
+#  ritracciare) -- corretta a implicazione one-way, celle ribattezzate
+#  MUTE non SATURE. **Classe NUOVA 398**: la dichiarazione di classe
+#  265 (file non lanciabile al pin vecchio) citava il NUMERO DI RIGA
+#  di $PIN invece della condizione -- il pin si muove a ogni giro, il
+#  numero no.
+#
+#  🕳️ **BUCO EREDITATO, NON CHIUSO**: come R174a, lo spread non e'
+#  pinnato dalla corsia (classe 394) -- ma qui il percorso che morde e'
+#  il GRILLETTO (avanti = bid - op, al netto dello spread), non la
+#  porta: distorce le celle BASSE, e non da' nessun segnale d'allarme
+#  visibile (a differenza di R174a). Leggere il blocco spread di
+#  -SoloControllo prima di fidarsi della posizione nominale delle
+#  celle sull'asse.
+#  ⚠️ **VINCOLO OPERATIVO**: R174a e R176a producono lo STESSO file
+#  intermedio (OptResults_ABTG_BreakingBand_GBPUSD.csv) -- vanno
+#  lanciati IN SERIE, mai in parallelo sullo stesso terminale.
+#
+#  Merito sospeso (IS/OOS 261/261 contro pavimento 150: pieno). Zero
+#  preset cambia, zero forward.
+#
+#  Pin: giro di pin 3aab9ae5 (67mo, d727f6dc -> 3aab9ae5). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e' VUOTO).
+#  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779886, vergine a
+#  HEAD (grep -rlw dalla radice, worktree compresi; nessuna collisione
+#  con 779885/R174a).
+# =====================================================================
+3aab9ae5116711023ce7f098b320965f515ce4e1 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
+# =====================================================================
 #  R175a -- InpSLMode, sedia 772234 (ABTG_GapFill, U30USD H1). Prima
 #  manopola d'uscita/stop mai messa ad asse su questa sedia. Asse a 2
 #  celle: 0 = multiplo del gap (vivo), 1 = ATR(D1) x InpAtrSlMult.
