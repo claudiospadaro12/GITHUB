@@ -1346,7 +1346,34 @@ $BancoBT = 'C:\MT5_Backtest'
 #  di diff, gia' lette riga per riga da R174a/R176a: v1.04/v1.05,
 #  default-neutri). Magic 779886 riverificato vergine (grep -rlw dalla
 #  radice, worktree compresi: solo questo file).
-$PIN = '3aab9ae5116711023ce7f098b320965f515ce4e1'
+#  >>> SESSANTOTTESIMO GIRO DI PIN (17/09/2026): 3aab9ae5 -> 23695c07.
+#  Serviva per armare R177a (InpTPRefreshBars, ABTG_BreakingBand, sedia
+#  772161 GBPUSD, magic 779892), terza manopola d'uscita su questa
+#  sedia, e per portare un'emendazione sui due fratelli GIA' ARMATI
+#  (R174a, R176a): **classe NUOVA 399** trovata sul secondo cancello di
+#  R177a -- l'artefatto CSV intermedio (OptResults_<EA>_<Simbolo>.csv)
+#  ha un nome che porta EA+simbolo ma NON il round, quindi due round
+#  della stessa sedia (come questi tre) possono scambiarsi il CSV se
+#  lanciati senza raccogliere i risultati fra l'uno e l'altro -- e il
+#  RAMO CHE LO FA (walkforward_generico.ps1 r.1687-1689, la copia
+#  normale) NON stampa NESSUNA riga, a differenza del ramo di ripiego
+#  (r.1683-1686, giallo) che invece un lettore attento avrebbe notato.
+#  Documentato il meccanismo esatto nei tre file (non solo "lanciare
+#  in serie", il COME e il PERCHE'). VERIFICATO DA ME, IN PIU': il
+#  runner (`backtest_pipeline/runner_abtg.ps1` r.734, `foreach($riga in
+#  $righe)`) esegue le righe di CODA.txt IN SERIE, non in parallelo --
+#  nessun `-Parallel`/`Start-Job` nel ciclo principale (e `Start-Job`
+#  e' esplicitamente nell'elenco dei pattern vietati dal runner stesso,
+#  r.193). Quindi il rischio della classe 399 e' STRUTTURALE (vale se
+#  qualcuno lanciasse due round della stessa sedia a mano, su due
+#  terminali, senza aspettare) ma NON e' vivo oggi nella coda
+#  automatica, che processa una riga alla volta. Diff sui tre file
+#  prova emendati: SOLO commenti (verificato, righe non-# = 0 su
+#  entrambi i fratelli gia' armati). RIGA_ROUND_VPS.ps1 e walkforward_
+#  generico.ps1 NON sono cambiati fra 3aab9ae5 e 23695c07 (git diff sui
+#  due percorsi: VUOTO, verificato). Magic 779892 riverificato vergine
+#  (grep -rlw dalla radice, worktree compresi: solo questo file).
+$PIN = '23695c070091735f54b237941831da37f91decda'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
