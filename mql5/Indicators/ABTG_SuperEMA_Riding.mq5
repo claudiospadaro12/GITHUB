@@ -34,24 +34,42 @@
 //|  Uso MANUALE, SOLA LETTURA: non piazza ordini, non legge conti,  |
 //|  non scrive file, non tocca nessun EA in forward.                |
 //|                                                                  |
-//|  INSTALLAZIONE - UN TERMINALE PER VOLTA, e il gesto F7 va fatto   |
-//|  UNA VOLTA PER TERMINALE (l'.ex5 nasce accanto al sorgente):      |
-//|    bersaglio consigliato  50504400  C:\MT5_Backtest              |
-//|    oppure                 50504263  BCM Markets MT5 Terminal -V3  |
-//|    MAI sul                10105439  C:\BCM_Reale                 |
+//|  INSTALLAZIONE - UN TERMINALE SOLO, e il gesto F7 va fatto UNA     |
+//|  VOLTA (l'.ex5 nasce accanto al sorgente):                        |
+//|    bersaglio UNICO  50504400  C:\MT5_Backtest                    |
+//|    MAI su 10105439  C:\BCM_Reale             (conto REALE)       |
+//|    MAI su 50503392  BCM Markets MT5 Terminal  (sedia VIVA 771531) |
+//|    MAI su 50504263  ... MT5 Terminal -V3      (sedie VIVE del     |
+//|                     100k: 770611 / 770202)                        |
+//|  Un F7 o un trascinamento dentro quei tre e' il gesto del 06/09,  |
+//|  quello che ha quasi messo un EA sul conto reale.                 |
 //|  Se MetaEditor era gia' aperto: chiudilo e riaprilo, altrimenti   |
 //|  il file nuovo non compare nell'albero.                           |
 //|                                                                  |
 //|  DUE AVVERTENZE MISURATE (non difetti: rodaggio dichiarato):      |
-//|  1) Le prime ~50 barre disegnate dopo il margine di avvio possono |
-//|     avere colore e flip DIVERSI da TradingView, perche' il        |
-//|     ratchet del Supertrend ha memoria e qui parte a freddo.       |
-//|     Misurato su 40 serie: converge entro 47 barre, media 12. E    |
-//|     seminare con la banda grezza PEGGIORA (47 -> 66). Quindi si   |
-//|     giudica al centro del grafico, non sul bordo sinistro.        |
+//|  1) RODAGGIO. Le prime ~50 barre disegnate dopo il margine di     |
+//|     avvio possono avere colore e flip DIVERSI da TradingView.     |
+//|     TRE cose partono a freddo, e vale la piu' lenta:              |
+//|       - il RATCHET del Supertrend (up/dn/dir): ha memoria, e      |
+//|         misurato su 40 serie converge entro 47 barre, media 12.   |
+//|         Seminarlo con la banda grezza PEGGIORA (47 -> 66): per    |
+//|         questo si dichiara invece di "correggerlo";               |
+//|       - l'HEIKIN ASHI: haOpen e' ricorsivo e parte da             |
+//|         (open+close)/2; l'errore si DIMEZZA a ogni barra, quindi  |
+//|         sparisce in 20-40 barre -- ma con tolleranza 0,5 x K      |
+//|         basta poco per ribaltare il filtro sulle prime;           |
+//|       - il REGIME dell'anti-doppione: il primo segnale del        |
+//|         grafico non ha un regime precedente da confrontare.       |
+//|     L'ATR invece NON e' piu' in rodaggio: e' identico al Pine     |
+//|     dalla barra <periodo>, da quando si calcola a mano (vedi la   |
+//|     nota sull'ATR sopra la funzione AtrSerie).                    |
+//|     Regola pratica: si giudica al CENTRO del grafico, non sul     |
+//|     bordo sinistro.                                              |
 //|  2) Questo NON e' ABTG_Supertrend.mq5: quello e' una VARIANTE     |
 //|     (flip contro la banda CORRENTE). Sulle barre a gap i due      |
-//|     danno il flip su barre DIVERSE - verificato a numeri. Questo  |
+//|     danno il flip su barre DIVERSE - verificato a numeri (banda   |
+//|     precedente 97,00 / chiusura 181,00 / banda corrente 187,00:   |
+//|     il Pine e questo restano SU, la variante flippa). Questo      |
 //|     segue il Pine alla lettera.                                  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
@@ -141,7 +159,7 @@ input int    InpCategoriaMan   = 0;      // categoria manuale: 0=INDEX 1=GOLD 2=
 input group "=== SUPERTREND (Pine v4 classico) ==="
 input int    InpAtrPeriodST    = 10;     // ATR Period del Supertrend
 input double InpMultST         = 3.0;    // ATR Multiplier
-input bool   InpAtrWilder      = true;   // true = ATR di Wilder | false = SMA del True Range
+input bool   InpAtrModoRma     = true;   // ATR: true = Wilder/RMA come ta.atr() del Pine | false = SMA del TR (convenzione di iATR, misura di casa SondaM0PB T3)
 input bool   InpMostraST       = true;   // disegna la linea Supertrend
 
 input group "=== BOLLINGER principale ==="
@@ -149,22 +167,23 @@ input int    InpBBLenIdx       = 37;     // BB Period - Indici/Oro
 input double InpBBMultIdx      = 3.0;    // BB Deviation - Indici/Oro
 input int    InpBBLenFx        = 22;     // BB Period - Forex
 input double InpBBMultFx       = 2.0;    // BB Deviation - Forex
-input ENUM_APPLIED_PRICE InpBBPrezzo = PRICE_CLOSE; // BB Source
+input ENUM_APPLIED_PRICE InpBBPrezzo = PRICE_CLOSE; // BB Source (governa SOLO la BB principale: la Cross ha il suo)
 input bool   InpMostraBB       = true;   // disegna la BB principale
 
 input group "=== BB CROSS DASHBOARD ==="
+input ENUM_APPLIED_PRICE InpCrossPrezzo = PRICE_CLOSE; // BB Cross Source (al default = come la BB principale)
 input int    InpCrossLenIdx    = 37;     // BB Cross Period - Indici/Oro
 input double InpCrossMultIdx   = 1.4;    // BB Cross Deviation - Indici/Oro
 input int    InpCrossLenFx     = 22;     // BB Cross Period - Forex
 input double InpCrossMultFx    = 2.0;    // BB Cross Deviation - Forex
-input bool   InpMostraCross    = false;  // disegna le bande Cross
+input bool   InpMostraCross    = true;   // disegna le bande Cross (default ON: InpFiltroCross veta, ed e' giusto vederlo)
 input bool   InpFiltroCross    = true;   // filtro: prezzo oltre la media Cross, nel verso
 
 input group "=== SLOPE delle bande (band riding) ==="
 input int    InpSlopeBarre     = 3;      // barre su cui si misura lo slope
 input double InpSlopeMin       = 0.8;    // slope minimo (punti normalizzati, x K)
 input bool   InpSlopeInAtr     = false;  // MIGLIORIA: misura lo slope in ATR invece che in punti
-input double InpSlopeMinAtr    = 0.15;   // [se sopra e' true] slope minimo in ATR sull'intera finestra
+input double InpSlopeMinAtr    = 0.15;   // [se sopra e' true] slope minimo in ATR(InpAtrLen) sull'intera finestra
 
 input group "=== ESPANSIONE delle bande ==="
 input double InpEspansioneMinPct = 0.0;  // espansione minima della larghezza, in %
@@ -230,7 +249,6 @@ double BufLong[], BufShort[], BufRideU[], BufRideD[];
 double BufStLong[], BufStShort[], BufDir[], BufRide[];
 double BufHaO[], BufHaC[], BufRegime[], BufRawL[], BufRawS[], BufCRM[];
 
-int hATR=INVALID_HANDLE, hATRf=INVALID_HANDLE;
 int hE1=INVALID_HANDLE, hE2=INVALID_HANDLE, hE3=INVALID_HANDLE, hE4=INVALID_HANDLE;
 int hBB=INVALID_HANDLE, hCR=INVALID_HANDLE;
 
@@ -246,8 +264,8 @@ string g_pre="";
 string g_originaUlt="";
 
 //--- prototipi
-bool   CalcolaAtrST(const int rates_total,const int daBarra,const bool tutto,
-                    const double &high[],const double &low[],const double &close[]);
+bool   CalcolaTR(const int rates_total,const double &high[],const double &low[],const double &close[]);
+bool   AtrSerie(const int rates_total,const int periodo,double &out[]);
 bool   FiltriExtra(const int i,const int verso,const double &close[],const datetime &time[]);
 void   Avvisa(const string testo);
 string EtichettaTF();
@@ -255,6 +273,7 @@ string NomeCategoria(const int c);
 void   Riga(const int n,const string testo,const color col);
 void   DisegnaPannello(const int rates_total,const double &close[],const datetime &time[]);
 double PendenzaEmaLenta(const int i);
+string OriginiDa(const int i);
 
 //+------------------------------------------------------------------+
 //| K COEFFICIENT: in MT5 lo si CHIEDE al broker, non si indovina    |
@@ -272,11 +291,20 @@ void RilevaCategoriaEK()
    bool fx =(cm==SYMBOL_CALC_MODE_FOREX || cm==SYMBOL_CALC_MODE_FOREX_NO_LEVERAGE);
 
    //--- secondo indizio, indipendente dal CALC_MODE: se il broker serve il
-   //    forex come CFD, base e profitto sono comunque due VALUTE e i decimali
-   //    sono 3 o 5. Cosi' un EURUSD/CFD non finisce su K=1.0 in silenzio.
-   if(!fx && !oro && StringLen(base)==3 && StringLen(prof)==3 &&
-      base!=prof && (_Digits==3 || _Digits==5 || _Digits==2 || _Digits==4))
-      fx=(StringFind(tick,base)>=0 && StringFind(tick,prof)>=0);
+   //    forex come CFD, base e profitto sono comunque due VALUTE.
+   //    R2: vale SOLO se le due sigle sono VALUTE VERE e il ticker COMINCIA
+   //    con BASE+PROFITTO. Senza la lista, XAGUSD (base XAG, profitto USD,
+   //    3 decimali) finiva su FX con K=0,0001: soglie mille volte piu'
+   //    larghe = filtri azzerati, e il set BB del forex (22x2.0) al posto di
+   //    quello dei metalli (37x3.0), cioe' un'altra strategia.
+   //    Cosi' XAGUSD/XPTUSD/BTCUSD restano INDEX, che per un metallo sono i
+   //    numeri giusti; EURUSD.pro continua a passare.
+   string valute=",AUD,CAD,CHF,CNH,CZK,DKK,EUR,GBP,HKD,HUF,JPY,MXN,NOK,NZD,PLN,SEK,SGD,TRY,USD,ZAR,";
+   bool baseVal=(StringFind(valute,","+base+",")>=0);
+   bool profVal=(StringFind(valute,","+prof+",")>=0);
+   if(!fx && !oro && baseVal && profVal && base!=prof &&
+      (_Digits==3 || _Digits==4 || _Digits==5))
+      fx=(StringFind(tick,base+prof)==0);
 
    g_catDaBroker=true;
    if(oro)                     g_categoria="GOLD";
@@ -324,9 +352,12 @@ int OnInit()
       InpCrossLenIdx<2 || InpCrossLenFx<2 || InpAtrLen<1 || InpAtrAvgLen<1 ||
       InpEmaFast<1 || InpEmaMid<1 || InpEmaSlow<1 || InpEmaFondo<1 ||
       InpSlopeBarre<1 || InpEspansioneBarre<1 || InpEmaSlopeBarre<1 ||
-      InpRidingBarre<1 || InpCandleAtrMult<=0.0 ||
+      InpRidingBarre<1 ||
       InpEspansioneMinPct<0.0 || InpHaWickToll<0.0 ||
-      InpCategoriaMan<0 || InpCategoriaMan>3 || InpKManuale<=0.0)
+      InpCategoriaMan<0 || InpCategoriaMan>3 ||
+      (!InpKAuto && InpKManuale<=0.0) ||
+      (InpAtrFiltroC && InpCandleAtrMult<=0.0) ||
+      InpSlopeMin<0.0 || InpSlopeMinAtr<0.0 || InpAtrMin<0.0 || InpEmaSlopeMin<0.0)
      {
       Print("ABTG_SuperEMA_Riding: parametri non validi. Richiesti: periodi ATR/BB/Cross/EMA >= 1 ",
             "(BB e Cross >= 2), moltiplicatori > 0, SlopeBarre/EspansioneBarre/EmaSlopeBarre/",
@@ -388,13 +419,10 @@ int OnInit()
    hE3=iMA(_Symbol,_Period,InpEmaSlow ,0,MODE_EMA,PRICE_CLOSE);
    hE4=iMA(_Symbol,_Period,InpEmaFondo,0,MODE_EMA,PRICE_CLOSE);
    hBB=iBands(_Symbol,_Period,g_bbLen,0,g_bbMult,InpBBPrezzo);
-   hCR=iBands(_Symbol,_Period,g_crLen,0,g_crMult,InpBBPrezzo);
-   hATRf=iATR(_Symbol,_Period,InpAtrLen);
-   if(InpAtrWilder) hATR=iATR(_Symbol,_Period,InpAtrPeriodST);
+   hCR=iBands(_Symbol,_Period,g_crLen,0,g_crMult,InpCrossPrezzo);
 
    if(hE1==INVALID_HANDLE || hE2==INVALID_HANDLE || hE3==INVALID_HANDLE ||
-      hE4==INVALID_HANDLE || hBB==INVALID_HANDLE || hCR==INVALID_HANDLE ||
-      hATRf==INVALID_HANDLE || (InpAtrWilder && hATR==INVALID_HANDLE))
+      hE4==INVALID_HANDLE || hBB==INVALID_HANDLE || hCR==INVALID_HANDLE)
      {
       Print("ABTG_SuperEMA_Riding: creazione handle fallita.");
       return(INIT_FAILED);
@@ -418,53 +446,70 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-   if(hATR !=INVALID_HANDLE) IndicatorRelease(hATR);
-   if(hATRf!=INVALID_HANDLE) IndicatorRelease(hATRf);
    if(hE1  !=INVALID_HANDLE) IndicatorRelease(hE1);
    if(hE2  !=INVALID_HANDLE) IndicatorRelease(hE2);
    if(hE3  !=INVALID_HANDLE) IndicatorRelease(hE3);
    if(hE4  !=INVALID_HANDLE) IndicatorRelease(hE4);
    if(hBB  !=INVALID_HANDLE) IndicatorRelease(hBB);
    if(hCR  !=INVALID_HANDLE) IndicatorRelease(hCR);
-   ObjectsDeleteAll(0,g_pre);
+   //--- D1: su init FALLITO (REASON_INITFAILED) g_pre e' ancora vuoto, e
+   //    ObjectsDeleteAll(0,"") cancella OGNI oggetto del grafico -- le
+   //    trendline disegnate a mano, i livelli, gli oggetti degli altri
+   //    indicatori. Un typo in un input costerebbe il grafico.
+   if(g_pre!="") ObjectsDeleteAll(0,g_pre);
    ChartRedraw();
   }
 
 //+------------------------------------------------------------------+
-//| ATR del Supertrend: Wilder (iATR) o SMA del True Range (Pine)    |
+//| ATR -- MISURA DI CASA, non un'assunzione: iATR di MQL5 e' la SMA  |
+//| del TRUE RANGE (misura T3 di ABTG_SondaM0PB, citata in 5 file:    |
+//| SondaLondonFx r.384-387, SondaRelativo r.287-291 e r.1008-1010,   |
+//| Relativo r.379, SondaRsiEmaV8 r.421), mentre ta.atr() del Pine e' |
+//| la WILDER/RMA. SONO DUE SERIE DIVERSE: con iATR il Supertrend e i |
+//| filtri A/B/C non sarebbero quelli di TradingView, e i due rami    |
+//| dell'interruttore consegnerebbero LA STESSA convenzione -- cioe'  |
+//| un interruttore che non commuta niente.                           |
+//| Quindi il True Range si calcola UNA volta e le ATR si smorzano    |
+//| qui, nella convenzione scelta. La RMA ha memoria infinita: si     |
+//| rifa' sempre dal seme, che e' la SMA del primo periodo come       |
+//| ta.rma() del Pine. Costo O(n) per tick, MENO della SMA a finestra |
+//| O(n*P) che c'era prima.                                           |
 //+------------------------------------------------------------------+
-bool CalcolaAtrST(const int rates_total,const int daBarra,const bool tutto,
-                  const double &high[],const double &low[],const double &close[])
+bool CalcolaTR(const int rates_total,const double &high[],const double &low[],const double &close[])
   {
-   if(InpAtrWilder)
-     {
-      if(ArraySize(AtrST)!=rates_total) ArrayResize(AtrST,rates_total);
-      ArraySetAsSeries(AtrST,false);
-      return(CopyBuffer(hATR,0,0,rates_total,AtrST)==rates_total);
-     }
-   if(ArraySize(AtrST)!=rates_total) ArrayResize(AtrST,rates_total);
-   if(ArraySize(TRv)  !=rates_total) ArrayResize(TRv,rates_total);
-   ArraySetAsSeries(AtrST,false);
+   if(rates_total<2) return(false);
+   if(ArraySize(TRv)!=rates_total) ArrayResize(TRv,rates_total);
    ArraySetAsSeries(TRv,false);
-
-   //--- al primo giro si rifa' TUTTO: partendo da meta' array la media
-   //    leggerebbe gli zeri delle barre mai calcolate.
-   int da=(tutto || daBarra<1)?0:daBarra;
-   for(int i=da;i<rates_total;i++)
+   TRv[0]=high[0]-low[0];
+   for(int i=1;i<rates_total;i++)
      {
-      if(i==0){ TRv[0]=high[0]-low[0]; AtrST[0]=0.0; continue; }
       double a=high[i]-low[i];
       double b=MathAbs(high[i]-close[i-1]);
       double c=MathAbs(low[i] -close[i-1]);
       TRv[i]=MathMax(a,MathMax(b,c));
      }
-   if(tutto) for(int i=0;i<InpAtrPeriodST-1 && i<rates_total;i++) AtrST[i]=0.0;
-   int daA=(da<InpAtrPeriodST-1)?InpAtrPeriodST-1:da;
-   for(int i=daA;i<rates_total;i++)
+   return(true);
+  }
+
+bool AtrSerie(const int rates_total,const int periodo,double &out[])
+  {
+   if(periodo<1 || rates_total<periodo) return(false);
+   if(ArraySize(out)!=rates_total) ArrayResize(out,rates_total);
+   ArraySetAsSeries(out,false);
+   for(int i=0;i<periodo-1;i++) out[i]=0.0;
+   double sm=0.0;
+   for(int k=0;k<periodo;k++) sm+=TRv[k];
+   out[periodo-1]=sm/(double)periodo;
+   if(InpAtrModoRma)
      {
-      double s=0.0;
-      for(int k=0;k<InpAtrPeriodST;k++) s+=TRv[i-k];
-      AtrST[i]=s/InpAtrPeriodST;
+      double alfa=1.0/(double)periodo;
+      for(int i=periodo;i<rates_total;i++) out[i]=out[i-1]+alfa*(TRv[i]-out[i-1]);
+     }
+   else
+     {
+      double somma=sm;
+      for(int i=periodo;i<rates_total;i++)
+        { somma+=TRv[i]-TRv[i-periodo]; out[i]=somma/(double)periodo; }
      }
    return(true);
   }
@@ -481,8 +526,21 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    ArraySetAsSeries(high,false);  ArraySetAsSeries(low,false);
    ArraySetAsSeries(close,false);
 
+   //--- D4: la finestra minima e' il MASSIMO EFFETTIVO di TUTTE le finestre,
+   //    non "quello che di solito e' il piu' grande". Con InpEmaFondo 20 e
+   //    InpEmaSlow 200 (assetto che la validazione ammette) il ciclo partiva
+   //    a 72 e leggeva la EMA 200 dove iMA la lascia a 0.0: la pendenza
+   //    usciva EMA-0 = +18.000 su un indice, passava qualunque soglia, e
+   //    nasceva un segnale finto. E SOLO LONG, perche' "E2 < 0" e'
+   //    impossibile: un artefatto asimmetrico, che tradisce anche la Regola
+   //    dei Due Lati del 25/08.
+   //    E la EMA di FONDO pesa sulla finestra SOLO se filtra davvero:
+   //    altrimenti 200 barre di storico si pagano per una linea disegnata, e
+   //    l'anti-doppione parte 144 barre piu' tardi del necessario.
    int piuLungo=(int)MathMax(InpAtrPeriodST,MathMax(g_bbLen,MathMax(g_crLen,
-                MathMax(InpEmaFondo,InpAtrLen+InpAtrAvgLen))));
+                MathMax(InpAtrLen+InpAtrAvgLen,
+                MathMax(InpEmaFast,MathMax(InpEmaMid,InpEmaSlow))))));
+   if(InpFiltroEma200) piuLungo=(int)MathMax(piuLungo,InpEmaFondo);
    int coda=(int)MathMax(InpSlopeBarre,MathMax(InpEmaSlopeBarre,
             MathMax(InpEspansioneBarre,InpRidingBarre)));
    int minimo=piuLungo+coda+5;
@@ -504,12 +562,11 @@ int OnCalculate(const int rates_total,const int prev_calculated,
    if(start<minimo) start=minimo;
 
    //--- serie di appoggio --------------------------------------------------
-   if(!CalcolaAtrST(rates_total,start-InpAtrPeriodST-1,(prev_calculated==0),high,low,close))
-      return(prev_calculated);
-   if(ArraySize(AtrF)!=rates_total)
-     { ArrayResize(AtrF,rates_total); ArrayResize(AtrFAvg,rates_total); }
-   ArraySetAsSeries(AtrF,false); ArraySetAsSeries(AtrFAvg,false);
-   if(CopyBuffer(hATRf,0,0,rates_total,AtrF)<rates_total) return(prev_calculated);
+   if(!CalcolaTR(rates_total,high,low,close))      return(prev_calculated);
+   if(!AtrSerie(rates_total,InpAtrPeriodST,AtrST)) return(prev_calculated);
+   if(!AtrSerie(rates_total,InpAtrLen,AtrF))       return(prev_calculated);
+   if(ArraySize(AtrFAvg)!=rates_total) ArrayResize(AtrFAvg,rates_total);
+   ArraySetAsSeries(AtrFAvg,false);
    if(CopyBuffer(hE1,0,0,rates_total,BufE1)<rates_total) return(prev_calculated);
    if(CopyBuffer(hE2,0,0,rates_total,BufE2)<rates_total) return(prev_calculated);
    if(CopyBuffer(hE3,0,0,rates_total,BufE3)<rates_total) return(prev_calculated);
@@ -612,9 +669,17 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       bool toccaSu =(high[i]>=BufBBU[i]);
       bool toccaGiu=(low[i] <=BufBBD[i]);
       double prec=BufRide[i-1];
-      if(toccaSu)       BufRide[i]=(prec>0.0)?prec+1.0: 1.0;
-      else if(toccaGiu) BufRide[i]=(prec<0.0)?prec-1.0:-1.0;
-      else              BufRide[i]=0.0;
+      //--- D6: la barra che INGLOBA la banda (news, gap di apertura) tocca i
+      //    DUE lati. Non e' un riding. Senza questo ramo l'else-if dava la
+      //    precedenza al lato SU per ORDINE DI SCRITTURA DEL CODICE, cioe' un
+      //    bias verso il long proprio sulle barre che contano di piu'.
+      //    NB: NON si tocca rawLongBR/rawShortBR, dove il doppio tocco e'
+      //    FEDELE al v1.2 (touchUpper e touchLower sono indipendenti) e la
+      //    collisione e' gia' gestita facendo TACERE il segnale.
+      if(toccaSu && toccaGiu) BufRide[i]=0.0;
+      else if(toccaSu)        BufRide[i]=(prec>0.0)?prec+1.0: 1.0;
+      else if(toccaGiu)       BufRide[i]=(prec<0.0)?prec-1.0:-1.0;
+      else                    BufRide[i]=0.0;
       bool ridingSu =(BufRide[i]>= (double)InpRidingBarre);
       bool ridingGiu=(BufRide[i]<=-(double)InpRidingBarre);
       if(InpMostraRiding)
@@ -641,10 +706,22 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       bool rawShortST=(BufDir[i]<0.0 && BufDir[i-1]>0.0);
 
       //--- il grezzo unificato, memorizzato per la conferma della 2a candela
-      bool rawL=(InpUsaBandRiding && rawLongBR) ||(InpUsaEmaCross && rawLongEMA) ||(InpUsaFlipST && rawLongST);
-      bool rawS=(InpUsaBandRiding && rawShortBR)||(InpUsaEmaCross && rawShortEMA)||(InpUsaFlipST && rawShortST);
-      BufRawL[i]=(rawL)?1.0:0.0;
-      BufRawS[i]=(rawS)?1.0:0.0;
+      //--- D5: il grezzo unificato porta la FIRMA dell'origine, come maschera
+      //    1=BR 2=EMA 4=ST. Serve perche' la conferma guarda la barra i-1:
+      //    leggere le origini alla barra i (dove il grezzo NON e' nato)
+      //    attribuisce il segnale all'origine sbagliata, o a nessuna. E le
+      //    maschere long e short restano SEPARATE, altrimenti un LONG puo'
+      //    finire etichettato con l'origine dello SHORT.
+      int mL=0, mS=0;
+      if(InpUsaBandRiding && rawLongBR  ) mL|=1;
+      if(InpUsaEmaCross   && rawLongEMA ) mL|=2;
+      if(InpUsaFlipST     && rawLongST  ) mL|=4;
+      if(InpUsaBandRiding && rawShortBR ) mS|=1;
+      if(InpUsaEmaCross   && rawShortEMA) mS|=2;
+      if(InpUsaFlipST     && rawShortST ) mS|=4;
+      bool rawL=(mL!=0), rawS=(mS!=0);
+      BufRawL[i]=(double)mL;
+      BufRawS[i]=(double)mS;
 
       //=========== CONFERMA 2a CANDELA (v1.2, identico) =================
       bool confL,confS;
@@ -682,15 +759,8 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       if(segL) BufLong[i] =low[i] -AtrF[i]*0.6;
       if(segS) BufShort[i]=high[i]+AtrF[i]*0.6;
 
-      //--- da dove e' nato: serve solo al pannello e all'avviso
-      if((segL || segS) && i==rates_total-1)
-        {
-         g_originaUlt="";
-         if(InpUsaBandRiding && (rawLongBR ||rawShortBR )) g_originaUlt+="BR ";
-         if(InpUsaEmaCross   && (rawLongEMA||rawShortEMA)) g_originaUlt+="EMA ";
-         if(InpUsaFlipST     && (rawLongST ||rawShortST )) g_originaUlt+="ST ";
-         if(g_originaUlt=="") g_originaUlt="conferma";
-        }
+      //--- da dove e' NATO: si legge la maschera della barra del GREZZO
+      if(segL || segS) g_originaUlt=OriginiDa(i);
      }
 
    //=========== AVVISI ==================================================
@@ -701,8 +771,9 @@ int OnCalculate(const int rates_total,const int prev_calculated,
         {
          g_ultAlertSeg=time[ib];
          string verso=(BufLong[ib]>0.0)?"LONG":"SHORT";
-         Avvisa(StringFormat("ABTG %s %s: %s  [%s K=%s]  ST %s . EMA9 %s EMA21 . BB largh %.0f pt @ %s",
-                _Symbol,EtichettaTF(),verso,g_categoria,DoubleToString(g_K,6),
+         Avvisa(StringFormat("ABTG %s %s: %s da %s [%s K=%s]  ST %s . EMA9 %s EMA21 . BB largh %.0f pt @ %s",
+                _Symbol,EtichettaTF(),verso,OriginiDa(ib),
+                g_categoria,DoubleToString(g_K,6),
                 (BufDir[ib]>0.0?"verde":"rosso"),
                 (BufE1[ib]>BufE2[ib]?">":"<"),
                 (BufBBU[ib]-BufBBD[ib])/_Point,
@@ -723,6 +794,22 @@ int OnCalculate(const int rates_total,const int prev_calculated,
 
    if(InpPannello) DisegnaPannello(rates_total,close,time);
    return(rates_total);
+  }
+
+//+------------------------------------------------------------------+
+//| D5: da quale origine e' nato il segnale della barra i. La maschera |
+//| sta nella barra del GREZZO, che con la conferma accesa e' i-1.     |
+//+------------------------------------------------------------------+
+string OriginiDa(const int i)
+  {
+   double v=(BufLong[i]>0.0)?((InpConferma && i>0)?BufRawL[i-1]:BufRawL[i])
+                            :((InpConferma && i>0)?BufRawS[i-1]:BufRawS[i]);
+   int m=(int)v;
+   string t="";
+   if((m&1)!=0) t+="BR ";
+   if((m&2)!=0) t+="EMA ";
+   if((m&4)!=0) t+="ST ";
+   return((t=="")?"?":t);
   }
 
 //+------------------------------------------------------------------+
@@ -819,7 +906,19 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
    double sogliaInAtr=(AtrF[i]>0.0)
                       ? ((InpSlopeInAtr?InpSlopeMinAtr*AtrF[i]:g_slopeMinPrezzo)/AtrF[i])
                       : 0.0;
-   bool kSospetto=(sogliaInAtr>5.0 || (sogliaInAtr<0.001 && sogliaInAtr>0.0));
+   //--- R1: la conversione in ATR da sola NON basta. Misurato: un K
+   //    sbagliato di 100 volte su USDJPY M15 da' 0,0011-0,0020 ATR, cioe'
+   //    DENTRO la banda [0,001; 5] -- l'allarme non suonerebbe. E con
+   //    InpSlopeInAtr acceso il rapporto vale IDENTICAMENTE InpSlopeMinAtr su
+   //    ogni simbolo e ogni TF, quindi l'allarme diventa una tautologia.
+   //    Controprova indipendente: per le categorie FX il K E' il pip, e il
+   //    pip lo dicono i decimali del simbolo.
+   //    NB: il pavimento resta 0,001 e non si alza a 0,01, perche' il DAX H4
+   //    sta a 0,8/120 = 0,0067 e suonerebbe A TORTO.
+   double kPip=(_Digits>=4)?0.0001:((_Digits==3 || _Digits==2)?0.01:1.0);
+   bool   fxCat2=(g_categoria=="FX" || g_categoria=="FX_JPY");
+   bool kSospetto=(sogliaInAtr>5.0 || (sogliaInAtr<0.001 && sogliaInAtr>0.0) ||
+                   (fxCat2 && MathAbs(g_K-kPip)>kPip*0.5));
 
    Riga(0,"ABTG BR+EMA+ST v2.00   "+_Symbol+" "+EtichettaTF(),InpPannelloColore);
    Riga(1,StringFormat("categoria  : %-7s %s   K = %s",
@@ -828,13 +927,16 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
    if(kSospetto)
       Riga(2,StringFormat("K SOSPETTO : la soglia slope vale %.4f ATR - controlla categoria/K",sogliaInAtr),clrRed);
    else
-      Riga(2,StringFormat("soglia slope: %.1f pt  (= %.3f ATR)",sogliaSlope,sogliaInAtr),InpPannelloColore);
+      Riga(2,StringFormat("soglia slope: %.1f pt MT5 (= %.2f x K = %.3f ATR)",
+           sogliaSlope,
+           (InpSlopeInAtr?InpSlopeMinAtr*AtrF[i]:g_slopeMinPrezzo)/((g_K>0.0)?g_K:1.0),
+           sogliaInAtr),InpPannelloColore);
    Riga(3,StringFormat("Supertrend : %-4s  linea a %.0f pt",
         (BufDir[i]>0.0?"SU":"GIU"),MathAbs(close[i]-BufST[i])/_Point),
         (BufDir[i]>0.0?clrLimeGreen:clrRed));
    Riga(4,StringFormat("EMA 9/21/50: %-5s   200: %s",
         (BufE1[i]>BufE2[i] && BufE2[i]>BufE3[i])?"LONG":((BufE1[i]<BufE2[i] && BufE2[i]<BufE3[i])?"SHORT":"MISTO"),
-        (close[i]>BufE4[i]?"sopra":"sotto")),
+        (BufE4[i]>0.0?(close[i]>BufE4[i]?"sopra":"sotto"):"n/d")),
         ((BufE1[i]>BufE2[i] && BufE2[i]>BufE3[i])?clrLimeGreen:
         ((BufE1[i]<BufE2[i] && BufE2[i]<BufE3[i])?clrRed:clrGray)));
    Riga(5,StringFormat("BB %d x %.1f : largh %.0f pt   espans %+.2f%% %s",
@@ -848,9 +950,10 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
    Riga(8,StringFormat("BAND RIDING: %s%d barre  (soglia %d)",
         (ride>0?"SU ":(ride<0?"GIU ":"-- ")),(int)MathAbs((double)ride),InpRidingBarre),
         (ride>=InpRidingBarre?clrAqua:(ride<=-InpRidingBarre?clrOrangeRed:InpPannelloColore)));
-   Riga(9,StringFormat("regime      : %s   origini: %s%s%s",
+   Riga(9,StringFormat("regime %-5s  abilitate: %s%s%s  ultimo segnale da: %s",
         (BufRegime[i]>0.0?"LONG":(BufRegime[i]<0.0?"SHORT":"--")),
-        (InpUsaBandRiding?"BR ":""),(InpUsaEmaCross?"EMA ":""),(InpUsaFlipST?"ST":"")),
+        (InpUsaBandRiding?"BR ":""),(InpUsaEmaCross?"EMA ":""),(InpUsaFlipST?"ST ":""),
+        ((g_originaUlt=="")?"--":g_originaUlt)),
         (BufRegime[i]>0.0?clrLimeGreen:(BufRegime[i]<0.0?clrRed:clrGray)));
    Riga(10,"ora server barra: "+TimeToString(time[i],TIME_MINUTES)+"   (BCM = ora IT - 1)",
         InpPannelloColore);
@@ -858,32 +961,80 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
   }
 
 //+------------------------------------------------------------------+
-//| NOTE -- le due differenze rispetto al Pine v1.2, dichiarate      |
+//| NOTE -- TUTTE le differenze rispetto al Pine v1.2, dichiarate    |
 //|                                                                  |
-//| 1) IL RILEVAMENTO DELLO STRUMENTO. Nel v1.2 la categoria nasce   |
-//|    da str.contains() sul ticker piu' syminfo.type. Se il broker  |
-//|    serve il FOREX come "cfd" (capita), un EURUSD non e' ne'      |
-//|    forex ne' indice ne' oro, e l'ultimo ramo del ternario lo     |
-//|    manda su "INDEX" -> K = 1.0 invece di 0.0001. Le soglie       |
-//|    diventano 10.000 volte piu' strette e NON ESCE PIU' NESSUN    |
-//|    SEGNALE, senza un messaggio che lo dica. Qui la categoria la  |
-//|    da' il broker (SYMBOL_TRADE_CALC_MODE + le due valute), con   |
-//|    un secondo indizio di riserva sui decimali, e il pannello     |
-//|    scrive sempre da dove viene (broker o manuale).               |
+//| Il sorgente di partenza e' in repo: pine/ABTG_BandRiding_3EMA_   |
+//| v1.2.pine, incollato verbatim. Senza di lui la fedelta' non era  |
+//| ne' verificabile ne' RI-verificabile da nessuno.                 |
 //|                                                                  |
-//| 2) IL FALLIMENTO SILENZIOSO DIVENTA VISIBILE. Il pannello        |
-//|    converte la soglia di slope in ATR: se vale piu' di 5 ATR o   |
-//|    meno di 0,001 ATR, scrive "K SOSPETTO" in rosso. E' lo stesso |
-//|    motivo per cui esiste InpSlopeInAtr: una soglia in ATR non    |
-//|    dipende dal livello di prezzo, mentre una soglia in punti su  |
-//|    INDEX (K=1.0) vale una cosa diversa sul Dow a 45.000 e sul    |
-//|    SP500 a 5.500. Non e' un difetto del v1.2: e' il limite della |
-//|    convenzione in punti, e ora si puo' misurare in due modi e    |
-//|    confrontarli.                                                |
+//| A) IL RILEVAMENTO DELLO STRUMENTO. Nel v1.2 la categoria nasce   |
+//|    da str.contains() sul ticker piu' syminfo.type. VERIFICATO    |
+//|    sul sorgente in repo: r.40 isForexRaw = syminfo.type ==       |
+//|    "forex", e r.58 l'ULTIMO ramo del ternario e' "INDEX". Quindi |
+//|    un simbolo che non e' index, non e' oro e non e' forex per    |
+//|    syminfo.type cade su INDEX con K = 1.0 invece di 0.0001: le   |
+//|    soglie diventano 10.000 volte piu' strette e non esce piu'    |
+//|    nessun segnale, in silenzio. Resta NON MISURATO su quale      |
+//|    feed syminfo.type dica "cfd" su una coppia, e va detto cosi'. |
+//|    Qui la categoria la da' il broker (SYMBOL_TRADE_CALC_MODE +   |
+//|    le due valute), e il pannello scrive sempre se viene dal      |
+//|    broker o da un override manuale.                             |
 //|                                                                  |
-//| 3) ATTENZIONE, PAROLA UGUALE E USO OPPOSTO: in ABTG_BreakingBand |
-//|    il "band riding" e' una INVALIDAZIONE (oltre 20 candele sulla |
-//|    banda = impulso esaurito, si scarta); qui e' un INGRESSO      |
-//|    (il prezzo sta correndo, si entra). Sono due misure diverse   |
-//|    con lo stesso nome: non si citano una per l'altra.            |
+//| B) IL FALLIMENTO SILENZIOSO DIVENTA VISIBILE: il pannello        |
+//|    converte la soglia di slope in ATR e la confronta anche col   |
+//|    PIP dedotto dai decimali, poi scrive "K SOSPETTO" in rosso.   |
+//|    Il solo rapporto in ATR non bastava (misura: un K sbagliato   |
+//|    di 100x su USDJPY M15 cade DENTRO la banda).                  |
+//|                                                                  |
+//| C) L'ATR. Vedi la nota lunga sopra AtrSerie: iATR di MQL5 e' la  |
+//|    SMA del TR, ta.atr() del Pine e' la Wilder/RMA. Qui si        |
+//|    calcola a mano e InpAtrModoRma sceglie davvero (col default   |
+//|    true = come il Pine).                                         |
+//|                                                                  |
+//| D) DUE VERSI SULLA STESSA BARRA: qui il segnale TACE, il v1.2 li |
+//|    lascia passare entrambi. Puo' capitare solo con InpConferma   |
+//|    spento (con la conferma accesa e' impossibile: close>open e   |
+//|    close<open insieme).                                          |
+//|                                                                  |
+//| E) L'ESPANSIONE ha una finestra a input (InpEspansioneBarre),    |
+//|    dove il Pine usa [1] fisso. Al default 1 e' identico.         |
+//|    E la banda a larghezza ZERO: il Pine da' isExpanding = TRUE   |
+//|    (0>=0), qui da' FALSE. Non morde (i filtri ATR B e C          |
+//|    bloccherebbero comunque), ma e' una divergenza reale.         |
+//|                                                                  |
+//| F) FILTRI EXTRA che nel v1.2 non esistono: EMA 200, Supertrend   |
+//|    concorde, riding attivo, finestra oraria. Tutti spenti di     |
+//|    default, quindi al default il comportamento e' quello del     |
+//|    v1.2.                                                         |
+//|                                                                  |
+//| G) L'ORDINE delle operazioni: il v1.2 conferma le origini        |
+//|    SEPARATAMENTE e poi le mette in OR; qui si mettono in OR i    |
+//|    grezzi e si conferma una volta. E' equivalente perche' la     |
+//|    conferma NON dipende dall'origine:                            |
+//|      (A[1] & C) | (B[1] & C) | (D[1] & C) == (A[1]|B[1]|D[1]) & C|
+//|    Provato su 4.000 barre e cinque assetti: 0 divergenze; e il   |
+//|    controllo discrimina (una variante con conferma DIVERSA per   |
+//|    origine produce 53 divergenze, e senza anti-doppione 118).    |
+//|    RESTRIZIONE: vale solo finche' la conferma e' la STESSA per   |
+//|    tutte. Il giorno in cui una sola origine avra' la sua, la     |
+//|    forma accorpata diventa sbagliata IN SILENZIO.                |
+//|                                                                  |
+//| H) L'AVVIO del calcolo e' spostato alla barra <minimo> (il       |
+//|    massimo di tutte le finestre), quindi il primo regime         |
+//|    dell'anti-doppione nasce piu' tardi che nel Pine.             |
+//|                                                                  |
+//| I) ATTENZIONE, PAROLA UGUALE E USO OPPOSTO: in                   |
+//|    ABTG_BreakingBand.mq5 (r.300, InpBandRidingMaxBars) il "band  |
+//|    riding" e' una INVALIDAZIONE - oltre 20 candele sulla banda   |
+//|    l'impulso e' esaurito e il pattern si SCARTA. Qui e' un       |
+//|    INGRESSO. Due misure diverse con lo stesso nome: non si       |
+//|    citano una per l'altra.                                       |
+//|                                                                  |
+//| J) DA SAPERE PRIMA DI PERDERCI MEZZ'ORA: coi default del v1.2 su |
+//|    GOLD e INDEX il filtro B chiede ATR > 8,0 unita' di prezzo.   |
+//|    Su XAUUSD sotto H1 l'ATR e' piu' basso [NON MISURATO in       |
+//|    casa], quindi il filtro B blocca quasi sempre e l'origine     |
+//|    BAND RIDING risulta di fatto spenta. Il pannello lo MOSTRA    |
+//|    (riga ATR, "B:no"): non e' un fallimento silenzioso, ma va    |
+//|    saputo.                                                       |
 //+------------------------------------------------------------------+
