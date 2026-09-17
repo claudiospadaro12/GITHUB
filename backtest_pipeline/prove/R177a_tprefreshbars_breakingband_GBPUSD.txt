@@ -12,8 +12,11 @@
 #  Terzo round d'uscita della stessa sedia in 24 ore, dopo R174a
 #  (InpBEMode, il BERSAGLIO) e R176a (InpBEatATR, il GRILLETTO). R176a
 #  dichiara questa manopola "CANDIDATA NUMERO DUE" (r.215-238): questo
-#  file e' quella candidata, **con due correzioni al modo in cui R176a la
-#  descriveva** -- sezione LE TRE PROPRIETA' STRUTTURALI.
+#  file e' quella candidata, **con due PRECISAZIONI rispetto a come R176a
+#  la descriveva -- precisazioni, NON correzioni**: le parole di R176a
+#  sono citate alla lettera nella sezione LE TRE PROPRIETA' STRUTTURALI, e
+#  non sono false. Attribuire a un file gemello un errore che non ha
+#  fatto e' un difetto come gli altri.
 # ---------------------------------------------------------------------
 #  Si lancia con (RIGA_SOTTILE_ROUND.ps1 -> RIGA_ROUND_VPS.ps1 ->
 #  walkforward_generico.ps1: simbolo, periodo, finestra, taglio IS/OOS
@@ -38,21 +41,41 @@
 #   `$csv=Join-Path $MqlFiles "OptResults_$($Expert)_$($Simbolo).csv"`).
 #  Quindi **R174a, R176a e R177a producono tutti e tre lo stesso
 #  `OptResults_ABTG_BreakingBand_GBPUSD.csv`** in `MQL5\Files`.
-#  >>> PERCHE' IL PARALLELO NON E' "SUBOTTIMALE" MA **ROMPE**, con le
-#      due righe che lo fanno rompere:
+#  >>> PERCHE' IL PARALLELO NON E' "SUBOTTIMALE" MA **ROMPE**. I rami del
+#      driver sono TRE, non due, e **il piu' pericoloso e' quello che non
+#      dice NIENTE** -- si veda la **CLASSE 399** della checklist, nata
+#      su questo file proprio per distinguerlo dal suo vicino rumoroso:
 #      (a) **r.1674** `if(Test-Path $csv){ Remove-Item $csv -Force }`: il
 #          driver CANCELLA quel file PRIMA di ogni gamba. Un round che
 #          parte mentre un altro sta girando gli porta via il CSV sotto i
-#          piedi.
-#      (b) **r.1683-1686**, il ripiego: se il file atteso non c'e', il
+#          piedi -- anche quando l'altro l'ha gia' scritto e non l'ha
+#          ancora raccolto.
+#      (b) **r.1687-1689**, IL RAMO NORMALE, ed e' QUESTO il difetto
+#          peggiore che esista su questa sedia:
+#          `if(Test-Path $csv){ $n=... ; Copy-Item $csv -Destination $done`
+#          `-Force; Remove-Item $csv -Force }`. **Nessun controllo di
+#          freschezza (`LastWriteTime`), nessun controllo di chi l'ha
+#          scritto**: il driver copia quel NOME e lo ribattezza col `tag`
+#          della gamba corrente. E siccome i tre fratelli condividono lo
+#          STESSO nome -- stesso EA, stesso simbolo -- un CSV uscito dal
+#          terminale del round vicino viene preso per proprio. A schermo
+#          esce `OK -> <tag>.csv (N righe)`, **in VERDE**: nessun errore,
+#          nessun avviso, **nessuna riga di nessun colore**. E' MUTO, e
+#          supera tutte le sentinelle strutturali (S3 conterebbe 6 righe
+#          invece di 5 e sembrerebbe solo "una cella di troppo").
+#      (c) **r.1683-1686**, IL RIPIEGO: se il file atteso NON c'e', il
 #          driver prende il piu' recente `OptResults_*.csv` scritto DOPO
-#          l'avvio (`$_.LastWriteTime -ge $prima`) e lo copia **con il
-#          nome della gamba corrente**. In parallelo questo non da'
-#          nessun errore: da' un CSV **intitolato a un round e riempito
-#          con le passate di un altro**. E' il difetto peggiore che
-#          esista, perche' e' silenzioso e supera tutte le sentinelle
-#          strutturali (S3 conterebbe 6 righe invece di 5 e sembrerebbe
-#          solo "una cella di troppo").
+#          l'avvio (`$_.LastWriteTime -ge $prima`) e lo copia col nome
+#          della gamba corrente. **Fra i tre fratelli questo ramo NON
+#          SCATTA**, e la ragione e' aritmetica: cattura solo i file con
+#          un nome DIVERSO da quello atteso (altro EA, altro simbolo) --
+#          se il nome fosse lo stesso, l'avrebbe gia' preso il ramo (b).
+#          Ed e' l'unico dei tre che lascia una traccia: **r.1685** stampa
+#          in giallo "(CSV trovato con un altro nome: ...)". E' la
+#          **classe 89-bis**, gia' in checklist e gia' misurata altrove:
+#          si cita qui **per non confonderla con (b)**, che e' un'altra
+#          cosa e non parla affatto. Scambiare le due vuol dire cercare
+#          una riga gialla che non comparira' mai.
 #  >>> QUINDI: i tre round si accodano **uno dopo l'altro**. Se un giorno
 #      dovessero girare insieme, devono stare su **terminali di backtest
 #      DIVERSI** (cartelle dati diverse), non su finestre diverse dello
@@ -343,8 +366,18 @@
 #        dichiarazione: r.573 e r.577). In un backtest riparte da 0 a
 #        ogni passata, cioe' **a ogni gamba del walk-forward**.
 #      - CELLA **0** -- e qui il codice dice una cosa piu' precisa di
-#        "meccanismo spento", **ed e' la prima delle due correzioni a
-#        R176a**: `RefreshTakeProfit` non viene MAI chiamata, quindi
+#        "meccanismo spento", **ed e' la prima delle due PRECISAZIONI a
+#        R176a**.
+#        >>> PRECISAZIONE, NON CORREZIONE, e la differenza si scrive
+#            perche' il contrario sarebbe un'attribuzione falsa: R176a
+#            dice gia', alla lettera (**r.225-227**), *"il TP resta
+#            quello messo all'ingresso e sparisce anche la chiusura a
+#            mercato sulla mediana"*, e chiude con *"in quella cella e'
+#            un'altra strategia"* (r.230). Il FATTO li' e' giusto. Qui si
+#            aggiungono il NOME della cella e il suo posto sull'asse, che
+#            R176a non aveva ragione di scrivere perche' non era il suo
+#            asse.
+#        Nel dettaglio: `RefreshTakeProfit` non viene MAI chiamata, quindi
 #          (i) il TP **non sparisce**: resta l'ordine gia' sul server,
 #              piazzato da `Enter()` a r.1348 con
 #              `tp = mediana` (r.1304-1306, `NormalizePrice(gMid[1])`
@@ -391,9 +424,10 @@
 #              in stop)");
 #          **r.1416** `if(MathAbs(tp-mid) < tick) continue;` -- **la
 #              guardia del tick**: se la mediana si e' mossa meno di un
-#              tick, l'aggiornamento NON viene nemmeno tentato. E' una
-#              terza causa di "cella identica alla 0" che nessun altro
-#              file di questa sedia ha dovuto considerare (T3);
+#              tick, l'aggiornamento NON viene nemmeno tentato. E' la
+#              causa **(b)** delle QUATTRO di "cella identica alla 0"
+#              elencate in T3, e nessun altro file di questa sedia ha
+#              dovuto considerarla;
 #          **r.1417** `PositionModify(tk,sl,mid)` -- il TP va sulla
 #              mediana corrente, e **lo `sl` passato e' quello CORRENTE**:
 #              l'aggiornamento **non annulla** la riduzione del rischio
@@ -438,7 +472,8 @@
 #          r.1314).
 # ---------------------------------------------------------------------
 #  LE TRE PROPRIETA' STRUTTURALI DI QUESTO ASSE, CHE NON ESISTONO IN
-#  R174a NE' IN R176a -- E DUE DI ESSE CORREGGONO R176a
+#  R174a NE' IN R176a -- E DUE DI ESSE PRECISANO R176a (senza smentirlo:
+#  le sue parole sono citate, e sono giuste)
 #
 #  Questa e' la sezione da leggere prima di tutto il resto: da sola puo'
 #  far leggere al contrario un esito pulitissimo.
@@ -511,10 +546,12 @@
 #          quindi non si chiude nemmeno passando ai tick reali.
 #
 #  (III) **LA CELLA 0 STA AL CAPO OPPOSTO DELL'ASSE RISPETTO A DOVE IL
-#      DRIVER LA SCRIVE, E QUESTA E' LA SECONDA CORREZIONE A R176a.**
+#      DRIVER LA SCRIVE, E QUESTA E' LA SECONDA PRECISAZIONE A R176a.**
 #      R176a la descrive come la cella che "spegne un pezzo di motore"
-#      (r.224-230) e la colloca implicitamente in fondo in basso, accanto
-#      alla cella 1, perche' e' li' che la scrive l'ordine numerico.
+#      (r.224-230) e **non scrive nessun ordinamento di questo asse** --
+#      non era il suo asse e non aveva ragione di farlo. Il rischio non
+#      e' nella sua frase: e' nella COLONNA DEL CSV, che mette lo 0
+#      accanto all'1 perche' li' comanda l'ordine numerico.
 #      **Ma la grandezza che questo asse governa non e' N: e' la
 #      STANCHEZZA dell'obiettivo**, che vale (N-1)/2 barre in media e che
 #      cresce con N. E allora:
@@ -660,8 +697,9 @@
 #          da due parti). **Scrivere qui un AR2 sarebbe esattamente
 #          l'errore della classe 387**, e la sua assenza e' dichiarata
 #          apposta.
-#   AR3 -- **L'AGGIORNAMENTO NON SPOSTA MAI LO STOP.** r.1417 passa
-#          `sl` letto dalla posizione due righe prima (r.1387). Quindi
+#   AR3 -- **L'AGGIORNAMENTO NON SPOSTA MAI LO STOP.** r.1417 passa lo
+#          `sl` letto dalla posizione in cima al ciclo (**r.1387**,
+#          `PositionGetDouble(POSITION_SL)`) e mai ricalcolato. Quindi
 #          questo asse **non puo' allargare ne' stringere lo stop di
 #          nessuna operazione**: tocca solo il TP e l'istante di
 #          chiusura a mercato. Verificato riga per riga perche' il
@@ -858,7 +896,9 @@
 #  UNITA' DI MISURA: `Trades` DEL CSV = POSIZIONI, IN TUTTE E CINQUE LE
 #  CELLE
 #    `Trades` e' `TesterStatistics(STAT_TRADES)` (r.1815, ottavo posto
-#    dell'intestazione cablata a r.1842 e del formato a r.1850-1851),
+#    dell'intestazione cablata a r.1842 e **ottavo segnaposto del formato
+#    a r.1847-1849**, dove e' un `%.0f`; le r.1850-1851 sono un'altra
+#    cosa e vengono DOPO: sono i VALORI degli input appesi alla riga),
 #    cioe' **le uscite**.
 #    `grep -n "PositionClose\|PositionClosePartial"` sul sorgente NON da'
 #    zero: da' r.1398 (banda opposta, ramo TPMode=1), r.1412 (mediana,
@@ -1340,7 +1380,12 @@
 #      >>> E QUI S3 HA UN SECONDO COMPITO CHE NEGLI ALTRI FILE NON HA:
 #          **6 righe sono il sintomo del vincolo di sequenza violato**
 #          (un CSV di R176a, che ha 6 celle, raccolto al posto di questo:
-#          sezione VINCOLO DI SEQUENZA, ripiego r.1683-1686 del driver).
+#          sezione VINCOLO DI SEQUENZA, ramo (b), **r.1687-1689** del
+#          driver -- quello che copia il nome atteso SENZA guardare chi
+#          l'ha scritto. **Non** il ripiego r.1683-1686, che fra due
+#          round con lo stesso nome di CSV non scatta mai: aspettare la
+#          sua riga gialla vuol dire aspettare un segnale che non
+#          arrivera'. Classe 399.)
 #          Prima di dare la colpa alla cache del tester (T5), si guarda
 #          la colonna `InpTPRefreshBars`: se ha un solo valore, il CSV
 #          **non e' di questo round**.
@@ -1411,7 +1456,7 @@
 #     `$Meta=$Inizio.AddDays([math]::Floor(($FineDt-$Inizio).TotalDays*$FrazioneIS))`),
 #    quindi con `@FRAZIONEIS 0.50`:
 #      IS  1999.01.04 -> **2012.10.01**  (5.019 giorni -> ~**261** op)
-#      OOS 2012.10.02 -> 2026.06.30      (5.020 giorni -> ~**261** op)
+#      OOS 2012.10.02 -> 2026.06.30      (5.019 giorni -> ~**261** op)
 #    >>> ENTRAMBE SOPRA 150, con un margine del **74%**. Perche' una
 #        meta' scendesse sotto il pavimento servirebbe che meno del
 #        **28,7%** delle 522 operazioni fosse caduta in quella meta': una
@@ -1574,11 +1619,13 @@
 #      verso solo. E si cita con **tutte e due** le colonne della fonte
 #      (classe 396): sonda A **0,2 pip** e prudente B **1,0 pip**, con
 #      l'ATR di GBPUSD **[INF] da EURUSD**, non misurato.
-#    - **IL VINCOLO DI SEQUENZA**: i tre round della sedia scrivono sullo
-#      stesso `OptResults_ABTG_BreakingBand_GBPUSD.csv`. Non e' un buco
-#      di misura, e' un buco di PROCESSO, e sta in testa al file perche'
-#      e' l'unico che puo' produrre un CSV **giusto intitolato al round
-#      sbagliato**.
+#    - **IL VINCOLO DI SEQUENZA (classe 399)**: i tre round della sedia
+#      scrivono sullo stesso `OptResults_ABTG_BreakingBand_GBPUSD.csv`,
+#      il cui nome porta l'EA e il SIMBOLO ma **non il round**. Non e' un
+#      buco di misura, e' un buco di PROCESSO, e sta in testa al file
+#      perche' e' l'unico che puo' produrre un CSV **giusto intitolato al
+#      round sbagliato**, per giunta senza stampare niente (ramo (b),
+#      r.1687-1689 del driver).
 #    - LATO SEPARATO (long/short): **[NON MISURABILE qui]**. L'EA non ha
 #      manopole di lato (verificato: nessun InpAllowLong/InpAllowShort nel
 #      sorgente) e il CSV non separa i lati. La cadenza giusta potrebbe

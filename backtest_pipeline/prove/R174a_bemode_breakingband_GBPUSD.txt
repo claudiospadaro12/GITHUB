@@ -18,6 +18,54 @@
 #    -Etichetta r174a -Modello 1 -Deposito 100000
 #
 #  ####################################################################
+#  ##  VINCOLO DI SEQUENZA (CLASSE 399) -- QUESTO ROUND E I DUE       ##
+#  ##  FRATELLI SCRIVONO SULLO STESSO FILE INTERMEDIO. SI LANCIANO    ##
+#  ##  IN SERIE, MAI IN PARALLELO SULLA STESSA CARTELLA DATI.         ##
+#  ####################################################################
+#  Aggiunto il 17/09/2026 dal cancello di giudizio mentre controllava
+#  R177a. **Il difetto non e' di questo file: e' della CORSIA**, e vale
+#  per tutti e tre i round della sedia 772161 (R174a `InpBEMode`, R176a
+#  `InpBEatATR`, R177a `InpTPRefreshBars`). Sta scritto QUI, e non in uno
+#  solo dei tre, perche' chi arma legge il file che sta armando.
+#  IL FATTO: il nome del CSV intermedio NON contiene ne' l'etichetta ne'
+#  il magic. Lo compone l'EA con `MQL_PROGRAM_NAME` e `_Symbol`
+#  (`ABTG_BreakingBand.mq5` r.1725) e il driver lo cerca con la stessa
+#  regola (`walkforward_generico.ps1` r.1673): i tre round producono
+#  tutti e tre lo stesso `OptResults_ABTG_BreakingBand_GBPUSD.csv` in
+#  `MQL5\Files`.
+#  IL MECCANISMO ESATTO -- e NON e' il ramo che si sospetterebbe:
+#    (a) **r.1674** `if(Test-Path $csv){ Remove-Item $csv -Force }`: il
+#        driver CANCELLA quel file prima di ogni gamba, anche se e' di un
+#        round vicino che non l'ha ancora raccolto.
+#    (b) **r.1687-1689, IL RAMO NORMALE**: se il file c'e', lo copia col
+#        `tag` della gamba corrente **senza guardare ne' l'ora di
+#        scrittura ne' chi l'ha scritto**. Un CSV uscito dal terminale
+#        del round vicino viene preso per proprio, e a schermo esce
+#        `OK -> <tag>.csv (N righe)` **in VERDE**: nessun errore, nessun
+#        avviso, **nessuna riga di nessun colore**. E' il ramo MUTO, ed
+#        e' quello che produce un CSV giusto intitolato al round
+#        sbagliato.
+#    (c) **r.1683-1686**, il ripiego (quello della nota riga gialla "CSV
+#        trovato con un altro nome", classe 89-bis): **fra i tre
+#        fratelli NON scatta**, perche' cattura solo i nomi DIVERSI da
+#        quello atteso. Aspettare quel giallo come allarme vuol dire
+#        aspettare un segnale che non arrivera' mai.
+#  >>> QUINDI: i tre round si accodano UNO DOPO L'ALTRO. Se un giorno
+#      dovessero girare insieme, devono stare su CARTELLE DATI diverse
+#      (`$MqlFiles` = `<DataFolder>\MQL5\Files`, r.1529), non su finestre
+#      diverse dello stesso terminale.
+#  >>> E SE I NUMERI DELLA CELLA CONDIVISA NON COINCIDESSERO fra i tre
+#      round (cella 0 di R174a = cella 1.0 di R176a = cella 1 di R177a:
+#      e' la STESSA configurazione), il sospetto numero uno **non e' il
+#      mercato**: e' questo. Il controllo costa zero -- si guarda la
+#      colonna dell'asse nel CSV: se porta i valori di un ALTRO round, il
+#      CSV non e' di questo round.
+#  >>> NOTA DI PROCESSO: questo blocco e' PROSA. Non tocca nessun pin,
+#      nessuna cella, nessuna soglia, e i criteri restano quelli
+#      congelati il 17/09 prima dei numeri.
+#  ####################################################################
+#
+#  ####################################################################
 #  ##  RISOLTO IL 17/09/2026: GIRO DI PIN 64 (dc069389 -> 87081012). ##
 #  ####################################################################
 #  Il file prova NON viene letto dal disco: lo SCARICA il driver, dal

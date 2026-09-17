@@ -22809,3 +22809,82 @@ stessa ora"* — e non applica la stessa prudenza al pin — che il progetto ha 
 3. **Il pin si rilegge all'ultimo gesto prima del commit**, come già si fa
    per i magic vergini. Un pin citato "alla stesura" non è una misura: è un
    ricordo.
+
+---
+
+## 399. 🔀🤐 L'ARTEFATTO INTERMEDIO IL CUI NOME PORTA **EA + SIMBOLO MA NON IL ROUND**: due round della stessa sedia si scambiano il CSV, e il ramo che lo fa **non stampa niente** (controllo-preventivo, 17/09/2026, gemella silenziosa della **89-bis**)
+
+**Il caso.** La sedia `772161` (`ABTG_BreakingBand`, GBPUSD, H1) ha **tre**
+round d'uscita scritti in 24 ore — `R174a` (`InpBEMode`), `R176a`
+(`InpBEatATR`), `R177a` (`InpTPRefreshBars`) — con **tre magic vergini
+diversi** e **tre etichette diverse**. Sembrano isolati. Non lo sono: il CSV
+**intermedio** del tester non porta né il magic né l'etichetta.
+
+```mql5
+// ABTG_BreakingBand.mq5 r.1725
+return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
+```
+```text
+walkforward_generico.ps1 r.1673:
+$csv=Join-Path $MqlFiles "OptResults_$($Expert)_$($Simbolo).csv"
+```
+
+👉 Tutti e tre producono **lo stesso** `OptResults_ABTG_BreakingBand_GBPUSD.csv`
+in `<DataFolder>\MQL5\Files`. L'identità del round entra **solo dopo**, quando
+il driver copia il file col `tag` della gamba (`$done`, r.1623/1689).
+
+### 🔴 I TRE RAMI, E IL PIÙ PERICOLOSO È QUELLO CHE NON PARLA
+| ramo | riga | cosa fa | che rumore fa |
+|---|---|---|---|
+| (a) cancellazione | **1674** | `if(Test-Path $csv){ Remove-Item $csv -Force }` prima di ogni gamba | nessuno |
+| (b) **ramo normale** | **1687-1689** | `if(Test-Path $csv){ Copy-Item $csv -Destination $done -Force; Remove-Item $csv -Force }` — **nessun controllo di `LastWriteTime`, nessun controllo di chi ha scritto** | `OK -> <tag>.csv (N righe)` **in VERDE** |
+| (c) ripiego | 1683-1686 | prende il più recente `OptResults_*.csv` con `LastWriteTime -ge $prima` | riga **gialla** "(CSV trovato con un altro nome: ...)" |
+
+🧠 **E qui sta la trappola di ragionamento che questa classe esiste per
+chiudere.** È naturale attribuire lo scambio al **ripiego** (c) — è il ramo
+"sospetto", quello che la **89-bis** ha già fatto pagare. **È sbagliato, ed è
+sbagliato per aritmetica**: il ripiego cattura solo file con un nome **DIVERSO**
+da quello atteso; se il nome fosse lo stesso, l'avrebbe già preso il ramo (b).
+Fra due round dello stesso EA sullo stesso simbolo **il nome è identico**, quindi
+lo scambio passa **sempre** dal ramo (b), che **non stampa nessuna riga di
+nessun colore**. Chi cerca la riga gialla della 89-bis aspetta un segnale che
+**non arriverà mai**.
+
+### 🆚 PERCHÉ NON È LA 89-bis
+La **89-bis** dice: *"un ripiego che accetta un artefatto con un nome DIVERSO
+controlla la parte di nome che porta l'IDENTITÀ (simbolo, magic, TF)"*. Il suo
+rimedio **qui non morde**: la parte di nome che porta l'identità **torna
+perfettamente** (stesso EA, stesso simbolo — sono proprio quelli i round che
+collidono). Il difetto non è *"nome diverso accettato"*: è **"nome identico che
+non identifica"**.
+
+### 💥 COSA PRODUCE
+Un CSV **formalmente perfetto**, con l'intestazione giusta, il numero di colonne
+giusto, il `tag` del round A e **le passate del round B**. `ESITO: OK`, codice
+d'uscita 0. E le sentinelle strutturali non lo prendono: un conteggio righe
+sbagliato (6 invece di 5) somiglia a *"una cella di troppo"* o alla cache del
+tester, non a un furto d'identità.
+
+> ✅ **LA REGOLA, in quattro pezzi:**
+> 1. **Prima di armare due round, si guarda il NOME DELL'ARTEFATTO INTERMEDIO,
+>    non quello finale.** La domanda è una sola: *"da che cosa è composto quel
+>    nome, e c'è dentro qualcosa che distingue QUESTO round?"*. Per la corsia
+>    ROUND la risposta è **EA + simbolo, e basta**.
+> 2. **Due round che condividono EA e simbolo si accodano IN SERIE**, sempre. Se
+>    devono girare insieme, vanno su **cartelle dati diverse** (terminali di
+>    backtest diversi), non su finestre diverse dello stesso: `$MqlFiles` è
+>    `<DataFolder>\MQL5\Files` (r.1529), quindi è la **cartella dati** a
+>    decidere, non la finestra.
+> 3. **Il vincolo si scrive DENTRO OGNI FILE PROVA che lo subisce**, non in uno
+>    solo dei fratelli: chi arma legge il file che sta armando.
+> 4. **Nel referto, la prima ipotesi davanti a due celle gemelle che non
+>    coincidono non è il mercato: è questo.** Controllo che costa zero: la
+>    colonna dell'asse. Se porta i valori di un ALTRO round (o un valore solo),
+>    il CSV non è di questo round.
+
+📌 **Nota per chi ripara il driver** (lavoro a sé, non si fa mentre si legge un
+risultato): basterebbe che il ramo (b) rifiutasse un `$csv` con
+`LastWriteTime -lt $prima`… e **non basterebbe comunque**, perché nel caso
+parallelo il file è **fresco davvero** — è solo di un altro. La riparazione vera
+è **mettere l'etichetta del round nel nome dell'artefatto intermedio**, cioè
+toccare `OptFrame_FileName()` nell'EA. Finché non si fa, la difesa è **la serie**.
