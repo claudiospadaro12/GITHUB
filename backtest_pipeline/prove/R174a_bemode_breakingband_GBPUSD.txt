@@ -16,6 +16,34 @@
 #    -Expert ABTG_BreakingBand
 #    -Prova R174a_bemode_breakingband_GBPUSD.txt
 #    -Etichetta r174a -Modello 1 -Deposito 100000
+#
+#  ####################################################################
+#  ##  FERMO: OGGI QUESTA RIGA NON SI PUO' LANCIARE. CLASSE 265.     ##
+#  ####################################################################
+#  Il file prova NON viene letto dal disco: lo SCARICA il driver, dal
+#  `$PIN` che sta DENTRO la copia di `RIGA_SOTTILE_ROUND.ps1`
+#  (`RIGA_ROUND_VPS.ps1` r.600: `Scarica ($RawBase + "/backtest_pipeline/
+#  prove/" + $Prova)`, con `$RawBase` costruito sul `-Pin`). E il `$PIN`
+#  di oggi e' `dc0693899d4ba51186d50ba6c9bdcdfdf578d782` (r.1276 della
+#  riga sottile), commit del **16/09/2026 23:07**. Questo file e' nato il
+#  **17/09** (`60bd1fc4`). Misurato adesso, con il controllo POSITIVO
+#  accanto a quello negativo, perche' un ASSENTE da solo non dice se il
+#  comando funziona:
+#    git cat-file -e dc069389:backtest_pipeline/prove/
+#        R161a_slatrmult_breakingband_GBPUSD.txt  -> **ESISTE**  (positivo)
+#        R174a_bemode_breakingband_GBPUSD.txt     -> **ASSENTE**
+#  >>> Lanciarla cosi' vuol dire **HTTP 404 sul file prova e round
+#      morto**, cioe' una notte persa: e' esattamente il caso della
+#      classe 265 (12/09), qui in RECIDIVA.
+#  >>> COSA SERVE PRIMA, e non e' un lavoro di questo file: il `$PIN`
+#      dentro `RIGA_SOTTILE_ROUND.ps1` va portato a un commit che
+#      contenga QUESTO file (cioe' `60bd1fc4` o un suo discendente), e
+#      quel cambio ripassa dal cancello (la riga sottile e' uno script:
+#      cambia un valore, cambiano le due SHA-256 che inchiodano driver e
+#      corsia). Finche' non e' fatto, questo file resta **SCRITTO E NON
+#      LANCIABILE**, e va detto cosi' a chi lo mette in coda.
+#  ####################################################################
+#
 #  (prima SEMPRE con -SoloControllo: deve stampare 2 CELLE per finestra.
 #   >>> SI GUARDA IL NUMERO DI CELLE, MAI QUELLO DELLE PASSATE: la riga
 #       "-> N pass a tick reali in tutto" del driver e' un *2 CABLATO
