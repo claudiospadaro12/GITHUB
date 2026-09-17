@@ -804,3 +804,61 @@ vecchia è **sottostimato di ~18-27%**, quindi **conservativo**: nessuna
 diventare `PASS`**. 🔴 **Non ricalibrato qui**: e' un lavoro suo, e va fatto
 una volta sola — chi corregge l'ancora **non** aggiunge anche il +18-27%,
 altrimenti conta l'errore due volte.
+
+
+---
+
+# ✏️✏️ CORREZIONE DELLA CORREZIONE — 18/09/2026, poche ore dopo
+
+> 🔴 **La correzione che avevo scritto qui sopra il 17/09 era METÀ sbagliata, e
+> la metà sbagliata è quella che ho propagato in chat.** La ritiro qui, con i
+> numeri che la smontano.
+
+## Che cosa avevo scritto, e che cosa resta in piedi
+
+| affermazione mia del 17/09 | esito |
+|---|---|
+| *"la frase «0 gambe in stop» è FALSA: 4 gambe su 5 hanno `close_reason = sl`"* | 🟢 **VERO alla lettera**, e resta |
+| *"quindi il `[NM]` sull'ATR M15 del DAX cade"* | 🔴 **FALSO: il `[NM]` REGGE** |
+| *"la gamba 20/08 dà `ATR(14) M15 >= 22,0 idx`"* | 🔴 **RITIRATO: non segue** |
+| il tag portato da `[NM]` a `[DER]` | 🔴 **RIPORTATO a `[NM]`** |
+
+## 🔬 IL NUMERO CHE LO SMONTA — le 5 gambe di `770411` coi PREZZI
+
+Fonte: `data/statements/trades_auto.csv`, magic `770411`, verificato riga per
+riga (tutte **SELL**, quindi chiudere **sotto** l'ingresso = **in profitto**):
+
+| data | ingresso | uscita | scarto | `close_reason` |
+|---|---:|---:|---:|---|
+| 18/08 08:14 | 26216,70 | 26216,70 | **0,00 — esattamente in PARI** | `sl` |
+| 20/08 08:02 | 26043,80 | 25988,80 | **+55,00 a FAVORE** | `sl` |
+| 24/08 08:01 | 26074,90 | 26073,90 | **+1,00 a favore** | `sl` |
+| 26/08 08:27 | 26214,90 | 26202,20 | +12,70 a favore | `expert` |
+| 31/08 08:03 | 26436,90 | 26420,50 | **+16,40 a favore** | `sl` |
+
+🔴 **Tutte e quattro le gambe `sl` chiudono AL PARI o MEGLIO. Nessuno stop
+pieno, nemmeno uno.** Su quella sedia `InpBreakeven` e `InpUseTrailing` sono
+accesi: quelle uscite sono **stop SPOSTATI**, quindi la distanza che si misura
+è quella del **trailing**, non quella **d'ingresso**.
+
+👉 **Da un'uscita dalla parte del guadagno non si ricava NESSUN limite
+inferiore sull'ATR.** Il mio `>= 22,0` era un'inferenza sbagliata, non un
+numero sbagliato: la catena logica non esiste.
+
+## ⚖️ E LA LEZIONE, che è più utile del numero
+
+> La frase originale di questo referto — *"0 gambe in stop"* — era **sbagliata
+> nella LETTERA e giusta nella SOSTANZA**: `close_reason = sl` c'era, ma
+> **stop PIENI** zero. E io ho corretto la lettera e **rovesciato la
+> sostanza**, che era la cosa che contava.
+
+🔴 **La regola**: quando si corregge una frase, si controlla **a che cosa
+serviva** nel discorso. Qui serviva a dire *"di questa sedia non abbiamo una
+distanza di stop misurata"* — e quello **era vero**. Smontare la frase e
+tenersi la conclusione ribaltata è **peggio** che lasciare la frase imprecisa.
+
+✅ **Stato corretto di questa riga, oggi**: `770411 / D30EUR / M15` →
+**stop `[NON MISURATO]`**, perché le 5 gambe non contengono **un solo stop
+pieno**. L'ATR M15 del DAX resta stimabile solo **per scalatura**
+(`[INFERITO]`, vedi `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`), non per
+misura diretta.
