@@ -23335,3 +23335,69 @@ approssimato, perché sia il True Range sia la RMA dipendono solo da `i−1`: il
 valore della passata precedente **è** quello definitivo. Le due strade in cui
 gli indici traslano restano coperte (`prev_calculated == 0` e
 `ArraySize() != rates_total`).
+
+---
+
+## 🏷️♻️ CLASSE 408 — IL TAG `[MISURATO]` PRESO PER **VICINANZA**: un numero senza tag lo eredita dal numero taggato che gli sta accanto nello stesso paragrafo (17/09/2026)
+
+> **Difetto vero**, e va detto com'è andata perché è istruttivo: l'ha
+> **segnalato** un agente del cancello, l'ho **verificato io alla fonte**, e
+> **la verità non era né la mia né la sua**.
+
+### 📜 LA CATENA, per intero
+1. Nel briefing di un giro di cancello ho scritto:
+   *"`ATR(M30) 25-40 punti` sul DAX **[MISURATO]**"*, attribuendolo all'agente.
+2. L'agente ha risposto: 🔴 *"quel numero **NON ESISTE**, non l'ho mai scritto,
+   e il repo dice **l'opposto in chiaro**: «ATR M15 del DAX mai misurato»"*.
+3. 🔎 **Verificato alla fonte, e sono sbagliate tutte e due le versioni:**
+   - `report/CACCIA_SABATO_2026-09-13.md` **r.464-465** dice letteralmente
+     *"L'ATR M30 del DAX vale **25-40 punti**"*. 👉 **Il numero ESISTE.**
+     (L'agente aveva ragione su *"non l'ho scritto io"* — era un **altro**
+     agente, due giri prima — e torto su *"non esiste"*.)
+   - Il *"mai misurato"* che cita sta in
+     `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.408 e riguarda **M15**,
+     non **M30**. 👉 **Non è l'opposto: è un altro timeframe.** Ha confuso due
+     TF, che è esattamente l'errore contro cui stava mettendo in guardia.
+   - 🔴 **Ma il `[MISURATO]` non regge lo stesso**, e per la ragione vera: a
+     r.464-465 quel numero **non porta nessun tag**, e la parola `MISURATI`
+     che gli sta due righe sopra si riferisce agli **spread**
+     (`D30EUR 1,6-1,7 · NASUSD 1,6-1,8 · U30USD 1,9-2,0`), **non all'ATR**.
+
+### 🔬 IL MECCANISMO, che è più insidioso dell'attribuzione
+Il tag non è stato inventato: è stato **ereditato per PROSSIMITÀ**. Un
+paragrafo che contiene *"dagli spread **MISURATI** in sessione"* e due righe
+sotto *"l'ATR M30 del DAX vale 25-40 punti"* fa sembrare **misurate entrambe**
+le cose. Nessuno ha mentito: il tag **è migrato**.
+
+⚠️ **E la prova che non è un cavillo**: lo stesso paragrafo del repo contiene
+un numero che, scalato dall'ancora H4 con la regola √T di casa, darebbe
+**~60 punti indice** per l'M30 — cioè **il doppio** di 25-40. 👉 In casa ci
+sono **due valori dell'ATR M30 del DAX che non concordano di un fattore 2**, e
+finché nessuno li riconcilia il verdetto onesto è **`[NON MISURATO]`**, non
+uno dei due.
+
+### ✅ LA REGOLA, in tre pezzi
+1. 🔴 **Il tag si attacca a una FONTE — file, riga, corsa, `n` — mai a una
+   persona, a un agente o a un paragrafo.** Se la risposta a *"chi l'ha
+   misurato?"* è *"lo ha detto l'agente X"* oppure *"sta accanto a un numero
+   misurato"*, il tag corretto è **`[NON MISURATO]`**.
+2. ⚠️ **Un `[MISURATO]` in un paragrafo NON si estende agli altri numeri dello
+   stesso paragrafo.** Quando si cita, si cita **la riga del numero**, non la
+   riga del vicino.
+3. 🔴 **E quando due numeri di casa sulla stessa grandezza non concordano, il
+   verdetto è `[NON MISURATO]` con ENTRAMBI i valori scritti**, non il più
+   comodo dei due. Una taratura costruita su un ATR ereditato manda in campo
+   soglie tarate su niente: è il modo in cui una misura falsa passa da un
+   commento a una **sedia**.
+
+### 📌 CHIUSA COSÌ, nello stesso giorno
+Nel file `ABTG_SuperEMA_Riding.mq5` la stima gemella (*"la soglia in ATR vale
+circa 1.000"*, NOTE M) è stata marcata
+**`[ORDINE DI GRANDEZZA, non misurato: poggia su un ATR assunto]`**. E la
+taratura di partenza proposta a Claudio porta **il range onesto e il conflitto
+dichiarato**, non il numero che faceva la figura migliore.
+
+🟢 **La cosa che è andata BENE, e va detta**: due cancelli in serie hanno
+prodotto **tre** versioni di un fatto, e la terza — quella verificata alla
+fonte da chi doveva consegnare — era l'unica giusta. Il meccanismo funziona
+**se chi consegna va a guardare**, non se si fida del controllo.

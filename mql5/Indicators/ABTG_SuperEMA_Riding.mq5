@@ -437,10 +437,11 @@ int OnInit()
    //    nessuno: arriva da CopyBuffer e contiene quello che ci lascia
    //    l'indicatore di serie. Senza PLOT_DRAW_BEGIN la "EMA 200" si
    //    disegnerebbe anche dove non e' ancora una EMA 200. E se quella testa
-   //    contenesse EMPTY_VALUE (= DBL_MAX) invece di 0.0 -- [NON MISURATO],
-   //    non c'e' un terminale qui -- con PLOT_EMPTY_VALUE a 0.0 quei valori
-   //    diventerebbero punti REALI e la scala verticale del grafico
-   //    esploderebbe. Queste sei righe chiudono le due cose insieme.
+   //    contenesse EMPTY_VALUE (= DBL_MAX) invece di 0.0, quei valori
+   //    diventerebbero punti REALI. Queste sei righe chiudono la PRIMA cosa
+   //    (il disegno). La SECONDA (la scala verticale) la chiude
+   //    l'azzeramento della testa in OnCalculate, e cosi' non dipende da
+   //    nessuna ipotesi su come si comporta l'autoscala di MT5.
    PlotIndexSetInteger(1,PLOT_DRAW_BEGIN,InpEmaFast);
    PlotIndexSetInteger(2,PLOT_DRAW_BEGIN,InpEmaMid);
    PlotIndexSetInteger(3,PLOT_DRAW_BEGIN,InpEmaSlow);
@@ -501,6 +502,13 @@ void OnDeinit(const int reason)
 //|     barre erano 300.000 iterazioni per tick (~2.700 volte il       |
 //|     vecchio), e su un feed a 20-50 tick/s l'indicatore non sta     |
 //|     dietro al flusso.                                              |
+//| ATTENZIONE, il conto qui sopra vale SUL SUO PERIMETRO: nella      |
+//| stessa OnCalculate la media dell'ATR (AtrFAvg) gira con una       |
+//| finestra interna, e sul ricalcolo PIENO e' LEI il termine         |
+//| dominante (a 100.000 barre ~16 volte le 3n dell'ATR). Per tick e' |
+//| innocua (finestra da start-AvgLen-1). Detto perche' un costo      |
+//| giusto sul suo pezzo da' un'impressione sbagliata sul totale --   |
+//| e' la classe 407 applicata al perimetro di fianco.                |
 //| Le due strade in cui gli indici possono TRASLARE sono coperte:     |
 //| MT5 passa prev_calculated==0 quando carica storico a sinistra, e   |
 //| se rates_total cambia scatta comunque ArraySize()!=rates_total.    |
@@ -554,7 +562,13 @@ bool AtrSerie(const int rates_total,const int periodo,const int da,double &out[]
    else
      {
       //--- poche barre: la finestra si somma DIRETTA, cosi' la coda non
-      //    riparte da una somma scorrevole gia' arrotondata.
+      //    riparte da una somma scorrevole gia' arrotondata. MISURATO: i due
+      //    rami NON coincidono all'ultimo bit (scarto relativo fino a
+      //    2,3e-14 a 100.000 barre) e la DIRETTA e' quella GIUSTA -- e' la
+      //    scorrevole che deriva, e lo scarto cresce con l'indice di barra.
+      //    Nessun confronto di questo file ne dipende (2,3e-14 su un ATR di
+      //    30 punti indice sono 7e-13 punti). Vale solo con
+      //    InpAtrModoRma=false, cioe' fuori dal default.
       for(int i=i0;i<rates_total;i++)
         { double sm=0.0; for(int k=0;k<periodo;k++) sm+=TRv[i-k]; out[i]=sm/(double)periodo; }
      }
@@ -1147,7 +1161,18 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
 //|    EURUSD.pro / EURUSD-ECN / EURUSDm passano, ma FX_EURUSD /     |
 //|    m.EURUSD / #EURUSD no. E' voluto: stretto sbaglia meno di     |
 //|    largo. E non e' silenzioso: su EURUSD letto come INDEX la     |
-//|    soglia in ATR vale circa 1.000, quindi il pannello scrive     |
+//|    soglia in ATR vale circa 1.000 [ORDINE DI GRANDEZZA, non      |
+//|    misurato: poggia su un ATR assunto], quindi il pannello scrive|
 //|    "K SOSPETTO" in rosso, e si ripara con InpForzaCategoria +    |
 //|    InpCategoriaMan.                                              |
+//|                                                                  |
+//| N) LO JPY SI DECIDE DALLA VALUTA DI PROFITTO, non dal nome. Il   |
+//|    v1.2 usa str.contains(ticker,"JPY") -- "JPY" in QUALUNQUE     |
+//|    posizione -- qui si guarda SYMBOL_CURRENCY_PROFIT. Divergono  |
+//|    solo su un simbolo con JPY come valuta BASE (tipo JPYUSD): il |
+//|    Pine direbbe FX_JPY con K=0,01, questo dice FX con K=0,0001.  |
+//|    Qui ha ragione questo file (il pip lo fa la valuta QUOTATA,   |
+//|    non la base), e su BCM un simbolo cosi' non esiste: la        |
+//|    differenza NON e' raggiungibile oggi. Scritta perche' il      |
+//|    giorno in cui comparisse, non sembri un bug.                  |
 //+------------------------------------------------------------------+
