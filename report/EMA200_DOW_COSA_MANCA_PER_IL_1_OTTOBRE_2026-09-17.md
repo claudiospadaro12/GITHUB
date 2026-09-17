@@ -277,9 +277,44 @@ EMA200_Ott XAUUSD, e su quello il verbale del **23/08** dice
 **«prop: NO a nessuna taglia»** (DD 45,91%) — `CENSIMENTO_CONTRATTI.md` r.231.
 ⚠️ E quel 1,245 **somma posizioni con deal**: non è omogeneo.
 
-🔴 **Non è riparabile misurando**: sui quattro indici azionari gemelli il motore
-fa **6 celle positive su 330** (D30EUR 0/80 · E50EUR 0/83 · F40EUR 0/81 ·
-NASUSD 2/83 · SPXUSD 4/86) contro **98/98 sul Dow**. → ostacolo **#8**.
+🔴 **Non è riparabile misurando** → ostacolo **#8**.
+
+> ## ✏️ CORREZIONE DEL 17/09/2026, poche ore dopo — TRE difetti in tre righe
+> Qui era scritto: *"sui **quattro** indici azionari gemelli il motore fa **6
+> celle positive su 330** (D30EUR 0/80 · E50EUR 0/83 · F40EUR 0/81 · NASUSD
+> 2/83 · SPXUSD 4/86) contro 98/98 sul Dow"*. **Tre cose non andavano**, e il
+> numero stava andando davanti a una firma:
+>
+> 1. 🔴 **L'insieme è definito male — è la classe 180.** Dice *"i **quattro**
+>    indici gemelli"* e poi **ne elenca CINQUE**. E ne lascia fuori **quattro**
+>    che nello **stesso archivio** fanno **85 celle positive**.
+> 2. 🔴 **Il conto rifatto sui CSV grezzi** (`risultati_archivio/EMA200/H1_OHLC/`,
+>    celle vive) su **NOVE** indici gemelli dà **87 su 771**, non 6 su 330 —
+>    contro **81/81** sul Dow.
+> 3. 🔴 **E la cosa peggiore: era già stato corretto in casa CINQUE GIORNI
+>    PRIMA.** `report/EMA200_I_DUE_REQUISITI_2026-09-12.md` **r.10** dice a
+>    chiare lettere che *"«l'edge sta su UN SIMBOLO SOLO» è vero **A H1** e
+>    **FALSO A H4**"*. Questo referto ha ricitato la versione non corretta.
+>
+> 🟢 **La conclusione operativa NON cambia**: a H1 l'edge resta sul Dow, e la
+> famiglia H1 resta a un simbolo. **Il numero sì**, e l'insieme pure.
+>
+> 🧱 **E il muro vero è un altro, ed è stato trovato solo stanotte**: a **H4**
+> l'edge sui gemelli **c'è** (`SPXUSD` 76/84, PF mediano 1,272-1,590, costo
+> 80-90×, il più sicuro di tutti i TF). Quello che manca **non è l'edge e non è
+> il costo: è lo STORICO.** Tutti gli indici BCM partono dal **`2024.09.26`**
+> — verificato: `D30EUR` e `U30USD` prima data `2024.09.26`, `NASUSD` idem
+> (`COME_ALLUNGARE_STORICO_INDICI_2026-09-09.md` rr.80-84). Sono ~21 mesi e
+> **un solo regime**: a H4 il massimo producibile è **~104 posizioni sull'intera
+> finestra**, contro un pavimento di **150 per finestra**. Serve **~3 volte** lo
+> storico che esiste.
+> 👉 Quindi il merito a H4 **non è bocciato: è SOSPESO per campione**
+> (Emendamento B del 16/08). 🚫 **Nessun certificato di morte.**
+> ⏱️ Via più corta: import HistData nei round `_EXT`. Costo dichiarato in casa
+> **~42 h (2 notti)** per 2 anni di Nasdaq, **~105 h (4-5 notti)** per 5 anni di
+> Dow. 🔴 **In 13 giorni non ci sta.**
+>
+> Dettaglio completo: `report/EMA200_IL_PAVIMENTO_DI_FREQUENZA_2026-09-17.md`.
 
 ## 3.4 📜 Verdetto sul contratto
 > 🟢 **La sedia HA un contratto, e il criterio d'uscita del 18/08 PUÒ funzionare su
