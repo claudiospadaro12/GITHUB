@@ -2887,3 +2887,57 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
 # =====================================================================
+#  R174a -- InpBEMode, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
+#  Prima manopola d'uscita mai messa ad asse su questa sedia (famiglia
+#  quasi vergine: solo InpMinRR era gia' girata, R91 20/08, ma sotto
+#  pavimento -- n=13 IS/26 OOS -- e non conta come misurata). Asse a 2
+#  celle: 0 = SL a meta' rischio (vivo), 1 = SL a pari (breakeven).
+#
+#  Ancora: R102 (finestra piena 1999.01.14-2026.06.30, tranche unica):
+#  Profit -11.574 EUR, PF 0,897, n 522, DD 23,43%. Round gira spezzato
+#  con @FRAZIONEIS 0.50 esplicita (classe 393 applicata bene): S1 e'
+#  scritta SOLO su Trades (grandezza additiva, 230+427=657 misurato
+#  altrove oggi con lo stesso schema), PF/DD dell'ancora restano
+#  contesto, non sentinella. Verificato: ABTG_BreakingBand.mq5 nasce
+#  il 12/08/2026, 4 giorni DOPO il fix sizing dell'8/08 (classe 392),
+#  gia' con OrderCalcProfit -- mai avuto il difetto.
+#
+#  Scelto InpBEMode invece del piu' ovvio InpTPMode perche' quest'ultimo
+#  raddoppia le uscite per posizione (parziale sulla mediana), rompendo
+#  il fattore uscite/posizioni=1,00 su cui si regge S1. Nessun verso
+#  congelato su Trades/Profit/DD (classe 387): due meccanismi -- durata
+#  della posizione e occupazione dell'unico slot permesso
+#  (InpMaxPositions=1) -- tirano in direzioni opposte, dichiarati come
+#  tali, non promossi a claim direzionale.
+#
+#  Secondo cancello: FAIL alla lettura -> PASS dopo 2 correzioni
+#  BLOCCANTI + 1 numero (commit 87081012). **Classe NUOVA 394**: la
+#  riga `Spread=` che l'ancora scriveva esplicita, questa corsia di
+#  lancio NON la scrive affatto -- MT5 eredita lo spread in memoria
+#  ("stato nascosto" per ammissione dello stesso driver), e su questo
+#  asse quel valore puo' chiudere la porta minDist sulla SOLA cella 1,
+#  falsificando un'inerzia come misurata quando sarebbe un artefatto di
+#  sessione. E' un buco della CORSIA condivisa da tutta la serie
+#  (R161a/b/c lo ereditano senza saperlo), non di questo file. **Classe
+#  265 recidiva**: il file era nato DOPO l'ultimo giro di pin -- al
+#  vecchio pin sarebbe stato un HTTP 404. Risolta da questo stesso giro
+#  di pin (64mo).
+#
+#  Merito sospeso (IS/OOS 261/261 contro pavimento 150: pieno). Zero
+#  preset cambia, zero forward. Con 2 celle nessun altopiano possibile,
+#  B5 assoluto: il round non promuove niente nemmeno con esito perfetto.
+#
+#  Pin: giro di pin 87081012 (64mo, dc069389 -> 87081012). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e' VUOTO).
+#  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779885, vergine a
+#  HEAD (grep -rl "InpMagic=779885" dalla radice, worktree compresi;
+#  nessuna collisione con 779879/R175a scritto in parallelo).
+#  🕳️ **BUCO APERTO, NON CHIUSO DA QUESTO ROUND**: lo spread del tester
+#  non e' pinnato da questa corsia (classe 394). Prima di leggere S5 su
+#  QUESTO round, verificare col blocco `-SoloControllo` se l'.ini scrive
+#  la riga Spread= o se il driver segnala "nessuna riga Spread" (stato
+#  ereditato in memoria) -- se ereditato, un'eventuale inerzia fra le
+#  due celle non e' attribuibile a InpBEMode senza quella verifica.
+# =====================================================================
+87081012e5c28801b95732fc24eef0742b692047 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
+# =====================================================================

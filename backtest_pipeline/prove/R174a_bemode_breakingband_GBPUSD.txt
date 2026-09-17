@@ -18,30 +18,25 @@
 #    -Etichetta r174a -Modello 1 -Deposito 100000
 #
 #  ####################################################################
-#  ##  FERMO: OGGI QUESTA RIGA NON SI PUO' LANCIARE. CLASSE 265.     ##
+#  ##  RISOLTO IL 17/09/2026: GIRO DI PIN 64 (dc069389 -> 87081012). ##
 #  ####################################################################
 #  Il file prova NON viene letto dal disco: lo SCARICA il driver, dal
 #  `$PIN` che sta DENTRO la copia di `RIGA_SOTTILE_ROUND.ps1`
 #  (`RIGA_ROUND_VPS.ps1` r.600: `Scarica ($RawBase + "/backtest_pipeline/
-#  prove/" + $Prova)`, con `$RawBase` costruito sul `-Pin`). E il `$PIN`
-#  di oggi e' `dc0693899d4ba51186d50ba6c9bdcdfdf578d782` (r.1276 della
-#  riga sottile), commit del **16/09/2026 23:07**. Questo file e' nato il
-#  **17/09** (`60bd1fc4`). Misurato adesso, con il controllo POSITIVO
-#  accanto a quello negativo, perche' un ASSENTE da solo non dice se il
-#  comando funziona:
+#  prove/" + $Prova)`, con `$RawBase` costruito sul `-Pin`). Alla stesura
+#  di questo blocco (classe 265 RECIDIVA, trovata dal secondo cancello)
+#  il `$PIN` era `dc0693899d4ba51186d50ba6c9bdcdfdf578d782` (16/09
+#  23:07), precedente alla nascita di questo file (`60bd1fc4`, 17/09):
+#  scaricarlo avrebbe dato HTTP 404, round morto. Controllo positivo/
+#  negativo fatto allora:
 #    git cat-file -e dc069389:backtest_pipeline/prove/
-#        R161a_slatrmult_breakingband_GBPUSD.txt  -> **ESISTE**  (positivo)
-#        R174a_bemode_breakingband_GBPUSD.txt     -> **ASSENTE**
-#  >>> Lanciarla cosi' vuol dire **HTTP 404 sul file prova e round
-#      morto**, cioe' una notte persa: e' esattamente il caso della
-#      classe 265 (12/09), qui in RECIDIVA.
-#  >>> COSA SERVE PRIMA, e non e' un lavoro di questo file: il `$PIN`
-#      dentro `RIGA_SOTTILE_ROUND.ps1` va portato a un commit che
-#      contenga QUESTO file (cioe' `60bd1fc4` o un suo discendente), e
-#      quel cambio ripassa dal cancello (la riga sottile e' uno script:
-#      cambia un valore, cambiano le due SHA-256 che inchiodano driver e
-#      corsia). Finche' non e' fatto, questo file resta **SCRITTO E NON
-#      LANCIABILE**, e va detto cosi' a chi lo mette in coda.
+#        R161a_slatrmult_breakingband_GBPUSD.txt  -> ESISTE  (positivo)
+#        R174a_bemode_breakingband_GBPUSD.txt     -> ASSENTE (allora)
+#  >>> CHI ARMA HA GIA' FATTO IL PASSO CHE SERVIVA: giro di pin 64,
+#      $PIN ora e' `87081012e5c28801b95732fc24eef0742b692047` (contiene
+#      questo commit, il file esiste al pin), $SHA_ROUND e $SHA_WALK
+#      riverificati invariati (git diff dc069389..87081012 sui due
+#      percorsi: VUOTO). Questa riga E' lanciabile.
 #  ####################################################################
 #
 #  (prima SEMPRE con -SoloControllo: deve stampare 2 CELLE per finestra.
