@@ -1326,7 +1326,27 @@ $BancoBT = 'C:\MT5_Backtest'
 #  deterministici passano su tutti e 21 i file. RIGA_ROUND_VPS.ps1 e
 #  walkforward_generico.ps1 NON sono cambiati fra 02f459c4 e d727f6dc
 #  (git diff sui due percorsi: VUOTO, verificato).
-$PIN = 'd727f6dcb5b2242d9ca72933fa51507d113da4dd'
+#  >>> SESSANTASETTESIMO GIRO DI PIN (17/09/2026): d727f6dc -> 3aab9ae5.
+#  Serviva per armare R176a (InpBEatATR, ABTG_BreakingBand, sedia 772161
+#  GBPUSD, magic 779886), seconda manopola d'uscita testata su questa
+#  sedia: R174a testa DOVE va lo stop, R176a testa QUANDO scatta.
+#  Secondo cancello FAIL alla lettura -> PASS dopo 3 correzioni di
+#  giudizio + 3 citazioni (commit 3aab9ae5). Classi NUOVE 396 (spread
+#  importato solo nella colonna ottimista di CANCELLO_COSTO_FLOTTA),
+#  397 (un'identita' col meccanismo spento letta come misura fisica
+#  invece che come implicazione one-way, estensione della 357), 398
+#  (la dichiarazione di classe 265 congelava il NUMERO DI RIGA di
+#  $PIN invece della condizione -- lezione applicata qui sotto: si
+#  cita "$PIN sta alla riga che segue questo blocco", non un numero
+#  che si sposta a ogni giro). RIGA_ROUND_VPS.ps1 e walkforward_
+#  generico.ps1 NON sono cambiati fra d727f6dc e 3aab9ae5 (git diff sui
+#  due percorsi: VUOTO, verificato). Il sorgente EA
+#  (ABTG_BreakingBand.mq5) fra c1442371 (nascita, gia' col fix di
+#  sizing) e HEAD e' invariato rispetto all'ultima verifica (886 righe
+#  di diff, gia' lette riga per riga da R174a/R176a: v1.04/v1.05,
+#  default-neutri). Magic 779886 riverificato vergine (grep -rlw dalla
+#  radice, worktree compresi: solo questo file).
+$PIN = '3aab9ae5116711023ce7f098b320965f515ce4e1'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
