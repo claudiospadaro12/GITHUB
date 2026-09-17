@@ -1,7 +1,7 @@
 # =====================================================================
 #  EA: ABTG_BreakingBand
 #  R174a -- "SL A META' RISCHIO oppure SL A PARI": l'unica manopola
-#           BINARIA della gestione, mai messa ad asse in 22 file prova
+#           BINARIA della gestione, mai messa ad asse in 25 file prova
 #           -- sedia GBPUSD H1, magic 772161 -- asse InpBEMode,
 #           2 celle (0 = meta' rischio, valore VIVO; 1 = breakeven),
 #           walk-forward VERO (IS e OOS ATTESI sopra il pavimento 150
@@ -193,6 +193,45 @@
 #      stato riscaricato nel frattempo" non sono separabili senza una
 #      passata di controllo. La banda larga di S1 (+/-8%) esiste anche
 #      per questo.
+#  >>> E C'E' UN QUARTO TERMINE, CHE NON E' IL CODICE E NON E' LO
+#      STORICO: **LO SPREAD DEL TESTER, CHE QUESTA CORSIA NON PINNA.**
+#      Trovato aprendo i due `.ini` invece di fidarsi del fatto che
+#      "gira lo stesso driver di sempre":
+#        - l'ANCORA: `RIGA_R102_CLASSIFICA_LUNGA.ps1` scrive
+#          `Spread=$SpreadIni` con `$SpreadIni=0` (r.210, r.1148 e
+#          r.1200) = "spread CORRENTE, DICHIARATO". Lo stato e' negli
+#          atti.
+#        - QUESTA CORSIA: `walkforward_generico.ps1` scrive `$RigaSpread`
+#          (r.1655), che e' la STRINGA VUOTA finche' `-Spread` vale il
+#          default **-1** (r.192, r.944-945). E `-Spread` non arriva:
+#          `RIGA_SOTTILE_ROUND.ps1` non ha il parametro (blocco param:
+#          Expert, Prova, Etichetta, Modello, Deposito, SoloControllo) e
+#          `RIGA_ROUND_VPS.ps1` r.646-650 passa solo -Expert -Prova
+#          -Etichetta -Modello -Deposito -Rifai -Force -TerminaleBacktest.
+#          Quindi **nell'.ini di questo round la riga `Spread=` NON
+#          ESISTE**, e il driver stesso lo dice a r.958: "MT5 usa il
+#          valore che ha in memoria. E' il comportamento di sempre, ma e'
+#          **STATO NASCOSTO**: per metterlo agli atti passa -Spread 0."
+#      >>> PERCHE' QUI MORDE PIU' CHE IN UN ROUND QUALUNQUE, e non e' una
+#          nota di igiene: lo spread entra in `StopsMinDist()` (r.1597-
+#          1601, `max(STOPS_LEVEL, spread)`), cioe' dentro **LA PORTA**
+#          che puo' zittire il breakeven della SOLA cella 1. Un valore
+#          lasciato in memoria da un round di STRESS (il parametro
+#          `-Spread` esiste apposta, R84-bis del 19/08) gonfia `minDist`,
+#          chiude la porta per la cella 1 e NON per la cella 0, e le due
+#          celle convergono: S5 leggerebbe "inerte" per una ragione che
+#          con `InpBEMode` non c'entra niente. E' lo stesso difetto che
+#          questo file rimprovera altrove ("uno stato implicito non e'
+#          uno stato dichiarato"), sul parametro che qui conta di piu'.
+#      >>> COSA SI FA, VISTO CHE LA CORSIA NON HA LA MANOPOLA: **si
+#          DICHIARA e si LEGGE PRIMA di interpretare**. In `-SoloControllo`
+#          il driver stampa il blocco spread (r.949 se la riga c'e', r.958
+#          se non c'e'): se stampa la frase "nessuna riga Spread
+#          nell'.ini", il round gira con lo spread in memoria e **ogni
+#          differenza fra le due celle va letta con questo buco aperto**.
+#          Chiuderlo davvero costa una riga nel driver (`-Spread 0`) o un
+#          parametro in piu' nella riga sottile: e' un lavoro a se', e
+#          **non si fa mentre si legge un risultato**.
 # ---------------------------------------------------------------------
 #  COSA FA IL PARAMETRO, LETTO NEL SORGENTE (non a memoria)
 #    `mql5/Experts/ABTG_BreakingBand.mq5` v1.05.
@@ -345,6 +384,19 @@
 #            MASSIMO fra STOPS_LEVEL e spread, e **STOPS_LEVEL su questi
 #            simboli e' [NON MISURATO] in tutto il repo**. Il margine
 #            ~37x confronta il grilletto col solo SPREAD.
+#        >>> E IL SECONDO TERMINE MANCANTE E' PEGGIO DEL PRIMO, perche'
+#            non e' una misura che manca: e' uno STATO CHE NON SI SA.
+#            **Lo 0,2 pip qui sopra e' lo spread della SONDA del 17/08,
+#            non lo spread che il TESTER usera'**, e questa corsia la
+#            riga `Spread=` nell'.ini **non la scrive affatto** (default
+#            `-Spread -1`, r.192 e r.944-945 del driver; ne'
+#            `RIGA_SOTTILE_ROUND.ps1` ne' `RIGA_ROUND_VPS.ps1` passano
+#            `-Spread`): MT5 usa il valore che ha in memoria, e il driver
+#            lo chiama da se' "**STATO NASCOSTO**" (r.958). Sezione
+#            CLASSE 392, quarto termine. Quindi il margine ~37x vale
+#            **se e solo se** in memoria c'e' lo spread corrente: con un
+#            valore di STRESS rimasto da un round precedente il conto si
+#            ribalta, e si ribalta **sulla sola cella 1**.
 #    >>> E COMUNQUE E' UN RITARDO, NON UN BLOCCO: `ManageRiskReduction`
 #        gira a ogni tick, e man mano che l'operazione avanza `avanti`
 #        cresce. La porta puo' spostare in avanti il momento del
@@ -652,9 +704,15 @@
 #    >>> E LE CAUSE NON SI ATTRIBUISCONO: un'inerzia misurata potrebbe
 #        venire da (a) poche operazioni al grilletto, (b) pochi
 #        ritracciamenti fino a op dopo il grilletto, (c) la PORTA
-#        minDist che rimanda il breakeven. **Nessuna delle tre e'
-#        distinguibile dalle colonne di questo CSV.** Si scrive
-#        "inerte", non "inerte perche'".
+#        minDist che rimanda il breakeven, (d) **lo spread del tester
+#        lasciato in memoria** -- che e' un caso PARTICOLARE di (c), ma
+#        va contato a parte perche' non dipende dal mercato: dipende da
+#        che cosa ha girato prima su quel MT5 (sezione CLASSE 392,
+#        quarto termine). **Nessuna delle quattro e' distinguibile dalle
+#        colonne di questo CSV.** Si scrive "inerte", non "inerte
+#        perche'". E la (d) e' l'unica che si puo' almeno ESCLUDERE
+#        senza girare niente: si legge il blocco spread stampato da
+#        `-SoloControllo` PRIMA di lanciare.
 #    >>> E la controprova indipendente che le celle siano davvero due e'
 #        un'altra cosa ancora: **S4**, due valori DISTINTI di InpBEMode
 #        nella colonna omonima (la colonna esiste: OnTesterDeinit accoda
@@ -884,6 +942,15 @@
 #      interpretabile un'eventuale inerzia.
 #    - LA PORTA minDist: [NON MISURATA], STOPS_LEVEL su questi simboli e'
 #      assente da tutto il repo (sezione LA PORTA).
+#    - LO SPREAD DEL TESTER: **[NON PINNATO DA QUESTA CORSIA]**, e l'ancora
+#      R102 invece lo pinnava (`Spread=0`). L'.ini di questo round non ha
+#      nessuna riga `Spread=`: MT5 usa il valore in memoria, che il driver
+#      stesso chiama "STATO NASCOSTO" (r.958). Tocca `minDist`, quindi
+#      tocca LA PORTA, quindi tocca la SOLA cella 1. Prima di leggere
+#      qualunque differenza fra le celle si legge il blocco spread di
+#      `-SoloControllo`; se dice "nessuna riga Spread nell'.ini", il buco
+#      e' aperto e va scritto nel referto. Sezioni CLASSE 392 (quarto
+#      termine), LA PORTA e T3(d).
 #    - CANCELLO DI COSTO: [NON MISURABILE E NON SPOSTABILE da questo
 #      round], e per di piu' identico fra le due celle (classe 353).
 #    - CONTATORI DEL FUNNEL: [NON RACCOLTI DA QUESTA CORSIA].
