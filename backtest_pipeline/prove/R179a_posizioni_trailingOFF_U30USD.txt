@@ -1,3 +1,40 @@
+# ============================================================================
+# 🪦 NON ARMARE -- RITIRATO IL 17/09/2026, PRIMA DI ANDARE IN CODA
+#
+# Questo file misura UN numero che ESISTE GIA', misurato CINQUE NOTTI DI FILA
+# dal runner stesso:
+#
+#   backtest_pipeline/coda/referti/CODA_12_pertrade_posizioni_20260917_033003.log
+#   r.209-214:  abtg_trades_ABTG_EMA200_U30USD_786400.csv
+#               deal uscita: 427
+#               POSIZIONI  : 215
+#               rapporto   : 1.986
+#               close_time : dal 2025.06.12 13:44:51 al 2026.06.26 16:30:02
+#
+#   e identico nelle notti 13, 14, 15, 16 e 17/09: 427 / 215 / 1.986.
+#
+# LA CELLA E' IDENTIFICATA DA TRE FATTI INDIPENDENTI, non da una convenzione:
+#   1. 427 deal = esattamente la colonna Trades della riga Pass=0 (trailing
+#      OFF) di ABTG_EMA200_U30USD_OOS_r136d.csv; la cella ON fa 517;
+#   2. la finestra: close_time 2025.06.12 -> 2026.06.26, dentro l'OOS;
+#   3. il banco: il primo close_time e' identico AL BYTE alla prima riga del
+#      per-trade di R112 (pertrade_00_metro_763400.csv).
+#
+# PERCHE' ESISTEVA E NON L'AVEVAMO VISTO: R136d e' ANCORA IN CODA
+# (CODA.txt r.222) e sta A MONTE di CODA_12 (r.565), quindi ogni notte il
+# runner gli rilegge il per-trade e stampa il conteggio.
+#
+# E IL CONTRO-ESEMPIO PRIMO DI QUESTO FILE E' FALSIFICATO DAL LOG: il file
+# sostiene che col magic condiviso sopravvive la cella con InpUseTrailing=1
+# (517 deal). Il log dice 427, cioe' la cella con InpUseTrailing=0.
+# Era una DEDUZIONE dove c'era una MISURA.
+#
+# -> classe 411 in backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md
+#
+# Il file NON si cancella: i suoi criteri congelati B1..B10 sono serviti a
+# leggere il numero, e il difetto sta nella ricerca, non nel mestiere.
+# ============================================================================
+
 # ======================================================================
 #  EA: ABTG_EMA200
 #  R179a -- QUANTE POSIZIONI FA LA SEDIA CON IL TRAILING SPENTO?

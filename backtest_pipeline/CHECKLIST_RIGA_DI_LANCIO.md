@@ -23508,3 +23508,71 @@ os.replace(tmp, p)             # sostituzione atomica
 🔴 **Non si apre in `'w'` un file che non si è pronti a perdere.** E la ragione
 per cui stanotte è costato zero è una sola: **era su GitHub.** È la Regola #1,
 pagata in diretta.
+
+
+---
+
+## 🪵🔍 CLASSE 411 — UN FILE PROVA DICHIARA `[NON MISURATO]` UN NUMERO CHE UN `CODA_*` GIÀ IN CODA HA MISURATO **CINQUE VOLTE**: la caccia al numero è stata fatta nella cartella dei RISULTATI e non nei **LOG DEL RUNNER** (17/09/2026)
+
+> **Difetto vero**, trovato dal cancello di giudizio **prima** dell'armamento.
+> Verificato da me sui cinque log.
+
+**Il caso.** `R179a_posizioni_trailingOFF_U30USD.txt` nasce per contare le
+posizioni OOS di `ABTG_EMA200` U30USD con `InpUseTrailing=0`, e apre
+dichiarando *"misura UN numero che oggi non esiste"*.
+
+🔴 **Il numero esisteva**, e non da ieri:
+
+```
+backtest_pipeline/coda/referti/CODA_12_pertrade_posizioni_20260917_033003.log
+r.209-214   abtg_trades_ABTG_EMA200_U30USD_786400.csv
+            deal uscita: 427
+            POSIZIONI  : 215
+            rapporto   : 1.986
+```
+
+**Identico nelle notti 13, 14, 15, 16 e 17/09: 427 / 215 / 1,986.** Cinque
+scritture fresche e indipendenti.
+
+### 🔬 IL MECCANISMO, ed è la parte che si riusa
+La ricerca è stata fatta dove stanno i **risultati pubblicati**
+(`risultati_prove/`, `risultati_archivio/`) e **non** dove stanno le **misure
+stampate** (`coda/referti/*.log`).
+
+🔴 **Sono due archivi diversi — e con il trasporto dei CSV fermo dal 13/09 il
+SECONDO è più aggiornato del PRIMO.** È il motivo per cui il buco si è aperto
+proprio adesso e non tre settimane fa.
+
+**Perché il numero era lì**: `R136d` è **ancora in coda** (`CODA.txt` r.222) e
+sta **a monte** di `CODA_12` (r.565), quindi ogni notte il runner gli rilegge
+il per-trade e ne stampa il conteggio.
+
+### ⚠️ E HA PRODOTTO UN SECONDO ERRORE A VALLE
+Per giustificare uno scostamento dal mandato, il file ha **ragionato** su quale
+cella sopravvive quando due passate condividono il magic — concludendo
+`InpUseTrailing=1` (517 deal). **Il log diceva 427**, cioè `InpUseTrailing=0`.
+👉 **Una deduzione dove c'era una misura.** Lo scostamento era tecnicamente
+ben argomentato e **praticamente inutile**.
+
+### ✅ LA REGOLA, in tre pezzi
+1. 🔴 **Prima di scrivere `[NON MISURATO]` su un conteggio di POSIZIONI si
+   grepano `backtest_pipeline/coda/referti/CODA_12_*.log`** per EA e simbolo.
+   Costa un grep.
+2. 📌 **Prima di scrivere un file prova nuovo si controlla se un round GIÀ IN
+   CODA produce la stessa misura**: `grep -n <EA> backtest_pipeline/coda/CODA.txt`,
+   e si guarda se sta **prima** di `CODA_12`.
+3. 🧮 **Se un per-trade a magic condiviso non dice quale cella contiene, il
+   conteggio dei DEAL lo dice**, confrontato con la colonna `Trades` del CSV di
+   riepilogo dello stesso round. **Non si deduce l'ordine delle passate: si
+   legge il numero.**
+
+### 📎 E DUE COSE CHE IL CANCELLO HA AGGIUNTO, e valgono oltre il caso
+- ⏱️ **La POSIZIONE della riga in `CODA.txt` decide se il numero arriva
+  stanotte o la notte dopo**: qualunque round che produca un per-trade va messo
+  **PRIMA** di `CODA_12` (r.565). Oggi tutte le righe di round stanno **dopo**
+  (da r.2306 a r.3167): appese in fondo, `CODA_12` non le vede.
+- 🔀 **Asimmetria da sapere**: la strada del **per-trade NON passa dal
+  trasporto rotto** (`CODA_12` stampa, e il runner pubblica log e referto da
+  solo), mentre i **CSV di riepilogo sì**. Quindi un conteggio può arrivare
+  **prima della sentinella che dovrebbe validarlo** — e va tenuto illeggibile
+  finché la sentinella non torna.

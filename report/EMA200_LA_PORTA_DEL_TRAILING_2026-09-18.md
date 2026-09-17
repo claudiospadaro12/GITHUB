@@ -335,3 +335,71 @@ il pavimento di **1,00 per famiglia**.
   cioè il valore **sfavorevole**.
 - ⚠️ **I 3 deal in eccesso** su 517 = 2×257+3 non sono attribuiti:
   `[NON MISURATO]`.
+
+
+---
+
+# 🎯 IL VERDETTO, SCRITTO LO STESSO GIORNO E A ZERO MINUTI DI MACCHINA (17/09/2026)
+
+> Il cancello di giudizio su `R179a` ha bocciato l'armamento con la ragione
+> migliore possibile: **il numero che il round voleva contare esisteva già.**
+> Verificato da me sui cinque log del runner.
+
+## Il numero mancante: **215 posizioni**
+
+```
+backtest_pipeline/coda/referti/CODA_12_pertrade_posizioni_20260917_033003.log
+r.209-214   abtg_trades_ABTG_EMA200_U30USD_786400.csv
+            deal uscita: 427
+            POSIZIONI  : 215
+            rapporto   : 1.986
+            close_time : dal 2025.06.12 13:44:51 al 2026.06.26 16:30:02
+```
+
+**Identico nelle notti 13, 14, 15, 16 e 17/09**, cinque scritture fresche:
+`427 / 215 / 1,986`. `[MISURATO]`
+
+**La cella è identificata da tre fatti indipendenti**, non da una convenzione:
+427 deal = la colonna `Trades` della riga `Pass=0` (la cella ON fa **517**) ·
+la finestra `close_time` cade dentro l'OOS · il primo `close_time` è identico
+**al byte** alla prima riga del per-trade di R112 → **stesso banco**.
+
+## 📊 IL CONFRONTO CHE CONTA — profitto per POSIZIONE
+
+| | posizioni | profitto OOS | **profitto / posizione** |
+|---|---:|---:|---:|
+| trailing **ON** (cella viva) | 257 | 23.321,47 | **90,745** |
+| trailing **OFF** | **215** | 28.249,94 | 🟢 **131,395** |
+| | −16,3% | +21,1% | 🟢 **+44,8%** |
+
+## 🟠 IL VERDETTO, nella forma massima che i criteri congelati ammettono
+
+> Con `InpUseTrailing=false` la sedia `ABTG_EMA200` U30USD H1 fa **215
+> posizioni** in OOS (427 deal, fattore 1,986) contro le **257** della cella
+> viva, e il **profitto per posizione passa da 90,75 a 131,40: +44,8%**
+> `[MISURATO]`. La frequenza scende a **0,779-0,790 posizioni/giorno feriale**,
+> **sotto** il pavimento di 1,00 per famiglia.
+>
+> 🔴 **Il vantaggio è MISURATO nella sola finestra OOS, e resta NON MISURATO
+> come MIGLIORAMENTO** finché una **terza finestra** o una **prova di regime**
+> non concorda: in IS il segno si inverte (PF −0,09394, profitto **−55,4%**).
+
+⚠️ **E un limite che non si nasconde**: 215 contro 257 posizioni sono
+**−16,3% di esposizione in numero di trade**, quindi **una parte** del
+miglioramento di drawdown (7,4151 contro 7,8323) **è comprata con la
+frequenza, non con la geometria**. Il DD normalizzato per esposizione non è
+una colonna del tester: `[NON MISURATO]`.
+
+## 🚫 Nessun certificato di morte — e che cosa manca, per nome
+1. ✅ le **posizioni OOS** della cella OFF: **chiuse**, 215;
+2. 🟠 una **terza finestra o prova di regime**: l'**unica** cosa che può
+   riparare il criterio di concordanza. Costo `[NON STIMATO]`;
+3. ⚪ le **posizioni IS** della cella OFF (194 deal): `[NON MISURATE]`, e
+   nessun round in casa le produce. Attesa dichiarabile prima: **97-108
+   posizioni**. Costo: **1,5 minuti**. 👉 È l'unica cosa qui dentro che
+   nessuno ha ancora misurato, e l'unica per cui valga accendere il tester.
+
+📌 `R179a` **non è stato armato** ed è marcato `NON ARMARE` in testa al file,
+con la ragione. Non è stato cancellato: i suoi criteri `B1..B10` sono serviti
+a **leggere** questo numero, e il difetto stava nella ricerca, non nel
+mestiere. → classe **411**.
