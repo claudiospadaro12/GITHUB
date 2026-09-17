@@ -22599,12 +22599,25 @@ un VERDETTO che viene stampato.** Tracciata riga per riga sui tre script:
 La dichiarazione esiste già, scritta bene, in **sei** file prova:
 `R161b`/`R161c` (r.31-46), `R170a` (r.252, r.886), `R171a`/`R171b`.
 🔴 **Ma NON esisteva in nessuna classe della checklist** — ed ecco il
-risultato misurabile: **manca nei due fratelli della stessa sedia**,
-`R157a` (zero occorrenze di "NON MISURATO", verificato col grep) e
-`R159a` (due occorrenze, tutt'altro argomento), e mancava in `R175a`.
-E `R161b` r.45-46 **afferma** che R157a/R159a ce l'hanno: **non è vero**.
+risultato misurabile: **mancava in 19 file su 22** che usano
+`@FRAZIONEIS 1.0` in tutto il repo (popolazione completa, verificata con
+grep sulle varianti numeriche), non solo nei due fratelli della stessa
+sedia GapFill. E `R161b` r.45-46 **affermava** che cinque fratelli
+(R154a/R156a/R157a/R158a/R159a) avevano "la stessa dichiarazione": **non
+era vero quando scritto**, verificato su tutti e cinque col grep.
+
+🟢 **CHIUSO IL 17/09/2026**: aggiunta la dichiarazione completa (i quattro
+punti: esito+codice, artefatto vero=CSV IS, non rilanciare, verdetto a
+mano) ai 19 file che ne erano privi, con i numeri di riga riverificati
+sugli script veri (non copiati da qui: due fonti si contraddicevano di
+una riga). Completati anche `R161b`/`R161c`, che coprivano solo i primi
+due punti. Corretta la claim falsa in `R161b`, dichiarando onestamente che
+è diventata vera solo con l'intervento di oggi, non perché lo fosse alla
+stesura. Verificato con diff filtrato (solo prosa di commento, nessuna
+direttiva toccata) e coi due cancelli deterministici su tutti e 21 i file,
+poi riarmati con un nuovo giro di pin (66mo).
 👉 Una pratica che vive solo nei file si propaga per copia, e la copia
-salta. Per questo entra qui.
+salta: la regola sotto resta la vera correzione strutturale.
 
 ### 🔴 LA REGOLA
 1. **Ogni file prova che dichiara `@FRAZIONEIS 1.0` (o qualunque schema a
