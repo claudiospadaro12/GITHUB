@@ -84,8 +84,53 @@
 //   tornano al valore di chiusura a ogni ricalcolo della barra viva, quindi
 //   l'etichetta si ripara da sola.
 //
-// ⚠️ IL DEFAULT NON E' IL v1.2: useST nasce ACCESO, quindi escono anche i
-//    segnali della terza origine. Per riprodurre il v1.2 va spento a mano.
+// ⚠️ IL DEFAULT NON E' IL v1.2, e i default cambiati sono DUE:
+//    · useST nasce ACCESO -> escono anche i segnali della terza origine, che
+//      nel v1.2 non esiste. Per riprodurre il v1.2 va spento a mano.
+//    · showCross nasce ACCESO (nel v1.2 era spento): solo grafica, zero
+//      effetto sui segnali, ma va detto -- un filtro che veta senza farsi
+//      vedere non si diagnostica.
+//
+// ⚠️ ALTRE DIVERGENZE, dichiarate perche' nessuna va "corretta":
+//  D1) IL TIE-BREAK sta PRIMA dell'anti-doppione; nel MT5 sta DOPO. Con
+//      regime gia' LONG, conferma SPENTA e una barra con long E short grezzi:
+//      qui il segnale TACE, il MT5 spara lo SHORT (l'anti-doppione gli ha
+//      gia' tolto il long). Misurato su simulatore della catena: 1 divergenza,
+//      e sparisce spegnendo l'anti-doppione -> la causa e' la POSIZIONE del
+//      tie-break. Qui ha ragione il Pine: tacere e' quello che la nota D del
+//      MT5 dichiara di fare. Con la conferma ACCESA il caso e'
+//      irraggiungibile (close>open e close<open insieme).
+//  G)  LA CONFERMA ACCORPATA ha una CLAUSOLA DI SCADENZA: l'identita'
+//      (A[1]&C)|(B[1]&C)|(D[1]&C) == (A[1]|B[1]|D[1])&C vale SOLO finche' la
+//      conferma e' LA STESSA per tutte le origini. Il giorno in cui una sola
+//      origine avra' la sua conferma, questa forma diventa sbagliata IN
+//      SILENZIO. Va riscritta per origine.
+//  J)  COI DEFAULT, su GOLD e INDEX il filtro B chiede ATR > 8,0 unita' di
+//      prezzo: su XAUUSD sotto H1 blocca quasi sempre e l'origine BAND RIDING
+//      risulta DI FATTO SPENTA. Il pannello lo mostra (riga ATR, B con la
+//      croce), ma va saputo PRIMA di contare le volte che spara.
+//  L)  IL K AUTOMATICO CONOSCE SOLO LO JPY: per ogni FX non-JPY vale 0,0001,
+//      quindi su USDHUF/EURHUF (pip 0,01) e' sbagliato di 100 volte. E' lo
+//      stesso limite del v1.2 e si tiene per FEDELTA'. Ora l'allarme del pip
+//      lo SCOPRE, e la via d'uscita e' il K manuale.
+//  N)  LO JPY si decide dalla valuta QUOTATA (syminfo.currency), non dal nome
+//      come nel v1.2. Divergono solo su un JPYxxx, che su BCM non esiste.
+//  E2) BANDA A LARGHEZZA ZERO: il v1.2 da' isExpanding = TRUE (0>=0), qui da'
+//      FALSE per la guardia wPrev > 0. Divergenza reale, non morde.
+//  I)  PAROLA UGUALE, USO OPPOSTO: in ABTG_BreakingBand.mq5 il "band riding"
+//      e' una INVALIDAZIONE (oltre 20 candele = impulso esaurito, si scarta);
+//      qui e' un INGRESSO. Non si citano uno per l'altro.
+//  D5) LE ETICHETTE DELL'ORIGINE hanno un TETTO DI PIATTAFORMA: 500. Su uno
+//      storico lungo sopravvivono solo le ultime 500, quindi il CONTEGGIO
+//      delle volte che spara un'origine NON si fa contando le etichette a
+//      occhio: si fa sul pannello ("ultimo da") o su finestre corte.
+//
+// 🔔 PER GLI AVVISI, e conta: il file ha DUE canali. Le quattro
+//    alertcondition (menu a tendina) mandano un messaggio SENZA l'origine;
+//    le due alert() mandano origine + categoria + K. Per l'esperimento qui
+//    sotto l'alert va creato su "Any alert() function call", NON sulla
+//    condizione dal menu, altrimenti l'informazione per cui questo file
+//    esiste non arriva.
 //
 // 🧪 E IL PRIMO ESPERIMENTO NON E' UNA GRIGLIA: E' UN CONTEGGIO.
 //    Accendi UNA origine per volta e guarda quante volte spara, leggendo
@@ -150,11 +195,17 @@ gS = "═══ Supertrend ═══"
 stPer    = input.int(10,   "ATR Period",     minval=1, group=gS)
 stMult   = input.float(3.0,"ATR Multiplier", minval=0.1, step=0.1, group=gS)
 changeATR= input.bool(true,"ATR di Wilder (spento = SMA del True Range)", group=gS,
-     tooltip="ta.atr() E' la Wilder. Spento usa ta.sma(ta.tr,...) come il " +
-             "changeATR del Supertrend classico.")
+     tooltip="ta.atr() E' la Wilder. Spento usa ta.sma(ta.tr(true),...) come il " +
+             "changeATR del Supertrend classico. ATTENZIONE: vale per l'ATR del " +
+             "SUPERTREND *E* per quello dei filtri A/B/C, come InpAtrModoRma del " +
+             "MT5. Al default true i due file sono identici.")
 showST   = input.bool(true,"Disegna il Supertrend", group=gS)
 
-// ta.tr(true) = il True Range con high-low sulla prima barra, come il `tr` del v4
+// ta.tr(true) = True Range con high-low sulla PRIMA barra. Attenzione: il `tr`
+// VARIABILE del Pine v4 corrisponde a ta.tr, e ta.tr(true) e' l'ALTRA modalita'
+// della stessa chiamata (classe 406). La differenza morde solo sulla prima barra,
+// dentro il rodaggio dichiarato. E il v1.2 di Claudio NON ha nessun Supertrend:
+// nasce col porting MT5 del 17/09.
 atrST = changeATR ? ta.atr(stPer) : ta.sma(ta.tr(true), stPer)
 
 // ATTENZIONE AI NOMI: nel Pine classico `up` e' la banda BASSA (usata in
@@ -235,7 +286,7 @@ atrMinPt  = input.float(8.0, "ATR minimo (punti normalizzati, x K)", minval=0.0,
 useC      = input.bool(true, "C: range candela sopra X volte l'ATR", group=gA)
 candleX   = input.float(1.0, "X (range candela / ATR)", minval=0.1, step=0.1, group=gA)
 
-atrF    = ta.atr(atrLen)
+atrF    = changeATR ? ta.atr(atrLen) : ta.sma(ta.tr(true), atrLen)
 atrAvg  = ta.sma(atrF, atrAvgLen)
 fA = not useA or atrF > atrAvg
 fB = not useB or atrF > atrMinPt * K
@@ -340,11 +391,15 @@ fEma200  = input.bool(false,"Prezzo oltre la EMA 200, nel verso", group=gX)
 fSTcorde = input.bool(false,"Supertrend concorde col verso", group=gX)
 fRiding  = input.bool(false,"Serve il BAND RIDING attivo, nel verso", group=gX)
 fAntiDup = input.bool(true, "Anti-doppione globale sul regime", group=gX)
-fHour    = input.bool(false,"Finestra oraria (ora del GRAFICO)", group=gX,
-     tooltip="ATTENZIONE: su TradingView e' l'ora del FUSO DEL GRAFICO, non " +
-             "l'ora server del broker. Su MT5 BCM l'ora server e' l'ora " +
-             "italiana MENO UNA: DAX 08:00 srv, Nasdaq 14:30 srv. Qui metti " +
-             "l'ora che vedi sull'asse del grafico.")
+fHour    = input.bool(false,"Finestra oraria (ora della BORSA, non dell'asse)", group=gX,
+     tooltip="ATTENZIONE: la variabile hour di Pine e' l'ora del FUSO DELLA " +
+             "BORSA (syminfo.timezone), NON quella che vedi sull'asse: il fuso " +
+             "del grafico e' una preferenza VISIVA e lo script non lo legge. " +
+             "Il pannello scrive fuso e ora che il filtro sta usando: leggi " +
+             "QUELLA. Su MT5 BCM l'ora server e' l'ora italiana meno una (DAX " +
+             "08:00 srv, Nasdaq 14:30 srv): e' un TERZO numero e non c'entra " +
+             "con questo. Sul Nasdaq l'asse dice 15:30 e hour dice 9: seguire " +
+             "l'asse sbaglierebbe di SEI ORE e spegnerebbe la sessione.")
 hourFrom = input.int(8, "Ora di inizio (inclusa)", minval=0, maxval=23, group=gX)
 hourTo   = input.int(22,"Ora di fine (esclusa)",   minval=0, maxval=23, group=gX)
 
@@ -415,8 +470,6 @@ plotshape(showRiding and ridingDn ? bbLower : na, title="Riding GIU",
 plotshape(longSig, title="LONG", location=location.belowbar, style=shape.triangleup,
      size=size.normal, color=color.new(color.green, 0),
      text="LONG", textcolor=color.white)
-plotshape(longSig and showOrig, title="LONG origine", location=location.belowbar,
-     style=shape.none, text="↑", textcolor=color.new(color.lime, 0))
 plotshape(shortSig, title="SHORT", location=location.abovebar, style=shape.triangledown,
      size=size.normal, color=color.new(color.red, 0),
      text="SHORT", textcolor=color.white)
@@ -455,14 +508,20 @@ if shortSig
 // Il solo rapporto in ATR non basta -- misurato, un K sbagliato di 100x su
 // USDJPY M15 cade DENTRO la banda [0,001; 5] e l'allarme non suonerebbe.
 kPip      = syminfo.mintick >= 0.0005 ? 0.01 : 0.0001
+kFxLike   = syminfo.mintick <= 0.001
 thrInAtr  = atrF > 0 ? slopeThr / atrF : 0.0
-// l'allarme audita il RILEVAMENTO AUTOMATICO: con K manuale voluto tace
-kSuspect  = (thrInAtr > 5.0) or (thrInAtr < 0.001 and thrInAtr > 0) or
-            (isFxCat and useAutoK and math.abs(K - kPip) > kPip * 0.5)
+// l'allarme audita il RILEVAMENTO AUTOMATICO: con K manuale voluto tace.
+// E la controprova del PIP NON e' piu' chiusa dietro isFxCat: in un forex letto
+// come INDEX -- cioe' ESATTAMENTE il guasto che si sta cercando -- quel flag e'
+// FALSE, e la clausola non verrebbe mai valutata. Misurato: su FX_USDJPY H4 letto
+// come INDEX il solo rapporto in ATR vale 1,60, dentro la banda: allarme MUTO.
+// (Una riga sola anche perche' un a-capo rientrato di 12 spazi fuori dalle tonde
+//  e' un errore di parse: Pine usa i multipli di 4 per i blocchi locali.)
+kSuspect  = (thrInAtr > 5.0) or (thrInAtr < 0.001 and thrInAtr > 0) or (useAutoK and kFxLike and math.abs(K - kPip) > kPip * 0.5)
 
+var table t = table.new(position.top_right, 2, 11,
+     bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
 if showPanel and barstate.islast
-    var table t = table.new(position.top_right, 2, 10,
-         bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
     table.cell(t, 0, 0, "ABTG SuperEMA Riding", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
     table.cell(t, 1, 0, "v2.0", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
 
@@ -473,7 +532,8 @@ if showPanel and barstate.islast
     table.cell(t, 0, 2, kSuspect ? "K SOSPETTO" : "soglia slope", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 2, kSuspect
          ? ("vale " + str.tostring(thrInAtr, "#.####") + " ATR: controlla categoria/K")
-         : (str.tostring(slopeThr / (K > 0 ? K : 1), "#.##") + " x K  = " + str.tostring(thrInAtr, "#.###") + " ATR"),
+         : (slopeInAtr ? (str.tostring(slopeMinAtrV, "#.###") + " ATR (misura in ATR)")
+                       : (str.tostring(slopeThr / (K > 0 ? K : 1), "#.##") + " x K = " + str.tostring(thrInAtr, "#.###") + " ATR")),
          text_color=kSuspect ? color.red : color.gray, text_size=size.small)
 
     table.cell(t, 0, 3, "Supertrend", text_color=color.white, text_size=size.small)
@@ -508,6 +568,12 @@ if showPanel and barstate.islast
 
     table.cell(t, 0, 9, "ultimo segnale da", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 9, lastOrig, text_color=color.aqua, text_size=size.small)
+
+    // il fuso che il filtro orario sta USANDO: e' della BORSA, non dell'asse.
+    // Era l'unica riga di pannello che il MT5 aveva e il Pine aveva perso.
+    table.cell(t, 0, 10, "fuso / ora filtro", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 10, syminfo.timezone + "   hour=" + str.tostring(hour),
+         text_color=fHour ? color.yellow : color.gray, text_size=size.small)
 // ═══════════════════════════════════════════════════════════════════════════════
 // FINE
 // ═══════════════════════════════════════════════════════════════════════════════

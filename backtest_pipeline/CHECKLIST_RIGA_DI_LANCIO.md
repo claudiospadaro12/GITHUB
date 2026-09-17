@@ -23576,3 +23576,78 @@ ben argomentato e **praticamente inutile**.
   solo), mentre i **CSV di riepilogo sì**. Quindi un conteggio può arrivare
   **prima della sentinella che dovrebbe validarlo** — e va tenuto illeggibile
   finché la sentinella non torna.
+
+
+---
+
+## 🧩🚫 CLASSE 412 — L'IDENTIFICATORE CHE NON ESISTE NEL LINGUAGGIO, in un file che nessun compilatore locale può leggere (18/09/2026)
+
+> **Difetto vero, mio**, e **il file era già stato consegnato a Claudio**: il
+> cancello l'ha trovato prima che lo aprisse, e la versione corretta è partita
+> subito. Senza quel giro, domattina apriva il Pine Editor e vedeva un errore
+> rosso.
+
+**Il caso.** `pine/ABTG_SuperEMA_Riding_v2.pine` usava **`shape.none`** in una
+chiamata `plotshape`. **In Pine Script `shape.none` non esiste**: le forme
+ammesse sono **dodici** (`xcross, cross, circle, triangleup, triangledown,
+flag, arrowup, arrowdown, square, diamond, labelup, labeldown`).
+
+### 🔬 PERCHÉ È INVISIBILE ALLA LETTURA — ed è questo che lo rende una classe
+1. Sta in mezzo a **56 identificatori veri, tutti corretti**, in una chiamata
+   per il resto perfetta;
+2. 🔴 **"none" ESISTE in quattro altri namespace** — `label.style_none`,
+   `display.none`, `strategy.oca.none`, `adjustment.none` — quindi
+   `shape.none` **sembra giusto**. Non è un nome inventato: è un nome vero nel
+   posto sbagliato;
+3. 🔴 **lo strato 1 non ha un oggetto `.pine`**: `controlla_riga.py` accetta
+   `riga|ps1|prova|md` e su un Pine risponde `NON SO CHE OGGETTO E'`. Questo
+   era **il primo Pine** passato dal cancello, e in checklist **non esisteva
+   nessuna classe Pine**.
+
+### ✅ LA REGOLA
+🔴 **Per ogni file scritto in un linguaggio che NON si compila in casa, si
+incrocia OGNI identificatore puntato col VOCABOLARIO della piattaforma, e si
+dichiara il RAPPORTO.** Qui: **56 su 57**. **Non si legge: si conta.**
+⚠️ **E il controllo va provato su un identificatore INVENTATO**, altrimenti non
+discrimina: un test che dice sempre *"trovato"* non è un test. (Nel caso reale:
+`shape.circle`, `ta.tr`, `str.startswith`, `alert.freq_once_per_bar_close` →
+trovati; `shape.none`, `shape.pippo`, `ta.non_esiste_affatto` → assenti.)
+
+📌 **Nota che vale oltre Pine**: la stessa forma può colpire un `.mq5` (nessun
+MetaEditor in casa) e qualunque `.pine`. L'assenza di uno strato 1 per questi
+oggetti **è un buco strutturale dichiarato**, non una dimenticanza.
+
+---
+
+## ↩️4️⃣ CLASSE 413 — L'A-CAPO RIENTRATO DI UN MULTIPLO DI QUATTRO FUORI DALLE PARENTESI (18/09/2026)
+
+> **Difetto vero, mio**, nello stesso file e nello stesso giro.
+
+**Il caso.** Un'espressione spezzata su due righe:
+
+```pine
+kSuspect  = (thrInAtr > 5.0) or (thrInAtr < 0.001 and thrInAtr > 0) or
+            (isFxCat and useAutoK and math.abs(K - kPip) > kPip * 0.5)
+```
+
+La seconda riga è rientrata di **12 spazi**, e alla fine della prima **le tonde
+sono bilanciate** — quindi l'a-capo **non è dentro parentesi**.
+
+**La regola della piattaforma**: *"each wrapped line after the first can use any
+indentation length **except multiples of four**, because Pine uses four-space or
+tab indentations to define local code blocks"*. 👉 **12 è multiplo di 4**: per
+il parser quella non è una continuazione, **è un blocco locale**. Errore.
+*(Se invece la continuazione è racchiusa in tonde, la restrizione non vale.)*
+
+### ✅ LA REGOLA
+📐 **Su un file Pine si conta il rientro di ogni riga di continuazione e si
+verifica il BILANCIO DELLE TONDE alla fine della riga precedente: se le tonde
+sono bilanciate, il rientro non può essere multiplo di 4.**
+🛠️ **Rimedio più sicuro: una riga sola**, oppure racchiudere l'espressione in
+tonde.
+
+⚠️ **E il dato che rende la classe utile**: nel file **30 a-capo su 31 erano
+legali**. L'unico sbagliato stava nell'**unica** espressione spezzata **al
+livello più alto** invece che dentro una chiamata di funzione — cioè il caso che
+non somiglia a nessuno degli altri trenta. **Non è distrazione diffusa: è un
+caso di forma diversa**, e per questo va cercato con un conto, non a occhio.
