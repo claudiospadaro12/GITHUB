@@ -22435,3 +22435,38 @@ storico tick è stato riscaricato nel frattempo" richiede una passata di
 controllo (ricompilare il sorgente d'archivio con un nome diverso e
 rigirare la sola cella viva) — proposta, non eseguita, perché tocca un
 sorgente EA e serve la firma di chi governa l'esperimento.
+
+---
+
+## 393. 🪟🚫 UN'ANCORA A FINESTRA PIENA DICHIARATA IN UN FILE PROVA CHE NON SCRIVE `@FRAZIONEIS`: IL DRIVER APPLICA IL DEFAULT (0,40), E LA SENTINELLA S1 DIVENTA IRRAGGIUNGIBILE PER COSTRUZIONE (mql5-ea-developer, 17/09/2026)
+
+**Il caso.** `R127b_sllookback_XAUUSD.txt` (sedia `970901`, `ABTG_
+SupertrendReversal_Ottimizzato`) congela come ancora **R99**: DD 9,02% su
+**22 anni, una tranche unica** (`RIGA_R99_ORO_RISCHIO.ps1` chiama
+`IniSingola`/`IniOtt` senza mai spezzare in IS/OOS), `n=657`. Ma il file
+prova **non dichiara `@FRAZIONEIS`** — solo `@DAQUANDO`. `walkforward_
+generico.ps1` costruisce SOLO `@{IS} + @{OOS}` (mai una gamba a finestra
+piena) e, senza `@FRAZIONEIS` esplicita, il driver applica il **default
+0,40**. Risultato: il round gira spezzato **8,8 anni / 13,2 anni** invece
+che in un'unica tranche di 22 — e la sentinella che chiede "DD 9,02% su
+questa corsa" non può MAI essere soddisfatta, qualunque binario giri,
+perché nessuna delle due gambe copre la finestra su cui l'ancora è stata
+misurata.
+
+**La prova che non è un banco sporco ma una geometria diversa**: `n`
+sulla cella-ancora torna **esattamente** (230+427=657=657, scarto 0%), a
+riprova che il lato ingresso del motore è identico — ma il file prova
+stesso dichiara un'attesa "n fra 600 e 700 su TUTTE E 7 le celle", e le
+celle vere (230 IS, 427 OOS) sono **entrambe** fuori da quella banda:
+il round si ferma da solo, per la sua stessa regola, due volte per la
+stessa causa.
+
+**Regola**: se un file prova congela un'ancora misurata a **finestra
+piena** (nessuna partizione IS/OOS), il file DEVE dichiarare
+esplicitamente `@FRAZIONEIS 1.0` (o l'equivalente schema a tranche unica
+del driver usato per l'ancora), altrimenti il default del driver spezza
+la corsa e la sentinella S1 diventa irraggiungibile per costruzione, non
+per un difetto del banco. Verificare SEMPRE che la finestra dichiarata
+nel file prova per l'ancora coincida con lo schema di lancio (IS/OOS
+spezzato vs tranche unica) usato per produrre l'ancora stessa, prima di
+scrivere la tolleranza di S1.

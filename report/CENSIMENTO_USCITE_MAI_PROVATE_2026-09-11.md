@@ -568,3 +568,55 @@ lo storico tick si è mosso" — non eseguito perché tocca un sorgente EA.
 cella viva sale da 0,8567% a 1,0869% (+26,9% relativo) — piccolo in assoluto, ma
 più alto di quanto l'archivio promettesse sulla configurazione in campo. Va
 portato a chi tiene `REGISTRO_TEST.md`/`TRACKING_FORWARD.md`.
+
+---
+
+## 🔴🆕 10. LA TERZA E ULTIMA MEDAGLIA (17/09/2026) — E QUESTO REFERTO È
+## UFFICIALMENTE CHIUSO: TUTTE E TRE LE PRIORITÀ SONO STATE LETTE
+
+Un agente ha letto per intero **R127b** (`InpSLLookback`, sedia `970901`,
+`ABTG_SupertrendReversal_Ottimizzato`, oro), la medaglia d'argento del §1.
+Verificato indipendentemente da me: assenza di `@FRAZIONEIS` nel file (solo
+`@DAQUANDO`), somma `n` sulla cella-ancora (230+427=657=657, scarto 0%), e la
+CSV mostra esattamente i PF/DD riportati.
+
+- **Anche questo round non riproduce S1, ma per una causa diversa dalle altre
+  due**: l'ancora (R99) è stata misurata su una TRANCHE UNICA di 22 anni; il
+  file prova non dichiara `@FRAZIONEIS`, quindi il driver ha applicato il
+  default 0,40 e ha spezzato la corsa in due finestre (8,8 + 13,2 anni) che
+  insieme non riproducono mai la finestra dell'ancora. **Classe NUOVA 393** in
+  `CHECKLIST_RIGA_DI_LANCIO.md`. La riga resta armata così in `CODA.txt` r.293
+  (senza `-FrazioneIS`): rigirarla oggi darebbe lo stesso non-risultato.
+- **La premessa di rischio del censimento su QUESTA riga era corretta
+  nell'aritmetica** (9,02% è già alla taglia contrattuale 1,0%, non va
+  riscalata) — ma sbagliava nell'ORIZZONTE: è un DD accumulato in 22 anni da
+  una sedia sola contro un muro di conto pensato per una challenge di
+  settimane. Il rischio vero a orizzonte challenge, misurato in tre modi
+  indipendenti (regimi R99, peggior giornata R99, le due metà di R127b), è
+  **≤2,69% sul peggior regime e -0,68% sulla peggior giornata** — non 9,02%.
+- **Prima misura in assoluto del PF di questa sedia viva**: 1,12525 sulla
+  finestra recente (2013-2026, n=427, +3.967 EUR) — non esisteva prima in
+  nessun documento. L'asse `InpSLLookback` è risultato piatto (il DD non
+  scende col lookback come l'ipotesi del round prevedeva): il default 5 va
+  bene così com'è, non c'è margine da comprare su questa manopola.
+- **Conflitto trovato, non risolto**: `report/CONTRATTI_SEDIE.md` r.77-81
+  elenca `970901` sotto l'intestazione "CONTRATTO PARZIALE" ma la sua stessa
+  riga dice "PIENO da R99, riempito il 23/08 su firma di Claudio" — e
+  `CENSIMENTO_CONTRATTI.md` la classifica PIENO. Quando R99 ha riempito il
+  contratto la sezione non è stata aggiornata. **Serve una decisione di
+  Claudio su quale sia la verità**, non una correzione automatica.
+- **Il binario in campo su `970901` (`344a11b`, 04/08) non è né quello
+  dell'ancora né quello di R127b**: tre binari diversi per una sedia sola,
+  stessa famiglia di problema della classe 392.
+
+**La via più corta rimasta, per tutte e tre le sedie**: una singola passata
+(o due, ancora + gemella) su ciascuna, sul binario di oggi, nella geometria
+giusta (tranche unica per 970901, cella singola per 970913) — chiude insieme
+l'ancora, il contratto e (per 970901) il PF a finestra piena mai misurato.
+Nessuna eseguita: tutte e tre toccano un sorgente EA o richiedono una firma.
+
+**Bilancio delle tre letture**: 🥉 772361 orologio inerte (ipotesi del
+censimento falsificata) · 🥇 970913 ancora scaduta per un fix di sizing legittimo
+(classe 392, riguarda 41 EA) · 🥈 970901 manopola piatta, premessa di rischio
+corretta nell'aritmetica ma sbagliata nell'orizzonte. **Zero file scritti in
+più, zero passate sprecate, tre misure nuove che il progetto non aveva.**
