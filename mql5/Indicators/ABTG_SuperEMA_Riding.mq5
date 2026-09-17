@@ -37,6 +37,23 @@
 //|  INSTALLAZIONE - UN TERMINALE SOLO, e il gesto F7 va fatto UNA     |
 //|  VOLTA (l'.ex5 nasce accanto al sorgente):                        |
 //|    bersaglio UNICO  50504400  C:\MT5_Backtest                    |
+//|                                                                  |
+//|  ATTENZIONE, MISURATO: C:\MT5_Backtest e' la cartella PROGRAMMA, |
+//|  e quel terminale NON gira in /portable. Il suo albero MQL5 sta   |
+//|  in %APPDATA%\MetaQuotes\Terminal\<hash>\MQL5, NON sotto       |
+//|  C:\MT5_Backtest. Copiare in C:\MT5_Backtest\MQL5\Indicators   |
+//|  mette il file in un albero che MetaEditor NON legge: il file     |
+//|  c'e', il Navigatore non lo mostra, e sembra che non abbia        |
+//|  funzionato.                                                      |
+//|  LA STRADA SICURA, che non indovina niente: in MetaEditor di      |
+//|  QUEL terminale, File -> Apri cartella dati, poi MQL5\Indicators. |
+//|  Cosi' la cartella la dice il terminale stesso.                   |
+//|  Fonte: CODA_03_conti_dei_terminali_20260917_033003.log legge i   |
+//|  giornali da <dati>\logs e conta SETTE cartelle dati, con        |
+//|  'programma : C:\MT5_Backtest' associato al conto 50504400; e    |
+//|  walkforward_generico.ps1 r.1516-1529 -- il driver che ha         |
+//|  prodotto i CSV dei round -- risolve l'albero MQL5 cercando       |
+//|  origin.txt nelle cartelle hash del roaming.                      |
 //|    MAI su 10105439  C:\BCM_Reale             (conto REALE)       |
 //|    MAI su 50503392  BCM Markets MT5 Terminal  (sedia VIVA 771531) |
 //|    MAI su 50504263  ... MT5 Terminal -V3      (sedie VIVE del     |

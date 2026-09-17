@@ -23401,3 +23401,110 @@ dichiarato**, non il numero che faceva la figura migliore.
 prodotto **tre** versioni di un fatto, e la terza — quella verificata alla
 fonte da chi doveva consegnare — era l'unica giusta. Il meccanismo funziona
 **se chi consegna va a guardare**, non se si fida del controllo.
+
+---
+
+## 🏷️🗂️ CLASSE 409 — L'INDIZIO PRESO DA UN REFERTO CHE **NOMINA** LA CARTELLA PROGRAMMA MENTRE **MISURA** LA CARTELLA DATI: la riga di log sembra provare *"è portable"* e prova **l'opposto** (17/09/2026)
+
+> **Difetto vero**, mio, trovato dal cancello **prima** che la riga arrivasse a
+> Claudio. Verificato alla fonte da me dopo la segnalazione.
+
+**Il fatto.** Per decidere dove installare un indicatore ho usato come indizio
+una riga di `CODA_10_slippage_20260917_033003.log`:
+
+```
+GUARDATO e NIENTE: C:\MT5_Backtest -- MQL5\Files c'e', nessun file ABTG_Slippage* dentro.
+```
+
+Letta così dice: *"sotto `C:\MT5_Backtest` c'è `MQL5\Files`"* → *"il terminale è
+portable"* → la riga di lancio scriveva in `C:\MT5_Backtest\MQL5\Indicators`.
+
+### 🔬 LA MECCANICA — il NOME e il FATTO vengono da DUE POSTI DIVERSI
+In `backtest_pipeline/righe/CODA_10_slippage.ps1`:
+- **r.58** `$root = Join-Path $env:APPDATA "MetaQuotes\Terminal"` · **r.64**
+  enumera le cartelle **hash** sotto quel root;
+- **r.71-76** legge `origin.txt` **soltanto per l'ETICHETTA da stampare** →
+  cioè il **nome** è la cartella **PROGRAMMA**;
+- **r.77** fa `Test-Path` su `MQL5\Files` **dentro la cartella hash** → cioè il
+  **fatto** è nella cartella **DATI**.
+
+👉 Messi sulla stessa riga, **sembrano parlare dello stesso posto**.
+
+### 🔴 E L'INDIZIO PROVA IL CONTRARIO
+Se esiste una cartella hash nel roaming il cui `origin.txt` nomina
+`C:\MT5_Backtest`, e **dentro quella hash** ci sono `MQL5`, `logs`, `profiles`
+e `config\common.ini`, allora **quel terminale NON gira in /portable**.
+**Verificato da me**: `CODA_03_conti_dei_terminali_20260917_033003.log` dichiara
+*"letto dal GIORNALE del terminale (`<dati>\logs`)"*, conta **`cartelle dati: 7`**,
+e associa `programma : C:\MT5_Backtest` al **conto 50504400**. E
+`walkforward_generico.ps1` **r.1516-1529** — **il driver che ha prodotto i CSV
+dei round**, quindi il percorso che *funziona davvero* — risolve l'albero MQL5
+cercando `origin.txt` nelle cartelle hash del roaming.
+
+### 💰 IL COSTO EVITATO
+Un `.mq5` in un albero che **MetaEditor non legge**: il file c'è, il Navigatore
+non lo mostra, l'F7 è impossibile, e la conclusione naturale è *"la riga non ha
+funzionato"* → si rilancia, o si va a cercarlo nel terminale sbagliato.
+
+### ✅ LA REGOLA
+🔴 **Quando un referto mette su UNA RIGA un NOME e un FATTO, si apre lo script
+e si guarda DA QUALE VARIABILE viene ciascuno dei due, prima di usarli
+insieme.**
+📌 E per *"dove sta l'albero MQL5 di un terminale"* la fonte autorevole è **il
+codice che ci scrive davvero**, non una riga di censimento.
+👉 **La strada che non indovina niente**, e va preferita a qualunque percorso
+calcolato: in MetaEditor di quel terminale, **File → Apri cartella dati**.
+
+🆕 **E un fatto nuovo uscito dalla stessa verifica**: le cartelle dati sul VPS
+sono **SETTE**, non sei, e i conti BCM sono **CINQUE**, non quattro — c'è
+`C:\MT5_MANUALE` → **conto 50503635**, con **zero sedie attaccate**. La regola
+dei terminali in `CLAUDE.md` ne nomina quattro: **va aggiornata**.
+
+---
+
+## 🧪📥 CLASSE 410 — L'IMPRONTA VERIFICATA **DOPO** AVER SCRITTO NEL POSTO SENSIBILE, e il bersaglio **cancellato prima** di avere il sostituto in mano (17/09/2026)
+
+> **Difetto vero**, mio, nella bozza della riga d'installazione. Il controllo
+> c'era, ed era buono: **era nel posto sbagliato della sequenza.**
+
+**La bozza faceva:**
+```
+Remove-Item $dst  ->  Invoke-WebRequest -OutFile $dst  ->  Get-FileHash  ->  throw se diversa
+```
+
+### 🔴 I DUE DANNI
+1. In caso di **404 / pagina HTML / download troncato**, resta un `.mq5`
+   **spurio dentro la cartella che il compilatore legge** — e un
+   *"Compila tutto"* lo prende.
+2. La **cancellazione preventiva** distrugge la copia precedente **anche quando
+   il download poi fallisce**: si finisce **peggio di prima**, con la cartella
+   vuota.
+
+### ✅ LA REGOLA, in tre pezzi
+1. 🔴 **Si scarica in `TEMP`, si verifica l'impronta LÌ, e solo dopo
+   `Move-Item` nel bersaglio.**
+2. ⚠️ **Se nel bersaglio c'era già qualcosa, copia di sicurezza con la data
+   prima di sostituire** — mai un `Remove-Item` incondizionato.
+3. 📌 **Ogni messaggio di fermata dice SE il bersaglio è stato toccato o no**
+   (`NIENTE SCRITTO: ...`): un errore che non lo dice obbliga a un giro di
+   verifica in più.
+
+### 🔥 E LA STESSA CLASSE L'HO PAGATA IO, IN PYTHON, VENTI MINUTI DOPO AVERLA SCRITTA
+Applicando la correzione all'intestazione del file ho usato
+`open(p,'w',encoding='ascii').write(testo)` con un'emoji dentro il testo:
+**`open(...,'w')` TRONCA IL FILE SUBITO**, e `.write()` è fallito **dopo**, con
+`UnicodeEncodeError`. Risultato: **`ABTG_SuperEMA_Riding.mq5` azzerato a 0
+righe.** Recuperato da `git checkout HEAD --` (impronta SHA-256 ricontrollata e
+**identica** a quella data a Claudio), quindi **danno nullo** — ma solo perché
+era committato.
+
+👉 **È la stessa forma, in un altro linguaggio**: il controllo (l'encoding)
+stava **dopo** l'apertura distruttiva. Regola operativa:
+```python
+dati = testo.encode('ascii')   # se alza, il file non e' stato toccato
+open(tmp,'wb').write(dati)
+os.replace(tmp, p)             # sostituzione atomica
+```
+🔴 **Non si apre in `'w'` un file che non si è pronti a perdere.** E la ragione
+per cui stanotte è costato zero è una sola: **era su GitHub.** È la Regola #1,
+pagata in diretta.
