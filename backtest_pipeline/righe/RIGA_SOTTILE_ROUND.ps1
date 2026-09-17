@@ -1273,7 +1273,27 @@ $BancoBT = 'C:\MT5_Backtest'
 #  1445abf8 e dc069389 e' VUOTO -- l'uguaglianza esatta su Trades (106
 #  IS/184 OOS) regge. Magic 779869 riverificato vergine (grep -rl dalla
 #  radice, worktree compresi: solo questo file).
-$PIN = 'dc0693899d4ba51186d50ba6c9bdcdfdf578d782'
+#  >>> SESSANTAQUATTRESIMO GIRO DI PIN (17/09/2026): dc069389 -> 87081012.
+#  Serviva per armare R174a (InpBEMode, ABTG_BreakingBand, sedia 772161
+#  GBPUSD, magic 779885). Secondo cancello FAIL alla lettura -> PASS
+#  dopo 2 correzioni BLOCCANTI + 1 numero (commit 87081012): **classe
+#  NUOVA 394** (la riga `Spread=` che l'ancora R102 scriveva esplicita,
+#  la corsia di lancio di oggi NON la scrive affatto -- MT5 eredita lo
+#  spread che ha IN MEMORIA, "stato nascosto" per ammissione dello
+#  stesso driver; su questo asse quel valore puo' chiudere la porta
+#  minDist sulla SOLA cella 1 e falsificare un'inerzia come "misurata"
+#  quando e' solo un artefatto di sessione) e **classe 265 recidiva**
+#  (il file era stato scritto DOPO l'ultimo giro di pin: scaricandolo
+#  al pin precedente sarebbe stato un HTTP 404 garantito -- controllo
+#  positivo/negativo fatto: R161a esiste al vecchio pin, R174a no).
+#  Questo giro di pin risolve la seconda; la prima resta un buco
+#  strutturale della corsia (non di questo file), dichiarato nel file
+#  stesso e in checklist. RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1
+#  NON sono cambiati fra dc069389 e 87081012 (git diff sui due percorsi:
+#  VUOTO, verificato). Magic 779885 riverificato vergine (grep -rl
+#  dalla radice, worktree compresi: solo questo file, nessuna collisione
+#  con 779879/R175a scritto in parallelo).
+$PIN = '87081012e5c28801b95732fc24eef0742b692047'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
