@@ -1293,7 +1293,26 @@ $BancoBT = 'C:\MT5_Backtest'
 #  VUOTO, verificato). Magic 779885 riverificato vergine (grep -rl
 #  dalla radice, worktree compresi: solo questo file, nessuna collisione
 #  con 779879/R175a scritto in parallelo).
-$PIN = '87081012e5c28801b95732fc24eef0742b692047'
+#  >>> SESSANTACINQUESIMO GIRO DI PIN (17/09/2026): 87081012 -> 02f459c4.
+#  Serviva per armare R175a (InpSLMode, ABTG_GapFill, sedia 772234
+#  U30USD, magic 779879). Secondo cancello FAIL alla lettura -> PASS
+#  dopo 5 correzioni (commit 4c7aa79d, riverifica 02f459c4): **classe
+#  NUOVA 395** (con @FRAZIONEIS 1.0 la gamba OOS non produce mai CSV,
+#  e la corsia chiude col codice d'uscita 2 / "NON MISURATO" anche
+#  quando la gamba IS e' girata benissimo -- il file dichiarava il
+#  fatto ma taceva il verdetto stampato: un round misurato rischiava
+#  di essere archiviato come non misurato). Altre correzioni: classe
+#  394 dichiarata anche qui (spread non pinnato dalla corsia, due
+#  meccanismi distinti -- uno fuori portata, uno a portata sul filtro
+#  InpMaxSpreadPts), 4 percorsi d'archivio senza radice completa,
+#  una citazione di riga (388) e due frazioni descrittive corrette.
+#  RIGA_ROUND_VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra
+#  87081012 e 02f459c4 (git diff sui due percorsi: VUOTO, verificato).
+#  Il sorgente EA (ABTG_GapFill.mq5) fra l'ultimo commit del sorgente
+#  (26a18566, 19/08) e HEAD e' VUOTO. Magic 779879 riverificato vergine
+#  (grep -rl "InpMagic=779879" dalla radice, worktree compresi: solo
+#  questo file, nessuna collisione con 779885/R174a).
+$PIN = '02f459c42c534c1d2446f50327e96c4ccdc0e974'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
