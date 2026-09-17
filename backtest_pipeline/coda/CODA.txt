@@ -2939,7 +2939,7 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  ereditato in memoria) -- se ereditato, un'eventuale inerzia fra le
 #  due celle non e' attribuibile a InpBEMode senza quella verifica.
 # =====================================================================
-87081012e5c28801b95732fc24eef0742b692047 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
+23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R176a -- InpBEatATR, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
 #  Seconda manopola d'uscita testata su questa sedia, complementare a
@@ -3003,7 +3003,7 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  HEAD (grep -rlw dalla radice, worktree compresi; nessuna collisione
 #  con 779885/R174a).
 # =====================================================================
-3aab9ae5116711023ce7f098b320965f515ce4e1 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
+23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R175a -- InpSLMode, sedia 772234 (ABTG_GapFill, U30USD H1). Prima
 #  manopola d'uscita/stop mai messa ad asse su questa sedia. Asse a 2
@@ -3062,4 +3062,51 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  segnala "nessuna riga Spread" (stato ereditato in memoria).
 # =====================================================================
 02f459c42c534c1d2446f50327e96c4ccdc0e974 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R175a_slmode_gapfill_U30USD.txt -Etichetta r175a -Modello 4 -Deposito 100000
+# =====================================================================
+#  R177a -- InpTPRefreshBars, sedia 772161 (ABTG_BreakingBand, GBPUSD
+#  H1). Terza manopola d'uscita testata su questa sedia (dopo R174a
+#  InpBEMode, R176a InpBEatATR). Asse a 5 celle: 0/1(viva)/2/3/4 --
+#  governa ogni quante barre si aggiorna il TP sulla mediana mobile.
+#
+#  Fattore uscite/posizioni = 1,00 esatto su tutte e 5 le celle (due
+#  sole occorrenze nel sorgente, mai nell'ingresso, mai sullo SL). La
+#  griglia esiste perche' il DEFAULT COMPILATO (1) contraddice il
+#  commento della guida originale ("ogni 2-3 candele"): le celle 2 e 3
+#  raccomandate dalla fonte non erano mai state girate. Nessun AR2
+#  (le celle non sono annidate: multipli di 2 e multipli di 3 sono
+#  insiemi incomparabili, dichiarato esplicitamente invece di inventare
+#  un limite falso -- classe 387). Nessun verso congelato su Trades/
+#  Profit/PF/DD: quattro meccanismi, tutti in tabella.
+#
+#  Stessa ancora di R174a/R176a (R102, GBPUSD, PF 0,897, DD 23,43%,
+#  n 522, @FRAZIONEIS 0.50).
+#
+#  Secondo cancello: FAIL alla lettura -> PASS dopo 6 correzioni
+#  (commit 23695c07). **Classe NUOVA 399**: l'artefatto CSV intermedio
+#  (OptResults_<EA>_<Simbolo>.csv) ha un nome che porta EA+simbolo ma
+#  NON il round -- due round della stessa sedia lanciati senza
+#  raccogliere i risultati fra l'uno e l'altro possono scambiarsi il
+#  CSV, e il ramo che lo fa (walkforward_generico.ps1 r.1687-1689, la
+#  copia NORMALE) non stampa NESSUNA riga (il ramo di ripiego, r.1683-
+#  1686, e' giallo e si nota; quello normale e' muto). Documentato il
+#  meccanismo esatto anche sui due fratelli gia' armati (R174a/R176a),
+#  solo prosa di commento su entrambi. VERIFICATO IN PIU' DALLA
+#  SESSIONE PRINCIPALE: il runner (runner_abtg.ps1 r.734, foreach non
+#  parallelo) esegue le righe di CODA.txt IN SERIE -- il rischio e'
+#  strutturale (vale per lanci manuali su terminali diversi) ma NON
+#  vivo nella coda automatica di oggi.
+#
+#  Merito sospeso (IS/OOS 261/261 contro pavimento 150: pieno). Zero
+#  preset cambia, zero forward.
+#
+#  Pin: giro di pin 23695c07 (68mo, 3aab9ae5 -> 23695c07). $SHA_ROUND
+#  e $SHA_WALK invariati (verificato: git diff sui due percorsi e'
+#  VUOTO). Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779892,
+#  vergine a HEAD (grep -rlw dalla radice, worktree compresi; nessuna
+#  collisione con 779885/779886 dei fratelli).
+#  ⚠️ **VINCOLO OPERATIVO**: R174a, R176a e R177a producono lo STESSO
+#  file intermedio -- vanno lanciati IN SERIE (la coda automatica lo fa
+#  di suo), mai forzati in parallelo su terminali diversi.
+# =====================================================================
+23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
 # =====================================================================
