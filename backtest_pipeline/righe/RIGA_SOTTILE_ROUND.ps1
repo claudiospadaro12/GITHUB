@@ -1391,7 +1391,7 @@ $BancoBT = 'C:\MT5_Backtest'
 #  19/08) e HEAD e' VUOTO. Magic 779897 riverificato vergine (grep -rlw
 #  dalla radice, worktree compresi: solo questo file, nessuna
 #  collisione con 779885/779886/779892 dei round BreakingBand).
-$PIN = '2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a'
+$PIN = 'e1e9335c10e7c28d83cbafbcabaee8b28d6288aa'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
