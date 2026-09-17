@@ -23190,3 +23190,61 @@ tutte le proprieta' che il file dichiara — non solo su "parte / non parte".
 sempre in un processo figlio (`& powershell -NoProfile -ExecutionPolicy Bypass
 -File $d`), mai con `iex` e mai incollato. Il perimetro del segreto e' il
 processo, non il file.
+
+---
+
+## 🗂️🔍 CLASSE 405 — IL CENSIMENTO DEI **MANCANTI** CERCATI SOLO NEL PERCORSO CHE LA PIPELINE USEREBBE: conta per difetto tutto quello che e' arrivato **a mano**, e i "due metodi di controllo" non sono due se girano sullo STESSO perimetro (controllo-preventivo, 17/09/2026)
+
+> **Difetto vero e MIO**, commesso verificando la riga di lancio di
+> `carica_risultati.ps1` e corretto dal coordinatore prima della consegna.
+
+Per ricontare i round illeggibili dal repo ho enumerato i CSV di
+`backtest_pipeline/risultati_prove/**dal_vps**/` — il sottoalbero in cui
+scrive il trasporto — e ho concluso **48 illeggibili su 82**. Il numero vero e'
+**47**: `r127a` era **leggibile**, con i suoi due CSV in
+`backtest_pipeline/risultati_prove/**r127a**/` (commit `eb281b53`, 16/09,
+*"Recupera i CSV di R127a dal log"*), cioe' in una cartella intitolata
+all'**ETICHETTA** invece che all'**EA**.
+
+🔴 **La causa non e' il perimetro sbagliato: e' che ho chiamato "due metodi" due
+match diversi (suffisso e sottostringa) applicati allo STESSO insieme
+ristretto.** Concordavano, ovviamente: la ridondanza stava nel **confronto**,
+non nel **perimetro**. E' la conferma travestita da verifica del 10/09, in una
+forma nuova e piu' insidiosa, perche' produce due numeri uguali e sembra una
+misura ripetuta.
+
+### 📐 PERCHE' NON E' LA 180
+La 180 vieta l'insieme definito **per differenza** (*"tutto cio' che non e'
+X"*). Qui l'insieme dei mancanti era definito **per intersezione con un solo
+percorso**: elencato per nome, verificabile, e **sbagliato lo stesso**. Il buco
+non e' nella definizione dell'insieme: e' nell'**universo** su cui la si
+valuta.
+
+### 🧠 PERCHE' COSTA
+Un "mancante" di troppo e' una **ricerca rifatta su una misura che c'era
+gia'** — il contrario esatto del recupero che quel censimento doveva servire.
+E il numero era **gia' committato in un referto** (`report/IL_TRASPORTO_E_FERMO_2026-09-17.md`):
+un conto sbagliato in un file diventa la fonte che qualcuno citera' fra un mese.
+
+### ✅ LA REGOLA, in tre pezzi
+1. 🔴 **"Questo artefatto manca" si dichiara cercandolo in TUTTO il repo**
+   (`glob '**/*.csv'`), mai solo nel percorso che la pipeline userebbe:
+   **l'archivio non ha una sola forma di cartella** (`risultati_prove/<EA>/`,
+   `risultati_prove/<etichetta>/`, `risultati_prove/dal_vps/<EA>/`), e ogni
+   recupero fatto a mano ne inventa una.
+2. 🔴 **Due metodi si chiamano due solo se cambiano il PERIMETRO, non la
+   regola di match.** Prima di dire "ricontato in due modi": *i due modi
+   potrebbero sbagliare insieme?* Se si', e' un modo solo, contato due volte.
+3. 📐 E il **CONTRO-ESEMPIO** da costruire e' sempre quello: *"che aspetto
+   avrebbe questo artefatto se fosse arrivato per una via che non e' la mia?"*
+   Se non si sa rispondere, il censimento non e' finito.
+
+### ⚠️ COROLLARIO OPERATIVO, misurato lo stesso giorno
+Un import di massa in un sottoalbero dedicato (classe 311) **non sovrascrive**
+la copia recuperata a mano — e per questo la **duplica**: dopo il caricamento i
+numeri di `r127a` staranno sia in `risultati_prove/r127a/` sia in
+`risultati_prove/dal_vps/<EA>/`, entrambi citabili e senza niente che dica
+quale sia la fonte. 🟢 Nessuna perdita di dati (la 311 tiene), ma **il conto
+atteso dei `NUOVI` non e' un cancello**: sale anche per i round gia' leggibili
+per un'altra via. Un'attesa che si sposta per costruzione non si usa come
+verdetto — si usa solo lo **zero**.
