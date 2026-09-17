@@ -2760,9 +2760,9 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  citato per nome dentro R172g come riferimento incrociato al
 #  fratello, non come proprio magic -- non e' una collisione).
 # =====================================================================
-439346653641e97cdc26981646c40f581b5a2c02 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
 # =====================================================================
-439346653641e97cdc26981646c40f581b5a2c02 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172h-j -- InpSLMode (R172h) + InpMinStopPts (R172i) +
 #  InpSkipIfTight (R172j), sedia 770202 (ABTG_Dow_Apertura_US, U30USD
@@ -2827,11 +2827,11 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  dalla radice, worktree compresi; 789560 lasciato libero come
 #  dichiarato).
 # =====================================================================
-44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
 # =====================================================================
-44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
 # =====================================================================
-44edd730a9c45703f696bb85265f65fc4619b38d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
 # =====================================================================
 #  R173c -- InpBreakeven, sedia 770511 (ABTG_SuperWave_DOW_H1_
 #  Ottimizzato, U30USD H1). TERZA e ultima manopola della famiglia
@@ -2885,7 +2885,7 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  regge. Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779869,
 #  vergine a HEAD (grep -rl dalla radice, worktree compresi).
 # =====================================================================
-dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
 # =====================================================================
 #  R174a -- InpBEMode, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
 #  Prima manopola d'uscita mai messa ad asse su questa sedia (famiglia
@@ -3108,7 +3108,7 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  file intermedio -- vanno lanciati IN SERIE (la coda automatica lo fa
 #  di suo), mai forzati in parallelo su terminali diversi.
 # =====================================================================
-23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
+a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R178a -- InpSLMode, sedia 772235 (ABTG_GapFill, 225JPY). Secondo
 #  simbolo testato per questo asse dopo U30USD (R175a). Asse a 2

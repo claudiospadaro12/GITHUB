@@ -22970,3 +22970,101 @@ stessa (il punto in cui `R178a` spiega che quella stringa non esiste). La
 classe nasce quindi su un caso singolo, e va guardata su **ogni file che
 dichiarerà il rovescio della 395** — cioè su tutti quelli con `@FRAZIONEIS`
 diverso da 1.0.
+
+---
+
+## 🔢 CLASSE 401 — IL GIRO DI PIN CORTO DI UNA GENERAZIONE: il file prova e la rotazione di `$PIN` nello STESSO commit (17/09/2026)
+
+**Il caso reale**, e ha gridato da solo: la notte del 17/09 **sei round sono
+usciti 1 in 5-7 secondi senza nemmeno partire** — `r172f`, `r172g`, `r172h`,
+`r172i`, `r172j`, `r173c`. Il log del VPS
+(`RIGA_SOTTILE_ROUND_20260917_033003.log`) non lascia margini:
+
+```
+ERRORE: scarico fallito:
+https://raw.githubusercontent.com/.../44edd730.../backtest_pipeline/prove/R173c_breakeven_superwave_U30USD.txt
+-- Errore del server remoto: (404) Non trovato.
+```
+
+### 🔎 LA MECCANICA, che è a DUE pin e va detta per intero
+Una riga di `CODA.txt` porta **un pin ESTERNO**: il runner lo usa per scaricare
+`RIGA_SOTTILE_ROUND.ps1`. Dentro **quella copia** c'è un **pin INTERNO**
+(`$PIN`), e **è quello** che scarica il **file prova**. Sono due salti, non uno:
+
+```
+CODA.txt  --pin esterno-->  RIGA_SOTTILE_ROUND.ps1  --$PIN interno-->  prove/*.txt
+```
+
+### 🔴 IL DIFETTO
+Il file prova e l'aggiornamento di `$PIN` erano finiti **nello stesso commit**.
+Ma **un commit non può pinnare sé stesso**: il valore scritto in `$PIN` è per
+forza un commit **precedente** — nei casi veri, il **padre**. E il padre la
+prova **non ce l'ha ancora**.
+
+```
+dc069389  "Cancello di giudizio su R173c"   contiene R173c,  porta $PIN = 44edd730
+44edd730                                     NON contiene R173c          -> 404
+```
+
+Il pin esterno era giusto, il pin interno era **corto di una generazione**.
+Nessun cancello se ne accorge: il file c'è nel repo, il pin esiste, l'impronta
+dei due `.ps1` torna, `git log` è pulito. **Il 404 esce solo sul VPS, alle
+03:30, quando è tardi.**
+
+### ✅ IL CONTRO-ESEMPIO CHE LA ISOLA, sugli stessi due giorni
+I round che **la stessa notte sono RIUSCITI** hanno un commit **DEDICATO** che
+non fa altro che ruotare il pin, e **il padre di quel commit contiene già la
+prova**:
+
+```
+b43753ab "Giro di pin 58: 72dcf8a3 -> 2b687789 (raggiunge R173b)"
+         $PIN = 2b687789 = il PADRE, e R173b e' li' dentro   -> scarico OK
+```
+
+👉 Quindi non è "a volte va e a volte no": è **una differenza strutturale fra
+due modi di committare**, e si vede prima di armare.
+
+### ⚠️ IL SECONDO SOTTOCASO, diverso e con la stessa cura
+`r177a` è fallito lo stesso audit **pur avendo un giro di pin fatto bene**
+(`7c3e2af9 "Giro di pin 68: arma R177a"`): il difetto è che in `CODA.txt` era
+stato scritto come pin esterno **`23695c07`, un commit di contenuto**
+(*"Salvataggio intermedio: correzioni in corso"*), non il commit del giro.
+👉 **Il pin esterno di una riga di coda è SEMPRE un commit "Giro di pin N", mai
+un commit di contenuto** — nemmeno quando il commit di contenuto è più recente.
+`r177a` non aveva ancora girato: sarebbe fallito **la notte dopo**.
+
+### 🛡️ LA REGOLA — tre commit, e si verifica risalendo la catena
+1. **Commit A**: entra il **file prova** (contenuto, e basta).
+2. **Commit B**: entra **solo** la rotazione di `$PIN`, e vale
+   `$PIN = <hash di A>`. Il messaggio è `Giro di pin N: <vecchio> -> <nuovo>`.
+3. In `CODA.txt` il pin esterno è **l'hash di B**.
+
+🔴 **E la verifica non è "ho fatto il giro di pin": è il DOWNLOAD simulato.**
+Per OGNI riga attiva, si risale la catena e si prova che il file c'è davvero:
+
+```bash
+# per una riga sola
+OUTER=<pin esterno della riga di CODA>
+PROVA=<il file di -Prova>
+INNER=$(git show $OUTER:backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | grep "^\$PIN = " | sed "s/.*'\(.*\)'.*/\1/")
+git cat-file -e $INNER:backtest_pipeline/prove/$PROVA && echo RAGGIUNGIBILE || echo "404 GARANTITO"
+```
+
+⚠️ **E si passa TUTTA la coda, non solo la riga appena armata.** L'audit del
+17/09 su 115 round ha trovato **7** irraggiungibili: i 6 che avevano già
+gridato **più `r177a`**, che non aveva ancora girato. Guardare solo le righe
+nuove avrebbe lasciato in trappola il settimo.
+
+### 📐 PERCHÉ NON È LA 265 NÉ LA 388
+- La **265** riguarda **la forma** della dichiarazione di `$PIN` (riga unica,
+  condizione e non numero di riga): lì `$PIN` è *scritto* male.
+- La **388** è un file che **dichiara un `HEAD` che non è il commit che lo
+  contiene**: riguarda una **citazione** in un documento, e si paga in
+  credibilità.
+- La **401** è **un pin formalmente perfetto che punta un commit reale
+  esistente**, e che per **un solo anello di catena** non raggiunge il file:
+  si paga in **round che non partono**, cioè in misure che Claudio non ha.
+
+💰 **Costo pagato**: 34 secondi di macchina e **sei misure mancate** a tredici
+giorni dal 1° ottobre. Zero numeri sbagliati prodotti — questo difetto non
+mente, si limita a non partire, ed è l'unica cosa buona che ha.
