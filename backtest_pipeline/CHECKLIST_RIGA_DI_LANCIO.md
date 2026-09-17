@@ -22550,3 +22550,74 @@ nullo archivia un candidato (regola del certificato di morte).
    blocco spread (r.949 se la riga c'e', r.958 se non c'e'). Se stampa
    *"nessuna riga Spread nell'.ini"*, il buco e' aperto e va nel referto
    **prima** dei numeri, non dopo.
+
+---
+
+## 395. 🪦🟥 `@FRAZIONEIS 1.0` FA CHIUDERE LA CORSIA CON **`ESITO: NON MISURATO`** E **CODICE D'USCITA 2**: il file prova dichiara il FATTO ("nessun CSV `*_OOS`") e tace la CONSEGUENZA, che è un verdetto stampato su un round che è girato benissimo (controllo-preventivo, 17/09/2026)
+
+**Il caso.** `R175a_slmode_gapfill_U30USD.txt` (sedia `772234`,
+`ABTG_GapFill`, asse `InpSLMode`) dichiara correttamente `@FRAZIONEIS 1.0`
+— anzi lo dichiara **per rispettare la classe 393**, appena scritta — e
+scrive una riga sola sul punto: *"Nessun CSV `*_OOS` esiste per questo
+round: e' VOLUTO, non un file mancante (classe 345)"*. La frase è **vera**.
+Ma la classe 345 parla di tutt'altro (il conteggio "passate" di
+`controlla_prova.py`), e **la conseguenza vera non è un file che manca: è
+un VERDETTO che viene stampato.** Tracciata riga per riga sui tre script:
+
+| chi | riga | che cosa fa con `@FRAZIONEIS 1.0` |
+|---|---|---|
+| `walkforward_generico.ps1` | r.921-924 | `$Meta = Inizio + floor(giorni × 1.0)` = la data di fine → la gamba OOS nasce **`2026.07.01 → 2026.06.30`**, cioè vuota |
+| idem | r.731-733 | avvisa: *"La gamba OOS e' DEGENERE (finestra vuota): il CSV _OOS non descrive niente"* |
+| idem | r.1720-1731 | attende **DUE** CSV e chiude in **ROSSO**: *"!!! QUESTI NON SONO STATI PRODOTTI"* + **"Rilancia lo STESSO comando SENZA -Rifai"** |
+| `RIGA_ROUND_VPS.ps1` | r.732-741 | conta l'OOS fra i `$mancanti` → **`$esitoFinale = "NON MISURATO -- CSV mancanti o vuoti: OOS"`**, e **codice d'uscita 2** |
+
+### 🔴 PERCHÉ NON È COSMESI, E PERCHÉ COSTA DUE VOLTE
+
+1. **Il driver dà un'istruzione SBAGLIATA per questo caso**: *"Rilancia lo
+   STESSO comando"*. Seguirla vuol dire **rifare una corsa a tick reali**
+   per produrre un file che **non può esistere**. Costo: una notte di
+   macchina, a due settimane dalla challenge.
+2. 🔴 **E il costo grave è l'altro**: il referto che arriva sul Desktop
+   dice **`NON MISURATO`** su un round in cui la gamba IS ha girato
+   perfettamente e ha prodotto tutte le celle. Chi legge quel referto fra
+   un mese archivia come **non misurata una misura fatta** — cioè
+   esattamente il difetto che il **certificato di morte** (09/09) esiste
+   per impedire. *Un morto senza certificato non è un morto; ma un vivo
+   timbrato "NON MISURATO" è peggio: nessuno lo va più a riprendere.*
+
+### 📐 PERCHÉ NON È LA 345 NÉ LA 354, ED È UNA CLASSE NUOVA
+- La **345** è lo strumento di STIMA (`controlla_prova.py` conta
+  celle×2 anche a una tranche sola): **non bloccante, informativo**, e
+  riguarda il *tempo macchina previsto*.
+- La **354** la estende al conteggio cablato del DRIVER: sempre un
+  *conteggio*, sempre informativo.
+- La **395** non è un conteggio: è **l'ESITO**. Le prime due sbagliano un
+  numero in un preventivo; questa **timbra un verdetto falso su un round
+  riuscito**, e il timbro sopravvive nel referto.
+
+### ✅ LA PROVA CHE LA REGOLA È GIÀ DI CASA — e che il buco è nella MEMORIA, non nel giudizio
+La dichiarazione esiste già, scritta bene, in **sei** file prova:
+`R161b`/`R161c` (r.31-46), `R170a` (r.252, r.886), `R171a`/`R171b`.
+🔴 **Ma NON esisteva in nessuna classe della checklist** — ed ecco il
+risultato misurabile: **manca nei due fratelli della stessa sedia**,
+`R157a` (zero occorrenze di "NON MISURATO", verificato col grep) e
+`R159a` (due occorrenze, tutt'altro argomento), e mancava in `R175a`.
+E `R161b` r.45-46 **afferma** che R157a/R159a ce l'hanno: **non è vero**.
+👉 Una pratica che vive solo nei file si propaga per copia, e la copia
+salta. Per questo entra qui.
+
+### 🔴 LA REGOLA
+1. **Ogni file prova che dichiara `@FRAZIONEIS 1.0` (o qualunque schema a
+   tranche unica) DEVE scrivere, PRIMA delle sentinelle, che l'esito
+   automatico della corsia sarà `NON MISURATO -- CSV mancanti o vuoti:
+   OOS` con codice d'uscita 2, e che QUESTO È ATTESO.**
+2. **E deve dire qual è l'artefatto vero** (il CSV `IS`) e la condizione
+   che decide davvero: *"se il CSV IS c'è, è fresco e porta N righe con
+   `Trades` > 0, il round È GIRATO"*. Senza quella condizione scritta, la
+   frase "l'esito rosso è atteso" diventa un permesso di ignorare anche i
+   rossi veri.
+3. **Si scrive esplicitamente NON RILANCIARE**, perché il driver dice il
+   contrario a schermo, in rosso, e a mezzanotte vince il rosso.
+4. **Il verdetto nel referto si scrive a mano**, mai copiando
+   `$esitoFinale`: per questi round la riga automatica è nota per essere
+   falsa.

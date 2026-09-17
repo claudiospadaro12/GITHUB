@@ -51,7 +51,7 @@
 #
 #  -Deposito 100000: NON e' il default del driver (10.000). E' il
 #  deposito con cui l'ANCORA di questo file e' stata misurata davvero
-#  (`risultati_archivio/R103_REFERTO_BLOCCO1_INDICI.md` r.3-4, testuale:
+#  (`backtest_pipeline/risultati_archivio/R103_REFERTO_BLOCCO1_INDICI.md` r.3-4, testuale:
 #  "pin `bb139de`, OHLC M1, deposito 100k"). Uno stato implicito non e'
 #  uno stato dichiarato -- classe 366: il -Deposito della riga armata si
 #  legge da QUI, non si eredita dal default degli altri round.
@@ -89,7 +89,8 @@
 #                                            (pezzo 5)"
 #      Cioe' questo EA **E' NATO CINQUE GIORNI DOPO `3af47ed9`**: non
 #      poteva stare in quella lista. E non e' "sfuggito" al fix, e'
-#      **nato col fix dentro** -- `LotByRisk` (r.618-625, HEAD `60bd1fc4`)
+#      **nato col fix dentro** -- `LotByRisk` (r.618-647, HEAD `60bd1fc4`;
+#      la chiamata sta a **r.628**, il commento a r.622-624)
 #      usa `OrderCalcProfit` e porta nel sorgente il commento che nomina
 #      la lezione: *"Perdita per lotto dal BROKER, non dal tick value
 #      nudo (lezione 08/08/2026: su alcuni simboli il tick value arriva
@@ -228,7 +229,7 @@
 #        colonna PF-LUNGA non c'e'"), e attaccare il numero di una
 #        finestra all'altra e' classe 359.
 #     c) **E' L'UNICA DELLE CINQUE CON UNO SPREAD REALE D'ARCHIVIO.**
-#        `risultati_archivio/spread_flotta/` contiene ESATTAMENTE TRE CSV
+#        `backtest_pipeline/risultati_archivio/spread_flotta/` contiene ESATTAMENTE TRE CSV
 #        (`spread_orario_NASUSD.csv`, `spread_orario_U30USD.csv`,
 #        `spread_orario_D30EUR.csv`; `REFERTO_SPREAD_FLOTTA.txt` r.6:
 #        "simboli: NASUSD,U30USD,D30EUR"). GBPUSD, EURUSD, AUDUSD e
@@ -378,8 +379,9 @@
 #           solo se |gap| sta in [0,30 ; 2,00] x ATR(D1) (r.383 e r.390).
 #           >>> QUINDI LO STOP DELLA CELLA 1 E' PIU' LARGO DI QUELLO
 #               DELLA CELLA 0 **ogni volta che |gap| < 1,5 x ATR(D1)**,
-#               cioe' su **tre quarti della finestra ammessa**, e piu'
-#               STRETTO nell'ultimo quarto. Non e' "sempre piu' largo":
+#               cioe' su **70,6% della finestra ammessa** (il tratto
+#               [0,30 ; 1,50] largo 1,20 su 1,70 totale), e piu'
+#               STRETTO sul restante **29,4%**. Non e' "sempre piu' largo":
 #               e' piu' largo dove i gap sono piccoli, che e' il caso
 #               comune. Il verso si scrive con la condizione accanto.
 #        3. LA VARIANZA. Cella 0: lo stop varia da settimana a settimana
@@ -490,8 +492,9 @@
 #      compra sopravvivenza pagandola in R:R; sopra, la cella 1 e'
 #      migliore su tutti e due i fronti. E il filtro d'ingresso ammette
 #      g fino a 2,00, quindi il tratto favorevole alla cella 1 e' il
-#      **25% dell'intervallo ammesso** -- ma non e' il 25% dei casi:
-#      i gap piccoli sono molto piu' frequenti dei grandi.
+#      **29,4% dell'intervallo ammesso** (0,50 su 1,70) -- ma non e' il
+#      29,4% dei CASI: i gap piccoli sono molto piu' frequenti dei
+#      grandi, e l'intervallo non e' la distribuzione.
 #  >>> E L'UNICA MISURA CHE IL REPO HA SU g PER QUESTA SEDIA DICE CHE
 #      SIAMO AL BORDO BASSO, ed e' n=1, e va etichettata come tale:
 #      la gamba reale misurata dal censimento del costo aveva uno stop
@@ -518,7 +521,7 @@
 #       stop MISURATO dal vivo (`trades_auto.csv`, **1 gamba reale**,
 #       ora 1) = **98,0 idx**;
 #       spread U30USD ora 1 = **2,800 idx**, RIVERIFICATO oggi contro
-#       `risultati_archivio/spread_flotta/spread_orario_U30USD.csv`
+#       `backtest_pipeline/risultati_archivio/spread_flotta/spread_orario_U30USD.csv`
 #       riga ora=01 (colonna `mediana_idx` = 2,8000): identica alla
 #       citazione del referto, non e' una citazione invecchiata;
 #       rapporto **98,0 / 2,800 = 35,0x = 88% del pavimento 40x**
@@ -670,24 +673,41 @@
 #      Quindi **nell'`.ini` di questo round la riga `Spread=` NON ESISTE**
 #      e MT5 usa il valore che ha **in memoria** (il driver lo dice da se'
 #      a r.958). Si dichiara **[NON PINNATO DA QUESTA CORSIA]**.
-#      >>> E QUI MORDE IN DUE PUNTI, non in generale -- e uno dei due e'
-#          **ASIMMETRICO FRA LE CELLE**, che e' il caso peggiore
-#          (classe 394 regola 3):
-#          (A) `StopsMinDist()` r.600-605 = `max(STOPS_LEVEL, SPREAD)`.
-#              Uno spread di STRESS rimasto in memoria da un round
-#              precedente gonfia `minDist`, e `minDist` e' la porta di
-#              `slOk` (r.467) -- **l'UNICO canale che dipende
-#              dall'asse**. La cella 1 ha 92-256x di margine e non la
-#              sente; **la cella 0 ne ha ~34x e la sente**. Uno spread in
-#              memoria sopra ~2,9 idx erode quel margine e puo' produrre
-#              `Trades(1) > Trades(0)` **senza che la manopola c'entri
-#              niente**: cioe' esattamente il pattern che S3 dice di
-#              nominare come RISULTATO;
-#          (B) `InpMaxSpreadPts = 300` (= 3,00 idx) e' un filtro
-#              d'ingresso ATTIVO tarato sul p95 (sezione IL MODELLO): uno
-#              spread in memoria sopra 3,00 idx **azzera gli ingressi in
-#              tutte e due le celle**, e S1 fallirebbe su `Trades` per una
-#              causa di banco, non di motore.
+#      >>> E QUI MORDE IN DUE PUNTI, non in generale. **HO PROVATO A
+#          ROMPERE TUTTI E DUE COL CONTO, E I DUE ESITI SONO DIVERSI**:
+#          uno e' asimmetrico ma **fuori portata**, l'altro e' simmetrico
+#          e **a portata di mano**. Scritti tutti e due col numero, perche'
+#          il secondo e' quello che morde e il primo non venga riusato in
+#          buona fede (classe 394 regola 3 + regola del contro-esempio):
+#          (A) `StopsMinDist()` r.600-605 = `max(STOPS_LEVEL, SPREAD)`
+#              alimenta `minDist`, che e' la porta di `slOk` (r.467) --
+#              **l'UNICO canale che dipende dall'asse**, e che puo'
+#              respingere **solo la cella 0**. L'asimmetria e' reale.
+#              **MA LA GRANDEZZA NECESSARIA NON LO E'**: perche' `slOk`
+#              cada, `minDist` deve superare la distanza di stop della
+#              cella 0, cioe' **~94 idx = ~9.400 points** su un simbolo
+#              dove 1 idx = 100 points. Uno spread di stress plausibile
+#              (centinaia di points) e' **due ordini di grandezza sotto**.
+#              >>> **(A) NON E' UNA SPIEGAZIONE CREDIBILE di un eventuale
+#              `Trades(1) > Trades(0)`**, e chi la usasse starebbe
+#              coprendo il meccanismo vero. L'unica coda in cui si
+#              avvicina e' quella in cui lo scarto d'ingresso `d` ha gia'
+#              quasi richiuso il gap -- ed e' la stessa coda gia'
+#              dichiarata nell'enumerazione qui sopra, non una nuova;
+#          (B) **QUESTO INVECE MORDE, ED E' IL PUNTO.**
+#              `InpMaxSpreadPts = 300` = **3,00 idx = 300 points** e' un
+#              filtro d'ingresso ATTIVO tarato ESATTAMENTE sul p95 delle
+#              ore d'ingresso (sezione IL MODELLO). Basta uno spread
+#              lasciato in memoria **sopra 300 points** -- cioe' il primo
+#              valore di stress che chiunque userebbe -- perche' il filtro
+#              respinga la finestra d'ingresso e **`Trades` crolli in
+#              TUTTE E DUE le celle**. S1 fallirebbe sulla banda 22-38 per
+#              una causa di BANCO, non di motore, e il sospetto n.2 di S1
+#              e' proprio questo.
+#              >>> Il verso e' simmetrico: **non puo' produrre una
+#              differenza fra le celle**, quindi non falsifica B3 -- ma
+#              puo' azzerare il round e farlo leggere come "l'ancora non
+#              si riproduce".
 #      >>> ATTENUANTE, DICHIARATA COM'E' E NON PIU' FORTE DI COSI': questa
 #          corsa e' a **-Modello 4 (tick reali)**, dove lo spread dovrebbe
 #          venire dal tick storico. Ma il driver stesso scrive a r.949-952
@@ -854,7 +874,7 @@
 #  >>> Identica a quella di R157a e R159a, apposta: i tre referti della
 #      sedia si leggono in fila solo se la finestra e' la stessa.
 #
-#  ANCORA (n, DD, PF, profitto): `risultati_archivio/
+#  ANCORA (n, DD, PF, profitto): `backtest_pipeline/risultati_archivio/
 #  R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_1348.txt`, riga della
 #  sedia **I04** (GapFill U30USD). Le colonne sono nominate dalla
 #  TESTATA del referto, non indovinate -- `POS ID EA SIMB RISCH
@@ -1101,10 +1121,18 @@
 #           1. IL MODELLO (OHLC contro tick). E' il primo, e ha un
 #              numero misurato accanto. Si distingue perche' colpisce PF
 #              e Profit molto piu' di `Trades`.
-#           2. LO SPREAD VERO che morde `InpMaxSpreadPts = 300` (= il
-#              p95 delle ore d'ingresso). Si distingue perche' colpisce
+#           2. LO SPREAD che morde `InpMaxSpreadPts = 300` (= il p95
+#              delle ore d'ingresso). Si distingue perche' colpisce
 #              `Trades`, e lo colpisce **nello stesso modo sulle due
 #              celle**.
+#              >>> E HA **DUE** ORIGINI POSSIBILI, non una: (a) lo spread
+#                  VERO del tick storico; (b) [ATTENZIONE] uno spread **rimasto in
+#                  memoria a MT5**, perche' la riga `Spread=` **non e'
+#                  scritta nell'`.ini` da questa corsia** (classe 394,
+#                  sezione IL CANALE CHE PUO' TOCCARE LA CADENZA). La (b)
+#                  si esclude PRIMA e a costo zero, con `-SoloControllo`:
+#                  se stampa *"nessuna riga Spread nell'.ini"*, il buco e'
+#                  aperto e va scritto nel referto prima dei numeri.
 #           3. L'INCLUDE Guardian, cambiato 4 volte dopo l'ancora.
 #              Fail-open nel tester; si esclude in un modo solo:
 #              `InpUsaGuardian=false` e rifare la sola cella 0.
@@ -1286,6 +1314,18 @@
 #      RISCHIO PER TRADE.
 #    - LO STORICO TICK: non e' escludibile che sia stato riscaricato
 #      dopo l'ancora del 24/08 (classe 392, punto "non ancora chiuso").
+#    - LA RIGA `Spread=` DELL'`.ini`: **[NON PINNATA DA QUESTA CORSIA]**
+#      (classe 394). L'ancora R103 la scriveva, questa corsia no: MT5 usa
+#      il valore che ha in memoria. Meccanismo che morde su QUESTO asse e
+#      conto ai due estremi: sezione IL CANALE CHE PUO' TOCCARE LA
+#      CADENZA, punti (A) e (B) -- (A) fuori portata di due ordini di
+#      grandezza, **(B) a portata di mano e simmetrico**. Gesto che lo
+#      chiude: `-SoloControllo` prima di lanciare. Chiuderlo DAVVERO
+#      vorrebbe dire `-Spread 0`, che questa corsia non sa passare: e'
+#      **un lavoro sulla corsia, fuori dal perimetro di questo file**.
+#    - L'ESITO AUTOMATICO DELLA CORSIA sara' **`NON MISURATO -- CSV
+#      mancanti o vuoti: OOS`** con **codice d'uscita 2**, ed e' ATTESO
+#      (classe 395, sezione CLASSE 393). L'artefatto vero e' il CSV IS.
 #    - `InpAtrSlMult` = 1.5: **NON e' l'asse**, ed e' il valore di campo
 #      (default compilato r.141, non nominato dal preset). Sulla cella 1
 #      **diventa la manopola che decide lo stop**: se la cella 1
