@@ -22470,3 +22470,83 @@ per un difetto del banco. Verificare SEMPRE che la finestra dichiarata
 nel file prova per l'ancora coincida con lo schema di lancio (IS/OOS
 spezzato vs tranche unica) usato per produrre l'ancora stessa, prima di
 scrivere la tolleranza di S1.
+
+---
+
+## 394. 💨🕳️ LA RIGA `Spread=` CHE L'ANCORA SCRIVEVA E LA CORSIA NUOVA **NON SCRIVE AFFATTO**: il banco eredita lo spread che MT5 ha IN MEMORIA, e su un asse di gestione quel valore muove **una cella sola** (controllo-preventivo, 17/09/2026)
+
+**Il caso.** `R174a_bemode_breakingband_GBPUSD.txt` (sedia `772161`,
+`ABTG_BreakingBand`, asse `InpBEMode`) congela come ancora **R102** e ne
+verifica con cura il codice (classe 392: i due commit di sizing, i due
+commit post-ancora letti riga per riga, il pin di `InpContEntryMode`). Ma
+la verifica si era fermata al **sorgente dell'EA** e non era arrivata
+all'**`.ini` del banco**. Aperti tutti e due:
+
+| chi | riga `Spread=` nell'`.ini` |
+|---|---|
+| l'ANCORA — `RIGA_R102_CLASSIFICA_LUNGA.ps1` r.210 · 1148 · 1200 | `Spread=$SpreadIni` con `$SpreadIni = 0` = **spread CORRENTE, dichiarato** |
+| la CORSIA DI OGGI — `walkforward_generico.ps1` r.1655 | `$RigaSpread`, che e' la **stringa vuota** finche' `-Spread` vale il default **−1** (r.192, r.944-945) |
+
+E `-Spread` **non arriva mai**: `RIGA_SOTTILE_ROUND.ps1` non ha il
+parametro (blocco `param`: `Expert`, `Prova`, `Etichetta`, `Modello`,
+`Deposito`, `SoloControllo`) e `RIGA_ROUND_VPS.ps1` r.646-650 passa solo
+`-Expert -Prova -Etichetta -Modello -Deposito -Rifai -Force
+-TerminaleBacktest`. Quindi nell'`.ini` di ogni round della corsia
+**ROUND** la riga `Spread=` **non esiste**, e il driver lo dice da se' a
+r.958: *"MT5 usa il valore che ha in memoria. E' il comportamento di
+sempre, ma e' **STATO NASCOSTO**: per metterlo agli atti passa
+`-Spread 0`."*
+
+### 🧠 PERCHE' NON E' IGIENE MA UNA MISURA CHE SI SPOSTA — ed e' la meta' che conta
+
+Lo spread non entra solo nel costo: entra in `StopsMinDist()`
+(`ABTG_BreakingBand.mq5` r.1597-1601, `max(STOPS_LEVEL, spread)`), e
+`minDist` e' **la porta** di `ManageRiskReduction` (r.1505-1506). Su un
+asse di **gestione dell'uscita** quella porta non e' simmetrica fra le
+celle: con `InpBEMode=1` il bersaglio e' il prezzo d'apertura e la porta
+puo' chiuderlo; con `InpBEMode=0` il bersaglio e' a 1,5 ATR di distanza e
+la porta non lo tocca mai. 👉 **Uno spread di STRESS rimasto in memoria da
+un round precedente (il parametro `-Spread` esiste apposta, R84-bis del
+19/08) zittisce il breakeven della SOLA cella 1**, le due celle
+convergono, e la sentinella d'identita' legge "manopola INERTE" per una
+causa che con la manopola non c'entra niente. È un **falso NULLO**, e un
+nullo archivia un candidato (regola del certificato di morte).
+
+### 📐 PERCHE' NON E' LA 89 NE' LA 392, ED E' UNA CLASSE NUOVA
+
+- La **89** e' il parametro di banco **scritto e identico** che cambia
+  *significato* sotto un simbolo CUSTOM: li' la riga c'e' ed e' giusta,
+  sbaglia la frase in italiano. Qui **la riga non c'e'**.
+- La **392** e' l'ancora irriproducibile perche' **il binario dell'EA** non
+  esiste piu'. Qui il binario e' riproducibile — verificato — e a
+  cambiare e' **lo script di lancio**, che fra l'ancora e oggi ha smesso
+  di mettere agli atti un parametro che prima ci metteva.
+- 🔴 E si eredita **all'indietro**: `R161a/b/c` (stessa famiglia, asse
+  `InpSL_ATRmult`, gia' passati dal cancello) hanno lo **stesso** buco e
+  **non lo dichiarano**. Il difetto non e' del file: e' della corsia, e
+  quindi vale per tutti i file che ci passano.
+
+### 🔴 LA REGOLA
+
+1. **Quando un file prova congela un'ancora, la reperibilita' si verifica
+   su DUE artefatti, non su uno: il SORGENTE dell'EA _e_ l'`.ini` del
+   banco.** Il grep minimo sui due script di lancio, ancora e corsia:
+   `Spread=`, `Model=`, `Deposit=`, `Currency=`, `Leverage=`,
+   `ExecutionMode=`. Per ognuno: *"questa riga c'e' in tutti e due? con
+   quale valore?"*. Una riga **presente in uno e assente nell'altro** e'
+   un difetto anche quando il valore di default coincide, perche' il
+   default non e' negli atti.
+2. **Un parametro di banco che non e' scritto nell'`.ini` si dichiara
+   `[NON PINNATO DA QUESTA CORSIA]` fra i buchi**, con il MECCANISMO per
+   cui morde su QUESTO asse (non in generale) e con il gesto che lo
+   chiuderebbe. Non si scrive "usa il default": MT5 non ha un default,
+   ha una **memoria**.
+3. **Se il parametro entra in una grandezza che tocca UNA cella sola**
+   (qui: lo spread -> `minDist` -> la porta del breakeven -> la sola
+   cella a bersaglio vicino), va aggiunto anche all'elenco delle CAUSE
+   possibili dell'inerzia, perche' altrimenti un round nullo viene
+   attribuito alla manopola.
+4. **Il controllo costa zero e si fa PRIMA**: `-SoloControllo` stampa il
+   blocco spread (r.949 se la riga c'e', r.958 se non c'e'). Se stampa
+   *"nessuna riga Spread nell'.ini"*, il buco e' aperto e va nel referto
+   **prima** dei numeri, non dopo.
