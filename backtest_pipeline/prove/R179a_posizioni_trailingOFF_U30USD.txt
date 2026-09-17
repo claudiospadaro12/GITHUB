@@ -1,0 +1,391 @@
+# ======================================================================
+#  EA: ABTG_EMA200
+#  R179a -- QUANTE POSIZIONI FA LA SEDIA CON IL TRAILING SPENTO?
+#  U30USD H1 FISSO. InpUseTrailing PINNATO A 0 (spento).
+#  Asse TECNICO: gemelli sul magic (cancello G1 di determinismo).
+#  Tutto il resto identico a R136d_trailing_U30USD.txt, cella 0.
+#  Scritto il 18/09/2026. Criteri congelati PRIMA dei numeri.
+#  NON PROMUOVE NIENTE. Misura UN numero che oggi non esiste.
+# ======================================================================
+#
+#  LA DOMANDA, in una riga
+#    R136d ha misurato che con il trailing spento questa sedia fa 427
+#    DEAL in OOS contro 517. Ma l'Emendamento A (16/08) si decide sulle
+#    POSIZIONI, e su questo motore il rapporto deal/posizione e'
+#    MISURATO in due valori DIVERSI (1,79545 in IS, 2,01167 in OOS):
+#    da 427 deal il numero di posizioni NON si deduce. Questo round lo
+#    CONTA, leggendo i position_id distinti del per-trade.
+#
+#  PERCHE' NON SI PUO' DEDURRE -- e non e' prudenza, e' aritmetica
+#    FONTI DEI DUE FATTORI, entrambi [MISURATO]:
+#      OOS  517 deal / 257 posizioni = 2,01167
+#           risultati_archivio/R112_CORSA_20260826/
+#             pertrade_00_metro_763400.csv -- 518 righe (517 deal),
+#             position_id distinti = 257 (ricontato il 18/09/2026).
+#      IS   237 deal / 132 posizioni = 1,79545
+#           report/EMA200_DOW_COSA_MANCA_PER_IL_1_OTTOBRE_2026-09-17.md
+#             r.213-217 (cinque notti indipendenti, sempre 237/132).
+#    >>> Lo SCARTO fra i due fattori misurati e' l'11,5%. Il fattore
+#        NON e' una costante del motore: dipende da QUANTE posizioni
+#        arrivano al primo bersaglio (una posizione che va a stop prima
+#        di TP1 chiude in UN deal; una che scatta il parziale chiude in
+#        DUE). E il trailing, spegnendolo, cambia la DURATA delle
+#        posizioni, quindi -- per via del vincolo "una alla volta"
+#        (ABTG_EMA200.mq5 r.322: if(HasPosition()||HasPending()) return)
+#        -- cambia QUALI candidate vengono prese. Insieme diverso di
+#        trade = frazione diversa che tocca TP1 = fattore diverso.
+#    >>> APPLICARE 2,01167 a 427 darebbe 212,3 posizioni. Applicare
+#        1,79545 darebbe 237,8. Sono 25 posizioni di differenza, cioe'
+#        il 12%: piu' del margine di qualunque conto che ci interessi.
+#        Per questo il numero si CONTA e non si stima.
+#
+#  IL NUMERO CHE DECIDE, e vale la pena scriverlo prima
+#    Profitto per POSIZIONE della cella VIVA (trailing acceso), OOS:
+#      23.321,47 / 257 = 90,745 per posizione. [MISURATO]
+#      (profitto: risultati_prove/dal_vps/ABTG_EMA200/
+#       ABTG_EMA200_U30USD_OOS_r136d.csv r.2 -- posizioni: R112 sopra.)
+#    Con il trailing spento il profitto OOS e' 28.249,94 [MISURATO,
+#    stesso file r.3]. Quindi il profitto per posizione della cella 0
+#    dipende SOLO dal numero che questo round conta:
+#      PAREGGIO a P = 28.249,94 / 90,745 = 311,3 posizioni.
+#      - P <= 311  ->  la cella 0 guadagna PIU' per posizione
+#      - P >= 312  ->  la cella 0 guadagna MENO per posizione
+#    Il pareggio corrisponde a un fattore deal/posizione di 1,37162,
+#    che sta SOTTO entrambi i fattori misurati (1,79545 e 2,01167).
+#    >>> Quindi l'esito atteso e' "meglio per posizione". E ALLORA
+#        PERCHE' MISURARLO? Perche' il verso e' atteso ma la TAGLIA no,
+#        e la taglia e' quello che serve: 212 posizioni e 238 posizioni
+#        danno +46,7% e +30,9% per posizione, e danno 0,769 e 0,862
+#        posizioni/giorno feriale. Sono due contratti diversi.
+#
+#  ATTESA DICHIARATA, PRIMA DEI NUMERI
+#    DEAL OOS attesi: 427 ESATTI. Non e' una previsione, e' la
+#      SENTINELLA S1: la cella e' la stessa di R136d cella 0, sullo
+#      stesso banco. Se il numero non e' 427, il banco e' cambiato e il
+#      conteggio delle posizioni NON e' confrontabile con le 257 di
+#      R112. Vedi criterio B1.
+#    POSIZIONI OOS attese: banda 208 - 244. [STIMATO]
+#      Costruita sui due SOLI fattori misurati su questa sedia, con un
+#      margine dichiarato: fattore fra 1,75 e 2,05 -> 427/2,05 = 208,3
+#      e 427/1,75 = 244,0.
+#      Tetto strutturale, e va detto perche' e' un controllo:
+#      il parziale chiude al massimo UNA volta (InpTP1Pct=50, una sola
+#      tranche), quindi una posizione produce al massimo DUE deal di
+#      uscita e il fattore NON PUO' superare ~2,0. Il 2,01167 misurato
+#      lo sfiora dall'alto (517 = 2x257 + 3): i 3 deal in eccesso sono
+#      un residuo che non ho attribuito e che dichiaro come tale
+#      [NON MISURATO]. Se il fattore uscisse sopra 2,05 o sotto 1,75,
+#      qualcosa che non ho previsto si e' mosso e va capito PRIMA di
+#      leggere qualunque altro numero.
+#    POSIZIONI/GIORNO attese: 208/276 = 0,754 fino a 244/276 = 0,884.
+#      Denominatore 276 giorni feriali della finestra OOS, da
+#      report/EMA200_IL_PAVIMENTO_DI_FREQUENZA_2026-09-17.md r.53.
+#      >>> E QUEL DENOMINATORE E' ESSO STESSO [NON MISURATO]: la stessa
+#          riga porta DUE valori di casa, 276 (ricalcolo) e 272
+#          (referto 17/09 par.3.3), e li scrive entrambi. Uso 276,
+#          che e' il valore SFAVOREVOLE (fa uscire una frequenza piu'
+#          bassa). Con 272 la banda sarebbe 0,765 - 0,897: sempre
+#          sotto il pavimento, quindi la scelta NON cambia nessun
+#          verdetto -- e lo dico per non farlo sembrare un dettaglio
+#          nascosto.
+#      >>> ENTRAMBI GLI ESTREMI STANNO SOTTO il pavimento di 1,00 per
+#          famiglia (firma 07/09), e stanno sotto anche lo 0,931 della
+#          cella viva. Questo NON e' una scoperta di questo round: la
+#          direzione e' gia' chiusa dal codice (r.322, sopra) ed e'
+#          scritta in EMA200_IL_PAVIMENTO_DI_FREQUENZA r.332-345. Qui
+#          si mette solo il NUMERO al posto del verso.
+#    PROFITTO PER POSIZIONE atteso: 115,8 - 135,6, cioe' da +27,6% a
+#      +49,5% sulla cella viva. [STIMATO, deriva dalla banda sopra]
+#
+#  IL CONTRO-ESEMPIO, COSTRUITO PRIMA DELLA CORSA (regola 10/09)
+#    >>> PRIMO, E HA GIA' MORSO NELLA SCRITTURA DI QUESTO FILE:
+#        IL ROUND POTEVA MISURARE LA CELLA SBAGLIATA SENZA ACCORGERSENE.
+#        La richiesta d'origine diceva "asse InpUseTrailing, modalita'
+#        per-trade". Quella combinazione NON PUO' FUNZIONARE, ed e'
+#        verificato nel codice, non intuito:
+#          (a) il nome del per-trade contiene SOLO il magic:
+#              ABTG_EMA200.mq5 r.619
+#              "abtg_trades_"+NOME+"_"+_Symbol+"_"+InpMagic+".csv"
+#          (b) si apre in FILE_WRITE, r.620 -> TRONCAMENTO. Ogni passata
+#              dello stesso magic CANCELLA la precedente.
+#          (c) con asse InpUseTrailing i due valori condividono il
+#              magic, quindi sopravvive SOLO l'ultima passata; e
+#              l'ultima passata e' quella col valore PIU' ALTO, cioe'
+#              InpUseTrailing=1. Il mapping pass->valore e' MISURATO,
+#              non assunto: ABTG_EMA200_U30USD_OOS_r136d.csv riga con
+#              Pass=0 porta InpUseTrailing=0 e la riga con Pass=1 porta
+#              InpUseTrailing=1.
+#          >>> Risultato: un file con asse InpUseTrailing avrebbe
+#              consegnato il per-trade della cella CON IL TRAILING, che
+#              e' esattamente il numero che abbiamo gia' (257). Un
+#              round intero per riprodurre un numero noto, e nessuno se
+#              ne sarebbe accorto perche' il file NON dice quale cella
+#              contiene. Per questo l'asse qui e' TECNICO sul magic e
+#              InpUseTrailing e' PINNATO A 0.
+#          >>> E L'ARGOMENTO NON DIPENDE DALL'ORDINE DELLE PASSATE.
+#              Il punto (c) usa la convenzione MT5 "indice di passata =
+#              ordine di esecuzione", che io NON ho misurato: ho
+#              misurato solo il mapping passata->valore. Ma la
+#              conclusione tiene comunque, e questa parte e' certa:
+#              con il magic condiviso UNA delle due celle va PERSA in
+#              ogni caso, e il file NON PORTA NESSUN CAMPO che dica
+#              quale delle due e' rimasta (il per-trade ha
+#              close_time, symbol, magic, position_id, deal_type,
+#              volume, price, net_profit -- ABTG_EMA200.mq5 r.622, e
+#              InpUseTrailing non c'e'). Un conteggio di cui non si
+#              puo' dimostrare la cella non e' una misura: e' un
+#              numero. Quindi l'asse sul magic non e' una preferenza,
+#              e' l'unica forma che rende il round leggibile.
+#    >>> SECONDO: UN CONTEGGIO CHE SEMBRA GIUSTO E NON LO E'.
+#        Il per-trade NON porta la finestra nel nome, e le due gambe
+#        dello stesso walkforward condividono il magic
+#        (CODA_12_pertrade_posizioni.ps1, limite dichiarato 2). Quindi
+#        il file che sopravvive e' quello della gamba che gira PER
+#        ULTIMA. L'ordine e' MISURATO nel driver:
+#        walkforward_generico.ps1 r.923-924 -- l'array delle gambe e'
+#        [IS, OOS] in quest'ordine, quindi sopravvive l'OOS.
+#        >>> E' quello che ci serve (l'OOS e' la finestra dove il merito
+#            si legge). MA se qualcuno leggesse quel file come "tutta la
+#            finestra" sbaglierebbe del 51%: 427 deal OOS su 621 deal
+#            totali (194 IS + 427 OOS). Il referto deve dire OOS.
+#        >>> E LA CONSEGUENZA CHE ACCETTO: le POSIZIONI IN IS con il
+#            trailing spento restano [NON MISURATE] dopo questo round,
+#            perche' il file IS viene sovrascritto. Non e' un buco che
+#            conta per la domanda di merito (A2 di R136a dichiara l'IS
+#            SOSPESO per il merito, e ora e' MISURATO: 132 posizioni
+#            contro 150), ma e' un buco e lo scrivo.
+#    >>> TERZO: IL DD CHE MIGLIORA PER LA RAGIONE SBAGLIATA.
+#        In R136d il DD OOS SCENDE col trailing spento (7,4151% contro
+#        7,8323%) -- e l'attesa scritta in quel file prevedeva che
+#        SALISSE. Prima di chiamarlo un miglioramento va considerata
+#        l'altra spiegazione: la cella 0 fa MENO posizioni, e meno
+#        posizioni vogliono dire meno esposizione, quindi meno DD. Se
+#        questo round conta P molto sotto 257, una parte del DD piu'
+#        basso e' COMPRATA CON LA FREQUENZA, non guadagnata con la
+#        geometria. Questo round non separa le due cose: lo DICHIARO
+#        come limite, non lo risolvo (servirebbe un DD normalizzato per
+#        esposizione, che non e' una colonna che il tester stampa).
+#
+#  SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#    B1  SENTINELLA S1 -- IL BANCO. I due CSV di riepilogo devono
+#        riprodurre R136d cella 0 alla QUARTA cifra, su tutte e quattro
+#        le colonne, in ENTRAMBE le gambe:
+#          IS   Profit 2045.18  | PF 1.10716 | DD 5.4988 | Trades 194
+#          OOS  Profit 28249.94 | PF 1.77080 | DD 7.4151 | Trades 427
+#        (fonte: risultati_prove/dal_vps/ABTG_EMA200/
+#         ABTG_EMA200_U30USD_{IS,OOS}_r136d.csv, riga con Pass=0.)
+#        Se UNA colonna non torna, il banco non e' lo stesso di R136d
+#        ne' di R112, il confronto con le 257 posizioni decade, e
+#        l'ESITO DEL ROUND E' "NON MISURATO". Non si legge il resto.
+#        >>> E' il cancello piu' forte di questo round, e non costa
+#            niente: il numero di confronto esiste GIA' nel repo.
+#    B2  CANCELLO G1 -- DETERMINISMO. I due magic gemelli 786410 e
+#        786411 sono la STESSA configurazione. Devono dare:
+#          (a) righe di riepilogo identiche alla quarta cifra;
+#          (b) lo STESSO conteggio di deal e lo STESSO conteggio di
+#              posizioni nei due per-trade.
+#        Se (a) o (b) differiscono, il banco non e' deterministico e la
+#        misura NON si legge (CHECKLIST_RIGA_DI_LANCIO.md, regola
+#        tripla punto 3). ESITO: "NON MISURATO".
+#    B3  IL CONTEGGIO. Posizioni = position_id DISTINTI nel per-trade
+#        OOS. Deal = righe meno l'intestazione. Il referto stampa TUTTI
+#        E TRE i numeri (deal, posizioni, rapporto), per ognuno dei due
+#        gemelli. Tre esiti diversi e distinti: file ASSENTE / file a
+#        SOLA INTESTAZIONE / N operazioni (CHECKLIST, regola tripla
+#        punto 2). "Il file c'e'" non e' un esito.
+#    B4  BANDA DI FORMA. Se il rapporto deal/posizione cade fuori da
+#        1,75 - 2,05, il round NON conclude niente sul merito: si
+#        scrive il numero, si dichiara che e' fuori attesa e si cerca
+#        la causa. Un numero fuori banda letto come se fosse in banda
+#        e' il modo in cui si costruisce un verdetto falso.
+#    B5  PAVIMENTO DEI 150 (Emendamento A). Se le posizioni OOS sono
+#        < 150, il MERITO di questa configurazione e' SOSPESO e il
+#        round lo scrive cosi'. Il RISCHIO si legge comunque
+#        (Emendamento B). Con la banda attesa 208-244 questo non
+#        dovrebbe scattare: se scatta, e' un fatto grosso e va davanti
+#        a Claudio, non in una nota.
+#    B6  QUANDO SI PUO' SCRIVERE "IL TRAILING OFF E' MEGLIO".
+#        Servono TUTTE E QUATTRO, e non tre su quattro:
+#          (i)   B1 e B2 passati;
+#          (ii)  posizioni OOS >= 150 (B5);
+#          (iii) profitto per posizione >= 99,82, cioe' almeno +10%
+#                sui 90,745 della cella viva. Il +10% e' la banda di
+#                rumore dichiarata adesso, per analogia con A9 di
+#                R136a (che fissava 0,10 di PF) e perche' sotto il 10%
+#                la differenza sta dentro lo scarto fra i due fattori
+#                deal/posizione misurati (11,5%), cioe' dentro
+#                l'incertezza della misura stessa. In posizioni:
+#                P <= 283.
+#          (iv)  E LA CONDIZIONE CHE QUESTO ROUND NON PUO' SODDISFARE:
+#                la CONCORDANZA IS/OOS richiesta dal criterio 1 di
+#                R136d. In R136d il segno si INVERTE (IS: PF -0,09394
+#                e profitto -55,4%; OOS: PF +0,24715 e profitto
+#                +21,1%). Questo round NON tocca quel fatto.
+#        >>> QUINDI IL MASSIMO CHE QUESTO ROUND PUO' SCRIVERE E':
+#            "il trailing OFF ha un vantaggio di profitto per
+#            POSIZIONE MISURATO nella sola finestra OOS, e resta
+#            NON MISURATO come miglioramento finche' una TERZA
+#            finestra o una PROVA DI REGIME non concorda."
+#            Questo e' il verdetto piu' favorevole ammesso, ed e'
+#            congelato adesso, prima dei numeri.
+#    B7  QUANDO SI SCRIVE "IL DEFAULT VA BENE". Se il profitto per
+#        posizione della cella 0 sta fra 81,671 e 99,82 (cioe' entro
+#        +/-10% dei 90,745 della cella viva), la differenza e' dentro
+#        il rumore dichiarato e la risposta e' "il trailing acceso va
+#        bene". In posizioni: 283 <= P <= 345 (a P=345 il profitto per
+#        posizione e' 81,88; a P=346 e' 81,65, cioe' gia' sotto).
+#    B8  QUANDO SI SCRIVE "IL TRAILING OFF E' PEGGIO". Se il profitto
+#        per posizione e' < 81,671 (P >= 346), la cella 0 e' PEGGIORE
+#        anche sull'unica metrica dove sembrava vincere, e il capitolo
+#        si chiude con un numero. E' l'esito che non mi aspetto, ed e'
+#        scritto qui perche' se esce va scritto senza discussione.
+#    B9  RISCHIO. Il DD di questa cella e' GIA' misurato (7,4151% OOS,
+#        5,4988% IS) e sta sotto A7 (8,5%). Questo round NON lo
+#        rimisura e NON cambia il DD promesso dalla sedia viva
+#        (7,8323%). Se il DD uscisse diverso, scatta B1.
+#   B10  IL ROUND NON PROMUOVE NIENTE, e non e' una formalita'. Non
+#        cambia un preset, non accende una sedia, non tocca il forward,
+#        non tocca il conto reale 10105439. Riaccensioni, taglie e
+#        rischio sono [FIRMA DI CLAUDIO].
+#
+#  BANCO E FINESTRA -- devono essere IDENTICI a R136d, o B1 non torna
+#    Modello 4 (TICK REALI). Deposito 100000 (NON opzionale: e' il
+#    valore con cui sono girate R112 e R136d).
+#    IS  2024.09.26 - 2025.06.09   OOS 2025.06.10 - 2026.06.30
+#    REGIME: 21 mesi, UN SOLO regime (toro). Regola C dell'Emendamento
+#    della Finestra: NON soddisfatta. Buco dichiarato.
+#
+#  @FRAZIONEIS -- DICHIARATO, E LA SCELTA E' OBBLIGATA
+#    Qui sotto c'e' '@FRAZIONEIS 0.40'. Non e' un default copiato: e'
+#    l'UNICO valore che fa esistere la gamba che serve.
+#    >>> Con @FRAZIONEIS 1.0 la corsia gira UNA SOLA TRANCHE, il CSV
+#        *_OOS non viene MAI scritto e il round chiude con
+#        "ESITO: NON MISURATO" e uscita 2 anche se la gamba e' girata
+#        perfettamente (classe 395; walkforward_generico.ps1 r.631 e
+#        r.732 lo dicono a schermo, r.1720 attende ENTRAMBI i CSV).
+#        E ci sarebbe un danno PEGGIORE del codice d'uscita: l'unica
+#        gamba girata sarebbe l'IS, quindi il per-trade che sopravvive
+#        sarebbe quello della finestra il cui MERITO E' SOSPESO (132
+#        posizioni contro 150). Il round misurerebbe con precisione il
+#        numero sbagliato.
+#    >>> 0.40 e' anche il valore con cui e' girata R136d, e B1 confronta
+#        contro R136d: con un'altra frazione le finestre cambiano e B1
+#        non puo' tornare per costruzione.
+#
+#  COSTO IN TEMPO MACCHINA -- e il conto non e' quello che mi era stato
+#  passato, quindi lo scrivo per esteso
+#    celle 2 (i gemelli sul magic) x 2 finestre = 4 PASSATE.
+#    Ritmo misurato su questo stesso EA, stesso simbolo, stessa
+#    finestra: R112, 16 passate in ~6 minuti = 0,375 min/passata.
+#    -> 4 x 0,375 = ~1,5 MINUTI.
+#    >>> La stima che accompagnava la richiesta era "2 passate ~0,75
+#        minuti", e vale per UNA cella x due finestre. Una cella sola
+#        significa ZERO assi Y, e controlla_prova.py (controllo 4) la
+#        rifiuta: "nessun asse Y: sarebbe un backtest singolo, il
+#        driver rifiuta di lanciare"; e uno sweep con start==stop viene
+#        bocciato come DEGENERE. Si potrebbe forzare con
+#        -PermettiCellaSingola, ma costerebbe il cancello G1 (B2) -- e
+#        i 45 secondi in piu' comprano una verifica di determinismo su
+#        un numero che poi useremo per decidere. Li spendo.
+#
+#  BUCHI DICHIARATI DI QUESTO ROUND -- sette, contati
+#    1. POSIZIONI IN IS con trailing OFF: [NON MISURATE]. Il per-trade
+#       dell'IS viene sovrascritto dall'OOS (contro-esempio secondo).
+#    2. La CONCORDANZA IS/OOS di R136d resta ROTTA e questo round non
+#       la ripara (B6-iv). Niente si promuove.
+#    3. PROVA DI REGIME: assente. Un solo regime (toro) in 21 mesi.
+#    4. DD NORMALIZZATO PER ESPOSIZIONE: non esiste come colonna, e
+#       senza di lui non si separa "DD piu' basso perche' meglio" da
+#       "DD piu' basso perche' meno trade" (contro-esempio terzo).
+#    5. LATO SHORT DA SOLO: [NON MISURATO]. Gira L+S come la sedia viva.
+#    6. GUARDIAN: fail-open nel tester, come in R112 e R136d.
+#       Confrontabile fra i round, NON descrive il campo.
+#    7. TRASPORTO. Il per-trade finisce in Common\Files e la corsia
+#       ROUND del runner NON HA UN CANALE PER IL PER-TRADE: zero
+#       occorrenze di 'abtg_trades' in runner_abtg.ps1,
+#       righe\RIGA_SOTTILE_ROUND.ps1 e righe\RIGA_ROUND_VPS.ps1
+#       (misurato in CODA_12_pertrade_posizioni.ps1, intestazione). I
+#       conteggi li stampa CODA_12, non la raccolta del round.
+#       >>> E IL TRASPORTO DEI CSV DI RIEPILOGO E' FERMO DAL 13/09
+#           (report/IL_TRASPORTO_E_FERMO_2026-09-17.md): 47 round
+#           misurati e illeggibili. Riparte solo quando Claudio lancia
+#           la riga. Quindi questo round puo' girare stanotte e il suo
+#           CSV arrivare GIORNI DOPO. E' il motivo per cui il numero
+#           non sara' qui subito, e non e' un motivo per non
+#           pre-posizionare 90 secondi di macchina.
+#    >>> InpNewsCurrencies NON e' pinnato di proposito: il pin di una
+#        stringa a valore vuoto non arriva all'EA (classe FiboH4,
+#        controlla_prova.py controllo 3).
+#    >>> InpLogImbuto pinnato a false: in ottimizzazione il Giornale
+#        non si legge. Non tocca nessuna decisione di trading.
+#
+# ======================================================================
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+#
+# --- LA CELLA: identica a R136d cella 0 (la sedia viva 771531 con il
+#     solo trailing spento). Verificata riga per riga contro
+#     prove/R136d_trailing_U30USD.txt.
+InpUsaGuardian=true
+InpTF=16385
+InpEmaPeriod=200
+InpEma14Period=14
+InpAtrPeriod=14
+InpMinDistAtr=0.3
+InpMaxDistAtr=1.5
+InpUseEma14Bias=true
+InpAllowLong=true
+InpAllowShort=true
+InpUseAdrFilter=false
+InpAdrDays=50
+InpAdrDistMin=0.0
+InpAdrDistMax=0.8
+InpOrder1Atr=0.2
+InpOrder2Atr=0.3
+InpUseOrder2=true
+InpPendingExpiryBars=6
+InpSLatr=1.0
+InpMinRR=1.0
+InpTP_RR=2.0
+InpTP1_ATRmult=0.0
+InpTP1Pct=50.0
+InpBreakeven=true
+# >>> IL PUNTO DI TUTTO IL ROUND: SPENTO, e pinnato, NON messo ad asse.
+#     La ragione e' nel contro-esempio primo, ed e' nel codice
+#     (ABTG_EMA200.mq5 r.619-620).
+InpUseTrailing=false
+InpUseCutoff=false
+InpCutoffHour=19
+InpCutoffMin=0
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=60
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpComment=EMA200R179A
+InpFridayClose=false
+InpFridayCloseHour=20
+InpMaxSpread=0
+InpVerbose=true
+InpLogImbuto=false
+#
+# --- L'UNICO ASSE: TECNICO, gemelli sul magic = cancello G1 (B2).
+#     E c'e' una seconda ragione, che e' quella che rende il round
+#     possibile: il nome del per-trade contiene il MAGIC, quindi due
+#     magic diversi scrivono DUE FILE DIVERSI e nessuno sovrascrive
+#     l'altro. Con qualunque altro asse i per-trade si mangiano fra
+#     loro (ABTG_EMA200.mq5 r.619-620, FILE_WRITE = troncamento).
+#     786410/786411 verificati VERGINI il 18/09/2026:
+#     grep -rl "786410" . --exclude-dir=.git -> 0 file. Idem 786411.
+#     Attesi in Common\Files:
+#       abtg_trades_ABTG_EMA200_U30USD_786410.csv
+#       abtg_trades_ABTG_EMA200_U30USD_786411.csv
+#     e contengono la gamba OOS (l'ultima girata, driver r.923-924).
+InpMagic=786410||786410||1||786411||Y
+# ======================================================================

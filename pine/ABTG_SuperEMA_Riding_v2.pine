@@ -1,0 +1,513 @@
+//@version=5
+// ═══════════════════════════════════════════════════════════════════════════════
+// ABTG SuperEMA Riding — v2.0  (TradingView)
+// Autore: Claudio (con Claude) · 18/09/2026
+//
+// CHE COS'E': il tuo "ABTG BR+EMA v1.2" (31/05/2026) con dentro le due cose
+// che avevi chiesto il 17/09 — il SUPERTREND come terza origine e la EMA 200 —
+// piu' TUTTE le correzioni che quattro giri di cancello hanno prodotto sulla
+// versione MT5 (mql5/Indicators/ABTG_SuperEMA_Riding.mq5, 1178 righe, PASS).
+//
+// ═══════════════════════════════════════════════════════════════════════════════
+// LE CORREZIONI PORTATE QUI DAL LAVORO SUL PORTING MT5
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1) 🔴 LA TRAPPOLA DEL K, ed e' un difetto VERO del v1.2.
+//    Nel v1.2 la categoria nasce da str.contains() sul ticker piu'
+//    syminfo.type. Se il feed serve una COPPIA come "cfd", EURUSD non e'
+//    index, non e' gold e non e' forex -> cade sull'ULTIMO ramo del ternario,
+//    che e' "INDEX" -> K = 1.0 invece di 0.0001. Le soglie diventano 10.000
+//    volte piu' strette e NON ESCE PIU' NESSUN SEGNALE, in silenzio.
+//    Qui la categoria si decide con syminfo.basecurrency / syminfo.currency
+//    (le due VALUTE, non il nome) e con una LISTA di valute vere: cosi'
+//    XAGUSD/XPTUSD/BTCUSD non finiscono su FX con i filtri azzerati.
+//
+// 2) 🔴 IL FALLIMENTO SILENZIOSO DIVENTA VISIBILE.
+//    Il pannello converte la soglia di slope in ATR e la confronta col PIP
+//    dedotto da syminfo.mintick, poi scrive "K SOSPETTO" in rosso.
+//    Il solo rapporto in ATR non bastava: misurato, un K sbagliato di 100x su
+//    USDJPY M15 cade DENTRO la banda e l'allarme non suonerebbe.
+//    L'allarme audita il RILEVAMENTO AUTOMATICO: con K manuale voluto tace.
+//
+// 3) 🔴 L'ORIGINE DEL SEGNALE ORA SI VEDE, ed e' letta alla barra GIUSTA.
+//    Nel porting MT5 il codice che attribuiva il segnale a BR / EMA / ST era
+//    scritto e MAI LETTO, e leggeva la barra della CONFERMA invece di quella
+//    del GREZZO (con useConfirm il grezzo nasce a [1]). Qui la firma viaggia
+//    come maschera 1=BR 2=EMA 4=ST, con maschere long e short SEPARATE --
+//    altrimenti un LONG puo' finire etichettato con l'origine dello SHORT.
+//    Su uno strumento che serve a scegliere QUALE origine diventa una sedia,
+//    e' l'informazione che conta.
+//
+// 4) 🔴 LA BARRA CHE INGLOBA LE DUE BANDE (news, gap di apertura: tocca sia
+//    la banda alta sia la bassa). Nel contatore di riding un else-if dava la
+//    precedenza al lato SU per ORDINE DI SCRITTURA DEL CODICE, cioe' un bias
+//    verso il long proprio sulle barre che contano di piu'. Qui il caso
+//    "entrambi" e' esplicito e NON e' un riding.
+//    NB: sui GREZZI del band riding il doppio tocco resta come nel v1.2
+//    (touchUpper e touchLower sono indipendenti): la collisione si gestisce
+//    facendo TACERE il segnale, non scegliendo un lato.
+//
+// 5) 🔴 DUE VERSI SULLA STESSA BARRA: il segnale TACE invece di disegnare due
+//    frecce opposte e annunciare "LONG" solo perche' e' letto per primo.
+//    Puo' capitare solo con useConfirm spento (con la conferma accesa
+//    close>open e close<open insieme sono impossibili).
+//
+// 6) 🔴 LA SORGENTE DELLA BB CROSS ha un input suo. Nel v1.2 bbSrc governava
+//    la BB principale E la Cross: si tarava una cosa e se ne spostavano due,
+//    e la prova dopo confrontava due assetti che differivano per DUE cose.
+//    Al default (close su entrambe) il comportamento NON cambia di un tick.
+//
+// 7) 🔴 L'ESPANSIONE ha una finestra a input. Nel v1.2 era [1] fissa e il
+//    testo diceva "N barre fa" con N mai definito. Al default 1 e' identico.
+//
+// 8) 🔵 LO SLOPE SI PUO' MISURARE IN ATR invece che in punti, e serve.
+//    MISURATO: slopeMin = 0.8 vale 0,013 ATR su D30EUR M30 (inerte) e
+//    0,089 ATR su EURUSD M15 (6,7 volte piu' vincolante). E atrMin = 8.0 x K
+//    su un indice passa con 5-7x di margine, su EURUSD taglia meta' delle
+//    barre. Il K rende le soglie confrontabili in NOMINALE, non in
+//    VOLATILITA'. Quindi coi default del v1.2, su un indice i filtri veri
+//    sono TRE: A (ATR sopra la media), C (range > 1 ATR) ed espansione.
+//    Slope e atrMin sono decorazioni, e non si contano fra le protezioni.
+//
+// 9) 🔵 FILTRI EXTRA che nel v1.2 non esistono: EMA 200, Supertrend concorde,
+//    riding attivo, finestra oraria. Tutti e quattro SPENTI di default.
+//
+// ═══════════════════════════════════════════════════════════════════════════════
+// DUE COSE CHE IN PINE NON SERVONO, e vale saperlo
+// ═══════════════════════════════════════════════════════════════════════════════
+// · L'ATR. In MT5 iATR NON e' la Wilder ma la SMA del True Range (misura di
+//   casa SondaM0PB T3, citata in 5 file), quindi il porting doveva calcolarlo
+//   a mano. Qui ta.atr() E' la Wilder per definizione, e changeATR sceglie
+//   davvero fra Wilder e SMA del TR. Un problema che non esiste.
+// · L'ORIGINE FANTASMA. In MT5 un segnale nato sulla barra in formazione puo'
+//   sparire al tick dopo e lasciare l'etichetta di un segnale che non c'e'
+//   piu': serviva un controllo di vitalita'. In Pine le variabili `var`
+//   tornano al valore di chiusura a ogni ricalcolo della barra viva, quindi
+//   l'etichetta si ripara da sola.
+//
+// ⚠️ IL DEFAULT NON E' IL v1.2: useST nasce ACCESO, quindi escono anche i
+//    segnali della terza origine. Per riprodurre il v1.2 va spento a mano.
+//
+// 🧪 E IL PRIMO ESPERIMENTO NON E' UNA GRIGLIA: E' UN CONTEGGIO.
+//    Accendi UNA origine per volta e guarda quante volte spara, leggendo
+//    "ultimo da" sul pannello. La frequenza per origine e' la grandezza che
+//    decide se una di queste diventa una sedia -- oggi e' NON MISURATA.
+// ═══════════════════════════════════════════════════════════════════════════════
+
+indicator("ABTG SuperEMA Riding — v2.0", shorttitle="ABTG SER v2",
+          overlay=true, max_labels_count=500, max_lines_count=100)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 1. MASTER — quali origini
+// ═══════════════════════════════════════════════════════════════════════════════
+gM = "═══ Master: origini del segnale ═══"
+useBR   = input.bool(true,  "Origine 1: BAND RIDING (Emiliano)", group=gM)
+useEMAX = input.bool(true,  "Origine 2: incrocio 3 EMA (Paolo)",  group=gM)
+useST   = input.bool(true,  "Origine 3: ROTTURA del Supertrend",  group=gM)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 2. K COEFFICIENT — la categoria la dicono le DUE VALUTE, non il nome
+// ═══════════════════════════════════════════════════════════════════════════════
+gK = "═══ K coefficient (ABTG) ═══"
+useAutoK  = input.bool(true, "K automatico dal simbolo", group=gK,
+     tooltip="INDEX/GOLD: K=1.0 | FOREX non-JPY: K=0.0001 | FOREX JPY: K=0.01. " +
+             "Scala tutte le soglie in punti. Spegni per usare il K manuale.")
+manualK   = input.float(1.0, "K manuale", minval=0.00001, step=0.0001, group=gK)
+forceCat  = input.bool(false, "Sovrascrivi la categoria rilevata", group=gK)
+manualCat = input.string("INDEX", "Categoria manuale",
+     options=["INDEX","GOLD","FX","FX_JPY"], group=gK)
+
+tickU = str.upper(syminfo.ticker)
+baseC = str.upper(syminfo.basecurrency)
+profC = str.upper(syminfo.currency)
+
+// lista di VALUTE VERE: senza di lei XAGUSD (base XAG) finirebbe su FX con
+// K=0.0001, cioe' con i filtri azzerati E il set BB del forex al posto di
+// quello dei metalli. Correzione portata dal porting MT5.
+valute = ",AUD,CAD,CHF,CNH,CZK,DKK,EUR,GBP,HKD,HUF,JPY,MXN,NOK,NZD,PLN,SEK,SGD,TRY,USD,ZAR,"
+baseIsCur = str.contains(valute, "," + baseC + ",")
+profIsCur = str.contains(valute, "," + profC + ",")
+
+isGold  = str.contains(tickU, "XAU")
+isFxRaw = syminfo.type == "forex"
+// secondo indizio: un feed che serve le coppie come "cfd" o altro. Chiede che
+// il ticker COMINCI con BASE+QUOTE: stretto sbaglia meno di largo.
+isFxAlt = not isFxRaw and not isGold and baseIsCur and profIsCur and baseC != profC and
+          str.startswith(tickU, baseC + profC)
+isFx    = isFxRaw or isFxAlt
+
+autoCat = isGold ? "GOLD" : (isFx and profC == "JPY" ? "FX_JPY" : (isFx ? "FX" : "INDEX"))
+cat     = forceCat ? manualCat : autoCat
+catSrc  = forceCat ? "manuale" : "simbolo"
+
+autoK = cat == "FX" ? 0.0001 : (cat == "FX_JPY" ? 0.01 : 1.0)
+K     = useAutoK ? autoK : manualK
+isFxCat = cat == "FX" or cat == "FX_JPY"
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 3. SUPERTREND — logica del Pine v4 classico, alla lettera
+// ═══════════════════════════════════════════════════════════════════════════════
+gS = "═══ Supertrend ═══"
+stPer    = input.int(10,   "ATR Period",     minval=1, group=gS)
+stMult   = input.float(3.0,"ATR Multiplier", minval=0.1, step=0.1, group=gS)
+changeATR= input.bool(true,"ATR di Wilder (spento = SMA del True Range)", group=gS,
+     tooltip="ta.atr() E' la Wilder. Spento usa ta.sma(ta.tr,...) come il " +
+             "changeATR del Supertrend classico.")
+showST   = input.bool(true,"Disegna il Supertrend", group=gS)
+
+// ta.tr(true) = il True Range con high-low sulla prima barra, come il `tr` del v4
+atrST = changeATR ? ta.atr(stPer) : ta.sma(ta.tr(true), stPer)
+
+// ATTENZIONE AI NOMI: nel Pine classico `up` e' la banda BASSA (usata in
+// trend SU) e `dn` e' la banda ALTA. Si tengono i nomi originali.
+up = hl2 - stMult * atrST
+up1 = nz(up[1], up)
+up := close[1] > up1 ? math.max(up, up1) : up
+dn = hl2 + stMult * atrST
+dn1 = nz(dn[1], dn)
+dn := close[1] < dn1 ? math.min(dn, dn1) : dn
+// il flip confronta la chiusura CORRENTE con la banda della barra PRECEDENTE
+trendST = 1
+trendST := nz(trendST[1], trendST)
+trendST := trendST == -1 and close > dn1 ? 1 : (trendST == 1 and close < up1 ? -1 : trendST)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 4. BOLLINGER principale + CROSS (sorgenti SEPARATE)
+// ═══════════════════════════════════════════════════════════════════════════════
+gB = "═══ Bollinger principale ═══"
+bbLenIdx  = input.int(37,   "BB Period — Indici/Oro",    minval=2, group=gB)
+bbMultIdx = input.float(3.0,"BB Deviation — Indici/Oro", minval=0.1, step=0.1, group=gB)
+bbLenFx   = input.int(22,   "BB Period — Forex",         minval=2, group=gB)
+bbMultFx  = input.float(2.0,"BB Deviation — Forex",      minval=0.1, step=0.1, group=gB)
+bbSrc     = input.source(close, "BB Source (governa SOLO la BB principale)", group=gB)
+bbWidthPx = input.int(2,    "Spessore linea BB", minval=1, maxval=5, group=gB)
+showBB    = input.bool(true,"Disegna la BB principale", group=gB)
+
+gC = "═══ BB Cross Dashboard ═══"
+crSrc     = input.source(close, "BB Cross Source (al default = come la principale)", group=gC)
+crLenIdx  = input.int(37,   "BB Cross Period — Indici/Oro",    minval=2, group=gC)
+crMultIdx = input.float(1.4,"BB Cross Deviation — Indici/Oro", minval=0.1, step=0.1, group=gC)
+crLenFx   = input.int(22,   "BB Cross Period — Forex",         minval=2, group=gC)
+crMultFx  = input.float(2.0,"BB Cross Deviation — Forex",      minval=0.1, step=0.1, group=gC)
+showCross = input.bool(true,"Disegna le bande Cross (ON: il filtro veta, ed e' giusto vederlo)", group=gC)
+useCross  = input.bool(true,"Filtro: prezzo oltre la media Cross, nel verso", group=gC)
+
+bbLen  = isFxCat ? bbLenFx  : bbLenIdx
+bbMult = isFxCat ? bbMultFx : bbMultIdx
+crLen  = isFxCat ? crLenFx  : crLenIdx
+crMult = isFxCat ? crMultFx : crMultIdx
+
+bbBasis = ta.sma(bbSrc, bbLen)
+bbDev   = bbMult * ta.stdev(bbSrc, bbLen)
+bbUpper = bbBasis + bbDev
+bbLower = bbBasis - bbDev
+bbWidth = bbUpper - bbLower
+
+crBasis = ta.sma(crSrc, crLen)
+crDev   = crMult * ta.stdev(crSrc, crLen)
+crUpper = crBasis + crDev
+crLower = crBasis - crDev
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 5. SLOPE — in punti normalizzati OPPURE in ATR
+// ═══════════════════════════════════════════════════════════════════════════════
+gSl = "═══ Slope delle bande (band riding) ═══"
+slopeBars  = input.int(3,    "Barre su cui si misura lo slope", minval=1, group=gSl)
+slopeMinPt = input.float(0.8,"Slope minimo (punti normalizzati, x K)", minval=0.0, step=0.1, group=gSl)
+slopeInAtr = input.bool(false,"Misura lo slope in ATR invece che in punti", group=gSl,
+     tooltip="MISURATO: 0.8 punti valgono 0,013 ATR su DAX M30 (inerte) e " +
+             "0,089 ATR su EURUSD M15. In ATR la soglia non dipende dal " +
+             "livello di prezzo. Consigliato su indici: true con 0.15.")
+slopeMinAtrV = input.float(0.15,"[se sopra e' true] slope minimo in ATR sull'intera finestra", minval=0.0, step=0.01, group=gSl)
+
+gE = "═══ Espansione delle bande ═══"
+expMinPct = input.float(0.0,"Espansione minima della larghezza (%)", minval=0.0, step=0.1, group=gE)
+expBars   = input.int(1,    "Barre indietro per il confronto di larghezza", minval=1, group=gE)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 6. ATR — triplo filtro in AND
+// ═══════════════════════════════════════════════════════════════════════════════
+gA = "═══ ATR — triplo filtro AND ═══"
+useA      = input.bool(true, "A: ATR sopra la sua media (regime)", group=gA)
+atrLen    = input.int(14,    "ATR Period",         minval=1, group=gA)
+atrAvgLen = input.int(50,    "ATR Average Period", minval=1, group=gA)
+useB      = input.bool(true, "B: ATR sopra una soglia", group=gA)
+atrMinPt  = input.float(8.0, "ATR minimo (punti normalizzati, x K)", minval=0.0, group=gA)
+useC      = input.bool(true, "C: range candela sopra X volte l'ATR", group=gA)
+candleX   = input.float(1.0, "X (range candela / ATR)", minval=0.1, step=0.1, group=gA)
+
+atrF    = ta.atr(atrLen)
+atrAvg  = ta.sma(atrF, atrAvgLen)
+fA = not useA or atrF > atrAvg
+fB = not useB or atrF > atrMinPt * K
+fC = not useC or (high - low) > candleX * atrF
+atrAll = fA and fB and fC
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 7. CONFERMA e HEIKIN ASHI
+// ═══════════════════════════════════════════════════════════════════════════════
+gCf = "═══ Conferma 2a candela ═══"
+useConfirm = input.bool(true, "Conferma della 2a candela (dura)", group=gCf)
+
+gH = "═══ Heikin Ashi (solo Band Riding) ═══"
+useHA     = input.bool(true, "Niente ombra contraria su 2 candele HA", group=gH)
+haTolPt   = input.float(0.5, "Tolleranza ombra HA (punti normalizzati, x K)", minval=0.0, step=0.1, group=gH)
+
+haClose = (open + high + low + close) / 4
+var float haOpen = na
+haOpen := na(haOpen[1]) ? (open + close) / 2 : (haOpen[1] + haClose[1]) / 2
+haHigh = math.max(high, math.max(haOpen, haClose))
+haLow  = math.min(low,  math.min(haOpen, haClose))
+wickDn = math.min(haOpen, haClose) - haLow
+wickUp = haHigh - math.max(haOpen, haClose)
+noWickDn = wickDn <= haTolPt * K
+noWickUp = wickUp <= haTolPt * K
+haLongOk  = not useHA or (noWickDn and noWickDn[1])
+haShortOk = not useHA or (noWickUp and noWickUp[1])
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 8. EMA — 9 / 21 / 50 + la 200
+// ═══════════════════════════════════════════════════════════════════════════════
+gEm = "═══ EMA 9/21/50 + 200 ═══"
+emaFastL = input.int(9,   "EMA veloce", minval=1, group=gEm)
+emaMidL  = input.int(21,  "EMA media",  minval=1, group=gEm)
+emaSlowL = input.int(50,  "EMA lenta (trend di giornata)", minval=1, group=gEm)
+emaDeepL = input.int(200, "EMA di fondo", minval=1, group=gEm)
+emaSlopeBars = input.int(3,   "Barre per la pendenza della EMA lenta", minval=1, group=gEm)
+emaSlopeMinPt= input.float(0.2,"Pendenza minima EMA lenta (punti normalizzati, x K)", minval=0.0, step=0.1, group=gEm)
+showEma  = input.bool(true, "Disegna le EMA", group=gEm)
+
+emaFast = ta.ema(close, emaFastL)
+emaMid  = ta.ema(close, emaMidL)
+emaSlow = ta.ema(close, emaSlowL)
+emaDeep = ta.ema(close, emaDeepL)
+emaSlowSlope = emaSlow - emaSlow[emaSlopeBars]
+
+emaLongAl  = emaFast > emaMid and emaMid > emaSlow
+emaShortAl = emaFast < emaMid and emaMid < emaSlow
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 9. BAND RIDING — contatore, con la barra che INGLOBA gestita
+// ═══════════════════════════════════════════════════════════════════════════════
+gR = "═══ Band riding ═══"
+ridingBars = input.int(3, "Barre consecutive per dichiarare RIDING", minval=1, group=gR)
+showRiding = input.bool(true, "Marca le barre in riding", group=gR)
+
+touchUp = high >= bbUpper
+touchDn = low  <= bbLower
+
+var int rideCnt = 0
+// la barra che INGLOBA la banda (news, gap di apertura) tocca i DUE lati e NON
+// e' un riding: senza questo ramo l'else-if dava la precedenza al lato SU per
+// ordine di scrittura del codice, cioe' un bias verso il long proprio sulle
+// barre che contano di piu'.
+rideCnt := touchUp and touchDn ? 0 :
+           touchUp            ? (nz(rideCnt[1]) > 0 ? nz(rideCnt[1]) + 1 :  1) :
+           touchDn            ? (nz(rideCnt[1]) < 0 ? nz(rideCnt[1]) - 1 : -1) : 0
+ridingUp = rideCnt >=  ridingBars
+ridingDn = rideCnt <= -ridingBars
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 10. I TRE GREZZI, con la FIRMA dell'origine (1=BR 2=EMA 4=ST)
+// ═══════════════════════════════════════════════════════════════════════════════
+slopeUp   = bbUpper - bbUpper[slopeBars]
+slopeDn   = bbLower - bbLower[slopeBars]
+slopeThr  = slopeInAtr ? slopeMinAtrV * atrF : slopeMinPt * K
+wPrev     = bbWidth[expBars]
+wGrowth   = wPrev > 0 ? ((bbWidth - wPrev) / wPrev) * 100 : 0.0
+isExpand  = wPrev > 0 and bbWidth >= wPrev * (1.0 + expMinPct / 100.0)
+crLongOk  = not useCross or close > crBasis
+crShortOk = not useCross or close < crBasis
+
+rawLongBR  = touchUp and slopeUp >=  slopeThr and isExpand and crLongOk  and atrAll and haLongOk
+rawShortBR = touchDn and slopeDn <= -slopeThr and isExpand and crShortOk and atrAll and haShortOk
+
+rawLongEMA  = emaLongAl  and not emaLongAl[1]  and emaSlowSlope >=  emaSlopeMinPt * K
+rawShortEMA = emaShortAl and not emaShortAl[1] and emaSlowSlope <= -emaSlopeMinPt * K
+
+rawLongST  = trendST ==  1 and trendST[1] == -1
+rawShortST = trendST == -1 and trendST[1] ==  1
+
+// maschere SEPARATE per verso: una unica etichetterebbe un LONG con l'origine
+// dello SHORT quando le due sparano sulla stessa barra.
+mL = (useBR and rawLongBR ? 1 : 0) + (useEMAX and rawLongEMA ? 2 : 0) + (useST and rawLongST ? 4 : 0)
+mS = (useBR and rawShortBR ? 1 : 0) + (useEMAX and rawShortEMA ? 2 : 0) + (useST and rawShortST ? 4 : 0)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 11. CONFERMA, FILTRI EXTRA, ANTI-DOPPIONE
+// ═══════════════════════════════════════════════════════════════════════════════
+gX = "═══ Filtri EXTRA sul segnale finale ═══"
+fEma200  = input.bool(false,"Prezzo oltre la EMA 200, nel verso", group=gX)
+fSTcorde = input.bool(false,"Supertrend concorde col verso", group=gX)
+fRiding  = input.bool(false,"Serve il BAND RIDING attivo, nel verso", group=gX)
+fAntiDup = input.bool(true, "Anti-doppione globale sul regime", group=gX)
+fHour    = input.bool(false,"Finestra oraria (ora del GRAFICO)", group=gX,
+     tooltip="ATTENZIONE: su TradingView e' l'ora del FUSO DEL GRAFICO, non " +
+             "l'ora server del broker. Su MT5 BCM l'ora server e' l'ora " +
+             "italiana MENO UNA: DAX 08:00 srv, Nasdaq 14:30 srv. Qui metti " +
+             "l'ora che vedi sull'asse del grafico.")
+hourFrom = input.int(8, "Ora di inizio (inclusa)", minval=0, maxval=23, group=gX)
+hourTo   = input.int(22,"Ora di fine (esclusa)",   minval=0, maxval=23, group=gX)
+
+// la conferma legge il GREZZO, che con useConfirm e' nato alla barra [1]
+confL = useConfirm ? (mL[1] > 0 and close > high[1] and close > open) : mL > 0
+confS = useConfirm ? (mS[1] > 0 and close < low[1]  and close < open) : mS > 0
+// e la FIRMA si legge alla stessa barra del grezzo, non a quella della conferma
+origMaskL = useConfirm ? mL[1] : mL
+origMaskS = useConfirm ? mS[1] : mS
+
+hourOk = not fHour or (hourFrom <= hourTo ? (hour >= hourFrom and hour < hourTo)
+                                          : (hour >= hourFrom or  hour < hourTo))
+extraL = (not fEma200 or close > emaDeep) and (not fSTcorde or trendST ==  1) and (not fRiding or ridingUp) and hourOk
+extraS = (not fEma200 or close < emaDeep) and (not fSTcorde or trendST == -1) and (not fRiding or ridingDn) and hourOk
+
+candL0 = confL and extraL
+candS0 = confS and extraS
+// due versi sulla stessa barra = whipsaw: si TACE, non si scegle a caso
+candL = candL0 and not candS0
+candS = candS0 and not candL0
+
+var int lastRegime = 0
+longSig  = candL and (not fAntiDup or lastRegime !=  1)
+shortSig = candS and (not fAntiDup or lastRegime != -1)
+if longSig
+    lastRegime := 1
+if shortSig
+    lastRegime := -1
+
+nomeOrigine(int m) =>
+    s = (m % 2 >= 1 ? "BR " : "") + (m % 4 >= 2 ? "EMA " : "") + (m >= 4 ? "ST" : "")
+    s == "" ? "?" : s
+
+var string lastOrig = "--"
+if longSig
+    lastOrig := nomeOrigine(origMaskL)
+if shortSig
+    lastOrig := nomeOrigine(origMaskS)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 12. DISEGNO
+// ═══════════════════════════════════════════════════════════════════════════════
+gD = "═══ Display ═══"
+showOrig  = input.bool(true, "Scrivi l'origine sulla freccia (BR / EMA / ST)", group=gD)
+showPanel = input.bool(true, "Mostra il pannello", group=gD)
+
+pU = plot(showBB ? bbUpper : na, "BB alta",  color=color.new(color.blue, 0), linewidth=bbWidthPx)
+pM = plot(showBB ? bbBasis : na, "BB media", color=color.new(color.gray, 30))
+pL = plot(showBB ? bbLower : na, "BB bassa", color=color.new(color.blue, 0), linewidth=bbWidthPx)
+fill(pU, pL, color=color.new(color.blue, 92))
+
+plot(showCross ? crUpper : na, "Cross alta",  color=color.new(color.orange, 50), style=plot.style_circles)
+plot(showCross ? crLower : na, "Cross bassa", color=color.new(color.orange, 50), style=plot.style_circles)
+
+plot(showEma ? emaFast : na, "EMA 9",   color=color.new(color.purple, 0))
+plot(showEma ? emaMid  : na, "EMA 21",  color=color.new(color.green,  0))
+plot(showEma ? emaSlow : na, "EMA 50",  color=color.new(color.yellow, 0), linewidth=2)
+plot(showEma ? emaDeep : na, "EMA 200", color=color.new(color.white,  0), linewidth=2)
+
+plot(showST and trendST ==  1 ? up : na, "Supertrend SU",  color=color.new(color.lime, 0), linewidth=2, style=plot.style_linebr)
+plot(showST and trendST == -1 ? dn : na, "Supertrend GIU", color=color.new(color.red,  0), linewidth=2, style=plot.style_linebr)
+
+plotshape(showRiding and ridingUp ? bbUpper : na, title="Riding SU",
+     location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(color.aqua, 0))
+plotshape(showRiding and ridingDn ? bbLower : na, title="Riding GIU",
+     location=location.absolute, style=shape.circle, size=size.tiny, color=color.new(color.orange, 0))
+
+plotshape(longSig, title="LONG", location=location.belowbar, style=shape.triangleup,
+     size=size.normal, color=color.new(color.green, 0),
+     text="LONG", textcolor=color.white)
+plotshape(longSig and showOrig, title="LONG origine", location=location.belowbar,
+     style=shape.none, text="↑", textcolor=color.new(color.lime, 0))
+plotshape(shortSig, title="SHORT", location=location.abovebar, style=shape.triangledown,
+     size=size.normal, color=color.new(color.red, 0),
+     text="SHORT", textcolor=color.white)
+
+// etichette con l'origine: l'informazione per cui questo strumento esiste
+if showOrig and longSig
+    label.new(bar_index, low, nomeOrigine(origMaskL), yloc=yloc.belowbar,
+              style=label.style_label_up, color=color.new(color.green, 20),
+              textcolor=color.white, size=size.tiny)
+if showOrig and shortSig
+    label.new(bar_index, high, nomeOrigine(origMaskS), yloc=yloc.abovebar,
+              style=label.style_label_down, color=color.new(color.red, 20),
+              textcolor=color.white, size=size.tiny)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 13. AVVISI — con l'origine nel testo, a barra CHIUSA
+// ═══════════════════════════════════════════════════════════════════════════════
+alertcondition(longSig,  title="ABTG LONG",  message="ABTG LONG su {{ticker}} @ {{close}}")
+alertcondition(shortSig, title="ABTG SHORT", message="ABTG SHORT su {{ticker}} @ {{close}}")
+alertcondition(rideCnt ==  ridingBars, title="ABTG Band riding SU",  message="ABTG BAND RIDING SU su {{ticker}}")
+alertcondition(rideCnt == -ridingBars, title="ABTG Band riding GIU", message="ABTG BAND RIDING GIU su {{ticker}}")
+
+if longSig
+    alert("ABTG LONG " + syminfo.ticker + " " + timeframe.period + " da " +
+          nomeOrigine(origMaskL) + " | cat " + cat + " K " + str.tostring(K, "#.######"),
+          alert.freq_once_per_bar_close)
+if shortSig
+    alert("ABTG SHORT " + syminfo.ticker + " " + timeframe.period + " da " +
+          nomeOrigine(origMaskS) + " | cat " + cat + " K " + str.tostring(K, "#.######"),
+          alert.freq_once_per_bar_close)
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 14. PANNELLO — e il "K SOSPETTO" che rende visibile il fallimento silenzioso
+// ═══════════════════════════════════════════════════════════════════════════════
+// il pip dedotto dal tick del simbolo: e' la CONTROPROVA indipendente del K.
+// Il solo rapporto in ATR non basta -- misurato, un K sbagliato di 100x su
+// USDJPY M15 cade DENTRO la banda [0,001; 5] e l'allarme non suonerebbe.
+kPip      = syminfo.mintick >= 0.0005 ? 0.01 : 0.0001
+thrInAtr  = atrF > 0 ? slopeThr / atrF : 0.0
+// l'allarme audita il RILEVAMENTO AUTOMATICO: con K manuale voluto tace
+kSuspect  = (thrInAtr > 5.0) or (thrInAtr < 0.001 and thrInAtr > 0) or
+            (isFxCat and useAutoK and math.abs(K - kPip) > kPip * 0.5)
+
+if showPanel and barstate.islast
+    var table t = table.new(position.top_right, 2, 10,
+         bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
+    table.cell(t, 0, 0, "ABTG SuperEMA Riding", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 0, "v2.0", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
+
+    table.cell(t, 0, 1, "categoria / K", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 1, cat + " (" + catSrc + ")  K=" + str.tostring(K, "#.######"),
+         text_color=kSuspect ? color.red : color.yellow, text_size=size.small)
+
+    table.cell(t, 0, 2, kSuspect ? "K SOSPETTO" : "soglia slope", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 2, kSuspect
+         ? ("vale " + str.tostring(thrInAtr, "#.####") + " ATR: controlla categoria/K")
+         : (str.tostring(slopeThr / (K > 0 ? K : 1), "#.##") + " x K  = " + str.tostring(thrInAtr, "#.###") + " ATR"),
+         text_color=kSuspect ? color.red : color.gray, text_size=size.small)
+
+    table.cell(t, 0, 3, "Supertrend", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 3, (trendST == 1 ? "SU" : "GIU") + "   linea a " +
+         str.tostring(math.abs(close - (trendST == 1 ? up : dn)) / syminfo.mintick, "#") + " tick",
+         text_color=trendST == 1 ? color.lime : color.red, text_size=size.small)
+
+    table.cell(t, 0, 4, "EMA 9/21/50 · 200", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 4, (emaLongAl ? "LONG" : (emaShortAl ? "SHORT" : "MISTO")) + " · " +
+         (close > emaDeep ? "sopra" : "sotto"),
+         text_color=emaLongAl ? color.lime : (emaShortAl ? color.red : color.gray), text_size=size.small)
+
+    table.cell(t, 0, 5, "BB " + str.tostring(bbLen) + "x" + str.tostring(bbMult), text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 5, "largh " + str.tostring(bbWidth / syminfo.mintick, "#") + " tick · espans " +
+         str.tostring(wGrowth, "#.##") + "% " + (isExpand ? "OK" : "NO"),
+         text_color=isExpand ? color.aqua : color.gray, text_size=size.small)
+
+    table.cell(t, 0, 6, "ATR(" + str.tostring(atrLen) + ") · A/B/C", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 6, str.tostring(atrF / syminfo.mintick, "#") + " tick   " +
+         (fA ? "✓" : "✗") + " " + (fB ? "✓" : "✗") + " " + (fC ? "✓" : "✗"),
+         text_color=atrAll ? color.lime : color.red, text_size=size.small)
+
+    table.cell(t, 0, 7, "BAND RIDING", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 7, (rideCnt > 0 ? "SU " : (rideCnt < 0 ? "GIU " : "-- ")) +
+         str.tostring(math.abs(rideCnt)) + " barre (soglia " + str.tostring(ridingBars) + ")",
+         text_color=ridingUp ? color.aqua : (ridingDn ? color.orange : color.gray), text_size=size.small)
+
+    table.cell(t, 0, 8, "regime · origini ON", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 8, (lastRegime == 1 ? "LONG" : (lastRegime == -1 ? "SHORT" : "--")) + " · " +
+         (useBR ? "BR " : "") + (useEMAX ? "EMA " : "") + (useST ? "ST" : ""),
+         text_color=lastRegime == 1 ? color.lime : (lastRegime == -1 ? color.red : color.gray), text_size=size.small)
+
+    table.cell(t, 0, 9, "ultimo segnale da", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 9, lastOrig, text_color=color.aqua, text_size=size.small)
+// ═══════════════════════════════════════════════════════════════════════════════
+// FINE
+// ═══════════════════════════════════════════════════════════════════════════════
