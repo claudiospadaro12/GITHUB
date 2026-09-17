@@ -23068,3 +23068,84 @@ nuove avrebbe lasciato in trappola il settimo.
 💰 **Costo pagato**: 34 secondi di macchina e **sei misure mancate** a tredici
 giorni dal 1° ottobre. Zero numeri sbagliati prodotti — questo difetto non
 mente, si limita a non partire, ed è l'unica cosa buona che ha.
+
+---
+
+## 👥🪧 CLASSE 402 — DUE COPIE DELLO STESSO INDICATORE SULLO STESSO GRAFICO: il prefisso oggetti è univoco per CHART, non per ISTANZA — e il pannello mescola le due configurazioni (17/09/2026)
+
+> **Difetto vero**, trovato dal cancello leggendo `ABTG_SuperEMA_Riding.mq5`
+> **prima** della consegna a Claudio.
+
+Un indicatore con pannello costruisce il prefisso dei suoi oggetti così:
+
+```mql5
+g_pre="PFX_"+IntegerToString(ChartID())+"_";
+```
+
+Sembra chirurgico, e per la convivenza fra indicatori **DIVERSI** lo è. Ma
+quando l'utente mette **due copie dello STESSO** indicatore sul medesimo
+grafico — cioè **il gesto naturale di chi "fa delle prove" con due assetti**,
+che è esattamente il motivo per cui l'indicatore è stato chiesto — i nomi
+coincidono. Da qui tre conseguenze, e **la terza è quella che costa**:
+
+1. la seconda istanza trova l'etichetta già esistente, salta il ramo
+   `if(ObjectFind(...)<0)` e quindi **non applica mai** `OBJPROP_XDISTANCE` /
+   `OBJPROP_YDISTANCE`, che stavano **dentro** quel ramo: l'input che serve a
+   spostare il pannello diventa un **no-op silenzioso**;
+2. togliendo una copia, il suo `OnDeinit` con `ObjectsDeleteAll(0,g_pre)`
+   **cancella le etichette dell'altra**;
+3. 🔴 le due istanze si sovrascrivono **testo e colore a ogni tick**, e
+   l'utente legge un pannello che **mescola i due assetti** senza alcun segno
+   che stia succedendo. Non è un fastidio grafico: è **un numero attribuito
+   all'assetto sbagliato**, cioè una misura falsa su cui si decide un ingresso.
+
+### ✅ LA REGOLA, in due pezzi
+1. **Il prefisso di un pannello deve contenere qualcosa che DISTINGUE
+   L'ISTANZA** — i parametri che la caratterizzano, o la posizione del
+   pannello — non soltanto il `ChartID()`.
+2. **Le proprietà di POSIZIONE si riapplicano a ogni passata, fuori dal ramo
+   di creazione.** Un input che non fa effetto quando l'oggetto esiste già è
+   **un input che mente**.
+
+🟢 **CHIUSO SUBITO** su `ABTG_SuperEMA_Riding.mq5` v2.00: prefisso con
+periodo/moltiplicatore ST, periodo BB, barre di slope, barre di riding e
+`InpPannelloY`; `XDISTANCE`/`YDISTANCE` spostate fuori dall'`if`.
+
+---
+
+## 🎚️🤫 CLASSE 403 — L'INPUT CHE GOVERNA **DUE** FILTRI E LO DICE SOLO A UNO: si tara il primo e si sposta il secondo senza saperlo (17/09/2026)
+
+> **Difetto vero**, `ABTG_SuperEMA_Riding.mq5` v1 r.124/127/485, trovato dal
+> cancello prima della consegna.
+
+`InpPendenzaBarre` era commentato *"barre su cui si misura la pendenza"* e
+veniva usato **anche** come finestra del filtro **ESPANSIONE**, il cui input
+`InpEspansioneMin` parlava di *"larghezza ora / larghezza **N barre fa**"* con
+**N mai definito da nessuna parte**.
+
+Il codice era coerente con sé stesso: era **il contratto con l'utente** a
+essere rotto. E la sequenza che ne segue è precisamente il difetto che i file
+prova di casa esistono per impedire:
+
+> si tara la pendenza → il filtro espansione cambia **soglia effettiva** →
+> la prova successiva confronta due assetti che differiscono per **DUE** cose
+> invece di una.
+
+👉 Cioè la regola *"un file prova misura UNA variabile"* violata **dalle
+impostazioni dell'indicatore**, dove nessun cancello guarda.
+
+### ✅ LA REGOLA
+🔴 **Ogni filtro porta la SUA finestra.** Se un parametro è condiviso fra due
+meccanismi, o gli si dà un input proprio, o il commento elenca **tutti** i
+filtri che governa.
+
+⚠️ **E il corollario che era il vero rischio tecnico**: se un input entra in un
+**margine di sicurezza** (il `minimo` di barre in `OnCalculate`, il `warmup` di
+un EA), il margine va aggiornato **insieme** all'input — altrimenti il primo
+valore grande legge **fuori dal calcolato**. Nel caso reale la finestra
+dell'espansione non entrava in `minimo`.
+
+🟢 **CHIUSO** in v2.00: `InpEspansioneBarre` è un input proprio, entra in
+`minimo`, e la validazione in `OnInit` rifiuta le finestre `< 1` (una finestra
+**negativa** dava `i-(-10) = i+10`, cioè lettura oltre la fine dell'array e
+indicatore fermo — vedi anche la validazione degli input, stessa passata).

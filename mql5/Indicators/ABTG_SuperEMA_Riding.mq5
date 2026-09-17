@@ -31,9 +31,28 @@
 //|       (InpSlopeInAtr), e il pannello GRIDA "K SOSPETTO" se la    |
 //|       soglia in ATR e' fuori scala. Un fallimento visibile.      |
 //|                                                                  |
-//|  Uso MANUALE. Non piazza ordini, non legge conti, non scrive     |
-//|  file. Niente a che vedere col conto reale ne' con gli EA in     |
-//|  forward. Installazione: copia in MQL5\Indicators, F7.           |
+//|  Uso MANUALE, SOLA LETTURA: non piazza ordini, non legge conti,  |
+//|  non scrive file, non tocca nessun EA in forward.                |
+//|                                                                  |
+//|  INSTALLAZIONE - UN TERMINALE PER VOLTA, e il gesto F7 va fatto   |
+//|  UNA VOLTA PER TERMINALE (l'.ex5 nasce accanto al sorgente):      |
+//|    bersaglio consigliato  50504400  C:\MT5_Backtest              |
+//|    oppure                 50504263  BCM Markets MT5 Terminal -V3  |
+//|    MAI sul                10105439  C:\BCM_Reale                 |
+//|  Se MetaEditor era gia' aperto: chiudilo e riaprilo, altrimenti   |
+//|  il file nuovo non compare nell'albero.                           |
+//|                                                                  |
+//|  DUE AVVERTENZE MISURATE (non difetti: rodaggio dichiarato):      |
+//|  1) Le prime ~50 barre disegnate dopo il margine di avvio possono |
+//|     avere colore e flip DIVERSI da TradingView, perche' il        |
+//|     ratchet del Supertrend ha memoria e qui parte a freddo.       |
+//|     Misurato su 40 serie: converge entro 47 barre, media 12. E    |
+//|     seminare con la banda grezza PEGGIORA (47 -> 66). Quindi si   |
+//|     giudica al centro del grafico, non sul bordo sinistro.        |
+//|  2) Questo NON e' ABTG_Supertrend.mq5: quello e' una VARIANTE     |
+//|     (flip contro la banda CORRENTE). Sulle barre a gap i due      |
+//|     danno il flip su barre DIVERSE - verificato a numeri. Questo  |
+//|     segue il Pine alla lettera.                                  |
 //+------------------------------------------------------------------+
 #property copyright "Progetto EA Aperture Mercati"
 #property version   "2.00"
@@ -298,12 +317,32 @@ string NomeCategoria(const int c)
 //+------------------------------------------------------------------+
 int OnInit()
   {
+   //--- VALIDAZIONE. L'indicatore esiste per fare PROVE dalle impostazioni:
+   //    ogni input e' una porta aperta. Una finestra NEGATIVA leggerebbe
+   //    oltre la fine degli array (i-(-10) = i+10) e fermerebbe tutto.
    if(InpAtrPeriodST<1 || InpBBLenIdx<2 || InpBBLenFx<2 || InpMultST<=0.0 ||
-      InpCrossLenIdx<2 || InpCrossLenFx<2 || InpAtrLen<1 || InpAtrAvgLen<1)
+      InpCrossLenIdx<2 || InpCrossLenFx<2 || InpAtrLen<1 || InpAtrAvgLen<1 ||
+      InpEmaFast<1 || InpEmaMid<1 || InpEmaSlow<1 || InpEmaFondo<1 ||
+      InpSlopeBarre<1 || InpEspansioneBarre<1 || InpEmaSlopeBarre<1 ||
+      InpRidingBarre<1 || InpCandleAtrMult<=0.0 ||
+      InpEspansioneMinPct<0.0 || InpHaWickToll<0.0 ||
+      InpCategoriaMan<0 || InpCategoriaMan>3 || InpKManuale<=0.0)
      {
-      Print("ABTG_SuperEMA_Riding: parametri non validi.");
+      Print("ABTG_SuperEMA_Riding: parametri non validi. Richiesti: periodi ATR/BB/Cross/EMA >= 1 ",
+            "(BB e Cross >= 2), moltiplicatori > 0, SlopeBarre/EspansioneBarre/EmaSlopeBarre/",
+            "RidingBarre >= 1, EspansioneMinPct >= 0, HaWickToll >= 0, CategoriaMan 0..3, KManuale > 0.");
       return(INIT_PARAMETERS_INCORRECT);
      }
+   if(InpFiltroOrario &&
+      (InpOraDa<0 || InpOraDa>23 || InpOraA<0 || InpOraA>23 || InpOraDa==InpOraA))
+     {
+      Print("ABTG_SuperEMA_Riding: filtro orario non valido. Ore 0..23 in ORA SERVER ",
+            "(BCM = ora italiana - 1: DAX 8, Nasdaq 14), e OraDa diversa da OraA.");
+      return(INIT_PARAMETERS_INCORRECT);
+     }
+   if(!InpUsaBandRiding && !InpUsaEmaCross && !InpUsaFlipST)
+      Print("ABTG_SuperEMA_Riding: ATTENZIONE, nessuna origine attiva. L'indicatore disegna ",
+            "le linee e il pannello ma NON produrra' MAI un segnale ne' un avviso.");
    RilevaCategoriaEK();
 
    SetIndexBuffer( 0,BufST,     INDICATOR_DATA);
@@ -361,7 +400,13 @@ int OnInit()
       return(INIT_FAILED);
      }
 
-   g_pre="ABTGSER_"+IntegerToString(ChartID())+"_";
+   //--- il prefisso distingue l'ISTANZA, non solo il grafico: due copie dello
+   //    stesso indicatore sullo stesso grafico si sovrascriverebbero il
+   //    pannello a ogni tick, e si leggerebbero numeri dell'altro assetto.
+   g_pre="ABTGSER_"+IntegerToString(ChartID())+"_"+
+         IntegerToString(InpAtrPeriodST)+"x"+DoubleToString(InpMultST,1)+"_"+
+         IntegerToString(g_bbLen)+"_"+IntegerToString(InpSlopeBarre)+"_"+
+         IntegerToString(InpRidingBarre)+"_"+IntegerToString(InpPannelloY)+"_";
    IndicatorSetString(INDICATOR_SHORTNAME,
       StringFormat("ABTG BR+EMA+ST v2.00 [%s K=%s] (ST %d x %.1f | BB %d x %.1f | EMA %d/%d/%d/%d)",
          g_categoria,DoubleToString(g_K,6),InpAtrPeriodST,InpMultST,
@@ -430,12 +475,30 @@ int OnCalculate(const int rates_total,const int prev_calculated,
                 const double &high[],const double &low[],const double &close[],
                 const long &tick_volume[],const long &volume[],const int &spread[])
   {
+   //--- il verso su cui si appoggia TUTTO il file, dichiarato invece che
+   //    dato per buono: indice 0 = barra piu' VECCHIA.
+   ArraySetAsSeries(time,false);  ArraySetAsSeries(open,false);
+   ArraySetAsSeries(high,false);  ArraySetAsSeries(low,false);
+   ArraySetAsSeries(close,false);
+
    int piuLungo=(int)MathMax(InpAtrPeriodST,MathMax(g_bbLen,MathMax(g_crLen,
                 MathMax(InpEmaFondo,InpAtrLen+InpAtrAvgLen))));
    int coda=(int)MathMax(InpSlopeBarre,MathMax(InpEmaSlopeBarre,
             MathMax(InpEspansioneBarre,InpRidingBarre)));
    int minimo=piuLungo+coda+5;
-   if(rates_total<minimo) return(0);
+   if(rates_total<minimo)
+     {
+      static bool dettoCorto=false;
+      if(!dettoCorto)
+        {
+         dettoCorto=true;
+         PrintFormat("ABTG_SuperEMA_Riding: servono almeno %d barre (la piu' lunga e' la EMA %d "
+                     "piu' le finestre); sul grafico ce ne sono %d, quindi non disegno niente. "
+                     "Carica piu' storico (Fine / PgUp) o sali di timeframe.",
+                     minimo,InpEmaFondo,rates_total);
+        }
+      return(0);
+     }
 
    int start=(prev_calculated>0)?prev_calculated-1:minimo;
    if(start<minimo) start=minimo;
@@ -611,6 +674,11 @@ int OnCalculate(const int rates_total,const int prev_calculated,
       else if(segS) reg=-1.0;
       BufRegime[i]=reg;
 
+      //--- due versi sulla STESSA barra (possibile con InpConferma spento, se
+      //    due origini puntano in direzioni opposte): non si sceglie a caso,
+      //    si TACE. Senza questo, l'avviso direbbe "LONG" solo perche' guarda
+      //    il buffer long per primo.
+      if(segL && segS){ segL=false; segS=false; BufRegime[i]=regPrec; }
       if(segL) BufLong[i] =low[i] -AtrF[i]*0.6;
       if(segS) BufShort[i]=high[i]+AtrF[i]*0.6;
 
@@ -715,13 +783,15 @@ void Riga(const int n,const string testo,const color col)
      {
       ObjectCreate(0,nome,OBJ_LABEL,0,0,0);
       ObjectSetInteger(0,nome,OBJPROP_CORNER,CORNER_LEFT_UPPER);
-      ObjectSetInteger(0,nome,OBJPROP_XDISTANCE,InpPannelloX);
-      ObjectSetInteger(0,nome,OBJPROP_YDISTANCE,InpPannelloY+n*14);
       ObjectSetInteger(0,nome,OBJPROP_FONTSIZE,8);
       ObjectSetString (0,nome,OBJPROP_FONT,"Consolas");
       ObjectSetInteger(0,nome,OBJPROP_SELECTABLE,false);
       ObjectSetInteger(0,nome,OBJPROP_HIDDEN,true);
      }
+   //--- la POSIZIONE si riapplica sempre: dentro il ramo di creazione,
+   //    un'etichetta che esiste gia' non l'avrebbe mai letta.
+   ObjectSetInteger(0,nome,OBJPROP_XDISTANCE,InpPannelloX);
+   ObjectSetInteger(0,nome,OBJPROP_YDISTANCE,InpPannelloY+n*14);
    ObjectSetString (0,nome,OBJPROP_TEXT,testo);
    ObjectSetInteger(0,nome,OBJPROP_COLOR,col);
   }
@@ -776,7 +846,7 @@ void DisegnaPannello(const int rates_total,const double &close[],const datetime 
         InpAtrLen,AtrF[i]/_Point,AtrFAvg[i]/_Point,(fA?"OK":"no"),(fB?"OK":"no")),
         ((fA&&fB)?clrLimeGreen:clrOrange));
    Riga(8,StringFormat("BAND RIDING: %s%d barre  (soglia %d)",
-        (ride>0?"SU ":(ride<0?"GIU ":"-- ")),MathAbs(ride),InpRidingBarre),
+        (ride>0?"SU ":(ride<0?"GIU ":"-- ")),(int)MathAbs((double)ride),InpRidingBarre),
         (ride>=InpRidingBarre?clrAqua:(ride<=-InpRidingBarre?clrOrangeRed:InpPannelloColore)));
    Riga(9,StringFormat("regime      : %s   origini: %s%s%s",
         (BufRegime[i]>0.0?"LONG":(BufRegime[i]<0.0?"SHORT":"--")),
