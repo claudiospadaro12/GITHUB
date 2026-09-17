@@ -22888,3 +22888,85 @@ risultato): basterebbe che il ramo (b) rifiutasse un `$csv` con
 parallelo il file è **fresco davvero** — è solo di un altro. La riparazione vera
 è **mettere l'etichetta del round nel nome dell'artefatto intermedio**, cioè
 toccare `OptFrame_FileName()` nell'EA. Finché non si fa, la difesa è **la serie**.
+
+---
+
+## 400. 🏷️🪤 LA SENTINELLA CONGELATA SU UNA STRINGA D'ESITO **CHE LA CORSIA NON STAMPA MAI** — e la stringa inventata è **SOTTOSTRINGA di quella di FALLIMENTO**, quindi il controllo passa proprio quando dovrebbe fermare (controllo-preventivo, 17/09/2026, rovescio della **395**)
+
+**Il caso.** `R178a_slmode_gapfill_225JPY.txt` (sedia `772235`,
+`ABTG_GapFill`, 225JPY, asse `InpSLMode`) fa la cosa giusta: applica il
+**rovescio** della classe 395. Con `@FRAZIONEIS 0.40` la gamba OOS non è
+degenere, quindi l'esito rosso **non è atteso**, e il file congela una
+sentinella nuova (`S6`) per dirlo. Testuale, prima della correzione:
+
+> _"**L'ESITO DELLA CORSIA DEVE ESSERE `MISURATO` E IL CODICE D'USCITA DEVE
+> ESSERE 0.**"_
+
+Il ragionamento è giusto. **La stringa non esiste.** Tracciata su
+`backtest_pipeline/righe/RIGA_ROUND_VPS.ps1`, le uniche quattro che lo script
+sa produrre sono:
+
+| riga | `$esitoFinale` | uscita | riga dell'uscita |
+|---|---|---:|---|
+| **740** | `NON MISURATO -- CSV mancanti o vuoti: <gambe>` | **2** | 836 |
+| **743** | `NON MISURATO -- Trades = 0 su: <gambe>` | **2** | 836 |
+| **746** | `ROUND GIRATO CON RILIEVI (N)` | **3** | 837 (fall-through) |
+| **749** | `ROUND GIRATO` | **0** | 835 |
+
+Stampate a r.794 (referto) e r.826 (schermo), sempre nella forma
+`"ESITO: " + $esitoFinale`. **`ESITO: MISURATO` non compare in nessuno dei
+tre script della corsia.**
+
+### 🔴 PERCHÉ È PEGGIO DI UN REFUSO — due difetti, e tirano in versi opposti
+
+1. 🪤 **LA TRAPPOLA DELLA SOTTOSTRINGA.** `MISURATO` è contenuto in
+   `NON MISURATO`. Chiunque esegua la sentinella nel modo naturale — cercare
+   `MISURATO` nel referto, a occhio o con un `Select-String` — **la trova sul
+   caso di FALLIMENTO**. La sentinella non è solo inefficace: è **invertita**.
+   È lo stesso meccanismo per cui la **395** costa cara, ma dall'altra parte:
+   là un round riuscito viene timbrato `NON MISURATO`; qui un round fallito
+   verrebbe timbrato a posto.
+2. 🟠 **IL CODICE D'USCITA NON È IL CANCELLO, E `0` NON È L'UNICO ESITO SANO.**
+   `ROUND GIRATO CON RILIEVI (N)` esce con **3**: i due CSV ci sono, le celle
+   ci sono, il round è misurato — e una sentinella che pretende `0` lo
+   dichiarerebbe guasto, mandando a rifare una corsa a tick reali. È lo stesso
+   costo della 395 punto 1 (una notte di macchina a due settimane dalla
+   challenge), con il segno scambiato.
+
+### 📐 PERCHÉ NON È LA 395 NÉ LA 353
+- La **395** è il caso in cui **lo script ha ragione e il file tace la
+  conseguenza**: l'esito rosso esiste davvero ed è atteso.
+- La **353** è il numero **inventato in un referto** (uno "stop medio per
+  cella" che nessun artefatto contiene): riguarda una MISURA.
+- La **400** è una **STRINGA DI CONTROLLO** inventata *prima* della corsa,
+  dentro una sentinella: non sbaglia un numero e non tace una conseguenza,
+  **costruisce un cancello che non si chiude mai** — e che per una coincidenza
+  lessicale si apre sul caso sbagliato.
+
+> ✅ **LA REGOLA, in tre pezzi:**
+> 1. **Una sentinella che nomina una STRINGA prodotta da uno script si scrive
+>    copiandola dallo script, non ricostruendola dal senso.** Il comando
+>    stabile è uno solo:
+>    `grep -n 'esitoFinale =' backtest_pipeline/righe/RIGA_ROUND_VPS.ps1`
+>    (e `grep -n '^exit ' ...` per i codici). Se la stringa non esce da lì,
+>    **non è una stringa: è una parafrasi**, e una parafrasi non è un cancello.
+> 2. **Si elencano TUTTI gli esiti buoni, non "quello buono".** Per la corsia
+>    ROUND sono **due**: `ROUND GIRATO` (0) e `ROUND GIRATO CON RILIEVI (N)`
+>    (3). Il secondo va letto rilievo per rilievo, non scartato.
+> 3. **Mai una sentinella su SOTTOSTRINGA quando la famiglia di stringhe
+>    contiene una negazione.** Si confronta la **riga intera**. Regola
+>    generale, non solo per questo campo: nel repo la coppia
+>    `MISURATO` / `NON MISURATO` compare anche nei verdetti del certificato di
+>    morte (`NON ANCORA MISURATO`), e lì lo stesso errore archivierebbe un
+>    candidato vivo.
+
+🟢 **CHIUSO SU `R178a` IL 17/09/2026**: `S6` riscritta con le quattro stringhe
+vere e i tre codici, più il richiamo esplicito alla trappola della
+sottostringa; corretta anche la dichiarazione gemella nel blocco della classe
+393 dello stesso file (che scriveva `ESITO: MISURATO` / uscita 0). **Nessun
+altro file prova del repo la scriveva**: `grep -rn "ESITO: MISURATO"
+backtest_pipeline/prove/` ora dà **una riga sola**, ed è dentro la correzione
+stessa (il punto in cui `R178a` spiega che quella stringa non esiste). La
+classe nasce quindi su un caso singolo, e va guardata su **ogni file che
+dichiarerà il rovescio della 395** — cioè su tutti quelli con `@FRAZIONEIS`
+diverso da 1.0.

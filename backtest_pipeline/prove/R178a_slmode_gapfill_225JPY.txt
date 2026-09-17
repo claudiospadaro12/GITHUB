@@ -48,6 +48,33 @@
 #   e non e' il *2 cablato della classe 354: con @FRAZIONEIS 0.40 le
 #   gambe sono davvero due, quindi 2 celle x 2 gambe = 4 passate.)
 #
+#  >>> [ATTENZIONE] CLASSE 399 -- **QUESTO ROUND NON PUO' GIRARE INSIEME
+#      A R167d NE' A R168d SULLA STESSA CARTELLA DATI, E IL VINCOLO STA
+#      QUI perche' chi arma legge il file che sta armando, non i
+#      fratelli.**
+#      L'artefatto INTERMEDIO del tester non porta ne' il magic ne'
+#      l'etichetta: `OptFrame_FileName()` (r.693-696) lo compone come
+#      `OptResults_<NOME_EA>_<SIMBOLO>.csv`, cioe'
+#      **`OptResults_ABTG_GapFill_225JPY.csv`** -- lo STESSO nome per
+#      tutti e tre i round d'uscita di questa sedia (R167d, R168d,
+#      R178a), che hanno magic ed etichette diversi e sembrano isolati.
+#      Il driver ci appiccica l'identita' **solo dopo**, copiandolo col
+#      tag della gamba (`walkforward_generico.ps1` r.1686-1688), e quel
+#      ramo **non guarda chi l'ha scritto e non stampa NIENTE di nessun
+#      colore**: due round in parallelo si scambiano il CSV in silenzio,
+#      con l'intestazione giusta, il numero di colonne giusto e
+#      `ESITO: ROUND GIRATO`.
+#      >>> LA DIFESA, e costa zero: **si accodano IN SERIE.** Se proprio
+#          devono girare insieme, vanno su **cartelle dati diverse**
+#          (e' `$MqlFiles` = `<DataFolder>\MQL5\Files`, r.1529, a
+#          decidere: la CARTELLA DATI, non la finestra del terminale).
+#      >>> IL CONTROLLO A COSTO ZERO SUL RISULTATO: **la colonna
+#          dell'asse.** Qui `InpSLMode` deve portare **0 e 1**. Se
+#          portasse un valore solo, o i valori di `InpSLGapMult`
+#          (R167d) o di `InpMaxHours` (R168d), quel CSV **non e' di
+#          questo round** -- ed e' la PRIMA ipotesi davanti a due celle
+#          gemelle che non tornano, prima del mercato.
+#
 #  -Deposito 100000: NON e' il default del driver (10.000), ed e' il
 #  deposito con cui le DUE ancore CSV di questo file sono state misurate
 #  davvero. Non e' un dettaglio di forma: sulla STESSA cella e sulla
@@ -165,10 +192,31 @@
 #         perche' i file fratelli della famiglia la dichiarano tutti.**
 #         Con 0,40 la gamba OOS NON e' degenere: produce un CSV vero.
 #         `RIGA_ROUND_VPS.ps1` r.732-741 attende `..._IS_r178a.csv` e
-#         `..._OOS_r178a.csv`, li trova tutti e due, e chiude con
-#         **`ESITO: MISURATO`** e **codice d'uscita 0**. Se invece uno
-#         dei due mancasse, **quello e' un guasto vero** e non l'esito
-#         atteso di R175a: non si rilancia "tanto e' normale".
+#         `..._OOS_r178a.csv` (i nomi si compongono a r.623-624; con
+#         `-Modello 4` il suffisso di modello e' la stringa VUOTA,
+#         r.621, quindi NON sono `..._IS_ohlc_r178a.csv`), li trova
+#         tutti e due, e chiude con **`ESITO: ROUND GIRATO`** e
+#         **codice d'uscita 0**. Se invece uno dei due mancasse,
+#         **quello e' un guasto vero** e non l'esito atteso di R175a:
+#         non si rilancia "tanto e' normale".
+#         >>> [ATTENZIONE] CLASSE 400, E VA SCRITTA QUI PERCHE' E' UNA
+#             STRINGA, NON UN CONCETTO: **`ESITO: MISURATO` NON ESISTE
+#             in nessuno dei tre script.** Le uniche quattro che la
+#             corsia sa stampare stanno in `RIGA_ROUND_VPS.ps1`
+#             r.740/743/746/749, e i tre codici d'uscita a r.835-837:
+#               `NON MISURATO -- CSV mancanti o vuoti: ...`  uscita 2
+#               `NON MISURATO -- Trades = 0 su: ...`         uscita 2
+#               `ROUND GIRATO CON RILIEVI (N)`               uscita 3
+#               `ROUND GIRATO`                               uscita 0
+#             Due conseguenze operative, tutte e due controintuitive:
+#             (a) **un round PERFETTO con un rilievo esce con 3, non
+#             con 0**: il codice d'uscita da solo NON e' il cancello,
+#             il cancello sono i due CSV freschi con `Trades` > 0
+#             (r.733-734);
+#             (b) **non si cerca la SOTTOSTRINGA `MISURATO`**, perche'
+#             sta dentro anche a `NON MISURATO`: un controllo scritto
+#             cosi' passerebbe proprio sul caso di fallimento. Si
+#             confronta la riga INTERA.
 #      3. **QUESTO ROUND HA DUE ARTEFATTI DI MISURA, NON UNO**, e quindi
 #         DUE riproduzioni d'ancora indipendenti (S1a e S1b). E' la
 #         ragione principale per cui questa sedia e' stata scelta.
@@ -263,8 +311,16 @@
 #  **225JPY PERDE, e va detto forte perche' e' l'unica colonna in cui
 #  perde davvero.**
 #  `report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` nomina `InpSLMode: 0 -> 1`
-#  in **una sola riga**, la **r.657**, e quella riga e' di **772234
-#  U30USD**. Per gli altri quattro gemelli il referto dice altro:
+#  in **DUE righe**, e le elenco per nome invece di scrivere "una sola"
+#  (classe 180: un insieme non si definisce per differenza, e "una
+#  sola" e' un conteggio che si verifica col grep, non a memoria):
+#    - **r.657**, sedia **772234 U30USD** (`ABTG_GapFill`): e' la riga
+#      che R175a esegue, ed e' l'unica della FAMIGLIA GapFill;
+#    - **r.665**, sedia **770250 GatedShort NASUSD**: **un altro EA**,
+#      altre formule, altro simbolo -- citarla qui come se fosse una
+#      ricetta per 225JPY sarebbe classe 359.
+#  >>> **NESSUNA DELLE DUE E' DI 225JPY**, ed e' questo che conta per
+#      questo file. Per gli altri quattro gemelli il referto dice altro:
 #    - r.485 (`772235`, 225JPY): stop **[NM]**, "0 gambe in stop",
 #      verdetto **NON ANCORA MISURATO**;
 #    - r.522-524 (`772231/2/3`, i tre forex): stop **[NM]**, "0 trade
@@ -329,8 +385,14 @@
 #      **50503392**, fuori dal repo). E' una fonte di **CONTENUTO
 #      VERIFICATO A MANO**, non una controprova di campo.
 #  CONTROPROVE CONCORDANTI, in ordine di autorita' decrescente:
-#    - `backtest_pipeline/deploy_vivaio_gap2.ps1` r.39-43, lo script che
-#      SCRIVE il preset di campo: blocco `$comune` con
+#    - `backtest_pipeline/deploy_vivaio_gap2.ps1`, lo script che SCRIVE
+#      il preset di campo. **LE RIGHE DA CITARE SONO DUE, E NON SONO
+#      CONTIGUE**, perche' quella che porta il magic di QUESTA sedia
+#      sta FUORI dal blocco comune: il `$comune` e' a **r.39-41**, la
+#      riga del NIKKEI a **r.44-45**. (r.42-43 e' la riga del **DOW
+#      772234**: citare quel tratto per parlare di 225JPY sarebbe
+#      classe 359 dentro lo script giusto, che e' il modo piu' subdolo
+#      di sbagliare fonte.) Il blocco `$comune` porta
 #      `"InpSLMode=0","InpSLGapMult=1.0","InpMaxHours=48",
 #      "InpMaxSpreadPts=300","InpEntryWindowBars=3"` piu'
 #      `InpFillPct=75` + `InpMagic=772235` + `InpComment=GAP NIKKEI`.
@@ -922,13 +984,26 @@
 #  6. **`Peggior Giornata %` NON E' LA SOMMA DEI P/L CHIUSI, ED E'
 #     IMPORTANTE SAPERLO PRIMA DI LEGGERE B2bis.** Letta nel sorgente
 #     (r.288-297, dentro `OnTick`): e' il minimo dell'**EQUITY** di
-#     giornata contro l'equity d'apertura, quindi **include il
-#     flottante**. Verifica incrociata sul ledger: la perdita chiusa
-#     peggiore e' **-1.031,21 = -1,03%**, ma il CSV riporta
-#     **-1,1640%**. Le due cose non si contraddicono: **la differenza
-#     (+16,4%) e' l'escursione di equity oltre lo stop**, cioe' spread e
-#     slippage al momento del tocco. **Su un simbolo con 35 punti indice
-#     di spread questo non e' un dettaglio contabile: e' il costo vero.**
+#     giornata contro l'**equity D'APERTURA DI QUELLA GIORNATA**,
+#     quindi **include il flottante** -- e, soprattutto, **il
+#     denominatore NON e' il deposito iniziale**.
+#     >>> [ATTENZIONE] LA BASE, perche' due percentuali con due basi
+#         diverse non si sottraggono: la perdita chiusa peggiore vale
+#         **-1.031,21**, che sul deposito iniziale di 100.000 fa
+#         -1,03%, **ma non e' quella la base della colonna**. Quel
+#         trade chiude il 25/05/2026 con un saldo d'apertura di
+#         **102.856,66** (ricostruito sommando i 15 P/L del ledger in
+#         ordine, che tornano a 100.811,56 = Profit del CSV), quindi
+#         vale **-1,0026%** nell'unita' della colonna. E lo stesso vale
+#         per le altre quattro perdite piene: ricalcolate sull'equity
+#         d'apertura del loro giorno stanno fra **-0,9957% e -1,0026%**,
+#         cioe' **l'1,00% nominale, e non lo sforano mai**.
+#     Verifica incrociata: il CSV riporta **-1,1640%** contro un 1,00%
+#     nominale che le chiusure rispettano al terzo decimale. **Lo
+#     sforamento e' +16,4%, ed e' l'escursione di equity oltre lo
+#     stop**, cioe' spread e slippage al momento del tocco. **Su un
+#     simbolo con 35 punti indice di spread questo non e' un dettaglio
+#     contabile: e' il costo vero.**
 #     >>> E DA QUI ESCE UN'ATTESA, **che NON diventa sentinella**
 #         (classe 387): siccome la cella 1 ha un lotto piu' piccolo, lo
 #         STESSO sforamento in punti indice costa MENO in percentuale.
@@ -1659,6 +1734,23 @@
 #  consegnato -- classe 388: il pin dichiarato e' quello su cui i
 #  controlli sono stati RIFATTI, non quello di quando ho aperto il
 #  terminale).
+#  >>> **RIVERIFICA DEL CANCELLO DI GIUDIZIO, a HEAD `23695c07`** (due
+#      commit piu' avanti: `936faa4c` = questo file, `23695c07` = le
+#      correzioni in corso del cancello su R177a). Tutte e tre le forme
+#      rifatte dalla radice, worktree compresi:
+#        `grep -rlw "779897"`           -> **solo questo file**
+#        `grep -rn "^InpMagic=779897"`  -> **solo questo file**
+#        `grep -rl "R178"`              -> **solo questo file**
+#      E l'intera serie **779881-779898** ricontata numero per numero
+#      nella forma di PIN. I pin VERI sono **cinque**, e li elenco per
+#      nome invece di dire "nessun altro" (classe 180): **779885**
+#      (`R174a`), **779886** (`R176a`), **779890**
+#      (`R130c_passo_D30EUR.txt`, la serie delle DECINE -- il grep ne
+#      conta nove perche' otto sono copie del file nei worktree degli
+#      agenti, e' UN file solo), **779892** (`R177a`) e **779897**
+#      (questo). Tutti gli altri tredici numeri della serie hanno solo
+#      CITAZIONI (riserve e note), zero pin. **Nessuna collisione.**
+#      Resta vero che chi arma la rifa' ancora.
 #
 #  >>> PERCHE' NON UN NUMERO VICINO ALLA FAMIGLIA (772236 e simili), che
 #      sarebbe la scelta "naturale": perche' **772231-772235 sono i
@@ -1712,9 +1804,24 @@
 #      momento, non su `51d67626`. Un'asserzione di unicita' non si
 #      eredita: si rifa'. Ordine di precedenza (classe 367 punto 1):
 #      **armato in CODA.txt > committato su `lavoro` > solo nell'albero
-#      di lavoro**. Questo file, mentre viene consegnato, e' **solo
-#      nell'albero di lavoro**: perde contro chiunque sia gia'
-#      committato, e **si sposta LUI**.
+#      di lavoro**.
+#      >>> [ATTENZIONE] E IL GRADINO DI QUESTO FILE **NON SI CONGELA
+#          NEL FILE**, che e' la classe 398 applicata allo STATO NEL
+#          VERSIONAMENTO invece che al valore del pin. La prima stesura
+#          diceva *"questo file e' solo nell'albero di lavoro, perde
+#          contro chiunque sia gia' committato e si sposta LUI"*: vero
+#          per i minuti della stesura, **falso dal commit `936faa4c`**
+#          -- cioe' falso dal gesto che SEMPRE segue la consegna. Dal
+#          `936faa4c` questo file e' **COMMITTATO su `lavoro`**, sta al
+#          SECONDO gradino e non al terzo, e la precedenza **si
+#          inverte**: ora perde solo contro chi e' gia' armato in
+#          `CODA.txt`.
+#      >>> LA FORMA CHE NON SCADE, ed e' l'unica che si scrive: il
+#          gradino **si misura al momento di armare**, cosi' --
+#            `git ls-files --error-unmatch backtest_pipeline/prove/R178a_slmode_gapfill_225JPY.txt`
+#          (risponde col percorso = committato; *"did not match"* =
+#          solo nell'albero), e poi si guarda `CODA.txt`.
+#          **Un gradino e' una data, non una proprieta' del file.**
 #
 #  NON e' 772235: un magic diverso tiene separate le corse di round da
 #  qualunque cosa giri in campo, ed e' anche la difesa contro la cache
@@ -1768,9 +1875,13 @@
 #      ANCORA LANCIABILE, E LA DICHIARAZIONE E' SCRITTA COME CONDIZIONE,
 #      NON COME VALORE.**
 #      `RIGA_SOTTILE_ROUND.ps1` riscarica il file prova **dal `$PIN`**,
-#      cioe' da un commit congelato. Questo file, nel momento in cui
-#      viene consegnato, **non e' in nessun commit**: un lancio adesso
-#      darebbe un **HTTP 404 garantito**.
+#      cioe' da un commit congelato. **Essere su `lavoro` non basta e
+#      non c'entra**: quello che conta e' se il file sta DENTRO il
+#      commit pinnato. Alla stesura non stava in nessun commit; da
+#      `936faa4c` sta su `lavoro` **ma il pin e' piu' VECCHIO di
+#      quel commit**, quindi un lancio adesso darebbe lo stesso un
+#      **HTTP 404 garantito**. E' la ragione per cui qui sotto si
+#      verifica una CONDIZIONE e non si scrive uno stato.
 #      >>> LA CONDIZIONE, e si verifica cosi' (classe 398: non si cita
 #          il VALORE del pin ne' il suo numero di riga, perche' il
 #          progetto lo ha gia' mosso sessantasette volte e si muove
@@ -1826,7 +1937,8 @@
 # --- IL MOTORE, pinnato sulla CELLA VIVA della sedia 772235
 #     (fonte di autorita': mql5/Presets/ABTG_GapFill_225JPY_R36_cella.set,
 #      aperto riga per riga; controprove concordanti:
-#      deploy_vivaio_gap2.ps1 r.39-43 (lo script degli INDICI: quello
+#      deploy_vivaio_gap2.ps1 r.39-41 + r.44-45 (lo script degli INDICI:
+#      r.42-43 e' il DOW, non questa sedia; e quello
 #      senza il "2" fa i tre forex), R103_ABTG_GapFill_225JPY_772235.txt,
 #      i CSV d'archivio r36/r37 e il default del sorgente)
 InpUsaGuardian=true
