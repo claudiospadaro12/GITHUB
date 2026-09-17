@@ -2941,3 +2941,61 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 87081012e5c28801b95732fc24eef0742b692047 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
 # =====================================================================
+#  R175a -- InpSLMode, sedia 772234 (ABTG_GapFill, U30USD H1). Prima
+#  manopola d'uscita/stop mai messa ad asse su questa sedia. Asse a 2
+#  celle: 0 = multiplo del gap (vivo), 1 = ATR(D1) x InpAtrSlMult.
+#
+#  Scelto U30USD fra i 5 simboli della famiglia per tre motivi con un
+#  numero ciascuno: campione piu' grande (n=30 contro 26/21), PF gia'
+#  misurato sulla STESSA finestra operata (gli altri 4 hanno il PF solo
+#  su una finestra diversa), unico simbolo con spread reale d'archivio
+#  disponibile (necessario due volte: filtro d'ingresso e cancello di
+#  costo). Verificato: nato il 13/08/2026, 5 giorni dopo il fix sizing
+#  dell'8/08 (classe 392), gia' con OrderCalcProfit -- mai avuto il
+#  difetto. Ancora (24/08) posteriore all'ultimo commit del sorgente:
+#  stesso binario di oggi.
+#
+#  La scoperta che vale il round: `CANCELLO_COSTO_FLOTTA_2026-09-10.md`
+#  raccomanda esplicitamente questo asse per portare 772234 dall'88%
+#  del pavimento di costo (35,0x) sopra i 40x richiesti. Conto rifatto
+#  da zero e ai due estremi della banda misurata (p25/p75): 92,1x-256,1x,
+#  robusto in tutto il range. Nessun trailing/breakeven/parziale su
+#  questo EA (zero occorrenze su nove forme cercate): le uscite sono
+#  solo TP, SL (l'asse), time-stop 48h. Sentinella su Trades a canale
+#  unico (classe 387: `Trades(1) >= Trades(0)`, mai un'uguaglianza o un
+#  tetto arbitrario). Nessun verso congelato su Profit/PF/DD.
+#
+#  Secondo cancello: FAIL alla lettura -> PASS dopo 5 correzioni (commit
+#  4c7aa79d, riverifica 02f459c4). **Classe NUOVA 395**: con
+#  `@FRAZIONEIS 1.0` la gamba OOS non produce mai CSV, e la corsia
+#  chiude col codice d'uscita 2 / "NON MISURATO" anche se la gamba IS
+#  e' girata benissimo -- il file dichiarava il fatto ma taceva il
+#  verdetto stampato. **Chi legge il referto di questo round: il rosso
+#  sulla gamba OOS e' ATTESO, non rilanciare** -- si legge a mano se il
+#  CSV IS e' fresco con Trades>0, mai copiando `$esitoFinale`. Anche
+#  dichiarata la classe 394 (spread non pinnato dalla corsia): qui ha
+#  DUE meccanismi, uno fuori portata (StopsMinDist, serve un movimento
+#  enorme) e uno a portata di mano (InpMaxSpreadPts=300, tarato sul p95:
+#  uno spread in memoria sopra soglia fa crollare Trades in ENTRAMBE le
+#  celle, sintomo di banco, non di manopola).
+#
+#  Merito sospeso (n~30 contro pavimento 150, storico che il broker non
+#  possiede). Un solo regime, indici in salita: B7 impone l'ordine delle
+#  ipotesi (regime, campione appaiato, troncatura del lotto, PRIMA di
+#  "la geometria a stop costante e' migliore"). Con 2 celle nessun
+#  altopiano possibile: il round non promuove niente nemmeno con esito
+#  perfetto. Zero preset cambia, zero forward.
+#
+#  Pin: giro di pin 02f459c4 (65mo, 87081012 -> 02f459c4). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e' VUOTO).
+#  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779879, vergine a
+#  HEAD (grep -rl "InpMagic=779879" dalla radice, worktree compresi;
+#  nessuna collisione con 779885/R174a).
+#  🕳️ **BUCO APERTO, NON CHIUSO DA QUESTO ROUND**: come per R174a, lo
+#  spread del tester non e' pinnato da questa corsia (classe 394).
+#  Prima di leggere Trades su QUESTO round, verificare col blocco
+#  `-SoloControllo` se l'.ini scrive la riga Spread= o se il driver
+#  segnala "nessuna riga Spread" (stato ereditato in memoria).
+# =====================================================================
+02f459c42c534c1d2446f50327e96c4ccdc0e974 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R175a_slmode_gapfill_U30USD.txt -Etichetta r175a -Modello 4 -Deposito 100000
+# =====================================================================
