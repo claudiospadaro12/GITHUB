@@ -405,7 +405,7 @@ demo (n a fianco) · **[INF]** = inferito, con la strada dichiarata ·
 | **771321** | PTE | U30USD | H1 | 🔵 | ATR(14) H1 + `InpSLbufferPips 5` (= 0,05 idx) — r.81-82 | **~65 idx** [INF] | scala: 314,5 × √(60/1440); **0 gambe in stop sul demo** | **2,00** | **32,5x** | 🔴 **NO** (81%) | 🟢 SI |
 | **970912** | SupRev_DAX_H4_Ott | D30EUR | H4 | 🔵 | swing 5 barre H4 + 3 "pip" (0,03 idx) | **~170 idx** [INF] | scala: 186,5 × √(1200/1440); **0 gambe in stop** | **1,70** | **~100x** | 🟢 SI | 🟢 SI |
 | **970913** | SupRev_NAS_H1_Ott | NASUSD | H1 | 🔵 | swing 5 barre H1 + 3 "pip" (0,03 idx) | **51,65 idx** [MIS] n=4 | `trades_auto.csv` (min 9,7 · max 151,9) | **1,80** (ora 15) | **28,7x** | 🔴 **NO** (72%) | 🟢 SI |
-| **770411** | MaxMinNotte_DAX_Short_Ott | D30EUR | M15 | 🔵🟣 | `SLMode = MM_SL_ATR`, `InpAtrSLmult 2.5` × ATR(14) M15 — r.75/78 | 🔴 **[NM]** | **0 gambe in stop** (5 trade, nessuno chiuso in SL); **ATR M15 del DAX mai misurato** | 1,70 (ora 8) | **[NM]** | ⚪ **NON ANCORA MISURATO** | ⚪ |
+| **770411** | MaxMinNotte_DAX_Short_Ott | D30EUR | M15 | 🔵🟣 | `SLMode = MM_SL_ATR`, `InpAtrSLmult 2.5` × ATR(14) M15 — r.75/78 | 🟠 **[DER]** ✏️ | ✏️ **CORRETTO IL 17/09/2026: la frase «0 gambe in stop» era FALSA.** Su `trades_auto.csv` le 5 gambe di `770411` sono **4 con `close_reason = sl`** (18/08 · 20/08 · 24/08 · 31/08) **+ 1 `expert`** — tutte ANTERIORI a questo referto. Il `[NM]` poggiava su quella frase. Stop misurato della gamba 20/08: **55,0 idx** (ma con breakeven e trailing accesi e' un **limite INFERIORE**, non la distanza d'ingresso). Vedi `report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` | 1,70 (ora 8) | **[NM]** | ⚪ **NON ANCORA MISURATO** | ⚪ |
 | **770250** | Nasdaq_Apertura_US *(GatedShort)* | NASUSD | M15 | 🔵 | `InpSLMode = 0` (SL_RANGE) su **candela H1 precedente** (`RangeMode 2`, `LevelTF 16385`), buffer 300 pt = **3 idx** — preset `ABTG_GatedShort_NASUSD_770250_LIVE.set` | **~67 idx** [INF] | scala: 313,8 × √(60/1440) + 3; **0 trade da quando è viva** | **1,80** (ora 15) | **~37,2x** | 🟡 **NO (93%)** — [INF] | 🟢 SI |
 
 > ### 🔢 IL NUMERO NUOVO CHE ESCE DALLA CORREZIONE — e rafforza il ramo OPPRANGE
@@ -669,7 +669,7 @@ dell'errore: i "PASSA" sono solidi, i "NON PASSA" sono da confermare.**
 
 | sedia | cosa manca esattamente |
 |---|---|
-| **770411** MaxMinNotte_DAX_Short D30EUR M15 | stop: 0 gambe in stop su 5 trade · **ATR(14) M15 del DAX mai misurato** |
+| **770411** MaxMinNotte_DAX_Short D30EUR M15 | ✏️ **CORRETTO IL 17/09/2026**: ~~0 gambe in stop su 5 trade~~ → **4 gambe su 5 chiuse in `sl`**. L'ATR(14) M15 del DAX resta non letto direttamente, ma ora e' **[DERIVATO] 25,7-29,2 idx** con un pavimento DAX-nativo `>= 22,0 idx`. Vedi `ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` |
 | **770924 / 770901 / 774101 / 772235** (225JPY) | **spread di 225JPY all'ora della sedia**: una lettura sola, presa a cash Tokyo chiuso |
 | **772161 / 772163** BreakingBand GBPUSD/AUDUSD | 0 gambe in stop; per AUDUSD anche lo spread è illeggibile |
 | **772231 / 772232 / 772233** GapFill forex | 0 trade sul demo |
@@ -751,3 +751,56 @@ _Fonti primarie, tutte sul branch `lavoro`:_
 `backtest_pipeline/caccia_strategie/CONFIG_PROP_SPREAD_SLIPPAGE_2026-09-05.md` §0 e §1.2 ·
 `mql5/Experts/ABTG_{ORB_Ottimizzato,DAX_Apertura_EU,Dow_Apertura_US,Nasdaq_Apertura_US,PostNews,PTE,BreakingBand,GapFill,PunteLarry,CostToCost,EasyTrend,GapContinuation,MaxMinNotte,MaxMinNotte_DAX_Short_Ottimizzato,EMA200,EMA200_Ottimizzato,SupertrendReversal,SupertrendReversal_Ottimizzato,SuperWave,SuperWave_DOW_H1_Ottimizzato,SupRev_DAX_H4_Ottimizzato,SupRev_NAS_H1_Ottimizzato}.mq5` ·
 `mql5/Presets/ABTG_GatedShort_NASUSD_770250_LIVE.set` · `mql5/Presets/conto_reale/{ABTG_ORB_Ottimizzato_770611_REALE,ABTG_DAX_Apertura_EU_770101_REALE}.set` · `mql5/Presets/ABTG_ORB_US.set` (770601) · `mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_ORB_Ottimizzato_770611.set`
+
+
+---
+
+# ✏️ CORREZIONE DEL 17/09/2026 — due numeri di questo referto non reggono
+
+> Verificati **da me alla fonte**, non sul riassunto di un agente. Il referto
+> completo della riconciliazione e' `report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md`.
+
+## 1. 🔴 «0 gambe in stop» su `770411` è FALSO — e ci poggiava un `[NM]`
+`data/statements/trades_auto.csv`, magic `770411`, 5 gambe:
+
+| data | esito |
+|---|---|
+| 2026.08.18 08:14 | **`sl`** (+25,35) |
+| 2026.08.20 08:02 | **`sl`** (+78,32) |
+| 2026.08.24 08:01 | **`sl`** (+1,20) |
+| 2026.08.26 08:27 | `expert` (+17,78) |
+| 2026.08.31 08:03 | **`sl`** (+33,13) |
+
+**4 su 5 chiuse in stop**, e tutte **anteriori** a questo referto (10/09).
+💡 **Probabile causa dello sbaglio, e vale come lezione**: tutte e quattro
+hanno chiuso **in PROFITTO** (`+25,35 · +78,32 · +1,20 · +33,13`), perche' lo
+stop era stato **mosso** (breakeven e trailing sono accesi su quella sedia).
+Una gamba chiusa in `sl` con profitto positivo **non somiglia** a uno stop, ed
+e' facile contarla come uscita a mercato.
+⚠️ **E la conseguenza sulla misura**: proprio perche' lo stop era mosso, quelle
+distanze sono un **limite INFERIORE** dell'ampiezza d'ingresso, non l'ampiezza.
+La gamba 20/08 (55,0 idx a `InpAtrSLmult 2.5`) da' `ATR(14) M15 >= 22,0 idx`.
+
+## 2. 🔴 La colonna `stop` di questa tabella è stata letta come un ATR, e non lo è
+L'header (**r.389**) dice: `| ... | geometria dello stop | **stop** | fonte del numero | spread | **stop/spr** | 40x? | 13,3x? |`.
+Quindi il **`~170 idx [INF]`** di `970912` a r.406 è **uno STOP**, non un ATR —
+lo conferma la stessa riga, che lo divide per lo spread e scrive `~100x`.
+
+🔴 **Perche' conta**: quel `~170` era stato scalato con la regola √T per
+ricavare un «ATR M30 del DAX ≈ 60 idx», e da lì tarature e cancelli. **La
+catena partiva da una colonna letta male.** Inoltre lo `√(1200/1440)` della
+stessa cella non è un errore di battitura: `1200 min = 5 x 240` sono le
+**«swing 5 barre H4»** della colonna geometria — cioè la scala di uno *stop
+strutturale*, non di un ATR.
+
+📉 **E la ricetta si smonta da sola sulla riga sorella**: applicata a `970913`
+(`NASUSD`, swing 5 barre H1) predirebbe `143,2 idx` contro il **51,65 [MIS]
+n=4** misurato — sovrastima **~2,8x**.
+
+## 3. 🟡 Da ricalibrare, e la direzione è quella BUONA
+Ogni `stop/spread` **`[INF]`** di questo referto costruito sull'ancora ADR
+vecchia è **sottostimato di ~18-27%**, quindi **conservativo**: nessuna
+*esclusione* per costo si ribalta, ma diverse celle **`FRAGILE` possono
+diventare `PASS`**. 🔴 **Non ricalibrato qui**: e' un lavoro suo, e va fatto
+una volta sola — chi corregge l'ancora **non** aggiunge anche il +18-27%,
+altrimenti conta l'errore due volte.
