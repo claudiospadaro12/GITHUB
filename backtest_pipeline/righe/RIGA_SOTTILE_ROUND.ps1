@@ -1312,7 +1312,21 @@ $BancoBT = 'C:\MT5_Backtest'
 #  (26a18566, 19/08) e HEAD e' VUOTO. Magic 779879 riverificato vergine
 #  (grep -rl "InpMagic=779879" dalla radice, worktree compresi: solo
 #  questo file, nessuna collisione con 779885/R174a).
-$PIN = '02f459c42c534c1d2446f50327e96c4ccdc0e974'
+#  >>> SESSANTASEIESIMO GIRO DI PIN (17/09/2026): 02f459c4 -> d727f6dc.
+#  Serviva per portare un'emendazione su 21 file GIA' ARMATI: 19 su 22
+#  dei file con `@FRAZIONEIS 1.0` dichiaravano solo il FATTO (nessun
+#  CSV OOS) ma non la CONSEGUENZA (classe 395: la corsia chiude con
+#  "NON MISURATO"/uscita 2 anche se IS e' girata benissimo). Aggiunta
+#  la dichiarazione completa, coi numeri di riga riverificati sugli
+#  script veri (non copiati dalla checklist). Corretta anche una claim
+#  falsa in R161b (diceva che altri cinque file avevano "la stessa
+#  dichiarazione": non era vero quando scritto). SOLO PROSA DI
+#  COMMENTO: nessuna direttiva/pin/cella toccata (verificato col diff
+#  filtrato sulle righe non-commento: vuoto) e i due cancelli
+#  deterministici passano su tutti e 21 i file. RIGA_ROUND_VPS.ps1 e
+#  walkforward_generico.ps1 NON sono cambiati fra 02f459c4 e d727f6dc
+#  (git diff sui due percorsi: VUOTO, verificato).
+$PIN = 'd727f6dcb5b2242d9ca72933fa51507d113da4dd'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
