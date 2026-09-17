@@ -1418,6 +1418,22 @@
 #  NON e' 772234: un magic diverso tiene separate le corse di round da
 #  qualunque cosa giri in campo.
 #
+#  >>> RIVERIFICA DEL SECONDO CANCELLO (classe 388, 17/09/2026). Tutte le
+#      citazioni di questo file -- i `r.NNN` del sorgente, i quattro
+#      documenti d'archivio, i due script di deploy, il blocco `param` del
+#      driver, il CSV dello spread, l'unicita' di 779879 e di R175 coi
+#      worktrees dentro -- sono state **RIAPERTE E RICONTROLLATE UNA PER
+#      UNA** dall'agente `controllo-preventivo` sull'albero al commit
+#      **`2b08c767`** di `lavoro`, non sul `60bd1fc4` dichiarato sopra.
+#      Esito: **tutte esatte**, e le cinque che non lo erano sono state
+#      corrette dentro questo file prima della consegna (le due grosse
+#      sono la classe 395 nella sezione CLASSE 393 e la classe 394 nella
+#      sezione IL CANALE CHE PUO' TOCCARE LA CADENZA).
+#      >>> Resta valido quello che dice il capoverso sopra: **chi armera'
+#          la riga rifa' comunque il grep sulla punta di `lavoro` di QUEL
+#          momento.** Una riverifica non e' un lasciapassare a tempo
+#          indeterminato: e' una data.
+#
 #  ETICHETTA **R175a** / `-Etichetta r175a`: `grep -rl "R175"
 #  --exclude-dir=.git .` dalla radice, worktrees compresi -> **ZERO
 #  occorrenze** a HEAD `60bd1fc4`. Le etichette gia' prese sono R157,
