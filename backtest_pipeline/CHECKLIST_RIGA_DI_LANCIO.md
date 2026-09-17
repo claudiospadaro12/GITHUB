@@ -22634,3 +22634,178 @@ salta: la regola sotto resta la vera correzione strutturale.
 4. **Il verdetto nel referto si scrive a mano**, mai copiando
    `$esitoFinale`: per questi round la riga automatica è nota per essere
    falsa.
+
+---
+
+## 396. 💱📉 IL NUMERO IMPORTATO DA UNA FONTE CHE LO SCRIVE **DUE VOLTE**, E ARRIVA A DESTINAZIONE SOLO NELLA SUA VERSIONE OTTIMISTA — la parola "trascurabile" cambia con la colonna (controllo-preventivo, 17/09/2026)
+
+**Il caso.** `R176a_beatatr_breakingband_GBPUSD.txt` (sedia `772161`,
+`ABTG_BreakingBand`, asse `InpBEatATR`) deve stimare quanto lo spread
+distorce il **grilletto** della riduzione del rischio (`avanti = bid − op`
+con `op` = ASK d'ingresso: uno spread `s` alza ogni soglia da `N × ATR` a
+`N × ATR + s`). Prende lo spread di GBPUSD da
+`report/CANCELLO_COSTO_FLOTTA_2026-09-10.md` **r.520** e scrive:
+
+> *"con lo spread della sonda (2 punti) e ATR ~74 punti, la cella 0.5
+> (37 punti) è distorta del **5,4%** — **trascurabile**"*, e poi passa
+> direttamente a uno scenario di **stress** a 20 punti.
+
+🔴 **Ma quella tabella ha DUE colonne di spread, non una**, e lo dice a
+**r.499-500**: *"Colonna A = spread della sonda istantanea 17/08 17:34 srv.
+Colonna B = **1,0 pip prudente**"*, con l'avvertenza a **r.359-369**: fra
+le due letture c'è **un fattore 3-5**, e **ogni riga forex si scrive DUE
+VOLTE**. Il file prova aveva importato solo la **A**.
+
+| spread in memoria | cella 0.5 (37 pt) | distorsione | cella 2.5 (185 pt) |
+|---|---|---|---|
+| **2 pt** — colonna A (sonda 0,2 pip) | 39 pt = 0,53 ATR | **+5,4%** | +1,1% |
+| **10 pt** — colonna B (1,0 pip *prudente*) | 47 pt = **0,64 ATR** | **+27,0%** | +5,4% |
+| **20 pt** — stress lasciato in memoria da `-Spread` | 57 pt = 0,77 ATR | +54,1% | +10,8% |
+
+👉 **La riga che mancava non è quella di stress: è quella di mezzo.** Con
+la lettura *prudente* — che non è un'ipotesi pessimista inventata qui, è la
+seconda colonna che la fonte **impone** — la cella `0.5` **non è 0,5 × ATR:
+è 0,64**, cioè **un quarto del passo dell'asse (0,5) se ne va nello
+spread**. L'aggettivo "trascurabile" era vero solo nel mondo A.
+
+### 🧠 PERCHÉ NON È LA 201 E NON È LA 285
+- La **201** riguarda **come si COSTRUISCE** una colonna "prudente" (e che
+  sui simboli illeggibili è ottimista). Qui la colonna prudente **esiste ed
+  è giusta**: sbaglia il file che la IMPORTA, a valle, mesi dopo.
+- La **285** riguarda due statistiche diverse calcolate **dentro lo stesso
+  referto**. Qui il numero è uno solo e viene da **fuori**: il difetto è nel
+  **trasporto**, ed è silenzioso perché il file cita la fonte giusta, la
+  riga giusta e perfino il valore giusto — solo, uno dei due.
+
+### 🔴 LA REGOLA
+1. **Quando si importa un numero, si apre la LEGENDA della tabella, non
+   solo la riga.** Se la fonte dichiara due letture, **se ne trasportano
+   DUE**: una sola è una citazione mutilata, anche se è esatta.
+2. **Ogni aggettivo di comodo ("trascurabile", "ampio margine",
+   "irrilevante") si scrive con accanto il numero dell'ALTRA lettura.** Se
+   l'aggettivo non sopravvive all'altra colonna, **non si scrive**: si
+   scrivono i due numeri.
+3. **Lo scenario di STRESS non sostituisce lo scenario PRUDENTE.** Saltare
+   dal caso migliore al caso assurdo fa sembrare il caso realistico un caso
+   estremo: è la stessa illusione della classe 178 (la banda che non separa
+   le ipotesi), applicata alla prosa.
+4. **Su un asse, la distorsione si scrive anche come frazione del PASSO**,
+   non solo in percentuale della cella: "+27%" suona piccolo, "un quarto di
+   passo" dice che la cella promossa avrebbe il nome sbagliato.
+
+---
+
+## 397. 🟰🕳️ "I NUMERI SONO IDENTICI A QUELLI DEL MECCANISMO SPENTO" LETTO COME **MISURA FISICA** ("il meccanismo non è mai scattato"): l'identità ha DUE cause e il CSV non le separa (controllo-preventivo, 17/09/2026, estensione della 357)
+
+**Il caso.** Lo stesso `R176a`. L'asse `InpBEatATR` contiene la cella
+**0.0 = meccanismo spento**, e il file costruisce — bene — la sentinella
+**S7**: ogni cella si confronta con la 0.0, e le identiche escono
+dall'altopiano prima che si applichi la regola del centro (B6). Fin qui è
+un guadagno vero. Poi però scrive un'**equivalenza**:
+
+> *"cella N identica a 0.0 **⟺** NESSUNA posizione ha mai avuto lo stop
+> spostato a soglia N"*, e la vende come la chiusura del buco che il file
+> fratello dichiarava impossibile (*"quante operazioni arrivano al
+> grilletto: NON MISURABILE"*).
+
+🔴 **Un verso di quell'equivalenza è falso, e si rompe leggendo la catena
+del codice** (`ABTG_BreakingBand.mq5`): con `InpBEMode=0` il bersaglio è
+`op −/+ 1,5 × ATR`, cioè **un livello che il prezzo può non toccare mai
+più**. Una posizione che raggiunge `+N × ATR`, si vede spostare lo stop, e
+poi va dritta a chiudersi sulla **mediana** senza ritracciare fin lì, esce
+**allo stesso prezzo e allo stesso istante** della cella 0.0: stesso
+`Profit`, stesso `Trades`, stesso `Equity DD %`. **Il meccanismo è scattato
+e non si vede.**
+
+| lettura | verso | vale? |
+|---|---|---|
+| cella **≠** 0.0 ⇒ almeno una posizione ha raggiunto la soglia **e** lo stop nuovo le ha cambiato l'esito | implicazione | ✅ |
+| cella **=** 0.0 ⇒ "nessuna posizione ci è arrivata" | implicazione | 🔴 **NO** |
+| cella **=** 0.0 ⇒ "la soglia non ha cambiato NESSUN esito" (due cause indistinguibili: non raggiunta **oppure** raggiunta e mai vincolante) | implicazione | ✅ |
+
+👉 **E qui la causa scartata è probabilmente quella DOMINANTE**: il TP di
+questa strategia è la mediana, spesso vicinissima (il sorgente documenta un
+forward con RR **1:0,069**). Un'operazione che arriva a `+N × ATR` è già a
+un passo dal proprio obiettivo: la strada corta è il TP, non un ritorno di
+1,5 ATR all'indietro. 🔴 **E lo stesso file, venti righe più in là, lo
+sapeva**: *"la manopola agisce solo sul sottoinsieme di operazioni che
+arrivano alla soglia **e poi ritracciano**"*. L'equivalenza contraddiceva
+una frase scritta dallo stesso autore nello stesso file.
+
+### 📐 DIFFERENZA DALLA 357 — ed è il motivo per cui è una classe nuova
+La **357** è un'identità usata come **PASS** che l'ipotesi nulla soddisfa
+gratis (*"n identico fra le celle"* → sembra una conferma, non è stato
+misurato niente). Qui l'identità è usata **al contrario**: non come
+conferma di una tesi, ma come **MISURA POSITIVA di una grandezza fisica**
+("quante operazioni arrivano al grilletto"). 👉 **Un'uguaglianza fra due
+righe di CSV non misura un evento del motore: misura l'assenza di
+CONSEGUENZE dell'evento.** Sono due cose diverse quando l'evento può essere
+ininfluente.
+
+### 🔴 LA REGOLA
+1. **Un'identità fra celle non si trasforma mai in un'affermazione su cosa
+   ha fatto il codice.** Dice solo: *"nessuna delle due configurazioni ha
+   prodotto un esito diverso"*. Le cause si elencano **tutte**, e se il CSV
+   non le separa **si scrive che non le separa**.
+2. **Prima di scrivere "⟺", si cerca il caso che rompe il verso
+   scomodo.** Qui bastava una domanda: *"lo stop nuovo può essere spostato e
+   non venire mai toccato?"*. Se la risposta è sì, l'equivalenza è un'
+   implicazione.
+3. **La sentinella resta, l'etichetta cambia.** Per decidere se una cella
+   può entrare in un altopiano la domanda giusta è *"i numeri sono diversi
+   da quelli del meccanismo SPENTO?"* — e a quella l'identità risponde
+   benissimo. Si chiami la cella **MUTA** ("non ha cambiato nessun esito"),
+   mai **SATURA** ("nessuno ci arriva"): la seconda parola è già una causa
+   attribuita.
+
+---
+
+## 398. 📌⏳ IL FILE CHE DICHIARA LA CLASSE 265 **CONGELANDO IL VALORE DEL `$PIN`**: il pin si muove sotto il file, e la dichiarazione nasce già scaduta (controllo-preventivo, 17/09/2026)
+
+**Il caso.** `R176a` fa la cosa giusta e rara: apre con un riquadro
+**"ATTENZIONE, CLASSE 265: QUESTA RIGA NON È ANCORA LANCIABILE"** e allega
+il controllo positivo/negativo con `git cat-file`. Ma lo scrive così:
+
+> *"Alla stesura di questo file il `$PIN` vale
+> `02f459c4...` (`RIGA_SOTTILE_ROUND.ps1` **r.1315**)"*
+
+🔴 Misurato al cancello, **poche ore dopo**: il `$PIN` vero è
+`d727f6dc...` e sta a **r.1329**. La **r.1315** oggi è una **riga di
+commento** (*"SESSANTASEIESIMO GIRO DI PIN (17/09/2026): 02f459c4 →
+d727f6dc"*). Cronologia dei commit, al secondo:
+
+| commit | ora (UTC) | cosa |
+|---|---|---|
+| `02f459c4` | 17/09 **03:54:36** | il pin citato dal file |
+| `d727f6dc` | 17/09 **06:22:08** | emendazione classe 395 su 21 file |
+| `8a989264` | 17/09 06:2x | **66° giro di pin**: `$PIN` → `d727f6dc` |
+| `89bac92e` | 17/09 **06:34:34** | nasce `R176a`, che cita ancora `02f459c4` |
+
+👉 **La dichiarazione è nata scaduta di dodici minuti.** La *conclusione*
+restava giusta (il pin non contiene il file: verificato anche su
+`d727f6dc` → ASSENTE), ma chi arma va a **r.1315** e non trova nessun
+`$PIN`, oppure confronta il commit sbagliato: il riquadro che doveva
+impedire un HTTP 404 diventa esso stesso un'informazione da verificare.
+
+### 🧠 PERCHÉ NON È LA 265 — è il suo ANTIDOTO che si guasta
+La **265** è *"il pin non contiene il file prova"*. Questa è *"la
+DICHIARAZIONE della 265 invecchia più in fretta del file che la contiene"*.
+E l'ironia misurata: **lo stesso file tratta benissimo il rischio gemello
+sui MAGIC** — *"il controllo è stato rifatto **immediatamente prima** di
+scrivere il valore, perché altri round possono nascere in parallelo nella
+stessa ora"* — e non applica la stessa prudenza al pin — che il progetto ha già mosso
+**sessantasei volte**, e il 66° giro (`8a989264`, **06:22:54**) è di
+**dodici minuti prima** che questo file nascesse.
+
+### 🔴 LA REGOLA
+1. **In un file prova si scrive la CONDIZIONE, non il valore**: *"il round
+   è lanciabile se e solo se il commit puntato da `$PIN` CONTIENE questo
+   file"*, più il comando per rileggerlo (`Select-String '^\$PIN\s*='` +
+   `git cat-file -e <pin>:<percorso>`).
+2. **Se il valore si cita lo stesso** (ed è utile: dà il controllo
+   positivo/negativo), si cita **con la sua data/ora**, si dice
+   esplicitamente che **decade**, e **non si cita il numero di riga** di
+   `$PIN` senza rileggerlo: quella riga si sposta a ogni giro di pin.
+3. **Il pin si rilegge all'ultimo gesto prima del commit**, come già si fa
+   per i magic vergini. Un pin citato "alla stesura" non è una misura: è un
+   ricordo.
