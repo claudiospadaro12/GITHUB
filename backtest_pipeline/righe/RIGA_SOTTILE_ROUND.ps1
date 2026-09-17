@@ -1373,7 +1373,25 @@ $BancoBT = 'C:\MT5_Backtest'
 #  generico.ps1 NON sono cambiati fra 3aab9ae5 e 23695c07 (git diff sui
 #  due percorsi: VUOTO, verificato). Magic 779892 riverificato vergine
 #  (grep -rlw dalla radice, worktree compresi: solo questo file).
-$PIN = '23695c070091735f54b237941831da37f91decda'
+#  >>> SESSANTANOVESIMO GIRO DI PIN (17/09/2026): 23695c07 -> 2faa7e37.
+#  Serviva per armare R178a (InpSLMode, ABTG_GapFill, sedia 772235
+#  225JPY, magic 779897), secondo simbolo testato per questo asse dopo
+#  U30USD (R175a). Secondo cancello FAIL alla lettura -> PASS dopo 5
+#  correzioni (commit 2faa7e37). **Classe NUOVA 400**: la sentinella
+#  S6 congelava l'esito su "ESITO: MISURATO", stringa che NESSUNO dei
+#  tre script stampa mai -- e "MISURATO" e' SOTTOSTRINGA di "NON
+#  MISURATO", quindi una ricerca naturale la trova proprio sul caso di
+#  fallimento (rovescio della classe 395: la 395 nasconde un successo
+#  come fallimento, la 400 avrebbe fatto leggere un fallimento come
+#  successo). Riscritta con le quattro stringhe vere e i tre codici
+#  d'uscita, divieto esplicito di cercare per sottostringa. RIGA_ROUND_
+#  VPS.ps1 e walkforward_generico.ps1 NON sono cambiati fra 23695c07 e
+#  2faa7e37 (git diff sui due percorsi: VUOTO, verificato). Il sorgente
+#  EA (ABTG_GapFill.mq5) fra l'ultimo commit del sorgente (26a18566,
+#  19/08) e HEAD e' VUOTO. Magic 779897 riverificato vergine (grep -rlw
+#  dalla radice, worktree compresi: solo questo file, nessuna
+#  collisione con 779885/779886/779892 dei round BreakingBand).
+$PIN = '2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a'
 
 # Le impronte dei due file A QUEL PIN, misurate sul blob git.
 #  - SHA_ROUND: RICALCOLATA l'11/09/2026 sul file con la guardia POSITIVA
