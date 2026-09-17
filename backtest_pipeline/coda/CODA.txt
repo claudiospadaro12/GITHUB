@@ -3110,3 +3110,59 @@ dc0693899d4ba51186d50ba6c9bdcdfdf578d782 | backtest_pipeline/righe/RIGA_SOTTILE_
 # =====================================================================
 23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
 # =====================================================================
+#  R178a -- InpSLMode, sedia 772235 (ABTG_GapFill, 225JPY). Secondo
+#  simbolo testato per questo asse dopo U30USD (R175a). Asse a 2
+#  celle: 0 = multiplo del gap (vivo), 1 = ATR(D1) x InpAtrSlMult.
+#
+#  Scelto dopo aver smontato la premessa iniziale (l'etichetta
+#  "campione sottile" della sedia si riferiva al confronto con U30USD,
+#  non con gli altri tre forex della famiglia): 225JPY ha il campione
+#  PIU' GRANDE dei quattro rimasti (n=26 sull'ancora, contro 17/14/13)
+#  ed e' l'unico con PF misurato sulla stessa finestra operata (gli
+#  altri tre hanno il PF solo sulla finestra lunga, dove per costruzione
+#  la colonna PF-LUNGA non esiste). Usati per la prima volta su questa
+#  sedia i ledger per-trade in repo (mai usati dai fratelli), che
+#  riconciliano al centesimo su 4 grandezze e misurano (non stimano)
+#  lotStep=0,10, tasso di vincita 60,0% contro un pareggio aritmetico
+#  al 57,14% (margine sotto un trade), e la varianza reale della cella
+#  0 (fattore 6,96 -- rompe il contro-esempio T5 che avrebbe previsto
+#  6,67, lasciato rotto invece di aggiustato).
+#
+#  Dichiarato onestamente: CANCELLO_COSTO_FLOTTA raccomanda InpSLMode
+#  0->1 per due sedie (r.657 U30USD GapFill, r.665 NASUSD GatedShort --
+#  ALTRO EA), nessuna delle due e' 225JPY. Questo round non esegue una
+#  ricetta scritta.
+#
+#  Classe 394 con verso diverso da U30USD: su 225JPY Digits=0/Point=1,00
+#  (fattore 100 su U30USD), quindi InpMaxSpreadPts e' FUORI PORTATA
+#  (8,6-14,3x) mentre StopsMinDist/slOk E' a portata (6,3-10,5x) e non
+#  va archiviato come inerte. Classe 392 verificata: l'EA nasce 5 giorni
+#  dopo il fix sizing dell'8/08, mai avuto il difetto; le due ancore
+#  (13/08 e 24/08) sono ai due lati dell'unico altro commit del sorgente
+#  (19/08, Guardian) e concordano esattamente su n=26.
+#
+#  Secondo cancello: FAIL alla lettura -> PASS dopo 5 correzioni
+#  (commit 2faa7e37). **Classe NUOVA 400**: la sentinella S6 congelava
+#  l'esito su "ESITO: MISURATO", stringa che la corsia non stampa MAI
+#  -- e "MISURATO" e' sottostringa di "NON MISURATO", quindi una
+#  ricerca ingenua l'avrebbe trovata proprio sul fallimento. Rovescio
+#  della classe 395 (quella nasconde un successo da fallito, questa
+#  avrebbe fatto leggere un fallito da riuscito). Riscritta con le
+#  quattro stringhe vere e i tre codici d'uscita.
+#
+#  Merito sospeso (n=11 IS/15 OOS contro pavimento 150, fattore 11,5x
+#  di storico che il broker non possiede). Zero preset cambia, zero
+#  forward.
+#
+#  Pin: giro di pin 2faa7e37 (69mo, 23695c07 -> 2faa7e37). $SHA_ROUND e
+#  $SHA_WALK invariati (verificato: git diff sui due percorsi e' VUOTO).
+#  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779897, vergine a
+#  HEAD (grep -rlw dalla radice, worktree compresi; nessuna collisione
+#  con 779885/779886/779892).
+#  ⚠️ **VINCOLO OPERATIVO (classe 399)**: R167d, R168d e R178a
+#  condividono lo stesso file intermedio (stessa sedia GapFill 225JPY)
+#  -- in serie, mai in parallelo sullo stesso terminale (la coda
+#  automatica lo fa di suo).
+# =====================================================================
+2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R178a_slmode_gapfill_225JPY.txt -Etichetta r178a -Modello 4 -Deposito 100000
+# =====================================================================
