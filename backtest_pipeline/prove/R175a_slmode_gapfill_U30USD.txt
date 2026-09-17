@@ -154,6 +154,45 @@
 #      controlla_prova.py restera' a celle x2 = 4 anche con @FRAZIONEIS
 #      1.0 -- il numero vero di passate e' 2, il difetto dello strumento
 #      e' noto, documentato e non bloccante (classe 354).
+#
+#  >>> [ATTENZIONE] AVVISO OPERATIVO, DA LEGGERE PRIMA DI LANCIARE E PRIMA
+#      DI SCRIVERE IL REFERTO -- CLASSE 395. La frase "nessun CSV *_OOS"
+#      qui sopra e' VERA ma NON BASTA: dice il FATTO e tace la
+#      CONSEGUENZA, che e' un verdetto stampato. Tracciata riga per riga
+#      sui tre script della corsia, non dedotta:
+#        1. `walkforward_generico.ps1` r.731-733 avvisa da se':
+#           *"FrazioneIS 1.0 = UNA SOLA TRANCHE. La gamba OOS e' DEGENERE
+#           (finestra vuota): il CSV _OOS non descrive niente."* Il taglio
+#           e' `$Meta = Inizio + floor(giorni x 1.0)` = 2026.06.30, quindi
+#           la gamba OOS nasce **2026.07.01 -> 2026.06.30**, cioe' vuota;
+#        2. lo STESSO driver, a r.1720-1731, attende **DUE** CSV
+#           (`$Attesi = @(..._IS..., ..._OOS...)`) e chiude in ROSSO con
+#           *"!!! QUESTI NON SONO STATI PRODOTTI"* + *"Rilancia lo STESSO
+#           comando SENZA -Rifai"*. **QUELL'ISTRUZIONE, QUI, NON VA
+#           SEGUITA**: rilanciare rifarebbe una corsa a tick reali per
+#           produrre un file che non puo' esistere;
+#        3. `RIGA_ROUND_VPS.ps1` r.732-741 conta l'OOS fra i `$mancanti` e
+#           scrive nel referto del Desktop
+#           **`ESITO: NON MISURATO -- CSV mancanti o vuoti: OOS`**, con
+#           **codice d'uscita 2**: il runner segna "fallito" tutto cio'
+#           che non e' 0.
+#      >>> **QUESTO ESITO E' ATTESO E NON E' UN FALLIMENTO.** L'artefatto
+#          di questo round e' il CSV **IS** -- l'unica finestra che
+#          esiste. Se il CSV IS c'e', e' fresco e porta **2 righe con
+#          Trades > 0**, **IL ROUND E' GIRATO**, e va scritto cosi' nel
+#          referto. Scrivere "NON MISURATO" perche' lo dice la riga
+#          automatica sarebbe archiviare come non misurata una misura
+#          fatta: e' esattamente il difetto che il certificato di morte
+#          esiste per impedire.
+#      >>> NON E' UNA NOVITA' DI QUESTO FILE, ED E' IL MOTIVO PER CUI
+#          DIVENTA UNA CLASSE: la stessa dichiarazione sta gia' in
+#          `R161b`/`R161c` (r.31-46), `R170a` (r.252, r.886) e
+#          `R171a`/`R171b`. **Manca invece nei due fratelli di questa
+#          stessa sedia, `R157a` e `R159a`** (verificato col grep: zero
+#          occorrenze di "NON MISURATO" in R157a, e in R159a le due
+#          occorrenze sono di tutt'altro argomento) -- cioe' il difetto
+#          si e' gia' propagato dentro la famiglia, e da qui in avanti
+#          non si propaga piu'.
 # =====================================================================
 #  PERCHE' QUESTA SEDIA E QUESTA MANOPOLA -- coi numeri, e verificato
 #  contro il repo VERO oggi (HEAD `60bd1fc4`), non a memoria
@@ -616,6 +655,53 @@
 #      Non e' un verso su una grandezza economica: e' una disuguaglianza
 #      che viene dalla struttura del codice, e ha un solo segno perche'
 #      c'e' un solo canale (classe 362).
+#
+#  >>> [ATTENZIONE] E IL PARAMETRO DI BANCO CHE ENTRA IN QUEL CANALE **NON
+#      E' PINNATO DA QUESTA CORSIA** -- CLASSE 394, che e' stata scritta
+#      IERI su `R174a` e si eredita all'indietro su tutti i file che
+#      passano di qui. Verificato sui due script, non assunto:
+#        - `walkforward_generico.ps1` scrive `$RigaSpread` nei due `.ini`
+#          (r.1001 e r.1655), e `$RigaSpread` resta la **stringa vuota**
+#          finche' `-Spread` vale il default **-1** (r.192, r.944-946);
+#        - `-Spread` non arriva MAI: `RIGA_SOTTILE_ROUND.ps1` non ha il
+#          parametro (blocco `param` r.99-106: solo `Expert`, `Prova`,
+#          `Etichetta`, `Modello`, `Deposito`, `SoloControllo`) e
+#          `RIGA_ROUND_VPS.ps1` r.646-650 non lo passa.
+#      Quindi **nell'`.ini` di questo round la riga `Spread=` NON ESISTE**
+#      e MT5 usa il valore che ha **in memoria** (il driver lo dice da se'
+#      a r.958). Si dichiara **[NON PINNATO DA QUESTA CORSIA]**.
+#      >>> E QUI MORDE IN DUE PUNTI, non in generale -- e uno dei due e'
+#          **ASIMMETRICO FRA LE CELLE**, che e' il caso peggiore
+#          (classe 394 regola 3):
+#          (A) `StopsMinDist()` r.600-605 = `max(STOPS_LEVEL, SPREAD)`.
+#              Uno spread di STRESS rimasto in memoria da un round
+#              precedente gonfia `minDist`, e `minDist` e' la porta di
+#              `slOk` (r.467) -- **l'UNICO canale che dipende
+#              dall'asse**. La cella 1 ha 92-256x di margine e non la
+#              sente; **la cella 0 ne ha ~34x e la sente**. Uno spread in
+#              memoria sopra ~2,9 idx erode quel margine e puo' produrre
+#              `Trades(1) > Trades(0)` **senza che la manopola c'entri
+#              niente**: cioe' esattamente il pattern che S3 dice di
+#              nominare come RISULTATO;
+#          (B) `InpMaxSpreadPts = 300` (= 3,00 idx) e' un filtro
+#              d'ingresso ATTIVO tarato sul p95 (sezione IL MODELLO): uno
+#              spread in memoria sopra 3,00 idx **azzera gli ingressi in
+#              tutte e due le celle**, e S1 fallirebbe su `Trades` per una
+#              causa di banco, non di motore.
+#      >>> ATTENUANTE, DICHIARATA COM'E' E NON PIU' FORTE DI COSI': questa
+#          corsa e' a **-Modello 4 (tick reali)**, dove lo spread dovrebbe
+#          venire dal tick storico. Ma il driver stesso scrive a r.949-952
+#          che **"a tick reali non e' MISURATO che MT5 onori questa
+#          riga"**: "non misurato" vale nei DUE versi, quindi non e'
+#          misurato nemmeno che la ignori. Resta un buco, non una
+#          rassicurazione.
+#      >>> IL GESTO CHE LO CHIUDE, e costa zero: **`-SoloControllo` stampa
+#          il blocco spread** (r.949 se la riga c'e', r.958 se non c'e').
+#          Se stampa *"nessuna riga Spread nell'.ini"*, il buco e' aperto
+#          e va nel referto **prima** dei numeri. Metterlo agli atti
+#          davvero richiederebbe `-Spread 0` (spread CORRENTE, dichiarato),
+#          che questa corsia non sa passare: **e' un lavoro sulla corsia,
+#          fuori dal perimetro di questo file.**
 # ---------------------------------------------------------------------
 #  IL RISCHIO PER TRADE, IL LOTTO E LA TRONCATURA
 #
