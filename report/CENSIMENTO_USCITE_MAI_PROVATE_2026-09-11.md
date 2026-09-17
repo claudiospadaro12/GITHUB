@@ -525,3 +525,46 @@ binario di oggi: chiude insieme la domanda dell'ancora, il contratto S5v e la
 domanda del binario in campo. Nessuna riga di armamento proposta: nessun preset si
 tocca senza la firma di Claudio, e questa sedia gira sul piccolo 50503392, mai sul
 conto reale 10105439.
+
+---
+
+## 🔴🆕 9. AGGIORNAMENTO DEL 17/09/2026 — TROVATA LA CAUSA VERA DEL MANCATO
+## MATCH DI R127a, E NON È IL GUARDIAN: **L'ANCORA È SCADUTA, NON SPORCA**
+
+Un agente mandato a preparare una riproduzione minima di R127a si è fermato prima
+di scrivere il file, per la clausola di escalation del suo mandato: la causa che
+ha trovato è più importante del round. Verificato indipendentemente (date dei
+commit, ancestry git, conteggio `OrderCalcProfit`): **CONFERMATO**.
+
+- I CSV d'ancora di `970913` sono entrati nel repo col commit `400a4624`
+  (08/08/2026 06:54:53 UTC). Il commit `3af47ed9` ("fix sizing su 41 EA:
+  `OrderCalcProfit` al posto del tick value nudo") è un **discendente diretto**,
+  arrivato **4 ore e 54 minuti dopo**. **L'ancora è stata prodotta da un binario
+  che calcolava il lotto in un altro modo** di quello che gira oggi.
+- Il segno dello scarto lo dimostra: `Trades` è **salito** in entrambe le
+  finestre (IS 69→71, OOS 86→87). Delle tre modifiche residue nel diff (Guardian,
+  riordino lotto pendente, sizing), solo il sizing può produrre PIÙ deal — le
+  altre due possono solo farne sparire. Il Guardian resta scagionato (fail-open
+  nel Tester, come su 770202).
+- 🟢 **Non è un bug**: `3af47ed9` è una riparazione vera (tick value non
+  convertito su simboli come 225JPY). **Il verdetto corretto non è "il round è
+  sporco", è "l'ancora dell'08/08 è scaduta"** — e le 9 celle di R127a restano
+  confrontabili fra loro perché girate tutte sullo stesso binario di oggi.
+- 🔴 **E questo vale oltre questa sedia**: `3af47ed9` tocca **41 EA**, `872dba82`
+  (08/09, pavimento lotto minimo) altri **15**. Qualunque ancora d'archivio
+  prodotta prima dell'08/08 11:48 UTC su uno di quei 41 EA è, per costruzione,
+  irriproducibile oggi — non un banco sporco, un contratto di ancoraggio scaduto.
+  Documentato come **classe NUOVA 392** in `CHECKLIST_RIGA_DI_LANCIO.md`.
+
+⚠️ **Due strade proposte, nessuna eseguita — richiedono una decisione, non un
+agente**: (A) ri-ancorare dichiarando la cella viva di R127a come nuova ancora
+(costo zero macchina, ma è un cambio di criterio e serve la firma di Claudio,
+anche se non è un ammorbidimento — corregge un criterio impossibile, non una
+soglia); (B) l'esperimento decisivo, una sola passata sul sorgente d'archivio
+ricompilato con nome diverso per separare "solo il sizing è cambiato" da "anche
+lo storico tick si è mosso" — non eseguito perché tocca un sorgente EA.
+
+📌 **Fatto di rischio da non perdere**: sul binario di oggi il DD OOS della
+cella viva sale da 0,8567% a 1,0869% (+26,9% relativo) — piccolo in assoluto, ma
+più alto di quanto l'archivio promettesse sulla configurazione in campo. Va
+portato a chi tiene `REGISTRO_TEST.md`/`TRACKING_FORWARD.md`.

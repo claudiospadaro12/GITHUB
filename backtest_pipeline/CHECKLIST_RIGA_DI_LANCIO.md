@@ -22384,3 +22384,54 @@ danno è **differito e moltiplicato**, come nella 323/383.
 la motivazione vera (prezzi e ordine sintetici) e, nel secondo punto dove la
 frase era ripetuta, il rimando esplicito a questa classe. **Il requisito
 `-Modello 4` non è cambiato.**
+
+---
+
+## 392. 🕰️💰 UN'ANCORA D'ARCHIVIO PUÒ ESSERE **STRUTTURALMENTE IRRIPRODUCIBILE**, NON PERCHÉ IL BANCO È SPORCO MA PERCHÉ IL BINARIO CHE L'HA PRODOTTA NON ESISTE PIÙ — e la riparazione che l'ha resa tale era GIUSTA (mql5-ea-developer, 17/09/2026)
+
+**Il caso.** `R127a_slbuffer_NASUSD.txt` (sedia `970913`, `ABTG_SupRev_NAS_H1_
+Ottimizzato`) falliva la propria sentinella S1 (PF fuori tolleranza su
+entrambe le finestre, `Trades` non identico — classe scritta ieri, §8 di
+`report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md`). Ieri sera si pensava
+al Guardian (come su 770202, fail-open nel Tester). **Non è quello.**
+
+🔴 **La causa vera**: i CSV d'ancora sono entrati nel repo col commit
+`400a4624` (08/08/2026 06:54:53 UTC). Il commit `3af47ed9` ("fix sizing su
+41 EA: OrderCalcProfit al posto del tick value nudo") è arrivato **4 ore e
+54 minuti DOPO**, ed è un **discendente diretto** di `400a4624` (verificato
+con `git merge-base --is-ancestor`). **L'ancora è stata prodotta da un
+binario che calcolava il lotto in un altro modo** di quello che gira oggi.
+Il segno dello scarto lo dimostra (non solo lo suggerisce): `Trades` è
+**salito** in entrambe le finestre (IS 69→71, OOS 86→87), e delle tre
+modifiche nel diff residuo (Guardian, riordino lotto pendente, sizing) SOLO
+il sizing può produrre PIÙ deal — le altre due possono solo farne sparire.
+
+🟢 **E non è un difetto da correggere**: `3af47ed9` è una **riparazione**
+(tick value non convertito su simboli come 225JPY), non un bug. Il binario
+di oggi è più giusto di quello dell'ancora. **La conclusione corretta non è
+"il round è sporco", è "l'ancora è scaduta"** — e le celle di R127a restano
+confrontabili fra loro perché girate tutte sullo stesso binario.
+
+🔴 **PERCHÉ VALE PER TUTTO IL REPO, NON SOLO PER QUESTA SEDIA.** `3af47ed9`
+tocca **41 EA**, `872dba82` (08/09, pavimento del lotto minimo, altro
+commit nella stessa famiglia) ne tocca **15**. **Qualunque ancora
+d'archivio prodotta prima dell'08/08/2026 11:48 UTC su uno di quei 41 EA
+è, per costruzione, irriproducibile dal binario di oggi** — non un banco
+sporco, un contratto di ancoraggio scaduto. Un round futuro che pretenda
+"n identico, PF entro tolleranza stretta" contro un'ancora pre-`3af47ed9`
+fallirà comunque, e la colpa cadrebbe sul binario invece che sulla data
+dell'ancora.
+
+**Prima di dichiarare un round "sporco" perché non riproduce l'ancora**:
+verificare la DATA del commit che ha portato i CSV d'ancora contro la data
+di `3af47ed9` (08/08 11:48 UTC) e `872dba82` (08/09) per l'EA in questione
+(`git log --follow` sul `.mq5`, o `git merge-base --is-ancestor <commit-
+ancora> 3af47ed9`). Se l'ancora precede la riparazione, il verdetto giusto
+è "ancora scaduta, da rifare sul binario attuale con UNA passata mirata",
+non "banco sporco" e non "nessuna cella promuovibile per sempre".
+
+**Non ancora chiuso**: separare "solo il sizing è cambiato" da "anche lo
+storico tick è stato riscaricato nel frattempo" richiede una passata di
+controllo (ricompilare il sorgente d'archivio con un nome diverso e
+rigirare la sola cella viva) — proposta, non eseguita, perché tocca un
+sorgente EA e serve la firma di chi governa l'esperimento.
