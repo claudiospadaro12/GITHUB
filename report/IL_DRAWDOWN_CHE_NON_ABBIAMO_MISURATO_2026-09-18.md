@@ -24,6 +24,16 @@ misura che mancava. I verdetti hanno criteri congelati altrove e restano lì.
 
 ---
 
+> ### ➕ **AGGIUNTA DELLA SERA DEL 18/09 → vedi §10**
+> La sedia **`Nasdaq_Apertura_US` `770201`** (NASUSD) **non è in nessuna tabella
+> di questo referto prima del §10**, e non ci è mai stata: la riga
+> `Dow Apertura 770202 (via 770206)` di §5 è **un'altra sedia**.
+> 🔴 **Il suo p99 è stato cercato e NON è misurabile con i dati in casa**: il
+> perché, la misura della famiglia che esiste, i contro-esempi e il round che
+> lo produrrebbe stanno nel **§10**.
+
+---
+
 # 1. 📋 IL CENSIMENTO — tutti i per-trade in repo, e cosa manca alla rosa
 
 ## 1.1 Come è stato fatto
@@ -465,3 +475,425 @@ misura, e questo referto non ne fa. **È un buco dichiarato (§8).**
   stampa del **residuo di abbinamento** su ogni riga di tester; rifiuto
   esplicito sotto le 50 posizioni; scelta **deterministica** della riga di
   tester col residuo minimo.
+
+---
+
+# 10. 🔴 ADDENDUM — **18/09/2026, sera** · `Nasdaq_Apertura_US` **`770201`**
+
+**Scritto dal collaudatore prop. SOLA LETTURA**: nessun backtest lanciato,
+nessun EA / preset / parametro in forward toccato, `coda/CODA.txt` non aperto,
+conto reale non letto né nominato. **Costo macchina: 0.**
+🔴 **Nessun lotto e nessuna soglia qui dentro**: le taglie le firma Claudio.
+
+- 🧮 Strumento: `backtest_pipeline/dd_riordino_nasdaq.py` — **non è un metodo
+  nuovo**: `import distribuzione_dd_riordino` e usa le sue funzioni. Lo
+  strumento madre **non è stato toccato** (è già passato dal cancello).
+- 📄 Output grezzo: `backtest_pipeline/risultati_archivio/DD_RIORDINO_NASDAQ_2026-09-18.txt`
+- 🔁 Riga per rifarlo identico:
+  `python3 backtest_pipeline/dd_riordino_nasdaq.py --riordini 20000 --blocchi 20000 --avversari 5000`
+  (seed di default `20260918`)
+
+> ## 🔴 **VERDETTO IN UNA RIGA: il p99 del drawdown per riordino di `770201` NON È MISURABILE con i dati in casa, e non è stato stimato.** Le uniche due fonti che esistono sono **degeneri o di un'altra cella**, ed è misurato quanto segue.
+> ## 🟢 **MA la notizia buona è più grande della cattiva: la configurazione VIVA della `770201` È ricostruibile riga per riga — 80 parametri su 80 — contro quello che il progetto aveva scritto in agosto.** Quindi il round che produce il numero **esiste, è UNO, e costa 4 passate** (§10.11).
+
+## 10.1 🧭 Perché questa sezione esiste
+
+La tabella di §5 contiene `Dow Apertura 770202 (via 770206)`. In un messaggio a
+Claudio quella riga era stata citata come *«Nasdaq/Dow Apertura»*: **errore mio,
+già corretto con lui**. `770201` è **un'altra sedia**, su **un altro simbolo**
+(NASUSD), con **un altro EA** (`ABTG_Nasdaq_Apertura_US`) — e nella tabella di
+§5 **non c'è mai stata**.
+
+E conta: nel censimento del campo del 18/09 (`report/LE_SEDIE_PER_LA_PROP_2026-09-18.md`
+§«LA SELEZIONE», riga 1) `770201` è la sedia col record migliore. **Senza p99
+non ha un tetto di taglia.**
+
+## 10.2 📋 LA FONTE — cosa ho cercato, elencato per nome
+
+Ho cercato in tutto il repo (escluse le copie di lavoro in `.claude/worktrees/`)
+i file con intestazione `close_time;symbol;magic;position_id;deal_type;volume;price;net_profit`.
+**Sono 136.** Quelli che contengono almeno una riga `NASUSD` sono **26**, e
+appartengono a **tre famiglie sole**:
+
+| famiglia | file | EA che li ha prodotti | è la sedia `770201`? |
+|---|---:|---|---|
+| **R84** `risultati_archivio/r84_csv/pertrade_r84*.csv` | 18 (9 celle × 2 gemelli) | 🟢 **`ABTG_Nasdaq_Apertura_US`** — lo stesso EA | 🟠 **stesso EA e stesso simbolo, ALTRA cella** (§10.5) |
+| **R83** `risultati_archivio/r83_csv/pertrade_r83n*.csv` | 6 | 🔴 `ABTG_Apertura_3Ingressi` — **altro EA** | ❌ no |
+| **R109** `risultati_archivio/R109_deal_anomali/NASUSD_*_pertrade_singola.csv` | 2 | 🔴 magic **`774462`** — altro motore | ❌ no |
+
+🔴 **E il gemello `770211` (`Nasdaq Apertura US OTT`) non ha NESSUN per-trade**:
+nel repo compare in tre file soli (`report/VERIFICA_CHIUSURE_INCROCIATE_2026-09-03.md`,
+`report/PIANO_PROP.md`, `data/statements/trades_auto.csv`) e nel campo ha
+**3 posizioni** (03/08 +41,04 · 06/08 +15,30 · 10/08 −10,00). **Il confronto
+col gemello chiesto dal compito NON è eseguibile**, e non è stato inventato.
+
+## 10.3 🔴 IL FORWARD DELLA `770201` — perché non produce un p99, e non è «rumore»
+
+`data/statements/trades_auto.csv`, magic `770201`, **10 posizioni**, tutte
+NASUSD, dal **20/07/2026** all'**11/08/2026**:
+
+| # | data apertura | verso | volume | netto (profit+swap+commissioni) |
+|---:|---|---|---:|---:|
+| 1 | 2026.07.20 | buy | 1,10 | **+58,55** |
+| 2 | 2026.07.21 | sell | 1,30 | +28,58 |
+| 3 | 2026.07.29 | sell | 0,60 | +44,28 |
+| 4 | 2026.07.31 | sell | 0,80 | +2,93 |
+| 5 | 2026.08.03 | sell | 0,90 | +28,53 |
+| 6 | 2026.08.05 | sell | 1,70 | +16,78 |
+| 7 | 2026.08.06 | buy | 1,10 | +36,81 |
+| 8 | 2026.08.07 | sell | 0,10 | +0,19 |
+| 9 | 2026.08.10 | sell | 0,10 | +0,26 |
+| 10 | 2026.08.11 | sell | 0,20 | +11,43 |
+| | | | **somma** | **+228,34** |
+
+> ## 🔴 **ZERO posizioni in perdita. Il minimo della serie è +0,19.**
+> ## 👉 Quindi il **DD a posizioni chiuse è `0,000000%`** — verificato a deposito 100.000 **e** a deposito 10.000 — **e resta `0` per OGNI riordino possibile**, perché una somma di addendi tutti non-negativi non scende mai sotto il suo massimo.
+> ## 🔴 **Il p99 di questa serie è `0,0000%` PER COSTRUZIONE. Non è una stima ottimistica: è una DEGENERAZIONE.** Pubblicarlo come «p99 della sedia» sarebbe il numero più pericoloso di tutto il progetto: direbbe *«questa sedia non ha coda»*.
+
+⚠️ E va detto anche il resto: **commissioni e swap sono `0,00` su tutte e 10** le
+righe del registro, quindi nemmeno il costo entra in questa serie.
+
+*(Nota di archivio, senza giudizio: `LE_SEDIE_PER_LA_PROP_2026-09-18.md` cita
+per questa sedia **7 segnali · +98,49**, perché legge il report MT5 sulla
+finestra 29/07→18/09. `trades_auto.csv` ne conta **10 · +228,34** sulla finestra
+30/03→17/09. **I due insiemi non coincidono** — è il buco già dichiarato in
+quel referto. In nessuna delle due letture c'è una posizione in perdita, quindi
+**il DD è `0` in tutte e due** e la conclusione non cambia.)*
+
+## 10.4 🥇 LA SCOPERTA CHE VALE PIÙ DEL NUMERO MANCANTE — la cella viva **è** ricostruibile
+
+`backtest_pipeline/prove/R84a_base_NASUSD.txt` (r.16-18) e
+`prove/R84_ABLAZIONE_CRITERI.md` §4 dicono, in agosto:
+
+> *«NON è 'la sedia viva'. La sedia 770201 girava a 0,25% con un preset più
+> vecchio del sorgente … una configurazione **non più ricostruibile riga per
+> riga**».*
+
+🔴 **Quella frase è SUPERATA, e il file che la supera stava nel repo dal 12/08:**
+`backtest_pipeline/allinea_nasdaq_volumi.ps1` **scrive il preset completo della
+sedia viva — 80 parametri** — e dichiara di essere stato *«verificato riga per
+riga sugli screenshot del 12/08»*, con controprova meccanica dai `.chr`
+(`DIARIO.md`, riga del 2026-08-12). La nota di agosto guardava
+`mql5/Presets/ABTG_Nasdaq_Apertura_US.set` (il `.set` in repo, vecchio), **non
+il preset che è stato caricato sul grafico**.
+
+### 🔬 Il diff, calcolato parametro per parametro (80 confronti per cella)
+
+| cella R84 | differenze dal preset vivo | quali |
+|---|---:|---|
+| **A** (scheletro nudo) | **4** | `InpRiskPercent` 0,25→**1** · `InpUseVolumeFilter` true→**false** · `InpConfirmMode` 1→**0** · `InpVerbose` true→**false** |
+| **B** (volumi) | **3** | `InpRiskPercent` 0,25→**1** · `InpConfirmMode` 1→**0** · `InpVerbose` true→**false** |
+| **D** (volumi OR ATR) | **4** | come B, più `InpUseAtrFilter` false→**true** |
+
+### 🟢 E due di quelle differenze sono INERTI — **provato nel sorgente, non dedotto**
+
+`mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5`:
+
+```
+r.2405   if(!InpUseVolumeFilter && !InpUseAtrFilter) return(true);
+r.2406   if(InpUseVolumeFilter && !InpUseAtrFilter)  return(VolumeOK());
+r.2407   if(!InpUseVolumeFilter && InpUseAtrFilter)  return(AtrOK());
+r.2410   return((InpConfirmMode == ABTG_CONF_AND) ? (v && a) : (v || a));
+```
+👉 **`InpConfirmMode` viene letto SOLO alla r.2410, cioè solo quando i filtri
+accesi sono DUE.** Nella cella A (zero filtri) e nella cella B (un filtro)
+**non viene mai letto**: AND e OR sono la stessa cosa.
+
+```
+r.370    input bool InpVerbose = true;   // Stampa messaggi nel log
+r.437    if(InpVerbose) Print(...)       // dentro ABTGLog(), unica occorrenza
+```
+👉 **`InpVerbose` compare in due righe in tutto il file e la seconda è un
+`Print`.** Non tocca nessuna decisione.
+
+> ## 🟢 **Conclusione del diff: la cella R84-A e la configurazione viva della `770201` PRIMA del 12/08 differiscono per UN parametro che conta — la taglia di test (1% contro 0,25%) — più il timeframe del grafico (§10.5).** Ed è esattamente la stessa situazione già dichiarata in §3 per `770101` e `770611`.
+> ## 📌 **E c'è un dettaglio di cronologia che chiude il cerchio: le 10 operazioni del campo sono del 20/07→11/08, l'allineamento è del 12/08, lo spegnimento (FIRMA 5) del 18/08.** 👉 **La configurazione «volumi ON» non ha MAI operato in campo.** Le 10 posizioni sono della configurazione **senza filtri** = il ramo della cella **A**, non della **B**.
+
+## 10.5 🔴 MA IL TIMEFRAME DEL GRAFICO È PORTANTE — ed è per QUESTO che R84 non è la sedia
+
+`prove/R84a_base_NASUSD.txt` r.37: **`@PERIODO M15`**.
+La sedia viva girava su **NASUSD M5** (`allinea_nasdaq_volumi.ps1` r.12 e r.120:
+*«grafico NASUSD M5»*; `report/CENSIMENTO_SCARTATI_PROSA_2026-09-09.md` riga A3:
+TF **M5**).
+
+🔴 **E nel sorgente il TF del grafico decide, non decora:**
+
+| riga | cosa fa |
+|---|---|
+| **r.1422** | `ENUM_TIMEFRAMES btf = (ENUM_TIMEFRAMES)Period();` — commento nel codice: *«la candela di rottura sta sul TF del grafico»* |
+| **r.1316** | `octf = (InpOCTimeframe == PERIOD_CURRENT) ? Period() : InpOCTimeframe` — e il preset vivo ha **`InpOCTimeframe=0` = PERIOD_CURRENT** |
+| **r.2452** | `bool VolumeOK(){ return(VolumeOKtf(PERIOD_CURRENT)); }` — con il commento *«se si valuta l'apertura su M15, non ha senso misurare il volume su M5»* |
+| **r.450** | `gAtrH = iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt)` |
+
+👉 **Su M5 la candela di rottura è un'altra candela.** Non è una sfumatura: è
+il segnale.
+
+> ## 🔴 **Quindi la conclusione di agosto («R84 non è la sedia viva») RESTA VALIDA — ma per un motivo diverso e molto più preciso di quello che c'era scritto.** Non perché la config sia irrecuperabile: **è recuperabile**. È perché **R84 l'ha girata sul timeframe sbagliato**, e la taglia di test è 4× quella viva.
+> ## 🟢 **E questa è una buona notizia travestita: un difetto NOTO e a UNA variabile si ripara con una corsa. Un «non ricostruibile» no.**
+
+## 10.6 📊 LA TABELLA — **della FAMIGLIA a M15, NON della sedia `770201`**
+
+Il numero c'è, e si dichiara **di chi è**. Nove celle di R84, stesso EA, stesso
+simbolo, stessa finestra OOS (**2025.06.10 → 2026.06.29**), **tick reali
+(modello 4)**, **deposito 10.000**, **`InpRiskPercent=1`**, **grafico M15**,
+`InpOneTradePerDay=true`. **20.000 riordini iid · modello moltiplicativo · seed
+20260918 · DD a posizioni chiuse. Tutti i gradini, non solo i favorevoli.**
+
+| cella R84 | n pos | **osservato** | mediana | P90 | **P95** | **P99** | max | **P95/oss** | P99/oss |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| **A** scheletro nudo 🎯 | **241** | **16,6531** | 13,2069 | 16,6403 | **17,7241** | **19,7437** | 24,5503 | **1,064** | 1,186 |
+| **B** volumi | 75 | 3,9943 | 5,2690 | 7,1690 | 7,7574 | 8,9438 | 11,5867 | 1,942 | 2,239 |
+| **C** ATR | 151 | 5,9898 | 7,4682 | 10,1033 | 10,9533 | 12,4601 | 15,4554 | 1,829 | 2,080 |
+| **D** volumi OR ATR | 169 | 6,1868 | 8,7020 | 11,6309 | 12,4955 | 14,1569 | 19,2599 | 2,020 | 2,288 |
+| **E** EMA 14/200 | 174 | 15,5794 | 16,7389 | 19,1497 | 19,8956 | 21,3372 | 26,4740 | 1,277 | 1,370 |
+| **F** Supertrend | 181 | 10,6233 | 12,9921 | 16,0742 | 17,0162 | 18,8464 | 23,9891 | 1,602 | 1,774 |
+| **G** Supertrend ×3 | 145 | 12,4788 | 12,7542 | 15,3097 | 16,1194 | 17,5797 | 22,0001 | 1,292 | 1,409 |
+| **H** correlazione SPXUSD | 177 | 9,9555 | 10,9162 | 13,8959 | 14,8491 | 16,6142 | 19,9697 | 1,492 | 1,669 |
+| **I** metodo completo | 60 | 8,6606 | 5,6737 | 7,4420 | 7,9576 | 8,8827 | 10,5023 | 0,919 | 1,026 |
+
+🎯 **La cella A è quella da guardare**: è il ramo «nessun filtro», lo stesso
+della configurazione che ha prodotto le 10 operazioni del campo (§10.4).
+
+> ## 🔴 **E IL CONTRO-ESEMPIO PIÙ DURO STA DENTRO QUESTA TABELLA STESSA: il P99 della STESSA famiglia, sulla STESSA finestra, con lo STESSO simbolo, va da 8,88 (cella I) a 21,34 (cella E). Un fattore 2,40.**
+> ## 👉 **Il p99 NON è una proprietà del MOTORE: è una proprietà della CELLA.** Quindi **nessuna** di queste nove righe può essere prestata alla `770201`, che è una decima cella su un decimo timeframe. Chi lo facesse starebbe scegliendo un numero fra 8,88 e 21,34 — cioè scegliendolo, non misurandolo.
+
+### ✅ La verifica che viene prima, e qui esce 9 su 9
+
+Come in §2, ogni per-trade è stato abbinato alla sua riga di tester facendo
+combaciare **Profit totale E numero di Trades** su **62.237 righe indicizzate**.
+
+- **Residuo di abbinamento sul Profit: `0,00` su tutte e nove.**
+- 🥇 **E la `Peggior Giornata %` è riprodotta ESATTAMENTE a 4 decimali su tutte
+  e nove** (A −1,0454 · B −1,0262 · C −1,0407 · D −1,0605 · E −1,1874 ·
+  F −1,0460 · G −1,0629 · H −1,1792 · I −1,0267). §2.3 ne aveva **due**: adesso
+  sono **undici**. La convenzione di giornata e l'aggregazione deal→posizione
+  **non sono più un'ipotesi**.
+- **Deposito dedotto: 10.000 su tutte e nove**, e coincide con quello dichiarato
+  in `r84_csv/REFERTO_RACCOLTA_R84.txt` (*«deposito: 10000 modello: 4»*).
+- 🟢 **Canarino gratis**: la riga di tester della cella A è stata trovata in
+  **due file che concordano** — `r84_csv/..._OOS_r84a.csv` e
+  `r83_csv/ABTG_Apertura_3Ingressi_NASUSD_OOS_r83n0.csv` — con **Profit
+  −795,03 · PF 0,87315 · DD 17,0700 · Trades 291 identici**. Due EA diversi,
+  stesso risultato al centesimo.
+- ⚠️ **Lo scarto resta nel verso noto** (§2.2): il mio DD a posizioni chiuse è
+  **sotto** l'`Equity DD %` del tester in **9 casi su 9**, da **−0,49%**
+  (cella E) a **−13,02%** (cella B). **I livelli assoluti sono sottostime, i
+  rapporti no.**
+
+## 10.7 🔬 AUTOCORRELAZIONE E PERMUTAZIONE A BLOCCHI — in quale verso sbaglia la stima
+
+| cella | **ACF lag 1** | lag 2 | lag 3 | lag 4 | lag 5 | corsa perd. max | P95 **blocchi** | P95 iid | **verso dell'errore iid** |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| **A** 🎯 | **+0,0236** | +0,0892 | −0,0683 | +0,0928 | +0,0028 | 4 | **18,1862** | 17,7241 | 🔴 **SOTTOSTIMA del 2,6%** |
+| B | −0,2423 | +0,2645 | −0,2248 | −0,0184 | +0,0061 | 3 | 6,6619 | 7,7574 | 🟢 sovrastima del 16,4% |
+| C | −0,0949 | +0,0314 | −0,0124 | +0,1035 | −0,0968 | 3 | 10,1072 | 10,9533 | 🟢 sovrastima dell'8,4% |
+| D | −0,1616 | +0,1314 | −0,0803 | +0,0851 | −0,0099 | 3 | 12,0519 | 12,4955 | 🟢 sovrastima del 3,7% |
+| E | +0,0837 | +0,0359 | −0,0055 | −0,0743 | −0,0210 | 7 | 20,1059 | 19,8956 | 🔴 sottostima dell'1,1% |
+| F | +0,0871 | −0,0077 | −0,0467 | −0,1329 | −0,0719 | 6 | 16,4033 | 17,0162 | 🟢 sovrastima del 3,7% |
+| G | +0,0876 | −0,0782 | −0,1633 | −0,1158 | −0,0668 | 3 | 16,0895 | 16,1194 | 🟢 sovrastima dello 0,2% |
+| H | +0,0692 | +0,0649 | +0,0246 | +0,0143 | −0,0526 | 7 | 16,0151 | 14,8491 | 🔴 **SOTTOSTIMA del 7,9%** |
+| I | +0,0515 | +0,0591 | +0,2025 | +0,1572 | −0,0783 | 5 | 8,6219 | 7,9576 | 🔴 **SOTTOSTIMA del 8,3%** |
+
+🎯 **Per la cella A**: `ACF lag 1 = +0,0236`, cioè **grappoli quasi assenti** —
+un ordine di grandezza sotto `EMA200` (+0,2844) e `SuperWave` (+0,4540) di §6.1.
+👉 **Il verso dell'errore iid è comunque SOTTOSTIMA**, quindi **il numero da
+citare per la cella A è quello a blocchi: P95 `18,1862` · P99 `20,2359` ·
+peggiore su 20.000 `24,7577`**, non quello iid.
+
+⚠️ **E la stessa regola di §6.2 vale qui**: la permutazione a blocchi conserva
+il multinsieme (ogni operazione compare una volta e una sola, `assert` nello
+script madre). **Non è un bootstrap.**
+
+## 10.8 🟢 IL MURO GIORNALIERO DEL 5% — l'unica cosa che **si trasferisce** alla sedia viva
+
+| cella | pegg. giornata **vera** = **P95 = P99 = peggiore su 20.000** | quota riordini ≤ −5% | pos/giorno |
+|---|---:|---:|---:|
+| **A** 🎯 | **−1,0454** | **0,0000%** | **1,00** |
+| B | −1,0262 | 0,0000% | 1,00 |
+| C | −1,0407 | 0,0000% | 1,00 |
+| D | −1,0605 | 0,0000% | 1,00 |
+| E | −1,1874 | 0,0000% | 1,00 |
+| F | −1,0460 | 0,0000% | 1,00 |
+| G | −1,0629 | 0,0000% | 1,00 |
+| H | −1,1792 | 0,0000% | 1,00 |
+| I | −1,0267 | 0,0000% | 1,00 |
+
+### 🥇 **Su tutte e nove la peggior giornata è INVARIANTE al riordino, ed è la stessa scoperta strutturale di §7.1**
+`InpOneTradePerDay=true` → **1,00 posizione per giornata su tutte e nove le
+celle** → **la peggior giornata È la peggior operazione**, e riordinare non la
+cambia (invarianza **esatta** nel modello moltiplicativo).
+
+> ## 🟢 **E questo pezzo SI TRASFERISCE alla sedia viva, perché non dipende dalla cella né dal timeframe: dipende da un interruttore.** `InpOneTradePerDay=true` è **nel preset vivo** (`allinea_nasdaq_volumi.ps1`), e il campo lo conferma: **le 10 posizioni cadono in 10 giornate DISTINTE**.
+> ## 👉 **Sul muro GIORNALIERO, per `770201`, l'obiezione del riordino è VUOTA**: qualunque sia il p99, la peggior giornata resta la peggior singola operazione.
+
+🔴 **Con tre limiti, gli stessi di §4.2**: non c'è il flottante
+infragiornaliero, non c'è il calendario vero, e **ogni sedia è misurata da
+sola** mentre il muro della prop è sul **conto**. Il verso dell'errore è
+**ottimista**.
+
+## 10.9 🟠 IL MURO TOTALE DEL 10% — a `InpRiskPercent=1`, su M15, per cella
+
+| cella | DD osservato | **quota riordini iid ≥ 10%** | **quota permutazioni a blocchi ≥ 10%** |
+|---|---:|---:|---:|
+| 🔴 **E** EMA | 15,5794 | **100,0000%** | **100,0000%** |
+| 🔴 **G** ST×3 | 12,4788 | 98,6250% | 98,8400% |
+| 🔴 **F** Supertrend | 10,6233 | 95,3900% | 95,1050% |
+| 🔴 **A** 🎯 nudo | **16,6531** | **93,5900%** | **94,8100%** |
+| 🔴 **H** correlazione | 9,9555 | 66,7050% | 80,1450% |
+| 🟠 **D** vol OR ATR | 6,1868 | 27,4500% | 23,3900% |
+| 🟠 **C** ATR | 5,9898 | 10,8100% | 5,5250% |
+| 🟢 **B** volumi | 3,9943 | 0,1600% | 0,0000% |
+| 🟢 **I** completo | 8,6606 | 0,0550% | 0,1550% |
+
+🔴 **Il numero va letto con la sua etichetta**: queste sono celle **OOS-negative**
+(PF da 0,681 a 0,972 — `REFERTO_ROUND84_ABLAZIONE.md` §tabella). Una cella che
+perde produce un DD che cresce col campione **per deriva**, non per coda.
+**Non è la sedia viva e non va citato come suo.**
+
+## 10.10 🧪 I CONTRO-ESEMPI — costruiti per rompere quello che ho appena scritto
+
+### ① ✅ Il wrapper ha cambiato il metodo? — **NO, e lo dimostra da solo**
+Prima di qualunque numero nuovo, `dd_riordino_nasdaq.py` **rimisura la riga 1
+della tabella di §5** e la confronta con quello che è già pubblicato:
+
+| grandezza | ricalcolato oggi | pubblicato in §5 | esito |
+|---|---:|---:|---|
+| n posizioni | **96** | 96 | ✅ COINCIDE |
+| DD osservato | **4,2235** | 4,2235 | ✅ COINCIDE |
+| P95 | **8,2421** | 8,2421 | ✅ COINCIDE |
+| P99 | **9,7253** | 9,7253 | ✅ COINCIDE |
+| P95/osservato | **1,952** | 1,952 | ✅ COINCIDE |
+
+🟢 **PASS.** Il metodo è lo stesso: le funzioni sono **importate**, non copiate.
+
+### ② 🔴 «Con quante operazioni il p99 diventa stabile?» — **NON si stabilizza**, e il verso è chiaro
+
+Cella A, stessa serie, prefissi crescenti:
+
+| prime n posizioni | osservato | P99 iid | P99 blocchi |
+|---:|---:|---:|---:|
+| 50 | 3,0758 | **5,6932** | 5,3845 |
+| 75 | 3,8085 | 8,3008 | 8,2174 |
+| 100 | 6,4171 | 10,4230 | 10,6068 |
+| 125 | 6,4171 | 10,4868 | 10,8318 |
+| 150 | 6,4171 | 10,3879 | 11,2066 |
+| 175 | 6,4171 | 12,0901 | 13,1012 |
+| 200 | 8,4513 | 14,0016 | 15,1088 |
+| 225 | 12,5244 | 16,5799 | 17,1857 |
+| **241** | **16,6531** | **19,7437** | **20,2359** |
+
+🔴 **Il P99 CRESCE in modo monotono col campione: ×3,5 da n=50 a n=241.**
+
+### ③ 🔨 «È solo la deriva negativa della cella A, che perde?» — **il contro-esempio al mio contro-esempio: NO**
+
+Se la crescita fosse un artefatto della cella perdente (PF 0,873), su una cella
+**positiva** non dovrebbe vedersi. Rifatto su **Dow `770206`, PF 1,27013**:
+
+| prime n posizioni | osservato | P99 iid |
+|---:|---:|---:|
+| 50 | 4,2235 | **6,4112** |
+| 60 | 4,2235 | 8,4102 |
+| 70 | 4,2235 | 8,8482 |
+| 80 | 4,2235 | 9,0577 |
+| **96** | 4,2235 | **9,7253** |
+
+🔴 **Cresce anche lì: +51,7% da n=50 a n=96, con il DD osservato FERMO a 4,2235.**
+👉 **La crescita non è la deriva: è la lunghezza del percorso.** Il massimo
+drawdown è una statistica **di estremo**, e l'estremo di un cammino lungo è più
+grande dell'estremo di un cammino corto.
+
+> ## 🔴 **CONSEGUENZA CHE TOCCA ANCHE LA TABELLA DI §5, e va detta: le sei righe hanno n da 50 a 257. Confrontare il loro P99 significa confrontare ORIZZONTI diversi, non solo sedie diverse.** Non riapre nessun verdetto — §5 resta com'è — **ma chi usa quei numeri deve sapere che il P99 va letto insieme al suo n.**
+
+### ④ 🔴 «Regge su metà campione?» — **NO, si sposta di 1,5×**
+
+| pezzo | n | osservato | P95 iid | **P99 iid** | P95 blocchi | P99 blocchi | ACF lag 1 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| **intero** | 241 | 16,6531 | 17,7241 | **19,7437** | 18,1862 | 20,2359 | +0,0236 |
+| **prima metà** | 120 | 6,4171 | 9,5133 | **10,9709** | 9,7476 | 11,3126 | −0,0923 |
+| **seconda metà** | 121 | 16,8864 | 15,1124 | **16,4642** | 15,8311 | 17,0648 | +0,1198 |
+
+🔴 **Fra le due metà il P99 passa da 10,97 a 16,46: un fattore 1,50.**
+👉 **Anche se avessimo il per-trade giusto, con ~120 operazioni il P99 NON
+sarebbe un numero stabile abbastanza da dimensionare.** Serve il campione
+pieno, e va detto prima di spendere le passate.
+
+### ⑤ 🎲 «È rumore del generatore?» — **NO**
+Tre seed (20260918 · 101 · 202) su 10.000 riordini, cella A:
+P95 **17,7828 · 17,6599 · 17,6381** (banda ±0,4%) · P99 **19,6320 · 19,6248 ·
+19,5481** (±0,2%) · P99 blocchi **20,2137 · 20,0774 · 20,0236**.
+🟢 **L'errore Monte Carlo è sotto mezzo punto percentuale**: le differenze fra
+celle (8,88 → 21,34) sono **reali**.
+
+### ⑥ ❌ «Il gemello `770211` conferma?» — **non misurabile**
+**3 posizioni in campo, zero per-trade di backtest.** Il confronto chiesto dal
+compito **non è eseguibile**, e non è stato sostituito con una stima. Al suo
+posto ho usato il confronto **fra le nove celle della stessa famiglia** (§10.6),
+che dice la stessa cosa in modo più severo: **il numero cambia di 2,40× fra
+celle dello stesso motore**.
+
+## 10.11 🎯 IL ROUND CHE PRODURREBBE IL NUMERO — e quanto costa in passate
+
+Tutto quello che serve **esiste già in repo**. La corsa che manca è **UNA**, ed
+è definita riga per riga:
+
+| | |
+|---|---|
+| **EA** | `ABTG_Nasdaq_Apertura_US` — quello vivo, **nessuna riga di codice da toccare** |
+| **simbolo** | **NASUSD** |
+| **@PERIODO** | 🔴 **M5** (è l'unica differenza strutturale da R84 — §10.5) |
+| **parametri** | gli **80** di `backtest_pipeline/allinea_nasdaq_volumi.ps1`, **copiati esatti** (⚠️ regola di casa: il progetto ha già pagato due volte un parametro copiato a memoria) |
+| **modello** | **4 = tick reali** (R84 ha già dimostrato che su NASUSD si può: `REFERTO_RACCOLTA_R84.txt` *«modello: 4»*) |
+| **finestra** | la stessa di R84 (`@DAQUANDO 2024.09.26`, fino a fine giugno 2026) così i numeri **si appoggiano** su quelli già misurati |
+| **raccolta** | 🔴 **per-trade su ENTRAMBE le finestre** — R84 raccolse *«solo finestra OOS»*, e con 241 posizioni OOS il §10.10④ dice che non bastano |
+
+### 💰 Il costo, dichiarato come STIMA con la sua base
+- **4 passate**: 1 cella × **2 magic gemelli** (il canarino di R84, che smaschera
+  le cache del tester) × **2 finestre** (IS e OOS).
+- **Se si vuole anche la configurazione post-12/08** (volumi ON = ramo cella B):
+  **8 passate**. 🔴 **Ma quella configurazione non ha mai operato in campo**
+  (§10.4), quindi **per dare un tetto alle 10 operazioni vere serve solo la
+  prima**.
+- ⏱️ **Tempo: STIMA, non misura.** La base è il canarino di R84
+  (`R84_ABLAZIONE_CRITERI.md` §7: *«20-60 min»* per **una cella a M15**). Su
+  **M5** le barre sono **3×**, quindi la stima onesta è **1-3 ore per cella**.
+  **Va rimisurata col canarino prima di dimensionare il `-TimeoutMin`**
+  (difetto n.19 della checklist: un timeout più corto della stima ammazza MT5 a
+  metà e **esce 0**).
+- ⚠️ **Vincolo del tester da rispettare**: il tetto delle ~100.000 barre limita
+  **M5 a ~1,3 anni per corsa**. La finestra OOS di R84 (2025.06.10→2026.06.29,
+  **~12,6 mesi**) ci sta; la finestra intera **no** e va spezzata, dichiarandolo.
+- 🔴 **`InpRiskPercent` della PROVA**: per essere confrontabile con le sei righe
+  di §5 la corsa va girata **all'1%**, che è un parametro **della prova**.
+  **Non è una proposta di taglia operativa**: le taglie le firma Claudio.
+
+🚦 **E prima di partire vale il cancello**: file criteri congelato PRIMA dei
+numeri, `controlla_prova.py`, agente `controllo-preventivo`, riga di lancio
+passata da `CHECKLIST_RIGA_DI_LANCIO.md`. **Qui non è stata preparata nessuna
+riga di lancio**: questo addendum è una misura, non un round.
+
+## 10.12 🕳️ BUCHI DICHIARATI DI QUESTO ADDENDUM
+
+1. 🔴 **Il p99 di `770201` NON c'è.** Non è stato stimato, non è stato
+   interpolato, non è stato preso in prestito da una cella vicina.
+2. 🔴 **Il forward non può produrlo**: 10 posizioni, **zero perdite**, DD
+   identicamente `0`. E vale per tutte e due le letture del campo (10 e 7).
+3. 🔴 **Il gemello `770211` non è misurabile**: 3 posizioni, nessun per-trade.
+4. 🔴 **Le nove righe di §10.6 sono di R84, a M15 e all'1%**, non della sedia
+   viva a M5 e allo 0,25%. **Il timeframe del grafico è portante** (§10.5).
+5. 🔴 **Sono tutte celle OOS-NEGATIVE** (PF 0,681→0,972). Servono a misurare la
+   **forma della coda**, non il merito di niente.
+6. 🔴 **Il mio DD resta una sottostima dell'`Equity DD %`** del tester (−0,49%
+   → −13,02% su nove celle): **non vedo il flottante infragiornaliero**.
+7. 🔴 **Il P99 dipende dall'ORIZZONTE** (§10.10②③) — e questo tocca anche la
+   tabella di §5, dove gli n vanno da 50 a 257.
+8. 🔴 **Ogni cella è misurata DA SOLA**: il muro giornaliero della prop è sul
+   **conto**, con tutte le sedie insieme.
+9. ⚠️ **La configurazione viva la conosco da uno SCRIPT che la scrive**
+   (`allinea_nasdaq_volumi.ps1`, verificato su screenshot e `.chr` il 12/08),
+   **non da un `.chr` letto oggi**. È la miglior prova in repo, **non è una
+   lettura diretta del terminale**. Un controllo di sola lettura sul VPS
+   (`50503392`, cartella `BCM Markets MT5 Terminal`) la chiuderebbe — **ma la
+   sedia è spenta dal 18/08**, quindi il `.chr` potrebbe non esistere più.
+10. ⚪ **Non coperto**: spread, slippage, requote, rifiuti, commissioni, swap ed
+    esecuzione della prop vera. Come tutto questo referto, **qui si misura solo
+    l'effetto dell'ORDINE**, a costi invariati.
