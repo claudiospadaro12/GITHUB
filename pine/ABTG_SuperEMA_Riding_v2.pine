@@ -417,7 +417,7 @@ extraS = (not fEma200 or close < emaDeep) and (not fSTcorde or trendST == -1) an
 
 candL0 = confL and extraL
 candS0 = confS and extraS
-// due versi sulla stessa barra = whipsaw: si TACE, non si scegle a caso
+// due versi sulla stessa barra = whipsaw: si TACE, non si sceglie a caso
 candL = candL0 and not candS0
 candS = candS0 and not candL0
 
