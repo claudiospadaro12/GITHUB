@@ -24095,3 +24095,125 @@ togliendo INFORMAZIONE?**
 🔎 **Corollario**: quando una riga aggregata mostra **piu' di un simbolo** o **piu' di
 un motore** dove te ne aspetti uno, **non e' una curiosita': e' il sintomo.** Si sospende
 il numero e si va a vedere, come si e' fatto qui.
+
+---
+
+## 🦵🎯 CLASSE 427 — IL RISCHIO REALIZZATO MISURATO SULLE **GAMBE** INVECE CHE SUI **SEGNALI**: tre delle quattro "perdite" sono gambe di segnali chiusi **in UTILE**, e la `n` scende da 4 a 1 (18/09/2026)
+
+**Il caso.** In `report/LE_TAGLIE_NON_SONO_LOTTI_2026-09-18.md` il rischio realizzato di
+`770511` (SuperWave DOW) e' dato come **~0,13% su n=4**, filtrando il CSV per
+`magic==770511 AND profit<0`. Ma `770511` apre **due gambe per segnale** (coppie con
+`open_time` allo stesso secondo: 0,10+0,20, 0,10+0,30, 0,10+0,60). Delle quattro gambe
+negative, **tre appartengono a segnali che hanno chiuso in UTILE**:
+
+| segnale | gambe | netto del segnale |
+|---|---|---:|
+| 2026.07.27 08:00:00 | +11,57 / **-1,12** | **+10,45** |
+| 2026.07.31 04:00:00 | +9,45 / **-4,86** | **+4,59** |
+| 2026.09.03 17:00:00 | **-8,48 / -8,49** | **-16,97** |
+
+➡️ **I segnali perdenti sono UNO, non quattro**, e vale **0,332%** del saldo (16,97 su
+5.110,01), non 0,13%. Il numero pubblicato e' **2,5 volte piu' piccolo** del vero e ha
+**n=1**, non n=4.
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **La stessa identica trappola era gia' stata pagata LO STESSO GIORNO**, e l'aveva
+   vista **Claudio**: `report/LE_SEDIE_PER_LA_PROP_2026-09-18.md` r.76 e r.102 — *«`770511`
+   ha n = 5 SEGNALI, non 10»*. Il referto delle taglie ha ripetuto l'errore **nella colonna
+   del rischio**, dove nessuno lo cercava perche' la lezione era stata archiviata come
+   "lezione sul conteggio delle vittorie".
+2. 🔴 **Il filtro `profit<0` non seleziona le perdite: seleziona le gambe negative.** Su un
+   EA che chiude a scaglioni (`InpTP1_ClosePct`, `InpUsePending`) una gamba negativa e' un
+   evento NORMALE dentro un segnale vincente.
+3. ⚠️ **E sbaglia nei due versi**: sul DAX `770101` lo stesso difetto sottostima **al
+   contrario** — due posizioni da 1,60 aperte allo stesso secondo (29/07 08:53:56) chiudono
+   a -115,04 e -120,80, cioe' **-235,84 = 3,91% del saldo su UN segnale**, mentre la tabella
+   le presenta come due eventi indipendenti da ~2%.
+
+### ✅ LA REGOLA
+📐 **Il rischio si misura per SEGNALE, e il segnale si ricostruisce raggruppando per
+`(magic, symbol, open_time` al secondo, con tolleranza di pochi secondi`)` — non per riga
+del CSV.** Prima di pubblicare un "rischio realizzato":
+- si stampa **quante posizioni per segnale** ha prodotto quella sedia (se e' sempre 1, lo si
+  dice: e' un'informazione, non un'ovvieta');
+- si somma il netto del **segnale**, poi lo si divide per il saldo;
+- si dichiara la `n` **in segnali**, e se e' diversa dal numero di righe si scrivono tutte e due.
+🚨 **Campanello**: `open_time` identici o a 1-2 secondi di distanza sullo stesso magic. Se
+ci sono, il conto per riga e' gia' sbagliato.
+
+---
+
+## 🧮⏱️ CLASSE 428 — LA RICOSTRUZIONE CUMULATIVA A RITROSO CHE DIPENDE DALL'**ORDINE DEI PARI-TIMESTAMP**: due righe della stessa tabella usano basi diverse, e la differenza e' esattamente il trade GEMELLO (18/09/2026)
+
+**Il caso.** Stesso referto, §3: il saldo al momento di ogni stop di `770101` e' ricostruito
+partendo dall'ancora (5.129,30 EUR al 2026.09.09 09:04) e risalendo col cumulato di
+`profit+commission+swap`. Sei righe su sette si riproducono al centesimo. **La settima no**:
+
+| chiusura | saldo nel referto | saldo riprodotto | differenza |
+|---|---:|---:|---:|
+| 2026.08.06 09:11:49 | **5.484,63** | **5.381,67** | **+102,96** |
+
+🔴 **102,96 e' esattamente la perdita del trade GEMELLO** `770311` (`Apertura Marco`), che
+chiude **nello stesso secondo, stesso simbolo, stesso volume 0,90** (documentato in
+`report/A1_A4_rischio_immediato.md` §A1: due EA identici su 64 parametri). La riga del 06/08
+tratta il gemello come "non ancora chiuso", la riga del 29/07 13:01:26 — **situazione
+identica, stesso gemello** — lo tratta come "gia' chiuso". Le due righe non usano la stessa
+base, e a decidere e' stato **l'ordine delle righe nel CSV**, non una scelta.
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **Nessun totale esplode**: il cumulato e' giusto in tutti e due i casi. Il difetto si
+   vede **solo** riproducendo il conto riga per riga.
+2. 🔴 **Colpisce proprio le giornate che contano**: i pari-timestamp nascono quando **piu'
+   sedie sparano sullo stesso segnale**, cioe' nei giorni di rischio massimo.
+3. ⚠️ **La base era comunque quella sbagliata.** Il dimensionatore legge
+   `AccountInfoDouble(ACCOUNT_BALANCE)` **all'APERTURA** (`ABTG_DAX_Apertura_EU.mq5` r.1794-1795,
+   `ABTG_SuperWave.mq5` r.526, `ABTG_MaxMinNotte.mq5` r.733, `ABTG_Nasdaq_Apertura_US.mq5`
+   r.2032). Ricostruire il saldo alla **CHIUSURA** misura un'altra cosa — e sul campione dei
+   sette stop cambia la banda: **1,88-2,26%** a chiusura contro **1,82-2,02%** all'apertura.
+
+### ✅ LA REGOLA
+📐 **Una ricostruzione a ritroso si ancora a un TIMESTAMP e a un CRITERIO DI PARITÀ
+DICHIARATI**: `>` o `>=` sul secondo, scritto nel referto. E l'istante giusto e' **quello in
+cui il numero viene LETTO dal codice** (per una taglia: l'apertura), non quello in cui fa
+comodo.
+🧪 **Il controllo che lo prende, e costa due righe**: stampare quanti trade condividono il
+secondo di chiusura con ciascuna riga della tabella. Se il conteggio non e' zero, la riga va
+rifatta a mano. 👉 **E se cambiare `>` in `>=` sposta un numero, quel numero non era una
+misura: era un artefatto di ordinamento.**
+
+---
+
+## ✍️🏷️ CLASSE 429 — IL VINCOLO **FIRMATO** CITATO DAL **COMMENTO DI UN ALTRO EA** INVECE CHE DAL VERBALE DI FIRMA — e in repo esiste un SECONDO «A4» che è tutt'altra cosa (18/09/2026)
+
+**Il caso.** Stesso referto, §4(b): il preset del Nasdaq a `InpRiskPercent=2.0` viene
+giudicato *«sopra il tetto A4 **citato nel sorgente del DAX**»*. La citazione e' un
+**commento** dentro `ABTG_DAX_Apertura_EU.mq5` r.313 — cioe' un vincolo di UNA sedia usato
+per giudicarne **un'altra**.
+
+🟢 **La conclusione regge**, ma per una ragione che nel referto non c'e': A4 e' una **firma**
+— *«nessuna sedia sopra l'1% sul conto piccolo, mai»*, FIRMA 4 del 18/08/2026
+(`report/PIANO_PROP.md` r.1072 e r.2502, verbale `report/FIRME_2026-08-18.md`). Vale per
+tutte le sedie del piccolo, Nasdaq compreso.
+🔴 **E la citazione debole nasconde due cose**: (a) il sorgente del Nasdaq dice **l'opposto**
+— r.260 *«Rischio per trade in % (piano: max 2%)»* con `ABTG_DEF_RISK = 2.0` (r.47): un
+lettore che apre il file trova il permesso, non il divieto; (b) **in repo esistono DUE «A4»**
+— il tetto di rischio firmato, e la **guardia «ho gia' operato oggi»** di
+`report/A1_A4_rischio_immediato.md`, che non c'entra niente col rischio per trade.
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **Un commento nel codice non e' una fonte normativa**: puo' essere vecchio, puo' essere
+   copiato, e **non si applica fuori dal file in cui sta**. Qui era pure giusto — la prossima
+   volta non lo sara'.
+2. 🔴 **La SIGLA senza il documento e' ambigua per costruzione.** Due «A4» in repo vuol dire
+   che chi legge ha il 50% di probabilita' di andare a controllare la cosa sbagliata.
+3. ⚠️ **E lo SCOPO va citato insieme al numero**: A4 e' firmata **sul conto piccolo in
+   forward**. Un referto che prepara una challenge prop sta parlando di un altro conto, e
+   quel salto va dichiarato, non sottinteso.
+
+### ✅ LA REGOLA
+📐 **Un vincolo firmato si cita dal VERBALE (documento + riga + data della firma), mai da un
+commento nel sorgente**, e si scrive per esteso **a chi si applica**: sedia, conto, finestra.
+Formula di casa: *«A4 (FIRMA 4, 18/08/2026, `report/PIANO_PROP.md` r.1072): nessuna sedia
+sopra l'1% **sul conto piccolo in forward**»*.
+🔎 **E prima di usare una sigla, `grep` della sigla in `report/`**: se torna piu' di un
+significato, la sigla da sola e' vietata.
