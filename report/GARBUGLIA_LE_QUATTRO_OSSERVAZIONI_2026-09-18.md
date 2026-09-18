@@ -15,6 +15,36 @@
 🔴 **Il documento NON era mai entrato nel progetto**: cercato repo-wide il 18/09,
 zero file col suo nome e **zero referti che lo citano**. È rimasto fuori **cinque giorni**.
 
+> ### ✏️ CORREZIONE ALLA PRIMA STESURA DI QUESTO REFERTO (stesso giorno, poche ore dopo)
+> La prima stesura presentava Garbuglia come **una voce esterna**. 🔴 **È un COLLEGA, e lo
+> scambio è in corso da almeno il 06/09** — verificato aprendo il repo:
+>
+> | data | cosa | dove |
+> |---|---|---|
+> | **06/09** | leggiamo il suo `PS5 ORB BOT — DOCUMENTO MASTER` | `report/ANALISI_STUDIO_PS5_ORB_2026-09-06.md` r.4 |
+> | **10/09** | un round nostro **nasce dal suo documento** | `report/ROUND_ORB_ATR_PS5_2026-09-10.md` r.3 · `caccia_strategie/PS5_ORB_MASTER_LETTURA_2026-09-10.md` |
+> | **11/09** | gli mandiamo il dossier di metodo — commit `aea15389`: *«Dossier metodologico in PDF **per il Claude Code di un collega**»* | `report/DOSSIER_METODO_ABTG_2026-09-11.pdf` |
+> | **13/09** | ⬅️ **questo documento è la sua risposta** | qui |
+>
+> 👉 **Quindi non è una recensione da fuori: è il quarto giro di uno scambio fra il
+> nostro Claude Code e il suo**, e le sue osservazioni usano il nostro metodo perché
+> gliel'abbiamo dato noi due giorni prima. È esattamente ciò che il suo documento
+> dichiara di aver fatto: *«applicando il vostro §5.3 al mio stesso documento»*.
+> ⚠️ **Resta vero che il PDF non era entrato**, ed è quello che va corretto nel flusso.
+
+### 🔴 E IL BUCO PIÙ GRANDE NON È QUESTO PDF: È QUELLO CHE IL PDF CITA
+
+Nel testo nomina, come **già mandato** la mattina del 13/09:
+- 📊 **gli ingressi del suo Monte Carlo** (*«sono fra i dati che vi ho mandato
+  stamattina; se vi servono anche i riordini, sono un pomeriggio di lavoro»*);
+- 📏 le **17 misure di ingresso e 15 di uscita** dello slippage;
+- 📄 il **documento di metodo suo** a cui la premessa fa la rettifica.
+
+🔴 **Cercati in repo: NON CI SONO.** In `docs/` esiste solo la cartella `garbuglia/`
+creata oggi. 👉 **Quindi i dati che varrebbero di più — i riordini Monte Carlo per il
+punto 4 e le misure di slippage — sono a una richiesta di distanza, e la richiesta non
+è mai partita.**
+
 ---
 
 ## 1. 💰 IL CANCELLO DI COSTO È IN DUE UNITÀ DIVERSE — e il difetto è NOSTRO, verificato
