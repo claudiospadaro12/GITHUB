@@ -42,9 +42,40 @@ La mail dichiara il limite giornaliero a **$4.000 = 4%**.
 | prodotto | limite giornaliero | fonte |
 |---|---|---|
 | **FundedNext Stellar 2-Step** | **5%** dell'iniziale, reset 00:00 server | `report/REGOLAMENTI_PROP_2026-09-08.md` § *MURO GIORNALIERO*, con link all'help ufficiale |
-| 🔴 **Stellar LITE** (il conto vero) | **[MAI VERIFICATO]** | `report/ROSA_OTTOBRE_2026-09-18.md` **r.347** lo elencava, **stamattina**, fra le cose ancora da fare |
+| ✅ **Stellar LITE** (il conto vero) | **4%** — **[VERIFICATO DA CLAUDIO sul suo account, 18/09]** | era `[MAI VERIFICATO]`: `report/ROSA_OTTOBRE_2026-09-18.md` **r.347** lo elencava **stamattina** fra le cose da fare. Ora è chiuso |
 
-> ### 🔴 **A 5% NON ci sarebbe stato breach: 4.209,43 < 5.000,00. Tutto dipende da un numero che non abbiamo mai letto sul sito del prodotto giusto.**
+> ### ✅ **CHIUSO IL 18/09: Claudio ha verificato sul suo account. Il limite del Lite è davvero il 4%.**
+> ### 🔴 **Quindi IL BREACH È LEGITTIMO: 4.209,43 > 4.000,00. Su questo fronte non c'è contestazione.**
+
+---
+
+## 3bis. 🚨 E LA CONSEGUENZA CHE NESSUNO AVEVA GUARDATO: **il nostro Guardian, su un conto Lite, sarebbe arrivato DOPO**
+
+I nostri due preset (`ABTG_Guardian_FTMO_2Step.set` r.21 e
+`ABTG_Guardian_50504263_779001_VIVO.set` r.65) portano **`InpDailyLossPct = 4.9`**, e
+il sorgente ha `InpDailyPausePct = 4.0` (r.152). Erano scritti per un prodotto col muro
+al **5%**. Applicati alla baseline di quel giorno (103.258,16):
+
+| soglia | % | in dollari | scatta a equity |
+|---|---:|---:|---:|
+| 🔴 **MURO PROP (Stellar Lite)** | **4,0%** | 4.000,00 | **99.258,16** |
+| nostra **PAUSA** `InpDailyPausePct` | 4,0% | 4.000,00 | **99.258,16** |
+| nostra **EMERGENZA** `InpDailyLossPct` | 4,9% | 4.900,00 | **98.358,16** |
+| *equity reale al blocco* | | | *99.048,73* |
+
+> ## 🔴 **L'EMERGENZA — l'unico meccanismo che CHIUDE le posizioni — scatta 900 dollari DOPO che il conto è già morto. E la PAUSA scatta ESATTAMENTE SUL MURO, margine zero: e per di più la pausa blocca i NUOVI ingressi, non chiude quello che è già aperto.**
+
+⚠️ **Su uno Stellar Lite la protezione è invertita**: l'unico strato che può salvare il
+conto agisce quando non c'è più niente da salvare.
+🟢 **E non è un difetto di codice: è un numero tarato per un altro prodotto.** Sullo
+Stellar **non-Lite** (muro 5%) il 4,9 scattava **100 dollari prima**, e il margine c'era.
+🔴 **La scelta del numero giusto è un parametro di RISCHIO, quindi è una firma di
+Claudio: qui si misura, non si decide.**
+
+⚠️ **E va detto perché non si confonda il piano**: su questo conto **il Guardian non
+c'era** — era un conto manuale. Questo paragrafo non dice *«il Guardian ha fallito»*:
+dice **«se ci fosse stato, con questi numeri non sarebbe bastato»**, ed è esattamente
+la configurazione che andrebbe in campo il 1° ottobre.
 
 ⚠️ **È del tutto plausibile che il Lite abbia davvero il 4%** — è un prodotto più
 economico e le regole più strette sono la contropartita normale. **Non stiamo dicendo che
