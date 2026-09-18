@@ -50,8 +50,8 @@ sull'ORO**, che insieme fanno **−107,98 su 11**.
 
 | | magic | EA | simb | n | netto | **record** | perché |
 |---|---|---|---|---:|---:|---|---|
-| 🥇 | **`770511`** | `SuperWave` DOW H1 | U30USD | 10 | **+244,94** | **6 vinte · 2 perse · 2 pari** | 🟢 **il netto piu' alto del campo** — vedi il chiarimento sotto |
-| 🥈 | **`770201`** | `Nasdaq_Apertura_US` | NASUSD | 7 | **+98,49** | **7 vinte su 7** | 🟢 **zero perse**, un simbolo solo, attribuzione pulita |
+| 🥇 | **`770201`** | `Nasdaq_Apertura_US` | NASUSD | **7 segnali** | **+98,49** | **7 vinte su 7** | 🟢 **zero perse**, un simbolo solo, **nessun segnale dominante** |
+| 🥈 | **`770511`** | `SuperWave` DOW H1 | U30USD | **5 segnali** (10 gambe) | **+244,94** | **4 vinti su 5** | 🟠 netto piu' alto, **ma il 60% viene da UN segnale** — vedi sotto |
 | 🥉 | **`770402`** | `MaxMinNotte` ORO | XAUUSD | 11 | **+43,29** | 6/5 | 🟢 **il campione più grande fra le positive pulite** |
 | 4 | **`770101`** | `DAX_Apertura_EU` **in RETEST** | D30EUR | 21 | −19,08 | **18 vinte su 21** | 🟠 negativa **in totale**, ma è il **prima+dopo**: la sola parte RETEST fa **+149,16 su 15, 14/1** |
 
@@ -73,7 +73,48 @@ vero di `770511`:
 | simbolo | **U30USD**, uno solo |
 | commenti | **quattro, tutti `SUPERWAVE DOW H1`**: `L 1/3`, `L 2/3`, `S 1/3`, `S 2/3` |
 
-> ## 🥇 **Quindi `770511` è la PRIMA della rosa, con il netto piu' alto del campo: +244,94 su 10 posizioni.**
+> ## ⚠️ **PRIMA STESURA: «`770511` è la PRIMA della rosa, +244,94 su 10 posizioni». 🔴 SBAGLIATO, e l'ha visto Claudio.**
+
+### 🔴 SECONDA CORREZIONE, stesso giorno: **le «10 posizioni» sono 5 SEGNALI**
+
+Claudio ha chiesto *«e' il SuperWave DOW H1, L o S, 1/2 o 2/3? VERIFICA»*. Verificato nel
+sorgente `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`:
+
+| riga | cosa dice |
+|---|---|
+| **r.71** | `InpFirstFraction = 0.3333` → **1/3 a mercato** |
+| **r.72** | `InpUsePending = true` → **il resto (2/3) su ordine pendente STOP** |
+| **r.396-397** | la gamba a mercato firma `L 1/3` / `S 1/3` |
+| **r.407-412** | la pendente firma `L 2/3` / `S 2/3`, con **TP proprio** (`tpP`) e la **stessa SL** |
+
+> ## 🔴 **`1/3` e `2/3` NON sono due operazioni: sono le DUE GAMBE DI UN INGRESSO SOLO** (una a mercato, una su pendente stop nella direzione del trade).
+
+E i dati lo confermano: **5 giorni, 2 gambe ciascuno, aperte a pochi secondi di distanza.**
+
+| data | verso | gamba `1/3` | gamba `2/3` | **segnale** |
+|---|---|---:|---:|---:|
+| 17/08 | S | 0,00 | +9,64 | **+9,64** |
+| 25/08 | L | 0,00 | +7,79 | **+7,79** |
+| 31/08 | S | +44,32 | +103,46 | **+147,78** |
+| 03/09 | L | −8,48 | −8,49 | **−16,97** |
+| 07/09 | S | +44,23 | +52,47 | **+96,70** |
+
+➡️ **`770511` ha n = 5 SEGNALI, non 10.** Il campione e' **la meta'** di quello che
+avevo scritto — e lo stavo confrontando con `770201`, che ha **7 posizioni = 7 segnali
+veri**. 🔴 **Non erano comparabili.**
+
+🔴 **E un secondo numero che va detto: il 60% del profitto viene da UN SOLO segnale**
+(il 31/08, +147,78 su +244,94). Senza quello: **+97,16 su 4 segnali**.
+
+> ## 🎯 **VERDETTO ONESTO: `770511` resta POSITIVA (4 segnali vinti su 5), ma con n=5 e un segnale che fa il 60% del risultato NON è la prima della rosa. `770201` — 7 su 7, nessun segnale dominante — ha il profilo più solido.**
+
+🟢 E le due uscite a **0,00** adesso si spiegano da sole: sono la **gamba `1/3` uscita
+a pareggio**, cioè il breakeven che fa il suo lavoro.
+
+📌 **Lezione di metodo, e vale oltre questa sedia**: su un motore a **ingresso
+frazionato**, contare le POSIZIONI al posto dei SEGNALI **raddoppia il campione
+dichiarato**. E' la classe 226 (deal contro posizioni) **con un gradino in piu'**:
+qui anche le POSIZIONI sono troppe, perche' un segnale ne apre due.
 
 🔥 **E dentro, la scomposizione è quella che avevamo già visto**: i due **SHORT** fanno
 **+254,12** (`S 2/3` +165,57 · `S 1/3` +88,55), i due **LONG** fanno **−9,18**
