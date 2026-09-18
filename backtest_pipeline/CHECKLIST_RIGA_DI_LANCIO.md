@@ -24327,3 +24327,99 @@ bugia, e **«casella libera» è quello che diventa se qualcuno rilegge il CSV f
 **passate gemelle a esito identico**. Se il round, così com'è scritto, **non può
 distinguere** quel caso dall'edge, l'asse è mal posto. Il modo più economico di scoprirlo è
 **leggere la catena di chiamata**, non lanciare le passate e contare gli esiti distinti dopo.
+
+---
+
+## 🛡️🗳️ CLASSE 432 — IL CENSIMENTO CHE CONTA COME **DIFETTO** UNA COSA CHE UN VERBALE HA **FIRMATO COME SCELTA**: `GUARD = no` sul conto dove il Guardian **non deve girare** (controllo-preventivo, 18/09/2026)
+
+**IL CASO REALE.** Il censimento dei binari del conto **50503392** legge dal runner `CODA_06`
+la colonna `GUARD` e trova **`no` su sei sedie su sette**. Il referto la mette fra i danni:
+*«il Guardian non c'è su nessuna delle sette tranne l'ORB»*, accanto al doppio lotto di
+SuperWave e al breakeven cieco di MaxMinNotte. **Non è della stessa specie, e su quel conto
+non è nemmeno un difetto.**
+
+`HANDOFF.md` rr.129-138 — **decisione di Claudio, 06/09/2026 notte**:
+> *«NIENTE Guardian sul piccolo (50503392)… sul piccolo non c'è mai stato e **resta fuori per
+> scelta**. Motivo: "dobbiamo vedere appieno come si comportano gli EA" — il piccolo è lo
+> strumento di misura, non il conto da proteggere.»*
+
+E `mql5/Include/ABTG_PausaGuardian.mqh` rr.54-56 chiude il conto:
+> *«se il guardiano NON gira, tutto ritorna false (**fail-open**)»*
+
+👉 Quindi ricompilare quei sei EA **non cambierebbe un singolo ingresso** su quel conto: la
+prova sta nella riga accanto, `ABTG_ORB_Ottimizzato`, che **ce l'ha** (`GUARD = SI`, `.ex5` del
+03/09) e gira **esattamente come se non ce l'avesse**. Il controllo che «manca» è già presente
+in una sedia e non protegge, perché il cane da guardia non c'è **per decisione**.
+
+### 🔬 PERCHÉ È UNA CLASSE SUA
+- **Non è la 350** (*«mai mossa e viva» vs «mai mossa ma inerte»*): là l'inerzia nasce dal
+  **codice**. Qui nasce da una **firma**, e sta in un file diverso da quello che si sta leggendo.
+- **Non è la 54** (compilazione fallita che lascia il `.ex5` vecchio): là il campo è **davvero**
+  diverso da quello che si crede.
+- 🔴 **Il tranello specifico è che il segnale è VERO**: `GUARD = no` è un fatto, misurato bene,
+  da uno strumento corretto. Sbagliata è **la conversione del fatto in danno**, che richiede un
+  contesto che lo strumento non ha e non può avere.
+- 💸 **E il costo è concreto, in due direzioni**: (1) gonfia una lista di urgenze che deve
+  essere **corta** per essere usata — sette voci indistinte al posto di **quattro** che costano
+  davvero; (2) se qualcuno la esegue, spende una ricompilazione su un conto vivo **per zero
+  protezione** — e le ricompilazioni sul VPS sono l'operazione più rischiosa che facciamo.
+
+### ✅ LA REGOLA
+📐 **Prima di classificare come DIFETTO l'assenza di un meccanismo, si cerca il verbale che
+potrebbe averla DECISA** — e la si cerca per il **conto**, non per l'EA:
+```
+grep -n "<NUMERO_CONTO>" HANDOFF.md CLAUDE.md report/FIRME_*.md report/PIANO_PROP.md
+grep -rn "NIENTE\|resta fuori\|per scelta\|non si applica" HANDOFF.md | grep -i "<meccanismo>"
+```
+🔴 **E se la decisione esiste, la voce NON si cancella: si RICLASSIFICA con le due unità.**
+⚪ *«inerte oggi su questo conto, per decisione firmata il GG/MM»* + 🟠 *«torna 🔴 il giorno in
+cui questa sedia passa sul conto X, dove il meccanismo gira»*. Cancellarla perderebbe
+l'informazione che serve **al 1° ottobre**; lasciarla rossa perderebbe la lista corta **oggi**.
+🧪 **Contro-esempio obbligatorio**: *«se questo fosse un difetto vero, che cosa vedrei di
+diverso nella sedia che invece ce l'ha?»* → se la risposta è **«niente»**, non è un difetto:
+è una configurazione. Nel caso reale l'ORB con `GUARD = SI` e le sei con `GUARD = no` si
+comportano **identicamente**, e quella identità era leggibile **prima** di scrivere il referto.
+
+---
+
+## 🧬📅 CLASSE 433 — LA RIGA DI CENSIMENTO CHE **MESCOLA DUE SORGENTI DI VERITÀ** (`.mq5` per il contenuto, `.ex5` per la data) E SI LEGGE COME UN FATTO SOLO (controllo-preventivo, 18/09/2026, discendente della **54**)
+
+**IL CASO REALE.** `backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1` stampa per ogni EA
+una riga sola: `NOME · VER · RIGHE · GUARD · COMPILATO IL`. Ma **`VER`, `RIGHE` e `GUARD`
+escono dal `.mq5`** (rr.83-93) e **`COMPILATO IL` esce dall'`.ex5`** (rr.95-99,
+`(Get-Item $ex5).LastWriteTime`). **Sono due file diversi, e nello script niente verifica che
+il secondo sia nato dal primo.** Lo script lo **dichiara** onestamente (rr.34-37: *«se qualcuno
+ha compilato un .ex5 e poi ha sostituito il .mq5, i due non corrispondono: per questo si stampa
+anche la data dell'.ex5, così lo scarto si vede»*) — ma **non calcola lo scarto**: lo stampa e
+lascia il conto a chi legge. E chi legge, davanti a una riga sola, legge **un fatto solo**.
+
+👉 La frase *«questa sedia gira il codice dell'08/08»* **non è nel log**: è un'inferenza, e va
+**costruita e dichiarata**, non ereditata dalla formattazione della tabella.
+
+### 🔬 PERCHÉ È UNA CLASSE SUA
+- **Non è la 54** (`.ex5` vecchio sotto un `.mq5` nuovo, da compilazione fallita): quella è la
+  **patologia**. Questa è il **modo di riportare** che rende la patologia invisibile — la 54 si
+  presenterebbe in questo log come una riga **perfettamente normale**.
+- 🔴 **Il tranello è la LARGHEZZA DELLA RIGA**: allineare due misure sulla stessa riga è una
+  **affermazione implicita di appartenenza**, e nessuno la mette in dubbio perché non è scritta
+  da nessuna parte — quindi non c'è niente da contestare.
+- ⚠️ **E nessun cancello lo prende**: `controlla_riga.py` guarda la sintassi e i percorsi di uno
+  script, non la **semantica di una colonna** del suo output.
+
+### ✅ LA REGOLA
+📐 **Un censimento che inferisce «quale codice gira» deve DICHIARARE quale colonna viene da
+quale file, e poi PROVARE l'appartenenza** — con le impronte che ha, non con l'allineamento
+tipografico. Le tre che bastano, in ordine di costo:
+1. **impronta tripla** del sorgente: `#property version` **+** righe **+** presenza di un
+   marcatore semantico (es. il Guardian). Il conteggio dello script è
+   `split("\r?\n").Count` = **`wc -l` + 1**: si tara su una riga di controllo già nota.
+2. **finestra temporale**: la data dell'`.ex5`, **riportata in UTC** (il log è in ora locale
+   VPS: in estate `−2`, in inverno `−1`), deve cadere **fra il commit identificato e il
+   successivo che tocca quel file**. Se cade fuori, l'appartenenza è **smentita**.
+3. **hash**, se esiste. Se non esiste, si dichiara che non esiste.
+🔴 **E il livello di prova si scrive accanto alla conclusione**: *«circostanziale forte (tre
+impronte + finestra temporale), non crittografica»* è un'informazione; *«il binario è del
+commit X»* detto senza aggettivi è una **promessa che il log non ha fatto**.
+🧪 **Contro-esempio obbligatorio**: *«un file può avere MENO righe ed essere PIÙ NUOVO»* — una
+rifattorizzazione accorcia. Quindi il numero di righe **da solo non ordina nel tempo**: va
+**ancorato a un commit specifico**, e il commit va **verificato con una seconda impronta**.
