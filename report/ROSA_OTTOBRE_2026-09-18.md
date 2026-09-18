@@ -415,3 +415,34 @@ partirebbe da zero misure.
 `mql5/Presets/ABTG_SupertrendReversal_225JPY_H2_770901_100K.set` ·
 `backtest_pipeline/coda/referti/CODA_01_sedie_attaccate_20260917_033003.log` ·
 `backtest_pipeline/coda/referti/CODA_07_desktop_20260917_033003.log` (rr.140-154)
+
+
+---
+
+## ✏️ VERIFICA ALLA FONTE DEL 18/09 — due correzioni al referto stesso
+
+> Fatte da me **prima** di portare i numeri a Claudio, come chiede la regola del
+> contro-esempio: il ritrovamento principale si verifica alla fonte, non sul
+> riassunto.
+
+**1. 🔴 Il percorso del file della leva era SBAGLIATO** (corretto sopra, 0 occorrenze).
+Citato come `report/ANALISI_TAGLIA_FASE1_2026-08-27.md` → **quel file non
+esiste**. Sta in `backtest_pipeline/risultati_archivio/`. 🟢 **Il contenuto
+regge**: verificato alle righe vere (§3a), `770611` **44,0%** · `771531`
+**38,9%** · `770202` **14,6%** del conto per **UN** ingresso pieno.
+
+**2. ⚖️ E due precisazioni che il referto non fa, e cambiano il peso del
+vincolo:**
+- 🟡 **L'invarianza rispetto alla taglia porta il tag `[PROIETTATO]`** nella
+  fonte (§0d: *"proprietà dell'ipotesi lineare"*), **non `[MISURATO]`**. Va
+  citata così.
+- 📐 **Il 97,5% è la somma dei MASSIMI.** Alle **mediane** lo stesso terzetto
+  fa `15,5 + 11,3 + 14,1 = `**41,0%**. 👉 Il vincolo è **reale e va misurato**,
+  ma la frase onesta è *"nei giorni peggiori il terzetto satura il margine"*,
+  non *"il terzetto non ci sta"*. 🔴 E resta vero che **una sola** sedia
+  (`770611`, 44,0%) da sola supera il doppio della soglia del 20%, e che su
+  `770411` **anche la mediana** la supera (28,9%).
+
+🟢 **La conclusione operativa del referto NON cambia**: la FASE 2 col tester a
+`Leverage=15` **non è mai stata girata**, costa **~4 minuti**, ed è la misura
+che trasforma un `[PROIETTATO]` in un numero. Resta in cima alla lista.
