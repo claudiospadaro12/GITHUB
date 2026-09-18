@@ -1,6 +1,6 @@
 //@version=5
 // ═══════════════════════════════════════════════════════════════════════════════
-// ABTG SuperEMA Riding — v2.2  (TradingView)
+// ABTG SuperEMA Riding — v2.3  (TradingView)
 // Autore: Claudio (con Claude) · 18/09/2026
 //
 // CHE COS'E': il tuo "ABTG BR+EMA v1.2" (31/05/2026) con dentro le due cose
@@ -138,7 +138,7 @@
 //    decide se una di queste diventa una sedia -- oggi e' NON MISURATA.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-indicator("ABTG SuperEMA Riding — v2.2", shorttitle="ABTG SER v2",
+indicator("ABTG SuperEMA Riding — v2.3", shorttitle="ABTG SER v2",
           overlay=true, max_labels_count=500, max_lines_count=100)
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -472,10 +472,26 @@ preWait = input.int(5,     "Barre entro cui deve avverarsi per contare come CENT
 // pre-allarme misura quella. Scatta anche quando poi il cambio NON arriva, e non
 // e' un difetto: e' cosa vuol dire "avvisare prima". Per questo il pannello conta
 // quanti se ne avverano -- cosi' il numero lo decidi tu, non io.
-mancaGiu = trendST ==  1 ? close - up : na    // quanto manca a rompere in GIU
-mancaSu  = trendST == -1 ? dn - close : na    // quanto manca a rompere in SU
-preSell0 = trendST ==  1 and (close - up) > 0 and (close - up) <= preDist * atrST
-preBuy0  = trendST == -1 and (dn - close) > 0 and (dn - close) <= preDist * atrST
+// 🔴 E una cosa in piu', perche' si vedra' a schermo: sulla barra VIVA il rombo
+// puo' comparire e SPARIRE, esattamente come la targhetta Buy/Sell del
+// Supertrend classico. Sullo STORICO no, mai, con qualunque impostazione.
+// Se l'avviso deve essere definitivo, l'alert va creato con frequenza
+// "Once Per Bar Close".
+// 🟠 E preTot conta SERIE DI AVVICINAMENTO, non rombi: un avvicinamento che
+// riparte mentre l'episodio precedente e' ancora aperto non apre una serie
+// nuova (misurato: ~12,6% dei rombi al default). NON e' un difetto e non si
+// corregge -- misurato, il "riarmo del cronometro" PEGGIORA il numero
+// (anticipo 1,64 barre contro 1,88 della verita'). Si dichiara, e basta.
+// UNA sola definizione della distanza dalla linea, e la leggono tutti: il
+// pre-allarme E il pannello. Prima erano due formule gemelle scritte in due
+// posti, cioe' esattamente il peccato contro cui avverte il commento venti
+// righe sopra ("non si duplica la logica").
+// Ed e' il numero GIUSTO da guardare: il flip alla barra N+1 confronta la
+// chiusura con la banda della barra N, quindi questa e' la soglia che varra'
+// alla PROSSIMA barra. Niente sguardo al futuro.
+mancaOra = trendST == 1 ? close - up : dn - close
+preSell0 = trendST ==  1 and mancaOra > 0 and mancaOra <= preDist * atrST
+preBuy0  = trendST == -1 and mancaOra > 0 and mancaOra <= preDist * atrST
 preSellN = math.sum(preSell0 ? 1 : 0, preBars) == preBars
 preBuyN  = math.sum(preBuy0  ? 1 : 0, preBars) == preBars
 // solo la PRIMA barra dell'avvicinamento, altrimenti e' una fila di segnacci
@@ -498,7 +514,15 @@ if preDir == -1 and rawShortST
     preHit := preHit + 1
     preLead := preLead + preAge
     preDir := 0
-if preDir != 0 and preAge > preWait
+// 🔴 SCADENZA CON >= E NON CON > . Il controllo di CENTRATO qui sopra legge
+// lo STESSO preAge gia' incrementato, quindi con > un pre-allarme aperto alla
+// barra N restava centrabile fino a N+preWait+1: la finestra vera era UNA BARRA
+// PIU' LUNGA dell'etichetta dell'input. E l'errore era sempre nel verso che
+// LUSINGA (una barra in piu' puo' solo aggiungere centri, mai toglierne).
+// Misurato su 3 semi da 60.000 barre contro una verita' calcolata a parte:
+// il pannello dava +2,4/+3,5 punti di percentuale e +0,14/+0,21 barre di
+// anticipo. Col >= l'errore scende a <= 0,4 punti e <= 0,01 barre.
+if preDir != 0 and preAge >= preWait
     preDir := 0
 if preBuy and preDir == 0
     preDir := 1
@@ -634,7 +658,7 @@ var table t = table.new(position.top_right, 2, 13,
      bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
 if showPanel and barstate.islast
     table.cell(t, 0, 0, "ABTG SuperEMA Riding", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
-    table.cell(t, 1, 0, "v2.2", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 0, "v2.3", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
 
     table.cell(t, 0, 1, "categoria / K", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 1, cat + " (" + catSrc + ")  K=" + str.tostring(K, "#.######"),
@@ -688,15 +712,15 @@ if showPanel and barstate.islast
 
     // quanto manca al cambio: e' il numero che il pre-allarme guarda
     table.cell(t, 0, 11, "manca al cambio", text_color=color.white, text_size=size.small)
-    table.cell(t, 1, 11, str.tostring(trendST == 1 ? (close - up) / atrST : (dn - close) / atrST, "#.###") +
+    table.cell(t, 1, 11, str.tostring(atrST > 0 ? (mancaOra / atrST) : 0.0, "#.###") +
          " ATR  (scatta a " + str.tostring(preDist, "#.##") + ")",
-         text_color=(trendST == 1 ? (close - up) : (dn - close)) <= preDist * atrST ? color.orange : color.gray,
+         text_color=mancaOra <= preDist * atrST ? color.orange : color.gray,
          text_size=size.small)
 
     // 🔴 LA RIGA CHE RENDE IL PRE-ALLARME UN NUMERO E NON UN'OPINIONE.
     // Conta da quando comincia lo storico caricato: cambiando TF o tirando
     // indietro il grafico il conteggio cambia, ed e' giusto cosi'.
-    table.cell(t, 0, 12, "pre-allarme centrati", text_color=color.white, text_size=size.small)
+    table.cell(t, 0, 12, "serie avvicin. centrate", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 12, str.tostring(preHit) + " su " + str.tostring(preTot) +
          (preTot > 0 ? "  (" + str.tostring(preHit * 100.0 / preTot, "#") + "%)" : "") +
          (preHit > 0 ? "   anticipo medio " + str.tostring(preLead / preHit, "#.#") + " barre" : ""),

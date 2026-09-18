@@ -23778,3 +23778,82 @@ riding» è **il CONTATORE** (`rideCnt`, **puro tocco**: `ATR minimo` e `X` non 
 toccano affatto) **e** l'**ORIGINE DI SEGNALE** (i sei AND). Un consiglio di taratura
 che non dice **quale dei due** sta tarando fa muovere manopole a **effetto ZERO** sulla
 cosa che si sta guardando.
+
+---
+
+## ⏱️🎁 CLASSE 419 — IL CONTATORE CHE SI AUTOASSOLVE: la scadenza controllata DOPO l'evento che la chiude, e la finestra vera è `N+1` (18/09/2026)
+
+**Il caso.** `pine/ABTG_SuperEMA_Riding_v2.pine`, macchina a stati del pre-allarme:
+
+```pine
+if preDir != 0
+    preAge := preAge + 1              # (1) invecchia
+if preDir == 1 and rawLongST          # (2) ha CENTRATO?
+    preHit := preHit + 1 ...
+if preDir != 0 and preAge > preWait   # (3) e' SCADUTO?
+    preDir := 0
+```
+
+Il controllo di **centro** sta **PRIMA** di quello di **scadenza** e legge lo stesso
+`preAge` già incrementato. Con `preWait = 5`, un pre-allarme aperto alla barra N è
+ancora centrabile alla barra **N+6**: la finestra vera è **`preWait + 1`**, mentre
+l'etichetta dell'input dice `preWait`.
+
+### 🔬 PERCHÉ È UNA CLASSE E NON UNA SVISTA
+1. 🔴 **L'errore è SEMPRE nella direzione che lusinga.** Una barra in più non può
+   togliere centri: può solo aggiungerne. Non è rumore, è un **bias di segno fisso**.
+2. 🔴 **Il numero sbagliato è proprio quello che giustifica la funzione.** Il commento
+   del file dichiarava *«il pannello conta quanti se ne avverano, così il numero lo decidi
+   tu»*. Il numero c'era, ed era **gonfio**.
+3. 🔴 **Nessuna lettura lo trova.** `>` e `>=` sono entrambi plausibili e l'ordine dei
+   tre `if` sembra innocuo. Si vede **solo** simulando, o contando a mano le barre.
+4. **Misura** (3 semi indipendenti, 60.000 barre l'uno, verità calcolata a parte per ogni
+   singolo segnale): pannello **69,9 / 71,3 / 70,5%** contro il vero **67,5 / 68,0 /
+   67,0%** ⇒ **da +2,4 a +3,5 punti**; anticipo medio **2,02 / 1,98 / 2,03** barre contro
+   **1,88 / 1,80 / 1,82** ⇒ **da +0,14 a +0,21 barre**. Anticipo MASSIMO misurato =
+   **`preWait + 1`**, su tutti i semi. Col `>=`: errore **≤ 0,4 punti e ≤ 0,01 barre**.
+
+### ✅ LA REGOLA
+🔴 **In una macchina a stati sulle barre, la finestra dichiarata all'utente si verifica
+CONTANDO le barre, non leggendo il confronto.** Si scrive la tabella `N+1 … N+k+1` e si
+guarda in quale riga muore lo stato. Se il test di *«e' successo?»* gira **prima** del test
+di *«e' scaduto?»* sullo stesso contatore, la finestra vera è **una barra più lunga** di
+quella scritta sull'etichetta.
+📐 **E il controllo definitivo è UNA misura**: si simula il contatore e lo si confronta
+con una **verità calcolata indipendentemente, evento per evento**. Se i due numeri non
+coincidono, il contatore ha un bias — e il segno del bias dice dove.
+
+---
+
+## 🩹📏 CLASSE 420 — LA CORREZIONE CHE SPOSTA L'ERRORE INVECE DI TOGLIERLO: anche il RIMEDIO va misurato contro la VERITÀ, non contro il difetto (18/09/2026)
+
+**Il caso.** Stesso file, stesso giro. Trovato un secondo indiziato: il pannello contava
+**episodi** (1227) mentre il grafico disegnava **avvicinamenti** (1404) — **12,6% di
+scarto**, fino al **20,1%** allargando la soglia. Rimedio ovvio e già scritto: **riarmare
+il cronometro** a ogni nuovo avvicinamento.
+
+🔴 **Misurato prima di proporlo, il rimedio PEGGIORAVA il numero.**
+
+| | % centrati | anticipo medio |
+|---|---|---|
+| così com'era | 69,9% | 2,02 b |
+| **sola correzione della scadenza (`>=`)** | **67,6%** | **1,88 b** |
+| `>=` **+ riarmo** | 69,3% | **1,64 b** |
+| **verità, calcolata a parte** | **67,5%** | **1,88 b** |
+
+Il riarmo azzera l'età dell'episodio e **accorcia l'anticipo misurato**: toglieva un
+errore di **+0,14 barre** e ne metteva uno di **−0,24**. La correzione da **un solo
+carattere** centrava la verità **da sola**, perché gli avvicinamenti non contati sono
+**la stessa popolazione** di quelli contati.
+
+### ✅ LA REGOLA
+🔴 **Una correzione proposta dal cancello è una MISURA NUOVA, e va trattata come tale:
+si confronta con la VERITÀ calcolata indipendentemente, MAI col difetto che sostituisce.**
+*«Meglio di prima»* non è un criterio: **sposta** l'errore e lo fa sembrare risolto.
+📐 **Corollario**: quando i rimedi candidati sono due, si misurano **separati**. Qui la
+coppia `>=` + riarmo avrebbe dato **69,3%** (vicino al difetto), e la colpa sarebbe finita
+sul carattere giusto.
+⚠️ **Rovescio utile, e va scritto**: **uno scarto del 12,6% fra due popolazioni NON è
+automaticamente un difetto.** Misurato, non spostava il numero. Il verdetto corretto non
+era *«correggilo»*: era **«DICHIARALO»** — cambiare l'etichetta perché dica cosa conta
+davvero. **Correggere per simmetria è un modo di rompere le cose che funzionano.**
