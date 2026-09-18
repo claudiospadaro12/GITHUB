@@ -18,6 +18,16 @@ verdetto (`FAIL S3 (rischio)` per R139a, `FAIL S3 + S4` per R139b) che **coincid
 la conclusione di oggi**. Quel referto non cita `LETTURA_BACKLOG_NOTTE_2026-09-13.md`
 da nessuna parte (verificato: zero occorrenze della stringa nel file).
 
+> ✏️ **AGGIORNAMENTO, poche ore dopo — e va scritto perché è la parte che funziona.**
+> Il paragrafo qui sopra descrive il referto AUDJPY **com'era quando l'ho letto**.
+> È stato **corretto alla fonte** nel commit `96548df3` del 18/09 06:26: adesso
+> quel referto apre con *«Non è vero»*, cita `LETTURA_BACKLOG_NOTTE_2026-09-13.md`
+> (r.6 e r.45) e si prende la classe 411 che aveva denunciato nella stessa riga.
+> 🟢 **Il difetto è stato verificato alla fonte da chi l'aveva commesso e riparato
+> prima di arrivare a Claudio** — che è esattamente il protocollo Sviluppatore /
+> Agente dei Controlli del 13/09. **Lascio il paragrafo com'era**: cancellarlo
+> nasconderebbe la misura che ha fatto scattare la correzione.
+
 **Che cosa mancava davvero**, e vale per tutti e 48: **la riga nel registro**. Chi cerca
 in `REGISTRO_TEST.md` — che è dove si cerca — trova *«file prova pronto, cancello
 deterministico passato»* e conclude che il numero non esiste. **Il numero esiste, in un
