@@ -30,7 +30,9 @@ script, r.89 di `CODA_06_quale_codice_gira.ps1`).
 | `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` | 1.01 | **775** | 🟢 SI | 2026-09-17 |
 | `ABTG_EMA200.mq5` | 1.00 | **691** | 🟢 SI | 2026-09-17 |
 
-🟢 **Una sola sedia su sette è allineata**: l'`ORB_Ottimizzato`, aggiornato il **03/09**.
+🟢 **Le sedie allineate sono DUE, non una** *(corretto il 18/09 sera: ne avevo contata una)*:
+`ABTG_ORB_Ottimizzato` v1.04 (**03/09**) e **`ABTG_PostNews` v1.10, 667 righe, `GUARD = SI`
+(04/09)** — quest'ultima **viva**, ha operato il 04/09.
 Vuol dire che **l'aggiornamento si sa fare** — non è un ostacolo tecnico, è una cosa non fatta.
 
 ---
@@ -55,8 +57,28 @@ raddoppia il rischio in silenzio**, che è esattamente lo scenario che la firma 
 👉 **Anche questo non è in campo.** La sedia `770511` gira il binario **di due giorni PRIMA** che
 quel difetto venisse perfino misurato.
 
-### (c) E il Guardian non c'è su **nessuna** delle sette tranne l'ORB
-Niente pausa B1, niente cap C1 al 3,25%. Su quel conto il Guardian **non ha presa**.
+### (c) 🔴 ~~E il Guardian non c'è su nessuna delle sette tranne l'ORB~~ — **QUESTO ERA SBAGLIATO**
+
+**CORREZIONE del 18/09 sera, trovata dal censimento e verificata da me alla fonte.**
+`GUARD = no` sul piccolo **non è un difetto: è una DECISIONE FIRMATA DA CLAUDIO.**
+`HANDOFF.md` r.129, testuale:
+
+> *«**DECISIONE (Claudio, 06/09 notte): NIENTE Guardian sul piccolo (50503392).** Il Guardian
+> sta solo su reale (10105439) e 100K (50504263); sul piccolo non c'è mai stato e **resta fuori
+> per scelta**. Motivo, dichiarato: "dobbiamo vedere appieno come si comportano gli EA" … **Il
+> piccolo è lo strumento di misura, non il conto da proteggere.**»*
+
+E la ragione regge, ed è la nostra: con la rete attiva il DD osservato sarebbe **quello potato
+dal Guardian**, non quello vero — e il criterio RISCHIO del 18/08 (*DD forward > DD promesso →
+revisione immediata*) confronterebbe un numero potato con un numero intero.
+
+🧪 **E c'è la prova dentro la tabella qui sopra**: l'`ORB_Ottimizzato` il Guardian **ce l'ha**
+(`GUARD = SI`) e si comporta **identico** alle altre — perché su quel conto nessun Guardian gira,
+e `ABTG_PausaGuardian.mqh` rr.54-56 dice che senza guardiano *«tutto ritorna false (**fail-open**)»*.
+👉 Ricompilare quelle sei **per il Guardian** darebbe **zero protezione**.
+⚠️ Diventa un problema **il giorno in cui una di quelle sedie passa sul 100k o sul reale**.
+
+📌 **Conseguenza sulla lista di urgenze: da sette voci indistinte a QUATTRO reali.**
 
 ---
 
