@@ -15,7 +15,8 @@
 #  su NASUSD TUTTE le righe con almeno un filtro acceso hanno
 #  InpEntryMode=0 (breakout) -- 610 righe, 610 volte modo 0.
 #  Le celle con ingresso a CHIUSURA (InpEntryMode=2 di QUESTO EA) sono
-#  8 righe in tutto, TUTTE a filtri spenti. La casella e' VUOTA.
+#  4 righe in tutto (R83n2: 2 gemelle x 2 finestre), TUTTE a filtri
+#  spenti. La casella e' VUOTA.
 #
 #  BASELINE DA BATTERE (R83n2, stesso EA, stesso file, filtri spenti):
 #    IS  PF 0,70462  n=198  DD 9,4841

@@ -32,7 +32,8 @@ Censimento su **tutti** i CSV del repo (esclusi i worktree `.claude`):
 | 1 · 2 · 3 · 4 · 5 | **0** |
 
 Le righe NASUSD con ingresso a **CHIUSURA** (`InpEntryMode=2` di
-`ABTG_Apertura_3Ingressi`) sono **8 in tutto, tutte a filtri spenti**.
+`ABTG_Apertura_3Ingressi`) sono **4 in tutto** (`R83n2`: 2 gemelle x 2 finestre), **tutte
+a filtri spenti**.
 👉 **La casella è VUOTA. Confermato.**
 
 ### 1.1 ⚠️ MA IL CENSIMENTO HA TROVATO ANCHE QUELLO CHE IL REFERTO NON CITAVA

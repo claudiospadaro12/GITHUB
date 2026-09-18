@@ -3549,7 +3549,7 @@ prescrivono (MARKET alla CHIUSURA della candela di rottura), **aggiunge edge o t
 ### ✅ LA CASELLA È VUOTA — ricontata a macchina
 Censimento su **368 CSV / 18.410 righe** (worktree `.claude` esclusi): su NASUSD **tutte** le
 righe con ≥1 filtro acceso hanno `InpEntryMode=0` (**610 righe**); le righe a ingresso CHIUSURA
-sono **8**, tutte a filtri spenti. 🔴 **Ma il primo giro del censimento deduceva il simbolo dal
+sono **4** (`R83n2`: 2 gemelle x 2 finestre), tutte a filtri spenti. 🔴 **Ma il primo giro del censimento deduceva il simbolo dal
 PERCORSO e saltava 73 file in silenzio** (classe 430, applicata a se stessi): rifatto senza
 filtri di simbolo, sono emersi i **vicini di casella, che sono misurati e dicono di no**.
 

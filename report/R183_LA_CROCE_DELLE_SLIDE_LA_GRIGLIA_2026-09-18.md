@@ -47,7 +47,11 @@ esclusi i worktree `.claude`, tenendo i file con la colonna `InpEntryMode`.
 | 1 · 2 · 3 · 4 · 5 | **0** |
 
 Le righe NASUSD a ingresso **CHIUSURA** (`InpEntryMode=2` di `ABTG_Apertura_3Ingressi`)
-sono **8**, tutte a filtri spenti (R83n2, 2 celle × 2 finestre × 2 gemelle).
+sono **4**, tutte a filtri spenti (`R83n2`: **2 gemelle × 2 finestre**).
+> 🧮 **Corretto prima della consegna.** La prima stesura diceva «8», moltiplicando *anche*
+> per le due celle: ma le due celle di `R83n2` **sono** le due gemelle sul magic, non un
+> fattore in più. Ricontato a macchina file per file: `..._IS_r83n2.csv` 2 righe +
+> `..._OOS_r83n2.csv` 2 righe = **4**. Il verdetto (**casella vuota**) non cambia; il numero sì.
 
 ### 🧪 IL CONTRO-ESEMPIO CHE HO COSTRUITO CONTRO IL MIO STESSO CENSIMENTO
 
