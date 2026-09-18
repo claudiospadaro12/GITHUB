@@ -455,3 +455,67 @@ vincolo:**
 🟢 **La conclusione operativa del referto NON cambia**: la FASE 2 col tester a
 `Leverage=15` **non è mai stata girata**, costa **~4 minuti**, ed è la misura
 che trasforma un `[PROIETTATO]` in un numero. Resta in cima alla lista.
+
+
+---
+
+# 🔴 CORREZIONE DEL 18/09, ore 05:20 — LA FASE 2 SULLA LEVA **È GIÀ GIRATA, E IL BANCO NON PUÒ RISPONDERE**
+
+> Trovata applicando la **classe 411** (scritta stanotte): *prima di dichiarare
+> una misura mancante, si grepa anche l'archivio e i log*. Verificata da me
+> agli artefatti, non su un riassunto.
+
+## Che cosa diceva questo referto
+> *"La FASE 2 col tester a `Leverage=15` costa ~4 minuti e non è mai stata
+> girata"*, messa **in cima al cammino critico** con scadenza **23/09**.
+
+## 🔴 È FALSO SU ENTRAMBI I PUNTI
+
+**1. È girata il 27/08**: `backtest_pipeline/risultati_archivio/R114_REFERTO.md`
+— *"R114 — IL BANCO DI CASA NON PUÒ MISURARE LA LEVA PROP, e lo ha detto DA
+SOLO, prima di mentire"*. Corsa 09:52-09:56 (4,3 min), pin `5550cd7`, esito
+**fermo dal canarino (exit 2)**, che **non è un guasto**: è il cancello 84-bis
+che ha impedito di stampare numeri falsi (**15 righe `n/d` oneste**).
+
+**2. Il banco NON PUÒ rispondere, e la pistola fumante l'ho verificata io:**
+
+| cosa | fatto |
+|---|---|
+| l'`.ini` chiedeva | `gen_R114_sonda_U30USD.ini` → **`Leverage=15`** ✅ |
+| il tester ha stampato | `GSPEC;U30USD;ACCOUNT_LEVERAGE;`**`100`** 🔴 |
+| e non su un simbolo solo | `D30EUR` → **100** · `XAUUSD` → **100** 🔴 |
+
+👉 **Il tester MT5 di BCM IGNORA la riga `Leverage` dell'ini** e ripiega in
+silenzio sulla leva del conto. Causa più probabile dichiarata nel referto:
+**1:15 non è fra le leve che il tester di questo broker accetta.**
+
+🔴 **E c'è un secondo strato, più profondo, che chiude la strada anche se il
+primo si aggirasse**: i simboli indice BCM portano un **margin rate proprio di
+0,01** (1%, `TRADE_CALC_MODE=1`). Il margine osservato per **1 lotto U30USD è
+343 USD su un nozionale di ~510.000**, cioè **~0,07%**. Su questo banco il
+margine è minuscolo **per costruzione del simbolo**: anche con la leva
+onorata, **non somiglierebbe mai a quello di una prop**.
+📌 *"Il banco misura il MOTORE, non il MARGINE prop."*
+
+## ✅ CHE COSA CAMBIA, in concreto
+
+- 🚫 **L'item "FASE 2 leva, 4 minuti" ESCE dal cammino critico.** Non è una
+  misura da fare: è **una misura già tentata e dichiarata impossibile su questo
+  banco**. Il tempo macchina totale della rosa scende da **~8 a ~4 minuti**.
+- 🔴 **Ma il VINCOLO resta, e diventa PIÙ difficile, non più facile.** Le
+  percentuali di margine (`770611` **44,0%** · `771531` **38,9%** · `770202`
+  **14,6%**) restano `[PROIETTATO]`, e **non c'è nessun modo di misurarle in
+  casa**.
+- 🎯 **Quindi cambia CHI risponde**: non è più una domanda per il tester, è
+  **una domanda per la prop**. La leva e il margin rate sugli indici stanno
+  nelle **specifiche del conto**, e si chiedono per iscritto insieme alla
+  domanda #2 già aperta in questo referto (*"1:15 o 1:25?"*).
+  👉 **Un'email, non quattro minuti di macchina.** E va mandata **prima** della
+  firma #7, perché è il numero che decide se tre sedie sugli indici **ci stanno
+  nel margine**.
+
+⚠️ **E la lezione di metodo, che è la stessa di stanotte**: `R114` stava in
+`backtest_pipeline/risultati_archivio/`, non in `report/`. **Il repo ha più di
+un archivio, e una misura dichiarata mancante va cercata in tutti** — è
+esattamente la classe 411, applicata a sé stessa un turno dopo essere stata
+scritta.
