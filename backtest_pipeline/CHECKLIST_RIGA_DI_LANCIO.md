@@ -23651,3 +23651,130 @@ legali**. L'unico sbagliato stava nell'**unica** espressione spezzata **al
 livello più alto** invece che dentro una chiamata di funzione — cioè il caso che
 non somiglia a nessuno degli altri trenta. **Non è distrazione diffusa: è un
 caso di forma diversa**, e per questo va cercato con un conto, non a occhio.
+
+---
+
+## 🗓️🚪 CLASSE 414 — LA DATA DI STACCO DELL'OOS PRESA COME PROVA DELLA PROFONDITÀ DI STORICO: MT5 la calcola dal RANGE DICHIARATO, non dai dati che esistono (18/09/2026)
+
+**Il caso.** Un referto trasformava un `[INFERITO]` in `[MISURATO]` così: *«l'OOS parte
+il 2016.08.10, e 6,6/16,5 = 0,40 esatto ⇒ la finestra 2010→2026 è stata girata per
+intero ⇒ AUDJPY ha dati BCM almeno dal 2010»*.
+
+🔴 **Non discrimina niente.** MT5 ricava la data di forward **dal range dichiarato**
+(`FromDate`/`ToDate` × frazione), **non dalla storia disponibile**: se le barre
+partissero dal 2013, lo stacco resterebbe **2016.08.10 identico**. L'osservazione ha
+la **stessa identica uscita** sotto l'ipotesi buona e sotto quella cattiva — è la
+**classe 178** applicata a una data invece che a una banda.
+
+### ✅ LA REGOLA
+📐 **La profondità di storico si misura sulla PRIMA OPERAZIONE dell'IS (o sul Diario
+del tester), mai sulla data di stacco IS/OOS.**
+🧮 **Ripiego ammesso quando il per-trade dell'IS non c'è: il TASSO** (deal/anno IS
+contro deal/anno OOS). Un IS troncato ha un tasso **più alto**. 🔴 Ma va dichiarato
+**quanto** esclude: nel caso reale, 116/anno contro 133 escludeva un buco **> ~10 mesi**
+e nient'altro — cioè `[INFERITO]` **con un limite accanto**, non `[MISURATO]`.
+
+---
+
+## 📍🎭 CLASSE 415 — LA CITAZIONE DI RIGA CHE CENTRA LE PAROLE E SBAGLIA IL SOGGETTO: l'intervallo esiste, la frase c'è, ma parla di un ALTRO candidato (18/09/2026)
+
+**Il caso.** Un verdetto che archiviava AUDJPY apriva con: *«`REGISTRO_TEST.md`
+r.2614-2618 li dava ancora per “NON ANCORA MISURATO”»*. Aperte le righe: a **r.2614**
+quelle parole sono il verdetto su **FiboH4 GBPUSD (R139c)**; a r.2616-2622 c'è il
+blocco «tre file prova nuovi», che dà R139a/b come **file prova pronti**. Per
+R139a/R139b il registro **non dice affatto** «non ancora misurato».
+
+🔴 **Perché non è la 43 né la 271.** Lì la riga **si sposta** (drift) e la frase resta
+vera. Qui **la riga è giusta e la frase pure**: sbagliato è il **SOGGETTO**. È il caso
+peggiore, perché un `grep` della frase **conferma** la citazione: la trova, e la trova
+proprio lì.
+
+### ✅ LA REGOLA
+📐 **Una citazione di riga si verifica su TRE cose, non due: (1) la riga esiste,
+(2) contiene la frase, (3) il SOGGETTO della frase è quello di cui sto parlando.**
+In un registro a blocchi, due candidati diversi distano quattro righe.
+⚠️ Vale doppio quando l'intervallo citato **attraversa un `###`**: un intervallo che
+scavalca un titolo di sezione è, per costruzione, un intervallo che parla di due
+soggetti.
+
+---
+
+## 🥇🕳️ CLASSE 416 — IL PRIMATO DICHIARATO SENZA IL CENSIMENTO: «il migliore che questo motore abbia MAI mostrato», smentito da un CSV nella stessa cartella (18/09/2026)
+
+**Il caso.** *«L'OOS di GBPUSD è il miglior profilo fuori campione che `EMA200` abbia
+MAI mostrato sul forex»* (PF 1,127-1,139, DD 10,0-11,0%). Nella **stessa** cartella
+`risultati_prove/ABTG_EMA200/`: `..._EURUSD_OOS_r29a.csv` → **PF 1,224 con DD 9,05%
+su 646 deal**, 28 celle su 30 sopra 1,10, e **stesso segno nelle due finestre**. Più
+alto di PF e più basso di DD.
+
+🔴 **Il difetto non è l'errore di fatto: è il SUPERLATIVO SENZA CRITERIO.** «Migliore»
+su cosa? Su PF vince EURUSD; su **durata** (9,8 anni contro 21 mesi) e su **posizioni**
+(705-721 contro ~353) vince GBPUSD. Senza il criterio accanto la frase non è né vera
+né falsa — è **invendibile**, e in un referto che archivia candidati orienta le
+decisioni.
+
+### ✅ LA REGOLA
+📐 **Un primato si scrive solo dopo aver ELENCATO PER NOME l'insieme su cui è
+calcolato** (classe 180) **e con la grandezza accanto**: «il più lungo», «il più largo
+in posizioni», mai «il migliore».
+🔎 **Costo del censimento: un `glob` più una lettura di colonna.** Nel caso reale
+erano 8 file e 30 secondi — e il referto che conteneva il superlativo denunciava **in
+prima pagina** la **classe 411** (non aver cercato ciò che c'era già).
+
+---
+
+## 🔬🧾 CLASSE 417 — LA PRECISIONE FABBRICATA: al numero detto a Claudio si dà UNA CIFRA IN PIÙ di quelle che lo strumento stampa (ROVESCIO della 385) (18/09/2026)
+
+**Il caso.** `pine/ABTG_SuperEMA_Riding_v2.pine`. Il messaggio in partenza diceva
+`0,80 / 2,699 = 0,2965 ATR`. Il conto vero è **0,296406 → 0,2964**. E il pannello che
+Claudio ha davanti stampa `thrInAtr` col formato `"#.###"`: sullo schermo si legge
+**`0.296`**. Due cifre in disaccordo su un numero che lui **può vedere**.
+
+**Perché non è pignoleria.** Il pannello stampa l'ATR **arrotondato al tick intero**
+(`atrF / syminfo.mintick`, formato `"#"` → `2699 tick`), quindi l'ATR vero sta in
+**[2,6985; 2,6995]** e il rapporto sta in **[0,29635; 0,29646]**: 🔴 **0,2965 è fuori
+dalla banda anche nel caso più favorevole.** Non è un arrotondamento generoso, è un
+numero che **nessun ATR compatibile col pannello può produrre**.
+
+### ✅ LA REGOLA
+📐 **Un numero che lo strumento STAMPA si riporta con le cifre che stampa.** La cifra
+in più si dà **solo** se ricalcolata dalla grandezza grezza, **dichiarando la banda di
+incertezza** che l'arrotondamento di stampa impone. Se la banda è più larga
+dell'ultima cifra, **quell'ultima cifra non si scrive**.
+🔄 **Rovescio della 385.** La 385 è *«l'INCERTEZZA fabbricata da un arrotondamento di
+stampa»*; questa è *«la PRECISIONE fabbricata»*. **Stessa causa, versi opposti**: si
+legge un numero **stampato** come se fosse il numero **grezzo**. Prima di aggiungere o
+togliere una cifra: **quale dei due sto guardando?**
+
+---
+
+## 🎛️🚪 CLASSE 418 — L'ESPERIMENTO CHE APRE TRE CANCELLI SU SEI: le manopole proposte sono giuste, il verdetto che produrranno è FALSO (18/09/2026)
+
+**Il caso.** `pine/ABTG_SuperEMA_Riding_v2.pine`. Per far vedere l'origine **BAND
+RIDING** su oro M1 si proponevano tre manopole: `BB Deviation — Indici/Oro` 3.0→2.0,
+`ATR minimo` 8.0→1.5, `X (range candela/ATR)` 1.0→0.6. **Tutte e tre esistono con
+quei nomi e quei default** — la proposta era *verificabile e vera*. Ma il segnale nasce
+da **SEI** condizioni in AND:
+`touchUp and slopeUp>=slopeThr and isExpand and crLongOk and atrAll and haLongOk`.
+Le tre manopole toccano **`touchUp`** e **`atrAll`**. Restano chiusi, ai default:
+**slope** (0,80 unità in 3 barre), **espansione**, **filtro Cross** (acceso) e
+**Heikin Ashi** (ombra contraria ≤ 0,50 unità su DUE candele di fila) — e su oro
+quest'ultimo è il più stretto dei sei.
+
+🔴 **Il danno è il peggiore che facciamo.** L'esperimento **non mostra niente**, e la
+conclusione diventa *«il band riding su oro non spara mai»*: un **candidato archiviato
+su una misura mai accesa**. È il difetto che il **certificato di morte** del 09/09
+esiste per impedire, entrato dalla porta di servizio — non da un verdetto, da un
+**consiglio di taratura**.
+
+### ✅ LA REGOLA
+📐 **Quando si propongono manopole per FAR VEDERE un fenomeno, si conta l'AND
+COMPLETO che lo governa e si dichiara quanti cancelli su quanti le manopole aprono.**
+Se non sono tutti, si dice **quali restano chiusi e con che soglia in unità di prezzo**
+— e i filtri residui si spengono **UNO ALLA VOLTA**, altrimenti non si sa quale
+bloccava.
+🔗 **Corollario, stessa famiglia: PAROLA UGUALE, DUE MECCANISMI.** Nel file «band
+riding» è **il CONTATORE** (`rideCnt`, **puro tocco**: `ATR minimo` e `X` non lo
+toccano affatto) **e** l'**ORIGINE DI SEGNALE** (i sei AND). Un consiglio di taratura
+che non dice **quale dei due** sta tarando fa muovere manopole a **effetto ZERO** sulla
+cosa che si sta guardando.

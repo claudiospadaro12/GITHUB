@@ -1,6 +1,6 @@
 //@version=5
 // ═══════════════════════════════════════════════════════════════════════════════
-// ABTG SuperEMA Riding — v2.1  (TradingView)
+// ABTG SuperEMA Riding — v2.2  (TradingView)
 // Autore: Claudio (con Claude) · 18/09/2026
 //
 // CHE COS'E': il tuo "ABTG BR+EMA v1.2" (31/05/2026) con dentro le due cose
@@ -138,7 +138,7 @@
 //    decide se una di queste diventa una sedia -- oggi e' NON MISURATA.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-indicator("ABTG SuperEMA Riding — v2.1", shorttitle="ABTG SER v2",
+indicator("ABTG SuperEMA Riding — v2.2", shorttitle="ABTG SER v2",
           overlay=true, max_labels_count=500, max_lines_count=100)
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -440,6 +440,76 @@ if shortSig
     lastOrig := nomeOrigine(origMaskS)
 
 // ═══════════════════════════════════════════════════════════════════════════════
+// 11b. BUY / SELL come nel Supertrend CLASSICO, e il PRE-ALLARME
+// ═══════════════════════════════════════════════════════════════════════════════
+gBS = "═══ BUY / SELL a grafico (stile Supertrend classico) ═══"
+showBuySell = input.bool(true, "Etichette BUY / SELL sul cambio del Supertrend", group=gBS)
+soloChiuse  = input.bool(false,"BUY/SELL solo a barra CHIUSA (niente ridisegno)", group=gBS,
+     tooltip="SPENTO = comportamento del Supertrend classico: l'etichetta compare " +
+             "appena la chiusura VIVA supera la linea, e SPARISCE se la candela " +
+             "torna indietro. ACCESO = compare solo a candela chiusa: arriva piu' " +
+             "tardi ma non si cancella mai.")
+
+// 🔴 NON si duplica la logica: sono gli STESSI rawLongST/rawShortST che
+// alimentano l'origine ST. Se li riscrivessi qui, un giorno le etichette e
+// l'origine direbbero cose diverse e nessuno se ne accorgerebbe.
+bsOk    = not soloChiuse or barstate.isconfirmed
+buySig  = rawLongST  and bsOk
+sellSig = rawShortST and bsOk
+
+gPre = "═══ Pre-allarme: il cambio si sta formando ═══"
+usePre  = input.bool(true, "Pre-allarme quando il prezzo si avvicina alla linea", group=gPre)
+preDist = input.float(0.35,"Distanza dalla linea, in ATR del Supertrend", minval=0.01, step=0.05, group=gPre,
+     tooltip="0.35 = il pre-allarme scatta quando alla rottura manca poco piu' di " +
+             "un terzo di ATR. Piu' grande = piu' anticipo e piu' falsi allarmi. " +
+             "Il pannello ti dice quanti se ne avverano: TARALO SUL NUMERO.")
+preBars = input.int(1,     "Barre consecutive di avvicinamento richieste", minval=1, maxval=20, group=gPre)
+preWait = input.int(5,     "Barre entro cui deve avverarsi per contare come CENTRATO", minval=1, group=gPre)
+
+// 🔴 QUESTO NON E' UNA PREVISIONE, ED E' IMPORTANTE CHE SI SAPPIA.
+// Il cambio del Supertrend avviene quando la chiusura supera la linea: PRIMA che
+// succeda, l'unica cosa che esiste davvero e' la DISTANZA dalla linea. Il
+// pre-allarme misura quella. Scatta anche quando poi il cambio NON arriva, e non
+// e' un difetto: e' cosa vuol dire "avvisare prima". Per questo il pannello conta
+// quanti se ne avverano -- cosi' il numero lo decidi tu, non io.
+mancaGiu = trendST ==  1 ? close - up : na    // quanto manca a rompere in GIU
+mancaSu  = trendST == -1 ? dn - close : na    // quanto manca a rompere in SU
+preSell0 = trendST ==  1 and (close - up) > 0 and (close - up) <= preDist * atrST
+preBuy0  = trendST == -1 and (dn - close) > 0 and (dn - close) <= preDist * atrST
+preSellN = math.sum(preSell0 ? 1 : 0, preBars) == preBars
+preBuyN  = math.sum(preBuy0  ? 1 : 0, preBars) == preBars
+// solo la PRIMA barra dell'avvicinamento, altrimenti e' una fila di segnacci
+preBuy   = usePre and preBuyN  and not preBuyN[1]
+preSell  = usePre and preSellN and not preSellN[1]
+
+// il contatore che rende il pre-allarme MISURABILE invece che opinabile
+var int preTot = 0
+var int preHit = 0
+var int preLead = 0
+var int preDir = 0
+var int preAge = 0
+if preDir != 0
+    preAge := preAge + 1
+if preDir == 1 and rawLongST
+    preHit := preHit + 1
+    preLead := preLead + preAge
+    preDir := 0
+if preDir == -1 and rawShortST
+    preHit := preHit + 1
+    preLead := preLead + preAge
+    preDir := 0
+if preDir != 0 and preAge > preWait
+    preDir := 0
+if preBuy and preDir == 0
+    preDir := 1
+    preAge := 0
+    preTot := preTot + 1
+if preSell and preDir == 0
+    preDir := -1
+    preAge := 0
+    preTot := preTot + 1
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // 12. DISEGNO
 // ═══════════════════════════════════════════════════════════════════════════════
 gD = "═══ Display ═══"
@@ -474,6 +544,31 @@ plotshape(shortSig, title="SHORT", location=location.abovebar, style=shape.trian
      size=size.normal, color=color.new(color.red, 0),
      text="SHORT", textcolor=color.white)
 
+// BUY / SELL come il Supertrend classico: pallino sulla linea + targhetta.
+// Stanno sulla LINEA (location.absolute), non sulla candela: e' cosi' che li
+// disegna lo script originale, ed e' anche il punto che serve (la cuspide e'
+// lo stop naturale).
+plotshape(showBuySell and buySig ? up : na, title="Inizio trend SU",
+     location=location.absolute, style=shape.circle, size=size.tiny,
+     color=color.new(color.green, 0))
+plotshape(showBuySell and buySig ? up : na, title="Buy", text="Buy",
+     location=location.absolute, style=shape.labelup, size=size.tiny,
+     color=color.new(color.green, 0), textcolor=color.white)
+plotshape(showBuySell and sellSig ? dn : na, title="Inizio trend GIU",
+     location=location.absolute, style=shape.circle, size=size.tiny,
+     color=color.new(color.red, 0))
+plotshape(showBuySell and sellSig ? dn : na, title="Sell", text="Sell",
+     location=location.absolute, style=shape.labeldown, size=size.tiny,
+     color=color.new(color.red, 0), textcolor=color.white)
+
+// PRE-ALLARME: rombo pallido, deliberatamente DIVERSO dalla targhetta piena.
+// Un avviso che somiglia a un segnale finisce per essere scambiato per un
+// segnale, e allora il danno lo fa proprio quando sbaglia.
+plotshape(preBuy  ? low  : na, title="Pre-allarme BUY",  location=location.belowbar,
+     style=shape.diamond, size=size.tiny, color=color.new(color.lime, 45))
+plotshape(preSell ? high : na, title="Pre-allarme SELL", location=location.abovebar,
+     style=shape.diamond, size=size.tiny, color=color.new(color.red, 45))
+
 // etichette con l'origine: l'informazione per cui questo strumento esiste
 if showOrig and longSig
     label.new(bar_index, low, nomeOrigine(origMaskL), yloc=yloc.belowbar,
@@ -489,6 +584,10 @@ if showOrig and shortSig
 // ═══════════════════════════════════════════════════════════════════════════════
 alertcondition(longSig,  title="ABTG LONG",  message="ABTG LONG su {{ticker}} @ {{close}}")
 alertcondition(shortSig, title="ABTG SHORT", message="ABTG SHORT su {{ticker}} @ {{close}}")
+alertcondition(buySig,  title="ABTG Supertrend BUY",  message="ABTG Supertrend BUY su {{ticker}} @ {{close}}")
+alertcondition(sellSig, title="ABTG Supertrend SELL", message="ABTG Supertrend SELL su {{ticker}} @ {{close}}")
+alertcondition(preBuy,  title="ABTG PRE-allarme BUY",  message="ABTG PRE-ALLARME BUY su {{ticker}} -- NON e' un segnale: manca poco alla rottura")
+alertcondition(preSell, title="ABTG PRE-allarme SELL", message="ABTG PRE-ALLARME SELL su {{ticker}} -- NON e' un segnale: manca poco alla rottura")
 alertcondition(rideCnt ==  ridingBars, title="ABTG Band riding SU",  message="ABTG BAND RIDING SU su {{ticker}}")
 alertcondition(rideCnt == -ridingBars, title="ABTG Band riding GIU", message="ABTG BAND RIDING GIU su {{ticker}}")
 
@@ -531,11 +630,11 @@ thrInAtr  = atrF > 0 ? slopeThr / atrF : 0.0
 //  e' un errore di parse: Pine usa i multipli di 4 per i blocchi locali.)
 kSuspect  = (thrInAtr > 5.0) or (thrInAtr < 0.001 and thrInAtr > 0) or (useAutoK and kFxLike and math.abs(K - kPip) > kPip * 0.5)
 
-var table t = table.new(position.top_right, 2, 11,
+var table t = table.new(position.top_right, 2, 13,
      bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
 if showPanel and barstate.islast
     table.cell(t, 0, 0, "ABTG SuperEMA Riding", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
-    table.cell(t, 1, 0, "v2.1", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 0, "v2.2", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
 
     table.cell(t, 0, 1, "categoria / K", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 1, cat + " (" + catSrc + ")  K=" + str.tostring(K, "#.######"),
@@ -586,6 +685,23 @@ if showPanel and barstate.islast
     table.cell(t, 0, 10, "fuso / ora filtro", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 10, syminfo.timezone + "   hour=" + str.tostring(hour),
          text_color=fHour ? color.yellow : color.gray, text_size=size.small)
+
+    // quanto manca al cambio: e' il numero che il pre-allarme guarda
+    table.cell(t, 0, 11, "manca al cambio", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 11, str.tostring(trendST == 1 ? (close - up) / atrST : (dn - close) / atrST, "#.###") +
+         " ATR  (scatta a " + str.tostring(preDist, "#.##") + ")",
+         text_color=(trendST == 1 ? (close - up) : (dn - close)) <= preDist * atrST ? color.orange : color.gray,
+         text_size=size.small)
+
+    // 🔴 LA RIGA CHE RENDE IL PRE-ALLARME UN NUMERO E NON UN'OPINIONE.
+    // Conta da quando comincia lo storico caricato: cambiando TF o tirando
+    // indietro il grafico il conteggio cambia, ed e' giusto cosi'.
+    table.cell(t, 0, 12, "pre-allarme centrati", text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 12, str.tostring(preHit) + " su " + str.tostring(preTot) +
+         (preTot > 0 ? "  (" + str.tostring(preHit * 100.0 / preTot, "#") + "%)" : "") +
+         (preHit > 0 ? "   anticipo medio " + str.tostring(preLead / preHit, "#.#") + " barre" : ""),
+         text_color=preTot == 0 ? color.gray : (preHit * 2 >= preTot ? color.lime : color.red),
+         text_size=size.small)
 // ═══════════════════════════════════════════════════════════════════════════════
 // FINE
 // ═══════════════════════════════════════════════════════════════════════════════
