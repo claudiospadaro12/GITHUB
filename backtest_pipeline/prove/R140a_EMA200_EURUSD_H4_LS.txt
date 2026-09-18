@@ -128,9 +128,13 @@
 #    edge, sono UNA DIREZIONE DI UNA SOLA EPOCA, contata 30 volte".
 #    E ha tre appigli VERI, che ho misurato io:
 #      1. la finestra di R29a e' `@DAQUANDO 2024.09.26`
-#         (prove/R29a_ema200_eurusd.txt r.24) -- cioe' ~21 mesi, UN
+#         (prove/R29a_ema200_eurusd.txt r.23) -- cioe' ~21 mesi, UN
 #         regime solo. "IS" e "OOS" li' dentro sono due fette dello
-#         stesso mercato.
+#         stesso mercato. (La data di FINE di R29a e' [NON MISURATO]:
+#         quel file non ha `@FINOA` e il default di FABBRICA del driver
+#         OGGI e' 2026.06.30, walkforward_generico.ps1 r.177 -- quale
+#         fosse il default il 12/08 non l'ho verificato. I ~21 mesi
+#         sono quindi una STIMA, non una lettura.)
 #      2. le 30 celle di R29a differiscono solo per O1 (0,10-0,30),
 #         O2 (0,2-0,3), TP (1,5-2,5): girano in gran parte sulle STESSE
 #         operazioni. "30/30 in utile" ha un campione efficace vicino a
@@ -142,11 +146,17 @@
 #      la finestra 2010.01.01 -> 2026.06.30 contiene la discesa
 #      1,39 -> 1,05 del 2014-2015 E la discesa 1,23 -> 0,96 del 2022 E
 #      le salite 2017 e 2020: piu' regimi, in tutti e due i versi.
-#      Se l'edge fosse deriva, su 16,5 anni IS e OOS NON possono
-#      restare positive tutte e due: una delle due deve andare sotto
-#      1,00 (e scatta S4). Se invece restano DELLO STESSO SEGNO su
-#      ~2.200 deal, la spiegazione "deriva di un'epoca" e' morta, come
-#      su AUDJPY l'ha uccisa la sottrazione OOS - fetta a tick.
+#      Se l'edge fosse deriva, su 16,5 anni il PF deve TORNARE a ~1,00,
+#      perche' le derive dei due versi si annullano: mi aspetto allora
+#      almeno una delle due finestre sotto 1,00 (scatta S4) oppure tutte
+#      e due schiacciate nella banda 0,98-1,04. Se invece restano DELLO
+#      STESSO SEGNO e sopra 1,10 su ~2.200 deal che attraversano quattro
+#      regimi, la spiegazione "deriva di un'epoca" e' morta -- come su
+#      AUDJPY l'ha uccisa la sottrazione OOS - fetta a tick.
+#      >>> E il test e' SIMMETRICO, cioe' puo' bocciare la mia tesi: se
+#          il PF esce a 1,02 io NON posso dire "ma il motore e' buono,
+#          e' la finestra lunga che diluisce". Quella frase e' vietata
+#          adesso, scritta prima dei numeri.
 #    >>> E' un contro-esempio ONESTO perche' puo' vincere lui: l'esito
 #        che mi aspetto (sotto) e' proprio quello in cui il PF si
 #        sgonfia.
