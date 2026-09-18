@@ -1,0 +1,266 @@
+==============================================================================
+DD PER RIORDINO -- FAMIGLIA Nasdaq_Apertura_US / NASUSD
+metodo importato da distribuzione_dd_riordino.py (non riscritto)
+riordini=20000 blocchi=20000 avversari=5000 seed=20260918 soglia=50 posizioni
+==============================================================================
+
+--- CONTROLLO DI NON-REGRESSIONE (Dow 770202 via 770206) ---
+    n_pos          ricalcolato=96  pubblicato 18/09=96  -> COINCIDE
+    dd_osservato   ricalcolato=4.22346962616014  pubblicato 18/09=4.2235  -> COINCIDE
+    rapporto_p95   ricalcolato=1.9515035591019652  pubblicato 18/09=1.952  -> COINCIDE
+    p95            ricalcolato=8.2421  pubblicato 18/09=8.2421  -> COINCIDE
+    p99            ricalcolato=9.7253  pubblicato 18/09=9.7253  -> COINCIDE
+    ESITO: PASS -- il wrapper NON ha cambiato il metodo
+
+### FORWARD VERO -- magic 770201 da data/statements/trades_auto.csv
+    posizioni=10  simboli=['NASUSD']  dal 2026.07.20 al 2026.08.11
+    somma netta=228.34  minimo=0.19  n. posizioni in perdita=0
+    DD a posizioni chiuse con deposito 100000 = 0.000000%
+    DD a posizioni chiuse con deposito 10000 = 0.000000%
+    -> NESSUNA PERDITA nella serie: il DD a posizioni chiuse e' IDENTICAMENTE ZERO per OGNI riordino.
+    -> p99 = 0.0000%% per costruzione. NON e' una misura della coda: e' una degenerazione. NON si pubblica.
+
+### R84-A scheletro nudo  NASUSD  magic sedia viva 770201  (per-trade: magic 776010)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84a_776010.csv
+    posizioni=241  deal=291  da 2025.06.10 a 2026.06.29  profitto=-795.03
+    riga del tester: backtest_pipeline/risultati_archivio/r83_csv/ABTG_Apertura_3Ingressi_NASUSD_OOS_r83n0.csv (file concordi=2, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=17.0700  PF=0.87315  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (-0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=16.6531%  scarto=-0.4169 pp (-2.44% relativo)
+    peggior giornata: ricalcolata=-1.0454%  tester=-1.0454%
+    ACF P/L lag1..5: +0.0236 +0.0892 -0.0683 +0.0928 +0.0028
+    corsa perdente max=4
+    DD per riordino iid: mediana=13.2069 p90=16.6403 p95=17.7241 p99=19.7437 max=24.5503
+    RAPPORTO p95/oss=1.064  p99/oss=1.186
+    BLOCCHI (len=4): mediana=13.5601 p95=18.1862 p99=20.2359 max=24.7577
+    -> il riordino iid SOTTOSTIMA la coda (p95 blocchi 18.1862 vs iid 17.7241)
+    peggior giornata per riordino: mediana=-1.0454 p95=-1.0454 p99=-1.0454 peggiore=-1.0454
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 93.5900%
+    quota permutazioni a blocchi con DD >= 10%: 94.8100%
+    CONTRO-ESEMPIO A: blocco perdente vero len=4 (posizioni 225..228 della sequenza vera) spostato all'indice 189 -> DD=16.6531
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=24.8827
+    TETTO NON PLAUSIBILE: DD=46.0067
+    posizioni per giornata (media)=1.00
+
+### R84-B volumi  NASUSD  magic sedia viva 770201  (per-trade: magic 776020)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84b_776020.csv
+    posizioni=75  deal=92  da 2025.06.10 a 2026.04.17  profitto=-85.01
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84b.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=4.5923  PF=0.95032  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (-0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=3.9943%  scarto=-0.5980 pp (-13.02% relativo)
+    peggior giornata: ricalcolata=-1.0262%  tester=-1.0262%
+    ACF P/L lag1..5: -0.2423 +0.2645 -0.2248 -0.0184 +0.0061
+    corsa perdente max=3
+    DD per riordino iid: mediana=5.2690 p90=7.1690 p95=7.7574 p99=8.9438 max=11.5867
+    RAPPORTO p95/oss=1.942  p99/oss=2.239
+    BLOCCHI (len=3): mediana=4.6147 p95=6.6619 p99=7.4201 max=9.4056
+    -> il riordino iid SOVRASTIMA la coda (p95 blocchi 6.6619 vs iid 7.7574)
+    peggior giornata per riordino: mediana=-1.0262 p95=-1.0262 p99=-1.0262 peggiore=-1.0262
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 0.1600%
+    quota permutazioni a blocchi con DD >= 10%: 0.0000%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 43..45 della sequenza vera) spostato all'indice 55 -> DD=5.5116
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=8.8639
+    TETTO NON PLAUSIBILE: DD=15.6649
+    posizioni per giornata (media)=1.00
+
+### R84-C atr  NASUSD  magic sedia viva 770201  (per-trade: magic 776030)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84c_776030.csv
+    posizioni=151  deal=180  da 2025.06.12 a 2026.06.29  profitto=-91.58
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84c.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=6.7284  PF=0.97232  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (+0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=5.9898%  scarto=-0.7386 pp (-10.98% relativo)
+    peggior giornata: ricalcolata=-1.0407%  tester=-1.0407%
+    ACF P/L lag1..5: -0.0949 +0.0314 -0.0124 +0.1035 -0.0968
+    corsa perdente max=3
+    DD per riordino iid: mediana=7.4682 p90=10.1033 p95=10.9533 p99=12.4601 max=15.4554
+    RAPPORTO p95/oss=1.829  p99/oss=2.080
+    BLOCCHI (len=3): mediana=6.9763 p95=10.1072 p99=11.5427 max=14.8256
+    -> il riordino iid SOVRASTIMA la coda (p95 blocchi 10.1072 vs iid 10.9533)
+    peggior giornata per riordino: mediana=-1.0407 p95=-1.0407 p99=-1.0407 peggiore=-1.0407
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 10.8100%
+    quota permutazioni a blocchi con DD >= 10%: 5.5250%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 43..45 della sequenza vera) spostato all'indice 119 -> DD=7.9039
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=14.2037
+    TETTO NON PLAUSIBILE: DD=27.8797
+    posizioni per giornata (media)=1.00
+
+### R84-D volumi OR atr  NASUSD  magic sedia viva 770201  (per-trade: magic 776040)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84d_776040.csv
+    posizioni=169  deal=201  da 2025.06.10 a 2026.06.29  profitto=-287.19
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84d.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=6.9188  PF=0.92450  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (+0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=6.1868%  scarto=-0.7320 pp (-10.58% relativo)
+    peggior giornata: ricalcolata=-1.0605%  tester=-1.0605%
+    ACF P/L lag1..5: -0.1616 +0.1314 -0.0803 +0.0851 -0.0099
+    corsa perdente max=3
+    DD per riordino iid: mediana=8.7020 p90=11.6309 p95=12.4955 p99=14.1569 max=19.2599
+    RAPPORTO p95/oss=2.020  p99/oss=2.288
+    BLOCCHI (len=3): mediana=8.5116 p95=12.0519 p99=13.5093 max=18.0088
+    -> il riordino iid SOVRASTIMA la coda (p95 blocchi 12.0519 vs iid 12.4955)
+    peggior giornata per riordino: mediana=-1.0605 p95=-1.0605 p99=-1.0605 peggiore=-1.0605
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 27.4500%
+    quota permutazioni a blocchi con DD >= 10%: 23.3900%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 153..155 della sequenza vera) spostato all'indice 85 -> DD=7.9116
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=17.7337
+    TETTO NON PLAUSIBILE: DD=31.5992
+    posizioni per giornata (media)=1.00
+
+### R84-E ema 14/200  NASUSD  magic sedia viva 770201  (per-trade: magic 776050)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84e_776050.csv
+    posizioni=174  deal=202  da 2025.06.10 a 2026.06.29  profitto=-1455.54
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84e.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=15.6567  PF=0.68132  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (-0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=15.5794%  scarto=-0.0773 pp (-0.49% relativo)
+    peggior giornata: ricalcolata=-1.1874%  tester=-1.1874%
+    ACF P/L lag1..5: +0.0837 +0.0359 -0.0055 -0.0743 -0.0210
+    corsa perdente max=7
+    DD per riordino iid: mediana=16.7389 p90=19.1497 p95=19.8956 p99=21.3372 max=26.4740
+    RAPPORTO p95/oss=1.277  p99/oss=1.370
+    BLOCCHI (len=7): mediana=16.9152 p95=20.1059 p99=21.2833 max=23.7718
+    -> il riordino iid SOTTOSTIMA la coda (p95 blocchi 20.1059 vs iid 19.8956)
+    peggior giornata per riordino: mediana=-1.1874 p95=-1.1874 p99=-1.1874 peggiore=-1.1874
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 100.0000%
+    quota permutazioni a blocchi con DD >= 10%: 100.0000%
+    CONTRO-ESEMPIO A: blocco perdente vero len=7 (posizioni 159..165 della sequenza vera) spostato all'indice 103 -> DD=17.1066
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=22.9357
+    TETTO NON PLAUSIBILE: DD=38.6739
+    posizioni per giornata (media)=1.00
+
+### R84-F supertrend  NASUSD  magic sedia viva 770201  (per-trade: magic 776060)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84f_776060.csv
+    posizioni=181  deal=217  da 2025.06.13 a 2026.06.29  profitto=-899.47
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84f.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=10.8414  PF=0.81513  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (+0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=10.6233%  scarto=-0.2181 pp (-2.01% relativo)
+    peggior giornata: ricalcolata=-1.0460%  tester=-1.0460%
+    ACF P/L lag1..5: +0.0871 -0.0077 -0.0467 -0.1329 -0.0719
+    corsa perdente max=6
+    DD per riordino iid: mediana=12.9921 p90=16.0742 p95=17.0162 p99=18.8464 max=23.9891
+    RAPPORTO p95/oss=1.602  p99/oss=1.774
+    BLOCCHI (len=6): mediana=12.8533 p95=16.4033 p99=17.9033 max=20.9061
+    -> il riordino iid SOVRASTIMA la coda (p95 blocchi 16.4033 vs iid 17.0162)
+    peggior giornata per riordino: mediana=-1.0460 p95=-1.0460 p99=-1.0460 peggiore=-1.0460
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 95.3900%
+    quota permutazioni a blocchi con DD >= 10%: 95.1050%
+    CONTRO-ESEMPIO A: blocco perdente vero len=6 (posizioni 165..170 della sequenza vera) spostato all'indice 63 -> DD=12.2362
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=20.0565
+    TETTO NON PLAUSIBILE: DD=39.5514
+    posizioni per giornata (media)=1.00
+
+### R84-G supertrend x3  NASUSD  magic sedia viva 770201  (per-trade: magic 776070)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84g_776070.csv
+    posizioni=145  deal=169  da 2025.06.13 a 2026.06.26  profitto=-993.91
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84g.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=13.0180  PF=0.73861  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (+0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=12.4788%  scarto=-0.5392 pp (-4.14% relativo)
+    peggior giornata: ricalcolata=-1.0629%  tester=-1.0629%
+    ACF P/L lag1..5: +0.0876 -0.0782 -0.1633 -0.1158 -0.0668
+    corsa perdente max=3
+    DD per riordino iid: mediana=12.7542 p90=15.3097 p95=16.1194 p99=17.5797 max=22.0001
+    RAPPORTO p95/oss=1.292  p99/oss=1.409
+    BLOCCHI (len=3): mediana=12.7858 p95=16.0895 p99=17.5251 max=21.5233
+    -> il riordino iid SOVRASTIMA la coda (p95 blocchi 16.0895 vs iid 16.1194)
+    peggior giornata per riordino: mediana=-1.0629 p95=-1.0629 p99=-1.0629 peggiore=-1.0629
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 98.6250%
+    quota permutazioni a blocchi con DD >= 10%: 98.8400%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 133..135 della sequenza vera) spostato all'indice 115 -> DD=12.4788
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=21.0460
+    TETTO NON PLAUSIBILE: DD=32.7995
+    posizioni per giornata (media)=1.00
+
+### R84-H corr SPXUSD  NASUSD  magic sedia viva 770201  (per-trade: magic 776080)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84h_776080.csv
+    posizioni=177  deal=211  da 2025.06.10 a 2026.06.29  profitto=-623.81
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84h.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=10.1323  PF=0.85687  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (-0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=9.9555%  scarto=-0.1768 pp (-1.74% relativo)
+    peggior giornata: ricalcolata=-1.1792%  tester=-1.1792%
+    ACF P/L lag1..5: +0.0692 +0.0649 +0.0246 +0.0143 -0.0526
+    corsa perdente max=7
+    DD per riordino iid: mediana=10.9162 p90=13.8959 p95=14.8491 p99=16.6142 max=19.9697
+    RAPPORTO p95/oss=1.492  p99/oss=1.669
+    BLOCCHI (len=7): mediana=11.9773 p95=16.0151 p99=17.4741 max=19.9595
+    -> il riordino iid SOTTOSTIMA la coda (p95 blocchi 16.0151 vs iid 14.8491)
+    peggior giornata per riordino: mediana=-1.1792 p95=-1.1792 p99=-1.1792 peggiore=-1.1792
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 66.7050%
+    quota permutazioni a blocchi con DD >= 10%: 80.1450%
+    CONTRO-ESEMPIO A: blocco perdente vero len=7 (posizioni 162..168 della sequenza vera) spostato all'indice 126 -> DD=11.6704
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=20.5397
+    TETTO NON PLAUSIBILE: DD=35.5015
+    posizioni per giornata (media)=1.00
+
+### R84-I metodo completo  NASUSD  magic sedia viva 770201  (per-trade: magic 776090)
+    file: backtest_pipeline/risultati_archivio/r84_csv/pertrade_r84i_776090.csv
+    posizioni=60  deal=69  da 2025.06.19 a 2026.06.26  profitto=-289.44
+    riga del tester: backtest_pipeline/risultati_archivio/r84_csv/ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r84i.csv (file concordi=1, varianti DD/PF=1, univoca=True)
+    tester: Equity DD %=8.8840  PF=0.78527  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (-0.0000%) -> ESATTO
+    deposito dedotto=10000
+    DD ricalcolato (posizioni chiuse)=8.6606%  scarto=-0.2234 pp (-2.51% relativo)
+    peggior giornata: ricalcolata=-1.0267%  tester=-1.0267%
+    ACF P/L lag1..5: +0.0515 +0.0591 +0.2025 +0.1572 -0.0783
+    corsa perdente max=5
+    DD per riordino iid: mediana=5.6737 p90=7.4420 p95=7.9576 p99=8.8827 max=10.5023
+    RAPPORTO p95/oss=0.919  p99/oss=1.026
+    BLOCCHI (len=5): mediana=6.2424 p95=8.6219 p99=9.4108 max=10.6001
+    -> il riordino iid SOTTOSTIMA la coda (p95 blocchi 8.6219 vs iid 7.9576)
+    peggior giornata per riordino: mediana=-1.0267 p95=-1.0267 p99=-1.0267 peggiore=-1.0267
+    quota riordini con giornata <= -5%: 0.0000%
+    quota riordini iid con DD >= 10%: 0.0550%
+    quota permutazioni a blocchi con DD >= 10%: 0.1550%
+    CONTRO-ESEMPIO A: blocco perdente vero len=5 (posizioni 23..27 della sequenza vera) spostato all'indice 26 -> DD=8.6606
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi -> DD=10.5614
+    TETTO NON PLAUSIBILE: DD=13.0630
+    posizioni per giornata (media)=1.00
+
+--- PROVA DI ROTTURA: meta' campione sulla cella R84-A ---
+    intero         n=241  oss=16.6531  p95=17.7241  p99=19.7437  p95bl=18.1862  p99bl=20.2359  acf1=+0.0236
+    prima meta'    n=120  oss= 6.4171  p95= 9.5133  p99=10.9709  p95bl= 9.7476  p99bl=11.3126  acf1=-0.0923
+    seconda meta'  n=121  oss=16.8864  p95=15.1124  p99=16.4642  p95bl=15.8311  p99bl=17.0648  acf1=+0.1198
+
+--- PROVA DI ROTTURA: p99 al crescere del campione (cella A) ---
+    prime  50 posizioni: oss= 3.0758  p99 iid= 5.6932  p99 blocchi= 5.3845
+    prime  75 posizioni: oss= 3.8085  p99 iid= 8.3008  p99 blocchi= 8.2174
+    prime 100 posizioni: oss= 6.4171  p99 iid=10.4230  p99 blocchi=10.6068
+    prime 125 posizioni: oss= 6.4171  p99 iid=10.4868  p99 blocchi=10.8318
+    prime 150 posizioni: oss= 6.4171  p99 iid=10.3879  p99 blocchi=11.2066
+    prime 175 posizioni: oss= 6.4171  p99 iid=12.0901  p99 blocchi=13.1012
+    prime 200 posizioni: oss= 8.4513  p99 iid=14.0016  p99 blocchi=15.1088
+    prime 225 posizioni: oss=12.5244  p99 iid=16.5799  p99 blocchi=17.1857
+    prime 241 posizioni: oss=16.6531  p99 iid=19.7437  p99 blocchi=20.2359
+
+--- PROVA DI ROTTURA: tre seed sulla cella R84-A ---
+    seed 20260918: p95=17.7828  p99=19.6320  p99 blocchi=20.2137
+    seed      101: p95=17.6599  p99=19.6248  p99 blocchi=20.0774
+    seed      202: p95=17.6381  p99=19.5481  p99 blocchi=20.0236
+
+--- CONTROLLO DEL MECCANISMO: p99 vs n su una cella POSITIVA (Dow 770206, PF 1,27) ---
+    Dow prime  50 posizioni: oss= 4.2235  p99 iid= 6.4112
+    Dow prime  60 posizioni: oss= 4.2235  p99 iid= 8.4102
+    Dow prime  70 posizioni: oss= 4.2235  p99 iid= 8.8482
+    Dow prime  80 posizioni: oss= 4.2235  p99 iid= 9.0577
+    Dow prime  96 posizioni: oss= 4.2235  p99 iid= 9.7253
+    (confronto: cella A NASUSD alle stesse n -- vedi sopra)
