@@ -140,3 +140,30 @@ Cambio reale nel repo: la correzione lessicale "pre-section → zona di
 protezione" (punto 6). Da propagare in
 `backtest_pipeline/caccia_strategie/ANALISI_LIVE_EMILIANO_2026-08-24.md` e
 `report/ANALISI_LIVE_EMILIANO_2026-09-09.md` (§2.2, spunto S3).
+
+---
+
+## 🔗 SEGUITO — live del 18/09/2026 (referto separato, non duplicato qui)
+
+👉 **`report/ANALISI_LIVE_EMILIANO_2026-09-18.md`**
+(fonte: `docs/live_emiliano/trascrizioni/LIVE_EMILIANO_2026-09-18.txt`, 472 righe).
+
+Cosa cambia rispetto a questo dossier, in tre righe — **i dettagli stanno là**:
+
+- 🔁 **ORB 15 minuti: terza ripetizione della STESSA fonte** (qui punto 2, là §1.5).
+  Nessuna misura nuova ⇒ **il cancello dei 35-45 min non si riapre**. 🔴 Ma là c'è
+  un dubbio che qui non era emerso: l'ORB è *"tre candele"* di un **TF non
+  dichiarato** — se fossero M15 la contraddizione svanirebbe. → domanda a Emiliano.
+- 🆕 **Lo scale-in prende un secondo numero.** Qui avevamo la soglia dei 200 punti
+  (3 ordini vs 2). Il 18/09 arriva la **frazione** (*"un terzo o due terzi"*) e la
+  **distanza fra gli ordini** (*"circa 20 punti"*, *"40-50 punti non ha senso"*).
+  🔴 Cade su `InpFirstFraction`, **voce 17 di `report/AUDIT_USCITE_2026-09-09.md`:
+  MAI misurata**, e viva a **0,3333** su `SuperWave 770511/770531`.
+- 🚩 **Bandiera nuova, metodologica**: il 18/09 la fonte **approva** un ingresso
+  (*"Bravissimo"*, r.333) e venti minuti dopo lo **demolisce** (*"sbagliato
+  clamorosamente"*, r.395) **senza informazione nuova in mezzo — solo l'esito del
+  trade**. Conseguenza: da quella live **non si estrae** una regola sull'ingresso a
+  retest/imbalance.
+
+**Assenze confermate anche all'ottava trascrizione**: martingala 0 · griglia 0 ·
+recovery 0 · mediazione 0 · no-stop 0 · trucchi anti-prop 0 · **regole prop 0**.
