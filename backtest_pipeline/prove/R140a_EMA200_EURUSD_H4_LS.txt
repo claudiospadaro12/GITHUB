@@ -1,10 +1,24 @@
 # ======================================================================
 #  EA: ABTG_EMA200
-#  R140a -- IL NUMERO CHE NON ESISTE: EURUSD H4, DUE LATI (L+S).
+#  R140a -- EURUSD H4, DUE LATI (L+S), SPLIT IS/OOS 2010-2026.
 #  Asse: InpTP_RR. Stesso disegno di R139b, simbolo e TF diversi.
 #  Scritto il 18/09/2026. Criteri congelati PRIMA dei numeri.
-#  Dossier: report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md par.12
+#  RISCRITTO il 18/09/2026 dal CANCELLO (strato di giudizio): la prima
+#  stesura si dichiarava "IL NUMERO CHE DISCRIMINA". NON LO E'. Vedi il
+#  paragrafo CHE COSA QUESTO ROUND NON PUO' MISURARE.
+#  Dossier: report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md
+#           par.12 + la CORREZIONE DEL 18/09 dentro quel capitolo.
 # ======================================================================
+#
+#  CHE COSA MISURA QUESTO ROUND, DETTO PER PRIMO E SENZA SCONTI
+#    Misura UNA cosa sola: come si comporta su 16,5 anni, spezzati
+#    IS/OOS, LA CONFIGURAZIONE A DUE LATI -- la stessa configurazione
+#    di R29a (H1), R139a (AUDJPY H4) e R139b (GBPUSD H4).
+#    Il suo valore e' la COMPARABILITA' con quei tre round e la lettura
+#    di S4 (coerenza dei segni IS/OOS).
+#    >>> NON e' la misura che dice se questo motore ha un edge su
+#        EURUSD H4. Quella misura e' il LATO, e sta in R140b/R140c.
+#        Il perche' e' aritmetico ed e' scritto sotto.
 #
 #  PERCHE' ESISTE, E PERCHE' PROPRIO EURUSD H4
 #    (a) E' UN CANDIDATO FERMO PER UN NUMERO MANCANTE, NON PER UN NUMERO
@@ -14,29 +28,45 @@
 #        28/30 celle sopra PF 1,10, 30/30 in utile; IS PF 0,986-1,222,
 #        DD 8,36-10,15%, 311-433 deal, 29/30 in utile. Fonte:
 #        risultati_prove/ABTG_EMA200/ABTG_EMA200_EURUSD_{IS,OOS}_r29a.csv
-#    (b) A H1 E' ESCLUSO PER COSTO, col numero: REGISTRO_TEST.md
-#        r.2393-2397 -- stop 1,0 x ATR(H1) ~ 18,0 pip / pedaggio all-in
-#        0,864 pip = 20,8x, contro il pavimento di LAVORO 40x.
-#        >>> A H4 lo stesso conto da' 41,7x e PASSA (stessa riga).
-#            Il conto rifatto da me con lo spread MISURATO sta sotto,
-#            al paragrafo IL COSTO, e viene MEGLIO di 41,7x.
-#    (c) !!! A H4 LO SPLIT IS/OOS NON ESISTE. Cercato repo-wide il
-#        18/09: zero file. C'e' solo una scansione a FINESTRA UNICA.
-#        Questo round scrive quel numero, e basta quello.
+#        >>> Con la riserva gia' scritta nel dossier: la finestra di R29a
+#            e' `@DAQUANDO 2024.09.26` (prove/R29a_ema200_eurusd.txt
+#            r.23, nessun `@FINOA`), cioe' ~21 mesi, UN regime solo, e le
+#            30 celle girano in gran parte sulle stesse operazioni.
+#    (b) !!! IL COSTO A H4 NON E' UN CANCELLO SUPERATO: E' UN CANCELLO
+#        NON MISURATO. La prima stesura scriveva "A H4 PASSA, 41,7x".
+#        Quel numero NON e' verificato: vedi IL COSTO qui sotto, dove
+#        due ancore di casa danno 54,2x e 22,2x, cioe' PASSA e NON
+#        PASSA. Questo round gira LO STESSO perche' costa 1,22 minuti e
+#        perche' S7 gli vieta di promuovere qualunque cosa -- ma se il
+#        costo si chiudesse sul valore basso, EURUSD H4 sarebbe
+#        ESCLUSO PER COSTO come H1, e il numero di questo round
+#        resterebbe solo una lettura di archivio.
+#    (c) A H4 LO SPLIT IS/OOS NON ESISTE. Cercato repo-wide il 18/09:
+#        zero file. C'e' solo una scansione a FINESTRA UNICA.
 #    (d) Il pavimento storico di EURUSD e' MISURATO, non assunto:
 #        prima operazione 1999.01.18 (storico dichiarato dal
 #        1971.01.03), risultati_archivio/R102_REFERTO_BLOCCO1.md r.106.
 #        La finestra 2010.01.01 -> 2026.06.30 e' quindi tutta dentro la
 #        parte di feed che PRODUCE operazioni: non e' un'assunzione.
 #
-#  I NUMERI CHE CI SONO GIA', ricontati da me sul CSV
+#  I NUMERI CHE CI SONO GIA', ricontati cella per cella sul CSV
 #    Fonte: risultati_archivio/EMA200/H4_OHLC/
-#           scan_ABTG_EMA200_H4_EURUSD.csv (136 righe)
-#    Banco di QUELLA scansione, letto dallo script al commit che l'ha
-#    prodotta (00fe47bf, 31/07/2026, scan_market.ps1 r.211-218):
-#    Period=H4, Model=1 (OHLC M1), Optimization=2 (GENETICA),
-#    FromDate 2024.01.01, ToDate 2026.06.30, Deposit 10000. UNA finestra
-#    di 2,5 anni.
+#           scan_ABTG_EMA200_H4_EURUSD.csv (136 righe di dati)
+#    !!! IL BANCO DI QUELLA SCANSIONE E' [NON VERIFICATO], e la prima
+#    stesura lo dava per letto. Il CSV e' entrato in repo col commit
+#    00fe47bf (31/07/2026) insieme a scan_market.ps1, e il blocco
+#    ABTG_EMA200 di QUELLO script mette in [TesterInputs] soltanto
+#    InpTF, InpRiskPercent, InpAllowLong, InpAllowShort, InpTP_RR:
+#    InpOrder1Atr e InpOrder2Atr NON CI SONO. Ma nel CSV variano
+#    (O1 su 6 valori 0,05-0,30 e O2 su 5 valori 0,2-0,6). Quindi il CSV
+#    NON e' stato prodotto dallo script a quel commit, e il suo
+#    [Tester] -- Model=1, Optimization=2, 2024.01.01 -> 2026.06.30,
+#    Deposit 10000 -- e' un'IPOTESI ragionevole, non una lettura.
+#    Cosa la chiuderebbe: l'.ini vero della corsa, che in repo non c'e'
+#    (lo script lo genera al volo sul PC di backtest).
+#    >>> Il conto 6 x 5 x 4 x 2 x 2 = 480 combinazioni contro 136 righe
+#        TORNA con gli assi del CSV: l'ottimizzazione era GENETICA
+#        (28,3% dello spazio). Questo pezzo regge.
 #
 #    136 righe; 85 celle con trade; PF 0,705-1,565; DD 3,94-8,09%.
 #    Celle con i DUE LATI accesi (InpAllowLong=1 E InpAllowShort=1): 31.
@@ -48,149 +78,216 @@
 #      InpOrder2Atr 0,4 -> 4 celle, 2 positive,      PF medio 0,9910
 #      InpOrder2Atr 0,5 -> 9 celle, 9 positive,      PF medio 1,0484
 #      InpOrder2Atr 0,6 -> 8 celle, 4 positive,      PF medio 1,0074
-#      InpOrder1Atr 0,30 -> 7 celle, 7 POSITIVE su 7, PF medio 1,0862
 #      InpTP_RR 1,5 -> 8 celle, 2 positive, PF medio 0,9782
 #      InpTP_RR 2,0 -> 7 celle, 6 positive, PF medio 1,0529
 #      InpTP_RR 2,5 -> 8 celle, 8 positive, PF medio 1,0613
 #      InpTP_RR 3,0 -> 8 celle, 8 positive, PF medio 1,0848
+#    >>> E OGNI MEDIA QUI SOPRA EREDITA DUE DIFETTI, e vanno letti
+#        insieme a lei: (1) la griglia e' GENETICA, quindi le celle che
+#        ci sono NON sono un campione uniforme -- l'algoritmo le ha
+#        visitate perche' promettevano; (2) le colonne non sono
+#        bilanciate fra loro (la colonna O2=0,2 ha 5 celle con QUATTRO
+#        TP diversi, la O2=0,5 ne ha 9). Una media per colonna su una
+#        griglia genetica sbilanciata NON e' la media della griglia.
 #
 #  COME HO SCELTO LA CELLA -- e la regola va scritta ACCANTO al numero
-#    La CRESTA e' la colonna InpOrder2Atr = 0,2: e' L'UNICA COLONNA IL
-#    CUI PF MEDIO SUPERA IL CANCELLO 1,10 (1,1504), ed e' anche quella
-#    con piu' operazioni.
-#    >>> ATTENZIONE, e lo scrivo contro di me: la colonna O2=0,5 fa
-#        9 celle POSITIVE su 9 -- piu' celle e piu' compatta della
-#        cresta -- ma con PF medio 1,0484, cioe' SOTTO il cancello, e
-#        con una banda strettissima (1,0199-1,0867). E' il candidato
-#        alternativo, sta DENTRO la griglia e non sul bordo, e sarebbe
-#        la scelta giusta se il criterio fosse "la regione piu' piatta".
-#        Non e' la scelta di questo round perche' screenare una regione
-#        che gia' in OHLC (ottimista) misura 1,05 vuol dire spendere
-#        8 passate per un esito noto. Se O2=0,2 fallisce su 16,5 anni,
-#        O2=0,5 NON va riprovato: e' gia' sotto soglia sul banco
-#        favorevole.
-#    Le 5 celle della cresta, in ordine di InpOrder1Atr:
+#    La colonna InpOrder2Atr = 0,2 e' l'unica il cui PF medio superi il
+#    cancello 1,10 (1,1504), ed e' anche quella con piu' operazioni.
+#    >>> Alternativa scartata, e scritta contro di me: la colonna
+#        O2=0,5 fa 9 celle POSITIVE su 9 -- piu' celle, banda
+#        strettissima (1,0199-1,0867), e sta DENTRO la griglia e non sul
+#        bordo -- ma con PF medio 1,0484, SOTTO il cancello. Sarebbe la
+#        scelta giusta se il criterio fosse "la regione piu' piatta".
+#        Se O2=0,2 fallisce su 16,5 anni, O2=0,5 NON va riprovato: e'
+#        gia' sotto soglia sul banco favorevole.
+#    Le 5 celle della colonna O2=0,2, in ordine di InpOrder1Atr:
 #      O1=0.05 O2=0.2 TP=1.5 -> PF 1,06189  DD 7,0193  deal 291
 #      O1=0.15 O2=0.2 TP=3.0 -> PF 1,14415  DD 6,8183  deal 331
-#      O1=0.20 O2=0.2 TP=2.0 -> PF 1,13166  DD 6,9171  deal 363   <<< SCELTA
+#      O1=0.20 O2=0.2 TP=2.0 -> PF 1,13166  DD 6,9171  deal 363  <<< SCELTA
 #      O1=0.25 O2=0.2 TP=2.5 -> PF 1,19677  DD 5,0143  deal 350
 #      O1=0.30 O2=0.2 TP=3.0 -> PF 1,21776  DD 4,9918  deal 357
-#    >>> Il PICCO di tutto l'insieme L+S e' O1=0,30 (PF 1,21776) e il
-#        secondo e' O1=0,25 (PF 1,19677): NON SONO LA CELLA DI QUESTO
-#        ROUND. Regola di casa: centro dell'altopiano, MAI il picco, e
-#        nemmeno il vicino di casa del picco.
-#    >>> La cella scelta e' O1=0,20 / O2=0,20, e le ragioni sono TRE,
-#        tutte numeriche:
-#          1. e' la MEDIANA per rango dei 5 punti campionati della
-#             cresta (0,05 - 0,15 - **0,20** - 0,25 - 0,30): il centro,
-#             non l'estremo;
+#    >>> Il PICCO dell'insieme L+S e' O1=0,30 (PF 1,21776) e il secondo
+#        e' O1=0,25 (PF 1,19677): NON sono la cella di questo round.
+#        Regola di casa: centro dell'altopiano, MAI il picco, e nemmeno
+#        il vicino di casa del picco.
+#    >>> La cella scelta e' O1=0,20 / O2=0,20. Le ragioni VALIDE sono
+#        DUE, non tre:
+#          1. e' la MEDIANA PER RANGO dei 5 punti CAMPIONATI della
+#             colonna (0,05 - 0,15 - **0,20** - 0,25 - 0,30). Nota: la
+#             griglia ha SEI valori di O1, e lo 0,10 non e' fra i
+#             campionati -- e' una mediana dei punti che l'algoritmo
+#             genetico ha visitato, non della griglia;
 #          2. ha il CAMPIONE PIU' GRANDE di tutto l'insieme L+S
 #             (363 deal su 249-363), e il campione e' il muro di questo
-#             motore, non il PF;
-#          3. i suoi due vicini in O1 stanno tutti e due sopra il
-#             cancello (1,14415 a 0,15 e 1,19677 a 0,25): la cella non
-#             sporge, e' in mezzo a una salita monotona.
-#        E il meccanismo si sa dire a parole, il che e' un controllo in
-#        piu': con O1 = O2 = 0,20 i due ordini pendenti sono SIMMETRICI
-#        attorno alla EMA200 (ABTG_EMA200.mq5 r.356-357: o1 = ema +
-#        O1*atr verso il prezzo, o2 = ema - O2*atr in overshoot). Non e'
-#        una coordinata pescata, e' "un limite sopra e uno sotto la
-#        media, alla stessa distanza".
+#             motore, non il PF.
+#    !!! LA TERZA RAGIONE DELLA PRIMA STESURA E' STATA TOLTA PERCHE'
+#        E' FALSA. Diceva: "i suoi due vicini in O1 stanno tutti e due
+#        sopra il cancello, la cella e' in mezzo a una salita monotona".
+#        Non e' una salita in O1: le 5 celle hanno QUATTRO TP DIVERSI
+#        (1,5 / 3,0 / 2,0 / 2,5 / 3,0), e il TP da solo muove il PF
+#        medio da 0,9782 a 1,0848. Tolto l'effetto TP (PF meno la media
+#        della sua colonna TP) la "salita" sparisce:
+#          O1=0,05 TP=1,5 residuo +0,0836
+#          O1=0,15 TP=3,0 residuo +0,0594
+#          O1=0,20 TP=2,0 residuo +0,0788   <<< la cella scelta
+#          O1=0,25 TP=2,5 residuo +0,1355
+#          O1=0,30 TP=3,0 residuo +0,1330
+#        Andamento non monotono. La cella scelta resta nella meta'
+#        BASSA dei residui, il che va bene (non e' il picco), ma
+#        "monotona" era una lettura di un confronto fra celle che non
+#        erano confrontabili.
+#        >>> E su questo round il TP delle 5 celle non conta nemmeno,
+#            perche' il TP E' L'ASSE: quello che si pinna e' la coppia
+#            O1/O2. Il difetto era nella GIUSTIFICAZIONE, non nel pin.
+#    Il meccanismo si sa dire a parole, e questo e' un controllo in piu':
+#    con O1 = O2 = 0,20 i due ordini pendenti sono SIMMETRICI attorno
+#    alla EMA200 (ABTG_EMA200.mq5, funzione PlaceOrders: per il long
+#    o1 = ema + O1*atr, o2 = ema - O2*atr, sl = o2 - SLatr*atr). Non e'
+#    una coordinata pescata: e' "un limite sopra e uno sotto la media,
+#    alla stessa distanza".
 #
 #  !!! IL BUCO DI QUESTA SCELTA, DETTO SUBITO
-#    La cresta e' LARGA lungo InpOrder1Atr (5 celle su 5, andamento
-#    monotono) ma STRETTA lungo InpOrder2Atr: passando da O2=0,2 a
-#    O2=0,3 il PF medio cade da 1,1504 a 1,0307. E O2=0,2 e' il BORDO
-#    della griglia campionata: sotto 0,2 NON HA MAI MISURATO NESSUNO.
-#    Un ottimo sul bordo della griglia e' sospetto per costruzione.
-#    >>> Ecco perche' questo round NON PROMUOVE NIENTE (S7): serve prima
-#        il numero su 16,5 anni, poi semmai un round che allarga O2
-#        SOTTO 0,2 -- che e' un'ALTRA variabile e quindi un ALTRO file.
+#    La colonna e' larga lungo InpOrder1Atr (5 celle su 5 positive) ma
+#    STRETTA lungo InpOrder2Atr: da O2=0,2 a O2=0,3 il PF medio cade da
+#    1,1504 a 1,0307. E O2=0,2 e' il BORDO della griglia campionata:
+#    sotto 0,2 NON HA MAI MISURATO NESSUNO.
+#    >>> "Centro dell'altopiano" e' quindi vero in UNA direzione (O1) e
+#        FALSO nell'altra (O2): lungo O2 la cella e' un ESTREMO, e un
+#        ottimo sul bordo della griglia e' sospetto per costruzione.
+#        La dichiarazione NON basta a renderla un centro; basta a
+#        renderla una scelta LEGGIBILE, ed e' per questo che il round
+#        NON PROMUOVE NIENTE (S7). Serve prima il numero su 16,5 anni,
+#        poi semmai un round che allarga O2 SOTTO 0,2 -- ALTRA
+#        variabile, ALTRO file.
 #
-#  !!! E IL BUCO PIU' GROSSO DI TUTTI, CHE HO TROVATO CONTANDO I LATI
-#    Sullo STESSO CSV, stessa finestra, celle a UN LATO SOLO:
+#  !!! CHE COSA QUESTO ROUND NON PUO' MISURARE -- ed e' il motivo per
+#      cui la prima stesura era mal posta
+#    Sullo STESSO CSV, stessa finestra, celle a UN LATO SOLO (contate
+#    riga per riga):
 #      LONG only : 28 celle, POSITIVE 0 su 28, PF mediano 0,7936
-#                  (0,70508 - 0,88650), deal 125-153
+#                  (0,70508 - 0,88646), deal 125-153
 #      SHORT only: 26 celle, POSITIVE 26 su 26, PF mediano 1,3206
-#                  (1,18390 - 1,56537), deal 148-216
-#    >>> Su EURUSD H4, in quella finestra, IL LATO LONG PERDE SEMPRE.
-#        Il risultato "L+S positivo" e' una MISCELA di uno short forte e
-#        di un long che perde: non due conferme, una sola.
-#        Questo NON e' un motivo per non fare il round (i due lati sono
-#        la configurazione che R29a ha misurato a H1, e la regola dei
-#        due lati del 25/08 chiede proprio questo), ma e' il primo
-#        numero da guardare nel referto, e le due corse a lato singolo
-#        su 16,5 anni sono il seguito naturale (R140b long, R140c
-#        short): UNA VARIABILE PER FILE, quindi non stanno qui.
+#                  (1,18390 - 1,56537), deal 148-216, DD 3,94-6,48
+#      L+S       : 31 celle, 24 positive,       PF mediano 1,0416
+#                  deal 249-363, DD 4,40-8,09
+#    E la configurazione L+S e' ARITMETICAMENTE la SOMMA dei due lati.
+#    Le tre coordinate in cui il CSV ha tutte e tre le configurazioni:
+#      O1=0,05 O2=0,3 TP=2,0  L -466,52  S +437,96  L+S  -80,73
+#      O1=0,05 O2=0,5 TP=3,0  L -397,76  S +490,18  L+S +138,16
+#      O1=0,10 O2=0,6 TP=3,0  L -204,60  S +279,27  L+S  +73,07
+#    E alla coordinata di QUESTO round (O1=0,20 / O2=0,20):
+#      SHORT only TP=3,0 -> PF 1,51402  DD 4,1374  deal 216  +915,68
+#      LONG  only TP=3,0 -> PF 0,86587  DD 5,7710  deal 148  -265,56
+#      L+S        TP=2,0 -> PF 1,13166  DD 6,9171  deal 363  +521,32
+#      (TP diversi: sulle medie per colonna il TP vale ~0,03 di PF fra
+#       2,0 e 3,0, contro i 0,38 che separano short e L+S. Il segno del
+#       confronto non dipende dal TP.)
+#    >>> Tradotto: accendere il lato LONG accanto allo SHORT, su questa
+#        coordinata e in questa finestra, BRUCIA il 43% del profitto
+#        dello short, ne DIMEZZA il PF (1,514 -> 1,132) e ne ALZA il
+#        drawdown del 67% (4,14% -> 6,92%). Non sono due conferme: e'
+#        un edge piu' una tassa.
 #
-#  IL CONTRO-ESEMPIO, costruito PRIMA e non dopo
-#    Ipotesi alternativa da battere: "i numeri H1 di EURUSD non sono un
-#    edge, sono UNA DIREZIONE DI UNA SOLA EPOCA, contata 30 volte".
-#    E ha tre appigli VERI, che ho misurato io:
-#      1. la finestra di R29a e' `@DAQUANDO 2024.09.26`
-#         (prove/R29a_ema200_eurusd.txt r.23) -- cioe' ~21 mesi, UN
-#         regime solo. "IS" e "OOS" li' dentro sono due fette dello
-#         stesso mercato. (La data di FINE di R29a e' [NON MISURATO]:
-#         quel file non ha `@FINOA` e il default di FABBRICA del driver
-#         OGGI e' 2026.06.30, walkforward_generico.ps1 r.177 -- quale
-#         fosse il default il 12/08 non l'ho verificato. I ~21 mesi
-#         sono quindi una STIMA, non una lettura.)
-#      2. le 30 celle di R29a differiscono solo per O1 (0,10-0,30),
-#         O2 (0,2-0,3), TP (1,5-2,5): girano in gran parte sulle STESSE
-#         operazioni. "30/30 in utile" ha un campione efficace vicino a
-#         UNO, non a trenta.
-#      3. e qui sopra si e' visto che su H4, stessa famiglia, il lato
-#         long fa 0 celle positive su 28. Un motore che vive di un lato
-#         solo e' esattamente quello che una deriva produce.
-#    IL NUMERO CHE LA DISCRIMINA, ed e' quello che questo round misura:
-#      la finestra 2010.01.01 -> 2026.06.30 contiene la discesa
-#      1,39 -> 1,05 del 2014-2015 E la discesa 1,23 -> 0,96 del 2022 E
-#      le salite 2017 e 2020: piu' regimi, in tutti e due i versi.
-#      Se l'edge fosse deriva, su 16,5 anni il PF deve TORNARE a ~1,00,
-#      perche' le derive dei due versi si annullano: mi aspetto allora
-#      almeno una delle due finestre sotto 1,00 (scatta S4) oppure tutte
-#      e due schiacciate nella banda 0,98-1,04. Se invece restano DELLO
-#      STESSO SEGNO e sopra 1,10 su ~2.200 deal che attraversano quattro
-#      regimi, la spiegazione "deriva di un'epoca" e' morta -- come su
-#      AUDJPY l'ha uccisa la sottrazione OOS - fetta a tick.
-#      >>> E il test e' SIMMETRICO, cioe' puo' bocciare la mia tesi: se
-#          il PF esce a 1,02 io NON posso dire "ma il motore e' buono,
-#          e' la finestra lunga che diluisce". Quella frase e' vietata
-#          adesso, scritta prima dei numeri.
-#    >>> E' un contro-esempio ONESTO perche' puo' vincere lui: l'esito
-#        che mi aspetto (sotto) e' proprio quello in cui il PF si
-#        sgonfia.
+#    E QUI STA IL DIFETTO DI IMPOSTAZIONE, scritto per esteso:
+#    l'attesa di questo round e' "PF 1,00-1,12, mediana ~1,06". Ora si
+#    guardi QUALE NUMERO PRODUCE L'IPOTESI ALTERNATIVA:
+#      IPOTESI A ("deriva d'epoca, contata 30 volte"): su 16,5 anni le
+#        derive dei due versi si annullano -> L+S PF verso 1,00.
+#      IPOTESI B ("lo SHORT ha un edge strutturale, il LONG no"): L+S e'
+#        la somma di 1,32 e 0,79 -> sulla scansione da' 1,0416, e su
+#        16,5 anni, anche con lo short indebolito, da' ancora ~1,00-1,10.
+#    >>> LE DUE IPOTESI PRODUCONO LO STESSO NUMERO, E CADE DENTRO LA
+#        BANDA DICHIARATA. Questo e' esattamente il difetto di CLASSE
+#        178: una banda che l'altra spiegazione riempie non misura
+#        niente. L'unico esito che discriminerebbe (PF sopra 1,10 in
+#        tutte e due le finestre) e' proprio quello che l'attesa dichiara
+#        di NON aspettarsi.
+#    >>> QUINDI: questo round si legge come COMPARABILITA' (contro R29a,
+#        R139a, R139b) e come S4. NON si legge come prova sull'edge.
+#        La frase "il numero che discrimina" e' VIETATA in referto per
+#        questo round, ed e' scritta prima dei numeri.
+#
+#  LA MISURA CHE DISCRIMINA DAVVERO, DICHIARATA ORA E NON DOPO
+#    E' il LATO, sulla stessa finestra spezzata: R140b (long-only) e
+#    R140c (short-only), 8 passate ciascuno, 16 in tutto, ~1,83 minuti.
+#    L'IPOTESI SI FISSA ADESSO, PRIMA DI QUALUNQUE NUMERO, cosi' nessuno
+#    potra' dire dopo che il lato e' stato scelto sul campione:
+#      H_lato: su EURUSD H4 il lato SHORT ha un edge e il lato LONG no.
+#      Previsione: R140c short-only chiude SOPRA 1,10 in ENTRAMBE le
+#      finestre; R140b long-only chiude SOTTO 1,00 in ENTRAMBE.
+#      Falsificata se: lo short e' sotto 1,00 in IS, oppure se il long
+#      e' sopra 1,10 in IS.
+#    >>> E la riserva che la rende onesta: il lato e' stato SUGGERITO
+#        dalla scansione 2024-2026. Ma la finestra IS di questi round
+#        (2010.01 -> ~2016.08, FrazioneIS 0,40) NON HA NESSUNA
+#        SOVRAPPOSIZIONE con quel campione: l'IS e' quindi una prova
+#        FUORI SELEZIONE a tutti gli effetti, e va letto come il numero
+#        principale. L'OOS ne condivide gli ultimi 2,5 anni su 9,9 ed e'
+#        il numero secondario.
+#    >>> E i due lati insieme sono la REGOLA DEI DUE LATI del 25/08: non
+#        si gira solo lo short perche' e' quello che promette.
+#    !!! Questi due round NON sono armati e NON sono scritti. Questo
+#        file non li apre: li DICHIARA, perche' dichiararli dopo aver
+#        visto il numero di R140a sarebbe selezione.
+#
+#  IL CONTRO-ESEMPIO CHE QUESTO ROUND PUO' ANCORA REGGERE
+#    Se il PF L+S uscisse SOPRA 1,10 in tutte e due le finestre, su
+#    ~2.200 deal che attraversano la discesa 1,39 -> 1,05 del 2014-2015,
+#    la discesa 1,23 -> 0,96 del 2022 e le salite 2017 e 2020, allora
+#    l'ipotesi "deriva di una sola epoca" e' morta -- perche' un motore
+#    a due lati non puo' raccogliere una deriva in una direzione sola, e
+#    perche' quel risultato NON e' prodotto dall'ipotesi B (che predice
+#    la miscela, cioe' ~1,00-1,10).
+#    >>> E il test resta SIMMETRICO: se il PF esce a 1,02 e' VIETATO
+#        dire "ma il motore e' buono, e' la finestra lunga che
+#        diluisce". Quella frase e' proibita adesso, scritta prima dei
+#        numeri.
 #
 #  UN CONTROLLO DI COERENZA CHE TORNA, e vale la pena scriverlo
 #    H1 R29a: 894-1192 deal totali su ~1,76 anni = 508-677 deal/anno.
 #    H4 scan: 331-363 deal su 2,5 anni          = 132-145 deal/anno.
 #    Rapporto H1/H4 = 3,50-5,12, cioe' a cavallo di 4,0 = il rapporto
-#    fra il numero di barre dei due TF. Le due misure, prese da due file
-#    diversi e da due banchi diversi, dicono la stessa cosa.
+#    fra il numero di barre dei due TF. Due file diversi, due banchi
+#    diversi, stessa cosa detta.
 #
-#  CLASSE 226, NEL VERSO SFAVOREVOLE
-#    Trades = DEAL DI USCITA, non posizioni. Fattore MISURATO su questo
-#    motore 2,0117 (R112_CORSA_20260826/pertrade_00_metro_763400.csv).
-#    Su EURUSD quel fattore e' una DERIVAZIONE, non una misura: nessun
-#    per-trade EURUSD in archivio (REGISTRO_TEST.md r.2388-2389).
+#  CLASSE 226, COL NUMERO GIUSTO
+#    Trades = DEAL DI USCITA, non posizioni. Il rapporto deal/posizione
+#    e' MISURATO SU QUESTO MOTORE, A H4, SUL FOREX, il 17-18/09:
+#      AUDJPY 771560: 1345 deal / 730 posizioni = 1,8425
+#      GBPUSD 771561: 1316 deal / 718 posizioni = 1,8329
+#    Fonte: report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md
+#    par.2. Si usa 1,838 (media dei due).
+#    >>> NON si usa piu' il 2,0117, che veniva da U30USD (indice, altro
+#        motore-simbolo) ed e' PESSIMISTA dell'8,4-8,9%: la correzione
+#        e' scritta nello stesso dossier che questo file cita.
+#    >>> Resta [DERIVATO], non misurato: nessun per-trade EURUSD in
+#        archivio. Ma e' derivato da DUE simboli forex, stesso motore,
+#        stesso TF, stessa finestra -- provenienza piu' vicina di
+#        qualunque indice. Ed e' [INFERITO] anche sui gemelli: il
+#        per-trade conserva UNA passata sola, quindi il rapporto e'
+#        misurato su una cella per simbolo, non su otto.
 #
 #  ATTESA DICHIARATA, PRIMA DEI NUMERI
-#    n (derivato dalla cresta, 132-145 deal/anno x 16,5 anni = 2185-2396
+#    n (derivato dalla colonna, 132-145 deal/anno x 16,5 anni = 2185-2396
 #      deal totali):
-#        IS  (FrazioneIS 0,40)   874 - 958 DEAL   (~434-476 posizioni)
-#        OOS (0,60)            1311 - 1437 DEAL   (~652-715 posizioni)
+#        IS  (FrazioneIS 0,40)   874 - 958 DEAL   (~475-521 posizioni)
+#        OOS (0,60)            1311 - 1437 DEAL   (~713-782 posizioni)
 #      Banda allargata in basso del 25% per la variabilita' d'epoca
 #      (la volatilita' 2010-2026 non e' quella del 2024-2026):
 #        IS  >= 650 deal, OOS >= 980 deal. Sotto, il MERITO e' sospeso.
+#      (La soglia e' e resta in DEAL: tutta la catena che la produce e'
+#       in deal. Il rapporto 1,838 serve solo a tradurla in posizioni.)
 #    PF: piu' BASSO della scansione, perche' 16,5 anni contengono anche
 #      i regimi che la finestra 2024-2026 non ha.
-#        PF IS 0,95-1,25 e PF OOS 0,95-1,25.
+#        Banda di accettazione: PF IS 0,95-1,25 e PF OOS 0,95-1,25.
 #      >>> PREVISIONE PUNTUALE, e la scrivo apposta perche' mi vincoli:
 #          mi aspetto PF fra 1,00 e 1,12 in tutte e due le finestre,
 #          mediana attesa ~1,06, cioe' SOTTO il cancello 1,10 su almeno
-#          una delle due. Tradotto: MI ASPETTO CHE S2 NON PASSI.
-#          Scriverlo prima e' quello che impedisce di leggere un 1,12
-#          come una promozione.
+#          una delle due. MI ASPETTO CHE S2 NON PASSI.
+#          !!! E dichiaro nello stesso respiro che QUESTA BANDA NON
+#          DISCRIMINA (vedi CHE COSA QUESTO ROUND NON PUO' MISURARE):
+#          la riempiono tutte e due le ipotesi. Serve a impedire di
+#          leggere un 1,12 come una promozione, NON a decidere niente.
 #      >>> E mi aspetto che la cella TP=1,5 sia la peggiore delle
 #          quattro: nella scansione le celle L+S con TP=1,5 sono 2
 #          positive su 8, PF medio 0,9782, contro 1,0848 a TP=3,0.
@@ -198,47 +295,84 @@
 #          dice se l'andamento monotono in TP regge anche su 16,5 anni.
 #          Se a TP=1,5 il PF fosse il piu' ALTO dei quattro, l'ordine si
 #          e' ribaltato e la scansione non descriveva niente.
-#    DD: in salita rispetto al 4,99-6,92% della cresta, perche' 16,5
-#      anni contengono 2010-2012 (crisi euro), 2014-2015 (1,39 -> 1,05 e
-#      lo strappo SNB del 15/01/2015), 2020 e 2022 (parita').
-#      Attesa DD IS 8-18%, DD OOS 7-16%, a rischio 1,0%.
-#      >>> E' un'attesa SCOMODA e la scrivo comunque: se il DD esce
-#          oltre S3 questo candidato muore PER RISCHIO, e il PF non si
-#          discute nemmeno (Emendamento B, il rischio si legge a
-#          qualunque n).
+#    DD: la banda NON e' copiata da R139b; e' DERIVATA dal gonfiamento
+#      MISURATO ieri sul gemello. Su GBPUSD, dalla scansione L+S
+#      (DD 5,78-9,22) ai numeri veri 2010-2026: IS x2,20-3,07 e
+#      OOS x1,20-1,74. Applicato alla colonna O2=0,2 di EURUSD
+#      (DD 4,99-7,02):
+#        attesa DD IS 11 - 22%   e   DD OOS 6 - 12%, a rischio 1,0%.
+#      (Il trasferimento del rapporto e' [DERIVATO]: su GBPUSD la
+#       scansione di partenza era a TICK, qui e' OHLC. Va detto.)
+#      >>> E' un'attesa MOLTO SCOMODA e si scrive lo stesso: la banda IS
+#          sta quasi tutta SOPRA S3 (14,0%), e sui due gemelli misurati
+#          ieri l'IS ha sfondato S3 su 8 celle su 8 (AUDJPY 15,35-16,94,
+#          GBPUSD 17,73-20,32). L'esito PIU' PROBABILE di questo round
+#          e' quindi che EURUSD L+S muoia PER RISCHIO in IS, e in quel
+#          caso il PF non si discute nemmeno (Emendamento B: il rischio
+#          si legge a qualunque n).
 #
-#  IL COSTO, rifatto da me con lo SPREAD MISURATO
+#  IL COSTO -- [NON RISOLTO], e la prima stesura lo dava per risolto
 #    Spread EURUSD MISURATO: mediana 0,200 pip, P95 0,500 pip, su
 #    n=84997 campioni e GG=6 giornate distinte -- conto 50503392,
 #    raccolta 04/09 -> 11/09/2026.
-#    Fonte: data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt r.98
-#    (intestazione EURUSD) e r.127 (riga TUTTA LA GIORNATA).
+#    Fonte: data/spread_vivo/SPREAD_VIVO_2026-09-12_referto.txt, blocco
+#    EURUSD, riga "TUTTA LA GIORNATA".
 #    Commissione: 0,4636 pip [MISURATO/derivato dal 0,004% del nozionale,
-#    calcola_pedaggio_forex.py r.50].
-#    ATR(14) H4 EURUSD = 36,0 pip [DERIVATO DUE VOLTE, e lo dico:
-#    ATR(14) M15 EURUSD = 9,00 pip misurato NON su BCM ma su EURUSD
-#    Oanda 2013-2019 (REGISTRO_TEST.md r.1443-1450), scalato x
-#    sqrt(240/15) = x4].
-#    Stop di questo motore (ABTG_EMA200.mq5 r.358: sl = o2 - SLatr*atr):
-#      ordine 2 -> 1,00 x ATR = 36,0 pip  <-- il PIU' CORTO dei due
-#      ordine 1 -> (O1+O2+SLatr) = 1,40 x ATR = 50,4 pip
-#    Frontiera stop / pedaggio all-in, sullo stop PIU' CORTO:
-#      spread mediana 0,200 -> all-in 0,6636 -> 36,0/0,6636 = 54,2x  OK
-#      spread P95     0,500 -> all-in 0,9636 -> 36,0/0,9636 = 37,4x  ---
-#      (riferimento: lettura unica 0,400 del 17/08 -> 41,7x, ED E'
-#       ESATTAMENTE il numero scritto in REGISTRO_TEST.md r.2397:
-#       la mia catena ATR+commissione RIPRODUCE un numero scritto da
-#       qualcun altro, quindi non e' una formula che torna da sola)
-#    >>> VERDETTO DI COSTO: H4 PASSA il pavimento di LAVORO 40x allo
-#        spread MEDIANO (54,2x) e lo manca di poco al P95 (37,4x), ma
-#        resta 2,8x sopra il pavimento DURO 13,3x anche al P95.
-#        H1, per confronto, e' 20,8x: ESCLUSO PER COSTO. Il TF basso qui
-#        non e' scartato per pigrizia, e' scartato con il numero.
+#    calcola_pedaggio_forex.py].
+#    All-in: 0,6636 pip alla mediana, 0,9636 pip al P95.
+#    Stop di questo motore (PlaceOrders: sl = o2 - SLatr*atr):
+#      ordine 2 -> 1,00 x ATR  <-- il PIU' CORTO dei due, e si usa questo
+#      ordine 1 -> (O1+O2+SLatr) = 1,40 x ATR
+#
+#    !!! ATR(14) H4 EURUSD SUL FEED BCM: [NON MISURATO]. In repo ci sono
+#    DUE ancore, e NON SONO D'ACCORDO -- differiscono di 2,4 volte.
+#      ANCORA A (quella usata finora, e la piu' fragile):
+#        ATR(14) M15 EURUSD = 9,00 pip, misurato su EURUSD **Oanda
+#        2013-2019** (REGISTRO_TEST.md, caccia M15 del 05/09), scalato
+#        x sqrt(240/15) = x4  ->  ATR H4 = 36,0 pip.
+#        Difetti: (1) feed DIVERSO da BCM; (2) epoca diversa; (3) la
+#        legge di scala usa k=0,50 ASSUNTA su un rapporto di tempo di
+#        16x -- e l'unico k MISURATO in casa e' 0,968 (SuperWave U30USD
+#        H1 n=4 contro H4 n=8, REGISTRO_TEST.md SCARTO 3, dove si legge
+#        anche "la radice del tempo sovrastima del 92%"). Con k=0,968 la
+#        stessa catena darebbe 131,8 pip. Un'estrapolazione il cui
+#        esito va da 36 a 132 pip non vincola niente.
+#      ANCORA B (mai cercata prima, e sta sul feed GIUSTO):
+#        ABTG_BreakingBand EURUSD, sedia 772162 sul demo BCM 50503392,
+#        geometria di codice SL = InpSL_ATRmult 3,0 x ATR(14) su H1.
+#        Stop MISURATO da trades_auto.csv: 22,1 pip [MIS] n=1
+#        (CANCELLO_COSTO_FLOTTA_2026-09-10.md tabella delle sedie;
+#         stesso numero in LA_BANDA_BASSA_2026-09-12.md).
+#        => ATR(14) H1 EURUSD su BCM = 22,1 / 3,0 = 7,37 pip
+#        => ATR(14) H4 = 7,37 x sqrt(4) = 14,7 pip (una sola scalatura,
+#           e su un rapporto di tempo di 4x invece che 16x).
+#        Difetto: n=1, cioe' UNA lettura di UN momento.
+#    FRONTIERA stop / pedaggio all-in, sullo stop piu' corto:
+#      con ANCORA A (36,0 pip):  54,2x alla mediana   37,4x al P95
+#      con ANCORA B (14,7 pip):  22,2x alla mediana   15,3x al P95
+#    >>> VERDETTO DI COSTO: [NON RISOLTO]. Con A, H4 PASSA il pavimento
+#        di LAVORO 40x alla mediana. Con B, H4 e' ESCLUSO PER COSTO
+#        esattamente come H1 (20,8x), e resta appena sopra il pavimento
+#        DURO 13,3x. Le due ancore non danno lo stesso verdetto: danno
+#        i due verdetti opposti.
+#    !!! E VA CANCELLATA UNA FRASE DELLA PRIMA STESURA, perche' e'
+#        FALSA E RASSICURANTE INSIEME. Diceva che la catena
+#        ATR+commissione "RIPRODUCE un numero scritto da qualcun altro
+#        (41,7x, REGISTRO_TEST.md), quindi non e' una formula che torna
+#        da sola". NON E' UNA VERIFICA INDIPENDENTE: quel 41,7x nel
+#        REGISTRO e' 36,0/0,864, e il suo 36,0 viene dalla STESSA ancora
+#        Oanda 9,00 pip con la STESSA legge sqrt. Stessa catena, stesso
+#        dato di partenza: riprodurla e' un'identita', non una conferma.
+#    >>> COSA CHIUDE IL BUCO, e costa pochissimo: una lettura DIRETTA di
+#        iATR(EURUSD, PERIOD_H4, 14) sul feed BCM -- una passata di
+#        tester o un indicatore su grafico. Finche' non c'e', il costo
+#        di EURUSD H4 e' una domanda aperta, e la riga (b) di questo
+#        file non e' una ragione dimostrata.
 #
 #  SOGLIE CONGELATE (decise ORA, col numero accanto)
-#    S1  CAMPIONE. n >= 650 DEAL in IS e >= 980 DEAL in OOS (~323 e ~487
-#        posizioni al fattore 2,0117). Sotto: MERITO SOSPESO (valvola
-#        R59). Il RISCHIO si legge lo stesso.
+#    S1  CAMPIONE. n >= 650 DEAL in IS e >= 980 DEAL in OOS (~354 e ~533
+#        posizioni al fattore MISURATO 1,838). Sotto: MERITO SOSPESO
+#        (valvola R59). Il RISCHIO si legge lo stesso.
 #    S2  MERITO. PF >= 1,10 in ENTRAMBE le finestre, su ALMENO 3 celle
 #        su 4. Due su quattro non sono un altopiano.
 #        (So gia' che la cella TP=1,5 e' la candidata a fallire: S2 a
@@ -248,56 +382,59 @@
 #        1,0% in entrambe le finestre (= ~9,1% a 0,65%). Sopra: cella
 #        SCARTATA PER RISCHIO, il PF non si legge.
 #    S4  COERENZA DEI SEGNI. IS e OOS di segno opposto su piu' di una
-#        cella = "REGIME, non edge", e non si promuove niente. E' anche
-#        il test del contro-esempio qui sopra.
+#        cella = "REGIME, non edge", e non si promuove niente.
 #    S5  MANOPOLA INERTE. Quattro celle con n e PF identici al
 #        centesimo = InpTP_RR inerte su questo motore a H4, e si scrive
 #        "manopola inerte, MISURATA" -- che e' una casella LIBERA, non
 #        una casella provata.
 #    S6  CONFRONTO COL DEFAULT, obbligatorio. Il default del sorgente e'
-#        InpTP_RR = 2,0 (ABTG_EMA200.mq5 r.76). Se la cella migliore
-#        batte la 2,0 di meno di 0,05 di PF, la risposta onesta e'
-#        "IL DEFAULT VA BENE" -- ed e' un risultato, non un fallimento.
+#        InpTP_RR = 2,0 (ABTG_EMA200.mq5, blocco "Stop / target"). Se la
+#        cella migliore batte la 2,0 di meno di 0,05 di PF, la risposta
+#        onesta e' "IL DEFAULT VA BENE" -- ed e' un risultato, non un
+#        fallimento.
 #    S7  QUESTO ROUND NON PROMUOVE NIENTE. Modello 1 = OHLC M1 =
 #        SCREENING, e l'OHLC e' OTTIMISTA (riempimenti ideali sui
 #        pendenti, spread corrente, nessuno slippage). Quindi questo
 #        round PUO' BOCCIARE, NON PUO' PROMUOVERE. Un numero OHLC non e'
 #        mai un verdetto: il verdetto lo danno i tick reali.
+#    S8  LIMITE DI LETTURA, NUOVA E BLOCCANTE. Qualunque sia l'esito,
+#        questo round NON e' evidenza sulla domanda del LATO, perche'
+#        misura la SOMMA di uno short forte e di un long che perde 28
+#        volte su 28. In referto e' VIETATO scrivere che R140a
+#        "discrimina", "conferma l'edge" o "smentisce la deriva" sulla
+#        base del solo PF L+S. Il lato lo dicono R140b e R140c.
 #
 #  BUCHI DICHIARATI
-#    - ATR H4 DERIVATO DUE VOLTE (feed Oanda 2013-2019 + legge di scala
-#      sqrt(T)): se l'ATR vero fosse 27 pip invece di 36, la frontiera
-#      scenderebbe a 40,7x al mediano e 28,0x al P95. NON MISURATO su
-#      BCM. E' il numero piu' fragile di tutto il file.
-#    - OHLC OTTIMISTA di una quantita' NON MISURATA (vedi S7).
-#    - LATO: il long perde 28 volte su 28 nella scansione H4. Il round
-#      gira comunque a due lati (e' la configurazione di R29a), ma il
-#      risultato va letto sapendolo. I due round a lato singolo non
-#      esistono ancora.
+#    - COSTO [NON RISOLTO]: ATR H4 EURUSD non misurato su BCM, due
+#      ancore in repo che danno 54,2x e 22,2x. E' il buco che puo'
+#      rendere inutile tutto il resto, e si chiude con una passata.
+#    - BANCO DELLA SCANSIONE [NON VERIFICATO]: lo script al commit
+#      citato non porta gli assi O1/O2 che il CSV ha.
+#    - GRIGLIA GENETICA (136 righe su 480): le celle non sono un
+#      campione uniforme, e ogni media per colonna eredita il difetto.
 #    - O2 = 0,20 e' il BORDO della griglia campionata: sotto non c'e'
-#      nessuna misura.
-#    - La scansione di partenza e' GENETICA (Optimization=2): 136 righe
-#      su 480 combinazioni possibili. Le celle NON sono un campione
-#      uniforme della griglia, e ogni media per colonna qui sopra eredita
-#      quel difetto.
+#      nessuna misura, e lungo O2 la cella non e' un centro.
+#    - OHLC OTTIMISTA di una quantita' NON MISURATA (vedi S7).
+#    - LATO: il long perde 28 volte su 28 nella scansione H4, e il round
+#      gira comunque a due lati. Vedi S8. I due round a lato singolo
+#      sono DICHIARATI ma NON scritti.
 #    - CAMPIONE EFFICACE: le 4 celle di questo round condividono in gran
 #      parte le stesse operazioni. Quattro celle positive NON sono
 #      quattro conferme indipendenti.
 #    - Nessuna PROVA DI REGIME separata: 16,5 anni contigui DILUISCONO
 #      (Emendamento C). La lettura per anno va fatta sul referto.
 #    - PEGGIOR GIORNATA: [NON MISURATO], la colonna non esiste nel CSV
-#      di ottimizzazione MT5. Con DD atteso 8-18% il muro giornaliero
-#      del 5% NON e' escluso: va scritto nel referto.
-#    - n in POSIZIONI: [DERIVATO] col fattore 2,0117 misurato su U30USD,
-#      non su EURUSD.
+#      di ottimizzazione MT5. Con DD IS atteso 11-22% il muro
+#      giornaliero del 5% NON e' escluso: va scritto nel referto.
+#    - n in POSIZIONI: [DERIVATO] col fattore 1,838 misurato sui gemelli
+#      forex AUDJPY/GBPUSD, non su EURUSD, e su UNA cella per simbolo.
 #    - TAGLIA: rischio 1,0% e non 0,65%, per confrontabilita' con
-#      l'archivio H4 e con R139b. La rilettura a 0,65% e' una domanda
-#      SEPARATA.
+#      l'archivio H4 e con R139a/R139b. La rilettura a 0,65% e' una
+#      domanda SEPARATA.
 #    - GUARDIAN inerte nel tester (fail-open dichiarato nel sorgente).
 #
 #  COSTO IN TEMPO MACCHINA
 #    4 celle x 2 finestre = 8 passate. T = 0,6 + 0,077 x 8 = 1,22 min.
-#    Non e' un ostacolo: e' il round piu' economico del pacchetto.
 #
 #  BANCO: Modello 1 (OHLC M1). Deposito 10000. FrazioneIS di fabbrica
 #         del driver (0,40). NON si usa @FRAZIONEIS: e' sotto canarino.
@@ -306,7 +443,8 @@
 @DAQUANDO 2010.01.01
 @FINOA    2026.06.30
 #
-# --- LA CELLA: centro (mediana per rango) della cresta L+S O2=0,20
+# --- LA CELLA: mediana per rango dei punti campionati della colonna
+#     O2=0,20 (centro lungo O1, BORDO lungo O2 -- vedi i buchi)
 InpUsaGuardian=true
 InpTF=16388
 InpEmaPeriod=200

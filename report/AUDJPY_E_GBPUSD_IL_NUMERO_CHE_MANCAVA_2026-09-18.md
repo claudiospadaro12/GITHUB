@@ -498,10 +498,42 @@ dichiarato PRIMA l'esito che si aspetta: PF 1,00-1,12 in entrambe le finestre, m
 rende il test simmetrico (*se esce 1,02 è vietato dire «e' la finestra lunga che
 diluisce»*).
 
-🟢 **E una cosa è andata benissimo, e va detta**: il costo H4 di **41,7×** è stato
-**ricalcolato da zero** (ATR + spread misurato + commissione) ed è uscito **identico al
-numero scritto da qualcun altro** in `REGISTRO_TEST.md` **r.2397**. Una formula che
-riproduce un numero indipendente non è una formula che torna da sola.
+> ### 🔴 **SECONDA CORREZIONE, ore 10:xx — QUI C'ERA SCRITTO CHE IL COSTO ERA «UNA COSA ANDATA BENISSIMO». NON LO ERA: LA VERIFICA ERA CIRCOLARE.**
+
+Diceva: *«il costo H4 di 41,7× è stato ricalcolato da zero ed è uscito identico al numero
+scritto da qualcun altro in `REGISTRO_TEST.md` r.2397 — una formula che riproduce un
+numero indipendente non è una formula che torna da sola»*.
+
+🔴 **Riaperta la riga citata: quel 41,7× nasce dalla MIA STESSA ANCORA.**
+`REGISTRO_TEST.md` **r.2394**: lo stop H1 è *«~18,0 pip **[DERIVATO da `ATR(14) M15
+EURUSD = 9,00 pip`, scalato × sqrt(60/15)]**»*, e r.2397 fa `36,0 / 0,864 = 41,7×` con la
+**stessa ancora Oanda** e la **stessa legge**. ➡️ Riprodurlo è **un'identità algebrica**,
+non una conferma. 👉 *La regola di casa chiede **dati indipendenti**, non **mani
+indipendenti** — e io ho verificato la seconda cosa credendo di verificare la prima.*
+
+### 🔻 E l'ancora indipendente ESISTE, sul feed giusto, e **ribalta il verdetto**
+
+`ABTG_BreakingBand` EURUSD, sedia **`772162`** sul demo BCM `50503392`. Geometria di
+codice **verificata da me nel sorgente** (`ABTG_BreakingBand.mq5` r.328 e r.1297:
+`InpSL_ATRmult = 3.0`, *«SL = 3 x ATR, regola fissa»*), stop **MISURATO su BCM: 22,1 pip**
+`[MIS] n=1` (`CANCELLO_COSTO_FLOTTA_2026-09-10.md` r.524, da `trades_auto.csv`).
+⇒ **ATR(14) H1 EURUSD su BCM = 22,1 / 3,0 = 7,37 pip** ⇒ **ATR H4 ≈ 14,7 pip**.
+
+| ancora | ATR H4 | costo alla mediana | verdetto contro 40× |
+|---|---:|---:|---|
+| **A** — Oanda M15 ×4 (quella che avevo usato) | 36,0 pip | **54,2×** | ✅ passa |
+| **B** — `772162` su **BCM** ×2 | **14,7 pip** | **22,2×** | 🔴 **ESCLUSO PER COSTO**, come H1 |
+
+> ## 🔴 **Le due ancore di casa danno i DUE VERDETTI OPPOSTI. Quindi il cancello di costo di EURUSD H4 è `[NON RISOLTO]`, non «PASSA» — ed era la ragione numero uno per cui questo capitolo esisteva.**
+
+⚠️ E l'esponente peggiora le cose: `k = 0,50` è **assunta** su un rapporto di tempo di
+**16×**, mentre l'unico `k` **misurato** in casa è **0,968**. Con quello la stessa catena
+darebbe **131,8 pip**. 👉 Un'estrapolazione il cui esito va da **14,7 a 131,8 pip** non
+vincola niente.
+
+✅ **La via più corta, e costa UNA passata**: una lettura diretta di
+`iATR(EURUSD, PERIOD_H4, 14)` sul feed BCM. 🔴 **Va fatta PRIMA delle 8 passate del
+round, non dopo**: decide se EURUSD H4 è un candidato o un escluso.
 
 ➡️ **Conclusione onesta: EURUSD non è «più avanti» come credevo stamattina. È il
 candidato con la MISURA MANCANTE PIÙ ECONOMICA — 8 passate, 1,22 minuti — e con il

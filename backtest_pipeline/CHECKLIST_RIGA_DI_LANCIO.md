@@ -23926,3 +23926,135 @@ il **CANCELLO** ed è lo **SVILUPPATORE** ad applicarlo, il numero era corretto 
 che il cancello aveva letto**, non in quello che ne esce.
 👉 **Il secondo giro di cancello non ri-verifica solo le righe CAMBIATE: ri-verifica le
 righe che le righe cambiate RENDONO FALSE.**
+
+---
+
+## 🔁🎓 CLASSE 423 — LA VERIFICA CIRCOLARE TRAVESTITA DA CONFERMA INDIPENDENTE: «la mia catena riproduce un numero scritto da qualcun altro» (18/09/2026)
+
+**Il caso.** `prove/R140a_EMA200_EURUSD_H4_LS.txt`, paragrafo IL COSTO, e da lì migrato in
+un referto. Scriveva, come prova di solidità: *«41,7×, ed è esattamente il numero scritto
+in `REGISTRO_TEST.md`: la mia catena ATR+commissione RIPRODUCE un numero scritto da
+qualcun altro, quindi non è una formula che torna da sola»*.
+🔴 **Riaperta la riga citata: quel 41,7× è `36,0 / 0,864`, e il suo 36,0 nasce dalla
+STESSA ancora** (`ATR(14) M15 EURUSD = 9,00 pip`, feed **Oanda**) **con la STESSA legge
+`sqrt`** (`REGISTRO_TEST.md` r.2394). Stessa catena, stesso dato di partenza:
+riprodurlo è **un'identità algebrica**, non una conferma.
+
+### 🔬 PERCHÉ È UNA CLASSE, e non una svista
+1. 🔴 **Non lascia un numero sbagliato: lascia un numero FRAGILE con un TIMBRO DI
+   VERIFICA sopra.** È peggio del difetto nudo — nessuno lo ricontrolla più, perché
+   risulta già controllato.
+2. 🔴 **Nasce dall'applicazione FORMALMENTE CORRETTA della regola giusta.** La regola del
+   10/09 dice *«si verifica contro i numeri veri già scritti da qualcun altro»*. Qui è stato
+   fatto — ma «qualcun altro» **aveva usato la stessa ancora**. 👉 **La regola chiede dati
+   indipendenti, non MANI indipendenti.**
+3. 🔴 **Si propaga**: l'argomento era già finito in un referto e da lì in chat. Un timbro
+   falso si copia.
+4. 📌 **Il contro-esempio esisteva, sul feed giusto, e nessuno l'aveva cercato**:
+   `ABTG_BreakingBand` EURUSD `772162`, geometria `SL = 3,0 × ATR(14)` H1 (verificata nel
+   sorgente r.328/r.1297), stop **MISURATO su BCM 22,1 pip** ⇒ ATR H1 = 7,37 ⇒
+   **ATR H4 = 14,7 pip**, cioè **2,4× più basso** del 36,0 derivato — e il verdetto di costo
+   si **ribalta** (22,2× invece di 54,2×: da PASSA a **ESCLUSO PER COSTO**).
+
+### ✅ LA REGOLA
+🔴 **Prima di scrivere «riproduce un numero indipendente», si risale la catena dell'altro
+numero fino alla MISURA GREZZA.** Se l'ancora è la stessa, l'esito è un'identità e va
+scritto così: *«coerente con X, che però parte dalla mia stessa ancora — non è una
+verifica»*.
+📐 **Un'ancora è indipendente solo se cambia almeno uno fra: lo STRUMENTO, il FEED,
+l'EPOCA, la LEGGE.** Stessa formula + stessa ancora = **zero informazione nuova**.
+🔎 **E prima ancora**: quando un numero è `[DERIVATO]` — a maggior ragione `[DERIVATO DUE
+VOLTE]` o da un **feed diverso** — si cerca in repo una **misura DIRETTA sullo strumento e
+sul feed veri**, anche dentro un **ALTRO EA**, se la geometria del suo stop è un multiplo
+noto dell'ATR. 👉 **Una sedia in forward con `SL = k × ATR` è un ATR-metro già installato,
+e in casa ce ne sono a decine.**
+⚠️ **E la dichiarazione di sensibilità si costruisce attorno al valore che RIBALTA il
+verdetto**, non attorno a uno scostamento comodo: *«se fosse 27 invece di 36 → 40,7×»* non
+serve a niente se l'altra ancora di casa dice **14,7**.
+
+---
+
+## ⚖️🎭 CLASSE 424 — IL ROUND A DUE LATI SU UN MOTORE CHE HA I DUE LATI DI SEGNO OPPOSTO: misura una SOMMA, e la somma la producono tutte e due le ipotesi (18/09/2026)
+
+**Il caso.** `prove/R140a_EMA200_EURUSD_H4_LS.txt`. Il file trova **da solo**, e lo scrive,
+che su EURUSD H4 il **LONG fa 0 celle positive su 28** (PF mediano 0,794) e lo **SHORT
+26 su 26** (PF mediano 1,321). Poi gira lo stesso il round a **due lati**, chiamandolo
+*«il numero che discrimina»* fra «edge vero» e «deriva d'epoca», con attesa **PF 1,00-1,12**.
+
+🔴 **La configurazione L+S è aritmeticamente la SOMMA dei due lati** (verificato sulle tre
+coordinate del CSV che hanno tutte e tre le configurazioni). Quindi:
+- **ipotesi A**, «è deriva d'epoca» ⇒ su una finestra lunga le derive dei due versi si
+  annullano ⇒ **PF → ~1,00**;
+- **ipotesi B**, «lo short ha un edge, il long no» ⇒ miscela di 1,32 e 0,79 ⇒ **PF ~1,00-1,10**.
+
+👉 **Le due ipotesi producono lo stesso numero, e cade dentro la banda dichiarata.** È la
+**classe 178** applicata non alla lettura di una banda ma al **DISEGNO del round**: il
+difetto non è come si legge il numero, è **quali celle si è deciso di girare**.
+
+### 💸 IL COSTO VERO, che non è il tempo macchina
+Il round costa **1,22 minuti**: cestinarlo per il costo sarebbe assurdo. 🔴 **Il costo è
+che poi qualcuno ci crede** — un PF di 1,06 su 2.200 deal e 16,5 anni ha l'aria di un
+verdetto, e finisce in un referto come *«EURUSD misurato»*. E ce n'è un secondo,
+misurabile: alla coordinata del round, accendere il long accanto allo short **brucia il
+43% del profitto, dimezza il PF (1,514 → 1,132) e alza il DD del 67% (4,14% → 6,92%)**. Il
+numero che esce **sottostima il motore migliore e sovrastima quello peggiore, insieme**.
+
+### ✅ LA REGOLA
+🔴 **Se la scansione di partenza mostra i due lati di SEGNO OPPOSTO in modo netto (0/28
+contro 26/26), il round a due lati NON è la misura del motore: è la misura della somma.**
+Prima di armarlo si decide **quale delle due cose si vuole sapere**, e lo si scrive nel
+titolo.
+✅ **Il L+S resta legittimo per la COMPARABILITÀ** con i round precedenti girati in quella
+configurazione, e per leggere `S4`. Ma allora si dichiara **così**, con una soglia che
+**vieta in referto** di leggerlo come prova sull'edge.
+🥇 **E la misura che risponde si dichiara NELLO STESSO FILE, PRIMA dei numeri**: ipotesi di
+lato, previsione puntuale per ciascun lato, condizione di falsificazione. Dichiarare i
+round a lato singolo **dopo** aver visto il L+S sarebbe **selezione**.
+🔓 **La clausola che li rende leciti, e va scritta**: un lato suggerito da una scansione
+recente **non è «scelto sul campione» se la finestra IS dello split NON si sovrappone a
+quel campione.** In quel caso **l'IS è una prova fuori selezione**, ed è il numero
+principale; l'OOS, che il campione lo tocca, è il secondario.
+🔗 Non contraddice il divieto del 18/09 (*«NON il lato singolo SCELTO SUL TICK
+2024-2026»*): quello vale per un round a **finestra unica sovrapposta**, questo per uno
+**split che ha una finestra pulita**.
+
+---
+
+## 🧾🔬 CLASSE 425 — LA PROVENIENZA DI UN CSV LETTA NEL BLOCCO `[Tester]` SENZA CONFRONTARE GLI ASSI DI `[TesterInputs]` COL CSV (18/09/2026)
+
+**Il caso.** `prove/R140a_EMA200_EURUSD_H4_LS.txt` dichiarava il banco della scansione
+*«leggendolo dallo script al commit che l'ha prodotta»* (`scan_market.ps1`, blocco
+`[Tester]`: Period H4, Model 1, Optimization 2, finestra, deposito). **Quelle righe sono
+lette bene.**
+🔴 **Ma il blocco `[TesterInputs]` dello stesso script, dieci righe sopra, per
+`ABTG_EMA200` porta solo `InpTF`, `InpRiskPercent`, `InpAllowLong`, `InpAllowShort`,
+`InpTP_RR`: `InpOrder1Atr` e `InpOrder2Atr` NON CI SONO.** Nel CSV invece variano su **6**
+e **5** valori — e sono **le due colonne su cui l'intera scelta della cella è costruita**.
+➡️ Quello script **non può aver prodotto quel CSV**, e il banco dichiarato è
+**un'ipotesi, non una lettura**.
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **I due blocchi sono nello STESSO heredoc, a dieci righe di distanza.** Chi apre il
+   file per copiare il banco ha gli assi sotto gli occhi e non li guarda, perché sta
+   cercando *«Model / Optimization / FromDate»*. Il difetto è nell'**obiettivo della
+   lettura**, non nella distrazione.
+2. 🔴 **Il CSV può essere nello STESSO commit dello script e divergere lo stesso**: la
+   corsa gira su una copia locale del PC di backtest, e il commit fotografa risultato e
+   script **senza garantire che siano la stessa versione**. 👉 **La co-presenza in un commit
+   NON è provenienza.**
+3. 🔴 **Il danno si vede solo dopo**: se il banco è ignoto, sono ignote la **finestra** e il
+   **modello** della misura da cui si è scelta la cella. Il difetto viaggia dentro ogni
+   round figlio.
+
+### ✅ LA REGOLA
+🔴 **La provenienza di un CSV si verifica CONFRONTANDO L'INSIEME DELLE COLONNE CHE VARIANO
+con l'insieme delle righe `||…||Y` di `[TesterInputs]`.** Se non coincidono, il banco è
+**`[NON VERIFICATO]`**, anche se il `[Tester]` era leggibile.
+📐 **Controllo aritmetico gratuito, da fare sempre**: `prodotto dei valori distinti di ogni
+asse` contro `numero di righe`. Se il prodotto **supera** le righe, l'ottimizzazione era
+**genetica** e ogni media per colonna eredita un campione **non uniforme** — va detto
+accanto a **ogni** media. Se il prodotto **non torna affatto**, gli assi dichiarati sono
+sbagliati.
+👉 **E il documento che chiude davvero il buco si nomina: l'`.ini` della corsa.** Se non è
+in repo, lo si dice — *«l'ini non c'è»* è un'informazione, *«il banco è questo»* senza
+l'ini è un'affermazione.
