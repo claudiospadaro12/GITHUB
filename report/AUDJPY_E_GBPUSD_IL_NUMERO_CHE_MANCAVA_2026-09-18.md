@@ -447,13 +447,65 @@ simboli di stamattina.
 |---|---|---|
 | H1, PF OOS | 1,076 - **1,224** su 30 celle | `ABTG_EMA200_EURUSD_OOS_r29a.csv` |
 | H1, DD OOS | 9,05 - 11,98% @1,0% | idem |
-| H1, segni | 🟢 **stesso segno nelle due finestre** (IS 29/30 in utile) | `..._IS_r29a.csv` |
+| H1, segni | 🟠 stesso segno nelle due finestre (IS 29/30 in utile) — 🔴 **ma vedi la correzione qui sotto** | `..._IS_r29a.csv` |
 | 🔴 H1, **costo** | **20,8×** contro il pavimento di lavoro **40×** → **ESCLUSO PER COSTO** | `REGISTRO_TEST.md` r.2367-2384 |
 | 🟢 **H4, costo** | **41,7×** → **PASSA** | idem |
 | H4, scansione esistente | **85 celle**, PF **0,705-1,565**, DD **3,94-8,09%**, 31 celle L+S | `risultati_archivio/EMA200/H4_OHLC/scan_ABTG_EMA200_H4_EURUSD.csv` |
 | 🔴 **H4, split IS/OOS** | **NON ESISTE** — cercato repo-wide, zero file | mio `glob`, 18/09 |
 
 > ### 🔴 **Il DD di quella scansione H4 è 3,94-8,09%: la METÀ di quello di GBPUSD H4 (10-11%) e di EURUSD H1 (9-12%). E il cancello del costo, che a H1 lo uccideva, a H4 lo lascia passare con 41,7× contro 40×.**
+
+---
+
+### 🔴 CORREZIONE DEL 18/09, ore 09:2x — **DUE NUMERI CHE INDEBOLISCONO QUESTO CAPITOLO, ED È GIUSTO CHE STIANO QUI DENTRO**
+
+Trovati dall'agente che ha scritto il file prova, **verificati da me alla fonte**.
+
+#### ① La finestra di R29a è di **~21 MESI**, non di sedici anni e mezzo
+
+`backtest_pipeline/prove/R29a_ema200_eurusd.txt` **r.23**: `@DAQUANDO 2024.09.26`.
+(Data di fine **[NON MISURATO]**: il file non ha `@FINOA`.)
+
+🔴 **Quindi «stesso segno nelle DUE finestre», che qui sopra è la riga che fa la
+differenza contro AUDJPY e GBPUSD, sono DUE FETTE DELLO STESSO MERCATO DI 21 MESI** —
+non un walk-forward lungo. È il caso in cui `S4` non scatta **perché non ha materia su
+cui scattare**, non perché il motore ha retto a un cambio di regime.
+⚠️ E c'è un secondo pezzo: le 30 celle di R29a differiscono per O1/O2/TP su range
+strettissimi, quindi girano **in gran parte sulle stesse operazioni**. «30/30 in utile»
+ha un **campione efficace vicino a UNO**, non a trenta.
+
+#### ② Su EURUSD H4 il «L+S positivo» è **una miscela**, e i due lati sono opposti
+
+Contati **da me** su `scan_ABTG_EMA200_H4_EURUSD.csv`:
+
+| lato | celle | positive | PF mediano | DD |
+|---|---:|---:|---:|---|
+| **LONG only** | 28 | 🔴 **0 / 28** | **0,798** (0,705-0,886) | 4,23-7,17% |
+| **SHORT only** | 26 | 🟢 **26 / 26** | **1,324** (1,184-1,565) | 3,94-6,48% |
+| **L+S** | 31 | 24 / 31 | 1,042 | 4,40-8,09% |
+
+👉 **Il PF 1,565 del massimo di scansione citato qui sopra è una cella SHORT-ONLY**, e
+il long da solo **non ha una cella positiva su 28**. La configurazione a due lati
+somma un corto forte e un lungo che perde.
+
+#### ✅ E allora perché il round R140a ha ANCORA senso — anzi, di più
+
+Perché è **esattamente la misura che discrimina**. La finestra 2010→2026 contiene la
+discesa 1,39→1,05 (2014-15), la 1,23→0,96 (2022) e le salite 2017/2020: se fosse
+**deriva d'epoca**, su 16,5 anni il PF deve tornare verso 1,00. 🔴 **L'agente ha
+dichiarato PRIMA l'esito che si aspetta: PF 1,00-1,12 in entrambe le finestre, mediana
+~1,06 — cioè SI ASPETTA CHE `S2` NON PASSI**, e ha scritto nel file la clausola che
+rende il test simmetrico (*se esce 1,02 è vietato dire «e' la finestra lunga che
+diluisce»*).
+
+🟢 **E una cosa è andata benissimo, e va detta**: il costo H4 di **41,7×** è stato
+**ricalcolato da zero** (ATR + spread misurato + commissione) ed è uscito **identico al
+numero scritto da qualcun altro** in `REGISTRO_TEST.md` **r.2397**. Una formula che
+riproduce un numero indipendente non è una formula che torna da sola.
+
+➡️ **Conclusione onesta: EURUSD non è «più avanti» come credevo stamattina. È il
+candidato con la MISURA MANCANTE PIÙ ECONOMICA — 8 passate, 1,22 minuti — e con il
+costo che finalmente passa. Il resto è tutto da misurare.**
 
 ⚠️ **Quei numeri H4 sono una scansione a finestra UNICA, non un verdetto**: è
 esattamente la condizione da cui partivano AUDJPY e GBPUSD stamattina, e si è

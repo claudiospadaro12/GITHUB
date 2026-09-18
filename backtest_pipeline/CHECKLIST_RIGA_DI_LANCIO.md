@@ -23857,3 +23857,36 @@ sul carattere giusto.
 automaticamente un difetto.** Misurato, non spostava il numero. Il verdetto corretto non
 era *«correggilo»*: era **«DICHIARALO»** — cambiare l'etichetta perché dica cosa conta
 davvero. **Correggere per simmetria è un modo di rompere le cose che funzionano.**
+
+---
+
+## 📅⚖️ CLASSE 421 — LO SPLIT IS/OOS LETTO COME PROVA DI ROBUSTEZZA SENZA GUARDARE QUANTO È LUNGA LA FINESTRA: due fette di 10 mesi non sono due regimi (18/09/2026)
+
+**Il caso.** Un referto metteva `EMA200` EURUSD H1 in cima ai candidati forex con questa
+riga: *«**stesso segno nelle due finestre** (IS 29/30 in utile, OOS 30/30) ⇒ `S4` non
+scatterebbe»* — e la contrapponeva ad AUDJPY/GBPUSD, che su 16,5 anni erano appena morti
+proprio su `S4`. 🔴 Ma `prove/R29a_ema200_eurusd.txt` **r.23** dice
+`@DAQUANDO 2024.09.26`: la finestra intera è di **~21 mesi**, quindi IS e OOS sono
+**due fette da ~8 e ~13 mesi dello STESSO mercato**.
+
+🔴 **`S4` non scattava perché non aveva materia su cui scattare.** Un cancello che
+cerca il **cambio di segno fra regimi** non può dire niente se le due finestre stanno
+dentro **un regime solo**: il suo «PASS» non è un'assoluzione, è un **non luogo a
+procedere**. E confrontarlo con un `FAIL` ottenuto su 16,5 anni è confrontare due cose
+che non sono la stessa misura.
+
+⚠️ **Aggravante misurata**: le 30 celle di quel round differivano per parametri su
+range strettissimi, quindi giravano **in gran parte sulle stesse operazioni**. Il
+«30 su 30» ha **campione efficace vicino a UNO**.
+
+### ✅ LA REGOLA
+📐 **Un esito `S4` (coerenza dei segni) si cita SEMPRE con la LUNGHEZZA della finestra
+e il NUMERO DI REGIMI che contiene, accanto.** *«Stesso segno»* su 21 mesi e *«segno
+opposto»* su 16,5 anni **non sono comparabili**, e metterli nella stessa tabella fa
+vincere il campione più povero.
+🔎 **Il controllo costa dieci secondi**: si apre il file prova del round e si legge
+`@DAQUANDO`/`@FINOA`. Se la finestra intera sta dentro un regime, l'esito `S4` si scrive
+**«NON APPLICABILE»**, mai **«PASS»**.
+🔗 È l'Emendamento C (16/08) applicato al verso opposto: quello avverte che *sedici
+anni contigui DILUISCONO*; questo avverte che **ventun mesi non DISTINGUONO**. Servono
+tutti e due.
