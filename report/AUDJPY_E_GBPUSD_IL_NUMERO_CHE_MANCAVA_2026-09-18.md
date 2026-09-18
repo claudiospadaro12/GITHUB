@@ -1,4 +1,36 @@
-# 📏 AUDJPY E GBPUSD: IL NUMERO C'ERA GIA', DA CINQUE GIORNI
+# 📏 AUDJPY E GBPUSD: IL NUMERO C'ERA GIA' — E ANCHE IL VERDETTO
+
+> # 🔴 CORREZIONE IN TESTA, 18/09 ore 08:5x — **IL TITOLO ORIGINALE DI QUESTO REFERTO ERA FALSO, E IL TITOLO ERA MIO**
+>
+> Diceva *«da cinque giorni»*, e sotto: *«letti oggi, 18/09. Cinque giorni.»*
+> **Non è vero.** `report/LETTURA_BACKLOG_NOTTE_2026-09-13.md` (commit `7aaa9526`,
+> **13/09 ore 23:32 +0200**, cioè **25 minuti dopo** che i CSV erano stati committati)
+> alle **righe 116-117** porta già gli stessi numeri e gli stessi verdetti:
+> *«r139a → **FAIL S3 (rischio)**, DD > 14,0% su tutte le celle in entrambe le
+> finestre»* e *«r139b → **FAIL S3 + S4**, segno opposto su 4 celle su 4 = REGIME,
+> non edge»*. 👉 **È parola per parola la conclusione che questo referto presenta
+> come nuova.** Verificato da me aprendo il file, dopo che l'audit dei 48 round me
+> l'ha contestato.
+>
+> 🔴 **E l'ironia va scritta, perché è la lezione**: il referto apriva denunciando
+> la **classe 411** (*«prima di ordinare una misura, si cerca se esiste già»*) e
+> **commetteva la stessa classe nella stessa riga**. Ho cercato i CSV e il registro.
+> **Non ho cercato i referti.**
+>
+> **Che cosa mancava DAVVERO, ed è un difetto vero lo stesso**: in `REGISTRO_TEST.md`
+> non c'è nessuna riga di risultato per R139a/R139b — né per gli altri 46 round.
+> **Il verdetto esisteva; l'INDICE no.** Chi cerca dove si cerca non lo trova.
+>
+> **Che cosa resta valido di questo referto, e non è poco:**
+> 🟢 **è una RIPRODUZIONE INDIPENDENTE** — due letture a cinque giorni di distanza,
+> partite da CSV e non l'una dall'altra, stessi numeri e stessi verdetti;
+> 🟢 l'**aritmetica del regime** (§6), la **frequenza in posizioni** (§7) e il
+> **§12 su EURUSD** sono **nuovi**: la lettura del 13/09 non nomina EURUSD **nemmeno
+> una volta** (0 occorrenze, verificato) e non contiene il costo H4 di 41,7×.
+> 🔴 È **falsa** solo la rivendicazione di primato, e con lei il §11 punto 1 e ogni
+> «sono stati letti oggi».
+
+---
 
 **18/09/2026** · risposta a *«MISURA AUDJPY E GBPUSD»* · round `R139a` / `R139b`
 
@@ -9,8 +41,9 @@
 > ### 🔴 **Nessuno dei due è schierabile. AUDJPY è MORTO con certificato completo (muore su DUE cancelli indipendenti in ENTRAMBE le finestre). GBPUSD non muore ma non passa: `S4` — «REGIME, non edge», IS negativo 4/4 e OOS positivo 4/4. 🟢 E la notizia buona è dentro la brutta: l'OOS di GBPUSD è il profilo fuori campione più LUNGO e più LARGO che `EMA200` abbia mostrato sul forex — PF 1,127-1,139 su 705-721 POSIZIONI, DD 10,0-11,0% a rischio 1,0% (= 6,5-7,2% alla taglia di flotta), su 9,8 anni. ⚠️ NON il più ALTO: `EURUSD` H1 arriva a PF 1,224 con DD 9,05%, e il §12 dice perché quella è la notizia più importante di tutto il documento.**
 
 E la cosa che brucia di più: **i quattro CSV sono nel repo dal 13/09 alle 23:05.**
-Letti oggi, 18/09. **Cinque giorni.** In `REGISTRO_TEST.md` **non esiste nessuna
-riga di risultato** per R139a/R139b: l'ultima che li nomina è **r.2616-2622**, che
+⚠️ **E letti già il 13/09 alle 23:32** — vedi la correzione in testa: il verdetto
+c'era, in `LETTURA_BACKLOG_NOTTE_2026-09-13.md` rr.116-117. In `REGISTRO_TEST.md`
+però **non esiste nessuna riga di risultato** per R139a/R139b: l'ultima che li nomina è **r.2616-2622**, che
 li dà come *file prova pronti, cancello deterministico passato*.
 ⚠️ **E il «NON ANCORA MISURATO» di r.2614 NON è loro**: è il verdetto su
 `FiboH4` GBPUSD (**R139c**), un altro candidato, quattro righe sopra.
@@ -377,8 +410,12 @@ di 0,05). *«Il default va bene» è un risultato, non un fallimento.*
 
 ## 11. 📌 COSA ENTRA NELLA MEMORIA
 
-1. **Classe 411, terza applicazione in due giorni.** I numeri chiesti stamattina
-   erano nel repo **dal 13/09**. Il costo del non-cercare, misurato: **5 giorni**.
+1. 🔴 **Classe 411 commessa DA QUESTO REFERTO, nella riga in cui la denunciava.**
+   I numeri erano nel repo dal 13/09 **e anche il verdetto era già scritto**, in un
+   **referto** che non ho cercato. Il costo vero non è «cinque giorni di misura
+   persa»: è **una giornata di lavoro rifatta** — e, in cambio, una **riproduzione
+   indipendente** che regge. 👉 **Quando si cerca «esiste già?» si cercano TRE posti:
+   i CSV, il REGISTRO e i REFERTI.** Io ne ho cercati due.
 2. Il rapporto **deal/posizione** di `EMA200` a H4 forex è **1,83-1,84** misurato,
    non 2,0117 come assunto nei file prova del 12/09.
 3. Lo spread MISURATO di **GBPUSD è 0,3 pip** mediana su 6 giornate — da oggi si
