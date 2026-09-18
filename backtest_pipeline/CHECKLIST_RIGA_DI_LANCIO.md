@@ -24423,3 +24423,156 @@ commit X»* detto senza aggettivi è una **promessa che il log non ha fatto**.
 🧪 **Contro-esempio obbligatorio**: *«un file può avere MENO righe ed essere PIÙ NUOVO»* — una
 rifattorizzazione accorcia. Quindi il numero di righe **da solo non ordina nel tempo**: va
 **ancorato a un commit specifico**, e il commit va **verificato con una seconda impronta**.
+
+---
+
+## 🆕 AGGIUNTE DEL 18/09/2026 (sera) — trovate dal **controllo-preventivo** sul `.set` `sedia_NASDAQ_RETEST_VOLUMI_770260` destinato al terminale **50503392** (grafico NASUSD), rigenerando il preset dalla riga del CSV e **diffandolo** invece di leggere la tabella che lo riassume. 🟢 **Il nucleo del pacchetto regge**: il `.set` è **identico byte per byte** alla rigenerazione meccanica dalla riga `Pass=8` di `NASDAQ_B_motore_{IS,OOS}.csv`, i numeri citati sono quelli di **quella** riga, il magic `770260` è **vergine**, e il binario di agosto (`3af47ed9`, 2033 righe) dichiara **tutti e 78** gli input del preset. Le quattro voci qui sotto sono difetti del **contorno** e del **referto**, tutti **riprodotti a macchina**.
+
+## 🚪📄 CLASSE 434 — IL `.set` È L'UNICO ARTEFATTO OPERATIVO CHE IL CANCELLO DETERMINISTICO **NON SA GUARDARE**, ed è quello che finisce su un **grafico vivo** (controllo-preventivo, 18/09/2026, discendente della **225**)
+
+**IL CASO REALE.** `python3 backtest_pipeline/controlla_riga.py <file>.set` risponde
+`NON SO CHE OGGETTO E'` e **esce 0**. `--oggetto` accetta `riga|ps1|prova|md`: **`set` non c'è.**
+Quindi lo **strato 1** su un `.set` non gira per niente — e il `.set` è l'unico dei cinque
+artefatti che **non passa da PowerShell**: va direttamente nella finestra degli input di un EA
+**attaccato a un grafico**, dove un valore sbagliato non dà nessun errore, **dà operazioni**.
+
+🔴 **E l'uscita è `0`**, cioè "verde" per chiunque legga solo il codice di ritorno. La 225 aveva
+già insegnato che *un cancello che non sa che oggetto guarda insegna a ignorare il cancello*:
+qui non c'è nemmeno un falso positivo che avvisi — c'è un **silenzio che somiglia a un PASS**.
+
+### ✅ LA REGOLA, finché il modo non esiste
+- 📐 Un `.set` **non si dichiara "passato al cancello"**: si dichiara **«strato 1 NON DISPONIBILE
+  per questo oggetto»** e si scrive nella sezione NON COPERTO. Dirlo è obbligatorio.
+- 🔧 I quattro controlli che il modo `--oggetto set` dovrà fare, e che oggi si fanno a mano:
+  1. **byte non-ASCII** (il `.set` viaggia su Windows come i `.ps1`);
+  2. **ogni chiave esiste come `input` nel sorgente del binario in campo**, e il binario si
+     nomina col **commit**, non col nome del file;
+  3. **ogni `input` del sorgente è nominato dal `.set`** (classe **25**: quello che manca non
+     torna al default, **resta l'ultimo valore lasciato nella finestra**);
+  4. **la notazione dei tipi** combacia con la dichiarazione (`bool` -> `true`/`false`).
+- 🧪 **Contro-esempio obbligatorio**: *«esce 0, quindi è passato»* — no: **esce 0 anche quando
+  non ha controllato niente.** Un cancello che non distingue "tutto a posto" da "non so
+  guardarlo" **non è una rete**, è un'abitudine.
+
+---
+
+## 🔢➡️📄 CLASSE 435 — IL `.set` GENERATO A MACCHINA DA UN CSV DI OTTIMIZZAZIONE: **la fedeltà al CSV è la virtù E il difetto** — la notazione del CSV non è la notazione del preset, e le colonne del CSV non sono gli input dell'EA (controllo-preventivo, 18/09/2026)
+
+**IL CASO REALE.** `sedia_NASDAQ_RETEST_VOLUMI_770260.set` nasce copiando le 78 colonne `Inp*`
+della riga `Pass=8` del CSV. La generazione meccanica è **giusta** (protegge dal ribattere a
+mano) e infatti il diff con la rigenerazione è **vuoto**. Ma eredita **due cose che nel CSV
+sono corrette e in un `.set` no**:
+
+**(a) LA NOTAZIONE DEI `bool`.** Il CSV scrive `1`/`0` perché è l'uscita dell'ottimizzatore.
+Il preset ne porta **13** così: `InpUseVolumeFilter=1`, `InpCloseAtEnd=1`, `InpUseGapFill=1`,
+`InpBreakevenAtTP1=0`, `InpSkipIfTight=0`... Su **169 `.set` in repo, 168 scrivono
+`true`/`false`**; l'unico con `0`/`1` (`ABTG_GapContinuation_FORWARD.set`) non ha nessuna prova
+scritta di essere mai stato **caricato**. 🔴 **Il punto non è "MT5 lo accetta o no": è che non
+lo sappiamo, e il modo di fallire è SILENZIOSO.** Se `InpUseVolumeFilter=1` venisse letto come
+`false`, la sedia girerebbe la configurazione **volumi OFF** — che nello stesso CSV fa **IS PF
+0,8135** — e nessuno se ne accorgerebbe: stesso grafico, stesso magic, stesso EA, **altra
+strategia**. Costo della correzione: **zero**. Quindi si corregge, senza aspettare di sapere.
+
+**(b) LE COLONNE MANCANTI.** Il CSV ha le colonne che la **griglia** conosceva. Qui il CSV è del
+**06/08** (`2ce7abce`) e il binario in campo è dell'**08/08** (`3af47ed9`), che nel frattempo ha
+guadagnato **`InpMaxPosSimbolo`** e **`InpTrailStartR`**: due input che l'EA ha e che il `.set`
+**non nomina**. I loro default sono inerti (`0`/`0`), quindi qui non morde — **ma è la classe 25
+in forma nuova**, e lì non era inerte.
+
+### ✅ LA REGOLA
+🔴 **Il formato di DESTINAZIONE non si deduce dal formato di ORIGINE.** Un `.set` nato da un CSV
+si genera in due passi, non in uno:
+1. si prendono i **valori** dal CSV (a macchina, e si diffa);
+2. si prende la **forma** dal **sorgente dell'EA**: si legge il `tipo` di ogni `input`
+   (`bool` -> `true`/`false`, `double` -> con il decimale) e si **elencano tutti** gli input del
+   sorgente, scrivendo esplicitamente **anche quelli che la griglia non spazzolava**, al loro
+   default, con un commento che dice che sono default.
+📌 La prova che il lavoro è fatto è **un conto**: *«80 input nel sorgente `3af47ed9`, 80 righe
+nel `.set`»*. Se i due numeri non sono uguali, il preset è incompleto — anche se il diff col CSV
+è vuoto.
+
+---
+
+## 🏗️🎭 CLASSE 436 — I PARAMETRI DEL **BANCO DI PROVA** RACCONTATI COME **SCELTE DELLA CELLA** — e uno di loro è un flag **INERTE**, messo a `1` apposta per far girare un ALTRO motore (controllo-preventivo, 18/09/2026)
+
+**IL CASO REALE.** `report/NASDAQ_RETEST_VOLUMI_LA_SEDIA_2026-09-18.md` §② presenta quattro
+parametri come le caratteristiche della **cella positiva**, contro il preset vivo:
+`InpRangeMode=0` · `InpRangeMinutes=35` · `InpTP1_R=0,5` · **`InpUseGapFill=true` -> «il gap
+fill è ACCESO»**. Aperto `backtest_pipeline/walkforward_aperture.ps1`, **tutti e quattro stanno
+nel `$BloccoJob`** (rr. 507-537), cioè nel **blocco fisso applicato a OGNI fase** del
+walk-forward: non sono l'esito di una ricerca, sono **il banco di prova**. E il quarto è peggio:
+
+```
+# BUG 05/08: la modalita' GAPFILL era subordinata al flag legacy InpUseGapFill.
+# Ora comanda la modalita'; il flag resta solo storico.      (ABTG_Nasdaq_Apertura_US.mq5 r.589-593)
+```
+🔴 **Con `InpEntryMode=2` (RETEST) `InpUseGapFill` non compare in NESSUN ramo di decisione**: le
+sue uniche occorrenze nel sorgente sono la dichiarazione (r.209) e **una riga di log** (r.389).
+Il `1` c'è perché lo script lo mette a 1 *«così il test è corretto anche con un binario vecchio»*
+(r.150) — cioè per far partire il motore **GAPFILL**, che qui non è quello scelto.
+👉 **La riga «il gap fill è acceso» descrive un comportamento che non esiste.**
+
+### 🔬 PERCHÉ È UNA CLASSE SUA, e non la 144
+La **144** è il conto sbagliato (*«tre differenze» e il diff ne fa quattro*). Qui il conto è
+sbagliato pure (il diff vero fa **17** differenze di valore, non 4 — mancano all'appello
+`InpCloseHour/Min` **17:30 contro 21:45**, `InpRiskPercent` **1,0 contro 0,25**, `InpTP1_ClosePct`
+**0 contro 50**, `InpBreakevenAtTP1`, `InpMinStopPts` **500 contro 0**, `InpSkipIfTight`,
+`InpTrailTF`), ma il difetto **nuovo** è un altro: **l'ATTRIBUZIONE**. Un valore che viene dal
+banco di prova viene raccontato come una **proprietà della strategia**, e allora chi legge crede
+che qualcuno l'abbia **scelto** e quindi **misurato**. Nessuno l'ha fatto.
+
+### ✅ LA REGOLA
+1. 📐 **Prima di descrivere una cella, si apre lo SCRIPT che l'ha prodotta** e si divide la riga
+   in due colonne: **spazzolato dalla fase** (e allora è un risultato) contro **fisso nel blocco
+   di base** (e allora è un'ipotesi del banco, da dichiarare come tale).
+2. 🧪 **Contro-esempio obbligatorio su ogni flag citato come "acceso":** `grep` del nome nel
+   sorgente. **Se le occorrenze sono solo la dichiarazione e un `Print`, il flag è INERTE**, e
+   scriverlo fra le differenze strutturali gonfia il conto con una voce che non fa niente —
+   peggio: fa **sparire** dal conto quelle che fanno qualcosa.
+3. 🔴 Il conto delle differenze si **stampa da una macchina** (classe **144**) **normalizzando la
+   notazione**, altrimenti `1` contro `true` sporca il diff con 29 differenze finte e le 17 vere
+   non si vedono più.
+
+---
+
+## 🥇❌ CLASSE 437 — IL SUPERLATIVO CON CRITERIO **DICHIARATO E VERIFICABILE**, SMENTITO DALLE ALTRE RIGHE **DELLO STESSO CSV CITATO** (e dal messaggio di commit che quel CSV l'ha prodotto) (controllo-preventivo, 18/09/2026, sorella della **364**)
+
+**IL CASO REALE.** Due frasi, nella sezione che giustifica la sedia:
+> *«È l'**unica** configurazione sul Nasdaq positiva in TUTTE E DUE le finestre, e il suo DD OOS
+> del 3,68% è **il più basso di qualunque cosa abbiamo**.»*
+
+Ricontate le **12 righe** di `NASDAQ_B_motore_{IS,OOS}.csv` — il file citato due righe sopra:
+
+| Pass | motore | volumi | IS PF | IS n | OOS PF | OOS n | OOS DD% |
+|---|---|---|---:|---:|---:|---:|---:|
+| 8 | RETEST | ON | 1,14498 | 91 | 1,10936 | 94 | 3,6753 |
+| **6** | **BREAKOUT** | **ON** | **1,07124** | **114** | **1,06338** | **108** | 4,1309 |
+| **7/1** | **GAPFILL** | ON/OFF | **2,08266** | 23 | **1,93691** | 19 | **3,2756** |
+
+🔴 Le configurazioni positive in tutte e due le finestre sono **tre, non una** — e una di esse
+(Pass 6) ha **più campione** di quella proposta (108 contro 94), cioè batte la cella proprio
+sulla dimensione che il referto dichiara come **l'unico difetto** della sedia. 🔴 E il DD OOS più
+basso è **3,2756%**, non 3,6753%.
+💥 **E la smentita era già scritta in casa**: il messaggio del commit che ha generato quel CSV
+(`2ce7abce`, 06/08) dice testualmente *«GAPFILL sul Nasdaq fa PF 2.083 in campione e 1.937 fuori,
+DD 3.28% - ma su 23 e 19 trade»*.
+
+### 🔬 PERCHÉ NON È LA 364
+Nella **364** il criterio era **assente** e le risposte possibili tre. Qui il criterio è
+**scritto, univoco e a una riga di distanza dai dati** (*positiva in tutte e due le finestre* /
+*DD OOS più basso*) — ed è **falso lo stesso**. Il meccanismo non è l'ambiguità: è che **il
+superlativo è stato scritto guardando la riga scelta, non la colonna intera**. È la forma pura
+del difetto del 10/09: *controllare che la propria risposta sia COERENTE con l'attesa, invece di
+provare a ROMPERLA*.
+
+### ✅ LA REGOLA
+🔴 **Ogni «unica / il più / nessun altro» si verifica RIORDINANDO LA COLONNA, a macchina, sul
+file che si sta citando — e nel referto ci va la RIGA SECONDA, non solo la prima.** Tre righe di
+`csv`/`sort` bastano. Se la seconda non si può stampare, il superlativo si cancella e si scrive
+il numero da solo: **un numero vero senza aggettivo vale più di un aggettivo falso.**
+🧪 **Contro-esempio obbligatorio**: *«la mia riga è positiva in IS e in OOS»* non dimostra
+**«è l'unica»**. Le due frasi hanno insiemi di verifica diversi: la prima guarda **una** riga, la
+seconda **tutte**. Chi scrive la seconda dopo aver controllato la prima **non ha controllato
+niente**.
+📌 E vale anche fuori dai CSV: prima di scrivere un superlativo, `git log`/`grep` sul file che si
+cita — **qui la smentita era nel messaggio di commit del CSV stesso**, a costo zero.
