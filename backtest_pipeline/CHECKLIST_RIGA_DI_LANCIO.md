@@ -24217,3 +24217,53 @@ Formula di casa: *«A4 (FIRMA 4, 18/08/2026, `report/PIANO_PROP.md` r.1072): nes
 sopra l'1% **sul conto piccolo in forward**»*.
 🔎 **E prima di usare una sigla, `grep` della sigla in `report/`**: se torna piu' di un
 significato, la sigla da sola e' vietata.
+
+---
+
+## 🪦🔁 CLASSE 430 — IL «MAI PROVATO» CHE DIVENTA LA **RACCOMANDAZIONE** DEL REFERTO, mentre in archivio la misura esiste **TRE volte e con DUE segni opposti** (18/09/2026)
+
+**Il caso.** `report/LA_STRATEGIA_NASDAQ_DEI_COLLEGHI_2026-09-18.md` chiude con:
+*«il RETEST sul Nasdaq non è mai stato provato — `InpRetestOffsetPts` è a 0 e il modo
+non è mai stato acceso su quel simbolo»* e ne ricava la **cosa da fare**:
+*«La cosa da fare non è confermare o smentire: è provare il RETEST sul Nasdaq, che non è
+mai stato misurato.»*
+
+🔴 **In repo, `InpEntryMode=2` su NASUSD è misurato in TRE posti distinti:**
+1. `risultati_archivio/Walkforward_Aperture/NASDAQ_B_motore_OOS.csv` — **OOS +218,98 ·
+   PF 1,0408 · n=240 · DD 8,79%** (volumi off) e **+274,35 · PF 1,1094 · n=94 · DD 3,68%**
+   (volumi on). Il referto di fase (`REFERTO_FASE_B_C5.md` r.66) lo marca ✅ **«passa»**;
+2. `Walkforward_Aperture/NASDAQ_E_retest_fill_FULL.csv` — **20 passate** a `InpEntryMode=2`
+   con `InpRetestOffsetPts` **0 / 100 / 200 / 300** già spazzolato: finestra piena
+   **negativa** (da −3.122,22 PF 0,765 DD 41,25% a +9,93 PF 1,001 DD 14,65%, n 382-430);
+3. **R83** (`REFERTO_ROUND83_INGRESSI.md`, `REFERTO_R83_R84_PREPARAZIONE.md` r.700-707) —
+   **N1 retest OOS −2.411 · PF 0,62 · n=303 · DD 29,1%**, con **autopsia per-trade** e
+   verdetto *«la regola d'oro del DAX è la peggiore del Nasdaq»*.
+
+### 🔬 PERCHÉ È UNA CLASSE SUA, e non la 416
+La **416** è il *superlativo comparativo* smentito da un CSV. Qui il difetto è diverso in
+**tutte e tre** le parti:
+1. 🔴 **È una NEGAZIONE DI ESISTENZA** (*«non è mai stato provato»*), che si confuta con
+   **un `grep` del VALORE nella colonna dei CSV**, non con un confronto fra referti. Il
+   censimento va fatto sui **risultati**, non sulla prosa: qui i tre file avevano tutti
+   `retest`/`B_motore` nel nome, e nessuno è stato aperto.
+2. 🔴 **Produce un'AZIONE, non solo una frase**: un round proposto su un motore che
+   l'archivio ha **già archiviato** (`CENSIMENTO_SCARTATI_PROSA_2026-09-09.md` riga A111:
+   RETEST su NASUSD **PF 0,73 · DD 27%**). È tempo macchina bruciato contro la *Regola
+   della Seconda Caccia* (non si riapre la griglia di un motore già dichiarato senza edge
+   **senza una tesi nuova dichiarata**).
+3. 🔴 **E SEPPELLISCE una misura POSITIVA**: le due celle di FASE B (+218,98 e +274,35 in
+   OOS) e le tre negative di R83/NASDAQ_E **hanno segno opposto sullo stesso motore e sullo
+   stesso simbolo**. Scrivere *«mai provato»* cancella la domanda vera, che è **perché due
+   misure di casa si contraddicono** (finestre, filtro volumi, EA diverso: R83 gira su
+   `ABTG_Apertura3Ingressi` magic `777010`, non sul core).
+
+### ✅ LA REGOLA
+📐 **Prima di scrivere «mai provato / mai acceso / mai misurato» su un PARAMETRO, si fa il
+`grep` del PARAMETRO E DEL SUO VALORE nelle colonne dei CSV di `risultati_archivio/` e
+`risultati_prove/`** — non nei referti, non nei `.set`. Costo reale: due comandi.
+🔴 **E se la misura esiste con SEGNI OPPOSTI, il verdetto non è «va provato»: è «va
+RICONCILIATO»**, e il referto elenca per nome le corse da confrontare, con finestra, filtri,
+EA e `n` accanto. Una terza corsa che non spiega le prime due **non chiude niente**.
+🧪 **Contro-esempio obbligatorio**: *«se davvero non fosse mai stato provato, quale file NON
+dovrebbe esistere?»* Se la risposta è un nome plausibile (`*retest*`, `*_motore_*`), quel
+`glob` si esegue **prima** di consegnare.

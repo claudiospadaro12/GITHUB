@@ -3376,3 +3376,65 @@ Non sposta il verdetto, ma chi cita quel numero citi **questa** riga.
 📝 Audit completo: `report/I_QUARANTOTTO_2026-09-18.md`. Riproduzione indipendente
 di `r139a`/`r139b` a cinque giorni di distanza, partita dai CSV e non dal referto:
 `report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md` (stessi numeri, stessi verdetti).
+
+---
+
+# 🗃️ R83 e R84 — **ERANO SENZA UNA RIGA IN QUESTO REGISTRO** (aggiunti il 18/09/2026)
+
+🔴 **Perché sta scritto qui**: il 18/09 Claudio ha chiesto *«PROVA IL RETEST SUL NASDAQ»* e io gli
+avevo appena detto che *«non risulta mai provato»*. **Era falso**: R83 lo aveva misurato il
+18-19/08, con IS, OOS e per-trade in repo. Non l'ho trovato perché **`grep -i r83` su questo
+registro dava ZERO**, esattamente come il 13/09 per R139a/b. Il verdetto esisteva in
+`report/PIANO_PROP.md` (rr.1149 e 2546) — ma chi cerca un round lo cerca **qui**.
+
+## R83 — DUELLO DEGLI INGRESSI (FIRMA 6 del 18/08) · EA `ABTG_Apertura_3Ingressi`
+**La domanda**: *«a parità ASSOLUTA di livello, orario, stop, gestione e uscite, quale STILE
+D'INGRESSO regge meglio su QUESTO mercato?»* · finestra `@DAQUANDO 2024.09.26`, M15, tick reali
+(modello 4) · canarini di equivalenza al centesimo su entrambi i core (**291/291** e **311/311**
+trade identici).
+CSV: `backtest_pipeline/risultati_archivio/r83_csv/` · file prova: `prove/R83n*.txt`, `R83d*.txt`
+· criteri congelati: `prove/R83_INGRESSI_CRITERI.md`.
+
+| cella | mercato | stile | IS PF | IS n | OOS PF | OOS n | OOS DD% | OOS profit |
+|---|---|---|---:|---:|---:|---:|---:|---:|
+| `r83n0` | NASUSD | STOP oltre il livello *(lo stile VIVO)* | 1,2537 | 156 | 0,8731 | 291 | 17,070 | −795,03 |
+| `r83n1` | NASUSD | **LIMIT sul RETEST** | 0,9465 | 187 | **0,6239** | 303 | **29,137** | **−2.411,28** |
+| `r83n2` | NASUSD | MARKET a chiusura oltre | 0,7046 | 198 | 0,9785 | 313 | 6,178 | −91,83 |
+| `r83d0` | D30EUR | STOP oltre il livello | 1,0467 | 220 | 1,0409 | 325 | 13,262 | +251,22 |
+| `r83d1` | D30EUR | **LIMIT sul RETEST** | 1,0781 | 197 | **1,1878** | 311 | 10,598 | **+999,42** |
+| `r83d2` | D30EUR | MARKET a chiusura oltre | 0,8038 | 212 | 0,9842 | 322 | 8,688 | −82,77 |
+
+### 🎯 VERDETTO — **la stessa regola d'ingresso CAMBIA SEGNO fra i due mercati**
+- 🟢 **DAX: il RETEST vince**, ed è l'unica cella positiva in tutte e due le finestre. **Incorona
+  la config della sedia viva `770101`** — il cambio BREAKOUT→RETEST del 7 agosto.
+- 🔴 **Nasdaq: il RETEST è il PEGGIORE dei tre**, e di parecchio: PF OOS **0,624** su 303 trade,
+  DD **29,14%** (il più alto del round). **Zero modalità positive su tre.**
+- 📌 **Regola che ne esce, ed è generale**: *ogni estensione a un altro indice RIFA' il duello,
+  non eredita il RETEST.*
+
+### 🔬 Il MECCANISMO, ricontato sui per-trade il 18/09 (aggregato per POSIZIONE, non per deal)
+| cella | posizioni | % vinte | vincita media | perdita media | **|vinc./perd.|** |
+|---|---:|---:|---:|---:|---:|
+| RETEST Nasdaq (`777021`) | 260 | 70,4% | +21,85 | −84,35 | 🔴 **0,259** |
+| STOP Nasdaq (`777011`) | 241 | 72,2% | +31,38 | −96,23 | 0,326 |
+| RETEST DAX (`777121`) | 245 | 73,9% | +34,92 | −83,15 | 🟢 **0,420** |
+
+👉 **Il RETEST sul Nasdaq vince spesso e piccolo, perde di rado e pieno.** Sul rapporto che
+conta peggiora pure lo stile vivo (0,259 contro 0,326). Sul DAX fa l'opposto (0,420, il migliore).
+⚠️ `PIANO_PROP.md` r.1149 riporta l'autopsia come *«74/78 perdite = stop pieni 1R contro vincite
+medie 0,18R»*: **numeri diversi dai miei perché contati per DEAL** (303 deal = 260 posizioni,
+classe 226). Stessa conclusione, unità diversa — **e va detto quale si sta citando.**
+
+## R84 — ABLAZIONE DEI CRITERI (metodo completo del corso) · NASUSD M15, tick reali
+Nove celle (`r84a`…`r84i`), stessa finestra. **9/9 celle OOS negative.** Cella `A` (scheletro
+nudo): 241 posizioni, PF 0,873, DD osservato 17,07%. La cella `D` (volumi OR ATR) passa tutti e
+quattro i cancelli congelati (PF 1,104 vs 0,988, DD dimezzato, n=311) **pur restando OOS-negativa**
+→ riduttore di perdita, **mai edge**.
+CSV: `backtest_pipeline/risultati_archivio/r84_csv/` · prove: `prove/R84*.txt` · criteri:
+`prove/R84_ABLAZIONE_CRITERI.md` · distribuzione del DD per riordino delle 9 celle:
+`report/IL_DRAWDOWN_CHE_NON_ABBIAMO_MISURATO_2026-09-18.md` §10.
+
+### 🎯 CONSEGUENZA CONGIUNTA R83+R84 sulla sedia `770201`
+**12 configurazioni, 12 OOS negative** = **terzo verdetto indipendente**. È la misura che sostiene
+la **FIRMA 5** (`770201` 🔴 **[SENZA CONTRATTO]**, spenta dal 18/08 09:41 —
+`report/CONTRATTI_SEDIE.md` r.54).
