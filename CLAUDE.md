@@ -452,6 +452,21 @@ Su Nasdaq, DAX e Dow:
 - Ottimizzazioni/backtest sul PC di backtest; gli EA girano in forward sul VPS.
 - Regola EA: gli `_Ottimizzato` girano in parallelo agli originali (magic diversi), mai sostituirli.
 
+## 📄 I FILE PER I COLLEGHI SI MANDANO IN **PDF** (richiesta di Claudio, 18/09/2026)
+Testuale: _«File per marco generami sempre dei pdf x favore. Anche x altri
+colleghi. E' piu' semplice.»_
+- Vale per **qualunque documento destinato a una persona fuori dal progetto**
+  (Marco Garbuglia e chiunque altro): si consegna il **PDF**, non il `.md`.
+  Il `.md` resta in repo come sorgente, il PDF è quello che esce.
+- Convertitore di casa: **`backtest_pipeline/md2pdf_collega.py`**
+  (`python3 backtest_pipeline/md2pdf_collega.py <input.md> [output.pdf]`).
+- 🔴 **E le emoji NON sopravvivono al PDF**: i font standard non hanno quei
+  glifi. Il convertitore traduce le **semantiche** in etichette ASCII colorate
+  (🔴 -> `[!]` rosso, ✅ -> `[ok]` verde, 🟠 -> `[~]` arancione) e **toglie le
+  decorative**, dichiarando in console quali ha tolto. 👉 Quindi **l'informazione
+  sta nel testo, mai solo nell'emoji**: un documento che senza emoji non si
+  capisce è un documento scritto male.
+
 ## STILE MESSAGGI IN CHAT (richiesta di Claudio, 12/08 — ampliata 08/09)
 Claudio vuole messaggi con PIU' HYPE ed energia: titoli grandi (##),
 emoji sui concetti chiave, tono carico ma sempre coi numeri veri sotto.
