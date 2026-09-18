@@ -484,8 +484,11 @@ preWait = input.int(5,     "Barre entro cui deve avverarsi per contare come CENT
 // (anticipo 1,64 barre contro 1,88 della verita'). Si dichiara, e basta.
 // UNA sola definizione della distanza dalla linea, e la leggono tutti: il
 // pre-allarme E il pannello. Prima erano due formule gemelle scritte in due
-// posti, cioe' esattamente il peccato contro cui avverte il commento venti
-// righe sopra ("non si duplica la logica").
+// posti, cioe' esattamente il peccato contro cui avverte il commento che apre
+// la sezione 11b ("NON si duplica la logica"). Un rimando si ancora a un NOME,
+// mai a una DISTANZA: qui c'era scritto "venti righe sopra", ed era VERO in
+// v2.2 -- poi la patch che sto commentando ne ha inserite 18 in mezzo e il
+// numero e' diventato falso senza che nessuno lo toccasse.
 // Ed e' il numero GIUSTO da guardare: il flip alla barra N+1 confronta la
 // chiusura con la banda della barra N, quindi questa e' la soglia che varra'
 // alla PROSSIMA barra. Niente sguardo al futuro.

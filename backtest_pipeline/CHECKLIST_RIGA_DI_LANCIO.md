@@ -23890,3 +23890,39 @@ vincere il campione più povero.
 🔗 È l'Emendamento C (16/08) applicato al verso opposto: quello avverte che *sedici
 anni contigui DILUISCONO*; questo avverte che **ventun mesi non DISTINGUONO**. Servono
 tutti e due.
+
+---
+
+## 🧭📉 CLASSE 422 — IL RIMANDO CHE CITA UNA DISTANZA IN RIGHE: è vero quando lo scrivi e falso al commit dopo, e a renderlo falso è la correzione stessa (18/09/2026)
+
+**Il caso.** `pine/ABTG_SuperEMA_Riding_v2.pine`. Il cancello propone un commento che dice
+*«esattamente il peccato contro cui avverte il commento **22 righe sopra**»*: in v2.2 è
+**esatto**. Lo Sviluppatore applica la correzione e, **nello stesso blocco**, aggiunge
+**18 righe di commento**. Il rimando diventa **39 righe**, il testo continua a dire
+«venti». 🔴 **Nessuno ha toccato quella frase: l'ha resa falsa l'edit che le stava
+intorno.**
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **È l'unica affermazione del blocco che nessun controllo numerico va a guardare.**
+   Le altre nove erano misure, e le misure si ricontrollano. *«Venti righe sopra»* sembra
+   prosa, non un dato — e invece è un **numero verificabile**, che era giusto.
+2. 🔴 **Si autodistrugge, e sempre nella stessa direzione**: ogni commit che allunga il
+   file allontana il bersaglio. Un rimando a distanza **decade da solo, senza colpevoli**.
+3. 🔴 **Il danno non è il numero: è che il rimando smette di FUNZIONARE.** Quella frase
+   esiste per far **andare a vedere** l'altro commento. Chi conta venti righe e non trova
+   niente smette di cercare — e la lezione che il rimando portava **si perde**.
+4. 📌 **Vale ovunque**, non solo in Pine: `.mq5`, `.ps1`, `.md`, referti (*«la tabella
+   qui sopra»*, *«il paragrafo precedente»*, *«r.165»*). Un `.md` che cita il numero di riga
+   di un sorgente è la stessa trappola con più superficie.
+
+### ✅ LA REGOLA
+🔴 **Un rimando interno si àncora a un NOME, mai a una DISTANZA o a un NUMERO DI RIGA**:
+il nome della sezione, l'identificatore, la stringa esatta fra virgolette. *«Il commento
+che apre la sezione 11b»* sopravvive a qualunque edit; *«venti righe sopra»* no.
+📐 **E quando una patch INSERISCE righe, si rileggono i rimandi che ATTRAVERSANO il punto
+d'inserimento**: sono l'unica cosa che una patch può rompere **senza toccarla**.
+⚠️ **Caso speciale, ed è quello che ha morso qui**: se il testo del rimando l'ha scritto
+il **CANCELLO** ed è lo **SVILUPPATORE** ad applicarlo, il numero era corretto **nel file
+che il cancello aveva letto**, non in quello che ne esce.
+👉 **Il secondo giro di cancello non ri-verifica solo le righe CAMBIATE: ri-verifica le
+righe che le righe cambiate RENDONO FALSE.**
