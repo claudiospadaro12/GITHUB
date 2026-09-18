@@ -3434,6 +3434,16 @@ CSV: `backtest_pipeline/risultati_archivio/r84_csv/` · prove: `prove/R84*.txt` 
 `prove/R84_ABLAZIONE_CRITERI.md` · distribuzione del DD per riordino delle 9 celle:
 `report/IL_DRAWDOWN_CHE_NON_ABBIAMO_MISURATO_2026-09-18.md` §10.
 
+### 🔴 RIMANDO OBBLIGATORIO — **R83 NON è tutta la storia del retest sul Nasdaq**
+Lo stesso giorno (18/09) si è scoperto che `InpEntryMode=2` su NASUSD è misurato anche nel
+**walk-forward** (`Walkforward_Aperture/NASDAQ_B_motore_{IS,OOS}.csv`, magic **`770201`**, il
+core vero) — e lì **due celle sono POSITIVE** (volumi ON: IS PF 1,145 n=91 · OOS PF 1,109 n=94).
+🔴 **Non è una contraddizione: è un SETUP DIVERSO** (`InpRangeMode` 0 contro 2, `InpRangeMinutes`
+35 contro 15, `InpTP1_R` 0,5 contro 1,0, EA diverso). La riconciliazione completa, con il diff
+parametro per parametro e i cancelli applicati a ognuna, sta in
+**`report/IL_RETEST_SUL_NASDAQ_LA_RICONCILIAZIONE_2026-09-18.md`**.
+👉 **Chi cita R83n1 come «il retest sul Nasdaq» cita metà della misura.**
+
 ### 🎯 CONSEGUENZA CONGIUNTA R83+R84 sulla sedia `770201`
 **12 configurazioni, 12 OOS negative** = **terzo verdetto indipendente**. È la misura che sostiene
 la **FIRMA 5** (`770201` 🔴 **[SENZA CONTRATTO]**, spenta dal 18/08 09:41 —
