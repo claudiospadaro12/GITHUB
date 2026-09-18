@@ -1,8 +1,31 @@
-# 🔍 PERCHÉ `770511` REALIZZA 0,13% — e perché **alzarlo non recupera niente**
+# 🔍 IL RISCHIO REALIZZATO DI `770511` — e perché **alzarlo al buio non recupera niente**
 
 **18/09/2026** · richiesta di Claudio: *«ALLORA ALZIAMO IL SUPERWAVE, CAPISCI PERCHÉ FA 0,13%»*
 
-> ## 🟢 **RISPOSTA IN UNA RIGA: lo 0,13% non è una taglia bassa. È quello che il TRAILING ha già salvato prima che lo stop venisse colpito.** Il rischio non è stato lasciato sul tavolo: è stato messo sul tavolo e ripreso indietro.
+> # 🔴 CORREZIONE, PRIMA DI TUTTO IL RESTO: **LO 0,13% ERA SBAGLIATO, E L'ERRORE È MIO**
+>
+> Avevo misurato il rischio sulle **gambe** invece che sui **segnali**. `770511` apre
+> **due gambe per segnale** (1/3 a mercato + 2/3 in pendente): delle quattro gambe negative,
+> **tre appartengono a segnali chiusi in UTILE**.
+>
+> | segnale | gambe | **netto del segnale** |
+> |---|---|---:|
+> | 27/07 08:00 | +11,57 / −1,12 | 🟢 **+10,45** |
+> | 31/07 04:00 | +9,45 / −4,86 | 🟢 **+4,59** |
+> | 03/09 17:00 | −8,48 / −8,49 | 🔴 **−16,97** |
+>
+> ## 👉 **Il segnale perdente è UNO SOLO. Il rischio realizzato è 0,332% (16,97 / 5.110,01), con n = 1.** Non «0,13% su n=4», e non «otto volte sotto il contratto»: **tre volte sotto, su una sola operazione.**
+>
+> 🔴 **Ed è lo stesso errore che Claudio in persona aveva corretto poche ore prima** su questa
+> identica sedia (*«E' IL SUPERWAVE DOW H1 L O S 1/2 O 2/3 / VERIFICA»* →
+> `LE_SEDIE_PER_LA_PROP_2026-09-18.md` r.76: *«`770511` ha n = 5 SEGNALI, non 10»*).
+> L'avevo corretto nella colonna del **conteggio** e me lo sono fatto rientrare da quella
+> del **rischio**. Classe **427** in checklist.
+>
+> ✅ **La conclusione del referto NON cambia — si rafforza**: con n=1 il rischio realizzato
+> di questa sedia **non è misurato affatto**, e alzare la taglia al buio è ancora meno difendibile.
+
+> ## 🟢 **RISPOSTA IN UNA RIGA: il rischio realizzato basso non è una taglia timida. È quello che il TRAILING ha già salvato prima che lo stop venisse colpito.** Il rischio non è stato lasciato sul tavolo: è stato messo sul tavolo e ripreso indietro.
 
 ---
 
@@ -59,8 +82,9 @@ In `ReportHistory50503392.xlsx` l'ordine **2847862** (`DAX Live 5m BUY`) compare
 
 ## ③ 🔴 CONSEGUENZA: alzare `InpRiskPercent` **non recupera uno 0,87% fantasma**
 
-Lo 0,87% di differenza fra il contratto (1,0%) e il realizzato (0,13%) **non è spazio libero**.
-È rischio che è stato **messo** all'ingresso e **ripreso** dal trailing prima dello stop.
+La differenza fra il contratto (1,0%) e il realizzato (**0,332%**, e su **un solo segnale**)
+**non è spazio libero**. È rischio che è stato **messo** all'ingresso e **ripreso** dal trailing
+prima che lo stop venisse colpito.
 
 👉 Alzare la percentuale alza il rischio **dell'ingresso** — quello vero, quello che il trailing
 deve ancora salvare. **E su quello non ho il numero.**

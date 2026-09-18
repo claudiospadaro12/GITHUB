@@ -4,6 +4,44 @@
 
 ---
 
+> # 🔴 CORREZIONE DEL 18/09 SERA — **LA SEDIA CHE AVEVO MESSO PRIMA È SPENTA DA UN MESE, E BOCCIATA**
+>
+> Trovato dal cancello sul referto delle taglie, **verificato da me alla fonte**.
+>
+> `report/CONTRATTI_SEDIE.md` **r.54**, testuale:
+> > *«ABTG_Nasdaq_Apertura_US ⛔ **SPENTA dal 18/08 09:41** … Rischio **0,25** … DD promesso:
+> > **NESSUNO** — mai promossa. Anzi: tick reali 31/07 **PF 0,82 · DD 17% · SCARTATO**;
+> > walk-forward 05/08: **19/20 celle OOS negative**» · etichetta 🔴 **[SENZA CONTRATTO]***
+>
+> Confermato da `report/CENSIMENTO_CONTRATTI_v2.md` r.363 (*«FIRMA 5»*).
+>
+> ## 🔴 **Quindi il «7 vinte su 7» del mio 🥇 non è un record: è la coda di una sedia già misurata e già bocciata, che si ferma l'11/08 perché QUALCUNO L'HA SPENTA.**
+>
+> Dieci operazioni in tre settimane **non ribaltano un walk-forward 19/20 negativo**. Metterla
+> prima in una rosa per la prop, citando solo le vittorie e tacendo PF 0,82 / DD 17%, è
+> esattamente il *«numero bello su campione sottile»* che la regola di casa del 19/08 vieta —
+> e l'ho fatto io. 🔴 **`770201` esce dalla rosa** finché una misura nuova non le ridà una ragione
+> (porta di rientro, criterio del 18/08).
+>
+> ⚠️ **E il suo preset in repo porta `InpRiskPercent=2.0`** contro un contratto di **0,25**:
+> otto volte. Da verificare sul terminale **50503392** (`BCM Markets MT5 Terminal`), in sola lettura.
+>
+> ### 🟢 Le altre tre correzioni della stessa passata
+> - **`770402` MaxMin ORO**: il contratto **non è 1,0% — è 0,5%**, ridotto il 23/08 con firma
+>   REVISIONE R100 (`CONTRATTI_SEDIE.md` r.95, che aggiunge *«prop: solo ≤ 0,5%»*). Il suo
+>   realizzato **0,545% è IN CONTRATTO**: 🟢 nessuna anomalia.
+> - **`770511` SuperWave**: il rischio realizzato è **0,332% su UN SOLO segnale**, non 0,13%
+>   su quattro — vedi `report/PERCHE_SUPERWAVE_FA_013_2026-09-18.md`.
+> - **`770101` DAX**: non è *«un solo simbolo»* (38 D30EUR + **1 NASUSD**), e il 29/07 ha aperto
+>   **due posizioni da 1,60 nello stesso secondo** → quel segnale è costato **3,91% del saldo**,
+>   non 2%. Il dimensionatore per-POSIZIONE funziona; **per SEGNALE no**.
+>
+> 📌 **Cosa resta in piedi della rosa**: `770101` in RETEST (+149,16 su 15, 14/1) e `770511`
+> (+244,94, 4 segnali su 5) restano le due misure migliori del campo. 🔴 **Ma la rosa ora è
+> di TRE sedie, non quattro, e nessuna delle tre ha una taglia firmata per la prop.**
+
+---
+
 ## 🔴 PRIMA: DUE CORREZIONI ALLA ROSA DI UN'ORA FA
 
 `report/ROSA_DAL_CAMPO_2026-09-18.md` ragionava per **COMMENTO**. Ho costruito il ponte
