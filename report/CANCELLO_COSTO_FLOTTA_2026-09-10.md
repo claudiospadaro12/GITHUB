@@ -1,5 +1,10 @@
 # 🚧 IL CANCELLO DEL COSTO, APPLICATO A TUTTA LA FLOTTA VIVA — 10/09/2026
 
+> ⚠️ **QUESTO FILE HA TRE BLOCCHI DI CORREZIONE IN CODA** (17/09 · 18/09 mattina ·
+> **18/09 sera: la ricalibrazione dell'ANCORA ADR, propagata riga per riga**).
+> Le righe toccate sono marcate **inline** con ✏️: se una riga non ha il
+> marcatore, il numero è quello originale del 10/09.
+
 > 🛑 **Questo referto non tocca niente.** Nessun `.mq5`, nessun `.set`, nessun
 > parametro in forward, nessun terminale, nessuna riga verso il VPS. È **sola
 > lettura** più questo file. Decide Claudio.
@@ -328,7 +333,7 @@ di `open_time` in `trades_auto.csv`, ora **server**), non assunta dal `SessionHo
 | 772341 U30USD | **07** (2 su 4) | 4 | **2,60** | 3,00 |
 | 772234 U30USD | **01** (1 su 1) | 1 | **2,80** | 3,00 |
 | 970913 NASUSD | **15** (2 su 6) | 6 | **1,80** | 2,60 |
-| 770250 NASUSD | 🔴 **nessun trade** | 0 | 1,80 (ora 15 attesa) | 2,60 |
+| 770250 NASUSD | 🔴 **nessun trade** ✏️ **18/09 (sera)** **1 trade: 15/09 14:31 → ora 14** | 0 ✏️ **18/09 (sera)** **1** | 1,80 (ora 15 attesa) ✏️ **18/09 (sera)** **1,80 (ora 14, misurata)** | 2,60 ✏️ **18/09 (sera)** **2,70 archivio · 1,90 vivo → `[NON MISURATO]`** |
 
 ## 4.2 🟡 L'oro: due letture sole, nessuna nell'ora giusta
 `ORO_1530_CANCELLO_COSTO_2026-09-10.md` §2.1: **0,16 $** (17/08 17:34 srv) e
@@ -392,9 +397,9 @@ demo (n a fianco) · **[INF]** = inferito, con la strada dichiarata ·
 | ↳ *stesso, allo spread P95* | | | | | | 71,9 | idem | 2,70 (P95) | **26,6x** | 🔴 **NO** (67%) | 🟢 SI |
 | ↳ *stesso, sotto-campione della geometria VIVA* | | | | | *(dopo il cambio range 15→35, buffer 200→500, entrata RETEST offset 200)* | **56,1** [MIS] n=2 | idem, gambe **10/08 (59,90) e 14/08 (52,30)** | 1,70 | **33,0x** | 🔴 **NO** (82%) | 🟢 SI |
 | ↳ *idem, allo spread P95* | | | | | | 56,1 | idem | 2,70 (P95) | **20,8x** | 🔴 **NO** (52%) | 🟢 SI |
-| **770202** | Dow_Apertura_US | U30USD | M5 | 🔵🟣 | `SL_RANGE` (range 15' 14:30-14:45, buffer 200 pt = 2 idx, **floor `InpMinStopPts = 500` = 5 idx**) — r.282/234/313 | **~102 idx** [INF] | `ROUND_ORB_ATR_PS5` §2.2 strada 3: **97,9 è il RANGE** (314,5 × √(15/1440) × 3,05); lo stop di `SL_RANGE` = `range + 2×buffer` = 97,9 + 4 (r.897/921: entry `high+buffer`, SL `low−buffer`). 🔴 **CORRETTO DAL CANCELLO**: la v1 usava il range come stop | **2,00** (ora 15) | **51,0x** *(banda 44,5-53,5x sul range 85-103)* | 🟢 SI (+28%) | 🟢 SI |
+| **770202** | Dow_Apertura_US | U30USD | M5 | 🔵🟣 | `SL_RANGE` (range 15' 14:30-14:45, buffer 200 pt = 2 idx, **floor `InpMinStopPts = 500` = 5 idx**) — r.282/234/313 | **~102 idx** [INF] ✏️ **18/09 (sera)** **→ 123,8 [MIS] n=446** | `ROUND_ORB_ATR_PS5` §2.2 strada 3: **97,9 è il RANGE** (314,5 × √(15/1440) × 3,05); lo stop di `SL_RANGE` = `range + 2×buffer` = 97,9 + 4 (r.897/921: entry `high+buffer`, SL `low−buffer`). 🔴 **CORRETTO DAL CANCELLO**: la v1 usava il range come stop | **2,00** (ora 15) | **51,0x** ✏️ **18/09 (sera)** **→ 61,9x** (coda 3,00: **41,2x**) | 🟢 SI (+28%) ✏️ **18/09 (sera)** **→ +55%** | 🟢 SI |
 | **770611** | ORB_Ottimizzato | U30USD | M5 | 🔵🟣🔴 | `SLMode = HALFRANGE(3)` = 50% del range **14:30-14:45 (15 minuti)** + buffer 0 — fonte: `mql5/Presets/conto_reale/ABTG_ORB_Ottimizzato_770611_REALE.set` e `mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_ORB_Ottimizzato_770611.set` (`InpRangeStart 14:30` / `InpRangeEnd 14:45` / `InpSLMode=3` / `InpSLBufferPts=0`); ⚠️ il **default compilato è OPPRANGE** (r.145). 🔴 **CORRETTO DAL CANCELLO**: la v1 scriveva *"range 14:25-14:30"*, che è la geometria di **`770601` NASUSD** (`mql5/Presets/ABTG_ORB_US.set`, `SLMode=0`), **un'altra sedia** | **59,0 idx** [MIS] n=7 | `trades_auto.csv`, 7 gambe 11/08→03/09 | **2,00** (ora 14) | **29,5x** | 🔴 **NO** (74%) | 🟢 SI |
-| ↳ *riga di R125, copiata* | | | | | | ~47 idx [INF] | `ROUND_ORB_ATR_PS5` §2.3 | 2,00 | **23,5x** | 🔴 **NO** (59%) | 🟢 SI |
+| ↳ *riga di R125, copiata* 🚫 **RITIRATA IL 18/09** (superata dal 59,0 `[MIS]` e dallo Studio 59,9) | | | | | | ~47 idx [INF] | `ROUND_ORB_ATR_PS5` §2.3 | 2,00 | **23,5x** | 🔴 **NO** (59%) | 🟢 SI |
 | ↳ *misurato, allo spread P95* | | | | | | 59,0 | idem | 3,00 (P95) | **19,7x** | 🔴 **NO** (49%) | 🟢 SI |
 | **770511** | SuperWave_DOW_H1_Ott | U30USD | H1 | 🔵 | swing 5 barre H1 + `InpSLBufferPips 3` (= **0,03 idx**, inerte) — r.78-79 | **77,1 idx** [MIS] n=4 | `trades_auto.csv` (min 12,7 · max 98,7) | **2,00** (TUTTO, ora sparsa) | **38,5x** | 🔴 **NO** (96%) | 🟢 SI |
 | **770531** | SuperWave | U30USD | H4 | 🔵 | swing 5 barre **H4** + 3 "pip" (0,03 idx) | **295,5 idx** [MIS] n=8 | `trades_auto.csv` (min 262,5) | **2,00** (ora 14) | **147,8x** | 🟢 **SI (+269%)** | 🟢 SI |
@@ -402,11 +407,11 @@ demo (n a fianco) · **[INF]** = inferito, con la strada dichiarata ·
 | **772341** | PunteLarry | U30USD | H1 | 🔵 | `SLMode 0` = oltre l'estremo della candela segnale + `0,1 × ATR(D1)` — r.152-153 | **274,2 idx** [MIS] n=2 | `trades_auto.csv` (113,1 / 435,2) | **2,60** (ora 7) | **105,4x** | 🟢 **SI** | 🟢 SI |
 | ↳ *al minimo delle due gambe* | | | | | | 113,1 | idem | 2,60 | **43,5x** | 🟢 SI (+9%) | 🟢 SI |
 | **772234** | GapFill | U30USD | H1 | 🔵 | `SLMode 0` = `weekOpen + gap × 1,0` — r.139-140 | **98,0 idx** [MIS] n=1 | `trades_auto.csv`, 1 gamba | **2,80** (ora 1) | **35,0x** | 🔴 **NO** (88%) | 🟢 SI |
-| **771321** | PTE | U30USD | H1 | 🔵 | ATR(14) H1 + `InpSLbufferPips 5` (= 0,05 idx) — r.81-82 | **~65 idx** [INF] | scala: 314,5 × √(60/1440); **0 gambe in stop sul demo** | **2,00** | **32,5x** | 🔴 **NO** (81%) | 🟢 SI |
-| **970912** | SupRev_DAX_H4_Ott | D30EUR | H4 | 🔵 | swing 5 barre H4 + 3 "pip" (0,03 idx) | **~170 idx** [INF] | scala: 186,5 × √(1200/1440); **0 gambe in stop** | **1,70** | **~100x** | 🟢 SI | 🟢 SI |
-| **970913** | SupRev_NAS_H1_Ott | NASUSD | H1 | 🔵 | swing 5 barre H1 + 3 "pip" (0,03 idx) | **51,65 idx** [MIS] n=4 | `trades_auto.csv` (min 9,7 · max 151,9) | **1,80** (ora 15) | **28,7x** | 🔴 **NO** (72%) | 🟢 SI |
-| **770411** | MaxMinNotte_DAX_Short_Ott | D30EUR | M15 | 🔵🟣 | `SLMode = MM_SL_ATR`, `InpAtrSLmult 2.5` × ATR(14) M15 — r.75/78 | 🟠 **[DER]** ✏️ | ✏️ **CORRETTO IL 17/09/2026: la frase «0 gambe in stop» era FALSA.** Su `trades_auto.csv` le 5 gambe di `770411` sono **4 con `close_reason = sl`** (18/08 · 20/08 · 24/08 · 31/08) **+ 1 `expert`** — tutte ANTERIORI a questo referto. Il `[NM]` poggiava su quella frase. Stop misurato della gamba 20/08: **55,0 idx** (ma con breakeven e trailing accesi e' un **limite INFERIORE**, non la distanza d'ingresso). Vedi `report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` | 1,70 (ora 8) | **[NM]** | ⚪ **NON ANCORA MISURATO** | ⚪ |
-| **770250** | Nasdaq_Apertura_US *(GatedShort)* | NASUSD | M15 | 🔵 | `InpSLMode = 0` (SL_RANGE) su **candela H1 precedente** (`RangeMode 2`, `LevelTF 16385`), buffer 300 pt = **3 idx** — preset `ABTG_GatedShort_NASUSD_770250_LIVE.set` | **~67 idx** [INF] | scala: 313,8 × √(60/1440) + 3; **0 trade da quando è viva** | **1,80** (ora 15) | **~37,2x** | 🟡 **NO (93%)** — [INF] | 🟢 SI |
+| **771321** | PTE | U30USD | H1 | 🔵 | ATR(14) H1 + `InpSLbufferPips 5` (= 0,05 idx) — r.81-82 | **~65 idx** [INF] ✏️ **18/09 (sera)** **→ 78,05-88,25 `[MIS]`** | scala: 314,5 × √(60/1440); **0 gambe in stop sul demo** ✏️ **18/09 (sera)** ATR(14) H1 **MISURATO** su `771531` (78,0 n=5) e su R112 (88,2 n=33) | **2,00** | **32,5x** ✏️ **18/09 (sera)** **→ 39,0-44,1x** (🟠 FRAGILE: la soglia cade DENTRO la banda) | 🔴 **NO** (81%) | 🟢 SI |
+| **970912** | SupRev_DAX_H4_Ott | D30EUR | H4 | 🔵 | swing 5 barre H4 + 3 "pip" (0,03 idx) | **~170 idx** [INF] ✏️ **18/09 (sera)** 🔴 **→ `[NON MISURATO]`, banda 47-313** | scala: 186,5 × √(1200/1440); **0 gambe in stop** (**0 trade in assoluto**, verificato al 17/09) | **1,70** | **~100x** ✏️ **18/09 (sera)** 🔴 **→ 27,8-184x: il 40x NON e' piu' deciso** | 🟢 SI ✏️ **18/09 (sera)** ⚪ **NM** | 🟢 SI |
+| **970913** | SupRev_NAS_H1_Ott | NASUSD | H1 | 🔵 | swing 5 barre H1 + 3 "pip" (0,03 idx) | **51,65 idx** [MIS] n=4 ✏️ **18/09 (sera)** 🔴 **→ 27,10 `[MIS]` n=5** (gamba nuova 11/09) | `trades_auto.csv` (min 9,7 · max 151,9) | **1,80** (ora 15) | **28,7x** ✏️ **18/09 (sera)** 🔴 **→ 15,1x** (coda 2,60: **10,4x**) | 🔴 **NO** (72%) ✏️ **18/09 (sera)** 🔴 **NO (38%)** | 🟢 SI ✏️ **18/09 (sera)** 🔴 **NO in coda** |
+| **770411** | MaxMinNotte_DAX_Short_Ott | D30EUR | M15 | 🔵🟣 | `SLMode = MM_SL_ATR`, `InpAtrSLmult 2.5` × ATR(14) M15 — r.75/78 | 🟠 **[DER]** ✏️ **18/09 (sera)** 🔴 **→ `[NM]`, banda 64,2-87,5 = 37,8-51,5x (🟠 FRAGILE)** | ✏️ **CORRETTO IL 17/09/2026: la frase «0 gambe in stop» era FALSA.** Su `trades_auto.csv` le 5 gambe di `770411` sono **4 con `close_reason = sl`** (18/08 · 20/08 · 24/08 · 31/08) **+ 1 `expert`** — tutte ANTERIORI a questo referto. Il `[NM]` poggiava su quella frase. Stop misurato della gamba 20/08: **55,0 idx** (ma con breakeven e trailing accesi e' un **limite INFERIORE**, non la distanza d'ingresso). Vedi `report/ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` | 1,70 (ora 8) | **[NM]** | ⚪ **NON ANCORA MISURATO** | ⚪ |
+| **770250** | Nasdaq_Apertura_US *(GatedShort)* | NASUSD | M15 | 🔵 | `InpSLMode = 0` (SL_RANGE) su **candela H1 precedente** (`RangeMode 2`, `LevelTF 16385`), buffer 300 pt = **3 idx** — preset `ABTG_GatedShort_NASUSD_770250_LIVE.set` | **~67 idx** [INF] ✏️ **18/09 (sera)** **→ 83,2 `[INF]`** | scala: 313,8 × √(60/1440) + 3; **0 trade da quando è viva** ✏️ **18/09 (sera)** **1 trade il 15/09 14:31 → ora 14** (uscita in profitto: nessuno stop misurato) | **1,80** (ora 15) ✏️ **18/09 (sera)** **ora 14** | **~37,2x** ✏️ **18/09 (sera)** 🟢 **→ 46,2x** (coda: **43,8x** vivo · **30,8x** archivio) | 🟡 **NO (93%)** — [INF] ✏️ **18/09 (sera)** 🟢 **PASS (+16%)** | 🟢 SI |
 
 > ### 🔢 IL NUMERO NUOVO CHE ESCE DALLA CORREZIONE — e rafforza il ramo OPPRANGE
 > Con la geometria giusta il **59,0 misurato smette di essere solo un rapporto e
@@ -662,14 +667,14 @@ dell'errore: i "PASSA" sono solidi, i "NON PASSA" sono da confermare.**
 
 | sedia | x | cosa manca | riparabile? |
 |---|---:|---|---|
-| **770250** GatedShort NASUSD M15 | ~37,2x [INF] | **0 trade da quando è viva** → stop mai misurato | 🟢 `InpBufferPoints: 300 → 900` (+6 idx) porta a ~40,5x; oppure `InpSLMode: 0 → 1` con `AtrSlMult 1.5` |
-| **771321** PTE U30USD H1 | ~32,5x [INF] | 0 gambe in stop sul demo | 🟢 `InpSLbufferPips 5 → 25` — **la manopola esiste, è la stessa del duello GBPUSD** (`771332`), e su U30USD **non è mai stata provata**. ⚠️ Su U30USD 25 "pip" = **0,25 punti indice** (§3): 🔴 **sul Dow quella manopola è INERTE**. Serve un buffer in ATR, che in `ABTG_PTE.mq5` **non c'è** |
+| **770250** GatedShort NASUSD M15 | ~37,2x [INF] ✏️ **18/09 (sera)** **46,2x → non serve piu' riparare** | **0 trade da quando è viva** → stop mai misurato | 🟢 `InpBufferPoints: 300 → 900` (+6 idx) porta a ~40,5x; oppure `InpSLMode: 0 → 1` con `AtrSlMult 1.5` |
+| **771321** PTE U30USD H1 | ~32,5x [INF] ✏️ **18/09 (sera)** **39,0-44,1x, 🟠 FRAGILE** | 0 gambe in stop sul demo | 🟢 `InpSLbufferPips 5 → 25` — **la manopola esiste, è la stessa del duello GBPUSD** (`771332`), e su U30USD **non è mai stata provata**. ⚠️ Su U30USD 25 "pip" = **0,25 punti indice** (§3): 🔴 **sul Dow quella manopola è INERTE**. Serve un buffer in ATR, che in `ABTG_PTE.mq5` **non c'è** |
 
 ## 7.3 ⚪ NON ANCORA MISURATO — cosa manca, sedia per sedia (19)
 
 | sedia | cosa manca esattamente |
 |---|---|
-| **770411** MaxMinNotte_DAX_Short D30EUR M15 | ✏️ **CORRETTO IL 17/09/2026**: ~~0 gambe in stop su 5 trade~~ → **4 gambe su 5 chiuse in `sl`**. L'ATR(14) M15 del DAX resta non letto direttamente, ma ora e' **[DERIVATO] 25,7-29,2 idx** con un pavimento DAX-nativo `>= 22,0 idx`. Vedi `ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` |
+| **770411** MaxMinNotte_DAX_Short D30EUR M15 | ✏️ **CORRETTO IL 17/09/2026**: ~~0 gambe in stop su 5 trade~~ → **4 gambe su 5 chiuse in `sl`**. L'ATR(14) M15 del DAX resta non letto direttamente. ✏️ **18/09 (sera)** 🔴 **il pavimento `>= 22,0` e' RITIRATO** (le 4 gambe `sl` sono tutte in PROFITTO: nessuno stop pieno) e la banda derivata sale a **25,7-35,0 idx** con la legge sulla finestra attiva. Vedi `ATR_DAX_M30_RICONCILIAZIONE_2026-09-17.md` |
 | **770924 / 770901 / 774101 / 772235** (225JPY) | **spread di 225JPY all'ora della sedia**: una lettura sola, presa a cash Tokyo chiuso |
 | **772161 / 772163** BreakingBand GBPUSD/AUDUSD | 0 gambe in stop; per AUDUSD anche lo spread è illeggibile |
 | **772231 / 772232 / 772233** GapFill forex | 0 trade sul demo |
@@ -862,3 +867,367 @@ tenersi la conclusione ribaltata è **peggio** che lasciare la frase imprecisa.
 pieno**. L'ATR M15 del DAX resta stimabile solo **per scalatura**
 (`[INFERITO]`, vedi `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`), non per
 misura diretta.
+
+
+# ✏️✏️✏️ TERZA CORREZIONE — 18/09/2026 (sera): L'ANCORA RICALIBRATA, PROPAGATA RIGA PER RIGA
+
+> **SOLA LETTURA · zero costo macchina** (tutti i dati erano già in repo).
+> Seguito operativo di `report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md`, che i
+> numeri nuovi li aveva **trovati** ma non li aveva **scritti qui** (§9 li
+> elencava e basta). Qui ci sono, con la fonte e il tag.
+> 🔴 **Non ho preso per buono il referto del 18/09: ho rifatto i conti alla
+> fonte.** Dove non torna, sotto c'è scritto che non torna — e **due sue
+> conclusioni sono cadute** (§C e §F).
+
+---
+
+## 🛑 A. IN TESTA: I NUMERI CHE **NON SI SOMMANO** A QUESTI
+
+Il difetto più caro di una ricalibrazione è contarla due volte. Questi tre
+moltiplicatori **sono già dentro** i numeri di questo blocco e **non vanno
+riapplicati**:
+
+| numero da NON aggiungere | dove sta scritto | perché è già dentro |
+|---|---|---|
+| **+18-27%** *(«la legge ancorata all'ADR sottostima»)* | `EMA200_I_DUE_REQUISITI_2026-09-12.md` **r.182** e la **§3 della correzione del 17/09** in coda a questo stesso file | **era** l'aggregazione min-per-data. L'ancora nuova la corregge alla radice |
+| **3,05×** *(fattore d'amplificazione d'apertura)* | `ROUND_ORB_ATR_PS5_2026-09-10.md` **r.243-245** | calcolato come `58,7 / 19,0` dove il **19,0 nasce dall'ancora rotta**. Tenerlo dopo la correzione è **doppio conteggio** |
+| **2,8×** *(«la ricetta si smonta sulla riga sorella»)* | **§2 della correzione del 17/09**, in coda a questo file | era `143,2 / 51,65`, e il **143,2 nasce dall'ancora vecchia**. Applicarlo a un numeratore nuovo mescola due epoche: è **l'errore che ha prodotto il «112» del 18/09** (§C) |
+
+🟢 **E i fattori d'apertura giusti, MISURATI e per simbolo** — non uno solo
+trasportato: `D30EUR` **1,561** · `NASUSD` **1,878** · `U30USD` **3,027**.
+`[MISURATO]` n=**440 / 447 / 446** giornate, mediana di `ampiezza_pt`/100 in
+`backtest_pipeline/risultati_archivio/studio_apertura/Studio_{D30EUR,NASUSD,U30USD}.csv`
+(mediane grezze verificate da me: **54,65 · 75,30 · 119,75** punti indice; i
+`_RIEPILOGO` confermano apertura **08:00 / 14:30 / 14:30** e `buffer 200`).
+👉 **Il 3,05 del DAX portato sul Dow funzionava per caso: il fattore vero del
+Dow è 3,03, quello del DAX è 1,56.** Coincidenza di cifre, non di simbolo.
+
+---
+
+## 🔬 B. I TRE PILASTRI, VERIFICATI ALLA FONTE — **due reggono, uno regge SOLO COME BANDA**
+
+### B1 🟢 REGGE — il righello `771501` (ATR(14) `D30EUR` H4 = 139,7)
+- **Geometria dal codice**, `mql5/Experts/ABTG_EMA200.mq5` **r.356-358**:
+  `o1 = ema ± InpOrder1Atr·ATR` · `o2 = ema ∓ InpOrder2Atr·ATR` ·
+  **`sl = o2 ∓ InpSLatr·ATR`**. Con `0,10 / 0,35 / 1,00` ⟹
+  gamba1 = `1,45·ATR`, gamba2 = `1,00·ATR`, **rapporto esatto 1,4500**.
+- **Rapporto misurato sulle gambe vere** (`trades_auto.csv`, magic `771501`):
+  **21/07** 202,60 / 139,70 = **1,45024** · **24/07** 201,50 / 139,00 =
+  **1,44964**. `[MISURATO]` n=2 coppie.
+- 🧪 **Contro-esempio costruito apposta — «e se lo stop fosse stato mosso?»**:
+  in tutte e due le coppie le due gambe chiudono **allo STESSO prezzo**
+  (25.132,90 e 25.136,40) e **tutte e quattro in perdita**. Stop condiviso e
+  mai toccato: se breakeven o trailing fossero intervenuti, i due prezzi di
+  chiusura sarebbero **diversi**. Non lo sono.
+- 🧪 **E il TF?** `grep 771501` su tutti i `.set` del repo dà **3 file**:
+  `ABTG_EMA200_H4.set` (`InpTF=16388`, 0.10/0.35), `..._U30USD_H1_771531_VIVA.set`,
+  `..._FW_XAUUSD_H4.set`. **Nessun preset `D30EUR` esiste** ⟹ la sedia girava a
+  default (`InpTF = PERIOD_H4`, r.49) o col generico: **H4 in tutti e due i casi**.
+  E il rapporto **1,4496/1,4502** distingue **dai dati** la cella `0,10/0,35`
+  dalla cella `0,2/0,3` della sedia Dow, che misura **1,4992/1,5000/1,5000**.
+- ✅ **Verdetto: il righello REGGE.** ⚠️ Limite dichiarato, e resta:
+  `ATR(14)` **non è mai stato letto direttamente**; è una distanza di stop con
+  la geometria invertita. `[MISURATO]` **indiretto**, n=3 eventi.
+
+### B2 🟢 REGGE — l'ancora **252,5**, riprodotta **al decimale**
+Rifatta da me col metodo dichiarato (massimo per data di `session_high −
+session_low`, poi **mediana sulle date**, **giorno in corso escluso**), su
+`data/statements/trades_auto.csv` + `trades_100k.csv` (1.354 righe lette):
+
+| simbolo | **ancora (max-per-data)** | n | media | p25 | p75 | max | (min-per-data) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| `D30EUR` | 🟢 **252,5000** | **52** | 253,03 | 162,2 | 308,6 | 601,7 | 185,65 |
+| `U30USD` | 🟢 **379,5000** | **24** | 383,04 | 277,2 | 469,8 | 769,0 | 314,50 |
+| `NASUSD` | 🟢 **384,6000** | **26** | 433,04 | 255,5 | 528,0 | 1090,1 | 300,45 |
+
+✅ **Tutte e tre identiche al decimale.** E il **min-per-data del Dow è
+314,50**, cioè **esattamente** il numero di `ROUND_ORB_ATR_PS5_2026-09-10.md`
+r.234: la vecchia catena è riprodotta, quindi il difetto è **dimostrato**, non
+supposto. `[MISURATO]`.
+
+### B3 🟡 REGGE **SOLO COME BANDA** — i «780 minuti attivi»
+Qui il referto del 18/09 è **più sicuro dei suoi dati**, e lo dico col numero.
+- 🟢 **Vero**: su **4 date su 4** in cui `D30EUR` ha un trade prima delle 08:00
+  **e** uno dalle 08:00, il range è **identico alla cifra**
+  (`02:06 = 08:00 = 447,7` · `02:36 = 08:00 = 252,2` · `07:00 = 08:00 = 268,9` ·
+  `07:02 = 08:00 = 307,8`). `[MISURATO]` n=4, verificato da me riga per riga, e
+  **sono tutte** le coppie disponibili su 52 date (nessuna scartata).
+- 🔴 **Ma solo DUE delle quattro coprono davvero la notte** (02:06 e 02:36): le
+  altre due partono alle **07:00/07:02** e testano **un'ora sola**. Il campione
+  che sostiene *«l'overnight non aggiunge niente»* è **n=2**, non n=4.
+- 🔴 **E lo spread, da solo, direbbe 840 non 780**:
+  `SPREAD_VIVO_2026-09-12_orario.csv` misura `D30EUR` a **1,60** di mediana
+  già **dall'ora 07** (n=3.600, GG=5), non dalle 08. Il gradino vero è
+  **07:00 → 21:00**.
+- ⚖️ **Perché il pilastro regge lo stesso**: sulla forbice plausibile l'errore
+  sull'ATR(H4) misurato (139,7) **non cambia il segno di nessun verdetto** —
+  W=720 → 145,8 (**+4,4%**) · W=**780** → **140,1** (**+0,3%**) · W=840 →
+  135,0 (**−3,4%**) · W=**1440** → 103,1 (🔴 **−26,2%**). Ricalcolato da me.
+- ✅ **Verdetto: `W(D30EUR) ∈ [720 … 840]` `[MISURATO]` come banda, `780` è una
+  SCELTA dentro la banda, non una misura.** Il numero che va scritto accanto
+  agli ATR del DAX è quindi **±4%**, e il margine onesto complessivo della
+  legge resta **±7%** (il sottocampione di luglio dà +6,8%).
+- 🔴 **`W(U30USD) = W(NASUSD) = 1380` resta `[INFERITO]`**: l'unica prova è che
+  l'ora 22 ha **0 campioni validi** su tutti e quattro gli indici
+  (`SPREAD_VIVO`, colonna `scartati` = 2.987). È un argomento, non una misura.
+
+---
+
+## 📊 C. LA TABELLA DI SCALA — `ATR(T) = ancora × √(T / W)`
+
+| simbolo | W | **M5** | **M15** | **M30** | **H1** | **H4** | tag |
+|---|---:|---:|---:|---:|---:|---:|---|
+| **`D30EUR`** | 780 | 20,2 | **35,0** | **49,5** | **70,0** | **140,1** | `[DERIVATO]` — legge validata **sul simbolo stesso a H4: +0,3%** (±4% da W) |
+| **`U30USD`** | 1380 | 22,8 | **39,6** | **56,0** | **79,1** | **158,3** | `[DERIVATO]` — validata **sul simbolo stesso a H1: +1,5%** (−10,3% contro il valore R112) |
+| **`NASUSD`** | 1380 | 23,2 | **40,1** | **56,7** | **80,2** | **160,4** | 🔴 `[INFERITO]` — **nessun ATR misurato su `NASUSD`, su nessun TF** |
+
+🟢 **I due righelli**, entrambi `[MISURATO]` e **indiretti**:
+`ATR(14) D30EUR H4 = 139,7` (n=3, banda 139,0-142,3) ·
+`ATR(14) U30USD H1 = 78,0` (n=5, banda 65,5-98,0).
+🔴 **E il secondo valore di casa sul Dow, che NON concorda e va scritto lo
+stesso**: **88,2** su n=33 coppie da backtest per-trade
+(`EMA200_I_DUE_REQUISITI_2026-09-12.md` r.157). 👉 **`ATR(14) U30USD H1` =
+`[NON MISURATO]`, banda 78,0 – 88,2**, e ogni cella che lo usa porta una banda,
+non un punto.
+
+---
+
+## 🚦 D. LE CELLE CHE CAMBIANO VERDETTO — **DA → A**, con tag e code
+
+Soglie di casa invariate: **40×** (lavoro) · **13,3×** (pavimento duro).
+🔴 **Toccate SOLO le righe costruite sull'ancora vecchia** (`[INF]`/`[NM]`).
+Le righe `[MIS]` non si toccano — tranne dove il **campione è cresciuto** (§E).
+
+| sedia | simb · TF | geometria | stop **DA** | stop **A** (tag) | spread mediano | `stop/spr` **DA → A** | **VERDETTO DA → A** |
+|---|---|---|---:|---|---:|---|---|
+| **`770202`** | `U30USD` M5 | `SL_RANGE` = range 15' + 2×buffer(2 idx) | ~102 `[INF]` | 🟢 **123,8** `[MISURATO]` **n=446** | 2,00 (ora 15) | 51,0× → **61,9×** | 🟢 **PASS (+28%)** → 🟢 **PASS (+55%)** |
+| **`770250`** | `NASUSD` M15 | `SL_RANGE` su candela H1 **chiusa** + buffer 3 | ~67 `[INF]` | **83,2** `[INFERITO]` | 1,80 (ora **14**) | 37,2× → **46,2×** | 🟡 **NO (93%)** → 🟢 **PASS (+16%)** |
+| **`771321`** | `U30USD` H1 | `ATR(14) H1 + 0,05` | ~65 `[INF]` | 🟢 **78,05 – 88,25** `[MIS]` (banda) | 2,00 (riga TUTTO) | 32,5× → **39,0 – 44,1×** | 🔴 **NO (81%)** → 🟠 **FRAGILE** |
+| **`770411`** | `D30EUR` M15 | `2,5 × ATR(14) M15` | `[NM]` | **64,2 – 87,5** 🔴 `[NON MISURATO]` | 1,70 (ora 08) | `[NM]` → **37,8 – 51,5×** | ⚪ **NM** → 🟠 **FRAGILE** |
+| 🔴 **`970912`** | `D30EUR` H4 | swing 5 barre H4 | ~170 `[INF]` | 🔴 **47 – 313** `[NON MISURATO]` | 1,70 | ~100× → **27,8 – 184×** | 🟢 **PASS** → 🔴 **⚪ NON PIÙ DECISO** |
+| `770611` ↳ | `U30USD` M5 | sub-riga *«~47 `[INF]` da R125»* | ~47 `[INF]` | 🚫 **RITIRATA** | — | — | superata dal **59,0 `[MIS]` n=7** e dallo Studio (**59,9**, −1,5%) |
+
+### 🔴 D-bis. **UNA CELLA PEGGIORA, ed è la notizia più importante di questo blocco**
+Il referto del 18/09 scrive: *«nessuna cella peggiora, la direzione attesa è
+confermata»*. 🔴 **Verificato, e NON è vero: `970912` peggiora.**
+
+`970912` (`SupRev_DAX_H4_Ott`, swing 5 barre H4) ha **zero trade in assoluto**
+(verificato su `trades_auto.csv` al **17/09**: magic assente). Le due strade per
+stimarne lo stop danno numeri che **non si toccano**:
+
+| strada | conto | stop | `/1,70` | `/2,70` (coda) |
+|---|---|---:|---:|---:|
+| **scala pura**, ancora e legge nuove | `252,5 × √(1200/780)` | **313,2** | **184×** 🟢 | 116× 🟢 |
+| **corretta con la riga sorella** `970913` (swing 5 barre H1), **fatta in modo coerente** | `27,10 × (313,2 / 179,3)` | 🔴 **47,3** | 🔴 **27,8×** | 17,5× |
+| *(la stessa, con la mediana sorella del 10/09: 51,65)* | | 90,2 | 53,1× | 33,4× |
+
+- 🔴 **Il «~112» del 18/09 non si riproduce**: nasce da `313,2 / 2,8`, dove il
+  **2,8 è il rapporto calcolato sull'ancora VECCHIA** (`143,2 / 51,65`). Mescola
+  un numeratore nuovo con un denominatore vecchio — cioè **il doppio conteggio
+  che quel referto stesso vieta in testa**. Rifatto in modo coerente, la stessa
+  ricetta dà **90,2** (con la sorella del 10/09) o **47,3** (con la sorella di
+  oggi, n=5).
+- 👉 **Verdetto onesto: `970912` = `[NON MISURATO]`, banda 27,8 – 184×.
+  Il 40× ATTRAVERSA la banda.** Non è più un PASS, e non è un NO: è **non
+  deciso**. 🟢 Il **pavimento duro 13,3× regge** anche all'estremo basso in coda
+  (17,5×).
+- 🛠️ **Via più corta al numero** (dichiarata, non eseguita — decide Claudio):
+  quella sedia non ha **mai** aperto. Il modo più economico è **leggere
+  l'ampiezza dello swing 5-barre-H4 sul DAX da una corsa diagnostica**, la
+  stessa che §8 chiede già per il range 14:30-14:45 del Dow. Costo: **una
+  corsa**, nessun parametro da ottimizzare.
+
+### 🟢 D-ter. E le altre **non** peggiorano — verificato cella per cella
+`770202`, `770250`, `771321`, `770411` migliorano tutte, e **nessuna esclusione
+si trasforma in un'esclusione più dura**. `770411` resta `[NM]` e **non lo
+promuovo a PASS** anche se la legge nuova da sola darebbe 51,5×: l'estremo basso
+della banda (25,7, la legge col 1440) non è una misura, e la sedia entra alle
+**08:01-08:27**, quando `ATR(14) M15` media 14 barre di DAX **fuori cassa** —
+dove abbiamo *misurato* che il range non si costruisce. 👉 **Il 35,0 è un
+TETTO, non una stima.**
+
+---
+
+## ⚠️ E. DUE CELLE PEGGIORANO **PER MOTIVI CHE NON C'ENTRANO CON L'ANCORA** — e vanno dette
+
+🔴 **Classe 411 applicata**: `trades_auto.csv` è cresciuto fino al **17/09**
+(1.319 righe). Due numeri `[MIS]` di questo referto sono **vecchi**.
+
+**E1 · `970913` `NASUSD` H1 — da 28,7× a 15,1×.**
+Le gambe chiuse in stop pieno sono ora **5**, non 4: `9,70 · 12,80 · 27,10 ·
+76,20 · 151,90` (la nuova è dell'**11/09**). Mediana **27,10** `[MISURATO]`
+n=5, non 51,65.
+
+| | stop | /1,80 (mediana) | /2,60 (coda archivio) | /1,90 (coda vivo) |
+|---|---:|---:|---:|---:|
+| 10/09 | 51,65 (n=4) | 28,7× 🔴 NO | 19,9× | — |
+| **oggi** | **27,10 (n=5)** | 🔴 **15,1×** (38% del pavimento) | 🔴 **10,4× — SOTTO IL PAVIMENTO DURO 13,3×** | 14,3× |
+
+🛑 **È la PRIMA sedia su INDICE della flotta che, con un numero misurato da
+tutte e due le parti, scende sotto il pavimento duro** (finora era successo solo
+a `771201` PostNews EURJPY, correzione dell'11/09).
+⚖️ **E la valvola di §2.3 si applica, per intero**: la distanza realizzata è un
+**limite INFERIORE** dello stop iniziale, e su questa sedia il trailing è
+evidente (min 9,70 · max 151,90 = **fattore 16**). 👉 Quindi il verdetto è
+**«NON PASSA, da confermare»**, non «bocciata» — ma il numero scritto in
+tabella non è più difendibile, e il 10,4× in coda va **davanti agli occhi di
+chi decide**, non in una nota.
+
+**E2 · `771321` PTE `U30USD` H1 — l'ancora la migliora, l'ORA la peggiora.**
+La sedia ha ora **1 trade** (03/09 alle **23:05 server**), che il referto del
+10/09 non poteva vedere. E l'ora 23 sul Dow è la peggiore della giornata, in
+**tutte e due** le fonti di casa:
+
+| spread usato | fonte | `stop/spr` (78,05-88,25) | verdetto |
+|---|---|---:|---|
+| **2,00** (riga `TUTTO`, mediana) | archivio tick | **39,0 – 44,1×** | 🟠 **FRAGILE** — la soglia cade dentro la banda |
+| 2,80 (riga `TUTTO`, p95) | archivio tick | 27,9 – 31,5× | 🔴 NO |
+| **2,80 / 3,00** (ora **23**, mediana) | archivio / vivo | **26,0 – 31,5×** | 🔴 NO |
+| **7,00 / 8,00** (ora **23**, p95) | archivio / vivo | 🔴 **9,8 – 12,6×** | 🛑 **SOTTO IL PAVIMENTO DURO** |
+
+⚠️ **Con n=1 quell'ora NON è una moda**: PTE è un motore H1 che può entrare a
+qualunque ora, e la riga `TUTTO` resta la lettura corretta. 👉 **Scrivo tutte e
+due**: cella **🟠 FRAGILE** sulla mediana, e **`[NON MISURATO]` l'ora
+operativa**. La via più corta al numero: **tempo** (altri trade), costo zero.
+
+---
+
+## 💵 F. LO SPREAD DI CODA — 🔴 `[NON MISURATO]`, e **il motivo del disaccordo È il risultato**
+
+Il mandato chiedeva due colonne e nessuna scelta. Ecco le due colonne — **e il
+disaccordo non è solo sul DAX: è su tutti e tre gli indici.**
+
+| simbolo · ora | **archivio a TICK** med / **p95** / max | **polling 5 s** med / **p95** / max | chi è peggio in coda |
+|---|---|---|---|
+| `D30EUR` **08** | 1,70 / 🔴 **2,70** / 12,00 — n=**1.847.049** tick | 1,60 / **1,70** / 1,70 — n=**3.596**, GG=5 | **archivio** (1,59×) |
+| `U30USD` **14** | **2,00** / 3,00 / 47,00 — n=4.931.660 | 🔴 **3,00** / 3,00 / 9,00 — n=3.578 | **vivo** (sulla mediana!) |
+| `U30USD` **15** | 2,00 / 2,60 / 36,00 | 2,00 / 🔴 **3,00** / 8,00 | **vivo** |
+| `U30USD` **23** | 2,80 / 7,00 / 60,00 | 3,00 / 🔴 **8,00** / 14,00 | **vivo** |
+| `NASUSD` **14** | 1,80 / 🔴 **2,70** / 8,20 — n=10.455.143 | 1,80 / **1,90** / 1,90 | **archivio** |
+| `NASUSD` **15** | 1,80 / 🔴 **2,60** / 6,10 | 1,80 / **1,90** / 3,80 | **archivio** |
+
+🔴 **Nessuna delle due fonti è uniformemente più prudente**: sul DAX e sul
+Nasdaq è peggio l'archivio, sul Dow è peggio il vivo — **e sull'ora 14 del Dow
+il disaccordo è sulla MEDIANA, non sulla coda**. 👉 **Non si può «scegliere la
+fonte peggiore»: si prende il valore peggiore CELLA PER CELLA**, ed è quello
+che ho fatto in §D.
+
+### ✅ F1 — **Il file sorgente della misura a tick ESISTE in repo.** Buco #3 del 18/09 chiuso
+Il referto del 18/09 dichiara: *«non ho il file sorgente di quella misura in
+repo e non posso verificarla»*. 🔴 **È in repo, e l'ho verificata.**
+`backtest_pipeline/risultati_archivio/spread_flotta/spread_orario_D30EUR.csv`,
+riga `ora_server = 8`: `tick_ask_usabili = 1847049` · `media 1,9194` ·
+`mediana 1,7000` · **`p95 2,7000`** · `max 12,0000` · `tick_solo_bid = 0`.
+**Combacia alla quarta cifra** con `I_QUATTRO_INVISIBILI_2026-09-12.md` r.298.
+👉 **Non è un numero orfano: è una misura di casa con l'n, la finestra e il
+metodo scritti** (`REFERTO_SPREAD_FLOTTA.txt`).
+
+### 🎯 F2 — **PERCHÉ le due non concordano: tre cause, e nessuna è «una delle due sbaglia»**
+Questo, non la scelta, è il risultato.
+
+1. 🔴 **I PERIODI NON SI TOCCANO.** Archivio: **2024.09.26 → 2026.06.30**
+   (`REFERTO_SPREAD_FLOTTA.txt`, r. «finestra»). Polling: **2026.09.04 21:54 →
+   2026.09.11 21:50** (`SPREAD_VIVO_..._referto.txt`). **Sovrapposizione: zero
+   giorni.** Due finestre disgiunte possono essere **tutte e due giuste** e
+   descrivere due regimi: la domanda *«quale delle due è giusta»* è **mal
+   posta**.
+2. 🔴 **I PERCENTILI NON PESANO LA STESSA COSA.** L'archivio conta **per TICK**,
+   il polling **per TEMPO** (un campione ogni 5 s). All'apertura del DAX il
+   flusso di tick esplode *e* lo spread si allarga: il p95 a tick **sovrappesa
+   proprio quei secondi**. Sono **due grandezze diverse con lo stesso nome**.
+   🧮 **E l'aritmetica lo conferma**: se il 5% del **TEMPO** dell'ora 08 avesse
+   spread ≥ 2,70, su 3.596 campioni ne aspetteremmo **~180**. Il polling ne ha
+   osservati **ZERO** (`max = 1,70`). 👉 L'ipotesi *«è solo il polling che non
+   vede i picchi brevi»* **non basta da sola**: dovrebbe nascondere il 5% dei
+   tick dentro finestre più corte del passo — che è esattamente la causa (2).
+3. 🟡 **LA FONTE È DIVERSA, e l'archivio lo dichiara**: *«spread dai tick del
+   broker, **non è lo spread di esecuzione live**»* (`REFERTO_SPREAD_FLOTTA.txt`,
+   riquadro CAVEAT). Il polling legge invece `ask − bid` sul terminale vivo
+   (`da_symbol_spread = 0`).
+
+### 🛑 F3 — Che cosa cambia, e che cosa **non** si può decidere
+| cella | coda **archivio** | coda **vivo** | esito |
+|---|---:|---:|---|
+| `D30EUR` M30 a 2,0 ATR (99,0) | 36,7× 🔴 | 58,3× 🟢 | 🔴 `[NON MISURATO]` |
+| `D30EUR` M15 a 2,5 ATR (87,5) | 32,4× 🔴 | 51,5× 🟢 | 🔴 `[NON MISURATO]` |
+| `770411` `D30EUR` M15 (64,2-87,5) | 23,8-32,4× 🔴 | 37,8-51,5× 🟠 | 🔴 `[NON MISURATO]` |
+| `770250` `NASUSD` M15 (83,2) | **30,8×** 🔴 | **43,8×** 🟢 | 🔴 `[NON MISURATO]` **in coda** (la **mediana** passa in tutte e due: 46,2×) |
+| `770202` `U30USD` M5 (123,8) | 47,6× 🟢 | 41,2× 🟢 | 🟢 **PASS in tutte e due** |
+
+👉 **Sul DAX il verdetto di coda dipende interamente da quale misura si
+crede**, e lo stesso vale ora per la **coda** di `770250`. 🚫 **Non scelgo il
+più comodo.** 🛠️ **Via più corta al numero, dichiarata**: far girare
+`ABTG_SpreadLogger` **abbastanza a lungo da coprire giornate di notizie** e
+confrontare il suo istogramma con l'archivio **sulla stessa finestra** — è
+l'unico confronto che decide. Costo: **zero corse**, solo tempo.
+
+### 📌 F4 — Il secondo rilievo di spread, segnalato e **non propagato**
+Questo referto usa `U30USD` = **2,00 (ora 14)** per `770611` (r.396) e per
+`770531` (r.400). Il file del **12/09** misura l'**ora 14 a 3,00 di mediana**
+(il 2,00 comincia dall'ora 15). Con 3,00 lo `stop/spread` di `770611` passa da
+**29,5× a 19,7×**: 🔴 **il verdetto NO non cambia**, il numero sì. `770531`
+resta larghissimo (147,8× → 98,5×, 🟢 PASS).
+🚫 **Non è una correzione d'ancora e non la propago nelle righe**: è dentro il
+disaccordo di §F2 e vale `[NON MISURATO]`, 2,00 **e** 3,00.
+
+---
+
+## 🩹 G. UN DATO FRESCO CHE NESSUNO AVEVA ANCORA GUARDATO (classe 411)
+
+`backtest_pipeline/coda/referti/CODA_10_slippage_20260917_033003.log` —
+`ABTG_SlippageLogger` sul **conto reale 10105439**, 12 deal dal 08/09 al 16/09.
+**Slippage MISURATO sugli SL di `770101` `D30EUR`**: **0,00 · 1,70 · 0,00 ·
+0,40** punti indice (n=4 uscite `SL`), e in ingresso **0,70 · −0,30 · −0,10 ·
+−0,10**.
+👉 Non è spread e **non entra nel cancello**, ma è il primo numero vero sul
+pedaggio *completo* della sedia del reale, e riempie in parte il buco
+*«slippage: quasi tutto [NON MISURATO], n=1 sul reale»* di §8.
+🚫 **Nessun commento su taglie o rischio: dato di sola lettura.**
+
+---
+
+## 🕳️ H. I BUCHI DI QUESTA PROPAGAZIONE, DICHIARATI
+
+1. 🔴 **`NASUSD` non ha NESSUN ATR misurato, su nessun TF.** Tutta la sua
+   colonna è `[INFERITO]` con una legge validata su **altri due** simboli. Il
+   validatore che sembrava disponibile (`970913`, 51,65 `[MIS]`) **non è un
+   ATR**: è uno stop *strutturale* (swing 5 barre) con distanze realizzate fra
+   **0,00 e 151,90** — e oggi la sua mediana è pure cambiata (§E1).
+2. 🔴 **`W = 1380` sugli indici USA è `[INFERITO]` per analogia.**
+3. 🟡 **`W = 780` sul DAX è una SCELTA dentro `[720 … 840]`** (§B3): gli ATR del
+   DAX portano **±4%** da questa sola scelta, **±7%** contando il regime.
+4. 🔴 **La coda dello spread è `[NON MISURATO]` su `D30EUR` e su `NASUSD`**, e
+   la **mediana** è `[NON MISURATO]` sull'**ora 14 di `U30USD`** (§F).
+5. 🔴 **`970912` è `[NON MISURATO]` e il 40× non è più deciso** (§D-bis).
+6. 🟡 **`Studio_*.csv` misura solo i giorni in cui il breakout è avvenuto**
+   (446 su ~470 giornate del periodo): c'è una selezione, piccola e dichiarata,
+   verso i giorni in cui il range è stato bucato.
+7. ⚪ **L'ancora copre apr-set 2026** (52/24/26 giornate): **un regime solo**,
+   nessuna prova di regime — **Emendamento C non applicato**.
+8. ⚪ **`225JPY` `[SOTTILE]` (n=9)** · `SPXUSD` (n=2) e `F40EUR` (n=1)
+   **non citabili** — e quindi **anche i loro «fattori d'apertura» 2,02 e 2,33
+   non sono citabili**, perché poggiano su quelle ancore.
+   `E35EUR`/`E50EUR`/`100GBP`/`200AUD`: nessuna ancora, nessuno spread →
+   `[NON CALCOLABILE]`, **non «esclusi per costo»**.
+
+---
+
+## 🧾 I. CHE COSA NON HO FATTO
+
+🚫 Nessun backtest, nessuna ottimizzazione, nessun EA, nessun preset, nessun
+file prova, nessuna riga di coda, nessuna riga di lancio, nessun terminale.
+🚫 **Conto reale `10105439` non toccato**; nessun commento su taglie o rischio.
+🚫 **Nessun candidato archiviato e nessuno promosso**: `970912` passa da PASS a
+**non deciso**, che è l'opposto di un certificato di morte — e §D-bis scrive
+**la via più corta al numero**. 🚫 Non ho scelto fra le due misure di spread.
+
+_Fonti nuove usate qui, oltre a quelle già in coda al referto:_
+`data/statements/trades_auto.csv` (al 17/09, 1.319 righe) · `trades_100k.csv` ·
+`data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv` + `_referto.txt` ·
+`backtest_pipeline/risultati_archivio/spread_flotta/spread_orario_{D30EUR,U30USD,NASUSD}.csv` + `REFERTO_SPREAD_FLOTTA.txt` ·
+`backtest_pipeline/risultati_archivio/studio_apertura/Studio_{D30EUR,U30USD,NASUSD}.csv` + `_RIEPILOGO` ·
+`mql5/Experts/ABTG_EMA200.mq5` r.49/r.104/r.356-358 · `mql5/Presets/ABTG_EMA200_H4.set` ·
+`mql5/Experts/ABTG_Apertura_Study_EA.mq5` r.29/r.210 (`gCurWidthPts = (gHi−gLo)/_Point`, **buffer NON incluso**) ·
+`mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5` r.744/r.909-915 · `mql5/presets/ABTG_GatedShort_NASUSD_770250_LIVE.set` ·
+`backtest_pipeline/coda/referti/CODA_10_slippage_20260917_033003.log` ·
+`report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md` · `report/I_QUATTRO_INVISIBILI_2026-09-12.md` r.298
