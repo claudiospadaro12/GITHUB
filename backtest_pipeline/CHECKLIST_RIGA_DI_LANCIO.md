@@ -24267,3 +24267,63 @@ EA e `n` accanto. Una terza corsa che non spiega le prime due **non chiude nient
 🧪 **Contro-esempio obbligatorio**: *«se davvero non fosse mai stato provato, quale file NON
 dovrebbe esistere?»* Se la risposta è un nome plausibile (`*retest*`, `*_motore_*`), quel
 `glob` si esegue **prima** di consegnare.
+
+## 🌿🔌 CLASSE 431 — LA MANOPOLA MESSA AD ASSE È VIVA **IN UN ALTRO RAMO DELLO STESSO EA**: `ConfirmOK()` legge l'ATR, ma la modalità d'ingresso della cella non la chiama mai (18/09/2026)
+
+**Il caso.** Il round che doveva chiudere «la croce delle slide» sul Nasdaq nasceva con
+**tre assi**: volumi ON/OFF, **ATR ON/OFF**, e **`InpConfirmMode` OR/AND** — tutti e tre
+attaccati all'ingresso a CHIUSURA (`InpEntryMode=2` di `ABTG_Apertura_3Ingressi`).
+I tre input **esistono**, sono **dichiarati `input`**, compaiono **nelle colonne dei CSV**
+e `controlla_prova.py` li accetta senza una parola. **Due dei tre non sarebbero serviti a
+niente.**
+
+🔴 **In `mql5/Experts/ABTG_Apertura_3Ingressi.mq5`:**
+- `InpUseAtrFilter` e `InpConfirmMode` vivono **solo** dentro `ConfirmOK()` (r.2518-2526);
+- `ConfirmOK()` è chiamata in **quattro** punti, e si contano col grep: r.1116
+  `TryPlaceBreakout` · r.1208 `TryPlaceRangeFade` · r.1314 `TryPlaceDelayed` · r.1764
+  gap fill;
+- il ramo **CLOSECONFIRM** non è nessuno dei quattro: `MonitorCloseConfirm()` (r.1576)
+  chiama **`VolumeOKtf(cftf)` a r.1594 e nient'altro**.
+
+👉 Quindi lo **stesso input**, nello **stesso EA**, sulla **stessa finestra**, è **VIVO con
+`InpEntryMode=0` e MORTO con `InpEntryMode=2`**. Otto passate su `InpUseAtrFilter` ×
+`InpConfirmMode` sarebbero uscite **identiche al centesimo** — la patologia delle **874
+CSV a esito identico** del censimento del 09/09, fabbricata di nuovo, a mano, sapendo.
+
+### 🔬 PERCHÉ È UNA CLASSE SUA
+- **Non è la 52** (parametro reso inerte da un *artefatto di inizializzazione*): qui
+  l'inizializzazione è perfetta e il parametro è letto benissimo — **in un ramo che questa
+  cella non percorre**.
+- **Non è la 350** (`mai mossa e viva` vs `mai mossa ma inerte` in un *censimento*): quella
+  riguarda **come si RIPORTA** un censimento, questa riguarda **come si DISEGNA un round**.
+- **Non è la 430** (il «mai provato» smentito dall'archivio): là la misura **esiste**, qui
+  la misura **non potrebbe esistere**.
+- 🔴 **Il tranello specifico è che l'inerzia è CONDIZIONATA A UN ALTRO ASSE DELLA STESSA
+  CELLA.** La nota nota *(«`InpConfirmMode` è inerte con meno di due filtri accesi»,
+  r.2410 di `ABTG_Nasdaq_Apertura_US.mq5` / r.2525 di `ABTG_Apertura_3Ingressi.mq5`)* è
+  **vera e insufficiente**: suggerisce che accendendo **tutti e due** i filtri la manopola
+  si svegli. Su `InpEntryMode=2` **non si sveglia lo stesso**, perché quella riga non viene
+  raggiunta **mai**. Fermarsi alla nota nota fa concludere l'opposto del vero.
+- ⚠️ E **nessun cancello lo prende**: `controlla_prova.py` verifica che l'input **esista**
+  nell'EA (`^input\s+\w+\s+(\w+)`), non che sia **raggiungibile** dal ramo scelto. Il
+  round sarebbe passato PASS e avrebbe consumato tempo macchina per produrre righe gemelle.
+
+### ✅ LA REGOLA
+📐 **Prima di mettere ad asse una manopola, si segue la CATENA DI CHIAMATA dal ramo che la
+cella seleziona davvero** — non basta che l'input esista. Tre comandi, e sono sempre gli
+stessi tre:
+```
+grep -n "InpUseAtrFilter\|InpConfirmMode" <EA>.mq5        # 1. chi la LEGGE?
+grep -n "ConfirmOK" <EA>.mq5                              # 2. chi CHIAMA quella funzione?
+awk 'NR<=<riga> && /^(bool|void|int|double) [A-Za-z_]+\(/ {f=$0} END{print f}' <EA>.mq5
+                                                          # 3. in quale FUNZIONE sta la chiamata?
+```
+Se la funzione del punto 3 **non è** quella che il `switch` sull'ingresso seleziona per la
+cella, **la manopola è INERTE PER QUELLA CELLA** e l'asse **non si lancia**.
+🔴 **E l'inerzia si DICHIARA nel file prova con il numero di riga**, non si toglie e basta:
+«casella non provabile col codice di oggi» è un'informazione, «casella provata» sarebbe una
+bugia, e **«casella libera» è quello che diventa se qualcuno rilegge il CSV fra un mese**.
+🧪 **Contro-esempio obbligatorio**: *«se questa manopola fosse inerte, che cosa vedrei?»* →
+**passate gemelle a esito identico**. Se il round, così com'è scritto, **non può
+distinguere** quel caso dall'edge, l'asse è mal posto. Il modo più economico di scoprirlo è
+**leggere la catena di chiamata**, non lanciare le passate e contare gli esiti distinti dopo.

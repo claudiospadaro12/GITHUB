@@ -3448,3 +3448,147 @@ parametro per parametro e i cancelli applicati a ognuna, sta in
 **12 configurazioni, 12 OOS negative** = **terzo verdetto indipendente**. È la misura che sostiene
 la **FIRMA 5** (`770201` 🔴 **[SENZA CONTRATTO]**, spenta dal 18/08 09:41 —
 `report/CONTRATTI_SEDIE.md` r.54).
+
+---
+
+## R180 — DUELLO DEGLI INGRESSI **SUL DOW** (U30USD) · ⏳ **PREPARATO, NON ANCORA GIRATO** (18/09/2026)
+Estensione di **R83** al terzo indice, come prescrive la regola che R83 stesso ha prodotto:
+*«ogni estensione a un altro indice RIFÀ il duello, non eredita il RETEST»* (riga 3412).
+R83 ha duellato su **D30EUR** e **NASUSD**; **su U30USD mai**.
+File prova: `prove/R180u{0,1,2}[b]_*_U30USD.txt` + `prove/R180uV_canarino_vivo_U30USD.txt` ·
+generatore: `prove/R180_GENERA.py` · criteri congelati: `prove/R180_DUELLO_DOW_CRITERI.md` ·
+referto: `report/DUELLO_GEMELLI_DOW_SPX_2026-09-18.md` · censimento:
+`backtest_pipeline/censimento_entrymode.py`.
+
+**Il censimento meccanico (2.376 CSV, 368 con `InpEntryMode`) — cosa esiste già su U30USD:**
+
+| modalità (semantica) | misurata? | n | PF | DD |
+|---|---|---|---|---|
+| BREAKOUT (stop) | ✅ SÌ (96 + 143 celle) | fino a 471 · 106-113 | max **0,997** · 1,106-1,214 | fino a **15,7%** |
+| **RETEST (limit)** = la sedia viva `770202` | ✅ SÌ, **6 corse** (`r6` `r35` `r46b` `r47c` `r47d` `ptc` `csv_r54`) | IS 56-150 / OOS 96-218 | IS 0,77-1,38 / **OOS 1,01-1,68** | 2,5-9,9% |
+| **CLOSECONFIRM (market a chiusura)** | 🔴 **MAI** | — | — | — |
+| FADE | ✅ SÌ | 324 | **0,806** | **19,7%** |
+| DELAYED | ✅ SÌ (157 celle) | 2-168 | max **0,978** | fino a **24,3%** |
+
+👉 **Non manca il retest: manca il CONFRONTO AD ARMI PARI** (quelle sei corse hanno finestre,
+filtri e scopi diversi) **e manca la CLOSECONFIRM**, mai girata su questo simbolo.
+
+🪤 **TRAPPOLA DA RICORDARE — `InpEntryMode` non significa la stessa cosa nei due EA:**
+`ABTG_Dow_Apertura_US` (`ENUM_ABTG_ENTRY`) **2 = RETEST**; `ABTG_Apertura_3Ingressi`
+(`ENUM_ABTG_STYLE`) **1 = RETEST**, **2 = CLOSECONFIRM**. Ponte in `ABTG_Apertura_3Ingressi.mq5`
+r.561-565. Chi copia il numero invece del significato misura un'altra strategia.
+
+🟢 **DUE COSE TROVATE E MAI SCRITTE PRIMA:**
+1. **Il PASSO 0 di R83 sul Dow è già risolto** — `risultati_archivio/ABTG_StoricoScaricato.csv`
+   (commit `70b289d5`, 08/09/2026): `U30USD,TICK,68558736,2024.09.26,-,COMPLETO` e
+   `D30EUR,TICK,35496307,2024.09.26,-,COMPLETO`. **NASUSD e SPXUSD no.**
+2. **Il pavimento dei 150 si supera SOLO coi due lati**: misurato su `r6` (retest, range 35):
+   solo long **74 IS / 130 OOS** (204 in tutto, irraggiungibile); due lati **147 IS / 203 OOS**
+   (350) → a taglio 0,50 ≈ **175/175**, sopra il pavimento tutte e due. Per questo il round ha
+   **due famiglie** (`L` solo long @0,40 = la cella viva · `B` due lati @0,50).
+
+**Magic vergini** 777410/411 · 777420/421 · 777430/431 · 777440/441 · 777450/451 · 777460/461 ·
+777490/491 — verificati con `grep -rIl --exclude-dir=.git -w "<m>" .` → **0 file per tutti e 14**.
+**Cancello strato 1**: `controlla_prova.py` → 7 file, 14 celle, **0 problemi, ESITO OK**.
+**Costo [STIMA]**: 28 passate → **2,3-10,5 min** (basi misurate R88a 0,083 e R112 0,375
+min/passata); si pianifica **15 min**. 🔴 **[NON MISURATO]** la cache tick al primo avvio.
+
+🛑 **Cosa NON misura**: robustezza di regime (21 mesi, un regime e mezzo, niente 2020/2022 — BCM
+non ha di più); il pavimento dei 150 sulla famiglia L (**non lo supera, atteso 74/130**);
+lo slippage (`InpSlippagePts=0` → **la modalità 0 è avvantaggiata**, e se vince ha l'asterisco);
+spread di prop, requote, rifiuti. E **non è confrontabile riga per riga con R83**: lì i filtri
+erano spenti, qui l'EMA della cella viva è **accesa** (1/50 su H4).
+
+## R185 — SONDA SU **SPXUSD** · 🔴 **IL DUELLO SPX NON PARTE FINCHÉ NON RISPONDE** (18/09/2026)
+Criteri: `prove/R185_SONDA_SPXUSD_CRITERI.md`. **Nessun file prova di duello è stato scritto**, e
+la ragione è misurata: sul **motore delle aperture**, su SPXUSD, **ZERO righe in tutto il repo**.
+
+🪤 **Falso positivo da non ripetere**: `grep SPXUSD` sui CSV risponde SÌ in decine di file — ma è
+il valore della colonna **`InpCorrSymbol`** (filtro di correlazione, per giunta **spento**), **non**
+il simbolo negoziato. L'unica cosa davvero girata su SPXUSD è `ABTG_GoldenCross` (H1/H4).
+
+| domanda | oggi |
+|---|---|
+| BCM quota SPXUSD | ✅ SÌ |
+| profondità **BARRE** | ✅ **2024.09.26 `COMPLETO`** (sonda 17/08) |
+| profondità **TICK REALI** | 🔴 **MAI MISURATA** |
+| specifiche di contratto (lotto min, valore punto, spread) | 🔴 **MAI MISURATE** |
+
+Tre cancelli congelati: **Q1** tick (PASS / PARZIALE con finestra riscritta / FAIL → solo OHLC
+dichiarato come screening, **mai** verdetto) · **Q2** pavimento del lotto (classe 229: se il lotto
+minimo rischia >1%, PF e DD descrivono una taglia che non esiste) · **Q3** frontiera del costo
+`stop >= 40 x spread` (se M5 la sfonda → **escluso PER COSTO, col numero accanto**, duello su
+M15/M30). Strumento: `scarica_storico.ps1` (nessuno script nuovo).
+📌 `SPXUSD_EXT` (M1 2010→2026, import del 26/08) **non serve qui**: OHLC, altro simbolo, marcato
+*«solo prova di regime»*. **Costo [STIMA, NON MISURATO]**: 30-180 min per simbolo.
+🔴 `scarica_storico.ps1 -Auto` **senza** `-TerminaleBacktest` chiude **TUTTI** i terminali, compreso
+il **REALE 10105439**: sul VPS è obbligatorio `-TerminaleBacktest "C:\MT5_Backtest"` (demo 50504400).
+
+---
+
+## 🔬 R183 — LA CROCE DELLE SLIDE: conferma di VOLUME sull'ingresso a CHIUSURA (NASUSD)
+**18/09/2026 · PREPARATO, NON ANCORA GIRATO.** EA `ABTG_Apertura_3Ingressi` · NASUSD M15 ·
+`@DAQUANDO 2024.09.26` · tick reali modello 4 · taglio IS/OOS 0,40 — **le stesse condizioni
+di R83/R84**, corpo estratto meccanicamente dalle 78 righe di `prove/R83n2_conferma_NASUSD.txt`.
+Criteri congelati PRIMA dei numeri: `prove/R183_CROCE_SLIDE_CRITERI.md` ·
+dossier: `report/R183_LA_CROCE_DELLE_SLIDE_LA_GRIGLIA_2026-09-18.md`.
+
+**LA DOMANDA:** la conferma di VOLUME delle slide, attaccata all'ingresso che le slide
+prescrivono (MARKET alla CHIUSURA della candela di rottura), **aggiunge edge o taglia e basta?**
+
+**LE CELLE (11 celle · 22 passate · `controlla_prova.py` ESITO OK · stima 2-9 min macchina):**
+| file | asse | celle | magic (vergini, `grep -rnoE "7793[5-9][0-9]" .` → 0) |
+|---|---|---:|---|
+| `prove/R183a_volmult_closeconf_NASUSD.txt` | `InpVolMult` 1,00/1,25/**1,50**/1,75/2,00 | 5 | `779350` |
+| `prove/R183b_volavgbars_closeconf_NASUSD.txt` | `InpVolAvgBars` 10/**20**/30/40 | 4 | `779360` |
+| `prove/R183c_canarino_baseline_NASUSD.txt` | `InpMagic` (asse tecnico, cancello G1) | 2 | `779370`·`779371` |
+
+**BASELINE DA BATTERE** (R83n2, stesso EA, filtri spenti): IS PF 0,70462 n=198 DD 9,4841 ·
+**OOS PF 0,97849 n=313 DD 6,1775**.
+
+### ✅ LA CASELLA È VUOTA — ricontata a macchina
+Censimento su **368 CSV / 18.410 righe** (worktree `.claude` esclusi): su NASUSD **tutte** le
+righe con ≥1 filtro acceso hanno `InpEntryMode=0` (**610 righe**); le righe a ingresso CHIUSURA
+sono **8**, tutte a filtri spenti. 🔴 **Ma il primo giro del censimento deduceva il simbolo dal
+PERCORSO e saltava 73 file in silenzio** (classe 430, applicata a se stessi): rifatto senza
+filtri di simbolo, sono emersi i **vicini di casella, che sono misurati e dicono di no**.
+
+### 🔴 I VICINI, MAI CITATI PRIMA — `Walkforward_Aperture/NASDAQ_B_motore_{IS,OOS}.csv` (core `770201`)
+| motore (enum del CORE) | volumi | IS PF · n | OOS PF · n |
+|---|---|---|---|
+| OPENCONFIRM (5) | ON | **1,816** · 108 | **0,956** · 104 |
+| DELAYED (4) | ON | **1,710** · 56 | **0,696** · 51 |
+| RETEST (2) | ON | 1,145 · 91 | 1,109 · 94 |
+
+**Tre casi su tre: IS che brilla, OOS che non regge, campione dimezzato (240→104 · 247→51 ·
+240→94).** 👉 Il `PF 1,200` di `DELAYED+volumi` del 05/08 (`Openconfirm/MOTORI_INGRESSO.md`,
+*«il tipo di coincidenza che di solito non è coincidenza»*) **fuori campione fa 0,696: era
+rumore**, ed è ora documentato. ⚠️ `InpEntryMode=2` vuol dire **CLOSECONF** nel `3Ingressi` e
+**RETEST** nel core: due enum diversi, mappatura del core verificata **contro i numeri**.
+
+### 🔌 DUE DEI TRE ASSI CHIESTI SONO **INERTI** — e non si lanciano
+`InpUseAtrFilter` e `InpConfirmMode` vivono solo in `ConfirmOK()` (r.2518-2526), chiamata a
+r.1116/1208/1314/1764 — **mai dal ramo CLOSECONFIRM**, che usa `VolumeOKtf(cftf)` (r.1594) e
+nient'altro. Su `InpEntryMode=2` **non vengono letti mai**: 8 passate identiche al centesimo.
+✅ Il claim *«`InpConfirmMode` inerte sotto i due filtri, r.2410»* è **vero** (r.2410 del core,
+r.2525 del `3Ingressi`) **ma insufficiente**: lì non si sveglia **nemmeno** accendendone due.
+📌 **Difetto di classe NUOVA: `CHECKLIST_RIGA_DI_LANCIO.md` classe 431** (ultima era la 430).
+🕳️ **Buco dichiarato**: la metà **ATR** della regola delle slide **non è misurabile col codice
+di oggi**. Costa **una riga** (`VolumeOKtf(cftf)` → `ConfirmOK()`): **decisione di Claudio**.
+
+### 🎯 ATTESA E SOGLIE, congelate PRIMA
+Attesa: PF OOS **1,00-1,10** con `n` **110-175** a VolMult 1,50. **Previsione onesta scritta
+prima: il round finirà con «sovra-filtro» o con «il default nudo va bene uguale».**
+Soglie: `n` OOS **≥150** (merito) · **≥157** (anti-sovra-filtro) · **altopiano di ≥3 celle,
+mai il picco** · segno non ribaltato IS/OOS · DD OOS **≤6,18%** · **confronto col default
+obbligatorio** (±0,05 → «i filtri non aggiungono») · **G1**: se `R183c` non riproduce R83n2 al
+centesimo **ci si ferma**.
+🧪 **Contro-esempio**: PF monotono crescente **e** `n` monotono decrescente **senza ottimo
+interno** = **taglio**, si scrive «taglio» qualunque sia il PF. Modello del sovra-filtro già in
+casa: `DELAYED+volumi` IS 1,710 n=56 → OOS 0,696 n=51.
+
+🚫 **R183 NON PROMUOVE NIENTE E NON RIACCENDE NIENTE.** La sedia `770201` resta **SPENTA** e
+🔴 **[SENZA CONTRATTO]** (PF 0,82 · DD 17% · 19/20 celle OOS negative — FIRMA 5 del 18/08).
+Nessun backtest eseguito, nessun EA/preset/forward toccato, niente sul conto reale `10105439`.
+📌 Nota d'archivio: **`R84BIS_B1/B2` (sensibilità a `InpVolMult` sul Nasdaq) è stato preparato
+il 18/08 e MAI GIRATO** — zero CSV nel repo. R183a è la prima misura di quell'asse.

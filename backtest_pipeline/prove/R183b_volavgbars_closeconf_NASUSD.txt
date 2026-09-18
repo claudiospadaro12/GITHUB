@@ -1,0 +1,138 @@
+# =====================================================================
+#  R183b -- ASSE: InpVolAvgBars (su quante barre si misura la media)
+#  LA CROCE DELLE SLIDE, IL LATO MAI GIRATO -- NASUSD
+#  EA: ABTG_Apertura_3Ingressi
+#  Scritto il 18/09/2026. CRITERI CONGELATI PRIMA DEI NUMERI:
+#  prove/R183_CROCE_SLIDE_CRITERI.md  <-- si legge PRIMA di questa tabella.
+# ---------------------------------------------------------------------
+#  LA DOMANDA, UNA SOLA:
+#    "La conferma di VOLUME che le slide chiedono, attaccata all'ingresso
+#     che le slide prescrivono (MARKET alla CHIUSURA della candela di
+#     rottura), AGGIUNGE edge sul Nasdaq -- o TAGLIA e basta?"
+#
+#  PERCHE' ESISTE: censimento meccanico del 18/09 su 368 CSV / 18.410
+#  righe del repo (script in report/, comando nei criteri par.2):
+#  su NASUSD TUTTE le righe con almeno un filtro acceso hanno
+#  InpEntryMode=0 (breakout) -- 610 righe, 610 volte modo 0.
+#  Le celle con ingresso a CHIUSURA (InpEntryMode=2 di QUESTO EA) sono
+#  8 righe in tutto, TUTTE a filtri spenti. La casella e' VUOTA.
+#
+#  BASELINE DA BATTERE (R83n2, stesso EA, stesso file, filtri spenti):
+#    IS  PF 0,70462  n=198  DD 9,4841
+#    OOS PF 0,97849  n=313  DD 6,1775
+#
+#  >>> QUESTO ROUND NON RIACCENDE NIENTE. <<<
+#  La sedia 770201 resta SPENTA e [SENZA CONTRATTO] (PF 0,82 - DD 17% -
+#  19/20 celle OOS negative, FIRMA 5 del 18/08). R183 MISURA E BASTA.
+#  Non propone taglie, non propone accensioni, non tocca il forward,
+#  non tocca il conto reale 10105439.
+#
+#  >>> DUE MANOPOLE DI QUESTO EA SONO INERTI SU QUESTO INGRESSO, <<<
+#  >>> ED E' VERIFICATO NEL SORGENTE, NON DEDOTTO:              <<<
+#    InpUseAtrFilter e InpConfirmMode vivono SOLO dentro ConfirmOK()
+#    (ABTG_Apertura_3Ingressi.mq5 r.2518-2526). ConfirmOK() e' chiamata
+#    a r.1116 (TryPlaceBreakout), r.1208 (TryPlaceRangeFade), r.1314
+#    (TryPlaceDelayed), r.1764 (gap fill). MAI dal ramo CLOSECONFIRM:
+#    MonitorCloseConfirm() (r.1576) chiama VolumeOKtf(cftf) a r.1594 e
+#    NIENT'ALTRO. Quindi su InpEntryMode=2 l'ATR non viene mai letto e
+#    InpConfirmMode non viene mai letto.
+#    -> METTERLI AD ASSE QUI PRODURREBBE PASSATE IDENTICHE (la patologia
+#       delle 874 CSV a esito identico del censimento 09/09).
+#    -> La meta' ATR della regola delle slide NON e' misurabile col
+#       codice di oggi: e' un BUCO DICHIARATO, vedi criteri par.6.
+#       Costa UNA riga di EA, e questo round NON la scrive.
+# ---------------------------------------------------------------------
+#  L'UNICA VARIABILE DI QUESTO FILE: InpVolAvgBars.
+#    Quattro celle: 10 - 20 - 30 - 40.
+#    InpVolMult e' PINNATO a 1,50, il valore DA DOCUMENTO. E' un pin di
+#    PRINCIPIO, non un pin scelto guardando R183a: se lo scegliessi
+#    dopo aver visto i numeri di R183a, R183b misurerebbe la mia
+#    scelta, non la lunghezza della media. Dichiarato qui, prima.
+#
+#  COSA CHIEDE: la conferma di volume dipende da QUANTO indietro si
+#  guarda? Se PF e n sono piatti su tutte e quattro le celle, la
+#  lunghezza della media NON conta e si scrive cosi' (e' un risultato:
+#  una manopola in meno da girare per sempre).
+#  VolumeOKtf legge la media delle n barre PRIMA della rottura
+#  (r.2559-2561 del sorgente), quindi 10 e 40 sono due domande diverse
+#  davvero, non due etichette.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=15
+InpCloseHour=21
+InpCloseMin=45
+InpCloseAtEnd=1
+InpOneTradePerDay=1
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=2
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=1
+InpAllowShort=1
+InpMinRangePts=0
+InpMaxRangePts=0
+InpRetestOffsetPts=0
+InpFadeOffsetPts=0
+InpUseGapFill=0
+InpGapMinPoints=150
+InpGapMinRR=1.5
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseEmaFilter=0
+InpEmaFast=14
+InpEmaSlow=200
+InpFilterTF=16385
+InpUseSupertrend=0
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=0
+InpUseCorrelation=0
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=0
+InpVwapTF=15
+InpUseVolumeFilter=1
+InpVolMult=1.5
+InpVolAvgBars=10||10||10||40||Y
+InpUseAtrFilter=0
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=0
+InpUseNewsFilter=0
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=1.0
+InpTP1_ClosePct=50
+InpBreakevenAtTP1=1
+InpBEatR=0
+InpUseTrailing=1
+InpTrailStartR=0
+InpTrailMode=1
+InpTrailTF=1
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410
+InpUseRoundLevels=0
+InpRoundStep=100.0
+InpRoundMinDistPts=50
+InpSlippagePts=0
+InpMinStopPts=0
+InpSkipIfTight=1
+InpMaxSpread=0
+InpVerbose=0
+InpUseVolRegime=0
+InpUseSRFilter=0
+InpAutoTest=1
+InpMagic=779360
