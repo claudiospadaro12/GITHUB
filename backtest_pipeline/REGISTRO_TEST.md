@@ -3258,3 +3258,121 @@ zero terminali.** File nuovi: il dossier + 4 sorgenti esterni in
   sul forex, perche' li' il conto di costo non esiste.
 
 ---
+
+---
+
+# 🗃️ INDICE DEI 48 ROUND DI `dal_vps/` — **dove sta il verdetto di ognuno** (18/09/2026)
+
+> ## 🔴 **PERCHÉ QUESTA SEZIONE ESISTE, e il motivo è un errore mio di oggi**
+> Il 18/09 ho riletto da zero i CSV di `r139a`/`r139b` e ho scritto un referto che
+> annunciava i numeri come **nuovi**, denunciando in prima riga la classe 411
+> (*«prima di ordinare una misura, si cerca se esiste già»*). **Erano già stati letti
+> il 13/09 alle 23:32**, venticinque minuti dopo che i CSV erano atterrati, con gli
+> **stessi numeri e gli stessi verdetti**.
+>
+> 👉 **Ho cercato i CSV. Ho cercato QUESTO registro. Non ho cercato i REFERTI.**
+> E chi cerca qui — che è dove si cerca — trovava solo *«file prova pronto, cancello
+> deterministico passato»* e concludeva che il numero non esistesse.
+>
+> ## 📌 **Il difetto non era di misura: era di ARCHIVIO. 48 verdetti vivevano in un referto che il registro non linkava. Questa tabella è la riparazione, e costa zero macchina.**
+
+**Fonte unica di tutte le righe qui sotto**: `report/LETTURA_BACKLOG_NOTTE_2026-09-13.md`,
+commit `7aaa9526` del **13/09/2026 23:32 +0200**. Dettaglio cella per cella di
+`r136*`/`r137*`/`q770be`/`r138a`/`cemad*` in
+`backtest_pipeline/risultati_archivio/R136_R137_LA_NOTTE_CHE_I_CSV_SONO_ARRIVATI_2026-09-13.md`.
+CSV: `backtest_pipeline/risultati_prove/dal_vps/<EA>/`, tutti committati il **13/09 23:05-23:07**.
+
+⚠️ **Questa tabella è un INDICE, non un verdetto nuovo**: è generata meccanicamente
+dalle righe 105-153 del referto sopra, senza ricopiare nulla a mano. Il verdetto, i
+criteri congelati e i buchi dichiarati stanno **lì**, e lì vanno letti prima di citarli.
+
+| round | riga fonte | EA | simbolo/TF | PF IS/OOS | DD% IS/OOS | n IS/OOS | verdetto |
+|---|---|---|---|---|---|---|---|
+| **r136a** | **r.105** | EMA200 | U30USD H1 | 1,20110 / 1,52365 | 5,73 / 7,83 | 237 / 517 | ✅ **PASS** — S1 riproduce; altopiano di **6 celle** (SLatr 0,6-1,6); **"il default va bene"** |
+| **r136b** | **r.106** | EMA200 | U30USD H1 | 1,20110 / 1,52365 | 5,73 / 7,83 | 237 / 517 | ✅ **PASS** — S1 ✓; altopiano 0,25-0,75, **centro 0,50 NON batte il default** |
+| **r136c** | **r.107** | EMA200 | U30USD H1 | 1,20110 / 1,52365 | 5,73 / 7,83 | 237 / 517 | ✅ **PASS** — S1 ✓; altopiano 25-50-75 **col centro = cella viva**; la cella NUDA è peggiore |
+| **r136d** | **r.108** | EMA200 | U30USD H1 | 1,20110 / 1,52365 | 5,73 / 7,83 | 237 / 517 | ⏸️ **NON MISURABILE** — S1 ✓ ma **il segno si inverte fra IS e OOS** (criterio 1 del file) |
+| **cemad02** | **r.109** | EMA200 | U30USD H1 | — / 1,20110 | — / 5,73 | vuoto / 237 | ✅ **PASS** — riproduce l'IS di R112; **132 posizioni MISURATE**; codice 2 = falso allarme |
+| **cemad05** | **r.110** | EMA200 | U30USD H1 | 1,20110 / 1,52365 | 5,73 / 7,83 | 237 / 517 | ✅ **PASS** — G0-B ✓; **requisito 5 (TF) CHIUSO**: H1 confermato, M15/M20/M30 bocciati |
+| **r137a** | **r.111** | DAX_Apertura_EU | D30EUR M5 | 1,12634 / 1,39709 | 5,44 / 7,23 | 175 / 270 (**193 pos**) | ❌ **A1 FALLITO** — 1 sola cella a-costo passa; **prezzo di R5 misurato** (vedi §3) |
+| **r137b** | **r.112** | DAX_Apertura_EU | D30EUR M5 | 1,12634 / 1,39709 | 5,44 / 7,23 | 175 / 270 | ❌ **FAIL** — ramo SKIP: campione a **24 posizioni** e PF **in calo monotono** |
+| **r137c** | **r.113** | DAX_Apertura_EU | D30EUR M5 | 1,18323 / **1,49140** | 4,96 / **6,27** | 132 / **193 pos** | ✅ **PASS** — riproduzione 8/8 → **è una FIRMA** |
+| **r138a** | **r.114** | DAX_Apertura_EU | **F40EUR** M5 | 1,44028 / **0,76965** | 7,36 / **11,82** | 130 / 195 (**152 pos**) | ❌ **FAIL F3 (rischio)** — DD OOS 11,82% > 10,0%; merito negativo su campione leggibile |
+| **q770be** | **r.115** | DAX_Apertura_EU | D30EUR M5 | 1,18323 / 1,49140 | 4,96 / 6,27 | 132 / 193 | ❌ **FAIL soglia** — peggior giornata **invariata** (-1,0793% su 4 celle su 4) |
+| **r139a** | **r.116** | EMA200 | AUDJPY H4 (OHLC) | 0,80 / 0,95-1,01 | **15,4-16,9 / 16,9-20,4** | 757-768 / 1292-1345 | ❌ **FAIL S3 (rischio)** — DD > 14,0% su **tutte** le celle, in **entrambe** le finestre |
+| **r139b** | **r.117** | EMA200 | GBPUSD H4 (OHLC) | 0,80-0,84 / 1,13 | **17,7-20,3** / 10,1-11,0 | 856-875 / 1292-1321 (**718 pos**) | ❌ **FAIL S3 + S4** — DD IS > 14,0%; **segno opposto su 4 celle su 4 = REGIME, non edge** |
+| **r139c** | **r.118** | FiboH4_Multi | GBPUSD H4 (OHLC) | 0,79-0,83 / 0,94-0,97 | **20,7-23,3 / 17,2-17,7** | 548-572 / 725-737 (**643 pos**) | ❌ **FAIL F1 (rischio)** — DD > 14,0% ovunque; PF < 1,00 in entrambe |
+| **r141a** | **r.119** | IntradayMomentum | NASUSD M30 | **0,60887** / 1,24334 | 7,76 / 3,03 | **146** / 261 | ⏸️ **NON GIUDICABILE** — IS a **4 operazioni** dal pavimento; segno nettamente discorde |
+| **r141b** | **r.120** | IntradayMomentum | U30USD M30 | **0,59938** / 1,03501 | 6,42 / 4,41 | **146** / 261 | ⏸️ **NON GIUDICABILE** — stesso schema del gemello, **identico nei conteggi** |
+| **r141c** | **r.121** | AtrExhaustVol | NASUSD M30 | 0,97227 / 1,22915 (cella ATR) | 5,69 / 4,14 | 70 / 96 | ❌ cella PERC **scartata** (C0 + DD 19,25%) · ⏸️ cella ATR non giudicabile (n<150) |
+| **r141d** | **r.122** | HVAncora | U30USD M30 | 1,38464 / 1,92073 (k=1,0) | 3,42 / 2,06 | 22 / 31 | ⏸️ **NON GIUDICABILE sul merito** — ma **PASSO 0 RIUSCITO**: il motore opera (vedi §4) |
+| **r142a** | **r.123** | Nasdaq_Live5m | NASUSD M5 | 1,01472 / 0,95624 | 12,3 / 22,5 @2% | **116 / 175** (riproduce) | ❌ **merito: scarta** (tutte < 1,10 con n≥150) · ✅ **voce 3 del certificato CHIUSA** |
+| **r142b** | **r.124** | Nasdaq_Live5m | NASUSD M5 | 1,01472 / 0,95624 | 12,3 / 22,5 @2% | 116 / 175 (riproduce) | ❌ **merito: scarta** — l'asse morde (+0,11 PF) ma **nessuna cella arriva a 1,10** |
+| **r142c** | **r.125** | Nasdaq_Live5m | NASUSD M5 | 1,01472 / 0,95624 | 12,3 / 22,5 @2% | 116 / 175 (riproduce) | ❌ **merito: scarta** — senza trailing il DD OOS sale a **33,62%** @2% |
+| **r127c** 🐤 | **r.126** | CostToCost | EURJPY H4 (OHLC) | 1,17686 / 1,52341 | 11,0 / 12,3 | 153 / 242 = **395** | ✅ **PASS — IL CANARINO DELLA NOTTE** (vedi §1) |
+| **r127b** | **r.127** | SupertrendRev_Ott | XAUUSD H4 (OHLC) | 0,85447 / 1,12525 | 6,58 / 5,91 | 230 / 427 = **657** | ⏸️ ancora **n 657 esatta** ✅ · merito non giudicabile (OHLC + PF IS < 1,00 su 7/7) |
+| **r126a** | **r.128** | SuperWave_DOW_H1 | U30USD H1 | **1,48166** / 1,24312 | 4,04 / 4,17 | 72 / 131 | ❌ **ANCORA GRADO C** — PF IS **1,48166 contro 1,84892** (Δ 0,367 > ±0,15) → **round fermo** |
+| **r126b** | **r.129** | SuperWave_DOW_H1 | U30USD H1 | 1,48166 / 1,24312 (lookback 5) | 4,04 / 4,17 | 72 / 131 | ⏸️ **non leggibile** (stesso gruppo) — **ma conferma il determinismo interno** |
+| **r126d** | **r.130** | SuperWave | NASUSD H1 | 0,71-1,13 / **0,73-0,84** | 1,72 / 2,7-3,2 | 35-38 / **58-63** | ❌ **FAIL G3+G4** — PF OOS < 1,10 su **9 celle su 9**; n OOS < 95 (pavimento) |
+| **r132c** | **r.131** | SupRev_DOW_H1_Ott | U30USD H1 | 0,98846 / 1,38900 (NearAtr 1,0) | 6,17 / 5,91 | 117 / 152 | ❌ **ROUND NULLO** — la riproduzione fallisce su **3 celle su 5** (vedi §5) |
+| **r120b11** | **r.132** | SuperWave_DOW_H1 | U30USD H1 (dep 10k) | 1,48166 / **1,24312** | 4,04 / 4,17 | 72 / 131 | ❌ **G1 metro FALLITO** — PF OOS fuori dalla forbice **1,30-1,55** → le altre 3 celle non si leggono |
+| **r120b00** | **r.133** | SuperWave_DOW_H1 | U30USD H1 (dep 10k) | 0,90317 / 1,18671 | 6,04 / 6,23 | 46 / 90 | ❌ non leggibile (G1 del gruppo) |
+| **r120b01** | **r.134** | SuperWave_DOW_H1 | U30USD H1 (dep 10k) | 1,40616 / 0,98333 | 4,45 / 5,11 | 71 / 125 | ❌ non leggibile (G1 del gruppo) |
+| **r120b10** | **r.135** | SuperWave_DOW_H1 | U30USD H1 (dep 10k) | 1,48914 / 1,24312 | 3,80 / 4,17 | 72 / 131 | ❌ non leggibile (G1 del gruppo) |
+| **r120e11** | **r.136** | SuperWave_DOW_H1 | U30USD H1 (**dep 100k**) | 1,39744 / 1,22034 | 3,48 / 4,21 | **106 / 184** | ⏸️ metro del banco — **ha misurato la cosa che spiega tutto** (§5) |
+| **r120e00** | **r.137** | SuperWave_DOW_H1 | U30USD H1 (**dep 100k**) | 0,97751 / 1,28437 | 5,07 / 6,53 | 74 / 130 | ⏸️ metro del banco |
+| **r133b** | **r.138** | ORB_Ottimizzato | U30USD M30 | 1,24979 / 1,67419 (cella 0) | 7,89 / 9,76 | 71 / 119 | ❌ cella 1 **scartata per rischio** (DD IS **27,21%** > 12,0%) · merito non leggibile (n<150) |
+| **r133c** | **r.139** | MaxMinNotte | D30EUR M5 | 1,99749 / 1,01569 (box 0) | 4,89 / 9,05 | 38 / 65 | ⏸️ **NON GIUDICABILE, dichiarato prima** — consegnata la curva Trades(soglia) |
+| **P0_IBRETEST** 📦 | **r.140** | IBRetest | U30USD M30 | 0,38242 / 0,69663 | 7,38 / 7,61 | 42 / 53 | ⏸️ archivio — frequenza **0,21 op/g** in banda; merito sospeso; segno negativo concorde |
+| **P0IBRTDAX** 📦 | **r.141** | IBRetest | D30EUR M30 | 1,21062 / 0,96493 | 2,80 / 5,25 | 58 / 107 | ⏸️ archivio — merito sospeso (n<150) |
+| **P0IBRTNAS** 📦 | **r.142** | IBRetest | NASUSD M30 | 0,56297 / 0,59292 | 5,80 / 5,31 | 35 / 49 | ⏸️ archivio — merito sospeso; segno negativo concorde |
+| **P0CONTA (LVN)** 📦 | **r.143** | LVNArbitro | U30USD M30 | 0,97856 / 1,05108 | **18,01** / 11,33 | 392 / 618 | ❌ archivio — **C0 (PF<1,10 con n≥150) + rischio** (DD > 10%) |
+| **P0_100K (LVN)** 📦 | **r.144** | LVNArbitro | U30USD M30 | 0,97485 / 1,05227 | **19,35** / 11,76 | 392 / 618 | ❌ archivio — idem, confermato alla taglia 100k |
+| **P0CONTA (ORB-B)** 📦 | **r.145** | OpeningReversalB | U30USD M5 | 1,82619 / — | 0,96 / 0,00 | **2 / 0** | ❌ archivio — **bocciato per frequenza** |
+| **P0A_FAIL** 📦 | **r.146** | OpeningReversalB | U30USD M5 | 1,82619 / — | 0,96 / 0,00 | 2 / 0 | ❌ archivio — contatori: State1 24-29, State2 16-19, **Entry 2** |
+| **P0B_SIGNAL** 📦 | **r.147** | OpeningReversalB | U30USD M5 | 0,00-1,83 / — | ≤0,96 / 0,00 | 1-2 / 0 | ❌ archivio — State1 fino a **49**, ingressi **1-2** |
+| **P0C_FT** 📦 | **r.148** | OpeningReversalB | U30USD M5 | 1,75-3,56 / — | ≤0,96 / 0,00 | 2-3 / 0 | ❌ archivio — il PF 3,56 è su **3 operazioni**: numero senza campione |
+| **P0_EURCHF** 📦 | **r.149** | Nightly | EURCHF | 0,89113 / 0,81429 | **11,10 / 15,39** | 63 / 85 | ❌ archivio — **BOCCIATO PER RISCHIO** (soglia congelata: DD > 10% su una cella) |
+| **R123AGATE** 📦 | **r.150** | SupRev_DOW_H1_Ott | U30USD H1 | 0,98837 / 1,38944 | 6,17 / 5,91 | 117 / 152 | 📦 **ancora d'archivio** (09/09) — termine di paragone di r132c |
+| **R123BSTMULT** 📦 | **r.151** | SupRev_DOW_H1_Ott | U30USD H1 | 0,88-2,02 / 0,91-1,42 | 2,9-8,9 / 3,6-12,4 | 97-180 / 112-261 | 📦 ancora d'archivio |
+| **R123CATRP** 📦 | **r.152** | SupRev_DOW_H1_Ott | U30USD H1 | 0,56-1,18 / 0,56-1,39 | 4,9-9,1 / 2,8-9,2 | 104-136 / 108-202 | 📦 ancora d'archivio |
+| **R123DNEARATR** 📦 | **r.153** | SupRev_DOW_H1_Ott | U30USD H1 | 0,63-1,00 / 0,99-1,39 | 4,6-7,2 / 5,9-6,4 | 64-128 / 122-172 | 📦 **ancora d'archivio — è quella che r132c non riproduce** |
+
+## 🏁 LA LETTURA D'INSIEME, misurata il 18/09 su tutte le **329 celle distinte**
+
+> ### 🔴 **ZERO round su 48 passa tutti e quattro i cancelli di casa. E quello che blocca è SEMPRE lo stesso: il CAMPIONE. Diciannove round arrivano a 3 su 4 fallendo solo lì.**
+
+I sei che il campione lo passano, lo pagano in **rischio**: tre forex a 16,5 anni
+(`r139a` 768/1345 deal, `r139b` 875/1321, `r139c` 557/737) e tre a DD alto
+(`P0CONTA` e `P0_100K` fino a **29,77% @1%**, `cemad05` fino a **30,71%** a TF basso).
+
+🔎 **E 69 celle distinte su 329 non erano MAI state scritte da nessuna parte**
+(test: PF al 3°/5° decimale o P/L al centesimo, cercato in 2.095 file `.md`/`.txt`).
+Le tre concentrazioni: `r126a` **14 mute su 18**, `r126b` **10 su 14**, `r127b` **9 su 14**.
+⚠️ Nelle altre (`r126d`, `r133c`) le celle mute sono **brutte o minuscole**, e non
+scriverle era ragionevole: si dichiara invece di gonfiare il numero.
+
+### 🟠 `r127b` — riletto e chiuso il 18/09, e NON è un'occasione
+Segnalato come promettente (*«celle con PF OOS sopra 1,10 su n=427, mai scritte»*).
+Riaperti i CSV **da me**: **IS 7 celle su 7 NEGATIVE** (PF 0,792-0,855, DD 6,5-10,2%,
+230 deal) contro **OOS 7 su 7 positive** (PF 1,053-1,125, DD 5,9-8,4%, 427 deal).
+🔴 **Segno opposto su 7 celle su 7 = `S4`, «REGIME, non edge»** — la stessa forma di
+`r139b`. Il PF OOS sopra 1,10 c'era; l'IS che lo uccide non era stato guardato.
+
+### 📚 Chi rileggerei per primo, e perché
+1. 🥇 **`r126a` + `r126b`** — fermi su un cancello di **riproduzione**, non su un numero
+   brutto: 9/9 e 7/7 celle passano merito+rischio+segno (PF OOS 1,135-1,402, DD@1%
+   3,15-4,58%, n OOS 115-139 deal). ⚠️ Il campione resta sotto il pavimento.
+2. 🥈 **`r133b`** — PF OOS **1,674**, ma la cella **viva** in IS fa PF 0,523 con DD
+   **27,21%**, e il file prova non è mai stato aperto.
+3. 🥉 **`r141d`** — passo 0 riuscito; il tappo vero è misurato altrove (91 ancore IS e
+   165 OOS che **scadono**).
+
+### ⚠️ Un difetto DEL REFERTO FONTE, trovato il 18/09 e non ancora corretto lì
+La riga `r139a` di `LETTURA_BACKLOG_NOTTE_2026-09-13.md` scrive **n OOS 1292-1345**:
+il minimo vero è **1322**, e **1292 è di `r139b`** (contaminazione fra righe adiacenti).
+Non sposta il verdetto, ma chi cita quel numero citi **questa** riga.
+
+📝 Audit completo: `report/I_QUARANTOTTO_2026-09-18.md`. Riproduzione indipendente
+di `r139a`/`r139b` a cinque giorni di distanza, partita dai CSV e non dal referto:
+`report/AUDJPY_E_GBPUSD_IL_NUMERO_CHE_MANCAVA_2026-09-18.md` (stessi numeri, stessi verdetti).
