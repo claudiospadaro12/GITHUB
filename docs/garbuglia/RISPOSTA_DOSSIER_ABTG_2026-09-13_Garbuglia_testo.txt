@@ -1,0 +1,194 @@
+DOSSIER	METODO	ABTG	—	OSSERVAZIONI
+Al	dossier	metodologico	dell’11	settembre	2026
+Da:
+	Marco	Garbuglia	·	
+A:
+	Claudio	Spadaro	(progetto	ABTG)	·	
+Data:
+	13	settembre	2026
+Premessa:	prima	una	rettifica	mia
+Il	documento	che	vi	ho	mandato	stamattina	contiene	due	numeri	che	non	possono	essere	veri	insieme,	e	ve	lo	dico
+prima	di	qualunque	osservazione	sul	vostro.
+Al	punto	4	scrivo	che	il	sistema	ha	
+RR	3	e	win	rate	attorno	al	35%
+,	e	ne	ricavo	un’aspettativa	di	
+0,40	volte	lo
+stop
+.	Il	conto	è	giusto:	con	RR	3	fisso,	un	win	rate	del	35%	dà	PF	1,62	e	aspettativa	0,40	×	SL.	Ma	nella	tabella
+dello	stesso	punto	ci	sono	i	profit	factor	misurati:	
+2,17	·	2,24	·	2,80	·	3,01
+.	Con	RR	3	fisso	quei	PF	implicano	win
+rate	del	
+42,0%	·	42,7%	·	48,3%	·	50,1%
+	e	aspettative	fra	
+0,68	e	1,00	×	SL
+.	Le	due	cose	non	stanno	insieme.
+Le	spiegazioni	possibili	sono	tre,	e	
+non	so	ancora	quale	sia	quella	vera
+:
+a.
+	I	PF	sono	per	singolo	asset,	il	35%	è	il	win	rate	medio	di	portafoglio.	In	questo	caso	sono	due	popolazioni	diverse
+e	nel	documento	manca	la	distinzione,	non	il	numero.
+b.
+	L’uscita	non	è	a	RR	fisso	—	parziale	al	primo	target,	stop	a	pareggio,	runner	—	e	allora	il	“3”	descrive	solo	la
+parte	non	gestita.
+c.
+	Il	35%	è	semplicemente	sbagliato	e	il	win	rate	vero	sta	fra	il	42%	e	il	50%.
+La	verifica	è	in	corso.	
+Fino	a	che	non	arriva,	non	usate	né	il	35%	né	l’aspettativa	0,40	×	SL
+	per	tarare	niente
+sui	vostri	dati:	prendete	i	PF,	che	sono	misurati.
+Devo	però	segnalarvi	da	solo	qual	è	l’ipotesi	che	mi	preoccupa,	perché	è	quella	che	vi	tocca:	se	la	risposta	è	la	
+(b)
+,
+allora	il	“rapporto	target/stop	noto	e	fisso”	su	cui	poggia	il	metodo	di	estrazione	dello	slippage	dalla	cronologia	—	il
+pezzo	che	vi	ho	descritto	per	intero	e	che	ho	definito	la	cosa	più	utile	del	documento	—	vale	solo	sulle	operazioni	non
+gestite,	e	sulle	altre	va	riderivato.	Le	17	misure	di	ingresso	e	15	di	uscita	andrebbero	rilette	separando	le	due
+popolazioni.	Se	applicate	quel	metodo	sul	vostro	storico,	verificate	prima	che	il	vostro	RR	sia	fisso	davvero,	e	non
+fisso	
+fino	al	primo	parziale
+.
+Una	nota	sul	come	l’ho	trovata:	non	guardando	se	il	numero	tornava,	ma	provando	a	romperlo	—	cioè	applicando	il
+vostro	§5.3	al	mio	stesso	documento.	È	costato	dieci	minuti	e	ha	trovato	una	crepa	che	era	lì	da	stamattina.	La
+sezione	funziona.
+Quattro	contro-esempi	al	dossier
+Sono	nella	forma	che	riconoscete:	il	conto,	la	conseguenza,	la	domanda.	Nessuno	dei	quattro	tocca	l’impianto	—
+l’impianto	regge.	Tre	toccano	una	taratura,	uno	tocca	un’assenza.
+1.	Il	cancello	n.1	è	espresso	in	spread,	e	il	vostro	stesso	§6.5	dimostra	che	lo	spread	non	è	il	costo
+Il	cancello	dice:	
+costo	stop	≥	40	×	spread	mediano	dell’ora
+,	pavimento	duro	13,3×.	È	il	cancello	che	dichiarate
+bloccante	—	
+chi	non	lo	passa	non	si	legge	nemmeno
+.
+Ma	la	trappola	§6.5,	sul	vostro	conto,	misura:	spread	0,30	+	commissione	0,50	=	
+0,86
+.	Cioè	il	costo	pieno	vale	
+2,87
+volte	lo	spread
+.	Riscrivendo	il	cancello	in	costo	pieno:
+in	spread
+in	costo	pieno
+costo	/	stop
+Cancello	nominale
+40×
+14,0×
+7,2%
+Pavimento	duro
+13,3×
+4,6×
+21,5%
+La	conseguenza	è	doppia.
+La	prima	riguarda	voi:	un	cancello	dichiarato	bloccante	è	tarato	su	un	numeratore	che	il	vostro	stesso	archivio
+dimostra	essere	il	35%	del	costo	vero.	Sedie	che	passano	a	40×	spread	possono	avere	un	costo	pieno	al	7%	dello
+stop;	al	pavimento	duro	arrivano	al	21%.
+La	seconda	riguarda	entrambi:	
+la	distanza	fra	il	vostro	2,5%	e	il	mio	20%	è	in	gran	parte	un	artefatto	di
+unità	di	misura.
+	Il	vostro	pavimento	duro,	espresso	in	costo	pieno,	è	
+21,5%	dello	stop
+	—	cioè	quasi	esattamente
+la	mia	soglia.	I	due	sistemi	non	sono	a	otto	volte	di	distanza;	sono	vicini,	e	sembravano	lontani	perché	misuravano
+due	cose	diverse.	Che	è,	alla	lettera,	la	regola	del	vostro	§6.5:	
+quando	due	misure	oneste	si	contraddicono,	l’ipotesi
+da	provare	per	prima	non	è	che	una	delle	due	sbagli,	ma	che	stiano	misurando	due	cose	diverse.
+Una	 precisazione	 di	 onestà:	 13,3	 è	 esattamente	 40/3,	 quindi	 il	 pavimento	 duro	 è	 verosimilmente	
+un	terzo	del
+cancello	nominale
+	e	non	una	conversione	in	costo	pieno	
+(supposizione	mia)
+.	Se	invece	la	conversione	l’avete	già
+fatta	e	le	due	righe	sono	in	unità	diverse,	allora	la	tabella	va	etichettata,	perché	così	com’è	si	legge	in	un	modo	solo.
+Domanda	diretta:
+	il	40×	è	su	spread	o	su	costo	pieno?	E	la	commissione,	dove	entra	nel	giudizio	di	una	sedia?
+Quello	che	ne	ricavo	io:
+	il	parametro	comparabile	fra	noi	non	è	né	
+spread	÷	stop
+	né	
+costo	÷	stop
+,	ma	
+costo	pieno
+÷	aspettativa	per	operazione
+.	 Vi	 avevo	 scritto	 stamattina	 che	 sul	 mio	 sistema	 lo	 spread	 al	 20%	 dello	 stop	 si
+mangia	metà	dell’aspettativa;	con	la	premessa	qui	sopra	quel	“metà”	è	sub	judice,	ma	la	struttura	del	criterio	no.	Su
+una	soglia	in	costo	pieno	rapportata	all’aspettativa	i	due	sistemi	diventano	confrontabili;	su	tutto	il	resto	no.
+2.	Il	campione	fuori	campione	è	richiesto	più	grande	di	quello	dentro
+Il	dossier	scrive:	
+n	OOS	≥	95	e	n	IS	≥	57
+.	È	l’unico	posto	del	documento	dove	il	fuori	campione	è	richiesto	più
+numeroso	del	dentro	campione,	ed	è	il	contrario	di	come	si	spezza	di	solito	una	corsa.
+Il	sospetto	è	uno	scambio	di	etichette	
+(supposizione)
+,	e	viene	dal	vostro	esempio	§6.2:	la	stessa	corsa	spezzata	dà
+84	e	143
+,	e	dite	che	sono	sotto	soglia	tutte	e	due.	Con	143	sotto	soglia	e	84	sotto	soglia,	la	lettura	coerente	è	IS	=
+143	(sotto	la	soglia	di	merito	150)	e	OOS	=	84	(sotto	95):	cioè	
+IS	più	grande	di	OOS
+,	il	contrario	della	tabella	al
+§3.1.
+Se	invece	le	etichette	della	tabella	sono	giuste,	allora	con	una	divisione	del	tipo	60/40	servono	circa	
+240	operazioni
+totali
+	per	passare	la	sola	leggibilità	—	e	la	soglia	di	leggibilità	diventa	più	severa	della	soglia	di	merito	a	150,	che	è
+esattamente	l’opposto	di	quanto	dice	la	nota	accanto	alla	riga.
+Domanda:
+	com’è	divisa	la	corsa,	e	in	che	ordine	vanno	letti	quei	due	numeri?
+3.	L’altopiano	non	è	evidenza	indipendente
+Questa	è	la	sola	osservazione	che	tocca	un	principio	e	non	una	taratura,	e	la	scrivo	sapendo	che	la	regola	l’avete	già
+stressata	su	200.000	griglie.
+Il	 problema	 non	 è	 la	 scelta	 della	 cella	 dentro	 l’altopiano:	 quella	 parte	 della	 regola	 è	 solida.	 Il	 problema	 è	 cosa
+dimostra	l’esistenza	dell’altopiano.	
+Celle	adiacenti	condividono	la	maggioranza	delle	operazioni
+:	una	media	a
+20	e	una	a	21	aprono	quasi	gli	stessi	trade.	Quindi	un	blocco	contiguo	di	celle	che	passano	i	cancelli	
+emerge	anche
+quando	il	vantaggio	è	zero
+,	 per	 il	 solo	 fatto	 che	 il	 parametro	 agisce	 con	 continuità.	 La	 regola	 dell’altopiano
+protegge	dal	picco	isolato	—	che	è	rumore	puntuale	—	ma	non	dalla	selezione	multipla,	che	con	otto	candidate	per
+griglie	intere	è	il	rischio	strutturale.
+Detto	nella	vostra	lingua:	l’altopiano	risponde	a	
+questa	cella	è	stabile?
+,	non	a	
+un	altopiano	così	è	raro?
+.	Sono	due
+domande	diverse	e	oggi	ne	misurate	una	sola.
+Il	rimedio	vi	costa	quasi	zero
+,	perché	il	motore	ce	l’avete	già:	la	forza	bruta	su	200.000	griglie	casuali	che	avete
+usato	per	i	pareggi	irrisolti	serve,	con	lo	stesso	codice,	a	costruire	la	
+distribuzione	nulla	dell’altopiano
+	—	quanto
+è	lungo	il	blocco	contiguo	più	lungo	che	compare	in	una	griglia	senza	vantaggio,	con	lo	stesso	numero	di	celle	e	la
+stessa	correlazione	fra	vicine.	Poi	si	confronta	il	candidato	con	quella	distribuzione.	Se	il	blocco	del	candidato	cade
+dentro	il	novantesimo	percentile	del	nulla,	l’altopiano	non	sta	dicendo	niente.
+È	il	vostro	contro-esempio	prima	della	consegna	applicato	alla	regola	di	selezione:	oggi	la	provate	contro	il	nulla
+ingenuo	(“un	picco	isolato”),	non	contro	l’ipotesi	alternativa	vera	(“un	altopiano	di	rumore	correlato”).
+4.	Il	drawdown	ha	una	soglia	ma	non	una	distribuzione
+Cancello:	
+DD	OOS	≤	7,00%
+,	contro	un	tetto	di	prova	che	sta	al	10%.	Su	questa	riga	il	dossier	non	nomina	nessun
+riordino	delle	operazioni:	né	Monte	Carlo,	né	bootstrap,	né	la	peggior	sequenza	plausibile.
+Un	 drawdown	 di	 backtest	 è	
+una	realizzazione
+,	 non	 la	 distribuzione.	 La	 stessa	 sedia,	 con	 le	 stesse	 identiche
+operazioni	 in	 ordine	 diverso,	 produce	 un	 massimo	 drawdown	 diverso	 —	 e	 il	 novantacinquesimo	 percentile	 sta
+tipicamente	sopra	il	valore	osservato	
+(il	moltiplicatore	che	ho	in	testa	è	1,5–2×,	e	quello	è	incerto:	il	punto	è
+che	il	margine	7	→	10	non	è	tre	punti,	è	tre	punti	meno	una	coda	che	non	è	stata	misurata)
+.
+Questo	è	l’unico	punto	in	cui	vi	dico	che	manca	qualcosa,	e	non	che	è	tarato	male.	Peraltro	è	coerente	con	la	vostra
+stessa	frase	migliore:	
+un	drawdown	è	un	fatto	accaduto,	non	una	stima
+	—	vero,	ma	il	fatto	accaduto	è	
+uno
+,	e	la
+prova	prop	la	superate	contro	tutti	gli	altri	ordinamenti	possibili	di	quello	stesso	fatto.
+Gli	ingressi	del	nostro	Monte	Carlo	sono	fra	i	dati	che	vi	ho	mandato	stamattina:	se	vi	servono	anche	i	riordini,	sono
+un	pomeriggio	di	lavoro.
+Chiusura
+Il	dossier	è	il	documento	di	metodo	più	utile	che	ho	letto	quest’anno,	e	l’unico	che	ho	letto	due	volte	per	copiarne
+l’apparato	invece	che	i	risultati.	Le	quattro	osservazioni	qui	sopra	non	lo	smontano:	tre	sono	unità	di	misura	da
+dichiarare	e	una	è	una	misura	da	aggiungere.	Se	avessi	trovato	solo	conferme,	per	vostra	stessa	regola	non	avrei
+verificato:	avrei	confermato.
+Aggiungo,	come	mia	parte	dello	scambio,	la	premessa	di	questo	documento:	la	crepa	nel	mio	numero	l’ho	trovata
+applicando	il	vostro	§5.3	a	me	stesso,	il	giorno	dopo	averlo	letto.	Il	metodo	si	è	ripagato	prima	di	essere	adottato.
+Marco	Garbuglia	—	13	settembre	2026.	Dove	una	misura	non	esiste	o	è	in	verifica,	in	questo	documento	è	scritto.
