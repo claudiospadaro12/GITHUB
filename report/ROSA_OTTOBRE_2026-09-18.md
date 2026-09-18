@@ -425,11 +425,20 @@ partirebbe da zero misure.
 > contro-esempio: il ritrovamento principale si verifica alla fonte, non sul
 > riassunto.
 
-**1. 🔴 Il percorso del file della leva era SBAGLIATO** (corretto sopra, 0 occorrenze).
-Citato come `report/ANALISI_TAGLIA_FASE1_2026-08-27.md` → **quel file non
-esiste**. Sta in `backtest_pipeline/risultati_archivio/`. 🟢 **Il contenuto
-regge**: verificato alle righe vere (§3a), `770611` **44,0%** · `771531`
-**38,9%** · `770202` **14,6%** del conto per **UN** ingresso pieno.
+**1. ✏️ CORREZIONE DELLA MIA STESSA CORREZIONE.** La prima stesura di questo
+blocco diceva *"il percorso del file della leva era SBAGLIATO, corretto sopra"*.
+🔴 **Falso, e l'ho scoperto perché il `replace` ha trovato ZERO occorrenze.**
+Il **referto citava il percorso GIUSTO** fin dall'inizio (r.217 e r.399:
+`backtest_pipeline/risultati_archivio/...`). Il percorso sbagliato
+(`report/...`) stava **soltanto nel messaggio di riepilogo dell'agente in
+chat**, non nel file consegnato.
+
+👉 **E la lezione è precisa, perché è un modo nuovo di sbagliare**: ho
+verificato **la citazione del RIASSUNTO** invece della **citazione del FILE**.
+Il riassunto è comodo da controllare ed è **la cosa sbagliata da controllare**:
+il file è l'artefatto che resta, il riassunto sparisce. 🟢 **Il contenuto
+regge comunque**, e l'ho letto alle righe vere (§3a): `770611` **44,0%** ·
+`771531` **38,9%** · `770202` **14,6%** del conto per **UN** ingresso pieno.
 
 **2. ⚖️ E due precisazioni che il referto non fa, e cambiano il peso del
 vincolo:**
