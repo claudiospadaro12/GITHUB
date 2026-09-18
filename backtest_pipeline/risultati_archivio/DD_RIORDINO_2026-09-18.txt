@@ -1,0 +1,196 @@
+==============================================================================
+DISTRIBUZIONE DEL DRAWDOWN PER RIORDINO
+modello=moltiplicativo  riordini=20000  blocchi=20000  seed=20260918  soglia=50 posizioni
+==============================================================================
+
+### Dow_Apertura_US  U30USD  magic rosa 770202  (per-trade: magic 770206)
+    file: backtest_pipeline/risultati_prove/trades_portafoglio/abtg_trades_ABTG_Dow_Apertura_US_U30USD_770206.csv
+    posizioni=96  deal=130  da 2025.06.10 a 2026.06.29  profitto=6721.93
+    riga del tester: backtest_pipeline/risultati_archivio/csv_r54/ABTG_Dow_Apertura_US_U30USD_OOS_r54a.csv  (file che concordano: 4, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=4.3941  PF=1.27013  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (-0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =4.2235%  scarto=-0.1706 pp (-3.88% relativo)
+    peggior giornata: ricalcolata=-1.0227%  tester=-1.0227%
+    volume medio primo quarto=5.57 ultimo quarto=4.40
+    ACF P/L lag1..5: -0.1006 +0.0080 -0.1858 +0.1114 +0.1296
+    peggior striscia consecutiva nei dati=-4271.61 su 25 posizioni; corsa perdente max=3
+    DD per riordino:  mediana=5.2509  p90=7.4812  p95=8.2421  p99=9.7253  max=13.5046  min=2.1311
+    RAPPORTO p95/osservato = 1.952      p99/osservato = 2.303
+    quota di riordini con DD >= 10%: 0.7200%
+    peggior giornata per riordino: mediana=-1.0227  p90=-1.0227  p95=-1.0227  p99=-1.0227  peggiore=-1.0227
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=3, grappoli PRESERVATI): mediana=5.4132 p95=8.1086 p99=9.2730 max=12.0557
+    quota di permutazioni a blocchi con DD >= 10%: 0.2450%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 57..59 della sequenza vera) spostato all'indice 7 -> DD=7.0606
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=10.7234
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=21.2429
+    posizioni per giornata (media)=1.00
+    -> il riordino iid SOVRASTIMA la coda: p95 blocchi=8.1086 vs p95 iid=8.2421
+
+### EMA200  U30USD  magic rosa 771531  (per-trade: magic 771521)
+    file: backtest_pipeline/risultati_prove/trades_candidati_r23/abtg_trades_ABTG_EMA200_U30USD_771521.csv
+    posizioni=257  deal=517  da 2025.06.12 a 2026.06.26  profitto=23321.47
+    riga del tester: backtest_pipeline/prove/R110_CSV_EMADOW/ABTG_EMA200_U30USD_OOS_00_metro.csv  (file che concordano: 9, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=7.8323  PF=1.52365  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (+0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =7.5367%  scarto=-0.2956 pp (-3.77% relativo)
+    peggior giornata: ricalcolata=-1.9754%  tester=nan%
+    volume medio primo quarto=3.12 ultimo quarto=2.71
+    ACF P/L lag1..5: +0.2844 -0.0095 +0.0851 -0.0672 -0.0548
+    peggior striscia consecutiva nei dati=-8817.93 su 46 posizioni; corsa perdente max=8
+    DD per riordino:  mediana=3.5228  p90=4.9906  p95=5.5206  p99=6.6929  max=9.6305  min=1.6605
+    RAPPORTO p95/osservato = 0.733      p99/osservato = 0.888
+    quota di riordini con DD >= 10%: 0.0000%
+    peggior giornata per riordino: mediana=-1.4823  p90=-1.9787  p95=-2.1352  p99=-2.5566  peggiore=-3.9250
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=8, grappoli PRESERVATI): mediana=5.3828 p95=8.0773 p99=9.4538 max=12.2768
+    quota di permutazioni a blocchi con DD >= 10%: 0.4150%
+    CONTRO-ESEMPIO A: blocco perdente vero len=8 (posizioni 137..144 della sequenza vera) spostato all'indice 125 -> DD=7.5679
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=12.3109
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=32.5364
+    posizioni per giornata (media)=2.52
+    -> il riordino iid SOTTOSTIMA la coda: p95 blocchi=8.0773 vs p95 iid=5.5206
+
+### DAX_Apertura_EU  D30EUR  magic rosa 770101  (per-trade: magic 770115)
+    file: backtest_pipeline/risultati_prove/trades_portafoglio/abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770115.csv
+    posizioni=193  deal=270  da 2025.06.11 a 2026.06.25  profitto=18029.58
+    riga del tester: backtest_pipeline/risultati_prove/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_OOS_ptd.csv  (file che concordano: 6, coppie DD/PF distinte entro tolleranza: 2, univoca: False)
+    tester: Equity DD %=7.2328  PF=1.39709  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (-0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =6.2516%  scarto=-0.9812 pp (-13.57% relativo)
+    peggior giornata: ricalcolata=-1.0780%  tester=-1.0780%
+    volume medio primo quarto=9.04 ultimo quarto=8.89
+    ACF P/L lag1..5: +0.0116 -0.0930 -0.0037 -0.0697 +0.1564
+    peggior striscia consecutiva nei dati=-7662.91 su 31 posizioni; corsa perdente max=3
+    DD per riordino:  mediana=5.6263  p90=7.9989  p95=8.8223  p99=10.5616  max=15.6822  min=2.3562
+    RAPPORTO p95/osservato = 1.411      p99/osservato = 1.689
+    quota di riordini con DD >= 10%: 1.7050%
+    peggior giornata per riordino: mediana=-1.0780  p90=-1.0780  p95=-1.0780  p99=-1.0780  peggiore=-1.0780
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=3, grappoli PRESERVATI): mediana=5.2220 p95=8.0532 p99=9.4886 max=13.3929
+    quota di permutazioni a blocchi con DD >= 10%: 0.6150%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 170..172 della sequenza vera) spostato all'indice 142 -> DD=8.2272
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=12.4531
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=33.2882
+    posizioni per giornata (media)=1.00
+    -> il riordino iid SOVRASTIMA la coda: p95 blocchi=8.0532 vs p95 iid=8.8223
+
+### ORB_Ottimizzato  U30USD  magic rosa 770611  (per-trade: magic 770612)
+    file: backtest_pipeline/risultati_prove/trades_portafoglio/abtg_trades_ABTG_ORB_Ottimizzato_U30USD_770612.csv
+    posizioni=119  deal=119  da 2025.06.11 a 2026.06.29  profitto=41057.00
+    riga del tester: backtest_pipeline/risultati_archivio/csv_r54/ABTG_ORB_Ottimizzato_U30USD_OOS_r54b.csv  (file che concordano: 7, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=9.7623  PF=1.67419  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (-0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =9.7203%  scarto=-0.0420 pp (-0.43% relativo)
+    peggior giornata: ricalcolata=-1.4055%  tester=nan%
+    volume medio primo quarto=18.85 ultimo quarto=18.41
+    ACF P/L lag1..5: +0.0871 -0.0875 -0.0813 -0.0365 +0.0323
+    peggior striscia consecutiva nei dati=-11614.48 su 15 posizioni; corsa perdente max=9
+    DD per riordino:  mediana=7.4629  p90=10.6537  p95=11.7939  p99=14.1080  max=20.3092  min=3.3376
+    RAPPORTO p95/osservato = 1.213      p99/osservato = 1.451
+    quota di riordini con DD >= 10%: 14.4450%
+    peggior giornata per riordino: mediana=-1.4055  p90=-1.4055  p95=-1.4055  p99=-1.4055  peggiore=-1.4055
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=9, grappoli PRESERVATI): mediana=7.1965 p95=10.4137 p99=11.8595 max=14.5005
+    quota di permutazioni a blocchi con DD >= 10%: 6.8350%
+    CONTRO-ESEMPIO A: blocco perdente vero len=9 (posizioni 33..41 della sequenza vera) spostato all'indice 75 -> DD=11.7834
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=13.9665
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=39.9208
+    posizioni per giornata (media)=1.00
+    -> il riordino iid SOVRASTIMA la coda: p95 blocchi=10.4137 vs p95 iid=11.7939
+
+### SuperWave  U30USD  magic rosa 770511  (per-trade: magic 770521)
+    file: backtest_pipeline/risultati_prove/trades_candidati_r23/abtg_trades_ABTG_SuperWave_U30USD_770521.csv
+    posizioni=50  deal=88  da 2025.06.20 a 2026.06.17  profitto=4371.06
+    riga del tester: backtest_pipeline/risultati_prove/ABTG_SuperWave/ABTG_SuperWave_U30USD_OOS_r23d.csv  (file che concordano: 1, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=4.2745  PF=1.76179  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (+0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =3.3069%  scarto=-0.9676 pp (-22.64% relativo)
+    peggior giornata: ricalcolata=-0.9904%  tester=nan%
+    volume medio primo quarto=0.52 ultimo quarto=0.76
+    ACF P/L lag1..5: +0.4540 +0.2458 +0.0646 -0.1798 -0.0496
+    peggior striscia consecutiva nei dati=-3458.72 su 18 posizioni; corsa perdente max=6
+    DD per riordino:  mediana=1.4315  p90=2.1017  p95=2.3343  p99=2.8141  max=4.2236  min=0.6879
+    RAPPORTO p95/osservato = 0.706      p99/osservato = 0.851
+    quota di riordini con DD >= 10%: 0.0000%
+    peggior giornata per riordino: mediana=-0.8579  p90=-1.2696  p95=-1.3378  p99=-1.3561  peggiore=-1.3561
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=6, grappoli PRESERVATI): mediana=2.7229 p95=3.7726 p99=4.0568 max=4.5831
+    quota di permutazioni a blocchi con DD >= 10%: 0.0000%
+    CONTRO-ESEMPIO A: blocco perdente vero len=6 (posizioni 36..41 della sequenza vera) spostato all'indice 24 -> DD=3.6331
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=4.5831
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=4.9050
+    posizioni per giornata (media)=2.00
+    -> il riordino iid SOTTOSTIMA la coda: p95 blocchi=3.7726 vs p95 iid=2.3343
+
+### MaxMinNotte_XAUUSD  XAUUSD  magic rosa FUORI-ROSA  (per-trade: magic 770406)
+    file: backtest_pipeline/risultati_prove/ABTG_MaxMinNotte/abtg_trades_ABTG_MaxMinNotte_XAUUSD_770406.csv
+    posizioni=68  deal=92  da 2025.09.16 a 2026.06.26  profitto=15875.16
+    riga del tester: backtest_pipeline/risultati_prove/ABTG_MaxMinNotte/ABTG_MaxMinNotte_XAUUSD_OOS_r19.csv  (file che concordano: 2, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=4.2436  PF=2.45189  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -26.41 (-0.1664%)  -> NON ESATTO, da dichiarare
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =2.9838%  scarto=-1.2598 pp (-29.69% relativo)
+    peggior giornata: ricalcolata=-1.0197%  tester=nan%
+    volume medio primo quarto=0.25 ultimo quarto=0.17
+    ACF P/L lag1..5: -0.1952 +0.2854 -0.1629 +0.2801 -0.0736
+    peggior striscia consecutiva nei dati=-3008.73 su 5 posizioni; corsa perdente max=3
+    DD per riordino:  mediana=2.2702  p90=3.3086  p95=3.6918  p99=4.4225  max=6.6205  min=1.0197
+    RAPPORTO p95/osservato = 1.237      p99/osservato = 1.482
+    quota di riordini con DD >= 10%: 0.0000%
+    peggior giornata per riordino: mediana=-1.0197  p90=-1.0197  p95=-1.0197  p99=-1.0197  peggiore=-1.0197
+    quota di riordini con una giornata <= -5%: 0.0000%
+    CONTRO-ESEMPIO blocchi (len=3, grappoli PRESERVATI): mediana=1.9981 p95=3.0651 p99=3.5502 max=4.8186
+    quota di permutazioni a blocchi con DD >= 10%: 0.0000%
+    CONTRO-ESEMPIO A: blocco perdente vero len=3 (posizioni 5..7 della sequenza vera) spostato all'indice 16 -> DD=3.4275
+    CONTRO-ESEMPIO B: peggior permutazione a blocchi su 5000 tentativi -> DD=4.6181
+    TETTO NON PLAUSIBILE (tutte le vincite, poi tutte le perdite): DD=10.2032
+    posizioni per giornata (media)=1.00
+    -> il riordino iid SOVRASTIMA la coda: p95 blocchi=3.0651 vs p95 iid=3.6918
+
+### SupertrendReversal  225JPY  magic rosa 770901  (per-trade: magic 770903)
+    file: backtest_pipeline/risultati_prove/trades_portafoglio/abtg_trades_ABTG_SupertrendReversal_225JPY_770903.csv
+    posizioni=31  deal=50  da 2025.07.18 a 2026.06.11  profitto=1863.34
+    riga del tester: backtest_pipeline/risultati_prove/ABTG_SupertrendReversal/ABTG_SupertrendReversal_225JPY_OOS_pta.csv  (file che concordano: 2, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=0.8752  PF=1.65283  InpRiskPercent=1
+    residuo di abbinamento sul Profit: -0.00 (-0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =0.6493%  scarto=-0.2259 pp (-25.81% relativo)
+    peggior giornata: ricalcolata=-0.4734%  tester=nan%
+    volume medio primo quarto=14.60 ultimo quarto=7.94
+    ACF P/L lag1..5: -0.2377 +0.0351 -0.0110 -0.4637 +0.2709
+    peggior striscia consecutiva nei dati=-652.74 su 4 posizioni; corsa perdente max=2
+    SOTTO SOGLIA (31 < 50): nessuna distribuzione calcolata.
+
+### MaxMinNotte_DAX_Short  D30EUR  magic rosa 770411  (per-trade: magic 770413)
+    file: backtest_pipeline/risultati_prove/trades_portafoglio/abtg_trades_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_770413.csv
+    posizioni=14  deal=21  da 2025.08.19 a 2026.06.24  profitto=6143.38
+    riga del tester: backtest_pipeline/risultati_archivio/r81_csv/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_OOS_r81a.csv  (file che concordano: 2, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=1.9213  PF=2.15985  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (+0.0000%)  -> ESATTO
+    deposito dedotto=50000
+    DD ricalcolato (posizioni chiuse) =2.4102%  scarto=+0.4889 pp (+25.45% relativo)
+    peggior giornata: ricalcolata=-2.1000%  tester=nan%
+    volume medio primo quarto=16.28 ultimo quarto=7.14
+    ACF P/L lag1..5: -0.4452 +0.0725 -0.2537 +0.1709 +0.1176
+    peggior striscia consecutiva nei dati=-1332.13 su 3 posizioni; corsa perdente max=1
+    SOTTO SOGLIA (14 < 50): nessuna distribuzione calcolata.
+
+### PTE  U30USD  magic rosa 771321  (per-trade: magic 771311)
+    file: backtest_pipeline/risultati_prove/trades_candidati_r23/abtg_trades_ABTG_PTE_U30USD_771311.csv
+    posizioni=23  deal=40  da 2025.06.13 a 2026.06.08  profitto=1092.69
+    riga del tester: backtest_pipeline/risultati_archivio/csv_r55/ABTG_PTE_U30USD_OOS_r55a.csv  (file che concordano: 2, coppie DD/PF distinte entro tolleranza: 1, univoca: True)
+    tester: Equity DD %=3.2166  PF=1.17090  InpRiskPercent=1
+    residuo di abbinamento sul Profit: +0.00 (+0.0000%)  -> ESATTO
+    deposito dedotto=100000
+    DD ricalcolato (posizioni chiuse) =2.1825%  scarto=-1.0341 pp (-32.15% relativo)
+    peggior giornata: ricalcolata=-1.2783%  tester=-1.0045%
+    volume medio primo quarto=6.16 ultimo quarto=5.39
+    ACF P/L lag1..5: -0.0599 -0.3376 -0.2495 +0.1583 +0.3490
+    peggior striscia consecutiva nei dati=-2235.83 su 6 posizioni; corsa perdente max=2
+    SOTTO SOGLIA (23 < 50): nessuna distribuzione calcolata.
