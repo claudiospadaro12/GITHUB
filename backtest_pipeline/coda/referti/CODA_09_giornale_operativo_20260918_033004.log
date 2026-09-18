@@ -1,0 +1,233 @@
+=== IL GIORNALE OPERATIVO DI OGNI CONTO -- ultimi due giorni ===
+data lettura: 2026-09-18 03:31:55  (ora locale)
+NB: alle 03:30 il giorno COMPLETO e' quello PRECEDENTE. La data di ogni
+    blocco e' stampata: si legge quella, non si dice 'oggi'.
+cartelle dati: 7
+
+=====================================================================
+=== C:\MT5_Backtest
+=== conto: 50504400
+=====================================================================
+
+--- GIORNO 20260916   (38.2 KB, ultima scrittura 2026-09-16 14:31) ---
+    righe totali: 146
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260917   (53.9 KB, ultima scrittura 2026-09-17 18:10) ---
+    righe totali: 206
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal
+=== conto: 50503392
+=====================================================================
+
+--- GIORNO 20260917   (83.1 KB, ultima scrittura 2026-09-17 23:53) ---
+    righe totali: 296
+    RIGHE DI ORDINE / DEAL: 208
+      NQ003:00:00.383ABTG_SupertrendReversal (225JPY,H2)CTrade::OrderSend: sell stop 0.80 225JPY at 64035 sl: 64896 tp: 62353 [invalid price]
+      MR008:00:00.494ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] BUY STOP @ 4320.51 SL 4254.97 TP 4582.67 lot 0.01
+      FM008:00:00.554ABTG_MaxMinNotte (XAUUSD,M15)[MaxMinNotte] SELL STOP @ 4254.97 SL 4320.51 TP 3992.81 lot 0.01
+      QP008:59:00.648ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)[MaxMinNotte] SELL STOP @ 25484.50 SL 25544.20 TP 25245.70 lot 0.80
+      ER009:00:00.716ABTG_EMA200_Ottimizzato (XAUUSD,H4)[EMA200] SELL LIMIT 1 @ 4362.01 SL 4429.46 TP 4227.11 lot 0.01
+      NM009:00:00.961ABTG_EMA200_Ottimizzato (XAUUSD,H4)[EMA200] SELL LIMIT 2 @ 4388.58 SL 4429.46 TP 4306.82 lot 0.01
+      EM014:19:12.411ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 25753.30000  SL 25640.70000  lot 0.40
+      CN014:43:36.474ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      KL014:43:36.502ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GK014:43:36.524ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LI014:43:36.644ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ND014:43:36.826ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OR014:43:37.534ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FQ014:43:38.219ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PO014:43:38.396ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      CJ014:43:38.548ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PH014:43:39.049ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      MG014:43:39.615ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RE014:43:40.089ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EP014:43:41.050ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ON014:43:42.303ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FM014:43:42.546ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PK014:43:43.541ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      CF014:43:44.244ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      QD014:43:46.042ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RS014:43:46.294ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EQ014:43:46.802ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EL014:43:47.333ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OJ014:43:48.820ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LI014:43:49.314ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      DG014:43:49.565ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      QR014:43:49.818ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PP014:43:50.064ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RO014:43:50.822ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EM014:43:51.581ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RH014:43:52.028ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      NF014:43:52.372ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IE014:43:53.417ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      MS014:43:54.320ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EN014:43:54.573ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404012 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ... altre 168 righe non stampate (tetto).
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260918   (7.2 KB, ultima scrittura 2026-09-18 03:23) ---
+    righe totali: 25
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\Pepperstone MetaTrader 5
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\Program Files\Tickmill Europe MT5 Terminal
+=== conto: NON TROVATO nei giornali recenti
+=====================================================================
+
+--- GIORNO 20260719   (2.3 KB, ultima scrittura 2026-07-19 22:41) ---
+    righe totali: 11
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN: nessuna riga in questo giorno.
+
+--- GIORNO 20260720   (0.2 KB, ultima scrittura 2026-07-20 22:19) ---
+    file quasi vuoto: questo giorno e' APPENA COMINCIATO, non e' un giorno senza operazioni.
+    righe totali: 1
+    RIGHE DI ORDINE / DEAL: 0
+    GUARDIAN: nessuna riga in questo giorno.
+
+=====================================================================
+=== C:\Program Files\BCM Markets MT5 Terminal -V3
+=== conto: 50504263
+=====================================================================
+
+--- GIORNO 20260917   (156 KB, ultima scrittura 2026-09-17 23:55) ---
+    righe totali: 545
+    RIGHE DI ORDINE / DEAL: 201
+      RO003:00:00.320ABTG_SupertrendReversal (225JPY,H2)CTrade::OrderSend: sell stop 9.60 225JPY at 64035 sl: 64896 tp: 62353 [invalid price]
+      MR008:59:00.564ABTG_MaxMinNotte_DAX_Short_Ottimizzato (D30EUR,M15)[MaxMinNotte] SELL STOP @ 25484.50 SL 25544.20 TP 25245.70 lot 11.30
+      KH014:19:12.037ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 25753.30000  SL 25640.70000  lot 5.90
+      DJ014:43:36.174ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LH014:43:36.323ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GG014:43:36.575ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FE014:43:36.822ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      JP014:43:37.533ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      MN014:43:38.078ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PM014:43:38.347ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FK014:43:38.547ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RF014:43:39.047ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FD014:43:39.575ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FS014:43:40.089ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RQ014:43:41.037ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EL014:43:42.288ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RJ014:43:42.546ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      DI014:43:43.541ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PG014:43:44.113ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ER014:43:46.042ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FP014:43:46.294ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EO014:43:46.798ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PM014:43:47.330ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      CH014:43:48.820ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EF014:43:49.313ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RE014:43:49.567ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PS014:43:49.817ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      DN014:43:50.064ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      NL014:43:50.819ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      KK014:43:51.578ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      QI014:43:52.025ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      HD014:43:52.334ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PR014:43:53.335ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IQ014:43:54.320ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OO014:43:54.571ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IJ014:43:54.818ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PH014:43:55.065ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EG014:43:55.598ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      HE014:43:55.821ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GP014:43:57.101ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404014 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ... altre 161 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      FG023:55:01.331ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=103890.91  dayLoss=0.29%  totDD=-3.89%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260918   (15.3 KB, ultima scrittura 2026-09-18 03:30) ---
+    righe totali: 55
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      QQ003:30:01.167ABTG_Guardian (AUDNZD,H1)[GUARDIAN] eq=103890.91  dayLoss=0.00%  totDD=-3.89%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+=====================================================================
+=== C:\MT5_MANUALE
+=== conto: 50503635
+=====================================================================
+    nessun log.
+
+=====================================================================
+=== C:\BCM_Reale
+=== conto: 10105439
+=====================================================================
+
+--- GIORNO 20260917   (142.3 KB, ultima scrittura 2026-09-17 23:55) ---
+    righe totali: 495
+    RIGHE DI ORDINE / DEAL: 199
+      PQ014:19:12.036ABTG_DAX_Apertura_EU (D30EUR,M5)[DAX Apertura EU] BUY LIMIT (retest) @ 25753.30000  SL 25640.70000  lot 0.20
+      RE014:43:36.319ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RS014:43:36.571ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GN014:43:36.819ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OF014:43:37.533ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EE014:43:38.059ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OS014:43:38.318ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LN014:43:38.546ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IL014:43:39.045ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      NK014:43:39.567ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GI014:43:40.085ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GD014:43:41.037ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      KR014:43:42.298ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EQ014:43:42.537ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      HO014:43:43.539ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      HJ014:43:44.101ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      KH014:43:46.043ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      KG014:43:46.294ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      CE014:43:46.791ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EP014:43:47.325ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      NN014:43:48.820ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      NM014:43:49.311ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IK014:43:49.565ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IF014:43:49.817ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PD014:43:50.063ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      QS014:43:50.817ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      PQ014:43:51.567ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IL014:43:52.026ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LJ014:43:52.333ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      II014:43:53.335ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      JG014:43:54.319ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      QR014:43:54.569ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      GP014:43:54.822ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      IO014:43:55.065ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      LM014:43:55.598ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      OH014:43:55.823ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      EF014:43:57.094ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      DE014:43:58.090ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      RS014:43:58.348ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      FN014:43:58.597ABTG_DAX_Apertura_EU (D30EUR,M5)CTrade::OrderSend: modify position #3404013 D30EUR (sl: 25773.20, tp: 26091.10) [invalid stops]
+      ... altre 159 righe non stampate (tetto).
+    GUARDIAN, ultima riga del giorno:
+      PF023:55:01.175ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7540.57  dayLoss=-0.01%  totDD=-0.54%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+--- GIORNO 20260918   (12.8 KB, ultima scrittura 2026-09-18 03:25) ---
+    righe totali: 47
+    RIGHE DI ORDINE / DEAL: 0
+      nessuna riga di ordine in un log NON vuoto: questo giorno il conto NON ha operato.
+    GUARDIAN, ultima riga del giorno:
+      ON003:30:02.042ABTG_Guardian (EURGBP,H1)[GUARDIAN] eq=7540.57  dayLoss=0.00%  totDD=-0.54%  rischioAperto=0.00%  stato=OK  pausa=off  cap=off
+
+COME SI LEGGE: 'RIGHE DI ORDINE/DEAL = 0' su un log NON vuoto vuol dire
+che quel giorno il conto non ha operato. Su un log quasi vuoto NON vuol
+dire niente: il giorno e' appena cominciato (classe 162).
+Il giornale dice QUANTE operazioni, non il P&L: quello lo da' il
+TradeExporter o l'estratto conto del broker.
+Questa riga LEGGE E STAMPA: non ha scritto, copiato o modificato niente.
