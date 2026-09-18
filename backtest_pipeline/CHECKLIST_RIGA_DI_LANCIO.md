@@ -24058,3 +24058,40 @@ sbagliati.
 👉 **E il documento che chiude davvero il buco si nomina: l'`.ini` della corsa.** Se non è
 in repo, lo si dice — *«l'ini non c'è»* è un'informazione, *«il banco è questo»* senza
 l'ini è un'affermazione.
+
+---
+
+## 🔗🔽 CLASSE 426 — LA NORMALIZZAZIONE CHE APPIATTISCE DUE IDENTIFICATORI DISTINTI: `.upper()` fonde due sedie in una, e la fusa diventa la prima in classifica (18/09/2026)
+
+**Il caso.** Per attribuire le 231 posizioni di un report MT5 (che **non ha il magic**) ho
+costruito un ponte `commento -> magic` da un per-trade che ha tutti e due. Chiave del
+ponte: il commento **normalizzato con `.upper()`**.
+🔴 **Due sedie diverse scrivevano `STRev L 1/3` e `STREV L 1/3`.** Maiuscolate
+diventano la stessa stringa: il ponte ha assegnato a **`770511`** (SuperWave, U30USD) due
+posizioni di **`770925`** (SupertrendReversal, NASUSD).
+
+**Come si e' manifestato**: la sedia risultava con **due motori** e **due simboli**, e
+`vinte + perse` **non tornava** col totale. 🟢 **Quel disallineamento e' stato l'unico
+segnale**, ed e' bastato a farmi sospendere il numero invece di pubblicarlo.
+
+### 🔬 PERCHÉ È UNA CLASSE
+1. 🔴 **La sedia contaminata era PRIMA in classifica** (+244,94, il netto piu' alto di
+   tutte). Un difetto di attribuzione colpisce **per primo** chi sta in cima, perche' e'
+   li' che si guarda.
+2. 🔴 **La normalizzazione serviva davvero** (spazi doppi, suffissi `BUY`/`SELL`): non
+   e' stata una svista, e' stata una scelta ragionevole **applicata a un campo che non la
+   tollerava**. Il commento MT5 e' **case-sensitive di fatto**, perche' lo scrive l'EA.
+3. ⚠️ **Il conto tornava lo stesso** — nessun totale esplodeva. Senza il controllo
+   `vinte + perse + pareggi == n` il difetto passava.
+
+### ✅ LA REGOLA
+📐 **La chiave di un ponte dev'essere specifica quanto la cosa che identifica.** Un
+commento **da solo** non identifica una sedia: `(commento, SIMBOLO)` si', perche' due
+sedie sullo stesso simbolo con lo stesso testo sono gia' la stessa cosa a tutti gli
+effetti pratici. 👉 **Prima di normalizzare, ci si chiede: sto togliendo rumore, o sto
+togliendo INFORMAZIONE?**
+🧮 **E il controllo che lo prende, che costa una riga**: in ogni aggregazione,
+`vinte + perse + pareggi == n`. Se non torna, l'aggregazione ha unito cose diverse.
+🔎 **Corollario**: quando una riga aggregata mostra **piu' di un simbolo** o **piu' di
+un motore** dove te ne aspetti uno, **non e' una curiosita': e' il sintomo.** Si sospende
+il numero e si va a vedere, come si e' fatto qui.

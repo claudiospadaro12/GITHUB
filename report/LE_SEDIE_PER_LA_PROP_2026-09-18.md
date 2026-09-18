@@ -50,16 +50,41 @@ sull'ORO**, che insieme fanno **−107,98 su 11**.
 
 | | magic | EA | simb | n | netto | **record** | perché |
 |---|---|---|---|---:|---:|---|---|
-| 🥇 | **`770201`** | `Nasdaq_Apertura_US` | NASUSD | 7 | **+98,49** | **7 vinte su 7** | 🟢 **zero perse**, un simbolo solo, attribuzione pulita |
-| 🥈 | **`770402`** | `MaxMinNotte` ORO | XAUUSD | 11 | **+43,29** | 6/5 | 🟢 **il campione più grande fra le positive pulite** |
-| 🥉 | **`770101`** | `DAX_Apertura_EU` **in RETEST** | D30EUR | 21 | −19,08 | **18 vinte su 21** | 🟠 negativa **in totale**, ma è il **prima+dopo**: la sola parte RETEST fa **+149,16 su 15, 14/1** |
+| 🥇 | **`770511`** | `SuperWave` DOW H1 | U30USD | 10 | **+244,94** | **6 vinte · 2 perse · 2 pari** | 🟢 **il netto piu' alto del campo** — vedi il chiarimento sotto |
+| 🥈 | **`770201`** | `Nasdaq_Apertura_US` | NASUSD | 7 | **+98,49** | **7 vinte su 7** | 🟢 **zero perse**, un simbolo solo, attribuzione pulita |
+| 🥉 | **`770402`** | `MaxMinNotte` ORO | XAUUSD | 11 | **+43,29** | 6/5 | 🟢 **il campione più grande fra le positive pulite** |
+| 4 | **`770101`** | `DAX_Apertura_EU` **in RETEST** | D30EUR | 21 | −19,08 | **18 vinte su 21** | 🟠 negativa **in totale**, ma è il **prima+dopo**: la sola parte RETEST fa **+149,16 su 15, 14/1** |
 
-### 🟠 E una che NON metto in classifica, e dico perché
-**`770511`** risulta prima per netto (**+244,94**), 🔴 **ma la sua attribuzione è sporca**:
-il ponte gli assegna commenti di **due motori diversi** (`SUPERWAVE DOW H1` e `STREV L 1/3`)
-e **due simboli** (U30USD e NASUSD), e il conto vinte/perse non torna col totale (6+2 contro
-n=12). 👉 **Finché non è chiarito, quel numero non si usa** — e sarebbe stato il primo
-posto.
+### ✅ `770511` — **CHIARITO il 18/09: la sedia è PULITA, il difetto era del mio ponte**
+
+Era stata sospesa perché risultava con **due motori e due simboli** e `vinte+perse` non
+tornava. 🔴 **Causa trovata: il mio ponte normalizzava il commento con `.upper()`, e due
+sedie diverse scrivevano `STRev L 1/3` (770511, U30USD) e `STREV L 1/3` (770925, NASUSD).**
+Maiuscolate diventano la stessa stringa → due posizioni di un'altra sedia finivano qui.
+
+✅ **Ponte corretto** (chiave `(commento, SIMBOLO)` invece del solo commento). Il risultato
+vero di `770511`:
+
+| | |
+|---|---|
+| n | **10** |
+| netto | **+244,94** |
+| record | **6 vinte · 2 perse · 2 a ZERO** (il `vinte+perse<n` era questo: due uscite **a pareggio**, cioè il breakeven che funziona) |
+| simbolo | **U30USD**, uno solo |
+| commenti | **quattro, tutti `SUPERWAVE DOW H1`**: `L 1/3`, `L 2/3`, `S 1/3`, `S 2/3` |
+
+> ## 🥇 **Quindi `770511` è la PRIMA della rosa, con il netto piu' alto del campo: +244,94 su 10 posizioni.**
+
+🔥 **E dentro, la scomposizione è quella che avevamo già visto**: i due **SHORT** fanno
+**+254,12** (`S 2/3` +165,57 · `S 1/3` +88,55), i due **LONG** fanno **−9,18**
+(`L 2/3` −0,70 · `L 1/3` −8,48). 👉 **Il guadagno della sedia è tutto del lato corto.**
+
+⚠️ **Campione: 10 posizioni, di cui 6 sul lato short.** Resta un **segnale**, non un
+verdetto — e il lato va MISURATO, non dedotto.
+
+📌 Difetto registrato come **classe 426** in `CHECKLIST_RIGA_DI_LANCIO.md`: *la
+normalizzazione che appiattisce due identificatori distinti*. Il controllo che lo prende
+costa una riga: **`vinte + perse + pareggi == n`**.
 
 ---
 
