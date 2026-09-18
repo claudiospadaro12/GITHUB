@@ -594,3 +594,61 @@ li deduco.** Se servono, serve lo screenshot.
 - 🔧 `report/CENSIMENTO_USCITE_MAI_PROVATE_2026-09-11.md` — `InpFirstFraction` su 770511/770531
 - 🎙️ Live precedenti: `report/ANALISI_LIVE_EMILIANO_2026-09-09.md` ·
   `backtest_pipeline/caccia_strategie/ANALISI_TRASCRIZIONI_2026-09-14.md`
+
+---
+
+# 🔍 CHIUSURA DEL 18/09 — **la domanda n.2 non serve più: la risposta è nella trascrizione**
+
+**Contesto**: Claudio ha comunicato che **non è possibile fare domande a Emiliano** (non
+è stato bene). Le quattro domande proposte al §4 vanno quindi rilette: **quali si possono
+chiudere da soli?**
+
+## ✅ DOMANDA 2 — *«L'ORB è 3 candele di QUALE timeframe?»* → **CHIUSA. È M5.**
+
+Il timeframe **è dichiarato**, due volte, nella stessa pagina di trascrizione:
+
+| riga | citazione testuale |
+|---|---|
+| **r.167** | *«uno guarda il time frame di riferimento che **era l'M5 adesso**»* |
+| **r.173** | *«Adesso vado a vedere l'Orb. L'Orb è aperto, **qui sono tre candele**… posso aspettarmi che con **una candela M5** che rompe sotto posso andare a short»* |
+
+➡️ **3 candele × M5 = 15 minuti.** Il `[INFERITO]` del referto diventa **[VERIFICATO]**.
+
+> ## 🔴 **Conseguenza: la contraddizione col nostro numero È REALE, non era un malinteso di timeframe.**
+> Speravo nell'ipotesi assolutoria (3 candele di **M15** = 45 minuti = **esattamente la
+> nostra banda vincente**). **Non regge: la trascrizione dice M5.**
+
+🏆 **E allora vince la nostra misura, per la terza volta e senza appello**: banda
+**35-45 min → 8 celle su 8 positive fuori campione**, banda **5-15 min → 0 su 8**, due
+motori concordi 18 volte su 20 (`DIARIO.md`, 06/08).
+👉 **Il cancello dell'ORB non si riapre**, e adesso il motivo è scritto con la citazione
+accanto invece che con un'inferenza.
+
+## 🔄 DOMANDA 1 — *«quanto dev'essere lunga la candela di rottura?»* → **diventa una MISURA nostra**
+
+Era l'unica cosa davvero nuova della live (r.389: *«non sono voluto entrare direttamente
+alla rottura dell'orb perché **avevo visto la candela troppo lunga**»*), e mancava solo la
+soglia.
+
+🟢 **E una soglia non si chiede: si misura.** Abbiamo il banco, i dati e i due motori
+di apertura già in archivio. La forma della misura è quella di casa: si aggiunge un asse
+**«lunghezza della candela di rottura in ATR»**, si guarda se esiste una banda in cui il
+break fallisce più spesso, e **si dichiara l'attesa prima**.
+
+💡 **Ed è meglio così, non peggio**: una soglia **misurata** batte una soglia
+**ricordata** — e non dipende da nessuno.
+
+## 🔴 DOMANDE 3 e 4 — **restano APERTE, e vanno marcate come tali**
+
+- **3** *«come si traccia operativamente una zona di protezione?»* — sesta live consecutiva
+  senza una regola di costruzione. 🔴 **Non chiudibile da noi**: manca proprio la
+  definizione, non un numero.
+- **4** *«hai un tetto di perdita giornaliera?»* — 🟠 **decaduta come domanda a lui**: la
+  risposta che ci serve non è la sua abitudine personale, è **il muro del prodotto prop
+  che sceglieremo** e **la soglia del nostro Guardian**. Tutte e due sono già sul tavolo di
+  Claudio (`report/QUALE_PROP_PER_I_NOSTRI_EA_2026-09-18.md`,
+  `report/IL_GUARDIAN_CONTRO_LA_REGOLA_CHE_CI_HA_UCCISI_2026-09-18.md`).
+
+---
+
+*Chiusura scritta il 18/09/2026. Nessuna domanda è stata inviata a nessuno.*
