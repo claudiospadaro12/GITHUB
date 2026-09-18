@@ -1,6 +1,6 @@
 //@version=5
 // ═══════════════════════════════════════════════════════════════════════════════
-// ABTG SuperEMA Riding — v2.0  (TradingView)
+// ABTG SuperEMA Riding — v2.1  (TradingView)
 // Autore: Claudio (con Claude) · 18/09/2026
 //
 // CHE COS'E': il tuo "ABTG BR+EMA v1.2" (31/05/2026) con dentro le due cose
@@ -138,7 +138,7 @@
 //    decide se una di queste diventa una sedia -- oggi e' NON MISURATA.
 // ═══════════════════════════════════════════════════════════════════════════════
 
-indicator("ABTG SuperEMA Riding — v2.0", shorttitle="ABTG SER v2",
+indicator("ABTG SuperEMA Riding — v2.1", shorttitle="ABTG SER v2",
           overlay=true, max_labels_count=500, max_lines_count=100)
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -508,7 +508,19 @@ if shortSig
 // Il solo rapporto in ATR non basta -- misurato, un K sbagliato di 100x su
 // USDJPY M15 cade DENTRO la banda [0,001; 5] e l'allarme non suonerebbe.
 kPip      = syminfo.mintick >= 0.0005 ? 0.01 : 0.0001
-kFxLike   = syminfo.mintick <= 0.001
+// 18/09/2026 -- CORREZIONE DI UN FALSO ALLARME MISURATO SUL CAMPO.
+// Qui c'era `syminfo.mintick <= 0.001`, cioe' "sembra forex perche' ha tanti
+// decimali". Su XAUUSD di OANDA il mintick E' 0.001 -> kFxLike TRUE, kPip 0.01,
+// K corretto 1.0 -> |1 - 0.01| = 0.99 -> "K SOSPETTO" ROSSO SU UN K GIUSTO.
+// Un allarme che grida sul caso sano insegna a ignorarlo, e allora non protegge
+// piu' dal caso malato: e' il difetto peggiore di un allarme.
+// Il discriminante giusto non e' il TICK, sono le DUE VALUTE: un forex letto
+// come INDEX (FX_USDJPY: base USD, quotata JPY) le ha entrambe nella lista e
+// l'allarme scatta lo stesso; XAUUSD ha base XAU, che nella lista non c'e'.
+// Buco dichiarato: se un feed lascia basecurrency VUOTA, kFxLike e' FALSE e
+// l'allarme TACE. Fallisce in silenzio, ed e' il verso meno peggio per un
+// controllo accessorio -- ma va saputo.
+kFxLike   = baseIsCur and profIsCur and baseC != profC
 thrInAtr  = atrF > 0 ? slopeThr / atrF : 0.0
 // l'allarme audita il RILEVAMENTO AUTOMATICO: con K manuale voluto tace.
 // E la controprova del PIP NON e' piu' chiusa dietro isFxCat: in un forex letto
@@ -523,7 +535,7 @@ var table t = table.new(position.top_right, 2, 11,
      bgcolor=color.new(color.black, 80), border_width=1, border_color=color.gray)
 if showPanel and barstate.islast
     table.cell(t, 0, 0, "ABTG SuperEMA Riding", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
-    table.cell(t, 1, 0, "v2.0", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
+    table.cell(t, 1, 0, "v2.1", bgcolor=color.new(color.orange, 0), text_color=color.white, text_size=size.small)
 
     table.cell(t, 0, 1, "categoria / K", text_color=color.white, text_size=size.small)
     table.cell(t, 1, 1, cat + " (" + catSrc + ")  K=" + str.tostring(K, "#.######"),
