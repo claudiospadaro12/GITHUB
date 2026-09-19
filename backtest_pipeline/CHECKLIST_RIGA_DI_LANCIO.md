@@ -26036,3 +26036,143 @@ nuove** — perché per il cancello lo sono.
   ha ancora la coda senza `$LASTEXITCODE`. Non ha fatto danno perché quella corsa è
   andata a buon fine, ma **è lo stesso difetto**, e va corretto alla prossima occasione
   in cui quella riga si ritocca.
+
+---
+
+## CLASSE 470 — 📡🕳️ **IL CANALE DI MISURA ESISTE SOLO NEL RAMO NUOVO**: si progetta un confronto vecchio-contro-nuovo su una colonna che il vecchio **non ha mai scritto** (controllo-preventivo, 19/09/2026)
+
+**Il caso, e sarebbe costato un round intero.** Claudio firma *«misura prima, lancia la corsa nel tester»*: bisogna misurare **di quanti lotti** cambia il volume piazzato dalle sedie `771531` e `770511` ricompilando ai pin. Il piano di misura — ragionevole, e scritto da chi conosce la casa — diceva: *«il confronto migliore che abbiamo è il per-trade: la colonna `volume` di `abtg_trades_*.csv` dà il volume vero deal per deal; attenzione alla classe 455 (il file si chiama col magic e in griglia viene sovrascritto)»*.
+
+🔴 **Ma il binario VECCHIO quel file non lo scrive.** Misurato:
+```
+git show 344a11b9:mql5/Experts/ABTG_EMA200.mq5 | grep -c ExportTrades   ->  0
+git show 26a18566:mql5/Experts/ABTG_EMA200.mq5 | grep -c ExportTrades   ->  1
+```
+`ExportTrades()` nasce in **`6074126d` (08/08)**, che è **DOPO** `344a11b9` (04/08). Stessa storia su `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`. 👉 **Due gambe su quattro non potevano produrre il dato su cui si basava tutto il confronto**, e ce ne saremmo accorti **dopo** aver acceso il banco: quattro corse, zero CSV su metà, e un referto che dice «non misurato» senza spiegare perché.
+
+**La cosa che rende la classe insidiosa** è che il difetto NON sta nel canale (il per-trade è davvero lo strumento giusto) né nel piano (la classe 455 era stata prevista). Sta in un'assunzione **muta**: *«il vecchio e il nuovo hanno gli stessi strumenti di diagnostica»*. Quasi mai è vero, perché **la diagnostica si aggiunge nel tempo, ed è quasi sempre più giovane del codice che deve diagnosticare.**
+
+### La regola
+🔴 **Prima di progettare un confronto A-contro-B, si verifica che la MISURA esista in TUTTI E DUE i rami** — con un `grep` sulla revisione, non con la memoria.
+- ✅ **Il controllo, ed è una riga**: `git show <rev_vecchia>:<file> | grep -c <funzione_di_misura>`. Se dà **0**, il confronto così com'è progettato **non esiste**, e va ridisegnato **prima** di accendere qualunque cosa.
+- ✅ **E la ri-progettazione giusta non è "aggiungo la diagnostica al vecchio"**: sarebbe un ibrido, e non misureresti più il vecchio. È **isolare la variabile**: si prende il ramo NUOVO (che la diagnostica ce l'ha) e gli si mette **un interruttore** che riproduce **alla lettera** il calcolo vecchio. Così il binario è **lo stesso** nelle due gambe, il segnale è identico **per costruzione** e l'unica cosa che cambia è quella che si vuole misurare.
+- 🟢 **Regalo della ri-progettazione, e non è piccolo**: con l'interruttore, *«a parità di segnale»* smette di essere una **speranza da dimostrare** e diventa un **fatto strutturale**. Se poi il numero di operazioni delle due gambe differisce, non c'è niente da interpretare: **è un difetto**, e la tabella lo può dire a caratteri cubitali.
+- 📌 **Corollario sul confronto "binario vecchio contro binario nuovo" in generale**: fra `344a11b9` e i pin non c'è solo il sizing — c'è il Guardian, c'è l'export, ci sono input nuovi. Un confronto wholesale **confonde** tutte quelle cose in un numero solo. Se la domanda è *«di quanto cambia X»*, si muove **X e basta**.
+
+---
+
+## CLASSE 471 — 🚪🔢 **L'ORDINE DEI CODICI D'USCITA ASSOLVE LA CORSA CHE NON HA MISURATO NIENTE**: «zero risultati» esce come «girato con rilievi» (controllo-preventivo, 19/09/2026, cugina della 14)
+
+**Il caso, trovato dal giro a vuoto e non dal rileggere.** Lo script della misura del delta lotti finisce con i codici di casa: `0` girato · `2` non misurato · `3` girato con rilievi · `4` allarme. Scritti così:
+```powershell
+if($persi.Count   -gt 0){ exit 2 }   # terminali non-banco spariti
+if($rilievi.Count -gt 0){ exit 3 }
+if($righeTab.Count -eq 0){ exit 2 }  # <-- zero risultati: MAI RAGGIUNTO
+```
+🔴 **Provato con un EA muto** (nessun file per-trade prodotto, cioè il caso «non ha compilato» o «zero operazioni»): la corsa è uscita **`3`**. Ma quando una gamba non produce niente, lo script **aggiunge anche un rilievo**, e il `-gt 0` sui rilievi **scatta per primo**. Risultato: una corsa che non ha misurato **assolutamente niente** restituisce il codice che significa **«girato»**. Chi automatizza su quel codice — o chi legge di fretta — la conta come riuscita.
+
+🔴 **E c'era un secondo difetto nello stesso blocco**: `$persi` (un terminale **non del banco** sparito, cioè la cosa più grave che possa capitare) usciva **`2`**, lo stesso codice di «non misurato». Le due cose non si somigliano nemmeno.
+
+### La regola
+🔴 **I codici d'uscita si ordinano dal PIÙ GRAVE al meno grave, e «non ho misurato niente» sta SOPRA «ho misurato con rilievi».** Un rilievo descrive un risultato che esiste; l'assenza di risultato non è un rilievo, è un'altra categoria.
+- ✅ **Il controllo, e va ESEGUITO**: si fa girare lo script con la fonte dei dati **muta** (EA che non scrive, cartella vuota, download a zero byte) e si guarda **il codice d'uscita**, non l'output. Se esce un codice che vuol dire «fatto», l'ordine è sbagliato.
+- ✅ **E ogni codice deve significare UNA cosa sola**: se due condizioni diversissime escono con lo stesso numero, il numero non informa. Qui l'allarme sui terminali si è preso un codice suo (`4`).
+- 📌 Cugina della **14** (*il giro a vuoto che esce 0 anche se un pezzo è fallito*): là il difetto era **dentro** il giro a vuoto, qui è **nell'ordine delle guardie finali**. Stessa conseguenza: un fallimento che si presenta come un successo.
+
+---
+
+## ✏️ PRECISAZIONE ALLA REGOLA DELLA CULTURA INVARIANTE (punto 5), misurata il 19/09/2026
+
+La regola di casa dice *«ogni `[double]$stringa` su valori con punto è sospetto»*. 🔴 **Misurato su `pwsh` con cultura `it-IT`, e la regola è imprecisa in un modo che può far introdurre il bug mentre si crede di ripararlo:**
+
+| espressione su `"0.30"`, cultura `it-IT` | risultato |
+|---|---|
+| `[double]"0.30"` (cast di PowerShell) | **0.3** ✅ — il cast usa la cultura **invariante** per progetto |
+| `[double]::Parse("0.30")` | **30** 🔴 |
+| `[double]::Parse("0.30",$INV)` | **0.3** ✅ |
+
+E sulla somma, che è il numero che finisce nel referto: `0.30+0.30+0.40` fa **1.00** parsato bene e **100** parsato con la cultura corrente — **cento volte tanto**, senza nessun errore a schermo.
+
+👉 **Quindi**: il **cast** è sicuro, è `::Parse` / `::TryParse` **senza cultura** che mente. 🔴 **Il pericolo pratico è il contrario di quello che la regola suggerisce**: chi legge *«il cast è sospetto»* e lo «corregge» in `[double]::Parse($x)` **introduce** il difetto dove non c'era. La forma da scrivere resta una sola: `[double]::TryParse($t, [Globalization.NumberStyles]::Float, $INV, [ref]$v)`.
+
+---
+
+## CLASSE 470 — 📅🧟 **UN PRESET IN CAMPO CHE PUNTA A UN CALENDARIO STORICO**: il filtro news è spento **in silenzio**, e il canarino dell'EA non può accorgersene perché conta gli eventi **utili**, non quelli **futuri** (controllo-preventivo, 19/09/2026, figlia della **460-b**)
+
+**Il caso reale.** `mql5/Presets/ABTG_PostNews_NFP_USDJPY.set` — il preset che stava
+per essere caricato su un grafico **vivo** USDJPY M5 — porta:
+```
+InpNewsFile=abtg_news_postnews_2010_2025_UTC.csv
+InpNewsCommon=true
+InpRestrictToNews=true
+```
+Quel file è il calendario **di backtest**: misurato, **600 righe, ultimo evento
+`2025.07.03`, eventi 2026 = ZERO**. E `backtest_pipeline/aggiorna_news.ps1`
+aggiorna **solo** `abtg_news.csv` (r. `$Dest = Join-Path $FilesDir "abtg_news.csv"`):
+quel file non lo tocca **nessuno**.
+
+**Cosa succede in campo, e non è un'ipotesi.** `ABTG_PostNews.mq5`:
+- `NewsToday()` (r.264-277) confronta **anno+mese+giorno** dell'evento con la barra
+  d'azione → nel 2026 non può mai combaciare;
+- `OnTick()` r.252: `if(InpRestrictToNews && !NewsToday(t0)) return;`
+→ **zero ordini, per sempre.** La sedia sembra accesa, il grafico ha l'EA, il log non
+dice niente di rosso.
+
+🔴 **E il canarino dell'EA NON scatta.** `LoadNews()` r.587 stampa `CANARINO ROSSO`
+solo se `utili==0`; qui `utili = 186` (le "Unemployment Rate" dal 2010 al 2025), tutte
+**passate**. Il controllo misura *«il preset trova eventi nel file»*, non *«il file
+contiene eventi che possono ancora accadere»*. È esattamente la **460-b** (`conta_futuri`),
+che era stata applicata al **generatore** e non all'**EA**.
+
+### La regola
+🔴 **Un preset destinato al FORWARD non può puntare a un file di calendario con una
+finestra chiusa nel nome.** Se il nome contiene un intervallo di anni (`_2010_2025_`,
+`_2021_2025_`, `_live_2026-09-04`), quel preset è **di banco**, non di campo.
+- ✅ **Controllo, e costa dieci secondi**: `tail -1` del file che il preset nomina. Se
+  l'ultima data è nel passato e `InpRestrictToNews=true`, la sedia è **cieca**, non
+  «senza edge».
+- ✅ **Controllo 2**: il file che il preset nomina compare in `aggiorna_news.ps1` (o in
+  qualunque cosa giri ogni mattina)? Se no, **nessuno lo aggiorna**, e non lo farà.
+- 🔴 **Il verdetto su una sedia così è `[NON ANCORA MISURATO]`**, mai «non opera».
+  Un «Trades 0» da calendario morto è indistinguibile da un «Trades 0» da strategia
+  morta, e i due costano cose opposte.
+- 📌 **Miglioria suggerita all'EA** (non fatta qui, è una modifica di comportamento):
+  in `LoadNews()` contare anche gli eventi con `gNewsTime[i] > TimeCurrent()` e gridare
+  se sono **zero** pur essendoci `utili>0`. Oggi quel numero non viene calcolato.
+
+---
+
+## CLASSE 471 — 🎯💥 **UNA COLLISIONE DI MAGIC SU STESSO SIMBOLO NON FONDE LE STATISTICHE: NE UCCIDE UNA.** E la riparazione dell'08/09 aveva **spostato** il numero dentro un altro già occupato, non tolto la collisione (controllo-preventivo, 19/09/2026)
+
+**Il caso reale.** `ABTG_PostNews_ECB_EURUSD.set` nasce l'**08/09/2026** con
+l'intestazione letterale *«NATO PER EVITARE UNA COLLISIONE DI MAGIC»* — e si prende
+`InpMagic=771202`, **che è il magic della sedia FOMC** (`ABTG_PostNews_FOMC_EURUSD.set`,
+già viva su `chart44` del piccolo **50503392**). Stesso EA, **stesso simbolo EURUSD**,
+e i due grafici sarebbero stati accesi **insieme**.
+
+**Perché non è (solo) un problema di referti.** In `ABTG_PostNews.mq5` **ogni** funzione
+di gestione seleziona per `SIMBOLO + MAGIC` e basta: `OcoCheck()` r.362-383,
+`ManageTrailing()` r.390, `CloseAllMine()` r.412-424, la guardia anti-duplicato r.245-249.
+E `ExpiryCloseCheck()` (r.432-444) non è un evento istantaneo: è **una finestra**
+— `if(nowMin < expMin) return;` — quindi da `InpExpiryHour:Min` **fino a mezzanotte**,
+a **ogni tick**, chiama `CloseAllMine()`.
+> 🔴 La ECB EURUSD scade alle **17:15 server**. La FOMC piazza alle **19:40 server**,
+> cioè **dentro** quella finestra. Con i due grafici accesi, **i pendenti della FOMC
+> vengono cancellati entro un tick da quando nascono: quella sedia non opera MAI.**
+
+### La regola
+🔴 **Due istanze dello stesso EA sullo stesso SIMBOLO con lo stesso MAGIC non sono
+"due sedie confuse nelle statistiche": sono una sedia che ne spegne un'altra.** E chi
+spegne chi lo decide un **orario**, non il magic — quindi non si vede leggendo i magic.
+- ✅ **Controllo, deterministico**: censire `InpMagic` su **tutti** i `.set` e, per ogni
+  numero usato più di una volta, rispondere a **due** domande, non una: *(1)* i preset
+  stanno sullo **stesso simbolo**? *(2)* possono essere **accesi insieme**? Solo se le
+  risposte sono SÌ+SÌ è 🔴; altrimenti è 🟠 (referti fusi) o benigno (varianti alternative).
+- ✅ **E poi si leggono le FINESTRE**: `InpExpiry*` / `InpCloseAtExpiry` / `InpFridayClose*`
+  di uno contro l'`InpActionHour` dell'altro. La sovrapposizione è il danno.
+- 🔴 **«Ho dato un numero diverso» non è una verifica: il numero nuovo va cercato in
+  TUTTO il repo prima di scriverlo.** L'08/09 non è stato fatto, ed è costata una
+  collisione peggiore di quella riparata.
+- 📌 **Censimento del 19/09 su 64 preset / 55 magic**: dopo la correzione restano **8**
+  numeri condivisi, tutti classificati 🟠 o benigni (simboli diversi o varianti
+  mutuamente esclusive) — elenco in `report/PACCHETTO_POSTNEWS_TRE_GRAFICI_2026-09-19.md`.
