@@ -25454,6 +25454,46 @@ viene il percorso.
 risposta fosse **coerente** con quello che mi aspettavo. È bastato provare a **romperla** per
 scoprire che il cancello approvava anche uno script che ammazza il conto reale.
 
+### 🔧 APPLICATA IL 19/09/2026 — MA **COME RILIEVO, NON COME BLOCCO**, e la ragione è misurata
+La correzione proposta qui sopra è stata implementata dalla sessione principale in
+`controlla_terminali()`. **Tutti e due i punti però sono diventati RILIEVI**, non bloccanti, e
+**non per prudenza: perché il blocco è stato provato e ha fatto strage di script sani.** Tre
+misure, in ordine, tutte sui `.ps1` del repo:
+
+| tentativo | bloccati su 249 | perché |
+|---|---:|---|
+| cercare tutti e tre i nomi di `VIETATI_PERCORSO` anche nelle stringhe | **141** | `BCM Markets MT5 Terminal` è la cartella del **piccolo 50503392**, bersaglio *legittimo* di mezzo repo |
+| ristretto a `BCM_Reale`, ma cercando anche nei **commenti** | **248** (tutti) | l'emendamento del 12/09 in `CLAUDE.md` **obbliga** ogni riga a dichiarare i bersagli vietati: cercarli nei commenti punisce chi rispetta la regola → è la **classe 446** un'altra volta |
+| ristretto a `BCM_Reale`, solo parte viva, solo quando ha un **backslash attaccato** (= è un percorso, non una voce d'elenco) | **6** | e tutti e sei sono **etichette, non bersagli** (sotto) |
+
+I sei falsi positivi dell'ultimo tentativo, che sono la prova del punto:
+`runner_abtg.ps1` r.457 (è il **caso di prova del runner stesso**, quello che verifica che il
+reale venga *rifiutato*) · `RIGA_CENSIMENTO_MT5_MACCHINA.ps1` r.57 (chiave di una mappa
+percorso→conto) · `RIGA_TROVA_POSTNEWS.ps1` r.46 (mappa GUID→conto) ·
+`RIGA_SPREADLOGGER_RACCOLTA.ps1` r.75 (la costante che serve a **escluderlo**) ·
+`pubblica_trades.ps1` r.186 (testo di un messaggio a schermo) · `prova_kill_chirurgico.ps1`
+r.26 (finto processo di prova).
+
+🔴 **LA LEZIONE, ed è più grande della patch: un cancello TESTUALE non sa distinguere un
+BERSAGLIO da un'ETICHETTA.** Servirebbe sapere se quel percorso finisce dentro un *verbo*
+(`Copy-Item`, `Start-Process`, `Set-Content`) — e nel contro-esempio non ci finisce nemmeno:
+è un'assegnazione nuda `$bersaglio = 'C:\BCM_Reale'`. Stessa storia per il punto (b): il
+blocco su `Stop-Process` è **impossibile**, perché **216 `.ps1` del repo lo usano** per
+chiudere il banco, che è legittimo.
+
+✅ **Quindi la divisione del lavoro resta quella scritta in `CLAUDE.md`**: lo **strato 1**
+(questo file) rende la cosa **VISIBILE**, lo **strato 2** (l'agente `controllo-preventivo`) dà
+il **giudizio**. Oggi il contro-esempio produce **due rilievi `[457]` in chiaro** dove prima
+produceva *"nessun difetto"* e basta. ⚠️ **Ma l'uscita resta 0: uno script canaglia NON viene
+fermato dalla macchina.** Chi legge un PASS sui terminali deve ancora aprire il file.
+
+🛑 **E un difetto pagato durante la riparazione stessa** (già classe **413**, qui ripetuto
+perché è costato due giri): `controlla_riga.py` dichiara `# -*- coding: ascii -*-`, quindi
+**un'emoji dentro un COMMENTO Python** lo rompe con
+`SyntaxError: 'ascii' codec can't decode byte 0xf0` — e peggio, uno script di patch che apre
+il file in scrittura **tronca il file a 0 byte** prima di accorgersene. Regola operativa
+aggiunta: **ogni patch a un file `ascii` fa `s.encode("ascii")` PRIMA di aprire in scrittura.**
+
 ---
 
 ## CLASSE 458 — 🗓️🧹 LA CARTELLA CHE RIORDINI E' L'**INPUT DI UN'ATTIVITA' PIANIFICATA**: il riordino del 16/09 ha spento l'aggiornamento delle news, e il danno si legge **solo nel codice d'uscita del task** (19/09/2026)

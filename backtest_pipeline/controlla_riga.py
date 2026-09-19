@@ -425,6 +425,50 @@ def controlla_terminali(path, testo, dove, stretta=False):
                               " BERSAGLIO (-Terminal.../-Percorso... = '" + val + "'). Nessuna"
                               " guardia lo rende innocuo: il 100k 50504263, il REALE 10105439 e"
                               " il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
+        # CLASSE 457 (19/09/2026) -- IL CANCELLO CERCAVA SOLO FUORI DAGLI APICI,
+        # E UN PERCORSO WINDOWS STA SEMPRE FRA APICI.
+        # Il fatto: uno script di QUATTRO righe che copia dentro la cartella
+        # dati del REALE e poi fa `Get-Process terminal64 | Stop-Process -Force`
+        # usciva "ESITO: nessun difetto meccanico", USCITA 0. Riprodotto a mano.
+        # Causa: `nudo` viene da righe_utili() -> senza_stringhe(), che
+        # sostituisce ogni '...' con ''. Il percorso vietato spariva PRIMA del
+        # confronto. Era la correzione giusta della classe 167 (non confondere
+        # una stringa con del codice) applicata al controllo SBAGLIATO: qui la
+        # stringa E' il bersaglio, ed e' esattamente la cosa da guardare.
+        #
+        # PERCHE' E' UN RILIEVO E NON UN BLOCCO -- tre misure, non un'opinione:
+        #  (1) estendendo il blocco a tutti e tre i nomi di VIETATI_PERCORSO,
+        #      i .ps1 di casa bloccati passavano da 0 a 141 su 248, runner
+        #      compreso: "BCM Markets MT5 Terminal" e' la cartella del PICCOLO,
+        #      bersaglio LEGITTIMO di decine di script. Ristretto a BCM_Reale.
+        #  (2) cercando anche nei COMMENTI: 248 su 248, cioe' TUTTI. Ogni riga
+        #      di casa DEVE dichiarare i bersagli vietati (emendamento 12/09 in
+        #      CLAUDE.md), quindi quei nomi stanno per forza ovunque. Cercarli
+        #      nei commenti punisce chi rispetta la regola: e' la classe 446.
+        #      Quindi si guarda solo la parte VIVA della riga.
+        #  (3) bloccando solo quando il nome ha un BACKSLASH attaccato (cioe'
+        #      e' un percorso e non una voce di elenco): 6 falsi positivi su
+        #      249, e tutti e sei della stessa forma -- il percorso e'
+        #      un'ETICHETTA, non un bersaglio:
+        #        runner_abtg.ps1 r.457  il CASO DI PROVA del runner, quello che
+        #                               verifica che il reale venga RIFIUTATO
+        #        RIGA_CENSIMENTO r.57   chiave di una mappa percorso -> conto
+        #        RIGA_TROVA_POSTNEWS    idem, mappa GUID -> conto
+        #        RIGA_SPREADLOGGER r.75 la costante che serve a ESCLUDERLO
+        #        pubblica_trades r.186  testo di un messaggio a schermo
+        #        prova_kill_chirurgico  finto processo di prova
+        #
+        # LA CONCLUSIONE, ed e' la cosa da ricordare: un cancello TESTUALE non
+        # sa distinguere un BERSAGLIO da un'ETICHETTA. Servirebbe capire se il
+        # percorso finisce dentro un verbo (Copy-Item, Start-Process), e nel
+        # contro-esempio non ci finisce nemmeno: e' un'assegnazione nuda.
+        # Quindi il cancello fa quello che sa fare -- LO RENDE VISIBILE -- e il
+        # giudizio lo mette lo strato 2 (agente controllo-preventivo): e' la
+        # divisione dei due strati gia' scritta in CLAUDE.md. Prima di oggi non
+        # era visibile per niente, ed e' questa la differenza che conta.
+        INTOCCABILI = ["BCM_Reale"]        # il REALE, e basta
+        taglio_c = senza_stringhe(cruda).find("#")
+        viva = cruda if taglio_c < 0 else cruda[:taglio_c]
         for v in VIETATI_PERCORSO:
             if stretta:
                 coperto = bool(re.search(GUARDIA_STRETTA, nudo, re.I))
@@ -432,9 +476,29 @@ def controlla_terminali(path, testo, dove, stretta=False):
                 coperto = in_una_guardia(righe, k)
             if v in nudo and not coperto:
                 blocca("TERMINALE", "r." + str(i) + ": nomina '" + v + "' senza una guardia che lo rifiuta nelle righe vicine. Il 100k 50504263, il REALE 10105439 e il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
+            elif v in INTOCCABILI and v in viva and v not in nudo and not coperto:
+                rileva("457", "r." + str(i) + ": nomina '" + v + "' DENTRO UNA STRINGA."
+                              " Il cancello NON sa dire se e' un bersaglio, un'etichetta"
+                              " o una lista di rifiuti: VA LETTO A MANO."
+                              " Il REALE 10105439 non si tocca mai", dove)
         for c in CONTI_VIETATI:
             if c in nudo and not in_una_guardia(righe, k):
                 blocca("CONTO", "r." + str(i) + ": nomina il conto " + c + " fuori da una guardia", dove)
+            elif c in viva and c not in nudo and not in_una_guardia(righe, k):
+                rileva("457", "r." + str(i) + ": nomina il conto " + c + " DENTRO UNA"
+                              " STRINGA. VA LETTO A MANO: bersaglio o guardia?", dove)
+        # CLASSE 457-b -- E IL CANCELLO NON CERCAVA NESSUN MODO DI AMMAZZARE UN
+        # TERMINALE, benche' il 12/09 uno script di casa avesse spento TUTTI i
+        # terminali della macchina, reale compreso. Qui non si blocca: chiudere
+        # il terminale del BANCO e' legittimo e lo fanno 216 .ps1 del repo
+        # (misurato). Si RILEVA, perche' chi legge deve andare a guardare CHE
+        # COSA viene chiuso: il filtro dev'essere una COSTANTE sul percorso del
+        # banco, mai una variabile che arriva da fuori.
+        if re.search(r"Stop-Process|taskkill|\.Kill\s*\(|CloseMainWindow", cruda, re.I):
+            rileva("457", "r." + str(i) + ": questa riga puo' TERMINARE un processo."
+                          " Non e' vietato (il banco si chiude), ma VA LETTO A MANO che"
+                          " cosa chiude: il filtro dev'essere una COSTANTE sul percorso"
+                          " del banco, mai una variabile che arriva da fuori", dove)
 
 # CLASSE 173 (10/09/2026) -- il cancello chiedeva un PIN e un MARCATORE anche a una
 # riga che NON scarica e NON esegue nessuno script: un censimento di sola lettura
