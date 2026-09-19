@@ -39,3 +39,7 @@ report/.backup/
 # temporanee create dal tool Agent con isolation:"worktree" -- non sono
 # consegne, sono lo spazio di lavoro dell'agente mentre gira.
 .claude/worktrees/
+
+# Cache di PowerShell (pwsh) creata dai contro-esempi degli agenti: 19/09/2026.
+# Non e roba di progetto e non va in repo.
+.cache/
