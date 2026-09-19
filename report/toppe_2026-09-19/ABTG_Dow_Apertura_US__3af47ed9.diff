@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_Dow_Apertura_US.mq5 (3af47ed9)
-+++ b/mql5/Experts/ABTG_Dow_Apertura_US.mq5 (3af47ed9 + toppa ticket)
+# BERSAGLIO ....: ABTG_Dow_Apertura_US.mq5 @ 3af47ed9
+# NOTA .........: binario IN CAMPO sul piccolo 50503392 (v1.00, 2065 righe)
+# PERIMETRO ....: AUTORIZZATA dalla firma 999b082d -- terminale 50503392 (C:\Program Files\BCM Markets MT5 Terminal)
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_Dow_Apertura_US.mq5	(3af47ed9)
++++ b/mql5/Experts/ABTG_Dow_Apertura_US.mq5	(3af47ed9 + toppa ticket)
 @@ -582,7 +582,7 @@
     if(newsBlk && InpNewsFlatten)
       {

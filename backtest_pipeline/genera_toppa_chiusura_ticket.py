@@ -136,6 +136,19 @@ BERSAGLI = [
  ("ABTG_Apertura_Marco",     "HEAD-lavorativo", "NON in campo (RITIRATO 06/08)"),
 ]
 
+# CANCELLO 19/09 (classe 448): il perimetro si legge dalla CONCESSIONE della firma
+# 999b082d (passo 5: "ricompilazione F7 sul terminale 50503392 ... NON su -V3
+# (50504263), NON su C:\\BCM_Reale (10105439), NON su C:\\MT5_Backtest"), NON per
+# sottrazione della sola esclusione scritta in chiaro. Autorizzati oggi: 3.
+PERIMETRO = {
+ ("ABTG_Nasdaq_Apertura_US", "3af47ed9"):        "AUTORIZZATA dalla firma 999b082d -- terminale 50503392 (C:\\Program Files\\BCM Markets MT5 Terminal)",
+ ("ABTG_DAX_Apertura_EU",    "3af47ed9"):        "AUTORIZZATA dalla firma 999b082d -- terminale 50503392 (C:\\Program Files\\BCM Markets MT5 Terminal)",
+ ("ABTG_Dow_Apertura_US",    "3af47ed9"):        "AUTORIZZATA dalla firma 999b082d -- terminale 50503392 (C:\\Program Files\\BCM Markets MT5 Terminal)",
+ ("ABTG_DAX_Apertura_EU",    "d83c1960"):        "NON AUTORIZZATA -- sarebbe il 100k 50504263 (... MT5 Terminal -V3): la firma dice NON su -V3. Serve una firma nuova.",
+ ("ABTG_Dow_Apertura_US",    "HEAD-lavorativo"): "NON AUTORIZZATA -- sarebbe il 100k 50504263 (... MT5 Terminal -V3): la firma dice NON su -V3. Serve una firma nuova.",
+ ("ABTG_DAX_Apertura_EU",    "HEAD-lavorativo"): "VIETATA -- e' il vintage del CONTO REALE 10105439 (C:\\BCM_Reale). La firma 999b082d NON autorizza ricompilazioni sul reale. Diff prodotto per completezza: NON si applica.",
+}
+
 os.makedirs(f"{SCR}/toppa", exist_ok=True)
 ok = 0
 for nome, rev, nota in BERSAGLI:
@@ -148,10 +161,19 @@ for nome, rev, nota in BERSAGLI:
     N = applica(L, et)
     if N is None: continue
     tag = rev.replace("-","_")
-    d = list(difflib.unified_diff(L, N, fromfile=f"a/{path} ({rev})",
-                                  tofile=f"b/{path} ({rev} + toppa ticket)", lineterm=""))
+    # CANCELLO 19/09 (classe 446): il vintage va dopo un TAB, non dopo uno SPAZIO.
+    # git apply / patch leggono il nome file fino al TAB: con lo spazio il " (rev)"
+    # finisce DENTRO il nome e il diff NON si applica (verificato: 11/11 falliti).
+    d = list(difflib.unified_diff(L, N, fromfile=f"a/{path}\t({rev})",
+                                  tofile=f"b/{path}\t({rev} + toppa ticket)", lineterm=""))
     fn = f"{SCR}/toppa/{nome}__{tag}.diff"
-    open(fn,"w",encoding="utf-8").write("\n".join(d)+"\n")
+    perim = PERIMETRO.get((nome, rev), "NON IN CAMPO (nessun grafico): nessuna ricompilazione da autorizzare.")
+    testa = [f"# BERSAGLIO ....: {nome}.mq5 @ {rev}",
+             f"# NOTA .........: {nota}",
+             f"# PERIMETRO ....: {perim}",
+             "# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)",
+             ""]
+    open(fn,"w",encoding="utf-8").write("\n".join(testa + d)+"\n")
     open(f"{SCR}/toppa/{nome}__{tag}.mq5","w",encoding="utf-8").write("\n".join(N))
     print(f"  [OK] {len([x for x in d if x.startswith('+') and not x.startswith('+++')])} righe aggiunte, "
           f"{len([x for x in d if x.startswith('-') and not x.startswith('---')])} tolte -> {os.path.basename(fn)}")

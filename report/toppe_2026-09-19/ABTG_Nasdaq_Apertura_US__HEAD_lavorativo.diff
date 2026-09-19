@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (HEAD-lavorativo)
-+++ b/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (HEAD-lavorativo + toppa ticket)
+# BERSAGLIO ....: ABTG_Nasdaq_Apertura_US.mq5 @ HEAD-lavorativo
+# NOTA .........: HEAD del repo (v1.02, WIP: vedi avvertenza nel referto)
+# PERIMETRO ....: NON IN CAMPO (nessun grafico): nessuna ricompilazione da autorizzare.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5	(HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5	(HEAD-lavorativo + toppa ticket)
 @@ -694,7 +694,7 @@
     if(newsBlk && InpNewsFlatten)
       {

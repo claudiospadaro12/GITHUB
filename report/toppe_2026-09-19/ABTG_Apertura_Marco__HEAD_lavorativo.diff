@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_Apertura_Marco.mq5 (HEAD-lavorativo)
-+++ b/mql5/Experts/ABTG_Apertura_Marco.mq5 (HEAD-lavorativo + toppa ticket)
+# BERSAGLIO ....: ABTG_Apertura_Marco.mq5 @ HEAD-lavorativo
+# NOTA .........: NON in campo (RITIRATO 06/08)
+# PERIMETRO ....: NON IN CAMPO (nessun grafico): nessuna ricompilazione da autorizzare.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_Apertura_Marco.mq5	(HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_Apertura_Marco.mq5	(HEAD-lavorativo + toppa ticket)
 @@ -562,7 +562,7 @@
     if(newsBlk && InpNewsFlatten)
       {

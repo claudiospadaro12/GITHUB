@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_DAX_Apertura_EU.mq5 (HEAD-lavorativo)
-+++ b/mql5/Experts/ABTG_DAX_Apertura_EU.mq5 (HEAD-lavorativo + toppa ticket)
+# BERSAGLIO ....: ABTG_DAX_Apertura_EU.mq5 @ HEAD-lavorativo
+# NOTA .........: binario IN CAMPO sul REALE 10105439 (v1.01, 2368 righe) = HEAD
+# PERIMETRO ....: VIETATA -- e' il vintage del CONTO REALE 10105439 (C:\BCM_Reale). La firma 999b082d NON autorizza ricompilazioni sul reale. Diff prodotto per completezza: NON si applica.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_DAX_Apertura_EU.mq5	(HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_DAX_Apertura_EU.mq5	(HEAD-lavorativo + toppa ticket)
 @@ -666,7 +666,7 @@
     if(newsBlk && InpNewsFlatten)
       {

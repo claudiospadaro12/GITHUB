@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_DAX_Apertura_EU_Ottimizzato.mq5 (HEAD-lavorativo)
-+++ b/mql5/Experts/ABTG_DAX_Apertura_EU_Ottimizzato.mq5 (HEAD-lavorativo + toppa ticket)
+# BERSAGLIO ....: ABTG_DAX_Apertura_EU_Ottimizzato.mq5 @ HEAD-lavorativo
+# NOTA .........: NON in campo (nessun grafico): toppa pronta, non urgente
+# PERIMETRO ....: NON IN CAMPO (nessun grafico): nessuna ricompilazione da autorizzare.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_DAX_Apertura_EU_Ottimizzato.mq5	(HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_DAX_Apertura_EU_Ottimizzato.mq5	(HEAD-lavorativo + toppa ticket)
 @@ -482,7 +482,7 @@
     if(newsBlk && InpNewsFlatten)
       {

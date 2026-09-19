@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_Dow_Apertura_US.mq5 (HEAD-lavorativo)
-+++ b/mql5/Experts/ABTG_Dow_Apertura_US.mq5 (HEAD-lavorativo + toppa ticket)
+# BERSAGLIO ....: ABTG_Dow_Apertura_US.mq5 @ HEAD-lavorativo
+# NOTA .........: binario IN CAMPO sul 100k 50504263 (v1.01, 2148 righe) = HEAD
+# PERIMETRO ....: NON AUTORIZZATA -- sarebbe il 100k 50504263 (... MT5 Terminal -V3): la firma dice NON su -V3. Serve una firma nuova.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_Dow_Apertura_US.mq5	(HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_Dow_Apertura_US.mq5	(HEAD-lavorativo + toppa ticket)
 @@ -606,7 +606,7 @@
     if(newsBlk && InpNewsFlatten)
       {

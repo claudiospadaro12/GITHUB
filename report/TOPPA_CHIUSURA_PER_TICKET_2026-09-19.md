@@ -288,6 +288,12 @@ funzione diversa. Prove **in casa, già compilate**: `ABTG_DaxValueArea.mq5:900`
 `DAX_MASTER_PROP.mq5:2164` · `ABTG_AllineaLondra.mq5:810` ·
 `esterni/Nasdaq_PreOpen_Breakout_EA.mq5:686`.
 
+✏️ **CORRETTO DAL CANCELLO, 19/09** — quanto segue vale per la forma **A**, che è stata
+**scartata**. 🔴 **Nella toppa consegnata (forma B) NON c'è nessun cast, e non serve**:
+`PositionGetTicket()` ritorna già `ulong`, quindi `miei[]` è `ulong` all'origine. Verificato su
+tutti e 11 i `.mq5` patchati (blocco `ChiudiMiePosizioni` identico, stesso md5). La frase «nella
+toppa il cast a `ulong` è la forma provata» qui sotto **descriveva codice che non c'è**.
+
 🔴 **MA c'è una trappola, ed è di TIPO**: `PositionGetInteger()` torna un **`long`**, e
 l'overload vuole un **`ulong`**. In tutti e quattro i casi in casa la variabile passata è
 **dichiarata `ulong`**, e `ABTG_DaxValueArea.mq5:873` usa proprio il cast esplicito
@@ -372,7 +378,14 @@ terminali diversi: si ricompila **per cartella dati**, non per file).
 🔴 **La #6 è GIÀ ESCLUSA da una firma, non da una mia opinione.**
 `report/FIRMA_2026-09-19_CHIUSURA_PER_TICKET.md` (commit `999b082d`) autorizza la toppa per
 ticket e dichiara testualmente che **NON autorizza «ricompilazioni sul conto reale 10105439»**.
-👉 Quindi le ricompilazioni **autorizzabili oggi sono 5, non 6**, e la #6 resta ferma —
+👉 ✏️ **CORRETTO DAL CANCELLO, 19/09 (classe 448): le ricompilazioni autorizzabili oggi sono
+**3**, non 5.** Qui il perimetro era stato calcolato **per sottrazione** (6 binari meno il reale),
+leggendo solo l'esclusione di ③. Ma la **concessione** sta in ④ passo 5 della stessa firma, ed è
+testuale: *«ricompilazione (F7) sul terminale **50503392** ... **NON** su `-V3` (50504263), **NON**
+su `C:\BCM_Reale` (10105439), **NON** su `C:\MT5_Backtest`»*. 🔴 Le due "in più" sarebbero state
+la **#4** e la **#5**, cioè **due F7 sul 100k `50504263`, conto in forward vivo**, vietato per nome
+dalla firma stessa. Autorizzate: **#1, #2, #3** (tutte sul `50503392`). Restano ferme
+la #4 e la #5 (serve una firma nuova) e la #6 —
 il che è anche la lettura tecnica giusta (zero vicini, ④: lì il difetto è inerte).
 🟢 E la sequenza firmata punta proprio al terminale **50503392**: sono le **#1, #2, #3**, cioè
 esattamente le tre righe in cima alla classifica per danno.
@@ -387,8 +400,20 @@ Pronti ma **non urgenti** (nessun grafico): `ABTG_Nasdaq_Apertura_US_Ottimizzato
 
 ### 🧪 Come si misura che la toppa non ha rotto niente
 🟢 **Nel tester il difetto è INVISIBILE** (l'EA è solo sul simbolo, nessun vicino): la stessa
-cella, prima e dopo, deve dare un risultato **identico al centesimo**. **Se cambia, la toppa ha
-rotto altro.** È un test di **non-regressione, non di merito**.
+cella, prima e dopo, deve dare un risultato **identico al centesimo** — 🔴 **TRANNE nei giorni in
+cui l'EA aveva DUE posizioni SUE aperte all'istante del flatten.** È un test di
+**non-regressione, non di merito**.
+
+> ✏️ **CORRETTO DAL CANCELLO, 19/09 (classe 447).** Qui c'era scritto *«Se cambia, la toppa ha
+> rotto altro»*, **senza eccezioni**: e lo smentisce ⑤ di questo stesso referto. Verificato nel
+> sorgente `3af47ed9`: `BuyStop` r.844 e `SellStop` r.868 sono due `if` **in sequenza** (i due
+> pendenti vivono insieme) e `HandleOCO()` r.1603 è `if(!HasOpenPosition()) return;
+> CancelMyPendings();` — cancella l'opposto **solo dopo** il riempimento. Quindi nel tester due
+> posizioni NOSTRE sono possibili, e lì il vecchio codice ne chiudeva **una per tick** mentre il
+> nuovo le chiude **entrambe nello stesso tick, a prezzi diversi**. 👉 **Quei giorni si elencano
+> dal report del tester e si guardano a mano**: una differenza lì è la toppa che funziona, non la
+> toppa che rompe. Applicare la regola vecchia alla lettera avrebbe fatto **annullare una toppa
+> giusta**.
 🔴 **Il merito si vede solo in forward**, e si legge nel giornale: la riga nuova
 `«fine sessione: chiusa la posizione #<ticket>»` deve portare **il ticket NOSTRO**. E la prova
 che il difetto c'era: **nessuna chiusura `expert` di un magic estraneo a 17:30**.
@@ -401,6 +426,16 @@ e che non toccherà la roba dei vicini. Che sia meglio, lo dice il forward.
 - **442** — il costo di una toppa non è la toppa: è il **delta fra HEAD e il binario in campo**.
 - **443** — la scrittura cieca dentro una funzione richiamata **a ogni tick** non fa UN danno:
   lo fa **a catena**, e scala col numero di **vicini**, non di errori.
+
+### 🚦 Depositate dal CANCELLO (strato 2) sullo stesso pacchetto, 19/09
+- **446** — il **vintage scritto dopo uno SPAZIO** nell'header di un diff lo rende
+  **inapplicabile**: `git apply` legge il nome file fino al **TAB**. 🔴 **11 toppe su 11
+  respinte**, con gli hunk giusti. Corretto: header `--- a/path<TAB>(rev)` + preambolo `#` col
+  bersaglio. **11/11 applicano e producono un file identico al `.mq5` di riferimento.**
+- **447** — la **non-regressione** dichiarata "identica al centesimo" era smentita da ⑤ di questo
+  stesso referto (due posizioni nostre → tick diversi).
+- **448** — il **perimetro di una firma** si legge dalla **concessione**, non dalla lista delle
+  esclusioni: 3 autorizzate, non 5.
 
 ---
 

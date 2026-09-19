@@ -24898,3 +24898,94 @@ valore sia "ragionevole": deve essere **il più stretto**, o il pin non fa quell
   (`14:29 + 9h31 = 24:00`). Il confronto `nowMin >= 1440` **non è mai vero** (`nowMin` arriva a
   1439): il flat non scatta mai, in silenzio. **Ogni ora tradotta si riporta sul quadrante prima
   di scriverla.**
+
+---
+
+## CLASSE 446 — il diff con il VINTAGE scritto dopo uno SPAZIO non si applica: 11 toppe su 11 respinte (19/09/2026)
+
+**Il caso.** Le 11 toppe "chiusura per TICKET" di `report/toppe_2026-09-19/` erano state
+generate con `difflib.unified_diff(..., fromfile=f"a/{path} ({rev})")`, per tenere il vintage
+scritto nell'intestazione. Gli hunk erano **giusti** (verificato: 11/11 applicano). Ma:
+
+```
+$ git apply --check ABTG_Nasdaq_Apertura_US__3af47ed9.diff
+error: mql5/Experts/ABTG_Nasdaq_Apertura_US.mq5 (3af47ed9 + toppa ticket): No such file or directory
+```
+
+**11 diff su 11**, tutti e undici. `git apply` e `patch` leggono il nome del file **fino al
+TAB**: con lo spazio, il ` (3af47ed9)` finisce **dentro il nome del file**, e la toppa non si
+applica a niente.
+
+🔴 **Perche' e' insidioso**: il generatore diceva `[OK] 64 righe aggiunte, 6 tolte` per tutti e
+undici, il referto li elencava come *"diff pronti"*, e il contenuto **era** corretto. Non c'e'
+nessun segnale di guasto finche' qualcuno non prova ad applicarli davvero. Un "diff pronto" mai
+applicato non e' pronto: e' **non misurato**.
+
+### La regola
+🔴 **Un diff si dichiara "pronto" solo dopo un `git apply --check` ESEGUITO contro il vintage
+dichiarato.** Leggere gli hunk non basta: l'intestazione e' codice anche lei.
+- Il campo dopo il nome file e' **delimitato dal TAB** (nel formato unificato e' il posto del
+  timestamp). Se serve annotare il vintage: `--- a/path<TAB>(3af47ed9)` — **funziona**, verificato.
+- Un preambolo di righe `#` **prima** del `---` e' tollerato sia da `git apply` sia da `patch`:
+  e' il posto giusto per bersaglio, terminale e perimetro (regola dei terminali multipli).
+- 📐 E la verifica si chiude con `diff` fra il **risultato applicato** e la copia patchata di
+  riferimento: "applica" e "applica producendo la cosa giusta" sono due controlli diversi.
+
+---
+
+## CLASSE 447 — la NON-REGRESSIONE dichiarata "identica al centesimo" e' smentita dalla toppa stessa (19/09/2026)
+
+**Il caso.** Il referto della toppa per ticket dichiarava due cose, a tre sezioni di distanza:
+- ⑤: *«`770261` puo' avere **DUE** posizioni nostre ... la A ne chiuderebbe **una per tick**;
+  la B le chiude **entrambe subito**»* — ed e' il **motivo per cui la forma B e' stata scelta**;
+- ⑦: *«Nel tester il difetto e' INVISIBILE: la stessa cella, prima e dopo, deve dare un
+  risultato **identico al centesimo**. Se cambia, la toppa ha rotto altro.»*
+
+**Non possono essere vere tutte e due.** Verificato nel sorgente (`3af47ed9`): `BuyStop` r.844 e
+`SellStop` r.868 sono due `if` **in sequenza**, non alternativi — i due pendenti sono vivi
+insieme; e `HandleOCO()` (r.1603) e' `if(!HasOpenPosition()) return; CancelMyPendings();`, cioe'
+cancella l'opposto **solo dopo** che un lato e' gia' entrato. Nel tester l'EA e' solo sul
+simbolo, ma **le due posizioni sono SUE**: nel giorno di whipsaw il vecchio codice ne chiudeva
+una per tick, il nuovo le chiude nello stesso tick, a **prezzi diversi**.
+
+🔴 **Il danno non e' la differenza: e' la conclusione sbagliata.** Chi segue ⑦ alla lettera vede
+il numero cambiare e **annulla una toppa giusta**.
+
+### La regola
+🔴 **Un criterio di non-regressione va derivato dalla MOTIVAZIONE della toppa, non scritto
+accanto.** Se la toppa e' stata scelta perche' *cambia* un comportamento, quel comportamento
+**non puo' comparire fra gli invarianti**.
+- Si scrive: *"identico al centesimo **tranne** nei giorni con N>1 posizioni nostre aperte
+  all'istante del flatten — quei giorni si **elencano** dal report del tester e si guardano a
+  mano"*. Un'eccezione elencata per nome (classe 180), non un'attesa assoluta che si rompe da sola.
+- 📐 Contro-esempio obbligatorio: **quale caso fa cambiare il numero anche se la toppa e'
+  giusta?** Se non si sa rispondere, il test di non-regressione non e' un test.
+
+---
+
+## CLASSE 448 — il perimetro autorizzato letto per SOTTRAZIONE: la firma ne concedeva 3, il referto ne contava 5 (19/09/2026)
+
+**Il caso.** `report/FIRMA_2026-09-19_CHIUSURA_PER_TICKET.md` (`999b082d`) dice due cose:
+- ③ — *«**Non autorizza** una ricompilazione sul conto REALE `10105439`»* (l'**esclusione**);
+- ④ passo 5 — *«ricompilazione (F7) sul terminale **50503392**. **NON** su `-V3` (50504263),
+  **NON** su `C:\BCM_Reale` (10105439), **NON** su `C:\MT5_Backtest` (50504400)»* (la **concessione**).
+
+Il referto della toppa ha letto **solo la ③** e ha concluso: *«le ricompilazioni autorizzabili
+oggi sono **5**, non 6»* (6 binari meno il reale). 🔴 **Sono 3.** Le due in piu' sarebbero state
+`ABTG_DAX_Apertura_EU @ d83c1960` e `ABTG_Dow_Apertura_US @ HEAD` — cioe' **due ricompilazioni
+sul 100k 50504263, conto in forward vivo**, che la stessa firma vieta per nome due righe sotto.
+
+👉 E' la **classe 180 applicata a un perimetro operativo**: l'insieme e' stato costruito come
+*"tutto quello che non e' escluso"* invece che *"quello che e' concesso"*. Il costo qui non e'
+un verdetto storto: e' un F7 su un conto che nessuno ha autorizzato.
+
+### La regola
+🔴 **Il perimetro di una firma si legge dalla CONCESSIONE, mai dalla lista delle esclusioni.**
+Quello che non e' scritto come concesso e' **negato**, non "non vietato".
+- Quando una firma dice sia *"non su X"* sia *"fai su Y"*, **comanda il "fai su Y"**: l'elenco
+  delle esclusioni non e' mai esaustivo, l'elenco delle concessioni si'.
+- 📌 Ogni artefatto che puo' finire in mano a chi esegue (diff, `.ps1`, `.set`) porta **scritto
+  dentro** il proprio perimetro: numero di conto e cartella programma (regola dei terminali
+  multipli). Un diff destinato al **conto reale** che sta nella stessa cartella degli altri, con
+  un nome che non lo distingue e nessun avviso nel file, e' un incidente in attesa — lo stesso
+  del 06/09.

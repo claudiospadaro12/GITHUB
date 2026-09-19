@@ -1,5 +1,10 @@
---- a/mql5/Experts/ABTG_DAX_Apertura_EU.mq5 (d83c1960)
-+++ b/mql5/Experts/ABTG_DAX_Apertura_EU.mq5 (d83c1960 + toppa ticket)
+# BERSAGLIO ....: ABTG_DAX_Apertura_EU.mq5 @ d83c1960
+# NOTA .........: binario IN CAMPO sul 100k 50504263 (v1.01, 2361 righe)
+# PERIMETRO ....: NON AUTORIZZATA -- sarebbe il 100k 50504263 (... MT5 Terminal -V3): la firma dice NON su -V3. Serve una firma nuova.
+# APPLICARE CON : git apply -p1 <questo file>   (dalla radice del repo)
+
+--- a/mql5/Experts/ABTG_DAX_Apertura_EU.mq5	(d83c1960)
++++ b/mql5/Experts/ABTG_DAX_Apertura_EU.mq5	(d83c1960 + toppa ticket)
 @@ -659,7 +659,7 @@
     if(newsBlk && InpNewsFlatten)
       {
