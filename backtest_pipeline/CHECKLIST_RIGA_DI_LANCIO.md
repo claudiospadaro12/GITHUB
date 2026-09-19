@@ -24989,3 +24989,40 @@ Quello che non e' scritto come concesso e' **negato**, non "non vietato".
   multipli). Un diff destinato al **conto reale** che sta nella stessa cartella degli altri, con
   un nome che non lo distingue e nessun avviso nel file, e' un incidente in attesa — lo stesso
   del 06/09.
+
+## CLASSE 449 — il diff di UN VINTAGE si applica PULITO a un ALTRO vintage, e nessuno protesta (19/09/2026)
+
+**Il caso.** Gli 11 diff della toppa per ticket sono stati rigenerati (classe 446) e verificati:
+`git apply --check` → **11/11 OK**. Sembrava chiuso. 🔴 **Poi ho provato a romperlo**: ho preso il
+diff marcato `__3af47ed9` (base **2032 righe**, il binario in campo del Nasdaq) e l'ho applicato
+contro il **working tree**, che su quel file e' **HEAD, 2566 righe, v1.02, con 21 input in piu'**.
+
+```
+git apply --check report/toppe_2026-09-19/ABTG_Nasdaq_Apertura_US__3af47ed9.diff
+-> APPLICA. Nessun errore, nessun avviso.
+```
+
+`git apply` cerca il contesto **con tolleranza di offset**: se le tre finestre di contesto
+esistono ancora nel file nuovo, la toppa entra. **E qui esistono**, perche' fra i due vintage il
+codice intorno a `PositionClose(_Symbol)` non e' cambiato.
+
+🔴 **Il danno non e' la toppa: e' che il NOME DEL FILE resta l'unica cosa che dice su quale base
+sei.** Chi applica il diff giusto al sorgente sbagliato ottiene un `.mq5` che **compila**, che
+**sembra patchato**, e che porta in campo **un altro EA** — nel caso del Nasdaq, la v1.02 con
+`InpUsaGuardian=true` di default che i `.set` a 80 input **non coprono**.
+
+### La regola
+🔴 **Un diff destinato a un vintage preciso non si consegna da solo: si consegna con l'IMPRONTA
+del file di partenza**, e l'impronta si verifica **prima** di applicare.
+- impronta minima: **numero di righe** (si legge in MetaEditor, senza strumenti) — qui
+  `Nasdaq 2032 / md5 05050724a8f7` · `DAX 2132 / 1e49383b6171` · `Dow 2064 / 8d0fe5f00abc`;
+- ✅ **meglio ancora: non consegnare il diff. Consegnare il `.mq5` GIA' PATCHATO**, che non ha
+  nessuna base da sbagliare. *(Fatto: `scratchpad/toppa/*__3af47ed9.mq5`, 2090/2190/2122 righe,
+  delta **+58** identico su tutti e tre.)*
+- e la controprova del delta uniforme vale come firma: **tre file, stesso delta**, e' una toppa
+  meccanica; un delta diverso su uno solo vuol dire che li' e' entrato in un punto diverso.
+
+📌 Famiglia della **446** (il diff che non si applicava e stampava `[OK]`) e della **225** (il
+silenzio che somiglia a un PASS): tutte e tre sono **strumenti che non protestano quando
+sbagliano bersaglio**. 👉 Quando uno strumento non sa distinguere il bersaglio giusto da quello
+sbagliato, **la distinzione la deve portare il pacchetto**, non la memoria di chi esegue.
