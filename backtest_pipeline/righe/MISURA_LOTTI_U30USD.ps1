@@ -394,7 +394,18 @@ Write-Host '         REFERTO_MISURA_LOTTI.txt   (leggi la riga data: DEVE essere
 Write-Host '         abtg_mis_*.csv             (attesi 8: 2 EA x 2 depositi x 2 rami)'
 Get-ChildItem -LiteralPath $racc -ErrorAction SilentlyContinue | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize
 
-if($persi.Count -gt 0){ exit 2 }
-if($rilievi.Count -gt 0){ exit 3 }
+# ---------------------------------------------------------------------
+# I CODICI D'USCITA, e l'ORDINE conta.
+#   4 = ALLARME: e' sparito un terminale che NON era il banco. E' la cosa
+#       piu' grave che possa succedere qui, e ha un codice tutto suo.
+#   2 = NON MISURATO: zero file per-trade. Va PRIMA dei rilievi, se no
+#       una corsa che non ha misurato NIENTE esce "3 = girato con
+#       rilievi", che e' quasi un'assoluzione. Trovato col giro a vuoto
+#       a EA muto: usciva 3, e 3 vuol dire "girato".
+#   3 = girato, con rilievi da leggere.
+#   0 = girato pulito.
+# ---------------------------------------------------------------------
+if($persi.Count -gt 0){ exit 4 }
 if($righeTab.Count -eq 0){ exit 2 }
+if($rilievi.Count -gt 0){ exit 3 }
 exit 0
