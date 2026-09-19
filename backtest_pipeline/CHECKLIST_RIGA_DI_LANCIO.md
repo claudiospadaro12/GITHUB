@@ -25989,3 +25989,50 @@ identico meccanismo che oggi ha messo `ABTG_ORB_Ottimizzato` in lista "da valuta
 (il numero dedotto da una fonte che non è quella che comanda davvero). 🟢 La nota che va detta
 accanto: **il censimento non era pigro, era letterale** — e la letteralità su un repo che
 commenta bene è, di per sé, una fonte di falsi positivi.
+
+---
+
+## CLASSE 469 — 🧬🩹 **IL DIFETTO EREDITATO DAL MODELLO CHE «HA FUNZIONATO»**: si copia la forma di una riga già approvata, e ci si porta dentro una classe nota (la **13**) che nel modello era solo *mitigata a parole* (controllo-preventivo, 19/09/2026, figlia della **13**)
+
+**Il caso, ed è un contro-esempio ESEGUITO, non un sospetto.** Preparando la riga che
+porta i sorgenti delle sedie `771531` e `770511` sul terminale 50503392, il modello
+indicato era `backtest_pipeline/righe/TOPPA_TICKET_50503392.ps1` con la nota *«usali come
+modello, hanno funzionato»* — ed è vero: quella riga è passata dal cancello ed è andata
+a segno lo stesso giorno. La coda della riga nuova è stata ricalcata su quella:
+
+```powershell
+& $p -Pin $pin; Write-Host 'Fine. Sul Desktop trovi la cartella ... e lo zip degli ORIGINALI.'
+```
+
+🔴 **Girata davvero contro un bersaglio inesistente**, lo script ha fatto il suo mestiere
+— *«FERMO: la cartella dati … non esiste. NESSUN FILE E STATO SOSTITUITO»*, **uscita 1** —
+e subito sotto la riga ha stampato **«Fine. Sul Desktop trovi … lo zip degli ORIGINALI»**,
+che era **falso** (sul Desktop non c'era niente), e il blocco intero ha restituito **0**.
+Cioè: la rete dello script ha retto, e **la riga l'ha smentita in console**.
+
+**Perché è una classe nuova e non solo la 13.** La 13 dice *come* si scrive il controllo
+(`$global:LASTEXITCODE = 0` prima, `-ne 0` dopo). Qui il punto è **da dove è entrato il
+difetto**: dal **modello approvato**. Nel modello la stessa riga diceva *«Fine. **Se e
+arrivata in fondo**, sul Desktop trovi…»* — 🔴 **una mitigazione in PROSA, non un
+controllo.** Con la prosa il modello era onesto ma non verificabile; ricopiandolo e
+limando la frase, la prosa è sparita e il difetto è rimasto nudo. 👉 **Un modello
+approvato trasmette la sua forma, comprese le parti che erano approvate solo perché
+nessuno ci aveva inciampato.**
+
+### La regola
+🔴 **«L'ho copiato da una riga che ha funzionato» non è una verifica: è un'eredità.**
+Quando si riusa un modello, le sue parti vanno ripassate dal cancello **come se fossero
+nuove** — perché per il cancello lo sono.
+- ✅ **Controllo da fare, e costa un minuto**: la **stringa intera si ESEGUE**, almeno
+  contro un bersaglio che **non esiste**, e si guarda **l'ultima riga di output** e il
+  codice d'uscita. Se la coda parla di file prodotti mentre lo script ha rifiutato, il
+  difetto è lì. *(Trovato così, e solo così: riletto a mente il blocco sembrava a posto.)*
+- ✅ **E si esegue anche il ramo buono E il ramo «era già tutto a posto»**: una coda
+  giusta in un ramo e bugiarda nell'altro è il caso normale, non quello raro.
+- 🔴 **Una mitigazione in prosa dentro un modello va trattata come un difetto aperto,
+  non come una soluzione.** *«Se è arrivata in fondo»* chiede al lettore di fare il
+  controllo che il codice non fa — e il lettore, alle undici di sera, non lo fa.
+- 📌 **Rilievo aperto sul modello**: `report/RIGA_TOPPA_TICKET_50503392_2026-09-19.md`
+  ha ancora la coda senza `$LASTEXITCODE`. Non ha fatto danno perché quella corsa è
+  andata a buon fine, ma **è lo stesso difetto**, e va corretto alla prossima occasione
+  in cui quella riga si ritocca.
