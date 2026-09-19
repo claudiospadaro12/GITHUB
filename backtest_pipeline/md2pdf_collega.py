@@ -90,13 +90,32 @@ def colore_di(t):
     return None
 
 def inline(t):
-    """**grassetto**, `codice`, [testo](url) -> markup di reportlab."""
+    """**grassetto**, `codice`, [testo](url) -> markup di reportlab.
+
+    19/09/2026 -- I CODICI SI ESTRAGGONO PRIMA DEL CORSIVO, e non e' cosmetica.
+    Prima le regex di enfasi giravano per prime, quindi un asterisco DENTRO i
+    backtick (es. `Path -like "C:\MT5_Backtest\*"`) diventava <i> e il tag
+    scavalcava il confine del <font>: reportlab moriva con
+    "Parse error: saw </font> instead of expected </i>" e il PDF non usciva
+    affatto. Trovato il 19/09 convertendo il referto delle righe di lancio --
+    cioe' proprio su un documento pieno di percorsi con l'asterisco.
+    Ora: si escludono i codici, si applica l'enfasi, si rimettono.
+    """
     t = t.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+    codici = []
+
+    def _stacca(m):
+        codici.append(m.group(1))
+        return "\x00%d\x01" % (len(codici) - 1)
+
+    t = re.sub(r"`([^`]+)`", _stacca, t)
     t = re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", t)
     t = re.sub(r"\*\*\*(.+?)\*\*\*", r"<b><i>\1</i></b>", t)
     t = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", t)
     t = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<i>\1</i>", t)
-    t = re.sub(r"`([^`]+)`", r'<font face="Courier" size="8.2">\1</font>', t)
+    for i, c in enumerate(codici):
+        t = t.replace("\x00%d\x01" % i,
+                      '<font face="Courier" size="8.2">%s</font>' % c)
     return t
 
 def S(nome, **kw):
