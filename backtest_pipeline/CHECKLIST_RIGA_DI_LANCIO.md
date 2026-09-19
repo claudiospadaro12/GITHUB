@@ -25655,3 +25655,38 @@ Con il solo `thisweek`, **il venerdi' sera il calendario non contiene nulla del 
 
 📌 **Parente stretta della 457**: lì un blocco troppo largo bocciava 141 script sani, qui un allarme troppo largo avrebbe acceso un rosso ogni weekend. **Stesso errore, due volte nello stesso giorno.**
 
+
+---
+
+## CLASSE 462 — 🧬🔀 IL FIX DI **FAMIGLIA** APPLICATO AL FILE **GENERICO** E NON ALLA VARIANTE `_Ottimizzato` **CHE È QUELLA IN CAMPO** — e il censimento eredita l'errore (19/09/2026)
+
+**Il caso.** Censimento dei binari della rosa (`report/I_BINARI_DELLA_ROSA_2026-09-19.md`). La sedia `770411` (**MAXMIN DAX SHORT**, D30EUR M15, in campo su **due** conti: 50503392 e 50504263) risultava **allineata a HEAD** sul 100k: delta **zero** righe. Sembrava la buona notizia della giornata — e per metà lo è. Ma «allineata a HEAD» era stata letta come «senza difetti», e sono due cose diverse.
+
+🔴 **`InpOneTradePerDay` è DICHIARATO e MAI LETTO in `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` ANCHE A HEAD**: `grep -c "InpOneTradePerDay"` = **1** (la sola dichiarazione, r.66). Il fix del 03/09 (`7d0da9f9`, *«InpOneTradePerDay ora e' letto davvero»*) è stato applicato ad `ABTG_MaxMinNotte.mq5` (**5** occorrenze) e ad `ABTG_ORB_Ottimizzato.mq5` (**6**) — **non alla variante `_Ottimizzato` del MaxMin, che è quella attaccata ai grafici**. Il conto a HEAD su tutta la cartella `mql5/Experts/`: **1 occorrenza** anche in `ABTG_Londra_ORB`, `ABTG_MaxMinNotte_DAX_Short_Ottimizzato_MFE`, `ABTG_ORB_Fibo`.
+
+**E la seconda metà del difetto è nel CENSIMENTO, non nel codice.** `report/CENSIMENTO_BINARI_50503392_2026-09-18.md` elencava i difetti **#2 (breakeven annegato nel parziale)** e **#6 (OneTradePerDay)** sotto *«`ABTG_MaxMinNotte` → MAXMIN ORO, **MAXMIN DAX**»*. 🔴 **MAXMIN DAX non gira `ABTG_MaxMinNotte.mq5`**: gira `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` (`CODA_01`, `chart32` e `chart03`, per nome). Verificato nel vintage in campo (`6074126d`): il breakeven **c'è già** ed è **fuori** dal ramo del parziale (`bool parzOK = (cv>0 && cv<vol && gTrade.PositionClosePartial(ticket,cv));`). 👉 **Il danno vero era su una sedia sola, non su due.**
+
+### 🧪 E il contro-esempio, perché il difetto non si gonfia nell'altra direzione
+Il censimento dava al difetto #6 il peso misurato sul gemello `ABTG_ORB`: **+25% di frequenza**. **Su `770411` quel numero non è trasferibile**, e l'ho verificato nel codice invece di ereditarlo: l'EA è **short-only** (`InpAllowLong=false`, r.71), piazza **un solo pendente**, e `gPhase` va `WAIT → PLACED → DONE` **senza mai tornare a WAIT dentro la giornata** (r.162: `ResetDay()` scatta solo al cambio di `day_of_year`). **Un ingresso al giorno c'è già, per costruzione.** 👉 Il difetto è di **etichetta** (il pannello promette una regola che il codice non applica), non di **frequenza**, e l'impatto va scritto **[NON MISURATO e strutturalmente limitato]**.
+
+### La regola
+🔴 **Un fix «di famiglia» si verifica contandolo nel file CHE GIRA, non nel file che porta il nome della famiglia.** E prima ancora: **quale file gira lo dice `CODA_01` (l'EA attaccato al grafico), non il nome della strategia.**
+- ✅ **Controllo da fare, due comandi**: (1) `CODA_01` → nome esatto dell'EA per quel magic; (2) `grep -c <InpNuovo> <quel file>` a HEAD: se è **1**, l'input è dichiarato e mai letto.
+- ✅ **E quando un fix tocca una famiglia, si elenca per nome chi NON l'ha ricevuto.** Il commit `7d0da9f9` nomina due EA; i fratelli rimasti indietro non erano scritti da nessuna parte.
+- 🔴 **Corollario che vale per tutti i censimenti**: `delta con HEAD = 0` significa *«gira il codice che abbiamo»*, **non** *«gira codice sano»*. Se HEAD ha il difetto, l'allineamento lo conserva intatto.
+
+---
+
+## CLASSE 463 — 🩹🕰️ DOPO UNA TOPPA **RETRO-APPLICATA A UN VINTAGE**, IL BINARIO IN CAMPO NON CORRISPONDE A **NESSUN COMMIT**: il righello smette di identificare, e la data dell'`.ex5` lo fa sembrare fresco (19/09/2026, figlia della 442 e della 456)
+
+**Il caso.** La toppa per ticket del 19/09 è stata costruita — **giustamente** — sul vintage **in campo** (`3af47ed9`, 08/08) e non su HEAD, per non trascinare in campo 534 righe e 21 input mai validati (classe 442). I tre sorgenti patchati stanno in `backtest_pipeline/toppe_da_applicare/2026-09-19/` e valgono `wc -l` **2090 / 2190 / 2122**.
+
+🔴 **Nessuno di quei tre numeri corrisponde a una revisione di `mql5/Experts/`.** La storia di `ABTG_DAX_Apertura_EU.mq5` ha 28 revisioni con conteggi 1224 … 2132, 2169, 2311, 2333, 2360, 2367: **2190 non c'è, e non ci sarà mai**, perché il file patchato **non vive nell'albero degli EA**. 👉 Dopo l'F7, il metodo di identificazione usato da tutti i censimenti di casa — *conteggio righe univoco + `#property version` + presenza Guardian + finestra temporale dell'`.ex5`* — **non identifica più niente**: restituisce «vintage sconosciuto» su un binario che invece sappiamo benissimo cos'è.
+
+🔴 **E la colonna `COMPILATO IL` diventa attivamente ingannevole.** Il prossimo `CODA_06` stamperà **`2026-09-19`** accanto a un EA il cui codice è **dell'8 agosto più 58 righe**: niente guardia A4 (`bc110939`, 14/08), niente Guardian (`d83c1960`, 19/08), e — verificato nel file patchato, r.78 — ancora `#define ABTG_DEF_RISK 2.0`, cioè **il FIX C4 firmato il 02/09 NON è dentro**. Chi legge solo la data conclude «binario aggiornato». È falso.
+
+### La regola
+🔴 **Una toppa retro-applicata va registrata come un VINTAGE A SÉ, con la sua impronta, nel posto dove il censimento va a guardare** — altrimenti si è appena fabbricato un binario non identificabile per salvare una validazione.
+- ✅ **Cosa deve portare la registrazione**: nome file · vintage di base (commit) · `wc -l` **e** conteggio `CODA_06` (= `wc -l` + 1, classe **456**) · sha dello scheletro · **l'elenco per nome dei fix che NON contiene**. Quest'ultimo è il pezzo che di solito manca, ed è quello che serve a chi dovrà schierare la sedia.
+- ✅ **E la frase da scrivere sempre accanto all'F7**: *«questa ricompilazione porta X e NON porta Y, Z»*. Il 19/09 l'F7 autorizzato porta la chiusura per ticket e **non** porta A4, Guardian e C4: la sedia `770101` sul 50503392 resta quella di agosto, con una toppa.
+- 🟠 **Rilievo della stessa famiglia, trovato lo stesso giorno (classe 456 applicata a metà)**: `backtest_pipeline/toppe_da_applicare/2026-09-19/LEGGIMI.md` r.44 dice che il referto notturno *«deve mostrare 2090 / 2190 / 2122 al posto di 2032 / 2132 / 2064»* — ma `CODA_06` stamperà **2091 / 2191 / 2123** al posto di **2033 / 2133 / 2065**. Il referto della riga di lancio lo ha già corretto; il `LEGGIMI.md` che **viaggia insieme ai sorgenti** no. Chi verifica leggendo il LEGGIMI conclude che la toppa **non è entrata**.
