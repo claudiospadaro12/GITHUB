@@ -534,9 +534,39 @@ def main():
                  ", ".join(sorted({r.get("strategy", "?") for r in ereditate}))), ""]
 
     # ---------- riepilogo per EA ----------
+    #  18/09/2026 -- SI RAGGRUPPA PER (commento, MAGIC), NON PER SOLO COMMENTO.
+    #  Motivo misurato: `770250` (GatedShort, viva) e `770201` (spenta dall'11/08)
+    #  scrivono la STESSA identica stringa "Nasdaq Apertura US SELL".
+    #  MISURATO prima di scrivere la patch, e il numero ridimensiona il caso:
+    #    - commenti condivisi da piu' di un magic in tutto il CSV: TRE
+    #      ("DAX Apertura EU OTT BUY" 770102/770111 - "DAX M3 L" 770501/770502 -
+    #       "Nasdaq Apertura US SELL" 770201/770250);
+    #    - GIORNI in cui la pagella ha davvero fuso due magic: UNO SOLO,
+    #      il 27/07 su "DAX M3 L".
+    #  Quindi il danno passato e' piccolo; il motivo per cui la patch vale e'
+    #  che la collisione Nasdaq scatta il giorno in cui si riarma una seconda
+    #  sedia su quel simbolo -- cioe' esattamente quello che stiamo per fare.
+    #  Stessa famiglia della classe 426 (li' bastavano le maiuscole a
+    #  distinguerle, qui nemmeno quelle).
+    #  L'etichetta resta il commento NUDO quando quel commento appartiene a un
+    #  magic solo -- cosi' le pagelle vecchie restano confrontabili. Il magic si
+    #  aggiunge fra parentesi quadre SOLO quando serve davvero a disambiguare.
+    magic_per_commento = defaultdict(set)
+    for r in oggi:
+        c = (r.get("strategy") or "").strip()
+        if c:
+            magic_per_commento[c].add(str(r.get("magic", "?")).strip())
+
+    def etichetta_ea(r):
+        c = (r.get("strategy") or "").strip()
+        m = str(r.get("magic", "?")).strip()
+        if not c:
+            return "magic " + m
+        return c if len(magic_per_commento[c]) == 1 else "%s [%s]" % (c, m)
+
     perEA = defaultdict(list)
     for r in oggi:
-        perEA[r.get("strategy") or ("magic " + str(r.get("magic", "?")))].append(r)
+        perEA[etichetta_ea(r)].append(r)
 
     out += ["## Chi ha operato", "",
             "| EA | Trade | P&L | Durata media | Come sono usciti | Frazione del giorno (solo vincenti) |",
