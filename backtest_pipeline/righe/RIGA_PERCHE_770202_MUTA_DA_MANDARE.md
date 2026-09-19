@@ -50,14 +50,15 @@ esce con la sua data davanti**, presa dal nome del file.
 
 ## ▶️ LA CORSA (un comando solo)
 
-`<PIN>` = l'hash del **commit** che contiene questo pacchetto.
+`9d7ca3b00c05f1183905523e0d61f45e7b14cbbb` = l'hash del **commit** che contiene questo pacchetto.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='<PIN>'; $p="$env:USERPROFILE\RIGA_PERCHE_770202_MUTA.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='9d7ca3b00c05f1183905523e0d61f45e7b14cbbb'; $p="$env:USERPROFILE\RIGA_PERCHE_770202_MUTA.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_PERCHE_770202_MUTA.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_PERCHE_770202_MUTA_v1' -Quiet)){ throw 'SCRIPT VECCHIO: il file scaricato non ha il marcatore PERCHE_770202_MUTA.' };
-    $global:LASTEXITCODE=0; & $p -Pin $pin -Giorni 25; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE - leggi il REFERTO sul Desktop' } }
+    $global:LASTEXITCODE=0; & $p -Pin $pin -Giorni 25; if($LASTEXITCODE -ne 0){ Write-Host 'ESITO: PARZIALE - leggi il REFERTO sul Desktop' };
+    Write-Host 'RACCOLTA -- questi file devono esistere sul Desktop:'; Get-ChildItem ([Environment]::GetFolderPath('Desktop')) -Filter 'PERCHE_770202_MUTA_*' | Select-Object Name, Length, LastWriteTime | Format-Table -AutoSize }
 ```
 
 Dura **secondi**: legge file di testo, non tick.
