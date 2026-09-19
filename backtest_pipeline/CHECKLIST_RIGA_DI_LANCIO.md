@@ -25188,3 +25188,68 @@ perché…»), mai in silenzio.
 - 🔁 **Vale anche al rovescio**: se la tabella intera è FAVOREVOLE su una colonna che non stavamo
   guardando, quella colonna è un **candidato in più** — ed è esattamente il motivo per cui il
   09/09 il censimento ha ritrovato `EMA200` sul Dow.
+
+---
+
+## CLASSE 453 — 💰🎚️ IL `-Deposito` CHE IL FILE PROVA **NON DICHIARA AFFATTO**, e i tre round dello **STESSO pacchetto** ne vogliono **DUE DIVERSI** (controllo-preventivo, 19/09/2026, figlia della **366**)
+
+**Il caso.** Scrittura delle righe di lancio di **R190** (`R190a_taglio050_EMA200SHORT_U30USD.txt`,
+`R190b_tfM30_SUPERWAVEDOW_U30USD.txt`, `R190c_tfM30_SUPREVDOW_U30USD.txt`). Tutti e tre i file sono
+lunghi, documentatissimi, e passati da tutti e due gli strati del cancello **sui file prova**. Tutti
+e tre dichiarano e motivano: il magic, l'etichetta, il modello, `@FINOA`, `@FRAZIONEIS`, il pavimento
+tick, il tetto barre, i pin di stringa, il rischio, il cancello di costo.
+
+🔴 **Nessuno dei tre nomina il `-Deposito`.** E il deposito **non sta nel file prova**: sta nella
+RIGA. `RIGA_ROUND_VPS.ps1` r.94 → `[int]$Deposito = 10000`. Una riga scritta "normale" li avrebbe
+mandati tutti e tre a **10.000**.
+
+**Le tre àncore, lette nella fonte grezza (classe 451), sono girate a depositi DIVERSI:**
+
+| round | àncora | deposito **vero** | fonte |
+|---|---|---:|---|
+| `R190a` | R112 `01_short_r1` | **100000** | `risultati_archivio/R112_CORSA_20260826/REFERTO_R112.txt` r.10 |
+| `R190b` | `r120e11` | **100000** | `coda/CODA.txt` r.335 (riga ARMATA) + `REFERTO_RUNNER_2026091{3..8}` r.193 |
+| `R190c` | `R123CATRP` | 🟠 **10000** | `coda/referti/CODA_07_desktop_20260910_033002.log` r.2735 |
+
+**Perché è BLOCCANTE e non un dettaglio.** La **366** l'ha già misurato su questa identica famiglia:
+il deposito cambia il numero di operazioni del **+40%** (131 → 184 posizioni, misurato su `r120e`).
+Con 10.000 l'ancora H1 di `R190b` avrebbe restituito ~131 trade invece di 184 → il file prova dice
+(r.217) *«l'ancora H1 NON riproduce r120e11: si legge SOLO quello»* → **il round sarebbe finito nel
+cestino per un argomento della riga, non per un fatto del mercato**, e la diagnosi sarebbe stata
+*«si riapre il baco del determinismo»*. Due round su tre, in un colpo solo.
+
+**Il controllo incrociato che chiude il caso, e costa due secondi:** il `Profit` di un CSV **dice il
+deposito**. R112 OOS fa `+16948,35` su n=302 (≈ **+17%** → 100k; a 10k sarebbero ~1.700);
+`R123CATRP` OOS `Pass 6` fa `+481,54` (≈ **+4,8%** → 10k). Se il `Profit` non è compatibile con il
+deposito che stai per scrivere sulla riga, **uno dei due è sbagliato**.
+
+### La regola
+🔴 **Il `-Deposito` fa parte dell'IDENTITÀ della cella esattamente come `@FINOA` e `@FRAZIONEIS`,
+e va scritto NEL FILE PROVA.** La **366** diceva *«si legge dal blocco "Si lancia con" del file
+prova»*: questa classe copre il caso in cui **quel blocco non esiste**, e allora non c'è niente da
+leggere e il default vince in silenzio.
+- 📋 **Ogni file prova porta in testa la riga** `#  Si lancia con: -Deposito <N>   (motivo: <...>)`.
+  Se il round ha un'àncora, il motivo è *«il deposito con cui l'àncora è confrontabile»* **e si cita
+  il file dove l'hai letto**.
+- 🚫 **Un pacchetto di round NON eredita un deposito unico.** Qui tre round scritti dallo stesso
+  autore, nella stessa ora, per lo stesso referto, ne vogliono **due valori diversi** — perché
+  seguono àncore diverse. *«Sono dello stesso pacchetto quindi stesso deposito»* è un'inferenza, e
+  le inferenze sui bersagli si pagano.
+- 🧪 **E dove NON c'è àncora, il deposito si SCEGLIE e si MOTIVA con un meccanismo, non con
+  un'abitudine.** Esempio dello stesso giorno (`R187a/b`, `ABTG_MaxMinNotte` su `NASUSD`, mai
+  girato): `SYMBOL_VOLUME_MIN` di `NASUSD` **non è mai stato misurato**, e nell'EA (rr.411-435)
+  `NormVol` restituisce **0** se il parziale scende sotto il lotto minimo → `gPart1` resta `false`
+  → **anche il secondo parziale non parte mai**, e la scala di uscita dichiarata nel file
+  (TP1 50% @1R · TP2 50% @3R · target EMA200 · trailing 4R) **si riduce a "stop in pari + TP
+  finale"**. A 10.000 il lotto richiesto è ~0,65 e il parziale ~0,325: passa **solo se** il lotto
+  minimo ignoto è ≤ 0,325. A 100.000 il lotto è ~6,5 e il parziale 3,25: passa sempre. 👉 Il
+  deposito **non muove solo la scala dei numeri: può SPEGNERE metà della gestione dell'uscita**, e
+  allora il round misura una strategia diversa da quella che promette.
+- ⚖️ **E la scelta si dichiara anche quando è il default.** Su `R190c` il **10000** è quello giusto
+  proprio perché riproduce l'antenato **anche nei suoi difetti** — ma scritto, non subìto: uno
+  stato implicito non è uno stato dichiarato.
+
+📌 Famiglia della **366** (riga armata che contraddice il file) e della **156** (la chiave `.ini`
+che MT5 ignora in silenzio): sono tutte e tre **valori che decidono il risultato e che nessuno
+stampa in faccia a chi legge il verdetto**. 🟢 La difesa che funziona è sempre la stessa: il numero
+si scrive **due volte, in due posti diversi**, e le due scritture si confrontano prima di partire.

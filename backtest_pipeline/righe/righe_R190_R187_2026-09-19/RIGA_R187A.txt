@@ -1,0 +1,21 @@
+$pin='b4442d5843de2b5ed66dba9cd10b364618b0478c'; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=60; $et='R187A'; $ea='ABTG_MaxMinNotte'; $pv='R187a_notteEU_MaxMinNotte_NASUSD.txt'; $dep='100000';
+New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue;
+irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop;
+if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' };
+if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v1' };
+Write-Host 'BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400. Chiudo SOLO quel terminale. NON tocco 50503392, 100k, reale, Pepperstone, Tickmill.' -ForegroundColor Cyan;
+$prima=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,Path); Write-Host '--- TERMINALI PRIMA ---'; $prima | Format-Table -AutoSize;
+$a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert',$ea,'-Prova',$pv,'-Etichetta',$et,'-Pin',$pin,'-TerminaleBacktest','C:\MT5_Backtest','-Modello','4','-Deposito',$dep,'-ChiudiBacktest');
+$pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru;
+if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\MT5_Backtest\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{} };
+$rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('esito ' + $et + ': codice ' + $rc + '   (qui il codice 2 e ATTESO: gamba OOS degenere. Conta il CSV _IS con Trades > 0)') -ForegroundColor Yellow;
+$dopo=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,Path); Write-Host '--- TERMINALI DOPO ---'; $dopo | Format-Table -AutoSize;
+$persi=@($prima | Where-Object { ($dopo.Id -notcontains $_.Id) -and ($_.Path -notlike 'C:\MT5_Backtest\*') });
+if($persi.Count -gt 0){ Write-Host 'ALLARME: sono spariti terminali NON di backtest (forward o CONTO REALE). Controlla subito.' -ForegroundColor Red; $persi | Format-Table -AutoSize } else { Write-Host 'OK: tutti i terminali NON di backtest sono ancora vivi, stessi PID di prima' -ForegroundColor Green };
+Write-Host ('ZIP PRONTO DA MANDARE: ' + $dsk + '\ROUND_' + $et + '.zip') -ForegroundColor Green;
+Write-Host 'FILE ATTESI NELLA CARTELLA DI RACCOLTA:' -ForegroundColor Gray;
+Write-Host ('   REFERTO_ROUND_' + $et + '.txt   (leggi la riga data: DEVE essere di oggi)') -ForegroundColor Gray;
+Write-Host ('   ' + $ea + '_NASUSD_IS_' + $et + '.csv') -ForegroundColor Gray;
+Write-Host ('   ' + $ea + '_NASUSD_OOS_' + $et + '.csv   <-- PUO MANCARE O ESSERE VUOTO: gamba OOS DEGENERE per @FRAZIONEIS 1.0, e voluto') -ForegroundColor Gray;
+Write-Host ('   ' + $pv) -ForegroundColor Gray;
+Get-ChildItem ($dsk + '\ROUND_' + $et) -ErrorAction SilentlyContinue | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize
