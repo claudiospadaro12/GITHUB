@@ -19,7 +19,7 @@ Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 
 # ⓪ 🔴 LE RIGHE CHE CAMBIANO LA MATTINATA
 
-> # 🟢 ZERO — **LUNEDÌ NON SI APPLICA NIENTE. NÉ LE NEWS, NÉ LA NOTTE, NÉ IL WEEKEND.**
+> # 🟢 ZERO — **IN VALUTAZIONE NON SI APPLICA NIENTE. NÉ LE NEWS, NÉ LA NOTTE, NÉ IL WEEKEND.**
 > Due schermate della **FAQ ufficiale FTMO in italiano**, mandate da Claudio il **19/09 alle
 > 23:01-23:02** — 🥇 **[POSTATO DA CLAUDIO]**, il rango più alto che abbiamo su questa materia:
 > - *«Le restrizioni al trading durante la pubblicazione di determinati comunicati stampa si
@@ -32,7 +32,7 @@ Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 >   conti Standard si applicano **solo dopo** aver iniziato su un conto FTMO. **Non si applicano
 >   durante il processo di valutazione.**»*
 >
-> ## 👉 **Quindi lunedì NESSUNA delle sette sedie è toccata da una regola FTMO. Nessuna.** Né le due che tengono posizioni di notte, né quelle che operano sui dati macro.
+> ## 👉 **Quindi da domenica notte NESSUNA delle sette sedie è toccata da una regola FTMO sulle news o sull'overnight. Nessuna.** Né le due che tengono posizioni di notte, né quelle che operano sui dati macro.
 > 🟢 Conferma quello che avevamo già in casa dal 13/08 (`docs/REGOLAMENTO_FTMO_2026-08.md` **r.45**),
 > **ma ora con una seconda restrizione che non avevamo messo a fuoco** (notte/weekend) e con una
 > fonte di rango superiore. Il problema nasce sul **conto finanziato**, cioè fra settimane — ed è
@@ -47,14 +47,25 @@ Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 > di mercato reale invece che alle 08:00, e il Dow alle **12:30** invece che alle 14:30.
 > 🔴 **Questa non è un'ipotesi di rischio: è una certezza aritmetica se nessuno rimappa.**
 > ⚠️ Etichetta della fonte: **[LETTO-VIA-SEARCH, 13/08]**, non verificata a terminale.
-> **Si chiude in 10 secondi lunedì**: orologio di Market Watch contro orologio di Windows (§④ passo 4).
+> **Si chiude in 10 secondi domenica sera**, appena fatto il login: orologio di Market Watch contro orologio di Windows (§④ passo 4).
 
 > ## ② 🔢 **A LEVA 1:15 LE SETTE SEDIE NON ENTRANO: SERVONO 121.894 $ DI MARGINE SU UN CONTO DA 100.000, E QUELLO È IL CASO *PIÙ ECONOMICO* (taglia 0,65%).**
 > A 1,00% servono **187.529 $**. A 1,30% **243.788 $**.
 > 🟢 A **1:50** (che è la leva indici del conto **Standard**) le sette entrano tutte a qualunque
 > taglia fino all'1,00% (**56.259 $ = 56%**).
 > 👉 **La scelta Standard-vs-Swing non è una scelta di regole news: è la scelta che decide se la
-> rosa esiste.** Tabella completa al §②.
+> rosa esiste.**
+>
+> ### 💰 LA TABELLA IN UNO SCHERMO — margine totale delle **sette** sedie, conto 100.000 $
+> | taglia ↓ · leva → | **1:15** *(Swing)* | **1:25** | **1:30** | *1:50 (Standard)* |
+> |---|---:|---:|---:|---:|
+> | **0,65%** | 🔴 **121.894 (121,9%)** · **3 sedie** | 🟠 73.136 (73,1%) · 5 | 🟠 60.947 (60,9%) · 6 | 🟢 ***36.568 (36,6%) · 7*** |
+> | **1,00%** | 🔴 **187.529 (187,5%)** · **2 sedie** | 🔴 112.518 (112,5%) · 4 | 🟠 93.765 (93,8%) · 4 | 🟢 *56.259 (56,3%) · 6* |
+> | **1,30%** | 🔴 **243.788 (243,8%)** · **2 sedie** | 🔴 146.273 (146,3%) · 3 | 🔴 121.894 (121,9%) · 3 | 🟠 *73.136 (73,1%) · 5* |
+>
+> *(«· N sedie» = quante entrano tenendosi sotto il **50% del conto**, cioè con margin level ≥ 200%.
+> Ipotesi, fonti e contro-esempio: §②. Ogni cella è `[INFERITO]` finché non arriva lo screenshot
+> delle specifiche di contratto.)*
 
 > ## ③ 🎯 **E IL DANNO DEL MARGINE NON È LO STOP-OUT — è l'ORDINE RIFIUTATO, silenzioso.**
 > Contraddico qui la tesi di partenza, e coi numeri: lo stop-out MT5 scatta a **margin level 50%**,
@@ -181,7 +192,7 @@ valutazione non si applicano.
 ## 1.1 Identità, orari e preset
 
 🔴 **Tre colonne di orario, e servono tutte e tre.** La colonna **BCM** è quella che i preset
-portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **lunedì**.
+portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **domenica sera**.
 
 | magic | EA (`.mq5`) | simbolo BCM | TF | preset (file in repo) | ora IT | **ora server BCM (preset di oggi)** | 🔴 **ora server FTMO (= BCM +2)** |
 |---|---|---|---|---|---|---|---|
@@ -200,7 +211,7 @@ portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **lun
 
 ## 1.2 Contratto misurato e stato di schieramento
 
-| magic | **PF** (fonte) | **DD promesso** | **frequenza** | 🌙 **tiene posizioni oltre la giornata?** *(campo vero)* | 🔴 **STATO PER LUNEDÌ** | cosa manca, esattamente |
+| magic | **PF** (fonte) | **DD promesso** | **frequenza** | 🌙 **tiene posizioni oltre la giornata?** *(campo vero)* | 🔴 **STATO PER DOMENICA NOTTE** | cosa manca, esattamente |
 |---|---|---|---|---|---|---|
 | **`770101`** | **1,41105** OOS · n 270 deal (**193 posizioni**) | **4,3501%** @0,65% · **6,7111%** @1,0% (banco 10k) · **7,2328%** @1,0% (banco 100k) | **0,699-0,705 op/gg** | 🟢 **MAI** — n=39, oltre mezzanotte **0**, weekend **0** | 🟠 **SERVE F7** | il sorgente a HEAD ha la toppa per ticket del 19/09 (2425 righe) ma **non è mai stato compilato**. Copia + F7 sul terminale FTMO. |
 | **`770411`** | **2,05** (promozione 26/07, n 41) | 🟢 **1,27%** @1,0% | **~1,7 op/mese** (21 deal = 14 pos OOS) | 🟢 **MAI** — n=5, oltre mezzanotte **0**, weekend **0**. ⚠️ *si chiama «MaxMinNotte» ma **non opera di notte**: legge il massimo/minimo notturno e apre alle **08:00**, tutte e 5 le volte* | 🟠 **SERVE F7** | codice **già a HEAD** (`5fc0bc31`) e già compilato sul 100k: è la sedia più semplice. Solo copia + F7. |
@@ -217,7 +228,7 @@ portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **lun
 - **Sedie che richiedono una MISURA prima: 1** — `770402`.
 - **Sedie che richiedono un FILE che oggi non esiste: 1** — `770260` (il `.set`).
 - **Sedie fuori: 1** — `770261`, per merito.
-- 🟢 **Zero sedie sono bloccate da una regola FTMO lunedì** (§⓪.ZERO).
+- 🟢 **Zero sedie sono bloccate da una regola FTMO in valutazione** (§⓪.ZERO). 🟠 L'unica clausola che vale **anche** in Challenge è il **gap trading**, e tocca `770511` e `771531` → §Ⓐ.3.
 - 🌙 **Cinque sedie su sette non tengono MAI una posizione oltre la giornata** — misurato sulle posizioni vere di `data/statements/trades_auto.csv`. **Due sì**: `771531` e `770511`. Su **Swing** non è mai un problema; su **Standard da funded** lo diventa (§⑤bis).
 
 ---
@@ -228,11 +239,11 @@ portano scritta **oggi**; la colonna **FTMO** è quella che devono portare **lun
 
 **Formula**: `lotti = rischio_conto / (stop × valore_punto)` → `nozionale = lotti × valore_punto × prezzo` → `margine = nozionale / leva`.
 
-| # | ipotesi | etichetta | come si sostituisce lunedì |
+| # | ipotesi | etichetta | come si sostituisce domenica sera |
 |---|---|---|---|
 | **H1** | **valore punto = 1 unità di valuta quotata per punto indice per lotto** (contract size 1); **oro = 100 $ per dollaro d'oro** | 🟢 **[MISURATO sul campo BCM]** — vedi il contro-esempio 2.1 | Market Watch → tasto destro sul simbolo → **Specification** → riga *Contract size* |
 | **H2** | **margine = nozionale / leva** (margine proporzionale, non fisso per lotto) | 🔴 **[INFERITO]** — alcuni broker usano margine **fisso per lotto** sugli indici | stessa finestra → riga *Initial margin* / *Margin rate* |
-| **H3** | **prezzi** `U30USD` **53.200** · `D30EUR` **25.753** · `NASUSD` **29.474** · `XAUUSD` **4.320** | 🟢 **[MISURATO]** — ultimi prezzi veri per magic in `data/statements/trades_auto.csv` (07/09, 17/09, 18/09, 17/09) | sostituire col prezzo del lunedì |
+| **H3** | **prezzi** `U30USD` **53.200** · `D30EUR` **25.753** · `NASUSD` **29.474** · `XAUUSD` **4.320** | 🟢 **[MISURATO]** — ultimi prezzi veri per magic in `data/statements/trades_auto.csv` (07/09, 17/09, 18/09, 17/09) | sostituire col prezzo di apertura |
 | **H4** | **stop** `770101` **71,9** · `770411` **75,85** *(centro della banda 64,2-87,5)* · `770202` **123,8** · `771531` **104,3** · `770511` **77,1** · `770402` **32,94 $** · `770260` **83,2** | `770101/770202/771531/770511/770402` **[MISURATO]**; `770411` 🔴 **[NON MISURATO]**; `770260` 🔴 **[INFERITO]** | — |
 | **H5** | **EURUSD = 1,160** (per convertire il nozionale `D30EUR` in dollari) | 🟢 **[MISURATO]** `trades_auto.csv` 31/08 | — |
 | **H6** | **conto da 100.000 $**, una posizione per sedia | dichiarata | — |
@@ -414,9 +425,36 @@ Censimento su tutti i 113 `.mq5` di `mql5/Experts/`: **occorrenze in codice eseg
 2426 / 2206 / 2625).
 🔴 **Ma i tre file patchati a HEAD non sono MAI stati compilati da nessuna parte**: il primo F7
 è anche il primo collaudo. Se dà errore, non è una sorpresa — è il collaudo che funziona.
-🔴 **E `ABTG_MaxMinNotte.mq5` (`770402`) ha ancora il difetto**: 32 occorrenze residue sono
-sparse su 14 EA *fuori dalla rosa*, ma la decisione su `770402` (vintage vs HEAD) resta
-aperta al §⑥.
+### 🔴 3.3 UNA SECONDA CORREZIONE, TROVATA STANOTTE — **e riguarda una sedia della rosa**
+
+`report/TOPPA_TICKET_A_HEAD_2026-09-19.md` scrive: *«🟢 Nessuna delle SEI SEDIE di lunedì resta
+col difetto»*, ed elenca `770411`, `771531`, `770511` (0 occorrenze), i tre Apertura (riparati) e
+`ABTG_ORB_Ottimizzato` (già a posto). 🔴 **Ma `ABTG_ORB_Ottimizzato` non è nella rosa, e
+`ABTG_MaxMinNotte.mq5` — che è la sedia `770402` — SÌ.** Quel file compare nell'elenco dei
+*«altri 14 EA … fuori dalle sei sedie»*.
+
+**Verificato a macchina, a HEAD, non dedotto:**
+```
+mql5/Experts/ABTG_MaxMinNotte.mq5:251:  if(newsBlk && InpNewsFlatten){ CancelPendings(); if(SelPos()) gTrade.PositionClose(_Symbol); }
+mql5/Experts/ABTG_MaxMinNotte.mq5:454:  if(isLong && e[0]>openP && bid>=e[0]) { gTrade.PositionClose(_Symbol); ... }
+mql5/Experts/ABTG_MaxMinNotte.mq5:455:  if(!isLong && e[0]<openP && ask<=e[0]){ gTrade.PositionClose(_Symbol); ... }
+mql5/Experts/ABTG_MaxMinNotte.mq5:490:  if(InpCloseAtEnd && SelPos()){ gTrade.PositionClose(_Symbol); ... }
+```
+> ## 🔴 **QUATTRO occorrenze in codice eseguibile, su una sedia che va in campo. Il conteggio «zero difetti nella rosa» era sbagliato per omissione — e lo era anche l'elenco, che ha sostituito una sedia della rosa con una che non c'è.**
+
+🟢 **E però il danno pratico sul conto prop è ZERO, ed è dimostrabile:** `770402` è **l'unica
+sedia su `XAUUSD`** (§③, mappa). Con una sola posizione sul simbolo, *«la più vecchia È la
+nostra»* — la stessa ragione per cui il difetto è stato tollerato per mesi su `770250`.
+🔴 **Diventa un problema il giorno in cui una seconda sedia tocca l'oro**, e quel giorno oggi non
+è previsto. 👉 **Non propongo di ripararlo prima di domenica**: lo strumento di casa
+(`backtest_pipeline/genera_toppa_chiusura_ticket.py`) lo sa già fare, è **una riga di comando**,
+ma una toppa in più a 24 ore dalla partenza è un rischio che non compra niente.
+📌 **Va scritto nel registro, non nascosto**: è la **classe 462** che si ripete
+(fix di famiglia applicato al file generico e non alla variante in campo — qui al contrario:
+elencata la variante e dimenticato il generico).
+
+⚠️ E la decisione su `770402` (vintage col breakeven cieco **vs** HEAD che cambia la frequenza)
+resta comunque aperta al §⑥ **B8**.
 
 > ## 🎯 **In una riga: sul conto prop vanno ricompilati DUE file per la protezione (`DAX_Apertura_EU`, `Dow_Apertura_US`), TRE per avere il binario giusto (`EMA200` a `26a18566`, `SuperWave_DOW_H1_Ott` a `872dba82`, `MaxMinNotte_DAX_Short_Ott` già a HEAD) e UNO perché ci serve la sedia (`Nasdaq_Apertura_US`).** In tutto **sei F7**, più il Guardian.
 
@@ -456,23 +494,23 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 
 ---
 
-# ⑤ ⚠️ COSA PUÒ ANDARE STORTO LUNEDÌ — in ordine di **probabilità × danno**
+# ⑤ ⚠️ COSA PUÒ ANDARE STORTO — in ordine di **probabilità × danno**
 
 | # | cosa | probabilità | danno | contromisura, e chi la fa |
 |---:|---|---|---|---|
 | **1** | 🔴 **I preset girano con gli orari di BCM su un server che sta 2 ore avanti.** Il DAX forma il range alle 06:00 di mercato (mercato chiuso/illiquido), il Dow alle 12:30 (tre ore prima dell'apertura USA) | 🔴 **certa se nessuno rimappa** — è aritmetica, non sfortuna | 🔴 **totale**: le sedie non fanno quello che il contratto dice, e i numeri del backtest **non valgono più** | **passo 4** (leggi l'orologio) + **passo 10** (colonna FTMO del §①.1). 10 secondi + 7 campi. ✍️ Claudio |
 | **2** | 🔴 **`Digits`/`Point` diversi su FTMO.** `770202` usa `InpBufferPoints=1000` che su BCM vale **10,00 punti indice** *(perché `U30USD` ha `_Digits=2`)*. Se `US30` su FTMO ha 1 decimale, gli stessi 1000 punti diventano **100 punti indice**: il livello di rottura si sposta di **dieci volte** | 🟠 media | 🔴 alto: le sedie a buffer (`770101`, `770202`, `770260`) entrano ai prezzi sbagliati, o non entrano mai | **passo 5** (specifiche: riga `Digits`). Se differisce, `InpBufferPoints` e `InpRetestOffsetPts` vanno riscalati — ✍️ **firma di Claudio**, non un aggiustamento automatico |
 | **3** | 🔴 **Ordini rifiutati per margine** (`not enough money`), **non** stop-out. A 1:15 le sette sedie chiedono **121.894 $** a 0,65%: le europee prendono il margine alle 07:00-08:00, le americane trovano il conto pieno alle 14:30-16:30 | 🔴 **alta se il conto è Swing** | 🟠 medio-alto, e **subdolo**: la challenge gira con 3 sedie invece di 7 e il Giornale è l'unico posto dove si vede | leggere la leva vera (**passo 5**) → se è 1:15, **si riduce la rosa PRIMA di accendere**, non dopo. ✍️ Claudio sceglie quali. 📌 E **lo stop-out vero non arriva**: servirebbe equity sotto il 50% del margine (≈ −54%), e il muro del 10% breccia prima |
-| **4** | 🟠 **L'F7 fallisce.** Cinque sorgenti su cinque non sono **mai** stati compilati nella forma che va in campo: i tre Apertura con la toppa (HEAD, 19/09), `EMA200` a `26a18566`, `SuperWave` a `872dba82` | 🟠 media | 🟠 medio: si perde tempo, non soldi — ma lunedì mattina il tempo è la cosa che manca | mandare il testo dell'errore. 🟢 Attenuante misurata: le API usate erano **già tutte presenti** nei file a HEAD, e la stessa forma gira già in campo in `ABTG_ORB_Ottimizzato` v1.04 |
+| **4** | 🟠 **L'F7 fallisce.** **Sei** sorgenti su sei non sono **mai** stati compilati nella forma che va in campo: i tre Apertura con la toppa (HEAD, 19/09), `EMA200` a `26a18566`, `SuperWave` a `872dba82`, `MaxMinNotte_DAX_Short_Ott` a HEAD | 🟠 media | 🟠 medio: si perde tempo, non soldi — 🔴 **ed è la cosa che può far saltare la sera** (§Ⓐ.2) | mandare il testo dell'errore. 🟢 Attenuante misurata: le API usate erano **già tutte presenti** nei file a HEAD, e la stessa forma gira già in campo in `ABTG_ORB_Ottimizzato` v1.04 |
 | **5** | 🟠 **Il Guardian conta la giornata sbagliata.** `InpDailyResetHour=23` è tarato su **BCM**. Su un server GMT+3 le 23:00 sono le 21:00 CEST: il contatore del **−5% giornaliero** si azzera **tre ore prima** del reset FTMO | 🟠 media | 🔴 alto **se si perde una giornata brutta**: il Guardian crede che sia un giorno nuovo mentre FTMO conta ancora quello vecchio | **passo 12**: `InpDailyResetHour=1`. 🔴 E resta `[INCERTO]` finché FTMO non conferma per iscritto quale fuso usa per il reset — è scritto **nel preset stesso** |
 | **6** | 🟠 **`770202` non apre niente.** Muta dal **28/08**: 15 sedute a secco al 18/09 | 🟢 **alta ma NON è un guasto** | 🟡 basso: la sedia c'è e arma ogni giorno, semplicemente il livello non viene toccato | 🟢 **misurato**: è **solo-long** su un Dow che scende, e la siccità massima del motore nel suo stesso OOS è **23 sedute** (`report/PERCHE_770202_E_MUTA_2026-09-19.md`). 🔴 **Le 23 sedute cadono il 30/09**: quello è il giorno in cui il silenzio smette di essere normale |
 | **7** | 🟠 **L'ORO parte al doppio del rischio.** Il preset in repo `sedia_MAXMIN_ORO_770402.set` porta **`InpRiskPercent=1.0`**, ma in campo la sedia gira a **0,5** (`CODA_01` 19/09) e il contratto dice **«prop: solo ≤ 0,5%»** | 🟠 media — **basta caricare il preset senza guardare** | 🔴 alto: DD promesso **19,72%** a 1,0% contro un muro del **10%** | **passo 10**: verificare `InpRiskPercent` a mano, campo per campo. È **due secondi** e vale la challenge |
 | **8** | 🟠 **La taglia non è decisa.** A **1,00%** la Monte Carlo di casa dà **p99 = 12,47%** di drawdown contro un muro **statico del 10%** — cioè **lo sfonda più di una volta su cento**; a **0,65%** dà **~8,1%** e non lo sfonda (`report/METRO_PROP.md` rr.24-25, 65-71) | 🔴 aperta | 🔴 totale | ✍️ **solo Claudio**. 📌 E il numero che avevo già dato regge: a **1,30%** la sola `770101` promette **9,40%** (= 7,2328% misurato a 1,0% su banco 100k, scalato ×1,3) contro il muro del 10% — **una sedia sola** |
 | **9** | 🟡 **Collisione per simbolo** se uno dei due Apertura va in campo col binario vecchio | 🟢 bassa (la toppa è a HEAD) | 🟠 medio | **passo 8**: se l'F7 è fatto, il problema non esiste. `770411`, `771531`, `770511` sono **sicure di natura** (§3.1) |
-| **10** | 🔵 **Una regola FTMO — news, oppure notte/weekend** | 🟢 **ZERO lunedì**, per tutte e sette e per tutti e due i tipi di conto | — | 🟢 **Fonte 🥇 [POSTATO DA CLAUDIO], schermate FAQ ufficiali del 19/09 23:01-23:02**: *«Non si applicano durante il processo di valutazione… indipendentemente dal tipo di conto»*, e la stessa frase per le **posizioni tenute di notte e nel weekend**. Coincide con `docs/REGOLAMENTO_FTMO_2026-08.md` **r.45**. 🔴 **Nasce sul conto FINANZIATO**, e lì colpisce `771531` e `770511` → §⑤bis |
+| **10** | 🔵 **Una regola FTMO — news, oppure notte/weekend** | 🟢 **ZERO in valutazione**, per tutte e sette e per tutti e due i tipi di conto | — | 🟢 **Fonte 🥇 [POSTATO DA CLAUDIO], schermate FAQ ufficiali del 19/09 23:01-23:02**: *«Non si applicano durante il processo di valutazione… indipendentemente dal tipo di conto»*, e la stessa frase per le **posizioni tenute di notte e nel weekend**. Coincide con `docs/REGOLAMENTO_FTMO_2026-08.md` **r.45**. 🔴 **Nasce sul conto FINANZIATO**, e lì colpisce `771531` e `770511` → §⑤bis |
 | **11** | 🔵 **Clausola «gap trading»** (`T-FTMO-2`): vale **sempre**, anche in Challenge, e la lettera (ii) parla di aprire *«due ore o meno prima che un mercato chiuda per almeno due ore»* | 🟡 bassa ma **non zero** | 🔴 **squalifica** — è l'unica clausola che uccide un conto che rispetta tutti i numeri | tocca **`770511`**, che gira `InpStartHour=0`/`InpEndHour=24` e quindi **può aprire il venerdì sera**. 👉 Domanda **già scritta dal 13/08** e mai inviata (§⑥ buco B2) |
 
-> ## 🔴 **QUINDI TI CONTRADDICO, COI NUMERI: il primo pericolo di lunedì NON è lo stop-out per margine.**
+> ## 🔴 **QUINDI TI CONTRADDICO, COI NUMERI: il primo pericolo NON è lo stop-out per margine.**
 > È l'**orologio** (certo, totale, e si chiude in 10 secondi), e subito dopo i **`Digits`** e gli
 > **ordini rifiutati**. Lo stop-out per margine, matematicamente, **non può arrivare**: pretende
 > un −54% che il muro del 10% rende impossibile. 🟢 **La tua intuizione sul margine era giusta;
@@ -482,7 +520,7 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 
 # ⑤bis ⚖️ STANDARD O SWING — **la raccomandazione ha DUE gambe, non una**
 
-🟢 **Niente di questo paragrafo tocca lunedì.** Serve a decidere **adesso** una cosa che morde
+🟢 **Niente di questo paragrafo tocca la partenza.** Serve a decidere **adesso** una cosa che morde
 **fra settimane**, sul conto finanziato — e che però si compra **prima**, quindi va decisa prima.
 
 Fino a stasera la scelta aveva **una** gamba (le news) e **un** costo (il margine). Le due
@@ -504,7 +542,7 @@ stesse due sedie**:
 > 🎯 **La terza via, ed è quella che i numeri suggeriscono**: **Standard**, e le due sedie che
 > tengono di notte si affrontano **quando il conto diventa funded** — o spegnendole, o mettendo
 > `InpFridayClose=true` su `771531` (la manopola **c'è già** ed è a `false`) e una finestra oraria
-> su `770511` (che oggi gira `0-24`). **In valutazione non servono: lunedì non c'è nessuna regola.**
+> su `770511` (che oggi gira `0-24`). **In valutazione non servono: non c'è nessuna regola.**
 > 🔴 **NON LA DECIDO IO.** È una firma di Claudio, ed è **anche una questione di soldi**: Standard
 > e Swing costano prezzi diversi. Io porto i numeri, lui porta la firma.
 
@@ -549,14 +587,14 @@ vuole valutare, la misura si fa — ma è una misura, non un click.
 
 # ⑦ 📌 IN UNA RIGA
 
-**La rosa firmata è di SETTE sedie. Lunedì ne sono schierabili CINQUE** — `770101` · `770411` ·
+**La rosa firmata è di SETTE sedie. Domenica notte ne sono schierabili CINQUE** — `770101` · `770411` ·
 `770202` · `771531` · `770511` — **e tutte e cinque hanno bisogno della stessa identica cosa: una
 copia e un F7 su un terminale che oggi non esiste.** `770402` aspetta una misura, **`770260`
 aspetta un file `.set` che qualcuno ha scritto e non ha committato**, `770261` è fuori per merito.
 🔴 **Ma quante ne regge il conto non lo decide questa tabella: lo decide la leva.** A **1:15** ne
 entrano **tre** a 0,65% e **due** a 1,00%. A **1:50** entrano tutte e sette con il 36% del conto
 impegnato.
-🎯 **Quindi la cosa più preziosa che Claudio può fare lunedì mattina, prima di ogni F7, è aprire
+🎯 **Quindi la cosa più preziosa che Claudio può fare domenica sera, prima di ogni F7, è aprire
 Market Watch e fare due screenshot: l'orologio e le specifiche di contratto.** Trenta secondi che
 valgono più di tutta la notte di lavoro che c'è dietro questo file.
 
