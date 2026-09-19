@@ -1,13 +1,19 @@
-# 📦 PACCHETTO DI SCHIERAMENTO PROP — **lunedì 21/09/2026, FTMO**
+# 📦 PACCHETTO DI SCHIERAMENTO PROP — **si parte DOMENICA NOTTE 20/09/2026, FTMO**
 
 **Scritto la notte del 19→20/09/2026** · branch `lavoro` ·
 🚫 **SOLA LETTURA**: nessun EA, nessun preset, nessun forward, nessuna taglia toccata.
 Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 🚫 **Nessuna taglia scelta qui dentro**: `InpRiskPercent` resta **[NON DECISO da Claudio]**.
 
+> ## 🔴 CAMBIO DI DATA — Claudio, 19/09 notte: *«Io pagherò la challenge e si inizia domani notte. Prepara tutto»*
+> **Non è più lunedì mattina: è DOMENICA 20/09, alla riapertura dei mercati.**
+> La finestra si accorcia di una notte, e il **cammino critico diventa l'installazione del
+> terminale FTMO** — che oggi sul VPS **non esiste**. Cronologia con i minuti al **§Ⓐ**.
+
 > ## 🎯 A COSA SERVE QUESTO FILE
-> Lunedì mattina si apre questo, si parte dal **§④ ORDINE DI ACCENSIONE** e si spunta.
-> Tutto il resto è il **perché** dei numeri che stanno lì dentro.
+> Domenica sera si apre questo, si parte dal **§Ⓐ CRONOLOGIA** (che dice *quando*) e si esegue
+> il **§④ ORDINE DI ACCENSIONE** (che dice *come si verifica*). Tutto il resto è il **perché**
+> dei numeri che stanno lì dentro.
 
 ---
 
@@ -65,7 +71,112 @@ Conto reale **10105439** non toccato in nessun modo. Nessun round lanciato.
 
 ---
 
-# ① 🪑 LA TABELLA DELLE SEDIE — chi si schiera lunedì
+# Ⓐ ⏱️ LA SERA DI DOMENICA — cronologia, coi minuti
+
+## A.1 🟢 PRIMA DI TUTTO, LA COSA CHE TOGLIE ANSIA — **ed è MISURATA**
+
+> ## 🟢 **DOMENICA SERA NON SI OPERA: SI ACCENDE IL CONTO.**
+> Contato su **96 posizioni vere** della rosa in `data/statements/trades_auto.csv`:
+> **nessuna sedia della rosa ha MAI aperto niente di domenica. Zero volte.**
+> Le prime aperture vere dopo un weekend cadono **lunedì**, e la rosa ha appuntamenti precisi:
+> `770402` ORO alle **07:00** (10 volte su 11), `770101` e `770411` alle **08:00**,
+> `770202` alle **14:30-15:00**.
+> 👉 **Se domenica sera il conto è acceso e i preset sono giusti, la prima operazione che conta
+> arriva lunedì mattina.** C'è tutta la notte di margine.
+
+🔴 **MA con due eccezioni misurate, e sono le stesse due di sempre** — vedi §A.3.
+
+## A.2 ⏱️ LA CATENA, passo per passo, col tempo che costa
+
+🔴 **Il cammino critico è l'installazione**: sul VPS ci sono **SETTE cartelle dati** e
+**nessuna è FTMO**. Tutto quello che c'è sotto va fatto **da zero**, la prima volta.
+
+| quando | cosa | 🖥️ dove | chi | ⏱️ **[STIMA]** |
+|---|---|---|---|---:|
+| **appena possibile** | 💰 **comprare la challenge** e ricevere le credenziali per mail | browser | ✍️ Claudio | **5-20 min** *(dipende da FTMO, non da noi)* |
+| ↓ | ⬇️ scaricare l'installer MT5 dalla dashboard FTMO e installarlo in **`C:\MT5_FTMO`** — 🔴 **non** dentro una cartella BCM | 🖥️ VPS | ✍️ Claudio | **10-20 min** |
+| ↓ | 🔑 login col conto FTMO + attesa della sincronizzazione simboli | 🪟 terminale **FTMO** | ✍️ Claudio | **2-5 min** |
+| ↓ | 🔴 **📸 le due letture che valgono tutta la notte**: orologio di Market Watch vs orologio di Windows, e **Specification** di US30 / GER40 / NAS100 / XAUUSD | 🪟 **FTMO** | ✍️ Claudio | **5 min** |
+| ↓ | 📁 copiare **6 `.mq5` + `ABTG_Guardian.mq5`** in `MQL5\Experts` e **`ABTG_PausaGuardian.mqh`** in `MQL5\Include` | 🖥️ VPS | ✍️ Claudio *(a mano con Esplora Risorse)* | **5-10 min** |
+| ↓ | 🔨 **sei F7** in MetaEditor | 🪟 **FTMO** | ✍️ Claudio | **10-20 min** 🔴 *senza tetto se uno fallisce* |
+| ↓ | 📊 aprire **7 grafici**, simbolo + TF giusti | 🪟 **FTMO** | ✍️ Claudio | **10 min** |
+| ↓ | ⚙️ caricare **7 preset** e 🔴 **rimappare a mano gli orari (+2h)** e la **taglia** | 🪟 **FTMO** | ✍️ Claudio | 🔴 **20-30 min — è il passo più lungo e il più facile da sbagliare** |
+| ↓ | 🛡️ attaccare `ABTG_Guardian` col preset FTMO e `InpDailyResetHour` ricalcolato | 🪟 **FTMO** | ✍️ Claudio | **5 min** |
+| ↓ | ▶️ **AutoTrading ON** + controllo delle faccine sui 7 grafici | 🪟 **FTMO** | ✍️ Claudio | **5 min** |
+| | | | **TOTALE** | 🔴 **~75-125 minuti** *(un'ora e mezza / due ore)*, **più** il tempo d'acquisto |
+
+> ## 🎯 **CI STA IN UNA SERA — ma solo se si comincia presto e se arriva il `.set` di `770260`.**
+> 🔴 **Due cose possono far saltare la sera, e nessuna delle due dipende da Claudio:**
+> **(1)** un **F7 che fallisce** — sei sorgenti su sei non sono **mai** stati compilati nella
+> forma che va in campo; **(2)** il **`.set` di `770260` che non è in repo** (buco **B6**), e
+> senza quello la settima sedia non si accende.
+> 🟢 **E la buona notizia: se la sera va storta non si perde niente**, perché la prima operazione
+> vera è lunedì alle 07:00-08:00. **La notte è un cuscinetto, non una scadenza.**
+
+## A.3 🪤 LA RIAPERTURA DELLA DOMENICA — **zona grigia dichiarata, e due sedie ci passano dentro**
+
+### La regola, testuale
+Il **«gap trading»** sta fra le **Forbidden Trading Practices**, e quelle
+🔴 **valgono SEMPRE — anche su Swing e anche in Challenge**
+(`docs/REGOLAMENTO_FTMO_2026-08.md` **r.83**, nota finale). Non è come le news, che in
+valutazione non si applicano.
+
+> *«performing **gap trading** by opening simulated trades (i) **when major global news,
+> macroeconomic events, or corporate reports or earnings are scheduled**…, or (ii) **two hours or
+> less before a relevant financial market is closed for at least two hours**»*
+> — e il nostro stesso dossier conclude (**r.83** e **r.149**):
+> *«Letteralmente vieta aprire PRIMA della chiusura, non DOPO la riapertura; però FTMO etichetta
+> il gap trading come "high-risk practice… due to increased volatility". **AMBIGUO per la nostra
+> famiglia gap-fill: DA CHIEDERE PER ISCRITTO»* · *«SENZA risposta scritta del supporto, la
+> famiglia gap-fill NON va caricata su FTMO.»*
+
+### 🔎 Chi, della rosa, **può** aprire alla riapertura — verificato nei sorgenti E nel campo
+
+| sedia | il codice glielo permette? | cosa ha fatto **davvero** in campo |
+|---|---|---|
+| `770101` DAX Apertura | ❌ no: `InpSessionHour=8` | 🟢 aperture solo alle **08-16**, mai prima delle 08 |
+| `770411` MaxMin DAX Short | ❌ no: `InpPlaceHour=7:59` | 🟢 **tutte e 5** le aperture alle **08** |
+| `770402` MaxMin ORO | ❌ no: `InpPlaceHour=7:00` | 🟢 **10 su 11** alle **07**, una alle 08 |
+| `770202` Dow Apertura | ❌ no: `InpSessionHour=14:30` | 🟢 **tutte e 4** alle **15** |
+| `770260` Nasdaq RETEST | ❌ no: `InpSessionHour=14:30` | ⚪ **[NON MISURATO]**, mai operata |
+| 🔴 **`771531` EMA200 Dow** | ✅ **SÌ** — verificato: `CutoffCheck()` (r.446-453) **cancella i pendenti** dopo le 19:00, **non impedisce di entrare prima**. Nessun filtro sul giorno della settimana | 🔴 **lo ha già fatto**: **17/08 alle 01:21 e alle 02:41 server**, su `U30USD`. E il **lunedì è il suo giorno più operoso: 10 aperture su 21** |
+| 🔴 **`770511` SuperWave Dow** | ✅ **SÌ, senza nemmeno una guardia** — `InpUseTimeWindow` ha **default `false`** (r.93) e **non è in nessun `.set`**: la finestra `0-24` è **inerte**, l'EA può entrare a qualunque ora, qualunque giorno | 🔴 **lo ha già fatto**: **31/08 alle 06:00** (×2) e **07/09 alle 05:00** (×2). Cluster di aperture alle **03-06**. E il **lunedì vale 8 aperture su 16, cioè metà** |
+
+> ## 🔴 **Le due sedie che tengono posizioni di notte sono LE STESSE DUE che aprono all'alba del lunedì — e per tutte e due il LUNEDÌ è il giorno più operoso dell'anno (48% e 50% delle aperture contro un 20% atteso).**
+> 🧪 **Contro-esempio, perché la concentrazione potrebbe essere un artefatto**: se fosse un caso di
+> campione, le altre cinque sedie mostrerebbero lo stesso sbilanciamento. **Non lo mostrano**:
+> `770101` apre su tutti i giorni in proporzione alle sue 39 posizioni, e `770411`/`770202`/`770402`
+> non hanno **nemmeno una** apertura fuori dal loro orario fisso. 👉 **La concentrazione del lunedì
+> è del meccanismo, non del campione** — ed è esattamente il meccanismo che FTMO chiama *gap trading*.
+
+### 💡 LA MIA RACCOMANDAZIONE (è una raccomandazione, non un divieto — la firma è di Claudio)
+
+> ## 🟠 **Tenere `770511` SuperWave SPENTA la prima notte, e accenderla lunedì mattina.**
+> **Tre ragioni, in ordine di peso:**
+> **(1)** è l'unica sedia della rosa **senza nessuna guardia oraria attiva** — la manopola che
+> dovrebbe fermarla (`InpUseTimeWindow`) è a `false` per default e non sta in nessun preset:
+> non è che *abbiamo deciso* di lasciarla libera, è che **nessuno l'ha mai accesa**;
+> **(2)** è quella che **ha davvero aperto all'alba**, con le date in mano;
+> **(3)** è anche la **più cara in margine** (29.901 $ a 0,65%/1:15, il 24,5% del totale): tenerla
+> ferma la prima notte **libera margine** proprio quando il conto è più vulnerabile.
+> 💸 **Il costo, detto onestamente**: SuperWave fa ~10,8 operazioni al mese e metà cadono di
+> lunedì. Spegnerla una notte **può costare un'operazione**. **Non è gratis, ed è un cambio di
+> frequenza, non una precauzione a costo zero.**
+>
+> 🟡 **Su `771531` EMA200 NON lo raccomando**, e dico perché: è l'unica sedia della rosa che passa
+> **tutti** i cancelli alla lettera (PF OOS **1,52**, n **517**, **30/30 PASS** a walk-forward
+> tick). Spegnere la sedia migliore per un'ambiguità di regolamento è un prezzo alto per una
+> protezione che nessuno ci ha chiesto per iscritto. 👉 **Invece: si manda la domanda al supporto
+> (è già scritta, buco B4) e si decide con la risposta in mano.**
+>
+> 🔴 **E la cosa onesta da scrivere per ultima: non c'è nessuna regola FTMO che vieti di aprire
+> DOPO la riapertura.** La lettera parla di aprire **prima** di una chiusura. La zona grigia è lo
+> **spirito** della clausola, non il testo. 👉 **Quindi questa è prudenza, non conformità** — e
+> chi decide quanta prudenza comprare, al prezzo di un'operazione, è Claudio.
+
+---
+
+# ① 🪑 LA TABELLA DELLE SEDIE — chi si schiera
 
 ## 1.1 Identità, orari e preset
 
