@@ -1,0 +1,274 @@
+; ==========================================================================
+; ABTG_MaxMinNotte_DAX_Short_Ottimizzato -- SEDIA 770411 -- D30EUR M15
+; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.
+; Generato il 20/09/2026 da backtest_pipeline/rimappa_preset_ftmo.py. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; BERSAGLIO ....: terminale MT5 FTMO (challenge 100k 2-Step).
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest).
+; ORIGINALE ....: mql5/Presets/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_M15_770411_100K.set
+;                 sha1(12) 9bacee5184e2 -- se cambia, questo file va rigenerato.
+;
+; ATTENZIONE, QUESTA SEDIA HA **DUE** ORIGINALI IN REPO E IO HO SCELTO:
+;   base usata ..: mql5/Presets/...ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_M15_770411_100K.set  -> InpRiskPercent=0.65, InpUsaGuardian=true
+;   NON usata ...: mql5/Presets/sedie_piccolo/recupero2/...  -> InpRiskPercent=1.0
+;                  e SENZA la riga InpUsaGuardian.
+;   PERCHE': 0,65% e' la taglia firmata di casa e il cap C1 (3,25% = 5 x 0,65)
+;   e' tarato su quella; la famiglia recupero2 e' quella del DEMO PICCOLO
+;   50503392. Su un 100k FTMO con perdita giornaliera al 5%, 1,0% per
+;   operazione x 5 posizioni aperte = il limite giornaliero in un colpo solo.
+;   *** E' UN PARAMETRO DI RISCHIO: LA SCELTA VA CONFERMATA DA CLAUDIO. ***
+;   Se la firma dicesse recupero2, questo file si rigenera in 10 secondi con
+;   backtest_pipeline/rimappa_preset_ftmo.py cambiando il percorso di partenza.
+;
+; PERCHE' +2, e da dove viene il numero
+;   docs/REGOLAMENTO_FTMO_2026-08.md r.130: server FTMO = GMT+2 inverno /
+;     GMT+3 estate, cioe' ORA ITALIANA +1.
+;   CLAUDE.md (regola fissa): server BCM = ORA ITALIANA -1.
+;   Oggi 19/09/2026 siamo in ora estiva: IT=UTC+2, BCM=UTC+1, FTMO=UTC+3.
+;   ==> FTMO = BCM + 2. Un preset non rimappato farebbe partire la sedia
+;       DUE ORE PRIMA, su un mercato che non e' quello misurato.
+;
+; COSA E' CAMBIATO -- e NIENTE ALTRO
+;   input                  BCM    FTMO   ora italiana
+;   InpBoxStartHour        23     1      00:00 IT (= 23:00 BCM = 01:00 FTMO)
+;   InpBoxEndHour          4      6      05:59 IT (= 04:59 BCM = 06:59 FTMO)
+;   InpPlaceHour           7      9      08:59 IT (= 07:59 BCM = 09:59 FTMO)
+;   InpEntryCutoffHour     8      10     09:30 IT (= 08:30 BCM = 10:30 FTMO)
+;   InpCloseHour           17     19     18:30 IT (= 17:30 BCM = 19:30 FTMO)
+;
+; NOTE DI QUESTA SEDIA
+;   IL BOX NOTTURNO CAMBIA GIORNO, E VA DETTO.
+;     BCM : box da 23:00 del giorno PRIMA fino a 04:59 di oggi (scavalla).
+;     FTMO: box da 01:00 a 06:59 DELLO STESSO GIORNO (NON scavalla piu').
+;     E' LO STESSO ISTANTE REALE: BCM=UTC+1 -> 22:00-03:59 UTC;
+;     FTMO=UTC+3 -> le stesse 22:00-03:59 UTC si leggono 01:00-06:59.
+;   CONTROLLATO NEL SORGENTE, non assunto: ComputeBox() r.203-206 fa
+;     'if(tStart>=tEnd) tStart-=86400'. Con 23>=4 il ramo SCATTA (box di ieri);
+;     con 1<6 il ramo NON scatta (box di oggi). In tutti e due i casi la
+;     finestra coperta e' la stessa. Il ramo dello scavalco non serve piu',
+;     e la sua assenza e' CORRETTA, non una dimenticanza.
+;   Piazzamento 07:59 -> 09:59, cutoff 08:30 -> 10:30, flat 17:30 -> 19:30:
+;     tutti nello stesso giorno, ordine preservato (box < place < cutoff < close).
+;
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
+;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
+;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
+;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
+;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
+;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
+;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
+;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
+;   in calendario per il 25/10/2026.
+; --------------------------------------------------------------------------
+; ==========================================================================
+; ABTG_MaxMinNotte_DAX_Short_Ottimizzato -- SEDIA 770411 -- D30EUR M15
+; Conto: DEMO 100K 50504263, cartella "C:\Program Files\BCM Markets MT5
+; Terminal -V3", profilo ATTIVO "SQUADRA 100K".
+; NON il piccolo 50503392 (cartella SENZA -V3). NON il reale 10105439.
+; Scritto il 12/09/2026 dall'architetto-prop. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; CHE COS'E' QUESTO FILE, in una riga:
+;   E' la FOTOGRAFIA dei parametri che GIRANO OGGI, non una proposta e non un
+;   miglioramento. NESSUN VALORE E' STATO SCELTO DA ME: sono tutti COPIATI
+;   dalla foto del .chr vivo. Dove qualcosa non torna c'e' un RILIEVO in fondo,
+;   e il valore resta com'e'.
+;
+; --------------------------------------------------------------------------
+; 1) DA DOVE VIENE OGNI RIGA -- una sola fonte, dichiarata
+; --------------------------------------------------------------------------
+;   FONTE [MISURATO DA NOI, rango 1]:
+;     backtest_pipeline/coda/referti/CODA_08_preset_dai_chr_20260911_033002.log
+;     righe 3387-3476, blocco:
+;       "--- SEDIA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato su D30EUR magic 770411 [chart03.chr]"
+;       "; terminale: C:\Program Files\BCM Markets MT5 Terminal -V3"
+;       "; profilo: SQUADRA 100K"
+;     Il log e' una LETTURA del file
+;     ...\Terminal\BCA8AD18563BF5B64A433C2662D0A104\MQL5\Profiles\Charts\
+;     SQUADRA 100K\chart03.chr  -- nessuna scrittura, nessun terminale toccato.
+;
+;   SIMBOLO E TIMEFRAME [stessa corsa del runner, file gemello]:
+;     CODA_01_sedie_attaccate_20260911_033002.log riga 75:
+;       "ABTG_MaxMinNotte_DAX_Short_Ottimizzato D30EUR M15 magic 770411 rischio 0.65 [SQUADRA 100K\chart03.chr]"
+;
+;   QUALE CONTO STA IN QUELLA CARTELLA [letto dai GIORNALI, non da una tabella]:
+;     CODA_03_conti_dei_terminali_20260911_033002.log:
+;       "CARTELLA BCA8AD18563BF5B64A433C2662D0A104 ->
+;        C:\Program Files\BCM Markets MT5 Terminal -V3 -> CONTO 50504263"
+;
+; --------------------------------------------------------------------------
+; 2) *** LA DATA DELLA FOTO -- IL CONTRO-ESEMPIO, COSTRUITO PRIMA ***
+; --------------------------------------------------------------------------
+; DOMANDA: un preset scritto da un .chr del 6 settembre descrive la sedia di
+; OGGI, 12 settembre?
+;   -> Il log lo dichiara: "; .chr modificato il: 2026-09-06 08:01".
+;      LA FOTO HA SEI GIORNI. Un .chr si riscrive quando il profilo viene
+;      SALVATO (o alla chiusura del terminale), non a ogni tick: se qualcuno
+;      avesse cambiato un input il 7, l'8, il 9 o dopo SENZA salvare il
+;      profilo, QUESTO FILE NON LO SAPREBBE.
+;   -> QUANTO E' GRAVE, misurato e non stimato: il .chr e' COERENTE con la riga
+;      di CODA_01 della corsa dell'11/09 03:30, che rilegge gli stessi file e
+;      stampa "rischio 0.65" -- ma e' la STESSA fonte riletta, quindi NON e'
+;      una conferma indipendente.
+;   -> CONCLUSIONE ONESTA: questo preset e' *** LA MIGLIOR FOTO CHE ABBIAMO,
+;      ED E' DEL 06/09/2026 ***. L'unica conferma indipendente possibile e'
+;      leggere la finestra Input dell'EA sul terminale 50504263 (-V3), che e'
+;      un gesto sul campo e NON e' nel mio perimetro.
+;
+; --------------------------------------------------------------------------
+; 3) *** COSA C'E' NEL .CHR E QUI NON C'E' -- la differenza dichiarata ***
+; --------------------------------------------------------------------------
+; Il blocco del log stampa "; parametri stampati: 84". Qui sotto ce ne sono
+; *** 52 ***. I 32 mancanti NON sono stati tolti per scelta: NON SONO DELL'EA.
+;
+;   LA PROVA, e non e' un'impressione:
+;   a) gli ultimi 32 (InpMostraEma, InpMostraBollinger, InpEma1..InpEma4,
+;      InpBbPeriodo, InpBbDeviazione, InpMostraMaxIeri..., InpCol*, InpStile*,
+;      InpSpes*, InpMostraEtichette, InpFontSize e un SECONDO InpVerbose) sono
+;      ESATTAMENTE i 32 input di mql5/Indicators/ABTG_Look.mq5, NELLO STESSO
+;      ORDINE -- confronto meccanico dei nomi: coincidono tutti e 32.
+;      ABTG_Look e' un INDICATORE, non un EA.
+;   b) gli stessi 32 compaiono IDENTICI anche sotto "SEDIA: ABTG_TradeExporter
+;      su NZDCAD" (riga 27 del log) -- e ABTG_TradeExporter.mq5 ha QUATTRO
+;      input in tutto;
+;   c) due input con lo stesso nome (InpVerbose due volte, a true e a false)
+;      NON possono stare nello stesso EA: in MQL5 non compila.
+;   -> Quei 32 valori sono gli input dell'INDICATORE ABTG_Look appeso al
+;      grafico, che lo strumento CODA_08 accorpa al blocco <expert>.
+;      *** E' UN DIFETTO DELLO STRUMENTO, segnalato nel rilievo R2. ***
+;      Metterli in un preset di EA vorrebbe dire scrivere il falso.
+;
+;   COME HO DECISO DOVE TAGLIARE (meccanica, non occhio):
+;     ho allineato POSIZIONALMENTE i nomi del blocco del log con le
+;     dichiarazioni "input" di mql5/Experts/ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5
+;     (escluse le righe "input group", che sono etichette e non parametri) e ho
+;     tenuto il PIU' LUNGO PREFISSO in cui i nomi coincidono uno per uno.
+;     Risultato: 52 nomi coincidono nell'ordine; gli altri 32 sono i 32 dell'indicatore.
+;     *** PERCHE' POSIZIONALE E NON "FILTRA PER NOME": *** su questa famiglia i
+;     nomi InpEma1..InpEma4 e InpVerbose compaiono DUE VOLTE nel blocco (una
+;     volta dell'EA, una volta dell'indicatore). Un filtro per nome avrebbe
+;     preso il valore sbagliato. L'ordine e' l'unica cosa che li distingue.
+;
+; --------------------------------------------------------------------------
+; 4) QUALE BINARIO DESCRIVE
+; --------------------------------------------------------------------------
+;   CODA_06_quale_codice_gira_20260911_033002.log (cartella
+;   BCA8AD18563BF5B64A433C2662D0A104):
+;     ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5
+;       VER 1.10   RIGHE 620   compilato il 2026-08-19 23:10
+;   repo oggi: VER 1.10   RIGHE 619   (mql5/Experts/)
+;   -> STESSA VERSIONE, 1 righe di scarto. E la prova forte e' che
+;      l'elenco degli input coincide: 52 su 52, nell'ordine.
+;
+; --------------------------------------------------------------------------
+; 5) E ADESSO I VALORI: DOVE IL VIVO DIVERGE DAL DEFAULT COMPILATO
+; --------------------------------------------------------------------------
+; Senza questo file, trascinare l'EA su un grafico da' un'ALTRA strategia.
+; I default sono stati RISOLTI (macro #define ed enum sostituiti col numero),
+; non letti a occhio; le voci che non ho potuto risolvere sono dichiarate.
+;
+;   | campo                  | default sorgente   | cio' che GIRA
+;   | InpRiskPercent         | default 1          | VIVO 0.65
+;
+;   Default NON risolvibili in un numero (sono STRINGHE), esclusi dal
+;   confronto sopra. Li elenco per nome, col valore vivo accanto:
+;     InpCorrSymbol          default "SPXUSD" -- VIVO "SPXUSD"
+;     InpNewsFile            default "abtg_news.csv" -- VIVO "abtg_news.csv"
+;     InpNewsCurrencies      default "" -- VIVO ""
+;     InpComment             default "MAXMIN DAX SHORT" -- VIVO "MAXMIN DAX SHORT"
+;
+; TRADUZIONE DEI CODICI, per chi rilegge (NON sono scelte, sono letture):
+; TUTTI GLI ORARI SONO IN ORA SERVER BCM (= ora italiana - 1):
+;   box notturno   InpBoxStartHour=23 -> InpBoxEndHour=4/Min=59
+;                  = 23:00-04:59 server = 00:00-05:59 italiane
+;   piazza ordini  InpPlaceHour=7 / InpPlaceMin=59 = 07:59 server = 08:59 IT
+;   taglio ingresso InpEntryCutoffHour=8 / Min=30 = 08:30 server = 09:30 IT
+;   flat           InpCloseHour=17 / InpCloseMin=30 = 17:30 server = 18:30 IT
+; InpMgmtTF=15 = PERIOD_M15 . InpCorrTF=16385 = PERIOD_H1
+; InpSLMode=1 = MM_SL_ATR (enum a r.45 del sorgente: OPPOSITE=0, ATR=1,
+;   FIXED=2) -> lo stop vivo e' ATR su M15 x InpAtrSLmult=2.5.
+;   [!!] QUINDI InpSLFixedPts=3000.0 E' INERTE: il sorgente lo usa SOLO con
+;   InpSLMode==MM_SL_FIXED (r.277 e r.285). Lo trascrivo perche' e' nel .chr,
+;   ma chi legge non deve credere che lo stop sia di 3000 punti.
+;   (Prima stesura di questa nota diceva 'MM_SL_FIXED': ERA SBAGLIATA,
+;    corretta leggendo l'enum. Il valore 1 non e' mai cambiato.)
+; InpUseCorrelation=true -> il filtro di correlazione su SPXUSD H1 e' ATTIVO
+;   (EMA 14/100). E' l'unica delle cinque sedie del 100k che lo ha accesso.
+;
+; --------------------------------------------------------------------------
+; 6) RILIEVI -- cose che ho trovato e NON ho sistemato (non e' il mio mestiere)
+; --------------------------------------------------------------------------
+; R1. MAGIC DOPPIO SU DUE CONTI. Lo stesso magic 770411 gira anche sul
+;     piccolo 50503392. Non e' un problema di esecuzione (i conti sono
+;     separati) ma lo e' per la CONTABILITA': qualunque conteggio che filtri
+;     per magic senza filtrare anche il CONTO mescola due taglie diverse.
+;     Il piano lo sa: azione C1, "rinumerare i magic del conto challenge".
+; R2. DIFETTO DI CODA_08: accorpa al blocco <expert> i 32 input
+;     dell'INDICATORE ABTG_Look. Chiunque usi quel log come fonte senza
+;     accorgersene scrive 32 righe false in un preset di EA. Da correggere
+;     nello strumento (backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1).
+; R3. LA FOTO E' DEL 06/09. Serve una foto .chr fresca prima del giorno 1:
+;     e' l'azione C4 del piano. Questo file va RIGENERATO su quella foto.
+; R4. L'.ex5 NON E' IL .mq5. MT5 esegue il binario; il sorgente accanto non
+;     e' una prova del suo contenuto. Tutto cio' che dico sul binario viene
+;     dall'elenco degli input nel .chr, che e' l'unica traccia del binario
+;     VERO -- ed e' per questo che l'ho usato per tagliare, e non il sorgente.
+; R5. CAMPIONE MINUSCOLO. Il contratto di questa sedia e' n=21 operazioni
+;     (CENSIMENTO_CONTRATTI.md): il MERITO e' sospeso, non promosso. Il
+;     preset descrive cosa gira, NON dice che debba girare il 1o ottobre.
+; ==========================================================================
+
+InpUsaGuardian=true
+InpBoxStartHour=1
+InpBoxStartMin=0
+InpBoxEndHour=6
+InpBoxEndMin=59
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+InpPlaceHour=9
+InpPlaceMin=59
+InpEntryCutoffHour=10
+InpEntryCutoffMin=30
+InpCloseHour=19
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpPendingExpiryMin=90
+InpBufferPoints=1000.0
+InpAllowLong=false
+InpAllowShort=true
+InpSLMode=1
+InpMgmtTF=15
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+InpSLFixedPts=3000.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=3.0
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpRiskPercent=0.65
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpComment=MAXMIN DAX SHORT
+InpMagic=770411
+InpMaxSpread=0
+InpVerbose=true

@@ -66,7 +66,7 @@ script, riga per riga, e viene stampato.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='PIN_DA_SOSTITUIRE'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='25fd32d7ea540f6284ca1b43bc951dec36c130a7'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SCHIERA_FTMO.ps1" -OutFile $p;
     if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_FTMO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SCHIERA_FTMO_v1.' };
     $global:LASTEXITCODE = 0; & $p -ContoAtteso $conto -Pin $pin;
@@ -289,6 +289,36 @@ a mano **deve sopravvivere** — contro-esempio **H**, eseguito. La versione del
    ma **il VPS ha PowerShell 5.1 e io ho girato i contro-esempi su pwsh 7.4.6**.
 7. ⚪ **`InpRiskPercent` (la taglia) non è toccata da niente di tutto questo.** È una firma di
    Claudio e resta **[NON DECISA]**.
+
+---
+
+## ⑦bis 🔴 **UNA COSA SUCCEDE ADESSO IN UN'ALTRA SESSIONE, E CAMBIA LA SERATA**
+
+Mentre scrivevo, nell'albero di lavoro sono comparsi (ancora **NON committati**, quindi **non
+pinnabili** e non toccati da me):
+- `mql5/Presets/FTMO/` — **dieci preset GIÀ RIMAPPATI** a FTMO (`…_770101_FTMO.set` ecc.);
+- `mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set` — 🎉 **il buco B6 che si chiude**;
+- `backtest_pipeline/rimappa_preset_ftmo.py` + `report/PRESET_FTMO_OROLOGIO_2026-09-20.md`.
+
+> ## 🟢 **PRIMA LA BELLA NOTIZIA, ED È UN CONTRO-ESEMPIO CHE NON MI SONO COSTRUITO IO.**
+> `ABTG_DAX_Apertura_EU_770101_FTMO.set` porta `InpSessionHour=10` e `InpCloseHour=19`.
+> La mia riga, partendo dal preset BCM, stampa `InpSessionHour BCM 8 -> FTMO 10` e
+> `InpCloseHour BCM 17 -> FTMO 19`. 👉 **Due strade indipendenti, stesso numero.** L'aritmetica
+> del `+2` non è più solo mia.
+
+🔴 **MA LA CONSEGUENZA OPERATIVA È GROSSA, e va decisa prima di domenica:** se quei preset
+vengono **committati**, la tabella del §5.2 va ripuntata su `mql5/Presets/FTMO/*` e il **passo 8**
+del §④ — 🔴 *la rimappatura a mano, 20-30 minuti, il passo più lungo e il più facile da sbagliare*
+— **sparisce dalla serata**. Restano il caricamento del preset e la taglia.
+
+⏱️ **Costo della modifica: ~10 minuti** (dieci righe di manifesto + un nuovo pin + i contro-esempi
+rigirati). 👉 **Va fatto appena quei file sono su `lavoro`**, e va fatto da chi coordina, non in
+autonomia: il merito di quei preset non l'ho giudicato io, e il `770260` arriva con un **nome e un
+percorso diversi** da quelli che il mio manifesto cerca oggi.
+
+🟢 **Nel frattempo la riga di oggi è corretta e sicura lo stesso**: i preset FTMO non esistono al
+pin `25fd32d7`, quindi copia quelli BCM e **stampa la tabella di rimappatura**. Non sbaglia, fa
+solo lavorare Claudio venti minuti in più.
 
 ---
 

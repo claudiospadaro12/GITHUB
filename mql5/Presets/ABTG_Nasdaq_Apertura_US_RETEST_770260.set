@@ -1,0 +1,168 @@
+; ==========================================================================
+; ABTG_Nasdaq_Apertura_US -- SEDIA 770260 -- NASUSD M5 -- ingresso RETEST
+; ORARI IN ORA SERVER BCM (italiana - 1). Per FTMO usare la copia rimappata
+; in mql5/Presets/FTMO/ (delta +2), NON questo file.
+; Scritto il 20/09/2026. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; PERCHE' QUESTO FILE NASCE OGGI
+;   Il referto del 18/09 lo descriveva input per input ("80 input, copertura
+;   verificata nei due versi contro il binario 3af47ed9") ma il file NON E'
+;   MAI ENTRATO IN REPO: "git log --all -S 770260 -- *.set" torna VUOTO,
+;   quindi non e' stato cancellato: non e' mai stato committato.
+;
+; DA DOVE VIENE OGNI RIGA -- tre fonti, dichiarate
+;   [A] FONTE GREZZA, 78 input su 98:
+;       backtest_pipeline/risultati_archivio/Walkforward_Aperture/
+;         NASDAQ_B_motore_IS.csv  e  NASDAQ_B_motore_OOS.csv, riga Pass=8.
+;       CONTRO-PROVA FATTA: i 78 input della riga Pass=8 sono IDENTICI nelle
+;       due finestre (confronto automatico, 0 discordanze). Se non lo fossero,
+;       "la cella" non esisterebbe.
+;       Numeri di quella riga:
+;         IS  26/09/2024-30/06/2025 : PF 1,14498 | n 91 | DD equity 5,9528%
+;         OOS 01/07/2025-30/06/2026 : PF 1,10936 | n 94 | DD equity 3,6753%
+;       RISERVA GIA' AGLI ATTI (referto 18/09 sera, punto 5): il CSV viene dal
+;       binario 2ce7abce, PRECEDENTE al fix di sizing 3af47ed9. PF e n reggono
+;       (invarianti alla scala del lotto), DD e profitto NO.
+;   [B] DEFAULT DELL'EA A HEAD, 19 input su 98:
+;       sono input che NEL BINARIO DEL ROUND NON ESISTEVANO. Verificato con
+;       "git show <rev>:...mq5": 2ce7abce ha 78 input, 3af47ed9 ne ha 80,
+;       HEAD ne ha 98. Tutti e 19 sono INERTI al default -- gating letto nel
+;       sorgente: InpUseVolRegime=false (r.470/1905), InpUseSRFilter=false
+;       (r.485/1984), InpRunnerTP_R=0 (r.1690-1691 = storico 3R),
+;       InpMinBreakoutRangeATR=0 (r.777 = pendente nudo invariato),
+;       InpMaxPosSimbolo=0 (r.723 = nessun limite),
+;       InpTrailStartR=0 (r.2224 = arma subito, come prima).
+;   [C] DUE VALORI SCELTI DA ME, e li dichiaro:
+;       InpMagic=770260  -- il CSV porta 770201, che ha gia' 10 posizioni in
+;         campo con un'ALTRA configurazione (referto 18/09 par.3). Riusarlo
+;         mescolerebbe due sedie sotto lo stesso nome.
+;       InpUsaGuardian=true -- NON esisteva nel binario del round (il round
+;         ha girato SENZA Guardian). Lo metto a true per allineamento con le
+;         altre sei sedie della rosa. E' CONSERVATIVO in una direzione sola:
+;         il Guardian puo' solo RIFIUTARE un ingresso, mai aggiungerne uno,
+;         quindi il campione in campo sara' <= a quello misurato, mai >.
+;         SE SI VUOLE IL REPLAY ESATTO DEL ROUND, va messo a false.
+;
+; INPUT NON RIMAPPABILI SUL SIMBOLO FTMO -- da verificare a terminale acceso
+;   InpBufferPoints=200 e InpMinStopPts=500 sono in PUNTI, e i punti dipendono
+;   da _Digits del simbolo. Su BCM NASUSD ha _Digits=2. Se su FTMO il Nasdaq
+;   ha un numero di decimali diverso, questi due valori vanno RISCALATI --
+;   e quella e' una firma di Claudio, non un aggiustamento automatico.
+;   InpCorrSymbol=SPXUSD e' un nome di simbolo BCM: INERTE qui
+;   (InpUseCorrelation=false), ma da rinominare se mai si accendesse.
+;
+; FILTRO NOTIZIE: SPENTO, e la decisione e' motivata da tre cose indipendenti
+;   (1) la FONTE GREZZA dice InpUseNewsFilter=0: la cella e' stata MISURATA
+;       col filtro spento. Accenderlo sarebbe un'altra configurazione.
+;   (2) in Challenge FTMO NON c'e' nessuna restrizione news (nessun obbligo
+;       da regolamento): il filtro non serve a passare un cancello.
+;   (3) MISURATO OGGI: mql5/Files/abtg_news.csv e' in ORA ITALIANA, non in
+;       ora server. Prova: FOMC 2026.01.28 -> 20:00 (14:00 ET inverno =
+;       19:00 UTC = 20:00 IT) e FOMC 2026.07.29 -> 20:00 (14:00 ET estate =
+;       18:00 UTC = 20:00 IT): segue il DST europeo. L'EA lo confronta con
+;       TimeCurrent() che e' ORA SERVER, e InpNewsShiftMinutes=0 ovunque.
+;       Quindi il blackout oggi cadrebbe UN'ORA TARDI su BCM e UN'ORA PRESTO
+;       su FTMO. Acceso senza shift sarebbe una rete messa nel posto sbagliato.
+;   NOTA: ABTG_Nasdaq_Apertura_US.set (il preset generico di 770201) ha
+;   InpUseNewsFilter=true. Quello e' un ALTRO preset e un'ALTRA sedia.
+;
+; --------------------------------------------------------------------------
+InpUsaGuardian=true
+InpSessionHour=14
+InpSessionMin=30
+InpRangeMinutes=35
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+InpMaxPosSimbolo=0
+InpEntryMode=2
+InpRangeMode=0
+InpLevelTF=16385
+InpPrevWindowMin=60
+InpBufferPoints=200.0
+InpOCTimeframe=0
+InpPendingExpiryMin=120
+InpAllowLong=true
+InpAllowShort=true
+InpMinRangePts=0.0
+InpMaxRangePts=0.0
+InpRetestOffsetPts=0.0
+InpFadeOffsetPts=0.0
+InpDelayMinutes=30
+InpDelayDirMode=0
+InpUseGapFill=true
+InpGapMinPoints=150.0
+InpGapMinRR=1.5
+InpUseEmaFilter=false
+InpEmaFast=1
+InpEmaSlow=50
+InpFilterTF=16388
+InpUseSupertrend=false
+InpStAtrPeriod=10
+InpStMultiplier=2.5
+InpStTF=16385
+InpUseSupertrend3=false
+InpUseCorrelation=false
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+InpUseVwapFilter=false
+InpVwapTF=15
+InpRiskPercent=1.0
+InpSLMode=0
+InpAtrSlMult=1.5
+InpAtrPeriodMgmt=14
+InpTP1_R=0.5
+InpTP1_ClosePct=0.0
+InpBreakevenAtTP1=false
+InpBEatR=0.0
+InpUseTrailing=true
+InpTrailStartR=0.0
+InpTrailMode=1
+InpTrailTF=5
+InpTrailAtrMult=2.0
+InpTrailFixedPts=410.0
+InpRunnerTP_R=0.0
+InpUseRoundLevels=false
+InpRoundStep=100.0
+InpRoundMinDistPts=50.0
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+InpNewsFlatten=true
+InpSlippagePts=0.0
+InpMinStopPts=500.0
+InpSkipIfTight=false
+InpMinBreakoutRangeATR=0.0
+InpUseVolumeFilter=true
+InpVolMult=1.5
+InpVolAvgBars=20
+InpUseAtrFilter=false
+InpAtrFilterBars=20
+InpAtrFilterMult=1.0
+InpConfirmMode=1
+InpUseVolRegime=false
+InpVolAtrPeriod=14
+InpVolLookback=100
+InpVolLowPct=20.0
+InpVolHighPct=80.0
+InpVolLowOffMult=0.7
+InpVolHighOffMult=1.5
+InpVolLowSlMult=0.75
+InpVolHighSlMult=1.5
+InpVolHighSizeMult=0.5
+InpUseSRFilter=false
+InpSRProximityPts=1500.0
+InpSRUsePrevDay=true
+InpSRUseRoundNumbers=true
+InpSRRoundInterval=10000.0
+InpMagic=770260
+InpMaxSpread=0
+InpVerbose=true

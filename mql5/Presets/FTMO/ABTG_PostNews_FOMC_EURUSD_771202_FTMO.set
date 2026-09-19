@@ -1,0 +1,97 @@
+; ==========================================================================
+; ABTG_PostNews -- SEDIA 771202 -- EURUSD
+; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.
+; Generato il 20/09/2026 da backtest_pipeline/rimappa_preset_ftmo.py. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; BERSAGLIO ....: terminale MT5 FTMO (challenge 100k 2-Step).
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest).
+; ORIGINALE ....: mql5/Presets/ABTG_PostNews_FOMC_EURUSD.set
+;                 sha1(12) ec07b4eff492 -- se cambia, questo file va rigenerato.
+;
+;
+; PERCHE' +2, e da dove viene il numero
+;   docs/REGOLAMENTO_FTMO_2026-08.md r.130: server FTMO = GMT+2 inverno /
+;     GMT+3 estate, cioe' ORA ITALIANA +1.
+;   CLAUDE.md (regola fissa): server BCM = ORA ITALIANA -1.
+;   Oggi 19/09/2026 siamo in ora estiva: IT=UTC+2, BCM=UTC+1, FTMO=UTC+3.
+;   ==> FTMO = BCM + 2. Un preset non rimappato farebbe partire la sedia
+;       DUE ORE PRIMA, su un mercato che non e' quello misurato.
+;
+; COSA E' CAMBIATO -- e NIENTE ALTRO
+;   input                  BCM    FTMO   ora italiana
+;   InpActionHour          19     21     20:40 IT (= 19:40 BCM = 21:40 FTMO)
+;   InpExpiryHour          20     22     21:45 IT (= 20:45 BCM = 22:45 FTMO)
+;   InpFridayCloseHour     21     23     22:50 IT (= 21:50 BCM = 23:50 FTMO)
+;
+; NOTE DI QUESTA SEDIA
+;   FOMC. Azione 19:40 BCM = 20:40 IT = 21:40 FTMO; scadenza 20:45 -> 22:45.
+;     Lo statement FOMC e' alle 14:00 New York = 18:00 UTC d'estate: la sedia
+;     agisce 40 minuti dopo, prima e dopo la rimappatura.
+;   Venerdi 21:50 -> 23:50 FTMO. NON scavalla: su un server UTC+3 la settimana
+;     chiude a 23:59 del venerdi (21:00 UTC), quindi il margine resta di 10
+;     minuti esatti come su BCM (21:50 contro chiusura 22:00). Controllato
+;     contro EA r.460-461, che pretende day_of_week==5.
+;   IL CALENDARIO NEWS NON VA TOCCATO, e il motivo e' nel sorgente:
+;     NewsToday() (r.263-277) confronta SOLO anno/mese/giorno, non l'ora,
+;     e il file e' UTC puro (costruisci_news_postnews.py r.34). Gli eventi
+;     di questa famiglia stanno fra le 12:15 e le 20:00 UTC = 15:15-23:00
+;     FTMO: stesso giorno di calendario. InpNewsShiftMinutes resta 0.
+;
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
+;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
+;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
+;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
+;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
+;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
+;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
+;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
+;   in calendario per il 25/10/2026.
+; --------------------------------------------------------------------------
+; Preset POST-NEWS -- FOMC Press Conference -- EUR/USD -- M5
+; Notizia 20:30 IT (ora legale) / 19:30 IT (ora solare). Azione = news+10 min. Scadenza = news+75 min.
+; ESTATE (ora legale IT): azione 20:40 IT = 19:40 server; scadenza 21:45 IT = 20:45 server (valori sotto).
+; INVERNO (ora solare IT): azione 19:40 IT = 18:40 server; scadenza 20:45 IT = 19:45 server -> metti Action 18:40, Expiry 19:45.
+; Range = candela della notizia + la successiva. BUY STOP max+3, SELL STOP min-3, TP50/SL25. NIENTE trailing.
+; [08/09/2026] corretto il commento, NON il valore: diceva "SELL STOP min-2"
+;   ma InpSellOffsetPips vale 3.0 in tutti e tre i preset di questa
+;   famiglia, e l'etichetta dell'input nel sorgente dice "strategia: 3 pip".
+;   Era il commento a essere vecchio. Visto nella schermata F7 di Claudio.
+; Attacca su grafico EUR/USD M5 e carica questo preset. Magic 771202.
+; NB: per operare servono le DATE FOMC nel file abtg_news.csv (valuta USD).
+InpActionHour=21
+InpActionMin=40
+InpExpiryHour=22
+InpExpiryMin=45
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsCurrencies=USD
+InpNewsTitleMatch=FOMC
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseTrail25=false
+InpCloseAtExpiry=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=23
+InpFridayCloseMin=50
+; --- 07/09/2026: riscalato al METRO DI CASA ---
+;   Era 3.0 (il numero del corso). Con InpRiskRefSLpips=50 e InpSLpips=25
+;   il sorgente (r.325) dimensiona su 50 pip: 3.0 significava 1,50% per
+;   gamba stoppata. 1.30 significa 0,65% per gamba -- la taglia firmata
+;   il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%), la stessa gia' usata
+;   dal preset NFP di questa famiglia.
+;   Contratto del collaudo: prove/POSTNEWS_ECB_1009_COLLAUDO.txt
+InpRiskPercent=1.30
+InpRiskRefSLpips=50.0
+InpComment=FOMC PostNews
+InpMagic=771202
+InpMaxSpread=0
+InpVerbose=true

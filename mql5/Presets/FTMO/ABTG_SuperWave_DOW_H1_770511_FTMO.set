@@ -1,0 +1,93 @@
+; ==========================================================================
+; ABTG_SuperWave_DOW_H1_Ottimizzato -- SEDIA 770511 -- U30USD H1
+; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.
+; Generato il 20/09/2026 da backtest_pipeline/rimappa_preset_ftmo.py. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; BERSAGLIO ....: terminale MT5 FTMO (challenge 100k 2-Step).
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest).
+; ORIGINALE ....: mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set
+;                 sha1(12) 6419968365da -- se cambia, questo file va rigenerato.
+;
+;
+; PERCHE' +2, e da dove viene il numero
+;   docs/REGOLAMENTO_FTMO_2026-08.md r.130: server FTMO = GMT+2 inverno /
+;     GMT+3 estate, cioe' ORA ITALIANA +1.
+;   CLAUDE.md (regola fissa): server BCM = ORA ITALIANA -1.
+;   Oggi 19/09/2026 siamo in ora estiva: IT=UTC+2, BCM=UTC+1, FTMO=UTC+3.
+;   ==> FTMO = BCM + 2. Un preset non rimappato farebbe partire la sedia
+;       DUE ORE PRIMA, su un mercato che non e' quello misurato.
+;
+; COSA E' CAMBIATO -- e NIENTE ALTRO
+;   NESSUNO. Vedi le note qui sotto: non e' una dimenticanza.
+;
+; NOTE DI QUESTA SEDIA
+;   NESSUN INPUT ORARIO SPOSTATO, E MI FERMO QUI INVECE DI SOMMARE.
+;     InpUseTimeWindow=false -> la finestra non viene mai valutata (EA r.315).
+;     InpStartHour=0 / InpEndHour=24 NON sono un orario: sono 'tutto il
+;     giorno', ed e' invariante per fuso. Sommare +2 darebbe 2 e 26:
+;     26 non e' un'ora valida e 2-26 sarebbe una finestra INVENTATA,
+;     piu' stretta dell'originale. Quindi: si lascia 0 e 24.
+;   InpTF=16385 (H1): griglia identica fra BCM e FTMO.
+;
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
+;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
+;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
+;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
+;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
+;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
+;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
+;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
+;   in calendario per il 25/10/2026.
+; --------------------------------------------------------------------------
+=== Supertrend e timeframe ====
+InpTF=16385
+InpStMult=2.5
+InpStAtrPeriod=10
+=== Pattern rimbalzo ====
+InpNearAtr=1.0
+InpRequireConfirmBody=true
+InpAllowLong=true
+InpAllowShort=true
+=== Confluenza tecnica (richiesta dal documento) ====
+InpUseConfluence=false
+InpEma1=14
+InpEma2=89
+InpEma3=100
+InpEma4=200
+InpConflAtr=1.5
+=== Ingresso frazionato ====
+InpFirstFraction=0.3333
+InpUsePending=true
+InpPendingPips=20.0
+InpPendingExpiryBars=3
+=== Stop / target ====
+InpSLLookback=5
+InpSLBufferPips=3.0
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP_RR=3.0
+InpTrailOnST=true
+InpExitOnFlip=true
+=== Rischio ====
+InpRiskPercent=1.0
+InpMaxTradesPerDay=0
+=== Filtro orari (ORA SERVER; opzionale) ====
+InpUseTimeWindow=false
+InpStartHour=0
+InpEndHour=24
+=== Filtro notizie (CSV in MQL5/Files) ====
+InpUseNewsFilter=false
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsBeforeMin=30
+InpNewsAfterMin=30
+InpNewsShiftMinutes=0
+InpNewsCurrencies=
+=== Generali ====
+InpComment=SUPERWAVE DOW H1
+InpMagic=770511
+InpMaxSpread=0
+InpVerbose=true

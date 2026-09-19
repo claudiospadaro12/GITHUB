@@ -1,0 +1,119 @@
+; ==========================================================================
+; ABTG_PostNews -- SEDIA 771204 -- EURUSD
+; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.
+; Generato il 20/09/2026 da backtest_pipeline/rimappa_preset_ftmo.py. ASCII PURO (regola 17/08).
+; ==========================================================================
+;
+; BERSAGLIO ....: terminale MT5 FTMO (challenge 100k 2-Step).
+;                 NON 50503392, NON 50504263, NON 10105439 (C:\BCM_Reale),
+;                 NON 50504400 (C:\MT5_Backtest).
+; ORIGINALE ....: mql5/Presets/ABTG_PostNews_ECB_EURUSD.set
+;                 sha1(12) 4a569474f801 -- se cambia, questo file va rigenerato.
+;
+;
+; PERCHE' +2, e da dove viene il numero
+;   docs/REGOLAMENTO_FTMO_2026-08.md r.130: server FTMO = GMT+2 inverno /
+;     GMT+3 estate, cioe' ORA ITALIANA +1.
+;   CLAUDE.md (regola fissa): server BCM = ORA ITALIANA -1.
+;   Oggi 19/09/2026 siamo in ora estiva: IT=UTC+2, BCM=UTC+1, FTMO=UTC+3.
+;   ==> FTMO = BCM + 2. Un preset non rimappato farebbe partire la sedia
+;       DUE ORE PRIMA, su un mercato che non e' quello misurato.
+;
+; COSA E' CAMBIATO -- e NIENTE ALTRO
+;   input                  BCM    FTMO   ora italiana
+;   InpActionHour          14     16     15:00 IT (= 14:00 BCM = 16:00 FTMO)
+;   InpExpiryHour          17     19     18:15 IT (= 17:15 BCM = 19:15 FTMO)
+;   InpFridayCloseHour     21     23     22:50 IT (= 21:50 BCM = 23:50 FTMO)
+;
+; NOTE DI QUESTA SEDIA
+;   BCE. Azione 14:00 BCM = 15:00 IT = 16:00 FTMO; scadenza 17:15 -> 19:15.
+;     La decisione BCE e' alle 14:15 IT: la sedia arma 15 minuti prima e
+;     lavora la reazione. Rapporto invariato dopo la rimappatura.
+;   Venerdi 21:50 -> 23:50 FTMO (vedi nota su 771202).
+;   Calendario news: invariato, stessa ragione di 771202.
+;
+; CAMBIO DI ORA DI FINE OTTOBRE -- QUESTO FILE HA UNA SCADENZA
+;   Il DST europeo finisce DOMENICA 25 OTTOBRE 2026; quello americano
+;   DOMENICA 1 NOVEMBRE 2026. Se FTMO e BCM cambiano nello STESSO giorno
+;   (tutti e due su DST europeo) il delta resta +2 e non si tocca niente.
+;   Se FTMO seguisse il DST AMERICANO, fra il 25/10 e il 01/11 il delta
+;   diventerebbe +3 per una settimana. NON E' VERIFICABILE DA QUI:
+;   la misura e' UNA SOLA e va fatta a terminale FTMO acceso ->
+;   confrontare l'ora dell'ultima candela M1 con l'ora UTC. Va messa
+;   in calendario per il 25/10/2026.
+; --------------------------------------------------------------------------
+; =====================================================================
+;  NATO L'08/09/2026 PER EVITARE UNA COLLISIONE DI MAGIC.
+;  Claudio ha firmato: EURJPY e EURUSD del PostNews vanno a 1.30.
+;  La strada corta sarebbe caricare ABTG_PostNews_ECB_EURJPY.set anche
+;  sul grafico EURUSD: un .set non contiene il simbolo, quindi
+;  "funzionerebbe". MA quel file porta dentro InpMagic=771201, che e'
+;  il magic della sedia EURJPY: due sedie con lo STESSO magic non si
+;  distinguono piu' -- ne' nei referti, ne' dentro l'EA quando controlla
+;  se ha gia' una posizione viva. Questo preset e' identico a quello
+;  ECB tranne magic e commento.
+;
+;  !!! CORREZIONE DEL 19/09/2026 -- LA RIPARAZIONE DELL'08/09 AVEVA
+;  !!! SPOSTATO LA COLLISIONE, NON TOLTA. Qui c'era InpMagic=771202,
+;  che e' il magic della sedia FOMC (ABTG_PostNews_FOMC_EURUSD.set),
+;  gia' viva su chart44 del piccolo 50503392 -- STESSO SIMBOLO EURUSD
+;  e STESSO EA. Misurato nel sorgente (ABTG_PostNews.mq5): tutte le
+;  funzioni di gestione selezionano per SIMBOLO + MAGIC, e basta.
+;  Conseguenza, non ipotesi: la ECB (InpCloseAtExpiry=true, scadenza
+;  17:15 server) chiama ExpiryCloseCheck -> CloseAllMine() a OGNI TICK
+;  dalle 17:15 a mezzanotte, e CloseAllMine cancella ordini e chiude
+;  posizioni di magic 771202 su EURUSD. La FOMC piazza alle 19:40
+;  server, cioe' DENTRO quella finestra: i suoi due pendenti sarebbero
+;  cancellati entro un tick. Con i due grafici accesi insieme la sedia
+;  FOMC non opererebbe MAI.
+;  Magic corretto: 771204 (libero, verificato su tutto il repo).
+;  E' un identificativo, NON una taglia: nessun numero di rischio e'
+;  stato toccato in questo file.
+;  L'altra strada -- caricare ABTG_PostNews_FOMC_EURUSD.set -- e'
+;  sbagliata per un altro motivo: filtra USD e "FOMC" e agisce alle
+;  19:40 server. Sulla BCE non sparerebbe mai.
+; =====================================================================
+; Preset POST-NEWS -- ECB Press Conference -- EUR/USD -- M5
+; Notizia 14:45 IT (giovedi, 8 volte/anno). Azione 15:00 IT = 14:00 server. Scadenza 18:15 IT = 17:15 server.
+; Range = le DUE candele dopo quella della notizia. BUY STOP max+3, SELL STOP min-3, TP50/SL25. Trailing +25->SL15 ON.
+; [08/09/2026] corretto il commento, NON il valore: diceva "SELL STOP min-2"
+;   ma InpSellOffsetPips vale 3.0 in tutti e tre i preset di questa
+;   famiglia, e l'etichetta dell'input nel sorgente dice "strategia: 3 pip".
+;   Era il commento a essere vecchio. Visto nella schermata F7 di Claudio.
+; Attacca su grafico EUR/USD M5 e carica questo preset. Magic 771204.
+; NB: per operare servono le DATE ECB nel file abtg_news.csv (valuta EUR). Vedi abtg_news_postnews_esempio.csv.
+InpActionHour=16
+InpActionMin=0
+InpExpiryHour=19
+InpExpiryMin=15
+InpRestrictToNews=true
+InpUseNewsFilter=true
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3
+InpNewsCurrencies=EUR
+InpNewsTitleMatch=ECB
+InpNewsShiftMinutes=0
+InpBuyOffsetPips=3.0
+InpSellOffsetPips=3.0
+InpTPpips=50.0
+InpSLpips=25.0
+InpUseTrail25=true
+InpCloseAtExpiry=true
+InpTrailTriggerPips=25.0
+InpTrailNewSLpips=15.0
+InpFridayClose=true
+InpFridayCloseHour=23
+InpFridayCloseMin=50
+; --- 07/09/2026: riscalato al METRO DI CASA ---
+;   Era 3.0 (il numero del corso). Con InpRiskRefSLpips=50 e InpSLpips=25
+;   il sorgente (r.325) dimensiona su 50 pip: 3.0 significava 1,50% per
+;   gamba stoppata. 1.30 significa 0,65% per gamba -- la taglia firmata
+;   il 18/08 (cap C1 3,25% = 5 SL vivi da 0,65%), la stessa gia' usata
+;   dal preset NFP di questa famiglia.
+;   Contratto del collaudo: prove/POSTNEWS_ECB_1009_COLLAUDO.txt
+InpRiskPercent=1.30
+InpRiskRefSLpips=50.0
+InpComment=ECB PostNews EURUSD
+InpMagic=771204
+InpMaxSpread=0
+InpVerbose=true
