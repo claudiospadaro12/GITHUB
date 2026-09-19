@@ -24609,3 +24609,144 @@ giusta** — ha le tabelle al posto giusto e i numeri che tornano fra loro. Sbag
 📌 Parente della **225** (il silenzio che somiglia a un PASS) e della **434** (l'artefatto che il
 cancello non sa guardare): qui il cancello non c'entra proprio, perche' il danno e' avvenuto
 **durante la verifica**, non nella consegna.
+
+## CLASSE 439 — il cancello legge l'INTESTAZIONE di un file prova come testo VIVO, perche' conosce solo il `#` (19/09/2026)
+
+**Il caso.** Cancello su `sedia_NASDAQ_BREAKOUT_VOLUMI_770261.set` (secondo `.set` del
+duello Nasdaq). `python3 backtest_pipeline/controlla_riga.py --oggetto prova <file>` ->
+**4 BLOCCANTI**, tutti su `r.5`:
+
+```
+X [TERMINALE] r.5: nomina '-V3' senza una guardia che lo rifiuta nelle righe vicine
+X [TERMINALE] r.5: nomina 'BCM_Reale' senza una guardia ...
+X [CONTO]     r.5: nomina il conto 50504263 fuori da una guardia
+X [CONTO]     r.5: nomina il conto 10105439 fuori da una guardia
+```
+
+E la `r.5` era questa:
+
+```
+; NON su -V3 (50504263), NON su C:\BCM_Reale (10105439), NON su C:\MT5_Backtest (50504400)
+```
+
+Cioe' **esattamente la riga che `CLAUDE.md` rende OBBLIGATORIA** (emendamento del 12/09:
+*«la riga del bersaglio dice anche che cosa NON viene toccato»*).
+
+🔴 **Il cancello puniva la regola di casa.** Chi dichiarava i terminali da non toccare veniva
+bocciato; chi taceva passava. Il verso del controllo era **invertito**.
+
+**La causa, e non e' la severita'.** `righe_utili()` spoglia i commenti con
+`riga.split("#", 1)[0]`: sa il `#` di PowerShell. Ma il commento di un `.set`/`.ini` di MT5
+comincia con **`;`**, e quelle righe restavano testo vivo. Stessa famiglia della **167**
+(`senza_stringhe`): il difetto non era il criterio, era il **LESSICO del formato**.
+
+⚠️ **E aveva gia' colpito senza che nessuno lo vedesse**: la gemella `770260`, passata dal
+cancello il **18/09**, fallisce allo stesso identico modo. Un PASS dato senza che lo strato 1
+fosse verde.
+
+### La correzione (fatta, `backtest_pipeline/controlla_riga.py`, in `controlla_file_prova`)
+Le righe il cui primo carattere non bianco e' `;` vengono **svuotate** (i numeri di riga
+restano) prima di `controlla_terminali()`, e il numero di righe escluse viene **stampato fra i
+PASSATI** — la deroga si vede, non e' silenziosa.
+
+🔴 **La correzione e' NARROW APPOSTA, e il perche' e' la meta' importante della classe**:
+vale **solo** per l'oggetto `prova`. Nei `.ps1` il `;` **non si tocca** — li' e' separatore di
+istruzioni, e spogliarlo aprirebbe un buco vero.
+
+### 🧪 I contro-esempi, costruiti PRIMA di dichiararla chiusa
+| prova | atteso | esito |
+|---|---|---|
+| `.set` con `TerminaleBacktest=C:\BCM_Reale` su riga **viva** | BLOCCA | 🟢 blocca (`r.3`) |
+| `.set` con `Conto=50504263` su riga viva **e** `; ... 10105439` nel commento sopra | BLOCCA | 🟢 blocca (`r.2`) |
+| `.set` con `InpSessionHour=15` | BLOCCA [FUSO] | 🟢 blocca |
+| `.ps1` con `$a = 1 ; $b = "..."` | comportamento **invariato** | 🟢 invariato |
+
+📌 **La lezione trasferibile**: quando il cancello boccia una riga che una REGOLA FIRMATA
+obbliga a scrivere, l'ipotesi giusta non e' *«la regola e' scomoda»* ma *«il cancello sta
+leggendo il file con la grammatica sbagliata»*. Prima di togliere la riga, si guarda **con che
+lessico** il cancello la sta leggendo.
+
+## CLASSE 440 — il COMMENTO a grafico dedotto dal `#define` invece che dalle stringhe passate a `CTrade` (19/09/2026)
+
+**Il caso.** L'intestazione del `.set` di `770261` dichiarava:
+
+> *«Il commento nasce da `ABTG_DEF_NAME`, che e' un #define compilato. Quindi 770250, 770260 e
+> 770261 scriveranno TUTTE E TRE la stessa stringa "Nasdaq Apertura US BUY/SELL"»*
+
+Premessa **vera** (`ABTG_DEF_NAME = "Nasdaq Apertura US"`, r.26; nessun `InpComment`),
+conclusione **falsa**. Perche' ogni ramo d'ingresso ci attacca un **suffisso diverso**:
+
+```
+grep -oE 'ABTG_DEF_NAME\+"[^"]*"' EA.mq5 | sort -u
+  -> " BUY"  " SELL"  " RETEST BUY"  " RETEST SELL"  " FADE ..."  " DELAY ..."  " GAPFILL ..."  " OPENCONF ..."
+```
+
+Quindi `770250` (BREAKOUT short) e `770261` (BREAKOUT) collidono **esattamente** su
+`"Nasdaq Apertura US SELL"`, mentre `770260` (RETEST) scrive
+`"Nasdaq Apertura US RETEST SELL"` ed e' **distinguibile**.
+
+🔴 **Perche' conta, se l'errore sembra prudente.** L'intestazione diceva «tutte e tre uguali»,
+che pare il caso peggiore — ma **cambia quali strumenti sbagliano e come**. Misurato lo stesso
+giorno: `classifica_report_mt5.py` attribuisce per commento e la sua `famiglia()` toglie
+`BUY|SELL|LONG|SHORT` ma **non** `RETEST`; quindi fonde `770250`+`770261` in **una riga sola** e
+mette `770260` in una riga a parte. Chi legge «tutte e tre uguali» cerca un problema a tre vie
+e non trova quello a due vie che c'e' davvero.
+
+### La regola
+🔴 **Il commento di un ordine non e' il `#define`: e' la STRINGA passata a `CTrade`.** Si
+estraggono **tutte** le stringhe di commento del sorgente (`grep -oE 'NOME\+"[^"]*"' | sort -u`)
+e si dichiara **quale ramo produce quale**, magic per magic. Mai dedurlo dalla costante.
+- E poi si elenca **per nome** (classe 180) ogni strumento di casa che ragiona per commento, con
+  l'esito **misurato** su quelle stringhe: `analizza_trades.py` 🟢 (per `(commento, magic)` dal
+  `75bd75d9`) · `classifica_report_mt5.py` 🔴 · `CODA_02_chi_ha_operato.ps1` 🟡 (conta il
+  prefisso di log, limite gia' dichiarato) · `ABTG_ChiudiSedie.mq5` 🟢 (per magic).
+- ⚠️ E il log e' **peggio** del commento: `ABTGLog()` stampa `[ABTG_DEF_NAME]` e **basta** —
+  nessun magic, nessun suffisso. Tre sedie, una sola firma nei log.
+
+## CLASSE 441 — schierare una SECONDA sedia su un simbolo toglie la condizione che rendeva innocuo un difetto gia' censito (19/09/2026)
+
+**Il caso.** `ABTG_Nasdaq_Apertura_US` ha, in `EndOfSession()` (r.1858 di `3af47ed9`):
+
+```
+if(InpCloseAtEnd && SelectMyPosition()) gTrade.PositionClose(_Symbol);
+```
+
+`SelectMyPosition()` e' **hedge-safe** (simbolo **+ magic**). `PositionClose(_Symbol)` **no**: su
+conto hedging `CTrade` chiude la posizione **piu' vecchia del simbolo**, di chiunque sia. E'
+la categoria **arancione** dell'audit di casa
+(`report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md` r.38-55), che dice testualmente che il
+mezzo-fix *«su un simbolo affollato e' PIU' PERICOLOSO del bug originale»* e che censisce
+proprio questo EA su `NASUSD`/`770250` (r.89).
+
+🟢 **Il difetto era noto, censito e classificato — e fino a ieri INNOCUO.** Per un motivo solo,
+scritto nell'audit stesso: *«se `SelPos()` e' vero vuol dire che la piu' vecchia E' la nostra»*,
+cioe' **una sola posizione per simbolo**.
+
+🔴 **Il round toglieva quel motivo e nessuno lo diceva.** Con `770260` e `770261` accanto a
+`770250` su `NASUSD`, alle **17:30 server** le due sedie nuove chiamano `EndOfSession()` (e la
+richiamano a **ogni tick**: il controllo dell'ora sta **prima** dello `switch` e non ha guardia
+di stato) e la `PositionClose(_Symbol)` colpisce la posizione piu' vecchia — quella di `770250`,
+entrata fra le 14:30 e le 16:30, che per contratto doveva restare fino alle **20:45**.
+
+### La regola
+🔴 **Prima di aggiungere una sedia su un simbolo gia' occupato, si rilegge l'audit dei difetti
+NOTI e si chiede: "qual era la CONDIZIONE che lo teneva innocuo, e la sto togliendo io?"**
+- Un difetto 🟠 in archivio **non e' un difetto chiuso**: e' un difetto **sospeso a una
+  condizione**. La condizione va riletta insieme al difetto, e va scritta nel pacchetto di
+  schieramento accanto al numero di magic.
+- Le tre domande che valgono per QUALUNQUE seconda sedia sullo stesso simbolo, e la risposta
+  misurata qui:
+  1. **le guardie contano per MAGIC o per SIMBOLO?** `InpOneTradePerDay` -> per **magic**
+     (`HaGiaOperatoOggi()` filtra `DEAL_SYMBOL` **e** `DEAL_MAGIC`): le sedie **non** si
+     bloccano fra loro. `InpMaxPosSimbolo` -> per **simbolo** (ignora il magic) ma vale **0**
+     in tutti i preset = **spento**.
+  2. **c'e' una SCRITTURA per simbolo?** `PositionClose(_Symbol)` / `PositionModify(_Symbol,..)`
+     / `PositionClosePartial(_Symbol,..)`. Qui: **una sola viva**, r.1858 (quella del filtro
+     notizie r.553 e' morta, `InpUseNewsFilter=false` in tutti e tre).
+  3. **gli ORARI di flat coincidono?** Se **no**, la sedia che chiude prima puo' flattare quella
+     che chiude dopo. Qui: 17:30 contro 20:45 = **3h15 di esposizione al difetto**.
+- 📌 E si somma il **rischio aperto**: `0,35 + 1,00 + 1,00 = 2,35%` del saldo nel caso normale,
+  `3,35%` se il breakout a due lati viene riempito da tutte e due le parti prima che l'OCO giri
+  (`HandleOCO` agisce al tick **dopo** il riempimento). Il cap **C1 a 3,25%** e' **superato** nel
+  caso peggiore, e su quel conto **non c'e' niente che lo faccia rispettare** (il binario non ha
+  `InpUsaGuardian`, e sul piccolo nessun Guardian gira).

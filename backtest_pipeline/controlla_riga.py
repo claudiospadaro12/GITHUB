@@ -965,7 +965,33 @@ def controlla_file_prova(path, dati, testo):
                    + " e' un'ora d'INIZIO che vale 9 o 15, cioe' l'ora ITALIANA di apertura"
                    + " di DAX e Nasdaq. In ora SERVER sarebbero 8 e 14. Va confermato a mano:"
                    + " il cancello non sa come si chiamano gli input di questo EA", path)
-    controlla_terminali(path, testo, path)
+    # CLASSE 439 (19/09/2026) -- IL COMMENTO DI UN FILE PROVA COMINCIA CON ';',
+    # NON CON '#', E righe_utili() SA SOLO IL '#'.
+    # Contro-esempio misurato su `sedia_NASDAQ_BREAKOUT_VOLUMI_770261.set`:
+    # l'intestazione portava la riga che CLAUDE.md (emendamento 12/09) rende
+    # OBBLIGATORIA -- "NON su -V3 (50504263), NON su C:\\BCM_Reale (10105439)" --
+    # e il cancello la leggeva come testo vivo: 4 BLOCCANTI [TERMINALE]/[CONTO]
+    # su una riga che e' un COMMENTO INERTE (MT5 legge solo le `chiave=valore`).
+    # Il cancello puniva la regola di casa: chi dichiarava i terminali da NON
+    # toccare veniva bocciato, chi taceva passava. Esattamente al contrario.
+    # Stessa famiglia della classe 167 (senza_stringhe): il difetto non era la
+    # severita', era il LESSICO del formato. La correzione e' NARROW APPOSTA --
+    # vale solo per l'oggetto `prova` e solo per le righe il cui primo
+    # carattere non bianco e' ';'. Nei .ps1 il ';' NON si tocca: li' e'
+    # separatore di istruzioni, e spogliarlo aprirebbe un buco vero.
+    righe_pulite = []
+    n_commenti = 0
+    for r in testo.splitlines():
+        if r.lstrip().startswith(";"):
+            righe_pulite.append("")      # riga svuotata: i numeri di riga restano
+            n_commenti += 1
+        else:
+            righe_pulite.append(r)
+    if n_commenti:
+        passa("file prova: " + str(n_commenti) + " righe di COMMENTO (';') escluse dal"
+              " controllo terminali/conti -- sono inerti per MT5 e l'intestazione DEVE"
+              " nominare i bersagli vietati (CLAUDE.md 12/09). Classe 439")
+    controlla_terminali(path, "\n".join(righe_pulite), path)
     rileva("225", "controlli PowerShell (PWSH7, cultura, formati .NET) SPENTI su questo"
            " oggetto: un file prova non e' uno script. Il cancello SEMANTICO dei file prova"
            " e' un altro programma, e va lanciato a parte:"
