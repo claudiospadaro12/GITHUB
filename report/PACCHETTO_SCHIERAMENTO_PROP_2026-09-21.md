@@ -598,6 +598,12 @@ impegnato.
 Market Watch e fare due screenshot: l'orologio e le specifiche di contratto.** Trenta secondi che
 valgono più di tutta la notte di lavoro che c'è dietro questo file.
 
+🟢 **E la cosa che toglie ansia, perché è misurata e non detta per consolare: domenica notte non
+si opera.** Nessuna sedia della rosa ha mai aperto di domenica, zero volte su 96 posizioni. La
+catena di accensione costa **75-125 minuti** e il primo appuntamento vero è **lunedì alle 07:00
+server FTMO** *(l'oro)*. 👉 **La notte è un cuscinetto, non una scadenza** — e l'unica cosa che
+la può far saltare è un F7 che non compila o un `.set` che non arriva.
+
 ---
 
 ## 📒 CHANGELOG
