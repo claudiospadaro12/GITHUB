@@ -25453,3 +25453,50 @@ viene il percorso.
 📌 **La morale è quella del 10/09**: il PASS era arrivato perché avevo controllato che la mia
 risposta fosse **coerente** con quello che mi aspettavo. È bastato provare a **romperla** per
 scoprire che il cancello approvava anche uno script che ammazza il conto reale.
+
+---
+
+## CLASSE 458 — 🗓️🧹 LA CARTELLA CHE RIORDINI E' L'**INPUT DI UN'ATTIVITA' PIANIFICATA**: il riordino del 16/09 ha spento l'aggiornamento delle news, e il danno si legge **solo nel codice d'uscita del task** (19/09/2026)
+
+**Il caso, ed e' successo davvero, non e' un'ipotesi.** Il 16/09/2026 alle 19:42 qualcuno ha
+messo in ordine il Desktop del VPS creando `Archivio_2026-09-16_1942` e infilandoci dentro le
+cartelle sciolte. Fra quelle c'era **`GITHUB-claude-creating-agents-SgGpD (1)`** — che non era
+una cartella qualsiasi: **e' il posto da cui parte l'attivita' `ABTG_AggiornaNews` delle 07:20**
+(lo sapevamo dal 12/09, `report/CODA_11_LA_PRIMA_FOTO_2026-09-12.md`).
+
+Il conto, letto nei referti della coda `CODA_11`, riga `ultimo esito` di `ABTG_AggiornaNews`:
+
+| corsa delle 07:20 | esito | |
+|---|---:|---|
+| 14/09 · 15/09 · 16/09 | **0** | prima del riordino |
+| **17/09** | **4294770688** | 🔴 prima corsa DOPO il riordino |
+| 18/09 | **4294770688** | 🔴 e da li' non si e' piu' ripresa |
+
+👉 **Il filtro news degli EA sta leggendo un calendario fermo al 16/09 da tre giorni**, e sul
+Desktop non c'e' **niente** che lo dica: nessun errore, nessun file rosso, nessuna finestra.
+L'unico strumento che misura il danno e' il **codice d'uscita dell'attivita'**.
+
+### La regola
+🔴 **Prima di spostare, rinominare o archiviare una cartella, si chiede: CHI LA LEGGE?** E la
+risposta non sta dentro la cartella: sta nel **registro delle attivita' pianificate** (e nelle
+righe di lancio che puntano a percorsi fissi). Un percorso e' una dipendenza **invisibile
+dall'oggetto che dipende**.
+- 🤖 **In uno script che sposta, la guardia si scrive**: si legge l'elenco delle attivita'
+  (`Get-ScheduledTask`, con ripiego su `schtasks /query /fo LIST /v`) e si **salta** ogni
+  cartella il cui percorso compare in un'azione. Implementata in
+  `backtest_pipeline/righe/RIGA_ARCHIVIO_DESKTOP.ps1` (guardia 4).
+- 🔒 **E la guardia e' FAIL-CLOSED**: se l'elenco delle attivita' non si riesce a leggere, lo
+  script **si rifiuta di spostare** invece di procedere senza la guardia. Una guardia che, quando
+  le manca il dato, diventa neutra in silenzio e' la classe **31-bis** — qui costerebbe un'altra
+  settimana di calendario fermo.
+- ⚠️ **Due trappole di implementazione, gia' pagate mentre lo scrivevo**:
+  **(a)** `$azione | Out-String` **manda a capo a 80 colonne**, e un percorso spezzato non
+  combacia con nessuna ricerca: la guardia direbbe "nessuna attivita' usa questa cartella"
+  **proprio sui percorsi lunghi, che sono tutti**. Va `Out-String -Width 8000`;
+  **(b)** un'attivita' puo' avere il percorso scritto con `%USERPROFILE%`, che nel registro **non
+  e' espanso**: il confronto sul solo percorso pieno non lo vede. Si cerca **anche** `\NOME\`.
+
+📌 Parente della **142** (la destinazione di un gemello sepolta da un altro gemello) e della
+**251** (il canale delle attivita' pianificate che nessuno vagliava). La differenza e' il verso:
+qui non e' lo script che si mangia un altro script, e' **la pulizia che si mangia il codice in
+produzione**.

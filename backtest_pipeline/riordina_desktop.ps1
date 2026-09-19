@@ -142,6 +142,8 @@ $EstensioniDocumenti = @(".md",".txt",".csv",".docx",".doc",".pdf",".xlsx",".xls
 $NonToccare = @(
   "ABTG_RISULTATI","ABTG_ZIP","ABTG_DOCUMENTI","ABTG_VARIE","ABTG_ORDINE_LOG",
   "ARCHIVIO_DESKTOP","ARCHIVIO_TEST",
+  "ARCHIVIO",                  # 19/09/2026: la radice di RIGA_ARCHIVIO_DESKTOP.ps1
+
   "Slippage_Spread","Collaudo","Canarino","Migrazione","Verifica_ORB","Censimenti","Pulizia_VPS",
   "Backup","R81_Uscite","Relativo_R117","PostNews","Caccia_Ticket","Pagelle","Backtest","Config",
   "Fantasmi","Trades"

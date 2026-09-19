@@ -274,8 +274,11 @@ foreach($v in $voci){
     [void]$saltate.Add([pscustomobject]@{ Nome=$v.Name; Perche="e' una giunzione/collegamento, non una cartella vera" })
     continue
   }
-  if(($v.Attributes -band [IO.FileAttributes]::System) -ne 0){
-    [void]$saltate.Add([pscustomobject]@{ Nome=$v.Name; Perche="e' una cartella di SISTEMA" })
+  if(($v.Attributes -band [IO.FileAttributes]::System) -ne 0 -or ($v.Attributes -band [IO.FileAttributes]::Hidden) -ne 0){
+    # una cartella NASCOSTA non riempie il Desktop di Claudio (non la vede),
+    # quindi archiviarla non porta niente e puo' togliere di mezzo la roba
+    # di un programma. Si salta, e si dice perche'.
+    [void]$saltate.Add([pscustomobject]@{ Nome=$v.Name; Perche="e' una cartella di SISTEMA o NASCOSTA: non ingombra il Desktop, non la tocco" })
     continue
   }
   # GUARDIA 6: strumenti nostri e dei gemelli

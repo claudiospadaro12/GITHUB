@@ -86,7 +86,7 @@ $Categorie = [ordered]@{
 # e senza il prefisso la parola chiave "backtest" se la porta via (bug
 # riprodotto il 06/09, checklist punto 140).
 $Escluse = @(
-  'ARCHIVIO_DESKTOP','ARCHIVIO_TEST',
+  'ARCHIVIO_DESKTOP','ARCHIVIO_TEST','ARCHIVIO',
   'ABTG_RISULTATI','ABTG_ZIP','ABTG_DOCUMENTI','ABTG_VARIE','ABTG_ORDINE_LOG'
 )
 $EsclusePrefisso = @(

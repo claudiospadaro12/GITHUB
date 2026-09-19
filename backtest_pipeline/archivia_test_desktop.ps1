@@ -144,7 +144,7 @@ $Regex = @(
 )
 # --- cio' che non si tocca MAI (esclusioni dichiarate dal gemello) ----
 $EstensioniMai = @('.ps1','.py','.exe','.bat','.cmd','.lnk','.url','.msi','.mq5','.mqh','.ex5','.dll','.sys')
-$NomiMai = @('ARCHIVIO_TEST','ABTG_RISULTATI','ABTG_ZIP','ABTG_DOCUMENTI','ABTG_VARIE','ABTG_ORDINE_LOG','desktop.ini')
+$NomiMai = @('ARCHIVIO_TEST','ARCHIVIO','ABTG_RISULTATI','ABTG_ZIP','ABTG_DOCUMENTI','ABTG_VARIE','ABTG_ORDINE_LOG','desktop.ini')
 
 # ultima modifica VERA: per una cartella il LastWriteTime della radice
 # NON cambia quando si scrive dentro una sottocartella (verificato).
