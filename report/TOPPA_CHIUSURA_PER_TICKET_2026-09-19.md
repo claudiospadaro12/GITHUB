@@ -369,9 +369,17 @@ terminali diversi: si ricompila **per cartella dati**, non per file).
 | 5 | `ABTG_DAX_Apertura_EU` | `d83c1960` | 2361 | `... MT5 Terminal -V3` · **50504263** | 662 · 2098 | `..__d83c1960.diff` |
 | 6 | `ABTG_DAX_Apertura_EU` | **HEAD** | 2368 | `C:\BCM_Reale` · **10105439** | 669 · 2105 | `..__HEAD_lavorativo.diff` |
 
-📌 La #6 è sul **conto reale**: è la **meno urgente** (zero vicini, ④) e la **più costosa** in
-firma. La mia lettura, che resta una lettura: **le #1, #2, #3 valgono la ricompilazione; la #6
-no, oggi.**
+🔴 **La #6 è GIÀ ESCLUSA da una firma, non da una mia opinione.**
+`report/FIRMA_2026-09-19_CHIUSURA_PER_TICKET.md` (commit `999b082d`) autorizza la toppa per
+ticket e dichiara testualmente che **NON autorizza «ricompilazioni sul conto reale 10105439»**.
+👉 Quindi le ricompilazioni **autorizzabili oggi sono 5, non 6**, e la #6 resta ferma —
+il che è anche la lettura tecnica giusta (zero vicini, ④: lì il difetto è inerte).
+🟢 E la sequenza firmata punta proprio al terminale **50503392**: sono le **#1, #2, #3**, cioè
+esattamente le tre righe in cima alla classifica per danno.
+
+📌 **La firma chiedeva un numero che non c'era** (*«Costo: NON MISURATO finché il censimento non
+dice quante ricompilazioni»*). 👉 **Eccolo: 6 binari in totale, 5 autorizzabili, 3 che valgono
+davvero** (quelle sul piccolo, dove i vicini sono 7 / 1→3 / 2).
 
 Pronti ma **non urgenti** (nessun grafico): `ABTG_Nasdaq_Apertura_US_Ottimizzato` ·
 `ABTG_DAX_Apertura_EU_Ottimizzato` · `ABTG_Apertura_3Ingressi` · `ABTG_Apertura_Marco`.
