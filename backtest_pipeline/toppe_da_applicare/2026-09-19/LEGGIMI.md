@@ -41,4 +41,14 @@ sorpresa: è il collaudo che fa il suo lavoro.
 
 ## DOPO
 Il runner delle 03:30 rilegge i sorgenti (`CODA_06`): la notte dopo il referto deve mostrare
-**2090 / 2190 / 2122** al posto di 2032 / 2132 / 2064. **È la verifica che la toppa è entrata.**
+**2091 / 2191 / 2123** al posto di 2033 / 2133 / 2065. **È la verifica che la toppa è entrata.**
+
+> 🔴 **ATTENZIONE AL RIGHELLO — correzione del 19/09 sera (classe 456).** Qui c'era scritto
+> *«2090 / 2190 / 2122 al posto di 2032 / 2132 / 2064»*: sono i numeri di `wc -l`, **non** quelli
+> che stampa `CODA_06`. Quel referto conta le righe con
+> `@($t -split "\`r?\`n").Count`, che dà **sempre UNO IN PIU'** di `wc -l` — verificato sui due
+> casi possibili: file che finisce con a capo (`"a\nb\n"` → 3 contro 2) e file che non ci
+> finisce (`"a\nb"` → 2 contro 1). **Non esiste il caso in cui i due righelli coincidano.**
+> 👉 Chi verificasse con i numeri vecchi concluderebbe che **la toppa NON è entrata**, mentre
+> è entrata benissimo. Le righe vere dei tre file patchati, con `wc -l`, sono
+> **2090 Nasdaq · 2190 DAX · 2122 Dow**.
