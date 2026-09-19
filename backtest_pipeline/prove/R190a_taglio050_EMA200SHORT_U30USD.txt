@@ -1,0 +1,209 @@
+# =====================================================================
+#  EA: ABTG_EMA200
+#  R190a -- IL TAGLIO A 0,50 SU EMA200 SHORT / U30USD H1.
+#           Asse unico: InpMagic (coppia gemella, cancello G1).
+#           L'UNICA COSA CHE CAMBIA RISPETTO A R112 E' @FRAZIONEIS.
+# =====================================================================
+#  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
+#  ANTENATO: prove/R112_01_short_r1.txt (girato il 26/08/2026)
+#            referto: risultati_archivio/R112_CORSA_20260826/REFERTO_R112.txt
+#            CSV:     risultati_archivio/R112_CORSA_20260826/
+#                     ABTG_EMA200_U30USD_{IS,OOS}_01_short_r1.csv
+#
+#  ###  PERCHE' QUESTO FILE ESISTE, IN UNA RIGA  ###
+#  La cella e' BUONA su tutti e quattro i cancelli TRANNE il pavimento
+#  del campione, e il pavimento lo manca SOLO DI 25 OPERAZIONI IN IS:
+#
+#     IS  n=125  PF 1,23237  DD 4,5136%   (MISURATO, R112, tick reali)
+#     OOS n=302  PF 1,89127  DD 2,6570%   (MISURATO, R112, tick reali)
+#     ----------------------------------------------------------------
+#     TOTALE 427 operazioni.  Il pavimento chiede 150 + 150 = 300.
+#
+#  >>> LE OPERAZIONI CI SONO GIA'. Sono tagliate male.
+#      A FrazioneIS 0,40 (il DEFAULT di fabbrica del driver,
+#      walkforward_generico.ps1 r.179) l'IS prende 256 giorni su 642 e
+#      si ferma a 125. A 0,50 ne prende 321, e la soglia cade.
+#      Non serve un dato nuovo, non serve un parametro nuovo, non serve
+#      piu' finestra (su U30USD PIU' FINESTRA NON C'E': i tick reali
+#      BCM partono dal 2024.09.26, MISURATO in
+#      risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#
+# ---------------------------------------------------------------------
+#  ###  L'ARITMETICA DEL TAGLIO, FATTA PRIMA  ###
+# ---------------------------------------------------------------------
+#  Finestra 2024.09.26 -> 2026.06.30 = 642 giorni di calendario.
+#  Il driver (r.921) fa: Meta = Inizio + floor(642 x FrazioneIS).
+#    a 0,40 -> Meta = 2025.06.09   IS 256 gg / OOS 386 gg   <-- R112
+#    a 0,50 -> Meta = 2025.08.13   IS 321 gg / OOS 321 gg   <-- QUI
+#  (le due date sono le stesse che il driver scrive nel proprio
+#   commento a r.605-607: "IS che finisce il 2025.06.09 invece del
+#   2025.08.13, cioe' 65 giorni di calendario". Non le ho inventate:
+#   le ho ritrovate.)
+#
+#  DENSITA' MISURATE su R112, cella 01_short_r1:
+#     IS  125 / 256 gg = 0,488 operazioni al giorno di calendario
+#     OOS 302 / 386 gg = 0,782 operazioni al giorno di calendario
+#  I 65 giorni che passano da OOS a IS stanno all'INIZIO dell'OOS.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  n IS atteso: BANDA 157 - 176, e la banda ha due estremi VERI:
+#     - estremo BASSO 125 + 65 x 0,488 = 157  (i 65 giorni nuovi vanno
+#       alla densita' dell'IS vecchio: IPOTESI PESSIMISTA)
+#     - estremo ALTO  125 + 65 x 0,782 = 176  (alla densita' dell'OOS,
+#       che e' il blocco da cui quei giorni arrivano davvero)
+#  >>> IL MARGINE PIU' SOTTILE E' +4,7% (157 contro 150) E LO DICHIARO.
+#      Non e' un margine grasso. Se esce sotto, vedi l'uscita (c).
+#  n OOS atteso: 251 - 270. Qui il margine e' largo (+67% almeno).
+#
+#  PF atteso: NON LO SO, E NON DEVO SAPERLO. Il taglio rende LEGGIBILE
+#  il campione, non CONSERVA il numero: 51-32 operazioni passano di
+#  finestra e il PF di 150 non e' il PF di 125.
+#  >>> MA IL VERSO DELL'ERRORE SI PUO' DICHIARARE, ed e' FAVOREVOLE:
+#      le operazioni che migrano vengono dalla testa di un blocco che
+#      fa PF 1,891. Se portassero con se' quel PF, il PF dell'IS
+#      SALIREBBE. Il rischio vero e' sull'OOS nuovo, che perde la sua
+#      parte migliore per costruzione -- ed e' per questo che il
+#      falsificatore qui sotto e' sull'OOS e non sull'IS.
+#  DD atteso: IS 4,5% / OOS 2,7% sono i MISURATI a rischio 1,00%.
+#  Il DD si legge a QUALUNQUE n (Emendamento B, 16/08): resta un
+#  cancello anche se il campione uscisse corto.
+#
+# ---------------------------------------------------------------------
+#  ###  SOGLIE CONGELATE PRIMA  ###
+# ---------------------------------------------------------------------
+#    scarta se  DD > 14% in una qualunque delle due finestre
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    NON GIUDICA se n < 150 (merito sospeso, valvola R59)
+#    non promuove NIENTE: questo round MISURA. Lo schieramento e' una
+#    firma di Claudio, e non gliela chiede questo file.
+#
+#  LE TRE USCITE, congelate adesso:
+#   (a) n IS >= 150 E n OOS >= 150 E PF >= 1,10 in tutte e due:
+#       e' la PRIMA cella del lato SHORT dell'EMADOW con campione
+#       pieno in tutte e due le finestre. Si apre il giro vero:
+#       gemelli (D30EUR, NASUSD), prova di REGIME, e scelta di cella
+#       al CENTRO dell'altopiano -- mai il picco.
+#   (b) n >= 150 in tutte e due E PF < 1,10 in una: cancello di
+#       merito, e il certificato del lato SHORT si CHIUDE con un
+#       numero. E' un risultato, non un fallimento: oggi quel lato
+#       non ha ne' un si' ne' un no, ha un "non misurato".
+#   (c) n IS < 150 lo stesso: il round NON HA RISPOSTO, e la risposta
+#       diventa "su U30USD il campione non c'e' e non ci sara'",
+#       perche' il muro dei tick e' il 2024.09.26 ed e' MISURATO.
+#       In quel caso NON si tocca nessun parametro per fabbricare
+#       operazioni: si scrive il numero e si va avanti.
+#   (d) le due celle gemelle NON identiche al centesimo: e' il
+#       cancello G1 che fallisce. Non si legge nient'altro del CSV,
+#       si riapre il baco del determinismo.
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  CORPO: copia riga per riga di prove/R112_01_short_r1.txt. Gli unici
+#    delta sono TRE e sono tutti di FINESTRA o di IDENTITA', mai di
+#    motore: (1) @FINOA 2026.06.30 -- che in R112 arrivava dalla riga
+#    di lancio (righe/RIGA_R112_EMADOW_CONTRATTO.ps1) e qui deve stare
+#    nel file perche' la corsia ROUND passa solo sei argomenti e -Fino
+#    NON e' fra quelli; (2) @FRAZIONEIS 0.50 -- l'oggetto del round;
+#    (3) InpMagic, blocco vergine.
+#  >>> NESSUN parametro del motore e' toccato. Confrontabile col
+#      diff contro l'antenato.
+#  MODELLO: tick reali = -Modello 4. Il default del driver e' 4.
+#    -Modello 1 (OHLC M1) qui sarebbe SOLO SCREENING e renderebbe il
+#    round inutile: il confronto col MISURATO di R112 si romperebbe.
+#  PAVIMENTO TICK: @DAQUANDO 2024.09.26 = inizio MISURATO dei tick
+#    reali BCM su U30USD (67.618.571 tick, referto del 20/08/2026).
+#    Il file non chiede niente prima.
+#  TETTO DELLE BARRE: H1 su 21 mesi = ~10.900 barre [DERIVATO: ~6.240
+#    barre H1 all'anno sul forex/indici x 1,76 anni]. Molto sotto il
+#    tetto delle ~100.000.
+#  CANCELLO DI COSTO: U30USD H1, stop = ATR(14) H1 x InpSLatr(1,0).
+#    MISURATO sulla sedia 771321 (stessa geometria, stesso simbolo,
+#    stesso TF): stop 78,05 - 88,25 idx contro spread 2,00 ->
+#    39,0x - 44,1x. STATO: ARANCIONE / FRAGILE -- a cavallo del
+#    pavimento di LAVORO 40x, largamente sopra il pavimento DURO 13,3x.
+#    >>> LO DICHIARO PRIMA, NON DOPO: se la cella passasse i cancelli,
+#        NON sarebbe promuovibile finche' il 40x non e' risolto.
+#        Fonte: report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md.
+#  MAGIC: 789310 / 789311 -- cercati in tutto il repo il 19/09/2026 con
+#    grep -rl, .git e .claude esclusi: ZERO occorrenze.
+#  ETICHETTA: r190a -- grep -ril su backtest_pipeline/ e report/:
+#    ZERO occorrenze.
+#  ENUM: l'unico ENUM e' InpTF, pinnato col VALORE ESPLICITO 16385
+#    (= PERIOD_H1) e con passo 0. Nessun intervallo su enum.
+#  PIN DI STRINGA: InpNewsFile e InpComment portano un valore NON
+#    vuoto, InpNewsCurrencies e' lasciato senza riga di pin (un pin di
+#    stringa VUOTA MT5 lo ignora in silenzio -- e' la classe che costo'
+#    il round FiboH4). Identico all'antenato.
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA. In campo la
+#    sedia gira a 0,65: ogni DD di questo file va MOLTIPLICATO PER 0,65
+#    per confrontarlo col forward. Taglie e rischio sono di CLAUDIO.
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO, con la base MISURATA MIGLIORE che esiste (classe 192: stesso
+#  EA, stesso simbolo, stessa finestra, stesso modello, quindi ZERO
+#  riscalatura sui tick):
+#    R112 -- 16 passate in ~6 min = 0,375 min/passata.
+#    2 celle x 2 gambe = 4 passate  ->  0,6 + 4 x 0,375 = 2,1 minuti.
+#    Estremo ottimista (R88a, U30USD tick, 0,083 min/passata, ma altro
+#    EA e altro TF): 0,93 minuti. BANDA DICHIARATA: 0,9 - 2,1 min.
+#
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
+#    10105439.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#    SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#    coordinatore. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.50
+
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=true||true||0||true||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+InpUseAdrFilter=false||false||0||false||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=true||true||0||true||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpUseCutoff=false||false||0||false||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpComment=EMA200 DOW
+InpFridayClose=false||false||0||false||N
+InpFridayCloseHour=20||20||0||20||N
+InpMagic=789310||789310||1||789311||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N

@@ -25026,3 +25026,48 @@ del file di partenza**, e l'impronta si verifica **prima** di applicare.
 silenzio che somiglia a un PASS): tutte e tre sono **strumenti che non protestano quando
 sbagliano bersaglio**. 👉 Quando uno strumento non sa distinguere il bersaglio giusto da quello
 sbagliato, **la distinzione la deve portare il pacchetto**, non la memoria di chi esegue.
+
+## CLASSE 450 — il TAGLIO IS/OOS spostato per superare il pavimento dei 150 **NON crea operazioni: le SPOSTA**, e sotto un totale di 300 manda sotto ANCHE l'altra finestra (19/09/2026)
+
+**Il caso.** Censimento della *"via piu' corta ai 150"* (`report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md`).
+Decine di combinazioni EA x simbolo hanno `n IS < 150` e `n OOS > 150`: la tentazione ovvia e'
+`@FRAZIONEIS 0.50`, che sposta il confine e alza l'IS. La direttiva esiste, e' implementata e
+collaudata dal 12/09, e **funziona**.
+
+🔴 **Ma il driver taglia per TEMPO** (`walkforward_generico.ps1` r.921:
+`Meta = Inizio + floor(giorni x FrazioneIS)`), e le operazioni sono **una somma fissa**. Alzare
+l'IS **abbassa l'OOS della stessa quantita'**.
+
+| combinazione | n IS | n OOS | **TOTALE** | a `0.50` |
+|---|---:|---:|---:|---|
+| `IntradayMomentum` NASUSD | 146 | 261 | **407** | ~203 / ~204 -> 🟢 tutte e due sopra |
+| `DAX_Live5m_v2` D30EUR | 80 | 202 | **282** | ~141 / ~141 -> 🔴 **tutte e due SOTTO** |
+
+👉 Nel secondo caso il round **peggiora la situazione**: si passa da *"una finestra sotto il
+pavimento"* a **DUE**, e si sono spesi i minuti per scoprirlo.
+
+### La regola
+🔴 **Prima di proporre un taglio diverso si somma: `n IS + n OOS >= 300`.** Il pavimento
+dell'Emendamento A e' 150 **per finestra**, quindi il vincolo da controllare **sta sul TOTALE**.
+Sotto 300 il taglio **non e' una leva, e' uno spostamento del problema**, e la risposta giusta e'
+un'altra (timeframe, oppure "il campione non c'e'").
+- 📐 **E la condizione non e' nemmeno sufficiente.** Il taglio e' per TEMPO, le operazioni **non
+  sono distribuite uniformemente**: con totale 305 e tutte le operazioni addensate nella seconda
+  meta', `0.50` puo' lasciare l'IS a 120. Percio' l'attesa si scrive come **BANDA a due estremi
+  veri**, calcolati con le **densita' MISURATE** delle due finestre (operazioni / giorni di
+  calendario), non con una proporzione:
+  `n_IS(0,50) = n_IS + (giorni spostati) x [densita' IS .. densita' OOS]`.
+  Se **l'estremo basso** della banda non supera 150, il round **non e' una via corta**.
+- ⚠️ **E il taglio NON conserva il PF.** Le operazioni che migrano cambiano finestra: il PF a
+  n=150 **non e'** il PF a n=125. Un file prova che promette *"stessa cella, solo piu' campione"*
+  sta dichiarando una cosa falsa. Quello che si puo' e si deve dichiarare e' il **VERSO**
+  dell'errore: se il blocco da cui le operazioni migrano ha un PF alto, l'IS **salira'** e il
+  rischio vero e' sull'**OOS nuovo**, che perde per costruzione la sua parte migliore. Il
+  falsificatore va messo li'.
+- 🚫 **E non si combina col cambio di TIMEFRAME nello stesso round**: due leve insieme rendono il
+  guadagno di campione non attribuibile, e distruggono l'ancora di riproduzione.
+
+📌 Parente della **296** (larghezza della finestra mai misurata ad asse controllato): li' la
+finestra cambiava senza che nessuno la misurasse, qui cambia il **confine interno** — ed e' la
+stessa lezione, perche' il confine interno e' un parametro della misura esattamente come la
+finestra.

@@ -1,0 +1,247 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R190b -- LA DISCESA DI TF CHE NON E' MAI STATA FATTA: H1 -> M30.
+#           Asse unico: InpTF (ENUM, due soli membri: M30 e H1).
+#           La cella H1 e' l'ANCORA: deve riprodurre r120e11.
+# =====================================================================
+#  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
+#  ANTENATO: prove/R120e_U30USD_11_vivo_TAGLIA.txt (etichetta r120e11)
+#            CSV: risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/
+#                 ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_{IS,OOS}_r120e11.csv
+#
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+#  La cella r120e11 (InpTrailOnST + InpExitOnFlip accesi) e' la
+#  MIGLIORE cella non-promossa di tutto l'archivio a dato pieno:
+#
+#     IS  n=106  PF 1,39708  DD 3,4849%   (MISURATO, tick reali)
+#     OOS n=184  PF 1,21985  DD 4,2148%   (MISURATO, tick reali)
+#
+#  PF sopra 1,10 in TUTTE E DUE le finestre, DD sotto il 5% in tutte e
+#  due, segni concordi. L'UNICA cosa che la tiene ferma e' il pavimento
+#  del campione: 106 operazioni in IS contro 150.
+#
+#  >>> E QUI IL TAGLIO IS/OOS NON BASTA, E LO DICO SUBITO.
+#      Totale 106 + 184 = 290. Il pavimento chiede 150 + 150 = 300.
+#      Con @FRAZIONEIS 0,50 l'IS salirebbe a ~137 e l'OOS scenderebbe a
+#      ~153: si sposta il problema, non si risolve. MANCANO 10
+#      OPERAZIONI CHE NON ESISTONO IN QUESTA FINESTRA.
+#      >>> E piu' finestra NON C'E': i tick reali BCM su U30USD partono
+#          dal 2024.09.26 (67.618.571 tick, MISURATO in
+#          risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#      >>> Quindi resta UNA sola strada onesta: il TIMEFRAME.
+#
+# ---------------------------------------------------------------------
+#  ###  LA DISCESA DI TF COMPRA OPERAZIONI SU QUESTO MOTORE?  SI  ###
+#  ###  E non e' un'opinione: e' la legge dell'ancoraggio applicata
+#  ###  al codice, PIU' una misura sullo stesso motore.
+# ---------------------------------------------------------------------
+#  LEGGE (12/09): un motore guadagna operazioni scendendo di TF SE E
+#  SOLO SE il suo stop si STRINGE scendendo di TF.
+#  LETTO NEL CODICE di ABTG_SuperWave_DOW_H1_Ottimizzato:
+#    - la barra nuova e' iTime(_Symbol, InpTF, 0) (r.285 e r.413): tutto
+#      il motore e' ancorato a InpTF, non al grafico;
+#    - lo stop e' min(linea Supertrend, estremo di InpSLLookback=5
+#      barre) - InpSLBufferPips: DUE ancore, tutte e due a BARRE;
+#    - la linea Supertrend e' InpStMult(2,5) x ATR(InpStAtrPeriod=10),
+#      ATR a barre.
+#  >>> CLASSE S PIENA: scendendo di TF lo stop si stringe e le
+#      operazioni aumentano. Non e' un motore d'orologio.
+#
+#  MISURA DI RIFERIMENTO, sullo STESSO motore base (ABTG_SuperWave),
+#  scansione di TF a dato pieno su NASUSD
+#  (risultati_prove/ABTG_SuperWave/ABTG_SuperWave_NASUSD_{IS,OOS}.csv):
+#      H1   n IS  33  |  n OOS  56
+#      M30  n IS  52  |  n OOS 108     -> x1,58 (IS)  x1,93 (OOS)
+#      M15  n IS 139  |  n OOS 256     -> x4,21 (IS)  x4,57 (OOS)
+#  >>> RAPPORTO M30/H1 MISURATO: 1,58 - 1,93.
+#      SIMBOLO DIVERSO, quindi e' un riferimento, non una previsione.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  CELLA M30 (InpTF = 30):
+#    n IS atteso   167 - 205   (106 x [1,58 .. 1,93])
+#    n OOS atteso  291 - 355   (184 x [1,58 .. 1,93])
+#    >>> All'estremo PESSIMISTA l'IS supera 150 del 11,3%. E' il
+#        margine piu' sottile del round, ed e' scritto qui.
+#    PF atteso: [NON MISURATO], e non lo invento. Cambiare TF cambia
+#    il motore: e' una misura nuova, non una riproduzione. La banda
+#    onesta e' larga e non serve a niente scriverla stretta.
+#    DD atteso: a stop piu' stretto e piu' operazioni il DD puo'
+#    andare in tutte e due le direzioni. Si legge a QUALUNQUE n
+#    (Emendamento B, 16/08).
+#
+#  CELLA H1 (InpTF = 16385): E' L'ANCORA, non un candidato.
+#    DEVE riprodurre r120e11 al centesimo: n 106 / 184, PF 1,39708 /
+#    1,21985, DD 3,4849% / 4,2148%. L'unico delta col file antenato e'
+#    InpMagic (783500 -> 789320) e il pin di @FINOA, che in R120
+#    arrivava dalla riga di lancio.
+#    >>> SE L'ANCORA NON RIPRODUCE, IL ROUND NON SI LEGGE. Non si
+#        guarda la cella M30: si riapre il baco.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CANCELLO DI COSTO A M30, COL NUMERO  ###
+# ---------------------------------------------------------------------
+#  Pedaggio sugli indici = SPREAD E BASTA (commissione 0,0000 MISURATA
+#  su n=302 deal, report/CANCELLO_COSTO_FLOTTA_2026-09-10.md).
+#  stop dominante = linea Supertrend = InpStMult x ATR(10).
+#  ATR(14) M30 U30USD = 56,0 idx [DERIVATO] -- e la legge di scala e'
+#    VALIDATA SUL SIMBOLO STESSO a H1 con errore +1,5%
+#    (report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md, tabella di scala).
+#  stop ~ 2,5 x 56,0 = 140 idx.
+#  spread U30USD MISURATO: 2,00 (ore 15+) / 3,00 (ora 14).
+#      140 / 2,00 = 70,0x       PASSA il 40x con +75%
+#      140 / 3,00 = 46,7x       PASSA il 40x con +17%
+#  >>> PASSA IN TUTTA LA BANDA ORARIA.
+#  >>> CONTRO-ESEMPIO, costruito per farlo fallire: perche' il 40x
+#      cada servirebbe ATR(M30) < 32,0 idx, cioe' il 57% del derivato.
+#      La legge ancorata all'ADR SOTTOSTIMA del 18-27% (MISURATO,
+#      report/EMA200_I_DUE_REQUISITI_2026-09-12.md): l'errore va nella
+#      direzione PRUDENTE, lo stop vero e' PIU' largo. Il cancello
+#      regge.
+#  >>> E PERCHE' IL ROUND SI FERMA A M30 E NON SCENDE A M15, che pure
+#      darebbe x4,2 di operazioni: a M15 lo stop e' 2,5 x 39,6 = 99 idx
+#      -> 49,5x all'ora 15, ma 33,0x all'ora 14, cioe' SOTTO il
+#      pavimento di LAVORO 40x in una parte della seduta.
+#      M15 e' quindi ESCLUSO PER COSTO, col numero: 33,0x contro 40x.
+#      Non e' pigrizia, e' un conto. (Resta sopra il pavimento DURO
+#      13,3x: e' informativo, non promuovibile.)
+#
+# ---------------------------------------------------------------------
+#  ###  SOGLIE CONGELATE PRIMA  ###
+# ---------------------------------------------------------------------
+#    scarta se  DD > 14% in una qualunque delle due finestre
+#    scarta se  n >= 150 in una finestra E PF < 1,10 in quella finestra
+#    NON GIUDICA se n < 150 (merito sospeso, valvola R59)
+#    il round NON PROMUOVE NIENTE. Anche un M30 bellissimo sarebbe UNA
+#    CELLA SOLA: per schierare servirebbe un altopiano attorno, e
+#    questo file non lo misura.
+#
+#  LE QUATTRO USCITE, congelate adesso:
+#   (a) M30 con n >= 150 in entrambe E PF >= 1,10 in entrambe:
+#       e' il primo campione pieno di questa famiglia. Si apre il
+#       round dell'altopiano attorno a M30 (StMult / TP_RR), i
+#       gemelli D30EUR e NASUSD, e la prova di REGIME.
+#   (b) M30 con n >= 150 in entrambe E PF < 1,10: cancello di merito.
+#       Il certificato di SuperWave_DOW si CHIUDE con un numero, e la
+#       casella 5 ("TF cambiato almeno una volta") si spunta.
+#   (c) M30 con n ANCORA sotto 150: la legge dell'ancoraggio non ha
+#       comprato quello che prometteva su questo motore, ed e' un
+#       risultato di suo (vale anche altrove). Verdetto: "su U30USD il
+#       campione non c'e'". NON si tocca nessun filtro per fabbricare
+#       operazioni.
+#   (d) l'ancora H1 NON riproduce r120e11: si legge SOLO quello.
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  CORPO: copia riga per riga di prove/R120e_U30USD_11_vivo_TAGLIA.txt.
+#    Delta: (1) @FINOA 2026.06.30 pinnato nel file, perche' la corsia
+#    ROUND passa sei argomenti e -Fino non e' fra quelli, e in R120
+#    quella data arrivava dalla riga di lancio (la finestra di R120 e'
+#    "2024.09.26 - 2026.06.30", citata in walkforward_generico.ps1
+#    r.596-597); (2) InpMagic pinnato su un blocco vergine;
+#    (3) InpTF da PIN ad ASSE. Nessun parametro di motore toccato.
+#  TAGLIO IS/OOS: si resta a 0,40, il DEFAULT. NON metto @FRAZIONEIS:
+#    cambiare taglio E timeframe nello stesso round misurerebbe due
+#    cose insieme e non ne misurerebbe nessuna -- e romperebbe
+#    l'ancora H1.
+#  ENUM, CLASSE 287: InpTF e' ENUM_TIMEFRAMES. MT5 e il driver IGNORANO
+#    il passo e spazzolano i MEMBRI fra start e stop. Fra 30 (PERIOD_M30)
+#    e 16385 (PERIOD_H1) i membri sono ESATTAMENTE DUE: M30 e H1.
+#    >>> Verificato contro il rovescio: se avessi scritto lo start a 15
+#        (M15) i membri sarebbero TRE (M15, M20, M30... piu' H1) e il
+#        round avrebbe misurato anche un TF che il cancello di costo
+#        esclude. Lo start e' 30 apposta.
+#  MODELLO: tick reali = -Modello 4 (il default del driver). -Modello 1
+#    romperebbe il confronto con r120e11, che e' a tick.
+#  PAVIMENTO TICK: @DAQUANDO 2024.09.26 = inizio MISURATO dei tick reali
+#    BCM su U30USD. Il file non chiede niente prima.
+#  TETTO DELLE BARRE: @PERIODO resta H1 = ~10.900 barre su 21 mesi
+#    [DERIVATO: ~6.240 barre H1/anno x 1,76]. Sotto il tetto delle
+#    ~100.000. Il grafico NON scende a M30 apposta: il motore legge
+#    InpTF (r.285), il grafico e' solo il passo del tester.
+#  MAGIC: 789320 -- cercato in tutto il repo il 19/09/2026 con grep -rl,
+#    .git e .claude esclusi: ZERO occorrenze. 783500/783501 (r120e11) e
+#    770511 (la sedia viva) sono VIETATI qui.
+#  ETICHETTA: r190b -- grep -ril su backtest_pipeline/ e report/: ZERO.
+#  PIN DI STRINGA: nessuno. Nessun input stringa viene toccato.
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA. Taglie e rischio
+#    in campo sono di CLAUDIO.
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO, con la base MISURATA (classe 192: stesso simbolo U30USD,
+#  stesso modello, stessa finestra -> nessuna riscalatura sui tick):
+#    R88a -- 96 passate in 8,0 min = 0,083 min/passata (U30USD, tick).
+#    R112 -- 0,375 min/passata (altro EA, stesso simbolo/finestra).
+#    2 celle x 2 gambe = 4 passate -> 0,93 min (R88a) .. 2,1 min (R112).
+#    BANDA DICHIARATA: 0,9 - 2,1 minuti.
+#    >>> La cella M30 puo' costare PIU' della H1 (piu' barre da
+#        costruire, stessi tick): la banda alta e' quella da usare.
+#
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
+#    10105439.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#    SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#    coordinatore. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# --- IDENTITA' DEL MOTORE: la cella r120e11, pinnata per nome ---
+InpUsaGuardian=true||true||0||true||N
+InpStMult=2.5||2.5||0||2.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+
+# --- I DUE LATI, TUTTI E DUE VIVI (regola di casa del 25/08) ---
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- Confluenza / medie ---
+InpUseConfluence=false||false||0||false||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+
+# --- Ingresso frazionato: PINNATO al default, come nell'antenato ---
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingAtr=0.0||0.0||0||0.0||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpSLBufferAtr=0.0||0.0||0||0.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+
+# --- LA GESTIONE DELL'USCITA: la cella vincente di R120e ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=789320||789320||0||789320||N
+
+# --- L'UNICO ASSE: IL TIMEFRAME DEL MOTORE.
+#     ENUM_TIMEFRAMES: fra 30 (M30) e 16385 (H1) i membri sono DUE.
+#     16385 e' l'ANCORA che deve riprodurre r120e11.
+InpTF=30||30||1||16385||Y
