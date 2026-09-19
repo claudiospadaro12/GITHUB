@@ -25352,3 +25352,104 @@ regola di NOMINA di quel file, prima di scriverlo nel file prova.**
 📌 Famiglia della **156** (la chiave che MT5 ignora in silenzio) e della **158** (il lettore che
 pretende una riga da un CSV che ne ha due): **strumenti di lettura tarati su un'idea del file
 invece che sul file**.
+
+---
+
+## CLASSE 456 — 📏 IL RIGHELLO DEL CENSIMENTO NON E' IL RIGHELLO DEL FILE: `CODA_06` conta **UNO IN PIU'**, e un'impronta presa da lì fa morire la riga sul terminale **GIUSTO** (19/09/2026)
+
+**Il caso.** La toppa "chiusura per ticket" per il **50503392** doveva rifiutarsi di
+sovrascrivere se il vintage in campo non era quello censito (classe **449**). L'impronta scelta
+era il **numero di righe**, e il numero veniva dal referto notturno
+`backtest_pipeline/coda/referti/CODA_06_quale_codice_gira_20260919_033003.log`:
+**2033 / 2133 / 2065**. Il `LEGGIMI.md` della toppa e la richiesta di lancio dicevano invece
+**2032 / 2132 / 2064** — cioè il `wc -l` dei file nel repo.
+
+**Nessuno dei due sbagliava: sbagliava il confronto.** `CODA_06` r.87 conta così:
+```powershell
+$righe = @($t -split "`r?`n").Count
+```
+Su un file che **finisce con un a-capo** — cioè su tutti — lo `-split` produce un ultimo
+elemento **vuoto**, e il conteggio esce **sempre uno in più** delle righe di contenuto.
+Misurato sui tre sorgenti al vintage `3af47ed9`: contenuto **2032/2132/2064**, referto
+**2033/2133/2065**. Delta **+1**, su tutti e tre.
+
+🔴 **Il costo, se non lo si vede prima:** una riga che "muore dicendo perché" avrebbe preso i
+numeri dal referto (l'unica fonte disponibile su quella macchina), li avrebbe confrontati col
+conteggio vero del file, e sarebbe **morta sul terminale GIUSTO con la toppa giusta in mano**.
+Un giro a vuoto sul VPS, e per di più con l'aria del difetto grave ("il binario in campo non è
+quello censito!") quando non c'era nessun difetto.
+
+### La regola
+🔴 **Un numero letto da un referto NON si usa come soglia finché non si è aperto lo strumento
+che l'ha scritto e non si è visto CON QUALE FORMULA l'ha contato.**
+- 📐 Vale per le righe, ma la classe è più larga: conteggi di trade, di celle, di file, di
+  giorni. **Ogni strumento ha il suo righello, e i righelli non si prestano.**
+- ✅ **Rimedio applicato**: lo script della toppa conta le righe di **CONTENUTO** (a-capo + 1
+  dopo `TrimEnd`) e **dichiara il +1 di `CODA_06` in un commento**, così il prossimo che
+  confronta le due cifre non ci ricasca. E il referto della riga dice a Claudio che la notte
+  dopo `CODA_06` stamperà **2091/2191/2123**, non 2090/2190/2122.
+- 🧪 **E l'impronta non è più solo le righe**: è righe **+ sha256 dello SCHELETRO ASCII**
+  (CRLF→LF, via i caratteri fuori dall'ASCII stampabile, via l'a-capo finale). Due vintage
+  diversi con le stesse righe esistono; con lo stesso scheletro no. La normalizzazione serve
+  perché fra MetaEditor e il repo cambiano fine riga, BOM e codifica delle **accentate nei
+  commenti** — tre cose che non cambiano una virgola di codice e che farebbero mentire
+  un'impronta presa sui byte nudi.
+
+📌 Famiglia della **158** e della **455**: **strumenti di lettura tarati su un'idea del file
+invece che sul file.**
+
+---
+
+## CLASSE 457 — 🕳️ IL CANCELLO NON VEDE UN PERCORSO VIETATO SE STA **FRA APICI** (cioè sempre), E NON CERCA AFFATTO `Stop-Process` (19/09/2026)
+
+**Il caso, e non è un'ipotesi: è un contro-esempio ESEGUITO.** Mentre si verificava la riga
+della toppa per ticket, si è provato a **rompere** `controlla_riga.py` invece che a confermarlo.
+Script di prova di cinque righe, dato in pasto a `--ps1`:
+```powershell
+$bersaglio = 'C:\BCM_Reale'
+$dati = Join-Path $env:APPDATA 'MetaQuotes\Terminal\E23E1504A8D02A22179395F0652B86B6'
+Copy-Item -LiteralPath .\x.mq5 -Destination (Join-Path $dati 'MQL5\Experts\x.mq5') -Force
+Get-Process terminal64 | Stop-Process -Force
+```
+Cioè: **scrive dentro la cartella dati del conto REALE 10105439 e poi ammazza tutti i
+terminali**, il reale compreso, mentre ha posizioni aperte. **Verdetto del cancello: «ESITO:
+nessun difetto meccanico», uscita 0.**
+
+**Due buchi indipendenti, e si sommano:**
+1. 🔴 `controlla_terminali()` cerca i percorsi vietati dentro `nudo`, che passa da
+   `senza_stringhe()` (r.244-262): quella funzione **spoglia i letterali di stringa** — è la
+   correzione giusta della classe **167**, che serve a non gridare al lupo sui `||` dei file
+   prova. Effetto collaterale mai visto: **un percorso di Windows si scrive SEMPRE fra apici**,
+   quindi nei `.ps1` il controllo sui terminali è **praticamente morto**. Prova del meccanismo:
+   lo stesso percorso scritto **nudo** (`$x = C:\BCM_Reale`) viene **bloccato** correttamente.
+   Fra apici, invisibile.
+2. 🔴 **Il cancello non cerca `Stop-Process` / `Kill()` / `taskkill` da nessuna parte.** La
+   lezione del 12/09 — `Get-Process terminal64 | Stop-Process -Force` in fondo a
+   `RIGA_SPREAD_NASUSD.ps1`, che spegneva **tutti** i terminali della macchina — sta in
+   `CLAUDE.md` e nel referto, ma **non è mai diventata un controllo**. Una lezione che resta
+   prosa è una lezione che si ripaga.
+
+### La regola
+🔴 **Un PASS del cancello sui terminali NON è una prova, finché questi due buchi sono aperti.**
+Sui `.ps1` che scrivono dentro `MetaQuotes\Terminal` il bersaglio va verificato **a mano**: si
+elencano le destinazioni di **ogni** `Copy-Item`/`WriteAllBytes`/`Out-File` e si guarda da dove
+viene il percorso.
+- ✅ **Fatto sulla riga della toppa del 19/09**: audit manuale delle 6 scritture (4 sul Desktop,
+  1 nella cartella temporanea, **1 sola** nel terminale, e quella parte da una **costante**
+  certificata con `origin.txt`), più grep esplicito su `Stop-Process|Kill\(|taskkill|
+  CloseMainWindow|Get-Process|Start-Process` = **zero occorrenze**.
+- 🔧 **La correzione proposta al cancello** (due punti, nessuno dei due allenta niente):
+  **(a)** in `controlla_terminali()` cercare i percorsi vietati **anche sulla riga CRUDA**, non
+  solo su `nudo` — il rischio di falso positivo lo copre già `in_una_guardia()`, che è la rete
+  nata apposta per le guardie scritte bene;
+  **(b)** una classe nuova di BLOCCANTE su `Stop-Process`, `.Kill()`, `taskkill`,
+  `CloseMainWindow` in qualunque `.ps1`, con l'unica esenzione della **chiusura chirurgica**
+  (il processo filtrato per `Path` sotto la cartella bersaglio) — che è esattamente la forma
+  con cui il 12/09 il difetto è stato riparato.
+- ⚠️ **Non applicata qui di mia iniziativa**: cambiare un cancello è una decisione, e i cancelli
+  si cambiano **prima** dei numeri, non in mezzo a una consegna. Va fatta dalla sessione
+  principale, e questa classe è la sua ricevuta.
+
+📌 **La morale è quella del 10/09**: il PASS era arrivato perché avevo controllato che la mia
+risposta fosse **coerente** con quello che mi aspettavo. È bastato provare a **romperla** per
+scoprire che il cancello approvava anche uno script che ammazza il conto reale.
