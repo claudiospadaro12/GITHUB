@@ -25599,3 +25599,29 @@ scarica** (`curl` sul link vero), non sul nome del ramo.
 - 📌 Parente della **251** (il file che leggono 55 EA, scritto a metà) e figlia diretta della
   **458**: là il riordino si mangiava il codice, qui si scopre che sotto quel codice non c'era
   più niente da mangiare.
+
+---
+
+## CLASSE 460 — 📰🔇 **QUATTRO STRATI CHE TACCIONO IN FILA**: il canale news era morto dal **26/07**, e ogni anello rispondeva «tutto ok» (19/09/2026, figlia della **459**)
+
+**Il caso.** La **458** aveva trovato il percorso rotto (task `ABTG_AggiornaNews` che puntava a una cartella archiviata il 16/09). La **459** aveva trovato la sorgente vuota. Riparato il percorso, il verdetto è stato **A = canale vivo**, con `esito 0` e calendario **di oggi**. 🔴 **E il verdetto A era vero e inutile insieme**: il calendario conteneva **16 eventi, tutti fra il 14 e il 18/09**, cioè **zero eventi futuri**. Un filtro news blocca il trading **prima** di una notizia: con solo eventi passati è **spento**, per quanto fresca sia la data del file.
+
+### Gli strati, misurati uno per uno
+| # | strato | cosa faceva | prova |
+|---|---|---|---|
+| 1 | `agent/news_export.py` `_fetch_feed()` | `except Exception: return []` — **ogni** errore di rete diventava «nessuna notizia» | codice, r.44-50 della versione precedente |
+| 2 | `write_abtg_news()` | scriveva il file **anche con zero righe** | `data/abtg_news.csv` = **0 byte** in repo dal 26/07/2026 |
+| 3 | `daily-report.yml` | `git add` + `commit` **solo se cambia**: vuoto rigenerato vuoto non cambia mai | log del 18/09 05:00 UTC: `[info] abtg_news.csv generato: 0 eventi (ECB=0, FOMC=0)` e commit `1 file changed` = **solo lo snapshot** |
+| 4 | `aggiorna_news.ps1` (versione in campo) | `Invoke-WebRequest -OutFile` diritto sul file in campo, **esce 0** anche con zero byte | esiti `0` del 14-15-16/09, che sembravano salute |
+| 5 | `news-export.yml` | **nessuno `schedule`**: aveva girato **UNA volta sola**, il 23/07/2026 | elenco run del workflow: `total_count = 2`, il secondo l'ho lanciato io il 19/09 |
+
+### 🔎 La causa tecnica, e non è «il sito è giù»
+I **tre** feed di `faireconomy.media` (`thisweek`, `nextweek`, `lastweek`) venivano chiesti **uno dietro l'altro senza pausa**, e il fornitore rifiuta le richieste ravvicinate. ✅ **Prova**: la corsa a mano del 19/09 alle 17:27 UTC ha riportato **16 eventi — ma tutti e soli di `thisweek`**, cioè **solo il primo dei tre**. `nextweek` (che è quello con gli eventi FUTURI) e `lastweek` erano stati rifiutati, e l'errore spariva dentro lo strato 1.
+
+### La regola
+🔴 **Un canale automatico che può produrre il VUOTO deve fallire RUMOROSAMENTE, o il vuoto diventa indistinguibile dal funzionamento.** E la misura che lo dice non è «il file esiste» né «il file è di oggi»: è **quanti eventi sono ancora DA VENIRE**.
+- ✅ **Applicato il 19/09**: `_fetch_feed()` ritenta 4 volte con attesa crescente e **stampa l'esito di ogni feed su stderr**; `collect_news()` mette **3 secondi di pausa** fra un feed e l'altro; nuova `conta_futuri()`; `python -m agent.news_export` **esce 1 se gli eventi futuri sono zero**, così il workflow si vede **rosso** e il file buono già in repo **non viene sovrascritto**; `news-export.yml` ha finalmente uno `schedule` giornaliero (**04:40 UTC**, 40 minuti prima che il VPS lo scarichi alle 07:20 IT).
+- 🧪 **Contro-esempi girati** su `conta_futuri()`: solo eventi passati → **0**; misto passato+futuro → conta **solo il futuro**; lista vuota → **0**.
+
+📌 **E la morale di metodo è quella del 10/09**: il verdetto **A** era stato costruito per **confermare** che la catena rispondesse, non per **romperla**. Ha misurato il tubo, non l'acqua. La domanda giusta non era *«il file è arrivato?»* ma *«questo file impedirebbe un'operazione domani?»*.
+

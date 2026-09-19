@@ -4,6 +4,13 @@ name: Genera abtg_news.csv (calendario EA)
 # committa. Utile per rigenerarlo su richiesta senza inviare il report.
 on:
   workflow_dispatch:
+  # CLASSE 460 (19/09/2026) -- PRIMA NON C'ERA NESSUNO SCHEDULE, e questo
+  # workflow aveva girato UNA volta sola in vita sua: il 23/07/2026. Il file
+  # data/abtg_news.csv e' rimasto a 0 byte dal 26/07 al 19/09. L'attivita'
+  # ABTG_AggiornaNews sul VPS lo scarica ogni mattina alle 07:20 ora italiana
+  # (= 05:20 UTC in questo periodo), quindi qui si rigenera 40 minuti prima.
+  schedule:
+    - cron: "40 4 * * *"
 
 permissions:
   contents: write
@@ -19,6 +26,11 @@ jobs:
       - name: Installa dipendenze
         run: pip install requests
       - name: Genera abtg_news.csv
+        # Esce 1 se il calendario non ha NESSUN evento futuro: un filtro news
+        # senza eventi futuri e' un filtro spento, e prima falliva in silenzio
+        # (feed rifiutato -> lista vuota -> file vuoto -> niente da committare
+        # -> nessuno se ne accorgeva). Fallendo qui, il file BUONO gia' in repo
+        # non viene sovrascritto e il workflow si vede rosso.
         run: python -m agent.news_export data/abtg_news.csv
       - name: Committa il file
         run: |

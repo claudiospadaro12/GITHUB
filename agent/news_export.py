@@ -15,6 +15,9 @@ Uso:
 
 from __future__ import annotations
 
+import sys
+import time
+
 from dataclasses import dataclass
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -41,12 +44,46 @@ class NewsRow:
     title: str
 
 
-def _fetch_feed(url: str, tz: ZoneInfo, timeout: int = 20) -> list[NewsRow]:
-    try:
-        r = requests.get(url, timeout=timeout, headers={"User-Agent": "market-agent/1.0"})
-        r.raise_for_status()
-        raw = r.json()
-    except Exception:
+def _fetch_feed(url: str, tz: ZoneInfo, timeout: int = 20,
+                tentativi: int = 4) -> list[NewsRow]:
+    """Scarica UN feed, con ritentativi e log esplicito.
+
+    CLASSE 460 (19/09/2026) -- QUESTA FUNZIONE INGOIAVA OGNI ERRORE E
+    RESTITUIVA UNA LISTA VUOTA, IN SILENZIO. Il `except Exception: return []`
+    originale faceva sembrare "nessuna notizia" quello che era "non sono
+    riuscito a chiedere". Misurato: il 18/09 alle 05:00 UTC il report
+    giornaliero ha scritto `abtg_news.csv generato: 0 eventi`, il file e'
+    rimasto a 0 byte, il commit-se-cambia non e' scattato, e lo script sul
+    VPS ha copiato zero byte USCENDO 0. Quattro strati che tacciono in fila.
+    Il file in repo era fermo al 26/07/2026.
+
+    E la causa della lista vuota e' la fretta: i tre feed di faireconomy
+    venivano chiesti uno dietro l'altro senza pausa, e il fornitore limita
+    le richieste ravvicinate. Prova del 19/09: una corsa a mano alle 17:27
+    UTC ha riportato 16 eventi -- ma SOLO quelli di `thisweek`, cioe' solo
+    il PRIMO dei tre feed. `nextweek` e `lastweek` erano stati rifiutati, e
+    nessuno se n'e' accorto perche' l'errore spariva qui dentro.
+
+    Ora: si ritenta con attesa crescente, si mette una pausa fra un feed e
+    l'altro (in collect_news), e ogni esito finisce su stderr con il nome
+    del feed. Un guasto resta un guasto, ma diventa VISIBILE.
+    """
+    nome = url.rsplit("/", 1)[-1]
+    ultimo = ""
+    for k in range(tentativi):
+        if k:
+            time.sleep(2 ** k)          # 2s, 4s, 8s
+        try:
+            r = requests.get(url, timeout=timeout,
+                             headers={"User-Agent": "market-agent/1.0"})
+            r.raise_for_status()
+            raw = r.json()
+            break
+        except Exception as exc:
+            ultimo = f"{type(exc).__name__}: {exc}"
+    else:
+        print(f"[ERRORE] feed {nome}: fallito dopo {tentativi} tentativi -- {ultimo}",
+              file=sys.stderr)
         return []
     out: list[NewsRow] = []
     for item in raw:
@@ -63,6 +100,7 @@ def _fetch_feed(url: str, tz: ZoneInfo, timeout: int = 20) -> list[NewsRow]:
             currency=(item.get("country") or "").strip(),
             title=(item.get("title") or "").strip(),
         ))
+    print(f"[info] feed {nome}: {len(out)} righe grezze", file=sys.stderr)
     return out
 
 
@@ -83,7 +121,9 @@ def collect_news(tz_name: str = "Europe/Rome",
     seen = set()
     rows: list[NewsRow] = []
     keep = {k.lower() for k in keep_impacts}
-    for url in FEEDS:
+    for n_feed, url in enumerate(FEEDS):
+        if n_feed:
+            time.sleep(3)      # CLASSE 460: il fornitore rifiuta le richieste ravvicinate
         for r in _fetch_feed(url, tz):
             if r.impact.lower() not in keep:
                 continue
@@ -120,13 +160,33 @@ def summarize(rows: list[NewsRow]) -> dict:
     return {"totale": len(rows), "ECB": ecb, "FOMC": fomc}
 
 
+def conta_futuri(rows: list[NewsRow], tz_name: str = "Europe/Rome") -> int:
+    """Quanti eventi sono ANCORA DA VENIRE.
+
+    CLASSE 460-b -- E' LA MISURA CHE MANCAVA, ed e' l'unica che dice se il
+    filtro serve a qualcosa. Un filtro news blocca il trading PRIMA di una
+    notizia: un calendario di soli eventi PASSATI e' un filtro spento, anche
+    se il file esiste, e' fresco di data e la catena ha risposto "tutto ok".
+    Il 19/09 la riparazione del VPS ha dato verdetto "A = canale vivo" con
+    16 eventi tutti fra il 14 e il 18/09: catena giusta, contenuto inutile.
+    Da qui in avanti il numero che conta si stampa accanto al totale.
+    """
+    adesso = datetime.now(ZoneInfo(tz_name))
+    return sum(1 for r in rows if r.dt > adesso)
+
+
 if __name__ == "__main__":
-    import sys
     out = sys.argv[1] if len(sys.argv) > 1 else "abtg_news.csv"
     rows = collect_news()
     n = write_abtg_news(out)
-    print(f"Scritte {n} righe in {out}")
+    futuri = conta_futuri(rows)
+    print(f"Scritte {n} righe in {out}  ({futuri} ancora DA VENIRE)")
     print("Riepilogo:", summarize(rows))
     for r in rows:
         if "ecb" in r.title.lower() or "fomc" in r.title.lower():
             print("  ", r.dt.strftime("%Y.%m.%d %H:%M"), r.currency, r.title)
+    if futuri == 0:
+        print("[ERRORE] il calendario non contiene NESSUN evento futuro: per un"
+              " filtro news e' come essere spento. Guarda le righe [ERRORE] dei"
+              " feed qui sopra.", file=sys.stderr)
+        sys.exit(1)
