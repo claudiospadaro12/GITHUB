@@ -25927,3 +25927,65 @@ promemoria, e i promemoria si ripagano.
 che va detta accanto: **il deposito nella riga di R192 era GIUSTO**. Il difetto non è il numero, è
 che era giusto **per inferenza** — e un'inferenza giusta è indistinguibile da una sbagliata finché
 non la si confronta con la fonte.
+
+---
+
+## CLASSE 468 — 🔍💬 **IL CENSIMENTO PER `grep` CONTA COME DIFETTI LE RIGHE DI COMMENTO CHE DOCUMENTANO LA RIPARAZIONE**: più un file è ben commentato, più risulta malato — e l'EA **già a posto** finisce in lista d'attesa (19/09/2026, figlia della **462**)
+
+**Il caso, misurato oggi.** Il censimento delle chiusure hedge-unsafe consegna questa riga:
+
+```
+ABTG_ORB_Ottimizzato      -> PositionClose(_Symbol)=4   (da valutare)
+```
+
+🔴 **Le quattro occorrenze sono alle righe 362, 799, 990, 1049 e sono TUTTE E QUATTRO DENTRO
+COMMENTI** — e per giunta commenti che raccontano **la riparazione già fatta**:
+
+| riga | testo | cos'è |
+|---|---|---|
+| 362 | `//--- v1.04: il flatten notizie chiudeva con PositionClose(_Symbol), cioe'` | 📝 storia del fix |
+| 799 | `//    PositionClose(_Symbol) su hedging si sarebbe chiusa la posizione col` | 📝 motivazione |
+| 990 | `//| Sostituisce PositionClose(_Symbol) nei due punti di "flatten"` | 📝 intestazione della cura |
+| 1049 | `//    PositionClose(_Symbol) avrebbe chiuso il trade del vicino.` | 📝 motivazione |
+
+**In codice eseguibile: ZERO.** L'EA è hedge-safe dalla **v1.04** (`ChiudiPosizioniMie()` r.1001,
+usata a r.370 e r.1050; uscite runner su `gTrade.PositionClose(gTicketMio)` r.810/819).
+
+### 🔬 La causa, ed è strutturale, non una svista
+**La regola di casa impone di commentare il *perché*** (`CLAUDE.md`: *«commenti che spiegano il
+perché»*). Una riparazione fatta bene quindi **cita testualmente l'API malata** per spiegare cosa
+si è tolto. 👉 **Il segnale che il grep cerca è esattamente la stringa che la cura è obbligata a
+scrivere.** Il metro e l'oggetto misurato sono la stessa stringa: la metrica **premia i file non
+documentati** e mette in coda quelli riparati meglio.
+
+### 📊 Quanto pesa, sul repo di oggi (113 `.mq5` in `mql5/Experts/`)
+| metro | occorrenze | file |
+|---|---:|---:|
+| `grep 'PositionClose(_Symbol)'` | **44** | **21** |
+| solo **codice eseguibile** (scarta le righe che iniziano per `//`) | **36** | **16** |
+| 🔴 **falsi positivi** | **8** | **5** |
+
+I cinque file "malati per commento" sono `ABTG_ORB_Ottimizzato` (4), `ABTG_Relativo` (1) e — **da
+oggi** — i tre `Apertura` appena riparati (1 ciascuno: la stringa compare dentro l'intestazione
+della toppa).
+
+### 🔴 LA TRAPPOLA CHE ABBIAMO APPENA ARMATO NOI, ed è il punto della classe
+Portando la toppa a HEAD, i tre `ABTG_*_Apertura_*` passano da **2 occorrenze in codice** a
+**0 in codice + 1 in commento**. 👉 **Un censimento rifatto domani con lo stesso `grep` stamperà
+`=1` e qualcuno concluderà che la toppa è entrata a metà.** Non è un rischio teorico: è lo stesso
+identico meccanismo che oggi ha messo `ABTG_ORB_Ottimizzato` in lista "da valutare".
+
+### ✅ LA REGOLA
+1. **Un censimento che cerca un DIFETTO nel codice non conta mai le righe di commento.** Filtro
+   minimo: scartare le righe il cui `strip()` inizia per `//`. Per le occorrenze dentro blocchi
+   `/* */` serve un filtro vero, non una riga di `grep`.
+2. **Il referto stampa DUE colonne — `grep` e `in codice` — e il verdetto si pronuncia sulla
+   seconda.** Se sono diverse, la differenza si **elenca per riga**: è informazione (dice che
+   qualcuno ha già riparato lì), non rumore da nascondere.
+3. **Mai archiviare un EA come "da riparare" senza aver aperto le righe contate.** Costa trenta
+   secondi e oggi avrebbe risparmiato un giro intero su un file già sano.
+
+📌 Famiglia della **462** (il censimento eredita l'errore di chi l'ha prodotto) e della **440**
+(il numero dedotto da una fonte che non è quella che comanda davvero). 🟢 La nota che va detta
+accanto: **il censimento non era pigro, era letterale** — e la letteralità su un repo che
+commenta bene è, di per sé, una fonte di falsi positivi.
