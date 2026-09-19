@@ -6,15 +6,27 @@
 # =====================================================================
 #  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
 #  ANTENATO: prove/R120e_U30USD_11_vivo_TAGLIA.txt (etichetta r120e11)
-#            CSV: risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/
+#            CSV: backtest_pipeline/risultati_prove/dal_vps/
+#                 ABTG_SuperWave_DOW_H1_Ottimizzato/
 #                 ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_{IS,OOS}_r120e11.csv
+#                 (percorso VERIFICATO il 19/09: la prima stesura
+#                  ometteva 'backtest_pipeline/' e 'dal_vps/', e non
+#                  risolveva)
 #
 #  ###  PERCHE' QUESTO FILE ESISTE  ###
 #  La cella r120e11 (InpTrailOnST + InpExitOnFlip accesi) e' la
 #  MIGLIORE cella non-promossa di tutto l'archivio a dato pieno:
 #
-#     IS  n=106  PF 1,39708  DD 3,4849%   (MISURATO, tick reali)
-#     OOS n=184  PF 1,21985  DD 4,2148%   (MISURATO, tick reali)
+#     IS  n=106  PF 1,39744  DD 3,4846%   (MISURATO, tick reali)
+#     OOS n=184  PF 1,22034  DD 4,2149%   (MISURATO, tick reali)
+#     >>> LETTI IL 19/09 NEL CSV GREZZO (passate 0 e 1, magic 783500 e
+#         783501, IDENTICHE fra loro = G1 passato in R120e). Sono gli
+#         stessi numeri che porta la tabella della consegna,
+#         report/VIA_PIU_CORTA_AI_150_2026-09-19.csv, riga r120e11.
+#         [Correzione del cancello, 19/09: la prima stesura portava
+#          1,39708 / 3,4849 / 1,21985 / 4,2148 -- cifre estese oltre la
+#          precisione della fonte letta, e DIVERSE dal CSV che stava
+#          nella stessa consegna. Classe 451.]
 #
 #  PF sopra 1,10 in TUTTE E DUE le finestre, DD sotto il 5% in tutte e
 #  due, segni concordi. L'UNICA cosa che la tiene ferma e' il pavimento
@@ -27,7 +39,8 @@
 #      OPERAZIONI CHE NON ESISTONO IN QUESTA FINESTRA.
 #      >>> E piu' finestra NON C'E': i tick reali BCM su U30USD partono
 #          dal 2024.09.26 (67.618.571 tick, MISURATO in
-#          risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#          backtest_pipeline/risultati_archivio/misura_tick/
+#          REFERTO_MISURA_TICK_U30USD.txt).
 #      >>> Quindi resta UNA sola strada onesta: il TIMEFRAME.
 #
 # ---------------------------------------------------------------------
@@ -48,13 +61,36 @@
 #      operazioni aumentano. Non e' un motore d'orologio.
 #
 #  MISURA DI RIFERIMENTO, sullo STESSO motore base (ABTG_SuperWave),
-#  scansione di TF a dato pieno su NASUSD
-#  (risultati_prove/ABTG_SuperWave/ABTG_SuperWave_NASUSD_{IS,OOS}.csv):
+#  scansione di TF a dato pieno su NASUSD (percorso VERIFICATO:
+#  backtest_pipeline/risultati_prove/ABTG_SuperWave/
+#  ABTG_SuperWave_NASUSD_{IS,OOS}.csv):
 #      H1   n IS  33  |  n OOS  56
 #      M30  n IS  52  |  n OOS 108     -> x1,58 (IS)  x1,93 (OOS)
 #      M15  n IS 139  |  n OOS 256     -> x4,21 (IS)  x4,57 (OOS)
 #  >>> RAPPORTO M30/H1 MISURATO: 1,58 - 1,93.
 #      SIMBOLO DIVERSO, quindi e' un riferimento, non una previsione.
+#
+#  >>> E ADESSO IL CONTRO-ESEMPIO, CHE STA NELLA STESSA TABELLA E CHE
+#      LA PRIMA STESURA AVEVA TACIUTO (aggiunto dal cancello, 19/09,
+#      classe 452). Quella scansione non misura solo il CAMPIONE: ha
+#      anche le colonne del MERITO, e dicono l'opposto.
+#        TF    n IS / n OOS      PF IS / PF OOS       DD IS / DD OOS
+#        H1     33 /  56        1,04884 / 1,14682    2,2705 / 2,0166
+#        M30    52 / 108        1,25527 / 0,68770    1,3432 / 3,2259
+#        M15   139 / 256        1,49628 / 0,90649    1,1157 / 2,4023
+#      Sull'UNICO simbolo dove questa identica discesa e' gia' stata
+#      misurata su questa famiglia, scendendo da H1 a M30 il PF OOS
+#      CROLLA da 1,147 a 0,688 -- e a M15 resta sotto 1 (0,906).
+#      Il campione sale (e' il motivo per cui il round si fa), il
+#      MERITO fuori campione peggiora.
+#  >>> COSA NE FACCIO, e non e' "lo ignoro": e' UN SOLO simbolo, con
+#      n IS = 33 a H1 (ben sotto il pavimento dei 150), quindi non
+#      DIMOSTRA niente -- ma sposta la probabilita' a priori verso
+#      l'uscita (b), non verso la (a). Chi legge questo round deve
+#      saperlo PRIMA: se M30 esce con n>=150 e PF<1,10, non e' una
+#      sorpresa, e' l'esito che il riferimento gia' suggeriva.
+#      Se invece M30 esce con PF>=1,10 su U30USD mentre su NASUSD
+#      crollava, quello e' un fatto NUOVO e va misurato due volte.
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
@@ -72,10 +108,21 @@
 #    (Emendamento B, 16/08).
 #
 #  CELLA H1 (InpTF = 16385): E' L'ANCORA, non un candidato.
-#    DEVE riprodurre r120e11 al centesimo: n 106 / 184, PF 1,39708 /
-#    1,21985, DD 3,4849% / 4,2148%. L'unico delta col file antenato e'
-#    InpMagic (783500 -> 789320) e il pin di @FINOA, che in R120
-#    arrivava dalla riga di lancio.
+#    DEVE riprodurre r120e11 al centesimo: n 106 / 184, PF 1,39744 /
+#    1,22034, DD 3,4846% / 4,2149%. I delta col file antenato sono TRE,
+#    e il terzo la prima stesura non lo nominava:
+#      - il pin di @FINOA (in R120e arrivava dal default del driver,
+#        walkforward_generico r.177 '2026.06.30': VERIFICATO che la
+#        corsia ROUND non passa -Fino, quindi il valore e' lo stesso);
+#      - InpMagic 783500 -> 789320;
+#      - >>> L'ASSE GEMELLO SU InpMagic E' STATO TOLTO. In R120e
+#        InpMagic era un asse a due valori (783500/783501) e serviva da
+#        cancello G1 di determinismo: le due gambe uscivano IDENTICHE.
+#        Qui InpMagic e' un PIN singolo, quindi G1 NON viene rifatto in
+#        questo round -- e va bene cosi', perche' l'ANCORA e' un
+#        controllo piu' forte (riproduce una corsa di sei giorni fa,
+#        non se stessa), ma va DETTO: se l'ancora fallisse, questo
+#        round non puo' dire se la colpa e' del banco o del binario.
 #    >>> SE L'ANCORA NON RIPRODUCE, IL ROUND NON SI LEGGE. Non si
 #        guarda la cella M30: si riapre il baco.
 #
@@ -93,12 +140,34 @@
 #      140 / 2,00 = 70,0x       PASSA il 40x con +75%
 #      140 / 3,00 = 46,7x       PASSA il 40x con +17%
 #  >>> PASSA IN TUTTA LA BANDA ORARIA.
-#  >>> CONTRO-ESEMPIO, costruito per farlo fallire: perche' il 40x
-#      cada servirebbe ATR(M30) < 32,0 idx, cioe' il 57% del derivato.
-#      La legge ancorata all'ADR SOTTOSTIMA del 18-27% (MISURATO,
-#      report/EMA200_I_DUE_REQUISITI_2026-09-12.md): l'errore va nella
-#      direzione PRUDENTE, lo stop vero e' PIU' largo. Il cancello
-#      regge.
+#  >>> CONTRO-ESEMPIO, costruito per farlo fallire -- E RIFATTO DAL
+#      CANCELLO IL 19/09, perche' la prima stesura lo aveva costruito
+#      sullo spread FAVOREVOLE invece che su quello VINCOLANTE.
+#      La prima stesura diceva: "perche' il 40x cada servirebbe
+#      ATR(M30) < 32,0 idx, cioe' il 57% del derivato". Quel 32,0 e'
+#      40 x 2,00 / 2,5, cioe' e' calcolato con lo spread delle ore 15+.
+#      Ma il cancello lo decide l'ORA PEGGIORE, e all'ora 14 lo spread
+#      MISURATO e' 3,00:
+#        soglia vera = 40 x 3,00 / 2,5 = ATR(M30) < 48,0 idx
+#                    = l'85,7% del derivato 56,0.
+#      >>> IL MARGINE VERO E' 14,3%, NON 43%. Tre volte piu' sottile.
+#      Regge lo stesso, e il motivo si puo' scrivere: sullo STESSO
+#      simbolo a H1 la legge di scala e' stata verificata contro il
+#      misurato vivo con errore +1,5% (79,1 contro 78,0,
+#      report/ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md r.239), e contro
+#      il misurato di backtest con -12,2% (77,5 contro 88,2, r.240).
+#      Nel caso PEGGIORE dei due (+1,5% di sovrastima) l'ATR vero e'
+#      ~55,2 -> stop 138 -> 46,0x all'ora 14: ancora sopra il 40x.
+#      >>> MA L'ETICHETTA ONESTA DI QUESTA CELLA E' 'VERDE STRETTO',
+#          non 'passa largo': basta un 14% di errore nella direzione
+#          sbagliata per portarla sotto il pavimento di LAVORO.
+#  >>> E UN SECONDO [INFERITO] CHE VA DICHIARATO: il numero 56,0 e'
+#      ATR(14) a M30, mentre il motore usa ATR(InpStAtrPeriod=10).
+#      ATR(10) non e' ATR(14): la sostituzione e' un'APPROSSIMAZIONE,
+#      non una misura, e nessuno l'ha quantificata. Su una serie in
+#      trend ATR(10) tende a essere leggermente PIU' reattivo, quindi
+#      puo' cadere sotto ATR(14) nelle fasi calme. E' il secondo
+#      motivo per cui questa cella e' 'verde STRETTO'.
 #  >>> E PERCHE' IL ROUND SI FERMA A M30 E NON SCENDE A M15, che pure
 #      darebbe x4,2 di operazioni: a M15 lo stop e' 2,5 x 39,6 = 99 idx
 #      -> 49,5x all'ora 15, ma 33,0x all'ora 14, cioe' SOTTO il
@@ -122,9 +191,24 @@
 #       e' il primo campione pieno di questa famiglia. Si apre il
 #       round dell'altopiano attorno a M30 (StMult / TP_RR), i
 #       gemelli D30EUR e NASUSD, e la prova di REGIME.
-#   (b) M30 con n >= 150 in entrambe E PF < 1,10: cancello di merito.
-#       Il certificato di SuperWave_DOW si CHIUDE con un numero, e la
-#       casella 5 ("TF cambiato almeno una volta") si spunta.
+#   (b) M30 con n >= 150 in entrambe E PF < 1,10: cancello di MERITO.
+#       Si spunta la casella 5 del certificato ("TF cambiato almeno
+#       una volta") e si mette un numero dove oggi c'e' un buco.
+#       >>> MA IL CERTIFICATO **NON SI CHIUDE**, e la prima stesura
+#           scriveva che si chiudeva. Le caselle sono CINQUE (regola
+#           del 09/09) e dopo questo round ne restano scoperte DUE:
+#             3. gestione dell'uscita messa ad asse -> FATTA (R120e era
+#                proprio quello: TrailOnST x ExitOnFlip). OK.
+#             4. simboli gemelli provati -> **NO**. Verificato il 19/09
+#                in report/VIA_PIU_CORTA_AI_150_2026-09-19.csv:
+#                ABTG_SuperWave_DOW_H1_Ottimizzato compare su U30USD e
+#                BASTA. D30EUR e NASUSD non sono mai stati girati su
+#                QUESTO binario (SuperWave_DAX_H4 e SuperWave 'base'
+#                sono altri EA: non contano come gemelli).
+#           Quindi il verdetto corretto in (b) e' "NON ANCORA
+#           MISURATO", con in REGISTRO_TEST.md l'elenco di cosa manca
+#           -- MAI "morto". Un morto senza certificato e' un'occasione
+#           persa che nessuno ritrovera' piu'.
 #   (c) M30 con n ANCORA sotto 150: la legge dell'ancoraggio non ha
 #       comprato quello che prometteva su questo motore, ed e' un
 #       risultato di suo (vale anche altrove). Verdetto: "su U30USD il
@@ -150,9 +234,13 @@
 #    il passo e spazzolano i MEMBRI fra start e stop. Fra 30 (PERIOD_M30)
 #    e 16385 (PERIOD_H1) i membri sono ESATTAMENTE DUE: M30 e H1.
 #    >>> Verificato contro il rovescio: se avessi scritto lo start a 15
-#        (M15) i membri sarebbero TRE (M15, M20, M30... piu' H1) e il
-#        round avrebbe misurato anche un TF che il cancello di costo
-#        esclude. Lo start e' 30 apposta.
+#        (M15) i membri sarebbero QUATTRO -- M15, M20, M30, H1 -- e il
+#        round avrebbe misurato anche DUE TF non previsti, uno dei
+#        quali (M15) il cancello di costo lo esclude e l'altro (M20)
+#        non e' nemmeno stato valutato. Lo start e' 30 apposta.
+#        (La prima stesura scriveva "TRE": il conto e' stato rifatto
+#         il 19/09 contro la tabella dei membri che il cancello copia
+#         dal driver, backtest_pipeline/controlla_prova.py r.80-85.)
 #  MODELLO: tick reali = -Modello 4 (il default del driver). -Modello 1
 #    romperebbe il confronto con r120e11, che e' a tick.
 #  PAVIMENTO TICK: @DAQUANDO 2024.09.26 = inizio MISURATO dei tick reali

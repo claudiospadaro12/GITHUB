@@ -6,8 +6,11 @@
 # =====================================================================
 #  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
 #  ANTENATO: prove/R123c_U30USD_02_atrperiod.txt (etichetta R123CATRP)
-#            CSV: risultati_prove/dal_vps/ABTG_SupRev_DOW_H1_Ottimizzato/
+#            CSV: backtest_pipeline/risultati_prove/dal_vps/
+#                 ABTG_SupRev_DOW_H1_Ottimizzato/
 #                 ..._U30USD_{IS,OOS}_R123CATRP.csv, passata 6
+#                 (percorso VERIFICATO il 19/09: la prima stesura
+#                  ometteva 'backtest_pipeline/', e non risolveva)
 #
 #  ###  PERCHE' QUESTO FILE ESISTE, E PERCHE' E' IL GEMELLO DI R190b  ###
 #  R190b prova la stessa cosa su ABTG_SuperWave_DOW_H1_Ottimizzato.
@@ -17,8 +20,17 @@
 #  quanto il numero.
 #
 #  LA CELLA DI PARTENZA (R123c, passata 6, InpStAtrPeriod = 12):
-#     IS  n=106  PF 1,17724  DD 4,9256%   (MISURATO, tick reali)
-#     OOS n=133  PF 1,35920  DD 2,8353%   (MISURATO, tick reali)
+#     IS  n=106  PF 1,17727  DD 4,9268%   (MISURATO, tick reali)
+#     OOS n=133  PF 1,35923  DD 2,8356%   (MISURATO, tick reali)
+#     >>> LETTI IL 19/09 NEL CSV GREZZO, riga Pass=6. Le DUE copie in
+#         repo sono state confrontate byte a byte e sono IDENTICHE:
+#         backtest_pipeline/risultati_prove/dal_vps/
+#           ABTG_SupRev_DOW_H1_Ottimizzato/..._{IS,OOS}_R123CATRP.csv
+#         backtest_pipeline/risultati_prove/r123_dal_vps/
+#           ABTG_SupRev_DOW_H1_Ottimizzato_U30USD_{IS,OOS}_R123CATRP.csv
+#         [Correzione del cancello, 19/09: la prima stesura portava
+#          1,17724 / 4,9256 / 1,35920 / 2,8353 -- cifre estese oltre la
+#          precisione della fonte letta. Classe 451.]
 #  PF sopra 1,10 in tutte e due, DD sotto il 5% in tutte e due, segni
 #  concordi. Ferma SOLO per campione: 106 e 133 contro 150.
 #
@@ -27,7 +39,8 @@
 #      FINESTRA NON ESISTONO.
 #  >>> E piu' finestra NON C'E': i tick reali BCM su U30USD partono dal
 #      2024.09.26 (67.618.571 tick, MISURATO in
-#      risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#      backtest_pipeline/risultati_archivio/misura_tick/
+#      REFERTO_MISURA_TICK_U30USD.txt).
 #
 # ---------------------------------------------------------------------
 #  ###  LA DISCESA DI TF COMPRA OPERAZIONI QUI?  SI, per lo stesso
@@ -43,11 +56,31 @@
 #      operazioni aumentano. Legge dell'ancoraggio (12/09), soddisfatta.
 #
 #  RAPPORTO M30/H1 DI RIFERIMENTO, MISURATO sulla famiglia Supertrend
-#  a dato pieno (ABTG_SuperWave NASUSD, scansione di TF completa):
+#  a dato pieno (ABTG_SuperWave NASUSD, scansione di TF completa,
+#  percorso VERIFICATO: backtest_pipeline/risultati_prove/
+#  ABTG_SuperWave/ABTG_SuperWave_NASUSD_{IS,OOS}.csv):
 #      H1 n IS 33 / OOS 56   ->   M30 n IS 52 / OOS 108
 #      cioe' x1,58 (IS) e x1,93 (OOS).
 #  >>> SIMBOLO DIVERSO E MOTORE COGNATO, NON IDENTICO: e' un
 #      riferimento dichiarato, non una previsione.
+#
+#  >>> IL CONTRO-ESEMPIO STA NELLA STESSA TABELLA, e la prima stesura
+#      lo aveva taciuto (aggiunto dal cancello, 19/09, classe 452).
+#      Quella scansione ha anche le colonne del MERITO:
+#        TF    n IS / n OOS      PF IS / PF OOS       DD IS / DD OOS
+#        H1     33 /  56        1,04884 / 1,14682    2,2705 / 2,0166
+#        M30    52 / 108        1,25527 / 0,68770    1,3432 / 3,2259
+#        M15   139 / 256        1,49628 / 0,90649    1,1157 / 2,4023
+#      Scendendo a M30 il campione SALE e il PF OOS CROLLA da 1,147 a
+#      0,688. E' un simbolo solo, con n IS = 33 a H1 (fuori dal
+#      pavimento), quindi non dimostra niente -- ma sposta l'attesa
+#      verso l'uscita (b), non verso la (a), e chi legge lo deve
+#      sapere PRIMA dei numeri, non dopo.
+#  >>> E QUI IL CONFRONTO FRA R190b E R190c VALE DI PIU' PROPRIO PER
+#      QUESTO: se il PF fuori campione crolla su tutti e due i motori,
+#      la discesa di TF su U30USD e' una leva che compra campione e
+#      vende merito, e va scritto come LEGGE. Se crolla su uno solo,
+#      la differenza sta nel motore.
 #
 # ---------------------------------------------------------------------
 #  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
@@ -62,10 +95,17 @@
 #    DD atteso: [NON MISURATO]. Si legge a QUALUNQUE n (Emendamento B).
 #
 #  CELLA H1 (InpTF = 16385): E' L'ANCORA, non un candidato.
-#    DEVE riprodurre R123c passata 6: n 106 / 133, PF 1,17724 /
-#    1,35920, DD 4,9256% / 2,8353%. L'unico delta con l'antenato e'
-#    InpMagic (784120 -> 789330) e il pin di InpStAtrPeriod sul valore
-#    12, che nell'antenato era l'asse.
+#    DEVE riprodurre R123c passata 6: n 106 / 133, PF 1,17727 /
+#    1,35923, DD 4,9268% / 2,8356%. I delta con l'antenato sono TRE,
+#    non due come diceva la prima stesura: InpMagic (784120 -> 789330),
+#    il pin di InpStAtrPeriod sul valore 12 (nell'antenato era l'asse)
+#    e InpComment (SRDOW123C -> SRDOW190C). InpComment non entra in
+#    nessuna condizione del motore -- cambia solo l'etichetta dei
+#    per-trade -- ma un'ancora si dichiara COMPLETA o non e' un'ancora.
+#    >>> Verificato il 19/09 che il binario NON si e' mosso sotto
+#        l'ancora: mql5/Experts/ABTG_SupRev_DOW_H1_Ottimizzato.mq5 e'
+#        fermo al commit 872dba82 dell'08/09, e R123CATRP e' girato il
+#        13/09. Nessuna classe 267-bis / 392 in agguato qui.
 #    >>> SE L'ANCORA NON RIPRODUCE, IL ROUND NON SI LEGGE.
 #
 # ---------------------------------------------------------------------
@@ -84,9 +124,21 @@
 #  >>> PASSA LARGO IN TUTTA LA BANDA ORARIA. Questo motore ha lo stop
 #      piu' largo di R190b (3,5 contro 2,5 di moltiplicatore) e quindi
 #      e' il piu' al sicuro dei due sul costo.
-#  >>> CONTRO-ESEMPIO: perche' il 40x cada servirebbe ATR(M30) < 22,9
-#      idx, cioe' il 41% del derivato. La legge ancorata all'ADR
-#      SOTTOSTIMA del 18-27% (MISURATO): l'errore e' PRUDENTE.
+#  >>> CONTRO-ESEMPIO, RIFATTO DAL CANCELLO IL 19/09. La prima stesura
+#      scriveva "perche' il 40x cada servirebbe ATR(M30) < 22,9 idx,
+#      cioe' il 41% del derivato": quel 22,9 e' 40 x 2,00 / 3,5, cioe'
+#      e' calcolato con lo spread delle ore 15+, che NON e' il caso
+#      vincolante. All'ora 14 lo spread MISURATO e' 3,00:
+#        soglia vera = 40 x 3,00 / 3,5 = ATR(M30) < 34,3 idx
+#                    = il 61,2% del derivato 56,0 -> margine 38,8%.
+#      >>> Il margine resta LARGO (a differenza di R190b, che con
+#          StMult 2,5 ha solo il 14,3%), ma il numero giusto e' 34,3,
+#          non 22,9. Su questo motore il cancello di costo e' VERDE
+#          PIENO, e questa e' la meta' buona della notizia.
+#  >>> E UN [INFERITO] CHE VA DICHIARATO LO STESSO: 56,0 e' ATR(14) a
+#      M30, mentre il motore usa ATR(InpStAtrPeriod=12). La
+#      sostituzione e' un'approssimazione non quantificata -- qui pesa
+#      poco (il margine e' 38,8%), ma va detta perche' in R190b pesa.
 #  >>> E a M15: 3,5 x 39,6 = 139 idx -> 69,3x / 46,2x. Passerebbe
 #      ANCHE M15 su questo motore. NON lo metto lo stesso, e il motivo
 #      e' di metodo, non di costo: due gradini nello stesso round
@@ -105,9 +157,28 @@
 #  LE QUATTRO USCITE, congelate adesso:
 #   (a) M30 con n >= 150 e PF >= 1,10 in entrambe -> si apre il round
 #       dell'altopiano attorno a M30, i gemelli, e la prova di REGIME.
-#   (b) M30 con n >= 150 in entrambe e PF < 1,10 -> cancello di merito:
-#       il certificato di SupRev_DOW si CHIUDE, e la casella 5 del
-#       certificato ("TF cambiato almeno una volta") si spunta.
+#   (b) M30 con n >= 150 in entrambe e PF < 1,10 -> cancello di MERITO:
+#       si spunta la casella 5 del certificato ("TF cambiato almeno
+#       una volta") e il motore ha finalmente un numero.
+#       >>> MA IL CERTIFICATO **NON SI CHIUDE**, e la prima stesura
+#           scriveva che si chiudeva. Le caselle sono CINQUE (regola
+#           del 09/09), e dopo questo round lo stato e':
+#             1. PF -> OK    2. n + DD -> OK
+#             3. gestione dell'uscita ad asse -> OK (R123c era su
+#                InpStAtrPeriod; la gestione TP1/BE/Trail/Flip e'
+#                stata messa ad asse nella famiglia, ma su QUESTO
+#                binario va citata la corsa, non data per fatta).
+#             4. simboli gemelli -> DA DICHIARARE. Su questo EA
+#                (ABTG_SupRev_DOW_H1_Ottimizzato) in
+#                report/VIA_PIU_CORTA_AI_150_2026-09-19.csv esiste solo
+#                U30USD; i binari SupRev_DAX_H1 (D30EUR) e SupRev_NAS_H1
+#                (NASUSD) sono EA DIVERSI, e usarli come "gemelli"
+#                e' una scorciatoia da dichiarare, non da assumere.
+#             5. TF -> lo spunta questo round.
+#           Quindi il verdetto corretto in (b) e' "NON ANCORA
+#           MISURATO" in REGISTRO_TEST.md, con l'elenco di cosa manca.
+#           MAI "morto": un morto senza certificato e' un'occasione
+#           persa che nessuno ritrovera' piu'.
 #   (c) M30 con n ancora sotto 150 -> la legge dell'ancoraggio non
 #       compra su questo motore. Risultato utile, e da confrontare con
 #       R190b: se R190b guadagna e questo no, la differenza sta nel

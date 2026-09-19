@@ -25071,3 +25071,120 @@ un'altra (timeframe, oppure "il campione non c'e'").
 finestra cambiava senza che nessuno la misurasse, qui cambia il **confine interno** — ed e' la
 stessa lezione, perche' il confine interno e' un parametro della misura esattamente come la
 finestra.
+
+---
+
+## CLASSE 451 — 🔢🪄 I NUMERI DI UN'**ANCORA DI RIPRODUZIONE** SCRITTI CON **PIÙ CIFRE DI QUANTE NE AVESSE LA FONTE LETTA**: la precisione è FABBRICATA, e il CSV con la precisione vera stava **nella stessa consegna** (controllo-preventivo, 19/09/2026, gemella rovesciata della **385**)
+
+**Il caso.** Tre file prova di R190 (`backtest_pipeline/prove/R190a_taglio050_EMA200SHORT_U30USD.txt`,
+`R190b_tfM30_SUPERWAVEDOW_U30USD.txt`, `R190c_tfM30_SUPREVDOW_U30USD.txt`). Due di essi portano
+una **cella-ANCORA** che *«DEVE riprodurre al centesimo»* una corsa d'archivio: è il cardine del
+round, perché se l'ancora non riproduce **la cella nuova non si legge**. I numeri di riferimento
+erano scritti a cinque cifre e marcati `(MISURATO, tick reali)`.
+
+🔴 **Erano sbagliati tutti e dodici** (PF e DD delle due finestre, per tutti e tre i file). Gli `n`
+erano giusti.
+
+| file | scritto nel file | **vero nel CSV** |
+|---|---|---|
+| `R190b` IS | PF 1,39708 · DD 3,4849 | **1,39744 · 3,4846** |
+| `R190b` OOS | PF 1,21985 · DD 4,2148 | **1,22034 · 4,2149** |
+| `R190c` IS | PF 1,17724 · DD 4,9256 | **1,17727 · 4,9268** |
+| `R190c` OOS | PF 1,35920 · DD 2,8353 | **1,35923 · 2,8356** |
+| `R190a` IS | PF 1,23237 · DD 4,5136 | **1,23153 · 4,5113** |
+| `R190a` OOS | PF 1,89127 · DD 2,6570 | **1,89147 · 2,6628** |
+
+**Il meccanismo, ed è quello che rende la classe utile.** Su `R190a` la fonte disponibile a
+portata di mano era il **referto** `REFERTO_R112.txt`, che stampa `1.232 | 4.51 | 1.891 | 2.66`,
+cioè **tre cifre**. I numeri scritti nel file prova **arrotondano esattamente a quei tre**
+(1,23237 → 1,232 · 2,6570 → 2,66): sono stati ottenuti **allungando** le cifre del referto, non
+leggendo il CSV. Il risultato ha l'aspetto di una misura di precisione piena ed è **una
+ricostruzione**.
+
+🔴 **E l'aggravante:** i numeri giusti a precisione piena erano già scritti **dallo stesso autore,
+nella stessa consegna**, nel file gemello `report/VIA_PIU_CORTA_AI_150_2026-09-19.csv`
+(riga `r120e11`: `1.39744, 3.4846, 1.22034, 4.2149`). Non era un dato mancante: era un dato **non
+riletto**.
+
+**Perché è BLOCCANTE e non cosmetico.** Una soglia *«riproduce al centesimo»* letta contro
+1,39708 mentre la corsa vera restituisce 1,39744:
+- se il confronto è a **due decimali**, passa lo stesso → l'ancora **non avrebbe accorto nulla**,
+  ma la riga scritta nel referto sarebbe falsa;
+- se il confronto è **alla cifra scritta** (ed è quello che la parola «al centesimo» in casa ha
+  sempre significato: le sentinelle si scrivono sui decimali del CSV), l'ancora **fallisce su una
+  corsa perfetta** e il round viene buttato con l'uscita *«si riapre il baco del determinismo»*.
+👉 In tutte e due le direzioni il numero fabbricato **rompe proprio il controllo che doveva
+proteggere il round**.
+
+### La regola
+🔴 **I numeri di un'ancora si copiano dal CSV GREZZO, con un comando, e si dichiara il comando.**
+Mai dal referto, mai dal `.md`, mai da un riassunto, mai a memoria.
+- 📋 **Nel file prova si scrive la PROVENIENZA accanto al numero**: percorso del CSV, riga (`Pass=`
+  o magic), e la data della rilettura. Un numero d'ancora senza provenienza **non è un'ancora**.
+- 🔍 **E la sentinella non può avere più cifre significative della fonte**: se la fonte ne ha tre,
+  la soglia si scrive a tre. Allungare le cifre è **inventare dati**; accorciarle di propria
+  iniziativa quando il CSV pieno esiste è la **classe 385** (incertezza fabbricata da un
+  riassunto). Le due classi sono la stessa disciplina letta nei due versi: **la precisione
+  dichiarata deve essere ESATTAMENTE quella della fonte aperta.**
+- 🧪 **Il contro-esempio da costruire prima di consegnare**: *«se questo numero fosse sbagliato
+  nella quarta cifra, che cosa farebbe la mia sentinella?»* Se la risposta è «boccia una corsa
+  buona» oppure «passa comunque», il numero va **riletto alla fonte**, non ragionato.
+- 🗂️ **E prima di scrivere il numero si cerca chi l'ha già scritto giusto.** È la **classe 411**
+  (non aver cercato ciò che c'era già): qui il file corretto stava nella stessa cartella di
+  consegna, generato dallo stesso autore, un'ora prima.
+
+---
+
+## CLASSE 452 — 📊✂️ LA TABELLA CITATA COME PROVA **PER LA COLONNA CHE CONVIENE**: lo stesso CSV misura anche il MERITO, e dice l'opposto (controllo-preventivo, 19/09/2026)
+
+**Il caso.** `R190b`/`R190c` (R190, discesa di timeframe H1 → M30 su `U30USD`). Per sostenere che
+scendere di TF **compra operazioni**, tutti e due i file citano la scansione di TF a dato pieno di
+`ABTG_SuperWave` su `NASUSD`, e ne riportano questa tabella:
+
+```
+H1   n IS  33  |  n OOS  56
+M30  n IS  52  |  n OOS 108     -> x1,58 (IS)  x1,93 (OOS)
+M15  n IS 139  |  n OOS 256     -> x4,21 (IS)  x4,57 (OOS)
+```
+
+✅ I numeri sono **veri e verificati** nel CSV. ✅ Il rapporto x1,58-1,93 è corretto. ✅ Ed è
+dichiarato onestamente come *«simbolo diverso, quindi è un riferimento, non una previsione»*.
+
+🔴 **Ma quel CSV ha altre quattro colonne, e nessuno le ha riportate:**
+
+| TF | n IS / n OOS | **PF IS / PF OOS** | DD IS / DD OOS |
+|---|---:|---:|---:|
+| H1 | 33 / 56 | 1,04884 / **1,14682** | 2,2705 / 2,0166 |
+| M30 | 52 / 108 | 1,25527 / **0,68770** | 1,3432 / 3,2259 |
+| M15 | 139 / 256 | 1,49628 / **0,90649** | 1,1157 / 2,4023 |
+
+👉 Sull'**unico** simbolo dove questa identica discesa è già stata misurata su questa famiglia, da
+H1 a M30 il **PF fuori campione crolla da 1,147 a 0,688**, e il PF **dentro** campione sale
+(1,049 → 1,255): il profilo classico di una leva che **compra campione e vende merito**. I due file
+scrivevano `PF atteso: [NON MISURATO]` — il che è corretto e onesto — **mentre la fonte che stavano
+citando un numero ce l'aveva**, e puntava dalla parte scomoda.
+
+**Perché non è un dettaglio.** La citazione selettiva non falsifica nessun numero: sposta la
+**probabilità a priori** del round senza che il lettore lo sappia. Chi legge la versione originale
+si aspetta l'uscita (a) *«il primo campione pieno della famiglia»*; chi legge la tabella intera si
+aspetta l'uscita (b) *«campione pieno, merito bocciato»*. **Le due attese comportano decisioni
+diverse su cosa fare DOPO**, e l'attesa va congelata **prima** dei numeri — che è tutto il senso
+del blocco «ATTESA DICHIARATA PRIMA DEI NUMERI».
+
+### La regola
+🔴 **Quando si cita una tabella come prova, si apre la tabella INTERA e si riportano anche le
+colonne che remano contro.** Se una colonna si omette, si dichiara **perché** («non pertinente
+perché…»), mai in silenzio.
+- 🧪 **Il contro-esempio si cerca PRIMA DI TUTTO dentro la fonte che si sta già citando.** È il
+  posto più economico dove trovarlo — e il più imbarazzante dove lasciarlo. La regola del 10/09
+  («costruisci tu il contro-esempio che ti farebbe sbagliare») **non chiede di inventarlo**:
+  chiede di **guardare**, e nove volte su dieci è nel CSV già aperto.
+- ⚖️ **`[NON MISURATO]` non copre l'omissione.** Dichiarare ignoranza su una grandezza mentre si
+  cita una fonte che quella grandezza la misura è **peggio** che dare un numero sbagliato: il
+  numero sbagliato si può controllare, l'omissione no.
+- 🚦 **E la conseguenza operativa va scritta**: se il riferimento sposta l'attesa verso l'esito
+  negativo, lo si dice nel blocco delle uscite («se esce (b) non è una sorpresa»), così il round
+  resta **leggibile** e nessuno lo rilegge dopo come una delusione.
+- 🔁 **Vale anche al rovescio**: se la tabella intera è FAVOREVOLE su una colonna che non stavamo
+  guardando, quella colonna è un **candidato in più** — ed è esattamente il motivo per cui il
+  09/09 il censimento ha ritrovato `EMA200` sul Dow.

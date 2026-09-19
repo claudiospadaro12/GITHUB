@@ -6,16 +6,25 @@
 # =====================================================================
 #  DOSSIER: report/LA_VIA_PIU_CORTA_AI_150_2026-09-19.md
 #  ANTENATO: prove/R112_01_short_r1.txt (girato il 26/08/2026)
-#            referto: risultati_archivio/R112_CORSA_20260826/REFERTO_R112.txt
-#            CSV:     risultati_archivio/R112_CORSA_20260826/
+#            referto: backtest_pipeline/risultati_archivio/
+#                     R112_CORSA_20260826/REFERTO_R112.txt
+#            CSV:     backtest_pipeline/risultati_archivio/
+#                     R112_CORSA_20260826/
 #                     ABTG_EMA200_U30USD_{IS,OOS}_01_short_r1.csv
 #
 #  ###  PERCHE' QUESTO FILE ESISTE, IN UNA RIGA  ###
 #  La cella e' BUONA su tutti e quattro i cancelli TRANNE il pavimento
 #  del campione, e il pavimento lo manca SOLO DI 25 OPERAZIONI IN IS:
 #
-#     IS  n=125  PF 1,23237  DD 4,5136%   (MISURATO, R112, tick reali)
-#     OOS n=302  PF 1,89127  DD 2,6570%   (MISURATO, R112, tick reali)
+#     IS  n=125  PF 1,23153  DD 4,5113%   (MISURATO, R112, tick reali)
+#     OOS n=302  PF 1,89147  DD 2,6628%   (MISURATO, R112, tick reali)
+#     >>> LETTI IL 19/09 NEL CSV GREZZO, non nel referto arrotondato a
+#         tre cifre: backtest_pipeline/risultati_archivio/
+#         R112_CORSA_20260826/ABTG_EMA200_U30USD_{IS,OOS}_01_short_r1.csv,
+#         righe magic 763410 e 763411, IDENTICHE fra loro (= G1 passato
+#         in R112).  [Correzione del cancello, 19/09: la prima stesura
+#         portava 1,23237 / 4,5136 / 1,89127 / 2,6570 -- cifre estese
+#         oltre la precisione della fonte letta. Classe 451.]
 #     ----------------------------------------------------------------
 #     TOTALE 427 operazioni.  Il pavimento chiede 150 + 150 = 300.
 #
@@ -26,7 +35,8 @@
 #      Non serve un dato nuovo, non serve un parametro nuovo, non serve
 #      piu' finestra (su U30USD PIU' FINESTRA NON C'E': i tick reali
 #      BCM partono dal 2024.09.26, MISURATO in
-#      risultati_archivio/misura_tick/REFERTO_MISURA_TICK_U30USD.txt).
+#      backtest_pipeline/risultati_archivio/misura_tick/
+#      REFERTO_MISURA_TICK_U30USD.txt).
 #
 # ---------------------------------------------------------------------
 #  ###  L'ARITMETICA DEL TAGLIO, FATTA PRIMA  ###
@@ -86,9 +96,17 @@
 #       gemelli (D30EUR, NASUSD), prova di REGIME, e scelta di cella
 #       al CENTRO dell'altopiano -- mai il picco.
 #   (b) n >= 150 in tutte e due E PF < 1,10 in una: cancello di
-#       merito, e il certificato del lato SHORT si CHIUDE con un
-#       numero. E' un risultato, non un fallimento: oggi quel lato
-#       non ha ne' un si' ne' un no, ha un "non misurato".
+#       MERITO, e il lato SHORT ha finalmente un NUMERO. E' un
+#       risultato, non un fallimento: oggi quel lato non ha ne' un si'
+#       ne' un no, ha un "non misurato".
+#       >>> MA IL CERTIFICATO DI MORTE NON SI CHIUDE QUI, e la prima
+#           stesura scriveva che si chiudeva. Le caselle sono CINQUE
+#           (regola del 09/09): PF / n+DD / gestione dell'uscita messa
+#           ad asse / simboli gemelli provati / TF cambiato almeno una
+#           volta. Questo round ne riempie DUE (PF, n+DD). Finche' le
+#           altre tre non hanno un numero, in REGISTRO_TEST.md si
+#           scrive "NON ANCORA MISURATO" con l'elenco di cosa manca,
+#           MAI "morto".
 #   (c) n IS < 150 lo stesso: il round NON HA RISPOSTO, e la risposta
 #       diventa "su U30USD il campione non c'e' e non ci sara'",
 #       perche' il muro dei tick e' il 2024.09.26 ed e' MISURATO.
@@ -101,13 +119,19 @@
 # ---------------------------------------------------------------------
 #  ###  IGIENE, VERIFICATA A MANO  ###
 # ---------------------------------------------------------------------
-#  CORPO: copia riga per riga di prove/R112_01_short_r1.txt. Gli unici
-#    delta sono TRE e sono tutti di FINESTRA o di IDENTITA', mai di
-#    motore: (1) @FINOA 2026.06.30 -- che in R112 arrivava dalla riga
-#    di lancio (righe/RIGA_R112_EMADOW_CONTRATTO.ps1) e qui deve stare
-#    nel file perche' la corsia ROUND passa solo sei argomenti e -Fino
-#    NON e' fra quelli; (2) @FRAZIONEIS 0.50 -- l'oggetto del round;
-#    (3) InpMagic, blocco vergine.
+#  CORPO: copia riga per riga di prove/R112_01_short_r1.txt. I delta
+#    sono QUATTRO (il conto e' stato rifatto col diff il 19/09: la
+#    prima stesura ne dichiarava TRE) e sono tutti di FINESTRA o di
+#    IDENTITA', mai di motore: (1) @FINOA 2026.06.30 -- che in R112
+#    arrivava dalla riga di lancio (righe/RIGA_R112_EMADOW_CONTRATTO.ps1
+#    r.202, VERIFICATO) e qui deve stare nel file perche' la corsia
+#    ROUND passa solo sei argomenti e -Fino NON e' fra quelli;
+#    (2) @FRAZIONEIS 0.50 -- l'oggetto del round; (3) InpMagic, blocco
+#    vergine; (4) la riga 'InpNewsCurrencies=' dell'antenato e' stata
+#    TOLTA. Con InpUseNewsFilter=false quell'input non e' letto da
+#    nessuno e il CSV di R112 lo riporta vuoto, quindi il delta e'
+#    NULLO sui numeri -- ma NON e' vero che il corpo sia 'identico
+#    all'antenato', e la prima stesura lo scriveva.
 #  >>> NESSUN parametro del motore e' toccato. Confrontabile col
 #      diff contro l'antenato.
 #  MODELLO: tick reali = -Modello 4. Il default del driver e' 4.
@@ -136,7 +160,8 @@
 #  PIN DI STRINGA: InpNewsFile e InpComment portano un valore NON
 #    vuoto, InpNewsCurrencies e' lasciato senza riga di pin (un pin di
 #    stringa VUOTA MT5 lo ignora in silenzio -- e' la classe che costo'
-#    il round FiboH4). Identico all'antenato.
+#    il round FiboH4). >>> NON e' identico all'antenato: R112 la riga
+#    'InpNewsCurrencies=' ce l'aveva. Vedi il delta (4) qui sopra.
 #  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA. In campo la
 #    sedia gira a 0,65: ogni DD di questo file va MOLTIPLICATO PER 0,65
 #    per confrontarlo col forward. Taglie e rischio sono di CLAUDIO.
@@ -149,6 +174,51 @@
 #    2 celle x 2 gambe = 4 passate  ->  0,6 + 4 x 0,375 = 2,1 minuti.
 #    Estremo ottimista (R88a, U30USD tick, 0,083 min/passata, ma altro
 #    EA e altro TF): 0,93 minuti. BANDA DICHIARATA: 0,9 - 2,1 min.
+#
+# ---------------------------------------------------------------------
+#  ###  CIO' CHE QUESTO FILE **NON** RIPRODUCE, E VA DETTO PRIMA  ###
+#  ###  (aggiunto dal cancello il 19/09: e' il buco piu' grosso del
+#  ###   round, ed era taciuto)
+# ---------------------------------------------------------------------
+#  QUESTO E' L'UNICO DEI TRE FILE DI R190 **SENZA CELLA-ANCORA**. R190b
+#  e R190c portano una cella H1 che deve riprodurre al centesimo una
+#  corsa d'archivio; qui NON si puo': spostando @FRAZIONEIS si spostano
+#  tutti e due i confini, quindi NESSUNA delle due gambe e' confrontabile
+#  con R112. Conseguenza operativa: una deriva del banco, del binario o
+#  della corsia in questo round NON HA NESSUN MODO DI FARSI VEDERE.
+#
+#  E le derive note sono DUE, tutte e due MISURATE il 19/09:
+#  (1) LA CORSIA E' DIVERSA. R112 giro' con lo script dedicato
+#      righe/RIGA_R112_EMADOW_CONTRATTO.ps1; questo file gira sulla
+#      corsia ROUND generica. La formula del taglio e' la stessa
+#      (RIGA_R112 r.711 == walkforward_generico r.921, confrontate), ma
+#      la riga Spread dell'.ini NO:
+#        - R112 passava -Spread 0 (r.205 + r.1248) -> l'.ini porta
+#          'Spread=0' = spread CORRENTE del feed, DICHIARATO;
+#        - la corsia ROUND non passa -Spread, quindi il driver resta al
+#          default -1 (walkforward_generico r.192) e LA RIGA NON VIENE
+#          SCRITTA AFFATTO: MT5 usa lo spread che ha in memoria.
+#      E' la CLASSE 394 della checklist, presa in casa il 17/09. A
+#      -Modello 4 il pedaggio lo dettano i tick, quindi l'effetto atteso
+#      e' piccolo, ma NON e' misurato e NON si dichiara nullo.
+#  (2) IL SORGENTE SI E' MOSSO DOPO R112. mql5/Experts/ABTG_EMA200.mq5
+#      e' stato toccato l'11/09 (commit b45dd009), cioe' DOPO la corsa
+#      R112 del 26/08. Il diff e' stato letto riga per riga il 19/09:
+#      aggiunge l'IMBUTO DI MORTALITA' (contatori + Print + il nuovo
+#      input InpLogImbuto, default true) e ogni guardia d'ingresso
+#      rimossa torna IDENTICA con un '++' davanti al return -- stesse
+#      condizioni, stesso ordine, nessuna soglia e nessun lotto toccati.
+#      >>> Quindi il motore e' lo stesso, ma il BINARIO NO (classi
+#          267-bis e 392). E il CSV di questo round avra' una colonna
+#          in piu' (InpLogImbuto) che in R112 non esiste.
+#
+#  >>> COME SI LEGGE L'USCITA (c) DOPO QUESTO PARAGRAFO: se n IS esce
+#      SOTTO la banda 157-176, le spiegazioni sono DUE e il round da
+#      solo non le separa -- (i) le operazioni in quei 65 giorni non
+#      c'erano, (ii) la corsia/il binario hanno spostato qualcosa. Per
+#      separarle basta una passata in piu': lo STESSO file con
+#      @FRAZIONEIS 0.40, che DEVE ridare 125/302. Costo: +2,1 minuti.
+#      Se la banda invece si centra, la domanda e' accademica.
 #
 #  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
 #    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
