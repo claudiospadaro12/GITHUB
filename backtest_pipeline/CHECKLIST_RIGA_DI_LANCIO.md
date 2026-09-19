@@ -26108,17 +26108,17 @@ InpRestrictToNews=true
 ```
 Quel file è il calendario **di backtest**: misurato, **600 righe, ultimo evento
 `2025.07.03`, eventi 2026 = ZERO**. E `backtest_pipeline/aggiorna_news.ps1`
-aggiorna **solo** `abtg_news.csv` (r. `$Dest = Join-Path $FilesDir "abtg_news.csv"`):
+aggiorna **solo** `abtg_news.csv` (r.104, `$Dest = Join-Path $FilesDir "abtg_news.csv"`):
 quel file non lo tocca **nessuno**.
 
 **Cosa succede in campo, e non è un'ipotesi.** `ABTG_PostNews.mq5`:
-- `NewsToday()` (r.264-277) confronta **anno+mese+giorno** dell'evento con la barra
+- `NewsToday()` (r.263-277) confronta **anno+mese+giorno** dell'evento con la barra
   d'azione → nel 2026 non può mai combaciare;
-- `OnTick()` r.252: `if(InpRestrictToNews && !NewsToday(t0)) return;`
+- `OnTick()` r.251: `if(InpRestrictToNews && !NewsToday(t0)) return;`
 → **zero ordini, per sempre.** La sedia sembra accesa, il grafico ha l'EA, il log non
 dice niente di rosso.
 
-🔴 **E il canarino dell'EA NON scatta.** `LoadNews()` r.587 stampa `CANARINO ROSSO`
+🔴 **E il canarino dell'EA NON scatta.** `LoadNews()` r.589 stampa `CANARINO ROSSO`
 solo se `utili==0`; qui `utili = 186` (le "Unemployment Rate" dal 2010 al 2025), tutte
 **passate**. Il controllo misura *«il preset trova eventi nel file»*, non *«il file
 contiene eventi che possono ancora accadere»*. È esattamente la **460-b** (`conta_futuri`),
@@ -26151,9 +26151,9 @@ già viva su `chart44` del piccolo **50503392**). Stesso EA, **stesso simbolo EU
 e i due grafici sarebbero stati accesi **insieme**.
 
 **Perché non è (solo) un problema di referti.** In `ABTG_PostNews.mq5` **ogni** funzione
-di gestione seleziona per `SIMBOLO + MAGIC` e basta: `OcoCheck()` r.362-383,
-`ManageTrailing()` r.390, `CloseAllMine()` r.412-424, la guardia anti-duplicato r.245-249.
-E `ExpiryCloseCheck()` (r.432-444) non è un evento istantaneo: è **una finestra**
+di gestione seleziona per `SIMBOLO + MAGIC` e basta: `OcoCheck()` r.364-385,
+`ManageTrailing()` r.389, `CloseAllMine()` r.414-431, la guardia anti-duplicato r.245-249.
+E `ExpiryCloseCheck()` (r.439-450) non è un evento istantaneo: è **una finestra**
 — `if(nowMin < expMin) return;` — quindi da `InpExpiryHour:Min` **fino a mezzanotte**,
 a **ogni tick**, chiama `CloseAllMine()`.
 > 🔴 La ECB EURUSD scade alle **17:15 server**. La FOMC piazza alle **19:40 server**,
