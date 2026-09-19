@@ -5,6 +5,28 @@
 
 > # 🟢 **VERDETTO IN UNA RIGA: `ABTG_MaxMinNotte` non è MAI girato su `NASUSD`. Zero corse su 43 CSV. La casella è libera, non provata — e i tick reali per riempirla CI SONO.**
 
+> ## 🔴 CORREZIONE A QUELLO CHE AVEVO DETTO A CLAUDIO — **la sonda sui tick di NASUSD NON mancava**
+>
+> Il 18/09 gli ho scritto due volte che la profondità dei tick di `NASUSD` *«non è mai stata
+> misurata»*, e ho proposto un round-sonda (`R185`) per ottenerla. **Era falso.**
+> `backtest_pipeline/risultati_archivio/misura_tick/REFERTO_MISURA_TICK_NASUSD.txt`, del
+> **30/08/2026**, dice testualmente:
+>
+> > *«I TICK REALI DI NASUSD PARTONO DAL **2024.09.26** (**166.509.474** tick, verdetto: TICK REALI
+> > PARZIALI)»* · *«NASUSD M1 barre=660018 … IL BROKER NON HA PIÙ STORICO»*
+>
+> 🔴 **Ed è il difetto d'archivio per la TERZA volta oggi, in una forma nuova**: la misura c'era,
+> ma **in un indice diverso da quello che ho guardato**. Io leggevo
+> `risultati_archivio/ABTG_StoricoScaricato.csv` — che elenca solo `D30EUR` e `U30USD` — e ho
+> concluso «non misurato» da un file che semplicemente **non è l'unico indice**.
+>
+> ### 🟢 Conseguenza buona: **il round gira a tick reali, niente [SOTTO SONDA]**
+> Finestra **2024.09.26 → 2026.06.30**, la stessa degli altri round indici.
+>
+> ### ⚠️ E la parte che RESTA vera
+> **`SPXUSD` non ha nessun referto tick**: la cartella `misura_tick/` contiene `D30EUR`, `U30USD`
+> e `NASUSD` — **e basta**. Quindi la sonda serve ancora, **ma per un simbolo solo**, non per due.
+
 ---
 
 ## ① 🏺 IL CENSIMENTO, fatto DENTRO i file e non sui nomi
