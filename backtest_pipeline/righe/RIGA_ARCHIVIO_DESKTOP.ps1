@@ -193,7 +193,11 @@ $attivitaLette = $false
 try{
   $tasks = @(Get-ScheduledTask -ErrorAction Stop)
   foreach($t in $tasks){
-    foreach($a in @($t.Actions)){ $testoAttivita = $testoAttivita + ($a | Out-String) + "`n" }
+    # -Width 8000 NON e' cosmetico: Out-String senza larghezza MANDA A CAPO
+    # a 80 colonne, e un percorso spezzato a meta' non combacia piu' con
+    # nessuna ricerca -- la guardia direbbe "nessuna attivita' usa questa
+    # cartella" proprio sui percorsi lunghi, che sono tutti.
+    foreach($a in @($t.Actions)){ $testoAttivita = $testoAttivita + ($a | Out-String -Width 8000) + "`n" }
   }
   if($tasks.Count -gt 0){ $attivitaLette = $true }
 } catch {
@@ -291,7 +295,10 @@ foreach($v in $voci){
     }
   }
   # GUARDIA 4: e' l'input di un'attivita' pianificata?
-  if($attivitaLette -and $testoAttivitaU.Contains($pienoU)){
+  # due forme, e servono tutte e due: il percorso PIENO (task scritto per
+  # esteso) e il solo "\NOME\" (task scritto con %USERPROFILE%, che qui
+  # non e' espanso e quindi il percorso pieno non combacerebbe).
+  if($attivitaLette -and ($testoAttivitaU.Contains($pienoU) -or $testoAttivitaU.Contains("\" + $nomeU + "\"))){
     [void]$saltate.Add([pscustomobject]@{ Nome=$v.Name; Perche="DA QUI PARTE UN'ATTIVITA' PIANIFICATA: spostarla la rompe (come il 16/09 con ABTG_AggiornaNews)" })
     continue
   }
@@ -322,7 +329,7 @@ Write-Host ("data: " + (Get-Date).ToString("yyyy.MM.dd HH:mm:ss", $INV)) -Foregr
 Write-Host ("Desktop   : " + $Desktop)
 Write-Host ("Archivio  : " + $Arch)
 Write-Host ("Cartelle al primo livello: " + $voci.Count + "   da archiviare: " + $piano.Count + "   saltate: " + $saltate.Count)
-Write-Host ("Attivita' pianificate lette: " + $(if($attivitaLette){"si'"}else{"NO (guardia ignorata su tua richiesta)"}))
+Write-Host ("Attivita' pianificate lette: " + $(if($attivitaLette){"si', guardia ATTIVA"}else{"NO -- guardia SPENTA perche' me l'hai chiesto con -IgnoraAttivita"}))
 Write-Host "FILE SCIOLTI, COLLEGAMENTI E ICONE: NON LI TOCCO. Questa riga sposta solo CARTELLE." -ForegroundColor Gray
 
 if($saltate.Count -gt 0){
