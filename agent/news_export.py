@@ -24,11 +24,29 @@ from zoneinfo import ZoneInfo
 
 import requests
 
-FEEDS = [
-    "https://nfs.faireconomy.media/ff_calendar_thisweek.json",
+# CLASSE 461 (19/09/2026) -- DUE DEI TRE FEED NON ESISTONO PIU'.
+# Misurato sul runner di GitHub alle 17:51 UTC, con i ritentativi gia' in
+# funzione: `ff_calendar_thisweek.json` risponde e da' 105 righe grezze,
+# mentre `ff_calendar_nextweek.json` e `ff_calendar_lastweek.json` rispondono
+# **404 Not Found**, quattro tentativi su quattro, tutti e due.
+# 🔴 Questo SMENTISCE la causa scritta nella classe 460 ("il fornitore rifiuta
+# le richieste ravvicinate"): non era una limitazione di frequenza, erano due
+# indirizzi morti. L'attesa crescente non serviva a niente -- e' stato il LOG
+# a trovare il guasto, non il ritentativo. Correzione riportata nella 460.
+FEED_PRINCIPALE = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
+
+# Provati a ogni corsa e LOGGATI, ma la loro assenza non e' un guasto: servono
+# ad accorgersi il giorno in cui tornano (o in cui ne troviamo di validi).
+FEED_OPZIONALI = [
     "https://nfs.faireconomy.media/ff_calendar_nextweek.json",
     "https://nfs.faireconomy.media/ff_calendar_lastweek.json",
 ]
+
+FEEDS = [FEED_PRINCIPALE] + FEED_OPZIONALI
+
+# Ogni corsa di collect_news() riempie questa lista con i feed OBBLIGATORI
+# falliti: e' quello che decide se il workflow va rosso.
+FALLITI_OBBLIGATORI: list[str] = []
 
 # parole-chiave per riconoscere gli eventi di politica monetaria
 ECB_KEYS = ("ecb", "main refinancing", "monetary policy statement",
@@ -81,6 +99,15 @@ def _fetch_feed(url: str, tz: ZoneInfo, timeout: int = 20,
             break
         except Exception as exc:
             ultimo = f"{type(exc).__name__}: {exc}"
+            # CLASSE 461: un 404 NON e' transitorio. Ritentarlo quattro volte
+            # con attesa crescente costa 14 secondi per feed e non cambia
+            # niente: il 19/09 ne sono stati bruciati 56 su due indirizzi
+            # morti. Si esce subito e si dice che l'indirizzo non c'e' piu'.
+            risp = getattr(exc, "response", None)
+            if risp is not None and risp.status_code in (404, 410):
+                print(f"[ERRORE] feed {nome}: l'indirizzo non esiste piu'"
+                      f" (HTTP {risp.status_code}). Non ritento.", file=sys.stderr)
+                return []
     else:
         print(f"[ERRORE] feed {nome}: fallito dopo {tentativi} tentativi -- {ultimo}",
               file=sys.stderr)
@@ -121,10 +148,14 @@ def collect_news(tz_name: str = "Europe/Rome",
     seen = set()
     rows: list[NewsRow] = []
     keep = {k.lower() for k in keep_impacts}
+    FALLITI_OBBLIGATORI.clear()
     for n_feed, url in enumerate(FEEDS):
         if n_feed:
-            time.sleep(3)      # CLASSE 460: il fornitore rifiuta le richieste ravvicinate
-        for r in _fetch_feed(url, tz):
+            time.sleep(1)
+        righe_feed = _fetch_feed(url, tz)
+        if not righe_feed and url == FEED_PRINCIPALE:
+            FALLITI_OBBLIGATORI.append(url.rsplit("/", 1)[-1])
+        for r in righe_feed:
             if r.impact.lower() not in keep:
                 continue
             r.title = _normalize_title(r.currency, r.title)
@@ -138,9 +169,17 @@ def collect_news(tz_name: str = "Europe/Rome",
 
 
 def write_abtg_news(path: str, tz_name: str = "Europe/Rome",
-                    keep_impacts=("High",)) -> int:
-    """Scrive il CSV nel formato dell'EA. Ritorna il n. di righe scritte."""
-    rows = collect_news(tz_name, keep_impacts)
+                    keep_impacts=("High",), rows: "list[NewsRow] | None" = None) -> int:
+    """Scrive il CSV nel formato dell'EA. Ritorna il n. di righe scritte.
+
+    CLASSE 461 -- `rows` si passa quando il chiamante ha GIA' raccolto.
+    Prima il `__main__` chiamava collect_news() e poi write_abtg_news(), che
+    la richiamava: ogni corsa scaricava i feed DUE VOLTE. Si vede nel log del
+    19/09, dove i tre feed compaiono due volte e i 404 sono otto invece di
+    quattro. Non era solo spreco: raddoppiava le richieste al fornitore.
+    """
+    if rows is None:
+        rows = collect_news(tz_name, keep_impacts)
     lines = []
     for r in rows:
         # formato data che StringToTime di MT5 legge: "AAAA.MM.GG HH:MM"
@@ -178,15 +217,33 @@ def conta_futuri(rows: list[NewsRow], tz_name: str = "Europe/Rome") -> int:
 if __name__ == "__main__":
     out = sys.argv[1] if len(sys.argv) > 1 else "abtg_news.csv"
     rows = collect_news()
-    n = write_abtg_news(out)
+    n = write_abtg_news(out, rows=rows)      # CLASSE 461: non riscaricare
     futuri = conta_futuri(rows)
     print(f"Scritte {n} righe in {out}  ({futuri} ancora DA VENIRE)")
     print("Riepilogo:", summarize(rows))
     for r in rows:
         if "ecb" in r.title.lower() or "fomc" in r.title.lower():
             print("  ", r.dt.strftime("%Y.%m.%d %H:%M"), r.currency, r.title)
-    if futuri == 0:
-        print("[ERRORE] il calendario non contiene NESSUN evento futuro: per un"
-              " filtro news e' come essere spento. Guarda le righe [ERRORE] dei"
-              " feed qui sopra.", file=sys.stderr)
+    # CLASSE 461 -- QUANDO SI VA ROSSI, E QUANDO NO.
+    # La prima stesura (classe 460) usciva 1 ogni volta che gli eventi futuri
+    # erano zero. Sbagliata, e lo dice il calendario: con il solo feed
+    # `thisweek` vivo, dal venerdi' sera alla domenica sera NON CI SONO piu'
+    # eventi futuri nella settimana corrente -- quindi il workflow sarebbe
+    # andato rosso ogni fine settimana, da sano. Un cancello che grida al lupo
+    # ogni sabato si impara a ignorare, ed e' il difetto che CLAUDE.md nomina
+    # per primo. Quindi:
+    #   ROSSO  = il feed OBBLIGATORIO e' caduto. Non e' ambiguo: e' un guasto.
+    #   GIALLO = zero eventi futuri con i feed a posto. E' il buco strutturale
+    #            dei 404 (manca la settimana prossima), va DETTO forte ma non
+    #            e' un guasto di oggi.
+    if FALLITI_OBBLIGATORI:
+        print("[ERRORE] il feed OBBLIGATORIO e' caduto: "
+              + ", ".join(FALLITI_OBBLIGATORI)
+              + ". Il file gia' in repo NON viene sovrascritto.", file=sys.stderr)
         sys.exit(1)
+    if futuri == 0:
+        print("[AVVISO] il calendario non contiene NESSUN evento futuro: per un"
+              " filtro news e' come essere spento fino al prossimo evento."
+              " Con il solo feed 'thisweek' vivo questo e' NORMALE dal venerdi'"
+              " sera alla domenica. Se succede in settimana, guarda le righe"
+              " [ERRORE] dei feed qui sopra.", file=sys.stderr)

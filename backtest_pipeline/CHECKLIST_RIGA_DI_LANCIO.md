@@ -25615,7 +25615,10 @@ scarica** (`curl` sul link vero), non sul nome del ramo.
 | 4 | `aggiorna_news.ps1` (versione in campo) | `Invoke-WebRequest -OutFile` diritto sul file in campo, **esce 0** anche con zero byte | esiti `0` del 14-15-16/09, che sembravano salute |
 | 5 | `news-export.yml` | **nessuno `schedule`**: aveva girato **UNA volta sola**, il 23/07/2026 | elenco run del workflow: `total_count = 2`, il secondo l'ho lanciato io il 19/09 |
 
-### 🔎 La causa tecnica, e non è «il sito è giù»
+### 🔴 ✏️ LA CAUSA SCRITTA QUI SOTTO E' SBAGLIATA — CORRETTA LA SERA STESSA, vedi **CLASSE 461**
+Quello che segue è rimasto **come l'avevo scritto**, perché il modo in cui ho sbagliato conta: avevo dedotto «il fornitore limita le richieste ravvicinate» da **un solo indizio** (solo il primo dei tre feed aveva dati) senza mai vedere il codice di errore, perché il codice di errore **non veniva stampato da nessuna parte**. Era una spiegazione **plausibile e non misurata**. Il log vero, arrivato un'ora dopo, dice **404**: due indirizzi morti. 📌 La correzione al codice (ritentativi, pausa) non ha fatto danni ma **non serviva**: a trovare il guasto è stato il **log**, non il ritentativo.
+
+### 🔎 La causa tecnica che avevo ipotizzato (SBAGLIATA)
 I **tre** feed di `faireconomy.media` (`thisweek`, `nextweek`, `lastweek`) venivano chiesti **uno dietro l'altro senza pausa**, e il fornitore rifiuta le richieste ravvicinate. ✅ **Prova**: la corsa a mano del 19/09 alle 17:27 UTC ha riportato **16 eventi — ma tutti e soli di `thisweek`**, cioè **solo il primo dei tre**. `nextweek` (che è quello con gli eventi FUTURI) e `lastweek` erano stati rifiutati, e l'errore spariva dentro lo strato 1.
 
 ### La regola
@@ -25624,4 +25627,31 @@ I **tre** feed di `faireconomy.media` (`thisweek`, `nextweek`, `lastweek`) veniv
 - 🧪 **Contro-esempi girati** su `conta_futuri()`: solo eventi passati → **0**; misto passato+futuro → conta **solo il futuro**; lista vuota → **0**.
 
 📌 **E la morale di metodo è quella del 10/09**: il verdetto **A** era stato costruito per **confermare** che la catena rispondesse, non per **romperla**. Ha misurato il tubo, non l'acqua. La domanda giusta non era *«il file è arrivato?»* ma *«questo file impedirebbe un'operazione domani?»*.
+
+---
+
+## CLASSE 461 — 🚫📡 **DUE DEI TRE FEED RISPONDONO 404**, e il cancello che l'ha scoperto stava per gridare al lupo ogni sabato (19/09/2026, figlia della **460**)
+
+**Il caso.** La **460** aveva reso visibile il fallimento dei feed. Alla prima corsa col log acceso, il verdetto è arrivato in chiaro:
+```
+[info]   feed ff_calendar_thisweek.json: 105 righe grezze
+[ERRORE] feed ff_calendar_nextweek.json: fallito dopo 4 tentativi -- HTTPError: 404 Not Found
+[ERRORE] feed ff_calendar_lastweek.json: fallito dopo 4 tentativi -- HTTPError: 404 Not Found
+```
+🔴 **Non era una limitazione di frequenza: sono due indirizzi che non esistono piu'.** La causa scritta nella **460** è stata corretta sul posto.
+
+### Le tre cose imparate, tutte misurate
+1. 🔄 **Ritentare un 404 è tempo buttato.** Quattro tentativi con attesa crescente su due indirizzi morti = **56 secondi per corsa**, e il risultato non cambia mai. Ora un `404`/`410` esce **al primo colpo**, dicendo *«l'indirizzo non esiste piu'»*; i ritentativi restano per i guasti veri (timeout, 5xx, connessione caduta).
+2. 📥 **I feed venivano scaricati DUE VOLTE per corsa.** Nel log i tre feed compaiono due volte e i 404 sono **otto invece di quattro**: `__main__` chiamava `collect_news()` e poi `write_abtg_news()`, che la richiamava dentro. Ora le righe si passano con `rows=`.
+3. 🔴 **E il difetto piu' serio era nel CANCELLO CHE AVEVO APPENA SCRITTO.** La **460** usciva `1` ogni volta che gli eventi futuri erano zero. Con il solo `thisweek` vivo, **dal venerdi' sera alla domenica sera non ci sono piu' eventi futuri nella settimana corrente**: il workflow sarebbe andato **rosso ogni fine settimana, da sano**. È esattamente il difetto che `CLAUDE.md` nomina per primo — *un cancello che grida al lupo su meta' dei casi si impara a ignorare* — e me l'ero appena rimproverato nella **457**, dove per lo stesso motivo un blocco era diventato un rilievo.
+
+### La regola
+🔴 **Un allarme si misura anche sui casi SANI, non solo su quello rotto che lo ha ispirato.** Prima di consegnare un cancello nuovo: *quante volte scatterebbe in una settimana normale?* Se la risposta non è «zero», non è un cancello, è rumore.
+- ✅ **Applicato**: **ROSSO** solo se cade il feed **obbligatorio** (`thisweek`) — non ambiguo, è un guasto. **GIALLO** (avviso forte, uscita 0) se gli eventi futuri sono zero ma i feed stanno bene: è il buco strutturale dei 404, va detto ma non è il guasto di oggi.
+- 🧪 **Contro-esempi girati**: feed obbligatorio caduto → ROSSO · weekend sano con 0 futuri → GIALLO · tutto a posto → VERDE · `write_abtg_news(rows=...)` scrive **senza toccare la rete**.
+
+### 🟠 IL BUCO CHE RESTA APERTO, e va detto e non nascosto
+Con il solo `thisweek`, **il venerdi' sera il calendario non contiene nulla del lunedi' successivo**. Non è un guasto da riparare con una patch: **manca una sorgente per la settimana entrante**, e finche' non la si trova il filtro news copre la settimana in corso e basta. ⚠️ Va saputo prima di accendere `InpUseNewsFilter` su una sedia — oggi l'unico preset che lo accende è `ABTG_Nasdaq_Apertura_US.set`.
+
+📌 **Parente stretta della 457**: lì un blocco troppo largo bocciava 141 script sani, qui un allarme troppo largo avrebbe acceso un rosso ogni weekend. **Stesso errore, due volte nello stesso giorno.**
 
