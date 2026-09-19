@@ -9,6 +9,38 @@
 
 ---
 
+> # 🔴 CORREZIONE DEL 19/09 SERA — **CONTAVO I DEAL E LI CHIAMAVO OPERAZIONI**
+>
+> Verificato da me sui per-trade di `R81`, che erano in archivio dal 18/08 e **nessun referto aveva
+> mai aperto**:
+>
+> | variante | gestione | **deal** | **posizioni** |
+> |---|---|---:|---:|
+> | `r81a` (sedia viva) | scala piena | **21** | **14** |
+> | `r81b` | 🔴 **tutta SPENTA** | **14** | **14** |
+> | `r81c` | solo breakeven | **22** | **14** |
+>
+> 👉 **Le due varianti con la gestione spenta fanno 14 = 14.** Non è un caso: **una posizione con
+> una parziale produce DUE deal**, e la colonna `Trades` dei CSV conta **i deal in uscita**.
+>
+> ### 🔴 Conseguenza su QUESTO censimento
+> Ho applicato `Trades >= 150` chiamandolo *«150 operazioni»*. Ma la regola di casa
+> (Emendamento A) conta le **POSIZIONI**. Rifatto il conto con la soglia coerente:
+>
+> | soglia | combinazioni che passano |
+> |---|---:|
+> | **150 deal** *(quella che ho usato)* | **4** |
+> | **300 deal ≈ 150 posizioni** *(la regola)* | 🔴 **1** — solo `EMA200` × EURUSD |
+>
+> ⚠️ **E nemmeno 300 è la risposta giusta**: vale per gli EA **con** una parziale (due deal per
+> posizione), ed è **troppo severa** per quelli senza, dove deal ≈ posizioni.
+> 🔴 **La misura vera — le posizioni — per la maggior parte delle combinazioni NON CE L'ABBIAMO**:
+> i file per-trade non esistono. 👉 **Il verdetto onesto su questo censimento è quindi
+> `[NON MISURATO]` per la maggior parte delle righe**, non «quattro passano».
+> Quello che resta solido: **`EMA200` × EURUSD passa con qualunque convenzione**.
+
+---
+
 ## ① IL NUMERO SECCO
 
 > # **6 combinazioni su 163** hanno almeno una cella che passa tutti e quattro i cancelli.
