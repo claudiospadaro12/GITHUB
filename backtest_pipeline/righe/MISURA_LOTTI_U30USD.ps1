@@ -294,8 +294,13 @@ foreach($c in $CORSE){
 $dopo = @(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id, Path)
 $persi = @($nonBanco | Where-Object { $dopo.Id -notcontains $_.Id })
 
-$R = New-Object System.Collections.ArrayList
-function W($t){ [void]$R.Add($t); Write-Host $t }
+# NB: si chiama $REFERTO e NON $R di proposito. $R e $r sono LA STESSA
+# VARIABILE (PowerShell e' case-insensitive, classe 79): il foreach su $r
+# qui sotto distruggeva l'ArrayList, e il referto moriva con
+# "PSCustomObject does not contain a method named Add". Trovato
+# ESEGUENDO la tabella su CSV finti, non rileggendo il codice.
+$REFERTO = New-Object System.Collections.ArrayList
+function W($t){ [void]$REFERTO.Add($t); Write-Host $t }
 
 W ''
 W '====================================================================='
@@ -375,7 +380,7 @@ W ''
 W ('corse fatte: ' + $fatte.ToString($INV) + ' su 4')
 
 $ref = Join-Path $racc 'REFERTO_MISURA_LOTTI.txt'
-($R -join "`r`n") | Set-Content -LiteralPath $ref -Encoding ASCII
+($REFERTO -join "`r`n") | Set-Content -LiteralPath $ref -Encoding ASCII
 
 $zip = Join-Path $dsk ('MISURA_LOTTI_U30USD_' + $stamp + '.zip')
 if(Test-Path -LiteralPath $zip){ Remove-Item -LiteralPath $zip -Force }

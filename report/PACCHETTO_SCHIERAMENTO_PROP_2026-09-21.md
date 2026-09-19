@@ -304,7 +304,7 @@ Censimento su tutti i 113 `.mq5` di `mql5/Experts/`: **occorrenze in codice eseg
 🔴 **Ma i tre file patchati a HEAD non sono MAI stati compilati da nessuna parte**: il primo F7
 è anche il primo collaudo. Se dà errore, non è una sorpresa — è il collaudo che funziona.
 🔴 **E `ABTG_MaxMinNotte.mq5` (`770402`) ha ancora il difetto**: 32 occorrenze residue sono
-sparse su 14 EA *fuori dalle sei sedie*, ma la decisione su `770402` (vintage vs HEAD) resta
+sparse su 14 EA *fuori dalla rosa*, ma la decisione su `770402` (vintage vs HEAD) resta
 aperta al §⑥.
 
 > ## 🎯 **In una riga: sul conto prop vanno ricompilati DUE file per la protezione (`DAX_Apertura_EU`, `Dow_Apertura_US`), TRE per avere il binario giusto (`EMA200` a `26a18566`, `SuperWave_DOW_H1_Ott` a `872dba82`, `MaxMinNotte_DAX_Short_Ott` già a HEAD) e UNO perché ci serve la sedia (`Nasdaq_Apertura_US`).** In tutto **sei F7**, più il Guardian.
@@ -358,7 +358,7 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 | **7** | 🟠 **L'ORO parte al doppio del rischio.** Il preset in repo `sedia_MAXMIN_ORO_770402.set` porta **`InpRiskPercent=1.0`**, ma in campo la sedia gira a **0,5** (`CODA_01` 19/09) e il contratto dice **«prop: solo ≤ 0,5%»** | 🟠 media — **basta caricare il preset senza guardare** | 🔴 alto: DD promesso **19,72%** a 1,0% contro un muro del **10%** | **passo 10**: verificare `InpRiskPercent` a mano, campo per campo. È **due secondi** e vale la challenge |
 | **8** | 🟠 **La taglia non è decisa.** A **1,00%** la Monte Carlo di casa dà **p99 = 12,47%** di drawdown contro un muro **statico del 10%** — cioè **lo sfonda più di una volta su cento**; a **0,65%** dà **~8,1%** e non lo sfonda (`report/METRO_PROP.md` rr.24-25, 65-71) | 🔴 aperta | 🔴 totale | ✍️ **solo Claudio**. 📌 E il numero che avevo già dato regge: a **1,30%** la sola `770101` promette **9,40%** (= 7,2328% misurato a 1,0% su banco 100k, scalato ×1,3) contro il muro del 10% — **una sedia sola** |
 | **9** | 🟡 **Collisione per simbolo** se uno dei due Apertura va in campo col binario vecchio | 🟢 bassa (la toppa è a HEAD) | 🟠 medio | **passo 8**: se l'F7 è fatto, il problema non esiste. `770411`, `771531`, `770511` sono **sicure di natura** (§3.1) |
-| **10** | 🔵 **Una regola FTMO sulle notizie** | 🟢 **nulla lunedì** | — | 🟢 *«Restrictions… do not apply during the Evaluation Process»* (`docs/REGOLAMENTO_FTMO_2026-08.md` **r.45**). **Nessuna delle sedie è toccata da una regola news lunedì.** Il problema nasce sul conto **finanziato**, cioè fra settimane |
+| **10** | 🔵 **Una regola FTMO — news, oppure notte/weekend** | 🟢 **ZERO lunedì**, per tutte e sette e per tutti e due i tipi di conto | — | 🟢 **Fonte 🥇 [POSTATO DA CLAUDIO], schermate FAQ ufficiali del 19/09 23:01-23:02**: *«Non si applicano durante il processo di valutazione… indipendentemente dal tipo di conto»*, e la stessa frase per le **posizioni tenute di notte e nel weekend**. Coincide con `docs/REGOLAMENTO_FTMO_2026-08.md` **r.45**. 🔴 **Nasce sul conto FINANZIATO**, e lì colpisce `771531` e `770511` → §⑤bis |
 | **11** | 🔵 **Clausola «gap trading»** (`T-FTMO-2`): vale **sempre**, anche in Challenge, e la lettera (ii) parla di aprire *«due ore o meno prima che un mercato chiuda per almeno due ore»* | 🟡 bassa ma **non zero** | 🔴 **squalifica** — è l'unica clausola che uccide un conto che rispetta tutti i numeri | tocca **`770511`**, che gira `InpStartHour=0`/`InpEndHour=24` e quindi **può aprire il venerdì sera**. 👉 Domanda **già scritta dal 13/08** e mai inviata (§⑥ buco B2) |
 
 > ## 🔴 **QUINDI TI CONTRADDICO, COI NUMERI: il primo pericolo di lunedì NON è lo stop-out per margine.**
@@ -366,6 +366,54 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 > **ordini rifiutati**. Lo stop-out per margine, matematicamente, **non può arrivare**: pretende
 > un −54% che il muro del 10% rende impossibile. 🟢 **La tua intuizione sul margine era giusta;
 > è il MECCANISMO del danno a essere un altro — ed è peggio, perché è silenzioso.**
+
+---
+
+# ⑤bis ⚖️ STANDARD O SWING — **la raccomandazione ha DUE gambe, non una**
+
+🟢 **Niente di questo paragrafo tocca lunedì.** Serve a decidere **adesso** una cosa che morde
+**fra settimane**, sul conto finanziato — e che però si compra **prima**, quindi va decisa prima.
+
+Fino a stasera la scelta aveva **una** gamba (le news) e **un** costo (il margine). Le due
+schermate FTMO di Claudio ne aggiungono una seconda, e le due gambe colpiscono **esattamente le
+stesse due sedie**:
+
+| restrizione | vale su **Standard funded** | vale su **Swing** | quali delle sette colpisce |
+|---|---|---|---|
+| **News** (±2 min, **incluse le esecuzioni di SL e TP**) | 🔴 **sì** | 🟢 **mai** | `770202` `771531` `770511` `770402` `770260` (strumenti USD/oro **nominati** nella tabella FTMO) — e la più esposta è **`771531`**, che può avere posizione aperta alle 19:00 BCM = ora del FOMC |
+| 🆕 **Posizioni tenute di notte e nel weekend** | 🔴 **sì** | 🟢 **mai** | 🔴 **`771531`** (4 notti, 2 weekend su 21 posizioni) e 🔴 **`770511`** (6 notti, 2 weekend su 16). **Le altre cinque: zero e zero** |
+| **Margine** | 🟢 indici **1:50** → le sette entrano col **36-56%** del conto | 🔴 indici **1:15**, metalli **1:9** → le sette chiedono **121,9%-187,5%** | **tutte** |
+
+> ## ⚖️ **E QUINDI LE DUE GAMBE TIRANO IN DIREZIONI OPPOSTE, ed è onesto dirlo così.**
+> 🟢 **Swing** = zero restrizioni, per sempre, su tutte e sette. 🔴 **Ma a 1:15 la rosa non ci sta:
+> ne entrano tre a 0,65%.**
+> 🟢 **Standard** = margine comodo, tutte e sette in campo. 🔴 **Ma da funded due sedie
+> (`771531`, `770511`) sarebbero in violazione sistematica** sulla notte/weekend, e cinque sono
+> esposte alle news.
+> 🎯 **La terza via, ed è quella che i numeri suggeriscono**: **Standard**, e le due sedie che
+> tengono di notte si affrontano **quando il conto diventa funded** — o spegnendole, o mettendo
+> `InpFridayClose=true` su `771531` (la manopola **c'è già** ed è a `false`) e una finestra oraria
+> su `770511` (che oggi gira `0-24`). **In valutazione non servono: lunedì non c'è nessuna regola.**
+> 🔴 **NON LA DECIDO IO.** È una firma di Claudio, ed è **anche una questione di soldi**: Standard
+> e Swing costano prezzi diversi. Io porto i numeri, lui porta la firma.
+
+## ⚠️ E UN AVVISO SUL BANNER DELLO SCONTO
+Nella schermata compare *«Sconto del 20% — Offerta speciale sulla sfida **1-Step** da 100.000
+dollari»*. 🔴 **La 1-Step non è la 2-Step con un passaggio in meno: ha un profilo di rischio
+diverso**, e la differenza è scritta in casa:
+
+> *«Max Loss 10% (**2-Step**) — **STATICO**: "equity must not drop below 90% of the initial
+> account balance at any given time". (**1-Step** invece: **End-of-Day trailing**, si aggiorna
+> alle 23:59:59 CE(S)T solo verso l'alto.)»*
+> — `docs/REGOLAMENTO_FTMO_2026-08.md` §2
+
+🔴 **Tutto il nostro metro è tarato sul DD STATICO**: le Monte Carlo di `report/METRO_PROP.md`
+danno p99 **12,47%** @1,0% e **~8,1%** @0,65% **su DD statico**, e lo stesso referto dichiara
+testualmente che *«con un DD trailing sull'equity quei numeri **non valgono**»*.
+👉 **Su 1-Step non sappiamo se passiamo: non l'abbiamo mai calcolato.** Più: la 1-Step ha la
+**Best Day Rule 50%**, non ha lo **Swing**, e la fee **non è rimborsata**.
+🎯 **Quindi: lo sconto del 20% è su un prodotto che oggi non sappiamo misurare.** Se Claudio lo
+vuole valutare, la misura si fa — ma è una misura, non un click.
 
 ---
 
@@ -378,7 +426,7 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 | 🔴 **B3** | **LA TAGLIA.** `InpRiskPercent` per sedia: **[NON DECISA]** | 🔴 blocca il passo 10 dell'accensione | ✍️ **Claudio, esclusivo.** 📌 I numeri sul tavolo, già misurati: 0,65% → p99 8,1% 🟢 · 1,00% → p99 12,47% 🔴 · 1,30% → `770101` da sola promette 9,40% 🔴. **La mia proposta resta 1,00% come TETTO, e resta una proposta** |
 | 🔴 **B4** | **Le domande al supporto FTMO sono pronte dal 13/08 e MAI INVIATE** (`report/DOMANDE_SUPPORTO_PROP.md` r.3: *«DECISIONE DI CLAUDIO (13/08): INVIO RINVIATO»*). Sono tre: **gap trading**, **bracket OCO**, **conti multipli** | 🔴 la clausola gap trading può squalificare un conto che rispetta **tutti** i numeri; e il 18/09 abbiamo già pagato una volta il prezzo di non aver verificato (breach FundedNext) | ✍️ **Claudio, dal suo account** · **10 minuti per inviarle**, 1-3 giorni per la risposta. 🔴 **Il testo è già scritto: va solo incollato.** Regola di casa `PIANO_PROP.md` F4: niente acquisti senza risposte scritte — **aperta dal 13/08** |
 | 🔴 **B5** | **`770202` non opera dal 28/08.** 15 sedute mute al 18/09 | 🟢 **non è un guasto**, è misurato: sedia **solo-long** su un Dow che scende, record di siccità del motore **23 sedute** | 🤖 **già chiuso come diagnosi** (`report/PERCHE_770202_E_MUTA_2026-09-19.md`). 🔴 **Resta la data**: le 23 sedute scadono il **30/09**. Se quel giorno è ancora muta, si riapre — e allora **non** è più il mercato |
-| 🟠 **B6** | **Il `.set` delle due sedie Nasdaq non è in repo.** `grep -rln "770260" --include=*.set` = **0 file**, benché il referto del 19/09 li descriva input per input | 🟠 rende `770260` non schierabile anche se Claudio la volesse | 🤖 **chi ha prodotto i due `.set`** (sessione del 18-19/09) deve **committarli** · minuti |
+| 🔴 **B6** | **Il `.set` di `770260` NON è in repo.** `grep -rln "770260" --include=*.set` su tutto l'albero = **0 file**, benché il referto del 19/09 lo descriva input per input (*«80 input, nessun valore sbagliato, copertura verificata nei due versi»*) | 🔴 **bloccante**: Claudio ha firmato *«Sì, dentro il 770260 RETEST»* e senza il `.set` quella sedia **non si accende**. Ricostruirla a mano dagli 80 input è esattamente il modo in cui si sbaglia un preset | 🤖 **chi ha prodotto il `.set`** (sessione del 18-19/09) deve **committarlo su `lavoro`** · **minuti**. 🔴 **È il buco più corto da chiudere e il più stupido da lasciare aperto** |
 | 🟠 **B7** | **Il conteggio righe atteso dei file da copiare sul terminale FTMO non è ancora scritto da nessuna parte.** Senza, il passo 6 non è verificabile | 🟠 non si può dire *«la copia è riuscita»* | 🤖 **io**, appena esiste la cartella bersaglio · minuti. 📌 I numeri noti: `DAX_Apertura_EU` **2425** (`CODA_06` 2426) · `Dow_Apertura_US` **2205** (2206) · `Nasdaq_Apertura_US` **2624** (2625) · `EMA200` **552** (553) · `SuperWave_DOW_H1_Ott` **645** (646) · `MaxMinNotte_DAX_Short_Ott` **619** (620) · `ABTG_PausaGuardian.mqh` **398** (399) |
 | 🟠 **B8** | **Il bersaglio di `770402` non è deciso**: il vintage in campo ha il **breakeven cieco** (rischio attivo), HEAD **cambia la frequenza** del contratto | 🟠 una sedia su sette resta indecisa | ✍️ **firma di Claudio** per autorizzare una corsa di controllo sulla macchina di backtest **50504400** (`C:\MT5_Backtest`) + 🤖 la corsa · **minuti di macchina** |
 | 🟠 **B9** | **Quanto cambiano le taglie di `771531` e `770511` dopo l'F7** è **[NON MISURATO su `U30USD`]**: uno porta `OrderCalcProfit`, l'altro il pavimento del lotto | 🟠 le due sedie partono con un lotto diverso da quello con cui il contratto è stato scritto | 🤖 una corsa nel **Tester** su `50504400` che confronta i lotti vecchio/nuovo · **~10 minuti**. ⚠️ **Un altro agente sta già preparando la misura del delta lotti: non la rifaccio e non tocco quei file** |
@@ -390,10 +438,10 @@ sono già — e che **nessun passo di questa lista deve toccare** — sono:
 
 # ⑦ 📌 IN UNA RIGA
 
-**Lunedì sono schierabili CINQUE sedie** — `770101` · `770411` · `770202` · `771531` · `770511` —
-**e tutte e cinque hanno bisogno della stessa cosa: una copia e un F7 su un terminale che oggi non
-esiste.** `770402` aspetta una misura, `770260` aspetta un preset e una firma, `770261` è fuori
-per merito.
+**La rosa firmata è di SETTE sedie. Lunedì ne sono schierabili CINQUE** — `770101` · `770411` ·
+`770202` · `771531` · `770511` — **e tutte e cinque hanno bisogno della stessa identica cosa: una
+copia e un F7 su un terminale che oggi non esiste.** `770402` aspetta una misura, **`770260`
+aspetta un file `.set` che qualcuno ha scritto e non ha committato**, `770261` è fuori per merito.
 🔴 **Ma quante ne regge il conto non lo decide questa tabella: lo decide la leva.** A **1:15** ne
 entrano **tre** a 0,65% e **due** a 1,00%. A **1:50** entrano tutte e sette con il 36% del conto
 impegnato.
@@ -411,6 +459,10 @@ valgono più di tutta la notte di lavoro che c'è dietro questo file.
 | — | ✏️ **corretto** il riferimento `QUALE_PROP…` rr.190-197: il *«~67.000 $ = 67%»* usa `U30USD` a **46.012** e `NASUSD` a **~21.000**, contro prezzi veri **53.200** e **29.474** | il margine vero è **più alto**, non più basso (§2.4) |
 | — | ✏️ **contraddetta** l'ipotesi *«il primo rischio è lo stop-out per margine»* | lo stop-out pretende equity < 50% del margine (≈ −54%): il muro del 10% breccia prima. Il danno vero è l'**ordine rifiutato** (§⓪.③, §⑤.3) |
 | — | 🆕 **alzato al primo posto** il fuso server FTMO (BCM+2) | è l'unico rischio **certo** della lista, e nessun referto precedente lo aveva messo in cima |
+| **20/09/2026 (notte, 2ª passata)** | **`770260` RETEST entra nella rosa** (firma di Claudio: *«Sì, dentro il 770260 RETEST»*), con **merito sospeso per campione** scritto accanto al nome. `770261` resta fuori per merito | la rosa passa da 6 a **7** sedie. 📌 La tabella del margine **conteneva già** `770260`: i totali del §② non cambiano |
+| — | ✏️ **CORRETTA una lettura del referto Nasdaq** che mi era stata passata: il *«due vie `770250`↔`770261`»* di r.104 riguarda le **stringhe di commento**, non la `PositionClose(_Symbol)`. Nella chiusura per simbolo **`770260` è dentro la collisione**, non fuori | 🟢 la conclusione regge lo stesso, **ma per un'altra ragione**: `770250` non va sul conto prop (§3.0). Una conclusione giusta con la ragione sbagliata è una trappola per il prossimo che legge |
+| — | 🆕 aggiunta la colonna **«tiene posizioni oltre la giornata?»** e il §⑤bis **Standard vs Swing a due gambe** | due schermate della FAQ FTMO ufficiale postate da Claudio il 19/09 alle 23:01-23:02 🥇 **[POSTATO DA CLAUDIO]**: confermano le news e aggiungono la restrizione **notte/weekend**, che nessun referto aveva messo a fuoco |
+| — | 🆕 avviso sulla **1-Step scontata del 20%**: Max Loss **trailing End-of-Day** invece che statico | tutto il nostro metro (`METRO_PROP.md`) è tarato su DD **statico**, e quel referto dichiara che su trailing *«quei numeri non valgono»* |
 
 ---
 *Fonti, per nome: `report/LA_ROSA_PER_LA_PROP_2026-09-19.md` · `report/I_BINARI_DELLA_ROSA_2026-09-19.md` ·
