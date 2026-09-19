@@ -1,0 +1,93 @@
+--- a/mql5/Experts/ABTG_Nasdaq_Apertura_US_Ottimizzato.mq5 (HEAD-lavorativo)
++++ b/mql5/Experts/ABTG_Nasdaq_Apertura_US_Ottimizzato.mq5 (HEAD-lavorativo + toppa ticket)
+@@ -483,7 +483,7 @@
+    if(newsBlk && InpNewsFlatten)
+      {
+       CancelMyPendings();
+-      if(SelectMyPosition()) gTrade.PositionClose(_Symbol);
++      ChiudiMiePosizioni("blackout notizie");   // TOPPA 19/09: per TICKET, non per simbolo
+      }
+ 
+    //--- a fine sessione: cancella i pendenti ed (eventualmente) chiudi
+@@ -1221,11 +1221,11 @@
+    // cancella eventuali ordini pendenti dell'EA
+    CancelMyPendings();
+    // chiudi la posizione se richiesto
+-   if(InpCloseAtEnd && SelectMyPosition())
+-     {
+-      gTrade.PositionClose(_Symbol);
+-      ABTGLog("fine sessione: posizione chiusa.");
+-     }
++   // TOPPA 19/09: per TICKET, non per simbolo. ChiudiMiePosizioni() ha gia'
++   // dentro la guardia (se non abbiamo niente non chiama niente) e chiude
++   // ENTRAMBE le nostre quando il whipsaw ha riempito tutti e due i lati.
++   if(InpCloseAtEnd)
++      ChiudiMiePosizioni("fine sessione");
+    gPhase = PH_DONE;
+   }
+ 
+@@ -1247,6 +1247,64 @@
+   }
+ 
+ bool HasOpenPosition() { return(SelectMyPosition()); }
++
++//+------------------------------------------------------------------+
++//| TOPPA HEDGE-SAFE (19/09/2026) -- chiude TUTTE e SOLE le NOSTRE    |
++//| posizioni, PER TICKET.                                            |
++//|                                                                   |
++//| IL DIFETTO CHE CURA:                                              |
++//|   gTrade.PositionClose(_Symbol), su conto HEDGING, chiude la      |
++//|   posizione PIU' VECCHIA del simbolo, DI CHIUNQUE SIA. La guardia |
++//|   SelectMyPosition() qui sopra era gia' hedge-safe: e' l'AZIONE   |
++//|   che non lo era. Il mezzo fix e' PEGGIO del bug intero, perche'  |
++//|   l'EA trova la PROPRIA posizione, decide di chiuderla, e chiude  |
++//|   quella DEL VICINO.                                              |
++//|                                                                   |
++//|   E non ne chiudeva UNA: le chiudeva A CATENA. I due punti di     |
++//|   chiamata girano a OGNI TICK (il controllo dell'ora sta PRIMA    |
++//|   dello switch e non ha guardia di stato). Finche' la NOSTRA      |
++//|   esiste, la guardia resta vera e la chiusura per simbolo         |
++//|   riparte: un vicino per tick, dal piu' vecchio in giu', finche'  |
++//|   la nostra non diventa la piu' vecchia.                          |
++//|                                                                   |
++//| PERCHE' I TICKET SI FOTOGRAFANO PRIMA E SI CHIUDONO DOPO:         |
++//|   un while(SelectMyPosition()) sarebbe un ciclo su una lettura    |
++//|   che il terminale aggiorna in modo ASINCRONO -> ciclo infinito   |
++//|   e doppia chiusura. La lista si legge UNA volta sola.            |
++//|   Stesso schema gia' in campo in ABTG_ORB_Ottimizzato v1.04       |
++//|   (ChiudiPosizioniMie): non c'e' niente da inventare.             |
++//|                                                                   |
++//| Se non abbiamo NIENTE non parte NESSUNA chiamata: la funzione     |
++//| resta muta invece di ritentare all'infinito.                      |
++//| Ritorna quante ne ha chiuse.                                      |
++//+------------------------------------------------------------------+
++int ChiudiMiePosizioni(const string motivo)
++  {
++   ulong miei[];
++   int   q = 0;
++   for(int _i = PositionsTotal()-1; _i >= 0; _i--)
++     {
++      ulong _tk = PositionGetTicket(_i);
++      if(_tk > 0 && PositionGetString(POSITION_SYMBOL) == _Symbol &&
++         PositionGetInteger(POSITION_MAGIC) == InpMagic)
++        { ArrayResize(miei, q+1); miei[q] = _tk; q++; }
++     }
++   int chiuse = 0;
++   for(int _k = 0; _k < q; _k++)
++     {
++      ResetLastError();
++      if(gTrade.PositionClose(miei[_k]))
++        {
++         chiuse++;
++         ABTGLog(StringFormat("%s: chiusa la posizione #%I64u.", motivo, miei[_k]));
++        }
++      else
++         ABTGLog(StringFormat("%s: PositionClose(#%I64u) FALLITA, retcode %u (%s), err=%d. Riprovo al prossimo tick.",
++                              motivo, miei[_k], gTrade.ResultRetcode(),
++                              gTrade.ResultRetcodeDescription(), GetLastError()));
++     }
++   return(chiuse);
++  }
+ 
+ //+------------------------------------------------------------------+
+ //| Spread accettabile?                                              |

@@ -24750,3 +24750,77 @@ NOTI e si chiede: "qual era la CONDIZIONE che lo teneva innocuo, e la sto toglie
   (`HandleOCO` agisce al tick **dopo** il riempimento). Il cap **C1 a 3,25%** e' **superato** nel
   caso peggiore, e su quel conto **non c'e' niente che lo faccia rispettare** (il binario non ha
   `InpUsaGuardian`, e sul piccolo nessun Guardian gira).
+
+---
+
+## CLASSE 442 — il costo di una toppa non e' la TOPPA: e' il DELTA fra HEAD e il BINARIO IN CAMPO (19/09/2026)
+
+**Il caso reale.** La toppa «chiusura per ticket» su `ABTG_Nasdaq_Apertura_US.mq5` e' **una
+riga di chiamata per sito**. Ma per metterla in campo bisogna **ricompilare**, e chi ricompila
+apre il file **a HEAD**. Misurato:
+
+| | |
+|---|---:|
+| binario in campo sul piccolo 50503392 | `3af47ed9` (08/08), v1.00, **2032 righe** |
+| HEAD del repo | v1.02, **2566 righe** |
+| commit in mezzo | **6**, fra cui `b5d904ab` **«WIP ... modifica in corso ... (build agente)»** |
+| input NUOVI a HEAD | **21**, fra cui `InpUsaGuardian = true` **acceso di default** |
+| input nei `.set` della sedia da schierare | **80**, verificati contro **`3af47ed9`** |
+
+👉 Ricompilare da HEAD **non spedisce la toppa: spedisce un EA diverso**, con 21 input che il
+`.set` non copre e che prendono il **default compilato**. La validazione walk-forward fatta sul
+binario vecchio **decade**, e nessuno se ne accorge perche' il file «si chiama uguale».
+
+### La regola
+🔴 **Prima di proporre una modifica a un EA, si stabilisce QUALE SORGENTE ha prodotto il
+BINARIO IN CAMPO — e la toppa si scrive CONTRO QUELLO, non contro HEAD.**
+- Si misura con `CODA_06_quale_codice_gira_*.log` (righe + data di compilazione **per cartella
+  dati**) e si aggancia al commit con `git show <rev>:<path> | wc -l`. 📐 L'offset di casa e'
+  **CODA_06 = `wc -l` + 1** (ultima riga senza `\n`): verificato su **4 file su 4**
+  (2032/2033, 2064/2065, 1379/1380, 1331/1332).
+- **Lo stesso `.mq5` puo' essere in campo in VINTAGE DIVERSI su terminali diversi**: si
+  ricompila **per cartella dati**, e i numeri di riga del sito cambiano ad ogni vintage. Un
+  diff senza il vintage accanto **non e' applicabile**.
+- 🚩 **Un `WIP` nel log fra il binario in campo e HEAD e' un cartello di STOP**, non un
+  dettaglio: vuol dire che HEAD non e' mai stato dichiarato buono da nessuno.
+- 📌 E la domanda va posta **anche quando la toppa e' un evidente miglioramento**: «migliora»
+  descrive la riga, **non** le altre 534 che viaggiano con lei.
+
+---
+
+## CLASSE 443 — la scrittura CIECA dentro una funzione richiamata A OGNI TICK non fa UN danno: lo fa A CATENA (19/09/2026, discendente della 441)
+
+**Il caso reale.** `gTrade.PositionClose(_Symbol)` su conto HEDGING chiude la posizione **piu'
+vecchia del simbolo, di chiunque sia**. L'audit del 03/09 lo descriveva come *«chiude quella
+del vicino»* — **al singolare**. E' peggio, e il codice lo dice:
+
+```mql5
+// ABTG_OnTick(): NESSUNA guardia di stato prima di questo controllo
+if(TimeInMinutes(now) >= InpCloseHour*60 + InpCloseMin) { EndOfSession(); return; }
+// EndOfSession():
+if(InpCloseAtEnd && SelectMyPosition()) { gTrade.PositionClose(_Symbol); ... }
+```
+
+👉 La guardia e' vera **finche' la NOSTRA esiste**. La chiusura colpisce la **piu' vecchia**.
+Quindi a ogni tick ne cade una: **un vicino per tick, dal piu' vecchio in giu', finche' la
+nostra non diventa la piu' vecchia.** Su `U30USD` del conto piccolo, dove `ABTG_Dow_Apertura_US
+770202` ha **7 vicini**, non e' un incidente: e' un **flatten di simbolo**.
+
+### La regola
+🔴 **Quando si valuta una scrittura cieca, la prima domanda non e' "chi colpisce", e'
+"QUANTE VOLTE viene richiamata prima che la condizione si spenga".**
+- Se il sito sta in una funzione **a ogni tick** e la guardia **non si spegne** con l'azione
+  sbagliata, il danno **non e' 1: e' il numero di VICINI**. Si conta il vicinato, non le
+  occorrenze nel codice.
+- 🔎 Il controllo concreto: **la guardia legge una cosa che l'azione NON cambia?** Qui la
+  guardia legge *«esiste una posizione MIA»*, l'azione chiude *«la piu' vecchia del SIMBOLO»*:
+  due insiemi diversi -> l'azione non fa progredire la guardia -> **ciclo**.
+- ⚖️ E vale anche per la CURA: la toppa non deve essere `while(guardia){ chiudi; }`, perche'
+  `PositionsTotal()` e' una lettura che il terminale aggiorna in modo **asincrono** rispetto al
+  ritorno di `PositionClose()` (ciclo infinito / doppia chiusura). **Si fotografano i ticket
+  UNA volta in un array, poi si cicla sull'array.** Schema gia' in campo:
+  `ABTG_ORB_Ottimizzato.mq5` rr. 988-1017.
+- 💯 **E il fatto che non sia mai successo non e' una difesa**: misurato su
+  `data/statements/trades_auto.csv`, la condizione che arma il difetto si presenta nel
+  **21,8% dei trade** (12 su 55), e l'EA preme il pulsante nel **5,5%** (3 su 55). Zero
+  incroci osservati e' **coerente col caso** (~0,65 eventi attesi), non una prova di sicurezza.
