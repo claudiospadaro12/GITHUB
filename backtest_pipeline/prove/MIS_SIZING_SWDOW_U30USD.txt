@@ -1,0 +1,135 @@
+# =====================================================================
+#  MISURA DEL DELTA LOTTI -- SuperWave DOW H1 su U30USD (sedia viva 770511)
+#  EA: ABTG_MIS_SIZING_SWDOW   (strumento di misura, NON una sedia)
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  Non misura PF, non misura DD, non misura frequenza. Misura UNA cosa:
+#
+#      DI QUANTI LOTTI cambia il volume piazzato, a parita' di segnale,
+#      passando dal sizing del binario IN CAMPO a quello del pin che
+#      stiamo per compilare.
+#
+#  Firma di Claudio (19/09/2026): "Misura prima, lancia la corsa nel
+#  tester". Referto: report/COMPILAZIONE_771531_770511_2026-09-19.md
+#
+#  SU QUESTA SEDIA I DELTA DI SIZING SONO **DUE**, e l'interruttore li
+#  muove INSIEME perche' insieme stanno nel binario che gira:
+#    (a) LotByRisk: tick value nudo -> OrderCalcProfit (3af47ed9, 08/08)
+#    (b) Enter: pavimento del lotto minimo DOPO il calcolo di lotPend
+#        -> PRIMA (872dba82, 08/09)
+#  Il (b) e' quello grosso: con l'ordine vecchio, se
+#  NormVol(totLot*InpFirstFraction) tornava 0, lotPend si prendeva TUTTO
+#  totLot e subito dopo lotMkt risorgeva a volMin -> volume totale
+#  totLot+volMin, cioe' FINO AL DOPPIO del rischio dichiarato.
+#
+#  LE DUE CELLE:
+#    InpSizingVecchio=false -> sizing del pin 872dba82
+#    InpSizingVecchio=true  -> sizing del binario 344a11b9 (in campo)
+#  Il binario .ex5 e' LO STESSO nelle due celle: il segnale e' identico
+#  per COSTRUZIONE. Se il numero di operazioni differisce fra le due
+#  celle, NON e' sizing: e' un DIFETTO, e va scritto tale.
+#
+#  PERCHE' LE CELLE NON SI CANCELLANO A VICENDA (classe 455):
+#  nello strumento di misura il nome del file per-trade porta dentro il
+#  ramo di sizing, il deposito e la data d'inizio. Col nome di casa
+#  (EA+simbolo+magic) la seconda cella cancellava la prima e la misura
+#  leggeva UNA gamba sola credendo di leggerne due.
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.06.30, MISURATA E NON SCELTA.
+#    U30USD ha inizio storico 2024.09.26 con stato COMPLETO
+#    (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md riga 46).
+#    NIENTE @FRAZIONEIS: vale il taglio di casa (0.40), e qui NON e' un
+#    walk-forward. IS e OOS sono DUE CAMPIONI DELLA STESSA
+#    CONFIGURAZIONE -- lo dice il driver stesso quando lo sweep non
+#    seleziona niente -- cioe' DUE REPLICHE INDIPENDENTI della stessa
+#    misura, su due finestre che non si sovrappongono. Costano le stesse
+#    barre di una tranche sola (40%+60% = la finestra intera) e danno il
+#    doppio delle prove. Se le due finestre dicono cose diverse, quello
+#    e' un dato, non un fastidio.
+#    (La prima stesura diceva '@FRAZIONEIS 1.0': l'avrei pagata con una
+#    gamba OOS DEGENERE a finestra vuota, che il driver stesso avvisa
+#    non descrivere niente.)
+#
+#  MAGIC 778412: cercato in tutto il repo il 19/09/2026 -> ZERO
+#  occorrenze. NON e' il magic della sedia viva (770511) di proposito.
+#
+#  IL DEPOSITO E' LA VARIABILE CHE DECIDE, e qui piu' che altrove: il
+#  difetto (b) scatta SOLO quando totLot*0.3333 arrotonda sotto il lotto
+#  minimo, cioe' SOLO a lotto piccolo. La corsa si fa DUE VOLTE, a
+#  100000 e a 10000 (lo passa la riga con -Deposito). A un deposito solo
+#  si rischia di certificare "nessuna differenza" proprio sul caso in
+#  cui non ce n'e' (classe 178).
+#
+#  >>> QUELLO CHE QUESTA MISURA NON PUO' DIRE, detto PRIMA:
+#      - NON dice se la sedia guadagna di piu' o di meno;
+#      - dopo la PRIMA operazione che differisce i due bilanci
+#        divergono, e il lotto si calcola sul bilancio: il confronto e'
+#        ESATTO solo sulla PRIMA operazione e CUMULATIVO sul resto.
+#        Le due letture si danno separate, mai mescolate;
+#      - il per-trade esporta i deal in USCITA: su questa sedia una
+#        posizione puo' chiudersi in PIU' deal (parziale TP1 al 50%),
+#        quindi il volume di una posizione e' la SOMMA dei suoi deal
+#        per position_id -- non il valore di una riga (classe 454);
+#      - la tranche a mercato e il pendente 2/3 sono DUE posizioni
+#        diverse: "volume del segnale" e' la somma delle due, e questa
+#        misura le tiene separate per position_id senza raggrupparle;
+#      - InpUsaGuardian e' pinnato a false per togliere una variabile;
+#      - l'EA ABTG_MIS_SIZING_SWDOW NON E' MAI STATO COMPILATO NE'
+#        GIRATO DA NESSUNO.
+#
+#  L'ORA E' SEMPRE ORA SERVER BCM (ora italiana - 1).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# ---------------------------------------------------------------------
+# L'UNICA COSA CHE SI MUOVE: il ramo di sizing. Due celle.
+# ---------------------------------------------------------------------
+InpSizingVecchio=0||0||1||1||Y
+
+# --- TUTTO IL RESTO PINNATO, sui valori della SEDIA VIVA 770511 ---
+# (mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set)
+InpTF=16385||16385||0||16385||N
+InpStMult=2.5||2.5||0||2.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseConfluence=0||0||0||0||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=1||1||0||1||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingAtr=0||0||0||0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpSLBufferAtr=0||0||0||0||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=1||1||0||1||N
+InpTP_RR=3.0||3.0||0||3.0||N
+InpTrailOnST=1||1||0||1||N
+InpExitOnFlip=1||1||0||1||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=0||0||0||0||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpUsaGuardian=0||0||0||0||N
+InpMagic=778412||778412||0||778412||N

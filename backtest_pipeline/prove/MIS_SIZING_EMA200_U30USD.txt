@@ -1,0 +1,133 @@
+# =====================================================================
+#  MISURA DEL DELTA LOTTI -- EMA200 su U30USD H1  (sedia viva 771531)
+#  EA: ABTG_MIS_SIZING_EMA200   (strumento di misura, NON una sedia)
+# ---------------------------------------------------------------------
+#  QUESTO NON E' UN ROUND E NON DA' NESSUN VERDETTO.
+#  Non misura PF, non misura DD, non misura frequenza. Misura UNA cosa:
+#
+#      DI QUANTI LOTTI cambia il volume piazzato, a parita' di segnale,
+#      passando dal sizing del binario IN CAMPO a quello del pin che
+#      stiamo per compilare.
+#
+#  Firma di Claudio (19/09/2026): "Misura prima, lancia la corsa nel
+#  tester". Referto del pacchetto: report/COMPILAZIONE_771531_770511_2026-09-19.md
+#
+#  LE DUE CELLE, e sono DUE e non quattro:
+#    InpSizingVecchio=false -> sizing del pin 26a18566 (OrderCalcProfit)
+#    InpSizingVecchio=true  -> sizing del binario 344a11b9 (tick value nudo)
+#  Tutto il resto e' PINNATO e identico. Il binario e' LO STESSO file
+#  .ex5 nelle due celle: il segnale e' identico per COSTRUZIONE, non
+#  per speranza. Se il numero di operazioni delle due celle differisce,
+#  NON e' una differenza di sizing: e' un DIFETTO, e va scritto tale.
+#
+#  PERCHE' LE CELLE NON SI CANCELLANO A VICENDA (classe 455):
+#  il file per-trade di casa si chiama abtg_trades_<EA>_<SIM>_<MAGIC>.csv
+#  e in una griglia ogni cella sovrascrive la precedente -- lo dichiara
+#  l'EA stesso nel commento di ExportTrades. Nello strumento di misura
+#  il nome porta dentro il ramo di sizing, il deposito e la data
+#  d'inizio: abtg_mis_<EA>_<SIM>_<MAGIC>_SIZ{OLD|NEW}_DEP<dep>_<data>.csv
+#  Collisione impossibile per COSTRUZIONE, non per attenzione.
+#
+#  LA FINESTRA: 2024.09.26 -> 2026.06.30, MISURATA E NON SCELTA.
+#    U30USD ha inizio storico 2024.09.26 con stato COMPLETO
+#    (risultati_archivio/REFERTO_SONDA_STORICO_17-08.md riga 46, la
+#    stessa fonte usata da SONDA_OROLOGIO_13_U30USD_LONG.txt).
+#    NIENTE @FRAZIONEIS: vale il taglio di casa (0.40), e qui NON e' un
+#    walk-forward. IS e OOS sono DUE CAMPIONI DELLA STESSA
+#    CONFIGURAZIONE -- lo dice il driver stesso quando lo sweep non
+#    seleziona niente -- cioe' DUE REPLICHE INDIPENDENTI della stessa
+#    misura, su due finestre che non si sovrappongono. Costano le stesse
+#    barre di una tranche sola (40%+60% = la finestra intera) e danno il
+#    doppio delle prove. Se le due finestre dicono cose diverse, quello
+#    e' un dato, non un fastidio.
+#    (La prima stesura diceva '@FRAZIONEIS 1.0': l'avrei pagata con una
+#    gamba OOS DEGENERE a finestra vuota, che il driver stesso avvisa
+#    non descrivere niente.)
+#
+#  MAGIC 778411: cercato in tutto il repo il 19/09/2026 -> ZERO
+#  occorrenze. NON e' il magic della sedia viva (771531) di proposito:
+#  questo EA non deve poter essere scambiato per lei in nessun referto.
+#
+#  IL DEPOSITO E' LA VARIABILE CHE DECIDE, e per questo la corsa si fa
+#  DUE VOLTE, a 100000 e a 10000 (lo passa la riga di lancio con
+#  -Deposito, non questo file). Il difetto del sizing si vede SOLO dove
+#  il lotto e' piccolo: misurare a un deposito solo vuol dire rischiare
+#  di certificare "nessuna differenza" proprio sul caso in cui non c'e'
+#  (classe 178 -- la banda provata contro il nulla invece che contro
+#  l'ipotesi alternativa).
+#
+#  >>> QUELLO CHE QUESTA MISURA NON PUO' DIRE, detto PRIMA:
+#      - NON dice se la sedia guadagna di piu' o di meno. Un volume
+#        diverso cambia il P/L per definizione: quel numero qui non e'
+#        un merito, e' un'aritmetica;
+#      - dopo la PRIMA operazione che differisce, i due bilanci
+#        divergono, e il lotto e' calcolato sul bilancio. Quindi il
+#        confronto e' ESATTO solo sulla PRIMA operazione (bilanci
+#        identici per costruzione) e CUMULATIVO su tutto il resto.
+#        Le due letture vanno date separate, mai mescolate;
+#      - NON dice niente sul Guardian: InpUsaGuardian e' pinnato a
+#        false proprio per togliere di mezzo una variabile. Nel tester
+#        sarebbe comunque fail-open (il canale non esiste), ma
+#        "comunque" non e' una misura;
+#      - l'EA ABTG_MIS_SIZING_EMA200 NON E' MAI STATO COMPILATO NE'
+#        GIRATO DA NESSUNO. Se MetaEditor si lamenta, quello e' il
+#        risultato e va riportato com'e'.
+#
+#  L'ORA E' SEMPRE ORA SERVER BCM (ora italiana - 1).
+# =====================================================================
+
+@SIMBOLO  U30USD
+@PERIODO  H1
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+# ---------------------------------------------------------------------
+# L'UNICA COSA CHE SI MUOVE: il ramo di sizing. Due celle.
+# ---------------------------------------------------------------------
+InpSizingVecchio=0||0||1||1||Y
+
+# --- TUTTO IL RESTO PINNATO, sui valori della SEDIA VIVA 771531 ---
+# (mql5/Presets/sedie_piccolo/recupero2/sedia_ABTG_EMA200_771531.set)
+# NB: i default COMPILATI non bastano -- InpTF nasce H4 e la sedia gira
+# H1, InpOrder1Atr nasce 0.10 e la sedia usa 0.2. Chi non pinna, misura
+# un'altra sedia.
+InpTF=16385||16385||0||16385||N
+InpEmaPeriod=200||200||0||200||N
+InpEma14Period=14||14||0||14||N
+InpAtrPeriod=14||14||0||14||N
+InpMinDistAtr=0.3||0.3||0||0.3||N
+InpMaxDistAtr=1.5||1.5||0||1.5||N
+InpUseEma14Bias=1||1||0||1||N
+InpAllowLong=1||1||0||1||N
+InpAllowShort=1||1||0||1||N
+InpUseAdrFilter=0||0||0||0||N
+InpAdrDays=50||50||0||50||N
+InpAdrDistMin=0.0||0.0||0||0.0||N
+InpAdrDistMax=0.8||0.8||0||0.8||N
+InpOrder1Atr=0.2||0.2||0||0.2||N
+InpOrder2Atr=0.3||0.3||0||0.3||N
+InpUseOrder2=1||1||0||1||N
+InpPendingExpiryBars=6||6||0||6||N
+InpSLatr=1.0||1.0||0||1.0||N
+InpMinRR=1.0||1.0||0||1.0||N
+InpTP_RR=2.0||2.0||0||2.0||N
+InpTP1_ATRmult=0.0||0.0||0||0.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=1||1||0||1||N
+InpUseTrailing=1||1||0||1||N
+InpUseCutoff=0||0||0||0||N
+InpCutoffHour=19||19||0||19||N
+InpCutoffMin=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseNewsFilter=0||0||0||0||N
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=60||60||0||60||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpFridayClose=0||0||0||0||N
+InpFridayCloseHour=20||20||0||20||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=1||1||0||1||N
+InpUsaGuardian=0||0||0||0||N
+InpMagic=778411||778411||0||778411||N

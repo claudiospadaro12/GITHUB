@@ -1,0 +1,710 @@
+//+------------------------------------------------------------------+
+//|                                   ABTG_MIS_SIZING_SWDOW.mq5       |
+//|                                                                   |
+//|  MARCATORE_MIS_SIZING_v1                                            |
+//|                                                                   |
+//|  STRUMENTO DI MISURA. NON E' UNA SEDIA, NON VA MAI SCHIERATO,     |
+//|  NON VA MAI ATTACCATO A UN GRAFICO DI UN CONTO VIVO.              |
+//|  Gira SOLO sul banco C:\MT5_Backtest (demo 50504400).             |
+//|                                                                   |
+//|  A COSA SERVE: misurare DI QUANTI LOTTI cambia il volume piazzato |
+//|  passando dal sizing del binario IN CAMPO (344a11b9) a quello del |
+//|  pin che stiamo per compilare (872dba82).                         |
+//|                                                                   |
+//|  SU QUESTA SEDIA I DELTA DI SIZING SONO **DUE**, e l'interruttore |
+//|  li muove INSIEME, perche' insieme stanno nel binario in campo:   |
+//|    (a) LotByRisk: tick value nudo -> OrderCalcProfit (3af47ed9);  |
+//|    (b) Enter: il pavimento del lotto minimo applicato DOPO il     |
+//|        calcolo di lotPend -> applicato PRIMA (872dba82).          |
+//|  Il (b) e' quello che puo' RADDOPPIARE il volume: con l'ordine    |
+//|  vecchio, se NormVol(totLot*InpFirstFraction) tornava 0, lotPend  |
+//|  si prendeva TUTTO totLot e subito dopo lotMkt risorgeva a        |
+//|  volMin -> volume totale totLot+volMin.                           |
+//|                                                                   |
+//|  COM'E' FATTO: e' il .mq5 al pin 872dba82 COPIATO SENZA TOCCARE   |
+//|  NIENTE, con quattro sole aggiunte: l'input InpSizingVecchio, i   |
+//|  due rami di sizing, e il nome del file per-trade che porta       |
+//|  dentro le variabili della corsa (classe 455).                    |
+//+------------------------------------------------------------------+
+//|                                                                  |
+//|  EA "SUPERTREND REVERSAL" - MT5 - VERSIONE TUTTO-IN-UNO         |
+//|  (metti in MQL5\Experts e compila con F7: niente cartelle)      |
+//|                                                                  |
+//|  Basato sul documento "Strategia SUPERTREND REVERSAL" (ABTG).   |
+//|  TF consigliati H4/D1/W1 (esempi anche H1).                     |
+//|                                                                  |
+//|  CUORE MECCANICO (automatizzato):                               |
+//|   - RIMBALZO: la candela tocca/viola il Supertrend(10,3.5) con  |
+//|     l'ombra e CHIUDE VICINO al livello (perdita di forza).      |
+//|   - CONFERMA: la candela successiva APRE "dentro" il Supertrend |
+//|     (sul lato del trend) e conferma la direzione.              |
+//|   - CONFLUENZA (richiesta): un livello tecnico vicino al        |
+//|     rimbalzo (qui: prossimita' a una EMA 14/89/100/200).       |
+//|   - INGRESSO frazionato: 1/3 a mercato + 2/3 pendente +/-20 pip.|
+//|   - SL dinamico su Supertrend / estremo recente.               |
+//|   - TP su RR (>=1:2); parziale al 1o target + stop in pari;    |
+//|     trailing su Supertrend / uscita su flip.                   |
+//|                                                                  |
+//|  NON automatizzato (discrezionale, come da documento):          |
+//|   Fibonacci/Multipivot/Larry Williams, Supply&Demand, timing    |
+//|   intra-candela, lettura del contesto. Restano all'occhio umano.|
+//|  DEMO. Nessun EA garantisce profitti.                          |
+//+------------------------------------------------------------------+
+#property copyright "Progetto EA Aperture Mercati"
+#property version   "1.01"
+#property description "SuperWave OTT - Dow (U30USD) H1 - PF 1.52 real-tick"
+#property strict
+
+#include <Trade/Trade.mqh>
+#include <ABTG_PausaGuardian.mqh>
+//--- GUARDIAN DEL CONTO -- firme B1 (pausa morbida giornaliera) e C1
+//    (cap sul rischio aperto simultaneo) del 18/08/2026.
+//    Verbale: report/FIRME_2026-08-18.md
+//    true  = prima di APRIRE chiede il via libera al guardiano del conto.
+//    false = comportamento identico a prima della migrazione.
+//    ATTENZIONE, il default true NON cambia niente da solo: se il
+//    Guardian non gira su questo conto -- e nel Strategy Tester, dove le
+//    sue GlobalVariable non esistono -- la guardia lascia passare tutto
+//    (fail-open totale). I backtest restano confrontabili con i vecchi.
+//    Non tocca MAI le posizioni gia' aperte, i parziali, i trailing e le
+//    uscite: blocca soltanto l'APERTURA di nuovo rischio.
+input bool InpUsaGuardian = true;  // Guardian: rispetta pausa giornaliera (B1) e cap rischio aperto (C1)
+CTrade gTrade;
+
+//==================================================================
+//  INPUT
+//==================================================================
+input group "=== Supertrend e timeframe ==="
+input ENUM_TIMEFRAMES InpTF   = PERIOD_H1;  // OTT SuperWave real-tick
+input double InpStMult        = 2.5;        // OTT SuperWave real-tick
+input int    InpStAtrPeriod   = 10;         // ATR del Supertrend (documento: 10)
+
+input group "=== Pattern rimbalzo ==="
+input double InpNearAtr       = 1.0;   // "chiude vicino": |chiusura - Supertrend| <= N*ATR
+input bool   InpRequireConfirmBody = true; // candela di conferma coerente (corpo in direzione)
+input bool   InpAllowLong     = true;
+input bool   InpAllowShort    = true;
+
+input group "=== Confluenza tecnica (richiesta dal documento) ==="
+input bool   InpUseConfluence = false; // (non usato in SuperWave: l'ingresso e' il cross)
+input int    InpEma1          = 14;    // EMA (primo target naturale)
+input int    InpEma2          = 89;
+input int    InpEma3          = 100;
+input int    InpEma4          = 200;
+input double InpConflAtr       = 1.5;  // "vicino a EMA": distanza <= N*ATR
+
+input group "=== Ingresso frazionato ==="
+input double InpFirstFraction = 0.3333; // quota a mercato (documento: 1/3)
+input bool   InpUsePending    = true;   // resto (2/3) su ordine pendente stop
+input double InpPendingPips    = 20;    // distanza del pendente dal 1o ingresso (documento: ~20 pip)
+input double InpPendingAtr    = 0;    // >0: distanza del pendente in ATR del TF operativo (IGNORA InpPendingPips). 0 = come prima
+input int    InpPendingExpiryBars = 3;  // scadenza del pendente in barre del TF operativo
+
+input group "=== Stop / target ==="
+input int    InpSLLookback    = 5;      // barre per il minimo/massimo recente dello SL
+input double InpSLBufferPips   = 3;     // buffer extra sullo SL, in pip
+input double InpSLBufferAtr   = 0;     // >0: buffer SL in ATR del TF operativo (IGNORA InpSLBufferPips). 0 = come prima
+input double InpTP1_R         = 1.0;    // 1o target in R -> parziale + stop in pari
+input double InpTP1Pct        = 50;     // % chiusa al 1o target
+input bool   InpBreakeven     = true;
+input double InpTP_RR         = 3.0;    // OTT SuperWave real-tick
+input bool   InpTrailOnST      = true;  // trailing dello stop sul Supertrend
+input bool   InpExitOnFlip     = true;  // esci se il Supertrend gira contro
+
+input group "=== Rischio ==="
+input double InpRiskPercent   = 1.0;    // rischio per trade in % (sull'intera size)
+input int    InpMaxTradesPerDay = 0;    // 0 = illimitato
+
+input group "=== Filtro orari (ORA SERVER; opzionale) ==="
+input bool   InpUseTimeWindow = false;
+input int    InpStartHour     = 0;
+input int    InpEndHour       = 24;
+
+input group "=== Filtro notizie (CSV in MQL5/Files) ==="
+input bool   InpUseNewsFilter = false;
+input string InpNewsFile      = "abtg_news.csv";
+input int    InpNewsMinImpact = 3;
+input int    InpNewsBeforeMin  = 30;
+input int    InpNewsAfterMin   = 30;
+input int    InpNewsShiftMinutes = 0;
+input string InpNewsCurrencies = "";
+
+input group "=== Generali ==="
+input string InpComment   = "SUPERWAVE DOW H1";
+input long   InpMagic     = 778412;   // VERGINE: strumento di misura, mai una sedia
+input int    InpMaxSpread = 0;
+input bool   InpVerbose   = true;
+
+//--- MARCATORE_MIS_SIZING_v1
+//--- STRUMENTO DI MISURA, NON UNA SEDIA. Vedi l'intestazione in cima.
+//    false = sizing NUOVO (pin 872dba82, quello che andrebbe in campo con l'F7)
+//    true  = sizing VECCHIO (binario 344a11b9, quello che gira ADESSO)
+//    Muove INSIEME i due delta (LotByRisk e ordine del pavimento in Enter):
+//    e' l'UNICA variabile della misura.
+input bool   InpSizingVecchio = false;  // true = riproduce il sizing del binario in campo
+
+//==================================================================
+//  STATO
+//==================================================================
+int  hAtr=INVALID_HANDLE, hE1=INVALID_HANDLE, hE2=INVALID_HANDLE, hE3=INVALID_HANDLE, hE4=INVALID_HANDLE;
+datetime gLastBar=0, gPendingBar=0;
+int  gDay=-1, gTradesToday=0;
+
+datetime gNewsTime[]; int gNewsImpact[]; string gNewsCcy[]; int gNewsCount=0;
+
+void Log(string m){ if(InpVerbose) Print("[SWDOW-MIS] ", m); }
+
+//--- MISURA: data del primo tick della corsa. Serve SOLO a rendere UNICO
+//    il nome del file per-trade; non entra in nessuna decisione.
+string gMisInizio="";
+
+//+------------------------------------------------------------------+
+double PipSize()
+  {
+   int d=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
+   return (d==3 || d==5) ? _Point*10.0 : _Point;
+  }
+
+int OnInit()
+  {
+   gMisInizio=TimeToString(TimeCurrent(),TIME_DATE);   // MISURA: solo per il nome del file
+   gTrade.SetExpertMagicNumber(InpMagic);
+   gTrade.SetTypeFillingBySymbol(_Symbol);
+   gTrade.SetDeviationInPoints(30);
+   hAtr = iATR(_Symbol,InpTF,InpStAtrPeriod);
+   hE1  = iMA(_Symbol,InpTF,InpEma1,0,MODE_EMA,PRICE_CLOSE);
+   hE2  = iMA(_Symbol,InpTF,InpEma2,0,MODE_EMA,PRICE_CLOSE);
+   hE3  = iMA(_Symbol,InpTF,InpEma3,0,MODE_EMA,PRICE_CLOSE);
+   hE4  = iMA(_Symbol,InpTF,InpEma4,0,MODE_EMA,PRICE_CLOSE);
+   if(hAtr==INVALID_HANDLE||hE1==INVALID_HANDLE||hE2==INVALID_HANDLE||hE3==INVALID_HANDLE||hE4==INVALID_HANDLE)
+     { Print("ERRORE: handle indicatori."); return(INIT_FAILED); }
+   if(InpUseNewsFilter) LoadNews();
+   Log(StringFormat("avviato su %s %s. Supertrend(%d,%.1f). 1 pip=%.5f",
+       _Symbol,EnumToString(InpTF),InpStAtrPeriod,InpStMult,PipSize()));
+   return(INIT_SUCCEEDED);
+  }
+
+void OnDeinit(const int reason)
+  {
+   int hs[5]={hAtr,hE1,hE2,hE3,hE4};
+   for(int i=0;i<5;i++) if(hs[i]!=INVALID_HANDLE) IndicatorRelease(hs[i]);
+  }
+
+//+------------------------------------------------------------------+
+void OnTick()
+  {
+   ManageAll();
+
+   datetime t=iTime(_Symbol,InpTF,0);
+   if(t==gLastBar) return;
+   gLastBar=t;
+
+   MqlDateTime now; TimeToStruct(TimeCurrent(),now);
+   if(now.day_of_year!=gDay){ gDay=now.day_of_year; gTradesToday=0; }
+
+   OnNewBar(now);
+  }
+
+//+------------------------------------------------------------------+
+void OnNewBar(MqlDateTime &now)
+  {
+   double dir[],line[];
+   if(!SupertrendSeries(5,dir,line)) return;
+
+   //--- uscita su flip (runner): chiude TUTTE le posizioni del magic
+   if(HasPosition())
+     {
+      int d1=(int)dir[1];
+      if(InpExitOnFlip && ((d1<0 && LongOpen())||(d1>0 && ShortOpen())))
+        { CloseAllPositions(); CancelPendings(); Log("Supertrend flip: uscita."); return; }
+      return;                       // con posizione aperta non cerco nuovi ingressi
+     }
+   if(HasPending()) return;         // pendente 2/3 gia' in attesa
+
+   //--- filtri generali
+   if(InpMaxTradesPerDay>0 && gTradesToday>=InpMaxTradesPerDay) return;
+   if(InpUseTimeWindow && (now.hour<InpStartHour || now.hour>=InpEndHour)) return;
+   if(InpUseNewsFilter && InNewsBlackout(TimeCurrent())) return;
+   if(!SpreadOK()) return;
+
+   //--- SEGNALE SuperWave: incrocio EMA14 x EMA200 sulla barra chiusa [1],
+   //    ACCETTATO solo se a favore del Supertrend (dir[1]).
+   double e14[2], e200[2];
+   if(CopyBuffer(hE1,0,1,2,e14)!=2)  return;   // hE1 = EMA InpEma1 (14)
+   if(CopyBuffer(hE4,0,1,2,e200)!=2) return;   // hE4 = EMA InpEma4 (200)
+   // e14[1]=barra1 (piu' recente chiusa), e14[0]=barra2 (precedente)
+   bool crossUp = (e14[0] <= e200[0]) && (e14[1] > e200[1]);
+   bool crossDn = (e14[0] >= e200[0]) && (e14[1] < e200[1]);
+   if(!crossUp && !crossDn) return;
+
+   int d1=(int)dir[1];
+   bool up = crossUp;
+   if(crossUp && d1<=0) return;   // cross rialzista ma Supertrend non concorda
+   if(crossDn && d1>=0) return;   // cross ribassista ma Supertrend non concorda
+   if(up && !InpAllowLong) return;
+   if(!up && !InpAllowShort) return;
+
+   double atr=AtrVal(); if(atr<=0) return;
+
+   Enter(up,line[1]);
+  }
+
+//+------------------------------------------------------------------+
+bool ConfluenceOK(double level,double atr)
+  {
+   double e[1];
+   int hs[4]={hE1,hE2,hE3,hE4};
+   for(int i=0;i<4;i++)
+      if(CopyBuffer(hs[i],0,1,1,e)==1 && MathAbs(level-e[0])<=InpConflAtr*atr) return(true);
+   return(false);
+  }
+
+//+------------------------------------------------------------------+
+//| Ingresso: 1/3 a mercato + 2/3 pendente stop +/-20 pip            |
+//+------------------------------------------------------------------+
+void Enter(bool isLong,double stLine)
+  {
+   double pip=PipSize();
+   //--- 17/08/2026: le distanze "in pip" sono INERTI sugli strumenti a 2 decimali.
+   //    PipSize() torna _Point quando digits!=3,5 -> su U30USD (digits=2) 20 pip = 0,20 punti.
+   //    L'ATR e' in unita' dello STRUMENTO e vale su forex e indici allo stesso modo.
+   double atrDist=AtrVal();
+   double ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK), bid=SymbolInfoDouble(_Symbol,SYMBOL_BID);
+   double entry=isLong?ask:bid;
+
+   //--- SL dinamico: Supertrend o estremo recente (il piu' protettivo), + buffer
+   double ext = isLong ? iLow(_Symbol,InpTF,iLowest(_Symbol,InpTF,MODE_LOW,InpSLLookback,1))
+                       : iHigh(_Symbol,InpTF,iHighest(_Symbol,InpTF,MODE_HIGH,InpSLLookback,1));
+   double buf = (InpSLBufferAtr>0 && atrDist>0) ? InpSLBufferAtr*atrDist : InpSLBufferPips*pip;
+   double sl = isLong ? MathMin(stLine,ext)-buf : MathMax(stLine,ext)+buf;
+   sl=NormalizePrice(sl);
+
+   double risk=isLong?(entry-sl):(sl-entry);
+   double minDist=MathMax(buf,(double)SymbolInfoInteger(_Symbol,SYMBOL_TRADE_STOPS_LEVEL)*_Point);
+   if(risk<minDist){ Log("SL troppo vicino: skip."); return; }
+
+   double tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR;
+   tp=NormalizePrice(tp);
+
+   double totLot=LotByRisk(risk);
+   if(totLot<=0){ Log("lotto nullo."); return; }
+
+   double lotMkt=NormVol(totLot*InpFirstFraction);
+   double lotPend=0;
+   if(InpSizingVecchio)
+     {
+      //--- RAMO VECCHIO (b): l'ORDINE di 344a11b9, copiato alla lettera.
+      //    lotPend si calcola PRIMA del pavimento: se lotMkt e' stato
+      //    azzerato da NormVol, lotPend si prende TUTTO totLot e subito
+      //    dopo lotMkt risorge a volMin -> totale totLot+volMin.
+      lotPend=NormVol(totLot-lotMkt);
+      if(lotMkt<=0) lotMkt=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+     }
+   else
+     {
+      //--- RAMO NUOVO: pavimento PRIMA, lotPend su cio' che resta davvero.
+      if(lotMkt<=0) lotMkt=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+      lotPend=NormVol(totLot-lotMkt);
+     }
+
+   //--- firme B1/C1: il guardiano del conto puo' fermare i NUOVI ingressi
+   if(!ABTG_GuardiaIngresso(InpUsaGuardian,"ABTG_SuperWave_DOW_H1_Ottimizzato")) return;
+   bool ok=isLong?gTrade.Buy(lotMkt,_Symbol,ask,sl,tp,InpComment+" L 1/3")
+                 :gTrade.Sell(lotMkt,_Symbol,bid,sl,tp,InpComment+" S 1/3");
+   if(!ok){ Log("apertura a mercato fallita: "+gTrade.ResultRetcodeDescription()); return; }
+   gTradesToday++;
+   Log(StringFormat("%s mercato %.2f lot @ %s SL %s TP %s",isLong?"LONG":"SHORT",lotMkt,
+       DoubleToString(entry,_Digits),DoubleToString(sl,_Digits),DoubleToString(tp,_Digits)));
+
+   //--- 2/3 su pendente stop nella direzione del trade
+   if(InpUsePending && lotPend>0)
+     {
+      double off = (InpPendingAtr>0 && atrDist>0) ? InpPendingAtr*atrDist : InpPendingPips*pip;
+      double px = isLong ? NormalizePrice(entry+off) : NormalizePrice(entry-off);
+      double tpP= isLong ? NormalizePrice(px+risk*InpTP_RR) : NormalizePrice(px-risk*InpTP_RR);
+      datetime exp=TimeCurrent()+InpPendingExpiryBars*PeriodSeconds(InpTF);
+      bool okp=isLong?gTrade.BuyStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,InpComment+" L 2/3")
+                     :gTrade.SellStop(lotPend,px,_Symbol,sl,tpP,ORDER_TIME_SPECIFIED,exp,InpComment+" S 2/3");
+      if(okp){ gPendingBar=iTime(_Symbol,InpTF,0); Log(StringFormat("pendente 2/3 %.2f lot @ %s",lotPend,DoubleToString(px,_Digits))); }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Gestione di TUTTE le posizioni del magic (netting o hedging):    |
+//| parziale a 1R + stop in pari, poi trailing sul Supertrend.       |
+//| "Parziale gia' fatto" e' dedotto dallo SL gia' in pari (nessuno  |
+//| stato globale, robusto anche con piu' posizioni contemporanee).  |
+//+------------------------------------------------------------------+
+void ManageAll()
+  {
+   double bid=SymbolInfoDouble(_Symbol,SYMBOL_BID), ask=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+   double stLine=0; bool haveST=false;
+   double dir[],line[];
+   if(InpTrailOnST && SupertrendSeries(3,dir,line)){ stLine=NormalizePrice(line[1]); haveST=true; }
+
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol) continue;
+      if(PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+
+      bool isLong=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
+      double openP=PositionGetDouble(POSITION_PRICE_OPEN);
+      double sl=PositionGetDouble(POSITION_SL);
+      double tp=PositionGetDouble(POSITION_TP);
+      double vol=PositionGetDouble(POSITION_VOLUME);
+
+      // parziale a 1R (solo se lo SL non e' ancora in pari)
+      bool beDone = isLong ? (sl>=openP) : (sl<=openP && sl>0);
+      double risk = isLong ? (openP-sl) : (sl-openP);
+      if(!beDone && risk>0 && InpTP1_R>0 && InpTP1Pct>0 && InpTP1Pct<100)
+        {
+         double tgt=isLong?openP+risk*InpTP1_R:openP-risk*InpTP1_R;
+         bool hit=isLong?(bid>=tgt):(ask<=tgt);
+         if(hit)
+           {
+            double cv=NormVol(vol*InpTP1Pct/100.0);
+            // Lo STOP IN PARI non deve dipendere dalla riuscita del parziale.
+            // Al LOTTO MINIMO NormVol(vol*50%) arrotonda a 0: il parziale non
+            // parte mai e, prima del 04/08/2026, con lui saltava anche il
+            // breakeven. Misurato: due short oro a 0,01 lotti hanno toccato
+            // 1,28R di profitto con lo stop ancora all'originale, e sono
+            // tornati in perdita (-112,78 EUR di oscillazione).
+            bool parz = (cv>0 && cv<vol && gTrade.PositionClosePartial(tk,cv));
+            if(InpBreakeven) gTrade.PositionModify(tk,NormalizePrice(openP),tp);
+            Log(parz ? "1o target (1R): parziale + stop in pari."
+                     : "1o target (1R): stop in pari (parziale impossibile al lotto minimo).");
+           }
+        }
+
+      // trailing sul Supertrend
+      if(haveST)
+        {
+         double slNow=PositionGetDouble(POSITION_SL);
+         if(isLong && stLine>slNow && stLine<bid) gTrade.PositionModify(tk,stLine,PositionGetDouble(POSITION_TP));
+         if(!isLong && (stLine<slNow||slNow==0) && stLine>ask) gTrade.PositionModify(tk,stLine,PositionGetDouble(POSITION_TP));
+        }
+     }
+  }
+
+//+------------------------------------------------------------------+
+//| Supertrend (series): dir (+1/-1) e linea, per barra chiusa idx1  |
+//+------------------------------------------------------------------+
+bool SupertrendSeries(int count,double &dirOut[],double &lineOut[])
+  {
+   int need=InpStAtrPeriod+count+220;
+   MqlRates r[]; ArraySetAsSeries(r,true);
+   int copied=CopyRates(_Symbol,InpTF,0,need,r);
+   if(copied<InpStAtrPeriod+count+5) return(false);
+   double atr[]; ArraySetAsSeries(atr,true);
+   if(CopyBuffer(hAtr,0,0,copied,atr)<copied) return(false);
+
+   ArrayResize(dirOut,copied); ArrayResize(lineOut,copied);
+   ArraySetAsSeries(dirOut,true); ArraySetAsSeries(lineOut,true);
+
+   double finalUpper=0, finalLower=0; int dir=+1;
+   for(int i=copied-2;i>=0;i--)
+     {
+      double hl2=(r[i].high+r[i].low)/2.0;
+      double bUp=hl2+InpStMult*atr[i], bLo=hl2-InpStMult*atr[i];
+      double prevFU=(finalUpper==0)?bUp:finalUpper;
+      double prevFL=(finalLower==0)?bLo:finalLower;
+      double pc=r[i+1].close;
+      double fU=(bUp<prevFU||pc>prevFU)?bUp:prevFU;
+      double fL=(bLo>prevFL||pc<prevFL)?bLo:prevFL;
+      if(r[i].close > (dir==-1?prevFU:fU))      dir=+1;
+      else if(r[i].close < (dir==+1?prevFL:fL)) dir=-1;
+      finalUpper=fU; finalLower=fL;
+      dirOut[i]=dir;
+      lineOut[i]=(dir>0)?fL:fU;
+     }
+   return(true);
+  }
+
+//==================================================================
+//  UTILITY
+//==================================================================
+double AtrVal(){ double a[1]; if(CopyBuffer(hAtr,0,1,1,a)<1) return(0); return(a[0]); }
+
+double NormalizePrice(double price)
+  {
+   double ts=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+   int dg=(int)SymbolInfoInteger(_Symbol,SYMBOL_DIGITS);
+   if(ts<=0) return(NormalizeDouble(price,dg));
+   return(NormalizeDouble(MathRound(price/ts)*ts,dg));
+  }
+
+double LotByRisk(double slDist)
+  {
+   if(slDist<=0) return(0);
+   double risk=AccountInfoDouble(ACCOUNT_BALANCE)*InpRiskPercent/100.0;
+   //  08/08/2026 -- PERDITA PER LOTTO DAL BROKER, NON DAL TICK VALUE NUDO.
+   //  Su 225JPY il tick value arriva non convertito in valuta conto: il lotto
+   //  usciva ~0 e finiva SEMPRE al minimo (round 2: a deposito 100k profitti
+   //  identici al 10k, DD 0,01%). OrderCalcProfit converte correttamente; il
+   //  tick value resta come ripiego. Sui simboli sani i due calcoli coincidono:
+   //  il comportamento cambia SOLO dove il tick value mente.
+   double lossPerLot=0;
+   if(InpSizingVecchio)
+     {
+      //--- RAMO VECCHIO (a): copia ALLA LETTERA del calcolo di 344a11b9.
+      double tvV=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
+      double tszV=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+      if(tvV<=0||tszV<=0) return(0);
+      lossPerLot=(slDist/tszV)*tvV;
+     }
+   else
+     {
+      double pxCalc=SymbolInfoDouble(_Symbol,SYMBOL_ASK);
+      double profCalc=0;
+      if(pxCalc>slDist && OrderCalcProfit(ORDER_TYPE_BUY,_Symbol,1.0,pxCalc,pxCalc-slDist,profCalc) && profCalc<0)
+         lossPerLot=-profCalc;
+      if(lossPerLot<=0)
+        {
+         double tv=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_VALUE);
+         double tsz=SymbolInfoDouble(_Symbol,SYMBOL_TRADE_TICK_SIZE);
+         if(tv<=0||tsz<=0) return(0);
+         lossPerLot=(slDist/tsz)*tv;
+        }
+     }
+   if(lossPerLot<=0) return(0);
+   double lot=risk/lossPerLot;
+   double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   double mx=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MAX);
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP); if(st<=0) st=0.01;
+   lot=MathFloor(lot/st)*st;
+   return(MathMax(mn,MathMin(mx,lot)));
+  }
+
+double NormVol(double v)
+  {
+   double st=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_STEP);
+   double mn=SymbolInfoDouble(_Symbol,SYMBOL_VOLUME_MIN);
+   if(st<=0) st=0.01;
+   v=MathFloor(v/st)*st;
+   return(v<mn?0:v);
+  }
+
+bool SpreadOK(){ if(InpMaxSpread<=0) return(true); return(SymbolInfoInteger(_Symbol,SYMBOL_SPREAD)<=InpMaxSpread); }
+
+//--- posizioni del magic (compatibile netting e hedging)
+bool HasPosition()
+  {
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)==_Symbol && PositionGetInteger(POSITION_MAGIC)==InpMagic) return(true);
+     }
+   return(false);
+  }
+
+bool DirOpen(bool wantLong)
+  {
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol || PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      bool isLong=(PositionGetInteger(POSITION_TYPE)==POSITION_TYPE_BUY);
+      if(isLong==wantLong) return(true);
+     }
+   return(false);
+  }
+bool LongOpen(){ return(DirOpen(true)); }
+bool ShortOpen(){ return(DirOpen(false)); }
+
+void CloseAllPositions()
+  {
+   for(int i=PositionsTotal()-1;i>=0;i--)
+     {
+      ulong tk=PositionGetTicket(i);
+      if(tk==0) continue;
+      if(PositionGetString(POSITION_SYMBOL)!=_Symbol || PositionGetInteger(POSITION_MAGIC)!=InpMagic) continue;
+      gTrade.PositionClose(tk);
+     }
+  }
+
+bool HasPending()
+  {
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong t=OrderGetTicket(i);
+      if(t==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)==_Symbol && OrderGetInteger(ORDER_MAGIC)==InpMagic) return(true);
+     }
+   return(false);
+  }
+
+void CancelPendings()
+  {
+   for(int i=OrdersTotal()-1;i>=0;i--)
+     {
+      ulong t=OrderGetTicket(i);
+      if(t==0) continue;
+      if(OrderGetString(ORDER_SYMBOL)!=_Symbol) continue;
+      if(OrderGetInteger(ORDER_MAGIC)!=InpMagic) continue;
+      gTrade.OrderDelete(t);
+     }
+  }
+
+//==================================================================
+//  FILTRO NOTIZIE (CSV in MQL5/Files)
+//==================================================================
+void LoadNews()
+  {
+   gNewsCount=0; ArrayResize(gNewsTime,0); ArrayResize(gNewsImpact,0); ArrayResize(gNewsCcy,0);
+   int h=FileOpen(InpNewsFile,FILE_READ|FILE_CSV|FILE_ANSI,';');
+   if(h==INVALID_HANDLE){ Log("file news non trovato: filtro di fatto spento."); return; }
+   while(!FileIsEnding(h))
+     {
+      string sTime=FileReadString(h);
+      if(FileIsLineEnding(h)&&StringLen(sTime)==0) continue;
+      string sImp=FileIsLineEnding(h)?"":FileReadString(h);
+      string sCcy=FileIsLineEnding(h)?"":FileReadString(h);
+      while(!FileIsLineEnding(h)&&!FileIsEnding(h)) FileReadString(h);
+      datetime t=StringToTime(sTime);
+      if(t<=0) continue;
+      t+=InpNewsShiftMinutes*60;
+      int imp=ImpactToInt(sImp);
+      int n=gNewsCount;
+      ArrayResize(gNewsTime,n+1); ArrayResize(gNewsImpact,n+1); ArrayResize(gNewsCcy,n+1);
+      gNewsTime[n]=t; gNewsImpact[n]=imp; gNewsCcy[n]=sCcy; gNewsCount=n+1;
+     }
+   FileClose(h);
+   Log(StringFormat("news caricate: %d.",gNewsCount));
+  }
+
+int ImpactToInt(string s)
+  {
+   string u=s; StringToUpper(u); StringTrimLeft(u); StringTrimRight(u);
+   if(StringFind(u,"HIGH")>=0||u=="3") return(3);
+   if(StringFind(u,"MED") >=0||u=="2") return(2);
+   if(StringFind(u,"LOW") >=0||u=="1") return(1);
+   return(0);
+  }
+
+bool InNewsBlackout(datetime now)
+  {
+   if(!InpUseNewsFilter||gNewsCount==0) return(false);
+   bool filt=(StringLen(InpNewsCurrencies)>0);
+   for(int i=0;i<gNewsCount;i++)
+     {
+      if(gNewsImpact[i]<InpNewsMinImpact) continue;
+      if(filt && StringFind(InpNewsCurrencies,gNewsCcy[i])<0) continue;
+      if(now>=gNewsTime[i]-InpNewsBeforeMin*60 && now<=gNewsTime[i]+InpNewsAfterMin*60) return(true);
+     }
+   return(false);
+  }
+//+------------------------------------------------------------------+
+
+//==================================================================//
+//  OPTFRAME (inlined, self-contained) - export automatico dei      //
+//  risultati di OTTIMIZZAZIONE in CSV.  NON richiede include.       //
+//  Scrive MQL5\Files\OptResults_<EA>_<Symbol>.csv, leggibile da:    //
+//      python optimizer/batch_analyze.py <cartella>                 //
+//  In live/backtest singolo e inerte (gira solo in ottimizzazione).//
+//==================================================================//
+#define OPTFRAME_NAME "OptFrame"
+#define OPTFRAME_ID   1
+
+string OptFrame_FileName()
+  {
+   return StringFormat("OptResults_%s_%s.csv", MQLInfoString(MQL_PROGRAM_NAME), _Symbol);
+  }
+
+//+------------------------------------------------------------------+
+//| EXPORT PER-TRADE (09/08/2026) - serve al DD di PORTAFOGLIO.       |
+//| A fine test scrive nella cartella COMUNE (Files comuni) un CSV    |
+//| con una riga per ogni trade CHIUSO (ora di chiusura e netto):     |
+//| con le serie di piu' EA si calcolano DD combinato e Monte Carlo   |
+//| (backtest_pipeline/dd_portafoglio.py). Solo tester. In            |
+//| ottimizzazione ogni pass sovrascrive il file del proprio magic:   |
+//| usarlo su run singoli / magic-sweep, non sulle griglie larghe.    |
+//+------------------------------------------------------------------+
+void ExportTrades()
+  {
+   if(!HistorySelect(0,TimeCurrent())) return;
+   //--- MISURA (classe 455): il nome porta dentro TUTTE le variabili della
+   //    corsa -- ramo di sizing, deposito iniziale, data d inizio -- percio'
+   //    due celle della stessa griglia NON possono scrivere lo stesso file.
+   string fn="abtg_mis_"+MQLInfoString(MQL_PROGRAM_NAME)+"_"+_Symbol+"_"
+             +IntegerToString((long)InpMagic)+"_"
+             +(InpSizingVecchio?"SIZOLD":"SIZNEW")+"_DEP"
+             +IntegerToString((long)TesterStatistics(STAT_INITIAL_DEPOSIT))+"_"
+             +gMisInizio+".csv";
+   int h=FileOpen(fn,FILE_WRITE|FILE_CSV|FILE_ANSI|FILE_COMMON,';');
+   if(h==INVALID_HANDLE) return;
+   FileWrite(h,"close_time","symbol","magic","position_id","deal_type","volume","price","net_profit");
+   int n=HistoryDealsTotal();
+   for(int i=0;i<n;i++)
+     {
+      ulong tk=HistoryDealGetTicket(i);
+      if(tk==0) continue;
+      long entry=HistoryDealGetInteger(tk,DEAL_ENTRY);
+      if(entry!=DEAL_ENTRY_OUT && entry!=DEAL_ENTRY_OUT_BY) continue;
+      double net=HistoryDealGetDouble(tk,DEAL_PROFIT)+HistoryDealGetDouble(tk,DEAL_SWAP)+HistoryDealGetDouble(tk,DEAL_COMMISSION);
+      FileWrite(h,
+                TimeToString((datetime)HistoryDealGetInteger(tk,DEAL_TIME),TIME_DATE|TIME_MINUTES|TIME_SECONDS),
+                HistoryDealGetString(tk,DEAL_SYMBOL),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_MAGIC)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_POSITION_ID)),
+                IntegerToString(HistoryDealGetInteger(tk,DEAL_TYPE)),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_VOLUME),2),
+                DoubleToString(HistoryDealGetDouble(tk,DEAL_PRICE),_Digits),
+                DoubleToString(net,2));
+     }
+   FileClose(h);
+   PrintFormat("[SWDOW-MIS] ramo=%s deposito=%.2f file=%s",
+               (InpSizingVecchio?"SIZOLD":"SIZNEW"),
+               TesterStatistics(STAT_INITIAL_DEPOSIT), fn);
+  }
+double OnTester()
+  {
+   ExportTrades();   // per-trade per il DD di portafoglio (ROTTA_PROP punto 4)
+   double stats[7];
+   stats[0] = TesterStatistics(STAT_PROFIT);
+   stats[1] = TesterStatistics(STAT_EXPECTED_PAYOFF);
+   stats[2] = TesterStatistics(STAT_PROFIT_FACTOR);
+   stats[3] = TesterStatistics(STAT_RECOVERY_FACTOR);
+   stats[4] = TesterStatistics(STAT_SHARPE_RATIO);
+   stats[5] = TesterStatistics(STAT_EQUITY_DDREL_PERCENT);
+   stats[6] = TesterStatistics(STAT_TRADES);
+   double criterion = stats[3];              // ottimizza per Recovery Factor (robusto)
+   FrameAdd(OPTFRAME_NAME, OPTFRAME_ID, criterion, stats);
+   return(criterion);
+  }
+
+int OnTesterInit() { return(INIT_SUCCEEDED); }
+
+void OnTesterDeinit()
+  {
+   string fname = OptFrame_FileName();
+   int h = FileOpen(fname, FILE_WRITE | FILE_CSV | FILE_ANSI, ",");
+   if(h == INVALID_HANDLE)
+     { PrintFormat("OptFrame: impossibile creare %s (err %d)", fname, GetLastError()); return; }
+   FrameFilter(OPTFRAME_NAME, OPTFRAME_ID);
+   ulong pass; string name; long id; double value; double data[];
+   bool header_scritto = false; int righe = 0;
+   while(FrameNext(pass, name, id, value, data))
+     {
+      string params[]; uint pcount = 0;
+      FrameInputs(pass, params, pcount);
+      if(!header_scritto)
+        {
+         string head = "Pass,Profit,Expected Payoff,Profit Factor,Recovery Factor,Sharpe Ratio,Equity DD %,Trades";
+         for(uint i = 0; i < pcount; i++)
+           { string kv[]; if(StringSplit(params[i], '=', kv) == 2) head += "," + kv[0]; }
+         FileWrite(h, head); header_scritto = true;
+        }
+      string row = StringFormat("%d,%.2f,%.5f,%.5f,%.5f,%.5f,%.4f,%.0f",
+                                (int)pass, data[0], data[1], data[2], data[3], data[4], data[5], data[6]);
+      for(uint i = 0; i < pcount; i++)
+        { string kv[]; if(StringSplit(params[i], '=', kv) == 2) row += "," + kv[1]; }
+      FileWrite(h, row); righe++;
+     }
+   FileClose(h);
+   PrintFormat("OptFrame: scritte %d passate in MQL5\\Files\\%s", righe, fname);
+  }
+//================== fine OPTFRAME inlined ==========================//
