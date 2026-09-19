@@ -11,6 +11,39 @@
 #  NON LANCIARE senza la firma di Claudio: il perimetro del runner e'
 #  SOLA LETTURA.
 #
+#  ###  IL DEPOSITO -- STA NELLA RIGA, NON IN QUESTO FILE, E PERCIO' VA SCRITTO QUI  ###
+#  Si lancia con: -Deposito 100000
+#
+#  CLASSE 453 (19/09/2026). RIGA_ROUND_VPS.ps1 r.94 ha [int]$Deposito = 10000:
+#  chi non lo scrive prende 10.000 in silenzio. E un pacchetto di round NON
+#  eredita un deposito: si dichiara round per round, anche quando coincide.
+#
+#  MOTIVO -- e qui NON c'e' un'ancora da riprodurre, quindi il deposito si
+#  SCEGLIE e si motiva con un MECCANISMO, non con l'abitudine:
+#    (a) CONFRONTABILITA'. Questa cella esiste per essere letta CONTRO la
+#        sessione EU delle 08:00 sullo STESSO simbolo (cella 'ptd', sedia
+#        770101), che e' girata a 100.000 (prove/R16d_pertrade_DAX.txt r.3,
+#        report/DIARIO.md 2026-08-09, report/SETACCIO_ARCHIVIO_2026-09-12.md
+#        r.300). L'attesa scritta qui sotto -- "banda 120-300 deal per
+#        finestra, stessa scala della sessione EU" -- e' un confronto: a
+#        taglia diversa non si puo' fare.
+#    (b) IL MECCANISMO CHE LO RENDE NON-NEUTRO, ed e' MISURATO su questo
+#        stesso EA e simbolo: alla taglia grande il DAX fa 270 deal contro
+#        256 alla taglia piccola, perche' "al lotto grande piu' parziali
+#        riescono a eseguire" (report/DIARIO.md, voce 2026-08-09). Il
+#        deposito non scala solo i numeri: decide QUANTI PARZIALI ESISTONO,
+#        cioe' quale gestione dell'uscita viene davvero misurata.
+#        Su questa cella il TP1 e' al 50% (InpTP1_ClosePct=50): a 100.000 il
+#        parziale non puo' cadere sotto il lotto minimo, a 10.000 e' un
+#        [NON MISURATO] che non ho motivo di comprare.
+#    (c) E' anche la taglia della challenge prop, che e' il bersaglio del
+#        1 ottobre.
+#
+#  >>> CIO' CHE QUESTA SCELTA **NON** GARANTISCE, dichiarato: il numero di
+#      operazioni di QUESTA cella a 10.000 non e' stato misurato, quindi non
+#      so di quanto cambierebbe. So che cambierebbe, ed e' il motivo per cui
+#      il deposito sta scritto e non lasciato al default.
+#
 #  ###  PERCHE' QUESTO FILE E' SEPARATO DA R192a  ###
 #  R192a sposta UNA sola manopola (InpSessionHour 8->13) e tiene
 #  l'ancora dell'ora 8 dentro il round. Non puo' arrivare all'apertura

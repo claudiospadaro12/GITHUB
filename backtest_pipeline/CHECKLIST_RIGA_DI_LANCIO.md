@@ -25851,3 +25851,79 @@ sull'ORDINAMENTO dichiarato.** Tre modi, in ordine di robustezza:
 
 📌 Famiglia della **456** (il righello dichiarato prima del numero): **strumenti di casa che
 stampano una cosa diversa da quella che il loro titolo promette.**
+
+---
+
+## CLASSE 467 — 📝🤖 UNA REGOLA CHE PRESCRIVE «IL NUMERO SI SCRIVE DUE VOLTE E LE DUE SCRITTURE SI CONFRONTANO» **SENZA CHE NESSUNO STRUMENTO FACCIA IL CONFRONTO**: dura un giorno, ed è misurato — la **453** è stata scritta e violata il **19/09** (controllo-preventivo, 19/09/2026, figlia della **453** e della **457**)
+
+**Il caso, e la data è la prova.** La mattina del 19/09 nasce la **CLASSE 453**: i file prova di
+`R190a/b/c` non nominano il `-Deposito`, che sta **solo** nella riga (`RIGA_ROUND_VPS.ps1` r.94 →
+`[int]$Deposito = 10000`), e su questa famiglia il deposito cambia il numero di operazioni del
+**+40%** (classe **366**). La regola scritta quel giorno è esplicita:
+
+> *«Ogni file prova porta in testa la riga `#  Si lancia con: -Deposito <N>   (motivo: <...>)`»* …
+> *«il numero si scrive **due volte, in due posti diversi**, e le due scritture **si confrontano
+> prima di partire**»*.
+
+🔴 **Poche ore dopo, lo stesso giorno, `R192a` e `R192b` arrivano al cancello senza la riga del
+deposito.** Nessuno dei due file la contiene — verificato col grep: `0 occorrenze` di `Deposit` in
+tutti e due. Il deposito corretto (**100000**) esisteva in **tre** fonti scritte
+(`prove/R16d_pertrade_DAX.txt` r.3 · `report/DIARIO.md` voce 09/08 · `report/SETACCIO_ARCHIVIO_2026-09-12.md`
+r.300) e nella riga era **giusto per inferenza**, non per lettura.
+
+### 🔬 La causa, e non è la distrazione dell'autore
+La **453** prescrive un **confronto**. Ma nel 19/09 **nessuno strumento sa confrontare**:
+
+| strumento | legge il `-Deposito` della riga? | legge quello del file prova? |
+|---|---|---|
+| `controlla_riga.py` | ❌ no | ❌ no |
+| `controlla_prova.py` | ❌ no | ❌ no (le righe `#` le salta) |
+| `RIGA_ROUND_VPS.ps1` | ✅ è un suo `param()` | ❌ **non apre mai il file prova per quello** |
+| `walkforward_generico.ps1` | ✅ lo riceve | ❌ no |
+
+👉 **La difesa della 453 era interamente PROSA.** Ed è esattamente il meccanismo che la **457**
+aveva nominato dodici ore prima: *«una lezione che resta prosa è una lezione che si ripaga»*.
+Qui il conto è arrivato **lo stesso giorno**, **dallo stesso autore**, sul **round successivo**.
+
+### 🧪 Il contro-esempio che chiude il caso (e che vale come metodo, non solo come aneddoto)
+Il `Profit` di un CSV **dice il deposito**, e su un motore a rischio percentuale lo dice in modo
+**decidibile**, non a naso:
+- il rischio è `InpRiskPercent=1` → **1R = 1% del saldo del momento**, quindi la curva scala col
+  deposito e **PF e DD% non cambiano**: a discriminare resta solo la **percentuale di rendimento**;
+- `ptd` OOS: `Profit 18.029,58` · `PF 1,39709` · **193 posizioni** (per-trade `770115`);
+- **a 10.000** sarebbe **+180,3%** → `ln(2,803)/0,01` = **103,1 R** netti → perdita **lorda**
+  `103,1/0,39709` = **259,6 R**. Ma ogni posizione perde **al massimo 1 R** (è lo stop), quindi il
+  tetto assoluto della perdita lorda è **193 R**. 🔴 **259,6 > 193 → ARITMETICAMENTE IMPOSSIBILE.**
+- **a 100.000** è **+18,0%** → **16,55 R** netti → perdita lorda **41,7 R** su 193 posizioni =
+  **0,22 R** medi: il profilo di un motore con parziale a 1R e stop portato in pari. ✅
+
+> 🟢 **Questo è il contro-esempio nel senso di `CLAUDE.md`**: non dice *«18% sembra più sensato di
+> 180%»* (che è un'impressione), dice **quale numero produce l'altra ipotesi e perché quel numero
+> non può esistere**. Un'ipotesi che si **esclude** vale più di una che si preferisce.
+
+### 🔴 La regola
+**Quando si scrive una classe che prescrive un CONFRONTO, nella stessa consegna si consegna anche
+CHI lo fa.** Se il confronto resta a carico di un umano che rilegge, la classe non è una rete: è un
+promemoria, e i promemoria si ripagano.
+- ✅ **Fatto subito, dentro la riga di R192**: un **pre-volo** che scarica i due file prova **dal
+  pin**, ne estrae `Si lancia con: -Deposito (\d+)` e lo confronta con quello che la riga sta per
+  passare. Se **manca** → non parte. Se **discorda** → non parte. Se **combacia** → lo stampa in
+  verde. Costa un download già fatto comunque dal driver e **non introduce nessun modo nuovo di
+  fallire**: la sua uscita peggiore è *«non parto»*.
+- 🔧 **Il rimedio vero, da fare con calma**: `controlla_prova.py` pretende la riga
+  `Si lancia con: -Deposito <N>` in ogni file prova (è un campo di identità della cella come
+  `@FINOA` e `@FRAZIONEIS`), e `controlla_riga.py` confronta il `-Deposito` della riga con quello
+  del file prova che la riga nomina. Finché non ci sono, il pre-volo nella riga è l'unica prova.
+- ⚠️ **E la guardia NON si appoggia a `throw`.** Le guardie di testa delle nostre righe
+  (`if(-not (Test-Path $p)){ throw ... }`) valgono **solo se** la console tratta il blocco incollato
+  come **un unico** elenco di istruzioni. 🟠 **[NON MISURATO]**: non ho potuto provarlo su Windows
+  PowerShell 5.1, e il comportamento dipende da PSReadLine e da come arriva l'incollato. La riga
+  corretta usa una **variabile di stato** (`$vai`) e racchiude l'esecuzione in `if($vai){ ... }`:
+  così è robusta **in tutti e due i casi**, e non mi costringe a scommettere su una cosa che non ho
+  misurato.
+
+📌 Famiglia della **453** (il valore che decide il risultato e che nessuno stampa), della **366**
+(riga armata che contraddice il file) e della **457** (la lezione che resta prosa). 🟢 E la nota
+che va detta accanto: **il deposito nella riga di R192 era GIUSTO**. Il difetto non è il numero, è
+che era giusto **per inferenza** — e un'inferenza giusta è indistinguibile da una sbagliata finché
+non la si confronta con la fonte.

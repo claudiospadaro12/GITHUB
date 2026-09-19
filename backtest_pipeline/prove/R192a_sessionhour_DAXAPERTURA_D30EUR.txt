@@ -11,6 +11,43 @@
 #  NON LANCIARE senza la firma di Claudio: il perimetro del runner e'
 #  SOLA LETTURA.
 #
+#  ###  IL DEPOSITO -- STA NELLA RIGA, NON IN QUESTO FILE, E PERCIO' VA SCRITTO QUI  ###
+#  Si lancia con: -Deposito 100000
+#
+#  CLASSE 453 (19/09/2026). RIGA_ROUND_VPS.ps1 r.94 ha [int]$Deposito = 10000:
+#  una riga scritta "normale" manderebbe questo round a 10.000. E a 10.000
+#  L'ANCORA DELL'ORA 8 NON RIPRODUCE 'ptd' -- classe 366: su questa famiglia
+#  il deposito cambia il numero di operazioni del +40%. Se l'ancora non
+#  riproduce, LE ALTRE CINQUE CELLE NON SI LEGGONO, e la diagnosi sbagliata
+#  sarebbe "si e' riaperto il baco del determinismo".
+#
+#  MOTIVO: e' il deposito con cui l'ancora 'ptd' e' confrontabile.
+#  LETTO, non inferito, in TRE fonti indipendenti che concordano:
+#    1. backtest_pipeline/prove/R16d_pertrade_DAX.txt r.3 --
+#       "Si lancia con: -Prova prove\R16d_pertrade_DAX.txt -Deposito 100000
+#        -Etichetta ptd"   (e' la riga che ha generato l'etichetta 'ptd')
+#    2. report/DIARIO.md, voce 2026-08-09 -- "Tutti e 4 i candidati riprodotti
+#       a deposito 100.000 ... DAX ... OOS +18029,58 - PF 1,397 - DD 7,23%":
+#       sono GLI STESSI QUATTRO NUMERI della cella d'ancora di questo round
+#    3. report/SETACCIO_ARCHIVIO_2026-09-12.md r.300 -- "..._OOS_ptd.csv,
+#       tick, 100.000 EUR"
+#
+#  IL CONTRO-ESEMPIO, ESEGUITO: il 10.000 non e' improbabile, e'
+#  ARITMETICAMENTE IMPOSSIBILE, e si vede senza aprire il tester.
+#    Il rischio e' PERCENTUALE (InpRiskPercent=1): 1R vale l'1% del saldo del
+#    momento, quindi TUTTA la curva scala col deposito e il PF/DD% non
+#    cambiano. Cambia solo la percentuale di rendimento, e quella discrimina.
+#    - a 10.000  Profit=18.029,58 sarebbe +180,3%. In unita' di rischio:
+#      ln(2,803)/0,01 = 103,1 R netti. Con PF 1,39709 la perdita LORDA vale
+#      103,1/0,39709 = 259,6 R. Ma le POSIZIONI sono 193 (per-trade 770115) e
+#      ognuna perde AL MASSIMO 1 R, perche' lo stop e' quello: il tetto
+#      assoluto della perdita lorda e' 193 R.  259,6 > 193 -> IMPOSSIBILE.
+#    - a 100.000 Profit=18.029,58 e' +18,0%: ln(1,18)/0,01 = 16,55 R netti,
+#      perdita lorda 16,55/0,39709 = 41,7 R su 193 posizioni = 0,22 R medi.
+#      E' il profilo di un motore con parziale a 1R e stop portato in pari.
+#    >>> Il 100.000 non e' una preferenza: e' l'UNICO valore compatibile coi
+#        numeri gia' scritti nel CSV di 'ptd'.
+#
 #  ###  PERCHE' QUESTO FILE ESISTE  ###
 #  Censimento del 19/09 su 2.069 CSV di risultati (cartelle
 #  risultati_archivio/, risultati_prove/, risultati_ottimizzazione/):
