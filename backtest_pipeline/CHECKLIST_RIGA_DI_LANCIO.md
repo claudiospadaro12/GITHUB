@@ -26097,7 +26097,7 @@ E sulla somma, che è il numero che finisce nel referto: `0.30+0.30+0.40` fa **1
 
 ---
 
-## CLASSE 470 — 📅🧟 **UN PRESET IN CAMPO CHE PUNTA A UN CALENDARIO STORICO**: il filtro news è spento **in silenzio**, e il canarino dell'EA non può accorgersene perché conta gli eventi **utili**, non quelli **futuri** (controllo-preventivo, 19/09/2026, figlia della **460-b**)
+## CLASSE 472 — 📅🧟 **UN PRESET IN CAMPO CHE PUNTA A UN CALENDARIO STORICO**: il filtro news è spento **in silenzio**, e il canarino dell'EA non può accorgersene perché conta gli eventi **utili**, non quelli **futuri** (controllo-preventivo, 19/09/2026, figlia della **460-b**)
 
 **Il caso reale.** `mql5/Presets/ABTG_PostNews_NFP_USDJPY.set` — il preset che stava
 per essere caricato su un grafico **vivo** USDJPY M5 — porta:
@@ -26142,7 +26142,7 @@ finestra chiusa nel nome.** Se il nome contiene un intervallo di anni (`_2010_20
 
 ---
 
-## CLASSE 471 — 🎯💥 **UNA COLLISIONE DI MAGIC SU STESSO SIMBOLO NON FONDE LE STATISTICHE: NE UCCIDE UNA.** E la riparazione dell'08/09 aveva **spostato** il numero dentro un altro già occupato, non tolto la collisione (controllo-preventivo, 19/09/2026)
+## CLASSE 473 — 🎯💥 **UNA COLLISIONE DI MAGIC SU STESSO SIMBOLO NON FONDE LE STATISTICHE: NE UCCIDE UNA.** E la riparazione dell'08/09 aveva **spostato** il numero dentro un altro già occupato, non tolto la collisione (controllo-preventivo, 19/09/2026)
 
 **Il caso reale.** `ABTG_PostNews_ECB_EURUSD.set` nasce l'**08/09/2026** con
 l'intestazione letterale *«NATO PER EVITARE UNA COLLISIONE DI MAGIC»* — e si prende
