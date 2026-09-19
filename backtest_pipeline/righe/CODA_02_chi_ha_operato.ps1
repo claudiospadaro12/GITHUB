@@ -34,8 +34,20 @@ Write-Host ("cartelle dati: " + $cart.Count)
 foreach($d in $cart){
   Write-Host ""
   Write-Host ("=== CARTELLA " + $d.Name)
+  # CLASSE 466 (19/09/2026) -- LA COLONNA "ultima riga" MOSTRAVA UNA RIGA DI DUE
+  # GIORNI FA. Si prendono i $GIORNI log piu' recenti con -Descending (giusto),
+  # ma poi il ciclo qui sotto li percorre IN QUELL'ORDINE e fa
+  #     $ultima[$k] = $riga
+  # a ogni riga: vince l'ULTIMA scritta, cioe' il file piu' VECCHIO dei tre.
+  # Con $GIORNI = 3 la colonna e' sistematicamente indietro di due giorni.
+  # Verificato sui referti veri: la corsa del 14/09 mostrava una riga di
+  # sabato 12/09, e quelle del 15 e 16/09 la STESSA riga al millisecondo.
+  # Morde sulla corsia TAGLIANDO firmata il 18/08: una sedia che si ferma la
+  # si scopre due giorni dopo. Si sceglie coi piu' recenti, si LEGGE dal piu'
+  # vecchio al piu' nuovo.
   $log = @(Get-ChildItem (Join-Path $d.FullName "MQL5\Logs") -Filter *.log -ErrorAction SilentlyContinue |
-           Sort-Object LastWriteTime -Descending | Select-Object -First $GIORNI)
+           Sort-Object LastWriteTime -Descending | Select-Object -First $GIORNI |
+           Sort-Object LastWriteTime)
   Write-Host ("    log letti: " + $log.Count)
   if($log.Count -eq 0){ Write-Host "    CONTROLLATA: nessun log"; continue }
 
