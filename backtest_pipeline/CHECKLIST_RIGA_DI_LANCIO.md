@@ -25540,3 +25540,62 @@ dall'oggetto che dipende**.
 **251** (il canale delle attivita' pianificate che nessuno vagliava). La differenza e' il verso:
 qui non e' lo script che si mangia un altro script, e' **la pulizia che si mangia il codice in
 produzione**.
+
+### 🧾 RICEVUTA DEL 19/09/2026 — la riparazione c'è, ed è verificata
+Le due righe che chiudono questo caso sono pronte e passate dal cancello (pin `70c240ad`):
+`backtest_pipeline/righe/RIGA_DIAGNOSI_NEWS.ps1` (sola lettura: dice **cosa** ripuntare prima di
+ripuntarlo) e `backtest_pipeline/righe/RIGA_RIPARA_NEWS.ps1` (ripunta a `C:\ABTG`, ri-eseguibile,
+salva l'XML per tornare indietro, verifica **sull'artefatto** e fa girare l'attività una volta).
+**51 contro-esempi eseguiti** in `backtest_pipeline/controlli/controesempi_news_vps.ps1`
+(`CONTRO-ESEMPI PROVATI: 51 FALLITI: 0`). Referto: `report/RIPARAZIONE_NEWS_VPS_2026-09-19.md`.
+⚠️ **Ma la riparazione del percorso NON riaccende il canale da sola**: vedi la classe **459**,
+nata misurando proprio questo caso.
+
+---
+
+## CLASSE 459 — 🕳️📅 PRIMA DI RIPUNTARE UN'ATTIVITÀ SI MISURA LA SUA **SORGENTE**: qui il percorso era rotto da 3 giorni, ma il file da scaricare era **VUOTO DA LUGLIO** — e l'«esito 0» di prima era prodotto **dall'assenza del controllo** (19/09/2026)
+
+**Il caso, misurato oggi mentre si verificava la riga che ripara la classe 458.** La premessa
+condivisa era: *«il riordino del 16/09 ha spostato la cartella, l'attività esce 4294770688,
+si ripunta a `C:\ABTG` e il calendario news riparte»*. La prima metà è vera
+(`4294770688` = `0xFFFD0000` = **−196608**, il codice di `powershell.exe` quando il file passato
+a `-File` non esiste). **La seconda metà no**, e si è rotta provando a romperla invece che a
+confermarla (regola del 10/09):
+
+```
+git cat-file -s HEAD:data/abtg_news.csv                                  -> 0
+git log --oneline -- data/abtg_news.csv                                  -> a86089c8, 26/07/2026, e basta
+curl https://raw.githubusercontent.com/.../lavoro/data/abtg_news.csv     -> HTTP 200, corpo VUOTO
+curl https://raw.githubusercontent.com/.../SgGpD/data/abtg_news.csv      -> HTTP 200, corpo VUOTO
+```
+
+🔴 **E qui arriva la parte che fa male: gli `0` del 14-15-16/09 non erano una prova che il canale
+funzionasse.** La copia che girava dal Desktop veniva dal ramo vecchio e faceva
+`Invoke-WebRequest -Uri $RawUrl -OutFile $Dest` — **download scritto diritto sul file in campo,
+nessuna verifica** — e usciva **0 comunque**, avendo appena messo **zero byte** sotto le sedie.
+La versione riparata il 12/09 (quella su `lavoro`), allo stesso identico file, risponde
+`file VUOTO (0 byte)` e **esce 1 senza toccare niente**. Cioè: **ripuntando il task, il codice
+d'uscita PEGGIORA (da 0 a 1) mentre il sistema MIGLIORA.** Chi giudica dal solo codice d'uscita
+legge il film al contrario.
+
+E il danno a valle è reale: `mql5/Experts/ABTG_PTE.mq5` r.637-638 apre il file **senza
+`FILE_COMMON`** (quindi si legge dalla cartella del *proprio* terminale) e, se non lo trova,
+scrive *«file news non trovato: filtro di fatto spento»* e **opera lo stesso**. Il filtro news
+fallisce **APERTO**.
+
+### La regola
+🔴 **Un'attività pianificata ha DUE estremi: il PERCORSO da cui parte e la SORGENTE che legge.
+Ripararne uno e dichiarare chiuso il caso è mezza riparazione.** Prima di ripuntare qualunque
+task si misurano tutti e due, e la misura della sorgente si fa **sull'URL esatto che lo script
+scarica** (`curl` sul link vero), non sul nome del ramo.
+- 🚫 **E un `esito 0` vale solo quanto i controlli della versione che l'ha prodotto.** Se la
+  versione in campo non verifica niente, il suo `0` significa *«sono arrivato in fondo»*, non
+  *«il lavoro è fatto»*. Prima di usare un codice d'uscita come prova: **quale versione l'ha
+  scritto, e cosa controlla?**
+- ✅ **Conseguenza applicata alla riga**: invece di promettere *«esito 0 e calendario di oggi»*,
+  la riga di riparazione **classifica** l'esito in **A** (canale vivo) / **B** (percorso
+  riparato, sorgente vuota, file in campo intatto) / **C** (non dimostrato). Una riga che può
+  solo *riuscire o fallire* avrebbe chiamato «fallimento» il comportamento **giusto**.
+- 📌 Parente della **251** (il file che leggono 55 EA, scritto a metà) e figlia diretta della
+  **458**: là il riordino si mangiava il codice, qui si scopre che sotto quel codice non c'era
+  più niente da mangiare.
