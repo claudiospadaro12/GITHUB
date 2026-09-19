@@ -12,7 +12,20 @@
 ## ① IL NUMERO SECCO
 
 > # **6 combinazioni su 163** hanno almeno una cella che passa tutti e quattro i cancelli.
-> # 🔴 **Ma una delle sei passa SOLO su OHLC. Le vere sono CINQUE.**
+> # 🔴 **Ma DUE delle sei passano SOLO su OHLC. Le vere sono QUATTRO.**
+
+> ## ✏️ CORREZIONE DEL 19/09, ORE 12 — **la trappola OHLC me ne era sfuggita una seconda**
+> Avevo preso `CostToCost` × EURJPY e l'avevo tolta perché le sue celle erano tutte `ohlc`.
+> 🔴 **`PTE` × GBPUSD ha lo stesso identico difetto e non l'avevo visto**: le due celle che
+> passano stanno nei CSV `..._ohlc_...`; a **dato pieno** il miglior `min(n)` è **42**, molto
+> sotto il pavimento di 150.
+> 👉 **Le combinazioni vere sono QUATTRO**, e un censimento indipendente le ha trovate **identiche**:
+> `DAX_Apertura_EU`×D30EUR · `EMA200`×U30USD · `EMA200`×EURUSD · `Dow_Apertura_US`×U30USD.
+>
+> 📌 **E una seconda correzione, di metodo**: la mia lista *«ferme SOLO per campione»* conteneva
+> combinazioni **già refutate**. Il pavimento dei 150 **sospende il merito su UNA finestra alla
+> volta, non sulla coppia**: se l'OOS ha n=256 e PF 0,906, il merito **è stato letto**, ed è un no
+> — anche se l'IS resta sotto soglia. *(Caso reale: `SuperWave` NASUSD a M15.)*
 
 | EA | simbolo | celle che passano | su totali | |
 |---|---|---:|---:|---|
@@ -21,7 +34,7 @@
 | `ABTG_EMA200` | 🆕 **EURUSD** | **15** | 30 | 🟢 **NON schierato** |
 | `ABTG_CostToCost` | EURJPY | 8 | 13 | 🔴 **tutte OHLC → non valgono** |
 | `ABTG_Dow_Apertura_US` | U30USD | 3 | 48 | 🟡 in campo (`770202`), n=4 |
-| `ABTG_PTE` | GBPUSD | 2 | 228 | 🟡 in campo (`771322`) |
+| ~~`ABTG_PTE`~~ | ~~GBPUSD~~ | ~~2~~ | ~~228~~ | 🔴 **anche queste sono OHLC** — vedi correzione |
 
 ## ② 🔴 IL CASO `CostToCost`, e perché l'ho tolto
 
