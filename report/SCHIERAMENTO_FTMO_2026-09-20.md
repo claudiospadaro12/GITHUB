@@ -29,7 +29,7 @@
 
 ---
 
-## ① ⏱️ LA CATENA COMPLETA — **95-145 minuti**, e dove sono i minuti
+## ① ⏱️ LA CATENA COMPLETA — **62-105 minuti**, e dove sono i minuti
 
 | # | cosa | 🖥️ dove | chi | ⏱️ stima | 🔴 rischio |
 |---|---|---|---|---:|---|
@@ -37,13 +37,13 @@
 | **2** | ⬇️ installare l'MT5 FTMO in **`C:\MT5_FTMO`** — 🔴 **non** dentro una cartella BCM | 🖥️ VPS | ✍️ Claudio | **10-20 min** | — |
 | **3** | 🔑 login + attesa sincronizzazione simboli | 🪟 **FTMO** | ✍️ Claudio | **2-5 min** | 🔴 **senza login il giornale è vuoto e il passo 5 rifiuta** |
 | **4** | 📸 **le due letture che valgono la notte**: orologio Market Watch vs orologio Windows; *Specification* di US30/GER40/NAS100 | 🪟 **FTMO** | ✍️ Claudio | **5 min** | trasforma il `+2` da `[INFERITO]` a misurato |
-| **5** | ▶️ **LA RIGA** (§②) — copia 9 sorgenti + 9 preset | 🖥️ **PowerShell sul VPS** | 🤖 | ⏱️ **~3 s** *(misurato: 2,4 s · tetto 120 s)* | rifiuta invece di indovinare |
+| **5** | ▶️ **LA RIGA** (§②) — copia 9 sorgenti + **10** preset | 🖥️ **PowerShell sul VPS** | 🤖 | ⏱️ **~3 s** *(misurato: 2,4 s · tetto 120 s)* | rifiuta invece di indovinare |
 | **6** | 🔨 **F7 in MetaEditor**, 🔴 **`ABTG_Guardian.mq5` per PRIMO** | 🪟 **FTMO** | ✍️ Claudio | **10-20 min** | 🔴 **senza tetto se uno fallisce** |
 | **7** | 📊 aprire i grafici, simbolo + TF giusti | 🪟 **FTMO** | ✍️ Claudio | **10 min** | — |
-| **8** | ⚙️ caricare i preset + 🔴 **rimappare gli orari (+2h)** + la **taglia** | 🪟 **FTMO** | ✍️ Claudio | 🔴 **20-30 min** | 🔴 **il passo più lungo e il più facile da sbagliare** |
+| **8** | ⚙️ caricare i preset (🟢 **già rimappati**) + 🔴 la **taglia** + 🔴 `InpDailyResetHour=1` sul Guardian | 🪟 **FTMO** | ✍️ Claudio | 🟢 **10-15 min** *(erano 20-30)* | 🟠 restano **due** valori a mano, non ventitré |
 | **9** | 🛡️ attaccare `ABTG_Guardian` col preset FTMO | 🪟 **FTMO** | ✍️ Claudio | **5 min** | — |
 | **10** | ▶️ **AutoTrading ON** + faccine sui grafici | 🪟 **FTMO** | ✍️ Claudio | **5 min** | vedi §④ l'ordine di accensione |
-| | | | **TOTALE** | 🔴 **~72-120 min** | **più** il tempo d'acquisto |
+| | | | **TOTALE** | 🟢 **~62-105 min** *(erano 72-120)* | **più** il tempo d'acquisto |
 
 > ## 🟢 **CI STA IN UNA SERA. E se non ci sta, non si perde niente.**
 > Misurato su 96 posizioni vere in `data/statements/trades_auto.csv`: **nessuna sedia della rosa
@@ -66,15 +66,15 @@ script, riga per riga, e viene stampato.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='25fd32d7ea540f6284ca1b43bc951dec36c130a7'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='489f98c02268a9dc976fc23ccbb8f48959fd4642'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SCHIERA_FTMO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_FTMO_v1' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SCHIERA_FTMO_v1.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_FTMO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SCHIERA_FTMO_v2.' };
     $global:LASTEXITCODE = 0; & $p -ContoAtteso $conto -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host ('FERMATO (uscita ' + $LASTEXITCODE + '): NON premere F7. Manda tutto l output qui sopra.') -ForegroundColor Red }
     else { Write-Host 'FATTO (uscita 0). Sul Desktop trovi la cartella SCHIERA_FTMO_<data> e lo zip: dentro ci sono il referto e i file scaricati.' -ForegroundColor Green } }
 ```
 
-🕐 **Dura ~3 secondi** (misurato 2,4 s su nove sorgenti e nove preset). Oltre **120 s** è la rete.
+🕐 **Dura ~3 secondi** (misurato **2,2 s** end-to-end da GitHub su nove sorgenti e **dieci** preset). Oltre **120 s** è la rete.
 
 ### 🔎 Se vuoi guardare prima di scrivere
 Stessa riga con **`-SoloDiagnosi`** in coda: fa la scoperta, dice che cosa **copierebbe**, e
@@ -101,7 +101,9 @@ idea di `InpLoginAtteso` sul reale.
 ➕ **E una dopo**: il percorso di destinazione **vero**, quello su cui si scriverà, ripassa dalla
 lista nera. Se un giorno la scoperta cambiasse, morirebbe lì.
 
-### 🧪 I CONTRO-ESEMPI — **eseguiti**, non raccontati
+### 🧪 I CONTRO-ESEMPI — **eseguiti**, e RIGIRATI TUTTI E TREDICI sul pin nuovo `489f98c0`
+
+> 🔴 **Perché tutti e tredici e non solo quelli toccati**: il ripuntamento ha cambiato **il manifesto**, cioè *la cosa che decide quali file finiscono dentro un terminale*. Un contro-esempio che passava prima **non è una prova che passi adesso**.
 Banco: un finto `%APPDATA%\MetaQuotes\Terminal` con le **sette** cartelle di casa ricostruite
 (hash veri, `origin.txt` veri, giornali finti) più le candidate del caso.
 
@@ -114,9 +116,9 @@ Banco: un finto `%APPDATA%\MetaQuotes\Terminal` con le **sette** cartelle di cas
 | **D2** | `-ContoAtteso = 10105439` (il **reale**) | 🟢 rifiuta **prima di guardare il disco** | **0** |
 | **D3** | cartella **senza `origin.txt`** | 🟢 esclusa: *«non posso CERTIFICARE di chi è»* | **0** |
 | **D4** | `-Pin lavoro` (un **ramo**, non uno SHA) | 🟢 rifiuta: *«un ramo si muove, un commit no»* | **0** |
-| **E** | 🟢 **terminale vergine**: `MQL5\Include` e `MQL5\Presets` **assenti** | 🟢 le crea, copia 9 sorgenti + 9 preset, **2,4 s**, uscita **0** | 18 |
-| **G** | **secondo lancio di fila** | 🟢 `GIA GIUSTO` ×9 e `GIA IDENTICO` ×9: **nessun download, nessuna scrittura** | invariati |
-| **H** | 🔴 **Claudio rimappa a mano `InpSessionHour=8 → 10`, poi rilancia la riga** | 🟢 **NON sovrascritto**: la modifica a mano sopravvive, la versione del repo finisce accanto come `…_DAL_REPO.set` | invariati |
+| **E** | 🟢 **terminale vergine**: `MQL5\Include` e `MQL5\Presets` **assenti** | 🟢 le crea, copia 9 sorgenti + **10** preset, **2,4 s**, uscita **0** | 18 |
+| **G** | **secondo lancio di fila** | 🟢 `GIA GIUSTO` ×9 e `GIA IDENTICO` ×**10**: **zero download** | invariati |
+| **H** | 🔴 **Claudio ritocca a mano `InpSessionHour=10 → 11`, poi rilancia la riga** | 🟢 **NON sovrascritto**: la modifica a mano sopravvive, la versione del repo finisce accanto come `…_DAL_REPO.set` | invariati |
 | **F1** | `-Pin` a un commit **vecchio**: un preset obbligatorio non esiste lì | 🟢 rifiuta col **404 e l'URL in chiaro** | **0** |
 | **F2** | un **EA mancante** al suo pin (mutante dello script) | 🟢 rifiuta col 404 | **0** |
 | **I** | un preset che **non porta il suo `InpMagic`** (preset della sedia sbagliata) | 🟢 rifiuta: *«caricarlo sul grafico sbagliato è come si perde una serata»* | **0** |
@@ -135,7 +137,7 @@ Banco: un finto `%APPDATA%\MetaQuotes\Terminal` con le **sette** cartelle di cas
 | **4** | 🔨 **F7 su `ABTG_Guardian.mq5` — PER PRIMO** | 🪟 MetaEditor **FTMO** | `0 errors, 0 warnings`. 🔴 **Se muore su `cannot open include file`, si ferma tutto e mi si manda l'errore**: è l'unico modo in cui l'include può essere sbagliato, e si scopre al **primo** colpo invece che al nono | 3 min |
 | **5** | 🔨 F7 sugli altri 7 `.mq5` | 🪟 MetaEditor **FTMO** | `0 errors` ciascuno | 10-20 min |
 | **6** | 📊 grafici: `D30EUR` M5 · `D30EUR` M15 · `U30USD` M5 · `U30USD` H1 ×2 · `NASUSD` M5 | 🪟 **FTMO** | i nomi dei simboli FTMO **possono essere diversi** (`GER40`, `US30`, `NAS100`): 🔴 **si usa quello che c'è in Market Watch** | 10 min |
-| **7** | ⚙️ preset + 🔴 **rimappatura +2** | 🪟 **FTMO** | 🟢 **la riga ti ha già stampato la tabella**: `InpSessionHour BCM 8 -> FTMO 10`, valore per valore, preset per preset. **Si copia da lì, non a memoria** | 20-30 min |
+| **7** | ⚙️ caricare i **10 preset** (🟢 orari **già FTMO**) | 🪟 **FTMO** | 🟢 la riga stampa ogni ora con `(gia rimappato: NON TOCCARE)`. 🔴 **L'unica riga gialla è il Guardian**: `InpDailyResetHour BCM 23 -> FTMO 1 <<< DA CAMBIARE A MANO` | **10-15 min** |
 | **8** | 💰 **la taglia** | 🪟 **FTMO** | 🔴 **`InpRiskPercent` è una firma di CLAUDIO**, non è scritta da nessuna parte in questo pacchetto | — |
 | **9** | 🛡️ Guardian con `ABTG_Guardian_FTMO_2Step.set` e 🔴 **`InpDailyResetHour=1`** (la riga te lo stampa: `BCM 23 -> FTMO 1`) | 🪟 **FTMO** | il pannello del Guardian compare sul grafico | 5 min |
 | **10** | ▶️ **AutoTrading ON** | 🪟 **FTMO** | faccina 😊 su ogni grafico | 5 min |
@@ -189,18 +191,68 @@ quelli già approvati in `backtest_pipeline/righe/COMPILA_771531_770511.ps1`. È
 che valida il **righello**: se la mia funzione d'impronta fosse diversa dalla sua, quei tre numeri
 non tornerebbero.
 
-### 5.2 I preset (`MQL5\Presets`) — pin + controllo **nel merito**
+### 5.2 I preset — **DIECI file**, ripuntati su `mql5/Presets/FTMO/` (20/09)
 
-Sei obbligatori (`770101` `770411` `770202` `771531` `770511` `779001`), quattro opzionali
-(`770260` + i tre PostNews). Ognuno deve contenere **il proprio `InpMagic=`**, altrimenti la riga
-rifiuta tutto.
+| # | preset installato | sedia | magic | ora **BCM** (originale) | 🟢 ora **FTMO** (nel file copiato) |
+|---|---|---|---|---|---|
+| 1 | `ABTG_DAX_Apertura_EU_770101_FTMO.set` | DAX Apertura · `D30EUR` M5 | `770101` | `Session 8` · `Close 17` | **`Session 10`** · **`Close 19`** |
+| 2 | `ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set` | MaxMin DAX Short · `D30EUR` M15 | `770411` | `Box 23→4` · `Place 7` · `Cutoff 8` · `Close 17` | **`Box 1→6`** · **`Place 9`** · **`Cutoff 10`** · **`Close 19`** |
+| 3 | `ABTG_Dow_Apertura_US_770202_FTMO.set` | Dow Apertura · `U30USD` M5 | `770202` | `Session 14` · `Close 17` | **`Session 16`** · **`Close 19`** |
+| 4 | `ABTG_EMA200_771531_FTMO.set` | EMA200 Dow · `U30USD` H1 | `771531` | `Cutoff 19` · `FriClose 20` | **`Cutoff 21`** · **`FriClose 22`** |
+| 5 | `ABTG_SuperWave_DOW_H1_770511_FTMO.set` | SuperWave · `U30USD` H1 | `770511` | `Start 0` · `End 24` | **invariato** *(0-24: è l'unica che non va rimappata)* |
+| 6 | `ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set` | Nasdaq RETEST · `NASUSD` M5 | `770260` | `Session 14` · `Close 17` | **`Session 16`** · **`Close 19`** |
+| 7 | `ABTG_Guardian_FTMO_2Step.set` | Guardian *(utility)* | `779001` | `DailyReset 23` | 🔴 **`23` — NON RIMAPPATO, va messo a `1` A MANO** |
+| 8 | `ABTG_PostNews_FOMC_EURUSD_771202_FTMO.set` | PostNews FOMC | `771202` | `Action 19` · `Expiry 20` · `FriClose 21` | **`21`** · **`22`** · **`23`** |
+| 9 | `ABTG_PostNews_NFP_USDJPY_771203_FTMO.set` | PostNews NFP | `771203` | `Action 13` · `Expiry 16` · `FriClose 21` | **`15`** · **`18`** · **`23`** |
+| 10 | `ABTG_PostNews_ECB_EURUSD_771204_FTMO.set` | PostNews ECB | `771204` | `Action 14` · `Expiry 17` · `FriClose 21` | **`16`** · **`19`** · **`23`** |
 
-🔴 **Perché i preset NON hanno l'impronta congelata e gli EA sì** — e non è una svista:
-un `.mq5` è il sorgente da cui nasce il binario su cui sono stati **misurati PF, DD e frequenza**:
-se cambia di una riga, **il contratto non è più quello**. I `.set` invece sono **ancora in
-lavorazione stanotte** da altre sessioni: congelarne l'impronta farebbe fallire la riga domani per
-un motivo che **non è un difetto**. Quindi i preset si prendono **dal `-Pin`** (immutabile per
-costruzione) e si controllano nel **merito**. L'impronta viene stampata e finisce nel referto.
+> ## 🎯 **IL CONTO CHE DEVE TORNARE: 10 file = 6 sedie schierabili + 1 Guardian + 3 PostNews.**
+> **Sedie che aprono posizioni domenica-lunedì: SEI** — `770101` `770411` `770202` `771531`
+> `770511` `770260`. **`770402` ORO resta FUORI** (§6.2). I tre PostNews sono un blocco a parte,
+> escludibile con `-SenzaPostNews`.
+
+🔴 **Il Guardian è l'unico rimasto a mano, e lo script lo grida**: è l'unico preset **senza** il
+marcatore `RIMAPPATO PER L'OROLOGIO`, quindi finisce nella riga gialla
+*«ATTENZIONE: 1 preset NON è rimappato»* con scritto `InpDailyResetHour BCM 23 -> FTMO 1
+<<< DA CAMBIARE A MANO`.
+
+🔴 **`ABTG_MaxMinNotte_ORO_770402_FTMO.set` ESISTE in repo e NON viene installato.** È voluto:
+**un preset senza il suo EA è una trappola** — si apre la finestra input, si vede il file, si crede
+che la sedia ci sia. Quando `770402` sarà firmata, arrivano **insieme** il `.mq5` al suo pin e il
+preset.
+
+### 5.3 ✅ I CONTROLLI CHE HO FATTO SUI PRESET NUOVI (e che nessuno aveva fatto)
+
+**Input per input, preset FTMO contro originale BCM, e preset contro il sorgente dell'EA al suo pin:**
+
+| controllo | esito |
+|---|---|
+| 🟢 **nessun input PERSO** nella rigenerazione | verificato su tutti e 10: `80→82`, `51→52`, `42→44`… solo **aggiunte** |
+| 🟢 **nomi degli input del preset ⊆ input dell'EA al pin** | 9 preset su 10 **perfetti**. Unica eccezione: `InpLogImbuto` nel preset `771531`, che **non esiste** in `ABTG_EMA200.mq5` al pin `26a18566` → MT5 lo **ignora in silenzio**, impatto **zero**, ma segnala che il preset è stato generato contro **HEAD** e non contro il bersaglio misurato |
+| 🟢 **`InpUsaGuardian` acceso su tutte** | esplicito in 7 preset; nei 3 che non ce l'hanno (`770511`, PostNews FOMC/ECB) il **default dell'EA è `true`** → il cancello del Guardian è attivo **ovunque**. Verificato nei sorgenti ai pin |
+| 🟢 **`InpMagic` corretto su tutti e 10** | e la riga **rifiuta** se non torna (contro-esempio **I**) |
+| 🔴 **`InpMaxSpread` `500 → 0` su `770411`** | **non è un orario.** Verificato nel codice (r.468): `if(InpMaxSpread<=0) return(true)` → **il filtro di spread è SPENTO**. Su un broker di cui **non conosciamo gli spread**, e con la frontiera di casa `stop >= 40 × spread`. Gli altri erano già a `0` di loro: **`770411` è l'unico cambiato** |
+| 🔴 **`InpRiskPercent` cambiato su 4 sedie** | vedi **§⑨** |
+
+### 5.4 ➕ LA DOMANDA SUL FILTRO NEWS DI `770260` — **la differenza è voluta, e non è fra due preset della stessa sedia**
+
+La premessa va corretta prima della risposta: `ABTG_Nasdaq_Apertura_US.set` porta
+**`InpMagic=770201`** e **`InpEntryMode=0`** — è **un'altra sedia**, non un secondo preset del
+`770260` (che è `InpEntryMode=2`, RETEST). Quindi non è *«la stessa sedia con due impostazioni
+diverse»*: sono due sedie diverse con impostazioni diverse.
+
+Detto questo, `InpUseNewsFilter=false` sul `770260` è **coerente, per tre ragioni misurate**:
+1. 🟢 **è il default del sorgente** (`ABTG_Nasdaq_Apertura_US.mq5` r.290: `input bool
+   InpUseNewsFilter = false`): il preset non sta spegnendo niente, sta **confermando il default**.
+   È il `770201` che lo **accende** esplicitamente;
+2. 🟢 **il contratto di `770260` (PF OOS 1,10936, n 94) è stato misurato così**: accenderlo adesso
+   sarebbe uno scostamento dal binario misurato, cioè il contrario di quello che vogliamo;
+3. 🟢 **su FTMO in Challenge non esiste nessuna restrizione news** (§⓪ del pacchetto, fonte
+   🥇 postata da Claudio il 19/09).
+➕ E c'è una quarta ragione che rende il `false` **più onesto** del `true`: le classi **459-460-472**
+hanno misurato che **il canale news era morto dal 26/07** e che un preset puntato a un calendario
+stantio spegne il filtro **in silenzio**. 👉 Un `true` oggi sarebbe **un filtro che non può
+scattare**, cioè una protezione dichiarata e inesistente. **Meglio un `false` scritto.**
 
 ---
 
@@ -287,42 +339,88 @@ a mano **deve sopravvivere** — contro-esempio **H**, eseguito. La versione del
 6. ⚪ **Il banco di prova è Linux, non Windows.** Il parser è quello vero
    (`Parser::ParseFile`, 0 errori) e il cancello dichiara *«nessun costrutto pwsh-7-only»*,
    ma **il VPS ha PowerShell 5.1 e io ho girato i contro-esempi su pwsh 7.4.6**.
-7. ⚪ **`InpRiskPercent` (la taglia) non è toccata da niente di tutto questo.** È una firma di
-   Claudio e resta **[NON DECISA]**.
+7. 🔴 **`InpRiskPercent` (la taglia) non è toccata da niente di tutto questo.** È una firma di
+   Claudio e resta **[NON DECISA]** — e adesso è **bloccante**, perché i preset portano **tre
+   valori diversi**: vedi **§⑨**.
+8. 🔴 **`InpMaxSpread` `500 → 0` su `770411`**: il filtro di spread è **spento** (verificato nel
+   codice). Su FTMO **non conosciamo gli spread**, e la frontiera di casa è `stop >= 40 × spread`.
+   ⚪ **Non l'ho cambiato** — è un parametro di comportamento su una sedia viva. Va **firmato o
+   misurato** col primo screenshot degli spread FTMO.
+9. ⚪ **Il MERITO dei dieci preset FTMO non l'ho giudicato io**: ho verificato che **non perdano
+   input**, che i **nomi esistano nell'EA al pin**, che l'`InpMagic` torni e che gli **orari siano
+   già rimappati**. Che i *valori* siano quelli giusti per la challenge è un'altra domanda.
+10. ⚪ **`InpLogImbuto`** nel preset `771531` non esiste nel sorgente al pin `26a18566`: MT5 lo
+   ignora, impatto zero, ma vuol dire che quel preset è stato generato contro **HEAD**.
 
 ---
 
-## ⑦bis 🔴 **UNA COSA SUCCEDE ADESSO IN UN'ALTRA SESSIONE, E CAMBIA LA SERATA**
+## ⑧ ✅ IL RIPUNTAMENTO DEL 20/09 — fatto, e cosa ha cambiato
 
-Mentre scrivevo, nell'albero di lavoro sono comparsi (ancora **NON committati**, quindi **non
-pinnabili** e non toccati da me):
-- `mql5/Presets/FTMO/` — **dieci preset GIÀ RIMAPPATI** a FTMO (`…_770101_FTMO.set` ecc.);
-- `mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set` — 🎉 **il buco B6 che si chiude**;
-- `backtest_pipeline/rimappa_preset_ftmo.py` + `report/PRESET_FTMO_OROLOGIO_2026-09-20.md`.
+I file dell'altra sessione sono **su `lavoro`**. Il manifesto dei preset è stato ripuntato su
+`mql5/Presets/FTMO/*` e lo script è passato a **`MARCATORE_SCHIERA_FTMO_v2`**.
 
-> ## 🟢 **PRIMA LA BELLA NOTIZIA, ED È UN CONTRO-ESEMPIO CHE NON MI SONO COSTRUITO IO.**
-> `ABTG_DAX_Apertura_EU_770101_FTMO.set` porta `InpSessionHour=10` e `InpCloseHour=19`.
-> La mia riga, partendo dal preset BCM, stampa `InpSessionHour BCM 8 -> FTMO 10` e
-> `InpCloseHour BCM 17 -> FTMO 19`. 👉 **Due strade indipendenti, stesso numero.** L'aritmetica
-> del `+2` non è più solo mia.
+🟢 **Il guadagno**: il passo 8 della catena era *«rimappare gli orari a mano, 20-30 min, il passo
+più lungo e il più facile da sbagliare»*. Adesso gli orari arrivano già giusti e restano **due**
+valori da mettere a mano — `InpDailyResetHour=1` sul Guardian e la **taglia**. **La catena scende
+da 72-120 a 62-105 minuti.**
 
-🔴 **MA LA CONSEGUENZA OPERATIVA È GROSSA, e va decisa prima di domenica:** se quei preset
-vengono **committati**, la tabella del §5.2 va ripuntata su `mql5/Presets/FTMO/*` e il **passo 8**
-del §④ — 🔴 *la rimappatura a mano, 20-30 minuti, il passo più lungo e il più facile da sbagliare*
-— **sparisce dalla serata**. Restano il caricamento del preset e la taglia.
-
-⏱️ **Costo della modifica: ~10 minuti** (dieci righe di manifesto + un nuovo pin + i contro-esempi
-rigirati). 👉 **Va fatto appena quei file sono su `lavoro`**, e va fatto da chi coordina, non in
-autonomia: il merito di quei preset non l'ho giudicato io, e il `770260` arriva con un **nome e un
-percorso diversi** da quelli che il mio manifesto cerca oggi.
-
-🟢 **Nel frattempo la riga di oggi è corretta e sicura lo stesso**: i preset FTMO non esistono al
-pin `25fd32d7`, quindi copia quelli BCM e **stampa la tabella di rimappatura**. Non sbaglia, fa
-solo lavorare Claudio venti minuti in più.
+> ## 🔴 E IL DIFETTO CHE IL RIPUNTAMENTO HA CREATO, trovato prima di spedirlo
+> La **v1** dello script leggeva i preset **BCM** e stampava la proposta **`BCM 8 -> FTMO 10`**.
+> Con i preset nuovi, che sono **già** a 10, la stessa identica tabella avrebbe stampato
+> **`BCM 10 -> FTMO 12`**. 👉 **Lo strumento nato per evitare l'errore di fuso lo avrebbe
+> PRESCRITTO**, e con l'autorevolezza di una tabella stampata.
+> ✅ **Correzione**: la trasformazione non si applica più *per convenzione*, ma solo se il dato
+> **dichiara di non averla già subita** — marcatore `RIMAPPATO PER L'OROLOGIO` dentro il file.
+> Col marcatore → `FTMO 10 (gia rimappato: NON TOCCARE)`. Senza → proposta `+2` e riga gialla.
+> 📌 È la **classe 477** della checklist (e la **478** è la sua gemella: la rimappatura aveva spostato anche la **taglia** e spento il **filtro di spread** — §⑨ e §5.3).
 
 ---
 
-## ⑧ 📎 FONTI
+## ⑨ 🔴 LE TAGLIE — **tre valori diversi, e il conto del margine non torna con nessuna riga del pacchetto**
+
+**Prima la cosa giusta, perché ho provato a smontare la mia stessa accusa e non ha retto in
+quella forma**: l'altra sessione **NON ha nascosto niente**. Ha scelto la famiglia `_100K`
+(0,65% + Guardian) invece di `recupero2` (1,0%), ha scritto il perché (*«0,65% è la taglia
+firmata di casa e il cap C1 = 3,25% = 5 × 0,65»*) e ha messo nel generatore, testuale:
+> `*** E' UN PARAMETRO DI RISCHIO: LA SCELTA VA CONFERMATA DA CLAUDIO. ***`
+
+🟢 **Quindi è dichiarato, non contrabbandato.** Ma resta un numero che nessuno ha fatto, ed è
+questo:
+
+### 🔴 La sostituzione di famiglia ha toccato **quattro sedie su sei**, perché solo quattro avevano una variante `_100K`
+
+| sedia | `InpRiskPercent` nel preset che si installa | da dove viene |
+|---|---:|---|
+| `770101` · `770411` · `770202` · `771531` | 🟢 **0,65%** | famiglia `_100K`, **cambiato** da 1,0 |
+| 🔴 **`770511` SuperWave** · `770260` Nasdaq | 🔴 **1,00%** | **invariato**: non esisteva la variante |
+| tre PostNews | 🔴 **1,30%** | **invariato** |
+
+**Il conto, sulle tabelle del pacchetto stesso (leva 1:15, conto 100.000 $):**
+
+| | margine totale delle **sei** sedie | % del conto |
+|---|---:|---:|
+| se fossero **tutte a 0,65%** | 116.210 $ | 116,2% |
+| 🔴 **come sono adesso (miste)** | **140.576 $** | 🔴 **140,6%** |
+| **differenza** | **+24.366 $** | **+24,4 punti di conto** |
+
+> ## 🔴 **`770511` da sola, a 1,00%, mangia 46.001 $ — il 46% del conto.** A 0,65% ne mangerebbe 29.901. La sedia più cara della rosa è **proprio quella rimasta alla taglia alta.**
+> 👉 E il danno **non è lo stop-out**: è l'**ordine rifiutato in silenzio** per margine
+> insufficiente (§③ del pacchetto), che colpisce **sempre le sedie che armano più tardi** — cioè
+> le americane, cioè `770511` e `771531`. **Si crede di correre con sei sedie e si corre con tre.**
+> ⚠️ Ogni cifra qui è `[INFERITO]` per via dell'ipotesi **H2** del pacchetto (*margine =
+> nozionale / leva*): **non abbiamo mai letto una specifica di contratto FTMO.** Si chiude con lo
+> screenshot del passo 4.
+
+✅ **Cosa fa lo script**: **stampa** la tabella delle taglie e, se trova più di un valore, alza una
+riga gialla che rimanda a questo paragrafo. **Non sceglie e non cambia niente**: `InpRiskPercent`
+è territorio di Claudio (CLAUDE.md).
+🔴 **Cosa serve prima di AutoTrading ON**: **una firma sola** — *o* si porta tutto a 0,65% (e
+allora il cap C1 = 5 × 0,65 torna coerente), *o* si accetta la flotta mista **sapendo** che costa
+140,6% di margine a 1:15.
+
+---
+
+## ⑩ 📎 FONTI
 
 `report/PACCHETTO_SCHIERAMENTO_PROP_2026-09-21.md` (§Ⓐ cronologia, §④ ordine, §⑥ buchi B6/B7) ·
 `report/I_BINARI_DELLA_ROSA_2026-09-19.md` (le sette cartelle dati, i vintage in campo) ·

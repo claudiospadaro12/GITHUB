@@ -26327,3 +26327,98 @@ fisso» e «fuso con DST» danno la stessa risposta.
   `InpNewsShiftMinutes=0` è **giusta** in un EA e **sbagliata** in un altro: non si giudica dal
   valore, si giudica dal **confronto che l'EA fa**.
 - 📌 Misura: `report/PRESET_FTMO_OROLOGIO_2026-09-20.md` §⑤.
+
+---
+
+## CLASSE 477 — ♻️➕ **LA TRASFORMAZIONE APPLICATA DUE VOLTE**: lo strumento nato per evitare l'errore di fuso arriva a PRESCRIVERLO, perché a monte qualcuno aveva già rimappato (controllo-preventivo, 20/09/2026)
+
+**Il caso, ed era in un file già committato e già passato dal doppio cancello.** `SCHIERA_FTMO.ps1`
+v1 leggeva i preset BCM e stampava, riga per riga, la tabella della rimappatura FTMO:
+```
+InpSessionHour   BCM  8  ->  FTMO 10
+```
+Serviva a chiudere il rischio n.1 della serata: *«un preset caricato com'è fa aprire il DAX alle
+06:00 invece che alle 08:00»*. **Poi un'altra sessione ha rigenerato i preset già rimappati.** La
+stessa identica tabella, sugli stessi identici input, ha cominciato a dire:
+```
+InpSessionHour   BCM 10  ->  FTMO 12
+```
+🔴 **Lo strumento nato per impedire l'errore di fuso lo PRESCRIVE** — e lo fa con l'autorevolezza
+di una tabella stampata in console, che è precisamente la cosa che Claudio è stato istruito a
+copiare *«da lì, non a memoria»*.
+
+### Il meccanismo, che non c'entra col fuso orario
+Uno strumento che applica una **trasformazione** (`+2`, una conversione di valuta, un
+`InpRiskPercent × fattore`, un fuso, un cambio di TF) è corretto **solo sull'input non ancora
+trasformato**. E la correttezza **non sta nel codice**: sta in un'**assunzione sullo stato di chi
+gliela passa** — cioè nella cosa più facile da invalidare, perché **la cambia qualcun altro, in
+un altro file, senza toccare il tuo**.
+
+🔴 **Il nome del file non è uno stato**: `..._FTMO.set` sembrava sufficiente a distinguere, ma un
+manifesto che cambia percorso, un file rinominato a mano o una copia sul Desktop lo perdono subito.
+
+### La regola
+**Una trasformazione si applica solo se il DATO dichiara di non averla già subita.** Il marcatore
+sta **dentro il file**, non nel nome, non nella cartella, non nella convenzione:
+```powershell
+$giaFatto = ($testo -match "RIMAPPATO PER L'OROLOGIO")
+if($giaFatto){ "<valore>  (gia rimappato: NON TOCCARE)" }
+else         { "<valore> -> <valore+2>  <<< DA CAMBIARE A MANO" }
+```
+E chi **genera** il file trasformato ha l'altra metà del dovere: **scriverci dentro il marcatore**.
+🟢 Qui l'aveva fatto (`; PRESET RIMAPPATO PER L'OROLOGIO **FTMO**. NON usarlo su BCM.`), presente
+in **10 file su 10** — ed è l'unica ragione per cui la riparazione è costata dieci minuti invece
+di una serata.
+
+📌 **E il corollario operativo, che vale oltre questo caso**: quando si **ripunta un manifesto** su
+file prodotti da qualcun altro, non basta controllare che i file **esistano**. Va riletto **cosa
+lo strumento DICE di quei file**: qui i contro-esempi passavano tutti — il file c'era, l'`InpMagic`
+tornava, l'impronta era giusta — e **la frase stampata era sbagliata**. 👉 **Un contro-esempio che
+verifica la COPIA non verifica il REFERTO.**
+
+
+---
+
+## CLASSE 478 — 🏷️🔀 **IL DIFF LETTO SUL NOME DEL GENERATORE INVECE CHE INPUT PER INPUT**: la «rimappatura oraria» aveva spostato anche la TAGLIA e spento il filtro di SPREAD (controllo-preventivo, 20/09/2026)
+
+**Il caso.** Dieci preset rigenerati da uno script che si chiama `rimappa_preset_ftmo.py`, con un
+referto che parla di orari e un marcatore interno che dice *«PRESET RIMAPPATO PER L'OROLOGIO»*.
+Tutto coerente. Diffando **input per input** contro gli originali, però, le differenze **non erano
+solo orarie**:
+
+| input | da | a | è un orario? |
+|---|---:|---:|---|
+| `InpSessionHour`, `InpBoxStartHour`, `InpCutoffHour`… | 8, 23, 19 | 10, 1, 21 | ✅ sì, atteso |
+| 🔴 **`InpRiskPercent`** (4 sedie) | **1,0** | **0,65** | ❌ **no: è una TAGLIA** |
+| 🔴 **`InpMaxSpread`** (`770411`) | **500** | **0** | ❌ **no, ed è un interruttore**: `if(InpMaxSpread<=0) return(true)` = **filtro spento** |
+
+🟢 **Onestà dovuta: non era contrabbando.** Il generatore lo dichiarava in un commento
+(*«E' UN PARAMETRO DI RISCHIO: LA SCELTA VA CONFERMATA DA CLAUDIO»*) e nasceva da una scelta
+ragionata (famiglia `_100K` invece di `recupero2`). 🔴 **Ma chi consuma quei file legge il NOME e
+il TITOLO, non i commenti del generatore** — e il nome diceva «orologio».
+
+### Il difetto vero è l'ASIMMETRIA, e si vede solo col diff completo
+La sostituzione di famiglia ha toccato **le quattro sedie che avevano una variante `_100K`** e
+**non** le altre. Risultato: una flotta con **TRE taglie diverse** (0,65 · 1,00 · 1,30) dove il
+cap firmato **C1 = 3,25% = 5 × 0,65** è coerente con **quattro sedie su sei**. E il conto del
+margine **non corrisponde a nessuna riga** della tabella di riferimento: **140,6% del conto invece
+di 116,2%**, con la sedia **più cara** (`770511`, 46.001 $ = 46% del conto) rimasta **proprio**
+alla taglia alta.
+
+### La regola
+🔴 **Quando un file di configurazione viene RIGENERATO da uno strumento, si diffa INPUT PER INPUT
+contro l'originale, e si classifica ogni differenza. Non si legge il nome dello strumento.**
+```bash
+# ogni differenza, non solo quelle che ti aspetti
+diff <(grep -E '^[A-Za-z_]+=' vecchio.set | sort) <(grep -E '^[A-Za-z_]+=' nuovo.set | sort)
+```
+Tre domande, in ordine:
+1. **input PERSI?** (quelli spariti tornano al default dell'EA, in silenzio) — 🟢 qui zero;
+2. **differenze FUORI dal dominio dichiarato?** (qui: taglia e spread dentro una rimappatura oraria);
+3. **la trasformazione è stata applicata a TUTTI o solo a quelli che si potevano?** — è
+   l'asimmetria, ed è il difetto che nessuno dei due lati vede: chi genera sa *perché* ha saltato
+   alcuni, chi consuma non sa nemmeno che ne siano stati saltati.
+
+📌 **Parentela**: la **462** dice *«il fix di famiglia applicato al file generico e non alla
+variante in campo»*. Questa è la sua immagine allo specchio: **il fix applicato solo alle varianti
+che esistevano**, e la flotta che ne esce disomogenea.
