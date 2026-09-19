@@ -3592,3 +3592,72 @@ casa: `DELAYED+volumi` IS 1,710 n=56 → OOS 0,696 n=51.
 Nessun backtest eseguito, nessun EA/preset/forward toccato, niente sul conto reale `10105439`.
 📌 Nota d'archivio: **`R84BIS_B1/B2` (sensibilità a `InpVolMult` sul Nasdaq) è stato preparato
 il 18/08 e MAI GIRATO** — zero CSV nel repo. R183a è la prima misura di quell'asse.
+
+---
+
+## 🌙 R187 — `ABTG_MaxMinNotte` su **NASUSD**: la casella era LIBERA, non provata (19/09/2026)
+
+**Origine**: screenshot dei colleghi di Claudio sul Nasdaq — i livelli a grafico sono
+`Max sett. prec. · Max notturno · Max giorno prec. · Apertura giorno · Min notturno`, e il nostro
+EA delle aperture sul Nasdaq **non usa nessuno di questi**. Sullo stesso livello (candela H1
+prec. / range dei primi N minuti) abbiamo già provato **tre ingressi diversi e perdono tutti e
+tre**: breakout PF OOS **0,873** · retest **0,624** · fade **0,930**.
+👉 **Quando tre ingressi diversi sullo stesso livello sbagliano, l'indiziato è il LIVELLO.**
+
+### 🏺 CENSIMENTO (per CONTENUTO, non per nome) — `ABTG_MaxMinNotte` non è MAI girato su NASUSD
+
+| simbolo | CSV in archivio | catena di prova |
+|---|---:|---|
+| `D30EUR` | **24** | `ini/valid_MaxMin_D30EUR.ini` · `prove/R103_*_770411.txt` · `r81_csv/` |
+| `XAUUSD` | **14** | `maxmin_oro.ps1 -Sym XAUUSD` · `prove/R103_*_770402.txt` |
+| `EURUSD` | 2 | `prove/ABTG_MaxMinNotte.txt` |
+| `F40EUR` · `E50EUR` · `100GBP` | 1 + 1 + 1 | `rilancia_maxmin_indici.ps1 $Targets` |
+| 🔴 **`NASUSD`** | **0** | **nessuna corsa, nessun `.ini`, nessun file prova, nessun file in `git log`** |
+
+🔴 **Il simbolo NON è dentro i CSV** (`OnTesterDeinit`/`FrameInputs` scrive solo gli INPUT), e
+`InpCorrSymbol=SPXUSD` compare su **43 CSV su 43** mentre le corse su `SPXUSD` sono **ZERO**:
+un `grep SPXUSD` dà il **100% di falsi positivi**. → **classe 444** della checklist.
+🟠 E l'occasione era in piena vista: `scan_market.ps1` r.54 ha **`NASUSD` nella lista simboli di
+`ABTG_MaxMinNotte`** — la scansione era *scritta* e **mai lanciata**.
+
+### 🟢 CORREZIONE A UNA CREDENZA DI CASA — i tick di NASUSD **sono misurati**
+`ABTG_StoricoScaricato.csv` non elenca `NASUSD`, ma
+`risultati_archivio/misura_tick/REFERTO_MISURA_TICK_NASUSD.txt` (30/08/2026) sì:
+**tick reali dal `2024.09.26`, 166.509.474 tick**. → il round gira a **modello 4**, **non** è
+`[SOTTO SONDA]`.
+
+### 📋 I DUE FILE PROVA (pronti, `controlla_prova.py` **OK**, ASCII puro, 52 pin, 2 celle ciascuno)
+| file | box (ora server) | piazza | cutoff | flat | magic |
+|---|---|---|---|---|---|
+| `prove/R187a_notteEU_MaxMinNotte_NASUSD.txt` | 23:00-04:59 | 07:59 | 08:30 | 17:30 | `761600/761601` |
+| `prove/R187b_notteUS_MaxMinNotte_NASUSD.txt` | 23:00-14:29 | 14:29 | **15:50** | **20:45** | `761610/761611` |
+
+Gestione **copiata verbatim** dalla cella viva `770411`. Due sole deviazioni, **dichiarate come
+scelte**: `InpAllowLong` false→**true** (regola dei DUE LATI, firmata 25/08, bloccante su
+Nasdaq/DAX/Dow) e `InpUseCorrelation` true→**false** (il filtro guarda `SPXUSD`: sul DAX chiede
+*«tira l'America?»*, sul Nasdaq chiede *«tira il Nasdaq?»* — **non è lo stesso meccanismo**).
+
+### 📐 ATTESA CONGELATA PRIMA DEI NUMERI
+**n = 180, banda 120-220**, ricavato per **due strade indipendenti che coincidono**
+(`41 × 2,38 × 1,84 = 179,5` e `255 × 0,7047 = 179,7`, basi: R103 r.81 e
+`080957cf-valid_MaxMin_D30EUR.csv`).
+🔴 **PF atteso: NESSUNO.** Le tre prove di questo motore **fuori dal DAX** fanno **0/54 celle
+positive tutte e tre** (`100GBP` 0,6717 · `E50EUR` 0,8398 · `F40EUR` 0,9985, rr.2526-2528):
+**la base storica è NEGATIVA**, e va scritto prima della corsa.
+
+### 🛑 SOGLIE DI `n`, e il verdetto che NON si può scrivere
+`n ≥ 150` merito leggibile · `50-149` merito **sospeso** (rischio leggibile lo stesso) ·
+🔴 **`n < 50` → «NON MISURATO — FINESTRA SBAGLIATA», MAI «non funziona»** · `n = 0` → difetto di
+configurazione. Se `a` e `b` si dividono sulla soglia, **il round ha misurato l'OROLOGIO, non il
+livello**, e il livello resta NON MISURATO.
+
+### 💰 COSTO E CANCELLI
+**Stima 15-25 minuti** (base **misurata**: 0,7 min/passata su `MaxMinNotte D30EUR` M15 a tick
+reali, `R104_REFERTO_DRIVER_20260825_0738.txt` r.15, **scalata ×4,69** perché `NASUSD` ha 166,5 M
+tick contro i 35,5 M di `D30EUR` nella stessa finestra). Banco `C:\MT5_Backtest` (demo
+`50504400`). Cancello di costo: `stop 100,25 idx / spread 1,90 p95 =` **52,8×** → 🟢 PASS (+32%),
+**ma l'ATR di `NASUSD` è `[INFERITO]`**: il cancello regge finché l'ATR(M15) vero è ≥ **30,4 idx**.
+
+📄 Referto: `report/R187_IL_LIVELLO_NOTTURNO_SUL_NASDAQ_2026-09-19.md`
+🛑 **Nessun backtest eseguito, nessun EA/preset/forward toccato, nessuna taglia e nessuna
+accensione proposta, niente sul conto reale `10105439`.**
