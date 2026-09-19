@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_FTMO_v1
+#  MARCATORE_SCHIERA_FTMO_v2
 #
 #  PORTA I SORGENTI E I PRESET DELLA ROSA NELLA CARTELLA DATI DEL
 #  TERMINALE FTMO -- CHE OGGI NON ESISTE E QUINDI VA SCOPERTO.
@@ -48,8 +48,11 @@
 #       SOVRASCRITTO (su un terminale nuovo di solito e' vuota);
 #    5. scarica dai PIN e VERIFICA L'IMPRONTA PRIMA di scrivere;
 #    6. copia, rilegge dal disco e stampa la tabella dei due righelli;
-#    7. stampa gli ORARI trovati dentro i preset con accanto l'ora
-#       FTMO attesa (BCM + 2) -- STAMPA, non rimappa;
+#    7. stampa gli ORARI e le TAGLIE trovati dentro i preset --
+#       STAMPA, non cambia. I preset arrivano da mql5/Presets/FTMO e
+#       sono GIA' rimappati: quelli col marcatore si segnano "GIA'
+#       FTMO, non toccare", quelli senza (il Guardian) prendono la
+#       proposta +2;
 #    8. lascia sul Desktop referto + zip.
 #
 #  -------------------------------------------------------------------
@@ -115,12 +118,15 @@
 #  Un .mq5 e' il sorgente da cui nasce il binario su cui sono stati
 #  misurati PF, DD e frequenza: se cambia di una riga, il contratto
 #  non e' piu' quello. Quindi impronta CONGELATA nel file.
-#  I .set sono ancora in lavorazione stanotte (altre sessioni), e
-#  congelarne l'impronta farebbe fallire lo script domani per un
-#  motivo che non e' un difetto. Quindi i preset si prendono dal -Pin
-#  (che e' immutabile per costruzione) e si controllano nel merito:
-#  devono contenere InpMagic=<magic atteso>. L'impronta viene STAMPATA
-#  e finisce nel referto, cosi' resta tracciata.
+#  I .set no, e il 20/09 si e' visto perche': sono stati RIGENERATI da
+#  un'altra sessione (mql5/Presets/FTMO, dieci file rimappati) mentre
+#  questo script era gia' scritto. Un'impronta congelata li' dentro
+#  avrebbe fatto fallire la riga per un motivo che NON e' un difetto.
+#  Quindi i preset si prendono dal -Pin (immutabile per costruzione) e
+#  si controllano NEL MERITO: devono contenere InpMagic=<magic atteso>.
+#  L'impronta viene STAMPATA e finisce nel referto, cosi' resta
+#  tracciata. E le TAGLIE si stampano a parte, perche' InpRiskPercent
+#  e' territorio di Claudio e nei preset di stasera non e' uniforme.
 #
 #  ASCII PURO: niente emoji, niente accentate (PS 5.1 legge i .ps1
 #  come ANSI -- regola di casa del 17/08).
@@ -192,21 +198,22 @@ $POSTNEWS_EA = [pscustomobject]@{ Nome='ABTG_PostNews.mq5'; Sedia='771202/771203
 #           sessione, stessa ragione.
 # ---------------------------------------------------------------------
 $PRESET = @(
-  [pscustomobject]@{ Nome='sedia_ABTG_DAX_Apertura_EU_770101.set';                   RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='770101'; Sedia='770101 DAX Apertura';    Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='sedia_ABTG_MaxMinNotte_DAX_Short_Ottimizzato_770411.set'; RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='770411'; Sedia='770411 MaxMin DAX Short'; Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='sedia_ABTG_Dow_Apertura_US_770202.set';                   RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='770202'; Sedia='770202 Dow Apertura';    Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='sedia_ABTG_EMA200_771531.set';                            RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='771531'; Sedia='771531 EMA200 Dow';      Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='sedia_ABTG_SuperWave_DOW_H1_Ottimizzato_770511.set';      RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='770511'; Sedia='770511 SuperWave DOW';   Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='ABTG_Guardian_FTMO_2Step.set';                            RepoDir='mql5/Presets';                        Magic='779001'; Sedia='779001 Guardian FTMO';   Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='sedia_ABTG_Nasdaq_Apertura_US_770260.set';                RepoDir='mql5/Presets/sedie_piccolo/recupero2'; Magic='770260'; Sedia='770260 Nasdaq RETEST';   Obbligatorio=$false; Blocco='ROSA' },
-  [pscustomobject]@{ Nome='ABTG_PostNews_FOMC_EURUSD.set';                           RepoDir='mql5/Presets';                        Magic='771202'; Sedia='771202 PostNews FOMC';   Obbligatorio=$false; Blocco='POSTNEWS' },
-  [pscustomobject]@{ Nome='ABTG_PostNews_NFP_USDJPY.set';                            RepoDir='mql5/Presets';                        Magic='771203'; Sedia='771203 PostNews NFP';    Obbligatorio=$false; Blocco='POSTNEWS' },
-  [pscustomobject]@{ Nome='ABTG_PostNews_ECB_EURUSD.set';                            RepoDir='mql5/Presets';                        Magic='771204'; Sedia='771204 PostNews ECB';    Obbligatorio=$false; Blocco='POSTNEWS' }
+  [pscustomobject]@{ Nome='ABTG_DAX_Apertura_EU_770101_FTMO.set';           RepoDir='mql5/Presets/FTMO'; Magic='770101'; Sedia='770101 DAX Apertura';    Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_MaxMinNotte_DAX_Short_770411_FTMO.set';     RepoDir='mql5/Presets/FTMO'; Magic='770411'; Sedia='770411 MaxMin DAX Short'; Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_Dow_Apertura_US_770202_FTMO.set';           RepoDir='mql5/Presets/FTMO'; Magic='770202'; Sedia='770202 Dow Apertura';    Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_EMA200_771531_FTMO.set';                    RepoDir='mql5/Presets/FTMO'; Magic='771531'; Sedia='771531 EMA200 Dow';      Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_SuperWave_DOW_H1_770511_FTMO.set';          RepoDir='mql5/Presets/FTMO'; Magic='770511'; Sedia='770511 SuperWave DOW';   Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set'; RepoDir='mql5/Presets/FTMO'; Magic='770260'; Sedia='770260 Nasdaq RETEST';   Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_Guardian_FTMO_2Step.set';                   RepoDir='mql5/Presets';      Magic='779001'; Sedia='779001 Guardian FTMO';   Obbligatorio=$true;  Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_PostNews_FOMC_EURUSD_771202_FTMO.set';      RepoDir='mql5/Presets/FTMO'; Magic='771202'; Sedia='771202 PostNews FOMC';   Obbligatorio=$false; Blocco='POSTNEWS' },
+  [pscustomobject]@{ Nome='ABTG_PostNews_NFP_USDJPY_771203_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771203'; Sedia='771203 PostNews NFP';    Obbligatorio=$false; Blocco='POSTNEWS' },
+  [pscustomobject]@{ Nome='ABTG_PostNews_ECB_EURUSD_771204_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771204'; Sedia='771204 PostNews ECB';    Obbligatorio=$false; Blocco='POSTNEWS' }
 )
 
 # La sedia che NON si schiera, e si dice perche'.
 $SOSPESE = @(
-  '770402 MaxMin ORO (ABTG_MaxMinNotte.mq5): BERSAGLIO NON DECISO. Il binario in campo (08239510, 28/07) ha il breakeven annegato nel parziale a 0,01 lotti; HEAD (7d0da9f9) rende effettivo InpOneTradePerDay e cambia la FREQUENZA con cui il contratto e stato misurato. Serve una corsa di controllo e una firma. NON COPIATA DI PROPOSITO.'
+  '770402 MaxMin ORO (ABTG_MaxMinNotte.mq5): BERSAGLIO NON DECISO. Il binario in campo (08239510, 28/07) ha il breakeven annegato nel parziale a 0,01 lotti; HEAD (7d0da9f9) rende effettivo InpOneTradePerDay e cambia la FREQUENZA con cui il contratto e stato misurato. Serve una corsa di controllo e una firma. NON COPIATA DI PROPOSITO.',
+  '770402: ATTENZIONE, in repo ESISTE mql5/Presets/FTMO/ABTG_MaxMinNotte_ORO_770402_FTMO.set. NON lo installo, ed e VOLUTO: un preset senza il suo EA e una trappola -- si apre la finestra input, si vede il file, si crede che la sedia ci sia. Quando 770402 verra firmata, arrivano INSIEME il .mq5 al suo pin e il preset.'
 )
 
 # =====================================================================
@@ -673,37 +680,89 @@ foreach($p in $presetMancanti){
 }
 
 # ---------------------------------------------------------------------
-# GLI ORARI DEI PRESET. Si STAMPANO, non si cambiano.
-# BCM = ora italiana -1. FTMO = ora italiana +1. Quindi FTMO = BCM + 2
-# (docs/REGOLAMENTO_FTMO_2026-08.md r.130). E' un numero [INFERITO]
-# finche l orologio di Market Watch non e stato letto: per questo lo
-# script lo scrive accanto, e non dentro il file.
+# GLI ORARI E LE TAGLIE DEI PRESET. Si STAMPANO, non si cambiano.
+#
+# ATTENZIONE, QUI IL SIGNIFICATO E' CAMBIATO CON IL RIPUNTAMENTO DEL
+# 20/09, ED E' LA RAGIONE PER CUI IL MARCATORE E' PASSATO A v2.
+# La v1 pescava i preset BCM e stampava la PROPOSTA "BCM X -> FTMO X+2".
+# Adesso i preset arrivano da mql5/Presets/FTMO e sono GIA' RIMAPPATI:
+# ristampare "+2" direbbe a Claudio di portare il DAX da 10 a 12, cioe'
+# ESATTAMENTE il danno che la tabella doveva evitare. Quindi:
+#   - preset col marcatore "RIMAPPATO PER L'OROLOGIO" -> si stampano le
+#     ore COSI' COME SONO, con scritto GIA' FTMO, NON TOCCARE;
+#   - preset SENZA marcatore (oggi: solo quello del Guardian) -> si
+#     stampa la proposta +2, perche' quello nessuno l'ha rimappato.
 # ---------------------------------------------------------------------
 Dillo '' $null
 Dillo '=====================================================================' $null
-Dillo ' GLI ORARI CHE STANNO DENTRO I PRESET COPIATI -- DA RIMAPPARE A MANO' $null
-Dillo ' FTMO = BCM + 2 ore. Questo script NON ha cambiato nessun valore.' $null
+Dillo ' GLI ORARI DENTRO I PRESET COPIATI' $null
+Dillo ' Questo script NON ha cambiato nessun valore: legge e stampa.' $null
 Dillo ' Valori >= 24 sono sentinelle (non orari): non si rimappano.' $null
 Dillo '=====================================================================' $null
+$daRimappare = @()
 foreach($p in $presetOk){
+  $giaFtmo = ($p.Testo -match "RIMAPPATO PER L'OROLOGIO")
   $righeOra = @()
   foreach($r in ($p.Testo -split "`n")){
     $m = [regex]::Match($r, '^\s*(Inp[A-Za-z0-9_]*Hour)\s*=\s*([0-9]+)\s*$')
     if($m.Success){
       $nomeI = $m.Groups[1].Value
       $val = [int]::Parse($m.Groups[2].Value, $INV)
-      if($val -ge 24){
-        $righeOra += ('      ' + $nomeI.PadRight(24) + 'BCM ' + $val.ToString($INV).PadLeft(2) + '  ->  FTMO ' + $val.ToString($INV).PadLeft(2) + '   (sentinella, NON un orario: non toccare)')
+      if($giaFtmo){
+        $righeOra += ('      ' + $nomeI.PadRight(24) + 'FTMO ' + $val.ToString($INV).PadLeft(2) + '   (gia rimappato: NON TOCCARE)')
+      } elseif($val -ge 24){
+        $righeOra += ('      ' + $nomeI.PadRight(24) + 'BCM ' + $val.ToString($INV).PadLeft(2) + '  ->  FTMO ' + $val.ToString($INV).PadLeft(2) + '   (sentinella, NON un orario)')
       } else {
         $nuovo = ($val + 2) % 24
-        $righeOra += ('      ' + $nomeI.PadRight(24) + 'BCM ' + $val.ToString($INV).PadLeft(2) + '  ->  FTMO ' + $nuovo.ToString($INV).PadLeft(2))
+        $righeOra += ('      ' + $nomeI.PadRight(24) + 'BCM ' + $val.ToString($INV).PadLeft(2) + '  ->  FTMO ' + $nuovo.ToString($INV).PadLeft(2) + '   <<< DA CAMBIARE A MANO')
       }
     }
   }
   if($righeOra.Count -gt 0){
-    Dillo ('  ' + $p.Sedia + '   (' + $p.Nome + ')') 'Cyan'
+    if($giaFtmo){
+      Dillo ('  ' + $p.Sedia.PadRight(26) + 'GIA FTMO   (' + $p.Nome + ')') 'Green'
+    } else {
+      Dillo ('  ' + $p.Sedia.PadRight(26) + 'DA RIMAPPARE A MANO   (' + $p.Nome + ')') 'Yellow'
+      $daRimappare += $p
+    }
     foreach($r in $righeOra){ Dillo $r $null }
   }
+}
+if($daRimappare.Count -eq 0){
+  Dillo '' $null
+  Dillo '  Nessun preset da rimappare a mano: gli orari sono gia quelli FTMO.' 'Green'
+} else {
+  Dillo '' $null
+  Dillo ('  ATTENZIONE: ' + $daRimappare.Count.ToString($INV) + ' preset NON sono rimappati e vanno corretti a mano:') 'Yellow'
+  foreach($p in $daRimappare){ Dillo ('    - ' + $p.Nome + '  (' + $p.Sedia + ')') 'Yellow' }
+}
+
+# ---------------------------------------------------------------------
+# LE TAGLIE. NON sono una decisione dello script ne' mia: si STAMPANO
+# perche' InpRiskPercent e' territorio di Claudio (CLAUDE.md) e perche'
+# nei preset di stasera NON sono tutte uguali. Un numero che cambia da
+# un file all'altro deve stare sotto gli occhi, non dentro un file.
+# ---------------------------------------------------------------------
+Dillo '' $null
+Dillo '=====================================================================' $null
+Dillo ' LE TAGLIE (InpRiskPercent) CHE STANNO NEI PRESET -- DA FIRMARE' $null
+Dillo ' Lo script NON le ha scelte e NON le ha cambiate: le legge.' $null
+Dillo '=====================================================================' $null
+$taglie = @{}
+foreach($p in $presetOk){
+  $mm = [regex]::Match($p.Testo, '(?m)^\s*InpRiskPercent\s*=\s*([0-9.]+)\s*$')
+  $v = 'non presente'
+  if($mm.Success){ $v = $mm.Groups[1].Value }
+  Dillo ('  ' + $p.Sedia.PadRight(26) + 'InpRiskPercent = ' + $v) $null
+  if($mm.Success){ $taglie[$v] = 1 }
+}
+if($taglie.Count -gt 1){
+  Dillo '' $null
+  Dillo ('  ATTENZIONE: nei preset ci sono ' + $taglie.Count.ToString($INV) + ' TAGLIE DIVERSE.') 'Yellow'
+  Dillo '  Non e un difetto dello script: e una decisione che manca. Il cap C1 (3,25%)' 'Yellow'
+  Dillo '  e tarato su 5 posizioni da 0,65%. Con taglie miste il conto del margine non' 'Yellow'
+  Dillo '  corrisponde a nessuna riga della tabella del pacchetto: leggi il referto' 'Yellow'
+  Dillo '  report/SCHIERAMENTO_FTMO_2026-09-20.md paragrafo 9 PRIMA di dare OK.' 'Yellow'
 }
 
 Dillo '' $null
