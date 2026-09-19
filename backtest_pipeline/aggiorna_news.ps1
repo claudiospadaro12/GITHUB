@@ -1,5 +1,11 @@
 # =====================================================================
 #  aggiorna_news.ps1  --  porta abtg_news.csv dentro MT5 (filtro news EA)
+#  MARCATORE_AGGIORNA_NEWS_v2
+#  (v2 = la versione col download in due tempi e la verifica del file
+#   PRIMA di metterlo in campo, riparata il 12/09/2026. Il marcatore c'e'
+#   perche' una riga di lancio possa dimostrare, sul VPS, di avere QUESTA
+#   versione e non quella vecchia che scriveva diritto sul bersaglio.
+#   Aggiunto il 19/09/2026 insieme a RIGA_RIPARA_NEWS.ps1.)
 # ---------------------------------------------------------------------
 #  Scarica il file news generato dall'agente (data/abtg_news.csv nel repo)
 #  e lo copia in MQL5\Files del terminale BCM. Da schedulare ogni mattina
@@ -42,6 +48,7 @@ function Dico([string]$t,[string]$c="Gray"){
 }
 Dico "=== AGGIORNO abtg_news.csv IN MT5 ===" "Cyan"
 Dico ("log di questa corsa: " + $LogFile) "DarkGray"
+Dico "versione dello script: MARCATORE_AGGIORNA_NEWS_v2" "DarkGray"
 
 # --- rileva il terminale BCM + la sua cartella dati ------------------
 $allTerm = Get-ChildItem "C:\Program Files","C:\Program Files (x86)" -Recurse -Filter "terminal64.exe" -ErrorAction SilentlyContinue
