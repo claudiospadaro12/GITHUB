@@ -25253,3 +25253,102 @@ leggere e il default vince in silenzio.
 che MT5 ignora in silenzio): sono tutte e tre **valori che decidono il risultato e che nessuno
 stampa in faccia a chi legge il verdetto**. 🟢 La difesa che funziona è sempre la stessa: il numero
 si scrive **due volte, in due posti diversi**, e le due scritture si confrontano prima di partire.
+
+---
+
+## CLASSE 454 — 🔢🎭 LA COLONNA `Trades` CONTA I **DEAL IN USCITA**, NON LE **POSIZIONI**: il pavimento dei 150 è stato applicato per mesi a un numero che su un EA con la parziale vale fino al **DOPPIO** (19/09/2026)
+
+**Il caso.** Censimento delle uscite sulle quattro sedie della rosa. Sulla sedia `770411`
+(`ABTG_MaxMinNotte_DAX_Short_Ottimizzato`, D30EUR) l'archivio contiene sia i CSV di
+ottimizzazione di **R81** (sei varianti d'uscita, 18/08/2026) sia i **file per-trade** che lo
+stesso round ha prodotto e che **nessun referto aveva mai aperto**.
+
+**La misura, fatta all'unità e nei due versi**
+(`backtest_pipeline/risultati_archivio/r81_csv/`, colonna `position_id`, valori **distinti**):
+
+| variante | gestione accesa? | righe nel per-trade | **posizioni distinte** | colonna `Trades` del CSV |
+|---|---|---:|---:|---:|
+| `r81a` (sedia viva) | scala piena | 21 | **14** | **21** |
+| `r81b` | 🔴 tutta SPENTA | 14 | **14** | **14** |
+| `r81c` | solo breakeven | 22 | **14** | **22** |
+| `r81d` | scala, trail 3,5 | 21 | **14** | **21** |
+| `r81e` | scala, trail 1,0 | 15 | **14** | **15** |
+| `r81f` | 🔴 tutta SPENTA | 14 | **14** | **14** |
+
+👉 **`Trades` è identico, riga per riga, al numero di RIGHE del per-trade** (deal con
+`DEAL_ENTRY_OUT`), **mai** al numero di posizioni. E il contro-esempio è dentro la tabella
+stessa: le **due** varianti con la gestione completamente spenta fanno **14 = 14 = 1 deal per
+posizione**, le altre quattro ne fanno **15-22 sulle STESSE 14 posizioni**. Se fosse un caso,
+non sarebbero proprio quelle due.
+
+### Perché è bloccante e non un dettaglio
+- **Il pavimento dei 150 (Emendamento A, 16/08) si legge sulla colonna `Trades`.** Su ogni EA
+  con parziale + stop in pari quel numero è gonfiato **fino a 2×**. Un round dichiarato "campione
+  pieno, n=160" può avere **83 posizioni**.
+- **Colpisce un argomento già in circolazione.** `R190b` (scritto lo stesso 19/09) poggia la sua
+  ragione d'essere su *«106 + 184 = 290 contro il pavimento 300: mancano 10 operazioni»*. Quei
+  106 e 184 sono **deal**, e su `ABTG_SuperWave_DOW_H1_Ottimizzato` (parziale 50% a 1R +
+  breakeven) le posizioni vere sono `[NON MISURATO]` — **nessun file per-trade esiste per
+  `r120e11`**. Il conto potrebbe essere molto più lontano dal pavimento di quanto scritto.
+- **E falsifica il proxy nel verso sbagliato.** Un round che *spegne* la gestione d'uscita vede
+  `Trades` **scendere** senza che sia entrato un ingresso in meno: letto come "n cala", diventa
+  "filtro travestito da uscita" quando invece non lo è affatto.
+
+### La regola
+🔴 **`Trades` è un conteggio di DEAL. Si chiama `n` solo quando è stato verificato che valga
+anche per le POSIZIONI.**
+- 📋 **Quando si cita un `n` contro il pavimento dei 150, si dichiara se è DEAL o POSIZIONI**, e
+  se è deal si scrive `[deal]` accanto. Un `n` senza quell'etichetta, su un EA con parziale,
+  **non è un campione**.
+- 🧪 **Il modo di misurarlo esiste già e costa zero macchina**: i file
+  `abtg_trades_<EA>_<SIMBOLO>_<MAGIC>.csv` prodotti da `ExportTrades()` in `OnTester()`. Basta
+  contare i `position_id` distinti. 👉 **Prima di stimare, si cerca se quel file c'è già**
+  (classe 411): per R81 c'era, da un mese, e nessuno l'aveva aperto.
+- ⚖️ **Dentro UN round, `ΔTrades` resta un proxy valido di `Δposizioni` SOLO se la scala
+  d'uscita è PINNATA e identica in tutte le celle** — perché il rapporto deal/posizione dipende
+  dalla scala, non dall'asse. Se l'asse È un pezzo della scala (un TP, una parziale, un
+  trailing), **il proxy non vale e va detto nel file prova**.
+- 🚫 E **non si ripara "a occhio" dividendo per due**: su `r81a` il rapporto è 21/14 = **1,5**,
+  non 2 — perché solo 7 posizioni su 14 sono arrivate al parziale.
+
+📌 Famiglia della **452** (la colonna che conviene) e della **450** (il pavimento dei 150 letto
+male): sono tutte e tre **numeri di campione che dicono una cosa diversa da quella che sembrano**.
+
+---
+
+## CLASSE 455 — 📄♻️ IL FILE PER-TRADE SI CHIAMA COL **MAGIC**, e in ottimizzazione **ogni cella sovrascrive la precedente**: il criterio che ci si appoggia misura solo l'ULTIMA passata (19/09/2026, figlia della **454**)
+
+**Il caso.** Prima stesura di `prove/R191a_orologio_ordine_MAXMINDAX_D30EUR.txt` (asse su
+`InpEntryCutoffMin`, 5 celle). Avendo appena scoperto la classe **454**, il criterio di lettura
+era stato scritto così: *«il conteggio che decide è il numero di `position_id` distinti nei file
+`pertrade_r191a_787410.csv`»*. **Non può funzionare, e il codice lo dice in faccia.**
+
+`mql5/Experts/ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` r.542-543 (e identico su
+`ABTG_SuperWave_DOW_H1_Ottimizzato.mq5` r.696-698):
+> *«Solo tester. In ottimizzazione ogni pass sovrascrive il file del proprio magic: usarlo su run
+> singoli / magic-sweep, non sulle griglie larghe.»*
+
+E il nome è costruito a r.548: `abtg_trades_<PROGRAMMA>_<SIMBOLO>_<MAGIC>.csv`. **Con un magic
+PINNATO e cinque celle, le cinque passate scrivono tutte sullo stesso nome**: sopravvive una
+sola serie, e non è nemmeno dichiarato quale.
+
+🟢 **Perché R81 invece ce l'aveva**: le sue sei varianti erano **sei file prova separati**, ognuno
+col suo magic (`778110`…`778161`), e l'asse era **il magic stesso**. È esattamente il
+"magic-sweep" che il commento del sorgente autorizza.
+
+### La regola
+🔴 **Un criterio di lettura che si appoggia a un file scritto DALL'EA va verificato contro la
+regola di NOMINA di quel file, prima di scriverlo nel file prova.**
+- 📋 **Se il nome contiene un input che il round PINNA, il file è UNO SOLO per tutto il round.**
+  Allora: o l'asse è quell'input (magic-sweep), o il criterio non può usarlo.
+- 🧪 **La via che funziona costa 2 passate e si scrive DOPO**: una passata di conferma a cella
+  singola con asse sul magic (due gemelli, che sono anche il cancello G1), sulla cella che
+  interessa. Metterla nel file prova *prima* di sapere quale cella interessa sarebbe spesa a
+  vuoto.
+- ⚠️ **E la classe 454 non si risolve con la 455**: il fatto che il per-trade non sia disponibile
+  per cella **non autorizza** a chiamare `n` la colonna `Trades`. Si dichiara `[deal]` e si va
+  avanti.
+
+📌 Famiglia della **156** (la chiave che MT5 ignora in silenzio) e della **158** (il lettore che
+pretende una riga da un CSV che ne ha due): **strumenti di lettura tarati su un'idea del file
+invece che sul file**.

@@ -1,0 +1,372 @@
+# =====================================================================
+#  EA: ABTG_SuperWave_DOW_H1_Ottimizzato
+#  R191b -- IL TETTO CHE SPEGNE IL RUNNER.
+#           Asse unico: InpTP_RR (il take profit finale, in R).
+#           La cella 3,0 e' l'ANCORA: deve riprodurre r120e11.
+#
+#  Si lancia con: -Deposito 100000 -Modello 4
+#     MOTIVO (classe 453): e' il deposito con cui l'ANCORA e'
+#     confrontabile. Letto nella fonte GREZZA, non in un referto:
+#     backtest_pipeline/coda/CODA.txt r.335, riga ARMATA --
+#       "...RIGA_SOTTILE_ROUND.ps1 | -Expert
+#        ABTG_SuperWave_DOW_H1_Ottimizzato -Prova
+#        R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11
+#        -Modello 4 -Deposito 100000"
+#     [!] NON ereditato da R191a, che sta nella stessa consegna e ha una
+#     fonte DIVERSA (classe 453: un pacchetto non eredita un deposito
+#     unico). Qui i due numeri coincidono per caso, non per parentela.
+#     CONTROPROVA (classe 453): r120e11 OOS fa +3.454,83 = +3,45% su
+#     100.000, con 184 deal a InpRiskPercent 1,0. A 10.000 sarebbe
+#     +34,5%: incompatibile con PF 1,22034.
+# =====================================================================
+#  DOSSIER: report/USCITE_DELLA_ROSA_2026-09-19.md
+#  ANCORA:  prove/R120e_U30USD_11_vivo_TAGLIA.txt (etichetta r120e11)
+#    CSV letti il 19/09/2026 nella fonte GREZZA (classe 451):
+#      backtest_pipeline/risultati_prove/dal_vps/
+#        ABTG_SuperWave_DOW_H1_Ottimizzato/
+#        ABTG_SuperWave_DOW_H1_Ottimizzato_U30USD_IS_r120e11.csv
+#          Pass 0 e 1 (magic 783500/783501, IDENTICHE = G1 passato):
+#          Profit 4236.16  PF 1.39744  DD 3.4846  Trades 106
+#        ..._U30USD_OOS_r120e11.csv
+#          Pass 0 e 1: Profit 3454.83  PF 1.22034  DD 4.2149  Trades 184
+#    Cifre ESATTAMENTE come nel CSV: cinque decimali sul PF, quattro
+#    sul DD (classe 451 / classe 385).
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+# ---------------------------------------------------------------------
+#  CENSIMENTO RIFATTO IL 19/09/2026 sui 22 CSV attribuiti a questo EA
+#  (nome dell'EA nel percorso o InpMagic 770511, piu' il VETO "ogni
+#  colonna Inp* dev'essere un input dichiarato in questo .mq5"):
+#
+#    GIA' MESSE AD ASSE su questa sedia, e va detto perche' cambia la
+#    classifica rispetto al censimento dell'11/09:
+#      InpTrailOnST x InpExitOnFlip -> R120b (4 celle 00/01/10/11) e
+#        R120e (00/11), a file separati, fattoriale pieno, tick reali
+#      InpSLBufferAtr -> R126a, 9 celle 0,000..1,000, 9 Profit distinti
+#      InpSLLookback  -> R126b, 7 celle 1..13, 7 Profit distinti
+#      InpTF          -> R190b, gia' scritto oggi (M30 vs H1)
+#    >>> Il censimento dell'11/09 le dava tutte e quattro "mai mosse":
+#        i round sono girati DOPO. Quel referto e' cronaca, non coda.
+#
+#    MAI MOSSE, nemmeno fra corse diverse, in nessuno dei 22 CSV:
+#      InpTP_RR        (costante 3   in tutti e 22)  <- QUESTO ROUND
+#      InpTP1_R        (costante 1   in tutti e 22)
+#      InpTP1Pct       (costante 50  in tutti e 22)
+#      InpBreakeven    (costante 1   in tutti e 22)
+#      InpFirstFraction(costante 0,3333 in tutti e 22)
+#      InpSLBufferPips (costante 3   in tutti e 22)
+#      InpEndHour / InpUseTimeWindow (24 / 0: finestra oraria spenta)
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' InpTP_RR E NON UNA DELLE ALTRE SEI  ###
+# ---------------------------------------------------------------------
+#  (1) E' L'UNICA CHE DECIDE **QUANDO** SI ESCE. Le altre spostano un
+#      decimale dello stop o la taglia di una tranche; InpTP_RR decide
+#      se il trade lo chiude un TETTO o lo chiude il mercato.
+#      Letto nel codice (r.375):
+#        double tp = isLong ? entry+risk*InpTP_RR : entry-risk*InpTP_RR;
+#      e r.409 per la tranche pendente 2/3. Nessuna guardia, nessun
+#      ramo: e' sempre attivo, su tutte e due le tranche.
+#
+#  (2) E QUI STA IL PUNTO CHE RENDE QUESTO ROUND NECESSARIO:
+#      >>> R120e HA MISURATO IL TRAILING **SOTTO UN TETTO DI 3R**. <<<
+#      InpTrailOnST e InpExitOnFlip sono stati messi ad asse mentre
+#      InpTP_RR restava inchiodato a 3,0. Ma un trailing sul
+#      Supertrend serve a lasciar correre: se il TP a 3R chiude prima,
+#      il trailing non ha modo di pagare. Le due manopole sono
+#      ACCOPPIATE, e ne e' stata misurata una sola.
+#      Il numero che rende concreta la cosa (letto nei CSV di R120e):
+#        r120e00 (trail OFF, flip OFF): IS PF 0,97751 DD 5,0668 -- 74
+#                                       OOS PF 1,28437 DD 6,5252 -- 130
+#        r120e11 (trail ON,  flip ON):  IS PF 1,39744 DD 3,4846 -- 106
+#                                       OOS PF 1,22034 DD 4,2149 -- 184
+#      Il trailing vale +0,42 di PF in IS e -0,06 in OOS. Quel -0,06 e'
+#      esattamente il segno che ci si aspetta da un runner che viene
+#      tagliato: non si sa se il trailing e' debole o se il tetto lo
+#      strozza, e questo round separa le due cose.
+#
+#  (3) E LA MANOPOLA MORDE: provato sul binario FRATELLO.
+#      backtest_pipeline/risultati_archivio/SuperWave/
+#        valid_SuperWaveRT_U30USD_H1_realtick.csv
+#      (ABTG_SuperWave "base", magic 770501/770531, STESSO simbolo
+#       U30USD, STESSO TF H1, TICK REALI, n 209-227)
+#      griglia InpStMult x InpTP_RR, 9 righe, 9 Profit distinti:
+#        TP_RR 2,0 -> PF 1,13866 / 1,14666 / 1,36373
+#        TP_RR 2,5 -> PF 1,40730 / 1,16327 / 1,18922
+#        TP_RR 3,0 -> PF 1,52140 / 1,26388 / 1,33652
+#      >>> Il PF si muove da 1,139 a 1,521 su quell'asse, e il verso e'
+#          "piu' alto il tetto, meglio va" -- su un binario diverso ma
+#          sullo STESSO mercato e TF. E' un indizio forte, non una
+#          previsione: lo dichiaro come tale.
+#
+# ---------------------------------------------------------------------
+#  ###  IL LIMITE DI QUESTO ROUND, SCRITTO PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  [!] QUESTA SEDIA E' SOTTO IL PAVIMENTO DI LAVORO DEL COSTO, E QUESTO
+#     ROUND NON LO SPOSTA DI UN MILLIMETRO.
+#     report/CANCELLO_COSTO_FLOTTA_2026-09-10.md r.404:
+#       770511 U30USD H1 -- stop 77,1 idx [MISURATO, n=4] /
+#       spread 2,00 = 38,5x contro il pavimento di lavoro 40x.
+#       "NO (96%)".
+#     InpTP_RR non tocca lo stop (r.368-371: lo stop e' min/max fra
+#     linea Supertrend ed estremo di InpSLLookback barre, meno il
+#     buffer). Quindi:
+#     >>> IL ROUND MISURA, NON PROMUOVE. Nessuna cella di questo asse
+#         puo' diventare una sedia finche' il costo non passa, e la
+#         manopola che lo farebbe passare e' InpSLBufferAtr (R126a,
+#         gia' girata: bastano ~0,05 ATR, r.661 dello stesso referto).
+#     E' scritto qui perche' sia chiaro PRIMA che dopo: se esce un PF
+#     bellissimo a TP_RR 5,0, la risposta corretta resta "bello, e non
+#     schierabile", non "allora il 40x e' troppo severo".
+#
+#  [!] E IL CAMPIONE DI QUESTA SEDIA E' PIU' SOTTILE DI COME LO
+#     SCRIVIAMO, ed e' una scoperta di oggi che tocca anche R190b.
+#     Misurato il 19/09 sui file per-trade di R81 (altro EA, stessa
+#     macchina): la colonna 'Trades' dei nostri CSV conta i DEAL IN
+#     USCITA, non le POSIZIONI -- 6 coppie su 6, con le due varianti a
+#     gestione spenta che fanno 14 righe = 14 posizioni e le quattro
+#     con la scala accesa che ne fanno 15-22 sulle STESSE 14 posizioni.
+#     Su questo EA il per-trade NON esiste per r120e11 (nessun file
+#     pertrade_r120e* in archivio), quindi:
+#     >>> LE POSIZIONI VERE DI r120e11 SONO [NON MISURATO]. I numeri
+#         106 e 184 sono DEAL. Con parziale al 50% + stop in pari, il
+#         rapporto puo' arrivare a 2 deal per posizione: il conto
+#         "106+184=290 contro il pavimento 300" che R190b usa come
+#         argomento centrale e' scritto su DEAL, e le posizioni
+#         potrebbero essere molte meno. VA PORTATO A CHI LEGGE R190b.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  CELLA 3,00 -- ANCORA, non candidata.
+#    DEVE dare IS  PF 1,39744 DD 3,4846 Trades 106 Profit 4236,16
+#            OOS PF 1,22034 DD 4,2149 Trades 184 Profit 3454,83
+#    Tolleranza: ZERO sui Trades, +-0,5% su PF e DD.
+#    >>> DELTA NOTI rispetto a R120e, dichiarati adesso: (1) InpMagic
+#        da asse gemello (783500/783501) a PIN singolo, quindi G1 NON
+#        viene rifatto -- l'ancora e' un controllo piu' forte, ma se
+#        fallisce questo round non sa dire se la colpa e' del banco o
+#        del binario; (2) @FINOA e @FRAZIONEIS scritti ESPLICITI (in
+#        R120e arrivavano dai default del driver, r.177 e r.179).
+#        >>> E IL RISCHIO CLASSE 392: r120e11 e' del 13-18/09,
+#            POSTERIORE a 3af47ed9 (08/08, fix sizing su 41 EA) e a
+#            872dba82 (08/09, pavimento lotto minimo). L'ancora NON e'
+#            scaduta per quei due commit. Verificato il 19/09 col diff
+#            degli input fra HEAD e il commit precedente al 13/09 su
+#            questo .mq5: nessun input cambiato.
+#
+#  CELLE 1,50 e 2,25 -- tetto PIU' BASSO dell'ancora.
+#    Trades attesi: verso [NON MISURATO]. Un tetto piu' basso chiude
+#    prima, quindi puo' produrre MENO deal (meno posizioni che
+#    arrivano al parziale + TP) o UGUALI. Non si prevede.
+#    PF atteso: indizio dal binario fratello -> in DISCESA.
+#    >>> SONO LE CELLE-TRAPPOLA: se il PF sale mentre i Trades
+#        scendono, e' un TAGLIO travestito da gestione. Vedi criterio.
+#
+#  CELLE 3,75 / 4,50 / 5,25 / 6,00 -- tetto PIU' ALTO.
+#    E' la domanda vera del round: lasciato correre, il runner paga?
+#    PF atteso: [NON MISURATO]. Il binario fratello dice "sale fino a
+#    3,0" e si FERMA li': oltre 3,0 nessuno ha mai misurato niente, su
+#    nessun binario della famiglia. Estrapolare sarebbe inventare.
+#    DD atteso: IN SALITA -- un tetto piu' alto tiene aperto piu' a
+#    lungo. Si legge a QUALUNQUE n (Emendamento B, 16/08).
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO OBBLIGATORIO: COSA VEDREI SE QUESTO ROUND
+#  ###  STESSE MISURANDO LA COSA SBAGLIATA
+# ---------------------------------------------------------------------
+#  (1) LO ZERO CHE NON E' "SPENTO". La cosa piu' naturale da scrivere
+#      su un asse di take profit e' "0 = nessun TP, lascia correre". Su
+#      QUESTO EA sarebbe un disastro silenzioso: a r.375 non c'e'
+#      nessun `if(tp>0)`, quindi con InpTP_RR=0 il take profit cade
+#      ESATTAMENTE sul prezzo d'ingresso. L'ordine verrebbe rifiutato
+#      o chiuso subito, e la cella misurerebbe "nessun trade", non
+#      "nessun tetto". (Il confronto che lo rende evidente:
+#      ABTG_CostToCost.mq5 r.829-834 quella guardia ce l'ha.)
+#      >>> DIFESA: l'asse parte da 1,50 e non passa mai da 0. Il "tetto
+#          praticamente assente" si ottiene con un valore ALTO (6,00),
+#          non con lo zero.
+#
+#  (2) IL PROXY DEI TRADE QUI E' PIU' DEBOLE CHE IN R191a, E LO DICO.
+#      In R191a la scala d'uscita e' identica in tutte le celle, quindi
+#      la variazione di Trades segue quella delle posizioni. QUI la
+#      manopola E' un pezzo della scala: cambiando il tetto cambia
+#      quante posizioni arrivano al parziale, e quindi il rapporto
+#      deal/posizione cambia CON la cella.
+#      >>> DIFESA: gli INGRESSI sono identici per costruzione (TP_RR
+#          non entra in nessuna condizione d'ingresso -- verificato:
+#          le uniche occorrenze nel sorgente sono r.84 dichiarazione,
+#          r.375 e r.409, tutte e due in fase di PIAZZAMENTO del TP).
+#          Quindi una variazione di Trades su questo asse NON e' mai
+#          un filtro: e' un effetto di scala. Il criterio di merito
+#          non si scrive sul numero di Trades ma sul PF e sul DD, e la
+#          soglia dei 150 si applica al numero PIU' BASSO fra le celle
+#          (il piu' prudente), non a quello che conviene.
+#      >>> E il per-trade non aiuta: r.696-698 del sorgente dice che in
+#          ottimizzazione ogni pass sovrascrive il file del proprio
+#          magic. Con un magic pinnato e 7 celle sopravvive solo
+#          l'ultima passata. Il conteggio delle posizioni per cella si
+#          compra solo con una passata di conferma a magic-sweep,
+#          DOPO, sulla cella che interessa. Non e' in questo file.
+#
+#  (3) LA FORMA "NASUSD", misurata oggi su un'altra manopola: dentro
+#      campione sale, fuori campione crolla (PF OOS 1,147 -> 0,688
+#      scendendo di TF). La stessa forma qui sarebbe: il PF IS che
+#      cresce monotono col tetto e l'OOS che si gira.
+#      >>> DIFESA: nessuna cella si dice migliore dell'ancora se non
+#          lo e' in TUTTE E DUE le finestre. E se l'IS e' monotono e
+#          l'OOS no, il verdetto e' "asse non stazionario", che e' un
+#          risultato e si scrive cosi'.
+#
+#  (4) L'ALTOPIANO CHE NON C'E'. Sette celle bastano per vedere un
+#      altopiano, e quindi anche per vedere che non c'e': se una cella
+#      sporge e le due vicine no, il verdetto e' "non c'e' una
+#      configurazione robusta". Centro dell'altopiano, MAI il picco.
+#
+#  (5) IL CONFRONTO CHE MANCA SE NON LO SI SCRIVE: "e' meglio del
+#      DEFAULT?". Se il guadagno della cella migliore sta dentro il
+#      rumore delle celle vicine, la risposta onesta e' "3,0 va bene
+#      cosi'" -- ed e' un risultato, non un fallimento. Su
+#      InpSLLookback (R127b, oro) l'asse e' uscito PIATTO e la
+#      conclusione e' stata esattamente questa.
+#
+# ---------------------------------------------------------------------
+#  ###  SOGLIE CONGELATE PRIMA  ###
+# ---------------------------------------------------------------------
+#   scarta se  DD > 8,0% in una qualunque delle due finestre
+#              (il contratto della sedia promette 4,0% --
+#               report/CONTRATTI_SEDIE.md -- e l'ancora misura
+#               3,4846 / 4,2149: 8,0 e' il doppio abbondante e resta
+#               sotto il muro prop del 10%)
+#   scarta se  PF < 1,10 in una finestra dove Trades >= 150
+#   NON GIUDICA il merito dove Trades < 150 (valvola R59). In IS
+#              l'ancora ne ha 106: >>> IL MERITO IN IS E' SOSPESO IN
+#              PARTENZA, e se le posizioni vere sono meno dei deal
+#              (vedi sopra) lo e' anche in OOS.
+#   IL ROUND NON PROMUOVE NIENTE, e in piu' NON POTREBBE: la sedia e'
+#   al 96% del pavimento di costo. Nessun preset si tocca.
+#
+#  LE QUATTRO USCITE, congelate adesso:
+#   (a) le celle sopra 3,0 danno PF >= dell'ancora in TUTTE E DUE le
+#       finestre, con un altopiano di almeno 3 celle contigue: allora
+#       il tetto a 3R stava strozzando il runner, e R120e ha misurato
+#       il trailing in condizioni sfavorevoli. Si riapre R120 col
+#       tetto giusto. NON si promuove qui.
+#   (b) le celle sopra 3,0 non migliorano niente: il tetto a 3,0 non
+#       strozza, il trailing e' misurato bene, e InpTP_RR si dichiara
+#       CHIUSA sul certificato di questa sedia. Risultato pieno.
+#   (c) il PF migliore sta SOTTO 3,0 con Trades in calo: e' un taglio,
+#       non una gestione. Si scrive cosi' e non si promuove.
+#   (d) la cella 3,00 non riproduce r120e11: si legge SOLO quello, e
+#       si apre la domanda del binario (classe 392).
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  CORPO: copia riga per riga di prove/R120e_U30USD_11_vivo_TAGLIA.txt
+#    (rr.247-302). Delta: (1) InpMagic da asse gemello a PIN vergine;
+#    (2) InpTP_RR da PIN ad ASSE; (3) @FINOA e @FRAZIONEIS espliciti.
+#    Nessun parametro di motore toccato.
+#  FINESTRA: identica a R120e. @DAQUANDO 2024.09.26 = inizio MISURATO
+#    dei tick reali BCM su U30USD (67.618.571 tick,
+#    backtest_pipeline/risultati_archivio/misura_tick/
+#    REFERTO_MISURA_TICK_U30USD.txt). @FINOA 2026.06.30 e
+#    @FRAZIONEIS 0.40 = i default del driver (walkforward_generico.ps1
+#    r.177 e r.179), che sono quelli con cui r120e11 e' stato prodotto
+#    perche' la corsia ROUND (RIGA_SOTTILE_ROUND.ps1) non passa ne'
+#    -Fino ne' -FrazioneIS. Scritti espliciti per la classe 393.
+#  MODELLO: tick reali = -Modello 4, come r120e11.
+#  TETTO DELLE BARRE: @PERIODO H1 su 21 mesi = ~10.900 barre
+#    [DERIVATO: ~6.240 barre H1/anno x 1,76]. Sotto le ~100.000.
+#  MAGIC: 787420 -- cercato il 19/09/2026 su tutto il repo con
+#    grep -rl, .git e .claude esclusi: ZERO occorrenze. VIETATI qui:
+#    770511 (la sedia viva), 783200-783511 (R120b/e), 779300/779310
+#    (R126a/b), 789320 (R190b).
+#  ETICHETTA: r191b -- grep -ril su backtest_pipeline/ e report/: ZERO.
+#  PIN DI STRINGA: nessuno. Nessun input stringa viene toccato.
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA, identico a
+#    R120e. Taglie e rischio in campo sono di CLAUDIO.
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO -- STIMA, con la base dichiarata:
+#    7 celle x 2 gambe (IS+OOS) = 14 passate.
+#    Base MISURATA piu' ALTA in archivio: 0,700 min/passata.
+#    Base MISURATA piu' bassa: 0,083 min/passata (R88a, 96 passate in
+#    8,0 min, U30USD, tick reali -- STESSO simbolo e stesso modello).
+#    >>> BANDA 1,2 - 9,8 MINUTI. Si dichiara l'ESTREMO ALTO: 9,8 min.
+#    Nota: su H1 le barre da costruire sono ~10.900 contro le ~120.000
+#    di M5 di R88a, quindi la banda alta e' quasi certamente molto
+#    prudente. Si misura al primo giro e si scrive.
+#
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
+#    10105439.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#    SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#    coordinatore. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO    U30USD
+@PERIODO    H1
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- IDENTITA' DEL MOTORE: la cella r120e11, pinnata per nome ---
+InpUsaGuardian=true||true||0||true||N
+InpTF=16385||16385||0||16385||N
+InpStMult=2.5||2.5||0||2.5||N
+InpStAtrPeriod=10||10||0||10||N
+InpNearAtr=1.0||1.0||0||1.0||N
+InpRequireConfirmBody=true||true||0||true||N
+
+# --- I DUE LATI, TUTTI E DUE VIVI (regola di casa del 25/08) ---
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+
+# --- Confluenza / medie ---
+InpUseConfluence=false||false||0||false||N
+InpEma1=14||14||0||14||N
+InpEma2=89||89||0||89||N
+InpEma3=100||100||0||100||N
+InpEma4=200||200||0||200||N
+InpConflAtr=1.5||1.5||0||1.5||N
+
+# --- Ingresso frazionato e stop: PINNATI ai valori dell'ancora ---
+InpFirstFraction=0.3333||0.3333||0||0.3333||N
+InpUsePending=true||true||0||true||N
+InpPendingPips=20.0||20.0||0||20.0||N
+InpPendingAtr=0.0||0.0||0||0.0||N
+InpSLBufferPips=3.0||3.0||0||3.0||N
+InpSLBufferAtr=0.0||0.0||0||0.0||N
+InpPendingExpiryBars=3||3||0||3||N
+InpSLLookback=5||5||0||5||N
+
+# --- LA GESTIONE DELL'USCITA: la cella vincente di R120e.
+#     InpTP_RR e' l'UNICO asse del file: tutto il resto e' PIN. ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50.0||50.0||0||50.0||N
+InpBreakeven=true||true||0||true||N
+InpTrailOnST=true||true||0||true||N
+InpExitOnFlip=true||true||0||true||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpMaxTradesPerDay=0||0||0||0||N
+InpUseTimeWindow=false||false||0||false||N
+InpStartHour=0||0||0||0||N
+InpEndHour=24||24||0||24||N
+InpUseNewsFilter=false||false||0||false||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=787420||787420||0||787420||N
+
+# --- L'UNICO ASSE: IL TETTO DEL RUNNER, in multipli di R.
+#     Sette celle: 1,50 / 2,25 / 3,00 / 3,75 / 4,50 / 5,25 / 6,00.
+#     3,00 e' l'ANCORA (deve riprodurre r120e11).
+#     Lo ZERO E' ESCLUSO APPOSTA: a r.375 non c'e' nessun if(tp>0),
+#     quindi 0 metterebbe il TP sull'ingresso -- misurerebbe "nessun
+#     trade", non "nessun tetto".
+InpTP_RR=1.5||1.5||0.75||6.0||Y

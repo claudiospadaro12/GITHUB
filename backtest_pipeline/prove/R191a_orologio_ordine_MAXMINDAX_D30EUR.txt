@@ -1,0 +1,442 @@
+# =====================================================================
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+#  R191a -- L'OROLOGIO CHE UCCIDE L'ORDINE.
+#           Asse unico: InpEntryCutoffMin (il CUTOFF degli ingressi).
+#           La cella 30 e' l'ANCORA: deve riprodurre r81a al centesimo.
+#
+#  Si lancia con: -Deposito 100000 -Modello 4
+#     MOTIVO (classe 453): e' il deposito con cui l'ANCORA e'
+#     confrontabile. Letto nella fonte piu' grezza sopravvissuta:
+#     l'intestazione "Si lancia con: ... -Deposito 100000 -Modello 4"
+#     di prove\R81a_uscita_A_viva.txt (r.5), il file che ha PRODOTTO
+#     i CSV d'ancora. [!] BUCO DICHIARATO: la riga di lancio di R81 NON
+#     esiste in coda\CODA.txt ne' nei referti runner (cercata il
+#     19/09/2026 con grep -rn su backtest_pipeline\: zero righe con
+#     'R81' e 'Deposito' insieme). Per questo il numero e' stato
+#     CONTROINCROCIATO col metodo della classe 453 stessa:
+#       r81a IS Profit +4.766,96 su 20 deal a InpRiskPercent 1,0
+#       -> +4,77% del capitale. A 10.000 sarebbe +47,7% con
+#          Expected Payoff 238,35 per deal = 2,4R medi a PF 1,88:
+#          aritmeticamente incompatibile.
+#       A 100.000 il rischio per trade e' 1.000 e il payoff medio
+#       238,35 = 0,24R: compatibile con PF 1,88.
+#     >>> 100.000 CONFERMATO IN DUE MODI INDIPENDENTI.
+# =====================================================================
+#  DOSSIER: report/USCITE_DELLA_ROSA_2026-09-19.md
+#  ANCORA:  prove/R81a_uscita_A_viva.txt  (etichetta r81a, 18/08/2026)
+#    CSV letti il 19/09/2026 nella fonte GREZZA (classe 451):
+#      backtest_pipeline/risultati_archivio/r81_csv/
+#        ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r81a.csv
+#          Pass 0 e 1 (magic 778110/778111, IDENTICHE = G1 passato):
+#          Profit 4766.96  PF 1.87803  DD 3.0977  Trades 20
+#        ..._D30EUR_OOS_r81a.csv
+#          Pass 0 e 1: Profit 6143.38  PF 2.15985  DD 1.9213  Trades 21
+#    Le cifre sono ESATTAMENTE quelle del CSV: cinque decimali sul PF,
+#    quattro sul DD. Non una in piu' (classe 451), non una in meno
+#    (classe 385).
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+# ---------------------------------------------------------------------
+#  Questa sedia (magic 770411, D30EUR) ha il DD promesso PIU' BASSO
+#  della flotta e 5 vinte su 5 in campo. L'UNICA cosa che la tiene
+#  fuori e' il CAMPIONE. E il campione non si compra con un filtro:
+#  si compra allungando la vita dell'ordine.
+#
+#  >>> LA MISURA CHE HA APERTO QUESTO ROUND, fatta il 19/09/2026 sui
+#      file per-trade di R81 (mai letti da nessun referto finora):
+#
+#      backtest_pipeline/risultati_archivio/r81_csv/pertrade_r81*.csv
+#      colonna position_id, conteggio dei valori DISTINTI:
+#        r81a 21 righe -> 14 posizioni      r81b 14 righe -> 14 posizioni
+#        r81c 22 righe -> 14 posizioni      r81d 21 righe -> 14 posizioni
+#        r81e 15 righe -> 14 posizioni      r81f 14 righe -> 14 posizioni
+#      E la colonna 'Trades' dei CSV di ottimizzazione vale
+#        21 / 14 / 22 / 21 / 15 / 14 -- cioe' ESATTAMENTE il numero di
+#      RIGHE, non di POSIZIONI.
+#
+#  >>> 'Trades' NEI NOSTRI CSV CONTA I DEAL IN USCITA, NON LE POSIZIONI.
+#      Provato all'unita' su 6 coppie, e provato nei due versi: le due
+#      varianti con la gestione COMPLETAMENTE spenta (r81b e r81f:
+#      TP1Pct=0, TP2Pct=0, Breakeven=0, UseTrailing=0, EMA200Target=0)
+#      fanno 14 righe = 14 posizioni = 1 deal per posizione. Le quattro
+#      con la scala di parziali accesa ne fanno 15-22 sulle STESSE 14
+#      posizioni.
+#      >>> CONSEGUENZA SU QUESTA SEDIA: il campione OOS vero e' 14
+#          POSIZIONI, non 21. E il "41 trade" della promozione R16
+#          (report/CONTRATTI_SEDIE.md r.93) sono 41 DEAL = ~27
+#          posizioni. Il pavimento dei 150 e' piu' lontano di come
+#          l'avevamo scritto, non piu' vicino.
+#      >>> E CONSEGUENZA SU QUESTO ROUND: il criterio di lettura NON si
+#          puo' scrivere sulla colonna Trades. Sta scritto sotto.
+#
+# ---------------------------------------------------------------------
+#  ###  LA MANOPOLA, E PERCHE' E' LEI  ###
+# ---------------------------------------------------------------------
+#  CENSIMENTO RIFATTO IL 19/09/2026 sui 20 CSV attribuiti a questo EA
+#  (attribuzione: nome dell'EA nel percorso oppure InpMagic della
+#  famiglia 770411/7781xx, piu' il VETO "ogni colonna Inp* del CSV
+#  dev'essere un input dichiarato in questo .mq5"):
+#    InpEntryCutoffHour -> COSTANTE 8  in tutti e 20
+#    InpEntryCutoffMin  -> COSTANTE 30 in tutti e 20
+#  >>> MAI MOSSA. Ne' dentro un file, ne' fra file diversi.
+#      E non compare in nessuno dei 6 file prova di R81, che pure era
+#      il round dedicato alle uscite di questa sedia.
+#
+#  COSA FA, LETTO NEL CODICE (non ricordato):
+#    ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5 r.172-179
+#      if(gPhase==MMP_PLACED && !SelPos() &&
+#         nowMin >= InpEntryCutoffHour*60+InpEntryCutoffMin)
+#        { CancelPendings(); gPhase=MMP_DONE; ... return; }
+#    E' l'orologio che AMMAZZA i due pendenti non scattati. Con
+#    InpPlaceHour/Min = 7:59 e cutoff 8:30, l'ordine vive 31 MINUTI.
+#
+#  >>> E' UNA MANOPOLA D'USCITA O D'INGRESSO? LO DICHIARO, non lo
+#      nascondo: e' l'USCITA A TEMPO DELL'ORDINE, e il suo effetto si
+#      vede sul numero di ingressi. Sta sul confine, e il round e'
+#      scritto sapendolo: per questo il criterio qui sotto e' costruito
+#      apposta per distinguere "piu' operazioni" da "operazioni
+#      peggiori".
+#
+# ---------------------------------------------------------------------
+#  ###  IL SOFFITTO CHE NESSUNO AVEVA VISTO: InpPendingExpiryMin  ###
+# ---------------------------------------------------------------------
+#  ARITMETICA, sul codice (r.238: exp = TimeCurrent() + InpPendingExpiryMin*60):
+#    piazzamento 7:59 + 90 min = 9:29 server -> il BROKER cancella.
+#    cutoff vivo 8:30 server                 -> l'EA cancella prima.
+#  >>> SU QUESTA SEDIA InpPendingExpiryMin=90 E' INERTE PER COSTRUZIONE:
+#      l'ordine e' gia' morto da 59 minuti quando scade. Qualunque
+#      valore sopra 31 minuti da' lo stesso risultato.
+#      Questa e' una casella del censimento che va segnata INERTE, non
+#      "mai provata": girarla costerebbe passate e non misurerebbe
+#      niente (trappola B del censimento dell'11/09).
+#
+#  >>> E IL ROVESCIO, CHE E' LA PROVA CHE IL RAGIONAMENTO E' GIUSTO:
+#      sulla sedia GEMELLA 770402 (ABTG_MaxMinNotte, XAUUSD) i CSV
+#      d'archivio (MaxMin_Oro/*, MaxMin_Oro_r17/*, ..._XAUUSD_*_r19*)
+#      portano InpPlaceHour=7 InpPlaceMin=0 e cutoff 9:30: la finestra
+#      e' 150 minuti e l'expiry a 90 minuti (8:30) scatta PRIMA.
+#      Sull'oro e' il CUTOFF a essere inerte e l'EXPIRY a mordere --
+#      la stessa coppia di manopole, i ruoli invertiti. Per questo il
+#      round dell'oro (terzo in classifica nel dossier) va scritto
+#      sull'ALTRA manopola, e questo qui su questa.
+#
+#  >>> PERCHE' L'ASSE SI FERMA A 90 E NON VA A 130.
+#      Con InpEntryCutoffHour pinnato a 8, la cella 90 vale 8*60+90 =
+#      9:30 server, cioe' UN MINUTO DOPO l'expiry del pendente. Da li'
+#      in poi comanda l'expiry e tutte le celle escono identiche:
+#      sarebbero passate spese per misurare una costante. La cella 90
+#      e' quindi il TETTO INFORMATIVO dell'asse, e sta dentro apposta:
+#      e' la cella che dice "qui l'orologio dell'EA ha smesso di
+#      contare". (InpEntryCutoffMin oltre 59 e' LEGALE: il codice fa
+#      solo aritmetica su Ora*60+Min, r.172, e il valore non entra mai
+#      in un MqlDateTime. Verificato col grep: le uniche occorrenze di
+#      InpEntryCutoffMin nel sorgente sono la dichiarazione r.62 e la
+#      r.172.)
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  CELLA 30 (8:30) -- ANCORA, non candidata.
+#    DEVE dare IS  PF 1,87803 DD 3,0977 Trades 20 Profit 4766,96
+#            OOS PF 2,15985 DD 1,9213 Trades 21 Profit 6143,38
+#    Tolleranza: ZERO sui Trades, +-0,5% su PF e DD.
+#    >>> DELTA NOTI rispetto al binario del 18/08, dichiarati adesso:
+#        il commit 5fc0bc31 (19/08, il giorno DOPO R81) ha AGGIUNTO
+#        'input bool InpUsaGuardian = true' a questo EA. Verificato col
+#        diff degli input fra HEAD e l'ultimo commit precedente al
+#        18/08: e' l'UNICA riga input cambiata, nessun default toccato.
+#        Nel Tester il Guardian e' fail-open (ABTG_PausaGuardian.mqh
+#        r.790: le GlobalVariable del Guardian nel tester non
+#        esistono), quindi l'ancora deve reggere lo stesso.
+#        SE L'ANCORA NON RIPRODUCE, il primo sospetto e' quello, e il
+#        round NON SI LEGGE: si legge solo l'ancora.
+#
+#  CELLE 50 / 70 / 90 (8:50 / 9:10 / 9:30) -- allungano la vita
+#    dell'ordine da 31 a 51 / 71 / 91 minuti.
+#    n atteso: IN SALITA. Di quanto: [NON MISURATO], e non lo invento.
+#    Non esiste in archivio una sola corsa di questo EA con un cutoff
+#    diverso da 8:30, quindi non c'e' una base da cui scalare.
+#    PF atteso: IN DISCESA, e c'e' una ragione SCRITTA NEL CODICE, non
+#    un presentimento -- il commento dell'autore a r.61-62 dice che il
+#    cutoff serve a prendere "solo la rottura FRESCA dell'apertura" e
+#    a evitare "la rincorsa a corsa gia' avvenuta -> esaurimento".
+#    Chi legge questo round deve saperlo PRIMA: piu' operazioni a PF
+#    piu' basso e' l'esito che il codice stesso prevede.
+#    DD atteso: puo' andare in tutte e due le direzioni (piu'
+#    operazioni = piu' occasioni di perdere, ma anche piu'
+#    diversificazione nel tempo). Si legge a QUALUNQUE n
+#    (Emendamento B, 16/08).
+#
+#  CELLA 10 (8:10) -- stringe la vita dell'ordine a 11 minuti.
+#    n atteso: IN DISCESA. E' la cella-TRAPPOLA messa apposta: se il
+#    PF sale mentre n scende, quella NON e' una gestione dell'uscita
+#    migliore, e' un FILTRO travestito. Vedi il criterio.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO OBBLIGATORIO: COSA VEDREI SE QUESTO ROUND
+#  ###  STESSE MISURANDO LA COSA SBAGLIATA
+# ---------------------------------------------------------------------
+#  (1) IL FILTRO TRAVESTITO DA USCITA. La cella 10 alza il PF e
+#      abbassa n. Letta male, diventa "abbiamo migliorato l'uscita".
+#      E' falso: ha solo buttato via le rotture piu' lente. Su una
+#      sedia che ha gia' 14 posizioni fuori campione, comprare PF
+#      pagandolo in n e' il peggior affare disponibile.
+#      >>> DIFESA, congelata sotto: nessuna cella con n INFERIORE
+#          all'ancora e' promuovibile, a nessun PF.
+#
+#  (2) IL CAMPIONE CHE NON E' UN CAMPIONE. La colonna Trades conta i
+#      DEAL (provato qui sopra su 6 coppie). Una cella che chiude piu'
+#      spesso col parziale gonfia Trades senza aggiungere un solo
+#      ingresso.
+#      >>> LA DIFESA "OVVIA" NON FUNZIONA, E LO DICO PRIMA DI
+#          PROPORLA. La prima stesura di questo file diceva "si
+#          contano i position_id distinti nel file per-trade". E'
+#          SBAGLIATO, e il codice lo dice in faccia:
+#          ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5 r.542-543 --
+#          "In ottimizzazione ogni pass sovrascrive il file del
+#          proprio magic: usarlo su run singoli / magic-sweep, non
+#          sulle griglie larghe". Il nome del file e'
+#          abtg_trades_<EA>_<SIMBOLO>_<MAGIC>.csv (r.548): con UN
+#          magic pinnato e CINQUE celle, le cinque passate scrivono
+#          tutte sullo stesso nome e sopravvive solo l'ultima, che
+#          per giunta non e' identificabile. R81 aveva i per-trade
+#          per cella solo perche' ogni cella era un FILE PROVA a se'
+#          con un magic suo.
+#      >>> LA DIFESA CHE FUNZIONA, ed e' un argomento, non un
+#          espediente: in QUESTO round la scala d'uscita e' PINNATA e
+#          IDENTICA in tutte e cinque le celle (TP1_R 1,0 / TP1Pct 50
+#          / Breakeven / TP2_R 3,0 / TP2Pct 50 / EMA200 / TPfinal 4,0
+#          / trailing 2,0 ATR). Il rapporto deal-per-posizione dipende
+#          dalla SCALA, non dall'orologio: fra le cinque celle resta
+#          approssimativamente costante, e quindi la VARIAZIONE di
+#          Trades e' un proxy valido della variazione di posizioni.
+#          E' esattamente il contrario di R81, dove a cambiare era la
+#          scala stessa e il proxy sarebbe stato falso (14 posizioni
+#          lette come 14/21/22 "trade").
+#          [!] RESTA UN'APPROSSIMAZIONE, e il limite e' dichiarato: il
+#          rapporto dipende anche da QUANTE posizioni arrivano a 1R, e
+#          le rotture piu' tarde potrebbero arrivarci meno spesso.
+#      >>> E LA PROVA VERA, PRIMA DI QUALUNQUE PROMOZIONE: una
+#          passata di conferma a cella singola con asse sul MAGIC (due
+#          gemelli), che produce il per-trade e da' il conteggio delle
+#          posizioni esatto. Costo: 2 passate. Non e' in questo file
+#          apposta: si scrive DOPO aver visto quale cella vale la
+#          conferma, non prima.
+#
+#  (3) LA FORMA "NASUSD": dentro campione sale, fuori campione crolla.
+#      Misurata oggi su un'altra famiglia (discesa di TF su NASUSD:
+#      PF OOS 1,147 -> 0,688). Qui la stessa forma sarebbe: IS che
+#      migliora allungando il cutoff e OOS che peggiora.
+#      >>> DIFESA: nessuna cella si giudica su UNA sola finestra. Una
+#          cella si dice "meglio dell'ancora" solo se lo e' in TUTTE E
+#          DUE, e allora comunque solo in OOS conta il merito.
+#
+#  (4) L'ALTOPIANO CHE NON C'E'. Cinque celle sono poche: se la
+#      migliore sporge e le due vicine no, il verdetto e' "non c'e'
+#      una configurazione robusta", si scrive cosi' e si chiude. Il
+#      centro dell'altopiano, MAI il picco.
+#
+#  (5) IL COSTO CHE SI SPOSTA COL CUTOFF -- ed e' il contro-esempio
+#      che riguarda il RISCHIO, non il merito. Il cancello di casa e'
+#      stop >= 40 x spread. Su questa sedia lo stop e'
+#      2,5 x ATR(14) M15 e NON viene toccato da questo round: resta
+#      la banda dichiarata in report/CANCELLO_COSTO_FLOTTA_2026-09-10.md
+#      r.1006 -- stop 64,2-87,5 idx [NON MISURATO], spread 1,70
+#      all'ora 08, cioe' 37,8x - 51,5x, etichetta [~] FRAGILE (l'estremo
+#      basso e' SOTTO il pavimento di lavoro 40x).
+#      >>> MA ALLUNGANDO IL CUTOFF I TRADE NASCONO PIU' TARDI, e due
+#          cose peggiorano insieme: l'ATR intraday cala dopo
+#          l'apertura (stop piu' stretto) e lo spread D30EUR alle
+#          09-10 server e' [NON MISURATO] (il referto ha solo l'ora 08
+#          = 1,70 e l'ora 21 = 2,80).
+#      >>> QUINDI: questo round NON PUO' PROMUOVERE una cella oltre
+#          l'ancora senza una misura NUOVA dello spread e dell'ATR
+#          nella fascia oraria che la cella apre. Scritto adesso, non
+#          dopo aver visto un PF che piace.
+#
+# ---------------------------------------------------------------------
+#  ###  SOGLIE CONGELATE PRIMA  ###
+# ---------------------------------------------------------------------
+#   scarta se  DD > 8,0% in una qualunque delle due finestre
+#              (il muro prop e' 10,0% -- FIRME_2026-08-18.md -- e
+#               questa sedia oggi sta a 3,0977 / 1,9213: 8,0 e' gia'
+#               un raddoppio abbondante e resta sotto il muro)
+#   scarta se  la cella ha MENO Trades dell'ancora (filtro travestito,
+#              contro-esempio 1) -- a qualunque PF. Su questo round
+#              Trades e' un proxy valido delle posizioni perche' la
+#              scala d'uscita e' identica in tutte le celle (vedi (2)).
+#   scarta se  PF < 1,10 in una finestra dove le posizioni sono >= 150
+#   NON GIUDICA il merito dove le posizioni sono < 150 (valvola R59):
+#              e su questa sedia saranno < 150 quasi di sicuro, quindi
+#              >>> IL MERITO DI QUESTO ROUND E' SOSPESO IN PARTENZA.
+#              Quello che il round puo' dire e' UNA cosa sola, ed e'
+#              quella che serve: DI QUANTO SALE IL CAMPIONE, e a che
+#              prezzo in DD. Il PF e' un indizio, non un verdetto.
+#   IL ROUND NON PROMUOVE NIENTE. Nessun preset si tocca, nessuna
+#   sedia si accende: quelle sono decisioni di Claudio.
+#
+#  LE QUATTRO USCITE, congelate adesso:
+#   (a) le celle 50/70/90 alzano i Trades in tutte e due le finestre e
+#       il DD resta sotto 8,0%: allora esiste una leva di frequenza su
+#       questa sedia che non passa da un filtro d'ingresso. Si fa la
+#       passata di conferma col magic-sweep per contare le POSIZIONI
+#       vere, poi la misura di spread/ATR nella fascia oraria nuova.
+#       NON si promuove qui.
+#   (b) i Trades NON salgono (l'orologio non morde): risultato di
+#       suo, e chiude una casella del certificato. Vuol dire che le
+#       rotture del box succedono tutte nei primi 31 minuti, e allora
+#       la frequenza di questa sedia NON si compra sull'uscita: va
+#       cercata sul lato (InpAllowLong=false oggi) o sul simbolo
+#       gemello. Si scrive in REGISTRO_TEST.md, non si insiste.
+#   (c) i Trades salgono ma il DD sfonda 8,0%: la leva esiste ma
+#       costa il patrimonio della sedia (il DD basso E' il suo
+#       contratto). Verdetto: "la frequenza c'e', non e' comprabile".
+#   (d) la cella 30 non riproduce r81a: si legge SOLO quello, e si
+#       apre la domanda del binario (classe 392).
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  CORPO: la configurazione VIVA della sedia 770411, presa da
+#    mql5/Presets/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_M15_770411_100K.set
+#    e confrontata riga per riga con i default del .mq5: coincidono
+#    tutte tranne InpRiskPercent (vivo 0,65, qui 1,00 = il dial di
+#    MISURA, come in R81a). Delta rispetto a R81a: (1) InpMagic
+#    pinnato su un blocco vergine; (2) InpEntryCutoffMin da PIN ad
+#    ASSE; (3) @FINOA e @FRAZIONEIS scritti ESPLICITI invece che
+#    lasciati al default del driver (classe 393).
+#  FINESTRA: identica a R81a. @DAQUANDO 2024.09.26 (R81a r.39),
+#    @FINOA 2026.06.30 = il default di walkforward_generico.ps1 r.177,
+#    che all'epoca di R81 era anche l'unico canale (la lettura di
+#    @FINOA dal file prova e' stata aperta solo l'11/09, commit
+#    c2b157c3). @FRAZIONEIS 0.40 = il default di r.179, in vigore il
+#    18/08 (la direttiva e' del 12/09). CONTROPROVA sui dati:
+#    l'ultima chiusura nei file pertrade di R81 e' 2026.06.24, dentro
+#    una finestra che finisce il 2026.06.30.
+#  MODELLO: tick reali = -Modello 4, come R81a. -Modello 1 romperebbe
+#    il confronto con l'ancora.
+#  TETTO DELLE BARRE: @PERIODO M15 su 21 mesi = ~34.900 barre
+#    [DERIVATO: 96 barre/giorno x ~364 giorni di borsa]. Sotto il
+#    tetto delle ~100.000. Nessuna tranche.
+#  PAVIMENTO TICK: 2024.09.26 e' l'inizio MISURATO dei tick reali BCM
+#    (stessa data usata da R81a e da tutti i round D30EUR).
+#  MAGIC: 787410 -- cercato il 19/09/2026 su tutto il repo con
+#    grep -rl, .git e .claude esclusi: ZERO occorrenze. VIETATI qui:
+#    770411/770412 (la sedia viva) e 778110-778161 (le sei celle di R81).
+#  ETICHETTA: r191a -- grep -ril su backtest_pipeline/ e report/: ZERO.
+#  PIN DI STRINGA: uno solo, InpCorrSymbol=SPXUSD, NON vuoto (il pin
+#    vuoto e' il difetto che controlla_prova.py cerca apposta). Il
+#    filtro di correlazione e' "la chiave" di questa sedia secondo il
+#    commento del sorgente r.94: lasciarlo implicito sarebbe stato
+#    l'unico input importante non dichiarato.
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA, identico a
+#    R81a. Taglie e rischio in campo sono di CLAUDIO.
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO -- STIMA, con la base MISURATA SU QUESTO STESSO EA:
+#    5 celle x 2 gambe (IS+OOS) = 10 passate.
+#    >>> BASE: 0,700 min/passata, e NON e' una trasposizione.
+#        backtest_pipeline/risultati_archivio/
+#        R104_REFERTO_DRIVER_20260825_0738.txt r.15 -- "durata: 0.7
+#        minuti di passata" -- su ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+#        (copia di misura _MFE), D30EUR M15, TICK REALI, deposito
+#        100000, finestra 2024.09.26 -> 2026.08.24. Stesso EA, stesso
+#        simbolo, stesso TF, stesso modello, stesso deposito, finestra
+#        piu' LUNGA di due mesi: nessuna riscalatura, e semmai la
+#        stima e' prudente.
+#        Il numero e' scritto DUE VOLTE in due posti diversi: quel
+#        referto e backtest_pipeline/REGISTRO_TEST.md (sezione R187,
+#        "base misurata: 0,7 min/passata su MaxMinNotte D30EUR M15 a
+#        tick reali"). Le due scritture coincidono.
+#    >>> COSTO DICHIARATO: 10 x 0,700 = 7,0 MINUTI.
+#        (La base piu' bassa d'archivio, 0,083 min/passata di R88a, e'
+#         su un ALTRO simbolo e un ALTRO EA: qui non si usa, e il
+#         mandato chiede comunque l'estremo alto.)
+#
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
+#    10105439.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#    SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#    coordinatore. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Guardian: acceso come in campo. Nel Tester e' fail-open. ---
+InpUsaGuardian=true||true||0||true||N
+
+# --- IL BOX NOTTURNO: identico alla sedia viva, non si tocca ---
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+
+# --- GLI OROLOGI. InpEntryCutoffMin e' l'UNICO asse del file. ---
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+# InpPendingExpiryMin: PIN al valore vivo. E' il SOFFITTO dell'asse
+# (7:59 + 90 min = 9:29 server) ed e' inerte finche' il cutoff e' prima.
+InpPendingExpiryMin=90||90||0||90||N
+
+# --- INGRESSO: pinnato per nome, nessun parametro di motore toccato ---
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+
+# --- STOP: la geometria resta quella viva (2,5 x ATR M15) ---
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+
+# --- LA SCALA D'USCITA VIVA: identica a r81a, tutta pinnata ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- FILTRO DI CORRELAZIONE: acceso, come sulla sedia viva ---
+InpUseCorrelation=true||true||0||true||N
+InpCorrSymbol=SPXUSD||SPXUSD||0||SPXUSD||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFlatten=true||true||0||true||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=787410||787410||0||787410||N
+
+# --- L'UNICO ASSE: L'OROLOGIO CHE AMMAZZA L'ORDINE.
+#     Con InpEntryCutoffHour=8 le cinque celle valgono, in ora server:
+#       10 -> 8:10 (ordine vivo 11 min)   <- cella-TRAPPOLA (filtro)
+#       30 -> 8:30 (ordine vivo 31 min)   <- ANCORA, deve dare r81a
+#       50 -> 8:50 (ordine vivo 51 min)
+#       70 -> 9:10 (ordine vivo 71 min)
+#       90 -> 9:30 (ordine vivo 91 min)   <- tetto: l'expiry a 9:29
+#                                            morde un minuto prima
+InpEntryCutoffMin=10||10||20||90||Y

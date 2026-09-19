@@ -3661,3 +3661,75 @@ tick contro i 35,5 M di `D30EUR` nella stessa finestra). Banco `C:\MT5_Backtest`
 📄 Referto: `report/R187_IL_LIVELLO_NOTTURNO_SUL_NASDAQ_2026-09-19.md`
 🛑 **Nessun backtest eseguito, nessun EA/preset/forward toccato, nessuna taglia e nessuna
 accensione proposta, niente sul conto reale `10105439`.**
+
+---
+
+## 🚪 R81 — USCITE `770411` (D30EUR) — **girato il 18/08/2026, MAI REGISTRATO FINO A OGGI**
+
+**Riga aperta il 19/09/2026** durante il censimento delle uscite della rosa. Il round esiste, è
+girato, i CSV sono in archivio (`backtest_pipeline/risultati_archivio/r81_csv/`) — e in questo
+registro compariva **una volta sola, come nome di cartella** in una colonna "catena di prova"
+(r.3611 della versione precedente): **nessun numero, nessuna variante, nessun verdetto.**
+È il difetto che il CERTIFICATO DI MORTE del 09/09 vuole impedire, nel verso opposto: non un
+morto senza certificato, ma **una misura viva che nessuno sapeva di avere**.
+
+**Che cos'era**: sei varianti di USCITA a **ingressi identici** su `ABTG_MaxMinNotte_DAX_Short_Ottimizzato`,
+D30EUR M15, tick reali, deposito 100.000, `InpRiskPercent` 1,0, finestra 2024.09.26 → 2026.06.30
+(`@FRAZIONEIS` 0,40). Ogni variante con **due gemelli G1 sul magic** (778110…778161), tutti usciti
+identici al centesimo.
+
+| variante | gestione | IS `PF / DD% / Trades` | OOS `PF / DD% / Trades` |
+|---|---|---|---|
+| `r81a` **= la sedia viva** | scala piena | 1,87803 / 3,0977 / 20 | 2,15985 / **1,9213** / 21 |
+| `r81b` | tutta SPENTA | 2,37960 / 7,0155 / 13 | 2,20206 / 6,1401 / 14 |
+| `r81c` | **solo breakeven** | **2,92019** / 4,0891 / 20 | **2,69515** / 3,7338 / 22 |
+| `r81d` | scala, trail 3,5×ATR | 2,17327 / 3,2509 / 20 | 1,78521 / 2,4583 / 21 |
+| `r81e` | scala, trail 1,0×ATR | 1,03072 / 3,4144 / 16 | 1,48580 / 3,1023 / 15 |
+| `r81f` | spenta, TPfinal 2R | 1,16955 / 7,0155 / 13 | 1,87505 / 4,0753 / 14 |
+
+### 🛑 IL VERDETTO, e non è una promozione
+**`r81c` batte la sedia viva in TUTTE E DUE le finestre** (PF +0,54 in IS, +0,54 in OOS), pagando
+~1-2 punti di DD. 🔴 **E NON SI PROMUOVE**, per una ragione misurata lo stesso giorno: i file
+per-trade dello stesso round dicono che quelle sono **14 POSIZIONI**, non 21 trade — la colonna
+`Trades` conta i **deal in uscita** (classe **454**). A 14 posizioni il **MERITO È SOSPESO**
+(valvola R59) e mezzo punto di PF **è rumore fino a prova contraria**. Il RISCHIO invece si legge
+a qualunque `n`: il DD raddoppia (1,92 → 3,73 in OOS), e il DD basso è il patrimonio di questa
+sedia.
+**Stato: `NON ANCORA MISURATO` sul merito, `MISURATO` sul rischio.** Nessun preset toccato.
+
+### ✅ E COSA SPUNTA DEL CERTIFICATO
+Casella 3 — *«la gestione dell'uscita è stata messa ad asse?»* — su `770411`: **PIENA**, da un
+mese. Ciò che resta aperto su questa sedia è **dove** (`InpTP1_R`, `InpTP2_R`), **quanto largo**
+lo stop (`InpAtrSLmult`, mai mosso su QUESTO binario) e **quanto vive l'ordine**
+(`InpEntryCutoffMin`, mai mosso in nessuno dei 20 CSV).
+
+---
+
+## 🕓 R191 — LE USCITE DELLA ROSA: due round SCRITTI, non ancora girati (19/09/2026)
+
+| round | sedia | asse | celle × 2 gambe | ancora | deposito |
+|---|---|---|---:|---|---|
+| `R191a` | **`770411`** D30EUR M15 | `InpEntryCutoffMin` 10/30/50/70/90 | **10 passate** | cella **30** = `r81a` | **100000** |
+| `R191b` | **`770511`** U30USD H1 | `InpTP_RR` 1,50 → 6,00 passo 0,75 | **14 passate** | cella **3,00** = `r120e11` | **100000** |
+
+📐 **ATTESE E SOGLIE congelate PRIMA dei numeri, dentro i file prova.** In sintesi:
+`R191a` — nessuna cella con **meno `Trades` dell'ancora** è promuovibile a nessun PF (è la difesa
+contro il filtro travestito da uscita); scarto a `DD > 8,0%`; merito **sospeso in partenza**
+(~27 posizioni totali). `R191b` — scarto a `DD > 8,0%` e a `PF < 1,10` dove `Trades ≥ 150`; e
+🔴 **il round non può promuovere nulla comunque**, perché `770511` è al **96% del pavimento di
+costo** (38,5× contro 40×) e `InpTP_RR` non tocca lo stop.
+
+💰 **Costo: 24 passate.** `R191a` = 10 × **0,700 min/passata MISURATI sullo stesso EA/simbolo/TF/
+modello** (`risultati_archivio/R104_REFERTO_DRIVER_20260825_0738.txt` r.15) = **7,0 min**.
+`R191b` = 14 × 0,700 (estremo alto) = **9,8 min**; la base vicina misurata (0,083 su U30USD tick)
+darebbe 1,2 min. **Totale dichiarato: ~17 minuti.**
+
+🔒 Magic vergini `787410` / `787420` (grep su tutto il repo: zero). Etichette `r191a` / `r191b`:
+zero. Cancello primo strato: `controlla_prova.py` **0 problemi**, `controlla_riga.py --oggetto
+prova` **nessun difetto meccanico**. ⏳ **Secondo strato (`controllo-preventivo`) non ancora
+lanciato: finché non torna, non si manda niente al VPS.**
+
+📄 Referto: `report/USCITE_DELLA_ROSA_2026-09-19.md`
+🛑 **Nessun backtest eseguito, nessun EA/preset/forward toccato, nessuna taglia e nessuna
+accensione proposta, niente sul conto reale `10105439`.** Bersaglio: banco `C:\MT5_Backtest`,
+demo `50504400`.
