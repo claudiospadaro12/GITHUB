@@ -25794,3 +25794,60 @@ cade dentro la banda delle misure disponibili.**
 
 📌 Famiglia della **454** (che ha aperto il problema) e della **192** (il numero riscalato da un
 altro contesto e usato come se fosse misurato).
+
+---
+
+## CLASSE 466 — 🕰️🔄 LA COLONNA SI CHIAMA **«ULTIMA RIGA»** ED È L'ULTIMA RIGA **DI DUE GIORNI FA**: ordinamento decrescente + sovrascrittura nel ciclo (19/09/2026)
+
+**Il caso, misurato oggi mentre si cercava perché `770202` è muta.**
+`backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1` — lo strumento su cui si legge **ogni notte**
+chi lavora e chi tace — fa queste due cose, a quattordici righe di distanza:
+
+```
+r.38   ... | Sort-Object LastWriteTime -Descending | Select-Object -First $GIORNI
+r.44   foreach($f in $log){
+r.52       $ultima[$k] = $riga.Trim()
+```
+
+I file arrivano **dal più recente al più vecchio**; dentro il ciclo la variabile viene
+**sovrascritta** a ogni riga che corrisponde. 🔴 **Il valore che sopravvive è quello del file
+PIÙ VECCHIO dei tre.** La colonna si chiama *«ultima riga»* e, quando il giorno corrente ha il log
+ancora vuoto (il runner gira alle **03:30**), è **l'ultima riga di due giorni fa**.
+
+### 🧪 Verificato empiricamente, non solo letto nel sorgente
+- La corsa del **14/09 03:30** legge `[20260914, 20260913, 20260912]` e mostra come *«ultima riga»*
+  di `ABTG_Dow_Apertura_US` un `nuovo giorno` delle **01:00** — cioè **sabato 12/09**, una giornata
+  **senza seduta USA**, in cui quella sedia non può avere armato niente.
+- Le corse del **15/09** e del **16/09** mostrano **la stessa riga al millisecondo** (`.265` sul
+  piccolo, `.188` sul 100k): due referti diversi, **un solo giorno vero** (lunedì **14/09**).
+- 🎯 **Il falsificatore che chiude la classe**: applicando la regola corretta *(«la riga viene dal
+  file più vecchio della finestra»)* le **nove** sedute ricostruite si datano **senza una
+  contraddizione**; con la lettura ingenua *(«è di ieri»)* **due sedute diverse ricadono sullo
+  stesso giorno**. Una regola che toglie le contraddizioni invece di aggiungerle è quella giusta.
+
+### 🔴 Perché costa, e non è un dettaglio estetico
+Su questa colonna si legge la **corsia TAGLIANDO** del criterio di uscita del 18/08
+(*«frequenza molto sotto il promesso → revisione»*). Chi la usa per dire *«questa sedia ieri non ha
+fatto niente»* sta guardando **l'altro ieri**, e:
+- una sedia che ha **ripreso a operare ieri** risulta ancora muta → si apre un'indagine inutile;
+- una sedia che **si è fermata ieri** risulta ancora viva → 🔴 **la si scopre due giorni dopo**, ed
+  è il verso che costa.
+
+### La regola
+🔴 **«L'ultima» non è mai il risultato di un ciclo che sovrascrive: si sceglie, e si sceglie
+sull'ORDINAMENTO dichiarato.** Tre modi, in ordine di robustezza:
+- ✅ **iterare in ordine CRESCENTE** (`Sort-Object Name` sui log MT5, che si chiamano `AAAAMMGG.log`
+  — il nome è già cronologico e non si sposta se qualcuno tocca il file);
+- ✅ oppure **tenere il massimo esplicito** (`if($chiave -gt $migliore){ ... }`), mai
+  l'ultimo assegnato;
+- ✅ **e comunque STAMPARE LA DATA ACCANTO AL DATO.** Una riga senza data costringe chi legge a
+  inferire da quale file viene — e l'inferenza qui era sbagliata per **undici referti di fila**.
+- ⚠️ **`LastWriteTime` non è il giorno del contenuto**: un log di sabato riscritto lunedì si
+  riordina. Sui file che portano la data **nel nome**, si ordina per **nome**.
+- 🚫 **E il troncamento è la seconda metà dello stesso difetto**: `CODA_02` taglia a **110
+  caratteri** (r.60), e qui il numero che serviva (`bias N` dentro `RETEST armato`) cadeva
+  **dopo** il taglio. Un campo troncato non è un campo mancante: è **peggio**, perché la riga
+  sembra completa.
+
+📌 Famiglia della **456** (il righello dichiarato prima del numero): **strumenti di casa che
+stampano una cosa diversa da quella che il loro titolo promette.**
