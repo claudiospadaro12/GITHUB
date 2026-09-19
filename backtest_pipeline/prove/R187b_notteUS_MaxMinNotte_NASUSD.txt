@@ -1,0 +1,230 @@
+# =====================================================================
+#  R187b -- IL LIVELLO NOTTURNO SUL NASDAQ, OROLOGIO AMERICANO
+#  EA: ABTG_MaxMinNotte
+#
+#  GEMELLO DI R187a. Stessa gestione, stesso simbolo, stesso banco.
+#  L'UNICA cosa che cambia fra i due file e' ***QUALE NOTTE***.
+#  Referto: report/R187_IL_LIVELLO_NOTTURNO_SUL_NASDAQ_2026-09-19.md
+# ---------------------------------------------------------------------
+#  >>> L'ORA E' LA TRAPPOLA NUMERO UNO DI QUESTO ROUND, E QUESTO FILE
+#      ESISTE APPOSTA PER NON CADERCI. <<<
+#
+#  R187a copia la cella viva 770411 alla lettera: box 23:00-04:59 server
+#  e ordini alle 07:59 server. Quegli orari sono tarati sul DAX, e sul
+#  DAX hanno un senso fisico: alle 08:00 server il DAX ***APRE***, e la
+#  notte che lo precede e' davvero una notte.
+#  ***IL NASDAQ NON E' IL DAX.*** Alle 08:00 server il Nasdaq non apre
+#  niente: e' aperto da ore. La sua apertura e' alle ***14:30 server***
+#  (15:30 italiane -- fuso BCM, italiana meno 1).
+#  Quindi "la notte che precede l'apertura" su NASUSD e' UN'ALTRA
+#  FINESTRA, e questo file la misura.
+#
+#  --- 1. QUALE FINESTRA, e perche' proprio quella ---------------------
+#  NON l'ho scelta a occhio. L'ho letta da una misura:
+#    data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv, righe NASUSD:
+#      ora 21 -> 2.628 campioni . ***ora 22 -> 0 campioni, 2.987
+#      scartati*** . ora 23 -> 3.299 campioni
+#    >>> NASUSD E' CHIUSO ALL'ORA 22 SERVER. <<< E' la pausa giornaliera
+#    del CFD, ed e' il confine naturale della "notte" del Nasdaq.
+#  Quindi la sessione notturna di NASUSD e':
+#    ***23:00 server (riapertura) -> 14:29 server (un minuto prima
+#    dell'apertura americana)*** = 929 minuti.
+#  >>> E NOTARE: InpBoxStartHour resta ***23***, identico alla cella
+#      viva. Non l'ho spostato: ci e' arrivato da solo, per una misura
+#      diversa. Le due strade danno lo stesso numero. <<<
+#
+#  --- 2. IL CUTOFF, e il conto che lo fissa ---------------------------
+#  Qui NON potevo copiare i 31 minuti della cella viva, e il motivo e'
+#  aritmetico, non estetico:
+#    la cella viva da' 31 minuti di cutoff su un box di 359 minuti.
+#    Il rapporto che conta -- sotto la legge di casa range ~ ADR*sqrt(t/W)
+#    (ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md) -- e'
+#      escursione(cutoff) / ampiezza(box) = sqrt(31/359) = ***0,294***
+#    e ADR e W SI SEMPLIFICANO: il rapporto dipende SOLO dai minuti.
+#  Su un box di 929 minuti, per tenere lo stesso 0,294 servono
+#      t = 929 x 31/359 = ***80,2 minuti***
+#  -> cutoff a 14:29 + 80 = ***15:49***, che arrotondo a ***15:50***.
+#  >>> SE AVESSI COPIATO I 31 MINUTI, il box sarebbe stato 2,6 volte piu'
+#      largo con la stessa finestra per romperlo: il round avrebbe dato
+#      n minuscolo e io avrei letto "il livello non funziona" quando il
+#      dato diceva "hai dato tre minuti a un muro tre volte piu' alto".
+#      Questo e' il contro-esempio, ed e' costruito PRIMA della corsa. <<<
+#  TRAPPOLA VERIFICATA E DISINNESCATA: InpPendingExpiryMin=90 fa scadere
+#  il pendente 90 minuti dopo il piazzamento (r.235 del sorgente,
+#  ORDER_TIME_SPECIFIED). 14:29 + 90 = 15:59, e il cutoff e' alle 15:50:
+#  ***il cutoff arriva PRIMA della scadenza, quindi comanda lui.***
+#  Se avessi messo il cutoff oltre le 15:59, la scadenza l'avrebbe
+#  tagliato IN SILENZIO e il file avrebbe dichiarato una finestra che non
+#  gira. (E' la classe 445, aperta oggi nella checklist.)
+#
+#  --- 3. IL FLAT, e la sua ragione ------------------------------------
+#  InpCloseHour 17:30 -> ***20:45 server***, cioe' 15 minuti prima della
+#  chiusura cash americana (21:00 server) e ben dentro l'orario in cui
+#  NASUSD quota. E' lo stesso orario di flat che la casa usa gia' sul
+#  Nasdaq per la sedia 770250 (checklist classe 441, 19/09/2026).
+#  >>> IL MOTIVO PER CUI NON POTEVO LASCIARE 17:30 NON E' DI GUSTO: <<<
+#  in OnTick il controllo "nowMin >= InpCloseHour*60+InpCloseMin ->
+#  EndOfDay(); return;" sta ***PRIMA*** del piazzamento. Con place alle
+#  14:29 e close alle 17:30 il file girerebbe -- ma flatterebbe dopo 3
+#  ore, tagliando il runner verso EMA200 che e' meta' della gestione.
+#  E se qualcuno avesse "tradotto" il close a 14:29+9h31 = 24:00, il
+#  confronto non sarebbe MAI vero (nowMin arriva a 1439) e
+#  InpCloseAtEnd non sarebbe mai scattato: zero flat, in silenzio.
+#
+#  --- 4. IL RIEPILOGO DEI CAMBI rispetto a R187a ----------------------
+#  Otto pin, e sono UNA COSA SOLA: l'orologio.
+#    InpBoxStartHour     23   ->   23   (INVARIATO, vedi par. 1)
+#    InpBoxEndHour        4   ->   14
+#    InpBoxEndMin        59   ->   29
+#    InpPlaceHour         7   ->   14
+#    InpPlaceMin         59   ->   29
+#    InpEntryCutoffHour   8   ->   15
+#    InpEntryCutoffMin   30   ->   50
+#    InpCloseHour        17   ->   20
+#    InpCloseMin         30   ->   45
+#  Box, buffer, SL, target, trailing, correlazione, lati, taglia, TF:
+#  ***IDENTICI a R187a***, carattere per carattere.
+#  L'asse del file resta UNO SOLO: il magic (asse tecnico, celle gemelle).
+#
+#  --- 5. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ------------------------
+#  Per costruzione (par. 2) la legge di casa prevede per R187b la
+#  ***STESSA*** frequenza di rottura di R187a: e' esattamente cosi' che
+#  ho scelto il cutoff.
+#    ATTESA: ***n = 180***, banda 120-220 -- la stessa di R187a.
+#    (base: D30EUR n=180 sulla stessa finestra, ricavata per due strade
+#     indipendenti che coincidono -- il conto sta in R187a par. 4.)
+#  >>> E QUI STA IL VALORE DEL ROUND: le due attese sono UGUALI, quindi
+#      OGNI DIFFERENZA FRA R187a E R187b E' INFORMAZIONE SUL LIVELLO,
+#      non rumore di taratura. <<<
+#  PF atteso: NESSUNO, per la stessa ragione di R187a -- le tre prove di
+#  questo motore fuori dal DAX (100GBP, E50EUR, F40EUR) fanno 0/54 celle
+#  positive tutte e tre (REGISTRO_TEST rr.2526-2528). La base storica e'
+#  NEGATIVA e va detto prima, non dopo.
+#  DD atteso: <= 5% alla taglia 0,65%.
+#
+#  --- 6. LE SOGLIE, CONGELATE PRIMA DEI NUMERI ------------------------
+#  Identiche a R187a, e si guarda n PRIMA di tutto:
+#    n >= 150      -> il MERITO si legge.
+#    50 <= n < 150 -> merito SOSPESO: "indizio", mai "funziona".
+#                     Il RISCHIO si legge lo stesso (Emendamento B).
+#    n < 50        -> ***"NON MISURATO -- FINESTRA SBAGLIATA"***, mai
+#                     "non funziona".
+#    n == 0        -> difetto di configurazione, non risultato: si
+#                     rilegge place(14:29) < cutoff(15:50) <
+#                     close(20:45) e la scadenza dei pendenti (par. 2).
+#  Poi, e solo con n >= 150: PF >= 1,10 candidato vivo (NON promosso);
+#  1,00-1,10 archiviato col numero; < 1,00 morto col certificato.
+#  A qualunque n: DD > 10% = rilievo di RISCHIO.
+#
+#  --- 7. LA LETTURA INCROCIATA, scritta prima dei numeri --------------
+#  >>> E' LA PARTE CHE IMPEDISCE DI MISURARE LA COSA SBAGLIATA. <<<
+#    a) ***a >= 50 e b >= 50***: il box notturno si rompe su NASUSD con
+#       tutti e due gli orologi. Allora il confronto dei PF dice
+#       qualcosa SUL LIVELLO, ed e' il caso buono.
+#    b) ***a < 50 e b >= 50*** (o il contrario): il round ha misurato
+#       ***L'OROLOGIO***, non il livello. Verdetto: "la notte del Nasdaq
+#       e' quella dell'altro file", e il livello resta NON MISURATO.
+#    c) ***a < 50 e b < 50***: il box notturno su NASUSD non si rompe
+#       quasi mai con questa geometria. Verdetto: ***"NON MISURATO"***,
+#       e l'ipotesi da falsificare diventa la legge sqrt(t/W) applicata
+#       a questa geometria -- che sarebbe un risultato utile di suo,
+#       perche' quella legge la usiamo anche altrove.
+#       NON si scrive "il livello notturno sul Nasdaq non vale".
+#    d) ***a e b >= 150 con PF molto diversi fra loro***: prima di
+#       raccontarlo si controlla che non sia la DURATA della posizione
+#       (flat 17:30 contro 20:45) invece del livello. E' l'unica altra
+#       cosa che ho cambiato, e va esclusa prima di concludere.
+#
+#  --- 8. CANCELLO DI COSTO -------------------------------------------
+#  Identico a R187a e anche piu' comodo: spread NASUSD ora 14 = 1,80
+#  mediana / 1,90 p95 [MISURATO, n=3.578, GG=5]; stop = 2,5 x ATR(14)
+#  M15 = 2,5 x 40,1 = 100,25 idx [ATR INFERITO];
+#  stop/spread = ***52,8x*** contro i 40x -> PASS +32%.
+#  Il cancello regge finche' l'ATR(M15) VERO di NASUSD e' almeno
+#  ***30,4 idx***: cioe' finche' l'inferenza (40,1) non sovrastima di
+#  piu' del 24,2% del valore dichiarato. Sotto i 30,4 idx il round e'
+#  FUORI COSTO e il suo PF non vale, qualunque numero esca.
+#
+#  --- 9. MAGIC E FINESTRA ---------------------------------------------
+#  761610 / 761611 -- VERGINI, stesso comando di R187a:
+#    grep -rIn -oE "\b7616[0-9]{2}\b" . --exclude-dir=.git
+#  Esito AL MOMENTO DELLA SCRITTURA (prima che esistessero questi due
+#  file): ZERO occorrenze nell'intero blocco 7616xx.
+#  Finestra 2024.09.26 -> 2026.06.30, modello 4 = TICK REALI (NASUSD ha
+#  166.509.474 tick veri dal 2024.09.26 -- REFERTO_MISURA_TICK_NASUSD.txt
+#  del 30/08/2026). @FRAZIONEIS 1.0 = UNA TRANCHE, gamba OOS DEGENERE:
+#  motivata in R187a par. 7, e il fuori campione si paga con la prova di
+#  regime su NASUSD_EXT gia' firmata da Claudio il 26/08.
+#
+#  --- 10. COSTO IN TEMPO MACCHINA (STIMA, con la base) ----------------
+#  Stessa base di R187a: 0,7 min/passata misurati su MaxMinNotte D30EUR
+#  M15 a tick reali (R104_REFERTO_DRIVER_20260825_0738.txt r.15), scalati
+#  x4,69 perche' NASUSD ha 166,5 M tick contro i 35,5 M di D30EUR nella
+#  stessa finestra => ~3,3 min a passata.
+#  2 celle x 2 gambe = 4 passate, 2 sulla gamba OOS degenere (costo ~0).
+#  => ***STIMA 8-12 MINUTI*** per questo file.
+#  Bersaglio: banco da backtest C:\MT5_Backtest (demo 50504400).
+#  NON il piccolo 50503392, NON il 100k 50504263, NON il reale 10105439.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=14||14||0||14||N
+InpBoxEndMin=29||29||0||29||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=14||14||0||14||N
+InpPlaceMin=29||29||0||29||N
+InpEntryCutoffHour=15||15||0||15||N
+InpEntryCutoffMin=50||50||0||50||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=45||45||0||45||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON e' pinnato DI PROPOSITO -- stessa ragione di R187a:
+# un pin di stringa vuota non arriva all'EA. Il default compilato e' "",
+# che e' il valore voluto, e InpUseNewsFilter=false lo rende inerte.
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN NAS US
+InpMagic=761610||761610||1||761611||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

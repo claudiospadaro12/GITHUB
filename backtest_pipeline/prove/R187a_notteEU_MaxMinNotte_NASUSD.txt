@@ -1,0 +1,271 @@
+# =====================================================================
+#  R187a -- IL LIVELLO NOTTURNO SUL NASDAQ, OROLOGIO EUROPEO
+#  EA: ABTG_MaxMinNotte
+#
+#  QUESTO ROUND NON E' MAI STATO FATTO. Censimento del 19/09/2026,
+#  fatto DENTRO i file e non sui nomi:
+#    43 CSV della famiglia MaxMinNotte in archivio ->
+#       D30EUR 24 . XAUUSD 14 . EURUSD 2 . F40EUR 1 . E50EUR 1 . 100GBP 1
+#       NASUSD: ***ZERO***
+#  Referto: report/R187_IL_LIVELLO_NOTTURNO_SUL_NASDAQ_2026-09-19.md
+# ---------------------------------------------------------------------
+#  DA DOVE NASCE (Claudio, 18/09/2026)
+#  Gli screenshot dei colleghi sul Nasdaq hanno a grafico questi livelli:
+#    Max sett. prec. . Max notturno . Max giorno prec. . Apertura giorno
+#    . Min notturno
+#  Il NOSTRO EA delle aperture sul Nasdaq non usa nessuno di questi: usa
+#  il max/min della candela H1 precedente (InpRangeMode=2) o il range dei
+#  primi N minuti (InpRangeMode=0). E sullo STESSO livello abbiamo gia'
+#  provato TRE ingressi diversi, e perdono tutti e tre:
+#    breakout PF OOS 0,873 . retest 0,624 . fade 0,930
+#  >>> QUANDO TRE INGRESSI DIVERSI SULLO STESSO LIVELLO SBAGLIANO,
+#      L'INDIZIATO E' IL LIVELLO. <<<
+#  E il motore dei livelli notturni ce l'abbiamo gia' e guadagna:
+#  ABTG_MaxMinNotte, vivo su XAUUSD (770402) e su D30EUR (770411).
+#
+#  QUESTO E' UN ALLARGAMENTO SU **SIMBOLO**, permesso dalla regola del
+#  19/08 (si allarga su motori, meccanismi, simboli, TF, gestione
+#  dell'uscita -- MAI sui parametri d'ingresso di un motore senza edge).
+#  Il motore NON e' senza edge: R103 lo misura a PF 2,257 su D30EUR.
+# =====================================================================
+#
+#  --- 1. CHE COSA MISURA, in una riga ---------------------------------
+#  Se il problema del Nasdaq e' il LIVELLO, un livello DIVERSO (il box
+#  notturno) sullo STESSO simbolo deve comportarsi diversamente dai tre
+#  ingressi gia' bocciati. Questo file cambia UNA COSA SOLA rispetto
+#  alla cella viva 770411: IL SIMBOLO.
+#
+#  --- 2. LA CELLA DA CUI COPIO, e la sua fonte ------------------------
+#  mql5/Presets/ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_M15_770411_100K.set
+#  (foto del .chr vivo del 06/09/2026, conto 50504263, profilo SQUADRA 100K).
+#  Copiati VERBATIM: box, orari, buffer, SL, target, trailing, taglia.
+#
+#  --- 3. LE DUE COSE CHE NON COPIO, e PERCHE' (scelte, non sviste) ----
+#  a) InpAllowLong  false -> ***true***
+#     REGOLA DEI DUE LATI, firmata da Claudio il 25/08 e BLOCCANTE su
+#     Nasdaq/DAX/Dow: "ogni analisi misura SEMPRE tutti e due i lati".
+#     Copiare il short-only violerebbe una regola di casa firmata.
+#     Il short-only e' una scoperta SUL DAX, non una proprieta' del motore.
+#  b) InpUseCorrelation true -> ***false***
+#     Il filtro guarda SPXUSD. Sul DAX vuol dire "sta tirando l'America?"
+#     ed e' la chiave (registro r.470: corr ON raddoppia il PF e dimezza
+#     il DD). Sul NASDAQ vuol dire "sta tirando il Nasdaq?": SPXUSD e
+#     NASUSD sono quasi lo stesso mercato. NON e' lo stesso meccanismo,
+#     e trasferirlo senza rimisurarlo e' il difetto che paghiamo di piu'
+#     (report/LA_STRATEGIA_NASDAQ_DEI_COLLEGHI_2026-09-18.md, par. 4).
+#  c) E costa CAMPIONE, misurato: vedi il par. 4 qui sotto.
+#  Tutto il resto e' la cella viva, carattere per carattere.
+#
+#  --- 4. L'ATTESA, DICHIARATA PRIMA DEI NUMERI ------------------------
+#  BASE MISURATA A (diretta, stessa finestra di questo file):
+#    R103_REFERTO_DRIVER_BLOCCO1_INDICI_20260824_1348.txt r.81
+#    MaxMinNotte_DAX_Short_Ott . D30EUR . 2024.09.26->2026.06.30
+#    PF 2,257 . DD 1,98 . ***n=41*** (short-only + corr ON, la cella viva)
+#  BASE MISURATA B (i moltiplicatori, da UN SOLO file, corr OFF):
+#    risultati_archivio/MaxMinNotte/080957cf-valid_MaxMin_D30EUR.csv
+#    72 celle, finestra 2024.01.01->2026.06.30, M15, modello 4
+#      long=0 short=1 -> Trades mediana ***107***
+#      long=1 short=0 -> Trades mediana ***149***
+#      long=1 short=1 -> Trades mediana ***255***
+#    => passare da short-only a due lati vale x2,38 (255/107)
+#  I DUE CONTI, fatti per strade INDIPENDENTI, devono dare lo stesso
+#  numero -- ed e' il controllo del 10/09 (verificare contro numeri gia'
+#  scritti da altri, non contro valori che tornano):
+#    strada 1: 41 x 2,38 (due lati) x 1,84 (corr OFF) = ***180***
+#              [il fattore 1,84 = 107x0,705 / 41, dove 0,705 = 642/911
+#               giorni solari fra le due finestre]
+#    strada 2: 255 x 0,705 (riscalo di finestra)      = ***180***
+#    -> COINCIDONO. La base e' 180 operazioni su D30EUR.
+#
+#  IL TRASFERIMENTO A NASUSD, e perche' non e' un salto nel buio:
+#    sotto la legge di casa range ~ ADR x sqrt(t/W)
+#    (ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md), il rapporto
+#      (escursione nei 31 min di cutoff) / (ampiezza del box di 359 min)
+#    vale sqrt(31/359) = 0,294 --- e ADR e W SI SEMPLIFICANO.
+#    Cioe': la legge prevede LA STESSA frequenza di rottura su
+#    QUALUNQUE simbolo, D30EUR o NASUSD.
+#    ATTESA: ***n = 180*** operazioni, con banda 120-220.
+#    (banda larga perche' un effetto NON e' nella legge: alle 08:00
+#     server il DAX APRE, il Nasdaq no -- e' aperto da tutta la notte.)
+#    E il buffer da' il verso dell'errore: 1000 punti = 10 idx sono il
+#    3,96% dell'ADR di D30EUR (252,5) ma solo il 2,60% di quello di
+#    NASUSD (384,6) -> a parita' di tutto il resto il buffer relativo e'
+#    PIU' PICCOLO su NASUSD, quindi si rompe PIU' facilmente, non meno.
+#    L'errore atteso e' verso l'ALTO. Se n esce BASSO, non e' il buffer.
+#  PF atteso: NESSUNO. Questo round non ha un'attesa sul PF, e dirlo e'
+#    la cosa onesta: le uniche misure di MaxMinNotte fuori dal DAX sono
+#    tre indici EUROPEI, e fanno 0/54 celle positive tutti e tre
+#    (100GBP 0,6717 . E50EUR 0,8398 . F40EUR 0,9985 -- REGISTRO_TEST
+#    r.2526-2528). ***La base storica di questo motore fuori dal DAX e'
+#    NEGATIVA.*** Se ne esce un PF > 1,10 e' una notizia; se ne esce
+#    0,9 e' quello che dice l'archivio.
+#  DD atteso: <= 5% alla taglia 0,65% (la cella viva fa 1,98% su D30EUR).
+#
+#  --- 5. LE SOGLIE, CONGELATE PRIMA DEI NUMERI ------------------------
+#  >>> PRIMA DI TUTTO IL RESTO SI GUARDA n. <<<
+#    n >= 150 : il MERITO si legge (Emendamento A del 16/08).
+#    50 <= n < 150 : merito SOSPESO. Si riportano PF, DD, n e si scrive
+#                    "indizio", MAI "funziona" / "non funziona".
+#                    Il RISCHIO si legge lo stesso (Emendamento B).
+#    n < 50   : >>> VERDETTO = "NON MISURATO -- FINESTRA SBAGLIATA" <<<
+#               NON "non funziona". Un box notturno che non viene quasi
+#               mai rotto nei 31 minuti dopo le 07:59 sta dicendo che
+#               quella non e' la notte del Nasdaq, non che il livello
+#               non vale. E allora comanda R187b.
+#    n == 0   : NON e' un risultato, e' un difetto di configurazione.
+#               Si rilegge l'ordine place(7:59) < cutoff(8:30) <
+#               close(17:30) e il log di InpVerbose/InpAutoTest.
+#  POI, e solo se n >= 150:
+#    PF >= 1,10 -> candidato VIVO, entra in coda all'imbuto.
+#                  ***NON e' una promozione e non e' una sedia.***
+#    1,00 <= PF < 1,10 -> nessun edge utile: si archivia COL NUMERO.
+#    PF < 1,00 -> morto su questo livello, col certificato.
+#  E A QUALUNQUE n (Emendamento B):
+#    DD > 10% -> rilievo di RISCHIO, anche con PF bello.
+#
+#  --- 6. PERCHE' NON C'E' UNA GRIGLIA, ed e' voluto -------------------
+#  L'unico asse di questo file e' il MAGIC: due celle GEMELLE, che
+#  devono dare esito IDENTICO. E' l'asse TECNICO del cancello G1 di
+#  determinismo, non una manopola.
+#  >>> Un round senza selezione non ha niente da sovradattare. <<<
+#  Per questo qui non si sceglie nessuna cella e non si cerca nessun
+#  altopiano: il round verifica UN'IPOTESI, non ottimizza. La griglia,
+#  se mai, viene DOPO -- e si paga con la prova di regime (par. 7).
+#
+#  --- 7. LA FINESTRA, e come si paga il fuori campione ----------------
+#  2024.09.26 -> 2026.06.30, ***modello 4 = TICK REALI***.
+#  I TICK DI NASUSD CI SONO E SONO MISURATI, contro quanto si credeva:
+#    risultati_archivio/misura_tick/REFERTO_MISURA_TICK_NASUSD.txt
+#    (30/08/2026): "I TICK REALI DI NASUSD PARTONO DAL 2024.09.26
+#    (166509474 tick)". ABTG_StoricoScaricato.csv non lo elenca, ma il
+#    referto dedicato si. >>> QUESTO ROUND NON E' SOTTO SONDA. <<<
+#  @FRAZIONEIS 1.0 = UNA SOLA TRANCHE, gamba OOS DEGENERE (finestra
+#  vuota, il CSV _OOS non descrive niente). E' una scelta, dichiarata:
+#    - con 21 mesi di tick e ~0,39 op/giorno il campione MASSIMO e' ~180:
+#      uno split 40/60 darebbe 72 IS e 108 OOS, ***tutti e due sotto il
+#      pavimento dei 150***, e due numeri non leggibili invece di uno
+#      leggibile;
+#    - e l'IS/OOS serve a smascherare la SELEZIONE: qui non si seleziona
+#      niente (par. 6), quindi non compra niente e costa meta' campione.
+#  IL FUORI CAMPIONE SI PAGA COSI', ed e' gia' firmato: se questo round
+#  passa, il passo successivo e' la PROVA DI REGIME su NASUSD_EXT
+#  (2010.11.14 -> 2026.07.31, 5,23 M barre M1, modello 1). Claudio l'ha
+#  firmata il 26/08 ("FIRMO FRIGO NASUSD") con i limiti scolpiti:
+#  parametri CONGELATI, SOLO prova di regime, MAI promozione
+#  (risultati_archivio/R113_CRITERI.md rr.36-60).
+#
+#  --- 8. IL CANCELLO DI COSTO, col numero accanto ---------------------
+#  stop = 2,5 x ATR(14) M15, la geometria della cella viva.
+#  ATR(14) M15 di NASUSD = 40,1 idx  [INFERITO] -- e il tag e' quello
+#    giusto: "su NASUSD non esiste nessun ATR misurato"
+#    (ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md rr.402 e 512).
+#  stop = 2,5 x 40,1 = 100,25 idx
+#  spread NASUSD ora 07 = 1,80 mediana / 1,90 p95  [MISURATO]
+#    data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv, n=3.600, GG=5
+#    (e lo spread di NASUSD e' PIATTO su tutte le 24 ore: 1,80/1,90
+#     ovunque -- non ho dovuto sperare che l'ora 07 somigliasse all'ora 14)
+#  stop/spread = 100,25 / 1,90 = ***52,8x*** contro la frontiera dei 40x
+#    -> PASS con +32%.
+#  CONTRO-ESEMPIO DEL CANCELLO: l'ATR e' INFERITO, quindi puo' essere
+#    sbagliato. Il cancello regge finche' ATR(M15) >= 30,4 idx, cioe'
+#    finche' l'inferenza non e' ottimista di piu' del ***24,2%***.
+#    Oltre quella soglia il round e' FUORI COSTO e il suo PF non vale.
+#
+#  --- 9. I MAGIC, e il comando con cui li ho cercati ------------------
+#  761600 / 761601 -- VERGINI. Comando eseguito il 19/09/2026 su tutto
+#  il repo (branch lavoro), escluse .git e .claude/worktrees:
+#    grep -rIn -oE "\b7616[0-9]{2}\b" . --exclude-dir=.git
+#  Esito AL MOMENTO DELLA SCRITTURA (cioe' prima che esistessero questi
+#  due file): ZERO occorrenze in tutto il blocco 7616xx. Da adesso le
+#  uniche occorrenze del blocco sono R187a e R187b.
+#
+#  --- 10. IL COSTO IN TEMPO MACCHINA (STIMA, con la base) -------------
+#  BASE MISURATA: R104_REFERTO_DRIVER_20260825_0738.txt r.13-15 --
+#    STESSO motore (MaxMinNotte DAX Short Ott), STESSO simbolo di banco
+#    D30EUR M15, finestra 2024.09.26->2026.08.24, ***modello 4 tick
+#    reali***: "durata 0.7 minuti di passata".
+#  LA CORREZIONE CHE MI FACCIO DA SOLO (classe 192: un modello di costo
+#  col denominatore sbagliato): quella base e' su D30EUR, che nella
+#  finestra ha 35.496.307 tick; NASUSD ne ha ***166.509.474***
+#  (ABTG_StoricoScaricato.csv + REFERTO_MISURA_TICK_NASUSD.txt).
+#  Rapporto ***4,69x***, e il tester scala col numero di tick.
+#    0,7 x 4,69 = ~3,3 minuti a passata.
+#  QUESTO FILE: 2 celle x 2 gambe = 4 passate, di cui 2 sulla gamba OOS
+#  DEGENERE (finestra vuota, costo ~0).
+#    2 passate vere x 3,3 = 6,6 min + compilazione e avvio ~3 min
+#    => ***STIMA 8-12 MINUTI*** per questo file.
+#    Con R187b accanto: ***15-25 MINUTI*** per il round intero.
+#  Bersaglio: banco da backtest C:\MT5_Backtest (demo 50504400).
+#  NON il piccolo 50503392, NON il 100k 50504263, NON il reale 10105439.
+#
+#  --- 11. IL BUCO DICHIARATO ------------------------------------------
+#  L'ATR(14) M15 di NASUSD e' INFERITO, non misurato (par. 8). E' l'unico
+#  numero di questo file che non ha una misura sotto. Lo chiude una sonda
+#  ATR su NASUSD; finche' non c'e', il cancello di costo ha il margine
+#  del 24,2% scritto sopra e non di piu'.
+# =====================================================================
+
+@SIMBOLO  NASUSD
+@PERIODO  M15
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 1.0
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.65||0.65||0||0.65||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON e' pinnato DI PROPOSITO: il suo valore voluto e' la
+# stringa VUOTA, e un pin di stringa vuota NON arriva all'EA (MT5 lo ignora
+# e usa il default compilato -- e' il controllo 3 di controlla_prova.py, nato
+# dal caso ABTG_FiboH4_Multi che misuro' otto volte lo stesso basket).
+# Qui il default compilato E' "" , cioe' esattamente il valore voluto, e
+# InpUseNewsFilter=false rende comunque il campo inerte.
+InpNewsFlatten=true||true||0||true||N
+InpComment=MAXMIN NAS EU
+InpMagic=761600||761600||1||761601||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -24824,3 +24824,77 @@ nostra non diventa la piu' vecchia.** Su `U30USD` del conto piccolo, dove `ABTG_
   `data/statements/trades_auto.csv`, la condizione che arma il difetto si presenta nel
   **21,8% dei trade** (12 su 55), e l'EA preme il pulsante nel **5,5%** (3 su 55). Zero
   incroci osservati e' **coerente col caso** (~0,65 eventi attesi), non una prova di sicurezza.
+
+## CLASSE 444 — il SIMBOLO di una corsa **non è dentro il CSV dei risultati**, e l'unica colonna che gli somiglia è un PARAMETRO (19/09/2026)
+
+**Il caso.** Censimento di `ABTG_MaxMinNotte` per rispondere a *«è mai girato su NASUSD?»*, con
+l'istruzione esplicita di **guardare dentro i CSV** e non dedurre il simbolo dal percorso.
+
+🔴 **Dentro i CSV il simbolo NON C'È.** Gli `OptResults_*.csv` di questa famiglia li scrive
+`OnTesterDeinit` con `FrameInputs` (`ABTG_MaxMinNotte.mq5`, blocco OPTFRAME): l'intestazione è
+`Pass,Profit,…,Trades` **+ un campo per ogni INPUT dell'EA**. Il simbolo scambiato non è un input,
+quindi **nessuna colonna lo porta**. Vale per ogni EA che usa lo stesso blocco OPTFRAME.
+
+🔴 **E l'unica colonna che sembra un simbolo è una TRAPPOLA**, misurata:
+
+| | |
+|---|---:|
+| CSV della famiglia `MaxMinNotte` in archivio | **43** |
+| con `InpCorrSymbol=SPXUSD` su tutte le righe | **43 / 43 = 100%** |
+| corse di `MaxMinNotte` davvero fatte su `SPXUSD` | 🔴 **ZERO** |
+
+`InpCorrSymbol` è il simbolo del **filtro di correlazione**, cioè un **parametro**. Un
+`grep SPXUSD` dentro quei CSV dà **43 falsi positivi su 43**, e un censimento che ci si appoggia
+conclude l'opposto del vero.
+
+### La regola
+🔴 **Il simbolo di una corsa si prova con la CATENA, non con una colonna**, e la catena si cita:
+**nome del CSV → `.ini` (riga `Symbol=`) → file prova (`@SIMBOLO`) → lanciatore (`$Symbols` /
+`-Sym`)**. Se nessuno dei quattro anelli esiste, il simbolo è **`[NON DETERMINABILE]`**, non
+«quello che dice il nome».
+- 🧪 **E prima di grepparlo, si guarda se quel nome di simbolo è anche un VALORE DI INPUT.**
+  I candidati noti: `InpCorrSymbol` (correlazione), `InpSymbols`/`Symbols_List` (EA multi-simbolo,
+  classe del caso `ABTG_FiboH4_Multi`), `InpHedgeSymbol`. Su questi il falso positivo non è raro:
+  **è il 100%**.
+- ⚠️ E il conteggio **per nome** sbaglia nell'altro verso: sullo stesso archivio dava **34** file,
+  il conteggio per contenuto ne trova **43** (6 `XAUUSD` chiamati `oro_maxmin_fase1_*` e 3 indici
+  che nessuno aveva contato). 👉 **Per NOME si perdono file, per COLONNA se ne inventano.**
+- 📌 La conclusione utile di quel censimento è arrivata da una **terza** strada, che va sempre
+  fatta: `git log --all --name-only` sui path del motore, per escludere i file **cancellati**.
+
+## CLASSE 445 — il CUTOFF allargato oltre la SCADENZA DEL PENDENTE viene tagliato IN SILENZIO (19/09/2026)
+
+**Il caso.** Traduzione della cella `MaxMinNotte` `770411` dall'orologio europeo a quello
+americano (round R187): il box passa da 359 a 929 minuti, e per tenere la stessa geometria il
+cutoff degli ingressi va da **31** a **81** minuti dopo il piazzamento.
+
+In `ABTG_MaxMinNotte.mq5` convivono **due** scadenze, e non si parlano:
+
+```
+TryPlace()  : datetime exp = TimeCurrent() + InpPendingExpiryMin*60;   // -> ORDER_TIME_SPECIFIED
+OnTick()    : if(gPhase==MMP_PLACED && !SelPos() && nowMin >= InpEntryCutoffHour*60+InpEntryCutoffMin) CancelPendings();
+```
+
+🔴 **Chi taglia per primo comanda, e a tagliare per primo può essere il BROKER.** Con
+`InpPendingExpiryMin=90`, qualunque cutoff messo oltre **piazzamento + 90 minuti** è
+**inerte**: il pendente è già scaduto, l'EA cancella il nulla, e **il file prova dichiara una
+finestra d'ingresso che non è mai esistita**. Nessun errore, nessun log: solo meno operazioni di
+quelle attese — che in un round a campione sottile si legge come *«il motore non entra»*.
+
+*(Nel caso reale il conto è stato fatto prima: 14:29 + 90 = 15:59 contro un cutoff alle 15:50 →
+comanda il cutoff, di 9 minuti. Il difetto è stato **evitato**, non subito.)*
+
+### La regola
+🔴 **Quando si allarga una finestra temporale in un file prova, si elencano TUTTI i meccanismi che
+la possono chiudere e si scrive QUALE scatta per primo, col minuto.** Non basta che il nuovo
+valore sia "ragionevole": deve essere **il più stretto**, o il pin non fa quello che dice.
+- I tre da controllare su questa famiglia: **(1)** `InpEntryCutoff*` (l'EA cancella);
+  **(2)** `InpPendingExpiryMin` (**il broker** cancella, `ORDER_TIME_SPECIFIED`);
+  **(3)** `InpClose*`, che in `OnTick` sta **PRIMA** del piazzamento — se il close finisce prima
+  del place, l'EA **non piazza mai** e la corsa dà zero operazioni senza dire perché.
+- 🧮 E l'ordine va scritto nel file prova come **catena col minuto accanto**
+  (`place 14:29 < cutoff 15:50 < scadenza 15:59 < close 20:45`), non come tre pin scollegati.
+- ⚠️ Corollario sulle 24 ore: un orario "tradotto" per somma può sfondare la mezzanotte
+  (`14:29 + 9h31 = 24:00`). Il confronto `nowMin >= 1440` **non è mai vero** (`nowMin` arriva a
+  1439): il flat non scatta mai, in silenzio. **Ogni ora tradotta si riporta sul quadrante prima
+  di scriverla.**
