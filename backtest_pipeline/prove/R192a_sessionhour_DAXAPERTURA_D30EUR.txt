@@ -1,0 +1,235 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R192a -- LA MANOPOLA MAI MESSA AD ASSE IN TUTTO L'ARCHIVIO:
+#           InpSessionHour. Asse 8 -> 13, passo 1 = 6 celle.
+#           La cella ORA 8 e' l'ANCORA: deve riprodurre 'ptd'.
+# =====================================================================
+#  DOSSIER: report/ALLARGARE_LA_ROSA_2026-09-19.md
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#             NON il piccolo 50503392, NON il 100k 50504263,
+#             NON il reale 10105439.
+#  NON LANCIARE senza la firma di Claudio: il perimetro del runner e'
+#  SOLA LETTURA.
+#
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+#  Censimento del 19/09 su 2.069 CSV di risultati (cartelle
+#  risultati_archivio/, risultati_prove/, risultati_ottimizzazione/):
+#  cercando le colonne InpSessionHour / InpSessionMin / InpRangeMinutes
+#  con piu' di un valore distinto per file, escono SOLO file con
+#  InpRangeMinutes ad asse (39 file).
+#
+#     >>> InpSessionHour ha UN SOLO VALORE in OGNI CSV in cui compare.
+#     >>> In due anni di round non e' MAI stato messo ad asse.
+#
+#  E' una casella LIBERA, non una casella provata -- la distinzione che
+#  il censimento del 09/09 chiede di fare (874 CSV su 1.960 con esiti
+#  identici = manopole inerti).
+#
+#  ###  PERCHE' VALE LA PENA ADESSO, con la bussola del 1 ottobre  ###
+#  La famiglia Aperture fa AL MASSIMO UNA posizione al giorno per
+#  simbolo (InpOneTradePerDay=true, e il per-trade lo conferma: 193
+#  posizioni su 193 giornate distinte di chiusura, file
+#  risultati_prove/trades_portafoglio/
+#  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770115.csv).
+#  Quindi la sua PORTATA si allarga solo in due modi: un simbolo in piu'
+#  (e i simboli sono esauriti, vedi dossier) oppure UNA SESSIONE IN PIU'
+#  sullo stesso simbolo. Questo file misura il secondo.
+#
+#  ###  L'ATTESA, SCRITTA PRIMA DEI NUMERI  ###
+#  n (deal): l'ancora ora 8 fa 175 in IS e 270 in OOS. Le altre cinque
+#     celle dovrebbero stare nella stessa scala (banda 120-300 per
+#     finestra): il motore fa un setup al giorno comunque, e cio' che
+#     cambia e' quante volte il livello viene rotto.
+#     Se una cella fa n < 50 il verdetto e' "NON MISURATO -- finestra
+#     sbagliata", MAI "quell'ora non funziona".
+#  PF atteso: NESSUNO, e lo dico prima. Non esiste in archivio UNA sola
+#     misura dell'apertura del DAX a un'ora diversa dalle 08:00.
+#     La base storica e' VUOTA, non negativa e non positiva.
+#     L'unico indizio laterale e' lo studio per-trade delle aperture
+#     (risultati_archivio/studio_apertura/Studio_D30EUR_RIEPILOGO.csv):
+#     misura +0,026 R/trade all'ora 08 e NON misura nessun'altra ora.
+#  DD atteso: sotto il 14% su tutte le celle. L'ancora fa 5,44% (IS) e
+#     7,23% (OOS). Una cella sopra il 14% si boccia PER RISCHIO e il
+#     rischio si legge A QUALUNQUE n (Emendamento B, 16/08).
+#
+#  ###  LE SOGLIE, CONGELATE PRIMA  ###
+#  PROMOSSA a candidato SOLO se, nella STESSA cella:
+#     PF >= 1,10 in ENTRAMBE le finestre
+#     DD <= 14%  in ENTRAMBE le finestre
+#     n  >= 150 DEAL in ENTRAMBE  (e n resta [deal], vedi sotto)
+#     segni concordi (profit > 0 in entrambe)
+#     e ALMENO UNA cella VICINA (ora +/- 1) nella stessa condizione.
+#  Una cella che sporge da sola e' RUMORE e si scarta: centro
+#  dell'altopiano, MAI il picco.
+#
+#  ###  IL CONFONDENTE, DICHIARATO PRIMA (e la regola asimmetrica)  ###
+#  InpCloseHour/InpCloseMin restano PINNATI a 17:30 in tutte le celle,
+#  perche' l'ancora dell'ora 8 deve riprodurre 'ptd' al centesimo.
+#  Conseguenza: le celle tarde hanno MENO tempo per lavorare.
+#     ora 08 -> range finito 08:35, mancano 8h55 al flat
+#     ora 13 -> range finito 13:35, mancano 3h55 al flat
+#  >>> REGOLA DI LETTURA, scritta prima dei numeri:
+#      una cella che BATTE l'ora 8 pur avendo meno spazio e' un segnale
+#      VERO (il confondente rema contro di lei);
+#      una cella che PERDE puo' star perdendo contro la tagliola delle
+#      17:30, e allora il suo verdetto e' [NON MISURATO], NON
+#      "quell'ora non funziona".
+#      L'ora di chiusura e' una SECONDA variabile: se una cella tarda
+#      promette, si apre un file prova suo con l'asse su InpCloseHour.
+#
+#  ###  L'ANCORA, LETTA NEL CSV GREZZO IL 19/09  ###
+#  Cella 'ptd' InpRangeMinutes=35 InpBufferPoints=500 InpMagic=770111,
+#  file risultati_prove/ABTG_DAX_Apertura_EU/
+#       ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_ptd.csv
+#     IS  n=175  PF 1,12634  DD 5,4362%
+#     OOS n=270  PF 1,39709  DD 7,2328%
+#  (le due passate gemelle 770111/770112 sono IDENTICHE al centesimo:
+#   il cancello G1 di determinismo era gia' passato in quel round)
+#  Se l'ora 8 NON riproduce questi quattro numeri, LE ALTRE CINQUE
+#  CELLE NON SI LEGGONO: si e' misurato il binario, non l'ora.
+#
+#  ###  DUE PIN CHE CAMBIANO RISPETTO A 'ptd', E PERCHE'  ###
+#  Il binario di HEAD ha DUE input che il binario di 'ptd' non aveva
+#  (confronto a macchina: 80 colonne Inp* nel CSV contro 82 input nel
+#  sorgente a HEAD):
+#     InpUsaGuardian  -> a HEAD il DEFAULT e' true (r.144). Qui e'
+#        pinnato a FALSE, altrimenti l'ancora non puo' riprodurre un
+#        round girato su un binario che il Guardian non ce l'aveva.
+#        Conseguenza dichiarata: questo round misura il motore NUDO.
+#        Il Guardian e' simmetrico fra le ore, quindi non altera il
+#        confronto fra celle.
+#     InpAllowReverse -> a HEAD il DEFAULT e' false (r.279), cioe' gia'
+#        il comportamento di 'ptd'. Pinnato esplicitamente lo stesso.
+#  InpNewsCurrencies NON e' pinnato di proposito: in 'ptd' vale stringa
+#  vuota e a HEAD il default e' stringa vuota (r.340). Un pin vuoto lo
+#  rifiuta controlla_prova.py (MT5 lo ignorerebbe in silenzio).
+#
+#  ###  COME SI LEGGE n, E PERCHE' NON SI PUO' LEGGERE MEGLIO  ###
+#  La colonna Trades conta i DEAL IN USCITA, non le posizioni
+#  (classe 454). Su questa cella il rapporto e' MISURATO: 270 deal /
+#  193 position_id distinti = 1,399
+#  (risultati_prove/trades_portafoglio/
+#   abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770115.csv, colonna
+#   position_id, finestra OOS 2025.06.11 -> 2026.06.25).
+#  >>> Qui il per-trade NON serve e NON si puo' usare: il magic e'
+#      PINNATO e sei celle scriverebbero tutte sullo stesso nome file
+#      (classe 455). Quindi n si dichiara [deal] e basta. Se una cella
+#      promette, il conteggio in POSIZIONI si compra dopo, con un round
+#      a cella singola e asse sul magic: 2 passate.
+#
+#  ###  IL CANCELLO DI COSTO  ###
+#  stop >= 40 x spread. Geometria SL_RANGE: stop = ampiezza del range +
+#  2 x buffer. Sul D30EUR lo Studio misura un'ampiezza mediana di
+#  6.254 punti = 62,5 punti indice sul range di apertura, e il buffer
+#  pinnato e' 500 punti = 5,0 indice: stop ~ 72,5 indice [DERIVATO].
+#  Spread D30EUR mediana ore 07-20 = 1,60 e di coda 1,70
+#  (data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv).
+#     72,5 / 1,70 = 42,6x  -> PASSA (+7%)
+#     72,5 / 1,60 = 45,3x  -> PASSA (+13%)
+#  >>> FRAGILE: passa di poco, e l'ampiezza del range ALLE ALTRE ORE e'
+#      [NON MISURATO] (lo Studio misura solo l'ora 08). Se una cella
+#      tarda promette, prima di promuoverla va misurata l'ampiezza del
+#      suo range: un range piu' stretto fa scendere lo stop e il
+#      cancello di costo si chiude.
+#
+#  ###  COSTO IN TEMPO MACCHINA  ###
+#  6 celle x 2 finestre = 12 passate.
+#  Banda, estremo alto = base MISURATA sullo STESSO EA/simbolo:
+#     0,700 min/passata (R104, D30EUR M15 tick reali,
+#     R104_REFERTO_DRIVER_20260825_0738.txt r.15)
+#     -> 0,6 + 12 x 0,700 = 9,0 min
+#  Banda, estremo basso = base riscalata sui tick del simbolo
+#     0,043 min/passata [DERIVATO, classe 192]
+#     -> 0,6 + 12 x 0,043 = 1,1 min
+#  Chi pianifica usa l'estremo alto: 9,0 minuti.
+#
+#  ###  IL MAGIC  ###
+#  762900 e' VERGINE: zero occorrenze in tutto il repo (cercato il
+#  19/09 su .txt .csv .md .mq5 .ps1 .set .ini).
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+InpAllowReverse=false||false||0||false||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=762900||762900||0||762900||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpSessionHour=8||8||1||13||Y

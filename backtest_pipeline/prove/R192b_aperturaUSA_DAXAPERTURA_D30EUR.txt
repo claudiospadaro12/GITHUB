@@ -1,0 +1,219 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU
+#  R192b -- LA SECONDA SESSIONE SUL SIMBOLO CHE GIA' ABBIAMO:
+#           il DAX all'APERTURA USA (14:30 server = 15:30 italiane).
+#           Asse: InpMagic (due gemelli G1). UNA domanda, una risposta.
+# =====================================================================
+#  DOSSIER: report/ALLARGARE_LA_ROSA_2026-09-19.md
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#             NON il piccolo 50503392, NON il 100k 50504263,
+#             NON il reale 10105439.
+#  NON LANCIARE senza la firma di Claudio: il perimetro del runner e'
+#  SOLA LETTURA.
+#
+#  ###  PERCHE' QUESTO FILE E' SEPARATO DA R192a  ###
+#  R192a sposta UNA sola manopola (InpSessionHour 8->13) e tiene
+#  l'ancora dell'ora 8 dentro il round. Non puo' arrivare all'apertura
+#  USA, perche' quella richiede TRE pin diversi insieme:
+#     InpSessionMin 0 -> 30   (l'apertura USA e' alle 14:30, non 14:00)
+#     InpCloseHour  17 -> 20  (alle 17:30 il trade avrebbe 2h25 di vita)
+#  Tre pin insieme non sono "una variabile": sono una CELLA NUOVA.
+#  Percio' qui l'asse e' il MAGIC (due gemelli identici), che e' anche
+#  il cancello G1 di determinismo -- ed e' il modo che il sorgente
+#  stesso autorizza per far scrivere il file per-trade
+#  (ABTG_..., "usarlo su run singoli / magic-sweep", classe 455).
+#
+#  ###  PERCHE' QUESTA DOMANDA, ADESSO  ###
+#  La famiglia Aperture fa AL MASSIMO UNA posizione al giorno per
+#  simbolo (InpOneTradePerDay=true; per-trade: 193 posizioni su 193
+#  giornate distinte). Misurato il 19/09 sul backtest OOS:
+#     D30EUR ora 08 (sedia 770101)  = 0,699 posizioni/giorno
+#     U30USD ora 14:30 (sedia 770202) = 0,348 posizioni/giorno
+#     famiglia = 1,047 -> il pavimento di 1,00 e' gia' superato
+#  Ma e' superato DI POCO, con DUE sedie, e una delle due in campo ha
+#  fatto 4 operazioni. Una terza sessione sul simbolo che conosciamo
+#  meglio e' il modo piu' corto di comprare margine, e non costa un
+#  simbolo nuovo (niente spread nuovo da misurare, niente ATR inferito).
+#
+#  ###  L'ATTESA, SCRITTA PRIMA DEI NUMERI  ###
+#  n (deal): banda 120-300 per finestra, stessa scala della sessione
+#     EU (175 IS / 270 OOS). Motivo: il motore fa un setup al giorno e
+#     le giornate sono le stesse. Se n < 50 -> "NON MISURATO --
+#     configurazione o finestra sbagliata", MAI "non funziona".
+#  PF atteso: NESSUNO, e lo dico prima. In archivio non esiste UNA sola
+#     misura dell'apertura USA sul DAX. La base storica e' VUOTA.
+#     Due indizi laterali, che tirano in direzioni OPPOSTE e vanno
+#     scritti tutti e due:
+#       + l'apertura USA e' l'ora piu' mossa del pomeriggio europeo;
+#       - il filtro di trend H4 "aiuta gli indici USA e danneggia gli
+#         europei" (FASE A: DAX -0,043, CAC -0,053, IBEX -0,081,
+#         risultati_archivio/Dow_Apertura/DOW_MOTORE.md): non e' lo
+#         stesso meccanismo, ma e' la prova che una regola che vale
+#         sull'indice americano non si trasferisce a quello europeo.
+#     >>> Percio' l'ipotesi da SMONTARE e' che funzioni, non che non
+#         funzioni.
+#  DD atteso: sotto il 14%. Il rischio si legge A QUALUNQUE n
+#     (Emendamento B, 16/08). Sopra il 14% si boccia e basta.
+#
+#  ###  LE SOGLIE, CONGELATE PRIMA  ###
+#  PROMOSSA a candidato SOLO se:
+#     PF >= 1,10 in ENTRAMBE le finestre
+#     DD <= 14%  in ENTRAMBE
+#     n  >= 150 DEAL in ENTRAMBE   (n resta [deal]: classe 454)
+#     profit > 0 in ENTRAMBE (segni concordi)
+#     le DUE passate gemelle IDENTICHE al centesimo (cancello G1)
+#  >>> E anche se passa tutto, NON diventa una sedia con questo round:
+#      manca la conta in POSIZIONI e manca il cancello di costo
+#      calcolato sull'ampiezza VERA del range delle 14:30.
+#      Questo round produce un CANDIDATO, non una promozione.
+#
+#  ###  IL CANCELLO DI COSTO -- [NON CALCOLABILE] OGGI, E LO DICO  ###
+#  stop >= 40 x spread. Geometria SL_RANGE: stop = ampiezza del range
+#  + 2 x buffer. L'ampiezza del range 14:30-15:05 sul D30EUR NON E'
+#  MAI STATA MISURATA: lo Studio delle aperture
+#  (risultati_archivio/studio_apertura/Studio_D30EUR_RIEPILOGO.csv)
+#  misura SOLO l'apertura delle 08:00 (ampiezza mediana 6.254 punti).
+#  Lo spread invece c'e': D30EUR mediana 1,60 per le ore 07-20
+#  (data/spread_vivo/SPREAD_VIVO_2026-09-12_orario.csv), e le 14:30
+#  cadono dentro quella banda.
+#  >>> Perche' il cancello passi servono >= 64 punti indice di stop,
+#      cioe' un'ampiezza di range >= 54 punti indice (5.400 punti) al
+#      netto dei 2 x 5,0 di buffer.
+#  >>> Il round si puo' comunque girare: produce n, PF e DD. Ma il
+#      VERDETTO di promozione resta sospeso finche' quell'ampiezza non
+#      e' misurata. Non si promuove un numero che non ha il suo costo.
+#
+#  ###  COME SI LEGGE n  ###
+#  La colonna Trades conta i DEAL IN USCITA (classe 454). Su questo EA
+#  e su questo simbolo il rapporto e' MISURATO: 270 deal / 193
+#  position_id distinti = 1,399 (risultati_prove/trades_portafoglio/
+#  abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_770115.csv).
+#  >>> QUEL rapporto e' misurato sulla sessione delle 08:00 e NON si
+#      trasporta: dipende da quante posizioni arrivano al parziale di
+#      1R, e a un'altra ora la quota puo' essere diversa.
+#  >>> Qui pero' il per-trade SI PUO' usare, perche' l'asse E' il magic:
+#      ogni gemello scrive il suo file
+#      abtg_trades_ABTG_DAX_Apertura_EU_D30EUR_7629{10,11}.csv nella
+#      cartella Common\Files, e i position_id distinti danno il numero
+#      VERO di posizioni. E' l'unico modo che la classe 455 autorizza.
+#      ATTENZIONE: il nome NON contiene la finestra, quindi la corsa
+#      OOS sovrascrive quella IS. Il conteggio che sopravvive e'
+#      dell'ULTIMA finestra girata: si dichiara quale, non si indovina.
+#
+#  ###  I DUE PIN CHE CAMBIANO RISPETTO AL BINARIO DI 'ptd'  ###
+#  InpUsaGuardian -> a HEAD il default e' true (r.144), qui FALSE:
+#     si misura il motore NUDO, come il round 'ptd' di confronto.
+#  InpAllowReverse -> a HEAD il default e' gia' false (r.279), pinnato
+#     esplicitamente.
+#  InpNewsCurrencies NON e' pinnato di proposito: il default e' stringa
+#     vuota (r.340) e un pin vuoto lo rifiuta controlla_prova.py.
+#
+#  ###  COSTO IN TEMPO MACCHINA  ###
+#  2 celle x 2 finestre = 4 passate.
+#  Estremo alto, base MISURATA sullo stesso EA/simbolo (R104, D30EUR
+#  M15 tick, 0,700 min/passata): 0,6 + 4 x 0,700 = 3,4 min
+#  Estremo basso, base riscalata sui tick [DERIVATO, classe 192]
+#  (0,043 min/passata): 0,6 + 4 x 0,043 = 0,8 min
+#  Chi pianifica usa 3,4 minuti.
+#
+#  ###  IL MAGIC  ###
+#  762910 e 762911 sono VERGINI: zero occorrenze in tutto il repo
+#  (cercato il 19/09 su .txt .csv .md .mq5 .ps1 .set .ini).
+#
+#  ###  UN AVVISO CHE NON E' DI QUESTO ROUND MA CI ATTACCA  ###
+#  Se questa cella diventasse una sedia, girerebbe sullo STESSO simbolo
+#  di 770101. Su conto HEDGING la chiusura di fine sessione dell'EA usa
+#  PositionClose(_Symbol), che chiude la posizione PIU' VECCHIA del
+#  simbolo di CHIUNQUE (report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md,
+#  e lo stesso blocco ha gia' fermato le due sedie Nasdaq il 19/09,
+#  report/DUE_SEDIE_NASDAQ_IL_BLOCCO_2026-09-19.md).
+#  >>> Due sedie Aperture sullo stesso simbolo NON si accendono finche'
+#      quella chiusura non e' per TICKET. Il backtest non lo vede:
+#      nel tester gira un EA solo.
+# =====================================================================
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+
+InpUsaGuardian=false||false||0||false||N
+InpAllowReverse=false||false||0||false||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=20||20||0||20||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpMagic=762910||762910||1||762911||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpSessionHour=14||14||0||14||N

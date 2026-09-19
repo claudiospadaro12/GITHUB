@@ -25690,3 +25690,107 @@ Il censimento dava al difetto #6 il peso misurato sul gemello `ABTG_ORB`: **+25%
 - ✅ **Cosa deve portare la registrazione**: nome file · vintage di base (commit) · `wc -l` **e** conteggio `CODA_06` (= `wc -l` + 1, classe **456**) · sha dello scheletro · **l'elenco per nome dei fix che NON contiene**. Quest'ultimo è il pezzo che di solito manca, ed è quello che serve a chi dovrà schierare la sedia.
 - ✅ **E la frase da scrivere sempre accanto all'F7**: *«questa ricompilazione porta X e NON porta Y, Z»*. Il 19/09 l'F7 autorizzato porta la chiusura per ticket e **non** porta A4, Guardian e C4: la sedia `770101` sul 50503392 resta quella di agosto, con una toppa.
 - 🟠 **Rilievo della stessa famiglia, trovato lo stesso giorno (classe 456 applicata a metà)**: `backtest_pipeline/toppe_da_applicare/2026-09-19/LEGGIMI.md` r.44 dice che il referto notturno *«deve mostrare 2090 / 2190 / 2122 al posto di 2032 / 2132 / 2064»* — ma `CODA_06` stamperà **2091 / 2191 / 2123** al posto di **2033 / 2133 / 2065**. Il referto della riga di lancio lo ha già corretto; il `LEGGIMI.md` che **viaggia insieme ai sorgenti** no. Chi verifica leggendo il LEGGIMI conclude che la toppa **non è entrata**.
+
+---
+
+## CLASSE 464 — 📈🐛 LA FREQUENZA DI CAMPO CONTATA **CON DENTRO LE POSIZIONI PRODOTTE DA UN DIFETTO NOTO**: il pavimento risulta più vicino di quanto sia, e si allontana il giorno della riparazione (19/09/2026)
+
+**Il caso.** `report/FREQUENZA_DELLA_ROSA_2026-09-19.md` misura la sedia `770101`
+(`ABTG_DAX_Apertura_EU`, D30EUR) a **0,886 posizioni/giorno** e **0,864 segnali/giorno**, e la
+mette in cima alla tabella come *«la migliore»*, a un soffio dal pavimento firmato di **1,00**.
+
+**La misura, rifatta all'unità** (`data/statements/trades_auto.csv`, `magic=770101`,
+`symbol=D30EUR`, colonna `open_time`):
+
+| giornate con N posizioni | N=1 | N=2 | N=3 | N=5 |
+|---|---:|---:|---:|---:|
+| numero di giornate | **28** | 1 | 1 | **1** |
+
+**38 posizioni su 31 giornate distinte.** Le sette in più stanno **tutte su tre giorni di fila**
+(28, 29 e 30 luglio 2026), e il 30/07 ce ne sono **cinque** — alle 08:20, 08:34, 08:51, 09:23,
+09:53. 🔴 **L'EA ha `InpOneTradePerDay=true`**: quelle sette posizioni non sono il motore, sono il
+buco nella guardia già censito in `report/LA_ROSA_PER_LA_PROP_2026-09-19.md` §⑤
+(*«guardia "un trade al giorno" col buco»*).
+
+👉 **Frequenza depurata: 31/44 = `0,705` op/giorno, non `0,864`.** Il divario dal pavimento non è
+del 14%: è del **30%**, e **peggiora** quando la toppa entra.
+
+### 🧪 Il contro-esempio che conferma il numero depurato (e non quello grezzo)
+Tre misure indipendenti cadono su `0,68-0,71` e **nessuna** su `0,86`:
+
+| misura | fonte | op/gg |
+|---|---|---:|
+| campo depurato | `trades_auto.csv` | **0,705** |
+| backtest OOS `ptd`: 193 posizioni / 276 gg lav | `risultati_prove/.../ABTG_DAX_Apertura_EU_D30EUR_OOS_ptd.csv` r.75 + per-trade `770115` | **0,699** |
+| backtest OOS `M_direzione`: 183 pos / 261 gg lav | `risultati_archivio/Walkforward_Aperture/DAX_M_direzione_OOS.csv` r.4 | **0,701** |
+
+Se il `0,864` fosse il vero comportamento del motore, il backtest dovrebbe vederlo. **Non lo vede
+in nessuna delle due finestre di nessuno dei due round.**
+
+### La regola
+🔴 **Una frequenza di campo è un numero di CAMPO: contiene tutto quello che il binario fa, compresi
+i suoi difetti. Prima di confrontarla con un pavimento va DEPURATA dei difetti già censiti — e la
+depurazione si dichiara con il conteggio, non con un aggettivo.**
+- 📋 **Come si fa, e costa un `Counter`**: si contano le **posizioni per giornata**. Se l'EA ha un
+  vincolo dichiarato (`InpOneTradePerDay`, `InpMaxPosSimbolo`, un tetto di cicli), ogni giornata
+  che lo **viola** è un difetto, non frequenza. Il numero da confrontare col pavimento è quello
+  **compatibile col vincolo**.
+- 🧪 **E si valida contro il backtest della stessa cella**: la frequenza vera del motore è
+  `posizioni / giorni lavorativi` sul backtest. Se campo e backtest divergono di più del 10%, **uno
+  dei due sta misurando qualcos'altro** — e prima di scrivere il numero si scopre quale.
+- ⚠️ **Il verso dell'errore è sempre lo stesso e sempre il peggiore**: un difetto che APRE di più
+  gonfia la frequenza *e* gonfia il rischio. Un pavimento raggiunto grazie a un bug si scopre non
+  raggiunto **il giorno in cui si ripara**, cioè il giorno peggiore.
+- 🚫 **Non vale l'obiezione «tanto è poco»**: qui sono 7 posizioni su 38, il **18%** del campione,
+  e spostano il verdetto da *«a un soffio dal pavimento»* a *«sotto di un terzo»*.
+
+📌 Famiglia della **454** (la colonna che conta i deal e si chiama `n`) e della **452** (la colonna
+che conviene): **numeri di campione e di frequenza che dicono una cosa diversa da quella che
+sembrano.**
+
+---
+
+## CLASSE 465 — 🔁📐 IL RAPPORTO **DEAL→POSIZIONI** MISURATO SU UNA CELLA E APPLICATO A UN'ALTRA: il pavimento dei 150 cade **dentro** la banda dei rapporti già misurati in casa (19/09/2026, figlia della **454**)
+
+**Il caso.** `ABTG_Dow_Apertura_US` su U30USD, round `ptc`, cella `Pass=3` (due lati, range 25):
+**218 `Trades` in OOS**. Per decidere se supera il pavimento dei **150 POSIZIONI** (Emendamento A)
+serve il rapporto deal→posizioni. In archivio ce n'è uno **misurato sullo stesso EA, sullo stesso
+simbolo, sulla stessa finestra**: `risultati_prove/trades_portafoglio/abtg_trades_ABTG_Dow_Apertura_US_U30USD_770206.csv`,
+**130 deal / 96 `position_id` distinti = 1,354**. `218 / 1,354 = 161` → sembra che passi.
+
+🔴 **Non passa e non è bocciata: è `[NON MISURATO]`.** Quel `770206` è la cella **LONG-ONLY**
+(`InpAllowShort=false`, `prove/R16c_pertrade_Dow.txt`), e il rapporto vale `1 + P(la posizione
+arriva al parziale di 1R)` — una quantità che **dipende dalla cella**, non dall'EA.
+
+| rapporto | posizioni da 218 deal | S1 (≥150) |
+|---:|---:|---|
+| 1,000 — misurato su `ORB_Ottimizzato` U30USD (nessuna parziale) | 218 | ✅ |
+| 1,353 — misurato su `MaxMinNotte` XAUUSD | 161 | ✅ |
+| **1,354** — misurato sulla cella LONG-only dello stesso EA | **161** | ✅ |
+| **1,453 — SOGLIA DI ROTTURA** | **150** | ⚖️ sul filo |
+| 1,399 — misurato su `DAX_Apertura_EU` D30EUR | 156 | ✅ |
+| 1,500 — misurato su `MaxMinNotte` D30EUR | 145 | ❌ |
+| 1,613 — misurato su `SupertrendReversal` 225JPY | 135 | ❌ |
+
+> 🔴 **Il valore che ribalta il verdetto (1,453) sta DENTRO la banda dei rapporti già misurati in
+> casa (1,000 – 1,613), e ci stanno dentro anche due valori misurati che lo superano.** Un numero
+> che si ribalta dentro la banda delle proprie fonti non è una misura: è una scommessa.
+
+### La regola
+🔴 **Un rapporto deal→posizioni vale per la CELLA su cui è stato contato. Trasportarlo è
+`[DERIVATO]`, e prima di appoggiarci un verdetto si calcola la SOGLIA DI ROTTURA e si guarda se
+cade dentro la banda delle misure disponibili.**
+- 📐 **La soglia di rottura si scrive sempre**: `rapporto_critico = deal / pavimento`. Qui
+  `218/150 = 1,453`. Se cade **fuori** dalla banda delle misure, il verdetto regge e si dichiara
+  `[DERIVATO, robusto]`. Se cade **dentro**, il verdetto è `[NON MISURATO]` — punto.
+- 🧪 **Il falsificatore è gratis e va guardato**: basta che UNA cella dell'archivio, con la stessa
+  scala d'uscita, abbia un rapporto oltre la soglia. Qui ne esistono **due**.
+- 🛠️ **La via più corta al numero vero costa 2 passate**: un round a cella singola con asse sul
+  **magic** (due gemelli, che sono anche il cancello G1) fa scrivere il per-trade di quella cella
+  — l'unico uso che la classe **455** autorizza.
+- ⚠️ **E il verso conta**: aggiungere un lato o accendere un pezzo di gestione **alza** il rapporto
+  (più posizioni toccano il parziale), quindi trasportare il rapporto da una cella *più magra* a
+  una *più grassa* sbaglia **sempre nel verso ottimista**.
+
+📌 Famiglia della **454** (che ha aperto il problema) e della **192** (il numero riscalato da un
+altro contesto e usato come se fosse misurato).

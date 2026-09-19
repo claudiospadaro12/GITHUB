@@ -3733,3 +3733,99 @@ lanciato: finché non torna, non si manda niente al VPS.**
 🛑 **Nessun backtest eseguito, nessun EA/preset/forward toccato, nessuna taglia e nessuna
 accensione proposta, niente sul conto reale `10105439`.** Bersaglio: banco `C:\MT5_Backtest`,
 demo `50504400`.
+
+---
+
+## 🌍 R192 — ALLARGARE LA ROSA: **simbolo × TF scavato in archivio**, e l'unica casella ancora libera (19/09/2026)
+
+**Origine**: bussola del 1° ottobre e `report/FREQUENZA_DELLA_ROSA_2026-09-19.md`
+(*nessuna famiglia raggiunge 1,00 op/giorno*). Censimento di **2.376 CSV**, di cui **315** dei tre
+motori della rosa, letti cella per cella con IS↔OOS appaiati sullo stesso `Pass`, `ohlc` esclusi.
+📄 Referto: `report/ALLARGARE_LA_ROSA_2026-09-19.md`
+
+### 🟢 IL RISULTATO CHE CAMBIA IL QUADRO: la famiglia Aperture il pavimento **lo supera già**
+`ABTG_Dow_Apertura_US` è lo **stesso motore** di `ABTG_DAX_Apertura_EU` (r.53 del sorgente Dow;
+tutti e tre montano `ABTG_ApertureCore.mqh`). Contata come **famiglia**, in **POSIZIONI**, sul
+backtest OOS a tick reali:
+
+| gamba | posizioni OOS | gg lav | op/gg |
+|---|---:|---:|---:|
+| `770101` D30EUR ora 08 | **193** | 276 | **0,699** |
+| `770202` U30USD ora 14:30 | **96** | 276 | **0,348** |
+| **famiglia** | **289** | 276 | 🟢 **1,047** |
+
+🔴 **Ma in campo la stessa famiglia fa 0,834**, perché `770202` ha fatto **4 posizioni in 31 giorni
+lavorativi (0,129/gg)** contro le 0,348 promesse — **fattore 2,7**, ultima operazione 28/08.
+👉 **La via più corta a +0,22 op/giorno di tutto il dossier non costa un minuto di macchina: è
+capire cosa sta facendo quella sedia.**
+
+### 📏 LA MISURA CHE MANCAVA A TUTTI — il rapporto deal→posizioni, **MISURATO**
+Sei file per-trade in `risultati_prove/trades_portafoglio/`, mai aperti da nessun referto.
+`position_id` distinti contro la colonna `Trades`:
+`DAX_Apertura_EU` D30EUR **270/193 = 1,399** · `Dow_Apertura_US` U30USD **130/96 = 1,354** ·
+`MaxMinNotte` D30EUR 21/14 = 1,500 · `MaxMinNotte` XAUUSD 92/68 = 1,353 ·
+`SupertrendReversal` 225JPY 50/31 = 1,613 · 🟢 **`ORB_Ottimizzato` U30USD 119/119 = 1,000**
+(l'unico **senza parziale** — è il contro-esempio che prova che il rapporto misura la parziale e
+non il lettore). Chiude in parte il `[NON MISURATO]` dichiarato da
+`report/QUANTI_SIMBOLI_PASSANO_2026-09-19.md`.
+
+### 🪦 TRE MORTI COL CERTIFICATO COMPLETO — `MaxMinNotte` sui gemelli europei
+`F40EUR` · `E50EUR` · `100GBP`: **72 passate ciascuno**, asse su buffer × lati × TP2_R,
+**ZERO celle con PF ≥ 1,10** su tutti e tre, PF massimo **0,999 / 0,840 / 0,672**, DD fino a
+**40,7% / 35,2% / 48,3%**. Fonti: `risultati_archivio/MaxMinNotte/{4528c79b,8eefb007,efe054b5}-valid_MaxMin_*.csv`.
+👉 **Il MaxMinNotte non si allarga sugli indici europei: è misurato, non supposto.**
+
+### 🔴 DUE VIE DI ALLARGAMENTO GIÀ PERCORSE E NEGATIVE — e una tocca un round già scritto
+1. **TF più basso su `SuperWave_DOW_H1_Ottimizzato` U30USD**: la discesa H1→M30 **è già in
+   archivio a tick reali sulla stessa finestra**
+   (`risultati_prove/ABTG_SuperWave_DOW_H1_Ottimizzato/..._{IS,OOS}.csv`):
+   **M30 OOS n=320 PF 0,868** · M20 OOS n=512 PF 0,753 DD 14,17% · M15 OOS n=637 PF 0,826
+   DD 14,07%, contro H1 OOS n=143 PF 1,328.
+   🔴 **A M30 l'OOS ha 320 operazioni: il merito NON è sospeso, è LETTO, ed è un no.**
+   ⚠️ Il round base gira su un **binario più vecchio** di `r120e11` (4 colonne `Inp*` in meno), e
+   su H1 quel binario fa **meglio** (PF OOS 1,328 contro 1,220). 👉 **`R190b` resta da girare ma
+   va letto come CERTIFICATO, non come candidato**: la frase *«la cella non-promossa più bella
+   dell'archivio»* nel suo file prova va corretta prima della corsa.
+2. **Lato SHORT dell'apertura**: `ptc` sul Dow, tre valori di range, **OOS profit
+   −3.281 / −2.795 / −6.010** passando da LONG-only a due lati (a fronte di **+55% di deal**),
+   con IS **positivo su 3 su 3**. Sul DAX `Walkforward_Aperture/DAX_M_direzione` dice lo stesso:
+   short IS PF **0,846**, combinazione IS PF **0,998** contro il long **1,131**.
+   🟢 **Con questo la REGOLA DEI DUE LATI (25/08) è soddisfatta su D30EUR, U30USD e NASUSD: il
+   lato short dell'apertura è stato misurato su tutti e tre ed è un no su tutti e tre.**
+
+### 🕳️ LA CASELLA LIBERA: **`InpSessionHour` non è MAI stato messo ad asse**
+Su 2.376 CSV, **230** portano la colonna `InpSessionHour`. Di questi: `InpRangeMinutes` ad asse in
+**54**, `InpSessionMin` ad asse in **0**, 🔴 **`InpSessionHour` ad asse in `0`**.
+È una casella **libera**, non provata. E conta perché la famiglia Aperture fa **una posizione al
+giorno per simbolo** (verificato: 193 posizioni su 193 giornate distinte): la portata cresce solo
+con **un simbolo in più** — esauriti — **o con una SESSIONE in più**.
+
+### 📦 I DUE FILE PROVA (scritti, `controlla_prova.py` **OK 0 problemi**, ASCII puro, NON girati)
+| file | asse | celle | passate | costo (estremo alto) | magic |
+|---|---|---:|---:|---:|---|
+| `prove/R192a_sessionhour_DAXAPERTURA_D30EUR.txt` | **`InpSessionHour` 8→13** | 6 | 12 | 9,0 min | `762900` |
+| `prove/R192b_aperturaUSA_DAXAPERTURA_D30EUR.txt` | `InpMagic` (2 gemelli G1) | 2 | 4 | 3,4 min | `762910/762911` |
+
+Magic **vergini** (grep su tutto il repo: zero occorrenze). Base di costo **misurata sullo stesso
+EA e simbolo**: 0,700 min/passata (`R104_REFERTO_DRIVER_20260825_0738.txt` r.15).
+**Àncora dentro il round**: la cella *ora 8* di `R192a` deve riprodurre `ptd`
+(IS n=175 PF 1,12634 DD 5,4362% · OOS n=270 PF 1,39709 DD 7,2328%, righe **77** e **75** dei CSV
+grezzi). Se non riproduce, **le altre cinque celle non si leggono**.
+🔴 Due pin cambiano rispetto a `ptd` e sono dichiarati nel file: `InpUsaGuardian` (default `true`
+a HEAD, r.144) pinnato **`false`**, e `InpAllowReverse` pinnato `false`.
+🔴 Confondente dichiarato **prima**: `InpCloseHour` resta 17:30 per tutte le celle, quindi le ore
+tarde hanno meno spazio → **regola asimmetrica**: chi batte l'ora 8 è un segnale vero, chi perde è
+`[NON MISURATO]`, non «quell'ora non funziona».
+
+### 🚨 E UN BLOCCO CHE VALE PRIMA DI ACCENDERE QUALSIASI SECONDA SESSIONE
+Due sedie Aperture sullo **stesso simbolo** si ostacolano: `PositionClose(_Symbol)` su conto
+HEDGING chiude la posizione **più vecchia del simbolo di chiunque**
+(`report/AUDIT_POSITIONSELECT_HEDGING_2026-09-03.md` r.39). È lo stesso blocco che ha fermato le
+due sedie Nasdaq il 19/09. 🔴 **Non si accende niente finché la chiusura non è per TICKET.**
+
+📌 Classi nuove registrate: **464** (frequenza di campo gonfiata da un difetto noto) e **465**
+(rapporto deal→posizioni trasportato fra celle, con la soglia di rottura dentro la banda).
+🛑 **Nessun backtest eseguito, nessun EA/preset/forward toccato, nessuna taglia e nessuna
+accensione proposta, niente sul conto reale `10105439`.** Bersaglio dei due file: banco
+`C:\MT5_Backtest`, demo `50504400`. ⏳ Secondo strato del cancello (`controllo-preventivo`) **non
+lanciato da me**: finché non torna, niente va verso il VPS.
