@@ -188,7 +188,7 @@ git log --all --diff-filter=D --name-only -- '*770260*'  ->  VUOTO
 ```
 👉 Non è stato cancellato: **non è mai stato committato**. È una **classe nuova** — un artefatto
 descritto come *validato* («80 input, copertura verificata nei due versi») che **non è mai
-entrato nel controllo di versione**. → **CLASSE 474** in `CHECKLIST_RIGA_DI_LANCIO.md`.
+entrato nel controllo di versione**. → **CLASSE 475** in `CHECKLIST_RIGA_DI_LANCIO.md`.
 
 ### La fonte grezza, trovata e usata
 `backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_B_motore_IS.csv` e
@@ -549,6 +549,19 @@ Ogni file FTMO porta in testa lo **sha1(12) dell'originale**: se l'originale cam
 toccato · 🚫 conto reale **10105439** mai nominato se non per escluderlo · 🚫 nessun forward,
 nessun round · 🚫 `MISURA_LOTTI_U30USD.ps1`, `ABTG_MIS_SIZING_*`, `MIS_SIZING_*`,
 `SCHIERA_FTMO.ps1`, `ABTG_PostNews_*.set` **letti ma mai scritti** · 🚫 niente è uscito verso Claudio.
+
+---
+
+## ⑫ 🔀 NOTA DI CANTIERE — collisione di numero di classe, risolta
+
+Le mie due classi nuove erano nate **474** e **475**. Nella stessa ora un'altra sessione ha
+committato una classe **474** sua (*«il pin dell'EA e il pin del suo `.mqh` sono una decisione
+sola»*): **due grep corretti, lo stesso numero**. Risolta **dal mio lato**, senza toccare niente
+di loro: le mie sono diventate **475** e **476** e sono state spostate **dopo** la loro, così il
+file resta in ordine crescente e i loro referti restano coerenti.
+📌 È il precedente già usato in casa (*«classi 472/473, rinumerate da 470/471»*) — ma segnala una
+cosa vera: 🔴 **«cerca il numero col grep» non basta quando più sessioni scrivono in parallelo.**
+Chi passa di qui per ultimo controlla i duplicati prima di chiudere.
 
 ---
 

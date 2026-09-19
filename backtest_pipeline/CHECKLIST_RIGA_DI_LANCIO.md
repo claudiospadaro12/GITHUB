@@ -26179,102 +26179,6 @@ spegne chi lo decide un **orario**, non il magic — quindi non si vede leggendo
 
 ---
 
-## CLASSE 474 — 📄👻 **UN ARTEFATTO DESCRITTO COME «VERIFICATO» CHE NON È MAI ENTRATO IN REPO**: il referto lo racconta input per input, `git log` non lo ha mai visto, e la sedia firmata non si accende (controllo-preventivo, 20/09/2026, cugina della **463**)
-
-**Il caso reale.** Il referto `report/NASDAQ_RETEST_VOLUMI_LA_SEDIA_2026-09-18.md` descrive il
-`.set` della sedia `770260` con un dettaglio che *suona* come una verifica compiuta:
-> *«**80 input**, **nessun valore sbagliato**, copertura verificata nei due versi contro il
-> binario `3af47ed9`»* · *«Il `.set` è stato **generato meccanicamente dalla riga del CSV**
-> (78 righe `Inp`), non ribattuto a mano»*.
-
-Il 19/09 Claudio firma *«Sì, dentro il `770260` RETEST»*. Il 20/09 il file **non c'è**:
-```
-grep -rln "770260" --include=*.set .                      ->  0 file
-git log --all --oneline -S"770260" -- '*.set'             ->  VUOTO
-git log --all --diff-filter=D --name-only -- '*770260*'   ->  VUOTO
-```
-🔴 **I due `git log` vuoti sono il punto**: il file non è stato **cancellato**, non è mai stato
-**committato**. Esisteva solo nella sessione che l'ha prodotto. Ed era **l'unico file mancante**
-di una rosa di sette sedie a due giorni dallo schieramento (buco **B6** del pacchetto).
-
-### E il danno secondario, che è peggiore del primo
-Quel referto ha fatto **due** cose sbagliate insieme:
-1. ha creato la **convinzione** che l'artefatto esistesse (nessuno lo ha ricercato per due giorni);
-2. ha **datato la verifica** su un binario (`3af47ed9`, **80 input**) che nel frattempo è stato
-   superato. A HEAD lo stesso EA ne ha **98**: **18 input nuovi** che un `.set` da 80 righe
-   lascerebbe al default **senza che nessuno l'abbia deciso**. Quindi anche se il file *fosse*
-   stato committato, oggi sarebbe **incompleto** — e il referto continuerebbe a dire
-   *«copertura verificata nei due versi»*.
-
-### La regola
-🔴 **Un artefatto non è «verificato» finché non è in `git`. Un referto che lo descrive senza
-citarne il PERCORSO IN REPO sta descrivendo qualcosa che non esiste per nessun altro.**
-- ✅ **Controllo, deterministico e da fare PRIMA di scrivere «verificato»**: `git log --oneline -1 -- <percorso>`
-  sull'artefatto. Se torna vuoto, **la frase da scrivere non è «verificato», è «prodotto e NON
-  committato»** — che è un compito aperto, non un risultato.
-- ✅ **Il referto cita sempre il PERCORSO, mai solo il contenuto.** «80 input, nessun valore
-  sbagliato» senza un percorso è un'affermazione **non ricontrollabile**: chi legge non può
-  rifare la misura, può solo crederci. È lo stesso difetto della **463** (un binario che non
-  corrisponde a nessun commit), visto dal lato degli artefatti di configurazione.
-- 🔴 **E la copertura di un `.set` si dichiara SEMPRE contro un COMMIT NOMINATO, con il numero
-  di input di quel commit accanto.** «Copertura verificata» senza la revisione è una data di
-  scadenza nascosta: basta che qualcuno aggiunga un `input` e la frase diventa falsa **senza che
-  niente nel repo cambi colore**. Forma corretta:
-  > *«98 input su 98 pinnati contro `<sha>` (che ne dichiara 98)»*.
-- 📌 **Contromisura applicata il 20/09**: il `.set` `770260` è stato **ricostruito dalla fonte
-  grezza** (`NASDAQ_B_motore_{IS,OOS}.csv`, riga `Pass=8`, con contro-prova che le due finestre
-  hanno gli stessi 78 input), pinnato su **98/98 contro HEAD**, e committato come
-  `mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set`. I 18 input nuovi sono stati
-  verificati **uno per uno leggendo il gating nel sorgente**, non fidandosi dei nomi.
-  Misura: `report/PRESET_FTMO_OROLOGIO_2026-09-20.md` §⑤.
-
----
-
-## CLASSE 475 — 📰🕐 **IL CALENDARIO NOTIZIE È IN ORA ITALIANA, L'EA LO CONFRONTA CON L'ORA SERVER**: il blackout esiste, funziona, stampa il log — e cade **un'ora fuori** (controllo-preventivo, 20/09/2026)
-
-**Il caso reale.** `mql5/Files/abtg_news.csv` (quello che leggono le sedie vive:
-`InpNewsFile=abtg_news.csv` in **ogni** preset) porta orari in **ORA ITALIANA**, con DST europeo.
-Misurato su due eventi in **stagioni opposte**, perché con un evento solo non si distingue un
-fuso fisso da un fuso con ora legale:
-| riga del file | evento vero | UTC | ora italiana | ora BCM |
-|---|---|---|---|---|
-| `2026.01.28 20:00` | FOMC 14:00 New York, **inverno** | 19:00 | **20:00** ✅ | 19:00 |
-| `2026.07.29 20:00` | FOMC 14:00 New York, **estate** | 18:00 | **20:00** ✅ | 19:00 |
-| `2026.09.10 14:15` | BCE, ore 14:15 CET/CEST | 12:15 | **14:15** ✅ | 13:15 |
-
-👉 **Il file segue l'Italia, non il server.** Ma gli EA della famiglia Apertura / MaxMin /
-EMA200 confrontano quegli istanti con **`TimeCurrent()`**, che è **ORA SERVER**, e
-**`InpNewsShiftMinutes=0` in tutti i preset del repo**.
-- su **BCM** (italiana − 1) il blackout cade **un'ora TARDI**;
-- su **FTMO** (italiana + 1) cadrebbe **un'ora PRESTO**.
-
-🔴 **In tutti e due i casi la finestra protegge il momento sbagliato**, e il difetto è **muto**:
-il calendario si legge, il canarino `utili>0` è verde, il log stampa «blackout notizie». Non c'è
-niente di rotto da vedere — c'è una **rete messa nel posto sbagliato**.
-
-**Chi è esposto oggi**: `mql5/Presets/ABTG_Nasdaq_Apertura_US.set` (sedia `770201`) ha
-`InpUseNewsFilter=true` con `InpNewsShiftMinutes=0`. Le sette sedie della rosa prop hanno il
-filtro **spento**, quindi oggi non morde — ma morderebbe **il giorno in cui qualcuno lo accende**.
-
-### La regola
-🔴 **Un calendario esterno ha SEMPRE un fuso, e quel fuso va MISURATO su due eventi in stagioni
-opposte, non letto nel nome del file né dedotto da un evento solo.** Con un evento solo, «fuso
-fisso» e «fuso con DST» danno la stessa risposta.
-- ✅ **Controllo**: prendere **un evento d'inverno e uno d'estate** a orario noto e ancorato a una
-  borsa (NFP e FOMC vanno benissimo: 08:30 e 14:00 New York), calcolarne l'UTC e confrontare.
-  Se l'offset **cambia** fra i due, il file segue un DST: **quale**, lo dice il segno.
-- ✅ **Poi si dichiara lo shift, sempre**: `InpNewsShiftMinutes` = (ora server) − (ora del file).
-  Oggi varrebbe **−60** su BCM e **+60** su FTMO. **`0` non è un default neutro: è
-  un'affermazione**, cioè «il file è già in ora server».
-- 🔴 **Attenzione al caso che ASSOLVE**: negli EA `ABTG_PostNews` il confronto è **solo per data**
-  (`NewsToday()` guarda anno/mese/giorno e basta) e il loro file è **UTC puro**. Lì lo shift è
-  davvero ininfluente — **ma solo perché qualcuno è andato a leggere il codice.** La stessa riga
-  `InpNewsShiftMinutes=0` è **giusta** in un EA e **sbagliata** in un altro: non si giudica dal
-  valore, si giudica dal **confronto che l'EA fa**.
-- 📌 Misura: `report/PRESET_FTMO_OROLOGIO_2026-09-20.md` §⑤.
-
----
-
 ## CLASSE 474 — 🧩🔨 **IL PIN DELL'EA E IL PIN DEL SUO `.mqh` SONO UNA DECISIONE SOLA, NON DUE**: l'EA a HEAD chiama tre funzioni che l'include *provato* non ha, e l'F7 muore (controllo-preventivo, 19/09/2026, figlia della **27**)
 
 **Il caso, e stava per essere eseguito stanotte.** Il pacchetto di schieramento FTMO prescriveva,
@@ -26327,3 +26231,99 @@ si sta guardando in quel momento: qui sette EA su otto passavano con la v1.20, e
 il riflesso di **copiare l'include**. Questa dice che **copiarlo non basta**: un include
 **presente ma della versione sbagliata** fallisce nello stesso identico modo, e con un messaggio
 d'errore che punta all'EA invece che all'include.
+
+---
+
+## CLASSE 475 — 📄👻 **UN ARTEFATTO DESCRITTO COME «VERIFICATO» CHE NON È MAI ENTRATO IN REPO**: il referto lo racconta input per input, `git log` non lo ha mai visto, e la sedia firmata non si accende (controllo-preventivo, 20/09/2026, cugina della **463**)
+
+**Il caso reale.** Il referto `report/NASDAQ_RETEST_VOLUMI_LA_SEDIA_2026-09-18.md` descrive il
+`.set` della sedia `770260` con un dettaglio che *suona* come una verifica compiuta:
+> *«**80 input**, **nessun valore sbagliato**, copertura verificata nei due versi contro il
+> binario `3af47ed9`»* · *«Il `.set` è stato **generato meccanicamente dalla riga del CSV**
+> (78 righe `Inp`), non ribattuto a mano»*.
+
+Il 19/09 Claudio firma *«Sì, dentro il `770260` RETEST»*. Il 20/09 il file **non c'è**:
+```
+grep -rln "770260" --include=*.set .                      ->  0 file
+git log --all --oneline -S"770260" -- '*.set'             ->  VUOTO
+git log --all --diff-filter=D --name-only -- '*770260*'   ->  VUOTO
+```
+🔴 **I due `git log` vuoti sono il punto**: il file non è stato **cancellato**, non è mai stato
+**committato**. Esisteva solo nella sessione che l'ha prodotto. Ed era **l'unico file mancante**
+di una rosa di sette sedie a due giorni dallo schieramento (buco **B6** del pacchetto).
+
+### E il danno secondario, che è peggiore del primo
+Quel referto ha fatto **due** cose sbagliate insieme:
+1. ha creato la **convinzione** che l'artefatto esistesse (nessuno lo ha ricercato per due giorni);
+2. ha **datato la verifica** su un binario (`3af47ed9`, **80 input**) che nel frattempo è stato
+   superato. A HEAD lo stesso EA ne ha **98**: **18 input nuovi** che un `.set` da 80 righe
+   lascerebbe al default **senza che nessuno l'abbia deciso**. Quindi anche se il file *fosse*
+   stato committato, oggi sarebbe **incompleto** — e il referto continuerebbe a dire
+   *«copertura verificata nei due versi»*.
+
+### La regola
+🔴 **Un artefatto non è «verificato» finché non è in `git`. Un referto che lo descrive senza
+citarne il PERCORSO IN REPO sta descrivendo qualcosa che non esiste per nessun altro.**
+- ✅ **Controllo, deterministico e da fare PRIMA di scrivere «verificato»**: `git log --oneline -1 -- <percorso>`
+  sull'artefatto. Se torna vuoto, **la frase da scrivere non è «verificato», è «prodotto e NON
+  committato»** — che è un compito aperto, non un risultato.
+- ✅ **Il referto cita sempre il PERCORSO, mai solo il contenuto.** «80 input, nessun valore
+  sbagliato» senza un percorso è un'affermazione **non ricontrollabile**: chi legge non può
+  rifare la misura, può solo crederci. È lo stesso difetto della **463** (un binario che non
+  corrisponde a nessun commit), visto dal lato degli artefatti di configurazione.
+- 🔴 **E la copertura di un `.set` si dichiara SEMPRE contro un COMMIT NOMINATO, con il numero
+  di input di quel commit accanto.** «Copertura verificata» senza la revisione è una data di
+  scadenza nascosta: basta che qualcuno aggiunga un `input` e la frase diventa falsa **senza che
+  niente nel repo cambi colore**. Forma corretta:
+  > *«98 input su 98 pinnati contro `<sha>` (che ne dichiara 98)»*.
+- 📌 **Contromisura applicata il 20/09**: il `.set` `770260` è stato **ricostruito dalla fonte
+  grezza** (`NASDAQ_B_motore_{IS,OOS}.csv`, riga `Pass=8`, con contro-prova che le due finestre
+  hanno gli stessi 78 input), pinnato su **98/98 contro HEAD**, e committato come
+  `mql5/Presets/ABTG_Nasdaq_Apertura_US_RETEST_770260.set`. I 18 input nuovi sono stati
+  verificati **uno per uno leggendo il gating nel sorgente**, non fidandosi dei nomi.
+  Misura: `report/PRESET_FTMO_OROLOGIO_2026-09-20.md` §⑤.
+
+---
+
+## CLASSE 476 — 📰🕐 **IL CALENDARIO NOTIZIE È IN ORA ITALIANA, L'EA LO CONFRONTA CON L'ORA SERVER**: il blackout esiste, funziona, stampa il log — e cade **un'ora fuori** (controllo-preventivo, 20/09/2026)
+
+**Il caso reale.** `mql5/Files/abtg_news.csv` (quello che leggono le sedie vive:
+`InpNewsFile=abtg_news.csv` in **ogni** preset) porta orari in **ORA ITALIANA**, con DST europeo.
+Misurato su due eventi in **stagioni opposte**, perché con un evento solo non si distingue un
+fuso fisso da un fuso con ora legale:
+| riga del file | evento vero | UTC | ora italiana | ora BCM |
+|---|---|---|---|---|
+| `2026.01.28 20:00` | FOMC 14:00 New York, **inverno** | 19:00 | **20:00** ✅ | 19:00 |
+| `2026.07.29 20:00` | FOMC 14:00 New York, **estate** | 18:00 | **20:00** ✅ | 19:00 |
+| `2026.09.10 14:15` | BCE, ore 14:15 CET/CEST | 12:15 | **14:15** ✅ | 13:15 |
+
+👉 **Il file segue l'Italia, non il server.** Ma gli EA della famiglia Apertura / MaxMin /
+EMA200 confrontano quegli istanti con **`TimeCurrent()`**, che è **ORA SERVER**, e
+**`InpNewsShiftMinutes=0` in tutti i preset del repo**.
+- su **BCM** (italiana − 1) il blackout cade **un'ora TARDI**;
+- su **FTMO** (italiana + 1) cadrebbe **un'ora PRESTO**.
+
+🔴 **In tutti e due i casi la finestra protegge il momento sbagliato**, e il difetto è **muto**:
+il calendario si legge, il canarino `utili>0` è verde, il log stampa «blackout notizie». Non c'è
+niente di rotto da vedere — c'è una **rete messa nel posto sbagliato**.
+
+**Chi è esposto oggi**: `mql5/Presets/ABTG_Nasdaq_Apertura_US.set` (sedia `770201`) ha
+`InpUseNewsFilter=true` con `InpNewsShiftMinutes=0`. Le sette sedie della rosa prop hanno il
+filtro **spento**, quindi oggi non morde — ma morderebbe **il giorno in cui qualcuno lo accende**.
+
+### La regola
+🔴 **Un calendario esterno ha SEMPRE un fuso, e quel fuso va MISURATO su due eventi in stagioni
+opposte, non letto nel nome del file né dedotto da un evento solo.** Con un evento solo, «fuso
+fisso» e «fuso con DST» danno la stessa risposta.
+- ✅ **Controllo**: prendere **un evento d'inverno e uno d'estate** a orario noto e ancorato a una
+  borsa (NFP e FOMC vanno benissimo: 08:30 e 14:00 New York), calcolarne l'UTC e confrontare.
+  Se l'offset **cambia** fra i due, il file segue un DST: **quale**, lo dice il segno.
+- ✅ **Poi si dichiara lo shift, sempre**: `InpNewsShiftMinutes` = (ora server) − (ora del file).
+  Oggi varrebbe **−60** su BCM e **+60** su FTMO. **`0` non è un default neutro: è
+  un'affermazione**, cioè «il file è già in ora server».
+- 🔴 **Attenzione al caso che ASSOLVE**: negli EA `ABTG_PostNews` il confronto è **solo per data**
+  (`NewsToday()` guarda anno/mese/giorno e basta) e il loro file è **UTC puro**. Lì lo shift è
+  davvero ininfluente — **ma solo perché qualcuno è andato a leggere il codice.** La stessa riga
+  `InpNewsShiftMinutes=0` è **giusta** in un EA e **sbagliata** in un altro: non si giudica dal
+  valore, si giudica dal **confronto che l'EA fa**.
+- 📌 Misura: `report/PRESET_FTMO_OROLOGIO_2026-09-20.md` §⑤.
