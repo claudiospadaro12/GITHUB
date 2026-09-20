@@ -2,8 +2,9 @@
 
 **20/09/2026, sera.** Misura in **SOLA LETTURA** su quello che c'è già in repo.
 🛑 **Nessun preset toccato, nessun EA toccato, nessuna taglia, nessun magic, nessun
-backtest lanciato.** `InpMaxSpread` qui si **PROPONE**, non si scrive. Il conto reale
-`10105439` non è stato nemmeno nominato in una riga di comando.
+backtest lanciato.** `InpMinStopPts`, `InpSkipIfTight` e `InpMaxSpread` qui si
+**PROPONGONO**, non si scrivono. Il conto reale `10105439` non è stato nemmeno nominato in
+una riga di comando.
 
 ---
 
@@ -27,6 +28,27 @@ backtest lanciato.** `InpMaxSpread` qui si **PROPONE**, non si scrive. Il conto 
 > calma** della giornata. **Tre delle cinque sedie entrano all'apertura cash**, dove sui
 > tick BCM il massimo su `U30USD` è **47,0 punti indice**. Lo spread FTMO **all'apertura è
 > `[NON MISURATO]`**. §7 dice come misurarlo in dieci minuti.
+
+## 🔧 E LA MANOPOLA — la frontiera **è già dentro l'EA**, e va lasciata com'è stasera
+
+`InpMinStopPts` + `InpSkipIfTight` (§6) **sono** il cancello del costo, per-trade, col log
+che lo dice. Oggi: **no-op su `770101`** (floor a 0 ⇒ il `SkipIfTight=true` non si attiva
+mai) e **a 5,00 punti indice su `770202`/`770260`**, cioè 21× e 12× sotto la frontiera.
+
+🎯 **La curva, misurata su 440-447 giornate vere** (non stimata), portando il floor a 40×:
+
+| sedia | operazioni superstiti | DD del proxy | PF del proxy |
+|---|---:|---:|---:|
+| `770101` | 🔴 **73,9%** (−26,1%) | 🟢 46,1 → **21,1 R** (−54%) | 1,042 → **1,080** |
+| `770202` | 🟡 **72,6%** *(0% perse se resta `SkipIfTight=false`: allarga lo stop)* | 🟢 16,7 → **10,4 R** | 1,134 → **1,166** |
+| `770260` | 🟡 **79,0%** | 36,8 → 32,8 R | 🔴 1,001 → **0,980 — PEGGIORA** |
+
+> ## ✍️ **PROPOSTA: STASERA NON SI TOCCA NIENTE.**
+> Alzare il floor è **cambiare cella**, e una cella con floor a 40× **non è mai girata a
+> tick reali**. Il numero che ho è un **proxy** (breakout cieco, PF 1,00-1,17: **non è la
+> cella**). Accendere sulla challenge pagata una configurazione mai validata, per
+> rispettare un pavimento di **lavoro**, sarebbe peggio del problema che risolve.
+> 👉 Il floor si alza **dopo** la corsa `R152a` già scritta in repo (§7.5 P4).
 
 ---
 
@@ -344,9 +366,146 @@ coerente, ma resta **`[INFERITO]`**.
 
 ---
 
-# 6. 🎚️ `InpMaxSpread` — LA PROPOSTA, derivata dal numero
+# 6. 🔧 `InpMinStopPts` — LA MANOPOLA CHE MORDE SULLA FRONTIERA, con la curva
 
-## 6.1 Che cosa fa davvero, verificato nel codice
+> 🎯 **Questa è la consegna principale.** `InpMaxSpread` filtra lo **spread istantaneo**;
+> `InpMinStopPts` filtra lo **STOP**, cioè esattamente il lato sinistro di
+> `stop >= 40 × spread`. La frontiera del costo **è già implementata nell'EA, per-trade,
+> con il log che lo dice** — ed è **SPENTA**.
+
+## 6.1 Il meccanismo, letto nel sorgente
+
+```mql5
+// ABTG_DAX_Apertura_EU.mq5 r.343-346   (identico in Dow r.313-314 e Nasdaq)
+input double InpMinStopPts  = 0;     // Floor minimo di STOP in punti. 0=off
+input bool   InpSkipIfTight = true;  // stop < floor -> SALTA il trade
+
+// r.1066 / 1090 / 1326 / 1357 (e gemelli negli altri due EA)
+if(InpMinStopPts > 0 && dist < InpMinStopPts*_Point)
+  { if(InpSkipIfTight) { skip = true; ... "troppo stretto per lo slippage" }
+    else               { sl = entry -+ InpMinStopPts*_Point; dist = InpMinStopPts*_Point; } }
+```
+
+🔴 **E la prima cosa da sapere è che le tre sedie NON si comportano allo stesso modo:**
+
+| sedia | `InpMinStopPts` | `InpSkipIfTight` | cosa fa **oggi** il floor | cosa farebbe alzandolo |
+|---|---:|---|---|---|
+| `770101` | **0,0** | `true` | 🔴 **NO-OP**: con il floor a 0 la condizione `InpMinStopPts > 0` è falsa e il `true` **non si attiva mai** | **SALTA** il trade ⇒ costa **operazioni** |
+| `770202` | **500** = 5,00 idx | **`false`** | 🟡 attivo ma a 5,00 idx = **21× sotto** la frontiera US30 | **ALLARGA** lo stop al floor ⇒ costa **0 operazioni**, cambia la geometria |
+| `770260` | **500** = 5,00 idx | **`false`** | 🟡 attivo ma a 5,00 idx = **12× sotto** la frontiera US100 | **ALLARGA** ⇒ **0 operazioni perse** |
+| `771531` · `770511` | *l'input non esiste* | — | — | — |
+
+> ## 🎯 **Quindi su `770202` e `770260` un floor a 40× NON costa NEMMENO UN'OPERAZIONE: porta lo stop alla frontiera e riduce il lotto in proporzione.** Costa frequenza **solo** se Claudio mette anche `InpSkipIfTight=true`.
+> 🔴 **Ma non è gratis lo stesso**: lo stop non sta più sul bordo del range, sta a una
+> distanza arbitraria dentro il range ⇒ **la probabilità di essere toccato cambia**, e
+> **quella non la so simulare da qui** — `[NON MISURATO]`, serve una corsa (§7.5 P4).
+
+## 6.2 📈 LA CURVA — floor `0 / 20× / 30× / 40×`, misurata
+
+**Fonte**: `backtest_pipeline/risultati_archivio/studio_apertura/Studio_{D30EUR,U30USD,NASUSD}.csv`
+— **440 / 446 / 447 giornate** con rottura vera su tick BCM, apertura **08:00 / 14:30 /
+14:30 server**, con per ogni giornata **l'ampiezza del range** *e* **l'esito in R**
+(`ABTG_Apertura_Study_EA.mq5`). Filtro applicato sullo stop **della cella viva**
+(`larghezza + buffer − offset`, §1), lettura **B** (range **35'** scalato `√(35/15)`, che è
+la geometria vera della cella).
+
+### 🔴 LEGGERE PRIMA: che cosa è trasferibile e che cosa NO
+| grandezza | trasferibile alla cella viva? |
+|---|---|
+| **`n` superstiti / % della base** | 🟢 **SÌ** — il floor agisce sull'ampiezza del range, che è lo **stesso oggetto** nelle due geometrie |
+| **PF · R/op · DD** | 🔴 **NO, solo la DIREZIONE** — lo Studio è un breakout **cieco** (TP fisso 2R, due lati, nessun filtro EMA/volumi/ritardo, nessun parziale, nessun trailing): **non è la cella**. I suoi PF stanno fra 1,00 e 1,13, quelli delle celle fra 1,11 e 1,52 |
+
+### `770101` DAX · `GER40.cash` · spread FTMO **1,43** · `SkipIfTight = TRUE` ⇒ **salta**
+
+| floor | in idx | **n superstiti** | **% base** | win% | tot R | R/op | PF proxy | DD max proxy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **0** (oggi) | — | 440 | 100,0% | 36,4% | 11,2 | 0,026 | 1,042 | 46,1 R |
+| 20× | 28,60 | 428 | **97,3%** | 36,4% | 11,2 | 0,026 | 1,043 | 46,1 R |
+| 30× | 42,90 | 387 | **88,0%** | 36,2% | 4,2 | 0,011 | 1,018 | 34,1 R |
+| **40×** | **57,20** | **325** | 🔴 **73,9%** | 37,8% | 15,2 | 0,047 | **1,080** | 🟢 **21,1 R** |
+
+### `770202` Dow · `US30.cash` · spread FTMO **2,63** · `SkipIfTight = FALSE` ⇒ **allarga**
+
+| floor | in idx | n superstiti *(se si mettesse `SkipIfTight=true`)* | % base | win% | tot R | R/op | PF proxy | DD max proxy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **0**/500 (oggi) | 5,00 | 446 | 100,0% | 41,5% | 33,1 | 0,074 | 1,134 | 16,7 R |
+| 20× | 52,60 | 403 | **90,4%** | 42,7% | 37,1 | 0,092 | 1,171 | 10,4 R |
+| 30× | 78,90 | 353 | **79,1%** | 42,5% | 23,0 | 0,065 | 1,121 | 11,6 R |
+| **40×** | **105,20** | **324** | 🟡 **72,6%** | 43,8% | 28,0 | 0,086 | **1,166** | 🟢 **10,4 R** |
+
+### `770260` Nasdaq · `US100.cash` · spread FTMO **1,53** · `SkipIfTight = FALSE` ⇒ **allarga**
+
+| floor | in idx | n superstiti *(se si mettesse `SkipIfTight=true`)* | % base | win% | tot R | R/op | PF proxy | DD max proxy |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **0**/500 (oggi) | 5,00 | 447 | 100,0% | 37,8% | 0,3 | 0,001 | 1,001 | 36,8 R |
+| 20× | 30,60 | 415 | **92,8%** | 38,6% | 5,3 | 0,013 | **1,022** | 32,8 R |
+| 30× | 45,90 | 385 | **86,1%** | 37,9% | −6,2 | −0,016 | 🔴 **0,973** | 35,8 R |
+| **40×** | **61,20** | **353** | 🟡 **79,0%** | 38,5% | −4,2 | −0,012 | 🔴 **0,980** | 32,8 R |
+
+## 6.3 🎯 LE TRE COSE CHE QUESTA CURVA DICE — e una non me l'aspettavo
+
+1. 🔴 **Il floor a 40× costa fra il 21% e il 26% delle operazioni** (325/440 · 324/446 ·
+   353/447), e il pavimento di frequenza è **1,00 op/g per famiglia** (firma 07/09).
+   Su sedie che oggi stanno a **0,97 / 0,46** op/g, togliere un quarto delle operazioni è
+   **un costo vero, non un dettaglio**.
+2. 🟢 **Dove il floor paga, paga sul RISCHIO più che sul merito**: sul DAX il DD del proxy
+   scende da **46,1 R a 21,1 R (−54%)** e sul Dow da 16,7 a 10,4 R (−38%), mentre il PF si
+   muove di poco (1,042→1,080 · 1,134→1,166). 📌 **È esattamente l'asimmetria misurata in
+   R118**: la larghezza dello stop compra rischio in modo riproducibile e paga in edge in
+   modo non riproducibile — **qui col segno girato, ed è coerente.**
+3. 🔴 **E LA SORPRESA, che va detta perché smonta il «floor = sempre meglio»: sul Nasdaq il
+   floor PEGGIORA il PF.** 1,001 → **0,980** a 40×, e la curva non è nemmeno monotona
+   (20× dà 1,022, 30× dà 0,973). Le giornate a range stretto, sul Nasdaq, **non erano le
+   peggiori**. 👉 Proporre 40× su `770260` «perché è la regola» sarebbe **esattamente il
+   difetto che la regola di casa vieta**: girare una manopola senza il numero.
+   ⚠️ E la non-monotonia dice anche un'altra cosa: **su un proxy con PF ~1,00 questi Δ sono
+   rumore.** Il verso è affidabile solo sul DD, dove è grande e concorde.
+
+## 6.4 ⚠️ LO SLIPPAGE DENTRO IL FLOOR — dichiarato, perché il commento del codice lo chiede
+
+Il codice dice: *«floor minimo di STOP ~ spread + slippage + cuscinetto»*.
+**Nei numeri del §6.2 c'è dentro SOLO LO SPREAD.** Il 40× è `40 × spread`, come da regola
+di casa. Lo slippage **non** è dentro, e va detto:
+
+| | valore | etichetta |
+|---|---|---|
+| slippage d'**ingresso** misurato in casa | **+0,70 punti indice, avverso** — `D30EUR`, magic `770101`, conto REALE, 08/09 | 🔴 `[MISURATO, n=1]` — `report/IL_PRIMO_SLIPPAGE_VERO_2026-09-11.md` |
+| slippage sulle **uscite in stop** | 🔴 **`[NON MISURATO]`** (n=1, scarto 0,00) | — |
+| slippage su **FTMO** | 🔴 **`[NON MISURATO]`** — nessun deal | — |
+| `InpSlippagePts` nei preset FTMO | **0,0** su tutte e tre ⇒ **non modellato** | `[MISURATO]` |
+
+🧮 **E quanto costerebbe metterlo dentro**, sull'unico simbolo dove ho il numero:
+pedaggio completo GER40 = `1,43 + 0,70 = 2,13` idx ⇒ floor 40× = **85,20** invece di 57,20.
+
+| floor `770101` | n superstiti | % base | tot R | PF proxy | DD max proxy |
+|---|---:|---:|---:|---:|---:|
+| 40× **solo spread** = 57,20 | 325 | 73,9% | 15,2 | 1,080 | 21,1 R |
+| 40× **spread + slippage** = 85,20 | **223** | 🔴 **50,7%** | 12,3 | 1,097 | 🟢 **12,3 R** |
+
+> 🔴 **Mettere lo slippage dentro il floor DIMEZZA le operazioni del DAX.** Con n=1 al
+> numeratore, **non lo propongo**: lo scrivo perché sia una decisione, non una svista.
+
+## 6.5 ✍️ LA PROPOSTA SU `InpMinStopPts` — e stasera è «non toccare»
+
+| sedia | valore oggi | **proposta per STASERA** | **proposta dopo P1/P4 (§7.5)** | perché |
+|---|---:|---|---|---|
+| `770101` | 0,0 (no-op) | 🟢 **lasciare 0** | **2860** (20×) o **5720** (40×) | a 20× costa **2,7%** di operazioni e non cambia niente; a 40× costa **26%** — **serve il numero sulla cella vera, non sul proxy** |
+| `770202` | 500 | 🟢 **lasciare 500** | **10520** (40×) *con* `SkipIfTight=false` = **0 operazioni perse** | è l'unico caso in cui il floor è **gratis in frequenza**, ma cambia la geometria dello stop: **una corsa lo dice** |
+| `770260` | 500 | 🟢 **lasciare 500** | 🔴 **NON alzare a 40×** | sul proxy il PF **peggiora** (1,001 → 0,980). Se si alza, **3060 (20×)** è l'unico gradino che migliora |
+| `771531` · `770511` | — | l'input **non esiste**: 🔴 la frontiera su quelle due **non ha manopola**. L'unica leva è `InpSLBufferAtr` su SuperWave (r.80, oggi **0**, mai messa ad asse) | | |
+
+> 🔴 **Perché «non toccare stasera» è la proposta giusta e non pigrizia**: alzare il floor
+> è un **cambio di cella**. La cella promossa dai round è quella con `InpMinStopPts=0`/`500`;
+> una cella con floor a 40× **non è mai stata girata a tick reali**, e il numero che ho
+> è un **proxy con PF 1,00-1,17 che non è la cella**. Accendere stasera una cella mai
+> validata, sulla challenge pagata, per rispettare un pavimento di lavoro, sarebbe
+> **peggio** del problema che risolve.
+
+---
+
+# 6-bis. 🎚️ `InpMaxSpread` — LA RETE SECONDARIA
+
+## 6-bis.1 Che cosa fa davvero, verificato nel codice
 
 ```mql5
 bool SpreadOK(){ if(InpMaxSpread<=0) return(true);
@@ -358,16 +517,18 @@ RETEST (`ABTG_Nasdaq_Apertura_US.mq5` r.1505, `Dow` r.1278, `DAX` r.1441).
 
 - ✅ **Unità: PUNTI MT5.** Su questi sei simboli **1 punto indice = 100**.
 - 🔴 **`0` su tutte e sei = filtro SPENTO**, confermato riga per riga.
-- 🔴 **Limite che va detto**: sulle tre Apertura il controllo avviene **all'ARMAMENTO**
-  (fine del range), **non al riempimento** — e l'ingresso è un **LIMIT**. Il filtro
-  protegge dalla giornata storta, **non dal tick storto sul fill**.
+- 🔴 **Limite**: sulle tre Apertura il controllo avviene **all'ARMAMENTO** (fine del range),
+  **non al riempimento** — e l'ingresso è un **LIMIT**. Protegge dalla giornata storta,
+  **non dal tick storto sul fill**.
+- 🔴 **E soprattutto: NON alza lo stop.** Una giornata a range stretto passa il filtro dello
+  spread e resta sotto la frontiera lo stesso. È una rete, non la frontiera.
 
-## 6.2 Quanto costa una soglia — **misurato**, non stimato
+## 6-bis.2 Quanto costa una soglia — **misurato**
 
 Fonte: `data/spread_vivo/SPREAD_VIVO_2026-09-12_istogramma.csv`, righe
 `BIN,<sym>,<ora>,<spread in punti MT5>,<conteggio>` (BCM **vivo**, 04→11/09/2026).
 
-| simbolo · ora | n campioni | mediana | P95 | P99 | max | quota bloccata a 300 | a 400 | a 600 |
+| simbolo · ora | n campioni | mediana | P95 | P99 | max | bloccati a 300 | a 400 | a 600 |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
 | `D30EUR` ora 8 | 3.596 | 160 | 170 | 170 | **170** | 0,00% | 0,00% | 0,00% |
 | `NASUSD` ora 14 | 3.578 | 180 | 190 | 190 | **190** | 0,00% | 0,00% | 0,00% |
@@ -375,46 +536,31 @@ Fonte: `data/spread_vivo/SPREAD_VIVO_2026-09-12_istogramma.csv`, righe
 | `U30USD` ore 1-21 | 72.240 | 200 | 300 | 300 | **3.000** | 0,52% | 0,52% | 0,52% |
 | `U30USD` 24h | 79.138 | 200 | 300 | 700 | **3.000** | 1,88% | 1,88% | 1,03% |
 
-## 6.3 🎯 LE SEI PROPOSTE — **numero, derivazione, costo**
+## 6-bis.3 🎯 LE SEI PROPOSTE — **numero, derivazione, costo**
 
 Regola di derivazione, dichiarata prima dei valori: **soglia = `P95` dello spread BCM
 all'ora di lavoro × il rapporto FTMO/BCM misurato (§5.2), arrotondato in su a 10 punti
-MT5** — cioè *«blocca la coda, non la mediana»*. Il filtro **non può** riparare uno stop
-troppo stretto: quello si ripara con `InpMinStopPts` (§6.4).
+MT5** — cioè *«blocca la coda, non la mediana»*.
 
-| sedia | simbolo | P95 BCM (ora) | × rapporto | **PROPOSTA `InpMaxSpread`** | in punti indice | **costo misurato** |
+| sedia | simbolo | P95 BCM (ora) | × rapporto | **PROPOSTA `InpMaxSpread`** | in idx | **costo misurato** |
 |---|---|---:|---:|---:|---:|---|
 | `770101` | `GER40.cash` | 2,70 (ora 8) | 0,84 | **230** | 2,30 | 🟢 **0,00%** dei campioni BCM · su FTMO taglia **60% sopra** il tick misurato |
 | `770202` | `US30.cash` | 3,00 (ora 14) | 1,38 | **420** | 4,20 | 🟢 **0,31%** · lascia passare fino a **1,6×** il tick misurato |
 | `770260` | `US100.cash` | 2,70 (ora 14) | 0,90 | **250** | 2,50 | 🟢 **0,00%** · **1,6×** il tick misurato |
-| `771531` | `US30.cash` | 2,00 (ora 17) | 1,38 | **280** | 2,80 | 🔴 **43,6%** su BCM ⇒ **NON usare 280.** Vedi nota |
-| ↳ *alternativa* | | 3,00 (banda 1-21) | 1,38 | **420** | 4,20 | 🟢 **0,52%** |
+| `771531` | `US30.cash` | 3,00 (banda 1-21) | 1,38 | **420** | 4,20 | 🟢 **0,52%** |
 | `770511` | `US30.cash` | 3,00 (24h) | 1,38 | **420** | 4,20 | 🟢 **1,88%** |
 | `770411` | `GER40.cash` | 2,70 (ora 7-8) | 0,84 | **230** | 2,30 | 🟢 **0,00%** *(fuori rosa stasera, per completezza)* |
 
-🔴 **La nota su `771531`, ed è il contro-esempio che mi ha corretto**: la mia prima
-derivazione usava il P95 dell'**ora modale 17** (2,00 → 280 punti). **Misurata sul campione
-vivo, quella soglia blocca il 43,6% dei campioni**, perché `771531` è una sedia **H1 che
-lavora su tutta la banda 01-21**, non solo alle 17. La soglia giusta è quella della
-**banda**, non dell'ora modale: **420**. *(Se non avessi controllato il costo, avrei
-proposto un numero che dimezza la frequenza della sedia con la frequenza migliore della
-rosa — 1,55 op/g, l'unica sopra il pavimento da sola.)*
+🔴 **Il contro-esempio che mi ha corretto**: la mia prima derivazione su `771531` usava il
+P95 dell'**ora modale 17** (2,00 → **280** punti). **Misurata sul campione vivo, quella
+soglia blocca il 43,6% dei campioni**, perché `771531` è una sedia **H1 che lavora su tutta
+la banda 01-21**, non solo alle 17. La soglia giusta è quella della **banda**: **420**.
+*(Senza il controllo del costo avrei proposto un numero che dimezza la frequenza della
+sedia con la frequenza migliore della rosa — 1,55 op/g, l'unica sopra il pavimento da sola.)*
 
-## 6.4 🔧 E LA MANOPOLA CHE MORDE DAVVERO SULLA FRONTIERA: `InpMinStopPts`
-
-Il filtro di spread non alza lo stop. **Quello che lo alza esiste già, ed è spento o
-inerte:**
-
-| sedia | `InpMinStopPts` | `InpSkipIfTight` | che cosa succede oggi |
-|---|---:|---|---|
-| `770101` | **0,0** | `true` | 🔴 **no-op**: con il floor a 0 il `true` non si attiva mai (`if(InpMinStopPts > 0 && ...)`) |
-| `770202` · `770260` | **500** = 5,00 idx | `false` | 🟡 il floor esiste ma vale **5 punti indice**: **21× sotto** la frontiera US30 |
-| `771531` · `770511` | *non esiste* | — | — |
-
-📌 Il conto è già in casa (`report/COSTO_C3_DAX_2026-09-09.md`): portare il floor alla
-frontiera **taglia operazioni**, e la frequenza è il vincolo n.1 di ottobre.
-👉 **Proposta: NON toccarlo stasera.** Il numero (quante operazioni costerebbe) è
-calcolabile dai CSV dello Studio ed è §7.
+⚠️ **E il limite di tutte e sei**: sono derivate da una distribuzione **BCM** riscalata con
+**un rapporto misurato su UN tick FTMO**. Dopo **P1** (§7.5) si rifanno sul P95 vero di
+FTMO, e allora sono misure invece che derivazioni.
 
 ---
 
@@ -479,8 +625,9 @@ scopo, che non sapeva di questa domanda.
 | **P1** 🥇 | **spread FTMO per ora, vero** | `ABTG_SpreadTick` / `ABTG_SpreadOrario` sui tick storici di `GER40.cash`, `US30.cash`, `US100.cash` — 🖥️ **finestra PowerShell sul VPS, terminale FTMO `541452707` (`C:\FTMO`)**, **nessun altro terminale toccato** | **~10 min**, sola lettura, **zero backtest** |
 | **P2** | **spread FTMO in accumulo** | `ABTG_SpreadLogger` su un grafico FTMO (come già fatto su BCM: produce esattamente l'istogramma del §6.2) | continuo, zero impatto |
 | **P3** | commissione indici FTMO | una posizione da `VolMin` 0,01 e la colonna commissione dell'estratto conto — **firma di Claudio** | 1 operazione |
-| **P4** | gambe in stop vere di `770202`/`770260` | round per-trade già **scritto e pronto**: `backtest_pipeline/prove/R152a_pertrade_DowApertura_770202.txt` | 1 corsa del tester |
-| **P5** | costo in operazioni di `InpMinStopPts` | contare sulle colonne `ampiezza_pt` degli `Studio_*.csv` quante giornate cadono sotto il floor | **0 macchina**, si fa in repo |
+| **P4** 🥈 | gambe in stop vere di `770202`/`770260` **E** PF/DD veri del floor sulla cella | round per-trade già **scritto e pronto**: `backtest_pipeline/prove/R152a_pertrade_DowApertura_770202.txt`, da rilanciare con `InpMinStopPts` come **asse** (0 / 20× / 30× / 40×) invece che pinnato | 1 corsa del tester, 4 passate per sedia |
+| **P5** | ✅ **FATTO IN QUESTO REFERTO** — costo in operazioni di `InpMinStopPts` | contate sulle colonne `ampiezza_pt` degli `Studio_*.csv`: **§6.2** | **0 macchina** |
+| **P6** | slippage FTMO | `ABTG_SlippageLogger` sul terminale FTMO, come già su `C:\BCM_Reale` | continuo, zero impatto |
 
 ---
 
