@@ -27294,3 +27294,60 @@ strumento stesso** e si dichiara **quante giornate/operazioni servono e quando a
 🟢 E si dice anche cosa quella misura **decide comunque** (qui: se il P95 all'apertura
 somiglia al prevolo a mercato chiuso si va avanti, se e' il doppio si rifa' subito
 `InpMinStopPts` senza aspettare venerdi').
+
+## CLASSE 513 — 🔩🪞 **IL DIFF PRESET↔CELLA FATTO SOLO SULLE COLONNE CONDIVISE** (20/09/2026)
+**Il caso reale**: il censimento dei contratti confrontava il `.set` FTMO con la riga CSV della
+cella promossa e concludeva, per la `770511`, *«zero input nuovi»*. 🔴 Il diff era fatto **solo
+sulle colonne che i due hanno in comune**. La direzione che conta operativamente e' l'altra:
+**BINARIO − `.set`**, cioe' gli input che l'EA **dichiara** e che il preset **non scrive**, e
+che quindi restano al **default compilato**. Misurato: `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`
+al pin `872dba82` dichiara **44** input, il `.set` FTMO ne scrive **41** -> restano al default
+`InpUsaGuardian=true` (**vivo**), `InpPendingAtr=0` e `InpSLBufferAtr=0` (inerti). Ed era
+proprio la sedia il cui contratto e' CONTESO, mentre il documento dichiarava di non trovare la
+causa del delta.
+🔴 **La regola**: il diff si fa nelle **DUE direzioni**, e per ogni input non scritto si nomina
+**il valore di default che resta**.
+
+## CLASSE 514 — 📐🗄️ **LA FORBICE EREDITATA QUANDO LA SCALA E' GIA' MISURATA NELLA CARTELLA CHE SI STA CITANDO** (20/09/2026)
+**Il caso reale**: le soglie di revisione @2,00% sono il DD misurato @1,00% moltiplicato per 2,
+marcato `[APPROSSIMATO]` con forbice **0,28%-6%** presa da una riconciliazione di **un'altra
+sedia**. 🔴 Nella **stessa cartella** citata per il DD di contratto — `R112_CORSA_20260826/` —
+ci sono le celle a **1% / 2% / 3%** con le stesse entrate: `2,6628 → 5,2951 → 7,9161` (OOS) e
+`4,5113 → 8,9027 → 13,1661` (IS). E' il difetto del 10/09 (*«il file che aveva la risposta era
+nella stessa cartella e non l'ho aperto»*), ripetuto.
+🔴 **E il verso dell'errore e' l'OPPOSTO di quello temuto.** Il sospetto naturale — *«a taglia
+doppia il DD e' PIU' del doppio»* — e' **falsificato** dalla misura (il lineare **sovrastima**
+dello 0,58%-2,79%) **e dall'algebra**: con size fissa-frazionale `1-(1-2r)^N < 2*(1-(1-r)^N)`,
+quindi il DD e' **sub-lineare** nel rischio.
+🔴 **La regola**: prima di marcare `[APPROSSIMATO]` una conversione di taglia si **cerca la
+scala misurata**; se c'e', l'etichetta diventa `[MISURATO]` con la forbice vera **e il verso
+dell'errore scritto accanto** — perche' una soglia che sovrastima fa scattare la revisione
+**tardi**, ed e' l'opposto di quello che serve.
+
+## CLASSE 515 — 📏🧱 **IL DD DEL TESTER (DAL PICCO) CONFRONTATO CON UN MURO PROP STATICO (DAL SALDO INIZIALE)** (20/09/2026)
+**Il caso reale**: *«due sedie sfondano il muro del 10% DA SOLE»*, scritto come un fatto.
+`Equity DD %` del tester e' **peak-to-valley**; il Max Loss del 2-Step FTMO e' *«equity must
+not drop below 90% of the **initial** account balance»* (`docs/REGOLAMENTO_FTMO_2026-08.md`
+r.28), cioe' **dal saldo iniziale**. Un 15,66% dal picco, con il picco a +20%, **non tocca il
+muro**. 🔴 **La regola**: un DD si confronta con un muro **solo dichiarando da dove si misura
+la discesa**; se le origini sono diverse, la risposta la da' il **rimescolamento dell'ORDINE
+dei giorni** (Monte Carlo), non la sottrazione.
+
+## CLASSE 516 — 🏦✍️ **LA TAGLIA DEL BANCO SCRITTA A MEMORIA IN UN DOCUMENTO CHE DECIDE** (20/09/2026)
+**Il caso reale**: *«il banco FTMO e' 100.000»* in un documento che fissa le soglie di
+revisione, quando il conto e' **`541452707` da 80.000 EUR** — nominato per esteso in **cinque**
+referti dello **stesso giorno**. 🔴 **La regola**: il numero di conto e la sua taglia si
+**copiano da un referto che li ha misurati, citando file e riga** — mai dalla memoria della
+sessione. Vale anche per i commenti dentro i `.set`.
+
+## CLASSE 517 — 📂👯 **IL FILE LETTO IN REPO NON E' IL FILE CHE L'EA LEGGERA', E IN REPO CE N'E' UN OMONIMO DIVERSO** (20/09/2026)
+**Il caso reale**: il verdetto *«le PostNews tornano vive il 28/10»* e' stato ricavato da
+`mql5/Files/abtg_news.csv` (**5** eventi futuri). 🔴 Ma in repo esiste **anche**
+`data/abtg_news.csv`, **diverso**, con **ZERO** eventi futuri — ed e' **quello** che
+`backtest_pipeline/aggiorna_news.ps1` r.32 scarica e distribuisce ai terminali. In piu'
+`InpNewsCommon` ha default `true` e `LoadNews` (r.532) apre **prima `Common\Files`** della
+sandbox: il file che l'EA legge davvero **non e' nessuno dei due in repo**.
+🔴 **La regola**: prima di misurare un file di dati si nomina **LA CATENA** — chi lo genera,
+chi lo copia, da quale cartella l'EA lo apre — e si dichiara **quale anello si e' misurato**.
+*(parente della 83 e della 482, ma nuova: qui gli omonimi sono in repo e la catena di
+distribuzione sceglie quello sbagliato.)*

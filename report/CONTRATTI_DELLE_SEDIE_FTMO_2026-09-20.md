@@ -384,7 +384,7 @@ va con il suo costo in tempo macchina)*
 | **B2** | 🔴 **`770511` non riproduce fra binario di luglio e binario di settembre** (§5.1) | rilanciare la cella **`00`** sul binario **`872dba82`** (quello che vola) alla stessa finestra e allo stesso deposito, e **dichiarare quale dei due numeri è il contratto** | ~1 min di tester |
 | **B3** | 🔴 **`770511` posizioni `[NON MISURATO]`** | la stessa corsa di B2 **con l'export per-trade acceso** | **gratis dentro B2** |
 | **B4** | 🔴 **`770411` IS in posizioni `[NON MISURATO]`** (forbice 9-20) | idem: l'export per-trade della gamba IS | ~30 s |
-| **B5** | 🔴 **`770260` è misurata a deposito 10.000 €, ma il banco FTMO è 100.000** — e sappiamo che il deposito morde (sulla `770101` vale **+7,8%** a parità di trade) | una corsa `Pass 8` a `-Deposito 100000` | ~1 min |
+| **B5** | 🔴 **`770260` è misurata a deposito 10.000 €, mentre il conto della challenge è `541452707` da 80.000 €** *(✏️ corretto il 20/09: qui c'era scritto 100.000, ed è sbagliato — la taglia vera è scritta per esteso in cinque referti dello stesso giorno, fra cui `report/LE_2000_RICHIESTE_2026-09-20.md` r.4)*. Il deposito morde nella stessa direzione: sulla `770101` la stessa cella fa 6,7111% a 10k e **7,2328% a 100k (+7,8%)** a trade identici, sulla `771531` 7,2138% contro 7,8323% (**+8,6%**), perché a banco piccolo il `MathFloor` sullo step taglia il lotto. 👉 **Il 7,35% è quindi un LIMITE INFERIORE del DD promesso**: come soglia di revisione **scatta presto, ed è il verso giusto** | una corsa `Pass 8` a `-Deposito 80000` | ~1 min |
 | **B6** | 🔴 **Nessuna delle sei misure descrive il BINARIO CHE VOLA**: i `.set` FTMO portano input che il banco non aveva (20 sul `770260`, 1 sul `771531`), e `InpUsaGuardian=true` non era della partita | confronto dei **lotti** fra binario vecchio e nuovo nel Tester `C:\MT5_Backtest` (**50504400**), stesso simbolo/TF | ~10 min, **e non tocca nessun conto** |
 | **B7** | 🔴 **Le tre PostNews non hanno NESSUN numero** (§7) | `POSTNEWS_NFP_00_conta.txt` **esiste ed è pronto**: va solo lanciato, col calendario copiato in `Common\Files` | ~2 min · ⚠️ **non può promuovere nulla**, vale solo sul RISCHIO |
 | **B8** | 🟠 **Doppio contratto sulla `770411`**: 1,9213% (R16) contro 3,1% (promozione 26/07, n 41) — **danno verdetti opposti fra 3,84% e 6,20% @2,00%** | riprodurre la cella del 26/07 sul banco di R16 e tenere **uno solo** dei due | ~1 min |
@@ -424,7 +424,17 @@ Rimessi alla taglia che vola:
 | `770260` Nasdaq RETEST | 🟠 7,35% *(IS **11,91%**)* | |
 | `770411` MaxMin DAX Short | 🟢 3,84% | |
 
-🔴 **Due sedie sfondano il muro del 10% DA SOLE, e altre due lo sfondano sulla finestra IS.**
+🔴 **Due sedie hanno un DD @2,00% che, se capitasse a conto ancora vicino al saldo iniziale,
+sfonderebbe il muro del 10% DA SOLE** — e altre due lo farebbero sulla finestra IS.
+
+⚠️ **E l'unità va dichiarata, perché NON è la stessa** *(correzione del cancello, 20/09: la
+prima stesura scriveva «sfondano il muro DA SOLE» come un fatto, e non è derivabile)*.
+`Equity DD %` del tester misura la discesa **dal PICCO dell'equity**; il Max Loss del
+2-Step FTMO è **STATICO e si misura dal SALDO INIZIALE** — *«equity must not drop below 90%
+of the **initial** account balance»*, `docs/REGOLAMENTO_FTMO_2026-08.md` r.28. Un 15,66%
+dal picco, se il picco sta a +20%, **non tocca il muro**. 👉 La misura che risponde alla
+domanda vera è il **Monte Carlo sull'ORDINE dei giorni**, ed è quella da citare.
+
 Non è una scoperta di questo documento — `report/DD_PORTAFOGLIO_FTMO_2026-09-20.md` l'ha già
 misurato sul portafoglio (13,91% combinato, 12,4% di sequenze Monte Carlo che sfondano) — ma è
 la **conseguenza diretta dei contratti scritti qui**, e un censimento dei contratti che la
@@ -441,7 +451,26 @@ compito era scrivere il numero contro cui si misura lunedì. **È scritto.**
 > `770101` **14,47%** · `770202` **8,79%** · `770260` **7,35%** · `770411` **3,84%** ·
 > `770511` **7,82%** · `771531` **15,66%**
 > · `771202`/`771203`/`771204` 🔴 **nessuna soglia: contratto `[NON MISURATO]`, vale solo il
-> Guardian e il cap C1**.
+> Guardian e il cap C1** — e da `report/LE_POSTNEWS_NON_TRADERANNO_2026-09-20.md` sappiamo
+> che **non apriranno affatto**: il loro calendario è scaduto.
+>
+> ⚠️ **COME VANNO LETTE — tre righe che non si saltano:**
+> 1. sono `Equity DD %` del tester, cioè **discesa dal PICCO**. Il muro FTMO 2-Step è
+>    **STATICO dal saldo iniziale** (10% di 80.000 € = 72.000 €): superare una soglia qui
+>    vuol dire **revisione di casa**, non challenge finita;
+> 2. 🔴 sono il DD misurato a **1,00% × 2**, e **il metro lineare SOVRASTIMA** — misurato su
+>    scale a entrate quasi identiche: `771531` short OOS **2,6628 → 5,2951** (il lineare
+>    predirebbe 5,3256, **+0,58%**) e IS **4,5113 → 8,9027** (predirebbe 9,0226, **+1,35%**);
+>    a 3% l'errore sale a +0,91% e +2,79%. 🔴 **Quindi queste sono SOGLIE-TETTO: fanno
+>    scattare la revisione TARDI, non presto.** Se il forward ci si avvicina, si guarda prima
+>    invece di aspettare il numero;
+> 3. **`770260` e `770511` sono misurate su banco da 10.000 €** e il conto è da **80.000**:
+>    il pavimento del lotto le rimpicciolisce di ~8%, quindi quelle due soglie sono **limiti
+>    inferiori** — scattano presto, ed è il verso giusto.
+>
+> 🧮 **E l'algebra dice lo stesso, quindi non è un caso del campione**: con size
+> fissa-frazionale la discesa su una striscia di `N` perdite è `1-(1-2r)^N`, che è **minore**
+> di `2*(1-(1-r)^N)`. La capitalizzazione rende il DD **sub-lineare** nel rischio.
 
 ---
 
