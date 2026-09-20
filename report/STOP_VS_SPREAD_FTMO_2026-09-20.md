@@ -623,7 +623,7 @@ scopo, che non sapeva di questa domanda.
 | # | che cosa | come | costo |
 |---|---|---|---|
 | **P1** 🥇 | **spread FTMO per ora, vero** | `ABTG_SpreadTick` / `ABTG_SpreadOrario` sui tick storici di `GER40.cash`, `US30.cash`, `US100.cash` — 🖥️ **finestra PowerShell sul VPS, terminale FTMO `541452707` (`C:\FTMO`)**, **nessun altro terminale toccato** | **~10 min**, sola lettura, **zero backtest** |
-| **P2** | **spread FTMO in accumulo** | `ABTG_SpreadLogger` su un grafico FTMO (come già fatto su BCM: produce esattamente l'istogramma del §6.2) | continuo, zero impatto |
+| **P2** | **spread FTMO in accumulo** | `ABTG_SpreadLogger` su un grafico FTMO (come già fatto su BCM: produce esattamente l'istogramma del §6-bis.2) | continuo, zero impatto |
 | **P3** | commissione indici FTMO | una posizione da `VolMin` 0,01 e la colonna commissione dell'estratto conto — **firma di Claudio** | 1 operazione |
 | **P4** 🥈 | gambe in stop vere di `770202`/`770260` **E** PF/DD veri del floor sulla cella | round per-trade già **scritto e pronto**: `backtest_pipeline/prove/R152a_pertrade_DowApertura_770202.txt`, da rilanciare con `InpMinStopPts` come **asse** (0 / 20× / 30× / 40×) invece che pinnato | 1 corsa del tester, 4 passate per sedia |
 | **P5** | ✅ **FATTO IN QUESTO REFERTO** — costo in operazioni di `InpMinStopPts` | contate sulle colonne `ampiezza_pt` degli `Studio_*.csv`: **§6.2** | **0 macchina** |

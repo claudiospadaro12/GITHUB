@@ -26918,3 +26918,71 @@ ingannato: **una manopola compagna valorizzata in modo plausibile** — `InpSLFi
 è esattamente ciò che si scrive quando lo stop fisso lo si è usato *in passato*, e resta
 lì inerte. **Un valore pieno non vuol dire un valore usato** (è la stessa famiglia delle
 874 corse con manopole inerti già censite in casa).
+
+---
+
+## CLASSE 496 — 📏1️⃣ **UNA SOGLIA DI CASA COSTRUITA SU UN CAMPIONE `n=1`, LETTO NELL'ORA SBAGLIATA** (20/09/2026)
+**Il caso reale**: la sera prima della challenge FTMO pagata, la frontiera del costo
+(`stop >= 40 x spread`) delle cinque sedie in partenza e' stata calcolata su
+**GER40 1,43 / US30 2,63 / US100 1,53 punti indice**, presi da
+`PREVOLO_FTMO_specifiche_2026-09-20.csv`. Quei tre numeri sono la colonna `SpreadPts`
+di **UNA fotografia istantanea**, scattata alle **17:08 locali = ora 16 server BCM**.
+Da li' sono usciti i tre numeri **57,2 / 105,2 / 61,2** usati per decidere se accendere.
+
+🔴 **Due difetti dentro lo stesso numero:**
+1. **n = 1.** Uno spread e' una **distribuzione**, non un valore. Un tick e' un campione,
+   e nessuno sa in che percentile e' caduto.
+2. 🔴 **E' l'ORA SBAGLIATA, in modo sistematico.** Tre delle cinque sedie entrano
+   **all'apertura cash** (14:30 server BCM). Sui tick storici BCM, alla stessa ora,
+   `U30USD` ha mediana 2,00, P95 3,00 e **massimo 47,00 punti indice**: la coda
+   dell'ora d'ingresso e' **23 volte** la mediana dell'ora in cui e' stata scattata la
+   foto. Misurato: alla mediana due sedie PASSANO, **al P95 cadono tutte e due**.
+
+**La causa**: una misura presa **quando era comodo prenderla** (a mercato aperto, in
+ufficio) invece che **quando serve** (nel minuto in cui l'EA entra), e poi usata come se
+fosse una proprieta' del broker. E' la stessa famiglia del 10/09: ho verificato che il
+numero fosse **coerente** (era plausibile, ed e' pure vero) invece di chiedermi **se
+descrive il momento che deve descrivere**.
+
+**La regola**: 🔑 **una soglia che decide uno schieramento si costruisce sulla
+distribuzione dello spread NELL'ORA DI LAVORO DELLA SEDIA, non su un campione singolo.**
+Se si ha solo il campione singolo, il verdetto si scrive **due volte** — alla mediana e
+alla coda — e si dichiara `[MISURATO, n=1]` accanto al numero, **non in nota**.
+🔎 E il segnale d'allarme e' gratis: **se il campione e' uno solo, l'ora in cui e' stato
+preso e l'ora in cui la sedia opera vanno scritte una sotto l'altra.** Se non coincidono,
+il numero non e' ancora una misura.
+👉 Strumento che chiude la classe, e in casa esiste gia': `ABTG_SpreadOrario` /
+`ABTG_SpreadTick` sui tick del broker nuovo (produce la tabella per ora) oppure
+`ABTG_SpreadLogger` in accumulo. Costo: ~10 minuti, sola lettura.
+
+---
+
+## CLASSE 497 — 🎚️🚪 **PROPORRE IL FILTRO SBAGLIATO: `InpMaxSpread` DOVE IL CANCELLO E' `InpMinStopPts`** (20/09/2026)
+**Il caso reale**: davanti a sei sedie con `InpMaxSpread=0` (filtro di spread spento) e
+alla regola di casa `stop >= 40 x spread`, il mandato chiedeva di proporre un valore di
+`InpMaxSpread` "derivato dal numero misurato". Sembra la manopola giusta: nella regola
+c'e' la parola *spread*, e la manopola si chiama *MaxSpread*.
+
+🔴 **Ma le due cose agiscono su lati diversi della disuguaglianza.**
+- `InpMaxSpread` guarda il **denominatore** (lo spread istantaneo) e non tocca lo stop:
+  una giornata a range stretto **passa il filtro dello spread** e resta sotto la
+  frontiera lo stesso.
+- `InpMinStopPts` (+ `InpSkipIfTight`) guarda il **numeratore**, per-trade, con il log
+  che lo dice alla lettera (*"stop %.0f pt < floor %.0f pt: troppo stretto per lo
+  slippage"*). **E' la frontiera del costo, gia' implementata.**
+
+E c'e' un secondo strato, che si vede solo leggendo il ramo `else`: **il floor non fa la
+stessa cosa su tutte le sedie.** Con `InpSkipIfTight=true` **salta** il trade (costa
+operazioni); con `false` **allarga lo stop** al floor (costa zero operazioni ma cambia
+la geometria). Misurato sui preset FTMO: `770101` ha `true` **con floor 0**, cioe' un
+**no-op** (`if(InpMinStopPts > 0 && ...)`: con il floor a zero il `true` non si attiva
+mai); `770202`/`770260` hanno `false` con floor 500. **Tre sedie della stessa famiglia,
+tre comportamenti diversi**, e nessuno dei tre e' quello che si crede leggendo la tabella
+dei preset.
+
+**La regola**: 🔑 **prima di proporre una manopola, si scrive la disuguaglianza che si
+vuole rispettare e si guarda SU QUALE LATO agisce la manopola.** Se agisce sull'altro
+lato, non e' la manopola: e' una rete di contorno, e va presentata come tale.
+🔎 E per le manopole a due rami (`if/else`), **il ramo che si attiva va letto nel preset
+di OGNI sedia**, non dedotto dal nome dell'input: due sedie con lo stesso valore possono
+fare cose opposte.
