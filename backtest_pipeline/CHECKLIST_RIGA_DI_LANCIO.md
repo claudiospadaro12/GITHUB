@@ -27032,3 +27032,43 @@ differenza — tornato con due conti in più, **e il commento che lo prevedeva e
 2. ⏳ **Un commento che dice «va esteso quando…» è un difetto già scritto, non una nota.**
    Va cercato col grep ogni volta che si aggiunge un'entità dello stesso tipo — qui bastava
    un `grep -n "TERZO conto"` il giorno in cui è entrato il conto reale.
+
+---
+
+## CLASSE 500 — 📜⏳ **LA RIVERIFICA CHE IL DOCUMENTO STESSO DICHIARA OBBLIGATORIA, E CHE NESSUNO ESEGUE PRIMA DI SPENDERE** (20/09/2026)
+**Il caso reale**: `docs/REGOLAMENTO_FTMO_2026-08.md` porta **in testa**, dal 13/08, l'avviso
+testuale *«Le citazioni vanno ri-verificate a occhio sulle URL indicate PRIMA DELL'ACQUISTO»*.
+L'acquisto della challenge è avvenuto il **20/09, trentotto giorni dopo**, e nel repo **non
+esiste traccia di quella riverifica**.
+🔴 **Nel frattempo su quel dossier sono state costruite tre cose che contano:**
+```
+l'orologio dei DIECI preset FTMO   (il "+2", da r.130 del dossier)
+il reset giornaliero del Guardian  (InpDailyResetHour, da r.25)
+la conclusione "il rischio FISSO e' perfetto" (r.97)
+```
+La riverifica del 20/09 ha poi trovato che la terza **copre meta' della regola**: la voce vera
+delle Forbidden Practices contiene anche *«cumulative exposure in a specific symbol or
+correlated symbols»*, e il tetto EA da 2.000 richieste/giorno conta anche le **modifiche di
+SL/TP** (*«opened, modified, or closed»*) — parola che nel dossier di agosto **non c'era**.
+
+**Perche' e' una classe e non un episodio**: un documento che contiene la propria **condizione
+di validita'** la rende **invisibile** appena qualcuno ne cita una riga. La citazione viaggia,
+l'avviso in testa no. **Misurato col grep il 20/09**: i file del repo che citano quel dossier
+sono **29**; di questi **solo 11** portano da qualche parte una cautela (`LETTO-VIA-SEARCH`) e
+**18 non ne portano nessuna**. E fra i 18 c'e' `report/PRESET_FTMO_OROLOGIO_2026-09-20.md`,
+cioe' **proprio il file che ha rimappato l'orologio dei dieci preset** sul "+2" preso da li'.
+
+**La regola, in tre pezzi:**
+1. 🔑 **Un documento con una condizione sospensiva («da riverificare prima di X») NON puo'
+   essere citato come fonte per X finche' la condizione non e' sciolta**, e lo scioglimento si
+   scrive **con la data, dentro il documento**.
+2. ⏳ **Se X e' gia' successo, la riverifica non si cancella: si fa DOPO**, e si dichiara per
+   nome **che cosa era stato deciso senza di essa**.
+3. 🔎 **Prima di un gesto che costa soldi, si fa il grep delle condizioni sospensive** nei
+   documenti che lo motivano: `grep -rn "prima dell'acquisto\|da riverificare\|va confermato"`.
+   Qui bastava, e costava trenta secondi.
+
+🟢 **Assoluzione parziale, e va scritta**: le due cose che quel dossier ha davvero deciso —
+orologio e reset giornaliero — sono state **misurate la sera stessa** dal prevolo FTMO,
+**indipendentemente dal dossier**, e **coincidono**. Il metodo ha fallito, la fortuna ha
+coperto. **E la fortuna non e' un metodo.**
