@@ -27072,3 +27072,70 @@ cioe' **proprio il file che ha rimappato l'orologio dei dieci preset** sul "+2" 
 orologio e reset giornaliero — sono state **misurate la sera stessa** dal prevolo FTMO,
 **indipendentemente dal dossier**, e **coincidono**. Il metodo ha fallito, la fortuna ha
 coperto. **E la fortuna non e' un metodo.**
+
+## CLASSE 501 — 📜🔢 **IL VINCOLO CITATO TRE VOLTE E MISURATO ZERO** (20/09/2026)
+**Il caso reale**: FTMO, *Forbidden Trading Practices* voce **4**, **>2.000 richieste
+server/giorno**. `grep` sul repo il 20/09, a challenge **già pagata (439 EUR)** e a sei sedie
+**già attaccate** sul conto `541452707`:
+```
+REGOLAMENTI_PROP_2026-09-08.md          -> la cita
+QUALE_PROP_PER_I_NOSTRI_EA_2026-09-18.md -> la cita
+LE_PROP_E_GLI_EA_COSA_SAPPIAMO_2026-09-19.md -> la cita
+chiunque l'abbia CONTATA                 -> nessuno
+```
+🔴 Tre referti, **zero misure**. E non per mancanza di dati: il giornale del terminale del
+piccolo `50503392` sta sul VPS **da mesi** con dentro la risposta — stesso codice, stessi
+simboli, tick veri — e **non è mai stato aperto per questa domanda**.
+
+🔴 **E c'è un secondo strato, scoperto lo stesso giorno da un agente gemello** (classe **500**,
+`docs/REGOLAMENTO_FTMO_2026-09-20.md`): la citazione ripetuta tre volte era anche
+**ABBREVIATA MALE**. Diceva *«su ordini/pending»*; il testo vero dice *«opened, **modified**,
+or closed»* e nomina *«order **modifications such as updates of TP/SL**»*. 👉 **Chi contava
+quella riga contava gli INGRESSI, mentre il grosso del nostro traffico sono le MODIFICHE di
+stop.** Una citazione riassunta è una citazione da riverificare alla fonte prima di misurarci
+contro: **si cita il testo, non il riassunto di ieri.**
+
+**La regola, in due pezzi:**
+1. 🔑 **Una clausola di regolamento che nomina un NUMERO è un test, non una nota.** Se il
+   dossier scrive «>2.000», da quel momento esiste un conteggio da fare e un file dove scriverne
+   il risultato. Citarla di nuovo **non è progresso**: è la stessa riga spostata di referto.
+2. 🚦 **Si conta PRIMA di attaccare, non dopo.** Il costo qui era **una lettura di log in sola
+   lettura su un conto demo**. Il costo di scoprirlo dopo è *«removal of simulated trades,
+   disqualification, termination of all agreements»* — su una challenge pagata.
+📌 **Il grep che la trova**: ogni volta che un dossier di regolamento entra in repo, si estraggono
+le clausole che contengono una **cifra** e si apre una riga per ognuna: *misurata / non misurata*.
+
+## CLASSE 502 — 🔁🧱 **LA RICHIESTA AL SERVER CHE NON GUARDA IL MERCATO (e quindi si ripete a ogni tick)** (20/09/2026)
+**Il caso reale**, `ABTG_DAX_Apertura_EU.mq5` r.1984-1988 (identico in `ABTG_Dow_Apertura_US.mq5`
+r.1815 e `ABTG_Nasdaq_Apertura_US.mq5` r.2228):
+```
+double newSL = TrailStopBuy(bid);
+if(newSL > 0 && newSL > sl && newSL > openP)      // <-- confronta con lo STOP
+   gTrade.PositionModify(ticket, NormalizePrice(newSL), tp);   //     mai col PREZZO
+```
+La guardia c'è e sembra corretta — **ma confronta il nuovo stop con lo stop vecchio, non con il
+mercato**. Se `newSL` finisce dalla parte sbagliata del prezzo (per un long: sopra il `bid`, o
+dentro lo `SYMBOL_TRADE_STOPS_LEVEL`), il server rifiuta, **`sl` non cambia**, la condizione
+**resta vera** e la richiesta riparte **al tick successivo** — fino alla chiusura della barra.
+Su un indice in sessione sono **centinaia o migliaia** di richieste per un solo episodio.
+
+🔎 **E la prova che è una dimenticanza, non una scelta: due EA della stessa casa CE L'HANNO.**
+`ABTG_EMA200.mq5` r.302-303 (`n<bid` / `n>ask`) e `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`
+r.341-342 (`stLine<bid` / `stLine>ask`). **Tre file su sei senza la riga che gli altri due hanno.**
+
+**La regola, in tre pezzi:**
+1. 🔑 **Ogni chiamata di trading dentro un `if` va letta chiedendosi: «se il server la RIFIUTA,
+   questa condizione diventa falsa?»** Se la risposta è no, **non è una guardia: è un ciclo.**
+   Una guardia che confronta un valore con sé stesso non protegge da un rifiuto esterno.
+2. 📐 **Un trailing ancorato al PREZZO VIVO (`bid`/`ask`) non ha tetto; uno ancorato a una BARRA
+   CHIUSA ne ha uno matematico** (una modifica per barra). Quando si sceglie il meccanismo, il
+   numero di richieste è una **conseguenza del disegno** e va dichiarata insieme alla cella.
+   Caso di casa: `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` r.363-364 usa `bid-atr*mult` →
+   **una `PositionModify` a ogni nuovo record del prezzo, nessun tetto**, e **nessun input**
+   che lo diradi (verificato: non esiste `InpTrailStep`/`InpTrailMinMove`/`InpTrailOnBarClose`).
+3. 🚨 **Stessa forma, altro posto**: i cicli che il codice **dichiara** — `«PositionClose FALLITA
+   … Riprovo al prossimo tick»` (r.2181-2183) — e il Guardian che rilancia `FlattenAll()`
+   **ogni secondo** finché `PositionsTotal()>0` (`ABTG_Guardian.mq5` r.359-363, `InpAction=0`).
+   Quest'ultimo si apre **esattamente nel giorno in cui il DD è già sfondato**: è il momento
+   peggiore per aggiungere una seconda violazione alla prima.
+📌 **Misura completa**: `report/LE_2000_RICHIESTE_2026-09-20.md`.
