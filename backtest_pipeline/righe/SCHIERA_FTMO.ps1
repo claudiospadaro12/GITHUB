@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_FTMO_v5
+#  MARCATORE_SCHIERA_FTMO_v6
 #
 #  PORTA I SORGENTI E I PRESET DELLA ROSA NELLA CARTELLA DATI DEL
 #  TERMINALE FTMO -- CHE OGGI NON ESISTE E QUINDI VA SCOPERTO.
@@ -182,6 +182,7 @@ $SORGENTI = @(
   [pscustomobject]@{ Nome='ABTG_Guardian.mq5';                           Sedia='779001 Guardian v1.12   (non trada)'; Cartella='Experts'; RepoDir='mql5/Experts'; Pin='d884f7e1328aacb35c7b7d94056f18a7643fce01'; Righe=498;  Sha='A457F2CDF211F312A4F6BEACC3D2B72B07B068EE2C5BC38514924693EE6B7DF8' },
   [pscustomobject]@{ Nome='ABTG_PrevoloFTMO_Specifiche.mq5';              Sedia='PREVOLO -- script di SOLA LETTURA: scrive MQL5\Files\PREVOLO_FTMO_specifiche.csv'; Cartella='Scripts'; RepoDir='mql5/Scripts'; Pin='db71b3c929d439ce399148d0d615d1f52666a91c'; Righe=485;  Sha='3E31E79D00612709BC807B87DAEFF717FF095CF019A5789706353193755BB8C1' },
   [pscustomobject]@{ Nome='ABTG_TradeExporter.mq5';                      Sedia='PAGELLA -- senza di lui la challenge e INVISIBILE al referto serale'; Cartella='Experts'; RepoDir='mql5/Experts'; Pin='0127d449a7aaef149b2d408b1dac10d1d8684be5'; Righe=211;  Sha='AEB9A4307C1CEB9795816A535D51EB9BF65A64A85C4C0F00755A8A6897B07674' },
+  [pscustomobject]@{ Nome='ABTG_SpreadLogger.mq5';                       Sedia='SONDA SPREAD -- mediana e P95 per ora server, non trada'; Cartella='Experts'; RepoDir='mql5/Experts'; Pin='2499339293e7bc65eb55ced09c07b3c266f7ca66'; Righe=1018; Sha='1119AC16C3F07939C78522CEFE0A8D2DD2309DBA26DA45A8265436DA8F5DBB59' },
   [pscustomobject]@{ Nome='ABTG_PausaGuardian.mqh';                      Sedia='include v1.20 -- SENZA DI LUI NESSUN F7 PARTE'; Cartella='Include'; RepoDir='mql5/Include'; Pin='26a185661c120de6fa0a33b79279595740e264e8'; Righe=398; Sha='D179846B407FDACC963825103F850E8F8BEE39B1DA3521A504EF74F8638AC8BC' }
 )
 
@@ -209,6 +210,7 @@ $PRESET = @(
   [pscustomobject]@{ Nome='ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set'; RepoDir='mql5/Presets/FTMO'; Magic='770260'; Sedia='770260 Nasdaq RETEST';   Obbligatorio=$true;  Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_Guardian_FTMO_2Step.set';                   RepoDir='mql5/Presets';      Magic='779001'; Sedia='779001 Guardian FTMO';   Obbligatorio=$true;  Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_TradeExporter_FTMO.set';                 RepoDir='mql5/Presets/FTMO'; Magic=''; Firma='InpFile=ABTG_Trades_FTMO.csv'; Sedia='PAGELLA TradeExporter (non trada: niente magic, la firma e il nome del file)';  Obbligatorio=$false; Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_SpreadLogger_FTMO.set';                  RepoDir='mql5/Presets/FTMO'; Magic=''; Firma='InpSimboli=GER40.cash,US30.cash,US100.cash,US500.cash,XAUUSD'; Sedia='SONDA SPREAD (non trada: niente magic, la firma e la lista dei simboli)';  Obbligatorio=$false; Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_PostNews_FOMC_EURUSD_771202_FTMO.set';      RepoDir='mql5/Presets/FTMO'; Magic='771202'; Sedia='771202 PostNews FOMC';   Obbligatorio=$false; Blocco='POSTNEWS' },
   [pscustomobject]@{ Nome='ABTG_PostNews_NFP_USDJPY_771203_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771203'; Sedia='771203 PostNews NFP';    Obbligatorio=$false; Blocco='POSTNEWS' },
   [pscustomobject]@{ Nome='ABTG_PostNews_ECB_EURUSD_771204_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771204'; Sedia='771204 PostNews ECB';    Obbligatorio=$false; Blocco='POSTNEWS' }

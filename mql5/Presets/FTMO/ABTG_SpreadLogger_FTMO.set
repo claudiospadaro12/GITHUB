@@ -1,0 +1,40 @@
+;  ==================================================================
+;  ABTG_SpreadLogger -- PRESET FTMO (conto 541452707)
+;  ==================================================================
+;  A COSA SERVE, e non e' un vezzo. Tutti i numeri di costo che
+;  abbiamo su FTMO poggiano su UN SOLO TICK di spread, letto il
+;  20/09 alle 17:08 = ora 16 server, cioe' l'ora piu' CALMA della
+;  giornata (classe 496). Ma TRE sedie su sei entrano all'APERTURA
+;  cash, dove sui tick BCM lo spread arriva a 47,0 punti indice.
+;  Lo spread FTMO all'apertura e' [NON MISURATO].
+;
+;  Questo EA lo misura DAL VIVO: campiona ogni 5 secondi e tiene
+;  MEDIANA e P95 per ORA SERVER, simbolo per simbolo. Non la media,
+;  che nasconde le fiammate. Usa un ISTOGRAMMA, quindi non butta via
+;  nessun campione e dichiara l'overflow invece di inventare un
+;  numero comodo.
+;
+;  NON TRADA: zero OrderSend, zero CTrade, zero PositionOpen --
+;  verificato col grep. L'unica scrittura fuori dai file e'
+;  l'aggiunta dei simboli a Market Watch.
+;
+;  I CINQUE SIMBOLI: i tre indici delle sedie, piu' US500.cash
+;  (l'indice guida di 770411: se il suo spread e' largo, la
+;  correlazione legge un prezzo peggiore) e XAUUSD (per quando
+;  770402 ORO tornera' in discussione).
+;
+;  QUANDO LEGGERLO: lunedi' sera. Le ore che contano, in ORA SERVER
+;  FTMO, sono 10 (apertura DAX) e 16 (apertura USA). La frontiera di
+;  casa chiede stop >= 40 x spread, e il confronto si fa sul P95
+;  dell'ora d'ingresso, non sulla mediana.
+;  ==================================================================
+InpSimboli=GER40.cash,US30.cash,US100.cash,US500.cash,XAUUSD
+InpCampionaSec=5
+InpSalvaSec=300
+InpFrescoSec=90
+InpAggiungiMarketWatch=true
+InpRiprendiStato=true
+InpPrefissoFile=ABTG_SpreadLogger_FTMO
+InpMostraComment=true
+InpLogOgniSalvataggio=false
+InpAutoTest=true
