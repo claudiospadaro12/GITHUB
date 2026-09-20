@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v4 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v5
+#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v4 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v5 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v6
 #  RIGA_SPREADLOGGER_RACCOLTA.ps1 -- RACCOGLIE e LEGGE i dati accumulati
 #  da ABTG_SpreadLogger sul terminale del conto PICCOLO 50503392.
 #
@@ -106,6 +106,10 @@ switch($Bersaglio){
     # piu' viene preteso per l'eleggibilita' automatica (era cosi' prima,
     # resta cosi' -- non si introduce una regressione per simmetria).
     $ESIGE_FATTO_TARGET = $false
+    # FUSO E FASCE: BCM = ora italiana MENO 1 (regola di casa).
+    $NOTA_ORE = "ore in ORA SERVER BCM (= ora italiana MENO 1 in questo periodo)."
+    $NOTA_LOC = "= server + 1 in questo periodo"
+    $FASCE    = @(@(0,23,"TUTTA LA GIORNATA"), @(8,15,"cash EUROPA 8-15 srv BCM"), @(14,20,"cash USA 14-20 srv BCM"), @(21,23,"sera/notte 21-23 srv BCM"), @(0,6,"notte 0-6 srv BCM"))
   }
   "ftmo" {
     $CONTO_TARGET   = $CONTO_FTMO
@@ -118,6 +122,14 @@ switch($Bersaglio){
     # tutti gli altri gate) sarebbe eleggibile anche in modo ftmo e
     # potrebbe essere scelta da sola. Fail-CLOSED.
     $ESIGE_FATTO_TARGET = $true
+    # FUSO E FASCE: NON sono quelli di BCM, e il segno e' OPPOSTO. FTMO e'
+    # UTC+3, l'Italia UTC+2, quindi server = ora italiana PIU' 1. MISURATO
+    # il 20/09 (risultati_prove\PREVOLO_FTMO_specifiche_2026-09-20.csv:
+    # DeltaServerGMT_hhmm +03:00 contro DeltaLocalePC_UTC_hhmm +02:00), non
+    # ereditato dalla regola di casa -- che qui sbaglierebbe di DUE ore.
+    $NOTA_ORE = "ore in ORA SERVER FTMO (= ora italiana PIU' 1: FTMO e' UTC+3, l'Italia UTC+2, MISURATO il 20/09). Apertura DAX 09:00 IT = ora 10. Apertura USA 15:30 IT = ora 16. NON vale la regola BCM (italiana meno 1): qui si SOMMA."
+    $NOTA_LOC = "= server - 1 in questo periodo"
+    $FASCE    = @(@(0,23,"TUTTA LA GIORNATA"), @(10,17,"cash EUROPA 10-17 srv FTMO"), @(16,22,"cash USA 16-22 srv FTMO"), @(22,23,"sera 22-23 srv FTMO"), @(0,7,"notte 0-7 srv FTMO"))
   }
   default { throw ("-Bersaglio ammette solo 'piccolo' o 'ftmo'; ricevuto: '" + $Bersaglio + "'.") }
 }
@@ -291,7 +303,7 @@ try{
   # -------------------------------------------------------------------
   #  1. LA CARTELLA DATI -- stessa scelta per FATTI della riga gemella
   # -------------------------------------------------------------------
-  Titolo "1. CARTELLA DATI DEL PICCOLO (scansione LARGA, scelta STRETTA)"
+  Titolo ("1. CARTELLA DATI DEL " + $ETICH_TARGET + " (scansione LARGA, scelta STRETTA)")
   foreach($pr in @(Get-Process -Name terminal64 -ErrorAction SilentlyContinue)){
     $exe = ""
     try{ $exe = $pr.Path }catch{ $exe = "" }
@@ -518,7 +530,15 @@ try{
   # Windows e' ora ITALIANA (un'ora avanti). Si confronta con tolleranza
   # larga proprio per non fare finta di una precisione che non c'e'.
   $ultimo = "" + $Meta["ultimo_campione"]
-  $frescoTxt = "ultimo campione (ora SERVER): " + $ultimo + "   -- l'orologio di questo PC segna " + $Avvio.ToString("yyyy.MM.dd HH:mm:ss",$INV) + " in ora LOCALE (= server + 1 in questo periodo)"
+  # CONTROLLO DI IDENTITA' (classe 511, 20/09/2026): il numero di conto lo
+  # scrive l'EA dentro il file di stato (META,conto, ABTG_SpreadLogger.mq5
+  # r.524). E' la prova piu' forte che i numeri vengono dal bersaglio, e
+  # finora veniva solo STAMPATA. Qui si CONFRONTA: fail-LOUD, e lo zip si
+  # fa lo stesso perche' il referto serve anche quando accusa.
+  $contoFile = ("" + $Meta["conto"]).Trim()
+  if($contoFile -eq ""){ [void]$Rilievi.Add("il file di stato non porta il numero di conto: l'identita' del terminale resta provata solo dai fatti sulla cartella.") }
+  elseif($contoFile -ne $CONTO_TARGET){ [void]$Problemi.Add("IL FILE DI STATO E' DI UN ALTRO CONTO: dice " + $contoFile + " @ " + $Meta["server"] + ", il bersaglio e' " + $CONTO_TARGET + " (" + $ETICH_TARGET + "). I NUMERI QUI SOTTO NON SONO DEL BERSAGLIO: non usarli.") }
+  $frescoTxt = "ultimo campione (ora SERVER): " + $ultimo + "   -- l'orologio di questo PC segna " + $Avvio.ToString("yyyy.MM.dd HH:mm:ss",$INV) + " in ora LOCALE (" + $NOTA_LOC + ")"
   try{
     $u = [datetime]::ParseExact($ultimo, "yyyy.MM.dd HH:mm:ss", $INV)
     $oreFa = ($Avvio - $u).TotalHours
@@ -587,7 +607,7 @@ try{
   [void]$r.Add("confronto EA/ricalcolo  : " + $Confronto)
   [void]$r.Add("")
   [void]$r.Add("COME SI LEGGE:")
-  [void]$r.Add(" - ore in ORA SERVER (= ora italiana meno 1 in questo periodo).")
+  [void]$r.Add(" - " + $NOTA_ORE)
   [void]$r.Add(" - i valori sono in unita' pratiche: pip nel forex, punti indice negli indici.")
   [void]$r.Add("   Fra parentesi quadre c'e' sempre il numero GREZZO in punti MT5.")
   [void]$r.Add(" - GG = giornate distinte entrate in quel secchio. E' QUESTO il numero che")
@@ -631,7 +651,7 @@ try{
                    (Pad (Mostra $p99 $ppu 3) 8) + " | " + (Pad (([double]$o.Max/$ppu).ToString("F3",$INV)) 8) + " | " + $nota)
     }
     # FASCE: istogrammi sommati
-    foreach($f in @(@(0,23,"TUTTA LA GIORNATA"), @(8,15,"cash EUROPA 8-15"), @(14,20,"cash USA 14-20"), @(21,23,"sera/notte 21-23"), @(0,6,"notte 0-6"))){
+    foreach($f in $FASCE){
       $h1 = [int]$f[0]; $h2 = [int]$f[1]; $nome = "" + $f[2]
       $bins = @{}; $n = 0; $gg = 0
       foreach($h in $h1..$h2){
