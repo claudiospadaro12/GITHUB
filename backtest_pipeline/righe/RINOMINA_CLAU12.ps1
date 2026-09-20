@@ -140,7 +140,7 @@ $INTOCCABILI = @(
   'ABTG_PausaGuardian.mqh          -- INCLUDE: rinominarlo rompe #include in tutti e sette',
   'ABTG_PrevoloFTMO_Specifiche.mq5 -- SCRIPT del prevolo, ancora da lanciare',
   'ABTG_*.set                      -- i preset si caricano col pulsante Load, il nome non deve combaciare',
-  'ABTG_PostNews.mq5               -- MISURATO: lo schieramento e stato lanciato con -SenzaPostNews, che esclude sia l EA (SCHIERA_FTMO r.476) sia i suoi tre preset (r.503). Su FTMO NON dovrebbe esserci affatto. Se [3/6 bis] lo trova, qualcuno ha rilanciato lo schieramento senza quella opzione: e una notizia, non un dettaglio.'
+  'ABTG_PostNews.mq5               -- NON DOVREBBE ESSERCI, e la fonte e questa: il referto della corsa VERA dello schieramento (zip SCHIERA_FTMO_2026-09-20_102153, mandato da Claudio) porta la riga MODO: SENZA POSTNEWS, che SCHIERA_FTMO.ps1 r.310 stampa SOLO se l opzione e stata passata; e quella opzione esclude l EA (r.476) e i suoi tre preset (r.503). ATTENZIONE: i documenti di PIANO dicono altro (SCHIERAMENTO_FTMO_2026-09-20 par.5.2 conta DIECI preset, par.11 parla di OTTO EA con l include) -- ma quelli sono il piano, non la corsa. In ogni caso NON lo rinomino: non ho la sua impronta in tavola. E [3/6 bis] non deduce, GUARDA: se c e, lo stampa, e allora il piano aveva ragione.'
 )
 
 $STAMPA  = (Get-Date).ToString('yyyy-MM-dd_HHmmss', $INV)
@@ -404,9 +404,9 @@ if($aperto){
 # ---------------------------------------------------------------------
 # GLI ALTRI ABTG_ CHE STANNO NELLA STESSA CARTELLA.
 # Si elencano PER NOME, mai "tutto il resto" (classe 180): lo
-# schieramento puo' aver portato anche ABTG_PostNews.mq5 (lo fa se non
-# gli si passa -SenzaPostNews, e i suoi TRE preset sono stati
-# installati), e quello NON e' in nessuna delle due tavole. Non lo
+# schieramento porta anche ABTG_PostNews.mq5 SE non gli si passa
+# -SenzaPostNews (r.476), e quello NON e' in nessuna delle due
+# tavole. QUI NON SI DEDUCE SE C'E': SI GUARDA. Non lo
 # rinomino di mia iniziativa -- lo DICO, perche' un Navigatore meta'
 # CLAU12_ e meta' ABTG_ e' esattamente il genere di ambiguita' che
 # questo script esiste per togliere.

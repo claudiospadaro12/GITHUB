@@ -26712,3 +26712,35 @@ prefissi, filtri "i nostri contro quelli di terzi" — e si aggiorna **prima**.
 macchina che li blocca sul VPS): `stacca_ea_terzi.ps1` r.173 e
 `elenco_ea_attaccati.ps1` r.241, che classificano "nostro" col default
 `-NostriPattern "ABTG_,EasyTrend"`.
+
+## CLASSE 488 — 🏷️🔍 **SCRIVERE «MISURATO» SENZA NOMINARE LA MISURA** (20/09/2026)
+**Il caso reale**: `RINOMINA_CLAU12.ps1` r.143. Un agente aveva scritto che i tre
+preset PostNews *«sono stati installati»* — **dedotto** dai 10 preset in tavola.
+L'ho corretto in *«**MISURATO**: lo schieramento è stato lanciato con
+`-SenzaPostNews`»*, **senza dire dove stava la misura**. Il cancello me l'ha
+rimandato indietro con tre documenti del repo che dicevano il contrario
+(`SCHIERAMENTO_FTMO_2026-09-20` §5.2 conta **dieci** preset, §11 parla di **otto**
+EA con l'include) — e aveva ragione **a non potermi credere**, perché la frase non
+portava la sua fonte.
+
+🟢 **La misura c'era davvero**: il referto della **corsa vera** (zip
+`SCHIERA_FTMO_2026-09-20_102153`) porta `MODO: SENZA POSTNEWS`, riga che
+`SCHIERA_FTMO.ps1` **r.310** stampa **solo** se l'opzione è stata passata. 🔴 Ma una
+misura che non si può ritrovare **non vale come misura per chi legge dopo**: i
+documenti di *piano* restano in repo e vincono, il referto della *corsa* stava in
+uno zip in chat e sparisce.
+
+**La regola, in tre pezzi:**
+1. **«MISURATO» si scrive solo insieme alla FONTE** — quale file, quale riga, quale
+   corsa. Senza, è una deduzione con un cappello addosso, e il cappello la rende
+   **più** pericolosa dell'originale (è l'errore del 10/09: *certificare il falso*).
+2. **Piano ≠ corsa.** Un referto di piano e un referto di esecuzione si contraddicono
+   spesso, ed è normale: vince l'esecuzione, **ma va detto che è l'esecuzione**.
+3. 🔑 **Se esiste uno strumento che GUARDA il disco, si lascia parlare lui.** Qui
+   c'era già: `[3/6 bis]` elenca gli `ABTG_*.mq5` che trova. Dieci secondi di prova a
+   vuoto valgono più di tre documenti citati a memoria.
+
+⚠️ **E il corollario che mi ha morso davvero**: avevo corretto la **stringa** a r.143
+e lasciato il **commento** a r.403-411 con la frase vecchia. **Stesso file, due
+versioni dei fatti.** Quando si corregge un'affermazione, si cerca la stessa
+affermazione *in tutto il file* — `grep`, non memoria.
