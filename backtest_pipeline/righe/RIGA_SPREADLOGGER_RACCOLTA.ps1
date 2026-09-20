@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v4
+#  MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v3 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v4 MARCATORE_RIGA_SPREADLOGGER_RACCOLTA_v5
 #  RIGA_SPREADLOGGER_RACCOLTA.ps1 -- RACCOGLIE e LEGGE i dati accumulati
 #  da ABTG_SpreadLogger sul terminale del conto PICCOLO 50503392.
 #
@@ -40,6 +40,15 @@
 param(
   [string]$Pin = "",
   [string]$CartellaDati = "",
+  # BERSAGLIO (20/09/2026). La raccolta nasce per il piccolo 50503392, ma
+  # il SpreadLogger dal 20/09 gira anche sul terminale FTMO 541452707
+  # (C:\FTMO). Si aggiunge un PROFILO, non si allarga una guardia: le
+  # tracce che rifiutano il REALE 10105439, il banco 50504400 e il 100k
+  # -V3 restano IDENTICHE in tutti e due i modi. ValidateSet chiude la
+  # porta prima che il corpo giri: il REALE non e' un bersaglio ammesso
+  # nemmeno nominandolo.
+  [ValidateSet("piccolo","ftmo")]
+  [string]$Bersaglio = "piccolo",
   [string]$Prefisso = "ABTG_SpreadLogger",
   # quante GIORNATE distinte servono in un secchio orario perche' quel
   # numero si possa citare in un round. Non e' una legge: e' la soglia
@@ -83,6 +92,35 @@ $SEGNI_BANCO   = @("MT5_Backtest", "MT5_BA~")
 $SEGNO_PICCOLO = "BCM Markets MT5 Terminal"
 $BASE_BCM      = "BCMMarkets-Server"
 $MAXBIN        = 10001
+# --- PROFILI DEL BERSAGLIO (20/09/2026) -----------------------------------
+$CONTO_FTMO    = "541452707"
+$PERC_FTMO     = "C:\FTMO"
+$SEGNO_FTMO    = "FTMO"
+switch($Bersaglio){
+  "piccolo" {
+    $CONTO_TARGET   = $CONTO_PICCOLO
+    $SEGNO_TARGET   = $SEGNO_PICCOLO
+    $ETICH_TARGET   = "piccolo " + $CONTO_PICCOLO
+    $ESIGE_BASE_BCM = $true
+    # il modo storico NON cambia comportamento: nessun fatto positivo in
+    # piu' viene preteso per l'eleggibilita' automatica (era cosi' prima,
+    # resta cosi' -- non si introduce una regressione per simmetria).
+    $ESIGE_FATTO_TARGET = $false
+  }
+  "ftmo" {
+    $CONTO_TARGET   = $CONTO_FTMO
+    $SEGNO_TARGET   = $SEGNO_FTMO
+    $ETICH_TARGET   = "FTMO " + $CONTO_FTMO
+    # FTMO non e' un broker BCM: la sua cartella NON ha bases\BCMMarkets-Server.
+    $ESIGE_BASE_BCM = $false
+    # ...e proprio per questo qui si PRETENDE un fatto positivo anche per
+    # la scelta automatica: senza, la cartella del piccolo (che passa
+    # tutti gli altri gate) sarebbe eleggibile anche in modo ftmo e
+    # potrebbe essere scelta da sola. Fail-CLOSED.
+    $ESIGE_FATTO_TARGET = $true
+  }
+  default { throw ("-Bersaglio ammette solo 'piccolo' o 'ftmo'; ricevuto: '" + $Bersaglio + "'.") }
+}
 
 $Avvio = Get-Date
 $Stamp = $Avvio.ToString("yyyyMMdd_HHmm", $INV)
@@ -203,6 +241,7 @@ function AggiungiCandidata([string]$percorso,[string]$origine){
     Percorso=$full; Origine=$origine; HaMql=$mq; Origin=""; BaseBcm=$false
     VistoPiccolo=$false; VistoGrande=$false; TracciaV3=""; Eleggibile=$false
     VistoReale=$false; VistoBanco=$false; TracciaAltro=""
+    VistoFtmo=$false; VistoTarget=$false; HaBases=$false; FattoTarget=""
     OriginNorm=""; PercNorm=""
     Profilo=$false; Scarto=""; HaStato=$false
   })
@@ -228,7 +267,7 @@ function Mostra($p,[double]$ppu,[int]$dec){
 function Pad([string]$s,[int]$n){ while($s.Length -lt $n){ $s = " " + $s }; return $s }
 
 try{
-  Titolo ("RACCOLTA DEI DATI DI " + $Prefisso + " dal piccolo " + $CONTO_PICCOLO)
+  Titolo ("RACCOLTA DEI DATI DI " + $Prefisso + " dal " + $ETICH_TARGET)
   Write-Host "Questa riga NON scrive niente dentro il terminale: MT5 puo' restare aperto." -ForegroundColor Yellow
   if($Pin -ne "" -and $Pin -notmatch '^[0-9a-f]{40}$'){ throw ("-Pin, se lo passi, deve essere un commit di 40 caratteri esadecimali; ricevuto: " + $Pin) }
   New-Item -ItemType Directory -Force -Path $Work | Out-Null
@@ -288,6 +327,7 @@ try{
     $o = Join-Path $c.Percorso "origin.txt"
     if(Test-Path -LiteralPath $o){ try{ $c.Origin = ([string](Get-Content -LiteralPath $o -Raw -ErrorAction Stop)).Trim() }catch{} }
     $c.BaseBcm  = (Test-Path -LiteralPath (Join-Path $c.Percorso ("bases\" + $BASE_BCM)))
+    $c.HaBases  = (Test-Path -LiteralPath (Join-Path $c.Percorso "bases"))
     $c.HaStato  = (Test-Path -LiteralPath (Join-Path $c.Percorso ("MQL5\Files\" + $Prefisso + "_stato.csv")))
     foreach($sub in @("logs","MQL5\Logs")){
       $dir = Join-Path $c.Percorso $sub
@@ -304,6 +344,7 @@ try{
         if($txt.IndexOf("'" + $CONTO_GRANDE + "'") -ge 0){ $c.VistoGrande = $true }
         if($txt.IndexOf("'" + $CONTO_REALE + "'") -ge 0){ $c.VistoReale = $true }
         if($txt.IndexOf("'" + $CONTO_BANCO + "'") -ge 0){ $c.VistoBanco = $true }
+        if($txt.IndexOf("'" + $CONTO_FTMO + "'") -ge 0){ $c.VistoFtmo = $true }
       }
     }
     $tr = New-Object System.Collections.ArrayList
@@ -329,11 +370,23 @@ try{
     if(ContieneUnSegno $c.PercNorm   $SEGNI_BANCO){ [void]$ta.Add("il PERCORSO porta un segno del banco") }
     if($c.VistoBanco){ [void]$ta.Add("login " + $CONTO_BANCO + " (banco) nei log") }
     $c.TracciaAltro = (@($ta) -join "; ")
+    # --- FATTI POSITIVI SUL BERSAGLIO: gli stessi quattro per i due modi,
+    #     calcolati QUI una volta sola e usati sia dall'eleggibilita' (solo
+    #     in modo ftmo) sia dalla manopola -CartellaDati (in tutti e due).
+    if($Bersaglio -eq "ftmo"){ $c.VistoTarget = $c.VistoFtmo } else { $c.VistoTarget = $c.VistoPiccolo }
+    $ft = New-Object System.Collections.ArrayList
+    if($c.HaStato){ [void]$ft.Add("contiene il file di stato del logger") }
+    if($c.VistoTarget){ [void]$ft.Add("il login " + $CONTO_TARGET + " compare nei suoi log") }
+    if(($c.OriginNorm -like ("*" + $SEGNO_TARGET + "*")) -and ($c.OriginNorm -notlike "*-V3*")){ [void]$ft.Add("origin.txt punta a '" + $SEGNO_TARGET + "' senza -V3") }
+    if(($c.PercNorm   -like ("*" + $SEGNO_TARGET + "*")) -and ($c.PercNorm   -notlike "*-V3*")){ [void]$ft.Add("il percorso contiene '" + $SEGNO_TARGET + "' senza -V3") }
+    $c.FattoTarget = (@($ft) -join "; ")
     if($env:APPDATA){ $c.Profilo = $c.Percorso.StartsWith(($env:APPDATA.TrimEnd("\")), [System.StringComparison]::OrdinalIgnoreCase) }
     if(-not $c.HaMql){ $c.Scarto = "nessuna cartella MQL5\"; continue }
-    if(-not $c.BaseBcm){ $c.Scarto = "nessuna bases\" + $BASE_BCM; continue }
+    if($ESIGE_BASE_BCM -and -not $c.BaseBcm){ $c.Scarto = "nessuna bases\" + $BASE_BCM; continue }
+    if(-not $ESIGE_BASE_BCM -and -not $c.HaBases){ $c.Scarto = "nessuna cartella bases\ (non sembra una cartella dati MT5 in uso)"; continue }
     if($c.TracciaV3 -ne ""){ $c.Scarto = "E' IL 100k/-V3 (" + $c.TracciaV3 + "): fuori dal perimetro"; continue }
-    if($c.TracciaAltro -ne ""){ $c.Scarto = "NON E' IL PICCOLO (" + $c.TracciaAltro + "): fuori dal perimetro"; continue }
+    if($c.TracciaAltro -ne ""){ $c.Scarto = "E' UN TERMINALE FUORI PERIMETRO (" + $c.TracciaAltro + "): non e' il " + $ETICH_TARGET; continue }
+    if($ESIGE_FATTO_TARGET -and $c.FattoTarget -eq ""){ $c.Scarto = "nessun fatto POSITIVO che sia la cartella del " + $ETICH_TARGET + " (niente file di stato " + $Prefisso + "_stato.csv, nessun login " + $CONTO_TARGET + " nei log degli ultimi 45 giorni, ne' origin.txt ne' il percorso nominano '" + $SEGNO_TARGET + "')"; continue }
     $c.Eleggibile = $true
     if(-not $c.Profilo){ $c.Scarto = "eleggibile per i fatti, ma sotto un ALTRO profilo utente (sessione " + $env:USERNAME + ")" }
   }
@@ -343,10 +396,11 @@ try{
     $tag = "scartata"
     if($c.Eleggibile -and $c.Profilo){ $tag = "ELEGGIBILE" }
     elseif($c.Eleggibile){ $tag = "eleggibile ma sotto un ALTRO profilo" }
-    [void]$righeC.Add("  --- " + $c.Percorso + "   [" + $tag + "]   file di stato del logger presente=" + $c.HaStato + "   login " + $CONTO_PICCOLO + " nei log=" + $c.VistoPiccolo)
-    if($c.TracciaAltro -ne ""){ [void]$righeC.Add("      RIFIUTATA, non e' il piccolo: " + $c.TracciaAltro) }
+    [void]$righeC.Add("  --- " + $c.Percorso + "   [" + $tag + "]   file di stato del logger presente=" + $c.HaStato + "   login " + $CONTO_TARGET + " nei log=" + $c.VistoTarget)
+    if($c.TracciaAltro -ne ""){ [void]$righeC.Add("      RIFIUTATA, e' un terminale FUORI PERIMETRO: " + $c.TracciaAltro) }
+    if($c.FattoTarget -ne ""){ [void]$righeC.Add("      fatti positivi sul bersaglio " + $ETICH_TARGET + ": " + $c.FattoTarget) }
     [void]$righeC.Add("      trovata come: " + $c.Origine + "   origin.txt: " + $c.Origin)
-    [void]$righeC.Add("      bases BCM=" + $c.BaseBcm + "   piccolo=" + $c.VistoPiccolo + "   grande=" + $c.VistoGrande)
+    [void]$righeC.Add("      bases BCM=" + $c.BaseBcm + "   bases=" + $c.HaBases + "   piccolo=" + $c.VistoPiccolo + "   ftmo=" + $c.VistoFtmo + "   grande=" + $c.VistoGrande)
     if($c.Scarto -ne ""){ [void]$righeC.Add("      nota: " + $c.Scarto) }
   }
   foreach($r in $righeC){ Write-Host ("  " + $r) -ForegroundColor Gray }
@@ -361,8 +415,8 @@ try{
   # una sola candidata ha il login 50503392 nei propri log, e' quella.
   # Non fallisce closed: se nessuna lo ha (log ruotati, cartella
   # appena creata), la scelta resta quella di prima.
-  $vp        = @($auto     | Where-Object { $_.VistoPiccolo })
-  $vpConStato= @($conStato | Where-Object { $_.VistoPiccolo })
+  $vp        = @($auto     | Where-Object { $_.VistoTarget })
+  $vpConStato= @($conStato | Where-Object { $_.VistoTarget })
   $scelto = $null
   if($CartellaDati -ne ""){
     $imp = @($Cand | Where-Object { $_.Origine -like "*IMPOSTA A MANO*" })
@@ -376,22 +430,18 @@ try{
     # (%APPDATA%), ma la manopola -CartellaDati accetta QUALUNQUE percorso:
     # e' li' che si incolla a mano, ed e' li' che si sbaglia. Quindi qui si
     # pretende un FATTO POSITIVO che quella cartella sia del piccolo.
-    $pos = New-Object System.Collections.ArrayList
-    if($imp[0].HaStato){ [void]$pos.Add("contiene il file di stato del logger") }
-    if($imp[0].VistoPiccolo){ [void]$pos.Add("il login " + $CONTO_PICCOLO + " compare nei suoi log") }
-    if(($imp[0].OriginNorm -like ("*" + $SEGNO_PICCOLO + "*")) -and ($imp[0].OriginNorm -notlike "*-V3*")){ [void]$pos.Add("origin.txt punta a '" + $SEGNO_PICCOLO + "' senza -V3") }
-    if(($imp[0].PercNorm   -like ("*" + $SEGNO_PICCOLO + "*")) -and ($imp[0].PercNorm   -notlike "*-V3*")){ [void]$pos.Add("il percorso contiene '" + $SEGNO_PICCOLO + "' senza -V3") }
-    if($pos.Count -eq 0){
-      throw ("-CartellaDati '" + $CartellaDati + "' non e' RICONOSCIUTA come cartella del piccolo " + $CONTO_PICCOLO + ". Non basta che non sia riconosciuta come un'altra: la manopola pretende un fatto POSITIVO, e nessuno dei quattro c'e' -- niente file di stato " + $Prefisso + "_stato.csv, nessun login " + $CONTO_PICCOLO + " nei log degli ultimi 45 giorni, e ne' origin.txt ne' il percorso nominano '" + $SEGNO_PICCOLO + "'. Mandami la riga CARTELLE GUARDATE qui sopra invece di forzare: se la cartella e' giusta ma muta, il dato da raccogliere non c'e' comunque.")
+    if($imp[0].FattoTarget -eq ""){
+      throw ("-CartellaDati '" + $CartellaDati + "' non e' RICONOSCIUTA come cartella del " + $ETICH_TARGET + ". Non basta che non sia riconosciuta come un'altra: la manopola pretende un fatto POSITIVO, e nessuno dei quattro c'e' -- niente file di stato " + $Prefisso + "_stato.csv, nessun login " + $CONTO_TARGET + " nei log degli ultimi 45 giorni, e ne' origin.txt ne' il percorso nominano '" + $SEGNO_TARGET + "'. Mandami la riga CARTELLE GUARDATE qui sopra invece di forzare: se la cartella e' giusta ma muta, il dato da raccogliere non c'e' comunque.")
     }
+    $pos = @($imp[0].FattoTarget)
     $scelto = $imp[0]; $Criterio = "IMPOSTA A MANO con -CartellaDati (gate passati + prova positiva: " + (@($pos) -join "; ") + ")"
   }
   elseif($conStato.Count -eq 1){ $scelto = $conStato[0]; $Criterio = "FATTO: unica cartella eleggibile sotto questo profilo che contiene gia' il file di stato del logger" }
-  elseif($vpConStato.Count -eq 1){ $scelto = $vpConStato[0]; $Criterio = "FATTO: unica cartella col file di stato del logger E col login " + $CONTO_PICCOLO + " nei propri log" }
+  elseif($vpConStato.Count -eq 1){ $scelto = $vpConStato[0]; $Criterio = "FATTO: unica cartella col file di stato del logger E col login " + $CONTO_TARGET + " nei propri log" }
   elseif($auto.Count -eq 1){ $scelto = $auto[0]; $Criterio = "FATTO: unica cartella dati eleggibile sotto il profilo di questa sessione (nessun file di stato trovato: la raccolta dira' che non c'e' niente da leggere)" }
-  elseif($vp.Count -eq 1){ $scelto = $vp[0]; $Criterio = "FATTO: unica cartella eleggibile col login " + $CONTO_PICCOLO + " nei propri log" }
+  elseif($vp.Count -eq 1){ $scelto = $vp[0]; $Criterio = "FATTO: unica cartella eleggibile col login " + $CONTO_TARGET + " nei propri log" }
   else{
-    throw ("NON SO DA QUALE CARTELLA DATI RACCOGLIERE (eleggibili sotto questo profilo " + $auto.Count + ", con file di stato " + $conStato.Count + ", col login " + $CONTO_PICCOLO + " nei log " + $vp.Count + "). L'elenco e' qui sopra. Rilancia aggiungendo al driver: -CartellaDati ""<percorso>"".")
+    throw ("NON SO DA QUALE CARTELLA DATI RACCOGLIERE PER IL " + $ETICH_TARGET + " (eleggibili sotto questo profilo " + $auto.Count + ", con file di stato " + $conStato.Count + ", col login " + $CONTO_TARGET + " nei log " + $vp.Count + "). L'elenco e' qui sopra. Rilancia aggiungendo al driver: -CartellaDati ""<percorso>"".")
   }
   $Scelta = $scelto.Percorso
   Dico ("cartella dati: " + $Scelta) "Yellow"
