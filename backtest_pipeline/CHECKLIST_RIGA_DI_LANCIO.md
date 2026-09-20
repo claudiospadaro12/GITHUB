@@ -27007,3 +27007,28 @@ della **495**: `InpSLFixedPts=3000` valorizzato e inerte).
 campo che, se sbagliato, **fa sparire la pagella in silenzio**. Controllarlo vale *più* di
 un magic. E se un preset non dichiara **né Firma né Magic**, si **rifiuta**: è il punto in
 cui una generalizzazione potrebbe diventare una scorciatoia, e lì va chiuso a chiave.
+
+## CLASSE 499 — 🏷️🍽️ **IL «DEFAULT PER COMPATIBILITÀ» CHE FA MANGIARE UN CONTO A UN ALTRO** (20/09/2026)
+**Il caso reale**: `run_weekly_report.py`, `_account_label()`. Riconosceva **due** conti dal
+nome file e mandava **tutto il resto** nel conto piccolo *«per compatibilità con l'unico
+conto che c'era prima del 22/08»*. Il suo stesso commento avvisava: *«se domani entra un
+TERZO conto, questa funzione va estesa esplicitamente»*.
+🔴 **I conti sono diventati QUATTRO e nessuno l'ha estesa:**
+```
+trades_reale.csv (10105439, dall'08/09)  -> etichettato "piccolo (50503392)"
+trades_ftmo.csv  (541452707, da oggi)    -> etichettato "piccolo (50503392)"
+```
+E siccome **dentro un gruppo vince il file più aggiornato**, quei due non comparivano solo
+con l'etichetta sbagliata: **SOSTITUIVANO il conto piccolo nel report, in silenzio.** È lo
+stesso difetto del 21/08 — due conti nello stesso gruppo, uno sparito per **38 secondi** di
+differenza — tornato con due conti in più, **e il commento che lo prevedeva era lì da un mese**.
+
+**La regola, in due pezzi:**
+1. 🔑 **Un default «per compatibilità» che fonde un'entità nuova dentro una vecchia non è
+   compatibilità: è una collisione silenziosa programmata.** Lo sconosciuto deve prendere
+   **un'etichetta propria e visibile** (`SCONOSCIUTO (<file>)`), mai quella di qualcun altro.
+   Una riga in più che dice *«non so di chi è»* costa nulla; un conto che ne mangia un altro
+   costa un referto sbagliato che nessuno smaschera.
+2. ⏳ **Un commento che dice «va esteso quando…» è un difetto già scritto, non una nota.**
+   Va cercato col grep ogni volta che si aggiunge un'entità dello stesso tipo — qui bastava
+   un `grep -n "TERZO conto"` il giorno in cui è entrato il conto reale.

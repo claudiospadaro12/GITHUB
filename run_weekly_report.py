@@ -48,16 +48,44 @@ def _eur(x: float) -> str:
     return f"{x:+,.2f}".replace(",", "§").replace(".", ",").replace("§", ".")
 
 
+# Un file -> un conto. Euristica sul NOME FILE: i CSV/xlsx non portano il
+# numero di conto in nessun campo, quindi il nome e' l'unica chiave.
+#
+# 20/09/2026 -- ESTESA, e il difetto che chiude era GIA' ATTIVO.
+# La versione precedente conosceva DUE conti e mandava tutto il resto nel
+# "piccolo" per compatibilita'. Il suo stesso commento avvisava: "se domani
+# entra un TERZO conto, questa funzione va estesa esplicitamente". I conti
+# nel frattempo sono diventati QUATTRO, e nessuno l'ha estesa:
+#   trades_reale.csv (10105439, dall'08/09) -> etichettato "piccolo"
+#   trades_ftmo.csv  (541452707, da oggi)   -> etichettato "piccolo"
+# E siccome DENTRO un gruppo vince il file piu' aggiornato, quei due non si
+# limitavano a comparire con l'etichetta sbagliata: SOSTITUIVANO il conto
+# piccolo nel report, in silenzio. Era lo stesso difetto del 21/08 (due conti
+# nello stesso gruppo, uno sparito per 38 secondi di differenza) tornato con
+# due conti in piu'.
+#
+# Ora i quattro sono elencati PER NOME, e quello che non si riconosce NON
+# finisce piu' in un gruppo esistente: prende un'etichetta tutta sua, visibile
+# nel report. Meglio una riga in piu' che dice "non so di chi e'" che un conto
+# che ne mangia un altro senza dirlo.
+_CONTI_NOTI = (
+    # (chiavi da cercare nel nome file, etichetta)
+    (("ftmo", "541452707"), "CHALLENGE FTMO (541452707)"),
+    (("reale", "10105439"), "REALE (10105439)"),
+    (("100k", "50504263"), "100k (dry-run 50504263)"),
+    (("auto", "50503392"), "piccolo (50503392)"),
+)
+
+
 def _account_label(path: str) -> str:
-    """Un file -> un conto. Euristica sul NOME FILE (non c'e' altro modo:
-    i CSV/xlsx non portano il numero di conto in un campo). Se domani entra
-    un TERZO conto, questa funzione va estesa esplicitamente: di default
-    tutto cio' che non riconosce finisce nel conto piccolo, per compatibilita'
-    con l'unico conto che c'era prima del 22/08."""
     name = os.path.basename(path).lower()
-    if "100k" in name or "50504263" in name:
-        return "100k (dry-run 50504263)"
-    return "piccolo (50503392)"
+    for chiavi, etichetta in _CONTI_NOTI:
+        for k in chiavi:
+            if k in name:
+                return etichetta
+    # Sconosciuto: etichetta PROPRIA, cosi' non si fonde con nessun conto vero
+    # e si vede nel report che c'e' un file che nessuno ha dichiarato.
+    return "SCONOSCIUTO (%s)" % os.path.basename(path)
 
 
 def _trade_section(stats_by_account: dict) -> str:
