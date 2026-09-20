@@ -26462,3 +26462,50 @@ a mercato fermo l'ultima candela è **di venerdì**.
 mercato chiuso»*) è la stessa famiglia vista dall'altro lato — lì mancava il **giorno della
 settimana** in un ragionamento, qui manca **la data** dentro un dato. Insieme dicono una cosa
 sola: **un orologio di mercato senza calendario non è un orologio.**
+
+---
+
+## CLASSE 480 — 🧪🪟 **IL COLLAUDO SINTETICO GIUDICATO SU UN CAMPIONE DOMINATO DAL RISCALDAMENTO**, dove l'uguaglianza esatta la decide l'**errore di virgola mobile** — e la decide **SEMPRE NELLO STESSO VERSO** (20/09/2026, cugina della **374**)
+
+**Il caso, ed è di stanotte.** `backtest_pipeline/analisi_griglia_h4.py` misura in quante sedute il
+filtro EMA su H4 dà bias **opposto** fra la griglia BCM e quella FTMO. Per collaudarlo ho costruito
+una serie H1 **sintetica** in cui la risposta è nota per costruzione: **400 giorni piatti** di
+riscaldamento (servono a far esistere la `EMA(50)`) seguiti da **60 giorni costruiti**, 20 per tipo.
+
+🟢 Il numero di testa usciva **giusto al primo colpo**: `discordi=20`, `entrambe=20`, in tutti e
+cinque i casi.
+🔴 **Ma il denominatore era `427`, non `60`.** Lo strumento stava giudicando anche i **367 giorni
+piatti** sopravvissuti al riscaldamento. E su una serie piatta `chiusura == EMA50` — *in teoria*.
+In virgola mobile no: `1000·k + 1000·(1−k)` con `k = 2/51` torna **`1000.0000000000001`**, quindi
+`EMA50 > chiusura`, quindi `bias = −1`. **Su tutte e 367.**
+
+### 🔬 Perché è una classe e non una svista
+1. 🎯 **Il difetto non tocca il numero che si guarda.** `discordi` era esatto. Chi avesse letto solo
+   la riga di testa avrebbe dichiarato **«collaudato»** un banco di prova in cui **l'86% del
+   campione era rumore di arrotondamento**. Il collaudo sarebbe stato **verde e inutile**.
+2. ⚖️ **L'errore di arrotondamento NON è 50/50.** L'istinto dice «tanto si compensa»: **falso**. La
+   ricorsione della EMA su valori costanti sbaglia **in modo deterministico e sempre nello stesso
+   verso**. Un bias che doveva essere `0` (zona neutra, `longOK=true`) è uscito `−1`
+   (**ingresso cancellato**) in modo **sistematico**. Su una sedia solo-long è la differenza fra
+   «opera sempre» e «non opera mai».
+3. 🧱 **Le righe di riscaldamento non sono dati: sono impalcatura.** Se finiscono nel campione
+   giudicato, il campione non è più quello costruito — e **«noto per costruzione» smette di essere
+   vero** senza che nessuno se ne accorga.
+
+### ✅ La regola
+1. **In un collaudo sintetico, le sedute GIUDICATE devono essere ESATTAMENTE quelle COSTRUITE.**
+   Non «almeno»: **uguali**. Il confronto `n_giudicate == n_costruite` è una **condizione di PASS**,
+   alla pari del numero che si sta misurando. Il riscaldamento si **esclude** (qui: `--da` sul primo
+   giorno costruito), non si tollera.
+2. **Mai costruire una regione di test in cui due grandezze devono risultare UGUALI.** Se il dato
+   sintetico rende `a == b` esatto, il verso del confronto lo decide l'ULP, non la logica. Si
+   costruisce sempre con un **margine dichiarato** (qui: perturbazione `10` su base `1000`).
+3. **Il collaudo porta la sua rete**: si misura e si stampa il **margine minimo** `|a − b|` su tutte
+   le celle giudicate, e **se scende sotto la soglia il test FALLISCE** invece di passare per caso
+   (qui `margine_min`, soglia `3.0`, valori reali 8,16-9,61). 👉 **Un test che non sa dire quanto è
+   stato vicino a sbagliare non è un test: è un'opinione con un `PASS` stampato sopra.**
+
+📌 **Parentela**: la **374** (*«il bordo della griglia in virgola mobile fa sparire una cella senza
+un avviso»*) è la stessa materia sul lato **input**; questa è sul lato **giudizio**. Insieme dicono:
+🔴 **ogni volta che un confronto in virgola mobile può cadere sull'uguaglianza, qualcuno sta già
+decidendo al posto tuo — e non te lo dice.**
