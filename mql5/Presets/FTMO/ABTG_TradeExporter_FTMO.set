@@ -1,0 +1,29 @@
+;  ==================================================================
+;  ABTG_TradeExporter -- PRESET FTMO (conto 541452707, 80.000 EUR)
+;  ==================================================================
+;  A COSA SERVE. Senza questo EA la challenge FTMO e' INVISIBILE alla
+;  pagella serale. La catena e':
+;     ABTG_TradeExporter  ->  Common\Files\ABTG_Trades_FTMO.csv
+;     pubblica_trades.ps1 ->  data/statements/trades_ftmo.csv  -> repo
+;     trigger 23:00       ->  report/giornata_AAAA-MM-GG.md
+;     scarica_pagella.ps1 ->  Desktop\pagella_AAAA-MM-GG.txt (23:15)
+;
+;  Trovato da Claudio il 20/09/2026, a schieramento gia' fatto: i conti
+;  che pubblica_trades.ps1 conosceva erano TRE (50503392, 50504263,
+;  10105439) e il 541452707 non c'era. Le cinque sedie avrebbero
+;  operato senza comparire da nessuna parte.
+;
+;  IL NOME DEL FILE E' LA CHIAVE, e per questo sta in un preset e non
+;  si digita a mano: pubblica_trades.ps1 cerca ESATTAMENTE
+;  ABTG_Trades_FTMO.csv in Common\Files. Un carattere diverso -- anche
+;  solo uno SPAZIO, come e' successo il 20/09 su InpCorrSymbol -- e il
+;  file non viene trovato, in silenzio.
+;
+;  NON TRADA: legge lo storico dei deal e scrive un CSV. Nessun ordine.
+;  Common\Files e' condivisa fra tutti i terminali MT5 della macchina,
+;  quindi lo script PowerShell lo trova senza sapere dove sta FTMO.
+;  ==================================================================
+InpFile=ABTG_Trades_FTMO.csv
+InpFromYear=2026
+InpExportMinutes=30
+InpUseCommon=true
