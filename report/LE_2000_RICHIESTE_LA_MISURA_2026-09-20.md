@@ -124,7 +124,15 @@ guardato anche li' prima del volo. Il suo trailing pero' e' un livello **FISSO**
 (`ABTG_PostNews.mq5` r.404-407: `openP ± InpTrailNewSLpips`), quindi **≤1 modifica per
 posizione** se accettata — e `InpUseTrail25=false` nei preset FOMC e NFP, `true` solo nell'ECB.
 
-### 🟢 Cinque sedie indici su sei sono limitate a ≤1 modifica per barra
+### 🟢 Cinque sedie indici su sei sono limitate a ≤1 modifica **ACCETTATA** per barra
+
+🔴 **E la parola «accettata» e' l'unica che conta, corretta la notte del 20/09.** Il tetto per
+barra vale sul **percorso di successo**. Sulle tre Aperture, se il server **rifiuta** la
+modifica (stop dalla parte sbagliata del prezzo: il primo pullback dopo una rottura, con
+`InpTrailStartR=0.0`), `sl` non cambia, la condizione resta vera e il tentativo **riparta a
+ogni tick fino alla chiusura della barra M5** — fino a cinque minuti. E' la **CODA B** del §④,
+misurata: **328 FALLITI** in una giornata, **senza tempo di rete**. 👉 `InpTrailMode=1` non
+chiude il rubinetto: lo **dirada**.
 
 | sedia | trailing agganciato a | costante per | tetto `PositionModify` |
 |---|---|---|---:|

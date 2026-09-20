@@ -27119,6 +27119,15 @@ dentro lo `SYMBOL_TRADE_STOPS_LEVEL`), il server rifiuta, **`sl` non cambia**, l
 **resta vera** e la richiesta riparte **al tick successivo** — fino alla chiusura della barra.
 Su un indice in sessione sono **centinaia o migliaia** di richieste per un solo episodio.
 
+✏️ **PRECISAZIONE DEL 20/09/2026 — i numeri di riga qui sotto sono quelli DEI PIN CHE VOLANO,
+non di HEAD, e i due insiemi NON coincidono** (`ABTG_EMA200.mq5`: 552 righe al pin
+`26a18566`, 690 a HEAD; `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`: 645 contro 774). Verificati
+con `git show`: al pin le guardie stanno a `EMA200` r.**302-303** e `SuperWave` r.**341-342**;
+a HEAD alle righe **440-441** e **470-471**. Le tre Aperture invece hanno pin e HEAD
+**identici al bit** (md5 confrontati), quindi li' i numeri valgono per entrambi — e ai rami
+BUY r.1986/1817/2230 vanno aggiunti i rami **SELL r.1992 / 1823 / 2236**, che hanno lo
+stesso difetto e che la prima stesura non citava.
+
 🔎 **E la prova che è una dimenticanza, non una scelta: due EA della stessa casa CE L'HANNO.**
 `ABTG_EMA200.mq5` r.302-303 (`n<bid` / `n>ask`) e `ABTG_SuperWave_DOW_H1_Ottimizzato.mq5`
 r.341-342 (`stLine<bid` / `stLine>ask`). **Tre file su sei senza la riga che gli altri due hanno.**
@@ -27196,7 +27205,36 @@ rifiutata. 🔴 E la frase contraddiceva la **CLASSE 502**, scritta **lo stesso 
 spegnerebbe**. Se esiste, il tappo è **una scelta di configurazione** e va messo nel cancello di
 prevolo, non nella prosa rassicurante.
 📌 Nel prevolo FTMO: **verificare `InpTrailMode=1` in tutti e tre i preset Aperture.**
+
+### ✏️ EMENDAMENTO DELLA STESSA NOTTE (20/09/2026) — e corregge la classe in TUTTE E DUE le direzioni
+Un agente ha riaperto i file e ha trovato che la classe, com'era scritta, sbagliava **due volte**:
+
+🟢 **PRIMO: il tappo e' PIU' FORTE di un preset, non meno.** `InpTrailMode` non nasce da un
+`.set`: il suo default e' **compilato dentro l'EA** — `#define ABTG_DEF_TRAIL_MODE 1` a
+r.**100** (DAX), r.**68** (Dow), r.**48** (Nasdaq), verificato col grep. Un preset
+**dimenticato** non apre niente: servirebbe qualcuno che scrive **attivamente** `=0`. La
+frase *«e' un valore di preset»* era allarmista.
+
+🔴 **SECONDO, e va nella direzione opposta: il tappo NON chiude il rubinetto. Lo DIRADA.**
+`ABTG_TRAIL_PREVBAR` restituisce `iLow(_Symbol,M5,1)`: un prezzo quotato **si', ma nel
+PASSATO**. Con `InpTrailStartR=0.0` (valore dei tre preset FTMO) il trailing e' armato dal
+primo tick; se la barra M5 precedente chiude col minimo sopra l'ingresso e poi il prezzo
+**ritraccia sotto quel minimo** — cioe' il primo pullback dopo una rottura, la cosa piu'
+ordinaria del mondo — allora `newSL > sl` e' vero, `newSL > openP` e' vero, **ma
+`newSL > bid`**: il server rifiuta, `sl` non cambia, e la richiesta **riparte a ogni tick
+fino alla chiusura della barra**. Fino a **cinque minuti** di tentativi.
+👉 Quindi il tetto vero di PREVBAR e' **≤1 modifica ACCETTATA per barra**, con i **tentativi
+RIFIUTATI non limitati dentro la barra**.
+
+🟢 **E non e' una deduzione: la misura lo diceva gia'.** In
+`report/LE_2000_RICHIESTE_LA_MISURA_2026-09-20.md` la CODA B e' *«VIVO ma piccolo»*, con
+**328 FALLITI** in una giornata — **e quelle giornate giravano con `InpTrailMode=1`**. Se il
+tappo chiudesse davvero, quella colonna sarebbe a zero.
+📌 **Il difetto di metodo**: avevo letto *«prezzo quotato»* e concluso *«mai dalla parte
+sbagliata del mercato»*. Un prezzo quotato **del passato** puo' benissimo stare dalla parte
+sbagliata di **adesso**. E' un contro-esempio che avrei dovuto costruire io.
 📌 **Misura completa**: `report/LE_2000_RICHIESTE_LA_MISURA_2026-09-20.md`.
+📌 **Pacchetto di riparazione pronto da firmare**: `report/RIPARAZIONE_CLASSE_502_2026-09-20.md`.
 
 ## CLASSE 508 — 🕐🌍 **IL FUSO SCRITTO IN PROSA, CABLATO SU UN BROKER, IN UNO STRUMENTO DIVENTATO BI-BROKER** (20/09/2026)
 **Il caso reale**: `RIGA_SPREADLOGGER_RACCOLTA.ps1`, appena esteso con `-Bersaglio ftmo`.
