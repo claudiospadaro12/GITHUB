@@ -26422,3 +26422,43 @@ Tre domande, in ordine:
 📌 **Parentela**: la **462** dice *«il fix di famiglia applicato al file generico e non alla
 variante in campo»*. Questa è la sua immagine allo specchio: **il fix applicato solo alle varianti
 che esistevano**, e la flotta che ne esce disomogenea.
+
+---
+
+## CLASSE 479 — 🕐🧊 **L'OROLOGIO DEL SERVER LETTO A MERCATO CHIUSO È L'ORA DELL'ULTIMO TICK**: la colonna «Ora» di Market Watch di domenica mostra **venerdì sera**, e sembra un'ora plausibile (controllo-preventivo, 20/09/2026, cugina della **267**)
+
+**Il caso, ed è di stanotte — la sonda di pre-volo FTMO** (`backtest_pipeline/righe/PREVOLO_FTMO.ps1`).
+Tutto il pacchetto di schieramento FTMO poggia su **un solo numero mai misurato**: il fuso del
+server (`FTMO = BCM +2`, `[INFERITO]` da **una riga** di `docs/REGOLAMENTO_FTMO_2026-08.md`).
+**Dieci preset** sono stati rimappati su quel numero. Il passo di verifica previsto era —
+giustamente — *«leggi l'ora del server in Market Watch e confrontala con l'orologio di Windows»*.
+
+🔴 **Ma Claudio schiera DOMENICA 20/09, e di domenica il mercato è CHIUSO.** La colonna «Ora»
+di Market Watch **non** è un orologio: è il **timestamp dell'ultimo tick ricevuto**, cioè
+**venerdì sera**. È la stessa trappola che in MQL5 rende `TimeCurrent()` inutilizzabile come
+orologio (si congela sull'ultimo tick) — ma qui a congelarsi è **la lettura umana**, quella su
+cui si decide se rigenerare dieci file di configurazione.
+
+### 🔬 Perché fa male in modo subdolo, e non rumoroso
+L'ora di chiusura del venerdì per gli indici (**23:00** di server) **sembra un'ora plausibile**.
+Chi legge solo `HH:MM`, senza la **data**, ricava un fuso — sbagliato — e poi ci costruisce
+sopra una rimappatura oraria. Non c'è nessun messaggio d'errore: c'è **un numero credibile**.
+📌 E la stessa trappola vale per la controprova «guarda l'ultima candela di un grafico M1»:
+a mercato fermo l'ultima candela è **di venerdì**.
+
+### ✅ La regola
+1. **Un'ora letta da un feed non è un orologio finché non porta accanto la sua DATA.** Prima di
+   usare un'ora di mercato per decidere qualcosa, si guarda **giorno e mese**: se non è **oggi**,
+   la lettura **non vale** e la casella resta **dichiarata aperta**.
+2. **Le misure di fuso si programmano a mercato APERTO.** Su indici e forex vuol dire: **non**
+   la domenica pomeriggio, **non** nel weekend, **non** nei festivi del mercato. Se il momento
+   in cui serve la misura cade a mercato chiuso, si dice *«questa casella si chiude alla
+   riapertura»* invece di chiuderla con un numero fermo.
+3. **Chi consegna la misura consegna anche la difesa**: lo strumento stampa la tabella di
+   **tutte** le ore possibili con il verdetto di ognuna **e** l'avviso della data, così chi
+   legge non deve ricordarsi la trappola — la trova scritta accanto al numero.
+
+📌 **Parentela**: la **267** (*«l'ora letta senza il giorno: un cancello che blocca su un
+mercato chiuso»*) è la stessa famiglia vista dall'altro lato — lì mancava il **giorno della
+settimana** in un ragionamento, qui manca **la data** dentro un dato. Insieme dicono una cosa
+sola: **un orologio di mercato senza calendario non è un orologio.**
