@@ -26509,3 +26509,88 @@ In virgola mobile no: `1000·k + 1000·(1−k)` con `k = 2/51` torna **`1000.000
 un avviso»*) è la stessa materia sul lato **input**; questa è sul lato **giudizio**. Insieme dicono:
 🔴 **ogni volta che un confronto in virgola mobile può cadere sull'uguaglianza, qualcuno sta già
 decidendo al posto tuo — e non te lo dice.**
+
+---
+
+## CLASSE 481 — 📌🕳️ **IL PIN CONGELA IL MANIFESTO, E CON LUI L'IGNORANZA DI QUELLO CHE NASCE DOPO**: l'artefatto è in repo, è della stessa operazione, e il consumatore pinnato non lo vede (controllo-preventivo, 20/09/2026)
+
+**Il caso, misurato al minuto.**
+```
+mql5/Scripts/ABTG_PrevoloFTMO_Specifiche.mq5   nato  20/09 03:29  (db71b3c9)
+SCHIERA_FTMO.ps1 pinnato a                     489f98c0, del 19/09 21:42
+grep "PrevoloFTMO_Specifiche" nel manifesto al pin  ->  0
+```
+Lo script che **misura l'orologio del server FTMO** è nato **sei ore dopo** il pin del manifesto
+che avrebbe dovuto installarlo. Tutto era a posto, uno per uno: il file **era in repo**, il pin
+**era valido**, i **tredici contro-esempi passavano**, il cancello dava `ESITO: nessun difetto`.
+🔴 **E la sera dello schieramento quel file semplicemente non sarebbe arrivato sul terminale**, e
+le caselle **orologio · margine · Digits · spread** sarebbero tornate a essere letture a mano da
+Market Watch a mezzanotte.
+
+### Il meccanismo, che è diverso dalla 475
+La **475** è *«un artefatto descritto come verificato che non è mai entrato in repo»*: lì manca il
+**file**. Qui il file c'è, è giusto, è pushato. 🔴 **Manca il PUNTATORE**, e manca per una ragione
+strutturale: **un pin è una fotografia**, e il suo scopo è proprio non cambiare. Ma un manifesto
+non è un'analisi: è un **elenco di cosa deve esistere altrove**, e quell'altrove **continua a
+crescere** mentre il pin sta fermo. 👉 **Più il pin è "buono" (immutabile, verificato, testato),
+più è bravo a nascondere quello che è nato dopo.**
+
+E la cosa che lo rende invisibile: **nessuno dei controlli di casa può accorgersene.** Il cancello
+verifica che i file del manifesto esistano al pin — **non che al pin esistano file che il
+manifesto non nomina.** È un test di **inclusione in un verso solo**.
+
+### La regola
+🔴 **Un manifesto pinnato va riletto contro HEAD ogni volta che si sta per spedirlo, e il
+controllo è al CONTRARIO di quello istintivo**: non *«i miei file esistono?»* ma *«esistono file
+NUOVI che dovrebbero essere miei?»*.
+```bash
+# cosa e' nato nell'albero rilevante DOPO il pin del manifesto
+git log --since="$(git log -1 --format=%aI <PIN>)" --diff-filter=A --name-only --format= \
+    -- mql5/ backtest_pipeline/ | sort -u
+# e per ognuno: il manifesto lo nomina?
+grep -c "<nomefile>" <manifesto>
+```
+📌 **E la domanda da farsi su ogni riga che esce è una sola, in linguaggio umano:**
+> *«Da quando ho pinnato, qualcuno ha prodotto qualcosa che serve a QUESTA serata?»*
+
+🟢 Qui la risposta è arrivata da **un altro agente**, non dal cancello — ed è la ragione per cui
+le consegne vanno **rilette da fuori** prima di partire, non solo verificate da dentro.
+
+
+---
+
+## CLASSE 482 — 🗂️💥 **IL BANCO DI PROVA SOVRASCRITTO DA UN ALTRO AGENTE**: stesso scratchpad, stesso nome di file, e i contro-esempi diventano verdi senza aver provato niente (controllo-preventivo, 20/09/2026)
+
+**Il caso, ed è successo mentre si rigiravano i contro-esempi.** Il banco di prova viveva in
+`<scratchpad>/mk.sh` + `<scratchpad>/casa.sh`. Un **altro agente**, nella **stessa sessione**, ha
+scritto il suo banco negli **stessi nomi**. Al rigiro successivo:
+```
+A  zero candidate      rifiuto=0  file=0
+B  due candidate       rifiuto=0  file=0
+C  candidata = REALE   esclusa=0  file=0
+```
+🔴 **Zero rifiuti e zero file: sembra che non succeda niente, e invece non veniva provato niente.**
+Il banco non costruiva più `MetaQuotes/Terminal`, quindi lo script moriva al passo 1 con *«non
+esiste …\\MetaQuotes\\Terminal»* — un rifiuto **legittimo**, ma di una domanda **diversa** da
+quella che il contro-esempio voleva porre.
+
+### 🔴 La parte che fa paura, ed è il vero contenuto della classe
+`file=0` era **giusto** in tutti e tre i casi. Un controllo scritto come *«non devono finire file
+nel terminale»* avrebbe detto **VERDE**. Solo il contatore dell'esito atteso (`rifiuto=1`) ha
+scoperto il guasto. 👉 **Un contro-esempio che verifica solo l'ASSENZA del danno passa anche
+quando non ha eseguito niente.** L'assenza di un effetto non distingue *«l'ho impedito»* da
+*«non ci ho nemmeno provato»*.
+
+### La regola, due metà e servono tutte e due
+1. **Ogni contro-esempio deve avere un TESTIMONE POSITIVO**: non solo *«nessun file è entrato»* ma
+   *«è comparsa la frase del rifiuto che mi aspettavo»*. Se il testimone positivo è a zero, il
+   caso **non ha girato** — indipendentemente da quanto è verde il resto.
+2. **Lo scratchpad è CONDIVISO fra gli agenti della sessione**: i banchi di prova vanno in una
+   **sottocartella con un nome che dice di chi è**, e gli script con un **prefisso proprio**
+   (`CP_SCHIERA_BANCO/cp_mk.sh`, non `mk.sh`). Un nome generico in un'area condivisa **verrà**
+   sovrascritto: è una questione di quando.
+
+📌 **Nota sul perché si è visto**: si è visto solo perché i tredici casi vengono **rigirati tutti**
+a ogni cambio di manifesto. Girandone solo quelli "toccati" — che è la tentazione, e fa risparmiare
+due minuti — il banco rotto sarebbe rimasto rotto per i giri successivi, **e sarebbe diventato la
+fotografia di riferimento**.

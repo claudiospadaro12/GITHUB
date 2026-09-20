@@ -43,3 +43,7 @@ report/.backup/
 # Cache di PowerShell (pwsh) creata dai contro-esempi degli agenti: 19/09/2026.
 # Non e roba di progetto e non va in repo.
 .cache/
+
+# Alberi finti dei contro-esempi degli agenti (falsi %APPDATA% con terminali MT5
+# ricostruiti). Sono banchi di prova usa-e-getta: non vanno in repo. 20/09/2026.
+casi/

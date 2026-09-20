@@ -37,7 +37,7 @@
 | **2** | ⬇️ installare l'MT5 FTMO in **`C:\MT5_FTMO`** — 🔴 **non** dentro una cartella BCM | 🖥️ VPS | ✍️ Claudio | **10-20 min** | — |
 | **3** | 🔑 login + attesa sincronizzazione simboli | 🪟 **FTMO** | ✍️ Claudio | **2-5 min** | 🔴 **senza login il giornale è vuoto e il passo 5 rifiuta** |
 | **4** | 📸 **le due letture che valgono la notte**: orologio Market Watch vs orologio Windows; *Specification* di US30/GER40/NAS100 | 🪟 **FTMO** | ✍️ Claudio | **5 min** | trasforma il `+2` da `[INFERITO]` a misurato |
-| **5** | ▶️ **LA RIGA** (§②) — copia 9 sorgenti + **10** preset | 🖥️ **PowerShell sul VPS** | 🤖 | ⏱️ **~3 s** *(misurato: 2,4 s · tetto 120 s)* | rifiuta invece di indovinare |
+| **5** | ▶️ **LA RIGA** (§②) — copia **10** sorgenti + **10** preset | 🖥️ **PowerShell sul VPS** | 🤖 | ⏱️ **~3 s** *(misurato: 2,4 s · tetto 120 s)* | rifiuta invece di indovinare |
 | **6** | 🔨 **F7 in MetaEditor**, 🔴 **`ABTG_Guardian.mq5` per PRIMO** | 🪟 **FTMO** | ✍️ Claudio | **10-20 min** | 🔴 **senza tetto se uno fallisce** |
 | **7** | 📊 aprire i grafici, simbolo + TF giusti | 🪟 **FTMO** | ✍️ Claudio | **10 min** | — |
 | **8** | ⚙️ caricare i preset (🟢 **già rimappati**) + 🔴 la **taglia** + 🔴 `InpDailyResetHour=1` sul Guardian | 🪟 **FTMO** | ✍️ Claudio | 🟢 **10-15 min** *(erano 20-30)* | 🟠 restano **due** valori a mano, non ventitré |
@@ -66,15 +66,15 @@ script, riga per riga, e viene stampato.
 
 ```powershell
 & { $ErrorActionPreference='Stop'; [Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;
-    $pin='489f98c02268a9dc976fc23ccbb8f48959fd4642'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
+    $pin='29bed7a1f90ac5eea24dae3bb5eecb122c5d6ad9'; $conto='IL_TUO_CONTO_FTMO'; $p="$env:USERPROFILE\SCHIERA_FTMO.ps1"; Remove-Item $p -EA SilentlyContinue;
     irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/SCHIERA_FTMO.ps1" -OutFile $p;
-    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_FTMO_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SCHIERA_FTMO_v2.' };
+    if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_SCHIERA_FTMO_v3' -Quiet)){ throw 'SCRIPT VECCHIO: manca il marcatore MARCATORE_SCHIERA_FTMO_v3.' };
     $global:LASTEXITCODE = 0; & $p -ContoAtteso $conto -Pin $pin;
     if($LASTEXITCODE -ne 0){ Write-Host ('FERMATO (uscita ' + $LASTEXITCODE + '): NON premere F7. Manda tutto l output qui sopra.') -ForegroundColor Red }
     else { Write-Host 'FATTO (uscita 0). Sul Desktop trovi la cartella SCHIERA_FTMO_<data> e lo zip: dentro ci sono il referto e i file scaricati.' -ForegroundColor Green } }
 ```
 
-🕐 **Dura ~3 secondi** (misurato **2,2 s** end-to-end da GitHub su nove sorgenti e **dieci** preset). Oltre **120 s** è la rete.
+🕐 **Dura ~2 secondi** (misurato **1,7 s** end-to-end da GitHub su **dieci** sorgenti e **dieci** preset). Oltre **120 s** è la rete.
 
 ### 🔎 Se vuoi guardare prima di scrivere
 Stessa riga con **`-SoloDiagnosi`** in coda: fa la scoperta, dice che cosa **copierebbe**, e
@@ -101,7 +101,7 @@ idea di `InpLoginAtteso` sul reale.
 ➕ **E una dopo**: il percorso di destinazione **vero**, quello su cui si scriverà, ripassa dalla
 lista nera. Se un giorno la scoperta cambiasse, morirebbe lì.
 
-### 🧪 I CONTRO-ESEMPI — **eseguiti**, e RIGIRATI TUTTI E TREDICI sul pin nuovo `489f98c0`
+### 🧪 I CONTRO-ESEMPI — **eseguiti**, e RIGIRATI TUTTI E TREDICI sul pin `29bed7a1`
 
 > 🔴 **Perché tutti e tredici e non solo quelli toccati**: il ripuntamento ha cambiato **il manifesto**, cioè *la cosa che decide quali file finiscono dentro un terminale*. Un contro-esempio che passava prima **non è una prova che passi adesso**.
 Banco: un finto `%APPDATA%\MetaQuotes\Terminal` con le **sette** cartelle di casa ricostruite
@@ -116,8 +116,8 @@ Banco: un finto `%APPDATA%\MetaQuotes\Terminal` con le **sette** cartelle di cas
 | **D2** | `-ContoAtteso = 10105439` (il **reale**) | 🟢 rifiuta **prima di guardare il disco** | **0** |
 | **D3** | cartella **senza `origin.txt`** | 🟢 esclusa: *«non posso CERTIFICARE di chi è»* | **0** |
 | **D4** | `-Pin lavoro` (un **ramo**, non uno SHA) | 🟢 rifiuta: *«un ramo si muove, un commit no»* | **0** |
-| **E** | 🟢 **terminale vergine**: `MQL5\Include` e `MQL5\Presets` **assenti** | 🟢 le crea, copia 9 sorgenti + **10** preset, **2,4 s**, uscita **0** | 18 |
-| **G** | **secondo lancio di fila** | 🟢 `GIA GIUSTO` ×9 e `GIA IDENTICO` ×**10**: **zero download** | invariati |
+| **E** | 🟢 **terminale vergine**: `MQL5\Include` e `MQL5\Presets` **assenti** | 🟢 le crea, copia **10** sorgenti + **10** preset, **2,4 s**, uscita **0** | 18 |
+| **G** | **secondo lancio di fila** | 🟢 `GIA GIUSTO` ×**10** e `GIA IDENTICO` ×**10**: **zero download** | invariati |
 | **H** | 🔴 **Claudio ritocca a mano `InpSessionHour=10 → 11`, poi rilancia la riga** | 🟢 **NON sovrascritto**: la modifica a mano sopravvive, la versione del repo finisce accanto come `…_DAL_REPO.set` | invariati |
 | **F1** | `-Pin` a un commit **vecchio**: un preset obbligatorio non esiste lì | 🟢 rifiuta col **404 e l'URL in chiaro** | **0** |
 | **F2** | un **EA mancante** al suo pin (mutante dello script) | 🟢 rifiuta col 404 | **0** |
@@ -185,6 +185,7 @@ scritta, buco B4) e si decide con la risposta in mano.
 | `ABTG_Guardian.mq5` | `779001` Guardian **v1.12** | 🔴 **`d884f7e1`** *(non HEAD)* | **498** *(499)* |
 | `ABTG_PostNews.mq5` | `771202`/`771203`/`771204` | `61dc18c9` | **666** *(667)* |
 | `ABTG_PausaGuardian.mqh` → `MQL5\Include` | 🔴 **senza di lui NESSUN F7 parte** (classe 27) | `26a18566` — **v1.20** | **398** *(399)* |
+| `ABTG_PrevoloFTMO_Specifiche.mq5` → 🔴 **`MQL5\Scripts`** | **script di SOLA LETTURA** (`OnStart`, niente `OnTick`, niente `CTrade`, **niente `#include`**): scrive `MQL5\Files\PREVOLO_FTMO_specifiche.csv` | `db71b3c9` | **485** *(486)* |
 
 📌 I numeri di `EMA200` (552) e `SuperWave` (645) e dell'include (398) **coincidono al bit** con
 quelli già approvati in `backtest_pipeline/righe/COMPILA_771531_770511.ps1`. È il contro-esempio
@@ -357,7 +358,7 @@ a mano **deve sopravvivere** — contro-esempio **H**, eseguito. La versione del
 ## ⑧ ✅ IL RIPUNTAMENTO DEL 20/09 — fatto, e cosa ha cambiato
 
 I file dell'altra sessione sono **su `lavoro`**. Il manifesto dei preset è stato ripuntato su
-`mql5/Presets/FTMO/*` e lo script è passato a **`MARCATORE_SCHIERA_FTMO_v2`**.
+`mql5/Presets/FTMO/*` e lo script è passato a **`MARCATORE_SCHIERA_FTMO_v3`**.
 
 🟢 **Il guadagno**: il passo 8 della catena era *«rimappare gli orari a mano, 20-30 min, il passo
 più lungo e il più facile da sbagliare»*. Adesso gli orari arrivano già giusti e restano **due**
@@ -417,6 +418,52 @@ riga gialla che rimanda a questo paragrafo. **Non sceglie e non cambia niente**:
 🔴 **Cosa serve prima di AutoTrading ON**: **una firma sola** — *o* si porta tutto a 0,65% (e
 allora il cap C1 = 5 × 0,65 torna coerente), *o* si accetta la flotta mista **sapendo** che costa
 140,6% di margine a 1:15.
+
+---
+
+## ⑪ 🔨 L'ORDINE DEGLI F7 — **lo script delle specifiche PRIMA del Guardian**, e si difende coi numeri
+
+Il referto diceva *«Guardian per primo»*, e la ragione era buona: un errore d'include si scopre al
+**1° colpo e non all'8°**. 🔴 **Con l'arrivo di `ABTG_PrevoloFTMO_Specifiche.mq5` quella ragione
+non cambia, ma non è più la prima.**
+
+| # | gesto | ⏱️ | perché è lì |
+|---|---|---:|---|
+| **1** | 🔨 F7 **`ABTG_PrevoloFTMO_Specifiche.mq5`** | ~10 s | **zero `#include`** → il suo esito è **isolato**: un errore qui non dice niente sugli altri otto, e un include rotto non lo tocca. È l'unico F7 che non condivide dipendenze con nessuno |
+| **2** | 📊 aprire **un** grafico e lanciarlo dal Navigatore | ~1 min | serve un grafico per eseguire uno script; uno qualsiasi basta |
+| **3** | 🔴 **LEGGERE `MQL5\Files\PREVOLO_FTMO_specifiche.csv`** | ~2 min | 🎯 **è il cancello della serata** |
+| **4** | 🔨 F7 **`ABTG_Guardian.mq5`** | ~1 min | **primo degli OTTO che usano l'include**: se l'include è sbagliato muore qui, non all'ottavo |
+| **5** | 🔨 F7 sugli altri sette | 10-20 min | |
+| **6** | grafici · preset · `InpDailyResetHour=1` · **taglia** | 10-15 min | |
+| **7** | ▶️ AutoTrading ON | 5 min | |
+
+### 🧮 Il conto che decide l'ordine — e l'ho fatto contro di me
+
+**L'obiezione da battere**: *«mettendo le specifiche per prime, scopri due minuti più tardi che
+l'include è rotto»*. È **vera**. Ma i due rami non costano uguale:
+
+| se si sbaglia l'ordine… | cosa si perde |
+|---|---:|
+| specifiche prima, include rotto | 🟢 **~2 minuti** di ritardo nello scoprirlo |
+| Guardian prima, **orologio ≠ +2** scoperto dopo i preset | 🔴 **10-15 minuti**: si rifà tutto il passo dei preset, a mezzanotte |
+
+👉 **Asimmetria 2 contro 10-15.** E c'è un secondo motivo, che non è di tempo ma di **ordine
+logico**: il `+2` su cui poggiano **i dieci preset che questa riga installa** è oggi `[INFERITO]`
+da **una riga di documentazione** (`REGOLAMENTO_FTMO_2026-08.md` r.130, etichetta
+*[LETTO-VIA-SEARCH, 13/08]*). Lo script lo trasforma in un **numero misurato** —
+e con `TimeTradeServer() - TimeGMT()`, che **non cade nella trappola della domenica** (classe 479:
+`TimeCurrent()` a mercato chiuso è l'ora di **venerdì**). 🎯 **Misurare l'orologio PRIMA di caricare
+dieci preset tarati su quell'orologio è l'unico ordine che ha senso.**
+
+### ⚠️ DA DIRE, E NON È UN DETTAGLIO
+🔴 **`ABTG_PrevoloFTMO_Specifiche.mq5` non è MAI STATO COMPILATO da nessuno.** Qui non c'è
+MetaEditor: **il primo F7 di Claudio è anche il suo primo collaudo.** Chi lo ha scritto lo ha
+verificato **senza compilarlo** — ASCII puro, 23/23 graffe, 354/354 tonde, 45 funzioni esistenti,
+e ha corretto **6 concatenazioni di stringhe adiacenti** (in MQL5 sono errori di compilazione
+certi). 🟢 È una verifica seria, **e non l'ho rifatta**: la cito. Ma resta **verifica statica**,
+non compilazione. 👉 Se quell'F7 fallisce, **non è colpa di Claudio** — e soprattutto **non blocca
+niente**: non avendo `#include`, un suo errore lascia intatti gli altri otto, e la serata prosegue
+dal passo 4 leggendo l'orologio a mano da Market Watch (com'era previsto ieri).
 
 ---
 
