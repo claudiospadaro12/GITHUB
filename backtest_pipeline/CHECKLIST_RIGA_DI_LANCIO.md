@@ -27197,3 +27197,62 @@ spegnerebbe**. Se esiste, il tappo è **una scelta di configurazione** e va mess
 prevolo, non nella prosa rassicurante.
 📌 Nel prevolo FTMO: **verificare `InpTrailMode=1` in tutti e tre i preset Aperture.**
 📌 **Misura completa**: `report/LE_2000_RICHIESTE_LA_MISURA_2026-09-20.md`.
+
+## CLASSE 508 — 🕐🌍 **IL FUSO SCRITTO IN PROSA, CABLATO SU UN BROKER, IN UNO STRUMENTO DIVENTATO BI-BROKER** (20/09/2026)
+**Il caso reale**: `RIGA_SPREADLOGGER_RACCOLTA.ps1`, appena esteso con `-Bersaglio ftmo`.
+Le righe di prosa erano rimaste quelle di BCM:
+```
+r.590  " - ore in ORA SERVER (= ora italiana meno 1 in questo periodo)."
+r.521  "... in ora LOCALE (= server + 1 in questo periodo)"
+```
+Vero per **BCM (UTC+1)**. 🔴 **Falso e di SEGNO OPPOSTO per FTMO (UTC+3 = italiana +1).**
+Claudio avrebbe letto il picco alla riga `10`, sottratto un'ora secondo la regola di casa, e
+concluso «le 09:00 server»: **sbaglio di DUE ore esatte** sul numero che deve decidere
+`InpMinStopPts` — cioe' sul numero per cui la riga esiste.
+🔴 **La regola**: quando si aggiunge un `-Bersaglio`/`-Conto`/`-Broker` a uno script, si fa
+il **grep di TUTTE le frasi che contengono un numero di ore** e l'offset si porta **dentro
+il profilo**, **misurato** (`TimeTradeServer()-TimeGMT()`), mai ereditato dalla regola di
+casa. 📌 Vale anche per i **titoli a schermo che nominano un conto**: qui r.294 stampava
+«CARTELLA DATI DEL PICCOLO» mentre leggeva FTMO, e quella e' la regola dei terminali multipli.
+📌 **Misura della fonte**: `backtest_pipeline/risultati_prove/PREVOLO_FTMO_specifiche_2026-09-20.csv`
+(`DeltaServerGMT_hhmm +03:00` contro `DeltaLocalePC_UTC_hhmm +02:00`).
+
+## CLASSE 509 — 🪟🕓 **LE FASCE ORARIE CABLATE SULLE ORE SERVER DI UN BROKER** (20/09/2026)
+**Il caso reale**: stesso file r.634, `@(8,15,"cash EUROPA 8-15")` e `@(14,20,"cash USA 14-20")`.
+In ore **FTMO** la banda `14-20` e' **13:00-19:00 IT**: l'apertura USA (15:30 IT = ora 16
+server) ci cade solo in coda e la chiusura ne resta **fuori**. 🔴 **La fascia mancava la
+sessione che dichiarava di misurare.** Le bande vere su FTMO sono **10-17** e **16-22**.
+🔴 **La regola**: una fascia oraria e' un **dato del profilo**, non una costante nel corpo;
+e l'etichetta porta **il nome del server** (`srv BCM` / `srv FTMO`), cosi' chi legge il
+referto sa in quale orologio sono i numeri senza doverlo dedurre.
+
+## CLASSE 510 — ⏱️🔀 **L'ORA DI LANCIO E L'ORA DELL'EVENTO SULLA STESSA RIGA DI TABELLA** (20/09/2026)
+**Il caso reale**: `RIGA_SPREADLOGGER_FTMO_DA_MANDARE.md`, prima stesura:
+`~09:30` accanto a `10:00` e `~16:00` accanto a `16:30`. Letta come tabella di conversione
+da' **+0:30**, che non e' nessun fuso al mondo. Erano **due eventi diversi** (quando premi
+invio / a che ora avviene l'apertura) e il documento non lo diceva.
+🔴 **La regola**: in una tabella con due orologi, **l'intestazione di colonna dice quale
+orologio e quale evento**, e se le due colonne non sono conversioni l'una dell'altra **si
+scrive che non lo sono**.
+
+## CLASSE 511 — 🪪🔍 **LA PROVA D'IDENTITA' STAMPATA E MAI CONFRONTATA** (20/09/2026)
+**Il caso reale**: `ABTG_SpreadLogger.mq5` r.524 scrive dentro il file di stato
+`META,conto,<ACCOUNT_LOGIN>` — **il numero di conto del terminale che ha prodotto i dati**,
+cioe' la prova d'identita' piu' forte che esista. `RIGA_SPREADLOGGER_RACCOLTA.ps1` r.582 lo
+**stampava** nel referto e **non lo confrontava** con il bersaglio.
+🔴 **La regola**: se il dato misurato **contiene gia'** il numero di conto del terminale da
+cui viene, quel numero si **CONFRONTA** col bersaglio, e un disaccordo e' un **PROBLEMA**
+(«i numeri qui sotto non sono del bersaglio: non usarli»), non una riga decorativa.
+📌 Quattro righe trasformano una decorazione in un cancello. Provato eseguendo il 20/09: con
+`META,conto,10105439` in modo `ftmo` il referto accusa (`PROBLEMI: 1`); col conto giusto tace.
+
+## CLASSE 512 — 🪦📏 **«CHIUDE LA CLASSE X» CON UN CAMPIONE CHE LO STRUMENTO STESSO MARCHERA' SOTTILE** (20/09/2026)
+**Il caso reale**: il documento di lancio prometteva *«chiude la classe 496»* con la lettura
+di lunedi'. Ma lo stesso script ha `$MinGiorni = 5` (r.56) e marca **`SOTTILE (GG<5)`** ogni
+riga (r.626): lunedi' `GG` vale **1 su tutte**. La riga non chiudeva niente — dava **un
+ordine di grandezza su una giornata sola**.
+🔴 **La regola**: prima di scrivere «chiude», si guarda **la soglia di sufficienza dello
+strumento stesso** e si dichiara **quante giornate/operazioni servono e quando arriveranno**.
+🟢 E si dice anche cosa quella misura **decide comunque** (qui: se il P95 all'apertura
+somiglia al prevolo a mercato chiuso si va avanti, se e' il doppio si rifa' subito
+`InpMinStopPts` senza aspettare venerdi').
