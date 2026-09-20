@@ -26889,3 +26889,32 @@ backtest_pipeline/righe/` per il **sostantivo**. **Trenta secondi.**
 cercare costa meno che scrivere, e molto meno che ri-pagare una classe già pagata.**
 `PULIZIA_DESKTOP.ps1` è stato **tolto dal repo** lo stesso giorno: uno script che
 sposta senza quella guardia non va lasciato in giro, perché prima o poi qualcuno lo usa.
+
+## CLASSE 495 — 🔢🎭 **LEGGERE UN `enum` DAL VALORE ACCANTO INVECE CHE DALLA DICHIARAZIONE** (20/09/2026)
+**Il caso reale**: nel preset di `770411` ho letto
+```
+InpSLMode=1
+InpAtrSLmult=2.5
+InpSLFixedPts=3000.0
+```
+e ho concluso *«stop fisso 3000 punti = 30,00 punti indice»*, perché `InpSLFixedPts`
+stava lì accanto con un valore pieno e la riga *sembrava* dire quello. Da lì ho calcolato
+la frontiera (**21× invece di 40×**), il lotto (**53,33**) e il margine (**33,7% del
+conto**) — e **li ho mandati a Claudio**, che stava decidendo se schierare la sedia.
+🔴 **Tutti e tre falsi.** La dichiarazione vera è
+`enum ENUM_MM_SL { MM_SL_OPPOSITE=0, MM_SL_ATR=1, MM_SL_FIXED=2 };`
+👉 **`1` è ATR, `FIXED` è `2`.** Lo stop è `ATR(14) M15 × 2,5`, e `InpSLFixedPts=3000` è
+una **manopola INERTE**. La configurazione era **giusta** e coerente con la promozione
+(`REGISTRO_TEST.md` r.476: *«SL ATR x2.5»*): il difetto era solo nella mia lettura.
+
+**La causa, ed è sempre la stessa**: ho controllato che la mia lettura fosse **coerente**
+con quello che mi aspettavo (c'era un numero di stop fisso, e tornava) invece di provare a
+**romperla**. È l'errore del 10/09 in una forma nuova.
+
+**La regola**: un valore numerico di un `input` tipizzato `enum` **non si interpreta mai
+dal contesto**. Si apre il sorgente, si legge la **dichiarazione dell'enum**, e si segue il
+**ramo vero** del codice che lo usa. 🔑 E il segnale d'allarme è proprio quello che mi ha
+ingannato: **una manopola compagna valorizzata in modo plausibile** — `InpSLFixedPts=3000`
+è esattamente ciò che si scrive quando lo stop fisso lo si è usato *in passato*, e resta
+lì inerte. **Un valore pieno non vuol dire un valore usato** (è la stessa famiglia delle
+874 corse con manopole inerti già censite in casa).

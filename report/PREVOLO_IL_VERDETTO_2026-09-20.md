@@ -102,3 +102,54 @@ Le altre cinque non hanno nessuno dei quattro problemi: correlazione spenta, sto
 (che si adatta allo strumento), margine leggero, orologio giusto, S5 sciolto.
 ✍️ `770411` rientra quando Claudio firma **o** lo stop, **o** il simbolo guida corretto,
 **o** la scelta di spegnere la correlazione. **Il numero c'è, la firma no.**
+
+---
+
+# ✏️ ERRATA DEL 20/09, SERA — **il guaio «A» di `770411` NON ESISTE. L'ho sbagliato io.**
+
+Qui sopra ho scritto che `770411` ha lo **stop fisso a 30,00 punti indice**, e ci ho
+costruito tre numeri che sono finiti in chat mentre Claudio decideva:
+> ~~stop 3000 punti = 30,00 punti indice · rapporto **21×** contro una frontiera di 40× ·
+> lotto **53,33** · margine **27.000 € = 33,7%** del conto~~
+
+🔴 **Tutti e tre FALSI.** La dichiarazione vera, `ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5` r.45:
+```
+enum ENUM_MM_SL { MM_SL_OPPOSITE=0, MM_SL_ATR=1, MM_SL_FIXED=2 };
+```
+Il preset porta `InpSLMode=1`, che è **`MM_SL_ATR`**, non `FIXED` (che è **2**). E il
+codice a r.284-286 lo conferma: *se non è OPPOSITE e non è FIXED → `sl = entry ± atr ×
+InpAtrSLmult`*.
+
+👉 **Lo stop di `770411` è `ATR(14) su M15 × 2,5`**, e `InpSLFixedPts=3000` è una
+**manopola INERTE**.
+
+🟢 **E la configurazione era GIUSTA**: `REGISTRO_TEST.md` r.476 dice che la sedia è stata
+promossa con *«short only, corr S&P ON, buffer 1000, **SL ATR x2.5**, TP2 3.0, rischio
+1%»*. Il preset corrisponde alla promozione **riga per riga**. Il difetto stava solo nella
+mia lettura.
+
+**Conseguenza sul verdetto**: lo stop di `770411` **non è misurabile dal preset**, esattamente
+come quello delle altre cinque. Esce dai guai di questa sedia ed **entra nel mandato**
+dell'agente che misura stop-vs-spread sulle cinque vive.
+📌 Errore archiviato come **classe 495**.
+
+## 🔴 IL GUAIO CHE RESTA, ed è l'unico — ma è serio e adesso è **confermato due volte**
+
+`InpUseCorrelation=true` che punta a **`SPXUSD`**, che su FTMO **non esiste**.
+E la sedia è stata **promossa con quel filtro ACCESO**, da due fonti indipendenti:
+- `report/CONTRATTI_SEDIE.md` r.93 — *«la promozione 26/07: PF 2,05 · DD 3,1% · 41 tr,
+  **corr S&P ON**»*
+- `backtest_pipeline/REGISTRO_TEST.md` r.476 — *«Promosso … short only, **corr S&P ON**,
+  buffer 1000, SL ATR x2.5, TP2 3.0, rischio 1%»*
+
+👉 Quindi **non è un errore di trascrizione**: il filtro serve. E su FTMO verrebbe
+**ignorato in silenzio** (`if(c != 0) bias = …`), facendo girare **una sedia diversa da
+quella misurata**.
+
+## 📄 E IL CONTRATTO DELLA SEDIA, per decidere con tutto davanti
+| | |
+|---|---|
+| DD promesso | **1,27%** a 1,0% (R16) → **2,54%** a 2,00% · la corsa di promozione: **3,1%** con n=41 → 6,2% a 2,00% |
+| PF | **2,05** (promozione 26/07, n=41) |
+| Frequenza | 🔴 **~1,7 operazioni al MESE** (21 trade in 12,6 mesi) — è un cecchino, non un motore |
+| Forward BCM | **9 posizioni, 9 vinte, 0 perse** (+155,78 € sul piccolo, +1.565,49 € sul 100k) — ⚠️ **n=9 non dice niente**: questa sedia **non ha ancora mostrato la sua distribuzione delle perdite** |
