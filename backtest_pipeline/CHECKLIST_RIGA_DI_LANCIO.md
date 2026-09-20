@@ -26860,3 +26860,32 @@ nel posto sbagliato.
    parte**: non è una prova di aver cambiato la cosa giusta. Qui il controllo che
    ha funzionato è stato `grep -vE "^;"` — cioè guardare i valori **veri**,
    ignorando quello che il file dice di sé.
+
+## CLASSE 494 — 🏗️🔁 **LO STRUMENTO RISCRITTO DA ZERO PER FRETTA, MENTRE IN REPO CE N'ERA GIÀ UNO PIÙ PROTETTO** (20/09/2026)
+**Il caso reale**: Claudio chiede *«archivia tutte le cartelle gialle in una unica
+cartella. **fa presto**»*. Ho scritto `PULIZIA_DESKTOP.ps1` da zero in pochi minuti.
+🔴 **Ripeteva, parola per parola, la CLASSE 458** — pagata il **16/09**, scritta in
+checklist il **19/09**: nessuna guardia sulle **attività pianificate**.
+```
+grep -c -iE "ScheduledTask|schtasks"  PULIZIA_DESKTOP.ps1   ->  0
+```
+La cartella `Desktop\GITHUB-claude-creating-agents-SgGpD (1)` è l'input dell'attività
+delle **07:20** che aggiorna il calendario news. **Passava tutte e quattro le mie
+protezioni** — nome non protetto, non giunzione, non l'archivio, e dentro **nessun
+`terminal64.exe`**, perché è uno zip di GitHub. Il mio script **l'avrebbe spostata**, e
+il filtro news sarebbe restato al buio **il lunedì in cui parte la challenge FTMO**.
+🔴 **Secondo difetto, della stessa famiglia**: la guardia MT5 era **fail-open** —
+`Get-ChildItem -Recurse -ErrorAction SilentlyContinue` inghiotte l'errore su un
+sottoalbero illeggibile (permessi, percorsi > 260 caratteri) e la cartella risulta
+*«nessun MT5 dentro» → spostata*. Una guardia che, quando le manca il dato, diventa
+neutra **in silenzio**.
+🟢 **E lo strumento giusto era già in repo**: `RIGA_ARCHIVIO_DESKTOP.ps1` (19/09), con la
+guardia sulle attività **fail-closed** *e* con **`-Annulla`**. Zero minuti di sviluppo.
+
+**La regola**: prima di scrivere uno script nuovo che **sposta, rinomina o cancella**,
+si fa un `grep` sulla checklist per il **verbo** (*sposta*, *archivia*) e un `ls
+backtest_pipeline/righe/` per il **sostantivo**. **Trenta secondi.**
+🔑 E il meccanismo da ricordare: **la fretta spinge a scrivere, non a cercare — ma
+cercare costa meno che scrivere, e molto meno che ri-pagare una classe già pagata.**
+`PULIZIA_DESKTOP.ps1` è stato **tolto dal repo** lo stesso giorno: uno script che
+sposta senza quella guardia non va lasciato in giro, perché prima o poi qualcuno lo usa.
