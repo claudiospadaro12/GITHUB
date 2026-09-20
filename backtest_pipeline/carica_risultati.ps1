@@ -1,5 +1,6 @@
 # =====================================================================
 #  carica_risultati.ps1 -- i CSV dei round girati sul VPS entrano nel repo
+#  MARCATORE_CARICA_RISULTATI_v1
 #  (nasce dalla classe 307: il runner pubblica il REFERTO, mai i CSV)
 #
 #  BERSAGLIO: finestra PowerShell sul VPS.
