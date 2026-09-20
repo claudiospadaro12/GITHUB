@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_FTMO_v4
+#  MARCATORE_SCHIERA_FTMO_v5
 #
 #  PORTA I SORGENTI E I PRESET DELLA ROSA NELLA CARTELLA DATI DEL
 #  TERMINALE FTMO -- CHE OGGI NON ESISTE E QUINDI VA SCOPERTO.
@@ -208,7 +208,7 @@ $PRESET = @(
   [pscustomobject]@{ Nome='ABTG_SuperWave_DOW_H1_770511_FTMO.set';          RepoDir='mql5/Presets/FTMO'; Magic='770511'; Sedia='770511 SuperWave DOW';   Obbligatorio=$true;  Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set'; RepoDir='mql5/Presets/FTMO'; Magic='770260'; Sedia='770260 Nasdaq RETEST';   Obbligatorio=$true;  Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_Guardian_FTMO_2Step.set';                   RepoDir='mql5/Presets';      Magic='779001'; Sedia='779001 Guardian FTMO';   Obbligatorio=$true;  Blocco='ROSA' },
-  [pscustomobject]@{ Nome='ABTG_TradeExporter_FTMO.set';                 RepoDir='mql5/Presets/FTMO'; Magic='779100'; Sedia='PAGELLA TradeExporter';  Obbligatorio=$false; Blocco='ROSA' },
+  [pscustomobject]@{ Nome='ABTG_TradeExporter_FTMO.set';                 RepoDir='mql5/Presets/FTMO'; Magic=''; Firma='InpFile=ABTG_Trades_FTMO.csv'; Sedia='PAGELLA TradeExporter (non trada: niente magic, la firma e il nome del file)';  Obbligatorio=$false; Blocco='ROSA' },
   [pscustomobject]@{ Nome='ABTG_PostNews_FOMC_EURUSD_771202_FTMO.set';      RepoDir='mql5/Presets/FTMO'; Magic='771202'; Sedia='771202 PostNews FOMC';   Obbligatorio=$false; Blocco='POSTNEWS' },
   [pscustomobject]@{ Nome='ABTG_PostNews_NFP_USDJPY_771203_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771203'; Sedia='771203 PostNews NFP';    Obbligatorio=$false; Blocco='POSTNEWS' },
   [pscustomobject]@{ Nome='ABTG_PostNews_ECB_EURUSD_771204_FTMO.set';       RepoDir='mql5/Presets/FTMO'; Magic='771204'; Sedia='771204 PostNews ECB';    Obbligatorio=$false; Blocco='POSTNEWS' }
@@ -584,8 +584,34 @@ try {
       continue
     }
     $sc = Scheletro ([Text.Encoding]::UTF8.GetString($byte))
-    if($sc.Testo -notmatch ('(?m)^\s*InpMagic\s*=\s*' + [regex]::Escape($p.Magic) + '\s*$')){
-      Muori ('il preset ' + $p.Nome + ' NON contiene "InpMagic=' + $p.Magic + '". O e il preset di un altra sedia, o e stato riscritto: in tutti e due i casi caricarlo sul grafico sbagliato e esattamente il modo in cui si perde una serata. Non e stato scritto niente sul terminale.')
+    # -----------------------------------------------------------------
+    # IL CONTROLLO DI MERITO. Ogni preset deve portare addosso la riga
+    # che lo IDENTIFICA, altrimenti non si copia.
+    #
+    # 20/09/2026 -- GENERALIZZATO, e NON indebolito. Prima pretendeva
+    # sempre un InpMagic, e il 20/09 ha RIFIUTATO (bene) il preset di
+    # ABTG_TradeExporter. Ma quello non e' una sedia: non trada, non ha
+    # magic, ha quattro input. Il campo che lo identifica e' InpFile --
+    # ed e' anche quello che, se sbagliato, fa sparire la pagella IN
+    # SILENZIO, quindi controllarlo vale PIU' di un magic.
+    # Ora la tavola puo' dichiarare una 'Firma' esplicita; se non c'e',
+    # si usa 'InpMagic=<Magic>' come prima.
+    # E se non c'e' NEMMENO il magic si RIFIUTA: un preset senza niente
+    # da controllare non passa. E' il punto in cui una generalizzazione
+    # potrebbe diventare una scorciatoia, e qui non lo diventa.
+    # -----------------------------------------------------------------
+    $firma = $p.Firma
+    if([string]::IsNullOrWhiteSpace($firma)){
+      if([string]::IsNullOrWhiteSpace($p.Magic)){
+        Muori ('il preset ' + $p.Nome + ' non dichiara ne Firma ne Magic: non ho niente da controllare, e un preset che non si puo identificare non si copia.')
+      }
+      $firma = 'InpMagic=' + $p.Magic
+    }
+    $pezzi = $firma -split '=', 2
+    if($pezzi.Count -ne 2){ Muori ('la Firma dichiarata per ' + $p.Nome + ' (' + $firma + ') non ha la forma NOME=VALORE.') }
+    $patt = '(?m)^\s*' + [regex]::Escape($pezzi[0].Trim()) + '\s*=\s*' + [regex]::Escape($pezzi[1].Trim()) + '\s*$'
+    if($sc.Testo -notmatch $patt){
+      Muori ('il preset ' + $p.Nome + ' NON contiene "' + $firma + '". O e il preset di un altra cosa, o e stato riscritto: in tutti e due i casi caricarlo sul grafico sbagliato e esattamente il modo in cui si perde una serata. Non e stato scritto niente sul terminale.')
     }
     $tmp = Join-Path $dirTmp $p.Nome
     [IO.File]::WriteAllBytes($tmp, $byte)

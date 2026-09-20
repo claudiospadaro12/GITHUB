@@ -26986,3 +26986,24 @@ lato, non e' la manopola: e' una rete di contorno, e va presentata come tale.
 🔎 E per le manopole a due rami (`if/else`), **il ramo che si attiva va letto nel preset
 di OGNI sedia**, non dedotto dal nome dell'input: due sedie con lo stesso valore possono
 fare cose opposte.
+
+## CLASSE 498 — 🎫❌ **DICHIARARE PER UN PRESET UN `InpMagic` CHE IL SUO EA NON HA** (20/09/2026)
+**Il caso reale**: aggiungendo `ABTG_TradeExporter` allo schieramento FTMO ho scritto
+`Magic='779100'` nella tavola dei preset. 🔴 **Quell'EA non ha nessun `InpMagic`**: non
+trada, ha **quattro input** (`InpFile`, `InpFromYear`, `InpExportMinutes`, `InpUseCommon`).
+Ho inventato un numero perché la colonna lo chiedeva.
+🟢 **Lo schieramento ha rifiutato, ed è andata esattamente come deve**: controllo di
+merito fallito, `NESSUN FILE E' STATO SCRITTO SU NESSUNA CARTELLA DATI`, referto sul
+Desktop. **Fail-closed.** Il difetto è costato zero.
+
+**La regola**: un campo di una tavola **non si riempie per far contento il formato**. Se
+un oggetto non ha quella proprietà, il posto giusto è **dirlo**, non inventarla — perché
+un valore inventato che *sembra* plausibile è indistinguibile da uno vero (stessa famiglia
+della **495**: `InpSLFixedPts=3000` valorizzato e inerte).
+
+🔑 **E la correzione giusta non è allargare la maglia**: la tavola ora dichiara una
+**`Firma`** esplicita — la riga che identifica quel preset. Per le sedie resta
+`InpMagic=<n>`; per il TradeExporter è **`InpFile=ABTG_Trades_FTMO.csv`**, cioè proprio il
+campo che, se sbagliato, **fa sparire la pagella in silenzio**. Controllarlo vale *più* di
+un magic. E se un preset non dichiara **né Firma né Magic**, si **rifiuta**: è il punto in
+cui una generalizzazione potrebbe diventare una scorciatoia, e lì va chiuso a chiave.
