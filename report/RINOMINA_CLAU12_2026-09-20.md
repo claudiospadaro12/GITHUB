@@ -80,29 +80,41 @@ interessante è che il cancello deterministico era **verde**: serviva lo strato 
 
 | # | difetto | effetto vero | classe |
 |---:|---|---|---|
-| **1** | l'impronta di controllo calcolata con **** mentre gli SHA in tavola erano l'impronta **SCHELETRO** di  | 🔴 **7 file su 7 rifiutati.** Lo script sarebbe stato **inerte**, accusando i file di essere sbagliati mentre erano giusti | **484** |
-| **2** | la guardia «il terminale è aperto?» confrontava  (una **cartella**) con  (un **eseguibile**) | 🔴 **non scattava mai**: stampava «CHIUSO» a MT5 spalancato | **485** |
-| 3 | il ciclo che cancella e rinomina senza  e con copia **non verificata** | 🟠 interruzione a metà = eccezione rossa, nessun rendiconto | **486** |
-| 4 |  non guardava il **binario orfano** | 🟠 poteva dichiarare il falso | — |
-| 5 | 👁️ ** cablato su ** | 🔴 avrebbe detto «nessuna riga di EA riconosciuta» **mentre le sedie lavorano** — falso muto sulla corsia TAGLIANDO | **487** |
+| **1** | l'impronta di controllo calcolata con **`Get-FileHash`** mentre gli SHA in tavola erano l'impronta **SCHELETRO** di `SCHIERA_FTMO.ps1` | 🔴 **7 file su 7 rifiutati.** Lo script sarebbe stato **inerte**, accusando i file di essere sbagliati mentre erano giusti | **484** |
+| **2** | la guardia «il terminale è aperto?» confrontava `origin.txt` (una **cartella**) con `$p.Path` (un **eseguibile**) | 🔴 **non scattava mai**: stampava «CHIUSO» a MT5 spalancato | **485** |
+| 3 | il ciclo che cancella e rinomina senza `try/catch` e con copia **non verificata** | 🟠 interruzione a metà = eccezione rossa, nessun rendiconto | **486** |
+| 4 | `GIA FATTO` non guardava il **binario orfano** | 🟠 poteva dichiarare il falso | — |
+| 5 | 👁️ **`CODA_02` cablato su `ABTG_`** | 🔴 avrebbe detto «nessuna riga di EA riconosciuta» **mentre le sedie lavorano** — falso muto sulla corsia TAGLIANDO | **487** |
 
 **Verificati con le mie mani**, non presi per buoni:
 
-🟢 **E una cosa l'agente l'aveva dedotta male**, quindi non l'ho copiata: diceva che
- è sul terminale FTMO. **Non c'è**: la corsa è stata fatta con
-, che esclude l'EA ( r.476) **e** i tre preset (r.503).
+```
+ABTG_EMA200.mq5 al pin 26a18566
+  SCHELETRO     5CA99D90A5F34E96...   <- quello che avevo messo in tavola
+  GET-FILEHASH  29CB8955DD11215C...   <- quello che lo script calcolava
+```
 
-🔴 ** l'ho corretto lo stesso giorno** (), prima della prima
+🟢 **E una cosa l'agente l'aveva dedotta male**, quindi non l'ho copiata: diceva che
+`ABTG_PostNews.mq5` è sul terminale FTMO. **Non c'è**: la corsa è stata fatta con
+`-SenzaPostNews`, che esclude l'EA (`SCHIERA_FTMO.ps1` r.476) **e** i tre preset (r.503).
+
+🔴 **`CODA_02` l'ho corretto lo stesso giorno** (`(?:ABTG_|CLAU12_)`), prima della prima
 notte operativa. Era l'unico difetto che mordeva **dopo**, non durante.
 
 ### ✅ E l'ho provato io su un albero finto, con un'esca
 
-Albero che riproduce il terminale FTMO (i sette file ai loro pin, gli  accanto,
-, giornale col conto ) **più una cartella-esca con
-l'hash del REALE  e lo stesso conto nel giornale**:
+Albero che riproduce il terminale FTMO (i sette file ai loro pin, gli `.ex5` accanto,
+`origin.txt = C:\FTMO`, giornale col conto `541452707`) **più una cartella-esca con
+l'hash del REALE `E23E1504...` e lo stesso conto nel giornale**:
 
-🟢 **Impronta della cartella  del REALE prima e dopo la corsa : identica.**
-E al rilancio:  ×7, **codice uscita 2**. Idempotente.
+```
+candidata 46C9F8E9...  = "C:\FTMO"
+ESCLUSA   E23E1504...  = 10105439  *** REALE ***     (C:\BCM_Reale)
+[4/6] ok 7 su 7  ->  CLAU12_*
+```
+
+🟢 **Impronta della cartella `Experts` del REALE prima e dopo la corsa `-Esegui`: identica.**
+E al rilancio: `GIA FATTO` ×7, **codice uscita 2**. Idempotente.
 
 ---
 
