@@ -1,0 +1,889 @@
+﻿REFERTO RUNNER ABTG -- 2026-09-20 03:30:03 (ora locale VPS)
+marcatore : MARCATORE_RUNNER_ABTG_v3
+branch    : lavoro
+perimetro : SOLA LETTURA (report/PERIMETRO_RUNNER.md) + corsia ROUND sul solo C:\MT5_Backtest
+
+righe di coda: 127
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 7s, uscita 0
+    log: CODA_01_sedie_attaccate_20260920_033003.log
+
+--- 5d4ab50dc275bd48179dc5669fbf31f1a26a2ee4 | backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_02_chi_ha_operato_20260920_033003.log
+
+--- d6362cbb1bb4e4b335d4b89a72177faed5f237c4 | backtest_pipeline/righe/CODA_03_conti_dei_terminali.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_03_conti_dei_terminali_20260920_033003.log
+
+--- 269de579821ebb3288b782e4aa4bc7f683616793 | backtest_pipeline/righe/CODA_04_capacita_macchina.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 11s, uscita 0
+    log: CODA_04_capacita_macchina_20260920_033003.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_05_foto_fresca.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_05_foto_fresca_20260920_033003.log
+
+--- 32718b9f6eb99728fe532a5c512ae39f83c0db6b | backtest_pipeline/righe/CODA_06_quale_codice_gira.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 13s, uscita 0
+    log: CODA_06_quale_codice_gira_20260920_033003.log
+
+--- 3a648eb6299ee287995358b87bee0a93e7a063be | backtest_pipeline/righe/CODA_07_desktop.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 29s, uscita 0
+    log: CODA_07_desktop_20260920_033003.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_08_preset_dai_chr.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 23s, uscita 0
+    log: CODA_08_preset_dai_chr_20260920_033003.log
+
+--- 4833b9dc218d1767f33faa5d613ce3d1d00779b7 | backtest_pipeline/righe/CODA_09_giornale_operativo.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_09_giornale_operativo_20260920_033003.log
+
+--- d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slippage.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 2s, uscita 0
+    log: CODA_10_slippage_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1450s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 108s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 90s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canali_e_attivita.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 3s, uscita 0
+    log: CODA_11_canali_e_attivita_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136a_slatr_U30USD.txt -Etichetta r136a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 263s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136b_primobersaglio_U30USD.txt -Etichetta r136b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 278s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136c_parziale_U30USD.txt -Etichetta r136c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 173s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136d_trailing_U30USD.txt -Etichetta r136d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 108s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R127c_orologio_EURJPY.txt -Etichetta r127c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 51s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126a_costo_bufferatr_U30USD.txt -Etichetta r126a -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1826s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 636s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1517s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 4138s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 270s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 391s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 104s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 95s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 382s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 394s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 109s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 8s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_02_pertrade_IS.txt -Etichetta cemad02 -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 59s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137c_parziale_770101_D30EUR.txt -Etichetta r137c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 49s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137a_floorstop_allarga_770101_D30EUR.txt -Etichetta r137a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 82s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137b_floorstop_salta_770101_D30EUR.txt -Etichetta r137b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 81s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R138a_gemello_F40EUR_770101.txt -Etichetta r138a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 39s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139a_EMA200_AUDJPY_H4_LS.txt -Etichetta r139a -Modello 1 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 105s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139b_EMA200_GBPUSD_H4_LS.txt -Etichetta r139b -Modello 1 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 104s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 156s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
+    corsia  : LETTURA
+    cancelli: G1 e G2 passati
+    ESEGUITO in 10s, uscita 0
+    log: CODA_12_pertrade_posizioni_20260920_033003.log
+
+--- ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_AtrExhaustVol -Prova R141c_atrexh_M30_NASUSD.txt -Etichetta r141c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 162s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_HVAncora -Prova R141d_hvancora_stopatr_M30_U30USD.txt -Etichetta r141d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 125s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141a_momentum_NASUSD_r12.txt -Etichetta r141a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 136s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141b_momentum_U30USD_gemello.txt -Etichetta r141b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 84s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 62s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 218s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 304s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 146s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 232s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 135s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 262s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 166s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 53s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 104s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 82s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 510s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 4120s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 228s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 103s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 351s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 07e7bb5c1f812f73aedbbc63117ade10d7e4b73f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 111s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 104s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 51s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 44fc20e81fea55d120178e1fb5919eff9d4ab2d5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 186s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bL_lato_long_NASUSD.txt -Etichetta r148bl -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 187s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bS_lato_short_NASUSD.txt -Etichetta r148bs -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 186s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 502487b175d2b9e5fbf7931477ed2fa3df49bd4f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R150a_uscita_nasdaqlive5m.txt -Etichetta r150a -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 355s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 966ccf4988a628c1be91a52c46f8f12174388a4c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R151a_trailingatr_XAUUSD.txt -Etichetta r151a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 62s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R152a_pertrade_DowApertura_770202.txt -Etichetta r152a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 95s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R153a_atrexit_GBPUSD.txt -Etichetta r153a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 206s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R154a_sllookback_SuperWave_U30USD.txt -Etichetta r154a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1492s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DaxValueArea -Prova R141e_daxva_buffer_M15_D30EUR.txt -Etichetta r141e -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 66s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 10000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1133s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R156a_maxdayshold_puntelarry_U30USD.txt -Etichetta r156a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 247s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 206s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R158a_atrexit_PTE_U30USD.txt -Etichetta r158a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 263s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160a_maxdayshold_puntelarry_EURAUD.txt -Etichetta r160a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 87s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160b_maxdayshold_puntelarry_EURCAD.txt -Etichetta r160b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 70s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160c_maxdayshold_puntelarry_GBPJPY.txt -Etichetta r160c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 183s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160d_maxdayshold_puntelarry_GBPUSD.txt -Etichetta r160d -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 184s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160e_maxdayshold_puntelarry_XAUUSD.txt -Etichetta r160e -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 121s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R159a_maxhours_gapfill_U30USD.txt -Etichetta r159a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 209s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161a_slatrmult_breakingband_GBPUSD.txt -Etichetta r161a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 196s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161b_slatrmult_breakingband_EURUSD.txt -Etichetta r161b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 95s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161c_slatrmult_breakingband_AUDUSD.txt -Etichetta r161c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 183s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapContinuation -Prova R162a_partialtargetr_gapcont_225JPY.txt -Etichetta r162a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 231s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R164a_atrexit_PTE_GBPUSD_771322.txt -Etichetta r164a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 219s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R163a_slbufferpips_suprev_NASUSD.txt -Etichetta r163a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 3279s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal -Prova R166a_slbufferpips_supertrendrev_225JPY.txt -Etichetta r166a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 726s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 72dcf8a3ef69fd6656d56f37ccf48ceff4ca1336 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 1108s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167a_slgapmult_gapfill_GBPUSD.txt -Etichetta r167a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 188s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167b_slgapmult_gapfill_EURUSD.txt -Etichetta r167b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 82s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167c_slgapmult_gapfill_AUDUSD.txt -Etichetta r167c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 172s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167d_slgapmult_gapfill_225JPY.txt -Etichetta r167d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 189s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168a_maxhours_gapfill_GBPUSD.txt -Etichetta r168a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 177s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168b_maxhours_gapfill_EURUSD.txt -Etichetta r168b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 81s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168c_maxhours_gapfill_AUDUSD.txt -Etichetta r168c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 162s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168d_maxhours_gapfill_225JPY.txt -Etichetta r168d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 181s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169a_slbufferatr_puntelarry_U30USD.txt -Etichetta r169a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 240s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169b_slbufferatr_puntelarry_EURAUD.txt -Etichetta r169b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 91s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169c_slbufferatr_puntelarry_XAUUSD.txt -Etichetta r169c -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 128s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169d_slbufferatr_puntelarry_GBPJPY.txt -Etichetta r169d -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 188s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169e_slbufferatr_puntelarry_GBPUSD.txt -Etichetta r169e -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 187s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169f_slbufferatr_puntelarry_EURCAD.txt -Etichetta r169f -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 72s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R170a_closeatend_nasdaq_NASUSD.txt -Etichetta r170a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 160s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R170b_closeatend_maxminnotte_XAUUSD.txt -Etichetta r170b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 44s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte_DAX_Short_Ottimizzato -Prova R170c_closeatend_maxminnottedax_D30EUR.txt -Etichetta r170c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 69s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171a_slbufferpts_easytrend_CHFJPY.txt -Etichetta r171a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 166s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171b_slbufferpts_easytrend_GBPUSD.txt -Etichetta r171b -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 171s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 6216938050d6c280b5b682b108654ee27e24e187 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 230s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 235s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 98s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 224s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 227s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 8e6c1da61af76f2747ea1882d594e412b1a756d8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173a_tp1pct_superwave_U30USD.txt -Etichetta r173a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 757s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173b_tp1r_superwave_U30USD.txt -Etichetta r173b -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 779s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 342s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 99s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 98s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 517s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 97s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 402s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 84s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 154s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 02f459c42c534c1d2446f50327e96c4ccdc0e974 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R175a_slmode_gapfill_U30USD.txt -Etichetta r175a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 92s, uscita 2 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 156s, uscita 3 -- guarda il log
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- 2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R178a_slmode_gapfill_225JPY.txt -Etichetta r178a -Modello 4 -Deposito 100000
+    corsia  : ROUND
+    cancelli: G1, G2 e G3 passato: bersaglio dichiarato e coerente
+    argomenti: G4 passato
+    ESEGUITO in 81s, uscita 0
+    log: RIGA_SOTTILE_ROUND_20260920_033003.log
+
+--- RIEPILOGO ---
+eseguiti  : 81   (di cui in corsia ROUND: 115)
+rifiutati : 0
+falliti   : 46
+ESITO: PARZIALE
