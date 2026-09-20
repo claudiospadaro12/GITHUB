@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_SCHIERA_FTMO_v2
+#  MARCATORE_SCHIERA_FTMO_v3
 #
 #  PORTA I SORGENTI E I PRESET DELLA ROSA NELLA CARTELLA DATI DEL
 #  TERMINALE FTMO -- CHE OGGI NON ESISTE E QUINDI VA SCOPERTO.
@@ -38,9 +38,9 @@
 #  -------------------------------------------------------------------
 #    1. scopre e CERTIFICA la cartella dati FTMO (sopra);
 #    2. si assicura che esistano MQL5\Experts, MQL5\Include,
-#       MQL5\Presets -- su un terminale appena installato Include e
-#       Presets possono mancare, e un F7 senza include muore
-#       (classe 27);
+#       MQL5\Presets e MQL5\Scripts -- su un terminale appena
+#       installato le ultime tre possono mancare, e un F7 senza
+#       include muore (classe 27);
 #    3. MISURA tutto PRIMA di scrivere: se e' gia' tutto a posto si
 #       ferma con uscita 0 senza scaricare e senza copiare niente
 #       (secondo lancio di fila = niente da fare);
@@ -67,7 +67,8 @@
 #      destinazione e' UNA SOLA, ed e' quella che ha passato le quattro
 #      serrature;
 #    - NON scrive MAI fuori da MQL5\Experts, MQL5\Include,
-#      MQL5\Presets. Nessun .chr, nessun profilo, nessun config:
+#      MQL5\Presets, MQL5\Scripts. Nessun .chr, nessun profilo,
+#      nessun config:
 #      e' il motivo per cui questo script NON pretende MT5 chiuso.
 #      Quei file li riscrive il terminale alla chiusura; i .mq5 e i
 #      .set no;
@@ -179,6 +180,7 @@ $SORGENTI = @(
   [pscustomobject]@{ Nome='ABTG_SuperWave_DOW_H1_Ottimizzato.mq5';       Sedia='770511 SuperWave DOW     U30USD H1';  Cartella='Experts'; RepoDir='mql5/Experts'; Pin='872dba82d7b3b345c8ae15cb1033b66df6066ae5'; Righe=645;  Sha='3C487F289023CEDC87375A6E589C7C8C43423A38151F19A8436A218F3EE7C18B' },
   [pscustomobject]@{ Nome='ABTG_Nasdaq_Apertura_US.mq5';                 Sedia='770260 Nasdaq RETEST     NASUSD M5';  Cartella='Experts'; RepoDir='mql5/Experts'; Pin='9fca63d98046e60b29f9300fc09dad7738cc887d'; Righe=2624; Sha='87BD4B187CCE6195D5F328FD833E61EF3B741FAED7FB2C7CD18AA3AE60CCB8A8' },
   [pscustomobject]@{ Nome='ABTG_Guardian.mq5';                           Sedia='779001 Guardian v1.12   (non trada)'; Cartella='Experts'; RepoDir='mql5/Experts'; Pin='d884f7e1328aacb35c7b7d94056f18a7643fce01'; Righe=498;  Sha='A457F2CDF211F312A4F6BEACC3D2B72B07B068EE2C5BC38514924693EE6B7DF8' },
+  [pscustomobject]@{ Nome='ABTG_PrevoloFTMO_Specifiche.mq5';              Sedia='PREVOLO -- script di SOLA LETTURA: scrive MQL5\Files\PREVOLO_FTMO_specifiche.csv'; Cartella='Scripts'; RepoDir='mql5/Scripts'; Pin='db71b3c929d439ce399148d0d615d1f52666a91c'; Righe=485;  Sha='3E31E79D00612709BC807B87DAEFF717FF095CF019A5789706353193755BB8C1' },
   [pscustomobject]@{ Nome='ABTG_PausaGuardian.mqh';                      Sedia='include v1.20 -- SENZA DI LUI NESSUN F7 PARTE'; Cartella='Include'; RepoDir='mql5/Include'; Pin='26a185661c120de6fa0a33b79279595740e264e8'; Righe=398; Sha='D179846B407FDACC963825103F850E8F8BEE39B1DA3521A504EF74F8638AC8BC' }
 )
 
@@ -448,8 +450,12 @@ foreach($k in $HASH_NOTI.Keys){
 $dirExp = Join-Path $dati 'MQL5\Experts'
 $dirInc = Join-Path $dati 'MQL5\Include'
 $dirPre = Join-Path $dati 'MQL5\Presets'
-Dillo '[3/8] le tre cartelle di destinazione:' $null
-foreach($p in @($dirExp, $dirInc, $dirPre)){
+# MQL5\Scripts e' la QUARTA cartella, aggiunta il 20/09 con lo script
+# delle specifiche. Su un terminale appena installato puo' NON esistere
+# (come Include e Presets): senza questa riga la copia fallirebbe.
+$dirScr = Join-Path $dati 'MQL5\Scripts'
+Dillo '[3/8] le quattro cartelle di destinazione:' $null
+foreach($p in @($dirExp, $dirInc, $dirPre, $dirScr)){
   if(Test-Path -LiteralPath $p){
     Dillo ('      c era gia : ' + $p) $null
   } else {
@@ -779,12 +785,37 @@ Dillo '=====================================================================' $n
 Dillo ' ADESSO TOCCA A TE, E SOLO A MANO (nell ordine)' $null
 Dillo '=====================================================================' $null
 Dillo ('  1. MetaEditor del terminale FTMO ' + $ContoAtteso + ' (' + $prog + ')') 'Yellow'
-Dillo '  2. F7 sui .mq5 copiati. Se uno e gia aperto in una scheda, CHIUDILA senza' 'Yellow'
-Dillo '     salvare e riaprila: altrimenti salvi sopra il sorgente appena messo.' 'Yellow'
-Dillo '  3. il primo F7 deve essere ABTG_Guardian.mq5: se l include non va, lo scopri' 'Yellow'
-Dillo '     al primo colpo e non al settimo.' 'Yellow'
-Dillo '  4. poi grafici, poi preset, poi la rimappatura degli orari, poi AutoTrading.' 'Yellow'
-Dillo '     L ordine completo e i tempi stanno in report/SCHIERAMENTO_FTMO_2026-09-20.md' 'Yellow'
+Dillo '     Se un file e gia aperto in una scheda, CHIUDILA senza salvare e riaprila:' 'Yellow'
+Dillo '     altrimenti salvi sopra il sorgente appena messo.' 'Yellow'
+Dillo '' $null
+Dillo '  2. F7 su ABTG_PrevoloFTMO_Specifiche.mq5  <<< QUESTO PER PRIMO, ed ecco perche:' 'Yellow'
+Dillo '     - non ha NESSUN #include, quindi se sbaglia la colpa e solo sua:' 'Yellow'
+Dillo '       un errore qui NON dice niente sugli altri otto, e viceversa;' 'Yellow'
+Dillo '     - il suo CSV serve PRIMA di decidere se i preset vanno bene.' 'Yellow'
+Dillo '' $null
+Dillo '  3. apri UN grafico qualsiasi e lancia lo script (doppio clic dal Navigatore).' 'Yellow'
+Dillo '     Scrive <dati>\MQL5\Files\PREVOLO_FTMO_specifiche.csv' 'Yellow'
+Dillo '' $null
+Dillo '  4. LEGGI QUEL CSV. E IL CANCELLO DELLA SERATA:' 'Yellow'
+Dillo '     lo scarto orologio deve valere +2 rispetto a quello che i preset danno' 'Yellow'
+Dillo '     per scontato. Se NON e +2, i dieci preset hanno l ora sbagliata e non si' 'Yellow'
+Dillo '     carica niente finche non lo sistemiamo. Mandami il CSV e ci penso io.' 'Yellow'
+Dillo '' $null
+Dillo '  5. F7 su ABTG_Guardian.mq5  <<< il primo degli OTTO che usano l include.' 'Yellow'
+Dillo '     Se l include e sbagliato muore QUI, al primo colpo e non all ottavo.' 'Yellow'
+Dillo '     Errore "cannot open include file" -> fermati e mandamelo.' 'Yellow'
+Dillo '' $null
+Dillo '  6. F7 sugli altri sette .mq5.' 'Yellow'
+Dillo '  7. grafici, preset, e le DUE cose rimaste a mano:' 'Yellow'
+Dillo '     - InpDailyResetHour = 1 sul preset del Guardian (te l ho segnato in giallo sopra)' 'Yellow'
+Dillo '     - la TAGLIA (InpRiskPercent): vedi la tabella qui sopra, sono tre valori diversi' 'Yellow'
+Dillo '  8. AutoTrading ON per ultimo.' 'Yellow'
+Dillo '     L ordine completo e i tempi: report/SCHIERAMENTO_FTMO_2026-09-20.md' 'Yellow'
+Dillo '' $null
+Dillo '  NOTA ONESTA: ABTG_PrevoloFTMO_Specifiche.mq5 non e MAI STATO COMPILATO da' 'Yellow'
+Dillo '  nessuno. Chi lo ha scritto lo ha verificato SENZA compilarlo (ASCII puro,' 'Yellow'
+Dillo '  graffe e tonde in pari, 45 funzioni esistenti, 6 concatenazioni corrette).' 'Yellow'
+Dillo '  Il tuo F7 e anche il suo primo collaudo: se fallisce non e colpa tua.' 'Yellow'
 Dillo '' $null
 Dillo '  QUESTA RIGA NON HA COMPILATO NIENTE, NON HA ATTACCATO NESSUN EA E NON HA' $null
 Dillo '  TOCCATO NESSUN PROCESSO. Ha copiato file, e basta.' $null
