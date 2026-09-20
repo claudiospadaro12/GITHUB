@@ -1,0 +1,46 @@
+ABTG_PREVOLO_FTMO_SPECIFICHE,v1,2026.09.20 17:08:07,prodotto da mql5/Scripts/ABTG_PrevoloFTMO_Specifiche.mq5 - SOLA LETTURA
+SE QUESTA DATA NON E DI ADESSO STAI LEGGENDO UN CSV VECCHIO: rilancia lo script.
+
+[OROLOGIO]
+Campo,Valore,Nota
+OraServer_TimeTradeServer,2026.09.20 18:08:07,orologio CALCOLATO del server: vale anche a mercato chiuso. E QUESTO che misura il fuso.
+OraServer_TimeCurrent,2026.09.20 18:08:07,ora dell ULTIMO TICK. Di domenica puo essere di VENERDI: NON usarla per il fuso.
+OraGMT,2026.09.20 15:08:07,UTC ricavato dall orologio di questo PC
+OraLocalePC,2026.09.20 17:08:07,orologio di Windows su questa macchina
+MercatoAperto,SI,scarto TimeTradeServer-TimeCurrent = 0 s
+DeltaServerGMT_min,180,arrotondato a 15 min per togliere il jitter fra i due orologi
+DeltaServerGMT_ore,3.00,positivo = server AVANTI rispetto a UTC
+DeltaServerGMT_hhmm,+03:00,IL NUMERO DELLA CASELLA 1
+DeltaLocalePC_UTC_hhmm,+02:00,fuso di Windows: se e sbagliato sono sbagliati TUTTI i numeri qui sopra
+TimeGMTOffset_sec,-7200,controprova indipendente del fuso di Windows
+Assunto_BCM_UTC,+1,NON misurato qui: e la regola di casa (ora italiana -1). Input InpBcmOffsetUTC.
+Atteso_FTMO_UTC,+3,BCM +2 su cui sono rimappati i 10 preset
+Scarto_vs_atteso_hhmm,+00:00,ZERO = non si tocca niente
+VERDETTO_OROLOGIO,MISURATO a mercato APERTO. Delta reale +03:00 = BCM +2. COME PREVISTO: i 10 preset FTMO gia rimappati vanno bene cosi.,-
+
+[CONTO]
+Campo,Valore,Nota
+Conto,541452707,CONFRONTALO col numero della mail FTMO: se non coincide sei sul terminale sbagliato
+Broker,FTMO Global Markets Ltd,-
+Server,FTMO-Server4,-
+Intestatario,80k FTMO Challenge 2-Step,-
+TipoConto,REALE/CONTEST,-
+Leva,1:100,IL NUMERO DELLA CASELLA 6. Standard 1:100 o Swing 1:15?
+Valuta,EUR,-
+Saldo,80000.00,-
+Equity,80000.00,-
+MargineLibero,80000.00,-
+StopOutLivello,50.000,-
+SimboliBroker,166,tutto l albero del broker
+SimboliMarketWatch,166,solo quelli in finestra
+SolaLettura,NO: InpSelezionaSimboli=true ha AGGIUNTO simboli a Market Watch,-
+
+[SIMBOLI]
+Mercato,Simbolo,Stato,Descrizione,Digits,Point,TickSize,TickValue,ContractSize,VolMin,VolMax,VolStep,Margine1Lotto,MargineIniziale,ValutaMargine,StopsLevelPts,FreezeLevelPts,SpreadPts,SpreadTipo,ValutaProfitto,ModoCalcoloMargine,ModoTrading,InMarketWatch,Bid,Ask,Percorso
+DAX,GER40.cash,TROVATO,German 40 Index  Spot CFD,2,0.01000,0.01000,0.01000,1.000,0.01000,1000.00,0.01000,506.240,0,EUR,0,0,143,FLOTTANTE,EUR,SYMBOL_CALC_MODE_CFDLEVERAGE,SYMBOL_TRADE_MODE_FULL,SI,25310.74,25312.17,Cash CFD\GER40.cash
+DOW,US30.cash,TROVATO,Dow Jones Industrial Average Index  Spot CFD,2,0.01000,0.01000,0.00871,1.000,0.01000,1000.00,0.01000,900.870,0,USD,0,0,263,FLOTTANTE,USD,SYMBOL_CALC_MODE_CFDLEVERAGE,SYMBOL_TRADE_MODE_FULL,SI,51732.73,51735.36,Cash CFD\US30.cash
+NASDAQ,US100.cash,TROVATO,NASDAQ 100 Index  Spot CFD,2,0.01000,0.01000,0.00871,1.000,0.01000,1000.00,0.01000,516.940,0,USD,0,0,153,FLOTTANTE,USD,SYMBOL_CALC_MODE_CFDLEVERAGE,SYMBOL_TRADE_MODE_FULL,SI,29685.14,29686.67,Cash CFD\US100.cash
+ORO,XAUUSD,TROVATO,Gold vs US Dollar  Spot CFD,2,0.01000,0.01000,0.87061,100.000,0.01000,100.000,0.01000,7623.89,0,USD,0,0,47,FLOTTANTE,USD,SYMBOL_CALC_MODE_CFDLEVERAGE,SYMBOL_TRADE_MODE_FULL,SI,4377.78,4378.25,Metals CFD\XAUUSD
+USDJPY,USDJPY,TROVATO,US Dollar vs Japanese Yen,3,0.00100,0.00100,0.55488,100000.00,0.01000,50.000,0.01000,870.660,0,USD,0,0,20,FLOTTANTE,JPY,SYMBOL_CALC_MODE_FOREX,SYMBOL_TRADE_MODE_FULL,SI,156.862,156.882,Forex\USDJPY
+
+[FINE],righe simbolo: 5,mercati con candidato unico: 5/5,mercati ASSENTI: 0/5
