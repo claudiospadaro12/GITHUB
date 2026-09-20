@@ -26594,3 +26594,53 @@ quando non ha eseguito niente.** L'assenza di un effetto non distingue *«l'ho i
 a ogni cambio di manifesto. Girandone solo quelli "toccati" — che è la tentazione, e fa risparmiare
 due minuti — il banco rotto sarebbe rimasto rotto per i giri successivi, **e sarebbe diventato la
 fotografia di riferimento**.
+
+---
+
+## CLASSE 483 — 🗂️ `git add <file>` **NON BASTA**: il commit si porta via **TUTTO L'INDICE**, anche quello che ha messo un altro agente (20/09/2026)
+
+**Il caso, ed e' mio.** Il 20/09 alle 06:2x ho committato un `.gitignore` con il messaggio
+*«gitignore: fuori casi/»*. Avevo fatto `git add .gitignore` **per nome**, come impone la regola
+di casa contro il `git add -A`. Verificato dopo:
+
+```
+git show --stat def67591
+  .gitignore                                    |  4 ++
+  backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md | 85 +++++      <-- non mio
+  report/SCHIERAMENTO_FTMO_2026-09-20.md        | 63 +++++      <-- non mio
+```
+
+🔴 **Il messaggio di commit descriveva UN file. Il commit ne conteneva TRE.** Gli altri due
+erano di un agente che stava lavorando in parallelo e che aveva **gia' messo i suoi file
+nell'indice** col suo `git add`. Il mio `git commit` se li e' portati via.
+
+### 🧪 Il meccanismo, riprodotto in un repo vuoto
+```
+git add altrui.txt          # un altro agente prepara il suo file
+git add mio.txt             # io aggiungo il MIO, per nome
+git commit -m "solo il mio file"
+  -> altrui.txt | 1 +
+     mio.txt    | 1 +       <-- DUE file, non uno
+```
+🟢 **E la forma che non sbaglia**, provata subito dopo:
+```
+git commit -m "solo mio2" -- mio2.txt
+  -> mio2.txt | 1 +          <-- altrui2.txt NON e' entrato
+```
+
+### La regola
+🔴 **Con agenti in parallelo, il percorso si mette sul COMMIT, non solo sull'ADD:**
+**`git commit -m "..." -- <percorso> [<percorso>...]`**
+La forma con pathspec **ignora l'indice** e committa quei file e basta. `git add <file>` da solo
+protegge dal `-A`, **non protegge dall'indice che ha riempito qualcun altro**.
+
+📌 **Perche' e' peggio di quanto sembri, ed e' la parte da ricordare:** il danno non e' il
+file in piu' — quello arriva a destinazione lo stesso. Il danno e' che **il messaggio di commit
+mente sul contenuto**, e la storia del repo diventa inaffidabile proprio nei giorni in cui
+lavorano piu' agenti insieme, cioe' quando serve di piu'. Un agente che rilegga
+`git log --oneline -- <suo file>` **non trova il suo lavoro dove dovrebbe essere**.
+
+📌 Parente della regola di `HANDOFF.md` sul `git add -A`, ma **non e' la stessa**: li' il
+difetto e' che si aggiunge tutto; qui si aggiunge **per nome** e si sbaglia lo stesso. Il
+`git add -A` e' la porta aperta, questo e' **la porta chiusa con la chiave gia' nella toppa**.
+
