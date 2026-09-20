@@ -651,6 +651,10 @@ scopo, che non sapeva di questa domanda.
 | 14 | spread FTMO | **n = 1 tick**, ora 16 BCM | 🔴 `[MISURATO, n=1]` |
 | 15 | commissioni / swap FTMO | 🔴 **`[NON MISURATO]`** | — |
 | 16 | Δ pedaggio FTMO−BCM | GER40 **−15,9%** · US100 **−15,0%** · US30 **+31,5% / +38,4%** | `[MISURATO]` |
+| 17 | `InpMinStopPts` oggi | `770101` **0 = NO-OP** · `770202`/`770260` **500 = 5,00 idx** · `771531`/`770511` **input assente** | `[MISURATO, sorgente + preset]` |
+| 18 | costo del floor a 40× (operazioni) | **−26,1%** · **−27,4%** · **−21,0%** | `[MISURATO, n=440/446/447 giornate]` |
+| 19 | effetto del floor a 40× su PF/DD | DD proxy **−54% / −38% / −11%**; PF proxy **+3,6% / +2,8% / 🔴 −2,1%** | 🔴 `[PROXY, non è la cella]` |
+| 20 | slippage dentro il floor | **NON c'è**: il 40× è `40 × spread` | `[dichiarato]` — slippage misurato **+0,70 idx** `[n=1]`, FTMO `[NON MISURATO]` |
 
 ---
 
@@ -660,6 +664,14 @@ terminale, nessuna taglia, nessun magic, nessun backtest. Scritti: **questo file
 classe nuova in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
 Letti: 2 CSV di statement, 5 sorgenti MQL5, 10 preset, 6 CSV di spread, 3 CSV dello Studio
 delle aperture, 8 referti.
-**`InpMaxSpread` e `InpMinStopPts` sono PROPOSTI. La firma è di Claudio.**
+**`InpMinStopPts`, `InpSkipIfTight` e `InpMaxSpread` sono PROPOSTI. La firma è di Claudio.**
+
+### 🔁 LE DUE CORREZIONI AL MANDATO, dichiarate
+1. Il mandato dava le tre Apertura per **«stop ad ATR»**: **falso** (§1), e l'avevo già
+   trovato in modo indipendente leggendo l'enum prima di usarlo — **recidiva della
+   CLASSE 495**, chiusa stamattina sullo stesso difetto su `770411`.
+2. Il mandato chiedeva `InpMaxSpread` come consegna principale: la manopola giusta è
+   **`InpMinStopPts`** (§6), e `InpMaxSpread` è la **rete secondaria** (§6-bis). Corretto
+   prima della consegna, non dopo.
 
 *Referto del 20/09/2026.*
