@@ -1,3 +1,31 @@
+;
+;  ==================================================================
+;  20/09/2026 -- CUSCINO ALLARGATO. Firma di Claudio: "si cuscino".
+;  ==================================================================
+;  PERCHE'. Le soglie 4.9 / 9.9 erano tarate su sedie a 0,65%. Con la
+;  taglia firmata a 2,00% i lotti sono circa 24 per sedia (~24 EUR per
+;  punto): con 3-6 sedie aperte fanno 72-144 EUR per punto, quindi i
+;  100 USD di distacco dal muro FTMO valevano meno di UN PUNTO E MEZZO,
+;  contro i ~4 punti che valevano a 0,65%. Il cuscino non era stato
+;  riscalato quando e' stata riscalata la taglia.
+;
+;    InpDailyLossPct  4.9 -> 4.5   distacco dal muro 5%  : 100 -> 500 USD
+;    InpTotalDDPct    9.9 -> 9.3   distacco dal muro 10% : 100 -> 700 USD
+;    InpDailyPausePct 4.0 -> 3.5   tiene il distacco dall'emergenza
+;
+;  E COSTA POCO, ed e' il motivo per cui conviene: fermarsi da soli a
+;  9,3% NON fallisce la challenge -- fallirla e' TOCCARE il 10%. Il
+;  cuscino largo garantisce che il 10% non venga toccato mai, al prezzo
+;  di 0,6 punti in uno scenario che era gia' perso.
+;
+;  Il Guardian gira su OnTimer OGNI SECONDO (ABTG_Guardian.mq5 r.13) e
+;  legge ACCOUNT_EQUITY, cioe' col flottante dentro (r.707), che e' la
+;  stessa cosa che guarda FTMO. InpAction=0 -> FlattenAll (r.754/761).
+;  Restano i buchi dichiarati: un PENDENTE gia' piazzato scatta lo
+;  stesso (ABTG_PausaGuardian.mqh r.49-51), il Guardian e' fail-open se
+;  non gira, e nessuno chiude attraverso un gap.
+;  Misura: report/DD_PORTAFOGLIO_FTMO_2026-09-20.md
+;  ==================================================================
 ; ================================================================
 ;  ABTG_Guardian - PRESET FTMO 2-Step (Challenge/Verifica)
 ;  Da caricare SOLO sul demo per il dry-run prop (NON sul forward).
@@ -14,12 +42,12 @@
 ;    - InpDailyResetHour=23 -> vedi nota sotto
 ;  E GRADINO B/C (nuovi, non chiudono nulla: scrivono solo le
 ;  GlobalVariable che gli EA leggeranno con ABTG_PausaGuardian.mqh):
-;    - InpDailyPausePct=4.0   pausa morbida nuovi ingressi
+;    - InpDailyPausePct=3.5   pausa morbida nuovi ingressi (era 4.0 fino al 20/09)
 ;    - InpMaxOpenRiskPct=3.25 cap C1 sul rischio aperto simultaneo
 ; ================================================================
 InpStartBalance=100000
-InpDailyLossPct=4.9
-InpTotalDDPct=9.9
+InpDailyLossPct=4.5
+InpTotalDDPct=9.3
 InpDDMode=0
 ; --- [INCERTO] ORA DI RESET GIORNALIERO -------------------------
 ; 23 = ora SERVER BCM, che in questo periodo e' 1 ora INDIETRO
@@ -47,7 +75,7 @@ InpMagic=779001
 InpComment=GUARDIAN FTMO 2STEP
 InpVerbose=true
 ; --- GRADINO B: pausa morbida (blocca i NUOVI ingressi, non chiude) ---
-InpDailyPausePct=4.0
+InpDailyPausePct=3.5
 ; --- GRADINO C: cap C1 sul rischio aperto simultaneo -------------
 ; 3.25% = 5 stop pieni vivi da 0,65% (misura M2: max reale 5,85%).
 ;

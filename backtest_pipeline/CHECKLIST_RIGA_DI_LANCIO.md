@@ -26837,3 +26837,26 @@ con **3 sedie su 6** e **mai due aperte insieme** — cioe' **non e' un DD di po
 **La regola**: un numero presentato come **REALIZZATO** deve portare, nello stesso respiro, **conto,
 n, finestra e quante sedie erano accese insieme**. Se una di queste quattro manca, non e' un
 realizzato: e' una citazione. E prima di scalarlo si apre il file che lo contiene.
+
+## CLASSE 493 — 📝🎯 **`replace(..., 1)` IN UN `.set`/`.ini` COLPISCE IL COMMENTO, NON IL VALORE** (20/09/2026)
+**Il caso reale**: firma di Claudio *«sì cuscino»*, tre soglie del Guardian da
+cambiare in `mql5/Presets/ABTG_Guardian_FTMO_2Step.set`. Ho usato
+`s.replace("InpDailyPausePct=4.0", "InpDailyPausePct=3.5", 1)`. 🔴 **La PRIMA
+occorrenza era a r.45, dentro un blocco di commento `;` che riassume i
+parametri.** Il valore vero stava a **r.78** e **non è stato toccato**.
+Risultato: il file diceva `3.5` nella documentazione e portava `4.0` nel
+parametro — cioè **un preset che descrive una protezione che non ha**, su un
+conto da 439 €.
+🟢 Preso subito perché dopo la scrittura ho **riletto i valori dal file** invece
+di fidarmi dell'`assert`: l'`assert` era passato: aveva trovato la stringa, solo
+nel posto sbagliato.
+**La regola, in due pezzi:**
+1. In un `.set`/`.ini`/`.txt` di parametri **non si sostituisce per sottostringa**:
+   si scorre riga per riga, **si saltano le righe di commento** (`;`, `#`, `//`)
+   e si tocca solo la riga che **comincia** con `NOME=`. E si **conta**: se le
+   righe toccate non sono esattamente quelle attese, si ferma tutto.
+2. 🔑 **La verifica si fa RILEGGENDO IL FILE, mai dall'esito della sostituzione.**
+   Un `assert "stringa" in testo` conferma che la stringa esiste **da qualche
+   parte**: non è una prova di aver cambiato la cosa giusta. Qui il controllo che
+   ha funzionato è stato `grep -vE "^;"` — cioè guardare i valori **veri**,
+   ignorando quello che il file dice di sé.
