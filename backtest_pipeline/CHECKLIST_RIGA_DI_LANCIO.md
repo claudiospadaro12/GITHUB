@@ -27139,3 +27139,61 @@ r.341-342 (`stLine<bid` / `stLine>ask`). **Tre file su sei senza la riga che gli
    Quest'ultimo si apre **esattamente nel giorno in cui il DD è già sfondato**: è il momento
    peggiore per aggiungere una seconda violazione alla prima.
 📌 **Misura completa**: `report/LE_2000_RICHIESTE_2026-09-20.md`.
+
+## CLASSE 503 — 📊🧮 **IL NUMERO DI UNITÀ DI UNA TABELLA RIPRESO DAL TESTO INVECE CHE RICONTATO** (20/09/2026)
+**Il caso reale**: il referto `report/LE_2000_RICHIESTE_LA_MISURA_2026-09-20.md`, prima stesura,
+dichiarava **«191 giornate»** in quattro punti. Ricontate: `grep -cE '^2026[0-9]{4} '` = **186**.
+Il 191 non esiste in nessuna lettura della fonte — veniva dal conteggio «sotto soglia» stampato
+dallo script (185), **che include una riga di servizio `metaeditor`** (il giornale di MetaEditor,
+raggruppato per nome file, ESITI 0), **più le due giornate fuori soglia**.
+🔴 **La regola**: il numero di righe di una tabella si **riconta dalla fonte con un comando**, mai
+si riprende da una frase. E una riga di **servizio** non è un'unità: va esclusa **per nome**,
+non per differenza (vedi anche classe 180).
+📌 `grep -cE '^<pattern della riga-dato>'` prima di scrivere il totale. Sempre.
+
+## CLASSE 504 — 📐🕳️ **LA MEDIANA CITATA SENZA DICHIARARE LA BASE** (20/09/2026)
+**Il caso reale**: stesso referto, «mediana ~20 richieste al giorno». Calcolate davvero:
+**15,5** su tutte le 186 giornate (**68 sono a zero**: terminale spento o mercato chiuso) e
+**44** sulle 118 giornate **con attività**. Il «~20» non era né l'una né l'altra: era una
+sensazione a occhio sulla colonna.
+🔴 **La regola**: una statistica di sintesi (mediana, media, percentile) **non si scrive senza
+la BASE accanto** — su quante unità, e quali sono escluse. Con il 37% delle giornate a zero,
+la base **cambia il numero del 180%**.
+📌 Forma corretta: *«mediana 15,5 su tutte le 186 giornate (68 a zero), 44 sulle 118 attive»*.
+
+## CLASSE 505 — 🗂️🔍 **L'INSIEME DELLE OCCASIONI RICAVATO A MEMORIA INVECE CHE DAL FILE** (20/09/2026)
+**Il caso reale**: stesso referto, tabella «le **quattro** giornate in cui `770411` ha tenuto
+una posizione». Nel CSV i trade di quel magic sono **cinque**: mancava il **31/08/2026
+08:03:15 → 09:50:50** — che per giunta era **la giornata con l'escursione più ampia** (266 punti
+contro i 138 della più ampia elencata). E sopra quell'insieme ci stava un **verdetto di
+assoluzione**.
+🔴 **La regola**: l'insieme delle occasioni su cui si pronuncia un verdetto si **estrae con un
+comando** (`awk -F';' '$13==<magic>'`) e si **conta**, anche — soprattutto — quando «me le
+ricordo tutte». Un insieme incompleto non indebolisce un verdetto: lo **invalida**, perché il
+caso mancante può essere proprio quello che conta.
+
+## CLASSE 506 — 📦🚪 **IL PERIMETRO LETTO SOLO NELLA METÀ OBBLIGATORIA** (20/09/2026)
+**Il caso reale**: stesso referto, «le **sei** sedie FTMO». `SCHIERA_FTMO.ps1` r.480 dice
+`if(-not $SenzaPostNews){ $lavoro += $POSTNEWS_EA }`: il blocco **PostNews** entra **per
+default** e porta **altre tre sedie che tradano** (`771202` FOMC EURUSD, `771203` NFP USDJPY,
+`771204` ECB EURUSD), con i `.set` in repo. Sono **nove**, non sei — e il tetto di traffico
+del referto non le contava. 🔴 Peggio: `771203` è su **USDJPY**, cioè **un cross JPY**, la
+stessa famiglia di simboli su cui il 10/04 il traffico era esploso.
+🔴 **La regola**: il perimetro di uno schieramento si legge **dove lo costruisce il codice**
+(la variabile che viene poi iterata), non nella lista «obbligatoria». Un blocco **opt-out**
+(`-Senza...`) è **dentro** il perimetro finché nessuno passa il flag.
+📌 Cercare sempre gli `if(-not $Senza…)` e i `+=` sulla variabile di lavoro.
+
+## CLASSE 507 — 🔩🎚️ **IL TAPPO VENDUTO COME STRUTTURALE QUANDO È UN VALORE DI PRESET** (20/09/2026)
+**Il caso reale**: stesso referto, *«le sedie che salgono hanno tutte il tappo, e per cinque il
+tappo è **strutturale**»*. Falso per tre: nelle Aperture (`770101`/`770202`/`770260`) il trailing
+è limitato a ≤1 modifica per barra **solo perché** `InpTrailMode=1` (`ABTG_TRAIL_PREVBAR` →
+`iLow(_Symbol,M5,1)`, un prezzo già quotato). Con `InpTrailMode=0` (ATR) il confronto
+`newSL > sl` di r.1986 / 1817 / 2230 torna a usare un valore **non normalizzato** contro lo stop
+normalizzato dal server → richiesta a **ogni tick**, e **accettata** (con tempo di rete), non
+rifiutata. 🔴 E la frase contraddiceva la **CLASSE 502**, scritta **lo stesso giorno**.
+🔴 **La regola**: prima di scrivere «strutturale», chiedersi **quale riga di `.set` lo
+spegnerebbe**. Se esiste, il tappo è **una scelta di configurazione** e va messo nel cancello di
+prevolo, non nella prosa rassicurante.
+📌 Nel prevolo FTMO: **verificare `InpTrailMode=1` in tutti e tre i preset Aperture.**
+📌 **Misura completa**: `report/LE_2000_RICHIESTE_LA_MISURA_2026-09-20.md`.
