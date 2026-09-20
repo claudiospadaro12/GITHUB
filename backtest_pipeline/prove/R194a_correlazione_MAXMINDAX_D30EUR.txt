@@ -1,0 +1,321 @@
+# =====================================================================
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+#  R194a -- QUANTO COSTA IL FILTRO CHE SI SPEGNE DA SOLO.
+#           Asse unico: InpUseCorrelation (true/false).
+#           La cella TRUE e' l'ANCORA: deve riprodurre r81a al centesimo.
+#
+#  Si lancia con: -Deposito 100000 -Modello 4
+#     Stesso deposito e stesso modello di R81a e di R191a. Il motivo
+#     (classe 453) e' scritto per esteso in
+#     prove/R191a_orologio_ordine_MAXMINDAX_D30EUR.txt r.6-23 e non si
+#     duplica qui: e' il deposito con cui l'ANCORA e' confrontabile,
+#     controincrociato in due modi indipendenti in quel file.
+# =====================================================================
+#  DOSSIER: report/SEDIA_770411_IL_RIENTRO_2026-09-20.md
+#  ANCORA:  prove/R81a_uscita_A_viva.txt  (etichetta r81a, 18/08/2026)
+#    backtest_pipeline/risultati_archivio/r81_csv/
+#      ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r81a.csv
+#        Profit 4766.96  PF 1.87803  DD 3.0977  Trades 20
+#      ..._D30EUR_OOS_r81a.csv
+#        Profit 6143.38  PF 2.15985  DD 1.9213  Trades 21
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' QUESTO FILE ESISTE  ###
+# ---------------------------------------------------------------------
+#  La sedia 770411 e' l'UNICA delle sei della challenge FTMO che porta
+#  InpUseCorrelation=true, e punta a InpCorrSymbol=SPXUSD.
+#  Sul broker FTMO (conto 541452707) i simboli misurati si chiamano
+#  GER40.cash / US30.cash / US100.cash: "SPXUSD" quasi certamente NON
+#  esiste, e il nome vero non e' ancora misurato.
+#
+#  COSA SUCCEDE SE IL SIMBOLO NON SI LEGGE -- letto nel codice, r.396-407:
+#      int CorrBias()
+#        { if(!InpUseCorrelation || StringLen(InpCorrSymbol)==0) return(0);
+#          int hf=iMA(InpCorrSymbol,...); int hs=iMA(InpCorrSymbol,...);
+#          if(hf==INVALID_HANDLE||hs==INVALID_HANDLE) return(0);
+#          ... if(CopyBuffer(...)==1 && CopyBuffer(...)==1) dir=...;
+#          return(dir==0?0:dir); }
+#  e a r.240-242:  bias=0 -> longOK=true E shortOK=true.
+#  >>> IL FILTRO SI SPEGNE IN SILENZIO. Non c'e' nessun Log() fra r.240
+#      e r.242: nella scheda Esperti non compare NIENTE. La sedia
+#      girerebbe nella configurazione con cui NON e' stata promossa, e
+#      nessuno se ne accorgerebbe guardando i log.
+#
+#  QUANTO VALE QUEL FILTRO -- gia' MISURATO, ma SOLO IN CAMPIONE:
+#    backtest_pipeline/risultati_archivio/MaxMinNotte/
+#      valid_MaxMin_DAX_short_refine.csv (36 passate, tick reali,
+#      D30EUR M15, 2024.01.01 -> 2026.06.30, deposito 10.000, rischio 1%)
+#    Cella viva (InpBufferPoints=1000, InpAtrSLmult=2.5):
+#      corr ON  -> PF 2.05328  DD 3.0687  Trades 41  Profit 1112.22
+#      corr OFF -> PF 1.18077  DD 6.1000  Trades 98  Profit  614.79
+#    Su tutte e 9 le coppie (buffer x AtrSL) accoppiate:
+#      corr ON batte corr OFF sul PF in 8 coppie su 9
+#      corr ON batte corr OFF sul DD in 9 coppie su 9
+#
+#  >>> IL BUCO CHE QUESTO ROUND CHIUDE, ed e' l'unica ragione per cui
+#      esiste: QUEL CONFRONTO ESISTE SOLO SULLA FINESTRA CHE HA SCELTO
+#      LA CELLA. Verificato il 20/09/2026 su tutti i CSV d'archivio di
+#      questo EA (r81_csv/*, risultati_prove/ABTG_MaxMinNotte_DAX_
+#      Short_Ottimizzato/*): la colonna InpUseCorrelation vale 1 in
+#      TUTTI. Fuori campione il confronto ON/OFF NON E' MAI STATO FATTO.
+#
+#  >>> E NON E' UNA GRIGLIA PIU' FITTA SU UN MOTORE MORTO (limite del
+#      19/08). Non si muove nessun parametro d'INGRESSO: si accende e
+#      si spegne un MECCANISMO, su due celle, per misurare il costo di
+#      un guasto gia' identificato. E' l'allargamento permesso, pagato
+#      con la finestra fuori campione, come chiede la regola.
+#
+# ---------------------------------------------------------------------
+#  ###  ATTESA DICHIARATA PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#  CELLA TRUE -- ANCORA, non candidata.
+#    DEVE dare IS  PF 1,87803 DD 3,0977 Trades 20 Profit 4766,96
+#              OOS PF 2,15985 DD 1,9213 Trades 21 Profit 6143,38
+#    Tolleranza: ZERO sui Trades, +-0,5% su PF e DD.
+#    >>> DELTA NOTO, dichiarato adesso: il commit 5fc0bc31 (19/08, il
+#        giorno DOPO R81) ha aggiunto 'input bool InpUsaGuardian=true'.
+#        Nel Tester il Guardian e' fail-open, quindi l'ancora deve
+#        reggere lo stesso. SE NON RIPRODUCE, il round NON SI LEGGE:
+#        si legge solo l'ancora, e si apre la domanda del binario.
+#
+#  CELLA FALSE -- la misura.
+#    Trades: IN SALITA. Di quanto: sul refine il rapporto e' 98/41 =
+#      2,39x. Riportato qui darebbe IS ~48 e OOS ~50.
+#      [DERIVATO da un'ALTRA finestra, NON misurato su questa: e' un
+#       ordine di grandezza dichiarato, non una previsione.]
+#    PF: IN DISCESA. Sul refine 2,053 -> 1,181.
+#    DD: IN SALITA. Sul refine 3,0687 -> 6,1000, cioe' 1,99x.
+#    >>> Se queste tre direzioni NON si verificano, la prima ipotesi
+#        NON e' "il filtro non serve": e' che la finestra 2024.09.26 ->
+#        2026.06.30 contenga un regime diverso da 2024.01 -> 2026.06.
+#        Si dichiara, non si promuove.
+#
+# ---------------------------------------------------------------------
+#  ###  IL CONTRO-ESEMPIO OBBLIGATORIO  ###
+# ---------------------------------------------------------------------
+#  (1) L'IPOTESI ALTERNATIVA CHE VA BATTUTA, e va nominata:
+#      "corr ON sembra meglio solo perche' BUTTA VIA il 58% delle
+#       operazioni. Un diradamento QUALUNQUE -- anche a caso -- alza il
+#       PF e abbassa il DD su n=41."
+#      >>> Questa e' l'altra spiegazione, e ha un numero: sotto
+#          diradamento casuale il segno del confronto ON-vs-OFF sarebbe
+#          circa 50/50 sulle 9 coppie. Misurato: 8/9 sul PF e 9/9 sul
+#          DD, tutti nello stesso verso.
+#      >>> MA IL LIMITE DELLA DIFESA VA SCRITTO: le 9 celle NON sono
+#          indipendenti (condividono gli stessi ingressi sottostanti),
+#          quindi qualunque p-value binomiale calcolato li' sopra e'
+#          OTTIMISTA e non lo scrivo. Quello che regge e' la
+#          CONSISTENZA DEL SEGNO, non una significativita'.
+#      >>> E la prova vera che il diradamento non basta e' un'ALTRA, ed
+#          e' gia' in archivio: sullo stesso filtro, sullo stesso
+#          proxy (EMA 14/100 su S&P H1), applicato al breakout M5,
+#          REGISTRO_TEST.md r.347-357 misura che la correlazione
+#          NON migliora il PF (DAX M5: 1,24 -> 1,21; Nasdaq: resta
+#          <=0,66) pur dimezzando i trade. Stesso diradamento, effetto
+#          opposto: quindi il diradamento DA SOLO non produce il
+#          guadagno. Il filtro fa qualcosa di specifico a QUESTO motore.
+#
+#  (2) LA TRAPPOLA AL CONTRARIO, e la difesa si congela ADESSO.
+#      Se la cella FALSE uscisse MIGLIORE (piu' PF e piu' n), la
+#      tentazione sarebbe "allora spegniamo il filtro e ci compriamo la
+#      frequenza che a questa sedia manca". 🔴 NO.
+#      >>> Una cella FALSE migliore sarebbe in contraddizione con
+#          QUATTRO misure indipendenti (refine 26/07, promozione R16,
+#          OOS r81/ohlc, R103 a 21 mesi). Il verdetto in quel caso NON
+#          e' "spegniamo": e' "una delle cinque misure e' sbagliata e
+#          va trovata quale, PRIMA di toccare qualunque cosa".
+#          Scritto prima di vedere i numeri, non dopo.
+#
+#  (3) IL CANCELLO CHE QUESTO ROUND NON TOCCA E NON USA.
+#      Lo stop di questa sedia e' 2,5 x ATR(14) M15 ed e' [NON
+#      MISURATO]: banda 64,2-87,5 idx (report/ANCORA_ADR_FLOTTA_
+#      INDICI_2026-09-18.md r.412). Questo round NON la misura, NON la
+#      usa e NON la migliora. Nessuna conclusione di costo puo' uscire
+#      da qui.
+#
+#  (4) L'ALTOPIANO CHE NON C'E' -- e qui NON PUO' ESSERCI, perche' le
+#      celle sono DUE. Questo round non e' una griglia e non seleziona
+#      una configurazione: misura un DELTA fra la cella viva e il suo
+#      guasto. Nessuna cella e' promuovibile da qui, per costruzione.
+#
+# ---------------------------------------------------------------------
+#  ###  SOGLIE CONGELATE PRIMA  ###
+# ---------------------------------------------------------------------
+#   IL ROUND NON PROMUOVE NIENTE e non tocca nessun preset.
+#   La domanda ha UNA risposta binaria, e la soglia e' un numero:
+#
+#   >>> LA TAGLIA FTMO FIRMATA E' 2,00% (firma di Claudio 20/09/2026,
+#       scritta dentro mql5/Presets/FTMO/ABTG_MaxMinNotte_DAX_Short_
+#       770411_FTMO.set). Il muro FTMO e' 10,0% di perdita massima.
+#       Questo round gira a rischio 1,00% (il dial di MISURA, come
+#       r81a), quindi la conversione e' x2,00 [APPROSSIMATO lineare,
+#       convenzione CONTRATTI_SEDIE.md punto 2].
+#
+#   SOGLIA:  DD della cella FALSE > 5,00% in una qualunque delle due
+#            finestre  ==>  a 2,00% supererebbe il muro del 10%
+#            ==> il guasto silenzioso del filtro e' INCOMPATIBILE con
+#                la challenge, e la sedia NON PUO' girare su FTMO
+#                senza che il simbolo S&P sia trovato e funzionante.
+#
+#   SOGLIA:  DD della cella FALSE <= 5,00% in TUTTE E DUE le finestre
+#            E PF >= 1,10 in tutte e due
+#            ==> il guasto e' SOPRAVVIVIBILE: la sedia degrada ma non
+#                sfonda, e trovare il simbolo diventa un MIGLIORAMENTO
+#                invece che un blocco.
+#
+#   NON GIUDICA IL MERITO: n sara' < 150 in tutte e due le finestre con
+#   certezza (r81a fa 20/21 deal, e R191a ha misurato che i deal non
+#   sono posizioni: le posizioni vere sono 14). Il merito e' SOSPESO in
+#   partenza (valvola R59). Il RISCHIO si legge a qualunque n
+#   (Emendamento B, 16/08), ed e' l'unica cosa che questo round decide.
+#
+# ---------------------------------------------------------------------
+#  ###  QUANDO SI LANCIA -- ed e' CONDIZIONATO  ###
+# ---------------------------------------------------------------------
+#  Questo file NON serve se il simbolo S&P su FTMO viene trovato e
+#  funziona: in quel caso la sedia gira nella cella promossa e il
+#  guasto non si verifica.
+#  >>> SI LANCIA se, dopo la corsa con InpTuttiISimboli=true:
+#      (a) nessun simbolo S&P esiste sul broker FTMO, OPPURE
+#      (b) esiste ma non si riesce a garantire lo storico H1 (servono
+#          >= 100 barre H1 per InpCorrEmaSlow=100), OPPURE
+#      (c) Claudio vuole comunque sapere quanto vale il filtro fuori
+#          campione prima di schierare -- e vale 2,8 minuti di banco.
+#
+# ---------------------------------------------------------------------
+#  ###  IGIENE, VERIFICATA A MANO  ###
+# ---------------------------------------------------------------------
+#  CORPO: identico a prove/R191a_orologio_ordine_MAXMINDAX_D30EUR.txt
+#    (che e' il corpo di r81a) con DUE sole differenze dichiarate:
+#      (1) InpEntryCutoffMin torna da ASSE a PIN sul valore vivo 30;
+#      (2) InpUseCorrelation passa da PIN ad ASSE.
+#    Una sola variabile in movimento in questo file.
+#  FINESTRA: identica a R81a e a R191a. @DAQUANDO 2024.09.26 (pavimento
+#    MISURATO dei tick reali BCM sugli indici), @FINOA 2026.06.30,
+#    @FRAZIONEIS 0.40.
+#  MODELLO: tick reali (-Modello 4), come l'ancora. -Modello 1
+#    romperebbe il confronto.
+#  TETTO DELLE BARRE: M15 su 21 mesi = ~34.900 barre [DERIVATO: 96
+#    barre/giorno x ~364 giorni di borsa]. Sotto il tetto delle
+#    ~100.000. Nessuna tranche.
+#  MAGIC: 787421 -- cercato il 20/09/2026 con grep -ril su tutto il
+#    repo (.git e .claude esclusi): ZERO occorrenze. VIETATI qui:
+#    770411/770412 (la sedia viva), 778110-778161 (le sei celle di
+#    R81), 787410 e 787420 (gia' usati da R191a/R191b).
+#  ETICHETTA: r194a -- grep -ril su backtest_pipeline/ e report/: ZERO.
+#  PIN DI STRINGA: uno solo, InpCorrSymbol=SPXUSD, NON vuoto. E' il
+#    difetto che controlla_prova.py cerca apposta (il pin vuoto non
+#    arriva all'EA). >>> E in QUESTO round il pin conta doppio: nella
+#    cella FALSE il valore e' irrilevante per costruzione (il codice
+#    esce a r.398 prima di leggerlo), ma nella cella TRUE e' l'ancora.
+#  RISCHIO: InpRiskPercent = 1,00 = il dial di MISURA, identico a r81a
+#    e a R191a. La taglia in campo (2,00% su FTMO) e' una firma di
+#    Claudio e NON si mette qui: la conversione e' dichiarata nelle
+#    soglie qui sopra.
+#  UN SOLO AGENTE locale nel Strategy Tester.
+#
+#  COSTO -- STIMA, base MISURATA SU QUESTO STESSO EA:
+#    2 celle x 2 gambe (IS+OOS) = 4 passate.
+#    BASE: 0,700 min/passata -- backtest_pipeline/risultati_archivio/
+#    R104_REFERTO_DRIVER_20260825_0738.txt r.15, stesso EA, stesso
+#    simbolo, stesso TF, tick reali, deposito 100000, finestra piu'
+#    LUNGA di due mesi. Lo stesso numero e' scritto una seconda volta
+#    in REGISTRO_TEST.md (sezione R187).
+#    >>> COSTO DICHIARATO: 4 x 0,700 = 2,8 MINUTI.
+#
+#  BERSAGLIO: banco da backtest C:\MT5_Backtest, demo 50504400.
+#    NON il piccolo 50503392, NON il 100k 50504263, NON il reale
+#    10105439, NON il terminale FTMO 541452707.
+#
+#  CANCELLO: primo strato (controlla_prova.py) lanciato da me. Il
+#    SECONDO strato, l'agente controllo-preventivo, lo lancia il
+#    coordinatore. Finche' non torna, questa prova non va verso il VPS.
+# =====================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Guardian: acceso come in campo. Nel Tester e' fail-open. ---
+InpUsaGuardian=true||true||0||true||N
+
+# --- IL BOX NOTTURNO: identico alla sedia viva, non si tocca ---
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+# InpMinBoxPts: PIN. MISURATO INERTE su questo EA -- nel refine le 18
+# coppie 0-contro-1500 danno risultati IDENTICI al centesimo (36
+# passate, 18 esiti). Girarlo costerebbe passate e non misurerebbe
+# niente (trappola B del censimento dell'11/09).
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+
+# --- GLI OROLOGI: tutti pinnati sui valori vivi (ora server BCM) ---
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=59||59||0||59||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+# InpPendingExpiryMin: PIN al valore vivo. INERTE per costruzione con
+# questo cutoff (7:59 + 90 min = 9:29, l'EA cancella gia' alle 8:30).
+InpPendingExpiryMin=90||90||0||90||N
+
+# --- INGRESSO: pinnato per nome, nessun parametro di motore toccato ---
+InpBufferPoints=1000||1000||0||1000||N
+InpAllowLong=false||false||0||false||N
+InpAllowShort=true||true||0||true||N
+
+# --- STOP: la geometria resta quella viva (2,5 x ATR(14) M15) ---
+InpSLMode=1||1||0||1||N
+InpMgmtTF=15||15||0||15||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=2.5||2.5||0||2.5||N
+# InpSLFixedPts: PIN al valore del preset vivo. E' INERTE per
+# costruzione: il sorgente lo legge SOLO se InpSLMode==MM_SL_FIXED,
+# che vale 2 (enum r.45: OPPOSITE=0, ATR=1, FIXED=2). Qui SLMode=1.
+# Sta nel file per fedelta' al preset, non perche' faccia qualcosa.
+InpSLFixedPts=3000||3000||0||3000||N
+
+# --- LA SCALA D'USCITA VIVA: identica a r81a, tutta pinnata ---
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=3.0||3.0||0||3.0||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+
+# --- IL SIMBOLO GUIDA: pinnato, NON vuoto. Non e' l'asse. ---
+InpCorrSymbol=SPXUSD||SPXUSD||0||SPXUSD||N
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+
+# --- Rischio e contorno ---
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFlatten=true||true||0||true||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpMagic=787421||787421||0||787421||N
+
+# --- L'UNICO ASSE: IL FILTRO DI CORRELAZIONE S&P.
+#     1 (true)  -> la cella PROMOSSA il 26/07. ANCORA: deve dare r81a.
+#     0 (false) -> esattamente cio' che l'EA fa da solo, in silenzio, se
+#                  InpCorrSymbol non si legge sul broker (codice r.398-401
+#                  -> bias=0 -> shortOK=true sempre).
+#     NOTA: un asse su un input bool si scrive in CIFRE (0/1), non in
+#     parole. La forma 'false||false||1||true||Y' e' rifiutata da
+#     controlla_prova.py come 'asse non numerico'. Convenzione di casa,
+#     verificata su prove/ gia' in repo (InpUseRsiPunte, InpSizingVecchio,
+#     InpSLfromDoji, InpUseVolumeFilter: tutti 0||0||1||1||Y).
+InpUseCorrelation=0||0||1||1||Y
