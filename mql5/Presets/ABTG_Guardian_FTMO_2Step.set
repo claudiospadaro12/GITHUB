@@ -30,7 +30,16 @@ InpDDMode=0
 ; SU UN SERVER DIVERSO DA BCM QUESTO NUMERO VA RICALCOLATO:
 ;   InpDailyResetHour = ora_server corrispondente a 00:00 del fuso FTMO.
 ; Se il fuso si sposta (ora legale/solare) il valore cambia.
-InpDailyResetHour=23
+;
+;  !!! AZZERAMENTO GIORNALIERO RIMAPPATO SULL'OROLOGIO FTMO (20/09/2026).
+;  Qui c'era 23, che e' ORA BCM. FTMO azzera il Max Daily Loss alle
+;  00:00 CE(S)T = mezzanotte ITALIANA. BCM = italiana -1 -> 23.
+;  FTMO = italiana +1 -> LA STESSA mezzanotte e' l'ora 1 del server FTMO.
+;  Stessa rimappatura +2 dei dieci preset delle sedie.
+;  ATTENZIONE: il +2 resta [INFERITO] finche' non lo conferma lo script
+;  delle specifiche (TimeTradeServer - TimeGMT) al primo F7.
+;
+InpDailyResetHour=1
 InpAction=0
 InpCloseAllMagics=true
 InpShowPanel=true
@@ -41,6 +50,23 @@ InpVerbose=true
 InpDailyPausePct=4.0
 ; --- GRADINO C: cap C1 sul rischio aperto simultaneo -------------
 ; 3.25% = 5 stop pieni vivi da 0,65% (misura M2: max reale 5,85%).
-InpMaxOpenRiskPct=3.25
+;
+;  !!! CAP C1 PORTATO A 4.00 -- FIRMA DI CLAUDIO DEL 20/09/2026.
+;  Qui c'era 3.25, che era tarato su CINQUE stop vivi da 0,65%. Con la
+;  taglia nuova al 2,00% quel numero lasciava passare UNA SOLA posizione:
+;  la seconda veniva rifiutata e la flotta girava una sedia alla volta,
+;  annullando la decisione sulla taglia.
+;  Il 4.00 non e' scelto, e' calcolato sul LIMITE GIORNALIERO FTMO del 5%:
+;    2 posizioni x 2,00% = 4,00%  -> sta dentro il 5%
+;    3 posizioni x 2,00% = 6,00%  -> SFONDA
+;  Misurato sui trade veri del 100k: la perdita PEGGIORE vale 1R pieno
+;  (1,99% a questa taglia), quindi due posizioni al peggio fanno 3,99%.
+;  La perdita MEDIA pero' e' solo il 40% del nominale (0,79%), grazie a
+;  trailing e breakeven: nella pratica questo cap quasi non morde.
+;  Picco misurato in campo: 4 posizioni aperte insieme (25/08, due sedie
+;  che piramidano su U30USD) -> li' la terza e la quarta sarebbero
+;  rifiutate. E' il prezzo dichiarato del 2,00%.
+;
+InpMaxOpenRiskPct=4.00
 InpRiskMode=0
 InpWarnNoSL=true
