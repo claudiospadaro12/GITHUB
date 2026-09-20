@@ -5,10 +5,11 @@
 #  Common\Files e lo carica nel repo (data/statements/trades_auto.csv) via
 #  API GitHub, usando il tuo token. Il report del sabato lo leggera' da li'.
 #
-#  Dal 08/09/2026 i CSV pubblicati sono TRE, uno per conto:
+#  Dal 20/09/2026 i CSV pubblicati sono QUATTRO, uno per conto:
 #    ABTG_Trades.csv       -> data/statements/trades_auto.csv    piccolo 50503392  (OBBLIGATORIO)
 #    ABTG_Trades_100k.csv  -> data/statements/trades_100k.csv    100k    50504263  (facoltativo)
 #    ABTG_Trades_Reale.csv -> data/statements/trades_reale.csv   REALE   10105439  (facoltativo)
+#    ABTG_Trades_FTMO.csv  -> data/statements/trades_ftmo.csv    FTMO    541452707 (facoltativo)
 #  Se un file facoltativo non c'e', lo script LO DICE e PROSEGUE: non fallisce.
 #
 #  Da lanciare sul VPS (dove gira l'EA e c'e' il token).
@@ -46,6 +47,16 @@ param(
     #     terminale del reale): qui e' FACOLTATIVO, lo dice e prosegue.
     [string]$RepoPathReale = "data/statements/trades_reale.csv",
     [string]$CsvNameReale  = "ABTG_Trades_Reale.csv",
+    # --- QUARTO CONTO, 20/09/2026: LA CHALLENGE FTMO 541452707 (80.000 EUR).
+    #     Trovato da Claudio la sera dello schieramento, a sedie gia' accese:
+    #     i conti qui sopra erano TRE e il 541452707 non c'era, quindi la
+    #     challenge che costa 439 EUR sarebbe rimasta INVISIBILE alla pagella.
+    #     Il nome del file deve combaciare ESATTAMENTE con InpFile del preset
+    #     ABTG_TradeExporter_FTMO.set: un carattere diverso -- anche solo uno
+    #     spazio -- e il file non si trova, in silenzio.
+    #     FACOLTATIVO come gli altri due: se manca lo dice e prosegue.
+    [string]$RepoPathFtmo  = "data/statements/trades_ftmo.csv",
+    [string]$CsvNameFtmo   = "ABTG_Trades_FTMO.csv",
     [string]$TokenFile  = "",
     [switch]$TriggerReport,
     [switch]$Installa,                 # registra l'attivita' pianificata e esce
@@ -184,6 +195,11 @@ Pubblica-Csv $CsvName100k  $RepoPath100k  $false "(e' quello del 100k 50504263: 
 # conto REALE 10105439: facoltativo finche' nessuno attacca il TradeExporter
 # sul terminale C:\BCM_Reale. Il gesto sul reale lo fa Claudio, non lo script.
 Pubblica-Csv $CsvNameReale $RepoPathReale $false "(e' quello del conto REALE 10105439: compare quando ABTG_TradeExporter gira su C:\BCM_Reale con InpFile=ABTG_Trades_Reale.csv - vedi report\PAGELLA_CONTO_REALE_2026-09-08.md)"
+# conto FTMO 541452707 (la CHALLENGE vera, 80.000 EUR): facoltativo finche'
+# il TradeExporter non ha fatto il suo primo export. Common\Files e' condivisa
+# fra tutti i terminali MT5 della macchina, quindi il file arriva qui senza che
+# questo script debba sapere dove sta installato C:\FTMO.
+Pubblica-Csv $CsvNameFtmo  $RepoPathFtmo  $false "(e' quello della CHALLENGE FTMO 541452707: compare col primo export di ABTG_TradeExporter su C:\FTMO con InpFile=ABTG_Trades_FTMO.csv)"
 
 # --- opzionale: lancia subito il report settimanale ---
 if ($TriggerReport) {
