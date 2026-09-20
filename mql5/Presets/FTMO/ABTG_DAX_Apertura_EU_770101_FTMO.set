@@ -252,7 +252,20 @@ InpCorrEmaFast=14
 InpCorrEmaSlow=100
 InpUseVwapFilter=false
 InpVwapTF=15
-InpRiskPercent=0.65
+
+;
+;  !!! TAGLIA PORTATA A 2.00% -- FIRMA DI CLAUDIO DEL 20/09/2026.
+;  Qui c'era 0.65. Deciso da lui dopo il conto sul 100k demo: nei 38 giorni
+;  veri (10/08-17/09) la flotta a 0,65% ha fatto +3.890,91 con un DD MAX
+;  REALIZZATO dello 0,96%; rigiocati a 2,00% quegli stessi 38 giorni danno
+;  +11.984 (+11,98%) con DD max 2,96% -- challenge superata, muro a 10%.
+;  AGLI ATTI, come promesso: il PEGGIOR TRATTO del backtest OOS a 2,00%
+;  vale 14,46% su 770101 e SFONDA il muro statico del 10%. Rischio SCELTO,
+;  non subito. La soglia dove il peggior tratto storico tocca il muro e' 1,38%.
+;  La taglia e' UNIFORME su tutte: FTMO vieta le size erratiche
+;  (Forbidden Practices, 'substantially larger or smaller position sizes').
+;
+InpRiskPercent=2.00
 InpSLMode=0
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
