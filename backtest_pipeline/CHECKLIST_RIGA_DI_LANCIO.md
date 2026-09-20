@@ -26644,3 +26644,71 @@ lavorano piu' agenti insieme, cioe' quando serve di piu'. Un agente che rilegga
 difetto e' che si aggiunge tutto; qui si aggiunge **per nome** e si sbaglia lo stesso. Il
 `git add -A` e' la porta aperta, questo e' **la porta chiusa con la chiave gia' nella toppa**.
 
+
+## CLASSE 484 — 🔐🧮 **L'IMPRONTA DI CONTROLLO CALCOLATA CON UN RIGHELLO DIVERSO DA QUELLO CHE L'HA GENERATA** (20/09/2026)
+**Il caso reale**: `RINOMINA_CLAU12.ps1` v1 r.140 verificava i sette `.mq5` con
+`Get-FileHash` (byte grezzi). Ma gli SHA in tavola erano stati **copiati da
+`SCHIERA_FTMO.ps1`**, che li calcola con la sua funzione `Scheletro` (r.256:
+CRLF→LF, via i non-ASCII-stampabili, `TrimEnd`, SHA256 sui byte ASCII).
+**Misurato** su `ABTG_EMA200.mq5` al pin `26a18566`:
+```
+SCHELETRO     5CA99D90A5F34E96...   <- quello che c'era in tavola
+GET-FILEHASH  29CB8955DD11215C...   <- quello che lo script calcolava
+```
+👉 **7 file su 7 rifiutati**, con un messaggio che accusava i file di essere
+sbagliati mentre erano giusti. 🟢 Fail-closed (non rompeva niente), ma avrebbe
+fatto sospettare lo schieramento su un terminale appena F7-ato a 0 errori.
+**La regola**: quando riusi un'impronta calcolata da un ALTRO script, **riusa
+anche la sua funzione**, non una che "fa la stessa cosa". E se nello stesso file
+convivono due righelli (qui: scheletro per i `.mq5`, `Get-FileHash` per le copie
+binarie dei `.ex5`), si scrive nel codice **perché** sono diversi — altrimenti
+qualcuno li "ripara" al contrario.
+
+## CLASSE 485 — 🚪👻 **LA GUARDIA CHE CONFRONTA `origin.txt` COL PERCORSO DELL'ESEGUIBILE** (20/09/2026)
+**Il caso reale**: `RINOMINA_CLAU12.ps1` v1 r.272 chiedeva "il terminale è
+aperto?" così: `if($pp -eq $prog)`, dove `$prog` viene da `origin.txt` =
+**cartella di installazione** (`C:\FTMO`) e `$pp` = `$p.Path` = **eseguibile**
+(`C:\FTMO\terminal64.exe`). **Non saranno mai uguali.**
+👉 Stampava sempre `il terminale FTMO risulta CHIUSO: e la condizione buona`,
+**anche a MT5 spalancato**. Una guardia decorativa è **peggio** di nessuna
+guardia, perché chi la legge smette di controllare a mano (stessa famiglia del
+10/09, `finestra_dax.py` che certificava "l'orologio è LO STESSO").
+**La convenzione di casa era già scritta**: `RIGA_NYRETEST_TAR.ps1` r.235 e
+`RIGA_SONDALONDONFX.ps1` r.523 confrontano `origin.txt` con
+**`$t.DirectoryName`** — la *cartella* dell'eseguibile.
+**La regola**: `origin.txt` è una **cartella**. Si confronta con
+`[IO.Path]::GetDirectoryName($p.Path)`, normalizzando (`TrimEnd('\')`, `-ieq`).
+E una guardia si prova **accendendo la cosa che deve rilevare**, non solo
+spegnendola.
+
+## CLASSE 486 — 💣📋 **IL CICLO CHE CANCELLA E RINOMINA N FILE SENZA `try/catch` E SENZA COPIA VERIFICATA** (20/09/2026)
+**Il caso reale**: `RINOMINA_CLAU12.ps1` v1 r.370-385. `$ErrorActionPreference='Stop'`
+garantiva **una** cosa sola — che una `Copy-Item` fallita fermasse prima della
+`Remove-Item` — ma l'eccezione usciva dal ciclo: **niente controprova, niente
+referto, nessun elenco di cosa era già cambiato**. Sul Desktop del VPS
+(notoriamente pieno) è lo scenario probabile, non quello esotico. In più
+`Copy-Item` può tornare senza errore lasciando un file tronco: **si cancellava
+sulla fiducia**.
+**La regola**: un ciclo che tocca N file va in `try/catch`, e il `catch` stampa
+**il rendiconto file per file** (fatto / non fatto) e dice se il rilancio
+riprende da solo. Una copia di sicurezza si **rilegge e si confronta**
+(dimensione + SHA) prima di cancellare l'originale. E l'ordine conta: qui
+`.ex5` **prima**, `.mq5` **dopo** — con l'ordine opposto un fallimento lascia il
+file "GIA FATTO" al rilancio e il binario vecchio lì per sempre.
+
+## CLASSE 487 — 👁️‍🗨️🏷️ **IL MONITORAGGIO NOTTURNO CABLATO SUL NOME VECCHIO** (20/09/2026)
+**Il caso reale**: rinominati gli EA `ABTG_*` → `CLAU12_*` sul terminale FTMO,
+`CODA_02_chi_ha_operato.ps1` r.60 riconosceva gli EA nei giornali con
+`'\s(ABTG_[A-Za-z0-9_]+)\s*\(...'` — **`ABTG_` cablato nella regex** — e gira su
+**tutte** le cartelle dati. Avrebbe stampato *"nessuna riga di EA riconosciuta"*
+**mentre le sedie lavoravano**: un **falso muto sul conto da 439 EUR**, proprio
+sulla corsia **TAGLIANDO** (frequenza) firmata il 18/08.
+👉 Corretto in `(?:ABTG_|CLAU12_)` lo stesso giorno, **prima** della prima notte
+operativa.
+**La regola**: rinominare qualcosa che gira **non è finito quando il file è
+rinominato**. Si cerca *nel repo* chi lo riconosce **per nome** — regex, glob,
+prefissi, filtri "i nostri contro quelli di terzi" — e si aggiorna **prima**.
+⚠️ Rimasti da aggiornare quando si toccheranno (non urgenti: hanno la guardia di
+macchina che li blocca sul VPS): `stacca_ea_terzi.ps1` r.173 e
+`elenco_ea_attaccati.ps1` r.241, che classificano "nostro" col default
+`-NostriPattern "ABTG_,EasyTrend"`.

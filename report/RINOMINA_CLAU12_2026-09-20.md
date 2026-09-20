@@ -73,6 +73,39 @@ i nostri strumenti che cercano `abtg_trades_*` continuano a trovarli.
 
 ---
 
+## 🚦 IL CANCELLO HA FATTO IL SUO MESTIERE — **v1 BOCCIATA, due difetti BLOCCANTI**
+
+Lo script è arrivato a Claudio in versione **v2**. La **v1 era rotta**, e la cosa
+interessante è che il cancello deterministico era **verde**: serviva lo strato di giudizio.
+
+| # | difetto | effetto vero | classe |
+|---:|---|---|---|
+| **1** | l'impronta di controllo calcolata con **** mentre gli SHA in tavola erano l'impronta **SCHELETRO** di  | 🔴 **7 file su 7 rifiutati.** Lo script sarebbe stato **inerte**, accusando i file di essere sbagliati mentre erano giusti | **484** |
+| **2** | la guardia «il terminale è aperto?» confrontava  (una **cartella**) con  (un **eseguibile**) | 🔴 **non scattava mai**: stampava «CHIUSO» a MT5 spalancato | **485** |
+| 3 | il ciclo che cancella e rinomina senza  e con copia **non verificata** | 🟠 interruzione a metà = eccezione rossa, nessun rendiconto | **486** |
+| 4 |  non guardava il **binario orfano** | 🟠 poteva dichiarare il falso | — |
+| 5 | 👁️ ** cablato su ** | 🔴 avrebbe detto «nessuna riga di EA riconosciuta» **mentre le sedie lavorano** — falso muto sulla corsia TAGLIANDO | **487** |
+
+**Verificati con le mie mani**, non presi per buoni:
+
+🟢 **E una cosa l'agente l'aveva dedotta male**, quindi non l'ho copiata: diceva che
+ è sul terminale FTMO. **Non c'è**: la corsa è stata fatta con
+, che esclude l'EA ( r.476) **e** i tre preset (r.503).
+
+🔴 ** l'ho corretto lo stesso giorno** (), prima della prima
+notte operativa. Era l'unico difetto che mordeva **dopo**, non durante.
+
+### ✅ E l'ho provato io su un albero finto, con un'esca
+
+Albero che riproduce il terminale FTMO (i sette file ai loro pin, gli  accanto,
+, giornale col conto ) **più una cartella-esca con
+l'hash del REALE  e lo stesso conto nel giornale**:
+
+🟢 **Impronta della cartella  del REALE prima e dopo la corsa : identica.**
+E al rilancio:  ×7, **codice uscita 2**. Idempotente.
+
+---
+
 ## ⚙️ COME È FATTO LO SCRIPT — `backtest_pipeline/righe/RINOMINA_CLAU12.ps1`
 
 **Cinque serrature.** Le prime quattro sono copiate alla lettera da `SCHIERA_FTMO.ps1`,

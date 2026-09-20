@@ -57,7 +57,12 @@ foreach($d in $cart){
     Write-Host ("      " + $f.Name + "   (" + [int]($f.Length/1KB) + " KB, ultimo " + $f.LastWriteTime + ")")
     foreach($riga in @(Get-Content -LiteralPath $f.FullName -ErrorAction SilentlyContinue)){
       # le righe degli EA di casa hanno la forma  ...  NomeEA (SIMBOLO,TF)  ...
-      $m = [regex]::Match($riga, '\s(ABTG_[A-Za-z0-9_]+)\s*\(([^,]+),([^)]+)\)')
+      # 20/09/2026 -- CLAU12_ ACCANTO A ABTG_, e non e un vezzo (classe 487):
+      # su FTMO i sette EA sono stati rinominati CLAU12_* su richiesta di
+      # Claudio. Con la sola ABTG_ questa riga avrebbe stampato "nessuna riga
+      # di EA riconosciuta" MENTRE le sedie lavoravano: un falso MUTO sul
+      # conto da 439 EUR, proprio sulla corsia TAGLIANDO (frequenza).
+      $m = [regex]::Match($riga, '\s((?:ABTG_|CLAU12_)[A-Za-z0-9_]+)\s*\(([^,]+),([^)]+)\)')
       if(-not $m.Success){ continue }
       $k = $m.Groups[1].Value + "  " + $m.Groups[2].Value + " " + $m.Groups[3].Value
       if($conta.ContainsKey($k)){ $conta[$k] = $conta[$k] + 1 } else { $conta[$k] = 1 }

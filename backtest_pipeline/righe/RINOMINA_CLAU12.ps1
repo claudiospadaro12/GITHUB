@@ -1,5 +1,5 @@
 # =====================================================================
-#  RINOMINA_CLAU12.ps1  --  MARCATORE_RINOMINA_CLAU12_v1
+#  RINOMINA_CLAU12.ps1  --  MARCATORE_RINOMINA_CLAU12_v2
 #
 #  COSA FA: rinomina i SETTE .mq5 delle sedie da "ABTG_..." a
 #  "CLAU12_..." DENTRO LA SOLA CARTELLA DATI DEL TERMINALE FTMO, e
@@ -64,6 +64,31 @@
 #  prefisso "abtg_trades_" e' una costante nel sorgente, quindi i
 #  nostri strumenti che cercano abtg_trades_* continuano a trovarli.
 #  Nessun effetto sul trading.
+#  (VERIFICATO AL PIN DI CIASCUNO: MQL_PROGRAM_NAME compare DUE volte
+#  per EA, tutte e due dentro un nome di file CSV; il Guardian non lo
+#  usa affatto. Le GlobalVariable del canale Guardian si chiamano col
+#  NUMERO DI CONTO, non col nome del programma -- ABTG_GVNome() in
+#  ABTG_PausaGuardian.mqh -- quindi il canale B1/C1 non si accorge di
+#  niente.)
+#
+#  ---------------------------------------------------------------
+#  IL SECONDO EFFETTO COLLATERALE, E QUESTO SI VEDE DA LUNEDI'
+#  backtest_pipeline/righe/CODA_02_chi_ha_operato.ps1 riconosce gli EA
+#  nei giornali con una regex che ha "ABTG_" CABLATO DENTRO
+#  (r.60: '\s(ABTG_[A-Za-z0-9_]+)\s*\(([^,]+),([^)]+)\)'), e gira su
+#  TUTTE le cartelle dati. Dopo questa rinomina, sul terminale FTMO
+#  stampera' "nessuna riga di EA riconosciuta in questi log" anche
+#  mentre le sedie lavorano: un FALSO MUTO sul conto che e' costato
+#  439 EUR, proprio sulla corsia TAGLIANDO (frequenza) firmata il
+#  18/08. VA CAMBIATA LA REGEX IN CODA_02 (ABTG_|CLAU12_) PRIMA DELLA
+#  PRIMA NOTTE OPERATIVA. Non lo fa questo script: e' un altro file,
+#  e passa dal suo cancello.
+#  (Censito il resto del repo: gli altri strumenti che nominano ABTG_
+#  o costruiscono il nome dall EA passato per parametro -- lato
+#  backtest -- oppure hanno una guardia di macchina che li blocca sul
+#  VPS: stacca_ea_terzi.ps1 rifiuta di girare fuori da
+#  DESKTOP-H4D7CAJ. CODA_06 elenca quello che trova e non filtra per
+#  nome: stampera' CLAU12_* e basta.)
 #
 #  USO:
 #    .\RINOMINA_CLAU12.ps1 -ContoAtteso 541452707              (PROVA)
@@ -114,11 +139,20 @@ $RINOMINE = @(
 $INTOCCABILI = @(
   'ABTG_PausaGuardian.mqh          -- INCLUDE: rinominarlo rompe #include in tutti e sette',
   'ABTG_PrevoloFTMO_Specifiche.mq5 -- SCRIPT del prevolo, ancora da lanciare',
-  'ABTG_*.set                      -- i preset si caricano col pulsante Load, il nome non deve combaciare'
+  'ABTG_*.set                      -- i preset si caricano col pulsante Load, il nome non deve combaciare',
+  'ABTG_PostNews.mq5               -- MISURATO: lo schieramento e stato lanciato con -SenzaPostNews, che esclude sia l EA (SCHIERA_FTMO r.476) sia i suoi tre preset (r.503). Su FTMO NON dovrebbe esserci affatto. Se [3/6 bis] lo trova, qualcuno ha rilanciato lo schieramento senza quella opzione: e una notizia, non un dettaglio.'
 )
 
 $STAMPA  = (Get-Date).ToString('yyyy-MM-dd_HHmmss', $INV)
-$CARTREF = Join-Path ([Environment]::GetFolderPath('Desktop')) ('RINOMINA_CLAU12_' + $STAMPA)
+# GetFolderPath('Desktop') puo' tornare stringa VUOTA in certi contesti
+# (profilo non caricato, attivita' pianificata): Join-Path su '' e' un
+# errore terminante, e con -Esegui morirebbe DOPO aver gia' deciso il
+# bersaglio. Stesso ripiego di SCHIERA_FTMO.ps1 (r.279).
+$DESKTOP = ''
+try { $DESKTOP = [Environment]::GetFolderPath('Desktop') } catch { $DESKTOP = '' }
+if(-not $DESKTOP -or -not (Test-Path -LiteralPath $DESKTOP)){ $DESKTOP = Join-Path $env:USERPROFILE 'Desktop' }
+if(-not (Test-Path -LiteralPath $DESKTOP)){ $DESKTOP = $env:USERPROFILE }
+$CARTREF = Join-Path $DESKTOP ('RINOMINA_CLAU12_' + $STAMPA)
 $RIGHE_REFERTO = New-Object System.Collections.ArrayList
 
 function Dillo($testo, $colore) {
@@ -126,19 +160,69 @@ function Dillo($testo, $colore) {
   [void]$RIGHE_REFERTO.Add($testo)
 }
 
+# Lettura condivisa, COPIATA DA SCHIERA_FTMO.ps1 (r.227) e non
+# riscritta: FileStream.Read NON garantisce di riempire il buffer in
+# una volta sola, e un byte mancante diventerebbe una "impronta
+# diversa" INVENTATA. Riconosce anche i file UTF-16 (i .chr e certi
+# giornali lo sono).
 function Leggi-Testo($path) {
   $b = $null
   try {
     $fs = [IO.File]::Open($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::ReadWrite)
-    try { $b = New-Object byte[] $fs.Length; [void]$fs.Read($b, 0, $b.Length) } finally { $fs.Close() }
   } catch { return '' }
-  if($b -eq $null){ return '' }
+  try {
+    $b = New-Object byte[] $fs.Length
+    $letti = 0
+    while($letti -lt $b.Length){
+      $q = $fs.Read($b, $letti, $b.Length - $letti)
+      if($q -le 0){ break }
+      $letti += $q
+    }
+  } finally { $fs.Close() }
+  if($null -eq $b -or $b.Count -lt 2){ return '' }
+  if($b[0] -eq 0xFF -and $b[1] -eq 0xFE){ return [Text.Encoding]::Unicode.GetString($b) }
+  $zeri = 0
+  $n = [math]::Min(400, $b.Count)
+  for($i = 1; $i -lt $n; $i += 2){ if($b[$i] -eq 0){ $zeri++ } }
+  if($zeri -gt ($n / 4)){ return [Text.Encoding]::Unicode.GetString($b) }
   return [Text.Encoding]::UTF8.GetString($b)
 }
 
-function Sha-Di($path) {
-  try { return (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToUpperInvariant() } catch { return '' }
+# ---------------------------------------------------------------------
+# L IMPRONTA, E QUI STA LA CORREZIONE CHE FA FUNZIONARE LO SCRIPT.
+# Gli SHA della tavola $RINOMINE NON sono l impronta dei byte del file:
+# sono l impronta dello SCHELETRO, cioe' del testo normalizzato
+# (CRLF->LF, via tutto quello che non e ASCII stampabile, tolte le righe
+# vuote in coda) -- esattamente come li calcola SCHIERA_FTMO.ps1 con la
+# sua funzione Scheletro, che e' quella che li ha MESSI su quel disco.
+# Get-FileHash sul file intero da un numero DIVERSO per tutti e sette
+# (misurato: 7 su 7 non combaciano), e lo script rifiuterebbe sempre
+# tutto. Questa e la stessa funzione, copiata alla lettera.
+# ---------------------------------------------------------------------
+function Scheletro($testo) {
+  $t = $testo -replace "`r`n", "`n"
+  $t = $t -replace "`r", "`n"
+  $t = $t -replace '[^\u0009\u000A\u0020-\u007E]', ''
+  $t = $t.TrimEnd("`n")
+  $righe = ($t -split "`n").Count
+  $sha = [Security.Cryptography.SHA256]::Create()
+  try { $hb = $sha.ComputeHash([Text.Encoding]::ASCII.GetBytes($t)) } finally { $sha.Dispose() }
+  $sb = New-Object Text.StringBuilder
+  foreach($x in $hb){ [void]$sb.Append($x.ToString('X2', $INV)) }
+  return [pscustomobject]@{ Righe = $righe; Sha = $sb.ToString() }
 }
+
+function Impronta-Di($path) {
+  $t = Leggi-Testo $path
+  if($t -eq ''){ return [pscustomobject]@{ Righe = 0; Sha = '' } }
+  return (Scheletro $t)
+}
+
+# NOTA per chi legge fra un mese: qui sotto, nella copia di sicurezza
+# dei .ex5, si usa INVECE Get-FileHash, e non e' una dimenticanza --
+# li' si confrontano DUE COPIE BINARIE DELLO STESSO FILE, e lo scheletro
+# (che butta via i byte non ASCII) su un binario non vorrebbe dire
+# niente. Due misure diverse perche' rispondono a due domande diverse.
 
 function Posa-Referto {
   try {
@@ -258,22 +342,48 @@ Dillo ('      si tocca SOLO : ' + $dirE) 'Green'
 Dillo ('      le altre ' + ($cartelle.Count - 1).ToString($INV) + ' cartelle dati non vengono nemmeno riaperte.') 'Green'
 if(-not (Test-Path -LiteralPath $dirE)){ Muori ('non esiste ' + $dirE + ': lo schieramento non e mai arrivato qui.') }
 
+# CINTURA DOPO LE BRETELLE (la stessa di SCHIERA_FTMO.ps1 r.441): la
+# cartella scelta viene RICONTROLLATA contro le sette note. Se la
+# scoperta sbagliasse, qui si ferma comunque. Costa tre righe.
+foreach($k in $HASH_NOTI.Keys){
+  if($dati -like ('*' + $k + '*')){
+    Muori ('il bersaglio scelto "' + $dati + '" e la cartella nota ' + $HASH_NOTI[$k] + '. Non si tocca.')
+  }
+}
+
 # =====================================================================
 # [3/6] -- IL TERMINALE E' APERTO? Rinominare e cancellare binari sotto
 #          un terminale vivo e' il modo piu' facile per ritrovarsi un
 #          EA staccato a meta'. Si chiede di chiuderlo: costa 30 s.
 # =====================================================================
+# ATTENZIONE AL CONFRONTO, ed e' il punto in cui la prima stesura
+# certificava il FALSO: origin.txt contiene la CARTELLA
+# di installazione ("C:\FTMO"), mentre $p.Path e' l ESEGUIBILE
+# ("C:\FTMO\terminal64.exe"). Confrontandoli con -eq non sono MAI
+# uguali, quindi la guardia stampava "risulta CHIUSO" anche col
+# terminale spalancato. Si confronta la CARTELLA dell eseguibile, senza
+# barra finale e senza distinzione di maiuscole.
+function Cartella-Netta($x) {
+  if(-not $x){ return '' }
+  return ($x.Trim().TrimEnd('\'))
+}
+$progN = Cartella-Netta $prog
 $aperto = $false
+$apertoChi = ''
 try {
   $pr = @(Get-Process terminal64 -ErrorAction SilentlyContinue)
   foreach($p in $pr){
     $pp = ''
     try { $pp = $p.Path } catch { $pp = '' }
-    if($pp -and $prog -and ($pp -eq $prog)){ $aperto = $true }
+    if(-not $pp){ continue }
+    $dirEseg = ''
+    try { $dirEseg = Cartella-Netta ([IO.Path]::GetDirectoryName($pp)) } catch { $dirEseg = '' }
+    if($dirEseg -and $progN -and ($dirEseg -ieq $progN)){ $aperto = $true; $apertoChi = $pp }
   }
+  Dillo ('      terminal64 in esecuzione: ' + $pr.Count.ToString($INV) + '   installazione cercata: ' + $progN) $null
 } catch { }
 if($aperto){
-  Dillo ('[3/6] il terminale FTMO ' + $ContoAtteso + ' risulta APERTO (' + $prog + ').') 'Yellow'
+  Dillo ('[3/6] il terminale FTMO ' + $ContoAtteso + ' risulta APERTO (' + $apertoChi + ').') 'Yellow'
   if(-not $AncheSeAperto){
     Dillo '' $null
     Dillo '      CHIUDILO e rilancia questa riga. Sono 30 secondi, e tolgono di mezzo' 'Yellow'
@@ -285,14 +395,38 @@ if($aperto){
   }
   Dillo '      -AncheSeAperto: proseguo lo stesso, come richiesto.' 'Yellow'
 } else {
-  Dillo '[3/6] il terminale FTMO risulta CHIUSO: e la condizione buona.' 'Green'
+  Dillo '[3/6] nessun terminal64.exe gira da quella installazione: e la condizione buona.' 'Green'
 }
 
 # =====================================================================
 # [4/6] -- SERRATURA 5: lo SHA di ogni file, uno per uno.
 # =====================================================================
+# ---------------------------------------------------------------------
+# GLI ALTRI ABTG_ CHE STANNO NELLA STESSA CARTELLA.
+# Si elencano PER NOME, mai "tutto il resto" (classe 180): lo
+# schieramento puo' aver portato anche ABTG_PostNews.mq5 (lo fa se non
+# gli si passa -SenzaPostNews, e i suoi TRE preset sono stati
+# installati), e quello NON e' in nessuna delle due tavole. Non lo
+# rinomino di mia iniziativa -- lo DICO, perche' un Navigatore meta'
+# CLAU12_ e meta' ABTG_ e' esattamente il genere di ambiguita' che
+# questo script esiste per togliere.
 Dillo '' $null
-Dillo '[4/6] controllo dei sette file (SHA256 contro l impronta installata)' $null
+$attesi = @()
+foreach($r in $RINOMINE){ $attesi += $r.Vecchio }
+$attesi += 'ABTG_PrevoloFTMO_Specifiche.mq5'
+$altri = @(Get-ChildItem -LiteralPath $dirE -Filter 'ABTG_*.mq5' -File -ErrorAction SilentlyContinue |
+           Where-Object { $attesi -notcontains $_.Name })
+if($altri.Count -gt 0){
+  Dillo ('[3/6 bis] ATTENZIONE: in ' + $dirE + ' ci sono ' + $altri.Count.ToString($INV) + ' altri .mq5 col nome ABTG_ che questo script NON tocca:') 'Yellow'
+  foreach($a in $altri){ Dillo ('        - ' + $a.Name + '   (resta ABTG_)') 'Yellow' }
+  Dillo '        Se vanno rinominati anche loro, si aggiungono alla tavola col loro SHA.' 'Yellow'
+  Dillo '        Non li rinomino a indovinare: non ho la loro impronta.' 'Yellow'
+} else {
+  Dillo '[3/6 bis] nessun altro .mq5 ABTG_ oltre ai sette e al prevolo: niente rimane a meta strada.' 'Green'
+}
+
+Dillo '' $null
+Dillo '[4/6] controllo dei sette file (impronta SCHELETRO contro quella installata: righe + SHA256)' $null
 $daFare   = @()
 $giaFatti = 0
 $problemi = @()
@@ -303,6 +437,16 @@ foreach($r in $RINOMINE){
   $cN = Test-Path -LiteralPath $pN
 
   if($cN -and -not $cV){
+    # ...ma il binario col nome VECCHIO puo' essere rimasto li' (per
+    # esempio se qualcuno ha rinominato a mano dentro MetaEditor). E'
+    # proprio la voce fantasma del Navigatore che questo script esiste
+    # per togliere: se c e', NON si dice "gia fatto e tutto a posto".
+    $pXorf = Join-Path $dirE ([IO.Path]::GetFileNameWithoutExtension($r.Vecchio) + '.ex5')
+    if(Test-Path -LiteralPath $pXorf){
+      $problemi += ('BINARIO ORFANO: ' + $r.Nuovo + ' esiste gia, ma e rimasto anche ' + [IO.Path]::GetFileName($pXorf) + '. Nel Navigatore resta attaccabile il vecchio.')
+      Dillo ('      ORFANO     ' + [IO.Path]::GetFileName($pXorf) + '  accanto a ' + $r.Nuovo) 'Red'
+      continue
+    }
     Dillo ('      GIA FATTO  ' + $r.Nuovo) 'Green'
     $giaFatti = $giaFatti + 1
     continue
@@ -318,10 +462,13 @@ foreach($r in $RINOMINE){
     continue
   }
 
-  $sha = Sha-Di $pV
-  if($sha -ne $r.Sha){
-    $problemi += ('SHA DIVERSO: ' + $r.Vecchio + ' -- atteso ' + $r.Sha.Substring(0,16) + '... trovato ' + $(if($sha){$sha.Substring(0,16)+'...'}else{'(illeggibile)'}) + '. Non e il file che abbiamo installato: NON lo rinomino.')
-    Dillo ('      SHA DIVERSO ' + $r.Vecchio + '  -> lo salto') 'Red'
+  $imp = Impronta-Di $pV
+  $sha = $imp.Sha
+  if($sha -ne $r.Sha -or $imp.Righe -ne $r.Righe){
+    $trovato = '(illeggibile)'
+    if($sha){ $trovato = $sha.Substring(0,16) + '... righe ' + $imp.Righe.ToString($INV) }
+    $problemi += ('IMPRONTA DIVERSA: ' + $r.Vecchio + ' -- atteso ' + $r.Sha.Substring(0,16) + '... righe ' + $r.Righe.ToString($INV) + ', trovato ' + $trovato + '. Non e il file che abbiamo installato: NON lo rinomino.')
+    Dillo ('      IMPRONTA DIVERSA ' + $r.Vecchio + '  -> lo salto') 'Red'
     continue
   }
   Dillo ('      ok         ' + $r.Vecchio + '  ->  ' + $r.Nuovo + '   (' + $r.Sedia + ')') 'Cyan'
@@ -355,7 +502,9 @@ if(-not $Esegui){
     if(Test-Path -LiteralPath $pX){ Dillo ('      salva+togli ' + [IO.Path]::GetFileName($pX) + '  (binario vecchio)') $null }
   }
   Dillo '' $null
-  Dillo '      NON HO SCRITTO NIENTE. Per farlo davvero rilancia con  -Esegui .' 'Green'
+  Dillo '      SUL TERMINALE NON HO SCRITTO NIENTE: nessun file rinominato, nessuno' 'Green'
+  Dillo '      cancellato. L unica cosa che scrivo e il referto qui sotto, sul Desktop.' 'Green'
+  Dillo '      Per farlo davvero rilancia con  -Esegui .' 'Green'
   $f = Posa-Referto
   if($f){ Write-Host ('referto: ' + $f) -ForegroundColor Green }
   exit 0
@@ -366,22 +515,78 @@ $backup = Join-Path $CARTREF 'ex5_vecchi'
 [void](New-Item -ItemType Directory -Path $backup -Force)
 
 Dillo '[5/6] eseguo.' 'Yellow'
-$fatti = 0
-foreach($r in $daFare){
-  $pV = Join-Path $dirE $r.Vecchio
-  $pX = Join-Path $dirE ([IO.Path]::GetFileNameWithoutExtension($r.Vecchio) + '.ex5')
+Dillo ('      copia di sicurezza dei binari vecchi in: ' + $backup) $null
+$fatti   = 0
+$rimasti = @()
+foreach($r in $daFare){ $rimasti += $r.Vecchio }
 
-  if(Test-Path -LiteralPath $pX){
-    Copy-Item -LiteralPath $pX -Destination $backup -Force
-    Remove-Item -LiteralPath $pX -Force
-    Dillo ('      binario vecchio salvato e tolto: ' + [IO.Path]::GetFileName($pX)) $null
-  } else {
-    Dillo ('      nessun .ex5 per ' + $r.Vecchio + ' (non era compilato)') $null
+# L ORDINE NON E' CASUALE: prima si toglie il .ex5, POI si rinomina il
+# .mq5. Se si facesse il contrario e la cancellazione fallisse, al
+# rilancio il file risulterebbe "GIA FATTO" e il binario vecchio
+# resterebbe li' per sempre. Cosi' invece ogni interruzione lascia uno
+# stato da cui il RILANCIO riprende da solo.
+#
+# E il ciclo sta dentro un try: un errore a meta' (disco pieno sul
+# Desktop del VPS, file tenuto aperto da MetaEditor) NON deve lasciare
+# Claudio davanti a un'eccezione rossa senza sapere QUALI file sono
+# gia' cambiati.
+try {
+  foreach($r in $daFare){
+    $pV = Join-Path $dirE $r.Vecchio
+    $pX = Join-Path $dirE ([IO.Path]::GetFileNameWithoutExtension($r.Vecchio) + '.ex5')
+
+    if(Test-Path -LiteralPath $pX){
+      # SI CANCELLA SOLO DOPO AVER VERIFICATO LA COPIA, byte per byte.
+      # $ErrorActionPreference='Stop' fa fallire Copy-Item se il disco
+      # e' pieno, ma NON garantisce che la copia sia INTEGRA: qui la
+      # si rilegge e si confrontano dimensione e SHA256 del BINARIO
+      # (Get-FileHash, non lo scheletro: sono due copie dello stesso
+      # file, non due versioni di un sorgente).
+      $copia = Join-Path $backup ([IO.Path]::GetFileName($pX))
+      Copy-Item -LiteralPath $pX -Destination $copia -Force
+      if(-not (Test-Path -LiteralPath $copia)){
+        throw ('la copia di sicurezza di ' + [IO.Path]::GetFileName($pX) + ' NON esiste dopo Copy-Item. Non cancello niente.')
+      }
+      $lenA = (Get-Item -LiteralPath $pX).Length
+      $lenB = (Get-Item -LiteralPath $copia).Length
+      if($lenA -ne $lenB){
+        throw ('la copia di sicurezza di ' + [IO.Path]::GetFileName($pX) + ' e di ' + $lenB.ToString($INV) + ' byte invece di ' + $lenA.ToString($INV) + ' (disco pieno?). Non cancello niente.')
+      }
+      $hA = (Get-FileHash -LiteralPath $pX    -Algorithm SHA256).Hash
+      $hB = (Get-FileHash -LiteralPath $copia -Algorithm SHA256).Hash
+      if($hA -ne $hB){
+        throw ('la copia di sicurezza di ' + [IO.Path]::GetFileName($pX) + ' ha un SHA diverso dall originale. Non cancello niente.')
+      }
+      Dillo ('      copia VERIFICATA (' + $lenA.ToString($INV) + ' byte, SHA uguale): ' + [IO.Path]::GetFileName($pX)) $null
+      Remove-Item -LiteralPath $pX -Force
+      Dillo ('      binario vecchio tolto: ' + [IO.Path]::GetFileName($pX)) $null
+    } else {
+      Dillo ('      nessun .ex5 per ' + $r.Vecchio + ' (non era compilato)') $null
+    }
+
+    Rename-Item -LiteralPath $pV -NewName $r.Nuovo -Force
+    Dillo ('      RINOMINATO ' + $r.Vecchio + '  ->  ' + $r.Nuovo) 'Green'
+    $fatti = $fatti + 1
+    $rimasti = @($rimasti | Where-Object { $_ -ne $r.Vecchio })
   }
-
-  Rename-Item -LiteralPath $pV -NewName $r.Nuovo -Force
-  Dillo ('      RINOMINATO ' + $r.Vecchio + '  ->  ' + $r.Nuovo) 'Green'
-  $fatti = $fatti + 1
+} catch {
+  Dillo '' $null
+  Dillo '=====================================================================' 'Red'
+  Dillo ('INTERROTTO A META: ' + $_.Exception.Message) 'Red'
+  Dillo '=====================================================================' 'Red'
+  Dillo ('   RINOMINATI PRIMA DELL ERRORE : ' + $fatti.ToString($INV)) 'Yellow'
+  foreach($r in $daFare){
+    if($rimasti -contains $r.Vecchio){ Dillo ('     - NON fatto : ' + $r.Vecchio) 'Yellow' }
+    else                             { Dillo ('     - fatto     : ' + $r.Nuovo)   'Green'  }
+  }
+  Dillo '' $null
+  Dillo '   COSA FARE: i binari vecchi gia tolti sono nella cartella qui sopra,' 'Yellow'
+  Dillo '   e il .mq5 non e mai stato modificato nel contenuto. Togli la causa' 'Yellow'
+  Dillo '   (spazio sul Desktop, MetaEditor aperto) e RILANCIA la stessa riga:' 'Yellow'
+  Dillo '   quelli gia fatti risultano GIA FATTO e riprende dagli altri.' 'Yellow'
+  $ff = Posa-Referto
+  if($ff){ Write-Host ('referto: ' + $ff) -ForegroundColor Yellow }
+  exit 1
 }
 
 # =====================================================================
@@ -396,9 +601,9 @@ foreach($r in $RINOMINE){
   $okN = Test-Path -LiteralPath $pN
   $okV = Test-Path -LiteralPath $pV
   if($okN -and -not $okV){
-    $sha = Sha-Di $pN
-    if($sha -eq $r.Sha){ Dillo ('      OK  ' + $r.Nuovo + '  SHA invariato (il contenuto non e stato toccato)') 'Green' }
-    else { Dillo ('      ATTENZIONE ' + $r.Nuovo + '  SHA CAMBIATO') 'Red'; $male = $male + 1 }
+    $imp = Impronta-Di $pN
+    if($imp.Sha -eq $r.Sha -and $imp.Righe -eq $r.Righe){ Dillo ('      OK  ' + $r.Nuovo + '  impronta invariata (' + $imp.Righe.ToString($INV) + ' righe: il contenuto non e stato toccato)') 'Green' }
+    else { Dillo ('      ATTENZIONE ' + $r.Nuovo + '  IMPRONTA CAMBIATA') 'Red'; $male = $male + 1 }
   } else {
     Dillo ('      ATTENZIONE ' + $r.Nuovo + '  nuovo:' + $okN.ToString() + ' vecchio:' + $okV.ToString()) 'Red'
     $male = $male + 1
@@ -408,6 +613,7 @@ foreach($r in $RINOMINE){
 Dillo '' $null
 Dillo '---------------------------------------------------------------------' 'Cyan'
 Dillo (' RINOMINATI: ' + $fatti.ToString($INV) + '   gia fatti prima: ' + $giaFatti.ToString($INV) + '   problemi in controprova: ' + $male.ToString($INV)) 'Cyan'
+$CRONO.Stop()
 Dillo (' durata: ' + $CRONO.Elapsed.TotalSeconds.ToString('0.0', $INV) + ' s') 'Cyan'
 Dillo '---------------------------------------------------------------------' 'Cyan'
 Dillo '' $null
@@ -424,6 +630,9 @@ Dillo '   3. F7 sugli altri sei' 'Yellow'
 Dillo '   4. i preset si caricano col pulsante Load: restano ABTG_*.set, va bene cosi' 'Yellow'
 Dillo '' $null
 Dillo ' ATTENZIONE PER IL FUTURO:' 'Yellow'
+Dillo '   CODA_02 (chi ha operato) cerca gli EA nei giornali con "ABTG_" cablato:' 'Yellow'
+Dillo '   finche non gli si aggiunge CLAU12_, su FTMO dira "nessuna riga di EA' 'Yellow'
+Dillo '   riconosciuta" anche mentre le sedie lavorano. E un falso muto, non un guasto.' 'Yellow'
 Dillo '   se un giorno rilanci SCHIERA_FTMO.ps1, quello rimette i file col nome' 'Yellow'
 Dillo '   ABTG_ accanto ai CLAU12_, e ti ritrovi i doppioni. Rilancia questa riga' 'Yellow'
 Dillo '   subito dopo, e torna tutto a posto.' 'Yellow'
@@ -431,7 +640,7 @@ Dillo '   subito dopo, e torna tutto a posto.' 'Yellow'
 $f = Posa-Referto
 if($f){ Write-Host ('referto: ' + $f) -ForegroundColor Green }
 try {
-  $zip = Join-Path ([Environment]::GetFolderPath('Desktop')) ('RINOMINA_CLAU12_' + $STAMPA + '.zip')
+  $zip = Join-Path $DESKTOP ('RINOMINA_CLAU12_' + $STAMPA + '.zip')
   Compress-Archive -Path (Join-Path $CARTREF '*') -DestinationPath $zip -Force
   Write-Host ('zip pronto da mandare: ' + $zip) -ForegroundColor Green
 } catch { Write-Host 'zip non creato (non e grave: il referto e nella cartella).' -ForegroundColor Yellow }
