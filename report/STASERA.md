@@ -7,13 +7,37 @@
 
 ---
 
+## ✏️ AGGIORNAMENTO DELLE 10:30 DEL 20/09 — **i passi 1-7 SONO FATTI**
+
+> Questo foglio è stato scritto **prima** della serata. Da allora sono successe tre cose che
+> ne cambiano le istruzioni. 🔴 **Leggere questo blocco prima di eseguire qualunque passo
+> qui sotto: alcune righe più in basso sono VECCHIE e lo dicono.**
+
+| cosa | com'era scritto qui | com'è ADESSO, misurato |
+|---|---|---|
+| **Percorso FTMO** | `C:\MT5_FTMO` | ✅ **`C:\FTMO`** — conto **`541452707`**, cartella dati `46C9F8E9FF0C747B2B5E09BCC13D5237` (corretto ovunque in questo foglio) |
+| **S1 — la TAGLIA** | ❌ NON DECISA, tre valori diversi | ✅ **FIRMATA DA CLAUDIO: `InpRiskPercent=2.00` UNIFORME** su tutte e sei le sedie. Già **dentro i file installati** (`FIRME_2026-09-19_SERA.md`) |
+| **Cap C1 del Guardian** | 3,25% | ✅ **4,00%** — firma di Claudio del 20/09, già nel preset installato |
+| **`InpDailyResetHour`** | 🔴 23 → 1 **A MANO** | ✅ **già = 1** nel preset installato. 🛑 **NON toccarlo a mano** |
+| **Passi 1-7** | da fare | ✅ **FATTI.** Installazione, login, riga di schieramento eseguita **due volte** (la seconda al pin `a298e1d4`, che porta taglia 2,00% + C1 4,00% + reset 1) |
+| **Primo F7** | il Guardian | ✏️ **NO: per primo `ABTG_PrevoloFTMO_Specifiche.mq5`** — vedi passo **7-bis** |
+
+🚦 **E IL CANCELLO DELLA SERA È UNO SOLO**: **non si accende l'AutoTrading** prima che io
+abbia letto il CSV del passo **7-bis**. Misura l'orologio vero (`TimeTradeServer() - TimeGMT()`),
+i **nomi dei simboli**, il **margine**, i **`Digits`**, lo **spread** e il **`SYMBOL_VOLUME_MAX`**:
+cioè **S2, S3 e S4 del semaforo tutti insieme**, che oggi sono `[INFERITO]`.
+
+---
+
+---
+
 # 🚦 IL SEMAFORO — cinque cose VERE prima di AutoTrading ON
 
 > **Se anche una sola è FALSA, il pulsante non si preme.**
 
 | # | deve essere VERO | oggi | chi lo rende vero |
 |---:|---|---|---|
-| **S1** | 🔴 **La TAGLIA è firmata.** I preset che si installano portano **tre valori diversi**: `0,65%` su `770101`/`770411`/`770202`/`771531` · **`1,00%`** su `770511` e `770260` · `1,30%` sui tre PostNews (`SCHIERAMENTO_FTMO` §⑨, verificato sul disco). Flotta mista = **140.576 $ = 140,6%** di margine a 1:15; tutte a 0,65% = **116.210 $ = 116,2%** (`NOTTE_2026-09-20` §7) | ❌ **[NON DECISA]** | ✍️ **solo Claudio** |
+| **S1** | ✅ **La TAGLIA È FIRMATA.** `InpRiskPercent=2.00` **uniforme** sulle sei sedie (`770101` `770411` `770202` `771531` `770511` `770260`), già scritto dentro i preset installati. PostNews **fuori** stasera. Cap C1 del Guardian a **4,00%** | ✅ **FIRMATA 20/09** | ✅ fatto — nessun gesto a mano |
 | **S2** | 🔴 **L'orologio è MISURATO, non inferito.** Tutti e 10 i preset sono rimappati su **FTMO = BCM + 2** (`PRESET_FTMO_OROLOGIO` §①-②). Quel `+2` è **[LETTO-VIA-SEARCH, 13/08]** (`docs/REGOLAMENTO_FTMO_2026-08.md` r.130), **mai misurato da noi** | ❌ `[INFERITO]` | passo **5** (10 secondi) |
 | **S3** | 🔴 **I nomi dei simboli FTMO sono confermati a video.** Su FTMO possono chiamarsi `US30`, `GER40`/`DE40`, `NAS100`/`US100`, non `U30USD`/`D30EUR`/`NASUSD` (`SCHIERAMENTO_FTMO` §④ passo 6, §⑦.5) | ❌ `[NON NOTO]` | passo **4/5** |
 | **S4** | 🔴 **Il margine regge le sedie che si accendono.** A **1:15** le sette chiedono **121,9%** del conto a 0,65% e **187,5%** a 1,00% (`PACCHETTO_SCHIERAMENTO_PROP` §⓪.②). Il danno non è lo stop-out: è l'**ordine RIFIUTATO in silenzio**, e colpisce sempre le americane (§⓪.③) | ❌ `[INFERITO]` — **nessuna specifica di contratto FTMO è mai stata letta** | passo **5** |
@@ -33,7 +57,7 @@
 | **`771531`** EMA200 Dow 🛑 **S5** | `U30USD` | **H1** | `ABTG_EMA200_771531_FTMO.set` | Cutoff **21** · FriClose **22** *(tutti e due INERTI)* | PF **1,52** OOS · n **517** · **30/30 PASS** walk-forward tick · DD **7,21%** · ~33 op/mese |
 | **`770511`** SuperWave Dow 🛑 **S5** | `U30USD` | **H1** | `ABTG_SuperWave_DOW_H1_770511_FTMO.set` | **0-24, invariato** | PF **1,52** (9/9 combo) · OOS H1 **1,328** n **143** · DD **4,0%** · ~10,8 op/mese |
 | **`770260`** Nasdaq RETEST | `NASUSD` | **M5** | `ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set` | Session **16** · Close **19** | PF **1,10936** OOS · n **94** · DD **3,6753%** 🔴 **merito SOSPESO per campione (n<150 in IS e OOS)** |
-| **`779001`** Guardian | un grafico qualsiasi | — | `ABTG_Guardian_FTMO_2Step.set` | 🔴 **`InpDailyResetHour` 23 → `1` A MANO** | utility, non trada. `InpStartBalance=100000` · daily **4,9%** · totale **9,9%** · pausa **4,0%** · cap C1 **3,25%** · `InpAction=0` = **CHIUDI+BLOCCA** |
+| **`779001`** Guardian | un grafico qualsiasi | — | `ABTG_Guardian_FTMO_2Step.set` | ✅ **`InpDailyResetHour` = `1` già nel file** — 🛑 non toccarlo | utility, non trada. `InpStartBalance=100000` · daily **4,9%** · totale **9,9%** · pausa **4,0%** · cap C1 **4,00%** (firma 20/09) · `InpAction=0` = **CHIUDI+BLOCCA** |
 
 ### ❌ PERCHÉ NON C'È — le escluse, per nome
 
@@ -57,9 +81,9 @@
 ✅ **Riuscito se**: arrivano numero di conto, password *trader* e server per mail.
 🔴 **Se fallisce**: si ferma tutto qui. Non c'è nessun passo che si possa anticipare senza il conto.
 
-### 2️⃣ Installare MT5 FTMO in `C:\MT5_FTMO` · ✍️ Claudio · 🖥️ **VPS** · **10-20 min**
+### 2️⃣ Installare MT5 FTMO in `C:\FTMO` · ✍️ Claudio · 🖥️ **VPS** · **10-20 min**
 🖥️ **BERSAGLIO: il VPS, installazione nuova.** 🚫 **Non** dentro `C:\Program Files\BCM Markets MT5 Terminal` (`50503392`), **non** `...-V3` (`50504263`), 🔴 **non** `C:\BCM_Reale` (`10105439`), **non** `C:\MT5_Backtest` (`50504400`), **non** `C:\MT5_MANUALE` (`50503635`), **non** Pepperstone, **non** Tickmill.
-✅ **Riuscito se**: esiste `C:\MT5_FTMO\terminal64.exe` e le **sette** cartelle dati di casa sono intatte.
+✅ **Riuscito se**: esiste `C:\FTMO\terminal64.exe` e le **sette** cartelle dati di casa sono intatte.
 🔴 **Se fallisce**: riprovare con l'installer della dashboard FTMO. Non installare "sopra" un MT5 esistente.
 
 ### 3️⃣ Login col conto FTMO · ✍️ Claudio · 🪟 **terminale FTMO** · **2-5 min**
@@ -72,7 +96,7 @@
 Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path
 ```
 *(copiata da `SPECIFICHE_E_GRIGLIA_H4_2026-09-20.md` §Istruzioni per Claudio)*
-✅ **Riuscito se**: compare **una riga con `C:\MT5_FTMO`** accanto alle altre. 🔴 Da qui in poi ogni gesto si fa sulla finestra con **quel** `Path`.
+✅ **Riuscito se**: compare **una riga con `C:\FTMO`** accanto alle altre. 🔴 Da qui in poi ogni gesto si fa sulla finestra con **quel** `Path`.
 
 ### 5️⃣ ▶️ **LA SONDA DI PRE-VOLO** · 🤖 una riga · 🖥️ **PowerShell sul VPS** · **~secondi**
 🖥️ **BERSAGLIO: finestra PowerShell sul VPS. SOLA LETTURA: non scrive dentro nessun terminale.** 🪟 MT5 FTMO va lasciato **aperto e connesso**. 🚫 Non tocca `50503392`, `50504263`, **`10105439`**, `50504400`, `C:\MT5_MANUALE`, Pepperstone, Tickmill: **li elenca per escluderli**.
@@ -99,7 +123,8 @@ Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path
    🟢 **Controprova che vale più di uno screenshot** (`PREVOLO_FTMO` §② casella 6): *Initial margin* del Dow per **1 lotto** → con Dow a 46.000, **1:100 ≈ 460 $**, **1:15 ≈ 3.067 $**. Due numeri che non si somigliano.
 🔴 **Se `Digits` è diverso da 2 su `US30`**: `InpBufferPoints=1000` passa da **10,00** a **100,0** punti indice — il livello di rottura si sposta di **dieci volte**. 🚫 **Non si aggiusta a occhio: è una firma di Claudio.** Fermarsi e chiamare.
 
-### 7️⃣ ▶️ **LA RIGA CHE INSTALLA TUTTO** · 🤖 · 🖥️ **PowerShell sul VPS** · **~3 s**
+### 7️⃣ ✅ **[FATTA — 20/09 ore 10:21]** LA RIGA CHE INSTALLA TUTTO · 🤖 · 🖥️ **PowerShell sul VPS** · **~3 s**
+✅ **Eseguita due volte.** L'installazione buona è la **seconda**, al pin **`a298e1d4`** (la prima, al pin `29bed7a1`, portava ancora 0,65%/1,00% e C1 3,25%). Verificato sul disco dallo zip che Claudio ha mandato: **2,00% su tutte e sei**, `InpMaxOpenRiskPct=4.00`, `InpDailyResetHour=1`, modo **SENZA POSTNEWS**. 🔴 **La riga qui sotto è la VERSIONE VECCHIA (pin `489f98c0`, marcatore v2): è rimasta per memoria, NON va rieseguita.**
 🖥️ **BERSAGLIO: finestra PowerShell sul VPS.** ✋ **Nessun MT5 da aprire o chiudere** — il terminale FTMO può restare aperto. La riga **scrive in UNA SOLA cartella**, quella FTMO che identifica da sola, e **solo** in `MQL5\Experts`, `MQL5\Include`, `MQL5\Presets`.
 🚫 **Non tocca**: `50503392` (`C:\Program Files\BCM Markets MT5 Terminal`) · `50504263` (`… -V3`) · 🔴 **`10105439` (`C:\BCM_Reale`)** · `50504400` (`C:\MT5_Backtest`) · `50503635` (`C:\MT5_MANUALE`) · Pepperstone · Tickmill.
 🔑 **Sostituire `IL_TUO_CONTO_FTMO`.** ➕ Per escludere i tre PostNews: aggiungere **`-SenzaPostNews`** dopo `-Pin $pin` (vedi §PostNews).
@@ -117,8 +142,25 @@ Get-Process terminal64 | Select-Object Id, MainWindowTitle, Path
 🔴 **Se esce ≠ 0**: **NON premere F7**, mandare l'output. In **tutti** i rifiuti **zero file finiscono nel terminale** — è una proprietà del disegno, provata su 13 contro-esempi.
 👀 **Da leggere nell'output**: la riga gialla `InpDailyResetHour BCM 23 -> FTMO 1 <<< DA CAMBIARE A MANO` e la riga **SEDIA SOSPESA `770402`**.
 
-### 8️⃣ 🔨 **F7 sul Guardian, PER PRIMO** · ✍️ Claudio · 🪟 **MetaEditor del terminale FTMO** · **3 min**
-🪟 **BERSAGLIO: MetaEditor di `C:\MT5_FTMO`.** 🚫 **NON** quello di `50503392`, 🚫 **NON** quello del reale `10105439`.
+### 7️⃣➕ 🔬 **IL PREVOLO — F7 SU `ABTG_PrevoloFTMO_Specifiche.mq5`, QUESTO PER PRIMO** · ✍️ Claudio · 🪟 **MetaEditor + un grafico di `C:\FTMO` (conto `541452707`)** · **5 min**
+🪟 **BERSAGLIO: il terminale FTMO `541452707` (`C:\FTMO`).** 🚫 **NON** `50503392` (`BCM Markets MT5 Terminal`) · 🚫 **NON** `50504263` (`… -V3`) · 🔴 **NON** il reale `10105439` (`C:\BCM_Reale`) · 🚫 **NON** `50504400` (`C:\MT5_Backtest`) · 🚫 **NON** `50503635` (`C:\MT5_MANUALE`).
+
+**Perché prima di tutto il resto**: è uno **script**, non un EA — **non ha nessun `#include`**, quindi
+se F7 dovesse fallire l'errore è **suo e basta** e non mi confonde la diagnosi dell'include. E soprattutto
+**non trada**: apre zero posizioni, legge e scrive un CSV.
+
+1. MetaEditor di `C:\FTMO` → `MQL5\Scripts\ABTG_PrevoloFTMO_Specifiche.mq5` → **F7**. ✅ Riuscito se `0 errors`.
+2. Aprire **un grafico qualsiasi** del terminale FTMO e **trascinarci sopra lo script** (Navigatore → Script).
+3. 📤 **Mandarmi il file `MQL5\Files\PREVOLO_FTMO_specifiche.csv`.**
+
+👀 **Cosa misura, e perché vale la serata**: `TimeTradeServer() - TimeGMT()` (→ **S2**, l'orologio, oggi
+`[INFERITO]`) · i **nomi veri dei simboli** (→ **S3**) · **margine richiesto**, **`Digits`**, **spread** e
+**`SYMBOL_VOLUME_MAX`** (→ **S4**). Tre luci del semaforo in un colpo solo.
+
+🚦 **È IL CANCELLO: finché non ho letto quel CSV, l'AutoTrading resta SPENTO.**
+
+### 8️⃣ 🔨 **F7 sul Guardian — il primo degli EA** (dopo il prevolo) · ✍️ Claudio · 🪟 **MetaEditor del terminale FTMO** · **3 min**
+🪟 **BERSAGLIO: MetaEditor di `C:\FTMO`.** 🚫 **NON** quello di `50503392`, 🚫 **NON** quello del reale `10105439`.
 File: **`ABTG_Guardian.mq5`** (v1.12, pin `d884f7e1`, **498 righe**).
 ✅ **Riuscito se**: `0 errors, 0 warnings`.
 🔴 **Se muore su `cannot open include file`**: **si ferma tutto** e mi si manda l'errore. È l'unico modo in cui l'include può essere sbagliato, e si scopre al **primo** colpo invece che al nono.
@@ -135,7 +177,7 @@ Uno per sedia, col **nome FTMO** letto al passo 6: DAX **M5** · DAX **M15** · 
 
 ### 1️⃣1️⃣ ⚙️ Caricare i preset + **la taglia** + `InpDailyResetHour=1` · ✍️ Claudio · 🪟 **FTMO** · **10-15 min**
 🟢 **Gli orari sono GIÀ rimappati dentro i `.set`**: non si tocca nessun `InpSessionHour`. La riga del passo 7 li stampa con `(gia rimappato: NON TOCCARE)`.
-🔴 **Restano DUE valori a mano**: **(a)** `InpDailyResetHour` **23 → 1** sul preset del Guardian — è l'unico senza marcatore, la riga lo grida in giallo; **(b)** 🔴 **`InpRiskPercent`, che è la firma S1 di Claudio.**
+✅ **NON RESTA NESSUN VALORE A MANO** (aggiornato 20/09 ore 10:30). 🔴 Qui c'era scritto *«restano DUE valori»*: **non è più vero**, e cambiarli a mano ora **romperebbe** la firma. **(a)** `InpDailyResetHour` è **già = 1** nel preset installato; **(b)** `InpRiskPercent` è **già = 2.00** su tutte e sei — firma di Claudio del 20/09. 👍 **Si carica il `.set` e basta.**
 ⚠️ **Guardare anche**: `InpUsaGuardian` (default **`true`** ovunque, verificato ai pin) · su `770411` **`InpMaxSpread=0` = filtro di spread SPENTO** su un broker di cui non conosciamo gli spread (`SCHIERAMENTO_FTMO` §5.3 e §⑦.8): **firmare o misurare**.
 🔴 **Se un preset carica meno input del previsto**: è malformato → fermarsi (`PRESET_FTMO_OROLOGIO` N10).
 
