@@ -443,3 +443,52 @@ python3 backtest_pipeline/dd_portafoglio.py --deposito 100000 \
 (`--deposito 50000` dà la lettura equivalente a 2,00%.) La metrica FTMO-statica e il Monte Carlo
 sull'ordine dei giorni sono un calcolo aggiuntivo fatto in questa sessione sugli **stessi** file,
 descritto in §2.2 — nessuno script nuovo committato.
+
+---
+
+## 🔬 CONTROPROVA INDIPENDENTE (sessione principale, 20/09 ore 12:45)
+
+Le due affermazioni che cambiano una decisione già firmata **non si accettano
+sulla parola di un agente**. Rimisurate a mano, sul CSV grezzo:
+
+### ① Il «0,96% realizzato» che avevo dato a Claudio — **NON ESISTE**
+`grep -rn "0,96%" --include=*.md .` su tutto il repo → **una sola occorrenza**:
+`report/P0_OPENINGREVERSALB_2026-09-08.md` r.38, che è il **DD di backtest** di
+`ABTG_OpeningReversalB`, un candidato **bocciato con n=2**. Non è forward, non è
+realizzato, non è di nessuna delle sei sedie.
+🔴 **Quel numero l'ho portato io in chat la mattina del 20/09, ed è il numero
+che ha reso accettabile triplicare il rischio.** Il realizzato vero è
+**−0,648%**, che è la peggior **giornata** sul 100k — e il repo stesso la
+dichiara già come **pavimento**, non come peggior giornata vera, perché il
+flottante non è nel CSV (`PIANO_CHALLENGE_OTTOBRE.md` r.344).
+
+### ② `770101` ha DAVVERO girato al 2% in forward — **riprodotto al centesimo**
+Su `data/statements/trades_auto.csv`, filtrando `magic=770101` e sommando
+`profit + commission + swap`, **senza bisogno di ricostruire il saldo** (la
+discesa massima di un flusso P/L è invariante all'ancora):
+
+```
+770101: 39 posizioni  (20/07/2026 -> 17/09/2026)
+discesa massima del flusso P/L : 747,60 EUR
+   su saldo 5.460 EUR  ->  13,69%
+   su saldo 5.100 EUR  ->  14,66%
+perdite: n=9, media -97,26 EUR, peggiore -120,80 EUR
+   stop peggiore  ->  2,21% - 2,37% del conto
+```
+
+🔴 **Gli stop valgono il 2,2% del conto: la taglia firmata per FTMO non è
+teoria, è già stata girata per 39 posizioni.** E il `747,60 EUR` coincide alla
+cifra con quello dell'agente, calcolato per un'altra strada.
+
+🔴 **E il confronto che chiude la questione**: backtest di `770101` a 2,00% →
+**13,42% – 14,47%**. Forward realizzato alla stessa taglia → **13,69%**.
+**Non divergono: coincidono.** L'argomento *«il backtest è pessimista, guarda il
+realizzato»* — che era **mio** — è smontato da una misura, non da un'opinione.
+
+### ⚠️ Un conto che ho sbagliato e che NON va usato
+Il mio primo tentativo ricostruiva il saldo cumulando i P/L da un'ancora di
+5.102 EUR posta all'**inizio** della serie, e dava un DD del **389%**: assurdo,
+perché quell'ancora è di **metà serie** (`772361`, 14/08) e va ricostruita
+all'indietro. Il numero buono è quello sopra, che **non usa nessuna ancora**.
+Lo scrivo invece di cancellarlo: un 389% lasciato in giro sarebbe diventato una
+citazione.
