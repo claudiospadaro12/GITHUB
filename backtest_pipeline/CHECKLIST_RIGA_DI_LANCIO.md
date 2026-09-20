@@ -26791,3 +26791,33 @@ cui l'ha presa.**
 📌 Parente della **178** (l'attesa provata contro il nulla invece che contro l'ipotesi
 alternativa) e della **488** (scrivere «MISURATO» senza nominare la misura), ma la porta
 d'ingresso è diversa: qui la misura è nominata *e sbagliata nel nominarla*.
+
+## CLASSE 490 — 📜🔑 **`Start-Transcript` SCRIVE L'INTERA RIGA DI COMANDO NELL'INTESTAZIONE** (20/09/2026)
+**Il caso reale**: per salvare la diagnosi del trasporto CSV (righe `SALTATI`,
+`FALLITI`, `oltre il tetto`, `NOTA: codice 401` — le uniche che dicono **se il
+trasporto è completo**, e che muoiono con la finestra) ho avvolto la riga in
+`Start-Transcript`. 🟢 Giusto. 🔴 **Ma `Start-Transcript` scrive in testa al file
+la riga `Host Application:` con l'INTERA riga di comando.**
+Qui è innocuo — **verificato**: l'unica stringa di 40 esadecimali nel referto è
+il pin, e il token GitHub si legge **da disco**, non sta sulla riga di comando.
+🔴 **Ma un segreto messo INLINE in una riga di lancio finirebbe in chiaro in un
+file sul Desktop, e da lì nello zip che mandiamo a Claudio.**
+**La regola**: `Start-Transcript` è sicuro **a condizione che i segreti stiano su
+disco**. Prima di avvolgere una riga in un transcript si guarda la riga: se porta
+un segreto inline, o si toglie il segreto dalla riga, o non si trascrive.
+
+## CLASSE 491 — 🌊📚 **IL TRASPORTO VIA API CONTENTS FA UN COMMIT PER FILE** (20/09/2026)
+**Il caso reale**: `carica_risultati.ps1` carica i CSV con l'API GitHub Contents,
+che fa **una PUT per file** e quindi **un commit per file**. **Misurato**:
+`git log --all --grep="Risultati dal VPS" | wc -l` → **98**, tutti del **13/09**,
+`git show --stat` → **1 file changed** ciascuno.
+🔴 E la mia riga del bersaglio ne dichiarava **zero**. Io stesso avevo scritto a
+Claudio che il trasporto erano «i commit `714d3d63` e `0381b210`»: erano **due su
+98**.
+👉 Con ~96 file nuovi la prossima corsa mette **un centinaio di commit su
+`lavoro`** mentre altre sessioni ci lavorano (terreno delle classi 482/483), e
+ogni checkout locale resta indietro finché non fa `git pull`.
+**La regola**: la riga del bersaglio deve dire **cosa fa**, non solo cosa non
+tocca — e l'effetto più **rumoroso** va dichiarato anche quando è normale e
+voluto. Un effetto normale scoperto dopo, in un `git log` illeggibile, sembra un
+guasto.
