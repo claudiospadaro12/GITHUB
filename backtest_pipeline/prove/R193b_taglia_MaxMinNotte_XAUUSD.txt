@@ -1,0 +1,285 @@
+# ======================================================================
+#  EA: ABTG_MaxMinNotte
+#  R193b -- LA TAGLIA DELLA SEDIA SOSPESA 770402 (ORO) CONTRO IL MURO
+#           FTMO. XAUUSD H2. Asse: InpRiskPercent (4 celle).
+#  Scritto il 20/09/2026. Criteri congelati PRIMA dei numeri, dentro
+#  questo file (paragrafi ANCORA / ATTESA / CONTRO-ESEMPIO / SOGLIE).
+#  GEMELLO DI R193a: si lanciano nella stessa serata, sullo stesso
+#  binario, e si leggono INSIEME. Ma sono due file perche' misurano due
+#  variabili diverse, e un file prova misura UNA variabile.
+#
+#  LA DOMANDA, e non e' la stessa di R193a:
+#    >>> il preset FTMO in repo
+#        (mql5/Presets/FTMO/ABTG_MaxMinNotte_ORO_770402_FTMO.set)
+#        porta InpRiskPercent=2.00, firma di Claudio del 20/09. Il
+#        contratto di questa sedia e' misurato a 0,5%. A che DD
+#        corrisponde 2,00% -- MISURATO, non riscalato a mano -- e
+#        qual e' la taglia PIU' ALTA che resta sotto il muro FTMO
+#        del 10%? <<<
+#
+#  PERCHE' NON BASTA LA MOLTIPLICAZIONE. Il DD in casa si riscala
+#  "[APPROSSIMATO lineare]" per convenzione (CONTRATTI_SEDIE.md punto
+#  2), e su questa sedia quella convenzione e' gia' stata usata DUE
+#  volte per scrivere il contratto (19,72% -> 10,0%; 10,6% a 1%). Ma
+#  il lotto si calcola sul BALANCE corrente, quindi le perdite
+#  compongono e la scala vera non e' lineare: 4x il rischio NON fa 4x
+#  il drawdown, fa 1-(1-dd)^4. Su un numero che decide se una sedia
+#  entra in challenge, l'approssimazione si paga misurandola.
+# ======================================================================
+#
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R193b_taglia_MaxMinNotte_XAUUSD.txt
+#    -Simbolo XAUUSD -Periodo H2
+#    -DaQuando 2020.01.01 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 1 -Etichetta r193b
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 4 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma -- vedi S1.)
+#
+#  !! BERSAGLIO: banco di backtest 50504400, cartella C:\MT5_Backtest.
+#     NON 50503392 (BCM Markets MT5 Terminal), che ha QUESTA STESSA
+#     sedia VIVA col magic 770402 e non si tocca; NON 50504263 (-V3);
+#     NON 10105439 (C:\BCM_Reale, conto REALE). Il magic di questo file
+#     e' 761702, VERGINE in tutto il repo (cercato il 20/09/2026).
+#
+#  !! -Modello 1 (OHLC M1), NON 4. Stessa ragione di R193a e di R103:
+#     sull'oro i TICK REALI BCM iniziano 2024.07.05 [MISURATO,
+#     R100_REFERTO.md] e la finestra parte 2020.01.01.
+#     >>> E QUI IL MODELLO 1 PESA PIU' CHE ALTROVE, perche' il numero
+#         che esce e' un DRAWDOWN e serve a decidere una taglia: il DD
+#         OHLC e' un LIMITE INFERIORE del rischio vero. Un DD misurato
+#         a 9,8% NON vuol dire "sotto il muro del 10%": vuol dire
+#         "gia' a 9,8% nel migliore dei mondi possibili". Questa frase
+#         e' dentro la soglia S3, non e' un commento.
+#     >>> ANTEPRIMA DI -SoloControllo: dira' "tick reali" ed e' FALSO
+#         (classe 356, difetto noto del driver).
+#
+#  !! -Deposito 100000. E' il deposito di R103 (R103_CRITERI.md r.212,
+#     "100.000 EUR, leva 100"), ed e' anche l'ordine di grandezza del
+#     conto FTMO 541452707 (100k 2-Step). Senza questo numero il
+#     pavimento del lotto morderebbe e la scala del rischio sarebbe
+#     falsata verso il basso (classe 366).
+#     >>> CONTO CHE VA FATTO PRIMA, e assolve il deposito: a 0,5% su
+#         100.000 il rischio per trade e' 500; lo SL misurato su questa
+#         sedia sta fra 25 e 41 USD/oz (9 operazioni vere,
+#         MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md C.2), cioe'
+#         2.500-4.100 USD per lotto -> lotto 0,12-0,20. E' 12-20 volte
+#         il minimo: il pavimento MathMax(mn,...) NON morde a nessuna
+#         delle quattro taglie di questo asse, e la scala si legge
+#         pulita. A deposito 10.000 il conto si ribalterebbe.
+#
+#  !! ORARI IN ORA SERVER BCM = ORA ITALIANA MENO UNA (identico a
+#     R193a): box 23:00-04:59, piazzamento 07:00, cutoff 08:30, flat
+#     17:30. NON le ore del preset FTMO (1 / 6:59 / 9 / 10:30 / 19:30),
+#     che sono gli STESSI istanti reali letti su un orologio che e'
+#     BCM+2 (report/PRESET_FTMO_OROLOGIO_2026-09-20.md).
+#
+# ----------------------------------------------------------------------
+#  A. L'ANCORA -- e la manopola non e' mai stata girata. MISURATO OGGI.
+# ----------------------------------------------------------------------
+#  A1. InpRiskPercent NON E' MAI STATO UN ASSE, in NESSUN file prova di
+#      questo progetto. Verificato il 20/09/2026:
+#         grep -rl "^InpRiskPercent=.*||Y" backtest_pipeline/prove/
+#         -> ZERO file (su 863).
+#      E sui CSV gia' girati di questo EA sull'oro: 10 file hanno la
+#      colonna InpRiskPercent, e ognuno ha UN SOLO valore dentro
+#      (r17/r19/r19b: '1'; il DAX e l'EURUSD sono altre sedie).
+#      >>> Non e' "gia' provato e scartato": e' una CASELLA LIBERA.
+#          La taglia e' sempre stata PINNATA e poi RISCALATA A MANO.
+#
+#  A2. IL MURO, e non e' nostro: FTMO 2-Step usa un Maximum Loss
+#      STATICO del 10% -- "equity must not drop below 90% of the
+#      initial account balance at any given time"
+#      (docs/REGOLAMENTO_FTMO_2026-08.md r.27). Piu' un Max Daily Loss
+#      del 5% su EQUITY, ricalcolato a mezzanotte italiana (r.25).
+#      >>> Il 10% e' un muro, non un obiettivo: lo tocchi una volta e
+#          hai finito. Non c'e' limite di TEMPO (r.17), quindi una
+#          taglia piu' bassa costa solo velocita', che e' l'unica cosa
+#          che FTMO non chiede.
+#
+#  A3. DA DOVE PARTE L'ATTESA -- i due numeri gia' misurati:
+#      R103_REFERTO_FINALE.md r.16: DD 10,6% NORMALIZZATO a 1% su
+#        2020.01.01-2026.06.30 (la sedia girava a 0,5%), n 693, PF 1,31.
+#        -> a 0,5% quel DD vale circa 5,3%.
+#      R100_REFERTO.md r.15: DD 19,72% a 1% su 22 anni (2004-2026),
+#        peggior giorno -1,07%. -> a 0,5% circa 10,0%, che e' il numero
+#        scritto nel contratto (CONTRATTI_SEDIE.md r.95).
+#      >>> Le due finestre danno numeri DIVERSI ed e' giusto cosi':
+#          22 anni contengono regimi che 6,5 anni non hanno. Questo
+#          file misura la finestra di 6,5 anni, la stessa di R103, e
+#          NON pretende di sostituire il numero dei 22 anni.
+#          La taglia si decide sul PEGGIORE dei due, non sul comodo.
+#
+#  A4. E IL CONFRONTO CHE SERVE A CLAUDIO, gia' agli atti
+#      (report/FIRME_2026-09-19_SERA.md r.66-68): DD a 2,00% delle
+#      sedie GIA' SCHIERATE -- 770101 14,46%, 770202 8,78%, 770260
+#      7,36%. Il numero di 770402 va letto CONTRO questi tre, non da
+#      solo: se esce a 20%, questa sedia non e' "un po' piu' rischiosa
+#      delle altre", e' fuori scala.
+#
+# ----------------------------------------------------------------------
+#  B. L'ATTESA, congelata PRIMA dei numeri
+# ----------------------------------------------------------------------
+#  B1. MONOTONIA. Il DD deve CRESCERE passando da 0,5 a 1,0 a 1,5 a
+#      2,0. Se non cresce in modo monotono, qualcosa di strutturale sta
+#      mordendo (pavimento del lotto, margine, rifiuti di ordine) e
+#      NESSUNO dei quattro numeri e' usabile -> vedi S2.
+#
+#  B2. IL NUMERO ATTESO A 0,5% (la cella di controllo): DD sulla
+#      sotto-finestra OOS fra 4,0% e 7,0%. Il centro e' 5,3% (= 10,6%
+#      di R103 riportato alla taglia). La banda e' larga perche' la
+#      sotto-finestra OOS (60% di 6,5 anni) non e' la finestra piena di
+#      R103: e' piu' corta, quindi il DD atteso e' semmai PIU' BASSO.
+#
+#  B3. IL NUMERO ATTESO A 2,00%: DD fra 19% e 22%.
+#      Da dove: moltiplicativo 1-(1-0,053)^4 = 19,6%; lineare
+#      0,053 x 4 = 21,2%. Le due formule danno i due estremi, e il vero
+#      sta in mezzo perche' il lotto si ricalcola sul balance.
+#      >>> QUINDI ME LO ASPETTO SOPRA IL MURO DEL 10%, E LO SCRIVO
+#          PRIMA DI VEDERLO. Questo round non e' scritto per assolvere
+#          la sedia: e' scritto per dare a Claudio il NUMERO e la
+#          TAGLIA MASSIMA, che e' l'informazione che gli manca.
+#
+#  B4. IL NUMERO CHE IL ROUND DEVE CONSEGNARE COMUNQUE VADA:
+#      la taglia piu' alta fra le quattro il cui DD misurato resta
+#      sotto il 10,0%. Se e' 1,0% o 1,5%, la domanda successiva e' di
+#      REGOLAMENTO e non di misura (vedi C3) e la decide Claudio.
+#
+#  B5. IL MERITO NON CAMBIA CON LA TAGLIA, ed e' un controllo interno
+#      gratis: il numero di OPERAZIONI deve essere IDENTICO sulle
+#      quattro celle (la taglia non tocca ne' l'ingresso ne' l'uscita),
+#      e il PF deve restare quasi identico. Se n cambia fra le celle,
+#      la taglia sta influenzando il TRADING -- e allora c'e' un
+#      difetto da capire prima di guardare il DD (vedi S4).
+#
+# ----------------------------------------------------------------------
+#  C. IL CONTRO-ESEMPIO -- costruito PRIMA (regola del 10/09)
+# ----------------------------------------------------------------------
+#  C1. "Se a 2,00% il DD esce SOTTO il 10%, la sedia passa." 🔴 NO, e
+#      questo e' il contro-esempio piu' importante del file. Un DD a
+#      2,00% sotto il 10% CONTRADDIREBBE tutti e due i numeri gia'
+#      misurati (R100 e R103, che a 1% danno 19,72% e 10,6%). Se esce,
+#      la conclusione NON e' "buona notizia": e' "una delle tre misure
+#      e' sbagliata, e finche' non so quale non schiero niente".
+#      Le spiegazioni alternative da escludere, per nome: (a) la
+#      finestra girata non e' quella dichiarata; (b) il deposito non e'
+#      100.000; (c) il pavimento del lotto sta tagliando le taglie
+#      alte verso il basso; (d) ordini rifiutati per margine.
+#      Tutte e quattro si leggono nel log e nel CSV, non si indovinano.
+#
+#  C2. "Il DD OHLC e' abbastanza." NO: e' un LIMITE INFERIORE. Per
+#      questo la soglia S3 non e' "sotto 10%" ma "sotto 8%": due punti
+#      di margine sono il prezzo dichiarato del modello. Il numero 8 e'
+#      congelato QUI, prima dei risultati, e non si tratta dopo.
+#
+#  C3. "Basta abbassare la taglia di questa sedia e si schiera." Non
+#      e' una decisione tecnica ed e' bene che non lo sembri: il
+#      preset FTMO porta InpRiskPercent=2.00 con una nota esplicita --
+#      "La taglia e' UNIFORME su tutte: FTMO vieta le size erratiche
+#      (Forbidden Practices, 'substantially larger or smaller position
+#      sizes')". Mettere 770402 a 0,5% mentre le altre sei stanno a
+#      2,00% e' una scelta che tocca il REGOLAMENTO della prop, e
+#      quindi e' di Claudio. Questo file gli porta il numero; la firma
+#      resta sua.
+#
+#  C4. "La finestra di 6,5 anni basta per una taglia." No, e va detto:
+#      il contratto scritto (10,0% a 0,5%) viene dai 22 ANNI di R100,
+#      non da qui. Questo round misura 6,5 anni perche' e' la finestra
+#      dove esiste anche il PF e l'n (693). Se le due finestre
+#      dessero taglie massime diverse, VINCE LA PIU' PRUDENTE.
+#
+# ----------------------------------------------------------------------
+#  D. LE SOGLIE, congelate PRIMA. Si citano come S<n> [R193b].
+# ----------------------------------------------------------------------
+#  S1. Se -SoloControllo non stampa esattamente 4 celle per finestra:
+#      STOP, non si lancia.
+#  S2. Se il DD non e' MONOTONO crescente sulle quattro taglie: STOP.
+#      Nessun numero di questo round e' usabile finche' non si capisce
+#      perche'.
+#  S3. 🔴 LA SOGLIA CHE DECIDE: se il DD misurato a InpRiskPercent=2.00
+#      supera 8,0% sulla sotto-finestra OOS, 770402 NON si schiera a
+#      2,00%. Otto e non dieci, perche' il DD OHLC e' un limite
+#      inferiore (C2). Non e' negoziabile con un'altra griglia: una
+#      griglia piu' fitta su un motore che sfonda il muro trova celle
+#      verdi per caso, ed e' la cella che brucia la challenge
+#      (regola del 19/08).
+#  S4. Se n cambia fra le quattro celle: c'e' un difetto strutturale
+#      (B5). Si indaga prima di leggere il DD.
+#  S5. Se il DD a 2,00% esce SOTTO l'8%: NON si conclude niente a
+#      favore. Si applica C1 e si cerca quale delle tre misure mente.
+#
+#  >>> E QUELLO CHE QUESTO ROUND NON FA: non promuove, non boccia il
+#      MOTORE, non sceglie una cella di ingresso, non tocca il
+#      forward, non cambia nessun preset, non tocca il conto reale
+#      10105439. Misura un drawdown a quattro taglie e consegna la
+#      taglia massima. La firma sulla taglia resta di Claudio.
+#
+# ----------------------------------------------------------------------
+#  E. LA CELLA -- identica a R193a campo per campo, TRANNE
+#     InpRiskPercent (che qui e' l'asse) e il magic. Cosi' i due round
+#     si leggono uno contro l'altro senza correzioni.
+# ======================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H2
+@DAQUANDO 2020.01.01
+@FINOA    2026.06.30
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0.5||2.0||Y
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato di proposito (stessa scelta di R151a,
+# R170b e R193a): il default compilato e' la stringa VUOTA e un pin
+# vuoto MT5 lo IGNORA in silenzio. Con InpUseNewsFilter=false e' inerte.
+InpNewsFlatten=true||true||0||true||N
+# InpComment porta l'etichetta del round (traccia nel per-trade), non la
+# stringa viva "MAXMIN ORO". Zero effetto sul comportamento.
+InpComment=MAXMINR193B
+InpMagic=761702||761702||0||761702||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N

@@ -26744,3 +26744,50 @@ uno zip in chat e sparisce.
 e lasciato il **commento** a r.403-411 con la frase vecchia. **Stesso file, due
 versioni dei fatti.** Quando si corregge un'affermazione, si cerca la stessa
 affermazione *in tutto il file* — `grep`, non memoria.
+
+
+## CLASSE 489 — 🔤🔍 **LA STRINGA DA CERCARE RISCRITTA A MEMORIA**: il criterio di PASS è un `grep`, e il `grep` cerca una frase che nel codice non esiste (20/09/2026)
+
+**Il caso, ed è mio.** Il round R193a su `770402` ha come **controllo decisivo** una conta:
+la guardia nuova di `ABTG_MaxMinNotte` v1.11 ha morso **se e solo se** nel log del tester
+compare una certa riga, e l'attesa congelata è **«zero occorrenze»**. Nella bozza del
+referto avevo citato la riga così:
+
+```
+"oggi ha già operato (storico simbolo+magic): non ripiazzo."
+```
+
+Nel sorgente (`7d0da9f9:mql5/Experts/ABTG_MaxMinNotte.mq5` r.287) c'è scritto:
+
+```
+"oggi ho gia' operato (storico simbolo+magic): non ripiazzo."
+```
+
+🔴 **Due differenze: «ha» invece di «ho», e «già» invece di «gia'».** Chi avesse cercato la
+mia versione avrebbe trovato **zero occorrenze** — che è **esattamente il valore atteso per
+il PASS**. 👉 **Il difetto non produce un errore: produce il risultato giusto per la ragione
+sbagliata, e quindi non si vede.**
+
+### 🧨 Perché questa classe è peggiore di un refuso
+Un criterio della forma *«la stringa X deve comparire ZERO volte»* è **degenere rispetto
+agli errori di trascrizione**: qualunque X sbagliata passa. È l'unica famiglia di criteri in
+cui **l'errore dello strumento e il successo della misura hanno la stessa firma**.
+Il gemello *«la stringa X deve comparire N>0 volte»* è invece auto-protetto: una X sbagliata
+fallisce subito e si scopre.
+
+### La regola
+🔴 **Una stringa che entra in un criterio di PASS/FAIL si COPIA dal sorgente con
+`git show <pin>:<file> | grep`, mai a memoria, e il referto dichiara il PIN e la RIGA da
+cui l'ha presa.**
+- ⚠️ **E si dichiara anche il PREFISSO che il log aggiunge**: qui `Log()` (r.210) fa
+  `Print("[MaxMinNotte] ", m)`, quindi nel giornale la riga è
+  `[MaxMinNotte] oggi ho gia' operato …`. Un `grep` **ancorato a inizio riga** (`^oggi`)
+  non la trova, e di nuovo trova zero.
+- 📌 **E quando l'attesa è ZERO, si costruisce sempre il controllo POSITIVO che dimostra
+  che il grep funziona.** In R193a è l'**autotest** di `OnInit` (`InpAutoTest=true`), che a
+  HEAD esiste e prima di `7d0da9f9` no: il log **deve** contenere l'autotest **e non
+  contenere** il gate. Una sola delle due non è una misura.
+
+📌 Parente della **178** (l'attesa provata contro il nulla invece che contro l'ipotesi
+alternativa) e della **488** (scrivere «MISURATO» senza nominare la misura), ma la porta
+d'ingresso è diversa: qui la misura è nominata *e sbagliata nel nominarla*.

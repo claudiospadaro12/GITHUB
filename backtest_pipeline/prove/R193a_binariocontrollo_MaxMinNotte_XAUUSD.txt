@@ -1,0 +1,334 @@
+# ======================================================================
+#  EA: ABTG_MaxMinNotte
+#  R193a -- IL CONTROLLO DI BINARIO DELLA SEDIA SOSPESA 770402 (ORO)
+#           XAUUSD H2. Asse TECNICO: InpMagic, due gemelle (2 celle).
+#  Scritto il 20/09/2026. Criteri congelati PRIMA dei numeri, dentro
+#  questo file (paragrafi ANCORA / ATTESA / CONTRO-ESEMPIO / SOGLIE).
+#
+#  NON E' UN ROUND DI RICERCA. Non cerca una cella migliore, non muove
+#  nessun parametro di ingresso e non propone niente da promuovere.
+#  Risponde a UNA domanda sola, e la domanda e' questa:
+#
+#    >>> il contratto di 770402 (PF 1,31 - n 693 - DD 10,6% a 1%) e'
+#        stato misurato con il binario 5fc0bc31. In campo gira
+#        08239510. Sulla FTMO si schiererebbe 7d0da9f9 (HEAD).
+#        Il contratto REGGE su HEAD, si' o no? <<<
+#
+#  Se regge, la sedia perde la sospensione tecnica e resta solo la
+#  decisione sulla TAGLIA (R193b). Se non regge, il contratto va
+#  riscritto sui numeri di QUESTA corsa e 770402 resta sospesa.
+# ======================================================================
+#
+#  SI LANCIA CON:
+#    -Expert ABTG_MaxMinNotte
+#    -Prova prove\R193a_binariocontrollo_MaxMinNotte_XAUUSD.txt
+#    -Simbolo XAUUSD -Periodo H2
+#    -DaQuando 2020.01.01 -Fino 2026.06.30
+#    -Deposito 100000 -Modello 1 -Etichetta r193a
+#    -TerminaleBacktest "C:\MT5_Backtest"
+#  (prima SEMPRE con -SoloControllo: deve stampare 2 celle per finestra.
+#   Se ne stampa un numero diverso, ci si ferma -- vedi S1.)
+#
+#  !! BERSAGLIO: banco di backtest 50504400, cartella C:\MT5_Backtest.
+#     NON 50503392 (BCM Markets MT5 Terminal), che ha QUESTA STESSA
+#     sedia VIVA col magic 770402 e non si tocca; NON 50504263 (-V3);
+#     NON 10105439 (C:\BCM_Reale, conto REALE). I magic di questo file
+#     sono 761700/761701, VERGINI in tutto il repo (cercati il
+#     20/09/2026: zero occorrenze), quindi nemmeno un incrocio di
+#     etichette con la sedia viva e' possibile.
+#
+#  !! -Modello 1 (OHLC M1), NON 4. E' l'INVERSO della regola di casa e
+#     va detto perche' e' facile sbagliarla per abitudine (classe 273):
+#     sull'oro i TICK REALI BCM iniziano 2024.07.05 [MISURATO,
+#     R100_REFERTO.md] e questa finestra parte 2020.01.01 -- quattro
+#     anni e mezzo PRIMA del muro dei tick. R100, R103 e R151a, sulla
+#     STESSA sedia e sulla STESSA finestra, hanno girato a Modello 1
+#     per lo stesso motivo. Non e' una scelta nuova: e' l'unica
+#     disponibile se si vuole confrontare con R103.
+#     >>> E IL MODELLO 1 NON E' UN PERMESSO: il DD che esce e' un
+#         LIMITE INFERIORE del rischio e il profitto e' una STIMA DEL
+#         LORDO (spread corrente, nessuno slippage, riempimenti
+#         ideali). Identico a quanto dichiarato da R100 e R103.
+#     >>> ATTENZIONE ALL'ANTEPRIMA DI -SoloControllo (classe 356):
+#         walkforward_generico.ps1 r.1000 scrive `Model=4` CABLATO
+#         nell'anteprima mentre la corsa vera usa `Model=$Modello`
+#         (r.1654). Qui l'anteprima dira' "tick reali" ed e' FALSO.
+#
+#  !! -Deposito 100000. NON e' il default del driver (10.000). E' il
+#     deposito dichiarato da R103 nei propri criteri
+#     (R103_CRITERI.md r.212: "deposito 100.000 EUR, leva 100"), ed e'
+#     l'unico che rende confrontabile il numero. Con 10.000 il
+#     pavimento del lotto morderebbe su una frazione diversa delle
+#     operazioni e il confronto decadrebbe (classe 366).
+#
+#  !! ORARI IN ORA SERVER BCM = ORA ITALIANA MENO UNA.
+#     Box InpBoxStartHour=23 -> InpBoxEndHour=4/Min=59 = 23:00-04:59
+#     SERVER = 00:00-05:59 IT. Piazzamento InpPlaceHour=7/Min=0 =
+#     07:00 SERVER = 08:00 IT. Cutoff 08:30 server = 09:30 IT. Flat
+#     InpCloseHour=17/InpCloseMin=30 = 17:30 SERVER = 18:30 IT.
+#     >>> NON si usano qui le ore del preset FTMO (1 / 6:59 / 9 / 10:30
+#         / 19:30). Quelle sono le STESSE ore reali lette sull'orologio
+#         FTMO, che e' BCM+2 (report/PRESET_FTMO_OROLOGIO_2026-09-20.md).
+#         Su un feed BCM farebbero partire la sedia DUE ORE PRIMA, su un
+#         mercato che non e' quello misurato. Il preset FTMO si valida
+#         sull'orologio FTMO, questo file gira sull'orologio BCM, e i
+#         due descrivono lo STESSO istante reale.
+#
+# ----------------------------------------------------------------------
+#  A. L'ANCORA -- da dove viene ogni numero che questo file cita
+# ----------------------------------------------------------------------
+#  A1. IL CONTRATTO DELLA SEDIA, e chi l'ha misurato:
+#      report/CONTRATTI_SEDIE.md r.95 e report/CENSIMENTO_CONTRATTI.md
+#      r.220 -> DD promesso 19,72% a rischio 1% (22 anni, R100) ->
+#      10,0% a 0,5% [APPROSSIMATO lineare, firma del 23/08].
+#      backtest_pipeline/risultati_archivio/R103_REFERTO_FINALE.md r.16
+#      -> "MaxMinNotte XAUUSD | 0,5% | +24.736 | +49.473 | 1,31 |
+#         10,6% | 693 | 2/7".
+#      >>> Questi sono gli UNICI numeri della sedia con n >= 150.
+#
+#  A2. CON QUALE BINARIO. Misurato, non dedotto:
+#      R100_REFERTO.md r.3 dichiara il pin `adbc27c` (23/08);
+#      R103_REFERTO_FINALE.md r.5 dichiara il pin `7e2fb0d` (24/08).
+#      `git rev-parse <pin>:mql5/Experts/ABTG_MaxMinNotte.mq5` da' per
+#      tutti e due lo STESSO blob 12afd16e, che e' quello di `5fc0bc31`
+#      (19/08, 615 righe).
+#        08239510 (in campo) -> blob 5b6b37fb, 539 righe
+#        5fc0bc31 (misurato) -> blob 12afd16e, 615 righe
+#        7d0da9f9 (HEAD)     -> blob 3ce0ccd6, 918 righe
+#      >>> Il contratto NON e' stato misurato col binario in campo, E
+#          NON e' stato misurato con HEAD. E' stato misurato con un
+#          TERZO binario, che sta in mezzo ai due.
+#
+#  A3. CHE COSA SEPARA IL BINARIO MISURATO DA HEAD. Diff letto riga per
+#      riga il 20/09 (`git diff 5fc0bc31 7d0da9f9 -- ...MaxMinNotte.mq5`,
+#      scartati commenti e righe vuote): +303 righe, e TUTTE stanno in
+#      UN solo meccanismo piu' il suo autotest --
+#        gOperatoOggi / gUltimoCheckStorico (variabili nuove)
+#        PosMia_Calc / TimbraGiornata_Calc / GiornataSpesa_Calc /
+#          PuoArmare_Calc / ContaPosizioniMie / HaGiaOperatoOggi /
+#          UnTradeAlGiorno / Autotest (funzioni nuove)
+#        + 1 chiamata in OnInit, + 1 in OnTick, + il ramo in MMP_WAIT,
+#        + l'azzeramento in ResetDay, + l'input InpAutoTest.
+#      NON toccati, verificati per assenza dal diff: TryPlace,
+#      ManagePos, LotByRisk, NormVol, SLforLong/SLforShort, ComputeBox,
+#      HandleOCO, CancelPendings, EndOfDay, CorrBias, il filtro news.
+#      >>> Cioe': fra il binario che ha misurato il contratto e quello
+#          che si schiererebbe NON c'e' nessuna differenza di INGRESSO,
+#          di STOP, di TAGLIA o di USCITA. C'e' una sola guardia in
+#          piu'.
+#
+#  A4. E IL BINARIO IN CAMPO E' UN'ALTRA COSA ANCORA. 08239510 gli
+#      mancano CINQUE commit, e due mordono:
+#        d4da7d7a (06/08) breakeven annegato nel parziale. A 0,01 lotti
+#          NormVol(vol*50%) = 0 -> niente parziale E niente stop in
+#          pari. MISURATO che morde su 9 trade su 9 della sedia viva
+#          (report/MAXMINNOTTE_ORO_770402_DIAGNOSI_2026-09-13.md B.1).
+#        3af47ed9 (08/08) lotto da OrderCalcProfit invece del tick
+#          value nudo.
+#      Tutti e due sono GIA' DENTRO il binario che ha misurato il
+#      contratto (5fc0bc31 e' posteriore a tutti e due) e dentro HEAD.
+#      >>> Quindi il difetto del breakeven NON e' una ragione per
+#          sospettare il contratto: e' una ragione per NON schierare il
+#          binario in campo. Sono due frasi diverse e vanno tenute
+#          separate.
+#
+# ----------------------------------------------------------------------
+#  B. L'ATTESA, congelata PRIMA dei numeri
+# ----------------------------------------------------------------------
+#  B1. LE DUE GEMELLE 761700/761701 DEVONO DARE RISULTATI IDENTICI AL
+#      CENTESIMO (cancello G1 di determinismo). Il magic non entra in
+#      nessuna decisione dell'EA se non come etichetta.
+#
+#  B2. IL CONTROLLO DECISIVO E' UNA CONTA SU UNA STRINGA, non un PF.
+#      InpVerbose=true. Quando la guardia NUOVA di HEAD morde, e solo
+#      allora, l'EA stampa. LA STRINGA E' COPIATA DAL SORGENTE, non
+#      riscritta a memoria (7d0da9f9 r.287) -- accento tipografico e
+#      "ho", non "ha":
+#         oggi ho gia' operato (storico simbolo+magic): non ripiazzo.
+#      !! Nel log compare PRECEDUTA dal prefisso di Log()
+#         (7d0da9f9:...ABTG_MaxMinNotte.mq5 r.210,
+#         Print("[MaxMinNotte] ", m)):
+#            [MaxMinNotte] oggi ho gia' operato (storico simbolo+magic)...
+#         Una ricerca ANCORATA A INIZIO RIGA non la trova. Si cerca la
+#         sottostringa, non la riga. (classe 489, depositata il 20/09
+#         dopo che l'avevo citata sbagliata io stesso in bozza.)
+#      >>> ATTESA: la riga compare ZERO volte, su tutta la finestra e
+#          su tutte e due le gemelle.
+#      PERCHE' me l'aspetto, e non e' fede nel changelog: gPhase torna
+#      a MMP_WAIT solo dentro ResetDay (cambio di giornata), e ResetDay
+#      nella STESSA riga azzera gOperatoOggi. Perche' il ramo morda
+#      servirebbe che gOperatoOggi si riaccenda FRA il cambio di
+#      giornata e le 07:00 -- cioe' o una posizione nostra viva a
+#      cavallo della mezzanotte (impossibile: InpCloseAtEnd=true chiude
+#      alle 17:30 e nel tester SelPos() vede sempre la nostra, perche'
+#      il tester ha un EA solo), o un deal nostro con DEAL_ENTRY_IN
+#      gia' registrato oggi (impossibile: il primo ingresso del giorno
+#      e' alle 07:00 o dopo, e il box notturno non piazza niente).
+#      >>> Questa e' la stessa conclusione che il changelog di HEAD
+#          scrive di se' ("Nel tester e' INERTE"): qui e' RIFATTA
+#          dall'esterno e sara' MISURATA, non ereditata.
+#
+#  B3. IL NUMERO DI OPERAZIONI. n_IS + n_OOS atteso in [655; 700].
+#      Il centro e' 693 (R103). La banda e' ASIMMETRICA per costruzione
+#      e va letta cosi':
+#        - verso il BASSO ha un meccanismo: il secondo ramo di HEAD
+#          (GiornataSpesa_Calc -> CancelPendings) puo' solo TOGLIERE
+#          ingressi, mai aggiungerne. 655 = -5,5% su 693.
+#        - verso l'ALTO non ha nessun meccanismo dentro l'EA: i 7 in
+#          piu' coprono solo la ripartizione al confine IS/OOS del
+#          driver (FrazioneIS 0,40) e il riscaldamento delle due
+#          sotto-finestre, che non e' lo stesso di una corsa unica.
+#      >>> E IL LIMITE DICHIARATO: R103 ha pubblicato UN PF di finestra
+#          PIENA, non due PF per sotto-finestra. Quindi un confronto
+#          PF-contro-PF cella per cella QUI NON E' POSSIBILE, e questo
+#          file non finge di farlo. Il PF di questa corsa si legge
+#          come coerenza (B4), non come riproduzione.
+#
+#  B4. COERENZA DEL MERITO, banda larga e dichiarata tale:
+#      PF_OOS >= 1,10 e PF_IS >= 1,00. Sotto quei valori la
+#      riproduzione non ha riprodotto niente e si indaga prima di
+#      concludere qualunque cosa. La sotto-finestra OOS (60% di 6,5
+#      anni, circa 416 operazioni attese) e' l'unica delle due che
+#      supera da sola il muro dei 150: il MERITO si legge li'.
+#      Il RISCHIO si legge su tutte e due (Emendamento B del 16/08).
+#
+# ----------------------------------------------------------------------
+#  C. IL CONTRO-ESEMPIO -- costruito PRIMA, come impone la regola
+#     del 10/09. "Che cosa renderebbe FALSA la mia attesa?"
+# ----------------------------------------------------------------------
+#  C1. "La riga del gate esce zero volte perche' l'ho guardata male."
+#      Contro-prova a costo zero dentro la stessa corsa: HEAD stampa
+#      in OnInit anche l'autotest dei predicati (InpAutoTest=true,
+#      default del sorgente, qui PINNATO a true di proposito). Se nel
+#      log NON c'e' nessuna riga di autotest, allora non sta girando
+#      HEAD e tutto il resto non vale niente.
+#      >>> Cioe': il log deve contenere l'autotest E NON contenere il
+#          gate. Una sola delle due non basta.
+#
+#  C2. "n torna a 693 perche' il gate e' inerte." Spiegazione
+#      ALTERNATIVA che darebbe lo stesso numero: il banco non ha
+#      ricompilato e sta girando ancora un binario vecchio. Scartata
+#      dallo stesso controllo C1 (l'autotest non esiste prima di
+#      7d0da9f9) piu' dal conteggio righe del referto del runner.
+#
+#  C3. "Se il contratto regge, la sedia si schiera." FALSO, e va detto
+#      qui perche' e' la conclusione sbagliata piu' facile da trarre:
+#      il contratto di R103 e' misurato a rischio 0,5%; il preset FTMO
+#      in repo porta InpRiskPercent=2.00. Questo file NON misura quella
+#      taglia e NON autorizza nessuno schieramento. La taglia e' la
+#      domanda di R193b, ed e' una domanda diversa.
+#
+#  C4. "InpMaxSpread non conta." Da verificare, non da assumere: il
+#      preset vivo (sedie_piccolo/sedia_MAXMIN_ORO_770402.set r.51) e
+#      il preset FTMO portano InpMaxSpread=150, mentre R103 ha girato
+#      con InpMaxSpread=0 (nessun filtro). Qui si tiene 0 PER
+#      RIPRODURRE R103 -- cambiarlo renderebbe questa corsa una
+#      MISURA DIVERSA invece che un controllo. Il fatto che la cella
+#      del contratto e la cella schierata differiscano su questo input
+#      e' un rilievo che va nel referto, NON una variabile di questo
+#      file (una variabile per file).
+#
+# ----------------------------------------------------------------------
+#  D. LE SOGLIE, congelate PRIMA. Si citano come S<n> [R193a].
+# ----------------------------------------------------------------------
+#  S1. Se -SoloControllo non stampa esattamente 2 celle per finestra:
+#      STOP, non si lancia. Il file e' scritto male.
+#  S2. Se le due gemelle NON danno risultati identici al centesimo:
+#      STOP. Il round non e' leggibile e nessun numero se ne ricava.
+#  S3. 🔴 Se la riga "oggi ho gia' operato (storico simbolo+magic):
+#      non ripiazzo." compare ANCHE UNA SOLA VOLTA: la guardia HA
+#      morso, la FREQUENZA su HEAD NON e' quella con cui il contratto
+#      e' stato misurato, e 770402 RESTA SOSPESA finche' il contratto
+#      non viene riscritto sui numeri di questa corsa. Non e' un
+#      fallimento del round: e' il round che ha fatto il suo lavoro.
+#  S4. Se n_IS + n_OOS cade fuori da [655; 700]: la riproduzione non
+#      ha riprodotto. Non si conclude ne' a favore ne' contro: si
+#      cerca il perche' (banco non a HEAD? finestra diversa? deposito
+#      diverso? barre M1 mancanti?) e si rilancia.
+#  S5. Se PF_OOS < 1,10: idem, si indaga. NON si scrive "il motore non
+#      ha edge": questo round non e' attrezzato per dirlo, e il
+#      giudizio sul merito di 770402 sta in R103, non qui.
+#
+#  >>> E QUELLO CHE QUESTO ROUND NON FA, elencato per nome:
+#      non promuove, non boccia, non sceglie una cella, non tocca il
+#      forward, non tocca nessuna taglia, non tocca il conto reale
+#      10105439. Misura se due binari fanno la stessa cosa. Punto.
+#
+# ----------------------------------------------------------------------
+#  E. LA CELLA -- identica a R103_ABTG_MaxMinNotte_XAUUSD_770402.txt,
+#     campo per campo, TRANNE il magic (asse tecnico) e TRANNE
+#     InpAutoTest, che a HEAD esiste e nel file di R103 no.
+#     Fonte della cella: mql5/Presets/sedie_piccolo/sedia_MAXMIN_ORO_770402.set
+#     + censimento .chr del 23/08/2026 15:49 per la taglia viva.
+#     ATTENZIONE, RILIEVO CHE VA NEL REFERTO E NON QUI: quel .set in
+#     repo porta InpRiskPercent=1.0, mentre la taglia viva firmata il
+#     23/08 e' 0,5% e R103 ha girato a 0,5%. Qui si usa 0,5%, che e'
+#     il numero del CONTRATTO da riprodurre.
+# ======================================================================
+
+@SIMBOLO  XAUUSD
+@PERIODO  H2
+@DAQUANDO 2020.01.01
+@FINOA    2026.06.30
+
+InpUsaGuardian=true||true||0||true||N
+InpBoxStartHour=23||23||0||23||N
+InpBoxStartMin=0||0||0||0||N
+InpBoxEndHour=4||4||0||4||N
+InpBoxEndMin=59||59||0||59||N
+InpMinBoxPts=0||0||0||0||N
+InpMaxBoxPts=0||0||0||0||N
+InpPlaceHour=7||7||0||7||N
+InpPlaceMin=0||0||0||0||N
+InpEntryCutoffHour=8||8||0||8||N
+InpEntryCutoffMin=30||30||0||30||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpPendingExpiryMin=90||90||0||90||N
+InpBufferPoints=250||250||0||250||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=true||true||0||true||N
+InpSLMode=0||0||0||0||N
+InpMgmtTF=16386||16386||0||16386||N
+InpAtrPeriod=14||14||0||14||N
+InpAtrSLmult=1.5||1.5||0||1.5||N
+InpSLFixedPts=3000||3000||0||3000||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1Pct=50||50||0||50||N
+InpBreakeven=true||true||0||true||N
+InpTP2_R=2.5||2.5||0||2.5||N
+InpTP2Pct=50||50||0||50||N
+InpUseEMA200Target=true||true||0||true||N
+InpEMA200Period=200||200||0||200||N
+InpTPfinal_R=4.0||4.0||0||4.0||N
+InpUseTrailing=true||true||0||true||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpRiskPercent=0.5||0.5||0||0.5||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+# InpNewsCurrencies NON pinnato di proposito (stessa scelta di R151a e
+# R170b sulla stessa sedia): il default compilato e' la stringa VUOTA e
+# un pin vuoto MT5 lo IGNORA in silenzio -- scriverlo sarebbe peggio che
+# ometterlo. Con InpUseNewsFilter=false il campo e' comunque inerte.
+InpNewsFlatten=true||true||0||true||N
+# InpComment porta l'etichetta del round e NON la stringa viva
+# "MAXMIN ORO": e' l'unico modo di riconoscere le operazioni di questa
+# corsa nel per-trade. Entra solo in TryPlace come commento dell'ordine
+# (7d0da9f9:mql5/Experts/ABTG_MaxMinNotte.mq5 r.355 e r.367)
+# -- zero effetto sul comportamento.
+InpComment=MAXMINR193A
+InpMagic=761700||761700||1||761701||Y
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpAutoTest=true||true||0||true||N
