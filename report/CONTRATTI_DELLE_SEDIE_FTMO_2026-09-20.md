@@ -87,9 +87,12 @@ input. Risultato, e le differenze sono **tutte spiegate**:
 non aveva**. Sul `770260` sono **20** (`InpUseVolRegime`, `InpUseSRFilter`, `InpMaxPosSimbolo`,
 `InpTrailStartR`, `InpRunnerTP_R`, `InpMinBreakoutRangeATR`, `InpVol*`, `InpSR*`, `InpUsaGuardian`);
 sul `770101` sono **2** (`InpUsaGuardian`, `InpAllowReverse`); su `770202` e `770411` **1**
-(`InpUsaGuardian`); sul `771531` **1** (`InpLogImbuto`); sul `770511` **zero**. Sono **a default inerte** (`false` / `0`) **tranne
-`InpUsaGuardian=true`**. 👉 **Il binario che vola non è il binario con cui il DD è stato
-misurato.** Non invalida i numeri; li marca **`descrive la sedia che gira? = NON MISURATO`**.
+(`InpUsaGuardian`); sul `771531` **1** (`InpLogImbuto`); sul `770511` **zero**. Sono **a default inerte** (`false` / `0`; su `770101` `InpAllowReverse=false`, verificato)
+**tranne `InpUsaGuardian=true`**. 🟢 **Eccezione che va detta perché è buona notizia: sulla
+`771531` il Guardian era GIÀ nel banco** (`InpUsaGuardian=1` nella riga R112, verificato), quindi
+lì non è una variabile nuova.
+👉 **Per le altre, il binario che vola non è il binario con cui il DD è stato misurato.** Non
+invalida i numeri; li marca **`descrive la sedia che gira? = NON MISURATO`** (§1.7 del censimento v2).
 
 ---
 
