@@ -1,5 +1,31 @@
 ;
 ;  ==================================================================
+;  20/09/2026 -- SALDO INIZIALE 100000 -> 80000. Firma: "si 80000".
+;  ==================================================================
+;  MISURATO su uno screenshot del terminale FTMO 541452707 delle 16:59
+;  del 20/09: barra in basso, "Bilancio: 80 000.00 EUR". La challenge
+;  comprata e' la 100k nella sua taglia EUR, che vale 80.000 EUR.
+;
+;  PERCHE' ERA UN BUCO E NON UN DETTAGLIO. Il Guardian usa questo
+;  numero come ANCORA (ABTG_Guardian.mq5 r.572: se InpStartBalance>0
+;  allora gStart=InpStartBalance), e ci calcola sopra le soglie:
+;    con ancora 100000:  giornaliero 4,5% = 4.500 EUR = 5,63% di 80.000
+;                        totale      9,3% = 9.300 EUR = 11,63% di 80.000
+;    muri FTMO veri   :  giornaliero 5%   = 4.000 EUR
+;                        statico     10%  = 8.000 EUR
+;  Cioe' il Guardian sarebbe scattato 500 EUR DOPO aver sfondato il
+;  muro giornaliero e 1.300 EUR DOPO aver perso la challenge: non una
+;  rete, un buco che si chiama rete.
+;
+;    con ancora 80000 :  giornaliero 4,5% = 3.600 EUR (muro 4.000, cuscino 400)
+;                        totale      9,3% = 7.440 EUR (muro 8.000, cuscino 560)
+;
+;  LA TAGLIA NON SI TOCCA: InpRiskPercent=2.00 e' una PERCENTUALE del
+;  saldo, quindi si adatta da sola -- 2% di 80.000 = 1.600 EUR a
+;  operazione. Nessun altro parametro cambia.
+;  ==================================================================
+;
+;  ==================================================================
 ;  20/09/2026 -- CUSCINO ALLARGATO. Firma di Claudio: "si cuscino".
 ;  ==================================================================
 ;  PERCHE'. Le soglie 4.9 / 9.9 erano tarate su sedie a 0,65%. Con la
@@ -45,7 +71,7 @@
 ;    - InpDailyPausePct=3.5   pausa morbida nuovi ingressi (era 4.0 fino al 20/09)
 ;    - InpMaxOpenRiskPct=3.25 cap C1 sul rischio aperto simultaneo
 ; ================================================================
-InpStartBalance=100000
+InpStartBalance=80000
 InpDailyLossPct=4.5
 InpTotalDDPct=9.3
 InpDDMode=0
