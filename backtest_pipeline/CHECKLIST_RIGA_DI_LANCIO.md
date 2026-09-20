@@ -26821,3 +26821,19 @@ ogni checkout locale resta indietro finché non fa `git pull`.
 tocca — e l'effetto più **rumoroso** va dichiarato anche quando è normale e
 voluto. Un effetto normale scoperto dopo, in un `git log` illeggibile, sembra un
 guasto.
+
+## CLASSE 492 — 📉🧟 **IL NUMERO «REALIZZATO» CHE IN REPO E' DI UN ALTRO CANDIDATO** (20/09/2026)
+**Il caso reale**: un mandato interno chiedeva di mettere accanto al caso peggiore da backtest il
+«**drawdown realizzato in forward: 0,96% a 0,65%, cioe' ~2,96% a 2,00%**». Cercato con `grep` su
+tutto il repository: **l'unica occorrenza di `0,96%` e'**
+`report/P0_OPENINGREVERSALB_2026-09-08.md` r.38 — il **DD di BACKTEST** di `ABTG_OpeningReversalB`,
+un candidato **BOCCIATO con n=2**. Non e' forward, non e' realizzato, non e' del portafoglio, e non
+e' di nessuna delle sei sedie FTMO.
+🔴 Il derivato «~2,96% a 2,00%» era quindi un numero **orfano scalato**: una cifra sbagliata
+moltiplicata per un fattore giusto resta sbagliata, ma sembra piu' solida perche' ha un conto
+dentro.
+🟢 Il realizzato **vero**, misurato: sul 100k a 0,65% il DD e' **0,648%**, che pero' e' **1R esatto**
+con **3 sedie su 6** e **mai due aperte insieme** — cioe' **non e' un DD di portafoglio**.
+**La regola**: un numero presentato come **REALIZZATO** deve portare, nello stesso respiro, **conto,
+n, finestra e quante sedie erano accese insieme**. Se una di queste quattro manca, non e' un
+realizzato: e' una citazione. E prima di scalarlo si apre il file che lo contiene.
