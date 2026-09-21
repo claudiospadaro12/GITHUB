@@ -1,0 +1,106 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU        (sedia 770101)
+#  R195b -- IL FILTRO DELLO SPAZIO: PRIMA SI MISURA.
+#           Asse unico: InpSpaceMode (0 = spento, 1 = SOLA MISURA).
+#           LATO SHORT. Il lato long e' R195a: regola dei due lati (25/08).
+#
+#  Si lancia con: -Deposito 100000 -Modello 4
+#     Stesso deposito e stesso modello della prova gemella gia' girata
+#     su questa sedia (prove/ABTG_DAX_Apertura_EU.txt): e' l'unico modo
+#     perche' i numeri siano confrontabili con qualcosa.
+#
+#  🖥️ E GIRA SUL PC DI BACKTEST, NON SUL VPS.
+#     Firma di Claudio del 21/09/2026 (CLAUDE.md): finche' una challenge
+#     e' viva, i round non girano sulla macchina che ospita le sedie.
+#     Il 21/09 alle 09:29 un tester a tick reali ha inchiodato il VPS
+#     nella prima mezz'ora del primo giorno di challenge.
+# =====================================================================
+#  DOSSIER:  report/FILTRO_DELLO_SPAZIO_2026-09-21.md
+#  ORIGINE:  trascrizioni/LIVE_EMILIANO_2026-04-10.txt r.71-73, r.83, r.93
+#  CODICE:   mql5/Experts/ABTG_DAX_Apertura_EU.mq5, commit bfacc1fd
+#            (+429 righe, 0 cancellate contro il pin schierato 9fca63d9)
+#
+# ---------------------------------------------------------------------
+#  ###  LE ATTESE, CONGELATE PRIMA DEI NUMERI  ###
+# ---------------------------------------------------------------------
+#
+#  A1. PASSATA 0 (InpSpaceMode=0) e PASSATA 1 (InpSpaceMode=1) devono
+#      dare Profit, PF, Equity DD % e Trades **IDENTICI AL CENTESIMO**.
+#      🔴 E' IL test di regressione, non una formalita'. Il modo 1 tocca
+#      handle, contatori e log ma NON deve spostare un solo trade.
+#      Se si muove anche un centesimo: C'E' UN BUG, la misura non si
+#      legge, e il round si ferma qui. Non si prosegue "tanto e' poco".
+#
+#  A2. La passata 1 deve stampare nel giornale, in coda:
+#        FILTRO SPAZIO - riepilogo: N valutazioni, M ...
+#        FILTRO SPAZIO - lato SHORT: ...
+#        FILTRO SPAZIO - distribuzione SHORT: <0,5R=.. | 0,5-1R=.. |
+#                        1-2R=.. | 2-3R=.. | >=3R=.. | nessun ostacolo=..
+#      Se l'istogramma e' tutto in "nessun ostacolo", il filtro non sta
+#      misurando niente e va capito perche' PRIMA di leggere altro.
+#
+#  A3. Numero di valutazioni atteso: dello stesso ordine del numero di
+#      ROTTURE del range, non del numero di trade (il filtro si
+#      interroga quando il RETEST sta per piazzare il limit).
+#      Non ho un numero atteso misurato: [NON MISURATO], e si dichiara.
+#
+# ---------------------------------------------------------------------
+#  ###  LA DOMANDA A CUI QUESTO ROUND RISPONDE  ###
+# ---------------------------------------------------------------------
+#  UNA SOLA: **lo spazio davanti separa i vinti dai persi, si' o no?**
+#
+#  Si risponde INCROCIANDO le righe "SPAZIO short: ..." del giornale con
+#  i trade del report (tutti e due hanno prezzo d'ingresso e orario).
+#
+#  🔴 E LA REGOLA DI DECISIONE, SCRITTA ORA E NON DOPO:
+#     se le due distribuzioni (vinti / persi) si sovrappongono, la
+#     risposta e' NO, il lavoro FINISCE QUI e il modo 2 non si accende
+#     mai. Nessuna griglia, nessuna soglia, nessun "proviamo lo stesso".
+#
+# ---------------------------------------------------------------------
+#  ###  PERCHE' NON C'E' NESSUNA GRIGLIA IN QUESTO FILE  ###
+# ---------------------------------------------------------------------
+#  Perche' esiste R30, ed e' il parente stretto di questo filtro.
+#  InpUseSRFilter (veta l'ingresso se c'e' un ostacolo davanti entro N
+#  punti) e' stato misurato il 12/08 sul Nasdaq:
+#      IN CAMPIONE ...: la cella PIU' BELLA del lotto, +221, PF 1,27,
+#                       drawdown DIMEZZATO
+#      FUORI CAMPIONE : l'UNICA ROSSA, -57, PF 0,97
+#      tagliava il 13% dei trade -- e tagliava QUELLI BUONI
+#  Oggi e' InpUseSRFilter=false in TUTTI i preset, per questo.
+#
+#  Scrivere un filtro nuovo, scegliere una soglia e ottimizzarla
+#  significherebbe rifare R30 con un altro nome. Quindi: prima la
+#  distribuzione, poi -- forse -- un numero.
+#
+# ---------------------------------------------------------------------
+#  ###  I DUE PIN NON SONO FACOLTATIVI  ###
+# ---------------------------------------------------------------------
+#  InpAllowShort=0   il SOLO LONG del 07/08 e' stato fatto SUL GRAFICO,
+#                    non nel codice: nel sorgente e' ancora true.
+#  InpRiskPercent=1.0 il #define dice 1.0 ma la sedia in campo gira al
+#                    2,00%: all'1% i numeri si confrontano con le fasi
+#                    precedenti, al 2% con niente.
+#
+# ---------------------------------------------------------------------
+#  ###  COSA QUESTO ROUND NON MISURA, dichiarato  ###
+# ---------------------------------------------------------------------
+#  - il TETTO (InpSpaceMaxR) resta SPENTO: due assi nuovi insieme e' il
+#    modo di non capire quale ha spostato i numeri;
+#  - un solo REGIME (la finestra e' quella di casa, 2024.09.26 in poi);
+#  - il lato LONG: e' R195a, e non si da' per buono;
+#  - il costo in FREQUENZA del filtro si legge dai segnali persi per
+#    lato, non dal PF: il pavimento e' 1,00 op/giorno per FAMIGLIA e le
+#    Aperture stanno a 1,407.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpAllowLong=0||0||0||0||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSpaceMinR=0||0||0||0||N
+InpSpaceMaxR=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMode=0||0||1||1||Y
