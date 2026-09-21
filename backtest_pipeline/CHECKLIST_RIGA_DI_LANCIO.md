@@ -28368,3 +28368,48 @@ pagina**, e se divergono scrive **il fattore di conversione**.
   dichiara anche questo, altrimenti si butta via un round buono.
 - Verifica meccanica in dieci secondi:
   `diff <(grep -E '^InpRiskPercent' prova.txt) <(grep -E '^InpRiskPercent' mql5/Presets/FTMO/<sedia>.set)`
+
+---
+
+## CLASSE 548 -- la PAROLA DI TEMPO RELATIVA ("stasera", "ieri sera", "stamattina") in un documento che viene LETTO dopo essere stato SCRITTO
+
+**Trovata il 21/09/2026 sulle righe `R202A`/`R202B`, al SECONDO passaggio del cancello** --
+cioe' **introdotta da una riscrittura fatta per correggere altri difetti**. E' la firma della
+classe: nasce quando si **ri**scrive, non quando si scrive.
+
+I due `.md` sono datati **21/09/2026** in intestazione e dicevano in **sei punti** che le
+ancore erano girate *«ieri sera»*. Ma i referti che citano portano `data : 2026-09-21
+21:01:33` e `21:05:24`, e il contro-esempio `R196a` e' **dello stesso giorno**. *«Ieri sera»*
+indica il **20/09**, dove **non esiste nessun referto**.
+
+**Perche' costa piu' di un refuso**: la stessa riga di lancio **insegna** a Claudio *«NEL
+REFERTO LEGGI LA RIGA `data:` -- DEVE ESSERE DI OGGI»*. Un lettore che obbedisce trova il
+referto datato 21/09 sotto un testo che dice «ieri sera», e **conclude che sta guardando il
+file sbagliato**. E' la stessa famiglia del referto stantio rimandato due volte in buona fede
+il 17/08 -- **col segno invertito**: qui il file e' fresco e il testo lo fa sembrare vecchio.
+
+### Il contro-esempio, che e' il test da fare sempre
+**Rileggere il documento fingendo di aprirlo DOMANI.** Se una frase cambia di significato,
+quella frase e' rotta. *«Ieri sera»* letto il 22/09 indica il 21/09 ed e' **giusto**; letto il
+21/09 -- quando e' stato scritto, e quando Claudio lo riceve -- indica il 20/09 ed e'
+**falso**. **Una frase vera solo in una finestra di 24 ore non e' una frase: e' una
+scommessa.**
+
+### La regola
+**In un documento che esce dalla sessione, il tempo si scrive con la DATA ASSOLUTA, mai con
+una parola relativa.** `"il 21/09 alle 21:01"`, non `"ieri sera"` / `"stasera"` / `"poco fa"`.
+Vale anche per «oggi» quando accompagna un numero: l'ora si mette accanto (`21/09 ore 21:05`),
+perche' e' l'unica forma che regge anche riletta a marzo.
+- Le parole relative restano legittime **in chat**, che si legge subito.
+- Verifica in tre secondi: `grep -n "ieri\|stasera\|stamattina\|poco fa\|domani" FILE.md`
+
+### E il difetto GEMELLO trovato lo stesso giorno, che vale la stessa disciplina
+Nello stesso secondo passaggio sono emersi altri due difetti **nati dalla riscrittura**:
+- una **contraddizione interna** (`33,0x` nella riga di testo contro `32,3x` nella tabella
+  due righe sotto -- **la stessa grandezza**, perche' la cella `1.00` *e'* lo stop);
+- una **frase copiata da un documento gemello** (*«meta' del DD del Nasdaq»*), vera sul Dow
+  e **falsa sul DAX**, dove nascondeva che alla stessa taglia la sedia fa **14,50% contro
+  9,12%** e **sfonda il muro statico FTMO del 10%**.
+
+**Morale operativa: il cancello si ripassa DOPO ogni patch, non solo prima.** Una riscrittura
+e' codice nuovo, e va trattata come tale.

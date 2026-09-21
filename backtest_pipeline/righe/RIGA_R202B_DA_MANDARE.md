@@ -35,7 +35,11 @@ File prova: `backtest_pipeline/prove/R202b_obiettivo_DAX_D30EUR.txt` (90 pin, **
 
 🟢 **Il cancello di casa `stop >= 40 × spread` NON si muove lungo l'asse**: lo stop è il
 range d'apertura (`InpSLMode=0`, pinnato) e `InpTP1_R` non lo tocca. Tutte e 4 le celle
-stanno a **33,0× (42,3× con lo stop forward)**.
+stanno a **32,3×** (`54,90 / 1,70`), **42,3×** con lo stop forward `[MIS n=8]`.
+*(La tabella r.271 del referto stampa `33,0×` su questa sola riga: userebbe uno spread
+implicito di 1,664 invece di 1,70 — scarto 2%, non spiegato lì. Qui uso il numero
+ricalcolato dalle due fonti citate, così la riga verde e la tabella qui sotto dicono
+**lo stesso** numero: la cella `1.00` **è** lo stop.)*
 🟠 **Ma il PRIMO OBIETTIVO sì**, e il numero va scritto **prima** di leggere il referto
 (`report/STOP_VS_SPREAD_FTMO_2026-09-20.md`: stop mediano **54,90** `[MIS n=3]` — campione sottilissimo, dichiarato, spread mediano **1,70**):
 
@@ -71,7 +75,7 @@ scattati**. 🟠 E il fattore di conversione **non si trasporta**: fra celle del
 sedia è stato misurato da **1,015 a 1,612**. Le posizioni vere si contano **una per una**
 dopo, non si dividono a memoria.
 
-### ⚓ LE ANCORE (da R201A, stessa macchina, ieri sera)
+### ⚓ LE ANCORE (da R201A, stessa macchina, **21/09 ore 21:05**)
 
 | finestra | ancora della cella viva |
 |---|---|
@@ -88,10 +92,13 @@ senza quel pin l'attesa **(a)** non è verificabile.
 > il preset in campo scrive che *«il peggior tratto del backtest OOS a 2,00% vale
 > **14,46%**»* — `7,2506 × 2 = 14,50`, **scarto 0,3%**.
 >
-> 🟠 **Contro-esempio di ieri sera, stessa macchina, stesso deposito**: `R196a` (Nasdaq)
-> è stato pinnato a **2,00** e riporta DD OOS **9,12%**. Qui uscirà **7,25%**. Chi mette le
-> due tabelle accanto conclude che questa sedia ha metà del DD del Nasdaq. **Non è vero:
-> è metà della taglia.**
+> 🟠 **Contro-esempio del 21/09, stessa macchina, stesso deposito**: `R196a` (Nasdaq)
+> è stato pinnato a **2,00** e riporta DD OOS **9,12%**. Qui uscirà **7,25%** — e chi mette
+> le due tabelle accanto conclude che questa sedia ha il DD **PIÙ BASSO** delle due.
+> 🔴 **È il contrario, ed è il fatto più importante di questa pagina**: alla **stessa
+> taglia** il DAX vale `7,2506 × 2 = **14,50%**` contro il **9,12%** del Nasdaq, cioè
+> **+59%** — e **sfonda il muro statico FTMO del 10%**, esattamente come il preset in
+> campo dichiara già oggi (*«il peggior tratto OOS a 2,00% vale 14,46%»*).
 >
 > 🟢 **Cosa NON tocca**: i cancelli del file prova sono **RELATIVI** («DD OOS scende di
 > almeno il 20%», «PF OOS ≥ cella viva»), quindi restano validi **identici**. Cambia solo
@@ -130,7 +137,7 @@ volte** in buona fede: si guarda quella riga **prima** di leggere i numeri.
 ## ② 📐 IL TETTO DELLE ~100.000 BARRE — **misurato, non stimato**
 
 Nessuna stima: **lo stesso EA, lo stesso simbolo, lo stesso M5, la stessa identica finestra**
-(`@DAQUANDO 2024.09.26`, `@FINOA 2026.06.30`, `@FRAZIONEIS 0.40`) è già girato **ieri sera** e
+(`@DAQUANDO 2024.09.26`, `@FINOA 2026.06.30`, `@FRAZIONEIS 0.40`) è già girato **il 21/09 alle 21:05** e
 il referto riporta `tetto barre : MaxBars=100000000`. Il pre-volo della classe 160 muore solo
 se `MaxBars` sta **fra 1.000 e 200.000**: qui è cento milioni, quindi passa.
 🟢 E le due corse sono **separate** (`walkforward_generico.ps1` r.931-938): il tetto vale
@@ -141,7 +148,7 @@ se `MaxBars` sta **fra 1.000 e 200.000**: qui è cento milioni, quindi passa.
 
 ## ③ ⏱️ IL TETTO DI TEMPO — **120 minuti, ed è un TETTO, non una stima**
 
-🟠 **Dichiaro quello che NON so.** `R172D` e `R201A` sono girati ieri sera sulla **stessa
+🟠 **Dichiaro quello che NON so.** `R172D` e `R201A` sono girati **il 21/09** sulla **stessa
 macchina**, con gli **stessi EA**, la **stessa finestra**, **14 passate ciascuno**: i referti
 portano avvio `21:01:33` e `21:05:24`, **3 minuti e 51 secondi** di distanza. **SE** erano in
 fila, 14 passate costano meno di 4 minuti e queste 8 ne costano ~2. ⚠️ **Ma che fossero in fila
@@ -158,7 +165,7 @@ dove quello è l'unico MT5 e che la riga ha **già verificato chiuso** prima di 
 
 ---
 
-## ④ 🚦 IL CANCELLO — **due strati, tutti e due passati**
+## ④ 🚦 IL CANCELLO — **due strati, e il secondo è passato al terzo giro**
 
 **Strato 1 (deterministico)**
 - `controlla_prova.py` sul file prova → **verde** (90 pin, 4 celle, 0 problemi).
@@ -166,9 +173,13 @@ dove quello è l'unico MT5 e che la riga ha **già verificato chiuso** prima di 
 - **Parser PowerShell** sulla riga: **0 errori**. **Una sola riga fisica** (classe 538),
   **zero caratteri non-ASCII**.
 
-**Strato 2 (giudizio, agente `controllo-preventivo`)** — ha risposto **FAIL** con **cinque
-difetti, tutti TESTUALI**, e sono stati **corretti prima** che questo file arrivasse a
-Claudio (regola del 13/09: lo Sviluppatore e l'Agente dei Controlli).
+**Strato 2 (giudizio, agente `controllo-preventivo`)** — ha risposto **FAIL due volte**:
+prima con **cinque** difetti (`D1`-`D5`), poi con **tre** che la riscrittura stessa aveva
+introdotto o lasciato (`E1`-`E3`). **Tutti TESTUALI**, e **tutti corretti prima** che
+questo file arrivasse a Claudio (regola del 13/09: lo Sviluppatore e l'Agente dei
+Controlli). 🟠 **Il secondo giro è la lezione vera**: una riscrittura fatta per
+correggere difetti ne ha **creati di nuovi** — per questo il cancello si ripassa
+**dopo** ogni patch, non solo prima.
 
 | # | difetto trovato | dov'è la correzione |
 |---|---|---|
@@ -177,6 +188,9 @@ Claudio (regola del 13/09: lo Sviluppatore e l'Agente dei Controlli).
 | **D3** | la citazione **`r.1694`** non puntava a niente di pertinente in nessuno dei due EA | ora **r.2085** (`TpTotalR`) e **r.2359** (cancello del parziale), verificate a grep |
 | **D4** | l'attesa **(b)** aveva **un solo** ramo di fallimento, ma nel codice ce n'è un secondo | la riga **(b)** della tabella delle attese |
 | **D5** | dove sta la cella `0.25` **rispetto al costo** non era dichiarato | la sezione 💸 qui sopra |
+| **E1** | **contraddizione interna**: `33,0×` nella riga verde contro `32,3×` nella tabella, ed è **la stessa grandezza** (la cella `1.00` *è* lo stop) | ricalcolato **32,3×** dalle due fonti citate, con la nota su da dove veniva il 33,0 |
+| **E2** | la frase *«metà del DD del Nasdaq»*, copiata dal Dow, **qui era FALSA** e nascondeva il fatto più importante | riscritta: alla stessa taglia il DAX fa **14,50% contro 9,12%**, **+59%**, e **sfonda il muro del 10%** |
+| **E3** | «**ieri sera**» in un documento datato **oggi** — **classe nuova 548** | sostituita ovunque dalla **data assoluta** (`21/09 ore 21:05`) |
 
 **Contro-esempi tenuti, non raccontati**
 - La riga è stata confrontata **parola per parola** con la riga già provata di `R196A`: le
