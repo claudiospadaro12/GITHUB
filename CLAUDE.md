@@ -438,6 +438,52 @@ Su Nasdaq, DAX e Dow:
 - Il 06/08 ho annunciato un "ritardo di un'ora" di un EA che invece aveva armato al secondo
   giusto. **Prima di dire che un EA è in ritardo: stabilire in quale ora è scritto il numero.**
 
+## 🖥️ I ROUND NON GIRANO PIU' SUL VPS (firmato da Claudio, 21/09/2026)
+Testuale, dopo l'incidente: _**"si, i round sul pc di backtest"**_.
+
+**Il fatto, ed e' successo nella PRIMA MEZZ'ORA del primo giorno di challenge.** Il 21/09
+alle ~09:29 il VPS si e' **inchiodato**: niente PowerShell, niente tasto destro, niente
+Gestione attivita'. La causa, letta dalla schermata: sul terminale **banco `50504400`**
+(`C:\MT5_Backtest`) girava lo **Strategy Tester** su `ABTG_IntradayMomentum` NASUSD M30 a
+**«Ogni tick basato su tick reali»**, finestra 2025.06.10-2026.06.30. Il tester si mangia
+tutte le CPU della macchina, e sulla stessa macchina c'erano **le sei sedie della challenge
+FTMO che stavano operando**.
+
+🔴 **Non e' stato un danno solo per fortuna**: se fosse capitato mentre una sedia d'apertura
+doveva piazzare il suo ordine, avremmo perso l'operazione **e non lo avremmo nemmeno saputo**.
+
+### La regola
+- 🖥️ **I round e le ottimizzazioni girano sul PC DI BACKTEST**, non sul VPS, per tutto il
+  tempo in cui una challenge e' viva.
+- 🪟 Il terminale banco `50504400` sul VPS **resta installato ma SPENTO** mentre la challenge
+  opera.
+- 🔴 **E LA CONSEGUENZA CHE COSTA, da non dimenticare: il RUNNER NOTTURNO GIRA SUL VPS.**
+  `backtest_pipeline/runner_abtg.ps1` r.91: `$Ora = "03:30"  # ora VPS della corsa notturna`,
+  ed e' un'**attivita' pianificata registrata sul VPS**. 👉 Finche' non viene **sospesa o
+  spostata**, ogni notte alle 03:30 il VPS rifa' da solo quello che il 21/09 e' stato fatto a
+  mano — e una corsa a tick che sfora arriva **dentro la sessione del mattino**.
+  **Sospenderla e' un'azione sul VPS: serve una riga, e la riga passa dal cancello.**
+- 🟢 Quello che sul VPS **resta** (non consuma CPU in modo apprezzabile): le righe di **sola
+  lettura** (giornali, spread logger, pagella), l'aggiornamento news delle 07:20, la pagella
+  serale delle 23:15.
+
+### Il pronto soccorso, se ricapita
+1. **Chiudere e riaprire la connessione remota** (spesso e' morta la sessione, non la macchina);
+2. **`Ctrl + Alt + FINE`** (dentro RDP `Ctrl+Alt+Canc` non funziona) -> Gestione attivita';
+3. chiudere **solo `metatester64.exe`** — sono gli agenti di calcolo del tester, **non hanno
+   conto, ne' posizioni, ne' ordini, e si chiamano tutti uguale: non si puo' sbagliare
+   bersaglio**. 🔴 **Mai `terminal64.exe`**: quelli sono i sei terminali e dalla Gestione
+   attivita' **non si distinguono a occhio** (regola dei terminali multipli);
+4. **console web del provider** (VNC): e' un canale diverso dall'RDP e spesso vive quando
+   l'RDP e' morto;
+5. ultima spiaggia **`Riavvia`** dal pannello del provider — 🔴 **mai** `Ricostruisci` /
+   `Rebuild` / `Reinstall`, che cancellano il disco.
+🟢 **Un riavvio NON chiude nessuna posizione**: stop e take profit vivono sul server del
+broker. E gli EA sono **reload-safe** (guardia anti-duplicato: `if(_has) gPhase=MMP_DONE`).
+🔴 **Ma dopo il riavvio si controllano TRE cose sul terminale FTMO `541452707` (`C:\FTMO`)**:
+terminale connesso · sedie attaccate (faccina 🙂) · **`Algo Trading` VERDE** — al riavvio
+torna spesso spento, e allora gli EA sono attaccati ma **muti**.
+
 ## Contesto
 - Conto DEMO BCM 50503392, tipo HEDGING.
 - Sviluppo sul branch **`lavoro`** (vedi Regola #1).
