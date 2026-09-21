@@ -652,3 +652,27 @@ break fallisce più spesso, e **si dichiara l'attesa prima**.
 ---
 
 *Chiusura scritta il 18/09/2026. Nessuna domanda è stata inviata a nessuno.*
+
+---
+
+# 🔗 AGGIORNAMENTO DEL 21/09/2026 — arrivata una live PIU' VECCHIA (10/04/2026)
+
+Claudio ha caricato `trascrizioni/LIVE_EMILIANO_2026-04-10.txt` (208 righe, stessi
+relatori + Paolo Scaglione e Renzo, **tutta sul DAX**). Il referto e':
+
+> 📄 **`report/ANALISI_LIVE_EMILIANO_2026-04-10.md`**
+
+**Cosa tocca di QUESTO documento** (senza duplicarne i contenuti — si legge li'):
+
+| voce del 18/09 | cosa dice la live del 10/04 |
+|---|---|
+| 🔴 **Domanda aperta n.2** — *«l'ORB e' 3 candele di QUALE timeframe?»* | ✅ **CHIUSA**: r.95 del 10/04 dice in chiaro che il range e' *"il massimo al minimo della candela in M15"* → **15 minuti**. 👉 **La contraddizione col nostro 35-45 min (8/8 OOS) e' REALE**, non un malinteso di TF. Quarta ripetizione della **stessa** fonte = **una** fonte |
+| **N1** — distanza fra gli ordini dello scale-in (*20 pt si' · 40-50 pt no*) | 🟢 **Terzo punto sulla stessa curva**: r.95 del 10/04 → **59 punti = troppo distanti** (*"e' molto probabile che i prezzi mi toccano il primo e rimbalzano"*). La soglia della fonte sta **fra 20 e 40 punti indice DAX**. ⚠️ **Stessa fonte: taratura coerente, non verifica indipendente** |
+| **C1** — `InpFirstFraction` mai misurata | 🟢 **Rinforzata**: r.93 del 10/04 → *"**un terzo** lo vado a piazzare"* = il nostro `0,3333`. E il referto nuovo aggiunge un bersaglio: `ABTG_EMA200` (`771531`), dove `InpOrder1Atr=0.10` / `InpOrder2Atr=0.35` non sono mai stati misurati |
+| **N2 / C2** — veto sul breakout se il target e' troppo vicino (`InpUseSRFilter`) | 🔴 **RIQUALIFICATO, e la differenza conta**: la live del 10/04 descrive lo stesso veto ma con **ostacoli DIVERSI** (medie 14/50/100/200 e **Supertrend**, non PDH/PDL+tondi), sul **TF SUPERIORE a scala** (H1→H4→D1, non lo stesso TF), e in forma di **BANDA** (26-30 pt = troppo poco · 170-500 pt = troppo lontano). 👉 **R30 non lo chiude**, ma ne alza l'asticella: nel referto nuovo la proposta e' una **SONDA in sola lettura**, non un input da ottimizzare |
+| 🚩 **Bandiere rosse** | 🔴 **La serie "due live pulite di fila" SI INTERROMPE**: la live del 10/04 contiene **media valore / averaging down con size progressiva** (10+10+20 contratti su posizione in perdita), **ammessa dalla fonte stessa**: *"non e' piu' il mio x per cento, diventa l'x per cento piu' il rischio della seconda operazione"* (r.127-129). **Marcata NON ADOTTABILE.** Piu' tre bandiere minori (fra cui *"non ho il permesso di chiudere"*, r.179, incompatibile con un limite di perdita giornaliera) |
+| ✅ **Conferme nuove** | 🟢 `InpBufferPoints = 1000` (10 punti indice sotto i minimi della notte) confermato **parola per parola** da una fonte che opera sullo **stesso strumento e sullo stesso broker BCM** (r.93 vs `ABTG_MaxMinNotte.mq5` r.140) · `OPENCONFIRM` confermato, con **r.145 che alza la conferma "almeno in H1"** = il nostro `InpOCTimeframe` |
+| 🔴 **Buco nuovo trovato** | L'**Open Weekly come BIAS DIREZIONALE** (r.81, r.95) **non esiste in nessun nostro EA**: l'unico che legge `iOpen(PERIOD_W1,0)` e' `ABTG_WOL.mq5` (r.154) e lo usa come **bersaglio**, non come spartiacque. ⚠️ **Non diventa una proposta**: la fonte non da' nessuna soglia |
+
+*Aggiornamento scritto il 21/09/2026. Nessuna azione eseguita: EA, preset, forward e
+conto reale 10105439 non toccati.*
