@@ -132,7 +132,14 @@
 #  (a) RIPRODUZIONE: la cella 0 deve riprodurre R202B Pass 3:
 #      IS  n175 PF 1.12733 DD 5.4089 profit 3050.56
 #      OOS n270 PF 1.39520 DD 7.2506 profit 14355.32
-#      Se non riproduce il round NON e' confrontabile.
+#      TOLLERANZA, che mancava: UN CENTESIMO sul Profit, e uguaglianza
+#      su n, PF e DD alla quinta cifra. E' la tolleranza di casa, gia'
+#      usata dal cancello G1 (report/MANOPOLE_INERTI_2026-09-09.md
+#      r.40: 949/949 passate, con 4 gruppi che differivano di 0,01 sul
+#      Profit avendo PF, Trades e DD identici).
+#      Oltre quella tolleranza (a) FALLISCE: il round NON e'
+#      confrontabile, NON si ricalcola nessuna soglia, e si cerca il
+#      pin che balla.
 #  (b) n SCENDE salendo il pavimento. E' la verifica che il meccanismo
 #      si sia ACCESO. Se n non scende, il pavimento non scarta niente e
 #      il round non ha misurato nulla.
@@ -161,7 +168,20 @@
 #          larga del margine non decide niente.
 #          LA MISURA: DD_fisso% = (Profit / Recovery Factor) / 80000
 #          x 100. Le due colonne sono GIA' nel CSV: costo zero.
-#          Cella 0: 8,9033.  ==> CANCELLO c1: DD_fisso OOS <= 7,12.
+#          Cella 0: 8,9033 ATTESO.  ==> CANCELLO c1: -20%.
+#          L'ANCORA E' LA CELLA 0 DI QUESTO ROUND, NON IL NUMERO DI
+#          R202B. 8,9033 e' il valore ATTESO, calcolato da R202B
+#          Pass 3, e serve a scrivere la soglia PRIMA di girare, come
+#          vuole la regola di casa. Ma c1 e' un confronto "cella
+#          contro cella DENTRO lo stesso round": se l'ancora fosse un
+#          numero esterno, c1 tornerebbe a essere proprio la cosa da
+#          cui e' nato per scappare. Allora:
+#           - si legge DD_fisso della cella 0 DI QUESTO REFERTO;
+#           - le tre soglie si RICALCOLANO da quel numero coi RAPPORTI
+#             congelati (-20%, -5%, +5%). Sono i RAPPORTI a essere
+#             congelati, non i tre numeri. Se la cella 0 coincide con
+#             8,9033 entro la tolleranza di (a), restano 7,12264 /
+#             8,45813 / 9,34847.
 #          "Equity DD %" si RIPORTA lo stesso, come seconda colonna,
 #          ma NON decide.
 #          NOTA: DENTRO QUESTO ROUND DD_fisso% e DD assoluto in EUR
@@ -363,6 +383,31 @@
 #  Il verdetto sull'ASSE si scrive dopo aver classificato TUTTE E TRE
 #  le celle, e si dichiara la TERNA (es. "C,B,A" oppure "C,C,D"): cosi'
 #  si vede se il meccanismo morde solo sopra una soglia.
+#
+#  IL VERDETTO QUANDO NELLA TERNA C'E' UNA 'E'
+#  -------------------------------------------
+#  Si decide sul NUMERO di celle MISURATE, e la regola e' congelata
+#  QUI, prima dei numeri:
+#   - 3 misurate (nessuna E): verdetto pieno sulla terna.
+#   - 2 misurate + 1 E: verdetto sulle due, E SI DICHIARA che SOPRA il
+#     gradino della E l'asse NON E' STATO MISURATO. Se le due misurate
+#     sono C, il verdetto NON e' "H0 confermata": e' "H0 confermata
+#     FINO a quel gradino, sopra non si sa" -> serve un gradino
+#     INTERMEDIO. NON si archivia.
+#   - 1 misurata + 2 E (es. "C,E,E"): il round ha misurato UN PUNTO
+#     SOLO. NON ci si pronuncia sull'asse. Verdetto: "SCALA TROPPO
+#     ALTA, si rifa' con gradini piu' bassi". Archiviare qui vorrebbe
+#     dire archiviare un asse mai misurato.
+#   - 0 misurate ("E,E,E"): ROUND NON MISURATO. Non e' un verdetto sul
+#     PAVIMENTO, e' un verdetto sulla SCALA. Si rifa' l'asse partendo
+#     SOTTO il P10 dello stop a 35' (39,49 idx = 3949 pt,
+#     STOP_VS_SPREAD_FTMO_2026-09-20.md r.246).
+#  REGOLA GENERALE: una 'E' non e' MAI un'informazione CONTRO il
+#  pavimento. E' ASSENZA di informazione, e si scrive come tale.
+#  E LO SCENARIO NON E' RARO: la cella 8625 scarta il 54,2-83,6% dei
+#  giorni e l'IS e' il 40% della finestra. "C,C,E" e "C,E,E" sono fra
+#  gli esiti PIU' PROBABILI di questo round -- senza questa regola, nel
+#  caso piu' probabile IL ROUND ARCHIVIEREBBE SE STESSO.
 #  Il calo di n (<= 216 uscite, -20%) resta come verifica del punto (b)
 #  -- che il pavimento si sia ACCESO -- e NON come condizione di C.
 #

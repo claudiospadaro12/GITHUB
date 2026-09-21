@@ -5,7 +5,7 @@ File prova: `backtest_pipeline/prove/R203a_pavimento_stop_DAX_D30EUR.txt` (90 pi
 — **i cancelli (a)-(f) e (c1)-(c3) sono quelli congelati in quel file** (classe 549).
 
 > 📌 **Nota d'archivio**: il **file prova** sta al pin `a774bb3be82a4ce52bcd27eb5614d6d29e672a33`
-> — che è quello che il driver scarica. Questo **documento** è stato riscritto **tre volte**:
+> — che è quello che il driver scarica. Questo **documento** ha la sua catena (qui sotto):
 > chi lo riaprisse da un pin precedente leggerebbe una stesura vecchia.
 
 > 🔴 **CATENA DELLE STESURE** (non un contatore a mano — classe 554):
@@ -98,7 +98,7 @@ frontiera calcolata sullo spread BCM.
 
 | | cancello | come si misura, e perché così |
 |---|---|---|
-| **c1** | 🎯 `DD_fisso OOS ≤ 7,12` (−20% sugli **8,9033** della cella `0`) | 🔴 **NON su `Equity DD %`**, che divide per il **picco** — e il picco **cambia da cella a cella**: una cella ad alto pavimento fa meno profitto, ha un picco più basso, e **lo stesso drawdown in euro le esce come percentuale più alta**. La misura è `(Profit / Recovery Factor) / 80000 × 100`: **due colonne già nel CSV, costo zero**. `Equity DD %` si riporta, ma **non decide** |
+| **c1** | 🎯 `DD_fisso OOS` **≤ −20%** rispetto alla cella `0` **misurata in questo referto** (atteso `8,9033` → `7,12264`) | 🔴 **NON su `Equity DD %`**, che divide per il **picco** — e il picco **cambia da cella a cella**: una cella ad alto pavimento fa meno profitto, ha un picco più basso, e **lo stesso drawdown in euro le esce come percentuale più alta**. La misura è `(Profit / Recovery Factor) / 80000 × 100`: **due colonne già nel CSV, costo zero**. `Equity DD %` si riporta, ma **non decide** |
 | **c2** | ⚠️ **non è più un cancello: è un numero da riportare** | il tester divide per l'**equity d'inizio giornata** (`ABTG_DAX_Apertura_EU.mq5` **r.759**), il MDL FTMO è il 5% del **capitale iniziale**: mobile contro fisso, **classe 515 in scala giornaliera** (fattore ≤ **1,228**). E il 5% è **del conto**, dove operano **sei** sedie: fissare la quota per sedia è un **parametro di rischio**, cioè **di Claudio** |
 | **c3** | 🔴 **il muro del 10% NON si giudica qui** | `Equity DD %` è **dal picco**, il Max Loss FTMO è **statico dal saldo iniziale**. 🟢 **Ma un limite superiore rigoroso il CSV lo dà**: `perdita_statica ≤ DDass / deposito` — cella viva OOS **8,90%** al banco, **≤ 17,8%** a taglia vera |
 | **d** | `PF OOS ≥ 1,20` | 🟢 **fonte: `risultati_archivio/R98_CRITERI.md` r.194, cancello S2, «opzione A (FIRMATA)», decisa da Claudio il 22/08 PRIMA dei numeri.** Per **questo** motore è **larga** (la cella viva fa 1,39520): è un **pavimento riusato**, e il cancello che morde qui è **c1** |
@@ -141,16 +141,39 @@ le direzioni**, con questo numero accanto.
 > volta sola**; classe 554: due copie divergono, e divergono **in silenzio**). Questa è una
 > **mappa di lettura**, per non riaprire il file mentre si guarda il referto:
 
-| classe | `DD_fisso OOS` | cosa vuol dire |
+| classe | **scostamento dalla cella `0`** | cosa vuol dire |
 |---|---|---|
-| **A** | ≤ 7,12 | H0 **falsificata** · cella **candidata** se `PF ≥ 1,20` |
-| **B** | 7,12 < x < 8,46 | H0 **falsificata lo stesso** · 🎯 **«asse giusto, gradino sbagliato»** → più risoluzione, **l'asse NON si archivia** |
-| **C** | 8,46 ≤ x ≤ 9,35 | H0 **confermata** su quella cella |
-| **D** | > 9,35 | il pavimento **peggiora** il DD · risposta **pulita**: chiude l'asse |
+| **A** | **≤ −20%** | H0 **falsificata** · cella **candidata** se `PF ≥ 1,20` |
+| **B** | fra **−20%** e **−5%** (esclusi) | H0 **falsificata lo stesso** · 🎯 **«asse giusto, gradino sbagliato»** → più risoluzione, **l'asse NON si archivia** |
+| **C** | dentro **±5%** | H0 **confermata** su quella cella |
+| **D** | **> +5%** | il pavimento **peggiora** il DD · risposta **pulita**: chiude l'asse |
 | **E** | `Trades = 0` / `[NON CALCOLABILE]` | 🔴 **cella senza misura**, fuori da A-D — e **sembra la più bella di tutte** |
 
-⚠️ **Le soglie normative sono i RAPPORTI** (`−20% → 7,12264`, `−5% → 8,45813`,
-`+5% → 9,34847`), non gli arrotondamenti a due decimali della tabella.
+🟢 **La mappa è in RAPPORTI apposta, e non può invecchiare.** L'ancora è il `DD_fisso` della
+cella `0` **misurato in questo referto**, non il numero di R202B: le soglie si **ricalcolano**
+da quello. Se la cella `0` riproduce l'atteso **8,9033** entro la tolleranza di `(a)`, i tagli
+sono `7,12264 / 8,45813 / 9,34847`.
+
+🔴 **E `(a)` ha una tolleranza, che prima mancava**: **un centesimo sul Profit** e
+uguaglianza su `n`, `PF` e `DD` **alla quinta cifra** — la tolleranza di casa già usata dal
+cancello G1 (`report/MANOPOLE_INERTI_2026-09-09.md` r.40). Oltre quella, `(a)` **fallisce**: il
+round non è confrontabile e **non si ricalcola nessuna soglia**.
+
+🔴 **E SE NELLA TERNA C'È UNA `E`, si decide sul NUMERO di celle misurate** — regola
+congelata nel file prova, **prima** dei numeri:
+
+| celle misurate | verdetto sull'asse |
+|---|---|
+| **3** | verdetto pieno sulla terna |
+| **2 + una E** | verdetto sulle due, **e si dichiara che sopra quel gradino l'asse NON è stato misurato**. Due `C` **non** fanno «H0 confermata»: fanno «confermata **fino** a quel gradino» → serve un gradino **intermedio**. **Non si archivia** |
+| **1 + due E** (`C,E,E`) | il round ha misurato **un punto solo**: **non ci si pronuncia**. Verdetto: **«scala troppo alta»** |
+| **0** (`E,E,E`) | **ROUND NON MISURATO** — verdetto sulla **scala**, non sul pavimento. Si rifà partendo **sotto il P10** dello stop a 35' (39,49 idx = 3949 pt) |
+
+⚠️ **E non è un'ipotesi di scuola**: la cella `8625` scarta il **54,2-83,6%** dei giorni e la
+gamba IS è solo il **40%** della finestra. **`C,C,E` e `C,E,E` sono fra gli esiti più probabili
+di questo round** — senza questa regola, nel caso più probabile **il round archivierebbe se
+stesso**.
+👉 **Una `E` non è MAI un'informazione CONTRO il pavimento: è assenza di informazione.**
 
 🔴 **E LA CLASSE E È IL TRANELLO DEL ROUND, verificato su una riga vera d'archivio**
 (`ABTG_OpeningReversalB_U30USD_OOS_P0CONTA.csv`): una passata a **zero trade** esce con
