@@ -27929,3 +27929,29 @@ Con `COMPUTERNAME=VMI3047753`:
 - **3 istruzioni separate** -> `GUARDIA SCATTATA`, poi *"...e QUESTA e partita lo
   stesso"*, poi *"...e anche QUESTA"*.
 - **avvolte in `& { ... }`** -> `GUARDIA SCATTATA` **e niente dopo e' partito**.
+
+## CLASSE 539 -- il verdetto che contraddice la riga sopra di se'
+**Trovata il 21/09/2026, leggendo l'output vero dopo una sospensione riuscita.**
+
+`SOSPENDI_RUNNER_NOTTURNO.ps1` stampava, a due righe di distanza:
+```
+  prossima corsa prevista: 09/22/2026 03:30:30
+  FATTO: l'attivita' e' DISABILITATA e non ha piu' una prossima corsa.
+```
+Le due frasi **non possono essere vere insieme**, e la seconda era **falsa**:
+Windows tiene `NextRunTime` popolato anche su un'attivita' `Disabled`. Il campo
+che comanda e' lo **STATO**, non l'ora.
+
+🔴 Perche' costa: chi rilegge quello zip fra un mese vede una data futura e conclude
+che la sospensione non ha tenuto -- oppure, peggio, si abitua a ignorare la riga
+della data e non si accorge il giorno in cui l'attivita' e' tornata `Ready`.
+
+### La regola
+**Un verdetto non puo' smentire un dato che lo stesso referto ha appena stampato.**
+Se un campo resta popolato per ragioni sue, si dichiara **perche'**, invece di
+scrivere una frase che lo contraddice. Riparazione applicata: la riga dell'ora
+dice ora che e' memoria di Windows, e il verdetto si appoggia allo STATO.
+
+📌 Nota di metodo: il difetto non e' uscito da nessun cancello, ne' dallo strato 1
+ne' dallo strato 2. E' uscito **leggendo l'output vero di una corsa riuscita**.
+Un referto che finisce "FATTO" va letto lo stesso, riga per riga.

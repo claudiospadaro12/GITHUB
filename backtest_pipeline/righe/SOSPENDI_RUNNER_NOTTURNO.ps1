@@ -248,10 +248,13 @@ $ok = ($statoDopo -eq $atteso)
 Dire ("  stato PRIMA  : " + $statoPrima) ""
 Dire ("  stato DOPO   : " + $statoDopo) ""
 Dire ("  stato ATTESO : " + $atteso) ""
-Dire ("  prossima corsa prevista: " + $(if($prossima -eq ""){ "nessuna" } else { $prossima })) ""
+Dire ("  ora di partenza che Windows tiene in memoria: " + $(if($prossima -eq ""){ "nessuna" } else { $prossima })) ""
+Dire  "  NOTA: Windows continua a mostrare quell'ora anche su un'attivita' DISABILITATA." "DarkGray"
+Dire  "  Non e' una corsa in programma: il campo che comanda e' lo STATO qui sopra." "DarkGray"
 if($ok -and (-not $Riaccendi)){
   Dire "" ""
-  Dire  "  FATTO: l'attivita' e' DISABILITATA e non ha piu' una prossima corsa." "Green"
+  Dire  "  FATTO: l'attivita' e' DISABILITATA, quindi NON parte, anche se qui sopra" "Green"
+  Dire  "  resta scritta un'ora: quella e' memoria di Windows, non un impegno." "Green"
   Dire  "  Stanotte alle 03:30 il VPS non fa partire nessun backtest." "Green"
   Dire  "  E' REVERSIBILE: la riga per riaccenderla sta nel documento." "Green"
 } elseif($ok) {
