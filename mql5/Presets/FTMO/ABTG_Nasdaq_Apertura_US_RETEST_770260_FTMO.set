@@ -129,7 +129,49 @@ InpOCTimeframe=0
 InpPendingExpiryMin=120
 InpAllowLong=true
 InpAllowShort=true
-InpMinRangePts=0.0
+; --- FILTRO AMPIEZZA, 21/09/2026 ------------------------------------------
+;   FIRMA DI CLAUDIO: "accendi min e max range sul nasdaq" + "FAI LA 1".
+;   ESEGUITO A META', E IL MOTIVO E' MISURATO. Il MIN e acceso sul NOSTRO
+;   numero; il MAX resta a 0 finche un round non lo misura (vedi sotto).
+;
+;   [1] LA BANDA DELLA FONTE NON E' TRASFERIBILE - misurato, non opinato.
+;   Live Emiliano 17/07/2026 (trascrizioni/LIVE_EMILIANO_2026-07-17...txt):
+;     r.21 "la candela deve essere superiore a 17 points"
+;     r.61 "io a 41 punti ho il divieto di fare l operazione"
+;   Quei numeri sono su una candela da CINQUE minuti. Questa sedia usa
+;   InpRangeMinutes=35. Misurato su 3.899 aperture vere di NASUSD
+;   (backtest_pipeline/risultati_archivio/ANATOMIA_APERTURE_20260826/
+;    ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, colonne up30_pt/dn30_pt):
+;     ampiezza 35' - mediana 2026 = 190,7 punti indice; p10 = 100,9
+;   => tetto 41  -> scarta il 100,0% dei giorni del 2026. SEDIA MUTA.
+;   => tetto 108 -> scarta l' 87,6% dei giorni del 2026. SEDIA QUASI MUTA.
+;   (108 era la mia "banda riscalata" del 21/09: SBAGLIATA DUE VOLTE -
+;    base non trasferibile, ed esponente errato: il nostro mercato cresce
+;    di 1,2441 per raddoppio del tempo, non di 1,4142.)
+;
+;   [2] IL PAVIMENTO CHE HO MESSO NON E' DI EMILIANO: E' DI CASA.
+;   InpSLMode=0 (ABTG_SL_RANGE) => LO STOP E' L'AMPIEZZA DEL RANGE.
+;   Quindi il filtro MIN e esattamente la frontiera di costo firmata
+;   "stop >= 40 x spread". Spread NASUSD ora 14 server, mediana MISURATA
+;   su 250 milioni di tick (report/STOP_VS_SPREAD_FTMO_2026-09-20.md
+;   par. 5.1) = 1,80 punti indice.
+;     40 x 1,80 = 72,0 punti indice = 7200 punti MT5  (Point=0,01)
+;   COSTO DEL FILTRO, misurato: scarta 4,1% dei giorni 2026, 10,3% della
+;   finestra di backtest. E scarta SOLO giorni in cui lo stop sta sotto la
+;   frontiera, cioe giorni che oggi operiamo gia in perdita di costo.
+;
+;   [3] PERCHE' IL MAX RESTA A 0. La ragione della fonte ("lo stop e
+;   troppo ampio" = troppi soldi a rischio) NON VALE PER NOI: la taglia e
+;   calcolata dal rischio (InpRiskPercent=2,00), quindi stop piu largo =
+;   lotto piu piccolo = stesso rischio in EUR. Un tetto qui non protegge
+;   niente di misurato, e ogni valore provato spegne la sedia. Lo misura
+;   il round R196 sul PC di backtest; finche non torna, 0 = off.
+;
+;   SPEGNIMENTO: rimettere InpMinRangePts=0.0.
+;   SPIA IN CAMPO: il giornale scrive "candela NNNN pt < min": quei numeri
+;   sono la misura vera, giorno per giorno.
+; --------------------------------------------------------------------------
+InpMinRangePts=7200.0
 InpMaxRangePts=0.0
 InpRetestOffsetPts=0.0
 InpFadeOffsetPts=0.0

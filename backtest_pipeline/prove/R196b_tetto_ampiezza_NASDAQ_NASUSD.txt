@@ -1,0 +1,113 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US          (sedia 770260, IN CAMPO su FTMO)
+#  R196b -- IL TETTO. Asse unico: InpMaxRangePts (0 = spento, poi 4 valori).\n#          Il PAVIMENTO e R196a: un file prova misura UNA variabile.
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.
+#     Firma di Claudio del 21/09/2026 (CLAUDE.md): finche' una challenge
+#     e' viva, i round non girano sulla macchina che ospita le sedie.
+#
+#  Si lancia con: -Deposito 80000 -Modello 4
+#     80.000 = il banco vero della challenge FTMO. Modello 4 = tick reali.
+#  REFERTO: report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md
+# =====================================================================
+#
+#  PERCHE' ESISTE QUESTO ROUND
+#  ---------------------------
+#  Claudio (21/09): "accendi min e max range sul nasdaq" -> "FAI LA 1 MA
+#  SI POSSONO PROVARE LE ALTRE DUE ANCHE?".
+#  La 1 (banda riscalata 4500/10800) e' stata MISURATA E BUTTATA prima di
+#  arrivare a lui: scarta l'87,6% dei giorni del 2026.
+#  La 2 (banda letterale 1700/4100 della live Emiliano) ne scarta il 100,0%.
+#  Questo e' la 3: si misura, e il numero decide.
+#
+#  LA MISURA GIA' FATTA, FUORI DAL TESTER, SU DATI VERI
+#  ----------------------------------------------------
+#  backtest_pipeline/risultati_archivio/ANATOMIA_APERTURE_20260826/
+#  ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv -- 3.899 aperture OK di NASUSD,
+#  colonne up30_pt/dn30_pt (massimo e minimo dei primi 30' rispetto
+#  all'apertura; verificato che up30>=0 e dn30<=0 su TUTTE e 3.899 le
+#  righe, quindi la loro differenza E' l'ampiezza max-min).
+#  Riportata a 35' col fattore MISURATO sui nostri dati (x1,2441 per
+#  raddoppio del tempo, NON x1,4142 della radice del tempo):
+#
+#      ampiezza 35' NASUSD, punti indice
+#      finestra                p10     mediana   p90
+#      2026 (anno in corso)   100,9     190,7   312,2
+#      2025+2026               75,4     150,5   282,7
+#      dal 2024.09.26          71,6     140,0   272,2
+#
+# ---------------------------------------------------------------------
+#  🔴 I PIN NON SONO DECORAZIONE: SENZA, SI MISURA UN'ALTRA SEDIA.
+# ---------------------------------------------------------------------
+#  walkforward_generico.ps1 r.836-843 blinda OGNI input al DEFAULT DEL
+#  SORGENTE, non al preset schierato; il file prova e' l'unica cosa che
+#  vince su quelle blindature (r.845-857). Fra preset FTMO 770260 e
+#  default del sorgente ci sono 21 divergenze vere: sono pinnate tutte.
+#
+#  E TRE VANNO CONVERTITE, perche' il preset e' scritto in ORA E SIMBOLI
+#  FTMO mentre il backtest gira su dati BCM:
+#     InpSessionHour  preset 16 -> 14   (FTMO = UTC+3, BCM = UTC+1)
+#     InpCloseHour    preset 19 -> 17   (stesso scarto di 2 ore)
+#     InpCorrSymbol   US500.cash -> SPXUSD   (lo stesso indice, altro nome)
+#  Un CSV che torna con InpSessionHour=16 o 15 e' in ora sbagliata: si
+#  cestina. DEVE essere 14 (CLAUDE.md, regola del fuso).
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- i 21 pin che ricostruiscono la sedia 770260 ---------------------
+InpMagic=770260||770260||0||770260||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+
+# --- asse unico: IL TETTO --------------------------------------------
+#  IL TETTO NON HA UNA RAGIONE NOSTRA, ED E' IL MOTIVO DEL ROUND.
+#  La ragione della fonte e' testuale (live 17/07 r.61): "lo stop e'
+#  troppo ampio ... qua sono 40.000 euro di stop". NON VALE PER NOI:
+#  Emiliano opera a CONTRATTI FISSI, noi calcoliamo la taglia DAL RISCHIO
+#  (InpRiskPercent=2,00) -> stop piu' largo = lotto piu' piccolo = STESSO
+#  rischio in EUR. Il problema che il tetto risolve per lui, da noi non
+#  esiste.
+#  Resta UN SOLO argomento, ed e' un'ipotesi finche' non e' misurato: con
+#  un range largo anche il bersaglio e' lontano in punti assoluti, e la
+#  chiusura di sessione (17:30 server BCM) arriva prima. Lo misura questo.
+#
+#  I VALORI, scelti sulla distribuzione vera (non sulla fonte):
+#    10000 = 100 punti indice -> sotto il p10 del 2026: quasi muta
+#    20000 = 200 punti indice -> appena sopra la mediana 2026 (190,7)
+#    30000 = 300 punti indice -> vicino al p90 2026 (312,2)
+#    40000 = 400 punti indice -> sopra il p90: quasi inerte
+#        0 = spento: CELLA DI CONTROLLO OBBLIGATORIA
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI:
+#    se il tetto serve, il PF sale scendendo da 40000 verso 20000 e lo fa
+#    con un ALTOPIANO (due celle vicine concordi), non con un picco solo.
+#    Se il PF sale SOLO nella cella piu' stretta mentre n crolla, e'
+#    rumore: si legge PF *e* n insieme.
+#    Se nessun tetto batte la cella 0, il verdetto e' "il tetto non serve
+#    a questa sedia" e resta 0. E' un esito, non un fallimento.
+#  SELEZIONE: centro dell'altopiano, MAI il picco.
+#
+#  Il pavimento resta al valore firmato il 21/09, cosi' il Delta misura
+#  il TETTO e non la somma dei due.
+InpMinRangePts=7200.0||7200.0||0||7200.0||N
+InpMaxRangePts=0||0||10000||40000||Y
+# 5 celle
