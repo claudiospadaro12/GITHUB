@@ -1,8 +1,9 @@
 # =====================================================================
 #  EA: ABTG_Nasdaq_Apertura_US          (sedia 770260, IN CAMPO su FTMO)
-#  R196b -- IL TETTO. Asse unico: InpMaxRangePts (0 = spento, poi 4 valori).\n#          Il PAVIMENTO e R196a: un file prova misura UNA variabile.
+#  R196b -- IL TETTO. Asse unico: InpMaxRangePts (0 = spento, poi 4 valori). (il resto e' nell'altro file).
+#          Il PAVIMENTO e R196a: un file prova misura UNA variabile.
 #
-#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.
+#  [PC] GIRA SUL PC DI BACKTEST, NON SUL VPS.
 #     Firma di Claudio del 21/09/2026 (CLAUDE.md): finche' una challenge
 #     e' viva, i round non girano sulla macchina che ospita le sedie.
 #
@@ -20,8 +21,15 @@
 #  La 2 (banda letterale 1700/4100 della live Emiliano) ne scarta il 100,0%.
 #  Questo e' la 3: si misura, e il numero decide.
 #
-#  LA MISURA GIA' FATTA, FUORI DAL TESTER, SU DATI VERI
-#  ----------------------------------------------------
+#  LA MISURA GIA' FATTA, FUORI DAL TESTER
+#  --------------------------------------
+#  [!] PROVENIENZA, e sono DUE SALTI, dichiarati dal cancello il 21/09:
+#  il CSV non e' tick BCM e non e' FTMO. CENSIMENTO_FONTE.txt dice che la
+#  fonte e' C:\Users\Master\abtg_storico_indici\NASUSD_M1.csv, ora di
+#  NEW YORK, con il fuso calibrato contro import HistData. La sedia opera
+#  su FTMO US100.cash. Quindi: HistData -> (nome NASUSD) -> US100.cash.
+#  La distribuzione e' indicativa, NON e' il feed su cui la sedia opera.
+#
 #  backtest_pipeline/risultati_archivio/ANATOMIA_APERTURE_20260826/
 #  ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv -- 3.899 aperture OK di NASUSD,
 #  colonne up30_pt/dn30_pt (massimo e minimo dei primi 30' rispetto
@@ -31,18 +39,30 @@
 #  raddoppio del tempo, NON x1,4142 della radice del tempo):
 #
 #      ampiezza 35' NASUSD, punti indice
-#      finestra                p10     mediana   p90
-#      2026 (anno in corso)   100,9     190,7   312,2
-#      2025+2026               75,4     150,5   282,7
-#      dal 2024.09.26          71,6     140,0   272,2
+#      (percentili a interpolazione lineare; fattore 1,0498)
+#      finestra                 n     p10   mediana   p90
+#      2026 (anno in corso)    145    98,3    185,3  314,6
+#      2025+2026               400    75,5    146,6  275,0
+#      dal 2024.09.26          468    69,6    136,2  265,9
+#
+#  [!] RICONTROLLATO DAL CANCELLO IL 21/09: la tabella di prima
+#  (100,9 / 190,7 / 312,2 ecc.) era calcolata col fattore 1,0801 =
+#  (35/30)^0,5, cioe' con la RADICE DEL TEMPO -- esattamente il fattore
+#  che il referto dichiara SBAGLIATO. Questi sono i numeri col fattore
+#  dichiarato (1,0498). Il metodo del fattore, che va detto perche' il
+#  numero cambia: 1,2441 e' la MEDIANA DEI RAPPORTI giorno per giorno
+#  (ricalcolata 1,2445 / 1,2437); il RAPPORTO DELLE MEDIANE darebbe
+#  1,2932 / 1,2832, cioe' esponente 0,3712 e fattore 1,0590.
 #
 # ---------------------------------------------------------------------
-#  🔴 I PIN NON SONO DECORAZIONE: SENZA, SI MISURA UN'ALTRA SEDIA.
+#  [!] I PIN NON SONO DECORAZIONE: SENZA, SI MISURA UN'ALTRA SEDIA.
 # ---------------------------------------------------------------------
 #  walkforward_generico.ps1 r.836-843 blinda OGNI input al DEFAULT DEL
 #  SORGENTE, non al preset schierato; il file prova e' l'unica cosa che
 #  vince su quelle blindature (r.845-857). Fra preset FTMO 770260 e
-#  default del sorgente ci sono 21 divergenze vere: sono pinnate tutte.
+#  default del sorgente ci sono 22 DIVERGENZE VERE (ricontate dal
+#  cancello il 21/09: erano dichiarate 21, e DUE non erano pinnate --
+#  vedi sotto). Adesso sono pinnate tutte e 22.
 #
 #  E TRE VANNO CONVERTITE, perche' il preset e' scritto in ORA E SIMBOLI
 #  FTMO mentre il backtest gira su dati BCM:
@@ -51,14 +71,57 @@
 #     InpCorrSymbol   US500.cash -> SPXUSD   (lo stesso indice, altro nome)
 #  Un CSV che torna con InpSessionHour=16 o 15 e' in ora sbagliata: si
 #  cestina. DEVE essere 14 (CLAUDE.md, regola del fuso).
+#
+#  [!] E IL VENTIQUATTRESIMO, TROVATO DAL CANCELLO CONTRO LA FONTE GIUSTA:
+#  InpRiskPercent. Non era pinnato, e il default del sorgente (2.0) NON e'
+#  il valore con cui la cella e' stata validata: la riga Pass=8 di
+#  NASDAQ_B_motore_OOS.csv porta InpRiskPercent=1. Lo pinno a 2.00, che e'
+#  la taglia VERA della sedia oggi (firma di Claudio del 20/09), ma la
+#  conseguenza va scritta perche' e' gia' agli atti nell'intestazione del
+#  preset: PF e n sono invarianti alla scala del lotto, DD E PROFITTO NO.
+#  ==> il DD di questo round NON si confronta con il 3,6753% d'archivio.
+#  Il Delta fra le celle resta pulito: il rischio e' costante su tutte.
+#
+#  [!] E IL METODO GIUSTO PER COSTRUIRE QUESTA LISTA, per la prossima volta:
+#  NON si fa il diff contro il preset FTMO (che e' in ora e simboli FTMO e
+#  costringe a tre conversioni a mano). Si legge la riga Pass=8 del CSV del
+#  round -- backtest_pipeline/risultati_archivio/Walkforward_Aperture/
+#  NASDAQ_B_motore_OOS.csv -- che ha i 78 input della cella validata GIA'
+#  in unita' BCM: InpSessionHour=14, InpCloseHour=17, InpCorrSymbol=SPXUSD,
+#  InpRangeMode=0, InpCloseMin=30. Zero conversioni, zero indovinelli.
+#  Verificato dal cancello il 21/09: contro quella riga le divergenze dal
+#  default sono 20, e adesso sono pinnate tutte e 20.
 # ---------------------------------------------------------------------
 
 @SIMBOLO  NASUSD
 @PERIODO  M5
 @DAQUANDO 2024.09.26
 
-# --- i 21 pin che ricostruiscono la sedia 770260 ---------------------
+# --- i pin che ricostruiscono la sedia 770260 ------------------------
+#  [!] I DUE PIN TROVATI DAL CANCELLO IL 21/09, E IL PRIMO ERA FATALE:
+#
+#  InpRangeMode  -- default del SORGENTE = 2 (ABTG_RANGE_PREVBAR,
+#     ABTG_Nasdaq_Apertura_US.mq5 r.42 #define ABTG_DEF_RANGE_MODE 2),
+#     preset = 0 (ABTG_RANGE_OPENING). SENZA QUESTO PIN il round non
+#     misurava affatto i primi 35' dopo l'apertura: ComputeLevels
+#     sarebbe uscito al primo ramo prendendo massimo e minimo
+#     dell'ULTIMA CANDELA H1 CHIUSA, e InpRangeMinutes=35 sarebbe stato
+#     IGNORATO DEL TUTTO. Il filtro d'ampiezza si sarebbe applicato a
+#     un oggetto diverso, e il CSV sarebbe tornato pieno di numeri
+#     plausibili che rispondono a un'altra domanda.
+#
+#  InpCloseMin   -- default del SORGENTE = 45 (r.45), preset = 30.
+#     Con InpCloseHour pinnato a 17 il round avrebbe chiuso alle 17:45
+#     invece che alle 17:30: un quarto d'ora di esposizione in piu' ogni
+#     giorno. E colpisce ESATTAMENTE l'ipotesi che R196b deve misurare
+#     ("con un range largo il bersaglio e' lontano e la chiusura di
+#     sessione arriva prima"): con l'ora di chiusura sbagliata, quella
+#     misura e' sbagliata.
+# ---------------------------------------------------------------------
 InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
 InpSessionHour=14||14||0||14||N
 InpSessionMin=30||30||0||30||N
 InpRangeMinutes=35||35||0||35||N
@@ -92,8 +155,8 @@ InpConfirmMode=1||1||0||1||N
 #
 #  I VALORI, scelti sulla distribuzione vera (non sulla fonte):
 #    10000 = 100 punti indice -> sotto il p10 del 2026: quasi muta
-#    20000 = 200 punti indice -> appena sopra la mediana 2026 (190,7)
-#    30000 = 300 punti indice -> vicino al p90 2026 (312,2)
+#    20000 = 200 punti indice -> appena sopra la mediana 2026 (185,3)
+#    30000 = 300 punti indice -> sotto il p90 2026 (314,6)
 #    40000 = 400 punti indice -> sopra il p90: quasi inerte
 #        0 = spento: CELLA DI CONTROLLO OBBLIGATORIA
 #
@@ -106,8 +169,14 @@ InpConfirmMode=1||1||0||1||N
 #    a questa sedia" e resta 0. E' un esito, non un fallimento.
 #  SELEZIONE: centro dell'altopiano, MAI il picco.
 #
-#  Il pavimento resta al valore firmato il 21/09, cosi' il Delta misura
-#  il TETTO e non la somma dei due.
-InpMinRangePts=7200.0||7200.0||0||7200.0||N
+#  [!] IL PAVIMENTO QUI STA A 0, E IL CANCELLO L'HA CAMBIATO IL 21/09.
+#  Prima era pinnato a 7200. Ma il 7200 NON E' ANCORA VALIDATO -- e' il
+#  soggetto di R196a. Misurare il tetto sopra un pavimento non validato
+#  rende il risultato del tetto CONDIZIONATO a una scelta che potrebbe
+#  cadere, e la cella di controllo (Max=0, Min=7200) non sarebbe piu' la
+#  cella vera. Con Min=0 la cella di controllo E' la cella promossa dal
+#  walk-forward (InpMinRangePts=0), e il Delta del tetto si legge da solo.
+#  Se R196a promuove il pavimento, il tetto si rimisura sopra quello.
+InpMinRangePts=0.0||0.0||0||0.0||N
 InpMaxRangePts=0||0||10000||40000||Y
 # 5 celle

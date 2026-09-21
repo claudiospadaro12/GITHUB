@@ -129,49 +129,129 @@ InpOCTimeframe=0
 InpPendingExpiryMin=120
 InpAllowLong=true
 InpAllowShort=true
+; ##########################################################################
+; ## RIPORTATO A 0.0 LA SERA DEL 21/09/2026 -- E NON E' UN RIPENSAMENTO, ##
+; ## E' UN NUMERO. Il valore 7200 e' rimasto in questo file per poche   ##
+; ## ore ed e' stato tolto PRIMA di arrivare al terminale.              ##
+; ##                                                                    ##
+; ## Il motivo l'avevamo gia' misurato NOI, il 20/09, su QUESTA sedia:  ##
+; ## report/STOP_VS_SPREAD_FTMO_2026-09-20.md par.6.2, fonte            ##
+; ## risultati_archivio/studio_apertura/Studio_NASUSD.csv (447 giornate ##
+; ## con rottura vera, tick BCM, apertura 14:30 server):                ##
+; ##                                                                    ##
+; ##    floor      idx    n superstiti   % base    PF proxy             ##
+; ##    0 (oggi)   5,00        447       100,0%     1,001               ##
+; ##    20x       30,60        415        92,8%     1,022               ##
+; ##    30x       45,90        385        86,1%     0,973               ##
+; ##    40x       61,20        353        79,0%     0,980               ##
+; ##                                                                    ##
+; ## DUE COSE, tutte e due contro l'accensione:                         ##
+; ## (1) IL COSTO E' IL DOPPIO di quello che avevo scritto. Il numero   ##
+; ##     trasferibile e' n: 79,0% => si perde il 21% delle giornate,    ##
+; ##     non il 10,3% che avevo calcolato dalla distribuzione. E questa ##
+; ##     sedia sta a 0,46 operazioni al giorno.                         ##
+; ## (2) IL BENEFICIO NON ESISTE, MISURATO: sul Nasdaq il floor NON     ##
+; ##     alza il PF (1,001 -> 0,980 a 40x) e la curva non e' nemmeno    ##
+; ##     monotona. Il par.6.3 punto 3 lo scrive cosi': "proporre 40x su ##
+; ##     770260 perche' e' la regola sarebbe esattamente il difetto che ##
+; ##     la regola di casa vieta". Il par.6.5 concludeva: NON alzare.   ##
+; ##                                                                    ##
+; ## ONESTA' SUL CONTRO-NUMERO: quel proxy ha PF ~1,00 e il referto     ##
+; ## stesso dichiara che i suoi Delta di PF sono RUMORE (solo n e il DD ##
+; ## sono affidabili). Quindi il 6.2 non dimostra che il floor FA MALE: ##
+; ## dimostra che NON ABBIAMO NESSUNA MISURA CHE DICA CHE FA BENE, e    ##
+; ## che costa il 21% delle giornate. Su una challenge pagata, accesa   ##
+; ## da tre giorni, quello basta per NON girare la manopola.            ##
+; ##                                                                    ##
+; ## LA FRONTIERA stop >= 40 x spread NON E' SMENTITA: resta un conto   ##
+; ## di COSTO, giusto. Dice solo che su questo simbolo il costo e'      ##
+; ## dominato da altro. Sul DAX 770101, con lo stesso proxy, il floor   ##
+; ## a 40x abbassa il DD del 54%: li' morde, qui no.                    ##
+; ##                                                                    ##
+; ## CHI DECIDE: la firma "accendi min e max range sul nasdaq" e' di    ##
+; ## Claudio e resta valida. Quello che e' caduto e' la GIUSTIFICAZIONE ##
+; ## che gli avevo dato (costo 4,1%, nessun rovescio): era sbagliata.   ##
+; ## Il numero lo fa R196a sul PC di backtest, poi decide lui.          ##
+; ##########################################################################
+;
 ; --- FILTRO AMPIEZZA, 21/09/2026 ------------------------------------------
 ;   FIRMA DI CLAUDIO: "accendi min e max range sul nasdaq" + "FAI LA 1".
-;   ESEGUITO A META', E IL MOTIVO E' MISURATO. Il MIN e acceso sul NOSTRO
-;   numero; il MAX resta a 0 finche un round non lo misura (vedi sotto).
+;   ESEGUITO A META', E IL MOTIVO E' MISURATO. Il MIN e' acceso sul NOSTRO
+;   numero; il MAX resta a 0 finche' un round non lo misura.
+;
+;   [!][!] LEGGERE PRIMA DI RICARICARE QUESTO FILE SU C:\FTMO (541452707) [!][!]
+;   QUESTA RIGA NON E' ANCORA VALIDATA DA NESSUNA CORSA, e la cella
+;   promossa dal walk-forward (NASDAQ_B_motore_IS/OOS, Pass=8) aveva
+;   InpMinRangePts=0. Accendendola si opera una CELLA MAI GIRATA, su una
+;   challenge pagata e viva. Il round che la misura e' R196a
+;   (backtest_pipeline/prove/R196a_pavimento_ampiezza_NASDAQ_NASUSD.txt).
+;   ==> Finche' R196a non torna, la raccomandazione del cancello e':
+;      NON ricaricare. Il file sta in repo, la manopola no.
+;      Per spegnerla senza toccare altro: InpMinRangePts=0.0.
 ;
 ;   [1] LA BANDA DELLA FONTE NON E' TRASFERIBILE - misurato, non opinato.
 ;   Live Emiliano 17/07/2026 (trascrizioni/LIVE_EMILIANO_2026-07-17...txt):
 ;     r.21 "la candela deve essere superiore a 17 points"
 ;     r.61 "io a 41 punti ho il divieto di fare l operazione"
-;   Quei numeri sono su una candela da CINQUE minuti. Questa sedia usa
-;   InpRangeMinutes=35. Misurato su 3.899 aperture vere di NASUSD
+;   Quei numeri sono su una candela da CINQUE minuti, e per giunta sulla
+;   candela PRIMA dell'apertura (15:25-15:30, r.21). Questa sedia usa
+;   InpRangeMode=0 = i primi InpRangeMinutes=35 DOPO l'apertura.
+;   Misurato su 3.899 aperture di NASUSD
 ;   (backtest_pipeline/risultati_archivio/ANATOMIA_APERTURE_20260826/
-;    ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, colonne up30_pt/dn30_pt):
-;     ampiezza 35' - mediana 2026 = 190,7 punti indice; p10 = 100,9
+;    ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, colonne up30_pt/dn30_pt,
+;    riportate a 35' col fattore 1,0498):
+;     ampiezza 35' - mediana 2026 = 185,3 punti indice; p10 = 98,3 (n=145)
 ;   => tetto 41  -> scarta il 100,0% dei giorni del 2026. SEDIA MUTA.
-;   => tetto 108 -> scarta l' 87,6% dei giorni del 2026. SEDIA QUASI MUTA.
-;   (108 era la mia "banda riscalata" del 21/09: SBAGLIATA DUE VOLTE -
-;    base non trasferibile, ed esponente errato: il nostro mercato cresce
-;    di 1,2441 per raddoppio del tempo, non di 1,4142.)
+;   => tetto 108 -> scarta l' 86,9% dei giorni del 2026. SEDIA QUASI MUTA.
+;   (108 era la "banda riscalata" del 21/09: SBAGLIATA DUE VOLTE - base
+;    non trasferibile, ed esponente errato.)
 ;
-;   [2] IL PAVIMENTO CHE HO MESSO NON E' DI EMILIANO: E' DI CASA.
-;   InpSLMode=0 (ABTG_SL_RANGE) => LO STOP E' L'AMPIEZZA DEL RANGE.
-;   Quindi il filtro MIN e esattamente la frontiera di costo firmata
-;   "stop >= 40 x spread". Spread NASUSD ora 14 server, mediana MISURATA
-;   su 250 milioni di tick (report/STOP_VS_SPREAD_FTMO_2026-09-20.md
-;   par. 5.1) = 1,80 punti indice.
-;     40 x 1,80 = 72,0 punti indice = 7200 punti MT5  (Point=0,01)
-;   COSTO DEL FILTRO, misurato: scarta 4,1% dei giorni 2026, 10,3% della
-;   finestra di backtest. E scarta SOLO giorni in cui lo stop sta sotto la
-;   frontiera, cioe giorni che oggi operiamo gia in perdita di costo.
+;   [2] IL PAVIMENTO NON E' DI EMILIANO: E' DI CASA.
+;   InpSLMode=0 (ABTG_SL_RANGE). [!] MA con InpEntryMode=2 (RETEST) lo stop
+;   NON e' l'ampiezza del range: e' AMPIEZZA + BUFFER.
+;     ABTG_Nasdaq_Apertura_US.mq5 r.1547-1549 (LONG) e r.1581-1583 (SHORT):
+;     entry = gRangeHigh/gRangeLow, sl = il trigger opposto = bordo -+
+;     gBuffer; EffectiveBuffer() r.2319-2329 = max(InpBufferPoints=200,
+;     SYMBOL_TRADE_STOPS_LEVEL) punti.
+;   [ok] L'imprecisione sta nel verso PRUDENTE: a 7200 lo stop e' >= 7400
+;   punti = 74,0 punti indice.
+;   Spread NASUSD ora 14 server, mediana MISURATA su 250 milioni di tick
+;   (report/STOP_VS_SPREAD_FTMO_2026-09-20.md par. 5.1) = 1,80 pt indice.
+;     40 x 1,80 = 72,0 punti indice = 7200 punti MT5  (Point=0,01, par.2)
+;   [!] 1,80 e' lo spread BCM. Sul simbolo su cui questa sedia OPERA
+;   (FTMO US100.cash) il referto misura 1,53 (par.5.2, n=1 tick, ora 16
+;   BCM, NON l'ora d'apertura) => la frontiera FTMO sarebbe 61,20 = 6120.
+;   Scelto il numero piu' solido (mediana su 250M tick all'ORA GIUSTA), che
+;   e' anche il piu' severo: va detto che e' una scelta, non un dato.
 ;
-;   [3] PERCHE' IL MAX RESTA A 0. La ragione della fonte ("lo stop e
-;   troppo ampio" = troppi soldi a rischio) NON VALE PER NOI: la taglia e
-;   calcolata dal rischio (InpRiskPercent=2,00), quindi stop piu largo =
-;   lotto piu piccolo = stesso rischio in EUR. Un tetto qui non protegge
-;   niente di misurato, e ogni valore provato spegne la sedia. Lo misura
-;   il round R196 sul PC di backtest; finche non torna, 0 = off.
+;   [!] [2-bis] IL COSTO NON E' UN NUMERO SOLO, e il file che aveva gia' la
+;   risposta dice DI NO. Due fonti di casa, stessa grandezza, stessa
+;   finestra (~445/447 giornate), NON D'ACCORDO sulla coda che conta:
+;     ANATOMIA (HistData) : mediana 15' 93,22 - p10 50,60 - <72 a 35' 10,9%
+;     Studio_NASUSD (BCM) : mediana 15' 75,30 - p10 23,50 - <72 a 35' 34,0%
+;   E report/STOP_VS_SPREAD_FTMO_2026-09-20.md par.6.2 misura proprio
+;   questa decisione su 770260 con la fonte che ha ampiezza E esito:
+;   a floor 40x restano 353/447 = 79,0% delle giornate e il PF del proxy
+;   PEGGIORA (1,001 -> 0,980, non monotono). Il par.6.5 scrive:
+;   "NON alzare a 40x" su questa sedia. Quel proxy non e' la cella e i
+;   suoi Delta a PF ~1,00 sono rumore -- ma il VERSO e' contrario, ed e'
+;   il motivo per cui questa riga aspetta R196a.
+;
+;   [3] PERCHE' IL MAX RESTA A 0. La ragione della fonte ("lo stop e'
+;   troppo ampio" = troppi soldi a rischio) NON VALE PER NOI: la taglia e'
+;   calcolata dal rischio (InpRiskPercent=2,00), quindi stop piu' largo =
+;   lotto piu' piccolo = stesso rischio in EUR. Lo misura R196b.
 ;
 ;   SPEGNIMENTO: rimettere InpMinRangePts=0.0.
-;   SPIA IN CAMPO: il giornale scrive "candela NNNN pt < min": quei numeri
-;   sono la misura vera, giorno per giorno.
+;   SPIA IN CAMPO: il giornale scrive "RETEST: candela NNNN pt < min"
+;   (r.1501-1502): quei numeri sono la misura vera, giorno per giorno.
+;   NOTA: InpMaxSpread=0 => SpreadOK() (r.2441-2445) ritorna sempre true:
+;   questo filtro sarebbe l'UNICA rete di costo accesa sulla sedia.
+;   E InpMinStopPts=500 (5,00 pt indice) con InpSkipIfTight=false fa una
+;   cosa DIVERSA: ALLARGA lo stop senza perdere operazioni. Con il MIN a
+;   7200 diventa inerte (dist >= 7400 > 500 sempre).
 ; --------------------------------------------------------------------------
-InpMinRangePts=7200.0
+InpMinRangePts=0.0
 InpMaxRangePts=0.0
 InpRetestOffsetPts=0.0
 InpFadeOffsetPts=0.0

@@ -27612,3 +27612,177 @@ senza asse Y il cancello lo boccia con *"celle = 0"*, **giustamente**.
 > 5. **Parente della 521** (li' il ramo muto era nel codice, qui e' nel modo di lanciarlo) e
 >    della 522 (il pin mancante). **La domanda che le unisce tutte e tre: come farebbe questo
 >    lavoro a fallire SENZA dirmelo?**
+
+
+## CLASSE 527 — 🧮🙈 **IL NUMERO CONSEGNATO E' CALCOLATO COL METODO CHE IL DOCUMENTO STESSO DICHIARA SBAGLIATO** (21/09/2026)
+**Il caso reale**: `report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md` dedica il §4/C4 a una
+confessione: *"il fattore radice-del-tempo che ho usato ieri e' SBAGLIATO, il nostro mercato
+misura x1,2441 per raddoppio, esponente 0,3155"*. 🔴 **E poi presenta TUTTE le tabelle
+calcolate con il radice-del-tempo.** Riprodotto dal CSV: `190,7` · `87,6%` · `8,5%` · `10,3%`
+· `71,6` · `140,0` escono **esattamente** con `1,0801 = (35/30)^0,5`; col fattore dichiarato
+`1,0498` valgono `185,3` · `86,9%` · `9,2%` · `10,9%` · `69,6` · `136,2`.
+Peggio: la riga "OPZIONE 1" era **mista** (87,6 dal vecchio fattore, 71,2 dal nuovo, 67,9 da
+nessuno dei due) -- segno che i numeri erano stati prodotti in passate diverse e mai rifatti
+insieme. Gli stessi numeri erano finiti nel **preset schierabile** e nel **file prova**.
+> ### 🔴 LA REGOLA
+> 1. **Una correzione di metodo annunciata in un documento si applica ai NUMERI di quel
+>    documento, o non e' una correzione: e' una nota.** Prima di consegnare, si **rigenera**
+>    la tabella col metodo nuovo e si **confronta cella per cella** con la vecchia.
+> 2. **Il test che lo trova costa dieci righe**: ricalcolare la tabella con il metodo VECCHIO.
+>    Se torna uguale alla tabella consegnata, la correzione **non e' entrata**.
+> 3. **Vale anche quando la conclusione non cambia** (qui non cambiava): l'ha detto Claudio il
+>    10/09 -- *"si controlla tutto AL CENTESIMO"*. Un numero giusto per caso resta sbagliato.
+> 4. **Parente della 178** (la banda provata contro il nulla invece che contro l'alternativa).
+
+## CLASSE 528 — 📚🔇 **IL REFERTO CITATO PER UN DETTAGLIO MENTRE LA SUA SEZIONE CHE MISURA LA STESSA DECISIONE DICE IL CONTRARIO** (21/09/2026)
+**Il caso reale**: il referto d'ampiezza del Nasdaq cita
+`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` **due volte** -- §5.1 per lo spread e §2 per il
+`Point` -- e su quelle due citazioni costruisce il pavimento `InpMinRangePts=7200` per la
+sedia `770260`, **in campo su una challenge viva**. 🔴 **Ma il §6.2 dello STESSO file misura
+esattamente quella decisione su quella stessa sedia**: a floor 40x restano **353/447 = 79,0%**
+delle giornate e il **PF del proxy PEGGIORA (1,001 -> 0,980**, curva non monotona). Il §6.3
+punto 3 lo scrive a parole; il §6.5 scrive **"NON alzare a 40x"**.
+👉 Il file era **aperto**, citato, e la sezione contraria non e' stata letta.
+> ### 🔴 LA REGOLA
+> 1. **Quando si cita un referto, si legge il suo INDICE per intero** e ci si chiede: *c'e' una
+>    sezione che misura la decisione che sto prendendo?* Non *"c'e' il numero che mi serve?"*.
+> 2. **Il grep giusto non e' sul numero, e' sul SOGGETTO**: `grep -n "770260"` sul file citato
+>    avrebbe restituito il §6.2, il §6.3 e il §6.5 in tre secondi.
+> 3. **Un contro-numero si consegna con la sua etichetta**, non gonfiato: qui il proxy e' un
+>    breakout cieco con PF ~1,00 e il referto stesso dichiara che **solo `n` e' trasferibile**.
+>    Ma `n` basta: diceva 21,0% di giornate perse contro il 10,3% consegnato.
+> 4. **Parente della 525** (la nota d'archivio citata dopo che il repo l'ha ritirata).
+
+## CLASSE 529 — ⚖️🎲 **DUE FONTI DI CASA SULLA STESSA GRANDEZZA, NON RICONCILIATE, E SI CONSEGNA L'OTTIMISTA — PROPRIO SULLA CODA CHE IL FILTRO TOCCA** (21/09/2026)
+**Il caso reale**: stessa grandezza (ampiezza del range d'apertura del Nasdaq), stessa finestra
+(~445/447 giornate), due fonti **gia' in repo**:
+| fonte | feed | mediana 15' | **p10 15'** | **% giorni < 72 idx a 35'** |
+|---|---|---:|---:|---:|
+| `ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv` | M1 **HistData** | 93,22 | **50,60** | **10,9%** |
+| `studio_apertura/Studio_NASUSD.csv` | tick **BCM** | 75,30 | **23,50** | **34,0%** |
+🔴 Le mediane differiscono del 24%, **ma il p10 del 115%** -- e un filtro di MINIMO vive
+**tutto** sul p10. Il referto ha consegnato **10,3%** come "costo misurato", cioe' un terzo.
+> ### 🔴 LA REGOLA
+> 1. **Quando esistono due fonti per la stessa grandezza, si misurano TUTTE E DUE e si
+>    dichiara lo scarto.** Se non si riconciliano, il verdetto e' `[NON RISOLTO]` con la
+>    forbice, mai un numero solo.
+> 2. **Il confronto si fa sulla PARTE DELLA DISTRIBUZIONE CHE LA DECISIONE TOCCA**: per un
+>    filtro MIN e' il p10, non la mediana. Due fonti che concordano sulla mediana possono
+>    divergere del 115% dove serve.
+> 3. **A parita' di tutto si preferisce la fonte sul FEED DEL BROKER** (qui: tick BCM) a un
+>    import storico di terze parti, e si dichiara la catena: HistData -> nome `NASUSD` ->
+>    `US100.cash` sono **due salti**, non zero.
+> 4. **E la forbice entra nell'ATTESA del round**, cosi' il round DISTINGUE le due fonti
+>    invece di confermare quella comoda.
+
+## CLASSE 530 — 🚪🔀 **IL FILTRO CHE SALTA LA GIORNATA SCAMBIATO PER QUELLO CHE ALLARGA LO STOP: STESSA FRONTIERA, COSTO IN FREQUENZA OPPOSTO** (21/09/2026)
+**Il caso reale**: la frontiera di casa `stop >= 40 x spread` si puo' applicare su `770260` in
+**due** modi, e non sono equivalenti:
+- `InpMinStopPts` con `InpSkipIfTight=false` (r.1554-1558): **ALLARGA lo stop al floor e riduce
+  il lotto. Zero operazioni perse.** E' quello che il referto del 20/09 §6.1 chiama testualmente
+  *"non costa NEMMENO UN'OPERAZIONE"*;
+- `InpMinRangePts` (r.1501-1502): **SALTA LA GIORNATA.** Costa 11-34% di giornate.
+🔴 E' stato scelto il secondo, **su una sedia misurata a 0,46 op/g**, con il pavimento di
+frequenza di casa a **1,00 op/g per famiglia** (firma 07/09), **a challenge viva**, e senza
+dire che il primo esisteva ed era gratis.
+> ### 🔴 LA REGOLA
+> 1. **Prima di accendere un cancello, si elencano TUTTI i punti dell'EA che possono imporre
+>    lo stesso vincolo**, e per ognuno si scrive **che cosa fa quando morde**: salta? allarga?
+>    riduce? Sono tre costi diversi.
+> 2. **Il costo si scrive in OPERAZIONI, non in percentuale di giornate**, e si confronta col
+>    pavimento di frequenza della famiglia.
+> 3. **Si verifica anche quali reti sono SPENTE**: qui `InpMaxSpread=0` => `SpreadOK()`
+>    (r.2441-2445) ritorna sempre `true`, quindi il nuovo filtro sarebbe l'unica rete di costo
+>    accesa -- un fatto che cambia il giudizio nei due versi e va detto.
+
+## CLASSE 531 — 🔢🤝 **IL CONTEGGIO DELLE DIVERGENZE PRESET-DEFAULT PRESO DAL DIFF AUTOMATICO E MAI RICONTATO (e il default vero sta nel `#define` DELL'EA, prima dell'include)** (21/09/2026)
+**Il caso reale**: `R196a`/`R196b` dichiaravano *"21 divergenze vere: sono pinnate tutte"*.
+Ricontate input per input: le divergenze sono **22**, i pin ne coprivano **20**, e fra i "21
+pin" ce n'erano **due che non erano divergenze affatto** (`InpSessionMin` e `InpMaxRangePts`:
+preset = default). I due mancanti:
+- 🔴 **`InpRangeMode`** -- default del sorgente **2** (`ABTG_Nasdaq_Apertura_US.mq5` **r.42**,
+  `#define ABTG_DEF_RANGE_MODE 2`), preset **0**. Senza il pin, `ComputeLevels` esce al primo
+  ramo e prende massimo/minimo dell'**ultima candela H1 chiusa**: `InpRangeMinutes=35` viene
+  **ignorato del tutto** e il round misura il filtro d'ampiezza su **un altro oggetto**;
+- **`InpCloseMin`** -- default **45** (r.45), preset **30**: chiusura alle 17:45 invece di
+  17:30, e colpisce proprio l'ipotesi che il round doveva misurare.
+🔑 **Perche' il diff sbagliava**: i default di questi EA **non stanno accanto all'`input`**,
+stanno in `#define ABTG_DEF_*` **in cima all'EA, PRIMA dell'`#include`**, dove sovrascrivono
+gli `#ifndef` del core. Un lettore (umano o script) che guarda solo la riga `input` vede
+`ABTG_DEF_RANGE_MODE` e, se risolve il macro sul core, trova **0** invece di **2**.
+> ### 🔴 LA REGOLA
+> 1. **Il conteggio si riconta a mano contro il sorgente**, e il risultato si scrive con i NOMI,
+>    non col numero: *"queste 22"*, mai *"21 divergenze"*. Un elenco si verifica, un numero no.
+> 2. **I `#define ABTG_DEF_*` in cima all'EA VINCONO sugli `#ifndef` del core**: il default vero
+>    e' il primo `#define` incontrato, non quello del file incluso. Si risolve **a partire
+>    dall'EA**.
+> 3. **Il pin dell'input che definisce la GEOMETRIA del round** (qui `InpRangeMode`) e' il primo
+>    da mettere e l'ultimo da togliere: senza, il CSV torna pieno di numeri plausibili che
+>    rispondono a un'altra domanda -- la classe piu' costosa che conosciamo.
+> 4. **Parente della 522 e della 526** (il pin mancante) e della **513** (il diff fatto solo
+>    sulle colonne condivise).
+
+## CLASSE 532 — 🏗️🪤 **IL TETTO MISURATO SOPRA UN PAVIMENTO NON ANCORA VALIDATO** (21/09/2026)
+**Il caso reale**: `R196b` (l'asse `InpMaxRangePts`) pinnava `InpMinRangePts=7200` -- cioe'
+**il soggetto di `R196a`**, mai girato da nessuna corsa. Cosi' il risultato del tetto sarebbe
+stato **condizionato** a una scelta che puo' cadere, e la **cella di controllo** (`Max=0`,
+`Min=7200`) **non sarebbe stata la cella vera**: i Delta si sarebbero letti contro una baseline
+inesistente in archivio.
+> ### 🔴 LA REGOLA
+> 1. **Gli input pinnati di un round devono essere tutti VALIDATI o tutti DICHIARATI COME
+>    IPOTESI.** Un pin che e' il soggetto di un altro round della stessa coda non e' un pin: e'
+>    una variabile.
+> 2. **La cella di controllo deve coincidere con la cella PROMOSSA dal walk-forward**, altrimenti
+>    il Delta non ha un riferimento in archivio.
+> 3. **Ordine giusto**: prima il round che valida il pavimento, poi quello che misura il tetto
+>    sopra il pavimento che ha vinto. Se si vuole l'interazione, si fa una griglia 2D
+>    **dichiarata come tale**, non un pin travestito.
+
+## CLASSE 533 — 📐🔀 **LA GEOMETRIA DELLO STOP DEDOTTA DALL'ENUM `SLMode` SENZA LEGGERE IL RAMO DELL'`EntryMode` ATTIVO** (21/09/2026)
+**Il caso reale**: da `InpSLMode=0` (`ABTG_SL_RANGE`) il referto, il preset e il file prova
+concludevano *"LO STOP DI QUESTA SEDIA E' L'AMPIEZZA DEL RANGE"*, e su quell'uguaglianza
+costruivano il numero `7200 = 40 x spread`. 🔴 **Falso con `InpEntryMode=2` (RETEST)**:
+r.1547-1549 (LONG) `entry = gRangeHigh - InpRetestOffsetPts` e `sl = sellTrig = gRangeLow -
+gBuffer` ⇒ **`dist = ampiezza + buffer`**; r.1581-1583 simmetrico; `EffectiveBuffer()`
+r.2319-2329 = `max(InpBufferPoints, SYMBOL_TRADE_STOPS_LEVEL)`. Nel **BREAKOUT** sarebbe
+`ampiezza + 2 x buffer` (r.981-983 + r.995-996); nel **FADE** e' un'altra cosa ancora (r.1080-1082).
+🟢 **Qui l'errore tirava nel verso PRUDENTE** (stop reale 74,0 idx invece di 72,0, cioe' 41,1x
+invece di 40x): il numero non andava cambiato, **la frase si'**. Ma la stessa svista con
+`InpRetestOffsetPts > 0` avrebbe tirato nel verso SBAGLIATO.
+> ### 🔴 LA REGOLA
+> 1. **`SLMode` dice DA DOVE si prende il livello, non QUANTO e' distante.** La distanza e'
+>    `entry - sl`, e **`entry` dipende dall'`EntryMode`**: si legge **il ramo attivo**, non
+>    l'enum.
+> 2. **Si scrive la formula per esteso** (`dist = ampiezza + buffer`) con i **numeri di riga
+>    del ramo attivo**, non il nome dell'enum.
+> 3. **E si dichiara di che segno e' l'errore** se la formula fosse sbagliata: qui prudente,
+>    e allora il numero resta; se fosse lasco, il numero cade.
+
+## CLASSE 534 — 🧭📄 **LA LISTA DEI PIN COSTRUITA CONTRO IL PRESET SCHIERATO INVECE CHE CONTRO LA RIGA DELLA CELLA VALIDATA** (21/09/2026)
+**Il caso reale**: i file prova `R196a`/`R196b` ricostruivano la sedia `770260` facendo il
+**diff contro il preset FTMO**. Quel preset e' scritto in **ora e simboli FTMO** mentre il
+backtest gira su **dati BCM**: ha costretto a **tre conversioni a mano**
+(`InpSessionHour` 16->14, `InpCloseHour` 19->17, `InpCorrSymbol` `US500.cash`->`SPXUSD`),
+cioe' a tre occasioni di sbagliare -- e ne ha fatte perdere **tre** di pin
+(`InpRangeMode`, `InpCloseMin`, `InpRiskPercent`), di cui uno **fatale** e uno sulla
+**taglia**, che e' territorio di Claudio.
+🟢 **La fonte giusta era in archivio**: la riga `Pass=8` di
+`backtest_pipeline/risultati_archivio/Walkforward_Aperture/NASDAQ_B_motore_OOS.csv` ha i
+**78 input della cella validata**, gia' **in unita' BCM**: `InpSessionHour=14`,
+`InpCloseHour=17`, `InpCorrSymbol=SPXUSD`, `InpRangeMode=0`, `InpCloseMin=30`,
+`InpRiskPercent=1`. **Zero conversioni.** E porta anche `PF`, `n` e `DD` della cella, cioe'
+il metro contro cui il round si legge.
+> ### 🔴 LA REGOLA
+> 1. **Il file prova riproduce LA CELLA, non il preset.** La cella sta nel CSV del round; il
+>    preset e' una sua TRADUZIONE in un altro broker, e una traduzione si puo' sbagliare.
+> 2. **Se il CSV del round non esiste, il round non ha una cella**: e allora il file prova va
+>    dichiarato ESPLORATIVO, non "ricostruisce la sedia".
+> 3. **Ogni input che differisce dal default e' nel CSV**: il diff si fa `cella vs default`,
+>    non `preset vs default`. Le due liste non coincidono (qui: 20 contro 22, con due input
+>    pinnati che non erano divergenze affatto).
+> 4. **`InpRiskPercent` si pinna SEMPRE e si dichiara SEMPRE.** E' la taglia: e' territorio di
+>    Claudio, e lasciarla al default la rende una variabile, non una decisione. E quando il
+>    valore scelto non e' quello della cella, si scrive la conseguenza: **`PF` e `n` sono
+>    invarianti alla scala del lotto, `DD` e profitto NO** -- il DD non si confronta piu' con
+>    l'archivio.
+
