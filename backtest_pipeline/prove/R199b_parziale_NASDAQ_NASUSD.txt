@@ -120,3 +120,43 @@ InpBreakevenAtTP1=1||1||0||1||N
 #   75 = chiude tre quarti (molto difensivo)
 InpTP1_ClosePct=0||0||25||75||Y
 # 4 celle
+
+# ---------------------------------------------------------------------
+#  21/09/2026 SERA -- AVVERTENZA AGGIUNTA PRIMA DI LANCIARE, E SENZA DI
+#  QUESTA IL ROUND SI LEGGE AL CONTRARIO (classe del canarino, 226/331)
+# ---------------------------------------------------------------------
+#  La colonna `Trades` dei nostri CSV e' TesterStatistics(STAT_TRADES) e
+#  conta i DEAL D'USCITA, NON le posizioni. Su questa sedia oggi la
+#  parziale e' SPENTA (InpTP1_ClosePct=0), quindi una posizione fa UNA
+#  uscita e i due numeri coincidono: le 82/102 celle vive SONO posizioni.
+#
+#  🔴 SU QUESTO ROUND NON SARA' PIU' VERO. L'asse ACCENDE la parziale:
+#  ogni posizione che raggiunge il primo obiettivo produce DUE uscite.
+#  Quindi `Trades` SALIRA' nelle celle 25/50/75 **senza che sia stata
+#  aperta una sola posizione in piu'**.
+#
+#  >>> MISURATO su una coppia appaiata della sedia gemella (Dow 770202,
+#      round R46b, letto dai CSV):
+#          IS   parziale spenta 56 uscite | accesa 73-74  -> fattore 1,30-1,32
+#          OOS  parziale spenta 96 uscite | accesa 123-130 -> fattore 1,28-1,35
+#
+#  >>> CONSEGUENZA SUL CRITERIO (e): "n INVARIATO 82/102" NON si applica
+#      alle celle con la parziale accesa. Su quelle il criterio diventa:
+#          le POSIZIONI devono restare 82/102, e si verificano cosi':
+#          InpOneTradePerDay=true e nessun ramo d'ingresso legge
+#          InpTP1_ClosePct, quindi le posizioni NON POSSONO cambiare.
+#          Se `Trades` sale fra 1,0 e ~1,4 volte, e' il fattore del
+#          parziale: ATTESO. Se sale OLTRE 1,5 o se SCENDE, allora e'
+#          cambiato qualcos'altro e ci si ferma.
+#
+#  >>> E IL PF NON VA CORRETTO: e' un rapporto di somme, non dipende da
+#      come si contano le righe. Quello che si distorce contando i deal
+#      e' il win rate e le medie vincita/perdita -- che questo round non
+#      usa come criterio. Il DD nemmeno.
+#
+#  >>> LA CELLA 0 RESTA IL CONTROLLO, E IL CONTRO-ESEMPIO: deve uscire
+#      IDENTICA alla cella 0 di R199A (IS n 82 PF 1,11621 DD 12,3568 ·
+#      OOS n 102 PF 1,14894 DD 9,1244), perche' a ClosePct=0 anche
+#      InpBreakevenAtTP1 e' inerte (r.2143). Se le due non coincidono,
+#      la lettura del codice e' sbagliata e il round va buttato.
+# ---------------------------------------------------------------------
