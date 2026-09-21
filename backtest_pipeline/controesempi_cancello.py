@@ -19,6 +19,13 @@ La regola che questi casi difendono, e che NON deve mai piu' aprirsi:
   * una GUARDIA legittima (che nomina il percorso per RIFIUTARLO) PASSA;
   * e da oggi (classe 225): estrarre i blocchi da un .md per non bocciare la
     PROSA non deve far passare un blocco PERICOLOSO.
+  * e dal 21/09/2026 (classi 536 e 537): il bersaglio si giudica sulla COPPIA
+    MACCHINA + PERCORSO. Lo STESSO percorso e' il terminale legittimo del PC di
+    backtest e il PICCOLO 50503392 con le sedie vive sul VPS: ammesso di qua,
+    vietato di la'. La macchina vale solo se la riga si RIFIUTA di girare
+    altrove; su macchina ignota si chiude. E il bersaglio si riconosce anche
+    quando e' un ELEMENTO DELL'ARRAY di -ArgumentList, che e' la forma di casa
+    e che prima nessuno vedeva.
 
 USCITA: 0 = tutti i contro-esempi si comportano come devono. 1 = almeno uno no,
 e allora il cancello ha un buco NUOVO: non si commetta niente finche' non torna
@@ -34,7 +41,7 @@ REPO     = os.path.dirname(QUI)
 # (quindi il 'throw' legittimo che nel 2026-09-11 zittiva il divieto) e un
 # bersaglio che si cambia. E' la forma che ha scoperto la classe 223.
 PIN = "65ef4e096935fa4fc8694d1877e45113cce8fc1d"
-# Il pin delle righe della classe 535: e' il commit in cui e' nato
+# Il pin delle righe della classe 536: e' il commit in cui e' nato
 # MARCATORE_RIGA_ROUND_VPS_v2 (la guardia PER MACCHINA). Serve un pin
 # DIVERSO perche' il controllo 187 incrocia pin e marcatore, e al pin
 # vecchio qui sopra il marcatore v2 non esiste ancora -- e' proprio il
@@ -120,7 +127,7 @@ sono nominati qui per dire che NON si toccano.
 
 
 # =====================================================================
-#  CLASSI 535 e 536 (21/09/2026) -- LA COPPIA MACCHINA + PERCORSO.
+#  CLASSI 536 e 537 (21/09/2026) -- LA COPPIA MACCHINA + PERCORSO.
 #
 #  Il 21/09 Claudio ha firmato che i round girano sul PC DI BACKTEST
 #  finche' una challenge e' viva. Sul PC di backtest l'unico MT5 sta in
@@ -135,7 +142,7 @@ sono nominati qui per dire che NON si toccano.
 #  un TESTO. Quindi la macchina e' quella che la riga DICHIARA, e la
 #  dichiarazione vale solo se la riga si RIFIUTA DI GIRARE ALTROVE.
 #
-#  E il caso che ha aperto la classe 536, misurato ESEGUENDO:
+#  E il caso che ha aperto la classe 537, misurato ESEGUENDO:
 #  '-TerminaleBacktest','C:\BCM_Reale' dentro l'array di -ArgumentList --
 #  cioe' LA FORMA DI CASA -- usciva "nessun difetto meccanico", uscita 0.
 # =====================================================================
@@ -179,50 +186,50 @@ V3      = "C:\\Program Files\\BCM Markets MT5 Terminal -V3"
 
 CASI_MACCHINA = [
     # -------- LE TRE PROVE CHIESTE ----------------------------------
-    ("535 STESSA RIGA, macchina PC di backtest dichiarata",
+    ("536 STESSA RIGA, macchina PC di backtest dichiarata",
      riga_round(PICCOLO, PCB, array=True), "PASSA"),
-    ("535 STESSA RIGA, ma dichiarata sul VPS -> e' il piccolo 50503392",
+    ("536 STESSA RIGA, ma dichiarata sul VPS -> e' il piccolo 50503392",
      riga_round(PICCOLO, VPS, array=True), "BLOCCA"),
-    ("535 STESSA RIGA senza NESSUNA macchina dichiarata (regola storica)",
+    ("536 STESSA RIGA senza NESSUNA macchina dichiarata (regola storica)",
      riga_round(PICCOLO, None, array=True), "BLOCCA"),
-    ("535 C:\\FTMO (challenge viva) sul PC di backtest",
+    ("536 C:\\FTMO (challenge viva) sul PC di backtest",
      riga_round("C:\\FTMO", PCB, array=True), "BLOCCA"),
-    ("535 C:\\FTMO sul VPS",
+    ("536 C:\\FTMO sul VPS",
      riga_round("C:\\FTMO", VPS, array=True), "BLOCCA"),
-    ("535 C:\\FTMO senza macchina dichiarata",
+    ("536 C:\\FTMO senza macchina dichiarata",
      riga_round("C:\\FTMO", None, array=True), "BLOCCA"),
-    ("535 MACCHINA IGNOTA dichiarata, bersaglio per il resto buono",
+    ("536 MACCHINA IGNOTA dichiarata, bersaglio per il resto buono",
      riga_round(BANCO, "PC-SCONOSCIUTO", array=True), "BLOCCA"),
     # -------- E ADESSO PROVO A ROMPERLO -----------------------------
-    ("536 il BUCO MISURATO: REALE dentro l'array, nessuna macchina",
+    ("537 il BUCO MISURATO: REALE dentro l'array, nessuna macchina",
      riga_round("C:\\BCM_Reale", None, array=True), "BLOCCA"),
-    ("536 REALE dentro l'array CON la deroga del PC di backtest",
+    ("537 REALE dentro l'array CON la deroga del PC di backtest",
      riga_round("C:\\BCM_Reale", PCB, array=True), "BLOCCA"),
-    ("535 il 100k -V3 sul PC di backtest: la deroga NON lo copre",
+    ("536 il 100k -V3 sul PC di backtest: la deroga NON lo copre",
      riga_round(V3, PCB, array=True), "BLOCCA"),
-    ("535 il banco del VPS chiesto sul PC di backtest (li' non esiste)",
+    ("536 il banco del VPS chiesto sul PC di backtest (li' non esiste)",
      riga_round(BANCO, PCB, array=True), "BLOCCA"),
-    ("535 nome 8.3 del bersaglio buono sul PC di backtest",
+    ("536 nome 8.3 del bersaglio buono sul PC di backtest",
      riga_round("C:\\PROGRA~1\\BCMMAR~1", PCB, array=True), "BLOCCA"),
-    ("535 il '..' parte dal nome buono e ATTERRA sul 100k",
+    ("536 il '..' parte dal nome buono e ATTERRA sul 100k",
      riga_round(PICCOLO + "\\..\\BCM Markets MT5 Terminal -V3", PCB, array=True), "BLOCCA"),
-    ("535 il '..' parte dal 100k e ATTERRA sul bersaglio: stesso posto",
+    ("536 il '..' parte dal 100k e ATTERRA sul bersaglio: stesso posto",
      riga_round(V3 + "\\..\\BCM Markets MT5 Terminal", PCB, array=True), "PASSA"),
-    ("535 RADICE del disco sul PC di backtest",
+    ("536 RADICE del disco sul PC di backtest",
      riga_round("C:\\", PCB, array=True), "BLOCCA"),
-    ("535 guardia col VERSO SBAGLIATO (-eq + throw): non dichiara niente",
+    ("536 guardia col VERSO SBAGLIATO (-eq + throw): non dichiara niente",
      riga_round(PICCOLO, PCB, array=True, verso="-eq"), "BLOCCA"),
-    ("535 guardia che NOMINA la macchina ma NON rifiuta (Write-Host)",
+    ("536 guardia che NOMINA la macchina ma NON rifiuta (Write-Host)",
      riga_round(PICCOLO, PCB, array=True, rifiuta=False), "BLOCCA"),
-    ("535 macchina scritta in minuscolo: e' la stessa macchina",
+    ("536 macchina scritta in minuscolo: e' la stessa macchina",
      riga_round(PICCOLO, "desktop-h4d7caj", array=True), "PASSA"),
-    ("535 barre al contrario: stesso posto scritto in un altro modo",
+    ("536 barre al contrario: stesso posto scritto in un altro modo",
      riga_round("C:/Program Files/BCM Markets MT5 Terminal", PCB, array=True), "PASSA"),
-    ("535 separatore finale sul bersaglio buono",
+    ("536 separatore finale sul bersaglio buono",
      riga_round(PICCOLO + "\\", PCB, array=True), "PASSA"),
-    ("535 forma con lo SPAZIO (non array), bersaglio buono su PC backtest",
+    ("536 forma con lo SPAZIO (non array), bersaglio buono su PC backtest",
      riga_round(PICCOLO, PCB, array=False), "PASSA"),
-    ("535 il banco del VPS, dichiarato sul VPS: il caso di sempre",
+    ("536 il banco del VPS, dichiarato sul VPS: il caso di sempre",
      riga_round(BANCO, VPS, array=True), "PASSA"),
 ]
 
@@ -326,12 +333,12 @@ def main():
     casi.append(("RIGA classe 339: mshta/javascript: dentro Set-Content -Value di una 'raccolta'",
                  ["--riga", p], "BLOCCA"))
 
-    # --- classi 535/536: la coppia MACCHINA + PERCORSO ----------------------
+    # --- classi 536/537: la coppia MACCHINA + PERCORSO ----------------------
     for etichetta, testo, atteso in CASI_MACCHINA:
         q = scrivi(tmp, "mac_" + str(len(casi)) + ".txt", testo)
         casi.append((etichetta, ["--riga", q], atteso))
     q = scrivi(tmp, "mac_discorde.txt", CASO_DISCORDE)
-    casi.append(("535 DUE macchine dichiarate, discordi", ["--riga", q], "BLOCCA"))
+    casi.append(("536 DUE macchine dichiarate, discordi", ["--riga", q], "BLOCCA"))
 
     # --- la riga vera di R125, che deve passare ------------------------------
     r125 = os.path.join(QUI, "righe", "RIGA_R125_DA_MANDARE.md")

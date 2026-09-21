@@ -27820,3 +27820,81 @@ uscita (parente della **154**).
 >    dell'attivita': il 12/09 l'attivita' delle 07:20 girava da una copia sul Desktop
 >    (zip di un branch vecchio), e le riparazioni fatte su `lavoro` non arrivavano a
 >    quello che girava davvero.
+
+
+## CLASSE 536 — 🖥️🔀 **LO STESSO PERCORSO E' IL BERSAGLIO GIUSTO SU UNA MACCHINA E IL CONTO VIVO SULL'ALTRA: IL CANCELLO BLOCCAVA LA RIGA CORRETTA** (21/09/2026)
+**Il caso reale**: il 21/09 Claudio ha firmato che, finché una challenge è viva, i round
+girano sul **PC di backtest** e non sul VPS (`CLAUDE.md`, dopo che un backtest a tick reali
+ha inchiodato il VPS nella **prima mezz'ora** del primo giorno di FTMO). Sul PC di backtest
+`DESKTOP-H4D7CAJ` l'unico MT5 è installato in `C:\Program Files\BCM Markets MT5 Terminal`
+— **esattamente la stringa che sul VPS è il PICCOLO `50503392`, con le sedie vive sopra**.
+`controlla_riga.py` r.65 la teneva (giustamente) in `VIETATI_PERCORSO`, e quindi **lo strato
+1 del cancello bloccava la riga CORRETTA**: la firma di Claudio non era eseguibile passando
+dal cancello, che è come non averla firmata.
+🟢 **Gli `.ps1` l'avevano già imparato** lo stesso giorno (blocco `GUARDIA_BANCO_POSITIVA_v2`,
+identico byte per byte in `righe/RIGA_ROUND_VPS.ps1`, `walkforward_generico.ps1`,
+`righe/RIGA_SCAN_GESTIONE.ps1`; banco `banco_guardia_macchina.ps1`, **117 prove su 117**).
+Il cancello no. **Un cancello che non sa quello che sanno gli script che gatta non è uno
+strato in più: è un ostacolo.**
+> ### 🔴 LA REGOLA
+> 1. **Il discriminante non è il PERCORSO, è la COPPIA `MACCHINA + PERCORSO`.** Un elenco di
+>    percorsi o li ammette tutti e due o li vieta tutti e due, e **nessuna delle due cose è
+>    giusta**. La tabella (`BERSAGLI_PER_MACCHINA`) è **una macchina → UN solo terminale**.
+> 2. **I VIETATI si consultano PRIMA e vincono**: reale `10105439`, 100k `-V3`, challenge
+>    FTMO `541452707`, manuale `50503635` restano vietati **su qualunque macchina**, anche su
+>    una che non è in tabella. L'unica **deroga** è il percorso del piccolo **sulla sola**
+>    `DESKTOP-H4D7CAJ`, e servono **tre** cose insieme: macchina in tabella, flag `deroga`,
+>    percorso **normalizzato identico** al bersaglio di quella macchina (quindi `...-V3` resta
+>    vietato anche lì: **non è lo stesso percorso**).
+> 3. **FAIL-CLOSED**: una macchina che non è in tabella **non ha bersagli**. Non esiste il
+>    ripiego "non la riconosco, allora lascio passare".
+> 4. 🔴 **E LA PARTE CHE VALE PER IL CANCELLO E NON PER GLI `.ps1`**: uno script **gira** su
+>    una macchina e può chiedere `$env:COMPUTERNAME`; il cancello legge un **TESTO**, e un
+>    testo non ha una macchina. Quindi la macchina è **quella che la riga DICHIARA**, e la
+>    dichiarazione si accetta **solo se la riga si rifiuta di girare altrove**:
+>    `if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw '...' }`. Senza quella guardia la
+>    macchina è **sconosciuta** e nessuna deroga è possibile — comportamento identico a prima,
+>    **al byte**. 👉 Così la deroga non è mai una parola: è una riga che, incollata nella
+>    finestra sbagliata, **muore prima di scaricare qualunque cosa** (ed è anche la rete
+>    contro l'incidente del 06/09).
+> 5. **Il verso conta**: `-eq` + `throw` vuol dire l'opposto ("muori SU quella macchina") e
+>    **non è una dichiarazione**; una guardia che nomina la macchina e poi stampa e basta
+>    nemmeno. Due guardie con **due nomi diversi** sono un difetto, non un'assenza: il cancello
+>    non sceglie al posto di chi scrive.
+> 6. 🟢 **E le due copie della regola (PowerShell e Python) non si lasciano divergere per
+>    fiducia**: `controesempi_cancello.py` rilegge **i casi veri del banco `.ps1`** dal suo
+>    sorgente e li rigira sulle funzioni Python. **39 su 39, zero divergenze.** Se un giorno
+>    divergessero, è un buco — non uno stile.
+
+
+## CLASSE 537 — 🎯🧵 **IL BERSAGLIO PASSATO COME ELEMENTO DELL'ARRAY DI `-ArgumentList` NON LO VEDEVA NESSUNO — ED È LA FORMA DI CASA** (21/09/2026)
+**Il caso reale, MISURATO ESEGUENDO il cancello, non leggendolo.** Il riconoscitore del
+bersaglio (`BERSAGLIO_VALORE`) pretendeva `-TerminaleBacktest<spazio>valore`. Ma **nessuna**
+riga di round di casa scrive così: tutte scrivono
+```
+$a=@('-NoProfile','-File',$p,'-TerminaleBacktest','C:\BCM_Reale','-Modello','4');
+Start-Process powershell -ArgumentList $a
+```
+cioè flag e valore separati da `','`, **non** da uno spazio. Risultato riprodotto col pin vero
+`b8e679c4`: **un round intero puntato sul CONTO REALE `10105439` usciva
+`ESITO: nessun difetto meccanico`, USCITA 0**, con due soli RILIEVI — e uno dei due diceva
+persino *«va letto a mano»*, cioè il cancello **sapeva di non sapere** e passava lo stesso.
+🔴 È la **classe 223** che si riapre da un'altra porta: la 223 aveva imparato che *un bersaglio
+vietato non è mai innocente*, ma il **riconoscitore** del bersaglio guardava **una sola
+sintassi**. Ed è la stessa lezione della **457**: il cancello non deve guardare il codice come
+lo scrive il manuale, ma **come lo scriviamo NOI**.
+> ### 🔴 LA REGOLA
+> 1. **Ogni controllo che riconosce qualcosa "per forma" va provato contro la forma VERA usata
+>    nel repo**, non contro quella del manuale. `grep` della forma reale **prima** di scrivere
+>    il regex: qui bastava guardare una qualunque `RIGA_*_DA_MANDARE.md`.
+> 2. **Un RILIEVO che dice "va letto a mano" su un BERSAGLIO non basta.** Se il cancello ha
+>    riconosciuto che lì c'è un percorso di terminale, deve **giudicarlo**; se non riesce a
+>    leggerne il valore, **lo dice e blocca**, non lo derubrica.
+> 3. **Il rumore si toglie dal REFERTO, mai dalla RETE.** Qui `-Path` di `Compress-Archive` e
+>    `Select-String` finiva nello stesso riconoscitore: la correzione è stata **non refertare**
+>    i flag che non sono `-Terminal*` — ma il **divieto per nome** su quei valori è rimasto
+>    acceso per tutti i flag.
+> 4. **Regressione obbligatoria dopo ogni modifica al cancello**: `358` oggetti (`.ps1` +
+>    `righe/*.md`) confrontati col cancello di prima, **0 esiti diversi**; `34` contro-esempi
+>    su `34`. Un cancello più severo che boccia il repo sano è un cancello che si impara a
+>    scavalcare (classe 235).

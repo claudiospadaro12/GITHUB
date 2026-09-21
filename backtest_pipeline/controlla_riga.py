@@ -378,7 +378,7 @@ def in_una_guardia(righe, idx):
 GUARDIA_STRETTA = r"(Muori|throw|exit\s+1|VIETATO)"
 
 # =====================================================================
-#  CLASSE 535 (21/09/2026) -- IL CANCELLO BLOCCAVA LA RIGA GIUSTA, PERCHE'
+#  CLASSE 536 (21/09/2026) -- IL CANCELLO BLOCCAVA LA RIGA GIUSTA, PERCHE'
 #  GUARDAVA IL PERCORSO E NON LA COPPIA "MACCHINA + PERCORSO".
 #
 #  IL FATTO. Il 21/09 Claudio ha firmato che, finche' una challenge e'
@@ -606,7 +606,7 @@ BERSAGLIO_VALORE = re.compile(
     r"-(Terminal(?:e)?(?:Backtest)?|Percorso|Cartella|Path)\s+"
     r"(?:'([^']*)'|\"([^\"]*)\"|(\S+))", re.I)
 
-# CLASSE 536 (21/09/2026) -- IL BERSAGLIO PASSATO COME ELEMENTO DI UN ARRAY
+# CLASSE 537 (21/09/2026) -- IL BERSAGLIO PASSATO COME ELEMENTO DI UN ARRAY
 # NON VENIVA VISTO DA NESSUNO, E LA FORMA E' QUELLA DI CASA.
 # Misurato ESEGUENDO il cancello, non leggendolo: la riga di round di casa
 # non scrive "-TerminaleBacktest C:\..." con uno SPAZIO, scrive
@@ -648,7 +648,7 @@ def valori_bersaglio(riga_cruda):
 def bersagli_vietati(riga_cruda, macchina=""):
     """I valori di -Terminal*/-Percorso* da RIFIUTARE, con il MOTIVO.
 
-    DUE REGIMI, e la differenza e' tutta la classe 535:
+    DUE REGIMI, e la differenza e' tutta la classe 536:
       - macchina NON dichiarata (e' il caso di ogni riga scritta prima di
         oggi): vale la regola STORICA, cioe' i soli VIETATI PER NOME. Non
         si concede nessuna deroga, perche' non c'e' nessuna macchina a cui
@@ -670,7 +670,7 @@ def bersagli_vietati(riga_cruda, macchina=""):
             motivo = motivo_vietato_per_nome(val, mac)
             if motivo and not mac:
                 motivo += (" Nessuna macchina e' dichiarata in questa riga, quindi nessuna"
-                           " deroga e' possibile (classe 535): per lanciare un round sul PC"
+                           " deroga e' possibile (classe 536): per lanciare un round sul PC"
                            " di backtest la riga deve portare"
                            " if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ... }")
         if motivo:
@@ -1151,7 +1151,7 @@ def controlla_riga_lancio(riga):
         else:
             passa("ogni corsa cattura il suo $LASTEXITCODE")
 
-    # --- 5. il terminale bersaglio: LA COPPIA MACCHINA + PERCORSO (classe 535)
+    # --- 5. il terminale bersaglio: LA COPPIA MACCHINA + PERCORSO (classe 536)
     #     Prima di oggi qui c'era una costante sola, TERMINALE_BUONO, cioe' il
     #     banco del VPS: tutto il resto era "verificare a mano". Con la firma
     #     del 21/09 i round girano sul PC di backtest, dove il terminale ha lo
@@ -1159,7 +1159,7 @@ def controlla_riga_lancio(riga):
     #     serve la tabella -- ed e' la stessa dei tre .ps1.
     mac, nota_mac = macchina_dichiarata(riga)
     if mac == "?":
-        blocca("535", "DICHIARAZIONI DI MACCHINA DISCORDI: " + nota_mac
+        blocca("536", "DICHIARAZIONI DI MACCHINA DISCORDI: " + nota_mac
                + ". Una riga gira su UNA macchina: due guardie che nominano due nomi"
                  " diversi vogliono dire che almeno una e' sbagliata, e il cancello"
                  " non sceglie al posto di chi scrive")
@@ -1167,7 +1167,7 @@ def controlla_riga_lancio(riga):
     if mac:
         rm = riga_macchina(mac)
         if rm is None:
-            blocca("535", "la riga si inchioda alla macchina '" + mac + "', che NON e' nella"
+            blocca("536", "la riga si inchioda alla macchina '" + mac + "', che NON e' nella"
                    " tabella dei bersagli. Ammesse: " + elenco_macchine_ammesse()
                    + ". FAIL-CLOSED: una macchina che il cancello non conosce non ha nessun"
                      " terminale ammesso. Se il round deve girare davvero li', si AGGIUNGE la"
@@ -1194,7 +1194,7 @@ def controlla_riga_lancio(riga):
             rileva("TERMINALE", "la riga nomina un -Terminal... di cui non riesco a leggere il"
                    " valore: va letto a mano")
     elif not mac:
-        rileva("535", "la riga passa un BERSAGLIO ma non dichiara su che MACCHINA deve girare ("
+        rileva("536", "la riga passa un BERSAGLIO ma non dichiara su che MACCHINA deve girare ("
                + nota_mac + "). E' la forma di tutte le righe scritte fino al 21/09 e non e' un"
                + " difetto di per se'; ma senza quella guardia la riga, incollata nella finestra"
                + " sbagliata, parte lo stesso -- e il cancello non puo' concedere nessuna deroga"
