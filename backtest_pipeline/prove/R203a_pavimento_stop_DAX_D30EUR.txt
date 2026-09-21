@@ -4,104 +4,193 @@
 #
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
 #  Si lancia con: -Deposito 80000 -Modello 4
+#
+#  SECONDA STESURA. La prima e' stata BOCCIATA dal cancello con tre
+#  difetti bloccanti: la scala era tarata su uno studio girato con una
+#  GEOMETRIA DIVERSA (classe 551), la "conferma incrociata" era
+#  algebricamente impossibile (classe 552), e la barra confrontava il DD
+#  del tester con il muro FTMO statico (classe 515, TERZA occorrenza).
+#  Tutto corretto qui sotto, e le correzioni sono dichiarate per nome.
 # =====================================================================
 #
 #  PERCHE' ESISTE
 #  --------------
-#  R202B (21/09) ha misurato che il DD del DAX NON si risolve sull'asse
-#  del bersaglio d'uscita: delle quattro celle di InpTP1_R, la sola che
-#  porta la sedia sotto il muro FTMO del 10% alla taglia vera (2,00%) e'
-#  la 0.25 -- che pero' e' SOTTO il pavimento duro di costo (8,1x contro
-#  13,3x) ed era gia' dichiarata non promuovibile PRIMA del round.
-#  Quindi il problema sta altrove, e Claudio ha chiesto lo STOP.
+#  R202B (girato il 21/09 alle 23:27) ha misurato che il DD del DAX non
+#  si abbassa sull'asse del bersaglio d'uscita restando dentro la
+#  frontiera del costo. Claudio ha chiesto lo STOP.
 #
-#  IL FATTO CHE APRE LA PORTA, ed e' misurato oggi:
-#  sul DAX il pavimento dello stop E' SPENTO. InpMinStopPts=0.0 nel
-#  preset in campo, contro 500 su Nasdaq 770260 e Dow 770202. E siccome
-#  il codice lo legge dentro "if(InpMinStopPts > 0 ...)", anche
-#  InpSkipIfTight=true (che nel preset c'e') oggi e' un NO-OP: non ha
-#  mai scartato niente. Questa sedia prende QUALUNQUE stop, per quanto
-#  stretto sia.
+#  IL FATTO CHE APRE LA PORTA, ed e' un CENSIMENTO COMPLETO, non un
+#  campione: sul DAX il pavimento dello stop E' SPENTO.
+#  mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set r.294
+#  InpMinStopPts=0.0, contro 500.0 su Dow 770202 (r.309) e Nasdaq
+#  770260 (r.376).
+#  In mql5/Experts/ABTG_DAX_Apertura_EU.mq5 (2885 righe) InpMinStopPts
+#  compare SETTE volte: r.1202, 1226, 1279, 1435, 1543, 1935, 1978.
+#  InpSkipIfTight compare SEI volte (r.1204, 1228, 1437, 1545, 1937,
+#  1980) e OGNUNA delle sei sta dentro il corpo di un
+#  "if(InpMinStopPts > 0 && ...)". La settima occorrenza del pavimento,
+#  r.1279, NON legge SkipIfTight per niente.
+#  ==> Con il pavimento a 0 NON ESISTE un solo ramo in cui SkipIfTight
+#      morda. Questo round ACCENDE un meccanismo mai operato su questa
+#      sedia. Non e' un ritocco: e' una porta che si apre.
 #
-#  LA DISTRIBUZIONE VERA, n=440 E NON n=3
-#  --------------------------------------
-#  backtest_pipeline/risultati_archivio/studio_apertura/Studio_D30EUR.csv
-#  ha 440 breakout veri con l'ampiezza del range d'apertura:
-#      P5  2028 pt | P10 2389 | P25 3440 | P50 5465 | P75 7835
-#      P90 10884   | P95 13255 | media 6254
-#  NOTA CHE VALE LA PENA: la mediana e' 5465 pt = 54,65 punti indice, e
-#  report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.275 dichiarava lo stop
-#  della geometria viva a 54,90 [MIS n=3]. Due misure indipendenti,
-#  una con n=3 e una con n=440, a 0,5% di distanza: il numero regge.
+#  LA SCALA VIENE DA UNO STUDIO CON GEOMETRIA DIVERSA (classe 551)
+#  ---------------------------------------------------------------
+#  Fonte: risultati_archivio/studio_apertura/Studio_D30EUR.csv, 440
+#  breakout veri con l'ampiezza del range d'apertura.
+#  MA backtest_pipeline/studio_apertura.ps1 r.131 scrive nell'ini
+#  dello studio "InpRangeMinutes=15", e la sedia gira a 35. Il range dei
+#  primi 35 minuti CONTIENE quello dei primi 15: e' piu' largo, punto
+#  per punto. La correzione di casa e' x sqrt(35/15) = 1,5275, ed e'
+#  [INF] -- e' la convenzione usata in
+#  report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.271-272, non una misura.
+#  Secondo scostamento: i percentili vanno presi sui soli 225 giorni
+#  LONG, perche' la sedia ha InpAllowShort=false, e i giorni LONG sono
+#  piu' STRETTI (media 5921 contro 6254 di tutti).
+#  Terzo: lo stop vero NON e' l'ampiezza, e' ampiezza + 300 pt ESATTI
+#  (retest long, InpSLMode=0: entry = High - InpRetestOffsetPts(200),
+#  sl = Low - InpBufferPoints(500)).
+#  Quarto, dichiarato e NON risolto: lo Studio entra con buffer 200 e
+#  non chiede che il retest si RIEMPIA, mentre la sedia si'. La mappa
+#  giorni-dello-Studio -> trade-dell'EA e' ASSUNTA, non misurata.
 #
-#  L'ASSE, e il costo di ogni gradino DICHIARATO PRIMA
-#  ---------------------------------------------------
-#  InpMinStopPts = 0 / 2300 / 4600 / 6900 (punti EA; 100 pt = 1 punto
-#  indice). Con InpSkipIfTight=true (come in campo) il pavimento NON
-#  allarga lo stop: SCARTA il trade.
+#  NIENTE CONFERMA INCROCIATA, E IL PERCHE' E' ALGEBRICO (classe 552)
+#  ------------------------------------------------------------------
+#  La prima stesura esultava: mediana dello Studio 5465 pt = 54,65 idx
+#  contro lo stop della geometria viva 54,90 idx [MIS n=3]
+#  (STOP_VS_SPREAD_FTMO_2026-09-20.md r.275), "a 0,5% di distanza".
+#  E' FALSO come validazione: 5465 e' l'AMPIEZZA di un range di 15', e
+#  54,90 idx e' lo STOP della sedia, cioe' ampiezza(35') + 300. Con
+#  InpRangeMode=0 la finestra di 15' e' CONTENUTA in quella di 35',
+#  quindi ampiezza(35') >= ampiezza(15') SEMPRE. Perche' coincidessero
+#  servirebbe ampiezza(35') ~ 5190 < 5465: impossibile.
+#  ==> La coincidenza non convalidava: era la FIRMA del difetto della
+#      classe 551, due righe piu' sopra. Un accordo fra due numeri
+#      informa solo se avrebbero POTUTO essere in disaccordo.
+#  Il confronto onesto e' con la riga SOPRA, r.274: stop mediano
+#  71,90 [MIS n=8] = 7190 pt -> ampiezza(35') mediana ~6890, cioe'
+#  x1,26 sui 5465 del 15' (contro il x1,53 teorico: compatibile a n=8).
 #
-#    0     pavimento SPENTO -- la cella VIVA, il controllo
-#    2300  = 13,5x lo spread mediano (1,70 idx) -- il PAVIMENTO DURO
-#          di casa. Scarta ~8,2% dei giorni (36 su 440).
-#    4600  = 27,1x -- meta' strada. Scarta ~38,4% (169 su 440).
-#    6900  = 40,6x -- LA FRONTIERA del costo (40x). Scarta ~67,0%
-#          (295 su 440), e n scende a ~145.
+#  L'ASSE, e il costo di ogni gradino dichiarato PRIMA come BANDA
+#  --------------------------------------------------------------
+#  InpMinStopPts = 0 / 2875 / 5750 / 8625 punti EA (100 pt EA = 1 punto
+#  indice su D30EUR). Con InpSkipIfTight=true (come in campo) il
+#  pavimento NON allarga lo stop: SCARTA il trade (r.1935/1978).
+#  Spread mediano BCM D30EUR ora 08 = 1,70 punti indice.
 #
-#  ATTENZIONE, e' un LIMITE SUPERIORE: quelle quote sono calcolate
-#  sull'AMPIEZZA del range, mentre lo stop vero e' ampiezza + buffer
-#  (InpBufferPoints=500) e l'ingresso e' a retest (InpRetestOffsetPts=
-#  200). Lo stop vero e' quindi PIU' LARGO dell'ampiezza di qualche
-#  centinaio di punti, e il pavimento scartera' QUALCHE GIORNO IN MENO
-#  di quanto scritto sopra. Il verso non cambia, il numero si legge dal
-#  referto.
+#    pavimento   idx   x spread   scarto [INF 35']  ..  [MIS 15' crudo]
+#      0         --    spento         0,0%                 0,0%
+#      2875      28,8   16,9x         3,1%                13,3%
+#      5750      57,5   33,8x        28,9%                54,2%
+#      8625      86,2   50,7x        54,2%                83,6%
+#
+#  E' UNA BANDA, NON UN NUMERO. La quota vera si legge dal referto.
+#  Popolazione: i 225 giorni LONG, stop = ampiezza + 300.
+#  PERCHE' QUESTA SCALA E NON 0/2300/4600/6900 (la prima stesura):
+#  il gradino a 2300 (13,5x, il pavimento duro di casa) scarta lo
+#  0,4-5,3%, cioe' sarebbe quasi un NO-OP e una passata buttata su
+#  quattro. Con 2875 il primo gradino sta comunque SOPRA il pavimento
+#  duro (16,9x contro 13,3x) e morde davvero. E i due gradini alti
+#  ABBRACCIANO la frontiera del costo dei 40x da sotto (33,8x) e da
+#  sopra (50,7x), che dice piu' che atterrarci sopra.
 #
 #  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
-#  -------------------------------------
-#  (a) RIPRODUZIONE: la cella 0 deve riprodurre R202B Pass 3 e R201A:
+#  =====================================
+#  (a) RIPRODUZIONE: la cella 0 deve riprodurre R202B Pass 3:
 #      IS  n175 PF 1.12733 DD 5.4089 profit 3050.56
 #      OOS n270 PF 1.39520 DD 7.2506 profit 14355.32
-#      Se non riproduce, il round NON e' confrontabile: si cerca il pin
-#      che balla, non si legge il resto.
-#  (b) n SCENDE salendo il pavimento, ed e' la verifica che il
-#      meccanismo si sia ACCESO davvero. Se n NON scende, il pavimento
-#      non sta scartando niente e il round non ha misurato nulla.
-#  (c) LA BARRA DA BATTERE, in chiaro: perche' una cella valga qualcosa
-#      deve portare il DD OOS a <= 5,00% (a taglia 1,0%), cioe' <=
-#      10,00% alla taglia vera del campo (2,00%). Oggi e' 7,2506 ->
-#      14,50%. Serve un taglio di almeno il 31%.
-#  (d) E IL PF NON DEVE CROLLARE: PF OOS >= 1,20 (oggi 1,39520). Una
-#      cella che porta il DD sotto il muro ma il PF sotto 1,20 non e'
-#      una sedia, e' un conto fermo.
-#  (e) IS e OOS CONCORDI sulla direzione. Discordi -> nessuna
-#      promozione, si dichiara "non deciso".
+#      Se non riproduce il round NON e' confrontabile.
+#  (b) n SCENDE salendo il pavimento. E' la verifica che il meccanismo
+#      si sia ACCESO. Se n non scende, il pavimento non scarta niente e
+#      il round non ha misurato nulla.
+#
+#  (c) LA BARRA, E IL CONFRONTO E' TUTTO INTERNO AL ROUND (classe 515):
+#      c1  DD OOS della cella <= 5,80, cioe' -20% secco sui 7,2506
+#          della cella 0. E' un confronto CELLA CONTRO CELLA, stessa
+#          taglia, tutti e due "dal picco": OMOGENEO e lecito.
+#      c2  Peggior Giornata % OOS <= 2,50 a taglia banco (~5,00 alla
+#          taglia vera) contro il Max Daily Loss FTMO del 5%. Questo
+#          confronto E' omogeneo -- giornata contro giornata -- ed e'
+#          l'unico che questo round sa produrre contro una regola FTMO.
+#          Misurato su R202B: -1,0782. Passa con margine.
+#      c3  IL MURO DEL 10% NON SI GIUDICA QUI. "Equity DD %" e' dal
+#          PICCO, il Max Loss FTMO 2-Step e' STATICO dal saldo iniziale
+#          ("equity must not drop below 90% of the initial account
+#          balance", docs/REGOLAMENTO_FTMO_2026-08.md). Con P >= I vale
+#          Equity DD % >= perdita statica SEMPRE: il DD del tester e'
+#          un LIMITE SUPERIORE. La misura che decide e' la MINIMA
+#          EQUITY contro il SALDO INIZIALE, che il CSV di ottimizzazione
+#          NON contiene: va letta dal report HTML per passata, e NON E'
+#          IN QUESTO ROUND.
+#      NOTA sul x2 per la taglia vera: e' un LIMITE SUPERIORE, non una
+#      identita'. CalcLotByRisk() usa ACCOUNT_BALANCE, quindi il DD
+#      composto a 2,0% sta un filo SOTTO il doppio di quello a 1,0%
+#      (5 SL di fila: 9,608 contro 2 x 4,901 = 9,802).
+#
+#  (d) IL PF NON DEVE CROLLARE: PF OOS >= 1,20.
+#      FONTE: risultati_archivio/R98_CRITERI.md r.194, cancello S2,
+#      "opzione A (FIRMATA)" -- DECISO DA CLAUDIO il 22/08 PRIMA dei
+#      numeri, motivato dalla forma del payoff.
+#      NON 1,40 (cancello A1): la cella VIVA fa 1,39520 e non lo
+#      passerebbe gia' al 21/09. NON 1,10 (S2 di ALLARGARE_LA_ROSA): e' la
+#      soglia di un altro imbuto.
+#      DISTORSIONE DICHIARATA (classe 550): il PF e' contato sulle
+#      USCITE. Qui InpTP1_R e' PINNATO a 1.0, quindi la meccanica del
+#      parziale e' IDENTICA in tutte e quattro le celle e la distorsione
+#      (W+x)/(L+x) e' al primo ordine LA STESSA: i confronti FRA CELLE
+#      sono leciti. Resta il residuo se le giornate scartate avessero un
+#      tasso di TP1 diverso dalle altre: NON MISURATO.
+#  (e) IS e OOS CONCORDI di segno. Discordi -> nessuna promozione.
 #  (f) CENTRO DELL'ALTOPIANO, MAI IL PICCO. Con 4 celle un altopiano
 #      puo' non esserci: allora il verdetto e' "serve piu' risoluzione".
 #
-#  LA CONTRO-IPOTESI, che va tenuta e non nascosta
-#  -----------------------------------------------
-#  Il pavimento potrebbe togliere trade SENZA toccare il DD: se le
-#  perdite che fanno il drawdown non sono concentrate nei giorni a range
-#  stretto, scartare quei giorni taglia n e profitto e lascia il DD dov'e'.
-#  In quel caso la risposta e' NO, e si va a cercare altrove (l'asse
-#  InpSLMode=ATR, o il filtro di spread InpMaxSpread che oggi e' 0).
-#  Questo esito NON e' un fallimento del round: e' la sua risposta.
+#  LA CONTRO-IPOTESI, FALSIFICABILE (si decide con questi numeri)
+#  --------------------------------------------------------------
+#  H0: il pavimento taglia n e profitto senza migliorare il DD.
+#  H0 e' FALSIFICATA se esiste almeno una cella non-zero con
+#      DD OOS <= 5,80 E PF OOS >= 1,20.
+#  H0 e' CONFERMATA se in TUTTE E TRE le celle non-zero il DD OOS resta
+#      dentro 6,89-7,61 (+-5% di 7,2506) mentre n OOS cala di almeno il
+#      20% (<= 216 uscite).
+#  Se non cade in nessuno dei due insiemi: "NON DECISO", e si dichiara
+#  in quale dei due buchi e' finito. NON si sceglie la regola dopo.
+#
+#  QUESTO ROUND PRODURRA' CELLE NON MISURABILI PER IL MERITO
+#  ---------------------------------------------------------
+#  Dichiarato PRIMA (emendamento della finestra, 16/08, regola A:
+#  IS >= 150 OPERAZIONI). STAT_TRADES conta le USCITE: con la parziale
+#  al 50% una posizione ne fa fino a due, quindi le POSIZIONI IS della
+#  cella 0 stanno fra 88 e 175 -- puo' essere che NEMMENO LA CELLA VIVA
+#  arrivi a 150. Alle celle alte le uscite calano ancora.
+#  ==> Per quelle celle il MERITO (PF, profitto) e' SOSPESO: il verdetto
+#      corretto e' "NON ANCORA MISURATO", mai "peggiore".
+#  ==> IL RISCHIO SI GIUDICA LO STESSO, a qualunque n (regola B del
+#      16/08): un DD accaduto e' un fatto, non una stima. Una cella alta
+#      puo' dire "il pavimento NON abbassa il DD" anche con n sottile, e
+#      quello e' il suo contributo.
+#  ==> Ogni n di questo referto e' [uscite]. Le POSIZIONI si contano
+#      dopo, sui position_id: finche' non sono contate non si scrive
+#      [pos].
 #
 #  QUELLO CHE QUESTO ROUND NON MISURA
 #  ----------------------------------
-#  - InpSkipIfTight=false (allargare lo stop invece di scartare il
-#    trade) e' un MECCANISMO DIVERSO e merita un round suo.
-#  - InpSLMode=1 (stop ad ATR) idem.
-#  - Un asse per round: qui si muove SOLO InpMinStopPts.
-#
-#  ATTENZIONE AL CONTEGGIO: STAT_TRADES conta le USCITE, non le
-#  posizioni. Con la parziale al 50% accesa una posizione fa due uscite.
-#  Le posizioni vere si contano dopo, una per una, sui position_id.
+#  - InpSkipIfTight=false (ALLARGARE lo stop invece di scartare il
+#    trade) e' un MECCANISMO DIVERSO: merita un round suo.
+#  - InpSLMode=1 (stop ad ATR) idem. InpMaxSpread (0 al 21/09) idem.
+#  - I rami d'ingresso NON si comportano tutti uguale, e va saputo
+#    prima di riusare questo asse: RETEST (r.1935/1978, quello VIVO a
+#    InpEntryMode=2) scarta e lascia gPhase in PH_ARMED; DELAYED
+#    (r.1435) fa return(true) e il chiamante porta a PH_PLACED;
+#    OPENCONFIRM (r.1543) mette gPhase=PH_DONE e uccide la giornata;
+#    FADE (r.1279) IGNORA SkipIfTight e ALLARGA SEMPRE lo stop. Su
+#    InpEntryMode=3 questo stesso asse misurerebbe il meccanismo
+#    OPPOSTO. Qui e' irraggiungibile: InpEntryMode=2 e' pinnato.
+#  - La MINIMA EQUITY contro il saldo iniziale (vedi c3).
 #
 #  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
-#  20/09). Pinnata a 1,0 per RIPRODURRE R202B/R201A. Ogni DD di questo
-#  round va RADDOPPIATO prima di leggerlo contro il muro FTMO del 10%
-#  (classe 547). I cancelli (c) e (d) qui sopra sono gia' scritti nella
-#  scala del BANCO: (c) chiede <= 5,00, che e' il 10,00 del campo.
+#  20/09). Pinnata a 1,0 per RIPRODURRE R202B. Ogni DD di questo round
+#  va raddoppiato prima di leggerlo a taglia vera (classe 547), e il
+#  raddoppio e' un LIMITE SUPERIORE (vedi la nota in (c)).
 # =====================================================================
 
 @SIMBOLO  D30EUR
@@ -177,7 +266,7 @@ InpNewsAfterMin=30||30||0||30||N
 InpNewsShiftMinutes=0||0||0||0||N
 InpNewsFlatten=true||true||0||true||N
 InpSlippagePts=0.0||0.0||0||0.0||N
-InpMinStopPts=0.0||0.0||2300.0||6900.0||Y
+InpMinStopPts=0.0||0.0||2875.0||8625.0||Y
 InpSkipIfTight=true||true||0||true||N
 InpUseVolumeFilter=false||false||0||false||N
 InpVolMult=1.5||1.5||0||1.5||N

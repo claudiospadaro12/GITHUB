@@ -28501,3 +28501,68 @@ uscite"*) e **non e' stato eseguito**.
 dichiarata nello stesso documento**, il verdetto su QUEL cancello e' **"NON RISOLTO"**, e il
 verdetto complessivo deve reggersi su **un cancello diverso, che va nominato**. Se non ce n'e'
 un altro, si esegue la misura che scioglie la distorsione **prima** di archiviare.
+
+---
+
+## CLASSE 551 -- LA SCALA DI UN ASSE PRESA DA UNO STUDIO GIRATO CON UNA GEOMETRIA DIVERSA, E LA DIFFERENZA DICHIARATA SOLO SUI PARAMETRI CHE NON CONTANO
+
+**Caso reale (21/09/2026, R203a).** Le quattro celle di `InpMinStopPts` erano state piazzate
+sui percentili di `risultati_archivio/studio_apertura/Studio_D30EUR.csv`. Ma
+`backtest_pipeline/studio_apertura.ps1` **r.131** scrive nell'`.ini` dello studio
+`InpRangeMinutes=15`, e **la sedia gira a 35**. Lo Studio misura l'ampiezza dei primi **15**
+minuti; l'asse era tarato su quei numeri come se descrivessero i primi **35**.
+
+**E la sezione "non coperto" del documento era ONESTA e comunque INUTILE**: dichiarava le
+differenze (`buffer 200`, `TP_R 2,0`) e concludeva *"serve per la distribuzione delle ampiezze,
+che non dipende da quei due"*. **Vero** su quei due -- e **l'unico parametro da cui l'ampiezza
+dipende PER DEFINIZIONE non era nell'elenco**.
+
+**Aggravante misurata: la correzione esisteva gia' in casa, scritta il GIORNO PRIMA.**
+`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` r.271-272 cita gli stessi file come
+*"(range 15' -- prudente)"* e *"x sqrt(35/15)"*. Non e' stata cercata.
+
+**Secondo difetto della stessa fonte, indipendente:** percentili presi su tutte e **440** le
+righe mentre la sedia e' **LONG-ONLY** (`InpAllowShort=false`), e i giorni LONG sono **piu'
+stretti** (media 5921 contro 6254). Il denominatore giusto era **225**.
+**Terzo:** lo stop vero non e' l'ampiezza, e' **ampiezza + 300 pt esatti** (retest long,
+`InpSLMode=0`: entry = High - 200, sl = Low - 500) -- calcolabile, non da lasciare vago.
+
+**Effetto:** scarto dichiarato **8,2 / 38,4 / 67,0%**; scarto sulla popolazione e sulla
+geometria giuste **0,4-5,3 / 16,0-37,8 / 38,7-71,1%**. Il gradino basso rischiava di essere un
+**NO-OP** (una passata su quattro buttata) e quello alto era spostato di **~1,8x**.
+**L'aritmetica era esatta: sbagliava il denominatore.**
+
+### La regola
+**Prima di usare un file d'archivio per TARARE un asse si apre lo SCRIPT CHE L'HA GENERATO --
+non il RIEPILOGO -- e si mette in tabella, una per una, OGNI differenza fra i suoi parametri e
+quelli della sedia, marcando quali toccano la grandezza che si sta prendendo in prestito.**
+Un elenco di differenze da cui manca la variabile misurata non e' una riserva: e' una
+rassicurazione. E le quote si consegnano come **BANDA** fra la lettura cruda e quella corretta,
+con `[MIS]` e `[INF]` accanto, **mai come numero singolo**.
+
+---
+
+## CLASSE 552 -- LA "CONFERMA INCROCIATA" FRA DUE NUMERI CHE L'ALGEBRA DICE CHE NON POSSONO COINCIDERE: LA COINCIDENZA E' LA PROVA DEL DIFETTO
+
+**Caso reale (21/09/2026, R203a).** Il file prova esultava: mediana dello Studio **5465 pt =
+54,65 idx** contro lo stop della geometria viva **54,90 idx** `[MIS n=3]`
+(`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` r.275) -- *"due misure indipendenti a 0,5% di
+distanza: il numero regge"*. **Il puntatore era esatto e il calcolo pure.**
+
+Ma i due numeri **misurano cose diverse**: 5465 e' l'**ampiezza** di un range di **15'**; 5490
+e' lo **stop** della sedia, cioe' **ampiezza(35') + 300**. Con `InpRangeMode=0` la finestra di
+15' e' **CONTENUTA** in quella di 35', quindi `ampiezza(35') >= ampiezza(15')` **punto per
+punto**. Perche' i due coincidessero servirebbe `ampiezza(35') ~ 5190 < 5465`: **impossibile**.
+
+**Quindi la coincidenza non convalidava niente: era la FIRMA del difetto della classe 551, che
+stava nello stesso documento due righe piu' sopra. La "conferma" ha fatto da anestetico
+esattamente dove serviva l'allarme.**
+
+### La regola
+**Una conferma incrociata si scrive solo dopo aver risposto per iscritto alla domanda: "le due
+grandezze POSSONO essere uguali?"** Se un'identita' o una disuguaglianza strutturale
+(contenimento di finestre, somme, monotonie) impone che siano **diverse**, e i numeri
+**coincidono**, il verdetto e' **ALLARME**, non conferma.
+E' la forma specifica del difetto del 10/09: **cercare la coerenza invece di provare a
+rompere**. Un accordo fra due numeri e' informativo **solo se avrebbero potuto essere in
+disaccordo**.
