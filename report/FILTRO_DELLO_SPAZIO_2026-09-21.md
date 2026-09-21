@@ -15,6 +15,33 @@
 
 ---
 
+## ✏️ VERSIONE 2 — RISCRITTO DOPO LA BOCCIATURA DEL CANCELLO (21/09/2026)
+
+La **versione 1 di questo referto è stata BOCCIATA** dal cancello del 09/09
+(`controlla_prova.py` + agente `controllo-preventivo`) con **4 difetti bloccanti
+e 6 rilievi**. Non è una nota di cortesia: **quattro di quei dieci cambiavano una
+conclusione**, e uno avrebbe reso il round **muto**. Dove il testo è stato
+corretto, **è scritto che cosa diceva prima e perché era sbagliato** — cancellare
+l'errore invece di raccontarlo è il modo di rifarlo.
+
+| # | Difetto | Dove è stato riparato | Classe |
+|---|---|---|---|
+| **R-1** | 🔴 contro-esempio costruito su **metà** del meccanismo: valeva per il pavimento, **si capovolge** col tetto | § 2, riscritta in 🅰️ / 🅱️ | **520** |
+| **R-2** | 🔴 il cancello guardava il ramo di fallimento **rumoroso** mentre il dominante è **silenzioso** | § 4 e tabella dei cancelli, riga 2 | **521** |
+| **R-3** | 🔴 file prova intitolato *«pronto»* e **mai passato** da `controlla_prova.py` | § «I FILE PROVA», ora due file **verdi** | **522** |
+| **R-4** | 🔴 diff misurata contro l'**antenato** (`cd5bf255`) invece che contro il **pin schierato** (`9fca63d9`) | tabella in testa + § prova del no-op | **523** |
+| **R-5** | censimento *«esattamente 2 punti di chiamata»* che **omette** le funzioni accessorie | § ②, ora tabella di 8 righe | **524** |
+| **R-6** | nota d'archivio (*«MT5 ignora lo step, 07/08»*) **già ritirata** dal repo | § Fase 2 | **525** |
+| **R-7** | 🔑 sonda il cui **intero prodotto** passa da un logger condizionato da un input **non pinnato**, e `Print()` è spento in ottimizzazione | § «PRIMA: il difetto che ha salvato il round» | **526** |
+| **R-8** | numeri di riga del sorgente **spostati due volte** | riverificati col `grep`, tutto il referto | *(nessuna classe nuova: è la disciplina già scritta — si rifà il `grep`, non si ricopia)* |
+| **R-9** | motivazione **contraddittoria** per tenere il tetto fuori dalla griglia | § Fase 2, sostituita con R-1 | *(vedi 520)* |
+| **R-10** | due citazioni imprecise (la barra H4; la r.83-84 della trascrizione) | § 4 e § «IL MECCANISMO» | *(nessuna classe nuova: riverificate sulla trascrizione)* |
+
+Le classi **520-526** sono scritte per esteso in
+`backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
+
+---
+
 # 🔴 PRIMA DI TUTTO: I CONTRO-ESEMPI
 
 Questa sezione sta **in testa e non in fondo** perché è la parte che conta di
@@ -498,11 +525,23 @@ Griglia `InpSpaceMode=2`, `InpSpaceMinR` = **0 / 0,5 / 1,0 / 1,5 / 2,0** ×
   esperimento: **ne apre un altro**, che vuole un nome, un file prova e un
   contro-esempio suoi.
 
-### Il file prova, pronto (da salvare in `backtest_pipeline/prove/ABTG_DAX_Apertura_EU_SPAZIO.txt`)
-🔴 **Non l'ho creato io**: un file prova va congelato **coi criteri scritti prima
-dei numeri** e passato dal cancello, e non era nei deliverable. Ecco il corpo,
-già allineato alla prova gemella già girata su questa sedia:
+### 📁 I FILE PROVA — esistono, sono due, e sono passati dal cancello
 
+🔴 **Qui la prima stesura aveva il difetto più imbarazzante del lotto**: il
+blocco si intitolava *«Il file prova, PRONTO»* e la riga successiva ammetteva
+*«Non l'ho creato io»*. Un corpo di file prova stampato in un referto **non è un
+file prova**: è un suggerimento. E quel corpo, passato oggi da
+`controlla_prova.py`, sarebbe stato **bocciato** — portava due assi (soglia e TF)
+per una misura che di assi non ne vuole nessuno, e nessun pin su `InpVerbose`.
+
+🟢 **Adesso i due file esistono, sono congelati in repo e sono VERDI:**
+
+| file | lato | asse | cancello |
+|---|---|---|---|
+| `backtest_pipeline/prove/R195a_spazio_LONG_DAX_D30EUR.txt` | **LONG** | `InpSpaceMode` 0→1 | ✅ `pin=7 celle=2 OK` · 4 passate · **0 problemi** |
+| `backtest_pipeline/prove/R195b_spazio_SHORT_DAX_D30EUR.txt` | **SHORT** | `InpSpaceMode` 0→1 | ✅ `pin=7 celle=2 OK` · 4 passate · **0 problemi** |
+
+Corpo (identico nei due file salvo il lato):
 ```
 @SIMBOLO  D30EUR
 @PERIODO  M5
@@ -510,26 +549,45 @@ già allineato alla prova gemella già girata su questa sedia:
 
 InpAllowShort=0||0||0||0||N
 InpRiskPercent=1.0||1.0||0||1.0||N
-InpSpaceMode=2||2||0||2||N
-InpSpaceMinR=0||0||0.5||2.0||Y
-InpSpaceTF=16388||16385||1||16388||Y
+InpVerbose=1||1||0||1||N
+InpSpaceMinR=0||0||0||0||N
+InpSpaceMaxR=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMode=0||0||1||1||Y
 ```
 
-⚠️ **I due pin non sono facoltativi** (stessa lezione della prova gemella):
+**👉 Come è stato risolto il problema dei due assi: non facendo la griglia.**
+La domanda della Fase 0 non è *"quale soglia è la migliore"* — è *"il modo 1
+sposta un trade, sì o no?"*. Quella domanda vuole **un asse solo**, a **due
+valori**, e **tutto il resto pinnato**: 7 pin, `InpSpaceTF` compreso (che è
+pinnato, non spazzolato) e `InpVerbose` compreso. Il tetto e il TF **non
+entrano**: entrerebbero in un altro esperimento (2-🅱️ e il punto sopra).
+
+⚠️ **I pin non sono facoltativi** (stessa lezione della prova gemella):
 `InpAllowShort=0` perché il SOLO LONG del 07/08 è stato fatto **sul grafico, non
 nel codice** (nel sorgente è ancora `true`); `InpRiskPercent=1.0` perché il
 `#define` dice 1,0 ma tutte le fasi precedenti girano all'1% e al 2% i numeri
-non si confrontano più con niente.
+non si confrontano più con niente; 🟢 **`InpVerbose=1`** perché **tutta** la
+consegna della sonda passa da `ABTGLog` (vedi il riquadro in testa a questa
+sezione) e un default non è una garanzia.
 
-⚠️ **Regola dei due lati (25/08)**: la prova sopra misura **solo il long**. Il
-lato short va misurato in una **seconda corsa**, non dato per buono.
+⚠️ **Regola dei due lati (25/08)**: non una prova con un flag, **due file
+separati**. Il lato short non si dà per buono.
+
+🔴 **E la Fase 1 NON è in questi file, ed è giusto così**: il formato dei file
+prova pilota ottimizzazioni, e un file senza asse Y il cancello lo boccia con
+*"celle = 0"*. Le impostazioni della Fase 1 (**test singolo**, `Optimization=0`,
+`InpSpaceMode=1`) stanno **in fondo a ciascuno dei due file**, come testo.
 
 ## 🕐 Tempo macchina
-🔴 **Non ho un numero misurato e non lo invento.** Quello che posso dire di
-fatto: è la **stessa geometria, stesso simbolo, stessa finestra** della prova
-`backtest_pipeline/prove/ABTG_DAX_Apertura_EU.txt`, che è da **50 pass** contro i
-nostri **40** → costo dello **stesso ordine di grandezza**, ricavabile dal
-registro di quella corsa. La fase 1 è **2 pass**: trascurabile.
+🔴 **Non ho un numero misurato e non lo invento.**
+- **FASE 0**: `controlla_prova.py` conta **2 celle × 2 finestre = 4 passate** per
+  file, quindi **8 passate** in tutto per i due lati. Trascurabile.
+- **FASE 1**: **1 corsa per lato**, test singolo. Trascurabile.
+- **FASE 2** (solo se la fase 1 dice di sì): stessa geometria, stesso simbolo,
+  stessa finestra della prova `backtest_pipeline/prove/ABTG_DAX_Apertura_EU.txt`,
+  che è da **50 pass** contro i **40** della griglia proposta → costo dello
+  **stesso ordine di grandezza**, ricavabile dal registro di quella corsa.
 
 🖥️ **E gira sul PC DI BACKTEST, non sul VPS** (firma del 21/09, dopo che stamattina
 il tester ha inchiodato la macchina delle sei sedie).
@@ -541,13 +599,15 @@ il tester ha inchiodato la macchina delle sei sedie).
 | # | Cancello | Stato |
 |---|---|---|
 | 1 | Modo 1 riproduce il modo 0 **al centesimo** | ⏳ da girare |
-| 2 | Il giornale **non contiene** righe *"handle EMAxx non creato"* | ⏳ da girare |
+| 2 | 🔴 **`FILTRO SPAZIO - letture di ostacolo FALLITE:` deve essere `0`** (r.716-717) — **e in più** il giornale non contiene righe *"handle EMAxx non creato"* (r.1685-1686) | ⏳ da girare |
 | 3 | La fase 1 mostra che lo spazio **separa vinti e persi** | ⏳ **è il cancello vero**: se no, si chiude qui |
 | 4 | La soglia scelta regge **fuori campione**, non solo IS | ⏳ — è esattamente dove R30 è morto |
 | 5 | **Centro dell'altopiano, MAI il picco**; i vicini (soglia **e** TF) anch'essi migliori | ⏳ |
 | 6 | Costo in **frequenza** per lato: la famiglia resta **≥ 1,00 op/giorno** | ⏳ |
 | 7 | **Due lati** misurati separatamente (25/08) | ⏳ |
-| 8 | Passaggio dal **cancello** (`controlla_riga.py` + `controllo-preventivo`) | ⏳ in corso |
+| 8 | I **file prova** passano `controlla_prova.py` | ✅ **fatto**: R195a e R195b, `celle=2`, 4 passate, **0 problemi** |
+| 8-bis | La **riga di lancio** passa il cancello (`controlla_riga.py` + `controllo-preventivo`) | ⏳ la riga non è ancora stata scritta |
+| 8-ter | 🔴 La **Fase 1 NON parte come ottimizzazione** (`Optimization=0`) e `InpVerbose=1` | ⏳ — se salta, il giornale è muto e la misura non esiste |
 | 9 | Firma di Claudio prima di qualunque cosa vada in campo | ⏳ |
 
 🔴 **In assenza di tutto questo: NON SI TOCCA NIENTE.** I default restano 0/0/0,
@@ -561,6 +621,15 @@ che è esattamente il comportamento di oggi.
 forma **misurabile** (in R, non in punti; banda, non pavimento) e — soprattutto —
 in una forma che **misura prima di filtrare**. Il modo 1 ci fa sapere quanto
 costerebbe l'idea **senza rischiare un euro e senza spostare un trade**.
+
+🟢 **E quello che è andato bene davvero, il 21/09**: il cancello ha bocciato la
+prima stesura di questo referto con **4 difetti bloccanti e 6 rilievi**, e uno
+solo di quelli — la sonda che passa tutta da `ABTGLog`, con `Print()` spento in
+ottimizzazione — **avrebbe reso il round MUTO senza che nessuno se ne
+accorgesse**. Non sarebbe stato un errore rumoroso: sarebbe stato un CSV normale
+e un giornale vuoto. 👉 **È il metodo che funziona, non una lista di colpe**: le
+correzioni sono arrivate prima che il lavoro uscisse. Le sette classi nuove
+(**520-526**) sono in `backtest_pipeline/CHECKLIST_RIGA_DI_LANCIO.md`.
 
 🟠 Quello che va detto **chiaro**: questa è **ponteggio**, non una sedia. Non
 avvicina di un centimetro il 1° ottobre finché la fase 1 non produce un numero.
