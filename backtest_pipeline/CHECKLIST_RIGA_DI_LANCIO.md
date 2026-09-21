@@ -27351,3 +27351,47 @@ sandbox: il file che l'EA legge davvero **non e' nessuno dei due in repo**.
 chi lo copia, da quale cartella l'EA lo apre — e si dichiara **quale anello si e' misurato**.
 *(parente della 83 e della 482, ma nuova: qui gli omonimi sono in repo e la catena di
 distribuzione sceglie quello sbagliato.)*
+
+## CLASSE 518 — 🕵️‍♂️🎯 **IL FILTRO PER PERCORSO SU `metatester64` NON E' VERIFICABILE A PRIORI: l'agente del tester non sta dove sta il terminale che l'ha lanciato** (21/09/2026)
+**Il caso reale**: VPS bloccato con la challenge FTMO `541452707` che **stava tradando**, e una
+riga pronta a partire: `Get-Process metatester64 | ForEach-Object { $_.Kill() }`. La correzione
+"ovvia" era il filtro di casa `Where-Object { $_.Path -like 'C:\MT5_Backtest\*' }` (l'idioma di
+`RIGA_R190` e `RIGA_DIAG_GBPUSD`). 🔴 **Ma per gli AGENTI quel filtro non e' dimostrato**: questo
+repo stesso conosce **TRE radici** per la cartella Tester — `<CartellaDati>\Tester`,
+`<Installazione>\Tester`, **`%APPDATA%\MetaQuotes\Tester\Agent-127.0.0.1-30xx`** (scritto in
+`RIGA_ROUND_VPS.ps1` r.830, `RIGA_R95` r.716-724, `RIGA_NOTTE2_DUKA_R91` r.859 e altri dieci).
+Se l'eseguibile dell'agente vive sotto `%APPDATA%`, il filtro combacia con **ZERO** processi:
+la riga **non fa niente** e sembra riuscita; e se invece combacia, **non distingue** quale
+terminale ha lanciato quell'agente, perche' la cartella `Agent-127.0.0.1-300X` **non nomina
+nessun conto**.
+> ### 🔴 LA REGOLA
+> 1. **La costante del filtro si LEGGE dal censimento, non si indovina**: prima la riga di sola
+>    lettura che stampa `Path` di ogni `metatester*`, poi — e solo poi — si scrive il filtro.
+> 2. **Il legame agente -> terminale si dimostra col `ParentProcessId`** (`Get-CimInstance
+>    Win32_Process`), non col percorso. Il percorso dice **quale programma**, mai **quale conto**
+>    (gia' classe 174 punto 4): per gli agenti non dice nemmeno **quale terminale**.
+> 3. **Un filtro che puo' combaciare con zero deve stampare il conteggio** e dire a parole
+>    *"colpisce N processi"*, altrimenti "non ha ucciso niente" e "ha funzionato" sono
+>    indistinguibili — stesso difetto della 174 punto 2, su un'altra riga.
+
+## CLASSE 519 — 🕳️🔧 **L'ASSEGNAZIONE A UNA PROPRIETA' PASSA LA LISTA BIANCA DELLA 173 E VIENE CERTIFICATA "SOLA LETTURA"** (21/09/2026)
+**Il caso reale**: cercando l'alternativa non distruttiva al kill degli agenti
+(`$x.PriorityClass = 'Idle'`, reversibile), il cancello ha risposto
+*"riga di SOLA LETTURA locale (lista bianca) ... pin e marcatore non si applicano"*.
+🔴 **Ma quella riga SCRIVE**: cambia lo stato di un processo vivo. La 173 vieta i **metodi**
+(`.Kill(`, `.Delete(`, `.WriteAllText`) e i **cmdlet** fuori lista, **non le assegnazioni a
+proprieta'**. Contro-esempio costruito e **misurato** contro `controlla_riga.py` di oggi:
+```
+$f = Get-Item "C:\MT5_Backtest\MQL5\Experts\X.ex5"; $f.IsReadOnly = $true
+```
+→ `PASSATI (3) ... riga di SOLA LETTURA locale`, **uscita 0**. Cambia il file, e il cancello
+ci scrive sopra "sola lettura". (Sul percorso del REALE il blocco scatta lo stesso, ma per la
+guardia `[TERMINALE]`, cioe' **per un altro motivo**: togli il percorso vietato e il buco resta.)
+> ### 🔴 LA REGOLA
+> 1. **E' la classe 175 che si ripresenta**: un cancello non certifica mai piu' di quello che ha
+>    guardato. Finche' la lista bianca non vede `$x.Prop = ...`, la frase "SOLA LETTURA" su una
+>    riga che contiene un'assegnazione a proprieta' e' **una certificazione falsa**.
+> 2. **Riparazione**: `$<var>.<Prop> = ` (e `$_.<Prop> = `) va trattata come scrittura →
+>    RILIEVO che **nomina la proprieta'**, e la frase "SOLA LETTURA" non si stampa piu'.
+> 3. **Finche' non e' riparata**: ogni riga con un'assegnazione a proprieta' va letta a mano
+>    dall'agente di giudizio, **anche se il cancello e' verde**. Verde meccanico != innocua.
