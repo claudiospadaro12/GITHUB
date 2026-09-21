@@ -17,8 +17,11 @@
 # =====================================================================
 #  DOSSIER:  report/FILTRO_DELLO_SPAZIO_2026-09-21.md
 #  ORIGINE:  trascrizioni/LIVE_EMILIANO_2026-04-10.txt r.71-73, r.83, r.93
-#  CODICE:   mql5/Experts/ABTG_DAX_Apertura_EU.mq5, commit bfacc1fd
-#            (+429 righe, 0 cancellate contro il pin schierato 9fca63d9)
+#  CODICE:   mql5/Experts/ABTG_DAX_Apertura_EU.mq5
+#            +460 righe, 0 cancellate contro il PIN SCHIERATO 9fca63d9
+#            (misurato con git diff --numstat, non contro l'antenato:
+#             e' la classe 523, scritta oggi. Il numero era 429 prima
+#             delle tre patch del cancello; qui sta quello di adesso)
 #
 # ---------------------------------------------------------------------
 #  ###  QUESTO FILE FA LA FASE 0, NON LA FASE 1  ###
@@ -28,7 +31,7 @@
 #
 #     TUTTO il prodotto della sonda (le righe per segnale, l'istogramma,
 #     il riepilogo) passa da ABTGLog, che stampa SOLO se InpVerbose
-#     (ABTG_DAX_Apertura_EU.mq5 r.494-497). E in OTTIMIZZAZIONE MT5 NON
+#     (ABTG_DAX_Apertura_EU.mq5 r.495-499). E in OTTIMIZZAZIONE MT5 NON
 #     ESEGUE Print(): il giornale resta VUOTO.
 #
 #  👉 Quindi il lavoro si spezza in due, e questo file e' il PRIMO pezzo:
