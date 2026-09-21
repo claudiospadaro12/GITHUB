@@ -28329,3 +28329,42 @@ non in base a quanto si vuole accorciare l'output.** Un evento di **avvio** si c
 va accorciato, si accorcia **il numero di righe STAMPATE** (prime N + ultime N dei
 risultati, col totale dichiarato), **mai la porzione di file LETTA** -- sono due cose
 diverse e solo la seconda puo' cambiare la risposta.
+
+---
+
+## CLASSE 547 -- la TAGLIA del banco diversa da quella IN CAMPO, e il DD consegnato senza la sua scala
+
+**Trovata il 21/09/2026 sulle righe `R202A`/`R202B` (Dow `770202` e DAX `770101`), dallo
+strato 2 del cancello, PRIMA che le righe arrivassero a Claudio.** I due file prova pinnano
+`InpRiskPercent=1.0`; le due sedie **in campo** girano a **`2,00`** dal 20/09 (firma di
+Claudio, scritta dentro i `.set` FTMO). I due `.md` consegnavano tabelle di DD **senza una
+riga** che lo dicesse.
+
+**Il numero, misurato e non dedotto** (`grep -oE '^#+ *CLASSE +[0-9]+' ... | sort -n | tail`
+eseguito **nel momento in cui questa riga viene scritta**: l'ultima era la **546**, 112 classi
+nel file, e `CLASSE 547` non compariva da nessuna parte nel repo).
+
+### Perche' morde
+**Il DD e' LINEARE nella taglia, e il fattore era gia' scritto in casa**: l'ancora `R201A` a
+1,0% vale **DD OOS 7,2506%**; lo stesso preset in campo dichiara *«il peggior tratto del
+backtest OOS a 2,00% vale **14,46%**»*. `7,2506 x 2 = 14,50`, **scarto 0,3%**.
+
+### Il contro-esempio, dello STESSO GIORNO
+`R196a` (Nasdaq `770260`, **stessa macchina, stesso deposito 80.000**) e' pinnato a **2,00** e
+riporta **DD OOS 9,12%**. `R202A` riportera' **4,39%** a 1,0%. Due tabelle affiancate, stessa
+colonna, **scala diversa e non dichiarata**: la lettura naturale (*«il Dow ha meta' del DD del
+Nasdaq»*) e' **falsa** -- e' meta' della **taglia**. E letto contro il muro statico FTMO del
+**10%**, un «DD OOS 7,25%» promette **2,75 punti di margine** dove il numero vero in campo e'
+**~14,5%**: muro gia' sfondato.
+
+### La regola
+**Un DD non e' un numero: e' un numero PIU' la taglia a cui e' stato misurato.** Chi consegna
+una tabella di DD dichiara `InpRiskPercent` del banco **e** quello in campo **nella stessa
+pagina**, e se divergono scrive **il fattore di conversione**.
+- Pinnare una taglia diversa da quella in campo **e' legittimo** quando serve a riprodurre
+  un'ancora (qui `R172D`/`R201A` sono girati a 1,0). **Non e' il pin il difetto: e' il
+  silenzio.**
+- I cancelli **RELATIVI** («DD scende del 20%», «PF >= cella viva») **non ne risentono**: si
+  dichiara anche questo, altrimenti si butta via un round buono.
+- Verifica meccanica in dieci secondi:
+  `diff <(grep -E '^InpRiskPercent' prova.txt) <(grep -E '^InpRiskPercent' mql5/Presets/FTMO/<sedia>.set)`

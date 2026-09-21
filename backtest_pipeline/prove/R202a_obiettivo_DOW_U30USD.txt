@@ -27,7 +27,8 @@
 #
 #  LA TRAPPOLA, E VA LETTA PRIMA DEI NUMERI
 #  -----------------------------------------
-#  InpTP1_R NON muove solo il parziale. ABTG_*_Apertura_*.mq5 r.1694:
+#  InpTP1_R NON muove solo il parziale. ABTG_Dow_Apertura_US.mq5 r.1456
+#  (funzione TpTotalR), e il cancello del parziale sta a r.1730:
 #      bersaglio finale = InpTP1_R x 3
 #  quindi:
 #      InpTP1_R 1,00 -> parziale a 1,00 R, bersaglio a 3,00 R  (oggi)
@@ -128,6 +129,17 @@ InpCorrEmaFast=14||14||0||14||N
 InpCorrEmaSlow=100||100||0||100||N
 InpUseVwapFilter=false||false||0||false||N
 InpVwapTF=15||15||0||15||N
+#  ---------------------------------------------------------------------
+#  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
+#  20/09, scritta in mql5/Presets/FTMO/ABTG_Dow_Apertura_US_770202_FTMO.set).
+#  Pinnata a 1,0 per RIPRODURRE R172D, che e' girato a 1,0.
+#  CONSEGUENZA: ogni DD di questo round va RADDOPPIATO prima di leggerlo
+#  contro il muro statico FTMO del 10%. Il fattore non e' stimato:
+#  l'ancora DAX a 1,0% vale DD OOS 7,2506 e il preset in campo dichiara
+#  14,46 a 2,00% -- 7,2506 x 2 = 14,50, scarto 0,3%.
+#  I cancelli di questo file sono RELATIVI (DD scende del 20%, PF >= cella
+#  viva) e NON ne risentono: cambia solo la lettura dei numeri assoluti.
+#  ---------------------------------------------------------------------
 InpRiskPercent=1.0||1.0||0||1.0||N
 InpSLMode=0||0||0||0||N
 InpAtrSlMult=1.5||1.5||0||1.5||N
