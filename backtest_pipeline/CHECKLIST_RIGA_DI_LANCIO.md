@@ -28413,3 +28413,91 @@ Nello stesso secondo passaggio sono emersi altri due difetti **nati dalla riscri
 
 **Morale operativa: il cancello si ripassa DOPO ogni patch, non solo prima.** Una riscrittura
 e' codice nuovo, e va trattata come tale.
+
+---
+
+## CLASSE 515 -- RICADUTA DEL 21/09/2026 (la classe esiste dal 20/09, r.27327)
+
+**E' successo di nuovo, un giorno dopo averla scritta, e stavolta la frase e' ARRIVATA A
+CLAUDIO IN CHAT.** Nei verdetti di R202A/R202B ho preso `Equity DD %` del tester -- che e'
+**dal picco** -- l'ho raddoppiato per la taglia vera (classe 547, quella parte era giusta) e
+l'ho confrontato con il **Max Loss FTMO del 10%, che e' STATICO dal saldo iniziale**
+(`docs/REGOLAMENTO_FTMO_2026-08.md`: *"equity must not drop below 90% of the initial account
+balance at any given time"*). Ne ho concluso *"il DAX sfonda il muro"* e *"il Dow e' a 1,2
+punti dal muro"*.
+
+**L'algebra, perche' non e' un cavillo.** Con `I` saldo iniziale, `E_min` minimo di equity,
+`P` il picco al momento di `E_min`, e `P >= I`:
+- perdita contro il muro statico = `1 - E_min/I`
+- `Equity DD %` = `1 - E_min/P`
+Poiche' `P >= I`, allora `E_min/P <= E_min/I`, quindi **`Equity DD % >= perdita statica`,
+SEMPRE**. Il DD del tester e' un **LIMITE SUPERIORE**, non la perdita contro il muro.
+
+**Conseguenza misurata:** l'OOS del DAX chiude a **+17,94%** sul banco (14.355 su 80.000 a
+taglia 1,0%). Con un cuscino del genere il picco sta **molto sopra** il saldo iniziale, e il
+14,50% dal picco puo' corrispondere a una perdita statica **molto minore**. **Non e' dimostrato
+che sfondi.** E cade anche la frase gemella *"la 0.25 e' la SOLA cella sotto il muro"*: nessun
+numero di quel round la stabilisce.
+
+**Perche' la ricaduta e' peggiore della prima volta:** la classe era gia' scritta, e il difetto
+e' passato **perche' non ho riletto la checklist prima di scrivere un verdetto**. Il cancello
+di strato 1 non lo prende: non c'e' riga di lancio da passargli.
+
+**La regola, rafforzata:** prima di scrivere QUALUNQUE frase che confronti un numero del tester
+con una soglia di una prop, si cerca nella checklist la parola `muro`. E la frase corretta e':
+*"`Equity DD %` X% dal picco; il muro e' Y% statico dal saldo iniziale; il DD e' un limite
+superiore della perdita statica, quindi il confronto NON e' dimostrato. La misura che decide e'
+la minima equity contro il saldo iniziale."*
+
+**Il confronto che INVECE e' omogeneo, e che nessuno aveva usato:** la colonna
+`Peggior Giornata %` del CSV contro il **Max Daily Loss del 5%**. Giornata contro giornata.
+Misurato su R202A/R202B: **-1,00% / -1,08%** a taglia banco, cioe' **~2,0-2,2% alla taglia
+vera**, contro il 5%. **Passa con margine**, ed e' una buona notizia che stava nei file da
+subito.
+
+---
+
+## CLASSE 549 -- DUE DOCUMENTI DELLO STESSO ROUND CON DUE LISTE DIVERSE ETICHETTATE (a)-(d)
+
+**Caso reale (21/09/2026, R202A e R202B).** Il **file prova** etichetta **(a)** *"DD OOS scende
+del 20%"* e **(b)** *"PF OOS >= cella viva"*. Il **`.md` della riga** etichetta **(a)**
+*"riproduce l'ancora"* e **(b)** *"n sale scendendo"*. Il verdetto ha citato *"attesa (a)"* e
+*"attesa (b)"* intendendo le seconde, ha degradato il cancello (a) del file prova a
+*"punto 5"*, e **ha saltato del tutto il cancello (b) del file prova**.
+
+**Perche' morde:** quelle del file prova sono le lettere dei **cancelli di PROMOZIONE**, cioe'
+quelle che decidono se una sedia cambia. Un rilettore che apre il file prova e legge *"(b)
+fallita"* conclude che il PF OOS era sotto la viva, mentre il verdetto parlava del conteggio
+delle uscite. L'omissione non ha cambiato l'esito **per fortuna** (il cancello (b) falliva per
+tutte le celle) -- ed e' lo stesso *"per fortuna"* del 09/09.
+
+**La regola:** i cancelli di PROMOZIONE si numerano **una volta sola, nel file prova**, e ogni
+citazione porta il **nome del file**. Le attese di LETTURA del `.md` si etichettano con un
+alfabeto **diverso** (L1, L2...). E il verdetto **evade tutti i cancelli del file prova uno per
+uno, anche quelli che falliscono in modo ovvio**: un cancello saltato e' un cancello non
+misurato.
+
+---
+
+## CLASSE 550 -- IL CANCELLO DICHIARATO "FALLITO" CON UNO SCARTO PIU' PICCOLO DELLA DISTORSIONE DI MISURA DICHIARATA NELLO STESSO FILE
+
+**Caso reale (21/09/2026, R202B).** Il cancello *"PF OOS >= cella viva"* e' stato dato per
+**fallito** dalla cella `0.25` con uno scarto di **-2,23%** (1,36404 contro 1,39520). Ma lo
+**stesso file prova**, prima dei numeri, dichiara che il PF contato sulle **uscite** sottostima
+le celle basse dell'asse (`(W+x)/(L+x) < W/L`, correzione di Marco Garbuglia del 21/09), tanto
+piu' quanto piu' spesso scatta il parziale -- e la `0.25` produce **339 uscite** contro le 270
+della viva, **sulle stesse posizioni**. La distorsione **non e' mai stata quantificata** e corre
+**a favore** della cella bocciata.
+
+**Un cancello "fallito" per meno della propria barra d'errore non e' fallito: e' NON RISOLTO.**
+
+**Perche' morde:** e' la forma **simmetrica** del picco di rumore promosso. Qui si **archivia**
+un candidato con un numero che la misura non sa produrre -- ed e' esattamente *"l'occasione
+persa che nessuno ritrovera' piu'"* del certificato di morte del 09/09. Il rimedio era gia'
+scritto nel `.md` della riga (*"si separano contando le POSIZIONI (`position_id`), non le
+uscite"*) e **non e' stato eseguito**.
+
+**La regola:** quando lo scarto su un cancello e' dello **stesso ordine di una distorsione
+dichiarata nello stesso documento**, il verdetto su QUEL cancello e' **"NON RISOLTO"**, e il
+verdetto complessivo deve reggersi su **un cancello diverso, che va nominato**. Se non ce n'e'
+un altro, si esegue la misura che scioglie la distorsione **prima** di archiviare.
