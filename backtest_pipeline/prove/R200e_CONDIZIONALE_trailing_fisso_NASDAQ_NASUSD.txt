@@ -212,5 +212,44 @@ InpRetestOffsetPts=0.0||0.0||0||0.0||N
 #   (86,8): oltre, il trailing smette di essere un trailing.
 #   Dieci celle servono a vedere se l'altopiano esiste, non a scegliere
 #   il minimo. Il minimo NON si sceglie (regola di casa).
-InpTrailFixedPts=410.0||410||410||4100||Y
+InpTrailFixedPts=410.0||410||2000||18410||Y
 # 10 celle
+
+# ---------------------------------------------------------------------
+#  21/09/2026 ORE 21:30 -- DUE COSE COMPILATE DOPO R200C, E DICHIARATE
+# ---------------------------------------------------------------------
+#  (1) LA CONDIZIONE D'INGRESSO E' SODDISFATTA, per il ramo del DD:
+#      R200c cella mode 2  ->  PF OOS 0,80365 (sotto 1,09149: ramo NON
+#      passato)  ·  DD OOS 5,3231 (sotto 8,20: RAMO PASSATO).
+#      Il ramo del DD e' quello che apriva la porta, e l'ha aperta.
+#
+#  (2) L'ANCORA, che era [NON MISURATO] e adesso e' un numero:
+#      la cella InpTrailFixedPts=410 di questo round E' la cella mode 2
+#      di R200c e DEVE riprodurla al centesimo:
+#          IS   n  82   PF 0,65823   DD equity  8,0354   profit -4377,67
+#          OOS  n 102   PF 0,80365   DD equity  5,3231   profit -2253,15
+#      Se non li riproduce, i pin sono sbagliati: ci si ferma li'.
+#
+#  🔴 (3) L'ASSE E' STATO ALLARGATO, e il motivo e' una MISURA che il 21/09
+#      alle 19:00 non esisteva ancora.
+#      Era:  410||410||410||4100||Y   -> 410 .. 4100 = 4,1 .. 41,0 punti indice
+#      E':   410||410||2000||18410||Y -> 410, 2410, 4410 ... 18410
+#                                      = 4,1 .. 184,1 punti indice
+#      PERCHE': R200c ha misurato che a 410 punti (4,1 indice) il trailing
+#      fisso porta il PF OOS a 0,80 e manda TUTTE E DUE le finestre in
+#      perdita. Non e' "gestisce meglio": e' "smette di stare sul mercato".
+#      E 41 punti indice restano quattro volte sotto la MEDIANA del range
+#      d'apertura del 2026, che e' 176,6 punti indice
+#      (ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, 145 giornate).
+#      Un asse che si ferma a 41 avrebbe quasi certamente dato dieci celle
+#      tutte strangolate, cioe' un round inconcludente pagato per intero.
+#      >>> Quello che e' cambiato e' il DOMINIO DI RICERCA, non un criterio:
+#          le cinque soglie di promozione restano quelle congelate prima e
+#          NON si toccano. La cella di controllo resta 410, cioe' l'ancora.
+#      >>> E l'attesa nuova, dichiarata prima dei numeri: se il PF sale in
+#          modo MONOTONO fino all'ultima cella (18410) senza fermarsi,
+#          vuol dire che il trailing fisso non ha un ottimo dentro questa
+#          banda e sta solo tendendo al caso "trailing quasi assente":
+#          allora il verdetto e' "il modo FISSO non serve", NON "serve piu'
+#          largo". Un massimo al bordo non e' un massimo.
+# ---------------------------------------------------------------------
