@@ -28566,3 +28566,34 @@ grandezze POSSONO essere uguali?"** Se un'identita' o una disuguaglianza struttu
 E' la forma specifica del difetto del 10/09: **cercare la coerenza invece di provare a
 rompere**. Un accordo fra due numeri e' informativo **solo se avrebbero potuto essere in
 disaccordo**.
+
+---
+
+## CLASSE 553 -- L'ASSENZA DICHIARATA SULLA BASE DI UN GREP, E IL PUNTATORE DI RIGA PROPAGATO DAL CANCELLO ALLA COSA CHE IL CANCELLO CONTROLLA
+
+**Caso reale (21/09/2026, R203a, SECONDO passaggio del cancello).** Il cancello ha bocciato la
+soglia `PF OOS >= 1,20` scrivendo che *«non esiste in nessun documento del progetto»*. Era
+**FALSA**: sta in `risultati_archivio/R98_CRITERI.md` **r.194**, **firmata da Claudio il 22/08
+PRIMA dei numeri**, con l'opzione alternativa (1,40) scartata per nome e la frase *«da qui in
+avanti NON si cambia»*. Il `grep` del cancello pretendeva `PF` e `>= 1,2` vicini sulla stessa
+riga; nel file la soglia sta in una **cella di tabella** e in un **blockquote**, col grassetto
+markdown in mezzo. Il pattern non copriva la forma, e **l'assenza e' stata consegnata come un
+fatto -- contro una firma di Claudio.**
+
+Nello stesso passaggio il cancello ha dato un **puntatore sbagliato**
+(`STOP_VS_SPREAD_FTMO_2026-09-20.md` *"r.271-272"*: **r.271 e' vuota**, r.272 e' l'intestazione
+della tabella; i riferimenti veri sono **r.276**, **r.278** e soprattutto **r.241**, che nomina
+la legge di casa). Il puntatore e' stato **copiato in buona fede** nel file prova e nel `.md`:
+**un difetto del controllore diventa un difetto del controllato**, e al giro dopo sembra farina
+del sacco di chi scrive. **E' la seconda volta in due giorni** (la prima: `r.271` al posto di
+`r.275` sul documento di R202B).
+
+### La regola, due meta'
+1. **Non si dichiara MAI che una cosa "non esiste" sulla base di un solo grep.** Per un'assenza
+   servono almeno **due pattern di forma diversa** (il numero nudo, il numero con il punto
+   decimale, il nome del cancello) **piu'** una scorsa ai file di `*CRITERI*` e `*FIRME*`. Un
+   grep che non trova dimostra che **il pattern non copriva**, non che la cosa non c'e'. E
+   **prima di contraddire una FIRMA di Claudio si cerca la firma**, non la si presume assente.
+2. **Ogni puntatore di riga che il cancello consegna va aperto con `sed -n 'Np'` e incollato nel
+   referto.** Un numero di riga non verificato **si propaga a valle e acquista autorita'
+   passando di mano**.

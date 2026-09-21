@@ -42,8 +42,12 @@
 #  dello studio "InpRangeMinutes=15", e la sedia gira a 35. Il range dei
 #  primi 35 minuti CONTIENE quello dei primi 15: e' piu' largo, punto
 #  per punto. La correzione di casa e' x sqrt(35/15) = 1,5275, ed e'
-#  [INF] -- e' la convenzione usata in
-#  report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.271-272, non una misura.
+#  [INF, CALIBRATO n=8] -- e' la LEGGE DI CASA nominata in
+#  report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.241 (range ~ ADR x
+#  sqrt(t/W), legge ANCORA_ADR_FLOTTA_INDICI_2026-09-18.md), usata
+#  alle r.276 e r.278. NON la r.271-272: quella e' una riga vuota e
+#  l'intestazione della tabella (classe 553: puntatore arrivato dal
+#  cancello stesso e copiato in buona fede).
 #  Secondo scostamento: i percentili vanno presi sui soli 225 giorni
 #  LONG, perche' la sedia ha InpAllowShort=false, e i giorni LONG sono
 #  piu' STRETTI (media 5921 contro 6254 di tutti).
@@ -84,15 +88,36 @@
 #      5750      57,5   33,8x        28,9%                54,2%
 #      8625      86,2   50,7x        54,2%                83,6%
 #
-#  E' UNA BANDA, NON UN NUMERO. La quota vera si legge dal referto.
+#  LA BANDA NON E' SIMMETRICA, E L'ESTREMO CRUDO E' GIA' FALSIFICATO.
+#  STOP_VS_SPREAD_FTMO_2026-09-20.md r.252-262 calibra le due letture
+#  contro le 8 gambe forward VERE del 770101:
+#      misurato sulle 8 gambe ........ 25,0%
+#      predetto dalla B (35') ........ 26,1%   scarto  1,1 punti
+#      predetto dalla A (15' crudo) .. 49,5%   scarto 24,5 punti
+#  ==> IL NUMERO DA USARE E' QUELLO A 35'. Il 15' crudo resta solo
+#      come traccia del calcolo ed e' la geometria SBAGLIATA: non e'
+#      l'altro estremo di una banda, e' un'ipotesi GIA' BATTUTA.
+#  La quota vera si legge comunque dal referto.
 #  Popolazione: i 225 giorni LONG, stop = ampiezza + 300.
-#  PERCHE' QUESTA SCALA E NON 0/2300/4600/6900 (la prima stesura):
-#  il gradino a 2300 (13,5x, il pavimento duro di casa) scarta lo
-#  0,4-5,3%, cioe' sarebbe quasi un NO-OP e una passata buttata su
-#  quattro. Con 2875 il primo gradino sta comunque SOPRA il pavimento
-#  duro (16,9x contro 13,3x) e morde davvero. E i due gradini alti
-#  ABBRACCIANO la frontiera del costo dei 40x da sotto (33,8x) e da
-#  sopra (50,7x), che dice piu' che atterrarci sopra.
+#  PERCHE' QUESTA SCALA: OGNI GRADINO E' ANCORATO A UN NUMERO GIA'
+#  SCRITTO IN CASA. STOP_VS_SPREAD_FTMO_2026-09-20.md r.246 porta la
+#  distribuzione dello STOP del 770101 nella lettura B (35'):
+#      min 19,80 | P10 39,49 | MEDIANA 86,48 | frontiera FTMO 57,2
+#  Le tre celle rispondono a TRE DOMANDE DIVERSE:
+#      2875 = 28,75 idx  sta fra il minimo (19,80) e il P10 (39,49)
+#                        --> 'taglio solo la coda stretta?'
+#      5750 = 57,50 idx  E' LA FRONTIERA FTMO (57,2), a meno dello
+#                        0,5% --> 'taglio tutto cio' che sta sotto
+#                        la frontiera del costo?'
+#      8625 = 86,25 idx  E' LA MEDIANA dello stop a 35' (86,48), a
+#                        meno dello 0,3% --> 'tengo solo la meta'
+#                        larga?'
+#  Il gradino a 2300 della prima stesura e' stato tolto perche'
+#  scartava lo 0,4-5,3%: quasi un NO-OP, una passata su quattro
+#  buttata. E il vincolo e' reale: l'asse del driver ha PASSO
+#  UNIFORME, quindi con 4 celle non si puo' avere INSIEME un primo
+#  gradino che morde e l'atterraggio sui 6800 della frontiera
+#  calcolata sullo spread BCM.
 #
 #  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
 #  =====================================
@@ -105,14 +130,72 @@
 #      il round non ha misurato nulla.
 #
 #  (c) LA BARRA, E IL CONFRONTO E' TUTTO INTERNO AL ROUND (classe 515):
-#      c1  DD OOS della cella <= 5,80, cioe' -20% secco sui 7,2506
-#          della cella 0. E' un confronto CELLA CONTRO CELLA, stessa
-#          taglia, tutti e due "dal picco": OMOGENEO e lecito.
-#      c2  Peggior Giornata % OOS <= 2,50 a taglia banco (~5,00 alla
-#          taglia vera) contro il Max Daily Loss FTMO del 5%. Questo
-#          confronto E' omogeneo -- giornata contro giornata -- ed e'
-#          l'unico che questo round sa produrre contro una regola FTMO.
-#          Misurato su R202B: -1,0782. Passa con margine.
+#      c1  DD OOS <= -20% rispetto alla cella 0, MA MISURATO A
+#          DENOMINATORE FISSO, non su "Equity DD %".
+#          PERCHE' (classe 550): "Equity DD %" divide per il PICCO
+#          di equity, che CAMBIA DA CELLA A CELLA. Una cella ad alto
+#          pavimento fa meno profitto, ha un picco piu' basso, e lo
+#          STESSO drawdown in euro le esce come percentuale PIU'
+#          ALTA: il confronto e' sistematicamente sfavorevole
+#          proprio alle celle che il round vuole giudicare.
+#          MISURATO sull'ancora R202B OOS:
+#            cella  EquityDD%  DDass EUR  DD/80000  picco implicito
+#             0.25    4,8467    4300,85   5,3761%      88.738
+#             0.50    7,7631    7127,62   8,9095%      91.814
+#             0.75    7,5746    7144,81   8,9310%      94.326
+#             1.00    7,2506    7122,67   8,9033%      98.236
+#          Due fatti: (i) fra 0.50 e 0.75 L'ORDINE SI RIBALTA --
+#          dal picco la 0.75 sembra meglio (7,5746 < 7,7631), in
+#          euro e' peggio (7144,81 > 7127,62); (ii) per la cella
+#          viva lo scarto fra le due letture e' 7,2506 contro
+#          8,9033 = +22,8%, cioe' PIU' GRANDE del -20% che il
+#          cancello chiede. Un cancello con la barra d'errore piu'
+#          larga del margine non decide niente.
+#          LA MISURA: DD_fisso% = (Profit / Recovery Factor) / 80000
+#          x 100. Le due colonne sono GIA' nel CSV: costo zero.
+#          Cella 0: 8,9033.  ==> CANCELLO c1: DD_fisso OOS <= 7,12.
+#          "Equity DD %" si RIPORTA lo stesso, come seconda colonna,
+#          ma NON decide.
+#          [DA CONFERMARE sul report HTML: se il Recovery Factor di
+#          MT5 usi il balance-drawdown o l'equity-drawdown. Su tutte
+#          e 8 le passate di R202B il picco implicito cade fra
+#          88.738 e 98.236, sempre sopra il deposito e sotto
+#          l'equity finale: COERENTE con l'equity drawdown. Ma
+#          coerente non e' dimostrato.]
+#      c2  NON E' UN CANCELLO DI PROMOZIONE: E' UN NUMERO DA
+#          RIPORTARE. La prima stesura lo usava come cancello ed era
+#          sbagliato in due modi indipendenti.
+#          (i) DENOMINATORE. Il tester divide per l'equity d'INIZIO
+#              GIORNATA (ABTG_DAX_Apertura_EU.mq5 r.759:
+#              100*(gDayMinEquity-gDayStartEquity)/gDayStartEquity),
+#              il MDL FTMO e' il 5% del CAPITALE INIZIALE
+#              (docs/REGOLAMENTO_FTMO_2026-08.md). MOBILE contro
+#              FISSO: e' la classe 515 in scala giornaliera. Su un
+#              conto in utile il tester SOTTOSTIMA. Fattore massimo
+#              = picco/deposito = 98.236/80.000 = 1,228.
+#              Si riporta: giornata_FTMO <= |Peggior Giornata %| x
+#              1,228 x 2. Cella viva: 1,0782 -> <= 2,65% a taglia
+#              vera, NON 2,16%.
+#          (ii) numeratore e confine del giorno COINCIDONO, ma SOLO
+#              perche' la sedia e' intraday e FLAT la notte
+#              (InpCloseAtEnd=true, InpCloseHour 17:30): a mezzanotte
+#              balance = equity, e lo sfasamento fra l'ora server BCM
+#              e le 00:00 CE(S)T non attraversa nessuna posizione. Se
+#              la sedia tenesse aperto la notte, questa equivalenza
+#              CADE.
+#          (iii) E IL 5% E' DEL CONTO, MENTRE SU QUEL CONTO OPERANO
+#              SEI SEDIE. Peggior Giornata % e' UNA sedia sola. Un
+#              cancello a 5,00 passerebbe una sedia che da sola si
+#              mangia il 100% del budget giornaliero del conto:
+#              protezione zero, lo stesso difetto del cluster C2
+#              discusso in CLAUDE.md. La quota giornaliera PER SEDIA
+#              NON E' UN NUMERO FIRMATO, e fissarla e' un PARAMETRO
+#              DI RISCHIO, cioe' di Claudio (mandato dell'08/09).
+#              Finche' non c'e' la firma questo round RIPORTA il
+#              numero e non promuove ne' boccia su di esso.
+#              Dato utile a Claudio per decidere: UNA sedia sola sta
+#              gia' a ~53% del budget giornaliero del conto intero
+#              (2,65 su 5,00).
 #      c3  IL MURO DEL 10% NON SI GIUDICA QUI. "Equity DD %" e' dal
 #          PICCO, il Max Loss FTMO 2-Step e' STATICO dal saldo iniziale
 #          ("equity must not drop below 90% of the initial account
@@ -122,6 +205,16 @@
 #          EQUITY contro il SALDO INIZIALE, che il CSV di ottimizzazione
 #          NON contiene: va letta dal report HTML per passata, e NON E'
 #          IN QUESTO ROUND.
+#          MA UN LIMITE SUPERIORE RIGOROSO IL CSV LO DA', e va
+#          riportato: perdita_statica <= DDass / deposito. Il caso
+#          peggiore e' che il drawdown massimo parta esattamente dal
+#          saldo iniziale: static = I - E_min = I - P + DDass <=
+#          DDass, dato P >= I. Cella viva OOS: 7122,67 / 80.000 =
+#          8,90% a taglia banco, <= 17,8% a taglia vera.
+#          ==> QUEL LIMITE SUPERA IL MURO DEL 10%. Quindi il round
+#          NON CERTIFICA CHE LA SEDIA SIA AL SICURO, e NON CERTIFICA
+#          CHE SFONDI. Il giudizio sul muro resta SOSPESO in tutte e
+#          due le direzioni, con questo numero accanto.
 #      NOTA sul x2 per la taglia vera: e' un LIMITE SUPERIORE, non una
 #      identita'. CalcLotByRisk() usa ACCOUNT_BALANCE, quindi il DD
 #      composto a 2,0% sta un filo SOTTO il doppio di quello a 1,0%
@@ -132,8 +225,18 @@
 #      "opzione A (FIRMATA)" -- DECISO DA CLAUDIO il 22/08 PRIMA dei
 #      numeri, motivato dalla forma del payoff.
 #      NON 1,40 (cancello A1): la cella VIVA fa 1,39520 e non lo
-#      passerebbe gia' al 21/09. NON 1,10 (S2 di ALLARGARE_LA_ROSA): e' la
-#      soglia di un altro imbuto.
+#      passerebbe gia' al 21/09.
+#      ONESTA' SULLA SOGLIA: e' un PAVIMENTO FIRMATO RIUSATO, e la sua
+#      motivazione originale (R98_CRITERI.md r.185-190) vale per un
+#      motore SENZA TP, a payoff ~1:1, che sta strutturalmente fra 1,1
+#      e 1,3. QUESTO motore ha un TP (TpTotalR), parziale e trailing, e
+#      la cella viva fa 1,39520: per lui 1,20 e' una soglia LARGA, non
+#      stretta. Va bene nel ruolo che le do -- pavimento, 'il PF non
+#      deve crollare' -- e va detto che e' larga. E va detto anche che
+#      in R98 la S2 arriva IN PACCHETTO con S1 (DD OOS <= 7,00) e S4
+#      (n IS e n OOS >= 150): prendere la S2 e lasciare li' le altre
+#      due e' UNA SCELTA, ed e' questa.
+#      Il cancello che morde in questo round non e' (d): e' c1.
 #      DISTORSIONE DICHIARATA (classe 550): il PF e' contato sulle
 #      USCITE. Qui InpTP1_R e' PINNATO a 1.0, quindi la meccanica del
 #      parziale e' IDENTICA in tutte e quattro le celle e la distorsione
@@ -148,10 +251,11 @@
 #  --------------------------------------------------------------
 #  H0: il pavimento taglia n e profitto senza migliorare il DD.
 #  H0 e' FALSIFICATA se esiste almeno una cella non-zero con
-#      DD OOS <= 5,80 E PF OOS >= 1,20.
-#  H0 e' CONFERMATA se in TUTTE E TRE le celle non-zero il DD OOS resta
-#      dentro 6,89-7,61 (+-5% di 7,2506) mentre n OOS cala di almeno il
-#      20% (<= 216 uscite).
+#      DD_fisso OOS <= 7,12 E PF OOS >= 1,20.
+#  H0 e' CONFERMATA se in TUTTE E TRE le celle non-zero il DD_fisso OOS
+#      resta dentro 8,46-9,35 (+-5% di 8,9033) mentre n OOS cala di
+#      almeno il 20% (<= 216 uscite).
+#  (Le soglie sono sul DD A DENOMINATORE FISSO, coerenti con c1.)
 #  Se non cade in nessuno dei due insiemi: "NON DECISO", e si dichiara
 #  in quale dei due buchi e' finito. NON si sceglie la regola dopo.
 #
