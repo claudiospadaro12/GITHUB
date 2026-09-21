@@ -1,0 +1,101 @@
+# =====================================================================
+#  EA: ABTG_Dow_Apertura_US            (sedia 770202, IN CAMPO su FTMO)
+#  R197b -- PROFONDITA DEL RETEST. Asse unico: InpRetestOffsetPts.
+#          MAI MISURATO.
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.
+#     Firma di Claudio del 21/09/2026 (CLAUDE.md).
+#  Si lancia con: -Deposito 80000 -Modello 4   (banco vero FTMO, tick reali)
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Claudio, 21/09, guardando un movimento del Dow preso in pieno dalla
+#  direzione ma non dagli ordini: "SIAMO SICURI CHE LA DISTANZA DEL
+#  RETEST NON SIA TROPPA".
+#
+#  Su DAX e NASDAQ la risposta E' GIA' MISURATA, e dice di tenere il
+#  retest (risultati_archivio/Walkforward_Aperture/):
+#     *_B_motore_IS/OOS.csv  -- modo 0 (BREAKOUT) contro modo 2 (RETEST)
+#        DAX  IS   n 179 PF 1,369   contro   n 180 PF 1,168
+#        DAX  OOS  n 243 PF 0,966   contro   n 244 PF 1,065
+#        NAS  IS   n 182 PF 1,071   contro   n 176 PF 1,145
+#        NAS  OOS  n 244 PF 1,063   contro   n 240 PF 1,109
+#        => il retest perde al massimo 6 operazioni su 180-244 (2,5%)
+#           e ha il PF migliore in 3 casi su 4.
+#     *_E_retest_fill_FULL.csv -- offset 0 -> 300
+#        DAX  n 415 -> 404 (-2,7%),  PF 1,007 -> 1,048
+#        NAS  n 421 -> 406 (-3,6%),  PF 0,799 -> 0,869
+#        => piu' profondo e' MEGLIO, non peggio.
+#
+#  🔴 MA IL DOW NON HA NESSUNO DI QUEI FILE. La batteria A->M esiste solo
+#  per DAX e NASDAQ: per U30USD, ZERO. Ed e' la sedia con il retest piu'
+#  profondo delle tre:
+#     Nasdaq 770260  offset    0   buffer  200  (0,0 e 2,0 punti indice)
+#     DAX    770101  offset  200   buffer  500  (2,0 e 5,0)
+#     Dow    770202  offset  400   buffer 1000  (4,0 e 10,0)  <-- il doppio
+#
+#  🔴 E UNA CORREZIONE CHE VA SCRITTA: i due SELL LIMIT della foto del
+#  21/09 NON sono di questa sedia. Il preset schierato ha
+#  InpAllowShort=false: la 770202 e' SOLO LONG e uno short non puo'
+#  averlo messo lei. Quel movimento non e' una prova su questa sedia.
+#  Questo round si fa lo stesso, ma per la ragione giusta: e' l'unica
+#  delle tre aperture mai passata dallo studio, ed e' la piu' profonda.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+#  ----------------------------------
+#  Se il Dow somiglia ai gemelli: il RETEST perde meno del 5% delle
+#  operazioni e ha il PF uguale o migliore del BREAKOUT.
+#  Se invece il retest perde PIU' DEL 15% delle operazioni, il Dow NON
+#  somiglia ai gemelli e la domanda di Claudio ha una risposta diversa
+#  per questo simbolo: allora si guarda se quel 15% lo ripaga in PF.
+#  Se il BREAKOUT batte il RETEST su PF *e* n insieme, in TUTTE E DUE le
+#  finestre, allora la sedia va cambiata -- e sarebbe una firma di Claudio.
+#  SELEZIONE: centro dell'altopiano, MAI il picco. IS e OOS devono
+#  concordare di SEGNO, altrimenti e' rumore.
+#
+# ---------------------------------------------------------------------
+#  I PIN: senza, si misura un'altra sedia.
+#  walkforward_generico.ps1 r.836-843 blinda OGNI input al DEFAULT DEL
+#  SORGENTE, non al preset schierato. Qui sono pinnate le 12 divergenze
+#  vere fra preset FTMO 770202 e default.
+#  E TRE SONO CONVERTITE, perche' il preset e' in ora e simboli FTMO
+#  mentre il backtest gira su dati BCM:
+#     InpSessionHour  16 -> 14   (FTMO = UTC+3, BCM = UTC+1)
+#     InpCloseHour    19 -> 17
+#     InpCorrSymbol   US500.cash -> SPXUSD
+#  Un CSV che torna con InpSessionHour diverso da 14 si CESTINA.
+#  NOTA: InpAllowShort=0 e' pinnato perche' e' la sedia vera. Il round
+#  misura il lato LONG, che e' l'unico che questa sedia opera.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  U30USD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- i pin che ricostruiscono la sedia 770202 ------------------------
+InpMagic=770202||770202||0||770202||N
+InpSessionHour=14||14||0||14||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpBufferPoints=1000.0||1000.0||0||1000.0||N
+InpAllowShort=0||0||0||0||N
+InpCorrSymbol=SPXUSD
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=1||1||0||1||N
+
+# --- asse unico: LA PROFONDITA' DEL RETEST ---------------------------
+#  Quanto DENTRO il livello si mette il LIMIT, in punti MT5
+#  (U30USD: Point=0,01, quindi 100 punti MT5 = 1,0 punto indice):
+#     0   = sul livello              (come il Nasdaq 770260)
+#     200 = 2,0 punti indice dentro  (come il DAX 770101)
+#     400 = 4,0 punti indice dentro  <-- QUELLO SCHIERATO OGGI
+#     600 = 6,0 punti indice dentro  (piu' profondo di tutti)
+#  Sui gemelli piu' profondo e' risultato MEGLIO (vedi sopra): qui si
+#  guarda se sul Dow vale lo stesso, e quanto costa in n.
+#  Il modo resta 2 (RETEST), altrimenti l'asse non vuol dire niente.
+InpEntryMode=2||2||0||2||N
+InpRetestOffsetPts=0||0||200||600||Y
+# 4 celle

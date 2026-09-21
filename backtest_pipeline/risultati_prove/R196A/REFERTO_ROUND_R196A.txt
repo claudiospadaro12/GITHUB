@@ -1,0 +1,43 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : bbd55d0267ba8a30e477d4393b6432513f75d73d
+data            : 2026-09-21 15:49:30   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Nasdaq_Apertura_US
+file prova      : R196a_pavimento_ampiezza_NASDAQ_NASUSD.txt   (11686 byte, dal pin)
+etichetta       : R196A
+simbolo         : NASUSD
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 80000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_IS_R196A.csv
+  righe : 2
+    Pass 0    Profit 4549.93      PF 1.11621    Equity DD % 12.3568    Trades 82
+    Pass 1    Profit 7875.59      PF 1.44176    Equity DD % 6.8997     Trades 55
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_OOS_R196A.csv
+  righe : 2
+    Pass 0    Profit 7689.12      PF 1.14894    Equity DD % 9.1244     Trades 102
+    Pass 1    Profit 3165.92      PF 1.09953    Equity DD % 6.9373     Trades 75
+  ESITO : LETTO -- 2 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO

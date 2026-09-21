@@ -352,3 +352,64 @@ come **classi 527-533**:
 - **532** — il **tetto misurato sopra un pavimento non ancora validato**.
 - **533** — la geometria dello **stop dedotta dall'enum `SLMode`** senza leggere il ramo
   dell'`EntryMode` **attivo** (qui: RETEST ⇒ `range + buffer`, non `range`).
+
+---
+
+# 7. 🏁 R196a È TORNATO — e ha DISTINTO, che è quello per cui esisteva
+
+**Girato il 21/09/2026 15:49:30** sul PC di backtest `DESKTOP-H4D7CAJ`, pin
+`bbd55d02`, `NASUSD` M5 dal 2024.09.26, tick reali, deposito 80.000.
+`ESITO: ROUND GIRATO` · `RILIEVI: 0`.
+
+| finestra | `InpMinRangePts` | **n** | **PF** | **DD equity %** | profitto |
+|---|---:|---:|---:|---:|---:|
+| IS | 0 (spento) | 82 | 1,116 | 🔴 **12,36** | 4.549,93 |
+| IS | **7200** | **55** | 🟢 **1,442** | 🟢 **6,90** | 7.875,59 |
+| OOS | 0 (spento) | 102 | 1,149 | 9,12 | 7.689,12 |
+| OOS | **7200** | **75** | 🔴 **1,100** | 🟢 **6,94** | 3.165,92 |
+
+## 7.1 🎯 Contro l'attesa dichiarata PRIMA — la fonte comoda aveva torto
+
+Il file prova metteva in campo **due predizioni alternative**: *«n scende ~11% ⇒
+vince ANATOMIA · n scende ~30% ⇒ vince lo Studio e il 7200 va rifatto»*.
+
+> **Misurato: IS −32,9% (82→55), OOS −26,5% (102→75).**
+> 🔴 **Vince lo `Studio_NASUSD`. La mia stima da `ANATOMIA` (11%) era sbagliata
+> di tre volte**, ed era quella che avevo consegnato a Claudio la mattina.
+
+👉 Le due fonti misurano la stessa grandezza su feed diversi (`ANATOMIA` = M1
+HistData, `Studio` = tick BCM). **Sulla coda bassa — l'unica che un filtro di
+minimo tocca — il feed conta.** Da oggi, per una decisione che vive sul p10,
+si usa il feed del broker, non quello importato.
+
+## 7.2 ⚖️ Il merito NON è dimostrato. Il rischio sì.
+
+- **PF: discordante di segno.** IS **+29%** (1,116→1,442), OOS **−4,3%**
+  (1,149→1,100). Regola di casa: IS e OOS devono concordare, altrimenti è rumore.
+- **Profitto OOS: −59%** (7.689 → 3.166). Il costo in operazioni si vede.
+- 🟢 **DD: concorde e grande.** IS **−44%** (12,36→6,90), OOS **−24%**
+  (9,12→6,94). **È l'unica cosa che le due finestre dicono insieme.**
+
+📌 È esattamente il §6.2 del 20/09 letto in anticipo: *«dove il floor paga, paga
+sul RISCHIO più che sul merito»*. Qui è successo di nuovo, su dati veri.
+
+## 7.3 🔴 Il numero che conta per la challenge — con il suo limite dichiarato
+
+**Con il filtro SPENTO, la finestra IS mostra un DD del 12,36%.** Il muro FTMO è
+al **10% statico**. Con il filtro acceso scende a **6,90%**.
+
+⚠️ **E qui va detto cosa NON è dimostrato**: il `DD equity %` di MT5 è il calo
+dal **picco di equity**, mentre il muro FTMO è il **10% dal saldo iniziale**.
+**Non sono la stessa grandezza** e il 12,36% non significa «avremmo fallito».
+Significa che questa sedia, senza filtro, produce escursioni dello stesso ordine
+di grandezza del muro — e quello è un fatto, non una stima.
+
+## 7.4 🚦 COSA RESTA DA DECIDERE, E NON È MIO
+
+Il pavimento **compra DD e paga in frequenza**: −24/−44% di DD contro −26/−33%
+di operazioni, su una sedia che fa **0,46 op/giorno**.
+🔴 **È un parametro di RISCHIO ⇒ è una firma di Claudio**, con i numeri qui sopra
+davanti. Il preset schierato resta a **`InpMinRangePts=0`** finché non firma.
+
+⚠️ **E il campione è sottile**: 55-102 operazioni per cella, tutte **sotto 150**.
+Regola di casa: **indizio, non verdetto**.
