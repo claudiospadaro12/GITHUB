@@ -1,0 +1,59 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : 4ebde97b1909194346be4d15c3d94936330c2aa2
+data            : 2026-09-21 21:28:45   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Nasdaq_Apertura_US
+file prova      : R200e_CONDIZIONALE_trailing_fisso_NASDAQ_NASUSD.txt   (13898 byte, dal pin)
+etichetta       : R200E
+simbolo         : NASUSD
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 80000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_IS_R200E.csv
+  righe : 10
+    Pass 0    Profit -4377.67     PF 0.65823    Equity DD % 8.0354     Trades 82
+    Pass 1    Profit 286.39       PF 1.00878    Equity DD % 11.3401    Trades 82
+    Pass 2    Profit 3021.18      PF 1.07156    Equity DD % 15.9822    Trades 82
+    Pass 3    Profit 6675.39      PF 1.14559    Equity DD % 18.3905    Trades 82
+    Pass 4    Profit 1467.21      PF 1.02987    Equity DD % 18.6277    Trades 82
+    Pass 5    Profit 4896.26      PF 1.0944     Equity DD % 20.0542    Trades 82
+    Pass 6    Profit 2101.8       PF 1.03942    Equity DD % 20.0732    Trades 82
+    Pass 7    Profit 1580.73      PF 1.02974    Equity DD % 20.0669    Trades 82
+    Pass 8    Profit 1250.43      PF 1.02355    Equity DD % 20.058     Trades 82
+    Pass 9    Profit 2488.28      PF 1.0467     Equity DD % 20.058     Trades 82
+  ESITO : LETTO -- 10 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_OOS_R200E.csv
+  righe : 10
+    Pass 0    Profit -2253.15     PF 0.80365    Equity DD % 5.3231     Trades 102
+    Pass 1    Profit -1182.02     PF 0.96527    Equity DD % 9.4542     Trades 102
+    Pass 2    Profit 2051.72      PF 1.03699    Equity DD % 16.3054    Trades 102
+    Pass 3    Profit -334.07      PF 0.99451    Equity DD % 20.0525    Trades 102
+    Pass 4    Profit 1192.86      PF 1.01809    Equity DD % 18.5448    Trades 102
+    Pass 5    Profit 4211.79      PF 1.0605     Equity DD % 16.7615    Trades 102
+    Pass 6    Profit 2736.63      PF 1.03839    Equity DD % 17.0208    Trades 102
+    Pass 7    Profit 2243.52      PF 1.03048    Equity DD % 16.6887    Trades 102
+    Pass 8    Profit 2085.07      PF 1.02833    Equity DD % 16.6887    Trades 102
+    Pass 9    Profit 2304.28      PF 1.0313     Equity DD % 16.6887    Trades 102
+  ESITO : LETTO -- 10 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
