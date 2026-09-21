@@ -244,6 +244,18 @@ enum ENUM_ABTG_TRAIL
    ABTG_TRAIL_FIXED   = 2   // trailing a distanza fissa in punti (piano DAX: es. 410 punti)
   };
 
+//--- FILTRO DELLO SPAZIO (live Paolo/Emiliano 10/04/2026): quanto spazio
+//    c'e' fino al primo ostacolo sul TF superiore, PRIMA di entrare.
+//    Il modo 1 esiste per una ragione precisa: si puo' accendere su una
+//    sedia VIVA e misurare quanto peserebbe il filtro sulle operazioni
+//    vere, senza cambiare nemmeno un trade.
+enum ENUM_ABTG_SPACE
+  {
+   ABTG_SPACE_OFF    = 0,  // spento: il filtro non viene nemmeno calcolato (default)
+   ABTG_SPACE_MISURA = 1,  // solo misura: calcola, CONTA e LOGGA, ma NON blocca niente
+   ABTG_SPACE_ATTIVO = 2   // attivo: blocca davvero l'ingresso senza spazio
+  };
+
 //==================================================================
 //  PARAMETRI DI INPUT (comuni a tutti gli EA che includono il core)
 //==================================================================
@@ -354,6 +366,28 @@ input int    InpAtrFilterBars   = 20;     // Barre su cui calcolo la media dell'
 input double InpAtrFilterMult   = 1.0;    // ATR ultima barra >= X * media (PDF: "ATR > media")
 input ENUM_ABTG_CONFIRM InpConfirmMode = ABTG_CONF_OR; // Se volumi E ATR sono entrambi accesi: basta una conferma (OR, come il PDF) o servono entrambe (AND)?
 
+input group "=== Filtro dello SPAZIO (live 10/04, opt-in) ==="
+//  DA DOVE NASCE (trascrizioni/LIVE_EMILIANO_2026-04-10.txt, r.71-73 e 83-84):
+//   "Vai a fare l'analisi multi-frame. Siamo in H1, vai in H4. In H4 c'e'
+//    spazio per portare del profitto? C'abbiamo subito la media. [...]
+//    C'e' poco spazio. Allora, non si puo' fare."
+//   "sotto i minimi della notte c'e' traffico, 30 punti [...] sono pochini."
+//  Cioe': prima di entrare si guarda quanto spazio c'e' fino al primo
+//  ostacolo sul TF superiore. Se il bersaglio sta OLTRE l'ostacolo,
+//  l'operazione non ci puo' arrivare.
+//
+//  LA SOGLIA E' IN R, NON IN PUNTI. Loro dicono "30 punti", ma 30 punti sul
+//  DAX e sul Nasdaq sono due cose diverse: la forma che si normalizza da
+//  sola su qualunque simbolo e' "spazio libero >= k x distanza dello stop".
+input ENUM_ABTG_SPACE InpSpaceMode = ABTG_SPACE_OFF;  // 0=spento (default, no-op) | 1=SOLO MISURA (conta e logga, non blocca) | 2=ATTIVO (blocca)
+input ENUM_TIMEFRAMES InpSpaceTF   = PERIOD_H4;       // TF su cui si cercano gli ostacoli (live: da H1 si sale in H4)
+input double InpSpaceMinR          = 1.0;             // Spazio minimo richiesto, in multipli dello STOP (0 = il filtro non morde mai)
+input int    InpSpaceEma1          = 14;              // Media 1 come ostacolo (0 = non si guarda)
+input int    InpSpaceEma2          = 50;              // Media 2 come ostacolo (0 = non si guarda)
+input int    InpSpaceEma3          = 100;             // Media 3 come ostacolo (0 = non si guarda)
+input int    InpSpaceEma4          = 200;             // Media 4 come ostacolo (0 = non si guarda)
+input bool   InpSpaceUseST         = false;           // Anche il Supertrend fa da ostacolo (stessi periodo/moltiplicatore del filtro di trend)
+
 input group "=== Generali ==="
 input long   InpMagic          = ABTG_DEF_MAGIC;      // Numero magico (identifica i trade dell'EA)
 input int    InpMaxSpread      = 0;                   // Spread massimo in punti (0 = nessun limite)
@@ -416,6 +450,17 @@ int      gNewsImpact[];            // impatto: 3=High, 2=Medium, 1=Low
 string   gNewsCcy[];               // valuta dell'evento
 int      gNewsCount = 0;
 
+// stato FILTRO DELLO SPAZIO (opt-in, InpSpaceMode). Tutto quello che c'e'
+// qui sotto resta inerte finche' InpSpaceMode == ABTG_SPACE_OFF: gli handle
+// non vengono nemmeno creati, perche' si creano alla PRIMA chiamata della
+// funzione e la funzione, a modo spento, non viene mai chiamata.
+int      gSpaceEmaH[4] = {INVALID_HANDLE, INVALID_HANDLE, INVALID_HANDLE, INVALID_HANDLE};
+bool     gSpaceReady   = false;    // handle gia' creati (si ritenta finche' non sono tutti validi)
+double   gSpazioLivello = 0.0;     // prezzo dell'ostacolo piu' vicino trovato nell'ultima chiamata
+string   gSpazioNome    = "";      // etichetta di quell'ostacolo (es. "EMA100")
+int      gSpazioValutati = 0;      // quante volte il filtro e' stato interrogato
+int      gSpazioMorsi    = 0;      // quante volte ha bloccato (o avrebbe bloccato, in modo 1)
+
 //+------------------------------------------------------------------+
 //| Log helper                                                       |
 //+------------------------------------------------------------------+
@@ -473,6 +518,23 @@ int ABTG_OnInit()
                         InpRiskPercent, InpTP1_R*3.0, InpTP1_ClosePct,
                         (InpBreakevenAtTP1 ? "si" : "no"),
                         EnumToString(InpTrailMode), EnumToString(InpTrailTF), InpTrailStartR));
+   //--- FILTRO DELLO SPAZIO: si annuncia SOLO se e' acceso. A InpSpaceMode=OFF
+   //    (default) qui non succede niente e il log resta identico a prima --
+   //    cosi' un giornale vecchio e uno nuovo si confrontano riga per riga.
+   if(InpSpaceMode != ABTG_SPACE_OFF)
+      ABTGLog(StringFormat("FILTRO SPAZIO %s -> TF %s | soglia %.2fR | medie %d/%d/%d/%d | supertrend %s. %s",
+                           (InpSpaceMode == ABTG_SPACE_ATTIVO ? "ATTIVO (blocca)" : "SOLO MISURA (non blocca nulla)"),
+                           SpazioTfLabel(InpSpaceTF), InpSpaceMinR,
+                           InpSpaceEma1, InpSpaceEma2, InpSpaceEma3, InpSpaceEma4,
+                           (InpSpaceUseST ? "si" : "no"),
+                           (InpSpaceMode == ABTG_SPACE_ATTIVO ? "ATTENZIONE: questo modo TOGLIE operazioni." : "Le operazioni restano ESATTAMENTE quelle di prima.")));
+   //  Un flag acceso che non fa niente e non lo dice e' il bug del 05/08
+   //  daccapo: il filtro dello spazio e' agganciato SOLO al motore RETEST
+   //  (quello che gira davvero sulla sedia). Su qualunque altro motore
+   //  non viene mai interrogato, e quel silenzio va detto ad alta voce.
+   if(InpSpaceMode != ABTG_SPACE_OFF && InpEntryMode != ABTG_RETEST)
+      ABTGLog(StringFormat("ATTENZIONE: InpSpaceMode e' acceso ma il motore e' %s, non RETEST: il filtro dello spazio NON verra' mai interrogato. Ne' misura ne' blocco.",
+                           EnumToString(InpEntryMode)));
    if(InpEntryMode == ABTG_GAPFILL && !InpUseGapFill)
       ABTGLog("NOTA: modalita' GAPFILL attiva. Il vecchio flag InpUseGapFill=false viene IGNORATO (prima faceva ricadere l'EA nel breakout senza dirlo).");
    // R51: un flag che non fa niente e non lo dice e' il bug del 05/08 daccapo.
@@ -578,6 +640,16 @@ void ABTG_OnDeinit(const int reason)
    if(gAtrH     != INVALID_HANDLE) IndicatorRelease(gAtrH);
    if(gEmaFastH != INVALID_HANDLE) IndicatorRelease(gEmaFastH);
    if(gEmaSlowH != INVALID_HANDLE) IndicatorRelease(gEmaSlowH);
+   //--- FILTRO DELLO SPAZIO: a modo spento questi handle non sono mai stati
+   //    creati e restano INVALID_HANDLE, quindi il ciclo non fa niente.
+   for(int i = 0; i < 4; i++)
+      if(gSpaceEmaH[i] != INVALID_HANDLE) { IndicatorRelease(gSpaceEmaH[i]); gSpaceEmaH[i] = INVALID_HANDLE; }
+   //--- riepilogo di fine corsa: in modo 1 e' IL numero che si va a cercare
+   if(InpSpaceMode != ABTG_SPACE_OFF)
+      ABTGLog(StringFormat("FILTRO SPAZIO - riepilogo: %d valutazioni, %d %s (%.1f%%).",
+                           gSpazioValutati, gSpazioMorsi,
+                           (InpSpaceMode == ABTG_SPACE_ATTIVO ? "blocchi" : "avrebbe bloccato"),
+                           (gSpazioValutati > 0 ? 100.0*gSpazioMorsi/gSpazioValutati : 0.0)));
   }
 
 //+------------------------------------------------------------------+
@@ -1455,6 +1527,223 @@ bool ArmRetest()
    return(true);
   }
 
+//==================================================================
+//  FILTRO DELLO SPAZIO (opt-in, InpSpaceMode) - live 10/04/2026
+//
+//  L'IDEA, testuale dalla live (r.71-73): "Siamo in H1, vai in H4. In H4
+//  c'e' spazio per portare del profitto? C'abbiamo subito la media. [...]
+//  C'e' poco spazio. Allora, non si puo' fare."
+//  E r.83-84: "sotto i minimi della notte c'e' traffico, 30 punti [...]
+//  sono pochini."
+//
+//  PERCHE' IN R E NON IN PUNTI: il bersaglio della sedia sta a TpTotalR()
+//  volte lo stop. Se fra l'ingresso e il primo ostacolo c'e' meno spazio
+//  del bersaglio, l'operazione NON CI PUO' ARRIVARE: non e' un'opinione
+//  sul mercato, e' aritmetica. E la stessa soglia vale su DAX, Dow e
+//  Nasdaq senza ritararla, perche' e' normalizzata dallo stop.
+//
+//  SOLO BARRE CHIUSE (shift 1): la barra 0 del TF superiore si muove
+//  ancora, e usarla vorrebbe dire leggere un livello che nel backtest
+//  non esisteva ancora. Niente sguardo nel futuro.
+//
+//  GLI OSTACOLI DIETRO LE SPALLE NON CONTANO: un long non e' ostacolato
+//  da una media che gli sta SOTTO. Si guarda solo davanti.
+//
+//  DIREZIONE DEL FALLIMENTO: se un dato non e' pronto (handle non creato,
+//  CopyBuffer a vuoto) quell'ostacolo semplicemente non si conta, e se non
+//  se ne conta nessuno la funzione risponde DBL_MAX. Cioe' il filtro
+//  FALLISCE APERTO: nel dubbio non blocca, e la sedia si comporta come
+//  prima. Per un cancello che toglie operazioni e' il verso giusto in cui
+//  sbagliare -- ma va dichiarato, perche' vuol dire che in modo 1 un
+//  periodo con dati mancanti sottostima i blocchi invece di sovrastimarli.
+//==================================================================
+
+//+------------------------------------------------------------------+
+//| Etichetta corta del timeframe per i log ("PERIOD_H4" -> "H4")     |
+//+------------------------------------------------------------------+
+string SpazioTfLabel(ENUM_TIMEFRAMES tf)
+  {
+   string s = EnumToString(tf);
+   if(StringSubstr(s, 0, 7) == "PERIOD_") s = StringSubstr(s, 7);
+   return(s);
+  }
+
+//+------------------------------------------------------------------+
+//| Handle delle medie-ostacolo, creati alla PRIMA richiesta.         |
+//|  Creati qui e non in OnInit apposta: a InpSpaceMode=OFF questa    |
+//|  funzione non viene mai chiamata, quindi a filtro spento l'EA non |
+//|  crea nemmeno un handle in piu' rispetto a prima.                 |
+//|  Se un handle non nasce (dati non ancora pronti) si ritenta alla  |
+//|  chiamata successiva invece di rassegnarsi per sempre.            |
+//+------------------------------------------------------------------+
+void SpazioAssicuraHandles()
+  {
+   if(gSpaceReady) return;
+
+   int per[4];
+   per[0] = InpSpaceEma1; per[1] = InpSpaceEma2;
+   per[2] = InpSpaceEma3; per[3] = InpSpaceEma4;
+
+   bool tuttiOk = true;
+   for(int i = 0; i < 4; i++)
+     {
+      if(per[i] <= 0) continue;                       // media disattivata: non e' un ostacolo
+      if(gSpaceEmaH[i] != INVALID_HANDLE) continue;   // gia' creata
+      gSpaceEmaH[i] = iMA(_Symbol, InpSpaceTF, per[i], 0, MODE_EMA, PRICE_CLOSE);
+      if(gSpaceEmaH[i] == INVALID_HANDLE)
+        {
+         tuttiOk = false;
+         ABTGLog(StringFormat("SPAZIO: handle EMA%d su %s non creato, riprovo. Per ora quella media non fa da ostacolo.",
+                              per[i], SpazioTfLabel(InpSpaceTF)));
+        }
+     }
+   gSpaceReady = tuttiOk;
+  }
+
+//+------------------------------------------------------------------+
+//| Valuta UN livello come possibile ostacolo e tiene il piu' vicino  |
+//|  DAVANTI all'operazione. Gli ostacoli alle spalle si scartano.    |
+//+------------------------------------------------------------------+
+void SpazioConsidera(bool isLong, double entry, double livello, string nome, double &migliore)
+  {
+   if(livello <= 0) return;
+   double d = isLong ? (livello - entry) : (entry - livello);
+   if(d <= 0) return;          // ostacolo DIETRO le spalle: non ostacola niente
+   if(d >= migliore) return;   // ce n'e' gia' uno piu' vicino
+   migliore       = d;
+   gSpazioLivello = livello;
+   gSpazioNome    = nome;
+  }
+
+//+------------------------------------------------------------------+
+//| LIVELLO del Supertrend sull'ultima candela CHIUSA.                |
+//|  Stessa matematica di SupertrendDir() (che pero' ritorna solo la  |
+//|  direzione): qui serve il PREZZO della linea, perche' e' quello   |
+//|  che fa da ostacolo. Ritorna 0 se i dati non bastano.             |
+//+------------------------------------------------------------------+
+double SpazioSupertrendLivello(string sym, ENUM_TIMEFRAMES tf, int atrPeriod, double mult)
+  {
+   int need = atrPeriod + 205;
+   MqlRates r[];
+   ArraySetAsSeries(r, true);
+   int copied = CopyRates(sym, tf, 0, need, r);
+   if(copied < atrPeriod + 5) return(0);
+
+   int atrH = iATR(sym, tf, atrPeriod);
+   if(atrH == INVALID_HANDLE) return(0);
+   double atr[];
+   ArraySetAsSeries(atr, true);
+   if(CopyBuffer(atrH, 0, 0, copied, atr) < copied) { IndicatorRelease(atrH); return(0); }
+   IndicatorRelease(atrH);
+
+   double finalUpper = 0, finalLower = 0;
+   int    dir = +1;
+   for(int i = copied - 2; i >= 1; i--)
+     {
+      double hl2  = (r[i].high + r[i].low) / 2.0;
+      double bUp  = hl2 + mult * atr[i];
+      double bLo  = hl2 - mult * atr[i];
+
+      double prevFU = (finalUpper == 0) ? bUp : finalUpper;
+      double prevFL = (finalLower == 0) ? bLo : finalLower;
+      double prevClose = r[i+1].close;
+
+      double fU = (bUp < prevFU || prevClose > prevFU) ? bUp : prevFU;
+      double fL = (bLo > prevFL || prevClose < prevFL) ? bLo : prevFL;
+
+      if(r[i].close > (dir == -1 ? prevFU : fU))      dir = +1;
+      else if(r[i].close < (dir == +1 ? prevFL : fL)) dir = -1;
+
+      finalUpper = fU;
+      finalLower = fL;
+     }
+   // la linea "viva" e' quella dal lato in cui il Supertrend tiene il prezzo
+   return(dir == +1 ? finalLower : finalUpper);
+  }
+
+//+------------------------------------------------------------------+
+//| SPAZIO FINO AL PRIMO OSTACOLO nella direzione dell'operazione.    |
+//|  Ritorna la distanza in PREZZO dall'ingresso all'ostacolo piu'    |
+//|  vicino DAVANTI; DBL_MAX se davanti non c'e' niente (e allora il  |
+//|  filtro non morde). Lascia l'ostacolo trovato in gSpazioNome /    |
+//|  gSpazioLivello per il log.                                       |
+//+------------------------------------------------------------------+
+double SpazioFinoAOstacolo(bool isLong, double entry)
+  {
+   gSpazioLivello = 0.0;
+   gSpazioNome    = "";
+   if(entry <= 0) return(DBL_MAX);
+
+   SpazioAssicuraHandles();
+
+   double migliore = DBL_MAX;
+
+   int per[4];
+   per[0] = InpSpaceEma1; per[1] = InpSpaceEma2;
+   per[2] = InpSpaceEma3; per[3] = InpSpaceEma4;
+
+   for(int i = 0; i < 4; i++)
+     {
+      if(per[i] <= 0 || gSpaceEmaH[i] == INVALID_HANDLE) continue;
+      double buf[1];
+      // shift 1 = ultima candela CHIUSA del TF superiore: niente futuro
+      if(CopyBuffer(gSpaceEmaH[i], 0, 1, 1, buf) < 1) continue;
+      SpazioConsidera(isLong, entry, buf[0], StringFormat("EMA%d", per[i]), migliore);
+     }
+
+   if(InpSpaceUseST)
+     {
+      double st = SpazioSupertrendLivello(_Symbol, InpSpaceTF, InpStAtrPeriod, InpStMultiplier);
+      SpazioConsidera(isLong, entry, st, "SUPERTREND", migliore);
+     }
+
+   return(migliore);
+  }
+
+//+------------------------------------------------------------------+
+//| Il cancello vero e proprio: c'e' abbastanza spazio?               |
+//|  Ritorna true se lo spazio e' INSUFFICIENTE (cioe' se il filtro   |
+//|  morde). CHI CHIAMA decide cosa farne: in modo 1 niente, in modo  |
+//|  2 salta il trade. Qui dentro si logga e si conta, sempre.        |
+//|  ATTENZIONE: non tocca niente a InpSpaceMode=OFF perche' a modo   |
+//|  spento questa funzione non viene proprio chiamata.               |
+//+------------------------------------------------------------------+
+bool SpazioTroppoStretto(bool isLong, double entry, double dist)
+  {
+   if(dist <= 0 || InpSpaceMinR <= 0) return(false);
+
+   gSpazioValutati++;
+   double richiesto = dist * InpSpaceMinR;
+   double spazio    = SpazioFinoAOstacolo(isLong, entry);
+
+   if(spazio >= richiesto)
+     {
+      // spazio sufficiente: lo si scrive lo stesso, perche' in modo 1 serve
+      // sapere il denominatore (quante volte il filtro NON ha morso).
+      if(spazio == DBL_MAX)
+         ABTGLog(StringFormat("SPAZIO: entry %s, nessun ostacolo davanti su %s -> via libera (%d valutazioni, %d blocchi)",
+                              DoubleToString(entry, _Digits), SpazioTfLabel(InpSpaceTF),
+                              gSpazioValutati, gSpazioMorsi));
+      else
+         ABTGLog(StringFormat("SPAZIO: entry %s, ostacolo %s %s a %s, spazio %s (%.0f punti broker) = %.2fR >= %.2fR -> via libera (%d valutazioni, %d blocchi)",
+                              DoubleToString(entry, _Digits), gSpazioNome, SpazioTfLabel(InpSpaceTF),
+                              DoubleToString(gSpazioLivello, _Digits),
+                              DoubleToString(spazio, _Digits), spazio/_Point,
+                              spazio/dist, InpSpaceMinR, gSpazioValutati, gSpazioMorsi));
+      return(false);
+     }
+
+   gSpazioMorsi++;
+   ABTGLog(StringFormat("SPAZIO: entry %s, ostacolo %s %s a %s, spazio %s (%.0f punti broker) = %.2fR < %.2fR -> %s (%d blocchi su %d valutazioni)",
+                        DoubleToString(entry, _Digits), gSpazioNome, SpazioTfLabel(InpSpaceTF),
+                        DoubleToString(gSpazioLivello, _Digits),
+                        DoubleToString(spazio, _Digits), spazio/_Point,
+                        spazio/dist, InpSpaceMinR,
+                        (InpSpaceMode == ABTG_SPACE_ATTIVO ? "BLOCCO" : "avrei bloccato (solo misura)"),
+                        gSpazioMorsi, gSpazioValutati));
+   return(true);
+  }
+
 //+------------------------------------------------------------------+
 //| RETEST: sorveglia la rottura; appena rotto il range piazza il    |
 //|  LIMIT sul livello (ritorno) -> fill a prezzo migliore, niente   |
@@ -1495,6 +1784,16 @@ void MonitorRetest()
             if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST BUY saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
             else               { sl = NormalizePrice(entry - InpMinStopPts*_Point); dist = entry - sl; }
            }
+         //--- FILTRO DELLO SPAZIO (live 10/04, opt-in): quanto spazio c'e'
+         //    fino al primo ostacolo su InpSpaceTF? Stesso idioma del floor
+         //    qui sopra: se il cancello morde, skip=true e non si piazza.
+         //    A InpSpaceMode=OFF (default) questa condizione e' falsa alla
+         //    prima clausola e non viene calcolato NIENTE.
+         if(InpSpaceMode != ABTG_SPACE_OFF && !skip && dist > 0 &&
+            SpazioTroppoStretto(true, entry, dist))
+           {
+            if(InpSpaceMode == ABTG_SPACE_ATTIVO) skip = true;   // modo 1: misura e basta, non blocca
+           }
          double lot = skip ? 0.0 : CalcLotByRisk(dist);
          double tp  = (InpTP1_R > 0) ? NormalizePrice(entry + dist*TpTotalR()) : 0.0;
          if(!skip && lot > 0 && dist > 0)
@@ -1527,6 +1826,14 @@ void MonitorRetest()
            {
             if(InpSkipIfTight) { skip=true; ABTGLog(StringFormat("RETEST SELL saltato: stop %.0f pt < floor %.0f pt.", dist/_Point, InpMinStopPts)); }
             else               { sl = NormalizePrice(entry + InpMinStopPts*_Point); dist = sl - entry; }
+           }
+         //--- FILTRO DELLO SPAZIO (live 10/04, opt-in): per lo short gli
+         //    ostacoli si cercano SOTTO l'ingresso. Stesso idioma del floor.
+         //    A InpSpaceMode=OFF (default) non viene calcolato NIENTE.
+         if(InpSpaceMode != ABTG_SPACE_OFF && !skip && dist > 0 &&
+            SpazioTroppoStretto(false, entry, dist))
+           {
+            if(InpSpaceMode == ABTG_SPACE_ATTIVO) skip = true;   // modo 1: misura e basta, non blocca
            }
          double lot = skip ? 0.0 : CalcLotByRisk(dist);
          double tp  = (InpTP1_R > 0) ? NormalizePrice(entry - dist*TpTotalR()) : 0.0;
