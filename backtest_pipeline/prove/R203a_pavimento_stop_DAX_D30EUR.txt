@@ -5,11 +5,15 @@
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
 #  Si lancia con: -Deposito 80000 -Modello 4
 #
-#  SECONDA STESURA. La prima e' stata BOCCIATA dal cancello con tre
-#  difetti bloccanti: la scala era tarata su uno studio girato con una
+#  TERZA STESURA. Il cancello ha risposto FAIL DUE VOLTE.
+#  Primo giro: la scala era tarata su uno studio girato con una
 #  GEOMETRIA DIVERSA (classe 551), la "conferma incrociata" era
 #  algebricamente impossibile (classe 552), e la barra confrontava il DD
 #  del tester con il muro FTMO statico (classe 515, TERZA occorrenza).
+#  Secondo giro: erano sbagliati I CANCELLI STESSI -- c1 non omogeneo
+#  (classe 550), c2 un 515-bis in scala giornaliera, c3 troppo
+#  pessimista. L'asse e la riga NON sono mai stati in discussione al
+#  secondo giro.
 #  Tutto corretto qui sotto, e le correzioni sono dichiarate per nome.
 # =====================================================================
 #
@@ -156,6 +160,50 @@
 #          Cella 0: 8,9033.  ==> CANCELLO c1: DD_fisso OOS <= 7,12.
 #          "Equity DD %" si RIPORTA lo stesso, come seconda colonna,
 #          ma NON decide.
+#          NOTA: DENTRO QUESTO ROUND DD_fisso% e DD assoluto in EUR
+#          sono la STESSA misura -- il deposito e' 80.000 per tutte e
+#          8 le passate (-Deposito 80000 -> Deposit=$Deposito,
+#          walkforward_generico.ps1 r.1020 e r.2018), e dividere per
+#          una costante non cambia ne' l'ordine ne' i rapporti. Si
+#          tiene la PERCENTUALE perche' c3 la confronta col muro del
+#          10%, perche' tutto l'archivio e' in percentuale, e perche'
+#          FRA round il deposito CAMBIA (ABTG_DAX_Live5m gira su
+#          10.000): in euro quei DD non sarebbero confrontabili.
+#
+#          E IL CAMBIO DI METRO NON E' UN ALLARGAMENTO: PROVATO.
+#          Il metro nuovo toglie una distorsione che penalizzava le
+#          celle a BASSO profitto, quindi e' strutturalmente piu'
+#          permissivo proprio per le celle alte -- quelle che il round
+#          vuole promuovere. "Abbiamo cambiato il righello e ora
+#          passano piu' celle" e' una forma che non deve mai passare
+#          senza esame. L'esame, sulle uniche celle dove esistono tutti
+#          e due i numeri (R202B OOS):
+#            Equity DD % <= 5,80 (-20% di 7,2506) -> passa SOLO la 0.25
+#            DD_fisso    <= 7,12 (-20% di 8,9033) -> passa SOLO la 0.25
+#          Stesso esito, 1 cella su 4 con tutti e due i righelli. Il
+#          cambio di metro non ha spostato NESSUNA cella: ha tolto un
+#          bias, non ha abbassato l'asticella.
+#
+#          IL BUCO DELLA FORMULA, MISURATO PRIMA (16.649 righe di
+#          backtest_pipeline/risultati_prove/): DD_fisso REGGE sulle
+#          celle in PERDITA, perche' MT5 mette il Recovery Factor
+#          NEGATIVO e i due segni si elidono -- 8.641 righe sono in
+#          quello stato e ZERO hanno Profit<0 con RF=0. NON REGGE
+#          quando la passata non fa NESSUN TRADE: li' Profit=0 e RF=0,
+#          ed e' 0/0 (3.379 righe dell'archivio sono cosi').
+#          Sulla cella 8625 lo scenario e' PLAUSIBILE, non di scuola:
+#          scarta il 54,2-83,6% dei giorni e la gamba IS e' solo il 40%
+#          della finestra, col vincolo in piu' che il retest si riempia.
+#          ALLORA:
+#           - si guarda SEMPRE la colonna Recovery Factor riga per riga
+#             PRIMA di dividere. RF = 0 -> NON si divide e NON si
+#             inventa: si scrive DD_fisso [NON CALCOLABILE DAL CSV];
+#           - una cella a zero trade e' gia' fuori dal cancello (d)
+#             (PF non definito o < 1,20) e il driver la marca da solo
+#             ESITO: NON MISURATO, rc=2. Il verdetto del round NON
+#             dipende da quel numero;
+#           - se serve lo stesso, il DD assoluto sta nel report HTML
+#             della passata e si legge li'.
 #          [DA CONFERMARE sul report HTML: se il Recovery Factor di
 #          MT5 usi il balance-drawdown o l'equity-drawdown. Su tutte
 #          e 8 le passate di R202B il picco implicito cade fra
@@ -249,15 +297,34 @@
 #
 #  LA CONTRO-IPOTESI, FALSIFICABILE (si decide con questi numeri)
 #  --------------------------------------------------------------
-#  H0: il pavimento taglia n e profitto senza migliorare il DD.
-#  H0 e' FALSIFICATA se esiste almeno una cella non-zero con
-#      DD_fisso OOS <= 7,12 E PF OOS >= 1,20.
-#  H0 e' CONFERMATA se in TUTTE E TRE le celle non-zero il DD_fisso OOS
-#      resta dentro 8,46-9,35 (+-5% di 8,9033) mentre n OOS cala di
-#      almeno il 20% (<= 216 uscite).
-#  (Le soglie sono sul DD A DENOMINATORE FISSO, coerenti con c1.)
-#  Se non cade in nessuno dei due insiemi: "NON DECISO", e si dichiara
-#  in quale dei due buchi e' finito. NON si sceglie la regola dopo.
+#  H0: il pavimento taglia n e profitto SENZA migliorare il DD.
+#  SI LEGGE CELLA PER CELLA, su DD_fisso OOS (cella 0 = 8,9033):
+#
+#   A) DD_fisso <= 7,12          (miglioramento >= 20%)
+#      -> H0 FALSIFICATA. La cella e' CANDIDATA se PF OOS >= 1,20; se
+#         il PF non passa, l'esito e' "DD a posto, PF sotto il
+#         pavimento" (cancello (d)), NON "non deciso".
+#   B) 7,12 < DD_fisso < 8,46    (miglioramento fra il 5% e il 20%)
+#      -> H0 FALSIFICATA LO STESSO: il pavimento MUOVE il DD. La cella
+#         non si promuove (non basta), ma il verdetto sull'ASSE e'
+#         "ASSE GIUSTO, GRADINO SBAGLIATO" -> serve piu' risoluzione,
+#         e l'asse NON si archivia. E' la risposta piu' utile che
+#         questo round puo' dare, e va saputa riconoscere.
+#   C) 8,46 <= DD_fisso <= 9,35  (+-5%: il DD non si muove)
+#      -> H0 CONFERMATA su quella cella.
+#   D) DD_fisso > 9,35           (il DD PEGGIORA)
+#      -> RISPOSTA PULITA, non un "non deciso": il pavimento fa male.
+#         Chiude l'asse e manda la caccia su InpSLMode=1 o su
+#         InpMaxSpread.
+#
+#  A|B|C|D PARTISCONO LA RETTA REALE: non esiste piu' nessun intervallo
+#  scoperto, e la parola "non deciso" SPARISCE da qui -- restava solo a
+#  coprire un buco di scrittura, e nascondeva proprio il caso B.
+#  Il verdetto sull'ASSE si scrive dopo aver classificato TUTTE E TRE
+#  le celle, e si dichiara la TERNA (es. "C,B,A" oppure "C,C,D"): cosi'
+#  si vede se il meccanismo morde solo sopra una soglia.
+#  Il calo di n (<= 216 uscite, -20%) resta come verifica del punto (b)
+#  -- che il pavimento si sia ACCESO -- e NON come condizione di C.
 #
 #  QUESTO ROUND PRODURRA' CELLE NON MISURABILI PER IL MERITO
 #  ---------------------------------------------------------
