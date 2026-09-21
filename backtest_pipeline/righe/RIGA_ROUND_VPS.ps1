@@ -570,7 +570,6 @@ function TabellaCoerente(){
 function MotivoRifiutoBersaglio([string]$chiesto,[string]$macchina){
   $g = ("" + $chiesto).Trim()
   $m = NomeMacchinaPulito $macchina
-  if($g -eq ""){ return "BERSAGLIO VUOTO: -TerminaleBacktest non dice niente, e su questa macchina non c'e' un bersaglio da mettere al suo posto." }
 
   # si LEGGE la riga (serve alla deroga), non si decide ancora niente
   $riga = RigaMacchina $m
@@ -594,6 +593,19 @@ function MotivoRifiutoBersaglio([string]$chiesto,[string]$macchina){
             "    non so quali MT5 ci vivano sopra ne' quali conti abbiano dentro. Se il round`n" +
             "    deve girare davvero qui, si AGGIUNGE la riga alla tabella, a mano, e si`n" +
             "    ripassa dal cancello.")
+  }
+
+  # IL VUOTO SI GIUDICA QUI, DOPO LA MACCHINA, e l'ordine non e' estetica:
+  # su una macchina sconosciuta il motivo VERO e' la macchina (il bersaglio
+  # e' vuoto proprio PERCHE' non c'e' una riga da cui prenderlo), e un
+  # messaggio che accusa la cosa sbagliata manda chi legge a cercare dove
+  # non c'e' niente. Misurato eseguendo, il 21/09: con il controllo prima,
+  # la macchina sconosciuta usciva come "BERSAGLIO VUOTO".
+  if($g -eq ""){
+    return ("BERSAGLIO VUOTO: -TerminaleBacktest non dice niente.`n" +
+            "    Su '" + $riga.macchina + "' il bersaglio sarebbe " + $riga.perc + " (conto " + $riga.conto + "):`n" +
+            "    o lo si passa, o lo si lascia fuori del tutto e lo mette la tabella. Una`n" +
+            "    stringa di soli spazi non e' nessuna delle due cose.")
   }
 
   if($n -eq ""){
@@ -750,9 +762,15 @@ if(("" + $TerminaleBacktest).Trim() -eq "" -and $null -ne $rigaMac){
 # 1d. IL VERDETTO.
 $motivoNo = MotivoRifiutoBersaglio $TerminaleBacktest $MACCHINA
 if($motivoNo -ne ""){
+  # La tabella si stampa UNA volta sola: il motivo "MACCHINA SCONOSCIUTA"
+  # la porta gia' dentro, e ripeterla qui farebbe leggere due volte la
+  # stessa cosa a chi ha gia' un errore da capire.
+  $codaTabella = ""
+  if($motivoNo -notlike "MACCHINA SCONOSCIUTA*"){
+    $codaTabella = ("    LA TABELLA DEI BERSAGLI -- una macchina, un terminale:`n" + (ElencoMacchineAmmesse) + "`n")
+  }
   Muori ($motivoNo + "`n" +
-         "    LA TABELLA DEI BERSAGLI -- una macchina, un terminale:`n" +
-         (ElencoMacchineAmmesse) + "`n" +
+         $codaTabella +
          "    Gli altri MT5 di queste macchine hanno SEDIE VIVE sopra e non si toccano:`n" +
          "    il piccolo 50503392, il 100k 50504263, il conto REALE 10105439, la`n" +
          "    challenge FTMO 541452707 (C:\FTMO) e il manuale 50503635.`n" +
@@ -811,8 +829,7 @@ if((([int]$infoBT.Attributes) -band ([int][IO.FileAttributes]::ReparsePoint)) -n
          "    quello giusto, il posto potrebbe non esserlo, e nessun controllo sulla`n" +
          "    STRINGA se ne accorgerebbe.`n" +
          "    Se il terminale " + $BERSAGLIO_CONTO + " e' davvero installato cosi', si guarda insieme`n" +
-         "    dove punta e si cambia LA TABELLA. Non si tira a indovinare.`n" +
-         "    punta e si cambia questa riga. Non si tira a indovinare.")
+         "    dove punta e si cambia LA TABELLA. Non si tira a indovinare.")
 }
 
 $exeBT = Join-Path $cartellaBT "terminal64.exe"
