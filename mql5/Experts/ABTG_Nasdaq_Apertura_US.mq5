@@ -2165,11 +2165,31 @@ void ManageOneTicket(ulong ticket, double bid, double ask)
               }
            }
 
-         //--- 2) BREAKEVEN al primo obiettivo -- FUORI dal ramo della parziale.
+         //--- 2) BREAKEVEN al primo obiettivo -- fuori dal ramo "parziale RIUSCITA",
+         //  ma ANCORA DENTRO il cancello su InpTP1_ClosePct > 0 di qui sopra.
          //  07/08/2026: stava DENTRO "se la parziale e' riuscita". Al lotto minimo il
          //  50% arrotonda sotto il minimo del broker, NormalizeVolume torna 0, la
          //  parziale non parte -- e cosi' il breakeven non veniva NEMMENO PROVATO:
          //  la posizione restava a rischio pieno anche dopo il primo obiettivo.
+         //
+         //  21/09/2026 -- PRECISAZIONE, perche' il commento sopra diceva il falso a
+         //  meta' e ci e' costato un round mal disegnato:
+         //  QUESTO BLOCCO NON GIRA AFFATTO SE InpTP1_ClosePct == 0 (o == 100),
+         //  perche' il cancello esterno e' InpTP1_ClosePct > 0 && < 100.
+         //  ==> Su una cella con la parziale SPENTA, mettere InpBreakevenAtTP1=true
+         //      e' un NO-OP: si accende e non succede niente.
+         //  Misurato, non dedotto: risultati_prove/gestione_20260909/ -- accoppiando
+         //  le righe che differiscono SOLO per InpBreakevenAtTP1, a ClosePct=0 sono
+         //  IDENTICHE 36 su 36 (24 DAX + 12 Nasdaq); a ClosePct=50 ne sono DIVERSE
+         //  15 su 36. L'asimmetria e' la prova: se il flag fosse inerte sempre,
+         //  anche la seconda colonna sarebbe 0.
+         //  Lo stesso schema e' in 16 file (grep "InpTP1_ClosePct > 0"), e nel
+         //  motore ABTG_ApertureCore.mqh r.858/881 e' perfino nella forma vecchia
+         //  (dentro "se la parziale e' riuscita"): quel file oggi non lo include
+         //  nessuno, ma e' il pezzo che verrebbe copiato per un EA nuovo.
+         //  NON si ripara il codice: InpBEatR (r.2189) fa gia' la stessa cosa, non
+         //  e' incatenato a niente, e una patch qui ACCENDEREBBE un breakeven dove
+         //  oggi non c'e' (9 EA su 10 hanno InpBreakevenAtTP1=true come default).
          //  (riskDist non cambia: con lo stop a pari InitialSL da' 0 e scatta lo
          //   stesso ripiego sull'ATR che c'era gia' dopo la parziale.)
          if(InpBreakevenAtTP1 && !TkDone(ticket, gBETk))
