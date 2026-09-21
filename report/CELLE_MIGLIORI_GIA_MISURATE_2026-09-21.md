@@ -373,3 +373,62 @@ passare `controlla_prova.py` **e** l'agente `controllo-preventivo` prima di usci
 > operazioni, e sul DD NON guadagna niente: quello era denominatore. Sul Dow e sul
 > MaxMin l'archivio dice no, e il no sul Dow è interessante perché è la STESSA manopola
 > che sul DAX dice sì.»*
+
+---
+
+# ✅ VERIFICA ALLA FONTE — rifatta da me, 21/09/2026 02:30
+
+Non ho ripreso nessun numero dal riassunto: ho riaperto i CSV e ricalcolato.
+
+## 🟢 Candidato A (`770101`, `InpTP1_ClosePct` 50 → 0): **CONFERMATO**
+
+**Il DD in VALUTA scende davvero** — ricalcolato io come `Profit / Recovery Factor`, che e'
+la definizione MT5 del drawdown massimo:
+
+| finestra | `ClosePct=50` (vola) | `ClosePct=0` | |
+|---|---:|---:|---|
+| **OOS** DD in valuta | 8.886 | **7.974** | 🟢 **−10,3%** |
+| **IS** DD in valuta | 5.876 | **5.441** | 🟢 **−7,4%** |
+
+👉 **Il mio contro-esempio dell'effetto denominatore NON lo uccide**: il drawdown cala anche
+in euro, non solo in percentuale. E il profitto sale del **+30,9%** (OOS) e **+47,0%** (IS).
+
+✅ **E la condizione a cui il vantaggio e' legato e' soddisfatta dalla sedia che vola**:
+`mql5/Presets/FTMO/ABTG_DAX_Apertura_EU_770101_FTMO.set` porta **`InpUseTrailing=true`**.
+
+## 🔴 MA TRE AVVERTENZE, e la terza l'ho trovata io guardando lo stesso file
+
+1. **E' UNA misura, letta tre volte.** `r137c` riproduce `r46a`; la corsa `gestione_20260909`
+   gira la **stessa finestra non spezzata** (n 445 = 175 IS + 270 OOS). Tre file, **una base
+   dati**. Non sono tre conferme.
+2. **E' misurata a `InpRiskPercent=1` sul simbolo BCM `D30EUR`**, non al 2,00% su
+   `GER40.cash`. I confronti **fra celle** reggono; i valori assoluti no.
+3. 🔴 **La manopola e' FRAGILE alla configurazione, e il numero sta nello stesso file.** In
+   `aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_OOS_r46a.csv` ci sono **altre** righe con
+   `ClosePct=0`, in configurazioni diverse, che fanno **PF 0,97437** e persino
+   **PF 0,87508 con DD 22,5000%**. 👉 **`ClosePct=0` non e' «meglio» in assoluto: e' meglio
+   NELLA NOSTRA configurazione.** Chi lo copiasse altrove potrebbe prendersi un DD del 22,5%.
+
+## 🛑 E IL CONTRO-TEST CHE VALE PIU' DEL CANDIDATO — **sul DOW la stessa manopola PERDE**
+
+`aperture_r46/ABTG_Dow_Apertura_US_U30USD_OOS_r46b.csv`, letto da me:
+
+| | PF | DD | n |
+|---|---:|---:|---:|
+| `770202` con `ClosePct=50` (**quello che vola**) | **1,27013** | **4,3941** | 130 |
+| `770202` con `ClosePct=0` | 1,25809 | 5,4280 | 96 |
+
+🔴 **PF piu' basso E drawdown piu' alto.** Sul Dow la stessa identica manopola fa il
+contrario che sul DAX. 👉 **Quindi non si estende «per simmetria» a nessun'altra sedia:
+qui c'e' il numero che lo vieta.**
+
+## 🖊️ LA RIGA PER CLAUDIO
+
+> **UNA firma, costo zero tempo macchina**: nel `.set` di `770101`,
+> `InpTP1_ClosePct` **50,0 → 0,0**. Il breakeven a 1R **resta acceso**
+> (`InpBreakevenAtTP1=true`): non si toglie la rete, si smette solo di chiudere meta'
+> posizione a 1R.
+> 🟢 Misurato: PF **+6,8%**, DD in euro **−10,3%**, profitto **+30,9%** fuori campione.
+> 🔴 Su **una** base dati, a rischio 1% su simbolo BCM, senza prova di regime, e con la
+> manopola che in altre configurazioni **peggiora**.
+> ✋ **Non l'ho applicata. E' un preset di una sedia che sta volando: e' firma tua.**
