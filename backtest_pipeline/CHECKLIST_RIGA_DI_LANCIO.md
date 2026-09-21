@@ -28259,3 +28259,73 @@ Stessa ricerca, due perimetri, stesso giorno:
   stesso EA e sullo stesso simbolo del round in preparazione**.
 Il primo perimetro non produce un numero basso: produce **il numero sbagliato**, e ha
 la forma di una risposta.
+
+---
+
+## CLASSE 545 -- la prova che un EA gira cercata nel GIORNALE del terminale (`<dati>\logs`) invece che nella scheda ESPERTI (`<dati>\MQL5\Logs`)
+
+**Trovata il 21/09/2026 dal `controllo-preventivo`, su una riga di sola lettura
+commissionata per rispondere alla domanda «il Guardian sta davvero girando su FTMO?».**
+
+La specifica ricevuta diceva, testuale:
+
+> *«Dal giornale di oggi (`<cartella dati>\logs\*.log` …): le righe che contengono
+> `GUARDIAN`, `Guardian`, `pausa`, `cap rischio`. Se non compare NESSUNA riga, e' il
+> segnale che cercavamo.»*
+
+🔴 **Quella cartella e' la cartella sbagliata, e il verdetto sarebbe stato un falso
+positivo perfetto: la forma della risposta che cercavamo.** In MT5 le due schede
+scrivono in due posti diversi:
+- **Giornale** (eventi del terminale: login, connessione, `expert … loaded`) ->
+  `<cartella dati>\logs\AAAAMMGG.log`;
+- **Esperti** (tutto quello che un EA stampa con `Print()`, quindi **ogni** riga del
+  Guardian: banner di avvio, cap C1, pausa B1, rifiuti) ->
+  `<cartella dati>\MQL5\Logs\AAAAMMGG.log`.
+
+### Il contro-esempio, ESEGUITO (non argomentato)
+Albero dati finto con il Guardian **acceso e loquace** (banco in
+`scratchpad/banco`, due righe `GUARDIAN` vere nella scheda Esperti):
+
+| perimetro letto | righe che nominano `guardian\|pausa\|cap rischio\|cluster` |
+|---|---|
+| **solo `<dati>\logs`** (la specifica alla lettera) | **0** |
+| `<dati>\MQL5\Logs` | **2** |
+
+👉 Il perimetro della specifica non produce «un numero basso»: produce **lo zero**, cioe'
+esattamente il segnale che la riga era stata scritta per trovare. Stessa forma della
+**classe 544**: un perimetro sbagliato non da' una risposta debole, da' **la risposta
+sbagliata con l'aria di una risposta**.
+
+### La regola
+**Quando si cerca la prova che un EA fa qualcosa, si legge `MQL5\Logs`. `logs` si legge
+in piu', mai al posto.** E una riga che cerca in tutti e due **deve stampare il nome del
+file letto e il conteggio di righe totali**, altrimenti un «0 righe» non si distingue da
+un file vuoto, assente o del giorno sbagliato.
+
+---
+
+## CLASSE 546 -- l'evento cercato solo in CODA al log (`-Tail N`), quando quell'evento viene stampato all'AVVIO
+
+**Trovata il 21/09/2026, stessa riga della classe 545 e stessa consegna.** La specifica
+chiedeva le *«ultime ~60 righe»* del giornale.
+
+🔴 **Il Guardian stampa il suo banner quando viene ATTACCATO** — cioe' all'apertura del
+terminale, la mattina — e poi tace per ore. A fine giornata quelle righe stanno **in
+cima** al file, non in coda: la finestra di lettura **esclude per costruzione l'unica
+riga che risponderebbe alla domanda**.
+
+### Il contro-esempio, ESEGUITO
+Stesso banco: scheda Esperti da **202 righe**, le due righe `GUARDIAN` alla riga **1** e **2**.
+
+| finestra di lettura | righe trovate |
+|---|---|
+| **ultime 60 righe** (la specifica alla lettera) | **0** |
+| **tutto il file** | **2** |
+
+### La regola
+**La finestra di lettura di un log si sceglie in base a QUANDO l'evento viene scritto,
+non in base a quanto si vuole accorciare l'output.** Un evento di **avvio** si cerca in
+**tutto il file**; la coda (`-Tail`) serve al **contesto**, non alla ricerca. Se l'output
+va accorciato, si accorcia **il numero di righe STAMPATE** (prime N + ultime N dei
+risultati, col totale dichiarato), **mai la porzione di file LETTA** -- sono due cose
+diverse e solo la seconda puo' cambiare la risposta.
