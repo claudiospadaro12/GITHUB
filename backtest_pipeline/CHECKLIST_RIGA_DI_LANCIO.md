@@ -27898,3 +27898,34 @@ lo scrive il manuale, ma **come lo scriviamo NOI**.
 >    `righe/*.md`) confrontati col cancello di prima, **0 esiti diversi**; `34` contro-esempi
 >    su `34`. Un cancello più severo che boccia il repo sano è un cancello che si impara a
 >    scavalcare (classe 235).
+
+## CLASSE 538 -- la riga su piu' righe fisiche: incollata in console, il `throw` non ferma niente
+**Trovata il 21/09/2026, sbagliando, e la guardia era gia' scritta giusta.**
+
+La riga di lancio di R196a portava in testa la guardia di macchina:
+`if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw '...' };`
+ed era su **22 righe fisiche**. Claudio l'ha incollata nella console del **VPS**.
+
+Una console PowerShell esegue **ogni riga incollata come un comando separato**: il
+`throw` ha interrotto **solo la prima riga**, e le altre 21 sono partite lo stesso.
+La guardia c'era, era giusta, e **non ha fermato niente**.
+
+🟢 Cosa ha salvato il colpo: la SECONDA rete, la guardia per macchina dentro
+`RIGA_ROUND_VPS.ps1` (`GUARDIA_BANCO_POSITIVA_v2`), che ha rifiutato il bersaglio
+con `ERRORE: TERMINALE VIETATO ... VMI3047753 -> C:\MT5_Backtest`. Nessun round e'
+partito, nessun terminale e' stato toccato. **La difesa in profondita' ha pagato:
+la prima rete era bucata e non lo sapevamo.**
+
+### La regola
+**Ogni riga di lancio e' UNA SOLA ISTRUZIONE, avvolta in `& { ... }`, su UNA riga
+fisica.** Se ha bisogno di andare a capo per leggibilita', non e' una riga di
+lancio: e' uno script, e allora si scarica e si esegue come script.
+🔎 Controllo: la riga deve iniziare con `& {` e contenere **zero** a capo.
+📌 Le due righe del runner del 21/09 erano gia' cosi'; quella di R196a no. L'asimmetria
+fra due righe consegnate lo stesso giorno e' il sintomo da cercare.
+
+### Il contro-esempio, ESEGUITO
+Con `COMPUTERNAME=VMI3047753`:
+- **3 istruzioni separate** -> `GUARDIA SCATTATA`, poi *"...e QUESTA e partita lo
+  stesso"*, poi *"...e anche QUESTA"*.
+- **avvolte in `& { ... }`** -> `GUARDIA SCATTATA` **e niente dopo e' partito**.
