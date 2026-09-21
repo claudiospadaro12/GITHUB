@@ -1,13 +1,19 @@
 # 🚀 R203A — IL PAVIMENTO DELLO STOP SUL DAX, sedia `770101`
 
-**21/09/2026** · branch `lavoro` · pin della riga: **`4bc9aa97c38009c8b6b12fe1479ec4b8f1465393`**
+**21/09/2026** · branch `lavoro` · pin della riga: **`018c1d95eaeced03532cee4b30de6b1ebe629b30`**
 File prova: `backtest_pipeline/prove/R203a_pavimento_stop_DAX_D30EUR.txt` (90 pin, **4 celle**)
-— **i cancelli (a)-(f) sono quelli congelati in quel file** (classe 549: le lettere dei
-cancelli di promozione si citano col nome del file).
+— **i cancelli (a)-(f) e (c1)-(c3) sono quelli congelati in quel file** (classe 549).
 
-> 🔴 **SECONDA STESURA.** La prima è stata **bocciata dal cancello** con **tre difetti
-> bloccanti**, e due cambiavano il numero che il round produce. Tutto corretto qui sotto, e le
-> correzioni sono dichiarate per nome nella sezione ④.
+> 📌 **Nota d'archivio**: il **file prova** sta al pin `018c1d95eaeced03532cee4b30de6b1ebe629b30`
+> — che è quello che il driver scarica. Questo **documento** è stato riscritto **tre volte**:
+> chi lo riaprisse da un pin precedente leggerebbe una stesura vecchia.
+
+> 🔴 **TERZA STESURA.** Il cancello ha risposto **FAIL due volte**. Al primo giro erano
+> sbagliati **la scala** e una «conferma» che era in realtà **la firma del difetto**; al secondo
+> erano sbagliati **i cancelli stessi**, cioè le righe che decidono **come si legge** il referto.
+> 🟢 **L'asse e la riga PowerShell non sono mai stati in discussione al secondo giro.**
+> E i criteri **si cambiano prima dei numeri, non dopo** (emendamento del 16/08): per questo si
+> correggono adesso e non dopo la corsa.
 
 ---
 
@@ -38,8 +44,12 @@ La fonte è `risultati_archivio/studio_apertura/Studio_D30EUR.csv`, **440 breako
 | buffer | 200 | 500 | sull'ampiezza no, sullo **stop** sì |
 | `TP_R` | 2,0 | `InpTP1_R × 3` | no |
 
-🟠 **La correzione di casa è ×√(35/15) = 1,5275, ed è `[INF]`** — è la convenzione di
-`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` **r.271-272**, non una misura sul feed.
+🟠 **La correzione di casa è ×√(35/15) = 1,5275, ed è `[INF]`** — è la **legge di casa** nominata a
+`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` **r.241** (`ANCORA_ADR_FLOTTA_INDICI`) e usata alle
+**r.276** e **r.278**, **calibrata a n=8** — etichetta corretta **`[INF, calibrato n=8]`**.
+🟠 *(Non la **r.271-272**, che avevo citato nelle prime due stesure: **r.271 è vuota** e r.272
+è l'intestazione della tabella. Quel puntatore me l'aveva dato il cancello e l'avevo copiato in
+buona fede — classe **553**.)*
 🟢 **E lo stop vero è calcolabile, non vago**: retest long con `InpSLMode=0` dà
 `entry = High − 200`, `sl = Low − 500`, quindi **stop = ampiezza + 300 pt esatti**.
 
@@ -54,20 +64,66 @@ Popolazione: i **225 giorni LONG**, stop = ampiezza + 300. Spread mediano BCM or
 | `5750` | 57,5 | 33,8× | 28,9% | … | 54,2% |
 | `8625` | 86,2 | 50,7× | 54,2% | … | 83,6% |
 
-🟢 **Perché questa scala e non `0/2300/4600/6900` della prima stesura**: il gradino a 2300
-(13,5×, il pavimento duro di casa) scarta lo **0,4-5,3%** — sarebbe quasi un **NO-OP**, una
-passata su quattro buttata. Con `2875` il primo gradino sta **comunque sopra** il pavimento duro
-(16,9× contro 13,3×) e **morde davvero**; e i due alti **abbracciano** la frontiera dei 40× da
-sotto (33,8×) e da sopra (50,7×), che dice più che atterrarci sopra.
+🔴 **LA BANDA NON È SIMMETRICA: l'estremo crudo è GIÀ STATO FALSIFICATO.** `STOP_VS_SPREAD`
+**r.252-262** calibra le due letture contro le **8 gambe forward vere** del `770101`:
+**misurato 25,0%** · predetto a **35' → 26,1%** (scarto **1,1 punti**) · predetto a **15' crudo
+→ 49,5%** (scarto **24,5 punti**).
+👉 **Il numero da usare è quello a 35'.** Il 15' crudo resta come traccia del calcolo ed è
+**la geometria sbagliata**: non è l'altro estremo di una banda, è **un'ipotesi già battuta**.
+
+### ⚓ PERCHÉ QUESTI TRE GRADINI — ognuno è **un numero già scritto in casa**
+
+`report/STOP_VS_SPREAD_FTMO_2026-09-20.md` **r.246** porta la distribuzione dello **STOP** del
+`770101` nella lettura a 35': **min 19,80 · P10 39,49 · MEDIANA 86,48**; e la **frontiera FTMO
+è 57,2**. Le tre celle fanno **tre domande diverse**:
+
+| cella | idx | coincide con | la domanda |
+|---|---:|---|---|
+| `2875` | 28,75 | fra il **minimo** (19,80) e il **P10** (39,49) | *taglio solo la coda stretta?* |
+| `5750` | 57,50 | 🎯 **la FRONTIERA FTMO** (57,2), a meno dello **0,5%** | *taglio tutto ciò che sta sotto la frontiera del costo?* |
+| `8625` | 86,25 | 🎯 **la MEDIANA** dello stop a 35' (86,48), a meno dello **0,3%** | *tengo solo la metà larga?* |
+
+🟠 **E la versione precedente di questa giustificazione era una razionalizzazione**: avevo
+scritto che i due gradini alti *«abbracciano la frontiera, e questo dice più che atterrarci
+sopra»* — un principio **inventato per l'occasione**. Il motivo vero è quello qui sopra, ed è
+fatto di **numeri di altri**. Il gradino a `2300` resta fuori perché scartava lo **0,4-5,3%**:
+quasi un **no-op**. ⚠️ Il vincolo è reale: l'asse del driver ha **passo uniforme**, quindi con
+4 celle non si può avere **insieme** un primo gradino che morde e l'atterraggio sui 6800 della
+frontiera calcolata sullo spread BCM.
 
 ### 🎯 LA BARRA, E IL CONFRONTO È TUTTO **INTERNO AL ROUND** (classe 515)
 
-| | cancello | perché è lecito |
+| | cancello | come si misura, e perché così |
 |---|---|---|
-| **c1** | `DD OOS ≤ 5,80` (−20% secco sui **7,2506** della cella `0`) | **cella contro cella**, stessa taglia, tutti e due **dal picco**: omogeneo |
-| **c2** | `Peggior Giornata % OOS ≤ 2,50` a taglia banco (~5,00 a taglia vera) contro il **Max Daily Loss FTMO del 5%** | **giornata contro giornata**: è l'**unico** confronto omogeneo che questo round sa produrre contro una regola FTMO. Misurato su R202B: **−1,0782** — passa con margine |
-| **c3** | 🔴 **IL MURO DEL 10% NON SI GIUDICA QUI** | `Equity DD %` è **dal picco**, il Max Loss FTMO 2-Step è **statico dal saldo iniziale**. Con `P ≥ I` vale `Equity DD % ≥ perdita statica` **sempre**: il DD del tester è un **limite superiore**. La misura che decide è la **minima equity contro il saldo iniziale**, che il CSV **non contiene** |
-| **d** | `PF OOS ≥ 1,20` | 🟢 **fonte: `risultati_archivio/R98_CRITERI.md` r.194, cancello S2, «oppure A (FIRMATA)», decisa da Claudio il 22/08 PRIMA dei numeri.** Non 1,40 (A1): la cella **viva** fa 1,39520 e non lo passerebbe |
+| **c1** | 🎯 `DD_fisso OOS ≤ 7,12` (−20% sugli **8,9033** della cella `0`) | 🔴 **NON su `Equity DD %`**, che divide per il **picco** — e il picco **cambia da cella a cella**: una cella ad alto pavimento fa meno profitto, ha un picco più basso, e **lo stesso drawdown in euro le esce come percentuale più alta**. La misura è `(Profit / Recovery Factor) / 80000 × 100`: **due colonne già nel CSV, costo zero**. `Equity DD %` si riporta, ma **non decide** |
+| **c2** | ⚠️ **non è più un cancello: è un numero da riportare** | il tester divide per l'**equity d'inizio giornata** (`ABTG_DAX_Apertura_EU.mq5` **r.759**), il MDL FTMO è il 5% del **capitale iniziale**: mobile contro fisso, **classe 515 in scala giornaliera** (fattore ≤ **1,228**). E il 5% è **del conto**, dove operano **sei** sedie: fissare la quota per sedia è un **parametro di rischio**, cioè **di Claudio** |
+| **c3** | 🔴 **il muro del 10% NON si giudica qui** | `Equity DD %` è **dal picco**, il Max Loss FTMO è **statico dal saldo iniziale**. 🟢 **Ma un limite superiore rigoroso il CSV lo dà**: `perdita_statica ≤ DDass / deposito` — cella viva OOS **8,90%** al banco, **≤ 17,8%** a taglia vera |
+| **d** | `PF OOS ≥ 1,20` | 🟢 **fonte: `risultati_archivio/R98_CRITERI.md` r.194, cancello S2, «opzione A (FIRMATA)», decisa da Claudio il 22/08 PRIMA dei numeri.** Per **questo** motore è **larga** (la cella viva fa 1,39520): è un **pavimento riusato**, e il cancello che morde qui è **c1** |
+
+### 🔬 IL NUMERO CHE HA FATTO CAMBIARE `c1` — misurato sull'ancora R202B OOS
+
+| cella | `Equity DD %` (dal picco) | DD assoluto (EUR) | **DD / 80.000** | picco implicito |
+|---|---:|---:|---:|---:|
+| `0.25` | 4,8467 | 4.300,85 | **5,3761%** | 88.738 |
+| `0.50` | **7,7631** | **7.127,62** | 8,9095% | 91.814 |
+| `0.75` | **7,5746** | **7.144,81** | 8,9310% | 94.326 |
+| `1.00` ← viva | 7,2506 | 7.122,67 | **8,9033%** | 98.236 |
+
+🔴 **Due fatti che chiudono la questione.** (i) Fra `0.50` e `0.75` **l'ordine si ribalta**:
+dal picco la `0.75` sembra migliore (7,5746 < 7,7631), **in euro è peggiore** (7.144,81 >
+7.127,62). (ii) Per la cella viva lo scarto fra le due letture è **+22,8%**, cioè **più grande
+del −20% che il cancello chiede**. Un cancello con la barra d'errore più larga del margine
+**non decide niente** (classe 550).
+
+🟠 **`[DA CONFERMARE]`**: se il `Recovery Factor` di MT5 usi il balance-drawdown o
+l'equity-drawdown. Su tutte e 8 le passate il picco implicito cade fra **88.738 e 98.236**,
+sempre sopra il deposito e sotto l'equity finale: **coerente** con l'equity drawdown. Coerente
+non è dimostrato.
+
+🔴 **E IL NUMERO SCOMODO DI `c3`**: il limite superiore della perdita statica della cella
+viva è **≤ 17,8%** a taglia vera, e **supera il muro del 10%**. Il round quindi **non certifica
+che la sedia sia al sicuro** e **non certifica che sfondi**: giudizio **sospeso in tutte e due
+le direzioni**, con questo numero accanto.
 
 ⚠️ **E il ×2 per la taglia vera è un LIMITE SUPERIORE, non un'identità**: `CalcLotByRisk()` usa
 `ACCOUNT_BALANCE`, quindi il DD composto a 2,0% sta un filo **sotto** il doppio di quello a
@@ -76,9 +132,11 @@ sotto (33,8×) e da sopra (50,7×), che dice più che atterrarci sopra.
 ### 🧪 LA CONTRO-IPOTESI, resa **FALSIFICABILE**
 
 > **H0**: il pavimento taglia `n` e profitto **senza** migliorare il DD.
-> - **FALSIFICATA** se esiste almeno una cella non-zero con `DD OOS ≤ 5,80` **e** `PF OOS ≥ 1,20`.
-> - **CONFERMATA** se in **tutte e tre** le celle non-zero il `DD OOS` resta dentro
->   **6,89-7,61** (±5% di 7,2506) mentre `n OOS` cala di almeno il **20%** (≤ 216 uscite).
+> - **FALSIFICATA** se esiste almeno una cella non-zero con `DD_fisso OOS ≤ 7,12` **e**
+>   `PF OOS ≥ 1,20`.
+> - **CONFERMATA** se in **tutte e tre** le celle non-zero il `DD_fisso OOS` resta dentro
+>   **8,46-9,35** (±5% di 8,9033) mentre `n OOS` cala di almeno il **20%** (≤ 216 uscite).
+> - *(Soglie sul DD a **denominatore fisso**, coerenti con `c1`.)*
 > - Se non cade in nessuno dei due insiemi: **«NON DECISO»**, e si dichiara in quale dei due
 >   buchi è finito. **Non si sceglie la regola dopo.**
 
@@ -108,7 +166,7 @@ contributo valido anche con campione sottile.
 > **14/08/2026** da quella macchina sono partiti **ordini veri**.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $pin='4bc9aa97c38009c8b6b12fe1479ec4b8f1465393'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=120; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND R203A   EA ABTG_DAX_Apertura_EU   D30EUR M5   tick reali   deposito 80000   4 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_DAX_Apertura_EU','-Prova','R203a_pavimento_stop_DAX_D30EUR.txt','-Etichetta','R203A','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','80000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10 }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito R203A: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_R203A"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_R203A sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_R203A.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_R203A.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_R203A.txt' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_IS_R203A.csv' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_OOS_R203A.csv' -ForegroundColor Gray; Write-Host '   R203a_pavimento_stop_DAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
+& { $ErrorActionPreference='Stop'; $pin='018c1d95eaeced03532cee4b30de6b1ebe629b30'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=120; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND R203A   EA ABTG_DAX_Apertura_EU   D30EUR M5   tick reali   deposito 80000   4 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_DAX_Apertura_EU','-Prova','R203a_pavimento_stop_DAX_D30EUR.txt','-Etichetta','R203A','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','80000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10 }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito R203A: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_R203A"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_R203A sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_R203A.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_R203A.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_R203A.txt' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_IS_R203A.csv' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_OOS_R203A.csv' -ForegroundColor Gray; Write-Host '   R203a_pavimento_stop_DAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
 ```
 
 📅 Dentro `REFERTO_ROUND_R203A.txt`, la riga **`data            :`** deve essere del giorno
@@ -143,6 +201,17 @@ parallelo quel numero non misura niente, e il tetto resta prudenziale. In ogni c
 | R2 | contro-ipotesi non falsificabile | due insiemi numerici + «non deciso» dichiarato prima |
 | R3 | celle non misurabili non dichiarate | dichiarate, con la distinzione **merito sospeso / rischio no** |
 | R4-R10 | date relative, puntatori senza file, `2:41` senza clausola, magic | tutti applicati |
+
+**Terzo giro** — il cancello ha bocciato **i cancelli**, non il round:
+
+| # | difetto | correzione |
+|---|---|---|
+| **C1** | `c1` **non era omogeneo**: `Equity DD %` divide per un picco che cambia da cella a cella, e la distorsione (**+22,8%**) è **più grande del margine del cancello** (−20%) | `c1` passa al **denominatore fisso** `(Profit/RF)/80000`, soglia **≤ 7,12** |
+| **C2** | `c2` era un **515-bis** (denominatore mobile, fattore ≤ 1,228) **e** metteva un tetto **per sedia** uguale al tetto **di conto**, con sei sedie sopra: protezione **zero** | **declassato a numero da riportare**; la quota per sedia è un **parametro di rischio → Claudio** |
+| **C3** | `c3` era **troppo pessimista**: un limite superiore rigoroso il CSV lo dà | aggiunto **≤ 17,8%** a taglia vera → **doppia sospensione** |
+| **C4** | la giustificazione dell'asse era una **razionalizzazione** | riscritta sui **tre ancoraggi veri** (min/P10 · frontiera FTMO 57,2 · mediana 86,48) |
+| **C5** | la **banda** trattava i due estremi come equivalenti, ma il 15' crudo è **già falsificato** | dichiarato: il numero da usare è quello a **35'** |
+| **C6** | 🔴 **puntatore `r.271-272` sbagliato** (r.271 è vuota) — **arrivato dal cancello stesso** e copiato in buona fede | → **r.241** (+ r.276, r.278). **Classe nuova 553** |
 
 **Strato 1 dopo le correzioni**
 - `controlla_prova.py` → **verde** (90 pin, 4 celle, 0 problemi) · **zero** non-ASCII · **zero**
