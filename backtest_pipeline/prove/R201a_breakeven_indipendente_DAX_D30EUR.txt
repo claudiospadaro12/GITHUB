@@ -1,0 +1,322 @@
+# =====================================================================
+#  EA: ABTG_DAX_Apertura_EU        (sedia 770101, IN CAMPO su FTMO)
+#  R201a -- IL BREAKEVEN INDIPENDENTE SULLA CELLA VIVA DEL DAX.
+#           Asse unico InpBEatR. Gemello di R199a (NASDAQ 770260) e di
+#           R172d (DOW 770202): stessa manopola, tre mercati.
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.  -Deposito 80000 -Modello 4
+#     (regola firmata 21/09: finche' la challenge FTMO opera, i round non
+#      girano sul VPS. Il banco 50504400 resta SPENTO.)
+#
+#  🛑 QUESTO ROUND NON TOCCA NIENTE IN CAMPO. La gestione dell'uscita e'
+#     gestione del RISCHIO: qualunque cosa esca, la firma e' di Claudio.
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Su 770260 (Nasdaq) il round R199A ha misurato che InpBEatR = 0,5
+#  DOMINA la cella schierata su ogni grandezza e in tutte e due le
+#  finestre, a operazioni invariate:
+#       IS   PF 1,11621 -> 1,27601   DD 12,3568 -> 8,7186   n 82  = 82
+#       OOS  PF 1,14894 -> 1,23262   DD  9,1244 -> 8,6538   n 102 = 102
+#  Fonte: backtest_pipeline/risultati_prove/R199A/, referto
+#  report/DD_NASDAQ_R199_2026-09-21.md.
+#  La domanda di questo file e' la sola che conta dopo un risultato
+#  cosi': >>> SI RIPETE SUL GEMELLO? <<<  Un effetto che c'e' su un
+#  mercato solo e' un'ipotesi; su due e' un meccanismo.
+#
+#  🔴 MA QUI LA GEOMETRIA E' DIVERSA, E VA DETTO PRIMA DEI NUMERI
+#  -------------------------------------------------------------
+#  Sul Nasdaq la sedia gira con TUTTE E TRE le protezioni d'uscita
+#  spente (InpTP1_ClosePct=0, InpBreakevenAtTP1=false, InpBEatR=0).
+#  QUI NO: la cella viva 770101 ha la PARZIALE ACCESA (50% a 1R) e il
+#  BREAKEVEN AL 1o OBIETTIVO ACCESO. Sono due differenze, e mordono
+#  tutte e due:
+#
+#  (a) 🔒 IL SOFFITTO A 1R -- percio' l'asse si ferma a 0,90.
+#      ABTG_DAX_Apertura_EU.mq5 r.2391-2401: il breakeven al 1o
+#      obiettivo, quando scatta, chiama TkMark(ticket, gBETk).
+#      r.2405: il breakeven INDIPENDENTE parte solo se
+#      !TkDone(ticket, gBETk).  Con InpTP1_R = 1,0 il BE al 1o
+#      obiettivo scatta ESATTAMENTE a 1R e marca il ticket.
+#      >>> QUINDI OGNI VALORE DI InpBEatR >= 1,0 E' GIA' STATO
+#          ESEGUITO DA UN'ALTRA MANOPOLA: e' una cella identica alla
+#          cella di controllo, non una misura. <<<
+#      Non e' un ragionamento: e' gia' successo ed e' agli atti.
+#        - R199A (Nasdaq, TP finale a InpTP1_R*3 = 1,5R):
+#          la cella InpBEatR=1,5 da' IS 4549,92 / PF 1,11621 /
+#          DD 12,3569 / n 82 contro la cella 0 a 4549,93 / 1,11621 /
+#          12,3568 / 82, e OOS IDENTICA AL CENTESIMO (7689,12 /
+#          1,14894 / 9,1244). Una cella sprecata su quattro.
+#        - LE_QUATTRO_FIRME_02 (DAX, cella "regalo" ClosePct=0):
+#          risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/..._IS_q770be.csv
+#          -> 0,0 / 1,0 / 1,5 danno TUTTE E TRE 5569,37 / 1,18323 /
+#          4,9576 / 132. Tre celle, un esito.
+#      👉 L'asse di questo file e' 0 ... 0,90 apposta. Le celle sopra
+#         1R sarebbero macchina buttata e, peggio, un "altopiano"
+#         finto in cui meta' dei punti e' la cella di controllo.
+#
+#  (b) ⚠️ IL SIDE EFFECT SULLA PARZIALE -- e QUI c'e' e sul Nasdaq NO.
+#      Documentato per la prima volta in
+#      backtest_pipeline/prove/R172d_beatr_dowapertura_U30USD.txt
+#      (classe 383 della checklist). La catena, sul sorgente DAX:
+#        r.2412  be = NormalizePrice(openP)        -> stop a PARI (BEatR)
+#        r.2488  InitialSL(): con partialDone==false e curSL!=0 torna
+#                curSL, che dopo il BE vale openP
+#        r.2355  riskDist = openP - openP = 0      -> ripiego su ATR
+#        r.2368  target = openP + dirSign*riskDist*InpTP1_R
+#      >>> Accendere InpBEatR SPOSTA ANCHE IL BERSAGLIO DELLA PARZIALE,
+#          perche' 1R viene ricalcolato sull'ATR invece che sulla
+#          distanza d'ingresso. <<<
+#      🔴 Sul Nasdaq (ClosePct = 0) questo non succede: non c'e'
+#         parziale da spostare. QUI SI'. Quindi R201a NON e' la stessa
+#         misura di R199a: e' la stessa MANOPOLA su una geometria che
+#         ne muove DUE. Va scritto nel referto, non scoperto dopo.
+#      🟢 Il ramo dei numeri tondi non c'entra: InpUseRoundLevels e'
+#         pinnato false (con true il bersaglio verrebbe da
+#         NextRoundLevel(), che riskDist non lo legge -- classe 383).
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI, e NON e' ottimista
+#  ------------------------------------------------------
+#  Uno stop a pari abbassa il DD e di norma abbassa anche il PF:
+#  chiude in pari operazioni che sarebbero tornate in profitto.
+#  🔴 E su questa sedia c'e' gia' un indizio CONTRARIO, agli atti, che
+#  va scritto qui invece di essere scoperto dopo: sulla cella
+#  "regalo" del DAX (ClosePct=0, quindi NON questa) InpBEatR=0,5 ha
+#  PEGGIORATO tutto e due le finestre --
+#     IS  5569,37 -> 4594,13  (PF 1,18323 -> 1,15177, DD 4,96 -> 5,06)
+#     OOS 23607,28 -> 19161,41 (PF 1,49140 -> 1,44637, DD 6,27 -> 6,25)
+#  cioe' profitto giu' del 17-19% e DD FERMO. Su quella cella il BE a
+#  mezzo R non ha comprato niente e ha pagato.
+#  👉 L'ipotesi di partenza di questo round e' quindi: "il risultato del
+#     Nasdaq NON si ripete sul DAX", e il round serve a falsificarla
+#     sulla cella GIUSTA (parziale accesa), che e' un'altra geometria.
+#     Se si ripete lo stesso, e' un meccanismo forte davvero.
+#
+#  SOGLIE DI PROMOZIONE, congelate PRIMA (le stesse di R199a)
+#  ----------------------------------------------------------
+#  PROMOSSA solo se, INSIEME:
+#    (a) DD OOS scende di almeno il 20% rispetto alla cella 0;
+#    (b) PF OOS resta >= 1,30 (la cella viva sta a 1,397: qui il PF
+#        non e' il collo di bottiglia come sul Nasdaq, e abbassare
+#        l'asticella sarebbe barare);
+#    (c) IS e OOS concordano di SEGNO su tutte e due le grandezze;
+#    (d) il numero di operazioni NON cala. Un BE non puo' togliere
+#        ingressi: se n scende, il round ha un difetto, non un merito.
+#  SELEZIONE: centro dell'altopiano, MAI il picco.
+#  Altrimenti il verdetto e' "misurato e NON promosso", che e' un esito.
+#
+#  🔬 CONTROLLO DI REGRESSIONE, E VA GUARDATO PER PRIMO
+#  ----------------------------------------------------
+#  La cella con l'asse a 0 e' LA CELLA VIVA e deve riprodurre i numeri
+#  d'archivio AL CENTESIMO:
+#      IS   n 175  profit  3.789,36  PF 1,12634  DD equity 5,4362
+#      OOS  n 270  profit 18.029,58  PF 1,39709  DD equity 7,2328
+#  Non e' una misura sola: l'archivio la riporta IDENTICA in SEI CSV
+#  prodotti in corse diverse --
+#    risultati_prove/aperture_r46/ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r46a.csv
+#    risultati_prove/aperture_r47/ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_r47a.csv
+#    risultati_prove/ABTG_DAX_Apertura_EU/ABTG_DAX_Apertura_EU_D30EUR_{IS,OOS}_ptd.csv
+#    risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/..._{IS,OOS}_r137a.csv (e r137b, r137c)
+#  ed e' lo stesso numero che R101_REFERTO.md par. 1 usa come metro
+#  ("DAX 770101: PF 1,397 DD 7,23% n OOS 270, RIPRODOTTO").
+#
+#  🔴 E IL MOTIVO PER CUI QUESTO CONTROLLO NON E' UNA FORMALITA' OGGI:
+#  tutte e sei quelle corse sono ANTERIORI a due modifiche del sorgente:
+#    - 19/09, commit 9fca63d9 "Toppa per ticket": le chiusure passano da
+#      ChiudiMiePosizioni() invece di PositionClose(_Symbol);
+#    - 21/09, commit bfacc1fd/99f58562 "Filtro dello spazio": nove input
+#      nuovi (InpSpace*), default no-op (InpSpaceMode = ABTG_SPACE_OFF,
+#      r.395; il cancello e' r.1854 "if(InpSpaceMode == ABTG_SPACE_OFF)
+#      return(false)").
+#  👉 Tutte e due sono ATTESE neutre nel tester (un solo EA, un solo
+#     magic, filtro spento), ma ATTESO non e' MISURATO. Se la cella 0
+#     non riproduce i sei numeri qui sopra, IL ROUND SI FERMA LI' e il
+#     difetto si cerca in quelle due modifiche, non nell'asse.
+#     🟢 Questa e' anche la PRIMA verifica post-toppa e post-filtro
+#     dello spazio sulla sedia 770101: vale da sola la corsa.
+#
+#  🧪 IL CONTRO-ESEMPIO, gia' ESEGUITO sull'archivio
+#  --------------------------------------------------
+#  "Se l'asse non misurasse niente, cosa vedrei?" -> vedrei celle
+#  diverse con esiti identici. E' esattamente quello che succede SOPRA
+#  1R (vedi il punto (a)): percio' la lettura del round NON e'
+#  "quante celle sono verdi" ma "quante celle sono DIVERSE dalla cella
+#  di controllo". Se su sette celle i Profit distinti sono meno di
+#  cinque, l'asse non ha morso abbastanza e il round si dichiara
+#  NON CONCLUSIVO invece di scegliere il massimo del rumore.
+#
+#  ---------------------------------------------------------------------
+#  I PIN: 89 righe, cioe' TUTTI gli 91 input dell'EA meno l'asse e meno
+#  InpNewsCurrencies (default gia' stringa vuota: un pin vuoto MT5 lo
+#  IGNORA -- controllo 3 di controlla_prova.py).
+#  Senza i pin si misura un'altra sedia: walkforward_generico.ps1
+#  r.836-843 blinda ogni input NON scritto qui al DEFAULT DEL SORGENTE,
+#  non al preset schierato.
+#
+#  LE CONVERSIONI FTMO -> BCM (il preset in campo e' in ora e simboli
+#  FTMO, il backtest gira su dati BCM):
+#    simbolo        GER40.cash  -> D30EUR
+#    InpSessionHour     10      -> 8     (FTMO = BCM + 2)
+#    InpCloseHour       19      -> 17
+#    InpCorrSymbol  US500.cash  -> SPXUSD   (inerte: InpUseCorrelation
+#                   = false, r.2150 "if(InpUseCorrelation && ...)";
+#                   e SPXUSD e' GIA' il default del sorgente r.315,
+#                   quindi il pin non puo' spostare il controllo di
+#                   regressione. Lo scrivo lo stesso perche' un pin
+#                   dichiarato non invecchia.)
+#  Un CSV che torna con InpSessionHour diverso da 8 si CESTINA.
+#
+#  ⚠️ PIN DI MANOPOLE INERTI -- SCELTA DICHIARATA, e va letta insieme al
+#  corollario della CLASSE 541 (scritta oggi stesso), che dice l'opposto:
+#  "le manopole inerti nella configurazione del round NON si pinnano".
+#  Qui SONO pinnate, tutte e 89, e il motivo e' che il prodotto di questo
+#  file e' un CONTROLLO DI REGRESSIONE al centesimo: un input non scritto
+#  qui viene blindato dal driver al DEFAULT DEL SORGENTE (r.836-843), e
+#  il sorgente e' cambiato due volte in due giorni (toppa 19/09, filtro
+#  dello spazio 21/09). Un pin completo rende il file immune al prossimo
+#  cambio di default; la 541 rende il file piu' leggibile. Ho scelto
+#  l'immunita' e pago la leggibilita' DICHIARANDO QUI quali sono inerti:
+#    InpTrailAtrMult, InpTrailFixedPts .. inerti: InpTrailMode=1 (PREVBAR),
+#                                         r.2463-2466 e 2476-2479:
+#                                         solo quel ramo viene aperto
+#    InpRoundStep, InpRoundMinDistPts ... inerti: InpUseRoundLevels=false
+#    InpStAtrPeriod/StMultiplier/StTF ... inerti: InpUseSupertrend=false
+#    InpCorrSymbol/CorrTF/CorrEma* ...... inerti: InpUseCorrelation=false
+#    InpVolMult, InpVolAvgBars .......... inerti: InpUseVolumeFilter=false
+#    InpAtrFilterBars, InpAtrFilterMult . inerti: InpUseAtrFilter=false
+#    InpNews* ........................... inerti: InpUseNewsFilter=false
+#    InpSpace* (9) ...................... inerti: InpSpaceMode=0, r.1854
+#    InpGapMinPoints, InpGapMinRR ....... inerti: InpUseGapFill=false
+#    InpVwapTF .......................... inerte: InpUseVwapFilter=false
+#    InpPrevWindowMin, InpLevelTF ....... inerti: InpRangeMode=0
+#    InpFadeOffsetPts, InpDelay* ........ inerti: InpEntryMode=2 (RETEST)
+#  🔴 Se il round venisse letto come "misura di una di queste", sarebbe
+#     letto male: qui sono zavorra dichiarata, non parametri.
+#
+#  🔴 IL RISCHIO E' 1,00%, NON IL 2,00% IN CAMPO -- ed e' una scelta.
+#  Il preset FTMO porta InpRiskPercent=2.00 (firma di Claudio del
+#  20/09). Qui e' 1,00 perche' 1,00 e' l'UNICO valore per cui esiste
+#  un'ancora d'archivio su questa cella: a 2,00 il controllo di
+#  regressione non esisterebbe e il round non si potrebbe leggere.
+#  Conseguenza da scrivere nel referto: i confronti FRA CELLE restano
+#  validi (stesso rischio in tutte e sette), i DD ASSOLUTI vanno letti
+#  ~x2 prima di avvicinarli al muro FTMO del 10%.
+#
+#  🔑 MAGIC 789521: verificato libero in tutto il repo il 21/09/2026
+#  (`grep -rl "789521" --exclude-dir=.git . | wc -l` -> 0 prima di
+#  salvare questo file; dopo il commit torna 1, ed e' QUESTO file --
+#  classe 382). Il magic vivo 770101 NON compare qui: il tester non
+#  deve poter incrociare i deal del forward.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_R=1.0||1.0||0||1.0||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789521||789521||0||789521||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+
+# --- ASSE UNICO: IL BREAKEVEN INDIPENDENTE (in multipli di R) --------
+#   La griglia e' la STESSA di R172d sul Dow (0 ... 0,90 passo 0,15),
+#   apposta: due mercati con la stessa geometria (InpTP1_R = 1,0,
+#   parziale 50%, BE al 1o obiettivo acceso) si confrontano solo se
+#   l'asse e' lo stesso. Sette celle:
+#     0     = LA CELLA VIVA. Controllo di regressione obbligatorio.
+#     0,15  = stop a pari quasi subito: protegge tantissimo, e per
+#             costruzione chiude in pari tante operazioni buone.
+#     0,30 / 0,45 / 0,60 / 0,75 = il corpo dell'altopiano da leggere.
+#     0,90  = l'ultimo valore che ha ancora spazio prima del soffitto
+#             a 1R (vedi il punto (a) dell'intestazione).
+#   🚫 NESSUNA cella >= 1,0: sarebbe la cella di controllo con un
+#      altro nome.
+InpBEatR=0||0||0.15||0.90||Y
+# 7 celle x 2 finestre = 14 passate

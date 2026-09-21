@@ -28004,3 +28004,195 @@ Script bersaglio che stampa cosa riceve, invocato in tutti e due i modi:
 `righe/RIGA_RITARDO_TESTER.ps1` r.243, `righe/RIGA_DIAG_GBPUSD.ps1` r.419.
 Oggi non mordono perche' puntano a `C:\MT5_Backtest` (senza spazi), ma
 mordono il giorno in cui useranno la tabella per macchina.
+
+---
+
+## CLASSE 541 -- la manopola messa ad asse che un ENUM FRATELLO rende INERTE: i tre rami del trailing
+**Trovata il 21/09/2026 preparando R200 (il round sul drawdown della sedia `770260`
+`ABTG_Nasdaq_Apertura_US`, in campo sulla challenge FTMO `541452707`).**
+
+La famiglia del trailing ha **quattro manopole**, ma **tre di esse sono i tre rami
+di uno `switch` mutuamente esclusivo** governato da un quarto input, `InpTrailMode`:
+
+```
+ABTG_Nasdaq_Apertura_US.mq5, TrailStopBuy() r.2245-2253
+   r.2247  if(InpTrailMode == ABTG_TRAIL_PREVBAR)   // = 1
+   r.2248     return(iLow(_Symbol, InpTrailTF, 1));          <- vive InpTrailTF
+   r.2249  if(InpTrailMode == ABTG_TRAIL_FIXED)     // = 2
+   r.2250     return(bid - InpTrailFixedPts * _Point);       <- vive InpTrailFixedPts
+   r.2251  double atr = AtrValue();                 // = 0 (ATR)
+   r.2252  return(atr > 0 ? bid - atr*InpTrailAtrMult : 0);  <- vive InpTrailAtrMult
+```
+
+Il preset schierato (`mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set`)
+porta `InpTrailMode=1`. 👉 **Su quella cella, `InpTrailAtrMult` e `InpTrailFixedPts`
+sono NO-OP**: si girano da un estremo all'altro e il CSV non cambia di un decimale.
+Mettere uno dei due ad asse sarebbe stato un round intero di tempo macchina buttato.
+
+### 🔴 Perche' e' una classe NUOVA e non un doppione della 296
+La classe 296 (`RangeMode!=0` rende inerte `InpRangeMinutes`) dice come **leggere un
+CSV gia' girato** senza contare i duplicati. Questa dice come **scegliere l'asse PRIMA
+di girare**, e il difetto e' diverso: qui le manopole inerti stanno nella **stessa
+famiglia** di quella che si vuole misurare e hanno **nomi che sembrano fratelli**
+(`InpTrail*`), quindi sembrano tutte e quattro assi legittimi dello stesso round.
+E' anche la stessa forma del NO-OP trovato lo stesso giorno su `InpBreakevenAtTP1`
+(inerte quando `InpTP1_ClosePct=0`, r.2143) -- con una differenza che conta: li' il
+cancello era una **soglia numerica**, qui e' un **selettore di enum**, e quindi la
+manopola non e' "spenta", e' **inesistente in quel ramo**.
+
+### ✅ IL CONTRO-ESEMPIO, e sta gia' in archivio: si contano gli ESITI, non le passate
+`backtest_pipeline/risultati_archivio/Dow_Apertura/dow_trailing.csv`
+-- **30 passate, OTTO esiti distinti**:
+- con `InpTrailMode=1`, le tre righe `InpTrailAtrMult` 1/2/3 a parita' di TF tornano
+  identiche (TF M1 -> PF 1,19964 · DD 4,8490 · n 329, **tre volte**; TF M5 -> PF
+  1,37075 · DD 5,3161, **tre volte**);
+- con `InpTrailMode=0`, le cinque righe `InpTrailTF` 1..5 a parita' di moltiplicatore
+  tornano identiche (mult 1 -> PF 1,20276 · DD 6,6541 · n 329, **cinque volte**).
+
+`backtest_pipeline/risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv`
+-- **96 passate, SETTE esiti distinti**: `InpTrailFixedPts` spazzolato su otto valori
+da 100 a 800 sotto `InpTrailMode=1` produce **un solo** risultato per configurazione.
+
+### La regola
+**Prima di mettere ad asse una manopola che appartiene a una famiglia selezionata da
+un enum, si apre il ramo che l'enum ATTIVO apre, e si scrive nel file prova la RIGA DI
+CODICE che dimostra che la manopola e' letta in quel ramo.** Se non e' letta, l'asse
+non esiste: o si cambia asse, o si pinna l'enum sul ramo giusto -- e allora **il
+controllo di regressione non puo' piu' essere la cella viva**, perche' la cella viva
+sta in un altro ramo (vedi `prove/R200d_CONDIZIONALE_trailing_atr_NASDAQ_NASUSD.txt`,
+dove la regressione e' agganciata alla cella `mode 0` di R200c invece che al preset).
+
+### 📌 E il corollario sui PIN, che e' la meta' pratica
+Le manopole **inerti nella configurazione del round NON si pinnano**: un pin le fa
+sembrare attive a chi legge il file sei mesi dopo. Si pinnano **solo** nel file in cui
+l'enum le rende vive (in R200c, dove `InpTrailMode` e' l'asse e passa per tutti e tre
+i rami, `InpTrailAtrMult` e `InpTrailFixedPts` **sono** pin veri e definiscono le celle).
+
+---
+
+## CLASSE 542 -- il difetto viene censito SOLO nel file in cui e' stato trovato, e in archivio c'era gia' il CSV che lo misurava
+**Trovata il 21/09/2026 facendo il censimento delle protezioni d'uscita su tutta la
+flotta FTMO (sedie `770101` `770202` `770260` `770402` `770411` `770511` `771531`
+`771202/3/4`).**
+
+### Il fatto
+La catena `if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100) { ... if(InpBreakevenAtTP1) ... }`
+-- cioe' **il breakeven al 1o obiettivo e' un NO-OP quando la parziale e' a 0 (o a 100)** --
+era gia' stata trovata **TRE VOLTE**, e ogni volta su UN file:
+- **classe 299** (13/09) su `ABTG_Nasdaq_Live5m.mq5` r.977, preparando `R142a`;
+- **classe 319** (14/09) su `ABTG_DAX_Apertura_EU.mq5`, firmando la cella del conto REALE;
+- **classe 541** (21/09, mattina) citata di sfuggita su `ABTG_Nasdaq_Apertura_US.mq5` r.2143.
+
+🔴 **Nessuna delle tre ha mai fatto il `grep` sulla flotta.** Fatto oggi
+(`grep -rn "InpTP1_ClosePct > 0" mql5/Experts/*.mq5 mql5/Experts/standalone/*.mq5 mql5/Include/ABTG/*.mqh`),
+la stessa catena sta in **QUINDICI file**: **dieci** `.mq5` di `mql5/Experts/`
+(`ABTG_Nasdaq_Apertura_US` r.2143 · `ABTG_DAX_Apertura_EU` r.2359 · `ABTG_Dow_Apertura_US`
+r.1730 · `ABTG_Apertura_3Ingressi` r.2258 · `ABTG_Apertura_Marco` r.1192 ·
+`ABTG_DAX_Live5m` r.974 · `ABTG_DAX_Live5m_v2` r.1003 · `ABTG_Nasdaq_Live5m` r.977 ·
+`ABTG_Nasdaq_Apertura_US_Ottimizzato` r.1038 · `ABTG_DAX_Apertura_EU_Ottimizzato` r.1037),
+**quattro** copie in `mql5/Experts/standalone/` (r.878-884) e **il motore condiviso**
+`mql5/Include/ABTG/ABTG_ApertureCore.mqh` r.858 -- dove pero' la catena e' **PEGGIORE**:
+li' il breakeven (r.881) sta ancora **dentro `if(gTrade.PositionClosePartial(...))`**, cioe'
+dentro "se la parziale e' RIUSCITA", che e' proprio il difetto che il 04-07/08 era stato
+corretto negli EA. 🟢 Non morde oggi: `grep -rn "#include.*ApertureCore" mql5/` torna
+**zero**, quel file non lo include nessuno. Ma e' il pezzo che verrebbe copiato per un EA
+nuovo.
+Con i nomi diversi (`InpTP1Pct>0 && InpTP1Pct<100`, `InpBreakeven`) la STESSA catena sta
+anche in `ABTG_EMA200` r.410/429, `ABTG_MaxMinNotte` r.411/428,
+`ABTG_MaxMinNotte_DAX_Short_Ottimizzato` r.310/327, `ABTG_SuperWave_DOW_H1_Ottimizzato`
+r.446/460 -- cioe' **in QUATTRO delle sedie FTMO in campo**, dove pero' oggi e' DORMIENTE
+perche' il preset porta la parziale al 50%.
+
+### 🔴 E la parte che fa male: la MISURA c'era gia', in un CSV mai letto
+`backtest_pipeline/risultati_prove/gestione_20260909/` (9 settembre, dodici giorni prima).
+Accoppiando le righe che differiscono **solo** per `InpBreakevenAtTP1`:
+
+| file | coppie con `InpTP1_ClosePct = 0` | coppie con `InpTP1_ClosePct = 50` |
+|---|---|---|
+| `gestione_ABTG_DAX_Apertura_EU_D30EUR_gestione.csv` | **24 identiche / 0 diverse** | 14 identiche / **10 diverse** |
+| `gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv` | **12 identiche / 0 diverse** | 7 identiche / **5 diverse** |
+
+👉 **36 coppie su 36 identiche al centesimo quando la parziale e' a zero, 15 coppie su 36
+DIVERSE quando la parziale e' accesa.** Il flag era gia' stato misurato come no-op, su due
+EA, in campione e fuori campione. Nessun referto ha mai aperto quei due file.
+
+### ✅ IL CONTRO-ESEMPIO, ed e' la ragione per cui la tabella qui sopra ha DUE colonne
+Una colonna sola non prova niente: *"il flag non cambia i numeri"* e' compatibile anche
+con *"il flag e' inerte sempre"* e con *"il trailing copre tutto e il BE non morde mai"*.
+E' la **seconda** colonna a scegliere fra le ipotesi: se il flag fosse inerte per sempre,
+le coppie a `ClosePct=50` sarebbero **0 diverse** come le altre. Sono 15. L'asimmetria
+**0/36 contro 15/36** e' l'unica forma in cui questo si dimostra.
+
+### La regola
+1. 🔴 **Un difetto di CODICE non si chiude sul file in cui e' stato trovato: si chiude con
+   un `grep` sulla flotta.** La domanda non e' "questo EA ce l'ha?", e' "**quanti** EA ce
+   l'hanno, e in quanti di quelli il preset IN CAMPO lo rende ATTIVO?". Le due risposte
+   sono diverse e servono tutte e due.
+2. 🔴 **Prima di scrivere un round per misurare un no-op, si cerca in archivio una COPPIA
+   di righe che differisce SOLO per quel flag.** Comando di casa: si legge ogni CSV con
+   `csv.DictReader`, si costruisce la chiave con tutte le colonne `Inp*` tranne il flag e
+   si contano le coppie identiche. Costa venti secondi e puo' risparmiare una notte.
+3. 📌 **E la tabella si fa sempre a due colonne** (il cancello acceso / il cancello spento):
+   una colonna sola e' una conferma, non una verifica.
+
+---
+
+## CLASSE 543 -- la cella dell'asse resa IDENTICA alla cella di controllo da un ALTRO meccanismo (il TP finale, o un marcatore condiviso), non dalla condizione sull'input
+**Trovata il 21/09/2026 rileggendo i CSV di `R199A` e di `LE_QUATTRO_FIRME_02` per
+scegliere l'intervallo dell'asse `InpBEatR` sul gemello DAX (`R201a`).**
+
+### Il fatto, in due misure gia' girate
+`InpBEatR` = "porta lo stop a pari quando il prezzo ha fatto X R a favore". L'intervallo
+"naturale" che si scrive d'istinto e' `0 / 0,5 / 1,0 / 1,5`. **Su due sedie su due, meta'
+di quelle celle E' LA CELLA DI CONTROLLO con un altro nome.**
+
+**(1) Il TP finale fa da soffitto.** `risultati_prove/R199A/` (Nasdaq `770260`):
+`InpTP1_R = 0,5` e `TpTotalR()` r.1694 restituisce `InpTP1_R * 3` -> **il take profit
+dell'ordine sta a 1,5 R**. La cella `InpBEatR = 1,5` non puo' scattare: a 1,5 R la
+posizione e' gia' chiusa dal TP.
+
+| cella | IS profit / PF / DD / n | OOS profit / PF / DD / n |
+|---|---|---|
+| `0` (controllo) | 4549,93 · 1,11621 · 12,3568 · 82 | 7689,12 · 1,14894 · 9,1244 · 102 |
+| `1,5` | **4549,92 · 1,11621 · 12,3569 · 82** | **7689,12 · 1,14894 · 9,1244 · 102** |
+
+**(2) Un marcatore condiviso fa da soffitto.** `ABTG_DAX_Apertura_EU.mq5` r.2397: il
+breakeven al 1o obiettivo, quando scatta, chiama `TkMark(ticket, gBETk)`; r.2405: il
+breakeven indipendente parte solo `if(InpBEatR > 0 && !TkDone(ticket, gBETk))`. Con
+`InpTP1_R = 1,0` il primo scatta a **1 R esatti**. 👉 Su DAX e Dow **ogni valore di
+`InpBEatR` >= 1,0 e' gia' stato eseguito da un'altra manopola**. Misurato, con la
+parziale spenta, in `risultati_prove/dal_vps/ABTG_DAX_Apertura_EU/..._IS_q770be.csv`:
+le celle `0,0`, `1,0` e `1,5` danno **tutte e tre 5569,37 · PF 1,18323 · DD 4,9576 · n
+132**. Tre celle su quattro, un esito.
+
+### 🔴 Perche' NON e' la 299 e NON e' la 541
+- La **299** (`InpTP1_ClosePct` a 0 e a 100 saltano lo stesso ramo) e la **541**
+  (`InpTrailAtrMult` inerte perche' `InpTrailMode=1`) hanno il cancello scritto **su un
+  `if` che nomina l'input stesso o il suo selettore**: si trovano con un `grep` del nome
+  dell'input e si leggono in due righe.
+- **Qui il cancello non nomina l'input.** `InpBEatR` e' letto, la condizione
+  `beTarget` e' calcolata, il confronto e' fatto: semplicemente **il trade non arriva
+  mai li'** (lo chiude il TP) oppure **un altro blocco ha gia' marcato il ticket**. Il
+  `grep` del nome non lo vede. Serve una **aritmetica sulla GEOMETRIA della cella**:
+  *fin dove puo' arrivare un trade, in R, prima di essere chiuso o gia' gestito?*
+- E il danno non e' solo la macchina sprecata: e' che un asse di quattro celle con due
+  celle uguali al controllo **disegna un altopiano falso**. Su R199A, delle quattro
+  celle, quelle che misuravano davvero erano **due** (`0,5` e `1,0`).
+
+### La regola
+**Prima di scegliere gli estremi di un asse di GESTIONE (breakeven, parziale, trailing,
+uscita a tempo), si calcola il TETTO IN R della cella e si tronca l'asse sotto quel
+tetto.** Il tetto e' il piu' BASSO fra:
+1. il **take profit** dell'ordine, in R (qui `TpTotalR()`);
+2. il **livello in R a cui un'altra manopola marca lo stesso stato** (qui `gBETk`, messo
+   dal BE al 1o obiettivo a `InpTP1_R`);
+3. qualunque **uscita a tempo / flat di fine seduta** che chiuda prima.
+
+E il tetto, col numero e la riga di codice, **si scrive nel file prova** -- non si scopre
+leggendo un CSV con celle gemelle. In `R201a` l'asse si ferma a **0,90** per questo:
+`InpTP1_R = 1,0` ⇒ tetto **1,0 R**.
+
+### 📌 Il sintomo, per chi legge un CSV gia' girato
+Due o piu' righe con `Profit` uguale **al centesimo** e un solo input diverso. Non e' un
+caso: e' quasi sempre questa classe o la 541. Prima di leggere un altopiano, **si contano
+i `Profit` DISTINTI**: se sono meno delle celle, l'asse non ha misurato quello che dice.
