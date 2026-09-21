@@ -1,0 +1,47 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : c6d67acd76c7039c004a91ef0f8e55db5cb42581
+data            : 2026-09-21 16:25:36   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Nasdaq_Apertura_US
+file prova      : R198_profondita_retest_NASDAQ_NASUSD.txt   (5392 byte, dal pin)
+etichetta       : R198
+simbolo         : NASUSD
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 80000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_IS_R198.csv
+  righe : 4
+    Pass 0    Profit 4549.93      PF 1.11621    Equity DD % 12.3568    Trades 82
+    Pass 1    Profit 10870.37     PF 1.28278    Equity DD % 9.8198     Trades 82
+    Pass 2    Profit 10711.51     PF 1.28578    Equity DD % 9.6114     Trades 81
+    Pass 3    Profit 10883.06     PF 1.29988    Equity DD % 9.0942     Trades 78
+  ESITO : LETTO -- 4 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Nasdaq_Apertura_US\ABTG_Nasdaq_Apertura_US_NASUSD_OOS_R198.csv
+  righe : 4
+    Pass 0    Profit 7689.12      PF 1.14894    Equity DD % 9.1244     Trades 102
+    Pass 1    Profit -2278.2      PF 0.95514    Equity DD % 14.6285    Trades 99
+    Pass 2    Profit -7651.17     PF 0.83796    Equity DD % 22.9521    Trades 96
+    Pass 3    Profit -7839.69     PF 0.83807    Equity DD % 26.111     Trades 96
+  ESITO : LETTO -- 4 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
