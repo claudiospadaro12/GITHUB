@@ -34,6 +34,46 @@
 #
 #  Il perimetro firmato: report/PERIMETRO_RUNNER.md (07/09/2026)
 # =====================================================================
+#
+# =====================================================================
+#  SOSPENSIONE DELLE RIGHE **ROUND** -- 21/09/2026
+# ---------------------------------------------------------------------
+#  LE 115 RIGHE `RIGA_SOTTILE_ROUND.ps1` DI QUESTA CODA SONO COMMENTATE.
+#  Non sono cancellate: portano in testa il marcatore
+#      [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione]
+#  e si riaccendono togliendo QUEL prefisso, niente altro.
+#
+#  PERCHE'. Il 21/09, nella PRIMA MEZZ'ORA del primo giorno di challenge,
+#  il VPS si e' inchiodato alle ~09:29: niente PowerShell, niente tasto
+#  destro, niente Gestione attivita'. La causa misurata non e' stata una
+#  prova a mano: l'attivita' pianificata delle 03:30 del 21/09 era ANCORA
+#  IN CORSO alle 14:43 (esito 267009 = SCHED_S_TASK_RUNNING). Il tester si
+#  mangia tutte le CPU, e sulla stessa macchina stavano operando le SEI
+#  sedie della challenge FTMO 541452707.
+#  Se fosse capitato mentre una sedia d'apertura doveva piazzare il suo
+#  ordine, avremmo perso l'operazione E NON LO AVREMMO NEMMENO SAPUTO.
+#
+#  DUE CINTURE, e servono tutte e due perche' proteggono da cose diverse:
+#    1. l'attivita' pianificata delle 03:30 sul VPS e' stata SOSPESA
+#       (Ready -> Disabled, riletta per conferma). Protegge da questa coda.
+#    2. QUESTA sospensione. Protegge da un avvio della coda fatto in un
+#       altro modo -- a mano, da un'altra attivita', da un altro giro.
+#  Una cintura sola non basta: la prima e' uno stato sul VPS che qualcuno
+#  puo' riattivare senza passare da qui, la seconda e' nel repo e si vede
+#  in un diff.
+#
+#  CONTEGGIO MISURATO AL MOMENTO DELLA SOSPENSIONE (non ricordato):
+#    - 115 righe ROUND commentate, di cui **82 a tick reali** (-Modello 4)
+#    - 12 righe di SOLA LETTURA lasciate ACCESE: non consumano CPU in modo
+#      apprezzabile e sono gli occhi che abbiamo sul campo (CODA_01..12).
+#
+#  QUANDO SI RIACCENDONO. Quando la challenge non e' piu' viva, oppure
+#  quando i round girano su una macchina che NON ospita sedie che operano
+#  (firma di Claudio del 21/09: "si, i round sul pc di backtest").
+#  Riaccenderle mentre la challenge opera e' una decisione di Claudio,
+#  non una manutenzione.
+# =====================================================================
+#
 
 # --- 1. che cosa e' attaccato, e dove. La foto di stanotte.
 d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_01_sedie_attaccate.ps1
@@ -125,12 +165,12 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 #  a) R132c -- il pavimento dello stop sul Dow. 16 passate.
 #     PRIMO DEI TRE, ed e' il cancello: 5 celle su 8 sono gia' girate in
 #     R123D sullo stesso binario e devono tornare IDENTICHE.
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_DOW_H1_Ottimizzato -Prova R132c_nearatr_U30USD.txt -Etichetta r132c -Modello 4 -Deposito 10000
 
 #  b) R133b -- un filtro SCRITTO E MAI ESEGUITO (52 gruppi su 52 morti in
 #     archivio). 4 passate, ~20 secondi. -Deposito 100000 NON e'
 #     opzionale: e' il valore con cui e' girata la cella di riferimento.
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R133b_filtrovolumi_U30USD.txt -Etichetta r133b -Modello 4 -Deposito 100000
 
 #  c) R133a -- InpLevelTF, mai messo ad asse in 0 CSV su 2.083, ed e'
 #     l'unica cosa che decide i livelli su quella sedia. 14 passate.
@@ -173,7 +213,7 @@ d22c61fc949e69caf83512c92bf5e684459c67d5 | backtest_pipeline/righe/CODA_10_slipp
 
 #  d) R133c -- InpMinBoxPts: 18 gruppi su 18 identici, la scala era fuori
 #     range di 10 volte. 18 passate.
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R133c_ampiezzabox_D30EUR.txt -Etichetta r133c -Modello 4 -Deposito 10000
 
 # --- 11. I CANALI CHE ENTRANO IN QUESTA MACCHINA (classe 251, 12/09/2026).
 #     Il censimento del 12/09 ha trovato che i canali sono QUATTRO e i
@@ -216,10 +256,10 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #     del 13/09) farebbe compilare quella modifica e romperebbe S1.
 #     P1 si applica DOPO.
 # =====================================================================
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136a_slatr_U30USD.txt -Etichetta r136a -Modello 4 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136b_primobersaglio_U30USD.txt -Etichetta r136b -Modello 4 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136c_parziale_U30USD.txt -Etichetta r136c -Modello 4 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136d_trailing_U30USD.txt -Etichetta r136d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136a_slatr_U30USD.txt -Etichetta r136a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136b_primobersaglio_U30USD.txt -Etichetta r136b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136c_parziale_U30USD.txt -Etichetta r136c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R136d_trailing_U30USD.txt -Etichetta r136d -Modello 4 -Deposito 100000
 
 # =====================================================================
 #  AGGIUNTE IL 12/09/2026 (sabato) -- LA CODA DEL WEEKEND, 12 round.
@@ -288,11 +328,11 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #     con UN SOLO agente locale: 4 passate, e ridà il cancello di
 #     determinismo di tutto R126.
 # =====================================================================
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R127c_orologio_EURJPY.txt -Etichetta r127c -Modello 1 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126a_costo_bufferatr_U30USD.txt -Etichetta r126a -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R127c_orologio_EURJPY.txt -Etichetta r127c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126a_costo_bufferatr_U30USD.txt -Etichetta r126a -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal_Ottimizzato -Prova R127b_sllookback_XAUUSD.txt -Etichetta r127b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R126b_stop_lookback_U30USD.txt -Etichetta r126b -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R126d_costo_bufferatr_NASUSD.txt -Etichetta r126d -Modello 4 -Deposito 10000
 # =====================================================================
 #  ERRATA DEL 12/09/2026 -- cemad05 RIATTIVATA. La spensi per un numero
 #  SBAGLIATO, e il numero sbagliato era del CANCELLO, non del file.
@@ -327,13 +367,13 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #  03:30). Costo se non l'avessi corretto: un round buono spento e un
 #  requisito raccontato come chiuso da un altro round.
 # =====================================================================
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
-1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_05_tf_U30USD.txt -Etichetta cemad05 -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_11_vivo.txt -Etichetta r120b11 -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_00_nuda.txt -Etichetta r120b00 -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_01_notrail.txt -Etichetta r120b01 -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120b_U30USD_10_noflip.txt -Etichetta r120b10 -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_11_vivo_TAGLIA.txt -Etichetta r120e11 -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 1445abf80666883ea2f6a4ecb983e91a2eb26834 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R120e_U30USD_00_nuda_TAGLIA.txt -Etichetta r120e00 -Modello 4 -Deposito 100000
 
 
 # =====================================================================
@@ -446,7 +486,7 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #      un file prova NUOVO deve fare un giro di pin. Sempre.
 #  Referto: report/CANARINO_FRAZIONEIS_2026-09-12.md
 # =====================================================================
-84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 84999392d0a8726fb3f03d8ffb9b0133657e0055 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova CANARINO_FRAZIONEIS_D30EUR.txt -Etichetta canfrz -Modello 4 -Deposito 10000 -SoloControllo
 # =====================================================================
 #  L'n DELL'IS DI EMA200 IN *POSIZIONI* -- due righe, e l'ordine conta
 #  Aggiunte il 12/09/2026 dopo PASS dei DUE strati del cancello.
@@ -482,7 +522,7 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #                            NON e' una risposta
 #  Referto: report/EMA200_IS_IN_CODA_2026-09-12.md
 # =====================================================================
-8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_02_pertrade_IS.txt -Etichetta cemad02 -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova COLLAUDO_EMADOW_02_pertrade_IS.txt -Etichetta cemad02 -Modello 4 -Deposito 100000
 # =====================================================================
 #  SETTE ROUND NUOVI -- 12/09/2026, pin 0c38419f (QUATTORDICESIMO GIRO)
 # ---------------------------------------------------------------------
@@ -554,13 +594,13 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #
 #  COME SI LEGGE DOMATTINA: report/SETTE_IN_CODA_2026-09-12.md
 # =====================================================================
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137c_parziale_770101_D30EUR.txt -Etichetta r137c -Modello 4 -Deposito 100000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137a_floorstop_allarga_770101_D30EUR.txt -Etichetta r137a -Modello 4 -Deposito 100000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137b_floorstop_salta_770101_D30EUR.txt -Etichetta r137b -Modello 4 -Deposito 100000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R138a_gemello_F40EUR_770101.txt -Etichetta r138a -Modello 4 -Deposito 100000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139a_EMA200_AUDJPY_H4_LS.txt -Etichetta r139a -Modello 1 -Deposito 10000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139b_EMA200_GBPUSD_H4_LS.txt -Etichetta r139b -Modello 1 -Deposito 10000
-0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137c_parziale_770101_D30EUR.txt -Etichetta r137c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137a_floorstop_allarga_770101_D30EUR.txt -Etichetta r137a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R137b_floorstop_salta_770101_D30EUR.txt -Etichetta r137b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R138a_gemello_F40EUR_770101.txt -Etichetta r138a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139a_EMA200_AUDJPY_H4_LS.txt -Etichetta r139a -Modello 1 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R139b_EMA200_GBPUSD_H4_LS.txt -Etichetta r139b -Modello 1 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0c38419f6031a5a33f24b8357f0f75fbe869c695 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_FiboH4_Multi -Prova R139c_FIBOH4_GBPUSD_unsimbolo.txt -Etichetta r139c -Modello 1 -Deposito 10000
 
 8d9d4fb9d83c93e4866bad15803d189c954f910a | backtest_pipeline/righe/CODA_12_pertrade_posizioni.ps1
 # =====================================================================
@@ -605,10 +645,10 @@ bbd2aa02d649a2789669ebea896aeb58dc9b7791 | backtest_pipeline/righe/CODA_11_canal
 #  $PIN = 55f0eb1b, dove i quattro file prova ESISTONO (verificato con
 #  git cat-file: a e6c0d70e, 69e252b3 e 23314d61 NON esistono).
 # =====================================================================
-ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_AtrExhaustVol -Prova R141c_atrexh_M30_NASUSD.txt -Etichetta r141c -Modello 4 -Deposito 100000
-ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_HVAncora -Prova R141d_hvancora_stopatr_M30_U30USD.txt -Etichetta r141d -Modello 4 -Deposito 100000
-ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141a_momentum_NASUSD_r12.txt -Etichetta r141a -Modello 4 -Deposito 100000
-ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141b_momentum_U30USD_gemello.txt -Etichetta r141b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_AtrExhaustVol -Prova R141c_atrexh_M30_NASUSD.txt -Etichetta r141c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_HVAncora -Prova R141d_hvancora_stopatr_M30_U30USD.txt -Etichetta r141d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141a_momentum_NASUSD_r12.txt -Etichetta r141a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_IntradayMomentum -Prova R141b_momentum_U30USD_gemello.txt -Etichetta r141b -Modello 4 -Deposito 100000
 # =====================================================================
 #  IL BREAKEVEN DEL REGALO -- l'unica delle quattro firme che sopravvive
 #  Aggiunta il 12/09/2026 sera, dopo PASS dei DUE strati del cancello.
@@ -655,7 +695,7 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  La toppa e' dentro l'EA (gPhase = PH_DONE sul rifiuto) = FIRMA DI
 #  CLAUDIO: si segnala e non si tocca.
 # =====================================================================
-ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova LE_QUATTRO_FIRME_02_be_regalo_ini.txt -Etichetta q770be -Modello 4 -Deposito 100000
 
 # =====================================================================
 #  DICIASSETTESIMO GIRO -- LE TRE RIGHE R142: GLI ASSI D'USCITA SULLA
@@ -754,9 +794,9 @@ ab1a206fe7b63cf5826a064db09a2b0c3d4c7528 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Il cancello si e' anche auto-verificato sul ratchet alla terza passata
 #  (nessun criterio nuovo) e ha chiuso la lista prima della quarta.
 # =====================================================================
-dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
-dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
-dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142a_preopen_parziale.txt -Etichetta r142a -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142b_preopen_trailing.txt -Etichetta r142b -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R142c_preopen_trailonoff.txt -Etichetta r142c -Modello 4 -Deposito 10000
 
 # =====================================================================
 #  R145a / R145b -- ABTG_VolExpBreak (magic 775301), 13/09/2026
@@ -865,8 +905,8 @@ dbe86ac371796898e7d99535f376bd28c8ec82bd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  dichiarato) e' stato corretto nei due file prova (punto 8/(C), punto
 #  4 riscritto, soglia di lettura congelata al 10% su "Segnali Grezzi"
 #  PRIMA di guardare i CSV) e verificato di nuovo: PASS.
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145a_volexp_kstop_M30_NASUSD.txt -Etichetta r145a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_VolExpBreak -Prova R145b_volexp_kstop_M30_U30USD.txt -Etichetta r145b -Modello 4 -Deposito 100000
 
 # =====================================================================
 #  R125 a-f -- ORB DENTRO LA FRONTIERA DEL COSTO. 13/09/2026.
@@ -1125,18 +1165,18 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Claudio del 09/09: "ED ALLORA SOCIO, DEVI ASPETTARE".
 #  Col PASS, il pacchetto R125 torna completo a 6 file, 32 celle,
 #  64 passate (era 33/66: una cella tolta perche' ripetuta).
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125a_costo_buffer_U30USD.txt -Etichetta r125a -Modello 4 -Deposito 100000
 #  >>> ARMATA il 13/09/2026 DOPO IL SECONDO PASS (rifatto da zero, non
 #  ereditato): asse corretto verificato 4 celle/8 passate, correzione
 #  dei criteri firmati controllata come non-silenziosa, giro di pin
 #  confermato necessario col contro-esempio (al pin vecchio il file
 #  porta ancora la versione con 100 nell'asse). Pacchetto R125 completo:
 #  6 file, 32 celle, 64 passate.
-bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
-da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] bfd6cbf97850624fb5c2b91a4ac79c8120d23c17 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125b_parziale_U30USD.txt -Etichetta r125b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125d_lato_short_D30EUR.txt -Etichetta r125d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125c_costo_buffer_D30EUR.txt -Etichetta r125c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125e_ampiezzaminima_D30EUR.txt -Etichetta r125e -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R125f_finestra15_NASUSD.txt -Etichetta r125f -Modello 4 -Deposito 100000
 
 # =====================================================================
 #  >>> R127a -- LA RIGA CHE MANCAVA, CORRETTA IL 13/09/2026 (classe 273).
@@ -1300,7 +1340,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  tutti DICHIARATI nel file invece di eliminati cambiando il deposito,
 #  perche' l'ancora congelata e' calcolata proprio a -Deposito 10000).
 #  Il round resta APERTO per costruzione: e' onesto, non incompleto.
-3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 3a0577fe785f94db274fb0a169e1c34c0f57c63f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R127a_slbuffer_NASUSD.txt -Etichetta r127a -Modello 4 -Deposito 10000
 
 # =====================================================================
 #  R146a/b/c -- LA SECONDA FASCIA DELLE USCITE MAI PROVATE (13/09/2026
@@ -1337,9 +1377,9 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  bloccava solo il pin. $SHA_ROUND/$SHA_WALK verificate identiche a
 #  tutti e quattro i commit di mezzo (19434520/4858ef6/30224fd/772b39d).
 #  ARMATE con la colonna corretta.
-30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
-30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
-30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146a_slbufferatr_EURJPY.txt -Etichetta r146a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R146b_venerdi_U30USD.txt -Etichetta r146b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 30224fd50662134b869b10aaef5809907fba852d | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_CostToCost -Prova R146c_slbufferatr_GBPCAD.txt -Etichetta r146c -Modello 4 -Deposito 100000
 
 # =====================================================================
 #  R147a/b/c -- LA TERZA FASCIA DELLE USCITE MAI PROVATE (14/09/2026
@@ -1368,7 +1408,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  del contenuto (b3603c7): a b3603c7 lo script porta ancora $PIN=4858ef6,
 #  dove i tre file R147 non esistevano -> 404 garantito. Trovato dal
 #  secondo giudizio.
-07e7bb5c1f812f73aedbbc63117ade10d7e4b73f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 07e7bb5c1f812f73aedbbc63117ade10d7e4b73f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EMA200 -Prova R147a_breakeven_U30USD.txt -Etichetta r147a -Modello 4 -Deposito 100000
 #  >>> r147b/r147c: RISCRITTI il 14/09 per la CLASSE 318 (il verso di n
 #  era dichiarato al contrario: la posizione riportata alla notte TOGLIE
 #  la giornata dopo, non la raddoppia -- HandleOCO r.341/1029 sull'ORB,
@@ -1392,8 +1432,8 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  trailing NON e' cieco di notte come diceva il file -- gira, ma solo
 #  sulle vincenti (selezione avversa, rinforza la scelta della colonna
 #  Peggior Giornata % come discriminante).
-82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
-82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_ORB_Ottimizzato -Prova R147b_flatfineseduta_U30USD.txt -Etichetta r147b -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 82794a3e4cd12be90981ca96ed9d5d2d0044cc11 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DAX_Apertura_EU -Prova R147c_flatfineseduta_D30EUR.txt -Etichetta r147c -Modello 4 -Deposito 100000
 #  >>> R148a -- IL CYCLE DI EMILIANO, PRIMO GIRO. EA nuovo (ABTG_Cycle,
 #  magic 775701 vergine), motore mai girato. La formula (media pesata di
 #  4 stocastici meno la sua SMA9) era gia' in casa dall'11/08
@@ -1431,7 +1471,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  banda di frequenza IS/OOS dichiarata (leggeva giorni di calendario
 #  come feriali -- trovato dall'agente che scriveva R148b). Non cambia
 #  nessun verdetto, cambia il numero che il CSV deve confermare.
-44fc20e81fea55d120178e1fb5919eff9d4ab2d5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 44fc20e81fea55d120178e1fb5919eff9d4ab2d5 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148a_cycle_verso_NASUSD.txt -Etichetta r148a -Modello 4 -Deposito 100000
 #  >>> R148bL/R148bS -- I DUE LATI, in DUE file a un asse solo (il vecchio
 #  file a due assi falliva il cancello, classe recente). MESSE QUI, DOPO
 #  r148a: girano sullo STESSO .ex5, e la sentinella S5 (riproduzione di
@@ -1452,8 +1492,8 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  sorgente, algebra del beta rifatta a mano (torna).
 #  Pin: giro di pin 281af63 (30mo, 1268b33 -> bb654a9). $SHA_ROUND e
 #  $SHA_WALK invariati.
-281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bL_lato_long_NASUSD.txt -Etichetta r148bl -Modello 4 -Deposito 100000
-281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bS_lato_short_NASUSD.txt -Etichetta r148bs -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bL_lato_long_NASUSD.txt -Etichetta r148bl -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 281af635b78550335d5ecae5c37673fb5ae01c9e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Cycle -Prova R148bS_lato_short_NASUSD.txt -Etichetta r148bs -Modello 4 -Deposito 100000
 # =====================================================================
 #  R150a -- L'ULTIMA MANOPOLA D'USCITA DI 770203 (ABTG_Nasdaq_Live5m),
 #  InpTrailStartR, MAI PRIMA MESSA AD ASSE. 7 celle (0/0,5/1,0/1,5/2,0/
@@ -1479,7 +1519,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Bersaglio: banco C:\MT5_Backtest (demo 50504400). Nessuna sedia viva
 #  toccata, nessun parametro di rischio.
 # =====================================================================
-502487b175d2b9e5fbf7931477ed2fa3df49bd4f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R150a_uscita_nasdaqlive5m.txt -Etichetta r150a -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 502487b175d2b9e5fbf7931477ed2fa3df49bd4f | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Live5m -Prova R150a_uscita_nasdaqlive5m.txt -Etichetta r150a -Modello 4 -Deposito 10000
 # =====================================================================
 #  R151a -- IL TRAILING SULL'ORO (770402, ABTG_MaxMinNotte XAUUSD H2)
 #  MAI TARATO. Asse InpTrailAtrMult, 7 celle (0,8->3,2 passo 0,4,
@@ -1520,7 +1560,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 966ccf4 (32mo, 02f2835 -> d1a158b). $SHA_ROUND e
 #  $SHA_WALK invariati.
 # =====================================================================
-966ccf4988a628c1be91a52c46f8f12174388a4c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R151a_trailingatr_XAUUSD.txt -Etichetta r151a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 966ccf4988a628c1be91a52c46f8f12174388a4c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R151a_trailingatr_XAUUSD.txt -Etichetta r151a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R152a -- EXPORT PER-TRADE DELLA CELLA VIVA 770202 (ABTG_Dow_Apertura_US,
 #  U30USD M5), per dare finalmente a mc_dd_cella.py un CSV vero da
@@ -1553,7 +1593,7 @@ da4344b865b3636f782c56cb1e072427a3f879ad | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  770202 vivo su 100k -V3 e piccolo 50503392: nessuno dei due toccato.
 # =====================================================================
-e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R152a_pertrade_DowApertura_770202.txt -Etichetta r152a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R152a_pertrade_DowApertura_770202.txt -Etichetta r152a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R153a -- InpAtrExitPeriod SU ABTG_PTE, GBPUSD H1 (sedia 771332).
 #  Sesta sedia coperta oggi. ABTG_PTE non aveva MAI avuto un file prova
@@ -1582,7 +1622,7 @@ e80758e5d80a5f4c004b0778101bf4914b851581 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Modello 1 (OHLC M1): screening dichiarato, finestra 2000-2026 fuori
 #  dal muro dei tick BCM.
 # =====================================================================
-d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R153a_atrexit_GBPUSD.txt -Etichetta r153a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R153a_atrexit_GBPUSD.txt -Etichetta r153a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R154a -- InpSLLookback SU ABTG_SuperWave, U30USD H4/H2 (sedia 770531).
 #  Ottava sedia coperta oggi. Primo round esplicitamente scoperto al
@@ -1610,7 +1650,7 @@ d5f14953d554220cc8e601fe1c4856f6b262906e | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  @FRAZIONEIS 1.0 (una tranche sola, nessun CSV _OOS -- voluto).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R154a_sllookback_SuperWave_U30USD.txt -Etichetta r154a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave -Prova R154a_sllookback_SuperWave_U30USD.txt -Etichetta r154a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R141e -- IL BUFFER DELLO STOP SU ABTG_DaxValueArea, D30EUR M15
 #  (magic 784105). RIENTRA DOPO 3 GIORNI FUORI CODA: il 12/09 (classe
@@ -1643,7 +1683,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin a10f345 (36mo, 9df14b7 -> 42903d2). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DaxValueArea -Prova R141e_daxva_buffer_M15_D30EUR.txt -Etichetta r141e -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_DaxValueArea -Prova R141e_daxva_buffer_M15_D30EUR.txt -Etichetta r141e -Modello 4 -Deposito 100000
 # =====================================================================
 #  R155a -- InpTP_RR SU ABTG_SuperWave_DOW_H1_Ottimizzato, U30USD H1
 #  (sedia 770511). Decima sedia coperta oggi. InpSLBufferAtr e
@@ -1682,7 +1722,7 @@ a10f3450124889ef3893839e4053c8a5a8bbca6b | backtest_pipeline/righe/RIGA_SOTTILE_
 #  cambiato: solo l'argomento sulla riga di questo file, non serve un
 #  nuovo giro).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 10000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R155a_tprr_SuperWaveDowH1_U30USD.txt -Etichetta r155a -Modello 4 -Deposito 10000
 # =====================================================================
 #  R156a -- InpMaxDaysHold SU ABTG_PunteLarry, U30USD H1 (sedia 772341).
 #  Undicesima sedia coperta oggi. Blocco 3 esaurito per oggi (le 7
@@ -1710,7 +1750,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin f78dacc (38mo, 45ed226 -> 0b4733c). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R156a_maxdayshold_puntelarry_U30USD.txt -Etichetta r156a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R156a_maxdayshold_puntelarry_U30USD.txt -Etichetta r156a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R157a -- InpSLGapMult SU ABTG_GapFill, U30USD H1 (sedia 772234).
 #  Dodicesima sedia coperta oggi, dal Blocco 2 (nessun candidato
@@ -1755,7 +1795,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #      diff vuoto su RIGA_ROUND_VPS.ps1/walkforward_generico.ps1 e
 #      200 su raw.githubusercontent.com per lo script e il file prova.
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R157a_slgapmult_gapfill_U30USD.txt -Etichetta r157a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R158a -- InpAtrExitPeriod SU ABTG_PTE, U30USD H1 (sedia 771321).
 #  Tredicesima sedia coperta oggi (esce dalla stessa caccia di R157a:
@@ -1784,7 +1824,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 342f6fdb (40mo, 1573c8b -> a9915cf). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R158a_atrexit_PTE_U30USD.txt -Etichetta r158a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R158a_atrexit_PTE_U30USD.txt -Etichetta r158a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R160a -- InpMaxDaysHold SU ABTG_PunteLarry, EURAUD H1 (sedia 772342).
 #  Primo dei cinque gemelli restanti della famiglia (772341 gia' coperta
@@ -1808,7 +1848,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 95170600 (41mo, a9915cf -> b402b92). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160a_maxdayshold_puntelarry_EURAUD.txt -Etichetta r160a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160a_maxdayshold_puntelarry_EURAUD.txt -Etichetta r160a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R160b -- InpMaxDaysHold SU ABTG_PunteLarry, EURCAD H1 (sedia 772346).
 #  Secondo dei cinque gemelli. Finestra 27 anni, @FRAZIONEIS 0.7586, OOS
@@ -1825,7 +1865,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160b_maxdayshold_puntelarry_EURCAD.txt -Etichetta r160b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160b_maxdayshold_puntelarry_EURCAD.txt -Etichetta r160b -Modello 1 -Deposito 100000
 # =====================================================================
 #  R160c -- InpMaxDaysHold SU ABTG_PunteLarry, GBPJPY H1 (sedia 772344).
 #  Terzo dei cinque gemelli. Finestra 27,5 anni (@DAQUANDO 1999.01.01,
@@ -1844,7 +1884,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160c_maxdayshold_puntelarry_GBPJPY.txt -Etichetta r160c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160c_maxdayshold_puntelarry_GBPJPY.txt -Etichetta r160c -Modello 1 -Deposito 100000
 # =====================================================================
 #  R160d -- InpMaxDaysHold SU ABTG_PunteLarry, GBPUSD H1 (sedia 772345).
 #  Quarto dei cinque gemelli. Finestra 27,5 anni, @DAQUANDO 1999.01.01
@@ -1859,7 +1899,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160d_maxdayshold_puntelarry_GBPUSD.txt -Etichetta r160d -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 9517060051f325954f50c31627f37edf52e43a44 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160d_maxdayshold_puntelarry_GBPUSD.txt -Etichetta r160d -Modello 1 -Deposito 100000
 # =====================================================================
 #  R160e -- InpMaxDaysHold SU ABTG_PunteLarry, XAUUSD H1 (sedia 772343).
 #  Quinto e ultimo dei cinque gemelli. Finestra 22 anni, UNA TRANCHE
@@ -1885,7 +1925,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 95170600 (41mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160e_maxdayshold_puntelarry_XAUUSD.txt -Etichetta r160e -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R160e_maxdayshold_puntelarry_XAUUSD.txt -Etichetta r160e -Modello 1 -Deposito 100000
 # =====================================================================
 #  R159a -- InpMaxHours SU ABTG_GapFill, U30USD H1 (sedia 772234).
 #  Quindicesima sedia con manopola d'uscita mai mossa (asse 12/24/36/
@@ -1916,7 +1956,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin b02d4341 (42mo, b402b92 -> 0dacebac). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R159a_maxhours_gapfill_U30USD.txt -Etichetta r159a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R159a_maxhours_gapfill_U30USD.txt -Etichetta r159a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R161a -- InpSL_ATRmult SU ABTG_BreakingBand, GBPUSD H1 (sedia 772161).
 #  Sedicesima famiglia con manopola d'uscita mai mossa. Qui la manopola
@@ -1946,7 +1986,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 0516350e (43mo, 0dacebac -> 48dfbfb1). $SHA_ROUND e
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 # =====================================================================
-0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161a_slatrmult_breakingband_GBPUSD.txt -Etichetta r161a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 0516350eb2f0cb30173a946300d09059db6112a6 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161a_slatrmult_breakingband_GBPUSD.txt -Etichetta r161a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R161b -- InpSL_ATRmult SU ABTG_BreakingBand, EURUSD H1 (sedia 772162).
 #  Secondo dei tre gemelli. @FRAZIONEIS 1.0 (276 posizioni attese su
@@ -1964,7 +2004,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 0516350e (43mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161b_slatrmult_breakingband_EURUSD.txt -Etichetta r161b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161b_slatrmult_breakingband_EURUSD.txt -Etichetta r161b -Modello 1 -Deposito 100000
 # =====================================================================
 #  R161c -- InpSL_ATRmult SU ABTG_BreakingBand, AUDUSD H1 (sedia 772163).
 #  Terzo e ultimo dei tre gemelli. @FRAZIONEIS 1.0 (239 posizioni attese
@@ -1983,7 +2023,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Pin: giro di pin 0516350e (43mo). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161c_slatrmult_breakingband_AUDUSD.txt -Etichetta r161c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R161c_slatrmult_breakingband_AUDUSD.txt -Etichetta r161c -Modello 1 -Deposito 100000
 # =====================================================================
 #  R162a -- InpPartialTargetR SU ABTG_GapContinuation, 225JPY M1
 #  (sedia 774101). "IL PARZIALE A 1R": la prima delle sei manopole
@@ -2030,7 +2070,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  walkforward_generico.ps1). Bersaglio: banco C:\MT5_Backtest
 #  (50504400).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapContinuation -Prova R162a_partialtargetr_gapcont_225JPY.txt -Etichetta r162a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapContinuation -Prova R162a_partialtargetr_gapcont_225JPY.txt -Etichetta r162a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R164a -- InpAtrExitPeriod SU ABTG_PTE, GBPUSD H1 (sedia 771322).
 #  Terza e ultima delle tre sedie PTE con questa manopola messa ad
@@ -2074,7 +2114,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic vergine 779825, non tocca 771322 vivo sul piccolo 50503392.
 # =====================================================================
-ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R164a_atrexit_PTE_GBPUSD_771322.txt -Etichetta r164a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PTE -Prova R164a_atrexit_PTE_GBPUSD_771322.txt -Etichetta r164a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R163a -- InpSLBufferPips SU ABTG_SupRev_NAS_H1_Ottimizzato, NASUSD
 #  H1 (sedia 970913). Priorita' #1 del censimento dell'11/09 ("le tre
@@ -2115,7 +2155,7 @@ ac23bdc14fc46b6468b5c337f8bd30d86c946b97 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic vergine 779826, non tocca 970913 vivo.
 # =====================================================================
-b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R163a_slbufferpips_suprev_NASUSD.txt -Etichetta r163a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupRev_NAS_H1_Ottimizzato -Prova R163a_slbufferpips_suprev_NASUSD.txt -Etichetta r163a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R166a -- InpSLBufferPips SU ABTG_SupertrendReversal, 225JPY H2
 #  (sedia 770901). Prima misura su questa sedia e sulla gemella 770924,
@@ -2162,7 +2202,7 @@ b61a5704c913fc52832f8ddec2e04217b6e56ecf | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Magic 779827, non tocca 770901 (100k 50504263) ne' 770924 (piccolo
 #  50503392).
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal -Prova R166a_slbufferpips_supertrendrev_225JPY.txt -Etichetta r166a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SupertrendReversal -Prova R166a_slbufferpips_supertrendrev_225JPY.txt -Etichetta r166a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R165a -- InpSLBufferPips SU ABTG_SuperWave_DOW_H1_Ottimizzato,
 #  U30USD H1 (sedia 770511). Ventiduesima famiglia -- sedia gia'
@@ -2225,7 +2265,7 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  ancora al nuovo pin (git diff 1445abf8 72dcf8a3 sul sorgente EA e'
 #  VUOTO). Nessun valore dell'asse o del banco toccato.
 # =====================================================================
-72dcf8a3ef69fd6656d56f37ccf48ceff4ca1336 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 72dcf8a3ef69fd6656d56f37ccf48ceff4ca1336 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R165a_slbufferpips_superwave_U30USD.txt -Etichetta r165a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R167a-d -- InpSLGapMult SU ABTG_GapFill, sui 4 gemelli GBPUSD
 #  (772231) / EURUSD (772232) / AUDUSD (772233) / 225JPY (772235).
@@ -2256,13 +2296,13 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic 779831/779832/779833/779834.
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167a_slgapmult_gapfill_GBPUSD.txt -Etichetta r167a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167a_slgapmult_gapfill_GBPUSD.txt -Etichetta r167a -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167b_slgapmult_gapfill_EURUSD.txt -Etichetta r167b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167b_slgapmult_gapfill_EURUSD.txt -Etichetta r167b -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167c_slgapmult_gapfill_AUDUSD.txt -Etichetta r167c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167c_slgapmult_gapfill_AUDUSD.txt -Etichetta r167c -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167d_slgapmult_gapfill_225JPY.txt -Etichetta r167d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R167d_slgapmult_gapfill_225JPY.txt -Etichetta r167d -Modello 4 -Deposito 100000
 # =====================================================================
 #  R168a-d -- InpMaxHours SU ABTG_GapFill, sui 4 gemelli GBPUSD
 #  (772231) / EURUSD (772232) / AUDUSD (772233) / 225JPY (772235).
@@ -2297,13 +2337,13 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic 779835/779836/779837/779838.
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168a_maxhours_gapfill_GBPUSD.txt -Etichetta r168a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168a_maxhours_gapfill_GBPUSD.txt -Etichetta r168a -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168b_maxhours_gapfill_EURUSD.txt -Etichetta r168b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168b_maxhours_gapfill_EURUSD.txt -Etichetta r168b -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168c_maxhours_gapfill_AUDUSD.txt -Etichetta r168c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168c_maxhours_gapfill_AUDUSD.txt -Etichetta r168c -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168d_maxhours_gapfill_225JPY.txt -Etichetta r168d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R168d_maxhours_gapfill_225JPY.txt -Etichetta r168d -Modello 4 -Deposito 100000
 # =====================================================================
 #  R169a-f -- InpSLBufferATR SU ABTG_PunteLarry, sui 6 gemelli U30USD
 #  (772341) / EURAUD (772342) / XAUUSD (772343) / GBPJPY (772344) /
@@ -2345,17 +2385,17 @@ d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_
 #  $SHA_WALK invariati. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic 779871-779876.
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169a_slbufferatr_puntelarry_U30USD.txt -Etichetta r169a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169a_slbufferatr_puntelarry_U30USD.txt -Etichetta r169a -Modello 4 -Deposito 100000
 # =====================================================================
-d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169b_slbufferatr_puntelarry_EURAUD.txt -Etichetta r169b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169b_slbufferatr_puntelarry_EURAUD.txt -Etichetta r169b -Modello 1 -Deposito 100000
 # =====================================================================
-d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169c_slbufferatr_puntelarry_XAUUSD.txt -Etichetta r169c -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d727f6dcb5b2242d9ca72933fa51507d113da4dd | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169c_slbufferatr_puntelarry_XAUUSD.txt -Etichetta r169c -Modello 1 -Deposito 100000
 # =====================================================================
-d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169d_slbufferatr_puntelarry_GBPJPY.txt -Etichetta r169d -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169d_slbufferatr_puntelarry_GBPJPY.txt -Etichetta r169d -Modello 1 -Deposito 100000
 # =====================================================================
-d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169e_slbufferatr_puntelarry_GBPUSD.txt -Etichetta r169e -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169e_slbufferatr_puntelarry_GBPUSD.txt -Etichetta r169e -Modello 1 -Deposito 100000
 # =====================================================================
-d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169f_slbufferatr_puntelarry_EURCAD.txt -Etichetta r169f -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_PunteLarry -Prova R169f_slbufferatr_puntelarry_EURCAD.txt -Etichetta r169f -Modello 1 -Deposito 100000
 # =====================================================================
 #  R170a-c -- InpCloseAtEnd, LE ULTIME TRE SEDIE DELLA LISTA (770250
 #  Nasdaq NASUSD, 770402 MaxMinNotte oro XAUUSD, 770411 MaxMinNotte DAX
@@ -2407,11 +2447,11 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  R170b usa -Modello 1 (l'inverso dell'abitudine di casa: motivato nel
 #  file dal muro dei tick BCM sull'oro, 2024.07.05), R170a/c -Modello 4.
 # =====================================================================
-29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R170a_closeatend_nasdaq_NASUSD.txt -Etichetta r170a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Nasdaq_Apertura_US -Prova R170a_closeatend_nasdaq_NASUSD.txt -Etichetta r170a -Modello 4 -Deposito 100000
 # =====================================================================
-29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R170b_closeatend_maxminnotte_XAUUSD.txt -Etichetta r170b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte -Prova R170b_closeatend_maxminnotte_XAUUSD.txt -Etichetta r170b -Modello 1 -Deposito 100000
 # =====================================================================
-29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte_DAX_Short_Ottimizzato -Prova R170c_closeatend_maxminnottedax_D30EUR.txt -Etichetta r170c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 29730b066793b0fd7a2ff9075d9b470e5028f8e2 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_MaxMinNotte_DAX_Short_Ottimizzato -Prova R170c_closeatend_maxminnottedax_D30EUR.txt -Etichetta r170c -Modello 4 -Deposito 100000
 # =====================================================================
 #  R171a-b -- InpSLBufferPts, ABTG_EasyTrend, sedie 772421 (CHFJPY H1)
 #  e 772422 (GBPUSD H1). Chiude l'ultima manopola d'uscita scoperta
@@ -2455,9 +2495,9 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  HEAD (grep dalla radice del repo, worktree compresi). Entrambi
 #  -Modello 1 -Deposito 100000, letti dal banco dell'ancora R103.
 # =====================================================================
-35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171a_slbufferpts_easytrend_CHFJPY.txt -Etichetta r171a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171a_slbufferpts_easytrend_CHFJPY.txt -Etichetta r171a -Modello 1 -Deposito 100000
 # =====================================================================
-35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171b_slbufferpts_easytrend_GBPUSD.txt -Etichetta r171b -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 35a0854389f5c005317071cd9e8f69eed9ae9a19 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_EasyTrend -Prova R171b_slbufferpts_easytrend_GBPUSD.txt -Etichetta r171b -Modello 1 -Deposito 100000
 # =====================================================================
 #  R172a-b -- InpTrailStartR (R172a) + InpCloseHour (R172b), sedia
 #  770202 (ABTG_Dow_Apertura_US, U30USD M5). Primi due file su
@@ -2520,9 +2560,9 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  posizioni misurate, correggendo anche un tetto scritto male a
 #  148/260). Verificato indipendentemente dalla sessione principale.
 # =====================================================================
-6216938050d6c280b5b682b108654ee27e24e187 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 6216938050d6c280b5b682b108654ee27e24e187 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172a_trailstartr_dowapertura_U30USD.txt -Etichetta r172a -Modello 4 -Deposito 100000
 # =====================================================================
-17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172b_closehour_dowapertura_U30USD.txt -Etichetta r172b -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172c -- InpBreakevenAtTP1, sedia 770202 (ABTG_Dow_Apertura_US,
 #  U30USD M5). Terzo file della serie su 770202. Stesso banco/ancora
@@ -2558,7 +2598,7 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  emendazione cosmetica della banda Peggior Giornata % di R172a/b/d/e,
 #  numero invariato.
 # =====================================================================
-17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172c_breakevenattp1_dowapertura_U30USD.txt -Etichetta r172c -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172d-e -- InpBEatR (R172d) + InpTP1_R (R172e), sedia 770202
 #  (ABTG_Dow_Apertura_US, U30USD M5). Quarto e quinto file della serie
@@ -2612,9 +2652,9 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  numero invariato (su R172d la giustificazione mancava del tutto,
 #  qui aggiunta per la prima volta).
 # =====================================================================
-17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172d_beatr_dowapertura_U30USD.txt -Etichetta r172d -Modello 4 -Deposito 100000
 # =====================================================================
-17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 17a985cf5d6c9a6ae422131832d21126c5cb4d1c | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172e_tp1r_dowapertura_U30USD.txt -Etichetta r172e -Modello 4 -Deposito 100000
 # =====================================================================
 #  R173a -- InpTP1Pct, sedia 770511 (ABTG_SuperWave_DOW_H1_Ottimizzato,
 #  U30USD H1). Prima sedia della famiglia parziale/breakeven
@@ -2663,7 +2703,7 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  esatta su Trades regge. Bersaglio: banco C:\MT5_Backtest (50504400).
 #  Magic 779863, vergine a HEAD (grep dalla radice, worktree compresi).
 # =====================================================================
-8e6c1da61af76f2747ea1882d594e412b1a756d8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173a_tp1pct_superwave_U30USD.txt -Etichetta r173a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 8e6c1da61af76f2747ea1882d594e412b1a756d8 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173a_tp1pct_superwave_U30USD.txt -Etichetta r173a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R173b -- InpTP1_R, sedia 770511 (ABTG_SuperWave_DOW_H1_Ottimizzato,
 #  U30USD H1). Secondo file della famiglia parziale/breakeven
@@ -2697,7 +2737,7 @@ d5096f8de6749bdbbcf26fcb90d24234082db651 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779867, vergine
 #  a HEAD (grep dalla radice, worktree compresi).
 # =====================================================================
-b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173b_tp1r_superwave_U30USD.txt -Etichetta r173b -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173b_tp1r_superwave_U30USD.txt -Etichetta r173b -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172f-g -- InpTrailTF (R172f) + InpCloseAtEnd (R172g), sedia 770202
 #  (ABTG_Dow_Apertura_US, U30USD M5). Sesto e settimo file della serie
@@ -2760,9 +2800,9 @@ b43753ab6c22c88943ffd599f0baac71cd539ab0 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  citato per nome dentro R172g come riferimento incrociato al
 #  fratello, non come proprio magic -- non e' una collisione).
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172f_trailtf_dowapertura_U30USD.txt -Etichetta r172f -Modello 4 -Deposito 100000
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172g_closeatend_dowapertura_U30USD.txt -Etichetta r172g -Modello 4 -Deposito 100000
 # =====================================================================
 #  R172h-j -- InpSLMode (R172h) + InpMinStopPts (R172i) +
 #  InpSkipIfTight (R172j), sedia 770202 (ABTG_Dow_Apertura_US, U30USD
@@ -2827,11 +2867,11 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  dalla radice, worktree compresi; 789560 lasciato libero come
 #  dichiarato).
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172h_slmode_dowapertura_U30USD.txt -Etichetta r172h -Modello 4 -Deposito 100000
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172i_minstoppts_dowapertura_U30USD.txt -Etichetta r172i -Modello 4 -Deposito 100000
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_Dow_Apertura_US -Prova R172j_skipiftight_dowapertura_U30USD.txt -Etichetta r172j -Modello 4 -Deposito 100000
 # =====================================================================
 #  R173c -- InpBreakeven, sedia 770511 (ABTG_SuperWave_DOW_H1_
 #  Ottimizzato, U30USD H1). TERZA e ultima manopola della famiglia
@@ -2885,7 +2925,7 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  regge. Bersaglio: banco C:\MT5_Backtest (50504400). Magic 779869,
 #  vergine a HEAD (grep -rl dalla radice, worktree compresi).
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_SuperWave_DOW_H1_Ottimizzato -Prova R173c_breakeven_superwave_U30USD.txt -Etichetta r173c -Modello 4 -Deposito 100000
 # =====================================================================
 #  R174a -- InpBEMode, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
 #  Prima manopola d'uscita mai messa ad asse su questa sedia (famiglia
@@ -2939,7 +2979,7 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  ereditato in memoria) -- se ereditato, un'eventuale inerzia fra le
 #  due celle non e' attribuibile a InpBEMode senza quella verifica.
 # =====================================================================
-23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R174a_bemode_breakingband_GBPUSD.txt -Etichetta r174a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R176a -- InpBEatATR, sedia 772161 (ABTG_BreakingBand, GBPUSD H1).
 #  Seconda manopola d'uscita testata su questa sedia, complementare a
@@ -3003,7 +3043,7 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  HEAD (grep -rlw dalla radice, worktree compresi; nessuna collisione
 #  con 779885/R174a).
 # =====================================================================
-23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 23695c070091735f54b237941831da37f91decda | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R176a_beatatr_breakingband_GBPUSD.txt -Etichetta r176a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R175a -- InpSLMode, sedia 772234 (ABTG_GapFill, U30USD H1). Prima
 #  manopola d'uscita/stop mai messa ad asse su questa sedia. Asse a 2
@@ -3061,7 +3101,7 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  `-SoloControllo` se l'.ini scrive la riga Spread= o se il driver
 #  segnala "nessuna riga Spread" (stato ereditato in memoria).
 # =====================================================================
-02f459c42c534c1d2446f50327e96c4ccdc0e974 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R175a_slmode_gapfill_U30USD.txt -Etichetta r175a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 02f459c42c534c1d2446f50327e96c4ccdc0e974 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R175a_slmode_gapfill_U30USD.txt -Etichetta r175a -Modello 4 -Deposito 100000
 # =====================================================================
 #  R177a -- InpTPRefreshBars, sedia 772161 (ABTG_BreakingBand, GBPUSD
 #  H1). Terza manopola d'uscita testata su questa sedia (dopo R174a
@@ -3108,7 +3148,7 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  file intermedio -- vanno lanciati IN SERIE (la coda automatica lo fa
 #  di suo), mai forzati in parallelo su terminali diversi.
 # =====================================================================
-a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_BreakingBand -Prova R177a_tprefreshbars_breakingband_GBPUSD.txt -Etichetta r177a -Modello 1 -Deposito 100000
 # =====================================================================
 #  R178a -- InpSLMode, sedia 772235 (ABTG_GapFill, 225JPY). Secondo
 #  simbolo testato per questo asse dopo U30USD (R175a). Asse a 2
@@ -3164,5 +3204,5 @@ a924ef4229fa730c703aa0574b16156e8c8ea993 | backtest_pipeline/righe/RIGA_SOTTILE_
 #  -- in serie, mai in parallelo sullo stesso terminale (la coda
 #  automatica lo fa di suo).
 # =====================================================================
-2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R178a_slmode_gapfill_225JPY.txt -Etichetta r178a -Modello 4 -Deposito 100000
+# [SOSPESO 21/09 -- CHALLENGE VIVA, vedi intestazione] 2faa7e37790eaef4bb6398fc4c9b0a8c57764a4a | backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1 | -Expert ABTG_GapFill -Prova R178a_slmode_gapfill_225JPY.txt -Etichetta r178a -Modello 4 -Deposito 100000
 # =====================================================================
