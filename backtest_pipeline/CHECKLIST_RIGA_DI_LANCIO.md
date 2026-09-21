@@ -27786,3 +27786,37 @@ il metro contro cui il round si legge.
 >    invarianti alla scala del lotto, `DD` e profitto NO** -- il DD non si confronta piu' con
 >    l'archivio.
 
+
+## CLASSE 535 — ⏰🤖 **LA REGOLA FIRMATA CHE NESSUNO HA SPENTO: UN'ATTIVITA' PIANIFICATA SOPRAVVIVE ALLA FIRMA** (21/09/2026)
+**Il caso reale**: il 21/09 alle ~09:29, **prima mezz'ora del primo giorno di challenge FTMO**,
+il VPS si e' inchiodato perche' sul terminale banco `50504400` girava lo Strategy Tester a
+tick reali sulla **stessa macchina** delle sei sedie che stavano operando. Claudio ha firmato
+la regola lo stesso giorno (*"i round sul pc di backtest"*), e la regola e' finita in
+`CLAUDE.md`. 🔴 **Ma la regola non spegne niente**: `backtest_pipeline/runner_abtg.ps1` r.91
+(`$Ora = "03:30"`) e r.653-678 registrano `ABTG_Runner` come **attivita' pianificata DAILY sul
+VPS** via `schtasks /Create`. Senza un gesto in piu', **alle 03:30 della notte seguente la
+macchina rifaceva da sola esattamente la cosa vietata dodici ore prima** — e una corsa a tick
+che sfora arriva dentro la sessione del mattino.
+🟢 **Il contro-esempio che chiude la classe** e' stato costruito ed eseguito: uno script che
+disabilita l'attivita' puo' "riuscire" senza cambiare niente (comando accettato, stato invariato).
+Provato sotto stub: in quel caso lo script **esce 1** e scrive *"lo stato dopo non e' quello
+atteso"*, invece di stampare FATTO. Il verdetto sta sull'artefatto riletto, non sul codice di
+uscita (parente della **154**).
+> ### 🔴 LA REGOLA
+> 1. **Una regola che cambia un COMPORTAMENTO va accompagnata dall'elenco delle AUTOMAZIONI che
+>    quel comportamento lo producono da sole**: attivita' pianificate, servizi, avvii automatici,
+>    attivita' del runner. Firmare non disarma: **disarma solo un gesto**.
+> 2. **La domanda da farsi e' sempre: "questa cosa, chi la rifa' stanotte senza di me?"**
+>    Se la risposta non e' *"nessuno, e l'ho verificato"*, la regola non e' applicata: e' scritta.
+> 3. **Si sospende, non si cancella**: `Disable-ScheduledTask` e' reversibile,
+>    `Unregister-ScheduledTask` / `schtasks /Delete` no — e per rimettere in piedi la
+>    registrazione servirebbe reinstallare. **E la riga per riaccendere si scrive SUBITO**,
+>    nello stesso documento, altrimenti a challenge finita nessuno se la ricorda.
+> 4. 🔴 **E si cerca la porta che riapre da sola**: qui `runner_abtg.ps1 -Installa` fa
+>    `schtasks /Delete` **e poi** `/Create` (r.677-678), cioe' **ricrea l'attivita' ABILITATA**.
+>    Una sospensione che un comando di manutenzione puo' disfare in silenzio va **dichiarata
+>    insieme alla sospensione**, non scoperta dopo.
+> 5. **La diagnosi si fa PRIMA e stampa il PERCORSO dell'azione**, non solo il nome
+>    dell'attivita': il 12/09 l'attivita' delle 07:20 girava da una copia sul Desktop
+>    (zip di un branch vecchio), e le riparazioni fatte su `lavoro` non arrivavano a
+>    quello che girava davvero.
