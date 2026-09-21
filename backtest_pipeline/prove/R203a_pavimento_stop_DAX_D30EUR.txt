@@ -5,15 +5,19 @@
 #  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
 #  Si lancia con: -Deposito 80000 -Modello 4
 #
-#  TERZA STESURA. Il cancello ha risposto FAIL DUE VOLTE.
-#  Primo giro: la scala era tarata su uno studio girato con una
-#  GEOMETRIA DIVERSA (classe 551), la "conferma incrociata" era
-#  algebricamente impossibile (classe 552), e la barra confrontava il DD
-#  del tester con il muro FTMO statico (classe 515, TERZA occorrenza).
-#  Secondo giro: erano sbagliati I CANCELLI STESSI -- c1 non omogeneo
-#  (classe 550), c2 un 515-bis in scala giornaliera, c3 troppo
-#  pessimista. L'asse e la riga NON sono mai stati in discussione al
-#  secondo giro.
+#  STESURE (catena dei pin, non un contatore a mano -- classe 554):
+#     89f222bf (1a) -> 4bc9aa97 (2a) -> 018c1d95 (3a) -> 20d168b2 (4a)
+#     -> QUESTA. Il cancello ha risposto FAIL su tutte le precedenti.
+#  1o giro: scala su geometria sbagliata (551), falsa conferma
+#           incrociata (552), barra contro il muro statico (515, terza
+#           occorrenza).
+#  2o giro: i CANCELLI stessi -- c1 non omogeneo (550), c2 un 515-bis
+#           in scala giornaliera, c3 troppo pessimista. L'asse e la
+#           riga NON sono mai stati in discussione.
+#  3o giro: H0 non esaustiva, e divisione per zero dentro c1.
+#  4o giro: la partizione era finita SOLO nel file prova mentre il .md
+#           teneva la versione vecchia e ne certificava la correzione
+#           (classe 554); e mancava la classe E.
 #  Tutto corretto qui sotto, e le correzioni sono dichiarate per nome.
 # =====================================================================
 #
@@ -199,9 +203,17 @@
 #             PRIMA di dividere. RF = 0 -> NON si divide e NON si
 #             inventa: si scrive DD_fisso [NON CALCOLABILE DAL CSV];
 #           - una cella a zero trade e' gia' fuori dal cancello (d)
-#             (PF non definito o < 1,20) e il driver la marca da solo
-#             ESITO: NON MISURATO, rc=2. Il verdetto del round NON
-#             dipende da quel numero;
+#             (PF 0 < 1,20), ma VA CLASSIFICATA COME 'E' (vedi sotto):
+#             non promuoverla NON basta, perche' e' la
+#             classificazione a scrivere il verdetto sull'asse;
+#           - CORREZIONE A UNA FRASE SBAGLIATA DELLA STESURA
+#             PRECEDENTE: il driver NON marca rc=2 in questo caso.
+#             RIGA_ROUND_VPS.ps1 r.342 da' "NON MISURATO" e rc=2 SOLO
+#             se TUTTE le righe hanno Trades=0; con UNA cella vuota su
+#             quattro scatta la r.346, che scrive "LETTO, ma 1 righe
+#             su 4 hanno Trades = 0" e lascia il codice d'uscita a 0
+#             o 3. La riga d'avviso c'e' (r.347-348), il codice
+#             d'uscita NO: SI LEGGE IL REFERTO, NON IL CODICE;
 #           - se serve lo stesso, il DD assoluto sta nel report HTML
 #             della passata e si legge li'.
 #          [DA CONFERMARE sul report HTML: se il Recovery Factor di
@@ -316,6 +328,34 @@
 #      -> RISPOSTA PULITA, non un "non deciso": il pavimento fa male.
 #         Chiude l'asse e manda la caccia su InpSLMode=1 o su
 #         InpMaxSpread.
+#   E) CELLA SENZA MISURA: Trades = 0, oppure DD_fisso [NON
+#      CALCOLABILE] perche' Profit=0 e RF=0.
+#      -> NON entra in A/B/C/D. Entra nella TERNA come 'E'
+#         (es. "C,B,E"), e il verdetto sull'ASSE si pronuncia SOLO
+#         sulle celle misurate.
+#      ATTENZIONE, E' IL TRANELLO DI QUESTO ROUND, ed e' verificato su
+#      una riga vera dell'archivio
+#      (ABTG_OpeningReversalB_U30USD_OOS_P0CONTA.csv): una passata a
+#      zero trade esce con Profit 0.00, PF 0.00000, RF 0.00000,
+#      Equity DD % 0.0000 E Peggior Giornata % 0.0000. Su TRE delle
+#      quattro colonne di rischio e' LA CELLA PIU' BELLA DELLA TABELLA,
+#      e chi classifica sul DD la mette in A -- "miglioramento del
+#      100%!". NON e' un pavimento che ha azzerato il DRAWDOWN: e' un
+#      pavimento che ha azzerato i TRADE. E' il "verde per caso" del
+#      19/08 nella sua forma piu' pulita.
+#      Il cancello (d) la ferma come PROMOZIONE (PF 0 < 1,20) ma NON
+#      la ferma nella CLASSIFICAZIONE, ed e' la classificazione che
+#      scrive il verdetto sull'ASSE.
+#      E SE LA CELLA 'E' E' L'UNICA A "MIGLIORARE", il verdetto e'
+#      "SERVE UN GRADINO PIU' BASSO", mai "il gradino alto vince".
+#
+#  SOGLIE NORMATIVE: valgono i RAPPORTI applicati a 8,9033 -- 7,12264
+#  (-20%), 8,45813 (-5%) e 9,34847 (+5%). I numeri a due decimali qui
+#  sopra sono arrotondamenti di comodo: in caso di discordanza vale il
+#  RAPPORTO, non l'arrotondamento. (Le due micro-bande di disaccordo
+#  sono larghe 0,0026 e 0,0019: la scelta si farebbe DOPO aver visto il
+#  numero, ed e' esattamente cio' che questo round esiste per
+#  impedire.)
 #
 #  A|B|C|D PARTISCONO LA RETTA REALE: non esiste piu' nessun intervallo
 #  scoperto, e la parola "non deciso" SPARISCE da qui -- restava solo a

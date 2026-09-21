@@ -28597,3 +28597,39 @@ del sacco di chi scrive. **E' la seconda volta in due giorni** (la prima: `r.271
 2. **Ogni puntatore di riga che il cancello consegna va aperto con `sed -n 'Np'` e incollato nel
    referto.** Un numero di riga non verificato **si propaga a valle e acquista autorita'
    passando di mano**.
+
+---
+
+## CLASSE 554 -- IL CHANGELOG CHE DICHIARA CORRETTO UN DIFETTO CHE IL DOCUMENTO CONTIENE ANCORA (e il contatore di stesura mantenuto a mano, che e' lo stesso difetto)
+
+**Caso reale (21/09/2026, R203a, QUARTO passaggio del cancello).** Il file prova e il `.md`
+della stessa riga sono stati corretti insieme per quattro giri. Al quarto, la correzione di
+**H0** (la partizione esaustiva `A|B|C|D`) e' entrata **SOLO nel file prova**. Il `.md` ha
+tenuto la versione vecchia a due insiemi col *«NON DECISO»* -- e **ottanta righe piu' sotto**,
+nella tabella del cancello, ha scritto che quel difetto era **CORRETTO**.
+
+**Perche' e' peggio di una dimenticanza: il changelog fa da ANESTETICO.** Un rilettore che
+controlla *«e' stato corretto?»* trova la riga che dice di si' e **non riapre la sezione
+operativa**. E' la stessa meccanica della **classe 552** -- una conferma che **spegne**
+l'allarme invece di accenderlo -- applicata al **proprio verbale**.
+
+**Conseguenza misurata, non teorica.** Con una cella a `DD_fisso 8,00`: chi legge il `.md`
+scrive *«NON DECISO»* e **archivia l'asse**; chi legge il file prova scrive *«B: asse giusto,
+gradino sbagliato»* e **chiede piu' risoluzione**. **Due verdetti OPPOSTI sullo stesso numero,
+dallo stesso round** -- e quello che si perdeva era **il piu' utile dei due**.
+
+**Il sintomo gemello, stessa radice**: l'intestazione *«TERZA STESURA / FAIL due volte»* quando
+le stesure erano quattro e i FAIL tre. **Terza ricorrenza in quattro giri.** Un contatore
+mantenuto a mano **invecchia di uno a OGNI riscrittura, per costruzione**: non e' distrazione,
+e' il disegno.
+
+### La regola, tre meta'
+1. **Un cancello si scrive in UN POSTO SOLO** -- il file prova (classe 549). Il `.md` ci
+   **rimanda** e al massimo ne da' una **MAPPA di lettura marcata come tale**. Non lo riscrive:
+   **due copie divergono sempre, e divergono in silenzio.**
+2. **Una riga di changelog NON e' una verifica.** Prima di scrivere *«corretto»* si **riapre la
+   sezione** e si rilegge il testo nuovo. E il cancello, dal canto suo, **non legge mai il
+   changelog** per decidere se una correzione c'e': va a guardare **il punto corretto**.
+3. **Niente contatori a mano nei documenti.** Al posto di *«terza stesura»* si scrive la
+   **catena dei pin** (`89f222bf -> 4bc9aa97 -> 018c1d95 -> ...`): aggiungere un pin e' **lo
+   stesso gesto** che fa la stesura nuova, quindi non puo' restare indietro in silenzio.
