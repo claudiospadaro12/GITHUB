@@ -28206,7 +28206,12 @@ i `Profit` DISTINTI**: se sono meno delle celle, l'asse non ha misurato quello c
 
 ---
 
-## CLASSE 542 -- la scansione d'archivio fermata a `risultati_archivio/`: la risposta stava in `risultati_prove/`
+## CLASSE 544 -- la scansione d'archivio fermata a `risultati_archivio/`: la risposta stava in `risultati_prove/`
+
+> ⚠️ **RINUMERATA da 542 a 544 il 21/09/2026.** Era nata come 542, ma un altro
+> agente in parallelo aveva gia' preso quel numero nello stesso turno. E' la
+> **classe 194** (due agenti, lo stesso numero) che si ripete: il grep sul
+> numero libero va rifatto **al momento di scrivere**, non all'inizio del lavoro.
 **Trovata il 21/09/2026, dall'autoverifica prima della consegna di R200. Se non si
 faceva quel secondo giro, partiva un round da 10 passate per una misura gia' in repo,
 e -- peggio -- partiva con l'attesa SBAGLIATA su un'altra cella.**
