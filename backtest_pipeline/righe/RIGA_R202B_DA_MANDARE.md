@@ -36,7 +36,8 @@ File prova: `backtest_pipeline/prove/R202b_obiettivo_DAX_D30EUR.txt` (90 pin, **
 🟢 **Il cancello di casa `stop >= 40 × spread` NON si muove lungo l'asse**: lo stop è il
 range d'apertura (`InpSLMode=0`, pinnato) e `InpTP1_R` non lo tocca. Tutte e 4 le celle
 stanno a **32,3×** (`54,90 / 1,70`), **42,3×** con lo stop forward `[MIS n=8]`.
-*(La tabella r.271 del referto stampa `33,0×` su questa sola riga: userebbe uno spread
+*(La **r.275** del referto stampa `33,0×` su questa sola riga della tabella — e la prosa
+di **r.19** la ripete: userebbe uno spread
 implicito di 1,664 invece di 1,70 — scarto 2%, non spiegato lì. Qui uso il numero
 ricalcolato dalle due fonti citate, così la riga verde e la tabella qui sotto dicono
 **lo stesso** numero: la cella `1.00` **è** lo stop.)*
@@ -98,7 +99,7 @@ senza quel pin l'attesa **(a)** non è verificabile.
 > 🔴 **È il contrario, ed è il fatto più importante di questa pagina**: alla **stessa
 > taglia** il DAX vale `7,2506 × 2 = **14,50%**` contro il **9,12%** del Nasdaq, cioè
 > **+59%** — e **sfonda il muro statico FTMO del 10%**, esattamente come il preset in
-> campo dichiara già oggi (*«il peggior tratto OOS a 2,00% vale 14,46%»*).
+> campo dichiara **dal 20/09** (*«il peggior tratto OOS a 2,00% vale 14,46%»*).
 >
 > 🟢 **Cosa NON tocca**: i cancelli del file prova sono **RELATIVI** («DD OOS scende di
 > almeno il 20%», «PF OOS ≥ cella viva»), quindi restano validi **identici**. Cambia solo

@@ -91,7 +91,9 @@ senza quel pin l'attesa **(a)** non è verificabile.
 > due tabelle accanto conclude che questa sedia ha metà del DD del Nasdaq. **Non è vero:
 > è metà della taglia.**
 > 🟢 **Alla stessa taglia sono 8,79% contro 9,12%**: praticamente pari, e a **1,2 punti**
-> dal muro statico FTMO del 10%. 🔴 *(Sulla gemella DAX lo stesso conto dà **14,50%**:
+> dal muro statico FTMO del 10% — ⚠️ che è un muro **DI CONTO**, e su quel conto operano
+> **sei** sedie: quegli 1,2 punti sono per **tutte**, non per questa.
+> 🔴 *(Sulla gemella DAX lo stesso conto dà **14,50%**:
 > il muro è già sfondato lì, non qui.)*
 >
 > 🟢 **Cosa NON tocca**: i cancelli del file prova sono **RELATIVI** («DD OOS scende di
