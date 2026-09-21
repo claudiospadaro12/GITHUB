@@ -1,0 +1,184 @@
+# =====================================================================
+#  R202b -- IL PRIMO OBIETTIVO: quanto spesso deve scattare la protezione?
+#  EA: ABTG_DAX_Apertura_EU   (sedia DAX 770101, simbolo D30EUR)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Il 21/09 R199B ha misurato sul Nasdaq 770260 che accendere la parziale
+#  migliora PF, DD e profitto in TUTTE E DUE le finestre. Claudio ha
+#  firmato e la parziale al 50% e' in campo dalle 22:33 di quella sera.
+#
+#  Su QUESTA sedia la parziale e' gia' accesa al 50% da prima. Quindi
+#  "fare la stessa cosa" non si puo': non c'e' niente da accendere.
+#  Cio' che DIFFERISCE fra questa sedia e il Nasdaq e' UNA riga sola:
+#      Nasdaq  InpTP1_R = 0,5
+#      questa  InpTP1_R = 1,0
+#
+#  E quella riga decide QUANTO SPESSO la protezione lavora:
+#      primo obiettivo a 0,5 R  ->  lo tocca il 65-69% delle posizioni
+#                                   (misurato su R199B: 135-82=53 e 172-102=70)
+#      primo obiettivo a 1,0 R  ->  lo tocca il 28-35% delle posizioni
+#                                   (misurato su R46b, sedia Dow)
+#  Stessa manopola accesa, che lavora META' DEL TEMPO.
+#
+#  LA TRAPPOLA, E VA LETTA PRIMA DEI NUMERI
+#  -----------------------------------------
+#  InpTP1_R NON muove solo il parziale. ABTG_*_Apertura_*.mq5 r.1694:
+#      bersaglio finale = InpTP1_R x 3
+#  quindi:
+#      InpTP1_R 1,00 -> parziale a 1,00 R, bersaglio a 3,00 R  (oggi)
+#      InpTP1_R 0,75 -> parziale a 0,75 R, bersaglio a 2,25 R
+#      InpTP1_R 0,50 -> parziale a 0,50 R, bersaglio a 1,50 R
+#      InpTP1_R 0,25 -> parziale a 0,25 R, bersaglio a 0,75 R
+#  >>> NON e' "faccio scattare la protezione prima": e' "cambio TUTTA la
+#      geometria d'uscita". Scendendo si rinuncia a meta' della coda.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI, e non e' ottimista
+#  -------------------------------------------------------
+#  Scendendo, la protezione scatta piu' spesso MA il bersaglio si accorcia.
+#  Sul Nasdaq ha vinto, ma li' la coda lunga non c'era mai stata (bersaglio
+#  gia' a 1,5 R). Qui c'e', ed e' a 3 R.
+#  PROMOSSA solo se, INSIEME:
+#    (a) DD OOS scende di almeno il 20%;
+#    (b) PF OOS resta >= quello della cella viva;
+#    (c) IS e OOS concordi di SEGNO su DD e su PF;
+#    (d) la cella scelta e' il CENTRO di un altopiano, MAI un picco --
+#        e questa e' la clausola che il 21/09 ha bocciato due candidati
+#        concordi (R198 e R201A), quindi non e' una formalita'.
+#  Se il PF crolla scendendo, il verdetto e' "su questo simbolo la coda a
+#  3 R vale piu' della protezione", e il Nasdaq resta un caso a se'.
+#  E' un esito, non un fallimento.
+#
+#  ATTENZIONE AL CONTEGGIO (classe del canarino, 21/09)
+#  -----------------------------------------------------
+#  La colonna Trades conta i DEAL D'USCITA, non le posizioni. Qui la
+#  parziale e' accesa in TUTTE le celle, quindi Trades e' gonfiato in
+#  tutte allo stesso modo? NO: il fattore dipende da quante posizioni
+#  toccano il primo obiettivo, e l'asse cambia proprio quello.
+#  >>> Percio' Trades SALIRA' scendendo lungo l'asse, senza che si apra
+#      una posizione in piu'. E' ATTESO, e NON va letto come frequenza.
+#      Le POSIZIONI non possono cambiare: InpOneTradePerDay=true e nessun
+#      ramo d'ingresso legge InpTP1_R.
+#  >>> E il PF va letto sapendo che, contato sui deal, un PF sopra 1 e'
+#      SOTTOSTIMATO -- tanto piu' quanto piu' spesso scatta il parziale.
+#      (W+x)/(L+x) < W/L quando W>L. Quindi le celle basse dell'asse sono
+#      penalizzate nella misura: se vincono lo stesso, vincono davvero.
+#      Correzione segnalata da Marco Garbuglia il 21/09, verificata.
+#
+#  ANCORA -- si controlla PRIMA di leggere qualunque altra cosa
+#  -------------------------------------------------------------
+#  La cella InpTP1_R = 1.0 E' LA CELLA VIVA e deve riprodurre R201A:
+#      IS   n 175  PF 1,12733  DD 5,4089
+#      OOS  n 270  PF 1,39520  DD 7,2506
+#  Se non li riproduce, i pin sono sbagliati: ci si ferma li'.
+#
+#  QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la firma di
+#  Claudio: la geometria d'uscita e' gestione del rischio, ed e' sua.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||0||0.0||N
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789521||789521||0||789521||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+
+# --- asse unico: IL PRIMO OBIETTIVO (e con lui il bersaglio finale) ---
+#   1.00 = quello VIVO, cella di controllo obbligatoria (bersaglio 3,00 R)
+#   0.75 = bersaglio 2,25 R
+#   0.50 = come il Nasdaq (bersaglio 1,50 R)
+#   0.25 = bersaglio 0,75 R -- molto corto, serve a vedere il verso
+InpTP1_R=1.0||0.25||0.25||1.0||Y
+# 4 celle
