@@ -479,6 +479,7 @@ int      gSpazioMorsi    = 0;      // quante volte ha bloccato (o avrebbe blocca
 // 1,407. Un filtro che taglia il 13-30% dei segnali puo' portare la famiglia
 // SOTTO il pavimento: sarebbe un PF piu' bello su una sedia non schierabile.
 // Indice 0 = long, 1 = short.
+int      gSpazioBufKo   = 0;       // letture di ostacolo FALLITE (CopyBuffer a vuoto)
 int      gSpazioValLato[2];        // segnali valutati per lato
 int      gSpazioMorLato[2];        // segnali bloccati (o che sarebbero stati persi) per lato
 // ISTOGRAMMA DELLO SPAZIO, in multipli di R. E' IL prodotto del modo 1: non
@@ -575,6 +576,13 @@ int ABTG_OnInit()
    // R51: un flag che non fa niente e non lo dice e' il bug del 05/08 daccapo.
    if(InpAllowReverse && InpEntryMode != ABTG_RETEST)
       ABTGLog("NOTA: InpAllowReverse=true ma il motore NON e' RETEST: il secondo ciclo NON si attivera'. Il reverse esiste solo per il retest.");
+   //  NESSUNA FONTE DI OSTACOLO (cancello, 21/09/2026): con le quattro medie
+   //  a 0 e il supertrend spento lo spazio risulta SEMPRE infinito. Il
+   //  pavimento non morderebbe mai (e' innocuo), ma il TETTO bloccherebbe
+   //  OGNI ingresso -- e sembrerebbe un guasto invece di una configurazione.
+   if(InpSpaceMode != ABTG_SPACE_OFF && InpSpaceEma1 <= 0 && InpSpaceEma2 <= 0 &&
+      InpSpaceEma3 <= 0 && InpSpaceEma4 <= 0 && !InpSpaceUseST)
+      ABTGLog("ATTENZIONE: filtro dello spazio acceso ma NESSUNA fonte di ostacolo (le quattro medie a 0 e supertrend spento): lo spazio risulta SEMPRE infinito. Il pavimento non mordera' mai; con InpSpaceMaxR > 0 il tetto blocchera' OGNI ingresso.");
    if(InpAllowReverse && !(InpAllowLong && InpAllowShort))
       ABTGLog("NOTA: InpAllowReverse=true con un solo lato consentito: il secondo ciclo puo' partire solo se il lato mancante e' abilitato. Cosi' com'e', quasi mai.");
    if(InpEntryMode == ABTG_DELAYED && InpDelayDirMode == ABTG_DIR_BREAK &&
@@ -702,6 +710,11 @@ void ABTG_OnDeinit(const int reason)
                               gSpazioIsto[L][0], gSpazioIsto[L][1], gSpazioIsto[L][2],
                               gSpazioIsto[L][3], gSpazioIsto[L][4], gSpazioIsto[L][5]));
         }
+      //  IL NUMERO CHE DICE SE L'ISTOGRAMMA SI PUO' LEGGERE (cancello, 21/09).
+      //  Senza, un giornale pulito non distingue "tutti gli ostacoli letti"
+      //  da "meta' non e' mai stata guardata".
+      ABTGLog(StringFormat("FILTRO SPAZIO - letture di ostacolo FALLITE: %d. Se > 0, i blocchi misurati sono un LIMITE INFERIORE e la distribuzione e' spostata verso 'nessun ostacolo'.",
+                           gSpazioBufKo));
      }
   }
 
@@ -1762,7 +1775,20 @@ double SpazioFinoAOstacolo(bool isLong, double entry)
       if(per[i] <= 0 || gSpaceEmaH[i] == INVALID_HANDLE) continue;
       double buf[1];
       // shift 1 = ultima candela CHIUSA del TF superiore: niente futuro
-      if(CopyBuffer(gSpaceEmaH[i], 0, 1, 1, buf) < 1) continue;
+      //  IL FALLIMENTO SILENZIOSO (cancello, 21/09/2026). Questo 'continue'
+      //  era muto: una EMA200 su H4 non ancora calcolata a inizio finestra
+      //  (servono ~200 barre H4 = ~33 giorni) faceva sparire quell'ostacolo
+      //  SENZA una riga di giornale. Un giornale pulito diventava compatibile
+      //  sia con "tutto letto" sia con "meta' degli ostacoli mai guardata":
+      //  i blocchi misurati sarebbero un LIMITE INFERIORE e nessuno lo
+      //  saprebbe. Adesso si conta e si dice.
+      if(CopyBuffer(gSpaceEmaH[i], 0, 1, 1, buf) < 1)
+        {
+         gSpazioBufKo++;
+         ABTGLog(StringFormat("SPAZIO: EMA%d su %s non ancora calcolata (CopyBuffer a vuoto): quell'ostacolo NON e' stato contato.",
+                              per[i], SpazioTfLabel(InpSpaceTF)));
+         continue;
+        }
       SpazioConsidera(isLong, entry, buf[0], StringFormat("EMA%d", per[i]), migliore);
      }
 
@@ -1821,6 +1847,11 @@ string SpazioBandaTesto()
 //+------------------------------------------------------------------+
 bool SpazioFuoriBanda(bool isLong, double entry, double dist)
   {
+   //  GUARDIA INTERNA (cancello, 21/09/2026): oggi il no-op dipende SOLO dal
+   //  punto di chiamata. Il parente in casa (SRBlocked) si difende da dentro,
+   //  e questa funzione fa lo stesso: se qualcuno un giorno la chiamasse da
+   //  un ramo nuovo dimenticando la guardia, il default resta un no-op.
+   if(InpSpaceMode == ABTG_SPACE_OFF) return(false);
    if(dist <= 0) return(false);
 
    double spazio         = SpazioFinoAOstacolo(isLong, entry);

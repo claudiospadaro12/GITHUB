@@ -21,6 +21,36 @@
 #            (+429 righe, 0 cancellate contro il pin schierato 9fca63d9)
 #
 # ---------------------------------------------------------------------
+#  ###  QUESTO FILE FA LA FASE 0, NON LA FASE 1  ###
+# ---------------------------------------------------------------------
+#  🔴 TROVATO DAL CANCELLO IL 21/09, e senza questa nota il round non
+#     avrebbe prodotto NIENTE:
+#
+#     TUTTO il prodotto della sonda (le righe per segnale, l'istogramma,
+#     il riepilogo) passa da ABTGLog, che stampa SOLO se InpVerbose
+#     (ABTG_DAX_Apertura_EU.mq5 r.494-497). E in OTTIMIZZAZIONE MT5 NON
+#     ESEGUE Print(): il giornale resta VUOTO.
+#
+#  👉 Quindi il lavoro si spezza in due, e questo file e' il PRIMO pezzo:
+#
+#     FASE 0 -- QUESTO FILE. E' un'OTTIMIZZAZIONE a 2 celle, e serve solo
+#               al test di regressione (A1): i NUMERI del report bastano,
+#               il giornale non serve. InpVerbose e' pinnato a 1 lo stesso,
+#               per non dipendere da un default.
+#
+#     FASE 1 -- NON E' UN FILE PROVA, ed e' scritta qui sotto in fondo.
+#               Il formato dei file prova pilota un'OTTIMIZZAZIONE: un
+#               file senza asse Y il cancello lo boccia con "celle = 0",
+#               e giustamente. La Fase 1 e' un TEST SINGOLO
+#               (Optimization=0 nell'ini del tester), e le sue
+#               impostazioni stanno in fondo a questo file.
+#
+#  🔴 Fase 1 NON si lancia come ottimizzazione. Se qualcuno ci mette un
+#     asse Y, il giornale torna muto e la misura non esiste -- e un
+#     giornale muto e' indistinguibile da "il filtro non e' mai stato
+#     interrogato".
+#
+# ---------------------------------------------------------------------
 #  ###  LE ATTESE, CONGELATE PRIMA DEI NUMERI  ###
 # ---------------------------------------------------------------------
 #
@@ -100,7 +130,42 @@
 
 InpAllowShort=0||0||0||0||N
 InpRiskPercent=1.0||1.0||0||1.0||N
+InpVerbose=1||1||0||1||N
 InpSpaceMinR=0||0||0||0||N
 InpSpaceMaxR=0||0||0||0||N
 InpSpaceTF=16388||16388||0||16388||N
 InpSpaceMode=0||0||1||1||Y
+
+# =====================================================================
+#  ###  FASE 1 -- LA MISURA. NON E' UN FILE PROVA: E' UN TEST SINGOLO ###
+# =====================================================================
+#  🔴 Non si lancia da questo file. Va impostata a mano nel tester (o con
+#     un ini che porti Optimization=0), perche' il formato dei file prova
+#     esiste per le ottimizzazioni e in ottimizzazione MT5 NON esegue
+#     Print(): il giornale tornerebbe vuoto e la misura non esisterebbe.
+#
+#  IMPOSTAZIONI, una corsa sola:
+#     EA ........... ABTG_DAX_Apertura_EU
+#     Simbolo ...... D30EUR        Periodo ... M5
+#     Da ........... 2024.09.26    Deposito .. 100000    Modello ... 4
+#     Optimization . 0   (TEST SINGOLO, non ottimizzazione)
+#     InpAllowShort=0
+#     InpRiskPercent=1.0
+#     InpVerbose=1            <- ci passa TUTTA la consegna
+#     InpSpaceMode=1          <- sola misura: conta e logga, NON blocca
+#     InpSpaceMinR=0   InpSpaceMaxR=0    <- soglie spente: e' una sonda
+#     InpSpaceTF=16388        (H4)
+#
+#  COSA SI LEGGE, e NON dal report: dal GIORNALE.
+#     1. una riga per segnale:
+#          SPAZIO long: entry ..., ostacolo EMA100 H4 a ...,
+#          spazio ... = 0.66R | soglie SPENTE -> via libera
+#     2. in coda:
+#          FILTRO SPAZIO - distribuzione LONG: <0,5R=.. | 0,5-1R=.. |
+#                          1-2R=.. | 2-3R=.. | >=3R=.. | nessun ostacolo=..
+#     3. 🔴 e la riga che dice se l'istogramma si puo' leggere:
+#          FILTRO SPAZIO - letture di ostacolo FALLITE: N
+#        Se N > 0, tipicamente l'EMA200 su H4 a inizio finestra (servono
+#        ~200 barre H4 = ~33 giorni): la distribuzione e' spostata verso
+#        "nessun ostacolo" e i numeri sono un LIMITE INFERIORE.
+# =====================================================================
