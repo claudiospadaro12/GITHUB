@@ -288,3 +288,163 @@ che impedisce al prossimo round di ripetere l'incidente — e adesso la firma di
 **la metà di strada fatta**: la riga dei round **sa** che esiste un'altra macchina.
 🔴 **L'altra metà è il driver (§5), e senza quella nessun round gira ancora sul PC di
 backtest.** È il primo passaggio da mettere in coda.
+
+---
+---
+
+# 🔧 SECONDO PASSO (stesso giorno, 21/09/2026) — **LE TRE COPIE ADESSO SONO UNA SOLA**
+
+> Chiude il §5 qui sopra, che era il difetto bloccante: *la firma non era eseguibile perché
+> il driver aveva una copia vecchia della guardia*. Scelta **(A)**, come raccomandato.
+
+## 10. 🎯 Che cosa è stato fatto, in una riga
+
+La tabella **una macchina → un solo terminale** è entrata **anche** in
+`walkforward_generico.ps1` e in `righe/RIGA_SCAN_GESTIONE.ps1`. Il blocco **non è stato
+riscritto**: è stato **copiato** dalla v2 di `RIGA_ROUND_VPS.ps1`, e il marcatore è salito
+`GUARDIA_BANCO_POSITIVA_v1` → **`_v2`** nei **tre file insieme**.
+
+🔴 **E la cosa che conta più della modifica**: adesso c'è **una macchina che dimostra che le
+tre copie non divergono**. Prima la frase *"copia dichiarata byte per byte"* era un commento,
+e un commento non misura niente — infatti l'originale era passato alla v2 e le due copie erano
+rimaste indietro **dieci giorni** senza che nulla lo segnalasse.
+
+## 11. 🧪 LE PROVE, ESEGUITE — uscita vera
+
+### 11.1 Il banco esteso: **117 prove su 117**, `exit 0`
+
+```
+pwsh -NoProfile -File backtest_pipeline/banco_guardia_macchina.ps1
+```
+
+```
+--- PARTE 1: LE IMPRONTE DELLE TRE COPIE ----------------------------
+  backtest_pipeline/righe/RIGA_ROUND_VPS.ps1       righe   336-  707  (372 righe)  sha256 ace9818b3d6a5d58...
+  backtest_pipeline/walkforward_generico.ps1       righe  1044- 1415  (372 righe)  sha256 ace9818b3d6a5d58...
+  backtest_pipeline/righe/RIGA_SCAN_GESTIONE.ps1   righe    75-  446  (372 righe)  sha256 ace9818b3d6a5d58...
+  IMPRONTE IDENTICHE: 3 copie su 3, sha256 ace9818b3d6a5d58c7ca9f42c5dbcf69506717728573c18dd6e5e52a2cda6ab3
+  (nessun marcatore v1 rimasto, tutti e tre ASCII puri)
+
+--- PARTE 2: I CASI SU backtest_pipeline/righe/RIGA_ROUND_VPS.ps1 ----
+  TabellaCoerente: OK (nessun doppione, nessun jolly, nessuna radice)
+  39 casi su 39: TUTTI PASSATI.
+--- PARTE 2: I CASI SU backtest_pipeline/walkforward_generico.ps1 ----
+  39 casi su 39: TUTTI PASSATI.
+--- PARTE 2: I CASI SU backtest_pipeline/righe/RIGA_SCAN_GESTIONE.ps1 ----
+  39 casi su 39: TUTTI PASSATI.
+
+TUTTO PASSATO: 117 prove su 117, su 3 copie, piu' il confronto delle impronte.
+```
+
+I sei casi chiesti, **misurati su tutte e tre le copie** (estratto della tabella):
+
+| gr | macchina | bersaglio | atteso | esito |
+|---|---|---|---|---|
+| 1 | `VMI3047753` | `C:\MT5_Backtest` | AMMESSO | **AMMESSO** ✅ |
+| 2 | `VMI3047753` | `C:\Program Files\BCM Markets MT5 Terminal` | RIFIUTATO | **RIFIUTATO** ✅ |
+| 3 | `DESKTOP-H4D7CAJ` | `C:\Program Files\BCM Markets MT5 Terminal` | AMMESSO | **AMMESSO** ✅ |
+| 4 | `DESKTOP-H4D7CAJ` | `C:\MT5_Backtest` | RIFIUTATO | **RIFIUTATO** ✅ |
+| 5 | qualunque (3 macchine) | `C:\BCM_Reale` · `C:\FTMO` · `...-V3` | RIFIUTATI **SEMPRE** | **RIFIUTATI** (9 casi su 9) ✅ |
+| 6 | `PC-SCONOSCIUTO` / `""` | qualunque | RIFIUTATO | **RIFIUTATO** (4 casi) ✅ |
+
+👉 **I casi 2 e 3 sono la stessa stringa di percorso** e danno esiti opposti: è la prova che il
+discriminante è **la macchina**, non il testo.
+
+### 11.2 🛑 I CONTRO-ESEMPI — *prima di consegnare, provo a ROMPERLO*
+
+Un controllo che dice solo «sì» quando tutto va bene non è un controllo. Quattro manomissioni,
+su copie di lavoro nello scratch (**mai** sui file del repo):
+
+| # | manomissione | atteso | uscita vera |
+|---|---|---|---|
+| **CE-1** | **un solo carattere** cambiato nel blocco di UNA copia (`VMI3047753` → `VMI3047754`) | FALLISCE | `LE COPIE DIVERGONO` + le tre impronte in chiaro → `FALLITO ... non e' identico nei 3 file` · **exit 1** |
+| **CE-2** | il marcatore **vecchio** `_v1` lasciato in una copia | FALLISCE | `porta ancora 1 riga/e col marcatore VECCHIO 'GUARDIA_BANCO_POSITIVA_v1'` · **exit 1** |
+| **CE-3** | **un byte non-ASCII** (emoji) dentro una stringa | FALLISCE | `NON e' ASCII puro: primo byte fuori scala all'offset 21764` · **exit 1** (regola del 17/08) |
+| **CE-4** | la **tabella manomessa** che punta alla challenge: `perc = "C:\FTMO"` | i **VIETATI** vincono lo stesso | `VMI3047753 + 'C:\FTMO' -> RIFIUTATO — TERMINALE VIETATO: ... CHALLENGE FTMO viva, conto 541452707 ... sei sedie che stanno operando` |
+
+🔴 **CE-4 è quello che vale di più**, perché prova una frase che finora era solo scritta:
+*«`$TERMINALI_VIETATI` è consultata PRIMA della tabella e vince lei»*. Anche con la tabella
+sabotata, e con `TabellaCoerente` che la considera **formalmente valida** (un percorso lo è),
+**la challenge non si tocca**.
+
+### 11.3 Gli ADATTATORI (il pezzo che il banco non copre), eseguiti
+
+Il blocco condiviso è **puro** e non legge `$env:COMPUTERNAME`: lo fanno le righe di
+adattamento, che sono **diverse per forza** nei tre file. Sono state estratte **dai file veri**
+ed eseguite con tre nomi di macchina.
+
+**Driver** (`walkforward_generico.ps1`, adattatore r.1435-1451):
+
+```
+  COMPUTERNAME = VMI3047753                BANCO_PERC "C:\MT5_Backtest"                            conto 50504400   RIPIEGO: SI    verdetto AMMESSO
+  COMPUTERNAME = DESKTOP-H4D7CAJ           BANCO_PERC "C:\Program Files\BCM Markets MT5 Terminal"  conto 50503392   RIPIEGO: SI    verdetto AMMESSO
+  COMPUTERNAME = PC-NUOVO-DI-UN-COLLEGA    BANCO_PERC ""   riga di tabella NULL                    RIPIEGO: NO -> muore nel 7-ter
+                                           verdetto: RIFIUTATO -- MACCHINA SCONOSCIUTA: ... NON e' nella tabella dei bersagli.
+```
+
+**Studio uscite** (`RIGA_SCAN_GESTIONE.ps1`, adattatore r.457-484), lanciato **senza**
+`-TerminaleBacktest` — che era il caso rotto, perché il suo default era **cablato** su
+`C:\MT5_Backtest`:
+
+```
+  COMPUTERNAME = VMI3047753         -> -TerminaleBacktest risolto in "C:\MT5_Backtest"                           AMMESSO
+  COMPUTERNAME = DESKTOP-H4D7CAJ    -> -TerminaleBacktest risolto in "C:\Program Files\BCM Markets MT5 Terminal"  AMMESSO
+  COMPUTERNAME = PC-NUOVO...        -> risolto in ""   RIFIUTATO -- MACCHINA SCONOSCIUTA
+```
+
+### 11.4 Il cancello deterministico, sui quattro file
+
+`python3 backtest_pipeline/controlla_riga.py --ps1 <file>` → **`ESITO: nessun difetto
+meccanico`** su tutti e quattro (ASCII puro · 0 errori dal parser PowerShell vero · nessun
+costrutto pwsh-7-only · `param()` riconosciuto). I rilievi sono tutti di **classe 457**
+(«nomina un conto vietato DENTRO UNA STRINGA»): sono le righe di `$TERMINALI_VIETATI`, cioè
+**la guardia stessa**, non bersagli.
+
+## 12. ⛓️ LE CATENE CHE SI ROMPONO — elencate per nome
+
+Il marcatore sale a `_v2` nei tre file: **chi cerca il `_v1` adesso muore invece di girare.**
+È voluto, ed è un fallimento **sicuro** (non parte, non tocca niente).
+
+| chi | dove | cosa succede |
+|---|---|---|
+| `backtest_pipeline/righe/MISURA_LOTTI_U30USD.ps1` | **r.67** `$MARC_ROUND='MARCATORE_RIGA_ROUND_VPS_v1'` (+ **r.63** `$BANCO='C:\MT5_Backtest'` cablato) | 🔴 lanciata col pin **`lavoro`** muore su *«il driver scaricato non ha il marcatore»* (**già rotta dal primo passo**, non da questo) |
+| `backtest_pipeline/righe/RIGA_SOTTILE_ROUND.ps1` | **r.1451** `$MARC_ROUND` `_v1`, **r.1413** `$SHA_ROUND`, **r.1446** `$SHA_WALK` | 🟢 **NON si rompe**: pinna il commit `e1e9335c`, scarica quel blob e le impronte tornano. 🔴 **Ma proprio per questo NON riceve la riparazione**: continua a portarsi dietro la guardia **v1**, cioè cablata sul VPS. Chi lo ri-pinna a HEAD rompe **tre cose insieme** (`$SHA_ROUND`, `$SHA_WALK`, `$MARC_ROUND`) e deve ricalcolarle |
+| `backtest_pipeline/controesempi_cancello.py` | r.18/50/106/111/135 | 🟠 le fixture parlano ancora del solo banco `C:\MT5_Backtest`: **continuano a passare**, ma non provano più il caso nuovo |
+| `backtest_pipeline/controlla_riga.py` | **r.65** `VIETATI_PERCORSO` contiene `"BCM Markets MT5 Terminal"` → **`blocca("TERMINALE", ...)`**; **r.68** `TERMINALE_BUONO="C:\MT5_Backtest"` | 🔴 **È la prossima cosa che morde davvero**: la futura **riga di lancio** per `DESKTOP-H4D7CAJ` nomina per forza `C:\Program Files\BCM Markets MT5 Terminal`, e **lo strato 1 del cancello la BLOCCA**. Il cancello è ancora cablato sul VPS: va insegnata anche a lui la coppia *macchina+percorso*, **come passaggio suo, col suo cancello** |
+| `backtest_pipeline/runner_abtg.ps1` | r.114-115 `$BANCO_PERC`/`$BANCO_CONTO`, gate **G3** (r.312/358) e **G4** (r.438) | 🟠 la corsia ROUND del runner **pretende** che la riga nomini `C:\MT5_Backtest`: resta **legata al VPS**, ed è coerente col fatto che il runner **gira sul VPS**. Non toccato |
+| le righe di lancio **pinnate a un commit** (`report/RIGHE_R190_R187...`, `report/RIGA_ROUND_VPS_2026-09-08.md`) | — | 🟢 non si rompono: scaricano il vecchio blob, che ha ancora `_v1`. Si rompe **solo** chi pinna al branch `lavoro` — ed è giusto: è il caso *«codice nuovo con controllo vecchio»* |
+
+## 13. ❓ `[NON MISURATO]` — l'elenco onesto del secondo passo
+
+| # | cosa non sappiamo | perché conta |
+|---|---|---|
+| 1 | 🟠 **niente è girato su Windows PowerShell 5.1.** Tutto è stato eseguito con `pwsh 7.4.6` su Linux | sul VPS e sul PC di backtest gira la **5.1**. Il cancello certifica *«nessun costrutto pwsh-7-only»*, che è una **misura**, non una corsa |
+| 2 | 🔴 **l'EA non è mai stato compilato da nessuna parte** — vale ancora, identico al §7 | un EA mai compilato è un testo. `-SoloControllo` **non compila** (checklist 39): un `#include` mancante salta fuori **solo a corsa avviata**, e restituisce **ZERO CSV**, che non è *«nessun edge»* |
+| 3 | 🔴 **il runner pianificato delle 03:30 sul VPS RESTA ACCESO.** Questa modifica **non lo sospende** | `runner_abtg.ps1` r.91 `$Ora = "03:30"` è un'**attività pianificata sul VPS**: ogni notte rifà da sola ciò che il 21/09 ha inchiodato la macchina. Sospenderlo è **un'azione sul VPS**, serve una riga, e la riga passa dal cancello |
+| 4 | 🟠 **lo stato attuale di `DESKTOP-H4D7CAJ`** (nome, conto, sedie attaccate, `MaxBars`, `metaeditor64.exe`, simboli `_EXT`) | dal 14/08 sappiamo che **quella macchina sa piazzare ordini veri**. Serve una sonda di **sola lettura** prima del primo round |
+| 5 | 🟠 **il gradino JUNCTION (`ReparsePoint`)** | il blocco condiviso è **puro** e gira su Linux: non può chiedere al disco se una cartella è un collegamento. Il gradino **c'è ed è invariato nei tre file**, ma **non è collaudato dal banco** |
+| 6 | 🟠 **gli ADATTATORI non sono nel blocco condiviso**, quindi **possono divergere** | l'impronta protegge la guardia, non le tre righe che la usano. Sono 17+28 righe, si leggono a occhio — ma è un buco dichiarato, non chiuso |
+
+## 14. 📦 Cosa consegno (secondo passo)
+
+| file | stato |
+|---|---|
+| `backtest_pipeline/walkforward_generico.ps1` | **modificato** — blocco condiviso `_v2` + adattatore; ripiego, messaggi e 7-ter resi consapevoli della macchina |
+| `backtest_pipeline/righe/RIGA_SCAN_GESTIONE.ps1` | **modificato** — stesso blocco, default `-TerminaleBacktest` **non più cablato**, avvertenza sul conto vivo |
+| `backtest_pipeline/righe/RIGA_ROUND_VPS.ps1` | **modificato** — solo l'involucro `_v2` attorno al blocco (il codice della guardia **non cambia**: impronta identica alle altre due) |
+| `backtest_pipeline/banco_guardia_macchina.ps1` | **esteso** — 3 copie × 39 casi + **confronto delle impronte** + marcatore vecchio + ASCII |
+
+**Per rifare tutto da zero (sola lettura, gira ovunque ci sia `pwsh`):**
+```
+pwsh -NoProfile -File backtest_pipeline/banco_guardia_macchina.ps1
+python3 backtest_pipeline/controlla_riga.py --ps1 backtest_pipeline/walkforward_generico.ps1
+python3 backtest_pipeline/controlla_riga.py --ps1 backtest_pipeline/righe/RIGA_SCAN_GESTIONE.ps1
+```
+
+## 15. 🎯 La bussola, aggiornata
+
+🟢 **La firma del 21/09 adesso è eseguibile fin dove arriva il codice**: un round su
+`DESKTOP-H4D7CAJ` non muore più dentro il driver. 🔴 **Ma non è ancora partito niente**: fra
+qui e il primo round vero restano **una riga di sola lettura** per censire quel PC, **il
+cancello `controlla_riga.py` da insegnare** (§12, riga rossa) e **l'EA da compilare una volta**.
+E resta **ponteggio**, non una sedia: va detto com'è.

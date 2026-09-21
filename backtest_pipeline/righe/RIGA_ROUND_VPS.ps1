@@ -121,12 +121,18 @@
 #     Da aggiornare quando si ripassa di li':
 #     righe\MISURA_LOTTI_U30USD.ps1 r.67 e righe\RIGA_SOTTILE_ROUND.ps1
 #     r.1451 (che inchioda anche lo SHA-256 di QUESTO file, r.1452-1585);
-#   - i blocchi marcati GUARDIA_BANCO_POSITIVA_v1 in
-#     walkforward_generico.ps1 e righe\RIGA_SCAN_GESTIONE.ps1 sono COPIE
-#     dichiarate delle righe 282-386 di questo file AL COMMIT e2d5dc3:
-#     quel commit non cambia, quindi la loro verifica di copia regge
-#     ancora, ma da oggi l'originale e la copia NON dicono piu' la stessa
-#     cosa. Vedi report\I_ROUND_SUL_PC_DI_BACKTEST_2026-09-21.md.
+#   - LE DUE COPIE SONO STATE ALLINEATE (21/09/2026, secondo passo). Il
+#     blocco condiviso qui sotto porta adesso il marcatore
+#     GUARDIA_BANCO_POSITIVA_v2 ed e' IDENTICO BYTE PER BYTE in
+#     walkforward_generico.ps1 e in righe\RIGA_SCAN_GESTIONE.ps1. Prima
+#     erano ferme alla v1, cioe' cablate sul banco del VPS: un round su
+#     DESKTOP-H4D7CAJ passava QUESTA guardia e poi moriva DENTRO IL
+#     DRIVER -- fallendo chiuso, quindi senza pericolo, ma senza girare.
+#     Che le tre copie non divergano NON e' piu' affidato alla buona
+#     volonta': lo dimostra backtest_pipeline\banco_guardia_macchina.ps1,
+#     che estrae il blocco dai tre file e confronta le impronte SHA-256.
+#     Chi cercava il marcatore _v1 non lo trova piu': e' voluto.
+#     Vedi report\I_ROUND_SUL_PC_DI_BACKTEST_2026-09-21.md.
 #  -------------------------------------------------------------------
 #
 #  NIENTE EMOJI: Windows PowerShell 5.1 legge i .ps1 come ANSI.

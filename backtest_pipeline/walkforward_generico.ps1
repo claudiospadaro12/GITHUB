@@ -1858,7 +1858,15 @@ Write-Host ("    cartella   : " + (Split-Path -Parent $Terminal)) -ForegroundCol
 Write-Host ("    via        : " + $ViaTerminale) -ForegroundColor Yellow
 if($ViaTerminale -like "RIPIEGO*"){
   Write-Host "    (ripiego: nessuna cartella nominata. Se non e' quello che volevi," -ForegroundColor DarkYellow
-  Write-Host ("     rilancia con -TerminaleBacktest `"" + $BANCO_PERC + "`" e non tirare a indovinare.)") -ForegroundColor DarkYellow
+  if($BANCO_PERC -ne ""){
+    Write-Host ("     rilancia con -TerminaleBacktest `"" + $BANCO_PERC + "`" e non tirare a indovinare.)") -ForegroundColor DarkYellow
+  }else{
+    # Qui $BANCO_PERC e' vuoto perche' la macchina non e' in tabella (ci si
+    # arriva col ramo di un ALTRO broker). Suggerire -TerminaleBacktest ""
+    # sarebbe un consiglio che non funziona: meglio dire la verita'.
+    Write-Host  "     su questa macchina non c'e' nessun bersaglio in tabella: l'unica porta" -ForegroundColor DarkYellow
+    Write-Host  "     e' -Terminal col percorso COMPLETO di terminal64.exe.)" -ForegroundColor DarkYellow
+  }
 }
 Write-Host "---------------------------------------------------------------------" -ForegroundColor Cyan
 
