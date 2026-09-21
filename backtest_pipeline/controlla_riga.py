@@ -376,25 +376,308 @@ def in_una_guardia(righe, idx):
 #   b) un percorso vietato passato come VALORE di -Terminal*/-Percorso* non e'
 #      mai una guardia: quello e' un bersaglio, e blocca sempre.
 GUARDIA_STRETTA = r"(Muori|throw|exit\s+1|VIETATO)"
+
+# =====================================================================
+#  CLASSE 535 (21/09/2026) -- IL CANCELLO BLOCCAVA LA RIGA GIUSTA, PERCHE'
+#  GUARDAVA IL PERCORSO E NON LA COPPIA "MACCHINA + PERCORSO".
+#
+#  IL FATTO. Il 21/09 Claudio ha firmato che, finche' una challenge e'
+#  viva, i round NON girano piu' sul VPS ma sul PC DI BACKTEST
+#  (CLAUDE.md, dopo che un backtest a tick reali ha inchiodato il VPS
+#  nella prima mezz'ora del primo giorno di FTMO). Sul PC di backtest
+#  l'unico MT5 e' installato in
+#      C:\Program Files\BCM Markets MT5 Terminal
+#  che e' ESATTAMENTE la stringa che sul VPS e' il PICCOLO 50503392, con
+#  le sedie vive sopra. VIETATI_PERCORSO la conteneva (giustamente), e
+#  quindi lo strato 1 del cancello BLOCCAVA LA RIGA CORRETTA: la firma
+#  di Claudio non era eseguibile passando dal cancello.
+#
+#  LA CORREZIONE NON E' UN ALLENTAMENTO, ed e' importante che si veda:
+#  non e' stato tolto NIENTE da VIETATI_PERCORSO ne' da nessun controllo.
+#  E' stata INSEGNATA al cancello la stessa identica tabella che gli
+#  .ps1 hanno gia' dal 21/09 -- il blocco GUARDIA_BANCO_POSITIVA_v2,
+#  identico byte per byte in
+#      backtest_pipeline\righe\RIGA_ROUND_VPS.ps1
+#      backtest_pipeline\walkforward_generico.ps1
+#      backtest_pipeline\righe\RIGA_SCAN_GESTIONE.ps1
+#  (banco che dimostra che non divergono:
+#   pwsh -NoProfile -File backtest_pipeline/banco_guardia_macchina.ps1).
+#  Qui sotto c'e' la PORTA IN PYTHON della stessa tabella e della stessa
+#  logica, nello stesso ordine: vietati PRIMA, macchina POI, e
+#  fail-closed su cio' che non e' in tabella.
+#
+#  >>> E LA DIFFERENZA CHE CONTA FRA I DUE STRATI <<<
+#  Lo .ps1 GIRA su una macchina e puo' chiedere $env:COMPUTERNAME. Il
+#  cancello no: legge un TESTO, e un testo non ha una macchina. Quindi
+#  la macchina, qui, e' quella che LA RIGA DICHIARA -- e si accetta la
+#  dichiarazione SOLO se la riga si RIFIUTA DI GIRARE ALTROVE, cioe' se
+#  porta una guardia della forma
+#      if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw '...' }
+#  Senza quella guardia la macchina e' SCONOSCIUTA e non si concede
+#  nessuna deroga: il comportamento resta quello di prima, al byte.
+#  Cosi' la deroga non e' mai una parola: e' una riga che, incollata
+#  nella finestra sbagliata, muore prima di scaricare qualunque cosa --
+#  che e' anche la rete contro l'incidente del 06/09 (un EA destinato al
+#  piccolo quasi finito sul REALE) e la regola del 12/09 sul bersaglio
+#  dichiarato in testa.
+# =====================================================================
+BERSAGLI_PER_MACCHINA = [
+    {"macchina": "VMI3047753",
+     "perc":     "C:\\MT5_Backtest",
+     "conto":    "50504400",
+     "comequi":  "il banco solo-tester del VPS",
+     # False = su questa macchina NESSUN percorso della lista dei vietati
+     #         puo' essere ammesso, per nessuna ragione.
+     "deroga":   False},
+    {"macchina": "DESKTOP-H4D7CAJ",
+     "perc":     "C:\\Program Files\\BCM Markets MT5 Terminal",
+     "conto":    "50503392",
+     "comequi":  "il terminale del PC di backtest (ATTENZIONE: e' loggato sul demo 50503392, e il 14/08/2026 da quella macchina sono partiti ordini VERI)",
+     # True = su QUESTA macchina, e SOLO qui, il percorso del piccolo e'
+     #        il bersaglio legittimo. La deroga NON e' un permesso
+     #        generico: vale SOLO per il percorso che, normalizzato, e'
+     #        IDENTICO a 'perc' -- quindi "...MT5 Terminal -V3" resta
+     #        VIETATO anche qui, perche' non e' lo stesso percorso.
+     "deroga":   True},
+]
+
+# I vietati per NOME, copiati dal blocco condiviso. NON decidono da soli
+# qual e' il bersaglio -- decide la tabella -- ma si consultano PRIMA e
+# vincono, cosi' che un terminale vietato resti vietato SU QUALUNQUE
+# MACCHINA, anche su una che non e' in tabella.
+# NB: e' un SOVRAINSIEME di VIETATI_PERCORSO (che resta come sta, perche'
+# governa un altro controllo -- la MENZIONE dentro uno script). Qui
+# entrano anche FTMO 541452707 e il manuale 50503635: un bersaglio, non
+# una menzione.
+TERMINALI_VIETATI = [
+    ("BCM_Reale",                "il terminale del conto REALE 10105439"),
+    ("-V3",                      "il terminale del 100k, conto 50504263"),
+    ("BCM Markets MT5 Terminal", "un terminale con SEDIE VIVE sopra: il piccolo 50503392 (e il 100k, che sta nella stessa famiglia di cartelle)"),
+    ("10105439",                 "il conto REALE"),
+    ("50504263",                 "il 100k"),
+    ("50503392",                 "il piccolo"),
+    ("FTMO",                     "il terminale della CHALLENGE FTMO viva, conto 541452707 (C:\\FTMO): sei sedie che stanno operando"),
+    ("541452707",                "il conto della challenge FTMO"),
+    ("MT5_MANUALE",              "il terminale del trading a mano, conto 50503635"),
+    ("50503635",                 "il conto del trading a mano"),
+]
+
+def normalizza_percorso_win(p):
+    """Porta in Python di NormalizzaPercorsoWin (blocco condiviso).
+    Stessa regola, stesso verso dell'errore: cio' che non so risolvere lo
+    RIFIUTO ("" = no), non lo indovino. Non uso os.path: il suo risultato
+    dipende dalla piattaforma, e questo cancello gira su Linux mentre la
+    riga girera' su Windows."""
+    if p is None:
+        return ""
+    s = ("" + p).strip()
+    if s == "":
+        return ""
+    s = s.replace("/", "\\")
+    if "~" in s:
+        return ""                                  # nome 8.3: non si indovina
+    if re.search(r"[\*\?\[\]\"|<>]", s):
+        return ""                                  # jolly e caratteri fuori posto
+    if not re.match(r"^[A-Za-z]:\\", s):
+        return ""                                  # niente UNC, niente \\?\, niente "C:senza-barra"
+    disco, resto = s[:2].upper(), s[2:]
+    if ":" in resto:
+        return ""                                  # un secondo ':' non e' un percorso
+    pezzi = []
+    for t in resto.split("\\"):
+        if t == "" or t == ".":
+            continue
+        if t == "..":
+            if not pezzi:
+                return ""                          # si risale sopra la radice
+            pezzi.pop()
+            continue
+        pezzi.append(t)
+    if not pezzi:
+        return disco + "\\"                        # la RADICE: rifiutata piu' sotto
+    return disco + "\\" + "\\".join(pezzi)
+
+def radice_di_disco(norm):
+    return bool(norm) and bool(re.match(r"^[A-Za-z]:\\$", norm))
+
+def riga_macchina(macchina):
+    m = ("" + (macchina or "")).strip()
+    if m == "":
+        return None
+    for b in BERSAGLI_PER_MACCHINA:
+        if m.lower() == b["macchina"].lower():     # i nomi NetBIOS non distinguono le maiuscole
+            return b
+    return None
+
+def elenco_macchine_ammesse():
+    return "; ".join(b["macchina"] + " -> " + b["perc"] + " (conto " + b["conto"] + ")"
+                     for b in BERSAGLI_PER_MACCHINA)
+
+def motivo_vietato_per_nome(chiesto, macchina):
+    """Il PRIMO gradino, da solo: i vietati per NOME, con l'unica deroga.
+    Si usa anche sui flag che NON sono -Terminal* (-Percorso, -Cartella,
+    -Path), dove il valore puo' benissimo essere una cartella di risultati e
+    non un terminale: li' la domanda giusta non e' "e' IL bersaglio di questa
+    macchina?" -- sarebbe un falso positivo su ogni Compress-Archive -Path --
+    ma resta "sta nominando un terminale che non si tocca?"."""
+    g = ("" + (chiesto or "")).strip()
+    m = ("" + (macchina or "")).strip()
+    riga = riga_macchina(m)
+    n = normalizza_percorso_win(g)
+    for pv, chi in TERMINALI_VIETATI:
+        if pv.lower() in g.lower():
+            derogato = (riga is not None and riga["deroga"] and n != ""
+                        and n.lower() == riga["perc"].lower())
+            if not derogato:
+                return "TERMINALE VIETATO: '" + g + "' nomina " + chi + "."
+    return ""
+
+def motivo_rifiuto_bersaglio(chiesto, macchina):
+    """"" se il bersaglio e' quello ammesso SU QUESTA MACCHINA, altrimenti
+    il MOTIVO. Stesso ordine del blocco condiviso, e l'ordine E' la guardia:
+      1. i VIETATI PER NOME, prima di tutto e con la precedenza sulla
+         tabella (l'unica deroga e' il percorso del piccolo sulla SOLA
+         DESKTOP-H4D7CAJ, e servono TRE cose insieme: macchina in tabella,
+         flag deroga, percorso normalizzato IDENTICO al suo bersaglio);
+      2. la MACCHINA (fail-closed: chi non e' in tabella non ha bersagli);
+      3. la forma del percorso e la RADICE DI DISCO;
+      4. il confronto POSITIVO col bersaglio DI QUELLA MACCHINA."""
+    g = ("" + (chiesto or "")).strip()
+    m = ("" + (macchina or "")).strip()
+    riga = riga_macchina(m)
+    n = normalizza_percorso_win(g)
+
+    vietato = motivo_vietato_per_nome(g, m)
+    if vietato:
+        return vietato
+    if riga is None:
+        return ("MACCHINA SCONOSCIUTA: la riga dichiara di girare su '" + m + "', che NON e'"
+                " nella tabella dei bersagli. Ammesse: " + elenco_macchine_ammesse() + "."
+                " Non esiste un ripiego: una macchina che non conosco non ha bersagli.")
+    if g == "":
+        return ("BERSAGLIO VUOTO: su '" + riga["macchina"] + "' il bersaglio sarebbe "
+                + riga["perc"] + " (conto " + riga["conto"] + "): o lo si passa, o lo si"
+                " lascia fuori del tutto e lo mette la tabella dello script.")
+    if n == "":
+        return ("BERSAGLIO NON RICONDUCIBILE A UNA CARTELLA DI WINDOWS: '" + g + "'."
+                " Un nome 8.3, un percorso di rete, un \\\\?\\, un jolly o un percorso non"
+                " ancorato a un disco non si indovinano: si rifiutano.")
+    if radice_di_disco(n):
+        return ("RADICE DI UN DISCO: '" + g + "'. Un disco intero non e' un terminale: la"
+                " pipe di chiusura diventerebbe '" + n + "*', cioe' OGNI terminal64 della"
+                " macchina, conto REALE compreso.")
+    if n.lower() != riga["perc"].lower():
+        return ("NON E' IL BERSAGLIO DI QUESTA MACCHINA: '" + g + "' (normalizzato: '" + n
+                + "'). Su '" + riga["macchina"] + "' l'unico terminale ammesso e' "
+                + riga["perc"] + " (conto " + riga["conto"] + "). Un percorso puo' essere"
+                " legittimo su UN'ALTRA macchina e non qui: il bersaglio lo decide la"
+                " MACCHINA, non il testo del percorso.")
+    return ""
+
+# La DICHIARAZIONE DI MACCHINA che il cancello accetta: solo una guardia
+# che RIFIUTA di girare altrove. Il verso conta -- '-eq' + throw vuol dire
+# l'esatto contrario ("muori SU quella macchina") e NON e' una
+# dichiarazione: in quel caso la macchina resta sconosciuta, cioe' chiusa.
+RE_MACCHINA_NE = re.compile(r"\$env:COMPUTERNAME\s*-ne\s*(?:'([^']*)'|\"([^\"]*)\")", re.I)
+
+def macchina_dichiarata(testo):
+    """(nome, nota). nome="" = nessuna macchina dichiarata -> nessuna deroga.
+    nome="?" = dichiarazioni DISCORDI -> e' un difetto, non un'assenza."""
+    nomi = []
+    for m in RE_MACCHINA_NE.finditer(testo):
+        val = (m.group(1) or m.group(2) or "").strip()
+        coda = testo[m.end(): m.end() + 240]
+        if not re.search(GUARDIA_STRETTA, coda, re.I):
+            continue          # nomina la macchina ma non rifiuta: non e' una guardia
+        if val:
+            nomi.append(val)
+    unici = sorted(set(x.lower() for x in nomi))
+    if not unici:
+        return "", "nessuna guardia '$env:COMPUTERNAME -ne ... { throw }' nella riga"
+    if len(unici) > 1:
+        return "?", "la riga dichiara DUE macchine diverse: " + ", ".join(sorted(set(nomi)))
+    return nomi[0], "guardia di macchina presente"
+
 # Attenzione: i percorsi veri CONTENGONO SPAZI ("C:\Program Files\BCM Markets
 # MT5 Terminal -V3"). Un [^\s]* si ferma al primo spazio e lascia passare
 # proprio i due terminali di Program Files: si cattura il VALORE per intero
 # (fra apici, fra virgolette, o fino a spazio se nudo) e lo si confronta dopo.
 BERSAGLIO_VALORE = re.compile(
-    r"-(?:Terminal(?:e)?(?:Backtest)?|Percorso|Cartella|Path)\s+"
+    r"-(Terminal(?:e)?(?:Backtest)?|Percorso|Cartella|Path)\s+"
     r"(?:'([^']*)'|\"([^\"]*)\"|(\S+))", re.I)
 
-def bersagli_vietati(riga_cruda):
-    """I valori di -Terminal*/-Percorso* che nominano un terminale vietato."""
+# CLASSE 536 (21/09/2026) -- IL BERSAGLIO PASSATO COME ELEMENTO DI UN ARRAY
+# NON VENIVA VISTO DA NESSUNO, E LA FORMA E' QUELLA DI CASA.
+# Misurato ESEGUENDO il cancello, non leggendolo: la riga di round di casa
+# non scrive "-TerminaleBacktest C:\..." con uno SPAZIO, scrive
+#     $a=@('-NoProfile','-File',$p,'-TerminaleBacktest','C:\BCM_Reale',...);
+#     Start-Process powershell -ArgumentList $a
+# cioe' flag e valore separati da "','" e non da uno spazio. BERSAGLIO_VALORE
+# pretende \s+ e quindi NON matcha: quella riga -- un round intero puntato
+# sul CONTO REALE 10105439 -- usciva "ESITO: nessun difetto meccanico",
+# USCITA 0, con due soli RILIEVI. Riprodotta col pin vero b8e679c4.
+# E' la classe 223 che si riapre da un'altra porta: la 223 aveva imparato
+# che un bersaglio vietato non e' mai innocente, ma il riconoscitore del
+# bersaglio guardava UNA SOLA sintassi. Stessa lezione della 457: il
+# cancello non deve guardare il codice come lo scrive il manuale, ma come
+# lo scriviamo NOI.
+BERSAGLIO_VALORE_ARRAY = re.compile(
+    r"['\"]-(Terminal(?:e)?(?:Backtest)?|Percorso|Cartella|Path)['\"]\s*,\s*"
+    r"(?:'([^']*)'|\"([^\"]*)\")", re.I)
+
+def valori_bersaglio(riga_cruda):
+    """Tutti i valori passati a -Terminal*/-Percorso*, nelle DUE sintassi che
+    usiamo davvero: con lo spazio e dentro l'array di -ArgumentList.
+    Gli apici interni si tolgono: per passare un percorso CON SPAZI dentro un
+    array si scrive '"C:\\Program Files\\..."', e le virgolette fanno parte
+    del quoting, non del percorso."""
     fuori = []
-    for m in BERSAGLIO_VALORE.finditer(riga_cruda):
-        val = m.group(1) or m.group(2) or m.group(3) or ""
-        for v in VIETATI_PERCORSO:
-            if v.lower() in val.lower():
-                fuori.append((v, val))
+    for rx in (BERSAGLIO_VALORE, BERSAGLIO_VALORE_ARRAY):
+        for m in rx.finditer(riga_cruda):
+            gruppi = m.groups()
+            flag, val = gruppi[0], ""
+            for g in gruppi[1:]:
+                if g:
+                    val = g
+                    break
+            val = val.strip().strip('"').strip("'").strip()
+            if val:
+                fuori.append((flag, val))
     return fuori
 
-def controlla_terminali(path, testo, dove, stretta=False):
+def bersagli_vietati(riga_cruda, macchina=""):
+    """I valori di -Terminal*/-Percorso* da RIFIUTARE, con il MOTIVO.
+
+    DUE REGIMI, e la differenza e' tutta la classe 535:
+      - macchina NON dichiarata (e' il caso di ogni riga scritta prima di
+        oggi): vale la regola STORICA, cioe' i soli VIETATI PER NOME. Non
+        si concede nessuna deroga, perche' non c'e' nessuna macchina a cui
+        concederla. Comportamento identico a prima, al byte.
+      - macchina DICHIARATA (la riga si rifiuta di girare altrove): vale la
+        guardia INTERA, la stessa dei tre .ps1 -- quindi anche "questo
+        percorso non e' il bersaglio di QUESTA macchina", che prima nessuno
+        controllava.
+    """
+    fuori = []
+    mac = ("" + (macchina or "")).strip()
+    for flag, val in valori_bersaglio(riga_cruda):
+        e_terminale = flag.lower().startswith("terminal")
+        if mac and e_terminale:
+            # macchina dichiarata + flag che nomina IL TERMINALE: guardia INTERA
+            motivo = motivo_rifiuto_bersaglio(val, mac)
+        else:
+            # tutto il resto: la regola STORICA, i soli vietati per nome
+            motivo = motivo_vietato_per_nome(val, mac)
+            if motivo and not mac:
+                motivo += (" Nessuna macchina e' dichiarata in questa riga, quindi nessuna"
+                           " deroga e' possibile (classe 535): per lanciare un round sul PC"
+                           " di backtest la riga deve portare"
+                           " if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ... }")
+        if motivo:
+            fuori.append((val, motivo))
+    return fuori
+
+def controlla_terminali(path, testo, dove, stretta=False, macchina=""):
     righe = righe_utili(testo)
     # Il percorso di un terminale sta SEMPRE fra virgolette, e righe_utili()
     # le toglie: questo controllo va fatto sul testo GREZZO (stessa scelta,
@@ -420,11 +703,10 @@ def controlla_terminali(path, testo, dove, stretta=False):
         # come valore di -Terminal.../-Percorso... -- e in quel caso
         # bersagli_vietati() non lo cattura affatto.
         if True:
-            for v, val in bersagli_vietati(cruda):
-                blocca("221", "r." + str(i) + ": il terminale VIETATO '" + v + "' e' passato come"
-                              " BERSAGLIO (-Terminal.../-Percorso... = '" + val + "'). Nessuna"
-                              " guardia lo rende innocuo: il 100k 50504263, il REALE 10105439 e"
-                              " il piccolo " + CONTO_PICCOLO + " non si toccano", dove)
+            for val, motivo in bersagli_vietati(cruda, macchina):
+                blocca("221", "r." + str(i) + ": BERSAGLIO RIFIUTATO (-Terminal.../-Percorso..."
+                              " = '" + val + "'). " + motivo + " Nessuna guardia altrove sulla"
+                              " riga lo rende innocuo (classe 223)", dove)
         # CLASSE 457 (19/09/2026) -- IL CANCELLO CERCAVA SOLO FUORI DAGLI APICI,
         # E UN PERCORSO WINDOWS STA SEMPRE FRA APICI.
         # Il fatto: uno script di QUATTRO righe che copia dentro la cartella
@@ -869,12 +1151,55 @@ def controlla_riga_lancio(riga):
         else:
             passa("ogni corsa cattura il suo $LASTEXITCODE")
 
-    # --- 5. il terminale bersaglio
-    if TERMINALE_BUONO.lower() in riga.lower():
-        passa("bersaglio dichiarato: " + TERMINALE_BUONO)
-    elif "-Terminal" in riga or "-TerminaleBacktest" in riga:
-        rileva("TERMINALE", "la riga passa un terminale che non e' " + TERMINALE_BUONO + ": verificare a mano che non sia un conto in forward")
-    controlla_terminali("<riga>", riga, "<riga di lancio>", stretta=True)
+    # --- 5. il terminale bersaglio: LA COPPIA MACCHINA + PERCORSO (classe 535)
+    #     Prima di oggi qui c'era una costante sola, TERMINALE_BUONO, cioe' il
+    #     banco del VPS: tutto il resto era "verificare a mano". Con la firma
+    #     del 21/09 i round girano sul PC di backtest, dove il terminale ha lo
+    #     STESSO percorso del piccolo 50503392: una costante non basta piu',
+    #     serve la tabella -- ed e' la stessa dei tre .ps1.
+    mac, nota_mac = macchina_dichiarata(riga)
+    if mac == "?":
+        blocca("535", "DICHIARAZIONI DI MACCHINA DISCORDI: " + nota_mac
+               + ". Una riga gira su UNA macchina: due guardie che nominano due nomi"
+                 " diversi vogliono dire che almeno una e' sbagliata, e il cancello"
+                 " non sceglie al posto di chi scrive")
+        mac = ""
+    if mac:
+        rm = riga_macchina(mac)
+        if rm is None:
+            blocca("535", "la riga si inchioda alla macchina '" + mac + "', che NON e' nella"
+                   " tabella dei bersagli. Ammesse: " + elenco_macchine_ammesse()
+                   + ". FAIL-CLOSED: una macchina che il cancello non conosce non ha nessun"
+                     " terminale ammesso. Se il round deve girare davvero li', si AGGIUNGE la"
+                     " riga alla tabella -- a mano, nei tre .ps1 E qui -- e si ripassa dal cancello")
+            mac = ""
+        else:
+            passa("macchina DICHIARATA e inchiodata dalla riga: " + mac + " -> unico bersaglio"
+                  " ammesso qui " + rm["perc"] + " (conto " + rm["conto"] + ", " + rm["comequi"] + ")")
+    valori = [v for f, v in valori_bersaglio(riga) if f.lower().startswith("terminal")]
+    for val in valori:
+        if mac:
+            if motivo_rifiuto_bersaglio(val, mac) == "":
+                passa("bersaglio AMMESSO sulla macchina dichiarata " + mac + ": '" + val + "'")
+        elif normalizza_percorso_win(val).lower() == TERMINALE_BUONO.lower():
+            passa("bersaglio dichiarato: " + TERMINALE_BUONO)
+        else:
+            rileva("TERMINALE", "la riga passa il terminale '" + val + "', che non e' "
+                   + TERMINALE_BUONO + ", e non dichiara nessuna macchina: verificare a mano"
+                   + " che non sia un conto in forward")
+    if not valori:
+        if TERMINALE_BUONO.lower() in riga.lower():
+            passa("bersaglio dichiarato: " + TERMINALE_BUONO)
+        elif "-Terminal" in riga:
+            rileva("TERMINALE", "la riga nomina un -Terminal... di cui non riesco a leggere il"
+                   " valore: va letto a mano")
+    elif not mac:
+        rileva("535", "la riga passa un BERSAGLIO ma non dichiara su che MACCHINA deve girare ("
+               + nota_mac + "). E' la forma di tutte le righe scritte fino al 21/09 e non e' un"
+               + " difetto di per se'; ma senza quella guardia la riga, incollata nella finestra"
+               + " sbagliata, parte lo stesso -- e il cancello non puo' concedere nessuna deroga"
+               + " per macchina. Per i round sul PC di backtest la guardia e' OBBLIGATORIA")
+    controlla_terminali("<riga>", riga, "<riga di lancio>", stretta=True, macchina=mac)
 
     # --- 6. la raccolta
     if "Compress-Archive" in riga or "zip" in riga.lower() or "-File" in riga:
@@ -948,7 +1273,7 @@ def prosa_di(testo, blocchi):
             dentro.add(k)
     return [(i, r) for i, r in enumerate(testo.splitlines(), 1) if i not in dentro]
 
-def controlla_prosa(path, testo, blocchi):
+def controlla_prosa(path, testo, blocchi, macchina=""):
     """LA PARTE DELICATA. Spegnere i controlli sulla prosa NON deve riaprire il
     buco della classe 223 (una riga puntata sul conto reale che esce pulita).
 
@@ -965,10 +1290,10 @@ def controlla_prosa(path, testo, blocchi):
     prosa = prosa_di(testo, blocchi)
     menzioni, comandi = [], 0
     for i, r in prosa:
-        for v, val in bersagli_vietati(r):
-            blocca("221", "r." + str(i) + " (PROSA): il terminale VIETATO '" + v
-                   + "' e' passato come BERSAGLIO (-Terminal.../-Percorso... = '" + val
-                   + "'). Fuori da un blocco o dentro, un bersaglio vietato non e' mai innocente", path)
+        for val, motivo in bersagli_vietati(r, macchina):
+            blocca("221", "r." + str(i) + " (PROSA): BERSAGLIO RIFIUTATO"
+                   " (-Terminal.../-Percorso... = '" + val + "'). " + motivo
+                   + " Fuori da un blocco o dentro, un bersaglio vietato non e' mai innocente", path)
         pare_comando = re.search(r"(\birm\b|& powershell|powershell\.exe|terminal64\.exe|"
                                  r"Invoke-RestMethod|Start-Process)", r, re.I)
         nominati = [v for v in VIETATI_PERCORSO if v in r] + [c for c in CONTI_VIETATI if c in r]
@@ -996,10 +1321,17 @@ def controlla_md(path, testo):
                + " meccanicamente. Se il documento contiene comandi, vanno messi in un"
                + " blocco ```powershell, altrimenti nessun cancello li vedra' mai", path)
     controllati, saltati = 0, []
+    mac_doc = ""
     for inizio, ling, cont in blocchi:
         if not cont.strip():
             continue
         e_ps = (ling in LINGUAGGI_PS) or (ling == "" and bool(ODORE_PS.search(cont)))
+        if e_ps:
+            # la macchina del DOCUMENTO si legge solo dai blocchi eseguibili:
+            # una frase in italiano non inchioda niente a nessuna macchina.
+            mm, _nota = macchina_dichiarata(cont)
+            if mm and mm != "?":
+                mac_doc = mm
         if not e_ps:
             saltati.append("r." + str(inizio) + " (```" + (ling or "senza linguaggio") + ")")
             continue
@@ -1018,7 +1350,7 @@ def controlla_md(path, testo):
     passa("blocchi ``` trovati: " + str(len(blocchi)) + ", controllati come riga di lancio: "
           + str(controllati) + ("; NON controllati: " + ", ".join(saltati) if saltati else "")
           + "  [" + os.path.basename(path) + "]")
-    controlla_prosa(path, testo, blocchi)
+    controlla_prosa(path, testo, blocchi, mac_doc)
 
 def controlla_file_prova(path, dati, testo):
     """Un file prova NON e' PowerShell: e' il formato di casa
