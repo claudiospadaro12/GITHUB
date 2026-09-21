@@ -294,8 +294,65 @@ InpSLMode=0
 InpAtrSlMult=1.5
 InpAtrPeriodMgmt=14
 InpTP1_R=0.5
-InpTP1_ClosePct=0.0
-InpBreakevenAtTP1=false
+; --- PARZIALE AL PRIMO OBIETTIVO, ACCESA IL 21/09/2026 --------------------
+;   FIRMA DI CLAUDIO: "ACCENDILA AL 50%".
+;
+;   SI ACCENDONO DUE RIGHE, NON UNA, E IL MOTIVO E' CHE LA CELLA MISURATA
+;   E' LA COPPIA:
+;       InpTP1_ClosePct   0.0   -> 50.0
+;       InpBreakevenAtTP1 false -> true
+;   Il round R199B ha pinnato InpBreakevenAtTP1=1 su TUTTE le celle, perche'
+;   a ClosePct=0 quel flag e' INERTE (r.2143: il suo blocco sta dentro
+;   "if(InpTP1_ClosePct > 0 && < 100)"). Accendere solo la prima riga
+;   significherebbe schierare una configurazione MAI GIRATA.
+;
+;   COSA FA, in concreto, su questa sedia:
+;     - stop iniziale all'estremo opposto del range = 1 R
+;     - bersaglio finale a InpTP1_R x 3 = 1,5 R  (r.1694)
+;     - primo obiettivo a InpTP1_R = 0,5 R
+;     Quando il prezzo fa mezzo R a favore: chiude META' posizione e porta
+;     lo stop del resto A PARI. Da li' in poi l'operazione non puo' piu'
+;     perdere: peggiore esito +0,25 R invece di -1 R.
+;
+;   LA MISURA (R199B, NASUSD M5 dal 2024.09.26, tick reali, banco 80.000,
+;   82 posizioni IS / 102 OOS, backtest_pipeline/risultati_prove/R199B/):
+;       ClosePct  IS: PF/DD/profit        OOS: PF/DD/profit
+;          0      1,116 / 12,36 / 4550    1,149 / 9,12 / 7689   <- com'era
+;         25      1,250 /  7,74 / 7946    1,224 / 8,26 / 8924
+;         50      1,221 /  7,31 / 7014    1,215 / 7,86 / 8497   <- messo
+;         75      1,193 /  7,89 / 6082    1,204 / 7,48 / 7979
+;   Tutte e tre le celle migliorano PF, DD E profitto in TUTTE E DUE le
+;   finestre. Il 50 e' il CENTRO dell'altopiano: il 25 vince sul PF, il 75
+;   sul DD, e stanno ai due bordi dell'intervallo utile (il codice ammette
+;   solo > 0 e < 100). Regola di casa: si prende il centro, mai il bordo.
+;
+;   IL 65-69% DELLE POSIZIONI TOCCA IL PRIMO OBIETTIVO, misurato:
+;   135 uscite - 82 posizioni = 53 parziali (64,6%); 172 - 102 = 70 (68,6%).
+;   In due casi su tre l'operazione diventa non piu' perdente.
+;
+;   PERCHE' IL PF SALE INVECE DI SCENDERE, che e' la cosa inattesa:
+;   un parziale di norma ABBASSA il PF, perche' taglia la coda. Qui lo alza.
+;   Vuol dire che le operazioni che toccavano 0,5 R e poi tornavano indietro
+;   fino allo stop pesavano PIU' della coda che si rinuncia. Il parziale
+;   prende esattamente quelle.
+;
+;   L'ANOMALIA CHE SI CHIUDE: DAX 770101 e Dow 770202 hanno gia'
+;   InpTP1_ClosePct=50. Il Nasdaq era l'UNICA delle tre aperture con la
+;   parziale spenta. Non si inventa un parametro: si toglie un'anomalia.
+;
+;   QUELLO CHE NON E' STATO RAGGIUNTO, e va scritto: il criterio congelato
+;   prima chiedeva DD OOS -20%; il migliore misurato e' -18,0% (cella 75) e
+;   la cella messa fa -13,9%. Gli altri quattro criteri sono passati.
+;   E il campione e' 82/102 POSIZIONI, sotto il pavimento di 150.
+;
+;   QUELLO CHE QUESTO ROUND NON SA: parziale e breakeven sono stati misurati
+;   INSIEME. Da R199B non si puo' dire quanto pesa ciascuno dei due.
+;
+;   SPEGNIMENTO: rimettere InpTP1_ClosePct=0.0 (a quel punto anche
+;   InpBreakevenAtTP1 torna inerte da solo, non serve toccarlo).
+; --------------------------------------------------------------------------
+InpTP1_ClosePct=50.0
+InpBreakevenAtTP1=true
 InpBEatR=0.0
 InpUseTrailing=true
 InpTrailStartR=0.0
