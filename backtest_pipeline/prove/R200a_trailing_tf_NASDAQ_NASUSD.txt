@@ -1,0 +1,301 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R200a -- IL DRAWDOWN, asse unico InpTrailTF: su QUALE candela il
+#           trailing appoggia lo stop.
+#           L'archivio dice che questa manopola MUOVE il DD parecchio
+#           su NASUSD (span misurato 4,6% - 19,6%) ma che il VERSO
+#           CAMBIA da una configurazione all'altra: tre corse, tre
+#           ordinamenti diversi. Quindi si misura, non si trasferisce.
+#           🔴 ORDINE DI CODA: si lancia DOPO R200c, che ha lo span
+#           misurato piu' grande (fattore 6,8 sul DD).
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.  -Deposito 80000 -Modello 4
+#     (21/09: il tester sul VPS ha inchiodato la macchina mentre le sei
+#      sedie FTMO operavano. I round non girano piu' sul VPS.)
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Cella VIVA, misurata TRE volte e sempre uguale (R196a, R198, R199A):
+#       IS   n  82   PF 1,11621   DD equity 12,3568%
+#       OOS  n 102   PF 1,14894   DD equity  9,1244%
+#  Il muro FTMO e' al 10% STATICO. Le due grandezze NON sono la stessa
+#  cosa (MT5 misura dal picco di equity, FTMO dal saldo iniziale): quel
+#  12,36% NON vuol dire "avremmo fallito", vuol dire che la sedia
+#  produce escursioni dello STESSO ORDINE DI GRANDEZZA del muro.
+#  Gia' escluso, coi numeri:
+#    R197A/R197B  il MODO e la PROFONDITA' d'ingresso non toccano il DD.
+#    R198         la profondita' del retest va lasciata a 0 (IS e OOS
+#                 opposti; la cella 600 arriva a DD OOS 26,1%).
+#    R199A        InpBEatR=0,5 migliora TUTTO ma il DD OOS scende solo
+#                 da 9,12% a 8,65% (-5,2%). IL DD RESTA IL PROBLEMA.
+#  Resta in piedi UNA sola famiglia d'uscita mai messa ad asse su questa
+#  sedia: il TRAILING.
+#  🔴 E DENTRO QUELLA FAMIGLIA, UNA MANOPOLA E' GIA' RISOLTA E NON VA
+#  GIRATA: InpTrailStartR. La risposta stava in repo -- stesso EA,
+#  stesso simbolo, IS e OOS separati -- e dice che il valore schierato
+#  (0) e' gia' il migliore e che alzarlo ALZA il DD in 5 righe su 5.
+#  Dettagli e numeri in prove/R200b_RITIRATO_trailing_soglia_NASDAQ_
+#  NASUSD.txt. Non spendere passate li'.
+#
+#  🔬 CHE COSA FA IL TRAILING, LETTO NEL CODICE (non ricordato)
+#  ------------------------------------------------------------
+#  ABTG_Nasdaq_Apertura_US.mq5:
+#    r.2224  bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
+#    r.2225  if(InpUseTrailing && trailArmato)
+#    r.2229-2232  BUY : newSL = TrailStopBuy(bid);
+#                       if(newSL > 0 && newSL > sl && newSL > openP) PositionModify
+#    r.2235-2238  SELL: speculare, con newSL < openP
+#    r.2247-2248  if(InpTrailMode == ABTG_TRAIL_PREVBAR)
+#                    return(iLow(_Symbol, InpTrailTF, 1));   <-- L'ASSE DI QUESTO ROUND
+#    r.2249-2250  if(InpTrailMode == ABTG_TRAIL_FIXED) return(bid - InpTrailFixedPts*_Point);
+#    r.2251-2252  altrimenti (ABTG_TRAIL_ATR) return(bid - AtrValue()*InpTrailAtrMult);
+#
+#  🔴 CONSEGUENZA CHE CAMBIA LA LETTURA, E VA DETTA PRIMA DEI NUMERI:
+#  la condizione `newSL > openP` (r.2231) vuol dire che il trailing NON
+#  PUO' MAI stringere lo stop SOTTO il prezzo d'ingresso. Quindi il
+#  trailing NON riduce la perdita di un'operazione perdente: la perdita
+#  massima per operazione resta fissata dallo stop iniziale e da
+#  InpRiskPercent=2,00. Il trailing muove il DD SOLO cambiando il
+#  cammino dell'equity (quanto profitto si porta a casa e quanto se ne
+#  restituisce). Chi si aspetta che il trailing "tagli le perdite" sta
+#  leggendo un altro meccanismo.
+#
+#  🔴 E LA MANOPOLA CHE MORDE DAVVERO -- VERIFICATO, NON SUPPOSTO
+#  --------------------------------------------------------------
+#  InpTrailTF compare in TUTTO l'EA in tre punti soli: r.271
+#  (dichiarazione), r.510 (una riga di log) e r.2248/2261, che stanno
+#  DENTRO il ramo `InpTrailMode == ABTG_TRAIL_PREVBAR`.
+#  Il preset schierato ha InpTrailMode=1 = ABTG_TRAIL_PREVBAR
+#  (mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set):
+#  👉 IL RAMO E' QUELLO ATTIVO, QUINDI InpTrailTF MORDE. ✅
+#  (E per la stessa ragione InpTrailAtrMult e InpTrailFixedPts sono
+#   INERTI in questa configurazione: vedi R200c, e i condizionali
+#   R200d/R200e, non qui.)
+#  Prova sperimentale gia' in archivio, non un ragionamento:
+#  risultati_archivio/Dow_Apertura/dow_trailing.csv -- 30 passate,
+#  SOLO 8 ESITI DISTINTI: con InpTrailMode=1 le tre righe
+#  InpTrailAtrMult 1/2/3 danno PF 1,19964 e DD 4,8490 IDENTICI; con
+#  InpTrailMode=0 le cinque righe InpTrailTF 1..5 danno PF 1,20276 e
+#  DD 6,6541 IDENTICI. La selezione dell'enum si vede nei dati.
+#
+#  🏺 IL NUMERO ESISTE GIA'? SI', IN PARTE -- e va dichiarato COM'E'
+#  -----------------------------------------------------------------
+#  Ho cercato in TUTTO risultati_archivio/ i CSV in cui InpTrailTF varia.
+#  Sono quattro, due sul Nasdaq:
+#
+#  (1) Walkforward_Aperture/NASDAQ_I_trailing_IS.csv e _OOS.csv
+#      5 passate per finestra, varia SOLO InpTrailTF. magic 770201,
+#      InpEntryMode=0 (BREAKOUT), rischio 1%, InpRangeMinutes=15.
+#        TF | IS: PF / DD / n        | OOS: PF / DD / n
+#        M1 | 1,17152 /  7,1466 / 227 | 0,85808 / 10,1986 / 294
+#        M2 | 1,03853 /  9,6067 / 249 | 0,93460 / 10,1221 / 325
+#        M3 | 1,03515 / 11,3240 / 258 | 0,74308 / 19,2318 / 327
+#        M4 | 1,01159 /  9,8874 / 263 | 0,75179 / 18,4461 / 332
+#        M5 | 1,02671 / 11,4025 / 265 | 0,78510 / 19,5678 / 338
+#
+#  (2) Aperture_Trailing/NASDAQ_trailing.csv -- 96 passate, SETTE esiti
+#      distinti (InpTrailFixedPts e' inerte a InpTrailMode=1: 8 valori
+#      -> 1 risultato). Finestra piena, magic 770201, BREAKOUT, 1%.
+#        trailing SPENTO | 0,95483 / 19,2693 / 260
+#        ON  M1          | 0,89924 /  8,7337 / 260
+#        ON  M2          | 0,96512 / 10,8408 / 260
+#        ON  M3          | 0,86293 / 16,9751 / 260
+#        ON  M4          | 0,82779 / 19,3721 / 260
+#        ON  M5          | 0,89431 / 15,9748 / 260
+#        ON  M6          | 0,85734 / 18,6255 / 260
+#
+#  ⚠️ IL LIMITE, DICHIARATO PRIMA DI USARE QUEI NUMERI:
+#  in TUTTE le celle di (1)-OOS e in TUTTE le celle di (2) il PF e'
+#  SOTTO 1. Di una configurazione con PF sotto 1 non si trasferisce
+#  NEANCHE IL VERSO. Quei numeri quindi NON sono la risposta e NON
+#  autorizzano nessun livello: sono la RAGIONE per cui questo round
+#  esiste, non il suo risultato. In piu' misurano un'altra sedia
+#  (BREAKOUT, 1%, range 15'), non questa (RETEST, 2%, range 35').
+#
+#  (3) 🔴 LA TERZA CORSA, TROVATA AL SECONDO GIRO DI SCANSIONE -- e
+#      contraddice le prime due. risultati_prove/ABTG_Nasdaq_Apertura_US/
+#      ..._IS_r24.csv e ..._OOS_r24.csv: griglia 5x5 InpTrailTF x
+#      InpTrailStartR, STESSO EA, STESSO SIMBOLO, con IS e OOS separati.
+#      magic 770201, InpEntryMode=0, InpRangeMode=2 (livello H1
+#      precedente, NON l'apertura), rischio 1%, TP1_ClosePct=50,
+#      CloseHour 21. Colonna InpTrailStartR = 0:
+#        TF | IS: PF / DD / n        | OOS: PF / DD / n
+#        M1 | 1,06836 / 4,6303 / 50  | 1,26893 / 5,7734 /  99
+#        M2 | 1,01805 / 6,8512 / 55  | 1,01916 / 4,9650 /  97
+#        M3 | 1,03738 / 5,7383 / 55  | 1,03229 / 5,2268 / 100
+#        M4 | 0,87617 / 8,3102 / 51  | 0,92001 / 7,8932 /  99
+#        M5 | 0,93409 / 9,0487 / 54  | 1,13928 / 5,1880 / 101
+#      Qui M5 e' la PEGGIORE per DD sull'IS (9,05%) ma la seconda
+#      MIGLIORE sull'OOS (5,19%). Nessuna fascia: le due finestre non
+#      concordano.
+#
+#  🟢 QUELLO CHE SI PUO' DIRE, E SOLO QUELLO -- corretto dopo (3):
+#  🔴 L'EFFETTO DI InpTrailTF SUL DD **NON E' STABILE** SU NASUSD. Tre
+#  corse, tre ordinamenti diversi: in (1) e (2) M1/M2 stanno in una
+#  fascia bassa (4,6-10,8%) e M3..M6 in una fascia alta (16-19,6%), con
+#  M5 IN ALTO; in (3)-OOS M5 sta in BASSO. Su quattro confronti diretti
+#  M1-contro-M5, TRE danno M1 con DD piu' basso e uno (3)-OOS li da'
+#  quasi pari (5,77 contro 5,19, a favore di M5).
+#  👉 Quindi l'archivio NON risponde: dice che la manopola MUOVE il DD
+#  (span da 4,6% a 19,6%) e che il verso DIPENDE DALLA CONFIGURAZIONE.
+#  E' esattamente il caso in cui la misura va rifatta sulla cella viva,
+#  perche' nessuna delle tre corse e' la cella viva.
+#  🔴 E cambia anche l'attesa: NON scrivo "M1/M2 abbasseranno il DD".
+#  Scrivo "non so quale TF abbassi il DD su questa cella, e questo round
+#  serve a saperlo". Chi avesse letto solo (1) e (2) si sarebbe portato
+#  a casa una convinzione che la terza corsa smonta.
+#  (Sul Dow, dove il PF e' SOPRA 1, M5 e' la cella migliore. Terzo
+#   ordinamento ancora diverso: il punto regge.)
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e NON e' ottimista
+#  ---------------------------------------------------------
+#  Un trailing su candela PIU' CORTA segue il prezzo piu' da vicino:
+#  chiude prima, restituisce meno profitto (DD giu') ma taglia anche i
+#  movimenti buoni (PF giu'). Un trailing su candela piu' LUNGA fa il
+#  contrario. L'esito ATTESO e' quindi "DD giu', PF giu'" scendendo di
+#  TF, e la domanda vera e' DI QUANTO ciascuno.
+#  🔴 MA IL VERSO NON E' GARANTITO, e l'ho scritto sopra al punto (3):
+#  in una delle tre corse d'archivio (r24, OOS) il TF piu' BASSO da' un
+#  DD piu' ALTO. Quindi l'attesa onesta e': "la manopola muove il DD di
+#  parecchio (span misurato 4,6%-19,6%), il verso lo dira' il CSV".
+#  Se il verso uscisse opposto all'attesa, NON e' un guasto: e' la terza
+#  corsa che aveva ragione.
+#  🔴 E L'ARCHIVIO MOSTRA GIA' LA PATOLOGIA DA TEMERE: in (2) la cella
+#  M1 porta il DD da 19,27% a 8,73% -- MA il PF scende da 0,95483 a
+#  0,89924. Quel DD piu' basso non e' "gestione migliore": e' "smette di
+#  stare sul mercato". Se qui succede lo stesso, la cella NON si
+#  promuove, per quanto bello sia il DD.
+#  Questa sedia passa il MERITO per un pelo (PF OOS 1,14894 sulla cella
+#  viva, 1,10936 sulla cella promossa dal walk-forward): se il PF OOS
+#  scende sotto 1,10 le si toglie l'unica cosa che le da' il posto.
+#
+#  SOGLIE CONGELATE PRIMA -- PROMOSSA solo se TUTTE E SEI:
+#   (a) DD OOS <= 7,30%   (cioe' -20% o meglio rispetto a 9,1244)
+#   (b) PF OOS >= 1,10
+#   (c) PF IS  >= 1,10
+#   (d) IS e OOS CONCORDI DI SEGNO su DD e su PF rispetto alla cella viva
+#   (e) n INVARIATO: 82 IS / 102 OOS. Il trailing tocca le USCITE, e
+#       InpOneTradePerDay=true impedisce che un'uscita anticipata apra
+#       un secondo ingresso. 🔴 Se n cambia, i pin sono sbagliati o sta
+#       agendo qualcos'altro: SI FERMA, non si interpreta.
+#   (f) ALTOPIANO, MAI IL PICCO: la cella scelta deve avere i due
+#       VICINI sull'asse che rispettano (b) e con DD entro +1,0 punto
+#       percentuale dal suo. Una cella che sporge da sola e' rumore, e
+#       allora il verdetto e' "NON c'e' una configurazione robusta".
+#  Se nessuna cella passa tutte e sei: "misurato e NON promosso, il
+#  default M5 resta" -- che e' un RISULTATO, non un fallimento.
+#
+#  🧪 IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------
+#  Spiegazione alternativa a "M1/M2 abbassano il DD perche' gestiscono
+#  meglio": M1/M2 abbassano il DD perche' chiudono quasi tutto a +epsilon
+#  -- cioe' la sedia SMETTE DI OPERARE davvero, pur contando le stesse
+#  82/102 operazioni. Le due spiegazioni producono numeri DIVERSI e si
+#  distinguono cosi', deciso ADESSO:
+#    - "gestisce meglio"  -> DD giu' E profitto per operazione >= quello
+#      della cella viva (IS 4.550/82 = 55,5 EUR; OOS 7.689/102 = 75,4 EUR);
+#    - "smette di operare" -> DD giu' MA profitto totale giu' e PF verso 1.
+#  L'ipotesi alternativa NON cade dentro la banda di promozione, perche'
+#  il criterio (b) PF OOS >= 1,10 la esclude per costruzione: e' il
+#  motivo per cui (b) sta li' e non e' decorativo.
+#
+#  🔬 CONTROLLO DI REGRESSIONE INTEGRATO, DA GUARDARE PER PRIMO
+#  La cella InpTrailTF = 5 (M5) E' LA CELLA VIVA e DEVE riprodurre
+#  R196a/R198/R199A al centesimo:
+#       IS   n  82   PF 1,11621   DD 12,3568
+#       OOS  n 102   PF 1,14894   DD  9,1244
+#  Se NON li riproduce, i pin sono sbagliati e tutto il resto del round
+#  non vuol dire niente: SI FERMA LI'.
+#
+#  💰 COSTO IN TEMPO MACCHINA
+#  9 celle x 2 finestre = 18 passate.
+#  Banda MISURATA in archivio, non stimata a occhio:
+#    0,083 min/passata (R88a: 96 passate in 8,0 min, tick reali, M5,
+#                       21 mesi -- il caso piu' vicino a questo)
+#    0,700 min/passata (R104, D30EUR M15 tick reali -- la base piu' alta)
+#  -> 1,5 .. 12,6 min + ~0,6 min di avvio = 2,1 .. 13,2 MINUTI.
+#  La nostra finestra e' ~12 mesi contro i 21 di R88a: la stima alta e'
+#  conservativa per eccesso.
+#  📌 AVVISO DI QUOTA, e la risposta: controlla_prova.py segnala che
+#  questo file fa 9 celle su 12 = 75,0% della coda R200 lanciabile
+#  (R200a + R200c). E' VOLUTO, per due ragioni:
+#   - R200c ha 3 celle perche' il suo asse e' un enum a tre membri: non
+#     si puo' allargare, e la sua quota bassa non e' un difetto;
+#   - 9 celle sono il minimo per leggere un ALTOPIANO su un asse di TF.
+#     Con 5 celle il DAX del 07/08 aveva una curva, non un altopiano, e
+#     l'archivio di NASUSD ci dice che qui il verso non e' stabile (vedi
+#     il punto (3) sopra): serve la forma intera, non due punti.
+#  Costo totale della coda: 24 passate = 2,6 .. 17,4 minuti.
+#
+#  🔵 QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la firma di
+#     Claudio: la gestione dell'uscita e' gestione del rischio, ed e' sua.
+#
+#  🕳️ BUCO DICHIARATO: questo round gira sulla cella VIVA, cioe' con
+#     InpBEatR=0. R199A ha trovato che InpBEatR=0,5 domina. Se Claudio
+#     firma quel cambio, il trailing andra' RImisurato sopra quella
+#     base: stop a pari a 0,5 R e trailing interagiscono (tutti e due
+#     spostano lo stop sopra l'ingresso), e il risultato di qui NON si
+#     trasferisce automaticamente la'. Va detto prima, non dopo.
+#
+# ---------------------------------------------------------------------
+#  I PIN: senza, si misura un'altra sedia. Le tre conversioni FTMO->BCM
+#  (InpSessionHour 16->14, InpCloseHour 19->17, InpCorrSymbol
+#  US500.cash->SPXUSD) sono le stesse di R196a/R198/R199A. Un CSV che
+#  torna con InpSessionHour diverso da 14 si CESTINA.
+#  Rispetto a R199A ci sono TRE pin IN PIU', e ognuno ha una ragione:
+#    InpBEatR=0.0     -- era l'asse di R199A, qui e' la cella VIVA;
+#    InpUseTrailing=1 -- e' l'interruttore generale della famiglia sotto
+#                        esame: non si lascia a un default;
+#    InpTrailStartR=0.0 e InpTrailMode=1 -- le altre due manopole della
+#                        stessa famiglia, che in R200b e R200c sono asse.
+#  InpTrailAtrMult e InpTrailFixedPts NON sono pinnati di proposito:
+#  sono INERTI sotto InpTrailMode=1 (r.2247-2252) e pinnarli farebbe
+#  credere che agiscano. Diventano pin veri in R200c/R200d.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+
+# --- asse unico: LA CANDELA SU CUI IL TRAILING APPOGGIA LO STOP ------
+#   InpTrailTF e' un ENUM_TIMEFRAMES: il PASSO E' IGNORATO, il driver
+#   spazzola i MEMBRI fra start e stop. Fra 1 e 15 i membri sono
+#   M1 M2 M3 M4 M5 M6 M10 M12 M15 = NOVE celle. (Il conto aritmetico
+#   direbbe 15: non e' quello, ed e' la classe 287.)
+#   M5 = LA CELLA VIVA, controllo di regressione obbligatorio.
+#   M1..M4  = piu' stretto del vivo: atteso DD giu', PF giu'.
+#   M6..M15 = piu' largo del vivo: atteso DD su, PF ?
+#   M15 c'e' come ANCORA ALTA: serve a far vedere la FORMA della curva,
+#   non e' un candidato (sul Dow M15 e' la peggiore per DD: 8,3583).
+InpTrailTF=5||1||1||15||Y
+# 9 celle

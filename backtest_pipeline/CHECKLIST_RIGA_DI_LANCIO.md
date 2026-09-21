@@ -28053,6 +28053,13 @@ manopola non e' "spenta", e' **inesistente in quel ramo**.
 -- **96 passate, SETTE esiti distinti**: `InpTrailFixedPts` spazzolato su otto valori
 da 100 a 800 sotto `InpTrailMode=1` produce **un solo** risultato per configurazione.
 
+`backtest_pipeline/risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv`
+-- **48 passate, QUATTORDICI esiti distinti**, e qui il gate e' **un bool, non un enum**:
+con `InpUseTrailing=0` i tre valori di `InpTrailMode` danno **tutti** `PF 0,86024 ·
+DD 48,7208 · n 369`. 👉 **L'interruttore generale della famiglia rende inerte il
+selettore che le sta sotto**: quindi non basta pinnare il selettore sul ramo giusto,
+va pinnato anche l'interruttore — mai lasciato a un default.
+
 ### La regola
 **Prima di mettere ad asse una manopola che appartiene a una famiglia selezionata da
 un enum, si apre il ramo che l'enum ATTIVO apre, e si scrive nel file prova la RIGA DI
@@ -28196,3 +28203,54 @@ leggendo un CSV con celle gemelle. In `R201a` l'asse si ferma a **0,90** per que
 Due o piu' righe con `Profit` uguale **al centesimo** e un solo input diverso. Non e' un
 caso: e' quasi sempre questa classe o la 541. Prima di leggere un altopiano, **si contano
 i `Profit` DISTINTI**: se sono meno delle celle, l'asse non ha misurato quello che dice.
+
+---
+
+## CLASSE 542 -- la scansione d'archivio fermata a `risultati_archivio/`: la risposta stava in `risultati_prove/`
+**Trovata il 21/09/2026, dall'autoverifica prima della consegna di R200. Se non si
+faceva quel secondo giro, partiva un round da 10 passate per una misura gia' in repo,
+e -- peggio -- partiva con l'attesa SBAGLIATA su un'altra cella.**
+
+Preparando il round sul drawdown della sedia `770260` ho scansionato i CSV cercando
+dove le manopole del trailing variassero. Ho guardato **solo**
+`backtest_pipeline/risultati_archivio/` e ho scritto nel file prova:
+
+> *«Scansione di TUTTI i .csv ... cercando la colonna `InpTrailStartR` con piu' di un
+> valore distinto: **ZERO FILE**. Su QUESTA sedia non e' mai stato girato.»*
+
+**Era falso.** Rifatta la scansione su `risultati_archivio/` **+** `risultati_prove/`:
+**2.387 CSV, 140 con la colonna, 4 in cui VARIA** — e due di quei quattro sono
+`risultati_prove/ABTG_Nasdaq_Apertura_US/ABTG_Nasdaq_Apertura_US_NASUSD_IS_r24.csv`
+e `..._OOS_r24.csv`: **stesso EA, stesso simbolo, griglia 5x5 `InpTrailTF` x
+`InpTrailStartR`, con IS e OOS separati.** La risposta c'era, con 50 passate.
+
+### 🔴 E il danno non era solo il round sprecato
+Lo stesso secondo giro ha trovato
+`risultati_prove/gestione_20260909/gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv`
+(48 passate, stesso EA, stesso simbolo), che **smentisce un'attesa che avevo gia'
+scritto**: avevo dichiarato la cella `InpTrailMode=2` **«DEGENERE prima di girare»**
+perche' 410 punti sono 4,10 punti indice su NASUSD. Il CSV dice che quella cella ha il
+**DD piu' basso dei tre rami: 7,1720 contro 17,6476 del ramo schierato (-59%)**, a PF
+quasi pari (0,94252 contro 0,95124) e a `n` invariato.
+👉 Senza il secondo giro avrei consegnato un file prova che **diceva a chi legge il CSV
+di ignorare la cella piu' interessante del round**.
+
+### La regola
+**Una frase del tipo «non e' mai stato provato» si scrive solo dopo aver scansionato
+TUTTE le cartelle di risultati, non quella che viene in mente per prima.** Le cartelle
+sono almeno tre e hanno storie diverse:
+- `backtest_pipeline/risultati_archivio/` — i round consolidati;
+- `backtest_pipeline/risultati_prove/` — **l'output GREZZO del driver**, dove i CSV
+  atterrano PRIMA di essere archiviati, e dove finiscono quelli che nessuno ha mai
+  archiviato (e' li' che stavano le 50 passate di r24);
+- `backtest_pipeline/risultati_prove/dal_vps/` — quelli rientrati dal VPS.
+📌 E il comando va scritto nel referto insieme al **totale dei file scansionati**: senza
+quel numero, «ho cercato ovunque» non e' verificabile da nessuno.
+
+### Il contro-esempio, ESEGUITO
+Stessa ricerca, due perimetri, stesso giorno:
+- perimetro `risultati_archivio/` -> **0 file** in cui `InpTrailStartR` varia;
+- perimetro `risultati_archivio/` + `risultati_prove/` -> **4 file**, di cui **2 sullo
+  stesso EA e sullo stesso simbolo del round in preparazione**.
+Il primo perimetro non produce un numero basso: produce **il numero sbagliato**, e ha
+la forma di una risposta.

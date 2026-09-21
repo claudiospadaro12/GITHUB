@@ -1,0 +1,199 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R200d -- IL DRAWDOWN, asse unico InpTrailAtrMult.
+#
+#  🛑🛑 NON LANCIARE ADESSO. 🛑🛑
+#  Questo file NON fa parte della coda di R200. Ha una CONDIZIONE
+#  D'INGRESSO scritta qui sotto, e finche' non e' soddisfatta lanciarlo
+#  e' tempo macchina buttato. E' preparato adesso perche' se la
+#  condizione scatta la risposta deve essere pronta, non da scrivere.
+#
+#  🖥️ SE E QUANDO GIRERA': PC DI BACKTEST, NON VPS.
+#     -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  🔴 PERCHE' NON SI LANCIA ADESSO: L'ASSE E' INERTE SULLA CELLA VIVA
+#  ------------------------------------------------------------------
+#  InpTrailAtrMult compare in tutto l'EA in TRE punti: r.272
+#  (dichiarazione) e r.2252 / r.2265, che stanno nel ramo raggiunto
+#  SOLO quando InpTrailMode == ABTG_TRAIL_ATR (0):
+#      r.2247  if(InpTrailMode == ABTG_TRAIL_PREVBAR) return(iLow(...));
+#      r.2249  if(InpTrailMode == ABTG_TRAIL_FIXED)   return(bid - ...);
+#      r.2251  double atr = AtrValue();
+#      r.2252  return(atr > 0 ? bid - atr*InpTrailAtrMult : 0);
+#  Il preset schierato ha InpTrailMode = 1
+#  (mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set).
+#  👉 Sulla cella viva questo input e' un NO-OP: si puo' girarlo da 1 a
+#  4 e NON SUCCEDE NIENTE. E' la stessa forma del difetto trovato il
+#  21/09 su InpBreakevenAtTP1 (NO-OP quando InpTP1_ClosePct=0, r.2143).
+#
+#  ✅ PROVA SPERIMENTALE, non un ragionamento sul codice:
+#  risultati_archivio/Dow_Apertura/dow_trailing.csv, 30 passate e SOLO
+#  OTTO esiti distinti. Con InpTrailMode=1 le tre righe
+#  InpTrailAtrMult = 1 / 2 / 3, a parita' di TF, tornano IDENTICHE:
+#      TF M1 -> PF 1,19964 · DD 4,8490 · n 329   (tre volte)
+#      TF M2 -> PF 1,33695 · DD 5,5622 · n 329   (tre volte)
+#      TF M5 -> PF 1,37075 · DD 5,3161 · n 329   (tre volte)
+#  Il CSV lo dimostra da solo: la manopola non ha morso.
+#
+#  🚦 LA CONDIZIONE D'INGRESSO, decisa PRIMA
+#  ------------------------------------------
+#  Si lancia SOLO se R200c (asse InpTrailMode) torna con la cella
+#  mode 0 (ATR) ENTRO 5 punti percentuali di PF OOS dalla cella viva
+#  (cioe' PF OOS della cella 0 >= 1,09149 = 1,14894 x 0,95), OPPURE con
+#  DD OOS della cella 0 <= 8,20% (-10% o meglio).
+#  👉 Fuori da quella condizione, il ramo ATR e' gia' misurato come
+#  lontano e tararne il moltiplicatore sarebbe cercare un picco di
+#  rumore in una famiglia che ha gia' perso il confronto.
+#  🔴 E vale il limite di casa: non si allarga la griglia su un
+#  meccanismo gia' dichiarato peggiore. Questa condizione E' quel limite,
+#  scritto come numero invece che come intenzione.
+#
+#  🟠 E VA DETTO CHE LA CONDIZIONE PROBABILMENTE NON SCATTERA'.
+#  Le due misure che abbiamo mettono il ramo ATR ULTIMO fra i rami vivi:
+#   - NASUSD, stesso EA (gestione_ABTG_Nasdaq_Apertura_US_NASUSD_
+#     gestione.csv): mode 0 DD 32,0908 contro 17,6476 del PREVBAR e
+#     7,1720 del FISSO. E' il peggiore dei tre.
+#   - U30USD (dow_trailing.csv): mode 0 perde contro mode 1 su PF *e* su
+#     DD a ogni accoppiamento.
+#  👉 Quindi l'ordine di precedenza fra i due file condizionali e':
+#     PRIMA R200e (ramo FISSO, il piu' promettente per il DD), POI
+#     eventualmente questo. Se R200c conferma quelle due misure, questo
+#     file NON si lancia e il ramo ATR si archivia come MISURATO E
+#     PEGGIORE -- con i numeri, non per stanchezza.
+#
+#  🔬 IL CONTROLLO DI REGRESSIONE QUI E' DIVERSO, E VA DETTO
+#  ---------------------------------------------------------
+#  🔴 In questo file la cella viva NON C'E'. Con InpTrailMode pinnato a
+#  0, NESSUNA cella puo' riprodurre IS 1,11621/12,3568 e OOS
+#  1,14894/9,1244: quei numeri appartengono al ramo PREVBAR.
+#  Pretenderli qui sarebbe un controllo che fallisce per costruzione.
+#  👉 Il controllo di regressione di questo file e' AGGANCIATO A R200c:
+#  la cella InpTrailAtrMult = 2.0 DEVE riprodurre AL CENTESIMO la cella
+#  mode 0 di R200c (stessi pin, stesso moltiplicatore 2,0 del preset).
+#  Se non la riproduce, i pin sono sbagliati e il round non vale niente:
+#  SI FERMA LI'.
+#  ⚠️ Il numero della cella mode 0 di R200c oggi e' [NON MISURATO]:
+#  va copiato QUI dal CSV di R200c PRIMA di lanciare, altrimenti il
+#  controllo non e' un controllo, e' una frase.
+#     -> cella mode 0 di R200c:  IS n ___ PF ______ DD ______
+#                                OOS n ___ PF ______ DD ______
+#
+#  🏺 IL NUMERO ESISTE GIA'? SOLO SUL DOW, in campione, tre punti
+#  --------------------------------------------------------------
+#  dow_trailing.csv, U30USD, BREAKOUT, 1%, finestra piena SENZA
+#  fuori campione, n=329, InpTrailMode=0:
+#      mult 1 | PF 1,20276 | DD 6,6541
+#      mult 2 | PF 1,24237 | DD 7,3409
+#      mult 3 | PF 1,24670 | DD 8,2207
+#  🟢 Forma: monotona in tutti e due i sensi -- moltiplicatore su, PF su
+#  e DD SU. E' lo scambio che questo round NON cerca: noi vogliamo il DD
+#  GIU'. Quindi il verso utile, se c'e', sta SOTTO 2,0, non sopra.
+#  ⚠️ Altro simbolo, altro ingresso, nessun fuori campione: e'
+#  un'aspettativa, non una risposta. Il livello non si trasferisce.
+#  E la griglia qui sotto copre lo stesso sotto 2,0 e sopra 2,0, perche'
+#  una curva con un solo lato non fa vedere un altopiano.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e NON e' ottimista
+#  ---------------------------------------------------------
+#  Un moltiplicatore piu' PICCOLO stringe il trailing: DD giu', PF giu'.
+#  Uno piu' GRANDE lo allarga: DD su, PF su. Atteso quindi un altopiano
+#  di PF sulla destra e un altopiano di DD sulla sinistra, con la cella
+#  buona -- se esiste -- nel mezzo. 🔴 Ma il mezzo di una curva a due
+#  pendenze opposte e' proprio il posto dove un picco di rumore si
+#  traveste da compromesso: per questo il criterio (f) dell'altopiano
+#  qui NON e' facoltativo.
+#
+#  SOGLIE CONGELATE PRIMA -- PROMOSSA solo se TUTTE E SEI:
+#   (a) DD OOS <= 7,30%   (-20% o meglio rispetto a 9,1244)
+#   (b) PF OOS >= 1,10
+#   (c) PF IS  >= 1,10
+#   (d) IS e OOS CONCORDI DI SEGNO su DD e su PF rispetto alla cella viva
+#   (e) n INVARIATO: 82 IS / 102 OOS (InpOneTradePerDay=true)
+#   (f) ALTOPIANO, MAI IL PICCO: i due VICINI sull'asse rispettano (b) e
+#       stanno entro +1,0 punto percentuale di DD. Cella isolata = "non
+#       c'e' una configurazione robusta", e si scrive cosi'.
+#
+#  🧪 IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------
+#  Spiegazione alternativa a "esiste un moltiplicatore che abbassa il
+#  DD": l'ATR(14) su M5 di NASUSD e' cresciuto di 15,4 volte fra il 2012
+#  e il 2026 (mediana dell'ampiezza dei primi 30': 11,5 -> 176,6 punti
+#  indice, report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md). La nostra
+#  finestra copre 2024.09 -> 2026 (mediane 86,8 / 116,6 / 176,6): il
+#  MOLTIPLICATORE e' costante ma la DISTANZA che produce raddoppia
+#  dentro la finestra. Una cella "buona" potrebbe esserlo solo perche'
+#  va bene sull'ultima epoca, che pesa di piu' nell'OOS (l'OOS e' la
+#  coda della finestra).
+#  👉 Si distingue cosi', deciso ADESSO: se la cella vincente OOS e'
+#  DIVERSA da quella vincente IS e le due stanno agli estremi opposti
+#  dell'asse, NON e' una taratura: e' la volatilita' che cambia, e il
+#  verdetto e' "il moltiplicatore ATR non e' stabile su questa finestra",
+#  non "abbiamo trovato il valore". Il criterio (d) lo esclude gia', ma
+#  la RAGIONE va scritta, non solo l'esito.
+#
+#  💰 COSTO IN TEMPO MACCHINA
+#  7 celle x 2 finestre = 14 passate.
+#  Banda MISURATA: 0,083 min/passata (R88a) .. 0,700 min/passata (R104).
+#  -> 1,2 .. 9,8 min + ~0,6 min di avvio = 1,8 .. 10,4 MINUTI.
+#
+#  🔵 NON SI TOCCA NIENTE IN CAMPO senza la firma di Claudio.
+#
+# ---------------------------------------------------------------------
+#  I PIN: stessa cella viva di R200a/R200b/R200c SALVO InpTrailMode, che
+#  qui e' 0 PER FORZA (senza, l'asse e' inerte). Stesse conversioni
+#  FTMO->BCM: InpSessionHour 16->14, InpCloseHour 19->17, InpCorrSymbol
+#  US500.cash->SPXUSD. Un CSV con InpSessionHour diverso da 14 si
+#  CESTINA.
+#  InpTrailTF e InpTrailFixedPts NON sono pinnati: sotto InpTrailMode=0
+#  sono INERTI (r.2247-2252), e pinnarli farebbe credere che agiscano.
+#  InpAtrPeriodMgmt=14 invece E' pinnato: sotto mode 0 diventa il
+#  periodo dell'ATR che decide la distanza (r.450 + r.1866-1871).
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=0||0||0||0||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+
+# --- asse unico: LA DISTANZA DEL TRAILING IN MULTIPLI DI ATR ---------
+#   Attivo SOLO perche' InpTrailMode e' pinnato a 0 qui sopra (r.2251-
+#   2252). Con il pin del preset (mode 1) questo asse sarebbe INERTE.
+#   ATR(14) sul TF del GRAFICO = M5 (r.450: PERIOD_CURRENT).
+#   1,0 - 1,5        = piu' stretto del punto misurato sul Dow
+#   2,0              = il valore del preset <-- regressione AGGANCIATA a
+#                      R200c cella mode 0, da compilare prima di girare
+#   2,5 - 3,0 - 3,5 - 4,0 = piu' largo
+#   Sette celle: servono per vedere se l'altopiano esiste, non per
+#   scegliere il massimo. Il massimo NON si sceglie (regola di casa).
+InpTrailAtrMult=2.0||1.0||0.5||4.0||Y
+# 7 celle

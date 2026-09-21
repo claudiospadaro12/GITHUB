@@ -1,0 +1,216 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R200e -- IL DRAWDOWN, asse unico InpTrailFixedPts: la DISTANZA del
+#           trailing a punti fissi.
+#
+#  🛑🛑 NON LANCIARE PRIMA DI R200c. 🛑🛑
+#  Su questa sedia l'asse e' INERTE finche' InpTrailMode resta 1, e il
+#  round ha senso solo se R200c dice che il ramo FISSO vale qualcosa.
+#  E' preparato adesso perche' l'unica misura d'archivio dice che quel
+#  ramo e' il piu' promettente dei tre per il DD: se R200c conferma,
+#  la risposta dev'essere pronta, non da scrivere.
+#
+#  🖥️ SE E QUANDO GIRERA': PC DI BACKTEST, NON VPS.
+#     -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  🔴 PERCHE' NON SI LANCIA ADESSO: L'ASSE E' INERTE SULLA CELLA VIVA
+#  ------------------------------------------------------------------
+#  InpTrailFixedPts compare in tutto l'EA in tre punti: r.273
+#  (dichiarazione) e r.2250 / r.2263, che stanno nel ramo raggiunto SOLO
+#  quando InpTrailMode == ABTG_TRAIL_FIXED (2):
+#      r.2247  if(InpTrailMode == ABTG_TRAIL_PREVBAR) return(iLow(...));
+#      r.2249  if(InpTrailMode == ABTG_TRAIL_FIXED)
+#      r.2250     return(bid - InpTrailFixedPts * _Point);
+#  Il preset schierato ha InpTrailMode = 1
+#  (mql5/Presets/FTMO/ABTG_Nasdaq_Apertura_US_RETEST_770260_FTMO.set).
+#  👉 Sulla cella viva questo input e' un NO-OP.
+#
+#  ✅ PROVA SPERIMENTALE, non un ragionamento sul codice:
+#  risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv -- 96
+#  passate, SETTE esiti distinti. InpTrailFixedPts spazzolato su OTTO
+#  valori (100, 200, 300, 400, 500, 600, 700, 800) sotto InpTrailMode=1
+#  produce UN SOLO risultato per configurazione: ottanta passate che
+#  dicono la stessa cosa. Il CSV lo dimostra da solo.
+#
+#  🚦 LA CONDIZIONE D'INGRESSO, decisa PRIMA
+#  ------------------------------------------
+#  Si lancia SOLO se R200c torna con la cella mode 2 che soddisfa almeno
+#  UNA delle due:
+#     - PF OOS >= 1,09149  (= 1,14894 x 0,95: entro 5 punti percentuali
+#       dalla cella viva -> il ramo e' vivo, vale la pena tararlo)
+#     - DD OOS <= 8,20%    (= -10% o meglio -> il ramo abbassa davvero
+#       il DD, e allora si cerca il punto dove lo fa senza rompere il PF)
+#  🔴 Fuori da quella condizione NON si lancia: sarebbe allargare la
+#  griglia su un meccanismo gia' misurato come peggiore, che e' il modo
+#  documentato di trovare picchi di rumore.
+#
+#  🔬 IL CONTROLLO DI REGRESSIONE QUI E' DIVERSO, E VA DETTO
+#  ---------------------------------------------------------
+#  🔴 In questo file la cella viva NON C'E'. Con InpTrailMode pinnato a
+#  2, nessuna cella puo' riprodurre IS 1,11621/12,3568 e OOS
+#  1,14894/9,1244: quei numeri appartengono al ramo PREVBAR. Pretenderli
+#  qui sarebbe un controllo che fallisce per costruzione.
+#  👉 La regressione e' AGGANCIATA A R200c: la cella
+#  InpTrailFixedPts = 410 DEVE riprodurre AL CENTESIMO la cella mode 2
+#  di R200c (stessi pin, stesso 410 del preset). Se non la riproduce, i
+#  pin sono sbagliati: SI FERMA LI'.
+#  ⚠️ Il numero della cella mode 2 di R200c oggi e' [NON MISURATO]: va
+#  copiato QUI dal CSV di R200c PRIMA di lanciare, altrimenti il
+#  controllo non e' un controllo, e' una frase.
+#     -> cella mode 2 di R200c:  IS  n ___ PF ______ DD ______
+#                                OOS n ___ PF ______ DD ______
+#
+#  🏺 IL NUMERO ESISTE GIA'? UN PUNTO SOLO, e va letto con cautela
+#  ---------------------------------------------------------------
+#  risultati_prove/gestione_20260909/
+#     gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv
+#  NASUSD, STESSO EA, magic 770201, BREAKOUT, InpRangeMode=2, 1%,
+#  CloseHour 21, finestra unica senza IS/OOS. Righe con
+#  InpTP1_ClosePct=0 e InpBEatR=0:
+#      trailing SPENTO       | PF 0,86024 | DD 48,7208 | n 369
+#      mode 0 (ATR x 2,0)    | PF 0,88164 | DD 32,0908 | n 371
+#      mode 1 (PREVBAR M1)   | PF 0,95124 | DD 17,6476 | n 371
+#      mode 2 (FISSO 410 pt) | PF 0,94252 | DD  7,1720 | n 371
+#  🟢 Un solo valore di distanza (410) e nessuna curva: e' il punto che
+#  ha fatto nascere questo round, non la sua risposta.
+#  ⚠️ E tutti e quattro i PF sono SOTTO 1: di quella configurazione non
+#  si trasferisce ne' il livello ne' il verso. Serve solo a dire che il
+#  ramo FISSO muove il DD parecchio, il che e' il requisito per aprire
+#  un round, non per chiuderlo.
+#
+#  📐 LE UNITA', perche' qui i punti ingannano
+#  --------------------------------------------
+#  Su NASUSD _Point = 0,01: il preset stesso scrive "InpMinStopPts=500
+#  (5,00 pt indice)". Quindi:
+#      410 punti  =  4,10 punti indice
+#     4100 punti  = 41,00 punti indice
+#  Per la scala: la mediana dell'ampiezza dei primi 30' di NASUSD e'
+#  86,8 punti indice nel 2024, 116,6 nel 2025, 176,6 nel 2026
+#  (report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md, fonte
+#  ANATOMIA_APERTURE_PERGIORNO_NASUSD.csv, 3.899 aperture).
+#  👉 Il 410 del preset sta fra 1/20 e 1/40 del range d'apertura: e' un
+#  numero preso dal PIANO DAX (r.273 lo dice: "piano DAX: 410 punti") e
+#  MAI ritarato per il Nasdaq. La griglia qui sotto sale fino a 41 punti
+#  indice proprio per coprire la scala vera del simbolo.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e NON e' ottimista
+#  ---------------------------------------------------------
+#  Distanza PIU' PICCOLA = profit-lock piu' duro: DD giu', PF giu'.
+#  Distanza PIU' GRANDE = si avvicina al comportamento "nessun trailing":
+#  PF su e DD SU (il trailing spento, nell'unica misura che abbiamo, da'
+#  DD 48,72% contro 7,17% del 410). Attesa: DD monotono CRESCENTE lungo
+#  l'asse, PF che sale e poi ricade.
+#  🔴 E LA PATOLOGIA DA TEMERE, detta prima: un DD bassissimo sulle celle
+#  piccole ottenuto smettendo di stare sul mercato. Si riconosce dal
+#  PROFITTO PER OPERAZIONE, calcolato adesso sulla cella viva:
+#  IS 4.550/82 = 55,5 EUR · OOS 7.689/102 = 75,4 EUR. Una cella con DD
+#  giu' e profitto per operazione sotto quei numeri NON e' un
+#  miglioramento: e' una sedia piu' piccola.
+#  🔴 E se il DD fosse monotono crescente, ATTENZIONE: il minimo starebbe
+#  all'ESTREMO SINISTRO dell'asse, e un estremo NON e' un altopiano. In
+#  quel caso il criterio (f) NON e' soddisfatto per costruzione e il
+#  verdetto giusto e' "il DD piu' basso sta al bordo della griglia:
+#  serve un secondo round che estenda l'asse verso il basso, oppure la
+#  cella non e' difendibile". Scritto prima di vedere i numeri.
+#
+#  SOGLIE CONGELATE PRIMA -- PROMOSSA solo se TUTTE E SEI:
+#   (a) DD OOS <= 7,30%   (-20% o meglio rispetto a 9,1244)
+#   (b) PF OOS >= 1,10
+#   (c) PF IS  >= 1,10
+#   (d) IS e OOS CONCORDI DI SEGNO su DD e su PF rispetto alla cella viva
+#   (e) n INVARIATO: 82 IS / 102 OOS (InpOneTradePerDay=true)
+#   (f) ALTOPIANO, MAI IL PICCO: i due VICINI sull'asse rispettano (b) e
+#       stanno entro +1,0 punto percentuale di DD. Cella isolata o al
+#       BORDO della griglia = "non c'e' una configurazione robusta".
+#
+#  🧪 IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------
+#  Spiegazione alternativa a "esiste una distanza fissa che abbassa il
+#  DD": una distanza FISSA in punti non si adatta alla volatilita', e la
+#  volatilita' di NASUSD DENTRO la nostra finestra RADDOPPIA (mediana
+#  d'apertura 86,8 nel 2024 -> 176,6 nel 2026). L'OOS e' la coda della
+#  finestra, cioe' la parte piu' volatile: una distanza che sembra buona
+#  sull'OOS potrebbe esserlo solo perche' li' e' relativamente piu'
+#  stretta, e viceversa sull'IS.
+#  👉 Si distingue cosi', deciso ADESSO: se la cella migliore OOS e la
+#  cella migliore IS stanno agli ESTREMI OPPOSTI dell'asse, NON e' una
+#  taratura -- e' la volatilita' che cambia sotto un numero fisso, e il
+#  verdetto e' "la distanza fissa non e' stabile su questa finestra;
+#  semmai serve una distanza che scali col regime". Il criterio (d) lo
+#  boccerebbe comunque, ma la RAGIONE va scritta, non solo l'esito.
+#  🔴 E il contro-esempio che smaschera i pin: se il CSV tornasse con
+#  dieci esiti IDENTICI, InpTrailMode non sarebbe arrivato a 2 e l'asse
+#  sarebbe inerte -- lo stesso difetto che questo file esiste per
+#  evitare. Si contano gli ESITI DISTINTI, non le passate.
+#
+#  💰 COSTO IN TEMPO MACCHINA
+#  10 celle x 2 finestre = 20 passate.
+#  Banda MISURATA: 0,083 min/passata (R88a: 96 passate in 8,0 min, tick
+#  reali, M5, 21 mesi) .. 0,700 min/passata (R104, D30EUR M15 tick).
+#  -> 1,7 .. 14,0 min + ~0,6 min di avvio = 2,3 .. 14,6 MINUTI.
+#
+#  🔵 NON SI TOCCA NIENTE IN CAMPO senza la firma di Claudio.
+#  🕳️ BUCO DICHIARATO: gira sulla cella VIVA (InpBEatR=0). Se Claudio
+#     firma InpBEatR=0,5 (R199A), va RImisurato sopra quella base.
+#
+# ---------------------------------------------------------------------
+#  I PIN: stessa cella viva degli altri file R200 SALVO InpTrailMode,
+#  che qui e' 2 PER FORZA (senza, l'asse e' inerte). Stesse conversioni
+#  FTMO->BCM: InpSessionHour 16->14, InpCloseHour 19->17, InpCorrSymbol
+#  US500.cash->SPXUSD. Un CSV con InpSessionHour diverso da 14 si
+#  CESTINA.
+#  InpTrailTF e InpTrailAtrMult NON sono pinnati: sotto InpTrailMode=2
+#  sono INERTI (r.2247-2252), e pinnarli farebbe credere che agiscano.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=2||2||0||2||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+
+# --- asse unico: LA DISTANZA FISSA DEL TRAILING, IN PUNTI ------------
+#   Attivo SOLO perche' InpTrailMode e' pinnato a 2 qui sopra
+#   (r.2249-2250). Col pin del preset (mode 1) questo asse e' INERTE.
+#   Su NASUSD _Point = 0,01 -> i punti indice sono i punti / 100:
+#      410 = 4,10 idx  <-- il valore del preset, regressione AGGANCIATA
+#                          a R200c cella mode 2, da compilare prima
+#      820 = 8,20 idx      1230 = 12,30 idx     1640 = 16,40 idx
+#     2050 = 20,50 idx     2460 = 24,60 idx     2870 = 28,70 idx
+#     3280 = 32,80 idx     3690 = 36,90 idx     4100 = 41,00 idx
+#   Il passo e' 410 apposta: cosi' la cella del preset cade ESATTAMENTE
+#   sulla griglia e la regressione e' possibile. Il tetto a 41 punti
+#   indice e' circa metà della mediana del range d'apertura del 2024
+#   (86,8): oltre, il trailing smette di essere un trailing.
+#   Dieci celle servono a vedere se l'altopiano esiste, non a scegliere
+#   il minimo. Il minimo NON si sceglie (regola di casa).
+InpTrailFixedPts=410.0||410||410||4100||Y
+# 10 celle

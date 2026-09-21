@@ -1,0 +1,291 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R200c -- IL DRAWDOWN, asse unico InpTrailMode: CON CHE COSA il
+#           trailing misura la distanza. Non e' un parametro: e' il
+#           MECCANISMO. E decide anche QUALI ALTRE MANOPOLE ESISTONO.
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.  -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Cella VIVA (R196a, R198, R199A, tre volte identica):
+#       IS   n  82   PF 1,11621   DD equity 12,3568%
+#       OOS  n 102   PF 1,14894   DD equity  9,1244%
+#  Muro FTMO al 10% STATICO (grandezza diversa: MT5 dal picco di equity,
+#  FTMO dal saldo iniziale). Ingresso gia' escluso (R197A/R197B/R198);
+#  stop a pari misurato (R199A): il DD OOS scende solo a 8,65%.
+#  IL DD NON E' RISOLTO, e il trailing e' l'ultima famiglia d'uscita.
+#
+#  🔬 I TRE RAMI, LETTI NEL CODICE (r.2245-2266) -- non ricordati
+#  ---------------------------------------------------------------
+#    double TrailStopBuy(double bid)
+#      r.2247  if(InpTrailMode == ABTG_TRAIL_PREVBAR)              // = 1
+#      r.2248     return(iLow(_Symbol, InpTrailTF, 1));
+#      r.2249  if(InpTrailMode == ABTG_TRAIL_FIXED)                // = 2
+#      r.2250     return(bid - InpTrailFixedPts * _Point);
+#      r.2251  double atr = AtrValue();                            // = 0
+#      r.2252  return(atr > 0 ? bid - atr*InpTrailAtrMult : 0);
+#    (r.2258-2265: lo specchio per lo SHORT.)
+#    Enum: r.188-193, ABTG_TRAIL_ATR=0, ABTG_TRAIL_PREVBAR=1,
+#    ABTG_TRAIL_FIXED=2.
+#    AtrValue() (r.1866-1871) legge gAtrH, creato a r.450:
+#    iATR(_Symbol, PERIOD_CURRENT, InpAtrPeriodMgmt) -> ATR(14) sul TF
+#    DEL GRAFICO, cioe' M5. Non su InpTrailTF.
+#
+#  🔴 IL FATTO CHE RENDE QUESTO ROUND DIVERSO DAGLI ALTRI DUE:
+#  i tre rami sono MUTUAMENTE ESCLUSIVI, quindi InpTrailMode non cambia
+#  solo un numero: cambia QUALE ALTRA MANOPOLA ESISTE.
+#    InpTrailMode=1 (SCHIERATO) -> vive InpTrailTF. InpTrailAtrMult e
+#                                  InpTrailFixedPts sono NO-OP.
+#    InpTrailMode=0             -> vive InpTrailAtrMult. InpTrailTF e
+#                                  InpTrailFixedPts sono NO-OP.
+#    InpTrailMode=2             -> vive InpTrailFixedPts. Gli altri due
+#                                  sono NO-OP.
+#  👉 Per questo InpTrailAtrMult NON puo' essere un asse su questa sedia
+#  (sarebbe tempo macchina buttato, come InpBreakevenAtTP1 a r.2143):
+#  diventa un asse solo se prima questo round dice che il ramo ATR vale
+#  qualcosa. Il file c'e' gia', si chiama R200d, ed e' DA NON LANCIARE
+#  finche' questo non ha parlato.
+#
+#  ✅ E LA PROVA CHE MORDE, SPERIMENTALE E GIA' IN ARCHIVIO
+#  (non un ragionamento sul codice: dati)
+#  risultati_archivio/Dow_Apertura/dow_trailing.csv -- 30 passate,
+#  🔴 SOLO OTTO ESITI DISTINTI:
+#    con InpTrailMode=1, le tre righe InpTrailAtrMult 1/2/3 a parita' di
+#    TF danno numeri IDENTICI (es. TF M1: PF 1,19964 / DD 4,8490 / n 329,
+#    tre volte);
+#    con InpTrailMode=0, le cinque righe InpTrailTF 1..5 a parita' di
+#    moltiplicatore danno numeri IDENTICI (es. mult 1: PF 1,20276 /
+#    DD 6,6541 / n 329, cinque volte).
+#  E risultati_archivio/Aperture_Trailing/NASDAQ_trailing.csv: 96
+#  passate, SETTE esiti distinti (InpTrailFixedPts, 8 valori da 100 a
+#  800, inerte sotto InpTrailMode=1).
+#  👉 InpTrailMode, invece, produce esiti DIVERSI in tutte e due le
+#  tabelle: MORDE. ✅
+#
+#  🏺 IL NUMERO ESISTE GIA'? IN PARTE SI', E SMENTISCE L'ATTESA CHE
+#     AVEVO SCRITTO AL PRIMO GIRO. Va letto PRIMA di lanciare.
+#  ---------------------------------------------------------------------
+#  🔴 PRIMA STESURA DI QUESTO FILE: avevo dichiarato la cella mode 2
+#  "DEGENERE prima di girare", col ragionamento che 410 punti = 4,10
+#  punti indice sono 1/20-1/40 del range d'apertura di NASUSD (mediana
+#  86,8 pt nel 2024, 116,6 nel 2025, 176,6 nel 2026 --
+#  report/AMPIEZZA_RANGE_NASDAQ_2026-09-21.md, 3.899 aperture) e quindi
+#  lo stop starebbe incollato al prezzo.
+#  🟢 LA GEOMETRIA E' GIUSTA. 🔴 LA CONSEGUENZA CHE NE AVEVO TRATTO E'
+#  SMENTITA DA UNA MISURA CHE STAVA GIA' IN REPO, sullo STESSO EA e
+#  sullo STESSO SIMBOLO. La scrivo qui perche' e' il motivo per cui
+#  questo round adesso e' il PRIMO della coda e non il terzo.
+#
+#  📊 risultati_prove/gestione_20260909/
+#     gestione_ABTG_Nasdaq_Apertura_US_NASUSD_gestione.csv
+#  48 passate, 🔴 SOLO 14 ESITI DISTINTI. NASUSD, magic 770201,
+#  InpEntryMode=0 (BREAKOUT), InpRangeMode=2 (livello H1 precedente),
+#  rischio 1%, CloseHour 21, InpTrailTF=1, finestra unica (nessuna
+#  separazione IS/OOS). Righe con InpTP1_ClosePct=0 e InpBEatR=0:
+#      trailing SPENTO             | PF 0,86024 | DD 48,7208 | n 369
+#      mode 0 (ATR x 2,0)          | PF 0,88164 | DD 32,0908 | n 371
+#      mode 1 (PREVBAR M1)         | PF 0,95124 | DD 17,6476 | n 371
+#      mode 2 (FISSO 410 pt)       | PF 0,94252 | DD  7,1720 | n 371
+#
+#  🔴 LA CELLA CHE AVEVO DATO PER MORTA E' QUELLA CON IL DD PIU' BASSO,
+#  E DI MOLTO: 7,17% contro 17,65% del ramo schierato -- il 59% in meno
+#  -- pagando appena 0,009 di PF (0,94252 contro 0,95124). E n NON
+#  cambia (371 in tutti e tre i rami: InpOneTradePerDay=true).
+#  👉 Il meccanismo e' quello che avevo descritto (uscita a +epsilon),
+#  ma l'EFFETTO sul conto e' l'opposto di quello che avevo previsto:
+#  con la condizione `newSL > openP` (r.2231) il trailing fisso stretto
+#  non e' "non operare", e' un PROFIT-LOCK durissimo che appiattisce la
+#  curva dell'equity. Il DD crolla e il PF quasi non si muove.
+#  🔴 E la mia frase "il 410 e' un numero del PIANO DAX mai ritarato per
+#  il Nasdaq" resta VERA come fatto (r.273 lo dice) ma NON e' piu' un
+#  argomento per scartare la cella: e' un argomento per TARARLA, ed e'
+#  il motivo per cui esiste R200e.
+#
+#  ⚖️ TRASFERIBILITA', dichiarata senza sconti
+#  - il LIVELLO: NO, e NEANCHE IL VERSO in senso stretto: tutti e quattro
+#    i PF di quella tabella sono SOTTO 1 (0,860 .. 0,951). Vale il limite
+#    di casa: di una configurazione con PF sotto 1 non si trasferisce
+#    neanche il verso.
+#  - quello che SI PUO' dire: InpTrailMode MUOVE IL DD DI UN FATTORE 6,8
+#    (da 48,72% a 7,17%) a parita' di tutto il resto e a n invariato. E'
+#    la manopola d'uscita con lo SPAN PIU' GRANDE mai misurato su questo
+#    EA. E' il motivo per cui va misurata sulla cella viva, e per primo.
+#
+#  📊 E LA SECONDA TABELLA, sul Dow, con PF SOPRA 1 ma senza OOS
+#  risultati_archivio/Dow_Apertura/dow_trailing.csv -- l'unico CSV
+#  d'archivio in cui InpTrailMode varia insieme a InpTrailTF.
+#  U30USD, magic 770201, BREAKOUT, 1%, FINESTRA PIENA SENZA IS/OOS,
+#  n=329 in tutte le celle:
+#    mode 0 (ATR) mult 1 | PF 1,20276 | DD 6,6541
+#    mode 0       mult 2 | PF 1,24237 | DD 7,3409
+#    mode 0       mult 3 | PF 1,24670 | DD 8,2207
+#    mode 1 (PREVBAR) M1 | PF 1,19964 | DD 4,8490
+#    mode 1           M2 | PF 1,33695 | DD 5,5622
+#    mode 1           M5 | PF 1,37075 | DD 5,3161
+#  🔴 In quel file mode 2 NON c'e' (l'asse si ferma a 1): il Dow non dice
+#  niente sul ramo fisso. Sul Dow il ramo PREVBAR batte il ramo ATR su
+#  PF e su DD a ogni accoppiamento, e il moltiplicatore ATR mostra la
+#  forma attesa (mult su -> PF su, DD su).
+#  ⚠️ Nessun fuori campione: e' un'aspettativa, non una risposta.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- riscritta dopo il ritrovamento,
+#  e NON e' ottimista
+#  ---------------------------------------------------------------------
+#  Cella per cella, deciso adesso:
+#   - mode 1 (SCHIERATO): e' il riferimento. IS 1,11621/12,3568,
+#     OOS 1,14894/9,1244.
+#   - mode 0 (ATR(14) M5 x 2,0): atteso PEGGIORE su tutte e due le
+#     grandezze. Sul Nasdaq ha dato DD 32,09% contro 17,65% del PREVBAR;
+#     sul Dow perde su PF e DD a ogni accoppiamento. Due misure, stesso
+#     verso. 🔴 E ATTENZIONE: il moltiplicatore qui e' fissato a 2,0 dal
+#     preset, quindi questa cella misura UN PUNTO della famiglia ATR,
+#     non la famiglia. Se esce vicina a mode 1, la conclusione corretta
+#     e' "vale la pena aprire R200d", non "l'ATR non serve".
+#   - mode 2 (FISSO 410 punti = 4,10 punti indice): 🔴 E' LA CELLA
+#     INTERESSANTE, non la cella da buttare. Atteso: DD MOLTO piu' basso
+#     (l'unica misura che abbiamo dice -59%) e PF quasi invariato.
+#     🔴 MA IL PF DI QUELLA MISURA ERA 0,94: sotto 1. Su questa sedia il
+#     PF parte da 1,149 e la domanda vera e' se il profit-lock duro lo
+#     lascia sopra 1,10. Se lo porta sotto, la cella e' bocciata dal
+#     criterio (b) per quanto bello sia il DD -- e sarebbe esattamente
+#     la patologia "DD giu' perche' smette di stare sul mercato".
+#     👉 ED E' QUI CHE SI DECIDE IL ROUND. Scritto prima.
+#
+#  SOGLIE CONGELATE PRIMA -- PROMOSSA solo se TUTTE E CINQUE:
+#   (a) DD OOS <= 7,30%   (-20% o meglio rispetto a 9,1244)
+#   (b) PF OOS >= 1,10
+#   (c) PF IS  >= 1,10
+#   (d) IS e OOS CONCORDI DI SEGNO su DD e su PF rispetto alla cella viva
+#   (e) n INVARIATO: 82 IS / 102 OOS (InpOneTradePerDay=true). Se n
+#       cambia: SI FERMA, non si interpreta.
+#  🔴 QUI NON C'E' IL CRITERIO (f) DELL'ALTOPIANO, E VA DETTO PERCHE':
+#  su un asse di MECCANISMO le tre celle non sono su una scala ordinata
+#  -- "ATR", "candela precedente" e "punti fissi" non hanno vicini. Un
+#  altopiano non e' definito e pretenderlo sarebbe finto rigore.
+#  👉 In cambio, una cella che vince QUI non e' promuovibile da sola:
+#  va confermata mettendo ad asse il SUO parametro (R200d per il ramo
+#  ATR, R200a per il ramo PREVBAR). Una vittoria su un asse di
+#  meccanismo e' un'INDICAZIONE, non una promozione. Scritto prima.
+#
+#  🧪 IL CONTRO-ESEMPIO CHE FAREBBE SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------
+#  (1) IL VIZIO DEL CONFRONTO. Spiegazione alternativa a qualunque
+#      verdetto sul "meccanismo": i tre rami NON sono tarati allo stesso
+#      modo. mode 1 ha il suo parametro SCELTO su questo simbolo
+#      (InpTrailTF=5), mode 0 gira col default 2,0 e mode 2 con un numero
+#      copiato dal piano DAX (410). E' un confronto fra un meccanismo
+#      tarato e due non tarati: un finto verdetto sul meccanismo.
+#      👉 Si distingue cosi', deciso ADESSO:
+#       - se un ramo non schierato arriva ENTRO 5 punti percentuali di PF
+#         OOS dalla cella viva (>= 1,09149 = 1,14894 x 0,95) OPPURE porta
+#         il DD OOS a <= 8,20%, il confronto E' viziato e si apre il
+#         round del SUO parametro: R200d per il ramo ATR, R200e per il
+#         ramo FISSO. NON si scrive "quel ramo non serve".
+#       - se resta LONTANO da tutte e due le soglie, la taratura non puo'
+#         colmare il divario e il verdetto sul meccanismo regge.
+#  (2) IL VIZIO DEL DD BELLO. Spiegazione alternativa a "mode 2 abbassa
+#      il DD perche' gestisce meglio": mode 2 abbassa il DD perche'
+#      chiude tutto a +epsilon, cioe' la sedia smette di stare sul
+#      mercato pur contando le stesse 82/102 operazioni. Le due si
+#      distinguono col PROFITTO PER OPERAZIONE, calcolato adesso sulla
+#      cella viva: IS 4.550/82 = 55,5 EUR · OOS 7.689/102 = 75,4 EUR.
+#       - "gestisce meglio" -> DD giu' E profitto per operazione >= quei
+#         due numeri;
+#       - "smette di operare" -> DD giu' MA profitto giu' e PF verso 1.
+#      L'ipotesi alternativa NON cade dentro la banda di promozione,
+#      perche' il criterio (b) PF OOS >= 1,10 la esclude per costruzione.
+#      E' il motivo per cui (b) sta li' e non e' decorativo.
+#  (3) IL VIZIO DEI PIN. Se il CSV tornasse con tre esiti IDENTICI al
+#      quinto decimale, InpTrailMode non starebbe mordendo -- e allora il
+#      difetto sono i pin, non il meccanismo. (Che sia possibile lo
+#      dimostra lo stesso CSV della gestione: con InpUseTrailing=0 i tre
+#      modi danno TUTTI 0,86024 / 48,7208 / 369. L'interruttore generale
+#      rende inerte il selettore: per questo InpUseTrailing e' pinnato
+#      a 1 qui sotto, e non lasciato a un default.)
+#
+#  🔬 CONTROLLO DI REGRESSIONE INTEGRATO, DA GUARDARE PER PRIMO
+#  La cella InpTrailMode = 1 E' LA CELLA VIVA e DEVE riprodurre
+#  R196a/R198/R199A al centesimo:
+#       IS   n  82   PF 1,11621   DD 12,3568
+#       OOS  n 102   PF 1,14894   DD  9,1244
+#  Se NON li riproduce, i pin sono sbagliati: SI FERMA LI'.
+#
+#  💰 COSTO IN TEMPO MACCHINA
+#  3 celle x 2 finestre = 6 passate.
+#  Banda MISURATA: 0,083 min/passata (R88a) .. 0,700 min/passata (R104).
+#  -> 0,5 .. 4,2 min + ~0,6 min di avvio = 1,1 .. 4,8 MINUTI.
+#
+#  🔵 NON SI TOCCA NIENTE IN CAMPO senza la firma di Claudio.
+#  🕳️ BUCO DICHIARATO: gira sulla cella VIVA (InpBEatR=0). Se Claudio
+#     firma InpBEatR=0,5 (R199A), il trailing va RImisurato sopra quella
+#     base.
+#
+# ---------------------------------------------------------------------
+#  I PIN: stessa cella viva di R200a/R200b, stesse conversioni FTMO->BCM
+#  (InpSessionHour 16->14, InpCloseHour 19->17, InpCorrSymbol
+#  US500.cash->SPXUSD). Un CSV con InpSessionHour diverso da 14 si
+#  CESTINA.
+#  🔴 QUI, E SOLO QUI, InpTrailAtrMult e InpTrailFixedPts SONO PINNATI:
+#  perche' quando l'asse passa per mode 0 e mode 2 quei due SMETTONO di
+#  essere inerti e definiscono la cella. I valori pinnati sono quelli
+#  del preset schierato (2.0 e 410.0), cosi' le celle 0 e 2 descrivono
+#  "che cosa succederebbe cambiando SOLO l'interruttore del modo",
+#  che e' esattamente la domanda di questo round.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpUseTrailing=1||1||0||1||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+
+# --- asse unico: IL MECCANISMO DEL TRAILING --------------------------
+#   InpTrailMode e' un ENUM_ABTG_TRAIL: il PASSO E' IGNORATO, il driver
+#   spazzola i MEMBRI fra start e stop. Fra 0 e 2 i membri sono
+#   0, 1, 2 = TRE celle (qui l'aritmetica dice 3 e i membri dicono 3:
+#   coincidono, ma il numero che conta e' quello dei membri).
+#   0 = ABTG_TRAIL_ATR     -> stop a 2,0 x ATR(14) M5 dal prezzo
+#   1 = ABTG_TRAIL_PREVBAR -> stop alla base della candela M5 precedente
+#                             <-- LA CELLA VIVA, regressione obbligatoria
+#   2 = ABTG_TRAIL_FIXED   -> stop a 410 punti = 4,10 punti indice
+#                             <-- LA CELLA DA GUARDARE. L'unica misura
+#                                 che esiste su questo EA e su questo
+#                                 simbolo le da' DD 7,17% contro 17,65%
+#                                 del ramo schierato (-59%) a PF quasi
+#                                 pari. Il PF di quella misura era pero'
+#                                 0,94: qui il PF parte da 1,149 e la
+#                                 domanda e' se resta sopra 1,10.
+InpTrailMode=1||0||1||2||Y
+# 3 celle

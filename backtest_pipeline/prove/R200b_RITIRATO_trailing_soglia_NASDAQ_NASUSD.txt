@@ -1,0 +1,134 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R200b -- asse InpTrailStartR (quanto profitto in R prima che il
+#           trailing armi).
+#
+#  🛑🛑 ROUND RITIRATO. NON SI LANCIA, E NON PERCHE' E' DIFFICILE:
+#  🛑🛑 PERCHE' LA RISPOSTA E' GIA' IN REPO, SULLO STESSO EA E SULLO
+#  🛑🛑 STESSO SIMBOLO, CON IS E OOS SEPARATI.
+#
+#  Questo file resta in prove/ apposta: e' il posto dove il prossimo che
+#  si chiede "InpTrailStartR e' mai stato provato?" andra' a guardare.
+#  La risposta e' SI', ed e' qui sotto coi numeri.
+# =====================================================================
+#
+#  🏺 DOVE STA LA RISPOSTA
+#  ------------------------
+#  backtest_pipeline/risultati_prove/ABTG_Nasdaq_Apertura_US/
+#      ABTG_Nasdaq_Apertura_US_NASUSD_IS_r24.csv
+#      ABTG_Nasdaq_Apertura_US_NASUSD_OOS_r24.csv
+#  Griglia 5x5: InpTrailTF (M1..M5) x InpTrailStartR (0 / 0,25 / 0,50 /
+#  0,75 / 1,00). 25 passate per finestra, IS e OOS SEPARATI.
+#  Configurazione: magic 770201, InpEntryMode=0 (BREAKOUT),
+#  InpRangeMode=2 (livello H1 precedente, NON l'apertura), rischio 1%,
+#  InpTP1_ClosePct=50, InpTP1_R=1, CloseHour 21, InpTrailMode=1.
+#
+#  📊 FUORI CAMPIONE -- Equity DD % (righe = TF, colonne = soglia in R)
+#      TF |   0,00  |   0,25  |   0,50  |   0,75  |   1,00
+#      M1 |  5,7734 |  6,7031 |  7,0636 |  9,1889 | 10,8848
+#      M2 |  4,9650 |  4,8163 |  5,5400 |  8,1809 | 10,5775
+#      M3 |  5,2268 |  5,2301 |  8,0740 |  8,4416 | 11,0380
+#      M4 |  7,8932 |  7,8932 |  8,1061 |  8,3145 | 11,2163
+#      M5 |  5,1880 |  6,2477 |  7,5403 |  8,0860 |  9,8574
+#  🔴 IL DD SALE ALZANDO LA SOGLIA IN TUTTE E CINQUE LE RIGHE, e la
+#  colonna 1,00 e' la PEGGIORE in tutte e cinque. Sulla riga M5 -- il TF
+#  SCHIERATO -- il DD passa da 5,19% a 9,86%: QUASI RADDOPPIA.
+#  La colonna 0,00 ha il DD piu' basso in 4 righe su 5 (in M2 perde per
+#  0,15 punti da 0,25: 4,9650 contro 4,8163, cioe' il 3% -- rumore).
+#  E il PF fuori campione fa la stessa cosa: riga M5 da 1,13928 a
+#  1,04120; riga M1 da 1,26893 a 0,87433.
+#
+#  📊 IN CAMPIONE DICE IL CONTRARIO (ed e' la trappola nota)
+#      IS, riga M5: DD  9,0487 (0,00) -> 5,1837 (0,75)
+#                   PF  0,93409 (0,00) -> 1,17360 (0,75)
+#  🔴 L'IS premia la soglia ALTA, l'OOS premia lo ZERO. E' il
+#  ribaltamento IS->OOS numero nove, e questa volta e' sul NOSTRO EA e
+#  sul NOSTRO simbolo. Chi avesse scelto sull'IS avrebbe schierato 0,75
+#  e portato il DD fuori campione da 5,19% a 8,09%.
+#
+#  🌐 E C'E' UNA SECONDA MISURA INDIPENDENTE, SULL'EA FRATELLO
+#  risultati_archivio/Walkforward_Aperture/REFERTO_TRAILING_SOGLIA.md
+#  (notte 07-08/08/2026, ABTG_DAX_Apertura_EU, D30EUR, RETEST, tick
+#  reali): stessa griglia 5x5, stessi cinque valori. Profitto OOS riga
+#  M5: +1810,72 / +1635,86 / +1020,05 / +656,35 / +258,67; PF da 1,415
+#  a 1,031; DD da 6,71% a 9,93%. La colonna 0 vince in tutte e cinque le
+#  righe, monotona. E anche li' l'IS preferiva 1,00 (Spearman -0,44).
+#
+#  👉 DUE SIMBOLI, DIECI RIGHE TF, DUE EA, TUTTE E DUE LE VOLTE FUORI
+#     CAMPIONE, E SEMPRE LO STESSO VERSO: ALZARE LA SOGLIA ALZA IL DD.
+#
+#  ⚖️ TRASFERIBILITA', dichiarata
+#  - il LIVELLO: NO. r24 e' un'altra cella (RangeMode=2 = livello H1,
+#    breakout, 1%, parziale al 50%, CloseHour 21). Il DAX e' un altro
+#    simbolo. Nessuno dei numeri qui sopra descrive la sedia 770260.
+#  - il VERSO: SI', e questa volta si PUO' citare. Il limite di casa
+#    ("di una configurazione con PF sotto 1 non si trasferisce neanche
+#    il verso") NON morde: le celle di partenza hanno PF SOPRA 1
+#    (r24 OOS: 1,13928 su M5, 1,26893 su M1; DAX: 1,415).
+#
+#  🔒 E POI C'E' L'ARGOMENTO CHE CHIUDE LA PORTA, ED E' ALGEBRICO
+#  --------------------------------------------------------------
+#  ABTG_Nasdaq_Apertura_US.mq5 r.2224:
+#      bool trailArmato = (InpTrailStartR <= 0) || (profR >= InpTrailStartR);
+#  👉 Il ramo "arma subito" e' `<= 0`: QUALUNQUE valore negativo si
+#  comporta esattamente come 0. Quindi **0 E' IL PAVIMENTO DI QUESTO
+#  ASSE**, e la sedia 770260 ci sta gia' sopra.
+#  Tutte le misure dicono che allontanarsi dallo zero ALZA il DD.
+#  👉 LA DIREZIONE CHE ABBASSA IL DD SU QUESTO ASSE NON ESISTE.
+#  Un round qui non puo' produrre altro che la conferma di quello che e'
+#  gia' schierato. Non e' pigrizia: e' un conto.
+#
+#  ✅ LA RISPOSTA, IN UNA RIGA
+#  InpTrailStartR = 0 (il valore in campo) E' GIA' IL VALORE GIUSTO.
+#  Non e' "non misurato": e' MISURATO, due volte, fuori campione, e la
+#  cella schierata e' quella che vince. Il DD della sedia 770260 NON si
+#  risolve da qui.
+#
+#  🕳️ L'UNICO BUCO CHE RESTA SU QUESTO ASSE, dichiarato
+#  Nessuna delle due misure gira sulla cella VIVA (RETEST, range 35',
+#  rischio 2%, InpBEatR=0). Se qualcuno volesse comunque la conferma
+#  sulla cella viva, il file e' pronto: bastano le righe qui sotto,
+#  5 celle x 2 finestre = 10 passate = 1,4 .. 7,6 minuti.
+#  🔴 Ma l'esito atteso e' "0 resta", e va speso solo DOPO R200c e
+#  R200a, che possono ancora muovere il DD. Questo no.
+#  (Le righe sono lasciate commentate DI PROPOSITO: senza un asse Y
+#   attivo il cancello rifiuta il file, ed e' quello che vogliamo --
+#   questo file non deve poter partire per sbaglio.)
+#
+# ---------------------------------------------------------------------
+#  @SIMBOLO  NASUSD
+#  @PERIODO  M5
+#  @DAQUANDO 2024.09.26
+#
+#  InpMagic=770260||770260||0||770260||N
+#  InpRangeMode=0||0||0||0||N
+#  InpRiskPercent=2.00||2.00||0||2.00||N
+#  InpCloseMin=30||30||0||30||N
+#  InpSessionHour=14||14||0||14||N
+#  InpSessionMin=30||30||0||30||N
+#  InpRangeMinutes=35||35||0||35||N
+#  InpCloseHour=17||17||0||17||N
+#  InpEntryMode=2||2||0||2||N
+#  InpUseGapFill=1||1||0||1||N
+#  InpEmaFast=1||1||0||1||N
+#  InpEmaSlow=50||50||0||50||N
+#  InpFilterTF=16388||16388||0||16388||N
+#  InpCorrSymbol=SPXUSD
+#  InpTP1_R=0.5||0.5||0||0.5||N
+#  InpTP1_ClosePct=0.0||0.0||0||0.0||N
+#  InpBreakevenAtTP1=0||0||0||0||N
+#  InpBEatR=0.0||0.0||0||0.0||N
+#  InpUseTrailing=1||1||0||1||N
+#  InpTrailMode=1||1||0||1||N
+#  InpTrailTF=5||5||0||5||N
+#  InpMinStopPts=500.0||500.0||0||500.0||N
+#  InpSkipIfTight=0||0||0||0||N
+#  InpUseVolumeFilter=1||1||0||1||N
+#  InpConfirmMode=1||1||0||1||N
+#  InpMinRangePts=0.0||0.0||0||0.0||N
+#  InpMaxRangePts=0.0||0.0||0||0.0||N
+#  InpRetestOffsetPts=0.0||0.0||0||0.0||N
+#  InpTrailStartR=0.0||0||0.25||1.0||Y
+#  # 5 celle -- regressione: la cella 0 deve dare
+#  #   IS n 82 PF 1,11621 DD 12,3568 · OOS n 102 PF 1,14894 DD 9,1244
+# ---------------------------------------------------------------------
