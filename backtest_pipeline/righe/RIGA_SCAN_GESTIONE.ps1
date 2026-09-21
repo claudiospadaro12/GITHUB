@@ -1,5 +1,5 @@
 # =====================================================================
-#  MARCATORE_RIGA_SCAN_GESTIONE_v1
+#  MARCATORE_RIGA_SCAN_GESTIONE_v2
 #  RIGA_SCAN_GESTIONE.ps1 -- lo STUDIO DELLA GESTIONE sul terminale da
 #  backtest, con le guardie di RIGA_ROUND_VPS.ps1 (non reinventate).
 # ---------------------------------------------------------------------
@@ -11,10 +11,16 @@
 #  sedie VIVE. La v2 dello script chiude quel buco alla radice; questa
 #  riga aggiunge il resto del cinturone gia' collaudato:
 #    - LA GUARDIA POSITIVA sul bersaglio (11/09/2026): non elenca i
-#      vietati, AMMETTE il solo banco C:\MT5_Backtest (demo 50504400) e
-#      uccide tutto il resto -- il piccolo 50503392, il 100k 50504263, il
-#      REALE 10105439, la radice di un disco, i nomi 8.3 e la fuga col
-#      '..'. E' la copia dichiarata di quella di RIGA_ROUND_VPS.ps1;
+#      vietati, AMMETTE un solo bersaglio e uccide tutto il resto -- il
+#      piccolo 50503392, il 100k 50504263, il REALE 10105439, la
+#      challenge FTMO 541452707, la radice di un disco, i nomi 8.3 e la
+#      fuga col '..'. E' la copia dichiarata (byte per byte, e c'e' una
+#      macchina che lo controlla) di quella di RIGA_ROUND_VPS.ps1.
+#      DAL 21/09/2026 E' PER MACCHINA: una tabella dice quale terminale
+#      e' ammesso su quale PC (VMI3047753 = il VPS -> C:\MT5_Backtest;
+#      DESKTOP-H4D7CAJ = il PC di backtest -> il suo terminale), perche'
+#      lo STESSO percorso e' il bersaglio di qua e il piccolo 50503392
+#      con le sedie vive di la'. Macchina non in tabella = si rifiuta;
 #    - censimento PID PRIMA e DOPO, con allarme rosso se sparisce un
 #      terminale NON bersaglio: e' la prova STAMPATA che il reale non e'
 #      stato toccato;
@@ -35,7 +41,12 @@
 # =====================================================================
 param(
   [string]$Pin               = "lavoro",
-  [string]$TerminaleBacktest = "C:\MT5_Backtest",
+  # 21/09/2026: il default NON e' piu' un percorso cablato (era
+  # "C:\MT5_Backtest", che sta SOLO sul VPS). Vuoto = "usa il bersaglio
+  # della macchina su cui sto girando", che la tabella decide. Su una
+  # macchina non in tabella resta vuoto e viene RIFIUTATO: il vuoto non
+  # e' un permesso.
+  [string]$TerminaleBacktest = "",
   [string]$Work              = "$env:USERPROFILE\abtg_gestione",
   [string]$Fase              = "struttura",
   [switch]$ChiudiBacktest,
@@ -44,7 +55,7 @@ param(
 $ErrorActionPreference = "Stop"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-$MARC_MIO = "MARCATORE_RIGA_SCAN_GESTIONE_v1"
+$MARC_MIO = "MARCATORE_RIGA_SCAN_GESTIONE_v2"   # v2 = guardia PER MACCHINA (21/09/2026)
 $MARC_SCN = "MARCATORE_SCAN_GESTIONE_v2_VPS"
 $RawBase  = "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$Pin"
 $Avvio    = Get-Date
@@ -61,64 +72,162 @@ Write-Host ""
 Write-Host "=== STUDIO GESTIONE -- fase '$Fase' -- pin $Pin ===" -ForegroundColor Cyan
 
 # =====================================================================
-#  GUARDIA_BANCO_POSITIVA_v1 -- INIZIO DEL BLOCCO COPIATO
+#  GUARDIA_BANCO_POSITIVA_v2 -- INIZIO DEL BLOCCO CONDIVISO
 #
-#  QUESTA E' UNA COPIA, NON CODICE NUOVO, e non va "migliorata" qui.
-#  ORIGINALE: backtest_pipeline\righe\RIGA_ROUND_VPS.ps1, righe 282-386
-#  al commit e2d5dc3be1c05d275d8c45c353caa46f929f846e (11/09/2026).
-#  Le righe fra questo marcatore e quello di FINE sono IDENTICHE BYTE
-#  PER BYTE all'originale, e si verifica cosi' (zero differenze attese):
-#     sed -n '282,386p' backtest_pipeline/righe/RIGA_ROUND_VPS.ps1 > /tmp/a
-#     sed -n '<prima riga di codice>,<ultima>p' QUESTO_FILE > /tmp/b
-#     diff /tmp/a /tmp/b
-#  (i due numeri si leggono qui accanto ai marcatori; il comando per
-#   intero sta nel referto di consegna dell'11/09/2026).
+#  QUESTO BLOCCO VIVE IN TRE FILE ED E' IDENTICO BYTE PER BYTE IN TUTTI
+#  E TRE. Non e' "codice di questo file": e' LA GUARDIA. Se una delle
+#  copie diverge, abbiamo tre guardie diverse che credono di essere la
+#  stessa -- ed e' il difetto peggiore che possa avere un cancello.
+#  I tre file, per nome:
+#     backtest_pipeline\righe\RIGA_ROUND_VPS.ps1      (l'originale)
+#     backtest_pipeline\walkforward_generico.ps1      (il driver)
+#     backtest_pipeline\righe\RIGA_SCAN_GESTIONE.ps1  (lo studio uscite)
+#  Si trovano tutti e tre con:
+#     grep -rn "GUARDIA_BANCO_POSITIVA_v2" backtest_pipeline
 #
-#  NOTA PER CHI TOCCA QUESTE RIGHE: il marcatore di INIZIO e quello di
-#  FINE devono comparire in questo file UNA VOLTA SOLA CIASCUNO. Sono
-#  presi come confini da chi estrae il blocco per rigirarci sopra i
-#  contro-esempi, e una seconda occorrenza dentro un commento accorcia il
-#  blocco estratto senza dire niente. Misurato l'11/09/2026, sbagliando:
-#  la prima stesura di questa intestazione citava i due marcatori per
-#  esteso dentro un esempio di comando, e il banco di prova ha estratto
-#  NOVE righe invece di centocinque -- verdetto "RIFIUTATO" su tutto,
-#  banco compreso, per un difetto del banco e non della guardia.
+#  SI MODIFICA IN UN POSTO SOLO E SI RICOPIA NEGLI ALTRI DUE, NELLO
+#  STESSO COMMIT. E da oggi non e' piu' una raccomandazione scritta in un
+#  commento: c'e' UNA MACCHINA CHE LO DIMOSTRA. Estrae il blocco dai tre
+#  file, ne confronta le impronte SHA-256 e FALLISCE se divergono:
+#     pwsh -NoProfile -File backtest_pipeline/banco_guardia_macchina.ps1
+#  Perche' serviva: fino al 21/09/2026 il controllo non esisteva, la
+#  guardia dell'originale e' passata alla v2 e le due copie sono rimaste
+#  alla v1 -- cioe' cablate sul banco del VPS. Nessuno se ne e' accorto
+#  leggendo: se ne e' accorto chi e' andato a guardare i tre file.
 #
-#  PERCHE' COPIATA E NON INCLUSA -- scelta dichiarata, col suo costo.
+#  PERCHE' COPIATO E NON INCLUSO -- scelta dichiarata, col suo costo.
 #  Un include sarebbe UNA DIPENDENZA IN PIU' DA PINNARE, e qui il pin e'
 #  la sola cosa che lega il codice che gira al codice che qualcuno ha
 #  letto: RIGA_SOTTILE_ROUND.ps1 inchioda al byte (SHA-256 + pin di
-#  commit) i .ps1 che esegue, e RIGA_ROUND_VPS.ps1 scarica questo driver
-#  da solo, un file alla volta. Con un include il file incluso o viaggia
+#  commit) i .ps1 che esegue, e RIGA_ROUND_VPS.ps1 scarica il driver da
+#  solo, un file alla volta. Con un include il file incluso o viaggia
 #  NON pinnato -- e allora il pin non vuol dire piu' niente -- oppure va
 #  aggiunto a mano a ogni catena di scaricamento e a ogni elenco di
 #  impronte: tre punti nuovi in cui sbagliare, per risparmiare una copia.
-#  Fra comodo e stretto, stretto: si duplica, e si DICHIARA.
+#  Fra comodo e stretto, stretto: si duplica, si DICHIARA, e si mette una
+#  macchina a controllare che le copie non divergano.
 #
-#  IL COSTO DELLA COPIA, detto per intero: se un giorno la guardia si
-#  corregge, va corretta in TUTTI i posti che portano questo marcatore.
-#  Si trovano con:
-#     grep -rn "GUARDIA_BANCO_POSITIVA_v1" backtest_pipeline
-#  L'originale NON porta il marcatore (la sua impronta e' gia' pinnata
-#  altrove e toccarlo vorrebbe dire ri-pinnare tutta la catena): sta
-#  scritto qui sopra col nome e col commit, ed e' il primo posto da
-#  aprire.
+#  COSA DEFINISCE -- e nient'altro: qui dentro NON si stampa, non si
+#  legge il disco, non si toccano processi. E' PURO apposta, cosi' il
+#  banco lo puo' ESEGUIRE su Linux con pwsh, senza MT5 e senza VPS:
+#     $BERSAGLI_PER_MACCHINA   tabella: una macchina -> UN solo terminale
+#     $TERMINALI_VIETATI       i divieti per nome, consultati PRIMA
+#     NormalizzaPercorsoWin / RadiceDiDisco / NomeMacchinaPulito
+#     RigaMacchina / ElencoMacchineAmmesse / TabellaCoerente
+#     MotivoRifiutoBersaglio   <- IL VERDETTO ("" = ammesso)
+#
+#  CHI LO USA DEVE FARE QUATTRO COSE, subito sotto (vedi l'ADATTATORE di
+#  questo file, che sta fuori dal blocco apposta):
+#     1. $MACCHINA = NomeMacchinaPulito $env:COMPUTERNAME
+#     2. TabellaCoerente          -> se non torna "", si muore
+#     3. MotivoRifiutoBersaglio <chiesto> $MACCHINA -> se non torna "",
+#        si muore, e si stampa il motivo per intero
+#     4. da li' in avanti si usa LA COSTANTE della tabella (.perc), MAI
+#        la stringa arrivata da fuori: e' quella riga che impedisce a
+#        $cartellaBT di diventare "C:\" per colpa di un argomento.
+#
+#  NOTA PER CHI TOCCA QUESTE RIGHE: i due marcatori che il banco usa come
+#  confini (quelli del blocco collaudabile, qui sotto) devono comparire
+#  in ogni file UNA VOLTA SOLA CIASCUNO. Misurato l'11/09/2026
+#  sbagliando: una seconda occorrenza dentro un commento aveva accorciato
+#  il blocco estratto da centocinque righe a nove, e il verdetto era
+#  "RIFIUTATO" su tutto, banco compreso -- per un difetto del banco e non
+#  della guardia.
 # =====================================================================
-$BANCO_PERC  = "C:\MT5_Backtest"
-$BANCO_CONTO = "50504400"
+# ===== BLOCCO COLLAUDABILE OFFLINE: INIZIO =====
+# Tutto cio' che sta fra questo marcatore e quello di FINE e' PURO: non
+# legge il disco, non tocca processi, non stampa niente. Serve perche' il
+# banco lo possa estrarre ed ESEGUIRE su Linux con pwsh, senza MT5 e
+# senza VPS (banco: backtest_pipeline\banco_guardia_macchina.ps1).
+# Il gradino che il disco DEVE fare -- la junction/ReparsePoint -- non sta
+# qui: sta al PUNTO 1, perche' nessuna stringa lo sa fare.
 
-# I vietati per NOME. NON decidono piu' niente -- decide la guardia
-# positiva qui sotto -- ma servono a due cose che contano: dare il
+# ---------------------------------------------------------------------
+#  LA TABELLA DEI BERSAGLI: UNA MACCHINA, UN TERMINALE. (v2, 21/09/2026)
+#
+#  E' LA COSTANTE DI QUESTO SCRIPT, ed e' la SOLA cosa che il resto usa
+#  come bersaglio: la stringa arrivata da fuori serve solo a essere
+#  GIUDICATA, mai a essere usata.
+#
+#  PERCHE' LA MACCHINA E NON IL PERCORSO. Il terminale del PC di backtest
+#  ha lo STESSO percorso che sul VPS e' il piccolo 50503392 (sedie vive):
+#  un elenco di percorsi ammessi o li ammette tutti e due o li vieta tutti
+#  e due, e nessuna delle due cose e' giusta. La macchina li distingue.
+#
+#  FAIL-CLOSED: una macchina che non e' qui dentro NON ha bersagli. Non
+#  esiste un ripiego "non la riconosco, allora lascio passare": se domani
+#  nascesse un terzo PC, questa tabella si cambia A MANO e si ripassa dal
+#  cancello. E' la stessa scelta della guardia positiva dell'11/09: cio'
+#  che non e' AMMESSO ESPLICITAMENTE e' vietato, compreso cio' che nascera'
+#  domani.
+#
+#  I NOMI SONO MISURATI, non ricordati:
+#   - VMI3047753      = il VPS. Censimento dei sei terminal64 di quella
+#                       macchina: report\collaudi\CENSIMENTO_MT5_VPS_2026-09-12_0846.txt
+#                       (li' C:\MT5_Backtest e' il banco, demo 50504400).
+#   - DESKTOP-H4D7CAJ = il PC di backtest, utente Master
+#                       (report\DAX_STORICO_APERTO_2026-09-10.md r.4;
+#                        report\censimento_ordini\riepilogo_DESKTOP-H4D7CAJ.txt r.1;
+#                        il terminale: report\COME_ALLUNGARE_STORICO_INDICI_2026-09-09.md r.163).
+#
+#  >>> E QUI VA LETTA LA RIGA CHE COSTA, prima di lanciare un round sul
+#  PC di backtest: quel terminale NON e' un banco solo-tester come
+#  C:\MT5_Backtest. E' LOGGATO SUL DEMO PICCOLO 50503392, e il 14/08/2026
+#  da quella macchina sono PARTITI ORDINI VERI -- #3160534 / #3160535,
+#  -104,60 sul piccolo (report\DAX_14-08_DUE_MOTORI.md r.401; HANDOFF.md
+#  r.1463). Quindi: -ChiudiBacktest li' chiude un terminale che ha un
+#  conto vivo dentro, e PRIMA si guarda che non abbia sedie attaccate.
+#  Lo script lo dice da solo, a schermo e nel referto (AVVERTENZA), ma
+#  sapere non e' controllare: il controllo e' un gesto umano. <<<
+# ---------------------------------------------------------------------
+$BERSAGLI_PER_MACCHINA = @(
+  @{ macchina = "VMI3047753"
+     perc     = "C:\MT5_Backtest"
+     conto    = "50504400"
+     comequi  = "il banco solo-tester del VPS"
+     # $false = su questa macchina NESSUN percorso della lista dei vietati
+     #          puo' essere ammesso, per nessuna ragione.
+     deroga   = $false },
+  @{ macchina = "DESKTOP-H4D7CAJ"
+     perc     = "C:\Program Files\BCM Markets MT5 Terminal"
+     conto    = "50503392"
+     comequi  = "il terminale del PC di backtest (ATTENZIONE: conto vivo, vedi sopra)"
+     # $true = su QUESTA macchina, e SOLO qui, il percorso del piccolo e'
+     #         il bersaglio legittimo. PERCHE': sul VPS quel percorso e' la
+     #         cartella programma del 50503392 CON LE SEDIE SOPRA; sul PC
+     #         di backtest e' l'unico MT5 installato, quello dove vivono i
+     #         simboli _EXT e dove i round hanno sempre girato fino
+     #         all'08/09. Stesso testo, due macchine, due cose diverse.
+     #         La deroga NON e' un permesso generico: vale SOLO per il
+     #         percorso che, normalizzato, e' IDENTICO a 'perc' qui sopra
+     #         -- quindi "...MT5 Terminal -V3" (il 100k) resta VIETATO
+     #         anche qui, perche' non e' lo stesso percorso.
+     deroga   = $true }
+)
+
+# I vietati per NOME. NON decidono da soli qual e' il bersaglio -- decide
+# la tabella qui sopra -- ma servono a tre cose che contano: dare il
 # messaggio GIUSTO (chi e' il terminale che stavi per toccare, col suo
-# numero di conto in chiaro, regola dei terminali multipli del 06/09), e
-# fare da seconda rete se un domani qualcuno allentasse il confronto.
+# numero di conto in chiaro, regola dei terminali multipli del 06/09),
+# fare da seconda rete se un domani qualcuno allentasse il confronto, e
+# -- dalla v2 -- essere consultati PRIMA della tabella per macchina, cosi'
+# che un terminale vietato resti vietato SU QUALUNQUE MACCHINA.
+# 21/09/2026: la lista e' stata ALLARGATA, mai accorciata. Entrano la
+# challenge FTMO (sei sedie vive, e' la cosa piu' pericolosa che ci sia
+# adesso sul VPS) e il terminale manuale, che nella v1 non erano nominati
+# da nessuna parte: erano rifiutati lo stesso dal confronto positivo, ma
+# senza dire CHI erano.
 $TERMINALI_VIETATI = @(
   @{ p = "BCM_Reale";                chi = "il terminale del conto REALE 10105439" },
   @{ p = "-V3";                      chi = "il terminale del 100k, conto 50504263" },
   @{ p = "BCM Markets MT5 Terminal"; chi = "un terminale con SEDIE VIVE sopra: il piccolo 50503392 (e il 100k, che sta nella stessa famiglia di cartelle)" },
   @{ p = "10105439";                 chi = "il conto REALE" },
   @{ p = "50504263";                 chi = "il 100k" },
-  @{ p = "50503392";                 chi = "il piccolo" }
+  @{ p = "50503392";                 chi = "il piccolo" },
+  @{ p = "FTMO";                     chi = "il terminale della CHALLENGE FTMO viva, conto 541452707 (C:\FTMO): sei sedie che stanno operando" },
+  @{ p = "541452707";                chi = "il conto della challenge FTMO" },
+  @{ p = "MT5_MANUALE";              chi = "il terminale del trading a mano, conto 50503635" },
+  @{ p = "50503635";                 chi = "il conto del trading a mano" }
 )
 
 # Canonicalizza UNA SCRITTURA DI PERCORSO DI WINDOWS: '/' diventa '\',
@@ -139,6 +248,9 @@ $TERMINALI_VIETATI = @(
 # protegge. Questa fa lo stesso identico conto ovunque.
 # Il pezzo che il DISCO deve dire (e che nessuna stringa sa) e' un altro,
 # ed e' l'attributo ReparsePoint: sta al PUNTO 1, non qui.
+# 21/09/2026: NON e' stata toccata. Regge anche i percorsi con spazi
+# dentro ("C:\Program Files\...") perche' non ha mai spezzato sugli spazi
+# -- spezza solo su '\' -- ed e' stato ri-collaudato apposta.
 function NormalizzaPercorsoWin([string]$p){
   if($null -eq $p){ return "" }
   $s = ("" + $p).Trim()
@@ -173,21 +285,137 @@ function RadiceDiDisco([string]$norm){
   return ($norm -match '^[A-Za-z]:\\$')
 }
 
-# IL VERDETTO SUL BERSAGLIO, in una funzione sola e senza effetti: torna
-# "" se il bersaglio E' il banco, altrimenti il MOTIVO del rifiuto.
-# L'ordine dei controlli e' scelto: prima i divieti per nome (che sanno
-# dire CHI stavi per toccare), poi la normalizzazione, poi il confronto
-# positivo. Il confronto positivo da solo basterebbe a rifiutare tutto
-# quanto; gli altri servono a dire perche'.
-function MotivoRifiutoBanco([string]$chiesto){
-  $g = ("" + $chiesto).Trim()
-  if($g -eq ""){ return "BERSAGLIO VUOTO: -TerminaleBacktest non dice niente." }
-  foreach($v in $TERMINALI_VIETATI){
-    if($g -like ("*" + $v.p + "*")){
-      return ("TERMINALE VIETATO: '" + $g + "' nomina " + $v.chi + ".")
+# Il nome della macchina, ripulito. $env:COMPUTERNAME non dovrebbe avere
+# spazi in coda, ma "non dovrebbe" non e' una misura: un nome passato a
+# mano per collaudo, o un valore che arriva da un file, li puo' avere, e
+# " VMI3047753 " non deve valere meno di "VMI3047753". Il Trim e' l'UNICA
+# liberta' concessa: nient'altro viene normalizzato.
+function NomeMacchinaPulito([string]$m){
+  if($null -eq $m){ return "" }
+  return ("" + $m).Trim()
+}
+
+# Trova la riga della tabella per una macchina. Torna $null se non c'e':
+# ed e' il $null che fa la guardia fail-closed, perche' senza riga non
+# esiste nessun bersaglio ammesso.
+# CONFRONTO ORDINALE, come sui percorsi e per lo stesso identico motivo
+# (vedi MotivoRifiutoBersaglio): il -eq di PowerShell passa dalla CULTURA
+# del thread, e sotto una cultura certi caratteri invisibili vengono
+# IGNORATI nel confronto -- cioe' due stringhe DIVERSE risultano uguali.
+# Qui si guardano i byte. IgnoreCase si': i nomi NetBIOS di Windows non
+# distinguono maiuscole e minuscole, e 'desktop-h4d7caj' e'
+# LA STESSA MACCHINA di 'DESKTOP-H4D7CAJ'.
+function RigaMacchina([string]$macchina){
+  $m = NomeMacchinaPulito $macchina
+  if($m -eq ""){ return $null }
+  foreach($b in $BERSAGLI_PER_MACCHINA){
+    if([string]::Equals($m, $b.macchina, [StringComparison]::OrdinalIgnoreCase)){ return $b }
+  }
+  return $null
+}
+
+# L'elenco, in chiaro, di chi e' ammesso dove. Serve al messaggio di
+# rifiuto: una guardia che dice NO senza dire "e allora cosa si fa"
+# costringe chi la incontra a indovinare, e chi indovina forza.
+function ElencoMacchineAmmesse(){
+  $righe = @()
+  foreach($b in $BERSAGLI_PER_MACCHINA){
+    $righe += ("      " + $b.macchina.PadRight(18) + " -> " + $b.perc + "   (conto " + $b.conto + ")")
+  }
+  return ($righe -join "`n")
+}
+
+# IL GUARDIANO DEL GUARDIANO. La tabella e' scritta a mano, e una tabella
+# scritta a mano si sbaglia: un percorso con un jolly dentro finirebbe
+# nella pipe di chiusura ($cartellaBT + "\*") e la allargherebbe, una
+# radice di disco la farebbe diventare "C:\*", un nome di macchina doppio
+# renderebbe il bersaglio dipendente dall'ordine delle righe. Si controlla
+# qui, all'avvio, e si muore prima di toccare qualunque cosa.
+function TabellaCoerente(){
+  if($BERSAGLI_PER_MACCHINA.Count -eq 0){ return "la tabella dei bersagli e' VUOTA: nessuna macchina puo' girare." }
+  $visti = @()
+  foreach($b in $BERSAGLI_PER_MACCHINA){
+    $m = NomeMacchinaPulito $b.macchina
+    if($m -eq ""){ return "una riga della tabella non ha il nome della macchina." }
+    foreach($v in $visti){
+      if([string]::Equals($m, $v, [StringComparison]::OrdinalIgnoreCase)){ return ("la macchina '" + $m + "' compare DUE VOLTE nella tabella: il bersaglio dipenderebbe dall'ordine delle righe.") }
+    }
+    $visti += $m
+    $n = NormalizzaPercorsoWin $b.perc
+    if($n -eq ""){ return ("il bersaglio di '" + $m + "' non e' un percorso di Windows riconducibile: '" + $b.perc + "'.") }
+    if(RadiceDiDisco $n){ return ("il bersaglio di '" + $m + "' e' la RADICE di un disco: '" + $b.perc + "'. La pipe di chiusura diventerebbe '" + $n + "*'.") }
+    if(-not [string]::Equals($n, $b.perc, [StringComparison]::Ordinal)){
+      return ("il bersaglio di '" + $m + "' non e' scritto in forma canonica: '" + $b.perc + "' si normalizza in '" + $n + "'. Si scrive gia' normalizzato, cosi' il confronto e' una lettura e non un calcolo.")
     }
   }
-  $n = NormalizzaPercorsoWin $g
+  return ""
+}
+
+# IL VERDETTO SUL BERSAGLIO, in una funzione sola e senza effetti: torna
+# "" se il bersaglio e' quello ammesso SU QUESTA MACCHINA, altrimenti il
+# MOTIVO del rifiuto.
+#
+# L'ORDINE DEI CONTROLLI E' SCELTO, e la scelta e' la guardia:
+#   1. il VUOTO, che ha un messaggio suo;
+#   2. i VIETATI PER NOME, PRIMA della tabella per macchina e con la
+#      precedenza su di essa (requisito firmato): il reale 10105439, il
+#      100k -V3, la challenge FTMO restano vietati SU QUALUNQUE MACCHINA,
+#      anche su una che non e' in tabella, anche se domani qualcuno
+#      sbagliasse a scrivere la tabella. L'UNICA deroga e' il percorso del
+#      piccolo sulla SOLA DESKTOP-H4D7CAJ, e per applicarla servono TRE
+#      cose insieme: la macchina in tabella, il suo flag deroga, e il
+#      percorso che normalizzato coincide ESATTAMENTE col suo bersaglio.
+#      Nota: la riga della tabella si LEGGE prima (serve alla deroga) ma
+#      non ASSOLVE niente -- e su una macchina sconosciuta e' $null,
+#      quindi nessuna deroga e' possibile. Leggere non e' decidere.
+#   3. la MACCHINA: se non e' in tabella si rifiuta, dicendo il nome
+#      trovato e i nomi ammessi (FAIL-CLOSED);
+#   4. la NORMALIZZAZIONE e la RADICE DI DISCO, come nella v1;
+#   5. il confronto POSITIVO col bersaglio DI QUELLA MACCHINA.
+# Il punto 5 da solo basterebbe a rifiutare tutto quanto: gli altri
+# servono a dire PERCHE', e il perche' e' cio' che impedisce a chi legge
+# il messaggio di aggirare la guardia per tentativi.
+function MotivoRifiutoBersaglio([string]$chiesto,[string]$macchina){
+  $g = ("" + $chiesto).Trim()
+  $m = NomeMacchinaPulito $macchina
+
+  # si LEGGE la riga (serve alla deroga), non si decide ancora niente
+  $riga = RigaMacchina $m
+  $n    = NormalizzaPercorsoWin $g
+
+  foreach($v in $TERMINALI_VIETATI){
+    if($g -like ("*" + $v.p + "*")){
+      $derogato = $false
+      if($null -ne $riga -and $riga.deroga -and $n -ne "" -and [string]::Equals($n, $riga.perc, [StringComparison]::OrdinalIgnoreCase)){ $derogato = $true }
+      if(-not $derogato){
+        return ("TERMINALE VIETATO: '" + $g + "' nomina " + $v.chi + ".")
+      }
+    }
+  }
+
+  if($null -eq $riga){
+    return ("MACCHINA SCONOSCIUTA: questa macchina si chiama '" + $m + "' e NON e' nella tabella dei bersagli.`n" +
+            "    Le macchine ammesse, e il solo terminale ammesso su ognuna, sono:`n" +
+            (ElencoMacchineAmmesse) + "`n" +
+            "    Non esiste un ripiego: una macchina che non conosco non ha bersagli, perche'`n" +
+            "    non so quali MT5 ci vivano sopra ne' quali conti abbiano dentro. Se il round`n" +
+            "    deve girare davvero qui, si AGGIUNGE la riga alla tabella, a mano, e si`n" +
+            "    ripassa dal cancello.")
+  }
+
+  # IL VUOTO SI GIUDICA QUI, DOPO LA MACCHINA, e l'ordine non e' estetica:
+  # su una macchina sconosciuta il motivo VERO e' la macchina (il bersaglio
+  # e' vuoto proprio PERCHE' non c'e' una riga da cui prenderlo), e un
+  # messaggio che accusa la cosa sbagliata manda chi legge a cercare dove
+  # non c'e' niente. Misurato eseguendo, il 21/09: con il controllo prima,
+  # la macchina sconosciuta usciva come "BERSAGLIO VUOTO".
+  if($g -eq ""){
+    return ("BERSAGLIO VUOTO: -TerminaleBacktest non dice niente.`n" +
+            "    Su '" + $riga.macchina + "' il bersaglio sarebbe " + $riga.perc + " (conto " + $riga.conto + "):`n" +
+            "    o lo si passa, o lo si lascia fuori del tutto e lo mette la tabella. Una`n" +
+            "    stringa di soli spazi non e' nessuna delle due cose.")
+  }
+
   if($n -eq ""){
     return ("BERSAGLIO NON RICONDUCIBILE A UNA CARTELLA DI WINDOWS: '" + $g + "'." +
             " Un nome 8.3 (PROGRA~1 = C:\Program Files scritto in un altro modo), un" +
@@ -204,17 +432,60 @@ function MotivoRifiutoBanco([string]$chiesto){
   # non deve mai entrare in un confronto (vedi NumInv, qui sopra): su un
   # confronto culturale certi caratteri invisibili vengono IGNORATI, cioe'
   # due stringhe diverse risultano uguali. Qui si guardano i byte.
-  if(-not [string]::Equals($n, $BANCO_PERC, [StringComparison]::OrdinalIgnoreCase)){
-    return ("NON E' IL BANCO: '" + $g + "' (normalizzato: '" + $n + "').")
+  if(-not [string]::Equals($n, $riga.perc, [StringComparison]::OrdinalIgnoreCase)){
+    return ("NON E' IL BERSAGLIO DI QUESTA MACCHINA: '" + $g + "' (normalizzato: '" + $n + "').`n" +
+            "    Su '" + $riga.macchina + "' l'unico terminale ammesso e' " + $riga.perc + " (conto " + $riga.conto + ").`n" +
+            "    Attenzione: un percorso puo' essere legittimo su UN'ALTRA macchina e non qui.`n" +
+            "    E' il caso di C:\MT5_Backtest, che e' il banco del VPS e sul PC di backtest`n" +
+            "    non esiste. Il bersaglio lo decide la MACCHINA, non il testo del percorso.")
   }
   return ""
 }
+# ===== BLOCCO COLLAUDABILE OFFLINE: FINE =====
 # ---------------------------------------------------------------------
-#  GUARDIA_BANCO_POSITIVA_v1 -- FINE DEL BLOCCO COPIATO
+#  GUARDIA_BANCO_POSITIVA_v2 -- FINE DEL BLOCCO CONDIVISO
 # ---------------------------------------------------------------------
 
+# ---------------------------------------------------------------------
+#  L'ADATTATORE DI QUESTO FILE (21/09/2026). Sta FUORI dal blocco
+#  condiviso apposta: il blocco e' identico nei tre file e non puo'
+#  contenere niente che sia "di questo file". Qui si legge LA MACCHINA e
+#  si ricava il bersaglio; i nomi $BANCO_PERC / $BANCO_CONTO restano
+#  quelli di prima perche' li usano i messaggi piu' sotto -- cambia il
+#  CONTENUTO, non il nome.
+# ---------------------------------------------------------------------
+$MACCHINA = NomeMacchinaPulito $env:COMPUTERNAME
+
+# IL GUARDIANO DEL GUARDIANO: la tabella e' scritta a mano, e una guardia
+# che si regge su una tabella rotta non e' una guardia.
+$motivoTab = TabellaCoerente
+if($motivoTab -ne ""){
+  Muori ("LA TABELLA DEI BERSAGLI E' SCRITTA MALE: " + $motivoTab + "`n" +
+         "    Non parto. Si corregge `$BERSAGLI_PER_MACCHINA nel blocco condiviso --`n" +
+         "    e nelle ALTRE DUE copie, nello stesso commit -- e si ripassa dal cancello.")
+}
+
+$rigaMac     = RigaMacchina $MACCHINA
+$BANCO_PERC  = ""
+$BANCO_CONTO = ""
+if($null -ne $rigaMac){ $BANCO_PERC = $rigaMac.perc; $BANCO_CONTO = $rigaMac.conto }
+
+# LA MACCHINA SI DICHIARA, e prima di tutto il resto (regola dei
+# terminali multipli, 06/09 e 12/09).
+Write-Host ("  pc  : " + $(if($MACCHINA -ne ""){$MACCHINA}else{"<COMPUTERNAME VUOTO>"}))
+Write-Host ("  term: " + $(if(("" + $TerminaleBacktest).Trim() -ne ""){$TerminaleBacktest}else{"<non passato: lo decide la tabella per macchina>"}))
+
+# IL BERSAGLIO NON PASSATO SI RISOLVE, NON SI INDOVINA. Su una macchina
+# sconosciuta resta vuoto apposta, e due righe piu' sotto viene rifiutato.
+if(("" + $TerminaleBacktest).Trim() -eq "" -and $null -ne $rigaMac){
+  $TerminaleBacktest = $rigaMac.perc
+  Write-Host ("  -TerminaleBacktest non passato: su " + $rigaMac.macchina + " il bersaglio e' " + $rigaMac.perc) -ForegroundColor DarkGray
+  Write-Host  "  (e passa comunque da TUTTI i controlli qui sotto, come se l'avessi scritto tu)." -ForegroundColor DarkGray
+}
+
 # =====================================================================
-#  1. IL TERMINALE: LA GUARDIA E' POSITIVA (rifatta l'11/09/2026)
+#  1. IL TERMINALE: LA GUARDIA E' POSITIVA **E PER MACCHINA**
+#     (positiva dall'11/09/2026, per macchina dal 21/09/2026)
 # =====================================================================
 # PRIMA ERA NEGATIVA, ED ERA LA COPIA LETTERALE DELLA GUARDIA VECCHIA:
 # "-like *-V3* oppure *BCM_Reale*". Eseguita contro bersagli finti,
@@ -230,30 +501,61 @@ function MotivoRifiutoBanco([string]$chiesto){
 #       8.3: una lista di divieti guarda le LETTERE, non il POSTO;
 #   C:\MT5_Backtest\..\Program Files\BCM Markets MT5 Terminal -> nomina il
 #       banco, ma il '..' porta altrove.
-# Adesso dice UNA COSA SOLA: DEVE ESSERE IL BANCO. Ed e' la forma giusta
-# per QUESTA riga, che non e' uno scandaglio di sola lettura: compila un
-# EA dentro la cartella dati del terminale bersaglio e ci fa girare il
-# tester. Un bersaglio diverso dal banco qui non ha nessun uso legittimo.
-$motivoNo = MotivoRifiutoBanco $TerminaleBacktest
+# Adesso dice UNA COSA SOLA: DEVE ESSERE IL BERSAGLIO DI QUESTA MACCHINA.
+# Ed e' la forma giusta per QUESTA riga, che non e' uno scandaglio di
+# sola lettura: compila un EA dentro la cartella dati del terminale
+# bersaglio e ci fa girare il tester.
+# 21/09/2026: il bersaglio non e' piu' UNO per tutti, e' uno PER
+# MACCHINA. Sul VPS resta il banco C:\MT5_Backtest (demo 50504400,
+# solo-tester); sul PC di backtest e' il suo terminale, che pero' E'
+# LOGGATO SU UN CONTO VIVO (50503392) -- percio' qui sotto, su quella
+# macchina, si stampa un'AVVERTENZA e non si fa finta che sia un banco.
+$motivoNo = MotivoRifiutoBersaglio $TerminaleBacktest $MACCHINA
 if($motivoNo -ne ""){
+  $codaTabella = ""
+  if($motivoNo -notlike "MACCHINA SCONOSCIUTA*"){
+    $codaTabella = ("    LA TABELLA DEI BERSAGLI -- una macchina, un terminale:`n" + (ElencoMacchineAmmesse) + "`n")
+  }
   Muori ($motivoNo + "`n" +
-         "    L'UNICO terminale ammesso e' " + $BANCO_PERC + " (demo " + $BANCO_CONTO + ", solo-tester).`n" +
-         "    Gli altri MT5 di questa macchina hanno SEDIE VIVE sopra e non si toccano:`n" +
-         "    il piccolo 50503392, il 100k 50504263 e il conto REALE 10105439.`n" +
-         "    La guardia e' POSITIVA: non elenca i vietati, ammette il banco. Se un`n" +
-         "    giorno il banco cambiasse casa, si cambia QUELLA COSTANTE, a mano, e si`n" +
-         "    ripassa dal cancello.")
+         $codaTabella +
+         "    Gli altri MT5 di queste macchine hanno SEDIE VIVE sopra e non si toccano:`n" +
+         "    il piccolo 50503392, il 100k 50504263, il conto REALE 10105439, la`n" +
+         "    challenge FTMO 541452707 (C:\FTMO) e il manuale 50503635.`n" +
+         "    La guardia e' POSITIVA E PER MACCHINA: non elenca i vietati, ammette UN`n" +
+         "    terminale su UNA macchina. Se un bersaglio cambiasse casa, o nascesse`n" +
+         "    una macchina nuova, si cambia LA TABELLA, a mano, e si ripassa dal`n" +
+         "    cancello.")
 }
 # LA COSTANTE, NON LA STRINGA DI FUORI. E' questa riga che chiude il buco
-# della radice del disco: la pipe qui sotto e' SEMPRE "C:\MT5_Backtest\*"
-# e non puo' diventare "C:\*" per colpa di come e' stato scritto un
-# argomento. Vale anche per $exeBT e $medBT, che nascono da qui.
-$cartellaBT = $BANCO_PERC
-Write-Host ("  bersaglio AMMESSO dalla guardia positiva: " + $cartellaBT + "   (conto " + $BANCO_CONTO + ")") -ForegroundColor Green
+# della radice del disco: la pipe qui sotto e' SEMPRE la cartella della
+# tabella + "\*" e non puo' diventare "C:\*" per colpa di come e' stato
+# scritto un argomento. Vale anche per $exeBT e $medBT, che nascono da qui.
+# $rigaMac qui NON puo' essere $null: se lo fosse, MotivoRifiutoBersaglio
+# avrebbe gia' detto "MACCHINA SCONOSCIUTA" e saremmo morti sopra.
+$cartellaBT = $rigaMac.perc
+Write-Host ("  bersaglio AMMESSO su " + $rigaMac.macchina + ": " + $cartellaBT + "   (conto " + $BANCO_CONTO + ")") -ForegroundColor Green
+# L'AVVERTENZA CHE COSTA, stampata SOLO dove e' vera. Sul PC di backtest
+# il bersaglio non e' un banco solo-tester: e' loggato sul demo piccolo
+# 50503392 e il 14/08/2026 da quella macchina sono PARTITI ordini veri
+# (#3160534/#3160535, -104,60). Questa riga COMPILA e fa girare il tester
+# li' dentro, e con -ChiudiBacktest lo chiude: sapere non e' controllare,
+# ma chi lancia deve almeno sapere.
+if($rigaMac.deroga){
+  Write-Host ""
+  Write-Host "  +---------------------------------------------------------------+" -ForegroundColor Yellow
+  Write-Host "  | AVVERTENZA SUL BERSAGLIO -- LEGGERE PRIMA DI -ChiudiBacktest   |" -ForegroundColor Yellow
+  Write-Host "  +---------------------------------------------------------------+" -ForegroundColor Yellow
+  Write-Host ("  Questo terminale e' loggato sul conto " + $BANCO_CONTO + " (demo piccolo), NON e'") -ForegroundColor Yellow
+  Write-Host  "  un banco solo-tester come C:\MT5_Backtest sul VPS." -ForegroundColor Yellow
+  Write-Host  "  Il 14/08/2026 da QUESTA macchina sono partiti ordini veri:" -ForegroundColor Yellow
+  Write-Host  "  #3160534 / #3160535 -> -104,60 sul piccolo (DAX_14-08_DUE_MOTORI.md r.401)." -ForegroundColor Yellow
+  Write-Host  "  Prima di lanciare: guarda che non abbia SEDIE attaccate ai grafici." -ForegroundColor Yellow
+}
 if(-not (Test-Path -LiteralPath $cartellaBT -PathType Container)){ Muori ("la cartella '" + $cartellaBT + "' non esiste.") }
-# --- GUARDIA_BANCO_POSITIVA_v1, GRADINO f: COPIA da RIGA_ROUND_VPS.ps1
-#     righe 480-497 al commit e2d5dc3 (stesse regole di sopra). E' il
-#     gradino che la sola stringa NON puo' fare: un nome giusto puo'
+# --- GUARDIA_BANCO_POSITIVA_v2, GRADINO f (COPIA dichiarata dello stesso
+#     gradino di RIGA_ROUND_VPS.ps1). Sta FUORI dal blocco condiviso
+#     perche' il blocco e' PURO e questo tocca il disco: e' il gradino
+#     che la sola stringa NON puo' fare, perche' un nome giusto puo'
 #     puntare nel posto sbagliato se la cartella e' una junction.
 # IL GRADINO CHE NESSUNA STRINGA PUO' FARE. Un nome giusto puo' puntare
 # nel posto sbagliato: basta che la cartella sia una junction o un link
@@ -266,12 +568,12 @@ if($null -eq $infoBT){
   Muori ("la cartella '" + $cartellaBT + "' non e' leggibile: non posso dire DOVE punta, e quindi non parto.")
 }
 if((([int]$infoBT.Attributes) -band ([int][IO.FileAttributes]::ReparsePoint)) -ne 0){
-  Muori ("IL BANCO E' UN COLLEGAMENTO: '" + $cartellaBT + "' non e' una cartella vera,`n" +
+  Muori ("IL BERSAGLIO E' UN COLLEGAMENTO: '" + $cartellaBT + "' non e' una cartella vera,`n" +
          "    e' una junction (o un link simbolico) che rimanda altrove. Il nome e'`n" +
          "    quello giusto, il posto potrebbe non esserlo, e nessun controllo sulla`n" +
          "    STRINGA se ne accorgerebbe.`n" +
-         "    Se il banco 50504400 e' davvero installato cosi', si guarda insieme dove`n" +
-         "    punta e si cambia questa riga. Non si tira a indovinare.")
+         "    Se il terminale " + $BANCO_CONTO + " e' davvero installato cosi', si guarda`n" +
+         "    insieme dove punta e si cambia LA TABELLA. Non si tira a indovinare.")
 }
 $exeBT = Join-Path $cartellaBT "terminal64.exe"
 $medBT = Join-Path $cartellaBT "metaeditor64.exe"

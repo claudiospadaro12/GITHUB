@@ -326,6 +326,69 @@ function RigheReferto($e,[string]$nome,[string]$testoTrades0){
   return @($R)
 }
 
+# =====================================================================
+#  GUARDIA_BANCO_POSITIVA_v2 -- INIZIO DEL BLOCCO CONDIVISO
+#
+#  QUESTO BLOCCO VIVE IN TRE FILE ED E' IDENTICO BYTE PER BYTE IN TUTTI
+#  E TRE. Non e' "codice di questo file": e' LA GUARDIA. Se una delle
+#  copie diverge, abbiamo tre guardie diverse che credono di essere la
+#  stessa -- ed e' il difetto peggiore che possa avere un cancello.
+#  I tre file, per nome:
+#     backtest_pipeline\righe\RIGA_ROUND_VPS.ps1      (l'originale)
+#     backtest_pipeline\walkforward_generico.ps1      (il driver)
+#     backtest_pipeline\righe\RIGA_SCAN_GESTIONE.ps1  (lo studio uscite)
+#  Si trovano tutti e tre con:
+#     grep -rn "GUARDIA_BANCO_POSITIVA_v2" backtest_pipeline
+#
+#  SI MODIFICA IN UN POSTO SOLO E SI RICOPIA NEGLI ALTRI DUE, NELLO
+#  STESSO COMMIT. E da oggi non e' piu' una raccomandazione scritta in un
+#  commento: c'e' UNA MACCHINA CHE LO DIMOSTRA. Estrae il blocco dai tre
+#  file, ne confronta le impronte SHA-256 e FALLISCE se divergono:
+#     pwsh -NoProfile -File backtest_pipeline/banco_guardia_macchina.ps1
+#  Perche' serviva: fino al 21/09/2026 il controllo non esisteva, la
+#  guardia dell'originale e' passata alla v2 e le due copie sono rimaste
+#  alla v1 -- cioe' cablate sul banco del VPS. Nessuno se ne e' accorto
+#  leggendo: se ne e' accorto chi e' andato a guardare i tre file.
+#
+#  PERCHE' COPIATO E NON INCLUSO -- scelta dichiarata, col suo costo.
+#  Un include sarebbe UNA DIPENDENZA IN PIU' DA PINNARE, e qui il pin e'
+#  la sola cosa che lega il codice che gira al codice che qualcuno ha
+#  letto: RIGA_SOTTILE_ROUND.ps1 inchioda al byte (SHA-256 + pin di
+#  commit) i .ps1 che esegue, e RIGA_ROUND_VPS.ps1 scarica il driver da
+#  solo, un file alla volta. Con un include il file incluso o viaggia
+#  NON pinnato -- e allora il pin non vuol dire piu' niente -- oppure va
+#  aggiunto a mano a ogni catena di scaricamento e a ogni elenco di
+#  impronte: tre punti nuovi in cui sbagliare, per risparmiare una copia.
+#  Fra comodo e stretto, stretto: si duplica, si DICHIARA, e si mette una
+#  macchina a controllare che le copie non divergano.
+#
+#  COSA DEFINISCE -- e nient'altro: qui dentro NON si stampa, non si
+#  legge il disco, non si toccano processi. E' PURO apposta, cosi' il
+#  banco lo puo' ESEGUIRE su Linux con pwsh, senza MT5 e senza VPS:
+#     $BERSAGLI_PER_MACCHINA   tabella: una macchina -> UN solo terminale
+#     $TERMINALI_VIETATI       i divieti per nome, consultati PRIMA
+#     NormalizzaPercorsoWin / RadiceDiDisco / NomeMacchinaPulito
+#     RigaMacchina / ElencoMacchineAmmesse / TabellaCoerente
+#     MotivoRifiutoBersaglio   <- IL VERDETTO ("" = ammesso)
+#
+#  CHI LO USA DEVE FARE QUATTRO COSE, subito sotto (vedi l'ADATTATORE di
+#  questo file, che sta fuori dal blocco apposta):
+#     1. $MACCHINA = NomeMacchinaPulito $env:COMPUTERNAME
+#     2. TabellaCoerente          -> se non torna "", si muore
+#     3. MotivoRifiutoBersaglio <chiesto> $MACCHINA -> se non torna "",
+#        si muore, e si stampa il motivo per intero
+#     4. da li' in avanti si usa LA COSTANTE della tabella (.perc), MAI
+#        la stringa arrivata da fuori: e' quella riga che impedisce a
+#        $cartellaBT di diventare "C:\" per colpa di un argomento.
+#
+#  NOTA PER CHI TOCCA QUESTE RIGHE: i due marcatori che il banco usa come
+#  confini (quelli del blocco collaudabile, qui sotto) devono comparire
+#  in ogni file UNA VOLTA SOLA CIASCUNO. Misurato l'11/09/2026
+#  sbagliando: una seconda occorrenza dentro un commento aveva accorciato
+#  il blocco estratto da centocinque righe a nove, e il verdetto era
+#  "RIFIUTATO" su tutto, banco compreso -- per un difetto del banco e non
+#  della guardia.
+# =====================================================================
 # ===== BLOCCO COLLAUDABILE OFFLINE: INIZIO =====
 # Tutto cio' che sta fra questo marcatore e quello di FINE e' PURO: non
 # legge il disco, non tocca processi, non stampa niente. Serve perche' il
@@ -634,6 +697,9 @@ function MotivoRifiutoBersaglio([string]$chiesto,[string]$macchina){
   return ""
 }
 # ===== BLOCCO COLLAUDABILE OFFLINE: FINE =====
+# ---------------------------------------------------------------------
+#  GUARDIA_BANCO_POSITIVA_v2 -- FINE DEL BLOCCO CONDIVISO
+# ---------------------------------------------------------------------
 
 # =====================================================================
 #  0. IL PRE-VOLO SUI PARAMETRI
