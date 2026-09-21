@@ -27955,3 +27955,52 @@ dice ora che e' memoria di Windows, e il verdetto si appoggia allo STATO.
 📌 Nota di metodo: il difetto non e' uscito da nessun cancello, ne' dallo strato 1
 ne' dallo strato 2. E' uscito **leggendo l'output vero di una corsa riuscita**.
 Un referto che finisce "FATTO" va letto lo stesso, riga per riga.
+
+## CLASSE 540 -- Start-Process -ArgumentList non mette le virgolette: uno spazio spezza tutto
+**Trovata il 21/09/2026 sul PC di backtest, sul primo round vero della challenge.**
+
+`Start-Process -FilePath "powershell.exe" -ArgumentList @(...)` **unisce gli
+elementi con uno SPAZIO e NON li cita**. Il bersaglio passato come
+`"-TerminaleBacktest", $cartellaBT` diventava, sulla riga di comando:
+
+```
+-TerminaleBacktest C:\Program Files\BCM Markets MT5 Terminal
+```
+
+cioe' `-TerminaleBacktest` = `C:\Program`, e `Files\BCM` come parametro
+posizionale. Errore vero, copiato dallo schermo:
+
+```
+walkforward_generico.ps1 : Impossibile trovare un parametro posizionale
+che accetta l'argomento 'Files\BCM'.
+FullyQualifiedErrorId : PositionalParameterNotFound
+```
+
+Risultato: `rc 1`, **zero .ini, zero CSV, morto in UN SECONDO**.
+
+### 🔴 Perche' e' insidiosa: il bug dormiva da sempre ed e' stata la RIPARAZIONE a svegliarlo
+Finche' l'unico banco era `C:\MT5_Backtest` non c'erano spazi e non succedeva
+niente. La classe 536 (bersaglio per MACCHINA) ha aggiunto alla tabella
+`C:\Program Files\BCM Markets MT5 Terminal` -- **un percorso con spazi** -- e il
+difetto e' emerso al primo uso.
+👉 **Quando si allarga una tabella di percorsi, si controlla se i nuovi valori
+hanno una forma che il codice non ha mai visto** (spazi, apostrofi, barra finale,
+unita' di rete). Non basta che la tabella sia giusta.
+
+### La regola
+**Ogni percorso che entra in un `-ArgumentList` passa da `CitaArg`**, che
+toglie la barra finale e mette le virgolette se c'e' uno spazio. La barra
+finale va tolta PRIMA: una `"` preceduta da `\` verrebbe letta come
+virgoletta di testo e la citazione salterebbe.
+
+### Il contro-esempio, ESEGUITO
+Script bersaglio che stampa cosa riceve, invocato in tutti e due i modi:
+- **valore nudo** -> `RICEVUTO TerminaleBacktest = [C:\Program]`
+- **da CitaArg**  -> `RICEVUTO TerminaleBacktest = [C:\Program Files\BCM Markets MT5 Terminal]`
+
+### 🟠 Dove lo stesso schema e' ancora presente (rilievo, NON riparato qui)
+`righe/RIGA_SOTTILE_ROUND.ps1` r.1616, `runner_abtg.ps1` r.774,
+`righe/RIGA_ANCORA_R119.ps1` r.257, `righe/RIGA_CORRI_OGGI.ps1` r.437,
+`righe/RIGA_RITARDO_TESTER.ps1` r.243, `righe/RIGA_DIAG_GBPUSD.ps1` r.419.
+Oggi non mordono perche' puntano a `C:\MT5_Backtest` (senza spazi), ma
+mordono il giorno in cui useranno la tabella per macchina.

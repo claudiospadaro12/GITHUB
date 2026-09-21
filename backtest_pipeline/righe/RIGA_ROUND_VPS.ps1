@@ -169,6 +169,27 @@ $TESTO_TRADES0 = "Trades=0 non vuol dire nessun edge, vuol dire NON E' GIRATA: g
 
 $RILIEVI = New-Object System.Collections.ArrayList
 function Muori($m){ Write-Host ""; Write-Host ("ERRORE: " + $m) -ForegroundColor Red; exit 1 }
+# CLASSE 540, trovata il 21/09/2026 sul PC di backtest.
+#   Start-Process -ArgumentList @(...) UNISCE gli elementi con uno SPAZIO e
+#   NON li mette fra virgolette. Finche' il banco era "C:\MT5_Backtest" non
+#   se ne accorgeva nessuno: nessuno spazio, nessun danno. Dal 21/09 la
+#   tabella dei bersagli contiene "C:\Program Files\BCM Markets MT5 Terminal",
+#   e la riga di comando diventava
+#       -TerminaleBacktest C:\Program Files\BCM Markets MT5 Terminal
+#   cioe' -TerminaleBacktest = "C:\Program" e poi "Files\BCM" come posizionale.
+#   Errore vero, misurato:
+#       "Impossibile trovare un parametro posizionale che accetta
+#        l'argomento 'Files\BCM'"  -> rc 1, ZERO .ini, ZERO CSV, in un secondo.
+#   Il difetto e' nato dalla riparazione della classe 536: aggiungere alla
+#   tabella un percorso CON SPAZI ha svegliato un bug che dormiva da sempre.
+#   La barra finale si toglie prima di citare: una " preceduta da \ verrebbe
+#   letta come virgoletta di testo e la citazione salterebbe.
+function CitaArg([string]$v){
+  if($null -eq $v){ return "" }
+  $t = $v.TrimEnd('\')
+  if($t -match '\s'){ return ('"' + $t + '"') }
+  return $t
+}
 function Rilievo($m){ [void]$RILIEVI.Add($m); Write-Host ("    RILIEVO: " + $m) -ForegroundColor DarkYellow }
 
 # =====================================================================
@@ -1051,10 +1072,11 @@ Remove-Item -LiteralPath $anteprima -Force -ErrorAction SilentlyContinue
 #     fatta questo script: il bersaglio e' chiuso, gli altri restano vivi.
 #     -Rifai: senza, il driver SALTA i CSV gia' presenti (classe 15).
 # =====================================================================
-$arg = @("-NoProfile","-ExecutionPolicy","Bypass","-File",$drv,
-         "-Expert",$Expert,"-Prova",$provaLoc,
+# CLASSE 540: ogni percorso passa da CitaArg, o uno spazio spezza la riga di comando.
+$arg = @("-NoProfile","-ExecutionPolicy","Bypass","-File",(CitaArg $drv),
+         "-Expert",$Expert,"-Prova",(CitaArg $provaLoc),
          "-Etichetta",$Etichetta,"-Modello",("" + $Modello),"-Deposito",("" + $Deposito),
-         "-Rifai","-Force","-TerminaleBacktest",$cartellaBT)
+         "-Rifai","-Force","-TerminaleBacktest",(CitaArg $cartellaBT))
 if($SoloControllo){ $arg += "-SoloControllo" }
 
 Write-Host ""
