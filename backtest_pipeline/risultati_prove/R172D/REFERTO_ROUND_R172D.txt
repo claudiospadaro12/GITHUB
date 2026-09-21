@@ -1,0 +1,53 @@
+REFERTO ROUND SUL TERMINALE DA BACKTEST
+marcatore riga  : MARCATORE_RIGA_ROUND_VPS_v2
+marcatore driver: MARCATORE_WALKFORWARD_GENERICO_v5_INCLUDE
+pin             : c4510e850d343fdf8880aa2ad4b67a76e4f11852
+data            : 2026-09-21 21:01:33   <-- SE QUESTA DATA NON E' DI OGGI, IL FILE E' VECCHIO
+macchina        : DESKTOP-H4D7CAJ   (bersaglio ammesso qui: C:\Program Files\BCM Markets MT5 Terminal, conto 50503392)
+terminale       : C:\Program Files\BCM Markets MT5 Terminal\terminal64.exe
+AVVERTENZA      : il bersaglio su DESKTOP-H4D7CAJ NON e' un banco solo-tester: e' loggato sul conto 50503392 e il 14/08/2026 da questa macchina sono PARTITI ordini veri (#3160534/#3160535, -104,60). Prima di un round: controlla che non abbia SEDIE attaccate.
+tetto barre     : MaxBars=100000000
+
+EA              : ABTG_Dow_Apertura_US
+file prova      : R172d_beatr_dowapertura_U30USD.txt   (86689 byte, dal pin)
+etichetta       : R172D
+simbolo         : U30USD
+periodo         : M5
+da quando       : 2024.09.26
+modello         : 4  (tick reali)
+deposito        : 80000
+rc del driver   : 0   (informativo -- classe 154: e' l'ultimo .exe lanciato dentro, NON il verdetto)
+
+QUESTO REFERTO NON GIUDICA: dice cosa e' uscito. Il verdetto si scrive
+dopo, coi criteri congelati PRIMA del round.
+
+--- IS  (dentro campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Dow_Apertura_US\ABTG_Dow_Apertura_US_U30USD_IS_R172D.csv
+  righe : 7
+    Pass 0    Profit 2241.62      PF 1.22173    Equity DD % 5.6726     Trades 74
+    Pass 1    Profit 1139.08      PF 1.28819    Equity DD % 2.8638     Trades 68
+    Pass 2    Profit 1152.81      PF 1.18134    Equity DD % 4.4115     Trades 71
+    Pass 3    Profit -1053.09     PF 0.88635    Equity DD % 5.2954     Trades 73
+    Pass 4    Profit 1875.3       PF 1.20045    Equity DD % 4.5114     Trades 75
+    Pass 5    Profit 2299.99      PF 1.24497    Equity DD % 4.5881     Trades 75
+    Pass 6    Profit 2232.7       PF 1.22052    Equity DD % 5.4463     Trades 75
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+--- OOS (fuori campione) ---
+  file  : C:\Users\Master\abtg_round\risultati_prove\ABTG_Dow_Apertura_US\ABTG_Dow_Apertura_US_U30USD_OOS_R172D.csv
+  righe : 7
+    Pass 0    Profit 5395.25      PF 1.27175    Equity DD % 4.3944     Trades 130
+    Pass 1    Profit -1144.85     PF 0.88927    Equity DD % 4.8134     Trades 115
+    Pass 2    Profit -1540.92     PF 0.89142    Equity DD % 5.0626     Trades 120
+    Pass 3    Profit 550.26       PF 1.03291    Equity DD % 4.3944     Trades 126
+    Pass 4    Profit 1964.4       PF 1.11098    Equity DD % 4.3944     Trades 128
+    Pass 5    Profit 4121.83      PF 1.21884    Equity DD % 4.3944     Trades 130
+    Pass 6    Profit 5293.19      PF 1.26699    Equity DD % 4.3944     Trades 130
+  ESITO : LETTO -- 7 righe, tutte con Trades > 0
+
+PID non bersaglio PRIMA: 
+PID non bersaglio DOPO : 
+
+RILIEVI: 0
+
+ESITO: ROUND GIRATO
