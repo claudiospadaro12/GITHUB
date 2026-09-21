@@ -376,12 +376,26 @@ input group "=== Filtro dello SPAZIO (live 10/04, opt-in) ==="
 //  ostacolo sul TF superiore. Se il bersaglio sta OLTRE l'ostacolo,
 //  l'operazione non ci puo' arrivare.
 //
+//  E' UNA BANDA, NON UN PAVIMENTO. La fonte blocca in DUE direzioni:
+//   - troppo POCO spazio (r.83): "sotto i minimi della notte c'e' traffico,
+//     30 punti [...] sono pochini";
+//   - troppo LONTANO (r.39): "Sono 170 punti. Se dovessimo andare a
+//     questo livello qua, nel prezzo attuale sono 500 punti, e' troppo
+//     distante". Un bersaglio a casa di Dio non e' un bersaglio.
+//
 //  LA SOGLIA E' IN R, NON IN PUNTI. Loro dicono "30 punti", ma 30 punti sul
 //  DAX e sul Nasdaq sono due cose diverse: la forma che si normalizza da
 //  sola su qualunque simbolo e' "spazio libero >= k x distanza dello stop".
-input ENUM_ABTG_SPACE InpSpaceMode = ABTG_SPACE_OFF;  // 0=spento (default, no-op) | 1=SOLO MISURA (conta e logga, non blocca) | 2=ATTIVO (blocca)
+//
+//  ATTENZIONE: LE DUE SOGLIE NASCONO SPENTE (0), DI PROPOSITO. Vedi R30 nel blocco
+//  in fondo al file: il parente stretto di questo filtro (InpUseSRFilter)
+//  era la cella piu' bella IN campione e l'unica rossa FUORI. Un default
+//  "ragionevole" qui sarebbe un numero inventato. Prima si misura la
+//  distribuzione (modo 1), poi - se c'e' un numero - si sceglie la soglia.
+input ENUM_ABTG_SPACE InpSpaceMode = ABTG_SPACE_OFF;  // 0=spento (default, no-op) | 1=SOLO MISURA (conta, logga, NON blocca) | 2=ATTIVO (blocca, ma solo se una soglia e' > 0)
 input ENUM_TIMEFRAMES InpSpaceTF   = PERIOD_H4;       // TF su cui si cercano gli ostacoli (live: da H1 si sale in H4)
-input double InpSpaceMinR          = 1.0;             // Spazio minimo richiesto, in multipli dello STOP (0 = il filtro non morde mai)
+input double InpSpaceMinR          = 0;               // Spazio MINIMO in multipli dello STOP (0 = spento: nessun numero e' ancora stato misurato)
+input double InpSpaceMaxR          = 0;               // Spazio MASSIMO in multipli dello STOP: oltre, il bersaglio e' troppo lontano (0 = spento)
 input int    InpSpaceEma1          = 14;              // Media 1 come ostacolo (0 = non si guarda)
 input int    InpSpaceEma2          = 50;              // Media 2 come ostacolo (0 = non si guarda)
 input int    InpSpaceEma3          = 100;             // Media 3 come ostacolo (0 = non si guarda)
@@ -460,6 +474,19 @@ double   gSpazioLivello = 0.0;     // prezzo dell'ostacolo piu' vicino trovato n
 string   gSpazioNome    = "";      // etichetta di quell'ostacolo (es. "EMA100")
 int      gSpazioValutati = 0;      // quante volte il filtro e' stato interrogato
 int      gSpazioMorsi    = 0;      // quante volte ha bloccato (o avrebbe bloccato, in modo 1)
+// SEGNALI PERSI PER LATO. Non e' un dettaglio: il pavimento di frequenza e'
+// 1,00 op/giorno PER FAMIGLIA (firma del 07/09) e la famiglia Aperture sta a
+// 1,407. Un filtro che taglia il 13-30% dei segnali puo' portare la famiglia
+// SOTTO il pavimento: sarebbe un PF piu' bello su una sedia non schierabile.
+// Indice 0 = long, 1 = short.
+int      gSpazioValLato[2];        // segnali valutati per lato
+int      gSpazioMorLato[2];        // segnali bloccati (o che sarebbero stati persi) per lato
+// ISTOGRAMMA DELLO SPAZIO, in multipli di R. E' IL prodotto del modo 1: non
+// un verdetto, una DISTRIBUZIONE. Con le soglie spente i contatori dei morsi
+// restano a zero e questo istogramma e' tutto quello che si porta a casa --
+// ed e' esattamente quello che serve per decidere se una soglia esiste.
+// Colonne: 0=<0,5R  1=0,5-1R  2=1-2R  3=2-3R  4=>=3R  5=nessun ostacolo
+int      gSpazioIsto[2][6];
 
 //+------------------------------------------------------------------+
 //| Log helper                                                       |
@@ -522,12 +549,20 @@ int ABTG_OnInit()
    //    (default) qui non succede niente e il log resta identico a prima --
    //    cosi' un giornale vecchio e uno nuovo si confrontano riga per riga.
    if(InpSpaceMode != ABTG_SPACE_OFF)
-      ABTGLog(StringFormat("FILTRO SPAZIO %s -> TF %s | soglia %.2fR | medie %d/%d/%d/%d | supertrend %s. %s",
+     {
+      ABTGLog(StringFormat("FILTRO SPAZIO %s -> TF %s | %s | medie %d/%d/%d/%d | supertrend %s. %s",
                            (InpSpaceMode == ABTG_SPACE_ATTIVO ? "ATTIVO (blocca)" : "SOLO MISURA (non blocca nulla)"),
-                           SpazioTfLabel(InpSpaceTF), InpSpaceMinR,
+                           SpazioTfLabel(InpSpaceTF), SpazioBandaTesto(),
                            InpSpaceEma1, InpSpaceEma2, InpSpaceEma3, InpSpaceEma4,
                            (InpSpaceUseST ? "si" : "no"),
                            (InpSpaceMode == ABTG_SPACE_ATTIVO ? "ATTENZIONE: questo modo TOGLIE operazioni." : "Le operazioni restano ESATTAMENTE quelle di prima.")));
+      //  Il caso piu' probabile e' proprio questo, ed e' VOLUTO: a soglie
+      //  spente il modo 2 non toglie niente. Dirlo evita che qualcuno lo
+      //  scambi per un guasto - e evita l'errore opposto, cioe' inventarsi
+      //  una soglia "ragionevole" per farlo mordere (vedi R30).
+      if(InpSpaceMinR <= 0 && InpSpaceMaxR <= 0)
+         ABTGLog("FILTRO SPAZIO: nessuna soglia accesa -> NON blocchera' MAI, nemmeno in modo 2. Si sta misurando la distribuzione, non filtrando. E' il comportamento previsto finche' un numero non e' stato MISURATO.");
+     }
    //  Un flag acceso che non fa niente e non lo dice e' il bug del 05/08
    //  daccapo: il filtro dello spazio e' agganciato SOLO al motore RETEST
    //  (quello che gira davvero sulla sedia). Su qualunque altro motore
@@ -644,12 +679,30 @@ void ABTG_OnDeinit(const int reason)
    //    creati e restano INVALID_HANDLE, quindi il ciclo non fa niente.
    for(int i = 0; i < 4; i++)
       if(gSpaceEmaH[i] != INVALID_HANDLE) { IndicatorRelease(gSpaceEmaH[i]); gSpaceEmaH[i] = INVALID_HANDLE; }
-   //--- riepilogo di fine corsa: in modo 1 e' IL numero che si va a cercare
+   //--- RIEPILOGO DI FINE CORSA: in modo 1 e' IL prodotto del lavoro.
+   //    Si stampano DUE cose diverse, e servono tutte e due:
+   //     1. i segnali persi PER LATO -> il costo in FREQUENZA (pavimento
+   //        1,00 op/giorno per famiglia, firma del 07/09);
+   //     2. l'ISTOGRAMMA dello spazio -> la distribuzione da cui, forse,
+   //        uscira' una soglia. Senza, si sceglierebbe un numero a occhio.
    if(InpSpaceMode != ABTG_SPACE_OFF)
-      ABTGLog(StringFormat("FILTRO SPAZIO - riepilogo: %d valutazioni, %d %s (%.1f%%).",
-                           gSpazioValutati, gSpazioMorsi,
-                           (InpSpaceMode == ABTG_SPACE_ATTIVO ? "blocchi" : "avrebbe bloccato"),
-                           (gSpazioValutati > 0 ? 100.0*gSpazioMorsi/gSpazioValutati : 0.0)));
+     {
+      string verbo = (InpSpaceMode == ABTG_SPACE_ATTIVO ? "bloccati" : "sarebbero stati persi");
+      ABTGLog(StringFormat("FILTRO SPAZIO - riepilogo: %d valutazioni, %d %s (%.1f%%). Banda: %s.",
+                           gSpazioValutati, gSpazioMorsi, verbo,
+                           (gSpazioValutati > 0 ? 100.0*gSpazioMorsi/gSpazioValutati : 0.0),
+                           SpazioBandaTesto()));
+      for(int L = 0; L < 2; L++)
+        {
+         ABTGLog(StringFormat("FILTRO SPAZIO - lato %s: %d segnali, %d %s (%.1f%%).",
+                              (L == 0 ? "LONG " : "SHORT"), gSpazioValLato[L], gSpazioMorLato[L], verbo,
+                              (gSpazioValLato[L] > 0 ? 100.0*gSpazioMorLato[L]/gSpazioValLato[L] : 0.0)));
+         ABTGLog(StringFormat("FILTRO SPAZIO - distribuzione %s: <0,5R=%d | 0,5-1R=%d | 1-2R=%d | 2-3R=%d | >=3R=%d | nessun ostacolo=%d",
+                              (L == 0 ? "LONG " : "SHORT"),
+                              gSpazioIsto[L][0], gSpazioIsto[L][1], gSpazioIsto[L][2],
+                              gSpazioIsto[L][3], gSpazioIsto[L][4], gSpazioIsto[L][5]));
+        }
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -1533,7 +1586,12 @@ bool ArmRetest()
 //  L'IDEA, testuale dalla live (r.71-73): "Siamo in H1, vai in H4. In H4
 //  c'e' spazio per portare del profitto? C'abbiamo subito la media. [...]
 //  C'e' poco spazio. Allora, non si puo' fare."
-//  E r.83-84: "sotto i minimi della notte c'e' traffico, 30 punti [...]
+//  E r.93, la riga piu' completa: "non mi basta vedere che ce l'ho in H1
+//  vado in H4 [...] poco spazio sono circa 30 punti 26 punti in realta' la
+//  media dovrebbe sostenere la media in H4 anche se la media e' a 14 [...]
+//  poi vado a vedere in D1 abbiamo dello spazio". La fonte nomina la media
+//  14 sul TF superiore e la scala H1->H4->D1: e' esattamente InpSpaceEma1 e
+//  InpSpaceTF. E r.83-84: "sotto i minimi della notte c'e' traffico, 30 punti [...]
 //  sono pochini."
 //
 //  PERCHE' IN R E NON IN PUNTI: il bersaglio della sedia sta a TpTotalR()
@@ -1548,6 +1606,23 @@ bool ArmRetest()
 //
 //  GLI OSTACOLI DIETRO LE SPALLE NON CONTANO: un long non e' ostacolato
 //  da una media che gli sta SOTTO. Si guarda solo davanti.
+//
+//  ATTENZIONE - IL PRECEDENTE MISURATO CONTRO QUESTO FILTRO: R30.
+//  Il parente stretto di questo meccanismo lo abbiamo gia' in casa e si
+//  chiama SRBlocked() / InpUseSRFilter (ABTG_Nasdaq_Apertura_US.mq5 r.361-365
+//  e r.1982; ABTG_Apertura_3Ingressi.mq5 r.2097-2136): veta l'ingresso se
+//  c'e' un ostacolo davanti entro N punti. Misurato il 12/08 sul Nasdaq
+//  (backtest_pipeline/risultati_archivio/REFERTO_ROUND30_REGALI_AMICO.md):
+//    baseline   IS  +69,62 PF 1,07 | OOS +476,33 PF 1,27 DD 5,77%
+//    SRFilter   IS +221,31 PF 1,27 | OOS  -56,86 PF 0,97 DD 6,80%
+//  Cioe': la cella PIU' BELLA in campione e l'UNICA ROSSA fuori campione.
+//  Tagliava 13 trade su 99 (13%) e tagliava QUELLI BUONI. Da allora e'
+//  InpUseSRFilter=false in TUTTI i preset.
+//  CONSEGUENZA SUL PROGETTO DI QUESTO CODICE: le soglie nascono a ZERO e il
+//  modo 1 non e' un ripiego, e' la consegna. Prima si misura la
+//  distribuzione dello spazio, poi - se e solo se i numeri lo dicono - si
+//  sceglie una soglia. Accendere il modo 2 con una soglia scelta a occhio
+//  sarebbe rifare R30 con un altro nome.
 //
 //  DIREZIONE DEL FALLIMENTO: se un dato non e' pronto (handle non creato,
 //  CopyBuffer a vuoto) quell'ostacolo semplicemente non si conta, e se non
@@ -1701,47 +1776,94 @@ double SpazioFinoAOstacolo(bool isLong, double entry)
   }
 
 //+------------------------------------------------------------------+
-//| Il cancello vero e proprio: c'e' abbastanza spazio?               |
-//|  Ritorna true se lo spazio e' INSUFFICIENTE (cioe' se il filtro   |
-//|  morde). CHI CHIAMA decide cosa farne: in modo 1 niente, in modo  |
-//|  2 salta il trade. Qui dentro si logga e si conta, sempre.        |
+//| In quale colonna dell'istogramma cade questo spazio?              |
+//|  0=<0,5R  1=0,5-1R  2=1-2R  3=2-3R  4=>=3R  5=nessun ostacolo     |
+//+------------------------------------------------------------------+
+int SpazioBucket(double erre, bool nessunOstacolo)
+  {
+   if(nessunOstacolo) return(5);
+   if(erre < 0.5) return(0);
+   if(erre < 1.0) return(1);
+   if(erre < 2.0) return(2);
+   if(erre < 3.0) return(3);
+   return(4);
+  }
+
+//+------------------------------------------------------------------+
+//| Descrizione a parole della banda richiesta (per i log)            |
+//+------------------------------------------------------------------+
+string SpazioBandaTesto()
+  {
+   if(InpSpaceMinR > 0 && InpSpaceMaxR > 0)
+      return(StringFormat("banda %.2fR-%.2fR", InpSpaceMinR, InpSpaceMaxR));
+   if(InpSpaceMinR > 0) return(StringFormat("minimo %.2fR", InpSpaceMinR));
+   if(InpSpaceMaxR > 0) return(StringFormat("massimo %.2fR", InpSpaceMaxR));
+   return("soglie SPENTE (sola misura della distribuzione)");
+  }
+
+//+------------------------------------------------------------------+
+//| IL CANCELLO - ma prima di tutto, IL METRO.                        |
+//|                                                                   |
+//|  Ritorna true se lo spazio e' FUORI BANDA (troppo poco o troppo   |
+//|  lontano). CHI CHIAMA decide cosa farne: in modo 1 niente, in     |
+//|  modo 2 salta il trade.                                           |
+//|                                                                   |
+//|  ORDINE DELLE COSE, e non e' un dettaglio di stile: si MISURA     |
+//|  SEMPRE (contatori + istogramma + riga di log), e solo DOPO si    |
+//|  guarda se le soglie hanno qualcosa da dire. Con InpSpaceMinR e   |
+//|  InpSpaceMaxR a zero - cioe' di default - la misura viene fatta e |
+//|  scritta per intero, e il verdetto e' sempre "via libera".        |
+//|  E' questo che rende il modo 1 una SONDA e non un filtro spento:  |
+//|  porta a casa una distribuzione senza aver scelto nessun numero.  |
+//|                                                                   |
 //|  ATTENZIONE: non tocca niente a InpSpaceMode=OFF perche' a modo   |
 //|  spento questa funzione non viene proprio chiamata.               |
 //+------------------------------------------------------------------+
-bool SpazioTroppoStretto(bool isLong, double entry, double dist)
+bool SpazioFuoriBanda(bool isLong, double entry, double dist)
   {
-   if(dist <= 0 || InpSpaceMinR <= 0) return(false);
+   if(dist <= 0) return(false);
 
+   double spazio         = SpazioFinoAOstacolo(isLong, entry);
+   bool   nessunOstacolo = (spazio == DBL_MAX);
+   double erre           = nessunOstacolo ? 0.0 : spazio/dist;
+
+   //--- MISURA: si conta sempre, soglie o non soglie
+   int lato = (isLong ? 0 : 1);
    gSpazioValutati++;
-   double richiesto = dist * InpSpaceMinR;
-   double spazio    = SpazioFinoAOstacolo(isLong, entry);
+   gSpazioValLato[lato]++;
+   gSpazioIsto[lato][SpazioBucket(erre, nessunOstacolo)]++;
 
-   if(spazio >= richiesto)
-     {
-      // spazio sufficiente: lo si scrive lo stesso, perche' in modo 1 serve
-      // sapere il denominatore (quante volte il filtro NON ha morso).
-      if(spazio == DBL_MAX)
-         ABTGLog(StringFormat("SPAZIO: entry %s, nessun ostacolo davanti su %s -> via libera (%d valutazioni, %d blocchi)",
-                              DoubleToString(entry, _Digits), SpazioTfLabel(InpSpaceTF),
-                              gSpazioValutati, gSpazioMorsi));
-      else
-         ABTGLog(StringFormat("SPAZIO: entry %s, ostacolo %s %s a %s, spazio %s (%.0f punti broker) = %.2fR >= %.2fR -> via libera (%d valutazioni, %d blocchi)",
-                              DoubleToString(entry, _Digits), gSpazioNome, SpazioTfLabel(InpSpaceTF),
-                              DoubleToString(gSpazioLivello, _Digits),
-                              DoubleToString(spazio, _Digits), spazio/_Point,
-                              spazio/dist, InpSpaceMinR, gSpazioValutati, gSpazioMorsi));
-      return(false);
-     }
+   //--- VERDETTO: solo adesso, e solo se qualcuno ha acceso una soglia
+   bool stretto = (InpSpaceMinR > 0 && !nessunOstacolo && spazio < dist*InpSpaceMinR);
+   //  Il tetto morde anche quando NON c'e' nessun ostacolo davanti: spazio
+   //  infinito vuol dire che davanti non c'e' nessun livello governabile,
+   //  che e' proprio il caso "e' troppo distante" della fonte (r.39).
+   //  E' la meta' AMBIGUA del progetto: va detta, non nascosta.
+   bool largo   = (InpSpaceMaxR > 0 && (nessunOstacolo || spazio > dist*InpSpaceMaxR));
+   bool morde   = (stretto || largo);
 
-   gSpazioMorsi++;
-   ABTGLog(StringFormat("SPAZIO: entry %s, ostacolo %s %s a %s, spazio %s (%.0f punti broker) = %.2fR < %.2fR -> %s (%d blocchi su %d valutazioni)",
-                        DoubleToString(entry, _Digits), gSpazioNome, SpazioTfLabel(InpSpaceTF),
-                        DoubleToString(gSpazioLivello, _Digits),
-                        DoubleToString(spazio, _Digits), spazio/_Point,
-                        spazio/dist, InpSpaceMinR,
-                        (InpSpaceMode == ABTG_SPACE_ATTIVO ? "BLOCCO" : "avrei bloccato (solo misura)"),
+   string verdetto;
+   if(!morde)                              verdetto = "via libera";
+   else if(InpSpaceMode == ABTG_SPACE_ATTIVO) verdetto = (stretto ? "BLOCCO (poco spazio)" : "BLOCCO (bersaglio troppo lontano)");
+   else                                    verdetto = (stretto ? "avrei bloccato (poco spazio)" : "avrei bloccato (bersaglio troppo lontano)");
+
+   string dove;
+   if(nessunOstacolo)
+      dove = StringFormat("nessun ostacolo davanti su %s, spazio INFINITO", SpazioTfLabel(InpSpaceTF));
+   else
+      dove = StringFormat("ostacolo %s %s a %s, spazio %s (%.0f punti broker) = %.2fR",
+                          gSpazioNome, SpazioTfLabel(InpSpaceTF),
+                          DoubleToString(gSpazioLivello, _Digits),
+                          DoubleToString(spazio, _Digits), spazio/_Point, erre);
+
+   if(morde) { gSpazioMorsi++; gSpazioMorLato[lato]++; }
+
+   ABTGLog(StringFormat("SPAZIO %s: entry %s, %s | %s -> %s (lato: %d su %d; totale: %d su %d)",
+                        (isLong ? "long" : "short"), DoubleToString(entry, _Digits), dove,
+                        SpazioBandaTesto(), verdetto,
+                        gSpazioMorLato[lato], gSpazioValLato[lato],
                         gSpazioMorsi, gSpazioValutati));
-   return(true);
+   return(morde);
   }
 
 //+------------------------------------------------------------------+
@@ -1790,7 +1912,7 @@ void MonitorRetest()
          //    A InpSpaceMode=OFF (default) questa condizione e' falsa alla
          //    prima clausola e non viene calcolato NIENTE.
          if(InpSpaceMode != ABTG_SPACE_OFF && !skip && dist > 0 &&
-            SpazioTroppoStretto(true, entry, dist))
+            SpazioFuoriBanda(true, entry, dist))
            {
             if(InpSpaceMode == ABTG_SPACE_ATTIVO) skip = true;   // modo 1: misura e basta, non blocca
            }
@@ -1831,7 +1953,7 @@ void MonitorRetest()
          //    ostacoli si cercano SOTTO l'ingresso. Stesso idioma del floor.
          //    A InpSpaceMode=OFF (default) non viene calcolato NIENTE.
          if(InpSpaceMode != ABTG_SPACE_OFF && !skip && dist > 0 &&
-            SpazioTroppoStretto(false, entry, dist))
+            SpazioFuoriBanda(false, entry, dist))
            {
             if(InpSpaceMode == ABTG_SPACE_ATTIVO) skip = true;   // modo 1: misura e basta, non blocca
            }
