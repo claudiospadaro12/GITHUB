@@ -194,7 +194,7 @@ la volatilità — e allora è un altro esperimento, con un altro nome.
   misura illeggibile senza che nessuno se ne accorgesse.** La prima stesura
   chiedeva di controllare che il giornale **non contenesse** righe *"handle
   EMAxx non creato"*. Quella riga però esce **solo** quando `iMA()` torna
-  `INVALID_HANDLE` (r.1683-1686): è il ramo **raro, e per fortuna rumoroso**.
+  `INVALID_HANDLE` (r.1681-1685): è il ramo **raro, e per fortuna rumoroso**.
   Il ramo **probabile** è l'altro — `CopyBuffer(...) < 1` (r.1785), cioè
   l'**EMA200 su H4 non ancora calcolata a inizio finestra**: servono ~200 barre
   H4 ≈ **33 giorni** — e quel ramo faceva `continue` **in silenzio**. 👉 Un
@@ -422,7 +422,7 @@ leggendo **come il codice viene lanciato**.
 
 **Tutto** il prodotto di questa sonda — la riga per segnale, l'istogramma, il
 riepilogo, il contatore delle letture fallite — passa da **`ABTGLog()`**
-(r.495-500), che stampa **solo se `InpVerbose`** (r.497). E `Print()` in MT5
+(r.495-499), che stampa **solo se `InpVerbose`** (r.497). E `Print()` in MT5
 **NON viene eseguito in OTTIMIZZAZIONE**.
 
 👉 Cioè: la prima stesura proponeva di raccogliere la distribuzione con un **file
@@ -442,90 +442,8 @@ concluso niente, senza sapere di non aver misurato.
 🟢 E `InpVerbose` è adesso **pinnato a `1`** in entrambi i file prova, così la
 Fase 0 non dipende da un default che qualcuno potrebbe cambiare sul grafico.
 
-## Fase 0 — il controllo di sanità (obbligatorio, prima di tutto) — **DUE FILE PROVA, E PASSANO IL CANCELLO**
-
-🔴 **La prima stesura di questo referto intitolava questo blocco «Il file prova,
-pronto» e poi ammetteva, due righe sotto, di non averlo creato** — mentre il
-corpo che mostrava sarebbe stato **bocciato** da `controlla_prova.py`. "Pronto"
-era una parola sbagliata su una cosa mai passata dal cancello.
-
-🟢 **Adesso i due file esistono, sono congelati e sono VERDI:**
-
-| file | lato | esito di `python3 backtest_pipeline/controlla_prova.py` |
-|---|---|---|
-| `backtest_pipeline/prove/R195a_spazio_LONG_DAX_D30EUR.txt` | **LONG** | ✅ `pin=7 celle=2 OK` · 4 passate · **0 problemi** |
-| `backtest_pipeline/prove/R195b_spazio_SHORT_DAX_D30EUR.txt` | **SHORT** | ✅ `pin=7 celle=2 OK` · 4 passate · **0 problemi** |
-
-**Come è stato risolto il problema dei due assi**: non facendo la griglia.
-L'asse è **uno solo** — `InpSpaceMode=0||0||1||1||Y`, cioè **spento contro sola
-misura** — e tutto il resto è **pinnato** (7 pin, `InpVerbose` compreso). Attesa
-congelata prima dei numeri: **profitto, PF, DD ed `n` IDENTICI AL CENTESIMO** fra
-le due passate. Se si muove un centesimo, **c'è un bug e il round si ferma lì**.
-
-*(Nota sul cancello: `controlla_prova.py` riconosce l'asse come `ENUM_ABTG_SPACE`
-e conta **2 celle** fra 0 e 1 ignorando il passo — è la regola degli enum,
-dimostrata sotto.)*
-
-## Fase 1 — LA MISURA VERA (modo 1, soglie spente) 🥇 — **TEST SINGOLO, non un file prova**
-**Questa è la consegna.** Nessuna soglia, nessuna griglia, nessuna scelta: si
-raccoglie **la distribuzione dello spazio** su tutti i segnali storici.
-
-🔴 **E non può vivere nel formato dei file prova**, per due motivi che si
-sommano: (a) in ottimizzazione il giornale è muto (vedi sopra); (b) un file prova
-**senza asse Y** viene bocciato dal cancello con *"celle = 0"* — **e fa bene**,
-perché quel formato esiste per pilotare ottimizzazioni. Le impostazioni della
-Fase 1 sono quindi scritte **in fondo ai due file prova**, come testo, da
-riportare a mano nel tester (o in un `.ini` con `Optimization=0`).
-
-- **2 corse** (una per lato), `InpSpaceMode=1`, `InpSpaceMinR=0`, `InpSpaceMaxR=0`,
-  `InpVerbose=1`, `Optimization=0`.
-- Output da leggere nel **giornale Esperti** (NON dal report):
-  - una riga per segnale: `SPAZIO long: entry ... ostacolo EMA100 H4 a ... = 0.66R ...`
-  - in coda, `FILTRO SPAZIO - distribuzione LONG/SHORT: <0,5R=.. | 0,5-1R=.. | ...`
-  - 🔴 e `FILTRO SPAZIO - letture di ostacolo FALLITE: N` — **se N > 0 la
-    distribuzione è spostata e i numeri sono un limite inferiore.**
-- **L'analisi che conta** si fa **incrociando le righe di log con i trade del
-  report** (entrambi hanno prezzo d'ingresso e orario): *lo spazio davanti
-  separa i vinti dai persi, sì o no?* 🔴 **Se la risposta è NO, il lavoro finisce
-  qui e il modo 2 non si accende mai.** Costo totale: quasi zero.
-
-## Fase 2 — solo SE la fase 1 dice di sì: la curva della soglia
-Griglia `InpSpaceMode=2`, `InpSpaceMinR` = **0 / 0,5 / 1,0 / 1,5 / 2,0** ×
-`InpSpaceTF` = **H1 / H2 / H3 / H4** → **20 celle per finestra, 40 pass**.
-- 🔑 **`InpSpaceMinR=0` È IL CONTROLLO dentro la griglia**: deve riprodurre la
-  baseline esatta. Senza, la tabella non ha metro (stessa disciplina del
-  `InpTrailStartR=0` nella prova gemella).
-- ⚠️ `InpSpaceTF` è `ENUM_TIMEFRAMES`: **MT5 ignora lo step** e spazzola i membri
-  fra start e stop → H1→H4 dà H1, H2, H3, H4.
-  🔴 **La prova NON è più quella "misurata il 07/08"**, che questo repo ha già
-  **ritirato**: `report/R128_USCITA_APERTURE_2026-09-11.md` r.135-141 la
-  classifica *«LA VERIFICA CHE NON DISCRIMINA»* — era
-  `InpTrailTF=5||1||1||5`, da M1 a M5 con passo 1, dove **aritmetica ed
-  enumerazione danno la STESSA risposta** (1,2,3,4,5). Citarla oggi sarebbe
-  appoggiarsi a una nota d'archivio che in casa non vale più.
-  🟢 **La conclusione resta vera, e la prova buona è un'altra**, reale e in
-  archivio: `InpTF=16385||15||1||16408||Y` ha prodotto **11 righe**
-  (`15, 20, 30, 16385, 16386, 16387, 16388, 16390, 16392, 16396, 16408`, oltre
-  40 CSV in `risultati_prove/`) dove **l'aritmetica ne avrebbe fatte 16.394** —
-  `backtest_pipeline/prove/R128_USCITA_CRITERI.md` r.583-592, riverificata in
-  `report/AUDIT_AL_CENTESIMO_2026-09-12.md` r.103-110. E il driver lo implementa
-  così apposta: `backtest_pipeline/walkforward_generico.ps1` r.786-789
-  (*«ENUM: MT5 IGNORA LO STEP e spazzola i membri fra start e stop»*, con il
-  conteggio per appartenenza e non per aritmetica) e la tabella dei membri a
-  r.405-410, `PERIOD_M20=20` compreso.
-  ⚠️ *(La nota d'archivio citava `r.348-349 e r.526-530`: riverificato oggi,
-  quelle righe nel file di HEAD sono tutt'altro — download degli include e nota
-  su `@FINOA`. Numeri di riga corretti qui sopra.)*
-- Il tetto `InpSpaceMaxR` **non entra in questa griglia**, e il motivo **non** è
-  quello scritto nella prima stesura (*«due assi nuovi insieme»* — ragione
-  contraddittoria, visto che questa griglia ne ha già due: soglia **e** TF).
-  🔴 Il motivo vero è il contro-esempio **2-🅱️**: pavimento e tetto sono **due
-  meccanismi semanticamente diversi**, di segno opposto, che mordono su
-  **popolazioni disgiunte**. Accendere il tetto non aggiunge una tacca a questo
-  esperimento: **ne apre un altro**, che vuole un nome, un file prova e un
-  contro-esempio suoi.
-
-### 📁 I FILE PROVA — esistono, sono due, e sono passati dal cancello
+## Fase 0 — il controllo di sanità (obbligatorio, prima di tutto)
+### 📁 I due FILE PROVA — esistono, sono congelati, e PASSANO IL CANCELLO
 
 🔴 **Qui la prima stesura aveva il difetto più imbarazzante del lotto**: il
 blocco si intitolava *«Il file prova, PRONTO»* e la riga successiva ammetteva
@@ -561,7 +479,8 @@ La domanda della Fase 0 non è *"quale soglia è la migliore"* — è *"il modo 
 sposta un trade, sì o no?"*. Quella domanda vuole **un asse solo**, a **due
 valori**, e **tutto il resto pinnato**: 7 pin, `InpSpaceTF` compreso (che è
 pinnato, non spazzolato) e `InpVerbose` compreso. Il tetto e il TF **non
-entrano**: entrerebbero in un altro esperimento (2-🅱️ e il punto sopra).
+entrano**: entrerebbero in un altro esperimento — vedi il contro-esempio **2-🅱️**
+e la Fase 2 qui sotto.
 
 ⚠️ **I pin non sono facoltativi** (stessa lezione della prova gemella):
 `InpAllowShort=0` perché il SOLO LONG del 07/08 è stato fatto **sul grafico, non
@@ -578,6 +497,65 @@ separati**. Il lato short non si dà per buono.
 prova pilota ottimizzazioni, e un file senza asse Y il cancello lo boccia con
 *"celle = 0"*. Le impostazioni della Fase 1 (**test singolo**, `Optimization=0`,
 `InpSpaceMode=1`) stanno **in fondo a ciascuno dei due file**, come testo.
+
+## Fase 1 — LA MISURA VERA (modo 1, soglie spente) 🥇 — **TEST SINGOLO, non un file prova**
+**Questa è la consegna.** Nessuna soglia, nessuna griglia, nessuna scelta: si
+raccoglie **la distribuzione dello spazio** su tutti i segnali storici.
+
+🔴 **E non può vivere nel formato dei file prova**, per due motivi che si
+sommano: (a) in ottimizzazione il giornale è muto (vedi sopra); (b) un file prova
+**senza asse Y** viene bocciato dal cancello con *"celle = 0"* — **e fa bene**,
+perché quel formato esiste per pilotare ottimizzazioni. Le impostazioni della
+Fase 1 sono quindi scritte **in fondo ai due file prova**, come testo, da
+riportare a mano nel tester (o in un `.ini` con `Optimization=0`).
+
+- **2 corse** (una per lato), `InpSpaceMode=1`, `InpSpaceMinR=0`, `InpSpaceMaxR=0`,
+  `InpVerbose=1`, `Optimization=0`.
+- Output da leggere nel **giornale Esperti** (NON dal report):
+  - una riga per segnale: `SPAZIO long: entry ... ostacolo EMA100 H4 a ... = 0.66R ...`
+  - in coda, `FILTRO SPAZIO - distribuzione LONG/SHORT: <0,5R=.. | 0,5-1R=.. | ...`
+  - 🔴 e `FILTRO SPAZIO - letture di ostacolo FALLITE: N` — **se N > 0 la
+    distribuzione è spostata e i numeri sono un limite inferiore.**
+- **L'analisi che conta** si fa **incrociando le righe di log con i trade del
+  report** (entrambi hanno prezzo d'ingresso e orario): *lo spazio davanti
+  separa i vinti dai persi, sì o no?* 🔴 **Se la risposta è NO, il lavoro finisce
+  qui e il modo 2 non si accende mai.** Costo totale: quasi zero.
+
+## Fase 2 — solo SE la fase 1 dice di sì: la curva della soglia
+Griglia `InpSpaceMode=2`, `InpSpaceMinR` = **0 / 0,5 / 1,0 / 1,5 / 2,0** ×
+`InpSpaceTF` = **H1 / H2 / H3 / H4** → **20 celle per finestra, 40 pass**.
+- 🔑 **`InpSpaceMinR=0` È IL CONTROLLO dentro la griglia**: deve riprodurre la
+  baseline esatta. Senza, la tabella non ha metro (stessa disciplina del
+  `InpTrailStartR=0` nella prova gemella).
+- ⚠️ `InpSpaceTF` è `ENUM_TIMEFRAMES`: **MT5 ignora lo step** e spazzola i membri
+  fra start e stop → H1→H4 dà H1, H2, H3, H4.
+  🔴 **La prova NON è più quella "misurata il 07/08"**, che questo repo ha già
+  **ritirato**: `report/R128_USCITA_APERTURE_2026-09-11.md` r.134-141 la
+  classifica *«LA VERIFICA CHE NON DISCRIMINA»* — era
+  `InpTrailTF=5||1||1||5`, da M1 a M5 con passo 1, dove **aritmetica ed
+  enumerazione danno la STESSA risposta** (1,2,3,4,5). Citarla oggi sarebbe
+  appoggiarsi a una nota d'archivio che in casa non vale più.
+  🟢 **La conclusione resta vera, e la prova buona è un'altra**, reale e in
+  archivio: `InpTF=16385||15||1||16408||Y` ha prodotto **11 righe**
+  (`15, 20, 30, 16385, 16386, 16387, 16388, 16390, 16392, 16396, 16408`, oltre
+  40 CSV in `risultati_prove/`) dove **l'aritmetica ne avrebbe fatte 16.394** —
+  `backtest_pipeline/prove/R128_USCITA_CRITERI.md` r.582-592, riverificata in
+  `report/AUDIT_AL_CENTESIMO_2026-09-12.md` r.103-110. E il driver lo implementa
+  così apposta: `backtest_pipeline/walkforward_generico.ps1` r.786-789
+  (*«ENUM: MT5 IGNORA LO STEP e spazzola i membri fra start e stop»*, con il
+  conteggio per appartenenza e non per aritmetica) e la tabella dei membri a
+  r.405-410, `PERIOD_M20=20` compreso.
+  ⚠️ *(La nota d'archivio citava `r.348-349 e r.526-530`: riverificato oggi,
+  quelle righe nel file di HEAD sono tutt'altro — download degli include e nota
+  su `@FINOA`. Numeri di riga corretti qui sopra.)*
+- Il tetto `InpSpaceMaxR` **non entra in questa griglia**, e il motivo **non** è
+  quello scritto nella prima stesura (*«due assi nuovi insieme»* — ragione
+  contraddittoria, visto che questa griglia ne ha già due: soglia **e** TF).
+  🔴 Il motivo vero è il contro-esempio **2-🅱️**: pavimento e tetto sono **due
+  meccanismi semanticamente diversi**, di segno opposto, che mordono su
+  **popolazioni disgiunte**. Accendere il tetto non aggiunge una tacca a questo
+  esperimento: **ne apre un altro**, che vuole un nome, un file prova e un
+  contro-esempio suoi.
 
 ## 🕐 Tempo macchina
 🔴 **Non ho un numero misurato e non lo invento.**
@@ -599,7 +577,7 @@ il tester ha inchiodato la macchina delle sei sedie).
 | # | Cancello | Stato |
 |---|---|---|
 | 1 | Modo 1 riproduce il modo 0 **al centesimo** | ⏳ da girare |
-| 2 | 🔴 **`FILTRO SPAZIO - letture di ostacolo FALLITE:` deve essere `0`** (r.716-717) — **e in più** il giornale non contiene righe *"handle EMAxx non creato"* (r.1685-1686) | ⏳ da girare |
+| 2 | 🔴 **`FILTRO SPAZIO - letture di ostacolo FALLITE:` deve essere `0`** (r.716-717) — **e in più** il giornale non contiene righe *"handle EMAxx non creato"* (r.1684-1685) | ⏳ da girare |
 | 3 | La fase 1 mostra che lo spazio **separa vinti e persi** | ⏳ **è il cancello vero**: se no, si chiude qui |
 | 4 | La soglia scelta regge **fuori campione**, non solo IS | ⏳ — è esattamente dove R30 è morto |
 | 5 | **Centro dell'altopiano, MAI il picco**; i vicini (soglia **e** TF) anch'essi migliori | ⏳ |

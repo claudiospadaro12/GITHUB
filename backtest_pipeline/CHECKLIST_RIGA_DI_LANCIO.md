@@ -27395,3 +27395,220 @@ guardia `[TERMINALE]`, cioe' **per un altro motivo**: togli il percorso vietato 
 >    RILIEVO che **nomina la proprieta'**, e la frase "SOLA LETTURA" non si stampa piu'.
 > 3. **Finche' non e' riparata**: ogni riga con un'assegnazione a proprieta' va letta a mano
 >    dall'agente di giudizio, **anche se il cancello e' verde**. Verde meccanico != innocua.
+
+## CLASSE 520 — 🧪🌗 **IL CONTRO-ESEMPIO COSTRUITO SU META' DEL PROPRIO MECCANISMO** (21/09/2026)
+**Il caso reale**: `report/FILTRO_DELLO_SPAZIO_2026-09-21.md` v1. Il referto presentava un
+"filtro dello spazio" con **due manopole** — un **pavimento** (`InpSpaceMinR`) e un **tetto**
+(`InpSpaceMaxR`) — e rispondeva alla domanda del mandato (*"in un trend forte e' un
+ammazza-trend?"*) con un **contro-esempio secco e convinto**:
+> *«In un trend forte al rialzo le EMA stanno SOTTO il prezzo, il codice le scarta, lo spazio
+> risulta infinito e il filtro non morde. Nel trend conclamato il filtro e' permissivo, non
+> ammazza-trend.»*
+🔴 **E' vero — per il PAVIMENTO. Col TETTO acceso la conclusione si CAPOVOLGE**, ed e' scritto
+nella riga che il referto non aveva letto fino in fondo (`ABTG_DAX_Apertura_EU.mq5` r.1873):
+```
+bool largo = (InpSpaceMaxR > 0 && (nessunOstacolo || spazio > dist*InpSpaceMaxR));
+```
+`nessunOstacolo` sta in **OR**, non in AND — e `nessunOstacolo` **e' esattamente la fotografia
+del trend conclamato** su cui il contro-esempio assolveva il filtro. Quindi il tetto **rifiuta
+proprio il caso migliore del motore**: la prima meta' del meccanismo diceva "permissivo", la
+seconda diceva "ammazza-trend", e il referto ha consegnato la prima come se fosse la risposta
+intera. 🔴 **Ed e' peggio di un errore isolato**: da quella meta'-risposta discendeva anche la
+motivazione (sbagliata, e per giunta contraddittoria) per cui il tetto restava fuori dalla
+griglia: il referto scriveva *«due assi nuovi insieme e' il modo di non capire quale ha spostato
+i numeri»*, **mentre la griglia proposta ne aveva gia' due** (soglia **e** TF). 👉 **Un
+contro-esempio mezzo sbagliato non resta isolato: si porta dietro le decisioni che ci poggiano
+sopra.**
+> ### 🔴 LA REGOLA
+> 1. **Prima di costruire il contro-esempio si ENUMERANO le manopole del meccanismo**, per
+>    nome, e si dice **quale di esse il contro-esempio sta esercitando**. Un meccanismo con due
+>    soglie vuole **due contro-esempi**, non uno con la clausola "in generale".
+> 2. **Il sospetto sta nel SEGNO**: se due manopole hanno **effetti di segno opposto** (una
+>    taglia quando c'e' poco, l'altra quando c'e' troppo), **non sono due tacche dello stesso
+>    asse**: mordono su **popolazioni disgiunte** e una conclusione presa sull'una **non si
+>    trasporta** sull'altra. Qui `stretto` vive solo se `!nessunOstacolo`, `largo` morde
+>    soprattutto se `nessunOstacolo`: **insiemi disgiunti**, quindi due misure.
+> 3. **Il contro-esempio si scrive contro la RIGA, non contro il racconto della riga.** La
+>    differenza fra `&&` e `||` in r.1873 vale un capovolgimento di verdetto: si incolla la riga
+>    nel referto e la si legge carattere per carattere.
+> 4. **Corollario operativo**: una manopola che, accesa, misura **un altro meccanismo** non
+>    entra nella griglia dell'esperimento in corso — e il motivo da scrivere e' *"e'
+>    semanticamente un altro esperimento"*, mai *"per non confondere gli assi"*.
+
+## CLASSE 521 — 🔇🚨 **IL CANCELLO DI VERIFICA PUNTATO SUL RAMO DI FALLIMENTO RUMOROSO MENTRE QUELLO DOMINANTE E' SILENZIOSO** (21/09/2026)
+**Il caso reale**: stesso referto, tabella «cosa serve per firmarlo», cancello n.2:
+> *«Il giornale NON contiene righe "handle EMAxx non creato"»*
+Sembra il controllo giusto: il filtro legge quattro EMA sul TF superiore, e se non le legge i
+blocchi misurati sono un limite inferiore. 🔴 **Ma quella riga esce da UN SOLO dei due rami di
+fallimento**, e per giunta dal **piu' raro**: `iMA()` che torna `INVALID_HANDLE`
+(`ABTG_DAX_Apertura_EU.mq5` r.1681-1685), cioe' una creazione di handle andata male.
+**Il ramo probabile e' l'altro**: `CopyBuffer(...) < 1` (r.1785) — l'**EMA200 su H4 non ancora
+calcolata a inizio finestra**, e ne servono ~200 barre H4 = **~33 giorni** — che faceva
+`continue` **in silenzio, senza una riga di giornale**.
+👉 **Conseguenza misurata sul significato**: un giornale **pulito** sarebbe stato compatibile
+**sia** con *"tutti gli ostacoli letti"* **sia** con *"meta' degli ostacoli mai guardata"*.
+L'istogramma sarebbe risultato spostato verso la colonna `nessun ostacolo`, il verdetto sarebbe
+stato letto come un fatto sul mercato, **ed era un fatto sul warm-up degli indicatori.**
+🟢 **Riparazione fatta**: contatore `gSpazioBufKo` (r.482, incrementato a r.1787), riga sul
+ramo silenzioso (r.1788-1789) e riepilogo di fine corsa
+`FILTRO SPAZIO - letture di ostacolo FALLITE: N` (r.716-717). Il cancello adesso **pretende
+quel numero a 0**, e la riga rumorosa resta come secondo controllo.
+> ### 🔴 LA REGOLA
+> 1. **Un cancello che si basa sull'ASSENZA di una riga di log va accompagnato dall'elenco dei
+>    RAMI che quella riga NON copre.** Si cercano i `continue`, i `return` e i `break` muti nel
+>    percorso, uno per uno.
+> 2. **L'assenza di un messaggio non e' una misura: un CONTATORE lo e'.** Ogni ramo di
+>    fallimento silenzioso deve incrementare un contatore che finisce nel **riepilogo di fine
+>    corsa**, perche' cosi' il valore atteso e' un **numero (0)** e non un "non ho visto niente".
+> 3. **Si chiede: quale ramo e' il PIU' PROBABILE?** Qui: il warm-up di una EMA200 su H4 a
+>    inizio finestra e' **certo**, mentre un `iMA()` fallito e' un'eccezione. Il cancello era
+>    puntato sull'eccezione.
+> 4. **Parente della 175** (un cancello non certifica mai piu' di quello che ha guardato), ma
+>    nuova: qui il cancello guardava **il ramo sbagliato dello stesso guasto**.
+
+## CLASSE 522 — 📄✅ **IL FILE PROVA STAMPATO COME «PRONTO» DENTRO UN REFERTO E MAI PASSATO DA `controlla_prova.py`** (21/09/2026)
+**Il caso reale**: stesso referto, sezione intitolata **«Il file prova, pronto»** — e la riga
+immediatamente successiva diceva *«Non l'ho creato io»*. Il corpo era stampato nel `.md`, con
+`@SIMBOLO/@PERIODO/@DAQUANDO` e cinque righe di parametri, **come se fosse consegnabile**.
+🔴 **Un corpo di file prova stampato in un referto NON e' un file prova: e' un suggerimento.**
+E quel suggerimento, passato oggi dal cancello, **sarebbe stato bocciato**: portava **due assi**
+(`InpSpaceMinR` **e** `InpSpaceTF`) per una domanda — *"il modo 1 sposta un trade, si' o no?"* —
+che vuole **un asse solo a due valori**, e **non pinnava `InpVerbose`** (vedi classe 526).
+🟢 **Riparazione**: due file veri e congelati, `backtest_pipeline/prove/R195a_spazio_LONG_DAX_D30EUR.txt`
+e `R195b_spazio_SHORT_DAX_D30EUR.txt`, **passati dal cancello** (`pin=7 celle=2 OK`, 4 passate,
+**0 problemi** ciascuno), con **7 pin** e un asse unico `InpSpaceMode=0||0||1||1||Y`.
+> ### 🔴 LA REGOLA
+> 1. **La parola "pronto" si scrive DOPO l'uscita 0 del cancello, mai prima.** Finche' non e'
+>    passato, il file si chiama **"bozza"** e si dice a parole che non e' stato controllato.
+> 2. **Un file prova vive in `backtest_pipeline/prove/`, non dentro un `.md`.** Se non merita di
+>    essere committato, non merita nemmeno di essere chiamato file prova: stamparlo in un referto
+>    lo fa sembrare verificato a chi lo legge (e a chi lo copia-incolla sei mesi dopo).
+> 3. **L'asse si dimensiona sulla DOMANDA.** Test di regressione = 1 asse, 2 valori, tutto il
+>    resto pinnato. La ricerca di una soglia e' un **altro round**, con un altro file.
+> 4. **Regola dei due lati (25/08): due file, non un flag.** `R195a` long, `R195b` short.
+
+## CLASSE 523 — 📌🌳 **LA DIFF DI UNA MODIFICA A UN EA MISURATA CONTRO L'ANTENATO DEL RAMO INVECE CHE CONTRO IL PIN SCHIERATO** (21/09/2026)
+**Il caso reale**: stesso referto, tabella in testa e sezione «la prova che il default e' un
+no-op»:
+```
+git diff --numstat cd5bf255 -- mql5/Experts/ABTG_DAX_Apertura_EU.mq5
+429     0
+```
+`cd5bf255` e' il commit da cui **quel ramo di lavoro** era partito. 🔴 **Quel numero dice quanto
+ha scritto l'autore, NON quanto il file si discosta da cio' che GIRA.** Il metro giusto e' il
+**pin schierato**, dichiarato in `report/SCHIERAMENTO_FTMO_2026-09-20.md` r.179 per la sedia
+`770101`: **`9fca63d9`**. Misurato oggi:
+`git diff --numstat 9fca63d9 HEAD -- mql5/Experts/ABTG_DAX_Apertura_EU.mq5` -> **460 0**.
+🔴 **E il modo in cui l'errore si nascondeva e' la parte istruttiva**: i due numeri
+**coincidevano**, perche' su quel file `git diff 9fca63d9 cd5bf255` e' **vuoto**. Cioe' la v1 non
+era "giusta per fortuna": era **non verificata**, e sarebbe bastato che qualcuno avesse toccato
+la sedia fra il 19 e il 21 perche' il referto dichiarasse un numero che non descriveva niente —
+e nessuno se ne sarebbe accorto, perche' il numero *sembrava* misurato.
+> ### 🔴 LA REGOLA
+> 1. **Una diff su un EA si misura SEMPRE contro il PIN SCHIERATO di quella sedia**, e il pin si
+>    **legge da un referto di schieramento citando file e riga** — mai dalla memoria della
+>    sessione, mai da `HEAD~n`, mai dal commit di partenza del ramo.
+> 2. **Se si vuole anche la diff contro l'antenato, si danno DUE numeri con DUE etichette.** Uno
+>    solo, senza etichetta, e' ambiguo proprio quando conta.
+> 3. **Quando due metri danno lo stesso numero, si dice PERCHE'** (qui: `git diff pin antenato`
+>    vuoto). Una coincidenza dichiarata e' una verifica; una coincidenza taciuta e' una trappola
+>    per la prossima volta.
+> 4. **E il numero si rimisura DOPO ogni patch**: 429 e' diventato 460 con le tre riparazioni
+>    del cancello. Un numero copiato dalla stesura precedente e' un numero non misurato.
+
+## CLASSE 524 — 🔎📋 **IL CENSIMENTO DEI PUNTI DI CHIAMATA PRESENTATO COME ESAUSTIVO CHE OMETTE LE FUNZIONI ACCESSORIE** (21/09/2026)
+**Il caso reale**: stesso referto, prova che il default e' un no-op, punto ②:
+> *«Verificato con grep: esistono ESATTAMENTE 2 punti di chiamata, entrambi dietro la stessa
+> guardia.»*
+E' vero **per `SpazioFuoriBanda`**, la funzione d'ingresso. 🔴 **Ma il blocco nuovo contiene
+OTTO funzioni**, e le due **accessorie** — quelle che formattano testo e non calcolano niente —
+hanno **altri punti di chiamata**: `SpazioTfLabel` e' chiamata anche da **`OnInit` r.556** e da
+`SpazioAssicuraHandles` r.1685; `SpazioBandaTesto` anche da **`OnInit` r.556** e da
+**`OnDeinit` r.702**. 🟢 **Il no-op regge lo stesso** (r.556 sta dentro la guardia aperta a
+r.552, r.702 dentro quella di r.696), **ma la frase "esattamente 2" era FALSA**, e una frase
+falsa dentro una prova di sicurezza e' peggio di una prova mancante: **chi legge smette di
+guardare**.
+🟢 **Riparazione**: tabella di **8 righe**, una per funzione, con `definita a` / `chiamata da` /
+`fuori dalla guardia?` — rifacibile con otto `grep` da chiunque.
+> ### 🔴 LA REGOLA
+> 1. **Un censimento si ELENCA PER NOME, mai si riassume in un numero** (e' la **classe 180**
+>    applicata alle funzioni: l'insieme non si definisce "per differenza" ne' "per totale").
+> 2. **Le funzioni ACCESSORIE contano.** Log, formattatori di stringa ed etichette sono le prime
+>    a essere chiamate da `OnInit`/`OnDeinit`, cioe' **fuori dal percorso caldo** — che e' proprio
+>    dove una guardia si dimentica.
+> 3. **Il `grep` si fa su OGNI simbolo introdotto**, non solo sull'entry point: la catena si
+>    risale dal basso (chi chiama chi) e si scrive la tabella, non la conclusione.
+> 4. **E si aggiunge la cintura**: una funzione che deve essere no-op si difende **da dentro**
+>    (`if(<modo> == OFF) return(false);`, r.1854 — come fa il parente `SRBlocked`), cosi' il
+>    no-op non dipende solo dalla disciplina del chiamante.
+
+## CLASSE 525 — 🗃️⏮️ **LA NOTA D'ARCHIVIO CITATA DOPO CHE IL REPO L'HA GIA' RITIRATA** (21/09/2026)
+**Il caso reale**: stesso referto, Fase 2:
+> *«`InpSpaceTF` e' `ENUM_TIMEFRAMES`: MT5 ignora lo step e spazzola i membri fra start e stop
+> (**misurato il 07/08**)»*
+🔴 **Quella misura e' stata RITIRATA IN CASA** da `report/R128_USCITA_APERTURE_2026-09-11.md`
+r.134-141, che la classifica come **«LA VERIFICA CHE NON DISCRIMINA»**: era
+`InpTrailTF=5||1||1||5`, da M1 a M5 con passo 1, dove **aritmetica ed enumerazione danno la
+STESSA risposta** (1,2,3,4,5). **Quel test non distingueva niente.** La **conclusione** resta
+vera, ma **la prova citata non la sostiene** — e citare una nota ritirata e' appoggiarsi a una
+prova che in casa non vale piu'.
+🟢 **La prova buona, e va citata al suo posto**: `InpTF=16385||15||1||16408||Y` ha prodotto
+**11 righe** (`15, 20, 30, 16385, 16386, 16387, 16388, 16390, 16392, 16396, 16408`, oltre 40 CSV
+in `risultati_prove/`) dove **l'aritmetica ne avrebbe fatte 16.394** —
+`backtest_pipeline/prove/R128_USCITA_CRITERI.md` r.582-592, riverificata in
+`report/AUDIT_AL_CENTESIMO_2026-09-12.md` r.103-110; implementazione nel driver a
+`backtest_pipeline/walkforward_generico.ps1` **r.786-789** (conteggio per appartenenza) e
+tabella dei membri **r.405-410**.
+🔴 **Nota nella nota, ed e' la stessa malattia**: la nota d'archivio rimandava a
+`walkforward_generico.ps1 r.348-349 e r.526-530` — riverificato oggi, **a HEAD quelle righe sono
+tutt'altro** (download degli include, nota su `@FINOA`).
+> ### 🔴 LA REGOLA
+> 1. **Prima di citare una nota d'archivio si cerca se qualcuno l'ha gia' CORRETTA O RITIRATA**:
+>    `grep` della frase (o della data della misura) su `report/` e `backtest_pipeline/`. Il repo
+>    ritira le proprie misure: e' una funzione, non un incidente.
+> 2. **Si cita la PROVA, non la conclusione**: se la prova citata non discrimina fra l'ipotesi e
+>    la sua alternativa, **non e' una prova** (classe «verifica che non discrimina», 11/09).
+> 3. **Una conclusione puo' restare vera mentre la sua prova muore.** In quel caso si scrive
+>    ***tutte e due le cose***: cosa resta vero, e con quale prova nuova.
+> 4. **I numeri di riga dentro una citazione d'archivio si RIVERIFICANO a HEAD** prima di
+>    ricopiarli: i file si muovono (vedi anche la 526 e la riparazione R-8 del 21/09).
+
+## CLASSE 526 — 🔑🔇 **LA SONDA IL CUI INTERO PRODOTTO PASSA DA UN LOGGER CONDIZIONATO DA UN INPUT NON PINNATO — E `Print()` IN OTTIMIZZAZIONE NON ESISTE** (21/09/2026)
+🔑 **E' la piu' importante delle sette, perche' non avrebbe prodotto un errore: avrebbe prodotto
+il NULLA, con l'aria di essere andata bene.**
+
+**Il caso reale**: il round R195 nasce per **misurare** una distribuzione — quanto spazio c'e'
+davanti a ogni ingresso. Tutto il suo prodotto (la riga per segnale, l'istogramma per lato, il
+riepilogo, il contatore delle letture fallite) esce da **`ABTGLog()`**
+(`ABTG_DAX_Apertura_EU.mq5` r.495-499), che stampa **solo se `InpVerbose`** (r.497). E il
+referto proponeva di raccoglierlo con un **file prova**, cioe' con un'**OTTIMIZZAZIONE**.
+🔴 **Due difetti che si sommano, e nessuno dei due e' rumoroso:**
+1. **`InpVerbose` non era pinnato** nel corpo proposto: bastava un default cambiato, o un `.set`
+   di passaggio, perche' il giornale fosse vuoto;
+2. **in OTTIMIZZAZIONE MT5 NON esegue `Print()`**: anche con `InpVerbose=1` il giornale sarebbe
+   stato **vuoto comunque**.
+👉 **Cosa sarebbe successo**: la corsa finisce, il CSV dei risultati e' perfettamente normale, i
+numeri ci sono — **e la misura non esiste**. 🔴 E un giornale vuoto e' **indistinguibile** da
+*"il filtro non e' mai stato interrogato"*: avremmo concluso il nulla, o peggio avremmo concluso
+qualcosa, **senza sapere di non aver misurato**.
+🟢 **Riparazione**: il lavoro si spezza in due, e i due pezzi si lanciano in modo **diverso**.
+**FASE 0** = i file prova (ottimizzazione a 2 celle, e' un test di regressione: bastano i
+**numeri del report**), con `InpVerbose=1` **pinnato** lo stesso per non dipendere da un default.
+**FASE 1** = **TEST SINGOLO** (`Optimization=0`), le cui impostazioni stanno **in fondo ai due
+file prova** come testo — perche' il formato dei file prova pilota ottimizzazioni, e un file
+senza asse Y il cancello lo boccia con *"celle = 0"*, **giustamente**.
+> ### 🔴 LA REGOLA
+> 1. **Si chiede: DOVE ESCE il prodotto di questo round — dal REPORT o dal GIORNALE?** E' la
+>    prima domanda, prima di scegliere il formato del lancio. Round che consegnano dal
+>    **giornale** -> **test singolo**, `Optimization=0`. Round che consegnano dai **numeri** ->
+>    ottimizzazione.
+> 2. **`Print()` NON viene eseguito in ottimizzazione.** Qualunque misura che viva nel log e'
+>    **morta** in un file prova: non "meno leggibile", **morta**.
+> 3. **Ogni input da cui dipende la CONSEGNA va PINNATO nel file prova**, `InpVerbose` per primo.
+>    Un input non pinnato non e' un default: e' una variabile fuori controllo.
+> 4. **Un round che puo' finire senza prodotto deve avere un CANCELLO SUL PRODOTTO**, non solo
+>    sui numeri: *"il giornale contiene la riga di riepilogo"* e' un cancello; *"la corsa e'
+>    finita"* non lo e'.
+> 5. **Parente della 521** (li' il ramo muto era nel codice, qui e' nel modo di lanciarlo) e
+>    della 522 (il pin mancante). **La domanda che le unisce tutte e tre: come farebbe questo
+>    lavoro a fallire SENZA dirmelo?**
