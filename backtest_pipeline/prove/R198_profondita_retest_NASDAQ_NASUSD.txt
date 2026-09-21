@@ -1,0 +1,115 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R198 -- LA PROFONDITA' DEL RETEST SUL NASDAQ.
+#          Asse unico: InpRetestOffsetPts (0 / 200 / 400 / 600).
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.
+#     Firma di Claudio del 21/09/2026 (CLAUDE.md).
+#  Si lancia con: -Deposito 80000 -Modello 4   (banco vero FTMO, tick reali)
+# =====================================================================
+#
+#  PERCHE' ESISTE, E NON E' UN SOSPETTO: SONO DUE MISURE INDIPENDENTI
+#  ------------------------------------------------------------------
+#  Questa sedia gira con InpRetestOffsetPts = 0, cioe' il LIMIT esatto
+#  SUL livello. E' l'unica delle tre aperture a stare a zero:
+#     Nasdaq 770260  offset    0   <-- questa
+#     DAX    770101  offset  200
+#     Dow    770202  offset  400
+#
+#  DUE misure, fatte su strade diverse, dicono che lo zero e' il posto
+#  peggiore:
+#
+#  (1) R197B, girato il 21/09/2026 sul Dow, tick reali, stesso disegno:
+#         offset    IS: n / PF / DD          OOS: n / PF / DD
+#           0       73 / 0,973 / 10,84       133 / 1,125 / 9,29
+#         200       74 / 1,071 / 11,02       133 / 1,280 / 9,01
+#         400       74 / 1,212 / 11,09       130 / 1,254 / 8,75
+#         600       72 / 1,110 / 12,88       131 / 1,259 / 9,44
+#      => lo ZERO e' l'UNICA cella in perdita su IS (-582,54) e la
+#         peggiore su OOS. E il numero di operazioni e' PIATTO
+#         (73/74/74/72): la profondita' NON costa ingressi.
+#
+#  (2) risultati_archivio/Walkforward_Aperture/NASDAQ_E_retest_fill_FULL.csv
+#      (archivio, su QUESTO simbolo):
+#         offset 0   -> n 421, PF mediano 0,799
+#         offset 300 -> n 406, PF mediano 0,869
+#      => stesso verso, sul Nasdaq stesso: piu' profondo, meglio, al
+#         costo del 3,6% delle operazioni.
+#      ⚠️ I LIVELLI di quel file NON sono trasferibili (PF sotto 1: e'
+#         una configurazione diversa dalla cella viva). Solo il VERSO.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI
+#  ----------------------------------
+#  Se le due misure dicono il vero anche qui: la cella 0 e' la peggiore,
+#  e fra 200 e 600 c'e' un ALTOPIANO con PF piu' alto, con n che cambia
+#  poco (meno del 5%).
+#  CONTRO-ESEMPIO CHE LA FAREBBE CADERE, e va guardato per primo: se n
+#  CROLLA passando da 0 a 200 (piu' del 10%), allora il Nasdaq non si
+#  comporta come il Dow, il LIMIT sul livello e' l'unico che riempie, e
+#  lo zero e' giusto dov'e'. In quel caso il verdetto e' "si lascia 0" e
+#  le due misure sopra non valgono per questo simbolo.
+#  Se invece la cella 0 vince su PF, il verdetto e' lo stesso: si lascia.
+#
+#  SELEZIONE: centro dell'ALTOPIANO, MAI il picco. Su R197B i picchi di
+#  IS e OOS sono caduti in celle DIVERSE (400 e 200): e' esattamente il
+#  caso in cui il picco e' rumore e l'altopiano no.
+#  IS e OOS devono concordare di SEGNO, altrimenti non si promuove niente.
+#
+#  🔵 E QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la firma
+#     di Claudio: la sedia 770260 opera sulla challenge FTMO 541452707.
+#
+# ---------------------------------------------------------------------
+#  I PIN: senza, si misura un'altra sedia.
+#  walkforward_generico.ps1 r.836-843 blinda OGNI input al DEFAULT DEL
+#  SORGENTE, non al preset schierato. Qui sono pinnate le divergenze
+#  vere fra preset FTMO 770260 e default, con TRE conversioni perche' il
+#  preset e' in ora e simboli FTMO e il backtest gira su dati BCM:
+#     InpSessionHour  16 -> 14   (FTMO = UTC+3, BCM = UTC+1)
+#     InpCloseHour    19 -> 17
+#     InpCorrSymbol   US500.cash -> SPXUSD
+#  Un CSV che torna con InpSessionHour diverso da 14 si CESTINA.
+#  InpMinRangePts e InpMaxRangePts sono pinnati a 0 = LA CELLA IN CAMPO
+#  (il pavimento e' R196a, e resta una firma di Claudio non ancora data).
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+# --- i pin che ricostruiscono la sedia 770260 ------------------------
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+
+# --- asse unico: LA PROFONDITA' DEL RETEST ---------------------------
+#  NASUSD: Point = 0,01, quindi 100 punti MT5 = 1,0 punto indice.
+#     0   = sul livello   <-- QUELLO SCHIERATO OGGI
+#     200 = 2,0 punti dentro   (come il DAX 770101)
+#     400 = 4,0 punti dentro   (come il Dow 770202, centro altopiano R197B)
+#     600 = 6,0 punti dentro
+#  IL NUMERO DA GUARDARE PER PRIMO E' n, non il PF: se n regge, la
+#  profondita' e' gratis e il confronto sul PF ha senso. Se n crolla,
+#  il PF piu' alto e' solo selezione di sopravvissuti.
+InpRetestOffsetPts=0||0||200||600||Y
+# 4 celle
