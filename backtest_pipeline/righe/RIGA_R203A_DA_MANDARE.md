@@ -1,10 +1,10 @@
 # 🚀 R203A — IL PAVIMENTO DELLO STOP SUL DAX, sedia `770101`
 
-**21/09/2026** · branch `lavoro` · pin della riga: **`018c1d95eaeced03532cee4b30de6b1ebe629b30`**
+**21/09/2026** · branch `lavoro` · pin della riga: **`20d168b219eb7a47320880cda13c19bfcdbd0f6e`**
 File prova: `backtest_pipeline/prove/R203a_pavimento_stop_DAX_D30EUR.txt` (90 pin, **4 celle**)
 — **i cancelli (a)-(f) e (c1)-(c3) sono quelli congelati in quel file** (classe 549).
 
-> 📌 **Nota d'archivio**: il **file prova** sta al pin `018c1d95eaeced03532cee4b30de6b1ebe629b30`
+> 📌 **Nota d'archivio**: il **file prova** sta al pin `20d168b219eb7a47320880cda13c19bfcdbd0f6e`
 > — che è quello che il driver scarica. Questo **documento** è stato riscritto **tre volte**:
 > chi lo riaprisse da un pin precedente leggerebbe una stesura vecchia.
 
@@ -57,7 +57,7 @@ buona fede — classe **553**.)*
 
 Popolazione: i **225 giorni LONG**, stop = ampiezza + 300. Spread mediano BCM ora 08 = **1,70**.
 
-| cella | idx | × spread | scarto **`[INF]` 35'** | … | scarto **`[MIS]` 15' crudo** |
+| cella | idx | × spread | 🎯 scarto **`[INF, calibrato n=8]` 35'** — **il numero da usare** | | *scarto 15' crudo* — 🔴 `[BATTUTA: 24,5 pp di errore]` |
 |---|---:|---:|---:|---|---:|
 | **`0`** ← viva | — | spento | 0,0% | | 0,0% |
 | `2875` | 28,8 | **16,9×** | 3,1% | … | 13,3% |
@@ -166,7 +166,7 @@ contributo valido anche con campione sottile.
 > **14/08/2026** da quella macchina sono partiti **ordini veri**.
 
 ```powershell
-& { $ErrorActionPreference='Stop'; $pin='018c1d95eaeced03532cee4b30de6b1ebe629b30'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=120; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND R203A   EA ABTG_DAX_Apertura_EU   D30EUR M5   tick reali   deposito 80000   4 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_DAX_Apertura_EU','-Prova','R203a_pavimento_stop_DAX_D30EUR.txt','-Etichetta','R203A','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','80000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10 }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito R203A: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_R203A"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_R203A sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_R203A.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_R203A.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_R203A.txt' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_IS_R203A.csv' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_OOS_R203A.csv' -ForegroundColor Gray; Write-Host '   R203a_pavimento_stop_DAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
+& { $ErrorActionPreference='Stop'; $pin='20d168b219eb7a47320880cda13c19bfcdbd0f6e'; if($env:COMPUTERNAME -ne 'DESKTOP-H4D7CAJ'){ throw ('VIETATO: questa riga gira SOLO sul PC di backtest DESKTOP-H4D7CAJ. Qui la macchina si chiama ' + $env:COMPUTERNAME + '. Sul VPS operano le sei sedie della challenge FTMO e un backtest a tick reali lo inchioda: firma di Claudio del 21/09.') }; $w="$env:USERPROFILE\abtg_round"; $p="$w\RIGA_ROUND_VPS.ps1"; $dsk=[Environment]::GetFolderPath('Desktop'); $tmo=120; New-Item -ItemType Directory -Force -Path $w | Out-Null; Remove-Item $p -Force -ErrorAction SilentlyContinue; irm "https://raw.githubusercontent.com/claudiospadaro12/GITHUB/$pin/backtest_pipeline/righe/RIGA_ROUND_VPS.ps1?cb=$([guid]::NewGuid().ToString('N'))" -OutFile $p -ErrorAction Stop; if(-not (Test-Path $p)){ throw 'DOWNLOAD FALLITO' }; if(-not (Select-String -Path $p -SimpleMatch -Pattern 'MARCATORE_RIGA_ROUND_VPS_v2' -Quiet)){ throw 'SCRIPT VECCHIO: manca MARCATORE_RIGA_ROUND_VPS_v2' }; Write-Host 'BERSAGLIO: il solo MT5 di questo PC, C:\Program Files\BCM Markets MT5 Terminal, demo 50503392. Tutto il resto (challenge FTMO 541452707, 100k 50504263, REALE 10105439, Pepperstone, Tickmill, banco 50504400) sta su una macchina diversa e questa riga non la raggiunge.' -ForegroundColor Cyan; $mt=@(Get-Process terminal64 -ErrorAction SilentlyContinue | Select-Object Id,MainWindowTitle,Path); Write-Host '--- MT5 APERTI SU QUESTA MACCHINA (PID / titolo / cartella) ---'; $mt | Format-Table -AutoSize; if(@($mt | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') }).Count -gt 0){ throw 'MT5 E APERTO: chiudilo A MANO (il PID sta nella tabella qui sopra), dopo aver guardato che non abbia EA attaccati, poi reincolla la riga. Non lo chiudo io: quel terminale e loggato sul demo 50503392 e da questa macchina il 14/08 sono partiti ordini veri.' }; Write-Host '=== ROUND R203A   EA ABTG_DAX_Apertura_EU   D30EUR M5   tick reali   deposito 80000   4 celle x 2 gambe ===' -ForegroundColor Cyan; $a=@('-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$p+'"'),'-Expert','ABTG_DAX_Apertura_EU','-Prova','R203a_pavimento_stop_DAX_D30EUR.txt','-Etichetta','R203A','-Pin',$pin,'-TerminaleBacktest','"C:\Program Files\BCM Markets MT5 Terminal"','-Modello','4','-Deposito','80000'); $pr=Start-Process powershell -ArgumentList $a -NoNewWindow -PassThru; if(-not $pr.WaitForExit($tmo*60*1000)){ Write-Host ('TETTO DI ' + $tmo + ' MINUTI SFONDATO: fermo il round. E UN RISULTATO, NON UN GUASTO: il referto che resta e PARZIALE.') -ForegroundColor Red; Stop-Process -Id $pr.Id -Force -ErrorAction SilentlyContinue; Get-Process metatester64,terminal64 -ErrorAction SilentlyContinue | Where-Object { $_.Path -and ($_.Path -like 'C:\Program Files\BCM Markets MT5 Terminal\*') } | Stop-Process -Force -ErrorAction SilentlyContinue; try{ $pr.WaitForExit() }catch{}; Start-Sleep -Seconds 10 }; $rc=$pr.ExitCode; if($null -eq $rc){ $rc='NON LEGGIBILE' }; Write-Host ('   esito R203A: codice ' + $rc + '   (0=GIRATO  2=NON MISURATO  3=GIRATO CON RILIEVI  1=non e partito)') -ForegroundColor Yellow; $d="$dsk\ROUND_R203A"; if(-not (Test-Path $d)){ Write-Host 'MANCA la cartella ROUND_R203A sul Desktop: il round NON ha prodotto raccolta.' -ForegroundColor Red } else { Compress-Archive -Path "$d\*" -DestinationPath "$dsk\ROUND_R203A.zip" -Force; Write-Host 'ZIP PRONTO DA MANDARE: Desktop\ROUND_R203A.zip' -ForegroundColor Green }; Write-Host 'FILE ATTESI NELLO ZIP (4):' -ForegroundColor Gray; Write-Host '   REFERTO_ROUND_R203A.txt' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_IS_R203A.csv' -ForegroundColor Gray; Write-Host '   ABTG_DAX_Apertura_EU_D30EUR_OOS_R203A.csv' -ForegroundColor Gray; Write-Host '   R203a_pavimento_stop_DAX_D30EUR.txt' -ForegroundColor Gray; Write-Host 'NEL REFERTO LEGGI LA RIGA  data:  -- DEVE ESSERE DI OGGI, altrimenti stai guardando un file vecchio.' -ForegroundColor Yellow; if(Test-Path $d){ Get-ChildItem $d -Recurse -File | Select-Object Name,Length,LastWriteTime | Format-Table -AutoSize } }
 ```
 
 📅 Dentro `REFERTO_ROUND_R203A.txt`, la riga **`data            :`** deve essere del giorno
@@ -213,6 +213,21 @@ parallelo quel numero non misura niente, e il tetto resta prudenziale. In ogni c
 | **C5** | la **banda** trattava i due estremi come equivalenti, ma il 15' crudo è **già falsificato** | dichiarato: il numero da usare è quello a **35'** |
 | **C6** | 🔴 **puntatore `r.271-272` sbagliato** (r.271 è vuota) — **arrivato dal cancello stesso** e copiato in buona fede | → **r.241** (+ r.276, r.278). **Classe nuova 553** |
 
+**Quarto giro** — due difetti, **tutti e due dentro le toppe del terzo**:
+
+| # | difetto | correzione |
+|---|---|---|
+| **D1** | 🔴 **H0 aveva due buchi.** L'intervallo `7,12-8,46` era etichettato «non deciso», ma lì dentro il pavimento **abbassa il DD del 5-20%**: H0 è **falsificata** e il verdetto è *«asse giusto, gradino sbagliato»* — **la risposta più utile che il round può dare**, che sarebbe finita in archivio come indecisione. E **non esisteva nessun ramo** per «il pavimento **peggiora** il DD», che è invece una risposta pulita | H0 diventa una **partizione esaustiva A\|B\|C\|D** letta **cella per cella**. La parola «non deciso» **sparisce**: copriva un buco di scrittura |
+| **D2** | 🔴 **`c1` è indefinito a zero trade.** `(Profit/RF)` con `Profit=0` e `RF=0` è **0/0** | misurato su **16.649 righe** d'archivio: **8.641** hanno `Profit<0 e RF<0` e la formula **regge**; **0** hanno `RF=0` con profitto negativo; **3.379** sono a `Profit=0`. Ora: si guarda `RF` **prima** di dividere, si scrive **`[NON CALCOLABILE DAL CSV]`**, e il driver marca già quel caso da solo (`NON MISURATO`, rc=2) |
+| **D3** | il file prova diceva ancora «SECONDA STESURA» mentre questo diceva «TERZA» — **classe 549** | intestazione allineata |
+
+🟢 **E il controllo che non avevo fatto, ora c'è**: il metro nuovo (`DD_fisso`) è
+**strutturalmente più permissivo** per le celle a basso profitto — cioè proprio quelle che il
+round vuole promuovere. *«Abbiamo cambiato il righello e ora passano più celle»* non deve mai
+passare senza esame. **L'esame**: sulle uniche celle dove esistono tutti e due i numeri, il
+cancello a −20% passa **solo la `0.25`** con **tutti e due** i righelli. **Stesso esito, 1 su
+4: ha tolto un bias, non abbassato l'asticella.**
+
 **Strato 1 dopo le correzioni**
 - `controlla_prova.py` → **verde** (90 pin, 4 celle, 0 problemi) · **zero** non-ASCII · **zero**
   parole di tempo relative.
@@ -227,8 +242,11 @@ parallelo quel numero non misura niente, e il tetto resta prudenziale. In ogni c
 - La mappa **giorni-dello-Studio → trade-dell'EA** è **assunta**, non misurata: lo Studio entra
   a buffer 200 e non chiede che il retest si **riempia**, la sedia sì.
 - Il rapporto **uscite/posizioni** non è misurato: ogni `n` di questo referto è **`[uscite]`**.
-- La **minima equity contro il saldo iniziale** — l'unica misura che deciderebbe il muro del
-  10% — **non è in questo round** e non lo sarà: serve il report HTML per passata.
+- La **minima equity contro il saldo iniziale** — l'unica misura che **deciderebbe** il muro
+  del 10% — **non c'è**: serve il report HTML per passata. 🟠 **Ma un LIMITE SUPERIORE
+  rigoroso sì**: `(Profit/RF)/deposito` → cella viva **8,90%** al banco, **≤ 17,8%** a taglia
+  vera, cioè **sopra il muro del 10%**. Il giudizio resta **sospeso in tutte e due le
+  direzioni**, non è «non misurabile».
 - `InpMagic` della prova è **789521**, quello in campo **770101**: **irrilevante** in un test a
   EA singolo (e identico a R202B), dichiarato per non far dubitare il rilettore.
 - Il driver **ricompila dal pin** (`walkforward_generico.ps1` r.317 e r.1929) e il referto lo
