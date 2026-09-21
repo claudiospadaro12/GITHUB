@@ -1,0 +1,202 @@
+# =====================================================================
+#  R203a -- IL PAVIMENTO DELLO STOP SUL DAX (sedia 770101, D30EUR)
+#  EA: ABTG_DAX_Apertura_EU   (sedia DAX 770101, simbolo D30EUR)
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#  Si lancia con: -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  R202B (21/09) ha misurato che il DD del DAX NON si risolve sull'asse
+#  del bersaglio d'uscita: delle quattro celle di InpTP1_R, la sola che
+#  porta la sedia sotto il muro FTMO del 10% alla taglia vera (2,00%) e'
+#  la 0.25 -- che pero' e' SOTTO il pavimento duro di costo (8,1x contro
+#  13,3x) ed era gia' dichiarata non promuovibile PRIMA del round.
+#  Quindi il problema sta altrove, e Claudio ha chiesto lo STOP.
+#
+#  IL FATTO CHE APRE LA PORTA, ed e' misurato oggi:
+#  sul DAX il pavimento dello stop E' SPENTO. InpMinStopPts=0.0 nel
+#  preset in campo, contro 500 su Nasdaq 770260 e Dow 770202. E siccome
+#  il codice lo legge dentro "if(InpMinStopPts > 0 ...)", anche
+#  InpSkipIfTight=true (che nel preset c'e') oggi e' un NO-OP: non ha
+#  mai scartato niente. Questa sedia prende QUALUNQUE stop, per quanto
+#  stretto sia.
+#
+#  LA DISTRIBUZIONE VERA, n=440 E NON n=3
+#  --------------------------------------
+#  backtest_pipeline/risultati_archivio/studio_apertura/Studio_D30EUR.csv
+#  ha 440 breakout veri con l'ampiezza del range d'apertura:
+#      P5  2028 pt | P10 2389 | P25 3440 | P50 5465 | P75 7835
+#      P90 10884   | P95 13255 | media 6254
+#  NOTA CHE VALE LA PENA: la mediana e' 5465 pt = 54,65 punti indice, e
+#  report/STOP_VS_SPREAD_FTMO_2026-09-20.md r.275 dichiarava lo stop
+#  della geometria viva a 54,90 [MIS n=3]. Due misure indipendenti,
+#  una con n=3 e una con n=440, a 0,5% di distanza: il numero regge.
+#
+#  L'ASSE, e il costo di ogni gradino DICHIARATO PRIMA
+#  ---------------------------------------------------
+#  InpMinStopPts = 0 / 2300 / 4600 / 6900 (punti EA; 100 pt = 1 punto
+#  indice). Con InpSkipIfTight=true (come in campo) il pavimento NON
+#  allarga lo stop: SCARTA il trade.
+#
+#    0     pavimento SPENTO -- la cella VIVA, il controllo
+#    2300  = 13,5x lo spread mediano (1,70 idx) -- il PAVIMENTO DURO
+#          di casa. Scarta ~8,2% dei giorni (36 su 440).
+#    4600  = 27,1x -- meta' strada. Scarta ~38,4% (169 su 440).
+#    6900  = 40,6x -- LA FRONTIERA del costo (40x). Scarta ~67,0%
+#          (295 su 440), e n scende a ~145.
+#
+#  ATTENZIONE, e' un LIMITE SUPERIORE: quelle quote sono calcolate
+#  sull'AMPIEZZA del range, mentre lo stop vero e' ampiezza + buffer
+#  (InpBufferPoints=500) e l'ingresso e' a retest (InpRetestOffsetPts=
+#  200). Lo stop vero e' quindi PIU' LARGO dell'ampiezza di qualche
+#  centinaio di punti, e il pavimento scartera' QUALCHE GIORNO IN MENO
+#  di quanto scritto sopra. Il verso non cambia, il numero si legge dal
+#  referto.
+#
+#  L'ATTESA, DICHIARATA PRIMA DEI NUMERI
+#  -------------------------------------
+#  (a) RIPRODUZIONE: la cella 0 deve riprodurre R202B Pass 3 e R201A:
+#      IS  n175 PF 1.12733 DD 5.4089 profit 3050.56
+#      OOS n270 PF 1.39520 DD 7.2506 profit 14355.32
+#      Se non riproduce, il round NON e' confrontabile: si cerca il pin
+#      che balla, non si legge il resto.
+#  (b) n SCENDE salendo il pavimento, ed e' la verifica che il
+#      meccanismo si sia ACCESO davvero. Se n NON scende, il pavimento
+#      non sta scartando niente e il round non ha misurato nulla.
+#  (c) LA BARRA DA BATTERE, in chiaro: perche' una cella valga qualcosa
+#      deve portare il DD OOS a <= 5,00% (a taglia 1,0%), cioe' <=
+#      10,00% alla taglia vera del campo (2,00%). Oggi e' 7,2506 ->
+#      14,50%. Serve un taglio di almeno il 31%.
+#  (d) E IL PF NON DEVE CROLLARE: PF OOS >= 1,20 (oggi 1,39520). Una
+#      cella che porta il DD sotto il muro ma il PF sotto 1,20 non e'
+#      una sedia, e' un conto fermo.
+#  (e) IS e OOS CONCORDI sulla direzione. Discordi -> nessuna
+#      promozione, si dichiara "non deciso".
+#  (f) CENTRO DELL'ALTOPIANO, MAI IL PICCO. Con 4 celle un altopiano
+#      puo' non esserci: allora il verdetto e' "serve piu' risoluzione".
+#
+#  LA CONTRO-IPOTESI, che va tenuta e non nascosta
+#  -----------------------------------------------
+#  Il pavimento potrebbe togliere trade SENZA toccare il DD: se le
+#  perdite che fanno il drawdown non sono concentrate nei giorni a range
+#  stretto, scartare quei giorni taglia n e profitto e lascia il DD dov'e'.
+#  In quel caso la risposta e' NO, e si va a cercare altrove (l'asse
+#  InpSLMode=ATR, o il filtro di spread InpMaxSpread che oggi e' 0).
+#  Questo esito NON e' un fallimento del round: e' la sua risposta.
+#
+#  QUELLO CHE QUESTO ROUND NON MISURA
+#  ----------------------------------
+#  - InpSkipIfTight=false (allargare lo stop invece di scartare il
+#    trade) e' un MECCANISMO DIVERSO e merita un round suo.
+#  - InpSLMode=1 (stop ad ATR) idem.
+#  - Un asse per round: qui si muove SOLO InpMinStopPts.
+#
+#  ATTENZIONE AL CONTEGGIO: STAT_TRADES conta le USCITE, non le
+#  posizioni. Con la parziale al 50% accesa una posizione fa due uscite.
+#  Le posizioni vere si contano dopo, una per una, sui position_id.
+#
+#  TAGLIA DEL BANCO: 1,0% -- NON e' la taglia in campo (2,00%, firma del
+#  20/09). Pinnata a 1,0 per RIPRODURRE R202B/R201A. Ogni DD di questo
+#  round va RADDOPPIATO prima di leggerlo contro il muro FTMO del 10%
+#  (classe 547). I cancelli (c) e (d) qui sopra sono gia' scritti nella
+#  scala del BANCO: (c) chiede <= 5,00, che e' il 10,00 del campo.
+# =====================================================================
+
+@SIMBOLO  D30EUR
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+@FINOA    2026.06.30
+@FRAZIONEIS 0.40
+
+InpUsaGuardian=true||true||0||true||N
+InpSessionHour=8||8||0||8||N
+InpSessionMin=0||0||0||0||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpCloseMin=30||30||0||30||N
+InpCloseAtEnd=true||true||0||true||N
+InpOneTradePerDay=true||true||0||true||N
+InpMaxPosSimbolo=0||0||0||0||N
+InpEntryMode=2||2||0||2||N
+InpRangeMode=0||0||0||0||N
+InpLevelTF=16385||16385||0||16385||N
+InpPrevWindowMin=60||60||0||60||N
+InpBufferPoints=500.0||500.0||0||500.0||N
+InpOCTimeframe=0||0||0||0||N
+InpPendingExpiryMin=120||120||0||120||N
+InpAllowLong=true||true||0||true||N
+InpAllowShort=false||false||0||false||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=200.0||200.0||0||200.0||N
+InpFadeOffsetPts=0.0||0.0||0||0.0||N
+InpAllowReverse=false||false||0||false||N
+InpDelayMinutes=30||30||0||30||N
+InpDelayDirMode=0||0||0||0||N
+InpUseGapFill=false||false||0||false||N
+InpGapMinPoints=150.0||150.0||0||150.0||N
+InpGapMinRR=1.5||1.5||0||1.5||N
+InpUseEmaFilter=false||false||0||false||N
+InpEmaFast=14||14||0||14||N
+InpEmaSlow=200||200||0||200||N
+InpFilterTF=16385||16385||0||16385||N
+InpUseSupertrend=false||false||0||false||N
+InpStAtrPeriod=10||10||0||10||N
+InpStMultiplier=2.5||2.5||0||2.5||N
+InpStTF=16385||16385||0||16385||N
+InpUseSupertrend3=false||false||0||false||N
+InpUseCorrelation=false||false||0||false||N
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385||16385||0||16385||N
+InpCorrEmaFast=14||14||0||14||N
+InpCorrEmaSlow=100||100||0||100||N
+InpUseVwapFilter=false||false||0||false||N
+InpVwapTF=15||15||0||15||N
+InpRiskPercent=1.0||1.0||0||1.0||N
+InpSLMode=0||0||0||0||N
+InpAtrSlMult=1.5||1.5||0||1.5||N
+InpAtrPeriodMgmt=14||14||0||14||N
+InpTP1_ClosePct=50.0||50.0||0||50.0||N
+InpBreakevenAtTP1=true||true||0||true||N
+InpUseTrailing=true||true||0||true||N
+InpTrailStartR=0.0||0.0||0||0.0||N
+InpTrailMode=1||1||0||1||N
+InpTrailTF=5||5||0||5||N
+InpTrailAtrMult=2.0||2.0||0||2.0||N
+InpTrailFixedPts=410.0||410.0||0||410.0||N
+InpUseRoundLevels=false||false||0||false||N
+InpRoundStep=100.0||100.0||0||100.0||N
+InpRoundMinDistPts=50.0||50.0||0||50.0||N
+InpUseNewsFilter=false||false||0||false||N
+InpNewsFile=abtg_news.csv
+InpNewsMinImpact=3||3||0||3||N
+InpNewsBeforeMin=30||30||0||30||N
+InpNewsAfterMin=30||30||0||30||N
+InpNewsShiftMinutes=0||0||0||0||N
+InpNewsFlatten=true||true||0||true||N
+InpSlippagePts=0.0||0.0||0||0.0||N
+InpMinStopPts=0.0||0.0||2300.0||6900.0||Y
+InpSkipIfTight=true||true||0||true||N
+InpUseVolumeFilter=false||false||0||false||N
+InpVolMult=1.5||1.5||0||1.5||N
+InpVolAvgBars=20||20||0||20||N
+InpUseAtrFilter=false||false||0||false||N
+InpAtrFilterBars=20||20||0||20||N
+InpAtrFilterMult=1.0||1.0||0||1.0||N
+InpConfirmMode=0||0||0||0||N
+InpSpaceMode=0||0||0||0||N
+InpSpaceTF=16388||16388||0||16388||N
+InpSpaceMinR=0.0||0.0||0||0.0||N
+InpSpaceMaxR=0.0||0.0||0||0.0||N
+InpSpaceEma1=14||14||0||14||N
+InpSpaceEma2=50||50||0||50||N
+InpSpaceEma3=100||100||0||100||N
+InpSpaceEma4=200||200||0||200||N
+InpSpaceUseST=false||false||0||false||N
+InpMagic=789521||789521||0||789521||N
+InpMaxSpread=0||0||0||0||N
+InpVerbose=true||true||0||true||N
+InpBEatR=0.0||0.0||0||0.0||N
+InpTP1_R=1.0||1.0||0||1.0||N
