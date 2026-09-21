@@ -1,0 +1,120 @@
+# =====================================================================
+#  EA: ABTG_Nasdaq_Apertura_US        (sedia 770260, IN CAMPO su FTMO)
+#  R199a -- IL DRAWDOWN, asse unico InpBEatR (stop a pari a X R, senza
+#           chiudere niente). E' l'unica delle tre protezioni che si
+#           accende da sola: vedi il ritrovamento qui sotto.
+#
+#  🖥️ GIRA SUL PC DI BACKTEST, NON SUL VPS.  -Deposito 80000 -Modello 4
+# =====================================================================
+#
+#  PERCHE' ESISTE
+#  --------------
+#  Misurato in R196a e riconfermato dalla cella 0 di R198, cella VIVA:
+#       IS   n  82   PF 1,116   DD equity 12,36%
+#       OOS  n 102   PF 1,149   DD equity  9,12%
+#  Il muro FTMO e' al 10% STATICO. Le due grandezze NON sono la stessa
+#  cosa (MT5 misura dal picco di equity, FTMO dal saldo iniziale), quindi
+#  quel 12,36% NON vuol dire "avremmo fallito". Vuol dire che questa
+#  sedia produce escursioni dello STESSO ORDINE DI GRANDEZZA del muro.
+#  R197 e R198 hanno gia' dimostrato che il MODO e la PROFONDITA'
+#  d'ingresso non lo toccano: il DD si muove con l'USCITA, non l'ingresso.
+#
+#  🔴 IL RITROVAMENTO CHE HA FATTO NASCERE QUESTO ROUND
+#  ----------------------------------------------------
+#  Questa sedia gira con TUTTE E TRE le protezioni d'uscita SPENTE:
+#       InpTP1_ClosePct   = 0      (nessuna chiusura parziale)
+#       InpBreakevenAtTP1 = false  (nessuno stop a pari al 1o obiettivo)
+#       InpBEatR          = 0      (nessun BE indipendente)
+#  L'unica gestione accesa e' il trailing (InpTrailMode=1, base candela
+#  precedente M5, InpTrailStartR=0 cioe' da subito).
+#
+#  🔴 E UNA DELLE TRE NON POTREBBE ACCENDERSI NEMMENO VOLENDO.
+#  ABTG_Nasdaq_Apertura_US.mq5 r.2143:
+#       if(!partialDone && InpTP1_ClosePct > 0 && InpTP1_ClosePct < 100)
+#  Il breakeven al 1o obiettivo (r.2175) sta DENTRO quel ramo. Con
+#  InpTP1_ClosePct = 0 il ramo non viene mai aperto, quindi
+#  InpBreakevenAtTP1 = true da SOLO sarebbe un NO-OP: si puo' mettere
+#  true e non succede niente.
+#  (Il commento a r.2166-2171 dice che il BE e' stato portato "FUORI dal
+#   ramo della parziale": e' vero per il ramo interno "se la parziale e'
+#   riuscita", NON per il cancello esterno su InpTP1_ClosePct > 0.)
+#  🟢 Il BE INDIPENDENTE (r.2189, InpBEatR) invece NON e' incatenato a
+#  niente: e' l'unica delle tre che si accende da sola. Per questo e'
+#  l'asse di R199a.
+#
+#  ATTESA DICHIARATA PRIMA DEI NUMERI -- e NON e' ottimista
+#  ---------------------------------------------------------
+#  Uno stop a pari ABBASSA il DD e di norma ABBASSA ANCHE IL PF: chiude
+#  in pari operazioni che sarebbero tornate in profitto. Quindi l'esito
+#  ATTESO e' "DD giu', PF giu'", e la domanda vera e' DI QUANTO ciascuno.
+#  🔴 E QUI C'E' UN COSTO CHE PUO' FAR FALLIRE LA PROPOSTA, detto PRIMA:
+#  questa sedia passa il merito PER UN PELO (PF OOS 1,149 sulla cella
+#  viva, e 1,10936 sulla cella promossa dal walk-forward). Se il BE porta
+#  il PF OOS SOTTO 1,10, le toglie l'unica cosa che le da' il posto, e
+#  allora il DD piu' basso NON basta.
+#  PROMOSSA solo se, INSIEME:
+#     (a) DD OOS scende di almeno il 20%,
+#     (b) PF OOS resta >= 1,10,
+#     (c) IS e OOS concordano di SEGNO su tutte e due le grandezze.
+#  Altrimenti il verdetto e' "misurato e NON promosso", che e' un esito.
+#  SELEZIONE: centro dell'altopiano, MAI il picco (su R198 il picco IS ha
+#  portato a una cella con DD OOS del 26,1%: e' successo oggi).
+#
+#  🔬 CONTROLLO DI REGRESSIONE INTEGRATO, e va guardato PER PRIMO
+#  La cella con l'asse a 0 e' la CELLA VIVA e DEVE riprodurre R198/R196a
+#  al centesimo:  IS n 82 PF 1,11621 DD 12,3568  ·  OOS n 102 PF 1,14894
+#  DD 9,1244. Se NON li riproduce, i pin sono sbagliati e tutto il resto
+#  del round non vuol dire niente: si ferma li'.
+#
+#  🔵 QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la firma di
+#     Claudio: la gestione dell'uscita e' gestione del rischio, ed e' sua.
+#
+# ---------------------------------------------------------------------
+#  I PIN: senza, si misura un'altra sedia. Le tre conversioni FTMO->BCM
+#  (InpSessionHour 16->14, InpCloseHour 19->17, InpCorrSymbol
+#  US500.cash->SPXUSD) sono le stesse di R196a/R198. Un CSV che torna con
+#  InpSessionHour diverso da 14 si CESTINA.
+#  InpRetestOffsetPts=0 e InpMinRangePts=0: la cella viva, confermata da
+#  R198 e non ancora cambiata da nessuna firma.
+# ---------------------------------------------------------------------
+
+@SIMBOLO  NASUSD
+@PERIODO  M5
+@DAQUANDO 2024.09.26
+
+InpMagic=770260||770260||0||770260||N
+InpRangeMode=0||0||0||0||N
+InpRiskPercent=2.00||2.00||0||2.00||N
+InpCloseMin=30||30||0||30||N
+InpSessionHour=14||14||0||14||N
+InpSessionMin=30||30||0||30||N
+InpRangeMinutes=35||35||0||35||N
+InpCloseHour=17||17||0||17||N
+InpEntryMode=2||2||0||2||N
+InpUseGapFill=1||1||0||1||N
+InpEmaFast=1||1||0||1||N
+InpEmaSlow=50||50||0||50||N
+InpFilterTF=16388||16388||0||16388||N
+InpCorrSymbol=SPXUSD
+InpTP1_R=0.5||0.5||0||0.5||N
+InpTP1_ClosePct=0.0||0.0||0||0.0||N
+InpBreakevenAtTP1=0||0||0||0||N
+InpTrailTF=5||5||0||5||N
+InpMinStopPts=500.0||500.0||0||500.0||N
+InpSkipIfTight=0||0||0||0||N
+InpUseVolumeFilter=1||1||0||1||N
+InpConfirmMode=1||1||0||1||N
+InpMinRangePts=0.0||0.0||0||0.0||N
+InpMaxRangePts=0.0||0.0||0||0.0||N
+InpRetestOffsetPts=0.0||0.0||0||0.0||N
+
+# --- asse unico: IL BREAKEVEN INDIPENDENTE (in multipli di R) --------
+#   0   = spento  <-- LA CELLA VIVA, controllo di regressione obbligatorio
+#   0.5 = stop a pari appena il prezzo fa mezzo R a favore (presto: protegge
+#         tanto, ma chiude in pari molte operazioni che sarebbero tornate)
+#   1.0 = stop a pari a un R (il compromesso classico)
+#   1.5 = stop a pari a un R e mezzo (tardi: protegge poco, disturba poco)
+#   Si guarda il DD *e* il PF INSIEME. Un DD piu' basso con il PF sotto
+#   1,10 non e' un miglioramento: e' una sedia diversa e peggiore.
+InpBEatR=0||0||0.5||1.5||Y
+# 4 celle
