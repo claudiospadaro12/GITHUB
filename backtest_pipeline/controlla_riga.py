@@ -754,7 +754,33 @@ def controlla_riga_lancio(riga):
                 blocca("173", "[" + motivo
                        + "] la riga non scarica nessuno script (quindi non e' appuntabile a un commit) MA non e' dimostrabilmente di SOLA LETTURA: " + "; ".join(sorted(set(sporche))) + ". Cosi' com'e' non e' ne' pinnata ne' innocua")
         else:
-            passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
+            # CLASSE 519 (21/09/2026) -- L'ASSEGNAZIONE A UNA PROPRIETA' PASSAVA LA
+            # LISTA BIANCA E VENIVA CERTIFICATA "SOLA LETTURA".
+            # La lista nera della 173 vieta i METODI ('.Kill(', '.Delete(',
+            # '.WriteAllText') e i CMDLET fuori lista -- ma NON le assegnazioni a
+            # proprieta'. Misurato eseguendo, il 21/09:
+            #   $f = Get-Item "C:\MT5_Backtest\MQL5\Experts\X.ex5"; $f.IsReadOnly = $true
+            # dava "PASSATI (3) ... riga di SOLA LETTURA locale", uscita 0.
+            # Quella riga SCRIVE: cambia un file. E' la classe 175 che ritorna --
+            # un cancello non certifica mai piu' di quello che ha guardato.
+            #
+            # Perche' RILIEVO e non BLOCCO: la scrittura piu' utile di questa
+            # famiglia ($x.PriorityClass='Idle' per liberare CPU) e' REVERSIBILE e
+            # non tocca nessun conto. Bloccarla insegnerebbe a scavalcare il
+            # cancello (lezione della classe 235). Ma la frase "SOLA LETTURA" non
+            # si stampa piu', e la proprieta' toccata si NOMINA.
+            prop = re.findall(r"\$(?:[A-Za-z_][A-Za-z0-9_]*|_)(?:\.[A-Za-z_][A-Za-z0-9_]*)*\.([A-Za-z_][A-Za-z0-9_]*)\s*=(?!=)", nudo)
+            if prop:
+                rileva("519", "la riga NON e' di sola lettura: assegna a una PROPRIETA' ("
+                       + ", ".join(sorted(set(prop))) + "), cioe' SCRIVE lo stato di un"
+                       + " oggetto vivo. La lista bianca della 173 guarda i metodi e i"
+                       + " cmdlet, non le assegnazioni: qui il verde e' MECCANICO, non"
+                       + " innocuo. Va letta a mano, e va detto se e' REVERSIBILE")
+                passa("riga locale senza download: nessun cmdlet fuori dalla lista bianca"
+                      + " e nessuno script eseguito -> pin e marcatore non si applicano"
+                      + " (classe 173). NON la chiamo di sola lettura: vedi il rilievo 519")
+            else:
+                passa("riga di SOLA LETTURA locale (lista bianca): nessuno script scaricato o eseguito, nessun cmdlet fuori dalla lista bianca, nessun operatore di chiamata -> pin e marcatore non si applicano (classe 173)")
 
     # --- 1. il PIN deve essere un COMMIT (classe 164): 40 esadecimali
     # CLASSE 217 (10/09/2026): questi due regex erano CASE SENSITIVE su $PIN,
