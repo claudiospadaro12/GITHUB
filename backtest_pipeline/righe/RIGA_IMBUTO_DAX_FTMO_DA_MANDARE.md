@@ -102,9 +102,13 @@ scritto, e messo per iscritto, che *«le quadre in `-like` non sono speciali»*:
 da `0` a `I`**. Il pattern significava quindi *«una riga che contiene una cifra o una lettera fra A
 e I»* -- **cioe' ogni riga di ogni log**.
 
-**Misurato eseguendo**, su un campione di 6 righe vere: `v2` ne prendeva **2**, `v3` ne prendeva
-**6**. Corretto con `-match [regex]::Escape($TagLog)`, che e' case-insensitive come `-like` ed e' la
-sostituzione a rischio zero del filtro della v2: **torna a 2, identiche**.
+**Misurato eseguendo**, e il fatto non e' un conteggio ma un'**invariante**: `v3` prendeva
+**TUTTE** le righe del log, qualunque fosse il campione -- **6 su 6** sul banco del ricollaudo,
+**8 su 8** su quello del cancello (che conteneva anche la stringa `ab`, presa anch'essa). `v2` ne
+prendeva **2**. Corretto con `-match [regex]::Escape($TagLog)`, che e' case-insensitive come
+`-like` ed e' la sostituzione a rischio zero del filtro della v2: **torna a 2, identiche**.
+*(Il commento dentro lo `.ps1` cita ancora il solo `6 su 6`: e' un commento, non cambia cosa fa lo
+script, e non vale una ripinnatura -- si allinea al prossimo giro.)*
 
 🔴 **E il sintomo somigliava a una vittoria.** Non usciva "zero" (che si nota): usciva un numero
 **grande**, con dentro il log intero. **Una misura falsa consegnata come misura vera** -- e la

@@ -2767,6 +2767,15 @@ si assomigliano molto, in lettura.
 > significati diversi: e' li' che si scivola.
 > 🧪 **E ogni guardia va provata sull'esempio che dovrebbe FARLA SCATTARE**
 > (punto 55): se non si riesce a costruire quell'esempio, la guardia e' morta.
+> 🔁 **E VALE ANCHE AL CONTRARIO -- vedi CLASSE 567 (22/09/2026).** Qui il pattern era
+> troppo STRETTO e non prendeva niente. Lo stesso meccanismo, con una stringa che
+> arriva da un **parametro**, lo rende troppo LARGO e prende **tutto**:
+> `-like ('*' + $Tag + '*')` con `$Tag = '[EMA200-IMBUTO]'` matcha ogni riga di ogni
+> log, perche' `0-I` dentro le quadre e' un **range**. 🔴 **Ed e' il caso piu'
+> pericoloso dei due, perche' non esce uno zero: esce un numero GRANDE**, e un falso
+> positivo di massa si consegna come misura vera. 👉 Regola aggiuntiva: **una stringa
+> che arriva da fuori non si incolla MAI dentro un pattern wildcard** --
+> `-match [regex]::Escape($x)`, oppure `[WildcardPattern]::Escape($x)` se serve `-like`.
 
 ## 61. ⏰ L'AUTOMATISMO A ORARIO FISSO ATTRAVERSA IL LAVORO DEGLI ALTRI (e la cartella "ferma" non lo e')
 
