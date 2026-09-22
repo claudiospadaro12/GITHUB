@@ -29082,3 +29082,62 @@ Un documento a cui manca il numero portante e' peggio di uno sbagliato: sembra g
    lancio e' sana»*, **non** *«il documento e' integro»*. Dopo ogni generazione automatica di un
    documento si rilegge che i **numeri portanti** ci siano ancora -- con un `grep` sul numero, non
    a occhio.
+
+## CLASSE 567 -- IL FILTRO CHE DIVENTA UN PARAMETRO: `-match '\[TAG\]'` RISCRITTO IN `-like "*$Tag*"` PRENDE **TUTTO**, E SEMBRA UN SUCCESSO
+
+**Caso reale (22/09/2026, `backtest_pipeline/righe/IMBUTO_EMA200_FTMO.ps1` v3, bocciato dal
+cancello di giudizio prima di partire per il VPS.)** La sonda FTMO filtrava le righe del log
+Esperti con un pattern fisso, e funzionava:
+
+```powershell
+$hit = @($txt -split "`r?`n" | Where-Object { $_ -match '\[EMA200-IMBUTO\]' })   # v2, SANA
+```
+
+Per leggere anche una seconda sedia, il tag e' stato reso **parametro** (`-TagLog`) e il
+confronto e' stato riscritto con `-like`, che sembra la scelta naturale per "contiene":
+
+```powershell
+$hit = @($txt -split "`r?`n" | Where-Object { $_ -like ('*' + $TagLog + '*') })  # v3, ROTTA
+```
+
+🔴 **In `-like` le parentesi quadre NON sono letterali: sono una classe di caratteri** (e' il
+meccanismo gia' pagato alla **classe 60**, qui in direzione opposta). Il tag di default
+`[EMA200-IMBUTO]` contiene `0-I`, che e' un **RANGE** da `0` a `I`: la classe vale
+`{0..9, A..I, E, M, A, 2, B, U, T, O}`. Quindi `*[EMA200-IMBUTO]*` significa *"una riga che
+contiene almeno una cifra o una lettera fra A e I"* -- cioe' **ogni riga di ogni log**.
+Misurato per esecuzione su un campione di 8 righe vere di log Esperti:
+
+```
+v2 (-match fisso)            ->  2 righe   (le due di imbuto, giuste)
+v3 (-like con tag default)   ->  8 righe   (TUTTE, compresa la stringa 'ab')
+-match [regex]::Escape($Tag) ->  2 righe   (identiche a v2)
+```
+
+### Perche' e' peggio di un filtro che non prende niente
+1. 🎭 **Il sintomo somiglia a una vittoria.** La classe 60 produceva *zero risultati*, e lo zero
+   si nota. Qui la sonda stampa **`righe trovate: 48213`** e riversa il log intero nel referto:
+   Claudio legge un numero grande e conclude *«la sedia ha lavorato moltissimo»*. **Un falso
+   positivo di massa e' una misura falsa consegnata come misura vera.**
+2. 🔁 **La regressione e' nata dalla PARAMETRIZZAZIONE, non dal filtro.** Il caso nuovo
+   (`-TagLog ABTG_DAX_Apertura_EU`, senza metacaratteri) funzionava benissimo: **il collaudo e'
+   stato fatto sul caso nuovo e il caso VECCHIO, gia' approvato, e' stato dato per buono.**
+   Il difetto era **invisibile al collaudo** perche' nessuno ha rilanciato il default.
+3. 🤖 **Il cancello deterministico non lo vede**: `-like` e' sintatticamente perfetto, ASCII,
+   PS 5.1-compatibile. Passa tutto. Lo trova solo chi **esegue il filtro sulle righe vere**.
+
+### La regola
+1. **Una stringa che arriva da FUORI (parametro, file, argomento) non si incolla mai dentro un
+   pattern wildcard.** Delle due l'una: `-match [regex]::Escape($Tag)` (case-insensitive, come
+   `-like`, e quindi sostituzione a rischio zero di un `-match` preesistente), oppure
+   `$_.Contains($Tag)` se si vuole il confronto **case-sensitive**. Se proprio serve `-like`:
+   `[System.Management.Automation.WildcardPattern]::Escape($Tag)`.
+2. 🔴 **Quando si trasforma un valore fisso in un parametro, si RILANCIA il caso vecchio col
+   valore di default e si verifica che dia lo STESSO risultato di prima.** Il collaudo del caso
+   nuovo non dice niente sul caso vecchio: sono due prove, non una. *(E' la stessa disciplina
+   del contro-esempio del 10/09: avevo controllato che la modifica facesse quello che volevo,
+   non che non rompesse quello che gia' funzionava.)*
+3. 📌 **E il testo che lo script stampa su se stesso va verificato come il codice.** La stessa
+   v3 elencava fra le cause dello zero: *«il filtro e una sottostringa, e distingue le
+   maiuscole»*. **Sono due affermazioni e sono entrambe false**: non e' una sottostringa (e' un
+   wildcard) e `-like` **non** distingue le maiuscole. Una diagnosi sbagliata stampata in un
+   referto manda Claudio a cercare nel posto sbagliato, e costa piu' del difetto.

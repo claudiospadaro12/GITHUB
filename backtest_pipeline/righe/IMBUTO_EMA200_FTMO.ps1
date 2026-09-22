@@ -333,7 +333,16 @@ if(-not (Test-Path -LiteralPath $dirExp)){
   foreach($f in ($fe | Sort-Object Name)){
     $txt = Leggi-Testo $f.FullName
     if($txt -eq ''){ Dillo ('      ' + $f.Name + '  [NON LEGGIBILE]') 'Yellow'; continue }
-    $hit = @($txt -split "`r?`n" | Where-Object { $_ -like ('*' + $TagLog + '*') })
+    # IL FILTRO E' -match CON [regex]::Escape, NON -like. Misurato il 22/09
+    # (classe 567): in -like le parentesi quadre sono una CLASSE DI CARATTERI, e
+    # il tag di default [EMA200-IMBUTO] contiene "0-I", cioe' un RANGE da 0 a I.
+    # Il pattern *[EMA200-IMBUTO]* significa quindi "riga che contiene una cifra
+    # o una lettera fra A e I": su 6 righe di prova ne prendeva 6 invece di 2.
+    # Il sintomo NON sarebbe stato uno zero (che si nota): sarebbe stato un
+    # numero GRANDE, cioe' una misura falsa consegnata come misura vera.
+    # -match con Escape e' case-insensitive come -like, quindi e' la sostituzione
+    # a rischio zero del -match fisso che c'era nella v2.
+    $hit = @($txt -split "`r?`n" | Where-Object { $_ -match [regex]::Escape($TagLog) })
     Dillo ('      --- file ' + $f.Name + '  (nome file = data in ORA LOCALE) -- righe trovate: ' + $hit.Count.ToString($INV)) 'Cyan'
     foreach($h in $hit){
       $nImb++
@@ -354,8 +363,8 @@ if($nImb -eq 0){
   Dillo '      1. InpVerbose e false nel preset in campo -> l EA e MUTO per scelta;' 'Yellow'
   if($eImbuto){ Dillo '      1-bis. InpLogImbuto e false (nel .set di repo e true);' 'Yellow' }
   Dillo '      2. la sedia non e attaccata, o e attaccata ma muta (Algo Trading spento);' 'Yellow'
-  Dillo '      3. il tag e SCRITTO MALE: il filtro e una sottostringa, e distingue le maiuscole' 'Yellow'
-  Dillo '         nel senso che deve comparire uguale nella riga di log;' 'Yellow'
+  Dillo '      3. il tag e SCRITTO MALE: il filtro cerca il tag come TESTO dentro la riga e NON' 'Yellow'
+  Dillo '         distingue maiuscole e minuscole -- ma ogni altro carattere deve combaciare;' 'Yellow'
   if($eImbuto){ Dillo '      4. il giorno non e ancora cambiato da quando e stata attaccata (L1);' 'Yellow' }
   Dillo '      5. il binario in campo e piu vecchio del sorgente e non scrive quella riga;' 'Yellow'
   Dillo '      6. la finestra -Giorni non arriva fino al giorno che ti interessa.' 'Yellow'
