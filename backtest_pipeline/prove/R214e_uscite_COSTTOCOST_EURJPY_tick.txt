@@ -1,0 +1,342 @@
+# ======================================================================
+#  EA: ABTG_CostToCost
+#  R214e -- LE TRE USCITE DEL COST-TO-COST, A TICK REALI.
+#  *** ABBIAMO PROMOSSO IL PICCO E POI L'ABBIAMO BOCCIATA PER IL
+#      DRAWDOWN DEL PICCO. *** EURJPY H4, LONG-ONLY.
+#  Asse unico: InpExitMode (0 / 1 / 2) -- ASSE CATEGORICO, non ordinale.
+#  Scritto il 22/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/RIESAME_MORTI_NOTTURNI_2026-09-22.md par. 4 #1.
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 100000 -Modello 4
+#     100.000 e' il deposito di r127c, l'unica corsa IS/OOS mai fatta
+#     su questo motore e questo simbolo: cosi' il file OHLC gemello
+#     (R214f) resta confrontabile con l'archivio. E a 100.000 il lotto
+#     non e' quantizzato dal minimo, mentre a 10.000 lo sarebbe:
+#     il DD in percentuale ne uscirebbe sporco.
+# ======================================================================
+#
+#  1. IL FATTO DA CUI PARTE TUTTO, LETTO NEL CSV GREZZO
+#  --------------------------------------------------------------------
+#  backtest_pipeline/risultati_prove/ABTG_CostToCost/scan_h4/
+#  scan_ABTG_CostToCost_H4_EURJPY.csv  -- 9 celle, rischio 1%, OHLC,
+#  finestra UNICA e [NON MISURATA]:
+#
+#    lato  | exit 0 (cost-to-cost)   | exit 1 (R-based)       | exit 2 (flip)
+#    LONG  | PF 1.34274 n 194 DD  9.1158 | PF 1.23787 n 160 DD 10.8444 | PF 1.54592 n 155 DD 12.0482
+#    SHORT | PF 0.90832 n 157 DD 27.6681 | PF 0.64382 n 144 DD 32.8933 | PF 0.63017 n 153 DD 44.7722
+#
+#  >>> TRE MECCANISMI D'USCITA DIVERSI, TUTTI E TRE POSITIVI SUL LATO
+#      LONG (1,24 / 1,34 / 1,55). E in vivaio e' finita la cella
+#      exit 2: il PF piu' alto E il drawdown piu' alto. Poi e' stata
+#      bocciata per quel drawdown.
+#  >>> exit 0 fa +25% di operazioni e -24,3% di drawdown rispetto a
+#      exit 2, e il suo 9,1158% sta SOTTO il muro del 10% a rischio 1%.
+#  >>> E il lato SHORT e' escluso PER MISURA, non per assunzione: su
+#      28 coppie x 3 uscite le celle short con PF > 1 sono 6 su 144,
+#      mediana 0,708. Per questo qui e' pinnato InpAllowShort=false, e
+#      NON e' una copia: e' una scelta misurata.
+#
+#  2. *** L'ASSE E' CATEGORICO: "CENTRO DELL'ALTOPIANO" QUI NON SI
+#     APPLICA, E VA DETTO PRIMA ***
+#  --------------------------------------------------------------------
+#  InpExitMode non e' un numero su una scala: 0, 1 e 2 sono TRE
+#  MACCHINE DIVERSE (r.830-831 e r.902-910 del sorgente):
+#    0 = TP sull'ultima punta opposta, congelata alla conferma;
+#    1 = TP a InpTP_R x rischio iniziale;
+#    2 = NESSUN TP: si esce quando gira il trend intermedio.
+#  Fra 0 e 2 non c'e' un "1,5": non esiste un centro da scegliere, e
+#  chiedere "il centro dell'altopiano" sarebbe una frase senza
+#  referente. *** LA TESI GIUSTA SU UN ASSE CATEGORICO E' UN'ALTRA, ed
+#  e' piu' forte: "il risultato NON DIPENDE da quale uscita scegli".
+#  Se tutte e tre reggono, l'edge sta nell'INGRESSO e il motore e'
+#  robusto. Se ne regge UNA SOLA, quella e' una cella scelta fra tre,
+#  cioe' una selezione -- e va trattata come tale. ***
+#
+#  3. *** IL BUCO PIU' GRANDE DI QUESTO FILE, DICHIARATO PER PRIMO:
+#     NON HA ANCORA DI REGRESSIONE ***
+#  --------------------------------------------------------------------
+#  Non ce l'ha per DUE motivi insieme, e non me ne invento una:
+#   (i) TUTTI i numeri che abbiamo su questo motore sono OHLC (lo scan
+#       e' senza suffisso ma e' uno scan di screening; r127c ha
+#       "_ohlc_" nel nome del file, che il driver appende quando il
+#       modello non e' 4). Questo file gira a MODELLO 4: modelli
+#       diversi non si confrontano.
+#  (ii) LA FINESTRA E' DIVERSA PER FORZA. I tick reali BCM sul FOREX
+#       partono dal 2024.07.05 -- MISURATO, non scelto:
+#       backtest_pipeline/risultati_archivio/
+#       NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md, righe verbatim del
+#       Diario del tester: "EURUSD: ticks data begins from 2024.07.05
+#       00:00". Prima di quella data, a modello 4, MT5 NON si ferma:
+#       genera i tick dalle barre M1 (sul forex le M1 ci sono, quindi
+#       e' un fallback silenzioso, non un errore -- ma NON sono tick
+#       veri, e la colonna spread e' RICOSTRUITA).
+#  >>> LA TENSIONE E' SCIOLTA COSI', E LA SCELTA E' DICHIARATA: questo
+#      file gira SOLO sul tratto di tick VERI (2024.07.05 ->
+#      2026.06.30). L'alternativa -- tenere la finestra di r127c
+#      (2020.01.01) e dichiarare "i tick veri coprono solo l'ultimo
+#      quarto" -- e' stata scartata perche' avrebbe messo il 73% del
+#      campione su tick fabbricati e avrebbe chiamato "verdetto a tick"
+#      un numero che a tick non e'. *** E IL PREZZO DELLA SCELTA E'
+#      L'n, che CROLLA: vedi il punto 4. ***
+#  >>> QUELLO CHE C'E' AL POSTO DELL'ANCORA:
+#      (a) LA BASE DI CONFRONTO OHLC, i sei numeri della tabella del
+#          punto 1, che si leggono come "da dove veniamo", mai come
+#          "questo deve tornare";
+#      (b) *** IL FILE GEMELLO R214f ***, che gira lo STESSO asse in
+#          OHLC sulla finestra lunga di r127c e LI' l'ancora c'e' ed e'
+#          esatta (la cella exit 2 deve riprodurre r127c alla quinta
+#          cifra). I due file insieme chiudono la domanda; questo da
+#          solo chiude solo la meta' del RISCHIO.
+#
+#  4. ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) *** IL PF SCENDERA'. LO SCRIVO ADESSO. ***
+#      Il fattore OHLC/tick misurato in casa e' 1,71-1,85 IN ECCESSO
+#      sul PF OOS (report/RIESAME_MORTI_BREAKOUT_M5_2026-09-22.md:
+#      L1 1,46853 -> 0,85701 = 1,714; L3 1,71088 -> 0,92490 = 1,850).
+#      *** MA QUEL FATTORE NON SI APPLICA QUI ALLA LETTERA, e dire il
+#      contrario sarebbe un numero inventato: *** e' misurato su un
+#      breakout M5 su INDICE, dove ingresso e stop stanno dentro la
+#      stessa barra e il percorso intra-barra decide tutto. Qui siamo
+#      su H4 FOREX con ingressi a limite e uscite su livelli: la
+#      distorsione dell'OHLC M1 dovrebbe essere molto minore.
+#      >>> IL FATTORE OHLC/TICK PER H4 FOREX E' [NON MISURATO]. Quello
+#          che dichiaro e' il SEGNO, non la taglia: PF in calo, DD in
+#          aumento (l'OHLC non vede le escursioni intra-barra e quindi
+#          SOTTOSTIMA il drawdown). Se il PF SALISSE a tick, sarei
+#          sorpreso e la prima cosa da sospettare sarebbe la finestra,
+#          non il modello.
+#  (B) *** L'n CROLLA, E IL MERITO E' SOSPESO PRIMA DI COMINCIARE. ***
+#      Cadenza misurata su r127c (hold 100, exit 2): IS 153 operazioni
+#      in 948 giorni = 0,1614/giorno; OOS 242 in 1.424 = 0,1700/giorno.
+#      Questa finestra e' 725 giorni: IS 290 gg -> ~47 operazioni,
+#      OOS 435 gg -> ~74. *** TUTTE E DUE MOLTO SOTTO IL PAVIMENTO DEI
+#      150. Il MERITO E' SOSPESO in tutte e due le finestre
+#      (Emendamento B del 16/08). Il RISCHIO no: il DD si legge a
+#      qualunque n, ed e' la ragione principale per cui questo round
+#      vale le sue 6 passate. ***
+#      >>> E se l'n uscisse MOLTO diverso da 47/74 (diciamo fuori dalla
+#          banda 30-110 per finestra), non e' il motore che e'
+#          cambiato: e' la finestra o i dati. Si guarda quello prima
+#          del PF.
+#  (C) DIREZIONE FRA LE TRE CELLE. Mi aspetto che l'ORDINE resti:
+#      exit 2 il PF piu' alto e il DD piu' alto, exit 0 il DD piu'
+#      basso. Se l'ordine si RIBALTA passando ai tick, la scelta della
+#      cella fatta in OHLC era un artefatto del modello -- e sarebbe
+#      la scoperta piu' utile del round.
+#  (D) CATENA ROTTA, che non e' una risposta: zero passate; Trades = 0
+#      su una qualunque cella; deposito diverso da 100.000 o modello
+#      diverso da 4.
+#
+#  5. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  (i) *** L'IPOTESI ALTERNATIVA SERIA: "le tre celle belle non sono un
+#      edge, sono una SCOMMESSA DI REGIME". *** Le coppie vincenti
+#      dello scan (EURJPY, USDCHF, CHFJPY) sono tre cross JPY/CHF in un
+#      periodo di yen debole: "long il cross in trend su" potrebbe
+#      essere il regime travestito da motore.
+#      QUALE NUMERO PRODUCE QUESTA SPIEGAZIONE? Se e' regime, la
+#      finestra 2024.07.05-2026.06.30 -- che e' TUTTA dentro lo stesso
+#      regime -- deve dare numeri BUONI, e il round non la distingue.
+#      *** QUINDI QUESTO FILE, DA SOLO, NON PUO' FALSIFICARE L'IPOTESI
+#      DI REGIME, E LO DICHIARO INVECE DI FINGERE. *** La falsifica il
+#      gemello R214f, che gira la stessa griglia su 6,5 anni (crollo
+#      2020, orso 2022, toro 2023-24) in OHLC.
+#      >>> E qui c'e' una notizia che fino a stanotte non avevamo:
+#          la prova di regime su questo motore E' POSSIBILE. Sul
+#          NATIVO EURJPY il broker ha storico dal 1993.04.26
+#          (backtest_pipeline/risultati_archivio/
+#          REFERTO_SONDA_STORICO_17-08.md: il muro del "2010" era il
+#          tetto delle 100.000 barre del GRAFICO, non il disco). E in
+#          piu' esiste EURJPY_EXT, feed HistData M1 dal 2018.01.01,
+#          promosso dal cancello ZERO con diff media 0,0063% e
+#          copertura 99,6% (REFERTO_IMPORT_6_SIMBOLI.md), che e' una
+#          SECONDA FONTE INDIPENDENTE. *** Tutti e due sono BARRE M1,
+#          non tick: una corsa li' NON e' modello 4 e non si confronta
+#          direttamente con questo file. *** Mappa dello storico
+#          esterno: report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md.
+#  (ii) CONFRONTI MULTIPLI. Lo scan H4 e' 432 celle su 48 simboli; le
+#      celle con PF >= 1,10 sono 26 (6,0%). Pescare 4 celle belle da
+#      432 e' quello che fa anche il rumore. LA DIFESA, e non e' una
+#      difesa a parole: le 4 non sono sparse a caso -- sono lo STESSO
+#      lato e la STESSA uscita su 3 simboli su 4, e il lato opposto e'
+#      negativo in modo sistematico. Un pescaggio casuale non si
+#      ordina cosi'. Ma resta vero che questo file misura UN SOLO
+#      simbolo: gli altri due (USDCHF, CHFJPY) sono buchi dichiarati.
+#  (iii) MANOPOLA INERTE. Se le tre celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, l'asse non e' arrivato all'EA e NESSUN
+#      numero si legge. Criterio a macchina: meno di 2 valori DISTINTI
+#      di Profit = "asse inerte", che NON e' "l'uscita non conta".
+#      >>> E qui il precedente c'e': in r127c l'asse InpMaxBarsHold
+#          aveva 8 valori e TRE esiti distinti -- da 75 a 200 le righe
+#          sono identiche BIT A BIT. Quell'asse non aveva morso. Su
+#          questo motore la trappola e' gia' scattata una volta.
+#  (iv) IL COSTO, dichiarato PRIMA e non dopo: su EURJPY H4 il
+#      rapporto stop/spread misurato e' 25,6x nell'unita' stretta.
+#      *** PASSA il cancello duro (13,3x) e NON PASSA il pavimento di
+#      lavoro (40x). *** Non e' una bocciatura -- su H4 forex il 40x e'
+#      tarato sugli indici intraday -- ma e' un numero che va accanto
+#      al PF ogni volta che lo si cita.
+#  (v) LA TAGLIA. Il 9,1158% di exit 0 e' a rischio 1,00%. Alla taglia
+#      FTMO del 2,00% diventa 17,83-18,14% (fattore misurato
+#      1,956-1,990): *** SFONDA IL MURO DEL 10%. *** Questa cella e'
+#      schierabile SOLO a rischio ~1,0%, e quella e' una FIRMA DI
+#      CLAUDIO, non una misura mia.
+#
+#  6. CLASSE 594 -- CHI ALTRO DIPENDE DALLA VARIABILE D'ASSE?
+#  --------------------------------------------------------------------
+#  Cercato nel sorgente, e ci sono DUE dipendenze. Le dichiaro invece
+#  di scoprirle dopo:
+#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (r.831:
+#      'else if(InpExitMode==1) tp = ... InpTP_R*riskDist'; e r.374-375
+#      lo valida SOLO in quel caso). Quindi la cella 1 non e' "l'uscita
+#      R-based": e' "l'uscita R-based CON N = 1,5", e quel 1,5 non e'
+#      MAI stato messo ad asse su questo motore. *** L'asse muove
+#      quindi un PACCHETTO su una cella su tre, e non lo si puo'
+#      isolare senza togliere la cella. Lo DICHIARO: se exit 1 esce
+#      male, il verdetto onesto e' "exit 1 A 1,5 R esce male", non
+#      "l'uscita R-based non funziona". ***
+#  (b) InpMaxBarsHold (time-stop) agisce su tutte e tre, ma NON allo
+#      stesso modo: exit 2 non ha TP (r.828), quindi e' la cella che
+#      dipende di piu' dall'orologio. In r127c, a exit 2, il time-stop
+#      e' misurato NON VINCOLANTE da 75 barre in su. Qui e' pinnato a
+#      100 = il valore vivo. Su exit 0 e exit 1 la sua vincolativita'
+#      e' [NON MISURATA].
+#  >>> Nessun altro input cambia di significato fra le tre celle:
+#      lo stop (InpSLBufferATR), la struttura (InpWarmupBars,
+#      InpAtrPeriod) e il filtro d'ampiezza (InpMinRangeATR, spento)
+#      sono identici per costruzione.
+#
+#  7. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  C1  IL CANCELLO E' IN GRANDEZZE INVARIANTI ALLA TAGLIA: Recovery
+#      Factor, Equity DD % e Profit. *** MAI Expected Payoff *** (qui
+#      l'EA non ha parziale, quindi Trades = posizioni e l'Expected
+#      Payoff sarebbe leggibile -- ma resta una grandezza che dipende
+#      dal conteggio, e il confronto FRA celle con n diversi la rompe).
+#      E MAI "DD contro DD" da solo: una cella che opera di meno ha un
+#      DD piu' basso per costruzione.
+#  C2  IL MOTORE E' PROMOSSO A "ROBUSTO SULL'USCITA" solo se, in OOS,
+#      *** TUTTE E TRE *** le celle fanno PF >= 1,00 e Recovery Factor
+#      > 0. E' la tesi del punto 2, ed e' un cancello severo: una
+#      cella su tre non basta.
+#  C3  UNA SINGOLA CELLA E' DICHIARATA "MIGLIORE" solo se, in OOS,
+#      batte le altre due su RF *** e *** ha Equity DD % <= 9,0 (il
+#      margine vero sotto il muro del 10%). Con RF migliore e DD sopra
+#      9,0 si scrive "PF migliore, rischio peggiore" e non si promuove
+#      niente: e' esattamente l'errore gia' fatto con exit 2.
+#  C4  RISCHIO, a qualunque n. Equity DD % > 12,0 in una qualunque
+#      finestra su una qualunque cella = NOTIZIA in cima al referto,
+#      perche' vorrebbe dire che il 9,1158 dell'OHLC sottostimava di
+#      oltre il 30% e allora TUTTI i DD OHLC del motore vanno riletti.
+#  C5  MERITO SOSPESO PER COSTRUZIONE (punto 4B): nessuna cella di
+#      questo round si porta in campo, nemmeno se vincesse. Il round
+#      MISURA. Taglie, rischio, accensioni: FIRMA DI CLAUDIO.
+#  C6  IL ROUND NON TOCCA NIENTE: nessun preset, nessuna sedia, nessun
+#      forward, nessun conto reale 10105439.
+#
+#  8. COSTO -- tetto dichiarato, non stima centrale
+#  --------------------------------------------------------------------
+#  3 celle x 2 finestre = 6 PASSATE.
+#  Base MISURATA il 21/09 sul PC di backtest (DESKTOP-H4D7CAJ),
+#  modello 4, 8 passate M5 su indice: caso stretto 2 min 41 s
+#  (20,1 s/passata), caso largo 11 min 57 s (89,6 s/passata).
+#  >>> COSTO DICHIARATO COL TETTO: 6 x 89,6 s = 9,0 MINUTI.
+#      Caso stretto: 2,0 minuti.
+#  *** E qui il tetto e' MOLTO largo: la calibrazione e' su M5 con 21
+#  mesi di indice; questa corsa e' H4 su 24 mesi di forex. Salendo di
+#  TF il costo scende, MA NON IN PROPORZIONE, perche' a modello 4 il
+#  tester rigioca lo stesso flusso di tick reali: cambia quante barre
+#  ci costruisce sopra, non quanti tick legge. Non dividere per 48. ***
+#
+#  9. BUCHI DICHIARATI DI QUESTO ROUND
+#  --------------------------------------------------------------------
+#  - NESSUNA ANCORA DI REGRESSIONE (punto 3). E' il buco principale, e
+#    il file gemello R214f esiste apposta per coprirlo.
+#  - MERITO SOSPESO: ~47 e ~74 operazioni contro il pavimento di 150.
+#  - NON misura USDCHF ne' CHFJPY, che nello scan sono gli altri due
+#    "exit 0 long" sotto il muro (PF 1,2617 DD 8,611 n 186 · PF 1,1474
+#    DD 7,095 n 190). Un simbolo per file: sono altri due file e altre
+#    12 passate.
+#  - NON misura il LATO SHORT. E' escluso PER MISURA (punto 1), non
+#    per pigrizia: 6 celle su 144 sopra 1,00, mediana 0,708. La regola
+#    dei due lati del 25/08 riguarda Nasdaq, DAX e Dow: qui siamo su
+#    forex, e il lato e' comunque stato misurato su 28 coppie.
+#  - NON mette ad asse InpTF (H1 / H2 / H3 / D1). La TESI del motore
+#    prescriveva "H4/D1 da spazzolare" (commento r.149 del sorgente) e
+#    il D1 NON E' MAI STATO PROVATO. Casella libera, round a parte.
+#  - NON mette ad asse InpTP_R, che come dice il punto 6a e' meta'
+#    della cella exit 1.
+#  - NON e' una prova di regime, e da solo NON PUO' esserlo (punto 5i).
+#  - LO SPREAD DI EURJPY PRESSO BCM E' [NON MISURATO]:
+#    risultati_archivio/spread_flotta/ ha 3 file su 13 simboli
+#    (D30EUR, NASUSD, U30USD). Il 25,6x del punto 5iv viene da
+#    un'altra fonte e va riconfermato. Misurarlo costa ZERO passate di
+#    tester (ABTG_SpreadOrario).
+#  - IL .ex5 SUL BANCO CORRISPONDE AL .mq5: [NON MISURATO]. Pinnare il
+#    commit e scriverlo nel referto.
+#
+#  10. LA FINESTRA, LO SPREAD, IL MAGIC
+#  --------------------------------------------------------------------
+#  @DAQUANDO 2024.07.05 e' MISURATO, non scelto (classe 590):
+#  risultati_archivio/NOTA_PAVIMENTO_TICK_FOREX_2026-09-01.md.
+#  @FINOA 2026.06.30 + @FRAZIONEIS 0.40 -> 725 giorni,
+#  floor(725 x 0,40) = 290 -> IS ~2024.07.05-2025.04.21,
+#  OOS ~2025.04.22-2026.06.30. *** Le date esatte del taglio le
+#  calcola il driver e vanno LETTE NEL REFERTO, non assunte da me:
+#  qui le scrivo come DERIVATE. ***
+#  InpMaxSpreadPts = 300: e' il valore di r127c, NON lo 0 dello scan, e
+#  la differenza e' DELIBERATA -- il commento del sorgente (r.173) dice
+#  "0 = filtro spento (obbligatorio ACCENDERLO nei run a tick reali)".
+#  Su EURJPY 300 points = 30 pip: con lo spread tipico intorno a 15
+#  points e' una VALVOLA contro i picchi, non un filtro che morde.
+#  *** E' una seconda differenza rispetto alla cella dello scan, ed e'
+#  un altro motivo per cui lo scan NON e' un'ancora. ***
+#  MAGIC 788211: grep -ril su tutto il repo il 22/09 (.git e .claude
+#  esclusi) + controllo dei file NON COMMITTATI (git status), ZERO
+#  occorrenze.
+#  UN SOLO AGENTE locale nello Strategy Tester (classe 129).
+# ======================================================================
+
+@SIMBOLO    EURJPY
+@PERIODO    H4
+@DAQUANDO   2024.07.05
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- IL MOTORE, pinnato sulla cella "exit 0 long" dello scan H4.
+#     Fonte dei pin: le colonne Inp* della riga Pass 3 di
+#     scan_ABTG_CostToCost_H4_EURJPY.csv, piu' i due input che quel CSV
+#     non ha (InpUsaGuardian, InpLogImbuto: aggiunti all'EA dopo lo
+#     scan) e InpMaxSpreadPts portato a 300 come in r127c (punto 10).
+InpUsaGuardian=true
+InpTF=16388
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpComment=R214E USCITE TICK
+InpMagic=788211
+InpVerbose=false
+# InpLogImbuto: PIN a false. In OTTIMIZZAZIONE il Giornale per passata
+#   non si legge, e l'imbuto scriverebbe una riga al giorno per sei
+#   passate. Se una cella esce con Trades = 0 si RILANCIA quella sola
+#   passata con InpLogImbuto=true: li' l'imbuto dice DOVE si perdono i
+#   segnali, ed e' l'unico posto dove serve.
+InpLogImbuto=false
+
+# --- L'UNICO ASSE: IL MECCANISMO D'USCITA. 3 celle, 6 passate.
+#     0 = cost-to-cost puro . 1 = R-based (a 1,5 R) . 2 = flip di
+#     struttura. Asse CATEGORICO: nessun centro, nessun bordo, nessun
+#     altopiano da centrare (punto 2). Il passo 1 qui non e' un passo:
+#     e' "il prossimo membro".
+InpExitMode=0||0||1||2||Y
+# ======================================================================

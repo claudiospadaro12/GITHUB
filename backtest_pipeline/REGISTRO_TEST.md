@@ -3624,7 +3624,7 @@ CSV: `backtest_pipeline/risultati_archivio/r83_csv/` · file prova: `prove/R83n*
   non eredita il RETEST.*
 
 ### 🔬 Il MECCANISMO, ricontato sui per-trade il 18/09 (aggregato per POSIZIONE, non per deal)
-| cella | posizioni | % vinte | vincita media | perdita media | **|vinc./perd.|** |
+| cella | posizioni | % vinte | vincita media | perdita media | **\|vinc./perd.\|** |
 |---|---:|---:|---:|---:|---:|
 | RETEST Nasdaq (`777021`) | 260 | 70,4% | +21,85 | −84,35 | 🔴 **0,259** |
 | STOP Nasdaq (`777011`) | 241 | 72,2% | +31,38 | −96,23 | 0,326 |
