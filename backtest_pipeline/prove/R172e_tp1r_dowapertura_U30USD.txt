@@ -1,49 +1,67 @@
 # =====================================================================
 #  >>> QUESTO FILE E' EMENDATO DA UN ADDENDUM DEL 22/09/2026. <<<
-#  I PUNTI SUPERATI SONO QUESTI, E SONO ELENCATI QUI IN TESTA PERCHE'
-#  UNA CLAUSOLA GENERICA DI PRECEDENZA NON COPRE I NUMERI CHE NON
-#  NOMINA, E IL LETTORE INCONTRA PRIMA I VECCHI (classe 556).
+#  I PUNTI SUPERATI SONO ELENCATI QUI IN TESTA, PERCHE' UNA CLAUSOLA
+#  GENERICA DI PRECEDENZA NON COPRE I NUMERI CHE NON NOMINA E IL LETTORE
+#  INCONTRA PRIMA I VECCHI (classe 556).
 #
-#   riga    cosa dice il 16/09              cosa vale dal 22/09
-#   ------  ------------------------------  ---------------------------
-#   104     -Deposito 100000                80000 (lo passa la riga di
-#   139     "sono il banco dell'ancora"     lancio: R202A/R202B girano a
-#   1579    banco 100.000                   80.000)
-#   1585    sentinella: se cambia il
-#           deposito il file VA RISCRITTO   -> emendata: vedi ADD.5
-#   644     ANCORA R54a: Profit IS 2811,84  a 80.000 i numeri veri sono
-#           e OOS 6721,93                   2241,62 e 5395,25 (fattore
-#                                           ~0,80). DI R54a SOPRAVVIVONO
-#                                           PF, Equity DD % e Trades,
-#                                           NON il Profit. L'ancora
-#                                           operativa e' R202A.
-#   1366    B0: "alla taglia viva 0,65%     la taglia viva e' 2,00% dal
-#   1391-96 B2.1: muro sfondato sopra       20/09: il muro si sfonda
-#           15,38% sul banco; l'ancora e'   sopra 5,00% sul banco, e
-#           il 29% e il 37% del muro        l'ancora e' l'87,9% (OOS) e
-#                                           il 113,4% (IS) del muro.
-#                                           LA GAMBA IS E' GIA' SOPRA.
-#   1453-54 B3: muro giornaliero 7,69%      2,50% sul banco. E il
-#           sul banco; "servirebbe un       peggioramento che serve e'
-#           peggioramento di 7,5 VOLTE,     1,22x, NON 7,5x: il
-#           non puo' mordere"               controllo di vuoto e' FALSO.
-#   1533-40 B7: pedaggio 51,0x, +28% sul    61,9x, +55% (stop 123,80
-#           pavimento (stop ~102 [INF])     [MIS n=446]). Vedi ADD.2.
-#   1564    B8: "la cella viva e' al        e' la TERZA di sette: 2
-#           CENTRO dell'asse, quarta di     vicini sotto e 4 sopra. Il
-#           sette"                          centro dell'asse e' 1.25.
-#   100     "si lancia con                  oggi: RIGA_ROUND_VPS.ps1 su
-#   114     RIGA_SOTTILE_ROUND.ps1";        DESKTOP-H4D7CAJ, bersaglio
-#   131     bersaglio C:\MT5_Backtest        C:\Program Files\BCM Markets
-#   405-06  (banco 50504400)                MT5 Terminal, demo 50503392.
-#   1484                                    Il banco 50504400 e' SPENTO
-#   1618                                    (firma del 21/09).
-#   1483-84 B5: rumore di macchina [NON     su DESKTOP-H4D7CAJ le tre
-#           MISURATO] su C:\MT5_Backtest     ancore lo misureranno.
-#   1664    "LE DUE ISTANZE della sedia"    sono TRE: manca FTMO
-#                                           541452707 (C:\FTMO, 2,00%),
-#                                           che e' la sola che conta.
-#   12-18   "QUINTO FILE DELLA SERIE"       esistono anche R172f..R172j.
+#  I PUNTI SI CITANO PER ANCORA DI TESTO, NON PER NUMERO DI RIGA.
+#  Motivo misurato, e questa mappa lo ha imparato su se stessa: la prima
+#  stesura citava i numeri di riga, poi la mappa stessa ne ha aggiunte
+#  50 in testa e TUTTI I SUOI PUNTATORI SONO SCADUTI NELLO STESSO
+#  ISTANTE -- 17 su 17, e alcuni atterravano su criteri DIVERSI E
+#  PLAUSIBILI dentro la sezione di rischio (classe 553). Il file lo
+#  diceva gia': "le citazioni interne per riga scadono appena qualcuno
+#  corregge il file". Ora si cerca col grep, come si fa gia' per i
+#  magic.
+#
+#   cerca (grep)                  stato                   dove vale ora
+#   ----------------------------  ----------------------  -------------
+#   "-Deposito 100000"            SUPERATO: il banco e'   ADD.5, ADD.6
+#   "SONO IL BANCO DELL'ANCORA"   80.000, lo passa la
+#   "banco 100.000"               riga di lancio
+#   "il file VA RISCRITTO"        sentinella EMENDATA     ADD.5
+#   "ANCORA PRIMARIA"             di R54a sopravvivono    ADD.5
+#                                 PF, Equity DD % e
+#                                 Trades, NON il Profit
+#   "Profit .........."           NON E' PIU' UN          nota in loco
+#     (tabella TOLLERANZA          CANCELLO: le bande      + ADD.5
+#      CONGELATA, riga Profit)     sono a 100.000 e a
+#                                 80.000 S1 fallirebbe
+#                                 PER IL SOLO BANCO
+#   "alla taglia viva 0,65%"      SUPERATO: la taglia     ADD.7
+#   "sfonda il muro se stampa"    che vola e' 2,00%       ADD.7
+#   "muro giornaliero"            dal 20/09. Le soglie    ADD.7
+#                                 derivate sono
+#                                 riscalate li'.
+#                                 (E il fatto che ne
+#                                 segue sulla gamba IS
+#                                 e' un LIMITE SUPERIORE,
+#                                 NON DIMOSTRATO: 515)
+#   "il pedaggio (banda"          SUPERATO dal 61,9x      ADD.2
+#   "AL CENTRO DELL'ASSE"         la viva e' la TERZA     nota in loco
+#   "e' il TERZO"                 di sette: 2 vicini
+#     (dentro S1)                  sotto e 4 sopra, il
+#                                 centro e' 1.25
+#   "RIGA_SOTTILE_ROUND"          SUPERATO: oggi si usa   ADD.10
+#   "C:\MT5_Backtest"             RIGA_ROUND_VPS.ps1 su   ADD.10
+#   "$BancoBT"                    DESKTOP-H4D7CAJ. Il
+#                                 banco 50504400 e'
+#                                 SPENTO (firma 21/09)
+#   "rumore di macchina"          [NON MISURATO] su una   nota
+#                                 macchina che non si usa
+#                                 piu': lo misureranno le
+#                                 tre ancore
+#   "LE DUE ISTANZE"              sono TRE: manca FTMO    nota
+#                                 541452707 (2,00%), la
+#                                 sola che conta
+#   "QUINTO FILE DELLA SERIE"     esistono anche          nota
+#                                 R172f..R172j
+#
+#  REGOLA DI QUESTA MAPPA: la colonna di destra dice lo STATO e rimanda.
+#  NON ripete i numeri. I numeri vivono in UN POSTO SOLO (classe 549):
+#  chi li vuole apre il paragrafo ADD.n indicato. Cosi' il giorno in cui
+#  si corregge ADD.n la mappa non puo' divergere -- perche' non contiene
+#  niente da cui divergere (classe 554).
 #
 #  TUTTO IL RESTO DEI CRITERI DEL 16/09 RESTA IN VIGORE.
 # =====================================================================
@@ -817,6 +835,23 @@
 #      Profit Factor ...  1,198 - 1,247        1,245 - 1,296
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
+#      >>> 22/09: QUESTA RIGA NON E' PIU' UN CANCELLO. Le bande sono
+#          costruite da R54a a deposito 100.000 (derivazione qui
+#          sotto) e il round gira a 80.000: uscirebbero 2241,62 e
+#          5395,25, FUORI da tutte e due le bande di 514,38 e
+#          1192,75, e S1 fermerebbe il round PER IL SOLO BANCO.
+#          DA OGGI S1 SI GIUDICA CON LA TOLLERANZA G1 CONTRO R202A
+#          (ADD.5): un centesimo sul Profit, uguaglianza alla quinta
+#          cifra su n, PF e DD. R202A e' l'ancora giusta -- stesso
+#          deposito, stessa macchina, stesso pin, binario e driver
+#          IDENTICI (git diff vuoto fra il pin di R202A e questo).
+#          La riga Profit qui sopra resta come MEMORIA di R54a, non
+#          come soglia. Le altre quattro righe della tabella (Trades,
+#          PF, Equity DD %, Peggior Giornata %) REGGONO anche a
+#          80.000 -- verificato: 74/130 dentro 72-76 e 128-132;
+#          1,22173 e 1,27175 dentro le bande; 5,6726 e 4,3944 dentro
+#          le bande; e la Peggior Giornata e' una percentuale del
+#          saldo, INVARIANTE al deposito. Si rompeva SOLO il Profit.
 #      Peggior Giorn. %.  -0,96 / -1,06        -0,97 / -1,08
 #  Criteri delle bande, DICHIARATI perche' sono di TRE tipi diversi
 #  apposta (classe 373, che vieta un confronto fra bande senza dire in
@@ -1310,7 +1345,10 @@
 #      >>> NON e' "bit-a-bit": il binario e' cambiato di 27 righe
 #          (Guardian) e il terminale e' un altro. Per questo e' una
 #          BANDA e non un'identita' (classe 375).
-#      >>> E LA CELLA 1,00 ESISTE DAVVERO NELLA GRIGLIA: e' il quarto
+#      >>> E LA CELLA 1,00 ESISTE DAVVERO NELLA GRIGLIA: e' il TERZO
+#          [CORRETTO IL 22/09: qui c'era scritto "il quarto", ed era
+#           lo stesso errore di B8 in un secondo posto -- classe 380.
+#           La lista qui sotto lo mostra in faccia: 0.50, 0.75, 1.00.]
 #          valore della lista verificata nel riquadro della classe 374
 #          ([0.5, 0.75, 1.0, ...]). Un asse che non contenesse la cella
 #          viva renderebbe S1 impossibile, ed e' un controllo che si fa
@@ -1929,12 +1967,26 @@
 #  (report/CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md r.61-64). Lo 0,65% su
 #  cui il 16/09 scalava il muro e' la famiglia _100K, un altro
 #  schieramento.
-#    B2.1 (r.1391-1396): muro statico 10% -> si sfonda sopra 5,00% SUL
+#    B2.1 (grep "sfonda il muro se stampa"): muro statico 10% -> si sfonda sopra 5,00% SUL
 #         BANCO, non 15,38%. La soglia vecchia e' LARGA 3,08 VOLTE.
-#    B3   (r.1453-1454): muro giornaliero 5% -> 2,50% SUL BANCO, non
-#         7,69%. E il peggioramento che servirebbe e' 1,22x, non 7,5x:
-#         la frase "questa soglia non puo' mordere" e' FALSA.
-#    B0   (r.1366): "~2,86% e ~2,74% alla taglia viva" -> 11,34% (IS) e
+#    B3   (grep "muro giornaliero"): muro giornaliero 5% -> 2,50% SUL BANCO, non
+#         7,69%. E il peggioramento che servirebbe e' 2,44x, non 7,5x
+#         (soglia 2,50% sul banco contro l'ancora -1,0227% sul banco
+#         = 2,4445x; sulla gamba IS, -1,0062, fa 2,4846x).
+#         ATTENZIONE: CAMBIA IL MARGINE, NON IL VERDETTO. La frase
+#         "questa soglia non puo' mordere" NON e' falsa, perche' B3
+#         poggia su DUE gambe e la riscalatura ne demolisce una sola.
+#         La seconda -- la sedia apre UNA posizione al giorno
+#         (InpOneTradePerDay=true), quindi il tetto strutturale di
+#         una giornata e' UNA perdita piena, ~1,02% sul banco --
+#         sopravvive intatta: 2,44 perdite piene in un giorno questo
+#         motore non le puo' fare. B3 non morde, e ora lo dice con
+#         meno aria.
+#         CONTROPROVA CHE IL METODO E' GIUSTO: lo stesso conto a
+#         0,65% da' 7,52x, che e' esattamente il "7,5 VOLTE" scritto
+#         il 16/09. Il conto del 16/09 era giusto; era la TAGLIA a
+#         essere cambiata.
+#    B0   (grep "alla taglia viva 0,65%"): "~2,86% e ~2,74% alla taglia viva" -> 11,34% (IS) e
 #         8,79% (OOS).
 #  E IL FATTO SCOMODO CHE NE SEGUE: la gamba IS dell'ancora, a taglia
 #  viva, sta GIA' SOPRA il muro statico del 10% (11,34%). E' scritto in
@@ -1961,7 +2013,7 @@
 #
 #  9. L'ATTESA SUL RISCHIO, CORRETTA
 #  ---------------------------------
-#  NON "nessuna cella alza il DD": B2.2 (r.1416-1429) ha misurato
+#  NON "nessuna cella alza il DD": B2.2 (grep "il cancello che potrebbe scattare") ha misurato
 #  l'OPPOSTO, e cioe' che in IS questo asse porta il DD da 5,52% a 7,76%
 #  in media e fino a 12,4677% sulla cella piu' alta, e conclude che "e'
 #  il cancello che potrebbe scattare per davvero, e va guardato per
