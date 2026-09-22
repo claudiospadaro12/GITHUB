@@ -1,0 +1,258 @@
+# ======================================================================
+#  EA: ABTG_CostToCost
+#  R214f -- LE TRE USCITE DEL COST-TO-COST SULLA FINESTRA LUNGA.
+#  *** E' IL GEMELLO DI R214e, E SERVE A DUE COSE CHE R214e NON PUO'
+#      FARE: L'ANCORA DI REGRESSIONE E I REGIMI. ***
+#  EURJPY H4, LONG-ONLY, 2020.01.01 -> 2026.06.30.
+#  Asse unico: InpExitMode (0 / 1 / 2) -- ASSE CATEGORICO.
+#  Scritto il 22/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/RIESAME_MORTI_NOTTURNI_2026-09-22.md par. 4 #1.
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 100000 -Modello 1
+#  *** MODELLO 1 = OHLC M1. E' UNO SCREENING, NON UN VERDETTO -- e il
+#  numero 1 NON e' un refuso: e' il modello con cui e' girata l'ANCORA
+#  (r127c, i cui CSV si chiamano "..._ohlc_r127c.csv" perche' il driver
+#  appende "_ohlc" quando il modello non e' 4). Due numeri con modelli
+#  diversi non si confrontano, quindi qui il modello lo detta l'ancora,
+#  non la preferenza. Il verdetto a tick lo da' R214e. ***
+# ======================================================================
+#
+#  1. PERCHE' ESISTE QUESTO FILE E NON BASTA R214e
+#  --------------------------------------------------------------------
+#  R214e gira a tick reali, e per farlo deve stare dentro il pavimento
+#  dei tick forex (2024.07.05). Conseguenze, gia' scritte li':
+#    . niente ancora di regressione (modello e finestra diversi da
+#      tutto quello che esiste in archivio);
+#    . ~47 e ~74 operazioni per finestra -> MERITO SOSPESO;
+#    . la finestra e' TUTTA dentro un regime solo, quindi R214e NON
+#      PUO' falsificare l'ipotesi "e' una scommessa di regime".
+#  *** QUESTO FILE copre esattamente quei tre buchi, al prezzo di
+#  essere OHLC. I due insieme rispondono; nessuno dei due da solo. ***
+#
+#  2. L'ANCORA -- sei numeri, letti nel CSV GREZZO
+#  --------------------------------------------------------------------
+#  La cella InpExitMode = 2 di questo file DEVE riprodurre r127c alla
+#  cella InpMaxBarsHold = 100 (che qui e' pinnata):
+#    backtest_pipeline/risultati_prove/dal_vps/ABTG_CostToCost/
+#      ABTG_CostToCost_EURJPY_IS_ohlc_r127c.csv   riga Pass 3
+#        Profit 13368.74  PF 1.17686  RF 1.17244  DD 10.9946  n 153
+#      ABTG_CostToCost_EURJPY_OOS_ohlc_r127c.csv  riga Pass 3
+#        Profit 71284.16  PF 1.52341  RF 4.30178  DD 12.2627  n 242
+#  Cifre ESATTAMENTE come nel CSV (classe 451 e 385).
+#  I pin di questo file sono COPIATI riga per riga da
+#  backtest_pipeline/prove/R127c_orologio_EURJPY.txt: InpTF=16388,
+#  InpTP_R=1.5, InpSLBufferATR=0.2, InpAtrPeriod=14, InpMinRangeATR=0.0,
+#  InpWarmupBars=500, InpAllowLong/Short, InpMaxSpreadPts=300,
+#  InpEntryWindowBars=3, InpRiskPercent=1.0, InpUsaGuardian=true.
+#  L'UNICO diverso e' InpMagic (779430 -> 788212) e InpComment, che nel
+#  tester non toccano un numero. *** E InpLogImbuto NON E' PINNATO
+#  APPOSTA: r127c non lo pinnava e prendeva il default compilato
+#  (true). Pinnarlo a false sarebbe stata una differenza in piu' su un
+#  file che deve riprodurre alla quinta cifra. ***
+#  Finestra: @DAQUANDO 2020.01.01 + @FINOA 2026.06.30 + @FRAZIONEIS
+#  0.40 -> 2.372 giorni, floor(2372 x 0,40) = 948. Sono gli stessi tre
+#  valori che r127c prendeva dai default del driver senza scriverli.
+#
+#  2-bis. SE L'ANCORA NON TORNA, IL PRIMO SOSPETTO NON E' "un altro
+#         motore": E' L'EA CHE E' CAMBIATO SOTTO.
+#  --------------------------------------------------------------------
+#  r127c e' dell'11/09; da allora il sorgente ha preso almeno un input
+#  nuovo (InpLogImbuto, r.190). *** IL CONTROLLO VA FATTO, NON
+#  ASSUNTO: *** si confronta il commit pinnato della corsa con quello
+#  di r127c e, se differiscono, si verifica che gli input aggiunti
+#  siano NO-OP al default. Se l'ancora manca, si misura QUELLO prima
+#  di buttare il round.
+#
+#  3. ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) ANCORA: i sei numeri sopra, alla quinta cifra, sulla cella
+#      exit 2. Se non tornano, il round e' MUTO su tutto il resto e
+#      non si legge nemmeno una cella (punto 2-bis).
+#  (B) *** LE DUE CELLE NUOVE, ED E' QUI CHE STA LA DOMANDA. *** Di
+#      exit 0 e exit 1 su finestre separate NON ESISTE NIENTE in
+#      archivio: lo scan H4 e' una corsa sola, senza IS/OOS, su una
+#      finestra [NON MISURATA]. Attesa dichiarata, col segno:
+#      mi aspetto che exit 0 tenga PF >= 1,10 in TUTTE E DUE le
+#      finestre (nello scan fa 1,34274) e che il suo DD resti SOTTO
+#      quello di exit 2 (9,1158 contro 12,0482 nello scan).
+#      >>> SE exit 0 FA MEGLIO DI exit 2 SUL RECOVERY FACTOR, allora la
+#          cella messa in vivaio era il PICCO e il centro e' un altro:
+#          e' la tesi del dossier, e questo e' il round che la decide.
+#      >>> SE exit 0 CROLLA fuori campione mentre exit 2 tiene, la tesi
+#          del dossier E' FALSA e va scritto cosi', senza sconti.
+#  (C) *** IL CAMPIONE QUI C'E', ed e' raro: *** r127c fa 153 (IS) e
+#      242 (OOS) POSIZIONI -- questo EA non ha parziale, quindi
+#      Trades = posizioni (nessuna classe 550). *** SOPRA IL PAVIMENTO
+#      DEI 150 IN TUTTE E DUE LE FINESTRE. *** Su exit 0 e exit 1
+#      l'n sara' diverso (nello scan exit 0 fa PIU' operazioni di
+#      exit 2: 194 contro 155, +25%), ma la banda di sanita' e'
+#      [120, 400] per finestra: fuori da li' si e' mosso ALTRO.
+#  (D) CATENA ROTTA: zero passate; Trades = 0; deposito diverso da
+#      100.000 o modello diverso da 1.
+#
+#  4. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  (i) *** L'IPOTESI ALTERNATIVA CHE QUESTO FILE ESISTE PER ROMPERE:
+#      "le celle belle sono una SCOMMESSA DI REGIME (yen debole),
+#      non un edge". *** QUALE NUMERO PRODUCE? Se e' regime, la gamba
+#      IS (2020.01.01 - ~2022.08.05: crollo COVID, ripresa, inizio
+#      dell'orso dei tassi) deve essere MOLTO peggiore della gamba OOS
+#      (~2022.08.06 - 2026.06.30: la fase di yen debole). *** E il
+#      numero dell'ancora dice che E' PROPRIO COSI': exit 2 fa 1,17686
+#      in IS e 1,52341 in OOS. *** Quindi l'ipotesi di regime NON e'
+#      campata per aria: ha gia' un numero a favore.
+#      >>> COSA LA FALSIFICHEREBBE, e lo scrivo prima: se exit 0
+#          tenesse PF >= 1,10 ANCHE IN IS (dove exit 2 fa 1,177), il
+#          motore guadagna in tutti e due i regimi e l'ipotesi cade.
+#          Se invece exit 0 in IS scendesse sotto 1,00, l'ipotesi di
+#          regime VINCE e il candidato va chiuso per quello -- col
+#          numero, non con un'impressione.
+#      >>> LIMITE DICHIARATO: 6,5 anni contengono crollo, orso e toro,
+#          ma sono UNA storia contigua, non le quattro finestre di
+#          regime della regola C del 16/08. E' meglio di niente, non
+#          e' la prova di regime.
+#  (ii) OHLC SOTTOSTIMA IL DRAWDOWN. Le escursioni intra-barra non si
+#      vedono. Quindi i DD di questo file sono un LIMITE INFERIORE:
+#      *** se gia' qui exit 2 fa 12,26%, a tick sara' peggio. *** Il
+#      DD vero lo da' R214e. Questo file NON si usa per decidere il
+#      rischio, e lo scrivo per non farlo per sbaglio.
+#  (iii) MANOPOLA INERTE. Se le tre celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, l'asse non e' arrivato all'EA. Criterio
+#      a macchina: meno di 2 valori DISTINTI di Profit = "asse
+#      inerte". Precedente su questo motore: in r127c l'asse
+#      InpMaxBarsHold aveva 8 valori e TRE esiti distinti (da 75 a 200
+#      righe identiche bit a bit). La trappola qui e' gia' scattata.
+#  (iv) *** IL SOSPETTO PIU' SGRADEVOLE, e lo scrivo io: se l'ancora
+#      torna PERFETTA, la prima reazione NON deve essere "che bella
+#      conferma". Un'identita' perfetta puo' essere una misura O un
+#      artefatto -- per esempio se l'asse non fosse arrivato e tutte e
+#      tre le celle avessero girato a exit 2. Le due spiegazioni
+#      producono, sulla cella 2, lo STESSO numero. Si separano
+#      guardando le ALTRE DUE celle: se anche loro danno 1.17686 /
+#      1.52341, l'asse non e' arrivato. *** Il controllo (iii) e'
+#      quindi OBBLIGATORIO e va fatto PRIMA di leggere l'ancora.
+#
+#  5. CLASSE 594 -- CHI ALTRO DIPENDE DALLA VARIABILE D'ASSE?
+#  --------------------------------------------------------------------
+#  Identico a R214e, e lo ripeto perche' un buco taciuto e' un buco
+#  perso:
+#  (a) *** InpTP_R VIVE SOLO DENTRO exit 1 *** (sorgente r.831 e
+#      r.374-375). La cella 1 e' "R-based CON N = 1,5", e quel 1,5 non
+#      e' mai stato messo ad asse. Se exit 1 esce male, il verdetto
+#      onesto e' "exit 1 A 1,5 R esce male".
+#  (b) InpMaxBarsHold (time-stop, pinnato a 100) morde in modo diverso
+#      sulle tre celle: exit 2 non ha TP (r.828), quindi e' la piu'
+#      esposta all'orologio. In r127c, su exit 2, e' misurato NON
+#      vincolante da 75 barre in su. Su exit 0 e exit 1: [NON
+#      MISURATO].
+#
+#  6. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  D1  L'ANCORA VIENE PRIMA DI TUTTO: se la cella exit 2 non riproduce
+#      i sei numeri di r127c alla quinta cifra, il round e' MUTO.
+#  D2  CANCELLO IN GRANDEZZE INVARIANTI ALLA TAGLIA: Recovery Factor,
+#      Equity DD %, Profit. Mai Expected Payoff nel confronto FRA
+#      celle (n diversi). Mai "DD contro DD" da solo.
+#  D3  "ROBUSTO SULL'USCITA" solo se TUTTE E TRE le celle fanno
+#      PF >= 1,00 in TUTTE E DUE le finestre. E' la tesi dell'asse
+#      categorico, ed e' severa apposta.
+#  D4  "exit 0 E' IL CENTRO, NON exit 2" si scrive solo se, in OOS,
+#      exit 0 ha Recovery Factor >= quello di exit 2 *** e ***
+#      Equity DD % inferiore. Se ha DD inferiore ma RF peggiore, si
+#      scrive "exit 0 rischia meno e rende meno" -- che e' un altro
+#      verdetto e porta a un'altra decisione.
+#  D5  RISCHIO. Ricordando (ii): i DD di questo file sono LIMITI
+#      INFERIORI. Non si promuove nessuna cella sul rischio leggendo
+#      questo file: quel numero lo da' R214e.
+#  D6  IL ROUND NON TOCCA NIENTE: nessun preset, nessuna sedia, nessun
+#      forward, nessun conto reale 10105439. Taglie e accensioni:
+#      FIRMA DI CLAUDIO.
+#
+#  7. COSTO -- tetto dichiarato
+#  --------------------------------------------------------------------
+#  3 celle x 2 finestre = 6 PASSATE, ma su 6,5 ANNI invece che su 2.
+#  *** A MODELLO 1 il tester non legge i tick: costruisce dalle barre
+#  M1, quindi la passata costa MOLTO meno di una a modello 4 a parita'
+#  di giorni. *** La base misurata di casa (21/09, modello 4, indice
+#  M5: 20,1-89,6 s/passata) NON si applica e usarla sarebbe un numero
+#  inventato: r127c ha girato 16 passate su questa stessa finestra e
+#  il suo costo per passata e' [NON MISURATO] nel referto.
+#  >>> COSTO DICHIARATO: 6 passate, tempo [NON MISURATO], e il tetto
+#      prudente che uso nel referto e' quello del modello 4
+#      (6 x 89,6 s = 9,0 minuti), che per un modello 1 e' quasi
+#      certamente LARGO. Si misura alla prima corsa e si scrive.
+#
+#  8. BUCHI DICHIARATI DI QUESTO ROUND
+#  --------------------------------------------------------------------
+#  - *** E' OHLC. NESSUN NUMERO DI QUESTO FILE E' UN VERDETTO. *** E'
+#    screening con un'ancora e con due regimi dentro.
+#  - NON e' la prova di regime della regola C (quattro finestre
+#    scelte): e' una storia contigua. *** MA la prova di regime vera,
+#    su questo motore, E' POSSIBILE e fino a stanotte la scrivevamo
+#    come buco non colmabile: sul NATIVO EURJPY il broker ha storico
+#    dal 1993.04.26 (REFERTO_SONDA_STORICO_17-08.md: il muro del 2010
+#    era il tetto delle 100.000 barre del GRAFICO, non il disco), e in
+#    piu' esiste EURJPY_EXT -- feed HistData M1 dal 2018.01.01,
+#    promosso dal cancello ZERO con diff media 0,0063% e copertura
+#    99,6% (REFERTO_IMPORT_6_SIMBOLI.md) -- che e' una SECONDA FONTE
+#    INDIPENDENTE sullo stesso mercato. *** Tutti e due sono BARRE M1:
+#    una corsa li' NON e' modello 4, e il confronto coi numeri a tick
+#    non e' diretto (fattore OHLC/tick misurato in casa: 1,71-1,85 in
+#    eccesso). *** Mappa:
+#    report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md.
+#    COSTO di quella prova, dichiarato: 3 celle x 4 finestre di regime
+#    = 12 passate, e serve il driver della prova di regime, non
+#    walkforward_generico. E' un round a parte.
+#  - NON misura USDCHF ne' CHFJPY (gli altri due "exit 0 long" sotto
+#    il muro nello scan). Un simbolo per file.
+#  - NON misura il LATO SHORT: escluso PER MISURA (28 coppie x 3
+#    uscite, 6 celle su 144 sopra 1,00, mediana 0,708).
+#  - NON mette ad asse InpTF: il D1 che la TESI del motore prescriveva
+#    ("H4/D1 da spazzolare", commento r.149) non e' MAI stato provato.
+#  - LO SPREAD DI EURJPY PRESSO BCM E' [NON MISURATO]. Su un run OHLC
+#    lo spread e' comunque ricostruito dal tester: questo file non
+#    puo' dire niente sul costo.
+#  - IL .ex5 SUL BANCO CORRISPONDE AL .mq5: [NON MISURATO].
+#
+#  9. IL MAGIC
+#  --------------------------------------------------------------------
+#  MAGIC 788212: grep -ril su tutto il repo il 22/09 (.git e .claude
+#  esclusi) + controllo dei file NON COMMITTATI (git status), ZERO
+#  occorrenze. UN SOLO AGENTE locale nello Strategy Tester (classe 129).
+# ======================================================================
+
+@SIMBOLO    EURJPY
+@PERIODO    H4
+@DAQUANDO   2020.01.01
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- IL MOTORE, copiato riga per riga da prove/R127c_orologio_EURJPY.txt
+#     (che a sua volta li copiava da prove/R103_ABTG_CostToCost_EURJPY
+#     _772361.txt, la cella viva). L'unico diverso e' il magic.
+InpUsaGuardian=true
+InpTF=16388
+InpTP_R=1.5
+InpSLBufferATR=0.2
+InpAtrPeriod=14
+InpMinRangeATR=0.0
+InpMaxBarsHold=100
+InpWarmupBars=500
+InpAllowLong=true
+InpAllowShort=false
+InpMaxSpreadPts=300
+InpEntryWindowBars=3
+InpRiskPercent=1.0
+InpComment=R214F USCITE OHLC
+InpMagic=788212
+InpVerbose=false
+# InpLogImbuto NON PINNATO DI PROPOSITO: r127c non lo pinnava e
+#   prendeva il default compilato. Pinnarlo sarebbe una differenza in
+#   piu' su un file che deve riprodurre alla quinta cifra (punto 2).
+
+# --- L'UNICO ASSE: IL MECCANISMO D'USCITA. 3 celle, 6 passate.
+#     La cella 2 e' l'ANCORA e deve riprodurre r127c.
+#     Asse CATEGORICO: nessun centro, nessun bordo (punto 2 di R214e).
+InpExitMode=0||0||1||2||Y
+# ======================================================================
