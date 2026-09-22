@@ -28737,3 +28737,36 @@ GAMBA SCRITTA ACCANTO.** `IS 6,3333` e `OOS 4,8949` sono due soglie, non una.
 📌 **La firma della classe, e si controlla in dieci secondi**: si applica la soglia alla **propria
 cella di riferimento**, in **tutte** le gambe. **Se l'ancora sfonda il proprio allarme, la
 calibrazione e' incompleta.**
+
+---
+
+## CLASSE 558 -- L'ANCORA DI TESTO SCELTA SENZA ESEGUIRE IL GREP CHE LA DEVE TROVARE, E IL `grep -c` CHE CONTA LA MAPPA STESSA
+
+**Caso reale (22/09/2026, R172E).** Rimpiazzati i puntatori di riga con **ancore di testo** — che
+e' il rimedio **corretto** alla classe 553. **Quattro ancore su diciannove non raggiungevano il
+bersaglio**, per tre meccanismi che l'occhio non vede:
+
+1. **Maiuscole**: `"il file VA RISCRITTO"` contro il testo vero `questo file va riscritto`;
+   `"rumore di macchina"` contro `Rumore di MACCHINA`.
+2. 🔴 **A capo dentro un blocco a colonna fissa**: `"il cancello che potrebbe scattare"` **non
+   esiste per il grep**, perche' il commento va a capo fra `potrebbe` e `scattare`. **A schermo la
+   frase si legge intera.** E' il meccanismo piu' insidioso, perche' **rileggere non lo trova**:
+   lo trova solo il grep.
+3. **Ancora inventata**: `"banco 100.000"` dove il file scrive `Deposito 100000.` — con un
+   **locus orfano** come conseguenza, e per giunta proprio il numero che aveva rotto la
+   sentinella bloccante.
+
+### 🔴 E LA VERIFICA CHE NON BASTA, che e' il cuore della classe
+La verifica era stata fatta con **`grep -c`**, e aveva dato **1** su ogni ancora. Ma in un file
+che contiene **anche la propria mappa**, `grep -c` su un'ancora **morta** restituisce **`1`, non
+`0`** — perche' conta **la riga della mappa stessa**. Un `1` sembra *«esiste»* e invece e'
+*«esiste solo me»*.
+
+### La regola
+**Un'ancora di testo si dichiara viva solo dopo aver ESEGUITO `grep -n` e aver visto il numero di
+riga del BERSAGLIO, fuori dalla mappa.** Mai `grep -c`, mai a memoria, mai copiando la frase da
+come si legge a schermo.
+📌 **Firma di un'ancora sana** in un file che contiene la sua mappa: **esattamente 2 occorrenze**
+(la mappa + il bersaglio). **Una sola occorrenza = ancora morta.**
+📌 E quando si sceglie l'ancora, si preferisce un **titolo di paragrafo**: sta su una riga sola,
+non si spezza a capo, e non invecchia.

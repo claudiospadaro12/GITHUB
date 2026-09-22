@@ -18,8 +18,10 @@
 #   ----------------------------  ----------------------  -------------
 #   "-Deposito 100000"            SUPERATO: il banco e'   ADD.5, ADD.6
 #   "SONO IL BANCO DELL'ANCORA"   80.000, lo passa la
-#   "banco 100.000"               riga di lancio
-#   "il file VA RISCRITTO"        sentinella EMENDATA     ADD.5
+#   "Deposito 100000. Rischio     riga di lancio
+#    PINNATO"
+#   "S1 decade e questo file      sentinella EMENDATA     ADD.5
+#    va riscritto"
 #   "ANCORA PRIMARIA"             di R54a sopravvivono    ADD.5
 #                                 PF, Equity DD % e
 #                                 Trades, NON il Profit
@@ -47,7 +49,7 @@
 #   "$BancoBT"                    DESKTOP-H4D7CAJ. Il
 #                                 banco 50504400 e'
 #                                 SPENTO (firma 21/09)
-#   "rumore di macchina"          [NON MISURATO] su una   nota
+#   "Rumore di MACCHINA"          [NON MISURATO] su una   nota
 #                                 macchina che non si usa
 #                                 piu': lo misureranno le
 #                                 tre ancore
@@ -835,7 +837,10 @@
 #      Profit Factor ...  1,198 - 1,247        1,245 - 1,296
 #      Equity DD % .....  5,556 - 5,783        4,306 - 4,483
 #      Profit ..........  +2.756 / +2.868      +6.588 / +6.857
-#      >>> 22/09: QUESTA RIGA NON E' PIU' UN CANCELLO. Le bande sono
+#      >>> 22/09: QUESTA RIGA NON E' PIU' UN CANCELLO, e quindi
+#          `Profit` NON fa piu' parte delle colonne-tabella di S1:
+#          restano le altre quattro, e il Profit si giudica VIA G1,
+#          non via banda. Le bande sono
 #          costruite da R54a a deposito 100.000 (derivazione qui
 #          sotto) e il round gira a 80.000: uscirebbero 2241,62 e
 #          5395,25, FUORI da tutte e due le bande di 514,38 e
@@ -1337,14 +1342,25 @@
 #  S1  RIPRODUZIONE DELL'ANCORA, ED E' BLOCCANTE.
 #      FILE   : risultati_prove\ABTG_Dow_Apertura_US\
 #               ABTG_Dow_Apertura_US_U30USD_IS_r172e.csv  e  ..._OOS_r172e.csv
-#      COLONNE: `Trades`, `Profit Factor`, `Equity DD %`, `Profit`,
+#      COLONNE: `Trades`, `Profit Factor`, `Equity DD %`,
 #               `Peggior Giornata %` sulla riga InpTP1_R = 1.00.
+#               [22/09: `Profit` TOLTO da questa lista -- la sua
+#                banda era costruita a 100.000 e si giudica VIA G1
+#                contro R202A. Vedi la nota dentro la tabella.]
 #      Devono cadere nelle bande della TOLLERANZA CONGELATA, IN
 #      ENTRAMBE LE GAMBE. Se anche una sola non ci cade, NON si legge
 #      nient'altro.
 #      >>> NON e' "bit-a-bit": il binario e' cambiato di 27 righe
 #          (Guardian) e il terminale e' un altro. Per questo e' una
 #          BANDA e non un'identita' (classe 375).
+#          [22/09: QUESTA FRASE E' SCRITTA PER R54a, E CONTRO R202A
+#           NON VALE. Fra il pin di R202A (3d527426) e questo, il
+#           diff su mql5/, RIGA_ROUND_VPS.ps1 e
+#           walkforward_generico.ps1 e' VUOTO: binario e driver
+#           IDENTICI, e la macchina e' la stessa (DESKTOP-H4D7CAJ).
+#           E' PROPRIO PER QUESTO che contro R202A la tolleranza
+#           giusta e' G1 (un centesimo) e non una banda al 2%.
+#           Questa frase NON si puo' usare per allentare S1.]
 #      >>> E LA CELLA 1,00 ESISTE DAVVERO NELLA GRIGLIA: e' il TERZO
 #          [CORRETTO IL 22/09: qui c'era scritto "il quarto", ed era
 #           lo stesso errore di B8 in un secondo posto -- classe 380.
@@ -2013,7 +2029,7 @@
 #
 #  9. L'ATTESA SUL RISCHIO, CORRETTA
 #  ---------------------------------
-#  NON "nessuna cella alza il DD": B2.2 (grep "il cancello che potrebbe scattare") ha misurato
+#  NON "nessuna cella alza il DD": B2.2 (grep "B2.2  IL PROMESSO") ha misurato
 #  l'OPPOSTO, e cioe' che in IS questo asse porta il DD da 5,52% a 7,76%
 #  in media e fino a 12,4677% sulla cella piu' alta, e conclude che "e'
 #  il cancello che potrebbe scattare per davvero, e va guardato per
