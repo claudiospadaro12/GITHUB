@@ -1,0 +1,408 @@
+# ======================================================================
+#  EA: ABTG_MaxMinNotte_DAX_Short_Ottimizzato
+#  R214g -- IL TF DI GESTIONE DELLA SEDIA 770411, FERMO A M15 IN TUTTI
+#  E 43 I CSV DEL REPO: MAI MOSSO NEMMENO UNA VOLTA.
+#  *** E SULL'ORO LO STESSO ASSE DA' 20 CELLE OOS POSITIVE SU 20. ***
+#  D30EUR M15, lato SHORT, cella viva INVARIATA.
+#  Asse unico: InpMgmtTF (M15 . M20 . M30 . H1 . H2 . H3 . H4).
+#  Scritto il 22/09/2026. Attesa e soglie congelate PRIMA dei numeri.
+#  Dossier: report/RIESAME_MORTI_NOTTURNI_2026-09-22.md par. 3a e 4 #3.
+#
+#  *** QUESTO FILE TOCCA UNA SEDIA VIVA (770411, sul terminale FTMO
+#  541452707). E DEVE ESSERE ESPLICITO: MISURA, NON PROPONE DI
+#  CAMBIARE NIENTE. Nessuna cella di questo round entra in un preset,
+#  nemmeno se vincesse: il parametro in campo e' FIRMA DI CLAUDIO, e
+#  il changelog v1.11 dell'EA impone comunque un backtest di
+#  riferimento nuovo prima di sostituire una sedia. ***
+#
+#  GIRA SUL PC DI BACKTEST, NON SUL VPS (firma di Claudio del 21/09).
+#     -Deposito 100000 -Modello 4
+#     MOTIVO (classe 453): e' il deposito con cui l'ANCORA (r81a) e'
+#     confrontabile, controincrociato in DUE modi indipendenti in
+#     prove/R191a_orologio_ordine_MAXMINDAX_D30EUR.txt (ancora di
+#     testo "100.000 CONFERMATO IN DUE MODI"). NON 80.000 (che e' il
+#     deposito delle aperture) e NON 10.000 (che e' quello dell'ORB):
+#     cambiare deposito qui romperebbe r81a.
+# ======================================================================
+#
+#  1. IL BUCO, CONTATO A MACCHINA
+#  --------------------------------------------------------------------
+#  Su D30EUR / F40EUR / E50EUR / 100GBP / EURUSD, InpMgmtTF vale 15 in
+#  OGNI CSV dell'archivio -- verificato su tutti i 43 CSV del repo che
+#  hanno quella colonna. *** Mai mosso, nemmeno una volta. E' una
+#  CASELLA LIBERA, non una casella provata. *** Per il CERTIFICATO DI
+#  MORTE del 09/09 (punto 5: "il TF cambiato almeno una volta") il
+#  certificato di questa sedia NON E' COMPLETO -- e la sedia opera.
+#
+#  1-bis. *** E SU QUESTO MOTORE "CAMBIARE TF" NON VUOL DIRE CAMBIARE
+#         @PERIODO: E' UN'ALTRA MANOPOLA. *** Letto nel sorgente:
+#    ABTG_MaxMinNotte.mq5 r.308-318: il box notturno e' letto su
+#      PERIOD_M1 CABLATO;
+#    ABTG_MaxMinNotte_DAX_Short_Ottimizzato.mq5 r.139-140:
+#      hAtr    = iATR(_Symbol, InpMgmtTF, InpAtrPeriod);
+#      hEma200 = iMA (_Symbol, InpMgmtTF, InpEMA200Period, 0, MODE_EMA,
+#                     PRICE_CLOSE);
+#  >>> Il TF del GRAFICO non tocca la geometria della strategia: un
+#      round che muove @PERIODO misurerebbe il passo del tester, non
+#      il motore. *** La manopola TF di questo motore si chiama
+#      InpMgmtTF, e @PERIODO resta M15 come in r81a. ***
+#
+#  2. PERCHE' PROPRIO QUESTO ASSE -- il numero viene dall'ORO
+#  --------------------------------------------------------------------
+#  E' l'unico posto del repo dove InpMgmtTF e' stato davvero misurato,
+#  a TICK REALI e con IS/OOS:
+#  risultati_prove/MaxMin_Oro_r17/ABTG_MaxMinNotte_XAUUSD_{IS,OOS}_r17.csv
+#    InpMgmtTF | PF OOS (buf 250) | n OOS | DD OOS
+#    M30       | 1,8946           | 99    | 4,095
+#    H1        | 2,2664           | 89    | 3,308
+#    H4        | 1,9081           | 82    | 5,322
+#    H6        | 1,9885           | 83    | 5,546
+#    H8        | 2,1934           | 83    | 4,899
+#  *** 20 celle su 20 positive in OOS (PF 1,455-2,266): e' un
+#  ALTOPIANO, non un picco. E sopra M30 l'asse e' PIATTO. ***
+#  E la parte BASSA dell'asse viene dalla seconda corsa
+#  (risultati_prove/MaxMin_Oro_fase2_vecchioscript/*.csv):
+#    buffer | M5            | M15           | M30           | H1
+#    200    | 1,2407 / 8,56 | 1,2831 / 7,71 | 1,3705 / 7,62 | 1,4821 / 4,02
+#    800    | 1,0790 / 5,62 | 1,1975 / 5,12 | 1,4555 / 3,98 | 1,5437 / 4,70
+#    1400   | 0,7074        | 0,6938        | 1,0406        | 1,1847
+#    2000   | 0,7404        | 0,9585        | 1,1095        | 1,2726
+#  *** MONOTONO SU 4 RIGHE SU 4: da M5 a H1 il PF SALE e il DD SCENDE
+#  (a buffer 200: DD 8,56% -> 4,02%, cioe' -53%, con PF +19,5%). ***
+#  E le DUE SEDIE VIVE stanno su due punti diversi di quell'asse:
+#    770402 ORO -> InpMgmtTF = 16386 = H4 -> DENTRO l'altopiano;
+#    770411 DAX -> InpMgmtTF = 15    = M15 -> nel tratto dove l'asse
+#                  MORDE, sul lato BASSO.
+#  >>> NON e' "proviamo un altro parametro su un motore morto" (che la
+#      regola del 19/08 vieta): e' portare su un simbolo una misura
+#      gia' fatta su un altro, dove l'asse ha mostrato un GRADIENTE
+#      MONOTONO e non un picco. La differenza e' tutta qui.
+#
+#  3. L'ANCORA -- sei numeri, letti nel CSV GREZZO
+#  --------------------------------------------------------------------
+#  La cella InpMgmtTF = 15 (M15) DEVE riprodurre r81a, che e' la cella
+#  VIVA (18/08/2026):
+#    backtest_pipeline/risultati_archivio/r81_csv/
+#      ABTG_MaxMinNotte_DAX_Short_Ottimizzato_D30EUR_IS_r81a.csv
+#        Profit 4766.96  PF 1.87803  RF 1.52059  DD 3.0977  Trades 20
+#      ..._D30EUR_OOS_r81a.csv
+#        Profit 6143.38  PF 2.15985  RF 3.02118  DD 1.9213  Trades 21
+#  Cifre ESATTAMENTE come nel CSV (classe 451 e 385).
+#  Controprova indipendente, altro file, stessi numeri a meno del
+#  deposito (10.000 invece di 100.000, quindi profitti /10 e
+#  percentuali quasi uguali):
+#    risultati_prove/ABTG_MaxMinNotte_DAX_Short_Ottimizzato/
+#      ..._D30EUR_IS.csv   Profit 477.51  PF 1.92148  DD 3.0687  n 20
+#      ..._D30EUR_OOS.csv  Profit 618.31  PF 2.19220  DD 1.8768  n 21
+#    (due magic gemelli, righe identiche fra loro: il banco era
+#     deterministico anche allora).
+#  Finestra: @DAQUANDO 2024.09.26 + @FINOA 2026.06.30 + @FRAZIONEIS
+#  0.40 -> 642 giorni, floor(642 x 0,40) = 256:
+#    IS 2024.09.26 - 2025.06.09    OOS 2025.06.10 - 2026.06.30.
+#  Sono le stesse finestre di r81a e di R206a.
+#
+#  4. *** CLASSE 594 -- E QUI IL PACCHETTO C'E' DAVVERO, LO DICHIARO
+#     PRIMA DI PAGARLO ***
+#  --------------------------------------------------------------------
+#  InpMgmtTF crea DUE handle (r.139-140) e quei due handle alimentano
+#  TRE meccanismi diversi. L'asse quindi NON muove una cosa sola:
+#    (a) LO STOP. r.277 e r.285: con InpSLMode = MM_SL_ATR (= 1, il
+#        valore vivo) lo stop e' 'entry +/- atr*InpAtrSLmult', con atr
+#        = ATR(14) su InpMgmtTF. *** Salendo di TF lo stop SI ALLARGA,
+#        e con rischio fisso all'1% il LOTTO si riduce. ***
+#    (b) IL TERZO TARGET. r.351: 'CopyBuffer(hEma200,...)' chiude tutto
+#        quando il prezzo raggiunge l'EMA200 -- e l'EMA200 su M15 e
+#        l'EMA200 su H4 sono due livelli DIVERSI. Vive dentro
+#        'if(InpUseEMA200Target)', che QUI e' true.
+#    (c) IL TRAILING. r.360-366: 'a = AtrVal()' e lo stop viene
+#        trascinato a 'InpTrailAtrMult x a'. Vive dentro
+#        'if(InpUseTrailing)', che QUI e' true.
+#  >>> NON SI PUO' ISOLARE SENZA SNATURARE LA CELLA: spegnere (b) e (c)
+#      per isolare (a) vorrebbe dire misurare un'ALTRA sedia, e
+#      l'ancora r81a decadrebbe. *** QUINDI L'ASSE E' UN PACCHETTO, E
+#      SI CHIAMA COL SUO NOME: "il TF DI GESTIONE", cioe' stop +
+#      terzo target + trailing insieme. *** E' esattamente quello che
+#      e' stato misurato sull'oro, quindi il confronto col gradiente
+#      del punto 2 e' lecito.
+#  >>> COME SI SCIOGLIE, SE IL RISULTATO E' BUONO: tre round da 14
+#      passate ciascuno, uno per meccanismo (InpSLMode a OPPOSITE per
+#      togliere (a); InpUseEMA200Target=false per togliere (b);
+#      InpUseTrailing=false per togliere (c)), ognuno con la sua
+#      ancora. NON si fa adesso: prima si guarda se il pacchetto si
+#      muove.
+#  >>> E UN INPUT CHE POTREBBE DIVENTARE IRRAGGIUNGIBILE, cercato
+#      apposta: InpSLFixedPts (3000) e' gia' INERTE per costruzione
+#      perche' vive solo dentro 'InpSLMode==MM_SL_FIXED' (r.276/284) e
+#      qui SLMode=1. Resta inerte a tutti i TF: l'asse non lo
+#      risveglia. InpMinBoxPts/InpMaxBoxPts (0) e InpPendingExpiryMin
+#      (90, gia' misurato inerte col cutoff 8:30) idem.
+#
+#  5. ATTESA DICHIARATA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  (A) ANCORA: la cella M15 riproduce r81a alla quinta cifra. Se non
+#      lo fa, il round e' MUTO e si indaga QUELLO (l'EA e' alla v1.10
+#      dal 19/08 e r81a e' del 18/08: e' uno dei pochi casi in cui la
+#      versione NON e' cambiata sotto, quindi un'ancora che non torna
+#      sarebbe una brutta notizia sul banco, non sull'EA).
+#  (B) DIREZIONE, col segno, presa dall'oro: *** PF IN SALITA da M15
+#      verso M30-H1 e DD IN DISCESA, con l'asse che si APPIATTISCE
+#      sopra M30. *** Se l'altopiano c'e', il centro sta fra M30 e H1,
+#      NON al valore che fa il PF piu' alto.
+#  (C) *** IL COSTO IN OPERAZIONI, DICHIARATO PRIMA E NON NASCOSTO:
+#      salire di TF COSTA FREQUENZA. Sull'oro M15 -> H1 toglie il
+#      14,6% delle uscite (412 -> 352 a buffer 200). Qui l'atteso e'
+#      un calo del 10-20%: da 20/21 uscite si scenderebbe a ~17/18.
+#      *** E la famiglia MaxMinNotte e' gia' 5,0x SOTTO il pavimento
+#      di 1,00 op/giorno per famiglia (0,199 misurate). Si compra PF e
+#      DD, si paga in operazioni, e su questa famiglia le operazioni
+#      sono la cosa che manca di piu'. VA SCRITTO ACCANTO AL RISULTATO,
+#      non dopo. ***
+#  (D) *** IL CAMPIONE E' MINUSCOLO E IL MERITO E' SOSPESO PRIMA DI
+#      COMINCIARE: 20 e 21 uscite contro il pavimento di 150.
+#      (Classe 550: con InpTP1Pct=50 la colonna Trades conta USCITE.
+#      Le POSIZIONI sono meno, e sono [NON CONTATE] in questi CSV.)
+#      Questo round NON puo' promuovere niente sul MERITO. Puo'
+#      leggere il RISCHIO (a qualunque n) e puo' dire se l'asse MORDE
+#      -- che e' gia' la risposta alla domanda "casella libera o
+#      casella provata?". ***
+#  (E) CATENA ROTTA: zero passate; meno di 7 valori distinti di
+#      InpMgmtTF nel CSV; Trades = 0; deposito diverso da 100.000 o
+#      modello diverso da 4.
+#
+#  6. IL CONTRO-ESEMPIO, COSTRUITO PER FAR SBAGLIARE QUESTO ROUND
+#  --------------------------------------------------------------------
+#  (i) *** L'IPOTESI ALTERNATIVA, e non e' "il nulla": "il gradiente
+#      dell'oro non e' un fatto sul TF, e' un fatto sullo STOP PIU'
+#      LARGO". *** Cioe': salendo di TF l'ATR cresce, lo stop si
+#      allarga, il lotto si riduce, e un lotto piu' piccolo abbassa il
+#      DD PER COSTRUZIONE -- senza che il motore sia migliorato di un
+#      centesimo.
+#      QUALE NUMERO PRODUCE QUESTA SPIEGAZIONE? Se fosse solo lo stop,
+#      il DD scenderebbe *** e il PF resterebbe PIATTO *** (stessi
+#      trade, stessa direzione, solo scalati). Sull'oro invece il PF
+#      SALE del 19,5% mentre il DD scende del 53%: *** l'alternativa
+#      prevede PF piatto e la misura trova PF in salita: FALSIFICATA
+#      SUI DATI, non sul nulla. *** Ma qui su DAX va RIVERIFICATA, e
+#      il criterio e' scritto ora: *** se in questo round il DD scende
+#      e il PF resta dentro +/-0,10, l'effetto E' lo stop e non il TF,
+#      e si scrive cosi'. ***
+#      >>> C'e' anche un CONTROLLO DIRETTO a costo zero: R206a mette
+#          ad asse InpAtrSLmult (1,5 -> 4,0) a TF FISSO M15 su questa
+#          stessa sedia. Quel file e' gia' scritto e gatato. *** I due
+#          round insieme separano "stop piu' largo" da "TF piu' alto",
+#          perche' R206a allarga lo stop SENZA cambiare il TF. ***
+#          Se R206a e R214g dessero la stessa curva, l'effetto e' lo
+#          stop.
+#  (ii) MANOPOLA INERTE. Se le 7 celle escono con Trades IDENTICO
+#      **e** Profit IDENTICO, l'asse non e' arrivato all'EA. Criterio
+#      a macchina: meno di 3 valori DISTINTI di Profit su 7 celle =
+#      "asse inerte", e allora si guarda PRIMA il pin InpSLMode (se
+#      fosse 0 o 2, il ramo ATR non si esegue e due delle tre vie del
+#      punto 4 si spengono).
+#  (iii) *** IL CAMPIONE E' 20-21 USCITE. Con n cosi' basso, DUE
+#      operazioni diverse ribaltano un PF. *** Qualunque differenza
+#      di PF fra celle adiacenti va letta come RUMORE finche' non e'
+#      monotona su almeno 4 celle consecutive. E' la stessa lezione di
+#      R70 (n=75-159, superficie frastagliata) contro R71 (n=190-256,
+#      altopiano leggibile). *** Per questo il cancello del punto 7
+#      chiede la MONOTONIA, non il massimo. ***
+#  (iv) E LA TAGLIA. r81a gira a rischio 1,00%; in campo questa sedia
+#      sta al 2,00% (firma del 20/09). Fattore misurato 1,956-1,990:
+#      i DD di 3,0977% e 1,9213% diventano 6,06-6,16% e 3,76-3,82%.
+#      *** Restano sotto il muro del 10%, e con margine. *** Ma vanno
+#      riletti alla taglia vera OGNI VOLTA, e le grandezze del
+#      cancello sono INVARIANTI ALLA TAGLIA apposta (punto 7).
+#
+#  7. SOGLIE CONGELATE ORA, PRIMA DEI NUMERI
+#  --------------------------------------------------------------------
+#  E1  L'ANCORA VIENE PRIMA: se M15 non riproduce r81a alla quinta
+#      cifra, il round e' MUTO.
+#  E2  CANCELLO IN GRANDEZZE INVARIANTI ALLA TAGLIA: Recovery Factor,
+#      Equity DD % e Profit. *** MAI Expected Payoff *** (classe 550:
+#      con la parziale accesa il denominatore conta USCITE). E MAI
+#      "DD contro DD" da solo: una cella che opera di meno ha un DD
+#      piu' basso per costruzione.
+#  E3  *** SI SCRIVE "L'ASSE MORDE" solo se ci sono almeno 4 valori
+#      distinti di Profit su 7 celle. Altrimenti il verdetto e'
+#      "manopola inerte anche qui", che e' un risultato e va
+#      registrato. ***
+#  E4  *** SI SCRIVE "ESISTE UN ALTOPIANO SOPRA M30" solo se almeno
+#      TRE celle CONSECUTIVE (fra M30, H1, H2, H3, H4) stanno tutte
+#      sopra il Recovery Factor della cella M15 in OOS (3.02118) e
+#      tutte con Equity DD % <= 3,0. Il MASSIMO SINGOLO NON BASTA e
+#      non si cita da solo: con 21 uscite il massimo di 7 celle e' la
+#      definizione di picco. ***
+#  E5  SI SCRIVE "M15 VA BENE" -- ed e' un RISULTATO, non un
+#      fallimento -- se le 7 celle stanno dentro +/-0,10 di PF e
+#      +/-1,0 punti di DD. La risposta onesta diventa "il TF di
+#      gestione non paga su questo simbolo", e la casella 5 del
+#      certificato si chiude lo stesso.
+#  E6  RISCHIO, a qualunque n: Equity DD % > 5,0 in una qualunque
+#      cella e in una qualunque finestra e' una NOTIZIA da mettere in
+#      cima al referto, perche' il contratto in essere di questa sedia
+#      e' 3,0977% (IS) e 1,9213% (OOS) a rischio 1,00% -- cioe'
+#      6,06-6,16% e 3,76-3,82% alla taglia di campo del 2,00%.
+#  E7  *** IL ROUND NON PROMUOVE E NON TOCCA NIENTE: nessun preset,
+#      nessuna sedia accesa o spenta, nessun forward, nessun conto
+#      reale 10105439. MISURA UNA SEDIA VIVA, non la cambia. ***
+#
+#  8. COSTO -- base misurata su QUESTO stesso EA
+#  --------------------------------------------------------------------
+#  7 celle x 2 finestre = 14 PASSATE.
+#  BASE MISURATA: 0,700 min/passata --
+#  backtest_pipeline/risultati_archivio/
+#  R104_REFERTO_DRIVER_20260825_0738.txt r.15, stesso EA, stesso
+#  simbolo, stesso TF di grafico, tick reali, deposito 100000,
+#  finestra piu' LUNGA di due mesi. Lo stesso numero e' scritto una
+#  seconda volta in REGISTRO_TEST.md (sezione R187).
+#  >>> COSTO DICHIARATO: 14 x 0,700 = 9,8 MINUTI.
+#  >>> TETTO PRUDENTE, con la base del 21/09 (89,6 s/passata, caso
+#      largo su indice a modello 4): 14 x 89,6 s = 20,9 MINUTI.
+#  *** Salendo di InpMgmtTF il costo NON cambia: il TF di gestione non
+#  tocca quanti tick il tester consegna, e @PERIODO resta M15 su tutte
+#  e 7 le celle. Questa e' la differenza con i file @PERIODO, dove il
+#  costo scende (poco) salendo. ***
+#
+#  9. BUCHI DICHIARATI DI QUESTO ROUND
+#  --------------------------------------------------------------------
+#  - *** MERITO SOSPESO: 20-21 uscite contro il pavimento di 150. ***
+#    Questo round dice se l'asse morde e come si muove il rischio;
+#    NON dice se la sedia e' migliore.
+#  - L'ASSE E' UN PACCHETTO DI TRE MECCANISMI (punto 4), non isolato.
+#  - NON misura il LATO LONG: la sedia e' short-only (InpAllowLong=
+#    false, "OTT: solo SHORT"). Qui si misura la SEDIA, non il motore.
+#  - NON misura F40EUR, E50EUR, 100GBP, dove InpMgmtTF vale 15 negli
+#    stessi 43 CSV e dove i tre gemelli sono dichiarati "non ancora
+#    misurati". Un simbolo per file: sono altri tre file, 24 passate
+#    in tutto (+17 minuti alla base misurata). *** E il loro spread
+#    presso BCM e' [NON MISURATO]: risultati_archivio/spread_flotta/
+#    ha 3 file su 13 simboli. ***
+#  - NON mette ad asse InpAtrSLmult: quello e' R206a, gia' scritto e
+#    gatato, e serve proprio a separare "stop" da "TF" (punto 6i).
+#  - NON mette ad asse InpBufferPoints, che sull'oro e' l'altro asse
+#    della griglia r17 e li' interagisce col TF. Qui e' pinnato a
+#    1000 = il valore vivo.
+#  - PROVA DI REGIME: assente e NON colmabile su D30EUR. Lo storico
+#    BCM degli indici parte dal 2024.09.26 -- 21 mesi, un regime e
+#    mezzo. *** E lo storico esterno NON la apre: il DAX non risulta
+#    importato affatto, e i due indici importati (NASUSD_EXT,
+#    SPXUSD_EXT) sono IN FRIGO -- diff 0,0756% e 0,0608% contro la
+#    soglia 0,05% del cancello ZERO. Mappa:
+#    report/LO_STORICO_ESTERNO_MAPPA_2026-09-23.md. ***
+#  - IL .ex5 SUL BANCO CORRISPONDE AL .mq5: [NON MISURATO]. Pinnare il
+#    commit e scriverlo nel referto.
+#  - GUARDIAN: InpUsaGuardian=true come in campo. Nel tester le
+#    GlobalVariable non esistono e la guardia e' fail-open, come in
+#    r81a.
+#
+#  10. GLI ORARI, LA FINESTRA, IL MAGIC
+#  --------------------------------------------------------------------
+#  *** TUTTI GLI ORARI SONO IN ORA SERVER BCM (= ora italiana - 1), e
+#  sono quelli di r81a, NON quelli rimappati +2 del preset FTMO: ***
+#    box notturno 23:00 -> 04:59 server = 00:00 -> 05:59 italiane
+#    piazzamento  07:59 server = 08:59 italiane
+#    cutoff       08:30 server = 09:30 italiane
+#    flat         17:30 server = 18:30 italiane
+#  Un InpPlaceHour=9 (il valore FTMO) in questo file sarebbe un file da
+#  cestinare: misurerebbe un mercato diverso da quello dell'ancora.
+#  InpCorrSymbol = SPXUSD (il nome BCM), NON "US500.cash" (il nome
+#  FTMO): con InpUseCorrelation=true il filtro e' ACCESO e il simbolo
+#  DEVE esistere sul banco, o il filtro fallisce in silenzio.
+#  @DAQUANDO 2024.09.26 e' MISURATO, non scelto (classe 590):
+#  risultati_archivio/misura_tick/REFERTO_MISURA_TICK_D30EUR.txt.
+#  MAGIC 788311: grep -ril su tutto il repo il 22/09 (.git e .claude
+#  esclusi) + controllo dei file NON COMMITTATI (git status), ZERO
+#  occorrenze. UN SOLO AGENTE locale nello Strategy Tester (classe 129).
+# ======================================================================
+
+@SIMBOLO    D30EUR
+@PERIODO    M15
+@DAQUANDO   2024.09.26
+@FINOA      2026.06.30
+@FRAZIONEIS 0.40
+
+# --- Guardian: acceso come in campo. Nel Tester e' fail-open.
+InpUsaGuardian=true
+
+# --- IL BOX NOTTURNO: identico alla sedia viva, ORA SERVER BCM.
+InpBoxStartHour=23
+InpBoxStartMin=0
+InpBoxEndHour=4
+InpBoxEndMin=59
+# InpMinBoxPts: PIN. MISURATO INERTE su questo EA -- nel refine le 18
+# coppie 0-contro-1500 danno risultati IDENTICI al centesimo.
+InpMinBoxPts=0.0
+InpMaxBoxPts=0.0
+
+# --- GLI OROLOGI: tutti pinnati sui valori vivi (ORA SERVER BCM).
+InpPlaceHour=7
+InpPlaceMin=59
+InpEntryCutoffHour=8
+InpEntryCutoffMin=30
+InpCloseHour=17
+InpCloseMin=30
+InpCloseAtEnd=true
+InpOneTradePerDay=true
+# InpPendingExpiryMin: INERTE per costruzione con questo cutoff
+# (7:59 + 90 min = 9:29, ma l'EA cancella gia' alle 8:30).
+InpPendingExpiryMin=90
+
+# --- INGRESSO: pinnato per nome, nessun parametro di motore toccato.
+InpBufferPoints=1000.0
+InpAllowLong=false
+InpAllowShort=true
+
+# --- LO STOP. InpSLMode=1 = MM_SL_ATR (enum r.45: OPPOSITE=0, ATR=1,
+#     FIXED=2). *** E' IL PIN CHE TIENE VIVO L'ASSE: *** con 0 o con 2
+#     il ramo 'else sl = entry +/- atr*InpAtrSLmult' (r.277/285) non si
+#     esegue e una delle tre vie del punto 4 si spegne. Se le celle
+#     uscissero inerti, si guarda QUESTA riga prima di tutto.
+InpSLMode=1
+InpAtrPeriod=14
+InpAtrSLmult=2.5
+# InpSLFixedPts: PIN al valore del preset vivo. INERTE per costruzione
+# (letto solo con InpSLMode==MM_SL_FIXED). Sta qui per fedelta' al
+# preset, non perche' faccia qualcosa -- a nessuno dei 7 TF.
+InpSLFixedPts=3000.0
+
+# --- LA SCALA D'USCITA VIVA: identica a r81a, tutta pinnata.
+InpTP1_R=1.0
+InpTP1Pct=50.0
+InpBreakeven=true
+InpTP2_R=3.0
+InpTP2Pct=50.0
+InpUseEMA200Target=true
+InpEMA200Period=200
+InpTPfinal_R=4.0
+InpUseTrailing=true
+InpTrailAtrMult=2.0
+
+# --- IL FILTRO DI CORRELAZIONE: PIN al valore VIVO. Nome BCM.
+InpUseCorrelation=true
+InpCorrSymbol=SPXUSD
+InpCorrTF=16385
+InpCorrEmaFast=14
+InpCorrEmaSlow=100
+
+# --- Rischio e contorno. 1,0 e' il dial di MISURA (quello dell'ancora),
+#     NON la taglia di campo (2,00%, firma del 20/09).
+InpRiskPercent=1.0
+InpUseNewsFilter=false
+InpNewsFlatten=true
+InpComment=R214G MGMTTF
+InpMaxSpread=0
+InpVerbose=true
+InpMagic=788311
+
+# --- L'UNICO ASSE: IL TF DI GESTIONE (ATR dello stop + EMA200 del
+#     terzo target + ATR del trailing: e' un PACCHETTO, punto 4).
+#     *** ASSE ENUM (ENUM_TIMEFRAMES): il passo NON conta, il driver
+#     spazzola i MEMBRI compresi fra start e stop. Fra 15 e 16388 ce ne
+#     sono SETTE: M15(15) M20(20) M30(30) H1(16385) H2(16386)
+#     H3(16387) H4(16388). 7 celle x 2 finestre = 14 passate. ***
+#     Il conto aritmetico direbbe 16374 e NON VA GUARDATO (classe 287).
+#     M15 e' la cella VIVA e l'ANCORA, ed e' il bordo BASSO: se
+#     l'altopiano si appoggiasse al bordo ALTO (H4), servirebbe un
+#     secondo round che vada oltre (H6, H8 esistono sull'oro).
+InpMgmtTF=15||15||1||16388||Y
+# ======================================================================
