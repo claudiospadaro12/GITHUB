@@ -74,14 +74,28 @@
 #          (spento), uno sul bordo, due ben oltre. IL DOMINIO CHE CONTA
 #          NON E' MAI STATO MISURATO. E' l'unica ragione di questo round.
 #
-#  (2) LA STESSA COSA E' GIA' STATA MISURATA SUL DOW, e la conferma vale.
-#      R172D, referto sezione 8.2: "da 0,45 in su il DD OOS e'
-#      esattamente 4,3944, identico alla cella 0". Sul Dow
-#      InpBreakevenAtTP1 scatta a 1 R (InpTP1_R=1.0 in quel file prova,
-#      r.1382) e marca gBETk; sopra quella soglia InpBEatR non puo' piu'
-#      fare niente. ==> il "tetto di inerzia a InpTP1_R" NON e' una mia
-#      deduzione di oggi: e' gia' MISURATO su una sedia gemella, ed e'
-#      esattamente lo stesso meccanismo che qui mette il tetto a 0,5.
+#  (2) IL TETTO NON E' MAI STATO MISURATO, NEMMENO SULLE GEMELLE -- E LA
+#      CELLA 0,5 DI QUESTO ROUND E' LA PRIMA MISURA CHE LO ATTRAVERSA.
+#      [!] CORREZIONE di una riga che sta anche nella classe 577: li' si
+#      legge che il tetto era "gia' misurato su una gemella", citando
+#      R172D sez. 8.2 ("da 0,45 in su il DD OOS e' esattamente 4,3944,
+#      identico alla cella 0"). LETTA SUI CSV VERI, QUELLA CITAZIONE NON
+#      REGGE, e per DUE motivi indipendenti:
+#        - R172D gira con InpTP1_R=1.0 (suo file prova r.1382) e il suo
+#          asse e' InpBEatR = 0 / 0,15 / ... / 0,90 (r.1442): TUTTE E
+#          SETTE le celle stanno SOTTO il tetto. Un asse che non lo
+#          attraversa non puo' misurarlo.
+#        - l'identita' citata e' su UNA SOLA COLONNA. Nelle stesse righe
+#          Profit e Trades sono DIVERSI dalla cella 0 (Pass 3: 550,26 e
+#          126 contro 5.395,25 e 130 di Pass 0): quelle celle NON sono
+#          inerti, hanno solo lo stesso massimo di drawdown. Leggere
+#          un'identita' PARZIALE come inerzia e' la classe 397.
+#      ==> Il tetto a InpTP1_R resta oggi una LETTURA DEL CODICE (r.2195
+#      e r.2209, marca gBETk condivisa), verificata riga per riga e non
+#      ancora confermata da NESSUN numero. Ed e' esattamente per questo
+#      che la cella 0,5 sta nell'asse: e' la PRIMA prova sperimentale del
+#      tetto, e la previsione falsificabile qui sotto e' il suo collaudo.
+#      Se 0,5 non riproduce 0, il tetto non c'e'.
 #
 #  (3) PERCHE' 1,5 ERA IDENTICO A 0 IN R199A -- e' un SECONDO tetto,
 #      indipendente dal primo, e va tenuto distinto.
@@ -157,6 +171,17 @@
 #  DOPPIAMENTE fuori gioco: misurato su una configurazione sostituita, e
 #  proprio sul valore che il punto (1) prevede INERTE.
 #
+#  [ok] E LA BUONA NOTIZIA CHE VA SCRITTA ACCANTO, perche' un elenco di
+#  soli "no" descrive male la realta': il guadagno trovato da R199A --
+#  LO STOP A PARI A 0,5 R -- NON E' ANDATO PERSO accendendo la parziale.
+#  In R199A la parziale era SPENTA, quindi InpBreakevenAtTP1 era un
+#  no-op (r.2143) e quello stop a pari poteva arrivare solo da InpBEatR.
+#  Oggi in campo la parziale e' ACCESA, e InpBreakevenAtTP1=true mette lo
+#  stop a pari ESATTAMENTE a InpTP1_R = 0,5 R (r.2195). Stessa soglia,
+#  altra porta: la sedia di oggi ha GIA' DENTRO il miglioramento di
+#  R199A. Questo round non va a recuperarlo -- va a vedere se ce n'e'
+#  dell'altro PIU' A SINISTRA di 0,5.
+#
 #  ATTESO, in ordine di probabilita':
 #   1. tutte le celle >= 0 indistinguibili dalla 0 entro il rumore
 #      ==> "lascia com'e'", ottava... nona manopola che dice no;
@@ -191,20 +216,41 @@
 #  c1-bis  Recovery Factor OOS >= 1,29687 (la viva). E' la grandezza che
 #      lega profitto e drawdown: un DD piu' basso pagato con meno
 #      profitto NON la muove, e per questo sta nel cancello.
-#  c2  DRAWDOWN, nella forma della classe 562:
+#  c2  DRAWDOWN -- E SI LEGGE IN DUE USI DIVERSI, CON DUE NUMERI DIVERSI.
+#      E' la classe 562 punto 3: "un numero puo' servire a due cose
+#      diverse, e la scelta giusta cambia con l'uso". La catena e'
 #          perdita statica  <=  Equity DD %  <=  DD assoluto / deposito
-#      Equity DD % e' il limite SUPERIORE PIU' STRETTO ed e' gia' nel
-#      CSV: si usa quello, e non si va a cercare il denominatore fisso
-#      per giudicare il muro (classe 562b: fra due limiti superiori
-#      validi si adotta il PIU' STRETTO, non il piu' largo).
+#
+#      c2-MURO -- "questa cella e' SICURA?". Si usa Equity DD %, che e'
+#      il limite superiore PIU' STRETTO ed e' gia' nel CSV (classe 562b:
+#      fra due limiti superiori validi si adotta il piu' stretto).
 #      Il muro FTMO e' il 10% STATICO. La cella viva ha Equity DD % OOS
 #      7,8576 e IS 7,3069: TUTTI E DUE SOTTO IL 10%, quindi la sedia di
 #      oggi e' GIA' DIMOSTRATA SICURA su questo campione (classe 562a: un
 #      limite superiore sotto la soglia DIMOSTRA, non "non dice niente").
+#      Richiesto: Equity DD % <= 10,0 su TUTTE E DUE le finestre.
+#
+#      c2-CONFRONTO -- "questa cella rischia MENO DELLA VIVA?". Qui
+#      Equity DD % NON SI USA: e' relativo al PICCO di equity, e il picco
+#      cambia da cella a cella. Confrontarlo fra celle e' esattamente
+#      l'uso che la classe 562 punto 3 vieta (il denominatore FISSO serve
+#      a confrontare le celle, quello del PICCO a giudicare il muro).
+#      E il denominatore fisso NON va misurato: e' gia' ricavabile dalle
+#      colonne che il CSV ha, perche' Recovery Factor = Profit / DD
+#      assoluto. Quindi, per ogni cella:
+#          DD assoluto = Profit / Recovery Factor
+#          DD fisso %  = DD assoluto / 80000 * 100
+#      Sulla cella viva (R199B Pass 2):
+#          IS   7014,20 / 1,14977 = 6100,52  ->  7,6257 %
+#          OOS  8496,74 / 1,29687 = 6551,73  ->  8,1897 %
+#      Richiesto per promuovere: DD fisso % <= 7,6257 (IS) e <= 8,1897
+#      (OOS), col pavimento di rumore c5.
+#      [ok] E questi due numeri sono INVARIANTI al conteggio delle
+#      uscite (Profit e DD assoluto non cambiano se una posizione esce in
+#      due pezzi): sono confrontabili fra celle anche quando n cambia.
 #      [!] Questo cambia il senso del round rispetto a come era nato: il
 #      DD della 770260 NON e' piu' sopra il muro. Non si sta piu'
 #      spegnendo un incendio, si sta cercando un margine in piu'.
-#      Richiesto per promuovere: Equity DD % OOS <= 7,8576 e IS <= 7,3069.
 #  c3  CONCORDANZA IS/OOS: PF, Recovery Factor, DD e profitto devono
 #      muoversi nello STESSO VERSO nelle due finestre. Un verso solo =
 #      non misurato. (E' il cancello che ha bocciato R200A e R172D.)
@@ -221,9 +267,18 @@
 #      (classe 550). Nessun cancello si dichiara passato NE' fallito con
 #      uno scarto INFERIORE A 1,0% sulla grandezza. Il numero non e'
 #      scelto a occhio: le ancore misurate il 21/09 su sedie gemelle
-#      hanno mostrato scarti di riproduzione fra 0,01% e 0,502%
-#      (R172D sez. 8.1, R201A sez. 9.1), e 1,0% e' il doppio del massimo
-#      osservato. Sotto quella soglia si scrive "indistinguibile".
+#      hanno mostrato scarti di riproduzione fra 0,01% e 0,502% --
+#      report/DD_NASDAQ_R199_2026-09-21.md r.107 (ancora del Dow:
+#      +0,06% / +0,01% sul DD) e r.170 (ancora del DAX: -0,502% /
+#      +0,246% sul DD) -- e 1,0% e' il doppio del massimo osservato.
+#      [!] La citazione qui sopra e' al FILE E ALLA RIGA apposta: la
+#      stesura precedente diceva "R172D sez. 8.1, R201A sez. 9.1", e
+#      quelle sezioni non esistono in nessun file del repo. I numeri
+#      erano veri, il puntatore no. Sotto quella soglia si scrive "indistinguibile".
+#      [!] E "indistinguibile" NON E' UN PASS: una cella che non batte la
+#      viva per almeno l'1,0% NON entra in un altopiano di c4. Le uscite
+#      possibili restano le tre dell'ATTESA, e l'unica che promuove e' la
+#      terza. Il default, a parita' di numeri, e' LASCIA COM'E'.
 #
 #  [!] E QUALUNQUE COSA ESCA, NON SI TOCCA NIENTE IN CAMPO senza la
 #      firma di Claudio: la gestione dell'uscita e' gestione del
@@ -256,12 +311,26 @@
 #       solo: si legge insieme a Profit, Recovery Factor e n, ed e' per
 #       questo che c1 chiede il profitto ACCANTO al PF e c5 mette un
 #       pavimento di rumore.
+#       [!] MA IL VERSO DELLA SOLA DILUIZIONE DA CONTEGGIO, QUI, SI
+#       CONOSCE, e va detto: la cella viva e' quella con PIU' parziali
+#       (n 135/172); le celle basse ne avranno MENO, e meno uscite = PF
+#       MENO diluito. Quel pezzo di distorsione corre dunque A FAVORE
+#       delle celle candidate -- il verso pericoloso, quello della
+#       promozione falsa. Per questo i cancelli si reggono su grandezze
+#       INVARIANTI al conteggio delle uscite (Profit, Recovery Factor,
+#       DD assoluto) e il PF non decide MAI da solo.
 #
 # =====================================================================
 #  SUL MAGIC -- grep fatto, e la scelta e' DELIBERATA
 # ---------------------------------------------------------------------
-#  grep -rhoE "77[0-9]{4}" sull'intero repo: 770260 e' la sedia viva,
-#  770261 NON risulta occupato da nessuno.
+#  770260 e' la sedia viva. [!] E 770261 NON E' LIBERO: e' la gemella
+#  SHORT della stessa apertura, gia' MISURATA e tenuta FUORI per merito
+#  (PF OOS 1,06338 su n 108, DD 4,13% -- report/
+#  PACCHETTO_SCHIERAMENTO_PROP_2026-09-21.md r.223, dove si discute anche
+#  la sua collisione di chiusura con la 770250). Una stesura precedente
+#  di questo file scriveva "770261 NON risulta occupato da nessuno":
+#  era FALSO, e si corregge qui prima che il round parta. Non cambia la
+#  scelta, che non era motivata dalla disponibilita' di un magic libero.
 #  QUI SI PINNA LO STESSO 770260, come hanno fatto R196a, R198, R199a,
 #  R199b e R200a sulla stessa sedia. Ragione: la validita' INTERA di
 #  questo round poggia sul cancello c0, cioe' sul riprodurre la cella
@@ -324,8 +393,19 @@ InpBreakevenAtTP1=1||1||0||1||N
 #            sprecata.
 #   Il dominio utile dell'asse e' 0 < x < 0,5, e il tetto NON e' una
 #   scelta: e' InpTP1_R, tramite la marca condivisa gBETk (r.2201/2209).
-#   Sopra 0,5 la manopola e' spenta per costruzione, e R199A lo ha gia'
-#   misurato su 1,0 e 1,5. Qui non si rimisura: si riempie il buco.
+#   [!] E QUESTO TETTO NON E' MAI STATO MISURATO DA NESSUNO, R199A
+#   COMPRESO -- va detto perche' e' il contrario di quello che verrebbe
+#   comodo scrivere. In R199A InpBreakevenAtTP1 era pinnato a 0 (suo
+#   file prova r.101) e la parziale era spenta (r.100): li' la marca
+#   gBETk non veniva MAI messa dal blocco 1, quindi il tetto di cui
+#   parliamo qui NON ESISTEVA in quel round. Difatti la sua cella 1,0
+#   NON e' uscita identica alla 0 (Profit IS 4905,33 contro 4549,93;
+#   OOS 9440,17 contro 7689,12): a 1,0 la manopola LAVORAVA. L'unica
+#   cella indistinguibile dalla 0, li', era 1,5 -- ed e' l'ALTRO tetto,
+#   quello del TP a 1,5 R del punto (3) (OOS identico al centesimo, IS
+#   4549,92 contro 4549,93). Due meccanismi diversi, due soglie diverse:
+#   non si scambiano. Qui il buco che si riempie e' 0 < x < 0,5, e la
+#   cella 0,5 e' la PRIMA misura in assoluto del tetto di gBETk.
 #   Si guardano PF, Recovery Factor, DD, PROFITTO e n INSIEME. Un DD piu'
 #   basso col profitto che crolla non e' un miglioramento: e' una sedia
 #   diversa e piu' piccola.

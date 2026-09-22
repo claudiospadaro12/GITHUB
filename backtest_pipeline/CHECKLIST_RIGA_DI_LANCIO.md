@@ -29496,9 +29496,13 @@ la tabella di R199A **come se fosse la sedia di oggi**. Non lo era piu'.
    🔴 **Le quattro celle misurate da R199A (0 / 0,5 / 1,0 / 1,5) cadono TUTTE fuori dal nuovo
    dominio o sul suo bordo. Il dominio che conta non e' mai stato misurato**, e il file prova
    non poteva saperlo: e' stato scritto prima della firma.
-   📌 Lo stesso tetto era **gia' misurato su una gemella** e non era stato generalizzato:
-   `R172D` sez. 8.2, *"da 0,45 in su il DD OOS e' esattamente 4,3944, identico alla cella 0"*
-   -- sul Dow `InpTP1_R=1,0`, quindi tetto a 1,0.
+   📌 ~~Lo stesso tetto era **gia' misurato su una gemella**~~ -- 🔴 **CORRETTO IL 22/09/2026,
+   vedi CLASSE 578: NON era misurato.** La citazione era `R172D` sez. 8.2, *"da 0,45 in su il
+   DD OOS e' esattamente 4,3944, identico alla cella 0"*, con `InpTP1_R=1,0` sul Dow. Ma
+   l'asse di R172D e' `0..0,90` (suo file prova r.1442): **non attraversa mai il tetto a 1,0**,
+   quindi non puo' confermarlo; e l'identita' citata sta **sulla sola colonna `Equity DD %`**
+   (negli stessi Pass 3-6 `Profit` e `Trades` sono diversi da Pass 0). **Il tetto resta una
+   lettura del codice, non ancora confermata da un numero.**
 
 ### La regola
 1. 🔴 **Prima di leggere il referto di un round su una sedia in campo, si rilegge il `.set`
@@ -29517,3 +29521,50 @@ la tabella di R199A **come se fosse la sedia di oggi**. Non lo era piu'.
    riapre i round sull'**uscita** (stesso codice, stesso stato condiviso), non quelli
    sull'**ingresso** (che scelgono quali operazioni esistono, e quelle non cambiano).
    Riaprire tutto costa tempo macchina che non abbiamo; riaprire niente costa una sedia.
+
+---
+
+## CLASSE 578 -- 🧾🚫 LA CORROBORAZIONE CITATA DA UN ROUND GEMELLO **IL CUI ASSE NON ATTRAVERSA MAI LA SOGLIA** che dovrebbe confermare -- e l'identità invocata sta su **UNA SOLA COLONNA** (controllo-preventivo, 22/09/2026, figlia della 397, corregge una riga della 577)
+
+**Caso reale.** Il file prova `backtest_pipeline/prove/R209a_breakeven_nasdaq_NASUSD.txt`
+(pin `b29aeb3c`) costruisce tutto il suo dominio (`0 < InpBEatR < InpTP1_R`) su una lettura
+del codice — corretta — e poi la dichiara **già confermata da una misura**:
+
+> *«LA STESSA COSA E' GIA' STATA MISURATA SUL DOW... R172D sez. 8.2: "da 0,45 in su il DD OOS
+> e' esattamente 4,3944, identico alla cella 0"... il "tetto di inerzia a `InpTP1_R`" NON e'
+> una mia deduzione di oggi: e' gia' MISURATO su una sedia gemella.»*
+
+🔴 **Letta sui CSV veri, la citazione non regge, e per DUE motivi indipendenti.**
+1. **L'asse gemello non attraversa mai il tetto.** `R172d_beatr_dowapertura_U30USD.txt` r.1382
+   pinna `InpTP1_R=1.0` e r.1442 apre l'asse `InpBEatR=0||0||0.15||0.90||Y`: **tutte e sette**
+   le celle stanno **sotto** la soglia. Un asse che non la attraversa **non può misurarla** —
+   qualunque cosa mostrino i suoi numeri.
+2. **L'identità invocata è su UNA colonna sola.** Nelle righe citate
+   (`risultati_prove/R172D/REFERTO_ROUND_R172D.txt`, OOS Pass 3-6) `Equity DD %` è davvero
+   `4,3944` come in Pass 0, ma **`Profit` e `Trades` no**: Pass 3 fa `550,26` su `126` contro
+   `5.395,25` su `130` di Pass 0. Quelle celle **non sono inerti**: hanno solo lo stesso
+   massimo di drawdown. È la **397** applicata a un'identità **parziale**, che è il caso
+   peggiore: una colonna che coincide *sembra* la prova e le altre due la smentiscono nella
+   stessa riga.
+
+**Perché costa, e non è pedanteria.** La lettura del codice era giusta. Ma un file che scrive
+*"già misurato"* su qualcosa che **nessuno ha ancora misurato** toglie di mezzo la ragione per
+cui la misura andava fatta: al primo giro di rilettura, la cella che serve a collaudare il
+tetto (`0,5`, qui) diventa *"una cella sprecata su un fatto noto"* e sparisce dal prossimo
+asse. **Si perde l'unico esperimento che poteva falsificare il meccanismo.** È la forma
+"ottimista" della **577**, che qui viene corretta: la 577 riporta la stessa citazione di R172D
+come tetto *"già misurato su una gemella"*, e **anche lì va letta come non dimostrata**.
+
+### ✅ La regola, in tre gesti che costano un minuto
+1. **Una corroborazione si cita col DOMINIO dell'asse che l'ha prodotta accanto**, non col solo
+   numero: *«R172D, asse 0..0,90, tetto a 1,0 ⇒ non lo attraversa»* si scrive in una riga e
+   chiude la questione. Se l'asse non attraversa la soglia, la citazione **non è una conferma:
+   è un'altra misura**.
+2. 🔴 **Un'identità fra celle si dichiara solo se è su TUTTE le colonne che il CSV ha**
+   (`Profit`, `Profit Factor`, `Recovery Factor`, `Equity DD %`, `Trades`). Una colonna sola
+   che coincide si chiama **coincidenza di quella colonna**, e si scrive così.
+3. 🟢 **E quando la conferma non c'è, non si toglie la cella: si promuove a ESPERIMENTO.**
+   La correzione applicata a R209a non cambia una virgola dell'asse — cambia il perché:
+   la cella `0,5` passa da *"conferma di un fatto noto"* a **prima prova sperimentale del
+   tetto**, con la sua previsione falsificabile già scritta prima dei numeri. Un buco
+   dichiarato vale più di una citazione gonfiata.
