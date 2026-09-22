@@ -340,16 +340,25 @@ Le prime **tre** righe del censimento del 09/09 (`report/CENSIMENTO_PF_MISURATI_
 Tabella A) sono `Live5m` Nasdaq (**PF OOS 2,16**), `EMA200` Dow short e `ORB_Ottimizzato`.
 Il primo posto è **falso**, e l'ho rotto così:
 
-| | modello | PF IS | PF OOS | DD OOS | n OOS | profitto OOS |
+| corsa | modello | PF IS | PF OOS | DD OOS | n OOS | profitto OOS |
 |---|---|--:|--:|--:|--:|--:|
-| `ABTG_Nasdaq_Live5m` NASUSD M5 | **OHLC** (Modello 1) | 1,36567 | **2,16249** | 7,3108 | 198 | **+8.943,56** |
-| **lo stesso, a TICK REALI** | **Modello 4** | 1,01621 | 🔴 **0,96265** | 🔴 **19,4006** | 175 | 🔴 **−326,54** |
+| `..._NASUSD_{IS,OOS}_ohlc.csv` | **OHLC** (Modello 1) | 1,36567 | **2,16249** | 7,3108 | 198 | **+8.943,56** |
+| `..._NASUSD_{IS,OOS}.csv` — **TICK REALI** | **Modello 4** | 1,01621 | 🔴 **0,96265** | 🔴 **19,4006** | 175 | 🔴 **−326,54** |
+| `..._r142a.csv` cella `ClosePct=50` — **TICK, binario di settembre** | **Modello 4** | 1,01472 | 🔴 **0,95624** | 🔴 **22,4729** | 175 | 🔴 **−447,69** |
+
+*(Le ultime due righe sono **la stessa cella su due binari**: l'EA è stato toccato due volte
+dopo la corsa d'agosto — `3af47ed` sizing, `d83c196` Guardian. Lo scarto di PF è **0,0064** e
+il verso del verdetto **non cambia**. 👉 **Due misure indipendenti dicono la stessa cosa**, ed
+è questo che rende il rifiuto solido invece che fragile.)*
 
 🔬 **E il contro-esempio l'ho costruito nel modo più duro possibile: ho diffato i due CSV
-input per input.** Su **65 colonne `Inp*`** **non ne cambia NEMMENO UNA** (stesso
-`InpMagic=770203`, stesso `InpTP1_ClosePct=50`, stesso `InpSessionHour=14`). Cambiano **solo**
-i risultati. 👉 **Non è una configurazione diversa: è lo stesso motore, letto con e senza i
-tick veri.** Lo stesso vale per il DAX: `Live5m_v2` **1,71088 → 0,92490**, `Live5m` v1
+input per input, cella per cella.** Il CSV a tick `r142a` ha **quattro** celle
+(`InpTP1_ClosePct` 0/25/50/75); quella a **50** è la gemella esatta della corsa OHLC, e su
+**tutte e 60 le colonne `Inp*` in comune** **non ne cambia NEMMENO UNA** — stesso
+`InpMagic=770203`, stesso `InpSessionHour=14`, stesso `InpRiskPercent=2`. *(Le altre tre celle
+differiscono per la sola `InpTP1_ClosePct`, e stanno fra 0,944 e 0,970: **il verdetto non
+dipende dalla cella scelta**.)* Cambiano **solo** i risultati.
+👉 **Non è una configurazione diversa: è lo stesso motore, letto con e senza i tick veri.** Lo stesso vale per il DAX: `Live5m_v2` **1,71088 → 0,92490**, `Live5m` v1
 **1,47 → 0,85701** (DD **39,744%**).
 
 📌 **La regola che ne esce, e che propongo di scrivere in checklist**: *in ogni classifica
@@ -424,22 +433,29 @@ non riaprirla. *(La sedia viva `770411` è la cella `short_refine`: PF med 1,187
 Dal censimento fresco, **miglior cella mediana** di ogni motore non schierato, su corse con
 `n ≥ 150` (cioè dove il merito **è** giudicabile):
 
-| motore | simbolo | PF | n | DD | modello |
+| motore | simbolo | PF OOS | n | DD OOS | modello — **come l'ho stabilito** |
 |---|---|--:|--:|--:|---|
-| `ABTG_FiboH4_Multi` | GBPUSD H4 | **0,950** | 737 | 17,21% | OHLC |
-| `ABTG_LVNArbitro` | U30USD | **1,052** | 618 | 11,76% | 🟢 tick |
-| `ABTG_AtrExhaustVol` | NASUSD | **0,952** | 224 | 13,45% | 🟢 tick |
-| `ABTG_AltaVelocita` | U30USD | **0,814** | 150 | 10,74% | OHLC |
-| `ABTG_MeanRevert` | GBPUSD H1 | **0,853** | 344 | 25,77% | OHLC |
-| `ABTG_TurnaroundTuesday` | GBPUSD H1 | **0,783** | 497 | 34,06% | OHLC |
-| `ABTG_BreakoutCorso` | GBPJPY M15 | **0,980** | 1467 | 46,63% | OHLC |
-| `ABTG_SupRev_CAC_H4_Ott.` | F40EUR H4 | **0,760** | 442 | 22,47% | OHLC |
-| `ABTG_IBRetest` | D30EUR | **0,965** | 107 | 5,25% | 🟢 tick |
-| `ABTG_Nightly` | EURCHF | **0,814** | 85 | 15,39% | 🟢 tick |
-| `ABTG_OpeningReversalB` | U30USD | **[NON MISURABILE]** | **0** | — | 🟢 tick |
+| `ABTG_FiboH4_Multi` | GBPUSD H4 | **0,950** | 737 | 17,21% | **OHLC** (`_ohlc_r139c`) |
+| `ABTG_LVNArbitro` | U30USD | **1,052** | 618 | 11,76% | `[NON VERIFICATO]` (`_P0_100K`, nessun marcatore) |
+| `ABTG_AtrExhaustVol` | NASUSD | **0,952** | 224 | 13,45% | 🟢 **tick reali** — `CODA.txt` r.648 `-Modello 4` |
+| `ABTG_AltaVelocita` | U30USD | **0,814** | 150 | 10,74% | 🔴 **ambiguo**: cartella `alta_v_tick/`, nome file `_IS_ohlc` ⇒ `[NON VERIFICATO]` |
+| `ABTG_MeanRevert` | GBPUSD H1 | **0,853** | 344 | 25,77% | **OHLC** (`_ohlc_mr1`) |
+| `ABTG_TurnaroundTuesday` | GBPUSD H1 | **0,783** | 497 | 34,06% | **OHLC** (`_ohlc_tt1`) |
+| `ABTG_BreakoutCorso` | GBPJPY M15 | **0,980** | 1467 | 46,63% | **OHLC** (`_ohlc_r82c`) |
+| `ABTG_SupRev_CAC_H4_Ott.` | F40EUR H4 | **0,760** | 442 | 22,47% | **OHLC** (`_IS_ohlc`) |
+| `ABTG_IBRetest` | D30EUR | **0,965** | 107 | 5,25% | `[NON VERIFICATO]` (`_P0IBRTDAX`) |
+| `ABTG_Nightly` | EURCHF | **0,814** | 85 | 15,39% | `[NON VERIFICATO]` (`_P0`) |
+| `ABTG_OpeningReversalB` | U30USD | **[NON MISURABILE]** | **0** | — | `[NON VERIFICATO]` |
 
-🧪 **E il contro-esempio che mi sarei potuto fare da solo**: *«sei righe su undici sono OHLC,
-e l'OHLC non dà mai un verdetto — quindi non puoi bocciarle».*
+🔴 **La colonna «modello» l'ho aggiunta DOPO essermi accorto che stavo per scriverla a
+memoria.** Nella prima stesura avevo messo «🟢 tick» su cinque righe **senza una fonte**:
+l'unica che ho potuto confermare è `AtrExhaustVol`, perché la sua riga di lancio è scritta in
+`backtest_pipeline/coda/CODA.txt` r.648 con `-Modello 4`. Per le altre quattro il marcatore
+non esiste, e allora si scrive `[NON VERIFICATO]`. 📌 **È la classe di errore del 10/09:
+controllare che la risposta sia coerente con l'attesa invece di provare a romperla.**
+
+🧪 **E il contro-esempio vero**: *«cinque righe su undici sono OHLC, e l'OHLC non dà mai un
+verdetto — quindi non puoi bocciarle».*
 🟢 **Qui invece il verso dell'errore SALVA il verdetto, e va detto perché**: l'OHLC **non
 attraversa lo spread dentro la barra**, quindi è **ottimista sul PF** e **pessimista sul DD
 solo per difetto di dettaglio**. 👉 Un PF **sotto 1,00 in OHLC** a tick può soltanto
@@ -541,20 +557,37 @@ INCOMPILABILE**: senza operazioni non esistono né PF, né n, né DD.
 
 > 🏁 **LA RIGA DA PORTARE A CLAUDIO**
 >
-> *«Socio, ho guardato in tutti i cassetti: **2.418 CSV**, rimacinati da zero. E la risposta
-> onesta è che **per il 1° ottobre non c'è una settima sedia pronta** — nessun candidato nuovo
-> passa tutti i cancelli, e le 31 righe che li passano sono tutte roba che vola già. 🟢 **Ma
-> non torno a mani vuote, torno con tre cose che valgono.** Primo: all'**ORB** — il nostro
-> candidato numero uno — ho **chiuso il certificato sul lato corto**: era l'ultima casella
-> aperta, e adesso sappiamo che il long-only non è un'eredità copiata, è una **scelta
-> misurata** (lo short fa 0,52 con un DD del 26%). Secondo: l'**EMA200 a H4 sul forex** era
-> stato letto **a un lato solo** — le celle a **due lati**, nello stesso file, hanno il
-> **doppio delle operazioni** (GBPUSD 362 invece di 147) e PF fra 1,23 e 1,51 a tick reali;
-> non è una sedia, perché manca l'OOS e l'ottimizzatore era genetico, **ma 18 minuti di
-> macchina ci dicono se lo è**. Terzo: ho **spento cinque strade con il numero in mano** — il
-> CAC (`R138a` era già girato e fa **0,77**, e nessuno l'aveva letto), il Live5m (a tick fa
-> **0,96**, non 2,16: quel 2,16 era OHLC), il MaxMin sugli altri indici, l'ORB sul Nasdaq, il
-> CostToCost. 🎁 **E ti ho ritrovato lo studio FASE A su 8 indici** che quattro referti
-> dichiaravano perso: dice che **gli unici due indici con aspettativa positiva all'apertura
-> sono il Dow e il DAX** — cioè proprio i due su cui siamo. Non ci siamo accontentati: ci
-> siamo dati ragione col numero.»*
+> *«Socio, ho aperto tutti i cassetti: **2.418 CSV**, rimacinati da zero, non riletti dai
+> referti. E torno con **un nome**, non con un catalogo. 🥇 **Il candidato è il Dow
+> d'apertura in versione BREAKOUT A DUE LATI con range di 15 minuti** — che **non è** la
+> sedia `770202` che vola (quella è retest, solo long, 35 minuti: dodici manopole diverse).
+> A tick reali fa **40 celle su 40 in utile fuori campione**, PF da **1,267 a 1,560**,
+> drawdown che **non supera mai l'8,70%** su tutte e quaranta, e **188 POSIZIONI** vere —
+> sopra il pavimento dei 150. 🔥 **È l'unica riga non schierata, in tutto l'archivio, che
+> passa i quattro cancelli insieme.**
+>
+> 🔴 **E adesso il difetto, perché l'ho cercato io e l'ho trovato**: la finestra in campione
+> parte dal **1° gennaio 2024**, ma i tick BCM sugli indici partono dal **26 settembre 2024**.
+> Metà dell'in-campione gira su tick **inventati dalle M1**. 🟢 **E la prova che è così era
+> già nel nostro referto, in un'anomalia che nessuno aveva chiuso**: lì c'era scritto *«IS 8,1
+> trade al mese, OOS 16,4, il doppio, va verificato»*. L'ho verificato: contando solo i mesi
+> che hanno davvero i tick, l'IS fa **16,04** contro **16,42**. 👉 **Non era il filtro: erano
+> i dati che non c'erano.** Si chiude con **80 passate, sette minuti di macchina**, e il round
+> si autoverifica da solo (una cella deve riprodurre PF 1,340).
+>
+> 🥈 Dietro: l'**ORB** — e gli ho chiuso il certificato sul lato corto, che era l'ultima
+> casella aperta (lo short fa **0,52** con un DD del **26%**: il long-only non è una
+> scopiazzatura, è una **scelta misurata**). 🥉 Poi l'**EMA200 a H4 sul forex**, che era stato
+> letto **a un lato solo**: le celle a due lati hanno il **doppio** delle operazioni
+> (GBPUSD **362**) e PF fra **1,23 e 1,51** a tick — non è una sedia, manca l'OOS, ma
+> **18 minuti** ci dicono se lo è.
+>
+> 🪦 **E ho spento cinque strade col numero in mano**: il CAC (`R138a` era **già girato** e fa
+> **0,77** — nessuno l'aveva letto), il Live5m (a tick fa **0,96**, non 2,16: quel 2,16 era
+> OHLC e ho diffato tutti e 65 gli input per dimostrarlo), il MaxMin sugli altri indici, l'ORB
+> sul Nasdaq, il CostToCost. 🎁 **E ti ho ritrovato lo studio FASE A su 8 indici** che quattro
+> referti davano per perso: dice che **gli unici due indici con aspettativa positiva
+> all'apertura sono il Dow e il DAX**, cioè esattamente i due su cui siamo già.
+>
+> **Non ci siamo accontentati: ci siamo dati ragione col numero. E ne abbiamo trovato uno
+> nuovo.»*
