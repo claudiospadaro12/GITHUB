@@ -107,7 +107,7 @@
 #  (La r.586 e' solo un ABTGLog di OnInit, e con InpAllowReverse=false
 #  non si stampa nemmeno: non e' una prova, e' una cortesia. La prima
 #  stesura la citava come prova -- corretto prima della partenza.)
-#  ==> Un asse solo: InpAllowShort. Le 8 occorrenze nell'EA sono: 284
+#  ==> Un asse solo: InpAllowShort. Le 9 occorrenze nell'EA sono: 284
 #      dichiarazione, 545 e 586 log, 1219/1284/1424/1524/2044 in rami
 #      esclusi dal dispatch di InpEntryMode (r.847-885), e 1966 l'unica
 #      viva con InpEntryMode=2. Tutto il resto inchiodato alla

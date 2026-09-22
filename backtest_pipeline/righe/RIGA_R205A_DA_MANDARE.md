@@ -121,15 +121,15 @@ corto da solo, ed è l'unico modo onesto di leggerlo.
 
 Il censimento avverte che *«spegnere lo short spegne anche il REVERSE»* (il secondo ciclo,
 R51). **Qui non morde**: `InpAllowReverse` è `false` nel preset in campo **E** pinnato `false`
-in questo file, quindi accendere lo short **non** accende il reverse. E l'EA lo dice da solo
-**e il cancello è DURO, non un avvertimento**: `MonitorReverse()` (**r.1026**) comincia con
+in questo file, quindi accendere lo short **non** accende il reverse. **E il cancello è DURO,
+non un avvertimento**: `MonitorReverse()` (**r.1026**) comincia con
 **`if(!InpAllowReverse) return;`** (**r.1028**), e il tetto dei cicli a **r.782** vale `1` quando
 il reverse è spento.
 *(La `r.586` è solo un `ABTGLog` di `OnInit` e con `InpAllowReverse=false` **non si stampa
 nemmeno**: non è una prova, è una cortesia. La prima stesura la citava come prova — corretto
 prima della partenza.)*
 
-👉 **Un asse solo: `InpAllowShort`**, e le **8** occorrenze nell'EA sono state classificate una
+👉 **Un asse solo: `InpAllowShort`**, e le **9** occorrenze nell'EA sono state classificate una
 per una: `284` dichiarazione, `545` e `586` log, `1219`/`1284`/`1424`/`1524`/`2044` in rami
 **esclusi** dal dispatch di `InpEntryMode` (r.847-885, catena `if/else if` esclusiva), e **`1966`
 l'unica viva** con `InpEntryMode=2`.
@@ -336,8 +336,8 @@ problemi`. **Il file prova è cambiato → la riga è stata RIPINNATA** su `ae8c
 | **2** 🔴 | il puntatore all'**unico indizio** a favore del round era **rotto** (mancava `backtest_pipeline/` davanti) — e il documento si vantava, due paragrafi dopo, di aver corretto un puntatore altrui | percorso completo in **tutti e due** i file |
 | **3** 🔴 | **«sei volte» era un rapporto fra due numeri entrambi indistinguibili da zero** — **classe nuova 560** | la tabella dei `t` (0,08 · 0,49 · **0,29**) e il motivo riscritto: **non un indizio, un BUCO** |
 | **4** 🔴 | *«le due celle stanno ENTRAMBE a 32,3×»* **smentito dal proprio caveat tre righe sotto** — **classe nuova 559** | la formula (identica) separata dal numero (`[NON MISURATO]` sulla cella `true`), con `ampiezza_pt` 5921 contro 6603 |
-| **5** 🟠 | la «prova» che l'asse è isolato era la **r.586**, che è un `ABTGLog` e con `InpAllowReverse=false` **non si stampa nemmeno** | la prova vera: `return` duro a **r.1028** + tetto dei cicli a **r.782**, più le 8 occorrenze classificate |
-| **6** 🟠 | allarme OOS **troncato** (`9,7936` invece di `9,7937`). Conservativo, quindi non poteva produrre un falso PASS — ma la casa scrive al centesimo | corretto nelle 3 occorrenze del `.md` e nelle 2 del file prova |
+| **5** 🟠 | la «prova» che l'asse è isolato era la **r.586**, che è un `ABTGLog` e con `InpAllowReverse=false` **non si stampa nemmeno** | la prova vera: `return` duro a **r.1028** + tetto dei cicli a **r.782**, più le **9** occorrenze classificate |
+| **6** 🟠 | allarme OOS **troncato** (`9,7936` invece di `9,7937`). Conservativo, quindi non poteva produrre un falso PASS — ma la casa scrive al centesimo | corretto nelle **2** occorrenze del `.md` e nelle **2** del file prova *(se il `grep` oggi ne trova tre nel `.md`, la terza è **questa riga di verbale**, che le cita — classe 558)* |
 | **7** 🟢 | il buco su **R42/R43 l'ha chiuso l'agente**, invece di lasciarlo dichiarato | sostituito con la misura: **tutti e sei** i file prova pinnano `InpEntryMode=3` |
 
 🟢 **E il cancello ha anche RAFFORZATO due cose, non solo tolto**: la simmetria dello stop è più
@@ -372,5 +372,6 @@ diversi → MT5 onora `0/1`).
 - Che il `.ex5` sul PC di backtest corrisponda ai `.mq5` letti qui: il driver ricompila dal pin,
   ma **non l'ho misurato** — e questa famiglia ha già avuto scarti sorgente/binario
   (`ABTG_EMA200`, 690 righe contro 486 in campo).
-- Lo stop mediano del **lato corto** è `[NON MISURATO]`: la simmetria è garantita dalla
-  geometria, il campione in forward è solo long (`[MIS n=3]` / `[MIS n=8]`).
+- Lo stop mediano del **lato corto** è `[NON MISURATO]`: la **formula** è identica per
+  costruzione (r.1930-1933 / r.1973-1976), ma **la popolazione delle giornate no** — il campione
+  in forward è solo long (`[MIS n=3]` / `[MIS n=8]`). **Classe 559.**
