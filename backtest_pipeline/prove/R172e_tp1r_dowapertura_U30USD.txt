@@ -1,4 +1,54 @@
 # =====================================================================
+#  >>> QUESTO FILE E' EMENDATO DA UN ADDENDUM DEL 22/09/2026. <<<
+#  I PUNTI SUPERATI SONO QUESTI, E SONO ELENCATI QUI IN TESTA PERCHE'
+#  UNA CLAUSOLA GENERICA DI PRECEDENZA NON COPRE I NUMERI CHE NON
+#  NOMINA, E IL LETTORE INCONTRA PRIMA I VECCHI (classe 556).
+#
+#   riga    cosa dice il 16/09              cosa vale dal 22/09
+#   ------  ------------------------------  ---------------------------
+#   104     -Deposito 100000                80000 (lo passa la riga di
+#   139     "sono il banco dell'ancora"     lancio: R202A/R202B girano a
+#   1579    banco 100.000                   80.000)
+#   1585    sentinella: se cambia il
+#           deposito il file VA RISCRITTO   -> emendata: vedi ADD.5
+#   644     ANCORA R54a: Profit IS 2811,84  a 80.000 i numeri veri sono
+#           e OOS 6721,93                   2241,62 e 5395,25 (fattore
+#                                           ~0,80). DI R54a SOPRAVVIVONO
+#                                           PF, Equity DD % e Trades,
+#                                           NON il Profit. L'ancora
+#                                           operativa e' R202A.
+#   1366    B0: "alla taglia viva 0,65%     la taglia viva e' 2,00% dal
+#   1391-96 B2.1: muro sfondato sopra       20/09: il muro si sfonda
+#           15,38% sul banco; l'ancora e'   sopra 5,00% sul banco, e
+#           il 29% e il 37% del muro        l'ancora e' l'87,9% (OOS) e
+#                                           il 113,4% (IS) del muro.
+#                                           LA GAMBA IS E' GIA' SOPRA.
+#   1453-54 B3: muro giornaliero 7,69%      2,50% sul banco. E il
+#           sul banco; "servirebbe un       peggioramento che serve e'
+#           peggioramento di 7,5 VOLTE,     1,22x, NON 7,5x: il
+#           non puo' mordere"               controllo di vuoto e' FALSO.
+#   1533-40 B7: pedaggio 51,0x, +28% sul    61,9x, +55% (stop 123,80
+#           pavimento (stop ~102 [INF])     [MIS n=446]). Vedi ADD.2.
+#   1564    B8: "la cella viva e' al        e' la TERZA di sette: 2
+#           CENTRO dell'asse, quarta di     vicini sotto e 4 sopra. Il
+#           sette"                          centro dell'asse e' 1.25.
+#   100     "si lancia con                  oggi: RIGA_ROUND_VPS.ps1 su
+#   114     RIGA_SOTTILE_ROUND.ps1";        DESKTOP-H4D7CAJ, bersaglio
+#   131     bersaglio C:\MT5_Backtest        C:\Program Files\BCM Markets
+#   405-06  (banco 50504400)                MT5 Terminal, demo 50503392.
+#   1484                                    Il banco 50504400 e' SPENTO
+#   1618                                    (firma del 21/09).
+#   1483-84 B5: rumore di macchina [NON     su DESKTOP-H4D7CAJ le tre
+#           MISURATO] su C:\MT5_Backtest     ancore lo misureranno.
+#   1664    "LE DUE ISTANZE della sedia"    sono TRE: manca FTMO
+#                                           541452707 (C:\FTMO, 2,00%),
+#                                           che e' la sola che conta.
+#   12-18   "QUINTO FILE DELLA SERIE"       esistono anche R172f..R172j.
+#
+#  TUTTO IL RESTO DEI CRITERI DEL 16/09 RESTA IN VIGORE.
+# =====================================================================
+#
+# =====================================================================
 #  EA: ABTG_Dow_Apertura_US
 #  R172e -- LA MANOPOLA CHE NE MUOVE TRE: dove si chiude la parziale,
 #           dove scatta lo stop a pari, e dove sta il TAKE PROFIT --
@@ -1869,6 +1919,63 @@
 #  niente in nessuna delle due direzioni. Il limite superiore si
 #  riporta: DDass/deposito, cella viva 4,4499% al banco (<= 8,90% a
 #  taglia vera).
+#
+#  7. SOGLIE DI RISCHIO RISCALATE ALLA TAGLIA CHE VOLA (est. classe 547)
+#  ---------------------------------------------------------------------
+#  Non basta dichiarare la scala: le SOGLIE DERIVATE dalla taglia, sparse
+#  nella parte del 16/09, vanno ricalcolate o dichiarate morte. Altrimenti
+#  la scala nuova convive con i numeri calcolati su quella vecchia.
+#  La sedia 770202 vola a 2,00% dal 20/09
+#  (report/CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md r.61-64). Lo 0,65% su
+#  cui il 16/09 scalava il muro e' la famiglia _100K, un altro
+#  schieramento.
+#    B2.1 (r.1391-1396): muro statico 10% -> si sfonda sopra 5,00% SUL
+#         BANCO, non 15,38%. La soglia vecchia e' LARGA 3,08 VOLTE.
+#    B3   (r.1453-1454): muro giornaliero 5% -> 2,50% SUL BANCO, non
+#         7,69%. E il peggioramento che servirebbe e' 1,22x, non 7,5x:
+#         la frase "questa soglia non puo' mordere" e' FALSA.
+#    B0   (r.1366): "~2,86% e ~2,74% alla taglia viva" -> 11,34% (IS) e
+#         8,79% (OOS).
+#  E IL FATTO SCOMODO CHE NE SEGUE: la gamba IS dell'ancora, a taglia
+#  viva, sta GIA' SOPRA il muro statico del 10% (11,34%). E' scritto in
+#  rosso in CONTRATTI_DELLE_SEDIE_FTMO_2026-09-20.md r.64.
+#  ATTENZIONE, E' UN LIMITE SUPERIORE E NON UNA PERDITA (classe 515):
+#  Equity DD % e' dal picco, il muro e' statico dal saldo iniziale.
+#  Quindi "gia' sopra" NON e' dimostrato -- ne' lo e' il contrario. La
+#  misura che decide e' la minima equity contro il saldo iniziale, e NON
+#  E' MAI STATA FATTA per nessuna delle sei sedie
+#  (report/IL_MURO_NON_E_MISURATO_2026-09-22.md).
+#
+#  8. L'ALLARME SUL DD HA DUE BASI, UNA PER GAMBA (classe 557)
+#  -----------------------------------------------------------
+#  La stesura precedente dava un allarme solo (DD_fisso > 4,89) calibrato
+#  sulla sola gamba OOS, e CONSEGNATO SENZA DIRE QUALE. Ma la cella viva
+#  in IS sta a 5,7575: SFONDA IL PROPRIO ALLARME di 0,87 punti. Un
+#  allarme che scatta sulla propria ancora non misura niente -- e proprio
+#  nella gamba in cui B2.2 dice che il DD SALE salendo (archivio: fino a
+#  12,4677% sulla cella piu' alta).
+#  DUE BASI, dai CSV di R202A, cella 1.00:
+#      IS   DD_fisso 5,7575  -> allarme sopra 6,3333  (+10%)
+#      OOS  DD_fisso 4,4499  -> allarme sopra 4,8949  (+10%)
+#  Ogni numero si scrive CON LA GAMBA ACCANTO.
+#
+#  9. L'ATTESA SUL RISCHIO, CORRETTA
+#  ---------------------------------
+#  NON "nessuna cella alza il DD": B2.2 (r.1416-1429) ha misurato
+#  l'OPPOSTO, e cioe' che in IS questo asse porta il DD da 5,52% a 7,76%
+#  in media e fino a 12,4677% sulla cella piu' alta, e conclude che "e'
+#  il cancello che potrebbe scattare per davvero, e va guardato per
+#  primo". L'attesa giusta e': IN IS IL DD PUO' SALIRE, ed e' la prima
+#  cosa da guardare.
+#
+#  10. LA CODA VA RISCRITTA PRIMA DI ESSERE RIARMATA
+#  --------------------------------------------------
+#  backtest_pipeline/coda/CODA.txt r.2657 arma ancora questo file con
+#  RIGA_SOTTILE_ROUND.ps1, bersaglio C:\MT5_Backtest (banco 50504400) e
+#  -Deposito 100000. Oggi e' SOSPESA (marcatore del 21/09), ma il giorno
+#  in cui la sospensione cade riparte sulla macchina che la firma del
+#  21/09 vuole SPENTA e con un deposito che rende sbagliata del 25% la
+#  colonna DD_fisso. VA RISCRITTA, non solo riaccesa.
 # =====================================================================
 
 @SIMBOLO  U30USD

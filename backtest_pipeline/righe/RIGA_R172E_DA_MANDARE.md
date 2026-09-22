@@ -108,7 +108,7 @@ raggiunto oggi (a 3,00 R) è `[NON MISURATO]`**: si legge dal calo di `n`, non s
 | **riproduzione** | le celle `0.50`, `0.75` e `1.00` riproducono R202A (PF OOS **1,10328** / **1,13744** / **1,27175**). Tolleranza: **un centesimo** sul Profit, uguaglianza su `n`/`PF`/`DD` alla quinta cifra (cancello G1, `MANOPOLE_INERTI_2026-09-09.md` r.40). Oltre → **round non confrontabile** |
 | **`n` scende salendo** | più lontano il primo obiettivo, meno spesso scatta il parziale, meno **uscite**. Se non scende, il round **non ha misurato quello che crede** |
 | 🎯 **la DIREZIONE** | **continua a salire fino a `2.00`** → l'ottimo è ancora oltre · **gira** → abbiamo trovato **la cresta** · **scende subito sopra `1.00`** → `1.00` era il massimo, e il *«non ancora misurato»* si chiude con un **NO**. **Tutte e tre sono risultati** |
-| **rischio** | nessuna cella alza il DD — misurato a **denominatore fisso** `(Profit/RF)/80000×100`, cella viva **4,4499**. Allarme sopra **4,89** |
+| **rischio** | 🔴 **in IS il DD PUÒ SALIRE, ed è la prima cosa da guardare**: B2.2 (r.1416-1429) ha misurato che questo asse porta il DD IS da 5,52% a 7,76% in media e **fino a 12,4677%** sulla cella più alta. Misura a **denominatore fisso** `(Profit/RF)/80000×100`, e **due soglie, una per gamba** (classe 557): **IS** viva 5,7575 → allarme sopra **6,3333** · **OOS** viva 4,4499 → allarme sopra **4,8949** |
 
 🔴 **Il DD si legge a denominatore fisso, NON su `Equity DD %`** (classe **550**): quello divide
 per il **picco**, che cambia da cella a cella. Su `R202B` la distorsione vale **+22,8%** — più del
@@ -169,8 +169,15 @@ fisica** (classe 538) · **zero** non-ASCII · URL del pin → **200**.
   con PASS in chiaro**: differiscono **solo** `pin`, etichetta, EA, simbolo, numero di celle, nome
   del file prova e nomi dei file attesi.
 - Il file prova ha **1.711 righe di criteri congelati il 16/09**, che **non sono stati
-  riscritti**: l'**addendum del 22/09** li **emenda prima** che il round produca un numero, e
-  dichiara **quali punti prevalgono**.
+  riscritti**: l'**addendum del 22/09** li **emenda prima** che il round produca un numero.
+  🔴 **E in TESTA al file c'è la MAPPA DEI PUNTI SUPERATI** (riga vecchia · cosa diceva ·
+  cosa vale ora), perché una clausola generica di precedenza **non copre i numeri che non
+  nomina** e il lettore incontra prima i vecchi — **classe 556**.
+- 🔴 **Le soglie di rischio del 16/09 erano scalate su una taglia che non vola più** (0,65%
+  contro il **2,00%** firmato il 20/09): *«si sfonda il muro sopra il 15,38% sul banco»* — il
+  numero vero è **5,00%**, soglia **larga 3,08 volte** — e *«servirebbe un peggioramento di
+  7,5 volte, questa soglia non può mordere»* — ne servono **1,22**: il controllo di vuoto era
+  **falso**. Riscalate nel paragrafo 7 dell'addendum (estensione **classe 547**).
 
 **🕳️ Non coperto**
 - Il rapporto **uscite/posizioni** non è misurato: ogni `n` è **`[uscite]`**.

@@ -28676,3 +28676,64 @@ INERTI** — li leggono solo i rami `FIXED` (r.1836-1837) e `ATR` (r.1838-1839).
 **vive**, `InpTrailTF=5`, non era nemmeno nominata.
 **Pinnare le manopole inerti va benissimo** (blocca i default): il difetto e' **citarne una
 inerte come descrizione del meccanismo**.
+
+---
+
+## CLASSE 556 -- L'ADDENDUM CHE EMENDA "IN GENERALE" UN FILE DI CRITERI CONGELATI SENZA ELENCARE I PUNTI SUPERATI
+
+**Caso reale (22/09/2026, R172E).** Un file prova con **1.711 righe di criteri congelati il
+16/09** e' stato emendato da un **addendum datato**, inserito **in coda** (r.1713), con una
+clausola generica: *«dove questo addendum e la parte sopra dicono cose diverse, vale questo
+addendum»*.
+
+**La tecnica e' giusta** — emendare in modo additivo e datato e' meglio che riscrivere: rispetta
+*«i criteri si cambiano prima dei numeri»* e conserva la tracciabilita' (il commit e' risultato
+**puramente additivo**: una sola riga `-` nel diff, l'header).
+
+🔴 **Ma l'esecuzione no, e la ragione e' meccanica, non stilistica.** Una clausola di precedenza
+risolve **solo i conflitti che elenca**. Sui numeri che l'addendum **non nomina** non c'e' niente
+che prevalga: restano in piedi, e producono **falsa fiducia**, che e' peggio del silenzio.
+**Aggravante di posizione**: l'addendum sta **in fondo**, quindi il lettore incontra **prima** i
+numeri superati.
+
+**Dieci loci in conflitto non nominati**, fra cui: il **deposito** (100.000 in cinque punti
+contro gli 80.000 della riga — e una **sentinella** che diceva *«se la riga di lancio cambia
+deposito, il file VA RISCRITTO»*); il **Profit dell'ancora primaria** (2811,84 / 6721,93 a
+100.000 contro 2241,62 / 5395,25 a 80.000: con una tolleranza di **un centesimo** la riproduzione
+verrebbe dichiarata **fallita** su uno scarto che e' solo l'effetto del banco); e le **soglie del
+muro prop** scalate su una taglia che non vola piu'.
+
+### La regola
+**Un addendum si apre con la MAPPA DEI PUNTI SUPERATI — riga vecchia · cosa diceva · cosa vale
+ora — e la mappa sta IN TESTA al file, non in coda.** Una clausola generica di precedenza non
+sostituisce l'elenco: lo annuncia soltanto.
+📌 **Distinzione dalla 554**: li' il changelog dichiarava una correzione **assente**; qui la
+correzione **c'e'**, ma la regola vecchia **resta accanto** e viene letta per prima.
+
+### E l'estensione della CLASSE 547 che ne discende
+**Dichiarare la scala non basta.** Se la taglia in campo e' cambiata, le **soglie DERIVATE**
+sparse altrove nello stesso file **vanno ricalcolate o dichiarate morte**. Qui la taglia era
+passata da 0,65% a 2,00% e restavano in piedi *«si sfonda il muro sopra il 15,38% sul banco»*
+(il numero vero e' **5,00%**: soglia **larga 3,08 volte**) e *«servirebbe un peggioramento di
+7,5 VOLTE, questa soglia non puo' mordere»* (ne servono **1,22**: il controllo di vuoto era
+**falso**). Su una challenge viva, e sempre **nel verso largo**.
+
+---
+
+## CLASSE 557 -- LA SOGLIA D'ALLARME CALIBRATA SU UNA SOLA GAMBA E CONSEGNATA SENZA DIRE QUALE
+
+**Caso reale (22/09/2026, R172E).** L'allarme sul drawdown era `DD_fisso > 4,89`, calibrato su
+`R202A` **OOS** (cella viva 4,4499, +10%). Ma **la stessa cella in IS sta a 5,7575**: **sfonda il
+proprio allarme di 0,87 punti**.
+
+🔴 **E non e' un caso raro: e' la gamba che il file stesso dice di guardare per prima.** B2.2
+aveva gia' misurato che **e' proprio in IS** che quell'asse **alza** il DD (archivio: fino a
+**12,4677%** sulla cella piu' alta). Un allarme che **scatta sulla propria ancora** nella gamba
+critica non separa niente: scatta su tutto.
+
+### La regola
+**Una soglia si calibra su OGNI gamba che il referto produce, e ogni numero si consegna CON LA
+GAMBA SCRITTA ACCANTO.** `IS 6,3333` e `OOS 4,8949` sono due soglie, non una.
+📌 **La firma della classe, e si controlla in dieci secondi**: si applica la soglia alla **propria
+cella di riferimento**, in **tutte** le gambe. **Se l'ancora sfonda il proprio allarme, la
+calibrazione e' incompleta.**
