@@ -11,7 +11,7 @@
 
 ## 🥇 LA RIGA CHE CONTA
 
-**Su 19 meccanismi guardati su 7 fonti, 18 pagine aperte davvero, 8 letti nel
+**Su 19 meccanismi guardati su 7 fonti, 21 pagine aperte davvero, 8 letti nel
 testo primario (paper intero, spec, o articolo col sorgente), 3 li proverei — e il
 primo non è un meccanismo nuovo: è una CORREZIONE che ci impedisce di spendere
 tempo macchina su un numero che l'autore ha ritirato.**
@@ -33,7 +33,7 @@ Costo di quella correzione: zero minuti. Valore: non costruire una sedia su
 | **QuantConnect** | `quantconnect.com/research/18444` | ✅ **PASS** — regole e numeri leggibili | 🟢 usata |
 | **GitHub** | repo + `raw.githubusercontent.com` | ✅ **PASS** — letta la spec grezza | 🟢 usata |
 | **TradingView** | pagina script `8vjWAdLN` | 🟡 **PASS PARZIALE** — descrizione e numeri sì, **il Pine NON l'ho letto** | 🟡 usata, dichiarata |
-| **Quantpedia** | `quantpedia.com/strategies/` | ✅ **PASS** (10 titoli) · ma `?s=opening+range+breakout` → **0 risultati mostrati** | 🔴 **nulla sul nostro tema** |
+| **Quantpedia** | `quantpedia.com/strategies/` | ✅ **PASS** (10 titoli) · ma `?s=opening+range+breakout` → **nessun titolo mostrato** (solo la paginazione) | 🔴 **nulla sul nostro tema** |
 | 🔴 **SSRN** | `papers.ssrn.com/.../4729284` e `/5095349.pdf` | ❌ **403 su pagina E su PDF** | 🛑 **FONTE NULLA** (come il 12/09) |
 | 🔴 **11 domini** | vedi §7 | ❌ **bloccati dal proxy di rete** (`EGRESS_BLOCKED`) | 🛑 **FONTI NULLE, elencate per nome** |
 
@@ -102,8 +102,8 @@ referti di altri round senza firma.**
 | 11 | **FINESTRA ORARIA DEL SEGNALE** (solo 09:45-11:30 ET) | `770101`/`770202`/`770260` · `770511` (`InpUseTimeWindow` esiste, default `false`) | `InpStartHour`/`InpEndHour` | ⚪ **[SENZA NUMERI]** nella spec letta | github crispysizzlin/strategy-test | nessuna | ⚪ **[SENZA NUMERI]** |
 | 12 | **STOP = 0,1 × ATR(14) GIORNALIERO, niente target, flat alla campanella** | `770101`/`770202`/`770260` | `InpSLMode=ABTG_SL_ATR` + `InpAtrSlMult` (ma il nostro ATR è sul TF di gestione, non giornaliero) | win rate **<30%**, R/R **~1:4**, **99 operazioni in 17 mesi** (PLTR, prova singola) | [MQL5 art. 23226](https://www.mql5.com/en/articles/23226) · Jocimar Lopes · **06/07/2026** · `ORB_Expert.mq5` incluso | ⚠️ prova su **UN titolo**; il "Sharpe 2,81 / 1.637%" citato è **della ricerca SFI, non del suo backtest** | 🟡 **IN CODA** |
 | 13 | **NON ENTRARE ALLA CHIUSURA DELLA BARRA DI ROTTURA** — il movimento è già consumato dentro la barra | `770411` MaxMin notte · e contro `OPENCONFIRM`/filtro volume delle aperture | scelta fra pendente piazzato **prima** (quello che già facciamo) e conferma a barra chiusa | **apertura→apertura successiva: +32,24 punti** nel verso dell'espansione · **chiusura→apertura successiva: −0,17 punti**. E continuazione a bar+1: **T = −11,52** | arXiv 2605.04004v3 §4.2, Mesfin · PDF letto | ⚠️ misurato su **sessione Asia di MNQ**, non su DAX notte M15 | 🟡 **IN CODA** — è una **conferma** del nostro disegno, non un cambio |
-| 14 | ORB **SHORT** su Nasdaq | `770260` | — | **bar+1 netto −3,45 · bar+15 netto −2,16** (N=428 OOS): **negativo a tutte e due le tenute** | arXiv 2605.04004v3 Tab. 4 | — | 🔴 **niente da innestare: è un avvertimento**, e spiega il DD OOS del lato short |
-| 15 | Ingresso **su pullback** dell'ORB con **stop fisso** | `770101`/`770202`/`770260` | — | **N=83 · netto −3,16 · T=−1,27 · 80,7% di stop-out con stop fisso a 20 punti** | arXiv 2605.04004v3 §4.1 | — | 🔴 **SCARTO come proposta, 🟢 come lezione**: vedi §4.1 |
+| 14 | ORB **SHORT** su Nasdaq | `770260` | — | **negativo a TUTTE E DUE le tenute** (N=428 OOS per tenuta). I due netti sono **−3,45** e **−2,16**; 🔴 **quale dei due sia bar+1 e quale bar+15 è [INCERTO]**: l'estrazione del PDF non separa le colonne in modo sicuro e la prosa non lo ripete | arXiv 2605.04004v3 Tab. 4 | — | 🔴 **niente da innestare: è un avvertimento**, e spiega il DD OOS del lato short |
+| 15 | Ingresso **su pullback** dell'ORB con **stop fisso** | `770101`/`770202`/`770260` | — | **N=83** e **80,7% di stop-out con stop FISSO a 20 punti** (prosa §4.1, verbatim). Netto e T: **[INCERTO]** — la tabella li dà, ma l'estrazione del PDF non separa le colonne in modo sicuro | arXiv 2605.04004v3 §4.1 | — | 🔴 **SCARTO come proposta, 🟢 come lezione**: vedi §5bis |
 | 16 | **GMM su regimi** (RTH Confluence / London Signal B) | — | — | T=**3,11** (N=196) e T=**4,30** (N=247, p=0,000025) | arXiv 2605.04004v3 §5, App. A | 🔴 **un ritardo di UNA barra ribalta T da +4,30 a −2,78** | 🔴 **SCARTO**: non portabile in MQL5 senza librerie, e fragilità d'esecuzione dichiarata |
 | 17 | **Livelli ottimi di TP/SL in forma chiusa** (processi di Ornstein-Uhlenbeck, metodo dei potenziali termici) | `771531` EMA200 (rimbalzo = ritorno a un livello) | `InpTP_RR` / `InpSLatr` | ⚪ **[SENZA NUMERI]** nell'abstract: nessuna tabella numerica | [arXiv 2003.10502](https://arxiv.org/abs/2003.10502) · Lipton & Lopez de Prado · **23/03/2020** · abstract letto | — | ⚪ **[SENZA NUMERI]** — cultura, costo di porting alto |
 | 18 | **Regole di stop-loss di portafoglio** | — | — | _"50 to 100 basis points per month"_ su dati **mensili** 1950-2004 | Kaminski & Lo (trovato in ricerca, **PDF non aperto**: SSRN 403) | — | 🔴 **FUORI MANDATO**: orizzonte mensile di portafoglio, non uno stop intraday |
@@ -163,8 +163,12 @@ misurata, e aggiunge la ragione di mercato che finora mancava.**
    stato RITIRATO perché l'archivio mostrava il **DD che sale in 5 righe su 5**
    alzando `InpTrailStartR`. 🔴 **Quindi la tesi ha già un dato contro sul Nasdaq**,
    e va detto prima, non dopo.
-3. ⏱️ **Ora di chiusura**: `InpCloseHour` è 17 server = la presa lunga **è già
-   possibile**. Se la durata media è corta, la colpa è della gestione, non dell'orario.
+3. ⏱️ **Ora di chiusura**: nel sorgente il default è `ABTG_DEF_CLOSE_HOUR 17` (server)
+   → la presa lunga **è già possibile per costruzione**. ⚠️ **[DA VERIFICARE sul preset
+   FTMO che vola**, non sul sorgente: quel preset porta `InpSessionHour=10` (orologio
+   FTMO) e quindi anche l'ora di chiusura può non essere 17.** Se la durata media delle
+   vincenti è corta, la colpa è della gestione; se è corta perché si chiude presto, è
+   dell'orario, ed è un'altra manopola.
 
 **COSTO IN OPERAZIONI:** 🟢 **ZERO**. Non taglia nessun ingresso: cambia solo dove
 si esce. Il pavimento di frequenza per famiglia (firma 07/09) **non è toccato**.
@@ -174,10 +178,14 @@ l'escursione avversa per operazione** e quindi mette più pressione sul muro
 **giornaliero del 5%** (−5.000 € su 100k), non solo su quello totale. La nostra
 peggior giornata misurata è **−2,06%** (R51). E il 22/09 abbiamo misurato che sul
 primo stop vero della challenge la perdita reale ha superato il modello del
-**+10,5%** (`report/PRIMO_STOP_FTMO_2026-09-22.md`). 👉 **Il guadagno in PF qui è
-+6,8% (1,397 → 1,491), quindi è SOPRA il rumore d'esecuzione del 10,5%? NO: è
-SOTTO.** Va detto chiaro: **il numero di PF da solo non basta a giustificarlo; la
-ragione per firmarlo è che il DD scende insieme al PF**, e il DD è un fatto accaduto.
+**+10,5%** (`report/PRIMO_STOP_FTMO_2026-09-22.md`). 👉 **Il guadagno in PF qui è +6,7%** (1,39709 → 1,49140).
+🔴 **E le due percentuali NON sono la stessa unità** — una è un rapporto di PF, l'altra
+è l'eccesso di perdita su un singolo stop: metterle a confronto è un'analogia, non
+un conto. Ma il criterio 4 della commessa chiede di dichiararlo, e lo dichiaro: **un
+miglioramento del 6,7% su una grandezza stimata vive nello stesso ordine di grandezza
+dell'errore d'esecuzione che abbiamo appena misurato.** Va detto chiaro: **il PF da
+solo non basta a firmarlo; la ragione per firmarlo è che il DD scende INSIEME al PF —
+in percentuale E in valuta — e il DD è un fatto accaduto, non una stima.**
 
 ---
 
@@ -290,8 +298,8 @@ sono tutte su DD **statico**).
 | meccanismo | perché fuori |
 |---|---|
 | GMM su regimi (RTH Confluence, London Signal B) | non portabile in MQL5 senza librerie esterne, e **un ritardo di 15 minuti ribalta T da +4,30 a −2,78**: fragilità d'esecuzione dichiarata dall'autore stesso |
-| ORB **short** Nasdaq | negativo a tutte e due le tenute (−3,45 e −2,16 netto, N=428): non è un innesto, è un avvertimento |
-| Ingresso su pullback con **stop fisso** | 80,7% di stop-out a stop fisso 20 punti, N=83, netto −3,16 |
+| ORB **short** Nasdaq | negativo a tutte e due le tenute (netti −3,45 e −2,16, N=428): non è un innesto, è un avvertimento |
+| Ingresso su pullback con **stop fisso** | **80,7% di stop-out** con stop FISSO a 20 punti, N=83. 🟢 **Ma la lezione è a NOSTRO favore**: il nostro retest NON ha lo stop fisso, ce l'ha **strutturale** (`InpSLMode=ABTG_SL_RANGE`, estremo opposto del range). La bocciatura dell'autore colpisce la SUA geometria, non la nostra — e R197A sul Dow ha misurato il contrario (retest > breakout) |
 | Kaminski & Lo, regole di stop-loss | orizzonte **mensile di portafoglio**: non si innesta su uno stop intraday. E il PDF non l'ho aperto (SSRN 403) |
 | Lipton & Lopez de Prado, TP/SL in forma chiusa | nessun numero nell'abstract, processo OU (market making), costo di porting fuori scala per il 1° ottobre |
 | Quantpedia | il motore di ricerca del sito **non restituisce nulla** su "opening range breakout": niente da setacciare |
@@ -301,6 +309,42 @@ sono tutte su DD **statico**).
 di stop, repaint o DLL.** Non perché non ce ne siano in giro: perché ho cercato
 **meccanismi di gestione e di filtro**, non EA completi, e quel tipo di marciume sta
 negli EA completi.
+
+---
+
+## 🟢 § 5bis — LA LEZIONE CHE VALE PIÙ DI UN CANDIDATO: perché il nostro retest NON è quello bocciato
+
+Il §4.1 di Mesfin boccia l'**ingresso su pullback** dell'ORB con una frase secca:
+
+> _"The pullback entry is more straightforwardly bad: **an 80.7% stop-out rate at a
+> 20-point stop** means the signal is predominantly identifying **reversals of
+> breakout attempts**, not continuations."_ (N = 83)
+
+🔴 **A prima vista questa riga boccia TRE nostre sedie su sei**, perché `770101`,
+`770202` e `770260` girano tutte in `InpEntryMode = ABTG_RETEST`.
+
+🟢 **Ma non le boccia, e il motivo sta in una sola differenza di geometria:**
+
+| | Mesfin §4.1 | le nostre tre aperture |
+|---|---|---|
+| dove si entra | pullback dopo la rottura | **limite sul livello**, `InpRetestOffsetPts` **dentro** il livello |
+| **dove sta lo stop** | 🔴 **fisso, 20 punti** | 🟢 **strutturale**: `InpSLMode = ABTG_SL_RANGE`, cioè **l'estremo OPPOSTO del range** (`ABTG_DAX_Apertura_EU.mq5` r.1931) |
+| conseguenza | **80,7% di stop-out**: lo stop sta dentro il rumore del rientro | lo stop sta **oltre** la struttura che ha generato il segnale |
+
+👉 **E in casa la prova contraria è già misurata**: round **R197A** (21/09, Dow
+`770202`) — _"retest confermato: costa il 15-20% degli ingressi e li ripaga. **Col
+breakout l'IS va in perdita**"_.
+
+🎯 **Quindi la lettura giusta non è "il retest non funziona": è "il retest con lo
+stop FISSO non funziona".** È la stessa lezione della regola di casa **R55**
+(_lo spread si misura in percentuale dello stop, non in punti_) e del pavimento di
+stop del collega (`PS5_ORB_MASTER_LETTURA_2026-09-10.md`: portare il pavimento a 20
+punti fa crollare il DAX da PF 2,40 a 1,26). **Tre fonti indipendenti, stessa
+conclusione: sugli ingressi di rientro, lo stop in PUNTI FISSI è il difetto.**
+
+⚠️ **E il rovescio, che va scritto perché è scomodo:** il nostro `InpMinStopPts`
+(pavimento di stop in punti) e il nostro `InpBufferPoints` **sono in punti fissi**.
+Su di loro questa lezione morde **contro di noi**, ed è la radice del candidato 6.
 
 ---
 
@@ -382,7 +426,7 @@ apposta: un file prova che sembra pronto e non lo è, è peggio di nessun file.
 
 ---
 
-## ✍️ FONTI APERTE DAVVERO (18) — contro quelle solo TROVATE
+## ✍️ FONTI APERTE DAVVERO (21 pagine) — contro quelle solo TROVATE
 
 **Aperte e lette:** `arxiv.org/list/q-fin.TR/recent` · `export.arxiv.org/api` (3 interrogazioni) ·
 `arxiv.org/abs/2605.04004` · **`arxiv.org/pdf/2605.04004v3` (PDF intero, testo estratto)** ·
